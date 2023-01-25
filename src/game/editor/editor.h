@@ -413,6 +413,9 @@ public:
 	}
 
 	void DeleteEnvelope(int Index);
+	void SwapEnvelopes(int Index0, int Index1);
+	template<typename F>
+	void VisitEnvelopeReferences(F &&Visitor);
 
 	CLayerGroup *NewGroup()
 	{
@@ -1065,6 +1068,8 @@ public:
 	char m_aSettingsCommand[256];
 
 	void PlaceBorderTiles();
+
+	void UpdateTooltip(const void *pID, const CUIRect *pRect, const char *pToolTip);
 	int DoButton_Editor_Common(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip);
 	int DoButton_Editor(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip, int AlignVert = 1);
 	int DoButton_Env(const void *pID, const char *pText, int Checked, const CUIRect *pRect, const char *pToolTip, ColorRGBA Color);
@@ -1082,8 +1087,8 @@ public:
 
 	int DoButton_ColorPicker(const void *pID, const CUIRect *pRect, ColorRGBA *pColor, const char *pToolTip = nullptr);
 
-	bool DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden = false, int Corners = IGraphics::CORNER_ALL);
-	bool DoClearableEditBox(void *pID, void *pClearID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden, int Corners);
+	bool DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden = false, int Corners = IGraphics::CORNER_ALL, const char *pToolTip = nullptr);
+	bool DoClearableEditBox(void *pID, void *pClearID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden = false, int Corners = IGraphics::CORNER_ALL, const char *pToolTip = nullptr);
 
 	void RenderBackground(CUIRect View, IGraphics::CTextureHandle Texture, float Size, float Brightness);
 

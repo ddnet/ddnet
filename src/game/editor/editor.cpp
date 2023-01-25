@@ -307,17 +307,19 @@ void CEditor::EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Channels, v
  OTHER
 *********************************************************/
 
-bool CEditor::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden, int Corners)
+bool CEditor::DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden, int Corners, const char *pToolTip)
 {
 	if(UI()->LastActiveItem() == pID)
 		m_EditBoxActive = 2;
+	UpdateTooltip(pID, pRect, pToolTip);
 	return UI()->DoEditBox(pID, pRect, pStr, StrSize, FontSize, pOffset, Hidden, Corners);
 }
 
-bool CEditor::DoClearableEditBox(void *pID, void *pClearID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden, int Corners)
+bool CEditor::DoClearableEditBox(void *pID, void *pClearID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden, int Corners, const char *pToolTip)
 {
 	if(UI()->LastActiveItem() == pID)
 		m_EditBoxActive = 2;
+	UpdateTooltip(pID, pRect, pToolTip);
 	return UI()->DoClearableEditBox(pID, pClearID, pRect, pStr, StrSize, FontSize, pOffset, Hidden, Corners);
 }
 
@@ -370,23 +372,22 @@ ColorRGBA CEditor::GetButtonColor(const void *pID, int Checked)
 	}
 }
 
+void CEditor::UpdateTooltip(const void *pID, const CUIRect *pRect, const char *pToolTip)
+{
+	if((UI()->MouseInside(pRect) && m_pTooltip) || (UI()->HotItem() == pID && pToolTip))
+		m_pTooltip = pToolTip;
+}
+
 int CEditor::DoButton_Editor_Common(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip)
 {
 	if(UI()->MouseInside(pRect))
 	{
 		if(Flags & BUTTON_CONTEXT)
 			ms_pUiGotContext = pID;
-		if(m_pTooltip)
-			m_pTooltip = pToolTip;
 	}
 
-	if(UI()->HotItem() == pID && pToolTip)
-		m_pTooltip = pToolTip;
-
+	UpdateTooltip(pID, pRect, pToolTip);
 	return UI()->DoButtonLogic(pID, Checked, pRect);
-
-	// Draw here
-	//return UI()->DoButton(id, text, checked, r, draw_func, 0);
 }
 
 int CEditor::DoButton_Editor(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip, int AlignVert)
@@ -4831,7 +4832,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			pNewEnv = m_Map.NewEnvelope(1);
 		}
 
-		ToolBar.VSplitRight(5.0f, &ToolBar, &Button);
+		ToolBar.VSplitRight(5.0f, &ToolBar, nullptr);
 		ToolBar.VSplitRight(50.0f, &ToolBar, &Button);
 		static int s_New4dButton = 0;
 		if(DoButton_Editor(&s_New4dButton, "Color+", 0, &Button, 0, "Creates a new color envelope"))
@@ -4840,7 +4841,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			pNewEnv = m_Map.NewEnvelope(4);
 		}
 
-		ToolBar.VSplitRight(5.0f, &ToolBar, &Button);
+		ToolBar.VSplitRight(5.0f, &ToolBar, nullptr);
 		ToolBar.VSplitRight(50.0f, &ToolBar, &Button);
 		static int s_New2dButton = 0;
 		if(DoButton_Editor(&s_New2dButton, "Pos.+", 0, &Button, 0, "Creates a new position envelope"))
@@ -4849,20 +4850,43 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			pNewEnv = m_Map.NewEnvelope(3);
 		}
 
-		// Delete button
 		if(m_SelectedEnvelope >= 0)
 		{
-			ToolBar.VSplitRight(10.0f, &ToolBar, &Button);
-			ToolBar.VSplitRight(50.0f, &ToolBar, &Button);
-			static int s_DelButton = 0;
-			if(DoButton_Editor(&s_DelButton, "Delete", 0, &Button, 0, "Delete this envelope"))
+			// Delete button
+			ToolBar.VSplitRight(10.0f, &ToolBar, nullptr);
+			ToolBar.VSplitRight(25.0f, &ToolBar, &Button);
+			static int s_DeleteButton = 0;
+			if(DoButton_Editor(&s_DeleteButton, "✗", 0, &Button, 0, "Delete this envelope"))
 			{
-				m_Map.m_Modified = true;
 				m_Map.DeleteEnvelope(m_SelectedEnvelope);
 				if(m_SelectedEnvelope >= (int)m_Map.m_vpEnvelopes.size())
 					m_SelectedEnvelope = m_Map.m_vpEnvelopes.size() - 1;
 				pEnvelope = m_SelectedEnvelope >= 0 ? m_Map.m_vpEnvelopes[m_SelectedEnvelope] : nullptr;
 			}
+
+			// Move right button
+			ToolBar.VSplitRight(5.0f, &ToolBar, nullptr);
+			ToolBar.VSplitRight(25.0f, &ToolBar, &Button);
+			static int s_MoveRightButton = 0;
+			if(DoButton_Ex(&s_MoveRightButton, "→", 0, &Button, 0, "Move this envelope to the right", IGraphics::CORNER_R))
+			{
+				m_Map.SwapEnvelopes(m_SelectedEnvelope, m_SelectedEnvelope + 1);
+				m_SelectedEnvelope = clamp<int>(m_SelectedEnvelope + 1, 0, m_Map.m_vpEnvelopes.size() - 1);
+				pEnvelope = m_Map.m_vpEnvelopes[m_SelectedEnvelope];
+			}
+
+			// Move left button
+			ToolBar.VSplitRight(25.0f, &ToolBar, &Button);
+			static int s_MoveLeftButton = 0;
+			if(DoButton_Ex(&s_MoveLeftButton, "←", 0, &Button, 0, "Move this envelope to the left", IGraphics::CORNER_L))
+			{
+				m_Map.SwapEnvelopes(m_SelectedEnvelope - 1, m_SelectedEnvelope);
+				m_SelectedEnvelope = clamp<int>(m_SelectedEnvelope - 1, 0, m_Map.m_vpEnvelopes.size() - 1);
+				pEnvelope = m_Map.m_vpEnvelopes[m_SelectedEnvelope];
+			}
+
+			// Margin on the right side
+			ToolBar.VSplitRight(7.0f, &ToolBar, nullptr);
 		}
 
 		if(pNewEnv) // add the default points
@@ -4883,7 +4907,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		ToolBar.VSplitLeft(60.0f, &Shifter, &ToolBar);
 		Shifter.VSplitRight(15.0f, &Shifter, &Inc);
 		Shifter.VSplitLeft(15.0f, &Dec, &Shifter);
-		char aBuf[512];
+		char aBuf[64];
 		str_format(aBuf, sizeof(aBuf), "%d/%d", m_SelectedEnvelope + 1, (int)m_Map.m_vpEnvelopes.size());
 
 		ColorRGBA EnvColor = ColorRGBA(1, 1, 1, 0.5f);
@@ -4894,7 +4918,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 					   ColorRGBA(0.7f, 1, 0.7f, 0.5f);
 		}
 
-		Shifter.Draw(EnvColor, 0, 0.0f);
+		Shifter.Draw(EnvColor, IGraphics::CORNER_NONE, 0.0f);
 		UI()->DoLabel(&Shifter, aBuf, 10.0f, TEXTALIGN_CENTER);
 
 		static int s_PrevButton = 0;
@@ -4917,14 +4941,15 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 		if(pEnvelope)
 		{
-			ToolBar.VSplitLeft(15.0f, &Button, &ToolBar);
-			ToolBar.VSplitLeft(35.0f, &Button, &ToolBar);
-			UI()->DoLabel(&Button, "Name:", 10.0f, TEXTALIGN_LEFT);
+			ToolBar.VSplitLeft(15.0f, nullptr, &ToolBar);
+			ToolBar.VSplitLeft(40.0f, &Button, &ToolBar);
+			UI()->DoLabel(&Button, "Name:", 10.0f, TEXTALIGN_RIGHT);
 
-			ToolBar.VSplitLeft(80.0f, &Button, &ToolBar);
+			ToolBar.VSplitLeft(3.0f, nullptr, &ToolBar);
+			ToolBar.VSplitLeft(ToolBar.w > ToolBar.h * 40 ? 80.0f : 60.0f, &Button, &ToolBar);
 
 			static float s_NameBox = 0;
-			if(DoEditBox(&s_NameBox, &Button, pEnvelope->m_aName, sizeof(pEnvelope->m_aName), 10.0f, &s_NameBox))
+			if(DoEditBox(&s_NameBox, &Button, pEnvelope->m_aName, sizeof(pEnvelope->m_aName), 10.0f, &s_NameBox, false, IGraphics::CORNER_ALL, "The name of the selected envelope"))
 			{
 				m_Map.m_Modified = true;
 			}
@@ -4954,41 +4979,43 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 		ToolBar.VSplitLeft(15.0f, &Button, &ToolBar);
 
-		static const char *s_aapNames[4][4] = {
+		static const char *s_aapNames[4][CEnvPoint::MAX_CHANNELS] = {
 			{"V", "", "", ""},
 			{"", "", "", ""},
 			{"X", "Y", "R", ""},
 			{"R", "G", "B", "A"},
 		};
 
-		static const char *s_aapDescriptions[4][4] = {
+		static const char *s_aapDescriptions[4][CEnvPoint::MAX_CHANNELS] = {
 			{"Volume of the envelope", "", "", ""},
 			{"", "", "", ""},
 			{"X-axis of the envelope", "Y-axis of the envelope", "Rotation of the envelope", ""},
 			{"Red value of the envelope", "Green value of the envelope", "Blue value of the envelope", "Alpha value of the envelope"},
 		};
 
-		static int s_aChannelButtons[4] = {0};
+		static int s_aChannelButtons[CEnvPoint::MAX_CHANNELS] = {0};
 		int Bit = 1;
 
-		for(int i = 0; i < pEnvelope->m_Channels; i++, Bit <<= 1)
+		for(int i = 0; i < CEnvPoint::MAX_CHANNELS; i++, Bit <<= 1)
 		{
 			ToolBar.VSplitLeft(15.0f, &Button, &ToolBar);
-
-			if(DoButton_Env(&s_aChannelButtons[i], s_aapNames[pEnvelope->m_Channels - 1][i], s_ActiveChannels & Bit, &Button, s_aapDescriptions[pEnvelope->m_Channels - 1][i], aColors[i]))
-				s_ActiveChannels ^= Bit;
+			if(i < pEnvelope->m_Channels)
+			{
+				if(DoButton_Env(&s_aChannelButtons[i], s_aapNames[pEnvelope->m_Channels - 1][i], s_ActiveChannels & Bit, &Button, s_aapDescriptions[pEnvelope->m_Channels - 1][i], aColors[i]))
+					s_ActiveChannels ^= Bit;
+			}
 		}
 
 		// sync checkbox
-		ToolBar.VSplitLeft(15.0f, &Button, &ToolBar);
+		ToolBar.VSplitLeft(15.0f, nullptr, &ToolBar);
 		ToolBar.VSplitLeft(12.0f, &Button, &ToolBar);
 		static int s_SyncButton;
 		if(DoButton_Editor(&s_SyncButton, pEnvelope->m_Synchronized ? "X" : "", 0, &Button, 0, "Synchronize envelope animation to game time (restarts when you touch the start line)"))
 			pEnvelope->m_Synchronized = !pEnvelope->m_Synchronized;
 
-		ToolBar.VSplitLeft(4.0f, &Button, &ToolBar);
-		ToolBar.VSplitLeft(80.0f, &Button, &ToolBar);
-		UI()->DoLabel(&Button, "Synchronized", 10.0f, TEXTALIGN_LEFT);
+		ToolBar.VSplitLeft(4.0f, nullptr, &ToolBar);
+		ToolBar.VSplitLeft(40.0f, &Button, &ToolBar);
+		UI()->DoLabel(&Button, "Sync.", 10.0f, TEXTALIGN_LEFT);
 
 		float EndTime = pEnvelope->EndTime();
 		if(EndTime < 1)
@@ -5016,7 +5043,6 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			{
 				// add point
 				int Time = (int)(((UI()->MouseX() - View.x) * TimeScale) * 1000.0f);
-				//float env_y = (UI()->MouseY()-view.y)/TimeScale;
 				ColorRGBA Channels;
 				pEnvelope->Eval(Time / 1000.0f, Channels);
 				pEnvelope->AddPoint(Time,
@@ -5071,8 +5097,6 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 				float t0 = pEnvelope->m_vPoints[i].m_Time / 1000.0f / EndTime;
 				float t1 = pEnvelope->m_vPoints[i + 1].m_Time / 1000.0f / EndTime;
 
-				//dbg_msg("", "%f", end_time);
-
 				CUIRect v;
 				v.x = CurveBar.x + (t0 + (t1 - t0) * 0.5f) * CurveBar.w;
 				v.y = CurveBar.y;
@@ -5113,16 +5137,9 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 				Graphics()->SetColorVertex(Array, 4);
 
 				float x0 = pEnvelope->m_vPoints[i].m_Time / 1000.0f / EndTime;
-				//				float y0 = (fx2f(envelope->points[i].values[c])-bottom)/(top-bottom);
 				float x1 = pEnvelope->m_vPoints[i + 1].m_Time / 1000.0f / EndTime;
-				//float y1 = (fx2f(envelope->points[i+1].values[c])-bottom)/(top-bottom);
-				CUIRect v;
-				v.x = ColorBar.x + x0 * ColorBar.w;
-				v.y = ColorBar.y;
-				v.w = (x1 - x0) * ColorBar.w;
-				v.h = ColorBar.h;
 
-				IGraphics::CQuadItem QuadItem(v.x, v.y, v.w, v.h);
+				IGraphics::CQuadItem QuadItem(ColorBar.x + x0 * ColorBar.w, ColorBar.y, (x1 - x0) * ColorBar.w, ColorBar.h);
 				Graphics()->QuadsDrawTL(&QuadItem, 1);
 			}
 			Graphics()->QuadsEnd();
@@ -5291,27 +5308,27 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 			CUIRect ToolBar1;
 			CUIRect ToolBar2;
-
 			ToolBar.VSplitMid(&ToolBar1, &ToolBar2);
+			ToolBar1.VSplitRight(3.0f, &ToolBar1, nullptr);
+			ToolBar2.VSplitRight(3.0f, &ToolBar2, nullptr);
 			if(ToolBar.w > ToolBar.h * 21)
 			{
-				ToolBar1.VMargin(3.0f, &ToolBar1);
-				ToolBar2.VMargin(3.0f, &ToolBar2);
-
 				CUIRect Label1;
 				CUIRect Label2;
 
 				ToolBar1.VSplitMid(&Label1, &ToolBar1);
 				ToolBar2.VSplitMid(&Label2, &ToolBar2);
+				Label1.VSplitRight(3.0f, &Label1, nullptr);
+				Label2.VSplitRight(3.0f, &Label2, nullptr);
 
-				UI()->DoLabel(&Label1, "Value:", 10.0f, TEXTALIGN_LEFT);
-				UI()->DoLabel(&Label2, "Time (in s):", 10.0f, TEXTALIGN_LEFT);
+				UI()->DoLabel(&Label1, "Value:", 10.0f, TEXTALIGN_RIGHT);
+				UI()->DoLabel(&Label2, "Time (in s):", 10.0f, TEXTALIGN_RIGHT);
 			}
 
 			static float s_ValNumber = 0;
-			DoEditBox(&s_ValNumber, &ToolBar1, s_aStrCurValue, sizeof(s_aStrCurValue), 10.0f, &s_ValNumber);
+			DoEditBox(&s_ValNumber, &ToolBar1, s_aStrCurValue, sizeof(s_aStrCurValue), 10.0f, &s_ValNumber, false, IGraphics::CORNER_ALL, "The value of the selected envelope point");
 			static float s_TimeNumber = 0;
-			DoEditBox(&s_TimeNumber, &ToolBar2, s_aStrCurTime, sizeof(s_aStrCurTime), 10.0f, &s_TimeNumber);
+			DoEditBox(&s_TimeNumber, &ToolBar2, s_aStrCurTime, sizeof(s_aStrCurTime), 10.0f, &s_TimeNumber, false, IGraphics::CORNER_ALL, "The time of the selected envelope point");
 		}
 	}
 }
@@ -6154,49 +6171,69 @@ void CEditorMap::DeleteEnvelope(int Index)
 
 	m_Modified = true;
 
-	// fix links between envelopes and quads
+	VisitEnvelopeReferences([Index](int &ElementIndex) {
+		if(ElementIndex == Index)
+			ElementIndex = -1;
+		else if(ElementIndex > Index)
+			ElementIndex--;
+	});
+
+	m_vpEnvelopes.erase(m_vpEnvelopes.begin() + Index);
+}
+
+void CEditorMap::SwapEnvelopes(int Index0, int Index1)
+{
+	if(Index0 < 0 || Index0 >= (int)m_vpEnvelopes.size())
+		return;
+	if(Index1 < 0 || Index1 >= (int)m_vpEnvelopes.size())
+		return;
+	if(Index0 == Index1)
+		return;
+
+	m_Modified = true;
+
+	VisitEnvelopeReferences([Index0, Index1](int &ElementIndex) {
+		if(ElementIndex == Index0)
+			ElementIndex = Index1;
+		else if(ElementIndex == Index1)
+			ElementIndex = Index0;
+	});
+
+	std::swap(m_vpEnvelopes[Index0], m_vpEnvelopes[Index1]);
+}
+
+template<typename F>
+void CEditorMap::VisitEnvelopeReferences(F &&Visitor)
+{
 	for(auto &pGroup : m_vpGroups)
+	{
 		for(auto &pLayer : pGroup->m_vpLayers)
+		{
 			if(pLayer->m_Type == LAYERTYPE_QUADS)
 			{
 				CLayerQuads *pLayerQuads = static_cast<CLayerQuads *>(pLayer);
 				for(auto &Quad : pLayerQuads->m_vQuads)
 				{
-					if(Quad.m_PosEnv == Index)
-						Quad.m_PosEnv = -1;
-					else if(Quad.m_PosEnv > Index)
-						Quad.m_PosEnv--;
-					if(Quad.m_ColorEnv == Index)
-						Quad.m_ColorEnv = -1;
-					else if(Quad.m_ColorEnv > Index)
-						Quad.m_ColorEnv--;
+					Visitor(Quad.m_PosEnv);
+					Visitor(Quad.m_ColorEnv);
 				}
 			}
 			else if(pLayer->m_Type == LAYERTYPE_TILES)
 			{
 				CLayerTiles *pLayerTiles = static_cast<CLayerTiles *>(pLayer);
-				if(pLayerTiles->m_ColorEnv == Index)
-					pLayerTiles->m_ColorEnv = -1;
-				if(pLayerTiles->m_ColorEnv > Index)
-					pLayerTiles->m_ColorEnv--;
+				Visitor(pLayerTiles->m_ColorEnv);
 			}
 			else if(pLayer->m_Type == LAYERTYPE_SOUNDS)
 			{
 				CLayerSounds *pLayerSounds = static_cast<CLayerSounds *>(pLayer);
 				for(auto &Source : pLayerSounds->m_vSources)
 				{
-					if(Source.m_PosEnv == Index)
-						Source.m_PosEnv = -1;
-					else if(Source.m_PosEnv > Index)
-						Source.m_PosEnv--;
-					if(Source.m_SoundEnv == Index)
-						Source.m_SoundEnv = -1;
-					else if(Source.m_SoundEnv > Index)
-						Source.m_SoundEnv--;
+					Visitor(Source.m_PosEnv);
+					Visitor(Source.m_SoundEnv);
 				}
 			}
-
-	m_vpEnvelopes.erase(m_vpEnvelopes.begin() + Index);
+		}
+	}
 }
 
 void CEditorMap::MakeGameLayer(CLayer *pLayer)
