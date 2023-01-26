@@ -69,7 +69,7 @@ private:
 	static void ConchainJoystickGuidChanged(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	float GetJoystickDeadzone();
 
-	int m_InputGrabbed;
+	bool m_InputGrabbed;
 	char *m_pClipboardText;
 
 	bool m_MouseFocus;

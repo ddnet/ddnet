@@ -47,7 +47,7 @@ CInput::CInput()
 	mem_zero(m_aInputState, sizeof(m_aInputState));
 
 	m_InputCounter = 1;
-	m_InputGrabbed = 0;
+	m_InputGrabbed = false;
 
 	m_MouseDoubleClick = false;
 
@@ -272,14 +272,14 @@ bool CInput::MouseRelative(float *pX, float *pY)
 
 void CInput::MouseModeAbsolute()
 {
-	m_InputGrabbed = 0;
+	m_InputGrabbed = false;
 	SDL_SetRelativeMouseMode(SDL_FALSE);
 	Graphics()->SetWindowGrab(false);
 }
 
 void CInput::MouseModeRelative()
 {
-	m_InputGrabbed = 1;
+	m_InputGrabbed = true;
 #if !defined(CONF_PLATFORM_ANDROID) // No relative mouse on Android
 	SDL_SetRelativeMouseMode(SDL_TRUE);
 #endif
