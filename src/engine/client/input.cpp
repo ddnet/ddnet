@@ -148,7 +148,7 @@ void CInput::ConchainJoystickGuidChanged(IConsole::IResult *pResult, void *pUser
 
 float CInput::GetJoystickDeadzone()
 {
-	return g_Config.m_InpControllerTolerance / 50.0f;
+	return minimum(g_Config.m_InpControllerTolerance / 50.0f, 0.995f);
 }
 
 CInput::CJoystick::CJoystick(CInput *pInput, int Index, SDL_Joystick *pDelegate)
