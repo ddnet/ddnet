@@ -213,6 +213,8 @@ void CGameWorld::UpdatePlayerMaps()
 		for(int j = 0; j < MAX_CLIENTS; j++)
 		{
 			Dist[j].second = j;
+			if(j == i)
+				continue;
 			if(!Server()->ClientIngame(j) || !GameServer()->m_apPlayers[j])
 			{
 				Dist[j].first = 1e10;
@@ -224,21 +226,12 @@ void CGameWorld::UpdatePlayerMaps()
 				Dist[j].first = 1e9;
 				continue;
 			}
-			// copypasted chunk from character.cpp Snap() follows
-			CCharacter *pSnapChar = GameServer()->GetPlayerChar(i);
-			if(pSnapChar && !pSnapChar->IsSuper() &&
-				!GameServer()->m_apPlayers[i]->IsPaused() && GameServer()->m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS &&
-				!pChr->CanCollide(i) &&
-				(!GameServer()->m_apPlayers[i] ||
-					GameServer()->m_apPlayers[i]->GetClientVersion() == VERSION_VANILLA ||
-					(GameServer()->m_apPlayers[i]->GetClientVersion() >= VERSION_DDRACE &&
-						(GameServer()->m_apPlayers[i]->m_ShowOthers == SHOW_OTHERS_OFF ||
-							(GameServer()->m_apPlayers[i]->m_ShowOthers == SHOW_OTHERS_ONLY_TEAM && !GameServer()->m_apPlayers[i]->GetCharacter()->SameTeam(j))))))
+			if(!pChr->CanSnapCharacter(i))
 				Dist[j].first = 1e8;
 			else
 				Dist[j].first = 0;
 
-			Dist[j].first += distance(GameServer()->m_apPlayers[i]->m_ViewPos, GameServer()->m_apPlayers[j]->GetCharacter()->m_Pos);
+			Dist[j].first += distance(GameServer()->m_apPlayers[i]->m_ViewPos, pChr->m_Pos);
 		}
 
 		// always send the player themselves
@@ -279,8 +272,11 @@ void CGameWorld::UpdatePlayerMaps()
 		for(int j = MAX_CLIENTS - 1; j > VANILLA_MAX_CLIENTS - 2; j--)
 		{
 			int k = Dist[j].second;
-			if(aReverseMap[k] != -1 && Demand-- > 0)
-				pMap[aReverseMap[k]] = -1;
+			if(aReverseMap[k] == -1)
+				continue;
+			if(Demand-- <= 0)
+				break;
+			pMap[aReverseMap[k]] = -1;
 		}
 		pMap[VANILLA_MAX_CLIENTS - 1] = -1; // player with empty name to say chat msgs
 	}
