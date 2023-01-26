@@ -3,6 +3,8 @@
 #ifndef ENGINE_SHARED_PROTOCOL_H
 #define ENGINE_SHARED_PROTOCOL_H
 
+#include <base/tl/bitmask.h>
+
 /*
 	Connection diagram - How the initialization works.
 
@@ -122,5 +124,7 @@ enum
 	VERSION_DDNET_NEW_HUD = 16020,
 	VERSION_DDNET_MULTI_LASER = 16040,
 };
+
+typedef std::bitset<MAX_CLIENTS> CClientMask;
 
 #endif

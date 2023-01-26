@@ -3,7 +3,6 @@
 #ifndef GAME_SERVER_ENTITIES_LASER_H
 #define GAME_SERVER_ENTITIES_LASER_H
 
-#include <base/tl/bitmask.h>
 #include <game/server/entity.h>
 
 class CLaser : public CEntity

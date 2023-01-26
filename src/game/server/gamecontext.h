@@ -3,7 +3,6 @@
 #ifndef GAME_SERVER_GAMECONTEXT_H
 #define GAME_SERVER_GAMECONTEXT_H
 
-#include <base/tl/bitmask.h>
 #include <engine/console.h>
 #include <engine/server.h>
 

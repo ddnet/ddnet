@@ -3,7 +3,6 @@
 #ifndef GAME_CLIENT_PREDICTION_GAMEWORLD_H
 #define GAME_CLIENT_PREDICTION_GAMEWORLD_H
 
-#include <base/tl/bitmask.h>
 #include <game/gamecore.h>
 #include <game/teamscore.h>
 

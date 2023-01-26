@@ -3,7 +3,6 @@
 #ifndef GAME_SERVER_ENTITIES_CHARACTER_H
 #define GAME_SERVER_ENTITIES_CHARACTER_H
 
-#include <base/tl/bitmask.h>
 #include <game/server/entity.h>
 #include <game/server/save.h>
 

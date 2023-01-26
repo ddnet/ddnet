@@ -4,8 +4,5 @@
 #define BASE_TL_BITMASK_H
 
 #include <bitset>
-#include <engine/shared/protocol.h>
-
-typedef std::bitset<MAX_CLIENTS> CClientMask;
 
 #endif
