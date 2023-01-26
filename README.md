@@ -1,5 +1,9 @@
 [![DDraceNetwork](https://ddnet.tw/ddnet-small.png)](https://ddnet.tw) 
 
+### The Client is currently being maintained by kdaniel
+https://github.com/danielkempf/TaterClient-ddnet/
+
+
 ### Taters custom ddnet client with some small modifications
 Not guarenteed to be bug free, but I will try to fix them. 
 
