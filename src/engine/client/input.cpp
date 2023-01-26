@@ -46,6 +46,9 @@ CInput::CInput()
 	mem_zero(m_aInputCount, sizeof(m_aInputCount));
 	mem_zero(m_aInputState, sizeof(m_aInputState));
 
+	m_LastUpdate = 0;
+	m_UpdateTime = 0.0f;
+
 	m_InputCounter = 1;
 	m_InputGrabbed = false;
 
@@ -220,7 +223,7 @@ bool CInput::CJoystick::Relative(float *pX, float *pY)
 	const float DeadZone = Input()->GetJoystickDeadzone();
 	if(Len > DeadZone)
 	{
-		const float Factor = 0.1f * maximum((Len - DeadZone) / (1 - DeadZone), 0.001f) / Len;
+		const float Factor = 2500.0f * Input()->GetUpdateTime() * maximum((Len - DeadZone) / (1.0f - DeadZone), 0.001f) / Len;
 		*pX = RawJoystickPos.x * Factor;
 		*pY = RawJoystickPos.y * Factor;
 		return true;
@@ -562,6 +565,14 @@ void CInput::SetEditingPosition(float X, float Y)
 
 int CInput::Update()
 {
+	const int64_t Now = time_get();
+	if(m_LastUpdate != 0)
+	{
+		const float Diff = (Now - m_LastUpdate) / (float)time_freq();
+		m_UpdateTime = m_UpdateTime == 0.0f ? Diff : (m_UpdateTime * 0.8f + Diff * 0.2f);
+	}
+	m_LastUpdate = Now;
+
 	// keep the counter between 1..0xFFFF, 0 means not pressed
 	m_InputCounter = (m_InputCounter % 0xFFFF) + 1;
 

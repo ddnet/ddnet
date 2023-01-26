@@ -35,6 +35,8 @@ protected:
 	// quick access to events
 	int m_NumEvents;
 	IInput::CEvent m_aInputEvents[INPUT_BUFFER_SIZE];
+	int64_t m_LastUpdate;
+	float m_UpdateTime;
 
 public:
 	enum
@@ -65,6 +67,12 @@ public:
 	}
 	CEvent *GetEventsRaw() { return m_aInputEvents; }
 	int *GetEventCountRaw() { return &m_NumEvents; }
+
+	/**
+	 * @return Rolling average of the time in seconds between
+	 * calls of the Update function.
+	 */
+	float GetUpdateTime() const { return m_UpdateTime; }
 
 	// keys
 	virtual bool ModifierIsPressed() const = 0;
