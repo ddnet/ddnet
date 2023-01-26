@@ -75,8 +75,6 @@ private:
 	bool m_MouseFocus;
 	bool m_MouseDoubleClick;
 
-	int m_VideoRestartNeeded;
-
 	void AddEvent(char *pText, int Key, int Flags);
 	void Clear() override;
 	bool IsEventValid(CEvent *pEvent) const override { return pEvent->m_InputCount == m_InputCounter; }
@@ -131,8 +129,6 @@ public:
 	void SetClipboardText(const char *pText) override;
 
 	int Update() override;
-
-	int VideoRestartNeeded() override;
 
 	bool GetIMEState() override;
 	void SetIMEState(bool Activate) override;

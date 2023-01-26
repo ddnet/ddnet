@@ -134,7 +134,6 @@ public:
 	virtual void Init() = 0;
 	virtual void Shutdown() override = 0;
 	virtual int Update() = 0;
-	virtual int VideoRestartNeeded() = 0;
 };
 
 extern IEngineInput *CreateEngineInput();

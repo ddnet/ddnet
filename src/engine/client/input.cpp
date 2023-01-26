@@ -54,7 +54,6 @@ CInput::CInput()
 	m_NumEvents = 0;
 	m_MouseFocus = true;
 
-	m_VideoRestartNeeded = 0;
 	m_pClipboardText = NULL;
 
 	m_NumTextInputInstances = 0;
@@ -771,16 +770,6 @@ int CInput::Update()
 		}
 	}
 
-	return 0;
-}
-
-int CInput::VideoRestartNeeded()
-{
-	if(m_VideoRestartNeeded)
-	{
-		m_VideoRestartNeeded = 0;
-		return 1;
-	}
 	return 0;
 }
 
