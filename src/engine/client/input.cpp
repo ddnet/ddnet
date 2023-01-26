@@ -212,7 +212,7 @@ void CInput::CJoystick::GetHatValue(int Hat, int (&HatKeys)[2])
 
 bool CInput::CJoystick::Relative(float *pX, float *pY)
 {
-	if(!g_Config.m_InpControllerEnable)
+	if(!Input()->m_MouseFocus || !Input()->m_InputGrabbed || !g_Config.m_InpControllerEnable)
 		return false;
 
 	const vec2 RawJoystickPos = vec2(GetAxisValue(g_Config.m_InpControllerX), GetAxisValue(g_Config.m_InpControllerY));
