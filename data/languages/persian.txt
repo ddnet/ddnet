@@ -305,7 +305,7 @@ Existing Player
 == ﺩﺭﺍﺩ ﺩﻮﺟﻭ ﻦﮑﯾﺯﺎﺑ
 
 Your nickname '%s' is already used (%d points). Do you still want to use it?
-== ؟ﯽﻨﮐ ﻩﺩﺎﻔﺘﺳﺍ ﻡﺎﻧ ﻦﯾﺍ ﺯﺍ  ﯼﺍﻮﺨﯿﻣ ﻢﻫ ﺯﻮﻨﻫ ('%d' ﺯﺎﯿﺘﻣﺍ )ﺖﺳﺍ ﻩﺪﺷ ﻩﺩﺎﻔﺘﺳﺍ '%s' ﻡﺎﻧ ﻦﯾﺍ
+== ؟ﯽﻨﮐ ﻩﺩﺎﻔﺘﺳﺍ ﻡﺎﻧ ﻦﯾﺍ ﺯﺍ  ﯼﺍﻮﺨﯿﻣ ﻢﻫ ﺯﻮﻨﻫ ('%2$d' ﺯﺎﯿﺘﻣﺍ )ﺖﺳﺍ ﻩﺪﺷ ﻩﺩﺎﻔﺘﺳﺍ '%1$s' ﻡﺎﻧ ﻦﯾﺍ
 
 Checking for existing player with your name
 == ﻡﺎﻧ ﻦﯾﺍ ﺎﺑ ﺩﻮﺟﻮﻣ ﻦﮑﯾﺯﺎﺑ ﯽﺳﺮﺑ ﻝﺎﺣﺭﺩ
