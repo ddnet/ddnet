@@ -69,13 +69,11 @@ private:
 	static void ConchainJoystickGuidChanged(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	float GetJoystickDeadzone();
 
-	int m_InputGrabbed;
+	bool m_InputGrabbed;
 	char *m_pClipboardText;
 
 	bool m_MouseFocus;
 	bool m_MouseDoubleClick;
-
-	int m_VideoRestartNeeded;
 
 	void AddEvent(char *pText, int Key, int Flags);
 	void Clear() override;
@@ -131,8 +129,6 @@ public:
 	void SetClipboardText(const char *pText) override;
 
 	int Update() override;
-
-	int VideoRestartNeeded() override;
 
 	bool GetIMEState() override;
 	void SetIMEState(bool Activate) override;

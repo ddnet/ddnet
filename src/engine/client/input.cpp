@@ -46,15 +46,17 @@ CInput::CInput()
 	mem_zero(m_aInputCount, sizeof(m_aInputCount));
 	mem_zero(m_aInputState, sizeof(m_aInputState));
 
+	m_LastUpdate = 0;
+	m_UpdateTime = 0.0f;
+
 	m_InputCounter = 1;
-	m_InputGrabbed = 0;
+	m_InputGrabbed = false;
 
 	m_MouseDoubleClick = false;
 
 	m_NumEvents = 0;
 	m_MouseFocus = true;
 
-	m_VideoRestartNeeded = 0;
 	m_pClipboardText = NULL;
 
 	m_NumTextInputInstances = 0;
@@ -148,7 +150,7 @@ void CInput::ConchainJoystickGuidChanged(IConsole::IResult *pResult, void *pUser
 
 float CInput::GetJoystickDeadzone()
 {
-	return g_Config.m_InpControllerTolerance / 50.0f;
+	return minimum(g_Config.m_InpControllerTolerance / 50.0f, 0.995f);
 }
 
 CInput::CJoystick::CJoystick(CInput *pInput, int Index, SDL_Joystick *pDelegate)
@@ -213,7 +215,7 @@ void CInput::CJoystick::GetHatValue(int Hat, int (&HatKeys)[2])
 
 bool CInput::CJoystick::Relative(float *pX, float *pY)
 {
-	if(!g_Config.m_InpControllerEnable)
+	if(!Input()->m_MouseFocus || !Input()->m_InputGrabbed || !g_Config.m_InpControllerEnable)
 		return false;
 
 	const vec2 RawJoystickPos = vec2(GetAxisValue(g_Config.m_InpControllerX), GetAxisValue(g_Config.m_InpControllerY));
@@ -221,7 +223,7 @@ bool CInput::CJoystick::Relative(float *pX, float *pY)
 	const float DeadZone = Input()->GetJoystickDeadzone();
 	if(Len > DeadZone)
 	{
-		const float Factor = 0.1f * maximum((Len - DeadZone) / (1 - DeadZone), 0.001f) / Len;
+		const float Factor = 2500.0f * Input()->GetUpdateTime() * maximum((Len - DeadZone) / (1.0f - DeadZone), 0.001f) / Len;
 		*pX = RawJoystickPos.x * Factor;
 		*pY = RawJoystickPos.y * Factor;
 		return true;
@@ -272,14 +274,14 @@ bool CInput::MouseRelative(float *pX, float *pY)
 
 void CInput::MouseModeAbsolute()
 {
-	m_InputGrabbed = 0;
+	m_InputGrabbed = false;
 	SDL_SetRelativeMouseMode(SDL_FALSE);
 	Graphics()->SetWindowGrab(false);
 }
 
 void CInput::MouseModeRelative()
 {
-	m_InputGrabbed = 1;
+	m_InputGrabbed = true;
 #if !defined(CONF_PLATFORM_ANDROID) // No relative mouse on Android
 	SDL_SetRelativeMouseMode(SDL_TRUE);
 #endif
@@ -563,6 +565,14 @@ void CInput::SetEditingPosition(float X, float Y)
 
 int CInput::Update()
 {
+	const int64_t Now = time_get();
+	if(m_LastUpdate != 0)
+	{
+		const float Diff = (Now - m_LastUpdate) / (float)time_freq();
+		m_UpdateTime = m_UpdateTime == 0.0f ? Diff : (m_UpdateTime * 0.8f + Diff * 0.2f);
+	}
+	m_LastUpdate = Now;
+
 	// keep the counter between 1..0xFFFF, 0 means not pressed
 	m_InputCounter = (m_InputCounter % 0xFFFF) + 1;
 
@@ -771,16 +781,6 @@ int CInput::Update()
 		}
 	}
 
-	return 0;
-}
-
-int CInput::VideoRestartNeeded()
-{
-	if(m_VideoRestartNeeded)
-	{
-		m_VideoRestartNeeded = 0;
-		return 1;
-	}
 	return 0;
 }
 
