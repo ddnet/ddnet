@@ -5159,8 +5159,8 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			s_pID = nullptr;
 
 			// update displayed text
-			str_format(s_aStrCurTime, sizeof(s_aStrCurTime), "0.000");
-			str_format(s_aStrCurValue, sizeof(s_aStrCurValue), "0.000");
+			str_copy(s_aStrCurTime, "0.000");
+			str_copy(s_aStrCurValue, "0.000");
 		}
 
 		{
@@ -5253,8 +5253,8 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 								s_pID = nullptr;
 
 								// update displayed text
-								str_format(s_aStrCurTime, sizeof(s_aStrCurTime), "0.000");
-								str_format(s_aStrCurValue, sizeof(s_aStrCurValue), "0.000");
+								str_copy(s_aStrCurTime, "0.000");
+								str_copy(s_aStrCurValue, "0.000");
 							}
 
 							pEnvelope->m_vPoints.erase(pEnvelope->m_vPoints.begin() + i);

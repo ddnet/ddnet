@@ -1192,10 +1192,12 @@ void str_append(char *dst, const char *src, int dst_size);
  * @param src String to be copied.
  * @param dst_size Size of the buffer dst.
  *
+ * @return Length of written string, even if it has been truncated
+ *
  * @remark The strings are treated as zero-terminated strings.
  * @remark Guarantees that dst string will contain zero-termination.
  */
-void str_copy(char *dst, const char *src, int dst_size);
+int str_copy(char *dst, const char *src, int dst_size);
 
 /**
  * Truncates a utf8 encoded string to a given length.
