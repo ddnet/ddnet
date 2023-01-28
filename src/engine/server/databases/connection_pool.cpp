@@ -432,12 +432,12 @@ void CWorker::Print(IConsole *pConsole, CDbConnectionPool::Mode DatabaseMode)
 /* static */
 bool CDbConnectionPool::ExecSqlFunc(IDbConnection *pConnection, CSqlExecData *pData, Write w)
 {
-	char aError[256] = "error message not initialized";
 	if(pConnection == nullptr)
 	{
-		str_format(aError, sizeof(aError), "No database given");
+		dbg_msg("sql", "No database given");
 		return false;
 	}
+	char aError[256] = "unknown error";
 	if(pConnection->Connect(aError, sizeof(aError)))
 	{
 		dbg_msg("sql", "failed connecting to db: %s", aError);
