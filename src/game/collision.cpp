@@ -1032,31 +1032,31 @@ int CCollision::Entity(int x, int y, int Layer) const
 {
 	if((0 > x || x >= m_Width) || (0 > y || y >= m_Height))
 	{
-		char aBuf[12];
+		const char *pName;
 		switch(Layer)
 		{
 		case LAYER_GAME:
-			str_format(aBuf, sizeof(aBuf), "Game");
+			pName = "Game";
 			break;
 		case LAYER_FRONT:
-			str_format(aBuf, sizeof(aBuf), "Front");
+			pName = "Front";
 			break;
 		case LAYER_SWITCH:
-			str_format(aBuf, sizeof(aBuf), "Switch");
+			pName = "Switch";
 			break;
 		case LAYER_TELE:
-			str_format(aBuf, sizeof(aBuf), "Tele");
+			pName = "Tele";
 			break;
 		case LAYER_SPEEDUP:
-			str_format(aBuf, sizeof(aBuf), "Speedup");
+			pName = "Speedup";
 			break;
 		case LAYER_TUNE:
-			str_format(aBuf, sizeof(aBuf), "Tune");
+			pName = "Tune";
 			break;
 		default:
-			str_format(aBuf, sizeof(aBuf), "Unknown");
+			pName = "Unknown";
 		}
-		dbg_msg("collision", "something is VERY wrong with the %s layer please report this at https://github.com/ddnet/ddnet, you will need to post the map as well and any steps that u think may have led to this", aBuf);
+		dbg_msg("collision", "something is VERY wrong with the %s layer please report this at https://github.com/ddnet/ddnet, you will need to post the map as well and any steps that u think may have led to this", pName);
 		return 0;
 	}
 	switch(Layer)
