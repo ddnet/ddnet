@@ -316,7 +316,7 @@ void CStatboard::RenderGlobalStats()
 		// RATIO
 		{
 			if(pStats->m_Deaths == 0)
-				str_format(aBuf, sizeof(aBuf), "--");
+				str_copy(aBuf, "--");
 			else
 				str_format(aBuf, sizeof(aBuf), "%.2f", (float)(pStats->m_Frags) / pStats->m_Deaths);
 			tw = TextRender()->TextWidth(0, FontSize, aBuf, -1, -1.0f);
@@ -469,7 +469,7 @@ void CStatboard::FormatStats(char *pDest, size_t DestSize)
 	}
 
 	char aPlayerStats[1024 * VANILLA_MAX_CLIENTS];
-	str_format(aPlayerStats, sizeof(aPlayerStats), "Local-player,Team,Name,Clan,Score,Frags,Deaths,Suicides,F/D-ratio,Net,FPM,Spree,Best,Hammer-F/D,Gun-F/D,Shotgun-F/D,Grenade-F/D,Laser-F/D,Ninja-F/D,GameWithFlags,Flag-grabs,Flag-captures\n");
+	str_copy(aPlayerStats, "Local-player,Team,Name,Clan,Score,Frags,Deaths,Suicides,F/D-ratio,Net,FPM,Spree,Best,Hammer-F/D,Gun-F/D,Shotgun-F/D,Grenade-F/D,Laser-F/D,Ninja-F/D,GameWithFlags,Flag-grabs,Flag-captures\n");
 	for(int i = 0; i < NumPlayers; i++)
 	{
 		const CNetObj_PlayerInfo *pInfo = apPlayers[i];
