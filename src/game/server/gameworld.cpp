@@ -231,7 +231,7 @@ void CGameWorld::UpdatePlayerMaps()
 			else
 				Dist[j].first = 0;
 
-			Dist[j].first += distance(GameServer()->m_apPlayers[i]->m_ViewPos, pChr->m_Pos);
+			Dist[j].first += length_squared(GameServer()->m_apPlayers[i]->m_ViewPos - pChr->m_Pos);
 		}
 
 		// always send the player themselves
