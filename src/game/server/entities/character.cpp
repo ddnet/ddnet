@@ -1415,13 +1415,14 @@ void CCharacter::SetTimeCheckpoint(int TimeCheckpoint)
 	}
 }
 
-void CCharacter::HandleTiles(int Index)
+void CCharacter::HandleTiles(int Index, bool *pStopProcessing)
 {
 	int MapIndex = Index;
 	//int PureMapIndex = Collision()->GetPureMapIndex(m_Pos);
 	m_TileIndex = Collision()->GetTileIndex(MapIndex);
 	m_TileFIndex = Collision()->GetFTileIndex(MapIndex);
 	m_MoveRestrictions = Collision()->GetMoveRestrictions(IsSwitchActiveCb, this, m_Pos, 18.0f, MapIndex);
+	*pStopProcessing = false;
 	if(Index < 0)
 	{
 		m_LastRefillJumps = false;
@@ -1790,6 +1791,13 @@ void CCharacter::HandleTiles(int Index)
 		m_LastBonus = false;
 	}
 
+	if((m_TileIndex == TILE_DEATH) || (m_TileFIndex == TILE_DEATH))
+	{
+		Die(m_pPlayer->GetCID(), WEAPON_WORLD);
+		*pStopProcessing = true;
+		return;
+	}
+
 	int z = Collision()->IsTeleport(MapIndex);
 	if(!g_Config.m_SvOldTeleportHook && !g_Config.m_SvOldTeleportWeapons && z && !(*m_pTeleOuts)[z - 1].empty())
 	{
@@ -1797,6 +1805,7 @@ void CCharacter::HandleTiles(int Index)
 			return;
 		int TeleOut = m_Core.m_pWorld->RandomOr0((*m_pTeleOuts)[z - 1].size());
 		m_Core.m_Pos = (*m_pTeleOuts)[z - 1][TeleOut];
+		*pStopProcessing = true;
 		if(!g_Config.m_SvTeleportHoldHook)
 		{
 			ResetHook();
@@ -1812,6 +1821,7 @@ void CCharacter::HandleTiles(int Index)
 			return;
 		int TeleOut = m_Core.m_pWorld->RandomOr0((*m_pTeleOuts)[evilz - 1].size());
 		m_Core.m_Pos = (*m_pTeleOuts)[evilz - 1][TeleOut];
+		*pStopProcessing = true;
 		if(!g_Config.m_SvOldTeleportHook && !g_Config.m_SvOldTeleportWeapons)
 		{
 			m_Core.m_Vel = vec2(0, 0);
@@ -1839,6 +1849,7 @@ void CCharacter::HandleTiles(int Index)
 			{
 				int TeleOut = m_Core.m_pWorld->RandomOr0((*m_pTeleCheckOuts)[k].size());
 				m_Core.m_Pos = (*m_pTeleCheckOuts)[k][TeleOut];
+				*pStopProcessing = true;
 				m_Core.m_Vel = vec2(0, 0);
 
 				if(!g_Config.m_SvTeleportHoldHook)
@@ -1855,6 +1866,7 @@ void CCharacter::HandleTiles(int Index)
 		if(GameServer()->m_pController->CanSpawn(m_pPlayer->GetTeam(), &SpawnPos, GameServer()->GetDDRaceTeam(GetPlayer()->GetCID())))
 		{
 			m_Core.m_Pos = SpawnPos;
+			*pStopProcessing = true;
 			m_Core.m_Vel = vec2(0, 0);
 
 			if(!g_Config.m_SvTeleportHoldHook)
@@ -1876,6 +1888,7 @@ void CCharacter::HandleTiles(int Index)
 			{
 				int TeleOut = m_Core.m_pWorld->RandomOr0((*m_pTeleCheckOuts)[k].size());
 				m_Core.m_Pos = (*m_pTeleCheckOuts)[k][TeleOut];
+				*pStopProcessing = true;
 
 				if(!g_Config.m_SvTeleportHoldHook)
 				{
@@ -1890,6 +1903,7 @@ void CCharacter::HandleTiles(int Index)
 		if(GameServer()->m_pController->CanSpawn(m_pPlayer->GetTeam(), &SpawnPos, GameServer()->GetDDRaceTeam(GetPlayer()->GetCID())))
 		{
 			m_Core.m_Pos = SpawnPos;
+			*pStopProcessing = true;
 
 			if(!g_Config.m_SvTeleportHoldHook)
 			{
@@ -2099,16 +2113,22 @@ void CCharacter::DDRacePostCoreTick()
 	{
 		for(int &Index : vIndices)
 		{
-			HandleTiles(Index);
-			if(!m_Alive)
+			bool StopProcessing;
+			HandleTiles(Index, &StopProcessing);
+			if(StopProcessing || !m_Alive)
+			{
 				return;
+			}
 		}
 	}
 	else
 	{
-		HandleTiles(CurrentIndex);
-		if(!m_Alive)
+		bool StopProcessing;
+		HandleTiles(CurrentIndex, &StopProcessing);
+		if(StopProcessing || !m_Alive)
+		{
 			return;
+		}
 	}
 
 	// teleport gun

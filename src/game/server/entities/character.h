@@ -148,7 +148,7 @@ private:
 	void SnapCharacter(int SnappingClient, int ID);
 	static bool IsSwitchActiveCb(int Number, void *pUser);
 	void SetTimeCheckpoint(int TimeCheckpoint);
-	void HandleTiles(int Index);
+	void HandleTiles(int Index, bool *pStopProcessing);
 	float m_Time;
 	int m_LastBroadcast;
 	void DDRaceInit();
