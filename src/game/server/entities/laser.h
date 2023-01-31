@@ -31,7 +31,7 @@ private:
 	int m_Bounces;
 	int m_EvalTick;
 	int m_Owner;
-	int m_TeamMask;
+	CClientMask m_TeamMask;
 	bool m_ZeroEnergyBounceInLastTick;
 
 	// DDRace

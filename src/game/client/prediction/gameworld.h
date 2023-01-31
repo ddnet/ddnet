@@ -61,7 +61,7 @@ public:
 	CCharacter *GetCharacterByID(int ID) { return (ID >= 0 && ID < MAX_CLIENTS) ? m_apCharacters[ID] : nullptr; }
 
 	// from gamecontext
-	void CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage, int ActivatedTeam, int64_t Mask);
+	void CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage, int ActivatedTeam, CClientMask Mask);
 
 	// for client side prediction
 	struct

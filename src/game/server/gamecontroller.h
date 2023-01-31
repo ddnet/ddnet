@@ -5,6 +5,7 @@
 
 #include <base/vmath.h>
 #include <engine/map.h>
+#include <engine/shared/protocol.h>
 
 #include <vector>
 
@@ -143,7 +144,7 @@ public:
 	virtual bool CanJoinTeam(int Team, int NotThisID);
 	int ClampTeam(int Team);
 
-	virtual int64_t GetMaskForPlayerWorldEvent(int Asker, int ExceptID = -1);
+	virtual CClientMask GetMaskForPlayerWorldEvent(int Asker, int ExceptID = -1);
 
 	// DDRace
 

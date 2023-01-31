@@ -212,10 +212,10 @@ void CGameControllerDDRace::DoTeamChange(class CPlayer *pPlayer, int Team, bool 
 	IGameController::DoTeamChange(pPlayer, Team, DoChatMsg);
 }
 
-int64_t CGameControllerDDRace::GetMaskForPlayerWorldEvent(int Asker, int ExceptID)
+CClientMask CGameControllerDDRace::GetMaskForPlayerWorldEvent(int Asker, int ExceptID)
 {
 	if(Asker == -1)
-		return CmaskAllExceptOne(ExceptID);
+		return CClientMask().set().reset(ExceptID);
 
 	return m_Teams.TeamMask(GetPlayerTeam(Asker), ExceptID, Asker);
 }

@@ -25,7 +25,7 @@ class CGameTeams
 
 	int m_aTeamState[NUM_TEAMS];
 	bool m_aTeamLocked[NUM_TEAMS];
-	uint64_t m_aInvited[NUM_TEAMS];
+	CClientMask m_aInvited[NUM_TEAMS];
 	bool m_aPractice[NUM_TEAMS];
 	std::shared_ptr<CScoreSaveResult> m_apSaveTeamResult[NUM_TEAMS];
 	uint64_t m_aLastSwap[MAX_CLIENTS]; // index is id of player who initiated swap
@@ -96,7 +96,7 @@ public:
 
 	void ChangeTeamState(int Team, int State);
 
-	int64_t TeamMask(int Team, int ExceptID = -1, int Asker = -1);
+	CClientMask TeamMask(int Team, int ExceptID = -1, int Asker = -1);
 
 	int Count(int Team) const;
 
@@ -151,7 +151,7 @@ public:
 
 	bool IsInvited(int Team, int ClientID)
 	{
-		return m_aInvited[Team] & 1LL << ClientID;
+		return m_aInvited[Team].test(ClientID);
 	}
 
 	bool IsStarted(int Team)

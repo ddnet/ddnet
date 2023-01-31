@@ -721,10 +721,10 @@ int IGameController::ClampTeam(int Team)
 	return 0;
 }
 
-int64_t IGameController::GetMaskForPlayerWorldEvent(int Asker, int ExceptID)
+CClientMask IGameController::GetMaskForPlayerWorldEvent(int Asker, int ExceptID)
 {
 	// Send all world events to everyone by default
-	return CmaskAllExceptOne(ExceptID);
+	return CClientMask().set().reset(ExceptID);
 }
 
 void IGameController::DoTeamChange(CPlayer *pPlayer, int Team, bool DoChatMsg)
