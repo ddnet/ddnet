@@ -831,25 +831,26 @@ bool CGraphics_Threaded::ScreenshotDirect()
 
 	if(Image.m_pData)
 	{
-		// find filename
-		char aWholePath[1024];
+		char aWholePath[IO_MAX_PATH_LENGTH];
+		char aBuf[64 + IO_MAX_PATH_LENGTH];
 
 		IOHANDLE File = m_pStorage->OpenFile(m_aScreenshotName, IOFLAG_WRITE, IStorage::TYPE_SAVE, aWholePath, sizeof(aWholePath));
 		if(File)
 		{
-			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "saved screenshot to '%s'", aWholePath);
-
-			// save png
-			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf, ColorRGBA{1.0f, 0.6f, 0.3f, 1.0f});
-
 			TImageByteBuffer ByteBuffer;
 			SImageByteBuffer ImageByteBuffer(&ByteBuffer);
 
 			if(SavePNG(IMAGE_FORMAT_RGBA, (const uint8_t *)Image.m_pData, ImageByteBuffer, Image.m_Width, Image.m_Height))
 				io_write(File, &ByteBuffer.front(), ByteBuffer.size());
 			io_close(File);
+
+			str_format(aBuf, sizeof(aBuf), "saved screenshot to '%s'", aWholePath);
 		}
+		else
+		{
+			str_format(aBuf, sizeof(aBuf), "failed to save screenshot to '%s'", aWholePath);
+		}
+		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf, ColorRGBA(1.0f, 0.6f, 0.3f, 1.0f));
 
 		free(Image.m_pData);
 	}
