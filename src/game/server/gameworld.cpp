@@ -229,56 +229,26 @@ void CGameWorld::UpdatePlayerMaps()
 			if(!pChr->CanSnapCharacter(i))
 				Dist[j].first = 1e8;
 			else
-				Dist[j].first = 0;
-
-			Dist[j].first += length_squared(GameServer()->m_apPlayers[i]->m_ViewPos - pChr->m_Pos);
+				Dist[j].first = length_squared(GameServer()->m_apPlayers[i]->m_ViewPos - pChr->m_Pos);
 		}
 
 		// always send the player themselves
-		Dist[i].first = 0;
-
-		// compute reverse map
-		int aReverseMap[MAX_CLIENTS];
-		for(int &j : aReverseMap)
-		{
-			j = -1;
-		}
-		for(int j = 0; j < VANILLA_MAX_CLIENTS; j++)
-		{
-			if(pMap[j] == -1)
-				continue;
-			if(Dist[pMap[j]].first > 5e9f)
-				pMap[j] = -1;
-			else
-				aReverseMap[pMap[j]] = j;
-		}
+		Dist[i].first = -1;
 
 		std::nth_element(&Dist[0], &Dist[VANILLA_MAX_CLIENTS - 1], &Dist[MAX_CLIENTS], distCompare);
 
-		int Mapc = 0;
-		int Demand = 0;
+		int Index = 1; // exclude self client id
 		for(int j = 0; j < VANILLA_MAX_CLIENTS - 1; j++)
 		{
-			int k = Dist[j].second;
-			if(aReverseMap[k] != -1 || Dist[j].first > 5e9f)
+			pMap[j + 1] = -1; // also fill player with empty name to say chat msgs
+			if(Dist[j].second == i || Dist[j].first > 5e9f)
 				continue;
-			while(Mapc < VANILLA_MAX_CLIENTS && pMap[Mapc] != -1)
-				Mapc++;
-			if(Mapc < VANILLA_MAX_CLIENTS - 1)
-				pMap[Mapc] = k;
-			else
-				Demand++;
+			pMap[Index++] = Dist[j].second;
 		}
-		for(int j = MAX_CLIENTS - 1; j > VANILLA_MAX_CLIENTS - 2; j--)
-		{
-			int k = Dist[j].second;
-			if(aReverseMap[k] == -1)
-				continue;
-			if(Demand-- <= 0)
-				break;
-			pMap[aReverseMap[k]] = -1;
-		}
-		pMap[VANILLA_MAX_CLIENTS - 1] = -1; // player with empty name to say chat msgs
+
+		// sort by real client ids, guarantee order on distance changes, O(Nlog(N)) worst case
+		// sort just clients in game always expect first (self client id) and last (fake client id) indexes
+		std::sort(&pMap[1], &pMap[minimum(Index, VANILLA_MAX_CLIENTS - 1)]);
 	}
 }
 
