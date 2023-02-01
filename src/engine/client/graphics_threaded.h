@@ -802,6 +802,7 @@ class CGraphics_Threaded : public IEngineGraphics
 	//
 	class IStorage *m_pStorage;
 	class IConsole *m_pConsole;
+	class IEngine *m_pEngine;
 
 	int m_CurIndex;
 
@@ -817,7 +818,7 @@ class CGraphics_Threaded : public IEngineGraphics
 	float m_Rotation;
 	int m_Drawing;
 	bool m_DoScreenshot;
-	char m_aScreenshotName[128];
+	char m_aScreenshotName[IO_MAX_PATH_LENGTH];
 
 	CTextureHandle m_InvalidTexture;
 

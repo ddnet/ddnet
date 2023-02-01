@@ -11,11 +11,14 @@
 #include <base/system.h>
 
 #include <engine/console.h>
+#include <engine/engine.h>
 #include <engine/gfx/image_loader.h>
 #include <engine/gfx/image_manipulation.h>
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
+#include <engine/shared/jobs.h>
 #include <engine/storage.h>
+
 #include <game/generated/client_data.h>
 #include <game/generated/client_data7.h>
 #include <game/localization.h>
@@ -811,6 +814,55 @@ void CGraphics_Threaded::KickCommandBuffer()
 	m_pCommandBuffer->Reset();
 }
 
+class CScreenshotSaveJob : public IJob
+{
+	IStorage *m_pStorage;
+	IConsole *m_pConsole;
+	char m_aName[IO_MAX_PATH_LENGTH];
+	int m_Width;
+	int m_Height;
+	void *m_pData;
+
+	void Run() override
+	{
+		char aWholePath[IO_MAX_PATH_LENGTH];
+		char aBuf[64 + IO_MAX_PATH_LENGTH];
+		IOHANDLE File = m_pStorage->OpenFile(m_aName, IOFLAG_WRITE, IStorage::TYPE_SAVE, aWholePath, sizeof(aWholePath));
+		if(File)
+		{
+			TImageByteBuffer ByteBuffer;
+			SImageByteBuffer ImageByteBuffer(&ByteBuffer);
+
+			if(SavePNG(IMAGE_FORMAT_RGBA, (const uint8_t *)m_pData, ImageByteBuffer, m_Width, m_Height))
+				io_write(File, &ByteBuffer.front(), ByteBuffer.size());
+			io_close(File);
+
+			str_format(aBuf, sizeof(aBuf), "saved screenshot to '%s'", aWholePath);
+		}
+		else
+		{
+			str_format(aBuf, sizeof(aBuf), "failed to save screenshot to '%s'", aWholePath);
+		}
+		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf, ColorRGBA(1.0f, 0.6f, 0.3f, 1.0f));
+	}
+
+public:
+	CScreenshotSaveJob(IStorage *pStorage, IConsole *pConsole, const char *pName, int Width, int Height, void *pData) :
+		m_pStorage(pStorage),
+		m_pConsole(pConsole),
+		m_Width(Width),
+		m_Height(Height),
+		m_pData(pData)
+	{
+		str_copy(m_aName, pName);
+	}
+
+	virtual ~CScreenshotSaveJob()
+	{
+		free(m_pData);
+	}
+};
+
 bool CGraphics_Threaded::ScreenshotDirect()
 {
 	// add swap command
@@ -831,28 +883,7 @@ bool CGraphics_Threaded::ScreenshotDirect()
 
 	if(Image.m_pData)
 	{
-		char aWholePath[IO_MAX_PATH_LENGTH];
-		char aBuf[64 + IO_MAX_PATH_LENGTH];
-
-		IOHANDLE File = m_pStorage->OpenFile(m_aScreenshotName, IOFLAG_WRITE, IStorage::TYPE_SAVE, aWholePath, sizeof(aWholePath));
-		if(File)
-		{
-			TImageByteBuffer ByteBuffer;
-			SImageByteBuffer ImageByteBuffer(&ByteBuffer);
-
-			if(SavePNG(IMAGE_FORMAT_RGBA, (const uint8_t *)Image.m_pData, ImageByteBuffer, Image.m_Width, Image.m_Height))
-				io_write(File, &ByteBuffer.front(), ByteBuffer.size());
-			io_close(File);
-
-			str_format(aBuf, sizeof(aBuf), "saved screenshot to '%s'", aWholePath);
-		}
-		else
-		{
-			str_format(aBuf, sizeof(aBuf), "failed to save screenshot to '%s'", aWholePath);
-		}
-		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf, ColorRGBA(1.0f, 0.6f, 0.3f, 1.0f));
-
-		free(Image.m_pData);
+		m_pEngine->AddJob(std::make_shared<CScreenshotSaveJob>(m_pStorage, m_pConsole, m_aScreenshotName, Image.m_Width, Image.m_Height, Image.m_pData));
 	}
 
 	return DidSwap;
@@ -2836,6 +2867,7 @@ int CGraphics_Threaded::Init()
 	// fetch pointers
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
+	m_pEngine = Kernel()->RequestInterface<IEngine>();
 
 	// init textures
 	m_FirstFreeTexture = 0;
