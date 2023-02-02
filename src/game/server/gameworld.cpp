@@ -207,6 +207,8 @@ void CGameWorld::UpdatePlayerMaps()
 	{
 		if(!Server()->ClientIngame(i))
 			continue;
+		if(Server()->GetClientVersion(i) >= VERSION_DDNET_OLD)
+			continue;
 		int *pMap = Server()->GetIdMap(i);
 
 		// compute distances
