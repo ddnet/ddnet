@@ -228,7 +228,7 @@ int mem_comp(const void *a, const void *b, int size)
 	return memcmp(a, b, size);
 }
 
-int mem_has_null(const void *block, unsigned size)
+bool mem_has_null(const void *block, unsigned size)
 {
 	const unsigned char *bytes = (const unsigned char *)block;
 	unsigned i;
@@ -236,10 +236,10 @@ int mem_has_null(const void *block, unsigned size)
 	{
 		if(bytes[i] == 0)
 		{
-			return 1;
+			return true;
 		}
 	}
-	return 0;
+	return false;
 }
 
 IOHANDLE io_open_impl(const char *filename, int flags)

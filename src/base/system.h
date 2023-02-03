@@ -181,10 +181,9 @@ int mem_comp(const void *a, const void *b, int size);
  * @param block Pointer to the block to check for nulls.
  * @param size Size of the block.
  *
- * @return 1 - The block has a null byte.
- * @return 0 - The block does not have a null byte.
+ * @return true if the block has a null byte, false otherwise.
  */
-int mem_has_null(const void *block, unsigned size);
+bool mem_has_null(const void *block, unsigned size);
 
 /**
  * @defgroup File-IO
