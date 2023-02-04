@@ -225,7 +225,7 @@ void CDemoRecorder::WriteTickMarker(int Tick, int Keyframe)
 {
 	if(m_LastTickMarker == -1 || Tick - m_LastTickMarker > CHUNKMASK_TICK || Keyframe)
 	{
-		unsigned char aChunk[5];
+		unsigned char aChunk[sizeof(int32_t) + 1];
 		aChunk[0] = CHUNKTYPEFLAG_TICKMARKER;
 		uint_to_bytes_be(aChunk + 1, Tick);
 
@@ -347,18 +347,18 @@ int CDemoRecorder::Stop()
 
 	// add the demo length to the header
 	io_seek(m_File, gs_LengthOffset, IOSEEK_START);
-	unsigned char aLength[4];
+	unsigned char aLength[sizeof(int32_t)];
 	uint_to_bytes_be(aLength, Length());
 	io_write(m_File, aLength, sizeof(aLength));
 
 	// add the timeline markers to the header
 	io_seek(m_File, gs_NumMarkersOffset, IOSEEK_START);
-	unsigned char aNumMarkers[4];
+	unsigned char aNumMarkers[sizeof(int32_t)];
 	uint_to_bytes_be(aNumMarkers, m_NumTimelineMarkers);
 	io_write(m_File, aNumMarkers, sizeof(aNumMarkers));
 	for(int i = 0; i < m_NumTimelineMarkers; i++)
 	{
-		unsigned char aMarker[4];
+		unsigned char aMarker[sizeof(int32_t)];
 		uint_to_bytes_be(aMarker, m_aTimelineMarkers[i]);
 		io_write(m_File, aMarker, sizeof(aMarker));
 	}
@@ -454,7 +454,7 @@ int CDemoPlayer::ReadChunkHeader(int *pType, int *pSize, int *pTick)
 		}
 		else
 		{
-			unsigned char aTickdata[4];
+			unsigned char aTickdata[sizeof(int32_t)];
 			if(io_read(m_File, aTickdata, sizeof(aTickdata)) != sizeof(aTickdata))
 				return -1;
 			*pTick = bytes_be_to_uint(aTickdata);

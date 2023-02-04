@@ -83,7 +83,7 @@ void CGhostRecorder::WriteData(int Type, const void *pData, int Size)
 	mem_copy(Data.m_aData, pData, Size);
 
 	if(m_LastItem.m_Type == Data.m_Type)
-		DiffItem((int *)m_LastItem.m_aData, (int *)Data.m_aData, (int *)m_pBufferPos, Size / 4);
+		DiffItem((int *)m_LastItem.m_aData, (int *)Data.m_aData, (int *)m_pBufferPos, Size / sizeof(int32_t));
 	else
 	{
 		FlushChunk();
@@ -144,11 +144,11 @@ int CGhostRecorder::Stop(int Ticks, int Time)
 	// write down num shots and time
 	io_seek(m_File, gs_NumTicksOffset, IOSEEK_START);
 
-	unsigned char aNumTicks[4];
+	unsigned char aNumTicks[sizeof(int32_t)];
 	uint_to_bytes_be(aNumTicks, Ticks);
 	io_write(m_File, aNumTicks, sizeof(aNumTicks));
 
-	unsigned char aTime[4];
+	unsigned char aTime[sizeof(int32_t)];
 	uint_to_bytes_be(aTime, Time);
 	io_write(m_File, aTime, sizeof(aTime));
 
@@ -341,7 +341,7 @@ bool CGhostLoader::ReadData(int Type, void *pData, int Size)
 	CGhostItem Data(Type);
 
 	if(m_LastItem.m_Type == Data.m_Type)
-		UndiffItem((int *)m_LastItem.m_aData, (int *)m_pBufferPos, (int *)Data.m_aData, Size / 4);
+		UndiffItem((int *)m_LastItem.m_aData, (int *)m_pBufferPos, (int *)Data.m_aData, Size / sizeof(int32_t));
 	else
 		mem_copy(Data.m_aData, m_pBufferPos, Size);
 
