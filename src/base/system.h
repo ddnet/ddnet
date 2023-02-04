@@ -2386,27 +2386,31 @@ const char *str_next_token(const char *str, const char *delim, char *buffer, int
 */
 int str_in_list(const char *list, const char *delim, const char *needle);
 
-/*
-	Function: bytes_be_to_uint
-		Packs 4 big endian bytes into an unsigned
-
-	Returns:
-		The packed unsigned
-
-	Remarks:
-		- Assumes the passed array is 4 bytes
-		- Assumes unsigned is 4 bytes
-*/
+/**
+ * Packs 4 big endian bytes into an unsigned.
+ *
+ * @param bytes Pointer to an array of bytes that will be packed.
+ *
+ * @return The packed unsigned.
+ *
+ * @remark Assumes the passed array is least 4 bytes in size.
+ * @remark Assumes unsigned is 4 bytes in size.
+ *
+ * @see uint_to_bytes_be
+ */
 unsigned bytes_be_to_uint(const unsigned char *bytes);
 
-/*
-	Function: uint_to_bytes_be
-		Packs an unsigned into 4 big endian bytes
-
-	Remarks:
-		- Assumes the passed array is 4 bytes
-		- Assumes unsigned is 4 bytes
-*/
+/**
+ * Packs an unsigned into 4 big endian bytes.
+ *
+ * @param bytes Pointer to an array where the bytes will be stored.
+ * @param value The values that will be packed into the array.
+ *
+ * @remark Assumes the passed array is least 4 bytes in size.
+ * @remark Assumes unsigned is 4 bytes in size.
+ *
+ * @see bytes_be_to_uint
+ */
 void uint_to_bytes_be(unsigned char *bytes, unsigned value);
 
 /*
