@@ -786,6 +786,7 @@ public:
 		m_MouseInsidePopup = false;
 
 		m_FileDialogStorageType = 0;
+		m_FileDialogLastPopulatedStorageType = 0;
 		m_pFileDialogTitle = nullptr;
 		m_pFileDialogButtonText = nullptr;
 		m_pFileDialogUser = nullptr;
@@ -872,7 +873,7 @@ public:
 	CLayerGroup *m_apSavedBrushes[10];
 
 	void RefreshFilteredFileList();
-	void FilelistPopulate(int StorageType);
+	void FilelistPopulate(int StorageType, bool KeepSelection = false);
 	void InvokeFileDialog(int StorageType, int FileType, const char *pTitle, const char *pButtonText,
 		const char *pBasepath, const char *pDefaultName,
 		void (*pfnFunc)(const char *pFilename, int StorageType, void *pUser), void *pUser);
@@ -947,6 +948,7 @@ public:
 	};
 
 	int m_FileDialogStorageType;
+	int m_FileDialogLastPopulatedStorageType;
 	const char *m_pFileDialogTitle;
 	const char *m_pFileDialogButtonText;
 	void (*m_pfnFileDialogFunc)(const char *pFileName, int StorageType, void *pUser);
