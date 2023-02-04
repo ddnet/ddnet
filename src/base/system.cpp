@@ -3838,6 +3838,9 @@ const char *str_next_token(const char *str, const char *delim, char *buffer, int
 	return tok + len;
 }
 
+static_assert(sizeof(unsigned) == 4, "unsigned must be 4 bytes in size");
+static_assert(sizeof(unsigned) == sizeof(int), "unsigned and int must have the same size");
+
 unsigned bytes_be_to_uint(const unsigned char *bytes)
 {
 	return ((bytes[0] & 0xffu) << 24u) | ((bytes[1] & 0xffu) << 16u) | ((bytes[2] & 0xffu) << 8u) | (bytes[3] & 0xffu);
