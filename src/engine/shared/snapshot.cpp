@@ -47,7 +47,7 @@ int CSnapshot::GetExternalItemType(int InternalType) const
 	const CSnapshotItem *pTypeItem = GetItem(TypeItemIndex);
 	CUuid Uuid;
 	for(int i = 0; i < (int)sizeof(CUuid) / 4; i++)
-		int_to_bytes_be(&Uuid.m_aData[i * 4], pTypeItem->Data()[i]);
+		uint_to_bytes_be(&Uuid.m_aData[i * 4], pTypeItem->Data()[i]);
 
 	return g_UuidManager.LookupUuid(Uuid);
 }
@@ -71,7 +71,7 @@ const void *CSnapshot::FindItem(int Type, int ID) const
 		CUuid TypeUuid = g_UuidManager.GetUuid(Type);
 		int aTypeUuidItem[sizeof(CUuid) / 4];
 		for(int i = 0; i < (int)sizeof(CUuid) / 4; i++)
-			aTypeUuidItem[i] = bytes_be_to_int(&TypeUuid.m_aData[i * 4]);
+			aTypeUuidItem[i] = bytes_be_to_uint(&TypeUuid.m_aData[i * 4]);
 
 		bool Found = false;
 		for(int i = 0; i < m_NumItems; i++)
@@ -630,7 +630,7 @@ void CSnapshotBuilder::AddExtendedItemType(int Index)
 	if(pUuidItem)
 	{
 		for(int i = 0; i < (int)sizeof(CUuid) / 4; i++)
-			pUuidItem[i] = bytes_be_to_int(&Uuid.m_aData[i * 4]);
+			pUuidItem[i] = bytes_be_to_uint(&Uuid.m_aData[i * 4]);
 	}
 }
 

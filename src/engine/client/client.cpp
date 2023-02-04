@@ -4088,8 +4088,8 @@ int CClient::HandleChecksum(int Conn, CUuid Uuid, CUnpacker *pUnpacker)
 	int FileStart = maximum(Start, (int)sizeof(m_Checksum.m_aBytes));
 	unsigned char aStartBytes[4];
 	unsigned char aEndBytes[4];
-	int_to_bytes_be(aStartBytes, Start);
-	int_to_bytes_be(aEndBytes, End);
+	uint_to_bytes_be(aStartBytes, Start);
+	uint_to_bytes_be(aEndBytes, End);
 
 	if(Start <= (int)sizeof(m_Checksum.m_aBytes))
 	{

@@ -23,12 +23,12 @@ struct CGhostHeader
 
 	int GetTicks() const
 	{
-		return bytes_be_to_int(m_aNumTicks);
+		return bytes_be_to_uint(m_aNumTicks);
 	}
 
 	int GetTime() const
 	{
-		return bytes_be_to_int(m_aTime);
+		return bytes_be_to_uint(m_aTime);
 	}
 
 	CGhostInfo ToGhostInfo() const

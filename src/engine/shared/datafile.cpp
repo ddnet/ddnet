@@ -28,7 +28,7 @@ struct CItemEx
 	{
 		CItemEx Result;
 		for(int i = 0; i < (int)sizeof(CUuid) / 4; i++)
-			Result.m_aUuid[i] = bytes_be_to_int(&Uuid.m_aData[i * 4]);
+			Result.m_aUuid[i] = bytes_be_to_uint(&Uuid.m_aData[i * 4]);
 		return Result;
 	}
 
@@ -36,7 +36,7 @@ struct CItemEx
 	{
 		CUuid Result;
 		for(int i = 0; i < (int)sizeof(CUuid) / 4; i++)
-			int_to_bytes_be(&Result.m_aData[i * 4], m_aUuid[i]);
+			uint_to_bytes_be(&Result.m_aData[i * 4], m_aUuid[i]);
 		return Result;
 	}
 };

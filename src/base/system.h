@@ -2387,29 +2387,6 @@ const char *str_next_token(const char *str, const char *delim, char *buffer, int
 int str_in_list(const char *list, const char *delim, const char *needle);
 
 /*
-	Function: bytes_be_to_int
-		Packs 4 big endian bytes into an int
-
-	Returns:
-		The packed int
-
-	Remarks:
-		- Assumes the passed array is 4 bytes
-		- Assumes int is 4 bytes
-*/
-int bytes_be_to_int(const unsigned char *bytes);
-
-/*
-	Function: int_to_bytes_be
-		Packs an int into 4 big endian bytes
-
-	Remarks:
-		- Assumes the passed array is 4 bytes
-		- Assumes int is 4 bytes
-*/
-void int_to_bytes_be(unsigned char *bytes, int value);
-
-/*
 	Function: bytes_be_to_uint
 		Packs 4 big endian bytes into an unsigned
 

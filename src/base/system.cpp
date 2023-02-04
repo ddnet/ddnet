@@ -3838,34 +3838,6 @@ const char *str_next_token(const char *str, const char *delim, char *buffer, int
 	return tok + len;
 }
 
-int bytes_be_to_int(const unsigned char *bytes)
-{
-	int Result;
-	unsigned char *pResult = (unsigned char *)&Result;
-	for(unsigned i = 0; i < sizeof(int); i++)
-	{
-#if defined(CONF_ARCH_ENDIAN_BIG)
-		pResult[i] = bytes[i];
-#else
-		pResult[i] = bytes[sizeof(int) - i - 1];
-#endif
-	}
-	return Result;
-}
-
-void int_to_bytes_be(unsigned char *bytes, int value)
-{
-	const unsigned char *pValue = (const unsigned char *)&value;
-	for(unsigned i = 0; i < sizeof(int); i++)
-	{
-#if defined(CONF_ARCH_ENDIAN_BIG)
-		bytes[i] = pValue[i];
-#else
-		bytes[sizeof(int) - i - 1] = pValue[i];
-#endif
-	}
-}
-
 unsigned bytes_be_to_uint(const unsigned char *bytes)
 {
 	return ((bytes[0] & 0xffu) << 24u) | ((bytes[1] & 0xffu) << 16u) | ((bytes[2] & 0xffu) << 8u) | (bytes[3] & 0xffu);

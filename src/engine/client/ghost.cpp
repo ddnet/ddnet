@@ -145,11 +145,11 @@ int CGhostRecorder::Stop(int Ticks, int Time)
 	io_seek(m_File, gs_NumTicksOffset, IOSEEK_START);
 
 	unsigned char aNumTicks[4];
-	int_to_bytes_be(aNumTicks, Ticks);
+	uint_to_bytes_be(aNumTicks, Ticks);
 	io_write(m_File, aNumTicks, sizeof(aNumTicks));
 
 	unsigned char aTime[4];
-	int_to_bytes_be(aTime, Time);
+	uint_to_bytes_be(aTime, Time);
 	io_write(m_File, aTime, sizeof(aTime));
 
 	io_close(m_File);
