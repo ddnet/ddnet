@@ -549,26 +549,13 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	else
 		str_format(aBufPyr, sizeof(aBufPyr), Localize("%d player"), NumPlayers);
 
-	CUIRect SvrsOnline, PlysOnline, ButtonVerify;
+	CUIRect SvrsOnline, PlysOnline;
 	Status3.HSplitTop(20.f, &PlysOnline, &SvrsOnline);
-	Status3.VSplitMid(&ButtonVerify, &Status3);
-	ButtonVerify.HSplitMid(0, &ButtonVerify);
-
 	PlysOnline.VSplitRight(TextRender()->TextWidth(0, 12.0f, aBufPyr, -1, -1.0f), 0, &PlysOnline);
 	UI()->DoLabel(&PlysOnline, aBufPyr, 12.0f, TEXTALIGN_LEFT);
 	SvrsOnline.VSplitRight(TextRender()->TextWidth(0, 12.0f, aBufSvr, -1, -1.0f), 0, &SvrsOnline);
 	UI()->DoLabel(&SvrsOnline, aBufSvr, 12.0f, TEXTALIGN_LEFT);
 
-	{
-		static CButtonContainer s_DiscordButton;
-		if(DoButton_Menu(&s_DiscordButton, Localize("Verify"), 0, &ButtonVerify, 0, IGraphics::CORNER_ALL))
-		{
-			if(!open_link("https://ger10.ddnet.tw/"))
-			{
-				dbg_msg("menus", "couldn't open link");
-			}
-		}
-	}
 	// status box
 	{
 		CUIRect ButtonRefresh, ButtonConnect, ButtonArea;

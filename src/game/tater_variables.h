@@ -89,6 +89,9 @@ MACRO_CONFIG_INT(ClVoteDefaultFriend, tc_vote_default, 0, 0, 1, CFGFLAG_CLIENT |
 MACRO_CONFIG_INT(ClVoteDontShow, tc_vote_show, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show only votes where your vote counts")
 MACRO_CONFIG_INT(ClVoteDontShowFriends, tc_vote_show_friends, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show only votes where your vote counts exclude friends")
 
+// Auto Verify 
+MACRO_CONFIG_INT(ClAutoVerify, tc_auto_verify, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Auto verify")
+
 //AAAAAAA
 MACRO_CONFIG_INT(ClAmIFrozen, EEEfrz, 0, 0, 1, CFGFLAG_CLIENT, "")
 MACRO_CONFIG_INT(ClFreezeTick, EEEfrztk, 0, 0, 9999, CFGFLAG_CLIENT, "")

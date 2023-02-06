@@ -63,6 +63,7 @@
 #include "components/outlines.h"
 #include "components/particles.h"
 #include "components/player_indicator.h"
+#include "components/verify.h"
 #include "components/players.h"
 #include "components/race_demo.h"
 #include "components/scoreboard.h"
@@ -136,6 +137,7 @@ void CGameClient::OnConsoleInit()
 					      &m_FreezeBars,
 					      &m_DamageInd,
 					      &m_PlayerIndicator,
+                          &m_Verify,
                           &m_Bindwheel,
 					      &m_Hud,
 					      &m_Spectator,

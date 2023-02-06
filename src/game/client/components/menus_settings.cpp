@@ -3295,7 +3295,6 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClWhiteFeet, ("Render all custom colored feet as white feet skin"), &g_Config.m_ClWhiteFeet, &MainView, LineMargin);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClMiniDebug, ("Show Position and angle (Mini debug)"), &g_Config.m_ClMiniDebug, &MainView, LineMargin);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClNotifyWhenLast, ("Show when you are last"), &g_Config.m_ClNotifyWhenLast, &MainView, LineMargin);
-
         if (g_Config.m_ClNotifyWhenLast)
         {
             // create a text box for notification text 
@@ -3313,6 +3312,24 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
             DoLine_ColorPicker(&NotifyWhenLastTextID, 25.0f, 200.0f, 14.0f, 0.0f, &Section, ("Notification Color"), &g_Config.m_ClNotifyWhenLastColor, ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), false);
 
         
+        }
+
+        DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClAutoVerify, ("Auto Verify"), &g_Config.m_ClAutoVerify, &MainView, LineMargin);
+        if (g_Config.m_ClAutoVerify){
+            static CButtonContainer s_VerifyButton;
+            CUIRect ButtonVerify;
+
+            MainView.HSplitTop(5.0f, 0, &MainView);
+        	MainView.HSplitTop(20.0f, &ButtonVerify, &MainView);
+        	ButtonVerify.VSplitLeft(15.0f, 0, &ButtonVerify);
+
+            if(DoButton_Menu(&s_VerifyButton, Localize("Manual Verify"), 0, &ButtonVerify, 0, IGraphics::CORNER_ALL))
+            {
+                if(!open_link("https://ger10.ddnet.tw/"))
+                {
+                    dbg_msg("menus", "couldn't open link");
+                }
+		    }
         }
 
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRenderCursorSpec, ("Show your cursor when in free spectate"), &g_Config.m_ClRenderCursorSpec, &MainView, LineMargin);
@@ -3554,7 +3571,19 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			NewValue = (int)(UI()->DoScrollbarH(&g_Config.m_ClIndicatorMaxDistance, &Button, (NewValue - 10) / 130.0f) * 130.0f) + 10;
 			g_Config.m_ClIndicatorMaxDistance = NewValue * 50;
 		}
-	}
+
+        MainView.HSplitTop(10.0f, 0x0, &MainView); 
+
+		MainView = Column;
+
+		MainView.HSplitTop(30.0f, &Section, &MainView);
+		UI()->DoLabel(&Section, Localize("Auto Verify"), 20.0f, TEXTALIGN_LEFT);
+		MainView.VSplitLeft(5.0f, 0x0, &MainView);
+		MainView.HSplitTop(5.0f, 0x0, &MainView);
+
+        
+    
+    }
 
 	if(s_CurCustomTab == TCLIENT_TAB_BINDWHEEL)
 	{

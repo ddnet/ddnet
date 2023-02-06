@@ -2257,6 +2257,8 @@ if(CLIENT)
     components/statboard.h
     components/tooltips.cpp
     components/tooltips.h
+    components/verify.cpp
+    components/verify.h
     components/voting.cpp
     components/voting.h
     gameclient.cpp

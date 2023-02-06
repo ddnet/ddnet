@@ -45,6 +45,7 @@
 #include "components/nameplates.h"
 #include "components/particles.h"
 #include "components/player_indicator.h"
+#include "components/verify.h"
 #include "components/bindwheel.h"
 #include "components/outlines.h"
 #include "components/players.h"
@@ -139,6 +140,7 @@ public:
     CBindWheel m_Bindwheel;
 	CDamageInd m_DamageInd;
 	CVoting m_Voting;
+    CVerify m_Verify;
 	CSpectator m_Spectator;
 
 	CPlayers m_Players;
