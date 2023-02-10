@@ -1041,7 +1041,7 @@ void CCharacter::SnapCharacter(int SnappingClient, int ID)
 
 	if(!Server()->IsSixup(SnappingClient))
 	{
-		CNetObj_Character *pCharacter = static_cast<CNetObj_Character *>(Server()->SnapNewItem(NETOBJTYPE_CHARACTER, ID, sizeof(CNetObj_Character)));
+		CNetObj_Character *pCharacter = Server()->SnapNewItem<CNetObj_Character>(ID);
 		if(!pCharacter)
 			return;
 
@@ -1066,7 +1066,7 @@ void CCharacter::SnapCharacter(int SnappingClient, int ID)
 	}
 	else
 	{
-		protocol7::CNetObj_Character *pCharacter = static_cast<protocol7::CNetObj_Character *>(Server()->SnapNewItem(NETOBJTYPE_CHARACTER, ID, sizeof(protocol7::CNetObj_Character)));
+		protocol7::CNetObj_Character *pCharacter = Server()->SnapNewItem<protocol7::CNetObj_Character>(ID);
 		if(!pCharacter)
 			return;
 
@@ -1152,7 +1152,7 @@ void CCharacter::Snap(int SnappingClient)
 
 	SnapCharacter(SnappingClient, ID);
 
-	CNetObj_DDNetCharacter *pDDNetCharacter = static_cast<CNetObj_DDNetCharacter *>(Server()->SnapNewItem(NETOBJTYPE_DDNETCHARACTER, ID, sizeof(CNetObj_DDNetCharacter)));
+	CNetObj_DDNetCharacter *pDDNetCharacter = Server()->SnapNewItem<CNetObj_DDNetCharacter>(ID);
 	if(!pDDNetCharacter)
 		return;
 

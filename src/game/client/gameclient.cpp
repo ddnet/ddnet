@@ -1690,7 +1690,7 @@ void CGameClient::OnNewSnapshot()
 		Msg.m_X = x;
 		Msg.m_Y = y;
 		Client()->ChecksumData()->m_Zoom = ZoomToSend;
-		CMsgPacker Packer(Msg.MsgID(), false);
+		CMsgPacker Packer(&Msg);
 		Msg.Pack(&Packer);
 		if(ZoomToSend != m_LastZoom)
 			Client()->SendMsg(IClient::CONN_MAIN, &Packer, MSGFLAG_VITAL);
@@ -2095,7 +2095,7 @@ void CGameClient::SendInfo(bool Start)
 		Msg.m_UseCustomColor = g_Config.m_ClPlayerUseCustomColor;
 		Msg.m_ColorBody = g_Config.m_ClPlayerColorBody;
 		Msg.m_ColorFeet = g_Config.m_ClPlayerColorFeet;
-		CMsgPacker Packer(Msg.MsgID(), false);
+		CMsgPacker Packer(&Msg);
 		Msg.Pack(&Packer);
 		Client()->SendMsg(IClient::CONN_MAIN, &Packer, MSGFLAG_VITAL);
 		m_aCheckInfo[0] = -1;
@@ -2110,7 +2110,7 @@ void CGameClient::SendInfo(bool Start)
 		Msg.m_UseCustomColor = g_Config.m_ClPlayerUseCustomColor;
 		Msg.m_ColorBody = g_Config.m_ClPlayerColorBody;
 		Msg.m_ColorFeet = g_Config.m_ClPlayerColorFeet;
-		CMsgPacker Packer(Msg.MsgID(), false);
+		CMsgPacker Packer(&Msg);
 		Msg.Pack(&Packer);
 		Client()->SendMsg(IClient::CONN_MAIN, &Packer, MSGFLAG_VITAL);
 		m_aCheckInfo[0] = Client()->GameTickSpeed();
@@ -2129,7 +2129,7 @@ void CGameClient::SendDummyInfo(bool Start)
 		Msg.m_UseCustomColor = g_Config.m_ClDummyUseCustomColor;
 		Msg.m_ColorBody = g_Config.m_ClDummyColorBody;
 		Msg.m_ColorFeet = g_Config.m_ClDummyColorFeet;
-		CMsgPacker Packer(Msg.MsgID(), false);
+		CMsgPacker Packer(&Msg);
 		Msg.Pack(&Packer);
 		Client()->SendMsg(IClient::CONN_DUMMY, &Packer, MSGFLAG_VITAL);
 		m_aCheckInfo[1] = -1;
@@ -2144,7 +2144,7 @@ void CGameClient::SendDummyInfo(bool Start)
 		Msg.m_UseCustomColor = g_Config.m_ClDummyUseCustomColor;
 		Msg.m_ColorBody = g_Config.m_ClDummyColorBody;
 		Msg.m_ColorFeet = g_Config.m_ClDummyColorFeet;
-		CMsgPacker Packer(Msg.MsgID(), false);
+		CMsgPacker Packer(&Msg);
 		Msg.Pack(&Packer);
 		Client()->SendMsg(IClient::CONN_DUMMY, &Packer, MSGFLAG_VITAL);
 		m_aCheckInfo[1] = Client()->GameTickSpeed();

@@ -239,7 +239,7 @@ void CGameContext::CreateDamageInd(vec2 Pos, float Angle, int Amount, CClientMas
 	for(int i = 0; i < Amount; i++)
 	{
 		float f = mix(s, e, (i + 1) / (float)(Amount + 2));
-		CNetEvent_DamageInd *pEvent = (CNetEvent_DamageInd *)m_Events.Create(NETEVENTTYPE_DAMAGEIND, sizeof(CNetEvent_DamageInd), Mask);
+		CNetEvent_DamageInd *pEvent = m_Events.Create<CNetEvent_DamageInd>(Mask);
 		if(pEvent)
 		{
 			pEvent->m_X = (int)Pos.x;
@@ -252,7 +252,7 @@ void CGameContext::CreateDamageInd(vec2 Pos, float Angle, int Amount, CClientMas
 void CGameContext::CreateHammerHit(vec2 Pos, CClientMask Mask)
 {
 	// create the event
-	CNetEvent_HammerHit *pEvent = (CNetEvent_HammerHit *)m_Events.Create(NETEVENTTYPE_HAMMERHIT, sizeof(CNetEvent_HammerHit), Mask);
+	CNetEvent_HammerHit *pEvent = m_Events.Create<CNetEvent_HammerHit>(Mask);
 	if(pEvent)
 	{
 		pEvent->m_X = (int)Pos.x;
@@ -263,7 +263,7 @@ void CGameContext::CreateHammerHit(vec2 Pos, CClientMask Mask)
 void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage, int ActivatedTeam, CClientMask Mask)
 {
 	// create the event
-	CNetEvent_Explosion *pEvent = (CNetEvent_Explosion *)m_Events.Create(NETEVENTTYPE_EXPLOSION, sizeof(CNetEvent_Explosion), Mask);
+	CNetEvent_Explosion *pEvent = m_Events.Create<CNetEvent_Explosion>(Mask);
 	if(pEvent)
 	{
 		pEvent->m_X = (int)Pos.x;
@@ -319,7 +319,7 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 void CGameContext::CreatePlayerSpawn(vec2 Pos, CClientMask Mask)
 {
 	// create the event
-	CNetEvent_Spawn *pEvent = (CNetEvent_Spawn *)m_Events.Create(NETEVENTTYPE_SPAWN, sizeof(CNetEvent_Spawn), Mask);
+	CNetEvent_Spawn *pEvent = m_Events.Create<CNetEvent_Spawn>(Mask);
 	if(pEvent)
 	{
 		pEvent->m_X = (int)Pos.x;
@@ -330,7 +330,7 @@ void CGameContext::CreatePlayerSpawn(vec2 Pos, CClientMask Mask)
 void CGameContext::CreateDeath(vec2 Pos, int ClientID, CClientMask Mask)
 {
 	// create the event
-	CNetEvent_Death *pEvent = (CNetEvent_Death *)m_Events.Create(NETEVENTTYPE_DEATH, sizeof(CNetEvent_Death), Mask);
+	CNetEvent_Death *pEvent = m_Events.Create<CNetEvent_Death>(Mask);
 	if(pEvent)
 	{
 		pEvent->m_X = (int)Pos.x;
@@ -345,7 +345,7 @@ void CGameContext::CreateSound(vec2 Pos, int Sound, CClientMask Mask)
 		return;
 
 	// create a sound
-	CNetEvent_SoundWorld *pEvent = (CNetEvent_SoundWorld *)m_Events.Create(NETEVENTTYPE_SOUNDWORLD, sizeof(CNetEvent_SoundWorld), Mask);
+	CNetEvent_SoundWorld *pEvent = m_Events.Create<CNetEvent_SoundWorld>(Mask);
 	if(pEvent)
 	{
 		pEvent->m_X = (int)Pos.x;
@@ -376,7 +376,7 @@ bool CGameContext::SnapLaserObject(const CSnapContext &Context, int SnapID, cons
 {
 	if(Context.GetClientVersion() >= VERSION_DDNET_MULTI_LASER)
 	{
-		CNetObj_DDNetLaser *pObj = static_cast<CNetObj_DDNetLaser *>(Server()->SnapNewItem(NETOBJTYPE_DDNETLASER, SnapID, sizeof(CNetObj_DDNetLaser)));
+		CNetObj_DDNetLaser *pObj = Server()->SnapNewItem<CNetObj_DDNetLaser>(SnapID);
 		if(!pObj)
 			return false;
 
@@ -390,7 +390,7 @@ bool CGameContext::SnapLaserObject(const CSnapContext &Context, int SnapID, cons
 	}
 	else
 	{
-		CNetObj_Laser *pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, SnapID, sizeof(CNetObj_Laser)));
+		CNetObj_Laser *pObj = Server()->SnapNewItem<CNetObj_Laser>(SnapID);
 		if(!pObj)
 			return false;
 

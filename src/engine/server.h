@@ -160,7 +160,7 @@ public:
 	int SendPackMsgOne(const T *pMsg, int Flags, int ClientID)
 	{
 		dbg_assert(ClientID != -1, "SendPackMsgOne called with -1");
-		CMsgPacker Packer(pMsg->MsgID(), false, protocol7::is_sixup<T>::value);
+		CMsgPacker Packer(T::ms_MsgID, false, protocol7::is_sixup<T>::value);
 
 		if(pMsg->Pack(&Packer))
 			return -1;
@@ -213,6 +213,13 @@ public:
 	virtual int SnapNewID() = 0;
 	virtual void SnapFreeID(int ID) = 0;
 	virtual void *SnapNewItem(int Type, int ID, int Size) = 0;
+
+	template<typename T>
+	T *SnapNewItem(int ID)
+	{
+		const int Type = protocol7::is_sixup<T>::value ? -T::ms_MsgID : T::ms_MsgID;
+		return static_cast<T *>(SnapNewItem(Type, ID, sizeof(T)));
+	}
 
 	virtual void SnapSetStaticsize(int ItemType, int Size) = 0;
 

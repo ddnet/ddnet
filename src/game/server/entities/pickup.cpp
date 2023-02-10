@@ -176,7 +176,7 @@ void CPickup::Snap(int SnappingClient)
 
 	CNetObj_EntityEx *pEntData = 0;
 	if(SnappingClientVersion >= VERSION_DDNET_SWITCH && (m_Layer == LAYER_SWITCH || length(m_Core) > 0))
-		pEntData = static_cast<CNetObj_EntityEx *>(Server()->SnapNewItem(NETOBJTYPE_ENTITYEX, GetID(), sizeof(CNetObj_EntityEx)));
+		pEntData = Server()->SnapNewItem<CNetObj_EntityEx>(GetID());
 
 	if(pEntData)
 	{
