@@ -173,6 +173,7 @@ void CPickup::Snap(int SnappingClient)
 		pChar = GameServer()->GetPlayerChar(GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID);
 
 	int SnappingClientVersion = GameServer()->GetClientVersion(SnappingClient);
+	bool Sixup = SnappingClientVersion == VERSION_NONE ? Server()->IsSixup(SnappingClient) : false;
 
 	CNetObj_EntityEx *pEntData = 0;
 	if(SnappingClientVersion >= VERSION_DDNET_SWITCH && (m_Layer == LAYER_SWITCH || length(m_Core) > 0))
@@ -191,30 +192,7 @@ void CPickup::Snap(int SnappingClient)
 			return;
 	}
 
-	int Size = Server()->IsSixup(SnappingClient) ? sizeof(protocol7::CNetObj_Pickup) : sizeof(CNetObj_Pickup);
-	CNetObj_Pickup *pPickup = static_cast<CNetObj_Pickup *>(Server()->SnapNewItem(NETOBJTYPE_PICKUP, GetID(), Size));
-	if(!pPickup)
-		return;
-
-	pPickup->m_X = (int)m_Pos.x;
-	pPickup->m_Y = (int)m_Pos.y;
-	pPickup->m_Type = m_Type;
-	if(SnappingClientVersion < VERSION_DDNET_WEAPON_SHIELDS)
-	{
-		if(m_Type >= POWERUP_ARMOR_SHOTGUN && m_Type <= POWERUP_ARMOR_LASER)
-		{
-			pPickup->m_Type = POWERUP_ARMOR;
-		}
-	}
-	if(Server()->IsSixup(SnappingClient))
-	{
-		if(m_Type == POWERUP_WEAPON)
-			pPickup->m_Type = m_Subtype == WEAPON_SHOTGUN ? protocol7::PICKUP_SHOTGUN : m_Subtype == WEAPON_GRENADE ? protocol7::PICKUP_GRENADE : protocol7::PICKUP_LASER;
-		else if(m_Type == POWERUP_NINJA)
-			pPickup->m_Type = protocol7::PICKUP_NINJA;
-	}
-	else
-		pPickup->m_Subtype = m_Subtype;
+	GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), GetID(), m_Pos, m_Type, m_Subtype);
 }
 
 void CPickup::Move()

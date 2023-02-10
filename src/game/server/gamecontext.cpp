@@ -404,6 +404,45 @@ bool CGameContext::SnapLaserObject(const CSnapContext &Context, int SnapID, cons
 	return true;
 }
 
+bool CGameContext::SnapPickup(const CSnapContext &Context, int SnapID, const vec2 &Pos, int Type, int SubType)
+{
+	if(Context.IsSixup())
+	{
+		protocol7::CNetObj_Pickup *pPickup = Server()->SnapNewItem<protocol7::CNetObj_Pickup>(SnapID);
+		if(!pPickup)
+			return false;
+
+		pPickup->m_X = (int)Pos.x;
+		pPickup->m_Y = (int)Pos.y;
+
+		if(Type == POWERUP_WEAPON)
+			pPickup->m_Type = SubType == WEAPON_SHOTGUN ? protocol7::PICKUP_SHOTGUN : SubType == WEAPON_GRENADE ? protocol7::PICKUP_GRENADE : protocol7::PICKUP_LASER;
+		else if(Type == POWERUP_NINJA)
+			pPickup->m_Type = protocol7::PICKUP_NINJA;
+	}
+	else
+	{
+		CNetObj_Pickup *pPickup = Server()->SnapNewItem<CNetObj_Pickup>(SnapID);
+		if(!pPickup)
+			return false;
+
+		pPickup->m_X = (int)Pos.x;
+		pPickup->m_Y = (int)Pos.y;
+
+		pPickup->m_Type = Type;
+		if(Context.GetClientVersion() < VERSION_DDNET_WEAPON_SHIELDS)
+		{
+			if(Type >= POWERUP_ARMOR_SHOTGUN && Type <= POWERUP_ARMOR_LASER)
+			{
+				pPickup->m_Type = POWERUP_ARMOR;
+			}
+		}
+		pPickup->m_Subtype = SubType;
+	}
+
+	return true;
+}
+
 void CGameContext::CallVote(int ClientID, const char *pDesc, const char *pCmd, const char *pReason, const char *pChatmsg, const char *pSixupDesc)
 {
 	// check if a vote is already running
