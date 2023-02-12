@@ -307,7 +307,7 @@ void CProjectile::Snap(int SnappingClient)
 
 	if(m_LifeSpan == -2)
 	{
-		CNetObj_EntityEx *pEntData = static_cast<CNetObj_EntityEx *>(Server()->SnapNewItem(NETOBJTYPE_ENTITYEX, GetID(), sizeof(CNetObj_EntityEx)));
+		CNetObj_EntityEx *pEntData = Server()->SnapNewItem<CNetObj_EntityEx>(GetID());
 		if(!pEntData)
 			return;
 
@@ -350,7 +350,7 @@ void CProjectile::Snap(int SnappingClient)
 	}
 	else
 	{
-		CNetObj_Projectile *pProj = static_cast<CNetObj_Projectile *>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, GetID(), sizeof(CNetObj_Projectile)));
+		CNetObj_Projectile *pProj = Server()->SnapNewItem<CNetObj_Projectile>(GetID());
 		if(!pProj)
 		{
 			return;

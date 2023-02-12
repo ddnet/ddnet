@@ -154,30 +154,6 @@ void CLight::Snap(int SnappingClient)
 			StartTick = Server()->Tick();
 	}
 
-	if(SnappingClientVersion >= VERSION_DDNET_MULTI_LASER)
-	{
-		CNetObj_DDNetLaser *pObj = static_cast<CNetObj_DDNetLaser *>(Server()->SnapNewItem(NETOBJTYPE_DDNETLASER, GetID(), sizeof(CNetObj_DDNetLaser)));
-		if(!pObj)
-			return;
-
-		pObj->m_ToX = (int)m_Pos.x;
-		pObj->m_ToY = (int)m_Pos.y;
-		pObj->m_FromX = (int)From.x;
-		pObj->m_FromY = (int)From.y;
-		pObj->m_StartTick = StartTick;
-		pObj->m_Owner = -1;
-		pObj->m_Type = LASERTYPE_FREEZE;
-	}
-	else
-	{
-		CNetObj_Laser *pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, GetID(), sizeof(CNetObj_Laser)));
-		if(!pObj)
-			return;
-
-		pObj->m_X = (int)m_Pos.x;
-		pObj->m_Y = (int)m_Pos.y;
-		pObj->m_FromX = (int)From.x;
-		pObj->m_FromY = (int)From.y;
-		pObj->m_StartTick = StartTick;
-	}
+	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion), GetID(),
+		m_Pos, From, StartTick, -1, LASERTYPE_FREEZE);
 }

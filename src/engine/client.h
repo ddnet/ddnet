@@ -233,7 +233,7 @@ public:
 	template<class T>
 	int SendPackMsgActive(T *pMsg, int Flags)
 	{
-		CMsgPacker Packer(pMsg->MsgID(), false);
+		CMsgPacker Packer(T::ms_MsgID, false);
 		if(pMsg->Pack(&Packer))
 			return -1;
 		return SendMsgActive(&Packer, Flags);

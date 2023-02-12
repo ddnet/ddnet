@@ -2189,7 +2189,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 								}
 							}
 							MsgP.m_pMessage = aBufMsg;
-							CMsgPacker PackerTimeout(MsgP.MsgID(), false);
+							CMsgPacker PackerTimeout(&MsgP);
 							MsgP.Pack(&PackerTimeout);
 							SendMsg(Conn, &PackerTimeout, MSGFLAG_VITAL);
 						}
