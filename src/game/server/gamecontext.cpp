@@ -3868,27 +3868,6 @@ const char *CGameContext::NetVersion() const { return GAME_NETVERSION; }
 
 IGameServer *CreateGameServer() { return new CGameContext; }
 
-bool CGameContext::PlayerCollision()
-{
-	float Temp;
-	m_Tuning.Get("player_collision", &Temp);
-	return Temp != 0.0f;
-}
-
-bool CGameContext::PlayerHooking()
-{
-	float Temp;
-	m_Tuning.Get("player_hooking", &Temp);
-	return Temp != 0.0f;
-}
-
-float CGameContext::PlayerJetpack()
-{
-	float Temp;
-	m_Tuning.Get("player_jetpack", &Temp);
-	return Temp;
-}
-
 void CGameContext::OnSetAuthed(int ClientID, int Level)
 {
 	if(m_apPlayers[ClientID])
