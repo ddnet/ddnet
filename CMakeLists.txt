@@ -1975,6 +1975,7 @@ set_src(ENGINE_SHARED GLOB_RECURSE src/engine/shared
   packer.cpp
   packer.h
   protocol.h
+  protocol7.h
   protocol_ex.cpp
   protocol_ex.h
   protocol_ex_msgs.h
