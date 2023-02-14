@@ -48,9 +48,7 @@ void CChat::RebuildChat()
 	for(auto &Line : m_aLines)
 	{
 		TextRender()->DeleteTextContainer(Line.m_TextContainerIndex);
-		if(Line.m_QuadContainerIndex != -1)
-			Graphics()->DeleteQuadContainer(Line.m_QuadContainerIndex);
-		Line.m_QuadContainerIndex = -1;
+		Graphics()->DeleteQuadContainer(Line.m_QuadContainerIndex);
 		// recalculate sizes
 		Line.m_aYOffset[0] = -1.f;
 		Line.m_aYOffset[1] = -1.f;
@@ -67,14 +65,11 @@ void CChat::Reset()
 	for(auto &Line : m_aLines)
 	{
 		TextRender()->DeleteTextContainer(Line.m_TextContainerIndex);
-		if(Line.m_QuadContainerIndex != -1)
-			Graphics()->DeleteQuadContainer(Line.m_QuadContainerIndex);
+		Graphics()->DeleteQuadContainer(Line.m_QuadContainerIndex);
 		Line.m_Time = 0;
 		Line.m_aText[0] = 0;
 		Line.m_aName[0] = 0;
 		Line.m_Friend = false;
-		Line.m_TextContainerIndex = -1;
-		Line.m_QuadContainerIndex = -1;
 		Line.m_TimesRepeated = 0;
 		Line.m_HasRenderTee = false;
 	}
@@ -738,10 +733,7 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 		{
 			pCurrentLine->m_TimesRepeated++;
 			TextRender()->DeleteTextContainer(pCurrentLine->m_TextContainerIndex);
-
-			if(pCurrentLine->m_QuadContainerIndex != -1)
-				Graphics()->DeleteQuadContainer(pCurrentLine->m_QuadContainerIndex);
-			pCurrentLine->m_QuadContainerIndex = -1;
+			Graphics()->DeleteQuadContainer(pCurrentLine->m_QuadContainerIndex);
 			pCurrentLine->m_Time = time();
 			pCurrentLine->m_aYOffset[0] = -1.f;
 			pCurrentLine->m_aYOffset[1] = -1.f;
@@ -764,10 +756,7 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 		pCurrentLine->m_NameColor = -2;
 
 		TextRender()->DeleteTextContainer(pCurrentLine->m_TextContainerIndex);
-
-		if(pCurrentLine->m_QuadContainerIndex != -1)
-			Graphics()->DeleteQuadContainer(pCurrentLine->m_QuadContainerIndex);
-		pCurrentLine->m_QuadContainerIndex = -1;
+		Graphics()->DeleteQuadContainer(pCurrentLine->m_QuadContainerIndex);
 
 		// check for highlighted name
 		if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
@@ -979,11 +968,7 @@ void CChat::OnPrepareLines()
 			continue;
 
 		TextRender()->DeleteTextContainer(m_aLines[r].m_TextContainerIndex);
-
-		if(m_aLines[r].m_QuadContainerIndex != -1)
-			Graphics()->DeleteQuadContainer(m_aLines[r].m_QuadContainerIndex);
-
-		m_aLines[r].m_QuadContainerIndex = -1;
+		Graphics()->DeleteQuadContainer(m_aLines[r].m_QuadContainerIndex);
 
 		char aName[64 + 12] = "";
 

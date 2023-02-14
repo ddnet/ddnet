@@ -36,8 +36,7 @@ void CHud::ResetHudContainers()
 		TextRender()->DeleteTextContainer(ScoreInfo.m_OptionalNameTextContainerIndex);
 		TextRender()->DeleteTextContainer(ScoreInfo.m_TextRankContainerIndex);
 		TextRender()->DeleteTextContainer(ScoreInfo.m_TextScoreContainerIndex);
-		if(ScoreInfo.m_RoundRectQuadContainerIndex != -1)
-			Graphics()->DeleteQuadContainer(ScoreInfo.m_RoundRectQuadContainerIndex);
+		Graphics()->DeleteQuadContainer(ScoreInfo.m_RoundRectQuadContainerIndex);
 
 		ScoreInfo.Reset();
 	}
@@ -199,8 +198,7 @@ void CHud::RenderScoreHud()
 				// draw box
 				if(RecreateRect)
 				{
-					if(m_aScoreInfo[t].m_RoundRectQuadContainerIndex != -1)
-						Graphics()->DeleteQuadContainer(m_aScoreInfo[t].m_RoundRectQuadContainerIndex);
+					Graphics()->DeleteQuadContainer(m_aScoreInfo[t].m_RoundRectQuadContainerIndex);
 
 					if(t == 0)
 						Graphics()->SetColor(1.0f, 0.0f, 0.0f, 0.25f);
@@ -379,8 +377,7 @@ void CHud::RenderScoreHud()
 				// draw box
 				if(RecreateRect)
 				{
-					if(m_aScoreInfo[t].m_RoundRectQuadContainerIndex != -1)
-						Graphics()->DeleteQuadContainer(m_aScoreInfo[t].m_RoundRectQuadContainerIndex);
+					Graphics()->DeleteQuadContainer(m_aScoreInfo[t].m_RoundRectQuadContainerIndex);
 
 					if(t == Local)
 						Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.25f);

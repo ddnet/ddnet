@@ -240,13 +240,14 @@ class CTextRender : public IEngineTextRender
 		}
 	}
 
-	void FreeTextContainerIndex(int Index)
+	void FreeTextContainerIndex(int &Index)
 	{
 		m_vTextContainerIndices[Index] = m_FirstFreeTextContainerIndex;
 		m_FirstFreeTextContainerIndex = Index;
+		Index = -1;
 	}
 
-	void FreeTextContainer(int Index)
+	void FreeTextContainer(int &Index)
 	{
 		m_vpTextContainers[Index]->Reset();
 		FreeTextContainerIndex(Index);
@@ -987,7 +988,6 @@ public:
 		if(TextContainer.m_StringInfo.m_vCharacterQuads.empty() && TextContainer.m_StringInfo.m_SelectionQuadContainerIndex == -1 && IsRendered)
 		{
 			FreeTextContainer(TextContainerIndex);
-			TextContainerIndex = -1;
 			return false;
 		}
 		else
@@ -1170,10 +1170,7 @@ public:
 		if(pCursor->m_CalculateSelectionMode != TEXT_CURSOR_SELECTION_MODE_NONE || pCursor->m_CursorMode != TEXT_CURSOR_CURSOR_MODE_NONE)
 		{
 			if(IsRendered)
-			{
-				if(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex != -1)
-					Graphics()->QuadContainerReset(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex);
-			}
+				Graphics()->QuadContainerReset(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex);
 
 			// if in calculate mode, also calculate the cursor
 			if(pCursor->m_CursorMode == TEXT_CURSOR_CURSOR_MODE_CALCULATE)
@@ -1560,19 +1557,14 @@ public:
 
 	void DeleteTextContainer(int &TextContainerIndex) override
 	{
-		if(TextContainerIndex != -1)
-		{
-			STextContainer &TextContainer = GetTextContainer(TextContainerIndex);
-			if(Graphics()->IsTextBufferingEnabled())
-			{
-				if(TextContainer.m_StringInfo.m_QuadBufferContainerIndex != -1)
-					Graphics()->DeleteBufferContainer(TextContainer.m_StringInfo.m_QuadBufferContainerIndex, true);
-			}
-			if(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex != -1)
-				Graphics()->DeleteQuadContainer(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex);
-			FreeTextContainer(TextContainerIndex);
-			TextContainerIndex = -1;
-		}
+		if(TextContainerIndex == -1)
+			return;
+
+		STextContainer &TextContainer = GetTextContainer(TextContainerIndex);
+		if(Graphics()->IsTextBufferingEnabled())
+			Graphics()->DeleteBufferContainer(TextContainer.m_StringInfo.m_QuadBufferContainerIndex, true);
+		Graphics()->DeleteQuadContainer(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex);
+		FreeTextContainer(TextContainerIndex);
 	}
 
 	void UploadTextContainer(int TextContainerIndex) override
