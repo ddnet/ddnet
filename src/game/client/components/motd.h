@@ -7,12 +7,13 @@
 class CMotd : public CComponent
 {
 	// motd
+	char m_aServerMotd[900];
 	int64_t m_ServerMotdTime;
 
 public:
-	char m_aServerMotd[900];
-
 	virtual int Sizeof() const override { return sizeof(*this); }
+
+	const char *ServerMotd() const { return m_aServerMotd; }
 	void Clear();
 	bool IsActive();
 

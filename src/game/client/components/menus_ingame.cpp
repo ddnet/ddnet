@@ -495,9 +495,9 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 	Motd.y += ScrollOffset.y;
 
 	CUIRect MotdTextArea;
-	Motd.HSplitTop((str_countchr(m_pClient->m_Motd.m_aServerMotd, '\n') + 1) * MotdFontSize, &MotdTextArea, &Motd);
+	Motd.HSplitTop((str_countchr(m_pClient->m_Motd.ServerMotd(), '\n') + 1) * MotdFontSize, &MotdTextArea, &Motd);
 	s_ScrollRegion.AddRect(MotdTextArea);
-	TextRender()->Text(MotdTextArea.x, MotdTextArea.y, MotdFontSize, m_pClient->m_Motd.m_aServerMotd, MotdTextArea.w);
+	TextRender()->Text(MotdTextArea.x, MotdTextArea.y, MotdFontSize, m_pClient->m_Motd.ServerMotd(), MotdTextArea.w);
 
 	s_ScrollRegion.End();
 }
