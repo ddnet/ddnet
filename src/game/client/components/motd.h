@@ -15,7 +15,7 @@ public:
 
 	const char *ServerMotd() const { return m_aServerMotd; }
 	void Clear();
-	bool IsActive();
+	bool IsActive() const;
 
 	virtual void OnRender() override;
 	virtual void OnStateChange(int NewState, int OldState) override;

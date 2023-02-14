@@ -15,7 +15,7 @@ void CMotd::Clear()
 	m_ServerMotdTime = 0;
 }
 
-bool CMotd::IsActive()
+bool CMotd::IsActive() const
 {
 	return time() < m_ServerMotdTime;
 }
