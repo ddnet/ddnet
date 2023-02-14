@@ -9,6 +9,8 @@ class CMotd : public CComponent
 	// motd
 	char m_aServerMotd[900];
 	int64_t m_ServerMotdTime;
+	int m_RectQuadContainer = -1;
+	int m_TextContainerIndex = -1;
 
 public:
 	virtual int Sizeof() const override { return sizeof(*this); }
@@ -19,6 +21,7 @@ public:
 
 	virtual void OnRender() override;
 	virtual void OnStateChange(int NewState, int OldState) override;
+	virtual void OnWindowResize() override;
 	virtual void OnMessage(int MsgType, void *pRawMsg) override;
 	virtual bool OnInput(IInput::CEvent Event) override;
 };
