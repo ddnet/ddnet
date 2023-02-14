@@ -564,8 +564,8 @@ int CNetServer::OnSixupCtrlMsg(NETADDR &Addr, CNetChunk *pChunk, int ControlMsg,
 	else if(ControlMsg == NET_CTRLMSG_CONNECT)
 	{
 		SECURITY_TOKEN MyToken = GetToken(Addr);
-		unsigned char aToken[4];
-		mem_copy(aToken, &MyToken, 4);
+		unsigned char aToken[sizeof(SECURITY_TOKEN)];
+		mem_copy(aToken, &MyToken, sizeof(aToken));
 
 		CNetBase::SendControlMsg(m_Socket, &Addr, 0, NET_CTRLMSG_CONNECTACCEPT, aToken, sizeof(aToken), ResponseToken, true);
 		if(Token == MyToken)

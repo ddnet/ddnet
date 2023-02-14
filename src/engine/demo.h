@@ -29,17 +29,17 @@ struct CDemoHeader
 	unsigned char m_Version;
 	char m_aNetversion[64];
 	char m_aMapName[64];
-	unsigned char m_aMapSize[4];
-	unsigned char m_aMapCrc[4];
+	unsigned char m_aMapSize[sizeof(int32_t)];
+	unsigned char m_aMapCrc[sizeof(int32_t)];
 	char m_aType[8];
-	unsigned char m_aLength[4];
+	unsigned char m_aLength[sizeof(int32_t)];
 	char m_aTimestamp[20];
 };
 
 struct CTimelineMarkers
 {
-	unsigned char m_aNumTimelineMarkers[4];
-	unsigned char m_aTimelineMarkers[MAX_TIMELINE_MARKERS][4];
+	unsigned char m_aNumTimelineMarkers[sizeof(int32_t)];
+	unsigned char m_aTimelineMarkers[MAX_TIMELINE_MARKERS][sizeof(int32_t)];
 };
 
 struct CMapInfo

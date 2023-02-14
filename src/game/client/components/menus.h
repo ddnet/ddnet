@@ -397,12 +397,12 @@ protected:
 
 		int NumMarkers() const
 		{
-			return clamp<int>(bytes_be_to_int(m_TimelineMarkers.m_aNumTimelineMarkers), 0, MAX_TIMELINE_MARKERS);
+			return clamp<int>(bytes_be_to_uint(m_TimelineMarkers.m_aNumTimelineMarkers), 0, MAX_TIMELINE_MARKERS);
 		}
 
 		int Length() const
 		{
-			return bytes_be_to_int(m_Info.m_aLength);
+			return bytes_be_to_uint(m_Info.m_aLength);
 		}
 
 		unsigned Size() const
