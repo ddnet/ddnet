@@ -413,6 +413,8 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 						hsl = ColorHSLA(0.75f, 1.0f, 0.75f);
 					else if(str_find_nocase(pItem->m_aGameType, "race") || str_find_nocase(pItem->m_aGameType, "fastcap"))
 						hsl = ColorHSLA(0.46f, 1.0f, 0.75f);
+					else if(str_find_nocase(pItem->m_aGameType, "s-ddr"))
+						hsl = ColorHSLA(1.0f, 1.0f, 0.70f);
 
 					ColorRGBA rgb = color_cast<ColorRGBA>(hsl);
 					TextRender()->TextColor(rgb);
