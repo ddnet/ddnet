@@ -1153,7 +1153,7 @@ public:
 	int QuadContainerAddQuads(int ContainerIndex, CQuadItem *pArray, int Num) override;
 	int QuadContainerAddQuads(int ContainerIndex, CFreeformItem *pArray, int Num) override;
 	void QuadContainerReset(int ContainerIndex) override;
-	void DeleteQuadContainer(int ContainerIndex) override;
+	void DeleteQuadContainer(int &ContainerIndex) override;
 	void RenderQuadContainer(int ContainerIndex, int QuadDrawNum) override;
 	void RenderQuadContainer(int ContainerIndex, int QuadOffset, int QuadDrawNum, bool ChangeWrapMode = true) override;
 	void RenderQuadContainerEx(int ContainerIndex, int QuadOffset, int QuadDrawNum, float X, float Y, float ScaleX = 1.f, float ScaleY = 1.f) override;
@@ -1254,7 +1254,7 @@ public:
 
 	int CreateBufferContainer(SBufferContainerInfo *pContainerInfo) override;
 	// destroying all buffer objects means, that all referenced VBOs are destroyed automatically, so the user does not need to save references to them
-	void DeleteBufferContainer(int ContainerIndex, bool DestroyAllBO = true) override;
+	void DeleteBufferContainer(int &ContainerIndex, bool DestroyAllBO = true) override;
 	void UpdateBufferContainerInternal(int ContainerIndex, SBufferContainerInfo *pContainerInfo);
 	void IndicesNumRequiredNotify(unsigned int RequiredIndicesCount) override;
 

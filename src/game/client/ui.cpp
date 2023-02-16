@@ -53,8 +53,7 @@ void CUIElement::SUIElementRect::Draw(const CUIRect *pRect, ColorRGBA Color, int
 	bool NeedsRecreate = false;
 	if(m_UIRectQuadContainer == -1 || m_Width != pRect->w || m_Height != pRect->h || mem_comp(&m_QuadColor, &Color, sizeof(Color)) != 0)
 	{
-		if(m_UIRectQuadContainer != -1)
-			m_pParent->UI()->Graphics()->DeleteQuadContainer(m_UIRectQuadContainer);
+		m_pParent->UI()->Graphics()->DeleteQuadContainer(m_UIRectQuadContainer);
 		NeedsRecreate = true;
 	}
 	m_X = pRect->x;
@@ -157,11 +156,8 @@ void CUI::ResetUIElement(CUIElement &UIElement)
 {
 	for(CUIElement::SUIElementRect &Rect : UIElement.m_vUIRects)
 	{
-		if(Rect.m_UIRectQuadContainer != -1)
-			Graphics()->DeleteQuadContainer(Rect.m_UIRectQuadContainer);
-		Rect.m_UIRectQuadContainer = -1;
+		Graphics()->DeleteQuadContainer(Rect.m_UIRectQuadContainer);
 		TextRender()->DeleteTextContainer(Rect.m_UITextContainer);
-
 		Rect.Reset();
 	}
 }
