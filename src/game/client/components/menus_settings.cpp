@@ -880,7 +880,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		SLabelProperties Props;
 		Props.m_AlignVertically = 0;
 		UI()->DoLabel(&QuickSearch, pSearchLabel, 14.0f, TEXTALIGN_LEFT, Props);
-		float wSearch = TextRender()->TextWidth(0, 14.0f, pSearchLabel, -1, -1.0f);
+		float wSearch = TextRender()->TextWidth(14.0f, pSearchLabel, -1, -1.0f);
 		TextRender()->SetRenderFlags(0);
 		TextRender()->SetCurFont(NULL);
 		QuickSearch.VSplitLeft(wSearch, 0, &QuickSearch);
@@ -1272,7 +1272,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 			MouseSettings.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
 			MouseSettings.VMargin(10.0f, &MouseSettings);
 
-			TextRender()->Text(0, MouseSettings.x, MouseSettings.y + (HeaderHeight - FontSize) / 2.f, FontSize, Localize("Mouse"), -1.0f);
+			TextRender()->Text(MouseSettings.x, MouseSettings.y + (HeaderHeight - FontSize) / 2.f, FontSize, Localize("Mouse"), -1.0f);
 
 			MouseSettings.HSplitTop(HeaderHeight, 0, &MouseSettings);
 
@@ -1296,7 +1296,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 			JoystickSettings.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
 			JoystickSettings.VMargin(Margin, &JoystickSettings);
 
-			TextRender()->Text(0, JoystickSettings.x, JoystickSettings.y + (HeaderHeight - FontSize) / 2.f, FontSize, Localize("Controller"), -1.0f);
+			TextRender()->Text(JoystickSettings.x, JoystickSettings.y + (HeaderHeight - FontSize) / 2.f, FontSize, Localize("Controller"), -1.0f);
 
 			JoystickSettings.HSplitTop(HeaderHeight, 0, &JoystickSettings);
 			s_JoystickSettingsHeight = RenderSettingsControlsJoystick(JoystickSettings);
@@ -1312,7 +1312,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 			MovementSettings.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
 			MovementSettings.VMargin(Margin, &MovementSettings);
 
-			TextRender()->Text(0, MovementSettings.x, MovementSettings.y + (HeaderHeight - FontSize) / 2.f, FontSize, Localize("Movement"), -1.0f);
+			TextRender()->Text(MovementSettings.x, MovementSettings.y + (HeaderHeight - FontSize) / 2.f, FontSize, Localize("Movement"), -1.0f);
 
 			MovementSettings.HSplitTop(HeaderHeight, 0, &MovementSettings);
 			DoSettingsControlsButtons(0, 15, MovementSettings);
@@ -1328,7 +1328,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 			WeaponSettings.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
 			WeaponSettings.VMargin(Margin, &WeaponSettings);
 
-			TextRender()->Text(0, WeaponSettings.x, WeaponSettings.y + (HeaderHeight - FontSize) / 2.f, FontSize, Localize("Weapon"), -1.0f);
+			TextRender()->Text(WeaponSettings.x, WeaponSettings.y + (HeaderHeight - FontSize) / 2.f, FontSize, Localize("Weapon"), -1.0f);
 
 			WeaponSettings.HSplitTop(HeaderHeight, 0, &WeaponSettings);
 			DoSettingsControlsButtons(15, 22, WeaponSettings);
@@ -1362,7 +1362,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 			VotingSettings.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
 			VotingSettings.VMargin(Margin, &VotingSettings);
 
-			TextRender()->Text(0, VotingSettings.x, VotingSettings.y + (HeaderHeight - FontSize) / 2.f, FontSize, Localize("Voting"), -1.0f);
+			TextRender()->Text(VotingSettings.x, VotingSettings.y + (HeaderHeight - FontSize) / 2.f, FontSize, Localize("Voting"), -1.0f);
 
 			VotingSettings.HSplitTop(HeaderHeight, 0, &VotingSettings);
 			DoSettingsControlsButtons(22, 24, VotingSettings);
@@ -1378,7 +1378,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 			ChatSettings.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
 			ChatSettings.VMargin(Margin, &ChatSettings);
 
-			TextRender()->Text(0, ChatSettings.x, ChatSettings.y + (HeaderHeight - FontSize) / 2.f, FontSize, Localize("Chat"), -1.0f);
+			TextRender()->Text(ChatSettings.x, ChatSettings.y + (HeaderHeight - FontSize) / 2.f, FontSize, Localize("Chat"), -1.0f);
 
 			ChatSettings.HSplitTop(HeaderHeight, 0, &ChatSettings);
 			DoSettingsControlsButtons(24, 29, ChatSettings);
@@ -1394,7 +1394,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 			DummySettings.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
 			DummySettings.VMargin(Margin, &DummySettings);
 
-			TextRender()->Text(0, DummySettings.x, DummySettings.y + (HeaderHeight - FontSize) / 2.f, FontSize, Localize("Dummy"), -1.0f);
+			TextRender()->Text(DummySettings.x, DummySettings.y + (HeaderHeight - FontSize) / 2.f, FontSize, Localize("Dummy"), -1.0f);
 
 			DummySettings.HSplitTop(HeaderHeight, 0, &DummySettings);
 			DoSettingsControlsButtons(29, 32, DummySettings);
@@ -1410,7 +1410,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 			MiscSettings.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
 			MiscSettings.VMargin(Margin, &MiscSettings);
 
-			TextRender()->Text(0, MiscSettings.x, MiscSettings.y + (HeaderHeight - FontSize) / 2.f, FontSize, Localize("Miscellaneous"), -1.0f);
+			TextRender()->Text(MiscSettings.x, MiscSettings.y + (HeaderHeight - FontSize) / 2.f, FontSize, Localize("Miscellaneous"), -1.0f);
 
 			MiscSettings.HSplitTop(HeaderHeight, 0, &MiscSettings);
 			DoSettingsControlsButtons(32, 44, MiscSettings);
@@ -2881,32 +2881,32 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 			if(g_Config.m_ClShowChatSystem)
 			{
 				str_format(aLineBuilder, sizeof(aLineBuilder), "*** '%s' entered and joined the game", aBuf);
-				Width = TextRender()->TextWidth(0, RealFontSize, aLineBuilder, -1, -1);
+				Width = TextRender()->TextWidth(RealFontSize, aLineBuilder, -1, -1);
 				Graphics()->DrawRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Width + RealMsgPaddingX, RealFontSize + RealMsgPaddingY, RealBackgroundRounding, IGraphics::CORNER_ALL);
 				TempY += RealOffsetY;
 			}
 
 			str_format(aLineBuilder, sizeof(aLineBuilder), "%sRandom Tee: Hey, how are you %s?", g_Config.m_ClShowIDs ? " 7: " : "", aBuf);
-			Width = TextRender()->TextWidth(0, RealFontSize, aLineBuilder, -1, -1);
+			Width = TextRender()->TextWidth(RealFontSize, aLineBuilder, -1, -1);
 			Graphics()->DrawRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Width + RealMsgPaddingX + RealMsgPaddingTee, RealFontSize + RealMsgPaddingY, RealBackgroundRounding, IGraphics::CORNER_ALL);
 			TempY += RealOffsetY;
 
 			str_format(aLineBuilder, sizeof(aLineBuilder), "%sYour Teammate: Let's speedrun this!", g_Config.m_ClShowIDs ? "11: " : "");
-			Width = TextRender()->TextWidth(0, RealFontSize, aLineBuilder, -1, -1);
+			Width = TextRender()->TextWidth(RealFontSize, aLineBuilder, -1, -1);
 			Graphics()->DrawRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Width + RealMsgPaddingX + RealMsgPaddingTee, RealFontSize + RealMsgPaddingY, RealBackgroundRounding, IGraphics::CORNER_ALL);
 			TempY += RealOffsetY;
 
 			str_format(aLineBuilder, sizeof(aLineBuilder), "%s%sFriend: Hello there", g_Config.m_ClMessageFriend ? "♥ " : "", g_Config.m_ClShowIDs ? " 8: " : "");
-			Width = TextRender()->TextWidth(0, RealFontSize, aLineBuilder, -1, -1);
+			Width = TextRender()->TextWidth(RealFontSize, aLineBuilder, -1, -1);
 			Graphics()->DrawRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Width + RealMsgPaddingX + RealMsgPaddingTee, RealFontSize + RealMsgPaddingY, RealBackgroundRounding, IGraphics::CORNER_ALL);
 			TempY += RealOffsetY;
 
 			str_format(aLineBuilder, sizeof(aLineBuilder), "%sSpammer [6]: Hey fools, I'm spamming here!", g_Config.m_ClShowIDs ? " 9: " : "");
-			Width = TextRender()->TextWidth(0, RealFontSize, aLineBuilder, -1, -1);
+			Width = TextRender()->TextWidth(RealFontSize, aLineBuilder, -1, -1);
 			Graphics()->DrawRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Width + RealMsgPaddingX + RealMsgPaddingTee, RealFontSize + RealMsgPaddingY, RealBackgroundRounding, IGraphics::CORNER_ALL);
 			TempY += RealOffsetY;
 
-			Width = TextRender()->TextWidth(0, RealFontSize, "*** Echo command executed", -1, -1);
+			Width = TextRender()->TextWidth(RealFontSize, "*** Echo command executed", -1, -1);
 			Graphics()->DrawRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Width + RealMsgPaddingX, RealFontSize + RealMsgPaddingY, RealBackgroundRounding, IGraphics::CORNER_ALL);
 
 			Graphics()->QuadsEnd();
@@ -3471,7 +3471,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 		if(NeedUpdate && State <= IUpdater::CLEAN)
 		{
 			str_format(aBuf, sizeof(aBuf), Localize("DDNet %s is available:"), Client()->LatestVersion());
-			Label.VSplitLeft(TextRender()->TextWidth(0, 14.0f, aBuf, -1, -1.0f) + 10.0f, &Label, &Button);
+			Label.VSplitLeft(TextRender()->TextWidth(14.0f, aBuf, -1, -1.0f) + 10.0f, &Label, &Button);
 			Button.VSplitLeft(100.0f, &Button, 0);
 			static CButtonContainer s_ButtonUpdate;
 			if(DoButton_Menu(&s_ButtonUpdate, Localize("Update now"), 0, &Button))
@@ -3489,7 +3489,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 		else
 		{
 			str_format(aBuf, sizeof(aBuf), Localize("No updates available"));
-			Label.VSplitLeft(TextRender()->TextWidth(0, 14.0f, aBuf, -1, -1.0f) + 10.0f, &Label, &Button);
+			Label.VSplitLeft(TextRender()->TextWidth(14.0f, aBuf, -1, -1.0f) + 10.0f, &Label, &Button);
 			Button.VSplitLeft(100.0f, &Button, 0);
 			static CButtonContainer s_ButtonUpdate;
 			if(DoButton_Menu(&s_ButtonUpdate, Localize("Check now"), 0, &Button))

@@ -819,7 +819,7 @@ public:
 		pCursor->m_Y = y;
 	}
 
-	void Text(void *pFontSetV, float x, float y, float Size, const char *pText, float LineWidth) override
+	void Text(float x, float y, float Size, const char *pText, float LineWidth) override
 	{
 		CTextCursor Cursor;
 		SetCursor(&Cursor, x, y, Size, TEXTFLAG_RENDER);
@@ -831,7 +831,7 @@ public:
 		SetRenderFlags(OldRenderFlags);
 	}
 
-	float TextWidth(void *pFontSetV, float Size, const char *pText, int StrLength, float LineWidth, float *pAlignedHeight = nullptr, float *pMaxCharacterHeightInLine = nullptr) override
+	float TextWidth(float Size, const char *pText, int StrLength, float LineWidth, float *pAlignedHeight = nullptr, float *pMaxCharacterHeightInLine = nullptr) override
 	{
 		CTextCursor Cursor;
 		SetCursor(&Cursor, 0, 0, Size, 0);
@@ -848,7 +848,7 @@ public:
 		return Cursor.m_X;
 	}
 
-	int TextLineCount(void *pFontSetV, float Size, const char *pText, float LineWidth) override
+	int TextLineCount(float Size, const char *pText, float LineWidth) override
 	{
 		CTextCursor Cursor;
 		SetCursor(&Cursor, 0, 0, Size, 0);
@@ -1052,7 +1052,7 @@ public:
 		const SFontSizeChar *pEllipsisChr = nullptr;
 		if(pCursor->m_Flags & TEXTFLAG_ELLIPSIS_AT_END)
 		{
-			if(pCursor->m_LineWidth != -1 && pCursor->m_LineWidth < TextWidth(0, pCursor->m_FontSize, pText, -1, -1.0f))
+			if(pCursor->m_LineWidth != -1 && pCursor->m_LineWidth < TextWidth(pCursor->m_FontSize, pText, -1, -1.0f))
 			{
 				pEllipsisChr = GetChar(TextContainer.m_pFont, pSizeData, 0x2026); // …
 				if(pEllipsisChr == nullptr)

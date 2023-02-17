@@ -77,7 +77,7 @@ void CTooltips::OnRender()
 		CUIRect Rect;
 		Rect.w = Tooltip.m_WidthHint;
 		if(Tooltip.m_WidthHint < 0.0f)
-			Rect.w = TextRender()->TextWidth(0, 14.0f, Tooltip.m_pText, -1, -1.0f) + 4.0f;
+			Rect.w = TextRender()->TextWidth(14.0f, Tooltip.m_pText, -1, -1.0f) + 4.0f;
 		Rect.h = 30.0f;
 
 		CUIRect *pScreen = UI()->Screen();
