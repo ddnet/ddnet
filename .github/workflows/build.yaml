@@ -48,7 +48,8 @@ jobs:
       if: contains(matrix.os, 'ubuntu')
       run: |
         sudo apt-get update -y
-        sudo apt-get upgrade -y
+        # mount: /var/lib/grub/esp: special device /dev/disk/by-id/scsi-... does not exist.
+        # sudo apt-get upgrade -y
         sudo apt-get install pkg-config cmake ninja-build libfreetype6-dev libnotify-dev libsdl2-dev libsqlite3-dev libvulkan-dev glslang-tools spirv-tools libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev libx264-dev libpng-dev valgrind gcovr -y
 
     - name: Prepare Linux (non-fancy)
