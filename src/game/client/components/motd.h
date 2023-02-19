@@ -6,16 +6,18 @@
 
 class CMotd : public CComponent
 {
-	// motd
 	char m_aServerMotd[900];
 	int64_t m_ServerMotdTime;
+	int64_t m_ServerMotdUpdateTime;
 	int m_RectQuadContainer = -1;
 	int m_TextContainerIndex = -1;
 
 public:
+	CMotd();
 	virtual int Sizeof() const override { return sizeof(*this); }
 
 	const char *ServerMotd() const { return m_aServerMotd; }
+	int64_t ServerMotdUpdateTime() const { return m_ServerMotdUpdateTime; }
 	void Clear();
 	bool IsActive() const;
 

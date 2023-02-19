@@ -10,6 +10,13 @@
 
 #include "motd.h"
 
+CMotd::CMotd()
+{
+	m_aServerMotd[0] = '\0';
+	m_ServerMotdTime = 0;
+	m_ServerMotdUpdateTime = 0;
+}
+
 void CMotd::Clear()
 {
 	m_ServerMotdTime = 0;
@@ -112,8 +119,9 @@ void CMotd::OnMessage(int MsgType, void *pRawMsg)
 		if(g_Config.m_ClPrintMotd && *pLast != '\0')
 			m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "motd", pLast, color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageHighlightColor)));
 
+		m_ServerMotdUpdateTime = time();
 		if(m_aServerMotd[0] && g_Config.m_ClMotdTime)
-			m_ServerMotdTime = time() + time_freq() * g_Config.m_ClMotdTime;
+			m_ServerMotdTime = m_ServerMotdUpdateTime + time_freq() * g_Config.m_ClMotdTime;
 		else
 			m_ServerMotdTime = 0;
 		TextRender()->DeleteTextContainer(m_TextContainerIndex);

@@ -2332,6 +2332,9 @@ void CMenus::OnStateChange(int NewState, int OldState)
 	// reset active item
 	UI()->SetActiveItem(nullptr);
 
+	if(OldState == IClient::STATE_ONLINE || OldState == IClient::STATE_OFFLINE)
+		TextRender()->DeleteTextContainer(m_MotdTextContainerIndex);
+
 	if(NewState == IClient::STATE_OFFLINE)
 	{
 		if(OldState >= IClient::STATE_ONLINE && NewState < IClient::STATE_QUITTING)
@@ -2368,6 +2371,11 @@ void CMenus::OnStateChange(int NewState, int OldState)
 			SetActive(false);
 		}
 	}
+}
+
+void CMenus::OnWindowResize()
+{
+	TextRender()->DeleteTextContainer(m_MotdTextContainerIndex);
 }
 
 void CMenus::OnRender()

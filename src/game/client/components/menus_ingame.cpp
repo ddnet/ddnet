@@ -475,7 +475,11 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 		TextRender()->Text(GameInfo.x + x, GameInfo.y + y, 20, aBuf, GameInfo.w - 10.0f);
 	}
 
-	// motd
+	RenderServerInfoMotd(Motd);
+}
+
+void CMenus::RenderServerInfoMotd(CUIRect Motd)
+{
 	const float MotdFontSize = 16.0f;
 	Motd.HSplitTop(10.0f, nullptr, &Motd);
 	Motd.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
@@ -487,6 +491,9 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 	Motd.HSplitTop(5.0f, nullptr, &Motd);
 	TextRender()->Text(MotdHeader.x, MotdHeader.y, 2.0f * MotdFontSize, Localize("MOTD"), -1.0f);
 
+	if(!m_pClient->m_Motd.ServerMotd()[0])
+		return;
+
 	static CScrollRegion s_ScrollRegion;
 	vec2 ScrollOffset(0.0f, 0.0f);
 	CScrollRegionParams ScrollParams;
@@ -494,10 +501,24 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 	s_ScrollRegion.Begin(&Motd, &ScrollOffset, &ScrollParams);
 	Motd.y += ScrollOffset.y;
 
+	static float s_MotdHeight = 0.0f;
+	static int64_t s_MotdLastUpdateTime = -1;
+	if(m_MotdTextContainerIndex == -1 || s_MotdLastUpdateTime == -1 || s_MotdLastUpdateTime != m_pClient->m_Motd.ServerMotdUpdateTime())
+	{
+		CTextCursor Cursor;
+		TextRender()->SetCursor(&Cursor, 0.0f, 0.0f, MotdFontSize, TEXTFLAG_RENDER);
+		Cursor.m_LineWidth = Motd.w;
+		TextRender()->RecreateTextContainer(m_MotdTextContainerIndex, &Cursor, m_pClient->m_Motd.ServerMotd());
+		s_MotdHeight = Cursor.Height();
+		s_MotdLastUpdateTime = m_pClient->m_Motd.ServerMotdUpdateTime();
+	}
+
 	CUIRect MotdTextArea;
-	Motd.HSplitTop((str_countchr(m_pClient->m_Motd.ServerMotd(), '\n') + 1) * MotdFontSize, &MotdTextArea, &Motd);
+	Motd.HSplitTop(s_MotdHeight, &MotdTextArea, &Motd);
 	s_ScrollRegion.AddRect(MotdTextArea);
-	TextRender()->Text(MotdTextArea.x, MotdTextArea.y, MotdFontSize, m_pClient->m_Motd.ServerMotd(), MotdTextArea.w);
+
+	if(m_MotdTextContainerIndex != -1)
+		TextRender()->RenderTextContainer(m_MotdTextContainerIndex, TextRender()->DefaultTextColor(), TextRender()->DefaultTextOutlineColor(), MotdTextArea.x, MotdTextArea.y);
 
 	s_ScrollRegion.End();
 }
