@@ -131,7 +131,7 @@ void dbg_msg(const char *sys, const char *fmt, ...)
  *
  * @see mem_move
  */
-void mem_copy(void *dest, const void *source, unsigned size);
+void mem_copy(void *dest, const void *source, size_t size);
 
 /**
  * Copies a a memory block.
@@ -146,7 +146,7 @@ void mem_copy(void *dest, const void *source, unsigned size);
  *
  * @see mem_copy
  */
-void mem_move(void *dest, const void *source, unsigned size);
+void mem_move(void *dest, const void *source, size_t size);
 
 /**
  * Sets a complete memory block to 0.
@@ -156,7 +156,7 @@ void mem_move(void *dest, const void *source, unsigned size);
  * @param block Pointer to the block to zero out.
  * @param size Size of the block.
  */
-void mem_zero(void *block, unsigned size);
+void mem_zero(void *block, size_t size);
 
 /**
  * Compares two blocks of memory
@@ -171,7 +171,7 @@ void mem_zero(void *block, unsigned size);
  * @return 0 - Block a is equal to block b.
  * @return > 0 - Block a is greater than block b.
  */
-int mem_comp(const void *a, const void *b, int size);
+int mem_comp(const void *a, const void *b, size_t size);
 
 /**
  * Checks whether a block of memory contains null bytes.
@@ -181,10 +181,9 @@ int mem_comp(const void *a, const void *b, int size);
  * @param block Pointer to the block to check for nulls.
  * @param size Size of the block.
  *
- * @return 1 - The block has a null byte.
- * @return 0 - The block does not have a null byte.
+ * @return true if the block has a null byte, false otherwise.
  */
-int mem_has_null(const void *block, unsigned size);
+bool mem_has_null(const void *block, size_t size);
 
 /**
  * @defgroup File-IO
