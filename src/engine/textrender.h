@@ -137,8 +137,8 @@ public:
 	// either creates a new text container or appends to a existing one
 	virtual bool CreateOrAppendTextContainer(int &TextContainerIndex, CTextCursor *pCursor, const char *pText, int Length = -1) = 0;
 	// just deletes and creates text container
-	virtual void RecreateTextContainer(CTextCursor *pCursor, int &TextContainerIndex, const char *pText, int Length = -1) = 0;
-	virtual void RecreateTextContainerSoft(CTextCursor *pCursor, int &TextContainerIndex, const char *pText, int Length = -1) = 0;
+	virtual void RecreateTextContainer(int &TextContainerIndex, CTextCursor *pCursor, const char *pText, int Length = -1) = 0;
+	virtual void RecreateTextContainerSoft(int &TextContainerIndex, CTextCursor *pCursor, const char *pText, int Length = -1) = 0;
 	virtual void DeleteTextContainer(int &TextContainerIndex) = 0;
 
 	virtual void UploadTextContainer(int TextContainerIndex) = 0;
