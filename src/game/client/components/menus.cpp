@@ -409,7 +409,7 @@ ColorHSLA CMenus::DoLine_ColorPicker(CButtonContainer *pResetID, const float Lin
 	}
 
 	Section.VSplitLeft(5.0f, 0x0, &Section);
-	float LabelWidth = TextRender()->TextWidth(0, 14.0f, pText, -1, -1.0f);
+	float LabelWidth = TextRender()->TextWidth(14.0f, pText, -1, -1.0f);
 	Section.VSplitLeft(LabelWidth, &Label, &Section);
 
 	UI()->DoLabel(&Label, pText, LabelSize, TEXTALIGN_LEFT);
@@ -1627,7 +1627,7 @@ int CMenus::Render()
 		SLabelProperties Props;
 		Props.m_MaxWidth = (int)Part.w;
 
-		if(TextRender()->TextWidth(0, 24.f, pTitle, -1, -1.0f) > Part.w)
+		if(TextRender()->TextWidth(24.f, pTitle, -1, -1.0f) > Part.w)
 			UI()->DoLabel(&Part, pTitle, 24.f, TEXTALIGN_LEFT, Props);
 		else
 			UI()->DoLabel(&Part, pTitle, 24.f, TEXTALIGN_CENTER);
@@ -1650,7 +1650,7 @@ int CMenus::Render()
 			UI()->DoLabel(&Part, pExtraText, FontSize, TEXTALIGN_LEFT, Props);
 		else
 		{
-			if(TextRender()->TextWidth(0, FontSize, pExtraText, -1, -1.0f) > Part.w)
+			if(TextRender()->TextWidth(FontSize, pExtraText, -1, -1.0f) > Part.w)
 				UI()->DoLabel(&Part, pExtraText, FontSize, TEXTALIGN_LEFT, Props);
 			else
 				UI()->DoLabel(&Part, pExtraText, FontSize, TEXTALIGN_CENTER);

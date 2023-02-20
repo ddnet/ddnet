@@ -235,7 +235,7 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 	UI()->DoLabel(&VersionUpdate, aBuf, 14.0f, TEXTALIGN_LEFT);
 	TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 
-	VersionUpdate.VSplitLeft(TextRender()->TextWidth(0, 14.0f, aBuf, -1, -1.0f) + 10.0f, 0, &Part);
+	VersionUpdate.VSplitLeft(TextRender()->TextWidth(14.0f, aBuf, -1, -1.0f) + 10.0f, 0, &Part);
 
 	if(State == IUpdater::CLEAN && NeedUpdate)
 	{

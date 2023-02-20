@@ -392,7 +392,7 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 	x = 5.0f;
 	y = 0.0f;
 
-	TextRender()->Text(0, ServerInfo.x + x, ServerInfo.y + y, 32, Localize("Server info"), 250.0f);
+	TextRender()->Text(ServerInfo.x + x, ServerInfo.y + y, 32, Localize("Server info"), 250.0f);
 	y += 32.0f + 5.0f;
 
 	mem_zero(aBuf, sizeof(aBuf));
@@ -410,7 +410,7 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 		Localize("Version"), CurrentServerInfo.m_aVersion,
 		Localize("Password"), CurrentServerInfo.m_Flags & 1 ? Localize("Yes") : Localize("No"));
 
-	TextRender()->Text(0, ServerInfo.x + x, ServerInfo.y + y, 20, aBuf, 250.0f);
+	TextRender()->Text(ServerInfo.x + x, ServerInfo.y + y, 20, aBuf, 250.0f);
 
 	// copy info button
 	{
@@ -451,7 +451,7 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 	x = 5.0f;
 	y = 0.0f;
 
-	TextRender()->Text(0, GameInfo.x + x, GameInfo.y + y, 32, Localize("Game info"), 250.0f);
+	TextRender()->Text(GameInfo.x + x, GameInfo.y + y, 32, Localize("Game info"), 250.0f);
 	y += 32.0f + 5.0f;
 
 	if(m_pClient->m_Snap.m_pGameInfoObj)
@@ -472,7 +472,7 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 			Localize("Score limit"), m_pClient->m_Snap.m_pGameInfoObj->m_ScoreLimit,
 			Localize("Time limit"), m_pClient->m_Snap.m_pGameInfoObj->m_TimeLimit,
 			Localize("Players"), m_pClient->m_Snap.m_NumPlayers, CurrentServerInfo.m_MaxClients);
-		TextRender()->Text(0, GameInfo.x + x, GameInfo.y + y, 20, aBuf, 250.0f);
+		TextRender()->Text(GameInfo.x + x, GameInfo.y + y, 20, aBuf, 250.0f);
 	}
 
 	// motd
@@ -485,7 +485,7 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 	CUIRect MotdHeader;
 	Motd.HSplitTop(2.0f * MotdFontSize, &MotdHeader, &Motd);
 	Motd.HSplitTop(5.0f, nullptr, &Motd);
-	TextRender()->Text(nullptr, MotdHeader.x, MotdHeader.y, 2.0f * MotdFontSize, Localize("MOTD"), -1.0f);
+	TextRender()->Text(MotdHeader.x, MotdHeader.y, 2.0f * MotdFontSize, Localize("MOTD"), -1.0f);
 
 	static CScrollRegion s_ScrollRegion;
 	vec2 ScrollOffset(0.0f, 0.0f);
@@ -497,7 +497,7 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 	CUIRect MotdTextArea;
 	Motd.HSplitTop((str_countchr(m_pClient->m_Motd.m_aServerMotd, '\n') + 1) * MotdFontSize, &MotdTextArea, &Motd);
 	s_ScrollRegion.AddRect(MotdTextArea);
-	TextRender()->Text(nullptr, MotdTextArea.x, MotdTextArea.y, MotdFontSize, m_pClient->m_Motd.m_aServerMotd, MotdTextArea.w);
+	TextRender()->Text(MotdTextArea.x, MotdTextArea.y, MotdFontSize, m_pClient->m_Motd.m_aServerMotd, MotdTextArea.w);
 
 	s_ScrollRegion.End();
 }
@@ -660,7 +660,7 @@ void CMenus::RenderServerControl(CUIRect MainView)
 			SLabelProperties Props;
 			Props.m_AlignVertically = 0;
 			UI()->DoLabel(&QuickSearch, pSearchLabel, 14.0f, TEXTALIGN_LEFT, Props);
-			float wSearch = TextRender()->TextWidth(0, 14.0f, pSearchLabel, -1, -1.0f);
+			float wSearch = TextRender()->TextWidth(14.0f, pSearchLabel, -1, -1.0f);
 			TextRender()->SetRenderFlags(0);
 			TextRender()->SetCurFont(NULL);
 			QuickSearch.VSplitLeft(wSearch, 0, &QuickSearch);
@@ -718,7 +718,7 @@ void CMenus::RenderServerControl(CUIRect MainView)
 		Reason.HSplitTop(5.0f, 0, &Reason);
 		const char *pLabel = Localize("Reason:");
 		UI()->DoLabel(&Reason, pLabel, 14.0f, TEXTALIGN_LEFT);
-		float w = TextRender()->TextWidth(0, 14.0f, pLabel, -1, -1.0f);
+		float w = TextRender()->TextWidth(14.0f, pLabel, -1, -1.0f);
 		Reason.VSplitLeft(w + 10.0f, 0, &Reason);
 		static float s_Offset = 0.0f;
 		if(Input()->KeyPress(KEY_R) && Input()->ModifierIsPressed())
@@ -1154,6 +1154,6 @@ void CMenus::RenderIngameHint()
 	float Width = 300 * Graphics()->ScreenAspect();
 	Graphics()->MapScreen(0, 0, Width, 300);
 	TextRender()->TextColor(1, 1, 1, 1);
-	TextRender()->Text(0x0, 5, 280, 5, Localize("Menu opened. Press Esc key again to close menu."), -1.0f);
+	TextRender()->Text(5, 280, 5, Localize("Menu opened. Press Esc key again to close menu."), -1.0f);
 	UI()->MapScreen();
 }

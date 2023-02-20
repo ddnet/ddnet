@@ -457,7 +457,7 @@ float CUI::DoTextLabel(float x, float y, float w, float h, const char *pText, fl
 	float AlignedSize = 0;
 	float MaxCharacterHeightInLine = 0;
 	float MaxTextWidth = LabelProps.m_MaxWidth != -1 ? LabelProps.m_MaxWidth : w;
-	float tw = TextRender()->TextWidth(0, Size, pText, -1, LabelProps.m_MaxWidth, &AlignedSize, &MaxCharacterHeightInLine);
+	float tw = TextRender()->TextWidth(Size, pText, -1, LabelProps.m_MaxWidth, &AlignedSize, &MaxCharacterHeightInLine);
 	while(tw > MaxTextWidth + 0.001f)
 	{
 		if(!LabelProps.m_EnableWidthCheck)
@@ -465,7 +465,7 @@ float CUI::DoTextLabel(float x, float y, float w, float h, const char *pText, fl
 		if(Size < 4.0f)
 			break;
 		Size -= 1.0f;
-		tw = TextRender()->TextWidth(0, Size, pText, -1, LabelProps.m_MaxWidth, &AlignedSize, &MaxCharacterHeightInLine);
+		tw = TextRender()->TextWidth(Size, pText, -1, LabelProps.m_MaxWidth, &AlignedSize, &MaxCharacterHeightInLine);
 	}
 
 	int Flags = TEXTFLAG_RENDER | (LabelProps.m_StopAtEnd ? TEXTFLAG_STOP_AT_END : 0);
@@ -529,7 +529,7 @@ void CUI::DoLabel(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, cons
 	float AlignedSize = 0;
 	float MaxCharacterHeightInLine = 0;
 	float MaxTextWidth = LabelProps.m_MaxWidth != -1 ? LabelProps.m_MaxWidth : pRect->w;
-	float tw = TextRender()->TextWidth(0, Size, pText, -1, LabelProps.m_MaxWidth, &AlignedSize, &MaxCharacterHeightInLine);
+	float tw = TextRender()->TextWidth(Size, pText, -1, LabelProps.m_MaxWidth, &AlignedSize, &MaxCharacterHeightInLine);
 	while(tw > MaxTextWidth + 0.001f)
 	{
 		if(!LabelProps.m_EnableWidthCheck)
@@ -537,7 +537,7 @@ void CUI::DoLabel(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, cons
 		if(Size < 4.0f)
 			break;
 		Size -= 1.0f;
-		tw = TextRender()->TextWidth(0, Size, pText, -1, LabelProps.m_MaxWidth, &AlignedSize, &MaxCharacterHeightInLine);
+		tw = TextRender()->TextWidth(Size, pText, -1, LabelProps.m_MaxWidth, &AlignedSize, &MaxCharacterHeightInLine);
 	}
 	float AlignmentVert = pRect->y + (pRect->h - AlignedSize) / 2.f;
 	float AlignmentHori = 0;
@@ -963,11 +963,11 @@ bool CUI::DoEditBox(const void *pID, const CUIRect *pRect, char *pStr, unsigned 
 	// check if the text has to be moved
 	if(LastActiveItem() == pID && !JustGotActive && (UpdateOffset || *m_pInputEventCount))
 	{
-		float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, DispCursorPos, std::numeric_limits<float>::max());
+		float w = TextRender()->TextWidth(FontSize, pDisplayStr, DispCursorPos, std::numeric_limits<float>::max());
 		if(w - *pOffset > Textbox.w)
 		{
 			// move to the left
-			float wt = TextRender()->TextWidth(0, FontSize, pDisplayStr, -1, std::numeric_limits<float>::max());
+			float wt = TextRender()->TextWidth(FontSize, pDisplayStr, -1, std::numeric_limits<float>::max());
 			do
 			{
 				*pOffset += minimum(wt - *pOffset - Textbox.w, Textbox.w / 3);
@@ -1051,7 +1051,7 @@ bool CUI::DoEditBox(const void *pID, const CUIRect *pRect, char *pStr, unsigned 
 	// set the ime cursor
 	if(LastActiveItem() == pID && !JustGotActive)
 	{
-		float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, DispCursorPos, std::numeric_limits<float>::max());
+		float w = TextRender()->TextWidth(FontSize, pDisplayStr, DispCursorPos, std::numeric_limits<float>::max());
 		Textbox.x += w;
 		Input()->SetEditingPosition(Textbox.x, Textbox.y + FontSize);
 	}
@@ -1283,7 +1283,7 @@ void CUI::DoScrollbarOption(const void *pID, int *pOption, const CUIRect *pRect,
 	}
 
 	float FontSize = pRect->h * CUI::ms_FontmodHeight * 0.8f;
-	float VSplitVal = 10.0f + maximum(TextRender()->TextWidth(0, FontSize, aBuf, -1, std::numeric_limits<float>::max()), TextRender()->TextWidth(0, FontSize, aBufMax, -1, std::numeric_limits<float>::max()));
+	float VSplitVal = 10.0f + maximum(TextRender()->TextWidth(FontSize, aBuf, -1, std::numeric_limits<float>::max()), TextRender()->TextWidth(FontSize, aBufMax, -1, std::numeric_limits<float>::max()));
 
 	CUIRect Label, ScrollBar;
 	pRect->VSplitLeft(VSplitVal, &Label, &ScrollBar);

@@ -546,7 +546,7 @@ void CGameConsole::PossibleCommandsRenderCallback(int Index, const char *pStr, v
 
 	if(Index == pInfo->m_WantedCompletion)
 	{
-		float TextWidth = pInfo->m_pSelf->TextRender()->TextWidth(pInfo->m_Cursor.m_pFont, pInfo->m_Cursor.m_FontSize, pStr, -1, -1.0f);
+		float TextWidth = pInfo->m_pSelf->TextRender()->TextWidth(pInfo->m_Cursor.m_FontSize, pStr, -1, -1.0f);
 		const CUIRect Rect = {pInfo->m_Cursor.m_X - 2.5f, pInfo->m_Cursor.m_Y - 4.f / 2.f, TextWidth + 5.f, pInfo->m_Cursor.m_FontSize + 4.f};
 		Rect.Draw(ColorRGBA(229.0f / 255.0f, 185.0f / 255.0f, 4.0f / 255.0f, 0.85f), IGraphics::CORNER_ALL, pInfo->m_Cursor.m_FontSize / 3.f);
 
@@ -923,12 +923,12 @@ void CGameConsole::OnRender()
 		char aBuf[128];
 		TextRender()->TextColor(1, 1, 1, 1);
 		str_format(aBuf, sizeof(aBuf), Localize("-Page %d-"), pConsole->m_BacklogCurPage + 1);
-		TextRender()->Text(0, 10.0f, FontSize / 2.f, FontSize, aBuf, -1.0f);
+		TextRender()->Text(10.0f, FontSize / 2.f, FontSize, aBuf, -1.0f);
 
 		// render version
 		str_copy(aBuf, "v" GAME_VERSION " on " CONF_PLATFORM_STRING " " CONF_ARCH_STRING);
-		float Width = TextRender()->TextWidth(0, FontSize, aBuf, -1, -1.0f);
-		TextRender()->Text(0, Screen.w - Width - 10.0f, FontSize / 2.f, FontSize, aBuf, -1.0f);
+		float Width = TextRender()->TextWidth(FontSize, aBuf, -1, -1.0f);
+		TextRender()->Text(Screen.w - Width - 10.0f, FontSize / 2.f, FontSize, aBuf, -1.0f);
 	}
 }
 

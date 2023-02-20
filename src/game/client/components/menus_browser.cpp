@@ -491,8 +491,8 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		SLabelProperties Props;
 		Props.m_AlignVertically = 0;
 		UI()->DoLabel(&QuickSearch, pSearchLabel, 16.0f, TEXTALIGN_LEFT, Props);
-		SearchIconWidth = TextRender()->TextWidth(0, 16.0f, pSearchLabel, -1, -1.0f);
-		ExcludeIconWidth = TextRender()->TextWidth(0, 16.0f, pExcludeLabel, -1, -1.0f);
+		SearchIconWidth = TextRender()->TextWidth(16.0f, pSearchLabel, -1, -1.0f);
+		ExcludeIconWidth = TextRender()->TextWidth(16.0f, pExcludeLabel, -1, -1.0f);
 		ExcludeSearchIconMax = maximum(SearchIconWidth, ExcludeIconWidth);
 		TextRender()->SetRenderFlags(0);
 		TextRender()->SetCurFont(NULL);
@@ -559,9 +559,9 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 
 	CUIRect SvrsOnline, PlysOnline;
 	Status3.HSplitTop(20.f, &PlysOnline, &SvrsOnline);
-	PlysOnline.VSplitRight(TextRender()->TextWidth(0, 12.0f, aBufPyr, -1, -1.0f), 0, &PlysOnline);
+	PlysOnline.VSplitRight(TextRender()->TextWidth(12.0f, aBufPyr, -1, -1.0f), 0, &PlysOnline);
 	UI()->DoLabel(&PlysOnline, aBufPyr, 12.0f, TEXTALIGN_LEFT);
-	SvrsOnline.VSplitRight(TextRender()->TextWidth(0, 12.0f, aBufSvr, -1, -1.0f), 0, &SvrsOnline);
+	SvrsOnline.VSplitRight(TextRender()->TextWidth(12.0f, aBufSvr, -1, -1.0f), 0, &SvrsOnline);
 	UI()->DoLabel(&SvrsOnline, aBufSvr, 12.0f, TEXTALIGN_LEFT);
 
 	// status box
@@ -1140,7 +1140,7 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 				str_format(aTemp, sizeof(aTemp), "%d", CurrentClient.m_Score);
 
 			float ScoreFontSize = 12.0f;
-			while(ScoreFontSize >= 4.0f && TextRender()->TextWidth(0, ScoreFontSize, aTemp, -1, -1.0f) > Score.w)
+			while(ScoreFontSize >= 4.0f && TextRender()->TextWidth(ScoreFontSize, aTemp, -1, -1.0f) > Score.w)
 				ScoreFontSize--;
 
 			TextRender()->SetCursor(&Cursor, Score.x, Score.y + (Score.h - ScoreFontSize) / 2.0f, ScoreFontSize, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);

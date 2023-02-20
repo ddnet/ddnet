@@ -304,7 +304,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 
 		char aSpeedBuf[256];
 		str_format(aSpeedBuf, sizeof(aSpeedBuf), "×%.2f", pInfo->m_Speed);
-		TextRender()->Text(0, 120.0f, Screen.y + Screen.h - 120.0f - TotalHeight, 60.0f, aSpeedBuf, -1.0f);
+		TextRender()->Text(120.0f, Screen.y + Screen.h - 120.0f - TotalHeight, 60.0f, aSpeedBuf, -1.0f);
 	}
 
 	const int CurrentTick = pInfo->m_CurrentTick - pInfo->m_FirstTick;
