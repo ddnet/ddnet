@@ -124,7 +124,7 @@ bool ReplaceArea(IStorage *pStorage, const char aaMapNames[3][64], const float a
 		for(int j = 0; j < 2; j++)
 		{
 			apLayerGroups[j] = GetLayerGroup(aInputMaps[j], i + 1);
-			apItem[j] = (CMapItemLayer *)aInputMaps[j].GetItem(aLayersStart[j] + i, 0, 0);
+			apItem[j] = (CMapItemLayer *)aInputMaps[j].GetItem(aLayersStart[j] + i);
 		}
 
 		if(!apLayerGroups[0] || !apLayerGroups[1])
@@ -205,7 +205,7 @@ bool CompareLayers(const char aaMapNames[3][64], CDataFileReader aInputMaps[2])
 	{
 		CMapItemLayer *apItem[2];
 		for(int j = 0; j < 2; j++)
-			apItem[j] = (CMapItemLayer *)aInputMaps[j].GetItem(aStart[j] + i, 0, 0);
+			apItem[j] = (CMapItemLayer *)aInputMaps[j].GetItem(aStart[j] + i);
 
 		if(apItem[0]->m_Type != apItem[1]->m_Type)
 		{
@@ -229,7 +229,7 @@ void CompareGroups(const char aaMapNames[3][64], CDataFileReader aInputMaps[2])
 	{
 		CMapItemGroup *apItem[2];
 		for(int j = 0; j < 2; j++)
-			apItem[j] = (CMapItemGroup *)aInputMaps[j].GetItem(aStart[j] + i, 0, 0);
+			apItem[j] = (CMapItemGroup *)aInputMaps[j].GetItem(aStart[j] + i);
 
 		bool bSameConfig = apItem[0]->m_ParallaxX == apItem[1]->m_ParallaxX && apItem[0]->m_ParallaxY == apItem[1]->m_ParallaxY && apItem[0]->m_OffsetX == apItem[1]->m_OffsetX && apItem[0]->m_OffsetY == apItem[1]->m_OffsetY && apItem[0]->m_UseClipping == apItem[1]->m_UseClipping && apItem[0]->m_ClipX == apItem[1]->m_ClipX && apItem[0]->m_ClipY == apItem[1]->m_ClipY && apItem[0]->m_ClipW == apItem[1]->m_ClipW && apItem[0]->m_ClipH == apItem[1]->m_ClipH;
 
@@ -245,7 +245,7 @@ const CMapItemGroup *GetLayerGroup(CDataFileReader &InputMap, const int LayerNum
 
 	for(int i = 0; i < Num; i++)
 	{
-		CMapItemGroup *pItem = (CMapItemGroup *)InputMap.GetItem(Start + i, 0, 0);
+		CMapItemGroup *pItem = (CMapItemGroup *)InputMap.GetItem(Start + i);
 		if(LayerNumber >= pItem->m_StartLayer && LayerNumber <= pItem->m_StartLayer + pItem->m_NumLayers)
 			return pItem;
 	}
