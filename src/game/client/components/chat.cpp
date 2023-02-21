@@ -781,9 +781,14 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 
 		pCurrentLine->m_Highlighted = Highlighted;
 
-		if(pCurrentLine->m_ClientID < 0) // server or client message
+		if(pCurrentLine->m_ClientID == SERVER_MSG)
 		{
 			str_copy(pCurrentLine->m_aName, "*** ");
+			str_copy(pCurrentLine->m_aText, pLine);
+		}
+		else if(pCurrentLine->m_ClientID == CLIENT_MSG)
+		{
+			str_copy(pCurrentLine->m_aName, "— ");
 			str_copy(pCurrentLine->m_aText, pLine);
 		}
 		else

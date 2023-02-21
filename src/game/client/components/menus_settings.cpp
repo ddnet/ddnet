@@ -2906,7 +2906,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 			Graphics()->DrawRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Width + RealMsgPaddingX + RealMsgPaddingTee, RealFontSize + RealMsgPaddingY, RealBackgroundRounding, IGraphics::CORNER_ALL);
 			TempY += RealOffsetY;
 
-			Width = TextRender()->TextWidth(RealFontSize, "*** Echo command executed", -1, -1);
+			Width = TextRender()->TextWidth(RealFontSize, "— Echo command executed", -1, -1);
 			Graphics()->DrawRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Width + RealMsgPaddingX, RealFontSize + RealMsgPaddingY, RealBackgroundRounding, IGraphics::CORNER_ALL);
 
 			Graphics()->QuadsEnd();
@@ -2997,7 +2997,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 
 		// Client
 		TextRender()->TextColor(ClientColor);
-		TextRender()->TextEx(&Cursor, "*** Echo command executed", -1);
+		TextRender()->TextEx(&Cursor, "— Echo command executed", -1);
 		TextRender()->SetCursorPosition(&Cursor, X, Y);
 
 		TextRender()->TextColor(TextRender()->DefaultTextColor());
