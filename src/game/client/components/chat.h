@@ -62,9 +62,12 @@ class CChat : public CComponent
 	CLine m_aLines[MAX_LINES];
 	int m_CurrentLine;
 
-	// chat
 	enum
 	{
+		// client IDs for special messages
+		CLIENT_MSG = -2,
+		SERVER_MSG = -1,
+
 		MODE_NONE = 0,
 		MODE_ALL,
 		MODE_TEAM,
