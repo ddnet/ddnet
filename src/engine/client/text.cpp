@@ -1182,6 +1182,7 @@ public:
 				Compare.m_X = DrawX;
 				Compare.m_Y = DrawY;
 				Compare.m_Flags &= ~TEXTFLAG_RENDER;
+				Compare.m_Flags |= TEXTFLAG_DISALLOW_NEWLINE;
 				Compare.m_LineWidth = -1;
 				TextEx(&Compare, pCurrent, Wlen);
 
@@ -1196,7 +1197,7 @@ public:
 					Cutter.m_X = DrawX;
 					Cutter.m_Y = DrawY;
 					Cutter.m_Flags &= ~TEXTFLAG_RENDER;
-					Cutter.m_Flags |= TEXTFLAG_STOP_AT_END;
+					Cutter.m_Flags |= TEXTFLAG_STOP_AT_END | TEXTFLAG_DISALLOW_NEWLINE;
 
 					TextEx(&Cutter, pCurrent, Wlen);
 					Wlen = Cutter.m_CharCount;
@@ -1221,17 +1222,24 @@ public:
 			{
 				pCursor->m_CharCount += pTmp - pCurrent;
 				pCurrent = pTmp;
-				const int Character = NextCharacter;
+				int Character = NextCharacter;
 				NextCharacter = str_utf8_decode(&pTmp);
 
 				if(Character == '\n')
 				{
-					LastCharGlyphIndex = 0;
-					++CharacterCounter;
-					StartNewLine();
-					if(pCursor->m_MaxLines > 0 && LineCount > pCursor->m_MaxLines)
-						break;
-					continue;
+					if((pCursor->m_Flags & TEXTFLAG_DISALLOW_NEWLINE) == 0)
+					{
+						LastCharGlyphIndex = 0;
+						++CharacterCounter;
+						StartNewLine();
+						if(pCursor->m_MaxLines > 0 && LineCount > pCursor->m_MaxLines)
+							break;
+						continue;
+					}
+					else
+					{
+						Character = ' ';
+					}
 				}
 
 				const SFontSizeChar *pChr = GetChar(TextContainer.m_pFont, pSizeData, Character);
