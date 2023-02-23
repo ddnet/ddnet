@@ -40,6 +40,8 @@ jobs:
       run: scripts/languages/update_all.py
     - name: Check dilated images
       run: scripts/check_dilate.sh release data
+    - name: Check absolute includes
+      run: "! grep --exclude-dir rust-bridge -rE '^#include \"(antibot|base|engine|game|steam|test)/' src/"
     # TODO: Enable on release branches
     #- name: Out-of-date translations
     #  run: |
