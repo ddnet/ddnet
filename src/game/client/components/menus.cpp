@@ -387,51 +387,39 @@ void CMenus::DoLaserPreview(const CUIRect *pRect, const ColorHSLA LaserOutlineCo
 	}
 }
 
-ColorHSLA CMenus::DoLine_ColorPicker(CButtonContainer *pResetID, const float LineSize, const float WantedPickerPosition, const float LabelSize, const float BottomMargin, CUIRect *pMainRect, const char *pText, unsigned int *pColorValue, const ColorRGBA DefaultColor, bool CheckBoxSpacing, bool UseCheckBox, int *pCheckBoxValue)
+ColorHSLA CMenus::DoLine_ColorPicker(CButtonContainer *pResetID, const float LineSize, const float LabelSize, const float BottomMargin, CUIRect *pMainRect, const char *pText, unsigned int *pColorValue, const ColorRGBA DefaultColor, bool CheckBoxSpacing, int *pCheckBoxValue)
 {
-	CUIRect Section, Button, Label;
+	CUIRect Section, ColorPickerButton, ResetButton, Label;
 
 	pMainRect->HSplitTop(LineSize, &Section, pMainRect);
-	pMainRect->HSplitTop(BottomMargin, 0x0, pMainRect);
+	pMainRect->HSplitTop(BottomMargin, nullptr, pMainRect);
 
-	float SectionWidth = Section.w;
-
-	if(CheckBoxSpacing || UseCheckBox)
-		Section.VSplitLeft(20.0f, &Button, &Section);
-
-	if(UseCheckBox)
+	if(CheckBoxSpacing || pCheckBoxValue != nullptr)
 	{
 		CUIRect CheckBox;
-		Button.Margin(2.0f, &CheckBox);
-
-		if(DoButton_CheckBox(pCheckBoxValue, "", *pCheckBoxValue, &CheckBox))
-			*pCheckBoxValue ^= 1;
+		Section.VSplitLeft(Section.h, &CheckBox, &Section);
+		if(pCheckBoxValue != nullptr)
+		{
+			CheckBox.Margin(2.0f, &CheckBox);
+			if(DoButton_CheckBox(pCheckBoxValue, "", *pCheckBoxValue, &CheckBox))
+				*pCheckBoxValue ^= 1;
+		}
 	}
 
-	Section.VSplitLeft(5.0f, 0x0, &Section);
-	float LabelWidth = TextRender()->TextWidth(14.0f, pText, -1, -1.0f);
-	Section.VSplitLeft(LabelWidth, &Label, &Section);
+	Section.VSplitLeft(5.0f, nullptr, &Section);
+	Section.VSplitMid(&Label, &Section, Section.h);
+	Section.VSplitRight(60.0f, &Section, &ResetButton);
+	Section.VSplitRight(8.0f, &Section, nullptr);
+	Section.VSplitRight(Section.h, &Section, &ColorPickerButton);
 
 	UI()->DoLabel(&Label, pText, LabelSize, TEXTALIGN_LEFT);
 
-	float Cut = WantedPickerPosition - (SectionWidth - Section.w);
-	if(Cut < 5)
-		Cut = 5.0f;
+	ColorHSLA PickedColor = RenderHSLColorPicker(&ColorPickerButton, pColorValue, false);
 
-	Section.VSplitLeft(Cut, 0x0, &Section);
-	Section.VSplitLeft(LineSize, &Button, &Section);
-
-	ColorHSLA PickedColor = RenderHSLColorPicker(&Button, pColorValue, false);
-
-	Section.VSplitLeft(7.5f, 0x0, &Section);
-	Section.VSplitLeft(55.0f, &Button, &Section);
-	Button.HSplitTop(2.0f, 0x0, &Button);
-	Button.HSplitBottom(2.0f, &Button, 0x0);
-
-	if(DoButton_Menu(pResetID, Localize("Reset"), 0, &Button, 0, IGraphics::CORNER_ALL, 8.0f, 0, vec4(1, 1, 1, 0.5f), vec4(1, 1, 1, 0.25f), 1, true))
+	ResetButton.HMargin(2.0f, &ResetButton);
+	if(DoButton_Menu(pResetID, Localize("Reset"), 0, &ResetButton, nullptr, IGraphics::CORNER_ALL, 8.0f, 0.0f, vec4(1, 1, 1, 0.5f), vec4(1, 1, 1, 0.25f), 1, true))
 	{
-		ColorHSLA HSL = color_cast<ColorHSLA>(DefaultColor);
-		*pColorValue = HSL.Pack(false);
+		*pColorValue = color_cast<ColorHSLA>(DefaultColor).Pack(false);
 	}
 
 	return PickedColor;
