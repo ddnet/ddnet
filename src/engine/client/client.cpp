@@ -7,6 +7,7 @@
 #include <new>
 #include <tuple>
 
+#include <base/hash.h>
 #include <base/hash_ctxt.h>
 #include <base/logger.h>
 #include <base/math.h>
@@ -67,8 +68,6 @@
 #ifdef main
 #undef main
 #endif
-
-#include "base/hash.h"
 
 #include <chrono>
 #include <thread>

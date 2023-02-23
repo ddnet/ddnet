@@ -7,12 +7,12 @@
 #include <engine/server.h>
 
 #include <game/collision.h>
+#include <game/generated/protocol.h>
 #include <game/layers.h>
 #include <game/mapbugs.h>
 #include <game/voting.h>
 
 #include "eventhandler.h"
-#include "game/generated/protocol.h"
 #include "gameworld.h"
 #include "teehistorian.h"
 

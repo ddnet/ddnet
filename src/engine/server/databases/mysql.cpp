@@ -1,5 +1,6 @@
 #include "connection.h"
-#include "engine/server/databases/connection_pool.h"
+
+#include <engine/server/databases/connection_pool.h>
 
 #if defined(CONF_MYSQL)
 #include <mysql.h>
