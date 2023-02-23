@@ -1,9 +1,9 @@
-#include "engine/server/databases/connection_pool.h"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 #include <base/detect.h>
 #include <engine/server/databases/connection.h>
+#include <engine/server/databases/connection_pool.h>
 #include <engine/shared/config.h>
 #include <game/server/scoreworker.h>
 
