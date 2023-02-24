@@ -42,62 +42,78 @@ float CConsole::CResult::GetFloat(unsigned Index) const
 
 ColorHSLA CConsole::CResult::GetColor(unsigned Index, bool Light) const
 {
-	ColorHSLA Hsla = ColorHSLA(0, 0, 0);
 	if(Index >= m_NumArgs)
-		return Hsla;
+		return ColorHSLA(0, 0, 0);
 
 	const char *pStr = m_apArgs[Index];
 	if(str_isallnum(pStr) || ((pStr[0] == '-' || pStr[0] == '+') && str_isallnum(pStr + 1))) // Teeworlds Color (Packed HSL)
 	{
-		Hsla = ColorHSLA(str_toulong_base(pStr, 10), true);
+		const ColorHSLA Hsla = ColorHSLA(str_toulong_base(pStr, 10), true);
 		if(Light)
-			Hsla = Hsla.UnclampLighting();
+			return Hsla.UnclampLighting();
+		return Hsla;
 	}
-	else if(*pStr == '$') // Hex RGB
+	else if(*pStr == '$') // Hex RGB/RGBA
 	{
 		ColorRGBA Rgba = ColorRGBA(0, 0, 0, 1);
-		int Len = str_length(pStr);
+		const int Len = str_length(pStr);
 		if(Len == 4)
 		{
-			unsigned Num = str_toulong_base(pStr + 1, 16);
+			const unsigned Num = str_toulong_base(pStr + 1, 16);
 			Rgba.r = (((Num >> 8) & 0x0F) + ((Num >> 4) & 0xF0)) / 255.0f;
 			Rgba.g = (((Num >> 4) & 0x0F) + ((Num >> 0) & 0xF0)) / 255.0f;
 			Rgba.b = (((Num >> 0) & 0x0F) + ((Num << 4) & 0xF0)) / 255.0f;
 		}
+		else if(Len == 5)
+		{
+			const unsigned Num = str_toulong_base(pStr + 1, 16);
+			Rgba.r = (((Num >> 12) & 0x0F) + ((Num >> 8) & 0xF0)) / 255.0f;
+			Rgba.g = (((Num >> 8) & 0x0F) + ((Num >> 4) & 0xF0)) / 255.0f;
+			Rgba.b = (((Num >> 4) & 0x0F) + ((Num >> 0) & 0xF0)) / 255.0f;
+			Rgba.a = (((Num >> 0) & 0x0F) + ((Num << 4) & 0xF0)) / 255.0f;
+		}
 		else if(Len == 7)
 		{
-			unsigned Num = str_toulong_base(pStr + 1, 16);
+			const unsigned Num = str_toulong_base(pStr + 1, 16);
 			Rgba.r = ((Num >> 16) & 0xFF) / 255.0f;
 			Rgba.g = ((Num >> 8) & 0xFF) / 255.0f;
 			Rgba.b = ((Num >> 0) & 0xFF) / 255.0f;
 		}
+		else if(Len == 9)
+		{
+			const unsigned Num = str_toulong_base(pStr + 1, 16);
+			Rgba.r = ((Num >> 24) & 0xFF) / 255.0f;
+			Rgba.g = ((Num >> 16) & 0xFF) / 255.0f;
+			Rgba.b = ((Num >> 8) & 0xFF) / 255.0f;
+			Rgba.a = ((Num >> 0) & 0xFF) / 255.0f;
+		}
 		else
 		{
-			return Hsla;
+			return ColorHSLA(0, 0, 0);
 		}
 
-		Hsla = color_cast<ColorHSLA>(Rgba);
+		return color_cast<ColorHSLA>(Rgba);
 	}
 	else if(!str_comp_nocase(pStr, "red"))
-		Hsla = ColorHSLA(0.0f / 6.0f, 1, .5f);
+		return ColorHSLA(0.0f / 6.0f, 1, .5f);
 	else if(!str_comp_nocase(pStr, "yellow"))
-		Hsla = ColorHSLA(1.0f / 6.0f, 1, .5f);
+		return ColorHSLA(1.0f / 6.0f, 1, .5f);
 	else if(!str_comp_nocase(pStr, "green"))
-		Hsla = ColorHSLA(2.0f / 6.0f, 1, .5f);
+		return ColorHSLA(2.0f / 6.0f, 1, .5f);
 	else if(!str_comp_nocase(pStr, "cyan"))
-		Hsla = ColorHSLA(3.0f / 6.0f, 1, .5f);
+		return ColorHSLA(3.0f / 6.0f, 1, .5f);
 	else if(!str_comp_nocase(pStr, "blue"))
-		Hsla = ColorHSLA(4.0f / 6.0f, 1, .5f);
+		return ColorHSLA(4.0f / 6.0f, 1, .5f);
 	else if(!str_comp_nocase(pStr, "magenta"))
-		Hsla = ColorHSLA(5.0f / 6.0f, 1, .5f);
+		return ColorHSLA(5.0f / 6.0f, 1, .5f);
 	else if(!str_comp_nocase(pStr, "white"))
-		Hsla = ColorHSLA(0, 0, 1);
+		return ColorHSLA(0, 0, 1);
 	else if(!str_comp_nocase(pStr, "gray"))
-		Hsla = ColorHSLA(0, 0, .5f);
+		return ColorHSLA(0, 0, .5f);
 	else if(!str_comp_nocase(pStr, "black"))
-		Hsla = ColorHSLA(0, 0, 0);
+		return ColorHSLA(0, 0, 0);
 
-	return Hsla;
+	return ColorHSLA(0, 0, 0);
 }
 
 const IConsole::CCommandInfo *CConsole::CCommand::NextCommandInfo(int AccessLevel, int FlagMask) const
