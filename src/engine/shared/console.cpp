@@ -42,16 +42,16 @@ float CConsole::CResult::GetFloat(unsigned Index) const
 
 ColorHSLA CConsole::CResult::GetColor(unsigned Index, bool Light) const
 {
-	ColorHSLA Hsla = ColorHSLA(0, 0, 0);
 	if(Index >= m_NumArgs)
-		return Hsla;
+		return ColorHSLA(0, 0, 0);
 
 	const char *pStr = m_apArgs[Index];
 	if(str_isallnum(pStr) || ((pStr[0] == '-' || pStr[0] == '+') && str_isallnum(pStr + 1))) // Teeworlds Color (Packed HSL)
 	{
-		Hsla = ColorHSLA(str_toulong_base(pStr, 10), true);
+		const ColorHSLA Hsla = ColorHSLA(str_toulong_base(pStr, 10), true);
 		if(Light)
-			Hsla = Hsla.UnclampLighting();
+			return Hsla.UnclampLighting();
+		return Hsla;
 	}
 	else if(*pStr == '$') // Hex RGB
 	{
@@ -73,31 +73,31 @@ ColorHSLA CConsole::CResult::GetColor(unsigned Index, bool Light) const
 		}
 		else
 		{
-			return Hsla;
+			return ColorHSLA(0, 0, 0);
 		}
 
-		Hsla = color_cast<ColorHSLA>(Rgba);
+		return color_cast<ColorHSLA>(Rgba);
 	}
 	else if(!str_comp_nocase(pStr, "red"))
-		Hsla = ColorHSLA(0.0f / 6.0f, 1, .5f);
+		return ColorHSLA(0.0f / 6.0f, 1, .5f);
 	else if(!str_comp_nocase(pStr, "yellow"))
-		Hsla = ColorHSLA(1.0f / 6.0f, 1, .5f);
+		return ColorHSLA(1.0f / 6.0f, 1, .5f);
 	else if(!str_comp_nocase(pStr, "green"))
-		Hsla = ColorHSLA(2.0f / 6.0f, 1, .5f);
+		return ColorHSLA(2.0f / 6.0f, 1, .5f);
 	else if(!str_comp_nocase(pStr, "cyan"))
-		Hsla = ColorHSLA(3.0f / 6.0f, 1, .5f);
+		return ColorHSLA(3.0f / 6.0f, 1, .5f);
 	else if(!str_comp_nocase(pStr, "blue"))
-		Hsla = ColorHSLA(4.0f / 6.0f, 1, .5f);
+		return ColorHSLA(4.0f / 6.0f, 1, .5f);
 	else if(!str_comp_nocase(pStr, "magenta"))
-		Hsla = ColorHSLA(5.0f / 6.0f, 1, .5f);
+		return ColorHSLA(5.0f / 6.0f, 1, .5f);
 	else if(!str_comp_nocase(pStr, "white"))
-		Hsla = ColorHSLA(0, 0, 1);
+		return ColorHSLA(0, 0, 1);
 	else if(!str_comp_nocase(pStr, "gray"))
-		Hsla = ColorHSLA(0, 0, .5f);
+		return ColorHSLA(0, 0, .5f);
 	else if(!str_comp_nocase(pStr, "black"))
-		Hsla = ColorHSLA(0, 0, 0);
+		return ColorHSLA(0, 0, 0);
 
-	return Hsla;
+	return ColorHSLA(0, 0, 0);
 }
 
 const IConsole::CCommandInfo *CConsole::CCommand::NextCommandInfo(int AccessLevel, int FlagMask) const
