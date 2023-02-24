@@ -62,7 +62,7 @@ void CKillMessages::CreateKillmessageNamesIfNotCreated(CKillMsg &Kill)
 	const float FontSize = 36.0f;
 	if(Kill.m_VictimTextContainerIndex == -1 && Kill.m_aVictimName[0] != 0)
 	{
-		Kill.m_VitctimTextWidth = TextRender()->TextWidth(FontSize, Kill.m_aVictimName, -1, -1.0f);
+		Kill.m_VictimTextWidth = TextRender()->TextWidth(FontSize, Kill.m_aVictimName, -1, -1.0f);
 
 		CTextCursor Cursor;
 		TextRender()->SetCursor(&Cursor, 0, 0, FontSize, TEXTFLAG_RENDER);
@@ -135,16 +135,7 @@ void CKillMessages::OnMessage(int MsgType, void *pRawMsg)
 
 		Kill.m_FlagCarrierBlue = m_pClient->m_Snap.m_pGameDataObj ? m_pClient->m_Snap.m_pGameDataObj->m_FlagCarrierBlue : -1;
 
-		Kill.m_VitctimTextWidth = Kill.m_KillerTextWidth = 0.f;
-
-		float Width = 400 * 3.0f * Graphics()->ScreenAspect();
-		float Height = 400 * 3.0f;
-
-		float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
-		Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
-		Graphics()->MapScreen(0, 0, Width * 1.5f, Height * 1.5f);
-
-		CreateKillmessageNamesIfNotCreated(Kill);
+		Kill.m_VictimTextWidth = Kill.m_KillerTextWidth = 0.f;
 
 		bool KillMsgValid = (Kill.m_VictimRenderInfo.m_CustomColoredSkin && Kill.m_VictimRenderInfo.m_ColorableRenderSkin.m_Body.IsValid()) || (!Kill.m_VictimRenderInfo.m_CustomColoredSkin && Kill.m_VictimRenderInfo.m_OriginalRenderSkin.m_Body.IsValid());
 		// if killer != victim, killer must be valid too
@@ -159,8 +150,6 @@ void CKillMessages::OnMessage(int MsgType, void *pRawMsg)
 
 			m_aKillmsgs[m_KillmsgCurrent] = Kill;
 		}
-
-		Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 	}
 }
 
@@ -184,20 +173,20 @@ void CKillMessages::OnRender()
 		if(Client()->GameTick(g_Config.m_ClDummy) > m_aKillmsgs[r].m_Tick + 50 * 10)
 			continue;
 
+		CreateKillmessageNamesIfNotCreated(m_aKillmsgs[r]);
+
 		float x = StartX;
 
 		ColorRGBA TColor(1.f, 1.f, 1.f, 1.f);
 		ColorRGBA TOutlineColor(0.f, 0.f, 0.f, 0.3f);
 
 		// render victim name
-		x -= m_aKillmsgs[r].m_VitctimTextWidth;
+		x -= m_aKillmsgs[r].m_VictimTextWidth;
 		if(m_aKillmsgs[r].m_VictimID >= 0 && g_Config.m_ClChatTeamColors && m_aKillmsgs[r].m_VictimDDTeam)
 		{
 			TColor = color_cast<ColorRGBA>(ColorHSLA(m_aKillmsgs[r].m_VictimDDTeam / 64.0f, 1.0f, 0.75f));
 			TColor.a = 1.f;
 		}
-
-		CreateKillmessageNamesIfNotCreated(m_aKillmsgs[r]);
 
 		if(m_aKillmsgs[r].m_VictimTextContainerIndex != -1)
 			TextRender()->RenderTextContainer(m_aKillmsgs[r].m_VictimTextContainerIndex, TColor, TOutlineColor, x, y + (46.f - 36.f) / 2.f);

@@ -26,7 +26,7 @@ public:
 		int m_VictimDDTeam;
 		char m_aVictimName[64];
 		int m_VictimTextContainerIndex;
-		float m_VitctimTextWidth;
+		float m_VictimTextWidth;
 		CTeeRenderInfo m_VictimRenderInfo;
 
 		int m_KillerID;
