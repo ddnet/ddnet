@@ -1704,13 +1704,13 @@ Open the directory to add custom assets
 
 [Graphics error]
 Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
-== 
+== Não foi possível inicializar o backend de vídeo fornecido, isso provavelmente porque você não instalou o driver da placa de vídeo 
 
 Could not save downloaded map. Try manually deleting this file: %s
-== 
+== Não foi possível salvar o mapa baixado. Tente excluir manualmente este arquivo: %s
 
 Search:
-== 
+== Pesquisa:
 
 Copy info
-== 
+== Copiar informação
