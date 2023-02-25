@@ -394,9 +394,6 @@ Show ingame HUD
 Show name plates
 == 이름 표시
 
-Skins
-== 스킨
-
 Sound
 == 소리
 
@@ -585,9 +582,6 @@ Reset to defaults
 Laser
 == 레이저
 
-Display Modes
-== 디스플레이 모드
-
 Version:
 == 버전:
 
@@ -692,9 +686,6 @@ Checking for existing player with your name
 
 Are you sure that you want to disconnect and switch to a different server?
 == 연결을 끊고 다른 서버에 접속하시겠습니까?
-
-Country / Region
-== 국가 / 지역
 
 Speed
 == 속도
@@ -1701,3 +1692,16 @@ Unregister protocol and file extensions
 
 Open the directory to add custom assets
 == 사용자 정의 에셋을 추가할 폴더를 엽니다.
+
+[Graphics error]
+Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
+== 
+
+Could not save downloaded map. Try manually deleting this file: %s
+== 
+
+Search:
+== 
+
+Copy info
+== 

@@ -421,9 +421,6 @@ Quit anyway?
 Yes
 == ﻪﻠﺑ
 
-Country / Region
-== ﻪﻘﻄﻨﻣ / ﺭﻮﺸﮐ
-
 Unable to rename the demo
 == ﺩﺭﺍﺪﻧ ﺩﻮﺟﻭ ﻮﻣﺩ ﻡﺎﻧ ﺮﯿﯿﻐﺗ ﻥﺎﮑﻣﺍ
 
@@ -742,9 +739,6 @@ Voting
 Miscellaneous
 == ﻪﻗﺮﻔﺘﻣ
 
-Display Modes
-== ﻪﺤﻔﺻ ﺖﻟﺎﺣ
-
 Desktop fullscreen
 == ﻪﺤﻔﺻ ﻡﺎﻤﺗ
 
@@ -914,18 +908,8 @@ Failed to swap framebuffers. Try to update your GPU drivers.
 Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
 == .ﺪﯿﻨﮐ ﺵﻼﺗ ﻩﺭﺎﺑﻭﺩ ﻭ ﺪﯿﻫﺩ ﺮﯿﯿﻐﺗ Vulkan ﺎﯾ OpenGL ﻪﺑ ﺍﺭ gfx_backend ، settings_ddnet.cfg ﺭﺩ ،ﮓﯿﻔﻧﺎﮐ ﻪﺷﻮﭘ ﺭﺩ ﺪﯿﻨﮐ ﯽﻌﺳ .ﺺﺨﺸﻣﺎﻧ ﯼﺎﻄﺧ
 
-[Graphics error]
-Could not initialize the given graphics backend, reverting to the default backend now.
-== 
-
 Saving ddnet-settings.cfg failed
 == ﺪﺸﻧ ﻡﺎﺠﻧﺍ ddnet-settings.cfg ﻩﺮﯿﺧﺫ
-
-The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
-== 
-
-The format of texture %s is not RGBA which will cause visual bugs.
-== 
 
 Preparing demo playback
 == ﻮﻣﺩ ﺶﺨﭘ ﯼﺯﺎﺳ ﻩﺩﺎﻣﺁ ﻝﺎﺣ ﺭﺩ
@@ -944,9 +928,6 @@ Initializing components
 
 Initializing assets
 == ﺎﻫ ﯽﯾﺍﺭﺍﺩ ﻥﺩﺮﮐ ﻩﺩﺎﻣﺁ
-
-Initializing map logic
-== 
 
 Sending initial client info
 == ﺖﻨﯾﻼﮐ ﻪﯿﻟﻭﺍ ﺕﺎﻋﻼﻃﺍ ﻝﺎﺳﺭﺍ
@@ -1170,9 +1151,6 @@ Vanilla skins only
 Choose default eyes when joining a server
 == . ﺭﻭﺮﺳ ﻪﺑ ﻦﺘﺳﻮﯿﭘ ﻡﺎﮕﻨﻫ ﺽﺮﻓ ﺶﯿﭘ ﯼﺎﻫ ﻢﺸﭼ ﺏﺎﺨﺘﻧﺍ
 
-Skins
-== ﺎﻫ ﻦﯿﮑﺳﺍ
-
 Skins directory
 == ﺎﻫ ﻦﯿﮑﺳﺍ ﻪﺷﻮﭘ
 
@@ -1205,9 +1183,6 @@ Statboard
 
 Enable controller
 == ﻦﮐ ﻝﺎﻌﻓ ﺍﺭ ﺮﻟﺮﺘﻨﮐ
-
-Controller %d: %s
-== 
 
 Click to cycle through all available controllers.
 == ﺪﯿﻨﮐ ﮏﯿﻠﮐ ﺩﻮﺟﻮﻣ ﯼﺎﻫﺮﻟﺮﺘﻨﮐ ﻡﺎﻤﺗ ﺭﺩ ﺶﺧﺮﭼ ﯼﺍﺮﺑ
@@ -1243,9 +1218,6 @@ Status
 
 Aim bind
 == ﻪﻧﻮﺸﻧ ﺪﻨﯾﺎﺑ
-
-Controller Axis #%d
-== 
 
 Mouse
 == ﺱﻮﻣ
@@ -1580,9 +1552,6 @@ Run on join
 Chat command (e.g. showall 1)
 == (showall ١ ﻝﺎﺜﻣ ﻥﺍﻮﻨﻋ ﻪﺑ) ﺖﭼ ﻥﺎﻣﺮﻓ
 
-Unregister protocol and file extensions
-== 
-
 DDNet %s is available:
 == :ﺖﺳﺍ ﺩﻮﺟﻮﻣ ﺖﻨﯾﺪﯾﺩ %s
 
@@ -1667,17 +1636,8 @@ Ratio
 Net
 == ﺺﻟﺎﺧ
 
-FPM
-== 
-
-Spree
-== 
-
 Best
 == ﻦﯾﺮﺘﻬﺑ
-
-Grabs
-== 
 
 1 new mention
 == ﺪﯾﺪﺟ ﻦﺸﻨﻣ ١
@@ -1687,3 +1647,47 @@ Grabs
 
 9+ new mentions
 == ﺪﯾﺪﺟ ﯼﺎﻫ ﻦﺸﻨﻣ ٩+
+
+[Graphics error]
+Could not initialize the given graphics backend, reverting to the default backend now.
+== 
+
+[Graphics error]
+Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
+== 
+
+Could not save downloaded map. Try manually deleting this file: %s
+== 
+
+The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
+== 
+
+The format of texture %s is not RGBA which will cause visual bugs.
+== 
+
+Initializing map logic
+== 
+
+Search:
+== 
+
+Copy info
+== 
+
+Controller %d: %s
+== 
+
+Controller Axis #%d
+== 
+
+Unregister protocol and file extensions
+== 
+
+FPM
+== 
+
+Spree
+== 
+
+Grabs
+== 

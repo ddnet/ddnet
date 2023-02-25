@@ -442,9 +442,6 @@ Show name plates
 Show only chat messages from friends
 == 只顯示好友訊息
 
-Skins
-== 外觀
-
 Sound
 == 聲音
 
@@ -636,9 +633,6 @@ Reset to defaults
 
 Quit anyway?
 == 無論如何都要退出嗎？
-
-Display Modes
-== 顯示模式
 
 Version:
 == 版本：
@@ -1068,9 +1062,6 @@ Show others (own team only)
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
 == 使用 k鍵 自殺以重新開始，使用 q鍵 可以暫停以旁觀他人或檢視地圖。 請在設定中檢視其他按鍵。
-
-Country / Region
-== 國家/地區
 
 https://wiki.ddnet.org/
 == https://wiki.ddnet.org/wiki/Main_Page/zh
@@ -1711,3 +1702,16 @@ Unregister protocol and file extensions
 
 Open the directory to add custom assets
 == 打開用以添加自定義材質的資料夾路徑
+
+[Graphics error]
+Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
+== 
+
+Could not save downloaded map. Try manually deleting this file: %s
+== 
+
+Search:
+== 
+
+Copy info
+== 

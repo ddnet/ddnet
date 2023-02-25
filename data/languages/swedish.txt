@@ -396,9 +396,6 @@ Show ingame HUD
 Show name plates
 == Visa namnskyltar
 
-Skins
-== Utseende
-
 Sound
 == Ljud
 
@@ -566,9 +563,6 @@ Reset to defaults
 
 Quit anyway?
 == Avsluta i alla fall?
-
-Display Modes
-== Skärmlägen
 
 Version:
 == Version:
@@ -1050,9 +1044,6 @@ Warning
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
 == Använd knappen k för att dö (starta om), q för att pausa och se andra spelare. Se inställningar för andra knappbindningar.
 
-Country / Region
-== Land / Region
-
 Speed
 == Hastighet
 
@@ -1301,6 +1292,13 @@ Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.c
 Could not initialize the given graphics backend, reverting to the default backend now.
 == 
 
+[Graphics error]
+Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
+== 
+
+Could not save downloaded map. Try manually deleting this file: %s
+== 
+
 The format of texture %s is not RGBA which will cause visual bugs.
 == 
 
@@ -1326,6 +1324,9 @@ Initializing map logic
 == 
 
 Sending initial client info
+== 
+
+Search:
 == 
 
 Position:
@@ -1371,6 +1372,9 @@ Skip Tutorial
 == 
 
 Loading menu images
+== 
+
+Copy info
 == 
 
 Are you sure that you want to remove the player '%s' from your friends list?

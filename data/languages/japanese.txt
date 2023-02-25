@@ -389,9 +389,6 @@ Show ingame HUD
 Show name plates
 == 名前を表示
 
-Skins
-== スキン
-
 Sound
 == サウンド
 
@@ -568,9 +565,6 @@ Reset to defaults
 Laser
 == レーザー
 
-Display Modes
-== 画面モード
-
 Version:
 == バージョン:
 
@@ -675,9 +669,6 @@ Your nickname '%s' is already used (%d points). Do you still want to use it?
 
 Checking for existing player with your name
 == 既存のプレーヤーの中でハンドルネームを検索しています。
-
-Country / Region
-== 国・地域
 
 Speed
 == 速度
@@ -1251,6 +1242,13 @@ Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.c
 Could not initialize the given graphics backend, reverting to the default backend now.
 == 
 
+[Graphics error]
+Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
+== 
+
+Could not save downloaded map. Try manually deleting this file: %s
+== 
+
 The format of texture %s is not RGBA which will cause visual bugs.
 == 
 
@@ -1276,6 +1274,9 @@ Initializing map logic
 == 
 
 Sending initial client info
+== 
+
+Search:
 == 
 
 Position:
@@ -1348,6 +1349,9 @@ Refreshing...
 == 
 
 Are you sure that you want to disconnect and switch to a different server?
+== 
+
+Copy info
 == 
 
 Are you sure that you want to remove the player '%s' from your friends list?

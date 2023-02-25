@@ -414,9 +414,6 @@ Show name plates
 Show only chat messages from friends
 == Recibir mensajes solo de amigos
 
-Skins
-== Skins
-
 Sound
 == Sonido
 
@@ -586,9 +583,6 @@ Reset to defaults
 
 Quit anyway?
 == ¿Salir de todos modos?
-
-Display Modes
-== Modos de video
 
 Version:
 == Versión:
@@ -1078,9 +1072,6 @@ Your nickname '%s' is already used (%d points). Do you still want to use it?
 
 Checking for existing player with your name
 == Comprobando si ya existe un jugador con tu nombre
-
-Country / Region
-== País / Región
 
 Speed
 == Velocidad
@@ -1706,3 +1697,16 @@ Unregister protocol and file extensions
 
 Open the directory to add custom assets
 == Abrir la carpeta para agregar recursos personalizados
+
+[Graphics error]
+Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
+== 
+
+Could not save downloaded map. Try manually deleting this file: %s
+== 
+
+Search:
+== 
+
+Copy info
+== 
