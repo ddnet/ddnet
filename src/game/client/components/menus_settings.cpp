@@ -1508,10 +1508,9 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	{
 		s_WasInit = true;
 
-		Graphics()->AddWindowResizeListener([&](void *pUser) {
+		Graphics()->AddWindowPropChangeListener([]() {
 			s_ModesReload = true;
-		},
-			this);
+		});
 	}
 
 	if(s_ModesReload || g_Config.m_GfxDisplayAllVideoModes != s_InitDisplayAllVideoModes)

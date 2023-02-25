@@ -474,7 +474,6 @@ public:
 	virtual void OnFlagGrab(int TeamID);
 
 	void OnWindowResize();
-	static void OnWindowResizeCB(void *pUser);
 
 	void OnLanguageChange();
 
