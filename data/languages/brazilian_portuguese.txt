@@ -420,9 +420,6 @@ Show name plates
 Show only chat messages from friends
 == Mostrar apenas mensagens de amigos
 
-Skins
-== Skins
-
 Sound
 == Som
 
@@ -656,9 +653,6 @@ Restart
 
 Old mouse mode
 == Modo antigo de mouse
-
-Display Modes
-== Modos de exibição
 
 Round
 == Turno
@@ -1070,9 +1064,6 @@ Show others (own team only)
 
 Warning
 == Atenção
-
-Country / Region
-== País / Região
 
 Speed
 == Velocidade
@@ -1710,3 +1701,16 @@ Unregister protocol and file extensions
 
 Open the directory to add custom assets
 == Abre o diretório para adicionar os ativos personalizados
+
+[Graphics error]
+Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
+== 
+
+Could not save downloaded map. Try manually deleting this file: %s
+== 
+
+Search:
+== 
+
+Copy info
+== 

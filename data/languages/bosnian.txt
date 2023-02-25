@@ -395,9 +395,6 @@ Show ingame HUD
 Show name plates
 == Prikaži imena igrača
 
-Skins
-== Skinovi
-
 Sound
 == Zvuk
 
@@ -567,9 +564,6 @@ Reset to defaults
 
 Quit anyway?
 == Izlaz?
-
-Display Modes
-== Rezolucija i način prikaza
 
 Version:
 == Verzija:
@@ -1021,11 +1015,6 @@ Best
 9+ new mentions
 == 9+ novih označenja
 
-Country / Region
-== Zemlja / Regija
-
-[Graphics error]
-
 [Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
 == 
@@ -1056,6 +1045,13 @@ Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.c
 
 [Graphics error]
 Could not initialize the given graphics backend, reverting to the default backend now.
+== 
+
+[Graphics error]
+Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
+== 
+
+Could not save downloaded map. Try manually deleting this file: %s
 == 
 
 Saving ddnet-settings.cfg failed
@@ -1092,6 +1088,9 @@ Sending initial client info
 == 
 
 Warning
+== 
+
+Search:
 == 
 
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
@@ -1197,6 +1196,9 @@ Refreshing...
 == 
 
 Are you sure that you want to disconnect and switch to a different server?
+== 
+
+Copy info
 == 
 
 Leak IP

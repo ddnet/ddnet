@@ -391,9 +391,6 @@ Show ingame HUD
 Show name plates
 == Прикажи плочице са именима
 
-Skins
-== Теме
-
 Sound
 == Звук
 
@@ -591,9 +588,6 @@ Reset to defaults
 Quit anyway?
 == Излаз?
 
-Display Modes
-== Резолуција и начин приказа
-
 Version:
 == Верзија:
 
@@ -680,9 +674,6 @@ It's recommended that you check the settings to adjust them to your liking befor
 
 Please enter your nickname below.
 == Молимо вас напишите ваш надимак испод.
-
-Country / Region
-== Земља / регион
 
 Speed
 == Брзина
@@ -1565,13 +1556,26 @@ Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.c
 Could not initialize the given graphics backend, reverting to the default backend now.
 == 
 
+[Graphics error]
+Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
+== 
+
+Could not save downloaded map. Try manually deleting this file: %s
+== 
+
 Initializing components
+== 
+
+Search:
 == 
 
 Cancel
 == 
 
 File '%s' already exists, do you want to overwrite it?
+== 
+
+Copy info
 == 
 
 Are you sure that you want to remove the player '%s' from your friends list?

@@ -404,9 +404,6 @@ Show name plates
 Show only chat messages from friends
 == Arată doar chatul prietenilor
 
-Skins
-== Costume
-
 Sound
 == Sunet
 
@@ -577,9 +574,6 @@ Reset to defaults
 Quit anyway?
 == Ieși oricum?
 
-Display Modes
-== Moduri de afișare
-
 Version:
 == Versiune:
 
@@ -641,6 +635,13 @@ Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.c
 Could not initialize the given graphics backend, reverting to the default backend now.
 == 
 
+[Graphics error]
+Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
+== 
+
+Could not save downloaded map. Try manually deleting this file: %s
+== 
+
 Successfully saved the replay!
 == 
 
@@ -684,6 +685,9 @@ Sending initial client info
 == 
 
 Warning
+== 
+
+Search:
 == 
 
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
@@ -762,9 +766,6 @@ Your nickname '%s' is already used (%d points). Do you still want to use it?
 == 
 
 Checking for existing player with your name
-== 
-
-Country / Region
 == 
 
 Cancel
@@ -861,6 +862,9 @@ Countries
 == 
 
 Types
+== 
+
+Copy info
 == 
 
 Leak IP

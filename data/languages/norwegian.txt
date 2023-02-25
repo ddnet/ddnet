@@ -394,9 +394,6 @@ Show ingame HUD
 Show name plates
 == Vis navneskilt
 
-Skins
-== Utseender
-
 Sound
 == Lyd
 
@@ -566,9 +563,6 @@ Reset to defaults
 
 Quit anyway?
 == Avslutt uansett?
-
-Display Modes
-== Skjermmodi
 
 Version:
 == Versjon:
@@ -1077,9 +1071,6 @@ Your nickname '%s' is already used (%d points). Do you still want to use it?
 Checking for existing player with your name
 == Sjekker etter eksisterende spiller med ditt navn
 
-Country / Region
-== Land / Region
-
 Speed
 == Hastighet
 
@@ -1211,6 +1202,13 @@ Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.c
 Could not initialize the given graphics backend, reverting to the default backend now.
 == 
 
+[Graphics error]
+Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
+== 
+
+Could not save downloaded map. Try manually deleting this file: %s
+== 
+
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
 == 
 
@@ -1239,6 +1237,9 @@ Initializing map logic
 == 
 
 Sending initial client info
+== 
+
+Search:
 == 
 
 Position:
@@ -1314,6 +1315,9 @@ Refreshing...
 == 
 
 Are you sure that you want to disconnect and switch to a different server?
+== 
+
+Copy info
 == 
 
 Leak IP

@@ -171,9 +171,6 @@ Password
 %i seconds left
 == Restas %i sekundoj
 
-Country / Region
-== Lando / Regiono
-
 Error
 == Eraro
 
@@ -406,9 +403,6 @@ Time
 Dummy settings
 == Agordoj de la pupo
 
-Skins
-== Haŭtoj
-
 Skin Database
 == Datumbazo de haŭtoj
 
@@ -621,6 +615,13 @@ Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.c
 Could not initialize the given graphics backend, reverting to the default backend now.
 == 
 
+[Graphics error]
+Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
+== 
+
+Could not save downloaded map. Try manually deleting this file: %s
+== 
+
 Successfully saved the replay!
 == 
 
@@ -652,6 +653,9 @@ Initializing map logic
 == 
 
 Sending initial client info
+== 
+
+Search:
 == 
 
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
@@ -789,10 +793,10 @@ Reset filter
 Server details
 == 
 
-Leak IP
+Copy info
 == 
 
-Scoreboard
+Leak IP
 == 
 
 Remove
@@ -1125,6 +1129,9 @@ Remote console
 Screenshot
 == 
 
+Scoreboard
+== 
+
 Statboard
 == 
 
@@ -1212,9 +1219,6 @@ Miscellaneous
 == 
 
 Current
-== 
-
-Display Modes
 == 
 
 Windowed

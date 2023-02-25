@@ -404,9 +404,6 @@ Show ingame HUD
 Show name plates
 == Показывать имена игроков
 
-Skins
-== Скины
-
 Sound
 == Звук
 
@@ -640,9 +637,6 @@ Reset to defaults
 
 Quit anyway?
 == Все равно выйти?
-
-Display Modes
-== Разрешения экрана
 
 Version:
 == Версия:
@@ -1051,9 +1045,6 @@ Warning
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
 == Используйте кнопку k, чтобы возродиться, q для паузы и наблюдения за остальными игроками. Проверьте настройки остальных кнопок.
-
-Country / Region
-== Страна / Регион
 
 Speed
 == Скорость
@@ -1698,3 +1689,16 @@ Unregister protocol and file extensions
 
 Open the directory to add custom assets
 == Открытие папки для добавления пользовательских ресурсов
+
+[Graphics error]
+Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
+== 
+
+Could not save downloaded map. Try manually deleting this file: %s
+== 
+
+Search:
+== 
+
+Copy info
+== 

@@ -396,9 +396,6 @@ Show ingame HUD
 Show name plates
 == Pokazuj nicki
 
-Skins
-== Motywy
-
 Sound
 == Dźwięk
 
@@ -583,9 +580,6 @@ Reset to defaults
 
 Quit anyway?
 == Wyjść mimo wszystko?
-
-Display Modes
-== Tryby wyświetlania
 
 Version:
 == Wersja:
@@ -1079,9 +1073,6 @@ Your nickname '%s' is already used (%d points). Do you still want to use it?
 Checking for existing player with your name
 == Sprawdzanie, czy istnieje gracz pociadający twój nick
 
-Country / Region
-== Kraj / Region
-
 Speed
 == Prędkość
 
@@ -1363,6 +1354,13 @@ Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.c
 Could not initialize the given graphics backend, reverting to the default backend now.
 == 
 
+[Graphics error]
+Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
+== 
+
+Could not save downloaded map. Try manually deleting this file: %s
+== 
+
 Preparing demo playback
 == 
 
@@ -1385,6 +1383,9 @@ Initializing map logic
 == 
 
 Sending initial client info
+== 
+
+Search:
 == 
 
 Position:
@@ -1424,6 +1425,9 @@ File '%s' already exists, do you want to overwrite it?
 == 
 
 Loading menu images
+== 
+
+Copy info
 == 
 
 Are you sure that you want to remove the player '%s' from your friends list?

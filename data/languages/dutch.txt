@@ -405,9 +405,6 @@ Show ingame HUD
 Show name plates
 == Laat naamplaat zien
 
-Skins
-== Skins
-
 Sound
 == Geluid
 
@@ -577,9 +574,6 @@ Reset to defaults
 
 Quit anyway?
 == Toch afsluiten?
-
-Display Modes
-== Resoluties
 
 Version:
 == Versie:
@@ -1090,9 +1084,6 @@ Checking for existing player with your name
 Are you sure that you want to disconnect and switch to a different server?
 == Weet je zeker dat je de verbinding wilt verbreken en wilt verbinden met een andere server?
 
-Country / Region
-== Land / Regio
-
 Speed
 == Snelheid
 
@@ -1371,6 +1362,13 @@ Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.c
 Could not initialize the given graphics backend, reverting to the default backend now.
 == 
 
+[Graphics error]
+Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
+== 
+
+Could not save downloaded map. Try manually deleting this file: %s
+== 
+
 Preparing demo playback
 == 
 
@@ -1393,6 +1391,9 @@ Initializing map logic
 == 
 
 Sending initial client info
+== 
+
+Search:
 == 
 
 Position:
@@ -1432,6 +1433,9 @@ File '%s' already exists, do you want to overwrite it?
 == 
 
 Loading menu images
+== 
+
+Copy info
 == 
 
 Are you sure that you want to remove the player '%s' from your friends list?

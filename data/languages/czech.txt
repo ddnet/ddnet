@@ -391,9 +391,6 @@ Show ingame HUD
 Show name plates
 == Zobrazovat jména hráčů
 
-Skins
-== Vzhledy
-
 Sound
 == Zvuk
 
@@ -563,9 +560,6 @@ Reset to defaults
 
 Quit anyway?
 == Opravdu odejít?
-
-Display Modes
-== Režimy zobrazení
 
 Version:
 == Verze:
@@ -1068,9 +1062,6 @@ Your nickname '%s' is already used (%d points). Do you still want to use it?
 Checking for existing player with your name
 == Kontrola pro existujícího hráče s vaším jménem
 
-Country / Region
-== Země / Region
-
 Speed
 == Rychlost
 
@@ -1212,6 +1203,13 @@ Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.c
 Could not initialize the given graphics backend, reverting to the default backend now.
 == 
 
+[Graphics error]
+Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
+== 
+
+Could not save downloaded map. Try manually deleting this file: %s
+== 
+
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
 == 
 
@@ -1240,6 +1238,9 @@ Initializing map logic
 == 
 
 Sending initial client info
+== 
+
+Search:
 == 
 
 Position:
@@ -1315,6 +1316,9 @@ Refreshing...
 == 
 
 Are you sure that you want to disconnect and switch to a different server?
+== 
+
+Copy info
 == 
 
 Leak IP
