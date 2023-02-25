@@ -1106,12 +1106,11 @@ void CGameConsole::OnInit()
 	m_pConsoleLogger = new CConsoleLogger(this);
 	Engine()->SetAdditionalLogger(std::unique_ptr<ILogger>(m_pConsoleLogger));
 	// add resize event
-	Graphics()->AddWindowResizeListener([this](void *) {
+	Graphics()->AddWindowResizeListener([this]() {
 		m_LocalConsole.ClearBacklogYOffsets();
 		m_RemoteConsole.ClearBacklogYOffsets();
 		m_HasSelection = false;
-	},
-		nullptr);
+	});
 }
 
 void CGameConsole::OnStateChange(int NewState, int OldState)
