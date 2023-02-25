@@ -225,7 +225,7 @@ void CGameClient::OnInit()
 
 	m_pGraphics = Kernel()->RequestInterface<IGraphics>();
 
-	m_pGraphics->AddWindowResizeListener(OnWindowResizeCB, this);
+	m_pGraphics->AddWindowResizeListener([this] { OnWindowResize(); });
 
 	// propagate pointers
 	m_UI.Init(Kernel());
@@ -901,12 +901,6 @@ void CGameClient::OnWindowResize()
 
 	UI()->OnWindowResize();
 	TextRender()->OnWindowResize();
-}
-
-void CGameClient::OnWindowResizeCB(void *pUser)
-{
-	CGameClient *pClient = (CGameClient *)pUser;
-	pClient->OnWindowResize();
 }
 
 void CGameClient::OnLanguageChange()

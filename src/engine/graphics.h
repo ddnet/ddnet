@@ -199,7 +199,8 @@ struct STWGraphicGPU
 
 typedef STWGraphicGPU TTWGraphicsGPUList;
 
-typedef std::function<void(void *)> WINDOW_RESIZE_FUNC;
+typedef std::function<void()> WINDOW_RESIZE_FUNC;
+typedef std::function<void()> WINDOW_PROPS_CHANGED_FUNC;
 
 namespace client_data7 {
 struct CDataSprite; // NOLINT(bugprone-forward-declaration-namespace)
@@ -261,7 +262,16 @@ public:
 	virtual void Resize(int w, int h, int RefreshRate) = 0;
 	virtual void GotResized(int w, int h, int RefreshRate) = 0;
 	virtual void UpdateViewport(int X, int Y, int W, int H, bool ByResize) = 0;
-	virtual void AddWindowResizeListener(WINDOW_RESIZE_FUNC pFunc, void *pUser) = 0;
+
+	/**
+	* Listens to a resize event of the canvas, which is usually caused by a window resize.
+	* Will only be triggered if the actual size changed.
+	*/
+	virtual void AddWindowResizeListener(WINDOW_RESIZE_FUNC pFunc) = 0;
+	/**
+	* Listens to various window property changes, such as minimize, maximize, move, fullscreen mode
+	*/
+	virtual void AddWindowPropChangeListener(WINDOW_PROPS_CHANGED_FUNC pFunc) = 0;
 
 	virtual void WindowDestroyNtf(uint32_t WindowID) = 0;
 	virtual void WindowCreateNtf(uint32_t WindowID) = 0;

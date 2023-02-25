@@ -878,14 +878,8 @@ class CGraphics_Threaded : public IEngineGraphics
 	std::vector<SQuadContainer> m_vQuadContainers;
 	int m_FirstFreeQuadContainer;
 
-	struct SWindowResizeListener
-	{
-		SWindowResizeListener(WINDOW_RESIZE_FUNC pFunc, void *pUser) :
-			m_pFunc(std::move(pFunc)), m_pUser(pUser) {}
-		WINDOW_RESIZE_FUNC m_pFunc;
-		void *m_pUser;
-	};
-	std::vector<SWindowResizeListener> m_vResizeListeners;
+	std::vector<WINDOW_RESIZE_FUNC> m_vResizeListeners;
+	std::vector<WINDOW_PROPS_CHANGED_FUNC> m_vPropChangeListeners;
 
 	void *AllocCommandBufferData(unsigned AllocSize);
 
@@ -1268,7 +1262,8 @@ public:
 	void Resize(int w, int h, int RefreshRate) override;
 	void GotResized(int w, int h, int RefreshRate) override;
 	void UpdateViewport(int X, int Y, int W, int H, bool ByResize) override;
-	void AddWindowResizeListener(WINDOW_RESIZE_FUNC pFunc, void *pUser) override;
+	void AddWindowResizeListener(WINDOW_RESIZE_FUNC pFunc) override;
+	void AddWindowPropChangeListener(WINDOW_PROPS_CHANGED_FUNC pFunc) override;
 	int GetWindowScreen() override;
 
 	void WindowDestroyNtf(uint32_t WindowID) override;

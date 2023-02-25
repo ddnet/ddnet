@@ -2910,12 +2910,18 @@ int CGraphics_Threaded::GetNumScreens() const
 void CGraphics_Threaded::Minimize()
 {
 	m_pBackend->Minimize();
+
+	for(auto &PropChangedListener : m_vPropChangeListeners)
+		PropChangedListener();
 }
 
 void CGraphics_Threaded::Maximize()
 {
 	// TODO: SDL
 	m_pBackend->Maximize();
+
+	for(auto &PropChangedListener : m_vPropChangeListeners)
+		PropChangedListener();
 }
 
 void CGraphics_Threaded::WarnPngliteIncompatibleImages(bool Warn)
@@ -2929,6 +2935,9 @@ void CGraphics_Threaded::SetWindowParams(int FullscreenMode, bool IsBorderless, 
 	CVideoMode CurMode;
 	m_pBackend->GetCurrentVideoMode(CurMode, m_ScreenHiDPIScale, g_Config.m_GfxDesktopWidth, g_Config.m_GfxDesktopHeight, g_Config.m_GfxScreen);
 	GotResized(CurMode.m_WindowWidth, CurMode.m_WindowHeight, CurMode.m_RefreshRate);
+
+	for(auto &PropChangedListener : m_vPropChangeListeners)
+		PropChangedListener();
 }
 
 bool CGraphics_Threaded::SetWindowScreen(int Index)
@@ -2941,6 +2950,9 @@ bool CGraphics_Threaded::SetWindowScreen(int Index)
 	m_pBackend->GetViewportSize(m_ScreenWidth, m_ScreenHeight);
 	AdjustViewport(true);
 	m_ScreenHiDPIScale = m_ScreenWidth / (float)g_Config.m_GfxScreenWidth;
+
+	for(auto &PropChangedListener : m_vPropChangeListeners)
+		PropChangedListener();
 	return true;
 }
 
@@ -2957,6 +2969,9 @@ void CGraphics_Threaded::Move(int x, int y)
 	m_pBackend->GetViewportSize(m_ScreenWidth, m_ScreenHeight);
 	AdjustViewport(true);
 	m_ScreenHiDPIScale = m_ScreenWidth / (float)g_Config.m_GfxScreenWidth;
+
+	for(auto &PropChangedListener : m_vPropChangeListeners)
+		PropChangedListener();
 }
 
 void CGraphics_Threaded::Resize(int w, int h, int RefreshRate)
@@ -2990,6 +3005,8 @@ void CGraphics_Threaded::GotResized(int w, int h, int RefreshRate)
 		RefreshRate = g_Config.m_GfxScreenRefreshRate;
 
 	// if the size change event is triggered, set all parameters and change the viewport
+	auto PrevCanvasWidth = m_ScreenWidth;
+	auto PrevCanvasHeight = m_ScreenHeight;
 	m_pBackend->GetViewportSize(m_ScreenWidth, m_ScreenHeight);
 
 	AdjustViewport(false);
@@ -3007,13 +3024,21 @@ void CGraphics_Threaded::GotResized(int w, int h, int RefreshRate)
 	KickCommandBuffer();
 	WaitForIdle();
 
-	for(auto &ResizeListener : m_vResizeListeners)
-		ResizeListener.m_pFunc(ResizeListener.m_pUser);
+	if(PrevCanvasWidth != m_ScreenWidth || PrevCanvasHeight != m_ScreenHeight)
+	{
+		for(auto &ResizeListener : m_vResizeListeners)
+			ResizeListener();
+	}
 }
 
-void CGraphics_Threaded::AddWindowResizeListener(WINDOW_RESIZE_FUNC pFunc, void *pUser)
+void CGraphics_Threaded::AddWindowResizeListener(WINDOW_RESIZE_FUNC pFunc)
 {
-	m_vResizeListeners.emplace_back(pFunc, pUser);
+	m_vResizeListeners.emplace_back(pFunc);
+}
+
+void CGraphics_Threaded::AddWindowPropChangeListener(WINDOW_PROPS_CHANGED_FUNC pFunc)
+{
+	m_vPropChangeListeners.emplace_back(pFunc);
 }
 
 int CGraphics_Threaded::GetWindowScreen()
