@@ -19,6 +19,7 @@
 # Deëivid!        2022-07-05 22:30:00
 # Deëivid!        2022-10-08 19:20:00
 # Deëivid!        2023-01-05 21:05:00
+# Deëivid!        2023-02-26 00:35:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -1700,13 +1701,13 @@ Open the directory to add custom assets
 
 [Graphics error]
 Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
-== 
+== No se pudo inizializar el backend de gráficos dado, probablemente debido a que los controladores de la tarjeta gráfica integrada no están instalados.
 
 Could not save downloaded map. Try manually deleting this file: %s
-== 
+== No se pudo almacenar el mapa descargado. Intenta eliminar este archivo manualmente: %s
 
 Search:
-== 
+== Buscar:
 
 Copy info
-== 
+== Copiar información
