@@ -392,7 +392,7 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 	x = 5.0f;
 	y = 0.0f;
 
-	TextRender()->Text(ServerInfo.x + x, ServerInfo.y + y, 32, Localize("Server info"), 250.0f);
+	TextRender()->Text(ServerInfo.x + x, ServerInfo.y + y, 32, Localize("Server info"), -1.0f);
 	y += 32.0f + 5.0f;
 
 	mem_zero(aBuf, sizeof(aBuf));
@@ -410,7 +410,7 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 		Localize("Version"), CurrentServerInfo.m_aVersion,
 		Localize("Password"), CurrentServerInfo.m_Flags & 1 ? Localize("Yes") : Localize("No"));
 
-	TextRender()->Text(ServerInfo.x + x, ServerInfo.y + y, 20, aBuf, 250.0f);
+	TextRender()->Text(ServerInfo.x + x, ServerInfo.y + y, 20, aBuf, ServerInfo.w - 10.0f);
 
 	// copy info button
 	{
@@ -451,7 +451,7 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 	x = 5.0f;
 	y = 0.0f;
 
-	TextRender()->Text(GameInfo.x + x, GameInfo.y + y, 32, Localize("Game info"), 250.0f);
+	TextRender()->Text(GameInfo.x + x, GameInfo.y + y, 32, Localize("Game info"), -1.0f);
 	y += 32.0f + 5.0f;
 
 	if(m_pClient->m_Snap.m_pGameInfoObj)
@@ -472,7 +472,7 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 			Localize("Score limit"), m_pClient->m_Snap.m_pGameInfoObj->m_ScoreLimit,
 			Localize("Time limit"), m_pClient->m_Snap.m_pGameInfoObj->m_TimeLimit,
 			Localize("Players"), m_pClient->m_Snap.m_NumPlayers, CurrentServerInfo.m_MaxClients);
-		TextRender()->Text(GameInfo.x + x, GameInfo.y + y, 20, aBuf, 250.0f);
+		TextRender()->Text(GameInfo.x + x, GameInfo.y + y, 20, aBuf, GameInfo.w - 10.0f);
 	}
 
 	// motd
