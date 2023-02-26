@@ -13,6 +13,7 @@ CScrollRegion::CScrollRegion()
 {
 	m_ScrollY = 0.0f;
 	m_ContentH = 0.0f;
+	m_AnimTimeMax = 0.0f;
 	m_AnimTime = 0.0f;
 	m_AnimInitScrollY = 0.0f;
 	m_AnimTargetScrollY = 0.0f;
@@ -68,23 +69,23 @@ void CScrollRegion::End()
 	CUIRect RegionRect = m_ClipRect;
 	RegionRect.w += m_Params.m_ScrollbarWidth;
 
-	const float AnimationDuration = g_Config.m_UiSmoothScrollTime / 1000.0f;
-
 	if(UI()->Enabled() && UI()->MouseHovered(&RegionRect))
 	{
-		const bool IsPageScroll = Input()->AltIsPressed();
-		const float ScrollUnit = IsPageScroll ? m_ClipRect.h : m_Params.m_ScrollUnit;
+		float ScrollDirection = 0.0f;
 		if(UI()->ConsumeHotkey(CUI::HOTKEY_SCROLL_UP))
-		{
-			m_AnimTime = AnimationDuration;
-			m_AnimInitScrollY = m_ScrollY;
-			m_AnimTargetScrollY -= ScrollUnit;
-		}
+			ScrollDirection = -1.0f;
 		else if(UI()->ConsumeHotkey(CUI::HOTKEY_SCROLL_DOWN))
+			ScrollDirection = 1.0f;
+
+		if(ScrollDirection != 0.0f)
 		{
-			m_AnimTime = AnimationDuration;
+			const bool IsPageScroll = Input()->AltIsPressed();
+			const float ScrollUnit = IsPageScroll ? m_ClipRect.h : m_Params.m_ScrollUnit;
+
+			m_AnimTimeMax = g_Config.m_UiSmoothScrollTime / 1000.0f;
+			m_AnimTime = m_AnimTimeMax;
 			m_AnimInitScrollY = m_ScrollY;
-			m_AnimTargetScrollY += ScrollUnit;
+			m_AnimTargetScrollY += ScrollDirection * ScrollUnit;
 		}
 	}
 
@@ -111,7 +112,7 @@ void CScrollRegion::End()
 	if(m_AnimTime > 0.0f)
 	{
 		m_AnimTime -= Client()->RenderFrameTime();
-		float AnimProgress = (1.0f - powf(m_AnimTime / AnimationDuration, 3.0f)); // cubic ease out
+		float AnimProgress = (1.0f - powf(m_AnimTime / m_AnimTimeMax, 3.0f)); // cubic ease out
 		m_ScrollY = m_AnimInitScrollY + (m_AnimTargetScrollY - m_AnimInitScrollY) * AnimProgress;
 	}
 	else

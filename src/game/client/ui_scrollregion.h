@@ -91,6 +91,7 @@ private:
 	float m_ContentH;
 	float m_RequestScrollY; // [0, ContentHeight]
 
+	float m_AnimTimeMax;
 	float m_AnimTime;
 	float m_AnimInitScrollY;
 	float m_AnimTargetScrollY;
