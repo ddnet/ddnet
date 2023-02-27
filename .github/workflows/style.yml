@@ -42,6 +42,8 @@ jobs:
       run: scripts/check_dilate.sh release data
     - name: Check absolute includes
       run: "! grep --exclude-dir rust-bridge -rE '^#include \"(antibot|base|engine|game|steam|test)/' src/"
+    - name: Check standard header includes
+      run: scripts/check_standard_headers.sh
     # TODO: Enable on release branches
     #- name: Out-of-date translations
     #  run: |
