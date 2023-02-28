@@ -1012,8 +1012,6 @@ endif()
 
 set(EXPECTED_DATA
   arrow.png
-  assets/emoticons/comic.png
-  assets/emoticons/license.txt
   assets/entities/comfort/ddnet.png
   assets/entities/license.txt
   assets/game/game_06.png
