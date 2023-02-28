@@ -345,7 +345,7 @@ bool CMenuBackground::Render()
 		// move time
 		m_MoveTime += clamp(Client()->RenderFrameTime(), 0.0f, 0.1f) * g_Config.m_ClCameraSpeed / 10.0f;
 		float XVal = 1 - m_MoveTime;
-		XVal = pow(XVal, 7.0f);
+		XVal = std::pow(XVal, 7.0f);
 
 		m_Camera.m_Center = TargetPos + Dir * (XVal * Distance);
 		if(m_CurrentPosition < 0)

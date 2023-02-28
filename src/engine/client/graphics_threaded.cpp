@@ -1262,12 +1262,12 @@ void CGraphics_Threaded::DrawRectExt(float x, float y, float w, float h, float r
 		float a1 = i * SegmentsAngle;
 		float a2 = (i + 1) * SegmentsAngle;
 		float a3 = (i + 2) * SegmentsAngle;
-		float Ca1 = cosf(a1);
-		float Ca2 = cosf(a2);
-		float Ca3 = cosf(a3);
-		float Sa1 = sinf(a1);
-		float Sa2 = sinf(a2);
-		float Sa3 = sinf(a3);
+		float Ca1 = std::cos(a1);
+		float Ca2 = std::cos(a2);
+		float Ca3 = std::cos(a3);
+		float Sa1 = std::sin(a1);
+		float Sa2 = std::sin(a2);
+		float Sa3 = std::sin(a3);
 
 		if(Corners & CORNER_TL)
 			aFreeform[NumItems++] = IGraphics::CFreeformItem(
@@ -1336,12 +1336,12 @@ void CGraphics_Threaded::DrawRectExt4(float x, float y, float w, float h, ColorR
 		float a1 = i * SegmentsAngle;
 		float a2 = (i + 1) * SegmentsAngle;
 		float a3 = (i + 2) * SegmentsAngle;
-		float Ca1 = cosf(a1);
-		float Ca2 = cosf(a2);
-		float Ca3 = cosf(a3);
-		float Sa1 = sinf(a1);
-		float Sa2 = sinf(a2);
-		float Sa3 = sinf(a3);
+		float Ca1 = std::cos(a1);
+		float Ca2 = std::cos(a2);
+		float Ca3 = std::cos(a3);
+		float Sa1 = std::sin(a1);
+		float Sa2 = std::sin(a2);
+		float Sa3 = std::sin(a3);
 
 		if(Corners & CORNER_TL)
 		{
@@ -1504,12 +1504,12 @@ int CGraphics_Threaded::CreateRectQuadContainer(float x, float y, float w, float
 		float a1 = i * SegmentsAngle;
 		float a2 = (i + 1) * SegmentsAngle;
 		float a3 = (i + 2) * SegmentsAngle;
-		float Ca1 = cosf(a1);
-		float Ca2 = cosf(a2);
-		float Ca3 = cosf(a3);
-		float Sa1 = sinf(a1);
-		float Sa2 = sinf(a2);
-		float Sa3 = sinf(a3);
+		float Ca1 = std::cos(a1);
+		float Ca2 = std::cos(a2);
+		float Ca3 = std::cos(a3);
+		float Sa1 = std::sin(a1);
+		float Sa2 = std::sin(a2);
+		float Sa3 = std::sin(a3);
 
 		if(Corners & CORNER_TL)
 			aFreeform[NumItems++] = IGraphics::CFreeformItem(
@@ -1598,9 +1598,9 @@ void CGraphics_Threaded::DrawCircle(float CenterX, float CenterY, float Radius, 
 		const float a3 = (i + 2) * SegmentsAngle;
 		aItems[NumItems++] = IGraphics::CFreeformItem(
 			CenterX, CenterY,
-			CenterX + cosf(a1) * Radius, CenterY + sinf(a1) * Radius,
-			CenterX + cosf(a3) * Radius, CenterY + sinf(a3) * Radius,
-			CenterX + cosf(a2) * Radius, CenterY + sinf(a2) * Radius);
+			CenterX + std::cos(a1) * Radius, CenterY + std::sin(a1) * Radius,
+			CenterX + std::cos(a3) * Radius, CenterY + std::sin(a3) * Radius,
+			CenterX + std::cos(a2) * Radius, CenterY + std::sin(a2) * Radius);
 		if(NumItems == std::size(aItems))
 		{
 			QuadsDrawFreeform(aItems, std::size(aItems));

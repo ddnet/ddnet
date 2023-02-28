@@ -780,7 +780,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 			ServerFilter.HSplitBottom(4.0f, &ServerFilter, 0);
 
 			const float TypesWidth = 40.0f;
-			const float TypesHeight = ServerFilter.h / ceil(MaxTypes / (float)PerLine);
+			const float TypesHeight = ServerFilter.h / std::ceil(MaxTypes / (float)PerLine);
 
 			CUIRect TypesRect, Left, Right;
 
@@ -1134,7 +1134,7 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 				if(CurrentClient.m_Score == -9999 || CurrentClient.m_Score == 0)
 					aTemp[0] = 0;
 				else
-					str_time((int64_t)abs(CurrentClient.m_Score) * 100, TIME_HOURS, aTemp, sizeof(aTemp));
+					str_time((int64_t)absolute(CurrentClient.m_Score) * 100, TIME_HOURS, aTemp, sizeof(aTemp));
 			}
 			else
 				str_format(aTemp, sizeof(aTemp), "%d", CurrentClient.m_Score);

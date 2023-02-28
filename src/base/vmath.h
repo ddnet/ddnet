@@ -87,8 +87,8 @@ template<typename T>
 constexpr inline vector2_base<T> rotate(const vector2_base<T> &a, float angle)
 {
 	angle = angle * pi / 180.0f;
-	float s = sinf(angle);
-	float c = cosf(angle);
+	float s = std::sin(angle);
+	float c = std::cos(angle);
 	return vector2_base<T>((T)(c * a.x - s * a.y), (T)(s * a.x + c * a.y));
 }
 
@@ -106,7 +106,7 @@ constexpr inline T dot(const vector2_base<T> a, const vector2_base<T> &b)
 
 inline float length(const vector2_base<float> &a)
 {
-	return sqrtf(dot(a, a));
+	return std::sqrt(dot(a, a));
 }
 
 constexpr inline float angle(const vector2_base<float> &a)
@@ -115,7 +115,7 @@ constexpr inline float angle(const vector2_base<float> &a)
 		return 0.0f;
 	else if(a.x == 0)
 		return a.y < 0 ? -pi / 2 : pi / 2;
-	float result = atanf(a.y / a.x);
+	float result = std::atan(a.y / a.x);
 	if(a.x < 0)
 		result = result + pi;
 	return result;
@@ -140,7 +140,7 @@ inline vector2_base<float> normalize(const vector2_base<float> &v)
 
 inline vector2_base<float> direction(float angle)
 {
-	return vector2_base<float>(cosf(angle), sinf(angle));
+	return vector2_base<float>(std::cos(angle), std::sin(angle));
 }
 
 typedef vector2_base<float> vec2;
@@ -271,7 +271,7 @@ constexpr inline vector3_base<T> cross(const vector3_base<T> &a, const vector3_b
 //
 inline float length(const vector3_base<float> &a)
 {
-	return sqrtf(dot(a, a));
+	return std::sqrt(dot(a, a));
 }
 
 inline vector3_base<float> normalize(const vector3_base<float> &v)

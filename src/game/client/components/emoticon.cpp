@@ -120,9 +120,8 @@ void CEmoticon::OnRender()
 		Graphics()->QuadsSetSubset(0, 0, 1, 1);
 
 		Graphics()->QuadsBegin();
-		float NudgeX = 150.0f * cosf(Angle);
-		float NudgeY = 150.0f * sinf(Angle);
-		IGraphics::CQuadItem QuadItem(Screen.w / 2 + NudgeX, Screen.h / 2 + NudgeY, Size, Size);
+		const vec2 Nudge = direction(Angle) * 150.0f;
+		IGraphics::CQuadItem QuadItem(Screen.w / 2 + Nudge.x, Screen.h / 2 + Nudge.y, Size, Size);
 		Graphics()->QuadsDraw(&QuadItem, 1);
 		Graphics()->QuadsEnd();
 	}
@@ -146,11 +145,9 @@ void CEmoticon::OnRender()
 
 			bool Selected = m_SelectedEyeEmote == i;
 
-			float NudgeX = 70.0f * cosf(Angle);
-			float NudgeY = 70.0f * sinf(Angle);
-
+			const vec2 Nudge = direction(Angle) * 70.0f;
 			pTeeInfo->m_Size = Selected ? 64.0f : 48.0f;
-			RenderTools()->RenderTee(CAnimState::GetIdle(), pTeeInfo, i, vec2(-1, 0), vec2(Screen.w / 2 + NudgeX, Screen.h / 2 + NudgeY));
+			RenderTools()->RenderTee(CAnimState::GetIdle(), pTeeInfo, i, vec2(-1, 0), vec2(Screen.w / 2 + Nudge.x, Screen.h / 2 + Nudge.y));
 			pTeeInfo->m_Size = 64.0f;
 		}
 

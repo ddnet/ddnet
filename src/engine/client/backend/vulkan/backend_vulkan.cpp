@@ -1780,7 +1780,7 @@ protected:
 
 	static size_t ImageMipLevelCount(size_t Width, size_t Height, size_t Depth)
 	{
-		return floor(log2(maximum(Width, maximum(Height, Depth)))) + 1;
+		return std::floor(std::log2(maximum(Width, maximum(Height, Depth)))) + 1;
 	}
 
 	static size_t ImageMipLevelCount(const VkExtent3D &ImgExtent)

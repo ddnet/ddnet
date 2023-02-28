@@ -19,11 +19,6 @@ constexpr inline int round_truncate(float f)
 	return (int)f;
 }
 
-inline int round_ceil(float f)
-{
-	return (int)ceilf(f);
-}
-
 template<typename T, typename TB>
 constexpr inline T mix(const T a, const T b, TB amount)
 {

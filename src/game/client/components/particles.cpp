@@ -195,7 +195,7 @@ bool CParticles::ParticleIsVisibleOnScreen(const vec2 &CurPos, float CurSize)
 	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
 
 	// for simplicity assume the worst case rotation, that increases the bounding box around the particle by its diagonal
-	const float SqrtOf2 = sqrtf(2);
+	const float SqrtOf2 = std::sqrt(2);
 	CurSize = SqrtOf2 * CurSize;
 
 	// always uses the mid of the particle
