@@ -14,9 +14,9 @@
 #define __USE_GNU
 #endif
 
-#include <inttypes.h>
-#include <stdint.h>
-#include <time.h>
+#include <cinttypes>
+#include <cstdint>
+#include <ctime>
 
 #ifdef __MINGW32__
 #undef PRId64
@@ -62,7 +62,7 @@
 void dbg_assert_imp(const char *filename, int line, int test, const char *msg);
 
 #ifdef __clang_analyzer__
-#include <assert.h>
+#include <cassert>
 #undef dbg_assert
 #define dbg_assert(test, msg) assert(test)
 #endif

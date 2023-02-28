@@ -70,7 +70,7 @@
 #include <ws2tcpip.h>
 
 #include <cerrno>
-#include <fenv.h>
+#include <cfenv>
 #include <io.h>
 #include <objbase.h>
 #include <process.h>

@@ -6,7 +6,7 @@
 #include <engine/shared/protocol.h>
 #include <game/generated/protocol.h>
 
-#include <time.h>
+#include <ctime>
 
 class CConfig;
 class CTuningParams;

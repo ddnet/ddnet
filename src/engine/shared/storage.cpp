@@ -7,7 +7,7 @@
 #include <engine/storage.h>
 
 #ifdef CONF_PLATFORM_HAIKU
-#include <stdlib.h>
+#include <cstdlib>
 #endif
 
 class CStorage : public IStorage

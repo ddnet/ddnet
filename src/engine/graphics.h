@@ -7,17 +7,18 @@
 #include "warning.h"
 
 #include <base/color.h>
-#include <stddef.h>
-#include <stdint.h>
 
+#include <cstddef>
+#include <cstdint>
 #include <functional>
-
 #include <vector>
+
 #define GRAPHICS_TYPE_UNSIGNED_BYTE 0x1401
 #define GRAPHICS_TYPE_UNSIGNED_SHORT 0x1403
 #define GRAPHICS_TYPE_INT 0x1404
 #define GRAPHICS_TYPE_UNSIGNED_INT 0x1405
 #define GRAPHICS_TYPE_FLOAT 0x1406
+
 struct SBufferContainerInfo
 {
 	int m_Stride;

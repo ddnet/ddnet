@@ -4,8 +4,8 @@
 #define BASE_MATH_H
 
 #include <algorithm>
-#include <math.h>
-#include <stdlib.h>
+#include <cmath>
+#include <cstdlib>
 
 using std::clamp;
 

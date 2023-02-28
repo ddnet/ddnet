@@ -1,7 +1,7 @@
 #ifndef ENGINE_GFX_IMAGE_MANIPULATION_H
 #define ENGINE_GFX_IMAGE_MANIPULATION_H
 
-#include <stdint.h>
+#include <cstdint>
 
 void DilateImage(unsigned char *pImageBuff, int w, int h, int BPP);
 void DilateImageSub(unsigned char *pImageBuff, int w, int h, int BPP, int x, int y, int sw, int sh);
