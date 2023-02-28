@@ -234,7 +234,7 @@ void CGameWorld::UpdatePlayerMaps()
 				Dist[j].first = length_squared(GameServer()->m_apPlayers[i]->m_ViewPos - pChr->m_Pos);
 		}
 
-		// always send the player themselves
+		// always send the player themselves, even if all in same position
 		Dist[i].first = -1;
 
 		std::nth_element(&Dist[0], &Dist[VANILLA_MAX_CLIENTS - 1], &Dist[MAX_CLIENTS], distCompare);
@@ -249,7 +249,7 @@ void CGameWorld::UpdatePlayerMaps()
 		}
 
 		// sort by real client ids, guarantee order on distance changes, O(Nlog(N)) worst case
-		// sort just clients in game always expect first (self client id) and last (fake client id) indexes
+		// sort just clients in game always except first (self client id) and last (fake client id) indexes
 		std::sort(&pMap[1], &pMap[minimum(Index, VANILLA_MAX_CLIENTS - 1)]);
 	}
 }
