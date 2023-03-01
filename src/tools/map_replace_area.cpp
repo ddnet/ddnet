@@ -618,8 +618,8 @@ void ConvertToTiles(const float aaArea[2][2], int aaTiles[2][2])
 {
 	for(int i = 0; i < 2; i++)
 	{
-		aaTiles[i][0] = floor((floor(aaArea[i][0] * 100.0f) / 100.0f) / 32.0f);
-		aaTiles[i][1] = ceil((floor(aaArea[i][1] * 100.0f) / 100.0f) / 32.0f);
+		aaTiles[i][0] = std::floor((std::floor(aaArea[i][0] * 100.0f) / 100.0f) / 32.0f);
+		aaTiles[i][1] = std::ceil((std::floor(aaArea[i][1] * 100.0f) / 100.0f) / 32.0f);
 	}
 }
 

@@ -4,8 +4,8 @@
 #define BASE_MATH_H
 
 #include <algorithm>
-#include <math.h>
-#include <stdlib.h>
+#include <cmath>
+#include <cstdlib>
 
 using std::clamp;
 
@@ -17,11 +17,6 @@ constexpr inline int round_to_int(float f)
 constexpr inline int round_truncate(float f)
 {
 	return (int)f;
-}
-
-inline int round_ceil(float f)
-{
-	return (int)ceilf(f);
 }
 
 template<typename T, typename TB>

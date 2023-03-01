@@ -180,8 +180,8 @@ void Rotate(vec2 *pCenter, vec2 *pPoint, float Rotation)
 {
 	float x = pPoint->x - pCenter->x;
 	float y = pPoint->y - pCenter->y;
-	pPoint->x = x * cosf(Rotation) - y * sinf(Rotation) + pCenter->x;
-	pPoint->y = x * sinf(Rotation) + y * cosf(Rotation) + pCenter->y;
+	pPoint->x = x * std::cos(Rotation) - y * std::sin(Rotation) + pCenter->x;
+	pPoint->y = x * std::sin(Rotation) + y * std::cos(Rotation) + pCenter->y;
 }
 
 void CLayerQuads::BrushRotate(float Amount)

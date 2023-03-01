@@ -890,8 +890,8 @@ class CGraphics_Threaded : public IEngineGraphics
 	template<typename TName>
 	void Rotate(const CCommandBuffer::SPoint &rCenter, TName *pPoints, int NumPoints)
 	{
-		float c = cosf(m_Rotation);
-		float s = sinf(m_Rotation);
+		float c = std::cos(m_Rotation);
+		float s = std::sin(m_Rotation);
 		float x, y;
 		int i;
 

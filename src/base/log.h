@@ -1,8 +1,8 @@
 #ifndef BASE_LOG_H
 #define BASE_LOG_H
 
-#include <stdarg.h>
-#include <stdint.h>
+#include <cstdarg>
+#include <cstdint>
 
 #ifdef __GNUC__
 #define GNUC_ATTRIBUTE(x) __attribute__(x)

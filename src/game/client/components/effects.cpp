@@ -167,7 +167,7 @@ void CEffects::PlayerSpawn(vec2 Pos)
 		p.SetDefault();
 		p.m_Spr = SPRITE_PART_SHELL;
 		p.m_Pos = Pos;
-		p.m_Vel = RandomDir() * (powf(random_float(), 3) * 600.0f);
+		p.m_Vel = RandomDir() * (std::pow(random_float(), 3) * 600.0f);
 		p.m_LifeSpan = 0.3f + random_float() * 0.3f;
 		p.m_StartSize = 64.0f + random_float() * 32;
 		p.m_EndSize = 0;

@@ -112,7 +112,7 @@ void CScrollRegion::End()
 	if(m_AnimTime > 0.0f)
 	{
 		m_AnimTime -= Client()->RenderFrameTime();
-		float AnimProgress = (1.0f - powf(m_AnimTime / m_AnimTimeMax, 3.0f)); // cubic ease out
+		float AnimProgress = (1.0f - std::pow(m_AnimTime / m_AnimTimeMax, 3.0f)); // cubic ease out
 		m_ScrollY = m_AnimInitScrollY + (m_AnimTargetScrollY - m_AnimInitScrollY) * AnimProgress;
 	}
 	else
@@ -174,7 +174,7 @@ bool CScrollRegion::AddRect(const CUIRect &Rect, bool ShouldScrollHere)
 {
 	m_LastAddedRect = Rect;
 	// Round up and add 1 to fix pixel clipping at the end of the scrolling area
-	m_ContentH = maximum(ceilf(Rect.y + Rect.h - (m_ClipRect.y + m_ContentScrollOff.y)) + 1.0f, m_ContentH);
+	m_ContentH = maximum(std::ceil(Rect.y + Rect.h - (m_ClipRect.y + m_ContentScrollOff.y)) + 1.0f, m_ContentH);
 	if(ShouldScrollHere)
 		ScrollHere();
 	return !IsRectClipped(Rect);

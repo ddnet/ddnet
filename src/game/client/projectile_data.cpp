@@ -43,8 +43,8 @@ CProjectileData ExtractProjectileInfoDDNet(const CNetObj_DDNetProjectile *pProj,
 	Result.m_StartPos.x = pProj->m_X / 100.0f;
 	Result.m_StartPos.y = pProj->m_Y / 100.0f;
 	float Angle = pProj->m_Angle / 1000000.0f;
-	Result.m_StartVel.x = sin(-Angle);
-	Result.m_StartVel.y = cos(-Angle);
+	Result.m_StartVel.x = std::sin(-Angle);
+	Result.m_StartVel.y = std::cos(-Angle);
 	Result.m_Type = pProj->m_Type;
 	Result.m_StartTick = pProj->m_StartTick;
 

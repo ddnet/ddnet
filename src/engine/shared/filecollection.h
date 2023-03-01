@@ -5,7 +5,7 @@
 
 #include <base/system.h>
 
-#include <stdint.h>
+#include <cstdint>
 
 class IStorage;
 

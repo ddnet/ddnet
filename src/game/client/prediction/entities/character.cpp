@@ -402,7 +402,7 @@ void CCharacter::FireWeapon()
 					WEAPON_SHOTGUN, //Type
 					GetCID(), //Owner
 					ProjStartPos, //Pos
-					vec2(cosf(a), sinf(a)) * Speed, //Dir
+					direction(a) * Speed, //Dir
 					(int)(GameWorld()->GameTickSpeed() * Tuning()->m_ShotgunLifetime), //Span
 					false, //Freeze
 					false, //Explosive
@@ -643,36 +643,36 @@ void CCharacter::HandleSkippableTiles(int Index)
 			if(MaxSpeed > 0)
 			{
 				if(Direction.x > 0.0000001f)
-					SpeederAngle = -atan(Direction.y / Direction.x);
+					SpeederAngle = -std::atan(Direction.y / Direction.x);
 				else if(Direction.x < 0.0000001f)
-					SpeederAngle = atan(Direction.y / Direction.x) + 2.0f * asin(1.0f);
+					SpeederAngle = std::atan(Direction.y / Direction.x) + 2.0f * std::asin(1.0f);
 				else if(Direction.y > 0.0000001f)
-					SpeederAngle = asin(1.0f);
+					SpeederAngle = std::asin(1.0f);
 				else
-					SpeederAngle = asin(-1.0f);
+					SpeederAngle = std::asin(-1.0f);
 
 				if(SpeederAngle < 0)
-					SpeederAngle = 4.0f * asin(1.0f) + SpeederAngle;
+					SpeederAngle = 4.0f * std::asin(1.0f) + SpeederAngle;
 
 				if(TempVel.x > 0.0000001f)
-					TeeAngle = -atan(TempVel.y / TempVel.x);
+					TeeAngle = -std::atan(TempVel.y / TempVel.x);
 				else if(TempVel.x < 0.0000001f)
-					TeeAngle = atan(TempVel.y / TempVel.x) + 2.0f * asin(1.0f);
+					TeeAngle = std::atan(TempVel.y / TempVel.x) + 2.0f * std::asin(1.0f);
 				else if(TempVel.y > 0.0000001f)
-					TeeAngle = asin(1.0f);
+					TeeAngle = std::asin(1.0f);
 				else
-					TeeAngle = asin(-1.0f);
+					TeeAngle = std::asin(-1.0f);
 
 				if(TeeAngle < 0)
-					TeeAngle = 4.0f * asin(1.0f) + TeeAngle;
+					TeeAngle = 4.0f * std::asin(1.0f) + TeeAngle;
 
-				TeeSpeed = sqrt(pow(TempVel.x, 2) + pow(TempVel.y, 2));
+				TeeSpeed = std::sqrt(std::pow(TempVel.x, 2) + std::pow(TempVel.y, 2));
 
 				DiffAngle = SpeederAngle - TeeAngle;
-				SpeedLeft = MaxSpeed / 5.0f - cos(DiffAngle) * TeeSpeed;
-				if(abs((int)SpeedLeft) > Force && SpeedLeft > 0.0000001f)
+				SpeedLeft = MaxSpeed / 5.0f - std::cos(DiffAngle) * TeeSpeed;
+				if(absolute((int)SpeedLeft) > Force && SpeedLeft > 0.0000001f)
 					TempVel += Direction * Force;
-				else if(abs((int)SpeedLeft) > Force)
+				else if(absolute((int)SpeedLeft) > Force)
 					TempVel += Direction * -Force;
 				else
 					TempVel += Direction * SpeedLeft;
@@ -1334,8 +1334,8 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 		}
 		else
 		{
-			m_Input.m_TargetX = m_SavedInput.m_TargetX = cosf(pChar->m_Angle / 256.0f) * 256.0f;
-			m_Input.m_TargetY = m_SavedInput.m_TargetY = sinf(pChar->m_Angle / 256.0f) * 256.0f;
+			m_Input.m_TargetX = m_SavedInput.m_TargetX = std::cos(pChar->m_Angle / 256.0f) * 256.0f;
+			m_Input.m_TargetY = m_SavedInput.m_TargetY = std::sin(pChar->m_Angle / 256.0f) * 256.0f;
 		}
 	}
 

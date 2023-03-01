@@ -122,9 +122,9 @@ void CProjectile::Tick()
 				m_Direction.x = -m_Direction.x;
 			else if(m_Bouncing == 2)
 				m_Direction.y = -m_Direction.y;
-			if(fabs(m_Direction.x) < 1e-6f)
+			if(absolute(m_Direction.x) < 1e-6f)
 				m_Direction.x = 0;
-			if(fabs(m_Direction.y) < 1e-6f)
+			if(absolute(m_Direction.y) < 1e-6f)
 				m_Direction.y = 0;
 			m_Pos += m_Direction;
 		}
@@ -172,7 +172,7 @@ CProjectile::CProjectile(CGameWorld *pGameWorld, int ID, CProjectileData *pProj,
 		m_Owner = -1;
 		m_Bouncing = 0;
 		m_Freeze = false;
-		m_Explosive = (pProj->m_Type == WEAPON_GRENADE) && (fabs(1.0f - length(m_Direction)) < 0.015f);
+		m_Explosive = (pProj->m_Type == WEAPON_GRENADE) && (absolute(1.0f - length(m_Direction)) < 0.015f);
 	}
 	m_Type = pProj->m_Type;
 	m_StartTick = pProj->m_StartTick;

@@ -3,7 +3,7 @@
 #ifndef GAME_SERVER_EVENTHANDLER_H
 #define GAME_SERVER_EVENTHANDLER_H
 
-#include <stdint.h>
+#include <cstdint>
 
 #include <engine/shared/protocol.h>
 

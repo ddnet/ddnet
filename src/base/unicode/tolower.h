@@ -1,4 +1,4 @@
-#include <stdint.h>
+#include <cstdint>
 
 struct UPPER_LOWER
 {

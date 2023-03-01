@@ -524,8 +524,7 @@ void CGameConsole::OnReset()
 // only defined for 0<=t<=1
 static float ConsoleScaleFunc(float t)
 {
-	//return t;
-	return sinf(acosf(1.0f - t));
+	return std::sin(std::acos(1.0f - t));
 }
 
 struct CCompletionOptionRenderInfo

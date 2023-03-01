@@ -53,7 +53,7 @@ def generate_decompositions():
 
 def gen_header(decompositions, len_set):
 	print("""\
-#include <stdint.h>
+#include <cstdint>
 
 struct DECOMP_SLICE
 {

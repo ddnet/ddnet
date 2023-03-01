@@ -317,7 +317,7 @@ void CHud::RenderScoreHud()
 					if(m_pClient->m_GameInfo.m_TimeScore && g_Config.m_ClDDRaceScoreBoard)
 					{
 						if(apPlayerInfo[t]->m_Score != -9999)
-							str_time((int64_t)abs(apPlayerInfo[t]->m_Score) * 100, TIME_HOURS, aScore[t], sizeof(aScore[t]));
+							str_time((int64_t)absolute(apPlayerInfo[t]->m_Score) * 100, TIME_HOURS, aScore[t], sizeof(aScore[t]));
 						else
 							aScore[t][0] = 0;
 					}
@@ -834,23 +834,23 @@ void CHud::RenderPlayerState(const int ClientID)
 				UsedJumps = !Grounded;
 			}
 
-			if(pCharacter->m_EndlessJump && UsedJumps >= abs(pCharacter->m_Jumps))
+			if(pCharacter->m_EndlessJump && UsedJumps >= absolute(pCharacter->m_Jumps))
 			{
-				UsedJumps = abs(pCharacter->m_Jumps) - 1;
+				UsedJumps = absolute(pCharacter->m_Jumps) - 1;
 			}
 
-			int UnusedJumps = abs(pCharacter->m_Jumps) - UsedJumps;
+			int UnusedJumps = absolute(pCharacter->m_Jumps) - UsedJumps;
 			if(!(pPlayer->m_Jumped & 2) && UnusedJumps <= 0)
 			{
 				// In some edge cases when the player just got another number of jumps, UnusedJumps is not correct
 				UnusedJumps = 1;
 			}
-			TotalJumpsToDisplay = maximum(minimum(abs(pCharacter->m_Jumps), 10), 0);
+			TotalJumpsToDisplay = maximum(minimum(absolute(pCharacter->m_Jumps), 10), 0);
 			AvailableJumpsToDisplay = maximum(minimum(UnusedJumps, TotalJumpsToDisplay), 0);
 		}
 		else
 		{
-			TotalJumpsToDisplay = AvailableJumpsToDisplay = abs(m_pClient->m_Snap.m_aCharacters[ClientID].m_ExtendedData.m_Jumps);
+			TotalJumpsToDisplay = AvailableJumpsToDisplay = absolute(m_pClient->m_Snap.m_aCharacters[ClientID].m_ExtendedData.m_Jumps);
 		}
 
 		// render available and used jumps
@@ -1303,7 +1303,7 @@ inline int CHud::GetDigitsIndex(int Value, int Max)
 	{
 		Value *= -1;
 	}
-	int DigitsIndex = (int)log10((Value ? Value : 1));
+	int DigitsIndex = std::log10((Value ? Value : 1));
 	if(DigitsIndex > Max)
 	{
 		DigitsIndex = Max;

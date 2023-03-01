@@ -438,7 +438,7 @@ void CMapImages::UpdateEntityLayerText(void *pTexBuffer, int ImageColorChannelCo
 	char aBuf[4];
 	int DigitsCount = NumbersPower + 1;
 
-	int CurrentNumber = pow(10, NumbersPower);
+	int CurrentNumber = std::pow(10, NumbersPower);
 
 	if(MaxNumber == -1)
 		MaxNumber = CurrentNumber * 10 - 1;
