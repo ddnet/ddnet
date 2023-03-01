@@ -21,7 +21,7 @@ jobs:
         sudo apt-get update -y
         sudo apt-get install clang-format imagemagick ddnet-tools shellcheck pkg-config cmake ninja-build libfreetype6-dev libnotify-dev libsdl2-dev libsqlite3-dev libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev libx264-dev python3-clang libvulkan-dev glslang-tools spirv-tools rustc cargo -y
         pip3 install pylint
-        git clone https://gitlab.com/Patiga/twmap
+        git clone https://gitlab.com/Patiga/twmap.git/
         cd twmap/twmap-tools
         cargo install --path=.
         cd ../..
