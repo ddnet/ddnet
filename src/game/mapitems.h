@@ -489,6 +489,7 @@ public:
 bool IsValidGameTile(int Index);
 bool IsValidFrontTile(int Index);
 bool IsValidTeleTile(int Index);
+bool IsTeleTileNumberUsed(int Index); // Assumes that Index is a valid tele tile index
 bool IsValidSpeedupTile(int Index);
 bool IsValidSwitchTile(int Index);
 bool IsValidTuneTile(int Index);

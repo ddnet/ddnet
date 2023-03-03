@@ -57,6 +57,12 @@ bool IsValidTeleTile(int Index)
 		Index == TILE_TELECHECKINEVIL);
 }
 
+bool IsTeleTileNumberUsed(int Index)
+{
+	return Index != TILE_TELECHECKIN &&
+	       Index != TILE_TELECHECKINEVIL;
+}
+
 bool IsValidSpeedupTile(int Index)
 {
 	return Index == TILE_BOOST;
