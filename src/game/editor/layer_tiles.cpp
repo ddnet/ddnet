@@ -1179,12 +1179,20 @@ void CLayerTele::BrushDraw(CLayer *pBrush, float wx, float wy)
 
 			if((m_pEditor->m_AllowPlaceUnusedTiles || IsValidTeleTile(pTeleLayer->m_pTiles[y * pTeleLayer->m_Width + x].m_Index)) && pTeleLayer->m_pTiles[y * pTeleLayer->m_Width + x].m_Index != TILE_AIR)
 			{
-				if(m_pEditor->m_TeleNumber != pTeleLayer->m_TeleNum)
+				if(!IsTeleTileNumberUsed(pTeleLayer->m_pTiles[y * pTeleLayer->m_Width + x].m_Index))
+				{
+					// Tele tile number is unused. Set a known value which is not 0,
+					// as tiles with number 0 would be ignored by previous versions.
+					m_pTeleTile[fy * m_Width + fx].m_Number = 255;
+				}
+				else if(m_pEditor->m_TeleNumber != pTeleLayer->m_TeleNum)
 				{
 					m_pTeleTile[fy * m_Width + fx].m_Number = m_pEditor->m_TeleNumber;
 				}
 				else if(pTeleLayer->m_pTeleTile[y * pTeleLayer->m_Width + x].m_Number)
+				{
 					m_pTeleTile[fy * m_Width + fx].m_Number = pTeleLayer->m_pTeleTile[y * pTeleLayer->m_Width + x].m_Number;
+				}
 				else
 				{
 					if(!m_pEditor->m_TeleNumber)
