@@ -86,7 +86,7 @@ void CEditor::UiDoPopupMenu()
 		r.Draw(ColorRGBA(0, 0, 0, 0.75f), Corners, 3.0f);
 		r.Margin(4.0f, &r);
 
-		if(s_UiPopups[i].m_pfnFunc(this, r, s_UiPopups[i].m_pContext) || Input()->KeyPress(KEY_ESCAPE))
+		if(s_UiPopups[i].m_pfnFunc(this, r, s_UiPopups[i].m_pContext) || UI()->ConsumeHotkey(CUI::HOTKEY_ESCAPE))
 			UiClosePopupMenus(1);
 	}
 }
