@@ -84,8 +84,8 @@ public:
 	int GetFTileFlags(int Index) const;
 	int IsTeleport(int Index) const;
 	int IsEvilTeleport(int Index) const;
-	int IsCheckTeleport(int Index) const;
-	int IsCheckEvilTeleport(int Index) const;
+	bool IsCheckTeleport(int Index) const;
+	bool IsCheckEvilTeleport(int Index) const;
 	int IsTeleportWeapon(int Index) const;
 	int IsTeleportHook(int Index) const;
 	int IsTeleCheckpoint(int Index) const;
