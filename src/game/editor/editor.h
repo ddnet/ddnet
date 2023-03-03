@@ -220,43 +220,8 @@ public:
 
 	bool IsEmpty() const
 	{
-		return m_vpLayers.size() == 0; // stupid function, since its bad for Fillselection: TODO add a function for Fillselection that returns whether a specific tile is used in the given layer
+		return m_vpLayers.empty();
 	}
-
-	/*bool IsUsedInThisLayer(int Layer, int Index) // <--------- this is what i meant but cause i don't know which Indexes belongs to which layers i can't finish yet
-	{
-		switch Layer
-		{
-			case LAYERTYPE_GAME: // security
-				return true;
-			case LAYERTYPE_FRONT:
-				return true;
-			case LAYERTYPE_TELE:
-			{
-				if (Index ==) // you could add an 2D array into mapitems.h which defines which Indexes belong to which layer(s)
-			}
-			case LAYERTYPE_SPEEDUP:
-			{
-				if (Index == TILE_BOOST)
-					return true;
-				else
-					return false;
-			}
-			case LAYERTYPE_SWITCH:
-			{
-
-			}
-			case LAYERTYPE_TUNE:
-			{
-				if (Index == TILE_TUNE)
-					return true;
-				else
-					return false;
-			}
-			default:
-				return false;
-		}
-	}*/
 
 	void OnEdited()
 	{

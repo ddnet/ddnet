@@ -1120,7 +1120,6 @@ void CLayerTiles::ModifyEnvelopeIndex(INDEX_MODIFY_FUNC Func)
 CLayerTele::CLayerTele(int w, int h) :
 	CLayerTiles(w, h)
 {
-	//m_Type = LAYERTYPE_TELE;
 	str_copy(m_aName, "Tele", sizeof(m_aName));
 	m_Tele = 1;
 
@@ -1353,7 +1352,6 @@ bool CLayerTele::ContainsElementWithId(int Id)
 CLayerSpeedup::CLayerSpeedup(int w, int h) :
 	CLayerTiles(w, h)
 {
-	//m_Type = LAYERTYPE_SPEEDUP;
 	str_copy(m_aName, "Speedup", sizeof(m_aName));
 	m_Speedup = 1;
 
@@ -1591,7 +1589,6 @@ void CLayerSpeedup::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 CLayerFront::CLayerFront(int w, int h) :
 	CLayerTiles(w, h)
 {
-	//m_Type = LAYERTYPE_FRONT;
 	str_copy(m_aName, "Front", sizeof(m_aName));
 	m_Front = 1;
 }
@@ -1638,7 +1635,6 @@ void CLayerFront::Resize(int NewW, int NewH)
 CLayerSwitch::CLayerSwitch(int w, int h) :
 	CLayerTiles(w, h)
 {
-	//m_Type = LAYERTYPE_SWITCH;
 	str_copy(m_aName, "Switch", sizeof(m_aName));
 	m_Switch = 1;
 
@@ -1895,7 +1891,6 @@ bool CLayerSwitch::ContainsElementWithId(int Id)
 CLayerTune::CLayerTune(int w, int h) :
 	CLayerTiles(w, h)
 {
-	//m_Type = LAYERTYPE_TUNE;
 	str_copy(m_aName, "Tune", sizeof(m_aName));
 	m_Tune = 1;
 
