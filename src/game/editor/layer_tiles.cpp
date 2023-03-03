@@ -259,11 +259,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 				for(int x = 0; x < r.w; x++)
 				{
 					pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x] = ((CLayerTele *)this)->m_pTeleTile[(r.y + y) * m_Width + (r.x + x)];
-					if(pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x].m_Type == TILE_TELEIN || pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x].m_Type == TILE_TELEOUT || pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x].m_Type == TILE_TELEINEVIL
-						// || pGrabbed->m_pTeleTile[y*pGrabbed->m_Width+x].m_Type == TILE_TELECHECKINEVIL
-						|| pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x].m_Type == TILE_TELECHECK || pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x].m_Type == TILE_TELECHECKOUT
-						// || pGrabbed->m_pTeleTile[y*pGrabbed->m_Width+x].m_Type == TILE_TELECHECKIN
-						|| pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x].m_Type == TILE_TELEINWEAPON || pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x].m_Type == TILE_TELEINHOOK)
+					if(IsValidTeleTile(pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x].m_Type) && IsTeleTileNumberUsed(pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x].m_Type))
 					{
 						m_pEditor->m_TeleNumber = pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x].m_Number;
 					}
@@ -297,7 +293,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 				for(int x = 0; x < r.w; x++)
 				{
 					pGrabbed->m_pSpeedupTile[y * pGrabbed->m_Width + x] = ((CLayerSpeedup *)this)->m_pSpeedupTile[(r.y + y) * m_Width + (r.x + x)];
-					if(pGrabbed->m_pSpeedupTile[y * pGrabbed->m_Width + x].m_Type == TILE_BOOST)
+					if(IsValidSpeedupTile(pGrabbed->m_pSpeedupTile[y * pGrabbed->m_Width + x].m_Type))
 					{
 						m_pEditor->m_SpeedupAngle = pGrabbed->m_pSpeedupTile[y * pGrabbed->m_Width + x].m_Angle;
 						m_pEditor->m_SpeedupForce = pGrabbed->m_pSpeedupTile[y * pGrabbed->m_Width + x].m_Force;
@@ -335,21 +331,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 				for(int x = 0; x < r.w; x++)
 				{
 					pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x] = ((CLayerSwitch *)this)->m_pSwitchTile[(r.y + y) * m_Width + (r.x + x)];
-					if(pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == ENTITY_DOOR + ENTITY_OFFSET ||
-						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == TILE_HIT_ENABLE ||
-						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == TILE_HIT_DISABLE ||
-						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == TILE_SWITCHOPEN ||
-						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == TILE_SWITCHCLOSE ||
-						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == TILE_SWITCHTIMEDOPEN ||
-						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == TILE_SWITCHTIMEDCLOSE ||
-						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == ENTITY_LASER_LONG + ENTITY_OFFSET ||
-						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == ENTITY_LASER_MEDIUM + ENTITY_OFFSET ||
-						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == ENTITY_LASER_SHORT + ENTITY_OFFSET ||
-						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == TILE_JUMP ||
-						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == TILE_ADD_TIME ||
-						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == TILE_SUBTRACT_TIME ||
-						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == TILE_ALLOW_TELE_GUN ||
-						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == TILE_ALLOW_BLUE_TELE_GUN)
+					if(IsValidSwitchTile(pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type))
 					{
 						m_pEditor->m_SwitchNum = pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Number;
 						m_pEditor->m_SwitchDelay = pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Delay;
@@ -386,7 +368,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 				for(int x = 0; x < r.w; x++)
 				{
 					pGrabbed->m_pTuneTile[y * pGrabbed->m_Width + x] = ((CLayerTune *)this)->m_pTuneTile[(r.y + y) * m_Width + (r.x + x)];
-					if(pGrabbed->m_pTuneTile[y * pGrabbed->m_Width + x].m_Type == TILE_TUNE)
+					if(IsValidTuneTile(pGrabbed->m_pTuneTile[y * pGrabbed->m_Width + x].m_Type))
 					{
 						m_pEditor->m_TuningNum = pGrabbed->m_pTuneTile[y * pGrabbed->m_Width + x].m_Number;
 					}

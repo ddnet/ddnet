@@ -456,7 +456,7 @@ void CRenderTools::RenderTeleOverlay(CTeleTile *pTele, int w, int h, float Scale
 			int c = mx + my * w;
 
 			unsigned char Index = pTele[c].m_Number;
-			if(Index && pTele[c].m_Type != TILE_TELECHECKIN && pTele[c].m_Type != TILE_TELECHECKINEVIL)
+			if(Index && IsTeleTileNumberUsed(pTele[c].m_Type))
 			{
 				char aBuf[16];
 				str_format(aBuf, sizeof(aBuf), "%d", Index);
