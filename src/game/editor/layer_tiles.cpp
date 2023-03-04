@@ -1865,7 +1865,7 @@ bool CLayerSwitch::ContainsElementWithId(int Id)
 	{
 		for(int x = 0; x < m_Width; ++x)
 		{
-			if(m_pSwitchTile[y * m_Width + x].m_Number == Id)
+			if(IsSwitchTileNumberUsed(m_pSwitchTile[y * m_Width + x].m_Type) && m_pSwitchTile[y * m_Width + x].m_Number == Id)
 			{
 				return true;
 			}
