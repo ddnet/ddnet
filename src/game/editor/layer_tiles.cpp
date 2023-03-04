@@ -1721,6 +1721,19 @@ void CLayerSwitch::BrushDraw(CLayer *pBrush, float wx, float wy)
 				m_pSwitchTile[fy * m_Width + fx].m_Flags = pSwitchLayer->m_pTiles[y * pSwitchLayer->m_Width + x].m_Flags;
 				m_pTiles[fy * m_Width + fx].m_Index = pSwitchLayer->m_pTiles[y * pSwitchLayer->m_Width + x].m_Index;
 				m_pTiles[fy * m_Width + fx].m_Flags = pSwitchLayer->m_pTiles[y * pSwitchLayer->m_Width + x].m_Flags;
+
+				if(!IsSwitchTileFlagsUsed(pSwitchLayer->m_pTiles[y * pSwitchLayer->m_Width + x].m_Index))
+				{
+					m_pSwitchTile[fy * m_Width + fx].m_Flags = 0;
+				}
+				if(!IsSwitchTileNumberUsed(pSwitchLayer->m_pTiles[y * pSwitchLayer->m_Width + x].m_Index))
+				{
+					m_pSwitchTile[fy * m_Width + fx].m_Number = 0;
+				}
+				if(!IsSwitchTileDelayUsed(pSwitchLayer->m_pTiles[y * pSwitchLayer->m_Width + x].m_Index))
+				{
+					m_pSwitchTile[fy * m_Width + fx].m_Delay = 0;
+				}
 			}
 			else
 			{
@@ -1729,16 +1742,6 @@ void CLayerSwitch::BrushDraw(CLayer *pBrush, float wx, float wy)
 				m_pSwitchTile[fy * m_Width + fx].m_Flags = 0;
 				m_pSwitchTile[fy * m_Width + fx].m_Delay = 0;
 				m_pTiles[fy * m_Width + fx].m_Index = 0;
-			}
-
-			if(pSwitchLayer->m_pTiles[y * pSwitchLayer->m_Width + x].m_Index == TILE_FREEZE)
-			{
-				m_pSwitchTile[fy * m_Width + fx].m_Flags = 0;
-			}
-			else if(pSwitchLayer->m_pTiles[y * pSwitchLayer->m_Width + x].m_Index == TILE_DFREEZE || pSwitchLayer->m_pTiles[y * pSwitchLayer->m_Width + x].m_Index == TILE_DUNFREEZE)
-			{
-				m_pSwitchTile[fy * m_Width + fx].m_Flags = 0;
-				m_pSwitchTile[fy * m_Width + fx].m_Delay = 0;
 			}
 		}
 	FlagModified(sx, sy, pSwitchLayer->m_Width, pSwitchLayer->m_Height);
