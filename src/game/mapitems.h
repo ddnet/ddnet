@@ -492,6 +492,9 @@ bool IsValidTeleTile(int Index);
 bool IsTeleTileNumberUsed(int Index); // Assumes that Index is a valid tele tile index
 bool IsValidSpeedupTile(int Index);
 bool IsValidSwitchTile(int Index);
+bool IsSwitchTileFlagsUsed(int Index); // Assumes that Index is a valid switch tile index
+bool IsSwitchTileNumberUsed(int Index); // Assumes that Index is a valid switch tile index
+bool IsSwitchTileDelayUsed(int Index); // Assumes that Index is a valid switch tile index
 bool IsValidTuneTile(int Index);
 bool IsValidEntity(int Index);
 bool IsRotatableTile(int Index);

@@ -87,6 +87,28 @@ bool IsValidSwitchTile(int Index)
 		(IsValidEntity(Index) && Index >= ENTITY_OFFSET + ENTITY_ARMOR_1));
 }
 
+bool IsSwitchTileFlagsUsed(int Index)
+{
+	return Index != TILE_FREEZE &&
+	       Index != TILE_DFREEZE &&
+	       Index != TILE_DUNFREEZE;
+}
+
+bool IsSwitchTileNumberUsed(int Index)
+{
+	return Index != TILE_JUMP &&
+	       Index != TILE_HIT_ENABLE &&
+	       Index != TILE_HIT_DISABLE &&
+	       Index != TILE_ALLOW_TELE_GUN &&
+	       Index != TILE_ALLOW_BLUE_TELE_GUN;
+}
+
+bool IsSwitchTileDelayUsed(int Index)
+{
+	return Index != TILE_DFREEZE &&
+	       Index != TILE_DUNFREEZE;
+}
+
 bool IsValidTuneTile(int Index)
 {
 	return Index == TILE_TUNE;
