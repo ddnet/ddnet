@@ -4367,6 +4367,11 @@ bool CGameContext::RateLimitPlayerMapVote(int ClientID)
 
 void CGameContext::OnUpdatePlayerServerInfo(char *aBuf, int BufSize, int ID)
 {
+	if(BufSize <= 0)
+		return;
+
+	aBuf[0] = '\0';
+
 	if(!m_apPlayers[ID])
 		return;
 
