@@ -30,7 +30,7 @@ serde_json = { version = "1.0.64", features = [
   "raw_value",
 ] }
 sha2 = "0.10.0"
-tokio = { version = "1.6.0", features = ["macros", "rt", "rt-multi-thread"] }
+tokio = { version = "1.18.5", features = ["macros", "rt", "rt-multi-thread"] }
 tokio-stream = { version = "0.1.8", features = ["net"] }
 url = { version = "2.2.2", features = ["serde"] }
 warp = { version = "0.3.1", default-features = false }
