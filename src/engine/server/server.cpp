@@ -1751,7 +1751,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		else if(Msg == NETMSG_PING)
 		{
 			CMsgPacker Msgp(NETMSG_PING_REPLY, true);
-			SendMsg(&Msgp, 0, ClientID);
+			SendMsg(&Msgp, MSGFLAG_FLUSH, ClientID);
 		}
 		else if(Msg == NETMSG_PINGEX)
 		{
