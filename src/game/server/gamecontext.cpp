@@ -4421,7 +4421,7 @@ void CGameContext::OnUpdatePlayerServerInfo(char *aBuf, int BufSize, int ID)
 			if(TeeInfo.m_aUseCustomColors[i])
 			{
 				str_format(aPartBuf, sizeof(aPartBuf),
-					",color:%d",
+					",\"color\":%d",
 					TeeInfo.m_aSkinPartColors[i]);
 				str_append(aJsonSkin, aPartBuf, sizeof(aJsonSkin));
 			}
