@@ -544,7 +544,6 @@ public:
 	virtual int WindowOpen() = 0;
 };
 
-extern IEngineGraphics *CreateEngineGraphics();
 extern IEngineGraphics *CreateEngineGraphicsThreaded();
 
 #endif
