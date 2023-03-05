@@ -2947,9 +2947,8 @@ bool CGraphics_Threaded::SetWindowScreen(int Index)
 		return false;
 	}
 
-	m_pBackend->GetViewportSize(m_ScreenWidth, m_ScreenHeight);
-	AdjustViewport(true);
-	m_ScreenHiDPIScale = m_ScreenWidth / (float)g_Config.m_GfxScreenWidth;
+	// send a got resized event so that the current canvas size is requested
+	GotResized(g_Config.m_GfxScreenWidth, g_Config.m_GfxScreenHeight, g_Config.m_GfxScreenRefreshRate);
 
 	for(auto &PropChangedListener : m_vPropChangeListeners)
 		PropChangedListener();
@@ -2966,9 +2965,9 @@ void CGraphics_Threaded::Move(int x, int y)
 	// Only handling CurScreen != m_GfxScreen doesn't work reliably
 	const int CurScreen = m_pBackend->GetWindowScreen();
 	m_pBackend->UpdateDisplayMode(CurScreen);
-	m_pBackend->GetViewportSize(m_ScreenWidth, m_ScreenHeight);
-	AdjustViewport(true);
-	m_ScreenHiDPIScale = m_ScreenWidth / (float)g_Config.m_GfxScreenWidth;
+
+	// send a got resized event so that the current canvas size is requested
+	GotResized(g_Config.m_GfxScreenWidth, g_Config.m_GfxScreenHeight, g_Config.m_GfxScreenRefreshRate);
 
 	for(auto &PropChangedListener : m_vPropChangeListeners)
 		PropChangedListener();
