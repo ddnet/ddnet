@@ -73,7 +73,7 @@ class CGameContext : public IGameServer
 	CNetObjHandler m_NetObjHandler;
 	CTuningParams m_Tuning;
 	CTuningParams m_aTuningList[NUM_TUNEZONES];
-	LOCKED_TUNINGS m_vLockedTuning[NUM_TUNEZONES];
+	LOCKED_TUNES m_vLockedTuning[NUM_TUNEZONES];
 	std::vector<std::string> m_vCensorlist;
 
 	bool m_TeeHistorianActive;
@@ -139,16 +139,17 @@ public:
 	IEngine *Engine() { return m_pEngine; }
 	IStorage *Storage() { return m_pStorage; }
 	CCollision *Collision() { return &m_Collision; }
-	CTuningParams *Tuning(int ClientID = -1);
+	CTuningParams *Tuning() { return &m_Tuning; };
+	CTuningParams Tuning(int ClientID);
 	CTuningParams *TuningList() { return &m_aTuningList[0]; }
 	IAntibot *Antibot() { return m_pAntibot; }
 	CTeeHistorian *TeeHistorian() { return &m_TeeHistorian; }
 	bool TeeHistorianActive() const { return m_TeeHistorianActive; }
 
-	LOCKED_TUNINGS *LockedTuning() { return &m_vLockedTuning[0]; }
-	bool SetLockedTune(LOCKED_TUNINGS *pLockedTunings, LOCKED_TUNE Tune);
-	void ApplyTuneLock(LOCKED_TUNINGS *pLockedTunings, int TuneLock);
-	CTuningParams ApplyLockedTunings(CTuningParams Tuning, LOCKED_TUNINGS LockedTunings);
+	LOCKED_TUNES *LockedTuning() { return &m_vLockedTuning[0]; }
+	bool SetLockedTune(LOCKED_TUNES *pLockedTunings, CLockedTune Tune);
+	void ApplyTuneLock(LOCKED_TUNES *pLockedTunings, int TuneLock);
+	CTuningParams ApplyLockedTunings(CTuningParams Tuning, LOCKED_TUNES LockedTunings);
 
 	CGameContext();
 	CGameContext(int Reset);

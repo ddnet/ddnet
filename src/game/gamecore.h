@@ -19,6 +19,25 @@
 class CCollision;
 class CTeamsCore;
 
+class CLockedTune
+{
+public:
+	char m_aParam[64];
+	float m_Value;
+
+	CLockedTune(const char *pParam, float Value)
+	{
+		str_copy(m_aParam, pParam, sizeof(m_aParam));
+		m_Value = Value;
+	}
+
+	bool operator==(const CLockedTune &Tune) const
+	{
+		return str_comp(m_aParam, Tune.m_aParam) == 0 && m_Value == Tune.m_Value;
+	}
+};
+typedef std::vector<CLockedTune> LOCKED_TUNES;
+
 class CTuneParam
 {
 	int m_Value;

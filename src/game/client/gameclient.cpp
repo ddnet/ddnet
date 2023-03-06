@@ -759,7 +759,7 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 			if(pUnpacker->Error())
 				return;
 
-			LOCKED_TUNE LockedTune(pParam, Value);
+			CLockedTune LockedTune(pParam, Value);
 			m_aClients[ClientID].m_vLockedTunings.push_back(LockedTune);
 		}
 

@@ -68,9 +68,6 @@ enum
 {
 	GAMEINFO_CURVERSION=8,
 };
-
-typedef std::pair<std::string, float> LOCKED_TUNE;
-typedef std::vector<LOCKED_TUNE> LOCKED_TUNINGS;
 '''
 
 RawSource = '''

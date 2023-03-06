@@ -400,7 +400,7 @@ public:
 		bool m_SpecCharPresent;
 		vec2 m_SpecChar;
 
-		LOCKED_TUNINGS m_vLockedTunings;
+		LOCKED_TUNES m_vLockedTunings;
 	};
 
 	CClientData m_aClients[MAX_CLIENTS];

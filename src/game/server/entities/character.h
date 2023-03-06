@@ -187,8 +187,8 @@ public:
 	bool m_FreezeHammer;
 	int m_TuneZone;
 	int m_TuneZoneOld;
-	LOCKED_TUNINGS m_LockedTunings;
-	LOCKED_TUNINGS m_LastLockedTunings;
+	LOCKED_TUNES m_LockedTunings;
+	LOCKED_TUNES m_LastLockedTunings;
 	bool m_aSentLockedTunings[MAX_CLIENTS];
 	int m_PainSoundTimer;
 	int m_LastMove;
@@ -255,7 +255,7 @@ public:
 
 	CSaveTee &GetRescueTeeRef() { return m_RescueTee; }
 
-	CTuningParams *Tuning();
+	CTuningParams Tuning();
 };
 
 enum
