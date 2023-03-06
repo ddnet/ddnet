@@ -161,7 +161,7 @@ void CTeeHistorian::WriteHeader(const CGameInfo *pGameInfo)
 #undef MACRO_CONFIG_COL
 #undef MACRO_CONFIG_STR
 
-	str_format(aJson, sizeof(aJson), "},\"tuning\":{");
+	str_copy(aJson, "},\"tuning\":{");
 	Write(aJson, str_length(aJson));
 
 	First = true;
@@ -180,7 +180,7 @@ void CTeeHistorian::WriteHeader(const CGameInfo *pGameInfo)
 #include <game/tuning.h>
 #undef MACRO_TUNING_PARAM
 
-	str_format(aJson, sizeof(aJson), "},\"uuids\":[");
+	str_copy(aJson, "},\"uuids\":[");
 	Write(aJson, str_length(aJson));
 
 	for(int i = 0; i < pGameInfo->m_pUuids->NumUuids(); i++)
@@ -191,7 +191,7 @@ void CTeeHistorian::WriteHeader(const CGameInfo *pGameInfo)
 		Write(aJson, str_length(aJson));
 	}
 
-	str_format(aJson, sizeof(aJson), "]}");
+	str_copy(aJson, "]}");
 	Write(aJson, str_length(aJson));
 	Write("", 1); // Null termination.
 }
@@ -423,7 +423,7 @@ void CTeeHistorian::RecordPlayerInput(int ClientID, uint32_t UniqueClientID, con
 		Buffer.Reset();
 
 		Buffer.AddInt(-TEEHISTORIAN_INPUT_DIFF);
-		CSnapshotDelta::DiffItem((int *)&pPrev->m_Input, (int *)pInput, (int *)&DiffInput, sizeof(DiffInput) / sizeof(int));
+		CSnapshotDelta::DiffItem((int *)&pPrev->m_Input, (int *)pInput, (int *)&DiffInput, sizeof(DiffInput) / sizeof(int32_t));
 		if(m_Debug)
 		{
 			const int *pData = (const int *)&DiffInput;
@@ -444,7 +444,7 @@ void CTeeHistorian::RecordPlayerInput(int ClientID, uint32_t UniqueClientID, con
 		}
 	}
 	Buffer.AddInt(ClientID);
-	for(int i = 0; i < (int)(sizeof(DiffInput) / sizeof(int)); i++)
+	for(size_t i = 0; i < sizeof(DiffInput) / sizeof(int32_t); i++)
 	{
 		Buffer.AddInt(((int *)&DiffInput)[i]);
 	}

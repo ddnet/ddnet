@@ -1,12 +1,8 @@
 #ifndef BASE_LOG_H
 #define BASE_LOG_H
 
-#include <stdarg.h>
-#include <stdint.h>
-
-#if defined(__cplusplus)
-extern "C" {
-#endif
+#include <cstdarg>
+#include <cstdint>
 
 #ifdef __GNUC__
 #define GNUC_ATTRIBUTE(x) __attribute__(x)
@@ -93,8 +89,4 @@ void log_log_v(LEVEL level, const char *sys, const char *fmt, va_list args)
  */
 void log_log_color_v(LEVEL level, LOG_COLOR color, const char *sys, const char *fmt, va_list args)
 	GNUC_ATTRIBUTE((format(printf, 4, 0)));
-
-#if defined(__cplusplus)
-}
-#endif
 #endif // BASE_LOG_H

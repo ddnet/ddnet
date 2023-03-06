@@ -37,7 +37,8 @@ class ISteam;
 class IStorage;
 class IUpdater;
 
-#define CONNECTLINK "ddnet:"
+#define CONNECTLINK_DOUBLE_SLASH "ddnet://"
+#define CONNECTLINK_NO_SLASH "ddnet:"
 
 class CGraph
 {
@@ -142,6 +143,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 
 	uint64_t m_aSnapshotParts[NUM_DUMMIES];
 	int64_t m_LocalStartTime;
+	int64_t m_GlobalStartTime;
 
 	IGraphics::CTextureHandle m_DebugFont;
 	int m_DebugSoundIndex = 0;
@@ -157,7 +159,6 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	bool m_AutoCSVRecycle;
 	bool m_EditorActive;
 	bool m_SoundInitFailed;
-	bool m_ResortServerBrowser;
 
 	int m_aAckGameTick[NUM_DUMMIES];
 	int m_aCurrentRecvTick[NUM_DUMMIES];
@@ -203,6 +204,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	char m_aMapDetailsName[256];
 	int m_MapDetailsCrc;
 	SHA256_DIGEST m_MapDetailsSha256;
+	char m_aMapDetailsUrl[256];
 
 	char m_aDDNetInfoTmp[64];
 	std::shared_ptr<CHttpRequest> m_pDDNetInfoTask;
@@ -239,7 +241,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	int m_aSnapshotIncomingDataSize[NUM_DUMMIES];
 
 	CSnapshotStorage::CHolder m_aDemorecSnapshotHolders[NUM_SNAPSHOT_TYPES];
-	char *m_aaapDemorecSnapshotData[NUM_SNAPSHOT_TYPES][2][CSnapshot::MAX_SIZE];
+	char m_aaaDemorecSnapshotData[NUM_SNAPSHOT_TYPES][2][CSnapshot::MAX_SIZE];
 
 	CSnapshotDelta m_SnapshotDelta;
 
@@ -249,8 +251,6 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	bool m_CanReceiveServerCapabilities;
 	bool m_ServerSentCapabilities;
 	CServerCapabilities m_ServerCapabilities;
-
-	bool ShouldSendChatTimeoutCodeHeuristic();
 
 	CServerInfo m_CurrentServerInfo;
 	int64_t m_CurrentServerInfoRequestTime; // >= 0 should request, == -1 got info
@@ -281,9 +281,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 
 	std::vector<SWarning> m_vWarnings;
 
-#if defined(CONF_FAMILY_UNIX)
 	CFifo m_Fifo;
-#endif
 
 	IOHANDLE m_BenchmarkFile;
 	int64_t m_BenchmarkStopTime;
@@ -375,8 +373,7 @@ public:
 	int GetPredictionTime() override;
 	void *SnapGetItem(int SnapID, int Index, CSnapItem *pItem) const override;
 	int SnapItemSize(int SnapID, int Index) const override;
-	void SnapInvalidateItem(int SnapID, int Index) override;
-	void *SnapFindItem(int SnapID, int Type, int ID) const override;
+	const void *SnapFindItem(int SnapID, int Type, int ID) const override;
 	int SnapNumItems(int SnapID) const override;
 	void SnapSetStaticsize(int ItemType, int Size) override;
 
@@ -442,7 +439,6 @@ public:
 	static void Con_Minimize(IConsole::IResult *pResult, void *pUserData);
 	static void Con_Ping(IConsole::IResult *pResult, void *pUserData);
 	static void Con_Screenshot(IConsole::IResult *pResult, void *pUserData);
-	static void Con_Reset(IConsole::IResult *pResult, void *pUserData);
 
 #if defined(CONF_VIDEORECORDER)
 	static void StartVideo(IConsole::IResult *pResult, void *pUserData, const char *pVideoName);
@@ -547,6 +543,11 @@ public:
 	CChecksumData *ChecksumData() override { return &m_Checksum.m_Data; }
 	bool InfoTaskRunning() override { return m_pDDNetInfoTask != nullptr; }
 	int UdpConnectivity(int NetType) override;
+
+#if defined(CONF_FAMILY_WINDOWS)
+	void ShellRegister() override;
+	void ShellUnregister() override;
+#endif
 };
 
 #endif

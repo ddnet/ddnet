@@ -30,7 +30,7 @@ public:
 
 static const char *GetUpdaterUrl(char *pBuf, int BufSize, const char *pFile)
 {
-	str_format(pBuf, BufSize, "https://update6.ddnet.tw/%s", pFile);
+	str_format(pBuf, BufSize, "https://update.ddnet.org/%s", pFile);
 	return pBuf;
 }
 

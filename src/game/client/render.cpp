@@ -15,6 +15,7 @@
 #include <game/generated/protocol.h>
 
 #include <game/mapitems.h>
+#include <game/mapitems_ex.h>
 
 static float gs_SpriteWScale;
 static float gs_SpriteHScale;
@@ -42,10 +43,18 @@ void CRenderTools::Init(IGraphics *pGraphics, ITextRender *pTextRender)
 	Graphics()->QuadsSetSubset(0, 0, 1, 1);
 	QuadContainerAddSprite(m_TeeQuadContainerIndex, 64.f * 0.4f);
 
+	// Feet
 	Graphics()->QuadsSetSubset(0, 0, 1, 1);
 	QuadContainerAddSprite(m_TeeQuadContainerIndex, -32.f, -16.f, 64.f, 32.f);
 	Graphics()->QuadsSetSubset(0, 0, 1, 1);
 	QuadContainerAddSprite(m_TeeQuadContainerIndex, -32.f, -16.f, 64.f, 32.f);
+
+	// Mirrored Feet
+	Graphics()->QuadsSetSubsetFree(1, 0, 0, 0, 0, 1, 1, 1);
+	QuadContainerAddSprite(m_TeeQuadContainerIndex, -32.f, -16.f, 64.f, 32.f);
+	Graphics()->QuadsSetSubsetFree(1, 0, 0, 0, 0, 1, 1, 1);
+	QuadContainerAddSprite(m_TeeQuadContainerIndex, -32.f, -16.f, 64.f, 32.f);
+
 	Graphics()->QuadContainerUpload(m_TeeQuadContainerIndex);
 }
 
@@ -102,7 +111,7 @@ void CRenderTools::GetSpriteScale(int Id, float &ScaleX, float &ScaleY)
 
 void CRenderTools::GetSpriteScaleImpl(int Width, int Height, float &ScaleX, float &ScaleY)
 {
-	float f = sqrtf(Height * Height + Width * Width);
+	const float f = length(vec2(Width, Height));
 	ScaleX = Width / f;
 	ScaleY = Height / f;
 }
@@ -165,16 +174,6 @@ int CRenderTools::QuadContainerAddSprite(int QuadContainerIndex, float X, float 
 {
 	IGraphics::CQuadItem QuadItem(X, Y, Width, Height);
 	return Graphics()->QuadContainerAddQuads(QuadContainerIndex, &QuadItem, 1);
-}
-
-void CRenderTools::DrawUIRect(const CUIRect *pRect, ColorRGBA Color, int Corners, float Rounding)
-{
-	Graphics()->DrawRect(pRect->x, pRect->y, pRect->w, pRect->h, Color, Corners, Rounding);
-}
-
-void CRenderTools::DrawUIRect4(const CUIRect *pRect, vec4 ColorTopLeft, vec4 ColorTopRight, vec4 ColorBottomLeft, vec4 ColorBottomRight, int Corners, float Rounding)
-{
-	Graphics()->DrawRect4(pRect->x, pRect->y, pRect->w, pRect->h, ColorTopLeft, ColorTopRight, ColorBottomLeft, ColorBottomRight, Corners, Rounding);
 }
 
 void CRenderTools::GetRenderTeeAnimScaleAndBaseSize(CAnimState *pAnim, CTeeRenderInfo *pInfo, float &AnimScale, float &BaseSize)
@@ -246,7 +245,7 @@ void CRenderTools::GetRenderTeeOffsetToRenderedTee(CAnimState *pAnim, CTeeRender
 	float MinY = -32.0f * AssumedScale;
 	// the body pos shifts the body away from center
 	MinY += BodyPos.y;
-	// the actual body is smaller tho, bcs it doesnt use the full skin image in most cases
+	// the actual body is smaller though, because it doesn't use the full skin image in most cases
 	MinY += BodyOffset.y;
 
 	vec2 FeetOffset;
@@ -256,13 +255,13 @@ void CRenderTools::GetRenderTeeOffsetToRenderedTee(CAnimState *pAnim, CTeeRender
 	// MaxY builds up from the MinY
 	float MaxY = MinY + BodyHeight;
 	// if the body is smaller than the total feet offset, use feet
-	// since feets are smaller in height, respect the assumed relative position
+	// since feet are smaller in height, respect the assumed relative position
 	MaxY = maximum(MaxY, (-16.0f * AssumedScale + FeetPos.y) + FeetOffset.y + FeetHeight);
 
 	// now we got the full rendered size
 	float FullHeight = (MaxY - MinY);
 
-	// next step is to calculate the offset that was created compared to the assumed relative positon
+	// next step is to calculate the offset that was created compared to the assumed relative position
 	float MidOfRendered = MinY + FullHeight / 2.0f;
 
 	// TODO: x coordinate is ignored for now, bcs it's not really used yet anyway
@@ -306,6 +305,7 @@ void CRenderTools::RenderTee(CAnimState *pAnim, CTeeRenderInfo *pInfo, int Emote
 					int QuadOffset = 2;
 					int EyeQuadOffset = 0;
 					int TeeEye = 0;
+
 					switch(Emote)
 					{
 					case EMOTE_PAIN:
@@ -347,6 +347,10 @@ void CRenderTools::RenderTee(CAnimState *pAnim, CTeeRenderInfo *pInfo, int Emote
 			float h = BaseSize / 2;
 
 			int QuadOffset = 7;
+			if(Dir.x < 0 && pInfo->m_FeetFlipped)
+			{
+				QuadOffset += 2;
+			}
 
 			Graphics()->QuadsSetRotation(pFoot->m_Angle * pi * 2);
 
@@ -377,7 +381,7 @@ void CRenderTools::CalcScreenParams(float Aspect, float Zoom, float *pWidth, flo
 	const float WMax = 1500;
 	const float HMax = 1050;
 
-	float f = sqrtf(Amount) / sqrtf(Aspect);
+	const float f = std::sqrt(Amount) / std::sqrt(Aspect);
 	*pWidth = f * Aspect;
 	*pHeight = f;
 
@@ -399,10 +403,15 @@ void CRenderTools::CalcScreenParams(float Aspect, float Zoom, float *pWidth, flo
 }
 
 void CRenderTools::MapScreenToWorld(float CenterX, float CenterY, float ParallaxX, float ParallaxY,
-	float OffsetX, float OffsetY, float Aspect, float Zoom, float *pPoints)
+	float ParallaxZoom, float OffsetX, float OffsetY, float Aspect, float Zoom, float *pPoints)
 {
 	float Width, Height;
 	CalcScreenParams(Aspect, Zoom, &Width, &Height);
+
+	float Scale = (ParallaxZoom * (Zoom - 1.0f) + 100.0f) / 100.0f / Zoom;
+	Width *= Scale;
+	Height *= Scale;
+
 	CenterX *= ParallaxX / 100.0f;
 	CenterY *= ParallaxY / 100.0f;
 	pPoints[0] = OffsetX + CenterX - Width / 2;
@@ -411,10 +420,19 @@ void CRenderTools::MapScreenToWorld(float CenterX, float CenterY, float Parallax
 	pPoints[3] = pPoints[1] + Height;
 }
 
-void CRenderTools::MapScreenToGroup(float CenterX, float CenterY, CMapItemGroup *pGroup, float Zoom)
+void CRenderTools::MapScreenToGroup(float CenterX, float CenterY, CMapItemGroup *pGroup, CMapItemGroupEx *pGroupEx, float Zoom)
+{
+	float ParallaxZoom = GetParallaxZoom(pGroup, pGroupEx);
+	float aPoints[4];
+	MapScreenToWorld(CenterX, CenterY, pGroup->m_ParallaxX, pGroup->m_ParallaxY, ParallaxZoom,
+		pGroup->m_OffsetX, pGroup->m_OffsetY, Graphics()->ScreenAspect(), Zoom, aPoints);
+	Graphics()->MapScreen(aPoints[0], aPoints[1], aPoints[2], aPoints[3]);
+}
+
+void CRenderTools::MapScreenToInterface(float CenterX, float CenterY)
 {
 	float aPoints[4];
-	MapScreenToWorld(CenterX, CenterY, pGroup->m_ParallaxX, pGroup->m_ParallaxY,
-		pGroup->m_OffsetX, pGroup->m_OffsetY, Graphics()->ScreenAspect(), Zoom, aPoints);
+	MapScreenToWorld(CenterX, CenterY, 100.0f, 100.0f, 100.0f,
+		0, 0, Graphics()->ScreenAspect(), 1.0f, aPoints);
 	Graphics()->MapScreen(aPoints[0], aPoints[1], aPoints[2], aPoints[3]);
 }

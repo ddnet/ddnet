@@ -39,9 +39,5 @@ wartee:
 Copyright Obst
 zlib license
 
-Aoe4legs:
-Copyright Aoe
-CC0 license
-
 All other skins:
-All content is released under CC-BY-SA 3.0 (http://creativecommons.org/licenses/by-sa/3.0/).
+All content is released under CC-BY-SA 3.0 (https://creativecommons.org/licenses/by-sa/3.0/).

@@ -2,11 +2,11 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
+#include <engine/shared/protocol.h>
 #include <engine/textrender.h>
 #include <game/generated/client_data.h>
 #include <game/generated/protocol.h>
 
-#include "engine/shared/protocol.h"
 #include "killmessages.h"
 #include <game/client/animstate.h>
 #include <game/client/gameclient.h>
@@ -62,7 +62,7 @@ void CKillMessages::CreateKillmessageNamesIfNotCreated(CKillMsg &Kill)
 	const float FontSize = 36.0f;
 	if(Kill.m_VictimTextContainerIndex == -1 && Kill.m_aVictimName[0] != 0)
 	{
-		Kill.m_VitctimTextWidth = TextRender()->TextWidth(0, FontSize, Kill.m_aVictimName, -1, -1.0f);
+		Kill.m_VitctimTextWidth = TextRender()->TextWidth(FontSize, Kill.m_aVictimName, -1, -1.0f);
 
 		CTextCursor Cursor;
 		TextRender()->SetCursor(&Cursor, 0, 0, FontSize, TEXTFLAG_RENDER);
@@ -80,7 +80,7 @@ void CKillMessages::CreateKillmessageNamesIfNotCreated(CKillMsg &Kill)
 
 	if(Kill.m_KillerTextContainerIndex == -1 && Kill.m_aKillerName[0] != 0)
 	{
-		Kill.m_KillerTextWidth = TextRender()->TextWidth(0, FontSize, Kill.m_aKillerName, -1, -1.0f);
+		Kill.m_KillerTextWidth = TextRender()->TextWidth(FontSize, Kill.m_aKillerName, -1, -1.0f);
 
 		CTextCursor Cursor;
 		TextRender()->SetCursor(&Cursor, 0, 0, FontSize, TEXTFLAG_RENDER);
@@ -100,6 +100,9 @@ void CKillMessages::CreateKillmessageNamesIfNotCreated(CKillMsg &Kill)
 
 void CKillMessages::OnMessage(int MsgType, void *pRawMsg)
 {
+	if(m_pClient->m_SuppressEvents)
+		return;
+
 	if(MsgType == NETMSGTYPE_SV_KILLMSG)
 	{
 		CNetMsg_Sv_KillMsg *pMsg = (CNetMsg_Sv_KillMsg *)pRawMsg;
@@ -299,7 +302,7 @@ void CKillMessages::RefindSkins()
 
 		if(m_aKillmsgs[r].m_KillerID >= 0)
 		{
-			CGameClient::CClientData &Client = GameClient()->m_aClients[m_aKillmsgs[r].m_KillerID];
+			const CGameClient::CClientData &Client = GameClient()->m_aClients[m_aKillmsgs[r].m_KillerID];
 			if(Client.m_aSkinName[0] != '\0')
 				m_aKillmsgs[r].m_KillerRenderInfo = Client.m_RenderInfo;
 			else
@@ -308,7 +311,7 @@ void CKillMessages::RefindSkins()
 
 		if(m_aKillmsgs[r].m_VictimID >= 0)
 		{
-			CGameClient::CClientData &Client = GameClient()->m_aClients[m_aKillmsgs[r].m_VictimID];
+			const CGameClient::CClientData &Client = GameClient()->m_aClients[m_aKillmsgs[r].m_VictimID];
 			if(Client.m_aSkinName[0] != '\0')
 				m_aKillmsgs[r].m_VictimRenderInfo = Client.m_RenderInfo;
 			else

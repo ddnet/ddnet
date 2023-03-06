@@ -3,7 +3,7 @@
 #ifndef BASE_VMATH_H
 #define BASE_VMATH_H
 
-#include <math.h>
+#include <cmath>
 
 #include "math.h"
 
@@ -84,11 +84,11 @@ public:
 };
 
 template<typename T>
-inline vector2_base<T> rotate(const vector2_base<T> &a, float angle)
+constexpr inline vector2_base<T> rotate(const vector2_base<T> &a, float angle)
 {
 	angle = angle * pi / 180.0f;
-	float s = sinf(angle);
-	float c = cosf(angle);
+	float s = std::sin(angle);
+	float c = std::cos(angle);
 	return vector2_base<T>((T)(c * a.x - s * a.y), (T)(s * a.x + c * a.y));
 }
 
@@ -99,30 +99,35 @@ inline T distance(const vector2_base<T> a, const vector2_base<T> &b)
 }
 
 template<typename T>
-inline T dot(const vector2_base<T> a, const vector2_base<T> &b)
+constexpr inline T dot(const vector2_base<T> a, const vector2_base<T> &b)
 {
 	return a.x * b.x + a.y * b.y;
 }
 
 inline float length(const vector2_base<float> &a)
 {
-	return sqrtf(a.x * a.x + a.y * a.y);
+	return std::sqrt(dot(a, a));
 }
 
-inline float angle(const vector2_base<float> &a)
+inline float length_squared(const vector2_base<float> &a)
+{
+	return dot(a, a);
+}
+
+constexpr inline float angle(const vector2_base<float> &a)
 {
 	if(a.x == 0 && a.y == 0)
 		return 0.0f;
 	else if(a.x == 0)
 		return a.y < 0 ? -pi / 2 : pi / 2;
-	float result = atanf(a.y / a.x);
+	float result = std::atan(a.y / a.x);
 	if(a.x < 0)
 		result = result + pi;
 	return result;
 }
 
 template<typename T>
-inline vector2_base<T> normalize_pre_length(const vector2_base<T> &v, T len)
+constexpr inline vector2_base<T> normalize_pre_length(const vector2_base<T> &v, T len)
 {
 	if(len == 0)
 		return vector2_base<T>();
@@ -131,7 +136,7 @@ inline vector2_base<T> normalize_pre_length(const vector2_base<T> &v, T len)
 
 inline vector2_base<float> normalize(const vector2_base<float> &v)
 {
-	float divisor = sqrtf(v.x * v.x + v.y * v.y);
+	float divisor = length(v);
 	if(divisor == 0.0f)
 		return vector2_base<float>(0.0f, 0.0f);
 	float l = (float)(1.0f / divisor);
@@ -140,7 +145,7 @@ inline vector2_base<float> normalize(const vector2_base<float> &v)
 
 inline vector2_base<float> direction(float angle)
 {
-	return vector2_base<float>(cosf(angle), sinf(angle));
+	return vector2_base<float>(std::cos(angle), std::sin(angle));
 }
 
 typedef vector2_base<float> vec2;
@@ -148,7 +153,7 @@ typedef vector2_base<bool> bvec2;
 typedef vector2_base<int> ivec2;
 
 template<typename T>
-inline bool closest_point_on_line(vector2_base<T> line_pointA, vector2_base<T> line_pointB, vector2_base<T> target_point, vector2_base<T> &out_pos)
+constexpr inline bool closest_point_on_line(vector2_base<T> line_pointA, vector2_base<T> line_pointB, vector2_base<T> target_point, vector2_base<T> &out_pos)
 {
 	vector2_base<T> AB = line_pointB - line_pointA;
 	T SquaredMagnitudeAB = dot(AB, AB);
@@ -182,12 +187,12 @@ public:
 		T z, b, l, w;
 	};
 
-	vector3_base() :
+	constexpr vector3_base() :
 		x(T()), y(T()), z(T())
 	{
 	}
 
-	vector3_base(T nx, T ny, T nz) :
+	constexpr vector3_base(T nx, T ny, T nz) :
 		x(nx), y(ny), z(nz)
 	{
 	}
@@ -254,13 +259,13 @@ inline T distance(const vector3_base<T> &a, const vector3_base<T> &b)
 }
 
 template<typename T>
-inline T dot(const vector3_base<T> &a, const vector3_base<T> &b)
+constexpr inline T dot(const vector3_base<T> &a, const vector3_base<T> &b)
 {
 	return a.x * b.x + a.y * b.y + a.z * b.z;
 }
 
 template<typename T>
-inline vector3_base<T> cross(const vector3_base<T> &a, const vector3_base<T> &b)
+constexpr inline vector3_base<T> cross(const vector3_base<T> &a, const vector3_base<T> &b)
 {
 	return vector3_base<T>(
 		a.y * b.z - a.z * b.y,
@@ -271,12 +276,12 @@ inline vector3_base<T> cross(const vector3_base<T> &a, const vector3_base<T> &b)
 //
 inline float length(const vector3_base<float> &a)
 {
-	return sqrtf(a.x * a.x + a.y * a.y + a.z * a.z);
+	return std::sqrt(dot(a, a));
 }
 
 inline vector3_base<float> normalize(const vector3_base<float> &v)
 {
-	float divisor = sqrtf(v.x * v.x + v.y * v.y + v.z * v.z);
+	float divisor = length(v);
 	if(divisor == 0.0f)
 		return vector3_base<float>(0.0f, 0.0f, 0.0f);
 	float l = (float)(1.0f / divisor);
@@ -310,12 +315,12 @@ public:
 		T w, a;
 	};
 
-	vector4_base() :
+	constexpr vector4_base() :
 		x(T()), y(T()), z(T()), w(T())
 	{
 	}
 
-	vector4_base(T nx, T ny, T nz, T nw) :
+	constexpr vector4_base(T nx, T ny, T nz, T nw) :
 		x(nx), y(ny), z(nz), w(nw)
 	{
 	}
@@ -378,6 +383,7 @@ public:
 	}
 
 	bool operator==(const vector4_base &vec) const { return x == vec.x && y == vec.y && z == vec.z && w == vec.w; } //TODO: do this with an eps instead
+	bool operator!=(const vector4_base &vec) const { return x != vec.x || y != vec.y || z != vec.z || w != vec.w; }
 };
 
 typedef vector4_base<float> vec4;

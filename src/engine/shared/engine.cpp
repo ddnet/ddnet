@@ -72,6 +72,12 @@ public:
 			dbg_msg("engine", "unknown endian");
 #endif
 
+			char aVersionStr[128];
+			if(!os_version_str(aVersionStr, sizeof(aVersionStr)))
+			{
+				dbg_msg("engine", "operation system version: %s", aVersionStr);
+			}
+
 			// init the network
 			net_init();
 			CNetBase::Init();

@@ -43,14 +43,8 @@ Address
 All
 == 全部
 
-Are you sure that you want to delete the demo?
-== デモを削除してもよろしいですか？
-
 Are you sure that you want to quit?
 == 終了してもよろしいですか？
-
-Are you sure that you want to remove the player from your friends list?
-== このプレイヤーを友達リストから削除してもよろしいですか？
 
 Automatically record demos
 == 自動的にデモを保存する
@@ -395,9 +389,6 @@ Show ingame HUD
 Show name plates
 == 名前を表示
 
-Skins
-== スキン
-
 Sound
 == サウンド
 
@@ -457,9 +448,6 @@ Try again
 
 Type
 == タイプ
-
-Unable to delete the demo
-== デモを削除できません。
 
 Unable to rename the demo
 == デモの名前を変更できません。
@@ -577,9 +565,6 @@ Reset to defaults
 Laser
 == レーザー
 
-Display Modes
-== 画面モード
-
 Version:
 == バージョン:
 
@@ -685,12 +670,6 @@ Your nickname '%s' is already used (%d points). Do you still want to use it?
 Checking for existing player with your name
 == 既存のプレーヤーの中でハンドルネームを検索しています。
 
-Country / Region
-== 国・地域
-
-Destination file already exist
-== 保存先のファイルはすでに存在します
-
 Speed
 == 速度
 
@@ -700,8 +679,8 @@ Video name:
 Show DDNet map finishes in server browser
 == サーバー・ブラウザーで完成した DDNet マップを表示する
 
-transmits your player name to info2.ddnet.tw
-== ハンドルネームを info2.ddnet.tw に送信します
+transmits your player name to info.ddnet.org
+== ハンドルネームを info.ddnet.org に送信します
 
 Theme
 == テーマ
@@ -1000,12 +979,6 @@ Show kill messages
 Show votes window after voting
 == 投票完了後にウィンドウを閉じない
 
-Laser Outline Color
-== レーザー枠の色
-
-Laser Inner Color
-== レーザーの色
-
 Use old chat style
 == 古いチャットボックスを使用
 
@@ -1102,9 +1075,6 @@ Show tiles layers from BG map
 Regular Background Color
 == 普通の背景色
 
-Try fast HTTP map download first
-== マップのダウンロードは HTTP を優先にする
-
 New random timeout code
 == ランダムにタイムアウト・コードを生成
 
@@ -1141,14 +1111,14 @@ Assets directory
 Discord
 == Discord
 
-https://ddnet.tw/discord
-== https://ddnet.tw/discord
+https://ddnet.org/discord
+== https://ddnet.org/discord
 
 Learn
 == チュートリアル
 
-https://wiki.ddnet.tw/
-== https://wiki.ddnet.tw/
+https://wiki.ddnet.org/
+== https://wiki.ddnet.org/
 
 Website
 == ウェブ
@@ -1238,6 +1208,47 @@ Grabs
 9+ new mentions
 == 9+ 件の新しいメンション
 
+[Graphics error]
+
+[Graphics error]
+Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== 
+
+[Graphics error]
+Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
+== 
+
+[Graphics error]
+An error during command recording occurred. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+A render command failed. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+Submitting the render commands failed. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+Failed to swap framebuffers. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== 
+
+[Graphics error]
+Could not initialize the given graphics backend, reverting to the default backend now.
+== 
+
+[Graphics error]
+Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
+== 
+
+Could not save downloaded map. Try manually deleting this file: %s
+== 
+
 The format of texture %s is not RGBA which will cause visual bugs.
 == 
 
@@ -1263,6 +1274,9 @@ Initializing map logic
 == 
 
 Sending initial client info
+== 
+
+Search:
 == 
 
 Position:
@@ -1295,7 +1309,10 @@ Getting game info
 Requesting to join the game
 == 
 
-Are you sure that you want to disconnect and switch to a different server?
+Cancel
+== 
+
+File '%s' already exists, do you want to overwrite it?
 == 
 
 Join Tutorial Server
@@ -1331,16 +1348,94 @@ CHN
 Refreshing...
 == 
 
+Are you sure that you want to disconnect and switch to a different server?
+== 
+
+Copy info
+== 
+
+Are you sure that you want to remove the player '%s' from your friends list?
+== 
+
+Are you sure that you want to remove the clan '%s' from your friends list?
+== 
+
+Play the current demo
+== 
+
+Pause the current demo
+== 
+
+Stop the current demo
+== 
+
+Go back one tick
+== 
+
+Go forward one tick
+== 
+
+Slow down the demo
+== 
+
+Speed up the demo
+== 
+
+Mark the beginning of a cut
+== 
+
+Mark the end of a cut
+== 
+
+Export cut as a separate demo
+== 
+
+Go back one marker
+== 
+
+Go forward one marker
+== 
+
+Toggle keyboard shortcuts
+== 
+
 Loading demo files
+== 
+
+Open the directory that contains the demo files
+== 
+
+Are you sure that you want to delete the demo '%s'?
+== 
+
+Unable to delete the demo '%s'
 == 
 
 Loading ghost files
 == 
 
+Menu opened. Press Esc key again to close menu.
+== 
+
+Save power by lowering refresh rate (higher input latency)
+== 
+
 Settings file
 == 
 
+Open the settings file
+== 
+
 Config directory
+== 
+
+Open the directory that contains the configuration and user files
+== 
+
+Open the directory to add custom themes
+== 
+
+Loading skin files
 == 
 
 Toggle to edit your dummy settings
@@ -1352,7 +1447,7 @@ Download community skins
 Choose default eyes when joining a server
 == 
 
-Loading skin files
+Open the directory to add custom skins
 == 
 
 Enable controller
@@ -1384,7 +1479,7 @@ UI controller sens.
 Controller jitter tolerance
 == 
 
-No controller found. Plug in a controller and restart the game.
+No controller found. Plug in a controller.
 == 
 
 Device
@@ -1409,6 +1504,12 @@ UI mouse sens.
 == 
 
 Controller
+== 
+
+Reset controls
+== 
+
+Are you sure that you want to reset the controls to their defaults?
 == 
 
 Windowed fullscreen
@@ -1513,6 +1614,36 @@ Normal Color
 Highlight Color
 == 
 
+Weapons
+== 
+
+Rifle Laser Outline Color
+== 
+
+Rifle Laser Inner Color
+== 
+
+Shotgun Laser Outline Color
+== 
+
+Shotgun Laser Inner Color
+== 
+
+Door Laser Outline Color
+== 
+
+Door Laser Inner Color
+== 
+
+Freeze Laser Outline Color
+== 
+
+Freeze Laser Inner Color
+== 
+
+Set all to Rifle
+== 
+
 When you cross the start line, show a ghost tee replicating the movements of your best time
 == 
 
@@ -1534,10 +1665,16 @@ Run on join
 Chat command (e.g. showall 1)
 == 
 
+Unregister protocol and file extensions
+== 
+
 Extras
 == 
 
 Loading assets
+== 
+
+Open the directory to add custom assets
 == 
 
 Tutorial

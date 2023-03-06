@@ -8,10 +8,10 @@
 //
 // Example:
 //
-// 1) `i-unfreeze-you@ddnet.tw`
+// 1) `i-unfreeze-you@ddnet.org`
 // 2) `creeper@minetee`
 //
-// The first example applies if you own the `ddnet.tw` domain, that is, if you
+// The first example applies if you own the `ddnet.org` domain, that is, if you
 // are adding this message on behalf of the DDNet team.
 //
 // The second example shows how you could add a message if you don't own a

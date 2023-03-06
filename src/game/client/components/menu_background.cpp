@@ -193,8 +193,6 @@ void CMenuBackground::LoadMenuBackground(bool HasDayHint, bool HasNightHint)
 
 	ResetPositions();
 
-	bool NeedImageLoading = false;
-
 	str_copy(m_aMapName, g_Config.m_ClMenuMap);
 
 	if(g_Config.m_ClMenuMap[0] != '\0')
@@ -265,11 +263,9 @@ void CMenuBackground::LoadMenuBackground(bool HasDayHint, bool HasNightHint)
 		if(m_Loaded)
 		{
 			m_pLayers->InitBackground(m_pMap);
-			NeedImageLoading = true;
 
 			CMapLayers::OnMapLoad();
-			if(NeedImageLoading)
-				m_pImages->LoadBackground(m_pLayers, m_pMap);
+			m_pImages->LoadBackground(m_pLayers, m_pMap);
 
 			// look for custom positions
 			CMapItemLayerTilemap *pTLayer = m_pLayers->GameLayer();
@@ -282,11 +278,9 @@ void CMenuBackground::LoadMenuBackground(bool HasDayHint, bool HasNightHint)
 
 				if(Size >= pTLayer->m_Width * pTLayer->m_Height * TileSize)
 				{
-					int x = 0;
-					int y = 0;
-					for(y = 0; y < pTLayer->m_Height; ++y)
+					for(int y = 0; y < pTLayer->m_Height; ++y)
 					{
-						for(x = 0; x < pTLayer->m_Width; ++x)
+						for(int x = 0; x < pTLayer->m_Width; ++x)
 						{
 							unsigned char Index = ((CTile *)pTiles)[y * pTLayer->m_Width + x].m_Index;
 							if(Index >= TILE_TIME_CHECKPOINT_FIRST && Index <= TILE_TIME_CHECKPOINT_LAST)
@@ -351,7 +345,7 @@ bool CMenuBackground::Render()
 		// move time
 		m_MoveTime += clamp(Client()->RenderFrameTime(), 0.0f, 0.1f) * g_Config.m_ClCameraSpeed / 10.0f;
 		float XVal = 1 - m_MoveTime;
-		XVal = pow(XVal, 7.0f);
+		XVal = std::pow(XVal, 7.0f);
 
 		m_Camera.m_Center = TargetPos + Dir * (XVal * Distance);
 		if(m_CurrentPosition < 0)

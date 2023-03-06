@@ -186,8 +186,8 @@ void FillTmpTileSpeedup(SGraphicTile *pTmpTile, SGraphicTileTexureCoords *pTmpTe
 
 	//same as in rotate from Graphics()
 	float Angle = (float)AngleRotate * (pi / 180.0f);
-	float c = cosf(Angle);
-	float s = sinf(Angle);
+	float c = std::cos(Angle);
+	float s = std::sin(Angle);
 	float xR, yR;
 	int i;
 
@@ -229,7 +229,7 @@ void FillTmpTile(SGraphicTile *pTmpTile, SGraphicTileTexureCoords *pTmpTex, bool
 		unsigned char x3 = x0;
 		unsigned char y3 = y0 + 1;
 
-		if(Flags & TILEFLAG_VFLIP)
+		if(Flags & TILEFLAG_XFLIP)
 		{
 			x0 = x2;
 			x1 = x3;
@@ -237,7 +237,7 @@ void FillTmpTile(SGraphicTile *pTmpTile, SGraphicTileTexureCoords *pTmpTex, bool
 			x3 = x0;
 		}
 
-		if(Flags & TILEFLAG_HFLIP)
+		if(Flags & TILEFLAG_YFLIP)
 		{
 			y0 = y3;
 			y2 = y1;
@@ -848,7 +848,7 @@ void CMapLayers::OnMapLoad()
 							mem_copy_special(pUploadData, pTmpTiles, sizeof(vec2), vtmpTiles.size() * 4, (DoTextureCoords ? sizeof(vec3) : 0));
 							if(DoTextureCoords)
 							{
-								mem_copy_special(pUploadData + sizeof(vec2), pTmpTileTexCoords, sizeof(vec3), vtmpTiles.size() * 4, (DoTextureCoords ? (sizeof(vec2)) : 0));
+								mem_copy_special(pUploadData + sizeof(vec2), pTmpTileTexCoords, sizeof(vec3), vtmpTiles.size() * 4, sizeof(vec2));
 							}
 
 							// first create the buffer object
@@ -1017,10 +1017,10 @@ void CMapLayers::RenderTileLayer(int LayerIndex, ColorRGBA &Color, CMapItemLayer
 	int BorderX0, BorderY0, BorderX1, BorderY1;
 	bool DrawBorder = false;
 
-	int Y0 = BorderY0 = (int)floorf((ScreenY0) / 32);
-	int X0 = BorderX0 = (int)floorf((ScreenX0) / 32);
-	int Y1 = BorderY1 = (int)floorf((ScreenY1) / 32);
-	int X1 = BorderX1 = (int)floorf((ScreenX1) / 32);
+	int Y0 = BorderY0 = std::floor((ScreenY0) / 32);
+	int X0 = BorderX0 = std::floor((ScreenX0) / 32);
+	int Y1 = BorderY1 = std::floor((ScreenY1) / 32);
+	int X1 = BorderX1 = std::floor((ScreenX1) / 32);
 
 	if(X0 <= 0)
 	{
@@ -1095,7 +1095,7 @@ void CMapLayers::RenderTileLayer(int LayerIndex, ColorRGBA &Color, CMapItemLayer
 	}
 
 	if(DrawBorder)
-		RenderTileBorder(LayerIndex, Color, pTileLayer, pGroup, BorderX0, BorderY0, BorderX1, BorderY1, (int)(-floorf((-ScreenX1) / 32.f)) - BorderX0, (int)(-floorf((-ScreenY1) / 32.f)) - BorderY0);
+		RenderTileBorder(LayerIndex, Color, pTileLayer, pGroup, BorderX0, BorderY0, BorderX1, BorderY1, -std::floor(-ScreenX1 / 32.f) - BorderX0, -std::floor(-ScreenY1 / 32.f) - BorderY0);
 }
 
 void CMapLayers::RenderTileBorderCornerTiles(int WidthOffsetToOrigin, int HeightOffsetToOrigin, int TileCountWidth, int TileCountHeight, int BufferContainerIndex, const ColorRGBA &Color, offset_ptr_size IndexBufferOffset, const vec2 &Offset, const vec2 &Dir)
@@ -1562,6 +1562,7 @@ void CMapLayers::OnRender()
 	for(int g = 0; g < m_pLayers->NumGroups(); g++)
 	{
 		CMapItemGroup *pGroup = m_pLayers->GetGroup(g);
+		CMapItemGroupEx *pGroupEx = m_pLayers->GetGroupEx(g);
 
 		if(!pGroup)
 		{
@@ -1575,7 +1576,7 @@ void CMapLayers::OnRender()
 		{
 			// set clipping
 			float aPoints[4];
-			RenderTools()->MapScreenToGroup(Center.x, Center.y, m_pLayers->GameGroup(), GetCurCamera()->m_Zoom);
+			RenderTools()->MapScreenToGroup(Center.x, Center.y, m_pLayers->GameGroup(), m_pLayers->GameGroupEx(), GetCurCamera()->m_Zoom);
 			Graphics()->GetScreen(&aPoints[0], &aPoints[1], &aPoints[2], &aPoints[3]);
 			float x0 = (pGroup->m_ClipX - aPoints[0]) / (aPoints[2] - aPoints[0]);
 			float y0 = (pGroup->m_ClipY - aPoints[1]) / (aPoints[3] - aPoints[1]);
@@ -1593,12 +1594,7 @@ void CMapLayers::OnRender()
 				(int)((x1 - x0) * Graphics()->ScreenWidth()), (int)((y1 - y0) * Graphics()->ScreenHeight()));
 		}
 
-		if((!g_Config.m_ClZoomBackgroundLayers || m_Type == TYPE_FULL_DESIGN) && !pGroup->m_ParallaxX && !pGroup->m_ParallaxY)
-		{
-			RenderTools()->MapScreenToGroup(Center.x, Center.y, pGroup, 1.0f);
-		}
-		else
-			RenderTools()->MapScreenToGroup(Center.x, Center.y, pGroup, GetCurCamera()->m_Zoom);
+		RenderTools()->MapScreenToGroup(Center.x, Center.y, pGroup, pGroupEx, GetCurCamera()->m_Zoom);
 
 		for(int l = 0; l < pGroup->m_NumLayers; l++)
 		{
@@ -1658,7 +1654,7 @@ void CMapLayers::OnRender()
 					Render = true;
 			}
 
-			if(Render && pLayer->m_Type == LAYERTYPE_TILES && Input()->ModifierIsPressed() && (Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT)) && Input()->KeyPress(KEY_KP_0))
+			if(Render && pLayer->m_Type == LAYERTYPE_TILES && Input()->ModifierIsPressed() && Input()->ShiftIsPressed() && Input()->KeyPress(KEY_KP_0))
 			{
 				CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
 				CTile *pTiles = (CTile *)m_pLayers->Map()->GetData(pTMap->m_Data);
@@ -1751,7 +1747,7 @@ void CMapLayers::OnRender()
 						if(!IsGameLayer)
 							Graphics()->TextureClear();
 						else
-							Graphics()->TextureSet(m_pImages->GetEntities(MAP_IMAGE_ENTITY_LAYER_TYPE_GAME));
+							Graphics()->TextureSet(m_pImages->GetEntities(MAP_IMAGE_ENTITY_LAYER_TYPE_ALL_EXCEPT_SWITCH));
 					}
 					else
 						Graphics()->TextureSet(m_pImages->Get(pTMap->m_Image));
@@ -1779,7 +1775,7 @@ void CMapLayers::OnRender()
 							{
 								// slow blinking to hint that it's not a part of the map
 								double Seconds = time_get() / (double)time_freq();
-								ColorRGBA ColorHint = ColorRGBA(1.0f, 1.0f, 1.0f, 0.3 + 0.7 * (1 + sin(2 * (double)pi * Seconds / 3)) / 2);
+								ColorRGBA ColorHint = ColorRGBA(1.0f, 1.0f, 1.0f, 0.3 + 0.7 * (1 + std::sin(2 * (double)pi * Seconds / 3)) / 2);
 
 								RenderTools()->RenderTileRectangle(-201, -201, pTMap->m_Width + 402, pTMap->m_Height + 402,
 									0, TILE_DEATH, // display air inside, death outside
@@ -1798,7 +1794,7 @@ void CMapLayers::OnRender()
 							{
 								// slow blinking to hint that it's not a part of the map
 								double Seconds = time_get() / (double)time_freq();
-								ColorRGBA ColorHint = ColorRGBA(1.0f, 1.0f, 1.0f, 0.3 + 0.7 * (1.0 + sin(2 * (double)pi * Seconds / 3)) / 2);
+								ColorRGBA ColorHint = ColorRGBA(1.0f, 1.0f, 1.0f, 0.3 + 0.7 * (1.0 + std::sin(2 * (double)pi * Seconds / 3)) / 2);
 
 								ColorRGBA ColorKill(Color.x * ColorHint.x, Color.y * ColorHint.y, Color.z * ColorHint.z, Color.w * ColorHint.w);
 								RenderKillTileBorder(TileLayerCounter - 1, ColorKill, pTMap, pGroup);
@@ -1852,7 +1848,7 @@ void CMapLayers::OnRender()
 			else if(Render && EntityOverlayVal && IsFrontLayer)
 			{
 				CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
-				Graphics()->TextureSet(m_pImages->GetEntities(MAP_IMAGE_ENTITY_LAYER_TYPE_FRONT));
+				Graphics()->TextureSet(m_pImages->GetEntities(MAP_IMAGE_ENTITY_LAYER_TYPE_ALL_EXCEPT_SWITCH));
 
 				CTile *pFrontTiles = (CTile *)m_pLayers->Map()->GetData(pTMap->m_Front);
 				unsigned int Size = m_pLayers->Map()->GetDataSize(pTMap->m_Front);
@@ -1912,7 +1908,7 @@ void CMapLayers::OnRender()
 			else if(Render && EntityOverlayVal && IsTeleLayer)
 			{
 				CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
-				Graphics()->TextureSet(m_pImages->GetEntities(MAP_IMAGE_ENTITY_LAYER_TYPE_TELE));
+				Graphics()->TextureSet(m_pImages->GetEntities(MAP_IMAGE_ENTITY_LAYER_TYPE_ALL_EXCEPT_SWITCH));
 
 				CTeleTile *pTeleTiles = (CTeleTile *)m_pLayers->Map()->GetData(pTMap->m_Tele);
 				unsigned int Size = m_pLayers->Map()->GetDataSize(pTMap->m_Tele);
@@ -1943,7 +1939,7 @@ void CMapLayers::OnRender()
 			else if(Render && EntityOverlayVal && IsSpeedupLayer)
 			{
 				CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
-				Graphics()->TextureSet(m_pImages->GetEntities(MAP_IMAGE_ENTITY_LAYER_TYPE_SPEEDUP));
+				Graphics()->TextureSet(m_pImages->GetEntities(MAP_IMAGE_ENTITY_LAYER_TYPE_ALL_EXCEPT_SWITCH));
 
 				CSpeedupTile *pSpeedupTiles = (CSpeedupTile *)m_pLayers->Map()->GetData(pTMap->m_Speedup);
 				unsigned int Size = m_pLayers->Map()->GetDataSize(pTMap->m_Speedup);
@@ -1981,7 +1977,7 @@ void CMapLayers::OnRender()
 			else if(Render && EntityOverlayVal && IsTuneLayer)
 			{
 				CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
-				Graphics()->TextureSet(m_pImages->GetEntities(MAP_IMAGE_ENTITY_LAYER_TYPE_TUNE));
+				Graphics()->TextureSet(m_pImages->GetEntities(MAP_IMAGE_ENTITY_LAYER_TYPE_ALL_EXCEPT_SWITCH));
 
 				CTuneTile *pTuneTiles = (CTuneTile *)m_pLayers->Map()->GetData(pTMap->m_Tune);
 				unsigned int Size = m_pLayers->Map()->GetDataSize(pTMap->m_Tune);

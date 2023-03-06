@@ -5,6 +5,8 @@
 
 #include <game/client/prediction/entity.h>
 
+class CLaserData;
+
 class CLaser : public CEntity
 {
 	friend class CGameWorld;
@@ -17,9 +19,10 @@ public:
 	const vec2 &GetFrom() { return m_From; }
 	const int &GetOwner() { return m_Owner; }
 	const int &GetEvalTick() { return m_EvalTick; }
-	CLaser(CGameWorld *pGameWorld, int ID, CNetObj_Laser *pLaser);
+	CLaser(CGameWorld *pGameWorld, int ID, CLaserData *pLaser);
 	void FillInfo(CNetObj_Laser *pLaser);
 	bool Match(CLaser *pLaser);
+	CLaserData GetData() const;
 
 protected:
 	bool HitCharacter(vec2 From, vec2 To);

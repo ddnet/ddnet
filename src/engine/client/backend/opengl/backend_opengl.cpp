@@ -21,7 +21,7 @@
 #else
 #include <GLES3/gl3.h>
 #define GL_TEXTURE_2D_ARRAY_EXT GL_TEXTURE_2D_ARRAY
-// GLES doesnt support GL_QUADS, but the code is also never executed
+// GLES doesn't support GL_QUADS, but the code is also never executed
 #define GL_QUADS GL_TRIANGLES
 #ifndef CONF_BACKEND_OPENGL_ES3
 #include <GLES/gl.h>
@@ -204,14 +204,12 @@ static void ParseVersionString(EBackendType BackendType, const char *pStr, int &
 				aCurNumberStr[CurNumberStrLen++] = (char)*pStr;
 				LastWasNumber = true;
 			}
-			else if(LastWasNumber && (*pStr == '.' || *pStr == ' ' || *pStr == '\0'))
+			else if(LastWasNumber && (*pStr == '.' || *pStr == ' '))
 			{
-				int CurNumber = 0;
 				if(CurNumberStrLen > 0)
 				{
 					aCurNumberStr[CurNumberStrLen] = 0;
-					CurNumber = str_toint(aCurNumberStr);
-					aNumbers[TotalNumbersPassed++] = CurNumber;
+					aNumbers[TotalNumbersPassed++] = str_toint(aCurNumberStr);
 					CurNumberStrLen = 0;
 				}
 
@@ -1061,7 +1059,7 @@ CCommandProcessorFragment_OpenGL::CCommandProcessorFragment_OpenGL()
 	m_HasShaders = false;
 }
 
-bool CCommandProcessorFragment_OpenGL::RunCommand(const CCommandBuffer::SCommand *pBaseCommand)
+ERunCommandReturnTypes CCommandProcessorFragment_OpenGL::RunCommand(const CCommandBuffer::SCommand *pBaseCommand)
 {
 	switch(pBaseCommand->m_Cmd)
 	{
@@ -1127,10 +1125,10 @@ bool CCommandProcessorFragment_OpenGL::RunCommand(const CCommandBuffer::SCommand
 	case CCommandBuffer::CMD_RENDER_QUAD_CONTAINER: Cmd_RenderQuadContainer(static_cast<const CCommandBuffer::SCommand_RenderQuadContainer *>(pBaseCommand)); break;
 	case CCommandBuffer::CMD_RENDER_QUAD_CONTAINER_EX: Cmd_RenderQuadContainerEx(static_cast<const CCommandBuffer::SCommand_RenderQuadContainerEx *>(pBaseCommand)); break;
 	case CCommandBuffer::CMD_RENDER_QUAD_CONTAINER_SPRITE_MULTIPLE: Cmd_RenderQuadContainerAsSpriteMultiple(static_cast<const CCommandBuffer::SCommand_RenderQuadContainerAsSpriteMultiple *>(pBaseCommand)); break;
-	default: return false;
+	default: return ERunCommandReturnTypes::RUN_COMMAND_COMMAND_UNHANDLED;
 	}
 
-	return true;
+	return ERunCommandReturnTypes::RUN_COMMAND_COMMAND_HANDLED;
 }
 
 // ------------ CCommandProcessorFragment_OpenGL2
@@ -2059,13 +2057,11 @@ void CCommandProcessorFragment_OpenGL2::RenderBorderTileEmulation(SBufferContain
 	{
 		GLint RealOffset = (GLint)((((size_t)(uintptr_t)(pBuffOffset)) / (6 * sizeof(unsigned int))) * 4);
 		size_t SingleVertSize = (sizeof(vec2) + (IsTextured ? sizeof(vec3) : 0));
-		size_t CurBufferOffset = (RealOffset)*SingleVertSize;
-
+		size_t CurBufferOffset = RealOffset * SingleVertSize;
+		int XCount = i - (size_t)(i / JumpIndex) * JumpIndex;
+		int YCount = (size_t)(i / JumpIndex);
 		for(size_t n = 0; n < 4; ++n)
 		{
-			int XCount = i - (int(i / JumpIndex) * JumpIndex);
-			int YCount = (int(i / JumpIndex));
-
 			ptrdiff_t VertOffset = (ptrdiff_t)(CurBufferOffset + (n * SingleVertSize));
 			vec2 *pPos = (vec2 *)((uint8_t *)BufferObject.m_pData + VertOffset);
 

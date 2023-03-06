@@ -40,6 +40,33 @@ CLayerTiles::CLayerTiles(int w, int h)
 	mem_zero(m_pTiles, (size_t)m_Width * m_Height * sizeof(CTile));
 }
 
+CLayerTiles::CLayerTiles(const CLayerTiles &Other) :
+	CLayer(Other)
+{
+	m_Width = Other.m_Width;
+	m_Height = Other.m_Height;
+	m_pTiles = new CTile[m_Width * m_Height];
+	mem_copy(m_pTiles, Other.m_pTiles, (size_t)m_Width * m_Height * sizeof(CTile));
+
+	m_Image = Other.m_Image;
+	m_Texture = Other.m_Texture;
+	m_Game = Other.m_Game;
+	m_Color = Other.m_Color;
+	m_ColorEnv = Other.m_ColorEnv;
+	m_ColorEnvOffset = Other.m_ColorEnvOffset;
+
+	m_AutoMapperConfig = Other.m_AutoMapperConfig;
+	m_Seed = Other.m_Seed;
+	m_AutoAutoMap = Other.m_AutoAutoMap;
+	m_Tele = Other.m_Tele;
+	m_Speedup = Other.m_Speedup;
+	m_Front = Other.m_Front;
+	m_Switch = Other.m_Switch;
+	m_Tune = Other.m_Tune;
+
+	mem_copy(m_aFileName, Other.m_aFileName, IO_MAX_PATH_LENGTH);
+}
+
 CLayerTiles::~CLayerTiles()
 {
 	delete[] m_pTiles;
@@ -59,7 +86,7 @@ void CLayerTiles::PrepareForSave()
 {
 	for(int y = 0; y < m_Height; y++)
 		for(int x = 0; x < m_Width; x++)
-			m_pTiles[y * m_Width + x].m_Flags &= TILEFLAG_VFLIP | TILEFLAG_HFLIP | TILEFLAG_ROTATE;
+			m_pTiles[y * m_Width + x].m_Flags &= TILEFLAG_XFLIP | TILEFLAG_YFLIP | TILEFLAG_ROTATE;
 
 	if(m_Image != -1 && m_Color.a == 255)
 	{
@@ -150,6 +177,11 @@ void CLayerTiles::Clamp(RECTi *pRect)
 		pRect->w = 0;
 }
 
+bool CLayerTiles::IsEntitiesLayer() const
+{
+	return m_pEditor->m_Map.m_pGameLayer == this || m_pEditor->m_Map.m_pTeleLayer == this || m_pEditor->m_Map.m_pSpeedupLayer == this || m_pEditor->m_Map.m_pFrontLayer == this || m_pEditor->m_Map.m_pSwitchLayer == this || m_pEditor->m_Map.m_pTuneLayer == this;
+}
+
 bool CLayerTiles::IsEmpty(CLayerTiles *pLayer)
 {
 	for(int y = 0; y < pLayer->m_Height; y++)
@@ -187,7 +219,7 @@ void CLayerTiles::BrushSelecting(CUIRect Rect)
 	m_pEditor->Graphics()->QuadsEnd();
 	char aBuf[16];
 	str_format(aBuf, sizeof(aBuf), "%d,%d", ConvertX(Rect.w), ConvertY(Rect.h));
-	TextRender()->Text(nullptr, Rect.x + 3.0f, Rect.y + 3.0f, m_pEditor->m_ShowPicker ? 15.0f : 15.0f * m_pEditor->m_WorldZoom, aBuf, -1.0f);
+	TextRender()->Text(Rect.x + 3.0f, Rect.y + 3.0f, m_pEditor->m_ShowPicker ? 15.0f : 15.0f * m_pEditor->m_WorldZoom, aBuf, -1.0f);
 }
 
 int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
@@ -516,7 +548,7 @@ void CLayerTiles::BrushFlipX()
 			if(!Rotate && !IsRotatableTile(m_pTiles[y * m_Width + x].m_Index))
 				m_pTiles[y * m_Width + x].m_Flags = 0;
 			else
-				m_pTiles[y * m_Width + x].m_Flags ^= m_pTiles[y * m_Width + x].m_Flags & TILEFLAG_ROTATE ? TILEFLAG_HFLIP : TILEFLAG_VFLIP;
+				m_pTiles[y * m_Width + x].m_Flags ^= (m_pTiles[y * m_Width + x].m_Flags & TILEFLAG_ROTATE) ? TILEFLAG_YFLIP : TILEFLAG_XFLIP;
 }
 
 void CLayerTiles::BrushFlipY()
@@ -532,7 +564,7 @@ void CLayerTiles::BrushFlipY()
 			if(!Rotate && !IsRotatableTile(m_pTiles[y * m_Width + x].m_Index))
 				m_pTiles[y * m_Width + x].m_Flags = 0;
 			else
-				m_pTiles[y * m_Width + x].m_Flags ^= m_pTiles[y * m_Width + x].m_Flags & TILEFLAG_ROTATE ? TILEFLAG_VFLIP : TILEFLAG_HFLIP;
+				m_pTiles[y * m_Width + x].m_Flags ^= (m_pTiles[y * m_Width + x].m_Flags & TILEFLAG_ROTATE) ? TILEFLAG_XFLIP : TILEFLAG_YFLIP;
 }
 
 void CLayerTiles::BrushRotate(float Amount)
@@ -557,7 +589,7 @@ void CLayerTiles::BrushRotate(float Amount)
 				else
 				{
 					if(pDst->m_Flags & TILEFLAG_ROTATE)
-						pDst->m_Flags ^= (TILEFLAG_HFLIP | TILEFLAG_VFLIP);
+						pDst->m_Flags ^= (TILEFLAG_YFLIP | TILEFLAG_XFLIP);
 					pDst->m_Flags ^= TILEFLAG_ROTATE;
 				}
 			}
@@ -571,6 +603,11 @@ void CLayerTiles::BrushRotate(float Amount)
 		BrushFlipX();
 		BrushFlipY();
 	}
+}
+
+CLayer *CLayerTiles::Duplicate() const
+{
+	return new CLayerTiles(*this);
 }
 
 void CLayerTiles::Resize(int NewW, int NewH)
@@ -633,11 +670,11 @@ void CLayerTiles::ShowInfo()
 			if(m_pTiles[c].m_Index)
 			{
 				char aBuf[64];
-				str_format(aBuf, sizeof(aBuf), "%i", m_pTiles[c].m_Index);
+				str_format(aBuf, sizeof(aBuf), m_pEditor->m_ShowTileHexInfo ? "%02X" : "%i", m_pTiles[c].m_Index);
 				m_pEditor->Graphics()->QuadsText(x * 32, y * 32, 16.0f, aBuf);
 
-				char aFlags[4] = {m_pTiles[c].m_Flags & TILEFLAG_VFLIP ? 'V' : ' ',
-					m_pTiles[c].m_Flags & TILEFLAG_HFLIP ? 'H' : ' ',
+				char aFlags[4] = {m_pTiles[c].m_Flags & TILEFLAG_XFLIP ? 'X' : ' ',
+					m_pTiles[c].m_Flags & TILEFLAG_YFLIP ? 'Y' : ' ',
 					m_pTiles[c].m_Flags & TILEFLAG_ROTATE ? 'R' : ' ',
 					0};
 				m_pEditor->Graphics()->QuadsText(x * 32, y * 32 + 16, 16.0f, aFlags);
@@ -653,12 +690,12 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 {
 	CUIRect Button;
 
-	bool IsGameLayer = (m_pEditor->m_Map.m_pGameLayer == this || m_pEditor->m_Map.m_pTeleLayer == this || m_pEditor->m_Map.m_pSpeedupLayer == this || m_pEditor->m_Map.m_pFrontLayer == this || m_pEditor->m_Map.m_pSwitchLayer == this || m_pEditor->m_Map.m_pTuneLayer == this);
+	const bool EntitiesLayer = IsEntitiesLayer();
 
 	CLayerGroup *pGroup = m_pEditor->m_Map.m_vpGroups[m_pEditor->m_SelectedGroup];
 
 	// Game tiles can only be constructed if the layer is relative to the game layer
-	if(!IsGameLayer && !(pGroup->m_OffsetX % 32) && !(pGroup->m_OffsetY % 32) && pGroup->m_ParallaxX == 100 && pGroup->m_ParallaxY == 100)
+	if(!EntitiesLayer && !(pGroup->m_OffsetX % 32) && !(pGroup->m_OffsetY % 32) && pGroup->m_ParallaxX == 100 && pGroup->m_ParallaxY == 100)
 	{
 		pToolBox->HSplitBottom(12.0f, pToolBox, &Button);
 		static int s_ColclButton = 0;
@@ -817,7 +854,7 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 		{nullptr},
 	};
 
-	if(IsGameLayer) // remove the image and color properties if this is a game layer
+	if(EntitiesLayer) // remove the image and color properties if this is a game layer
 	{
 		aProps[PROP_IMAGE].m_pName = nullptr;
 		aProps[PROP_COLOR].m_pName = nullptr;
@@ -1733,7 +1770,7 @@ void CLayerSwitch::BrushRotate(float Amount)
 				if(IsRotatableTile(pDst2->m_Index))
 				{
 					if(pDst2->m_Flags & TILEFLAG_ROTATE)
-						pDst2->m_Flags ^= (TILEFLAG_HFLIP | TILEFLAG_VFLIP);
+						pDst2->m_Flags ^= (TILEFLAG_YFLIP | TILEFLAG_XFLIP);
 					pDst2->m_Flags ^= TILEFLAG_ROTATE;
 				}
 			}

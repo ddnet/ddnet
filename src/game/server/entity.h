@@ -87,13 +87,6 @@ public: // TODO: Maybe make protected
 	virtual void Reset() {}
 
 	/*
-		Function: PreTick
-			Called to progress the entity before the next tick.
-			Can be used to prepare variables for all clients before the next tick is executed.
-	*/
-	virtual void PreTick() {}
-
-	/*
 		Function: Tick
 			Called to progress the entity to the next tick. Updates
 			and moves the entity to its new state and position.
@@ -134,6 +127,16 @@ public: // TODO: Maybe make protected
 			Client2 - Second client ID
 	*/
 	virtual void SwapClients(int Client1, int Client2) {}
+
+	/*
+		Function GetOwnerID
+		Returns:
+			ClientID of the initiator from this entity. -1 created by map.
+			This is used by save/load to remove related entities to the tee.
+			CCharacter should not return the PlayerId, because they get
+			handled separatly in save/load code.
+	*/
+	virtual int GetOwnerID() const { return -1; }
 
 	/*
 		Function: NetworkClipped

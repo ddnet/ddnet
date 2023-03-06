@@ -3,12 +3,11 @@
 #ifndef GAME_CLIENT_RENDER_H
 #define GAME_CLIENT_RENDER_H
 
-#include "ui.h"
-
 #include <base/color.h>
 #include <base/vmath.h>
 
 #include <game/client/skin.h>
+#include <game/client/ui_rect.h>
 
 class CSpeedupTile;
 class CSwitchTile;
@@ -21,6 +20,7 @@ struct CDataSprite;
 struct CDataSprite;
 struct CEnvPoint;
 struct CMapItemGroup;
+struct CMapItemGroupEx;
 struct CQuad;
 
 class CTeeRenderInfo
@@ -48,6 +48,7 @@ public:
 	float m_Size;
 	int m_GotAirJump;
 	int m_TeeRenderFlags;
+	bool m_FeetFlipped;
 };
 
 // Tee Render Flags
@@ -104,10 +105,6 @@ public:
 	int QuadContainerAddSprite(int QuadContainerIndex, float Width, float Height);
 	int QuadContainerAddSprite(int QuadContainerIndex, float X, float Y, float Width, float Height);
 
-	// rects
-	void DrawUIRect(const CUIRect *pRect, ColorRGBA Color, int Corners, float Rounding);
-	void DrawUIRect4(const CUIRect *pRect, vec4 ColorTopLeft, vec4 ColorTopRight, vec4 ColorBottomLeft, vec4 ColorBottomRight, int Corners, float Rounding);
-
 	// larger rendering methods
 	void GetRenderTeeBodySize(class CAnimState *pAnim, CTeeRenderInfo *pInfo, vec2 &BodyOffset, float &Width, float &Height);
 	void GetRenderTeeFeetSize(class CAnimState *pAnim, CTeeRenderInfo *pInfo, vec2 &FeetOffset, float &Width, float &Height);
@@ -131,8 +128,9 @@ public:
 	// helpers
 	void CalcScreenParams(float Aspect, float Zoom, float *pWidth, float *pHeight);
 	void MapScreenToWorld(float CenterX, float CenterY, float ParallaxX, float ParallaxY,
-		float OffsetX, float OffsetY, float Aspect, float Zoom, float *pPoints);
-	void MapScreenToGroup(float CenterX, float CenterY, CMapItemGroup *pGroup, float Zoom = 1.0f);
+		float ParallaxZoom, float OffsetX, float OffsetY, float Aspect, float Zoom, float *pPoints);
+	void MapScreenToGroup(float CenterX, float CenterY, CMapItemGroup *pGroup, CMapItemGroupEx *pGroupEx, float Zoom);
+	void MapScreenToInterface(float CenterX, float CenterY);
 
 	// DDRace
 

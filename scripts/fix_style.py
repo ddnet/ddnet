@@ -20,7 +20,8 @@ IGNORE_FILES = [
 def filter_ignored(filenames):
 	return [filename for filename in filenames
 		if filename not in IGNORE_FILES
-		and not filename.startswith("src/game/generated/")]
+		and not filename.startswith("src/game/generated/")
+        and not filename.startswith("src/rust-bridge")]
 
 def filter_cpp(filenames):
 	return [filename for filename in filenames

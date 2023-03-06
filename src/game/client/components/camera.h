@@ -2,12 +2,12 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #ifndef GAME_CLIENT_COMPONENTS_CAMERA_H
 #define GAME_CLIENT_COMPONENTS_CAMERA_H
+#include <base/bezier.h>
 #include <base/vmath.h>
 
 #include <engine/client.h>
 #include <engine/console.h>
 
-#include <game/bezier.h>
 #include <game/client/component.h>
 
 class CCamera : public CComponent

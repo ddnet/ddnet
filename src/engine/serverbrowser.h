@@ -42,6 +42,12 @@ public:
 		int m_Score;
 		bool m_Player;
 
+		// skin info
+		char m_aSkin[24 + 1];
+		bool m_CustomSkinColors;
+		int m_CustomSkinColorBody;
+		int m_CustomSkinColorFeet;
+
 		int m_FriendState;
 	};
 
@@ -83,21 +89,8 @@ public:
 
 	static int EstimateLatency(int Loc1, int Loc2);
 	static bool ParseLocation(int *pResult, const char *pString);
+	void InfoToString(char *pBuffer, int BufferSize) const;
 };
-
-bool IsVanilla(const CServerInfo *pInfo);
-bool IsCatch(const CServerInfo *pInfo);
-bool IsInsta(const CServerInfo *pInfo);
-bool IsFNG(const CServerInfo *pInfo);
-bool IsRace(const CServerInfo *pInfo);
-bool IsFastCap(const CServerInfo *pInfo);
-bool IsDDRace(const CServerInfo *pInfo);
-bool IsDDNet(const CServerInfo *pInfo);
-bool IsBlockWorlds(const CServerInfo *pInfo);
-bool IsCity(const CServerInfo *pInfo);
-
-bool Is64Player(const CServerInfo *pInfo);
-bool IsPlus(const CServerInfo *pInfo);
 
 class IServerBrowser : public IInterface
 {
@@ -140,6 +133,8 @@ public:
 		NETWORK_KOG = 1,
 		NUM_NETWORKS,
 	};
+
+	static constexpr const char *SEARCH_EXCLUDE_TOKEN = ";";
 
 	virtual void Refresh(int Type) = 0;
 	virtual bool IsGettingServerlist() const = 0;

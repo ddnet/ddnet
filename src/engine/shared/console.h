@@ -46,8 +46,9 @@ class CConsole : public IConsole
 	};
 
 	CExecFile *m_pFirstExec;
-	class CConfig *m_pConfig;
-	class IStorage *m_pStorage;
+	IConfigManager *m_pConfigManager;
+	CConfig *m_pConfig;
+	IStorage *m_pStorage;
 	int m_AccessLevel;
 
 	CCommand *m_pRecycleList;
@@ -58,6 +59,7 @@ class CConsole : public IConsole
 	static void Con_Chain(IResult *pResult, void *pUserData);
 	static void Con_Echo(IResult *pResult, void *pUserData);
 	static void Con_Exec(IResult *pResult, void *pUserData);
+	static void Con_Reset(IResult *pResult, void *pUserData);
 	static void ConToggle(IResult *pResult, void *pUser);
 	static void ConToggleStroke(IResult *pResult, void *pUser);
 	static void ConCommandAccess(IResult *pResult, void *pUser);
@@ -67,6 +69,9 @@ class CConsole : public IConsole
 
 	FTeeHistorianCommandCallback m_pfnTeeHistorianCommandCallback;
 	void *m_pTeeHistorianCommandUserdata;
+
+	FUnknownCommandCallback m_pfnUnknownCommandCallback = EmptyUnknownCommandCallback;
+	void *m_pUnknownCommandUserdata = nullptr;
 
 	enum
 	{
@@ -111,10 +116,10 @@ class CConsole : public IConsole
 			m_apArgs[m_NumArgs++] = pArg;
 		}
 
-		const char *GetString(unsigned Index) override;
-		int GetInteger(unsigned Index) override;
-		float GetFloat(unsigned Index) override;
-		ColorHSLA GetColor(unsigned Index, bool Light) override;
+		const char *GetString(unsigned Index) const override;
+		int GetInteger(unsigned Index) const override;
+		float GetFloat(unsigned Index) const override;
+		ColorHSLA GetColor(unsigned Index, bool Light) const override;
 
 		void RemoveArgument(unsigned Index) override
 		{
@@ -139,7 +144,7 @@ class CConsole : public IConsole
 		bool HasVictim();
 		void SetVictim(int Victim);
 		void SetVictim(const char *pVictim);
-		int GetVictim() override;
+		int GetVictim() const override;
 	};
 
 	int ParseStart(CResult *pResult, const char *pString, int Length);
@@ -161,8 +166,7 @@ class CConsole : public IConsole
 		struct CQueueEntry
 		{
 			CQueueEntry *m_pNext;
-			FCommandCallback m_pfnCommandCallback;
-			void *m_pCommandUserData;
+			CCommand *m_pCommand;
 			CResult m_Result;
 		} * m_pFirst, *m_pLast;
 
@@ -188,6 +192,7 @@ class CConsole : public IConsole
 	CCommand *FindCommand(const char *pName, int FlagMask);
 
 public:
+	IConfigManager *ConfigManager() { return m_pConfigManager; }
 	CConfig *Config() { return m_pConfig; }
 
 	CConsole(int FlagMask);
@@ -212,8 +217,9 @@ public:
 	void ExecuteFile(const char *pFilename, int ClientID = -1, bool LogFailure = false, int StorageType = IStorage::TYPE_ALL) override;
 
 	char *Format(char *pBuf, int Size, const char *pFrom, const char *pStr) override;
-	void Print(int Level, const char *pFrom, const char *pStr, ColorRGBA PrintColor = gs_ConsoleDefaultColor) override;
+	void Print(int Level, const char *pFrom, const char *pStr, ColorRGBA PrintColor = gs_ConsoleDefaultColor) const override;
 	void SetTeeHistorianCommandCallback(FTeeHistorianCommandCallback pfnCallback, void *pUser) override;
+	void SetUnknownCommandCallback(FUnknownCommandCallback pfnCallback, void *pUser) override;
 	void InitChecksum(CChecksumData *pData) const override;
 
 	void SetAccessLevel(int AccessLevel) override { m_AccessLevel = clamp(AccessLevel, (int)(ACCESS_LEVEL_ADMIN), (int)(ACCESS_LEVEL_USER)); }

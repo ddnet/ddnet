@@ -40,13 +40,16 @@ public:
 
 	int Start(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, const char *pNetversion, const char *pMap, SHA256_DIGEST *pSha256, unsigned MapCrc, const char *pType, unsigned MapSize, unsigned char *pMapData, IOHANDLE MapFile = nullptr, DEMOFUNC_FILTER pfnFilter = nullptr, void *pUser = nullptr);
 	int Stop() override;
+
 	void AddDemoMarker();
+	void AddDemoMarker(int Tick);
 
 	void RecordSnapshot(int Tick, const void *pData, int Size);
 	void RecordMessage(const void *pData, int Size);
 
 	bool IsRecording() const override { return m_File != nullptr; }
 	char *GetCurrentFilename() override { return m_aCurrentFilename; }
+	void ClearCurrentFilename() { m_aCurrentFilename[0] = '\0'; }
 
 	int Length() const override { return (m_LastTickMarker - m_FirstTick) / SERVER_TICK_SPEED; }
 };
@@ -117,9 +120,8 @@ private:
 	int ReadChunkHeader(int *pType, int *pSize, int *pTick);
 	void DoTick();
 	void ScanFile();
-	int NextFrame();
 
-	int64_t time();
+	int64_t Time();
 
 public:
 	CDemoPlayer(class CSnapshotDelta *pSnapshotDelta);
@@ -140,6 +142,7 @@ public:
 	void SetSpeedIndex(int Offset) override;
 	int SeekPercent(float Percent) override;
 	int SeekTime(float Seconds) override;
+	int SeekTick(ETickOffset TickOffset) override;
 	int SetPos(int WantedTick) override;
 	const CInfo *BaseInfo() const override { return &m_Info.m_Info; }
 	void GetDemoName(char *pBuffer, int BufferSize) const override;

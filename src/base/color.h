@@ -109,14 +109,14 @@ public:
 	bool operator==(const color4_base &col) const { return x == col.x && y == col.y && z == col.z && a == col.a; }
 	bool operator!=(const color4_base &col) const { return x != col.x || y != col.y || z != col.z || a != col.a; }
 
-	unsigned Pack(bool Alpha = true)
+	unsigned Pack(bool Alpha = true) const
 	{
-		return (Alpha ? ((unsigned)(a * 255.0f) << 24) : 0) + ((unsigned)(x * 255.0f) << 16) + ((unsigned)(y * 255.0f) << 8) + (unsigned)(z * 255.0f);
+		return (Alpha ? ((unsigned)round_to_int(a * 255.0f) << 24) : 0) + ((unsigned)round_to_int(x * 255.0f) << 16) + ((unsigned)round_to_int(y * 255.0f) << 8) + (unsigned)round_to_int(z * 255.0f);
 	}
 
-	DerivedT WithAlpha(float alpha)
+	DerivedT WithAlpha(float alpha) const
 	{
-		DerivedT col(static_cast<DerivedT &>(*this));
+		DerivedT col(static_cast<const DerivedT &>(*this));
 		col.a = alpha;
 		return col;
 	}
@@ -130,19 +130,19 @@ public:
 
 	constexpr static const float DARKEST_LGT = 0.5f;
 
-	ColorHSLA UnclampLighting(float Darkest = DARKEST_LGT)
+	ColorHSLA UnclampLighting(float Darkest = DARKEST_LGT) const
 	{
 		ColorHSLA col = *this;
 		col.l = Darkest + col.l * (1.0f - Darkest);
 		return col;
 	}
 
-	unsigned Pack(bool Alpha = true)
+	unsigned Pack(bool Alpha = true) const
 	{
 		return color4_base::Pack(Alpha);
 	}
 
-	unsigned Pack(float Darkest, bool Alpha = false)
+	unsigned Pack(float Darkest, bool Alpha = false) const
 	{
 		ColorHSLA col = *this;
 		col.l = (l - Darkest) / (1 - Darkest);

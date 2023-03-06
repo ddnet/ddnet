@@ -62,9 +62,12 @@ class CChat : public CComponent
 	CLine m_aLines[MAX_LINES];
 	int m_CurrentLine;
 
-	// chat
 	enum
 	{
+		// client IDs for special messages
+		CLIENT_MSG = -2,
+		SERVER_MSG = -1,
+
 		MODE_NONE = 0,
 		MODE_ALL,
 		MODE_TEAM,
@@ -110,7 +113,6 @@ class CChat : public CComponent
 	};
 
 	std::vector<CCommand> m_vCommands;
-	bool m_ReverseTAB;
 
 	struct CHistoryEntry
 	{
@@ -133,7 +135,6 @@ class CChat : public CComponent
 
 	bool LineShouldHighlight(const char *pLine, const char *pName);
 	void StoreSave(const char *pText);
-	void Reset();
 
 public:
 	CChat();
@@ -162,6 +163,7 @@ public:
 	void OnRender() override;
 	void RefindSkins();
 	void OnPrepareLines();
+	void Reset();
 	void OnRelease() override;
 	void OnMessage(int MsgType, void *pRawMsg) override;
 	bool OnInput(IInput::CEvent Event) override;

@@ -1,12 +1,13 @@
 #include "save.h"
 
-#include <cstdio>
+#include <cstdio> // sscanf
 
 #include "entities/character.h"
 #include "gamemodes/DDRace.h"
 #include "player.h"
 #include "teams.h"
 #include <engine/shared/config.h>
+#include <engine/shared/protocol.h>
 
 CSaveTee::CSaveTee() = default;
 
@@ -16,7 +17,7 @@ void CSaveTee::Save(CCharacter *pChr)
 	str_copy(m_aName, pChr->Server()->ClientName(m_ClientID), sizeof(m_aName));
 
 	m_Alive = pChr->m_Alive;
-	m_Paused = abs(pChr->m_pPlayer->IsPaused());
+	m_Paused = absolute(pChr->m_pPlayer->IsPaused());
 	m_NeededFaketuning = pChr->m_NeededFaketuning;
 
 	m_TeeStarted = pChr->Teams()->TeeStarted(m_ClientID);
@@ -427,11 +428,9 @@ bool CSaveTee::IsHooking() const
 	return m_HookState == HOOK_GRABBED || m_HookState == HOOK_FLYING;
 }
 
-CSaveTeam::CSaveTeam(IGameController *pController)
+CSaveTeam::CSaveTeam()
 {
-	m_pController = pController;
-	m_pSwitchers = 0;
-	m_pSavedTees = 0;
+	m_aString[0] = '\0';
 }
 
 CSaveTeam::~CSaveTeam()
@@ -440,62 +439,67 @@ CSaveTeam::~CSaveTeam()
 	delete[] m_pSavedTees;
 }
 
-int CSaveTeam::Save(int Team)
+int CSaveTeam::Save(CGameContext *pGameServer, int Team, bool Dry)
 {
-	if(g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO || (Team > 0 && Team < MAX_CLIENTS))
-	{
-		CGameTeams *pTeams = &(((CGameControllerDDRace *)m_pController)->m_Teams);
-
-		m_MembersCount = pTeams->Count(Team);
-		if(m_MembersCount <= 0)
-		{
-			return 2;
-		}
-
-		m_TeamState = pTeams->GetTeamState(Team);
-
-		if(m_TeamState != CGameTeams::TEAMSTATE_STARTED)
-		{
-			return 4;
-		}
-
-		m_HighestSwitchNumber = m_pController->GameServer()->Collision()->m_HighestSwitchNumber;
-		m_TeamLocked = pTeams->TeamLocked(Team);
-		m_Practice = pTeams->IsPractice(Team);
-
-		m_pSavedTees = new CSaveTee[m_MembersCount];
-		int j = 0;
-		CCharacter *p = (CCharacter *)m_pController->GameServer()->m_World.FindFirst(CGameWorld::ENTTYPE_CHARACTER);
-		for(; p; p = (CCharacter *)p->TypeNext())
-		{
-			if(pTeams->m_Core.Team(p->GetPlayer()->GetCID()) != Team)
-				continue;
-			if(m_MembersCount == j)
-				return 3;
-			m_pSavedTees[j].Save(p);
-			j++;
-		}
-		if(m_MembersCount != j)
-			return 3;
-
-		if(m_pController->GameServer()->Collision()->m_HighestSwitchNumber)
-		{
-			m_pSwitchers = new SSimpleSwitchers[m_pController->GameServer()->Collision()->m_HighestSwitchNumber + 1];
-
-			for(int i = 1; i < m_pController->GameServer()->Collision()->m_HighestSwitchNumber + 1; i++)
-			{
-				m_pSwitchers[i].m_Status = m_pController->GameServer()->Switchers()[i].m_aStatus[Team];
-				if(m_pController->GameServer()->Switchers()[i].m_aEndTick[Team])
-					m_pSwitchers[i].m_EndTime = m_pController->Server()->Tick() - m_pController->GameServer()->Switchers()[i].m_aEndTick[Team];
-				else
-					m_pSwitchers[i].m_EndTime = 0;
-				m_pSwitchers[i].m_Type = m_pController->GameServer()->Switchers()[i].m_aType[Team];
-			}
-		}
-		return 0;
-	}
-	else
+	if(g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO && (Team <= 0 || MAX_CLIENTS <= Team))
 		return 1;
+
+	IGameController *pController = pGameServer->m_pController;
+	CGameTeams *pTeams = &(((CGameControllerDDRace *)pController)->m_Teams);
+
+	m_MembersCount = pTeams->Count(Team);
+	if(m_MembersCount <= 0)
+	{
+		return 2;
+	}
+
+	m_TeamState = pTeams->GetTeamState(Team);
+
+	if(m_TeamState != CGameTeams::TEAMSTATE_STARTED)
+	{
+		return 4;
+	}
+
+	m_HighestSwitchNumber = pGameServer->Collision()->m_HighestSwitchNumber;
+	m_TeamLocked = pTeams->TeamLocked(Team);
+	m_Practice = pTeams->IsPractice(Team);
+
+	m_pSavedTees = new CSaveTee[m_MembersCount];
+	int aPlayerCIDs[MAX_CLIENTS];
+	int j = 0;
+	CCharacter *p = (CCharacter *)pGameServer->m_World.FindFirst(CGameWorld::ENTTYPE_CHARACTER);
+	for(; p; p = (CCharacter *)p->TypeNext())
+	{
+		if(pTeams->m_Core.Team(p->GetPlayer()->GetCID()) != Team)
+			continue;
+		if(m_MembersCount == j)
+			return 3;
+		m_pSavedTees[j].Save(p);
+		aPlayerCIDs[j] = p->GetPlayer()->GetCID();
+		j++;
+	}
+	if(m_MembersCount != j)
+		return 3;
+
+	if(pGameServer->Collision()->m_HighestSwitchNumber)
+	{
+		m_pSwitchers = new SSimpleSwitchers[pGameServer->Collision()->m_HighestSwitchNumber + 1];
+
+		for(int i = 1; i < pGameServer->Collision()->m_HighestSwitchNumber + 1; i++)
+		{
+			m_pSwitchers[i].m_Status = pGameServer->Switchers()[i].m_aStatus[Team];
+			if(pGameServer->Switchers()[i].m_aEndTick[Team])
+				m_pSwitchers[i].m_EndTime = pController->Server()->Tick() - pGameServer->Switchers()[i].m_aEndTick[Team];
+			else
+				m_pSwitchers[i].m_EndTime = 0;
+			m_pSwitchers[i].m_Type = pGameServer->Switchers()[i].m_aType[Team];
+		}
+	}
+	if(!Dry)
+	{
+		pGameServer->m_World.RemoveEntitiesFromPlayers(aPlayerCIDs, m_MembersCount);
+	}
+	return 0;
 }
 
 bool CSaveTeam::HandleSaveError(int Result, int ClientID, CGameContext *pGameContext)
@@ -511,7 +515,7 @@ bool CSaveTeam::HandleSaveError(int Result, int ClientID, CGameContext *pGameCon
 		pGameContext->SendChatTarget(ClientID, "Could not find your Team");
 		break;
 	case 3:
-		pGameContext->SendChatTarget(ClientID, "Unable to find all Characters");
+		pGameContext->SendChatTarget(ClientID, "To save all players in your team have to be alive and not in '/spec'");
 		break;
 	case 4:
 		pGameContext->SendChatTarget(ClientID, "Your team has not started yet");
@@ -523,45 +527,50 @@ bool CSaveTeam::HandleSaveError(int Result, int ClientID, CGameContext *pGameCon
 	return true;
 }
 
-void CSaveTeam::Load(int Team, bool KeepCurrentWeakStrong)
+void CSaveTeam::Load(CGameContext *pGameServer, int Team, bool KeepCurrentWeakStrong)
 {
-	CGameTeams *pTeams = &(((CGameControllerDDRace *)m_pController)->m_Teams);
+	IGameController *pController = pGameServer->m_pController;
+	CGameTeams *pTeams = &(((CGameControllerDDRace *)pController)->m_Teams);
 
 	pTeams->ChangeTeamState(Team, m_TeamState);
 	pTeams->SetTeamLock(Team, m_TeamLocked);
 	pTeams->SetPractice(Team, m_Practice);
 
+	int aPlayerCIDs[MAX_CLIENTS];
 	for(int i = m_MembersCount; i-- > 0;)
 	{
 		int ClientID = m_pSavedTees[i].GetClientID();
-		if(m_pController->GameServer()->m_apPlayers[ClientID] && pTeams->m_Core.Team(ClientID) == Team)
+		aPlayerCIDs[i] = ClientID;
+		if(pGameServer->m_apPlayers[ClientID] && pTeams->m_Core.Team(ClientID) == Team)
 		{
-			CCharacter *pChr = MatchCharacter(m_pSavedTees[i].GetClientID(), i, KeepCurrentWeakStrong);
+			CCharacter *pChr = MatchCharacter(pGameServer, m_pSavedTees[i].GetClientID(), i, KeepCurrentWeakStrong);
 			m_pSavedTees[i].Load(pChr, Team);
 		}
 	}
 
-	if(m_pController->GameServer()->Collision()->m_HighestSwitchNumber)
+	if(pGameServer->Collision()->m_HighestSwitchNumber)
 	{
-		for(int i = 1; i < minimum(m_HighestSwitchNumber, m_pController->GameServer()->Collision()->m_HighestSwitchNumber) + 1; i++)
+		for(int i = 1; i < minimum(m_HighestSwitchNumber, pGameServer->Collision()->m_HighestSwitchNumber) + 1; i++)
 		{
-			m_pController->GameServer()->Switchers()[i].m_aStatus[Team] = m_pSwitchers[i].m_Status;
+			pGameServer->Switchers()[i].m_aStatus[Team] = m_pSwitchers[i].m_Status;
 			if(m_pSwitchers[i].m_EndTime)
-				m_pController->GameServer()->Switchers()[i].m_aEndTick[Team] = m_pController->Server()->Tick() - m_pSwitchers[i].m_EndTime;
-			m_pController->GameServer()->Switchers()[i].m_aType[Team] = m_pSwitchers[i].m_Type;
+				pGameServer->Switchers()[i].m_aEndTick[Team] = pController->Server()->Tick() - m_pSwitchers[i].m_EndTime;
+			pGameServer->Switchers()[i].m_aType[Team] = m_pSwitchers[i].m_Type;
 		}
 	}
+	// remove projectiles and laser
+	pGameServer->m_World.RemoveEntitiesFromPlayers(aPlayerCIDs, m_MembersCount);
 }
 
-CCharacter *CSaveTeam::MatchCharacter(int ClientID, int SaveID, bool KeepCurrentCharacter)
+CCharacter *CSaveTeam::MatchCharacter(CGameContext *pGameServer, int ClientID, int SaveID, bool KeepCurrentCharacter)
 {
-	if(KeepCurrentCharacter && m_pController->GameServer()->m_apPlayers[ClientID]->GetCharacter())
+	if(KeepCurrentCharacter && pGameServer->m_apPlayers[ClientID]->GetCharacter())
 	{
 		// keep old character to retain current weak/strong order
-		return m_pController->GameServer()->m_apPlayers[ClientID]->GetCharacter();
+		return pGameServer->m_apPlayers[ClientID]->GetCharacter();
 	}
-	m_pController->GameServer()->m_apPlayers[ClientID]->KillCharacter(WEAPON_GAME);
-	return m_pController->GameServer()->m_apPlayers[ClientID]->ForceSpawn(m_pSavedTees[SaveID].GetPos());
+	pGameServer->m_apPlayers[ClientID]->KillCharacter(WEAPON_GAME);
+	return pGameServer->m_apPlayers[ClientID]->ForceSpawn(m_pSavedTees[SaveID].GetPos());
 }
 
 char *CSaveTeam::GetString()

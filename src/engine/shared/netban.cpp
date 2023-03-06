@@ -44,36 +44,13 @@ int CNetBan::CNetHash::MakeHashArray(const NETADDR *pAddr, CNetHash aHash[17])
 }
 
 template<class T, int HashCount>
-typename CNetBan::CBan<T> *CNetBan::CBanPool<T, HashCount>::Add(const T *pData, const CBanInfo *pInfo, const CNetHash *pNetHash)
+void CNetBan::CBanPool<T, HashCount>::InsertUsed(CBan<T> *pBan)
 {
-	if(!m_pFirstFree)
-		return 0;
-
-	// create new ban
-	CBan<T> *pBan = m_pFirstFree;
-	pBan->m_Data = *pData;
-	pBan->m_Info = *pInfo;
-	pBan->m_NetHash = *pNetHash;
-	if(pBan->m_pNext)
-		pBan->m_pNext->m_pPrev = pBan->m_pPrev;
-	if(pBan->m_pPrev)
-		pBan->m_pPrev->m_pNext = pBan->m_pNext;
-	else
-		m_pFirstFree = pBan->m_pNext;
-
-	// add it to the hash list
-	if(m_aapHashList[pNetHash->m_HashIndex][pNetHash->m_Hash])
-		m_aapHashList[pNetHash->m_HashIndex][pNetHash->m_Hash]->m_pHashPrev = pBan;
-	pBan->m_pHashPrev = 0;
-	pBan->m_pHashNext = m_aapHashList[pNetHash->m_HashIndex][pNetHash->m_Hash];
-	m_aapHashList[pNetHash->m_HashIndex][pNetHash->m_Hash] = pBan;
-
-	// insert it into the used list
 	if(m_pFirstUsed)
 	{
 		for(CBan<T> *p = m_pFirstUsed;; p = p->m_pNext)
 		{
-			if(p->m_Info.m_Expires == CBanInfo::EXPIRES_NEVER || (pInfo->m_Expires != CBanInfo::EXPIRES_NEVER && pInfo->m_Expires <= p->m_Info.m_Expires))
+			if(p->m_Info.m_Expires == CBanInfo::EXPIRES_NEVER || (pBan->m_Info.m_Expires != CBanInfo::EXPIRES_NEVER && pBan->m_Info.m_Expires <= p->m_Info.m_Expires))
 			{
 				// insert before
 				pBan->m_pNext = p;
@@ -101,6 +78,35 @@ typename CNetBan::CBan<T> *CNetBan::CBanPool<T, HashCount>::Add(const T *pData, 
 		m_pFirstUsed = pBan;
 		pBan->m_pNext = pBan->m_pPrev = 0;
 	}
+}
+
+template<class T, int HashCount>
+typename CNetBan::CBan<T> *CNetBan::CBanPool<T, HashCount>::Add(const T *pData, const CBanInfo *pInfo, const CNetHash *pNetHash)
+{
+	if(!m_pFirstFree)
+		return 0;
+
+	// create new ban
+	CBan<T> *pBan = m_pFirstFree;
+	pBan->m_Data = *pData;
+	pBan->m_Info = *pInfo;
+	pBan->m_NetHash = *pNetHash;
+	if(pBan->m_pNext)
+		pBan->m_pNext->m_pPrev = pBan->m_pPrev;
+	if(pBan->m_pPrev)
+		pBan->m_pPrev->m_pNext = pBan->m_pNext;
+	else
+		m_pFirstFree = pBan->m_pNext;
+
+	// add it to the hash list
+	if(m_aapHashList[pNetHash->m_HashIndex][pNetHash->m_Hash])
+		m_aapHashList[pNetHash->m_HashIndex][pNetHash->m_Hash]->m_pHashPrev = pBan;
+	pBan->m_pHashPrev = 0;
+	pBan->m_pHashNext = m_aapHashList[pNetHash->m_HashIndex][pNetHash->m_Hash];
+	m_aapHashList[pNetHash->m_HashIndex][pNetHash->m_Hash] = pBan;
+
+	// insert it into the used list
+	InsertUsed(pBan);
 
 	// update ban count
 	++m_CountUsed;
@@ -158,38 +164,7 @@ void CNetBan::CBanPool<T, HashCount>::Update(CBan<CDataType> *pBan, const CBanIn
 		m_pFirstUsed = pBan->m_pNext;
 
 	// insert it into the used list
-	if(m_pFirstUsed)
-	{
-		for(CBan<T> *p = m_pFirstUsed;; p = p->m_pNext)
-		{
-			if(p->m_Info.m_Expires == CBanInfo::EXPIRES_NEVER || (pInfo->m_Expires != CBanInfo::EXPIRES_NEVER && pInfo->m_Expires <= p->m_Info.m_Expires))
-			{
-				// insert before
-				pBan->m_pNext = p;
-				pBan->m_pPrev = p->m_pPrev;
-				if(p->m_pPrev)
-					p->m_pPrev->m_pNext = pBan;
-				else
-					m_pFirstUsed = pBan;
-				p->m_pPrev = pBan;
-				break;
-			}
-
-			if(!p->m_pNext)
-			{
-				// last entry
-				p->m_pNext = pBan;
-				pBan->m_pPrev = p;
-				pBan->m_pNext = 0;
-				break;
-			}
-		}
-	}
-	else
-	{
-		m_pFirstUsed = pBan;
-		pBan->m_pNext = pBan->m_pPrev = 0;
-	}
+	InsertUsed(pBan);
 }
 
 void CNetBan::UnbanAll()

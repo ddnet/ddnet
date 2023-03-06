@@ -18,6 +18,10 @@ public:
 		int m_Country;
 		int m_Score;
 		bool m_IsPlayer;
+		char m_aSkin[24 + 1];
+		bool m_CustomSkinColors;
+		int m_CustomSkinColorBody;
+		int m_CustomSkinColorFeet;
 	};
 
 	CClient m_aClients[SERVERINFO_MAX_CLIENTS];

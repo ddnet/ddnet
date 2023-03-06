@@ -3,7 +3,7 @@
 
 #include <base/dynamic.h>
 
-#include <stdint.h>
+#include <cstdint>
 
 #ifndef STEAMAPI
 #define STEAMAPI DYNAMIC_IMPORT

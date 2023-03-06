@@ -46,8 +46,8 @@ const unsigned char *CVariableInt::Unpack(const unsigned char *pSrc, int *pInOut
 	*pInOut = *pSrc & 0x3F;
 	SrcSize--;
 
-	const static int s_aMasks[] = {0x7F, 0x7F, 0x7F, 0x0F};
-	const static int s_aShifts[] = {6, 6 + 7, 6 + 7 + 7, 6 + 7 + 7 + 7};
+	static const int s_aMasks[] = {0x7F, 0x7F, 0x7F, 0x0F};
+	static const int s_aShifts[] = {6, 6 + 7, 6 + 7 + 7, 6 + 7 + 7 + 7};
 
 	for(unsigned i = 0; i < std::size(s_aMasks); i++)
 	{

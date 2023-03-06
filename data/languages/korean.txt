@@ -10,6 +10,10 @@
 # 2022-05-16 CHaBek
 # 2022-06-17 CHaBek
 # 2022-07-05 CHaBek
+# 2022-08-17 CHaBek
+# 2022-09-18 CHaBek
+# 2022-10-20 CHaBek
+# 2023-01-08 CHaBek
 ##### /authors #####
 
 ##### translated strings #####
@@ -50,14 +54,8 @@ Address
 All
 == 모두
 
-Are you sure that you want to delete the demo?
-== 데모를 삭제하시겠습니까?
-
 Are you sure that you want to quit?
 == 종료하시겠습니까?
-
-Are you sure that you want to remove the player from your friends list?
-== 이 플레이어를 친구 목록에서 삭제하시겠습니까?
 
 Automatically record demos
 == 자동으로 데모 녹화
@@ -337,10 +335,10 @@ Remote console
 == 원격 콘솔
 
 Remove
-== 삭제
+== 제거
 
 Remove friend
-== 친구 삭제
+== 친구 제거
 
 Rename
 == 이름 변경
@@ -382,7 +380,7 @@ Server not full
 == 빈 자리가 있는 서버
 
 Shotgun
-== 샷건
+== 산탄총
 
 Show chat
 == 채팅 표시
@@ -391,13 +389,10 @@ Show friends only
 == 친구가 있는 서버
 
 Show ingame HUD
-== 게임 인터페이스 표시
+== 게임 내 HUD 표시
 
 Show name plates
 == 이름 표시
-
-Skins
-== 스킨
 
 Sound
 == 소리
@@ -439,22 +434,19 @@ The server is running a non-standard tuning on a pure game type.
 == 이 서버는 조정된 비표준 게임 모드를 실행하고 있습니다.
 
 There's an unsaved map in the editor, you might want to save it before you quit the game.
-== 편집기에서 맵이 저장되지 않았습니다. 종료 전에 되돌아가 저장하실 수 있습니다.
+== 편집기에서 맵이 저장되지 않았습니다. 종료 전 되돌아가 저장하실 수 있습니다.
 
 Time limit
 == 시간 제한
 
 Time limit: %d min
-== 시간 제한: %d min
+== 시간 제한: %d 분
 
 Try again
 == 재시도
 
 Type
 == 종류
-
-Unable to delete the demo
-== 데모를 삭제할 수 없음
 
 Unable to rename the demo
 == 데모의 이름을 변경할 수 없음
@@ -570,7 +562,7 @@ Info
 == 정보
 
 UI Color
-== 메뉴 색상
+== UI 색상
 
 Your skin
 == 당신의 스킨
@@ -589,9 +581,6 @@ Reset to defaults
 
 Laser
 == 레이저
-
-Display Modes
-== 디스플레이 모드
 
 Version:
 == 버전:
@@ -624,7 +613,7 @@ Replay feature is disabled!
 == 리플레이 기능을 비활성화했습니다!
 
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
-== 텍스처 %s 의 너비 또는 높이를 %d 로 나눌 수 없습니다. 이는 시각적 오류를 발생시킬 수 있습니다.
+== 텍스처 %s 의 너비 또는 높이를 %d 으로 나눌 수 없습니다. 이는 시각적 오류를 발생시킬 수 있습니다.
 
 Warning
 == 주의
@@ -633,10 +622,10 @@ Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
 == 디버그 모드를 활성화했습니다. Ctrl+Shift+D를 눌러 비활성화할 수 있습니다.
 
 Server best:
-== 서버 최고 기록
+== 서버 최고 기록:
 
 Personal best:
-== 개인 최고 기록
+== 개인 최고 기록:
 
 Reset
 == 초기화
@@ -651,7 +640,7 @@ Loading DDNet Client
 == DDNet 클라이언트 로딩 중
 
 Reconnect in %d sec
-== %d 초 후에 재접속
+== %d 초 후 재접속
 
 Render demo
 == 데모 렌더링
@@ -698,23 +687,17 @@ Checking for existing player with your name
 Are you sure that you want to disconnect and switch to a different server?
 == 연결을 끊고 다른 서버에 접속하시겠습니까?
 
-Country / Region
-== 국가 / 지역
-
-Destination file already exist
-== 대상 파일이 이미 존재함
-
 Speed
 == 속도
 
 Video name:
-== 동영상 이름
+== 동영상 이름:
 
 Show DDNet map finishes in server browser
 == DDNet 맵 완주를 서버 브라우저에 표시
 
-transmits your player name to info2.ddnet.tw
-== info2.ddnet.tw에 당신의 닉네임을 전송함
+transmits your player name to info.ddnet.org
+== info.ddnet.org에 당신의 닉네임을 전송함
 
 Theme
 == 테마
@@ -768,19 +751,19 @@ Please use a different name
 == 다른 이름을 사용해 주십시오
 
 Remove chat
-== 채팅 기록 삭제
+== 채팅 제거
 
 Demofile: %s
 == 데모 파일: %s
 
 Markers:
-== 책갈피
+== 마커:
 
 Demo
 == 데모
 
 Markers
-== 책갈피
+== 마커
 
 Length
 == 길이
@@ -909,13 +892,13 @@ Toggle ghost
 == 고스트 표시
 
 Dummy copy
-== 더미와 동시동작
+== 더미 동시동작
 
 Hammerfly dummy
 == 해머플라이 더미
 
 Converse
-== 지속 대화
+== 비밀대화 지속
 
 Statboard
 == 통계표
@@ -1022,12 +1005,6 @@ Show kill messages
 Kill Messages
 == 킬 메시지
 
-Laser Outline Color
-== 레이저 테두리 색상
-
-Laser Inner Color
-== 레이저 색상
-
 Use old chat style
 == 구식 채팅 방식 사용
 
@@ -1127,9 +1104,6 @@ Show tiles layers from BG map
 Regular Background Color
 == 기본 배경 색상
 
-Try fast HTTP map download first
-== 빠른 HTTP 맵 다운로드 우선 시도
-
 New random timeout code
 == 새로운 무작위 타임아웃 코드 생성
 
@@ -1172,14 +1146,14 @@ Assets directory
 Discord
 == 디스코드
 
-https://ddnet.tw/discord
-== https://ddnet.tw/discord
+https://ddnet.org/discord
+== https://ddnet.org/discord
 
 Learn
 == 학습터
 
-https://wiki.ddnet.tw/
-== https://wiki.ddnet.tw/
+https://wiki.ddnet.org/
+== https://wiki.ddnet.org/wiki/Main_Page/ko
 
 Website
 == 웹사이트
@@ -1204,7 +1178,7 @@ Play
 == 플레이
 
 DDNet %s is out!
-== DDNet %s 가 공개되었습니다!
+== DDNet %s 이 공개되었습니다!
 
 Downloading %s:
 == %s 다운로드 중:
@@ -1345,7 +1319,7 @@ Quads are used for background decoration
 == 맵 배경을 표시합니다.
 
 Tries to predict other entities to give a feel of low latency
-== 다른 엔티티를 예측하여 지연 시간을 줄입니다.
+== 다른 엔티티를 예측해 지연 시간을 줄입니다.
 
 Super
 == 무적
@@ -1406,9 +1380,6 @@ UI controller sens.
 Controller jitter tolerance
 == 컨트롤러 신호 오차 허용 범위
 
-No controller found. Plug in a controller and restart the game.
-== 컨트롤러가 발견되지 않았습니다. 컨트롤러 연결 후 게임을 재시작 하십시오.
-
 Device
 == 장치
 
@@ -1461,106 +1432,276 @@ Extras
 == 기타
 
 Preparing demo playback
-== 
+== 데모 재생 준비 중
 
 Connected
-== 
+== 연결됨
 
 Loading map file from storage
-== 
+== 저장공간에서 맵 파일 로딩 중
 
 Why are you slowmo replaying to read this?
-== 
+== 왜 이것을 슬로우 모션으로 보려고 하십니까?
 
 Initializing components
-== 
+== 구성요소 초기화 중
 
 Initializing assets
-== 
+== 에셋 초기화 중
 
 Initializing map logic
-== 
+== 맵 로직 초기화 중
 
 Sending initial client info
-== 
+== 초기 클라이언트 정보 전송 중
 
 Uploading map data to GPU
-== 
+== 맵 데이터를 GPU에 업로드 중
 
 Getting game info
-== 
+== 게임 정보 가져오는 중
 
 Requesting to join the game
-== 
+== 게임 참가 요청 중
 
 Loading menu images
-== 
+== 메뉴 이미지 로딩 중
 
 Loading demo files
-== 
+== 데모 파일 로딩 중
 
 Loading ghost files
-== 
+== 고스트 파일 로딩 중
 
 Loading skin files
-== 
+== 스킨 파일 로딩 중
 
 Appearance
-== 
+== 표시
 
 Name Plate
-== 
+== 이름 표시
 
 Hook Collisions
-== 
+== 갈고리 보조선
 
 Show health, shields and ammo
-== 
+== 체력과 방패, 탄약 표시
 
 DDRace HUD
-== 
+== DDRace HUD
 
 Show client IDs in scoreboard
-== 
+== 점수판에 클라이언트 ID 표시
 
 Show DDRace HUD
-== 
+== DDRace HUD 표시
 
 Show jumps indicator
-== 
+== 점프 상태 표시
 
 Show hook strength indicator
-== 
+== 갈고리 세기 표시
 
 Hook collision line
-== 
+== 갈고리 보조선
 
 Hook collision line width
-== 
+== 갈고리 보조선 폭
 
 Hook collision line opacity
-== 
+== 갈고리 보조선 불투명도
 
 Colors of the hook collision line, in case of a possible collision with:
-== 
+== 갈고리 보조선 색상:
 
 Your movements are not taken into account when calculating the line colors
-== 
+== 움직임은 색상 추정에 고려되지 않습니다.
 
 Nothing hookable
-== 
+== 갈고리 불가
 
 Something hookable
-== 
+== 갈고리 가능
 
 A Tee
-== 
+== Tee 대상
 
 Loading assets
-== 
+== 에셋 로딩 중
 
 Loading race demo files
-== 
+== 레이스 데모 파일 로딩 중
 
 Loading sound files
+== 소리 파일 로딩 중
+
+Play the current demo
+== 데모 재생
+
+Pause the current demo
+== 데모 일시정지
+
+Stop the current demo
+== 데모 정지
+
+Slow down the demo
+== 데모 속도 낮추기
+
+Speed up the demo
+== 데모 속도 높이기
+
+Mark the beginning of a cut
+== 영상 자르기의 시작 부분
+
+Mark the end of a cut
+== 영상 자르기의 끝 부분
+
+Export cut as a separate demo
+== 자른 부분을 다른 이름으로 저장
+
+Toggle keyboard shortcuts
+== 키보드 단축키 사용 선택
+
+Weapons
+== 무기
+
+Rifle Laser Outline Color
+== 소총 레이저 테두리 색상
+
+Rifle Laser Inner Color
+== 소총 레이저 광선 색상
+
+Shotgun Laser Outline Color
+== 산탄총 레이저 테두리 색상
+
+Shotgun Laser Inner Color
+== 산탄총 레이저 광선 색상
+
+Door Laser Outline Color
+== 문 레이저 테두리 색상
+
+Door Laser Inner Color
+== 문 레이저 광선 색상
+
+Freeze Laser Outline Color
+== 동결 레이저 테두리 색상
+
+Freeze Laser Inner Color
+== 동결 레이저 광선 색상
+
+Menu opened. Press Esc key again to close menu.
+== 메뉴가 열려 있습니다. Esc 키를 눌러 닫을 수 있습니다.
+
+Set all to Rifle
+== 소총 색상으로 통일
+
+[Graphics error]
+
+[Graphics error]
+Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== 초기화에 실패했습니다. 구성 폴더의 settings_ddnet.cfg에서 gfx_backend를 OpenGL 또는 Vulkan으로 변경 후 재시도하십시오.
+
+[Graphics error]
+Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
+== VRAM이 부족합니다. 사용자 정의 에셋(스킨, 엔티티 등), 특히 고해상도 에셋을 제거해 보십시오.
+
+[Graphics error]
+An error during command recording occurred. Try to update your GPU drivers.
+== 명령 기록 중 오류가 발생했습니다. GPU 드라이버를 업데이트해 보십시오.
+
+[Graphics error]
+A render command failed. Try to update your GPU drivers.
+== 렌더링 명령에 실패했습니다. GPU 드라이버를 업데이트해 보십시오.
+
+[Graphics error]
+Submitting the render commands failed. Try to update your GPU drivers.
+== 렌더링 명령 제출에 실패했습니다. GPU 드라이버를 업데이트해 보십시오.
+
+[Graphics error]
+Failed to swap framebuffers. Try to update your GPU drivers.
+== 프레임버퍼 교환에 실패했습니다. GPU 드라이버를 업데이트해 보십시오.
+
+[Graphics error]
+Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== 알 수 없는 오류가 발생했습니다. 구성 폴더의 settings_ddnet.cfg에서 gfx_backend를 OpenGL 또는 Vulkan으로 변경 후 재시도하십시오.
+
+[Graphics error]
+Could not initialize the given graphics backend, reverting to the default backend now.
+== 지정된 그래픽 백엔드를 초기화할 수 없습니다. 기본 백엔드로 되돌립니다.
+
+Cancel
+== 취소
+
+File '%s' already exists, do you want to overwrite it?
+== 파일 '%s' 이 이미 존재합니다. 덮어쓰기하시겠습니까?
+
+Are you sure that you want to remove the player '%s' from your friends list?
+== '%s' 님을 친구 목록에서 제거하시겠습니까?
+
+Are you sure that you want to remove the clan '%s' from your friends list?
+== '%s' 클랜을 친구 목록에서 제거하시겠습니까?
+
+Go back one tick
+== 1 틱 뒤로 이동
+
+Go forward one tick
+== 1 틱 앞으로 이동
+
+Go back one marker
+== 이전 마커로 이동
+
+Go forward one marker
+== 다음 마커로 이동
+
+Open the directory that contains the demo files
+== 데모 파일이 있는 폴더를 엽니다.
+
+Are you sure that you want to delete the demo '%s'?
+== 데모 '%s' 을 삭제하시겠습니까?
+
+Unable to delete the demo '%s'
+== 데모 '%s' 을 삭제할 수 없음
+
+Save power by lowering refresh rate (higher input latency)
+== 화면 주사율을 낮춰 전력 절약 (입력 지연 증가)
+
+Open the settings file
+== 설정 파일을 엽니다.
+
+Open the directory that contains the configuration and user files
+== 구성 파일과 사용자 파일이 있는 폴더를 엽니다.
+
+Open the directory to add custom themes
+== 사용자 정의 테마를 추가할 폴더를 엽니다.
+
+Open the directory to add custom skins
+== 사용자 정의 스킨을 추가할 폴더를 엽니다.
+
+No controller found. Plug in a controller.
+== 컨트롤러가 발견되지 않았습니다. 컨트롤러를 연결해 주십시오.
+
+Reset controls
+== 조작 초기화
+
+Are you sure that you want to reset the controls to their defaults?
+== 조작 설정을 초기화하시겠습니까?
+
+Unregister protocol and file extensions
+== 프로토콜과 파일 확장자 등록 해제
+
+Open the directory to add custom assets
+== 사용자 정의 에셋을 추가할 폴더를 엽니다.
+
+[Graphics error]
+Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
+== 
+
+Could not save downloaded map. Try manually deleting this file: %s
+== 
+
+Search:
+== 
+
+Copy info
 == 

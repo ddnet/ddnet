@@ -171,9 +171,6 @@ Password
 %i seconds left
 == Restas %i sekundoj
 
-Country / Region
-== Lando / Regiono
-
 Error
 == Eraro
 
@@ -194,9 +191,6 @@ Join Tutorial Server
 
 Skip Tutorial
 == Pasi la lernilo
-
-transmits your player name to info2.ddnet.tw
-== sendas vian ludantnomon al info2.ddnet.tw
 
 Nickname
 == Kromnomo
@@ -409,9 +403,6 @@ Time
 Dummy settings
 == Agordoj de la pupo
 
-Skins
-== Haŭtoj
-
 Skin Database
 == Datumbazo de haŭtoj
 
@@ -526,14 +517,14 @@ Check now
 Discord
 == Diskordo
 
-https://ddnet.tw/discord
-== https://ddnet.tw/discord
+https://ddnet.org/discord
+== https://ddnet.org/discord
 
 Learn
 == Lerni
 
-https://wiki.ddnet.tw/
-== https://wiki.ddnet.tw/
+https://wiki.ddnet.org/
+== https://wiki.ddnet.org/
 
 Tutorial
 == Lernilo
@@ -590,6 +581,47 @@ Deaths
 9+ new mentions
 == 9+ novaj mencioj
 
+[Graphics error]
+
+[Graphics error]
+Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== 
+
+[Graphics error]
+Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
+== 
+
+[Graphics error]
+An error during command recording occurred. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+A render command failed. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+Submitting the render commands failed. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+Failed to swap framebuffers. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== 
+
+[Graphics error]
+Could not initialize the given graphics backend, reverting to the default backend now.
+== 
+
+[Graphics error]
+Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
+== 
+
+Could not save downloaded map. Try manually deleting this file: %s
+== 
+
 Successfully saved the replay!
 == 
 
@@ -623,6 +655,9 @@ Initializing map logic
 Sending initial client info
 == 
 
+Search:
+== 
+
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
 == 
 
@@ -650,6 +685,12 @@ Reset
 Demos
 == 
 
+Sound error
+== 
+
+The audio device couldn't be initialised.
+== 
+
 Trying to determine UDP connectivity...
 == 
 
@@ -668,37 +709,10 @@ Getting game info
 Requesting to join the game
 == 
 
-The server is running a non-standard tuning on a pure game type.
-== 
-
-Delete demo
-== 
-
-Are you sure that you want to delete the demo?
-== 
-
 Rename demo
 == 
 
 Render demo
-== 
-
-Replace video
-== 
-
-File already exists, do you want to overwrite it?
-== 
-
-Remove friend
-== 
-
-Are you sure that you want to remove the player from your friends list?
-== 
-
-Sound error
-== 
-
-The audio device couldn't be initialised.
 == 
 
 Password incorrect
@@ -713,16 +727,16 @@ Use k key to kill (restart), q to pause and watch other players. See settings fo
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == 
 
-Unable to delete the demo
+Cancel
 == 
 
 Unable to rename the demo
 == 
 
-Destination file already exist
+File '%s' already exists, do you want to overwrite it?
 == 
 
-Error loading demo
+Replace video
 == 
 
 Show ingame HUD
@@ -732,6 +746,15 @@ Video name:
 == 
 
 Show DDNet map finishes in server browser
+== 
+
+transmits your player name to info.ddnet.org
+== 
+
+Error loading demo
+== 
+
+The server is running a non-standard tuning on a pure game type.
 == 
 
 Loading menu images
@@ -770,16 +793,67 @@ Reset filter
 Server details
 == 
 
-Leak IP
+Copy info
 == 
 
-Scoreboard
+Leak IP
 == 
 
 Remove
 == 
 
+Are you sure that you want to remove the player '%s' from your friends list?
+== 
+
+Are you sure that you want to remove the clan '%s' from your friends list?
+== 
+
+Remove friend
+== 
+
 Info
+== 
+
+File already exists, do you want to overwrite it?
+== 
+
+Play the current demo
+== 
+
+Pause the current demo
+== 
+
+Stop the current demo
+== 
+
+Go back one tick
+== 
+
+Go forward one tick
+== 
+
+Slow down the demo
+== 
+
+Speed up the demo
+== 
+
+Mark the beginning of a cut
+== 
+
+Mark the end of a cut
+== 
+
+Export cut as a separate demo
+== 
+
+Go back one marker
+== 
+
+Go forward one marker
+== 
+
+Toggle keyboard shortcuts
 == 
 
 Demofile: %s
@@ -842,7 +916,19 @@ Fetch Info
 Demos directory
 == 
 
+Open the directory that contains the demo files
+== 
+
+Are you sure that you want to delete the demo '%s'?
+== 
+
+Delete demo
+== 
+
 Render
+== 
+
+Unable to delete the demo '%s'
 == 
 
 Stop record
@@ -870,6 +956,9 @@ Activate
 == 
 
 Save
+== 
+
+Menu opened. Press Esc key again to close menu.
 == 
 
 Dynamic Camera
@@ -905,13 +994,25 @@ Max Screenshots
 Refresh Rate
 == 
 
+Save power by lowering refresh rate (higher input latency)
+== 
+
 Settings file
+== 
+
+Open the settings file
 == 
 
 Config directory
 == 
 
+Open the directory that contains the configuration and user files
+== 
+
 Themes directory
+== 
+
+Open the directory to add custom themes
 == 
 
 Automatically take statboard screenshot
@@ -921,6 +1022,9 @@ Automatically create statboard csv
 == 
 
 Max CSVs
+== 
+
+Loading skin files
 == 
 
 Your skin
@@ -956,7 +1060,7 @@ Body
 Feet
 == 
 
-Loading skin files
+Open the directory to add custom skins
 == 
 
 Hook collisions
@@ -1025,6 +1129,9 @@ Remote console
 Screenshot
 == 
 
+Scoreboard
+== 
+
 Statboard
 == 
 
@@ -1069,7 +1176,7 @@ UI controller sens.
 Controller jitter tolerance
 == 
 
-No controller found. Plug in a controller and restart the game.
+No controller found. Plug in a controller.
 == 
 
 Device
@@ -1082,9 +1189,6 @@ Aim bind
 == 
 
 Controller Axis #%d
-== 
-
-Controls
 == 
 
 Ingame mouse sens.
@@ -1102,6 +1206,12 @@ Movement
 Reset to defaults
 == 
 
+Reset controls
+== 
+
+Are you sure that you want to reset the controls to their defaults?
+== 
+
 Voting
 == 
 
@@ -1109,9 +1219,6 @@ Miscellaneous
 == 
 
 Current
-== 
-
-Display Modes
 == 
 
 Windowed
@@ -1205,6 +1312,9 @@ Map sound volume
 == 
 
 Background music volume
+== 
+
+Controls
 == 
 
 Hue
@@ -1348,10 +1458,37 @@ Normal Color
 Highlight Color
 == 
 
-Laser Outline Color
+Weapons
 == 
 
-Laser Inner Color
+Rifle Laser Outline Color
+== 
+
+Rifle Laser Inner Color
+== 
+
+Shotgun Laser Outline Color
+== 
+
+Shotgun Laser Inner Color
+== 
+
+Entities
+== 
+
+Door Laser Outline Color
+== 
+
+Door Laser Inner Color
+== 
+
+Freeze Laser Outline Color
+== 
+
+Freeze Laser Inner Color
+== 
+
+Set all to Rifle
 == 
 
 Save the best demo of each race
@@ -1432,9 +1569,6 @@ Show tiles layers from BG map
 Regular Background Color
 == 
 
-Try fast HTTP map download first
-== 
-
 New random timeout code
 == 
 
@@ -1444,13 +1578,13 @@ Run on join
 Chat command (e.g. showall 1)
 == 
 
+Unregister protocol and file extensions
+== 
+
 DDNet Client updated!
 == 
 
 No updates available
-== 
-
-Entities
 == 
 
 Emoticons
@@ -1466,6 +1600,9 @@ Loading assets
 == 
 
 Assets directory
+== 
+
+Open the directory to add custom assets
 == 
 
 Can't find a Tutorial server

@@ -794,6 +794,17 @@ void CGraphics_Threaded::KickCommandBuffer()
 {
 	m_pBackend->RunBuffer(m_pCommandBuffer);
 
+	std::vector<std::string> WarningStrings;
+	if(m_pBackend->GetWarning(WarningStrings))
+	{
+		SWarning NewWarning;
+		std::string WarningStr;
+		for(const auto &WarnStr : WarningStrings)
+			WarningStr.append((WarnStr + "\n"));
+		str_copy(NewWarning.m_aWarningMsg, WarningStr.c_str());
+		m_vWarnings.emplace_back(NewWarning);
+	}
+
 	// swap buffer
 	m_CurrentCommandBuffer ^= 1;
 	m_pCommandBuffer = m_apCommandBuffers[m_CurrentCommandBuffer];
@@ -820,25 +831,26 @@ bool CGraphics_Threaded::ScreenshotDirect()
 
 	if(Image.m_pData)
 	{
-		// find filename
-		char aWholePath[1024];
+		char aWholePath[IO_MAX_PATH_LENGTH];
+		char aBuf[64 + IO_MAX_PATH_LENGTH];
 
 		IOHANDLE File = m_pStorage->OpenFile(m_aScreenshotName, IOFLAG_WRITE, IStorage::TYPE_SAVE, aWholePath, sizeof(aWholePath));
 		if(File)
 		{
-			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "saved screenshot to '%s'", aWholePath);
-
-			// save png
-			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf, ColorRGBA{1.0f, 0.6f, 0.3f, 1.0f});
-
 			TImageByteBuffer ByteBuffer;
 			SImageByteBuffer ImageByteBuffer(&ByteBuffer);
 
 			if(SavePNG(IMAGE_FORMAT_RGBA, (const uint8_t *)Image.m_pData, ImageByteBuffer, Image.m_Width, Image.m_Height))
 				io_write(File, &ByteBuffer.front(), ByteBuffer.size());
 			io_close(File);
+
+			str_format(aBuf, sizeof(aBuf), "saved screenshot to '%s'", aWholePath);
 		}
+		else
+		{
+			str_format(aBuf, sizeof(aBuf), "failed to save screenshot to '%s'", aWholePath);
+		}
+		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf, ColorRGBA(1.0f, 0.6f, 0.3f, 1.0f));
 
 		free(Image.m_pData);
 	}
@@ -849,6 +861,7 @@ bool CGraphics_Threaded::ScreenshotDirect()
 void CGraphics_Threaded::TextureSet(CTextureHandle TextureID)
 {
 	dbg_assert(m_Drawing == 0, "called Graphics()->TextureSet within begin");
+	dbg_assert(!TextureID.IsValid() || m_vTextureIndices[TextureID.Id()] == -1, "Texture handle was not invalid, but also did not correlate to an existing texture.");
 	m_State.m_Texture = TextureID.Id();
 }
 
@@ -1249,12 +1262,12 @@ void CGraphics_Threaded::DrawRectExt(float x, float y, float w, float h, float r
 		float a1 = i * SegmentsAngle;
 		float a2 = (i + 1) * SegmentsAngle;
 		float a3 = (i + 2) * SegmentsAngle;
-		float Ca1 = cosf(a1);
-		float Ca2 = cosf(a2);
-		float Ca3 = cosf(a3);
-		float Sa1 = sinf(a1);
-		float Sa2 = sinf(a2);
-		float Sa3 = sinf(a3);
+		float Ca1 = std::cos(a1);
+		float Ca2 = std::cos(a2);
+		float Ca3 = std::cos(a3);
+		float Sa1 = std::sin(a1);
+		float Sa2 = std::sin(a2);
+		float Sa3 = std::sin(a3);
 
 		if(Corners & CORNER_TL)
 			aFreeform[NumItems++] = IGraphics::CFreeformItem(
@@ -1323,12 +1336,12 @@ void CGraphics_Threaded::DrawRectExt4(float x, float y, float w, float h, ColorR
 		float a1 = i * SegmentsAngle;
 		float a2 = (i + 1) * SegmentsAngle;
 		float a3 = (i + 2) * SegmentsAngle;
-		float Ca1 = cosf(a1);
-		float Ca2 = cosf(a2);
-		float Ca3 = cosf(a3);
-		float Sa1 = sinf(a1);
-		float Sa2 = sinf(a2);
-		float Sa3 = sinf(a3);
+		float Ca1 = std::cos(a1);
+		float Ca2 = std::cos(a2);
+		float Ca3 = std::cos(a3);
+		float Sa1 = std::sin(a1);
+		float Sa2 = std::sin(a2);
+		float Sa3 = std::sin(a3);
 
 		if(Corners & CORNER_TL)
 		{
@@ -1491,12 +1504,12 @@ int CGraphics_Threaded::CreateRectQuadContainer(float x, float y, float w, float
 		float a1 = i * SegmentsAngle;
 		float a2 = (i + 1) * SegmentsAngle;
 		float a3 = (i + 2) * SegmentsAngle;
-		float Ca1 = cosf(a1);
-		float Ca2 = cosf(a2);
-		float Ca3 = cosf(a3);
-		float Sa1 = sinf(a1);
-		float Sa2 = sinf(a2);
-		float Sa3 = sinf(a3);
+		float Ca1 = std::cos(a1);
+		float Ca2 = std::cos(a2);
+		float Ca3 = std::cos(a3);
+		float Sa1 = std::sin(a1);
+		float Sa2 = std::sin(a2);
+		float Sa3 = std::sin(a3);
 
 		if(Corners & CORNER_TL)
 			aFreeform[NumItems++] = IGraphics::CFreeformItem(
@@ -1585,9 +1598,9 @@ void CGraphics_Threaded::DrawCircle(float CenterX, float CenterY, float Radius, 
 		const float a3 = (i + 2) * SegmentsAngle;
 		aItems[NumItems++] = IGraphics::CFreeformItem(
 			CenterX, CenterY,
-			CenterX + cosf(a1) * Radius, CenterY + sinf(a1) * Radius,
-			CenterX + cosf(a3) * Radius, CenterY + sinf(a3) * Radius,
-			CenterX + cosf(a2) * Radius, CenterY + sinf(a2) * Radius);
+			CenterX + std::cos(a1) * Radius, CenterY + std::sin(a1) * Radius,
+			CenterX + std::cos(a3) * Radius, CenterY + std::sin(a3) * Radius,
+			CenterX + std::cos(a2) * Radius, CenterY + std::sin(a2) * Radius);
 		if(NumItems == std::size(aItems))
 		{
 			QuadsDrawFreeform(aItems, std::size(aItems));
@@ -1934,23 +1947,27 @@ int CGraphics_Threaded::QuadContainerAddQuads(int ContainerIndex, CFreeformItem 
 
 void CGraphics_Threaded::QuadContainerReset(int ContainerIndex)
 {
+	if(ContainerIndex == -1)
+		return;
+
 	SQuadContainer &Container = m_vQuadContainers[ContainerIndex];
 	if(IsQuadContainerBufferingEnabled())
-	{
-		if(Container.m_QuadBufferContainerIndex != -1)
-			DeleteBufferContainer(Container.m_QuadBufferContainerIndex, true);
-	}
+		DeleteBufferContainer(Container.m_QuadBufferContainerIndex, true);
 	Container.m_vQuads.clear();
-	Container.m_QuadBufferContainerIndex = Container.m_QuadBufferObjectIndex = -1;
+	Container.m_QuadBufferObjectIndex = -1;
 }
 
-void CGraphics_Threaded::DeleteQuadContainer(int ContainerIndex)
+void CGraphics_Threaded::DeleteQuadContainer(int &ContainerIndex)
 {
+	if(ContainerIndex == -1)
+		return;
+
 	QuadContainerReset(ContainerIndex);
 
 	// also clear the container index
 	m_vQuadContainers[ContainerIndex].m_FreeIndex = m_FirstFreeQuadContainer;
 	m_FirstFreeQuadContainer = ContainerIndex;
+	ContainerIndex = -1;
 }
 
 void CGraphics_Threaded::RenderQuadContainer(int ContainerIndex, int QuadDrawNum)
@@ -2521,10 +2538,11 @@ int CGraphics_Threaded::CreateBufferContainer(SBufferContainerInfo *pContainerIn
 	return Index;
 }
 
-void CGraphics_Threaded::DeleteBufferContainer(int ContainerIndex, bool DestroyAllBO)
+void CGraphics_Threaded::DeleteBufferContainer(int &ContainerIndex, bool DestroyAllBO)
 {
 	if(ContainerIndex == -1)
 		return;
+
 	CCommandBuffer::SCommand_DeleteBufferContainer Cmd;
 	Cmd.m_BufferContainerIndex = ContainerIndex;
 	Cmd.m_DestroyAllBO = DestroyAllBO;
@@ -2551,6 +2569,7 @@ void CGraphics_Threaded::DeleteBufferContainer(int ContainerIndex, bool DestroyA
 	// also clear the buffer object index
 	m_vVertexArrayInfo[ContainerIndex].m_FreeIndex = m_FirstFreeVertexArrayInfo;
 	m_FirstFreeVertexArrayInfo = ContainerIndex;
+	ContainerIndex = -1;
 }
 
 void CGraphics_Threaded::UpdateBufferContainerInternal(int ContainerIndex, SBufferContainerInfo *pContainerInfo)
@@ -2680,7 +2699,7 @@ void CGraphics_Threaded::AddBackEndWarningIfExists()
 	if(pErrStr != NULL)
 	{
 		SWarning NewWarning;
-		str_format(NewWarning.m_aWarningMsg, sizeof(NewWarning.m_aWarningMsg), "%s", Localize(pErrStr));
+		str_copy(NewWarning.m_aWarningMsg, Localize(pErrStr));
 		m_vWarnings.emplace_back(NewWarning);
 	}
 }
@@ -2829,7 +2848,7 @@ int CGraphics_Threaded::Init()
 	m_FirstFreeBufferObjectIndex = -1;
 	m_FirstFreeQuadContainer = -1;
 
-	m_pBackend = CreateGraphicsBackend();
+	m_pBackend = CreateGraphicsBackend(Localize);
 	if(InitWindow() != 0)
 		return -1;
 
@@ -2891,12 +2910,18 @@ int CGraphics_Threaded::GetNumScreens() const
 void CGraphics_Threaded::Minimize()
 {
 	m_pBackend->Minimize();
+
+	for(auto &PropChangedListener : m_vPropChangeListeners)
+		PropChangedListener();
 }
 
 void CGraphics_Threaded::Maximize()
 {
 	// TODO: SDL
 	m_pBackend->Maximize();
+
+	for(auto &PropChangedListener : m_vPropChangeListeners)
+		PropChangedListener();
 }
 
 void CGraphics_Threaded::WarnPngliteIncompatibleImages(bool Warn)
@@ -2910,6 +2935,9 @@ void CGraphics_Threaded::SetWindowParams(int FullscreenMode, bool IsBorderless, 
 	CVideoMode CurMode;
 	m_pBackend->GetCurrentVideoMode(CurMode, m_ScreenHiDPIScale, g_Config.m_GfxDesktopWidth, g_Config.m_GfxDesktopHeight, g_Config.m_GfxScreen);
 	GotResized(CurMode.m_WindowWidth, CurMode.m_WindowHeight, CurMode.m_RefreshRate);
+
+	for(auto &PropChangedListener : m_vPropChangeListeners)
+		PropChangedListener();
 }
 
 bool CGraphics_Threaded::SetWindowScreen(int Index)
@@ -2919,9 +2947,11 @@ bool CGraphics_Threaded::SetWindowScreen(int Index)
 		return false;
 	}
 
-	m_pBackend->GetViewportSize(m_ScreenWidth, m_ScreenHeight);
-	AdjustViewport(true);
-	m_ScreenHiDPIScale = m_ScreenWidth / (float)g_Config.m_GfxScreenWidth;
+	// send a got resized event so that the current canvas size is requested
+	GotResized(g_Config.m_GfxScreenWidth, g_Config.m_GfxScreenHeight, g_Config.m_GfxScreenRefreshRate);
+
+	for(auto &PropChangedListener : m_vPropChangeListeners)
+		PropChangedListener();
 	return true;
 }
 
@@ -2935,9 +2965,12 @@ void CGraphics_Threaded::Move(int x, int y)
 	// Only handling CurScreen != m_GfxScreen doesn't work reliably
 	const int CurScreen = m_pBackend->GetWindowScreen();
 	m_pBackend->UpdateDisplayMode(CurScreen);
-	m_pBackend->GetViewportSize(m_ScreenWidth, m_ScreenHeight);
-	AdjustViewport(true);
-	m_ScreenHiDPIScale = m_ScreenWidth / (float)g_Config.m_GfxScreenWidth;
+
+	// send a got resized event so that the current canvas size is requested
+	GotResized(g_Config.m_GfxScreenWidth, g_Config.m_GfxScreenHeight, g_Config.m_GfxScreenRefreshRate);
+
+	for(auto &PropChangedListener : m_vPropChangeListeners)
+		PropChangedListener();
 }
 
 void CGraphics_Threaded::Resize(int w, int h, int RefreshRate)
@@ -2971,6 +3004,8 @@ void CGraphics_Threaded::GotResized(int w, int h, int RefreshRate)
 		RefreshRate = g_Config.m_GfxScreenRefreshRate;
 
 	// if the size change event is triggered, set all parameters and change the viewport
+	auto PrevCanvasWidth = m_ScreenWidth;
+	auto PrevCanvasHeight = m_ScreenHeight;
 	m_pBackend->GetViewportSize(m_ScreenWidth, m_ScreenHeight);
 
 	AdjustViewport(false);
@@ -2988,13 +3023,21 @@ void CGraphics_Threaded::GotResized(int w, int h, int RefreshRate)
 	KickCommandBuffer();
 	WaitForIdle();
 
-	for(auto &ResizeListener : m_vResizeListeners)
-		ResizeListener.m_pFunc(ResizeListener.m_pUser);
+	if(PrevCanvasWidth != m_ScreenWidth || PrevCanvasHeight != m_ScreenHeight)
+	{
+		for(auto &ResizeListener : m_vResizeListeners)
+			ResizeListener();
+	}
 }
 
-void CGraphics_Threaded::AddWindowResizeListener(WINDOW_RESIZE_FUNC pFunc, void *pUser)
+void CGraphics_Threaded::AddWindowResizeListener(WINDOW_RESIZE_FUNC pFunc)
 {
-	m_vResizeListeners.emplace_back(pFunc, pUser);
+	m_vResizeListeners.emplace_back(pFunc);
+}
+
+void CGraphics_Threaded::AddWindowPropChangeListener(WINDOW_PROPS_CHANGED_FUNC pFunc)
+{
+	m_vPropChangeListeners.emplace_back(pFunc);
 }
 
 int CGraphics_Threaded::GetWindowScreen()

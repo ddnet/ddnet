@@ -221,9 +221,7 @@ public:
 	CSnapIDPool m_IDPool;
 	CNetServer m_NetServer;
 	CEcon m_Econ;
-#if defined(CONF_FAMILY_UNIX)
 	CFifo m_Fifo;
-#endif
 	CServerBan m_ServerBan;
 
 	IEngineMap *m_pMap;
@@ -270,6 +268,10 @@ public:
 
 	std::vector<CNameBan> m_vNameBans;
 
+	size_t m_AnnouncementLastLine;
+	std::vector<std::string> m_vAnnouncements;
+	char m_aAnnouncementFile[IO_MAX_PATH_LENGTH];
+
 	CServer();
 	~CServer();
 
@@ -287,7 +289,6 @@ public:
 	void Ban(int ClientID, int Seconds, const char *pReason) override;
 
 	void DemoRecorder_HandleAutoStart() override;
-	bool DemoRecorder_IsRecording() override;
 
 	//int Tick()
 	int64_t TickStartTime(int Tick);
@@ -362,6 +363,8 @@ public:
 	CCache m_aServerInfoCache[3 * 2];
 	CCache m_aSixupServerInfoCache[2];
 	bool m_ServerInfoNeedsUpdate;
+
+	void FillAntibot(CAntibotRoundData *pData) override;
 
 	void ExpireServerInfo() override;
 	void CacheServerInfo(CCache *pCache, int Type, bool SendClients);
@@ -443,7 +446,6 @@ public:
 	void GetClientAddr(int ClientID, NETADDR *pAddr) const override;
 	int m_aPrevStates[MAX_CLIENTS];
 	const char *GetAnnouncementLine(char const *pFileName) override;
-	unsigned m_AnnouncementLastLine;
 
 	int *GetIdMap(int ClientID) override;
 
@@ -487,4 +489,5 @@ public:
 #endif
 };
 
+extern CServer *CreateServer();
 #endif

@@ -13,6 +13,8 @@
 #	gerdoe		2020-09-17 22:49:22
 #	Vy0x2		2021-06-08 15:48:25
 #	Anime.pdf	2021-06-13 13:08:50
+#	banan   	2022-06-12 11:36:50
+#	ban   	2023-01-5 10:22:50
 ##### /authors #####
 
 ##### translated strings #####
@@ -53,14 +55,8 @@ Address
 All
 == Все
 
-Are you sure that you want to delete the demo?
-== Вы уверены, что хотите удалить демо?
-
 Are you sure that you want to quit?
 == Вы действительно желаете выйти?
-
-Are you sure that you want to remove the player from your friends list?
-== Вы уверены, что хотите удалить игрока из друзей?
 
 Automatically record demos
 == Записывать демо
@@ -408,9 +404,6 @@ Show ingame HUD
 Show name plates
 == Показывать имена игроков
 
-Skins
-== Скины
-
 Sound
 == Звук
 
@@ -482,9 +475,6 @@ Try again
 
 Type
 == Тип
-
-Unable to delete the demo
-== Невозможно удалить демо
 
 Unable to rename the demo
 == Невозможно переименовать демо
@@ -648,9 +638,6 @@ Reset to defaults
 Quit anyway?
 == Все равно выйти?
 
-Display Modes
-== Разрешения экрана
-
 Version:
 == Версия:
 
@@ -798,17 +785,14 @@ It's recommended that you check the settings to adjust them to your liking befor
 Please enter your nickname below.
 == Пожалуйста, ниже укажите ваш псевдоним.
 
-Destination file already exist
-== Конечный файл уже существует
-
 Video name:
 == Название видео:
 
 Show DDNet map finishes in server browser
 == Показывать в браузере статус завершения карты
 
-transmits your player name to info2.ddnet.tw
-== передает ваш псевдоним на info2.ddnet.tw
+transmits your player name to info.ddnet.org
+== передает ваш псевдоним на info.ddnet.org
 
 Exclude
 == Исключить
@@ -1005,9 +989,6 @@ Show other players' key presses
 Show tiles layers from BG map
 == Показывать тайловые слои фона
 
-Try fast HTTP map download first
-== Быстро загружать карты по HTTP
-
 DDNet %s is available:
 == Доступен DDNet %s:
 
@@ -1065,9 +1046,6 @@ Warning
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
 == Используйте кнопку k, чтобы возродиться, q для паузы и наблюдения за остальными игроками. Проверьте настройки остальных кнопок.
 
-Country / Region
-== Страна / Регион
-
 Speed
 == Скорость
 
@@ -1077,8 +1055,8 @@ Markers
 Skip the main menu
 == Пропускать главное меню
 
-https://wiki.ddnet.tw/
-== https://wiki.ddnet.tw/wiki/Main_Page/ru
+https://wiki.ddnet.org/
+== https://wiki.ddnet.org/wiki/Main_Page/ru
 
 Website
 == Сайт
@@ -1204,12 +1182,6 @@ The width of texture %s is not divisible by %d, or the height is not divisible b
 Dummy
 == Дамми
 
-Laser Outline Color
-== Цвет обводки лазера
-
-Laser Inner Color
-== Цвет лазера
-
 Preview
 == Превью
 
@@ -1228,8 +1200,8 @@ Chat command
 Discord
 == Дискорд
 
-https://ddnet.tw/discord
-== https://ddnet.tw/discord
+https://ddnet.org/discord
+== https://ddnet.org/discord
 
 AFR
 == AFR
@@ -1382,9 +1354,6 @@ UI controller sens.
 
 Controller jitter tolerance
 == Устойчивость к движению контроллера
-
-No controller found. Plug in a controller and restart the game.
-== Контроллер не найден. Подключите контроллер и перезапустите игру.
 
 Device
 == Устройство
@@ -1564,4 +1533,172 @@ Loading sound files
 == Загрузка звуковых файлов
 
 Why are you slowmo replaying to read this?
+== Зачем ты читаешь на это в замедлении?
+
+Play the current demo
+== Включить демо
+
+Pause the current demo
+== Поставить на паузу
+
+Stop the current demo
+== Остановить демо
+
+Slow down the demo
+== Замедлить демо
+
+Speed up the demo
+== Ускорить демо
+
+Mark the beginning of a cut
+== Отметить начало участка
+
+Mark the end of a cut
+== Отметить конец участка
+
+Export cut as a separate demo
+== Экспортировать участок отдельно
+
+Toggle keyboard shortcuts
+== Включить горячие клавиши
+
+Weapons
+== Оружия
+
+Rifle Laser Outline Color
+== Цвет обводки лазера
+
+Rifle Laser Inner Color
+== Цвет лазера
+
+Shotgun Laser Outline Color
+== Цвет обводки лазера дробовика
+
+Shotgun Laser Inner Color
+== Цвет лазера дробовика
+
+Door Laser Outline Color
+== Цвет обводки двери
+
+Door Laser Inner Color
+== Цвет двери
+
+Freeze Laser Outline Color
+== Цвет обводки фриз лазера
+
+Freeze Laser Inner Color
+== Цвет фриз лазера
+
+Menu opened. Press Esc key again to close menu.
+== Меню открыто. Нажмите Esc для закрытия меню
+
+Set all to Rifle
+== Цвет всех как у лазера
+
+Cancel
+== Отмена
+
+File '%s' already exists, do you want to overwrite it?
+== файл '%s' уже существует, вы уверены что хотите его перезаписать?
+
+Are you sure that you want to remove the player '%s' from your friends list?
+== Вы уверены что хотите удалить игрока '%s' из списка ваших друзей?
+
+Are you sure that you want to remove the clan '%s' from your friends list?
+== Вы уверены что хотите удалить клан '%s' из списка ваших друзей?
+
+Go back one tick
+== Отмотать назад на один тик
+
+Go forward one tick
+== Отмотать вперед на один тик
+
+Go back one marker
+== Отмотать назад на один маркер
+
+Go forward one marker
+== Отмотать вперед на один маркер
+
+Are you sure that you want to delete the demo '%s'?
+== Вы уверены что хотите удалить демо '%s'?
+
+Unable to delete the demo '%s'
+== Невозможно удалить демо '%s'
+
+Reset controls
+== Сброс настроек
+
+Are you sure that you want to reset the controls to their defaults?
+== Вы уверены что хотите сбросить настройки на их стандартные значения?
+
+[Graphics error]
+Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== Ошибка во время инициализации. Попробуйте изменить gfx_backend на OpenGL или Vulkan в settings_ddnet.cfg в папке config и повторите попытку.
+
+[Graphics error]
+Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
+== Нехватка памяти VRAM. Попробуйте удалить пользовательские ресурсы (скины, энтити и т.д.), особенно те, которые имеют высокое разрешение.
+
+[Graphics error]
+An error during command recording occurred. Try to update your GPU drivers.
+== Произошла ошибка во время выполнения команды записи. Попробуйте обновить драйверы видеокарты.
+
+[Graphics error]
+A render command failed. Try to update your GPU drivers.
+== Команда рендеринга не выполнена. Попробуйте обновить драйверы видеокарты.
+
+[Graphics error]
+Submitting the render commands failed. Try to update your GPU drivers.
+== Отправка команд рендеринга не удалась. Попробуйте обновить драйверы видеокарты.
+
+[Graphics error]
+Failed to swap framebuffers. Try to update your GPU drivers.
+== Не удалось выполнить подкачку кадровых буферов. Попробуйте обновить драйверы видеокарты.
+
+[Graphics error]
+Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== Неизвестная ошибка. Попробуйте изменить gfx_backend на OpenGL или Vulkan в settings_ddnet.cfg в папке config и повторите попытку.
+
+[Graphics error]
+Could not initialize the given graphics backend, reverting to the default backend now.
+== Не удалось инициализировать заданный графический модуль, возврат к модулю по умолчанию.
+
+Open the directory that contains the demo files
+== Открытие папки, содержащего файлы демок
+
+Save power by lowering refresh rate (higher input latency)
+== Экономия энергии за счет снижения частоты кадров (более высокая задержка ввода)
+
+Open the settings file
+== Открытие файла настроек
+
+Open the directory that contains the configuration and user files
+== Открытие папки, содержащей файлы конфигурации и пользовательские файлы
+
+Open the directory to add custom themes
+== Открытие папки для добавления пользовательских тем
+
+Open the directory to add custom skins
+== Открытие папки для добавления пользовательских скинов
+
+No controller found. Plug in a controller.
+== Контроллер не найден. Подключите контроллер.
+
+Unregister protocol and file extensions
+== Незарегистрированный протокол и расширения файлов
+
+Open the directory to add custom assets
+== Открытие папки для добавления пользовательских ресурсов
+
+[Graphics error]
+Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
+== 
+
+Could not save downloaded map. Try manually deleting this file: %s
+== 
+
+Search:
+== 
+
+Copy info
 == 

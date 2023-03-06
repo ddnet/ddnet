@@ -220,6 +220,7 @@ class NetObject:
 			lines += [f"struct {self.struct_name} : public {self.base_struct_name}", "{"]
 		else:
 			lines += [f"struct {self.struct_name}", "{"]
+		lines += [f"\tstatic constexpr int ms_MsgID = {self.enum_name};"]
 		for v in self.variables:
 			lines += ["\t"+line for line in v.emit_declaration()]
 		lines += ["};"]
@@ -286,7 +287,6 @@ class NetMessage(NetObject):
 
 	def emit_declaration(self):
 		extra = []
-		extra += [f"\tint MsgID() const {{ return {self.enum_name}; }}"]
 		extra += ["\t"]
 		extra += ["\tbool Pack(CMsgPacker *pPacker) const"]
 		extra += ["\t{"]
