@@ -1331,7 +1331,7 @@ void CEditor::DoSoundSource(CSoundSource *pSource, int Index)
 		{
 			if(!UI()->MouseButton(1))
 			{
-				if(m_vSelectedLayers.size() == 1 && m_GuiActive)
+				if(m_vSelectedLayers.size() == 1)
 				{
 					static int s_SourcePopupID = 0;
 					UiInvokePopupMenu(&s_SourcePopupID, 0, UI()->MouseX(), UI()->MouseY(), 120, 200, PopupSource);
@@ -1480,7 +1480,7 @@ void CEditor::DoQuad(CQuad *pQuad, int Index)
 		{
 			if(!UI()->MouseButton(1))
 			{
-				if(m_vSelectedLayers.size() == 1 && m_GuiActive)
+				if(m_vSelectedLayers.size() == 1)
 				{
 					m_SelectedQuadIndex = FindSelectedQuadIndex(Index);
 
@@ -1692,7 +1692,7 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 		{
 			if(!UI()->MouseButton(1))
 			{
-				if(m_vSelectedLayers.size() == 1 && m_GuiActive)
+				if(m_vSelectedLayers.size() == 1)
 				{
 					m_SelectedQuadPoint = V;
 					m_SelectedQuadIndex = FindSelectedQuadIndex(QuadIndex);
@@ -6496,10 +6496,7 @@ void CEditor::OnRender()
 	{
 		m_GuiActive = !m_GuiActive;
 		if(!m_GuiActive)
-		{
 			m_LockMouse = false;
-			UiClosePopupMenus();
-		}
 	}
 
 	if(Input()->KeyPress(KEY_F10))
