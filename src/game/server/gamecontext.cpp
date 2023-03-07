@@ -3463,11 +3463,11 @@ void CGameContext::OnInit()
 	int MapCrc;
 	Server()->GetMapInfo(aMapName, sizeof(aMapName), &MapSize, &MapSha256, &MapCrc);
 	m_MapBugs = GetMapBugs(aMapName, MapSize, MapSha256);
-  
+
 	// reset tune locks
 	for(int i = 0; i < NUM_TUNEZONES; i++)
 		LockedTuning()[i].clear();
-    
+
 	// Reset Tunezones
 	CTuningParams TuningParams;
 	for(int i = 0; i < NUM_TUNEZONES; i++)
