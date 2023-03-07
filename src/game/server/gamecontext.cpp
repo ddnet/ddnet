@@ -185,11 +185,13 @@ bool CGameContext::EmulateBug(int Bug)
 	return m_MapBugs.Contains(Bug);
 }
 
-CTuningParams CGameContext::Tuning(int ClientID)
+CTuningParams *CGameContext::Tuning(int ClientID, int Zone)
 {
 	if(GetPlayerChar(ClientID))
-		return GetPlayerChar(ClientID)->Tuning();
-	return m_Tuning;
+		return GetPlayerChar(ClientID)->Tuning(Zone);
+	if(Zone != 0)
+		return &TuningList()[Zone];
+	return &m_Tuning;
 }
 
 bool CGameContext::SetLockedTune(LOCKED_TUNES *pLockedTunings, CLockedTune Tune)
@@ -333,11 +335,9 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 		if(l)
 			ForceDir = normalize(Diff);
 		l = 1 - clamp((l - InnerRadius) / (Radius - InnerRadius), 0.0f, 1.0f);
-		float Strength;
-		if(Owner == -1 || !m_apPlayers[Owner] || !m_apPlayers[Owner]->m_TuneZone)
-			Strength = Tuning(Owner).m_ExplosionStrength;
-		else
-			Strength = TuningList()[m_apPlayers[Owner]->m_TuneZone].m_ExplosionStrength;
+
+		int TuneZone = m_apPlayers[Owner] ? m_apPlayers[Owner]->m_TuneZone : 0;
+		float Strength = Tuning(Owner, TuneZone)->m_ExplosionStrength;
 
 		float Dmg = Strength * l;
 		if(!(int)Dmg)
@@ -810,13 +810,17 @@ void CGameContext::SendTuningParams(int ClientID, int Zone)
 
 	CMsgPacker Msg(NETMSGTYPE_SV_TUNEPARAMS);
 	int *pParams = 0;
-	if(Zone == 0)
+	if(GetClientVersion(ClientID) >= VERSION_DDNET_TUNELOCK)
 	{
-		CTuningParams Params = GetClientVersion(ClientID) >= VERSION_DDNET_TUNELOCK ? m_Tuning : Tuning(ClientID);
-		pParams = (int *)&(Params);
+		if(Zone == 0)
+			pParams = (int *)&m_Tuning;
+		else
+			pParams = (int *)&(m_aTuningList[Zone]);
 	}
 	else
-		pParams = (int *)&(m_aTuningList[Zone]);
+	{
+		pParams = (int *)Tuning(ClientID, Zone);
+	}
 
 	for(unsigned i = 0; i < sizeof(m_Tuning) / sizeof(int); i++)
 	{

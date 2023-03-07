@@ -255,7 +255,7 @@ public:
 
 	CSaveTee &GetRescueTeeRef() { return m_RescueTee; }
 
-	CTuningParams Tuning();
+	CTuningParams *Tuning(int Zone = 0);
 };
 
 enum
