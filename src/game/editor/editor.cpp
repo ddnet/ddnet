@@ -104,6 +104,7 @@ CLayerGroup::CLayerGroup()
 	m_OffsetY = 0;
 	m_ParallaxX = 100;
 	m_ParallaxY = 100;
+	m_CustomParallaxZoom = 0;
 	m_ParallaxZoom = 100;
 
 	m_UseClipping = 0;
