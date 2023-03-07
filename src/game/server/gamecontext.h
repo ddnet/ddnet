@@ -514,6 +514,9 @@ public:
 
 	void SendRecord(int ClientID);
 	void OnSetAuthed(int ClientID, int Level) override;
+	virtual bool PlayerCollision();
+	virtual bool PlayerHooking();
+	virtual float PlayerJetpack();
 
 	void ResetTuning();
 };
