@@ -44,11 +44,11 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 	static CButtonContainer s_DiscordButton;
 	if(DoButton_Menu(&s_DiscordButton, Localize("Discord"), 0, &Button, 0, IGraphics::CORNER_ALL, 5.0f, 0.0f, vec4(0.0f, 0.0f, 0.0f, 0.5f), vec4(0.0f, 0.0f, 0.0f, 0.25f)))
 	{
-		if(!open_link(Localize("https://ddnet.tw/discord")))
+		const char *pLink = Localize("https://ddnet.org/discord");
+		if(!open_link(pLink))
 		{
-			dbg_msg("menus", "couldn't open link");
+			dbg_msg("menus", "couldn't open link '%s'", pLink);
 		}
-		m_DoubleClickIndex = -1;
 	}
 
 	ExtMenu.HSplitBottom(5.0f, &ExtMenu, 0); // little space
@@ -56,11 +56,11 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 	static CButtonContainer s_LearnButton;
 	if(DoButton_Menu(&s_LearnButton, Localize("Learn"), 0, &Button, 0, IGraphics::CORNER_ALL, 5.0f, 0.0f, vec4(0.0f, 0.0f, 0.0f, 0.5f), vec4(0.0f, 0.0f, 0.0f, 0.25f)))
 	{
-		if(!open_link(Localize("https://wiki.ddnet.tw/")))
+		const char *pLink = Localize("https://wiki.ddnet.org/");
+		if(!open_link(pLink))
 		{
-			dbg_msg("menus", "couldn't open link");
+			dbg_msg("menus", "couldn't open link '%s'", pLink);
 		}
-		m_DoubleClickIndex = -1;
 	}
 
 	ExtMenu.HSplitBottom(5.0f, &ExtMenu, 0); // little space
@@ -86,7 +86,6 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 			PopupWarning(Localize("Warning"), Localize("Can't find a Tutorial server"), Localize("Ok"), 10s);
 			s_JoinTutorialTime = 0.0f;
 		}
-		m_DoubleClickIndex = -1;
 	}
 
 	ExtMenu.HSplitBottom(5.0f, &ExtMenu, 0); // little space
@@ -94,11 +93,11 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 	static CButtonContainer s_WebsiteButton;
 	if(DoButton_Menu(&s_WebsiteButton, Localize("Website"), 0, &Button, 0, IGraphics::CORNER_ALL, 5.0f, 0.0f, vec4(0.0f, 0.0f, 0.0f, 0.5f), vec4(0.0f, 0.0f, 0.0f, 0.25f)))
 	{
-		if(!open_link("https://ddnet.tw/"))
+		const char *pLink = "https://ddnet.org/";
+		if(!open_link(pLink))
 		{
-			dbg_msg("menus", "couldn't open link");
+			dbg_msg("menus", "couldn't open link '%s'", pLink);
 		}
-		m_DoubleClickIndex = -1;
 	}
 
 	ExtMenu.HSplitBottom(5.0f, &ExtMenu, 0); // little space
@@ -113,9 +112,10 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 
 	Menu.HSplitBottom(40.0f, &Menu, &Button);
 	static CButtonContainer s_QuitButton;
-	if(DoButton_Menu(&s_QuitButton, Localize("Quit"), 0, &Button, 0, IGraphics::CORNER_ALL, Rounding, 0.5f, vec4(0.0f, 0.0f, 0.0f, 0.5f), vec4(0.0f, 0.0f, 0.0f, 0.25f)) || m_EscapePressed || CheckHotKey(KEY_Q))
+	bool UsedEscape = false;
+	if(DoButton_Menu(&s_QuitButton, Localize("Quit"), 0, &Button, 0, IGraphics::CORNER_ALL, Rounding, 0.5f, vec4(0.0f, 0.0f, 0.0f, 0.5f), vec4(0.0f, 0.0f, 0.0f, 0.25f)) || (UsedEscape = UI()->ConsumeHotkey(CUI::HOTKEY_ESCAPE)) || CheckHotKey(KEY_Q))
 	{
-		if(m_EscapePressed || m_pClient->Editor()->HasUnsavedData() || (Client()->GetCurrentRaceTime() / 60 >= g_Config.m_ClConfirmQuitTime && g_Config.m_ClConfirmQuitTime >= 0))
+		if(UsedEscape || m_pClient->Editor()->HasUnsavedData() || (Client()->GetCurrentRaceTime() / 60 >= g_Config.m_ClConfirmQuitTime && g_Config.m_ClConfirmQuitTime >= 0))
 		{
 			m_Popup = POPUP_QUIT;
 		}
@@ -189,7 +189,7 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 	Menu.HSplitBottom(5.0f, &Menu, 0); // little space
 	Menu.HSplitBottom(40.0f, &Menu, &Button);
 	static CButtonContainer s_PlayButton;
-	if(DoButton_Menu(&s_PlayButton, Localize("Play", "Start menu"), 0, &Button, g_Config.m_ClShowStartMenuImages ? "play_game" : 0, IGraphics::CORNER_ALL, Rounding, 0.5f, vec4(0.0f, 0.0f, 0.0f, 0.5f), vec4(0.0f, 0.0f, 0.0f, 0.25f)) || m_EnterPressed || CheckHotKey(KEY_P))
+	if(DoButton_Menu(&s_PlayButton, Localize("Play", "Start menu"), 0, &Button, g_Config.m_ClShowStartMenuImages ? "play_game" : 0, IGraphics::CORNER_ALL, Rounding, 0.5f, vec4(0.0f, 0.0f, 0.0f, 0.5f), vec4(0.0f, 0.0f, 0.0f, 0.25f)) || UI()->ConsumeHotkey(CUI::HOTKEY_ENTER) || CheckHotKey(KEY_P))
 	{
 		NewPage = g_Config.m_UiPage >= PAGE_INTERNET && g_Config.m_UiPage <= PAGE_KOG ? g_Config.m_UiPage : PAGE_DDNET;
 	}
@@ -235,7 +235,7 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 	UI()->DoLabel(&VersionUpdate, aBuf, 14.0f, TEXTALIGN_LEFT);
 	TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 
-	VersionUpdate.VSplitLeft(TextRender()->TextWidth(0, 14.0f, aBuf, -1, -1.0f) + 10.0f, 0, &Part);
+	VersionUpdate.VSplitLeft(TextRender()->TextWidth(14.0f, aBuf, -1, -1.0f) + 10.0f, 0, &Part);
 
 	if(State == IUpdater::CLEAN && NeedUpdate)
 	{
@@ -265,9 +265,9 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 		Part.VSplitLeft(100.0f, &ProgressBar, &Percent);
 		ProgressBar.y += 2.0f;
 		ProgressBar.HMargin(1.0f, &ProgressBar);
-		RenderTools()->DrawUIRect(&ProgressBar, vec4(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, 5.0f);
+		ProgressBar.Draw(vec4(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, 5.0f);
 		ProgressBar.w = clamp((float)Updater()->GetCurrentPercent(), 10.0f, 100.0f);
-		RenderTools()->DrawUIRect(&ProgressBar, vec4(1.0f, 1.0f, 1.0f, 0.5f), IGraphics::CORNER_ALL, 5.0f);
+		ProgressBar.Draw(vec4(1.0f, 1.0f, 1.0f, 0.5f), IGraphics::CORNER_ALL, 5.0f);
 	}
 #elif defined(CONF_INFORM_UPDATE)
 	if(str_comp(Client()->LatestVersion(), "0") != 0)

@@ -176,15 +176,15 @@ void CSounds::ClearQueue()
 
 void CSounds::Enqueue(int Channel, int SetId)
 {
-	// add sound to the queue
-	if(m_QueuePos < QUEUE_SIZE)
-	{
-		if(Channel == CHN_MUSIC || !g_Config.m_ClEditor)
-		{
-			m_aQueue[m_QueuePos].m_Channel = Channel;
-			m_aQueue[m_QueuePos++].m_SetId = SetId;
-		}
-	}
+	if(m_pClient->m_SuppressEvents)
+		return;
+	if(m_QueuePos >= QUEUE_SIZE)
+		return;
+	if(Channel != CHN_MUSIC && g_Config.m_ClEditor)
+		return;
+
+	m_aQueue[m_QueuePos].m_Channel = Channel;
+	m_aQueue[m_QueuePos++].m_SetId = SetId;
 }
 
 void CSounds::PlayAndRecord(int Channel, int SetId, float Vol, vec2 Pos)
@@ -198,6 +198,8 @@ void CSounds::PlayAndRecord(int Channel, int SetId, float Vol, vec2 Pos)
 
 void CSounds::Play(int Channel, int SetId, float Vol)
 {
+	if(m_pClient->m_SuppressEvents)
+		return;
 	if(Channel == CHN_MUSIC && !g_Config.m_SndMusic)
 		return;
 
@@ -214,6 +216,8 @@ void CSounds::Play(int Channel, int SetId, float Vol)
 
 void CSounds::PlayAt(int Channel, int SetId, float Vol, vec2 Pos)
 {
+	if(m_pClient->m_SuppressEvents)
+		return;
 	if(Channel == CHN_MUSIC && !g_Config.m_SndMusic)
 		return;
 

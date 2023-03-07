@@ -43,14 +43,8 @@ Address
 All
 == Усё
 
-Are you sure that you want to delete the demo?
-== Вы ўпэўнены, што жадаеце выдаліць дэма?
-
 Are you sure that you want to quit?
 == Вы сапраўды жадаеце выйсці?
-
-Are you sure that you want to remove the player from your friends list?
-== Вы ўпэўнены, што жадаеце выдаліць гульца з сяброў?
 
 Automatically record demos
 == Аўтаматычна запісваць дэма
@@ -398,9 +392,6 @@ Show ingame HUD
 Show name plates
 == Паказваць нікі гульцоў
 
-Skins
-== Скіны
-
 Sound
 == Гук
 
@@ -460,9 +451,6 @@ Try again
 
 Type
 == Тып
-
-Unable to delete the demo
-== Немагчыма выдаліць дэма
 
 Unable to rename the demo
 == Немагчыма пераназваць дэма
@@ -574,9 +562,6 @@ Reset to defaults
 Quit anyway?
 == Выйсці?
 
-Display Modes
-== Дазвол экрана
-
 Version:
 == Версія:
 
@@ -603,6 +588,47 @@ Name plates size
 
 Type:
 == Тып:
+
+[Graphics error]
+
+[Graphics error]
+Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== 
+
+[Graphics error]
+Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
+== 
+
+[Graphics error]
+An error during command recording occurred. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+A render command failed. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+Submitting the render commands failed. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+Failed to swap framebuffers. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== 
+
+[Graphics error]
+Could not initialize the given graphics backend, reverting to the default backend now.
+== 
+
+[Graphics error]
+Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
+== 
+
+Could not save downloaded map. Try manually deleting this file: %s
+== 
 
 Successfully saved the replay!
 == 
@@ -647,6 +673,9 @@ Sending initial client info
 == 
 
 Warning
+== 
+
+Search:
 == 
 
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
@@ -706,21 +735,6 @@ Reconnect in %d sec
 Render demo
 == 
 
-Replace video
-== 
-
-File already exists, do you want to overwrite it?
-== 
-
-Are you sure that you want to disconnect?
-== 
-
-Disconnect Dummy
-== 
-
-Are you sure that you want to disconnect your dummy?
-== 
-
 Welcome to DDNet
 == 
 
@@ -745,13 +759,13 @@ Your nickname '%s' is already used (%d points). Do you still want to use it?
 Checking for existing player with your name
 == 
 
-Are you sure that you want to disconnect and switch to a different server?
+Cancel
 == 
 
-Country / Region
+File '%s' already exists, do you want to overwrite it?
 == 
 
-Destination file already exist
+Replace video
 == 
 
 Speed
@@ -769,7 +783,7 @@ Skip Tutorial
 Show DDNet map finishes in server browser
 == 
 
-transmits your player name to info2.ddnet.tw
+transmits your player name to info.ddnet.org
 == 
 
 Theme
@@ -823,6 +837,9 @@ Exclude
 Refreshing...
 == 
 
+Are you sure that you want to disconnect and switch to a different server?
+== 
+
 Filter connecting players
 == 
 
@@ -838,7 +855,16 @@ Countries
 Types
 == 
 
+Copy info
+== 
+
 Leak IP
+== 
+
+Are you sure that you want to remove the player '%s' from your friends list?
+== 
+
+Are you sure that you want to remove the clan '%s' from your friends list?
 == 
 
 Select a name
@@ -847,7 +873,49 @@ Select a name
 Please use a different name
 == 
 
+File already exists, do you want to overwrite it?
+== 
+
 Remove chat
+== 
+
+Play the current demo
+== 
+
+Pause the current demo
+== 
+
+Stop the current demo
+== 
+
+Go back one tick
+== 
+
+Go forward one tick
+== 
+
+Slow down the demo
+== 
+
+Speed up the demo
+== 
+
+Mark the beginning of a cut
+== 
+
+Mark the end of a cut
+== 
+
+Export cut as a separate demo
+== 
+
+Go back one marker
+== 
+
+Go forward one marker
+== 
+
+Toggle keyboard shortcuts
 == 
 
 Loading demo files
@@ -880,13 +948,31 @@ Fetch Info
 Demos directory
 == 
 
+Open the directory that contains the demo files
+== 
+
+Are you sure that you want to delete the demo '%s'?
+== 
+
 Render
+== 
+
+Unable to delete the demo '%s'
+== 
+
+Are you sure that you want to disconnect?
 == 
 
 Connect Dummy
 == 
 
 Connecting dummy
+== 
+
+Disconnect Dummy
+== 
+
+Are you sure that you want to disconnect your dummy?
 == 
 
 Kill
@@ -913,6 +999,9 @@ Activate
 Save
 == 
 
+Menu opened. Press Esc key again to close menu.
+== 
+
 Smooth Dynamic Camera
 == 
 
@@ -925,13 +1014,25 @@ Skip the main menu
 Refresh Rate
 == 
 
+Save power by lowering refresh rate (higher input latency)
+== 
+
 Settings file
+== 
+
+Open the settings file
 == 
 
 Config directory
 == 
 
+Open the directory that contains the configuration and user files
+== 
+
 Themes directory
+== 
+
+Open the directory to add custom themes
 == 
 
 Automatically take statboard screenshot
@@ -944,6 +1045,9 @@ Max CSVs
 == 
 
 Dummy settings
+== 
+
+Loading skin files
 == 
 
 Toggle to edit your dummy settings
@@ -973,7 +1077,7 @@ Skin Database
 Skins directory
 == 
 
-Loading skin files
+Open the directory to add custom skins
 == 
 
 Hook collisions
@@ -1056,7 +1160,7 @@ UI controller sens.
 Controller jitter tolerance
 == 
 
-No controller found. Plug in a controller and restart the game.
+No controller found. Plug in a controller.
 == 
 
 Device
@@ -1081,6 +1185,12 @@ UI mouse sens.
 == 
 
 Controller
+== 
+
+Reset controls
+== 
+
+Are you sure that you want to reset the controls to their defaults?
 == 
 
 Dummy
@@ -1311,10 +1421,37 @@ Normal Color
 Highlight Color
 == 
 
-Laser Outline Color
+Weapons
 == 
 
-Laser Inner Color
+Rifle Laser Outline Color
+== 
+
+Rifle Laser Inner Color
+== 
+
+Shotgun Laser Outline Color
+== 
+
+Shotgun Laser Inner Color
+== 
+
+Entities
+== 
+
+Door Laser Outline Color
+== 
+
+Door Laser Inner Color
+== 
+
+Freeze Laser Outline Color
+== 
+
+Freeze Laser Inner Color
+== 
+
+Set all to Rifle
 == 
 
 Save the best demo of each race
@@ -1395,9 +1532,6 @@ Show tiles layers from BG map
 Regular Background Color
 == 
 
-Try fast HTTP map download first
-== 
-
 New random timeout code
 == 
 
@@ -1405,6 +1539,9 @@ Run on join
 == 
 
 Chat command (e.g. showall 1)
+== 
+
+Unregister protocol and file extensions
 == 
 
 DDNet %s is available:
@@ -1425,9 +1562,6 @@ No updates available
 Check now
 == 
 
-Entities
-== 
-
 Emoticons
 == 
 
@@ -1443,16 +1577,19 @@ Loading assets
 Assets directory
 == 
 
+Open the directory to add custom assets
+== 
+
 Discord
 == 
 
-https://ddnet.tw/discord
+https://ddnet.org/discord
 == 
 
 Learn
 == 
 
-https://wiki.ddnet.tw/
+https://wiki.ddnet.org/
 == 
 
 Tutorial

@@ -147,6 +147,7 @@ void CGameConsole::CInstance::ClearHistory()
 void CGameConsole::CInstance::Reset()
 {
 	m_CompletionRenderOffset = 0.0f;
+	m_CompletionRenderOffsetChange = 0.0f;
 }
 
 void CGameConsole::CInstance::ExecuteLine(const char *pLine)
@@ -362,7 +363,7 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 		}
 		else if(Event.m_Key == KEY_TAB)
 		{
-			const int Direction = m_pGameConsole->m_pClient->Input()->KeyIsPressed(KEY_LSHIFT) || m_pGameConsole->m_pClient->Input()->KeyIsPressed(KEY_RSHIFT) ? -1 : 1;
+			const int Direction = m_pGameConsole->m_pClient->Input()->ShiftIsPressed() ? -1 : 1;
 
 			// command completion
 			if(m_Type == CGameConsole::CONSOLETYPE_LOCAL || m_pGameConsole->Client()->RconAuthed())
@@ -505,7 +506,7 @@ CGameConsole::~CGameConsole()
 float CGameConsole::TimeNow()
 {
 	static int64_t s_TimeStart = time_get();
-	return float(time_get() - s_TimeStart) / float(time_freq());
+	return (time_get() - s_TimeStart) / (float)time_freq();
 }
 
 CGameConsole::CInstance *CGameConsole::CurrentConsole()
@@ -523,8 +524,7 @@ void CGameConsole::OnReset()
 // only defined for 0<=t<=1
 static float ConsoleScaleFunc(float t)
 {
-	//return t;
-	return sinf(acosf(1.0f - t));
+	return std::sin(std::acos(1.0f - t));
 }
 
 struct CCompletionOptionRenderInfo
@@ -533,25 +533,29 @@ struct CCompletionOptionRenderInfo
 	CTextCursor m_Cursor;
 	const char *m_pCurrentCmd;
 	int m_WantedCompletion;
-	int m_EnumCount;
 	float m_Offset;
+	float *m_pOffsetChange;
 	float m_Width;
+	float m_TotalWidth;
 };
 
 void CGameConsole::PossibleCommandsRenderCallback(int Index, const char *pStr, void *pUser)
 {
 	CCompletionOptionRenderInfo *pInfo = static_cast<CCompletionOptionRenderInfo *>(pUser);
 
-	if(pInfo->m_EnumCount == pInfo->m_WantedCompletion)
+	if(Index == pInfo->m_WantedCompletion)
 	{
-		float tw = pInfo->m_pSelf->TextRender()->TextWidth(pInfo->m_Cursor.m_pFont, pInfo->m_Cursor.m_FontSize, pStr, -1, -1.0f);
-		pInfo->m_pSelf->Graphics()->DrawRect(pInfo->m_Cursor.m_X - 2.5f, pInfo->m_Cursor.m_Y - 4.f / 2.f, tw + 5.f, pInfo->m_Cursor.m_FontSize + 4.f, ColorRGBA(229.0f / 255.0f, 185.0f / 255.0f, 4.0f / 255.0f, 0.85f), IGraphics::CORNER_ALL, pInfo->m_Cursor.m_FontSize / 3.f);
+		float TextWidth = pInfo->m_pSelf->TextRender()->TextWidth(pInfo->m_Cursor.m_FontSize, pStr, -1, -1.0f);
+		const CUIRect Rect = {pInfo->m_Cursor.m_X - 2.5f, pInfo->m_Cursor.m_Y - 4.f / 2.f, TextWidth + 5.f, pInfo->m_Cursor.m_FontSize + 4.f};
+		Rect.Draw(ColorRGBA(229.0f / 255.0f, 185.0f / 255.0f, 4.0f / 255.0f, 0.85f), IGraphics::CORNER_ALL, pInfo->m_Cursor.m_FontSize / 3.f);
 
 		// scroll when out of sight
-		if(pInfo->m_Cursor.m_X < 3.0f)
-			pInfo->m_Offset = 0.0f;
-		else if(pInfo->m_Cursor.m_X + tw > pInfo->m_Width)
-			pInfo->m_Offset -= pInfo->m_Width / 2;
+		const bool MoveLeft = Rect.x - *pInfo->m_pOffsetChange < 0.0f;
+		const bool MoveRight = Rect.x + Rect.w - *pInfo->m_pOffsetChange > pInfo->m_Width;
+		if(MoveLeft && !MoveRight)
+			*pInfo->m_pOffsetChange -= -Rect.x + pInfo->m_Width / 4.0f;
+		else if(!MoveLeft && MoveRight)
+			*pInfo->m_pOffsetChange += Rect.x + Rect.w - pInfo->m_Width + pInfo->m_Width / 4.0f;
 
 		pInfo->m_pSelf->TextRender()->TextColor(0.05f, 0.05f, 0.05f, 1);
 		pInfo->m_pSelf->TextRender()->TextEx(&pInfo->m_Cursor, pStr, -1);
@@ -576,8 +580,8 @@ void CGameConsole::PossibleCommandsRenderCallback(int Index, const char *pStr, v
 		}
 	}
 
-	pInfo->m_EnumCount++;
 	pInfo->m_Cursor.m_X += 7.0f;
+	pInfo->m_TotalWidth = pInfo->m_Cursor.m_X + pInfo->m_Offset;
 }
 
 void CGameConsole::OnRender()
@@ -761,28 +765,30 @@ void CGameConsole::OnRender()
 			CCompletionOptionRenderInfo Info;
 			Info.m_pSelf = this;
 			Info.m_WantedCompletion = pConsole->m_CompletionChosen;
-			Info.m_EnumCount = 0;
 			Info.m_Offset = pConsole->m_CompletionRenderOffset;
+			Info.m_pOffsetChange = &pConsole->m_CompletionRenderOffsetChange;
 			Info.m_Width = Screen.w;
+			Info.m_TotalWidth = 0.0f;
 			Info.m_pCurrentCmd = pConsole->m_aCompletionBuffer;
-			TextRender()->SetCursor(&Info.m_Cursor, InitialX + Info.m_Offset, InitialY + RowHeight + 2.0f, FontSize, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
+			TextRender()->SetCursor(&Info.m_Cursor, InitialX - Info.m_Offset, InitialY + RowHeight + 2.0f, FontSize, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
 			Info.m_Cursor.m_LineWidth = std::numeric_limits<float>::max();
-			m_pConsole->PossibleCommands(Info.m_pCurrentCmd, pConsole->m_CompletionFlagmask, m_ConsoleType != CGameConsole::CONSOLETYPE_LOCAL && Client()->RconAuthed() && Client()->UseTempRconCommands(), PossibleCommandsRenderCallback, &Info);
+			const int NumCommands = m_pConsole->PossibleCommands(Info.m_pCurrentCmd, pConsole->m_CompletionFlagmask, m_ConsoleType != CGameConsole::CONSOLETYPE_LOCAL && Client()->RconAuthed() && Client()->UseTempRconCommands(), PossibleCommandsRenderCallback, &Info);
 			pConsole->m_CompletionRenderOffset = Info.m_Offset;
 
-			if(Info.m_EnumCount <= 0 && pConsole->m_IsCommand)
+			if(NumCommands <= 0 && pConsole->m_IsCommand)
 			{
 				const bool TuningCompletion = IsTuningCommandPrefix(Info.m_pCurrentCmd);
+				int NumArguments = 0;
 				if(TuningCompletion)
 				{
 					Info.m_WantedCompletion = pConsole->m_CompletionChosenArgument;
-					Info.m_EnumCount = 0;
+					Info.m_TotalWidth = 0.0f;
 					Info.m_pCurrentCmd = pConsole->m_aCompletionBufferArgument;
-					m_pClient->m_aTuning[g_Config.m_ClDummy].PossibleTunings(Info.m_pCurrentCmd, PossibleCommandsRenderCallback, &Info);
+					NumArguments = m_pClient->m_aTuning[g_Config.m_ClDummy].PossibleTunings(Info.m_pCurrentCmd, PossibleCommandsRenderCallback, &Info);
 					pConsole->m_CompletionRenderOffset = Info.m_Offset;
 				}
 
-				if(Info.m_EnumCount <= 0 && pConsole->m_IsCommand)
+				if(NumArguments <= 0 && pConsole->m_IsCommand)
 				{
 					char aBuf[512];
 					str_format(aBuf, sizeof(aBuf), "Help: %s ", pConsole->m_aCommandHelp);
@@ -792,6 +798,8 @@ void CGameConsole::OnRender()
 					TextRender()->TextEx(&Info.m_Cursor, aBuf, -1);
 				}
 			}
+
+			UI()->DoSmoothScrollLogic(&pConsole->m_CompletionRenderOffset, &pConsole->m_CompletionRenderOffsetChange, Info.m_Width, Info.m_TotalWidth);
 		}
 
 		pConsole->m_BacklogLock.lock();
@@ -914,12 +922,12 @@ void CGameConsole::OnRender()
 		char aBuf[128];
 		TextRender()->TextColor(1, 1, 1, 1);
 		str_format(aBuf, sizeof(aBuf), Localize("-Page %d-"), pConsole->m_BacklogCurPage + 1);
-		TextRender()->Text(0, 10.0f, FontSize / 2.f, FontSize, aBuf, -1.0f);
+		TextRender()->Text(10.0f, FontSize / 2.f, FontSize, aBuf, -1.0f);
 
 		// render version
 		str_copy(aBuf, "v" GAME_VERSION " on " CONF_PLATFORM_STRING " " CONF_ARCH_STRING);
-		float Width = TextRender()->TextWidth(0, FontSize, aBuf, -1, -1.0f);
-		TextRender()->Text(0, Screen.w - Width - 10.0f, FontSize / 2.f, FontSize, aBuf, -1.0f);
+		float Width = TextRender()->TextWidth(FontSize, aBuf, -1, -1.0f);
+		TextRender()->Text(Screen.w - Width - 10.0f, FontSize / 2.f, FontSize, aBuf, -1.0f);
 	}
 }
 
@@ -1097,12 +1105,11 @@ void CGameConsole::OnInit()
 	m_pConsoleLogger = new CConsoleLogger(this);
 	Engine()->SetAdditionalLogger(std::unique_ptr<ILogger>(m_pConsoleLogger));
 	// add resize event
-	Graphics()->AddWindowResizeListener([this](void *) {
+	Graphics()->AddWindowResizeListener([this]() {
 		m_LocalConsole.ClearBacklogYOffsets();
 		m_RemoteConsole.ClearBacklogYOffsets();
 		m_HasSelection = false;
-	},
-		nullptr);
+	});
 }
 
 void CGameConsole::OnStateChange(int NewState, int OldState)

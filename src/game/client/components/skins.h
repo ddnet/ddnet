@@ -3,14 +3,18 @@
 #ifndef GAME_CLIENT_COMPONENTS_SKINS_H
 #define GAME_CLIENT_COMPONENTS_SKINS_H
 
+#include <base/system.h>
 #include <engine/shared/http.h>
 #include <game/client/component.h>
 #include <game/client/skin.h>
-#include <vector>
+#include <string_view>
+#include <unordered_map>
 
 class CSkins : public CComponent
 {
 public:
+	CSkins() = default;
+
 	class CGetPngFile : public CHttpRequest
 	{
 		CSkins *m_pSkins;
@@ -25,12 +29,18 @@ public:
 
 	struct CDownloadSkin
 	{
-		std::shared_ptr<CSkins::CGetPngFile> m_pTask;
-		char m_aPath[IO_MAX_PATH_LENGTH];
+	private:
 		char m_aName[24];
 
+	public:
+		std::shared_ptr<CSkins::CGetPngFile> m_pTask;
+		char m_aPath[IO_MAX_PATH_LENGTH];
+
 		CDownloadSkin(CDownloadSkin &&Other) = default;
-		CDownloadSkin() = default;
+		CDownloadSkin(const char *pName)
+		{
+			str_copy(m_aName, pName);
+		}
 
 		~CDownloadSkin()
 		{
@@ -42,6 +52,8 @@ public:
 		bool operator==(const char *pOther) const { return !str_comp(m_aName, pOther); }
 
 		CDownloadSkin &operator=(CDownloadSkin &&Other) = default;
+
+		const char *GetName() const { return m_aName; }
 	};
 
 	typedef std::function<void(int)> TSkinLoadedCBFunc;
@@ -51,18 +63,22 @@ public:
 
 	void Refresh(TSkinLoadedCBFunc &&SkinLoadedFunc);
 	int Num();
-	const CSkin *Get(int Index);
-	int Find(const char *pName);
+	std::unordered_map<std::string_view, std::unique_ptr<CSkin>> &GetSkinsUnsafe() { return m_Skins; }
+	const CSkin *FindOrNullptr(const char *pName);
+	const CSkin *Find(const char *pName);
+
+	bool IsDownloadingSkins() { return m_DownloadingSkins; }
 
 private:
-	std::vector<CSkin> m_vSkins;
-	std::vector<CDownloadSkin> m_vDownloadSkins;
+	std::unordered_map<std::string_view, std::unique_ptr<CSkin>> m_Skins;
+	std::unordered_map<std::string_view, std::unique_ptr<CDownloadSkin>> m_DownloadSkins;
+	size_t m_DownloadingSkins = 0;
 	char m_aEventSkinPrefix[24];
 
 	bool LoadSkinPNG(CImageInfo &Info, const char *pName, const char *pPath, int DirType);
-	int LoadSkin(const char *pName, const char *pPath, int DirType);
-	int LoadSkin(const char *pName, CImageInfo &Info);
-	int FindImpl(const char *pName);
+	const CSkin *LoadSkin(const char *pName, const char *pPath, int DirType);
+	const CSkin *LoadSkin(const char *pName, CImageInfo &Info);
+	const CSkin *FindImpl(const char *pName);
 	static int SkinScan(const char *pName, int IsDir, int DirType, void *pUser);
 };
 #endif

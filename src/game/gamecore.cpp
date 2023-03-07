@@ -62,11 +62,25 @@ int CTuningParams::PossibleTunings(const char *pStr, IConsole::FPossibleCallback
 	return Index;
 }
 
+float CTuningParams::GetWeaponFireDelay(int Weapon) const
+{
+	switch(Weapon)
+	{
+	case WEAPON_HAMMER: return (float)m_HammerHitFireDelay / 1000.0f;
+	case WEAPON_GUN: return (float)m_GunFireDelay / 1000.0f;
+	case WEAPON_SHOTGUN: return (float)m_ShotgunFireDelay / 1000.0f;
+	case WEAPON_GRENADE: return (float)m_GrenadeFireDelay / 1000.0f;
+	case WEAPON_LASER: return (float)m_LaserFireDelay / 1000.0f;
+	case WEAPON_NINJA: return (float)m_NinjaFireDelay / 1000.0f;
+	default: dbg_assert(false, "invalid weapon"); return 0.0f; // this value should not be reached
+	}
+}
+
 float VelocityRamp(float Value, float Start, float Range, float Curvature)
 {
 	if(Value < Start)
 		return 1.0f;
-	return 1.0f / powf(Curvature, (Value - Start) / Range);
+	return 1.0f / std::pow(Curvature, (Value - Start) / Range);
 }
 
 void CCharacterCore::Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore *pTeams, std::map<int, std::vector<vec2>> *pTeleOuts)
@@ -237,7 +251,6 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 	if(m_HookState == HOOK_IDLE)
 	{
 		SetHookedPlayer(-1);
-		m_HookState = HOOK_IDLE;
 		m_HookPos = m_Pos;
 	}
 	else if(m_HookState >= HOOK_RETRACT_START && m_HookState < HOOK_RETRACT_END)
@@ -266,7 +279,7 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 		int teleNr = 0;
 		int Hit = m_pCollision->IntersectLineTeleHook(m_HookPos, NewPos, &NewPos, 0, &teleNr);
 
-		//m_NewHook = false;
+		// m_NewHook = false;
 
 		if(Hit)
 		{
@@ -354,8 +367,8 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 			}
 
 			// keep players hooked for a max of 1.5sec
-			//if(Server()->Tick() > hook_tick+(Server()->TickSpeed()*3)/2)
-			//release_hooked();
+			// if(Server()->Tick() > hook_tick+(Server()->TickSpeed()*3)/2)
+			// release_hooked();
 		}
 
 		// don't do this hook rutine when we are hook to a player
@@ -405,8 +418,8 @@ void CCharacterCore::TickDeferred()
 			if(!pCharCore)
 				continue;
 
-			//player *p = (player*)ent;
-			//if(pCharCore == this) // || !(p->flags&FLAG_ALIVE)
+			// player *p = (player*)ent;
+			// if(pCharCore == this) // || !(p->flags&FLAG_ALIVE)
 
 			if(pCharCore == this || (m_Id != -1 && !m_pTeams->CanCollide(m_Id, i)))
 				continue; // make sure that we don't nudge our self

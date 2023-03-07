@@ -1,7 +1,7 @@
 Requirements for building:
 ==========================
 -	Android NDK (tested with NDK 23), must be in the same location in which Android studio would unpack it (~/Android/Sdk/ndk/)
-	atleast version 23
+	at least version 23
 -	Android SDK build tools
 	version 30.0.3
 -	ddnet-libs with Android libs

@@ -37,10 +37,6 @@ IGameController::IGameController(class CGameContext *pGameServer)
 	m_UnbalancedTick = -1;
 	m_ForceBalanced = false;
 
-	m_aNumSpawnPoints[0] = 0;
-	m_aNumSpawnPoints[1] = 0;
-	m_aNumSpawnPoints[2] = 0;
-
 	m_CurrentRecord = 0;
 }
 
@@ -119,15 +115,14 @@ void IGameController::EvaluateSpawnType(CSpawnEval *pEval, int Type, int DDTeam)
 	for(int j = 0; j < 2 && !pEval->m_Got; j++)
 	{
 		// get spawn point
-		for(int i = 0; i < m_aNumSpawnPoints[Type]; i++)
+		for(const vec2 &SpawnPoint : m_avSpawnPoints[Type])
 		{
-			vec2 P = m_aaSpawnPoints[Type][i];
-
+			vec2 P = SpawnPoint;
 			if(j == 0)
 			{
 				// check if the position is occupado
-				CCharacter *apEnts[MAX_CLIENTS];
-				int Num = GameServer()->m_World.FindEntities(m_aaSpawnPoints[Type][i], 64, (CEntity **)apEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
+				CEntity *apEnts[MAX_CLIENTS];
+				int Num = GameServer()->m_World.FindEntities(SpawnPoint, 64, apEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
 				vec2 aPositions[5] = {vec2(0.0f, 0.0f), vec2(-32.0f, 0.0f), vec2(0.0f, -32.0f), vec2(32.0f, 0.0f), vec2(0.0f, 32.0f)}; // start, left, up, right, down
 				int Result = -1;
 				for(int Index = 0; Index < 5 && Result == -1; ++Index)
@@ -136,12 +131,15 @@ void IGameController::EvaluateSpawnType(CSpawnEval *pEval, int Type, int DDTeam)
 					if(!GameServer()->m_World.m_Core.m_aTuning[0].m_PlayerCollision)
 						break;
 					for(int c = 0; c < Num; ++c)
-						if(GameServer()->Collision()->CheckPoint(m_aaSpawnPoints[Type][i] + aPositions[Index]) ||
-							distance(apEnts[c]->m_Pos, m_aaSpawnPoints[Type][i] + aPositions[Index]) <= apEnts[c]->GetProximityRadius())
+					{
+						CCharacter *pChr = static_cast<CCharacter *>(apEnts[c]);
+						if(GameServer()->Collision()->CheckPoint(SpawnPoint + aPositions[Index]) ||
+							distance(pChr->m_Pos, SpawnPoint + aPositions[Index]) <= pChr->GetProximityRadius())
 						{
 							Result = -1;
 							break;
 						}
+					}
 				}
 				if(Result == -1)
 					continue; // try next spawn point
@@ -162,12 +160,11 @@ void IGameController::EvaluateSpawnType(CSpawnEval *pEval, int Type, int DDTeam)
 
 bool IGameController::CanSpawn(int Team, vec2 *pOutPos, int DDTeam)
 {
-	CSpawnEval Eval;
-
 	// spectators can't spawn
 	if(Team == TEAM_SPECTATORS)
 		return false;
 
+	CSpawnEval Eval;
 	EvaluateSpawnType(&Eval, 0, DDTeam);
 	EvaluateSpawnType(&Eval, 1, DDTeam);
 	EvaluateSpawnType(&Eval, 2, DDTeam);
@@ -176,14 +173,12 @@ bool IGameController::CanSpawn(int Team, vec2 *pOutPos, int DDTeam)
 	return Eval.m_Got;
 }
 
-bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Number)
+bool IGameController::OnEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number)
 {
-	if(Index < 0)
-		return false;
+	dbg_assert(Index >= 0, "Invalid entity index");
 
-	int x, y;
-	x = (Pos.x - 16.0f) / 32.0f;
-	y = (Pos.y - 16.0f) / 32.0f;
+	const vec2 Pos(x * 32.0f + 16.0f, y * 32.0f + 16.0f);
+
 	int aSides[8];
 	aSides[0] = GameServer()->Collision()->Entity(x, y + 1, Layer);
 	aSides[1] = GameServer()->Collision()->Entity(x + 1, y + 1, Layer);
@@ -194,13 +189,11 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 	aSides[6] = GameServer()->Collision()->Entity(x - 1, y, Layer);
 	aSides[7] = GameServer()->Collision()->Entity(x - 1, y + 1, Layer);
 
-	if(Index >= ENTITY_SPAWN && Index <= ENTITY_SPAWN_BLUE)
+	if(Index >= ENTITY_SPAWN && Index <= ENTITY_SPAWN_BLUE && Initial)
 	{
-		int Type = Index - ENTITY_SPAWN;
-		m_aaSpawnPoints[Type][m_aNumSpawnPoints[Type]] = Pos;
-		m_aNumSpawnPoints[Type] = minimum(m_aNumSpawnPoints[Type] + 1, (int)std::size(m_aaSpawnPoints[0]));
+		const int Type = Index - ENTITY_SPAWN;
+		m_avSpawnPoints[Type].push_back(Pos);
 	}
-
 	else if(Index == ENTITY_DOOR)
 	{
 		for(int i = 0; i < 8; i++)
@@ -234,11 +227,10 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 			WEAPON_SHOTGUN, //Type
 			-1, //Owner
 			Pos, //Pos
-			vec2(sin(Deg), cos(Deg)), //Dir
+			vec2(std::sin(Deg), std::cos(Deg)), //Dir
 			-2, //Span
 			true, //Freeze
 			true, //Explosive
-			0, //Force
 			(g_Config.m_SvShotgunBulletSound) ? SOUND_GRENADE_EXPLODE : -1, //SoundImpact
 			Layer,
 			Number);
@@ -251,7 +243,7 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 			Dir = 0;
 		else if(Flags == (TILEFLAG_ROTATE))
 			Dir = 1;
-		else if(Flags == (TILEFLAG_VFLIP | TILEFLAG_HFLIP))
+		else if(Flags == (TILEFLAG_XFLIP | TILEFLAG_YFLIP))
 			Dir = 2;
 		else
 			Dir = 3;
@@ -261,11 +253,10 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 			WEAPON_SHOTGUN, //Type
 			-1, //Owner
 			Pos, //Pos
-			vec2(sin(Deg), cos(Deg)), //Dir
+			vec2(std::sin(Deg), std::cos(Deg)), //Dir
 			-2, //Span
 			true, //Freeze
 			false, //Explosive
-			0,
 			SOUND_GRENADE_EXPLODE,
 			Layer,
 			Number);
@@ -319,7 +310,6 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 		aSides2[6] = GameServer()->Collision()->Entity(x - 2, y, Layer);
 		aSides2[7] = GameServer()->Collision()->Entity(x - 2, y + 2, Layer);
 
-		float AngularSpeed = 0.0f;
 		int Ind = Index - ENTITY_LASER_STOP;
 		int M;
 		if(Ind < 0)
@@ -332,6 +322,7 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 		else
 			M = -1;
 
+		float AngularSpeed = 0.0f;
 		if(Ind == 0)
 			AngularSpeed = 0.0f;
 		else if(Ind == 1)
@@ -451,8 +442,6 @@ const char *IGameController::GetTeamName(int Team)
 	return "spectators";
 }
 
-//static bool IsSeparator(char c) { return c == ';' || c == ' ' || c == ',' || c == '\t'; }
-
 void IGameController::StartRound()
 {
 	ResetGame();
@@ -543,7 +532,7 @@ void IGameController::Tick()
 
 void IGameController::Snap(int SnappingClient)
 {
-	CNetObj_GameInfo *pGameInfoObj = (CNetObj_GameInfo *)Server()->SnapNewItem(NETOBJTYPE_GAMEINFO, 0, sizeof(CNetObj_GameInfo));
+	CNetObj_GameInfo *pGameInfoObj = Server()->SnapNewItem<CNetObj_GameInfo>(0);
 	if(!pGameInfoObj)
 		return;
 
@@ -582,7 +571,7 @@ void IGameController::Snap(int SnappingClient)
 		}
 	}
 
-	CNetObj_GameInfoEx *pGameInfoEx = (CNetObj_GameInfoEx *)Server()->SnapNewItem(NETOBJTYPE_GAMEINFOEX, 0, sizeof(CNetObj_GameInfoEx));
+	CNetObj_GameInfoEx *pGameInfoEx = Server()->SnapNewItem<CNetObj_GameInfoEx>(0);
 	if(!pGameInfoEx)
 		return;
 
@@ -605,13 +594,13 @@ void IGameController::Snap(int SnappingClient)
 		GAMEINFOFLAG_ENTITIES_RACE |
 		GAMEINFOFLAG_RACE;
 	pGameInfoEx->m_Flags2 = GAMEINFOFLAG2_HUD_DDRACE;
-	if(g_Config.m_SvNoWeakHookAndBounce)
-		pGameInfoEx->m_Flags2 |= GAMEINFOFLAG2_NO_WEAK_HOOK_AND_BOUNCE;
+	if(g_Config.m_SvNoWeakHook)
+		pGameInfoEx->m_Flags2 |= GAMEINFOFLAG2_NO_WEAK_HOOK;
 	pGameInfoEx->m_Version = GAMEINFO_CURVERSION;
 
 	if(Server()->IsSixup(SnappingClient))
 	{
-		protocol7::CNetObj_GameData *pGameData = static_cast<protocol7::CNetObj_GameData *>(Server()->SnapNewItem(-protocol7::NETOBJTYPE_GAMEDATA, 0, sizeof(protocol7::CNetObj_GameData)));
+		protocol7::CNetObj_GameData *pGameData = Server()->SnapNewItem<protocol7::CNetObj_GameData>(0);
 		if(!pGameData)
 			return;
 
@@ -626,7 +615,7 @@ void IGameController::Snap(int SnappingClient)
 
 		pGameData->m_GameStateEndTick = 0;
 
-		protocol7::CNetObj_GameDataRace *pRaceData = static_cast<protocol7::CNetObj_GameDataRace *>(Server()->SnapNewItem(-protocol7::NETOBJTYPE_GAMEDATARACE, 0, sizeof(protocol7::CNetObj_GameDataRace)));
+		protocol7::CNetObj_GameDataRace *pRaceData = Server()->SnapNewItem<protocol7::CNetObj_GameDataRace>(0);
 		if(!pRaceData)
 			return;
 
@@ -645,7 +634,7 @@ void IGameController::Snap(int SnappingClient)
 		if(Team == TEAM_SUPER)
 			return;
 
-		CNetObj_SwitchState *pSwitchState = static_cast<CNetObj_SwitchState *>(Server()->SnapNewItem(NETOBJTYPE_SWITCHSTATE, Team, sizeof(CNetObj_SwitchState)));
+		CNetObj_SwitchState *pSwitchState = Server()->SnapNewItem<CNetObj_SwitchState>(Team);
 		if(!pSwitchState)
 			return;
 
@@ -663,7 +652,7 @@ void IGameController::Snap(int SnappingClient)
 			if(EndTick > 0 && EndTick < Server()->Tick() + 3 * Server()->TickSpeed() && GameServer()->Switchers()[i].m_aLastUpdateTick[Team] < Server()->Tick())
 			{
 				// only keep track of EndTicks that have less than three second left and are not currently being updated by a player being present on a switch tile, to limit how often these are sent
-				vEndTicks.emplace_back(std::pair<int, int>(GameServer()->Switchers()[i].m_aEndTick[Team], i));
+				vEndTicks.emplace_back(GameServer()->Switchers()[i].m_aEndTick[Team], i);
 			}
 		}
 
@@ -732,10 +721,10 @@ int IGameController::ClampTeam(int Team)
 	return 0;
 }
 
-int64_t IGameController::GetMaskForPlayerWorldEvent(int Asker, int ExceptID)
+CClientMask IGameController::GetMaskForPlayerWorldEvent(int Asker, int ExceptID)
 {
 	// Send all world events to everyone by default
-	return CmaskAllExceptOne(ExceptID);
+	return CClientMask().set().reset(ExceptID);
 }
 
 void IGameController::DoTeamChange(CPlayer *pPlayer, int Team, bool DoChatMsg)

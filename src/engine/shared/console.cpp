@@ -19,85 +19,101 @@
 
 // todo: rework this
 
-const char *CConsole::CResult::GetString(unsigned Index)
+const char *CConsole::CResult::GetString(unsigned Index) const
 {
 	if(Index >= m_NumArgs)
 		return "";
 	return m_apArgs[Index];
 }
 
-int CConsole::CResult::GetInteger(unsigned Index)
+int CConsole::CResult::GetInteger(unsigned Index) const
 {
 	if(Index >= m_NumArgs)
 		return 0;
 	return str_toint(m_apArgs[Index]);
 }
 
-float CConsole::CResult::GetFloat(unsigned Index)
+float CConsole::CResult::GetFloat(unsigned Index) const
 {
 	if(Index >= m_NumArgs)
 		return 0.0f;
 	return str_tofloat(m_apArgs[Index]);
 }
 
-ColorHSLA CConsole::CResult::GetColor(unsigned Index, bool Light)
+ColorHSLA CConsole::CResult::GetColor(unsigned Index, bool Light) const
 {
-	ColorHSLA Hsla = ColorHSLA(0, 0, 0);
 	if(Index >= m_NumArgs)
-		return Hsla;
+		return ColorHSLA(0, 0, 0);
 
 	const char *pStr = m_apArgs[Index];
 	if(str_isallnum(pStr) || ((pStr[0] == '-' || pStr[0] == '+') && str_isallnum(pStr + 1))) // Teeworlds Color (Packed HSL)
 	{
-		Hsla = ColorHSLA(str_toulong_base(pStr, 10), true);
+		const ColorHSLA Hsla = ColorHSLA(str_toulong_base(pStr, 10), true);
 		if(Light)
-			Hsla = Hsla.UnclampLighting();
+			return Hsla.UnclampLighting();
+		return Hsla;
 	}
-	else if(*pStr == '$') // Hex RGB
+	else if(*pStr == '$') // Hex RGB/RGBA
 	{
 		ColorRGBA Rgba = ColorRGBA(0, 0, 0, 1);
-		int Len = str_length(pStr);
+		const int Len = str_length(pStr);
 		if(Len == 4)
 		{
-			unsigned Num = str_toulong_base(pStr + 1, 16);
+			const unsigned Num = str_toulong_base(pStr + 1, 16);
 			Rgba.r = (((Num >> 8) & 0x0F) + ((Num >> 4) & 0xF0)) / 255.0f;
 			Rgba.g = (((Num >> 4) & 0x0F) + ((Num >> 0) & 0xF0)) / 255.0f;
 			Rgba.b = (((Num >> 0) & 0x0F) + ((Num << 4) & 0xF0)) / 255.0f;
 		}
+		else if(Len == 5)
+		{
+			const unsigned Num = str_toulong_base(pStr + 1, 16);
+			Rgba.r = (((Num >> 12) & 0x0F) + ((Num >> 8) & 0xF0)) / 255.0f;
+			Rgba.g = (((Num >> 8) & 0x0F) + ((Num >> 4) & 0xF0)) / 255.0f;
+			Rgba.b = (((Num >> 4) & 0x0F) + ((Num >> 0) & 0xF0)) / 255.0f;
+			Rgba.a = (((Num >> 0) & 0x0F) + ((Num << 4) & 0xF0)) / 255.0f;
+		}
 		else if(Len == 7)
 		{
-			unsigned Num = str_toulong_base(pStr + 1, 16);
+			const unsigned Num = str_toulong_base(pStr + 1, 16);
 			Rgba.r = ((Num >> 16) & 0xFF) / 255.0f;
 			Rgba.g = ((Num >> 8) & 0xFF) / 255.0f;
 			Rgba.b = ((Num >> 0) & 0xFF) / 255.0f;
 		}
+		else if(Len == 9)
+		{
+			const unsigned Num = str_toulong_base(pStr + 1, 16);
+			Rgba.r = ((Num >> 24) & 0xFF) / 255.0f;
+			Rgba.g = ((Num >> 16) & 0xFF) / 255.0f;
+			Rgba.b = ((Num >> 8) & 0xFF) / 255.0f;
+			Rgba.a = ((Num >> 0) & 0xFF) / 255.0f;
+		}
 		else
 		{
-			return Hsla;
+			return ColorHSLA(0, 0, 0);
 		}
 
-		Hsla = color_cast<ColorHSLA>(Rgba);
+		return color_cast<ColorHSLA>(Rgba);
 	}
 	else if(!str_comp_nocase(pStr, "red"))
-		Hsla = ColorHSLA(0.0f / 6.0f, 1, .5f);
+		return ColorHSLA(0.0f / 6.0f, 1, .5f);
 	else if(!str_comp_nocase(pStr, "yellow"))
-		Hsla = ColorHSLA(1.0f / 6.0f, 1, .5f);
+		return ColorHSLA(1.0f / 6.0f, 1, .5f);
 	else if(!str_comp_nocase(pStr, "green"))
-		Hsla = ColorHSLA(2.0f / 6.0f, 1, .5f);
+		return ColorHSLA(2.0f / 6.0f, 1, .5f);
 	else if(!str_comp_nocase(pStr, "cyan"))
-		Hsla = ColorHSLA(3.0f / 6.0f, 1, .5f);
+		return ColorHSLA(3.0f / 6.0f, 1, .5f);
 	else if(!str_comp_nocase(pStr, "blue"))
-		Hsla = ColorHSLA(4.0f / 6.0f, 1, .5f);
+		return ColorHSLA(4.0f / 6.0f, 1, .5f);
 	else if(!str_comp_nocase(pStr, "magenta"))
-		Hsla = ColorHSLA(5.0f / 6.0f, 1, .5f);
+		return ColorHSLA(5.0f / 6.0f, 1, .5f);
 	else if(!str_comp_nocase(pStr, "white"))
-		Hsla = ColorHSLA(0, 0, 1);
+		return ColorHSLA(0, 0, 1);
 	else if(!str_comp_nocase(pStr, "gray"))
-		Hsla = ColorHSLA(0, 0, .5f);
+		return ColorHSLA(0, 0, .5f);
 	else if(!str_comp_nocase(pStr, "black"))
-		Hsla = ColorHSLA(0, 0, 0);
+		return ColorHSLA(0, 0, 0);
 
-	return Hsla;
+	return ColorHSLA(0, 0, 0);
 }
 
 const IConsole::CCommandInfo *CConsole::CCommand::NextCommandInfo(int AccessLevel, int FlagMask) const
@@ -322,7 +338,7 @@ LOG_COLOR ColorToLogColor(ColorRGBA Color)
 		(uint8_t)(Color.b * 255.0)};
 }
 
-void CConsole::Print(int Level, const char *pFrom, const char *pStr, ColorRGBA PrintColor)
+void CConsole::Print(int Level, const char *pFrom, const char *pStr, ColorRGBA PrintColor) const
 {
 	LEVEL LogLevel = IConsole::ToLogLevel(Level);
 	// if the color is pure white, use default terminal color
@@ -340,6 +356,12 @@ void CConsole::SetTeeHistorianCommandCallback(FTeeHistorianCommandCallback pfnCa
 {
 	m_pfnTeeHistorianCommandCallback = pfnCallback;
 	m_pTeeHistorianCommandUserdata = pUser;
+}
+
+void CConsole::SetUnknownCommandCallback(FUnknownCommandCallback pfnCallback, void *pUser)
+{
+	m_pfnUnknownCommandCallback = pfnCallback;
+	m_pUnknownCommandUserdata = pUser;
 }
 
 void CConsole::InitChecksum(CChecksumData *pData) const
@@ -498,8 +520,7 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientID, bo
 					else if(m_StoreCommands && pCommand->m_Flags & CFGFLAG_STORE)
 					{
 						m_ExecutionQueue.AddEntry();
-						m_ExecutionQueue.m_pLast->m_pfnCommandCallback = pCommand->m_pfnCallback;
-						m_ExecutionQueue.m_pLast->m_pCommandUserData = pCommand->m_pUserData;
+						m_ExecutionQueue.m_pLast->m_pCommand = pCommand;
 						m_ExecutionQueue.m_pLast->m_Result = Result;
 					}
 					else
@@ -542,9 +563,14 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientID, bo
 		}
 		else if(Stroke)
 		{
-			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "No such command: %s.", Result.m_pCommand);
-			Print(OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
+			// Pass the original string to the unknown command callback instead of the parsed command, as the latter
+			// ends at the first whitespace, which breaks for unknown commands (filenames) containing spaces.
+			if(!m_pfnUnknownCommandCallback(pStr, m_pUnknownCommandUserdata))
+			{
+				char aBuf[256];
+				str_format(aBuf, sizeof(aBuf), "No such command: %s.", Result.m_pCommand);
+				Print(OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
+			}
 		}
 
 		pStr = pNextPart;
@@ -648,6 +674,11 @@ void CConsole::Con_Echo(IResult *pResult, void *pUserData)
 void CConsole::Con_Exec(IResult *pResult, void *pUserData)
 {
 	((CConsole *)pUserData)->ExecuteFile(pResult->GetString(0), -1, true, IStorage::TYPE_ALL);
+}
+
+void CConsole::Con_Reset(IResult *pResult, void *pUserData)
+{
+	((CConsole *)pUserData)->ConfigManager()->Reset(pResult->GetString(0));
 }
 
 void CConsole::ConCommandAccess(IResult *pResult, void *pUser)
@@ -967,6 +998,7 @@ CConsole::CConsole(int FlagMask)
 	// register some basic commands
 	Register("echo", "r[text]", CFGFLAG_SERVER, Con_Echo, this, "Echo the text");
 	Register("exec", "r[file]", CFGFLAG_SERVER | CFGFLAG_CLIENT, Con_Exec, this, "Execute the specified file");
+	Register("reset", "s[config-name]", CFGFLAG_SERVER | CFGFLAG_CLIENT | CFGFLAG_STORE, Con_Reset, this, "Reset a config to its default value");
 
 	Register("toggle", "s[config-option] i[value 1] i[value 2]", CFGFLAG_SERVER | CFGFLAG_CLIENT, ConToggle, this, "Toggle config value");
 	Register("+toggle", "s[config-option] i[value 1] i[value 2]", CFGFLAG_CLIENT, ConToggleStroke, this, "Toggle config value via keypress");
@@ -1007,14 +1039,16 @@ CConsole::~CConsole()
 
 void CConsole::Init()
 {
-	m_pConfig = Kernel()->RequestInterface<IConfigManager>()->Values();
+	m_pConfigManager = Kernel()->RequestInterface<IConfigManager>();
+	m_pConfig = m_pConfigManager->Values();
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 
 // TODO: this should disappear
 #define MACRO_CONFIG_INT(Name, ScriptName, Def, Min, Max, Flags, Desc) \
 	{ \
 		static CIntVariableData Data = {this, &g_Config.m_##Name, Min, Max, Def}; \
-		Register(#ScriptName, "?i", Flags, IntVariableCommand, &Data, Desc " (default: " #Def ", min: " #Min ", max: " #Max ")"); \
+		Register(#ScriptName, "?i", Flags, IntVariableCommand, &Data, \
+			Min == Max ? Desc " (default: " #Def ")" : Max == 0 ? Desc " (default: " #Def ", min: " #Min ")" : Desc " (default: " #Def ", min: " #Min ", max: " #Max ")"); \
 	}
 
 #define MACRO_CONFIG_COL(Name, ScriptName, Def, Flags, Desc) \
@@ -1237,7 +1271,7 @@ void CConsole::StoreCommands(bool Store)
 	if(!Store)
 	{
 		for(CExecutionQueue::CQueueEntry *pEntry = m_ExecutionQueue.m_pFirst; pEntry; pEntry = pEntry->m_pNext)
-			pEntry->m_pfnCommandCallback(&pEntry->m_Result, pEntry->m_pCommandUserData);
+			pEntry->m_pCommand->m_pfnCallback(&pEntry->m_Result, pEntry->m_pCommand->m_pUserData);
 		m_ExecutionQueue.Reset();
 	}
 	m_StoreCommands = Store;
@@ -1257,7 +1291,7 @@ const IConsole::CCommandInfo *CConsole::GetCommandInfo(const char *pName, int Fl
 	return 0;
 }
 
-extern IConsole *CreateConsole(int FlagMask) { return new CConsole(FlagMask); }
+std::unique_ptr<IConsole> CreateConsole(int FlagMask) { return std::make_unique<CConsole>(FlagMask); }
 
 void CConsole::ResetServerGameSettings()
 {
@@ -1296,7 +1330,7 @@ void CConsole::ResetServerGameSettings()
 #undef MACRO_CONFIG_STR
 }
 
-int CConsole::CResult::GetVictim()
+int CConsole::CResult::GetVictim() const
 {
 	return m_Victim;
 }

@@ -139,6 +139,8 @@ protected:
 		CBan<CDataType> *m_pFirstFree;
 		CBan<CDataType> *m_pFirstUsed;
 		int m_CountUsed;
+
+		void InsertUsed(CBan<CDataType> *pBan);
 	};
 
 	typedef CBanPool<NETADDR, 1> CBanAddrPool;

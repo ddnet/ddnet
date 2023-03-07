@@ -3,6 +3,7 @@
 #include "layers.h"
 
 #include "mapitems.h"
+#include "mapitems_ex.h"
 
 #include <engine/map.h>
 
@@ -10,9 +11,12 @@ CLayers::CLayers()
 {
 	m_GroupsNum = 0;
 	m_GroupsStart = 0;
+	m_GroupsExNum = 0;
+	m_GroupsExStart = 0;
 	m_LayersNum = 0;
 	m_LayersStart = 0;
 	m_pGameGroup = 0;
+	m_pGameGroupEx = 0;
 	m_pGameLayer = 0;
 	m_pMap = 0;
 
@@ -27,6 +31,7 @@ void CLayers::Init(class IKernel *pKernel)
 {
 	m_pMap = pKernel->RequestInterface<IMap>();
 	m_pMap->GetType(MAPITEMTYPE_GROUP, &m_GroupsStart, &m_GroupsNum);
+	m_pMap->GetType(MAPITEMTYPE_GROUP_EX, &m_GroupsExStart, &m_GroupsExNum);
 	m_pMap->GetType(MAPITEMTYPE_LAYER, &m_LayersStart, &m_LayersNum);
 
 	m_pTeleLayer = 0;
@@ -38,6 +43,7 @@ void CLayers::Init(class IKernel *pKernel)
 	for(int g = 0; g < NumGroups(); g++)
 	{
 		CMapItemGroup *pGroup = GetGroup(g);
+		CMapItemGroupEx *pGroupEx = GetGroupEx(g);
 		for(int l = 0; l < pGroup->m_NumLayers; l++)
 		{
 			CMapItemLayer *pLayer = GetLayer(pGroup->m_StartLayer + l);
@@ -50,6 +56,7 @@ void CLayers::Init(class IKernel *pKernel)
 				{
 					m_pGameLayer = pTilemap;
 					m_pGameGroup = pGroup;
+					m_pGameGroupEx = pGroupEx;
 
 					// make sure the game group has standard settings
 					m_pGameGroup->m_OffsetX = 0;
@@ -65,6 +72,9 @@ void CLayers::Init(class IKernel *pKernel)
 						m_pGameGroup->m_ClipW = 0;
 						m_pGameGroup->m_ClipH = 0;
 					}
+
+					if(pGroupEx)
+						pGroupEx->m_ParallaxZoom = 100;
 
 					//break;
 				}
@@ -119,6 +129,7 @@ void CLayers::InitBackground(class IMap *pMap)
 {
 	m_pMap = pMap;
 	m_pMap->GetType(MAPITEMTYPE_GROUP, &m_GroupsStart, &m_GroupsNum);
+	m_pMap->GetType(MAPITEMTYPE_GROUP_EX, &m_GroupsExStart, &m_GroupsExNum);
 	m_pMap->GetType(MAPITEMTYPE_LAYER, &m_LayersStart, &m_LayersNum);
 
 	//following is here to prevent crash using standard map as background
@@ -131,6 +142,7 @@ void CLayers::InitBackground(class IMap *pMap)
 	for(int g = 0; g < NumGroups(); g++)
 	{
 		CMapItemGroup *pGroup = GetGroup(g);
+		CMapItemGroupEx *pGroupEx = GetGroupEx(g);
 		for(int l = 0; l < pGroup->m_NumLayers; l++)
 		{
 			CMapItemLayer *pLayer = GetLayer(pGroup->m_StartLayer + l);
@@ -143,6 +155,7 @@ void CLayers::InitBackground(class IMap *pMap)
 				{
 					m_pGameLayer = pTilemap;
 					m_pGameGroup = pGroup;
+					m_pGameGroupEx = pGroupEx;
 
 					// make sure the game group has standard settings
 					m_pGameGroup->m_OffsetX = 0;
@@ -158,6 +171,10 @@ void CLayers::InitBackground(class IMap *pMap)
 						m_pGameGroup->m_ClipW = 0;
 						m_pGameGroup->m_ClipH = 0;
 					}
+
+					if(pGroupEx)
+						pGroupEx->m_ParallaxZoom = 100;
+
 					//We don't care about tile layers.
 				}
 			}
@@ -204,6 +221,15 @@ void CLayers::InitTilemapSkip()
 CMapItemGroup *CLayers::GetGroup(int Index) const
 {
 	return static_cast<CMapItemGroup *>(m_pMap->GetItem(m_GroupsStart + Index, 0, 0));
+}
+
+CMapItemGroupEx *CLayers::GetGroupEx(int Index) const
+{
+	// Map doesn't have GroupEx items or GroupEx indexes don't match groups for some other reason. Lets turn them off completely to be safe.
+	if(m_GroupsExNum != m_GroupsNum)
+		return nullptr;
+
+	return static_cast<CMapItemGroupEx *>(m_pMap->GetItem(m_GroupsExStart + Index, 0, 0));
 }
 
 CMapItemLayer *CLayers::GetLayer(int Index) const

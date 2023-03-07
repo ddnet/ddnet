@@ -159,6 +159,7 @@ function wait_for_fifo() {
 	done
 }
 
+echo "[*] launch server"
 $tool ../DDNet-Server \
 	"sv_input_fifo server.fifo;
 	sv_rcon_password rcon;
@@ -168,6 +169,7 @@ $tool ../DDNet-Server \
 	sv_register 0;
 	sv_port $port" > stdout_server.txt 2> stderr_server.txt || fail server "$?" &
 
+echo "[*] launch client 1"
 $tool ../DDNet \
 	"cl_input_fifo client1.fifo;
 	player_name client1;
@@ -179,12 +181,18 @@ $tool ../DDNet \
 
 if [ "$arg_valgrind_memcheck" == "1" ]; then
 	wait_for_fifo client1.fifo 120
-	sleep 1
+	sleep 20
 else
 	wait_for_fifo client1.fifo 50
 	sleep 1
 fi
 
+echo "[*] start demo recording"
+echo "record server" > server.fifo
+echo "record client1" > client1.fifo
+sleep 1
+
+echo "[*] launch client 2"
 $tool ../DDNet \
 	"cl_input_fifo client2.fifo;
 	player_name client2;
@@ -225,6 +233,7 @@ say "/mc
 ;saytime"
 EOF
 sleep 1
+
 echo "[*] test rcon commands"
 tr -d '\n' > client1.fifo << EOF
 rcon say hello from admin;
@@ -235,18 +244,40 @@ muteid 1 900 spam;
 unban_all;
 EOF
 sleep 1
-echo "[*] test map change"
-echo "rcon sv_map Tutorial" > client1.fifo
+
+echo "[*] stop demo recording"
+echo "stoprecord" > server.fifo
+echo "stoprecord" > client1.fifo
 sleep 1
 
+echo "[*] test map change"
+echo "rcon sv_map Tutorial" > client1.fifo
+if [ "$arg_valgrind_memcheck" == "1" ]; then
+	sleep 30
+else
+	sleep 15
+fi
 
-# TODO: remove the first grep after https://github.com/ddnet/ddnet/pull/5036 is merged
-if ! grep -qE '^\[[0-9]{4}-[0-9]{2}-[0-9]{2} ([0-9]{2}:){2}[0-9]{2}\]\[chat\]: 0:-2:client1: hello world$' server.log && \
-	! grep -qE '^[0-9]{4}-[0-9]{2}-[0-9]{2} ([0-9]{2}:){2}[0-9]{2} D chat: 0:-2:client1: hello world$' server.log
+echo "[*] play demos"
+echo "play demos/server.demo" > client1.fifo
+echo "play demos/client1.demo" > client2.fifo
+if [ "$arg_valgrind_memcheck" == "1" ]; then
+	sleep 20
+else
+	sleep 5
+fi
+
+# Kill all processes first so all outputs are fully written
+kill_all
+wait
+sleep 1
+
+if ! grep -qE '^[0-9]{4}-[0-9]{2}-[0-9]{2} ([0-9]{2}:){2}[0-9]{2} I chat: 0:-2:client1: hello world$' server.log
 then
 	touch fail_chat.txt
 	echo "[-] Error: chat message not found in server log"
 fi
+
 if ! grep -q 'cmdlist' client1.log || \
 	! grep -q 'pause' client1.log || \
 	! grep -q 'rank' client1.log || \
@@ -262,10 +293,16 @@ then
 	echo "[-] Error: admin message not found in server log"
 fi
 
-kill_all
-wait
-
-sleep 1
+if ! grep -q "demo_player: Stopped playback" client1.log
+then
+	touch fail_demo_server.txt
+	echo "[-] Error: demo playback of server demo in client 1 was not started/finished"
+fi
+if ! grep -q "demo_player: Stopped playback" client2.log
+then
+	touch fail_demo_client.txt
+	echo "[-] Error: demo playback of client demo in client 2 was not started/finished"
+fi
 
 ranks="$(sqlite3 ddnet-server.sqlite < <(echo "select * from record_race;"))"
 num_ranks="$(echo "$ranks" | wc -l | xargs)"
@@ -316,23 +353,16 @@ do
 	then
 		continue
 	fi
-	if [ "$arg_verbose" != "1" ]
-	then
-		continue
-	fi
 	echo "[!] Warning: $stderr"
 	cat "$stderr"
 done
 
 if test -n "$(find . -maxdepth 1 -name 'fail_*' -print -quit)"
 then
-	if [ "$arg_verbose" == "1" ]
-	then
-		for fail in fail_*
-		do
-			cat "$fail"
-		done
-	fi
+	for fail in fail_*
+	do
+		cat "$fail"
+	done
 	print_results
 	echo "[-] Test failed. See errors above."
 	exit 1

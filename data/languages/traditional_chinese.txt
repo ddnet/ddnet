@@ -16,6 +16,10 @@
 # 2022-06-16 cheeser0613
 # 2022-06-27 cheeser0613
 # 2022-08-08 cheeser0613
+# 2022-09-17 cheeser0613
+# 2022-10-24 cheeser0613
+# 2022-12-11 cheeser0613
+# 2023-01-11 cheeser0613
 ##### /authors #####
 
 ##### translated strings #####
@@ -56,14 +60,8 @@ Address
 All
 == 全部
 
-Are you sure that you want to delete the demo?
-== 你確定要刪除這個回放嗎？
-
 Are you sure that you want to quit?
 == 你確定要退出嗎？
-
-Are you sure that you want to remove the player from your friends list?
-== 你確定要把這個玩家從好友列表中刪除嗎？
 
 Automatically record demos
 == 自動錄製回放
@@ -444,9 +442,6 @@ Show name plates
 Show only chat messages from friends
 == 只顯示好友訊息
 
-Skins
-== 外觀
-
 Sound
 == 聲音
 
@@ -502,7 +497,7 @@ The server is running a non-standard tuning on a pure game type.
 == 此伺服器執行著經過調整的非標準遊戲模式。
 
 There's an unsaved map in the editor, you might want to save it before you quit the game.
-== 編輯器中的地圖尚未儲存，建議您在退出遊戲之前返回編輯器進行儲存。
+== 編輯器中的地圖尚未儲存，建議你在退出遊戲之前返回編輯器進行儲存。
 
 Time limit
 == 規定時限
@@ -515,9 +510,6 @@ Try again
 
 Type
 == 模式
-
-Unable to delete the demo
-== 無法刪除這個回放
 
 Unable to rename the demo
 == 無法重新命名這個回放
@@ -613,7 +605,7 @@ Length:
 == 長度：
 
 Laser
-== 鐳射槍
+== 鐳射
 
 Netversion:
 == 通訊版本：
@@ -641,9 +633,6 @@ Reset to defaults
 
 Quit anyway?
 == 無論如何都要退出嗎？
-
-Display Modes
-== 顯示模式
 
 Version:
 == 版本：
@@ -752,9 +741,6 @@ Show other players' key presses
 
 Show tiles layers from BG map
 == 顯示實體層背景地圖的圖塊層
-
-Try fast HTTP map download first
-== 優先嘗試用HTTP高速下載地圖
 
 DDNet %s is available:
 == DDNet %s 現已可用：
@@ -915,8 +901,8 @@ Date
 Show DDNet map finishes in server browser
 == 在伺服器瀏覽器中顯示已完成的 DDNet 地圖
 
-transmits your player name to info2.ddnet.tw
-== 將會發送您的玩家名稱到 info2.ddnet.tw
+transmits your player name to info.ddnet.org
+== 將會發送你的玩家名稱到 info.ddnet.org
 
 Reload
 == 重新整理
@@ -1059,9 +1045,6 @@ Personal best:
 Render demo
 == 渲染回放
 
-Destination file already exist
-== 目標檔案已經存在
-
 Replace video
 == 替換影片
 
@@ -1080,11 +1063,8 @@ Show others (own team only)
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
 == 使用 k鍵 自殺以重新開始，使用 q鍵 可以暫停以旁觀他人或檢視地圖。 請在設定中檢視其他按鍵。
 
-Country / Region
-== 國家/地區
-
-https://wiki.ddnet.tw/
-== https://docs.qq.com/doc/DWGFrV0xPRmVWVkla
+https://wiki.ddnet.org/
+== https://wiki.ddnet.org/wiki/Main_Page/zh
 
 Warning
 == 警告
@@ -1139,7 +1119,7 @@ Existing Player
 == 玩家已存在
 
 Your nickname '%s' is already used (%d points). Do you still want to use it?
-== 你使用的暱稱"%s"在DDNet中有%d分的記錄，這可能代表這個暱稱已經被其他人使用過。確認要使用這個名字嗎？
+== 你使用的暱稱 "%s" 在DDNet中有%d分的記錄，這可能代表這個暱稱已經被其他人使用過。確認要使用這個名字嗎？
 
 Checking for existing player with your name
 == 正在查詢該暱稱的DDNet記錄
@@ -1252,12 +1232,6 @@ Windowed borderless
 Desktop fullscreen
 == 無邊框全螢幕
 
-Laser Outline Color
-== 鐳射線邊框顏色
-
-Laser Inner Color
-== 鐳射線顏色
-
 Preview
 == 預覽
 
@@ -1273,11 +1247,11 @@ Regular Background Color
 Discord
 == Discord
 
-https://ddnet.tw/discord
-== https://ddnet.tw/discord
+https://ddnet.org/discord
+== https://ddnet.org/discord
 
 Are you sure that you want to disconnect and switch to a different server?
-== 您確定要中斷此伺服器并嘗試加入其他伺服器嗎？
+== 你確定要中斷此伺服器并嘗試加入其他伺服器嗎？
 
 Refreshing...
 == 正在重整...
@@ -1416,9 +1390,6 @@ UI controller sens.
 Controller jitter tolerance
 == 搖桿錯位容錯
 
-No controller found. Plug in a controller and restart the game.
-== 未檢測到任何控制器。請重試重新連接控制器並重啓游戲。
-
 Device
 == 輸入設備
 
@@ -1495,7 +1466,7 @@ Sending initial client info
 == 正在發送初始客戶端資訊
 
 Uploading map data to GPU
-== 正在將地圖數據傳輸至顯卡
+== 正在將地圖數據傳輸至顯示卡
 
 Getting game info
 == 正在獲取游戲資訊
@@ -1574,3 +1545,173 @@ Loading race demo files
 
 Loading sound files
 == 正在加載聲音檔案
+
+Play the current demo
+== 播放回放
+
+Pause the current demo
+== 暫停回放
+
+Stop the current demo
+== 結束回放
+
+Slow down the demo
+== 減慢播放速度
+
+Speed up the demo
+== 加快播放速度
+
+Mark the beginning of a cut
+== 標記裁剪起點
+
+Mark the end of a cut
+== 標記裁剪終點
+
+Export cut as a separate demo
+== 另存爲新回放檔案
+
+Toggle keyboard shortcuts
+== 啓用/禁用鍵盤快捷鍵
+
+Weapons
+== 武器
+
+Rifle Laser Outline Color
+== 鐳射槍彈道外框顔色
+
+Rifle Laser Inner Color
+== 鐳射槍彈道實心顔色
+
+Shotgun Laser Outline Color
+== 霰彈槍彈道外框顔色
+
+Shotgun Laser Inner Color
+== 霰彈槍彈道實心顔色
+
+Door Laser Outline Color
+== 鐳射門外框顔色
+
+Door Laser Inner Color
+== 鐳射門實心顔色
+
+Freeze Laser Outline Color
+== 凍結鐳射外框顔色
+
+Freeze Laser Inner Color
+== 凍結鐳射實心顔色
+
+Menu opened. Press Esc key again to close menu.
+== 菜單已打開，再次點擊 Esc 以關閉
+
+Set all to Rifle
+== 統一為鐳射槍顔色
+
+Cancel
+== 取消
+
+File '%s' already exists, do you want to overwrite it?
+== 檔案名 "%s" 已經存在，是否要取代該檔案？
+
+Are you sure that you want to remove the player '%s' from your friends list?
+== 你確定要將好友 "%s" 從你的好友列表中移除？
+
+Are you sure that you want to remove the clan '%s' from your friends list?
+== 你確定要將戰隊 "%s" 從你的好友列表中移除？
+
+Go back one tick
+== 上一個 tick
+
+Go forward one tick
+== 下一個 tick
+
+Go back one marker
+== 返回上一個標記
+
+Go forward one marker
+== 跳至下一個標記
+
+Are you sure that you want to delete the demo '%s'?
+== 你確定要刪除回放檔案 "%s" ？
+
+Unable to delete the demo '%s'
+== 無法刪除回放檔案 "%s"
+
+Reset controls
+== 恢復預設設定
+
+Are you sure that you want to reset the controls to their defaults?
+== 你確定要將當前的控制恢復至預設設定
+
+[Graphics error]
+
+[Graphics error]
+Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== 初始化失敗。請嘗試打開配置目錄中的設定檔案（settings_ddnet.cfg）并將“gfx_backend OpenGL”修改為“gfx_backend Vulkan”（若沒有前者則可直接輸入後者）再重試。
+
+[Graphics error]
+Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
+== 顯存不足。請嘗試移除自定義材質（如外觀，實體層等等），尤其高分辨率的自定義材質。
+
+[Graphics error]
+An error during command recording occurred. Try to update your GPU drivers.
+== 指令記錄期間檢測到錯誤。請嘗試更新顯示卡驅動程序。
+
+[Graphics error]
+A render command failed. Try to update your GPU drivers.
+== 渲染指令錯誤。請嘗試更新顯示卡驅動程序。
+
+[Graphics error]
+Submitting the render commands failed. Try to update your GPU drivers.
+== 渲染指令提交失敗。請嘗試更新顯示卡驅動程序。
+
+[Graphics error]
+Failed to swap framebuffers. Try to update your GPU drivers.
+== 幀緩存交替失敗。請嘗試更新顯示卡驅動程序。
+
+[Graphics error]
+Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== 未知錯誤。請嘗試打開配置目錄中的設定檔案（settings_ddnet.cfg）并將“gfx_backend OpenGL”修改為“gfx_backend Vulkan”（若沒有前者則可直接輸入後者）再重試。
+
+[Graphics error]
+Could not initialize the given graphics backend, reverting to the default backend now.
+== 無法初始化當前配置的圖形後端，正在將配置回退至預設圖形後端。
+
+Open the directory that contains the demo files
+== 打開存有回放檔案的資料夾路徑
+
+Save power by lowering refresh rate (higher input latency)
+== 節能模式（限制幀率上限以降低功耗但也將提高輸入延遲）
+
+Open the settings file
+== 打開設定檔案
+
+Open the directory that contains the configuration and user files
+== 打開存有配置檔案與用戶檔案的資料夾路徑
+
+Open the directory to add custom themes
+== 打開用以添加自定義主題的資料夾路徑
+
+Open the directory to add custom skins
+== 打開用以添加自定義外觀的資料夾路徑
+
+No controller found. Plug in a controller.
+== 未檢測到任何控制器。請嘗試重新連接控制器。
+
+Unregister protocol and file extensions
+== 未注冊的協議與擴充檔案
+
+Open the directory to add custom assets
+== 打開用以添加自定義材質的資料夾路徑
+
+[Graphics error]
+Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
+== 
+
+Could not save downloaded map. Try manually deleting this file: %s
+== 
+
+Search:
+== 
+
+Copy info
+== 

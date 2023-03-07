@@ -33,52 +33,52 @@ void CDebugHud::RenderNetCorrections()
 
 	float x = Width - 100.0f, y = 50.0f;
 	for(int i = 0; i < Num; ++i)
-		TextRender()->Text(0, x, y + i * LineHeight, Fontsize, s_apStrings[i], -1.0f);
+		TextRender()->Text(x, y + i * LineHeight, Fontsize, s_apStrings[i], -1.0f);
 
 	x = Width - 10.0f;
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "%.0f Bps", Velspeed / 32);
-	float w = TextRender()->TextWidth(0, Fontsize, aBuf, -1, -1.0f);
-	TextRender()->Text(0, x - w, y, Fontsize, aBuf, -1.0f);
+	float w = TextRender()->TextWidth(Fontsize, aBuf, -1, -1.0f);
+	TextRender()->Text(x - w, y, Fontsize, aBuf, -1.0f);
 	y += LineHeight;
 	str_format(aBuf, sizeof(aBuf), "%.0f Bps", VelspeedX / 32 * Ramp);
-	w = TextRender()->TextWidth(0, Fontsize, aBuf, -1, -1.0f);
-	TextRender()->Text(0, x - w, y, Fontsize, aBuf, -1.0f);
+	w = TextRender()->TextWidth(Fontsize, aBuf, -1, -1.0f);
+	TextRender()->Text(x - w, y, Fontsize, aBuf, -1.0f);
 	y += LineHeight;
 	str_format(aBuf, sizeof(aBuf), "%.0f Bps", VelspeedY / 32);
-	w = TextRender()->TextWidth(0, Fontsize, aBuf, -1, -1.0f);
-	TextRender()->Text(0, x - w, y, Fontsize, aBuf, -1.0f);
+	w = TextRender()->TextWidth(Fontsize, aBuf, -1, -1.0f);
+	TextRender()->Text(x - w, y, Fontsize, aBuf, -1.0f);
 	y += LineHeight;
 	str_format(aBuf, sizeof(aBuf), "%.2f", Ramp);
-	w = TextRender()->TextWidth(0, Fontsize, aBuf, -1, -1.0f);
-	TextRender()->Text(0, x - w, y, Fontsize, aBuf, -1.0f);
+	w = TextRender()->TextWidth(Fontsize, aBuf, -1, -1.0f);
+	TextRender()->Text(x - w, y, Fontsize, aBuf, -1.0f);
 	y += LineHeight;
 	const CCharacter *pCharacter = m_pClient->m_GameWorld.GetCharacterByID(m_pClient->m_Snap.m_LocalClientID);
 	if(pCharacter)
 		str_format(aBuf, sizeof(aBuf), "%d", pCharacter->m_TeleCheckpoint);
 	else
 		str_copy(aBuf, "-1");
-	w = TextRender()->TextWidth(0, Fontsize, aBuf, -1, -1.0f);
-	TextRender()->Text(0, x - w, y, Fontsize, aBuf, -1.0f);
+	w = TextRender()->TextWidth(Fontsize, aBuf, -1, -1.0f);
+	TextRender()->Text(x - w, y, Fontsize, aBuf, -1.0f);
 	y += 2 * LineHeight;
 	str_format(aBuf, sizeof(aBuf), "%.2f", m_pClient->m_Snap.m_pLocalCharacter->m_X / 32.0f);
-	w = TextRender()->TextWidth(0, Fontsize, aBuf, -1, -1.0f);
-	TextRender()->Text(0, x - w, y, Fontsize, aBuf, -1.0f);
+	w = TextRender()->TextWidth(Fontsize, aBuf, -1, -1.0f);
+	TextRender()->Text(x - w, y, Fontsize, aBuf, -1.0f);
 	y += LineHeight;
 	str_format(aBuf, sizeof(aBuf), "%.2f", m_pClient->m_Snap.m_pLocalCharacter->m_Y / 32.0f);
-	w = TextRender()->TextWidth(0, Fontsize, aBuf, -1, -1.0f);
-	TextRender()->Text(0, x - w, y, Fontsize, aBuf, -1.0f);
+	w = TextRender()->TextWidth(Fontsize, aBuf, -1, -1.0f);
+	TextRender()->Text(x - w, y, Fontsize, aBuf, -1.0f);
 	y += LineHeight;
 	str_format(aBuf, sizeof(aBuf), "%d", m_pClient->m_Snap.m_pLocalCharacter->m_Angle);
-	w = TextRender()->TextWidth(0, Fontsize, aBuf, -1, -1.0f);
-	TextRender()->Text(0, x - w, y, Fontsize, aBuf, -1.0f);
+	w = TextRender()->TextWidth(Fontsize, aBuf, -1, -1.0f);
+	TextRender()->Text(x - w, y, Fontsize, aBuf, -1.0f);
 	y += 2 * LineHeight;
 	str_format(aBuf, sizeof(aBuf), "%d", m_pClient->NetobjNumCorrections());
-	w = TextRender()->TextWidth(0, Fontsize, aBuf, -1, -1.0f);
-	TextRender()->Text(0, x - w, y, Fontsize, aBuf, -1.0f);
+	w = TextRender()->TextWidth(Fontsize, aBuf, -1, -1.0f);
+	TextRender()->Text(x - w, y, Fontsize, aBuf, -1.0f);
 	y += LineHeight;
-	w = TextRender()->TextWidth(0, Fontsize, m_pClient->NetobjCorrectedOn(), -1, -1.0f);
-	TextRender()->Text(0, x - w, y, Fontsize, m_pClient->NetobjCorrectedOn(), -1.0f);
+	w = TextRender()->TextWidth(Fontsize, m_pClient->NetobjCorrectedOn(), -1, -1.0f);
+	TextRender()->Text(x - w, y, Fontsize, m_pClient->NetobjCorrectedOn(), -1.0f);
 }
 
 void CDebugHud::RenderTuning()
@@ -110,16 +110,16 @@ void CDebugHud::RenderTuning()
 
 		str_format(aBuf, sizeof(aBuf), "%.2f", Standard);
 		x += 20.0f;
-		w = TextRender()->TextWidth(0, 5, aBuf, -1, -1.0f);
-		TextRender()->Text(0x0, x - w, y + Count * 6, 5, aBuf, -1.0f);
+		w = TextRender()->TextWidth(5, aBuf, -1, -1.0f);
+		TextRender()->Text(x - w, y + Count * 6, 5, aBuf, -1.0f);
 
 		str_format(aBuf, sizeof(aBuf), "%.2f", Current);
 		x += 20.0f;
-		w = TextRender()->TextWidth(0, 5, aBuf, -1, -1.0f);
-		TextRender()->Text(0x0, x - w, y + Count * 6, 5, aBuf, -1.0f);
+		w = TextRender()->TextWidth(5, aBuf, -1, -1.0f);
+		TextRender()->Text(x - w, y + Count * 6, 5, aBuf, -1.0f);
 
 		x += 5.0f;
-		TextRender()->Text(0x0, x, y + Count * 6, 5, CTuningParams::Name(i), -1.0f);
+		TextRender()->Text(x, y + Count * 6, 5, CTuningParams::Name(i), -1.0f);
 
 		Count++;
 	}
@@ -193,7 +193,7 @@ void CDebugHud::RenderTuning()
 	str_format(aBuf, sizeof(aBuf), "Velspeed.X*Ramp in Bps (Velspeed %d to %d)", StepSizeRampGraph / 32, 128 * StepSizeRampGraph / 32);
 	m_RampGraph.Render(Graphics(), Client()->GetDebugFont(), GraphX, GraphY - GraphH - sp, GraphW, GraphH, aBuf);
 	str_format(aBuf, sizeof(aBuf), "Max Velspeed before it ramps off:  %.2f Bps", m_SpeedTurningPoint / 32);
-	TextRender()->Text(0x0, GraphX, GraphY - sp - GraphH - 12, 12, aBuf, -1.0f);
+	TextRender()->Text(GraphX, GraphY - sp - GraphH - 12, 12, aBuf, -1.0f);
 	str_format(aBuf, sizeof(aBuf), "Zoomed in on turning point (Velspeed %d to %d)", ((int)MiddleOfZoomedInGraph - 64 * StepSizeZoomedInGraph) / 32, ((int)MiddleOfZoomedInGraph + 64 * StepSizeZoomedInGraph) / 32);
 	m_ZoomedInGraph.Render(Graphics(), Client()->GetDebugFont(), GraphX, GraphY, GraphW, GraphH, aBuf);
 	TextRender()->TextColor(1, 1, 1, 1);
@@ -207,7 +207,7 @@ void CDebugHud::RenderHint()
 	float Width = 300 * Graphics()->ScreenAspect();
 	Graphics()->MapScreen(0, 0, Width, 300);
 	TextRender()->TextColor(1, 1, 1, 1);
-	TextRender()->Text(0x0, 5, 290, 5, Localize("Debug mode enabled. Press Ctrl+Shift+D to disable debug mode."), -1.0f);
+	TextRender()->Text(5, 290, 5, Localize("Debug mode enabled. Press Ctrl+Shift+D to disable debug mode."), -1.0f);
 }
 
 void CDebugHud::OnRender()

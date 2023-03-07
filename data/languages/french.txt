@@ -23,6 +23,8 @@
 #	Nouaa			2022-05-14 23:00:00
 #	Chairn			2022-06-16 19:00:00
 #	Sucre			2022-07-19 20:36:00
+#	archimede67		2022-08-15 13:02:00
+#	Nouaa			2022-10-25 18:00:00
 
 ##### /authors #####
 
@@ -64,14 +66,8 @@ Address
 All
 == Tout le monde
 
-Are you sure that you want to delete the demo?
-== Êtes-vous sûr de vouloir supprimer la démo ?
-
 Are you sure that you want to quit?
-== Êtes-vous sûr de vouloir quitter ?
-
-Are you sure that you want to remove the player from your friends list?
-== Êtes-vous sûr de vouloir supprimer ce joueur de votre liste d'amis ?
+== Êtes-vous sûrs de vouloir quitter ?
 
 Automatically record demos
 == Enregistrer les démos automatiquement
@@ -419,9 +415,6 @@ Show ingame HUD
 Show name plates
 == Afficher les pseudonymes
 
-Skins
-== Skins
-
 Sound
 == Son
 
@@ -481,9 +474,6 @@ Try again
 
 Type
 == Type
-
-Unable to delete the demo
-== Impossible de supprimer la démo
 
 Unable to rename the demo
 == Impossible de renommer la démo
@@ -595,9 +585,6 @@ Reset to defaults
 Quit anyway?
 == Quitter quand même ?
 
-Display Modes
-== Résolutions
-
 Version:
 == Version :
 
@@ -698,7 +685,7 @@ AntiPing: predict other players
 == AntiPing: prédit le déplacement des autres joueurs
 
 Are you sure that you want to disconnect your dummy?
-== Êtes vous sûr de vouloir déconnecter votre dummy ?
+== Êtes vous sûrs de vouloir déconnecter votre dummy ?
 
 Reload
 == Recharger
@@ -785,7 +772,7 @@ Dummy settings
 == Config. du dummy
 
 Are you sure that you want to disconnect?
-== Êtes-vous sûr de vouloir vous déconnecter ?
+== Êtes-vous sûrs de vouloir vous déconnecter ?
 
 Deactivate
 == Désactiver
@@ -919,9 +906,6 @@ Hammerfly dummy
 Switch weapon when out of ammo
 == Changer d'arme lorsqu'il n'y a plus de munition
 
-Try fast HTTP map download first
-== Carte : essayer d'abord le téléchargement rapide HTTP
-
 Save the best demo of each race
 == Sauvegarder la meilleure démo de chaque course
 
@@ -990,9 +974,6 @@ Show tiles layers from BG map
 
 Show votes window after voting
 == Afficher la fenêtre de vote après avoir voté
-
-Destination file already exist
-== Le fichier de destination existe déjà
 
 %d new mentions
 == %d nouveaux messages
@@ -1072,8 +1053,8 @@ Please enter your nickname below.
 Show DDNet map finishes in server browser
 == Afficher les cartes de DDNet terminées dans le navigateur
 
-transmits your player name to info2.ddnet.tw
-== transmet votre pseudonyme à info2.ddnet.tw
+transmits your player name to info.ddnet.org
+== transmet votre pseudonyme à info.ddnet.org
 
 Saving ddnet-settings.cfg failed
 == L'enregistrement de ddnet-settings.cfg a échoué
@@ -1083,9 +1064,6 @@ Warning
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
 == Appuyez sur "k" pour mourir (recommencer) et "a" pour vous mettre en pause afin de regarder les autres joueurs. Allez dans les configurations pour voir davantage de raccourcis.
-
-Country / Region
-== Pays / Région
 
 Speed
 == Vitesse
@@ -1150,8 +1128,8 @@ Particles
 Assets directory
 == Répertoire des assets
 
-https://wiki.ddnet.tw/
-== https://wiki.ddnet.tw/
+https://wiki.ddnet.org/
+== https://wiki.ddnet.org/wiki/Main_Page/fr
 
 Website
 == Site web
@@ -1259,12 +1237,6 @@ Desktop fullscreen
 Kill Messages
 == Messages d'élimination
 
-Laser Outline Color
-== Couleur de la bordure du laser
-
-Laser Inner Color
-== Couleur du laser
-
 Preview
 == Prévisualisation
 
@@ -1280,8 +1252,8 @@ Regular Background Color
 Discord
 == Discord
 
-https://ddnet.tw/discord
-== https://ddnet.tw/discord
+https://ddnet.org/discord
+== https://ddnet.org/discord
 
 Are you sure that you want to disconnect and switch to a different server?
 == Êtes vous sur de vouloir vous déconnecter et changer de serveur?
@@ -1420,9 +1392,6 @@ UI controller sens.
 Controller jitter tolerance
 == Tolérance gigue de la manette
 
-No controller found. Plug in a controller and restart the game.
-== Aucune manette détectée. Branchez une manette et redémarrez le jeu.
-
 Device
 == Manette
 
@@ -1475,7 +1444,7 @@ Extras
 == Extras
 
 Connected
-==  Connecté
+== Connecté
 
 Initializing assets
 == Initialisation des assets
@@ -1517,64 +1486,234 @@ Loading sound files
 == Chargement des fichiers sonores
 
 Preparing demo playback
-== 
+== Préparation de la lecture de la demo
 
 Loading map file from storage
-== 
+== Chargement de la map depuis le stockage
 
 Why are you slowmo replaying to read this?
-== 
+== Pourquoi rejoues-tu en slow-motion pour lire ça?
 
 Initializing components
-== 
+== Initialisation des composants
 
 Initializing map logic
-== 
+== Initialisation de la logique de la map
 
 Sending initial client info
-== 
+== Envoi des informations initiales du client
 
 Uploading map data to GPU
-== 
+== Transfert des données de la map vers le GPU
 
 Loading menu images
-== 
+== Chargement des images de menu
 
 Loading demo files
-== 
+== Chargement des fichiers de demo
 
 Loading ghost files
-== 
+== Chargement des fichiers de fantôme
 
 Name Plate
-== 
+== Plaque de nom
 
 Hook Collisions
-== 
+== Collisions du grappin
 
 Show client IDs in scoreboard
-== 
+== Afficher les IDs des clients dans le tableau des scores
 
 Show hook strength indicator
-== 
+== Afficher l'indicateur de force du grappin
 
 Hook collision line width
-== 
+== Largeur de la ligne de collision du grappin
 
 Hook collision line opacity
-== 
+== Opacité de la ligne de collision du grappin
 
 Colors of the hook collision line, in case of a possible collision with:
-== 
+== Couleurs de la ligne de collision du grappin, dans le cas d'une collision possible avec :
 
 Your movements are not taken into account when calculating the line colors
-== 
+== Vos mouvements ne sont pas pris en compte lors du calcul des couleurs de la ligne
 
 Nothing hookable
-== 
+== Rien d'accrochable
 
 Something hookable
-== 
+== Quelque chose d'accrochable
 
 Loading race demo files
+== Chargement des fichiers de demo de course
+
+Play the current demo
+== Jouer la démo en cours
+
+Pause the current demo
+== Mettre en pause la démo en cours
+
+Stop the current demo
+== Arrêter la démo en cours
+
+Slow down the demo
+== Ralentir la démo
+
+Speed up the demo
+== Accélérer la démo
+
+Mark the beginning of a cut
+== Marquer le début d'une coupe
+
+Mark the end of a cut
+== Marquer la fin d'une coupe
+
+Export cut as a separate demo
+== Exporter la coupe comme une démo séparée
+
+Toggle keyboard shortcuts
+== Basculer les raccourcis clavier
+
+Menu opened. Press Esc key again to close menu.
+== Menu ouvert. Appuyez à nouveau sur la touche Éch. pour fermer le menu.
+
+Weapons
+== Armes
+
+[Graphics error]
+
+[Graphics error]
+Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== Échec lors de l'initialisation. Essayez de changer gfx_backend à OpenGL ou Vulkan dans le fichier settings_ddnet.cfg dans le dossier de configuration et réessayez.
+
+[Graphics error]
+Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
+== Mémoire graphique insuffisante. Essayez de retirer des ressources personnalisées (skins, entités, etc.), spécialement celles de haute résolution.
+
+[Graphics error]
+An error during command recording occurred. Try to update your GPU drivers.
+== Une erreur pendant l'enregistrement des commandes est survenue. Essayez de mettre à jour vos pilotes GPU.
+
+[Graphics error]
+A render command failed. Try to update your GPU drivers.
+== Une commande de rendu a échoué. Essayez de mettre à jour vos pilotes GPU.
+
+[Graphics error]
+Submitting the render commands failed. Try to update your GPU drivers.
+== L'envoi d'une commande de rendu a échoué. Essayez de mettre à jour vos pilotes GPU.
+
+[Graphics error]
+Failed to swap framebuffers. Try to update your GPU drivers.
+== Échec de l'échange de tampons d'images. Essayez de mettre à jour vos pilotes GPU.
+
+[Graphics error]
+Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== Erreur inconnue. Essayez de changer gfx_backend à OpenGL ou Vulkan dans le fichier settings_ddnet.cfg dans le dossier de configuration et réessayez.
+
+[Graphics error]
+Could not initialize the given graphics backend, reverting to the default backend now.
+== Impossible d'initialiser le moteur de rendu spécifié, nouvel essai avec le moteur par défaut.
+
+Cancel
+== Annuler
+
+File '%s' already exists, do you want to overwrite it?
+== Le fichier '%s' existe déjà, voulez-vous l'écraser ?
+
+Are you sure that you want to remove the player '%s' from your friends list?
+== Êtes-vous sûrs de vouloir retirer le joueur '%s' de votre liste d'amis ? 
+
+Are you sure that you want to remove the clan '%s' from your friends list?
+== Êtes-vous sûrs de vouloir retirer le clan '%s' de votre liste d'amis ?
+
+Go back one tick
+== Reculer d'une image
+
+Go forward one tick
+== Avancer d'une image
+
+Go back one marker
+== Aller au marqueur précédent
+
+Go forward one marker
+== Aller au marqueur suivant
+
+Open the directory that contains the demo files
+== Ouvrir le dossier contenant les fichiers démo
+
+Are you sure that you want to delete the demo '%s'?
+== Êtes-vous sûrs de vouloir supprimer la démo '%s' ?
+
+Unable to delete the demo '%s'
+== Impossible de supprimer la démo '%s'
+
+Save power by lowering refresh rate (higher input latency)
+== Économiser la puissance en diminuant le taux de rafraîchissement (augmente la latence d'entrée)
+
+Open the settings file
+== Ouvrir le fichier de configuration
+
+Open the directory that contains the configuration and user files
+== Ouvrir le dossier de configuration et des fichiers personnalisés
+
+Open the directory to add custom themes
+== Ouvrir le dossier pour ajouter un thème personnalisé
+
+Open the directory to add custom skins
+== Ouvrir le dossier pour ajouter des skins personnalisés
+
+No controller found. Plug in a controller.
+== Aucune manette détectée. Branchez une manette.
+
+Reset controls
+== Réinitialiser les contrôles
+
+Are you sure that you want to reset the controls to their defaults?
+== Êtes-vous sûrs de vouloir réinitialiser les contrôles aux valeurs par défaut ?
+
+Rifle Laser Outline Color
+== Couleur fusil laser (contour)
+
+Rifle Laser Inner Color
+== Couleur fusil laser (intérieur)
+
+Shotgun Laser Outline Color
+== Couleur fusil à pompe (contour)
+
+Shotgun Laser Inner Color
+== Couleur fusil à pompe (intérieur)
+
+Door Laser Outline Color
+== Couleur porte laser (contour)
+
+Door Laser Inner Color
+== Couleur porte laser (intérieur)
+
+Freeze Laser Outline Color
+== Couleur laser gelant (contour) 
+
+Freeze Laser Inner Color
+== Couleur laser gelant (intérieur)
+
+Set all to Rifle
+== Copier les réglages du fusil laser à tous
+
+Unregister protocol and file extensions
+== Désenregistrer le protocole et les extensions de fichier
+
+Open the directory to add custom assets
+== Ouvrir le dossier pour ajouter des ressources personnalisées
+
+[Graphics error]
+Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
+== 
+
+Could not save downloaded map. Try manually deleting this file: %s
+== 
+
+Search:
+== 
+
+Copy info
 == 

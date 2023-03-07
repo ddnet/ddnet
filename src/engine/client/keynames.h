@@ -4,8 +4,6 @@
 #error do not include this header!
 #endif
 
-#include <string.h>
-
 const char g_aaKeyStrings[512][20] = // NOLINT(misc-definitions-in-headers)
 {
 	"unknown",
@@ -318,22 +316,14 @@ const char g_aaKeyStrings[512][20] = // NOLINT(misc-definitions-in-headers)
 	"joystick9",
 	"joystick10",
 	"joystick11",
-	"joy_hat0_leftup",
 	"joy_hat0_up",
-	"joy_hat0_rightup",
 	"joy_hat0_left",
 	"joy_hat0_right",
-	"joy_hat0_leftdown",
 	"joy_hat0_down",
-	"joy_hat0_rightdown",
-	"joy_hat1_leftup",
 	"joy_hat1_up",
-	"joy_hat1_rightup",
 	"joy_hat1_left",
 	"joy_hat1_right",
-	"joy_hat1_leftdown",
 	"joy_hat1_down",
-	"joy_hat1_rightdown",
 	"joy_axis0_left",
 	"joy_axis0_right",
 	"joy_axis1_left",
@@ -358,6 +348,14 @@ const char g_aaKeyStrings[512][20] = // NOLINT(misc-definitions-in-headers)
 	"joy_axis10_right",
 	"joy_axis11_left",
 	"joy_axis11_right",
+	"&342",
+	"&343",
+	"&344",
+	"&345",
+	"&346",
+	"&347",
+	"&348",
+	"&349",
 	"&350",
 	"&351",
 	"&352",

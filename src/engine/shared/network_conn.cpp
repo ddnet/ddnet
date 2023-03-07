@@ -238,7 +238,7 @@ void CNetConnection::Disconnect(const char *pReason)
 	Reset();
 }
 
-void CNetConnection::DirectInit(NETADDR &Addr, SECURITY_TOKEN SecurityToken, SECURITY_TOKEN Token, bool Sixup)
+void CNetConnection::DirectInit(const NETADDR &Addr, SECURITY_TOKEN SecurityToken, SECURITY_TOKEN Token, bool Sixup)
 {
 	Reset();
 
@@ -308,7 +308,20 @@ int CNetConnection::Feed(CNetPacketConstruct *pPacket, NETADDR *pAddr, SECURITY_
 
 		if(CtrlMsg == NET_CTRLMSG_CLOSE)
 		{
-			if(net_addr_comp(&m_PeerAddr, pAddr) == 0)
+			bool IsPeer;
+			if(m_State != NET_CONNSTATE_CONNECT)
+			{
+				IsPeer = m_PeerAddr == *pAddr;
+			}
+			else
+			{
+				IsPeer = false;
+				for(int i = 0; i < m_NumConnectAddrs; i++)
+				{
+					IsPeer = IsPeer || m_aConnectAddrs[i] == *pAddr;
+				}
+			}
+			if(IsPeer)
 			{
 				m_State = NET_CONNSTATE_ERROR;
 				m_RemoteClosed = 1;

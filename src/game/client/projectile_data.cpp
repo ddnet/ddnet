@@ -43,8 +43,8 @@ CProjectileData ExtractProjectileInfoDDNet(const CNetObj_DDNetProjectile *pProj,
 	Result.m_StartPos.x = pProj->m_X / 100.0f;
 	Result.m_StartPos.y = pProj->m_Y / 100.0f;
 	float Angle = pProj->m_Angle / 1000000.0f;
-	Result.m_StartVel.x = sin(-Angle);
-	Result.m_StartVel.y = cos(-Angle);
+	Result.m_StartVel.x = std::sin(-Angle);
+	Result.m_StartVel.y = std::cos(-Angle);
 	Result.m_Type = pProj->m_Type;
 	Result.m_StartTick = pProj->m_StartTick;
 
@@ -67,7 +67,7 @@ void SnapshotRemoveExtraProjectileInfo(unsigned char *pData)
 	CSnapshot *pSnap = (CSnapshot *)pData;
 	for(int Index = 0; Index < pSnap->NumItems(); Index++)
 	{
-		CSnapshotItem *pItem = pSnap->GetItem(Index);
+		const CSnapshotItem *pItem = pSnap->GetItem(Index);
 		if(pItem->Type() == NETOBJTYPE_PROJECTILE)
 		{
 			CNetObj_Projectile *pProj = (CNetObj_Projectile *)((void *)pItem->Data());

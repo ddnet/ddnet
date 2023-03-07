@@ -1,0 +1,20 @@
+[
+	{
+		"name": "[DDNet] (recommended) Clang + mold + ninja for fastest compiling (and dev modus)",
+		"compilers": {
+			"C": "clang",
+			"CXX": "clang++"
+		},
+		"preferredGenerator": {
+			"name": "Ninja"
+		},
+		"cmakeSettings": {
+			"DEV": "ON",
+			"CMAKE_CXX_LINK_FLAGS_INIT": "-fuse-ld=mold"
+		}
+	},
+	{
+		"name": "[DDNet] Crosscompile for Windows using MinGW",
+		"toolchainFile": "${workspaceFolder}/cmake/toolchains/mingw64.toolchain"
+	}
+]

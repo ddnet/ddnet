@@ -137,11 +137,9 @@ void CCharacter::HandleNinja()
 
 		// check if we Hit anything along the way
 		{
-			CCharacter *apEnts[MAX_CLIENTS];
-			vec2 Dir = m_Pos - OldPos;
+			CEntity *apEnts[MAX_CLIENTS];
 			float Radius = m_ProximityRadius * 2.0f;
-			vec2 Center = OldPos + Dir * 0.5f;
-			int Num = GameWorld()->FindEntities(Center, Radius, (CEntity **)apEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
+			int Num = GameWorld()->FindEntities(OldPos, Radius, apEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
 
 			// check that we're not in solo part
 			if(TeamsCore()->GetSolo(GetCID()))
@@ -149,37 +147,38 @@ void CCharacter::HandleNinja()
 
 			for(int i = 0; i < Num; ++i)
 			{
-				if(apEnts[i] == this)
+				auto *pChr = static_cast<CCharacter *>(apEnts[i]);
+				if(pChr == this)
 					continue;
 
 				// Don't hit players in other teams
-				if(Team() != apEnts[i]->Team())
+				if(Team() != pChr->Team())
 					continue;
 
 				// Don't hit players in solo parts
-				if(TeamsCore()->GetSolo(apEnts[i]->GetCID()))
+				if(TeamsCore()->GetSolo(pChr->GetCID()))
 					return;
 
 				// make sure we haven't Hit this object before
 				bool bAlreadyHit = false;
 				for(int j = 0; j < m_NumObjectsHit; j++)
 				{
-					if(m_aHitObjects[j] == apEnts[i]->GetCID())
+					if(m_aHitObjects[j] == pChr->GetCID())
 						bAlreadyHit = true;
 				}
 				if(bAlreadyHit)
 					continue;
 
 				// check so we are sufficiently close
-				if(distance(apEnts[i]->m_Pos, m_Pos) > (m_ProximityRadius * 2.0f))
+				if(distance(pChr->m_Pos, m_Pos) > (m_ProximityRadius * 2.0f))
 					continue;
 
 				// Hit a player, give them damage and stuffs...
 				// set his velocity to fast upward (for now)
 				if(m_NumObjectsHit < 10)
-					m_aHitObjects[m_NumObjectsHit++] = apEnts[i]->GetCID();
+					m_aHitObjects[m_NumObjectsHit++] = pChr->GetCID();
 
-				CCharacter *pChar = GameWorld()->GetCharacterByID(apEnts[i]->GetCID());
+				CCharacter *pChar = GameWorld()->GetCharacterByID(pChr->GetCID());
 				if(pChar)
 					pChar->TakeDamage(vec2(0, -10.0f), g_pData->m_Weapons.m_Ninja.m_pBase->m_Damage, GetCID(), WEAPON_NINJA);
 			}
@@ -304,14 +303,14 @@ void CCharacter::FireWeapon()
 		if(m_Core.m_HammerHitDisabled)
 			break;
 
-		CCharacter *apEnts[MAX_CLIENTS];
+		CEntity *apEnts[MAX_CLIENTS];
 		int Hits = 0;
-		int Num = GameWorld()->FindEntities(ProjStartPos, m_ProximityRadius * 0.5f, (CEntity **)apEnts,
+		int Num = GameWorld()->FindEntities(ProjStartPos, m_ProximityRadius * 0.5f, apEnts,
 			MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
 
 		for(int i = 0; i < Num; ++i)
 		{
-			CCharacter *pTarget = apEnts[i];
+			auto *pTarget = static_cast<CCharacter *>(apEnts[i]);
 
 			if((pTarget == this || !CanCollide(pTarget->GetCID())))
 				continue;
@@ -393,7 +392,7 @@ void CCharacter::FireWeapon()
 			int ShotSpread = 2;
 			for(int i = -ShotSpread; i <= ShotSpread; ++i)
 			{
-				float aSpreading[] = {-0.185f, -0.070f, 0, 0.070f, 0.185f};
+				const float aSpreading[] = {-0.185f, -0.070f, 0, 0.070f, 0.185f};
 				float a = angle(Direction);
 				a += aSpreading[i + 2];
 				float v = 1 - (absolute(i) / (float)ShotSpread);
@@ -403,11 +402,10 @@ void CCharacter::FireWeapon()
 					WEAPON_SHOTGUN, //Type
 					GetCID(), //Owner
 					ProjStartPos, //Pos
-					vec2(cosf(a), sinf(a)) * Speed, //Dir
+					direction(a) * Speed, //Dir
 					(int)(GameWorld()->GameTickSpeed() * Tuning()->m_ShotgunLifetime), //Span
 					false, //Freeze
 					false, //Explosive
-					0, //Force
 					-1 //SoundImpact
 				);
 			}
@@ -434,7 +432,6 @@ void CCharacter::FireWeapon()
 			Lifetime, //Span
 			false, //Freeze
 			true, //Explosive
-			0, //Force
 			SOUND_GRENADE_EXPLODE //SoundImpact
 		); //SoundImpact
 	}
@@ -492,7 +489,7 @@ void CCharacter::GiveNinja()
 {
 	m_Core.m_Ninja.m_ActivationTick = GameWorld()->GameTick();
 	m_Core.m_aWeapons[WEAPON_NINJA].m_Got = true;
-	if(!m_FreezeTime)
+	if(m_FreezeTime > 0)
 		m_Core.m_aWeapons[WEAPON_NINJA].m_Ammo = -1;
 	if(m_Core.m_ActiveWeapon != WEAPON_NINJA)
 		m_LastWeapon = m_Core.m_ActiveWeapon;
@@ -504,7 +501,7 @@ void CCharacter::OnPredictedInput(CNetObj_PlayerInput *pNewInput)
 	// skip the input if chat is active
 	if(!GameWorld()->m_WorldConfig.m_BugDDRaceInput && pNewInput->m_PlayerFlags & PLAYERFLAG_CHATTING)
 	{
-		// save reseted input
+		// save the reset input
 		mem_copy(&m_SavedInput, &m_Input, sizeof(m_SavedInput));
 		return;
 	}
@@ -646,36 +643,36 @@ void CCharacter::HandleSkippableTiles(int Index)
 			if(MaxSpeed > 0)
 			{
 				if(Direction.x > 0.0000001f)
-					SpeederAngle = -atan(Direction.y / Direction.x);
+					SpeederAngle = -std::atan(Direction.y / Direction.x);
 				else if(Direction.x < 0.0000001f)
-					SpeederAngle = atan(Direction.y / Direction.x) + 2.0f * asin(1.0f);
+					SpeederAngle = std::atan(Direction.y / Direction.x) + 2.0f * std::asin(1.0f);
 				else if(Direction.y > 0.0000001f)
-					SpeederAngle = asin(1.0f);
+					SpeederAngle = std::asin(1.0f);
 				else
-					SpeederAngle = asin(-1.0f);
+					SpeederAngle = std::asin(-1.0f);
 
 				if(SpeederAngle < 0)
-					SpeederAngle = 4.0f * asin(1.0f) + SpeederAngle;
+					SpeederAngle = 4.0f * std::asin(1.0f) + SpeederAngle;
 
 				if(TempVel.x > 0.0000001f)
-					TeeAngle = -atan(TempVel.y / TempVel.x);
+					TeeAngle = -std::atan(TempVel.y / TempVel.x);
 				else if(TempVel.x < 0.0000001f)
-					TeeAngle = atan(TempVel.y / TempVel.x) + 2.0f * asin(1.0f);
+					TeeAngle = std::atan(TempVel.y / TempVel.x) + 2.0f * std::asin(1.0f);
 				else if(TempVel.y > 0.0000001f)
-					TeeAngle = asin(1.0f);
+					TeeAngle = std::asin(1.0f);
 				else
-					TeeAngle = asin(-1.0f);
+					TeeAngle = std::asin(-1.0f);
 
 				if(TeeAngle < 0)
-					TeeAngle = 4.0f * asin(1.0f) + TeeAngle;
+					TeeAngle = 4.0f * std::asin(1.0f) + TeeAngle;
 
-				TeeSpeed = sqrt(pow(TempVel.x, 2) + pow(TempVel.y, 2));
+				TeeSpeed = std::sqrt(std::pow(TempVel.x, 2) + std::pow(TempVel.y, 2));
 
 				DiffAngle = SpeederAngle - TeeAngle;
-				SpeedLeft = MaxSpeed / 5.0f - cos(DiffAngle) * TeeSpeed;
-				if(abs((int)SpeedLeft) > Force && SpeedLeft > 0.0000001f)
+				SpeedLeft = MaxSpeed / 5.0f - std::cos(DiffAngle) * TeeSpeed;
+				if(absolute((int)SpeedLeft) > Force && SpeedLeft > 0.0000001f)
 					TempVel += Direction * Force;
-				else if(abs((int)SpeedLeft) > Force)
+				else if(absolute((int)SpeedLeft) > Force)
 					TempVel += Direction * -Force;
 				else
 					TempVel += Direction * SpeedLeft;
@@ -955,12 +952,9 @@ void CCharacter::DDRaceTick()
 		m_Input.m_Jump = 0;
 		//Hook and weapons are possible in live freeze
 	}
-	if(m_FreezeTime > 0 || m_FreezeTime == -1)
+	if(m_FreezeTime > 0)
 	{
-		if(m_FreezeTime > 0)
-			m_FreezeTime--;
-		else
-			m_Core.m_Ninja.m_ActivationTick = GameWorld()->GameTick();
+		m_FreezeTime--;
 		if(!m_CanMoveInFreeze)
 		{
 			m_Input.m_Direction = 0;
@@ -1049,11 +1043,11 @@ bool CCharacter::Freeze(int Seconds)
 {
 	if(!GameWorld()->m_WorldConfig.m_PredictFreeze)
 		return false;
-	if((Seconds <= 0 || m_Core.m_Super || m_FreezeTime == -1 || m_FreezeTime > Seconds * GameWorld()->GameTickSpeed()) && Seconds != -1)
+	if(Seconds <= 0 || m_Core.m_Super || m_FreezeTime > Seconds * GameWorld()->GameTickSpeed())
 		return false;
-	if(m_Core.m_FreezeStart < GameWorld()->GameTick() - GameWorld()->GameTickSpeed() || Seconds == -1)
+	if(m_Core.m_FreezeStart < GameWorld()->GameTick() - GameWorld()->GameTickSpeed())
 	{
-		m_FreezeTime = Seconds == -1 ? Seconds : Seconds * GameWorld()->GameTickSpeed();
+		m_FreezeTime = Seconds * GameWorld()->GameTickSpeed();
 		m_Core.m_FreezeStart = GameWorld()->GameTick();
 		return true;
 	}
@@ -1130,8 +1124,6 @@ CCharacter::CCharacter(CGameWorld *pGameWorld, int ID, CNetObj_Character *pChar,
 	m_Core.Init(&GameWorld()->m_Core, GameWorld()->Collision(), GameWorld()->Teams());
 	m_Core.m_Id = ID;
 	mem_zero(&m_Core.m_Ninja, sizeof(m_Core.m_Ninja));
-	mem_zero(&m_SavedInput, sizeof(m_SavedInput));
-	m_LatestInput = m_LatestPrevInput = m_PrevInput = m_Input = m_SavedInput;
 	m_Core.m_LeftWall = true;
 	m_ReloadTimer = 0;
 	m_NumObjectsHit = 0;
@@ -1141,6 +1133,7 @@ CCharacter::CCharacter(CGameWorld *pGameWorld, int ID, CNetObj_Character *pChar,
 	m_TeleCheckpoint = 0;
 	m_StrongWeakID = 0;
 
+	mem_zero(&m_Input, sizeof(m_Input));
 	// never initialize both to zero
 	m_Input.m_TargetX = 0;
 	m_Input.m_TargetY = -1;
@@ -1341,8 +1334,8 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 		}
 		else
 		{
-			m_Input.m_TargetX = m_SavedInput.m_TargetX = cosf(pChar->m_Angle / 256.0f) * 256.0f;
-			m_Input.m_TargetY = m_SavedInput.m_TargetY = sinf(pChar->m_Angle / 256.0f) * 256.0f;
+			m_Input.m_TargetX = m_SavedInput.m_TargetX = std::cos(pChar->m_Angle / 256.0f) * 256.0f;
+			m_Input.m_TargetY = m_SavedInput.m_TargetY = std::sin(pChar->m_Angle / 256.0f) * 256.0f;
 		}
 	}
 

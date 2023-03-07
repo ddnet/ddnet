@@ -33,7 +33,7 @@ public:
 
 	void Reset() override;
 	void Destroy() override;
-	void PreTick() override;
+	void PreTick();
 	void Tick() override;
 	void TickDeferred() override;
 	void TickPaused() override;
@@ -86,7 +86,7 @@ public:
 	bool IsAlive() const { return m_Alive; }
 	bool IsPaused() const { return m_Paused; }
 	class CPlayer *GetPlayer() { return m_pPlayer; }
-	int64_t TeamMask();
+	CClientMask TeamMask();
 
 private:
 	// player controlling this character
@@ -235,7 +235,6 @@ public:
 	void SetWeaponGot(int Type, bool Value) { m_Core.m_aWeapons[Type].m_Got = Value; }
 	int GetWeaponAmmo(int Type) { return m_Core.m_aWeapons[Type].m_Ammo; }
 	void SetWeaponAmmo(int Type, int Value) { m_Core.m_aWeapons[Type].m_Ammo = Value; }
-	bool IsAlive() { return m_Alive; }
 	void SetNinjaActivationDir(vec2 ActivationDir) { m_Core.m_Ninja.m_ActivationDir = ActivationDir; }
 	void SetNinjaActivationTick(int ActivationTick) { m_Core.m_Ninja.m_ActivationTick = ActivationTick; }
 	void SetNinjaCurrentMoveTime(int CurrentMoveTime) { m_Core.m_Ninja.m_CurrentMoveTime = CurrentMoveTime; }

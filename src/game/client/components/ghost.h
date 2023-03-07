@@ -80,7 +80,7 @@ private:
 		void SetSize(int Items);
 		int Size() const { return m_NumItems; }
 
-		void Add(CGhostCharacter Char);
+		void Add(const CGhostCharacter &Char);
 		CGhostCharacter *Get(int Index);
 	};
 

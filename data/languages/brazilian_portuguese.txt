@@ -1,4 +1,4 @@
-﻿##### authors #####
+##### authors #####
 #originally created by:
 # slinack
 #modified by:
@@ -22,6 +22,9 @@
 # Rafael Fontenelle   2021-02-13 07:00:00
 # Rafael Fontenelle   2021-06-10 12:00:00
 # pv                  2022-06-01 20:44:00
+# Rafael Fontenelle   2022-09-17 23:23:00
+# Rafael Fontenelle   2022-10-25 11:22:00
+# Rafael Fontenelle   2023-01-09 10:33:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -62,14 +65,8 @@ Address
 All
 == Todos
 
-Are you sure that you want to delete the demo?
-== Tem certeza que deseja deletar o demo?
-
 Are you sure that you want to quit?
 == Você tem certeza que deseja sair?
-
-Are you sure that you want to remove the player from your friends list?
-== Tem certeza que deseja remover o jogador de sua lista de amigos?
 
 Automatically record demos
 == Gravar demos automaticamente
@@ -135,7 +132,7 @@ Delete demo
 == Deletar demo
 
 Demo details
-== Detalhes do demo
+== Detalhes da demo
 
 Demofile: %s
 == Demo: %s
@@ -423,9 +420,6 @@ Show name plates
 Show only chat messages from friends
 == Mostrar apenas mensagens de amigos
 
-Skins
-== Skins
-
 Sound
 == Som
 
@@ -486,11 +480,8 @@ Try again
 Type
 == Tipo
 
-Unable to delete the demo
-== Não foi possível deletar o demo
-
 Unable to rename the demo
-== Não foi possível renomear o demo
+== Não foi possível renomear a demo
 
 Use sounds
 == Usar sons
@@ -663,9 +654,6 @@ Restart
 Old mouse mode
 == Modo antigo de mouse
 
-Display Modes
-== Modos de exibição
-
 Round
 == Turno
 
@@ -798,9 +786,6 @@ Show score
 UI Color
 == Cor da UI
 
-Try fast HTTP map download first
-== Tentar baixar mapa por HTTP (rápido) primeiro
-
 Best
 == Melhor
 
@@ -915,8 +900,8 @@ Date
 Show DDNet map finishes in server browser
 == Mostrar finalizações de mapas do DDNet no navegador do servidor
 
-transmits your player name to info2.ddnet.tw
-== transmite seu nome de jogador para info2.ddnet.tw
+transmits your player name to info.ddnet.org
+== transmite seu nome de jogador para info.ddnet.org
 
 Reload
 == Recarregar
@@ -1059,9 +1044,6 @@ It's recommended that you check the settings to adjust them to your liking befor
 Please enter your nickname below.
 == Por favor, insira seu apelido abaixo.
 
-Destination file already exist
-== O arquivo de destino já existe
-
 Video name:
 == Nome do vídeo
 
@@ -1082,9 +1064,6 @@ Show others (own team only)
 
 Warning
 == Atenção
-
-Country / Region
-== País / Região
 
 Speed
 == Velocidade
@@ -1107,8 +1086,8 @@ Skip the main menu
 Download skins
 == Baixar skins
 
-https://wiki.ddnet.tw/
-== https://wiki.ddnet.tw/wiki/Main_Page/pt-br
+https://wiki.ddnet.org/
+== https://wiki.ddnet.org/wiki/Main_Page/pt-br
 
 Website
 == Site
@@ -1213,12 +1192,6 @@ The width of texture %s is not divisible by %d, or the height is not divisible b
 Dummy
 == Dummy
 
-Laser Outline Color
-== Cor de contorno do laser
-
-Laser Inner Color
-== Cor interna do laser
-
 Preview
 == Visualizar
 
@@ -1273,11 +1246,11 @@ Desktop fullscreen
 Discord
 == Discord
 
-https://ddnet.tw/discord
-== https://ddnet.tw/discord
+https://ddnet.org/discord
+== https://ddnet.org/discord
 
 Are you sure that you want to disconnect and switch to a different server?
-== Tem certeza que deseja desconectar e trocar pata um servidor diferente?
+== Tem certeza que deseja desconectar e trocar para um servidor diferente?
 
 Refreshing...
 == Atualizando...
@@ -1416,9 +1389,6 @@ UI controller sens.
 Controller jitter tolerance
 == Tolerância jitter do controle
 
-No controller found. Plug in a controller and restart the game.
-== Nenhum controle encontrado. Conecte um controle e reinicie o jogo.
-
 Device
 == Dispositivo
 
@@ -1471,106 +1441,276 @@ Extras
 == Extras
 
 Preparing demo playback
-== 
+== Preparando reprodução da demo
 
 Connected
-== 
+== Conectado
 
 Loading map file from storage
-== 
+== Carregando arquivo de mapa do armazenamento
 
 Why are you slowmo replaying to read this?
-== 
+== Por que você está respondendo em câmera lenta para ler isso?
 
 Initializing components
-== 
+== Inicializando componentes
 
 Initializing assets
-== 
+== Inicializando ativos
 
 Initializing map logic
-== 
+== Inicializando lógica de mapa
 
 Sending initial client info
-== 
+== Enviando info iniciais do cliente
 
 Uploading map data to GPU
-== 
+== Carregando dados de mapa para GPU
 
 Getting game info
-== 
+== Obtendo info do jogo
 
 Requesting to join the game
-== 
+== Solicitando entrada no jogo
 
 Loading menu images
-== 
+== Carregando imagens de menu
 
 Loading demo files
-== 
+== Carregando arquivos de demo
 
 Loading ghost files
-== 
+== Carregando arquivos de fantasma
 
 Loading skin files
-== 
+== Carregando arquivos de skins
 
 Appearance
-== 
+== Aparência
 
 Name Plate
-== 
+== Placa de nome
 
 Hook Collisions
-== 
+== Colisões de gancho
 
 Show health, shields and ammo
-== 
+== Mostrar saúde, escudos e munição
 
 DDRace HUD
-== 
+== HUD do DDRace
 
 Show client IDs in scoreboard
-== 
+== Mostrar IDs de cliente no placar
 
 Show DDRace HUD
-== 
+== Mostrar HUD do DDRace
 
 Show jumps indicator
-== 
+== Mostrar indicador de pulos
 
 Show hook strength indicator
-== 
+== Mostrar indicador de força do gancho
 
 Hook collision line
-== 
+== Linha de colisão do gancho
 
 Hook collision line width
-== 
+== Largura da linha de colisão do gancho
 
 Hook collision line opacity
-== 
+== Opacidade da linha de colisão do gancho
 
 Colors of the hook collision line, in case of a possible collision with:
-== 
+== Cores da linha de colisão do gancho, no caso de uma possível colisão com:
 
 Your movements are not taken into account when calculating the line colors
-== 
+== Seus movimentos não são levados em conta ao calcular as cores de linha
 
 Nothing hookable
-== 
+== Nada enganchável
 
 Something hookable
-== 
+== Alguma coisa enganchável
 
 A Tee
-== 
+== Um tee
 
 Loading assets
-== 
+== Carregando ativos
 
 Loading race demo files
-== 
+== Carregando arquivos de demo de corrida
 
 Loading sound files
-== 
+== Carregando arquivos de som
+
+Play the current demo
+== Assistir a demo atual
+
+Pause the current demo
+== Pausar a demo atual
+
+Stop the current demo
+== Parar a demo atual
+
+Slow down the demo
+== Desacelerar a demo
+
+Speed up the demo
+== Acelerar a demo
+
+Mark the beginning of a cut
+== Marcar o início de um corte
+
+Mark the end of a cut
+== Marcar o fim de um corte
+
+Export cut as a separate demo
+== Exportar corte como uma demo separada
+
+Toggle keyboard shortcuts
+== Ativar atalhos de teclado
+
+Weapons
+== Armas
+
+Rifle Laser Outline Color
+== Cor de contorno do laser do rifle
+
+Rifle Laser Inner Color
+== Cor de interna do laser do rifle
+
+Shotgun Laser Outline Color
+== Cor contorno do laser da espingarda
+
+Shotgun Laser Inner Color
+== Cor interna do laser do espingarda
+
+Door Laser Outline Color
+== Cor de contorno do laser da porta
+
+Door Laser Inner Color
+== Cor interna do laser do porta
+
+Freeze Laser Outline Color
+== Cor de contorno do laser do congelamento
+
+Freeze Laser Inner Color
+== Cor interna do laser do congelamento
+
+Menu opened. Press Esc key again to close menu.
+== Menu aberto. Pressione Esc novamente para fechar o menu.
+
+Set all to Rifle
+== Definir todos para rifle
+
+Cancel
+== Cancelar
+
+File '%s' already exists, do you want to overwrite it?
+== O arquivo "%s" já existe, tem certeza que deseja sobrescrevê-lo?
+
+Are you sure that you want to remove the player '%s' from your friends list?
+== Tem certeza que deseja remover o jogador "%s" de sua lista de amigos?
+
+Are you sure that you want to remove the clan '%s' from your friends list?
+== Tem certeza que deseja remover o clã "%s" da sua lista de amigos?
+
+Go back one tick
+== Voltar um passo
+
+Go forward one tick
+== Avançar um passo
+
+Go back one marker
+== Voltar um marcador
+
+Go forward one marker
+== Avançar um marcador
+
+Are you sure that you want to delete the demo '%s'?
+== Tem certeza que deseja excluir a demo "%s"?
+
+Unable to delete the demo '%s'
+== Não foi possível excluir a demo "%s"
+
+Reset controls
+== Redefinir controles
+
+Are you sure that you want to reset the controls to their defaults?
+== Tem certeza que deseja redefinir os controles para seu padrão?
+
+[Graphics error]
+
+[Graphics error]
+Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== Falha durante a inicialização. Tente alterar gfx_backend para OpenGL ou Vulkan em settings_ddnet.cfg no diretório de configuração e tente novamente.
+
+[Graphics error]
+Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
+== VRAM insuficiente. Tente remover ativos personalizados (skins, entidades, etc.), especialmente aqueles com alta resolução.
+
+[Graphics error]
+An error during command recording occurred. Try to update your GPU drivers.
+== Ocorreu um erro durante a gravação do comando. Tente atualizar seus drivers de GPU.
+
+[Graphics error]
+A render command failed. Try to update your GPU drivers.
+== Um comando de renderização falhou. Tente atualizar seus drivers de GPU.
+
+[Graphics error]
+Submitting the render commands failed. Try to update your GPU drivers.
+== O envio dos comandos de renderização falhou. Tente atualizar seus drivers de GPU.
+
+[Graphics error]
+Failed to swap framebuffers. Try to update your GPU drivers.
+== Falha ao trocar framebuffers. Tente atualizar seus drivers de GPU.
+
+[Graphics error]
+Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== Erro desconhecido. Tente alterar gfx_backend para OpenGL ou Vulkan em settings_ddnet.cfg no diretório de configuração e tente novamente.
+
+[Graphics error]
+Could not initialize the given graphics backend, reverting to the default backend now.
+== Não foi possível inicializar o backend gráfico fornecido, revertendo para o backend padrão agora.
+
+Open the directory that contains the demo files
+== Abre o diretório que contém os arquivos de demonstração
+
+Save power by lowering refresh rate (higher input latency)
+== Economiza energia diminuindo a taxa de atualização (maior latência de entrada)
+
+Open the settings file
+== Abre o arquivo de configurações
+
+Open the directory that contains the configuration and user files
+== Abre o diretório que contém os arquivos de configuração e do usuário
+
+Open the directory to add custom themes
+== Abre o diretório para adicionar os temas personalizados
+
+Open the directory to add custom skins
+== Abre o diretório para adicionar skins personalizadas
+
+No controller found. Plug in a controller.
+== Nenhum controle encontrado. Conecte um controle.
+
+Unregister protocol and file extensions
+== Protoloco e arquivos de extensões não registrados
+
+Open the directory to add custom assets
+== Abre o diretório para adicionar os ativos personalizados
+
+[Graphics error]
+Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
+== Não foi possível inicializar o backend de vídeo fornecido, isso provavelmente porque você não instalou o driver da placa de vídeo 
+
+Could not save downloaded map. Try manually deleting this file: %s
+== Não foi possível salvar o mapa baixado. Tente excluir manualmente este arquivo: %s
+
+Search:
+== Pesquisa:
+
+Copy info
+== Copiar informação

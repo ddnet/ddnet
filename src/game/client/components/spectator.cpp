@@ -119,7 +119,7 @@ void CSpectator::ConSpectateClosest(IConsole::IResult *pResult, void *pUserData)
 	if(!pSelf->CanChangeSpectator())
 		return;
 
-	CGameClient::CSnapState &Snap = pSelf->m_pClient->m_Snap;
+	const CGameClient::CSnapState &Snap = pSelf->m_pClient->m_Snap;
 	int SpectatorID = Snap.m_SpecInfo.m_SpectatorID;
 
 	int NewSpectatorID = -1;
@@ -218,7 +218,7 @@ void CSpectator::OnRender()
 	float BoxMove = -10.0f;
 	float BoxOffset = 0.0f;
 
-	for(auto &pInfo : m_pClient->m_Snap.m_apInfoByDDTeamName)
+	for(const auto &pInfo : m_pClient->m_Snap.m_apInfoByDDTeamName)
 	{
 		if(!pInfo || pInfo->m_Team == TEAM_SPECTATORS)
 			continue;
@@ -251,12 +251,12 @@ void CSpectator::OnRender()
 
 	// draw selections
 	if((Client()->State() == IClient::STATE_DEMOPLAYBACK && m_pClient->m_DemoSpecID == SPEC_FREEVIEW) ||
-		m_pClient->m_Snap.m_SpecInfo.m_SpectatorID == SPEC_FREEVIEW)
+		(Client()->State() != IClient::STATE_DEMOPLAYBACK && m_pClient->m_Snap.m_SpecInfo.m_SpectatorID == SPEC_FREEVIEW))
 	{
 		Graphics()->DrawRect(Width / 2.0f - (ObjWidth - 20.0f), Height / 2.0f - 280.0f, 270.0f, 60.0f, ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, 20.0f);
 	}
 
-	if(Client()->State() == IClient::STATE_DEMOPLAYBACK && m_pClient->m_DemoSpecID == SPEC_FOLLOW)
+	if(Client()->State() == IClient::STATE_DEMOPLAYBACK && m_pClient->m_Snap.m_LocalClientID >= 0 && m_pClient->m_DemoSpecID == SPEC_FOLLOW)
 	{
 		Graphics()->DrawRect(Width / 2.0f - (ObjWidth - 310.0f), Height / 2.0f - 280.0f, 270.0f, 60.0f, ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, 20.0f);
 	}
@@ -268,9 +268,9 @@ void CSpectator::OnRender()
 		Selected = true;
 	}
 	TextRender()->TextColor(1.0f, 1.0f, 1.0f, Selected ? 1.0f : 0.5f);
-	TextRender()->Text(0, Width / 2.0f - (ObjWidth - 60.0f), Height / 2.0f - 280.f + (60.f - BigFontSize) / 2.f, BigFontSize, Localize("Free-View"), -1.0f);
+	TextRender()->Text(Width / 2.0f - (ObjWidth - 60.0f), Height / 2.0f - 280.f + (60.f - BigFontSize) / 2.f, BigFontSize, Localize("Free-View"), -1.0f);
 
-	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
+	if(Client()->State() == IClient::STATE_DEMOPLAYBACK && m_pClient->m_Snap.m_LocalClientID >= 0)
 	{
 		Selected = false;
 		if(m_SelectorMouse.x > -(ObjWidth - 290.0f) && m_SelectorMouse.x <= -(ObjWidth - 590.0f) &&
@@ -280,7 +280,7 @@ void CSpectator::OnRender()
 			Selected = true;
 		}
 		TextRender()->TextColor(1.0f, 1.0f, 1.0f, Selected ? 1.0f : 0.5f);
-		TextRender()->Text(0, Width / 2.0f - (ObjWidth - 350.0f), Height / 2.0f - 280.0f + (60.f - BigFontSize) / 2.f, BigFontSize, Localize("Follow"), -1.0f);
+		TextRender()->Text(Width / 2.0f - (ObjWidth - 350.0f), Height / 2.0f - 280.0f + (60.f - BigFontSize) / 2.f, BigFontSize, Localize("Follow"), -1.0f);
 	}
 
 	float x = -(ObjWidth - 35.0f), y = StartY;
@@ -366,7 +366,7 @@ void CSpectator::OnRender()
 			TextRender()->TextColor(1.0f, 1.0f, 1.0f, Selected ? 1.0f : 0.5f);
 			TeeAlpha = 1.0f;
 		}
-		TextRender()->Text(0, Width / 2.0f + x + 50.0f, Height / 2.0f + y + BoxMove + (LineHeight - FontSize) / 2.f, FontSize, m_pClient->m_aClients[m_pClient->m_Snap.m_apInfoByDDTeamName[i]->m_ClientID].m_aName, 220.0f);
+		TextRender()->Text(Width / 2.0f + x + 50.0f, Height / 2.0f + y + BoxMove + (LineHeight - FontSize) / 2.f, FontSize, m_pClient->m_aClients[m_pClient->m_Snap.m_apInfoByDDTeamName[i]->m_ClientID].m_aName, 220.0f);
 
 		// flag
 		if(m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_FLAGS &&
@@ -401,7 +401,7 @@ void CSpectator::OnRender()
 		{
 			ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageFriendColor));
 			TextRender()->TextColor(rgb.WithAlpha(1.f));
-			TextRender()->Text(0, Width / 2.0f + x - TeeInfo.m_Size / 2.0f, Height / 2.0f + y + BoxMove + (LineHeight - FontSize) / 2.f, FontSize, "♥", 220.0f);
+			TextRender()->Text(Width / 2.0f + x - TeeInfo.m_Size / 2.0f, Height / 2.0f + y + BoxMove + (LineHeight - FontSize) / 2.f, FontSize, "♥", 220.0f);
 			TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 		}
 
@@ -424,6 +424,9 @@ void CSpectator::Spectate(int SpectatorID)
 	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
 		m_pClient->m_DemoSpecID = clamp(SpectatorID, (int)SPEC_FOLLOW, MAX_CLIENTS - 1);
+		// The tick must be rendered for the spectator mode to be updated, so we do it manually when demo playback is paused
+		if(DemoPlayer()->BaseInfo()->m_Paused)
+			GameClient()->m_Menus.DemoSeekTick(IDemoPlayer::TICK_CURRENT);
 		return;
 	}
 

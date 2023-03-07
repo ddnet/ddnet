@@ -7,8 +7,6 @@
 #include <mutex>
 #include <vector>
 
-extern "C" {
-
 typedef struct IOINTERNAL *IOHANDLE;
 
 /**
@@ -150,7 +148,6 @@ ILogger *log_get_scope_logger();
  * @see CLogScope
  */
 void log_set_scope_logger(ILogger *logger);
-}
 
 /**
  * @ingroup Log

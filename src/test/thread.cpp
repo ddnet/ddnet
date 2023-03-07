@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include <base/system.h>
+#include <base/tl/threading.h>
 
 static void Nothing(void *pUser)
 {
@@ -47,6 +48,20 @@ TEST(Thread, SemaphoreSingleThreaded)
 	sphore_wait(&Semaphore);
 	sphore_wait(&Semaphore);
 	sphore_destroy(&Semaphore);
+}
+
+TEST(Thread, SemaphoreWrapperSingleThreaded)
+{
+	CSemaphore Semaphore;
+	EXPECT_EQ(Semaphore.GetApproximateValue(), 0);
+	Semaphore.Signal();
+	EXPECT_EQ(Semaphore.GetApproximateValue(), 1);
+	Semaphore.Signal();
+	EXPECT_EQ(Semaphore.GetApproximateValue(), 2);
+	Semaphore.Wait();
+	EXPECT_EQ(Semaphore.GetApproximateValue(), 1);
+	Semaphore.Wait();
+	EXPECT_EQ(Semaphore.GetApproximateValue(), 0);
 }
 
 static void SemaphoreThread(void *pUser)

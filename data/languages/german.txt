@@ -61,14 +61,8 @@ Address
 All
 == Alle
 
-Are you sure that you want to delete the demo?
-== Möchtest du die Aufnahme wirklich löschen?
-
 Are you sure that you want to quit?
 == Bist du sicher, dass du beenden möchtest?
-
-Are you sure that you want to remove the player from your friends list?
-== Bist du sicher, dass du diesen Spieler aus deiner Freundesliste entfernen möchtest?
 
 Automatically record demos
 == Automatisch Aufnahmen erstellen
@@ -434,9 +428,6 @@ Show name plates
 Show only chat messages from friends
 == Nur Nachrichten von Freunden anzeigen
 
-Skins
-== Skins
-
 Sound
 == Ton
 
@@ -497,9 +488,6 @@ Try again
 Type
 == Typ
 
-Unable to delete the demo
-== Aufnahme konnte nicht gelöscht werden
-
 Unable to rename the demo
 == Aufnahme konnte nicht umbenannt werden
 
@@ -534,7 +522,7 @@ Warmup
 == Aufwärmen
 
 Weapon
-== Waffen
+== Waffe
 
 Yes
 == Ja
@@ -607,9 +595,6 @@ Reset to defaults
 
 Quit anyway?
 == Trotzdem beenden?
-
-Display Modes
-== Auflösungen
 
 Version:
 == Version:
@@ -769,9 +754,6 @@ Show score
 
 %.2f KiB
 == %.2f KiB
-
-Try fast HTTP map download first
-== Schnellen HTTP-Kartendownload nutzen
 
 Enable regular chat sound
 == Ton für normale Nachrichten aktivieren
@@ -1049,14 +1031,11 @@ Default length: %d
 Pause
 == Pause
 
-transmits your player name to info2.ddnet.tw
-== überträgt deinen Spielernamen an info2.ddnet.tw
+transmits your player name to info.ddnet.org
+== überträgt deinen Spielernamen an info.ddnet.org
 
 Server best:
 == Serverbeste:
-
-Destination file already exist
-== Zieldatei existiert bereits
 
 Render demo
 == Demo rendern
@@ -1111,9 +1090,6 @@ Use k key to kill (restart), q to pause and watch other players. See settings fo
 
 Client message
 == Client-Nachricht
-
-Country / Region
-== Land / Region
 
 Skip the main menu
 == Hauptmenü überspringen
@@ -1194,8 +1170,8 @@ Particles
 Assets directory
 == Assets-Ordner
 
-https://wiki.ddnet.tw/
-== https://wiki.ddnet.tw/wiki/Main_Page/de
+https://wiki.ddnet.org/
+== https://wiki.ddnet.org/wiki/Main_Page/de
 
 Saving ddnet-settings.cfg failed
 == ddnet-settings.cfg zu speichern ist fehlgeschlagen
@@ -1245,12 +1221,6 @@ The width of texture %s is not divisible by %d, or the height is not divisible b
 Dummy
 == Dummy
 
-Laser Outline Color
-== Laser-Konturfarbe
-
-Laser Inner Color
-== Laser-Innenfarbe
-
 Preview
 == Vorschau
 
@@ -1269,8 +1239,8 @@ Chat command
 Discord
 == Discord
 
-https://ddnet.tw/discord
-== https://ddnet.tw/discord
+https://ddnet.org/discord
+== https://ddnet.org/discord
 
 AFR
 == AFR
@@ -1490,9 +1460,6 @@ UI controller sens.
 Controller jitter tolerance
 == Jitter-Toleranz des Controllers
 
-No controller found. Plug in a controller and restart the game.
-== Keine Controller gefunden. Schließ einen Controller an und starte das Spiel neu.
-
 Controller Axis #%d
 == Controller-Axe #%d
 
@@ -1573,3 +1540,171 @@ Loading sound files
 
 Why are you slowmo replaying to read this?
 == Warum spielst du das Replay in Slow-Motion um das zu lesen?
+
+Play the current demo
+== Aktuelle Demo abspielen
+
+Pause the current demo
+== Aktuelle Demo pausieren
+
+Stop the current demo
+== Aktuelle Demo stoppen
+
+Slow down the demo
+== Demo verlangsamen
+
+Speed up the demo
+== Demo beschleunigen
+
+Export cut as a separate demo
+== Schnitt als separate Demo exportieren
+
+Toggle keyboard shortcuts
+== Keyboard-Shortcuts umschalten
+
+Weapons
+== Waffen
+
+Rifle Laser Outline Color
+== Konturfarbe Gewehr-Laser
+
+Rifle Laser Inner Color
+== Innenfarbe Gewehr-Laser
+
+Shotgun Laser Outline Color
+== Konturfarbe Schrotflinten-Laser
+
+Shotgun Laser Inner Color
+== Innenfarbe Schrotflinten-Laser
+
+Door Laser Outline Color
+== Konturfarbe Tür-Laser
+
+Door Laser Inner Color
+== Innenfarbe Tür-Laser
+
+Freeze Laser Outline Color
+== Konturfabe Einfrier-Laser
+
+Freeze Laser Inner Color
+== Innenfarbe Einfrier-Laser
+
+Mark the beginning of a cut
+== Den Anfang eines Schnitts markieren
+
+Mark the end of a cut
+== Das Ende eines Schnitts markieren
+
+Menu opened. Press Esc key again to close menu.
+== Menü geöffnet. Erneut Esc-Taste drücken um Menü zu schließen.
+
+Set all to Rifle
+== Alle auf Gewehr setzen
+
+Cancel
+== Abbrechen
+
+File '%s' already exists, do you want to overwrite it?
+== Datei '%s' existiert bereits, willst du sie überschreiben?
+
+Are you sure that you want to remove the player '%s' from your friends list?
+== Willst du wirklich den Spieler '%s' aus deiner Freundesliste entfernen?
+
+Are you sure that you want to remove the clan '%s' from your friends list?
+== Willst du wirklich den Clan '%s' aus deiner Freundesliste entfernen?
+
+Go back one tick
+== Vorheriger Tick
+
+Go forward one tick
+== Nächster Tick
+
+Go back one marker
+== Vorherige Markierung
+
+Go forward one marker
+== Nächste Markierung
+
+Are you sure that you want to delete the demo '%s'?
+== Willst du wirklich die Demo '%s' entfernen?
+
+Unable to delete the demo '%s'
+== Kann Demo '%s' nicht entfernen
+
+Reset controls
+== Bedienungen zurücksetzen
+
+Are you sure that you want to reset the controls to their defaults?
+== Willst du wirklich die Bedienungen zum Standard zurücksetzen?
+
+[Graphics error]
+Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== Fehler während der Initialisierung. Versuch gfx_backend zu OpenGL oder Vulkan zu ändern in settings_ddnet.cfg im Konfigurations-Ordner und versuche es erneut.
+
+[Graphics error]
+Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
+== Kein VRAM mehr verfügbar. Versuch eigene Assets (Skins, Entities, usw.) zu löschen, insbesondere solche mit hoher Auflösung.
+
+[Graphics error]
+An error during command recording occurred. Try to update your GPU drivers.
+== Ein Fehler ist währen dem Aufnahme-Befehl aufgetreten. Versuch deinen Grafiktreiber zu aktualisieren.
+
+[Graphics error]
+A render command failed. Try to update your GPU drivers.
+== Ein Render-Befehl ist fehlgeschlagen. Versuch deinen Grafiktreiber zu aktualisieren.
+
+[Graphics error]
+Submitting the render commands failed. Try to update your GPU drivers.
+== Einreichen der Render-Befhle fehlgeschlagen. Versuch deinen Grafiktreiber zu aktualisieren.
+
+[Graphics error]
+Failed to swap framebuffers. Try to update your GPU drivers.
+== Framebuffer konnten nicht getauscht werden. Versuch deinen Grafiktreiber zu aktualisieren.
+
+[Graphics error]
+Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== Unbekannter Fehler. Versuch gfx_backend zu OpenGL oder Vulkan zu ändern in settings_ddnet.cfg im Konfigurations-Ordner und versuche es erneut.
+
+[Graphics error]
+Could not initialize the given graphics backend, reverting to the default backend now.
+== Konnte eingestelltes Grafik-Backend nicht initialisieren, setze zu Standard-Backend zurück.
+
+Open the directory that contains the configuration and user files
+== Öffne den Ordner der die Konfigurations- und Benutzer-Dateien enthält
+
+Open the directory to add custom themes
+== Öffne den Ordner um eigene Themes hinzuzufügen
+
+Open the directory to add custom skins
+== Öffne den Ordner um eigene Skins hinzuzufügen
+
+No controller found. Plug in a controller.
+== Kein Controller gefunden. Schließ einen Controller an.
+
+Unregister protocol and file extensions
+== Entferne die Registrierungen für Protokoll- und Datei-Erweiterungen
+
+Open the directory to add custom assets
+== Öffne den Ordner um eigene Assets hinzuzufügen
+
+Save power by lowering refresh rate (higher input latency)
+== Spare Energie durch geringere Bildwiederholrate (höhere Inputverzögerung)
+
+[Graphics error]
+Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
+== Konnte eingestelltes Grafik-Backend nicht initialisieren, wahrscheinlich weil du die Treiber für die integrierte Grafikkarte nicht installiert hast.
+
+Could not save downloaded map. Try manually deleting this file: %s
+== Konnte heruntergeladene Map nicht speichern. Versuch die Datei händisch zu löschen: %s
+
+Search:
+== Suche:
+
+Copy info
+== Kopier Info
+
+Open the directory that contains the demo files
+== Öffne den Ordner der die Demo-Dateien enthält
+
+Open the settings file
+== Öffne die Einstellungs-Datei

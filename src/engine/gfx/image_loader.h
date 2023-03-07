@@ -1,8 +1,8 @@
 #ifndef ENGINE_GFX_IMAGE_LOADER_H
 #define ENGINE_GFX_IMAGE_LOADER_H
 
-#include <stddef.h>
-#include <stdint.h>
+#include <cstddef>
+#include <cstdint>
 #include <vector>
 
 enum EImageFormat

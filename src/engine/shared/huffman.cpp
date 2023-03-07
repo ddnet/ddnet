@@ -213,12 +213,11 @@ int CHuffman::Decompress(const void *pInput, int InputSize, void *pOutput, int O
 	unsigned Bitcount = 0;
 
 	const CNode *pEof = &m_aNodes[HUFFMAN_EOF_SYMBOL];
-	const CNode *pNode = 0;
 
 	while(true)
 	{
 		// {A} try to load a node now, this will reduce dependency at location {D}
-		pNode = 0;
+		const CNode *pNode = 0;
 		if(Bitcount >= HUFFMAN_LUTBITS)
 			pNode = m_apDecodeLut[Bits & HUFFMAN_LUTMASK];
 

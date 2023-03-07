@@ -9,6 +9,7 @@
 #include "entity.h"
 #include <algorithm>
 #include <engine/shared/config.h>
+#include <game/client/laser_data.h>
 #include <game/client/projectile_data.h>
 #include <game/mapitems.h>
 #include <utility>
@@ -187,24 +188,29 @@ bool distCompare(std::pair<float, int> a, std::pair<float, int> b)
 void CGameWorld::Tick()
 {
 	// update all objects
-	if(m_WorldConfig.m_NoWeakHookAndBounce)
+	for(int i = 0; i < NUM_ENTTYPES; i++)
 	{
-		for(auto *pEnt : m_apFirstEntityTypes)
+		// It's important to call PreTick() and Tick() after each other.
+		// If we call PreTick() before, and Tick() after other entities have been processed, it causes physics changes such as a stronger shotgun or grenade.
+		if(m_WorldConfig.m_NoWeakHookAndBounce && i == ENTTYPE_CHARACTER)
+		{
+			auto *pEnt = m_apFirstEntityTypes[i];
 			for(; pEnt;)
 			{
 				m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
-				pEnt->PreTick();
+				((CCharacter *)pEnt)->PreTick();
 				pEnt = m_pNextTraverseEntity;
 			}
-	}
+		}
 
-	for(auto *pEnt : m_apFirstEntityTypes)
+		auto *pEnt = m_apFirstEntityTypes[i];
 		for(; pEnt;)
 		{
 			m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
 			pEnt->Tick();
 			pEnt = m_pNextTraverseEntity;
 		}
+	}
 
 	for(auto *pEnt : m_apFirstEntityTypes)
 		for(; pEnt;)
@@ -241,7 +247,7 @@ void CGameWorld::Tick()
 }
 
 // TODO: should be more general
-CCharacter *CGameWorld::IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, vec2 &NewPos, CCharacter *pNotThis, int CollideWith, class CCharacter *pThisOnly)
+CCharacter *CGameWorld::IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, vec2 &NewPos, const CCharacter *pNotThis, int CollideWith, const CCharacter *pThisOnly)
 {
 	// Find other players
 	float ClosestLen = distance(Pos0, Pos1) * 100.0f;
@@ -279,7 +285,7 @@ CCharacter *CGameWorld::IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, v
 	return pClosest;
 }
 
-std::list<class CCharacter *> CGameWorld::IntersectedCharacters(vec2 Pos0, vec2 Pos1, float Radius, class CEntity *pNotThis)
+std::list<class CCharacter *> CGameWorld::IntersectedCharacters(vec2 Pos0, vec2 Pos1, float Radius, const CEntity *pNotThis)
 {
 	std::list<CCharacter *> listOfChars;
 
@@ -330,7 +336,7 @@ CEntity *CGameWorld::GetEntity(int ID, int EntityType)
 	return 0;
 }
 
-void CGameWorld::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage, int ActivatedTeam, int64_t Mask)
+void CGameWorld::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage, int ActivatedTeam, CClientMask Mask)
 {
 	if(Owner < 0 && m_WorldConfig.m_IsSolo && !(Weapon == WEAPON_SHOTGUN && m_WorldConfig.m_IsDDRace))
 		return;
@@ -339,10 +345,10 @@ void CGameWorld::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage,
 	CEntity *apEnts[MAX_CLIENTS];
 	float Radius = 135.0f;
 	float InnerRadius = 48.0f;
-	int Num = FindEntities(Pos, Radius, (CEntity **)apEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
+	int Num = FindEntities(Pos, Radius, apEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
 	for(int i = 0; i < Num; i++)
 	{
-		CCharacter *pChar = (CCharacter *)apEnts[i];
+		auto *pChar = static_cast<CCharacter *>(apEnts[i]);
 		vec2 Diff = pChar->m_Pos - Pos;
 		vec2 ForceDir(0, 1);
 		float l = length(Diff);
@@ -415,7 +421,7 @@ void CGameWorld::NetObjAdd(int ObjID, int ObjType, const void *pObjData, const C
 		}
 		CProjectile NetProj = CProjectile(this, ObjID, &Data, pDataEx);
 
-		if(NetProj.m_Type != WEAPON_SHOTGUN && fabs(length(NetProj.m_Direction) - 1.f) > 0.02f) // workaround to skip grenades on ball mod
+		if(NetProj.m_Type != WEAPON_SHOTGUN && absolute(length(NetProj.m_Direction) - 1.f) > 0.02f) // workaround to skip grenades on ball mod
 			return;
 
 		if(CProjectile *pProj = (CProjectile *)GetEntity(ObjID, ENTTYPE_PROJECTILE))
@@ -480,9 +486,18 @@ void CGameWorld::NetObjAdd(int ObjID, int ObjType, const void *pObjData, const C
 		CEntity *pEnt = new CPickup(NetPickup);
 		InsertEntity(pEnt, true);
 	}
-	else if(ObjType == NETOBJTYPE_LASER && m_WorldConfig.m_PredictWeapons)
+	else if((ObjType == NETOBJTYPE_LASER || ObjType == NETOBJTYPE_DDNETLASER) && m_WorldConfig.m_PredictWeapons)
 	{
-		CLaser NetLaser = CLaser(this, ObjID, (CNetObj_Laser *)pObjData);
+		CLaserData Data;
+		if(ObjType == NETOBJTYPE_LASER)
+		{
+			Data = ExtractLaserInfo((const CNetObj_Laser *)pObjData, this);
+		}
+		else
+		{
+			Data = ExtractLaserInfoDDNet((const CNetObj_DDNetLaser *)pObjData, this);
+		}
+		CLaser NetLaser = CLaser(this, ObjID, &Data);
 		CLaser *pMatching = 0;
 		if(CLaser *pLaser = dynamic_cast<CLaser *>(GetEntity(ObjID, ENTTYPE_LASER)))
 			if(NetLaser.Match(pLaser))
@@ -554,7 +569,7 @@ void CGameWorld::CopyWorld(CGameWorld *pFrom)
 		return;
 	m_IsValidCopy = false;
 	m_pParent = pFrom;
-	if(m_pParent && m_pParent->m_pChild && m_pParent->m_pChild != this)
+	if(m_pParent->m_pChild && m_pParent->m_pChild != this)
 		m_pParent->m_pChild->m_IsValidCopy = false;
 	pFrom->m_pChild = this;
 
@@ -632,7 +647,25 @@ CEntity *CGameWorld::FindMatch(int ObjID, int ObjType, const void *pObjData)
 		}
 		return 0;
 	}
-	case NETOBJTYPE_LASER: FindType(ENTTYPE_LASER, CLaser, CNetObj_Laser);
+	case NETOBJTYPE_LASER:
+	case NETOBJTYPE_DDNETLASER:
+	{
+		CLaserData Data;
+		if(ObjType == NETOBJTYPE_LASER)
+		{
+			Data = ExtractLaserInfo((const CNetObj_Laser *)pObjData, this);
+		}
+		else
+		{
+			Data = ExtractLaserInfoDDNet((const CNetObj_DDNetLaser *)pObjData, this);
+		}
+		CLaser *pEnt = (CLaser *)GetEntity(ObjID, ENTTYPE_LASER);
+		if(pEnt && CLaser(this, ObjID, &Data).Match(pEnt))
+		{
+			return pEnt;
+		}
+		return 0;
+	}
 	case NETOBJTYPE_PICKUP: FindType(ENTTYPE_PICKUP, CPickup, CNetObj_Pickup);
 	}
 	return 0;
@@ -649,5 +682,5 @@ void CGameWorld::Clear()
 	// delete all entities
 	for(auto &pFirstEntityType : m_apFirstEntityTypes)
 		while(pFirstEntityType)
-			delete pFirstEntityType;
+			delete pFirstEntityType; // NOLINT(clang-analyzer-cplusplus.NewDelete)
 }

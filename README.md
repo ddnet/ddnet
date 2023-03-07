@@ -1,15 +1,15 @@
-[![DDraceNetwork](https://ddnet.tw/ddnet-small.png)](https://ddnet.tw) [![](https://github.com/ddnet/ddnet/workflows/Build/badge.svg)](https://github.com/ddnet/ddnet/actions?query=workflow%3ABuild+event%3Apush+branch%3Amaster)
+[![DDraceNetwork](https://ddnet.org/ddnet-small.png)](https://ddnet.org) [![](https://github.com/ddnet/ddnet/workflows/Build/badge.svg)](https://github.com/ddnet/ddnet/actions?query=workflow%3ABuild+event%3Apush+branch%3Amaster) [![](https://codecov.io/gh/ddnet/ddnet/branch/master/graph/badge.svg)](https://codecov.io/gh/ddnet/ddnet/branch/master)
 
-Our own flavor of DDRace, a Teeworlds mod. See the [website](https://ddnet.tw) for more information.
+Our own flavor of DDRace, a Teeworlds mod. See the [website](https://ddnet.org) for more information.
 
 Development discussions happen on #ddnet on Quakenet ([Webchat](http://webchat.quakenet.org/?channels=ddnet&uio=d4)) or on [Discord in the developer channel](https://discord.gg/xsEd9xu).
 
-You can get binary releases on the [DDNet website](https://ddnet.tw/downloads/), find it on [Steam](https://store.steampowered.com/app/412220/DDraceNetwork/) or [install from repository](#installation-from-repository).
+You can get binary releases on the [DDNet website](https://ddnet.org/downloads/), find it on [Steam](https://store.steampowered.com/app/412220/DDraceNetwork/) or [install from repository](#installation-from-repository).
 
-- [Code Browser](https://ddnet.tw/codebrowser/DDNet/)
-- [Source Code Documentation](https://codedoc.ddnet.tw/) (very incomplete, only a few items are documented)
+- [Code Browser](https://ddnet.org/codebrowser/DDNet/)
+- [Source Code Documentation](https://codedoc.ddnet.org/) (very incomplete, only a few items are documented)
 
-If you want to learn about the source code, you can check the [Development](https://wiki.ddnet.tw/wiki/Development) article on the wiki.
+If you want to learn about the source code, you can check the [Development](https://wiki.ddnet.org/wiki/Development) article on the wiki.
 
 Cloning
 -------
@@ -26,7 +26,7 @@ To clone this repository with history since we moved the libraries to https://gi
 
     git clone --shallow-exclude=included-libs https://github.com/ddnet/ddnet
 
-To clone the libraries if you have previously cloned DDNet without them:
+To clone the libraries if you have previously cloned DDNet without them, or if you require the ddnet-libs history instead of a shallow clone:
 
     git submodule update --init --recursive
 
@@ -35,21 +35,31 @@ Dependencies on Linux / macOS
 
 You can install the required libraries on your system, `touch CMakeLists.txt` and CMake will use the system-wide libraries by default. You can install all required dependencies and CMake on Debian or Ubuntu like this:
 
-    sudo apt install build-essential cmake git google-mock libcurl4-openssl-dev libssl-dev libfreetype6-dev libglew-dev libnotify-dev libogg-dev libopus-dev libopusfile-dev libsdl2-dev libsqlite3-dev libwavpack-dev python libx264-dev libavfilter-dev libavdevice-dev libavformat-dev libavcodec-extra libavutil-dev libvulkan-dev glslang-tools spirv-tools libpng-dev
+    sudo apt install build-essential cargo cmake git glslang-tools google-mock libavcodec-extra libavdevice-dev libavfilter-dev libavformat-dev libavutil-dev libcurl4-openssl-dev libfreetype6-dev libglew-dev libnotify-dev libogg-dev libopus-dev libopusfile-dev libpng-dev libsdl2-dev libsqlite3-dev libssl-dev libvulkan-dev libwavpack-dev libx264-dev python rustc spirv-tools
 
 On older distributions like Ubuntu 18.04 don't install `google-mock`, but instead set `-DDOWNLOAD_GTEST=ON` when building to get a more recent gtest/gmock version.
 
+On older distributions `rustc` version might be too old, to get an up-to-date Rust compiler you can use [rustup](https://rustup.rs/) with stable channel instead or try the `rustc-mozilla` package.
+
 Or on CentOS, RedHat and AlmaLinux like this:
 
-    sudo yum install gcc gcc-c++ make cmake git python2 gtest-devel gmock-devel libcurl-devel openssl-devel freetype-devel glew-devel libnotify-devel libogg-devel opus-devel opusfile-devel SDL2-devel sqlite-devel wavpack-devel libx264-devel ffmpeg-devel vulkan-devel glslang spirv-tools libpng-devel
+    sudo yum install cargo cmake ffmpeg-devel freetype-devel gcc gcc-c++ git glew-devel glslang gmock-devel gtest-devel libcurl-devel libnotify-devel libogg-devel libpng-devel libx264-devel make openssl-devel opus-devel opusfile-devel python2 rust SDL2-devel spirv-tools sqlite-devel vulkan-devel wavpack-devel
+
+Or on Fedora like this:
+
+    sudo dnf install cargo cmake ffmpeg-devel freetype-devel gcc gcc-c++ git glew-devel glslang gmock-devel gtest-devel libcurl-devel libnotify-devel libogg-devel libpng-devel make openssl-devel opus-devel opusfile-devel python2 SDL2-devel spirv-tools sqlite-devel vulkan-devel wavpack-devel x264-devel
 
 Or on Arch Linux like this:
 
-    sudo pacman -S --needed base-devel cmake curl freetype2 git glew gmock libnotify opusfile python sdl2 sqlite wavpack x264 ffmpeg vulkan-icd-loader vulkan-headers glslang spirv-tools libpng
+    sudo pacman -S --needed base-devel cmake curl ffmpeg freetype2 git glew glslang gmock libnotify libpng opusfile python rust sdl2 spirv-tools sqlite vulkan-headers vulkan-icd-loader wavpack x264
+
+Or on Gentoo like this:
+
+    emerge --ask dev-db/sqlite dev-lang/rust-bin dev-libs/glib dev-libs/openssl dev-util/glslang dev-util/spirv-headers dev-util/spirv-tools media-libs/freetype media-libs/glew media-libs/libglvnd media-libs/libogg media-libs/libpng media-libs/libsdl2 media-libs/libsdl2[vulkan] media-libs/opus media-libs/opusfile media-libs/pnglite media-libs/vulkan-loader[layers] media-sound/wavpack media-video/ffmpeg net-misc/curl x11-libs/gdk-pixbuf x11-libs/libnotify
 
 On macOS you can use [homebrew](https://brew.sh/) to install build dependencies like this:
 
-    brew install cmake freetype glew googletest opusfile SDL2 wavpack x264 ffmpeg molten-vk vulkan-headers glslang spirv-tools libpng
+    brew install cmake ffmpeg freetype glew glslang googletest libpng molten-vk opusfile rust SDL2 spirv-tools vulkan-headers wavpack x264
 
 If you don't want to use the system libraries, you can pass the `-DPREFER_BUNDLED_LIBS=ON` parameter to cmake.
 
@@ -84,7 +94,9 @@ Whether to enable MySQL/MariaDB support for server. Requires at least MySQL 8.0 
    Note that the bundled MySQL libraries might not work properly on your system. If you run into connection problems with the MySQL server, for example that it connects as root while you chose another user, make sure to install your system libraries for the MySQL client. Make sure that the CMake configuration summary says that it found MySQL libs that were not bundled (no "using bundled libs").
 
 * **-DTEST_MYSQL=[ON|OFF]** <br>
-Whether to test MySQL/MariaDB support in GTest based tests. Note that this requires a running MySQL/MariaDB database on localhost with this setup:
+Whether to test MySQL/MariaDB support in GTest based tests. Default value is OFF.
+
+   Note that this requires a running MySQL/MariaDB database on localhost with this setup:
 
 ```
 CREATE DATABASE ddnet;
@@ -111,20 +123,30 @@ Whether to optimize for development, speeding up the compilation process a littl
 * **-DUPNP=[ON|OFF]** <br>
 Whether to enable UPnP support for the server.
 You need to install `libminiupnpc-dev` on Debian, `miniupnpc` on Arch Linux.
+Default value is OFF.
 
 * **-DVULKAN=[ON|OFF]** <br>
 Whether to enable the vulkan backend.
 On Windows you need to install the Vulkan SDK and set the `VULKAN_SDK` environment flag accordingly.
+Default value is ON for Windows x86\_64 and Linux, and OFF for Windows x86 and macOS.
 
 * **-GNinja** <br>
-Use the Ninja build system instead of Make. This automatically parallizes the build and is generally faster. Compile with `ninja` instead of `make`. Install Ninja with `sudo apt install ninja-build` on Debian, `sudo pacman -S --needed ninja` on Arch Linux.
+Use the Ninja build system instead of Make. This automatically parallelizes the build and is generally faster. Compile with `ninja` instead of `make`. Install Ninja with `sudo apt install ninja-build` on Debian, `sudo pacman -S --needed ninja` on Arch Linux.
 
 * **-DCMAKE_CXX_LINK_FLAGS=[FLAGS]** <br>
-Custom flags to set for compiler when linking. With clang++ as the compiler this can be [used to link](https://github.com/rui314/mold#how-to-use) with [mold](https://github.com/rui314/mold), speeds up linking by a factor of ~10:
+Custom flags to set for compiler when linking.
 
-```bash
-CC=clang CXX=clang++ cmake -DCMAKE_CXX_LINK_FLAGS="--ld-path=/usr/bin/mold" .
-```
+* **-DEXCEPTION_HANDLING=[ON|OFF]** <br>
+Enable exception handling (only works with Windows as of now, uses DrMingw there). Default value is OFF.
+
+* **-DIPO=[ON|OFF]** <br>
+Enable interprocedural optimizations, also known as Link Time Optimization (LTO). Default value is OFF.
+
+* **-DFUSE_LD=[OFF|LINKER]** <br>
+Linker to use. Default value is OFF to try mold, lld, gold.
+
+* **-DSECURITY_COMPILER_FLAGS=[ON|OFF]** <br>
+Whether to set security-relevant compiler flags like `-D_FORTIFY_SOURCE=2` and `-fstack-protector-all`. Default Value is ON.
 
 Running tests (Debian/Ubuntu)
 -----------------------------
@@ -137,7 +159,7 @@ sudo apt install libgtest-dev
 cd /usr/src/gtest
 sudo cmake CMakeLists.txt
 sudo make -j8
- 
+
 # copy or symlink libgtest.a and libgtest_main.a to your /usr/lib folder
 sudo cp lib/*.a /usr/lib
 ```
@@ -177,7 +199,7 @@ Expect a large slow down.
 Building on Windows with Visual Studio
 --------------------------------------
 
-Download and install some version of [Microsoft Visual Studio](https://www.visualstudio.com/) (as of writing, MSVS Community 2017) with **C++ support**, install [Python 3](https://www.python.org/downloads/) **for all users** and install [CMake](https://cmake.org/download/#latest).
+Download and install some version of [Microsoft Visual Studio](https://www.visualstudio.com/) (as of writing, MSVS Community 2017) with **C++ support**, install [Python 3](https://www.python.org/downloads/) **for all users** and install [CMake](https://cmake.org/download/#latest). You also need to install [Rust](https://rustup.rs/).
 
 Start CMake and select the source code folder (where DDNet resides, the directory with `CMakeLists.txt`). Additionally select a build folder, e.g. create a build subdirectory in the source code directory. Click "Configure" and select the Visual Studio generator (it should be pre-selected, so pressing "Finish" will suffice). After configuration finishes and the "Generate" reactivates, click it. When that finishes, click "Open Project". Visual Studio should open. You can compile the DDNet client by right-clicking the DDNet project (not the solution) and select "Select as StartUp project". Now you should be able to compile DDNet by clicking the green, triangular "Run" button.
 
@@ -246,7 +268,7 @@ Importing the official DDNet Database
 -------------------------------------
 
 ```bash
-$ wget https://ddnet.tw/stats/ddnet-sql.zip
+$ wget https://ddnet.org/stats/ddnet-sql.zip
 $ unzip ddnet-sql.zip
 $ yaourt -S mariadb mysql-connector-c++
 $ mysql_install_db --user=mysql --basedir=/usr --datadir=/var/lib/mysql
@@ -314,4 +336,24 @@ DDNet is available in the [Phoronix Test Suite](https://openbenchmarking.org/tes
 
 ```bash
 $ phoronix-test-suite benchmark ddnet
+```
+
+Better Git Blame
+----------------
+
+First, use a better tool than `git blame` itself, e.g. [`tig`](https://jonas.github.io/tig/). There's probably a good UI for Windows, too. Alternatively, use the GitHub UI, click "Blame" in any file view.
+
+For `tig`, use `tig blame path/to/file.cpp` to open the blame view, you can navigate with arrow keys or kj, press comma to go to the previous revision of the current line, q to quit.
+
+Only then you could also set up git to ignore specific formatting revisions:
+```bash
+git config blame.ignoreRevsFile formatting-revs.txt
+```
+
+(Neo)Vim Syntax Highlighting for config files
+----------------------------------------
+Copy the file detection and syntax files to your vim config folder, in the case of neovim:
+
+```bash
+cp -R other/vim/* ~/.config/nvim/
 ```

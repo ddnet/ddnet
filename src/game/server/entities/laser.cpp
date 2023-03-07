@@ -27,7 +27,7 @@ CLaser::CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEner
 	m_ZeroEnergyBounceInLastTick = false;
 	m_TuneZone = GameServer()->Collision()->IsTune(GameServer()->Collision()->GetMapIndex(m_Pos));
 	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
-	m_TeamMask = pOwnerChar ? pOwnerChar->TeamMask() : 0;
+	m_TeamMask = pOwnerChar ? pOwnerChar->TeamMask() : CClientMask();
 	m_BelongsToPracticeTeam = pOwnerChar && pOwnerChar->Teams()->IsPractice(pOwnerChar->Team());
 
 	GameWorld()->InsertEntity(this);
@@ -286,7 +286,7 @@ void CLaser::Snap(int SnappingClient)
 		return;
 
 	pOwnerChar = nullptr;
-	int64_t TeamMask = -1LL;
+	CClientMask TeamMask = CClientMask().set();
 
 	if(m_Owner >= 0)
 		pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
@@ -294,17 +294,13 @@ void CLaser::Snap(int SnappingClient)
 	if(pOwnerChar && pOwnerChar->IsAlive())
 		TeamMask = pOwnerChar->TeamMask();
 
-	if(SnappingClient != SERVER_DEMO_CLIENT && !CmaskIsSet(TeamMask, SnappingClient))
-		return;
-	CNetObj_Laser *pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(NETOBJTYPE_LASER, GetID(), sizeof(CNetObj_Laser)));
-	if(!pObj)
+	if(SnappingClient != SERVER_DEMO_CLIENT && !TeamMask.test(SnappingClient))
 		return;
 
-	pObj->m_X = (int)m_Pos.x;
-	pObj->m_Y = (int)m_Pos.y;
-	pObj->m_FromX = (int)m_From.x;
-	pObj->m_FromY = (int)m_From.y;
-	pObj->m_StartTick = m_EvalTick;
+	int SnappingClientVersion = GameServer()->GetClientVersion(SnappingClient);
+	int LaserType = m_Type == WEAPON_LASER ? LASERTYPE_RIFLE : m_Type == WEAPON_SHOTGUN ? LASERTYPE_SHOTGUN : -1;
+	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion), GetID(),
+		m_Pos, m_From, m_EvalTick, m_Owner, LaserType);
 }
 
 void CLaser::SwapClients(int Client1, int Client2)

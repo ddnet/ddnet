@@ -4,7 +4,7 @@
 
 #define TW_DILATE_ALPHA_THRESHOLD 10
 
-static void Dilate(int w, int h, int BPP, unsigned char *pSrc, unsigned char *pDest, unsigned char AlphaThreshold = TW_DILATE_ALPHA_THRESHOLD)
+static void Dilate(int w, int h, int BPP, const unsigned char *pSrc, unsigned char *pDest, unsigned char AlphaThreshold = TW_DILATE_ALPHA_THRESHOLD)
 {
 	int ix, iy;
 	const int aDirX[] = {0, -1, 1, 0};
@@ -33,7 +33,7 @@ static void Dilate(int w, int h, int BPP, unsigned char *pSrc, unsigned char *pD
 				{
 					for(int p = 0; p < BPP - 1; ++p)
 						// Seems safe for BPP = 3, 4 which we use. clang-analyzer seems to
-						// asssume being called with larger value. TODO: Can make this
+						// assume being called with larger value. TODO: Can make this
 						// safer anyway.
 						aSumOfOpaque[p] += pSrc[k + p]; // NOLINT(clang-analyzer-core.uninitialized.Assign)
 					++Counter;
@@ -55,7 +55,7 @@ static void Dilate(int w, int h, int BPP, unsigned char *pSrc, unsigned char *pD
 	}
 }
 
-static void CopyColorValues(int w, int h, int BPP, unsigned char *pSrc, unsigned char *pDest)
+static void CopyColorValues(int w, int h, int BPP, const unsigned char *pSrc, unsigned char *pDest)
 {
 	int m = 0;
 	for(int y = 0; y < h; y++)
@@ -143,11 +143,11 @@ static void SampleBicubic(const uint8_t *pSourceImage, float u, float v, uint32_
 {
 	float X = (u * W) - 0.5f;
 	int xInt = (int)X;
-	float xFract = X - floorf(X);
+	float xFract = X - std::floor(X);
 
 	float Y = (v * H) - 0.5f;
 	int yInt = (int)Y;
-	float yFract = Y - floorf(Y);
+	float yFract = Y - std::floor(Y);
 
 	uint8_t aPX00[4];
 	uint8_t aPX10[4];
