@@ -2355,8 +2355,10 @@ if(CLIENT)
   endif()
 
   # Target
+  set(TARGET_CLIENT ${CLIENT_EXECUTABLE})
+
   if(TARGET_OS STREQUAL "android")
-    add_library(game-client SHARED
+    add_library(${TARGET_CLIENT} SHARED
       ${CLIENT_SRC}
       ${CLIENT_ICON}
       ${CLIENT_MANIFEST}
@@ -2367,7 +2369,7 @@ if(CLIENT)
       $<TARGET_OBJECTS:rust-bridge-shared>
     )
   else()
-    add_executable(game-client WIN32
+    add_executable(${TARGET_CLIENT} WIN32
       ${CLIENT_SRC}
       ${CLIENT_ICON}
       ${CLIENT_MANIFEST}
@@ -2378,16 +2380,13 @@ if(CLIENT)
       $<TARGET_OBJECTS:rust-bridge-shared>
     )
   endif()
-  set_property(TARGET game-client
-      PROPERTY OUTPUT_NAME ${CLIENT_EXECUTABLE}
-  )
-  target_link_libraries(game-client ${LIBS_CLIENT})
+  target_link_libraries(${TARGET_CLIENT} ${LIBS_CLIENT})
 
   if(MSVC)
-    target_link_options(game-client PRIVATE /ENTRY:mainCRTStartup)
+    target_link_options(${TARGET_CLIENT} PRIVATE /ENTRY:mainCRTStartup)
   endif()
 
-  target_include_directories(game-client SYSTEM PRIVATE
+  target_include_directories(${TARGET_CLIENT} SYSTEM PRIVATE
     ${FREETYPE_INCLUDE_DIRS}
     ${GLEW_INCLUDE_DIRS}
     ${OGG_INCLUDE_DIRS}
@@ -2405,7 +2404,7 @@ if(CLIENT)
   )
 
   if(STEAMAPI_KIND STREQUAL SHARED OR DISCORD_DYNAMIC)
-    set_own_rpath(game-client)
+    set_own_rpath(${TARGET_CLIENT})
   endif()
 
   set(PARAMS "${WAVPACK_INCLUDE_DIRS};${WAVPACK_INCLUDE_DIRS}")
@@ -2422,23 +2421,23 @@ if(CLIENT)
   set(CMAKE_REQUIRED_LIBRARIES ${ORIGINAL_CMAKE_REQUIRED_LIBRARIES})
 
   if(WAVPACK_OPEN_FILE_INPUT_EX)
-    target_compile_definitions(game-client PRIVATE CONF_WAVPACK_OPEN_FILE_INPUT_EX)
+    target_compile_definitions(${TARGET_CLIENT} PRIVATE CONF_WAVPACK_OPEN_FILE_INPUT_EX)
   endif()
 
   if(WAVPACK_CLOSE_FILE)
-    target_compile_definitions(game-client PRIVATE CONF_WAVPACK_CLOSE_FILE)
+    target_compile_definitions(${TARGET_CLIENT} PRIVATE CONF_WAVPACK_CLOSE_FILE)
   endif()
 
   if(GLEW_BUNDLED)
-    target_compile_definitions(game-client PRIVATE CONF_GLEW_HAS_CONTEXT_INIT)
+    target_compile_definitions(${TARGET_CLIENT} PRIVATE CONF_GLEW_HAS_CONTEXT_INIT)
   endif()
 
   if(VULKAN)
-    target_compile_definitions(game-client PRIVATE CONF_BACKEND_VULKAN)
+    target_compile_definitions(${TARGET_CLIENT} PRIVATE CONF_BACKEND_VULKAN)
   endif()
 
-  list(APPEND TARGETS_OWN game-client)
-  list(APPEND TARGETS_LINK game-client)
+  list(APPEND TARGETS_OWN ${TARGET_CLIENT})
+  list(APPEND TARGETS_LINK ${TARGET_CLIENT})
 endif()
 
 
@@ -2560,7 +2559,8 @@ if(SERVER)
   )
 
   # Target
-  add_executable(game-server
+  set(TARGET_SERVER ${SERVER_EXECUTABLE})
+  add_executable(${TARGET_SERVER}
     ${DEPS}
     ${SERVER_SRC}
     ${SERVER_ICON}
@@ -2568,23 +2568,18 @@ if(SERVER)
     $<TARGET_OBJECTS:game-shared>
     $<TARGET_OBJECTS:rust-bridge-shared>
   )
-  set_property(TARGET game-server
-      PROPERTY OUTPUT_NAME ${SERVER_EXECUTABLE}
-  )
-  target_link_libraries(game-server ${LIBS_SERVER})
-  target_include_directories(game-server PRIVATE ${PNG_INCLUDE_DIRS})
-  list(APPEND TARGETS_OWN game-server)
-  list(APPEND TARGETS_LINK game-server)
+  target_link_libraries(${TARGET_SERVER} ${LIBS_SERVER})
+  target_include_directories(${TARGET_SERVER} PRIVATE ${PNG_INCLUDE_DIRS})
+  list(APPEND TARGETS_OWN ${TARGET_SERVER})
+  list(APPEND TARGETS_LINK ${TARGET_SERVER})
 
   if(TARGET_OS AND TARGET_OS STREQUAL "mac")
     set(SERVER_LAUNCHER_SRC src/macos/server.mm)
-    add_executable(game-server-launcher ${SERVER_LAUNCHER_SRC})
-    set_property(TARGET game-server-launcher
-        PROPERTY OUTPUT_NAME ${SERVER_EXECUTABLE}-Launcher
-    )
-    target_link_libraries(game-server-launcher ${COCOA})
-    list(APPEND TARGETS_OWN game-server-launcher)
-    list(APPEND TARGETS_LINK game-server-launcher)
+    set(TARGET_SERVER_LAUNCHER ${TARGET_SERVER}-Launcher)
+    add_executable(${TARGET_SERVER_LAUNCHER} ${SERVER_LAUNCHER_SRC})
+    target_link_libraries(${TARGET_SERVER_LAUNCHER} ${COCOA})
+    list(APPEND TARGETS_OWN ${TARGET_SERVER_LAUNCHER})
+    list(APPEND TARGETS_LINK ${TARGET_SERVER_LAUNCHER})
   endif()
 endif()
 
@@ -2808,7 +2803,7 @@ add_custom_target(run_rust_tests
 add_custom_target(run_integration_tests
   COMMAND ${PROJECT_BINARY_DIR}/integration_test.sh ${INTEGRATIONTESTRUNNER_ARGS}
   COMMENT Running integration tests
-  DEPENDS game-client game-server
+  DEPENDS ${TARGET_CLIENT} ${TARGET_SERVER}
   USES_TERMINAL
 )
 
@@ -2976,8 +2971,8 @@ else()
 endif()
 
 set(CPACK_TARGETS
-  game-client
-  game-server
+  ${TARGET_CLIENT}
+  ${TARGET_SERVER}
   ${TARGET_TOOLS}
 )
 if(STEAMAPI_KIND STREQUAL SHARED)
@@ -3006,11 +3001,11 @@ endif()
 if(NOT DEV)
   include(GNUInstallDirs)
   install(DIRECTORY data DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/ddnet COMPONENT data)
-  install(TARGETS game-client DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT client)
+  install(TARGETS ${TARGET_CLIENT} DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT client)
   if(STEAMAPI_KIND STREQUAL SHARED)
     install(TARGETS ${TARGET_STEAMAPI} DESTINATION ${CMAKE_INSTALL_LIBDIR}/ddnet COMPONENT client)
   endif()
-  install(TARGETS game-server DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT server)
+  install(TARGETS ${TARGET_SERVER} DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT server)
   if(ANTIBOT)
     install(TARGETS ${TARGET_ANTIBOT} DESTINATION ${CMAKE_INSTALL_LIBDIR}/ddnet COMPONENT server)
   endif()
@@ -3047,17 +3042,17 @@ if(CLIENT AND DMGBUILD)
 
   set(DMG_TMPDIR pack_${CPACK_PACKAGE_FILE_NAME}_dmg)
   set(DMG_MKDIRS
-    ${CLIENT_EXECUTABLE}.app
-    ${CLIENT_EXECUTABLE}.app/Contents
-    ${CLIENT_EXECUTABLE}.app/Contents/Frameworks
-    ${CLIENT_EXECUTABLE}.app/Contents/MacOS
-    ${CLIENT_EXECUTABLE}.app/Contents/Resources
-    ${SERVER_EXECUTABLE}.app
-    ${SERVER_EXECUTABLE}.app/Contents
-    ${SERVER_EXECUTABLE}.app/Contents/MacOS
-    ${SERVER_EXECUTABLE}.app/Contents/Resources
-    ${SERVER_EXECUTABLE}.app/Contents/Resources/data
-    ${SERVER_EXECUTABLE}.app/Contents/Resources/data/mapres
+    ${TARGET_CLIENT}.app
+    ${TARGET_CLIENT}.app/Contents
+    ${TARGET_CLIENT}.app/Contents/Frameworks
+    ${TARGET_CLIENT}.app/Contents/MacOS
+    ${TARGET_CLIENT}.app/Contents/Resources
+    ${TARGET_SERVER}.app
+    ${TARGET_SERVER}.app/Contents
+    ${TARGET_SERVER}.app/Contents/MacOS
+    ${TARGET_SERVER}.app/Contents/Resources
+    ${TARGET_SERVER}.app/Contents/Resources/data
+    ${TARGET_SERVER}.app/Contents/Resources/data/mapres
   )
   set(DMG_MKDIR_COMMANDS)
   foreach(dir ${DMG_MKDIRS})
@@ -3074,39 +3069,39 @@ if(CLIENT AND DMGBUILD)
     ${DMG_MKDIR_COMMANDS}
 
     # CLIENT
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/data ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Resources/data
-    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/other/icons/${CLIENT_EXECUTABLE}.icns ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Resources/
-    COMMAND ${CMAKE_COMMAND} -E copy bundle/client/Info.plist ${PROJECT_SOURCE_DIR}/other/bundle/client/PkgInfo ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/
-    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:game-client> ${TARGET_TOOLS_FILES} ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/MacOS/
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/ddnet-libs/sdl/${LIB_DIR}/SDL2.framework ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/SDL2.framework
-    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/discord/${LIB_DIR}/discord_game_sdk.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
-    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/freetype/${LIB_DIR}/libfreetype.6.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
-    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/png/${LIB_DIR}/libpng16.16.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
-    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/ffmpeg/${LIB_DIR}/libavcodec.59.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
-    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/ffmpeg/${LIB_DIR}/libavformat.59.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
-    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/ffmpeg/${LIB_DIR}/libavutil.57.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
-    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/ffmpeg/${LIB_DIR}/libswresample.4.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
-    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/ffmpeg/${LIB_DIR}/libswscale.6.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
-    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/libsteam_api.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
-    COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/scripts/darwin_strip_rpath.py ${CMAKE_OTOOL} ${CMAKE_INSTALL_NAME_TOOL} ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/MacOS/${CLIENT_EXECUTABLE}
-    COMMAND ${CMAKE_INSTALL_NAME_TOOL} -add_rpath @loader_path/../Frameworks ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/MacOS/${CLIENT_EXECUTABLE}
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/data ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Resources/data
+    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/other/icons/${TARGET_CLIENT}.icns ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Resources/
+    COMMAND ${CMAKE_COMMAND} -E copy bundle/client/Info.plist ${PROJECT_SOURCE_DIR}/other/bundle/client/PkgInfo ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${TARGET_CLIENT}> ${TARGET_TOOLS_FILES} ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/MacOS/
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/ddnet-libs/sdl/${LIB_DIR}/SDL2.framework ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/SDL2.framework
+    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/discord/${LIB_DIR}/discord_game_sdk.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/
+    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/freetype/${LIB_DIR}/libfreetype.6.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/
+    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/png/${LIB_DIR}/libpng16.16.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/
+    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/ffmpeg/${LIB_DIR}/libavcodec.59.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/
+    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/ffmpeg/${LIB_DIR}/libavformat.59.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/
+    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/ffmpeg/${LIB_DIR}/libavutil.57.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/
+    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/ffmpeg/${LIB_DIR}/libswresample.4.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/
+    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/ffmpeg/${LIB_DIR}/libswscale.6.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/
+    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/libsteam_api.dylib ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/Frameworks/
+    COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/scripts/darwin_strip_rpath.py ${CMAKE_OTOOL} ${CMAKE_INSTALL_NAME_TOOL} ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/MacOS/${TARGET_CLIENT}
+    COMMAND ${CMAKE_INSTALL_NAME_TOOL} -add_rpath @loader_path/../Frameworks ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/MacOS/${TARGET_CLIENT}
 
     # SERVER
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/data/maps ${DMG_TMPDIR}/${SERVER_EXECUTABLE}.app/Contents/Resources/data/maps
-    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/other/icons/${SERVER_EXECUTABLE}.icns ${DMG_TMPDIR}/${SERVER_EXECUTABLE}.app/Contents/Resources/
-    COMMAND ${CMAKE_COMMAND} -E copy bundle/server/Info.plist ${PROJECT_SOURCE_DIR}/other/bundle/server/PkgInfo ${DMG_TMPDIR}/${SERVER_EXECUTABLE}.app/Contents/
-    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:game-server> $<TARGET_FILE:game-server-launcher> ${DMG_TMPDIR}/${SERVER_EXECUTABLE}.app/Contents/MacOS/
-    COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/scripts/darwin_strip_rpath.py ${CMAKE_OTOOL} ${CMAKE_INSTALL_NAME_TOOL} ${DMG_TMPDIR}/${SERVER_EXECUTABLE}.app/Contents/MacOS/${SERVER_EXECUTABLE}
-    COMMAND ${CMAKE_COMMAND} -E copy ${DMG_TMPDIR}/${SERVER_EXECUTABLE}.app/Contents/MacOS/${SERVER_EXECUTABLE} ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/MacOS/${SERVER_EXECUTABLE}
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/data/maps ${DMG_TMPDIR}/${TARGET_SERVER}.app/Contents/Resources/data/maps
+    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/other/icons/${TARGET_SERVER}.icns ${DMG_TMPDIR}/${TARGET_SERVER}.app/Contents/Resources/
+    COMMAND ${CMAKE_COMMAND} -E copy bundle/server/Info.plist ${PROJECT_SOURCE_DIR}/other/bundle/server/PkgInfo ${DMG_TMPDIR}/${TARGET_SERVER}.app/Contents/
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${TARGET_SERVER}> $<TARGET_FILE:${TARGET_SERVER_LAUNCHER}> ${DMG_TMPDIR}/${TARGET_SERVER}.app/Contents/MacOS/
+    COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/scripts/darwin_strip_rpath.py ${CMAKE_OTOOL} ${CMAKE_INSTALL_NAME_TOOL} ${DMG_TMPDIR}/${TARGET_SERVER}.app/Contents/MacOS/${TARGET_SERVER}
+    COMMAND ${CMAKE_COMMAND} -E copy ${DMG_TMPDIR}/${TARGET_SERVER}.app/Contents/MacOS/${TARGET_SERVER} ${DMG_TMPDIR}/${TARGET_CLIENT}.app/Contents/MacOS/${TARGET_SERVER}
 
     # DMG
-    COMMAND dmgbuild -s ${PROJECT_SOURCE_DIR}/other/dmgsettings.py -D client=${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app -D server=${DMG_TMPDIR}/${SERVER_EXECUTABLE}.app -D background=${PROJECT_SOURCE_DIR}/other/dmgbackground.png "${CPACK_PACKAGE_NAME} ${CPACK_PACKAGE_VERSION}" ${CPACK_PACKAGE_FILE_NAME}.dmg
+    COMMAND dmgbuild -s ${PROJECT_SOURCE_DIR}/other/dmgsettings.py -D client=${DMG_TMPDIR}/${TARGET_CLIENT}.app -D server=${DMG_TMPDIR}/${TARGET_SERVER}.app -D background=${PROJECT_SOURCE_DIR}/other/dmgbackground.png "${CPACK_PACKAGE_NAME} ${CPACK_PACKAGE_VERSION}" ${CPACK_PACKAGE_FILE_NAME}.dmg
 
     DEPENDS
-      game-client
+      ${TARGET_CLIENT}
       ${TARGET_STEAMAPI}
-      game-server-launcher
-      game-server
+      ${TARGET_SERVER_LAUNCHER}
+      ${TARGET_SERVER}
       ${PROJECT_BINARY_DIR}/bundle/client/Info.plist
       ${PROJECT_BINARY_DIR}/bundle/server/Info.plist
       data
@@ -3114,8 +3109,8 @@ if(CLIENT AND DMGBUILD)
       other/bundle/server/PkgInfo
       other/dmgbackground.png
       other/dmgsettings.py
-      other/icons/${CLIENT_EXECUTABLE}.icns
-      other/icons/${SERVER_EXECUTABLE}.icns
+      other/icons/${TARGET_CLIENT}.icns
+      other/icons/${TARGET_SERVER}.icns
   )
   add_custom_target(package_dmg DEPENDS ${CPACK_PACKAGE_FILE_NAME}.dmg)
   list(APPEND PACKAGE_TARGETS package_dmg)
@@ -3210,7 +3205,7 @@ source_group_tree(src)
 if(ANTIBOT)
   # Allow the antibot library to use functions from the server binary.
   add_cxx_compiler_flag_if_supported(OUR_FLAGS_LINK -rdynamic)
-  set_own_rpath(game-server)
+  set_own_rpath(${TARGET_SERVER})
 endif()
 
 set(TARGETS ${TARGETS_OWN} ${TARGETS_DEP})
