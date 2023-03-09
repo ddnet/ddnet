@@ -105,6 +105,11 @@ public:
 	ETextCursorCursorMode m_CursorMode;
 	// note this is the decoded character offset
 	int m_CursorCharacter;
+
+	float Height() const
+	{
+		return m_LineCount * m_AlignedFontSize;
+	}
 };
 
 class ITextRender : public IInterface

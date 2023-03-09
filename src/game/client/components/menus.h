@@ -513,11 +513,13 @@ protected:
 	void RenderStartMenu(CUIRect MainView);
 
 	// found in menus_ingame.cpp
+	int m_MotdTextContainerIndex = -1;
 	void RenderGame(CUIRect MainView);
 	void PopupConfirmDisconnect();
 	void PopupConfirmDisconnectDummy();
 	void RenderPlayers(CUIRect MainView);
 	void RenderServerInfo(CUIRect MainView);
+	void RenderServerInfoMotd(CUIRect Motd);
 	void RenderServerControl(CUIRect MainView);
 	bool RenderServerControlKick(CUIRect MainView, bool FilterSpectators);
 	bool RenderServerControlServer(CUIRect MainView);
@@ -590,6 +592,7 @@ public:
 	void OnConsoleInit() override;
 
 	virtual void OnStateChange(int NewState, int OldState) override;
+	virtual void OnWindowResize() override;
 	virtual void OnReset() override;
 	virtual void OnRender() override;
 	virtual bool OnInput(IInput::CEvent Event) override;

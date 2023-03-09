@@ -960,11 +960,11 @@ public:
 		float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 		Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
 
-		const float FakeToScreenX = (Graphics()->ScreenWidth() / (ScreenX1 - ScreenX0));
-		const float FakeToScreenY = (Graphics()->ScreenHeight() / (ScreenY1 - ScreenY0));
+		const float FakeToScreenX = Graphics()->ScreenWidth() / (ScreenX1 - ScreenX0);
+		const float FakeToScreenY = Graphics()->ScreenHeight() / (ScreenY1 - ScreenY0);
 
-		const int ActualX = (int)((pCursor->m_X * FakeToScreenX) + 0.5f);
-		const int ActualY = (int)((pCursor->m_Y * FakeToScreenY) + 0.5f);
+		const int ActualX = round_to_int(pCursor->m_X * FakeToScreenX);
+		const int ActualY = round_to_int(pCursor->m_Y * FakeToScreenY);
 
 		TextContainer.m_AlignedStartX = ActualX / FakeToScreenX;
 		TextContainer.m_AlignedStartY = ActualY / FakeToScreenY;
@@ -1024,11 +1024,11 @@ public:
 		float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 		Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
 
-		const float FakeToScreenX = (Graphics()->ScreenWidth() / (ScreenX1 - ScreenX0));
-		const float FakeToScreenY = (Graphics()->ScreenHeight() / (ScreenY1 - ScreenY0));
+		const float FakeToScreenX = Graphics()->ScreenWidth() / (ScreenX1 - ScreenX0);
+		const float FakeToScreenY = Graphics()->ScreenHeight() / (ScreenY1 - ScreenY0);
 
-		const int ActualX = (int)((pCursor->m_X * FakeToScreenX) + 0.5f);
-		const int ActualY = (int)((pCursor->m_Y * FakeToScreenY) + 0.5f);
+		const int ActualX = round_to_int(pCursor->m_X * FakeToScreenX);
+		const int ActualY = round_to_int(pCursor->m_Y * FakeToScreenY);
 		const float CursorX = ActualX / FakeToScreenX;
 		const float CursorY = ActualY / FakeToScreenY;
 
@@ -1142,8 +1142,8 @@ public:
 			DrawY += Size;
 			if((RenderFlags & TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT) == 0)
 			{
-				DrawX = (int)((DrawX * FakeToScreenX) + 0.5f) / FakeToScreenX; // realign
-				DrawY = (int)((DrawY * FakeToScreenY) + 0.5f) / FakeToScreenY;
+				DrawX = round_to_int(DrawX * FakeToScreenX) / FakeToScreenX; // realign
+				DrawY = round_to_int(DrawY * FakeToScreenY) / FakeToScreenY;
 			}
 			LastSelX = DrawX;
 			LastSelWidth = 0;
@@ -1677,10 +1677,10 @@ public:
 
 		if((TextContainer.m_RenderFlags & TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT) == 0)
 		{
-			const float FakeToScreenX = (Graphics()->ScreenWidth() / (ScreenX1 - ScreenX0));
-			const float FakeToScreenY = (Graphics()->ScreenHeight() / (ScreenY1 - ScreenY0));
-			const int ActualX = (int)(((TextContainer.m_X + X) * FakeToScreenX) + 0.5f);
-			const int ActualY = (int)(((TextContainer.m_Y + Y) * FakeToScreenY) + 0.5f);
+			const float FakeToScreenX = Graphics()->ScreenWidth() / (ScreenX1 - ScreenX0);
+			const float FakeToScreenY = Graphics()->ScreenHeight() / (ScreenY1 - ScreenY0);
+			const int ActualX = round_to_int((TextContainer.m_X + X) * FakeToScreenX);
+			const int ActualY = round_to_int((TextContainer.m_Y + Y) * FakeToScreenY);
 			const float AlignedX = ActualX / FakeToScreenX;
 			const float AlignedY = ActualY / FakeToScreenY;
 			X = AlignedX - TextContainer.m_AlignedStartX;
