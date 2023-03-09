@@ -2,11 +2,14 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #ifndef GAME_CLIENT_COMPONENTS_MOTD_H
 #define GAME_CLIENT_COMPONENTS_MOTD_H
+
+#include <engine/shared/config.h>
+
 #include <game/client/component.h>
 
 class CMotd : public CComponent
 {
-	char m_aServerMotd[900];
+	char m_aServerMotd[std::size(g_Config.m_SvMotd)];
 	int64_t m_ServerMotdTime;
 	int64_t m_ServerMotdUpdateTime;
 	int m_RectQuadContainer = -1;
