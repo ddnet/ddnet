@@ -9,7 +9,7 @@ syntax match settingName "^\w*"
 
 syntax match comment "#.*"
 syntax match value "\s\w*"
-syntax match escapeQuote  "\\\"" 
+syntax match escapeQuote  "\\\""
 syntax match number  "\s[0-9]\+"
 syntax match ip  "\s\d\+\.\d\+\.\d\+\.\d\+\(:\d\+\)\="
 
