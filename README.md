@@ -355,5 +355,9 @@ git config blame.ignoreRevsFile formatting-revs.txt
 Copy the file detection and syntax files to your vim config folder, in the case of neovim:
 
 ```bash
+# vim
+cp -R other/vim/* ~/.vim/
+
+# neovim
 cp -R other/vim/* ~/.config/nvim/
 ```
