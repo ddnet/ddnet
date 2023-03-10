@@ -293,7 +293,9 @@ void CMenus::KillServer()
 {
 	if(m_ServerProcess.m_Process)
 	{
-		kill_process(m_ServerProcess.m_Process);
-		m_ServerProcess.m_Process = INVALID_PROCESS;
+		if(kill_process(m_ServerProcess.m_Process))
+		{
+			m_ServerProcess.m_Process = INVALID_PROCESS;
+		}
 	}
 }
