@@ -3947,7 +3947,12 @@ PROCESS shell_execute(const char *file)
 int kill_process(PROCESS process)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	return TerminateProcess(process, 0);
+	BOOL success = TerminateProcess(process, 0);
+	if(success)
+	{
+		CloseHandle(process);
+	}
+	return success;
 #elif defined(CONF_FAMILY_UNIX)
 	int status;
 	kill(process, SIGTERM);
