@@ -15,6 +15,7 @@
 #	Anime.pdf	2021-06-13 13:08:50
 #	banan   	2022-06-12 11:36:50
 #	ban   	2023-01-5 10:22:50
+#	unban   	2023-03-10 21:50:50
 ##### /authors #####
 
 ##### translated strings #####
@@ -1692,13 +1693,13 @@ Open the directory to add custom assets
 
 [Graphics error]
 Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
-== 
+== Не удалось инициализировать данный графический модуль, возможно, это связано с тем, что вы не установили драйвер встроенной видеокарты.
 
 Could not save downloaded map. Try manually deleting this file: %s
-== 
+== Не удалось сохранить загруженную карту. Попробуйте вручную удалить этот файл: %s
 
 Search:
-== 
+== Поиск:
 
 Copy info
-== 
+== Cкопировать сведения
