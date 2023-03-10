@@ -96,6 +96,7 @@ CEditorSound::~CEditorSound()
 
 CLayerGroup::CLayerGroup()
 {
+	m_vpLayers.clear();
 	m_aName[0] = 0;
 	m_Visible = true;
 	m_Collapse = false;
