@@ -352,7 +352,7 @@ git config blame.ignoreRevsFile formatting-revs.txt
 
 (Neo)Vim Syntax Highlighting for config files
 ----------------------------------------
-Copy the file detection and syntax files to your vim config folder, in the case of neovim:
+Copy the file detection and syntax files to your vim config folder:
 
 ```bash
 # vim
