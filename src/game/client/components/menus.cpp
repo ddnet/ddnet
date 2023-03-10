@@ -85,7 +85,6 @@ CMenus::CMenus()
 	m_Dummy = false;
 
 	m_ServerProcess.Process = 0;
-	m_ServerProcess.Initialized = false;
 
 	for(SUIAnimator &animator : m_aAnimatorsSettingsTab)
 	{
