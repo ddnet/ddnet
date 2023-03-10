@@ -26,7 +26,7 @@
 
 struct CServerProcess
 {
-	PROCESS Process;
+	PROCESS m_Process;
 };
 
 struct SColorPicker

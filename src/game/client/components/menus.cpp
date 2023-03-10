@@ -84,7 +84,7 @@ CMenus::CMenus()
 	m_DemoPlayerState = DEMOPLAYER_NONE;
 	m_Dummy = false;
 
-	m_ServerProcess.Process = 0;
+	m_ServerProcess.m_Process = 0;
 
 	for(SUIAnimator &animator : m_aAnimatorsSettingsTab)
 	{
