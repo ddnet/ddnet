@@ -301,6 +301,7 @@ public:
 	{
 		m_pEditor = pEditor;
 		m_aName[0] = 0;
+		m_Texture.Invalidate();
 		m_External = 0;
 		m_Width = 0;
 		m_Height = 0;
@@ -767,6 +768,13 @@ public:
 		m_pTextRender = nullptr;
 		m_pSound = nullptr;
 
+		m_EntitiesTexture.Invalidate();
+		m_FrontTexture.Invalidate();
+		m_TeleTexture.Invalidate();
+		m_SpeedupTexture.Invalidate();
+		m_SwitchTexture.Invalidate();
+		m_TuneTexture.Invalidate();
+
 		m_Mode = MODE_LAYERS;
 		m_Dialog = 0;
 		m_EditBoxActive = 0;
@@ -798,6 +806,9 @@ public:
 		m_pFileDialogPath = m_aFileDialogCurrentFolder;
 		m_FileDialogOpening = false;
 		m_FilesSelectedIndex = -1;
+
+		m_FilePreviewImage.Invalidate();
+		m_PreviewImageIsLoaded = false;
 
 		m_SelectEntitiesImage = "DDNet";
 
@@ -837,6 +848,10 @@ public:
 
 		m_QuadKnifeActive = false;
 		m_QuadKnifeCount = 0;
+
+		m_CheckerTexture.Invalidate();
+		m_BackgroundTexture.Invalidate();
+		m_CursorTexture.Invalidate();
 
 		m_CommandBox = 0.0f;
 		m_aSettingsCommand[0] = 0;
