@@ -84,8 +84,7 @@ CMenus::CMenus()
 	m_DemoPlayerState = DEMOPLAYER_NONE;
 	m_Dummy = false;
 
-	m_ServerProcess.Process = 0;
-	m_ServerProcess.Initialized = false;
+	m_ServerProcess.m_Process = INVALID_PROCESS;
 
 	for(SUIAnimator &animator : m_aAnimatorsSettingsTab)
 	{

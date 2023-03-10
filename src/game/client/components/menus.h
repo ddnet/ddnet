@@ -26,9 +26,7 @@
 
 struct CServerProcess
 {
-	PROCESS Process;
-	bool Initialized;
-	CLineReader LineReader;
+	PROCESS m_Process;
 };
 
 struct SColorPicker

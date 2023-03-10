@@ -2449,8 +2449,10 @@ void cmdline_free(int argc, const char **argv);
 
 #if defined(CONF_FAMILY_WINDOWS)
 typedef void *PROCESS;
+constexpr PROCESS INVALID_PROCESS = nullptr;
 #else
 typedef pid_t PROCESS;
+constexpr PROCESS INVALID_PROCESS = 0;
 #endif
 
 /*
