@@ -703,10 +703,10 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View, void *pContext)
 		if(Prop == PROP_POS_ENV)
 		{
 			int Index = clamp(NewVal - 1, -1, (int)pEditor->m_Map.m_vpEnvelopes.size() - 1);
-			int Step = (Index - pQuad->m_PosEnv) % 2;
-			if(Step != 0)
+			int StepDirection = Index < pQuad->m_PosEnv ? -1 : 1;
+			if(StepDirection != 0)
 			{
-				for(; Index >= -1 && Index < (int)pEditor->m_Map.m_vpEnvelopes.size(); Index += Step)
+				for(; Index >= -1 && Index < (int)pEditor->m_Map.m_vpEnvelopes.size(); Index += StepDirection)
 					if(Index == -1 || pEditor->m_Map.m_vpEnvelopes[Index]->m_Channels == 3)
 					{
 						pQuad->m_PosEnv = Index;
@@ -719,10 +719,10 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View, void *pContext)
 		if(Prop == PROP_COLOR_ENV)
 		{
 			int Index = clamp(NewVal - 1, -1, (int)pEditor->m_Map.m_vpEnvelopes.size() - 1);
-			int Step = (Index - pQuad->m_ColorEnv) % 2;
-			if(Step != 0)
+			int StepDirection = Index < pQuad->m_ColorEnv ? -1 : 1;
+			if(StepDirection != 0)
 			{
-				for(; Index >= -1 && Index < (int)pEditor->m_Map.m_vpEnvelopes.size(); Index += Step)
+				for(; Index >= -1 && Index < (int)pEditor->m_Map.m_vpEnvelopes.size(); Index += StepDirection)
 					if(Index == -1 || pEditor->m_Map.m_vpEnvelopes[Index]->m_Channels == 4)
 					{
 						pQuad->m_ColorEnv = Index;
@@ -842,10 +842,10 @@ int CEditor::PopupSource(CEditor *pEditor, CUIRect View, void *pContext)
 	if(Prop == PROP_POS_ENV)
 	{
 		int Index = clamp(NewVal - 1, -1, (int)pEditor->m_Map.m_vpEnvelopes.size() - 1);
-		int Step = (Index - pSource->m_PosEnv) % 2;
-		if(Step != 0)
+		int StepDirection = Index < pSource->m_PosEnv ? -1 : 1;
+		if(StepDirection != 0)
 		{
-			for(; Index >= -1 && Index < (int)pEditor->m_Map.m_vpEnvelopes.size(); Index += Step)
+			for(; Index >= -1 && Index < (int)pEditor->m_Map.m_vpEnvelopes.size(); Index += StepDirection)
 				if(Index == -1 || pEditor->m_Map.m_vpEnvelopes[Index]->m_Channels == 3)
 				{
 					pSource->m_PosEnv = Index;
@@ -858,10 +858,10 @@ int CEditor::PopupSource(CEditor *pEditor, CUIRect View, void *pContext)
 	if(Prop == PROP_SOUND_ENV)
 	{
 		int Index = clamp(NewVal - 1, -1, (int)pEditor->m_Map.m_vpEnvelopes.size() - 1);
-		int Step = (Index - pSource->m_SoundEnv) % 2;
-		if(Step != 0)
+		int StepDirection = Index < pSource->m_SoundEnv ? -1 : 1;
+		if(StepDirection != 0)
 		{
-			for(; Index >= -1 && Index < (int)pEditor->m_Map.m_vpEnvelopes.size(); Index += Step)
+			for(; Index >= -1 && Index < (int)pEditor->m_Map.m_vpEnvelopes.size(); Index += StepDirection)
 				if(Index == -1 || pEditor->m_Map.m_vpEnvelopes[Index]->m_Channels == 1)
 				{
 					pSource->m_SoundEnv = Index;
