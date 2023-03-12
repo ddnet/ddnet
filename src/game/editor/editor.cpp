@@ -1,6 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
+#include "game/client/ui_rect.h"
 #include <algorithm>
 
 #include <base/color.h>
@@ -4219,31 +4220,53 @@ void CEditor::RenderSounds(CUIRect ToolBox)
 	s_ScrollRegion.End();
 }
 
-static int EditorListdirCallback(const char *pName, int IsDir, int StorageType, void *pUser)
+static int EditorListdirCallback(const CFsFileInfo *info, int IsDir, int StorageType, void *pUser)
 {
 	CEditor *pEditor = (CEditor *)pUser;
-	if((pName[0] == '.' && (pName[1] == 0 ||
-				       (pName[1] == '.' && pName[2] == 0 && (!str_comp(pEditor->m_pFileDialogPath, "maps") || !str_comp(pEditor->m_pFileDialogPath, "mapres"))))) ||
-		(!IsDir && ((pEditor->m_FileDialogFileType == CEditor::FILETYPE_MAP && !str_endswith(pName, ".map")) ||
-				   (pEditor->m_FileDialogFileType == CEditor::FILETYPE_IMG && !str_endswith(pName, ".png")) ||
-				   (pEditor->m_FileDialogFileType == CEditor::FILETYPE_SOUND && !str_endswith(pName, ".opus")))))
+	if((info->m_pName[0] == '.' && (info->m_pName[1] == 0 ||
+					       (info->m_pName[1] == '.' && info->m_pName[2] == 0 && (!str_comp(pEditor->m_pFileDialogPath, "maps") || !str_comp(pEditor->m_pFileDialogPath, "mapres"))))) ||
+		(!IsDir && ((pEditor->m_FileDialogFileType == CEditor::FILETYPE_MAP && !str_endswith(info->m_pName, ".map")) ||
+				   (pEditor->m_FileDialogFileType == CEditor::FILETYPE_IMG && !str_endswith(info->m_pName, ".png")) ||
+				   (pEditor->m_FileDialogFileType == CEditor::FILETYPE_SOUND && !str_endswith(info->m_pName, ".opus")))))
 		return 0;
 
 	CEditor::CFilelistItem Item;
-	str_copy(Item.m_aFilename, pName, sizeof(Item.m_aFilename));
+	str_copy(Item.m_aFilename, info->m_pName, sizeof(Item.m_aFilename));
 	if(IsDir)
-		str_format(Item.m_aName, sizeof(Item.m_aName), "%s/", pName);
+		str_format(Item.m_aName, sizeof(Item.m_aName), "%s/", info->m_pName);
 	else
 	{
 		int LenEnding = pEditor->m_FileDialogFileType == CEditor::FILETYPE_SOUND ? 5 : 4;
-		str_truncate(Item.m_aName, sizeof(Item.m_aName), pName, str_length(pName) - LenEnding);
+		str_truncate(Item.m_aName, sizeof(Item.m_aName), info->m_pName, str_length(info->m_pName) - LenEnding);
 	}
 	Item.m_IsDir = IsDir != 0;
 	Item.m_IsLink = false;
 	Item.m_StorageType = StorageType;
+	Item.m_TimeModified = info->m_TimeModified;
 	pEditor->m_vCompleteFileList.push_back(Item);
 
 	return 0;
+}
+
+void CEditor::SortFilteredFileList()
+{
+	if(m_SortByFilename == 1)
+	{
+		std::sort(m_vpFilteredFileList.begin(), m_vpFilteredFileList.end(), CEditor::cmp_filename_less);
+	}
+	else
+	{
+		std::sort(m_vpFilteredFileList.begin(), m_vpFilteredFileList.end(), CEditor::cmp_filename_greater);
+	}
+
+	if(m_SortByTimeModified == 1)
+	{
+		std::stable_sort(m_vpFilteredFileList.begin(), m_vpFilteredFileList.end(), CEditor::cmp_timemodified_less);
+	}
+	else if(m_SortByTimeModified == -1)
+	{
+		std::stable_sort(m_vpFilteredFileList.begin(), m_vpFilteredFileList.end(), CEditor::cmp_timemodified_greater);
+	}
 }
 
 void CEditor::RenderFileDialog()
@@ -4274,6 +4297,53 @@ void CEditor::RenderFileDialog()
 		View.VSplitMid(&View, &Preview);
 
 	// title
+	CUIRect ButtonTimeModified, ButtonFileName;
+	Title.VSplitRight(10.0f, &Title, nullptr);
+	Title.VSplitRight(90.0f, &Title, &ButtonTimeModified);
+	Title.VSplitRight(10.0f, &Title, nullptr);
+	Title.VSplitRight(90.0f, &Title, &ButtonFileName);
+	Title.VSplitRight(10.0f, &Title, nullptr);
+
+	static int s_ButtonTimeModified = 0;
+	char aBufLabelButtonTimeModified[64];
+	str_format(aBufLabelButtonTimeModified, sizeof(aBufLabelButtonTimeModified), "Time modified %s", m_SortByTimeModified == 1 ? "▲" : m_SortByTimeModified == -1 ? "▼" :
+																					"");
+	if(DoButton_Editor(&s_ButtonTimeModified, aBufLabelButtonTimeModified, 0, &ButtonTimeModified, 0, "Sort by time modified"))
+	{
+		if(m_SortByTimeModified == 1)
+		{
+			m_SortByTimeModified = -1;
+		}
+		else if(m_SortByTimeModified == -1)
+		{
+			m_SortByTimeModified = 0;
+		}
+		else
+		{
+			m_SortByTimeModified = 1;
+		}
+
+		SortFilteredFileList();
+	}
+
+	static int s_ButtonFileName = 0;
+	char aBufLabelButtonFilename[64];
+	str_format(aBufLabelButtonFilename, sizeof(aBufLabelButtonFilename), "Filename %s", m_SortByFilename == 1 ? "▲" : m_SortByFilename == -1 ? "▼" :
+																		   "");
+	if(DoButton_Editor(&s_ButtonFileName, aBufLabelButtonFilename, 0, &ButtonFileName, 0, "Sort by file name"))
+	{
+		if(m_SortByFilename == 1)
+		{
+			m_SortByFilename = -1;
+		}
+		else
+		{
+			m_SortByFilename = 1;
+		}
+
+		SortFilteredFileList();
+	}
+
 	Title.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 4.0f);
 	Title.VMargin(10.0f, &Title);
 	UI()->DoLabel(&Title, m_pFileDialogTitle, 12.0f, TEXTALIGN_LEFT);
@@ -4435,9 +4505,10 @@ void CEditor::RenderFileDialog()
 		if(!Item.m_Visible)
 			continue;
 
-		CUIRect Button, FileIcon;
+		CUIRect Button, FileIcon, TimeModified;
 		Item.m_Rect.VSplitLeft(Item.m_Rect.h, &FileIcon, &Button);
 		Button.VSplitLeft(5.0f, nullptr, &Button);
+		Button.VSplitRight(100.0f, &Button, &TimeModified);
 
 		const char *pIconType;
 		if(!m_vpFilteredFileList[i]->m_IsDir)
@@ -4469,9 +4540,14 @@ void CEditor::RenderFileDialog()
 		UI()->DoLabel(&FileIcon, pIconType, 12.0f, TEXTALIGN_LEFT);
 		TextRender()->SetCurFont(nullptr);
 
+		char aBufTimeModified[64];
+		tm *time_modified = localtime(&m_vpFilteredFileList[i]->m_TimeModified);
+		strftime(aBufTimeModified, sizeof(aBufTimeModified), "%d.%m.%y %H:%M", time_modified);
+
 		SLabelProperties Props;
 		Props.m_AlignVertically = 0;
 		UI()->DoLabel(&Button, m_vpFilteredFileList[i]->m_aName, 10.0f, TEXTALIGN_LEFT, Props);
+		UI()->DoLabel(&TimeModified, aBufTimeModified, 10.0f, TEXTALIGN_RIGHT, Props);
 	}
 
 	const int NewSelection = s_ListBox.DoEnd();
@@ -4634,9 +4710,9 @@ void CEditor::FilelistPopulate(int StorageType, bool KeepSelection)
 		Item.m_StorageType = IStorage::TYPE_SAVE;
 		m_vCompleteFileList.push_back(Item);
 	}
-	Storage()->ListDirectory(StorageType, m_pFileDialogPath, EditorListdirCallback, this);
-	std::sort(m_vCompleteFileList.begin(), m_vCompleteFileList.end());
+	Storage()->ListDirectoryInfo(StorageType, m_pFileDialogPath, EditorListdirCallback, this);
 	RefreshFilteredFileList();
+	SortFilteredFileList();
 	if(!KeepSelection)
 	{
 		m_FilesSelectedIndex = m_vpFilteredFileList.empty() ? -1 : 0;

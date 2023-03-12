@@ -975,11 +975,49 @@ public:
 		bool m_IsDir;
 		bool m_IsLink;
 		int m_StorageType;
-
-		bool operator<(const CFilelistItem &Other) const { return !str_comp(m_aFilename, "..") ? true : !str_comp(Other.m_aFilename, "..") ? false : m_IsDir && !Other.m_IsDir ? true : !m_IsDir && Other.m_IsDir ? false : str_comp_filenames(m_aFilename, Other.m_aFilename) < 0; }
+		time_t m_TimeModified;
 	};
 	std::vector<CFilelistItem> m_vCompleteFileList;
 	std::vector<const CFilelistItem *> m_vpFilteredFileList;
+
+	static bool cmp_filename_less(const CFilelistItem *a, const CFilelistItem *b) 
+	{
+		if (str_comp(a->m_aFilename, "..") == 0)
+			return true;
+		if (str_comp(b->m_aFilename, "..") == 0)
+			return false;
+		if(a->m_IsDir != b->m_IsDir)
+			return a->m_IsDir;
+		return str_comp(a->m_aName, b->m_aName) < 0;
+	}
+
+	static bool cmp_filename_greater(const CFilelistItem *a, const CFilelistItem *b) 
+	{
+		if (str_comp(a->m_aFilename, "..") == 0)
+			return true;
+		if (str_comp(b->m_aFilename, "..") == 0)
+			return false;
+		if(a->m_IsDir != b->m_IsDir)
+			return a->m_IsDir;
+		return str_comp(a->m_aName, b->m_aName) > 0;
+	}
+
+	static bool cmp_timemodified_less(const CFilelistItem *a, const CFilelistItem *b) 
+	{
+		if(a->m_IsDir != b->m_IsDir)
+			return a->m_IsDir;
+		return a->m_TimeModified < b->m_TimeModified;
+	}
+
+	static bool cmp_timemodified_greater(const CFilelistItem *a, const CFilelistItem *b) {
+		if(a->m_IsDir != b->m_IsDir)
+			return a->m_IsDir;
+		return a->m_TimeModified > b->m_TimeModified;
+	}
+
+	void SortFilteredFileList();
+	int m_SortByFilename = 1;
+	int m_SortByTimeModified = 0;
 
 	std::vector<std::string> m_vSelectEntitiesFiles;
 	std::string m_SelectEntitiesImage;
