@@ -32,6 +32,16 @@ inline float random_float()
 	return rand() / (float)(RAND_MAX);
 }
 
+inline float random_float(float min, float max)
+{
+	return min + random_float() * (max - min);
+}
+
+inline float random_float(float max)
+{
+	return random_float(0.0f, max);
+}
+
 inline float random_angle()
 {
 	return 2.0f * pi * (rand() / std::nextafter((float)RAND_MAX, std::numeric_limits<float>::max()));
