@@ -148,6 +148,11 @@ inline vector2_base<float> direction(float angle)
 	return vector2_base<float>(std::cos(angle), std::sin(angle));
 }
 
+inline vector2_base<float> random_direction()
+{
+	return direction(random_angle());
+}
+
 typedef vector2_base<float> vec2;
 typedef vector2_base<bool> bvec2;
 typedef vector2_base<int> ivec2;

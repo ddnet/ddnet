@@ -15,8 +15,6 @@
 
 #include "effects.h"
 
-inline vec2 RandomDir() { return normalize(vec2(random_float() - 0.5f, random_float() - 0.5f)); }
-
 CEffects::CEffects()
 {
 	m_Add5hz = false;
@@ -113,7 +111,7 @@ void CEffects::SmokeTrail(vec2 Pos, vec2 Vel, float Alpha, float TimePassed)
 	p.SetDefault();
 	p.m_Spr = SPRITE_PART_SMOKE;
 	p.m_Pos = Pos;
-	p.m_Vel = Vel + RandomDir() * 50.0f;
+	p.m_Vel = Vel + random_direction() * 50.0f;
 	p.m_LifeSpan = 0.5f + random_float() * 0.5f;
 	p.m_StartSize = 12.0f + random_float() * 8;
 	p.m_EndSize = 0;
@@ -132,7 +130,7 @@ void CEffects::SkidTrail(vec2 Pos, vec2 Vel)
 	p.SetDefault();
 	p.m_Spr = SPRITE_PART_SMOKE;
 	p.m_Pos = Pos;
-	p.m_Vel = Vel + RandomDir() * 50.0f;
+	p.m_Vel = Vel + random_direction() * 50.0f;
 	p.m_LifeSpan = 0.5f + random_float() * 0.5f;
 	p.m_StartSize = 24.0f + random_float() * 12;
 	p.m_EndSize = 0;
@@ -167,7 +165,7 @@ void CEffects::PlayerSpawn(vec2 Pos)
 		p.SetDefault();
 		p.m_Spr = SPRITE_PART_SHELL;
 		p.m_Pos = Pos;
-		p.m_Vel = RandomDir() * (std::pow(random_float(), 3) * 600.0f);
+		p.m_Vel = random_direction() * (std::pow(random_float(), 3) * 600.0f);
 		p.m_LifeSpan = 0.3f + random_float() * 0.3f;
 		p.m_StartSize = 64.0f + random_float() * 32;
 		p.m_EndSize = 0;
@@ -208,7 +206,7 @@ void CEffects::PlayerDeath(vec2 Pos, int ClientID)
 		p.SetDefault();
 		p.m_Spr = SPRITE_PART_SPLAT01 + (rand() % 3);
 		p.m_Pos = Pos;
-		p.m_Vel = RandomDir() * ((random_float() + 0.1f) * 900.0f);
+		p.m_Vel = random_direction() * ((random_float() + 0.1f) * 900.0f);
 		p.m_LifeSpan = 0.3f + random_float() * 0.3f;
 		p.m_StartSize = 24.0f + random_float() * 16;
 		p.m_EndSize = 0;
@@ -252,7 +250,7 @@ void CEffects::Explosion(vec2 Pos)
 		p.SetDefault();
 		p.m_Spr = SPRITE_PART_SMOKE;
 		p.m_Pos = Pos;
-		p.m_Vel = RandomDir() * ((1.0f + random_float() * 0.2f) * 1000.0f);
+		p.m_Vel = random_direction() * ((1.0f + random_float() * 0.2f) * 1000.0f);
 		p.m_LifeSpan = 0.5f + random_float() * 0.4f;
 		p.m_StartSize = 32.0f + random_float() * 8;
 		p.m_EndSize = 0;
