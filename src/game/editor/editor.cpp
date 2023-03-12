@@ -560,7 +560,7 @@ void CEditor::RenderBackground(CUIRect View, IGraphics::CTextureHandle Texture, 
 	Graphics()->QuadsEnd();
 }
 
-int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, int Current, int Min, int Max, int Step, float Scale, const char *pToolTip, bool IsDegree, bool IsHex, int Corners, ColorRGBA *pColor)
+int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, int Current, int Min, int Max, int Step, float Scale, const char *pToolTip, bool IsDegree, bool IsHex, int Corners, ColorRGBA *pColor, bool ShowValue)
 {
 	// logic
 	static float s_Value;
@@ -664,7 +664,12 @@ int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, in
 		// render
 		char aBuf[128];
 		if(pLabel[0] != '\0')
-			str_format(aBuf, sizeof(aBuf), "%s %d", pLabel, Current);
+		{
+			if(ShowValue)
+				str_format(aBuf, sizeof(aBuf), "%s %d", pLabel, Current);
+			else
+				str_copy(aBuf, pLabel);
+		}
 		else if(IsDegree)
 			str_format(aBuf, sizeof(aBuf), "%d°", Current);
 		else if(IsHex)
@@ -3208,22 +3213,32 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 		else if(pProps[i].m_Type == PROPTYPE_ENVELOPE)
 		{
 			CUIRect Inc, Dec;
-			char aBuf[64];
+			char aBuf[8];
 			int CurValue = pProps[i].m_Value;
 
 			Shifter.VSplitRight(10.0f, &Shifter, &Inc);
 			Shifter.VSplitLeft(10.0f, &Dec, &Shifter);
 
 			if(CurValue <= 0)
-				str_copy(aBuf, "None", sizeof(aBuf));
+				str_copy(aBuf, "None:", sizeof(aBuf));
 			else if(m_Map.m_vpEnvelopes[CurValue - 1]->m_aName[0])
-				str_format(aBuf, sizeof(aBuf), "%d: %s", CurValue, m_Map.m_vpEnvelopes[CurValue - 1]->m_aName);
+			{
+				str_format(aBuf, sizeof(aBuf), "%s:", m_Map.m_vpEnvelopes[CurValue - 1]->m_aName);
+				if(!str_endswith(aBuf, ":"))
+				{
+					aBuf[sizeof(aBuf) - 2] = ':';
+					aBuf[sizeof(aBuf) - 1] = '\0';
+				}
+			}
 			else
-				str_format(aBuf, sizeof(aBuf), "%d", CurValue);
+				aBuf[0] = '\0';
 
-			float FontSize = ScaleFontSize(aBuf, sizeof(aBuf), 10.0f, Shifter.w);
-			Shifter.Draw(Color, 0, 5.0f);
-			UI()->DoLabel(&Shifter, aBuf, FontSize, TEXTALIGN_CENTER);
+			int NewVal = UiDoValueSelector((char *)&pIDs[i], &Shifter, aBuf, CurValue, 0, m_Map.m_vpEnvelopes.size(), 1, 1.0f, "Set Envelope", false, false, IGraphics::CORNER_NONE);
+			if(NewVal != CurValue)
+			{
+				*pNewVal = NewVal;
+				Change = i;
+			}
 
 			if(DoButton_ButtonDec((char *)&pIDs[i] + 1, nullptr, 0, &Dec, 0, "Previous Envelope"))
 			{
@@ -4934,8 +4949,13 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 					   ColorRGBA(0.7f, 1, 0.7f, 0.5f);
 		}
 
-		Shifter.Draw(EnvColor, IGraphics::CORNER_NONE, 0.0f);
-		UI()->DoLabel(&Shifter, aBuf, 10.0f, TEXTALIGN_CENTER);
+		static int s_EnvelopeSelector = 0;
+		int NewValue = UiDoValueSelector(&s_EnvelopeSelector, &Shifter, aBuf, m_SelectedEnvelope + 1, 1, m_Map.m_vpEnvelopes.size(), 1, 1.0f, "Select Envelope", false, false, IGraphics::CORNER_NONE, &EnvColor, false);
+		if(NewValue - 1 != m_SelectedEnvelope)
+		{
+			m_SelectedEnvelope = NewValue - 1;
+			CurrentEnvelopeSwitched = true;
+		}
 
 		static int s_PrevButton = 0;
 		if(DoButton_ButtonDec(&s_PrevButton, nullptr, 0, &Dec, 0, "Previous Envelope"))
