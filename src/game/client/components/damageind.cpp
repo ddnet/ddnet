@@ -41,7 +41,7 @@ void CDamageInd::Create(vec2 Pos, vec2 Dir)
 		pItem->m_Pos = Pos;
 		pItem->m_StartTime = LocalTime();
 		pItem->m_Dir = Dir * -1;
-		pItem->m_StartAngle = (random_float() - 1.0f) * 2.0f * pi;
+		pItem->m_StartAngle = -random_angle();
 	}
 }
 

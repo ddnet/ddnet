@@ -34,7 +34,7 @@ void CEffects::AirJump(vec2 Pos)
 	p.m_LifeSpan = 0.5f;
 	p.m_StartSize = 48.0f;
 	p.m_EndSize = 0;
-	p.m_Rot = random_float() * pi * 2;
+	p.m_Rot = random_angle();
 	p.m_Rotspeed = pi * 2;
 	p.m_Gravity = 500;
 	p.m_Friction = 0.7f;
@@ -71,7 +71,7 @@ void CEffects::PowerupShine(vec2 Pos, vec2 Size)
 	p.m_LifeSpan = 0.5f;
 	p.m_StartSize = 16.0f;
 	p.m_EndSize = 0;
-	p.m_Rot = random_float() * pi * 2;
+	p.m_Rot = random_angle();
 	p.m_Rotspeed = pi * 2;
 	p.m_Gravity = 500;
 	p.m_Friction = 0.9f;
@@ -95,7 +95,7 @@ void CEffects::FreezingFlakes(vec2 Pos, vec2 Size)
 	p.m_UseAlphaFading = true;
 	p.m_StartAlpha = 1.0f;
 	p.m_EndAlpha = 0.0f;
-	p.m_Rot = random_float() * pi * 2;
+	p.m_Rot = random_angle();
 	p.m_Rotspeed = pi;
 	p.m_Gravity = random_float() * 250.0f;
 	p.m_Friction = 0.9f;
@@ -171,7 +171,7 @@ void CEffects::PlayerSpawn(vec2 Pos)
 		p.m_LifeSpan = 0.3f + random_float() * 0.3f;
 		p.m_StartSize = 64.0f + random_float() * 32;
 		p.m_EndSize = 0;
-		p.m_Rot = random_float() * pi * 2;
+		p.m_Rot = random_angle();
 		p.m_Rotspeed = random_float();
 		p.m_Gravity = random_float() * -400.0f;
 		p.m_Friction = 0.7f;
@@ -212,7 +212,7 @@ void CEffects::PlayerDeath(vec2 Pos, int ClientID)
 		p.m_LifeSpan = 0.3f + random_float() * 0.3f;
 		p.m_StartSize = 24.0f + random_float() * 16;
 		p.m_EndSize = 0;
-		p.m_Rot = random_float() * pi * 2;
+		p.m_Rot = random_angle();
 		p.m_Rotspeed = (random_float() - 0.5f) * pi;
 		p.m_Gravity = 800.0f;
 		p.m_Friction = 0.8f;
@@ -243,7 +243,7 @@ void CEffects::Explosion(vec2 Pos)
 	p.m_LifeSpan = 0.4f;
 	p.m_StartSize = 150.0f;
 	p.m_EndSize = 0;
-	p.m_Rot = random_float() * pi * 2;
+	p.m_Rot = random_angle();
 	m_pClient->m_Particles.Add(CParticles::GROUP_EXPLOSIONS, &p);
 
 	// add the smoke
@@ -273,7 +273,7 @@ void CEffects::HammerHit(vec2 Pos)
 	p.m_LifeSpan = 0.3f;
 	p.m_StartSize = 120.0f;
 	p.m_EndSize = 0;
-	p.m_Rot = random_float() * pi * 2;
+	p.m_Rot = random_angle();
 	m_pClient->m_Particles.Add(CParticles::GROUP_EXPLOSIONS, &p);
 	if(g_Config.m_SndGame)
 		m_pClient->m_Sounds.PlayAt(CSounds::CHN_WORLD, SOUND_HAMMER_HIT, 1.0f, Pos);
