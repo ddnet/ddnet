@@ -980,40 +980,52 @@ public:
 	std::vector<CFilelistItem> m_vCompleteFileList;
 	std::vector<const CFilelistItem *> m_vpFilteredFileList;
 
-	static bool cmp_filename_less(const CFilelistItem *a, const CFilelistItem *b)
+	static bool CompareFilenameAscending(const CFilelistItem *pLhs, const CFilelistItem *pRhs)
 	{
-		if(str_comp(a->m_aFilename, "..") == 0)
+		if(str_comp(pLhs->m_aFilename, "..") == 0)
 			return true;
-		if(str_comp(b->m_aFilename, "..") == 0)
+		if(str_comp(pRhs->m_aFilename, "..") == 0)
 			return false;
-		if(a->m_IsDir != b->m_IsDir)
-			return a->m_IsDir;
-		return str_comp(a->m_aName, b->m_aName) < 0;
+		if(pLhs->m_IsDir != pRhs->m_IsDir)
+			return pLhs->m_IsDir;
+		return str_comp_filenames(pLhs->m_aName, pRhs->m_aName) < 0;
 	}
 
-	static bool cmp_filename_greater(const CFilelistItem *a, const CFilelistItem *b)
+	static bool CompareFilenameDescending(const CFilelistItem *pLhs, const CFilelistItem *pRhs)
 	{
-		if(str_comp(a->m_aFilename, "..") == 0)
+		if(str_comp(pLhs->m_aFilename, "..") == 0)
 			return true;
-		if(str_comp(b->m_aFilename, "..") == 0)
+		if(str_comp(pRhs->m_aFilename, "..") == 0)
 			return false;
-		if(a->m_IsDir != b->m_IsDir)
-			return a->m_IsDir;
-		return str_comp(a->m_aName, b->m_aName) > 0;
+		if(pLhs->m_IsDir != pRhs->m_IsDir)
+			return pLhs->m_IsDir;
+		return str_comp_filenames(pLhs->m_aName, pRhs->m_aName) > 0;
 	}
 
-	static bool cmp_timemodified_less(const CFilelistItem *a, const CFilelistItem *b) 
+	static bool CompareTimeModifiedAscending(const CFilelistItem *pLhs, const CFilelistItem *pRhs)
 	{
-		if(a->m_IsDir != b->m_IsDir)
-			return a->m_IsDir;
-		return a->m_TimeModified < b->m_TimeModified;
+		if(str_comp(pLhs->m_aFilename, "..") == 0)
+			return true;
+		if(str_comp(pRhs->m_aFilename, "..") == 0)
+			return false;
+		if(pLhs->m_IsLink || pRhs->m_IsLink)
+			return pLhs->m_IsLink;
+		if(pLhs->m_IsDir != pRhs->m_IsDir)
+			return pLhs->m_IsDir;
+		return pLhs->m_TimeModified < pRhs->m_TimeModified;
 	}
 
-	static bool cmp_timemodified_greater(const CFilelistItem *a, const CFilelistItem *b)
+	static bool CompareTimeModifiedDescending(const CFilelistItem *pLhs, const CFilelistItem *pRhs)
 	{
-		if(a->m_IsDir != b->m_IsDir)
-			return a->m_IsDir;
-		return a->m_TimeModified > b->m_TimeModified;
+		if(str_comp(pLhs->m_aFilename, "..") == 0)
+			return true;
+		if(str_comp(pRhs->m_aFilename, "..") == 0)
+			return false;
+		if(pLhs->m_IsLink || pRhs->m_IsLink)
+			return pLhs->m_IsLink;
+		if(pLhs->m_IsDir != pRhs->m_IsDir)
+			return pLhs->m_IsDir;
+		return pLhs->m_TimeModified > pRhs->m_TimeModified;
 	}
 
 	void SortFilteredFileList();

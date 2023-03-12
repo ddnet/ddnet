@@ -4251,20 +4251,20 @@ void CEditor::SortFilteredFileList()
 {
 	if(m_SortByFilename == 1)
 	{
-		std::sort(m_vpFilteredFileList.begin(), m_vpFilteredFileList.end(), CEditor::cmp_filename_less);
+		std::sort(m_vpFilteredFileList.begin(), m_vpFilteredFileList.end(), CEditor::CompareFilenameAscending);
 	}
 	else
 	{
-		std::sort(m_vpFilteredFileList.begin(), m_vpFilteredFileList.end(), CEditor::cmp_filename_greater);
+		std::sort(m_vpFilteredFileList.begin(), m_vpFilteredFileList.end(), CEditor::CompareFilenameDescending);
 	}
 
 	if(m_SortByTimeModified == 1)
 	{
-		std::stable_sort(m_vpFilteredFileList.begin(), m_vpFilteredFileList.end(), CEditor::cmp_timemodified_less);
+		std::stable_sort(m_vpFilteredFileList.begin(), m_vpFilteredFileList.end(), CEditor::CompareTimeModifiedAscending);
 	}
 	else if(m_SortByTimeModified == -1)
 	{
-		std::stable_sort(m_vpFilteredFileList.begin(), m_vpFilteredFileList.end(), CEditor::cmp_timemodified_greater);
+		std::stable_sort(m_vpFilteredFileList.begin(), m_vpFilteredFileList.end(), CEditor::CompareTimeModifiedDescending);
 	}
 }
 
@@ -4303,11 +4303,11 @@ void CEditor::RenderFileDialog()
 	Title.VSplitRight(90.0f, &Title, &ButtonFileName);
 	Title.VSplitRight(10.0f, &Title, nullptr);
 
-	std::string aSortIndicator[3] = {"▼", "", "▲"};
+	const char* aSortIndicator[3] = {"▼", "", "▲"};
 
 	static int s_ButtonTimeModified = 0;
 	char aBufLabelButtonTimeModified[64];
-	str_format(aBufLabelButtonTimeModified, sizeof(aBufLabelButtonTimeModified), "Time modified %s", aSortIndicator[m_SortByTimeModified + 1].c_str());
+	str_format(aBufLabelButtonTimeModified, sizeof(aBufLabelButtonTimeModified), "Time modified %s", aSortIndicator[m_SortByTimeModified + 1]);
 	if(DoButton_Editor(&s_ButtonTimeModified, aBufLabelButtonTimeModified, 0, &ButtonTimeModified, 0, "Sort by time modified"))
 	{
 		if(m_SortByTimeModified == 1)
@@ -4328,7 +4328,7 @@ void CEditor::RenderFileDialog()
 
 	static int s_ButtonFileName = 0;
 	char aBufLabelButtonFilename[64];
-	str_format(aBufLabelButtonFilename, sizeof(aBufLabelButtonFilename), "Filename %s", aSortIndicator[m_SortByFilename + 1].c_str());
+	str_format(aBufLabelButtonFilename, sizeof(aBufLabelButtonFilename), "Filename %s", aSortIndicator[m_SortByFilename + 1]);
 	if(DoButton_Editor(&s_ButtonFileName, aBufLabelButtonFilename, 0, &ButtonFileName, 0, "Sort by file name"))
 	{
 		if(m_SortByFilename == 1)
@@ -4545,7 +4545,8 @@ void CEditor::RenderFileDialog()
 		SLabelProperties Props;
 		Props.m_AlignVertically = 0;
 		UI()->DoLabel(&Button, m_vpFilteredFileList[i]->m_aName, 10.0f, TEXTALIGN_LEFT, Props);
-		UI()->DoLabel(&TimeModified, aBufTimeModified, 10.0f, TEXTALIGN_RIGHT, Props);
+		if(!m_vpFilteredFileList[i]->m_IsLink && str_comp(m_vpFilteredFileList[i]->m_aFilename, "..") != 0)
+			UI()->DoLabel(&TimeModified, aBufTimeModified, 10.0f, TEXTALIGN_RIGHT, Props);
 	}
 
 	const int NewSelection = s_ListBox.DoEnd();
