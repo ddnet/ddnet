@@ -4303,7 +4303,7 @@ void CEditor::RenderFileDialog()
 	Title.VSplitRight(90.0f, &Title, &ButtonFileName);
 	Title.VSplitRight(10.0f, &Title, nullptr);
 
-	const char* aSortIndicator[3] = {"▼", "", "▲"};
+	const char *aSortIndicator[3] = {"▼", "", "▲"};
 
 	static int s_ButtonTimeModified = 0;
 	char aBufLabelButtonTimeModified[64];
