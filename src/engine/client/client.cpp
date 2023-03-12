@@ -3359,7 +3359,9 @@ void CClient::Run()
 		{
 			SleepTimeInNanoSeconds = (std::chrono::nanoseconds(1s) / (int64_t)g_Config.m_ClRefreshRate) - (Now - LastTime);
 			if(SleepTimeInNanoSeconds > 0ns)
-				net_socket_read_wait(m_aNetClient[CONN_MAIN].m_Socket, SleepTimeInNanoSeconds);
+			{
+				m_aNetClient[CONN_MAIN].Wait((SleepTimeInNanoSeconds / std::chrono::nanoseconds(1us).count()).count());
+			}
 			Slept = true;
 		}
 		if(Slept)

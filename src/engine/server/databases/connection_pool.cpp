@@ -2,7 +2,6 @@
 #include "connection.h"
 
 #include <base/system.h>
-#include <cstring>
 #include <engine/console.h>
 
 #include <chrono>

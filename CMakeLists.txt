@@ -1967,7 +1967,6 @@ set_src(ENGINE_SHARED GLOB_RECURSE src/engine/shared
   network.cpp
   network.h
   network_client.cpp
-  network_conn.cpp
   network_console.cpp
   network_console_conn.cpp
   network_server.cpp
@@ -2067,6 +2066,7 @@ set(LIBS
   ${WEBSOCKETS_LIBRARIES}
   ${ZLIB_LIBRARIES}
   ${PLATFORM_LIBS}
+  ${PROJECT_SOURCE_DIR}/src/net/target/debug/libnet.so
   # Add pthreads (on non-Windows) at the end, so that other libraries can depend
   # on it.
   ${CMAKE_THREAD_LIBS_INIT}

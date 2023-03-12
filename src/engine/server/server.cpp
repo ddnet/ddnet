@@ -2837,19 +2837,27 @@ int CServer::Run()
 				}
 
 				if(Config()->m_SvShutdownWhenEmpty)
+				{
 					m_RunServer = STOPPING;
+				}
 				else
-					PacketWaiting = net_socket_read_wait(m_NetServer.Socket(), 1000000);
+				{
+					m_NetServer.Wait(10'000'000);
+					PacketWaiting = true;
+				}
 			}
 			else
 			{
 				m_ReloadedWhenEmpty = false;
 
 				set_new_tick();
-				t = time_get();
-				int x = (TickStartTime(m_CurrentGameTick + 1) - t) * 1000000 / time_freq() + 1;
+				int x = (TickStartTime(m_CurrentGameTick + 1) - time_get()) * 1000000 / time_freq() + 1;
 
-				PacketWaiting = x > 0 ? net_socket_read_wait(m_NetServer.Socket(), x) : true;
+				if(x > 0)
+				{
+					m_NetServer.Wait(x);
+				}
+				PacketWaiting = true;
 			}
 			if(IsInterrupted())
 			{

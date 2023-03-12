@@ -1,0 +1,6 @@
+cpp_compat = true
+language = "c"
+usize_is_size_t = true
+
+[export]
+exclude = ["Option"]

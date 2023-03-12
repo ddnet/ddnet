@@ -1,0 +1,2 @@
+#!/bin/sh
+cbindgen -c cbindgen.toml src/ffi.rs | grep -v Option > net.h
