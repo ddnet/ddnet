@@ -980,22 +980,22 @@ public:
 	std::vector<CFilelistItem> m_vCompleteFileList;
 	std::vector<const CFilelistItem *> m_vpFilteredFileList;
 
-	static bool cmp_filename_less(const CFilelistItem *a, const CFilelistItem *b) 
+	static bool cmp_filename_less(const CFilelistItem *a, const CFilelistItem *b)
 	{
-		if (str_comp(a->m_aFilename, "..") == 0)
+		if(str_comp(a->m_aFilename, "..") == 0)
 			return true;
-		if (str_comp(b->m_aFilename, "..") == 0)
+		if(str_comp(b->m_aFilename, "..") == 0)
 			return false;
 		if(a->m_IsDir != b->m_IsDir)
 			return a->m_IsDir;
 		return str_comp(a->m_aName, b->m_aName) < 0;
 	}
 
-	static bool cmp_filename_greater(const CFilelistItem *a, const CFilelistItem *b) 
+	static bool cmp_filename_greater(const CFilelistItem *a, const CFilelistItem *b)
 	{
-		if (str_comp(a->m_aFilename, "..") == 0)
+		if(str_comp(a->m_aFilename, "..") == 0)
 			return true;
-		if (str_comp(b->m_aFilename, "..") == 0)
+		if(str_comp(b->m_aFilename, "..") == 0)
 			return false;
 		if(a->m_IsDir != b->m_IsDir)
 			return a->m_IsDir;
@@ -1009,7 +1009,8 @@ public:
 		return a->m_TimeModified < b->m_TimeModified;
 	}
 
-	static bool cmp_timemodified_greater(const CFilelistItem *a, const CFilelistItem *b) {
+	static bool cmp_timemodified_greater(const CFilelistItem *a, const CFilelistItem *b)
+	{
 		if(a->m_IsDir != b->m_IsDir)
 			return a->m_IsDir;
 		return a->m_TimeModified > b->m_TimeModified;

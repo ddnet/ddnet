@@ -1,7 +1,6 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
-#include "game/client/ui_rect.h"
 #include <algorithm>
 
 #include <base/color.h>
@@ -4304,10 +4303,11 @@ void CEditor::RenderFileDialog()
 	Title.VSplitRight(90.0f, &Title, &ButtonFileName);
 	Title.VSplitRight(10.0f, &Title, nullptr);
 
+	std::string aSortIndicator[3] = {"▼", "", "▲"};
+
 	static int s_ButtonTimeModified = 0;
 	char aBufLabelButtonTimeModified[64];
-	str_format(aBufLabelButtonTimeModified, sizeof(aBufLabelButtonTimeModified), "Time modified %s", m_SortByTimeModified == 1 ? "▲" : m_SortByTimeModified == -1 ? "▼" :
-																					"");
+	str_format(aBufLabelButtonTimeModified, sizeof(aBufLabelButtonTimeModified), "Time modified %s", aSortIndicator[m_SortByTimeModified + 1].c_str());
 	if(DoButton_Editor(&s_ButtonTimeModified, aBufLabelButtonTimeModified, 0, &ButtonTimeModified, 0, "Sort by time modified"))
 	{
 		if(m_SortByTimeModified == 1)
@@ -4328,8 +4328,7 @@ void CEditor::RenderFileDialog()
 
 	static int s_ButtonFileName = 0;
 	char aBufLabelButtonFilename[64];
-	str_format(aBufLabelButtonFilename, sizeof(aBufLabelButtonFilename), "Filename %s", m_SortByFilename == 1 ? "▲" : m_SortByFilename == -1 ? "▼" :
-																		   "");
+	str_format(aBufLabelButtonFilename, sizeof(aBufLabelButtonFilename), "Filename %s", aSortIndicator[m_SortByFilename + 1].c_str());
 	if(DoButton_Editor(&s_ButtonFileName, aBufLabelButtonFilename, 0, &ButtonFileName, 0, "Sort by file name"))
 	{
 		if(m_SortByFilename == 1)
