@@ -317,6 +317,15 @@ pub extern "C" fn ddnet_net_send_chunk(
     })
 }
 #[no_mangle]
+pub extern "C" fn ddnet_net_flush(
+    net: &mut DdnetNet,
+    peer_index: u64,
+) -> bool {
+    net.good(|impl_| {
+        impl_.flush(PeerIndex(peer_index))
+    })
+}
+#[no_mangle]
 pub extern "C" fn ddnet_net_connect(
     net: &mut DdnetNet,
     addr: *const c_char,

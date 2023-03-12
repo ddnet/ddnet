@@ -545,7 +545,7 @@ impl Net {
                 if let Some(ev) = self.peers.get_mut(&idx).unwrap().recv(buf).unwrap() {
                     return Ok(Some((idx, ev)));
                 }
-                //self.peers.get_mut(&idx).unwrap().flush(&self.local_addr, &self.socket, &mut self.packet_buf).unwrap();
+                self.peers.get_mut(&idx).unwrap().flush(&self.local_addr, &self.socket, &mut self.packet_buf).unwrap();
                 assert!(self.readable_peers.pop_front().is_some());
                 did_nothing = false;
             }
@@ -572,6 +572,9 @@ impl Net {
     pub fn send_chunk(&mut self, idx: PeerIndex, frame: &[u8], unreliable: bool) -> Result<()> {
         self.peers.get_mut(&idx).unwrap().send_chunk(frame, unreliable).unwrap();
         Ok(())
+    }
+    pub fn flush(&mut self, idx: PeerIndex) -> Result<()> {
+        self.peers.get_mut(&idx).unwrap().flush(&self.local_addr, &self.socket, &mut self.packet_buf)
     }
     fn parse_connect_addr(addr: &str) -> Result<(SocketAddr, Identity)> {
         let addr = Url::parse(addr).context("connect: URL")?;
@@ -621,7 +624,9 @@ impl Net {
         Ok(idx)
     }
     pub fn close(&mut self, idx: PeerIndex, reason: Option<&str>) -> Result<()> {
-        self.peers.get_mut(&idx).unwrap().close(reason);
+        let conn = self.peers.get_mut(&idx).unwrap();
+        conn.close(reason);
+        conn.flush(&self.local_addr, &self.socket, &mut self.packet_buf).unwrap();
         self.readable_peers.push_back(idx);
         Ok(())
     }
@@ -802,7 +807,7 @@ impl Connection {
             buf.extend_from_slice(frame);
             // `Error::Done` means that the datagram was immediately dropped
             // without being sent.
-            self.inner.dgram_send_vec(buf).not_done().context("quiche::Conn::dgram_send_vec")?;
+            self.inner.dgram_send_vec(buf).not_done().context("quiche::Conn::dgram_send_vec")?.unwrap();
             Ok(())
         }
     }

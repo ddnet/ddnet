@@ -180,7 +180,14 @@ int CNetClient::Send(CNetChunk *pChunk)
 			log_error("net", "send failed: %s", ddnet_net_error(m_pNet));
 			exit(1);
 		}
-		// TODO: flush
+		if((pChunk->m_Flags & NETSENDFLAG_FLUSH) != 0)
+		{
+			if(ddnet_net_flush(m_pNet, m_PeerID))
+			{
+				log_error("net", "flush failed: %s", ddnet_net_error(m_pNet));
+				exit(1);
+			}
+		}
 	}
 	return 0;
 }

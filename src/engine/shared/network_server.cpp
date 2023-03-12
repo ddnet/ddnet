@@ -155,7 +155,14 @@ int CNetServer::Send(CNetChunk *pChunk)
 			log_error("net", "send failed: %s", ddnet_net_error(m_pNet));
 			exit(1);
 		}
-		// TODO: handle flush
+		if((pChunk->m_Flags & NETSENDFLAG_FLUSH) != 0)
+		{
+			if(ddnet_net_flush(m_pNet, pChunk->m_ClientID))
+			{
+				log_error("net", "flush failed: %s", ddnet_net_error(m_pNet));
+				exit(1);
+			}
+		}
 	}
 	return 0;
 }

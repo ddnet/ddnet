@@ -67,6 +67,8 @@ bool ddnet_net_send_chunk(struct DdnetNet *net,
                           size_t chunk_len,
                           bool unreliable);
 
+bool ddnet_net_flush(struct DdnetNet *net, uint64_t peer_index);
+
 bool ddnet_net_connect(struct DdnetNet *net,
                        const char *addr,
                        size_t addr_len,
