@@ -2325,7 +2325,7 @@ void CEditor::DoMapEditor(CUIRect View)
 	}
 
 	static void *s_pEditorID = (void *)&s_pEditorID;
-	const bool Inside = UI()->MouseInside(&View);
+	const bool Inside = !m_GuiActive || UI()->MouseInside(&View);
 
 	// fetch mouse position
 	float wx = UI()->MouseWorldX();
@@ -6071,7 +6071,7 @@ void CEditor::Render()
 
 	UiDoPopupMenu();
 
-	if(m_Dialog == DIALOG_NONE && !m_MouseInsidePopup && UI()->MouseInside(&View))
+	if(m_Dialog == DIALOG_NONE && !m_MouseInsidePopup && (!m_GuiActive || UI()->MouseInside(&View)))
 	{
 		if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
 			ChangeZoom(20.0f);
