@@ -4317,8 +4317,13 @@ void CEditor::RenderFileDialog()
 		{
 			// remove '/' and '\'
 			for(int i = 0; m_aFileDialogFileName[i]; ++i)
+			{
 				if(m_aFileDialogFileName[i] == '/' || m_aFileDialogFileName[i] == '\\')
+				{
 					str_copy(&m_aFileDialogFileName[i], &m_aFileDialogFileName[i + 1], (int)(sizeof(m_aFileDialogFileName)) - i);
+					--i;
+				}
+			}
 			m_FilesSelectedIndex = -1;
 			m_aFilesSelectedName[0] = '\0';
 			// find first valid entry, if it exists
