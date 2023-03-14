@@ -1312,6 +1312,10 @@ bool CLayerTele::ContainsElementWithId(int Id)
 	{
 		for(int x = 0; x < m_Width; ++x)
 		{
+			if(m_pTeleTile[y * m_Width + x].m_Type == TILE_TELECHECKIN)
+				continue;
+			if(m_pTeleTile[y * m_Width + x].m_Type == TILE_TELECHECKINEVIL)
+				continue;
 			if(m_pTeleTile[y * m_Width + x].m_Number == Id)
 			{
 				return true;
