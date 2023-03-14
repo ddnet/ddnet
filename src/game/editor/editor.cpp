@@ -4323,7 +4323,7 @@ void CEditor::RenderFileDialog()
 			m_SortByTimeModified = 1;
 		}
 
-		SortFilteredFileList();
+		RefreshFilteredFileList();
 	}
 
 	static int s_ButtonFileName = 0;
@@ -4334,13 +4334,15 @@ void CEditor::RenderFileDialog()
 		if(m_SortByFilename == 1)
 		{
 			m_SortByFilename = -1;
+			m_SortByTimeModified = 0;
 		}
 		else
 		{
 			m_SortByFilename = 1;
+			m_SortByTimeModified = 0;
 		}
 
-		SortFilteredFileList();
+		RefreshFilteredFileList();
 	}
 
 	Title.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 4.0f);
@@ -4672,6 +4674,7 @@ void CEditor::RefreshFilteredFileList()
 			m_vpFilteredFileList.push_back(&Item);
 		}
 	}
+	SortFilteredFileList();
 	if(!m_vpFilteredFileList.empty())
 	{
 		if(m_aFilesSelectedName[0])
@@ -4711,7 +4714,6 @@ void CEditor::FilelistPopulate(int StorageType, bool KeepSelection)
 	}
 	Storage()->ListDirectoryInfo(StorageType, m_pFileDialogPath, EditorListdirCallback, this);
 	RefreshFilteredFileList();
-	SortFilteredFileList();
 	if(!KeepSelection)
 	{
 		m_FilesSelectedIndex = m_vpFilteredFileList.empty() ? -1 : 0;
