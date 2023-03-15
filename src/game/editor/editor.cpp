@@ -498,6 +498,23 @@ int CEditor::DoButton_ColorPicker(const void *pID, const CUIRect *pRect, ColorRG
 	return DoButton_Editor_Common(pID, nullptr, 0, pRect, 0, pToolTip);
 }
 
+int CEditor::DoButton_DraggableEx(const void *pID, const char *pText, int Checked, const CUIRect *pRect, bool *pClicked, bool *pAbrupted, int Flags, const char *pToolTip, int Corners, float FontSize, int AlignVert)
+{
+	pRect->Draw(GetButtonColor(pID, Checked), Corners, 3.0f);
+	SLabelProperties Props;
+	Props.m_AlignVertically = AlignVert;
+	UI()->DoLabel(pRect, pText, FontSize, TEXTALIGN_CENTER, Props);
+
+	if(UI()->MouseInside(pRect))
+	{
+		if(Flags & BUTTON_CONTEXT)
+			ms_pUiGotContext = pID;
+	}
+
+	UpdateTooltip(pID, pRect, pToolTip);
+	return UI()->DoDraggableButtonLogic(pID, Checked, pRect, pClicked, pAbrupted);
+}
+
 void CEditor::RenderGrid(CLayerGroup *pGroup)
 {
 	if(!m_GridActive)
@@ -3261,6 +3278,8 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 	const float RowHeight = 12.0f;
 	char aBuf[64];
 
+	CUIRect UnscrolledLayersBox = LayersBox;
+
 	static CScrollRegion s_ScrollRegion;
 	vec2 ScrollOffset(0.0f, 0.0f);
 	CScrollRegionParams ScrollParams;
@@ -3270,13 +3289,110 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 	s_ScrollRegion.Begin(&LayersBox, &ScrollOffset, &ScrollParams);
 	LayersBox.y += ScrollOffset.y;
 
+	enum
+	{
+		OP_NONE = 0,
+		OP_CLICK,
+		OP_LAYER_DRAG,
+		OP_GROUP_DRAG
+	};
+	static int s_Operation = OP_NONE;
+	static const void *s_pDraggedButton = 0;
+	static float s_InitialMouseY = 0;
+	static float s_InitialCutHeight = 0;
+	int GroupAfterDraggedLayer = -1;
+	int LayerAfterDraggedLayer = -1;
+	bool DraggedPositionFound = false;
+	bool MoveLayers = false;
+	bool MoveGroup = false;
+	bool StartDragLayer = false;
+	bool StartDragGroup = false;
+	std::vector<int> vButtonsPerGroup;
+
+	vButtonsPerGroup.reserve(m_Map.m_vpGroups.size());
+	for(CLayerGroup *pGroup : m_Map.m_vpGroups)
+	{
+		vButtonsPerGroup.push_back(pGroup->m_vpLayers.size() + 1);
+	}
+
+	if(!UI()->CheckActiveItem(s_pDraggedButton))
+		s_Operation = OP_NONE;
+
+	if(s_Operation == OP_LAYER_DRAG || s_Operation == OP_GROUP_DRAG)
+	{
+		float MinDraggableValue = UnscrolledLayersBox.y;
+		float MaxDraggableValue = MinDraggableValue;
+		for(int NumButtons : vButtonsPerGroup)
+		{
+			MaxDraggableValue += NumButtons * (RowHeight + 2.0f) + 5.0f;
+		}
+		MaxDraggableValue += ScrollOffset.y;
+
+		if(s_Operation == OP_GROUP_DRAG)
+		{
+			MaxDraggableValue -= vButtonsPerGroup[m_SelectedGroup] * (RowHeight + 2.0f) + 5.0f;
+		}
+		else if(s_Operation == OP_LAYER_DRAG)
+		{
+			MinDraggableValue += RowHeight + 2.0f;
+			MaxDraggableValue -= m_vSelectedLayers.size() * (RowHeight + 2.0f) + 5.0f;
+		}
+
+		UnscrolledLayersBox.HSplitTop(s_InitialCutHeight, nullptr, &UnscrolledLayersBox);
+		UnscrolledLayersBox.y -= s_InitialMouseY - UI()->MouseY();
+
+		UnscrolledLayersBox.y = clamp(UnscrolledLayersBox.y, MinDraggableValue, MaxDraggableValue);
+
+		UnscrolledLayersBox.w = LayersBox.w;
+	}
+
 	const bool ScrollToSelection = SelectLayerByTile();
 
 	// render layers
 	for(int g = 0; g < (int)m_Map.m_vpGroups.size(); g++)
 	{
+		if(s_Operation == OP_LAYER_DRAG && g > 0 && !DraggedPositionFound && UI()->MouseY() < LayersBox.y + RowHeight / 2)
+		{
+			DraggedPositionFound = true;
+			GroupAfterDraggedLayer = g;
+
+			LayerAfterDraggedLayer = m_Map.m_vpGroups[g - 1]->m_vpLayers.size();
+
+			CUIRect Slot;
+			LayersBox.HSplitTop(m_vSelectedLayers.size() * (RowHeight + 2.0f), &Slot, &LayersBox);
+			s_ScrollRegion.AddRect(Slot);
+		}
+
 		CUIRect Slot, VisibleToggle;
-		LayersBox.HSplitTop(RowHeight, &Slot, &LayersBox);
+		if(s_Operation == OP_GROUP_DRAG)
+		{
+			if(g == m_SelectedGroup)
+			{
+				UnscrolledLayersBox.HSplitTop(RowHeight, &Slot, &UnscrolledLayersBox);
+				UnscrolledLayersBox.HSplitTop(2.0f, nullptr, &UnscrolledLayersBox);
+			}
+			else if(!DraggedPositionFound && UI()->MouseY() < LayersBox.y + RowHeight * vButtonsPerGroup[g] / 2 + 3.0f)
+			{
+				DraggedPositionFound = true;
+				GroupAfterDraggedLayer = g;
+
+				CUIRect TmpSlot;
+				if(m_Map.m_vpGroups[m_SelectedGroup]->m_Collapse)
+					LayersBox.HSplitTop(RowHeight + 7.0f, &TmpSlot, &LayersBox);
+				else
+					LayersBox.HSplitTop(vButtonsPerGroup[m_SelectedGroup] * (RowHeight + 2.0f) + 5.0f, &TmpSlot, &LayersBox);
+				s_ScrollRegion.AddRect(TmpSlot, false);
+			}
+		}
+		if(s_Operation != OP_GROUP_DRAG || g != m_SelectedGroup)
+		{
+			LayersBox.HSplitTop(RowHeight, &Slot, &LayersBox);
+
+			CUIRect TmpRect;
+			LayersBox.HSplitTop(2.0f, &TmpRect, &LayersBox);
+			s_ScrollRegion.AddRect(TmpRect);
+		}
+
 		if(s_ScrollRegion.AddRect(Slot))
 		{
 			Slot.VSplitLeft(15.0f, &VisibleToggle, &Slot);
@@ -3287,32 +3403,61 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 			float FontSize = 10.0f;
 			while(TextRender()->TextWidth(FontSize, aBuf, -1, -1.0f) > Slot.w && FontSize >= 7.0f)
 				FontSize--;
-			if(int Result = DoButton_Ex(&m_Map.m_vpGroups[g], aBuf, g == m_SelectedGroup, &Slot,
+
+			bool Clicked;
+			bool Abrupted;
+			if(int Result = DoButton_DraggableEx(&m_Map.m_vpGroups[g], aBuf, g == m_SelectedGroup, &Slot, &Clicked, &Abrupted,
 				   BUTTON_CONTEXT, m_Map.m_vpGroups[g]->m_Collapse ? "Select group. Shift click to select all layers. Double click to expand." : "Select group. Shift click to select all layers. Double click to collapse.", IGraphics::CORNER_R, FontSize))
 			{
-				if(g != m_SelectedGroup)
-					SelectLayer(0, g);
-
-				if(Input()->ShiftIsPressed() && m_SelectedGroup == g)
+				if(s_Operation == OP_NONE)
 				{
-					m_vSelectedLayers.clear();
-					for(size_t i = 0; i < m_Map.m_vpGroups[g]->m_vpLayers.size(); i++)
-					{
-						AddSelectedLayer(i);
-					}
+					s_InitialMouseY = UI()->MouseY();
+					s_InitialCutHeight = s_InitialMouseY - UnscrolledLayersBox.y;
+					s_Operation = OP_CLICK;
+
+					if(g != m_SelectedGroup)
+						SelectLayer(0, g);
 				}
 
-				static int s_GroupPopupId = 0;
-				if(Result == 2)
-					UiInvokePopupMenu(&s_GroupPopupId, 0, UI()->MouseX(), UI()->MouseY(), 145, 256, PopupGroup);
+				if(Abrupted)
+					s_Operation = OP_NONE;
 
-				if(!m_Map.m_vpGroups[g]->m_vpLayers.empty() && Input()->MouseDoubleClick())
-					m_Map.m_vpGroups[g]->m_Collapse ^= 1;
+				if(s_Operation == OP_CLICK)
+				{
+					if(absolute(UI()->MouseY() - s_InitialMouseY) > 5)
+						StartDragGroup = true;
+
+					s_pDraggedButton = &m_Map.m_vpGroups[g];
+				}
+
+				if(s_Operation == OP_CLICK && Clicked)
+				{
+					if(g != m_SelectedGroup)
+						SelectLayer(0, g);
+
+					if(Input()->ShiftIsPressed() && m_SelectedGroup == g)
+					{
+						m_vSelectedLayers.clear();
+						for(size_t i = 0; i < m_Map.m_vpGroups[g]->m_vpLayers.size(); i++)
+						{
+							AddSelectedLayer(i);
+						}
+					}
+
+					static int s_GroupPopupId = 0;
+					if(Result == 2)
+						UiInvokePopupMenu(&s_GroupPopupId, 0, UI()->MouseX(), UI()->MouseY(), 145, 256, PopupGroup);
+
+					if(!m_Map.m_vpGroups[g]->m_vpLayers.empty() && Input()->MouseDoubleClick())
+						m_Map.m_vpGroups[g]->m_Collapse ^= 1;
+
+					s_Operation = OP_NONE;
+				}
+
+				if(s_Operation == OP_GROUP_DRAG && Clicked)
+					MoveGroup = true;
 			}
 		}
-
-		LayersBox.HSplitTop(2.0f, &Slot, &LayersBox);
-		s_ScrollRegion.AddRect(Slot);
 
 		for(int i = 0; i < (int)m_Map.m_vpGroups[g]->m_vpLayers.size(); i++)
 		{
@@ -3332,9 +3477,41 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 				}
 			}
 
-			LayersBox.HSplitTop(RowHeight + 2.0f, &Slot, &LayersBox);
-			if(!s_ScrollRegion.AddRect(Slot, ScrollToSelection && IsLayerSelected))
-				continue;
+			if(s_Operation == OP_GROUP_DRAG && g == m_SelectedGroup)
+			{
+				UnscrolledLayersBox.HSplitTop(RowHeight + 2.0f, &Slot, &UnscrolledLayersBox);
+			}
+			else if(s_Operation == OP_LAYER_DRAG)
+			{
+				if(IsLayerSelected)
+				{
+					UnscrolledLayersBox.HSplitTop(RowHeight + 2.0f, &Slot, &UnscrolledLayersBox);
+				}
+				else
+				{
+					if(!DraggedPositionFound && UI()->MouseY() < LayersBox.y + RowHeight / 2)
+					{
+						DraggedPositionFound = true;
+						GroupAfterDraggedLayer = g + 1;
+						LayerAfterDraggedLayer = i;
+						for(size_t j = 0; j < m_vSelectedLayers.size(); j++)
+						{
+							LayersBox.HSplitTop(RowHeight + 2.0f, nullptr, &LayersBox);
+							s_ScrollRegion.AddRect(Slot);
+						}
+					}
+					LayersBox.HSplitTop(RowHeight + 2.0f, &Slot, &LayersBox);
+					if(!s_ScrollRegion.AddRect(Slot, ScrollToSelection && IsLayerSelected))
+						continue;
+				}
+			}
+			else
+			{
+				LayersBox.HSplitTop(RowHeight + 2.0f, &Slot, &LayersBox);
+				if(!s_ScrollRegion.AddRect(Slot, ScrollToSelection && IsLayerSelected))
+					continue;
+			}
+
 			Slot.HSplitTop(RowHeight, &Slot, nullptr);
 
 			CUIRect Button;
@@ -3381,60 +3558,191 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 			{
 				Checked += 6;
 			}
-			if(int Result = DoButton_Ex(m_Map.m_vpGroups[g]->m_vpLayers[i], aBuf, Checked, &Button,
+
+			bool Clicked;
+			bool Abrupted;
+			if(int Result = DoButton_DraggableEx(m_Map.m_vpGroups[g]->m_vpLayers[i], aBuf, Checked, &Button, &Clicked, &Abrupted,
 				   BUTTON_CONTEXT, "Select layer. Shift click to select multiple.", IGraphics::CORNER_R, FontSize))
 			{
-				static CLayerPopupContext s_LayerPopupContext = {};
-				if(Result == 1)
+				if(s_Operation == OP_NONE)
 				{
-					if(Input()->ShiftIsPressed() && m_SelectedGroup == g)
-					{
-						auto Position = std::find(m_vSelectedLayers.begin(), m_vSelectedLayers.end(), i);
-						if(Position != m_vSelectedLayers.end())
-							m_vSelectedLayers.erase(Position);
-						else
-							AddSelectedLayer(i);
-					}
-					else if(!Input()->ShiftIsPressed())
+					s_InitialMouseY = UI()->MouseY();
+					s_InitialCutHeight = s_InitialMouseY - UnscrolledLayersBox.y;
+					s_Operation = OP_CLICK;
+
+					if(!Input()->ShiftIsPressed() && !IsLayerSelected)
 					{
 						SelectLayer(i, g);
 					}
 				}
-				else if(Result == 2)
-				{
-					if(!IsLayerSelected)
-					{
-						SelectLayer(i, g);
-					}
 
-					if(m_vSelectedLayers.size() > 1)
+				if(Abrupted)
+					s_Operation = OP_NONE;
+
+				if(s_Operation == OP_CLICK)
+				{
+					if(absolute(UI()->MouseY() - s_InitialMouseY) > 5)
 					{
-						bool AllTile = true;
-						for(size_t j = 0; AllTile && j < m_vSelectedLayers.size(); j++)
+						bool EntitiesLayerSelected = false;
+						for(int k : m_vSelectedLayers)
 						{
-							if(m_Map.m_vpGroups[m_SelectedGroup]->m_vpLayers[m_vSelectedLayers[j]]->m_Type == LAYERTYPE_TILES)
-								s_LayerPopupContext.m_vpLayers.push_back((CLayerTiles *)m_Map.m_vpGroups[m_SelectedGroup]->m_vpLayers[m_vSelectedLayers[j]]);
-							else
-								AllTile = false;
+							if(m_Map.m_vpGroups[m_SelectedGroup]->m_vpLayers[k]->IsEntitiesLayer())
+								EntitiesLayerSelected = true;
 						}
 
-						// Don't allow editing if all selected layers are tile layers
-						if(!AllTile)
-							s_LayerPopupContext.m_vpLayers.clear();
+						if(!EntitiesLayerSelected)
+							StartDragLayer = true;
 					}
-					else
-						s_LayerPopupContext.m_vpLayers.clear();
 
-					UiInvokePopupMenu(&s_LayerPopupContext, 0, UI()->MouseX(), UI()->MouseY(), 120, 320, PopupLayer, &s_LayerPopupContext);
+					s_pDraggedButton = m_Map.m_vpGroups[g]->m_vpLayers[i];
+				}
+
+				if(s_Operation == OP_CLICK && Clicked)
+				{
+					static CLayerPopupContext s_LayerPopupContext = {};
+					if(Result == 1)
+					{
+						if(Input()->ShiftIsPressed() && m_SelectedGroup == g)
+						{
+							auto Position = std::find(m_vSelectedLayers.begin(), m_vSelectedLayers.end(), i);
+							if(Position != m_vSelectedLayers.end())
+								m_vSelectedLayers.erase(Position);
+							else
+								AddSelectedLayer(i);
+						}
+						else if(!Input()->ShiftIsPressed())
+						{
+							SelectLayer(i, g);
+						}
+					}
+					else if(Result == 2)
+					{
+						if(!IsLayerSelected)
+						{
+							SelectLayer(i, g);
+						}
+
+						if(m_vSelectedLayers.size() > 1)
+						{
+							bool AllTile = true;
+							for(size_t j = 0; AllTile && j < m_vSelectedLayers.size(); j++)
+							{
+								if(m_Map.m_vpGroups[m_SelectedGroup]->m_vpLayers[m_vSelectedLayers[j]]->m_Type == LAYERTYPE_TILES)
+									s_LayerPopupContext.m_vpLayers.push_back((CLayerTiles *)m_Map.m_vpGroups[m_SelectedGroup]->m_vpLayers[m_vSelectedLayers[j]]);
+								else
+									AllTile = false;
+							}
+
+							// Don't allow editing if all selected layers are tile layers
+							if(!AllTile)
+								s_LayerPopupContext.m_vpLayers.clear();
+						}
+						else
+							s_LayerPopupContext.m_vpLayers.clear();
+
+						UiInvokePopupMenu(&s_LayerPopupContext, 0, UI()->MouseX(), UI()->MouseY(), 120, 320, PopupLayer, &s_LayerPopupContext);
+					}
+
+					s_Operation = OP_NONE;
+				}
+
+				if(s_Operation == OP_LAYER_DRAG && Clicked)
+				{
+					MoveLayers = true;
 				}
 			}
 		}
 
-		LayersBox.HSplitTop(5.0f, &Slot, &LayersBox);
-		s_ScrollRegion.AddRect(Slot);
+		if(s_Operation != OP_GROUP_DRAG || g != m_SelectedGroup)
+		{
+			LayersBox.HSplitTop(5.0f, &Slot, &LayersBox);
+			s_ScrollRegion.AddRect(Slot);
+		}
 	}
 
-	if(Input()->KeyPress(KEY_DOWN) && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0)
+	if(!DraggedPositionFound && s_Operation == OP_LAYER_DRAG)
+	{
+		GroupAfterDraggedLayer = m_Map.m_vpGroups.size();
+		LayerAfterDraggedLayer = m_Map.m_vpGroups[GroupAfterDraggedLayer - 1]->m_vpLayers.size();
+
+		CUIRect TmpSlot;
+		LayersBox.HSplitTop(m_vSelectedLayers.size() * (RowHeight + 2.0f), &TmpSlot, &LayersBox);
+		s_ScrollRegion.AddRect(TmpSlot);
+	}
+
+	if(!DraggedPositionFound && s_Operation == OP_GROUP_DRAG)
+	{
+		GroupAfterDraggedLayer = m_Map.m_vpGroups.size();
+
+		CUIRect TmpSlot;
+		if(m_Map.m_vpGroups[m_SelectedGroup]->m_Collapse)
+			LayersBox.HSplitTop(RowHeight + 7.0f, &TmpSlot, &LayersBox);
+		else
+			LayersBox.HSplitTop(vButtonsPerGroup[m_SelectedGroup] * (RowHeight + 2.0f) + 5.0f, &TmpSlot, &LayersBox);
+		s_ScrollRegion.AddRect(TmpSlot, false);
+	}
+
+	if(MoveLayers && 1 <= GroupAfterDraggedLayer && GroupAfterDraggedLayer <= (int)m_Map.m_vpGroups.size())
+	{
+		std::vector<CLayer *> &vpNewGroupLayers = m_Map.m_vpGroups[GroupAfterDraggedLayer - 1]->m_vpLayers;
+		if(0 <= LayerAfterDraggedLayer && LayerAfterDraggedLayer <= (int)vpNewGroupLayers.size())
+		{
+			std::vector<CLayer *> vpSelectedLayers;
+			std::vector<CLayer *> &vpSelectedGroupLayers = m_Map.m_vpGroups[m_SelectedGroup]->m_vpLayers;
+			CLayer *pNextLayer = nullptr;
+			if(LayerAfterDraggedLayer < (int)vpNewGroupLayers.size())
+				pNextLayer = vpNewGroupLayers[LayerAfterDraggedLayer];
+
+			std::sort(m_vSelectedLayers.begin(), m_vSelectedLayers.end(), std::greater<>());
+			for(int k : m_vSelectedLayers)
+			{
+				vpSelectedLayers.insert(vpSelectedLayers.begin(), vpSelectedGroupLayers[k]);
+			}
+			for(int k : m_vSelectedLayers)
+			{
+				vpSelectedGroupLayers.erase(vpSelectedGroupLayers.begin() + k);
+			}
+
+			auto InsertPosition = std::find(vpNewGroupLayers.begin(), vpNewGroupLayers.end(), pNextLayer);
+			vpNewGroupLayers.insert(InsertPosition, vpSelectedLayers.begin(), vpSelectedLayers.end());
+
+			m_SelectedGroup = GroupAfterDraggedLayer - 1;
+			m_vSelectedLayers.clear();
+			m_vSelectedQuads.clear();
+			m_Map.m_Modified = true;
+		}
+	}
+
+	if(MoveGroup && 0 <= GroupAfterDraggedLayer && GroupAfterDraggedLayer <= (int)m_Map.m_vpGroups.size())
+	{
+		CLayerGroup *pSelectedGroup = m_Map.m_vpGroups[m_SelectedGroup];
+		CLayerGroup *pNextGroup = nullptr;
+		if(GroupAfterDraggedLayer < (int)m_Map.m_vpGroups.size())
+			pNextGroup = m_Map.m_vpGroups[GroupAfterDraggedLayer];
+
+		m_Map.m_vpGroups.erase(m_Map.m_vpGroups.begin() + m_SelectedGroup);
+
+		auto InsertPosition = std::find(m_Map.m_vpGroups.begin(), m_Map.m_vpGroups.end(), pNextGroup);
+		m_Map.m_vpGroups.insert(InsertPosition, pSelectedGroup);
+
+		m_SelectedGroup = GroupAfterDraggedLayer == 0 ? 0 : GroupAfterDraggedLayer - 1;
+		m_Map.m_Modified = true;
+	}
+
+	if(MoveLayers || MoveGroup)
+		s_Operation = OP_NONE;
+	if(StartDragLayer)
+		s_Operation = OP_LAYER_DRAG;
+	if(StartDragGroup)
+		s_Operation = OP_GROUP_DRAG;
+
+	if(s_Operation == OP_LAYER_DRAG || s_Operation == OP_GROUP_DRAG)
+	{
+		s_ScrollRegion.DoEdgeScrolling();
+		UI()->SetActiveItem(s_pDraggedButton);
+	}
+
+	if(Input()->KeyPress(KEY_DOWN) && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0 && s_Operation == OP_NONE)
 	{
 		if(Input()->ShiftIsPressed())
 		{
@@ -3465,7 +3773,7 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 			}
 		}
 	}
-	if(Input()->KeyPress(KEY_UP) && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0)
+	if(Input()->KeyPress(KEY_UP) && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0 && s_Operation == OP_NONE)
 	{
 		if(Input()->ShiftIsPressed())
 		{

@@ -341,6 +341,7 @@ public:
 	inline bool IsClipped() const { return !m_vClips.empty(); }
 
 	int DoButtonLogic(const void *pID, int Checked, const CUIRect *pRect);
+	int DoDraggableButtonLogic(const void *pID, int Checked, const CUIRect *pRect, bool *pClicked, bool *pAbrupted);
 	int DoPickerLogic(const void *pID, const CUIRect *pRect, float *pX, float *pY);
 	void DoSmoothScrollLogic(float *pScrollOffset, float *pScrollOffsetChange, float ViewPortSize, float TotalSize, float ScrollSpeed = 10.0f);
 

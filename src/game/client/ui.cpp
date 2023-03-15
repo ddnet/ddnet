@@ -401,6 +401,67 @@ int CUI::DoButtonLogic(const void *pID, int Checked, const CUIRect *pRect)
 	return ReturnValue;
 }
 
+int CUI::DoDraggableButtonLogic(const void *pID, int Checked, const CUIRect *pRect, bool *pClicked, bool *pAbrupted)
+{
+	// logic
+	int ReturnValue = 0;
+	const bool Inside = MouseHovered(pRect);
+	static int s_ButtonUsed = -1;
+
+	if(pClicked != nullptr)
+		*pClicked = false;
+	if(pAbrupted != nullptr)
+		*pAbrupted = false;
+
+	if(CheckActiveItem(pID))
+	{
+		if(s_ButtonUsed == 0)
+		{
+			if(Checked >= 0)
+				ReturnValue = 1 + s_ButtonUsed;
+			if(!MouseButton(s_ButtonUsed))
+			{
+				if(pClicked != nullptr)
+					*pClicked = true;
+				SetActiveItem(nullptr);
+				s_ButtonUsed = -1;
+			}
+			if(MouseButton(1))
+			{
+				if(pAbrupted != nullptr)
+					*pAbrupted = true;
+				SetActiveItem(nullptr);
+				s_ButtonUsed = -1;
+			}
+		}
+		else if(s_ButtonUsed > 0 && !MouseButton(s_ButtonUsed))
+		{
+			if(Inside && Checked >= 0)
+				ReturnValue = 1 + s_ButtonUsed;
+			if(pClicked != nullptr)
+				*pClicked = true;
+			SetActiveItem(nullptr);
+			s_ButtonUsed = -1;
+		}
+	}
+	else if(HotItem() == pID)
+	{
+		for(int i = 0; i < 3; ++i)
+		{
+			if(MouseButton(i))
+			{
+				SetActiveItem(pID);
+				s_ButtonUsed = i;
+			}
+		}
+	}
+
+	if(Inside && !MouseButton(0) && !MouseButton(1) && !MouseButton(2))
+		SetHotItem(pID);
+
+	return ReturnValue;
+}
+
 int CUI::DoPickerLogic(const void *pID, const CUIRect *pRect, float *pX, float *pY)
 {
 	if(MouseHovered(pRect))
