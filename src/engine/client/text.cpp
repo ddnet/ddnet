@@ -845,7 +845,7 @@ public:
 			*pAlignedHeight = Cursor.m_AlignedFontSize;
 		if(pMaxCharacterHeightInLine != nullptr)
 			*pMaxCharacterHeightInLine = Cursor.m_MaxCharacterHeight;
-		return Cursor.m_X;
+		return Cursor.m_LongestLineWidth;
 	}
 
 	int TextLineCount(float Size, const char *pText, float LineWidth) override
@@ -1416,8 +1416,7 @@ public:
 					LastCharWidth = CharWidth;
 				}
 
-				if(DrawX > pCursor->m_LongestLineWidth)
-					pCursor->m_LongestLineWidth = DrawX;
+				pCursor->m_LongestLineWidth = maximum(pCursor->m_LongestLineWidth, DrawX);
 			}
 
 			if(NewLine)
