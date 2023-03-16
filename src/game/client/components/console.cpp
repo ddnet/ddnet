@@ -324,8 +324,12 @@ void CGameConsole::CInstance::OnInput(IInput::CEvent Event)
 			{
 				if(m_Type == CONSOLETYPE_LOCAL || m_pGameConsole->Client()->RconAuthed())
 				{
-					char *pEntry = m_History.Allocate(m_Input.GetLength() + 1);
-					str_copy(pEntry, m_Input.GetString(), m_Input.GetLength() + 1);
+					const char *pPrevEntry = m_History.Last();
+					if(pPrevEntry == nullptr || str_comp(pPrevEntry, m_Input.GetString()) != 0)
+					{
+						char *pEntry = m_History.Allocate(m_Input.GetLength() + 1);
+						str_copy(pEntry, m_Input.GetString(), m_Input.GetLength() + 1);
+					}
 				}
 				ExecuteLine(m_Input.GetString());
 				m_Input.Clear();
