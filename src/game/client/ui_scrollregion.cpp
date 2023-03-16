@@ -13,11 +13,15 @@ CScrollRegion::CScrollRegion()
 {
 	m_ScrollY = 0.0f;
 	m_ContentH = 0.0f;
+	m_RequestScrollY = -1.0f;
+	m_ScrollDirection = SCROLLRELATIVE_NONE;
+	m_ScrollSpeedMultiplier = 1.0f;
+
 	m_AnimTimeMax = 0.0f;
 	m_AnimTime = 0.0f;
 	m_AnimInitScrollY = 0.0f;
 	m_AnimTargetScrollY = 0.0f;
-	m_RequestScrollY = -1.0f;
+
 	m_ContentScrollOff = vec2(0.0f, 0.0f);
 	m_Params = CScrollRegionParams();
 }
@@ -69,23 +73,30 @@ void CScrollRegion::End()
 	CUIRect RegionRect = m_ClipRect;
 	RegionRect.w += m_Params.m_ScrollbarWidth;
 
-	if(UI()->Enabled() && UI()->MouseHovered(&RegionRect))
+	if(m_ScrollDirection != SCROLLRELATIVE_NONE || (UI()->Enabled() && UI()->MouseHovered(&RegionRect)))
 	{
-		float ScrollDirection = 0.0f;
+		bool ProgrammaticScroll = false;
 		if(UI()->ConsumeHotkey(CUI::HOTKEY_SCROLL_UP))
-			ScrollDirection = -1.0f;
+			m_ScrollDirection = SCROLLRELATIVE_UP;
 		else if(UI()->ConsumeHotkey(CUI::HOTKEY_SCROLL_DOWN))
-			ScrollDirection = 1.0f;
+			m_ScrollDirection = SCROLLRELATIVE_DOWN;
+		else
+			ProgrammaticScroll = true;
 
-		if(ScrollDirection != 0.0f)
+		if(!ProgrammaticScroll)
+			m_ScrollSpeedMultiplier = 1.0f;
+
+		if(m_ScrollDirection != SCROLLRELATIVE_NONE)
 		{
 			const bool IsPageScroll = Input()->AltIsPressed();
-			const float ScrollUnit = IsPageScroll ? m_ClipRect.h : m_Params.m_ScrollUnit;
+			const float ScrollUnit = IsPageScroll && !ProgrammaticScroll ? m_ClipRect.h : m_Params.m_ScrollUnit;
 
 			m_AnimTimeMax = g_Config.m_UiSmoothScrollTime / 1000.0f;
 			m_AnimTime = m_AnimTimeMax;
 			m_AnimInitScrollY = m_ScrollY;
-			m_AnimTargetScrollY += ScrollDirection * ScrollUnit;
+			m_AnimTargetScrollY = (ProgrammaticScroll ? m_ScrollY : m_AnimTargetScrollY) + (int)m_ScrollDirection * ScrollUnit * m_ScrollSpeedMultiplier;
+			m_ScrollDirection = SCROLLRELATIVE_NONE;
+			m_ScrollSpeedMultiplier = 1.0f;
 		}
 	}
 
@@ -204,6 +215,28 @@ void CScrollRegion::ScrollHere(EScrollOption Option)
 			m_RequestScrollY = TopScroll - (m_ClipRect.h - MinHeight);
 		break;
 	}
+}
+
+void CScrollRegion::ScrollRelative(EScrollRelative Direction, float SpeedMultiplier)
+{
+	m_ScrollDirection = Direction;
+	m_ScrollSpeedMultiplier = SpeedMultiplier;
+}
+
+void CScrollRegion::DoEdgeScrolling()
+{
+	if(!IsScrollbarShown())
+		return;
+
+	const float ScrollBorderSize = 20.0f;
+	const float MaxScrollMultiplier = 2.0f;
+	const float ScrollSpeedFactor = MaxScrollMultiplier / ScrollBorderSize;
+	const float TopScrollPosition = m_ClipRect.y + ScrollBorderSize;
+	const float BottomScrollPosition = m_ClipRect.y + m_ClipRect.h - ScrollBorderSize;
+	if(UI()->MouseY() < TopScrollPosition)
+		ScrollRelative(SCROLLRELATIVE_UP, minimum(MaxScrollMultiplier, (TopScrollPosition - UI()->MouseY()) * ScrollSpeedFactor));
+	else if(UI()->MouseY() > BottomScrollPosition)
+		ScrollRelative(SCROLLRELATIVE_DOWN, minimum(MaxScrollMultiplier, (UI()->MouseY() - BottomScrollPosition) * ScrollSpeedFactor));
 }
 
 bool CScrollRegion::IsRectClipped(const CUIRect &Rect) const
