@@ -75,7 +75,7 @@ public:
 			char aVersionStr[128];
 			if(!os_version_str(aVersionStr, sizeof(aVersionStr)))
 			{
-				dbg_msg("engine", "operation system version: %s", aVersionStr);
+				dbg_msg("engine", "operating system version: %s", aVersionStr);
 			}
 
 			// init the network
