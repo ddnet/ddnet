@@ -73,7 +73,7 @@ public:
 #endif
 
 			char aVersionStr[128];
-			if(!os_version_str(aVersionStr, sizeof(aVersionStr)))
+			if(os_version_str(aVersionStr, sizeof(aVersionStr)))
 			{
 				dbg_msg("engine", "operating system version: %s", aVersionStr);
 			}

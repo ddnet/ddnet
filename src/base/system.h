@@ -2552,19 +2552,15 @@ int secure_rand();
 */
 int secure_rand_below(int below);
 
-/*
-	Function: os_version_str
-		Returns a human-readable version string of the operating system
-
-	Parameters:
-		version - Buffer to use for the output.
-		length - Length of the output buffer.
-
-	Returns:
-		0 - Success in getting the version.
-		1 - Failure in getting the version.
-*/
-int os_version_str(char *version, int length);
+/**
+ * Returns a human-readable version string of the operating system.
+ *
+ * @param version Buffer to use for the output.
+ * @param length Length of the output buffer.
+ *
+ * @return true on success, false on failure.
+ */
+bool os_version_str(char *version, size_t length);
 
 #if defined(CONF_EXCEPTION_HANDLING)
 void init_exception_handler();
