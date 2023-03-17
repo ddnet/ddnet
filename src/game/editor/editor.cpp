@@ -4884,6 +4884,7 @@ void CEditor::RenderFileDialog()
 			else
 				m_aFileDialogFileName[0] = '\0';
 			s_ListBox.ScrollToSelected();
+			m_PreviewImageState = PREVIEWIMAGE_UNLOADED;
 		}
 	}
 
