@@ -4899,6 +4899,7 @@ void CEditor::RenderFileDialog()
 	static int s_RefreshButton = 0;
 	static int s_NewFolderButton = 0;
 	static int s_MapInfoButton = 0;
+	static int s_ShowDirectoryButton = 0;
 
 	CUIRect Button;
 	ButtonBar.VSplitRight(50.0f, &ButtonBar, &Button);
@@ -4976,6 +4977,16 @@ void CEditor::RenderFileDialog()
 	ButtonBar.VSplitRight(50.0f, &ButtonBar, &Button);
 	if(DoButton_Editor(&s_RefreshButton, "Refresh", 0, &Button, 0, nullptr) || (s_ListBoxUsed && (Input()->KeyIsPressed(KEY_F5) || (Input()->ModifierIsPressed() && Input()->KeyIsPressed(KEY_R)))))
 		FilelistPopulate(m_FileDialogLastPopulatedStorageType, true);
+
+	ButtonBar.VSplitRight(40.0f, &ButtonBar, nullptr);
+	ButtonBar.VSplitRight(90.0f, &ButtonBar, &Button);
+	if(DoButton_Editor(&s_ShowDirectoryButton, "Show directory", 0, &Button, 0, "Open the current directory in the file browser"))
+	{
+		if(!open_file(aPath))
+		{
+			dbg_msg("editor", "couldn't open file '%s'", aPath);
+		}
+	}
 
 	if(m_FileDialogStorageType == IStorage::TYPE_SAVE)
 	{
