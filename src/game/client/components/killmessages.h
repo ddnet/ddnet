@@ -6,6 +6,11 @@
 
 #include <game/client/render.h>
 
+enum
+{
+	MAX_KILLMSGS = 5,
+	MAX_KILLMSGTEAM = 4,
+};
 class CKillMessages : public CComponent
 {
 	int m_SpriteQuadContainerIndex;
@@ -27,8 +32,7 @@ public:
 		char m_aVictimName[64];
 		int m_VictimTextContainerIndex;
 		float m_VitctimTextWidth;
-		CTeeRenderInfo m_VictimRenderInfo;
-
+		CTeeRenderInfo m_VictimRenderInfo[MAX_KILLMSGTEAM];
 		int m_KillerID;
 		int m_KillerTeam;
 		char m_aKillerName[64];
@@ -39,11 +43,7 @@ public:
 		int m_ModeSpecial; // for CTF, if the guy is carrying a flag for example
 		int m_Tick;
 		int m_FlagCarrierBlue;
-	};
-
-	enum
-	{
-		MAX_KILLMSGS = 5,
+		int m_TeamSize;
 	};
 
 private:
@@ -52,6 +52,12 @@ private:
 public:
 	CKillMsg m_aKillmsgs[MAX_KILLMSGS];
 	int m_KillmsgCurrent;
+
+	CTeeRenderInfo m_aVictimSkinBuffer[MAX_KILLMSGTEAM];
+	int m_VictimSkinCurrent;
+
+	bool m_Sendable;
+	int m_TeamSizeCarrier;
 
 	virtual int Sizeof() const override { return sizeof(*this); }
 	virtual void OnWindowResize() override;

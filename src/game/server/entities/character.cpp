@@ -906,7 +906,7 @@ bool CCharacter::IncreaseArmor(int Amount)
 	return true;
 }
 
-void CCharacter::Die(int Killer, int Weapon)
+void CCharacter::Die(int Killer, int Weapon, bool Single)
 {
 	if(Server()->IsRecording(m_pPlayer->GetCID()))
 		Server()->StopRecord(m_pPlayer->GetCID());
@@ -919,7 +919,24 @@ void CCharacter::Die(int Killer, int Weapon)
 		m_pPlayer->GetCID(), Server()->ClientName(m_pPlayer->GetCID()), Weapon, ModeSpecial);
 	GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
 
-	// send the kill message
+	// send the kill messages
+	if(Single)
+	{
+		CNetMsg_Sv_KillMsgPlus MsgPlus;
+
+		if(Team() != TEAM_FLOCK && Teams()->TeamSize(Team()) != 1 && Teams()->GetTeamState(Team()) != 1)
+		{
+			MsgPlus.m_Sendable = false;
+			MsgPlus.m_TeamSize = 0;
+		}
+		else
+		{
+			MsgPlus.m_Sendable = true;
+			MsgPlus.m_TeamSize = 1;
+		}
+		Server()->SendPackMsg(&MsgPlus, MSGFLAG_VITAL, -1);
+	}
+
 	CNetMsg_Sv_KillMsg Msg;
 	Msg.m_Killer = Killer;
 	Msg.m_Victim = m_pPlayer->GetCID();

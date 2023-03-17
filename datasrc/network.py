@@ -513,4 +513,9 @@ Messages = [
 		NetIntAny("m_ServerTimeBest"),
 		NetIntAny("m_PlayerTimeBest"),
 	]),
+    
+	NetMessageEx("Sv_KillMsgPlus", "killmsgplus@netmsg.ddnet.tw", [
+		NetBool("m_Sendable"),
+        NetIntRange("m_TeamSize", 0, 'MAX_CLIENTS'),
+	]),
 ]

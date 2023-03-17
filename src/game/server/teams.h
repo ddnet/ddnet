@@ -126,6 +126,8 @@ public:
 
 	int GetFirstEmptyTeam() const;
 
+	int TeamSize(int Team);
+
 	bool TeeStarted(int ClientID)
 	{
 		return m_aTeeStarted[ClientID];

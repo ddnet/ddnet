@@ -446,6 +446,12 @@ void CGameTeams::ChangeTeamState(int Team, int State)
 
 void CGameTeams::KillTeam(int Team, int NewStrongID, int ExceptID)
 {
+	int ShowcaseID = 0;
+	int First = 0;
+
+	if(NewStrongID != -1)
+		ShowcaseID = NewStrongID;
+
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		if(m_Core.Team(i) == Team && GameServer()->m_apPlayers[i])
@@ -453,7 +459,12 @@ void CGameTeams::KillTeam(int Team, int NewStrongID, int ExceptID)
 			GameServer()->m_apPlayers[i]->m_VotedForPractice = false;
 			if(i != ExceptID)
 			{
-				GameServer()->m_apPlayers[i]->KillCharacter(WEAPON_SELF);
+				GameServer()->m_apPlayers[i]->KillCharacter(WEAPON_SELF, false);
+
+				First++;
+				if(First == 1 && NewStrongID == -1)
+					ShowcaseID = i;
+
 				if(NewStrongID != -1 && i != NewStrongID)
 				{
 					GameServer()->m_apPlayers[i]->Respawn(true); // spawn the rest of team with weak hook on the killer
@@ -461,6 +472,19 @@ void CGameTeams::KillTeam(int Team, int NewStrongID, int ExceptID)
 			}
 		}
 	}
+
+	CNetMsg_Sv_KillMsgPlus MsgPlus;
+
+	MsgPlus.m_Sendable = true;
+	MsgPlus.m_TeamSize = TeamSize(Team);
+	Server()->SendPackMsg(&MsgPlus, MSGFLAG_VITAL, -1);
+
+	CNetMsg_Sv_KillMsg Msg;
+	Msg.m_Killer = ShowcaseID;
+	Msg.m_Victim = ShowcaseID;
+	Msg.m_Weapon = WEAPON_SELF;
+	Msg.m_ModeSpecial = 0;
+	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
 }
 
 bool CGameTeams::TeamFinished(int Team)
@@ -1137,4 +1161,15 @@ int CGameTeams::GetFirstEmptyTeam() const
 		if(m_aTeamState[i] == TEAMSTATE_EMPTY)
 			return i;
 	return -1;
+}
+
+int CGameTeams::TeamSize(int Team)
+{
+	int TeamSize = 0;
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(m_Core.Team(i) == Team && GameServer()->m_apPlayers[i])
+			TeamSize++;
+	}
+	return TeamSize;
 }
