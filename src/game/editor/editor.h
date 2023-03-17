@@ -902,6 +902,8 @@ public:
 	void LoadCurrentMap();
 	void Render();
 
+	void ResetMenuBackgroundPositions();
+
 	std::vector<CQuad *> GetSelectedQuads();
 	CLayer *GetSelectedLayerType(int Index, int Type) const;
 	CLayer *GetSelectedLayer(int Index) const;

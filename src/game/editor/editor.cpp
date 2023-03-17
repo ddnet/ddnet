@@ -2827,6 +2827,7 @@ void CEditor::DoMapEditor(CUIRect View)
 		// menu proof selection
 		if(m_MenuProofBorders && !m_ShowPicker)
 		{
+			ResetMenuBackgroundPositions();
 			for(int i = 0; i < (int)m_vMenuBackgroundPositions.size(); i++)
 			{
 				vec2 Pos = m_vMenuBackgroundPositions[i];
@@ -6911,15 +6912,7 @@ void CEditor::Init()
 
 	ms_PickerColor = ColorHSVA(1.0f, 0.0f, 0.0f);
 
-	m_vMenuBackgroundPositions = GenerateMenuBackgroundPositions();
-	for(size_t i = 0; i < m_vMenuBackgroundPositions.size(); i++)
-	{
-		for(size_t j = 0; j < m_vMenuBackgroundPositions.size(); j++)
-		{
-			if(i != j && distance(m_vMenuBackgroundPositions[i], m_vMenuBackgroundPositions[j]) < 0.001f)
-				m_vMenuBackgroundPositions[j] = vec2(0, 0);
-		}
-	}
+    ResetMenuBackgroundPositions();
 }
 
 void CEditor::PlaceBorderTiles()
@@ -7066,6 +7059,40 @@ void CEditor::LoadCurrentMap()
 }
 
 IEditor *CreateEditor() { return new CEditor; }
+
+void CEditor::ResetMenuBackgroundPositions()
+{
+	std::array<vec2, CMenuBackground::NUM_POS> aBackgroundPositions = GenerateMenuBackgroundPositions();
+	m_vMenuBackgroundPositions.assign(aBackgroundPositions.begin(), aBackgroundPositions.end());
+
+	CLayerGame *pLayer = m_Map.m_pGameLayer;
+	if(pLayer)
+	{
+		for(int y = 0; y < pLayer->m_Height; ++y)
+		{
+			for(int x = 0; x < pLayer->m_Width; ++x)
+			{
+				CTile Tile = pLayer->GetTile(x, y);
+				if(Tile.m_Index >= TILE_TIME_CHECKPOINT_FIRST && Tile.m_Index <= TILE_TIME_CHECKPOINT_LAST)
+				{
+					int ArrayIndex = clamp<int>((Tile.m_Index - TILE_TIME_CHECKPOINT_FIRST), 0, CMenuBackground::NUM_POS);
+					m_vMenuBackgroundPositions[ArrayIndex] = vec2(x * 32.0f + 16.0f, y * 32.0f + 16.0f);
+				}
+
+				x += Tile.m_Skip;
+			}
+		}
+	}
+
+	for(size_t i = 0; i < m_vMenuBackgroundPositions.size(); i++)
+	{
+		for(size_t j = 0; j < m_vMenuBackgroundPositions.size(); j++)
+		{
+			if(i != j && distance(m_vMenuBackgroundPositions[i], m_vMenuBackgroundPositions[j]) < 0.001f)
+				m_vMenuBackgroundPositions[j] = vec2(0, 0);
+		}
+	}
+}
 
 // DDRace
 

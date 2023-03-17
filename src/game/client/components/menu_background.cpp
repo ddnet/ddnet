@@ -19,9 +19,9 @@
 
 using namespace std::chrono_literals;
 
-std::vector<vec2> GenerateMenuBackgroundPositions()
+std::array<vec2, CMenuBackground::NUM_POS> GenerateMenuBackgroundPositions()
 {
-	std::vector<vec2> Positions(CMenuBackground::NUM_POS);
+	std::array<vec2, CMenuBackground::NUM_POS> Positions;
 
 	Positions[CMenuBackground::POS_START] = vec2(500.0f, 500.0f);
 	Positions[CMenuBackground::POS_BROWSER_INTERNET] = vec2(1000.0f, 1000.0f);
