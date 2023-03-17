@@ -28,6 +28,8 @@ public:
 	bool operator<(const CTheme &Other) const { return m_Name < Other.m_Name; }
 };
 
+std::vector<vec2> GenerateMenuBackgroundPositions();
+
 class CMenuBackground : public CBackground
 {
 	std::chrono::nanoseconds m_ThemeScanStartTime{0};
@@ -83,7 +85,7 @@ public:
 
 	vec2 m_MenuCenter;
 	vec2 m_RotationCenter;
-	vec2 m_aPositions[NUM_POS];
+	std::vector<vec2> m_aPositions;
 	int m_CurrentPosition;
 	vec2 m_AnimationStartPos;
 	bool m_ChangedPosition;

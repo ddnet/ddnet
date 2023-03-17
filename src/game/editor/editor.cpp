@@ -21,6 +21,7 @@
 #include <engine/textrender.h>
 
 #include <game/client/components/camera.h>
+#include <game/client/components/menu_background.h>
 #include <game/client/gameclient.h>
 #include <game/client/render.h>
 #include <game/client/ui.h>
@@ -919,7 +920,17 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 		if(DoButton_Editor(&s_ProofButton, "Proof", m_ProofBorders, &Button, 0, "[ctrl+p] Toggles proof borders. These borders represent what a player maximum can see.") ||
 			(m_Dialog == DIALOG_NONE && m_EditBoxActive == 0 && Input()->KeyPress(KEY_P) && ModPressed))
 		{
-			m_ProofBorders = !m_ProofBorders;
+			m_ProofBorders = !m_ProofBorders && !m_MenuProofBorders;
+		}
+
+		TB_Top.VSplitLeft(5.0f, nullptr, &TB_Top);
+
+		// menu proof button
+		TB_Top.VSplitLeft(60.0f, &Button, &TB_Top);
+		static int s_MenuProofButton = 0;
+		if(DoButton_Editor(&s_MenuProofButton, "Proof Menu", m_MenuProofBorders, &Button, 0, "Toggles menu proof borders. These borders represent what will be shown in the menu."))
+		{
+			m_MenuProofBorders = !m_MenuProofBorders && !m_ProofBorders;
 		}
 
 		TB_Top.VSplitLeft(5.0f, nullptr, &TB_Top);
@@ -1131,10 +1142,33 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 		{
 			TB_Bottom.VSplitLeft(45.0f, &Button, &TB_Bottom);
 			static int s_RefocusButton = 0;
-			if(DoButton_Editor(&s_RefocusButton, "Refocus", m_WorldOffsetX && m_WorldOffsetY ? 0 : -1, &Button, 0, "[HOME] Restore map focus") || (m_Dialog == DIALOG_NONE && m_EditBoxActive == 0 && Input()->KeyPress(KEY_HOME)))
+			int FocusButtonChecked;
+			if(m_MenuProofBorders)
 			{
-				m_WorldOffsetX = 0;
-				m_WorldOffsetY = 0;
+				if(distance(m_vMenuBackgroundPositions[m_CurrentMenuProofIndex], vec2(m_WorldOffsetX, m_WorldOffsetY)) < 0.0001f)
+					FocusButtonChecked = -1;
+				else
+					FocusButtonChecked = 1;
+			}
+			else
+			{
+				if(m_WorldOffsetX == 0 && m_WorldOffsetY == 0)
+					FocusButtonChecked = -1;
+				else
+					FocusButtonChecked = 1;
+			}
+			if(DoButton_Editor(&s_RefocusButton, "Refocus", FocusButtonChecked, &Button, 0, "[HOME] Restore map focus") || (m_Dialog == DIALOG_NONE && m_EditBoxActive == 0 && Input()->KeyPress(KEY_HOME)))
+			{
+				if(m_MenuProofBorders)
+				{
+					m_WorldOffsetX = m_vMenuBackgroundPositions[m_CurrentMenuProofIndex].x;
+					m_WorldOffsetY = m_vMenuBackgroundPositions[m_CurrentMenuProofIndex].y;
+				}
+				else
+				{
+					m_WorldOffsetX = 0;
+					m_WorldOffsetY = 0;
+				}
 			}
 			TB_Bottom.VSplitLeft(5.0f, nullptr, &TB_Bottom);
 		}
@@ -2790,6 +2824,44 @@ void CEditor::DoMapEditor(CUIRect View)
 			}
 		}
 
+		// menu proof selection
+		if(m_MenuProofBorders && !m_ShowPicker)
+		{
+			for(int i = 0; i < (int)m_vMenuBackgroundPositions.size(); i++)
+			{
+				vec2 Pos = m_vMenuBackgroundPositions[i];
+				if(i == m_CurrentMenuProofIndex || Pos == vec2(0, 0))
+					continue;
+
+				Pos += vec2(m_WorldOffsetX, m_WorldOffsetY) - m_vMenuBackgroundPositions[m_CurrentMenuProofIndex];
+				Pos.y -= 3.0f;
+
+				vec2 MousePos(m_MouseWorldNoParaX, m_MouseWorldNoParaY);
+				if(distance(Pos, MousePos) <= 20.0f)
+				{
+					UI()->SetHotItem(&m_vMenuBackgroundPositions[i]);
+
+					if(UI()->CheckActiveItem(&m_vMenuBackgroundPositions[i]))
+					{
+						if(!UI()->MouseButton(0))
+						{
+							m_CurrentMenuProofIndex = i;
+							m_WorldOffsetX = m_vMenuBackgroundPositions[i].x;
+							m_WorldOffsetY = m_vMenuBackgroundPositions[i].y;
+							UI()->SetActiveItem(nullptr);
+						}
+					}
+					else if(UI()->HotItem() == &m_vMenuBackgroundPositions[i])
+					{
+						m_pTooltip = "Switch proof position";
+
+						if(UI()->MouseButton(0))
+							UI()->SetActiveItem(&m_vMenuBackgroundPositions[i]);
+					}
+				}
+			}
+		}
+
 		// do panning
 		if(UI()->CheckActiveItem(s_pEditorID))
 		{
@@ -2860,7 +2932,7 @@ void CEditor::DoMapEditor(CUIRect View)
 	}
 
 	// render screen sizes
-	if(m_ProofBorders && !m_ShowPicker)
+	if((m_ProofBorders || m_MenuProofBorders) && !m_ShowPicker)
 	{
 		CLayerGroup *pGameGroup = m_Map.m_pGameGroup;
 		pGameGroup->MapScreen();
@@ -2878,9 +2950,10 @@ void CEditor::DoMapEditor(CUIRect View)
 			float aPoints[4];
 			float Aspect = Start + (End - Start) * (i / (float)NumSteps);
 
+			float Zoom = m_MenuProofBorders ? 0.7f : 1.0f;
 			RenderTools()->MapScreenToWorld(
 				m_WorldOffsetX, m_WorldOffsetY,
-				100.0f, 100.0f, 100.0f, 0.0f, 0.0f, Aspect, 1.0f, aPoints);
+				100.0f, 100.0f, 100.0f, 0.0f, 0.0f, Aspect, Zoom, aPoints);
 
 			if(i == 0)
 			{
@@ -2920,9 +2993,10 @@ void CEditor::DoMapEditor(CUIRect View)
 				const float aAspects[] = {4.0f / 3.0f, 16.0f / 10.0f, 5.0f / 4.0f, 16.0f / 9.0f};
 				float Aspect = aAspects[i];
 
+				float Zoom = m_MenuProofBorders ? 0.7f : 1.0f;
 				RenderTools()->MapScreenToWorld(
 					m_WorldOffsetX, m_WorldOffsetY,
-					100.0f, 100.0f, 100.0f, 0.0f, 0.0f, Aspect, 1.0f, aPoints);
+					100.0f, 100.0f, 100.0f, 0.0f, 0.0f, Aspect, Zoom, aPoints);
 
 				CUIRect r;
 				r.x = aPoints[0];
@@ -2941,12 +3015,29 @@ void CEditor::DoMapEditor(CUIRect View)
 		}
 		Graphics()->LinesEnd();
 
-		// tee position (blue circle)
+		// tee position (blue circle) and other screen positions
 		{
 			Graphics()->TextureClear();
 			Graphics()->QuadsBegin();
 			Graphics()->SetColor(0, 0, 1, 0.3f);
 			Graphics()->DrawCircle(m_WorldOffsetX, m_WorldOffsetY - 3.0f, 20.0f, 32);
+
+			if(m_MenuProofBorders)
+			{
+				Graphics()->SetColor(0, 1, 0, 0.3f);
+
+				for(int i = 0; i < (int)m_vMenuBackgroundPositions.size(); i++)
+				{
+					vec2 Pos = m_vMenuBackgroundPositions[i];
+					if(i == m_CurrentMenuProofIndex || Pos == vec2(0, 0))
+						continue;
+
+					Pos += vec2(m_WorldOffsetX, m_WorldOffsetY) - m_vMenuBackgroundPositions[m_CurrentMenuProofIndex];
+
+					Graphics()->DrawCircle(Pos.x, Pos.y - 3.0f, 20.0f, 32);
+				}
+			}
+
 			Graphics()->QuadsEnd();
 		}
 	}
@@ -6819,6 +6910,16 @@ void CEditor::Init()
 	m_Map.m_Modified = false;
 
 	ms_PickerColor = ColorHSVA(1.0f, 0.0f, 0.0f);
+
+	m_vMenuBackgroundPositions = GenerateMenuBackgroundPositions();
+	for(size_t i = 0; i < m_vMenuBackgroundPositions.size(); i++)
+	{
+		for(size_t j = 0; j < m_vMenuBackgroundPositions.size(); j++)
+		{
+			if(i != j && distance(m_vMenuBackgroundPositions[i], m_vMenuBackgroundPositions[j]) < 0.001f)
+				m_vMenuBackgroundPositions[j] = vec2(0, 0);
+		}
+	}
 }
 
 void CEditor::PlaceBorderTiles()
@@ -6896,6 +6997,21 @@ void CEditor::OnUpdate()
 		{
 			m_MouseWorldX = 0.0f;
 			m_MouseWorldY = 0.0f;
+		}
+
+		for(CLayerGroup *pGameGroup : m_Map.m_vpGroups)
+		{
+			if(!pGameGroup->m_GameGroup)
+				continue;
+
+			float aPoints[4];
+			pGameGroup->Mapping(aPoints);
+
+			float WorldWidth = aPoints[2] - aPoints[0];
+			float WorldHeight = aPoints[3] - aPoints[1];
+
+			m_MouseWorldNoParaX = aPoints[0] + WorldWidth * (s_MouseX / Graphics()->WindowWidth());
+			m_MouseWorldNoParaY = aPoints[1] + WorldHeight * (s_MouseY / Graphics()->WindowHeight());
 		}
 	}
 }
