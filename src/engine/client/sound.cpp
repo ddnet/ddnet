@@ -608,6 +608,8 @@ int CSound::LoadOpus(const char *pFilename)
 
 	SampleID = DecodeOpus(SampleID, pData, DataSize);
 	free(pData);
+	if(SampleID < 0)
+		return -1;
 
 	if(g_Config.m_Debug)
 		dbg_msg("sound/opus", "loaded %s", pFilename);
@@ -648,6 +650,8 @@ int CSound::LoadWV(const char *pFilename)
 
 	SampleID = DecodeWV(SampleID, pData, DataSize);
 	free(pData);
+	if(SampleID < 0)
+		return -1;
 
 	if(g_Config.m_Debug)
 		dbg_msg("sound/wv", "loaded %s", pFilename);
@@ -703,6 +707,8 @@ int CSound::LoadWVFromMem(const void *pData, unsigned DataSize, bool FromEditor 
 		return -1;
 
 	SampleID = DecodeWV(SampleID, pData, DataSize);
+	if(SampleID < 0)
+		return -1;
 
 	RateConvert(SampleID);
 	return SampleID;
