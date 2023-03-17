@@ -747,6 +747,13 @@ class CEditor : public IEditor
 
 	int GetTextureUsageFlag();
 
+	enum EPreviewImageState
+	{
+		PREVIEWIMAGE_UNLOADED,
+		PREVIEWIMAGE_LOADED,
+		PREVIEWIMAGE_ERROR,
+	};
+
 public:
 	class IInput *Input() { return m_pInput; }
 	class IClient *Client() { return m_pClient; }
@@ -808,7 +815,7 @@ public:
 		m_FilesSelectedIndex = -1;
 
 		m_FilePreviewImage.Invalidate();
-		m_PreviewImageIsLoaded = false;
+		m_PreviewImageState = PREVIEWIMAGE_UNLOADED;
 
 		m_SelectEntitiesImage = "DDNet";
 
@@ -979,7 +986,7 @@ public:
 	int m_FilesSelectedIndex;
 	char m_aFileDialogNewFolderName[IO_MAX_PATH_LENGTH];
 	IGraphics::CTextureHandle m_FilePreviewImage;
-	bool m_PreviewImageIsLoaded;
+	EPreviewImageState m_PreviewImageState;
 	CImageInfo m_FilePreviewImageInfo;
 	bool m_FileDialogOpening;
 
