@@ -676,6 +676,8 @@ int CSound::LoadOpusFromMem(const void *pData, unsigned DataSize, bool FromEdito
 		return -1;
 
 	SampleID = DecodeOpus(SampleID, pData, DataSize);
+	if(SampleID < 0)
+		return -1;
 
 	RateConvert(SampleID);
 	return SampleID;
