@@ -1034,61 +1034,44 @@ int CEditor::PopupNewFolder(CEditor *pEditor, CUIRect View, void *pContext)
 	View.HSplitBottom(10.0f, &View, nullptr);
 	View.HSplitBottom(20.0f, &View, &ButtonBar);
 
-	if(pEditor->m_aFileDialogErrString[0] == 0)
-	{
-		// interaction box
-		View.HSplitBottom(40.0f, &View, nullptr);
-		View.VMargin(40.0f, &View);
-		View.HSplitBottom(20.0f, &View, &Label);
-		static float s_FolderBox = 0;
-		pEditor->DoEditBox(&s_FolderBox, &Label, pEditor->m_aFileDialogNewFolderName, sizeof(pEditor->m_aFileDialogNewFolderName), 15.0f, &s_FolderBox);
-		View.HSplitBottom(20.0f, &View, &Label);
-		pEditor->UI()->DoLabel(&Label, "Name:", 10.0f, TEXTALIGN_LEFT);
+	// interaction box
+	View.HSplitBottom(40.0f, &View, nullptr);
+	View.VMargin(40.0f, &View);
+	View.HSplitBottom(20.0f, &View, &Label);
+	static float s_FolderBox = 0;
+	pEditor->DoEditBox(&s_FolderBox, &Label, pEditor->m_aFileDialogNewFolderName, sizeof(pEditor->m_aFileDialogNewFolderName), 15.0f, &s_FolderBox);
+	View.HSplitBottom(20.0f, &View, &Label);
+	pEditor->UI()->DoLabel(&Label, "Name:", 10.0f, TEXTALIGN_LEFT);
 
-		// button bar
-		ButtonBar.VSplitLeft(30.0f, nullptr, &ButtonBar);
-		ButtonBar.VSplitLeft(110.0f, &Label, &ButtonBar);
-		static int s_CreateButton = 0;
-		if(pEditor->DoButton_Editor(&s_CreateButton, "Create", 0, &Label, 0, nullptr) || pEditor->Input()->KeyPress(KEY_RETURN) || pEditor->Input()->KeyPress(KEY_KP_ENTER))
+	// button bar
+	ButtonBar.VSplitLeft(30.0f, nullptr, &ButtonBar);
+	ButtonBar.VSplitLeft(110.0f, &Label, &ButtonBar);
+	static int s_CreateButton = 0;
+	if(pEditor->DoButton_Editor(&s_CreateButton, "Create", 0, &Label, 0, nullptr) || pEditor->Input()->KeyPress(KEY_RETURN) || pEditor->Input()->KeyPress(KEY_KP_ENTER))
+	{
+		// create the folder
+		if(pEditor->m_aFileDialogNewFolderName[0])
 		{
-			// create the folder
-			if(pEditor->m_aFileDialogNewFolderName[0])
+			char aBuf[512];
+			str_format(aBuf, sizeof(aBuf), "%s/%s", pEditor->m_pFileDialogPath, pEditor->m_aFileDialogNewFolderName);
+			if(pEditor->Storage()->CreateFolder(aBuf, IStorage::TYPE_SAVE))
 			{
-				char aBuf[512];
-				str_format(aBuf, sizeof(aBuf), "%s/%s", pEditor->m_pFileDialogPath, pEditor->m_aFileDialogNewFolderName);
-				if(pEditor->Storage()->CreateFolder(aBuf, IStorage::TYPE_SAVE))
-				{
-					pEditor->FilelistPopulate(IStorage::TYPE_SAVE);
-					return 1;
-				}
-				else
-					str_copy(pEditor->m_aFileDialogErrString, "Unable to create the folder", sizeof(pEditor->m_aFileDialogErrString));
+				pEditor->FilelistPopulate(IStorage::TYPE_SAVE);
+				return 1;
+			}
+			else
+			{
+				char aError[64 + IO_MAX_PATH_LENGTH];
+				str_format(aError, sizeof(aError), "Failed to create the folder '%s'.", aBuf);
+				pEditor->ShowFileDialogError(aError);
 			}
 		}
-		ButtonBar.VSplitRight(30.0f, &ButtonBar, nullptr);
-		ButtonBar.VSplitRight(110.0f, &ButtonBar, &Label);
-		static int s_AbortButton = 0;
-		if(pEditor->DoButton_Editor(&s_AbortButton, "Abort", 0, &Label, 0, nullptr))
-			return 1;
 	}
-	else
-	{
-		// error text
-		View.HSplitTop(30.0f, nullptr, &View);
-		View.VMargin(40.0f, &View);
-		View.HSplitTop(20.0f, &Label, &View);
-		pEditor->UI()->DoLabel(&Label, "Error:", 10.0f, TEXTALIGN_LEFT);
-		View.HSplitTop(20.0f, &Label, &View);
-		SLabelProperties Props;
-		Props.m_MaxWidth = View.w;
-		pEditor->UI()->DoLabel(&Label, "Unable to create the folder", 10.0f, TEXTALIGN_LEFT, Props);
-
-		// button
-		ButtonBar.VMargin(ButtonBar.w / 2.0f - 55.0f, &ButtonBar);
-		static int s_CreateButton = 0;
-		if(pEditor->DoButton_Editor(&s_CreateButton, "Ok", 0, &ButtonBar, 0, nullptr))
-			return 1;
-	}
+	ButtonBar.VSplitRight(30.0f, &ButtonBar, nullptr);
+	ButtonBar.VSplitRight(110.0f, &ButtonBar, &Label);
+	static int s_AbortButton = 0;
+	if(pEditor->DoButton_Editor(&s_AbortButton, "Abort", 0, &Label, 0, nullptr))
+		return 1;
 
 	return 0;
 }
@@ -1233,7 +1216,10 @@ int CEditor::PopupEvent(CEditor *pEditor, CUIRect View, void *pContext)
 			pEditor->m_aFileName[0] = 0;
 		}
 		else if(pEditor->m_PopupEventType == POPEVENT_SAVE)
-			CEditor::CallbackSaveMap(pEditor->m_aFileSaveName, IStorage::TYPE_SAVE, pEditor);
+		{
+			if(!CallbackSaveMap(pEditor->m_aFileSaveName, IStorage::TYPE_SAVE, pEditor))
+				return 0; // don't close this popup on error, because it would close the error popup instead
+		}
 		else if(pEditor->m_PopupEventType == POPEVENT_PLACE_BORDER_TILES)
 			pEditor->PlaceBorderTiles();
 		pEditor->m_PopupEventWasActivated = false;

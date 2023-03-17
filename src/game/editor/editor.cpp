@@ -807,26 +807,43 @@ int CEditor::FindSelectedQuadIndex(int Index) const
 	return -1;
 }
 
-void CEditor::CallbackOpenMap(const char *pFileName, int StorageType, void *pUser)
+bool CEditor::CallbackOpenMap(const char *pFileName, int StorageType, void *pUser)
 {
 	CEditor *pEditor = (CEditor *)pUser;
 	if(pEditor->Load(pFileName, StorageType))
 	{
 		pEditor->m_ValidSaveFilename = StorageType == IStorage::TYPE_SAVE && pEditor->m_pFileDialogPath == pEditor->m_aFileDialogCurrentFolder;
 		pEditor->m_Dialog = DIALOG_NONE;
+		return true;
+	}
+	else
+	{
+		char aError[64 + IO_MAX_PATH_LENGTH];
+		str_format(aError, sizeof(aError), "Failed to load map from file '%s'.", pFileName);
+		pEditor->ShowFileDialogError(aError);
+		return false;
 	}
 }
 
-void CEditor::CallbackAppendMap(const char *pFileName, int StorageType, void *pUser)
+bool CEditor::CallbackAppendMap(const char *pFileName, int StorageType, void *pUser)
 {
 	CEditor *pEditor = (CEditor *)pUser;
-	if(!pEditor->Append(pFileName, StorageType))
+	if(pEditor->Append(pFileName, StorageType))
+	{
+		pEditor->m_Dialog = DIALOG_NONE;
+		return true;
+	}
+	else
+	{
 		pEditor->m_aFileName[0] = 0;
-
-	pEditor->m_Dialog = DIALOG_NONE;
+		char aError[64 + IO_MAX_PATH_LENGTH];
+		str_format(aError, sizeof(aError), "Failed to load map from file '%s'.", pFileName);
+		pEditor->ShowFileDialogError(aError);
+		return false;
+	}
 }
 
-void CEditor::CallbackSaveMap(const char *pFileName, int StorageType, void *pUser)
+bool CEditor::CallbackSaveMap(const char *pFileName, int StorageType, void *pUser)
 {
 	CEditor *pEditor = static_cast<CEditor *>(pUser);
 	char aBuf[1024];
@@ -842,12 +859,19 @@ void CEditor::CallbackSaveMap(const char *pFileName, int StorageType, void *pUse
 		str_copy(pEditor->m_aFileName, pFileName, sizeof(pEditor->m_aFileName));
 		pEditor->m_ValidSaveFilename = StorageType == IStorage::TYPE_SAVE && pEditor->m_pFileDialogPath == pEditor->m_aFileDialogCurrentFolder;
 		pEditor->m_Map.m_Modified = false;
+		pEditor->m_Dialog = DIALOG_NONE;
+		return true;
 	}
-
-	pEditor->m_Dialog = DIALOG_NONE;
+	else
+	{
+		char aError[64 + IO_MAX_PATH_LENGTH];
+		str_format(aError, sizeof(aError), "Failed to save map to file '%s'.", pFileName);
+		pEditor->ShowFileDialogError(aError);
+		return false;
+	}
 }
 
-void CEditor::CallbackSaveCopyMap(const char *pFileName, int StorageType, void *pUser)
+bool CEditor::CallbackSaveCopyMap(const char *pFileName, int StorageType, void *pUser)
 {
 	CEditor *pEditor = static_cast<CEditor *>(pUser);
 	char aBuf[1024];
@@ -861,9 +885,16 @@ void CEditor::CallbackSaveCopyMap(const char *pFileName, int StorageType, void *
 	if(pEditor->Save(pFileName))
 	{
 		pEditor->m_Map.m_Modified = false;
+		pEditor->m_Dialog = DIALOG_NONE;
+		return true;
 	}
-
-	pEditor->m_Dialog = DIALOG_NONE;
+	else
+	{
+		char aError[64 + IO_MAX_PATH_LENGTH];
+		str_format(aError, sizeof(aError), "Failed to save map to file '%s'.", pFileName);
+		pEditor->ShowFileDialogError(aError);
+		return false;
+	}
 }
 
 static int EntitiesListdirCallback(const char *pName, int IsDir, int StorageType, void *pUser)
@@ -3882,19 +3913,39 @@ bool CEditor::SelectLayerByTile()
 	return false;
 }
 
-void CEditor::ReplaceImage(const char *pFileName, int StorageType, void *pUser)
+bool CEditor::ReplaceImage(const char *pFileName, int StorageType, void *pUser)
 {
 	CEditor *pEditor = (CEditor *)pUser;
+
+	// check if we have that image already
+	char aBuf[128];
+	IStorage::StripPathAndExtension(pFileName, aBuf, sizeof(aBuf));
+	for(const auto &pImage : pEditor->m_Map.m_vpImages)
+	{
+		if(!str_comp(pImage->m_aName, aBuf))
+		{
+			char aError[64 + IO_MAX_PATH_LENGTH];
+			str_format(aError, sizeof(aError), "Image named '%s' was already added.", pImage->m_aName);
+			pEditor->ShowFileDialogError(aError);
+			return false;
+		}
+	}
+
 	CEditorImage ImgInfo(pEditor);
 	if(!pEditor->Graphics()->LoadPNG(&ImgInfo, pFileName, StorageType))
-		return;
+	{
+		char aError[64 + IO_MAX_PATH_LENGTH];
+		str_format(aError, sizeof(aError), "Failed to load image from file '%s'.", pFileName);
+		pEditor->ShowFileDialogError(aError);
+		return false;
+	}
 
 	CEditorImage *pImg = pEditor->m_Map.m_vpImages[pEditor->m_SelectedImage];
 	pEditor->Graphics()->UnloadTexture(&(pImg->m_Texture));
 	free(pImg->m_pData);
 	pImg->m_pData = nullptr;
 	*pImg = ImgInfo;
-	IStorage::StripPathAndExtension(pFileName, pImg->m_aName, sizeof(pImg->m_aName));
+	str_copy(pImg->m_aName, aBuf);
 	pImg->m_External = IsVanillaImage(pImg->m_aName);
 
 	if(!pImg->m_External && g_Config.m_ClEditorDilate == 1 && pImg->m_Format == CImageInfo::FORMAT_RGBA)
@@ -3919,14 +3970,12 @@ void CEditor::ReplaceImage(const char *pFileName, int StorageType, void *pUser)
 			pEditor->m_SelectedImage = i;
 	}
 	pEditor->m_Dialog = DIALOG_NONE;
+	return true;
 }
 
-void CEditor::AddImage(const char *pFileName, int StorageType, void *pUser)
+bool CEditor::AddImage(const char *pFileName, int StorageType, void *pUser)
 {
 	CEditor *pEditor = (CEditor *)pUser;
-	CEditorImage ImgInfo(pEditor);
-	if(!pEditor->Graphics()->LoadPNG(&ImgInfo, pFileName, StorageType))
-		return;
 
 	// check if we have that image already
 	char aBuf[128];
@@ -3934,14 +3983,28 @@ void CEditor::AddImage(const char *pFileName, int StorageType, void *pUser)
 	for(const auto &pImage : pEditor->m_Map.m_vpImages)
 	{
 		if(!str_comp(pImage->m_aName, aBuf))
-			return;
+		{
+			char aError[64 + IO_MAX_PATH_LENGTH];
+			str_format(aError, sizeof(aError), "Image named '%s' was already added.", pImage->m_aName);
+			pEditor->ShowFileDialogError(aError);
+			return false;
+		}
 	}
 
 	if(pEditor->m_Map.m_vpImages.size() >= 64) // hard limit for teeworlds
 	{
-		pEditor->m_PopupEventType = pEditor->POPEVENT_IMAGE_MAX;
+		pEditor->m_PopupEventType = POPEVENT_IMAGE_MAX;
 		pEditor->m_PopupEventActivated = true;
-		return;
+		return false;
+	}
+
+	CEditorImage ImgInfo(pEditor);
+	if(!pEditor->Graphics()->LoadPNG(&ImgInfo, pFileName, StorageType))
+	{
+		char aError[64 + IO_MAX_PATH_LENGTH];
+		str_format(aError, sizeof(aError), "Failed to load image from file '%s'.", pFileName);
+		pEditor->ShowFileDialogError(aError);
+		return false;
 	}
 
 	CEditorImage *pImg = new CEditorImage(pEditor);
@@ -3976,9 +4039,10 @@ void CEditor::AddImage(const char *pFileName, int StorageType, void *pUser)
 			}
 	}
 	pEditor->m_Dialog = DIALOG_NONE;
+	return true;
 }
 
-void CEditor::AddSound(const char *pFileName, int StorageType, void *pUser)
+bool CEditor::AddSound(const char *pFileName, int StorageType, void *pUser)
 {
 	CEditor *pEditor = (CEditor *)pUser;
 
@@ -3988,7 +4052,12 @@ void CEditor::AddSound(const char *pFileName, int StorageType, void *pUser)
 	for(const auto &pSound : pEditor->m_Map.m_vpSounds)
 	{
 		if(!str_comp(pSound->m_aName, aBuf))
-			return;
+		{
+			char aError[64 + IO_MAX_PATH_LENGTH];
+			str_format(aError, sizeof(aError), "Sound named '%s' was already added.", pSound->m_aName);
+			pEditor->ShowFileDialogError(aError);
+			return false;
+		}
 	}
 
 	// load external
@@ -3996,16 +4065,21 @@ void CEditor::AddSound(const char *pFileName, int StorageType, void *pUser)
 	unsigned DataSize;
 	if(!pEditor->Storage()->ReadFile(pFileName, StorageType, &pData, &DataSize))
 	{
-		dbg_msg("sound/opus", "failed to open file. filename='%s'", pFileName);
-		return;
+		char aError[64 + IO_MAX_PATH_LENGTH];
+		str_format(aError, sizeof(aError), "Failed to open sound file '%s'.", pFileName);
+		pEditor->ShowFileDialogError(aError);
+		return false;
 	}
 
 	// load sound
-	int SoundId = pEditor->Sound()->LoadOpusFromMem(pData, (unsigned)DataSize, true);
+	const int SoundId = pEditor->Sound()->LoadOpusFromMem(pData, DataSize, true);
 	if(SoundId == -1)
 	{
 		free(pData);
-		return;
+		char aError[64 + IO_MAX_PATH_LENGTH];
+		str_format(aError, sizeof(aError), "Failed to load sound from file '%s'.", pFileName);
+		pEditor->ShowFileDialogError(aError);
+		return false;
 	}
 
 	// add sound
@@ -4027,19 +4101,47 @@ void CEditor::AddSound(const char *pFileName, int StorageType, void *pUser)
 	}
 
 	pEditor->m_Dialog = DIALOG_NONE;
+	return true;
 }
 
-void CEditor::ReplaceSound(const char *pFileName, int StorageType, void *pUser)
+bool CEditor::ReplaceSound(const char *pFileName, int StorageType, void *pUser)
 {
 	CEditor *pEditor = (CEditor *)pUser;
+
+	// check if we have that sound already
+	char aBuf[128];
+	IStorage::StripPathAndExtension(pFileName, aBuf, sizeof(aBuf));
+	for(const auto &pSound : pEditor->m_Map.m_vpSounds)
+	{
+		if(!str_comp(pSound->m_aName, aBuf))
+		{
+			char aError[64 + IO_MAX_PATH_LENGTH];
+			str_format(aError, sizeof(aError), "Sound named '%s' was already added.", pSound->m_aName);
+			pEditor->ShowFileDialogError(aError);
+			return false;
+		}
+	}
 
 	// load external
 	void *pData;
 	unsigned DataSize;
 	if(!pEditor->Storage()->ReadFile(pFileName, StorageType, &pData, &DataSize))
 	{
-		dbg_msg("sound/opus", "failed to open file. filename='%s'", pFileName);
-		return;
+		char aError[64 + IO_MAX_PATH_LENGTH];
+		str_format(aError, sizeof(aError), "Failed to open sound file '%s'.", pFileName);
+		pEditor->ShowFileDialogError(aError);
+		return false;
+	}
+
+	// load sound
+	const int SoundId = pEditor->Sound()->LoadOpusFromMem(pData, DataSize, true);
+	if(SoundId == -1)
+	{
+		free(pData);
+		char aError[64 + IO_MAX_PATH_LENGTH];
+		str_format(aError, sizeof(aError), "Failed to load sound from file '%s'.", pFileName);
+		pEditor->ShowFileDialogError(aError);
+		return false;
 	}
 
 	CEditorSound *pSound = pEditor->m_Map.m_vpSounds[pEditor->m_SelectedSound];
@@ -4047,15 +4149,15 @@ void CEditor::ReplaceSound(const char *pFileName, int StorageType, void *pUser)
 	// unload sample
 	pEditor->Sound()->UnloadSample(pSound->m_SoundID);
 	free(pSound->m_pData);
-	pSound->m_pData = nullptr;
 
 	// replace sound
-	IStorage::StripPathAndExtension(pFileName, pSound->m_aName, sizeof(pSound->m_aName));
-	pSound->m_SoundID = pEditor->Sound()->LoadOpusFromMem(pData, (unsigned)DataSize, true);
+	str_copy(pSound->m_aName, aBuf);
+	pSound->m_SoundID = SoundId;
 	pSound->m_pData = pData;
 	pSound->m_DataSize = DataSize;
 
 	pEditor->m_Dialog = DIALOG_NONE;
+	return true;
 }
 
 static int gs_ModifyIndexDeletedIndex;
@@ -4966,7 +5068,6 @@ void CEditor::RenderFileDialog()
 		if(DoButton_Editor(&s_NewFolderButton, "New folder", 0, &Button, 0, nullptr))
 		{
 			m_aFileDialogNewFolderName[0] = 0;
-			m_aFileDialogErrString[0] = 0;
 			static int s_NewFolderPopupID = 0;
 			UiInvokePopupMenu(&s_NewFolderPopupID, 0, Width / 2.0f - 200.0f, Height / 2.0f - 100.0f, 400.0f, 200.0f, PopupNewFolder);
 			UI()->SetActiveItem(nullptr);
@@ -4984,7 +5085,9 @@ void CEditor::RenderFileDialog()
 	{
 		if(!open_file(aPath))
 		{
-			dbg_msg("editor", "couldn't open file '%s'", aPath);
+			char aError[64 + IO_MAX_PATH_LENGTH];
+			str_format(aError, sizeof(aError), "Failed to open the directory '%s'.", aPath);
+			ShowFileDialogError(aError);
 		}
 	}
 
@@ -5068,7 +5171,7 @@ void CEditor::FilelistPopulate(int StorageType, bool KeepSelection)
 
 void CEditor::InvokeFileDialog(int StorageType, int FileType, const char *pTitle, const char *pButtonText,
 	const char *pBasePath, const char *pDefaultName,
-	void (*pfnFunc)(const char *pFileName, int StorageType, void *pUser), void *pUser)
+	bool (*pfnFunc)(const char *pFileName, int StorageType, void *pUser), void *pUser)
 {
 	UiClosePopupMenus();
 	m_FileDialogStorageType = StorageType;
@@ -5094,6 +5197,14 @@ void CEditor::InvokeFileDialog(int StorageType, int FileType, const char *pTitle
 
 	m_FileDialogOpening = true;
 	m_Dialog = DIALOG_FILE;
+}
+
+void CEditor::ShowFileDialogError(const char *pError)
+{
+	static SMessagePopupContext s_MessagePopupContext;
+	s_MessagePopupContext.ErrorColor();
+	str_copy(s_MessagePopupContext.m_aMessage, pError);
+	ShowPopupMessage(UI()->MouseX(), UI()->MouseY(), &s_MessagePopupContext);
 }
 
 void CEditor::RenderModebar(CUIRect View)

@@ -891,7 +891,8 @@ public:
 	void FilelistPopulate(int StorageType, bool KeepSelection = false);
 	void InvokeFileDialog(int StorageType, int FileType, const char *pTitle, const char *pButtonText,
 		const char *pBasepath, const char *pDefaultName,
-		void (*pfnFunc)(const char *pFilename, int StorageType, void *pUser), void *pUser);
+		bool (*pfnFunc)(const char *pFilename, int StorageType, void *pUser), void *pUser);
+	void ShowFileDialogError(const char *pError);
 
 	void Reset(bool CreateDefault = true);
 	bool Save(const char *pFilename) override;
@@ -966,7 +967,7 @@ public:
 	int m_FileDialogLastPopulatedStorageType;
 	const char *m_pFileDialogTitle;
 	const char *m_pFileDialogButtonText;
-	void (*m_pfnFileDialogFunc)(const char *pFileName, int StorageType, void *pUser);
+	bool (*m_pfnFileDialogFunc)(const char *pFileName, int StorageType, void *pUser);
 	void *m_pFileDialogUser;
 	char m_aFileDialogFileName[IO_MAX_PATH_LENGTH];
 	char m_aFileDialogCurrentFolder[IO_MAX_PATH_LENGTH];
@@ -977,7 +978,6 @@ public:
 	int m_FileDialogFileType;
 	int m_FilesSelectedIndex;
 	char m_aFileDialogNewFolderName[IO_MAX_PATH_LENGTH];
-	char m_aFileDialogErrString[64];
 	IGraphics::CTextureHandle m_FilePreviewImage;
 	bool m_PreviewImageIsLoaded;
 	CImageInfo m_FilePreviewImageInfo;
@@ -1248,10 +1248,10 @@ public:
 	static int PopupSelection(CEditor *pEditor, CUIRect View, void *pContext);
 	void ShowPopupSelection(float X, float Y, SSelectionPopupContext *pContext);
 
-	static void CallbackOpenMap(const char *pFileName, int StorageType, void *pUser);
-	static void CallbackAppendMap(const char *pFileName, int StorageType, void *pUser);
-	static void CallbackSaveMap(const char *pFileName, int StorageType, void *pUser);
-	static void CallbackSaveCopyMap(const char *pFileName, int StorageType, void *pUser);
+	static bool CallbackOpenMap(const char *pFileName, int StorageType, void *pUser);
+	static bool CallbackAppendMap(const char *pFileName, int StorageType, void *pUser);
+	static bool CallbackSaveMap(const char *pFileName, int StorageType, void *pUser);
+	static bool CallbackSaveCopyMap(const char *pFileName, int StorageType, void *pUser);
 
 	void PopupSelectImageInvoke(int Current, float x, float y);
 	int PopupSelectImageResult();
@@ -1280,10 +1280,10 @@ public:
 	void DoQuad(CQuad *pQuad, int Index);
 	ColorRGBA GetButtonColor(const void *pID, int Checked);
 
-	static void ReplaceImage(const char *pFilename, int StorageType, void *pUser);
-	static void ReplaceSound(const char *pFileName, int StorageType, void *pUser);
-	static void AddImage(const char *pFilename, int StorageType, void *pUser);
-	static void AddSound(const char *pFileName, int StorageType, void *pUser);
+	static bool ReplaceImage(const char *pFilename, int StorageType, void *pUser);
+	static bool ReplaceSound(const char *pFileName, int StorageType, void *pUser);
+	static bool AddImage(const char *pFilename, int StorageType, void *pUser);
+	static bool AddSound(const char *pFileName, int StorageType, void *pUser);
 
 	bool IsEnvelopeUsed(int EnvelopeIndex) const;
 	void RemoveUnusedEnvelopes();
