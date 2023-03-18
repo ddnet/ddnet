@@ -2831,7 +2831,7 @@ void CEditor::DoMapEditor(CUIRect View)
 			for(int i = 0; i < (int)m_vMenuBackgroundPositions.size(); i++)
 			{
 				vec2 Pos = m_vMenuBackgroundPositions[i];
-				if(i == m_CurrentMenuProofIndex || Pos == vec2(0, 0))
+				if(Pos == vec2(0, 0))
 					continue;
 
 				Pos += vec2(m_WorldOffsetX, m_WorldOffsetY) - m_vMenuBackgroundPositions[m_CurrentMenuProofIndex];
@@ -2842,7 +2842,7 @@ void CEditor::DoMapEditor(CUIRect View)
 				{
 					UI()->SetHotItem(&m_vMenuBackgroundPositions[i]);
 
-					if(UI()->CheckActiveItem(&m_vMenuBackgroundPositions[i]))
+					if(i != m_CurrentMenuProofIndex && UI()->CheckActiveItem(&m_vMenuBackgroundPositions[i]))
 					{
 						if(!UI()->MouseButton(0))
 						{
@@ -2854,8 +2854,18 @@ void CEditor::DoMapEditor(CUIRect View)
 					}
 					else if(UI()->HotItem() == &m_vMenuBackgroundPositions[i])
 					{
-						m_pTooltip = "Switch proof position";
+						char aNumBuf[8];
+						if(i < (TILE_TIME_CHECKPOINT_LAST - TILE_TIME_CHECKPOINT_FIRST))
+							str_format(aNumBuf, sizeof(aNumBuf), "#%d", i + 1);
+						else
+							aNumBuf[0] = '\0';
 
+						if(i == m_CurrentMenuProofIndex)
+							str_format(m_aMenuBackgroundTooltip, sizeof(m_aMenuBackgroundTooltip), "Current proof position is %s %s", m_vpMenuBackgroundPositionNames[i], aNumBuf);
+						else
+							str_format(m_aMenuBackgroundTooltip, sizeof(m_aMenuBackgroundTooltip), "Switch proof position to %s %s", m_vpMenuBackgroundPositionNames[i], aNumBuf);
+
+						m_pTooltip = m_aMenuBackgroundTooltip;
 						if(UI()->MouseButton(0))
 							UI()->SetActiveItem(&m_vMenuBackgroundPositions[i]);
 					}
@@ -6912,7 +6922,33 @@ void CEditor::Init()
 
 	ms_PickerColor = ColorHSVA(1.0f, 0.0f, 0.0f);
 
-    ResetMenuBackgroundPositions();
+	ResetMenuBackgroundPositions();
+	m_vpMenuBackgroundPositionNames.resize(CMenuBackground::NUM_POS);
+	m_vpMenuBackgroundPositionNames[CMenuBackground::POS_START] = "start";
+	m_vpMenuBackgroundPositionNames[CMenuBackground::POS_BROWSER_INTERNET] = "browser(internet)";
+	m_vpMenuBackgroundPositionNames[CMenuBackground::POS_BROWSER_LAN] = "browser(lan)";
+	m_vpMenuBackgroundPositionNames[CMenuBackground::POS_DEMOS] = "demos";
+	m_vpMenuBackgroundPositionNames[CMenuBackground::POS_NEWS] = "news";
+	m_vpMenuBackgroundPositionNames[CMenuBackground::POS_BROWSER_FAVORITES] = "favorites";
+	m_vpMenuBackgroundPositionNames[CMenuBackground::POS_SETTINGS_LANGUAGE] = "settings(language)";
+	m_vpMenuBackgroundPositionNames[CMenuBackground::POS_SETTINGS_GENERAL] = "settings(general)";
+	m_vpMenuBackgroundPositionNames[CMenuBackground::POS_SETTINGS_PLAYER] = "settings(player)";
+	m_vpMenuBackgroundPositionNames[CMenuBackground::POS_SETTINGS_TEE] = "settings(tee)";
+	m_vpMenuBackgroundPositionNames[CMenuBackground::POS_SETTINGS_APPEARANCE] = "settings(appearance)";
+	m_vpMenuBackgroundPositionNames[CMenuBackground::POS_SETTINGS_CONTROLS] = "settings(controls)";
+	m_vpMenuBackgroundPositionNames[CMenuBackground::POS_SETTINGS_GRAPHICS] = "settings(graphics)";
+	m_vpMenuBackgroundPositionNames[CMenuBackground::POS_SETTINGS_SOUND] = "settings(sound)";
+	m_vpMenuBackgroundPositionNames[CMenuBackground::POS_SETTINGS_DDNET] = "settings(ddnet)";
+	m_vpMenuBackgroundPositionNames[CMenuBackground::POS_SETTINGS_ASSETS] = "settings(assets)";
+	m_vpMenuBackgroundPositionNames[CMenuBackground::POS_BROWSER_CUSTOM0] = "custom(ddnet)";
+	m_vpMenuBackgroundPositionNames[CMenuBackground::POS_BROWSER_CUSTOM1] = "custom(kog)";
+	m_vpMenuBackgroundPositionNames[CMenuBackground::POS_BROWSER_CUSTOM2] = "custom(3)";
+	m_vpMenuBackgroundPositionNames[CMenuBackground::POS_BROWSER_CUSTOM3] = "custom(4)";
+	m_vpMenuBackgroundPositionNames[CMenuBackground::POS_SETTINGS_RESERVED0] = "reserved settings(1)";
+	m_vpMenuBackgroundPositionNames[CMenuBackground::POS_SETTINGS_RESERVED0] = "reserved settings(2)";
+	m_vpMenuBackgroundPositionNames[CMenuBackground::POS_RESERVED0] = "reserved(1)";
+	m_vpMenuBackgroundPositionNames[CMenuBackground::POS_RESERVED1] = "reserved(2)";
+	m_vpMenuBackgroundPositionNames[CMenuBackground::POS_RESERVED2] = "reserved(3)";
 }
 
 void CEditor::PlaceBorderTiles()
@@ -7086,7 +7122,7 @@ void CEditor::ResetMenuBackgroundPositions()
 
 	for(size_t i = 0; i < m_vMenuBackgroundPositions.size(); i++)
 	{
-		for(size_t j = 0; j < m_vMenuBackgroundPositions.size(); j++)
+		for(size_t j = i + 1; j < m_vMenuBackgroundPositions.size(); j++)
 		{
 			if(i != j && distance(m_vMenuBackgroundPositions[i], m_vMenuBackgroundPositions[j]) < 0.001f)
 				m_vMenuBackgroundPositions[j] = vec2(0, 0);
