@@ -6871,7 +6871,6 @@ void CEditor::OnUpdate()
 		IInput::ECursorType CursorType = Input()->CursorRelative(&MouseRelX, &MouseRelY);
 		if(CursorType != IInput::CURSOR_NONE)
 			UI()->ConvertMouseMove(&MouseRelX, &MouseRelY, CursorType);
-		UI()->ResetMouseSlow();
 
 		m_MouseDeltaX += MouseRelX;
 		m_MouseDeltaY += MouseRelY;
@@ -6913,6 +6912,8 @@ void CEditor::OnUpdate()
 
 void CEditor::OnRender()
 {
+	UI()->ResetMouseSlow();
+
 	// toggle gui
 	if(m_Dialog == DIALOG_NONE && m_EditBoxActive == 0 && Input()->KeyPress(KEY_TAB))
 		m_GuiActive = !m_GuiActive;
