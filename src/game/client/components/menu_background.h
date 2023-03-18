@@ -4,6 +4,7 @@
 #include <game/client/components/background.h>
 #include <game/client/components/camera.h>
 
+#include <array>
 #include <chrono>
 #include <string>
 #include <vector>
