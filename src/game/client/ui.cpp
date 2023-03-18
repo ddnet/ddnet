@@ -476,6 +476,9 @@ int CUI::DoPickerLogic(const void *pID, const CUIRect *pRect, float *pX, float *
 	if(!CheckActiveItem(pID))
 		return 0;
 
+	if(Input()->ShiftIsPressed())
+		m_MouseSlow = true;
+
 	if(pX)
 		*pX = clamp(m_MouseX - pRect->x, 0.0f, pRect->w);
 	if(pY)
