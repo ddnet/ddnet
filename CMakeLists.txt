@@ -2290,6 +2290,7 @@ if(CLIENT)
     auto_map.h
     editor.cpp
     editor.h
+    envelopes.cpp
     explanations.cpp
     io.cpp
     layer_game.cpp

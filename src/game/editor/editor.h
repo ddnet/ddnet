@@ -841,6 +841,9 @@ public:
 
 		m_ShowEnvelopeEditor = 0;
 		m_ShowServerSettingsEditor = false;
+		m_EnvelopeSelectorSplit = 200.0f;
+		m_LastEnvelopeSelectorSplit = 38.0f;
+		m_NewEnvelopeType = -1;
 
 		m_ShowEnvelopePreview = SHOWENV_NONE;
 		m_SelectedQuadEnvelope = -1;
@@ -1087,6 +1090,9 @@ public:
 	float m_AnimateSpeed;
 
 	int m_ShowEnvelopeEditor;
+	float m_EnvelopeSelectorSplit;
+	float m_LastEnvelopeSelectorSplit;
+	int m_NewEnvelopeType;
 
 	enum EShowEnvelope
 	{
@@ -1197,6 +1203,8 @@ public:
 	static int PopupSource(CEditor *pEditor, CUIRect View, void *pContext);
 	static int PopupColorPicker(CEditor *pEditor, CUIRect View, void *pContext);
 	static int PopupEntities(CEditor *pEditor, CUIRect View, void *pContext);
+	static int PopupEnvelopeType(CEditor *pEditor, CUIRect View, void *pContext);
+	static int PopupEnvelope(CEditor *pEditor, CUIRect View, void *pContext);
 
 	struct SMessagePopupContext
 	{
@@ -1294,6 +1302,7 @@ public:
 	void RenderSounds(CUIRect Toolbox);
 	void RenderModebar(CUIRect View);
 	void RenderStatusbar(CUIRect View);
+	void RenderEnvelopeSelector(CUIRect View);
 	void RenderEnvelopeEditor(CUIRect View);
 	void RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEditorLast);
 

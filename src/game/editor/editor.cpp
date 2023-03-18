@@ -6342,8 +6342,12 @@ void CEditor::Render()
 			}
 		}
 
-		if(m_Mode == MODE_LAYERS)
+		if(m_Mode == MODE_LAYERS) {
+			CUIRect EnvelopeSelectorView;
+			ToolBox.HSplitBottom(m_EnvelopeSelectorSplit, &ToolBox, &EnvelopeSelectorView);
 			RenderLayers(ToolBox);
+			RenderEnvelopeSelector(EnvelopeSelectorView);
+		}
 		else if(m_Mode == MODE_IMAGES)
 		{
 			RenderImagesList(ToolBox);
