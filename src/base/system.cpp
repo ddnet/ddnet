@@ -2690,24 +2690,25 @@ int str_length(const char *str)
 	return (int)strlen(str);
 }
 
-int str_format(char *buffer, int buffer_size, const char *format, ...)
+int str_format_v(char *buffer, int buffer_size, const char *format, va_list args)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	va_list ap;
-	va_start(ap, format);
-	_vsprintf_p(buffer, buffer_size, format, ap);
-	va_end(ap);
-
+	_vsprintf_p(buffer, buffer_size, format, args);
 	buffer[buffer_size - 1] = 0; /* assure null termination */
 #else
-	va_list ap;
-	va_start(ap, format);
-	vsnprintf(buffer, buffer_size, format, ap);
-	va_end(ap);
-
+	vsnprintf(buffer, buffer_size, format, args);
 	/* null termination is assured by definition of vsnprintf */
 #endif
 	return str_utf8_fix_truncation(buffer);
+}
+
+int str_format(char *buffer, int buffer_size, const char *format, ...)
+{
+	va_list args;
+	va_start(args, format);
+	int length = str_format_v(buffer, buffer_size, format, args);
+	va_end(args);
+	return length;
 }
 
 const char *str_trim_words(const char *str, int words)

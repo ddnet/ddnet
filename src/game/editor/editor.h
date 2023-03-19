@@ -747,6 +747,13 @@ class CEditor : public IEditor
 
 	int GetTextureUsageFlag();
 
+	enum EPreviewImageState
+	{
+		PREVIEWIMAGE_UNLOADED,
+		PREVIEWIMAGE_LOADED,
+		PREVIEWIMAGE_ERROR,
+	};
+
 public:
 	class IInput *Input() { return m_pInput; }
 	class IClient *Client() { return m_pClient; }
@@ -808,7 +815,7 @@ public:
 		m_FilesSelectedIndex = -1;
 
 		m_FilePreviewImage.Invalidate();
-		m_PreviewImageIsLoaded = false;
+		m_PreviewImageState = PREVIEWIMAGE_UNLOADED;
 
 		m_SelectEntitiesImage = "DDNet";
 
@@ -891,7 +898,9 @@ public:
 	void FilelistPopulate(int StorageType, bool KeepSelection = false);
 	void InvokeFileDialog(int StorageType, int FileType, const char *pTitle, const char *pButtonText,
 		const char *pBasepath, const char *pDefaultName,
-		void (*pfnFunc)(const char *pFilename, int StorageType, void *pUser), void *pUser);
+		bool (*pfnFunc)(const char *pFilename, int StorageType, void *pUser), void *pUser);
+	void ShowFileDialogError(const char *pFormat, ...)
+		GNUC_ATTRIBUTE((format(printf, 2, 3)));
 
 	void Reset(bool CreateDefault = true);
 	bool Save(const char *pFilename) override;
@@ -966,7 +975,7 @@ public:
 	int m_FileDialogLastPopulatedStorageType;
 	const char *m_pFileDialogTitle;
 	const char *m_pFileDialogButtonText;
-	void (*m_pfnFileDialogFunc)(const char *pFileName, int StorageType, void *pUser);
+	bool (*m_pfnFileDialogFunc)(const char *pFileName, int StorageType, void *pUser);
 	void *m_pFileDialogUser;
 	char m_aFileDialogFileName[IO_MAX_PATH_LENGTH];
 	char m_aFileDialogCurrentFolder[IO_MAX_PATH_LENGTH];
@@ -977,9 +986,8 @@ public:
 	int m_FileDialogFileType;
 	int m_FilesSelectedIndex;
 	char m_aFileDialogNewFolderName[IO_MAX_PATH_LENGTH];
-	char m_aFileDialogErrString[64];
 	IGraphics::CTextureHandle m_FilePreviewImage;
-	bool m_PreviewImageIsLoaded;
+	EPreviewImageState m_PreviewImageState;
 	CImageInfo m_FilePreviewImageInfo;
 	bool m_FileDialogOpening;
 
@@ -1202,7 +1210,7 @@ public:
 	{
 		static constexpr float POPUP_MAX_WIDTH = 200.0f;
 		static constexpr float POPUP_FONT_SIZE = 10.0f;
-		char m_aMessage[256];
+		char m_aMessage[1024];
 		ColorRGBA m_TextColor;
 
 		void DefaultColor(class ITextRender *pTextRender);
@@ -1248,10 +1256,10 @@ public:
 	static int PopupSelection(CEditor *pEditor, CUIRect View, void *pContext);
 	void ShowPopupSelection(float X, float Y, SSelectionPopupContext *pContext);
 
-	static void CallbackOpenMap(const char *pFileName, int StorageType, void *pUser);
-	static void CallbackAppendMap(const char *pFileName, int StorageType, void *pUser);
-	static void CallbackSaveMap(const char *pFileName, int StorageType, void *pUser);
-	static void CallbackSaveCopyMap(const char *pFileName, int StorageType, void *pUser);
+	static bool CallbackOpenMap(const char *pFileName, int StorageType, void *pUser);
+	static bool CallbackAppendMap(const char *pFileName, int StorageType, void *pUser);
+	static bool CallbackSaveMap(const char *pFileName, int StorageType, void *pUser);
+	static bool CallbackSaveCopyMap(const char *pFileName, int StorageType, void *pUser);
 
 	void PopupSelectImageInvoke(int Current, float x, float y);
 	int PopupSelectImageResult();
@@ -1280,10 +1288,10 @@ public:
 	void DoQuad(CQuad *pQuad, int Index);
 	ColorRGBA GetButtonColor(const void *pID, int Checked);
 
-	static void ReplaceImage(const char *pFilename, int StorageType, void *pUser);
-	static void ReplaceSound(const char *pFileName, int StorageType, void *pUser);
-	static void AddImage(const char *pFilename, int StorageType, void *pUser);
-	static void AddSound(const char *pFileName, int StorageType, void *pUser);
+	static bool ReplaceImage(const char *pFilename, int StorageType, void *pUser);
+	static bool ReplaceSound(const char *pFileName, int StorageType, void *pUser);
+	static bool AddImage(const char *pFilename, int StorageType, void *pUser);
+	static bool AddSound(const char *pFileName, int StorageType, void *pUser);
 
 	bool IsEnvelopeUsed(int EnvelopeIndex) const;
 	void RemoveUnusedEnvelopes();
