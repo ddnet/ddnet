@@ -1061,9 +1061,7 @@ int CEditor::PopupNewFolder(CEditor *pEditor, CUIRect View, void *pContext)
 			}
 			else
 			{
-				char aError[64 + IO_MAX_PATH_LENGTH];
-				str_format(aError, sizeof(aError), "Failed to create the folder '%s'.", aBuf);
-				pEditor->ShowFileDialogError(aError);
+				pEditor->ShowFileDialogError("Failed to create the folder '%s'.", aBuf);
 			}
 		}
 	}

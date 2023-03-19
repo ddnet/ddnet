@@ -899,7 +899,8 @@ public:
 	void InvokeFileDialog(int StorageType, int FileType, const char *pTitle, const char *pButtonText,
 		const char *pBasepath, const char *pDefaultName,
 		bool (*pfnFunc)(const char *pFilename, int StorageType, void *pUser), void *pUser);
-	void ShowFileDialogError(const char *pError);
+	void ShowFileDialogError(const char *pFormat, ...)
+		GNUC_ATTRIBUTE((format(printf, 2, 3)));
 
 	void Reset(bool CreateDefault = true);
 	bool Save(const char *pFilename) override;
@@ -1209,7 +1210,7 @@ public:
 	{
 		static constexpr float POPUP_MAX_WIDTH = 200.0f;
 		static constexpr float POPUP_FONT_SIZE = 10.0f;
-		char m_aMessage[256];
+		char m_aMessage[1024];
 		ColorRGBA m_TextColor;
 
 		void DefaultColor(class ITextRender *pTextRender);
