@@ -3,6 +3,11 @@
 data/
 !/data/
 
+*.supp
+integration_test.sh
+!/*.supp
+!/scripts/integration_test.sh
+
 docs/
 
 bundle/
