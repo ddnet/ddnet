@@ -3346,7 +3346,9 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 		UnscrolledLayersBox.w = LayersBox.w;
 	}
 
-	const bool ScrollToSelection = SelectLayerByTile();
+	static bool s_ScrollToSelectionNext = false;
+	const bool ScrollToSelection = SelectLayerByTile() || s_ScrollToSelectionNext;
+	s_ScrollToSelectionNext = false;
 
 	// render layers
 	for(int g = 0; g < (int)m_Map.m_vpGroups.size(); g++)
@@ -3772,6 +3774,7 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 				}
 			}
 		}
+		s_ScrollToSelectionNext = true;
 	}
 	if(Input()->KeyPress(KEY_UP) && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0 && s_Operation == OP_NONE)
 	{
@@ -3803,6 +3806,7 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 				}
 			}
 		}
+		s_ScrollToSelectionNext = true;
 	}
 
 	CUIRect AddGroupButton;
