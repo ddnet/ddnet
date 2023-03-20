@@ -14,12 +14,13 @@ class CLanguage
 {
 public:
 	CLanguage() = default;
-	CLanguage(const char *pName, const char *pFileName, int Code) :
-		m_Name(pName), m_FileName(pFileName), m_CountryCode(Code) {}
+	CLanguage(const char *pName, const char *pFileName, int Code, const std::vector<std::string> &vLanguageCodes) :
+		m_Name(pName), m_FileName(pFileName), m_CountryCode(Code), m_vLanguageCodes(vLanguageCodes) {}
 
 	std::string m_Name;
 	std::string m_FileName;
 	int m_CountryCode;
+	std::vector<std::string> m_vLanguageCodes;
 
 	bool operator<(const CLanguage &Other) const { return m_Name < Other.m_Name; }
 };

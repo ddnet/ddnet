@@ -38,65 +38,107 @@ CLocalizationDatabase::CLocalizationDatabase()
 void CLocalizationDatabase::LoadIndexfile(IStorage *pStorage, IConsole *pConsole)
 {
 	m_vLanguages.clear();
-	m_vLanguages.emplace_back("English", "", 826);
+
+	const std::vector<std::string> vEnglishLanguageCodes = {"en"};
+	m_vLanguages.emplace_back("English", "", 826, vEnglishLanguageCodes);
 
 	const char *pFilename = "languages/index.txt";
 	IOHANDLE File = pStorage->OpenFile(pFilename, IOFLAG_READ | IOFLAG_SKIP_BOM, IStorage::TYPE_ALL);
 	if(!File)
 	{
-		char aBuf[128];
-		str_format(aBuf, sizeof(aBuf), "couldn't open index file '%s'", pFilename);
+		char aBuf[64 + IO_MAX_PATH_LENGTH];
+		str_format(aBuf, sizeof(aBuf), "Couldn't open index file '%s'", pFilename);
 		pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "localization", aBuf);
 		return;
 	}
 
-	char aOrigin[128];
-	char aReplacement[128];
 	CLineReader LineReader;
 	LineReader.Init(File);
-	char *pLine;
+
+	const char *pLine;
 	while((pLine = LineReader.Get()))
 	{
 		if(!str_length(pLine) || pLine[0] == '#') // skip empty lines and comments
 			continue;
 
-		str_copy(aOrigin, pLine);
+		char aEnglishName[128];
+		str_copy(aEnglishName, pLine);
 
 		pLine = LineReader.Get();
 		if(!pLine)
 		{
-			pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "localization", "unexpected end of index file");
+			char aBuf[256];
+			str_format(aBuf, sizeof(aBuf), "Unexpected end of index file after language '%s'", aEnglishName);
+			pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "localization", aBuf);
 			break;
 		}
-
-		if(pLine[0] != '=' || pLine[1] != '=' || pLine[2] != ' ')
+		if(!str_startswith(pLine, "== "))
 		{
-			char aBuf[128];
-			str_format(aBuf, sizeof(aBuf), "malform replacement for index '%s'", aOrigin);
+			char aBuf[256];
+			str_format(aBuf, sizeof(aBuf), "Missing native name for language '%s'", aEnglishName);
+			pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "localization", aBuf);
+			(void)LineReader.Get();
+			(void)LineReader.Get();
+			continue;
+		}
+		char aNativeName[128];
+		str_copy(aNativeName, pLine + 3);
+
+		pLine = LineReader.Get();
+		if(!pLine)
+		{
+			char aBuf[256];
+			str_format(aBuf, sizeof(aBuf), "Unexpected end of index file after language '%s'", aEnglishName);
+			pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "localization", aBuf);
+			break;
+		}
+		if(!str_startswith(pLine, "== "))
+		{
+			char aBuf[256];
+			str_format(aBuf, sizeof(aBuf), "Missing country code for language '%s'", aEnglishName);
 			pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "localization", aBuf);
 			(void)LineReader.Get();
 			continue;
 		}
-		str_copy(aReplacement, pLine + 3);
+		char aCountryCode[128];
+		str_copy(aCountryCode, pLine + 3);
 
 		pLine = LineReader.Get();
 		if(!pLine)
 		{
-			pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "localization", "unexpected end of index file");
+			char aBuf[256];
+			str_format(aBuf, sizeof(aBuf), "Unexpected end of index file after language '%s'", aEnglishName);
+			pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "localization", aBuf);
 			break;
 		}
-
-		if(pLine[0] != '=' || pLine[1] != '=' || pLine[2] != ' ')
+		if(!str_startswith(pLine, "== "))
 		{
-			char aBuf[128];
-			str_format(aBuf, sizeof(aBuf), "malform replacement for index '%s'", aOrigin);
+			char aBuf[256];
+			str_format(aBuf, sizeof(aBuf), "Missing language codes for language '%s'", aEnglishName);
+			pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "localization", aBuf);
+			continue;
+		}
+		const char *pLanguageCodes = pLine + 3;
+		char aLanguageCode[256];
+		std::vector<std::string> vLanguageCodes;
+		while((pLanguageCodes = str_next_token(pLanguageCodes, ";", aLanguageCode, sizeof(aLanguageCode))))
+		{
+			if(aLanguageCode[0])
+			{
+				vLanguageCodes.emplace_back(aLanguageCode);
+			}
+		}
+		if(vLanguageCodes.empty())
+		{
+			char aBuf[256];
+			str_format(aBuf, sizeof(aBuf), "At least one language code required for language '%s'", aEnglishName);
 			pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "localization", aBuf);
 			continue;
 		}
 
 		char aFileName[IO_MAX_PATH_LENGTH];
-		str_format(aFileName, sizeof(aFileName), "languages/%s.txt", aOrigin);
-		m_vLanguages.emplace_back(aReplacement, aFileName, str_toint(pLine + 3));
+		str_format(aFileName, sizeof(aFileName), "languages/%s.txt", aEnglishName);
+		m_vLanguages.emplace_back(aNativeName, aFileName, str_toint(aCountryCode), vLanguageCodes);
 	}
 
 	io_close(File);

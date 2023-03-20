@@ -91,7 +91,7 @@ def check_folder(path):
 
 def languages():
 	with open("data/languages/index.txt", encoding="utf-8") as f:
-		index = decode(f, 2)
+		index = decode(f, 3)
 	langs = {"data/languages/"+key[0]+".txt" : [key[0]]+elements for key, elements in index.items()}
 	return langs
 
