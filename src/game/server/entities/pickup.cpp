@@ -173,7 +173,7 @@ void CPickup::Snap(int SnappingClient)
 		pChar = GameServer()->GetPlayerChar(GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID);
 
 	int SnappingClientVersion = GameServer()->GetClientVersion(SnappingClient);
-	bool Sixup = SnappingClientVersion == VERSION_NONE ? Server()->IsSixup(SnappingClient) : false;
+	bool Sixup = Server()->IsSixup(SnappingClient);
 
 	CNetObj_EntityEx *pEntData = 0;
 	if(SnappingClientVersion >= VERSION_DDNET_SWITCH && (m_Layer == LAYER_SWITCH || length(m_Core) > 0))
