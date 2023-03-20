@@ -101,7 +101,7 @@ void CInput::InitJoysticks()
 		OpenJoystick(i);
 	UpdateActiveJoystick();
 
-	Console()->Chain("joystick_guid", ConchainJoystickGuidChanged, this);
+	Console()->Chain("inp_controller_guid", ConchainJoystickGuidChanged, this);
 }
 
 bool CInput::OpenJoystick(int JoystickIndex)
@@ -145,7 +145,10 @@ void CInput::UpdateActiveJoystick()
 void CInput::ConchainJoystickGuidChanged(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	pfnCallback(pResult, pCallbackUserData);
-	static_cast<CInput *>(pUserData)->UpdateActiveJoystick();
+	if(pResult->NumArguments() == 1)
+	{
+		static_cast<CInput *>(pUserData)->UpdateActiveJoystick();
+	}
 }
 
 float CInput::GetJoystickDeadzone()
