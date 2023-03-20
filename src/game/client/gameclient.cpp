@@ -243,6 +243,9 @@ void CGameClient::OnInit()
 	}
 
 	// set the language
+	g_Localization.LoadIndexfile(Storage(), Console());
+	if(g_Config.m_ClShowWelcome)
+		g_Localization.SelectDefaultLanguage(Console(), g_Config.m_ClLanguagefile, sizeof(g_Config.m_ClLanguagefile));
 	g_Localization.Load(g_Config.m_ClLanguagefile, Storage(), Console());
 
 	// TODO: this should be different

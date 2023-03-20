@@ -146,6 +146,59 @@ void CLocalizationDatabase::LoadIndexfile(IStorage *pStorage, IConsole *pConsole
 	std::sort(m_vLanguages.begin(), m_vLanguages.end());
 }
 
+void CLocalizationDatabase::SelectDefaultLanguage(IConsole *pConsole, char *pFilename, size_t Length) const
+{
+	char aLocaleStr[128];
+	os_locale_str(aLocaleStr, sizeof(aLocaleStr));
+
+	char aBuf[256];
+	str_format(aBuf, sizeof(aBuf), "Choosing default language based on user locale '%s'", aLocaleStr);
+	pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "localization", aBuf);
+
+	while(true)
+	{
+		const CLanguage *pPrefixMatch = nullptr;
+		for(const auto &Language : Languages())
+		{
+			for(const auto &LanguageCode : Language.m_vLanguageCodes)
+			{
+				if(LanguageCode == aLocaleStr)
+				{
+					// Exact match found, use it immediately
+					str_copy(pFilename, Language.m_FileName.c_str(), Length);
+					return;
+				}
+				else if(LanguageCode.rfind(aLocaleStr, 0) == 0)
+				{
+					// Locale is prefix of language code, e.g. locale is "en" and current language is "en-US"
+					pPrefixMatch = &Language;
+				}
+			}
+		}
+		// Use prefix match if no exact match was found
+		if(pPrefixMatch)
+		{
+			str_copy(pFilename, pPrefixMatch->m_FileName.c_str(), Length);
+			return;
+		}
+
+		// Remove last segment of locale string and try again with more generic locale, e.g. "en-US" -> "en"
+		int i = str_length(aLocaleStr) - 1;
+		for(; i >= 0; --i)
+		{
+			if(aLocaleStr[i] == '-')
+			{
+				aLocaleStr[i] = '\0';
+				break;
+			}
+		}
+
+		// Stop if no more locale segments are left
+		if(i == 0)
+			break;
+	}
+}
+
 bool CLocalizationDatabase::Load(const char *pFilename, IStorage *pStorage, IConsole *pConsole)
 {
 	// empty string means unload

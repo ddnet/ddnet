@@ -2028,18 +2028,21 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 
 bool CMenus::RenderLanguageSelection(CUIRect MainView)
 {
-	static int s_SelectedLanguage = -1;
+	static int s_SelectedLanguage = -2; // -2 = unloaded, -1 = unset
 	static CListBox s_ListBox;
 
-	if(g_Localization.Languages().empty())
+	if(s_SelectedLanguage == -2)
 	{
-		g_Localization.LoadIndexfile(Storage(), Console());
+		s_SelectedLanguage = -1;
 		for(size_t i = 0; i < g_Localization.Languages().size(); i++)
+		{
 			if(str_comp(g_Localization.Languages()[i].m_FileName.c_str(), g_Config.m_ClLanguagefile) == 0)
 			{
 				s_SelectedLanguage = i;
+				s_ListBox.ScrollToSelected();
 				break;
 			}
+		}
 	}
 
 	const int OldSelected = s_SelectedLanguage;

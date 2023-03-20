@@ -56,6 +56,7 @@ public:
 
 	void LoadIndexfile(class IStorage *pStorage, class IConsole *pConsole);
 	const std::vector<CLanguage> &Languages() const { return m_vLanguages; }
+	void SelectDefaultLanguage(class IConsole *pConsole, char *pFilename, size_t Length) const;
 
 	bool Load(const char *pFilename, class IStorage *pStorage, class IConsole *pConsole);
 
