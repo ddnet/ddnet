@@ -35,9 +35,73 @@ CLocalizationDatabase::CLocalizationDatabase()
 	m_CurrentVersion = 0;
 }
 
-void CLocalizationDatabase::AddString(const char *pOrgStr, const char *pNewStr, const char *pContext)
+void CLocalizationDatabase::LoadIndexfile(IStorage *pStorage, IConsole *pConsole)
 {
-	m_vStrings.emplace_back(str_quickhash(pOrgStr), str_quickhash(pContext), m_StringsHeap.StoreString(*pNewStr ? pNewStr : pOrgStr));
+	m_vLanguages.clear();
+	m_vLanguages.emplace_back("English", "", 826);
+
+	const char *pFilename = "languages/index.txt";
+	IOHANDLE File = pStorage->OpenFile(pFilename, IOFLAG_READ | IOFLAG_SKIP_BOM, IStorage::TYPE_ALL);
+	if(!File)
+	{
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf), "couldn't open index file '%s'", pFilename);
+		pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "localization", aBuf);
+		return;
+	}
+
+	char aOrigin[128];
+	char aReplacement[128];
+	CLineReader LineReader;
+	LineReader.Init(File);
+	char *pLine;
+	while((pLine = LineReader.Get()))
+	{
+		if(!str_length(pLine) || pLine[0] == '#') // skip empty lines and comments
+			continue;
+
+		str_copy(aOrigin, pLine);
+
+		pLine = LineReader.Get();
+		if(!pLine)
+		{
+			pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "localization", "unexpected end of index file");
+			break;
+		}
+
+		if(pLine[0] != '=' || pLine[1] != '=' || pLine[2] != ' ')
+		{
+			char aBuf[128];
+			str_format(aBuf, sizeof(aBuf), "malform replacement for index '%s'", aOrigin);
+			pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "localization", aBuf);
+			(void)LineReader.Get();
+			continue;
+		}
+		str_copy(aReplacement, pLine + 3);
+
+		pLine = LineReader.Get();
+		if(!pLine)
+		{
+			pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "localization", "unexpected end of index file");
+			break;
+		}
+
+		if(pLine[0] != '=' || pLine[1] != '=' || pLine[2] != ' ')
+		{
+			char aBuf[128];
+			str_format(aBuf, sizeof(aBuf), "malform replacement for index '%s'", aOrigin);
+			pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "localization", aBuf);
+			continue;
+		}
+
+		char aFileName[IO_MAX_PATH_LENGTH];
+		str_format(aFileName, sizeof(aFileName), "languages/%s.txt", aOrigin);
+		m_vLanguages.emplace_back(aReplacement, aFileName, str_toint(pLine + 3));
+	}
+
+	io_close(File);
+
+	std::sort(m_vLanguages.begin(), m_vLanguages.end());
 }
 
 bool CLocalizationDatabase::Load(const char *pFilename, IStorage *pStorage, IConsole *pConsole)
@@ -117,6 +181,11 @@ bool CLocalizationDatabase::Load(const char *pFilename, IStorage *pStorage, ICon
 
 	m_CurrentVersion = ++m_VersionCounter;
 	return true;
+}
+
+void CLocalizationDatabase::AddString(const char *pOrgStr, const char *pNewStr, const char *pContext)
+{
+	m_vStrings.emplace_back(str_quickhash(pOrgStr), str_quickhash(pContext), m_StringsHeap.StoreString(*pNewStr ? pNewStr : pOrgStr));
 }
 
 const char *CLocalizationDatabase::FindString(unsigned Hash, unsigned ContextHash) const
