@@ -2143,6 +2143,14 @@ char str_uppercase(char c);
 int str_isallnum(const char *str);
 unsigned str_quickhash(const char *str);
 
+enum
+{
+	/**
+	 * The maximum bytes necessary to encode one Unicode codepoint with UTF-8.
+	 */
+	UTF8_BYTE_LENGTH = 4,
+};
+
 int str_utf8_to_skeleton(const char *str, int *buf, int buf_len);
 
 /*
@@ -2585,6 +2593,20 @@ int secure_rand_below(int below);
 		1 - Failure in getting the version.
 */
 int os_version_str(char *version, int length);
+
+/**
+ * Returns a string of the preferred locale of the user / operating system.
+ * The string conforms to [RFC 3066](https://www.ietf.org/rfc/rfc3066.txt)
+ * and only contains the characters `a`-`z`, `A`-`Z`, `0`-`9` and `-`.
+ * If the preferred locale could not be determined this function
+ * falls back to the locale `"en-US"`.
+ *
+ * @param locale Buffer to use for the output.
+ * @param length Length of the output buffer.
+ *
+ * @remark The destination buffer will be zero-terminated.
+ */
+void os_locale_str(char *locale, size_t length);
 
 #if defined(CONF_EXCEPTION_HANDLING)
 void init_exception_handler();
