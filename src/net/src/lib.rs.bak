@@ -1,0 +1,310 @@
+#[macro_use]
+extern crate log;
+
+use anyhow::Context;
+use anyhow::anyhow;
+use bstr::BStr;
+use getrandom::getrandom;
+use mio::Events;
+use mio::Poll;
+use mio::net::UdpSocket;
+use self::util::NoBlock;
+use self::util::NotDone;
+use self::util::peek_quic_varint;
+use self::util::secure_hash;
+use self::util::secure_random;
+use self::util::write_quic_varint;
+use std::collections::HashMap;
+use std::collections::hash_map;
+use std::fs;
+use std::net::SocketAddr;
+use std::time::Instant;
+
+// TODO: after standby, I see error: interrupted system call
+
+mod error;
+mod proto;
+mod util;
+
+pub use proto::ConnectionId;
+pub use proto::Error;
+pub use proto::Net;
+pub use proto::Result;
+
+const UDP_SOCKET: mio::Token = mio::Token(0);
+
+fn pump_read(local: &SocketAddr, conn: &mut quiche::Connection, socket: &UdpSocket, buf: &mut [u8])
+    -> anyhow::Result<()>
+{
+    let mut num_bytes = 0;
+    let mut num_packets = 0;
+    loop {
+        let Some((read, from)) = socket.recv_from(buf).no_block().context("UdpSocket::recv_from")? else { break; };
+        conn.recv(&mut buf[..read], quiche::RecvInfo { from, to: *local }).context("quiche::Conn::recv")?;
+        num_packets += 1;
+        num_bytes += read;
+    }
+    if num_packets != 0 {
+        println!("received {} packet(s) with {} byte(s)", num_packets, num_bytes);
+    }
+    Ok(())
+}
+
+fn pump_write(local: &SocketAddr, conn: &mut quiche::Connection, socket: &UdpSocket, buf: &mut [u8])
+    -> anyhow::Result<()>
+{
+    let mut num_bytes = 0;
+    let mut num_packets = 0;
+    loop {
+        let Some((written, info)) = conn.send(buf).not_done().context("quiche::Conn::send")? else { break; };
+        let now = Instant::now();
+        let delay = info.at.saturating_duration_since(now);
+        if !delay.is_zero() {
+            println!("should have delayed packet by {:?}, but haven't", delay);
+        }
+        assert!(*local == info.from);
+        socket.send_to(&buf[..written], info.to).context("UdpSocket::send_to")?;
+        num_packets += 1;
+        num_bytes += written;
+    }
+    if num_packets != 0 {
+        println!("sent {} packet(s) with {} byte(s)", num_packets, num_bytes);
+    }
+    Ok(())
+}
+
+fn communicate(local: &SocketAddr, conn: &mut quiche::Connection, socket: &UdpSocket, buf: &mut [u8], poll: &mut Poll, events: &mut Events)
+    -> anyhow::Result<()>
+{
+    pump_write(local, conn, socket, buf)?;
+    if let Some(timeout) = conn.timeout() {
+        println!("waiting up to {:?}", timeout);
+    } else {
+        println!("waiting forever");
+    }
+    let before_wait = Instant::now();
+    poll.poll(events, conn.timeout()).context("mio::Poll::poll")?;
+    if events.is_empty() {
+        println!("timeout");
+        conn.on_timeout();
+    } else {
+        println!("got packet after {:?}", before_wait.elapsed());
+        pump_read(local, conn, socket, buf)?;
+    }
+    pump_write(local, conn, socket, buf)?;
+    Ok(())
+}
+
+pub fn client_main() -> anyhow::Result<()> {
+    env_logger::init();
+    let certs = openssl_probe::probe();
+    let cert_dir = certs
+        .cert_dir.ok_or_else(|| anyhow!("no certs found"))?
+        .into_os_string().into_string().ok().ok_or_else(|| anyhow!("cert dir with invalid utf-8"))?;
+
+    let bindaddr = "0.0.0.0:0".parse().unwrap();
+    let mut socket = UdpSocket::bind(bindaddr).context("bind")?;
+    let local = socket.local_addr().context("local_addr")?;
+    //let remote = "172.67.186.100:443".parse().unwrap();
+    let remote = "127.0.0.1:4433".parse().unwrap();
+
+    let mut poll = Poll::new().context("mio::Poll::new")?;
+    let mut events = Events::with_capacity(1);
+    poll.registry().register(&mut socket, UDP_SOCKET, mio::Interest::READABLE).context("mio::Poll::register")?;
+
+    let mut config = quiche::Config::new(quiche::PROTOCOL_VERSION).context("quiche::Config::new")?;
+    config.log_keys();
+    config.load_verify_locations_from_directory(&cert_dir).context("quiche::Config::load_verify_locations_from_directory")?;
+    config.set_application_protos(&[b"ddnet-15"]).context("quiche::Config::set_application_protos")?;
+
+    config.set_initial_max_data(1024);
+    config.set_initial_max_stream_data_bidi_local(1024);
+    config.set_initial_max_stream_data_bidi_remote(1024);
+    config.set_initial_max_stream_data_uni(1024);
+    config.set_initial_max_streams_bidi(64);
+    config.set_initial_max_streams_uni(64);
+
+    let mut conn = quiche::connect(
+        Some("master1.ddnet.org"),
+        &quiche::ConnectionId::default(),
+        local,
+        remote,
+        &mut config,
+    ).context("quiche::connect")?;
+
+    conn.set_keylog(Box::new(fs::OpenOptions::new().create(true).append(true).open("/tmp/sslkeylogfile").context("/tmp/sslkeylogfile")?));
+
+    let mut buf = [0; 65536];
+    loop {
+        communicate(&local, &mut conn, &socket, &mut buf, &mut poll, &mut events)?;
+        if conn.is_established() {
+            break;
+        }
+    }
+    println!("connection established");
+    conn.stream_send(0, b"\x0eHello, world!\n", true).context("quiche::Conn::stream_send")?;
+    //conn.close(false, 0, b"").context("quiche::Conn::close")?;
+    loop {
+        communicate(&local, &mut conn, &socket, &mut buf, &mut poll, &mut events)?;
+        if conn.is_closed() {
+            break;
+        }
+    }
+    println!("connection closed");
+    Ok(())
+}
+
+pub fn server_main() -> anyhow::Result<()> {
+    env_logger::init();
+    let bindaddr = "0.0.0.0:4433".parse().unwrap();
+    let mut socket = UdpSocket::bind(bindaddr).context("bind")?;
+    let local = socket.local_addr().context("local_addr")?;
+
+    let mut poll = Poll::new().context("mio::Poll::new")?;
+    let mut events = Events::with_capacity(1);
+    poll.registry().register(&mut socket, UDP_SOCKET, mio::Interest::READABLE).context("mio::Poll::register")?;
+
+    let mut config = quiche::Config::new(quiche::PROTOCOL_VERSION).context("quiche::Config::new")?;
+    config.log_keys();
+    config.set_application_protos(&[b"ddnet-15"]).context("quiche::Config::set_application_protos")?;
+    config.load_cert_chain_from_pem_file("cert.crt").context("cert.crt not found or could not be loaded")?;
+    config.load_priv_key_from_pem_file("cert.key").context("cert.key not found or could not be loaded")?;
+
+    config.set_initial_max_data(1024);
+    config.set_initial_max_stream_data_bidi_local(1024);
+    config.set_initial_max_stream_data_bidi_remote(1024);
+    config.set_initial_max_stream_data_uni(1024);
+    config.set_initial_max_streams_bidi(64);
+    config.set_initial_max_streams_uni(64);
+
+    let mut clients: HashMap<_, quiche::Connection> = HashMap::new();
+
+    let mut buf = [0; 65536];
+    loop {
+        let before_wait = Instant::now();
+        let timeout = clients.values().filter_map(|conn| conn.timeout()).min();
+        if let Some(timeout) = timeout {
+            println!("waiting up to {:?}", timeout);
+        } else {
+            println!("waiting forever");
+        }
+        poll.poll(&mut events, timeout).context("mio::Poll::poll")?;
+        if events.is_empty() {
+            println!("timeout");
+            for conn in clients.values_mut() {
+                conn.on_timeout();
+            }
+        } else {
+            println!("got packet after {:?}", before_wait.elapsed());
+            loop {
+                let Some((read, from)) = socket.recv_from(&mut buf).no_block().context("UdpSocket::recv_from")? else { break; };
+                if let Ok(header) = quiche::Header::from_slice(&mut buf[..read], 5) {
+                    println!("received quic packet from {}: {:?}", from, header);
+                    let conn = match clients.entry(header.dcid.clone()) {
+                        hash_map::Entry::Occupied(o) => o.into_mut(),
+                        hash_map::Entry::Vacant(v) => {
+                            if header.ty == quiche::Type::Initial {
+                                let mut new_scid = [0; 5];
+                                getrandom(&mut new_scid).context("getrandom")?;
+                                // token is always present in Initial packets.
+                                let token = header.token.unwrap();
+                                if token.is_empty() {
+                                    let written = quiche::retry(
+                                        &header.scid,
+                                        &header.dcid,
+                                        // TODO: fixme
+                                        &quiche::ConnectionId::from_ref(&new_scid),
+                                        // TODO: fixme (sign? looking at the docs, maybe it is already signed by quiche)
+                                        &header.dcid,
+                                        header.version,
+                                        &mut buf,
+                                    ).context("quiche::retry")?; // TODO: unwrap instead?
+                                    println!("sending retry to {}", from);
+                                    socket.send_to(&buf[..written], from).context("UdpSocket::send_to")?;
+                                    continue;
+                                } else {
+                                    println!("accepting connection from {}", from);
+                                    let mut conn = quiche::accept(&header.dcid, Some(&quiche::ConnectionId::from_ref(&token)), local, from, &mut config).context("quiche::accept")?; // TODO: unwrap instead?
+                                    conn.set_keylog(Box::new(fs::OpenOptions::new().create(true).append(true).open("/tmp/sslkeylogfile").context("/tmp/sslkeylogfile")?));
+                                    v.insert(conn)
+                                }
+                            } else {
+                                continue;
+                            }
+                        }
+                    };
+                    conn.recv(&mut buf[..read], quiche::RecvInfo { from, to: local }).context("quiche::Conn::recv")?;
+                } else {
+                    println!("received non-quic packet from {}", from);
+                }
+            }
+        }
+        for conn in clients.values_mut() {
+            if conn.is_established() {
+                for stream_id in conn.readable() {
+                    while let Some((read, end)) = conn.stream_recv(stream_id, &mut buf).not_done().context("quiche::Conn::stream_recv")? {
+                        println!("Stream {} received {:?}{}", stream_id, BStr::new(&buf[..read]), if end { " (end of stream)" } else { "" });
+                    }
+                    conn.close(true, 0, b"").context("quiche::Conn::close")?;
+                }
+            }
+            pump_write(&local, conn, &socket, &mut buf)?;
+        }
+    }
+}
+
+pub fn client2_main() -> anyhow::Result<()> {
+    env_logger::init();
+    let bindaddr = "0.0.0.0:0".parse().unwrap();
+    let remote = "127.0.0.1:4433".parse().unwrap();
+    let mut net = Net::open(&bindaddr).context("Net::open")?;
+    let mut buf = [0; 65536];
+    let conn_cid = net.connect(&remote).context("Net::connect")?;
+    loop {
+        while let Some((cid, event)) = net.recv(&mut buf).context("Net::recv")? {
+            assert_eq!(conn_cid, cid);
+            use proto::Event::*;
+            match event {
+                Connect => {
+                    println!("{}: connect", cid);
+                    println!("{}: send nonvital \"blab\"", cid);
+                    println!("{}: send \"blub\"", cid);
+                    println!("{}: send \"blob\"", cid);
+                    net.send(cid, b"blab", true).unwrap();
+                    net.send(cid, b"blub", false).unwrap();
+                    net.send(cid, b"blob", false).unwrap();
+                },
+                Chunk(size, nonvital) => {
+                    println!("{}: {}{:?}", cid, if nonvital { "nonvital " } else { "" }, BStr::new(&buf[..size]));
+                },
+                Disconnect(size, code) => {
+                    println!("{}: disconnect ({}, {:?})", cid, code, BStr::new(&buf[..size]));
+                    return Ok(());
+                }
+            }
+        }
+        net.wait();
+    }
+}
+pub fn server2_main() -> anyhow::Result<()> {
+    env_logger::init();
+    let bindaddr = "0.0.0.0:4433".parse().unwrap();
+    let mut net = Net::open(&bindaddr).context("Net::open")?;
+    let mut buf = [0; 65536];
+    loop {
+        while let Some((cid, event)) = net.recv(&mut buf).context("Net::recv")? {
+            use proto::Event::*;
+            match event {
+                Connect => println!("{}: connect", cid),
+                Chunk(size, nonvital) => {
+                    println!("{}: recv {}{:?}", cid, if nonvital { "nonvital " } else { "" }, BStr::new(&buf[..size]));
+                    if !nonvital {
+                        net.close(cid, Some("blib?")).unwrap();
+                    }
+                },
+                Disconnect(size, code) => println!("{}: disconnect ({}, {:?})", cid, code, BStr::new(&buf[..size])),
+            }
+        }
+        net.wait();
+    }
+}
