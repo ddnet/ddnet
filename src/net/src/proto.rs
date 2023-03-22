@@ -1,34 +1,34 @@
-use arrayvec::ArrayString;
-use arrayvec::ArrayVec;
-use crate::Context as _;
-use crate::Error;
-use crate::Identity;
-use crate::Result;
-use crate::NoBlock as _;
-use crate::NotDone as _;
-use crate::PrivateIdentity;
 use crate::normalize;
 use crate::peek_quic_varint;
 use crate::secure_hash;
 use crate::secure_random;
 use crate::write_quic_varint;
+use crate::Context as _;
+use crate::Error;
+use crate::Identity;
+use crate::NoBlock as _;
+use crate::NotDone as _;
+use crate::PrivateIdentity;
+use crate::Result;
+use arrayvec::ArrayString;
+use arrayvec::ArrayVec;
+use mio::net::UdpSocket;
 use mio::Events;
 use mio::Poll;
-use mio::net::UdpSocket;
 use std::cmp;
+use std::collections::hash_map;
 use std::collections::HashMap;
 use std::collections::VecDeque;
-use std::collections::hash_map;
 use std::env;
-use std::fmt::Write as _;
 use std::fmt;
-use std::fs::File;
+use std::fmt::Write as _;
 use std::fs;
-use std::io::Write as _;
+use std::fs::File;
 use std::io;
+use std::io::Write as _;
 use std::mem;
-use std::net::SocketAddr;
 use std::net::Ipv6Addr;
+use std::net::SocketAddr;
 use std::ops;
 use std::path::Path;
 use std::str;
@@ -40,6 +40,7 @@ use url::Url;
 
 // TODO: coalesce ACKs with other packets
 // TODO: coalesce dgrams with stream packets
+// TODO: remove double waits in the server (9999ms, then 0ms)
 
 // Originally `NET_MAX_PAYLOAD`.
 pub const MAX_FRAME_SIZE: u64 = 1394;
@@ -108,7 +109,11 @@ impl fmt::Display for ConnectionId {
 
 impl fmt::Debug for ConnectionId {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{:02x}{:02x}{:02x}{:02x}{:02x}", self.0[0], self.0[1], self.0[2], self.0[3], self.0[4])
+        write!(
+            f,
+            "{:02x}{:02x}{:02x}{:02x}{:02x}",
+            self.0[0], self.0[1], self.0[2], self.0[3], self.0[4]
+        )
     }
 }
 
@@ -164,26 +169,32 @@ impl Challenger {
         result.copy_from_slice(&secure_hash(&buf)[..TOKEN_LEN]);
         result
     }
-    pub fn compute_retry_token(&self, addr: &SocketAddr, odcid: &[u8])
-        -> ArrayVec<[u8; RETRY_TOKEN_LEN]>
-    {
+    pub fn compute_retry_token(
+        &self,
+        addr: &SocketAddr,
+        odcid: &[u8],
+    ) -> ArrayVec<[u8; RETRY_TOKEN_LEN]> {
         if odcid.len() > 20 {
             panic!("connection IDs in QUICv1 cannot be longer than 20 bytes");
         }
         let mut result = ArrayVec::new();
-        result.try_extend_from_slice(&Challenger::token(&self.seed, addr)).unwrap();
+        result
+            .try_extend_from_slice(&Challenger::token(&self.seed, addr))
+            .unwrap();
         result.try_extend_from_slice(odcid).unwrap();
         result
     }
-    pub fn verify_retry_token<'a>(&self, addr: &SocketAddr, retry_token: &'a [u8])
-        -> Option<&'a [u8]>
-    {
+    pub fn verify_retry_token<'a>(
+        &self,
+        addr: &SocketAddr,
+        retry_token: &'a [u8],
+    ) -> Option<&'a [u8]> {
         if retry_token.len() < TOKEN_LEN {
             return None;
         }
         let (token, odcid) = retry_token.split_at(TOKEN_LEN);
-        if token != Challenger::token(&self.seed, addr) &&
-            token != Challenger::token(&self.prev_seed, addr)
+        if token != Challenger::token(&self.seed, addr)
+            && token != Challenger::token(&self.prev_seed, addr)
         {
             return None;
         }
@@ -243,10 +254,17 @@ fn config(
     cert: &boring::x509::X509Ref,
     callback_peer_identity: Arc<Mutex<Option<PeerIdentity>>>,
 ) -> Result<quiche::Config> {
-    let mut context = boring::ssl::SslContext::builder(boring::ssl::SslMethod::tls()).context("boring::SslContext::builder")?;
-    context.set_sigalgs_list("ed25519").context("boring::SslContext::set_sigalgs_list")?;
-    context.set_private_key(key).context("boring::SslContext::set_private_key")?;
-    context.set_certificate(cert).context("boring::SslContext::set_certificate")?;
+    let mut context = boring::ssl::SslContext::builder(boring::ssl::SslMethod::tls())
+        .context("boring::SslContext::builder")?;
+    context
+        .set_sigalgs_list("ed25519")
+        .context("boring::SslContext::set_sigalgs_list")?;
+    context
+        .set_private_key(key)
+        .context("boring::SslContext::set_private_key")?;
+    context
+        .set_certificate(cert)
+        .context("boring::SslContext::set_certificate")?;
     context.set_verify_callback(boring::ssl::SslVerifyMode::PEER, move |pre, store| {
         fn verify(
             store: &mut boring::x509::X509StoreContextRef,
@@ -259,7 +277,7 @@ fn config(
                 AcceptAny => {
                     *peer_identity = Known(public);
                     Some(())
-                },
+                }
                 Wanted(identity) | Known(identity) => {
                     // TODO: verify that this verification method works with
                     // longer certificate chains
@@ -270,31 +288,24 @@ fn config(
                     }
                     *peer_identity = Known(identity);
                     Some(())
-                },
+                }
                 Invalid(_) => None,
             }
         }
         // ignore boringssl's certificate verification
         let _ = pre;
-        verify(store, callback_peer_identity.lock().unwrap().as_mut().unwrap()).is_some()
+        verify(
+            store,
+            callback_peer_identity.lock().unwrap().as_mut().unwrap(),
+        )
+        .is_some()
     });
-    let mut config = quiche::Config::with_boring_ssl_ctx(quiche::PROTOCOL_VERSION, context.build()).context("quiche::Config::new")?;
+    let mut config = quiche::Config::with_boring_ssl_ctx(quiche::PROTOCOL_VERSION, context.build())
+        .context("quiche::Config::new")?;
     config.log_keys();
-    config.set_application_protos(&[b"ddnet-15"]).context("quiche::Config::set_application_protos")?;
-    /*
-    if client {
-        //config.verify_peer(true);
-        // TODO
-        //config.load_verify_locations_from_directory(&cert_dir).context("quiche::Config::load_verify_locations_from_directory")?;
-        //config.load_verify_locations_from_file("ed25519.crt").context("quiche::Config::load_verify_locations_from_file")?;
-        //config.load_priv_key_from_pem_file("client.key").context("client.key not found or could not be loaded")?;
-        //config.load_cert_chain_from_pem_file("client.crt").context("client.crt not found or could not be loaded")?;
-    } else {
-        //config.load_verify_locations_from_file("ed25519.crt").context("quiche::Config::load_verify_locations_from_file")?;
-        //config.load_priv_key_from_pem_file("server.key").context("server.key not found or could not be loaded")?;
-        //config.load_cert_chain_from_pem_file("server.crt").context("server.crt not found or could not be loaded")?;
-    }
-    */
+    config
+        .set_application_protos(&[b"ddnet-15"])
+        .context("quiche::Config::set_application_protos")?;
     // TODO: decide on a proper number. the current one ensures datagrams of size 1394
     config.set_max_send_udp_payload_size(1423);
     config.enable_dgram(true, 32, 32);
@@ -344,13 +355,22 @@ impl NetBuilder {
                 .append(true)
                 .open(&sslkeylogfile)
                 .map(|file| ArcFile(Arc::new(file)))
-                .map_err(|err| error!("error opening SSLKEYLOGFILE {}: {}", Path::new(&sslkeylogfile).display(), err))
+                .map_err(|err| {
+                    error!(
+                        "error opening SSLKEYLOGFILE {}: {}",
+                        Path::new(&sslkeylogfile).display(),
+                        err
+                    )
+                })
                 .ok()
         } else {
             None
         };
 
-        let bindaddr = self.bindaddr.unwrap_or(SocketAddr::new(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 0).into(), 0));
+        let bindaddr = self.bindaddr.unwrap_or(SocketAddr::new(
+            Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 0).into(),
+            0,
+        ));
         let identity = self.identity.unwrap_or_else(PrivateIdentity::random);
 
         let mut socket = UdpSocket::bind(bindaddr).context("bind")?;
@@ -358,7 +378,9 @@ impl NetBuilder {
 
         let poll = Poll::new().context("mio::Poll::new")?;
         let events = Events::with_capacity(1);
-        poll.registry().register(&mut socket, mio::Token(0), mio::Interest::READABLE).context("mio::Poll::register")?;
+        poll.registry()
+            .register(&mut socket, mio::Token(0), mio::Interest::READABLE)
+            .context("mio::Poll::register")?;
         let cert = identity.generate_certificate();
         let callback_peer_identity = Arc::new(Mutex::new(None));
 
@@ -366,7 +388,8 @@ impl NetBuilder {
         info!("listening on {}", bindaddr);
 
         Ok(Net {
-            config: config(identity.as_lib(), &cert, callback_peer_identity.clone()).context("config")?,
+            config: config(identity.as_lib(), &cert, callback_peer_identity.clone())
+                .context("config")?,
             accept_incoming_connections: self.accept_incoming_connections,
             sslkeylogfile,
             challenger: Challenger::new(),
@@ -389,7 +412,6 @@ impl NetBuilder {
     }
 }
 
-// TODO: allow selecting whether we want to permit incoming connections or not
 impl Net {
     pub fn builder() -> NetBuilder {
         NetBuilder {
@@ -410,20 +432,35 @@ impl Net {
         loop {
             let Some((read, from)) = self.socket.recv_from(&mut self.packet_buf).no_block().context("UdpSocket::recv_from")? else { break; };
             let from = normalize(from);
-            if let Ok(header) = quiche::Header::from_slice(&mut self.packet_buf[..read], ConnectionId::LEN) {
+            if let Ok(header) =
+                quiche::Header::from_slice(&mut self.packet_buf[..read], ConnectionId::LEN)
+            {
                 trace!("received quic packet from {}: {:?}", from, header);
                 let cid = ConnectionId::from_raw(&header.dcid);
                 let idx = match cid.map(|cid| self.connection_ids.entry(cid)) {
                     Some(hash_map::Entry::Occupied(o)) => *o.get(),
                     // TODO: test version negotiation
                     // token is always present in Initial packets.
-                    _ if self.accept_incoming_connections && header.ty == quiche::Type::Initial && !quiche::version_is_supported(header.version) => {
-                        let written = quiche::negotiate_version(&header.scid, &header.dcid, &mut self.packet_buf).unwrap();
-                        self.socket.send_to(&self.packet_buf[..written], from).context("UdpSocket::send_to")?;
+                    _ if self.accept_incoming_connections
+                        && header.ty == quiche::Type::Initial
+                        && !quiche::version_is_supported(header.version) =>
+                    {
+                        let written = quiche::negotiate_version(
+                            &header.scid,
+                            &header.dcid,
+                            &mut self.packet_buf,
+                        )
+                        .unwrap();
+                        self.socket
+                            .send_to(&self.packet_buf[..written], from)
+                            .context("UdpSocket::send_to")?;
                         continue;
                     }
                     // token is always present in Initial packets.
-                    _ if self.accept_incoming_connections && header.ty == quiche::Type::Initial && header.token.as_ref().unwrap().is_empty() => {
+                    _ if self.accept_incoming_connections
+                        && header.ty == quiche::Type::Initial
+                        && header.token.as_ref().unwrap().is_empty() =>
+                    {
                         let new_scid = self.new_conn_id();
                         let token = self.challenger.compute_retry_token(&from, &header.dcid);
                         let written = quiche::retry(
@@ -433,12 +470,18 @@ impl Net {
                             &token,
                             header.version,
                             &mut self.packet_buf,
-                        ).context("quiche::retry")?; // TODO: unwrap instead?
+                        )
+                        .context("quiche::retry")?; // TODO: unwrap instead?
                         trace!("sending retry to {}", from);
-                        self.socket.send_to(&self.packet_buf[..written], from).context("UdpSocket::send_to")?;
+                        self.socket
+                            .send_to(&self.packet_buf[..written], from)
+                            .context("UdpSocket::send_to")?;
                         continue;
                     }
-                    Some(hash_map::Entry::Vacant(v)) if self.accept_incoming_connections && header.ty == quiche::Type::Initial => {
+                    Some(hash_map::Entry::Vacant(v))
+                        if self.accept_incoming_connections
+                            && header.ty == quiche::Type::Initial =>
+                    {
                         // token is always present in Initial packets.
                         let token = header.token.unwrap();
                         let odcid = match self.challenger.verify_retry_token(&from, &token) {
@@ -449,7 +492,14 @@ impl Net {
                             }
                         };
                         debug!("accepting connection from {}", from);
-                        let mut conn = quiche::accept(&header.dcid, Some(&quiche::ConnectionId::from_ref(&odcid)), self.local_addr, from, self.config.server()).context("quiche::accept")?; // TODO: unwrap instead?
+                        let mut conn = quiche::accept(
+                            &header.dcid,
+                            Some(&quiche::ConnectionId::from_ref(&odcid)),
+                            self.local_addr,
+                            from,
+                            self.config.server(),
+                        )
+                        .context("quiche::accept")?; // TODO: unwrap instead?
                         if let Some(sslkeylogfile) = &self.sslkeylogfile {
                             conn.set_keylog(Box::new(sslkeylogfile.clone()));
                         }
@@ -467,8 +517,15 @@ impl Net {
                     assert!(cpi.is_none());
                     *cpi = Some(conn.peer_identity);
                 }
-                let _ = conn.on_recv(&mut self.packet_buf[..read], quiche::RecvInfo { from, to: self.local_addr }); // TODO: figure out why error packets aren't getting sent
-                conn.flush(&self.local_addr, &self.socket, &mut self.packet_buf).unwrap();
+                let _ = conn.on_recv(
+                    &mut self.packet_buf[..read],
+                    quiche::RecvInfo {
+                        from,
+                        to: self.local_addr,
+                    },
+                ); // TODO: figure out why error packets aren't getting sent
+                conn.flush(&self.local_addr, &self.socket, &mut self.packet_buf)
+                    .unwrap();
                 conn.peer_identity = self.callback_peer_identity.lock().unwrap().take().unwrap();
                 return Ok(Some(idx));
             } else {
@@ -478,7 +535,7 @@ impl Net {
         Ok(None)
     }
     fn wait_impl(&mut self, timeout: Option<Instant>) {
-        if !self.readable_peers.is_empty() || self.socket_readable {
+        if !self.connect_errors.is_empty() || !self.readable_peers.is_empty() || self.socket_readable {
             return;
         }
         let user_timeout = timeout;
@@ -511,7 +568,8 @@ impl Net {
             if !is_user_timeout {
                 for conn in self.peers.values_mut() {
                     conn.on_timeout();
-                    conn.flush(&self.local_addr, &self.socket, &mut self.packet_buf).unwrap();
+                    conn.flush(&self.local_addr, &self.socket, &mut self.packet_buf)
+                        .unwrap();
                 }
             }
         }
@@ -527,16 +585,17 @@ impl Net {
     }
     // TODO: remove errors?
     // TODO: actually remove connections once they're gone
-    pub fn recv(&mut self, buf: &mut [u8])
-        -> Result<Option<(PeerIndex, Event)>>
-    {
+    pub fn recv(&mut self, buf: &mut [u8]) -> Result<Option<(PeerIndex, Event)>> {
         assert!(buf.len() >= MAX_FRAME_SIZE as usize);
 
         if let Some((idx, error)) = self.connect_errors.pop_front() {
             let mut remaining = &mut buf[..];
             let _ = write!(remaining, "{}", error);
             let remaining_len = remaining.len();
-            return Ok(Some((idx, Event::Disconnect(buf.len() - remaining_len, true))));
+            return Ok(Some((
+                idx,
+                Event::Disconnect(buf.len() - remaining_len, true),
+            )));
         }
         let mut did_nothing = true;
         loop {
@@ -545,7 +604,11 @@ impl Net {
                 if let Some(ev) = self.peers.get_mut(&idx).unwrap().recv(buf).unwrap() {
                     return Ok(Some((idx, ev)));
                 }
-                self.peers.get_mut(&idx).unwrap().flush(&self.local_addr, &self.socket, &mut self.packet_buf).unwrap();
+                self.peers
+                    .get_mut(&idx)
+                    .unwrap()
+                    .flush(&self.local_addr, &self.socket, &mut self.packet_buf)
+                    .unwrap();
                 assert!(self.readable_peers.pop_front().is_some());
                 did_nothing = false;
             }
@@ -570,11 +633,19 @@ impl Net {
         }
     }
     pub fn send_chunk(&mut self, idx: PeerIndex, frame: &[u8], unreliable: bool) -> Result<()> {
-        self.peers.get_mut(&idx).unwrap().send_chunk(frame, unreliable).unwrap();
+        self.peers
+            .get_mut(&idx)
+            .unwrap()
+            .send_chunk(frame, unreliable)
+            .unwrap();
         Ok(())
     }
     pub fn flush(&mut self, idx: PeerIndex) -> Result<()> {
-        self.peers.get_mut(&idx).unwrap().flush(&self.local_addr, &self.socket, &mut self.packet_buf)
+        self.peers.get_mut(&idx).unwrap().flush(
+            &self.local_addr,
+            &self.socket,
+            &mut self.packet_buf,
+        )
     }
     fn parse_connect_addr(addr: &str) -> Result<(SocketAddr, Identity)> {
         let addr = Url::parse(addr).context("connect: URL")?;
@@ -586,14 +657,20 @@ impl Net {
         write!(
             &mut ip_port,
             "{}:{}",
-            addr.host_str().ok_or_else(|| Error::from_string("connect: URL missing host".to_owned()))?,
-            addr.port().ok_or_else(|| Error::from_string("connect: URL missing port".to_owned()))?,
+            addr.host_str()
+                .ok_or_else(|| Error::from_string("connect: URL missing host".to_owned()))?,
+            addr.port()
+                .ok_or_else(|| Error::from_string("connect: URL missing port".to_owned()))?,
         )
         .unwrap();
         let sock_addr: SocketAddr = ip_port.parse().context("connect: IP addr")?;
         let fragment = addr.fragment().unwrap_or("");
         // Take at most 64 characters.
-        let end = fragment.char_indices().nth(64).map(|(idx, _)| idx).unwrap_or(fragment.len());
+        let end = fragment
+            .char_indices()
+            .nth(64)
+            .map(|(idx, _)| idx)
+            .unwrap_or(fragment.len());
         let identity: Identity = fragment[..end].parse().context("connect: identity")?;
         Ok((sock_addr, identity))
     }
@@ -603,7 +680,7 @@ impl Net {
             Err(error) => {
                 self.connect_errors.push_back((idx, error));
                 return Ok(idx);
-            },
+            }
             Ok(parsed) => parsed,
         };
         let cid = self.new_conn_id();
@@ -613,12 +690,14 @@ impl Net {
             self.local_addr,
             sock_addr,
             self.config.client(),
-        ).context("quiche::connect")?;
+        )
+        .context("quiche::connect")?;
         if let Some(sslkeylogfile) = &self.sslkeylogfile {
             conn.set_keylog(Box::new(sslkeylogfile.clone()));
         }
         let mut conn = Connection::new(conn, true, PeerIdentity::Wanted(peer_identity));
-        conn.flush(&self.local_addr, &self.socket, &mut self.packet_buf).unwrap();
+        conn.flush(&self.local_addr, &self.socket, &mut self.packet_buf)
+            .unwrap();
         assert!(self.peers.insert(idx, conn).is_none());
         assert!(self.connection_ids.insert(cid, idx).is_none());
         Ok(idx)
@@ -626,7 +705,8 @@ impl Net {
     pub fn close(&mut self, idx: PeerIndex, reason: Option<&str>) -> Result<()> {
         let conn = self.peers.get_mut(&idx).unwrap();
         conn.close(reason);
-        conn.flush(&self.local_addr, &self.socket, &mut self.packet_buf).unwrap();
+        conn.flush(&self.local_addr, &self.socket, &mut self.packet_buf)
+            .unwrap();
         self.readable_peers.push_back(idx);
         Ok(())
     }
@@ -649,9 +729,7 @@ struct Connection {
 }
 
 impl Connection {
-    fn new(inner: quiche::Connection, client: bool, peer_identity: PeerIdentity)
-        -> Connection
-    {
+    fn new(inner: quiche::Connection, client: bool, peer_identity: PeerIdentity) -> Connection {
         Connection {
             inner,
             client,
@@ -661,10 +739,10 @@ impl Connection {
             buffer_range: 0..0,
         }
     }
-    pub fn on_recv(&mut self, buf: &mut [u8], recv_info: quiche::RecvInfo)
-        -> Result<()>
-    {
-        self.inner.recv(buf, recv_info).context("quiche::Conn::recv")?;
+    pub fn on_recv(&mut self, buf: &mut [u8], recv_info: quiche::RecvInfo) -> Result<()> {
+        self.inner
+            .recv(buf, recv_info)
+            .context("quiche::Conn::recv")?;
         Ok(())
     }
     fn check_connection_params(&self) -> Result<()> {
@@ -679,16 +757,24 @@ impl Connection {
         Ok(())
     }
     fn peek_chunk_range(&self) -> Result<Option<ops::Range<usize>>> {
-        Ok(if let Some((len, len_encoded_len)) = peek_quic_varint(&self.buffer[self.buffer_range.clone()]) {
-            if len > MAX_FRAME_SIZE {
-                bail!("frames must be shorter than {} bytes, got length field with {} bytes", MAX_FRAME_SIZE, len);
-            }
-            let len: usize = len.try_into().unwrap();
-            let start = self.buffer_range.start + len_encoded_len;
-            Some(start..start + len)
-        } else {
-            None
-        })
+        Ok(
+            if let Some((len, len_encoded_len)) =
+                peek_quic_varint(&self.buffer[self.buffer_range.clone()])
+            {
+                if len > MAX_FRAME_SIZE {
+                    bail!(
+                        "frames must be shorter than {} bytes, got length field with {} bytes",
+                        MAX_FRAME_SIZE,
+                        len
+                    );
+                }
+                let len: usize = len.try_into().unwrap();
+                let start = self.buffer_range.start + len_encoded_len;
+                Some(start..start + len)
+            } else {
+                None
+            },
+        )
     }
     fn read_chunk_from_buffer(&mut self, buf: &mut [u8]) -> Result<Option<usize>> {
         assert!(buf.len() >= MAX_FRAME_SIZE as usize);
@@ -716,7 +802,9 @@ impl Connection {
                     if self.inner.is_established() {
                         self.state = Online;
                         // TODO: this doesn't actually open the stream
-                        self.inner.stream_send(0, b"", false).context("quiche::Conn::stream_send")?;
+                        self.inner
+                            .stream_send(0, b"", false)
+                            .context("quiche::Conn::stream_send")?;
                     }
                 } else {
                     // Check if the stream is already open.
@@ -728,8 +816,8 @@ impl Connection {
                     self.check_connection_params()?;
                     return Ok(Some(Event::Connect(*self.peer_identity.assert_known())));
                 }
-            },
-            Online => {},
+            }
+            Online => {}
             Disconnected => return Ok(None),
         }
 
@@ -746,9 +834,17 @@ impl Connection {
         }
 
         // Check if we have any datagrams lying around.
-        if let Some(dgram) = self.inner.dgram_recv_vec().not_done().context("quiche::Conn::dgram_recv_vec")? {
+        if let Some(dgram) = self
+            .inner
+            .dgram_recv_vec()
+            .not_done()
+            .context("quiche::Conn::dgram_recv_vec")?
+        {
             if dgram.first() != Some(&0) {
-                bail!("invalid datagram received, first byte should be 0, is {:?}", dgram.first());
+                bail!(
+                    "invalid datagram received, first byte should be 0, is {:?}",
+                    dgram.first()
+                );
             }
             let len = dgram.len() - 1;
             // Buffer was checked to be long enough above.
@@ -772,7 +868,10 @@ impl Connection {
         self.buffer_range = 0..self.buffer_range.len();
 
         // Read some more data from the stream.
-        let (read, fin) = self.inner.stream_recv(0, &mut self.buffer[self.buffer_range.end..]).context("quiche::Conn::stream_recv")?;
+        let (read, fin) = self
+            .inner
+            .stream_recv(0, &mut self.buffer[self.buffer_range.end..])
+            .context("quiche::Conn::stream_recv")?;
         self.buffer_range.end += read;
 
         // Check for a chunk again.
@@ -796,9 +895,15 @@ impl Connection {
             let capacity = self.inner.stream_capacity(0).ok();
             let total_len = len_encoded_len + frame.len();
             if capacity.map(|c| total_len > c).unwrap_or(true) {
-                bail!("cannot send data, capacity={:?} len={}", capacity, total_len);
+                bail!(
+                    "cannot send data, capacity={:?} len={}",
+                    capacity,
+                    total_len
+                );
             }
-            self.inner.stream_send(0, &len_buf[..len_encoded_len], false).unwrap();
+            self.inner
+                .stream_send(0, &len_buf[..len_encoded_len], false)
+                .unwrap();
             self.inner.stream_send(0, frame, false).unwrap();
             Ok(())
         } else {
@@ -807,7 +912,11 @@ impl Connection {
             buf.extend_from_slice(frame);
             // `Error::Done` means that the datagram was immediately dropped
             // without being sent.
-            self.inner.dgram_send_vec(buf).not_done().context("quiche::Conn::dgram_send_vec")?.unwrap();
+            self.inner
+                .dgram_send_vec(buf)
+                .not_done()
+                .context("quiche::Conn::dgram_send_vec")?
+                .unwrap();
             Ok(())
         }
     }
@@ -819,8 +928,12 @@ impl Connection {
         } else {
             unreachable!();
         };
-        // TODO: sanitize error
-        let reason = str::from_utf8(&err.reason).ok().unwrap_or("(invalid utf-8)");
+        let mut reason = str::from_utf8(&err.reason)
+            .ok()
+            .unwrap_or("(invalid utf-8)");
+        if reason.bytes().any(|b| b < 32) {
+            reason = "(reason containing control characters)";
+        }
         let len;
         if err.error_code == QUIC_CLOSE_CODE {
             len = cmp::min(buf.len(), reason.len());
@@ -831,7 +944,11 @@ impl Connection {
             if reason.is_empty() {
                 let _ = write!(remaining, "QUIC error ({}0x{:x})", kind, err.error_code);
             } else {
-                let _ = write!(remaining, "QUIC error ({}0x{:x}): {}", kind, err.error_code, reason);
+                let _ = write!(
+                    remaining,
+                    "QUIC error ({}0x{:x}): {}",
+                    kind, err.error_code, reason
+                );
             }
             let remaining_len = remaining.len();
             len = buf.len() - remaining_len;
@@ -839,7 +956,10 @@ impl Connection {
         (len, remote)
     }
     pub fn close(&mut self, reason: Option<&str>) {
-        self.inner.close(true, QUIC_CLOSE_CODE, reason.unwrap_or("").as_bytes()).not_done().unwrap();
+        self.inner
+            .close(true, QUIC_CLOSE_CODE, reason.unwrap_or("").as_bytes())
+            .not_done()
+            .unwrap();
     }
     pub fn timeout(&self) -> Option<Instant> {
         // TODO: Use `Connection::timeout_instant` once quiche > 0.16.0 is
@@ -849,9 +969,7 @@ impl Connection {
     pub fn on_timeout(&mut self) {
         self.inner.on_timeout();
     }
-    pub fn flush(&mut self, local: &SocketAddr, socket: &UdpSocket, buf: &mut [u8])
-        -> Result<()>
-    {
+    pub fn flush(&mut self, local: &SocketAddr, socket: &UdpSocket, buf: &mut [u8]) -> Result<()> {
         let mut num_bytes = 0;
         let mut num_packets = 0;
         loop {
@@ -862,7 +980,9 @@ impl Connection {
                 warn!("should have delayed packet by {:?}, but haven't", delay);
             }
             assert!(*local == info.from);
-            socket.send_to(&buf[..written], info.to).context("UdpSocket::send_to")?;
+            socket
+                .send_to(&buf[..written], info.to)
+                .context("UdpSocket::send_to")?;
             num_packets += 1;
             num_bytes += written;
         }

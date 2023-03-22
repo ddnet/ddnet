@@ -79,6 +79,8 @@ bool ddnet_net_close(struct DdnetNet *net,
                      const char *reason,
                      size_t reason_len);
 
+bool ddnet_net_set_logger(void (*log)(int32_t level, const char *sys, size_t sys_len, const char *message, size_t message_len));
+
 #ifdef __cplusplus
 } // extern "C"
 #endif // __cplusplus

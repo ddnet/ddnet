@@ -272,7 +272,7 @@ public:
 class CNetClient
 {
 	CNet *m_pNet = nullptr;
-	unsigned char m_aBuffer[2048];
+	unsigned char m_aBuffer[2048] = {0};
 	int m_State = NETSTATE_OFFLINE;
 	int m_PeerID = -1;
 
@@ -296,7 +296,6 @@ public:
 
 	// pumping
 	int Update();
-	int Flush();
 
 	int ResetErrorString();
 

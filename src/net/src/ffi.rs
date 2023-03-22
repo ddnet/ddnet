@@ -1,3 +1,4 @@
+use self::NetInner::*;
 use crate::Context;
 use crate::Error;
 use crate::Event as EventImpl;
@@ -6,10 +7,9 @@ use crate::NetBuilder as NetBuilderImpl;
 use crate::PeerIndex;
 use crate::PrivateIdentity;
 use crate::Result;
-use self::NetInner::*;
-use std::ffi::CString;
-use std::ffi::CStr;
 use std::ffi::c_char;
+use std::ffi::CStr;
+use std::ffi::CString;
 use std::mem;
 use std::panic;
 use std::ptr;
@@ -51,9 +51,7 @@ impl DdnetNet {
     ///
     /// Returns `true` if an error has occured during this call or in an
     /// earlier method of `DdnetNet`.
-    fn init<F: FnOnce(&mut NetBuilderImpl) -> Result<()>>(&mut self, f: F)
-        -> bool
-    {
+    fn init<F: FnOnce(&mut NetBuilderImpl) -> Result<()>>(&mut self, f: F) -> bool {
         let impl_ = match &mut self.0 {
             Init(impl_) => impl_,
             Good(_) => {
@@ -61,9 +59,13 @@ impl DdnetNet {
                     Good(impl_) => impl_,
                     _ => unreachable!(),
                 };
-                self.0 = LaterError(impl_, CString::new("initialization function called after call to `ddnet_net_open`").unwrap());
+                self.0 = LaterError(
+                    impl_,
+                    CString::new("initialization function called after call to `ddnet_net_open`")
+                        .unwrap(),
+                );
                 return true;
-            },
+            }
             _ => return true,
         };
         if let Err(err) = catch_unwind(panic::AssertUnwindSafe(move || f(impl_))) {
@@ -82,14 +84,14 @@ impl DdnetNet {
     ///
     /// Returns `true` if an error has occured during this call or in an
     /// earlier method of `DdnetNet`.
-    fn good<F: FnOnce(&mut NetImpl) -> Result<()>>(&mut self, f: F)
-        -> bool
-    {
+    fn good<F: FnOnce(&mut NetImpl) -> Result<()>>(&mut self, f: F) -> bool {
         let mut impl_ = match &mut self.0 {
             Init(_) => {
-                self.0 = InitError(CString::new("normal function called before call to `ddnet_net_open`").unwrap());
+                self.0 = InitError(
+                    CString::new("normal function called before call to `ddnet_net_open`").unwrap(),
+                );
                 return true;
-            },
+            }
             Good(impl_) => impl_,
             _ => return true,
         };
@@ -114,16 +116,15 @@ impl DdnetNet {
 }
 
 fn error_to_cstring(err: Error) -> CString {
-    CString::new(format!("{}", err))
-        .unwrap_or_else(|_| {
-            let message = "error: error string contained nul byte".to_owned();
-            CString::from_vec_with_nul(message.into()).unwrap()
-        })
+    CString::new(format!("{}", err)).unwrap_or_else(|_| {
+        let message = "error: error string contained nul byte".to_owned();
+        CString::from_vec_with_nul(message.into()).unwrap()
+    })
 }
 
-fn catch_unwind<T, F: FnOnce() -> Result<T> + panic::UnwindSafe>(f: F)
-    -> result::Result<T, CString>
-{
+fn catch_unwind<T, F: FnOnce() -> Result<T> + panic::UnwindSafe>(
+    f: F,
+) -> result::Result<T, CString> {
     panic::catch_unwind(f)
         .unwrap_or_else(|panic| {
             let msg = match panic.downcast_ref::<&'static str>() {
@@ -203,7 +204,7 @@ pub extern "C" fn ddnet_net_new(net: *mut *mut DdnetNet) -> bool {
 }
 #[no_mangle]
 pub extern "C" fn ddnet_net_set_bindaddr(
-    net: &mut DdnetNet, 
+    net: &mut DdnetNet,
     addr: *const c_char,
     addr_len: usize,
 ) -> bool {
@@ -215,10 +216,7 @@ pub extern "C" fn ddnet_net_set_bindaddr(
     })
 }
 #[no_mangle]
-pub extern "C" fn ddnet_net_set_identity(
-    net: &mut DdnetNet, 
-    private_identity: &[u8; 32],
-) -> bool {
+pub extern "C" fn ddnet_net_set_identity(net: &mut DdnetNet, private_identity: &[u8; 32]) -> bool {
     net.init(|builder| {
         builder.identity(PrivateIdentity::from_bytes(*private_identity));
         Ok(())
@@ -226,7 +224,7 @@ pub extern "C" fn ddnet_net_set_identity(
 }
 #[no_mangle]
 pub extern "C" fn ddnet_net_set_accept_incoming_connections(
-    net: &mut DdnetNet, 
+    net: &mut DdnetNet,
     accept: bool,
 ) -> bool {
     net.init(|builder| {
@@ -240,15 +238,18 @@ pub extern "C" fn ddnet_net_open(net: &mut DdnetNet) -> bool {
         let builder = match mem::replace(&mut net.0, Temporary) {
             Init(builder) => builder,
             Good(impl_) => {
-                net.0 = LaterError(impl_, CString::new("`ddnet_net_open` called on already open instance").unwrap());
-                return Ok(())
-            },
+                net.0 = LaterError(
+                    impl_,
+                    CString::new("`ddnet_net_open` called on already open instance").unwrap(),
+                );
+                return Ok(());
+            }
             _ => return Ok(()),
         };
         net.0 = Good(builder.open()?);
         Ok(())
     })) {
-        Ok(()) => {},
+        Ok(()) => {}
         Err(err) => net.0 = InitError(err),
     };
     net.good(|_| Ok(()))
@@ -262,9 +263,10 @@ pub extern "C" fn ddnet_net_free(net: *mut DdnetNet) {
 static NO_ERROR: &str = "no error\0";
 #[no_mangle]
 pub extern "C" fn ddnet_net_error(net: &DdnetNet) -> *const c_char {
-    net.error().map(|(s, _)| s).unwrap_or_else(|| {
-        CStr::from_bytes_with_nul(NO_ERROR.as_bytes()).unwrap()
-    }).as_ptr()
+    net.error()
+        .map(|(s, _)| s)
+        .unwrap_or_else(|| CStr::from_bytes_with_nul(NO_ERROR.as_bytes()).unwrap())
+        .as_ptr()
 }
 #[no_mangle]
 pub extern "C" fn ddnet_net_error_len(net: &DdnetNet) -> usize {
@@ -317,13 +319,8 @@ pub extern "C" fn ddnet_net_send_chunk(
     })
 }
 #[no_mangle]
-pub extern "C" fn ddnet_net_flush(
-    net: &mut DdnetNet,
-    peer_index: u64,
-) -> bool {
-    net.good(|impl_| {
-        impl_.flush(PeerIndex(peer_index))
-    })
+pub extern "C" fn ddnet_net_flush(net: &mut DdnetNet, peer_index: u64) -> bool {
+    net.good(|impl_| impl_.flush(PeerIndex(peer_index)))
 }
 #[no_mangle]
 pub extern "C" fn ddnet_net_connect(
@@ -357,11 +354,57 @@ pub extern "C" fn ddnet_net_close(
         impl_.close(PeerIndex(peer_index), reason)
     })
 }
+#[no_mangle]
+pub extern "C" fn ddnet_net_set_logger(
+    log: extern "C" fn(
+        level: i32,
+        system: *const c_char,
+        system_len: usize,
+        message: *const c_char,
+        message_len: usize,
+    ),
+) -> bool {
+    catch_unwind(|| {
+        struct Log(extern "C" fn(i32, *const c_char, usize, *const c_char, usize));
+        impl log::Log for Log {
+            fn enabled(&self, _metadata: &log::Metadata) -> bool {
+                true
+            }
+            fn log(&self, record: &log::Record) {
+                use log::Level::*;
+                let level = match record.level() {
+                    Error => 0,
+                    Warn => 1,
+                    Info => 2,
+                    Debug => 3,
+                    Trace => 4,
+                };
+                let message = record.args().to_string();
+                self.0(
+                    level,
+                    record.target().as_bytes().as_ptr() as *const c_char,
+                    record.target().len(),
+                    message.as_bytes().as_ptr() as *const c_char,
+                    message.len(),
+                );
+            }
+            fn flush(&self) {}
+        }
+        if log::set_logger(Box::leak(Box::new(Log(log)))).is_err() {
+            eprintln!("ddnet_net: failed to set logger");
+            return Err(From::from(Error::from_string(String::new())));
+        }
+        log::set_max_level(log::LevelFilter::Trace);
+        info!("set logger");
+        Ok(())
+    })
+    .is_err()
+}
 
 #[cfg(test)]
 mod test {
-    use std::mem;
     use super::DdnetNetEvent;
+    use std::mem;
 
     #[test]
     fn event_padding_works() {

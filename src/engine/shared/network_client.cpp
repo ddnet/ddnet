@@ -31,6 +31,7 @@ bool CNetClient::Open(NETADDR BindAddr)
                 return false;
         }
 
+	// TODO: use the same socket as the above one
 	NETADDR Any = {0};
 	Any.type = NETTYPE_IPV4 | NETTYPE_IPV6;
 	m_pStun = new CStun(net_udp_create(Any));
@@ -88,7 +89,7 @@ int CNetClient::Connect(const NETADDR *pAddr, int NumAddrs)
 	char aAddr[NETADDR_MAXSTRSIZE];
 	net_addr_str(&pAddr[0], aAddr, sizeof(aAddr), true);
 	char aUrl[128];
-	str_format(aUrl, sizeof(aUrl), "ddnet-15+quic://%s#0026a0d653cd5f38d1002bf166167933f2f7910f26d6dd619b2b3fe769e057eef", aAddr);
+	str_format(aUrl, sizeof(aUrl), "ddnet-15+quic://%s#0026a0d653cd5f38d1002bf166167933f2f7910f26d6dd619b2b3fe769e057ee", aAddr);
 	uint64_t PeerID;
 	if(ddnet_net_connect(m_pNet, aUrl, str_length(aUrl), &PeerID))
 	{
@@ -102,7 +103,11 @@ int CNetClient::Connect(const NETADDR *pAddr, int NumAddrs)
 
 int CNetClient::ResetErrorString()
 {
-	// unimplemented
+	dbg_assert(m_State == NETSTATE_OFFLINE, "can only reset error string while having one");
+	if(m_State == NETSTATE_OFFLINE)
+	{
+		m_aBuffer[0] = 0;
+	}
 	return 0;
 }
 
@@ -136,6 +141,7 @@ int CNetClient::Recv(CNetChunk *pChunk)
 			}
 			m_PeerID = -1;
 			m_State = NETSTATE_OFFLINE;
+			m_aBuffer[ddnet_net_ev_disconnect_reason_len(&Event)] = 0;
                         break;
                 case DDNET_NET_EV_CHUNK:
 			if((int)PeerID != m_PeerID)
@@ -197,12 +203,6 @@ int CNetClient::State()
 	return m_State;
 }
 
-int CNetClient::Flush()
-{
-	// unimplemented
-	return 0;
-}
-
 int CNetClient::GotProblems(int64_t MaxLatency) const
 {
 	// unimplemented
@@ -213,8 +213,14 @@ int CNetClient::GotProblems(int64_t MaxLatency) const
 
 const char *CNetClient::ErrorString() const
 {
-	// unimplemented
-	return "";
+	if(m_State == NETSTATE_OFFLINE)
+	{
+		return (char *)m_aBuffer;
+	}
+	else
+	{
+		return "";
+	}
 }
 
 void CNetClient::FeedStunServer(NETADDR StunServer)
