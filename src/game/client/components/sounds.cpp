@@ -85,7 +85,7 @@ void CSounds::OnInit()
 		m_pSoundJob = std::make_shared<CSoundLoading>(m_pClient, false);
 		m_pClient->Engine()->AddJob(m_pSoundJob);
 		m_WaitForSoundJob = true;
-		m_pClient->m_Menus.RenderLoading(Localize("Loading DDNet Client"), Localize("Loading sound files"), 0);
+		m_pClient->m_Menus.RenderLoading(Localize("Loading KeClient"), Localize("Loading sound files"), 0);
 	}
 	else
 	{

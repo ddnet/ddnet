@@ -2581,7 +2581,7 @@ int CMenus::MenuImageScan(const char *pName, int IsDir, int DirType, void *pUser
 		// set menu image data
 		str_truncate(MenuImage.m_aName, sizeof(MenuImage.m_aName), pName, str_length(pName) - 4);
 		pSelf->m_vMenuImages.push_back(MenuImage);
-		pSelf->RenderLoading(Localize("Loading DDNet Client"), Localize("Loading menu images"), 1);
+		pSelf->RenderLoading("Loading KeClient", Localize("Loading menu images"), 1);
 	}
 	return 0;
 }

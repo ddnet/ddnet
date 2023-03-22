@@ -2181,7 +2181,9 @@ void CMenus::RenderSettings(CUIRect MainView)
 		Localize("Graphics"),
 		Localize("Sound"),
 		Localize("DDNet"),
-		Localize("Assets")};
+		Localize("Assets"),
+		("KeClient")
+	};
 	static CButtonContainer s_aTabButtons[sizeof(apTabs)];
 
 	int NumTabs = (int)std::size(apTabs);
@@ -2250,6 +2252,11 @@ void CMenus::RenderSettings(CUIRect MainView)
 		m_pBackground->ChangePosition(CMenuBackground::POS_SETTINGS_ASSETS);
 		RenderSettingsCustom(MainView);
 	}
+	else if(g_Config.m_UiSettingsPage == SETTINGS_KECLIENT)
+	{
+		m_pBackground->ChangePosition(CMenuBackground::POS_SETTINGS_KECLIENT);
+		RenderSettingsKeClient(MainView);
+	}
 
 	if(m_NeedRestartUpdate)
 	{
@@ -2261,6 +2268,16 @@ void CMenus::RenderSettings(CUIRect MainView)
 		UI()->DoLabel(&RestartWarning, Localize("You must restart the game for all settings to take effect."), 14.0f, TEXTALIGN_LEFT);
 
 	RenderColorPicker();
+}
+
+
+void CMenus::RenderSettingsKeClient(CUIRect MainView)
+{
+	// TODO: 
+	/*
+		- abilitare e disabilitare l'opzione che fa azioni tramite chat
+		- 
+	*/
 }
 
 ColorHSLA CMenus::RenderHSLColorPicker(const CUIRect *pRect, unsigned int *pColor, bool Alpha)

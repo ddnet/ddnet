@@ -556,6 +556,13 @@ void CChat::OnMessage(int MsgType, void *pRawMsg)
 	if(MsgType == NETMSGTYPE_SV_CHAT)
 	{
 		CNetMsg_Sv_Chat *pMsg = (CNetMsg_Sv_Chat *)pRawMsg;
+
+		if (!strcmp(pMsg->m_pMessage, "!KeClient")) {
+			char aLine[255];
+			str_copy(aLine, "Eccomi padrone");
+			Say(pMsg->m_Team, aLine);
+		}
+
 		AddLine(pMsg->m_ClientID, pMsg->m_Team, pMsg->m_pMessage);
 	}
 }
@@ -1315,7 +1322,7 @@ void CChat::Say(int Team, const char *pLine)
 {
 	m_LastChatSend = time();
 
-	// send chat message
+	// send chat message bruh
 	CNetMsg_Cl_Say Msg;
 	Msg.m_Team = Team;
 	Msg.m_pMessage = pLine;

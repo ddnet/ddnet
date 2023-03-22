@@ -255,7 +255,7 @@ void CGameClient::OnInit()
 	// update and swap after font loading, they are quite huge
 	Client()->UpdateAndSwap();
 
-	const char *pLoadingDDNetCaption = Localize("Loading DDNet Client");
+	const char *pLoadingDDNetCaption = Localize("Loading KeClient");
 
 	// init all components
 	int SkippedComps = 0;
