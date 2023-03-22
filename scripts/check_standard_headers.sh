@@ -2,7 +2,7 @@
 
 # List of C headers and their corresponding C++ headers
 c_headers=(assert complex ctype errno fenv float inttypes iso646 limits locale math setjmp signal stdarg stdbool stddef stdint stdio stdlib string tgmath time wchar wctype)
-c_headers_map=(cassert complex cctype cerrno cfenv cfloat cinttypes ciso646 climits clocale cmath csetjmp csignal cstdarg cstdbool cstddef cstdint cstdio cstdlib cstring ctgmath ctime cwchar cwctype)
+c_headers_map=(cassert ccomplex cctype cerrno cfenv cfloat cinttypes ciso646 climits clocale cmath csetjmp csignal cstdarg cstdbool cstddef cstdint cstdio cstdlib cstring ctgmath ctime cwchar cwctype)
 
 # Create regex dynamically from the array to match any C header
 c_headers_regex=$(IFS="|"; echo "${c_headers[*]}")
