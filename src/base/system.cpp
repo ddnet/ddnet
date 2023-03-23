@@ -3428,7 +3428,7 @@ int str_time(int64_t centisecs, int format, char *buffer, int buffer_size)
 
 int str_time_float(float secs, int format, char *buffer, int buffer_size)
 {
-	return str_time(llroundf(secs * 100), format, buffer, buffer_size);
+	return str_time(llroundf(secs * 1000) / 10, format, buffer, buffer_size);
 }
 
 void str_escape(char **dst, const char *src, const char *end)
