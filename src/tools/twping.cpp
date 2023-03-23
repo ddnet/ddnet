@@ -5,8 +5,6 @@
 #include <engine/shared/network.h>
 #include <engine/shared/packer.h>
 
-static CNetClient g_NetOp; // main
-
 int main(int argc, const char **argv)
 {
 	CCmdlineFix CmdlineFix(&argc, &argv);
@@ -18,7 +16,9 @@ int main(int argc, const char **argv)
 	NETADDR BindAddr;
 	mem_zero(&BindAddr, sizeof(BindAddr));
 	BindAddr.type = NETTYPE_ALL;
-	g_NetOp.Open(BindAddr);
+
+	CNetClient NetClient;
+	NetClient.Open(BindAddr);
 
 	if(argc != 2)
 	{
@@ -36,42 +36,39 @@ int main(int argc, const char **argv)
 	if(Addr.port == 0)
 		Addr.port = 8303;
 
+	const int CurToken = rand() % 256;
 	unsigned char aBuffer[sizeof(SERVERBROWSE_GETINFO) + 1];
-	CNetChunk Packet;
-
 	mem_copy(aBuffer, SERVERBROWSE_GETINFO, sizeof(SERVERBROWSE_GETINFO));
-
-	int CurToken = rand() % 256;
 	aBuffer[sizeof(SERVERBROWSE_GETINFO)] = CurToken;
 
+	CNetChunk Packet;
 	Packet.m_ClientID = -1;
 	Packet.m_Address = Addr;
 	Packet.m_Flags = NETSENDFLAG_CONNLESS;
 	Packet.m_DataSize = sizeof(aBuffer);
 	Packet.m_pData = aBuffer;
 
-	g_NetOp.Send(&Packet);
+	NetClient.Send(&Packet);
 
-	int64_t startTime = time_get();
+	const int64_t StartTime = time_get();
 
-	net_socket_read_wait(g_NetOp.m_Socket, 1000000);
+	net_socket_read_wait(NetClient.m_Socket, 1000000);
 
-	g_NetOp.Update();
+	NetClient.Update();
 
-	while(g_NetOp.Recv(&Packet))
+	while(NetClient.Recv(&Packet))
 	{
 		if(Packet.m_DataSize >= (int)sizeof(SERVERBROWSE_INFO) && mem_comp(Packet.m_pData, SERVERBROWSE_INFO, sizeof(SERVERBROWSE_INFO)) == 0)
 		{
 			// we got ze info
-			CUnpacker Up;
-
-			Up.Reset((unsigned char *)Packet.m_pData + sizeof(SERVERBROWSE_INFO), Packet.m_DataSize - sizeof(SERVERBROWSE_INFO));
-			int Token = str_toint(Up.GetString());
+			CUnpacker Unpacker;
+			Unpacker.Reset((unsigned char *)Packet.m_pData + sizeof(SERVERBROWSE_INFO), Packet.m_DataSize - sizeof(SERVERBROWSE_INFO));
+			int Token = str_toint(Unpacker.GetString());
 			if(Token != CurToken)
 				continue;
 
-			int64_t endTime = time_get();
-			log_info("twping", "%g ms", (double)(endTime - startTime) / time_freq() * 1000);
+			const int64_t EndTime = time_get();
+			log_info("twping", "%g ms", (double)(EndTime - StartTime) / time_freq() * 1000);
 		}
 	}
 
