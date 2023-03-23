@@ -685,6 +685,9 @@ TEST(Str, TimeFloat)
 
 	EXPECT_EQ(str_time_float(12.16, TIME_HOURS_CENTISECS, aBuf, sizeof(aBuf)), 8);
 	EXPECT_STREQ(aBuf, "00:12.16");
+
+	EXPECT_EQ(str_time_float(22.995, TIME_MINS, aBuf, sizeof(aBuf)), 5);
+	EXPECT_STREQ(aBuf, "00:22");
 }
 
 TEST(Str, HasCc)
