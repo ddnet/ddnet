@@ -1,6 +1,6 @@
-#include <base/math.h>
+#include <base/logger.h>
 #include <base/system.h>
-#include <cstdio>
+
 #include <engine/shared/masterserver.h>
 #include <engine/shared/network.h>
 #include <engine/shared/packer.h>
@@ -10,6 +10,9 @@ static CNetClient g_NetOp; // main
 int main(int argc, const char **argv)
 {
 	CCmdlineFix CmdlineFix(&argc, &argv);
+
+	log_set_global_logger_default();
+
 	NETADDR BindAddr;
 	mem_zero(&BindAddr, sizeof(BindAddr));
 	BindAddr.type = NETTYPE_ALL;
@@ -17,14 +20,14 @@ int main(int argc, const char **argv)
 
 	if(argc != 2)
 	{
-		fprintf(stderr, "usage: %s server[:port] (default port: 8303)\n", argv[0]);
+		log_error("twping", "usage: %s server[:port] (default port: 8303)", argv[0]);
 		return 1;
 	}
 
 	NETADDR Addr;
 	if(net_host_lookup(argv[1], &Addr, NETTYPE_ALL))
 	{
-		fprintf(stderr, "host lookup failed\n");
+		log_error("twping", "host lookup failed");
 		return 1;
 	}
 
@@ -66,8 +69,9 @@ int main(int argc, const char **argv)
 				continue;
 
 			int64_t endTime = time_get();
-			printf("%g ms\n", (double)(endTime - startTime) / time_freq() * 1000);
+			log_info("twping", "%g ms", (double)(endTime - startTime) / time_freq() * 1000);
 		}
 	}
+
 	return 0;
 }
