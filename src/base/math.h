@@ -9,6 +9,8 @@
 
 using std::clamp;
 
+constexpr float pi = 3.1415926535897932384626433f;
+
 constexpr inline int round_to_int(float f)
 {
 	return f > 0 ? (int)(f + 0.5f) : (int)(f - 0.5f);
@@ -28,6 +30,21 @@ constexpr inline T mix(const T a, const T b, TB amount)
 inline float random_float()
 {
 	return rand() / (float)(RAND_MAX);
+}
+
+inline float random_float(float min, float max)
+{
+	return min + random_float() * (max - min);
+}
+
+inline float random_float(float max)
+{
+	return random_float(0.0f, max);
+}
+
+inline float random_angle()
+{
+	return 2.0f * pi * (rand() / std::nextafter((float)RAND_MAX, std::numeric_limits<float>::max()));
 }
 
 constexpr int fxpscale = 1 << 10;
@@ -84,8 +101,6 @@ public:
 		return fx2f(value);
 	}
 };
-
-constexpr float pi = 3.1415926535897932384626433f;
 
 template<typename T>
 constexpr inline T minimum(T a, T b)

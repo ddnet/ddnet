@@ -633,7 +633,7 @@ void CItems::ReconstructSmokeTrail(const CProjectileData *pCurrent, int DestroyT
 	float Step = maximum(Client()->FrameTimeAvg(), (pCurrent->m_Type == WEAPON_GRENADE) ? 0.02f : 0.01f);
 	for(int i = 1 + (int)(Gt / Step); i < (int)(T / Step); i++)
 	{
-		float t = Step * (float)i + 0.4f * Step * (random_float() - 0.5f);
+		float t = Step * (float)i + 0.4f * Step * random_float(-0.5f, 0.5f);
 		vec2 Pos = CalcPos(pCurrent->m_StartPos, pCurrent->m_StartVel, Curvature, Speed, t);
 		vec2 PrevPos = CalcPos(pCurrent->m_StartPos, pCurrent->m_StartVel, Curvature, Speed, t - 0.001f);
 		vec2 Vel = Pos - PrevPos;
