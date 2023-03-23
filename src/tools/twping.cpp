@@ -5,6 +5,8 @@
 #include <engine/shared/network.h>
 #include <engine/shared/packer.h>
 
+#include <chrono>
+
 int main(int argc, const char **argv)
 {
 	CCmdlineFix CmdlineFix(&argc, &argv);
@@ -23,14 +25,14 @@ int main(int argc, const char **argv)
 	if(argc != 2)
 	{
 		log_error("twping", "usage: %s server[:port] (default port: 8303)", argv[0]);
-		return 1;
+		return -1;
 	}
 
 	NETADDR Addr;
 	if(net_host_lookup(argv[1], &Addr, NETTYPE_ALL))
 	{
 		log_error("twping", "host lookup failed");
-		return 1;
+		return -1;
 	}
 
 	if(Addr.port == 0)
@@ -52,7 +54,9 @@ int main(int argc, const char **argv)
 
 	const int64_t StartTime = time_get();
 
-	net_socket_read_wait(NetClient.m_Socket, 1000000);
+	using namespace std::chrono_literals;
+	const std::chrono::nanoseconds Timeout = std::chrono::nanoseconds(1s);
+	net_socket_read_wait(NetClient.m_Socket, Timeout);
 
 	NetClient.Update();
 
@@ -69,8 +73,10 @@ int main(int argc, const char **argv)
 
 			const int64_t EndTime = time_get();
 			log_info("twping", "%g ms", (double)(EndTime - StartTime) / time_freq() * 1000);
+			return 0;
 		}
 	}
 
-	return 0;
+	log_info("twping", "timeout (%" PRId64 " ms)", std::chrono::duration_cast<std::chrono::milliseconds>(Timeout).count());
+	return 1;
 }
