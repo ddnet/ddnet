@@ -438,6 +438,36 @@ void CMenus::RefreshSkins()
 	}
 }
 
+void CMenus::RandomSkin()
+{
+	const float schemes[] = {1.0f / 2.0f, 1.0f / 3.0f, 1.0f / -3.0f, 1.0f / 12.0f, 1.0f / -12.0f}; // complementary, triadic, analogous
+
+	float goal_sat = 0.3f + 0.6f * random_float();
+	float max_body_lht = 1.0f - goal_sat * goal_sat; // max allowed lightness before we start losing saturation
+
+	ColorHSLA Body;
+	Body.h = random_float();
+	Body.l = max_body_lht * random_float();
+	Body.s = clamp(goal_sat * goal_sat / (1.0f - Body.l), 0.0f, 1.0f);
+
+	ColorHSLA Feet;
+	Feet.h = fmodf(Body.h + schemes[rand() % 5], 1.0f);
+	Feet.l = random_float();
+	Feet.s = clamp(goal_sat * goal_sat / (1.0f - Feet.l), 0.0f, 1.0f);
+
+	const char *pRandomSkinName = CSkins::VANILLA_SKINS[rand() % 16];
+
+	char *pSkinName = !m_Dummy ? g_Config.m_ClPlayerSkin : g_Config.m_ClDummySkin;
+	unsigned *pColorBody = !m_Dummy ? &g_Config.m_ClPlayerColorBody : &g_Config.m_ClDummyColorBody;
+	unsigned *pColorFeet = !m_Dummy ? &g_Config.m_ClPlayerColorFeet : &g_Config.m_ClDummyColorFeet;
+
+	mem_copy(pSkinName, pRandomSkinName, sizeof(g_Config.m_ClPlayerSkin));
+	*pColorBody = Body.Pack(false);
+	*pColorFeet = Feet.Pack(false);
+
+	SetNeedSendInfo();
+}
+
 void CMenus::Con_AddFavoriteSkin(IConsole::IResult *pResult, void *pUserData)
 {
 	auto *pSelf = (CMenus *)pUserData;
@@ -670,8 +700,9 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		SetNeedSendInfo();
 	}
 
-	// custom color selector
-	MainView.HSplitTop(20.0f + RenderEyesBelow * 25.0f, 0, &MainView);
+	MainView.HSplitTop(RenderEyesBelow * 55.0f, 0, &MainView);
+
+	// custom color checkbox
 	MainView.HSplitTop(20.0f, &Button, &MainView);
 	Button.VSplitLeft(150.0f, &Button, 0);
 	static int s_CustomColorID = 0;
@@ -681,6 +712,17 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		SetNeedSendInfo();
 	}
 
+	// random skin button
+	MainView.HSplitTop(20.0f, &Button, &MainView);
+	Button.VSplitLeft(120.0f, &Button, 0);
+	Button.HMargin(2.0f, &Button);
+	static CButtonContainer Random;
+	if(DoButton_Menu(&Random, Localize("Random skin"), 1, &Button))
+	{
+		RandomSkin();
+	}
+
+	// custom color pickers
 	MainView.HSplitTop(5.0f, 0, &MainView);
 	MainView.HSplitTop(82.5f, &Label, &MainView);
 	if(*pUseCustomColor)
