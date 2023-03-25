@@ -440,22 +440,22 @@ void CMenus::RefreshSkins()
 
 void CMenus::RandomSkin()
 {
-	const float schemes[] = {1.0f / 2.0f, 1.0f / 3.0f, 1.0f / -3.0f, 1.0f / 12.0f, 1.0f / -12.0f}; // complementary, triadic, analogous
+	static const float s_aSchemes[] = {1.0f / 2.0f, 1.0f / 3.0f, 1.0f / -3.0f, 1.0f / 12.0f, 1.0f / -12.0f}; // complementary, triadic, analogous
 
-	float goal_sat = 0.3f + 0.6f * random_float();
-	float max_body_lht = 1.0f - goal_sat * goal_sat; // max allowed lightness before we start losing saturation
+	float GoalSat = random_float(0.3f, 1.0f);
+	float MaxBodyLht = 1.0f - GoalSat * GoalSat; // max allowed lightness before we start losing saturation
 
 	ColorHSLA Body;
 	Body.h = random_float();
-	Body.l = max_body_lht * random_float();
-	Body.s = clamp(goal_sat * goal_sat / (1.0f - Body.l), 0.0f, 1.0f);
+	Body.l = random_float(0.0f, MaxBodyLht);
+	Body.s = clamp(GoalSat * GoalSat / (1.0f - Body.l), 0.0f, 1.0f);
 
 	ColorHSLA Feet;
-	Feet.h = fmodf(Body.h + schemes[rand() % 5], 1.0f);
+	Feet.h = std::fmod(Body.h + s_aSchemes[rand() % std::size(s_aSchemes)], 1.0f);
 	Feet.l = random_float();
-	Feet.s = clamp(goal_sat * goal_sat / (1.0f - Feet.l), 0.0f, 1.0f);
+	Feet.s = clamp(GoalSat * GoalSat / (1.0f - Feet.l), 0.0f, 1.0f);
 
-	const char *pRandomSkinName = CSkins::VANILLA_SKINS[rand() % 16];
+	const char *pRandomSkinName = CSkins::VANILLA_SKINS[rand() % (std::size(CSkins::VANILLA_SKINS) - 2)]; // last 2 skins are x_ninja and x_spec
 
 	char *pSkinName = !m_Dummy ? g_Config.m_ClPlayerSkin : g_Config.m_ClDummySkin;
 	unsigned *pColorBody = !m_Dummy ? &g_Config.m_ClPlayerColorBody : &g_Config.m_ClDummyColorBody;
@@ -631,7 +631,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	OwnSkinInfo.m_Size = 50.0f;
 
 	MainView.HSplitTop(50.0f, &Label, &MainView);
-	Label.VSplitLeft(230.0f, &Label, 0);
+	Label.VSplitLeft(260.0f, &Label, 0);
 	CAnimState *pIdleState = CAnimState::GetIdle();
 	vec2 OffsetToMid;
 	RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &OwnSkinInfo, OffsetToMid);
@@ -691,6 +691,8 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		RenderTools()->RenderTee(pIdleState, &OwnSkinInfo, CurrentEyeEmote, vec2(1, 0), vec2(EyesTee.x + 25.0f, EyesTee.y + EyesTee.h / 2.0f + OffsetToMid.y));
 	}
 
+	Label.VSplitRight(34.0f, &Label, &Button);
+
 	static float s_OffsetSkin = 0.0f;
 	static int s_ClearButton = 0;
 	SUIExEditBoxProperties EditProps;
@@ -700,9 +702,24 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		SetNeedSendInfo();
 	}
 
-	MainView.HSplitTop(RenderEyesBelow * 55.0f, 0, &MainView);
+	// random skin button
+	Button.VSplitRight(30.0f, 0, &Button);
+	static CButtonContainer s_RandomSkinButtonID;
+	static const char *s_apDice[] = {"\xef\x94\xa5", "\xef\x94\xa8", "\xef\x94\xa7", "\xef\x94\xa4", "\xef\x94\xa3", "\xef\x94\xa6"};
+	static int s_CurrentDie = rand() % std::size(s_apDice);
+	TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
+	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
+	if(DoButton_Menu(&s_RandomSkinButtonID, s_apDice[s_CurrentDie], 1, &Button, nullptr, IGraphics::CORNER_ALL, 5.0f, -0.2f))
+	{
+		RandomSkin();
+		s_CurrentDie = rand() % std::size(s_apDice);
+	}
+	TextRender()->SetRenderFlags(0);
+	TextRender()->SetCurFont(nullptr);
+	GameClient()->m_Tooltips.DoToolTip(0, &Button, Localize("Create a random skin"));
 
-	// custom color checkbox
+	// custom color selector
+	MainView.HSplitTop(20.0f + RenderEyesBelow * 25.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
 	Button.VSplitLeft(150.0f, &Button, 0);
 	static int s_CustomColorID = 0;
@@ -712,17 +729,6 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		SetNeedSendInfo();
 	}
 
-	// random skin button
-	MainView.HSplitTop(20.0f, &Button, &MainView);
-	Button.VSplitLeft(120.0f, &Button, 0);
-	Button.HMargin(2.0f, &Button);
-	static CButtonContainer Random;
-	if(DoButton_Menu(&Random, Localize("Random skin"), 1, &Button))
-	{
-		RandomSkin();
-	}
-
-	// custom color pickers
 	MainView.HSplitTop(5.0f, 0, &MainView);
 	MainView.HSplitTop(82.5f, &Label, &MainView);
 	if(*pUseCustomColor)
@@ -1735,7 +1741,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	CUIRect Text;
 	MainView.HSplitTop(20.0f, 0, &MainView);
 	MainView.HSplitTop(20.0f, &Text, &MainView);
-	//text.VSplitLeft(15.0f, 0, &text);
+	// text.VSplitLeft(15.0f, 0, &text);
 	UI()->DoLabel(&Text, Localize("UI Color"), 14.0f, TEXTALIGN_LEFT);
 	CUIRect HSLBar = MainView;
 	RenderHSLScrollbars(&HSLBar, &g_Config.m_UiColor, true);
