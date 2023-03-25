@@ -644,6 +644,19 @@ public:
 		return Success;
 	}
 
+	bool RemoveFolder(const char *pFilename, int Type) override
+	{
+		dbg_assert(Type == TYPE_ABSOLUTE || (Type >= TYPE_SAVE && Type < m_NumPaths), "Type invalid");
+
+		char aBuffer[IO_MAX_PATH_LENGTH];
+		GetPath(Type, pFilename, aBuffer, sizeof(aBuffer));
+
+		bool Success = !fs_removedir(aBuffer);
+		if(!Success)
+			dbg_msg("storage", "failed to remove: %s", aBuffer);
+		return Success;
+	}
+
 	bool RemoveBinaryFile(const char *pFilename) override
 	{
 		char aBuffer[IO_MAX_PATH_LENGTH];
