@@ -69,6 +69,13 @@ public:
 
 	bool IsDownloadingSkins() { return m_DownloadingSkins; }
 
+	static bool IsVanillaSkin(const char *pName);
+
+	constexpr static const char *VANILLA_SKINS[] = {"bluekitty", "bluestripe", "brownbear",
+		"cammo", "cammostripes", "coala", "default", "limekitty",
+		"pinky", "redbopp", "redstripe", "saddo", "toptri",
+		"twinbop", "twintri", "warpaint", "x_ninja", "x_spec"};
+
 private:
 	std::unordered_map<std::string_view, std::unique_ptr<CSkin>> m_Skins;
 	std::unordered_map<std::string_view, std::unique_ptr<CDownloadSkin>> m_DownloadSkins;

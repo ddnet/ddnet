@@ -17,12 +17,7 @@
 
 #include "skins.h"
 
-static const char *VANILLA_SKINS[] = {"bluekitty", "bluestripe", "brownbear",
-	"cammo", "cammostripes", "coala", "default", "limekitty",
-	"pinky", "redbopp", "redstripe", "saddo", "toptri",
-	"twinbop", "twintri", "warpaint", "x_ninja", "x_spec"};
-
-static bool IsVanillaSkin(const char *pName)
+bool CSkins::IsVanillaSkin(const char *pName)
 {
 	return std::any_of(std::begin(VANILLA_SKINS), std::end(VANILLA_SKINS), [pName](const char *pVanillaSkin) { return str_comp(pName, pVanillaSkin) == 0; });
 }
