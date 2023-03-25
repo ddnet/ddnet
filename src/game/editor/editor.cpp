@@ -4980,9 +4980,10 @@ void CEditor::RenderFileDialog()
 	static int s_OkButton = 0;
 	static int s_CancelButton = 0;
 	static int s_RefreshButton = 0;
+	static int s_ShowDirectoryButton = 0;
+	static int s_DeleteButton = 0;
 	static int s_NewFolderButton = 0;
 	static int s_MapInfoButton = 0;
-	static int s_ShowDirectoryButton = 0;
 
 	CUIRect Button;
 	ButtonBar.VSplitRight(50.0f, &ButtonBar, &Button);
@@ -5057,6 +5058,42 @@ void CEditor::RenderFileDialog()
 			ShowFileDialogError("Failed to open the directory '%s'.", aPath);
 		}
 	}
+
+	ButtonBar.VSplitRight(40.0f, &ButtonBar, &Button);
+	ButtonBar.VSplitRight(50.0f, &ButtonBar, &Button);
+	static SConfirmPopupContext s_ConfirmDeletePopupContext;
+	if(m_FilesSelectedIndex >= 0 && m_vpFilteredFileList[m_FilesSelectedIndex]->m_StorageType == IStorage::TYPE_SAVE && !m_vpFilteredFileList[m_FilesSelectedIndex]->m_IsLink && str_comp(m_vpFilteredFileList[m_FilesSelectedIndex]->m_aFilename, "..") != 0)
+	{
+		if(DoButton_Editor(&s_DeleteButton, "Delete", 0, &Button, 0, nullptr) || (s_ListBoxUsed && UI()->ConsumeHotkey(CUI::HOTKEY_DELETE)))
+		{
+			s_ConfirmDeletePopupContext.Reset();
+			str_format(s_ConfirmDeletePopupContext.m_aMessage, sizeof(s_ConfirmDeletePopupContext.m_aMessage), "Are you sure that you want to delete the %s '%s/%s'?", IsDir ? "folder" : "file", m_pFileDialogPath, m_vpFilteredFileList[m_FilesSelectedIndex]->m_aFilename);
+			ShowPopupConfirm(UI()->MouseX(), UI()->MouseY(), &s_ConfirmDeletePopupContext);
+		}
+		if(s_ConfirmDeletePopupContext.m_Result == SConfirmPopupContext::CONFIRMED)
+		{
+			char aDeleteFilePath[IO_MAX_PATH_LENGTH];
+			str_format(aDeleteFilePath, sizeof(aDeleteFilePath), "%s/%s", m_pFileDialogPath, m_vpFilteredFileList[m_FilesSelectedIndex]->m_aFilename);
+			if(IsDir)
+			{
+				if(Storage()->RemoveFolder(aDeleteFilePath, IStorage::TYPE_SAVE))
+					FilelistPopulate(m_FileDialogLastPopulatedStorageType, true);
+				else
+					ShowFileDialogError("Failed to delete folder '%s'. Make sure it's empty first.", aDeleteFilePath);
+			}
+			else
+			{
+				if(Storage()->RemoveFile(aDeleteFilePath, IStorage::TYPE_SAVE))
+					FilelistPopulate(m_FileDialogLastPopulatedStorageType, true);
+				else
+					ShowFileDialogError("Failed to delete file '%s'.", aDeleteFilePath);
+			}
+		}
+		if(s_ConfirmDeletePopupContext.m_Result != SConfirmPopupContext::UNSET)
+			s_ConfirmDeletePopupContext.Reset();
+	}
+	else
+		s_ConfirmDeletePopupContext.Reset();
 
 	if(m_FileDialogStorageType == IStorage::TYPE_SAVE)
 	{
