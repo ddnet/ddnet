@@ -359,6 +359,9 @@ int CHttpRequest::ProgressCallback(void *pUser, double DlTotal, double DlCurr, d
 
 int CHttpRequest::OnCompletion(int State)
 {
+	if(m_Abort)
+		State = HTTP_ABORTED;
+
 	if(m_WriteToFile)
 	{
 		if(m_File && io_close(m_File) != 0)
