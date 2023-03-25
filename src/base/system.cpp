@@ -1895,56 +1895,39 @@ NETSOCKET net_tcp_create(NETADDR bindaddr)
 	return sock;
 }
 
-int net_set_non_blocking(NETSOCKET sock)
+static int net_set_blocking_impl(NETSOCKET sock, bool blocking)
 {
-	unsigned long mode = 1;
-	if(sock->ipv4sock >= 0)
-	{
-#if defined(CONF_FAMILY_WINDOWS)
-		ioctlsocket(sock->ipv4sock, FIONBIO, (unsigned long *)&mode);
-#else
-		if(ioctl(sock->ipv4sock, FIONBIO, (unsigned long *)&mode) == -1)
-			dbg_msg("socket", "setting ipv4 non-blocking failed: %d", errno);
-#endif
-	}
+	unsigned long mode = blocking ? 0 : 1;
+	const char *mode_str = blocking ? "blocking" : "non-blocking";
+	int sockets[] = {sock->ipv4sock, sock->ipv6sock};
+	const char *socket_str[] = {"ipv4", "ipv6"};
 
-	if(sock->ipv6sock >= 0)
+	for(size_t i = 0; i < std::size(sockets); ++i)
 	{
+		if(sockets[i] >= 0)
+		{
 #if defined(CONF_FAMILY_WINDOWS)
-		ioctlsocket(sock->ipv6sock, FIONBIO, (unsigned long *)&mode);
+			int result = ioctlsocket(sockets[i], FIONBIO, (unsigned long *)&mode);
+			if(result != NO_ERROR)
+				dbg_msg("socket", "setting %s %s failed: %d", socket_str[i], mode_str, result);
 #else
-		if(ioctl(sock->ipv6sock, FIONBIO, (unsigned long *)&mode) == -1)
-			dbg_msg("socket", "setting ipv6 non-blocking failed: %d", errno);
+			if(ioctl(sockets[i], FIONBIO, (unsigned long *)&mode) == -1)
+				dbg_msg("socket", "setting %s %s failed: %d", socket_str[i], mode_str, errno);
 #endif
+		}
 	}
 
 	return 0;
 }
 
+int net_set_non_blocking(NETSOCKET sock)
+{
+	return net_set_blocking_impl(sock, false);
+}
+
 int net_set_blocking(NETSOCKET sock)
 {
-	unsigned long mode = 0;
-	if(sock->ipv4sock >= 0)
-	{
-#if defined(CONF_FAMILY_WINDOWS)
-		ioctlsocket(sock->ipv4sock, FIONBIO, (unsigned long *)&mode);
-#else
-		if(ioctl(sock->ipv4sock, FIONBIO, (unsigned long *)&mode) == -1)
-			dbg_msg("socket", "setting ipv4 blocking failed: %d", errno);
-#endif
-	}
-
-	if(sock->ipv6sock >= 0)
-	{
-#if defined(CONF_FAMILY_WINDOWS)
-		ioctlsocket(sock->ipv6sock, FIONBIO, (unsigned long *)&mode);
-#else
-		if(ioctl(sock->ipv6sock, FIONBIO, (unsigned long *)&mode) == -1)
-			dbg_msg("socket", "setting ipv6 blocking failed: %d", errno);
-#endif
-	}
-
-	return 0;
+	return net_set_blocking_impl(sock, true);
 }
 
 int net_tcp_listen(NETSOCKET sock, int backlog)
