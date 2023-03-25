@@ -57,8 +57,11 @@ impl Identity {
             let mut buf = [0; 32];
             let mut len = buf.len();
             // TODO: expose this from the `boring` crate
-            if boring_sys::EVP_PKEY_get_raw_public_key(key.as_ptr(), buf.as_mut_ptr(), &mut len)
-                != 1
+            if boring_sys::EVP_PKEY_get_raw_public_key(
+                key.as_ptr(),
+                buf.as_mut_ptr(),
+                &mut len,
+            ) != 1
             {
                 return None;
             }
@@ -106,7 +109,11 @@ fn hex_to_32_bytes(v: &str) -> Result<[u8; 32], Error> {
     };
     for (i, (s, e)) in starts.zip(ends).enumerate() {
         result[i] = u8::from_str_radix(&v[s..e], 16).map_err(|_| {
-            Error::from_string(format!("non-hex character {:?} at index {}", &v[s..e], s))
+            Error::from_string(format!(
+                "non-hex character {:?} at index {}",
+                &v[s..e],
+                s
+            ))
         })?;
     }
     Ok(result)
@@ -149,17 +156,24 @@ impl PrivateIdentity {
         let name = {
             let mut builder = boring::x509::X509Name::builder().unwrap();
             builder
-                .append_entry_by_nid(boring::nid::Nid::ORGANIZATIONNAME, "ddnet16-autogen")
+                .append_entry_by_nid(
+                    boring::nid::Nid::ORGANIZATIONNAME,
+                    "ddnet16-autogen",
+                )
                 .unwrap();
             builder
-                .append_entry_by_nid(boring::nid::Nid::COMMONNAME, &format!("{}", self.public()))
+                .append_entry_by_nid(
+                    boring::nid::Nid::COMMONNAME,
+                    &format!("{}", self.public()),
+                )
                 .unwrap();
             builder
                 .append_entry_by_nid(boring::nid::Nid::COMMONNAME, "a")
                 .unwrap();
             builder.build()
         };
-        let default_md = unsafe { boring::hash::MessageDigest::from_ptr(ptr::null()) };
+        let default_md =
+            unsafe { boring::hash::MessageDigest::from_ptr(ptr::null()) };
 
         let mut builder = boring::x509::X509::builder().unwrap();
         // TODO: what do we want to strip?

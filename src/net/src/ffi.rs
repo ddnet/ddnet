@@ -51,7 +51,10 @@ impl DdnetNet {
     ///
     /// Returns `true` if an error has occured during this call or in an
     /// earlier method of `DdnetNet`.
-    fn init<F: FnOnce(&mut NetBuilderImpl) -> Result<()>>(&mut self, f: F) -> bool {
+    fn init<F: FnOnce(&mut NetBuilderImpl) -> Result<()>>(
+        &mut self,
+        f: F,
+    ) -> bool {
         let impl_ = match &mut self.0 {
             Init(impl_) => impl_,
             Good(_) => {
@@ -68,7 +71,9 @@ impl DdnetNet {
             }
             _ => return true,
         };
-        if let Err(err) = catch_unwind(panic::AssertUnwindSafe(move || f(impl_))) {
+        if let Err(err) =
+            catch_unwind(panic::AssertUnwindSafe(move || f(impl_)))
+        {
             let impl_ = match mem::replace(&mut self.0, Temporary) {
                 Good(impl_) => impl_,
                 _ => unreachable!(),
@@ -95,7 +100,9 @@ impl DdnetNet {
             Good(impl_) => impl_,
             _ => return true,
         };
-        if let Err(err) = catch_unwind(panic::AssertUnwindSafe(move || f(&mut impl_))) {
+        if let Err(err) =
+            catch_unwind(panic::AssertUnwindSafe(move || f(&mut impl_)))
+        {
             let impl_ = match mem::replace(&mut self.0, Temporary) {
                 Good(impl_) => impl_,
                 _ => unreachable!(),
@@ -150,7 +157,9 @@ pub extern "C" fn ddnet_net_ev_kind(ev: &DdnetNetEvent) -> u64 {
     }
 }
 #[no_mangle]
-pub extern "C" fn ddnet_net_ev_connect_identity(ev: &DdnetNetEvent) -> &[u8; 32] {
+pub extern "C" fn ddnet_net_ev_connect_identity(
+    ev: &DdnetNetEvent,
+) -> &[u8; 32] {
     use self::EventImpl::*;
     match unsafe { &ev.inner } {
         Some(Connect(id)) => id.as_bytes(),
@@ -174,7 +183,9 @@ pub extern "C" fn ddnet_net_ev_chunk_is_unreliable(ev: &DdnetNetEvent) -> bool {
     }
 }
 #[no_mangle]
-pub extern "C" fn ddnet_net_ev_disconnect_reason_len(ev: &DdnetNetEvent) -> usize {
+pub extern "C" fn ddnet_net_ev_disconnect_reason_len(
+    ev: &DdnetNetEvent,
+) -> usize {
     use self::EventImpl::*;
     match unsafe { ev.inner } {
         Some(Disconnect(reason_len, _)) => reason_len,
@@ -182,7 +193,9 @@ pub extern "C" fn ddnet_net_ev_disconnect_reason_len(ev: &DdnetNetEvent) -> usiz
     }
 }
 #[no_mangle]
-pub extern "C" fn ddnet_net_ev_disconnect_is_remote(ev: &DdnetNetEvent) -> bool {
+pub extern "C" fn ddnet_net_ev_disconnect_is_remote(
+    ev: &DdnetNetEvent,
+) -> bool {
     use self::EventImpl::*;
     match unsafe { ev.inner } {
         Some(Disconnect(_, remote)) => remote,
@@ -209,14 +222,18 @@ pub extern "C" fn ddnet_net_set_bindaddr(
     addr_len: usize,
 ) -> bool {
     net.init(|builder| {
-        let addr = unsafe { slice::from_raw_parts(addr as *const u8, addr_len) };
+        let addr =
+            unsafe { slice::from_raw_parts(addr as *const u8, addr_len) };
         let addr = str::from_utf8(addr).unwrap();
         builder.bindaddr(addr.parse().context("ddnet_net_set_bindaddr")?);
         Ok(())
     })
 }
 #[no_mangle]
-pub extern "C" fn ddnet_net_set_identity(net: &mut DdnetNet, private_identity: &[u8; 32]) -> bool {
+pub extern "C" fn ddnet_net_set_identity(
+    net: &mut DdnetNet,
+    private_identity: &[u8; 32],
+) -> bool {
     net.init(|builder| {
         builder.identity(PrivateIdentity::from_bytes(*private_identity));
         Ok(())
@@ -240,7 +257,10 @@ pub extern "C" fn ddnet_net_open(net: &mut DdnetNet) -> bool {
             Good(impl_) => {
                 net.0 = LaterError(
                     impl_,
-                    CString::new("`ddnet_net_open` called on already open instance").unwrap(),
+                    CString::new(
+                        "`ddnet_net_open` called on already open instance",
+                    )
+                    .unwrap(),
                 );
                 return Ok(());
             }
@@ -265,7 +285,9 @@ static NO_ERROR: &str = "no error\0";
 pub extern "C" fn ddnet_net_error(net: &DdnetNet) -> *const c_char {
     net.error()
         .map(|(s, _)| s)
-        .unwrap_or_else(|| CStr::from_bytes_with_nul(NO_ERROR.as_bytes()).unwrap())
+        .unwrap_or_else(|| {
+            CStr::from_bytes_with_nul(NO_ERROR.as_bytes()).unwrap()
+        })
         .as_ptr()
 }
 #[no_mangle]
@@ -330,7 +352,8 @@ pub extern "C" fn ddnet_net_connect(
     peer_index: &mut u64,
 ) -> bool {
     net.good(|impl_| {
-        let addr = unsafe { slice::from_raw_parts(addr as *const u8, addr_len) };
+        let addr =
+            unsafe { slice::from_raw_parts(addr as *const u8, addr_len) };
         let addr = str::from_utf8(addr).unwrap();
         *peer_index = impl_.connect(addr)?.0;
         Ok(())
@@ -346,7 +369,9 @@ pub extern "C" fn ddnet_net_close(
 ) -> bool {
     net.good(|impl_| {
         let reason = if !reason.is_null() {
-            let reason = unsafe { slice::from_raw_parts(reason as *const u8, reason_len) };
+            let reason = unsafe {
+                slice::from_raw_parts(reason as *const u8, reason_len)
+            };
             Some(str::from_utf8(reason).unwrap())
         } else {
             None
@@ -365,7 +390,9 @@ pub extern "C" fn ddnet_net_set_logger(
     ),
 ) -> bool {
     catch_unwind(|| {
-        struct Log(extern "C" fn(i32, *const c_char, usize, *const c_char, usize));
+        struct Log(
+            extern "C" fn(i32, *const c_char, usize, *const c_char, usize),
+        );
         impl log::Log for Log {
             fn enabled(&self, _metadata: &log::Metadata) -> bool {
                 true
@@ -410,8 +437,14 @@ mod test {
     fn event_padding_works() {
         let ev = DdnetNetEvent { inner: None };
         unsafe {
-            assert!(mem::size_of_val(&ev.inner) <= mem::size_of_val(&ev._padding_alignment));
-            assert!(mem::align_of_val(&ev.inner) <= mem::align_of_val(&ev._padding_alignment));
+            assert!(
+                mem::size_of_val(&ev.inner)
+                    <= mem::size_of_val(&ev._padding_alignment)
+            );
+            assert!(
+                mem::align_of_val(&ev.inner)
+                    <= mem::align_of_val(&ev._padding_alignment)
+            );
         }
     }
 }
