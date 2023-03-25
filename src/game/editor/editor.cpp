@@ -5043,18 +5043,6 @@ void CEditor::RenderFileDialog()
 	if(DoButton_Editor(&s_CancelButton, "Cancel", 0, &Button, 0, nullptr) || (s_ListBoxUsed && UI()->ConsumeHotkey(CUI::HOTKEY_ESCAPE)))
 		m_Dialog = DIALOG_NONE;
 
-	if(m_FileDialogStorageType == IStorage::TYPE_SAVE)
-	{
-		ButtonBar.VSplitLeft(70.0f, &Button, &ButtonBar);
-		if(DoButton_Editor(&s_NewFolderButton, "New folder", 0, &Button, 0, nullptr))
-		{
-			m_aFileDialogNewFolderName[0] = 0;
-			static int s_NewFolderPopupID = 0;
-			UiInvokePopupMenu(&s_NewFolderPopupID, 0, Width / 2.0f - 200.0f, Height / 2.0f - 100.0f, 400.0f, 200.0f, PopupNewFolder);
-			UI()->SetActiveItem(nullptr);
-		}
-	}
-
 	ButtonBar.VSplitRight(40.0f, &ButtonBar, &Button);
 	ButtonBar.VSplitRight(50.0f, &ButtonBar, &Button);
 	if(DoButton_Editor(&s_RefreshButton, "Refresh", 0, &Button, 0, nullptr) || (s_ListBoxUsed && (Input()->KeyIsPressed(KEY_F5) || (Input()->ModifierIsPressed() && Input()->KeyIsPressed(KEY_R)))))
@@ -5072,6 +5060,15 @@ void CEditor::RenderFileDialog()
 
 	if(m_FileDialogStorageType == IStorage::TYPE_SAVE)
 	{
+		ButtonBar.VSplitLeft(70.0f, &Button, &ButtonBar);
+		if(DoButton_Editor(&s_NewFolderButton, "New folder", 0, &Button, 0, nullptr))
+		{
+			m_aFileDialogNewFolderName[0] = 0;
+			static int s_NewFolderPopupID = 0;
+			UiInvokePopupMenu(&s_NewFolderPopupID, 0, Width / 2.0f - 200.0f, Height / 2.0f - 100.0f, 400.0f, 200.0f, PopupNewFolder);
+			UI()->SetActiveItem(nullptr);
+		}
+
 		ButtonBar.VSplitLeft(40.0f, nullptr, &ButtonBar);
 		ButtonBar.VSplitLeft(70.0f, &Button, &ButtonBar);
 		if(DoButton_Editor(&s_MapInfoButton, "Map details", 0, &Button, 0, nullptr))
