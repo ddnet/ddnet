@@ -716,7 +716,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	}
 	TextRender()->SetRenderFlags(0);
 	TextRender()->SetCurFont(nullptr);
-	GameClient()->m_Tooltips.DoToolTip(0, &Button, Localize("Create a random skin"));
+	GameClient()->m_Tooltips.DoToolTip(&s_RandomSkinButtonID, &Button, Localize("Create a random skin"));
 
 	// custom color selector
 	MainView.HSplitTop(20.0f + RenderEyesBelow * 25.0f, 0, &MainView);
