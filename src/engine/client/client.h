@@ -163,6 +163,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	int m_aAckGameTick[NUM_DUMMIES];
 	int m_aCurrentRecvTick[NUM_DUMMIES];
 	int m_aRconAuthed[NUM_DUMMIES];
+	char m_aRconUsername[32];
 	char m_aRconPassword[32];
 	int m_UseTempRconCommands;
 	char m_aPassword[32];

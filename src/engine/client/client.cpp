@@ -323,6 +323,7 @@ CClient::CClient() :
 	m_aCurrentRecvTick[1] = 0;
 	m_aRconAuthed[0] = 0;
 	m_aRconAuthed[1] = 0;
+	m_aRconUsername[0] = '\0';
 	m_aRconPassword[0] = '\0';
 	m_aPassword[0] = '\0';
 
@@ -508,6 +509,8 @@ void CClient::RconAuth(const char *pName, const char *pPassword)
 	if(RconAuthed())
 		return;
 
+	if(pName != m_aRconUsername)
+		str_copy(m_aRconUsername, pName);
 	if(pPassword != m_aRconPassword)
 		str_copy(m_aRconPassword, pPassword);
 
@@ -838,6 +841,8 @@ void CClient::DisconnectWithReason(const char *pReason)
 
 	//
 	m_aRconAuthed[0] = 0;
+	mem_zero(m_aRconUsername, sizeof(m_aRconUsername));
+	mem_zero(m_aRconPassword, sizeof(m_aRconPassword));
 	m_ServerSentCapabilities = false;
 	m_UseTempRconCommands = 0;
 	m_pConsole->DeregisterTempAll();
@@ -933,7 +938,13 @@ void CClient::DummyDisconnect(const char *pReason)
 
 	m_aNetClient[CONN_DUMMY].Disconnect(pReason);
 	g_Config.m_ClDummy = 0;
+
+	if(!m_aRconAuthed[0] && m_aRconAuthed[1])
+	{
+		RconAuth(m_aRconUsername, m_aRconPassword);
+	}
 	m_aRconAuthed[1] = 0;
+
 	m_aapSnapshots[1][SNAP_CURRENT] = 0;
 	m_aapSnapshots[1][SNAP_PREV] = 0;
 	m_aReceivedSnapshots[1] = 0;
@@ -1803,7 +1814,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 			g_Config.m_ClDummy = 1;
 			Rcon("crashmeplx");
 			if(m_aRconAuthed[0])
-				RconAuth("", m_aRconPassword);
+				RconAuth(m_aRconUsername, m_aRconPassword);
 		}
 		else if(Msg == NETMSG_PING)
 		{
