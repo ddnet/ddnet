@@ -1074,6 +1074,9 @@ Skin prefix
 Choose default eyes when joining a server
 == 
 
+Create a random skin
+== 
+
 Skin Database
 == 
 

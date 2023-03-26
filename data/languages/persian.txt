@@ -1674,6 +1674,9 @@ Search:
 Copy info
 == 
 
+Create a random skin
+== 
+
 Controller %d: %s
 == 
 
