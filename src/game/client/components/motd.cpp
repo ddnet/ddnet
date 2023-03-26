@@ -64,7 +64,10 @@ void CMotd::OnRender()
 	}
 
 	if(m_RectQuadContainer != -1)
+	{
+		Graphics()->TextureClear();
 		Graphics()->RenderQuadContainer(m_RectQuadContainer, -1);
+	}
 
 	const float TextWidth = RectWidth - 2.0f * FontSize;
 	const float TextX = RectX + FontSize;
