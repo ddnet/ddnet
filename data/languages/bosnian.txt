@@ -1321,6 +1321,9 @@ Download community skins
 Choose default eyes when joining a server
 == 
 
+Create a random skin
+== 
+
 Skin Database
 == 
 

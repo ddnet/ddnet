@@ -1708,3 +1708,6 @@ Open the directory that contains the demo files
 
 Open the settings file
 == Öffne die Einstellungs-Datei
+
+Create a random skin
+== Erstelle einen zufälligen Skin

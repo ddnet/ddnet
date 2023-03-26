@@ -1703,3 +1703,6 @@ Search:
 
 Copy info
 == Cкопировать данные
+
+Create a random skin
+== 
