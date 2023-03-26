@@ -1717,3 +1717,6 @@ Search:
 
 Copy info
 == 
+
+Create a random skin
+== 
