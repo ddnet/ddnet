@@ -304,7 +304,10 @@ void CNamePlates::OnRender()
 			// don't render offscreen
 			if(!(pRenderPos->x < ScreenX0) && !(pRenderPos->x > ScreenX1) && !(pRenderPos->y < ScreenY0) && !(pRenderPos->y > ScreenY1))
 			{
-				RenderNameplatePos(m_pClient->m_aClients[i].m_SpecChar, pInfo, 0.4f, true);
+                if(g_Config.m_ClRenderNameplateSpec)
+                {
+                    RenderNameplatePos(m_pClient->m_aClients[i].m_SpecChar, pInfo, 0.4f, true);
+                }
 			}
 		}
 		if(!m_pClient->m_Snap.m_aCharacters[i].m_Active)

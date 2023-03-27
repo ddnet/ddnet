@@ -3577,12 +3577,12 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		MainView = Column;
 
 		MainView.HSplitTop(30.0f, &Section, &MainView);
-		UI()->DoLabel(&Section, Localize("Auto Verify"), 20.0f, TEXTALIGN_LEFT);
+		UI()->DoLabel(&Section, Localize("Miscellaneous 2.0"), 20.0f, TEXTALIGN_LEFT);
 		MainView.VSplitLeft(5.0f, 0x0, &MainView);
 		MainView.HSplitTop(5.0f, 0x0, &MainView);
 
-        
-    
+        // checkbox for hiding nameplates
+        DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRenderNameplateSpec, ("Show nameplates in spec"), &g_Config.m_ClRenderNameplateSpec, &MainView, LineMargin);
     }
 
 	if(s_CurCustomTab == TCLIENT_TAB_BINDWHEEL)
