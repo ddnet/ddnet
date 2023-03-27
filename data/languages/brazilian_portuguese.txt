@@ -25,6 +25,7 @@
 # Rafael Fontenelle   2022-09-17 23:23:00
 # Rafael Fontenelle   2022-10-25 11:22:00
 # Rafael Fontenelle   2023-01-09 10:33:00
+# Rafael Fontenelle   2023-03-26 19:11:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -1716,4 +1717,4 @@ Copy info
 == Copiar informação
 
 Create a random skin
-== 
+== Criar uma skin aleatória
