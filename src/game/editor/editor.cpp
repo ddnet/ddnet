@@ -4321,10 +4321,7 @@ int CEditor::PopupImage(CEditor *pEditor, CUIRect View, void *pContext)
 		pEditor->Storage()->FindFiles(aFilename, "mapres", IStorage::TYPE_ALL, &s_SelectionPopupContext.m_Entries);
 		if(s_SelectionPopupContext.m_Entries.empty())
 		{
-			static SMessagePopupContext s_MessagePopupContext;
-			s_MessagePopupContext.ErrorColor();
-			str_format(s_MessagePopupContext.m_aMessage, sizeof(s_MessagePopupContext.m_aMessage), "Error: could not find image '%s' in the mapres folder.", aFilename);
-			pEditor->ShowPopupMessage(pEditor->UI()->MouseX(), pEditor->UI()->MouseY(), &s_MessagePopupContext);
+			pEditor->ShowFileDialogError("Error: could not find image '%s' in the mapres folder.", aFilename);
 		}
 		else if(s_SelectionPopupContext.m_Entries.size() == 1)
 		{
@@ -4386,10 +4383,7 @@ int CEditor::PopupSound(CEditor *pEditor, CUIRect View, void *pContext)
 		pEditor->Storage()->FindFiles(aFilename, "mapres", IStorage::TYPE_ALL, &s_SelectionPopupContext.m_Entries);
 		if(s_SelectionPopupContext.m_Entries.empty())
 		{
-			static SMessagePopupContext s_MessagePopupContext;
-			s_MessagePopupContext.ErrorColor();
-			str_format(s_MessagePopupContext.m_aMessage, sizeof(s_MessagePopupContext.m_aMessage), "Error: could not find sound '%s' in the mapres folder.", aFilename);
-			pEditor->ShowPopupMessage(pEditor->UI()->MouseX(), pEditor->UI()->MouseY(), &s_MessagePopupContext);
+			pEditor->ShowFileDialogError("Error: could not find sound '%s' in the mapres folder.", aFilename);
 		}
 		else if(s_SelectionPopupContext.m_Entries.size() == 1)
 		{
