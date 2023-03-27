@@ -52,12 +52,7 @@ private:
 public:
 	CKillMsg m_aKillmsgs[MAX_KILLMSGS];
 	int m_KillmsgCurrent;
-
-	CTeeRenderInfo m_aVictimSkinBuffer[MAX_KILLMSGTEAM];
 	int m_VictimSkinCurrent;
-
-	bool m_Sendable;
-	int m_TeamSizeCarrier;
 
 	virtual int Sizeof() const override { return sizeof(*this); }
 	virtual void OnWindowResize() override;

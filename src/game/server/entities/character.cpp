@@ -922,27 +922,24 @@ void CCharacter::Die(int Killer, int Weapon, bool Single)
 	// send the kill messages
 	if(Single)
 	{
-		CNetMsg_Sv_KillMsgPlus MsgPlus;
-
-		if(Team() != TEAM_FLOCK && Teams()->TeamSize(Team()) != 1 && Teams()->GetTeamState(Team()) != 1)
+		if(Team() != TEAM_FLOCK && Teams()->TeamSize(Team()) > 1 && Teams()->GetTeamState(Team()) != 1)
 		{
-			MsgPlus.m_Sendable = false;
-			MsgPlus.m_TeamSize = 0;
+			CNetMsg_Sv_KillMsgPlus MsgPlus;
+			MsgPlus.m_Victim = m_pPlayer->GetCID();
+			MsgPlus.m_Weapon = Weapon;
+			MsgPlus.m_Size = Teams()->TeamSize(Team());
+			Server()->SendPackMsg(&MsgPlus, MSGFLAG_VITAL, -1);
 		}
 		else
 		{
-			MsgPlus.m_Sendable = true;
-			MsgPlus.m_TeamSize = 1;
+			CNetMsg_Sv_KillMsg Msg;
+			Msg.m_Killer = Killer;
+			Msg.m_Victim = m_pPlayer->GetCID();
+			Msg.m_Weapon = Weapon;
+			Msg.m_ModeSpecial = ModeSpecial;
+			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
 		}
-		Server()->SendPackMsg(&MsgPlus, MSGFLAG_VITAL, -1);
 	}
-
-	CNetMsg_Sv_KillMsg Msg;
-	Msg.m_Killer = Killer;
-	Msg.m_Victim = m_pPlayer->GetCID();
-	Msg.m_Weapon = Weapon;
-	Msg.m_ModeSpecial = ModeSpecial;
-	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
 
 	// a nice sound
 	GameServer()->CreateSound(m_Pos, SOUND_PLAYER_DIE, TeamMask());

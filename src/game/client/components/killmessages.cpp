@@ -24,8 +24,6 @@ void CKillMessages::OnReset()
 {
 	m_KillmsgCurrent = 0;
 	m_VictimSkinCurrent = 0;
-	m_Sendable = true;
-	m_TeamSizeCarrier = 1;
 
 	for(auto &Killmsg : m_aKillmsgs)
 	{
@@ -111,11 +109,74 @@ void CKillMessages::OnMessage(int MsgType, void *pRawMsg)
 	{
 		CNetMsg_Sv_KillMsgPlus *pMsg = (CNetMsg_Sv_KillMsgPlus *)pRawMsg;
 
-		m_Sendable = pMsg->m_Sendable;
-		m_TeamSizeCarrier = minimum(pMsg->m_TeamSize, 4);
+		// unpack messages
+		CKillMsg Kill;
+		Kill.m_aVictimName[0] = '\0';
+		Kill.m_aKillerName[0] = '\0';
 
-		if(m_Sendable == true)
+		Kill.m_TeamSize = pMsg->m_Size;
+		if(Kill.m_TeamSize > MAX_KILLMSGTEAM)
+			Kill.m_TeamSize = MAX_KILLMSGTEAM;
+
+		Kill.m_VictimID = pMsg->m_Victim;
+		if(Kill.m_VictimID >= 0 && Kill.m_VictimID < MAX_CLIENTS)
+		{
+			Kill.m_VictimTeam = m_pClient->m_aClients[Kill.m_VictimID].m_Team;
+			Kill.m_VictimDDTeam = m_pClient->m_Teams.Team(Kill.m_VictimID);
+			Kill.m_VictimRenderInfo[0] = m_pClient->m_aClients[Kill.m_VictimID].m_RenderInfo;
+
 			m_VictimSkinCurrent = 0;
+			for(int i = 0; i < MAX_CLIENTS; i++)
+			{
+				if(m_pClient->m_Teams.Team(i) == Kill.m_VictimDDTeam && i != Kill.m_VictimID)
+				{
+					Kill.m_VictimRenderInfo[m_VictimSkinCurrent + 1] = m_pClient->m_aClients[i].m_RenderInfo;
+					m_VictimSkinCurrent = (m_VictimSkinCurrent + 1) % (MAX_KILLMSGTEAM - 1);
+				}
+			}
+
+			char aBuf[8];
+			str_format(aBuf, sizeof(aBuf), "Team %d", Kill.m_VictimDDTeam);
+			str_copy(Kill.m_aVictimName, aBuf);
+		}
+
+		Kill.m_KillerID = Kill.m_VictimID;
+
+		Kill.m_Weapon = pMsg->m_Weapon;
+		Kill.m_ModeSpecial = 0;
+		Kill.m_Tick = Client()->GameTick(g_Config.m_ClDummy);
+
+		Kill.m_VitctimTextWidth = Kill.m_KillerTextWidth = 0.f;
+
+		float Width = 400 * 3.0f * Graphics()->ScreenAspect();
+		float Height = 400 * 3.0f;
+
+		float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
+		Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
+		Graphics()->MapScreen(0, 0, Width * 1.5f, Height * 1.5f);
+
+		CreateKillmessageNamesIfNotCreated(Kill);
+
+		int VictimSkinsValid = 0;
+		for(int i = 0; i < Kill.m_TeamSize; i++)
+		{
+			if((Kill.m_VictimRenderInfo[i].m_CustomColoredSkin && Kill.m_VictimRenderInfo[i].m_ColorableRenderSkin.m_Body.IsValid()) || (!Kill.m_VictimRenderInfo[i].m_CustomColoredSkin && Kill.m_VictimRenderInfo[i].m_OriginalRenderSkin.m_Body.IsValid()))
+				VictimSkinsValid++;
+		}
+		bool KillMsgValid = VictimSkinsValid == Kill.m_TeamSize;
+
+		if(KillMsgValid)
+		{
+			// add the message
+			m_KillmsgCurrent = (m_KillmsgCurrent + 1) % MAX_KILLMSGS;
+
+			TextRender()->DeleteTextContainer(m_aKillmsgs[m_KillmsgCurrent].m_VictimTextContainerIndex);
+			TextRender()->DeleteTextContainer(m_aKillmsgs[m_KillmsgCurrent].m_KillerTextContainerIndex);
+
+			m_aKillmsgs[m_KillmsgCurrent] = Kill;
+		}
+
+		Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 	}
 
 	if(MsgType == NETMSGTYPE_SV_KILLMSG)
@@ -127,28 +188,15 @@ void CKillMessages::OnMessage(int MsgType, void *pRawMsg)
 		Kill.m_aVictimName[0] = '\0';
 		Kill.m_aKillerName[0] = '\0';
 
-		Kill.m_TeamSize = m_TeamSizeCarrier;
+		Kill.m_TeamSize = 1;
 
 		Kill.m_VictimID = pMsg->m_Victim;
 		if(Kill.m_VictimID >= 0 && Kill.m_VictimID < MAX_CLIENTS)
 		{
 			Kill.m_VictimTeam = m_pClient->m_aClients[Kill.m_VictimID].m_Team;
 			Kill.m_VictimDDTeam = m_pClient->m_Teams.Team(Kill.m_VictimID);
-			if(Kill.m_TeamSize != 1)
-			{
-				char aBuf[8];
-				str_format(aBuf, sizeof(aBuf), "Team %d", Kill.m_VictimDDTeam);
-				str_copy(Kill.m_aVictimName, aBuf);
-			}
-			else
-				str_copy(Kill.m_aVictimName, m_pClient->m_aClients[Kill.m_VictimID].m_aName);
-
-			if(!m_Sendable)
-				m_aVictimSkinBuffer[m_VictimSkinCurrent + 1] = m_pClient->m_aClients[Kill.m_VictimID].m_RenderInfo;
-			else
-				m_aVictimSkinBuffer[0] = m_pClient->m_aClients[Kill.m_VictimID].m_RenderInfo;
-
-			m_VictimSkinCurrent = (m_VictimSkinCurrent + 1) % (MAX_KILLMSGTEAM - 1);
+			str_copy(Kill.m_aVictimName, m_pClient->m_aClients[Kill.m_VictimID].m_aName);
+			Kill.m_VictimRenderInfo[0] = m_pClient->m_aClients[Kill.m_VictimID].m_RenderInfo;
 		}
 
 		Kill.m_KillerID = pMsg->m_Killer;
@@ -165,44 +213,32 @@ void CKillMessages::OnMessage(int MsgType, void *pRawMsg)
 
 		Kill.m_FlagCarrierBlue = m_pClient->m_Snap.m_pGameDataObj ? m_pClient->m_Snap.m_pGameDataObj->m_FlagCarrierBlue : -1;
 
-		if(m_Sendable)
+		Kill.m_VitctimTextWidth = Kill.m_KillerTextWidth = 0.f;
+
+		float Width = 400 * 3.0f * Graphics()->ScreenAspect();
+		float Height = 400 * 3.0f;
+
+		float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
+		Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
+		Graphics()->MapScreen(0, 0, Width * 1.5f, Height * 1.5f);
+
+		CreateKillmessageNamesIfNotCreated(Kill);
+
+		bool KillMsgValid = (Kill.m_VictimRenderInfo[0].m_CustomColoredSkin && Kill.m_VictimRenderInfo[0].m_ColorableRenderSkin.m_Body.IsValid()) || (!Kill.m_VictimRenderInfo[0].m_CustomColoredSkin && Kill.m_VictimRenderInfo[0].m_OriginalRenderSkin.m_Body.IsValid());
+		// if killer != victim, killer must be valid too
+		KillMsgValid &= Kill.m_KillerID == Kill.m_VictimID || ((Kill.m_KillerRenderInfo.m_CustomColoredSkin && Kill.m_KillerRenderInfo.m_ColorableRenderSkin.m_Body.IsValid()) || (!Kill.m_KillerRenderInfo.m_CustomColoredSkin && Kill.m_KillerRenderInfo.m_OriginalRenderSkin.m_Body.IsValid()));
+		if(KillMsgValid)
 		{
-			Kill.m_VitctimTextWidth = Kill.m_KillerTextWidth = 0.f;
+			// add the message
+			m_KillmsgCurrent = (m_KillmsgCurrent + 1) % MAX_KILLMSGS;
 
-			float Width = 400 * 3.0f * Graphics()->ScreenAspect();
-			float Height = 400 * 3.0f;
+			TextRender()->DeleteTextContainer(m_aKillmsgs[m_KillmsgCurrent].m_VictimTextContainerIndex);
+			TextRender()->DeleteTextContainer(m_aKillmsgs[m_KillmsgCurrent].m_KillerTextContainerIndex);
 
-			float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
-			Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
-			Graphics()->MapScreen(0, 0, Width * 1.5f, Height * 1.5f);
-
-			CreateKillmessageNamesIfNotCreated(Kill);
-
-			int VictimSkinsValid = 0;
-			for(int i = 0; i < Kill.m_TeamSize; i++)
-			{
-				Kill.m_VictimRenderInfo[i] = m_aVictimSkinBuffer[i];
-				if((Kill.m_VictimRenderInfo[i].m_CustomColoredSkin && Kill.m_VictimRenderInfo[i].m_ColorableRenderSkin.m_Body.IsValid()) || (!Kill.m_VictimRenderInfo[i].m_CustomColoredSkin && Kill.m_VictimRenderInfo[i].m_OriginalRenderSkin.m_Body.IsValid()))
-					VictimSkinsValid++;
-				dbg_msg("valid", "%d", VictimSkinsValid);
-			}
-			bool KillMsgValid = (VictimSkinsValid == Kill.m_TeamSize);
-
-			// if killer != victim, killer must be valid too
-			KillMsgValid &= Kill.m_KillerID == Kill.m_VictimID || ((Kill.m_KillerRenderInfo.m_CustomColoredSkin && Kill.m_KillerRenderInfo.m_ColorableRenderSkin.m_Body.IsValid()) || (!Kill.m_KillerRenderInfo.m_CustomColoredSkin && Kill.m_KillerRenderInfo.m_OriginalRenderSkin.m_Body.IsValid()));
-			if(KillMsgValid)
-			{
-				// add the message
-				m_KillmsgCurrent = (m_KillmsgCurrent + 1) % MAX_KILLMSGS;
-
-				TextRender()->DeleteTextContainer(m_aKillmsgs[m_KillmsgCurrent].m_VictimTextContainerIndex);
-				TextRender()->DeleteTextContainer(m_aKillmsgs[m_KillmsgCurrent].m_KillerTextContainerIndex);
-
-				m_aKillmsgs[m_KillmsgCurrent] = Kill;
-			}
-
-			Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
+			m_aKillmsgs[m_KillmsgCurrent] = Kill;
 		}
+
+		Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 	}
 }
 
@@ -266,7 +302,7 @@ void CKillMessages::OnRender()
 
 		if(m_aKillmsgs[r].m_VictimID >= 0)
 		{
-			for(int j = 0; j < m_aKillmsgs[r].m_TeamSize; j++)
+			for(int j = (m_aKillmsgs[r].m_TeamSize - 1); j >= 0; j--)
 			{
 				CTeeRenderInfo TeeInfo = m_aKillmsgs[r].m_VictimRenderInfo[j];
 
