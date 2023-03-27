@@ -837,6 +837,8 @@ public:
 
 		m_GuiActive = true;
 		m_ProofBorders = false;
+		m_MenuProofBorders = false;
+		m_CurrentMenuProofIndex = 0;
 		m_PreviewZoom = false;
 
 		m_ShowTileInfo = false;
@@ -908,6 +910,8 @@ public:
 	bool Append(const char *pFilename, int StorageType);
 	void LoadCurrentMap();
 	void Render();
+
+	void ResetMenuBackgroundPositions();
 
 	std::vector<CQuad *> GetSelectedQuads();
 	CLayer *GetSelectedLayerType(int Index, int Type) const;
@@ -1076,12 +1080,20 @@ public:
 	bool m_ShowMousePointer;
 	bool m_GuiActive;
 	bool m_ProofBorders;
+	bool m_MenuProofBorders;
+	int m_CurrentMenuProofIndex;
+	std::vector<vec2> m_vMenuBackgroundPositions;
+	std::vector<const char *> m_vpMenuBackgroundPositionNames;
+	std::vector<std::vector<int>> m_vMenuBackgroundCollisions;
+	char m_aMenuBackgroundTooltip[256];
 	bool m_PreviewZoom;
 	float m_MouseWScale = 1.0f; // Mouse (i.e. UI) scale relative to the World (selected Group)
 	float m_MouseX = 0.0f;
 	float m_MouseY = 0.0f;
 	float m_MouseWorldX = 0.0f;
 	float m_MouseWorldY = 0.0f;
+	float m_MouseWorldNoParaX = 0.0f;
+	float m_MouseWorldNoParaY = 0.0f;
 	float m_MouseDeltaX;
 	float m_MouseDeltaY;
 	float m_MouseDeltaWx;
