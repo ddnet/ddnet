@@ -31,7 +31,7 @@ void CEditor::UiInvokePopupMenu(void *pID, int Flags, float x, float y, float Wi
 {
 	if(g_UiNumPopups > 7)
 		return;
-	Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "editor", "invoked");
+
 	const float Margin = 5.0f;
 	if(x + Width > UI()->Screen()->w - Margin)
 		x = maximum<float>(x - Width, Margin);
