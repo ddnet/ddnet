@@ -2831,9 +2831,6 @@ void CEditor::DoMapEditor(CUIRect View)
 			for(int i = 0; i < (int)m_vMenuBackgroundPositions.size(); i++)
 			{
 				vec2 Pos = m_vMenuBackgroundPositions[i];
-				if(Pos == vec2(0, 0))
-					continue;
-
 				Pos += vec2(m_WorldOffsetX, m_WorldOffsetY) - m_vMenuBackgroundPositions[m_CurrentMenuProofIndex];
 				Pos.y -= 3.0f;
 
@@ -2854,21 +2851,48 @@ void CEditor::DoMapEditor(CUIRect View)
 					}
 					else if(UI()->HotItem() == &m_vMenuBackgroundPositions[i])
 					{
+						char aTooltipPrefix[32] = "Switch proof position to";
+						if(i == m_CurrentMenuProofIndex)
+							str_copy(aTooltipPrefix, "Current proof position at");
+
 						char aNumBuf[8];
 						if(i < (TILE_TIME_CHECKPOINT_LAST - TILE_TIME_CHECKPOINT_FIRST))
 							str_format(aNumBuf, sizeof(aNumBuf), "#%d", i + 1);
 						else
 							aNumBuf[0] = '\0';
 
-						if(i == m_CurrentMenuProofIndex)
-							str_format(m_aMenuBackgroundTooltip, sizeof(m_aMenuBackgroundTooltip), "Current proof position is %s %s", m_vpMenuBackgroundPositionNames[i], aNumBuf);
-						else
-							str_format(m_aMenuBackgroundTooltip, sizeof(m_aMenuBackgroundTooltip), "Switch proof position to %s %s", m_vpMenuBackgroundPositionNames[i], aNumBuf);
+						char aTooltipPositions[128];
+						str_format(aTooltipPositions, sizeof(aTooltipPositions), "%s %s", m_vpMenuBackgroundPositionNames[i], aNumBuf);
+
+						for(int k : m_vMenuBackgroundCollisions.at(i))
+						{
+							if(k == m_CurrentMenuProofIndex)
+								str_copy(aTooltipPrefix, "Current proof position at");
+
+							Pos = m_vMenuBackgroundPositions[k];
+							Pos += vec2(m_WorldOffsetX, m_WorldOffsetY) - m_vMenuBackgroundPositions[m_CurrentMenuProofIndex];
+							Pos.y -= 3.0f;
+
+							MousePos = vec2(m_MouseWorldNoParaX, m_MouseWorldNoParaY);
+							if(distance(Pos, MousePos) > 20.0f)
+								continue;
+
+							if(i < (TILE_TIME_CHECKPOINT_LAST - TILE_TIME_CHECKPOINT_FIRST))
+								str_format(aNumBuf, sizeof(aNumBuf), "#%d", k + 1);
+							else
+								aNumBuf[0] = '\0';
+
+							char aTooltipPositionsCopy[128];
+							str_copy(aTooltipPositionsCopy, aTooltipPositions);
+							str_format(aTooltipPositions, sizeof(aTooltipPositions), "%s, %s %s", aTooltipPositionsCopy, m_vpMenuBackgroundPositionNames[k], aNumBuf);
+						}
+						str_format(m_aMenuBackgroundTooltip, sizeof(m_aMenuBackgroundTooltip), "%s %s", aTooltipPrefix, aTooltipPositions);
 
 						m_pTooltip = m_aMenuBackgroundTooltip;
 						if(UI()->MouseButton(0))
 							UI()->SetActiveItem(&m_vMenuBackgroundPositions[i]);
 					}
+					break;
 				}
 			}
 		}
@@ -3037,13 +3061,22 @@ void CEditor::DoMapEditor(CUIRect View)
 			{
 				Graphics()->SetColor(0, 1, 0, 0.3f);
 
+				std::set<int> indices;
 				for(int i = 0; i < (int)m_vMenuBackgroundPositions.size(); i++)
-				{
-					vec2 Pos = m_vMenuBackgroundPositions[i];
-					if(i == m_CurrentMenuProofIndex || Pos == vec2(0, 0))
-						continue;
+					indices.insert(i);
 
+				while(!indices.empty())
+				{
+					int i = *indices.begin();
+					indices.erase(i);
+					for(int k : m_vMenuBackgroundCollisions.at(i))
+						indices.erase(k);
+
+					vec2 Pos = m_vMenuBackgroundPositions[i];
 					Pos += vec2(m_WorldOffsetX, m_WorldOffsetY) - m_vMenuBackgroundPositions[m_CurrentMenuProofIndex];
+
+					if(distance(Pos, vec2(m_WorldOffsetX, m_WorldOffsetY)) < 0.001f)
+						continue;
 
 					Graphics()->DrawCircle(Pos.x, Pos.y - 3.0f, 20.0f, 32);
 				}
@@ -6945,7 +6978,7 @@ void CEditor::Init()
 	m_vpMenuBackgroundPositionNames[CMenuBackground::POS_BROWSER_CUSTOM2] = "custom(3)";
 	m_vpMenuBackgroundPositionNames[CMenuBackground::POS_BROWSER_CUSTOM3] = "custom(4)";
 	m_vpMenuBackgroundPositionNames[CMenuBackground::POS_SETTINGS_RESERVED0] = "reserved settings(1)";
-	m_vpMenuBackgroundPositionNames[CMenuBackground::POS_SETTINGS_RESERVED0] = "reserved settings(2)";
+	m_vpMenuBackgroundPositionNames[CMenuBackground::POS_SETTINGS_RESERVED1] = "reserved settings(2)";
 	m_vpMenuBackgroundPositionNames[CMenuBackground::POS_RESERVED0] = "reserved(1)";
 	m_vpMenuBackgroundPositionNames[CMenuBackground::POS_RESERVED1] = "reserved(2)";
 	m_vpMenuBackgroundPositionNames[CMenuBackground::POS_RESERVED2] = "reserved(3)";
@@ -7120,12 +7153,14 @@ void CEditor::ResetMenuBackgroundPositions()
 		}
 	}
 
+	m_vMenuBackgroundCollisions.clear();
+	m_vMenuBackgroundCollisions.resize(m_vMenuBackgroundPositions.size());
 	for(size_t i = 0; i < m_vMenuBackgroundPositions.size(); i++)
 	{
 		for(size_t j = i + 1; j < m_vMenuBackgroundPositions.size(); j++)
 		{
 			if(i != j && distance(m_vMenuBackgroundPositions[i], m_vMenuBackgroundPositions[j]) < 0.001f)
-				m_vMenuBackgroundPositions[j] = vec2(0, 0);
+				m_vMenuBackgroundCollisions.at(i).push_back(j);
 		}
 	}
 }

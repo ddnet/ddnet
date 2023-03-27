@@ -1076,7 +1076,8 @@ public:
 	int m_CurrentMenuProofIndex;
 	std::vector<vec2> m_vMenuBackgroundPositions;
 	std::vector<const char *> m_vpMenuBackgroundPositionNames;
-	char m_aMenuBackgroundTooltip[128];
+	std::vector<std::vector<int>> m_vMenuBackgroundCollisions;
+	char m_aMenuBackgroundTooltip[256];
 	bool m_PreviewZoom;
 	float m_MouseWScale = 1.0f; // Mouse (i.e. UI) scale relative to the World (selected Group)
 	float m_MouseX = 0.0f;
