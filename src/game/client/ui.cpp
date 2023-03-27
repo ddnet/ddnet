@@ -12,6 +12,7 @@
 #include <engine/shared/config.h>
 
 #include <game/client/lineinput.h>
+#include <game/localization.h>
 
 #include <limits>
 
@@ -1148,6 +1149,19 @@ bool CUI::DoClearableEditBox(const void *pID, const void *pClearID, const CUIRec
 	return ReturnValue;
 }
 
+int CUI::DoButton_PopupMenu(CButtonContainer *pButtonContainer, const char *pText, const CUIRect *pRect, int Align)
+{
+	pRect->Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f * ButtonColorMul(pButtonContainer)), IGraphics::CORNER_ALL, 3.0f);
+
+	CUIRect Label;
+	pRect->VMargin(2.0f, &Label);
+	SLabelProperties Props;
+	Props.m_AlignVertically = 0;
+	DoLabel(&Label, pText, 10.0f, Align, Props);
+
+	return DoButtonLogic(pButtonContainer, 0, pRect);
+}
+
 float CUI::DoScrollbarV(const void *pID, const CUIRect *pRect, float Current)
 {
 	Current = clamp(Current, 0.0f, 1.0f);
@@ -1389,4 +1403,249 @@ void CUI::DoScrollbarOptionLabeled(const void *pID, int *pOption, const CUIRect 
 		Value = (Value + 1) % NumLabels;
 
 	*pOption = clamp(Value, 0, Max);
+}
+
+void CUI::DoPopupMenu(const SPopupMenuId *pID, int X, int Y, int Width, int Height, void *pContext, FPopupMenuFunction pfnFunc, int Corners)
+{
+	constexpr float Margin = SPopupMenu::POPUP_BORDER + SPopupMenu::POPUP_MARGIN;
+	if(X + Width > Screen()->w - Margin)
+		X = maximum<float>(X - Width, Margin);
+	if(Y + Height > Screen()->h - Margin)
+		Y = maximum<float>(Y - Height, Margin);
+
+	m_vPopupMenus.emplace_back();
+	SPopupMenu *pNewMenu = &m_vPopupMenus.back();
+	pNewMenu->m_pID = pID;
+	pNewMenu->m_Rect.x = X;
+	pNewMenu->m_Rect.y = Y;
+	pNewMenu->m_Rect.w = Width;
+	pNewMenu->m_Rect.h = Height;
+	pNewMenu->m_Corners = Corners;
+	pNewMenu->m_pContext = pContext;
+	pNewMenu->m_pfnFunc = pfnFunc;
+}
+
+void CUI::RenderPopupMenus()
+{
+	for(size_t i = 0; i < m_vPopupMenus.size(); ++i)
+	{
+		const SPopupMenu &PopupMenu = m_vPopupMenus[i];
+		const bool Inside = MouseInside(&PopupMenu.m_Rect);
+		const bool Active = i == m_vPopupMenus.size() - 1;
+
+		if(Active)
+			SetHotItem(PopupMenu.m_pID);
+
+		if(CheckActiveItem(PopupMenu.m_pID))
+		{
+			if(!MouseButton(0))
+			{
+				if(!Inside)
+				{
+					ClosePopupMenu(PopupMenu.m_pID);
+				}
+				SetActiveItem(nullptr);
+			}
+		}
+		else if(HotItem() == PopupMenu.m_pID)
+		{
+			if(MouseButton(0))
+				SetActiveItem(PopupMenu.m_pID);
+		}
+
+		CUIRect PopupRect = PopupMenu.m_Rect;
+		PopupRect.Draw(ColorRGBA(0.5f, 0.5f, 0.5f, 0.75f), PopupMenu.m_Corners, 3.0f);
+		PopupRect.Margin(SPopupMenu::POPUP_BORDER, &PopupRect);
+		PopupRect.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.75f), PopupMenu.m_Corners, 3.0f);
+		PopupRect.Margin(SPopupMenu::POPUP_MARGIN, &PopupRect);
+
+		EPopupMenuFunctionResult Result = PopupMenu.m_pfnFunc(PopupMenu.m_pContext, PopupRect, Active);
+		if(Result != POPUP_KEEP_OPEN || (Active && ConsumeHotkey(HOTKEY_ESCAPE)))
+			ClosePopupMenu(PopupMenu.m_pID, Result == POPUP_CLOSE_CURRENT_AND_DESCENDANTS);
+	}
+}
+
+void CUI::ClosePopupMenu(const SPopupMenuId *pID, bool IncludeDescendants)
+{
+	auto PopupMenuToClose = std::find_if(m_vPopupMenus.begin(), m_vPopupMenus.end(), [pID](const SPopupMenu PopupMenu) { return PopupMenu.m_pID == pID; });
+	if(PopupMenuToClose != m_vPopupMenus.end())
+	{
+		if(IncludeDescendants)
+			m_vPopupMenus.erase(PopupMenuToClose, m_vPopupMenus.end());
+		else
+			m_vPopupMenus.erase(PopupMenuToClose);
+		SetActiveItem(nullptr);
+		if(m_pfnPopupMenuClosedCallback)
+			m_pfnPopupMenuClosedCallback();
+	}
+}
+
+void CUI::ClosePopupMenus()
+{
+	if(m_vPopupMenus.empty())
+		return;
+
+	m_vPopupMenus.clear();
+	SetActiveItem(nullptr);
+	if(m_pfnPopupMenuClosedCallback)
+		m_pfnPopupMenuClosedCallback();
+}
+
+bool CUI::IsPopupOpen() const
+{
+	return !m_vPopupMenus.empty();
+}
+
+bool CUI::IsPopupOpen(const SPopupMenuId *pID) const
+{
+	return std::any_of(m_vPopupMenus.begin(), m_vPopupMenus.end(), [pID](const SPopupMenu PopupMenu) { return PopupMenu.m_pID == pID; });
+}
+
+bool CUI::IsPopupHovered() const
+{
+	return std::any_of(m_vPopupMenus.begin(), m_vPopupMenus.end(), [this](const SPopupMenu PopupMenu) { return MouseHovered(&PopupMenu.m_Rect); });
+}
+
+void CUI::SetPopupMenuClosedCallback(FPopupMenuClosedCallback pfnCallback)
+{
+	m_pfnPopupMenuClosedCallback = std::move(pfnCallback);
+}
+
+void CUI::SMessagePopupContext::DefaultColor(ITextRender *pTextRender)
+{
+	m_TextColor = pTextRender->DefaultTextColor();
+}
+
+void CUI::SMessagePopupContext::ErrorColor()
+{
+	m_TextColor = ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f);
+}
+
+CUI::EPopupMenuFunctionResult CUI::PopupMessage(void *pContext, CUIRect View, bool Active)
+{
+	SMessagePopupContext *pMessagePopup = static_cast<SMessagePopupContext *>(pContext);
+	CUI *pUI = pMessagePopup->m_pUI;
+
+	CTextCursor Cursor;
+	pUI->TextRender()->SetCursor(&Cursor, View.x, View.y, SMessagePopupContext::POPUP_FONT_SIZE, TEXTFLAG_RENDER);
+	Cursor.m_LineWidth = View.w;
+	pUI->TextRender()->TextColor(pMessagePopup->m_TextColor);
+	pUI->TextRender()->TextEx(&Cursor, pMessagePopup->m_aMessage, -1);
+	pUI->TextRender()->TextColor(pUI->TextRender()->DefaultTextColor());
+
+	return (Active && pUI->ConsumeHotkey(HOTKEY_ENTER)) ? CUI::POPUP_CLOSE_CURRENT : CUI::POPUP_KEEP_OPEN;
+}
+
+CUI::SConfirmPopupContext::SConfirmPopupContext()
+{
+	Reset();
+}
+
+void CUI::SConfirmPopupContext::Reset()
+{
+	m_Result = SConfirmPopupContext::UNSET;
+}
+
+void CUI::SConfirmPopupContext::YesNoButtons()
+{
+	str_copy(m_aPositiveButtonLabel, Localize("Yes"));
+	str_copy(m_aNegativeButtonLabel, Localize("No"));
+}
+
+void CUI::ShowPopupConfirm(float X, float Y, SConfirmPopupContext *pContext)
+{
+	const float TextWidth = minimum(TextRender()->TextWidth(SConfirmPopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, -1, -1.0f), SConfirmPopupContext::POPUP_MAX_WIDTH);
+	const int LineCount = TextRender()->TextLineCount(SConfirmPopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, TextWidth);
+	const float PopupHeight = LineCount * SConfirmPopupContext::POPUP_FONT_SIZE + SConfirmPopupContext::POPUP_BUTTON_HEIGHT + SConfirmPopupContext::POPUP_BUTTON_SPACING + 10.0f;
+	pContext->m_pUI = this;
+	pContext->m_Result = SConfirmPopupContext::UNSET;
+	DoPopupMenu(pContext, X, Y, TextWidth + 10.0f, PopupHeight, pContext, PopupConfirm);
+}
+
+CUI::EPopupMenuFunctionResult CUI::PopupConfirm(void *pContext, CUIRect View, bool Active)
+{
+	SConfirmPopupContext *pConfirmPopup = static_cast<SConfirmPopupContext *>(pContext);
+	CUI *pUI = pConfirmPopup->m_pUI;
+
+	CUIRect Label, ButtonBar, CancelButton, ConfirmButton;
+	View.HSplitBottom(SConfirmPopupContext::POPUP_BUTTON_HEIGHT, &Label, &ButtonBar);
+	ButtonBar.VSplitMid(&CancelButton, &ConfirmButton, SConfirmPopupContext::POPUP_BUTTON_SPACING);
+
+	CTextCursor Cursor;
+	pUI->TextRender()->SetCursor(&Cursor, Label.x, Label.y, SConfirmPopupContext::POPUP_FONT_SIZE, TEXTFLAG_RENDER);
+	Cursor.m_LineWidth = Label.w;
+	pUI->TextRender()->TextEx(&Cursor, pConfirmPopup->m_aMessage, -1);
+
+	static CButtonContainer s_CancelButton;
+	if(pUI->DoButton_PopupMenu(&s_CancelButton, pConfirmPopup->m_aNegativeButtonLabel, &CancelButton, TEXTALIGN_CENTER))
+	{
+		pConfirmPopup->m_Result = SConfirmPopupContext::CANCELED;
+		return CUI::POPUP_CLOSE_CURRENT;
+	}
+
+	static CButtonContainer s_ConfirmButton;
+	if(pUI->DoButton_PopupMenu(&s_ConfirmButton, pConfirmPopup->m_aPositiveButtonLabel, &ConfirmButton, TEXTALIGN_CENTER) || (Active && pUI->ConsumeHotkey(HOTKEY_ENTER)))
+	{
+		pConfirmPopup->m_Result = SConfirmPopupContext::CONFIRMED;
+		return CUI::POPUP_CLOSE_CURRENT;
+	}
+
+	return CUI::POPUP_KEEP_OPEN;
+}
+
+void CUI::ShowPopupMessage(float X, float Y, SMessagePopupContext *pContext)
+{
+	const float TextWidth = minimum(TextRender()->TextWidth(SMessagePopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, -1, -1.0f), SMessagePopupContext::POPUP_MAX_WIDTH);
+	const int LineCount = TextRender()->TextLineCount(SMessagePopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, TextWidth);
+	pContext->m_pUI = this;
+	DoPopupMenu(pContext, X, Y, TextWidth + 10.0f, LineCount * SMessagePopupContext::POPUP_FONT_SIZE + 10.0f, pContext, PopupMessage);
+}
+
+CUI::SSelectionPopupContext::SSelectionPopupContext()
+{
+	Reset();
+}
+
+void CUI::SSelectionPopupContext::Reset()
+{
+	m_pSelection = nullptr;
+	m_Entries.clear();
+}
+
+CUI::EPopupMenuFunctionResult CUI::PopupSelection(void *pContext, CUIRect View, bool Active)
+{
+	SSelectionPopupContext *pSelectionPopup = static_cast<SSelectionPopupContext *>(pContext);
+	CUI *pUI = pSelectionPopup->m_pUI;
+
+	CUIRect Slot;
+	const int LineCount = pUI->TextRender()->TextLineCount(SSelectionPopupContext::POPUP_FONT_SIZE, pSelectionPopup->m_aMessage, SSelectionPopupContext::POPUP_MAX_WIDTH);
+	View.HSplitTop(LineCount * SSelectionPopupContext::POPUP_FONT_SIZE, &Slot, &View);
+
+	CTextCursor Cursor;
+	pUI->TextRender()->SetCursor(&Cursor, Slot.x, Slot.y, SSelectionPopupContext::POPUP_FONT_SIZE, TEXTFLAG_RENDER);
+	Cursor.m_LineWidth = Slot.w;
+	pUI->TextRender()->TextEx(&Cursor, pSelectionPopup->m_aMessage, -1);
+
+	pSelectionPopup->m_vButtonContainers.resize(pSelectionPopup->m_Entries.size());
+
+	size_t Index = 0;
+	for(const auto &Entry : pSelectionPopup->m_Entries)
+	{
+		View.HSplitTop(SSelectionPopupContext::POPUP_ENTRY_SPACING, nullptr, &View);
+		View.HSplitTop(SSelectionPopupContext::POPUP_ENTRY_HEIGHT, &Slot, &View);
+		if(pUI->DoButton_PopupMenu(&pSelectionPopup->m_vButtonContainers[Index], Entry.c_str(), &Slot, TEXTALIGN_LEFT))
+			pSelectionPopup->m_pSelection = &Entry;
+		++Index;
+	}
+
+	return pSelectionPopup->m_pSelection == nullptr ? CUI::POPUP_KEEP_OPEN : CUI::POPUP_CLOSE_CURRENT;
+}
+
+void CUI::ShowPopupSelection(float X, float Y, SSelectionPopupContext *pContext)
+{
+	const int LineCount = TextRender()->TextLineCount(SSelectionPopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, SSelectionPopupContext::POPUP_MAX_WIDTH);
+	const float PopupHeight = LineCount * SSelectionPopupContext::POPUP_FONT_SIZE + pContext->m_Entries.size() * (SSelectionPopupContext::POPUP_ENTRY_HEIGHT + SSelectionPopupContext::POPUP_ENTRY_SPACING) + 10.0f;
+	pContext->m_pUI = this;
+	pContext->m_pSelection = nullptr;
+	DoPopupMenu(pContext, X, Y, SSelectionPopupContext::POPUP_MAX_WIDTH + 10.0f, PopupHeight, pContext, PopupSelection);
 }

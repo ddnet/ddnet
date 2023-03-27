@@ -218,7 +218,7 @@ void CLayerQuads::GetSize(float *pWidth, float *pHeight)
 	}
 }
 
-int CLayerQuads::RenderProperties(CUIRect *pToolBox)
+CUI::EPopupMenuFunctionResult CLayerQuads::RenderProperties(CUIRect *pToolBox)
 {
 	enum
 	{
@@ -235,7 +235,9 @@ int CLayerQuads::RenderProperties(CUIRect *pToolBox)
 	int NewVal = 0;
 	int Prop = m_pEditor->DoProperties(pToolBox, aProps, s_aIds, &NewVal);
 	if(Prop != -1)
+	{
 		m_pEditor->m_Map.m_Modified = true;
+	}
 
 	if(Prop == PROP_IMAGE)
 	{
@@ -245,7 +247,7 @@ int CLayerQuads::RenderProperties(CUIRect *pToolBox)
 			m_Image = -1;
 	}
 
-	return 0;
+	return CUI::POPUP_KEEP_OPEN;
 }
 
 void CLayerQuads::ModifyImageIndex(INDEX_MODIFY_FUNC Func)
