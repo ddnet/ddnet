@@ -3750,7 +3750,7 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 		auto InsertPosition = std::find(m_Map.m_vpGroups.begin(), m_Map.m_vpGroups.end(), pNextGroup);
 		m_Map.m_vpGroups.insert(InsertPosition, pSelectedGroup);
 
-		m_SelectedGroup = GroupAfterDraggedLayer == 0 ? 0 : GroupAfterDraggedLayer - 1;
+		m_SelectedGroup = InsertPosition - m_Map.m_vpGroups.begin();
 		m_Map.m_Modified = true;
 	}
 
