@@ -808,11 +808,11 @@ public:
 		m_aFileDialogFileName[0] = '\0';
 		m_aFileDialogCurrentFolder[0] = '\0';
 		m_aFileDialogCurrentLink[0] = '\0';
-		m_aFilesSelectedName[0] = '\0';
 		m_aFileDialogFilterString[0] = '\0';
 		m_pFileDialogPath = m_aFileDialogCurrentFolder;
 		m_FileDialogOpening = false;
-		m_FilesSelectedIndex = -1;
+		m_FileDialogAllowMultipleSelection = false;
+		m_FileDialogLastSelectedIndex = -1;
 
 		m_FilePreviewImage.Invalidate();
 		m_PreviewImageState = PREVIEWIMAGE_UNLOADED;
@@ -899,7 +899,7 @@ public:
 	void RefreshFilteredFileList();
 	void FilelistPopulate(int StorageType, bool KeepSelection = false);
 	void InvokeFileDialog(int StorageType, int FileType, const char *pTitle, const char *pButtonText,
-		const char *pBasepath, const char *pDefaultName,
+		const char *pBasepath, const char *pDefaultName, bool AllowMultipleSelection,
 		bool (*pfnFunc)(const char *pFilename, int StorageType, void *pUser), void *pUser);
 	void ShowFileDialogError(const char *pFormat, ...)
 		GNUC_ATTRIBUTE((format(printf, 2, 3)));
@@ -984,16 +984,17 @@ public:
 	char m_aFileDialogFileName[IO_MAX_PATH_LENGTH];
 	char m_aFileDialogCurrentFolder[IO_MAX_PATH_LENGTH];
 	char m_aFileDialogCurrentLink[IO_MAX_PATH_LENGTH];
-	char m_aFilesSelectedName[IO_MAX_PATH_LENGTH];
 	char m_aFileDialogFilterString[IO_MAX_PATH_LENGTH];
 	char *m_pFileDialogPath;
 	int m_FileDialogFileType;
-	int m_FilesSelectedIndex;
+	std::set<int> m_SelectedFileIndices;
+	int m_FileDialogLastSelectedIndex;
 	char m_aFileDialogNewFolderName[IO_MAX_PATH_LENGTH];
 	IGraphics::CTextureHandle m_FilePreviewImage;
 	EPreviewImageState m_PreviewImageState;
 	CImageInfo m_FilePreviewImageInfo;
 	bool m_FileDialogOpening;
+	bool m_FileDialogAllowMultipleSelection;
 
 	struct CFilelistItem
 	{

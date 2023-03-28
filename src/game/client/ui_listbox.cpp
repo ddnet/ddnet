@@ -124,7 +124,6 @@ void CListBox::DoStart(float RowHeight, int NumItems, int ItemsPerRow, int RowsP
 	m_ListBoxRowHeight = RowHeight;
 	m_ListBoxNumItems = NumItems;
 	m_ListBoxItemsPerRow = ItemsPerRow;
-	m_ListBoxDoneEvents = false;
 	m_ListBoxItemActivated = false;
 	m_ListBoxItemSelected = false;
 
@@ -182,7 +181,7 @@ CListboxItem CListBox::DoNextItem(const void *pId, bool Selected, bool *pActive)
 		DoSpacing(m_AutoSpacing);
 
 	const int ThisItemIndex = m_ListBoxItemIndex;
-	if(Selected)
+	if(Selected && !m_ListBoxItemSelected)
 	{
 		if(m_ListBoxSelectedIndex == m_ListBoxNewSelected)
 			m_ListBoxNewSelected = ThisItemIndex;
@@ -206,17 +205,12 @@ CListboxItem CListBox::DoNextItem(const void *pId, bool Selected, bool *pActive)
 	const bool ProcessInput = !pActive || *pActive;
 
 	// process input, regard selected index
-	if(m_ListBoxSelectedIndex == ThisItemIndex)
+	if(m_ListBoxSelectedIndex == ThisItemIndex && ProcessInput)
 	{
-		if(ProcessInput && !m_ListBoxDoneEvents)
+		if(UI()->ConsumeHotkey(CUI::HOTKEY_ENTER) || (ItemClicked && Input()->MouseDoubleClick()))
 		{
-			m_ListBoxDoneEvents = true;
-
-			if(UI()->ConsumeHotkey(CUI::HOTKEY_ENTER) || (ItemClicked && Input()->MouseDoubleClick()))
-			{
-				m_ListBoxItemActivated = true;
-				UI()->SetActiveItem(nullptr);
-			}
+			m_ListBoxItemActivated = true;
+			UI()->SetActiveItem(nullptr);
 		}
 
 		Item.m_Rect.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, ProcessInput ? 0.5f : 0.33f), IGraphics::CORNER_ALL, 5.0f);
