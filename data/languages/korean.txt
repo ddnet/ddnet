@@ -14,6 +14,7 @@
 # 2022-09-18 CHaBek
 # 2022-10-20 CHaBek
 # 2023-01-08 CHaBek
+# 2023-03-28 CHaBek
 ##### /authors #####
 
 ##### translated strings #####
@@ -428,7 +429,7 @@ Team chat
 == 팀 채팅
 
 The audio device couldn't be initialised.
-== 오디오 장치를 초기화할 수 없습니다.
+== 오디오 장치를 초기화하지 못했습니다.
 
 The server is running a non-standard tuning on a pure game type.
 == 이 서버는 조정된 비표준 게임 모드를 실행하고 있습니다.
@@ -1628,7 +1629,7 @@ Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.c
 
 [Graphics error]
 Could not initialize the given graphics backend, reverting to the default backend now.
-== 지정된 그래픽 백엔드를 초기화할 수 없습니다. 기본 백엔드로 되돌립니다.
+== 지정된 그래픽 백엔드를 초기화하지 못했습니다. 기본 백엔드로 되돌립니다.
 
 Cancel
 == 취소
@@ -1695,16 +1696,16 @@ Open the directory to add custom assets
 
 [Graphics error]
 Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
-== 
+== 지정된 그래픽 백엔드를 초기화하지 못했습니다. 통합 그래픽 카드 드라이버가 설치되지 않은 것이 원인일 수 있습니다.
 
 Could not save downloaded map. Try manually deleting this file: %s
-== 
+== 다운로드한 맵을 저장하지 못했습니다. 다음 파일을 삭제해 보십시오: %s
 
 Search:
-== 
+== 검색:
 
 Copy info
-== 
+== 정보 복사
 
 Create a random skin
-== 
+== 무작위 스킨 생성
