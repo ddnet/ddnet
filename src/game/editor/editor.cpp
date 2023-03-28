@@ -4983,11 +4983,11 @@ void CEditor::RenderFileDialog()
 	{
 		if(m_PreviewImageState == PREVIEWIMAGE_UNLOADED)
 		{
-			int FirstIndex = *m_SelectedFileIndices.begin();
-			if(str_endswith(m_vpFilteredFileList[FirstIndex]->m_aFilename, ".png"))
+			int Index = m_FileDialogLastSelectedIndex >= 0 ? m_FileDialogLastSelectedIndex : *m_SelectedFileIndices.begin();
+			if(str_endswith(m_vpFilteredFileList[Index]->m_aFilename, ".png"))
 			{
 				char aBuffer[IO_MAX_PATH_LENGTH];
-				str_format(aBuffer, sizeof(aBuffer), "%s/%s", m_pFileDialogPath, m_vpFilteredFileList[FirstIndex]->m_aFilename);
+				str_format(aBuffer, sizeof(aBuffer), "%s/%s", m_pFileDialogPath, m_vpFilteredFileList[Index]->m_aFilename);
 				if(Graphics()->LoadPNG(&m_FilePreviewImageInfo, aBuffer, IStorage::TYPE_ALL))
 				{
 					Graphics()->UnloadTexture(&m_FilePreviewImage);
