@@ -205,7 +205,7 @@ CListboxItem CListBox::DoNextItem(const void *pId, bool Selected, bool *pActive)
 	const bool ProcessInput = !pActive || *pActive;
 
 	// process input, regard selected index
-	if(m_ListBoxSelectedIndex == ThisItemIndex && ProcessInput)
+	if(Selected && ProcessInput)
 	{
 		if(UI()->ConsumeHotkey(CUI::HOTKEY_ENTER) || (ItemClicked && Input()->MouseDoubleClick()))
 		{
