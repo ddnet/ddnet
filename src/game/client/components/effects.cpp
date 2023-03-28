@@ -88,7 +88,7 @@ void CEffects::FreezingFlakes(vec2 Pos, vec2 Size)
 	p.m_Pos = Pos + vec2(random_float(-0.5f, 0.5f), random_float(-0.5f, 0.5f)) * Size;
 	p.m_Vel = vec2(0, 0);
 	p.m_LifeSpan = 1.5f;
-	p.m_StartSize = random_float(1.0f, 1.5f) * 16.0f;
+	p.m_StartSize = random_float(0.5f, 1.5f) * 16.0f;
 	p.m_EndSize = p.m_StartSize * 0.5f;
 	p.m_UseAlphaFading = true;
 	p.m_StartAlpha = 1.0f;
@@ -206,7 +206,7 @@ void CEffects::PlayerDeath(vec2 Pos, int ClientID)
 		p.SetDefault();
 		p.m_Spr = SPRITE_PART_SPLAT01 + (rand() % 3);
 		p.m_Pos = Pos;
-		p.m_Vel = random_direction() * (random_float(1.0f, 1.1f) * 900.0f);
+		p.m_Vel = random_direction() * (random_float(0.1f, 1.1f) * 900.0f);
 		p.m_LifeSpan = random_float(0.3f, 0.6f);
 		p.m_StartSize = random_float(24.0f, 40.0f);
 		p.m_EndSize = 0;
