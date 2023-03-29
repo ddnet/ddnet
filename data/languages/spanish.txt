@@ -1713,4 +1713,4 @@ Copy info
 == Copiar información
 
 Create a random skin
-== 
+== Crear skin aleatoria
