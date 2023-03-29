@@ -47,9 +47,11 @@
 #include "components/player_indicator.h"
 #include "components/verify.h"
 #include "components/bindwheel.h"
+#include "components/tater.h"
 #include "components/outlines.h"
 #include "components/players.h"
 #include "components/race_demo.h"
+#include "components/rainbow.h"
 #include "components/scoreboard.h"
 #include "components/skins.h"
 #include "components/sounds.h"
@@ -138,6 +140,7 @@ public:
 	CSounds m_Sounds;
 	CEmoticon m_Emoticon;
     CBindWheel m_Bindwheel;
+    CTater m_Tater;
 	CDamageInd m_DamageInd;
 	CVoting m_Voting;
     CVerify m_Verify;
@@ -159,6 +162,7 @@ public:
 	CMapSounds m_MapSounds;
 
 	CRaceDemo m_RaceDemo;
+    CRainbow m_Rainbow;
 	CGhost m_Ghost;
 
 	CTooltips m_Tooltips;

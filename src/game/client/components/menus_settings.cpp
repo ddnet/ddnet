@@ -3582,7 +3582,32 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		MainView.HSplitTop(5.0f, 0x0, &MainView);
 
         // checkbox for hiding nameplates
-        DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRenderNameplateSpec, ("Show nameplates in spec"), &g_Config.m_ClRenderNameplateSpec, &MainView, LineMargin);
+        DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRenderNameplateSpec, ("Hide nameplates in spec"), &g_Config.m_ClRenderNameplateSpec, &MainView, LineMargin);
+
+        // create dropdown for rainbow modes
+       	static float s_ScrollValueDrop = 0;
+    	const char *apWindowModes[] = {Localize("Rainbow"), Localize("Pulse"), Localize("Black")};
+    	static const int s_NumWindowMode = std::size(apWindowModes);
+    	static int s_aWindowModeIDs[s_NumWindowMode];
+    	const void *apWindowModeIDs[s_NumWindowMode];
+    	for(int i = 0; i < s_NumWindowMode; ++i)
+    		apWindowModeIDs[i] = &s_aWindowModeIDs[i];
+    	static int s_WindowModeDropDownState = 0;
+
+
+        static CButtonContainer s_WindowButton;
+	    int OldSelected = g_Config.m_ClRainbowMode - 1;
+        
+        DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRainbow, ("Rainbow"), &g_Config.m_ClRainbow, &MainView, LineMargin);
+        DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRainbowOthers, ("Rainbow Others"), &g_Config.m_ClRainbowOthers, &MainView, LineMargin);
+        const int NewWindowMode = RenderDropDown(s_WindowModeDropDownState, &MainView, OldSelected, apWindowModeIDs, apWindowModes, s_NumWindowMode, &s_WindowButton, s_ScrollValueDrop);
+	
+        if(OldSelected != NewWindowMode)
+	    {
+            g_Config.m_ClRainbowMode = NewWindowMode+1;
+            OldSelected = NewWindowMode;
+            dbg_msg("rainbow", "rainbow mode changed to %d", g_Config.m_ClRainbowMode);
+	    }
     }
 
 	if(s_CurCustomTab == TCLIENT_TAB_BINDWHEEL)

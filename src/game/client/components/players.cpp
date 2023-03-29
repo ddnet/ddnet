@@ -22,6 +22,7 @@
 
 #include "players.h"
 
+#include "rainbow.h"
 #include <base/color.h>
 #include <base/math.h>
 
@@ -45,7 +46,10 @@ void CPlayers::RenderHand(CTeeRenderInfo *pInfo, vec2 CenterPos, vec2 Dir, float
 
 	const CSkin::SSkinTextures *pSkinTextures = pInfo->m_CustomColoredSkin ? &pInfo->m_ColorableRenderSkin : &pInfo->m_OriginalRenderSkin;
 
-	Graphics()->SetColor(pInfo->m_ColorBody.r, pInfo->m_ColorBody.g, pInfo->m_ColorBody.b, Alpha);
+    if(!(g_Config.m_ClRainbow == 1 || g_Config.m_ClRainbowOthers == 1))
+    {
+        Graphics()->SetColor(pInfo->m_ColorBody.r, pInfo->m_ColorBody.g, pInfo->m_ColorBody.b, Alpha);
+    }
 
 	// two passes
 	for(int i = 0; i < 2; i++)

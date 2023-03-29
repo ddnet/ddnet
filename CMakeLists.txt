@@ -2243,6 +2243,8 @@ if(CLIENT)
     components/players.h
     components/race_demo.cpp
     components/race_demo.h
+    components/rainbow.cpp
+    components/rainbow.h
     components/scoreboard.cpp
     components/scoreboard.h
     components/skinprofiles.cpp
@@ -2255,6 +2257,8 @@ if(CLIENT)
     components/spectator.h
     components/statboard.cpp
     components/statboard.h
+    components/tater.cpp
+    components/tater.h
     components/tooltips.cpp
     components/tooltips.h
     components/verify.cpp
