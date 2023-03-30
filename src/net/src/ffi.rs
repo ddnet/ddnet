@@ -240,12 +240,12 @@ pub extern "C" fn ddnet_net_set_identity(
     })
 }
 #[no_mangle]
-pub extern "C" fn ddnet_net_set_accept_incoming_connections(
+pub extern "C" fn ddnet_net_set_accept_connections(
     net: &mut DdnetNet,
     accept: bool,
 ) -> bool {
     net.init(|builder| {
-        builder.accept_incoming_connections(accept);
+        builder.accept_connections(accept);
         Ok(())
     })
 }

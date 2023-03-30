@@ -1,5 +1,6 @@
 use crate::normalize;
 use crate::quic;
+use crate::tw06;
 use crate::Challenger;
 use crate::Context as _;
 use crate::Error;
@@ -37,19 +38,25 @@ use url::Url;
 // Originally `NET_MAX_PAYLOAD`.
 pub const MAX_FRAME_SIZE: u64 = 1394;
 
-pub struct Net {
-    accept_incoming_connections: bool,
+pub struct CallbackData {
+    accept_connections: bool,
     sslkeylogfile: Option<ArcFile>,
     challenger: Challenger,
     local_addr: SocketAddr,
     socket: UdpSocket,
-    events: Events,
-    poll: Poll,
+    next_peer_index: PeerIndex,
+}
+
+pub struct Net {
+    cb: CallbackData,
     packet_buf: [u8; 65536],
 
-    proto_quic: quic::Protocol,
+    events: Events,
+    poll: Poll,
 
-    next_peer_index: PeerIndex,
+    proto_quic: quic::Protocol,
+    proto_tw06: tw06::Protocol,
+
     peer_addrs: HashMap<SocketAddr, PeerIndex>,
     peers: HashMap<PeerIndex, Connection>,
     connect_errors: VecDeque<(PeerIndex, Error)>,
@@ -61,7 +68,7 @@ pub struct Net {
 pub struct NetBuilder {
     bindaddr: Option<SocketAddr>,
     identity: Option<PrivateIdentity>,
-    accept_incoming_connections: bool,
+    accept_connections: bool,
 }
 
 #[derive(Clone, Copy, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -100,6 +107,7 @@ pub enum Event {
 
 pub enum Addr {
     Quic(QuicAddr),
+    Tw06(Tw06Addr),
 }
 
 impl Addr {
@@ -107,20 +115,18 @@ impl Addr {
         use self::Addr::*;
         match self {
             Quic(QuicAddr(socket_addr, _)) => socket_addr,
+            Tw06(Tw06Addr(socket_addr)) => socket_addr,
         }
     }
 }
 
+pub struct Tw06Addr(pub SocketAddr);
 pub struct QuicAddr(pub SocketAddr, pub Identity);
 
 impl FromStr for Addr {
     type Err = Error;
     fn from_str(addr: &str) -> Result<Addr> {
         let addr = Url::parse(addr).context("connect: URL")?;
-        // TODO: remove version because it can be negotiated via ALPN?
-        if addr.scheme() != "ddnet-15+quic" {
-            bail!("unsupported scheme {}", addr.scheme());
-        }
         let mut ip_port: ArrayString<[u8; 64]> = ArrayString::new();
         write!(
             &mut ip_port,
@@ -135,16 +141,22 @@ impl FromStr for Addr {
         .unwrap();
         let sock_addr: SocketAddr =
             ip_port.parse().context("connect: IP addr")?;
-        let fragment = addr.fragment().unwrap_or("");
-        // Take at most 64 characters.
-        let end = fragment
-            .char_indices()
-            .nth(64)
-            .map(|(idx, _)| idx)
-            .unwrap_or(fragment.len());
-        let identity: Identity =
-            fragment[..end].parse().context("connect: identity")?;
-        Ok(Addr::Quic(QuicAddr(sock_addr, identity)))
+        Ok(match addr.scheme() {
+            "ddnet-15+quic" => {
+                let fragment = addr.fragment().unwrap_or("");
+                // Take at most 64 characters.
+                let end = fragment
+                    .char_indices()
+                    .nth(64)
+                    .map(|(idx, _)| idx)
+                    .unwrap_or(fragment.len());
+                let identity: Identity =
+                    fragment[..end].parse().context("connect: identity")?;
+                Addr::Quic(QuicAddr(sock_addr, identity))
+            }
+            "tw-0.6+udp" => Addr::Tw06(Tw06Addr(sock_addr)),
+            scheme => bail!("unsupported scheme {}", scheme),
+        })
     }
 }
 
@@ -192,8 +204,8 @@ impl NetBuilder {
     pub fn identity(&mut self, identity: PrivateIdentity) {
         self.identity = Some(identity);
     }
-    pub fn accept_incoming_connections(&mut self, accept: bool) {
-        self.accept_incoming_connections = accept;
+    pub fn accept_connections(&mut self, accept: bool) {
+        self.accept_connections = accept;
     }
     pub fn open(self) -> Result<Net> {
         let sslkeylogfile =
@@ -234,19 +246,23 @@ impl NetBuilder {
         info!("listening on {}", bindaddr);
 
         Ok(Net {
-            accept_incoming_connections: self.accept_incoming_connections,
-            sslkeylogfile,
-            challenger: Challenger::new(),
-            local_addr,
-            socket,
-            events,
-            poll,
+            cb: CallbackData {
+                accept_connections: self.accept_connections,
+                sslkeylogfile,
+                challenger: Challenger::new(),
+                local_addr,
+                socket,
+                next_peer_index: PeerIndex(0),
+            },
             // TODO: uninitialized
             packet_buf: [0; 65536],
 
-            proto_quic: quic::Protocol::new(&identity)?,
+            events,
+            poll,
 
-            next_peer_index: PeerIndex(0),
+            proto_quic: quic::Protocol::new(&identity)?,
+            proto_tw06: tw06::Protocol::new(&identity)?,
+
             peer_addrs: HashMap::new(),
             peers: HashMap::new(),
             connect_errors: VecDeque::with_capacity(1),
@@ -262,12 +278,12 @@ impl Net {
         NetBuilder {
             bindaddr: None,
             identity: None,
-            accept_incoming_connections: false,
+            accept_connections: false,
         }
     }
     fn socket_read(&mut self) -> Result<Option<PeerIndex>> {
         loop {
-            let Some((read, from)) = self.socket.recv_from(&mut self.packet_buf).no_block().context("UdpSocket::recv_from")? else { break; };
+            let Some((read, from)) = self.cb.socket.recv_from(&mut self.packet_buf).no_block().context("UdpSocket::recv_from")? else { break; };
             let from = normalize(from);
             let idx = if let Some(&idx) = self.peer_addrs.get(&from) {
                 idx
@@ -297,15 +313,15 @@ impl Net {
                                 &mut self.packet_buf,
                                 read,
                                 &from,
-                                &self.challenger,
-                                if self.accept_incoming_connections {
-                                    Some(&mut self.next_peer_index)
+                                &self.cb.challenger,
+                                if self.cb.accept_connections {
+                                    Some(&mut self.cb.next_peer_index)
                                 } else {
                                     None
                                 },
-                                &self.local_addr,
-                                self.sslkeylogfile.as_ref(),
-                                &self.socket,
+                                &self.cb.local_addr,
+                                self.cb.sslkeylogfile.as_ref(),
+                                &self.cb.socket,
                             )
                             .map(|something| something.map(Something::into))?
                     }
@@ -315,15 +331,15 @@ impl Net {
                                 &mut self.packet_buf,
                                 read,
                                 &from,
-                                &self.challenger,
-                                if self.accept_incoming_connections {
-                                    Some(&mut self.next_peer_index)
+                                &self.cb.challenger,
+                                if self.cb.accept_connections {
+                                    Some(&mut self.cb.next_peer_index)
                                 } else {
                                     None
                                 },
-                                &self.local_addr,
-                                self.sslkeylogfile.as_ref(),
-                                &self.socket,
+                                &self.cb.local_addr,
+                                self.cb.sslkeylogfile.as_ref(),
+                                &self.cb.socket,
                             )
                             .map(|something| something.map(Something::into))?
                     }
@@ -346,10 +362,10 @@ impl Net {
             let _ = conn.on_recv(
                 &mut self.packet_buf[..read],
                 &from,
-                &self.local_addr,
+                &self.cb.local_addr,
             );
             // TODO: figure out why error packets aren't getting sent
-            conn.flush(&self.local_addr, &self.socket, &mut self.packet_buf)
+            conn.flush(&self.cb.local_addr, &self.cb.socket, &mut self.packet_buf)
                 .unwrap();
             return Ok(Some(idx));
         }
@@ -395,8 +411,8 @@ impl Net {
                 for conn in self.peers.values_mut() {
                     conn.on_timeout();
                     conn.flush(
-                        &self.local_addr,
-                        &self.socket,
+                        &self.cb.local_addr,
+                        &self.cb.socket,
                         &mut self.packet_buf,
                     )
                     .unwrap();
@@ -442,7 +458,7 @@ impl Net {
                 self.peers
                     .get_mut(&idx)
                     .unwrap()
-                    .flush(&self.local_addr, &self.socket, &mut self.packet_buf)
+                    .flush(&self.cb.local_addr, &self.cb.socket, &mut self.packet_buf)
                     .unwrap();
                 assert!(self.readable_peers.pop_front().is_some());
                 did_nothing = false;
@@ -473,6 +489,7 @@ impl Net {
         frame: &[u8],
         unreliable: bool,
     ) -> Result<()> {
+        assert!(frame.len() <= MAX_FRAME_SIZE as usize);
         self.peers
             .get_mut(&idx)
             .unwrap()
@@ -482,13 +499,13 @@ impl Net {
     }
     pub fn flush(&mut self, idx: PeerIndex) -> Result<()> {
         self.peers.get_mut(&idx).unwrap().flush(
-            &self.local_addr,
-            &self.socket,
+            &self.cb.local_addr,
+            &self.cb.socket,
             &mut self.packet_buf,
         )
     }
     pub fn connect(&mut self, addr: &str) -> Result<PeerIndex> {
-        let idx = self.next_peer_index.get_and_increment();
+        let idx = self.cb.next_peer_index.get_and_increment();
         let addr: Addr = match addr.parse() {
             Err(error) => {
                 self.connect_errors.push_back((idx, error));
@@ -508,12 +525,21 @@ impl Net {
                 .connect(
                     addr,
                     idx,
-                    &self.local_addr,
-                    self.sslkeylogfile.as_ref(),
+                    &self.cb.local_addr,
+                    self.cb.sslkeylogfile.as_ref(),
+                )?
+                .into(),
+            Tw06(addr) => self
+                .proto_tw06
+                .connect(
+                    addr,
+                    idx,
+                    &self.cb.local_addr,
+                    self.cb.sslkeylogfile.as_ref(),
                 )?
                 .into(),
         };
-        conn.flush(&self.local_addr, &self.socket, &mut self.packet_buf)
+        conn.flush(&self.cb.local_addr, &self.cb.socket, &mut self.packet_buf)
             .unwrap();
         assert!(self.peers.insert(idx, conn).is_none());
         assert!(self.peer_addrs.insert(socket_addr, idx).is_none());
@@ -526,7 +552,7 @@ impl Net {
     ) -> Result<()> {
         let conn = self.peers.get_mut(&idx).unwrap();
         conn.close(reason);
-        conn.flush(&self.local_addr, &self.socket, &mut self.packet_buf)
+        conn.flush(&self.cb.local_addr, &self.cb.socket, &mut self.packet_buf)
             .unwrap();
         self.readable_peers.push_back(idx);
         Ok(())
@@ -535,6 +561,7 @@ impl Net {
 
 enum Connection {
     Quic(quic::Connection),
+    Tw06(tw06::Connection),
 }
 
 impl Connection {
@@ -547,36 +574,42 @@ impl Connection {
         use self::Connection::*;
         match self {
             Quic(inner) => inner.on_recv(buf, from, local_addr),
+            Tw06(inner) => inner.on_recv(buf, from, local_addr),
         }
     }
     pub fn recv(&mut self, buf: &mut [u8]) -> Result<Option<Event>> {
         use self::Connection::*;
         match self {
             Quic(inner) => inner.recv(buf),
+            Tw06(inner) => inner.recv(buf),
         }
     }
     pub fn send_chunk(&mut self, frame: &[u8], unreliable: bool) -> Result<()> {
         use self::Connection::*;
         match self {
             Quic(inner) => inner.send_chunk(frame, unreliable),
+            Tw06(inner) => inner.send_chunk(frame, unreliable),
         }
     }
     pub fn close(&mut self, reason: Option<&str>) {
         use self::Connection::*;
         match self {
             Quic(inner) => inner.close(reason),
+            Tw06(inner) => inner.close(reason),
         }
     }
     pub fn timeout(&self) -> Option<Instant> {
         use self::Connection::*;
         match self {
             Quic(inner) => inner.timeout(),
+            Tw06(inner) => inner.timeout(),
         }
     }
     pub fn on_timeout(&mut self) {
         use self::Connection::*;
         match self {
             Quic(inner) => inner.on_timeout(),
+            Tw06(inner) => inner.on_timeout(),
         }
     }
     pub fn flush(
@@ -588,6 +621,7 @@ impl Connection {
         use self::Connection::*;
         match self {
             Quic(inner) => inner.flush(local, socket, buf),
+            Tw06(inner) => inner.flush(local, socket, buf),
         }
     }
 }
@@ -595,5 +629,11 @@ impl Connection {
 impl From<quic::Connection> for Connection {
     fn from(conn: quic::Connection) -> Connection {
         Connection::Quic(conn)
+    }
+}
+
+impl From<tw06::Connection> for Connection {
+    fn from(conn: tw06::Connection) -> Connection {
+        Connection::Tw06(conn)
     }
 }

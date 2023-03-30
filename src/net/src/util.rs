@@ -7,21 +7,6 @@ use std::io;
 use std::net::IpAddr;
 use std::net::SocketAddr;
 
-pub trait NotDone {
-    type T;
-    fn not_done(self) -> quiche::Result<Option<Self::T>>;
-}
-
-impl<T> NotDone for quiche::Result<T> {
-    type T = T;
-    fn not_done(self) -> quiche::Result<Option<T>> {
-        match self {
-            Err(quiche::Error::Done) => Ok(None),
-            r => r.map(Some),
-        }
-    }
-}
-
 pub trait NoBlock {
     type T;
     fn no_block(self) -> io::Result<Option<Self::T>>;

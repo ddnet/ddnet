@@ -3,6 +3,7 @@ extern crate log;
 
 use self::challenger::Challenger;
 use self::net::ArcFile;
+use self::net::Tw06Addr;
 use self::net::QuicAddr;
 use self::net::Something;
 use self::net::MAX_FRAME_SIZE;
@@ -12,7 +13,6 @@ use self::util::secure_hash;
 use self::util::secure_random;
 use self::util::write_quic_varint;
 use self::util::NoBlock;
-use self::util::NotDone;
 use bstr::BStr;
 use error::Context;
 
@@ -28,6 +28,7 @@ mod ffi;
 mod key;
 mod net;
 mod quic;
+mod tw06;
 mod util;
 
 pub use self::error::Error;
@@ -99,7 +100,7 @@ pub fn server2_main() -> Result<()> {
     let mut builder = Net::builder();
     builder.identity(identity);
     builder.bindaddr(bindaddr);
-    builder.accept_incoming_connections(true);
+    builder.accept_connections(true);
     let mut net = builder.open().context("Net::open")?;
     let mut buf = [0; 65536];
     loop {

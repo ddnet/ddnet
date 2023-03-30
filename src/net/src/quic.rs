@@ -6,7 +6,6 @@ use crate::Challenger;
 use crate::Context as _;
 use crate::Event;
 use crate::Identity;
-use crate::NotDone as _;
 use crate::PeerIndex;
 use crate::PrivateIdentity;
 use crate::QuicAddr as Addr;
@@ -85,6 +84,21 @@ impl ConnectionId {
     }
     fn as_raw(&self) -> quiche::ConnectionId {
         quiche::ConnectionId::from_ref(&self.0)
+    }
+}
+
+trait NotDone {
+    type T;
+    fn not_done(self) -> quiche::Result<Option<Self::T>>;
+}
+
+impl<T> NotDone for quiche::Result<T> {
+    type T = T;
+    fn not_done(self) -> quiche::Result<Option<T>> {
+        match self {
+            Err(quiche::Error::Done) => Ok(None),
+            r => r.map(Some),
+        }
     }
 }
 
@@ -699,7 +713,7 @@ impl Connection {
     }
     pub fn flush(
         &mut self,
-        local: &SocketAddr,
+        local_addr: &SocketAddr,
         socket: &UdpSocket,
         buf: &mut [u8],
     ) -> Result<()> {
@@ -712,7 +726,7 @@ impl Connection {
             if !delay.is_zero() {
                 warn!("should have delayed packet by {:?}, but haven't", delay);
             }
-            assert!(*local == info.from);
+            assert!(*local_addr == info.from);
             socket
                 .send_to(&buf[..written], info.to)
                 .context("UdpSocket::send_to")?;
