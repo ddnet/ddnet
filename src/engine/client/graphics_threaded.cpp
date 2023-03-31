@@ -891,49 +891,36 @@ void CGraphics_Threaded::QuadsSetRotation(float Angle)
 	m_Rotation = Angle;
 }
 
-inline void clampf(float &Value, float Min, float Max)
+static unsigned char NormalizeColorComponent(float ColorComponent)
 {
-	if(Value > Max)
-		Value = Max;
-	else if(Value < Min)
-		Value = Min;
+	return (unsigned char)(clamp(ColorComponent, 0.0f, 1.0f) * 255.0f);
 }
 
-void CGraphics_Threaded::SetColorVertex(const CColorVertex *pArray, int Num)
+void CGraphics_Threaded::SetColorVertex(const CColorVertex *pArray, size_t Num)
 {
 	dbg_assert(m_Drawing != 0, "called Graphics()->SetColorVertex without begin");
 
-	for(int i = 0; i < Num; ++i)
+	for(size_t i = 0; i < Num; ++i)
 	{
-		float r = pArray[i].m_R, g = pArray[i].m_G, b = pArray[i].m_B, a = pArray[i].m_A;
-		clampf(r, 0.f, 1.f);
-		clampf(g, 0.f, 1.f);
-		clampf(b, 0.f, 1.f);
-		clampf(a, 0.f, 1.f);
-		m_aColor[pArray[i].m_Index].r = (unsigned char)(r * 255.f);
-		m_aColor[pArray[i].m_Index].g = (unsigned char)(g * 255.f);
-		m_aColor[pArray[i].m_Index].b = (unsigned char)(b * 255.f);
-		m_aColor[pArray[i].m_Index].a = (unsigned char)(a * 255.f);
+		const CColorVertex &Vertex = pArray[i];
+		CCommandBuffer::SColor &Color = m_aColor[Vertex.m_Index];
+		Color.r = NormalizeColorComponent(Vertex.m_R);
+		Color.g = NormalizeColorComponent(Vertex.m_G);
+		Color.b = NormalizeColorComponent(Vertex.m_B);
+		Color.a = NormalizeColorComponent(Vertex.m_A);
 	}
 }
 
 void CGraphics_Threaded::SetColor(float r, float g, float b, float a)
 {
-	clampf(r, 0.f, 1.f);
-	clampf(g, 0.f, 1.f);
-	clampf(b, 0.f, 1.f);
-	clampf(a, 0.f, 1.f);
-	r *= 255.f;
-	g *= 255.f;
-	b *= 255.f;
-	a *= 255.f;
-
-	for(auto &Color : m_aColor)
+	CCommandBuffer::SColor NewColor;
+	NewColor.r = NormalizeColorComponent(r);
+	NewColor.g = NormalizeColorComponent(g);
+	NewColor.b = NormalizeColorComponent(b);
+	NewColor.a = NormalizeColorComponent(a);
+	for(CCommandBuffer::SColor &Color : m_aColor)
 	{
-		Color.r = (unsigned char)(r);
-		Color.g = (unsigned char)(g);
-		Color.b = (unsigned char)(b);
-		Color.a = (unsigned char)(a);
+		Color = NewColor;
 	}
 }
 
@@ -944,25 +931,20 @@ void CGraphics_Threaded::SetColor(ColorRGBA Color)
 
 void CGraphics_Threaded::SetColor4(ColorRGBA TopLeft, ColorRGBA TopRight, ColorRGBA BottomLeft, ColorRGBA BottomRight)
 {
-	dbg_assert(m_Drawing != 0, "called Graphics()->SetColor without begin");
-	CColorVertex Array[4] = {
-		CColorVertex(0, TopLeft.r, TopLeft.g, TopLeft.b, TopLeft.a),
-		CColorVertex(1, TopRight.r, TopRight.g, TopRight.b, TopRight.a),
-		CColorVertex(2, BottomRight.r, BottomRight.g, BottomRight.b, BottomRight.a),
-		CColorVertex(3, BottomLeft.r, BottomLeft.g, BottomLeft.b, BottomLeft.a)};
-	SetColorVertex(Array, 4);
+	CColorVertex aArray[] = {
+		CColorVertex(0, TopLeft),
+		CColorVertex(1, TopRight),
+		CColorVertex(2, BottomRight),
+		CColorVertex(3, BottomLeft)};
+	SetColorVertex(aArray, std::size(aArray));
 }
 
 void CGraphics_Threaded::ChangeColorOfCurrentQuadVertices(float r, float g, float b, float a)
 {
-	clampf(r, 0.f, 1.f);
-	clampf(g, 0.f, 1.f);
-	clampf(b, 0.f, 1.f);
-	clampf(a, 0.f, 1.f);
-	m_aColor[0].r = (unsigned char)(r * 255.f);
-	m_aColor[0].g = (unsigned char)(g * 255.f);
-	m_aColor[0].b = (unsigned char)(b * 255.f);
-	m_aColor[0].a = (unsigned char)(a * 255.f);
+	m_aColor[0].r = NormalizeColorComponent(r);
+	m_aColor[0].g = NormalizeColorComponent(g);
+	m_aColor[0].b = NormalizeColorComponent(b);
+	m_aColor[0].a = NormalizeColorComponent(a);
 
 	for(int i = 0; i < m_NumVertices; ++i)
 	{
@@ -970,61 +952,13 @@ void CGraphics_Threaded::ChangeColorOfCurrentQuadVertices(float r, float g, floa
 	}
 }
 
-void CGraphics_Threaded::ChangeColorOfQuadVertices(int QuadOffset, unsigned char r, unsigned char g, unsigned char b, unsigned char a)
+void CGraphics_Threaded::ChangeColorOfQuadVertices(size_t QuadOffset, unsigned char r, unsigned char g, unsigned char b, unsigned char a)
 {
-	if(g_Config.m_GfxQuadAsTriangle && !m_GLUseTrianglesAsQuad)
+	const CCommandBuffer::SColor Color(r, g, b, a);
+	const size_t VertNum = g_Config.m_GfxQuadAsTriangle && !m_GLUseTrianglesAsQuad ? 6 : 4;
+	for(size_t i = 0; i < VertNum; ++i)
 	{
-		m_aVertices[QuadOffset * 6].m_Color.r = r;
-		m_aVertices[QuadOffset * 6].m_Color.g = g;
-		m_aVertices[QuadOffset * 6].m_Color.b = b;
-		m_aVertices[QuadOffset * 6].m_Color.a = a;
-
-		m_aVertices[QuadOffset * 6 + 1].m_Color.r = r;
-		m_aVertices[QuadOffset * 6 + 1].m_Color.g = g;
-		m_aVertices[QuadOffset * 6 + 1].m_Color.b = b;
-		m_aVertices[QuadOffset * 6 + 1].m_Color.a = a;
-
-		m_aVertices[QuadOffset * 6 + 2].m_Color.r = r;
-		m_aVertices[QuadOffset * 6 + 2].m_Color.g = g;
-		m_aVertices[QuadOffset * 6 + 2].m_Color.b = b;
-		m_aVertices[QuadOffset * 6 + 2].m_Color.a = a;
-
-		m_aVertices[QuadOffset * 6 + 3].m_Color.r = r;
-		m_aVertices[QuadOffset * 6 + 3].m_Color.g = g;
-		m_aVertices[QuadOffset * 6 + 3].m_Color.b = b;
-		m_aVertices[QuadOffset * 6 + 3].m_Color.a = a;
-
-		m_aVertices[QuadOffset * 6 + 4].m_Color.r = r;
-		m_aVertices[QuadOffset * 6 + 4].m_Color.g = g;
-		m_aVertices[QuadOffset * 6 + 4].m_Color.b = b;
-		m_aVertices[QuadOffset * 6 + 4].m_Color.a = a;
-
-		m_aVertices[QuadOffset * 6 + 5].m_Color.r = r;
-		m_aVertices[QuadOffset * 6 + 5].m_Color.g = g;
-		m_aVertices[QuadOffset * 6 + 5].m_Color.b = b;
-		m_aVertices[QuadOffset * 6 + 5].m_Color.a = a;
-	}
-	else
-	{
-		m_aVertices[QuadOffset * 4].m_Color.r = r;
-		m_aVertices[QuadOffset * 4].m_Color.g = g;
-		m_aVertices[QuadOffset * 4].m_Color.b = b;
-		m_aVertices[QuadOffset * 4].m_Color.a = a;
-
-		m_aVertices[QuadOffset * 4 + 1].m_Color.r = r;
-		m_aVertices[QuadOffset * 4 + 1].m_Color.g = g;
-		m_aVertices[QuadOffset * 4 + 1].m_Color.b = b;
-		m_aVertices[QuadOffset * 4 + 1].m_Color.a = a;
-
-		m_aVertices[QuadOffset * 4 + 2].m_Color.r = r;
-		m_aVertices[QuadOffset * 4 + 2].m_Color.g = g;
-		m_aVertices[QuadOffset * 4 + 2].m_Color.b = b;
-		m_aVertices[QuadOffset * 4 + 2].m_Color.a = a;
-
-		m_aVertices[QuadOffset * 4 + 3].m_Color.r = r;
-		m_aVertices[QuadOffset * 4 + 3].m_Color.g = g;
-		m_aVertices[QuadOffset * 4 + 3].m_Color.b = b;
-		m_aVertices[QuadOffset * 4 + 3].m_Color.a = a;
+		m_aVertices[QuadOffset * VertNum + i].m_Color = Color;
 	}
 }
 
