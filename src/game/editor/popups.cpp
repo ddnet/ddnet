@@ -2103,17 +2103,17 @@ int CEditor::PopupColorPicker(CEditor *pEditor, CUIRect View, void *pContext)
 	pEditor->Graphics()->QuadsBegin();
 
 	// base: white - hue
-	ColorHSVA hsv = CEditor::ms_PickerColor;
+	ColorHSVA Hsv = CEditor::ms_PickerColor;
 	IGraphics::CColorVertex aColors[4];
 
-	ColorRGBA c = color_cast<ColorRGBA>(ColorHSVA(hsv.x, 0.0f, 1.0f));
-	aColors[0] = IGraphics::CColorVertex(0, c.r, c.g, c.b, 1.0f);
-	c = color_cast<ColorRGBA>(ColorHSVA(hsv.x, 1.0f, 1.0f));
-	aColors[1] = IGraphics::CColorVertex(1, c.r, c.g, c.b, 1.0f);
-	c = color_cast<ColorRGBA>(ColorHSVA(hsv.x, 1.0f, 1.0f));
-	aColors[2] = IGraphics::CColorVertex(2, c.r, c.g, c.b, 1.0f);
-	c = color_cast<ColorRGBA>(ColorHSVA(hsv.x, 0.0f, 1.0f));
-	aColors[3] = IGraphics::CColorVertex(3, c.r, c.g, c.b, 1.0f);
+	ColorRGBA Color = color_cast<ColorRGBA>(ColorHSVA(Hsv.x, 0.0f, 1.0f));
+	aColors[0] = IGraphics::CColorVertex(0, Color.r, Color.g, Color.b, 1.0f);
+	Color = color_cast<ColorRGBA>(ColorHSVA(Hsv.x, 1.0f, 1.0f));
+	aColors[1] = IGraphics::CColorVertex(1, Color.r, Color.g, Color.b, 1.0f);
+	Color = color_cast<ColorRGBA>(ColorHSVA(Hsv.x, 1.0f, 1.0f));
+	aColors[2] = IGraphics::CColorVertex(2, Color.r, Color.g, Color.b, 1.0f);
+	Color = color_cast<ColorRGBA>(ColorHSVA(Hsv.x, 0.0f, 1.0f));
+	aColors[3] = IGraphics::CColorVertex(3, Color.r, Color.g, Color.b, 1.0f);
 
 	pEditor->Graphics()->SetColorVertex(aColors, 4);
 
@@ -2133,7 +2133,7 @@ int CEditor::PopupColorPicker(CEditor *pEditor, CUIRect View, void *pContext)
 	pEditor->Graphics()->QuadsEnd();
 
 	// marker
-	vec2 Marker = vec2(hsv.y, (1.0f - hsv.z)) * vec2(SVPicker.w, SVPicker.h);
+	const vec2 Marker = vec2(Hsv.y, (1.0f - Hsv.z)) * vec2(SVPicker.w, SVPicker.h);
 	pEditor->Graphics()->QuadsBegin();
 	pEditor->Graphics()->SetColor(0.5f, 0.5f, 0.5f, 1.0f);
 	IGraphics::CQuadItem aMarker[2];
@@ -2146,28 +2146,27 @@ int CEditor::PopupColorPicker(CEditor *pEditor, CUIRect View, void *pContext)
 	float X, Y;
 	if(pEditor->UI()->DoPickerLogic(&CEditor::ms_SVPicker, &SVPicker, &X, &Y))
 	{
-		hsv.y = X / SVPicker.w;
-		hsv.z = 1.0f - Y / SVPicker.h;
+		Hsv.y = X / SVPicker.w;
+		Hsv.z = 1.0f - Y / SVPicker.h;
 	}
 
 	// hue slider
-	static const float s_aColorIndices[7][3] = {
+	static const float s_aaColorIndices[7][3] = {
 		{1.0f, 0.0f, 0.0f}, // red
 		{1.0f, 0.0f, 1.0f}, // magenta
 		{0.0f, 0.0f, 1.0f}, // blue
 		{0.0f, 1.0f, 1.0f}, // cyan
 		{0.0f, 1.0f, 0.0f}, // green
 		{1.0f, 1.0f, 0.0f}, // yellow
-		{1.0f, 0.0f, 0.0f} // red
+		{1.0f, 0.0f, 0.0f}, // red
 	};
 
 	pEditor->Graphics()->QuadsBegin();
-	ColorRGBA ColorTop, ColorBottom;
-	float Offset = HuePicker.h / 6.0f;
-	for(int j = 0; j < 6; j++)
+	const float Offset = HuePicker.h / 6.0f;
+	for(size_t j = 0; j < std::size(s_aaColorIndices) - 1; ++j)
 	{
-		ColorTop = ColorRGBA(s_aColorIndices[j][0], s_aColorIndices[j][1], s_aColorIndices[j][2], 1.0f);
-		ColorBottom = ColorRGBA(s_aColorIndices[j + 1][0], s_aColorIndices[j + 1][1], s_aColorIndices[j + 1][2], 1.0f);
+		const ColorRGBA ColorTop = ColorRGBA(s_aaColorIndices[j][0], s_aaColorIndices[j][1], s_aaColorIndices[j][2], 1.0f);
+		const ColorRGBA ColorBottom = ColorRGBA(s_aaColorIndices[j + 1][0], s_aaColorIndices[j + 1][1], s_aaColorIndices[j + 1][2], 1.0f);
 
 		aColors[0] = IGraphics::CColorVertex(0, ColorTop.r, ColorTop.g, ColorTop.b, ColorTop.a);
 		aColors[1] = IGraphics::CColorVertex(1, ColorTop.r, ColorTop.g, ColorTop.b, ColorTop.a);
@@ -2180,17 +2179,17 @@ int CEditor::PopupColorPicker(CEditor *pEditor, CUIRect View, void *pContext)
 
 	// marker
 	pEditor->Graphics()->SetColor(0.5f, 0.5f, 0.5f, 1.0f);
-	IGraphics::CQuadItem QuadItemMarker(HuePicker.x, HuePicker.y + (1.0f - hsv.x) * HuePicker.h, HuePicker.w, pEditor->UI()->PixelSize());
+	IGraphics::CQuadItem QuadItemMarker(HuePicker.x, HuePicker.y + (1.0f - Hsv.x) * HuePicker.h, HuePicker.w, pEditor->UI()->PixelSize());
 	pEditor->Graphics()->QuadsDrawTL(&QuadItemMarker, 1);
 
 	pEditor->Graphics()->QuadsEnd();
 
 	if(pEditor->UI()->DoPickerLogic(&CEditor::ms_HuePicker, &HuePicker, &X, &Y))
 	{
-		hsv.x = 1.0f - Y / HuePicker.h;
+		Hsv.x = 1.0f - Y / HuePicker.h;
 	}
 
-	CEditor::ms_PickerColor = hsv;
+	CEditor::ms_PickerColor = Hsv;
 
 	return 0;
 }
