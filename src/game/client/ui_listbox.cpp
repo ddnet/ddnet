@@ -56,34 +56,6 @@ void CListBox::DoSpacing(float Spacing)
 	m_ListBoxView = View;
 }
 
-bool CListBox::DoFilter(float FilterHeight, float Spacing)
-{
-	CUIRect Filter;
-	CUIRect View = m_ListBoxView;
-
-	// background
-	View.HSplitTop(FilterHeight + Spacing, &Filter, 0);
-	Filter.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.15f), IGraphics::CORNER_NONE, 0.0f);
-
-	// draw filter
-	View.HSplitTop(FilterHeight, &Filter, &View);
-	Filter.Margin(Spacing, &Filter);
-
-	const float FontSize = Filter.h * CUI::ms_FontmodHeight * 0.8f;
-
-	CUIRect Label, EditBox;
-	Filter.VSplitLeft(Filter.w / 5.0f, &Label, &EditBox);
-	Label.y += Spacing;
-	UI()->DoLabel(&Label, Localize("Search:"), FontSize, TEXTALIGN_CENTER);
-	bool Changed = UI()->DoClearableEditBox(m_aFilterString, m_aFilterString + 1, &EditBox, m_aFilterString, sizeof(m_aFilterString), FontSize, &m_FilterOffset);
-
-	View.HSplitTop(Spacing, &Filter, &View);
-
-	m_ListBoxView = View;
-
-	return Changed;
-}
-
 void CListBox::DoFooter(const char *pBottomText, float FooterHeight)
 {
 	m_pBottomText = pBottomText;

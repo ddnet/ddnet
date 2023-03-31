@@ -1701,9 +1701,6 @@ Could not initialize the given graphics backend, this is probably because you di
 Could not save downloaded map. Try manually deleting this file: %s
 == 다운로드한 맵을 저장하지 못했습니다. 다음 파일을 삭제해 보십시오: %s
 
-Search:
-== 검색:
-
 Copy info
 == 정보 복사
 

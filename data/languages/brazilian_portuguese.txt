@@ -1710,9 +1710,6 @@ Could not initialize the given graphics backend, this is probably because you di
 Could not save downloaded map. Try manually deleting this file: %s
 == Não foi possível salvar o mapa baixado. Tente excluir manualmente este arquivo: %s
 
-Search:
-== Pesquisa:
-
 Copy info
 == Copiar informação
 

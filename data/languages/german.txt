@@ -1697,9 +1697,6 @@ Could not initialize the given graphics backend, this is probably because you di
 Could not save downloaded map. Try manually deleting this file: %s
 == Konnte heruntergeladene Map nicht speichern. Versuch die Datei händisch zu löschen: %s
 
-Search:
-== Suche:
-
 Copy info
 == Kopier Info
 

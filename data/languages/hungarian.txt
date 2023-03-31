@@ -1566,9 +1566,6 @@ Could not save downloaded map. Try manually deleting this file: %s
 Why are you slowmo replaying to read this?
 == 
 
-Search:
-== 
-
 Cancel
 == 
 
