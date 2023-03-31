@@ -2568,12 +2568,16 @@ int CServer::Run()
 
 	// start server
 	NETADDR BindAddr;
-	int NetType = Config()->m_SvIpv4Only ? NETTYPE_IPV4 : NETTYPE_ALL;
-
-	if(!Config()->m_Bindaddr[0] || net_host_lookup(Config()->m_Bindaddr, &BindAddr, NetType) != 0)
+	if(g_Config.m_Bindaddr[0] == '\0')
+	{
 		mem_zero(&BindAddr, sizeof(BindAddr));
-
-	BindAddr.type = NetType;
+	}
+	else if(net_host_lookup(g_Config.m_Bindaddr, &BindAddr, NETTYPE_ALL) != 0)
+	{
+		dbg_msg("server", "The configured bindaddr '%s' cannot be resolved", g_Config.m_Bindaddr);
+		return -1;
+	}
+	BindAddr.type = Config()->m_SvIpv4Only ? NETTYPE_IPV4 : NETTYPE_ALL;
 
 	int Port = Config()->m_SvPort;
 	for(BindAddr.port = Port != 0 ? Port : 8303; !m_NetServer.Open(BindAddr, &m_ServerBan, Config()->m_SvMaxClients, Config()->m_SvMaxClientsPerIP); BindAddr.port++)

@@ -367,7 +367,7 @@ public:
 	void GetServerInfo(CServerInfo *pServerInfo) const override;
 	void ServerInfoRequest();
 
-	int LoadData();
+	void LoadDebugFont();
 
 	// ---
 
