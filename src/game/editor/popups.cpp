@@ -2196,13 +2196,12 @@ int CEditor::PopupColorPicker(CEditor *pEditor, CUIRect View, void *pContext)
 
 int CEditor::PopupEntities(CEditor *pEditor, CUIRect View, void *pContext)
 {
-	for(int i = 0; i < (int)pEditor->m_vSelectEntitiesFiles.size(); i++)
+	for(size_t i = 0; i < pEditor->m_vSelectEntitiesFiles.size(); i++)
 	{
 		CUIRect Button;
 		View.HSplitTop(14.0f, &Button, &View);
 
 		const char *pName = pEditor->m_vSelectEntitiesFiles[i].c_str();
-
 		if(pEditor->DoButton_MenuItem(pName, pName, pEditor->m_vSelectEntitiesFiles[i] == pEditor->m_SelectEntitiesImage, &Button))
 		{
 			if(pEditor->m_vSelectEntitiesFiles[i] != pEditor->m_SelectEntitiesImage)
@@ -2211,14 +2210,13 @@ int CEditor::PopupEntities(CEditor *pEditor, CUIRect View, void *pContext)
 				pEditor->m_AllowPlaceUnusedTiles = pEditor->m_SelectEntitiesImage == "DDNet" ? 0 : -1;
 				pEditor->m_PreventUnusedTilesWasWarned = false;
 
-				char aBuf[512];
-				str_format(aBuf, sizeof(aBuf), "editor/entities/%s.png", pName);
-
 				if(pEditor->m_EntitiesTexture.IsValid())
 					pEditor->Graphics()->UnloadTexture(&pEditor->m_EntitiesTexture);
-				int TextureLoadFlag = pEditor->GetTextureUsageFlag();
-				pEditor->m_EntitiesTexture = pEditor->Graphics()->LoadTexture(aBuf, IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, TextureLoadFlag);
-				g_UiNumPopups--;
+
+				char aBuf[IO_MAX_PATH_LENGTH];
+				str_format(aBuf, sizeof(aBuf), "editor/entities/%s.png", pName);
+				pEditor->m_EntitiesTexture = pEditor->Graphics()->LoadTexture(aBuf, IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, pEditor->GetTextureUsageFlag());
+				return 1;
 			}
 		}
 	}

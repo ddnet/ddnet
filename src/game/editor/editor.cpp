@@ -1019,9 +1019,8 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 			Storage()->ListDirectory(IStorage::TYPE_ALL, "editor/entities", EntitiesListdirCallback, this);
 			std::sort(m_vSelectEntitiesFiles.begin(), m_vSelectEntitiesFiles.end());
 
-			static int s_EntitiesPopupID = 0;
-			UiInvokePopupMenu(&s_EntitiesPopupID, 0, Button.x, Button.y + 18.0f,
-				250, m_vSelectEntitiesFiles.size() * 14 + 10, PopupEntities);
+			static int s_PopupEntitiesId;
+			UiInvokePopupMenu(&s_PopupEntitiesId, 0, Button.x, Button.y + Button.h, 250, m_vSelectEntitiesFiles.size() * 14.0f + 10.0f, PopupEntities);
 		}
 
 		TB_Top.VSplitLeft(5.0f, nullptr, &TB_Top);
