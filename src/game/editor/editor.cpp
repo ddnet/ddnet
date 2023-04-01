@@ -4445,16 +4445,12 @@ void CEditor::RenderImagesList(CUIRect ToolBox)
 			{
 				m_SelectedImage = i;
 
-				static int s_PopupImageID = 0;
 				if(Result == 2)
 				{
-					CEditorImage *pImg = m_Map.m_vpImages[m_SelectedImage];
-					int Height;
-					if(pImg->m_External || IsVanillaImage(pImg->m_aName))
-						Height = 73;
-					else
-						Height = 56;
-					UiInvokePopupMenu(&s_PopupImageID, 0, UI()->MouseX(), UI()->MouseY(), 120, Height, PopupImage);
+					const CEditorImage *pImg = m_Map.m_vpImages[m_SelectedImage];
+					const int Height = pImg->m_External || IsVanillaImage(pImg->m_aName) ? 73 : 56;
+					static int s_PopupImageId;
+					UiInvokePopupMenu(&s_PopupImageId, 0, UI()->MouseX(), UI()->MouseY(), 120, Height, PopupImage);
 				}
 			}
 		}

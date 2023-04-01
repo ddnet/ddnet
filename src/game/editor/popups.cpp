@@ -1282,7 +1282,7 @@ int CEditor::PopupImage(CEditor *pEditor, CUIRect View, void *pContext)
 	}
 	if(s_SelectionPopupContext.m_pSelection != nullptr)
 	{
-		bool WasExternal = pImg->m_External;
+		const bool WasExternal = pImg->m_External;
 		ReplaceImage(s_SelectionPopupContext.m_pSelection->c_str(), IStorage::TYPE_ALL, pEditor);
 		pImg->m_External = WasExternal;
 		s_SelectionPopupContext.Reset();
@@ -1546,11 +1546,17 @@ int CEditor::PopupEvent(CEditor *pEditor, CUIRect View, void *pContext)
 	if(pEditor->DoButton_Editor(&s_OkButton, "Ok", 0, &Label, 0, nullptr) || pEditor->Input()->KeyPress(KEY_RETURN) || pEditor->Input()->KeyPress(KEY_KP_ENTER))
 	{
 		if(pEditor->m_PopupEventType == POPEVENT_EXIT)
+		{
 			g_Config.m_ClEditor = 0;
+		}
 		else if(pEditor->m_PopupEventType == POPEVENT_LOAD)
+		{
 			pEditor->InvokeFileDialog(IStorage::TYPE_ALL, FILETYPE_MAP, "Load map", "Load", "maps", "", CEditor::CallbackOpenMap, pEditor);
+		}
 		else if(pEditor->m_PopupEventType == POPEVENT_LOADCURRENT)
+		{
 			pEditor->LoadCurrentMap();
+		}
 		else if(pEditor->m_PopupEventType == POPEVENT_NEW)
 		{
 			pEditor->Reset();
