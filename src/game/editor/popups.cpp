@@ -2044,7 +2044,9 @@ int CEditor::PopupTune(CEditor *pEditor, CUIRect View, void *pContext)
 	int Prop = pEditor->DoProperties(&View, aProps, s_aIds, &NewVal);
 
 	if(Prop == PROP_TUNE)
+	{
 		pEditor->m_TuningNum = (NewVal - 1 + 255) % 255 + 1;
+	}
 
 	return 0;
 }
