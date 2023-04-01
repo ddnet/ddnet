@@ -1030,7 +1030,7 @@ int CCollision::GetFTile(int x, int y) const
 
 int CCollision::Entity(int x, int y, int Layer) const
 {
-	if((0 > x || x >= m_Width) || (0 > y || y >= m_Height))
+	if(x < 0 || x >= m_Width || y < 0 || y >= m_Height)
 	{
 		const char *pName;
 		switch(Layer)
@@ -1056,7 +1056,7 @@ int CCollision::Entity(int x, int y, int Layer) const
 		default:
 			pName = "Unknown";
 		}
-		dbg_msg("collision", "something is VERY wrong with the %s layer please report this at https://github.com/ddnet/ddnet, you will need to post the map as well and any steps that u think may have led to this", pName);
+		dbg_msg("collision", "Something is VERY wrong with the %s layer near (%d, %d). Please report this at https://github.com/ddnet/ddnet/issues, you will need to post the map as well and any steps that you think may have led to this.", pName, x, y);
 		return 0;
 	}
 	switch(Layer)
