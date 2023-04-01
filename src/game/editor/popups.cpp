@@ -1152,17 +1152,17 @@ int CEditor::PopupPoint(CEditor *pEditor, CUIRect View, void *pContext)
 	Color |= pCurrentQuad->m_aColors[pEditor->m_SelectedQuadPoint].b << 8;
 	Color |= pCurrentQuad->m_aColors[pEditor->m_SelectedQuadPoint].a;
 
-	int x = fx2i(pCurrentQuad->m_aPoints[pEditor->m_SelectedQuadPoint].x);
-	int y = fx2i(pCurrentQuad->m_aPoints[pEditor->m_SelectedQuadPoint].y);
-	int tu = fx2f(pCurrentQuad->m_aTexcoords[pEditor->m_SelectedQuadPoint].x) * 1024;
-	int tv = fx2f(pCurrentQuad->m_aTexcoords[pEditor->m_SelectedQuadPoint].y) * 1024;
+	const int X = fx2i(pCurrentQuad->m_aPoints[pEditor->m_SelectedQuadPoint].x);
+	const int Y = fx2i(pCurrentQuad->m_aPoints[pEditor->m_SelectedQuadPoint].y);
+	const int TextureU = fx2f(pCurrentQuad->m_aTexcoords[pEditor->m_SelectedQuadPoint].x) * 1024;
+	const int TextureV = fx2f(pCurrentQuad->m_aTexcoords[pEditor->m_SelectedQuadPoint].y) * 1024;
 
 	CProperty aProps[] = {
-		{"Pos X", x, PROPTYPE_INT_SCROLL, -1000000, 1000000},
-		{"Pos Y", y, PROPTYPE_INT_SCROLL, -1000000, 1000000},
+		{"Pos X", X, PROPTYPE_INT_SCROLL, -1000000, 1000000},
+		{"Pos Y", Y, PROPTYPE_INT_SCROLL, -1000000, 1000000},
 		{"Color", Color, PROPTYPE_COLOR, 0, 0},
-		{"Tex U", tu, PROPTYPE_INT_SCROLL, -1000000, 1000000},
-		{"Tex V", tv, PROPTYPE_INT_SCROLL, -1000000, 1000000},
+		{"Tex U", TextureU, PROPTYPE_INT_SCROLL, -1000000, 1000000},
+		{"Tex V", TextureV, PROPTYPE_INT_SCROLL, -1000000, 1000000},
 		{nullptr},
 	};
 
@@ -1170,7 +1170,9 @@ int CEditor::PopupPoint(CEditor *pEditor, CUIRect View, void *pContext)
 	int NewVal = 0;
 	int Prop = pEditor->DoProperties(&View, aProps, s_aIds, &NewVal);
 	if(Prop != -1)
+	{
 		pEditor->m_Map.m_Modified = true;
+	}
 
 	for(auto &pQuad : vpQuads)
 	{
@@ -1178,15 +1180,15 @@ int CEditor::PopupPoint(CEditor *pEditor, CUIRect View, void *pContext)
 		{
 			for(int v = 0; v < 4; v++)
 				if(pEditor->m_SelectedPoints & (1 << v))
-					pQuad->m_aPoints[v].x = i2fx(fx2i(pQuad->m_aPoints[v].x) + NewVal - x);
+					pQuad->m_aPoints[v].x = i2fx(fx2i(pQuad->m_aPoints[v].x) + NewVal - X);
 		}
-		if(Prop == PROP_POS_Y)
+		else if(Prop == PROP_POS_Y)
 		{
 			for(int v = 0; v < 4; v++)
 				if(pEditor->m_SelectedPoints & (1 << v))
-					pQuad->m_aPoints[v].y = i2fx(fx2i(pQuad->m_aPoints[v].y) + NewVal - y);
+					pQuad->m_aPoints[v].y = i2fx(fx2i(pQuad->m_aPoints[v].y) + NewVal - Y);
 		}
-		if(Prop == PROP_COLOR)
+		else if(Prop == PROP_COLOR)
 		{
 			for(int v = 0; v < 4; v++)
 			{
@@ -1199,17 +1201,17 @@ int CEditor::PopupPoint(CEditor *pEditor, CUIRect View, void *pContext)
 				}
 			}
 		}
-		if(Prop == PROP_TEX_U)
+		else if(Prop == PROP_TEX_U)
 		{
 			for(int v = 0; v < 4; v++)
 				if(pEditor->m_SelectedPoints & (1 << v))
-					pQuad->m_aTexcoords[v].x = f2fx(fx2f(pQuad->m_aTexcoords[v].x) + (NewVal - tu) / 1024.0f);
+					pQuad->m_aTexcoords[v].x = f2fx(fx2f(pQuad->m_aTexcoords[v].x) + (NewVal - TextureU) / 1024.0f);
 		}
-		if(Prop == PROP_TEX_V)
+		else if(Prop == PROP_TEX_V)
 		{
 			for(int v = 0; v < 4; v++)
 				if(pEditor->m_SelectedPoints & (1 << v))
-					pQuad->m_aTexcoords[v].y = f2fx(fx2f(pQuad->m_aTexcoords[v].y) + (NewVal - tv) / 1024.0f);
+					pQuad->m_aTexcoords[v].y = f2fx(fx2f(pQuad->m_aTexcoords[v].y) + (NewVal - TextureV) / 1024.0f);
 		}
 	}
 

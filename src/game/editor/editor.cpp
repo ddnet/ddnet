@@ -1778,8 +1778,8 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 					m_SelectedQuadPoint = V;
 					m_SelectedQuadIndex = FindSelectedQuadIndex(QuadIndex);
 
-					static int s_PointPopupID = 0;
-					UiInvokePopupMenu(&s_PointPopupID, 0, UI()->MouseX(), UI()->MouseY(), 120, 150, PopupPoint);
+					static int s_PopupPointId;
+					UiInvokePopupMenu(&s_PopupPointId, 0, UI()->MouseX(), UI()->MouseY(), 120, 150, PopupPoint);
 				}
 				UI()->SetActiveItem(nullptr);
 			}
