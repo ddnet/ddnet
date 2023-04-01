@@ -1268,10 +1268,10 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 						static int s_ModifierButton = 0;
 						if(DoButton_Ex(&s_ModifierButton, pButtonName, 0, &Button, 0, aBuf, IGraphics::CORNER_ALL) || (m_Dialog == DIALOG_NONE && m_EditBoxActive == 0 && ModPressed && Input()->KeyPress(KEY_T)))
 						{
-							static int s_ModifierPopupID = 0;
-							if(!UiPopupExists(&s_ModifierPopupID))
+							static int s_PopupModifierId;
+							if(!UiPopupExists(&s_PopupModifierId))
 							{
-								UiInvokePopupMenu(&s_ModifierPopupID, 0, Button.x, Button.y + Button.h, 120, 10.0f + Rows * 13.0f, pfnPopupFunc);
+								UiInvokePopupMenu(&s_PopupModifierId, 0, Button.x, Button.y + Button.h, 120, 10.0f + Rows * 13.0f, pfnPopupFunc);
 							}
 						}
 						TB_Bottom.VSplitLeft(5.0f, nullptr, &TB_Bottom);

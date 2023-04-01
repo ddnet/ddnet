@@ -1939,11 +1939,17 @@ int CEditor::PopupSpeedup(CEditor *pEditor, CUIRect View, void *pContext)
 	int Prop = pEditor->DoProperties(&View, aProps, s_aIds, &NewVal);
 
 	if(Prop == PROP_FORCE)
+	{
 		pEditor->m_SpeedupForce = clamp(NewVal, 1, 255);
-	if(Prop == PROP_MAXSPEED)
+	}
+	else if(Prop == PROP_MAXSPEED)
+	{
 		pEditor->m_SpeedupMaxSpeed = clamp(NewVal, 0, 255);
-	if(Prop == PROP_ANGLE)
+	}
+	else if(Prop == PROP_ANGLE)
+	{
 		pEditor->m_SpeedupAngle = clamp(NewVal, 0, 359);
+	}
 
 	return 0;
 }
