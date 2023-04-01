@@ -5079,8 +5079,10 @@ void CEditor::RenderFileDialog()
 		if(DoButton_Editor(&s_NewFolderButton, "New folder", 0, &Button, 0, nullptr))
 		{
 			m_aFileDialogNewFolderName[0] = 0;
-			static int s_NewFolderPopupID = 0;
-			UiInvokePopupMenu(&s_NewFolderPopupID, 0, Width / 2.0f - 200.0f, Height / 2.0f - 100.0f, 400.0f, 200.0f, PopupNewFolder);
+			static int s_PopupNewFolderId;
+			constexpr float PopupWidth = 400.0f;
+			constexpr float PopupHeight = 110.0f;
+			UiInvokePopupMenu(&s_PopupNewFolderId, 0, Width / 2.0f - PopupWidth / 2.0f, Height / 2.0f - PopupHeight / 2.0f, PopupWidth, PopupHeight, PopupNewFolder);
 			UI()->SetActiveItem(nullptr);
 		}
 

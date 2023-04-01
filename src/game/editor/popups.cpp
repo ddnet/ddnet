@@ -1371,35 +1371,38 @@ int CEditor::PopupSound(CEditor *pEditor, CUIRect View, void *pContext)
 
 int CEditor::PopupNewFolder(CEditor *pEditor, CUIRect View, void *pContext)
 {
-	CUIRect Label, ButtonBar;
+	CUIRect Label, ButtonBar, Button;
 
-	// title
-	View.HSplitTop(10.0f, nullptr, &View);
-	View.HSplitTop(30.0f, &Label, &View);
-	pEditor->UI()->DoLabel(&Label, "Create new folder", 20.0f, TEXTALIGN_CENTER);
-
-	View.HSplitBottom(10.0f, &View, nullptr);
+	View.Margin(10.0f, &View);
 	View.HSplitBottom(20.0f, &View, &ButtonBar);
 
-	// interaction box
-	View.HSplitBottom(40.0f, &View, nullptr);
-	View.VMargin(40.0f, &View);
-	View.HSplitBottom(20.0f, &View, &Label);
-	static float s_FolderBox = 0;
-	pEditor->DoEditBox(&s_FolderBox, &Label, pEditor->m_aFileDialogNewFolderName, sizeof(pEditor->m_aFileDialogNewFolderName), 15.0f, &s_FolderBox);
-	View.HSplitBottom(20.0f, &View, &Label);
+	// title
+	View.HSplitTop(20.0f, &Label, &View);
+	pEditor->UI()->DoLabel(&Label, "Create new folder", 20.0f, TEXTALIGN_CENTER);
+	View.HSplitTop(10.0f, nullptr, &View);
+
+	// folder name
+	View.HSplitTop(20.0f, &Label, &View);
 	pEditor->UI()->DoLabel(&Label, "Name:", 10.0f, TEXTALIGN_LEFT);
+	Label.VSplitLeft(50.0f, nullptr, &Button);
+	Button.HMargin(2.0f, &Button);
+	static float s_FolderBox = 0;
+	pEditor->DoEditBox(&s_FolderBox, &Button, pEditor->m_aFileDialogNewFolderName, sizeof(pEditor->m_aFileDialogNewFolderName), 12.0f, &s_FolderBox);
 
 	// button bar
-	ButtonBar.VSplitLeft(30.0f, nullptr, &ButtonBar);
-	ButtonBar.VSplitLeft(110.0f, &Label, &ButtonBar);
+	ButtonBar.VSplitLeft(110.0f, &Button, &ButtonBar);
+	static int s_CancelButton = 0;
+	if(pEditor->DoButton_Editor(&s_CancelButton, "Cancel", 0, &Button, 0, nullptr))
+		return 1;
+
+	ButtonBar.VSplitRight(110.0f, &ButtonBar, &Button);
 	static int s_CreateButton = 0;
-	if(pEditor->DoButton_Editor(&s_CreateButton, "Create", 0, &Label, 0, nullptr) || pEditor->Input()->KeyPress(KEY_RETURN) || pEditor->Input()->KeyPress(KEY_KP_ENTER))
+	if(pEditor->DoButton_Editor(&s_CreateButton, "Create", 0, &Button, 0, nullptr) || pEditor->UI()->ConsumeHotkey(CUI::HOTKEY_ENTER))
 	{
 		// create the folder
 		if(pEditor->m_aFileDialogNewFolderName[0])
 		{
-			char aBuf[512];
+			char aBuf[IO_MAX_PATH_LENGTH];
 			str_format(aBuf, sizeof(aBuf), "%s/%s", pEditor->m_pFileDialogPath, pEditor->m_aFileDialogNewFolderName);
 			if(pEditor->Storage()->CreateFolder(aBuf, IStorage::TYPE_SAVE))
 			{
@@ -1412,11 +1415,6 @@ int CEditor::PopupNewFolder(CEditor *pEditor, CUIRect View, void *pContext)
 			}
 		}
 	}
-	ButtonBar.VSplitRight(30.0f, &ButtonBar, nullptr);
-	ButtonBar.VSplitRight(110.0f, &ButtonBar, &Label);
-	static int s_AbortButton = 0;
-	if(pEditor->DoButton_Editor(&s_AbortButton, "Abort", 0, &Label, 0, nullptr))
-		return 1;
 
 	return 0;
 }
