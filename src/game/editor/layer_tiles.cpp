@@ -697,8 +697,8 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 	if(!EntitiesLayer && !(pGroup->m_OffsetX % 32) && !(pGroup->m_OffsetY % 32) && pGroup->m_ParallaxX == 100 && pGroup->m_ParallaxY == 100)
 	{
 		pToolBox->HSplitBottom(12.0f, pToolBox, &Button);
-		static int s_ColclButton = 0;
-		if(m_pEditor->DoButton_Editor(&s_ColclButton, "Game tiles", 0, &Button, 0, "Constructs game tiles from this layer"))
+		static int s_GameTilesButton = 0;
+		if(m_pEditor->DoButton_Editor(&s_GameTilesButton, "Game tiles", 0, &Button, 0, "Constructs game tiles from this layer"))
 			m_pEditor->PopupSelectGametileOpInvoke(m_pEditor->UI()->MouseX(), m_pEditor->UI()->MouseY());
 
 		int Result = m_pEditor->PopupSelectGameTileOpResult();
@@ -736,8 +736,8 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 		}
 		if(Result > -1)
 		{
-			int OffsetX = -pGroup->m_OffsetX / 32;
-			int OffsetY = -pGroup->m_OffsetY / 32;
+			const int OffsetX = -pGroup->m_OffsetX / 32;
+			const int OffsetY = -pGroup->m_OffsetY / 32;
 
 			if(Result != TILE_TELECHECKIN && Result != TILE_TELECHECKINEVIL)
 			{
@@ -745,18 +745,22 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 
 				if(pGLayer->m_Width < m_Width + OffsetX || pGLayer->m_Height < m_Height + OffsetY)
 				{
-					int NewW = pGLayer->m_Width < m_Width + OffsetX ? m_Width + OffsetX : pGLayer->m_Width;
-					int NewH = pGLayer->m_Height < m_Height + OffsetY ? m_Height + OffsetY : pGLayer->m_Height;
+					const int NewW = pGLayer->m_Width < m_Width + OffsetX ? m_Width + OffsetX : pGLayer->m_Width;
+					const int NewH = pGLayer->m_Height < m_Height + OffsetY ? m_Height + OffsetY : pGLayer->m_Height;
 					pGLayer->Resize(NewW, NewH);
 				}
 
 				for(int y = OffsetY < 0 ? -OffsetY : 0; y < m_Height; y++)
+				{
 					for(int x = OffsetX < 0 ? -OffsetX : 0; x < m_Width; x++)
+					{
 						if(GetTile(x, y).m_Index)
 						{
-							CTile ResultTile = {(unsigned char)Result};
+							const CTile ResultTile = {(unsigned char)Result};
 							pGLayer->SetTile(x + OffsetX, y + OffsetY, ResultTile);
 						}
+					}
+				}
 			}
 			else
 			{
@@ -777,13 +781,17 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 				}
 
 				for(int y = OffsetY < 0 ? -OffsetY : 0; y < m_Height; y++)
+				{
 					for(int x = OffsetX < 0 ? -OffsetX : 0; x < m_Width; x++)
+					{
 						if(GetTile(x, y).m_Index)
 						{
 							pTLayer->m_pTiles[(y + OffsetY) * pTLayer->m_Width + x + OffsetX].m_Index = TILE_AIR + Result;
 							pTLayer->m_pTeleTile[(y + OffsetY) * pTLayer->m_Width + x + OffsetX].m_Number = 1;
 							pTLayer->m_pTeleTile[(y + OffsetY) * pTLayer->m_Width + x + OffsetX].m_Type = TILE_AIR + Result;
 						}
+					}
+				}
 			}
 
 			return 1;
@@ -792,11 +800,8 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 
 	if(m_pEditor->m_Map.m_pGameLayer != this)
 	{
-		if(m_Image >= 0 && (size_t)m_Image < m_pEditor->m_Map.m_vpImages.size() && m_pEditor->m_Map.m_vpImages[m_Image]->m_AutoMapper.IsLoaded() &&
-			m_AutoMapperConfig != -1)
+		if(m_Image >= 0 && (size_t)m_Image < m_pEditor->m_Map.m_vpImages.size() && m_pEditor->m_Map.m_vpImages[m_Image]->m_AutoMapper.IsLoaded() && m_AutoMapperConfig != -1)
 		{
-			static int s_AutoMapperButton = 0;
-			static int s_AutoMapperButtonAuto = 0;
 			pToolBox->HSplitBottom(2.0f, pToolBox, nullptr);
 			pToolBox->HSplitBottom(12.0f, pToolBox, &Button);
 			if(m_Seed != 0)
@@ -804,12 +809,15 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 				CUIRect ButtonAuto;
 				Button.VSplitRight(16.0f, &Button, &ButtonAuto);
 				Button.VSplitRight(2.0f, &Button, nullptr);
+				static int s_AutoMapperButtonAuto = 0;
 				if(m_pEditor->DoButton_Editor(&s_AutoMapperButtonAuto, "A", m_AutoAutoMap, &ButtonAuto, 0, "Automatically run automap after modifications."))
 				{
 					m_AutoAutoMap = !m_AutoAutoMap;
 					FlagModified(0, 0, m_Width, m_Height);
 				}
 			}
+
+			static int s_AutoMapperButton = 0;
 			if(m_pEditor->DoButton_Editor(&s_AutoMapperButton, "Automap", 0, &Button, 0, "Run the automapper"))
 			{
 				m_pEditor->m_Map.m_vpImages[m_Image]->m_AutoMapper.Proceed(this, m_AutoMapperConfig, m_Seed);
@@ -890,9 +898,13 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 		Resize(m_Width, NewVal);
 	}
 	else if(Prop == PROP_SHIFT)
+	{
 		Shift(NewVal);
+	}
 	else if(Prop == PROP_SHIFT_BY)
+	{
 		m_pEditor->m_ShiftBy = NewVal;
+	}
 	else if(Prop == PROP_IMAGE)
 	{
 		m_Image = NewVal;
@@ -923,24 +935,30 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 		m_Color.b = (NewVal >> 8) & 0xff;
 		m_Color.a = NewVal & 0xff;
 	}
-	if(Prop == PROP_COLOR_ENV)
+	else if(Prop == PROP_COLOR_ENV)
 	{
 		int Index = clamp(NewVal - 1, -1, (int)m_pEditor->m_Map.m_vpEnvelopes.size() - 1);
-		int Step = (Index - m_ColorEnv) % 2;
+		const int Step = (Index - m_ColorEnv) % 2;
 		if(Step != 0)
 		{
 			for(; Index >= -1 && Index < (int)m_pEditor->m_Map.m_vpEnvelopes.size(); Index += Step)
+			{
 				if(Index == -1 || m_pEditor->m_Map.m_vpEnvelopes[Index]->m_Channels == 4)
 				{
 					m_ColorEnv = Index;
 					break;
 				}
+			}
 		}
 	}
-	if(Prop == PROP_COLOR_ENV_OFFSET)
+	else if(Prop == PROP_COLOR_ENV_OFFSET)
+	{
 		m_ColorEnvOffset = NewVal;
+	}
 	else if(Prop == PROP_SEED)
+	{
 		m_Seed = NewVal;
+	}
 	else if(Prop == PROP_AUTOMAPPER)
 	{
 		if(m_Image >= 0 && m_pEditor->m_Map.m_vpImages[m_Image]->m_AutoMapper.ConfigNamesNum() > 0 && NewVal >= 0)
@@ -948,6 +966,7 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 		else
 			m_AutoMapperConfig = -1;
 	}
+
 	if(Prop != -1)
 	{
 		FlagModified(0, 0, m_Width, m_Height);
@@ -965,7 +984,6 @@ int CLayerTiles::RenderCommonProperties(SCommonPropState &State, CEditor *pEdito
 		static int s_CommitButton = 0;
 		if(pEditor->DoButton_Editor(&s_CommitButton, "Commit", 0, &Commit, 0, "Applies the changes"))
 		{
-			dbg_msg("editor", "applying changes");
 			for(auto &pLayer : vpLayers)
 			{
 				if((State.m_Modified & SCommonPropState::MODIFIED_SIZE) != 0)
@@ -1057,16 +1075,22 @@ int CLayerTiles::RenderCommonProperties(SCommonPropState &State, CEditor *pEdito
 			pLayer->Shift(NewVal);
 	}
 	else if(Prop == PROP_SHIFT_BY)
+	{
 		pEditor->m_ShiftBy = NewVal;
+	}
 	else if(Prop == PROP_COLOR)
 	{
 		State.m_Color = NewVal;
 	}
 
 	if(Prop == PROP_WIDTH || Prop == PROP_HEIGHT)
+	{
 		State.m_Modified |= SCommonPropState::MODIFIED_SIZE;
+	}
 	else if(Prop == PROP_COLOR)
+	{
 		State.m_Modified |= SCommonPropState::MODIFIED_COLOR;
+	}
 
 	return 0;
 }

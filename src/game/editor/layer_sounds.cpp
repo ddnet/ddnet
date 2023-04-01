@@ -184,7 +184,6 @@ void CLayerSounds::BrushPlace(CLayer *pBrush, float wx, float wy)
 
 int CLayerSounds::RenderProperties(CUIRect *pToolBox)
 {
-	//
 	enum
 	{
 		PROP_SOUND = 0,
