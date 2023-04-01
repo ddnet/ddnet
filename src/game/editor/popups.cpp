@@ -1741,31 +1741,30 @@ int CEditor::PopupSelectSoundResult()
 
 static int s_GametileOpSelected = -1;
 
+static const char *s_apGametileOpButtonNames[] = {
+	"Air",
+	"Hookable",
+	"Death",
+	"Unhookable",
+	"Hookthrough",
+	"Freeze",
+	"Unfreeze",
+	"Deep Freeze",
+	"Deep Unfreeze",
+	"Blue Check-Tele",
+	"Red Check-Tele",
+	"Live Freeze",
+	"Live Unfreeze",
+};
+
 int CEditor::PopupSelectGametileOp(CEditor *pEditor, CUIRect View, void *pContext)
 {
-	static const char *s_apButtonNames[] = {
-		"Air",
-		"Hookable",
-		"Death",
-		"Unhookable",
-		"Hookthrough",
-		"Freeze",
-		"Unfreeze",
-		"Deep Freeze",
-		"Deep Unfreeze",
-		"Blue Check-Tele",
-		"Red Check-Tele",
-		"Live Freeze",
-		"Live Unfreeze",
-	};
-	static unsigned s_NumButtons = std::size(s_apButtonNames);
 	CUIRect Button;
-
-	for(unsigned i = 0; i < s_NumButtons; ++i)
+	for(size_t i = 0; i < std::size(s_apGametileOpButtonNames); ++i)
 	{
 		View.HSplitTop(2.0f, nullptr, &View);
 		View.HSplitTop(12.0f, &Button, &View);
-		if(pEditor->DoButton_Editor(&s_apButtonNames[i], s_apButtonNames[i], 0, &Button, 0, nullptr))
+		if(pEditor->DoButton_Editor(&s_apGametileOpButtonNames[i], s_apGametileOpButtonNames[i], 0, &Button, 0, nullptr))
 			s_GametileOpSelected = i;
 	}
 
@@ -1774,9 +1773,9 @@ int CEditor::PopupSelectGametileOp(CEditor *pEditor, CUIRect View, void *pContex
 
 void CEditor::PopupSelectGametileOpInvoke(float x, float y)
 {
-	static int s_SelectGametileOpPopupId = 0;
+	static int s_PopupSelectGametileOpId;
 	s_GametileOpSelected = -1;
-	UiInvokePopupMenu(&s_SelectGametileOpPopupId, 0, x, y, 120.0f, 189.0f, PopupSelectGametileOp);
+	UiInvokePopupMenu(&s_PopupSelectGametileOpId, 0, x, y, 120.0f, std::size(s_apGametileOpButtonNames) * 14.0f + 10.0f, PopupSelectGametileOp);
 }
 
 int CEditor::PopupSelectGameTileOpResult()
