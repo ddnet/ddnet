@@ -1698,9 +1698,6 @@ Could not initialize the given graphics backend, this is probably because you di
 Could not save downloaded map. Try manually deleting this file: %s
 == Не удалось сохранить загруженную карту. Попробуйте вручную удалить этот файл: %s
 
-Search:
-== Поиск:
-
 Copy info
 == Cкопировать данные
 

@@ -1256,9 +1256,6 @@ Initializing map logic
 Sending initial client info
 == 
 
-Search:
-== 
-
 Position:
 == 
 

@@ -1567,9 +1567,6 @@ Could not save downloaded map. Try manually deleting this file: %s
 Initializing components
 == 
 
-Search:
-== 
-
 Cancel
 == 
 

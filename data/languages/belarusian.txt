@@ -674,9 +674,6 @@ Sending initial client info
 Warning
 == Папярэджанне
 
-Search:
-== Пошук:
-
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
 == Рэжым адладкі уключаны. Націсніце Ctrl+Shift+D, каб выключыць яго.
 

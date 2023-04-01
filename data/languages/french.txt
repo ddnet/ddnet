@@ -1712,9 +1712,6 @@ Could not initialize the given graphics backend, this is probably because you di
 Could not save downloaded map. Try manually deleting this file: %s
 == 
 
-Search:
-== 
-
 Copy info
 == 
 
