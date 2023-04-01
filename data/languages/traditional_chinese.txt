@@ -20,6 +20,7 @@
 # 2022-10-24 cheeser0613
 # 2022-12-11 cheeser0613
 # 2023-01-11 cheeser0613
+# 2023-04-01 cheeser0613
 ##### /authors #####
 
 ##### translated strings #####
@@ -1278,7 +1279,7 @@ Windowed fullscreen
 == 視窗化全螢幕
 
 The format of texture %s is not RGBA which will cause visual bugs.
-== 紋理文件 %s 并非 RGBA 格式，這可能會導致顯示錯誤
+== 紋理檔案 %s 并非 RGBA 格式，這可能會導致顯示錯誤
 
 Join Tutorial Server
 == 加入教學伺服器
@@ -1654,19 +1655,19 @@ Out of VRAM. Try removing custom assets (skins, entities, etc.), especially thos
 
 [Graphics error]
 An error during command recording occurred. Try to update your GPU drivers.
-== 指令記錄期間檢測到錯誤。請嘗試更新顯示卡驅動程序。
+== 指令記錄期間檢測到錯誤。請嘗試更新顯示卡驅動程式。
 
 [Graphics error]
 A render command failed. Try to update your GPU drivers.
-== 渲染指令錯誤。請嘗試更新顯示卡驅動程序。
+== 渲染指令錯誤。請嘗試更新顯示卡驅動程式。
 
 [Graphics error]
 Submitting the render commands failed. Try to update your GPU drivers.
-== 渲染指令提交失敗。請嘗試更新顯示卡驅動程序。
+== 渲染指令提交失敗。請嘗試更新顯示卡驅動程式。
 
 [Graphics error]
 Failed to swap framebuffers. Try to update your GPU drivers.
-== 幀緩存交替失敗。請嘗試更新顯示卡驅動程序。
+== 幀緩存交替失敗。請嘗試更新顯示卡驅動程式。
 
 [Graphics error]
 Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
@@ -1705,16 +1706,16 @@ Open the directory to add custom assets
 
 [Graphics error]
 Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
-== 
+== 無法初始化當前配置的圖形後端，請檢查此電腦是否已安裝集成顯卡的驅動程式。
 
 Could not save downloaded map. Try manually deleting this file: %s
-== 
+== 地圖下載失敗，請嘗試手動刪除此檔案：%s
 
 Search:
 == 
 
 Copy info
-== 
+== 複製伺服器資訊
 
 Create a random skin
-== 
+== 隨機創造外觀
