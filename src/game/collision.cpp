@@ -1030,7 +1030,7 @@ int CCollision::GetFTile(int x, int y) const
 
 int CCollision::Entity(int x, int y, int Layer) const
 {
-	if((0 > x || x >= m_Width) || (0 > y || y >= m_Height))
+	if(x < 0 || x >= m_Width || y < 0 || y >= m_Height)
 	{
 		const char *pName;
 		switch(Layer)
