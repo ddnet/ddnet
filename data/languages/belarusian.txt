@@ -1070,6 +1070,9 @@ Skin prefix
 Choose default eyes when joining a server
 == Выбраць вочы па змаўчанні пры падлучэнні да сервера
 
+Create a random skin
+== Стварыць выпадковы скін
+
 Skin Database
 == База дадзеных скінаў
 
