@@ -654,10 +654,14 @@ int CEditor::PopupLayer(CEditor *pEditor, CUIRect View, void *pContext)
 	int NewVal = 0;
 	int Prop = pEditor->DoProperties(&View, aProps, s_aIds, &NewVal);
 	if(Prop != -1)
+	{
 		pEditor->m_Map.m_Modified = true;
+	}
 
 	if(Prop == PROP_ORDER)
+	{
 		pEditor->SelectLayer(pCurrentGroup->SwapLayers(pEditor->m_vSelectedLayers[0], NewVal));
+	}
 	else if(Prop == PROP_GROUP)
 	{
 		if(NewVal >= 0 && (size_t)NewVal < pEditor->m_Map.m_vpGroups.size())
