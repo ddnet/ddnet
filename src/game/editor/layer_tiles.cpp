@@ -873,7 +873,7 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 	{
 		if(NewVal > 1000 && !m_pEditor->m_LargeLayerWasWarned)
 		{
-			m_pEditor->m_PopupEventType = m_pEditor->POPEVENT_LARGELAYER;
+			m_pEditor->m_PopupEventType = CEditor::POPEVENT_LARGELAYER;
 			m_pEditor->m_PopupEventActivated = true;
 			m_pEditor->m_LargeLayerWasWarned = true;
 		}
@@ -883,7 +883,7 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 	{
 		if(NewVal > 1000 && !m_pEditor->m_LargeLayerWasWarned)
 		{
-			m_pEditor->m_PopupEventType = m_pEditor->POPEVENT_LARGELAYER;
+			m_pEditor->m_PopupEventType = CEditor::POPEVENT_LARGELAYER;
 			m_pEditor->m_PopupEventActivated = true;
 			m_pEditor->m_LargeLayerWasWarned = true;
 		}
@@ -908,7 +908,7 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 
 			if(m_pEditor->m_Map.m_vpImages[m_Image]->m_Width % 16 != 0 || m_pEditor->m_Map.m_vpImages[m_Image]->m_Height % 16 != 0)
 			{
-				m_pEditor->m_PopupEventType = m_pEditor->POPEVENT_IMAGEDIV16;
+				m_pEditor->m_PopupEventType = CEditor::POPEVENT_IMAGEDIV16;
 				m_pEditor->m_PopupEventActivated = true;
 
 				m_Texture.Invalidate();
@@ -1594,7 +1594,7 @@ void CLayerFront::SetTile(int x, int y, CTile tile)
 		CLayerTiles::SetTile(x, y, air);
 		if(!m_pEditor->m_PreventUnusedTilesWasWarned)
 		{
-			m_pEditor->m_PopupEventType = m_pEditor->POPEVENT_PREVENTUNUSEDTILES;
+			m_pEditor->m_PopupEventType = CEditor::POPEVENT_PREVENTUNUSEDTILES;
 			m_pEditor->m_PopupEventActivated = true;
 			m_pEditor->m_PreventUnusedTilesWasWarned = true;
 		}
