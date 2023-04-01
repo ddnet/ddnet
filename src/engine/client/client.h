@@ -425,6 +425,7 @@ public:
 
 	void Run();
 
+	bool InitNetworkClient();
 	bool CtrlShiftKey(int Key, bool &Last);
 
 	static void Con_Connect(IConsole::IResult *pResult, void *pUserData);
