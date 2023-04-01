@@ -3604,9 +3604,11 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 						}
 					}
 
-					static int s_GroupPopupId = 0;
 					if(Result == 2)
-						UiInvokePopupMenu(&s_GroupPopupId, 0, UI()->MouseX(), UI()->MouseY(), 145, 256, PopupGroup);
+					{
+						static int s_PopupGroupId;
+						UiInvokePopupMenu(&s_PopupGroupId, 0, UI()->MouseX(), UI()->MouseY(), 145, 256, PopupGroup);
+					}
 
 					if(!m_Map.m_vpGroups[g]->m_vpLayers.empty() && Input()->MouseDoubleClick())
 						m_Map.m_vpGroups[g]->m_Collapse ^= 1;

@@ -288,6 +288,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 			// search for unneeded game tiles
 			CLayerTiles *pGameLayer = pEditor->m_Map.m_pGameLayer;
 			for(int y = 0; y < pGameLayer->m_Height; ++y)
+			{
 				for(int x = 0; x < pGameLayer->m_Width; ++x)
 				{
 					if(pGameLayer->m_pTiles[y * pGameLayer->m_Width + x].m_Index > static_cast<unsigned char>(TILE_NOHOOK))
@@ -309,6 +310,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 						pEditor->m_Map.m_Modified = true;
 					}
 				}
+			}
 
 			return 1;
 		}
@@ -317,7 +319,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 	if(pEditor->GetSelectedGroup()->m_GameGroup && !pEditor->m_Map.m_pTeleLayer)
 	{
 		// new tele layer
-		View.HSplitBottom(5.0f, &View, &Button);
+		View.HSplitBottom(5.0f, &View, nullptr);
 		View.HSplitBottom(12.0f, &View, &Button);
 		static int s_NewTeleLayerButton = 0;
 		if(pEditor->DoButton_Editor(&s_NewTeleLayerButton, "Add tele layer", 0, &Button, 0, "Creates a new tele layer"))
@@ -334,7 +336,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 	if(pEditor->GetSelectedGroup()->m_GameGroup && !pEditor->m_Map.m_pSpeedupLayer)
 	{
 		// new speedup layer
-		View.HSplitBottom(5.0f, &View, &Button);
+		View.HSplitBottom(5.0f, &View, nullptr);
 		View.HSplitBottom(12.0f, &View, &Button);
 		static int s_NewSpeedupLayerButton = 0;
 		if(pEditor->DoButton_Editor(&s_NewSpeedupLayerButton, "Add speedup layer", 0, &Button, 0, "Creates a new speedup layer"))
@@ -351,7 +353,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 	if(pEditor->GetSelectedGroup()->m_GameGroup && !pEditor->m_Map.m_pTuneLayer)
 	{
 		// new tune layer
-		View.HSplitBottom(5.0f, &View, &Button);
+		View.HSplitBottom(5.0f, &View, nullptr);
 		View.HSplitBottom(12.0f, &View, &Button);
 		static int s_NewTuneLayerButton = 0;
 		if(pEditor->DoButton_Editor(&s_NewTuneLayerButton, "Add tune layer", 0, &Button, 0, "Creates a new tuning layer"))
@@ -368,7 +370,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 	if(pEditor->GetSelectedGroup()->m_GameGroup && !pEditor->m_Map.m_pFrontLayer)
 	{
 		// new front layer
-		View.HSplitBottom(5.0f, &View, &Button);
+		View.HSplitBottom(5.0f, &View, nullptr);
 		View.HSplitBottom(12.0f, &View, &Button);
 		static int s_NewFrontLayerButton = 0;
 		if(pEditor->DoButton_Editor(&s_NewFrontLayerButton, "Add front layer", 0, &Button, 0, "Creates a new item layer"))
@@ -385,7 +387,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 	if(pEditor->GetSelectedGroup()->m_GameGroup && !pEditor->m_Map.m_pSwitchLayer)
 	{
 		// new Switch layer
-		View.HSplitBottom(5.0f, &View, &Button);
+		View.HSplitBottom(5.0f, &View, nullptr);
 		View.HSplitBottom(12.0f, &View, &Button);
 		static int s_NewSwitchLayerButton = 0;
 		if(pEditor->DoButton_Editor(&s_NewSwitchLayerButton, "Add switch layer", 0, &Button, 0, "Creates a new switch layer"))
@@ -400,7 +402,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 	}
 
 	// new quad layer
-	View.HSplitBottom(5.0f, &View, &Button);
+	View.HSplitBottom(5.0f, &View, nullptr);
 	View.HSplitBottom(12.0f, &View, &Button);
 	static int s_NewQuadLayerButton = 0;
 	if(pEditor->DoButton_Editor(&s_NewQuadLayerButton, "Add quads layer", 0, &Button, 0, "Creates a new quad layer"))
@@ -414,7 +416,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 	}
 
 	// new tile layer
-	View.HSplitBottom(5.0f, &View, &Button);
+	View.HSplitBottom(5.0f, &View, nullptr);
 	View.HSplitBottom(12.0f, &View, &Button);
 	static int s_NewTileLayerButton = 0;
 	if(pEditor->DoButton_Editor(&s_NewTileLayerButton, "Add tile layer", 0, &Button, 0, "Creates a new tile layer"))
@@ -428,7 +430,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 	}
 
 	// new sound layer
-	View.HSplitBottom(5.0f, &View, &Button);
+	View.HSplitBottom(5.0f, &View, nullptr);
 	View.HSplitBottom(12.0f, &View, &Button);
 	static int s_NewSoundLayerButton = 0;
 	if(pEditor->DoButton_Editor(&s_NewSoundLayerButton, "Add sound layer", 0, &Button, 0, "Creates a new sound layer"))
@@ -444,7 +446,7 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 	// group name
 	if(!pEditor->GetSelectedGroup()->m_GameGroup)
 	{
-		View.HSplitBottom(5.0f, &View, &Button);
+		View.HSplitBottom(5.0f, &View, nullptr);
 		View.HSplitBottom(12.0f, &View, &Button);
 		pEditor->UI()->DoLabel(&Button, "Name:", 10.0f, TEXTALIGN_LEFT);
 		Button.VSplitLeft(40.0f, nullptr, &Button);
@@ -478,7 +480,6 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 		{"Para Y", pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ParallaxY, PROPTYPE_INT_SCROLL, -1000000, 1000000},
 		{"Custom Zoom", pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_CustomParallaxZoom, PROPTYPE_BOOL, 0, 1},
 		{"Para Zoom", pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ParallaxZoom, PROPTYPE_INT_SCROLL, -1000000, 1000000},
-
 		{"Use Clipping", pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_UseClipping, PROPTYPE_BOOL, 0, 1},
 		{"Clip X", pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ClipX, PROPTYPE_INT_SCROLL, -1000000, 1000000},
 		{"Clip Y", pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ClipY, PROPTYPE_INT_SCROLL, -1000000, 1000000},
@@ -487,48 +488,71 @@ int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 		{nullptr},
 	};
 
-	static int s_aIds[NUM_PROPS] = {0};
-	int NewVal = 0;
-
-	// cut the properties that isn't needed
+	// cut the properties that aren't needed
 	if(pEditor->GetSelectedGroup()->m_GameGroup)
 		aProps[PROP_POS_X].m_pName = nullptr;
 
+	static int s_aIds[NUM_PROPS] = {0};
+	int NewVal = 0;
 	int Prop = pEditor->DoProperties(&View, aProps, s_aIds, &NewVal);
 	if(Prop != -1)
+	{
 		pEditor->m_Map.m_Modified = true;
+	}
 
 	if(Prop == PROP_ORDER)
+	{
 		pEditor->m_SelectedGroup = pEditor->m_Map.SwapGroups(pEditor->m_SelectedGroup, NewVal);
+	}
 
 	// these can not be changed on the game group
 	if(!pEditor->GetSelectedGroup()->m_GameGroup)
 	{
 		if(Prop == PROP_PARA_X)
+		{
 			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ParallaxX = NewVal;
+		}
 		else if(Prop == PROP_PARA_Y)
+		{
 			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ParallaxY = NewVal;
+		}
 		else if(Prop == PROP_CUSTOM_ZOOM)
+		{
 			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_CustomParallaxZoom = NewVal;
+		}
 		else if(Prop == PROP_PARA_ZOOM)
 		{
 			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_CustomParallaxZoom = 1;
 			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ParallaxZoom = NewVal;
 		}
 		else if(Prop == PROP_POS_X)
+		{
 			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_OffsetX = -NewVal;
+		}
 		else if(Prop == PROP_POS_Y)
+		{
 			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_OffsetY = -NewVal;
+		}
 		else if(Prop == PROP_USE_CLIPPING)
+		{
 			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_UseClipping = NewVal;
+		}
 		else if(Prop == PROP_CLIP_X)
+		{
 			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ClipX = NewVal;
+		}
 		else if(Prop == PROP_CLIP_Y)
+		{
 			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ClipY = NewVal;
+		}
 		else if(Prop == PROP_CLIP_W)
+		{
 			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ClipW = NewVal;
+		}
 		else if(Prop == PROP_CLIP_H)
+		{
 			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ClipH = NewVal;
+		}
 
 		pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->OnEdited();
 	}
