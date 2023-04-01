@@ -508,7 +508,7 @@ public:
 	int ResetErrorString();
 
 	// error and state
-	int NetType() const { return net_socket_type(m_Socket); }
+	int NetType() const { return m_Socket ? net_socket_type(m_Socket) : 0; }
 	int State();
 	const NETADDR *ServerAddress() const { return m_Connection.PeerAddress(); }
 	void ConnectAddresses(const NETADDR **ppAddrs, int *pNumAddrs) const { m_Connection.ConnectAddresses(ppAddrs, pNumAddrs); }

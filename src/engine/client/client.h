@@ -158,6 +158,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	bool m_AutoStatScreenshotRecycle;
 	bool m_AutoCSVRecycle;
 	bool m_EditorActive;
+	bool m_NetworkInitFailed;
 	bool m_SoundInitFailed;
 
 	int m_aAckGameTick[NUM_DUMMIES];
@@ -333,6 +334,7 @@ public:
 
 	bool ConnectionProblems() const override;
 
+	bool NetworkInitFailed() const override { return m_NetworkInitFailed; }
 	bool SoundInitFailed() const override { return m_SoundInitFailed; }
 
 	IGraphics::CTextureHandle GetDebugFont() const override { return m_DebugFont; }
@@ -425,6 +427,7 @@ public:
 
 	void Run();
 
+	bool InitNetworkClient();
 	bool CtrlShiftKey(int Key, bool &Last);
 
 	static void Con_Connect(IConsole::IResult *pResult, void *pUserData);

@@ -1322,11 +1322,19 @@ int CMenus::Render()
 	// some margin around the screen
 	Screen.Margin(10.0f, &Screen);
 
+	static bool s_NetworkCheck = false;
+	if(!s_NetworkCheck && m_Popup == POPUP_NONE)
+	{
+		if(Client()->NetworkInitFailed())
+			PopupMessage(Localize("Network error"), Localize("The network couldn't be initialised. Check the local console for details."), Localize("Ok"));
+		s_NetworkCheck = true;
+	}
+
 	static bool s_SoundCheck = false;
 	if(!s_SoundCheck && m_Popup == POPUP_NONE)
 	{
 		if(Client()->SoundInitFailed())
-			PopupMessage(Localize("Sound error"), Localize("The audio device couldn't be initialised."), Localize("Ok"));
+			PopupMessage(Localize("Sound error"), Localize("The audio device couldn't be initialised. Check the local console for details."), Localize("Ok"));
 		s_SoundCheck = true;
 	}
 

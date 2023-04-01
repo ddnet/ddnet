@@ -3024,47 +3024,10 @@ void CClient::Run()
 	CVideo::Init();
 #endif
 
-#ifndef CONF_WEBASM
-	// open socket
-	{
-		NETADDR BindAddr;
-		if(g_Config.m_Bindaddr[0] == '\0')
-		{
-			mem_zero(&BindAddr, sizeof(BindAddr));
-		}
-		else if(net_host_lookup(g_Config.m_Bindaddr, &BindAddr, NETTYPE_ALL) != 0)
-		{
-			dbg_msg("client", "The configured bindaddr '%s' cannot be resolved", g_Config.m_Bindaddr);
-			return;
-		}
-		BindAddr.type = NETTYPE_ALL;
-		for(unsigned int i = 0; i < std::size(m_aNetClient); i++)
-		{
-			int &PortRef = i == CONN_MAIN ? g_Config.m_ClPort : i == CONN_DUMMY ? g_Config.m_ClDummyPort : g_Config.m_ClContactPort;
-			if(PortRef < 1024) // Reject users setting ports that we don't want to use
-			{
-				PortRef = 0;
-			}
-			BindAddr.port = PortRef;
-			unsigned RemainingAttempts = 25;
-			while(BindAddr.port == 0 || !m_aNetClient[i].Open(BindAddr))
-			{
-				if(BindAddr.port != 0)
-				{
-					--RemainingAttempts;
-					if(RemainingAttempts == 0)
-					{
-						if(g_Config.m_Bindaddr[0])
-							dbg_msg("client", "Could not open network client, try changing or unsetting the bindaddr '%s'", g_Config.m_Bindaddr);
-						else
-							dbg_msg("client", "Could not open network client");
-						return;
-					}
-				}
-				BindAddr.port = (secure_rand() % 64511) + 1024;
-			}
-		}
-	}
+#if defined(CONF_WEBASM)
+	m_NetworkInitFailed = false;
+#else
+	m_NetworkInitFailed = !InitNetworkClient();
 #endif
 
 	// init font rendering
@@ -3420,6 +3383,48 @@ void CClient::Run()
 		m_aNetClient[i].Close();
 
 	delete m_pEditor;
+}
+
+bool CClient::InitNetworkClient()
+{
+	NETADDR BindAddr;
+	if(g_Config.m_Bindaddr[0] == '\0')
+	{
+		mem_zero(&BindAddr, sizeof(BindAddr));
+	}
+	else if(net_host_lookup(g_Config.m_Bindaddr, &BindAddr, NETTYPE_ALL) != 0)
+	{
+		dbg_msg("client", "The configured bindaddr '%s' cannot be resolved", g_Config.m_Bindaddr);
+		return false;
+	}
+	BindAddr.type = NETTYPE_ALL;
+	for(unsigned int i = 0; i < std::size(m_aNetClient); i++)
+	{
+		int &PortRef = i == CONN_MAIN ? g_Config.m_ClPort : i == CONN_DUMMY ? g_Config.m_ClDummyPort : g_Config.m_ClContactPort;
+		if(PortRef < 1024) // Reject users setting ports that we don't want to use
+		{
+			PortRef = 0;
+		}
+		BindAddr.port = PortRef;
+		unsigned RemainingAttempts = 25;
+		while(BindAddr.port == 0 || !m_aNetClient[i].Open(BindAddr))
+		{
+			if(BindAddr.port != 0)
+			{
+				--RemainingAttempts;
+				if(RemainingAttempts == 0)
+				{
+					if(g_Config.m_Bindaddr[0])
+						dbg_msg("client", "Could not open network client, try changing or unsetting the bindaddr '%s'", g_Config.m_Bindaddr);
+					else
+						dbg_msg("client", "Could not open network client");
+					return false;
+				}
+			}
+			BindAddr.port = (secure_rand() % 64511) + 1024;
+		}
+	}
+	return true;
 }
 
 bool CClient::CtrlShiftKey(int Key, bool &Last)

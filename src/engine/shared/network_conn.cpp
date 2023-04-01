@@ -90,6 +90,9 @@ void CNetConnection::SignalResend()
 
 int CNetConnection::Flush()
 {
+	if(!m_Socket)
+		return 0;
+
 	int NumChunks = m_Construct.m_NumChunks;
 	if(!NumChunks && !m_Construct.m_Flags)
 		return 0;
@@ -166,6 +169,9 @@ int CNetConnection::QueueChunk(int Flags, int DataSize, const void *pData)
 
 void CNetConnection::SendConnect()
 {
+	if(!m_Socket)
+		return;
+
 	// send the connect message
 	m_LastSendTime = time_get();
 	for(int i = 0; i < m_NumConnectAddrs; i++)
@@ -176,6 +182,9 @@ void CNetConnection::SendConnect()
 
 void CNetConnection::SendControl(int ControlMsg, const void *pExtra, int ExtraSize)
 {
+	if(!m_Socket)
+		return;
+
 	// send the control message
 	m_LastSendTime = time_get();
 	CNetBase::SendControlMsg(m_Socket, &m_PeerAddr, m_Ack, ControlMsg, pExtra, ExtraSize, m_SecurityToken, m_Sixup);

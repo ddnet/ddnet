@@ -5,14 +5,14 @@
 
 bool CNetClient::Open(NETADDR BindAddr)
 {
+	// clean it
+	mem_zero(this, sizeof(*this));
+
 	// open socket
 	NETSOCKET Socket;
 	Socket = net_udp_create(BindAddr);
 	if(!Socket)
 		return false;
-
-	// clean it
-	mem_zero(this, sizeof(*this));
 
 	// init
 	m_Socket = Socket;
@@ -26,17 +26,16 @@ int CNetClient::Close()
 {
 	if(!m_Socket)
 		return 0;
-	if(m_pStun)
-	{
-		delete m_pStun;
-		m_pStun = nullptr;
-	}
-	return net_udp_close(m_Socket);
+
+	delete m_pStun;
+	m_pStun = nullptr;
+	int Result = net_udp_close(m_Socket);
+	m_Socket = 0;
+	return Result;
 }
 
 int CNetClient::Disconnect(const char *pReason)
 {
-	//dbg_msg("netclient", "disconnected. reason=\"%s\"", pReason);
 	m_Connection.Disconnect(pReason);
 	return 0;
 }
@@ -44,9 +43,12 @@ int CNetClient::Disconnect(const char *pReason)
 int CNetClient::Update()
 {
 	m_Connection.Update();
-	if(m_Connection.State() == NET_CONNSTATE_ERROR)
+	if(!m_Socket)
+		Disconnect("The network couldn't be initialised.");
+	else if(m_Connection.State() == NET_CONNSTATE_ERROR)
 		Disconnect(m_Connection.ErrorString());
-	m_pStun->Update();
+	if(m_pStun != nullptr)
+		m_pStun->Update();
 	return 0;
 }
 
@@ -64,6 +66,9 @@ int CNetClient::ResetErrorString()
 
 int CNetClient::Recv(CNetChunk *pChunk)
 {
+	if(!m_Socket)
+		return 0;
+
 	while(true)
 	{
 		// check for a chunk
@@ -79,7 +84,7 @@ int CNetClient::Recv(CNetChunk *pChunk)
 		if(Bytes <= 0)
 			break;
 
-		if(m_pStun->OnPacket(Addr, pData, Bytes))
+		if(m_pStun != nullptr && m_pStun->OnPacket(Addr, pData, Bytes))
 		{
 			continue;
 		}
@@ -113,6 +118,9 @@ int CNetClient::Recv(CNetChunk *pChunk)
 
 int CNetClient::Send(CNetChunk *pChunk)
 {
+	if(!m_Socket)
+		return 0;
+
 	if(pChunk->m_DataSize >= NET_MAX_PAYLOAD)
 	{
 		dbg_msg("netclient", "chunk payload too big. %d. dropping chunk", pChunk->m_DataSize);
@@ -169,15 +177,19 @@ const char *CNetClient::ErrorString() const
 
 void CNetClient::FeedStunServer(NETADDR StunServer)
 {
-	m_pStun->FeedStunServer(StunServer);
+	if(m_pStun)
+		m_pStun->FeedStunServer(StunServer);
 }
 
 void CNetClient::RefreshStun()
 {
-	m_pStun->Refresh();
+	if(m_pStun)
+		m_pStun->Refresh();
 }
 
 CONNECTIVITY CNetClient::GetConnectivity(int NetType, NETADDR *pGlobalAddr)
 {
+	if(m_pStun == nullptr)
+		return CONNECTIVITY::UNKNOWN;
 	return m_pStun->GetConnectivity(NetType, pGlobalAddr);
 }
