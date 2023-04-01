@@ -119,6 +119,143 @@ bool CEditor::UiPopupOpen()
 	return g_UiNumPopups > 0;
 }
 
+int CEditor::PopupMenuFile(CEditor *pEditor, CUIRect View, void *pContext)
+{
+	static int s_NewMapButton = 0;
+	static int s_SaveButton = 0;
+	static int s_SaveAsButton = 0;
+	static int s_SaveCopyButton = 0;
+	static int s_OpenButton = 0;
+	static int s_OpenCurrentMapButton = 0;
+	static int s_AppendButton = 0;
+	static int s_ExitButton = 0;
+
+	CUIRect Slot;
+	View.HSplitTop(12.0f, &Slot, &View);
+	if(pEditor->DoButton_MenuItem(&s_NewMapButton, "New", 0, &Slot, 0, "Creates a new map (ctrl+n)"))
+	{
+		if(pEditor->HasUnsavedData())
+		{
+			pEditor->m_PopupEventType = POPEVENT_NEW;
+			pEditor->m_PopupEventActivated = true;
+		}
+		else
+		{
+			pEditor->Reset();
+			pEditor->m_aFileName[0] = 0;
+		}
+		return 1;
+	}
+
+	View.HSplitTop(10.0f, &Slot, &View);
+	View.HSplitTop(12.0f, &Slot, &View);
+	if(pEditor->DoButton_MenuItem(&s_OpenButton, "Load", 0, &Slot, 0, "Opens a map for editing (ctrl+l)"))
+	{
+		if(pEditor->HasUnsavedData())
+		{
+			pEditor->m_PopupEventType = POPEVENT_LOAD;
+			pEditor->m_PopupEventActivated = true;
+		}
+		else
+			pEditor->InvokeFileDialog(IStorage::TYPE_ALL, FILETYPE_MAP, "Load map", "Load", "maps", "", pEditor->CallbackOpenMap, pEditor);
+		return 1;
+	}
+
+	View.HSplitTop(2.0f, &Slot, &View);
+	View.HSplitTop(12.0f, &Slot, &View);
+	if(pEditor->DoButton_MenuItem(&s_OpenCurrentMapButton, "Load Current Map", 0, &Slot, 0, "Opens the current in game map for editing (ctrl+alt+l)"))
+	{
+		if(pEditor->HasUnsavedData())
+		{
+			pEditor->m_PopupEventType = POPEVENT_LOADCURRENT;
+			pEditor->m_PopupEventActivated = true;
+		}
+		else
+		{
+			pEditor->LoadCurrentMap();
+		}
+		return 1;
+	}
+
+	View.HSplitTop(10.0f, &Slot, &View);
+	View.HSplitTop(12.0f, &Slot, &View);
+	if(pEditor->DoButton_MenuItem(&s_AppendButton, "Append", 0, &Slot, 0, "Opens a map and adds everything from that map to the current one (ctrl+a)"))
+	{
+		pEditor->InvokeFileDialog(IStorage::TYPE_ALL, FILETYPE_MAP, "Append map", "Append", "maps", "", pEditor->CallbackAppendMap, pEditor);
+		return 1;
+	}
+
+	View.HSplitTop(10.0f, &Slot, &View);
+	View.HSplitTop(12.0f, &Slot, &View);
+	if(pEditor->DoButton_MenuItem(&s_SaveButton, "Save", 0, &Slot, 0, "Saves the current map (ctrl+s)"))
+	{
+		if(pEditor->m_aFileName[0] && pEditor->m_ValidSaveFilename)
+		{
+			str_copy(pEditor->m_aFileSaveName, pEditor->m_aFileName, sizeof(pEditor->m_aFileSaveName));
+			pEditor->m_PopupEventType = POPEVENT_SAVE;
+			pEditor->m_PopupEventActivated = true;
+		}
+		else
+			pEditor->InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_MAP, "Save map", "Save", "maps", "", pEditor->CallbackSaveMap, pEditor);
+		return 1;
+	}
+
+	View.HSplitTop(2.0f, &Slot, &View);
+	View.HSplitTop(12.0f, &Slot, &View);
+	if(pEditor->DoButton_MenuItem(&s_SaveAsButton, "Save As", 0, &Slot, 0, "Saves the current map under a new name (ctrl+shift+s)"))
+	{
+		pEditor->InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_MAP, "Save map", "Save", "maps", "", pEditor->CallbackSaveMap, pEditor);
+		return 1;
+	}
+
+	View.HSplitTop(2.0f, &Slot, &View);
+	View.HSplitTop(12.0f, &Slot, &View);
+	if(pEditor->DoButton_MenuItem(&s_SaveCopyButton, "Save Copy", 0, &Slot, 0, "Saves a copy of the current map under a new name (ctrl+shift+alt+s)"))
+	{
+		pEditor->InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_MAP, "Save map", "Save", "maps", "", pEditor->CallbackSaveCopyMap, pEditor);
+		return 1;
+	}
+
+	View.HSplitTop(10.0f, &Slot, &View);
+	View.HSplitTop(12.0f, &Slot, &View);
+	if(pEditor->DoButton_MenuItem(&s_ExitButton, "Exit", 0, &Slot, 0, "Exits from the editor"))
+	{
+		if(pEditor->HasUnsavedData())
+		{
+			pEditor->m_PopupEventType = POPEVENT_EXIT;
+			pEditor->m_PopupEventActivated = true;
+		}
+		else
+			g_Config.m_ClEditor = 0;
+		return 1;
+	}
+
+	return 0;
+}
+
+int CEditor::PopupMenuTools(CEditor *pEditor, CUIRect View, void *pContext)
+{
+	CUIRect Slot;
+	View.HSplitTop(12.0f, &Slot, &View);
+	static int s_RemoveUnusedEnvelopesButton = 0;
+	static SConfirmPopupContext s_ConfirmPopupContext;
+	if(pEditor->DoButton_MenuItem(&s_RemoveUnusedEnvelopesButton, "Remove unused envelopes", 0, &Slot, 0, "Removes all unused envelopes from the map"))
+	{
+		s_ConfirmPopupContext.Reset();
+		str_copy(s_ConfirmPopupContext.m_aMessage, "Are you sure that you want to remove all unused envelopes from this map?");
+		pEditor->ShowPopupConfirm(Slot.x + Slot.w, Slot.y, &s_ConfirmPopupContext);
+	}
+	if(s_ConfirmPopupContext.m_Result == SConfirmPopupContext::CONFIRMED)
+		pEditor->RemoveUnusedEnvelopes();
+	if(s_ConfirmPopupContext.m_Result != SConfirmPopupContext::UNSET)
+	{
+		s_ConfirmPopupContext.Reset();
+		return 1;
+	}
+
+	return 0;
+}
+
 int CEditor::PopupGroup(CEditor *pEditor, CUIRect View, void *pContext)
 {
 	// remove group button
@@ -1017,6 +1154,159 @@ int CEditor::PopupPoint(CEditor *pEditor, CUIRect View, void *pContext)
 				if(pEditor->m_SelectedPoints & (1 << v))
 					pQuad->m_aTexcoords[v].y = f2fx(fx2f(pQuad->m_aTexcoords[v].y) + (NewVal - tv) / 1024.0f);
 		}
+	}
+
+	return 0;
+}
+
+static int gs_ModifyIndexDeletedIndex;
+static void ModifyIndexDeleted(int *pIndex)
+{
+	if(*pIndex == gs_ModifyIndexDeletedIndex)
+		*pIndex = -1;
+	else if(*pIndex > gs_ModifyIndexDeletedIndex)
+		*pIndex = *pIndex - 1;
+}
+
+int CEditor::PopupImage(CEditor *pEditor, CUIRect View, void *pContext)
+{
+	static int s_ReaddButton = 0;
+	static int s_ReplaceButton = 0;
+	static int s_RemoveButton = 0;
+
+	CUIRect Slot;
+	View.HSplitTop(12.0f, &Slot, &View);
+	CEditorImage *pImg = pEditor->m_Map.m_vpImages[pEditor->m_SelectedImage];
+
+	static int s_ExternalButton = 0;
+	if(pImg->m_External)
+	{
+		if(pEditor->DoButton_MenuItem(&s_ExternalButton, "Embed", 0, &Slot, 0, "Embeds the image into the map file."))
+		{
+			pImg->m_External = 0;
+			return 1;
+		}
+		View.HSplitTop(5.0f, nullptr, &View);
+		View.HSplitTop(12.0f, &Slot, &View);
+	}
+	else if(pEditor->IsVanillaImage(pImg->m_aName))
+	{
+		if(pEditor->DoButton_MenuItem(&s_ExternalButton, "Make external", 0, &Slot, 0, "Removes the image from the map file."))
+		{
+			pImg->m_External = 1;
+			return 1;
+		}
+		View.HSplitTop(5.0f, nullptr, &View);
+		View.HSplitTop(12.0f, &Slot, &View);
+	}
+
+	static SSelectionPopupContext s_SelectionPopupContext;
+	if(pEditor->DoButton_MenuItem(&s_ReaddButton, "Readd", 0, &Slot, 0, "Reloads the image from the mapres folder"))
+	{
+		char aFilename[IO_MAX_PATH_LENGTH];
+		str_format(aFilename, sizeof(aFilename), "%s.png", pImg->m_aName);
+		s_SelectionPopupContext.Reset();
+		pEditor->Storage()->FindFiles(aFilename, "mapres", IStorage::TYPE_ALL, &s_SelectionPopupContext.m_Entries);
+		if(s_SelectionPopupContext.m_Entries.empty())
+		{
+			pEditor->ShowFileDialogError("Error: could not find image '%s' in the mapres folder.", aFilename);
+		}
+		else if(s_SelectionPopupContext.m_Entries.size() == 1)
+		{
+			s_SelectionPopupContext.m_pSelection = &*s_SelectionPopupContext.m_Entries.begin();
+		}
+		else
+		{
+			str_copy(s_SelectionPopupContext.m_aMessage, "Select the wanted image:");
+			pEditor->ShowPopupSelection(pEditor->UI()->MouseX(), pEditor->UI()->MouseY(), &s_SelectionPopupContext);
+		}
+	}
+	if(s_SelectionPopupContext.m_pSelection != nullptr)
+	{
+		bool WasExternal = pImg->m_External;
+		ReplaceImage(s_SelectionPopupContext.m_pSelection->c_str(), IStorage::TYPE_ALL, pEditor);
+		pImg->m_External = WasExternal;
+		s_SelectionPopupContext.Reset();
+		return 1;
+	}
+
+	View.HSplitTop(5.0f, nullptr, &View);
+	View.HSplitTop(12.0f, &Slot, &View);
+	if(pEditor->DoButton_MenuItem(&s_ReplaceButton, "Replace", 0, &Slot, 0, "Replaces the image with a new one"))
+	{
+		pEditor->InvokeFileDialog(IStorage::TYPE_ALL, FILETYPE_IMG, "Replace Image", "Replace", "mapres", "", ReplaceImage, pEditor);
+		return 1;
+	}
+
+	View.HSplitTop(5.0f, nullptr, &View);
+	View.HSplitTop(12.0f, &Slot, &View);
+	if(pEditor->DoButton_MenuItem(&s_RemoveButton, "Remove", 0, &Slot, 0, "Removes the image from the map"))
+	{
+		delete pImg;
+		pEditor->m_Map.m_vpImages.erase(pEditor->m_Map.m_vpImages.begin() + pEditor->m_SelectedImage);
+		gs_ModifyIndexDeletedIndex = pEditor->m_SelectedImage;
+		pEditor->m_Map.ModifyImageIndex(ModifyIndexDeleted);
+		return 1;
+	}
+
+	return 0;
+}
+
+int CEditor::PopupSound(CEditor *pEditor, CUIRect View, void *pContext)
+{
+	static int s_ReaddButton = 0;
+	static int s_ReplaceButton = 0;
+	static int s_RemoveButton = 0;
+
+	CUIRect Slot;
+	View.HSplitTop(12.0f, &Slot, &View);
+	CEditorSound *pSound = pEditor->m_Map.m_vpSounds[pEditor->m_SelectedSound];
+
+	static SSelectionPopupContext s_SelectionPopupContext;
+	if(pEditor->DoButton_MenuItem(&s_ReaddButton, "Readd", 0, &Slot, 0, "Reloads the sound from the mapres folder"))
+	{
+		char aFilename[IO_MAX_PATH_LENGTH];
+		str_format(aFilename, sizeof(aFilename), "%s.opus", pSound->m_aName);
+		s_SelectionPopupContext.Reset();
+		pEditor->Storage()->FindFiles(aFilename, "mapres", IStorage::TYPE_ALL, &s_SelectionPopupContext.m_Entries);
+		if(s_SelectionPopupContext.m_Entries.empty())
+		{
+			pEditor->ShowFileDialogError("Error: could not find sound '%s' in the mapres folder.", aFilename);
+		}
+		else if(s_SelectionPopupContext.m_Entries.size() == 1)
+		{
+			s_SelectionPopupContext.m_pSelection = &*s_SelectionPopupContext.m_Entries.begin();
+		}
+		else
+		{
+			str_copy(s_SelectionPopupContext.m_aMessage, "Select the wanted sound:");
+			pEditor->ShowPopupSelection(pEditor->UI()->MouseX(), pEditor->UI()->MouseY(), &s_SelectionPopupContext);
+		}
+	}
+	if(s_SelectionPopupContext.m_pSelection != nullptr)
+	{
+		ReplaceSound(s_SelectionPopupContext.m_pSelection->c_str(), IStorage::TYPE_ALL, pEditor);
+		s_SelectionPopupContext.Reset();
+		return 1;
+	}
+
+	View.HSplitTop(5.0f, nullptr, &View);
+	View.HSplitTop(12.0f, &Slot, &View);
+	if(pEditor->DoButton_MenuItem(&s_ReplaceButton, "Replace", 0, &Slot, 0, "Replaces the sound with a new one"))
+	{
+		pEditor->InvokeFileDialog(IStorage::TYPE_ALL, FILETYPE_SOUND, "Replace sound", "Replace", "mapres", "", ReplaceSound, pEditor);
+		return 1;
+	}
+
+	View.HSplitTop(5.0f, nullptr, &View);
+	View.HSplitTop(12.0f, &Slot, &View);
+	if(pEditor->DoButton_MenuItem(&s_RemoveButton, "Remove", 0, &Slot, 0, "Removes the sound from the map"))
+	{
+		delete pSound;
+		pEditor->m_Map.m_vpSounds.erase(pEditor->m_Map.m_vpSounds.begin() + pEditor->m_SelectedSound);
+		gs_ModifyIndexDeletedIndex = pEditor->m_SelectedSound;
+		pEditor->m_Map.ModifySoundIndex(ModifyIndexDeleted);
+		return 1;
 	}
 
 	return 0;
