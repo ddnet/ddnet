@@ -1956,13 +1956,10 @@ int CEditor::PopupSpeedup(CEditor *pEditor, CUIRect View, void *pContext)
 
 int CEditor::PopupSwitch(CEditor *pEditor, CUIRect View, void *pContext)
 {
-	static int s_PreviousNumber = -1;
+	CUIRect NumberPicker, FindEmptySlot;
 
-	CUIRect NumberPicker;
-	CUIRect FindEmptySlot;
-
-	View.VSplitRight(15.f, &NumberPicker, &FindEmptySlot);
-	NumberPicker.VSplitRight(2.f, &NumberPicker, nullptr);
+	View.VSplitRight(15.0f, &NumberPicker, &FindEmptySlot);
+	NumberPicker.VSplitRight(2.0f, &NumberPicker, nullptr);
 	FindEmptySlot.HSplitTop(13.0f, &FindEmptySlot, nullptr);
 	FindEmptySlot.HMargin(1.0f, &FindEmptySlot);
 
@@ -1971,31 +1968,32 @@ int CEditor::PopupSwitch(CEditor *pEditor, CUIRect View, void *pContext)
 		static int s_EmptySlotPid = 0;
 		if(pEditor->DoButton_Editor(&s_EmptySlotPid, "F", 0, &FindEmptySlot, 0, "[ctrl+f] Find empty slot") || (pEditor->Input()->ModifierIsPressed() && pEditor->Input()->KeyPress(KEY_F)))
 		{
-			int number = -1;
+			int Number = -1;
 			for(int i = 1; i <= 255; i++)
 			{
 				if(!pEditor->m_Map.m_pSwitchLayer->ContainsElementWithId(i))
 				{
-					number = i;
+					Number = i;
 					break;
 				}
 			}
 
-			if(number != -1)
+			if(Number != -1)
 			{
-				pEditor->m_SwitchNum = number;
+				pEditor->m_SwitchNum = Number;
 			}
 		}
 	}
 
 	// number picker
+	static int s_PreviousNumber = -1;
 	{
 		static ColorRGBA s_Color = ColorRGBA(1, 1, 1, 0.5f);
 
 		enum
 		{
-			PROP_SwitchNumber = 0,
-			PROP_SwitchDelay,
+			PROP_SWITCH_NUMBER = 0,
+			PROP_SWITCH_DELAY,
 			NUM_PROPS,
 		};
 
@@ -2009,11 +2007,11 @@ int CEditor::PopupSwitch(CEditor *pEditor, CUIRect View, void *pContext)
 		int NewVal = 0;
 		int Prop = pEditor->DoProperties(&NumberPicker, aProps, s_aIds, &NewVal, s_Color);
 
-		if(Prop == PROP_SwitchNumber)
+		if(Prop == PROP_SWITCH_NUMBER)
 		{
 			pEditor->m_SwitchNum = (NewVal + 256) % 256;
 		}
-		else if(Prop == PROP_SwitchDelay)
+		else if(Prop == PROP_SWITCH_DELAY)
 		{
 			pEditor->m_SwitchDelay = (NewVal + 256) % 256;
 		}
