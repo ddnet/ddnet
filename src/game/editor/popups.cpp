@@ -1423,66 +1423,62 @@ int CEditor::PopupMapInfo(CEditor *pEditor, CUIRect View, void *pContext)
 {
 	CUIRect Label, ButtonBar, Button;
 
-	// title
-	View.HSplitTop(10.0f, nullptr, &View);
-	View.HSplitTop(30.0f, &Label, &View);
-	pEditor->UI()->DoLabel(&Label, "Map details", 20.0f, TEXTALIGN_CENTER);
-
-	View.HSplitBottom(10.0f, &View, nullptr);
+	View.Margin(10.0f, &View);
 	View.HSplitBottom(20.0f, &View, &ButtonBar);
 
-	View.VMargin(40.0f, &View);
+	// title
+	View.HSplitTop(20.0f, &Label, &View);
+	pEditor->UI()->DoLabel(&Label, "Map details", 20.0f, TEXTALIGN_CENTER);
+	View.HSplitTop(10.0f, nullptr, &View);
 
 	// author box
 	View.HSplitTop(20.0f, &Label, &View);
 	pEditor->UI()->DoLabel(&Label, "Author:", 10.0f, TEXTALIGN_LEFT);
-	Label.VSplitLeft(45.0f, nullptr, &Button);
-	Button.HMargin(3, &Button);
+	Label.VSplitLeft(60.0f, nullptr, &Button);
+	Button.HMargin(3.0f, &Button);
 	static float s_AuthorBox = 0;
 	pEditor->DoEditBox(&s_AuthorBox, &Button, pEditor->m_Map.m_MapInfo.m_aAuthorTmp, sizeof(pEditor->m_Map.m_MapInfo.m_aAuthorTmp), 10.0f, &s_AuthorBox);
 
 	// version box
 	View.HSplitTop(20.0f, &Label, &View);
 	pEditor->UI()->DoLabel(&Label, "Version:", 10.0f, TEXTALIGN_LEFT);
-	Label.VSplitLeft(45.0f, nullptr, &Button);
-	Button.HMargin(3, &Button);
+	Label.VSplitLeft(60.0f, nullptr, &Button);
+	Button.HMargin(3.0f, &Button);
 	static float s_VersionBox = 0;
 	pEditor->DoEditBox(&s_VersionBox, &Button, pEditor->m_Map.m_MapInfo.m_aVersionTmp, sizeof(pEditor->m_Map.m_MapInfo.m_aVersionTmp), 10.0f, &s_VersionBox);
 
 	// credits box
 	View.HSplitTop(20.0f, &Label, &View);
 	pEditor->UI()->DoLabel(&Label, "Credits:", 10.0f, TEXTALIGN_LEFT);
-	Label.VSplitLeft(45.0f, nullptr, &Button);
-	Button.HMargin(3, &Button);
+	Label.VSplitLeft(60.0f, nullptr, &Button);
+	Button.HMargin(3.0f, &Button);
 	static float s_CreditsBox = 0;
 	pEditor->DoEditBox(&s_CreditsBox, &Button, pEditor->m_Map.m_MapInfo.m_aCreditsTmp, sizeof(pEditor->m_Map.m_MapInfo.m_aCreditsTmp), 10.0f, &s_CreditsBox);
 
 	// license box
 	View.HSplitTop(20.0f, &Label, &View);
 	pEditor->UI()->DoLabel(&Label, "License:", 10.0f, TEXTALIGN_LEFT);
-	Label.VSplitLeft(45.0f, nullptr, &Button);
-	Button.HMargin(3, &Button);
+	Label.VSplitLeft(60.0f, nullptr, &Button);
+	Button.HMargin(3.0f, &Button);
 	static float s_LicenseBox = 0;
 	pEditor->DoEditBox(&s_LicenseBox, &Button, pEditor->m_Map.m_MapInfo.m_aLicenseTmp, sizeof(pEditor->m_Map.m_MapInfo.m_aLicenseTmp), 10.0f, &s_LicenseBox);
 
 	// button bar
-	ButtonBar.VSplitLeft(30.0f, nullptr, &ButtonBar);
 	ButtonBar.VSplitLeft(110.0f, &Label, &ButtonBar);
-	static int s_CreateButton = 0;
-	if(pEditor->DoButton_Editor(&s_CreateButton, "Ok", 0, &Label, 0, nullptr))
+	static int s_CancelButton = 0;
+	if(pEditor->DoButton_Editor(&s_CancelButton, "Cancel", 0, &Label, 0, nullptr))
+		return 1;
+
+	ButtonBar.VSplitRight(110.0f, &ButtonBar, &Label);
+	static int s_ConfirmButton = 0;
+	if(pEditor->DoButton_Editor(&s_ConfirmButton, "Confirm", 0, &Label, 0, nullptr))
 	{
-		str_copy(pEditor->m_Map.m_MapInfo.m_aAuthor, pEditor->m_Map.m_MapInfo.m_aAuthorTmp, sizeof(pEditor->m_Map.m_MapInfo.m_aAuthor));
-		str_copy(pEditor->m_Map.m_MapInfo.m_aVersion, pEditor->m_Map.m_MapInfo.m_aVersionTmp, sizeof(pEditor->m_Map.m_MapInfo.m_aVersion));
-		str_copy(pEditor->m_Map.m_MapInfo.m_aCredits, pEditor->m_Map.m_MapInfo.m_aCreditsTmp, sizeof(pEditor->m_Map.m_MapInfo.m_aCredits));
-		str_copy(pEditor->m_Map.m_MapInfo.m_aLicense, pEditor->m_Map.m_MapInfo.m_aLicenseTmp, sizeof(pEditor->m_Map.m_MapInfo.m_aLicense));
+		str_copy(pEditor->m_Map.m_MapInfo.m_aAuthor, pEditor->m_Map.m_MapInfo.m_aAuthorTmp);
+		str_copy(pEditor->m_Map.m_MapInfo.m_aVersion, pEditor->m_Map.m_MapInfo.m_aVersionTmp);
+		str_copy(pEditor->m_Map.m_MapInfo.m_aCredits, pEditor->m_Map.m_MapInfo.m_aCreditsTmp);
+		str_copy(pEditor->m_Map.m_MapInfo.m_aLicense, pEditor->m_Map.m_MapInfo.m_aLicenseTmp);
 		return 1;
 	}
-
-	ButtonBar.VSplitRight(30.0f, &ButtonBar, nullptr);
-	ButtonBar.VSplitRight(110.0f, &ButtonBar, &Label);
-	static int s_AbortButton = 0;
-	if(pEditor->DoButton_Editor(&s_AbortButton, "Abort", 0, &Label, 0, nullptr))
-		return 1;
 
 	return 0;
 }

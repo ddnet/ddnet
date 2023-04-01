@@ -5090,12 +5090,14 @@ void CEditor::RenderFileDialog()
 		ButtonBar.VSplitLeft(70.0f, &Button, &ButtonBar);
 		if(DoButton_Editor(&s_MapInfoButton, "Map details", 0, &Button, 0, nullptr))
 		{
-			str_copy(m_Map.m_MapInfo.m_aAuthorTmp, m_Map.m_MapInfo.m_aAuthor, sizeof(m_Map.m_MapInfo.m_aAuthorTmp));
-			str_copy(m_Map.m_MapInfo.m_aVersionTmp, m_Map.m_MapInfo.m_aVersion, sizeof(m_Map.m_MapInfo.m_aVersionTmp));
-			str_copy(m_Map.m_MapInfo.m_aCreditsTmp, m_Map.m_MapInfo.m_aCredits, sizeof(m_Map.m_MapInfo.m_aCreditsTmp));
-			str_copy(m_Map.m_MapInfo.m_aLicenseTmp, m_Map.m_MapInfo.m_aLicense, sizeof(m_Map.m_MapInfo.m_aLicenseTmp));
-			static int s_MapInfoPopupID = 0;
-			UiInvokePopupMenu(&s_MapInfoPopupID, 0, Width / 2.0f - 200.0f, Height / 2.0f - 100.0f, 400.0f, 200.0f, PopupMapInfo);
+			str_copy(m_Map.m_MapInfo.m_aAuthorTmp, m_Map.m_MapInfo.m_aAuthor);
+			str_copy(m_Map.m_MapInfo.m_aVersionTmp, m_Map.m_MapInfo.m_aVersion);
+			str_copy(m_Map.m_MapInfo.m_aCreditsTmp, m_Map.m_MapInfo.m_aCredits);
+			str_copy(m_Map.m_MapInfo.m_aLicenseTmp, m_Map.m_MapInfo.m_aLicense);
+			static int s_PopupMapInfoId;
+			constexpr float PopupWidth = 400.0f;
+			constexpr float PopupHeight = 170.0f;
+			UiInvokePopupMenu(&s_PopupMapInfoId, 0, Width / 2.0f - PopupWidth / 2.0f, Height / 2.0f - PopupHeight / 2.0f, PopupWidth, PopupHeight, PopupMapInfo);
 			UI()->SetActiveItem(nullptr);
 		}
 	}
