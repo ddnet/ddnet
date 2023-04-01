@@ -31,6 +31,7 @@
 # 2022-10-24 cheeser0613
 # 2022-12-11 cheeser0613
 # 2023-01-11 cheeser0613
+# 2023-04-01 cheeser0613
 ##### /authors #####
 
 ##### translated strings #####
@@ -1716,16 +1717,16 @@ Open the directory to add custom assets
 
 [Graphics error]
 Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
-== 
+== 无法初始化当前配置的图形后端，请检查此电脑是否已安装集成显卡的驱动程序。
 
 Could not save downloaded map. Try manually deleting this file: %s
-== 
+== 地图下载失败，请尝试手动删除此文件：%s
 
 Search:
 == 
 
 Copy info
-== 
+== 复制服务器信息
 
 Create a random skin
-== 
+== 随机创造皮肤
