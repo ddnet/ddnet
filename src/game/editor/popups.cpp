@@ -1487,63 +1487,90 @@ int CEditor::PopupMapInfo(CEditor *pEditor, CUIRect View, void *pContext)
 
 int CEditor::PopupEvent(CEditor *pEditor, CUIRect View, void *pContext)
 {
-	CUIRect Label, ButtonBar;
-
-	// title
-	View.HSplitTop(10.0f, nullptr, &View);
-	View.HSplitTop(30.0f, &Label, &View);
+	const char *pTitle;
+	const char *pMessage;
 	if(pEditor->m_PopupEventType == POPEVENT_EXIT)
-		pEditor->UI()->DoLabel(&Label, "Exit the editor", 20.0f, TEXTALIGN_CENTER);
-	else if(pEditor->m_PopupEventType == POPEVENT_LOAD)
-		pEditor->UI()->DoLabel(&Label, "Load map", 20.0f, TEXTALIGN_CENTER);
+	{
+		pTitle = "Exit the editor";
+		pMessage = "The map contains unsaved data, you might want to save it before you exit the editor.\n\nContinue anyway?";
+	}
+	else if(pEditor->m_PopupEventType == POPEVENT_LOAD || pEditor->m_PopupEventType == POPEVENT_LOADCURRENT)
+	{
+		pTitle = "Load map";
+		pMessage = "The map contains unsaved data, you might want to save it before you load a new map.\n\nContinue anyway?";
+	}
 	else if(pEditor->m_PopupEventType == POPEVENT_NEW)
-		pEditor->UI()->DoLabel(&Label, "New map", 20.0f, TEXTALIGN_CENTER);
+	{
+		pTitle = "New map";
+		pMessage = "The map contains unsaved data, you might want to save it before you create a new map.\n\nContinue anyway?";
+	}
 	else if(pEditor->m_PopupEventType == POPEVENT_SAVE)
-		pEditor->UI()->DoLabel(&Label, "Save map", 20.0f, TEXTALIGN_CENTER);
+	{
+		pTitle = "Save map";
+		pMessage = "The file already exists.\n\nDo you want to overwrite the map?";
+	}
 	else if(pEditor->m_PopupEventType == POPEVENT_LARGELAYER)
-		pEditor->UI()->DoLabel(&Label, "Large layer", 20.0f, TEXTALIGN_CENTER);
+	{
+		pTitle = "Large layer";
+		pMessage = "You are trying to set the height or width of a layer to more than 1000 tiles. This is actually possible, but only rarely necessary. It may cause the editor to work slower and will result in a larger file size as well as higher memory usage for client and server.";
+	}
 	else if(pEditor->m_PopupEventType == POPEVENT_PREVENTUNUSEDTILES)
-		pEditor->UI()->DoLabel(&Label, "Unused tiles disabled", 20.0f, TEXTALIGN_CENTER);
+	{
+		pTitle = "Unused tiles disabled";
+		pMessage = "Unused tiles can't be placed by default because they could get a use later and then destroy your map.\n\nActivate the 'Unused' switch to be able to place every tile.";
+	}
 	else if(pEditor->m_PopupEventType == POPEVENT_IMAGEDIV16)
-		pEditor->UI()->DoLabel(&Label, "Image width/height", 20.0f, TEXTALIGN_CENTER);
+	{
+		pTitle = "Image width/height";
+		pMessage = "The width or height of this image is not divisible by 16. This is required for images used in tile layers.";
+	}
 	else if(pEditor->m_PopupEventType == POPEVENT_IMAGE_MAX)
-		pEditor->UI()->DoLabel(&Label, "Max images", 20.0f, TEXTALIGN_CENTER);
+	{
+		pTitle = "Max images";
+		pMessage = "The client only allows a maximum of 64 images.";
+	}
 	else if(pEditor->m_PopupEventType == POPEVENT_PLACE_BORDER_TILES)
-		pEditor->UI()->DoLabel(&Label, "Place border tiles", 20.0f, TEXTALIGN_CENTER);
+	{
+		pTitle = "Place border tiles";
+		pMessage = "This is going to overwrite any existing tiles around the edges of the layer.\n\nContinue?";
+	}
+	else
+	{
+		dbg_assert(false, "m_PopupEventType invalid");
+		return 1;
+	}
 
-	View.HSplitBottom(10.0f, &View, nullptr);
+	CUIRect Label, ButtonBar, Button;
+
+	View.Margin(10.0f, &View);
 	View.HSplitBottom(20.0f, &View, &ButtonBar);
 
-	// notification text
-	View.HSplitTop(30.0f, nullptr, &View);
-	View.VMargin(40.0f, &View);
+	// title
+	View.HSplitTop(20.0f, &Label, &View);
+	pEditor->UI()->DoLabel(&Label, pTitle, 20.0f, TEXTALIGN_CENTER);
+	View.HSplitTop(10.0f, nullptr, &View);
+
+	// message
 	View.HSplitTop(20.0f, &Label, &View);
 	SLabelProperties Props;
-	Props.m_MaxWidth = Label.w - 10.0f;
-	if(pEditor->m_PopupEventType == POPEVENT_EXIT)
-		pEditor->UI()->DoLabel(&Label, "The map contains unsaved data, you might want to save it before you exit the editor.\nContinue anyway?", 10.0f, TEXTALIGN_LEFT, Props);
-	else if((pEditor->m_PopupEventType == POPEVENT_LOAD) || (pEditor->m_PopupEventType == POPEVENT_LOADCURRENT))
-		pEditor->UI()->DoLabel(&Label, "The map contains unsaved data, you might want to save it before you load a new map.\nContinue anyway?", 10.0f, TEXTALIGN_LEFT, Props);
-	else if(pEditor->m_PopupEventType == POPEVENT_NEW)
-		pEditor->UI()->DoLabel(&Label, "The map contains unsaved data, you might want to save it before you create a new map.\nContinue anyway?", 10.0f, TEXTALIGN_LEFT, Props);
-	else if(pEditor->m_PopupEventType == POPEVENT_SAVE)
-		pEditor->UI()->DoLabel(&Label, "The file already exists.\nDo you want to overwrite the map?", 10.0f, TEXTALIGN_LEFT);
-	else if(pEditor->m_PopupEventType == POPEVENT_LARGELAYER)
-		pEditor->UI()->DoLabel(&Label, "You are trying to set the height or width of a layer to more than 1000 tiles. This is actually possible, but only rarely necessary. It may cause the editor to work slower, larger file size as well as higher memory usage for client and server.", 10.0f, TEXTALIGN_LEFT, Props);
-	else if(pEditor->m_PopupEventType == POPEVENT_PREVENTUNUSEDTILES)
-		pEditor->UI()->DoLabel(&Label, "Unused tiles can't be placed by default because they could get a use later and then destroy your map.\nActivate the 'Unused' switch to be able to place every tile.", 10.0f, TEXTALIGN_LEFT, Props);
-	else if(pEditor->m_PopupEventType == POPEVENT_IMAGEDIV16)
-		pEditor->UI()->DoLabel(&Label, "The width or height of this image is not divisible by 16. This is required for images used in tile layers.", 10.0f, TEXTALIGN_LEFT, Props);
-	else if(pEditor->m_PopupEventType == POPEVENT_IMAGE_MAX)
-		pEditor->UI()->DoLabel(&Label, "The client only allows a maximum of 64 images.", 10.0f, TEXTALIGN_LEFT, Props);
-	else if(pEditor->m_PopupEventType == POPEVENT_PLACE_BORDER_TILES)
-		pEditor->UI()->DoLabel(&Label, "This is going to overwrite any existing tiles around the edges of the layer.\nContinue?", 10.0f, TEXTALIGN_LEFT, Props);
+	Props.m_MaxWidth = Label.w;
+	pEditor->UI()->DoLabel(&Label, pMessage, 10.0f, TEXTALIGN_LEFT, Props);
 
 	// button bar
-	ButtonBar.VSplitLeft(30.0f, nullptr, &ButtonBar);
-	ButtonBar.VSplitLeft(110.0f, &Label, &ButtonBar);
-	static int s_OkButton = 0;
-	if(pEditor->DoButton_Editor(&s_OkButton, "Ok", 0, &Label, 0, nullptr) || pEditor->Input()->KeyPress(KEY_RETURN) || pEditor->Input()->KeyPress(KEY_KP_ENTER))
+	ButtonBar.VSplitLeft(110.0f, &Button, &ButtonBar);
+	if(pEditor->m_PopupEventType != POPEVENT_LARGELAYER && pEditor->m_PopupEventType != POPEVENT_PREVENTUNUSEDTILES && pEditor->m_PopupEventType != POPEVENT_IMAGEDIV16 && pEditor->m_PopupEventType != POPEVENT_IMAGE_MAX)
+	{
+		static int s_CancelButton = 0;
+		if(pEditor->DoButton_Editor(&s_CancelButton, "Cancel", 0, &Button, 0, nullptr))
+		{
+			pEditor->m_PopupEventWasActivated = false;
+			return 1;
+		}
+	}
+
+	ButtonBar.VSplitRight(110.0f, &ButtonBar, &Button);
+	static int s_ConfirmButton = 0;
+	if(pEditor->DoButton_Editor(&s_ConfirmButton, "Confirm", 0, &Button, 0, nullptr) || pEditor->UI()->ConsumeHotkey(CUI::HOTKEY_ENTER))
 	{
 		if(pEditor->m_PopupEventType == POPEVENT_EXIT)
 		{
@@ -1568,20 +1595,11 @@ int CEditor::PopupEvent(CEditor *pEditor, CUIRect View, void *pContext)
 				return 0; // don't close this popup on error, because it would close the error popup instead
 		}
 		else if(pEditor->m_PopupEventType == POPEVENT_PLACE_BORDER_TILES)
+		{
 			pEditor->PlaceBorderTiles();
+		}
 		pEditor->m_PopupEventWasActivated = false;
 		return 1;
-	}
-	ButtonBar.VSplitRight(30.0f, &ButtonBar, nullptr);
-	ButtonBar.VSplitRight(110.0f, &ButtonBar, &Label);
-	if(pEditor->m_PopupEventType != POPEVENT_LARGELAYER && pEditor->m_PopupEventType != POPEVENT_PREVENTUNUSEDTILES && pEditor->m_PopupEventType != POPEVENT_IMAGEDIV16 && pEditor->m_PopupEventType != POPEVENT_IMAGE_MAX)
-	{
-		static int s_AbortButton = 0;
-		if(pEditor->DoButton_Editor(&s_AbortButton, "Abort", 0, &Label, 0, nullptr))
-		{
-			pEditor->m_PopupEventWasActivated = false;
-			return 1;
-		}
 	}
 
 	return 0;

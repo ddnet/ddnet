@@ -6352,8 +6352,10 @@ void CEditor::Render()
 
 	if(m_PopupEventActivated)
 	{
-		static int s_PopupID = 0;
-		UiInvokePopupMenu(&s_PopupID, 0, Width / 2.0f - 200.0f, Height / 2.0f - 100.0f, 400.0f, 200.0f, PopupEvent);
+		static int s_PopupEventId;
+		constexpr float PopupWidth = 400.0f;
+		constexpr float PopupHeight = 150.0f;
+		UiInvokePopupMenu(&s_PopupEventId, 0, Width / 2.0f - PopupWidth / 2.0f, Height / 2.0f - PopupHeight / 2.0f, PopupWidth, PopupHeight, PopupEvent);
 		m_PopupEventActivated = false;
 		m_PopupEventWasActivated = true;
 	}
