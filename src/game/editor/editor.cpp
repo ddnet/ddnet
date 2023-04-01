@@ -1414,8 +1414,8 @@ void CEditor::DoSoundSource(CSoundSource *pSource, int Index)
 			{
 				if(m_vSelectedLayers.size() == 1)
 				{
-					static int s_SourcePopupID = 0;
-					UiInvokePopupMenu(&s_SourcePopupID, 0, UI()->MouseX(), UI()->MouseY(), 120, 200, PopupSource);
+					static int s_PopupSourceId;
+					UiInvokePopupMenu(&s_PopupSourceId, 0, UI()->MouseX(), UI()->MouseY(), 120, 200, PopupSource);
 					m_LockMouse = false;
 				}
 				s_Operation = OP_NONE;

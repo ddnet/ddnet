@@ -935,14 +935,14 @@ int CEditor::PopupSource(CEditor *pEditor, CUIRect View, void *pContext)
 	CUIRect ShapeButton;
 	View.HSplitBottom(3.0f, &View, nullptr);
 	View.HSplitBottom(12.0f, &View, &ShapeButton);
-	static int s_ShapeTypeButton = 0;
 
-	static const char *s_apShapeNames[] = {
+	static const char *s_apShapeNames[CSoundShape::NUM_SHAPES] = {
 		"Rectangle",
 		"Circle"};
 
 	pSource->m_Shape.m_Type = pSource->m_Shape.m_Type % CSoundShape::NUM_SHAPES; // prevent out of array errors
 
+	static int s_ShapeTypeButton = 0;
 	if(pEditor->DoButton_Editor(&s_ShapeTypeButton, s_apShapeNames[pSource->m_Shape.m_Type], 0, &ShapeButton, 0, "Change shape"))
 	{
 		pSource->m_Shape.m_Type = (pSource->m_Shape.m_Type + 1) % CSoundShape::NUM_SHAPES;
@@ -990,7 +990,6 @@ int CEditor::PopupSource(CEditor *pEditor, CUIRect View, void *pContext)
 		{"Pos. TO", pSource->m_PosEnvOffset, PROPTYPE_INT_SCROLL, -1000000, 1000000},
 		{"Sound Env", pSource->m_SoundEnv + 1, PROPTYPE_ENVELOPE, 0, 0},
 		{"Sound. TO", pSource->m_SoundEnvOffset, PROPTYPE_INT_SCROLL, -1000000, 1000000},
-
 		{nullptr},
 	};
 
@@ -998,52 +997,68 @@ int CEditor::PopupSource(CEditor *pEditor, CUIRect View, void *pContext)
 	int NewVal = 0;
 	int Prop = pEditor->DoProperties(&View, aProps, s_aIds, &NewVal);
 	if(Prop != -1)
+	{
 		pEditor->m_Map.m_Modified = true;
+	}
 
 	if(Prop == PROP_POS_X)
+	{
 		pSource->m_Position.x = NewVal * 1000;
-	if(Prop == PROP_POS_Y)
+	}
+	else if(Prop == PROP_POS_Y)
+	{
 		pSource->m_Position.y = NewVal * 1000;
-	if(Prop == PROP_LOOP)
+	}
+	else if(Prop == PROP_LOOP)
+	{
 		pSource->m_Loop = NewVal;
-	if(Prop == PROP_PAN)
+	}
+	else if(Prop == PROP_PAN)
+	{
 		pSource->m_Pan = NewVal;
-	if(Prop == PROP_TIME_DELAY)
+	}
+	else if(Prop == PROP_TIME_DELAY)
+	{
 		pSource->m_TimeDelay = NewVal;
-	if(Prop == PROP_FALLOFF)
+	}
+	else if(Prop == PROP_FALLOFF)
+	{
 		pSource->m_Falloff = NewVal;
-	if(Prop == PROP_POS_ENV)
+	}
+	else if(Prop == PROP_POS_ENV)
 	{
 		int Index = clamp(NewVal - 1, -1, (int)pEditor->m_Map.m_vpEnvelopes.size() - 1);
-		int StepDirection = Index < pSource->m_PosEnv ? -1 : 1;
-		if(StepDirection != 0)
+		const int StepDirection = Index < pSource->m_PosEnv ? -1 : 1;
+		for(; Index >= -1 && Index < (int)pEditor->m_Map.m_vpEnvelopes.size(); Index += StepDirection)
 		{
-			for(; Index >= -1 && Index < (int)pEditor->m_Map.m_vpEnvelopes.size(); Index += StepDirection)
-				if(Index == -1 || pEditor->m_Map.m_vpEnvelopes[Index]->m_Channels == 3)
-				{
-					pSource->m_PosEnv = Index;
-					break;
-				}
+			if(Index == -1 || pEditor->m_Map.m_vpEnvelopes[Index]->m_Channels == 3)
+			{
+				pSource->m_PosEnv = Index;
+				break;
+			}
 		}
 	}
-	if(Prop == PROP_POS_ENV_OFFSET)
+	else if(Prop == PROP_POS_ENV_OFFSET)
+	{
 		pSource->m_PosEnvOffset = NewVal;
-	if(Prop == PROP_SOUND_ENV)
+	}
+	else if(Prop == PROP_SOUND_ENV)
 	{
 		int Index = clamp(NewVal - 1, -1, (int)pEditor->m_Map.m_vpEnvelopes.size() - 1);
-		int StepDirection = Index < pSource->m_SoundEnv ? -1 : 1;
-		if(StepDirection != 0)
+		const int StepDirection = Index < pSource->m_SoundEnv ? -1 : 1;
+		for(; Index >= -1 && Index < (int)pEditor->m_Map.m_vpEnvelopes.size(); Index += StepDirection)
 		{
-			for(; Index >= -1 && Index < (int)pEditor->m_Map.m_vpEnvelopes.size(); Index += StepDirection)
-				if(Index == -1 || pEditor->m_Map.m_vpEnvelopes[Index]->m_Channels == 1)
-				{
-					pSource->m_SoundEnv = Index;
-					break;
-				}
+			if(Index == -1 || pEditor->m_Map.m_vpEnvelopes[Index]->m_Channels == 1)
+			{
+				pSource->m_SoundEnv = Index;
+				break;
+			}
 		}
 	}
-	if(Prop == PROP_SOUND_ENV_OFFSET)
+	else if(Prop == PROP_SOUND_ENV_OFFSET)
+	{
 		pSource->m_SoundEnvOffset = NewVal;
+	}
 
 	// source shape properties
 	switch(pSource->m_Shape.m_Type)
@@ -1058,19 +1073,21 @@ int CEditor::PopupSource(CEditor *pEditor, CUIRect View, void *pContext)
 
 		CProperty aCircleProps[] = {
 			{"Radius", pSource->m_Shape.m_Circle.m_Radius, PROPTYPE_INT_SCROLL, 0, 1000000},
-
 			{nullptr},
 		};
 
 		static int s_aCircleIds[NUM_CIRCLE_PROPS] = {0};
-
 		NewVal = 0;
 		Prop = pEditor->DoProperties(&View, aCircleProps, s_aCircleIds, &NewVal);
 		if(Prop != -1)
+		{
 			pEditor->m_Map.m_Modified = true;
+		}
 
 		if(Prop == PROP_CIRCLE_RADIUS)
+		{
 			pSource->m_Shape.m_Circle.m_Radius = NewVal;
+		}
 
 		break;
 	}
@@ -1087,21 +1104,25 @@ int CEditor::PopupSource(CEditor *pEditor, CUIRect View, void *pContext)
 		CProperty aRectangleProps[] = {
 			{"Width", pSource->m_Shape.m_Rectangle.m_Width / 1024, PROPTYPE_INT_SCROLL, 0, 1000000},
 			{"Height", pSource->m_Shape.m_Rectangle.m_Height / 1024, PROPTYPE_INT_SCROLL, 0, 1000000},
-
 			{nullptr},
 		};
 
 		static int s_aRectangleIds[NUM_RECTANGLE_PROPS] = {0};
-
 		NewVal = 0;
 		Prop = pEditor->DoProperties(&View, aRectangleProps, s_aRectangleIds, &NewVal);
 		if(Prop != -1)
+		{
 			pEditor->m_Map.m_Modified = true;
+		}
 
 		if(Prop == PROP_RECTANGLE_WIDTH)
+		{
 			pSource->m_Shape.m_Rectangle.m_Width = NewVal * 1024;
-		if(Prop == PROP_RECTANGLE_HEIGHT)
+		}
+		else if(Prop == PROP_RECTANGLE_HEIGHT)
+		{
 			pSource->m_Shape.m_Rectangle.m_Height = NewVal * 1024;
+		}
 
 		break;
 	}
