@@ -881,8 +881,6 @@ public:
 		m_AllowPlaceUnusedTiles = 0;
 		m_BrushDrawDestructive = true;
 		m_ShowTileHexInfo = false;
-		m_GotoX = 0;
-		m_GotoY = 0;
 
 		m_Mentions = 0;
 	}
@@ -1440,9 +1438,6 @@ public:
 
 	unsigned char m_SwitchNum;
 	unsigned char m_SwitchDelay;
-
-	int m_GotoX;
-	int m_GotoY;
 };
 
 // make sure to inline this function
