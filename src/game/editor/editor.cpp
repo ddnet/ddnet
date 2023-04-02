@@ -4958,7 +4958,6 @@ void CEditor::RenderFileDialog()
 	static int s_ShowDirectoryButton = 0;
 	static int s_DeleteButton = 0;
 	static int s_NewFolderButton = 0;
-	static int s_MapInfoButton = 0;
 
 	CUIRect Button;
 	ButtonBar.VSplitRight(50.0f, &ButtonBar, &Button);
@@ -5080,21 +5079,6 @@ void CEditor::RenderFileDialog()
 			constexpr float PopupWidth = 400.0f;
 			constexpr float PopupHeight = 110.0f;
 			UiInvokePopupMenu(&s_PopupNewFolderId, 0, Width / 2.0f - PopupWidth / 2.0f, Height / 2.0f - PopupHeight / 2.0f, PopupWidth, PopupHeight, PopupNewFolder);
-			UI()->SetActiveItem(nullptr);
-		}
-
-		ButtonBar.VSplitLeft(40.0f, nullptr, &ButtonBar);
-		ButtonBar.VSplitLeft(70.0f, &Button, &ButtonBar);
-		if(DoButton_Editor(&s_MapInfoButton, "Map details", 0, &Button, 0, nullptr))
-		{
-			str_copy(m_Map.m_MapInfo.m_aAuthorTmp, m_Map.m_MapInfo.m_aAuthor);
-			str_copy(m_Map.m_MapInfo.m_aVersionTmp, m_Map.m_MapInfo.m_aVersion);
-			str_copy(m_Map.m_MapInfo.m_aCreditsTmp, m_Map.m_MapInfo.m_aCredits);
-			str_copy(m_Map.m_MapInfo.m_aLicenseTmp, m_Map.m_MapInfo.m_aLicense);
-			static int s_PopupMapInfoId;
-			constexpr float PopupWidth = 400.0f;
-			constexpr float PopupHeight = 170.0f;
-			UiInvokePopupMenu(&s_PopupMapInfoId, 0, Width / 2.0f - PopupWidth / 2.0f, Height / 2.0f - PopupHeight / 2.0f, PopupWidth, PopupHeight, PopupMapInfo);
 			UI()->SetActiveItem(nullptr);
 		}
 	}
@@ -6031,7 +6015,7 @@ void CEditor::RenderMenubar(CUIRect MenuBar)
 	static int s_FileButton = 0;
 	MenuBar.VSplitLeft(60.0f, &FileButton, &MenuBar);
 	if(DoButton_Menu(&s_FileButton, "File", 0, &FileButton, 0, nullptr))
-		UiInvokePopupMenu(&s_FileButton, 1, FileButton.x, FileButton.y + FileButton.h - 1.0f, 120.0f, 152.0f, PopupMenuFile, this);
+		UiInvokePopupMenu(&s_FileButton, 1, FileButton.x, FileButton.y + FileButton.h - 1.0f, 120.0f, 174.0f, PopupMenuFile, this);
 
 	MenuBar.VSplitLeft(5.0f, nullptr, &MenuBar);
 

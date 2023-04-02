@@ -128,6 +128,7 @@ int CEditor::PopupMenuFile(CEditor *pEditor, CUIRect View, void *pContext)
 	static int s_OpenButton = 0;
 	static int s_OpenCurrentMapButton = 0;
 	static int s_AppendButton = 0;
+	static int s_MapInfoButton = 0;
 	static int s_ExitButton = 0;
 
 	CUIRect Slot;
@@ -214,6 +215,22 @@ int CEditor::PopupMenuFile(CEditor *pEditor, CUIRect View, void *pContext)
 	{
 		pEditor->InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_MAP, "Save map", "Save", "maps", "", pEditor->CallbackSaveCopyMap, pEditor);
 		return 1;
+	}
+
+	View.HSplitTop(10.0f, nullptr, &View);
+	View.HSplitTop(12.0f, &Slot, &View);
+	if(pEditor->DoButton_MenuItem(&s_MapInfoButton, "Map details", 0, &Slot, 0, "Adjust the map details of the current map"))
+	{
+		const CUIRect *pScreen = pEditor->UI()->Screen();
+		str_copy(pEditor->m_Map.m_MapInfo.m_aAuthorTmp, pEditor->m_Map.m_MapInfo.m_aAuthor);
+		str_copy(pEditor->m_Map.m_MapInfo.m_aVersionTmp, pEditor->m_Map.m_MapInfo.m_aVersion);
+		str_copy(pEditor->m_Map.m_MapInfo.m_aCreditsTmp, pEditor->m_Map.m_MapInfo.m_aCredits);
+		str_copy(pEditor->m_Map.m_MapInfo.m_aLicenseTmp, pEditor->m_Map.m_MapInfo.m_aLicense);
+		static int s_PopupMapInfoId;
+		constexpr float PopupWidth = 400.0f;
+		constexpr float PopupHeight = 170.0f;
+		pEditor->UiInvokePopupMenu(&s_PopupMapInfoId, 0, pScreen->w / 2.0f - PopupWidth / 2.0f, pScreen->h / 2.0f - PopupHeight / 2.0f, PopupWidth, PopupHeight, PopupMapInfo);
+		pEditor->UI()->SetActiveItem(nullptr);
 	}
 
 	View.HSplitTop(10.0f, nullptr, &View);
