@@ -1723,10 +1723,10 @@ int CEditor::PopupSelectSound(CEditor *pEditor, CUIRect View, void *pContext)
 
 void CEditor::PopupSelectSoundInvoke(int Current, float x, float y)
 {
-	static int s_SelectSoundPopupId = 0;
+	static int s_PopupSelectSoundId;
 	g_SelectSoundSelected = -100;
 	g_SelectSoundCurrent = Current;
-	UiInvokePopupMenu(&s_SelectSoundPopupId, 0, x, y, 150, 300, PopupSelectSound);
+	UiInvokePopupMenu(&s_PopupSelectSoundId, 0, x, y, 150, 300, PopupSelectSound);
 }
 
 int CEditor::PopupSelectSoundResult()
