@@ -688,6 +688,7 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View, void *pContext)
 {
 	std::vector<CQuad *> vpQuads = pEditor->GetSelectedQuads();
 	CQuad *pCurrentQuad = vpQuads[pEditor->m_SelectedQuadIndex];
+	CLayerQuads *pLayer = static_cast<CLayerQuads *>(pEditor->GetSelectedLayerType(0, LAYERTYPE_QUADS));
 
 	CUIRect Button;
 
@@ -696,7 +697,6 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View, void *pContext)
 	static int s_DeleteButton = 0;
 	if(pEditor->DoButton_Editor(&s_DeleteButton, "Delete", 0, &Button, 0, "Deletes the current quad"))
 	{
-		CLayerQuads *pLayer = (CLayerQuads *)pEditor->GetSelectedLayerType(0, LAYERTYPE_QUADS);
 		if(pLayer)
 		{
 			pEditor->m_Map.m_Modified = true;
@@ -706,9 +706,8 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View, void *pContext)
 	}
 
 	// aspect ratio button
-	View.HSplitBottom(10.0f, &View, &Button);
+	View.HSplitBottom(10.0f, &View, nullptr);
 	View.HSplitBottom(12.0f, &View, &Button);
-	CLayerQuads *pLayer = (CLayerQuads *)pEditor->GetSelectedLayerType(0, LAYERTYPE_QUADS);
 	if(pLayer && pLayer->m_Image >= 0 && (size_t)pLayer->m_Image < pEditor->m_Map.m_vpImages.size())
 	{
 		static int s_AspectRatioButton = 0;
@@ -730,7 +729,7 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View, void *pContext)
 						Right = pQuad->m_aPoints[k].x;
 				}
 
-				int Height = (Right - Left) * pEditor->m_Map.m_vpImages[pLayer->m_Image]->m_Height / pEditor->m_Map.m_vpImages[pLayer->m_Image]->m_Width;
+				const int Height = (Right - Left) * pEditor->m_Map.m_vpImages[pLayer->m_Image]->m_Height / pEditor->m_Map.m_vpImages[pLayer->m_Image]->m_Width;
 
 				pQuad->m_aPoints[0].x = Left;
 				pQuad->m_aPoints[0].y = Top;
@@ -747,7 +746,7 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View, void *pContext)
 	}
 
 	// align button
-	View.HSplitBottom(6.0f, &View, &Button);
+	View.HSplitBottom(6.0f, &View, nullptr);
 	View.HSplitBottom(12.0f, &View, &Button);
 	static int s_AlignButton = 0;
 	if(pEditor->DoButton_Editor(&s_AlignButton, "Align", 0, &Button, 0, "Aligns coordinates of the quad points"))
@@ -765,7 +764,7 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View, void *pContext)
 	}
 
 	// square button
-	View.HSplitBottom(6.0f, &View, &Button);
+	View.HSplitBottom(6.0f, &View, nullptr);
 	View.HSplitBottom(12.0f, &View, &Button);
 	static int s_Button = 0;
 	if(pEditor->DoButton_Editor(&s_Button, "Square", 0, &Button, 0, "Squares the current quad"))
@@ -803,7 +802,7 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View, void *pContext)
 	}
 
 	// slice button
-	View.HSplitBottom(6.0f, &View, &Button);
+	View.HSplitBottom(6.0f, &View, nullptr);
 	View.HSplitBottom(12.0f, &View, &Button);
 	static int s_SliceButton = 0;
 	if(pEditor->DoButton_Editor(&s_SliceButton, "Slice", 0, &Button, 0, "Enables quad knife mode"))
@@ -825,7 +824,7 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View, void *pContext)
 		NUM_PROPS,
 	};
 
-	int NumQuads = pLayer ? (int)pLayer->m_vQuads.size() : 0;
+	const int NumQuads = pLayer ? (int)pLayer->m_vQuads.size() : 0;
 	CProperty aProps[] = {
 		{"Order", pEditor->m_vSelectedQuads[pEditor->m_SelectedQuadIndex], PROPTYPE_INT_STEP, 0, NumQuads},
 		{"Pos X", fx2i(pCurrentQuad->m_aPoints[4].x), PROPTYPE_INT_SCROLL, -1000000, 1000000},
@@ -834,7 +833,6 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View, void *pContext)
 		{"Pos. TO", pCurrentQuad->m_PosEnvOffset, PROPTYPE_INT_SCROLL, -1000000, 1000000},
 		{"Color Env", pCurrentQuad->m_ColorEnv + 1, PROPTYPE_ENVELOPE, 0, 0},
 		{"Color TO", pCurrentQuad->m_ColorEnvOffset, PROPTYPE_INT_SCROLL, -1000000, 1000000},
-
 		{nullptr},
 	};
 
@@ -842,14 +840,16 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View, void *pContext)
 	int NewVal = 0;
 	int Prop = pEditor->DoProperties(&View, aProps, s_aIds, &NewVal);
 	if(Prop != -1)
+	{
 		pEditor->m_Map.m_Modified = true;
+	}
 
-	float OffsetX = i2fx(NewVal) - pCurrentQuad->m_aPoints[4].x;
-	float OffsetY = i2fx(NewVal) - pCurrentQuad->m_aPoints[4].y;
+	const float OffsetX = i2fx(NewVal) - pCurrentQuad->m_aPoints[4].x;
+	const float OffsetY = i2fx(NewVal) - pCurrentQuad->m_aPoints[4].y;
 
 	if(Prop == PROP_ORDER && pLayer)
 	{
-		int QuadIndex = pLayer->SwapQuads(pEditor->m_vSelectedQuads[pEditor->m_SelectedQuadIndex], NewVal);
+		const int QuadIndex = pLayer->SwapQuads(pEditor->m_vSelectedQuads[pEditor->m_SelectedQuadIndex], NewVal);
 		pEditor->m_vSelectedQuads[pEditor->m_SelectedQuadIndex] = QuadIndex;
 	}
 
@@ -860,43 +860,51 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View, void *pContext)
 			for(auto &Point : pQuad->m_aPoints)
 				Point.x += OffsetX;
 		}
-		if(Prop == PROP_POS_Y)
+		else if(Prop == PROP_POS_Y)
 		{
 			for(auto &Point : pQuad->m_aPoints)
 				Point.y += OffsetY;
 		}
-		if(Prop == PROP_POS_ENV)
+		else if(Prop == PROP_POS_ENV)
 		{
 			int Index = clamp(NewVal - 1, -1, (int)pEditor->m_Map.m_vpEnvelopes.size() - 1);
 			int StepDirection = Index < pQuad->m_PosEnv ? -1 : 1;
 			if(StepDirection != 0)
 			{
 				for(; Index >= -1 && Index < (int)pEditor->m_Map.m_vpEnvelopes.size(); Index += StepDirection)
+				{
 					if(Index == -1 || pEditor->m_Map.m_vpEnvelopes[Index]->m_Channels == 3)
 					{
 						pQuad->m_PosEnv = Index;
 						break;
 					}
+				}
 			}
 		}
-		if(Prop == PROP_POS_ENV_OFFSET)
+		else if(Prop == PROP_POS_ENV_OFFSET)
+		{
 			pQuad->m_PosEnvOffset = NewVal;
-		if(Prop == PROP_COLOR_ENV)
+		}
+		else if(Prop == PROP_COLOR_ENV)
 		{
 			int Index = clamp(NewVal - 1, -1, (int)pEditor->m_Map.m_vpEnvelopes.size() - 1);
 			int StepDirection = Index < pQuad->m_ColorEnv ? -1 : 1;
 			if(StepDirection != 0)
 			{
 				for(; Index >= -1 && Index < (int)pEditor->m_Map.m_vpEnvelopes.size(); Index += StepDirection)
+				{
 					if(Index == -1 || pEditor->m_Map.m_vpEnvelopes[Index]->m_Channels == 4)
 					{
 						pQuad->m_ColorEnv = Index;
 						break;
 					}
+				}
 			}
 		}
-		if(Prop == PROP_COLOR_ENV_OFFSET)
+		else if(Prop == PROP_COLOR_ENV_OFFSET)
+		{
 			pQuad->m_ColorEnvOffset = NewVal;
+		}
 	}
 
 	return 0;

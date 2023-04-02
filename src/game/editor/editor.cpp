@@ -1565,8 +1565,8 @@ void CEditor::DoQuad(CQuad *pQuad, int Index)
 				{
 					m_SelectedQuadIndex = FindSelectedQuadIndex(Index);
 
-					static int s_QuadPopupID = 0;
-					UiInvokePopupMenu(&s_QuadPopupID, 0, UI()->MouseX(), UI()->MouseY(), 120, 198, PopupQuad);
+					static int s_PopupQuadId;
+					UiInvokePopupMenu(&s_PopupQuadId, 0, UI()->MouseX(), UI()->MouseY(), 120, 198, PopupQuad);
 					m_LockMouse = false;
 				}
 				s_Operation = OP_NONE;
