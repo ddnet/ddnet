@@ -4951,6 +4951,8 @@ void CEditor::RenderFileDialog()
 		m_PreviewImageState = PREVIEWIMAGE_UNLOADED;
 	}
 
+	const float ButtonSpacing = ButtonBar.w > 600.0f ? 40.0f : 10.0f;
+
 	// the buttons
 	static int s_OkButton = 0;
 	static int s_CancelButton = 0;
@@ -5013,17 +5015,17 @@ void CEditor::RenderFileDialog()
 		}
 	}
 
-	ButtonBar.VSplitRight(40.0f, &ButtonBar, &Button);
+	ButtonBar.VSplitRight(ButtonSpacing, &ButtonBar, nullptr);
 	ButtonBar.VSplitRight(50.0f, &ButtonBar, &Button);
 	if(DoButton_Editor(&s_CancelButton, "Cancel", 0, &Button, 0, nullptr) || (s_ListBoxUsed && UI()->ConsumeHotkey(CUI::HOTKEY_ESCAPE)))
 		m_Dialog = DIALOG_NONE;
 
-	ButtonBar.VSplitRight(40.0f, &ButtonBar, &Button);
+	ButtonBar.VSplitRight(ButtonSpacing, &ButtonBar, nullptr);
 	ButtonBar.VSplitRight(50.0f, &ButtonBar, &Button);
 	if(DoButton_Editor(&s_RefreshButton, "Refresh", 0, &Button, 0, nullptr) || (s_ListBoxUsed && (Input()->KeyIsPressed(KEY_F5) || (Input()->ModifierIsPressed() && Input()->KeyIsPressed(KEY_R)))))
 		FilelistPopulate(m_FileDialogLastPopulatedStorageType, true);
 
-	ButtonBar.VSplitRight(40.0f, &ButtonBar, nullptr);
+	ButtonBar.VSplitRight(ButtonSpacing, &ButtonBar, nullptr);
 	ButtonBar.VSplitRight(90.0f, &ButtonBar, &Button);
 	if(DoButton_Editor(&s_ShowDirectoryButton, "Show directory", 0, &Button, 0, "Open the current directory in the file browser"))
 	{
@@ -5033,7 +5035,7 @@ void CEditor::RenderFileDialog()
 		}
 	}
 
-	ButtonBar.VSplitRight(40.0f, &ButtonBar, &Button);
+	ButtonBar.VSplitRight(ButtonSpacing, &ButtonBar, nullptr);
 	ButtonBar.VSplitRight(50.0f, &ButtonBar, &Button);
 	static SConfirmPopupContext s_ConfirmDeletePopupContext;
 	if(m_FilesSelectedIndex >= 0 && m_vpFilteredFileList[m_FilesSelectedIndex]->m_StorageType == IStorage::TYPE_SAVE && !m_vpFilteredFileList[m_FilesSelectedIndex]->m_IsLink && str_comp(m_vpFilteredFileList[m_FilesSelectedIndex]->m_aFilename, "..") != 0)
