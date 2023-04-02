@@ -1828,13 +1828,13 @@ int CEditor::PopupSelectConfigAutoMap(CEditor *pEditor, CUIRect View, void *pCon
 
 void CEditor::PopupSelectConfigAutoMapInvoke(int Current, float x, float y)
 {
-	static int s_AutoMapConfigSelectID = 0;
+	static int s_PopupSelectConfigAutoMapId;
 	s_AutoMapConfigSelected = -100;
 	s_AutoMapConfigCurrent = Current;
 	CLayerTiles *pLayer = static_cast<CLayerTiles *>(GetSelectedLayer(0));
 	const int ItemCount = minimum(m_Map.m_vpImages[pLayer->m_Image]->m_AutoMapper.ConfigNamesNum(), 10);
 	// Width for buttons is 120, 15 is the scrollbar width, 2 is the margin between both.
-	UiInvokePopupMenu(&s_AutoMapConfigSelectID, 0, x, y, 120.0f + 15.0f + 2.0f, 26.0f + 14.0f * ItemCount, PopupSelectConfigAutoMap);
+	UiInvokePopupMenu(&s_PopupSelectConfigAutoMapId, 0, x, y, 120.0f + 15.0f + 2.0f, 26.0f + 14.0f * ItemCount, PopupSelectConfigAutoMap);
 }
 
 int CEditor::PopupSelectConfigAutoMapResult()
