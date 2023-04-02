@@ -1670,10 +1670,10 @@ int CEditor::PopupSelectImage(CEditor *pEditor, CUIRect View, void *pContext)
 
 void CEditor::PopupSelectImageInvoke(int Current, float x, float y)
 {
-	static int s_SelectImagePopupId = 0;
+	static int s_PopupSelectImageId;
 	g_SelectImageSelected = -100;
 	g_SelectImageCurrent = Current;
-	UiInvokePopupMenu(&s_SelectImagePopupId, 0, x, y, 450, 300, PopupSelectImage);
+	UiInvokePopupMenu(&s_PopupSelectImageId, 0, x, y, 450, 300, PopupSelectImage);
 }
 
 int CEditor::PopupSelectImageResult()
