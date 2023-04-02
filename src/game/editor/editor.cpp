@@ -4565,9 +4565,11 @@ void CEditor::RenderSounds(CUIRect ToolBox)
 		{
 			m_SelectedSound = i;
 
-			static int s_PopupSoundID = 0;
 			if(Result == 2)
-				UiInvokePopupMenu(&s_PopupSoundID, 0, UI()->MouseX(), UI()->MouseY(), 120, 56, PopupSound);
+			{
+				static int s_PopupSoundId;
+				UiInvokePopupMenu(&s_PopupSoundId, 0, UI()->MouseX(), UI()->MouseY(), 120, 56, PopupSound);
+			}
 		}
 	}
 
