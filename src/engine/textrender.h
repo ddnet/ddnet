@@ -45,6 +45,67 @@ enum
 	TEXT_FONT_ICON_FONT = 0,
 };
 
+namespace FontIcons {
+// Each font icon is named according to its official name in Font Awesome
+static const char *FONT_ICON_LOCK = "\xEF\x80\xA3";
+static const char *FONT_ICON_MAGNIFYING_GLASS = "\xEF\x80\x82";
+static const char *FONT_ICON_HEART = "\xEF\x80\x84";
+static const char *FONT_ICON_STAR = "\xEF\x80\x85";
+static const char *FONT_ICON_CHECK = "\xEF\x80\x8C";
+static const char *FONT_ICON_XMARK = "\xEF\x80\x8D";
+static const char *FONT_ICON_ARROW_ROTATE_LEFT = "\xEF\x83\xA2";
+static const char *FONT_ICON_ARROW_ROTATE_RIGHT = "\xEF\x80\x9E";
+static const char *FONT_ICON_CERTIFICATE = "\xEF\x82\xA3";
+static const char *FONT_ICON_FLAG_CHECKERED = "\xEF\x84\x9E";
+static const char *FONT_ICON_BAN = "\xEF\x81\x9E";
+static const char *FONT_ICON_CIRCLE_CHEVRON_DOWN = "\xEF\x84\xBA";
+
+static const char *FONT_ICON_HOUSE = "\xEF\x80\x95";
+static const char *FONT_ICON_NEWSPAPER = "\xEF\x87\xAA";
+static const char *FONT_ICON_POWER_OFF = "\xEF\x80\x91";
+static const char *FONT_ICON_GEAR = "\xEF\x80\x93";
+static const char *FONT_ICON_PEN_TO_SQUARE = "\xEF\x81\x84";
+static const char *FONT_ICON_CLAPPERBOARD = "\xEE\x84\xB1";
+static const char *FONT_ICON_EARTH_AMERICAS = "\xEF\x95\xBD";
+
+static const char *FONT_ICON_SLASH = "\xEF\x9C\x95";
+static const char *FONT_ICON_PLAY = "\xEF\x81\x8B";
+static const char *FONT_ICON_PAUSE = "\xEF\x81\x8C";
+static const char *FONT_ICON_STOP = "\xEF\x81\x8D";
+static const char *FONT_ICON_CHEVRON_LEFT = "\xEF\x81\x93";
+static const char *FONT_ICON_CHEVRON_RIGHT = "\xEF\x81\x94";
+static const char *FONT_ICON_BACKWARD = "\xEF\x81\x8A";
+static const char *FONT_ICON_FORWARD = "\xEF\x81\x8E";
+static const char *FONT_ICON_RIGHT_FROM_BRACKET = "\xEF\x8B\xB5";
+static const char *FONT_ICON_RIGHT_TO_BRACKET = "\xEF\x8B\xB6";
+static const char *FONT_ICON_ARROW_UP_RIGHT_FROM_SQUARE = "\xEF\x82\x8E";
+static const char *FONT_ICON_BACKWARD_STEP = "\xEF\x81\x88";
+static const char *FONT_ICON_FORWARD_STEP = "\xEF\x81\x91";
+static const char *FONT_ICON_KEYBOARD = "\xE2\x8C\xA8";
+
+static const char *FONT_ICON_FOLDER = "\xEF\x81\xBB";
+static const char *FONT_ICON_FOLDER_TREE = "\xEF\xA0\x82";
+static const char *FONT_ICON_FILM = "\xEF\x80\x88";
+static const char *FONT_ICON_MAP = "\xEF\x89\xB9";
+static const char *FONT_ICON_IMAGE = "\xEF\x80\xBE";
+static const char *FONT_ICON_MUSIC = "\xEF\x80\x81";
+static const char *FONT_ICON_FILE = "\xEF\x85\x9B";
+
+static const char *FONT_ICON_ARROWS_LEFT_RIGHT = "\xEF\x8C\xB7";
+static const char *FONT_ICON_ARROWS_UP_DOWN = "\xEF\x81\xBD";
+static const char *FONT_ICON_CIRCLE_PLAY = "\xEF\x85\x84";
+static const char *FONT_ICON_BORDER_ALL = "\xEF\xA1\x8C";
+static const char *FONT_ICON_EYE = "\xEF\x81\xAE";
+static const char *FONT_ICON_EYE_SLASH = "\xEF\x81\xB0";
+
+static const char *FONT_ICON_DICE_ONE = "\xEF\x94\xA5";
+static const char *FONT_ICON_DICE_TWO = "\xEF\x94\xA8";
+static const char *FONT_ICON_DICE_THREE = "\xEF\x94\xA7";
+static const char *FONT_ICON_DICE_FOUR = "\xEF\x94\xA4";
+static const char *FONT_ICON_DICE_FIVE = "\xEF\x94\xA3";
+static const char *FONT_ICON_DICE_SIX = "\xEF\x94\xA6";
+} // end namespace FontIcons
+
 class CFont;
 
 enum ETextCursorSelectionMode
