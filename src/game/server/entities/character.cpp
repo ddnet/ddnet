@@ -906,7 +906,7 @@ bool CCharacter::IncreaseArmor(int Amount)
 	return true;
 }
 
-void CCharacter::Die(int Killer, int Weapon, bool Single)
+void CCharacter::Die(int Killer, int Weapon, bool SendKillMsg)
 {
 	if(Server()->IsRecording(m_pPlayer->GetCID()))
 		Server()->StopRecord(m_pPlayer->GetCID());
@@ -919,26 +919,15 @@ void CCharacter::Die(int Killer, int Weapon, bool Single)
 		m_pPlayer->GetCID(), Server()->ClientName(m_pPlayer->GetCID()), Weapon, ModeSpecial);
 	GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
 
-	// send the kill messages
-	if(Single)
+	// send the kill message
+	if(SendKillMsg && (Team() == TEAM_FLOCK || Teams()->Count(Team()) == 1 || Teams()->GetTeamState(Team()) == CGameTeams::TEAMSTATE_OPEN))
 	{
-		if(Team() != TEAM_FLOCK && Teams()->TeamSize(Team()) > 1 && Teams()->GetTeamState(Team()) != 1)
-		{
-			CNetMsg_Sv_KillMsgPlus MsgPlus;
-			MsgPlus.m_Victim = m_pPlayer->GetCID();
-			MsgPlus.m_Weapon = Weapon;
-			MsgPlus.m_Size = Teams()->TeamSize(Team());
-			Server()->SendPackMsg(&MsgPlus, MSGFLAG_VITAL, -1);
-		}
-		else
-		{
-			CNetMsg_Sv_KillMsg Msg;
-			Msg.m_Killer = Killer;
-			Msg.m_Victim = m_pPlayer->GetCID();
-			Msg.m_Weapon = Weapon;
-			Msg.m_ModeSpecial = ModeSpecial;
-			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
-		}
+		CNetMsg_Sv_KillMsg Msg;
+		Msg.m_Killer = Killer;
+		Msg.m_Victim = m_pPlayer->GetCID();
+		Msg.m_Weapon = Weapon;
+		Msg.m_ModeSpecial = ModeSpecial;
+		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
 	}
 
 	// a nice sound

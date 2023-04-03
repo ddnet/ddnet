@@ -6,6 +6,7 @@
 #include <engine/textrender.h>
 #include <game/generated/client_data.h>
 #include <game/generated/protocol.h>
+#include <game/localization.h>
 
 #include "killmessages.h"
 #include <game/client/animstate.h>
@@ -135,9 +136,7 @@ void CKillMessages::OnMessage(int MsgType, void *pRawMsg)
 				}
 			}
 
-			char aBuf[8];
-			str_format(aBuf, sizeof(aBuf), "Team %d", Kill.m_VictimDDTeam);
-			str_copy(Kill.m_aVictimName, aBuf);
+			str_format(Kill.m_aVictimName, sizeof(Kill.m_aVictimName), Localize("Team %d"), Kill.m_VictimDDTeam);
 		}
 
 		Kill.m_KillerID = Kill.m_VictimID;
