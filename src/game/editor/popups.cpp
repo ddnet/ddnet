@@ -1283,17 +1283,17 @@ int CEditor::PopupImage(CEditor *pEditor, CUIRect View, void *pContext)
 	if(s_SelectionPopupContext.m_pSelection != nullptr)
 	{
 		const bool WasExternal = pImg->m_External;
-		ReplaceImage(s_SelectionPopupContext.m_pSelection->c_str(), IStorage::TYPE_ALL, pEditor);
+		const bool Result = pEditor->ReplaceImage(s_SelectionPopupContext.m_pSelection->c_str(), IStorage::TYPE_ALL, false);
 		pImg->m_External = WasExternal;
 		s_SelectionPopupContext.Reset();
-		return 1;
+		return Result ? 1 : 0;
 	}
 
 	View.HSplitTop(5.0f, nullptr, &View);
 	View.HSplitTop(12.0f, &Slot, &View);
 	if(pEditor->DoButton_MenuItem(&s_ReplaceButton, "Replace", 0, &Slot, 0, "Replaces the image with a new one"))
 	{
-		pEditor->InvokeFileDialog(IStorage::TYPE_ALL, FILETYPE_IMG, "Replace Image", "Replace", "mapres", "", ReplaceImage, pEditor);
+		pEditor->InvokeFileDialog(IStorage::TYPE_ALL, FILETYPE_IMG, "Replace Image", "Replace", "mapres", "", ReplaceImageCallback, pEditor);
 		return 1;
 	}
 
@@ -1344,16 +1344,16 @@ int CEditor::PopupSound(CEditor *pEditor, CUIRect View, void *pContext)
 	}
 	if(s_SelectionPopupContext.m_pSelection != nullptr)
 	{
-		ReplaceSound(s_SelectionPopupContext.m_pSelection->c_str(), IStorage::TYPE_ALL, pEditor);
+		const bool Result = pEditor->ReplaceSound(s_SelectionPopupContext.m_pSelection->c_str(), IStorage::TYPE_ALL, false);
 		s_SelectionPopupContext.Reset();
-		return 1;
+		return Result ? 1 : 0;
 	}
 
 	View.HSplitTop(5.0f, nullptr, &View);
 	View.HSplitTop(12.0f, &Slot, &View);
 	if(pEditor->DoButton_MenuItem(&s_ReplaceButton, "Replace", 0, &Slot, 0, "Replaces the sound with a new one"))
 	{
-		pEditor->InvokeFileDialog(IStorage::TYPE_ALL, FILETYPE_SOUND, "Replace sound", "Replace", "mapres", "", ReplaceSound, pEditor);
+		pEditor->InvokeFileDialog(IStorage::TYPE_ALL, FILETYPE_SOUND, "Replace sound", "Replace", "mapres", "", ReplaceSoundCallback, pEditor);
 		return 1;
 	}
 

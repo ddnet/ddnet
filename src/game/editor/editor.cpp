@@ -4045,31 +4045,32 @@ bool CEditor::SelectLayerByTile()
 	return false;
 }
 
-bool CEditor::ReplaceImage(const char *pFileName, int StorageType, void *pUser)
+bool CEditor::ReplaceImage(const char *pFileName, int StorageType, bool CheckDuplicate)
 {
-	CEditor *pEditor = (CEditor *)pUser;
-
 	// check if we have that image already
 	char aBuf[128];
 	IStorage::StripPathAndExtension(pFileName, aBuf, sizeof(aBuf));
-	for(const auto &pImage : pEditor->m_Map.m_vpImages)
+	if(CheckDuplicate)
 	{
-		if(!str_comp(pImage->m_aName, aBuf))
+		for(const auto &pImage : m_Map.m_vpImages)
 		{
-			pEditor->ShowFileDialogError("Image named '%s' was already added.", pImage->m_aName);
-			return false;
+			if(!str_comp(pImage->m_aName, aBuf))
+			{
+				ShowFileDialogError("Image named '%s' was already added.", pImage->m_aName);
+				return false;
+			}
 		}
 	}
 
-	CEditorImage ImgInfo(pEditor);
-	if(!pEditor->Graphics()->LoadPNG(&ImgInfo, pFileName, StorageType))
+	CEditorImage ImgInfo(this);
+	if(!Graphics()->LoadPNG(&ImgInfo, pFileName, StorageType))
 	{
-		pEditor->ShowFileDialogError("Failed to load image from file '%s'.", pFileName);
+		ShowFileDialogError("Failed to load image from file '%s'.", pFileName);
 		return false;
 	}
 
-	CEditorImage *pImg = pEditor->m_Map.m_vpImages[pEditor->m_SelectedImage];
-	pEditor->Graphics()->UnloadTexture(&(pImg->m_Texture));
+	CEditorImage *pImg = m_Map.m_vpImages[m_SelectedImage];
+	Graphics()->UnloadTexture(&(pImg->m_Texture));
 	free(pImg->m_pData);
 	pImg->m_pData = nullptr;
 	*pImg = ImgInfo;
@@ -4086,19 +4087,24 @@ bool CEditor::ReplaceImage(const char *pFileName, int StorageType, void *pUser)
 	}
 
 	pImg->m_AutoMapper.Load(pImg->m_aName);
-	int TextureLoadFlag = pEditor->Graphics()->HasTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
+	int TextureLoadFlag = Graphics()->HasTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
 	if(ImgInfo.m_Width % 16 != 0 || ImgInfo.m_Height % 16 != 0)
 		TextureLoadFlag = 0;
-	pImg->m_Texture = pEditor->Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, CImageInfo::FORMAT_AUTO, TextureLoadFlag, pFileName);
+	pImg->m_Texture = Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, CImageInfo::FORMAT_AUTO, TextureLoadFlag, pFileName);
 	ImgInfo.m_pData = nullptr;
-	pEditor->SortImages();
-	for(size_t i = 0; i < pEditor->m_Map.m_vpImages.size(); ++i)
+	SortImages();
+	for(size_t i = 0; i < m_Map.m_vpImages.size(); ++i)
 	{
-		if(!str_comp(pEditor->m_Map.m_vpImages[i]->m_aName, pImg->m_aName))
-			pEditor->m_SelectedImage = i;
+		if(!str_comp(m_Map.m_vpImages[i]->m_aName, pImg->m_aName))
+			m_SelectedImage = i;
 	}
-	pEditor->m_Dialog = DIALOG_NONE;
+	m_Dialog = DIALOG_NONE;
 	return true;
+}
+
+bool CEditor::ReplaceImageCallback(const char *pFileName, int StorageType, void *pUser)
+{
+	return static_cast<CEditor *>(pUser)->ReplaceImage(pFileName, StorageType, true);
 }
 
 bool CEditor::AddImage(const char *pFileName, int StorageType, void *pUser)
@@ -4222,44 +4228,45 @@ bool CEditor::AddSound(const char *pFileName, int StorageType, void *pUser)
 	return true;
 }
 
-bool CEditor::ReplaceSound(const char *pFileName, int StorageType, void *pUser)
+bool CEditor::ReplaceSound(const char *pFileName, int StorageType, bool CheckDuplicate)
 {
-	CEditor *pEditor = (CEditor *)pUser;
-
 	// check if we have that sound already
 	char aBuf[128];
 	IStorage::StripPathAndExtension(pFileName, aBuf, sizeof(aBuf));
-	for(const auto &pSound : pEditor->m_Map.m_vpSounds)
+	if(CheckDuplicate)
 	{
-		if(!str_comp(pSound->m_aName, aBuf))
+		for(const auto &pSound : m_Map.m_vpSounds)
 		{
-			pEditor->ShowFileDialogError("Sound named '%s' was already added.", pSound->m_aName);
-			return false;
+			if(!str_comp(pSound->m_aName, aBuf))
+			{
+				ShowFileDialogError("Sound named '%s' was already added.", pSound->m_aName);
+				return false;
+			}
 		}
 	}
 
 	// load external
 	void *pData;
 	unsigned DataSize;
-	if(!pEditor->Storage()->ReadFile(pFileName, StorageType, &pData, &DataSize))
+	if(!Storage()->ReadFile(pFileName, StorageType, &pData, &DataSize))
 	{
-		pEditor->ShowFileDialogError("Failed to open sound file '%s'.", pFileName);
+		ShowFileDialogError("Failed to open sound file '%s'.", pFileName);
 		return false;
 	}
 
 	// load sound
-	const int SoundId = pEditor->Sound()->LoadOpusFromMem(pData, DataSize, true);
+	const int SoundId = Sound()->LoadOpusFromMem(pData, DataSize, true);
 	if(SoundId == -1)
 	{
 		free(pData);
-		pEditor->ShowFileDialogError("Failed to load sound from file '%s'.", pFileName);
+		ShowFileDialogError("Failed to load sound from file '%s'.", pFileName);
 		return false;
 	}
 
-	CEditorSound *pSound = pEditor->m_Map.m_vpSounds[pEditor->m_SelectedSound];
+	CEditorSound *pSound = m_Map.m_vpSounds[m_SelectedSound];
 
 	// unload sample
-	pEditor->Sound()->UnloadSample(pSound->m_SoundID);
+	Sound()->UnloadSample(pSound->m_SoundID);
 	free(pSound->m_pData);
 
 	// replace sound
@@ -4268,8 +4275,13 @@ bool CEditor::ReplaceSound(const char *pFileName, int StorageType, void *pUser)
 	pSound->m_pData = pData;
 	pSound->m_DataSize = DataSize;
 
-	pEditor->m_Dialog = DIALOG_NONE;
+	m_Dialog = DIALOG_NONE;
 	return true;
+}
+
+bool CEditor::ReplaceSoundCallback(const char *pFileName, int StorageType, void *pUser)
+{
+	return static_cast<CEditor *>(pUser)->ReplaceSound(pFileName, StorageType, true);
 }
 
 void CEditor::SelectGameLayer()
