@@ -41,6 +41,14 @@
 #include <chrono>
 #include <functional>
 
+#if __cplusplus >= 201703L
+#define MAYBE_UNUSED [[maybe_unused]]
+#elif defined(__GNUC__)
+#define MAYBE_UNUSED __attribute__((unused))
+#else
+#define MAYBE_UNUSED
+#endif
+
 /**
  * @defgroup Debug
  *
