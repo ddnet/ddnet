@@ -37,6 +37,7 @@
 #include "countryflags.h"
 #include "menus.h"
 
+using namespace FontIcons;
 using namespace std::chrono_literals;
 
 ColorRGBA CMenus::ms_GuiColor;
@@ -304,7 +305,7 @@ int CMenus::DoButton_CheckBox_Common(const void *pID, const char *pText, const c
 	{
 		TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT);
 		TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
-		UI()->DoLabel(&c, "\xEF\x80\x8D", c.h * CUI::ms_FontmodHeight, TEXTALIGN_CENTER, Props);
+		UI()->DoLabel(&c, FONT_ICON_XMARK, c.h * CUI::ms_FontmodHeight, TEXTALIGN_CENTER, Props);
 		TextRender()->SetCurFont(NULL);
 	}
 	else
@@ -681,10 +682,10 @@ int CMenus::RenderMenubar(CUIRect r)
 		ColorRGBA *pHomeButtonColor = NULL;
 		ColorRGBA *pHomeButtonColorHover = NULL;
 
-		const char *pHomeScreenButtonLabel = "\xEF\x80\x95";
+		const char *pHomeScreenButtonLabel = FONT_ICON_HOUSE;
 		if(GotNewsOrUpdate)
 		{
-			pHomeScreenButtonLabel = "\xEF\x87\xAA";
+			pHomeScreenButtonLabel = FONT_ICON_NEWSPAPER;
 			pHomeButtonColor = &HomeButtonColorAlert;
 			pHomeButtonColorHover = &HomeButtonColorAlertHover;
 		}
@@ -822,7 +823,7 @@ int CMenus::RenderMenubar(CUIRect r)
 	Box.VSplitRight(33.0f, &Box, &Button);
 	static CButtonContainer s_QuitButton;
 	ColorRGBA QuitColor(1, 0, 0, 0.5f);
-	if(DoButton_MenuTab(&s_QuitButton, "\xEF\x80\x91", 0, &Button, IGraphics::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_QUIT], NULL, NULL, &QuitColor, 10.0f, 0))
+	if(DoButton_MenuTab(&s_QuitButton, FONT_ICON_POWER_OFF, 0, &Button, IGraphics::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_QUIT], NULL, NULL, &QuitColor, 10.0f, 0))
 	{
 		if(m_pClient->Editor()->HasUnsavedData() || (Client()->GetCurrentRaceTime() / 60 >= g_Config.m_ClConfirmQuitTime && g_Config.m_ClConfirmQuitTime >= 0))
 		{
@@ -838,13 +839,13 @@ int CMenus::RenderMenubar(CUIRect r)
 	Box.VSplitRight(33.0f, &Box, &Button);
 	static CButtonContainer s_SettingsButton;
 
-	if(DoButton_MenuTab(&s_SettingsButton, "\xEF\x80\x93", m_ActivePage == PAGE_SETTINGS, &Button, IGraphics::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_SETTINGS], NULL, NULL, NULL, 10.0f, 0))
+	if(DoButton_MenuTab(&s_SettingsButton, FONT_ICON_GEAR, m_ActivePage == PAGE_SETTINGS, &Button, IGraphics::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_SETTINGS], NULL, NULL, NULL, 10.0f, 0))
 		NewPage = PAGE_SETTINGS;
 
 	Box.VSplitRight(10.0f, &Box, &Button);
 	Box.VSplitRight(33.0f, &Box, &Button);
 	static CButtonContainer s_EditorButton;
-	if(DoButton_MenuTab(&s_EditorButton, "\xEF\x81\x84", 0, &Button, IGraphics::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_EDITOR], NULL, NULL, NULL, 10.0f, 0))
+	if(DoButton_MenuTab(&s_EditorButton, FONT_ICON_PEN_TO_SQUARE, 0, &Button, IGraphics::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_EDITOR], NULL, NULL, NULL, 10.0f, 0))
 	{
 		g_Config.m_ClEditor = 1;
 	}
@@ -855,14 +856,14 @@ int CMenus::RenderMenubar(CUIRect r)
 		Box.VSplitRight(33.0f, &Box, &Button);
 		static CButtonContainer s_DemoButton;
 
-		if(DoButton_MenuTab(&s_DemoButton, "\xEE\x84\xB1", m_ActivePage == PAGE_DEMOS, &Button, IGraphics::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_DEMOBUTTON], NULL, NULL, NULL, 10.0f, 0))
+		if(DoButton_MenuTab(&s_DemoButton, FONT_ICON_CLAPPERBOARD, m_ActivePage == PAGE_DEMOS, &Button, IGraphics::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_DEMOBUTTON], NULL, NULL, NULL, 10.0f, 0))
 			NewPage = PAGE_DEMOS;
 
 		Box.VSplitRight(10.0f, &Box, &Button);
 		Box.VSplitRight(33.0f, &Box, &Button);
 		static CButtonContainer s_ServerButton;
 
-		if(DoButton_MenuTab(&s_ServerButton, "\xEF\x95\xBD", m_ActivePage == g_Config.m_UiPage, &Button, IGraphics::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_SERVER], NULL, NULL, NULL, 10.0f, 0))
+		if(DoButton_MenuTab(&s_ServerButton, FONT_ICON_EARTH_AMERICAS, m_ActivePage == g_Config.m_UiPage, &Button, IGraphics::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_SERVER], NULL, NULL, NULL, 10.0f, 0))
 			NewPage = g_Config.m_UiPage;
 	}
 
@@ -2017,14 +2018,14 @@ int CMenus::Render()
 			Part.VSplitLeft(5.0f, 0, &Part);
 			Part.VSplitLeft(ButtonSize, &Button, &Part);
 			static CButtonContainer s_SlowDownButton;
-			if(DoButton_FontIcon(&s_SlowDownButton, "\xEF\x81\x8A", 0, &Button, IGraphics::CORNER_ALL))
+			if(DoButton_FontIcon(&s_SlowDownButton, FONT_ICON_BACKWARD, 0, &Button, IGraphics::CORNER_ALL))
 				DecDemoSpeed = true;
 
 			// fastforward
 			Part.VSplitLeft(5.0f, 0, &Part);
 			Part.VSplitLeft(ButtonSize, &Button, &Part);
 			static CButtonContainer s_FastForwardButton;
-			if(DoButton_FontIcon(&s_FastForwardButton, "\xEF\x81\x8E", 0, &Button, IGraphics::CORNER_ALL))
+			if(DoButton_FontIcon(&s_FastForwardButton, FONT_ICON_FORWARD, 0, &Button, IGraphics::CORNER_ALL))
 				IncDemoSpeed = true;
 
 			// speed meter

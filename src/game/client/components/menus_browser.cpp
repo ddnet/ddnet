@@ -21,6 +21,8 @@
 
 #include "menus.h"
 
+using namespace FontIcons;
+
 static const int gs_OffsetColFlagLock = 2;
 static const int gs_OffsetColFav = gs_OffsetColFlagLock + 3;
 static const int gs_OffsetColOff = gs_OffsetColFav + 3;
@@ -278,22 +280,22 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			{
 				if(pItem->m_Flags & SERVER_FLAG_PASSWORD)
 				{
-					RenderBrowserIcons(*pItem->m_pUIElement->Rect(gs_OffsetColFlagLock + 0), &Button, {0.75f, 0.75f, 0.75f, 1}, TextRender()->DefaultTextOutlineColor(), "\xEF\x80\xA3", TEXTALIGN_CENTER);
+					RenderBrowserIcons(*pItem->m_pUIElement->Rect(gs_OffsetColFlagLock + 0), &Button, {0.75f, 0.75f, 0.75f, 1}, TextRender()->DefaultTextOutlineColor(), FONT_ICON_LOCK, TEXTALIGN_CENTER);
 				}
 			}
 			else if(ID == COL_FLAG_FAV)
 			{
 				if(pItem->m_Favorite != TRISTATE::NONE)
 				{
-					RenderBrowserIcons(*pItem->m_pUIElement->Rect(gs_OffsetColFav + 0), &Button, {0.94f, 0.4f, 0.4f, 1}, TextRender()->DefaultTextOutlineColor(), "\xEF\x80\x84", TEXTALIGN_CENTER);
+					RenderBrowserIcons(*pItem->m_pUIElement->Rect(gs_OffsetColFav + 0), &Button, {0.94f, 0.4f, 0.4f, 1}, TextRender()->DefaultTextOutlineColor(), FONT_ICON_HEART, TEXTALIGN_CENTER);
 				}
 			}
 			else if(ID == COL_FLAG_OFFICIAL)
 			{
 				if(pItem->m_Official && g_Config.m_UiPage != PAGE_DDNET && g_Config.m_UiPage != PAGE_KOG)
 				{
-					RenderBrowserIcons(*pItem->m_pUIElement->Rect(gs_OffsetColOff + 0), &Button, {0.4f, 0.7f, 0.94f, 1}, {0.0f, 0.0f, 0.0f, 1.0f}, "\xEF\x82\xA3", TEXTALIGN_CENTER);
-					RenderBrowserIcons(*pItem->m_pUIElement->Rect(gs_OffsetColOff + 1), &Button, {0.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 0.0f, 0.0f}, "\xEF\x80\x8C", TEXTALIGN_CENTER, true);
+					RenderBrowserIcons(*pItem->m_pUIElement->Rect(gs_OffsetColOff + 0), &Button, {0.4f, 0.7f, 0.94f, 1}, {0.0f, 0.0f, 0.0f, 1.0f}, FONT_ICON_CERTIFICATE, TEXTALIGN_CENTER);
+					RenderBrowserIcons(*pItem->m_pUIElement->Rect(gs_OffsetColOff + 1), &Button, {0.0f, 0.0f, 0.0f, 1.0f}, {0.0f, 0.0f, 0.0f, 0.0f}, FONT_ICON_CHECK, TEXTALIGN_CENTER, true);
 				}
 			}
 			else if(ID == COL_NAME)
@@ -323,7 +325,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 
 					if(g_Config.m_BrIndicateFinished && pItem->m_HasRank == 1)
 					{
-						RenderBrowserIcons(*pItem->m_pUIElement->Rect(gs_OffsetColFlagLock + 1), &Icon, TextRender()->DefaultTextColor(), TextRender()->DefaultTextOutlineColor(), "\xEF\x84\x9E", TEXTALIGN_CENTER);
+						RenderBrowserIcons(*pItem->m_pUIElement->Rect(gs_OffsetColFlagLock + 1), &Icon, TextRender()->DefaultTextColor(), TextRender()->DefaultTextOutlineColor(), FONT_ICON_FLAG_CHECKERED, TEXTALIGN_CENTER);
 					}
 				}
 
@@ -349,7 +351,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 					Button.VSplitRight(50.0f, &Icon, &Button);
 					Icon.Margin(2.0f, &Icon);
 					Icon.HSplitBottom(6.0f, 0, &IconText);
-					RenderBrowserIcons(*pItem->m_pUIElement->Rect(gs_OffsetColFav + 1), &Icon, {0.94f, 0.4f, 0.4f, 1}, TextRender()->DefaultTextOutlineColor(), "\xEF\x80\x84", TEXTALIGN_CENTER);
+					RenderBrowserIcons(*pItem->m_pUIElement->Rect(gs_OffsetColFav + 1), &Icon, {0.94f, 0.4f, 0.4f, 1}, TextRender()->DefaultTextOutlineColor(), FONT_ICON_HEART, TEXTALIGN_CENTER);
 					if(FriendsOnServer > 1)
 					{
 						char aBufFriendsOnServer[64];
@@ -480,8 +482,6 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	float SearchIconWidth = 0;
 	float ExcludeIconWidth = 0;
 	float ExcludeSearchIconMax = 0;
-	const char *pSearchLabel = "\xEF\x80\x82";
-	const char *pExcludeLabel = "\xEF\x81\x9E";
 
 	// render quick search
 	{
@@ -490,9 +490,9 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 
 		SLabelProperties Props;
 		Props.m_AlignVertically = 0;
-		UI()->DoLabel(&QuickSearch, pSearchLabel, 16.0f, TEXTALIGN_LEFT, Props);
-		SearchIconWidth = TextRender()->TextWidth(16.0f, pSearchLabel, -1, -1.0f);
-		ExcludeIconWidth = TextRender()->TextWidth(16.0f, pExcludeLabel, -1, -1.0f);
+		UI()->DoLabel(&QuickSearch, FONT_ICON_MAGNIFYING_GLASS, 16.0f, TEXTALIGN_LEFT, Props);
+		SearchIconWidth = TextRender()->TextWidth(16.0f, FONT_ICON_MAGNIFYING_GLASS, -1, -1.0f);
+		ExcludeIconWidth = TextRender()->TextWidth(16.0f, FONT_ICON_BAN, -1, -1.0f);
 		ExcludeSearchIconMax = maximum(SearchIconWidth, ExcludeIconWidth);
 		TextRender()->SetRenderFlags(0);
 		TextRender()->SetCurFont(NULL);
@@ -525,7 +525,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 
 		SLabelProperties Props;
 		Props.m_AlignVertically = 0;
-		UI()->DoLabel(&QuickExclude, pExcludeLabel, 16.0f, TEXTALIGN_LEFT, Props);
+		UI()->DoLabel(&QuickExclude, FONT_ICON_BAN, 16.0f, TEXTALIGN_LEFT, Props);
 		TextRender()->SetRenderFlags(0);
 		TextRender()->SetCurFont(NULL);
 		QuickExclude.VSplitLeft(ExcludeSearchIconMax, 0, &QuickExclude);

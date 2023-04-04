@@ -45,6 +45,67 @@ enum
 	TEXT_FONT_ICON_FONT = 0,
 };
 
+namespace FontIcons {
+// Each font icon is named according to its official name in Font Awesome
+MAYBE_UNUSED static const char *FONT_ICON_LOCK = "\xEF\x80\xA3";
+MAYBE_UNUSED static const char *FONT_ICON_MAGNIFYING_GLASS = "\xEF\x80\x82";
+MAYBE_UNUSED static const char *FONT_ICON_HEART = "\xEF\x80\x84";
+MAYBE_UNUSED static const char *FONT_ICON_STAR = "\xEF\x80\x85";
+MAYBE_UNUSED static const char *FONT_ICON_CHECK = "\xEF\x80\x8C";
+MAYBE_UNUSED static const char *FONT_ICON_XMARK = "\xEF\x80\x8D";
+MAYBE_UNUSED static const char *FONT_ICON_ARROW_ROTATE_LEFT = "\xEF\x83\xA2";
+MAYBE_UNUSED static const char *FONT_ICON_ARROW_ROTATE_RIGHT = "\xEF\x80\x9E";
+MAYBE_UNUSED static const char *FONT_ICON_CERTIFICATE = "\xEF\x82\xA3";
+MAYBE_UNUSED static const char *FONT_ICON_FLAG_CHECKERED = "\xEF\x84\x9E";
+MAYBE_UNUSED static const char *FONT_ICON_BAN = "\xEF\x81\x9E";
+MAYBE_UNUSED static const char *FONT_ICON_CIRCLE_CHEVRON_DOWN = "\xEF\x84\xBA";
+
+MAYBE_UNUSED static const char *FONT_ICON_HOUSE = "\xEF\x80\x95";
+MAYBE_UNUSED static const char *FONT_ICON_NEWSPAPER = "\xEF\x87\xAA";
+MAYBE_UNUSED static const char *FONT_ICON_POWER_OFF = "\xEF\x80\x91";
+MAYBE_UNUSED static const char *FONT_ICON_GEAR = "\xEF\x80\x93";
+MAYBE_UNUSED static const char *FONT_ICON_PEN_TO_SQUARE = "\xEF\x81\x84";
+MAYBE_UNUSED static const char *FONT_ICON_CLAPPERBOARD = "\xEE\x84\xB1";
+MAYBE_UNUSED static const char *FONT_ICON_EARTH_AMERICAS = "\xEF\x95\xBD";
+
+MAYBE_UNUSED static const char *FONT_ICON_SLASH = "\xEF\x9C\x95";
+MAYBE_UNUSED static const char *FONT_ICON_PLAY = "\xEF\x81\x8B";
+MAYBE_UNUSED static const char *FONT_ICON_PAUSE = "\xEF\x81\x8C";
+MAYBE_UNUSED static const char *FONT_ICON_STOP = "\xEF\x81\x8D";
+MAYBE_UNUSED static const char *FONT_ICON_CHEVRON_LEFT = "\xEF\x81\x93";
+MAYBE_UNUSED static const char *FONT_ICON_CHEVRON_RIGHT = "\xEF\x81\x94";
+MAYBE_UNUSED static const char *FONT_ICON_BACKWARD = "\xEF\x81\x8A";
+MAYBE_UNUSED static const char *FONT_ICON_FORWARD = "\xEF\x81\x8E";
+MAYBE_UNUSED static const char *FONT_ICON_RIGHT_FROM_BRACKET = "\xEF\x8B\xB5";
+MAYBE_UNUSED static const char *FONT_ICON_RIGHT_TO_BRACKET = "\xEF\x8B\xB6";
+MAYBE_UNUSED static const char *FONT_ICON_ARROW_UP_RIGHT_FROM_SQUARE = "\xEF\x82\x8E";
+MAYBE_UNUSED static const char *FONT_ICON_BACKWARD_STEP = "\xEF\x81\x88";
+MAYBE_UNUSED static const char *FONT_ICON_FORWARD_STEP = "\xEF\x81\x91";
+MAYBE_UNUSED static const char *FONT_ICON_KEYBOARD = "\xE2\x8C\xA8";
+
+MAYBE_UNUSED static const char *FONT_ICON_FOLDER = "\xEF\x81\xBB";
+MAYBE_UNUSED static const char *FONT_ICON_FOLDER_TREE = "\xEF\xA0\x82";
+MAYBE_UNUSED static const char *FONT_ICON_FILM = "\xEF\x80\x88";
+MAYBE_UNUSED static const char *FONT_ICON_MAP = "\xEF\x89\xB9";
+MAYBE_UNUSED static const char *FONT_ICON_IMAGE = "\xEF\x80\xBE";
+MAYBE_UNUSED static const char *FONT_ICON_MUSIC = "\xEF\x80\x81";
+MAYBE_UNUSED static const char *FONT_ICON_FILE = "\xEF\x85\x9B";
+
+MAYBE_UNUSED static const char *FONT_ICON_ARROWS_LEFT_RIGHT = "\xEF\x8C\xB7";
+MAYBE_UNUSED static const char *FONT_ICON_ARROWS_UP_DOWN = "\xEF\x81\xBD";
+MAYBE_UNUSED static const char *FONT_ICON_CIRCLE_PLAY = "\xEF\x85\x84";
+MAYBE_UNUSED static const char *FONT_ICON_BORDER_ALL = "\xEF\xA1\x8C";
+MAYBE_UNUSED static const char *FONT_ICON_EYE = "\xEF\x81\xAE";
+MAYBE_UNUSED static const char *FONT_ICON_EYE_SLASH = "\xEF\x81\xB0";
+
+MAYBE_UNUSED static const char *FONT_ICON_DICE_ONE = "\xEF\x94\xA5";
+MAYBE_UNUSED static const char *FONT_ICON_DICE_TWO = "\xEF\x94\xA8";
+MAYBE_UNUSED static const char *FONT_ICON_DICE_THREE = "\xEF\x94\xA7";
+MAYBE_UNUSED static const char *FONT_ICON_DICE_FOUR = "\xEF\x94\xA4";
+MAYBE_UNUSED static const char *FONT_ICON_DICE_FIVE = "\xEF\x94\xA3";
+MAYBE_UNUSED static const char *FONT_ICON_DICE_SIX = "\xEF\x94\xA6";
+} // end namespace FontIcons
+
 class CFont;
 
 enum ETextCursorSelectionMode

@@ -12,6 +12,7 @@
 
 #include <chrono>
 
+using namespace FontIcons;
 using namespace std::chrono_literals;
 
 typedef std::function<void()> TMenuAssetScanLoadedFunc;
@@ -639,14 +640,13 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 		MainView.HSplitBottom(ms_ButtonHeight, &MainView, &QuickSearch);
 		QuickSearch.VSplitLeft(240.0f, &QuickSearch, &DirectoryButton);
 		QuickSearch.HSplitTop(5.0f, 0, &QuickSearch);
-		const char *pSearchLabel = "\xEF\x80\x82";
 		TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
 		TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
 
 		SLabelProperties Props;
 		Props.m_AlignVertically = 0;
-		UI()->DoLabel(&QuickSearch, pSearchLabel, 14.0f, TEXTALIGN_LEFT, Props);
-		float wSearch = TextRender()->TextWidth(14.0f, pSearchLabel, -1, -1.0f);
+		UI()->DoLabel(&QuickSearch, FONT_ICON_MAGNIFYING_GLASS, 14.0f, TEXTALIGN_LEFT, Props);
+		float wSearch = TextRender()->TextWidth(14.0f, FONT_ICON_MAGNIFYING_GLASS, -1, -1.0f);
 		TextRender()->SetRenderFlags(0);
 		TextRender()->SetCurFont(NULL);
 		QuickSearch.VSplitLeft(wSearch, 0, &QuickSearch);
@@ -699,7 +699,7 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 	TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
 	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
 	static CButtonContainer s_AssetsReloadBtnID;
-	if(DoButton_Menu(&s_AssetsReloadBtnID, "\xEF\x80\x9E", 0, &ReloadButton, nullptr, IGraphics::CORNER_ALL, 5, 0, vec4(1.0f, 1.0f, 1.0f, 0.75f), vec4(1, 1, 1, 0.5f), 0))
+	if(DoButton_Menu(&s_AssetsReloadBtnID, FONT_ICON_ARROW_ROTATE_RIGHT, 0, &ReloadButton, nullptr, IGraphics::CORNER_ALL, 5, 0, vec4(1.0f, 1.0f, 1.0f, 0.75f), vec4(1, 1, 1, 0.5f), 0))
 	{
 		ClearCustomItems(s_CurCustomTab);
 	}

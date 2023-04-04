@@ -36,6 +36,7 @@
 #include <string>
 #include <vector>
 
+using namespace FontIcons;
 using namespace std::chrono_literals;
 
 CMenusKeyBinder CMenus::m_Binder;
@@ -705,7 +706,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	// random skin button
 	Button.VSplitRight(30.0f, 0, &Button);
 	static CButtonContainer s_RandomSkinButtonID;
-	static const char *s_apDice[] = {"\xef\x94\xa5", "\xef\x94\xa8", "\xef\x94\xa7", "\xef\x94\xa4", "\xef\x94\xa3", "\xef\x94\xa6"};
+	static const char *s_apDice[] = {FONT_ICON_DICE_ONE, FONT_ICON_DICE_TWO, FONT_ICON_DICE_THREE, FONT_ICON_DICE_FOUR, FONT_ICON_DICE_FIVE, FONT_ICON_DICE_SIX};
 	static int s_CurrentDie = rand() % std::size(s_apDice);
 	TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
 	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
@@ -826,7 +827,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		TextRender()->TextOutlineColor(TextRender()->DefaultTextOutlineColor());
 		SLabelProperties Props;
 		Props.m_MaxWidth = FavIcon.w;
-		UI()->DoLabel(&FavIcon, "\xef\x80\x85", 12.0f, TEXTALIGN_RIGHT, Props);
+		UI()->DoLabel(&FavIcon, FONT_ICON_STAR, 12.0f, TEXTALIGN_RIGHT, Props);
 		TextRender()->TextColor(TextRender()->DefaultTextColor());
 		TextRender()->SetRenderFlags(0);
 		TextRender()->SetCurFont(nullptr);
@@ -921,14 +922,13 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		MainView.HSplitBottom(ms_ButtonHeight, &MainView, &QuickSearch);
 		QuickSearch.VSplitLeft(240.0f, &QuickSearch, &SkinDB);
 		QuickSearch.HSplitTop(5.0f, 0, &QuickSearch);
-		const char *pSearchLabel = "\xEF\x80\x82";
 		TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
 		TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
 
 		SLabelProperties Props;
 		Props.m_AlignVertically = 0;
-		UI()->DoLabel(&QuickSearch, pSearchLabel, 14.0f, TEXTALIGN_LEFT, Props);
-		float wSearch = TextRender()->TextWidth(14.0f, pSearchLabel, -1, -1.0f);
+		UI()->DoLabel(&QuickSearch, FONT_ICON_MAGNIFYING_GLASS, 14.0f, TEXTALIGN_LEFT, Props);
+		float wSearch = TextRender()->TextWidth(14.0f, FONT_ICON_MAGNIFYING_GLASS, -1, -1.0f);
 		TextRender()->SetRenderFlags(0);
 		TextRender()->SetCurFont(NULL);
 		QuickSearch.VSplitLeft(wSearch, 0, &QuickSearch);
@@ -979,7 +979,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
 	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
 	static CButtonContainer s_SkinRefreshButtonID;
-	if(DoButton_Menu(&s_SkinRefreshButtonID, "\xEF\x80\x9E", 0, &RefreshButton, nullptr, IGraphics::CORNER_ALL, 5, 0, vec4(1.0f, 1.0f, 1.0f, 0.75f), vec4(1, 1, 1, 0.5f), 0))
+	if(DoButton_Menu(&s_SkinRefreshButtonID, FONT_ICON_ARROW_ROTATE_RIGHT, 0, &RefreshButton, nullptr, IGraphics::CORNER_ALL, 5, 0, vec4(1.0f, 1.0f, 1.0f, 0.75f), vec4(1, 1, 1, 0.5f), 0))
 	{
 		// reset render flags for possible loading screen
 		TextRender()->SetRenderFlags(0);
@@ -1527,7 +1527,7 @@ int CMenus::RenderDropDown(int &CurDropDownState, CUIRect *pRect, int CurSelecti
 		DropDownIcon.VSplitRight(5.0f, &DropDownIcon, nullptr);
 		TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
 		TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
-		UI()->DoLabel(&DropDownIcon, "\xEF\x84\xBA", DropDownIcon.h * CUI::ms_FontmodHeight, TEXTALIGN_RIGHT);
+		UI()->DoLabel(&DropDownIcon, FONT_ICON_CIRCLE_CHEVRON_DOWN, DropDownIcon.h * CUI::ms_FontmodHeight, TEXTALIGN_RIGHT);
 		TextRender()->SetRenderFlags(0);
 		TextRender()->SetCurFont(NULL);
 		return CurSelection;
