@@ -122,3 +122,8 @@ void CPlasma::Snap(int SnappingClient)
 	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion), GetID(),
 		m_Pos, m_Pos, m_EvalTick, -1, m_Freeze ? LASERTYPE_FREEZE : LASERTYPE_RIFLE);
 }
+
+void CPlasma::SwapClients(int Client1, int Client2)
+{
+	m_ForClientID = m_ForClientID == Client1 ? Client2 : m_ForClientID == Client2 ? Client1 : m_ForClientID;
+}
