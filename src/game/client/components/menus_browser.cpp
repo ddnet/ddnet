@@ -409,7 +409,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 						hsl = ColorHSLA(0.525f, 1.0f, 0.75f);
 					else if(str_find_nocase(pItem->m_aGameType, "BW"))
 						hsl = ColorHSLA(0.050f, 1.0f, 0.75f);
-					else if(str_find_nocase(pItem->m_aGameType, "ddracenet") || str_find_nocase(pItem->m_aGameType, "ddnet"))
+					else if(str_find_nocase(pItem->m_aGameType, "ddracenet") || str_find_nocase(pItem->m_aGameType, "ddnet") || str_find_nocase(pItem->m_aGameType, "0xf"))
 						hsl = ColorHSLA(0.58f, 1.0f, 0.75f);
 					else if(str_find_nocase(pItem->m_aGameType, "ddrace") || str_find_nocase(pItem->m_aGameType, "mkrace"))
 						hsl = ColorHSLA(0.75f, 1.0f, 0.75f);
