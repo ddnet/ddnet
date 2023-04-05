@@ -1714,6 +1714,8 @@ public:
 
 	void UploadEntityLayerText(void *pTexBuff, size_t ImageColorChannelCount, int TexWidth, int TexHeight, int TexSubWidth, int TexSubHeight, const char *pText, int Length, float x, float y, int FontSize) override
 	{
+		if(m_pDefaultFont == nullptr)
+			return;
 		if(FontSize < 1)
 			return;
 
@@ -1796,6 +1798,9 @@ public:
 
 	float GetGlyphOffsetX(int FontSize, char TextCharacter) const override
 	{
+		if(m_pDefaultFont == nullptr)
+			return -1;
+
 		const CFont *pFont = m_pDefaultFont;
 		FT_Set_Pixel_Sizes(pFont->m_FtFace, 0, FontSize);
 		const char *pTmp = &TextCharacter;
@@ -1821,6 +1826,9 @@ public:
 
 	int CalculateTextWidth(const char *pText, int TextLength, int FontWidth, int FontHeight) const override
 	{
+		if(m_pDefaultFont == nullptr)
+			return 0;
+
 		const CFont *pFont = m_pDefaultFont;
 		const char *pCurrent = pText;
 		const char *pEnd = pCurrent + TextLength;
