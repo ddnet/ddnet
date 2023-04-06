@@ -881,8 +881,6 @@ public:
 		m_AllowPlaceUnusedTiles = 0;
 		m_BrushDrawDestructive = true;
 		m_ShowTileHexInfo = false;
-		m_GotoX = 0;
-		m_GotoY = 0;
 
 		m_Mentions = 0;
 	}
@@ -1193,8 +1191,9 @@ public:
 
 	int UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, int Current, int Min, int Max, int Step, float Scale, const char *pToolTip, bool IsDegree = false, bool IsHex = false, int corners = IGraphics::CORNER_ALL, ColorRGBA *pColor = nullptr, bool ShowValue = true);
 
+	static int PopupMenuFile(CEditor *pEditor, CUIRect View, void *pContext);
+	static int PopupMenuTools(CEditor *pEditor, CUIRect View, void *pContext);
 	static int PopupGroup(CEditor *pEditor, CUIRect View, void *pContext);
-
 	struct CLayerPopupContext
 	{
 		std::vector<CLayerTiles *> m_vpLayers;
@@ -1210,13 +1209,16 @@ public:
 	static int PopupSelectSound(CEditor *pEditor, CUIRect View, void *pContext);
 	static int PopupSelectGametileOp(CEditor *pEditor, CUIRect View, void *pContext);
 	static int PopupImage(CEditor *pEditor, CUIRect View, void *pContext);
-	static int PopupMenuFile(CEditor *pEditor, CUIRect View, void *pContext);
-	static int PopupMenuTools(CEditor *pEditor, CUIRect View, void *pContext);
 	static int PopupSelectConfigAutoMap(CEditor *pEditor, CUIRect View, void *pContext);
 	static int PopupSound(CEditor *pEditor, CUIRect View, void *pContext);
 	static int PopupSource(CEditor *pEditor, CUIRect View, void *pContext);
 	static int PopupColorPicker(CEditor *pEditor, CUIRect View, void *pContext);
 	static int PopupEntities(CEditor *pEditor, CUIRect View, void *pContext);
+	static int PopupTele(CEditor *pEditor, CUIRect View, void *pContext);
+	static int PopupSpeedup(CEditor *pEditor, CUIRect View, void *pContext);
+	static int PopupSwitch(CEditor *pEditor, CUIRect View, void *pContext);
+	static int PopupTune(CEditor *pEditor, CUIRect View, void *pContext);
+	static int PopupGoto(CEditor *pEditor, CUIRect View, void *pContext);
 
 	struct SMessagePopupContext
 	{
@@ -1307,6 +1309,8 @@ public:
 
 	bool IsEnvelopeUsed(int EnvelopeIndex) const;
 	void RemoveUnusedEnvelopes();
+
+	static bool IsVanillaImage(const char *pImage);
 
 	void RenderLayers(CUIRect LayersBox);
 	void RenderImagesList(CUIRect Toolbox);
@@ -1423,11 +1427,6 @@ public:
 	IGraphics::CTextureHandle GetSwitchTexture();
 	IGraphics::CTextureHandle GetTuneTexture();
 
-	static int PopupTele(CEditor *pEditor, CUIRect View, void *pContext);
-	static int PopupSpeedup(CEditor *pEditor, CUIRect View, void *pContext);
-	static int PopupSwitch(CEditor *pEditor, CUIRect View, void *pContext);
-	static int PopupTune(CEditor *pEditor, CUIRect View, void *pContext);
-	static int PopupGoto(CEditor *pEditor, CUIRect View, void *pContext);
 	void Goto(float X, float Y);
 	unsigned char m_TeleNumber;
 
@@ -1439,9 +1438,6 @@ public:
 
 	unsigned char m_SwitchNum;
 	unsigned char m_SwitchDelay;
-
-	int m_GotoX;
-	int m_GotoY;
 };
 
 // make sure to inline this function

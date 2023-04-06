@@ -67,7 +67,7 @@ static const char *VANILLA_IMAGES[] = {
 	"winter_mountains2",
 	"winter_mountains3"};
 
-static bool IsVanillaImage(const char *pImage)
+bool CEditor::IsVanillaImage(const char *pImage)
 {
 	return std::any_of(std::begin(VANILLA_IMAGES), std::end(VANILLA_IMAGES), [pImage](const char *pVanillaImage) { return str_comp(pImage, pVanillaImage) == 0; });
 }
@@ -1021,9 +1021,8 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 			Storage()->ListDirectory(IStorage::TYPE_ALL, "editor/entities", EntitiesListdirCallback, this);
 			std::sort(m_vSelectEntitiesFiles.begin(), m_vSelectEntitiesFiles.end());
 
-			static int s_EntitiesPopupID = 0;
-			UiInvokePopupMenu(&s_EntitiesPopupID, 0, Button.x, Button.y + 18.0f,
-				250, m_vSelectEntitiesFiles.size() * 14 + 10, PopupEntities);
+			static int s_PopupEntitiesId;
+			UiInvokePopupMenu(&s_PopupEntitiesId, 0, Button.x, Button.y + Button.h, 250, m_vSelectEntitiesFiles.size() * 14.0f + 10.0f, PopupEntities);
 		}
 
 		TB_Top.VSplitLeft(5.0f, nullptr, &TB_Top);
@@ -1204,11 +1203,8 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 			static int s_GotoButton = 0;
 			if(DoButton_Editor(&s_GotoButton, "Goto XY", 0, &Button, 0, "Go to a specified coordinate point on the map"))
 			{
-				static int s_ModifierPopupID = 0;
-				if(!UiPopupExists(&s_ModifierPopupID))
-				{
-					UiInvokePopupMenu(&s_ModifierPopupID, 0, Button.x, Button.y + Button.h, 120, 52, PopupGoto);
-				}
+				static int s_PopupGotoId;
+				UiInvokePopupMenu(&s_PopupGotoId, 0, Button.x, Button.y + Button.h, 120, 52, PopupGoto);
 			}
 			TB_Bottom.VSplitLeft(5.0f, nullptr, &TB_Bottom);
 		}
@@ -1270,10 +1266,10 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 						static int s_ModifierButton = 0;
 						if(DoButton_Ex(&s_ModifierButton, pButtonName, 0, &Button, 0, aBuf, IGraphics::CORNER_ALL) || (m_Dialog == DIALOG_NONE && m_EditBoxActive == 0 && ModPressed && Input()->KeyPress(KEY_T)))
 						{
-							static int s_ModifierPopupID = 0;
-							if(!UiPopupExists(&s_ModifierPopupID))
+							static int s_PopupModifierId;
+							if(!UiPopupExists(&s_PopupModifierId))
 							{
-								UiInvokePopupMenu(&s_ModifierPopupID, 0, Button.x, Button.y + Button.h, 120, 10.0f + Rows * 13.0f, pfnPopupFunc);
+								UiInvokePopupMenu(&s_PopupModifierId, 0, Button.x, Button.y + Button.h, 120, 10.0f + Rows * 13.0f, pfnPopupFunc);
 							}
 						}
 						TB_Bottom.VSplitLeft(5.0f, nullptr, &TB_Bottom);
@@ -1416,8 +1412,8 @@ void CEditor::DoSoundSource(CSoundSource *pSource, int Index)
 			{
 				if(m_vSelectedLayers.size() == 1)
 				{
-					static int s_SourcePopupID = 0;
-					UiInvokePopupMenu(&s_SourcePopupID, 0, UI()->MouseX(), UI()->MouseY(), 120, 200, PopupSource);
+					static int s_PopupSourceId;
+					UiInvokePopupMenu(&s_PopupSourceId, 0, UI()->MouseX(), UI()->MouseY(), 120, 200, PopupSource);
 					m_LockMouse = false;
 				}
 				s_Operation = OP_NONE;
@@ -1567,8 +1563,8 @@ void CEditor::DoQuad(CQuad *pQuad, int Index)
 				{
 					m_SelectedQuadIndex = FindSelectedQuadIndex(Index);
 
-					static int s_QuadPopupID = 0;
-					UiInvokePopupMenu(&s_QuadPopupID, 0, UI()->MouseX(), UI()->MouseY(), 120, 198, PopupQuad);
+					static int s_PopupQuadId;
+					UiInvokePopupMenu(&s_PopupQuadId, 0, UI()->MouseX(), UI()->MouseY(), 120, 198, PopupQuad);
 					m_LockMouse = false;
 				}
 				s_Operation = OP_NONE;
@@ -1780,8 +1776,8 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 					m_SelectedQuadPoint = V;
 					m_SelectedQuadIndex = FindSelectedQuadIndex(QuadIndex);
 
-					static int s_PointPopupID = 0;
-					UiInvokePopupMenu(&s_PointPopupID, 0, UI()->MouseX(), UI()->MouseY(), 120, 150, PopupPoint);
+					static int s_PopupPointId;
+					UiInvokePopupMenu(&s_PopupPointId, 0, UI()->MouseX(), UI()->MouseY(), 120, 150, PopupPoint);
 				}
 				UI()->SetActiveItem(nullptr);
 			}
@@ -3272,11 +3268,12 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 				((pProps[i].m_Value >> s_aShift[2]) & 0xff) / 255.0f,
 				1.0f);
 
-			static int s_ColorPicker, s_ColorPickerID;
+			static int s_ColorPicker;
 			if(DoButton_ColorPicker(&s_ColorPicker, &ColorBox, &ColorPick))
 			{
 				ms_PickerColor = color_cast<ColorHSVA>(ColorPick);
-				UiInvokePopupMenu(&s_ColorPickerID, 0, UI()->MouseX(), UI()->MouseY(), 180, 150, PopupColorPicker);
+				static int s_PopupColorPickerId;
+				UiInvokePopupMenu(&s_PopupColorPickerId, 0, UI()->MouseX(), UI()->MouseY(), 180, 150, PopupColorPicker);
 			}
 
 			if(UI()->HotItem() == &ms_SVPicker || UI()->HotItem() == &ms_HuePicker)
@@ -3606,9 +3603,11 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 						}
 					}
 
-					static int s_GroupPopupId = 0;
 					if(Result == 2)
-						UiInvokePopupMenu(&s_GroupPopupId, 0, UI()->MouseX(), UI()->MouseY(), 145, 256, PopupGroup);
+					{
+						static int s_PopupGroupId;
+						UiInvokePopupMenu(&s_PopupGroupId, 0, UI()->MouseX(), UI()->MouseY(), 145, 256, PopupGroup);
+					}
 
 					if(!m_Map.m_vpGroups[g]->m_vpLayers.empty() && Input()->MouseDoubleClick())
 						m_Map.m_vpGroups[g]->m_Collapse ^= 1;
@@ -4273,165 +4272,6 @@ bool CEditor::ReplaceSound(const char *pFileName, int StorageType, void *pUser)
 	return true;
 }
 
-static int gs_ModifyIndexDeletedIndex;
-static void ModifyIndexDeleted(int *pIndex)
-{
-	if(*pIndex == gs_ModifyIndexDeletedIndex)
-		*pIndex = -1;
-	else if(*pIndex > gs_ModifyIndexDeletedIndex)
-		*pIndex = *pIndex - 1;
-}
-
-int CEditor::PopupImage(CEditor *pEditor, CUIRect View, void *pContext)
-{
-	static int s_ReaddButton = 0;
-	static int s_ReplaceButton = 0;
-	static int s_RemoveButton = 0;
-
-	CUIRect Slot;
-	View.HSplitTop(12.0f, &Slot, &View);
-	CEditorImage *pImg = pEditor->m_Map.m_vpImages[pEditor->m_SelectedImage];
-
-	static int s_ExternalButton = 0;
-	if(pImg->m_External)
-	{
-		if(pEditor->DoButton_MenuItem(&s_ExternalButton, "Embed", 0, &Slot, 0, "Embeds the image into the map file."))
-		{
-			pImg->m_External = 0;
-			return 1;
-		}
-		View.HSplitTop(5.0f, nullptr, &View);
-		View.HSplitTop(12.0f, &Slot, &View);
-	}
-	else if(IsVanillaImage(pImg->m_aName))
-	{
-		if(pEditor->DoButton_MenuItem(&s_ExternalButton, "Make external", 0, &Slot, 0, "Removes the image from the map file."))
-		{
-			pImg->m_External = 1;
-			return 1;
-		}
-		View.HSplitTop(5.0f, nullptr, &View);
-		View.HSplitTop(12.0f, &Slot, &View);
-	}
-
-	static SSelectionPopupContext s_SelectionPopupContext;
-	if(pEditor->DoButton_MenuItem(&s_ReaddButton, "Readd", 0, &Slot, 0, "Reloads the image from the mapres folder"))
-	{
-		char aFilename[IO_MAX_PATH_LENGTH];
-		str_format(aFilename, sizeof(aFilename), "%s.png", pImg->m_aName);
-		s_SelectionPopupContext.Reset();
-		pEditor->Storage()->FindFiles(aFilename, "mapres", IStorage::TYPE_ALL, &s_SelectionPopupContext.m_Entries);
-		if(s_SelectionPopupContext.m_Entries.empty())
-		{
-			static SMessagePopupContext s_MessagePopupContext;
-			s_MessagePopupContext.ErrorColor();
-			str_format(s_MessagePopupContext.m_aMessage, sizeof(s_MessagePopupContext.m_aMessage), "Error: could not find image '%s' in the mapres folder.", aFilename);
-			pEditor->ShowPopupMessage(pEditor->UI()->MouseX(), pEditor->UI()->MouseY(), &s_MessagePopupContext);
-		}
-		else if(s_SelectionPopupContext.m_Entries.size() == 1)
-		{
-			s_SelectionPopupContext.m_pSelection = &*s_SelectionPopupContext.m_Entries.begin();
-		}
-		else
-		{
-			str_copy(s_SelectionPopupContext.m_aMessage, "Select the wanted image:");
-			pEditor->ShowPopupSelection(pEditor->UI()->MouseX(), pEditor->UI()->MouseY(), &s_SelectionPopupContext);
-		}
-	}
-	if(s_SelectionPopupContext.m_pSelection != nullptr)
-	{
-		bool WasExternal = pImg->m_External;
-		ReplaceImage(s_SelectionPopupContext.m_pSelection->c_str(), IStorage::TYPE_ALL, pEditor);
-		pImg->m_External = WasExternal;
-		s_SelectionPopupContext.Reset();
-		return 1;
-	}
-
-	View.HSplitTop(5.0f, nullptr, &View);
-	View.HSplitTop(12.0f, &Slot, &View);
-	if(pEditor->DoButton_MenuItem(&s_ReplaceButton, "Replace", 0, &Slot, 0, "Replaces the image with a new one"))
-	{
-		pEditor->InvokeFileDialog(IStorage::TYPE_ALL, FILETYPE_IMG, "Replace Image", "Replace", "mapres", "", ReplaceImage, pEditor);
-		return 1;
-	}
-
-	View.HSplitTop(5.0f, nullptr, &View);
-	View.HSplitTop(12.0f, &Slot, &View);
-	if(pEditor->DoButton_MenuItem(&s_RemoveButton, "Remove", 0, &Slot, 0, "Removes the image from the map"))
-	{
-		delete pImg;
-		pEditor->m_Map.m_vpImages.erase(pEditor->m_Map.m_vpImages.begin() + pEditor->m_SelectedImage);
-		gs_ModifyIndexDeletedIndex = pEditor->m_SelectedImage;
-		pEditor->m_Map.ModifyImageIndex(ModifyIndexDeleted);
-		return 1;
-	}
-
-	return 0;
-}
-
-int CEditor::PopupSound(CEditor *pEditor, CUIRect View, void *pContext)
-{
-	static int s_ReaddButton = 0;
-	static int s_ReplaceButton = 0;
-	static int s_RemoveButton = 0;
-
-	CUIRect Slot;
-	View.HSplitTop(12.0f, &Slot, &View);
-	CEditorSound *pSound = pEditor->m_Map.m_vpSounds[pEditor->m_SelectedSound];
-
-	static SSelectionPopupContext s_SelectionPopupContext;
-	if(pEditor->DoButton_MenuItem(&s_ReaddButton, "Readd", 0, &Slot, 0, "Reloads the sound from the mapres folder"))
-	{
-		char aFilename[IO_MAX_PATH_LENGTH];
-		str_format(aFilename, sizeof(aFilename), "%s.opus", pSound->m_aName);
-		s_SelectionPopupContext.Reset();
-		pEditor->Storage()->FindFiles(aFilename, "mapres", IStorage::TYPE_ALL, &s_SelectionPopupContext.m_Entries);
-		if(s_SelectionPopupContext.m_Entries.empty())
-		{
-			static SMessagePopupContext s_MessagePopupContext;
-			s_MessagePopupContext.ErrorColor();
-			str_format(s_MessagePopupContext.m_aMessage, sizeof(s_MessagePopupContext.m_aMessage), "Error: could not find sound '%s' in the mapres folder.", aFilename);
-			pEditor->ShowPopupMessage(pEditor->UI()->MouseX(), pEditor->UI()->MouseY(), &s_MessagePopupContext);
-		}
-		else if(s_SelectionPopupContext.m_Entries.size() == 1)
-		{
-			s_SelectionPopupContext.m_pSelection = &*s_SelectionPopupContext.m_Entries.begin();
-		}
-		else
-		{
-			str_copy(s_SelectionPopupContext.m_aMessage, "Select the wanted sound:");
-			pEditor->ShowPopupSelection(pEditor->UI()->MouseX(), pEditor->UI()->MouseY(), &s_SelectionPopupContext);
-		}
-	}
-	if(s_SelectionPopupContext.m_pSelection != nullptr)
-	{
-		ReplaceSound(s_SelectionPopupContext.m_pSelection->c_str(), IStorage::TYPE_ALL, pEditor);
-		s_SelectionPopupContext.Reset();
-		return 1;
-	}
-
-	View.HSplitTop(5.0f, nullptr, &View);
-	View.HSplitTop(12.0f, &Slot, &View);
-	if(pEditor->DoButton_MenuItem(&s_ReplaceButton, "Replace", 0, &Slot, 0, "Replaces the sound with a new one"))
-	{
-		pEditor->InvokeFileDialog(IStorage::TYPE_ALL, FILETYPE_SOUND, "Replace sound", "Replace", "mapres", "", ReplaceSound, pEditor);
-		return 1;
-	}
-
-	View.HSplitTop(5.0f, nullptr, &View);
-	View.HSplitTop(12.0f, &Slot, &View);
-	if(pEditor->DoButton_MenuItem(&s_RemoveButton, "Remove", 0, &Slot, 0, "Removes the sound from the map"))
-	{
-		delete pSound;
-		pEditor->m_Map.m_vpSounds.erase(pEditor->m_Map.m_vpSounds.begin() + pEditor->m_SelectedSound);
-		gs_ModifyIndexDeletedIndex = pEditor->m_SelectedSound;
-		pEditor->m_Map.ModifySoundIndex(ModifyIndexDeleted);
-		return 1;
-	}
-
-	return 0;
-}
-
 void CEditor::SelectGameLayer()
 {
 	for(size_t g = 0; g < m_Map.m_vpGroups.size(); g++)
@@ -4604,16 +4444,12 @@ void CEditor::RenderImagesList(CUIRect ToolBox)
 			{
 				m_SelectedImage = i;
 
-				static int s_PopupImageID = 0;
 				if(Result == 2)
 				{
-					CEditorImage *pImg = m_Map.m_vpImages[m_SelectedImage];
-					int Height;
-					if(pImg->m_External || IsVanillaImage(pImg->m_aName))
-						Height = 73;
-					else
-						Height = 56;
-					UiInvokePopupMenu(&s_PopupImageID, 0, UI()->MouseX(), UI()->MouseY(), 120, Height, PopupImage);
+					const CEditorImage *pImg = m_Map.m_vpImages[m_SelectedImage];
+					const int Height = pImg->m_External || IsVanillaImage(pImg->m_aName) ? 73 : 56;
+					static int s_PopupImageId;
+					UiInvokePopupMenu(&s_PopupImageId, 0, UI()->MouseX(), UI()->MouseY(), 120, Height, PopupImage);
 				}
 			}
 		}
@@ -4728,9 +4564,11 @@ void CEditor::RenderSounds(CUIRect ToolBox)
 		{
 			m_SelectedSound = i;
 
-			static int s_PopupSoundID = 0;
 			if(Result == 2)
-				UiInvokePopupMenu(&s_PopupSoundID, 0, UI()->MouseX(), UI()->MouseY(), 120, 56, PopupSound);
+			{
+				static int s_PopupSoundId;
+				UiInvokePopupMenu(&s_PopupSoundId, 0, UI()->MouseX(), UI()->MouseY(), 120, 56, PopupSound);
+			}
 		}
 	}
 
@@ -5238,8 +5076,10 @@ void CEditor::RenderFileDialog()
 		if(DoButton_Editor(&s_NewFolderButton, "New folder", 0, &Button, 0, nullptr))
 		{
 			m_aFileDialogNewFolderName[0] = 0;
-			static int s_NewFolderPopupID = 0;
-			UiInvokePopupMenu(&s_NewFolderPopupID, 0, Width / 2.0f - 200.0f, Height / 2.0f - 100.0f, 400.0f, 200.0f, PopupNewFolder);
+			static int s_PopupNewFolderId;
+			constexpr float PopupWidth = 400.0f;
+			constexpr float PopupHeight = 110.0f;
+			UiInvokePopupMenu(&s_PopupNewFolderId, 0, Width / 2.0f - PopupWidth / 2.0f, Height / 2.0f - PopupHeight / 2.0f, PopupWidth, PopupHeight, PopupNewFolder);
 			UI()->SetActiveItem(nullptr);
 		}
 
@@ -5247,12 +5087,14 @@ void CEditor::RenderFileDialog()
 		ButtonBar.VSplitLeft(70.0f, &Button, &ButtonBar);
 		if(DoButton_Editor(&s_MapInfoButton, "Map details", 0, &Button, 0, nullptr))
 		{
-			str_copy(m_Map.m_MapInfo.m_aAuthorTmp, m_Map.m_MapInfo.m_aAuthor, sizeof(m_Map.m_MapInfo.m_aAuthorTmp));
-			str_copy(m_Map.m_MapInfo.m_aVersionTmp, m_Map.m_MapInfo.m_aVersion, sizeof(m_Map.m_MapInfo.m_aVersionTmp));
-			str_copy(m_Map.m_MapInfo.m_aCreditsTmp, m_Map.m_MapInfo.m_aCredits, sizeof(m_Map.m_MapInfo.m_aCreditsTmp));
-			str_copy(m_Map.m_MapInfo.m_aLicenseTmp, m_Map.m_MapInfo.m_aLicense, sizeof(m_Map.m_MapInfo.m_aLicenseTmp));
-			static int s_MapInfoPopupID = 0;
-			UiInvokePopupMenu(&s_MapInfoPopupID, 0, Width / 2.0f - 200.0f, Height / 2.0f - 100.0f, 400.0f, 200.0f, PopupMapInfo);
+			str_copy(m_Map.m_MapInfo.m_aAuthorTmp, m_Map.m_MapInfo.m_aAuthor);
+			str_copy(m_Map.m_MapInfo.m_aVersionTmp, m_Map.m_MapInfo.m_aVersion);
+			str_copy(m_Map.m_MapInfo.m_aCreditsTmp, m_Map.m_MapInfo.m_aCredits);
+			str_copy(m_Map.m_MapInfo.m_aLicenseTmp, m_Map.m_MapInfo.m_aLicense);
+			static int s_PopupMapInfoId;
+			constexpr float PopupWidth = 400.0f;
+			constexpr float PopupHeight = 170.0f;
+			UiInvokePopupMenu(&s_PopupMapInfoId, 0, Width / 2.0f - PopupWidth / 2.0f, Height / 2.0f - PopupHeight / 2.0f, PopupWidth, PopupHeight, PopupMapInfo);
 			UI()->SetActiveItem(nullptr);
 		}
 	}
@@ -6183,143 +6025,6 @@ void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEd
 	s_ScrollRegion.End();
 }
 
-int CEditor::PopupMenuFile(CEditor *pEditor, CUIRect View, void *pContext)
-{
-	static int s_NewMapButton = 0;
-	static int s_SaveButton = 0;
-	static int s_SaveAsButton = 0;
-	static int s_SaveCopyButton = 0;
-	static int s_OpenButton = 0;
-	static int s_OpenCurrentMapButton = 0;
-	static int s_AppendButton = 0;
-	static int s_ExitButton = 0;
-
-	CUIRect Slot;
-	View.HSplitTop(12.0f, &Slot, &View);
-	if(pEditor->DoButton_MenuItem(&s_NewMapButton, "New", 0, &Slot, 0, "Creates a new map (ctrl+n)"))
-	{
-		if(pEditor->HasUnsavedData())
-		{
-			pEditor->m_PopupEventType = POPEVENT_NEW;
-			pEditor->m_PopupEventActivated = true;
-		}
-		else
-		{
-			pEditor->Reset();
-			pEditor->m_aFileName[0] = 0;
-		}
-		return 1;
-	}
-
-	View.HSplitTop(10.0f, &Slot, &View);
-	View.HSplitTop(12.0f, &Slot, &View);
-	if(pEditor->DoButton_MenuItem(&s_OpenButton, "Load", 0, &Slot, 0, "Opens a map for editing (ctrl+l)"))
-	{
-		if(pEditor->HasUnsavedData())
-		{
-			pEditor->m_PopupEventType = POPEVENT_LOAD;
-			pEditor->m_PopupEventActivated = true;
-		}
-		else
-			pEditor->InvokeFileDialog(IStorage::TYPE_ALL, FILETYPE_MAP, "Load map", "Load", "maps", "", pEditor->CallbackOpenMap, pEditor);
-		return 1;
-	}
-
-	View.HSplitTop(2.0f, &Slot, &View);
-	View.HSplitTop(12.0f, &Slot, &View);
-	if(pEditor->DoButton_MenuItem(&s_OpenCurrentMapButton, "Load Current Map", 0, &Slot, 0, "Opens the current in game map for editing (ctrl+alt+l)"))
-	{
-		if(pEditor->HasUnsavedData())
-		{
-			pEditor->m_PopupEventType = POPEVENT_LOADCURRENT;
-			pEditor->m_PopupEventActivated = true;
-		}
-		else
-		{
-			pEditor->LoadCurrentMap();
-		}
-		return 1;
-	}
-
-	View.HSplitTop(10.0f, &Slot, &View);
-	View.HSplitTop(12.0f, &Slot, &View);
-	if(pEditor->DoButton_MenuItem(&s_AppendButton, "Append", 0, &Slot, 0, "Opens a map and adds everything from that map to the current one (ctrl+a)"))
-	{
-		pEditor->InvokeFileDialog(IStorage::TYPE_ALL, FILETYPE_MAP, "Append map", "Append", "maps", "", pEditor->CallbackAppendMap, pEditor);
-		return 1;
-	}
-
-	View.HSplitTop(10.0f, &Slot, &View);
-	View.HSplitTop(12.0f, &Slot, &View);
-	if(pEditor->DoButton_MenuItem(&s_SaveButton, "Save", 0, &Slot, 0, "Saves the current map (ctrl+s)"))
-	{
-		if(pEditor->m_aFileName[0] && pEditor->m_ValidSaveFilename)
-		{
-			str_copy(pEditor->m_aFileSaveName, pEditor->m_aFileName, sizeof(pEditor->m_aFileSaveName));
-			pEditor->m_PopupEventType = POPEVENT_SAVE;
-			pEditor->m_PopupEventActivated = true;
-		}
-		else
-			pEditor->InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_MAP, "Save map", "Save", "maps", "", pEditor->CallbackSaveMap, pEditor);
-		return 1;
-	}
-
-	View.HSplitTop(2.0f, &Slot, &View);
-	View.HSplitTop(12.0f, &Slot, &View);
-	if(pEditor->DoButton_MenuItem(&s_SaveAsButton, "Save As", 0, &Slot, 0, "Saves the current map under a new name (ctrl+shift+s)"))
-	{
-		pEditor->InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_MAP, "Save map", "Save", "maps", "", pEditor->CallbackSaveMap, pEditor);
-		return 1;
-	}
-
-	View.HSplitTop(2.0f, &Slot, &View);
-	View.HSplitTop(12.0f, &Slot, &View);
-	if(pEditor->DoButton_MenuItem(&s_SaveCopyButton, "Save Copy", 0, &Slot, 0, "Saves a copy of the current map under a new name (ctrl+shift+alt+s)"))
-	{
-		pEditor->InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_MAP, "Save map", "Save", "maps", "", pEditor->CallbackSaveCopyMap, pEditor);
-		return 1;
-	}
-
-	View.HSplitTop(10.0f, &Slot, &View);
-	View.HSplitTop(12.0f, &Slot, &View);
-	if(pEditor->DoButton_MenuItem(&s_ExitButton, "Exit", 0, &Slot, 0, "Exits from the editor"))
-	{
-		if(pEditor->HasUnsavedData())
-		{
-			pEditor->m_PopupEventType = POPEVENT_EXIT;
-			pEditor->m_PopupEventActivated = true;
-		}
-		else
-			g_Config.m_ClEditor = 0;
-		return 1;
-	}
-
-	return 0;
-}
-
-int CEditor::PopupMenuTools(CEditor *pEditor, CUIRect View, void *pContext)
-{
-	CUIRect Slot;
-	View.HSplitTop(12.0f, &Slot, &View);
-	static int s_RemoveUnusedEnvelopesButton = 0;
-	static SConfirmPopupContext s_ConfirmPopupContext;
-	if(pEditor->DoButton_MenuItem(&s_RemoveUnusedEnvelopesButton, "Remove unused envelopes", 0, &Slot, 0, "Removes all unused envelopes from the map"))
-	{
-		s_ConfirmPopupContext.Reset();
-		str_copy(s_ConfirmPopupContext.m_aMessage, "Are you sure that you want to remove all unused envelopes from this map?");
-		pEditor->ShowPopupConfirm(Slot.x + Slot.w, Slot.y, &s_ConfirmPopupContext);
-	}
-	if(s_ConfirmPopupContext.m_Result == SConfirmPopupContext::CONFIRMED)
-		pEditor->RemoveUnusedEnvelopes();
-	if(s_ConfirmPopupContext.m_Result != SConfirmPopupContext::UNSET)
-	{
-		s_ConfirmPopupContext.Reset();
-		return 1;
-	}
-
-	return 0;
-}
-
 void CEditor::RenderMenubar(CUIRect MenuBar)
 {
 	CUIRect FileButton;
@@ -6646,8 +6351,10 @@ void CEditor::Render()
 
 	if(m_PopupEventActivated)
 	{
-		static int s_PopupID = 0;
-		UiInvokePopupMenu(&s_PopupID, 0, Width / 2.0f - 200.0f, Height / 2.0f - 100.0f, 400.0f, 200.0f, PopupEvent);
+		static int s_PopupEventId;
+		constexpr float PopupWidth = 400.0f;
+		constexpr float PopupHeight = 150.0f;
+		UiInvokePopupMenu(&s_PopupEventId, 0, Width / 2.0f - PopupWidth / 2.0f, Height / 2.0f - PopupHeight / 2.0f, PopupWidth, PopupHeight, PopupEvent);
 		m_PopupEventActivated = false;
 		m_PopupEventWasActivated = true;
 	}

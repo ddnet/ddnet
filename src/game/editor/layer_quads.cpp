@@ -220,7 +220,6 @@ void CLayerQuads::GetSize(float *pWidth, float *pHeight)
 
 int CLayerQuads::RenderProperties(CUIRect *pToolBox)
 {
-	// layer props
 	enum
 	{
 		PROP_IMAGE = 0,
