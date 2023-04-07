@@ -1455,9 +1455,6 @@ int CMenus::Render()
 	}
 	else
 	{
-		// make sure that other windows doesn't do anything funnay!
-		//UI()->SetHotItem(0);
-		//UI()->SetActiveItem(nullptr);
 		char aBuf[1536];
 		const char *pTitle = "";
 		const char *pExtraText = "";
@@ -2162,6 +2159,9 @@ int CMenus::Render()
 		if(m_Popup == POPUP_NONE)
 			UI()->SetActiveItem(nullptr);
 	}
+
+	UI()->RenderPopupMenus();
+
 	return 0;
 }
 

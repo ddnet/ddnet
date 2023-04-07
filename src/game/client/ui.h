@@ -9,6 +9,7 @@
 #include <engine/textrender.h>
 
 #include <chrono>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -177,8 +178,55 @@ class CButtonContainer
 {
 };
 
+/**
+ * Type safe UI ID for popup menus.
+ */
+struct SPopupMenuId
+{
+};
+
 class CUI
 {
+public:
+	/**
+	 * These enum values are returned by popup menu functions to specify the behavior.
+	 */
+	enum EPopupMenuFunctionResult
+	{
+		/**
+		 * The current popup menu will be kept open.
+		 */
+		POPUP_KEEP_OPEN = 0,
+
+		/**
+		 * The current popup menu will be closed.
+		 */
+		POPUP_CLOSE_CURRENT = 1,
+
+		/**
+		 * The current popup menu and all popup menus above it will be closed.
+		 */
+		POPUP_CLOSE_CURRENT_AND_DESCENDANTS = 2,
+	};
+
+	/**
+	 * Callback that draws a popup menu.
+	 *
+	 * @param pContext The context object of the popup menu.
+	 * @param View The UI rect where the popup menu's contents should be drawn.
+	 * @param Active Whether this popup is active (the top-most popup).
+	 * Only the active popup should handle key and mouse events.
+	 *
+	 * @return Value from the @link EPopupMenuFunctionResult @endlink enum.
+	 */
+	typedef EPopupMenuFunctionResult (*FPopupMenuFunction)(void *pContext, CUIRect View, bool Active);
+
+	/**
+	 * Callback that is called when one or more popups are closed.
+	 */
+	typedef std::function<void()> FPopupMenuClosedCallback;
+
+private:
 	bool m_Enabled;
 
 	const void *m_pHotItem;
@@ -216,6 +264,24 @@ class CUI
 
 	std::vector<CUIRect> m_vClips;
 	void UpdateClipping();
+
+	struct SPopupMenu
+	{
+		static constexpr float POPUP_BORDER = 1.0f;
+		static constexpr float POPUP_MARGIN = 4.0f;
+
+		const SPopupMenuId *m_pID;
+		CUIRect m_Rect;
+		int m_Corners;
+		void *m_pContext;
+		FPopupMenuFunction m_pfnFunc;
+	};
+	std::vector<SPopupMenu> m_vPopupMenus;
+	FPopupMenuClosedCallback m_pfnPopupMenuClosedCallback = nullptr;
+
+	static CUI::EPopupMenuFunctionResult PopupMessage(void *pContext, CUIRect View, bool Active);
+	static CUI::EPopupMenuFunctionResult PopupConfirm(void *pContext, CUIRect View, bool Active);
+	static CUI::EPopupMenuFunctionResult PopupSelection(void *pContext, CUIRect View, bool Active);
 
 	IClient *m_pClient;
 	IGraphics *m_pGraphics;
@@ -326,9 +392,9 @@ public:
 	void ClearHotkeys() { m_HotkeysPressed = 0; }
 	bool OnInput(const IInput::CEvent &Event);
 
-	float ButtonColorMulActive() { return 0.5f; }
-	float ButtonColorMulHot() { return 1.5f; }
-	float ButtonColorMulDefault() { return 1.0f; }
+	constexpr float ButtonColorMulActive() const { return 0.5f; }
+	constexpr float ButtonColorMulHot() const { return 1.5f; }
+	constexpr float ButtonColorMulDefault() const { return 1.0f; }
 	float ButtonColorMul(const void *pID);
 
 	const CUIRect *Screen();
@@ -355,6 +421,8 @@ public:
 	bool DoEditBox(const void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden = false, int Corners = IGraphics::CORNER_ALL, const SUIExEditBoxProperties &Properties = {});
 	bool DoClearableEditBox(const void *pID, const void *pClearID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden = false, int Corners = IGraphics::CORNER_ALL, const SUIExEditBoxProperties &Properties = {});
 
+	int DoButton_PopupMenu(CButtonContainer *pButtonContainer, const char *pText, const CUIRect *pRect, int Align);
+
 	enum
 	{
 		SCROLLBAR_OPTION_INFINITE = 1,
@@ -364,6 +432,73 @@ public:
 	float DoScrollbarH(const void *pID, const CUIRect *pRect, float Current, const ColorRGBA *pColorInner = nullptr);
 	void DoScrollbarOption(const void *pID, int *pOption, const CUIRect *pRect, const char *pStr, int Min, int Max, const IScrollbarScale *pScale = &ms_LinearScrollbarScale, unsigned Flags = 0u);
 	void DoScrollbarOptionLabeled(const void *pID, int *pOption, const CUIRect *pRect, const char *pStr, const char **ppLabels, int NumLabels, const IScrollbarScale *pScale = &ms_LinearScrollbarScale);
+
+	// popup menu
+	void DoPopupMenu(const SPopupMenuId *pID, int X, int Y, int Width, int Height, void *pContext, FPopupMenuFunction pfnFunc, int Corners = IGraphics::CORNER_ALL);
+	void RenderPopupMenus();
+	void ClosePopupMenu(const SPopupMenuId *pID, bool IncludeDescendants = false);
+	void ClosePopupMenus();
+	bool IsPopupOpen() const;
+	bool IsPopupOpen(const SPopupMenuId *pID) const;
+	bool IsPopupHovered() const;
+	void SetPopupMenuClosedCallback(FPopupMenuClosedCallback pfnCallback);
+
+	struct SMessagePopupContext : public SPopupMenuId
+	{
+		static constexpr float POPUP_MAX_WIDTH = 200.0f;
+		static constexpr float POPUP_FONT_SIZE = 10.0f;
+
+		CUI *m_pUI; // set by CUI when popup is shown
+		char m_aMessage[1024];
+		ColorRGBA m_TextColor;
+
+		void DefaultColor(class ITextRender *pTextRender);
+		void ErrorColor();
+	};
+	void ShowPopupMessage(float X, float Y, SMessagePopupContext *pContext);
+
+	struct SConfirmPopupContext : public SPopupMenuId
+	{
+		enum EConfirmationResult
+		{
+			UNSET = 0,
+			CONFIRMED,
+			CANCELED,
+		};
+		static constexpr float POPUP_MAX_WIDTH = 200.0f;
+		static constexpr float POPUP_FONT_SIZE = 10.0f;
+		static constexpr float POPUP_BUTTON_HEIGHT = 12.0f;
+		static constexpr float POPUP_BUTTON_SPACING = 5.0f;
+
+		CUI *m_pUI; // set by CUI when popup is shown
+		char m_aPositiveButtonLabel[128];
+		char m_aNegativeButtonLabel[128];
+		char m_aMessage[1024];
+		EConfirmationResult m_Result;
+
+		SConfirmPopupContext();
+		void Reset();
+		void YesNoButtons();
+	};
+	void ShowPopupConfirm(float X, float Y, SConfirmPopupContext *pContext);
+
+	struct SSelectionPopupContext : public SPopupMenuId
+	{
+		static constexpr float POPUP_MAX_WIDTH = 300.0f;
+		static constexpr float POPUP_FONT_SIZE = 10.0f;
+		static constexpr float POPUP_ENTRY_HEIGHT = 12.0f;
+		static constexpr float POPUP_ENTRY_SPACING = 5.0f;
+
+		CUI *m_pUI; // set by CUI when popup is shown
+		char m_aMessage[256];
+		std::set<std::string> m_Entries;
+		std::vector<CButtonContainer> m_vButtonContainers;
+		const std::string *m_pSelection;
+
+		SSelectionPopupContext();
+		void Reset();
+	};
+	void ShowPopupSelection(float X, float Y, SSelectionPopupContext *pContext);
 };
 
 #endif

@@ -685,7 +685,7 @@ void CLayerTiles::ShowInfo()
 	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 }
 
-int CLayerTiles::RenderProperties(CUIRect *pToolBox)
+CUI::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 {
 	CUIRect Button;
 
@@ -794,7 +794,7 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 				}
 			}
 
-			return 1;
+			return CUI::POPUP_CLOSE_CURRENT;
 		}
 	}
 
@@ -821,7 +821,7 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 			if(m_pEditor->DoButton_Editor(&s_AutoMapperButton, "Automap", 0, &Button, 0, "Run the automapper"))
 			{
 				m_pEditor->m_Map.m_vpImages[m_Image]->m_AutoMapper.Proceed(this, m_AutoMapperConfig, m_Seed);
-				return 1;
+				return CUI::POPUP_CLOSE_CURRENT;
 			}
 		}
 	}
@@ -972,10 +972,10 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 		FlagModified(0, 0, m_Width, m_Height);
 	}
 
-	return 0;
+	return CUI::POPUP_KEEP_OPEN;
 }
 
-int CLayerTiles::RenderCommonProperties(SCommonPropState &State, CEditor *pEditor, CUIRect *pToolbox, std::vector<CLayerTiles *> &vpLayers)
+CUI::EPopupMenuFunctionResult CLayerTiles::RenderCommonProperties(SCommonPropState &State, CEditor *pEditor, CUIRect *pToolbox, std::vector<CLayerTiles *> &vpLayers)
 {
 	if(State.m_Modified)
 	{
@@ -1092,7 +1092,7 @@ int CLayerTiles::RenderCommonProperties(SCommonPropState &State, CEditor *pEdito
 		State.m_Modified |= SCommonPropState::MODIFIED_COLOR;
 	}
 
-	return 0;
+	return CUI::POPUP_KEEP_OPEN;
 }
 
 void CLayerTiles::FlagModified(int x, int y, int w, int h)

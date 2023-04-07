@@ -17,7 +17,6 @@
 #include "auto_map.h"
 
 #include <chrono>
-#include <set>
 #include <string>
 #include <vector>
 
@@ -156,7 +155,7 @@ public:
 	virtual bool IsEntitiesLayer() const { return false; }
 
 	virtual void Render(bool Tileset = false) {}
-	virtual int RenderProperties(CUIRect *pToolbox) { return 0; }
+	virtual CUI::EPopupMenuFunctionResult RenderProperties(CUIRect *pToolbox) { return CUI::POPUP_KEEP_OPEN; }
 
 	virtual void ModifyImageIndex(INDEX_MODIFY_FUNC pfnFunc) {}
 	virtual void ModifyEnvelopeIndex(INDEX_MODIFY_FUNC pfnFunc) {}
@@ -628,7 +627,7 @@ public:
 	CLayer *Duplicate() const override;
 
 	virtual void ShowInfo();
-	int RenderProperties(CUIRect *pToolbox) override;
+	CUI::EPopupMenuFunctionResult RenderProperties(CUIRect *pToolbox) override;
 
 	struct SCommonPropState
 	{
@@ -642,7 +641,7 @@ public:
 		int m_Height = -1;
 		int m_Color = 0;
 	};
-	static int RenderCommonProperties(SCommonPropState &State, CEditor *pEditor, CUIRect *pToolbox, std::vector<CLayerTiles *> &vpLayers);
+	static CUI::EPopupMenuFunctionResult RenderCommonProperties(SCommonPropState &State, CEditor *pEditor, CUIRect *pToolbox, std::vector<CLayerTiles *> &vpLayers);
 
 	void ModifyImageIndex(INDEX_MODIFY_FUNC pfnFunc) override;
 	void ModifyEnvelopeIndex(INDEX_MODIFY_FUNC pfnFunc) override;
@@ -698,7 +697,7 @@ public:
 	void BrushFlipY() override;
 	void BrushRotate(float Amount) override;
 
-	int RenderProperties(CUIRect *pToolbox) override;
+	CUI::EPopupMenuFunctionResult RenderProperties(CUIRect *pToolbox) override;
 
 	void ModifyImageIndex(INDEX_MODIFY_FUNC pfnFunc) override;
 	void ModifyEnvelopeIndex(INDEX_MODIFY_FUNC pfnFunc) override;
@@ -719,7 +718,7 @@ public:
 	CTile GetTile(int x, int y) override;
 	void SetTile(int x, int y, CTile tile) override;
 
-	int RenderProperties(CUIRect *pToolbox) override;
+	CUI::EPopupMenuFunctionResult RenderProperties(CUIRect *pToolbox) override;
 };
 
 class CEditor : public IEditor
@@ -798,7 +797,6 @@ public:
 
 		m_PopupEventActivated = false;
 		m_PopupEventWasActivated = false;
-		m_MouseInsidePopup = false;
 
 		m_FileDialogStorageType = 0;
 		m_FileDialogLastPopulatedStorageType = 0;
@@ -957,7 +955,6 @@ public:
 	int m_PopupEventType;
 	int m_PopupEventActivated;
 	int m_PopupEventWasActivated;
-	bool m_MouseInsidePopup;
 	bool m_LargeLayerWasWarned;
 	bool m_PreventUnusedTilesWasWarned;
 	int m_AllowPlaceUnusedTiles;
@@ -1183,92 +1180,37 @@ public:
 	void RenderGrid(CLayerGroup *pGroup);
 	void SnapToGrid(float &x, float &y);
 
-	void UiInvokePopupMenu(void *pID, int Flags, float X, float Y, float W, float H, int (*pfnFunc)(CEditor *pEditor, CUIRect Rect, void *pContext), void *pContext = nullptr);
-	void UiDoPopupMenu();
-	void UiClosePopupMenus(int Menus = 0);
-	bool UiPopupExists(void *pID);
-	bool UiPopupOpen();
-
 	int UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, int Current, int Min, int Max, int Step, float Scale, const char *pToolTip, bool IsDegree = false, bool IsHex = false, int corners = IGraphics::CORNER_ALL, ColorRGBA *pColor = nullptr, bool ShowValue = true);
 
-	static int PopupMenuFile(CEditor *pEditor, CUIRect View, void *pContext);
-	static int PopupMenuTools(CEditor *pEditor, CUIRect View, void *pContext);
-	static int PopupGroup(CEditor *pEditor, CUIRect View, void *pContext);
-	struct CLayerPopupContext
+	static CUI::EPopupMenuFunctionResult PopupMenuFile(void *pContext, CUIRect View, bool Active);
+	static CUI::EPopupMenuFunctionResult PopupMenuTools(void *pContext, CUIRect View, bool Active);
+	static CUI::EPopupMenuFunctionResult PopupGroup(void *pContext, CUIRect View, bool Active);
+	struct SLayerPopupContext : public SPopupMenuId
 	{
+		CEditor *m_pEditor;
 		std::vector<CLayerTiles *> m_vpLayers;
 		CLayerTiles::SCommonPropState m_CommonPropState;
 	};
-	static int PopupLayer(CEditor *pEditor, CUIRect View, void *pContext);
-	static int PopupQuad(CEditor *pEditor, CUIRect View, void *pContext);
-	static int PopupPoint(CEditor *pEditor, CUIRect View, void *pContext);
-	static int PopupNewFolder(CEditor *pEditor, CUIRect View, void *pContext);
-	static int PopupMapInfo(CEditor *pEditor, CUIRect View, void *pContext);
-	static int PopupEvent(CEditor *pEditor, CUIRect View, void *pContext);
-	static int PopupSelectImage(CEditor *pEditor, CUIRect View, void *pContext);
-	static int PopupSelectSound(CEditor *pEditor, CUIRect View, void *pContext);
-	static int PopupSelectGametileOp(CEditor *pEditor, CUIRect View, void *pContext);
-	static int PopupImage(CEditor *pEditor, CUIRect View, void *pContext);
-	static int PopupSelectConfigAutoMap(CEditor *pEditor, CUIRect View, void *pContext);
-	static int PopupSound(CEditor *pEditor, CUIRect View, void *pContext);
-	static int PopupSource(CEditor *pEditor, CUIRect View, void *pContext);
-	static int PopupColorPicker(CEditor *pEditor, CUIRect View, void *pContext);
-	static int PopupEntities(CEditor *pEditor, CUIRect View, void *pContext);
-	static int PopupTele(CEditor *pEditor, CUIRect View, void *pContext);
-	static int PopupSpeedup(CEditor *pEditor, CUIRect View, void *pContext);
-	static int PopupSwitch(CEditor *pEditor, CUIRect View, void *pContext);
-	static int PopupTune(CEditor *pEditor, CUIRect View, void *pContext);
-	static int PopupGoto(CEditor *pEditor, CUIRect View, void *pContext);
-
-	struct SMessagePopupContext
-	{
-		static constexpr float POPUP_MAX_WIDTH = 200.0f;
-		static constexpr float POPUP_FONT_SIZE = 10.0f;
-		char m_aMessage[1024];
-		ColorRGBA m_TextColor;
-
-		void DefaultColor(class ITextRender *pTextRender);
-		void ErrorColor();
-	};
-	static int PopupMessage(CEditor *pEditor, CUIRect View, void *pContext);
-	void ShowPopupMessage(float X, float Y, SMessagePopupContext *pContext);
-
-	struct SConfirmPopupContext
-	{
-		enum EConfirmationResult
-		{
-			UNSET = 0,
-			CONFIRMED,
-			CANCELED
-		};
-		static constexpr float POPUP_MAX_WIDTH = 200.0f;
-		static constexpr float POPUP_FONT_SIZE = 10.0f;
-		static constexpr float POPUP_BUTTON_HEIGHT = 12.0f;
-		static constexpr float POPUP_BUTTON_SPACING = 5.0f;
-		char m_aMessage[256];
-		EConfirmationResult m_Result;
-
-		SConfirmPopupContext();
-		void Reset();
-	};
-	static int PopupConfirm(CEditor *pEditor, CUIRect View, void *pContext);
-	void ShowPopupConfirm(float X, float Y, SConfirmPopupContext *pContext);
-
-	struct SSelectionPopupContext
-	{
-		static constexpr float POPUP_MAX_WIDTH = 300.0f;
-		static constexpr float POPUP_FONT_SIZE = 10.0f;
-		static constexpr float POPUP_ENTRY_HEIGHT = 12.0f;
-		static constexpr float POPUP_ENTRY_SPACING = 5.0f;
-		char m_aMessage[256];
-		std::set<std::string> m_Entries;
-		const std::string *m_pSelection;
-
-		SSelectionPopupContext();
-		void Reset();
-	};
-	static int PopupSelection(CEditor *pEditor, CUIRect View, void *pContext);
-	void ShowPopupSelection(float X, float Y, SSelectionPopupContext *pContext);
+	static CUI::EPopupMenuFunctionResult PopupLayer(void *pContext, CUIRect View, bool Active);
+	static CUI::EPopupMenuFunctionResult PopupQuad(void *pContext, CUIRect View, bool Active);
+	static CUI::EPopupMenuFunctionResult PopupSource(void *pContext, CUIRect View, bool Active);
+	static CUI::EPopupMenuFunctionResult PopupPoint(void *pContext, CUIRect View, bool Active);
+	static CUI::EPopupMenuFunctionResult PopupImage(void *pContext, CUIRect View, bool Active);
+	static CUI::EPopupMenuFunctionResult PopupSound(void *pContext, CUIRect View, bool Active);
+	static CUI::EPopupMenuFunctionResult PopupNewFolder(void *pContext, CUIRect View, bool Active);
+	static CUI::EPopupMenuFunctionResult PopupMapInfo(void *pContext, CUIRect View, bool Active);
+	static CUI::EPopupMenuFunctionResult PopupEvent(void *pContext, CUIRect View, bool Active);
+	static CUI::EPopupMenuFunctionResult PopupSelectImage(void *pContext, CUIRect View, bool Active);
+	static CUI::EPopupMenuFunctionResult PopupSelectSound(void *pContext, CUIRect View, bool Active);
+	static CUI::EPopupMenuFunctionResult PopupSelectGametileOp(void *pContext, CUIRect View, bool Active);
+	static CUI::EPopupMenuFunctionResult PopupSelectConfigAutoMap(void *pContext, CUIRect View, bool Active);
+	static CUI::EPopupMenuFunctionResult PopupTele(void *pContext, CUIRect View, bool Active);
+	static CUI::EPopupMenuFunctionResult PopupSpeedup(void *pContext, CUIRect View, bool Active);
+	static CUI::EPopupMenuFunctionResult PopupSwitch(void *pContext, CUIRect View, bool Active);
+	static CUI::EPopupMenuFunctionResult PopupTune(void *pContext, CUIRect View, bool Active);
+	static CUI::EPopupMenuFunctionResult PopupGoto(void *pContext, CUIRect View, bool Active);
+	static CUI::EPopupMenuFunctionResult PopupColorPicker(void *pContext, CUIRect View, bool Active);
+	static CUI::EPopupMenuFunctionResult PopupEntities(void *pContext, CUIRect View, bool Active);
 
 	static bool CallbackOpenMap(const char *pFileName, int StorageType, void *pUser);
 	static bool CallbackAppendMap(const char *pFileName, int StorageType, void *pUser);
@@ -1552,7 +1494,7 @@ public:
 	int BrushGrab(CLayerGroup *pBrush, CUIRect Rect) override;
 	void BrushPlace(CLayer *pBrush, float wx, float wy) override;
 
-	int RenderProperties(CUIRect *pToolbox) override;
+	CUI::EPopupMenuFunctionResult RenderProperties(CUIRect *pToolbox) override;
 
 	void ModifyEnvelopeIndex(INDEX_MODIFY_FUNC pfnFunc) override;
 	void ModifySoundIndex(INDEX_MODIFY_FUNC pfnFunc) override;
