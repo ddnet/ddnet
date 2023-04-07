@@ -2431,7 +2431,7 @@ void CMenus::OnRender()
 	ms_ColorTabbarHoverIngame = ColorRGBA(1, 1, 1, 0.75f);
 
 	// update the ui
-	CUIRect *pScreen = UI()->Screen();
+	const CUIRect *pScreen = UI()->Screen();
 	float mx = (m_MousePos.x / (float)Graphics()->WindowWidth()) * pScreen->w;
 	float my = (m_MousePos.y / (float)Graphics()->WindowHeight()) * pScreen->h;
 

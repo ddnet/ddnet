@@ -4963,6 +4963,8 @@ void CEditor::RenderFileDialog()
 		m_PreviewImageState = PREVIEWIMAGE_UNLOADED;
 	}
 
+	const float ButtonSpacing = ButtonBar.w > 600.0f ? 40.0f : 10.0f;
+
 	// the buttons
 	static int s_OkButton = 0;
 	static int s_CancelButton = 0;
@@ -4970,7 +4972,6 @@ void CEditor::RenderFileDialog()
 	static int s_ShowDirectoryButton = 0;
 	static int s_DeleteButton = 0;
 	static int s_NewFolderButton = 0;
-	static int s_MapInfoButton = 0;
 
 	CUIRect Button;
 	ButtonBar.VSplitRight(50.0f, &ButtonBar, &Button);
@@ -5026,17 +5027,17 @@ void CEditor::RenderFileDialog()
 		}
 	}
 
-	ButtonBar.VSplitRight(40.0f, &ButtonBar, &Button);
+	ButtonBar.VSplitRight(ButtonSpacing, &ButtonBar, nullptr);
 	ButtonBar.VSplitRight(50.0f, &ButtonBar, &Button);
 	if(DoButton_Editor(&s_CancelButton, "Cancel", 0, &Button, 0, nullptr) || (s_ListBoxUsed && UI()->ConsumeHotkey(CUI::HOTKEY_ESCAPE)))
 		m_Dialog = DIALOG_NONE;
 
-	ButtonBar.VSplitRight(40.0f, &ButtonBar, &Button);
+	ButtonBar.VSplitRight(ButtonSpacing, &ButtonBar, nullptr);
 	ButtonBar.VSplitRight(50.0f, &ButtonBar, &Button);
 	if(DoButton_Editor(&s_RefreshButton, "Refresh", 0, &Button, 0, nullptr) || (s_ListBoxUsed && (Input()->KeyIsPressed(KEY_F5) || (Input()->ModifierIsPressed() && Input()->KeyIsPressed(KEY_R)))))
 		FilelistPopulate(m_FileDialogLastPopulatedStorageType, true);
 
-	ButtonBar.VSplitRight(40.0f, &ButtonBar, nullptr);
+	ButtonBar.VSplitRight(ButtonSpacing, &ButtonBar, nullptr);
 	ButtonBar.VSplitRight(90.0f, &ButtonBar, &Button);
 	if(DoButton_Editor(&s_ShowDirectoryButton, "Show directory", 0, &Button, 0, "Open the current directory in the file browser"))
 	{
@@ -5046,7 +5047,7 @@ void CEditor::RenderFileDialog()
 		}
 	}
 
-	ButtonBar.VSplitRight(40.0f, &ButtonBar, &Button);
+	ButtonBar.VSplitRight(ButtonSpacing, &ButtonBar, nullptr);
 	ButtonBar.VSplitRight(50.0f, &ButtonBar, &Button);
 	static SConfirmPopupContext s_ConfirmDeletePopupContext;
 	if(m_FilesSelectedIndex >= 0 && m_vpFilteredFileList[m_FilesSelectedIndex]->m_StorageType == IStorage::TYPE_SAVE && !m_vpFilteredFileList[m_FilesSelectedIndex]->m_IsLink && str_comp(m_vpFilteredFileList[m_FilesSelectedIndex]->m_aFilename, "..") != 0)
@@ -5092,21 +5093,6 @@ void CEditor::RenderFileDialog()
 			constexpr float PopupWidth = 400.0f;
 			constexpr float PopupHeight = 110.0f;
 			UiInvokePopupMenu(&s_PopupNewFolderId, 0, Width / 2.0f - PopupWidth / 2.0f, Height / 2.0f - PopupHeight / 2.0f, PopupWidth, PopupHeight, PopupNewFolder);
-			UI()->SetActiveItem(nullptr);
-		}
-
-		ButtonBar.VSplitLeft(40.0f, nullptr, &ButtonBar);
-		ButtonBar.VSplitLeft(70.0f, &Button, &ButtonBar);
-		if(DoButton_Editor(&s_MapInfoButton, "Map details", 0, &Button, 0, nullptr))
-		{
-			str_copy(m_Map.m_MapInfo.m_aAuthorTmp, m_Map.m_MapInfo.m_aAuthor);
-			str_copy(m_Map.m_MapInfo.m_aVersionTmp, m_Map.m_MapInfo.m_aVersion);
-			str_copy(m_Map.m_MapInfo.m_aCreditsTmp, m_Map.m_MapInfo.m_aCredits);
-			str_copy(m_Map.m_MapInfo.m_aLicenseTmp, m_Map.m_MapInfo.m_aLicense);
-			static int s_PopupMapInfoId;
-			constexpr float PopupWidth = 400.0f;
-			constexpr float PopupHeight = 170.0f;
-			UiInvokePopupMenu(&s_PopupMapInfoId, 0, Width / 2.0f - PopupWidth / 2.0f, Height / 2.0f - PopupHeight / 2.0f, PopupWidth, PopupHeight, PopupMapInfo);
 			UI()->SetActiveItem(nullptr);
 		}
 	}
@@ -6043,7 +6029,7 @@ void CEditor::RenderMenubar(CUIRect MenuBar)
 	static int s_FileButton = 0;
 	MenuBar.VSplitLeft(60.0f, &FileButton, &MenuBar);
 	if(DoButton_Menu(&s_FileButton, "File", 0, &FileButton, 0, nullptr))
-		UiInvokePopupMenu(&s_FileButton, 1, FileButton.x, FileButton.y + FileButton.h - 1.0f, 120.0f, 152.0f, PopupMenuFile, this);
+		UiInvokePopupMenu(&s_FileButton, 1, FileButton.x, FileButton.y + FileButton.h - 1.0f, 120.0f, 174.0f, PopupMenuFile, this);
 
 	MenuBar.VSplitLeft(5.0f, nullptr, &MenuBar);
 

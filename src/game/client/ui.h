@@ -331,7 +331,7 @@ public:
 	float ButtonColorMulDefault() { return 1.0f; }
 	float ButtonColorMul(const void *pID);
 
-	CUIRect *Screen();
+	const CUIRect *Screen();
 	void MapScreen();
 	float PixelSize();
 
