@@ -1302,8 +1302,10 @@ public:
 	void DoQuad(CQuad *pQuad, int Index);
 	ColorRGBA GetButtonColor(const void *pID, int Checked);
 
-	static bool ReplaceImage(const char *pFilename, int StorageType, void *pUser);
-	static bool ReplaceSound(const char *pFileName, int StorageType, void *pUser);
+	bool ReplaceImage(const char *pFilename, int StorageType, bool CheckDuplicate);
+	static bool ReplaceImageCallback(const char *pFilename, int StorageType, void *pUser);
+	bool ReplaceSound(const char *pFileName, int StorageType, bool CheckDuplicate);
+	static bool ReplaceSoundCallback(const char *pFileName, int StorageType, void *pUser);
 	static bool AddImage(const char *pFilename, int StorageType, void *pUser);
 	static bool AddSound(const char *pFileName, int StorageType, void *pUser);
 
