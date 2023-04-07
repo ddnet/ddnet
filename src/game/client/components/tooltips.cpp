@@ -80,7 +80,7 @@ void CTooltips::OnRender()
 			Rect.w = TextRender()->TextWidth(14.0f, Tooltip.m_pText, -1, -1.0f) + 4.0f;
 		Rect.h = 30.0f;
 
-		CUIRect *pScreen = UI()->Screen();
+		const CUIRect *pScreen = UI()->Screen();
 
 		// Try the top side.
 		if(Tooltip.m_Rect.y - Rect.h - MARGIN > pScreen->y)

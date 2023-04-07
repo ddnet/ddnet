@@ -294,7 +294,7 @@ float CUI::ButtonColorMul(const void *pID)
 	return ButtonColorMulDefault();
 }
 
-CUIRect *CUI::Screen()
+const CUIRect *CUI::Screen()
 {
 	float Aspect = Graphics()->ScreenAspect();
 	float w, h;

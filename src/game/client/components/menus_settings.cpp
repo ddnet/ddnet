@@ -2263,7 +2263,7 @@ ColorHSLA CMenus::RenderHSLColorPicker(const CUIRect *pRect, unsigned int *pColo
 				return HSLColor;
 		}
 
-		CUIRect *pScreen = UI()->Screen();
+		const CUIRect *pScreen = UI()->Screen();
 		ms_ColorPicker.m_X = minimum(UI()->MouseX(), pScreen->w - ms_ColorPicker.ms_Width);
 		ms_ColorPicker.m_Y = minimum(UI()->MouseY(), pScreen->h - ms_ColorPicker.ms_Height);
 		ms_ColorPicker.m_pColor = pColor;
