@@ -103,6 +103,19 @@ tc_profile_clan
 tc_profile_flag
 tc_profile_colors
 tc_profile_emote
+tc_last_notify
+tc_last_notify_text
+tc_last_notify_color
+tc_render_nameplate_spec
+tc_vote_auto
+tc_vote_default
+tc_vote_default
+tc_vote_show
+tc_vote_show_friends
+tc_auto_verify
+tc_rainbow
+tc_rainbow_others
+tc_rainbow_mode
 add_profile
 ```
 
