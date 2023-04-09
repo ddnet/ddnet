@@ -517,48 +517,46 @@ void CUI::DoSmoothScrollLogic(float *pScrollOffset, float *pScrollOffsetChange, 
 	}
 }
 
-float CUI::DoTextLabel(float x, float y, float w, float h, const char *pText, float Size, int Align, const SLabelProperties &LabelProps)
+void CUI::DoLabel(const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps)
 {
-	float AlignedSize = 0;
-	float MaxCharacterHeightInLine = 0;
-	float MaxTextWidth = LabelProps.m_MaxWidth != -1 ? LabelProps.m_MaxWidth : w;
-	float tw = TextRender()->TextWidth(Size, pText, -1, LabelProps.m_MaxWidth, &AlignedSize, &MaxCharacterHeightInLine);
-	while(tw > MaxTextWidth + 0.001f)
+	int Flags = LabelProps.m_StopAtEnd ? TEXTFLAG_STOP_AT_END : 0;
+	float TextHeight = 0.0f;
+	float AlignedFontSize = 0.0f;
+	float MaxCharacterHeightInLine = 0.0f;
+	float MaxTextWidth = LabelProps.m_MaxWidth != -1 ? LabelProps.m_MaxWidth : pRect->w;
+	float TextWidth = TextRender()->TextWidth(Size, pText, -1, LabelProps.m_MaxWidth, Flags, &TextHeight, &AlignedFontSize, &MaxCharacterHeightInLine);
+	while(TextWidth > MaxTextWidth + 0.001f)
 	{
 		if(!LabelProps.m_EnableWidthCheck)
 			break;
 		if(Size < 4.0f)
 			break;
 		Size -= 1.0f;
-		tw = TextRender()->TextWidth(Size, pText, -1, LabelProps.m_MaxWidth, &AlignedSize, &MaxCharacterHeightInLine);
+		TextWidth = TextRender()->TextWidth(Size, pText, -1, LabelProps.m_MaxWidth, Flags, &TextHeight, &AlignedFontSize, &MaxCharacterHeightInLine);
 	}
 
-	int Flags = TEXTFLAG_RENDER | (LabelProps.m_StopAtEnd ? TEXTFLAG_STOP_AT_END : 0);
-
-	float AlignmentVert = y + (h - AlignedSize) / 2.f;
-	float AlignmentHori = 0;
-	if(LabelProps.m_AlignVertically == 0)
-	{
-		AlignmentVert = y + (h - AlignedSize) / 2.f - (AlignedSize - MaxCharacterHeightInLine) / 2.f;
-	}
-	// if(Align == 0)
+	float CursorX = 0.0f;
 	if(Align & TEXTALIGN_CENTER)
 	{
-		AlignmentHori = x + (w - tw) / 2.f;
+		CursorX = pRect->x + (pRect->w - TextWidth) / 2.f;
 	}
-	// else if(Align < 0)
 	else if(Align & TEXTALIGN_LEFT)
 	{
-		AlignmentHori = x;
+		CursorX = pRect->x;
 	}
-	// else if(Align > 0)
 	else if(Align & TEXTALIGN_RIGHT)
 	{
-		AlignmentHori = x + w - tw;
+		CursorX = pRect->x + pRect->w - TextWidth;
+	}
+
+	float CursorY = pRect->y + (pRect->h - TextHeight) / 2.f;
+	if(LabelProps.m_AlignVertically == 0)
+	{
+		CursorY = pRect->y + (pRect->h - AlignedFontSize) / 2.f - (AlignedFontSize - MaxCharacterHeightInLine) / 2.f;
 	}
 
 	CTextCursor Cursor;
-	TextRender()->SetCursor(&Cursor, AlignmentHori, AlignmentVert, Size, Flags);
+	TextRender()->SetCursor(&Cursor, CursorX, CursorY, Size, TEXTFLAG_RENDER | Flags);
 	Cursor.m_LineWidth = (float)LabelProps.m_MaxWidth;
 	if(LabelProps.m_pSelCursor)
 	{
@@ -580,64 +578,54 @@ float CUI::DoTextLabel(float x, float y, float w, float h, const char *pText, fl
 	{
 		*LabelProps.m_pSelCursor = Cursor;
 	}
-
-	return tw;
-}
-
-void CUI::DoLabel(const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps)
-{
-	DoTextLabel(pRect->x, pRect->y, pRect->w, pRect->h, pText, Size, Align, LabelProps);
 }
 
 void CUI::DoLabel(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps, int StrLen, const CTextCursor *pReadCursor)
 {
-	float AlignedSize = 0;
-	float MaxCharacterHeightInLine = 0;
+	int Flags = pReadCursor ? (pReadCursor->m_Flags & ~TEXTFLAG_RENDER) : LabelProps.m_StopAtEnd ? TEXTFLAG_STOP_AT_END : 0;
+	float TextHeight = 0.0f;
+	float AlignedFontSize = 0.0f;
+	float MaxCharacterHeightInLine = 0.0f;
 	float MaxTextWidth = LabelProps.m_MaxWidth != -1 ? LabelProps.m_MaxWidth : pRect->w;
-	float tw = TextRender()->TextWidth(Size, pText, -1, LabelProps.m_MaxWidth, &AlignedSize, &MaxCharacterHeightInLine);
-	while(tw > MaxTextWidth + 0.001f)
+	float TextWidth = TextRender()->TextWidth(Size, pText, -1, LabelProps.m_MaxWidth, Flags, &TextHeight, &AlignedFontSize, &MaxCharacterHeightInLine);
+	while(TextWidth > MaxTextWidth + 0.001f)
 	{
 		if(!LabelProps.m_EnableWidthCheck)
 			break;
 		if(Size < 4.0f)
 			break;
 		Size -= 1.0f;
-		tw = TextRender()->TextWidth(Size, pText, -1, LabelProps.m_MaxWidth, &AlignedSize, &MaxCharacterHeightInLine);
+		TextWidth = TextRender()->TextWidth(Size, pText, -1, LabelProps.m_MaxWidth, Flags, &TextHeight, &AlignedFontSize, &MaxCharacterHeightInLine);
 	}
-	float AlignmentVert = pRect->y + (pRect->h - AlignedSize) / 2.f;
-	float AlignmentHori = 0;
 
-	CTextCursor Cursor;
-
-	int Flags = TEXTFLAG_RENDER | (LabelProps.m_StopAtEnd ? TEXTFLAG_STOP_AT_END : 0);
-
-	if(LabelProps.m_AlignVertically == 0)
-	{
-		AlignmentVert = pRect->y + (pRect->h - AlignedSize) / 2.f - (AlignedSize - MaxCharacterHeightInLine) / 2.f;
-	}
-	// if(Align == 0)
+	float CursorX = 0;
 	if(Align & TEXTALIGN_CENTER)
 	{
-		AlignmentHori = pRect->x + (pRect->w - tw) / 2.f;
+		CursorX = pRect->x + (pRect->w - TextWidth) / 2.f;
 	}
-	// else if(Align < 0)
 	else if(Align & TEXTALIGN_LEFT)
 	{
-		AlignmentHori = pRect->x;
+		CursorX = pRect->x;
 	}
-	// else if(Align > 0)
 	else if(Align & TEXTALIGN_RIGHT)
 	{
-		AlignmentHori = pRect->x + pRect->w - tw;
+		CursorX = pRect->x + pRect->w - TextWidth;
 	}
 
+	float CursorY = pRect->y + (pRect->h - TextHeight) / 2.f;
+	if(LabelProps.m_AlignVertically == 0)
+	{
+		CursorY = pRect->y + (pRect->h - AlignedFontSize) / 2.f - (AlignedFontSize - MaxCharacterHeightInLine) / 2.f;
+	}
+
+	CTextCursor Cursor;
 	if(pReadCursor)
 	{
 		Cursor = *pReadCursor;
 	}
 	else
 	{
-		TextRender()->SetCursor(&Cursor, AlignmentHori, AlignmentVert, Size, Flags);
+		TextRender()->SetCursor(&Cursor, CursorX, CursorY, Size, TEXTFLAG_RENDER | Flags);
 	}
 	Cursor.m_LineWidth = LabelProps.m_MaxWidth;
 
@@ -651,11 +639,11 @@ void CUI::DoLabel(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, cons
 	RectEl.m_Cursor = Cursor;
 }
 
-void CUI::DoLabelStreamed(CUIElement::SUIElementRect &RectEl, float x, float y, float w, float h, const char *pText, float Size, int Align, float MaxWidth, int AlignVertically, bool StopAtEnd, int StrLen, const CTextCursor *pReadCursor)
+void CUI::DoLabelStreamed(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth, int AlignVertically, bool StopAtEnd, int StrLen, const CTextCursor *pReadCursor)
 {
 	bool NeedsRecreate = false;
 	bool ColorChanged = RectEl.m_TextColor != TextRender()->GetTextColor() || RectEl.m_TextOutlineColor != TextRender()->GetTextOutlineColor();
-	if(RectEl.m_UITextContainer == -1 || RectEl.m_Width != w || RectEl.m_Height != h || ColorChanged)
+	if(RectEl.m_UITextContainer == -1 || RectEl.m_Width != pRect->w || RectEl.m_Height != pRect->h || ColorChanged)
 	{
 		NeedsRecreate = true;
 	}
@@ -672,14 +660,14 @@ void CUI::DoLabelStreamed(CUIElement::SUIElementRect &RectEl, float x, float y, 
 				NeedsRecreate = true;
 		}
 	}
-	RectEl.m_X = x;
-	RectEl.m_Y = y;
+	RectEl.m_X = pRect->x;
+	RectEl.m_Y = pRect->y;
 	if(NeedsRecreate)
 	{
 		TextRender()->DeleteTextContainer(RectEl.m_UITextContainer);
 
-		RectEl.m_Width = w;
-		RectEl.m_Height = h;
+		RectEl.m_Width = pRect->w;
+		RectEl.m_Height = pRect->h;
 
 		if(StrLen > 0)
 			RectEl.m_Text = std::string(pText, StrLen);
@@ -691,8 +679,8 @@ void CUI::DoLabelStreamed(CUIElement::SUIElementRect &RectEl, float x, float y, 
 		CUIRect TmpRect;
 		TmpRect.x = 0;
 		TmpRect.y = 0;
-		TmpRect.w = w;
-		TmpRect.h = h;
+		TmpRect.w = pRect->w;
+		TmpRect.h = pRect->h;
 
 		SLabelProperties Props;
 		Props.m_MaxWidth = MaxWidth;
@@ -705,14 +693,8 @@ void CUI::DoLabelStreamed(CUIElement::SUIElementRect &RectEl, float x, float y, 
 	ColorRGBA ColorTextOutline(RectEl.m_TextOutlineColor);
 	if(RectEl.m_UITextContainer != -1)
 	{
-		TextRender()->RenderTextContainer(RectEl.m_UITextContainer,
-			ColorText, ColorTextOutline, x, y);
+		TextRender()->RenderTextContainer(RectEl.m_UITextContainer, ColorText, ColorTextOutline, pRect->x, pRect->y);
 	}
-}
-
-void CUI::DoLabelStreamed(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth, int AlignVertically, bool StopAtEnd, int StrLen, const CTextCursor *pReadCursor)
-{
-	DoLabelStreamed(RectEl, pRect->x, pRect->y, pRect->w, pRect->h, pText, Size, Align, MaxWidth, AlignVertically, StopAtEnd, StrLen, pReadCursor);
 }
 
 bool CUI::DoEditBox(const void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden, int Corners, const SUIExEditBoxProperties &Properties)
@@ -1526,14 +1508,20 @@ CUI::EPopupMenuFunctionResult CUI::PopupMessage(void *pContext, CUIRect View, bo
 	SMessagePopupContext *pMessagePopup = static_cast<SMessagePopupContext *>(pContext);
 	CUI *pUI = pMessagePopup->m_pUI;
 
-	CTextCursor Cursor;
-	pUI->TextRender()->SetCursor(&Cursor, View.x, View.y, SMessagePopupContext::POPUP_FONT_SIZE, TEXTFLAG_RENDER);
-	Cursor.m_LineWidth = View.w;
 	pUI->TextRender()->TextColor(pMessagePopup->m_TextColor);
-	pUI->TextRender()->TextEx(&Cursor, pMessagePopup->m_aMessage, -1);
+	pUI->TextRender()->Text(View.x, View.y, SMessagePopupContext::POPUP_FONT_SIZE, pMessagePopup->m_aMessage, View.w);
 	pUI->TextRender()->TextColor(pUI->TextRender()->DefaultTextColor());
 
 	return (Active && pUI->ConsumeHotkey(HOTKEY_ENTER)) ? CUI::POPUP_CLOSE_CURRENT : CUI::POPUP_KEEP_OPEN;
+}
+
+void CUI::ShowPopupMessage(float X, float Y, SMessagePopupContext *pContext)
+{
+	const float TextWidth = minimum(std::ceil(TextRender()->TextWidth(SMessagePopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, -1, -1.0f)), SMessagePopupContext::POPUP_MAX_WIDTH);
+	float TextHeight = 0.0f;
+	TextRender()->TextWidth(SMessagePopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, -1, TextWidth, 0, &TextHeight);
+	pContext->m_pUI = this;
+	DoPopupMenu(pContext, X, Y, TextWidth + 10.0f, TextHeight + 10.0f, pContext, PopupMessage);
 }
 
 CUI::SConfirmPopupContext::SConfirmPopupContext()
@@ -1554,9 +1542,10 @@ void CUI::SConfirmPopupContext::YesNoButtons()
 
 void CUI::ShowPopupConfirm(float X, float Y, SConfirmPopupContext *pContext)
 {
-	const float TextWidth = minimum(TextRender()->TextWidth(SConfirmPopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, -1, -1.0f), SConfirmPopupContext::POPUP_MAX_WIDTH);
-	const int LineCount = TextRender()->TextLineCount(SConfirmPopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, TextWidth);
-	const float PopupHeight = LineCount * SConfirmPopupContext::POPUP_FONT_SIZE + SConfirmPopupContext::POPUP_BUTTON_HEIGHT + SConfirmPopupContext::POPUP_BUTTON_SPACING + 10.0f;
+	const float TextWidth = minimum(std::ceil(TextRender()->TextWidth(SConfirmPopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, -1, -1.0f)), SConfirmPopupContext::POPUP_MAX_WIDTH);
+	float TextHeight = 0.0f;
+	TextRender()->TextWidth(SConfirmPopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, -1, TextWidth, 0, &TextHeight);
+	const float PopupHeight = TextHeight + SConfirmPopupContext::POPUP_BUTTON_HEIGHT + SConfirmPopupContext::POPUP_BUTTON_SPACING + 10.0f;
 	pContext->m_pUI = this;
 	pContext->m_Result = SConfirmPopupContext::UNSET;
 	DoPopupMenu(pContext, X, Y, TextWidth + 10.0f, PopupHeight, pContext, PopupConfirm);
@@ -1571,10 +1560,7 @@ CUI::EPopupMenuFunctionResult CUI::PopupConfirm(void *pContext, CUIRect View, bo
 	View.HSplitBottom(SConfirmPopupContext::POPUP_BUTTON_HEIGHT, &Label, &ButtonBar);
 	ButtonBar.VSplitMid(&CancelButton, &ConfirmButton, SConfirmPopupContext::POPUP_BUTTON_SPACING);
 
-	CTextCursor Cursor;
-	pUI->TextRender()->SetCursor(&Cursor, Label.x, Label.y, SConfirmPopupContext::POPUP_FONT_SIZE, TEXTFLAG_RENDER);
-	Cursor.m_LineWidth = Label.w;
-	pUI->TextRender()->TextEx(&Cursor, pConfirmPopup->m_aMessage, -1);
+	pUI->TextRender()->Text(Label.x, Label.y, SConfirmPopupContext::POPUP_FONT_SIZE, pConfirmPopup->m_aMessage, Label.w);
 
 	static CButtonContainer s_CancelButton;
 	if(pUI->DoButton_PopupMenu(&s_CancelButton, pConfirmPopup->m_aNegativeButtonLabel, &CancelButton, TEXTALIGN_CENTER))
@@ -1591,14 +1577,6 @@ CUI::EPopupMenuFunctionResult CUI::PopupConfirm(void *pContext, CUIRect View, bo
 	}
 
 	return CUI::POPUP_KEEP_OPEN;
-}
-
-void CUI::ShowPopupMessage(float X, float Y, SMessagePopupContext *pContext)
-{
-	const float TextWidth = minimum(TextRender()->TextWidth(SMessagePopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, -1, -1.0f), SMessagePopupContext::POPUP_MAX_WIDTH);
-	const int LineCount = TextRender()->TextLineCount(SMessagePopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, TextWidth);
-	pContext->m_pUI = this;
-	DoPopupMenu(pContext, X, Y, TextWidth + 10.0f, LineCount * SMessagePopupContext::POPUP_FONT_SIZE + 10.0f, pContext, PopupMessage);
 }
 
 CUI::SSelectionPopupContext::SSelectionPopupContext()
@@ -1618,13 +1596,11 @@ CUI::EPopupMenuFunctionResult CUI::PopupSelection(void *pContext, CUIRect View, 
 	CUI *pUI = pSelectionPopup->m_pUI;
 
 	CUIRect Slot;
-	const int LineCount = pUI->TextRender()->TextLineCount(SSelectionPopupContext::POPUP_FONT_SIZE, pSelectionPopup->m_aMessage, SSelectionPopupContext::POPUP_MAX_WIDTH);
-	View.HSplitTop(LineCount * SSelectionPopupContext::POPUP_FONT_SIZE, &Slot, &View);
+	float TextHeight = 0.0f;
+	pUI->TextRender()->TextWidth(SSelectionPopupContext::POPUP_FONT_SIZE, pSelectionPopup->m_aMessage, -1, SSelectionPopupContext::POPUP_MAX_WIDTH, 0, &TextHeight);
+	View.HSplitTop(TextHeight, &Slot, &View);
 
-	CTextCursor Cursor;
-	pUI->TextRender()->SetCursor(&Cursor, Slot.x, Slot.y, SSelectionPopupContext::POPUP_FONT_SIZE, TEXTFLAG_RENDER);
-	Cursor.m_LineWidth = Slot.w;
-	pUI->TextRender()->TextEx(&Cursor, pSelectionPopup->m_aMessage, -1);
+	pUI->TextRender()->Text(Slot.x, Slot.y, SSelectionPopupContext::POPUP_FONT_SIZE, pSelectionPopup->m_aMessage, Slot.w);
 
 	pSelectionPopup->m_vButtonContainers.resize(pSelectionPopup->m_Entries.size());
 
@@ -1643,8 +1619,9 @@ CUI::EPopupMenuFunctionResult CUI::PopupSelection(void *pContext, CUIRect View, 
 
 void CUI::ShowPopupSelection(float X, float Y, SSelectionPopupContext *pContext)
 {
-	const int LineCount = TextRender()->TextLineCount(SSelectionPopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, SSelectionPopupContext::POPUP_MAX_WIDTH);
-	const float PopupHeight = LineCount * SSelectionPopupContext::POPUP_FONT_SIZE + pContext->m_Entries.size() * (SSelectionPopupContext::POPUP_ENTRY_HEIGHT + SSelectionPopupContext::POPUP_ENTRY_SPACING) + 10.0f;
+	float TextHeight = 0.0f;
+	TextRender()->TextWidth(SSelectionPopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, -1, SSelectionPopupContext::POPUP_MAX_WIDTH, 0, &TextHeight);
+	const float PopupHeight = TextHeight + pContext->m_Entries.size() * (SSelectionPopupContext::POPUP_ENTRY_HEIGHT + SSelectionPopupContext::POPUP_ENTRY_SPACING) + 10.0f;
 	pContext->m_pUI = this;
 	pContext->m_pSelection = nullptr;
 	DoPopupMenu(pContext, X, Y, SSelectionPopupContext::POPUP_MAX_WIDTH + 10.0f, PopupHeight, pContext, PopupSelection);

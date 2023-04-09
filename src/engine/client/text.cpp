@@ -831,34 +831,23 @@ public:
 		SetRenderFlags(OldRenderFlags);
 	}
 
-	float TextWidth(float Size, const char *pText, int StrLength, float LineWidth, float *pAlignedHeight = nullptr, float *pMaxCharacterHeightInLine = nullptr) override
+	float TextWidth(float Size, const char *pText, int StrLength, float LineWidth, int Flags = 0, float *pHeight = nullptr, float *pAlignedFontSize = nullptr, float *pMaxCharacterHeightInLine = nullptr) override
 	{
 		CTextCursor Cursor;
-		SetCursor(&Cursor, 0, 0, Size, 0);
+		SetCursor(&Cursor, 0, 0, Size, Flags);
 		Cursor.m_LineWidth = LineWidth;
 		const unsigned OldRenderFlags = m_RenderFlags;
 		if(LineWidth <= 0)
 			SetRenderFlags(OldRenderFlags | ETextRenderFlags::TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE);
 		TextEx(&Cursor, pText, StrLength);
 		SetRenderFlags(OldRenderFlags);
-		if(pAlignedHeight != nullptr)
-			*pAlignedHeight = Cursor.m_AlignedFontSize;
+		if(pHeight != nullptr)
+			*pHeight = Cursor.Height();
+		if(pAlignedFontSize != nullptr)
+			*pAlignedFontSize = Cursor.m_AlignedFontSize;
 		if(pMaxCharacterHeightInLine != nullptr)
 			*pMaxCharacterHeightInLine = Cursor.m_MaxCharacterHeight;
-		return Cursor.m_X;
-	}
-
-	int TextLineCount(float Size, const char *pText, float LineWidth) override
-	{
-		CTextCursor Cursor;
-		SetCursor(&Cursor, 0, 0, Size, 0);
-		Cursor.m_LineWidth = LineWidth;
-		const unsigned OldRenderFlags = m_RenderFlags;
-		if(LineWidth <= 0)
-			SetRenderFlags(OldRenderFlags | ETextRenderFlags::TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE);
-		TextEx(&Cursor, pText, -1);
-		SetRenderFlags(OldRenderFlags);
-		return Cursor.m_LineCount;
+		return Cursor.m_LongestLineWidth;
 	}
 
 	void TextColor(float r, float g, float b, float a) override
@@ -1200,7 +1189,7 @@ public:
 					Cutter.m_Flags |= TEXTFLAG_STOP_AT_END | TEXTFLAG_DISALLOW_NEWLINE;
 
 					TextEx(&Cutter, pCurrent, Wlen);
-					Wlen = Cutter.m_CharCount;
+					Wlen = maximum(Cutter.m_CharCount - 1, 0);
 					NewLine = true;
 
 					if(Cutter.m_GlyphCount <= 3 && !GotNewLineLast) // if we can't place 3 chars of the word on this line, take the next
@@ -1416,8 +1405,7 @@ public:
 					LastCharWidth = CharWidth;
 				}
 
-				if(DrawX > pCursor->m_LongestLineWidth)
-					pCursor->m_LongestLineWidth = DrawX;
+				pCursor->m_LongestLineWidth = maximum(pCursor->m_LongestLineWidth, DrawX);
 			}
 
 			if(NewLine)
