@@ -1517,7 +1517,7 @@ CUI::EPopupMenuFunctionResult CUI::PopupMessage(void *pContext, CUIRect View, bo
 
 void CUI::ShowPopupMessage(float X, float Y, SMessagePopupContext *pContext)
 {
-	const float TextWidth = minimum(TextRender()->TextWidth(SMessagePopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, -1, -1.0f), SMessagePopupContext::POPUP_MAX_WIDTH);
+	const float TextWidth = minimum(std::ceil(TextRender()->TextWidth(SMessagePopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, -1, -1.0f)), SMessagePopupContext::POPUP_MAX_WIDTH);
 	float TextHeight = 0.0f;
 	TextRender()->TextWidth(SMessagePopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, -1, TextWidth, 0, &TextHeight);
 	pContext->m_pUI = this;
@@ -1542,7 +1542,7 @@ void CUI::SConfirmPopupContext::YesNoButtons()
 
 void CUI::ShowPopupConfirm(float X, float Y, SConfirmPopupContext *pContext)
 {
-	const float TextWidth = minimum(TextRender()->TextWidth(SConfirmPopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, -1, -1.0f), SConfirmPopupContext::POPUP_MAX_WIDTH);
+	const float TextWidth = minimum(std::ceil(TextRender()->TextWidth(SConfirmPopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, -1, -1.0f)), SConfirmPopupContext::POPUP_MAX_WIDTH);
 	float TextHeight = 0.0f;
 	TextRender()->TextWidth(SConfirmPopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, -1, TextWidth, 0, &TextHeight);
 	const float PopupHeight = TextHeight + SConfirmPopupContext::POPUP_BUTTON_HEIGHT + SConfirmPopupContext::POPUP_BUTTON_SPACING + 10.0f;
