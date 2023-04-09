@@ -1518,6 +1518,15 @@ CUI::EPopupMenuFunctionResult CUI::PopupMessage(void *pContext, CUIRect View, bo
 	return (Active && pUI->ConsumeHotkey(HOTKEY_ENTER)) ? CUI::POPUP_CLOSE_CURRENT : CUI::POPUP_KEEP_OPEN;
 }
 
+void CUI::ShowPopupMessage(float X, float Y, SMessagePopupContext *pContext)
+{
+	const float TextWidth = minimum(TextRender()->TextWidth(SMessagePopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, -1, -1.0f), SMessagePopupContext::POPUP_MAX_WIDTH);
+	float TextHeight = 0.0f;
+	TextRender()->TextWidth(SMessagePopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, -1, TextWidth, 0, &TextHeight);
+	pContext->m_pUI = this;
+	DoPopupMenu(pContext, X, Y, TextWidth + 10.0f, TextHeight + 10.0f, pContext, PopupMessage);
+}
+
 CUI::SConfirmPopupContext::SConfirmPopupContext()
 {
 	Reset();
@@ -1537,8 +1546,9 @@ void CUI::SConfirmPopupContext::YesNoButtons()
 void CUI::ShowPopupConfirm(float X, float Y, SConfirmPopupContext *pContext)
 {
 	const float TextWidth = minimum(TextRender()->TextWidth(SConfirmPopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, -1, -1.0f), SConfirmPopupContext::POPUP_MAX_WIDTH);
-	const int LineCount = TextRender()->TextLineCount(SConfirmPopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, TextWidth);
-	const float PopupHeight = LineCount * SConfirmPopupContext::POPUP_FONT_SIZE + SConfirmPopupContext::POPUP_BUTTON_HEIGHT + SConfirmPopupContext::POPUP_BUTTON_SPACING + 10.0f;
+	float TextHeight = 0.0f;
+	TextRender()->TextWidth(SConfirmPopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, -1, TextWidth, 0, &TextHeight);
+	const float PopupHeight = TextHeight + SConfirmPopupContext::POPUP_BUTTON_HEIGHT + SConfirmPopupContext::POPUP_BUTTON_SPACING + 10.0f;
 	pContext->m_pUI = this;
 	pContext->m_Result = SConfirmPopupContext::UNSET;
 	DoPopupMenu(pContext, X, Y, TextWidth + 10.0f, PopupHeight, pContext, PopupConfirm);
@@ -1575,14 +1585,6 @@ CUI::EPopupMenuFunctionResult CUI::PopupConfirm(void *pContext, CUIRect View, bo
 	return CUI::POPUP_KEEP_OPEN;
 }
 
-void CUI::ShowPopupMessage(float X, float Y, SMessagePopupContext *pContext)
-{
-	const float TextWidth = minimum(TextRender()->TextWidth(SMessagePopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, -1, -1.0f), SMessagePopupContext::POPUP_MAX_WIDTH);
-	const int LineCount = TextRender()->TextLineCount(SMessagePopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, TextWidth);
-	pContext->m_pUI = this;
-	DoPopupMenu(pContext, X, Y, TextWidth + 10.0f, LineCount * SMessagePopupContext::POPUP_FONT_SIZE + 10.0f, pContext, PopupMessage);
-}
-
 CUI::SSelectionPopupContext::SSelectionPopupContext()
 {
 	Reset();
@@ -1600,8 +1602,9 @@ CUI::EPopupMenuFunctionResult CUI::PopupSelection(void *pContext, CUIRect View, 
 	CUI *pUI = pSelectionPopup->m_pUI;
 
 	CUIRect Slot;
-	const int LineCount = pUI->TextRender()->TextLineCount(SSelectionPopupContext::POPUP_FONT_SIZE, pSelectionPopup->m_aMessage, SSelectionPopupContext::POPUP_MAX_WIDTH);
-	View.HSplitTop(LineCount * SSelectionPopupContext::POPUP_FONT_SIZE, &Slot, &View);
+	float TextHeight = 0.0f;
+	pUI->TextRender()->TextWidth(SSelectionPopupContext::POPUP_FONT_SIZE, pSelectionPopup->m_aMessage, -1, SSelectionPopupContext::POPUP_MAX_WIDTH, 0, &TextHeight);
+	View.HSplitTop(TextHeight, &Slot, &View);
 
 	CTextCursor Cursor;
 	pUI->TextRender()->SetCursor(&Cursor, Slot.x, Slot.y, SSelectionPopupContext::POPUP_FONT_SIZE, TEXTFLAG_RENDER);
@@ -1625,8 +1628,9 @@ CUI::EPopupMenuFunctionResult CUI::PopupSelection(void *pContext, CUIRect View, 
 
 void CUI::ShowPopupSelection(float X, float Y, SSelectionPopupContext *pContext)
 {
-	const int LineCount = TextRender()->TextLineCount(SSelectionPopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, SSelectionPopupContext::POPUP_MAX_WIDTH);
-	const float PopupHeight = LineCount * SSelectionPopupContext::POPUP_FONT_SIZE + pContext->m_Entries.size() * (SSelectionPopupContext::POPUP_ENTRY_HEIGHT + SSelectionPopupContext::POPUP_ENTRY_SPACING) + 10.0f;
+	float TextHeight = 0.0f;
+	TextRender()->TextWidth(SSelectionPopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, -1, SSelectionPopupContext::POPUP_MAX_WIDTH, 0, &TextHeight);
+	const float PopupHeight = TextHeight + pContext->m_Entries.size() * (SSelectionPopupContext::POPUP_ENTRY_HEIGHT + SSelectionPopupContext::POPUP_ENTRY_SPACING) + 10.0f;
 	pContext->m_pUI = this;
 	pContext->m_pSelection = nullptr;
 	DoPopupMenu(pContext, X, Y, SSelectionPopupContext::POPUP_MAX_WIDTH + 10.0f, PopupHeight, pContext, PopupSelection);

@@ -850,19 +850,6 @@ public:
 		return Cursor.m_LongestLineWidth;
 	}
 
-	int TextLineCount(float Size, const char *pText, float LineWidth) override
-	{
-		CTextCursor Cursor;
-		SetCursor(&Cursor, 0, 0, Size, 0);
-		Cursor.m_LineWidth = LineWidth;
-		const unsigned OldRenderFlags = m_RenderFlags;
-		if(LineWidth <= 0)
-			SetRenderFlags(OldRenderFlags | ETextRenderFlags::TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE);
-		TextEx(&Cursor, pText, -1);
-		SetRenderFlags(OldRenderFlags);
-		return Cursor.m_LineCount;
-	}
-
 	void TextColor(float r, float g, float b, float a) override
 	{
 		m_Color.r = r;
