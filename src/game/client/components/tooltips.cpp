@@ -109,7 +109,7 @@ void CTooltips::OnRender()
 
 		Rect.Draw(ColorRGBA(0.2, 0.2, 0.2, 0.80f), IGraphics::CORNER_ALL, 5.0f);
 		Rect.Margin(2.0f, &Rect);
-		UI()->DoLabel(&Rect, Tooltip.m_pText, 14.0f, TEXTALIGN_LEFT);
+		UI()->DoLabel(&Rect, Tooltip.m_pText, 14.0f, TEXTALIGN_ML);
 		Tooltip.m_OnScreen = false;
 	}
 }

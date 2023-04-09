@@ -232,7 +232,7 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 		str_format(aBuf, sizeof(aBuf), Localize("DDNet Client updated!"));
 		TextRender()->TextColor(1.0f, 0.4f, 0.4f, 1.0f);
 	}
-	UI()->DoLabel(&VersionUpdate, aBuf, 14.0f, TEXTALIGN_LEFT);
+	UI()->DoLabel(&VersionUpdate, aBuf, 14.0f, TEXTALIGN_ML);
 	TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 
 	VersionUpdate.VSplitLeft(TextRender()->TextWidth(14.0f, aBuf, -1, -1.0f) + 10.0f, 0, &Part);
@@ -275,12 +275,12 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 		char aBuf[64];
 		str_format(aBuf, sizeof(aBuf), Localize("DDNet %s is out!"), Client()->LatestVersion());
 		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
-		UI()->DoLabel(&VersionUpdate, aBuf, 14.0f, TEXTALIGN_CENTER);
+		UI()->DoLabel(&VersionUpdate, aBuf, 14.0f, TEXTALIGN_MC);
 		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 #endif
 
-	UI()->DoLabel(&CurVersion, GAME_RELEASE_VERSION, 14.0f, TEXTALIGN_RIGHT);
+	UI()->DoLabel(&CurVersion, GAME_RELEASE_VERSION, 14.0f, TEXTALIGN_MR);
 
 	if(NewPage != -1)
 	{
