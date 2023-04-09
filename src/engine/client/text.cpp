@@ -1200,7 +1200,7 @@ public:
 					Cutter.m_Flags |= TEXTFLAG_STOP_AT_END | TEXTFLAG_DISALLOW_NEWLINE;
 
 					TextEx(&Cutter, pCurrent, Wlen);
-					Wlen = Cutter.m_CharCount;
+					Wlen = maximum(Cutter.m_CharCount - 1, 0);
 					NewLine = true;
 
 					if(Cutter.m_GlyphCount <= 3 && !GotNewLineLast) // if we can't place 3 chars of the word on this line, take the next
