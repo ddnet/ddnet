@@ -831,18 +831,20 @@ public:
 		SetRenderFlags(OldRenderFlags);
 	}
 
-	float TextWidth(float Size, const char *pText, int StrLength, float LineWidth, float *pAlignedHeight = nullptr, float *pMaxCharacterHeightInLine = nullptr) override
+	float TextWidth(float Size, const char *pText, int StrLength, float LineWidth, int Flags = 0, float *pHeight = nullptr, float *pAlignedFontSize = nullptr, float *pMaxCharacterHeightInLine = nullptr) override
 	{
 		CTextCursor Cursor;
-		SetCursor(&Cursor, 0, 0, Size, 0);
+		SetCursor(&Cursor, 0, 0, Size, Flags);
 		Cursor.m_LineWidth = LineWidth;
 		const unsigned OldRenderFlags = m_RenderFlags;
 		if(LineWidth <= 0)
 			SetRenderFlags(OldRenderFlags | ETextRenderFlags::TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE);
 		TextEx(&Cursor, pText, StrLength);
 		SetRenderFlags(OldRenderFlags);
-		if(pAlignedHeight != nullptr)
-			*pAlignedHeight = Cursor.m_AlignedFontSize;
+		if(pHeight != nullptr)
+			*pHeight = Cursor.Height();
+		if(pAlignedFontSize != nullptr)
+			*pAlignedFontSize = Cursor.m_AlignedFontSize;
 		if(pMaxCharacterHeightInLine != nullptr)
 			*pMaxCharacterHeightInLine = Cursor.m_MaxCharacterHeight;
 		return Cursor.m_LongestLineWidth;

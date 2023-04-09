@@ -862,8 +862,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		OriginalRect.VSplitLeft(60.0f, 0, &Label);
 		{
 			SLabelProperties Props;
-			Props.m_MaxWidth = Label.w;
-			Props.m_AlignVertically = 0;
+			Props.m_MaxWidth = Label.w - 5.0f;
 			UI()->DoLabel(&Label, pSkinToBeDraw->GetName(), 12.0f, TEXTALIGN_LEFT, Props);
 		}
 		if(g_Config.m_Debug)

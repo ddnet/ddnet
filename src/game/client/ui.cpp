@@ -519,10 +519,12 @@ void CUI::DoSmoothScrollLogic(float *pScrollOffset, float *pScrollOffsetChange, 
 
 void CUI::DoLabel(const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps)
 {
+	int Flags = LabelProps.m_StopAtEnd ? TEXTFLAG_STOP_AT_END : 0;
+	float TextHeight = 0.0f;
 	float AlignedFontSize = 0.0f;
 	float MaxCharacterHeightInLine = 0.0f;
 	float MaxTextWidth = LabelProps.m_MaxWidth != -1 ? LabelProps.m_MaxWidth : pRect->w;
-	float TextWidth = TextRender()->TextWidth(Size, pText, -1, LabelProps.m_MaxWidth, &AlignedFontSize, &MaxCharacterHeightInLine);
+	float TextWidth = TextRender()->TextWidth(Size, pText, -1, LabelProps.m_MaxWidth, Flags, &TextHeight, &AlignedFontSize, &MaxCharacterHeightInLine);
 	while(TextWidth > MaxTextWidth + 0.001f)
 	{
 		if(!LabelProps.m_EnableWidthCheck)
@@ -530,7 +532,7 @@ void CUI::DoLabel(const CUIRect *pRect, const char *pText, float Size, int Align
 		if(Size < 4.0f)
 			break;
 		Size -= 1.0f;
-		TextWidth = TextRender()->TextWidth(Size, pText, -1, LabelProps.m_MaxWidth, &AlignedFontSize, &MaxCharacterHeightInLine);
+		TextWidth = TextRender()->TextWidth(Size, pText, -1, LabelProps.m_MaxWidth, Flags, &TextHeight, &AlignedFontSize, &MaxCharacterHeightInLine);
 	}
 
 	float CursorX = 0.0f;
@@ -547,15 +549,14 @@ void CUI::DoLabel(const CUIRect *pRect, const char *pText, float Size, int Align
 		CursorX = pRect->x + pRect->w - TextWidth;
 	}
 
-	float CursorY = pRect->y + (pRect->h - AlignedFontSize) / 2.f;
+	float CursorY = pRect->y + (pRect->h - TextHeight) / 2.f;
 	if(LabelProps.m_AlignVertically == 0)
 	{
 		CursorY = pRect->y + (pRect->h - AlignedFontSize) / 2.f - (AlignedFontSize - MaxCharacterHeightInLine) / 2.f;
 	}
 
 	CTextCursor Cursor;
-	int Flags = TEXTFLAG_RENDER | (LabelProps.m_StopAtEnd ? TEXTFLAG_STOP_AT_END : 0);
-	TextRender()->SetCursor(&Cursor, AlignmentHori, AlignmentVert, Size, Flags);
+	TextRender()->SetCursor(&Cursor, CursorX, CursorY, Size, TEXTFLAG_RENDER | Flags);
 	Cursor.m_LineWidth = (float)LabelProps.m_MaxWidth;
 	if(LabelProps.m_pSelCursor)
 	{
@@ -581,10 +582,12 @@ void CUI::DoLabel(const CUIRect *pRect, const char *pText, float Size, int Align
 
 void CUI::DoLabel(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps, int StrLen, const CTextCursor *pReadCursor)
 {
+	int Flags = pReadCursor ? (pReadCursor->m_Flags & ~TEXTFLAG_RENDER) : LabelProps.m_StopAtEnd ? TEXTFLAG_STOP_AT_END : 0;
+	float TextHeight = 0.0f;
 	float AlignedFontSize = 0.0f;
 	float MaxCharacterHeightInLine = 0.0f;
 	float MaxTextWidth = LabelProps.m_MaxWidth != -1 ? LabelProps.m_MaxWidth : pRect->w;
-	float TextWidth = TextRender()->TextWidth(Size, pText, -1, LabelProps.m_MaxWidth, &AlignedFontSize, &MaxCharacterHeightInLine);
+	float TextWidth = TextRender()->TextWidth(Size, pText, -1, LabelProps.m_MaxWidth, Flags, &TextHeight, &AlignedFontSize, &MaxCharacterHeightInLine);
 	while(TextWidth > MaxTextWidth + 0.001f)
 	{
 		if(!LabelProps.m_EnableWidthCheck)
@@ -592,7 +595,7 @@ void CUI::DoLabel(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, cons
 		if(Size < 4.0f)
 			break;
 		Size -= 1.0f;
-		TextWidth = TextRender()->TextWidth(Size, pText, -1, LabelProps.m_MaxWidth, &AlignedFontSize, &MaxCharacterHeightInLine);
+		TextWidth = TextRender()->TextWidth(Size, pText, -1, LabelProps.m_MaxWidth, Flags, &TextHeight, &AlignedFontSize, &MaxCharacterHeightInLine);
 	}
 
 	float CursorX = 0;
@@ -609,7 +612,7 @@ void CUI::DoLabel(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, cons
 		CursorX = pRect->x + pRect->w - TextWidth;
 	}
 
-	float CursorY = pRect->y + (pRect->h - AlignedFontSize) / 2.f;
+	float CursorY = pRect->y + (pRect->h - TextHeight) / 2.f;
 	if(LabelProps.m_AlignVertically == 0)
 	{
 		CursorY = pRect->y + (pRect->h - AlignedFontSize) / 2.f - (AlignedFontSize - MaxCharacterHeightInLine) / 2.f;
@@ -622,8 +625,7 @@ void CUI::DoLabel(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, cons
 	}
 	else
 	{
-		int Flags = TEXTFLAG_RENDER | (LabelProps.m_StopAtEnd ? TEXTFLAG_STOP_AT_END : 0);
-		TextRender()->SetCursor(&Cursor, CursorX, CursorY, Size, Flags);
+		TextRender()->SetCursor(&Cursor, CursorX, CursorY, Size, TEXTFLAG_RENDER | Flags);
 	}
 	Cursor.m_LineWidth = LabelProps.m_MaxWidth;
 
