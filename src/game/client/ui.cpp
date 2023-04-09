@@ -1508,11 +1508,8 @@ CUI::EPopupMenuFunctionResult CUI::PopupMessage(void *pContext, CUIRect View, bo
 	SMessagePopupContext *pMessagePopup = static_cast<SMessagePopupContext *>(pContext);
 	CUI *pUI = pMessagePopup->m_pUI;
 
-	CTextCursor Cursor;
-	pUI->TextRender()->SetCursor(&Cursor, View.x, View.y, SMessagePopupContext::POPUP_FONT_SIZE, TEXTFLAG_RENDER);
-	Cursor.m_LineWidth = View.w;
 	pUI->TextRender()->TextColor(pMessagePopup->m_TextColor);
-	pUI->TextRender()->TextEx(&Cursor, pMessagePopup->m_aMessage, -1);
+	pUI->TextRender()->Text(View.x, View.y, SMessagePopupContext::POPUP_FONT_SIZE, pMessagePopup->m_aMessage, View.w);
 	pUI->TextRender()->TextColor(pUI->TextRender()->DefaultTextColor());
 
 	return (Active && pUI->ConsumeHotkey(HOTKEY_ENTER)) ? CUI::POPUP_CLOSE_CURRENT : CUI::POPUP_KEEP_OPEN;
@@ -1563,10 +1560,7 @@ CUI::EPopupMenuFunctionResult CUI::PopupConfirm(void *pContext, CUIRect View, bo
 	View.HSplitBottom(SConfirmPopupContext::POPUP_BUTTON_HEIGHT, &Label, &ButtonBar);
 	ButtonBar.VSplitMid(&CancelButton, &ConfirmButton, SConfirmPopupContext::POPUP_BUTTON_SPACING);
 
-	CTextCursor Cursor;
-	pUI->TextRender()->SetCursor(&Cursor, Label.x, Label.y, SConfirmPopupContext::POPUP_FONT_SIZE, TEXTFLAG_RENDER);
-	Cursor.m_LineWidth = Label.w;
-	pUI->TextRender()->TextEx(&Cursor, pConfirmPopup->m_aMessage, -1);
+	pUI->TextRender()->Text(Label.x, Label.y, SConfirmPopupContext::POPUP_FONT_SIZE, pConfirmPopup->m_aMessage, Label.w);
 
 	static CButtonContainer s_CancelButton;
 	if(pUI->DoButton_PopupMenu(&s_CancelButton, pConfirmPopup->m_aNegativeButtonLabel, &CancelButton, TEXTALIGN_CENTER))
@@ -1606,10 +1600,7 @@ CUI::EPopupMenuFunctionResult CUI::PopupSelection(void *pContext, CUIRect View, 
 	pUI->TextRender()->TextWidth(SSelectionPopupContext::POPUP_FONT_SIZE, pSelectionPopup->m_aMessage, -1, SSelectionPopupContext::POPUP_MAX_WIDTH, 0, &TextHeight);
 	View.HSplitTop(TextHeight, &Slot, &View);
 
-	CTextCursor Cursor;
-	pUI->TextRender()->SetCursor(&Cursor, Slot.x, Slot.y, SSelectionPopupContext::POPUP_FONT_SIZE, TEXTFLAG_RENDER);
-	Cursor.m_LineWidth = Slot.w;
-	pUI->TextRender()->TextEx(&Cursor, pSelectionPopup->m_aMessage, -1);
+	pUI->TextRender()->Text(Slot.x, Slot.y, SSelectionPopupContext::POPUP_FONT_SIZE, pSelectionPopup->m_aMessage, Slot.w);
 
 	pSelectionPopup->m_vButtonContainers.resize(pSelectionPopup->m_Entries.size());
 
