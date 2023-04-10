@@ -1492,6 +1492,9 @@ void CHud::RenderLocalTime(float x)
 
 void CHud::OnRender()
 {
+#if defined(CONF_HEADLESS_CLIENT)
+	return;
+#endif
 	if(!m_pClient->m_Snap.m_pGameInfoObj)
 		return;
 

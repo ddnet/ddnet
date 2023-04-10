@@ -1138,6 +1138,9 @@ void CChat::OnPrepareLines()
 
 void CChat::OnRender()
 {
+#if defined(CONF_HEADLESS_CLIENT)
+	return;
+#endif
 	// send pending chat messages
 	if(m_PendingChatCounter > 0 && m_LastChatSend + time_freq() < time())
 	{

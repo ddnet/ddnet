@@ -255,6 +255,9 @@ void CRenderTools::RenderTileRectangle(int RectX, int RectY, int RectW, int Rect
 void CRenderTools::RenderTilemap(CTile *pTiles, int w, int h, float Scale, ColorRGBA Color, int RenderFlags,
 	ENVELOPE_EVAL pfnEval, void *pUser, int ColorEnv, int ColorEnvOffset)
 {
+#if defined(CONF_HEADLESS_CLIENT)
+	return;
+#endif
 	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
 
