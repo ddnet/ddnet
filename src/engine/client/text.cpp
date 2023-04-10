@@ -867,6 +867,19 @@ public:
 		return Cursor.BoundingBox();
 	}
 
+	vec2 CaretPosition(float Size, const char *pText, int StrLength = -1, float LineWidth = -1.0f, int Flags = 0) override
+	{
+		CTextCursor Cursor;
+		SetCursor(&Cursor, 0, 0, Size, Flags);
+		Cursor.m_LineWidth = LineWidth;
+		const unsigned OldRenderFlags = m_RenderFlags;
+		if(LineWidth <= 0)
+			SetRenderFlags(OldRenderFlags | ETextRenderFlags::TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE);
+		TextEx(&Cursor, pText, StrLength);
+		SetRenderFlags(OldRenderFlags);
+		return vec2(Cursor.m_X, Cursor.m_Y);
+	}
+
 	void TextColor(float r, float g, float b, float a) override
 	{
 		m_Color.r = r;

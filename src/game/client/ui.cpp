@@ -996,11 +996,11 @@ bool CUI::DoEditBox(const void *pID, const CUIRect *pRect, char *pStr, unsigned 
 	// check if the text has to be moved
 	if(LastActiveItem() == pID && !JustGotActive && (UpdateOffset || *m_pInputEventCount))
 	{
-		float w = TextRender()->TextWidth(FontSize, pDisplayStr, DispCursorPos, std::numeric_limits<float>::max());
+		float w = TextRender()->CaretPosition(FontSize, pDisplayStr, DispCursorPos).x;
 		if(w - *pOffset > Textbox.w)
 		{
 			// move to the left
-			float wt = TextRender()->TextWidth(FontSize, pDisplayStr, -1, std::numeric_limits<float>::max());
+			float wt = TextRender()->TextWidth(FontSize, pDisplayStr);
 			do
 			{
 				*pOffset += minimum(wt - *pOffset - Textbox.w, Textbox.w / 3);
@@ -1084,7 +1084,7 @@ bool CUI::DoEditBox(const void *pID, const CUIRect *pRect, char *pStr, unsigned 
 	// set the ime cursor
 	if(LastActiveItem() == pID && !JustGotActive)
 	{
-		float w = TextRender()->TextWidth(FontSize, pDisplayStr, DispCursorPos, std::numeric_limits<float>::max());
+		float w = TextRender()->CaretPosition(FontSize, pDisplayStr, DispCursorPos).x;
 		Textbox.x += w;
 		Input()->SetEditingPosition(Textbox.x, Textbox.y + FontSize);
 	}
