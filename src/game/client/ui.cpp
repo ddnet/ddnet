@@ -1577,9 +1577,8 @@ CUI::EPopupMenuFunctionResult CUI::PopupSelection(void *pContext, CUIRect View, 
 	CUI *pUI = pSelectionPopup->m_pUI;
 
 	CUIRect Slot;
-	float TextHeight = 0.0f;
-	pUI->TextRender()->TextWidth(SSelectionPopupContext::POPUP_FONT_SIZE, pSelectionPopup->m_aMessage, -1, SSelectionPopupContext::POPUP_MAX_WIDTH, 0, &TextHeight);
-	View.HSplitTop(TextHeight, &Slot, &View);
+	const STextBoundingBox TextBoundingBox = pUI->TextRender()->TextBoundingBox(SSelectionPopupContext::POPUP_FONT_SIZE, pSelectionPopup->m_aMessage, -1, SSelectionPopupContext::POPUP_MAX_WIDTH);
+	View.HSplitTop(TextBoundingBox.m_H, &Slot, &View);
 
 	pUI->TextRender()->Text(Slot.x, Slot.y, SSelectionPopupContext::POPUP_FONT_SIZE, pSelectionPopup->m_aMessage, Slot.w);
 
@@ -1600,9 +1599,8 @@ CUI::EPopupMenuFunctionResult CUI::PopupSelection(void *pContext, CUIRect View, 
 
 void CUI::ShowPopupSelection(float X, float Y, SSelectionPopupContext *pContext)
 {
-	float TextHeight = 0.0f;
-	TextRender()->TextWidth(SSelectionPopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, -1, SSelectionPopupContext::POPUP_MAX_WIDTH, 0, &TextHeight);
-	const float PopupHeight = TextHeight + pContext->m_Entries.size() * (SSelectionPopupContext::POPUP_ENTRY_HEIGHT + SSelectionPopupContext::POPUP_ENTRY_SPACING) + 10.0f;
+	const STextBoundingBox TextBoundingBox = TextRender()->TextBoundingBox(SSelectionPopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, -1, SSelectionPopupContext::POPUP_MAX_WIDTH);
+	const float PopupHeight = TextBoundingBox.m_H + pContext->m_Entries.size() * (SSelectionPopupContext::POPUP_ENTRY_HEIGHT + SSelectionPopupContext::POPUP_ENTRY_SPACING) + 10.0f;
 	pContext->m_pUI = this;
 	pContext->m_pSelection = nullptr;
 	DoPopupMenu(pContext, X, Y, SSelectionPopupContext::POPUP_MAX_WIDTH + 10.0f, PopupHeight, pContext, PopupSelection);

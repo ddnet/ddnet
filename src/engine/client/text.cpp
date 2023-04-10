@@ -171,6 +171,8 @@ struct STextContainer
 
 	bool m_SingleTimeUse;
 
+	STextBoundingBox m_BoundingBox;
+
 	void Reset()
 	{
 		m_pFont = nullptr;
@@ -193,6 +195,8 @@ struct STextContainer
 		m_HasSelection = false;
 
 		m_SingleTimeUse = false;
+
+		m_BoundingBox = {0.0f, 0.0f, 0.0f, 0.0f};
 	}
 };
 
@@ -831,7 +835,7 @@ public:
 		SetRenderFlags(OldRenderFlags);
 	}
 
-	float TextWidth(float Size, const char *pText, int StrLength, float LineWidth, int Flags = 0, float *pHeight = nullptr, float *pAlignedFontSize = nullptr, float *pMaxCharacterHeightInLine = nullptr) override
+	float TextWidth(float Size, const char *pText, int StrLength = -1, float LineWidth = -1.0f, int Flags = 0, float *pHeight = nullptr, float *pAlignedFontSize = nullptr, float *pMaxCharacterHeightInLine = nullptr) override
 	{
 		CTextCursor Cursor;
 		SetCursor(&Cursor, 0, 0, Size, Flags);
@@ -848,6 +852,19 @@ public:
 		if(pMaxCharacterHeightInLine != nullptr)
 			*pMaxCharacterHeightInLine = Cursor.m_MaxCharacterHeight;
 		return Cursor.m_LongestLineWidth;
+	}
+
+	STextBoundingBox TextBoundingBox(float Size, const char *pText, int StrLength = -1, float LineWidth = -1.0f, int Flags = 0) override
+	{
+		CTextCursor Cursor;
+		SetCursor(&Cursor, 0, 0, Size, Flags);
+		Cursor.m_LineWidth = LineWidth;
+		const unsigned OldRenderFlags = m_RenderFlags;
+		if(LineWidth <= 0)
+			SetRenderFlags(OldRenderFlags | ETextRenderFlags::TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE);
+		TextEx(&Cursor, pText, StrLength);
+		SetRenderFlags(OldRenderFlags);
+		return Cursor.BoundingBox();
 	}
 
 	void TextColor(float r, float g, float b, float a) override
@@ -1510,6 +1527,8 @@ public:
 
 		if(GotNewLine)
 			pCursor->m_Y = DrawY;
+
+		TextContainer.m_BoundingBox = pCursor->BoundingBox();
 	}
 
 	bool CreateOrAppendTextContainer(int &TextContainerIndex, CTextCursor *pCursor, const char *pText, int Length = -1) override
@@ -1657,7 +1676,7 @@ public:
 
 	void RenderTextContainer(int TextContainerIndex, const ColorRGBA &TextColor, const ColorRGBA &TextOutlineColor, float X, float Y) override
 	{
-		const STextContainer &TextContainer = GetTextContainer(TextContainerIndex);
+		STextContainer &TextContainer = GetTextContainer(TextContainerIndex);
 
 		// remap the current screen, after render revert the change again
 		float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
@@ -1675,9 +1694,18 @@ public:
 			Y = AlignedY - TextContainer.m_AlignedStartY;
 		}
 
+		TextContainer.m_BoundingBox.m_X = X;
+		TextContainer.m_BoundingBox.m_Y = Y;
+
 		Graphics()->MapScreen(ScreenX0 - X, ScreenY0 - Y, ScreenX1 - X, ScreenY1 - Y);
 		RenderTextContainer(TextContainerIndex, TextColor, TextOutlineColor);
 		Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
+	}
+
+	STextBoundingBox GetBoundingBoxTextContainer(int TextContainerIndex) override
+	{
+		const STextContainer &TextContainer = GetTextContainer(TextContainerIndex);
+		return TextContainer.m_BoundingBox;
 	}
 
 	void UploadEntityLayerText(void *pTexBuff, size_t ImageColorChannelCount, int TexWidth, int TexHeight, int TexSubWidth, int TexSubHeight, const char *pText, int Length, float x, float y, int FontSize) override

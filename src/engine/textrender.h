@@ -144,6 +144,17 @@ enum ETextCursorCursorMode
 	TEXT_CURSOR_CURSOR_MODE_SET,
 };
 
+struct STextBoundingBox
+{
+	float m_X;
+	float m_Y;
+	float m_W;
+	float m_H;
+
+	float Right() const { return m_X + m_W; }
+	float Bottom() const { return m_Y + m_H; }
+};
+
 class CTextCursor
 {
 public:
@@ -187,6 +198,11 @@ public:
 	{
 		return m_LineCount * m_AlignedFontSize;
 	}
+
+	STextBoundingBox BoundingBox() const
+	{
+		return {m_StartX, m_StartY, m_LongestLineWidth, Height()};
+	}
 };
 
 class ITextRender : public IInterface
@@ -228,6 +244,8 @@ public:
 	virtual void RenderTextContainer(int TextContainerIndex, const ColorRGBA &TextColor, const ColorRGBA &TextOutlineColor) = 0;
 	virtual void RenderTextContainer(int TextContainerIndex, const ColorRGBA &TextColor, const ColorRGBA &TextOutlineColor, float X, float Y) = 0;
 
+	virtual STextBoundingBox GetBoundingBoxTextContainer(int TextContainerIndex) = 0;
+
 	virtual void UploadEntityLayerText(void *pTexBuff, size_t ImageColorChannelCount, int TexWidth, int TexHeight, int TexSubWidth, int TexSubHeight, const char *pText, int Length, float x, float y, int FontHeight) = 0;
 	virtual int AdjustFontSize(const char *pText, int TextLength, int MaxSize, int MaxWidth) const = 0;
 	virtual float GetGlyphOffsetX(int FontSize, char TextCharacter) const = 0;
@@ -245,7 +263,8 @@ public:
 	virtual void TextSelectionColor(float r, float g, float b, float a) = 0;
 	virtual void TextSelectionColor(ColorRGBA rgb) = 0;
 	virtual void Text(float x, float y, float Size, const char *pText, float LineWidth) = 0;
-	virtual float TextWidth(float Size, const char *pText, int StrLength, float LineWidth, int Flags = 0, float *pHeight = nullptr, float *pAlignedFontSize = nullptr, float *pMaxCharacterHeightInLine = nullptr) = 0;
+	virtual float TextWidth(float Size, const char *pText, int StrLength = -1, float LineWidth = -1.0f, int Flags = 0, float *pHeight = nullptr, float *pAlignedFontSize = nullptr, float *pMaxCharacterHeightInLine = nullptr) = 0;
+	virtual STextBoundingBox TextBoundingBox(float Size, const char *pText, int StrLength = -1, float LineWidth = -1.0f, int Flags = 0) = 0;
 
 	virtual ColorRGBA GetTextColor() const = 0;
 	virtual ColorRGBA GetTextOutlineColor() const = 0;
