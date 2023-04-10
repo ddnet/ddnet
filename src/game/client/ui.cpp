@@ -517,14 +517,39 @@ void CUI::DoSmoothScrollLogic(float *pScrollOffset, float *pScrollOffsetChange, 
 	}
 }
 
+static vec2 CalcAlignedCursorPos(const CUIRect *pRect, vec2 TextSize, int Align)
+{
+	vec2 Cursor(pRect->x, pRect->y);
+
+	const int HorizontalAlign = Align & TEXTALIGN_MASK_HORIZONTAL;
+	if(HorizontalAlign == TEXTALIGN_CENTER)
+	{
+		Cursor.x += (pRect->w - TextSize.x) / 2.0f;
+	}
+	else if(HorizontalAlign == TEXTALIGN_RIGHT)
+	{
+		Cursor.x += pRect->w - TextSize.x;
+	}
+
+	const int VerticalAlign = Align & TEXTALIGN_MASK_VERTICAL;
+	if(VerticalAlign == TEXTALIGN_MIDDLE)
+	{
+		Cursor.y += (pRect->h - TextSize.y) / 2.0f;
+	}
+	else if(VerticalAlign == TEXTALIGN_BOTTOM)
+	{
+		Cursor.y += pRect->h - TextSize.y;
+	}
+
+	return Cursor;
+}
+
 void CUI::DoLabel(const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps)
 {
 	int Flags = LabelProps.m_StopAtEnd ? TEXTFLAG_STOP_AT_END : 0;
 	float TextHeight = 0.0f;
-	float AlignedFontSize = 0.0f;
-	float MaxCharacterHeightInLine = 0.0f;
 	float MaxTextWidth = LabelProps.m_MaxWidth != -1 ? LabelProps.m_MaxWidth : pRect->w;
-	float TextWidth = TextRender()->TextWidth(Size, pText, -1, LabelProps.m_MaxWidth, Flags, &TextHeight, &AlignedFontSize, &MaxCharacterHeightInLine);
+	float TextWidth = TextRender()->TextWidth(Size, pText, -1, LabelProps.m_MaxWidth, Flags, &TextHeight);
 	while(TextWidth > MaxTextWidth + 0.001f)
 	{
 		if(!LabelProps.m_EnableWidthCheck)
@@ -532,31 +557,13 @@ void CUI::DoLabel(const CUIRect *pRect, const char *pText, float Size, int Align
 		if(Size < 4.0f)
 			break;
 		Size -= 1.0f;
-		TextWidth = TextRender()->TextWidth(Size, pText, -1, LabelProps.m_MaxWidth, Flags, &TextHeight, &AlignedFontSize, &MaxCharacterHeightInLine);
+		TextWidth = TextRender()->TextWidth(Size, pText, -1, LabelProps.m_MaxWidth, Flags, &TextHeight);
 	}
 
-	float CursorX = 0.0f;
-	if(Align & TEXTALIGN_CENTER)
-	{
-		CursorX = pRect->x + (pRect->w - TextWidth) / 2.f;
-	}
-	else if(Align & TEXTALIGN_LEFT)
-	{
-		CursorX = pRect->x;
-	}
-	else if(Align & TEXTALIGN_RIGHT)
-	{
-		CursorX = pRect->x + pRect->w - TextWidth;
-	}
-
-	float CursorY = pRect->y + (pRect->h - TextHeight) / 2.f;
-	if(LabelProps.m_AlignVertically == 0)
-	{
-		CursorY = pRect->y + (pRect->h - AlignedFontSize) / 2.f - (AlignedFontSize - MaxCharacterHeightInLine) / 2.f;
-	}
+	const vec2 CursorPos = CalcAlignedCursorPos(pRect, vec2(TextWidth, TextHeight), Align);
 
 	CTextCursor Cursor;
-	TextRender()->SetCursor(&Cursor, CursorX, CursorY, Size, TEXTFLAG_RENDER | Flags);
+	TextRender()->SetCursor(&Cursor, CursorPos.x, CursorPos.y, Size, TEXTFLAG_RENDER | Flags);
 	Cursor.m_LineWidth = (float)LabelProps.m_MaxWidth;
 	if(LabelProps.m_pSelCursor)
 	{
@@ -584,10 +591,8 @@ void CUI::DoLabel(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, cons
 {
 	int Flags = pReadCursor ? (pReadCursor->m_Flags & ~TEXTFLAG_RENDER) : LabelProps.m_StopAtEnd ? TEXTFLAG_STOP_AT_END : 0;
 	float TextHeight = 0.0f;
-	float AlignedFontSize = 0.0f;
-	float MaxCharacterHeightInLine = 0.0f;
 	float MaxTextWidth = LabelProps.m_MaxWidth != -1 ? LabelProps.m_MaxWidth : pRect->w;
-	float TextWidth = TextRender()->TextWidth(Size, pText, -1, LabelProps.m_MaxWidth, Flags, &TextHeight, &AlignedFontSize, &MaxCharacterHeightInLine);
+	float TextWidth = TextRender()->TextWidth(Size, pText, -1, LabelProps.m_MaxWidth, Flags, &TextHeight);
 	while(TextWidth > MaxTextWidth + 0.001f)
 	{
 		if(!LabelProps.m_EnableWidthCheck)
@@ -595,27 +600,7 @@ void CUI::DoLabel(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, cons
 		if(Size < 4.0f)
 			break;
 		Size -= 1.0f;
-		TextWidth = TextRender()->TextWidth(Size, pText, -1, LabelProps.m_MaxWidth, Flags, &TextHeight, &AlignedFontSize, &MaxCharacterHeightInLine);
-	}
-
-	float CursorX = 0;
-	if(Align & TEXTALIGN_CENTER)
-	{
-		CursorX = pRect->x + (pRect->w - TextWidth) / 2.f;
-	}
-	else if(Align & TEXTALIGN_LEFT)
-	{
-		CursorX = pRect->x;
-	}
-	else if(Align & TEXTALIGN_RIGHT)
-	{
-		CursorX = pRect->x + pRect->w - TextWidth;
-	}
-
-	float CursorY = pRect->y + (pRect->h - TextHeight) / 2.f;
-	if(LabelProps.m_AlignVertically == 0)
-	{
-		CursorY = pRect->y + (pRect->h - AlignedFontSize) / 2.f - (AlignedFontSize - MaxCharacterHeightInLine) / 2.f;
+		TextWidth = TextRender()->TextWidth(Size, pText, -1, LabelProps.m_MaxWidth, Flags, &TextHeight);
 	}
 
 	CTextCursor Cursor;
@@ -625,7 +610,8 @@ void CUI::DoLabel(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, cons
 	}
 	else
 	{
-		TextRender()->SetCursor(&Cursor, CursorX, CursorY, Size, TEXTFLAG_RENDER | Flags);
+		const vec2 CursorPos = CalcAlignedCursorPos(pRect, vec2(TextWidth, TextHeight), Align);
+		TextRender()->SetCursor(&Cursor, CursorPos.x, CursorPos.y, Size, TEXTFLAG_RENDER | Flags);
 	}
 	Cursor.m_LineWidth = LabelProps.m_MaxWidth;
 
@@ -639,7 +625,7 @@ void CUI::DoLabel(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, cons
 	RectEl.m_Cursor = Cursor;
 }
 
-void CUI::DoLabelStreamed(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth, int AlignVertically, bool StopAtEnd, int StrLen, const CTextCursor *pReadCursor)
+void CUI::DoLabelStreamed(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth, bool StopAtEnd, int StrLen, const CTextCursor *pReadCursor)
 {
 	bool NeedsRecreate = false;
 	bool ColorChanged = RectEl.m_TextColor != TextRender()->GetTextColor() || RectEl.m_TextOutlineColor != TextRender()->GetTextOutlineColor();
@@ -684,16 +670,16 @@ void CUI::DoLabelStreamed(CUIElement::SUIElementRect &RectEl, const CUIRect *pRe
 
 		SLabelProperties Props;
 		Props.m_MaxWidth = MaxWidth;
-		Props.m_AlignVertically = AlignVertically;
 		Props.m_StopAtEnd = StopAtEnd;
-		DoLabel(RectEl, &TmpRect, pText, Size, Align, Props, StrLen, pReadCursor);
+		DoLabel(RectEl, &TmpRect, pText, Size, TEXTALIGN_TL, Props, StrLen, pReadCursor);
 	}
 
 	ColorRGBA ColorText(RectEl.m_TextColor);
 	ColorRGBA ColorTextOutline(RectEl.m_TextOutlineColor);
 	if(RectEl.m_UITextContainer != -1)
 	{
-		TextRender()->RenderTextContainer(RectEl.m_UITextContainer, ColorText, ColorTextOutline, pRect->x, pRect->y);
+		const vec2 CursorPos = CalcAlignedCursorPos(pRect, vec2(RectEl.m_Cursor.m_LongestLineWidth, RectEl.m_Cursor.Height()), Align);
+		TextRender()->RenderTextContainer(RectEl.m_UITextContainer, ColorText, ColorTextOutline, CursorPos.x, CursorPos.y);
 	}
 }
 
@@ -1010,11 +996,11 @@ bool CUI::DoEditBox(const void *pID, const CUIRect *pRect, char *pStr, unsigned 
 	// check if the text has to be moved
 	if(LastActiveItem() == pID && !JustGotActive && (UpdateOffset || *m_pInputEventCount))
 	{
-		float w = TextRender()->TextWidth(FontSize, pDisplayStr, DispCursorPos, std::numeric_limits<float>::max());
+		float w = TextRender()->CaretPosition(FontSize, pDisplayStr, DispCursorPos).x;
 		if(w - *pOffset > Textbox.w)
 		{
 			// move to the left
-			float wt = TextRender()->TextWidth(FontSize, pDisplayStr, -1, std::numeric_limits<float>::max());
+			float wt = TextRender()->TextWidth(FontSize, pDisplayStr);
 			do
 			{
 				*pOffset += minimum(wt - *pOffset - Textbox.w, Textbox.w / 3);
@@ -1076,7 +1062,7 @@ bool CUI::DoEditBox(const void *pID, const CUIRect *pRect, char *pStr, unsigned 
 	SLabelProperties Props;
 	Props.m_pSelCursor = &SelCursor;
 	Props.m_EnableWidthCheck = IsEmptyText;
-	DoLabel(&Textbox, pDisplayStr, FontSize, TEXTALIGN_LEFT, Props);
+	DoLabel(&Textbox, pDisplayStr, FontSize, TEXTALIGN_ML, Props);
 
 	if(LastActiveItem() == pID)
 	{
@@ -1098,7 +1084,7 @@ bool CUI::DoEditBox(const void *pID, const CUIRect *pRect, char *pStr, unsigned 
 	// set the ime cursor
 	if(LastActiveItem() == pID && !JustGotActive)
 	{
-		float w = TextRender()->TextWidth(FontSize, pDisplayStr, DispCursorPos, std::numeric_limits<float>::max());
+		float w = TextRender()->CaretPosition(FontSize, pDisplayStr, DispCursorPos).x;
 		Textbox.x += w;
 		Input()->SetEditingPosition(Textbox.x, Textbox.y + FontSize);
 	}
@@ -1112,22 +1098,19 @@ bool CUI::DoClearableEditBox(const void *pID, const void *pClearID, const CUIRec
 {
 	CUIRect EditBox;
 	CUIRect ClearButton;
-	pRect->VSplitRight(15.0f, &EditBox, &ClearButton);
+	pRect->VSplitRight(pRect->h, &EditBox, &ClearButton);
+
 	bool ReturnValue = DoEditBox(pID, &EditBox, pStr, StrSize, FontSize, pOffset, Hidden, Corners & ~IGraphics::CORNER_R, Properties);
 
-	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT);
-	ClearButton.Draw(ColorRGBA(1, 1, 1, 0.33f * ButtonColorMul(pClearID)), Corners & ~IGraphics::CORNER_L, 3.0f);
-
-	SLabelProperties Props;
-	Props.m_AlignVertically = 0;
-	DoLabel(&ClearButton, "×", ClearButton.h * CUI::ms_FontmodHeight, TEXTALIGN_CENTER, Props);
-	TextRender()->SetRenderFlags(0);
+	ClearButton.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.33f * ButtonColorMul(pClearID)), Corners & ~IGraphics::CORNER_L, 3.0f);
+	DoLabel(&ClearButton, "×", ClearButton.h * CUI::ms_FontmodHeight * 0.8f, TEXTALIGN_MC);
 	if(DoButtonLogic(pClearID, 0, &ClearButton))
 	{
 		pStr[0] = 0;
 		SetActiveItem(pID);
 		ReturnValue = true;
 	}
+
 	return ReturnValue;
 }
 
@@ -1137,9 +1120,7 @@ int CUI::DoButton_PopupMenu(CButtonContainer *pButtonContainer, const char *pTex
 
 	CUIRect Label;
 	pRect->VMargin(2.0f, &Label);
-	SLabelProperties Props;
-	Props.m_AlignVertically = 0;
-	DoLabel(&Label, pText, 10.0f, Align, Props);
+	DoLabel(&Label, pText, 10.0f, Align);
 
 	return DoButtonLogic(pButtonContainer, 0, pRect);
 }
@@ -1347,7 +1328,7 @@ void CUI::DoScrollbarOption(const void *pID, int *pOption, const CUIRect *pRect,
 
 	CUIRect Label, ScrollBar;
 	pRect->VSplitLeft(VSplitVal, &Label, &ScrollBar);
-	DoLabel(&Label, aBuf, FontSize, TEXTALIGN_LEFT);
+	DoLabel(&Label, aBuf, FontSize, TEXTALIGN_ML);
 
 	Value = pScale->ToAbsolute(DoScrollbarH(pID, &ScrollBar, pScale->ToRelative(Value, Min, Max)), Min, Max);
 	if(Infinite)
@@ -1377,7 +1358,7 @@ void CUI::DoScrollbarOptionLabeled(const void *pID, int *pOption, const CUIRect 
 	CUIRect Label, ScrollBar;
 	pRect->VSplitRight(60.0f, &Label, &ScrollBar);
 	Label.VSplitRight(10.0f, &Label, 0);
-	DoLabel(&Label, aBuf, FontSize, TEXTALIGN_LEFT);
+	DoLabel(&Label, aBuf, FontSize, TEXTALIGN_MC);
 
 	Value = pScale->ToAbsolute(DoScrollbarH(pID, &ScrollBar, pScale->ToRelative(Value, 0, Max)), 0, Max);
 
@@ -1563,14 +1544,14 @@ CUI::EPopupMenuFunctionResult CUI::PopupConfirm(void *pContext, CUIRect View, bo
 	pUI->TextRender()->Text(Label.x, Label.y, SConfirmPopupContext::POPUP_FONT_SIZE, pConfirmPopup->m_aMessage, Label.w);
 
 	static CButtonContainer s_CancelButton;
-	if(pUI->DoButton_PopupMenu(&s_CancelButton, pConfirmPopup->m_aNegativeButtonLabel, &CancelButton, TEXTALIGN_CENTER))
+	if(pUI->DoButton_PopupMenu(&s_CancelButton, pConfirmPopup->m_aNegativeButtonLabel, &CancelButton, TEXTALIGN_MC))
 	{
 		pConfirmPopup->m_Result = SConfirmPopupContext::CANCELED;
 		return CUI::POPUP_CLOSE_CURRENT;
 	}
 
 	static CButtonContainer s_ConfirmButton;
-	if(pUI->DoButton_PopupMenu(&s_ConfirmButton, pConfirmPopup->m_aPositiveButtonLabel, &ConfirmButton, TEXTALIGN_CENTER) || (Active && pUI->ConsumeHotkey(HOTKEY_ENTER)))
+	if(pUI->DoButton_PopupMenu(&s_ConfirmButton, pConfirmPopup->m_aPositiveButtonLabel, &ConfirmButton, TEXTALIGN_MC) || (Active && pUI->ConsumeHotkey(HOTKEY_ENTER)))
 	{
 		pConfirmPopup->m_Result = SConfirmPopupContext::CONFIRMED;
 		return CUI::POPUP_CLOSE_CURRENT;
@@ -1596,9 +1577,8 @@ CUI::EPopupMenuFunctionResult CUI::PopupSelection(void *pContext, CUIRect View, 
 	CUI *pUI = pSelectionPopup->m_pUI;
 
 	CUIRect Slot;
-	float TextHeight = 0.0f;
-	pUI->TextRender()->TextWidth(SSelectionPopupContext::POPUP_FONT_SIZE, pSelectionPopup->m_aMessage, -1, SSelectionPopupContext::POPUP_MAX_WIDTH, 0, &TextHeight);
-	View.HSplitTop(TextHeight, &Slot, &View);
+	const STextBoundingBox TextBoundingBox = pUI->TextRender()->TextBoundingBox(SSelectionPopupContext::POPUP_FONT_SIZE, pSelectionPopup->m_aMessage, -1, SSelectionPopupContext::POPUP_MAX_WIDTH);
+	View.HSplitTop(TextBoundingBox.m_H, &Slot, &View);
 
 	pUI->TextRender()->Text(Slot.x, Slot.y, SSelectionPopupContext::POPUP_FONT_SIZE, pSelectionPopup->m_aMessage, Slot.w);
 
@@ -1609,7 +1589,7 @@ CUI::EPopupMenuFunctionResult CUI::PopupSelection(void *pContext, CUIRect View, 
 	{
 		View.HSplitTop(SSelectionPopupContext::POPUP_ENTRY_SPACING, nullptr, &View);
 		View.HSplitTop(SSelectionPopupContext::POPUP_ENTRY_HEIGHT, &Slot, &View);
-		if(pUI->DoButton_PopupMenu(&pSelectionPopup->m_vButtonContainers[Index], Entry.c_str(), &Slot, TEXTALIGN_LEFT))
+		if(pUI->DoButton_PopupMenu(&pSelectionPopup->m_vButtonContainers[Index], Entry.c_str(), &Slot, TEXTALIGN_ML))
 			pSelectionPopup->m_pSelection = &Entry;
 		++Index;
 	}
@@ -1619,9 +1599,8 @@ CUI::EPopupMenuFunctionResult CUI::PopupSelection(void *pContext, CUIRect View, 
 
 void CUI::ShowPopupSelection(float X, float Y, SSelectionPopupContext *pContext)
 {
-	float TextHeight = 0.0f;
-	TextRender()->TextWidth(SSelectionPopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, -1, SSelectionPopupContext::POPUP_MAX_WIDTH, 0, &TextHeight);
-	const float PopupHeight = TextHeight + pContext->m_Entries.size() * (SSelectionPopupContext::POPUP_ENTRY_HEIGHT + SSelectionPopupContext::POPUP_ENTRY_SPACING) + 10.0f;
+	const STextBoundingBox TextBoundingBox = TextRender()->TextBoundingBox(SSelectionPopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, -1, SSelectionPopupContext::POPUP_MAX_WIDTH);
+	const float PopupHeight = TextBoundingBox.m_H + pContext->m_Entries.size() * (SSelectionPopupContext::POPUP_ENTRY_HEIGHT + SSelectionPopupContext::POPUP_ENTRY_SPACING) + 10.0f;
 	pContext->m_pUI = this;
 	pContext->m_pSelection = nullptr;
 	DoPopupMenu(pContext, X, Y, SSelectionPopupContext::POPUP_MAX_WIDTH + 10.0f, PopupHeight, pContext, PopupSelection);
