@@ -8,6 +8,7 @@
 #include <engine/demo.h>
 #include <engine/graphics.h>
 #include <engine/keys.h>
+#include <engine/shared/localization.h>
 #include <engine/storage.h>
 #include <engine/textrender.h>
 
@@ -914,14 +915,11 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	};
 
 	static CColumn s_aCols[] = {
-		{COL_DEMONAME, SORT_DEMONAME, "Demo", 0, 0.0f, {0}, {0}},
-		{COL_MARKERS, SORT_MARKERS, "Markers", 1, 75.0f, {0}, {0}},
-		{COL_LENGTH, SORT_LENGTH, "Length", 1, 75.0f, {0}, {0}},
-		{COL_DATE, SORT_DATE, "Date", 1, 160.0f, {0}, {0}},
+		{COL_DEMONAME, SORT_DEMONAME, Localizable("Demo"), 0, 0.0f, {0}, {0}},
+		{COL_MARKERS, SORT_MARKERS, Localizable("Markers"), 1, 75.0f, {0}, {0}},
+		{COL_LENGTH, SORT_LENGTH, Localizable("Length"), 1, 75.0f, {0}, {0}},
+		{COL_DATE, SORT_DATE, Localizable("Date"), 1, 160.0f, {0}, {0}},
 	};
-	/* This is just for scripts/update_localization.py to work correctly. Don't remove!
-		Localize("Demo");Localize("Markers");Localize("Length");Localize("Date");
-	*/
 
 	Headers.Draw(ColorRGBA(0.0f, 0, 0, 0.15f), 0, 0);
 
