@@ -823,7 +823,7 @@ public:
 		pCursor->m_Y = y;
 	}
 
-	void Text(float x, float y, float Size, const char *pText, float LineWidth) override
+	void Text(float x, float y, float Size, const char *pText, float LineWidth = -1.0f) override
 	{
 		CTextCursor Cursor;
 		SetCursor(&Cursor, x, y, Size, TEXTFLAG_RENDER);
@@ -918,7 +918,7 @@ public:
 		return m_SelectionColor;
 	}
 
-	void TextEx(CTextCursor *pCursor, const char *pText, int Length) override
+	void TextEx(CTextCursor *pCursor, const char *pText, int Length = -1) override
 	{
 		const unsigned OldRenderFlags = m_RenderFlags;
 		m_RenderFlags |= TEXT_RENDER_FLAG_ONE_TIME_USE;
