@@ -828,11 +828,7 @@ public:
 		CTextCursor Cursor;
 		SetCursor(&Cursor, x, y, Size, TEXTFLAG_RENDER);
 		Cursor.m_LineWidth = LineWidth;
-		const unsigned OldRenderFlags = m_RenderFlags;
-		if(LineWidth <= 0)
-			SetRenderFlags(OldRenderFlags | ETextRenderFlags::TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE);
 		TextEx(&Cursor, pText, -1);
-		SetRenderFlags(OldRenderFlags);
 	}
 
 	float TextWidth(float Size, const char *pText, int StrLength = -1, float LineWidth = -1.0f, int Flags = 0, float *pHeight = nullptr, float *pAlignedFontSize = nullptr, float *pMaxCharacterHeightInLine = nullptr) override
@@ -840,11 +836,7 @@ public:
 		CTextCursor Cursor;
 		SetCursor(&Cursor, 0, 0, Size, Flags);
 		Cursor.m_LineWidth = LineWidth;
-		const unsigned OldRenderFlags = m_RenderFlags;
-		if(LineWidth <= 0)
-			SetRenderFlags(OldRenderFlags | ETextRenderFlags::TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE);
 		TextEx(&Cursor, pText, StrLength);
-		SetRenderFlags(OldRenderFlags);
 		if(pHeight != nullptr)
 			*pHeight = Cursor.Height();
 		if(pAlignedFontSize != nullptr)
@@ -859,11 +851,7 @@ public:
 		CTextCursor Cursor;
 		SetCursor(&Cursor, 0, 0, Size, Flags);
 		Cursor.m_LineWidth = LineWidth;
-		const unsigned OldRenderFlags = m_RenderFlags;
-		if(LineWidth <= 0)
-			SetRenderFlags(OldRenderFlags | ETextRenderFlags::TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE);
 		TextEx(&Cursor, pText, StrLength);
-		SetRenderFlags(OldRenderFlags);
 		return Cursor.BoundingBox();
 	}
 
@@ -872,11 +860,7 @@ public:
 		CTextCursor Cursor;
 		SetCursor(&Cursor, 0, 0, Size, Flags);
 		Cursor.m_LineWidth = LineWidth;
-		const unsigned OldRenderFlags = m_RenderFlags;
-		if(LineWidth <= 0)
-			SetRenderFlags(OldRenderFlags | ETextRenderFlags::TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE);
 		TextEx(&Cursor, pText, StrLength);
-		SetRenderFlags(OldRenderFlags);
 		return vec2(Cursor.m_X, Cursor.m_Y);
 	}
 
