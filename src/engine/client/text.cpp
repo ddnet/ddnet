@@ -1046,6 +1046,8 @@ public:
 		// string length
 		if(Length < 0)
 			Length = str_length(pText);
+		else
+			Length = minimum(Length, str_length(pText));
 
 		const float Scale = 1.0f / pSizeData->m_FontSize;
 
