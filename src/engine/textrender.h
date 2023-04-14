@@ -198,6 +198,7 @@ public:
 	int m_SelectionEnd;
 
 	ETextCursorCursorMode m_CursorMode;
+	bool m_ForceCursorRendering;
 	// note this is the decoded character offset
 	int m_CursorCharacter;
 

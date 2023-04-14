@@ -167,6 +167,7 @@ struct STextContainer
 	unsigned m_RenderFlags;
 
 	bool m_HasCursor;
+	bool m_ForceCursorRendering;
 	bool m_HasSelection;
 
 	bool m_SingleTimeUse;
@@ -193,6 +194,7 @@ struct STextContainer
 
 		m_HasCursor = false;
 		m_HasSelection = false;
+		m_ForceCursorRendering = false;
 
 		m_SingleTimeUse = false;
 
@@ -809,6 +811,7 @@ public:
 		pCursor->m_SelectionEnd = 0;
 
 		pCursor->m_CursorMode = TEXT_CURSOR_CURSOR_MODE_NONE;
+		pCursor->m_ForceCursorRendering = false;
 		pCursor->m_CursorCharacter = -1;
 	}
 
@@ -1505,6 +1508,7 @@ public:
 
 			TextContainer.m_HasCursor = HasCursor;
 			TextContainer.m_HasSelection = HasSelection;
+			TextContainer.m_ForceCursorRendering = pCursor->m_ForceCursorRendering;
 
 			if(HasSelection)
 			{
@@ -1660,14 +1664,16 @@ public:
 				const auto CurTime = time_get_nanoseconds();
 
 				Graphics()->TextureClear();
-				if((CurTime - m_CursorRenderTime) > 500ms)
+				if(TextContainer.m_ForceCursorRendering || (CurTime - m_CursorRenderTime) > 500ms)
 				{
 					Graphics()->SetColor(TextOutlineColor);
 					Graphics()->RenderQuadContainerEx(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex, 0, 1, 0, 0);
 					Graphics()->SetColor(TextColor);
 					Graphics()->RenderQuadContainerEx(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex, 1, 1, 0, 0);
 				}
-				if((CurTime - m_CursorRenderTime) > 1s)
+				if(TextContainer.m_ForceCursorRendering)
+					m_CursorRenderTime = CurTime - 501ms;
+				else if((CurTime - m_CursorRenderTime) > 1s)
 					m_CursorRenderTime = time_get_nanoseconds();
 				Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 			}
