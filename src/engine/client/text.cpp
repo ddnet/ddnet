@@ -800,6 +800,7 @@ public:
 		pCursor->m_LongestLineWidth = 0;
 
 		pCursor->m_CalculateSelectionMode = TEXT_CURSOR_SELECTION_MODE_NONE;
+		pCursor->m_SelectionHeightFactor = 1.0f;
 		pCursor->m_PressMouseX = 0;
 		pCursor->m_PressMouseY = 0;
 		pCursor->m_ReleaseMouseX = 0;
@@ -1409,7 +1410,7 @@ public:
 
 					if(SelectionStarted && IsRendered)
 					{
-						vSelectionQuads.emplace_back(SelX, DrawY, SelWidth, Size);
+						vSelectionQuads.emplace_back(SelX, DrawY + (1.0f - pCursor->m_SelectionHeightFactor) * Size, SelWidth, pCursor->m_SelectionHeightFactor * Size);
 					}
 
 					LastSelX = SelX;

@@ -183,6 +183,7 @@ public:
 	float m_AlignedFontSize;
 
 	ETextCursorSelectionMode m_CalculateSelectionMode;
+	float m_SelectionHeightFactor;
 
 	// these coordinates are repsected if selection mode is set to calculate @see ETextCursorSelectionMode
 	int m_PressMouseX;
