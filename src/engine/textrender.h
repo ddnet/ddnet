@@ -232,7 +232,7 @@ public:
 
 	ColorRGBA DefaultTextColor() const { return ColorRGBA(1, 1, 1, 1); }
 	ColorRGBA DefaultTextOutlineColor() const { return ColorRGBA(0, 0, 0, 0.3f); }
-	ColorRGBA DefaultSelectionColor() const { return ColorRGBA(0, 0, 1.0f, 1.0f); }
+	ColorRGBA DefaultTextSelectionColor() const { return ColorRGBA(0, 0, 1.0f, 1.0f); }
 
 	//
 	virtual void TextEx(CTextCursor *pCursor, const char *pText, int Length = -1) = 0;

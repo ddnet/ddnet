@@ -608,7 +608,7 @@ public:
 
 		m_Color = DefaultTextColor();
 		m_OutlineColor = DefaultTextOutlineColor();
-		m_SelectionColor = DefaultSelectionColor();
+		m_SelectionColor = DefaultTextSelectionColor();
 
 		m_pCurFont = nullptr;
 		m_pDefaultFont = nullptr;
