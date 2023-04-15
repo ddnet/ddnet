@@ -1698,8 +1698,8 @@ void CGameClient::OnNewSnapshot()
 	}
 	m_LastDummyConnected = Client()->DummyConnected();
 
-	m_Ghost.OnNewSnapshot();
-	m_RaceDemo.OnNewSnapshot();
+	for(auto &pComponent : m_vpAll)
+		pComponent->OnNewSnapshot();
 
 	// detect air jump for other players
 	for(int i = 0; i < MAX_CLIENTS; i++)

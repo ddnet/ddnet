@@ -180,6 +180,10 @@ public:
 	 */
 	virtual void OnRender(){};
 	/**
+	 * Called when a new snapshot is received.
+	 */
+	virtual void OnNewSnapshot(){};
+	/**
 	 * Called when the input gets released, for example when a text box loses focus.
 	 */
 	virtual void OnRelease(){};
