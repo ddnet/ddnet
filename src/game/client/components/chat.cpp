@@ -1021,11 +1021,11 @@ void CChat::OnPrepareLines()
 			}
 
 			CTextCursor AppendCursor = Cursor;
-
+			AppendCursor.m_LongestLineWidth = 0.0f;
 			if(!IsScoreBoardOpen && !g_Config.m_ClChatOld)
 			{
 				AppendCursor.m_StartX = Cursor.m_X;
-				AppendCursor.m_LineWidth -= (Cursor.m_LongestLineWidth - Cursor.m_StartX);
+				AppendCursor.m_LineWidth -= Cursor.m_LongestLineWidth;
 			}
 
 			TextRender()->TextEx(&AppendCursor, m_aLines[r].m_aText, -1);
@@ -1113,10 +1113,13 @@ void CChat::OnPrepareLines()
 		TextRender()->TextColor(Color);
 
 		CTextCursor AppendCursor = Cursor;
+		AppendCursor.m_LongestLineWidth = 0.0f;
+		float OriginalWidth = 0.0f;
 		if(!IsScoreBoardOpen && !g_Config.m_ClChatOld)
 		{
-			AppendCursor.m_LineWidth -= (Cursor.m_LongestLineWidth - Cursor.m_StartX);
 			AppendCursor.m_StartX = Cursor.m_X;
+			AppendCursor.m_LineWidth -= Cursor.m_LongestLineWidth;
+			OriginalWidth = Cursor.m_LongestLineWidth;
 		}
 
 		TextRender()->CreateOrAppendTextContainer(m_aLines[r].m_TextContainerIndex, &AppendCursor, m_aLines[r].m_aText);
@@ -1125,7 +1128,7 @@ void CChat::OnPrepareLines()
 		{
 			float Height = m_aLines[r].m_aYOffset[OffsetType];
 			Graphics()->SetColor(1, 1, 1, 1);
-			m_aLines[r].m_QuadContainerIndex = Graphics()->CreateRectQuadContainer(Begin, y, (AppendCursor.m_LongestLineWidth - TextBegin) + RealMsgPaddingX * 1.5f, Height, MESSAGE_ROUNDING, IGraphics::CORNER_ALL);
+			m_aLines[r].m_QuadContainerIndex = Graphics()->CreateRectQuadContainer(Begin, y, OriginalWidth + AppendCursor.m_LongestLineWidth + RealMsgPaddingX * 1.5f, Height, MESSAGE_ROUNDING, IGraphics::CORNER_ALL);
 		}
 
 		TextRender()->SetRenderFlags(CurRenderFlags);
