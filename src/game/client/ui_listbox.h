@@ -35,7 +35,6 @@ private:
 	float m_AutoSpacing;
 	CScrollRegion m_ScrollRegion;
 	vec2 m_ScrollOffset;
-	char m_aFilterString[128];
 	float m_FilterOffset;
 	int m_BackgroundCorners;
 	bool m_HasHeader;

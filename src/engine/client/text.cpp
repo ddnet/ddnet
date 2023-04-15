@@ -608,7 +608,7 @@ public:
 
 		m_Color = DefaultTextColor();
 		m_OutlineColor = DefaultTextOutlineColor();
-		m_SelectionColor = DefaultSelectionColor();
+		m_SelectionColor = DefaultTextSelectionColor();
 
 		m_pCurFont = nullptr;
 		m_pDefaultFont = nullptr;
@@ -823,16 +823,12 @@ public:
 		pCursor->m_Y = y;
 	}
 
-	void Text(float x, float y, float Size, const char *pText, float LineWidth) override
+	void Text(float x, float y, float Size, const char *pText, float LineWidth = -1.0f) override
 	{
 		CTextCursor Cursor;
 		SetCursor(&Cursor, x, y, Size, TEXTFLAG_RENDER);
 		Cursor.m_LineWidth = LineWidth;
-		const unsigned OldRenderFlags = m_RenderFlags;
-		if(LineWidth <= 0)
-			SetRenderFlags(OldRenderFlags | ETextRenderFlags::TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE);
 		TextEx(&Cursor, pText, -1);
-		SetRenderFlags(OldRenderFlags);
 	}
 
 	float TextWidth(float Size, const char *pText, int StrLength = -1, float LineWidth = -1.0f, int Flags = 0, float *pHeight = nullptr, float *pAlignedFontSize = nullptr, float *pMaxCharacterHeightInLine = nullptr) override
@@ -840,11 +836,7 @@ public:
 		CTextCursor Cursor;
 		SetCursor(&Cursor, 0, 0, Size, Flags);
 		Cursor.m_LineWidth = LineWidth;
-		const unsigned OldRenderFlags = m_RenderFlags;
-		if(LineWidth <= 0)
-			SetRenderFlags(OldRenderFlags | ETextRenderFlags::TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE);
 		TextEx(&Cursor, pText, StrLength);
-		SetRenderFlags(OldRenderFlags);
 		if(pHeight != nullptr)
 			*pHeight = Cursor.Height();
 		if(pAlignedFontSize != nullptr)
@@ -859,11 +851,7 @@ public:
 		CTextCursor Cursor;
 		SetCursor(&Cursor, 0, 0, Size, Flags);
 		Cursor.m_LineWidth = LineWidth;
-		const unsigned OldRenderFlags = m_RenderFlags;
-		if(LineWidth <= 0)
-			SetRenderFlags(OldRenderFlags | ETextRenderFlags::TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE);
 		TextEx(&Cursor, pText, StrLength);
-		SetRenderFlags(OldRenderFlags);
 		return Cursor.BoundingBox();
 	}
 
@@ -872,11 +860,7 @@ public:
 		CTextCursor Cursor;
 		SetCursor(&Cursor, 0, 0, Size, Flags);
 		Cursor.m_LineWidth = LineWidth;
-		const unsigned OldRenderFlags = m_RenderFlags;
-		if(LineWidth <= 0)
-			SetRenderFlags(OldRenderFlags | ETextRenderFlags::TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE);
 		TextEx(&Cursor, pText, StrLength);
-		SetRenderFlags(OldRenderFlags);
 		return vec2(Cursor.m_X, Cursor.m_Y);
 	}
 
@@ -934,7 +918,7 @@ public:
 		return m_SelectionColor;
 	}
 
-	void TextEx(CTextCursor *pCursor, const char *pText, int Length) override
+	void TextEx(CTextCursor *pCursor, const char *pText, int Length = -1) override
 	{
 		const unsigned OldRenderFlags = m_RenderFlags;
 		m_RenderFlags |= TEXT_RENDER_FLAG_ONE_TIME_USE;
@@ -1062,6 +1046,8 @@ public:
 		// string length
 		if(Length < 0)
 			Length = str_length(pText);
+		else
+			Length = minimum(Length, str_length(pText));
 
 		const float Scale = 1.0f / pSizeData->m_FontSize;
 
@@ -1098,7 +1084,6 @@ public:
 		}
 
 		int LineCount = pCursor->m_LineCount;
-		size_t CharacterCounter = 0;
 
 		const bool IsRendered = (pCursor->m_Flags & TEXTFLAG_RENDER) != 0;
 
@@ -1126,7 +1111,7 @@ public:
 			{
 				if(CheckInsideChar(CheckOuter, CursorX_, CursorY_, LastCharX, LastCharWidth, CharX, CharWidth, CharY))
 				{
-					SelectionChar = CharacterCounter;
+					SelectionChar = pCursor->m_GlyphCount;
 					SelectionStarted = !SelectionStarted;
 					SelectionUsedCase = true;
 				}
@@ -1144,7 +1129,7 @@ public:
 			{
 				if(CheckOutsideChar(CheckOuter, CursorX_, CursorY_, CharX, CharWidth, CharY))
 				{
-					SelectionChar = CharacterCounter;
+					SelectionChar = pCursor->m_GlyphCount;
 					SelectionStarted = !SelectionStarted;
 					SelectionUsedCase = true;
 				}
@@ -1249,7 +1234,6 @@ public:
 					if((pCursor->m_Flags & TEXTFLAG_DISALLOW_NEWLINE) == 0)
 					{
 						LastCharGlyphIndex = 0;
-						++CharacterCounter;
 						StartNewLine();
 						if(pCursor->m_MaxLines > 0 && LineCount > pCursor->m_MaxLines)
 							break;
@@ -1264,7 +1248,7 @@ public:
 				const SFontSizeChar *pChr = GetChar(TextContainer.m_pFont, pSizeData, Character);
 				if(pChr)
 				{
-					bool ApplyBearingX = !(((RenderFlags & TEXT_RENDER_FLAG_NO_X_BEARING) != 0) || (CharacterCounter == 0 && (RenderFlags & TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING) != 0));
+					bool ApplyBearingX = !(((RenderFlags & TEXT_RENDER_FLAG_NO_X_BEARING) != 0) || (pCursor->m_GlyphCount == 0 && (RenderFlags & TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING) != 0));
 					float Advance = ((((RenderFlags & TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH) != 0) ? (pChr->m_Width) : (pChr->m_AdvanceX + ((!ApplyBearingX) ? (-pChr->m_OffsetX) : 0.f)))) * Scale * Size;
 
 					float OutLineRealDiff = (pChr->m_Width - pChr->m_CharWidth) * Scale * Size;
@@ -1368,15 +1352,15 @@ public:
 
 					if(pCursor->m_CursorMode == TEXT_CURSOR_CURSOR_MODE_CALCULATE)
 					{
-						if(pCursor->m_CursorCharacter == -1 && CheckInsideChar(CharacterCounter == 0, pCursor->m_ReleaseMouseX, pCursor->m_ReleaseMouseY, CharacterCounter == 0 ? std::numeric_limits<float>::lowest() : LastCharX, LastCharWidth, CharX, CharWidth, TmpY))
+						if(pCursor->m_CursorCharacter == -1 && CheckInsideChar(pCursor->m_GlyphCount == 0, pCursor->m_ReleaseMouseX, pCursor->m_ReleaseMouseY, pCursor->m_GlyphCount == 0 ? std::numeric_limits<float>::lowest() : LastCharX, LastCharWidth, CharX, CharWidth, TmpY))
 						{
-							pCursor->m_CursorCharacter = CharacterCounter;
+							pCursor->m_CursorCharacter = pCursor->m_GlyphCount;
 						}
 					}
 
 					if(pCursor->m_CalculateSelectionMode == TEXT_CURSOR_SELECTION_MODE_CALCULATE)
 					{
-						if(CharacterCounter == 0)
+						if(pCursor->m_GlyphCount == 0)
 						{
 							CheckSelectionStart(true, pCursor->m_PressMouseX, pCursor->m_PressMouseY, SelectionStartChar, SelectionUsedPress, std::numeric_limits<float>::lowest(), 0, CharX, CharWidth, TmpY);
 							CheckSelectionStart(true, pCursor->m_ReleaseMouseX, pCursor->m_ReleaseMouseY, SelectionEndChar, SelectionUsedRelease, std::numeric_limits<float>::lowest(), 0, CharX, CharWidth, TmpY);
@@ -1390,23 +1374,23 @@ public:
 					}
 					if(pCursor->m_CalculateSelectionMode == TEXT_CURSOR_SELECTION_MODE_SET)
 					{
-						if((int)CharacterCounter == pCursor->m_SelectionStart)
+						if((int)pCursor->m_GlyphCount == pCursor->m_SelectionStart)
 						{
 							SelectionStarted = !SelectionStarted;
-							SelectionStartChar = CharacterCounter;
+							SelectionStartChar = pCursor->m_GlyphCount;
 							SelectionUsedPress = true;
 						}
-						if((int)CharacterCounter == pCursor->m_SelectionEnd)
+						if((int)pCursor->m_GlyphCount == pCursor->m_SelectionEnd)
 						{
 							SelectionStarted = !SelectionStarted;
-							SelectionEndChar = CharacterCounter;
+							SelectionEndChar = pCursor->m_GlyphCount;
 							SelectionUsedRelease = true;
 						}
 					}
 
 					if(pCursor->m_CursorMode != TEXT_CURSOR_CURSOR_MODE_NONE)
 					{
-						if((int)CharacterCounter == pCursor->m_CursorCharacter)
+						if((int)pCursor->m_GlyphCount == pCursor->m_CursorCharacter)
 						{
 							HasCursor = true;
 							aCursorQuads[0] = IGraphics::CQuadItem(SelX - CursorOuterInnerDiff, DrawY, CursorOuterWidth, Size);
@@ -1422,7 +1406,6 @@ public:
 						DrawX += Advance + CharKerning;
 
 					pCursor->m_GlyphCount++;
-					++CharacterCounter;
 
 					if(SelectionStarted && IsRendered)
 					{
@@ -1478,16 +1461,16 @@ public:
 		}
 		else if(pCursor->m_CalculateSelectionMode == TEXT_CURSOR_SELECTION_MODE_SET)
 		{
-			if((int)CharacterCounter == pCursor->m_SelectionStart)
+			if((int)pCursor->m_GlyphCount == pCursor->m_SelectionStart)
 			{
 				SelectionStarted = !SelectionStarted;
-				SelectionStartChar = CharacterCounter;
+				SelectionStartChar = pCursor->m_GlyphCount;
 				SelectionUsedPress = true;
 			}
-			if((int)CharacterCounter == pCursor->m_SelectionEnd)
+			if((int)pCursor->m_GlyphCount == pCursor->m_SelectionEnd)
 			{
 				SelectionStarted = !SelectionStarted;
-				SelectionEndChar = CharacterCounter;
+				SelectionEndChar = pCursor->m_GlyphCount;
 				SelectionUsedRelease = true;
 			}
 		}
@@ -1496,10 +1479,10 @@ public:
 		{
 			if(pCursor->m_CursorMode == TEXT_CURSOR_CURSOR_MODE_CALCULATE && pCursor->m_CursorCharacter == -1 && CheckOutsideChar(true, pCursor->m_ReleaseMouseX, pCursor->m_ReleaseMouseY, std::numeric_limits<float>::max(), 0, DrawY + Size))
 			{
-				pCursor->m_CursorCharacter = CharacterCounter;
+				pCursor->m_CursorCharacter = pCursor->m_GlyphCount;
 			}
 
-			if((int)CharacterCounter == pCursor->m_CursorCharacter)
+			if((int)pCursor->m_GlyphCount == pCursor->m_CursorCharacter)
 			{
 				HasCursor = true;
 				aCursorQuads[0] = IGraphics::CQuadItem((LastSelX + LastSelWidth) - CursorOuterInnerDiff, DrawY, CursorOuterWidth, Size);

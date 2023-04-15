@@ -14,7 +14,6 @@ CListBox::CListBox()
 {
 	m_ScrollOffset = vec2(0.0f, 0.0f);
 	m_ListBoxUpdateScroll = false;
-	m_aFilterString[0] = '\0';
 	m_FilterOffset = 0.0f;
 	m_HasHeader = false;
 	m_AutoSpacing = 0.0f;
@@ -214,9 +213,4 @@ int CListBox::DoEnd()
 		ScrollToSelected();
 	}
 	return m_ListBoxNewSelected;
-}
-
-bool CListBox::FilterMatches(const char *pNeedle) const
-{
-	return !m_aFilterString[0] || str_find_nocase(pNeedle, m_aFilterString);
 }
