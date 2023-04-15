@@ -15,8 +15,6 @@
 #include <game/gamecore.h>
 #include <game/teamscore.h>
 
-MACRO_ALLOC_POOL_ID_IMPL(CPlayer, MAX_CLIENTS)
-
 IServer *CPlayer::Server() const { return m_pGameServer->Server(); }
 
 CPlayer::CPlayer(CGameContext *pGameServer, uint32_t UniqueClientID, int ClientID, int Team) :
@@ -34,7 +32,8 @@ CPlayer::~CPlayer()
 {
 	GameServer()->Antibot()->OnPlayerDestroy(m_ClientID);
 	delete m_pLastTarget;
-	delete m_pCharacter;
+    if (GameServer()->m_apCharacters[m_ClientID])
+	    GameServer()->m_apCharacters.Delete(m_ClientID);
 	m_pCharacter = 0;
 }
 
@@ -43,7 +42,8 @@ void CPlayer::Reset()
 	m_DieTick = Server()->Tick();
 	m_PreviousDieTick = m_DieTick;
 	m_JoinTick = Server()->Tick();
-	delete m_pCharacter;
+    if (GameServer()->m_apCharacters[m_ClientID])
+	    GameServer()->m_apCharacters.Delete(m_ClientID);
 	m_pCharacter = 0;
 	m_SpectatorID = SPEC_FREEVIEW;
 	m_LastActionTick = Server()->Tick();
@@ -243,7 +243,7 @@ void CPlayer::Tick()
 			}
 			else if(!m_pCharacter->IsPaused())
 			{
-				delete m_pCharacter;
+                GameServer()->m_apCharacters.Delete(m_ClientID);
 				m_pCharacter = 0;
 			}
 		}
@@ -565,7 +565,7 @@ void CPlayer::KillCharacter(int Weapon)
 	{
 		m_pCharacter->Die(m_ClientID, Weapon);
 
-		delete m_pCharacter;
+		GameServer()->m_apCharacters.Delete(m_ClientID);
 		m_pCharacter = 0;
 	}
 }
@@ -582,7 +582,7 @@ void CPlayer::Respawn(bool WeakHook)
 CCharacter *CPlayer::ForceSpawn(vec2 Pos)
 {
 	m_Spawning = false;
-	m_pCharacter = new(m_ClientID) CCharacter(&GameServer()->m_World, GameServer()->GetLastPlayerInput(m_ClientID));
+	m_pCharacter = GameServer()->m_apCharacters.New(m_ClientID, &GameServer()->m_World, GameServer()->GetLastPlayerInput(m_ClientID));
 	m_pCharacter->Spawn(this, Pos);
 	m_Team = 0;
 	return m_pCharacter;
@@ -607,7 +607,7 @@ void CPlayer::SetTeam(int Team, bool DoChatMsg)
 	if(Team == TEAM_SPECTATORS)
 	{
 		// update spectator modes
-		for(auto &pPlayer : GameServer()->m_apPlayers)
+		for(auto pPlayer : GameServer()->m_apPlayers)
 		{
 			if(pPlayer && pPlayer->m_SpectatorID == m_ClientID)
 				pPlayer->m_SpectatorID = SPEC_FREEVIEW;
@@ -670,7 +670,7 @@ void CPlayer::TryRespawn()
 
 	m_WeakHookSpawn = false;
 	m_Spawning = false;
-	m_pCharacter = new(m_ClientID) CCharacter(&GameServer()->m_World, GameServer()->GetLastPlayerInput(m_ClientID));
+	m_pCharacter = GameServer()->m_apCharacters.New(m_ClientID, &GameServer()->m_World, GameServer()->GetLastPlayerInput(m_ClientID));
 	m_ViewPos = SpawnPos;
 	m_pCharacter->Spawn(this, SpawnPos);
 	GameServer()->CreatePlayerSpawn(SpawnPos, GameServer()->m_pController->GetMaskForPlayerWorldEvent(m_ClientID));

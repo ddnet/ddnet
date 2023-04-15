@@ -19,6 +19,10 @@
 #include <memory>
 #include <string>
 
+#include "alloc.h"
+#include "player.h"
+#include "entities/character.h"
+
 /*
 	Tick
 		Game Context (CGameContext::tick)
@@ -46,10 +50,8 @@ enum
 	NUM_TUNEZONES = 256
 };
 
-class CCharacter;
 class CConfig;
 class CHeap;
-class CPlayer;
 class CScore;
 class CUnpacker;
 class IAntibot;
@@ -165,7 +167,8 @@ public:
 	void Clear();
 
 	CEventHandler m_Events;
-	CPlayer *m_apPlayers[MAX_CLIENTS];
+	CObjectPool<CPlayer, MAX_CLIENTS> m_apPlayers;
+    CObjectPool<CCharacter, MAX_CLIENTS> m_apCharacters;
 	// keep last input to always apply when none is sent
 	CNetObj_PlayerInput m_aLastPlayerInput[MAX_CLIENTS];
 	bool m_aPlayerHasInput[MAX_CLIENTS];
@@ -178,7 +181,8 @@ public:
 	CGameWorld m_World;
 
 	// helper functions
-	class CCharacter *GetPlayerChar(int ClientID);
+    CPlayer *GetPlayer() const;
+	class CCharacter *GetPlayerChar(int ClientID) const;
 	bool EmulateBug(int Bug);
 	std::vector<SSwitchers> &Switchers() { return m_World.m_Core.m_vSwitchers; }
 

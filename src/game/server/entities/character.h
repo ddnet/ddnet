@@ -24,8 +24,6 @@ enum
 
 class CCharacter : public CEntity
 {
-	MACRO_ALLOC_POOL_ID()
-
 	friend class CSaveTee; // need to use core
 
 public:

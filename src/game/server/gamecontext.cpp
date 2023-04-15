@@ -73,8 +73,7 @@ void CGameContext::Construct(int Resetting)
 	m_Resetting = false;
 	m_pServer = 0;
 
-	for(auto &pPlayer : m_apPlayers)
-		pPlayer = 0;
+    m_apPlayers.Reset();
 
 	mem_zero(&m_aLastPlayerInput, sizeof(m_aLastPlayerInput));
 	mem_zero(&m_aPlayerHasInput, sizeof(m_aPlayerHasInput));
@@ -109,8 +108,7 @@ void CGameContext::Construct(int Resetting)
 
 void CGameContext::Destruct(int Resetting)
 {
-	for(auto &pPlayer : m_apPlayers)
-		delete pPlayer;
+    m_apPlayers.Reset();
 
 	if(Resetting == NO_RESET)
 		delete m_pVoteOptionHeap;
@@ -177,7 +175,7 @@ CNetObj_PlayerInput CGameContext::GetLastPlayerInput(int ClientID) const
 	return m_aLastPlayerInput[ClientID];
 }
 
-class CCharacter *CGameContext::GetPlayerChar(int ClientID)
+class CCharacter *CGameContext::GetPlayerChar(int ClientID) const
 {
 	if(ClientID < 0 || ClientID >= MAX_CLIENTS || !m_apPlayers[ClientID])
 		return 0;
@@ -644,7 +642,7 @@ void CGameContext::SendBroadcast(const char *pText, int ClientID, bool IsImporta
 		dbg_assert(IsImportant, "broadcast messages to all players must be important");
 		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
 
-		for(auto &pPlayer : m_apPlayers)
+		for(auto pPlayer : m_apPlayers)
 		{
 			if(pPlayer)
 			{
@@ -671,7 +669,7 @@ void CGameContext::StartVote(const char *pDesc, const char *pCommand, const char
 	// reset votes
 	m_VoteEnforce = VOTE_ENFORCE_UNKNOWN;
 	m_VoteEnforcer = -1;
-	for(auto &pPlayer : m_apPlayers)
+	for(auto pPlayer : m_apPlayers)
 	{
 		if(pPlayer)
 		{
@@ -945,7 +943,7 @@ void CGameContext::OnTick()
 		}
 	}
 
-	for(auto &pPlayer : m_apPlayers)
+	for(auto pPlayer : m_apPlayers)
 	{
 		if(pPlayer)
 			pPlayer->PostPostTick();
@@ -1573,7 +1571,7 @@ void CGameContext::OnClientConnected(int ClientID, void *pData)
 
 	{
 		bool Empty = true;
-		for(auto &pPlayer : m_apPlayers)
+		for(auto pPlayer : m_apPlayers)
 		{
 			// connecting clients with spoofed ips can clog slots without being ingame
 			if(pPlayer && Server()->ClientIngame(pPlayer->GetCID()))
@@ -1592,8 +1590,8 @@ void CGameContext::OnClientConnected(int ClientID, void *pData)
 	const int StartTeam = (Spec || g_Config.m_SvTournamentMode) ? TEAM_SPECTATORS : m_pController->GetAutoTeam(ClientID);
 
 	if(m_apPlayers[ClientID])
-		delete m_apPlayers[ClientID];
-	m_apPlayers[ClientID] = new(ClientID) CPlayer(this, NextUniqueClientID, ClientID, StartTeam);
+        m_apPlayers.Delete(ClientID);
+	m_apPlayers.New(ClientID, this, NextUniqueClientID, ClientID, StartTeam);
 	m_apPlayers[ClientID]->SetAfk(Afk);
 	NextUniqueClientID += 1;
 
@@ -1618,19 +1616,19 @@ void CGameContext::OnClientDrop(int ClientID, const char *pReason)
 	AbortVoteKickOnDisconnect(ClientID);
 	m_pController->OnPlayerDisconnect(m_apPlayers[ClientID], pReason);
 	delete m_apPlayers[ClientID];
-	m_apPlayers[ClientID] = 0;
+	m_apPlayers.Delete(ClientID);
 
 	m_VoteUpdate = true;
 
 	// update spectator modes
-	for(auto &pPlayer : m_apPlayers)
+	for(auto pPlayer : m_apPlayers)
 	{
 		if(pPlayer && pPlayer->m_SpectatorID == ClientID)
 			pPlayer->m_SpectatorID = SPEC_FREEVIEW;
 	}
 
 	// update conversation targets
-	for(auto &pPlayer : m_apPlayers)
+	for(auto pPlayer : m_apPlayers)
 	{
 		if(pPlayer && pPlayer->m_LastWhisperTo == ClientID)
 			pPlayer->m_LastWhisperTo = -1;
@@ -2976,7 +2974,7 @@ void CGameContext::ConSetTeamAll(IConsole::IResult *pResult, void *pUserData)
 	str_format(aBuf, sizeof(aBuf), "All players were moved to the %s", pSelf->m_pController->GetTeamName(Team));
 	pSelf->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
 
-	for(auto &pPlayer : pSelf->m_apPlayers)
+	for(auto pPlayer : pSelf->m_apPlayers)
 		if(pPlayer)
 			pSelf->m_pController->DoTeamChange(pPlayer, Team, false);
 }
@@ -3074,7 +3072,7 @@ void CGameContext::ConRemoveVote(IConsole::IResult *pResult, void *pUserData)
 	pSelf->Server()->SendPackMsg(&VoteClearOptionsMsg, MSGFLAG_VITAL, -1);
 
 	// reset sending of vote options
-	for(auto &pPlayer : pSelf->m_apPlayers)
+	for(auto pPlayer : pSelf->m_apPlayers)
 	{
 		if(pPlayer)
 			pPlayer->m_SendVoteIndex = 0;
@@ -3197,7 +3195,7 @@ void CGameContext::ConClearVotes(IConsole::IResult *pResult, void *pUserData)
 	pSelf->m_NumVoteOptions = 0;
 
 	// reset sending of vote options
-	for(auto &pPlayer : pSelf->m_apPlayers)
+	for(auto pPlayer : pSelf->m_apPlayers)
 	{
 		if(pPlayer)
 			pPlayer->m_SendVoteIndex = 0;
@@ -3834,7 +3832,7 @@ void CGameContext::OnSnap(int ClientID)
 
 	m_pController->Snap(ClientID);
 
-	for(auto &pPlayer : m_apPlayers)
+	for(auto pPlayer : m_apPlayers)
 	{
 		if(pPlayer)
 			pPlayer->Snap(ClientID);
@@ -4237,7 +4235,10 @@ CClientMask CGameContext::ClientsMaskExcludeClientVersionAndHigher(int Version)
 
 bool CGameContext::PlayerModerating() const
 {
-	return std::any_of(std::begin(m_apPlayers), std::end(m_apPlayers), [](const CPlayer *pPlayer) { return pPlayer && pPlayer->m_Moderating; });
+    for (auto pPlayer : m_apPlayers)
+        if (pPlayer && pPlayer->m_Moderating)
+            return true;
+    return false;
 }
 
 void CGameContext::ForceVote(int EnforcerID, bool Success)

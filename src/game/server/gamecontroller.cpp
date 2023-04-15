@@ -72,7 +72,7 @@ void IGameController::DoActivityCheck()
 				{
 					// move player to spectator if the reserved slots aren't filled yet, kick him otherwise
 					int Spectators = 0;
-					for(auto &pPlayer : GameServer()->m_apPlayers)
+					for(auto pPlayer : GameServer()->m_apPlayers)
 						if(pPlayer && pPlayer->GetTeam() == TEAM_SPECTATORS)
 							++Spectators;
 					if(Spectators >= g_Config.m_SvSpectatorSlots)
@@ -464,7 +464,7 @@ void IGameController::ChangeMap(const char *pToMap)
 
 void IGameController::OnReset()
 {
-	for(auto &pPlayer : GameServer()->m_apPlayers)
+	for(auto pPlayer : GameServer()->m_apPlayers)
 		if(pPlayer)
 			pPlayer->Respawn();
 }

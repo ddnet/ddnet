@@ -3,78 +3,86 @@
 #ifndef GAME_SERVER_ALLOC_H
 #define GAME_SERVER_ALLOC_H
 
-#include <new>
+#include <bitset>
+#include <iterator>
 
 #include <base/system.h>
-#ifndef __has_feature
-#define __has_feature(x) 0
-#endif
-#if __has_feature(address_sanitizer)
-#include <sanitizer/asan_interface.h>
-#else
-#define ASAN_POISON_MEMORY_REGION(addr, size) \
-	((void)(addr), (void)(size))
-#define ASAN_UNPOISON_MEMORY_REGION(addr, size) \
-	((void)(addr), (void)(size))
-#endif
 
-#define MACRO_ALLOC_HEAP() \
-public: \
-	void *operator new(size_t Size) \
-	{ \
-		void *p = malloc(Size); \
-		mem_zero(p, Size); \
-		return p; \
-	} \
-	void operator delete(void *pPtr) \
-	{ \
-		free(pPtr); \
-	} \
-\
-private:
+template<typename Type, const std::size_t Size>
+class CObjectPool {
+    char m_Data[Size][sizeof(Type)]{{0}};
+    std::bitset<Size> m_Used{0};
 
-#define MACRO_ALLOC_POOL_ID() \
-public: \
-	void *operator new(size_t Size, int id); \
-	void operator delete(void *p, int id); \
-	void operator delete(void *p); /* NOLINT(misc-new-delete-overloads) */ \
-\
-private:
+public:
+    CObjectPool() {
+    }
 
-#if __has_feature(address_sanitizer)
-#define MACRO_ALLOC_GET_SIZE(POOLTYPE) ((sizeof(POOLTYPE) + 7) & ~7)
-#else
-#define MACRO_ALLOC_GET_SIZE(POOLTYPE) (sizeof(POOLTYPE))
-#endif
+    template <typename ...TArgs>
+    Type *New(std::size_t ObjectId, TArgs ...Args) {
+        dbg_assert(!m_Used[ObjectId], "Already constructed");
+        dbg_assert(0 <= ObjectId && ObjectId < Size, "Invalid ObjectId");
 
-#define MACRO_ALLOC_POOL_ID_IMPL(POOLTYPE, PoolSize) \
-	static char gs_PoolData##POOLTYPE[PoolSize][MACRO_ALLOC_GET_SIZE(POOLTYPE)] = {{0}}; \
-	static int gs_PoolUsed##POOLTYPE[PoolSize] = {0}; \
-	MAYBE_UNUSED static int gs_PoolDummy##POOLTYPE = (ASAN_POISON_MEMORY_REGION(gs_PoolData##POOLTYPE, sizeof(gs_PoolData##POOLTYPE)), 0); \
-	void *POOLTYPE::operator new(size_t Size, int id) \
-	{ \
-		dbg_assert(sizeof(POOLTYPE) >= Size, "size error"); \
-		dbg_assert(!gs_PoolUsed##POOLTYPE[id], "already used"); \
-		ASAN_UNPOISON_MEMORY_REGION(gs_PoolData##POOLTYPE[id], sizeof(gs_PoolData##POOLTYPE[id])); \
-		gs_PoolUsed##POOLTYPE[id] = 1; \
-		mem_zero(gs_PoolData##POOLTYPE[id], sizeof(gs_PoolData##POOLTYPE[id])); \
-		return gs_PoolData##POOLTYPE[id]; \
-	} \
-	void POOLTYPE::operator delete(void *p, int id) \
-	{ \
-		dbg_assert(gs_PoolUsed##POOLTYPE[id], "not used"); \
-		dbg_assert(id == (POOLTYPE *)p - (POOLTYPE *)gs_PoolData##POOLTYPE, "invalid id"); \
-		gs_PoolUsed##POOLTYPE[id] = 0; \
-		mem_zero(gs_PoolData##POOLTYPE[id], sizeof(gs_PoolData##POOLTYPE[id])); \
-		ASAN_POISON_MEMORY_REGION(gs_PoolData##POOLTYPE[id], sizeof(gs_PoolData##POOLTYPE[id])); \
-	} \
-	void POOLTYPE::operator delete(void *p) /* NOLINT(misc-new-delete-overloads) */ \
-	{ \
-		int id = (POOLTYPE *)p - (POOLTYPE *)gs_PoolData##POOLTYPE; \
-		dbg_assert(gs_PoolUsed##POOLTYPE[id], "not used"); \
-		gs_PoolUsed##POOLTYPE[id] = 0; \
-		mem_zero(gs_PoolData##POOLTYPE[id], sizeof(gs_PoolData##POOLTYPE[id])); \
-		ASAN_POISON_MEMORY_REGION(gs_PoolData##POOLTYPE[id], sizeof(gs_PoolData##POOLTYPE[id])); \
-	}
+        Type *Pointer = new (m_Data[ObjectId]) Type(std::forward<TArgs>(Args)...);
+        m_Used[ObjectId] = true;
+
+        return Pointer;
+    }
+
+    Type *Get(std::size_t ObjectId) const {
+        dbg_assert(0 <= ObjectId && ObjectId < Size, "Invalid ObjectId");
+
+        if (!m_Used[ObjectId])
+            return nullptr;
+        return (Type *)(m_Data[ObjectId]);
+    }
+
+    Type *operator[](std::size_t ObjectId) const
+    {
+        return Get(ObjectId);
+    }
+
+    void Delete(std::size_t ObjectId) {
+        dbg_assert(m_Used[ObjectId], "Already unused");
+        dbg_assert(0 <= ObjectId && ObjectId < Size, "Invalid ObjectId");
+
+        m_Used[ObjectId] = false;
+    }
+
+    void Reset()
+    {
+        for (std::size_t i = 0; i < Size; i++)
+            m_Used[i] = false;
+    }
+
+    template<typename T>
+    class iterator
+    {
+        const CObjectPool *m_pPool;
+        std::size_t m_Id;
+
+        // helper
+        T Value() const { return (T)(m_pPool->Get(m_Id)); };
+
+    public:
+        using value_type = T;
+        using self_type = iterator<T>;
+        using size_type = std::size_t;
+        using difference_type = T;
+
+        iterator(const CObjectPool *pPool, std::size_t Id) : m_pPool(pPool), m_Id(Id) {}
+
+        self_type operator++() { m_Id++; return *this; }
+        self_type operator++(int) { return self_type(m_pPool, m_Id + 1); }
+        value_type operator*() { return Value(); }
+        value_type *operator->() { return &Value(); }
+        friend bool operator==(const self_type& Lhs, const self_type& Rhs) { return Lhs.m_Id == Rhs.m_Id; }
+        friend bool operator!=(const self_type& Lhs, const self_type& Rhs) { return Lhs.m_Id != Rhs.m_Id; }
+    };
+
+    iterator<Type *> begin() const { return iterator<Type *>(this, 0); }
+    iterator<Type *> end() const { return iterator<Type *>(this, Size); }
+    iterator<const Type *> cbegin() const { return iterator<const Type *>(this, 0); }
+    iterator<const Type *> cend() const { return iterator<const Type *>(this, Size); }
+};
 
 #endif

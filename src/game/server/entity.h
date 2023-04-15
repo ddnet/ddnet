@@ -5,7 +5,6 @@
 
 #include <base/vmath.h>
 
-#include "alloc.h"
 #include "gameworld.h"
 
 class CCollision;
@@ -17,9 +16,6 @@ class CGameContext;
 */
 class CEntity
 {
-	MACRO_ALLOC_HEAP()
-
-private:
 	friend CGameWorld; // entity list handling
 	CEntity *m_pPrevTypeEntity;
 	CEntity *m_pNextTypeEntity;

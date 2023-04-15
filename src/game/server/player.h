@@ -28,8 +28,6 @@ enum
 // player object
 class CPlayer
 {
-	MACRO_ALLOC_POOL_ID()
-
 public:
 	CPlayer(CGameContext *pGameServer, uint32_t UniqueClientID, int ClientID, int Team);
 	~CPlayer();
