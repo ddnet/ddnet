@@ -11,6 +11,8 @@
 #include "killmessages.h"
 #include <game/client/animstate.h>
 #include <game/client/gameclient.h>
+#include <game/client/prediction/entities/character.h>
+#include <game/client/prediction/gameworld.h>
 
 void CKillMessages::OnWindowResize()
 {
@@ -24,7 +26,6 @@ void CKillMessages::OnWindowResize()
 void CKillMessages::OnReset()
 {
 	m_KillmsgCurrent = 0;
-	m_VictimSkinCurrent = 0;
 
 	for(auto &Killmsg : m_aKillmsgs)
 	{
@@ -106,42 +107,47 @@ void CKillMessages::OnMessage(int MsgType, void *pRawMsg)
 	if(m_pClient->m_SuppressEvents)
 		return;
 
-	if(MsgType == NETMSGTYPE_SV_KILLMSGPLUS)
+	if(MsgType == NETMSGTYPE_SV_KILLMSGTEAM)
 	{
-		CNetMsg_Sv_KillMsgPlus *pMsg = (CNetMsg_Sv_KillMsgPlus *)pRawMsg;
+		CNetMsg_Sv_KillMsgTeam *pMsg = (CNetMsg_Sv_KillMsgTeam *)pRawMsg;
 
 		// unpack messages
 		CKillMsg Kill;
 		Kill.m_aVictimName[0] = '\0';
 		Kill.m_aKillerName[0] = '\0';
 
-		Kill.m_TeamSize = pMsg->m_Size;
-		if(Kill.m_TeamSize > MAX_KILLMSGTEAM)
-			Kill.m_TeamSize = MAX_KILLMSGTEAM;
+		std::vector<std::pair<int, int>> vStrongWeakSorted;
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if(m_pClient->m_Teams.Team(i) == pMsg->m_Team)
+			{
+				CCharacter *pChr = m_pClient->m_GameWorld.GetCharacterByID(i);
+				vStrongWeakSorted.emplace_back(i, pMsg->m_First == i ? MAX_CLIENTS : pChr ? pChr->GetStrongWeakID() : 0);
+			}
+		}
 
-		Kill.m_VictimID = pMsg->m_Victim;
+		std::stable_sort(vStrongWeakSorted.begin(), vStrongWeakSorted.end(), [](auto &Left, auto &Right) { return Left.second > Right.second; });
+
+		Kill.m_TeamSize = vStrongWeakSorted.size();
+		if(Kill.m_TeamSize > MAX_KILLMSG_TEAM_MEMBERS)
+			Kill.m_TeamSize = MAX_KILLMSG_TEAM_MEMBERS;
+
+		Kill.m_VictimID = vStrongWeakSorted[0].first;
 		if(Kill.m_VictimID >= 0 && Kill.m_VictimID < MAX_CLIENTS)
 		{
 			Kill.m_VictimTeam = m_pClient->m_aClients[Kill.m_VictimID].m_Team;
-			Kill.m_VictimDDTeam = m_pClient->m_Teams.Team(Kill.m_VictimID);
+			Kill.m_VictimDDTeam = pMsg->m_Team;
 			Kill.m_VictimRenderInfo[0] = m_pClient->m_aClients[Kill.m_VictimID].m_RenderInfo;
 
-			m_VictimSkinCurrent = 0;
-			for(int i = 0; i < MAX_CLIENTS; i++)
-			{
-				if(m_pClient->m_Teams.Team(i) == Kill.m_VictimDDTeam && i != Kill.m_VictimID)
-				{
-					Kill.m_VictimRenderInfo[m_VictimSkinCurrent + 1] = m_pClient->m_aClients[i].m_RenderInfo;
-					m_VictimSkinCurrent = (m_VictimSkinCurrent + 1) % (MAX_KILLMSGTEAM - 1);
-				}
-			}
+			for(int i = 1; i < Kill.m_TeamSize; i++)
+				Kill.m_VictimRenderInfo[i] = m_pClient->m_aClients[vStrongWeakSorted[i].first].m_RenderInfo;
 
 			str_format(Kill.m_aVictimName, sizeof(Kill.m_aVictimName), Localize("Team %d"), Kill.m_VictimDDTeam);
 		}
 
 		Kill.m_KillerID = Kill.m_VictimID;
 
-		Kill.m_Weapon = pMsg->m_Weapon;
+		Kill.m_Weapon = -1;
 		Kill.m_ModeSpecial = 0;
 		Kill.m_Tick = Client()->GameTick(g_Config.m_ClDummy);
 

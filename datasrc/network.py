@@ -514,9 +514,8 @@ Messages = [
 		NetIntAny("m_PlayerTimeBest"),
 	]),
     
-	NetMessageEx("Sv_KillMsgPlus", "killmsgplus@netmsg.ddnet.tw", [
-		NetIntRange("m_Victim", 0, 'MAX_CLIENTS-1'),
-		NetIntRange("m_Weapon", -3, 'NUM_WEAPONS-1'),
-		NetIntRange("m_Size", 0, 'MAX_CLIENTS-1'),
+	NetMessageEx("Sv_KillMsgTeam", "killmsgteam@netmsg.ddnet.tw", [
+		NetIntRange("m_Team", 0, 'MAX_CLIENTS-1'),
+		NetIntRange("m_First", -1, 'MAX_CLIENTS-1'),
 	]),
 ]

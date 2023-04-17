@@ -446,12 +446,6 @@ void CGameTeams::ChangeTeamState(int Team, int State)
 
 void CGameTeams::KillTeam(int Team, int NewStrongID, int ExceptID)
 {
-	int ShowcaseID = 0;
-	int First = 0;
-
-	if(NewStrongID != -1)
-		ShowcaseID = NewStrongID;
-
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		if(m_Core.Team(i) == Team && GameServer()->m_apPlayers[i])
@@ -460,11 +454,6 @@ void CGameTeams::KillTeam(int Team, int NewStrongID, int ExceptID)
 			if(i != ExceptID)
 			{
 				GameServer()->m_apPlayers[i]->KillCharacter(WEAPON_SELF, false);
-
-				First++;
-				if(First == 1 && NewStrongID == -1)
-					ShowcaseID = i;
-
 				if(NewStrongID != -1 && i != NewStrongID)
 				{
 					GameServer()->m_apPlayers[i]->Respawn(true); // spawn the rest of team with weak hook on the killer
@@ -474,10 +463,9 @@ void CGameTeams::KillTeam(int Team, int NewStrongID, int ExceptID)
 	}
 
 	// send the team kill message
-	CNetMsg_Sv_KillMsgPlus Msg;
-	Msg.m_Victim = ShowcaseID;
-	Msg.m_Weapon = WEAPON_SELF;
-	Msg.m_Size = Count(Team);
+	CNetMsg_Sv_KillMsgTeam Msg;
+	Msg.m_Team = Team;
+	Msg.m_First = NewStrongID;
 	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
 }
 

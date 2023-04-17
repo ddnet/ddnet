@@ -5,15 +5,14 @@
 #include <game/client/component.h>
 
 #include <game/client/render.h>
-
-enum
-{
-	MAX_KILLMSGS = 5,
-	MAX_KILLMSGTEAM = 4,
-};
 class CKillMessages : public CComponent
 {
 	int m_SpriteQuadContainerIndex;
+	enum
+	{
+		MAX_KILLMSGS = 5,
+		MAX_KILLMSG_TEAM_MEMBERS = 4,
+	};
 
 public:
 	// kill messages
@@ -32,7 +31,7 @@ public:
 		char m_aVictimName[64];
 		int m_VictimTextContainerIndex;
 		float m_VitctimTextWidth;
-		CTeeRenderInfo m_VictimRenderInfo[MAX_KILLMSGTEAM];
+		CTeeRenderInfo m_VictimRenderInfo[MAX_KILLMSG_TEAM_MEMBERS];
 		int m_KillerID;
 		int m_KillerTeam;
 		char m_aKillerName[64];
@@ -52,7 +51,6 @@ private:
 public:
 	CKillMsg m_aKillmsgs[MAX_KILLMSGS];
 	int m_KillmsgCurrent;
-	int m_VictimSkinCurrent;
 
 	virtual int Sizeof() const override { return sizeof(*this); }
 	virtual void OnWindowResize() override;
