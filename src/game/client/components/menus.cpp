@@ -58,7 +58,7 @@ float CMenus::ms_ButtonHeight = 25.0f;
 float CMenus::ms_ListheaderHeight = 17.0f;
 
 IInput::CEvent CMenus::m_aInputEvents[MAX_INPUTEVENTS];
-int CMenus::m_NumInputEvents;
+size_t CMenus::m_NumInputEvents;
 
 CMenus::CMenus()
 {

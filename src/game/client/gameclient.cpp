@@ -392,7 +392,7 @@ void CGameClient::OnUpdate()
 	}
 
 	// handle key presses
-	for(int i = 0; i < Input()->NumEvents(); i++)
+	for(size_t i = 0; i < Input()->NumEvents(); i++)
 	{
 		const IInput::CEvent &Event = Input()->GetEvent(i);
 		if(!Input()->IsEventValid(Event))

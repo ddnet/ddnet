@@ -101,7 +101,7 @@ void CUI::Init(IKernel *pKernel)
 	CUIElementBase::Init(this);
 }
 
-void CUI::InitInputs(IInput::CEvent *pInputEventsArray, int *pInputEventCount)
+void CUI::InitInputs(IInput::CEvent *pInputEventsArray, size_t *pInputEventCount)
 {
 	m_pInputEventsArray = pInputEventsArray;
 	m_pInputEventCount = pInputEventCount;
@@ -812,7 +812,7 @@ bool CUI::DoEditBox(const void *pID, const CUIRect *pRect, char *pStr, unsigned 
 			ReturnValue = true;
 		}
 
-		for(int i = 0; i < *m_pInputEventCount; i++)
+		for(size_t i = 0; i < *m_pInputEventCount; i++)
 		{
 			int LastCursor = m_CurCursor;
 			int Len, NumChars;

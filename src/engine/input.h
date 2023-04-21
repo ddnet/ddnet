@@ -33,7 +33,7 @@ protected:
 	};
 
 	// quick access to events
-	int m_NumEvents;
+	size_t m_NumEvents;
 	IInput::CEvent m_aInputEvents[INPUT_BUFFER_SIZE];
 	int64_t m_LastUpdate;
 	float m_UpdateTime;
@@ -54,15 +54,15 @@ public:
 	};
 
 	// events
-	int NumEvents() const { return m_NumEvents; }
+	size_t NumEvents() const { return m_NumEvents; }
 	virtual bool IsEventValid(const CEvent &Event) const = 0;
-	const CEvent &GetEvent(int Index) const
+	const CEvent &GetEvent(size_t Index) const
 	{
-		dbg_assert(Index >= 0 && Index < m_NumEvents, "Index invalid");
+		dbg_assert(Index < m_NumEvents, "Index invalid");
 		return m_aInputEvents[Index];
 	}
 	CEvent *GetEventsRaw() { return m_aInputEvents; }
-	int *GetEventCountRaw() { return &m_NumEvents; }
+	size_t *GetEventCountRaw() { return &m_NumEvents; }
 
 	/**
 	 * @return Rolling average of the time in seconds between

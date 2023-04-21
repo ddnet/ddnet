@@ -340,7 +340,7 @@ protected:
 		MAX_INPUTEVENTS = 32
 	};
 	static IInput::CEvent m_aInputEvents[MAX_INPUTEVENTS];
-	static int m_NumInputEvents;
+	static size_t m_NumInputEvents;
 
 	// some settings
 	static float ms_ButtonHeight;

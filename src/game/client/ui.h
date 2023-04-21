@@ -243,7 +243,7 @@ private:
 	bool m_MouseSlow = false;
 
 	IInput::CEvent *m_pInputEventsArray;
-	int *m_pInputEventCount;
+	size_t *m_pInputEventCount;
 	unsigned m_HotkeysPressed = 0;
 
 	bool m_MouseIsPress = false;
@@ -297,7 +297,7 @@ public:
 	static float ms_FontmodHeight;
 
 	void Init(IKernel *pKernel);
-	void InitInputs(IInput::CEvent *pInputEventsArray, int *pInputEventCount);
+	void InitInputs(IInput::CEvent *pInputEventsArray, size_t *pInputEventCount);
 	IClient *Client() const { return m_pClient; }
 	IGraphics *Graphics() const { return m_pGraphics; }
 	IInput *Input() const { return m_pInput; }
