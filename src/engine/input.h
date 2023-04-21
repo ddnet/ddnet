@@ -58,11 +58,7 @@ public:
 	virtual bool IsEventValid(CEvent *pEvent) const = 0;
 	CEvent GetEvent(int Index) const
 	{
-		if(Index < 0 || Index >= m_NumEvents)
-		{
-			IInput::CEvent e = {0, 0};
-			return e;
-		}
+		dbg_assert(Index >= 0 && Index < m_NumEvents, "Index invalid");
 		return m_aInputEvents[Index];
 	}
 	CEvent *GetEventsRaw() { return m_aInputEvents; }
