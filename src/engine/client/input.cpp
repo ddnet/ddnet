@@ -32,7 +32,7 @@ void CInput::AddEvent(char *pText, int Key, int Flags)
 	{
 		m_aInputEvents[m_NumEvents].m_Key = Key;
 		m_aInputEvents[m_NumEvents].m_Flags = Flags;
-		if(!pText)
+		if(pText == nullptr)
 			m_aInputEvents[m_NumEvents].m_aText[0] = 0;
 		else
 			str_copy(m_aInputEvents[m_NumEvents].m_aText, pText);
@@ -57,7 +57,7 @@ CInput::CInput()
 	m_NumEvents = 0;
 	m_MouseFocus = true;
 
-	m_pClipboardText = NULL;
+	m_pClipboardText = nullptr;
 
 	m_NumTextInputInstances = 0;
 	m_EditingTextLen = -1;
@@ -290,7 +290,7 @@ void CInput::MouseModeRelative()
 #endif
 	Graphics()->SetWindowGrab(true);
 	// Clear pending relative mouse motion
-	SDL_GetRelativeMouseState(0x0, 0x0);
+	SDL_GetRelativeMouseState(nullptr, nullptr);
 }
 
 void CInput::NativeMousePos(int *pX, int *pY) const
@@ -300,7 +300,7 @@ void CInput::NativeMousePos(int *pX, int *pY) const
 
 bool CInput::NativeMousePressed(int Index)
 {
-	int i = SDL_GetMouseState(NULL, NULL);
+	int i = SDL_GetMouseState(nullptr, nullptr);
 	return (i & SDL_BUTTON(Index)) != 0;
 }
 
@@ -342,7 +342,7 @@ bool CInput::KeyState(int Key) const
 
 void CInput::UpdateMouseState()
 {
-	const int MouseState = SDL_GetMouseState(NULL, NULL);
+	const int MouseState = SDL_GetMouseState(nullptr, nullptr);
 	if(MouseState & SDL_BUTTON(SDL_BUTTON_LEFT))
 		m_aInputState[KEY_MOUSE_1] = 1;
 	if(MouseState & SDL_BUTTON(SDL_BUTTON_RIGHT))
@@ -408,24 +408,24 @@ void CInput::HandleJoystickAxisMotionEvent(const SDL_JoyAxisEvent &Event)
 	{
 		m_aInputState[LeftKey] = true;
 		m_aInputCount[LeftKey] = m_InputCounter;
-		AddEvent(0, LeftKey, IInput::FLAG_PRESS);
+		AddEvent(nullptr, LeftKey, IInput::FLAG_PRESS);
 	}
 	else if(Event.value > SDL_JOYSTICK_AXIS_MIN * DeadZone && m_aInputState[LeftKey])
 	{
 		m_aInputState[LeftKey] = false;
-		AddEvent(0, LeftKey, IInput::FLAG_RELEASE);
+		AddEvent(nullptr, LeftKey, IInput::FLAG_RELEASE);
 	}
 
 	if(Event.value >= SDL_JOYSTICK_AXIS_MAX * DeadZone && !m_aInputState[RightKey])
 	{
 		m_aInputState[RightKey] = true;
 		m_aInputCount[RightKey] = m_InputCounter;
-		AddEvent(0, RightKey, IInput::FLAG_PRESS);
+		AddEvent(nullptr, RightKey, IInput::FLAG_PRESS);
 	}
 	else if(Event.value < SDL_JOYSTICK_AXIS_MAX * DeadZone && m_aInputState[RightKey])
 	{
 		m_aInputState[RightKey] = false;
-		AddEvent(0, RightKey, IInput::FLAG_RELEASE);
+		AddEvent(nullptr, RightKey, IInput::FLAG_RELEASE);
 	}
 }
 
@@ -445,12 +445,12 @@ void CInput::HandleJoystickButtonEvent(const SDL_JoyButtonEvent &Event)
 	{
 		m_aInputState[Key] = true;
 		m_aInputCount[Key] = m_InputCounter;
-		AddEvent(0, Key, IInput::FLAG_PRESS);
+		AddEvent(nullptr, Key, IInput::FLAG_PRESS);
 	}
 	else if(Event.type == SDL_JOYBUTTONUP)
 	{
 		m_aInputState[Key] = false;
-		AddEvent(0, Key, IInput::FLAG_RELEASE);
+		AddEvent(nullptr, Key, IInput::FLAG_RELEASE);
 	}
 }
 
@@ -472,7 +472,7 @@ void CInput::HandleJoystickHatMotionEvent(const SDL_JoyHatEvent &Event)
 		if(Key != HatKeys[0] && Key != HatKeys[1] && m_aInputState[Key])
 		{
 			m_aInputState[Key] = false;
-			AddEvent(0, Key, IInput::FLAG_RELEASE);
+			AddEvent(nullptr, Key, IInput::FLAG_RELEASE);
 		}
 	}
 
@@ -482,7 +482,7 @@ void CInput::HandleJoystickHatMotionEvent(const SDL_JoyHatEvent &Event)
 		{
 			m_aInputState[CurrentKey] = true;
 			m_aInputCount[CurrentKey] = m_InputCounter;
-			AddEvent(0, CurrentKey, IInput::FLAG_PRESS);
+			AddEvent(nullptr, CurrentKey, IInput::FLAG_PRESS);
 		}
 	}
 }
@@ -731,7 +731,7 @@ int CInput::Update()
 					// Enable this in case SDL 2.0.16 has major bugs or 2.0.18 still doesn't fix tabbing out with relative mouse
 					// MouseModeRelative();
 					// Clear pending relative mouse motion
-					SDL_GetRelativeMouseState(0x0, 0x0);
+					SDL_GetRelativeMouseState(nullptr, nullptr);
 				}
 				m_MouseFocus = true;
 				IgnoreKeys = true;
@@ -780,7 +780,7 @@ int CInput::Update()
 				m_aInputState[Scancode] = 1;
 				m_aInputCount[Scancode] = m_InputCounter;
 			}
-			AddEvent(0, Scancode, Action);
+			AddEvent(nullptr, Scancode, Action);
 		}
 	}
 
