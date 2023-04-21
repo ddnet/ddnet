@@ -55,8 +55,8 @@ public:
 
 	// events
 	int NumEvents() const { return m_NumEvents; }
-	virtual bool IsEventValid(CEvent *pEvent) const = 0;
-	CEvent GetEvent(int Index) const
+	virtual bool IsEventValid(const CEvent &Event) const = 0;
+	const CEvent &GetEvent(int Index) const
 	{
 		dbg_assert(Index >= 0 && Index < m_NumEvents, "Index invalid");
 		return m_aInputEvents[Index];

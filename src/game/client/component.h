@@ -209,9 +209,9 @@ public:
 	virtual bool OnCursorMove(float x, float y, IInput::ECursorType CursorType) { return false; }
 	/**
 	 * Called on a input event.
-	 * @param e The input event.
+	 * @param Event The input event.
 	 */
-	virtual bool OnInput(IInput::CEvent e) { return false; }
+	virtual bool OnInput(const IInput::CEvent &Event) { return false; }
 };
 
 #endif

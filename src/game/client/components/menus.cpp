@@ -2297,7 +2297,7 @@ bool CMenus::OnCursorMove(float x, float y, IInput::ECursorType CursorType)
 	return true;
 }
 
-bool CMenus::OnInput(IInput::CEvent Event)
+bool CMenus::OnInput(const IInput::CEvent &Event)
 {
 	// special handle esc and enter for popup purposes
 	if(Event.m_Flags & IInput::FLAG_PRESS && Event.m_Key == KEY_ESCAPE)
