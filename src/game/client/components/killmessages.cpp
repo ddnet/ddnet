@@ -6,10 +6,13 @@
 #include <engine/textrender.h>
 #include <game/generated/client_data.h>
 #include <game/generated/protocol.h>
+#include <game/localization.h>
 
 #include "killmessages.h"
 #include <game/client/animstate.h>
 #include <game/client/gameclient.h>
+#include <game/client/prediction/entities/character.h>
+#include <game/client/prediction/gameworld.h>
 
 void CKillMessages::OnWindowResize()
 {
@@ -23,6 +26,7 @@ void CKillMessages::OnWindowResize()
 void CKillMessages::OnReset()
 {
 	m_KillmsgCurrent = 0;
+
 	for(auto &Killmsg : m_aKillmsgs)
 	{
 		Killmsg.m_Tick = -100000;
@@ -103,6 +107,83 @@ void CKillMessages::OnMessage(int MsgType, void *pRawMsg)
 	if(m_pClient->m_SuppressEvents)
 		return;
 
+	if(MsgType == NETMSGTYPE_SV_KILLMSGTEAM)
+	{
+		CNetMsg_Sv_KillMsgTeam *pMsg = (CNetMsg_Sv_KillMsgTeam *)pRawMsg;
+
+		// unpack messages
+		CKillMsg Kill;
+		Kill.m_aVictimName[0] = '\0';
+		Kill.m_aKillerName[0] = '\0';
+
+		std::vector<std::pair<int, int>> vStrongWeakSorted;
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if(m_pClient->m_Teams.Team(i) == pMsg->m_Team)
+			{
+				CCharacter *pChr = m_pClient->m_GameWorld.GetCharacterByID(i);
+				vStrongWeakSorted.emplace_back(i, pMsg->m_First == i ? MAX_CLIENTS : pChr ? pChr->GetStrongWeakID() : 0);
+			}
+		}
+
+		std::stable_sort(vStrongWeakSorted.begin(), vStrongWeakSorted.end(), [](auto &Left, auto &Right) { return Left.second > Right.second; });
+
+		Kill.m_TeamSize = vStrongWeakSorted.size();
+		if(Kill.m_TeamSize > MAX_KILLMSG_TEAM_MEMBERS)
+			Kill.m_TeamSize = MAX_KILLMSG_TEAM_MEMBERS;
+
+		Kill.m_VictimID = vStrongWeakSorted[0].first;
+		if(Kill.m_VictimID >= 0 && Kill.m_VictimID < MAX_CLIENTS)
+		{
+			Kill.m_VictimTeam = m_pClient->m_aClients[Kill.m_VictimID].m_Team;
+			Kill.m_VictimDDTeam = pMsg->m_Team;
+			Kill.m_VictimRenderInfo[0] = m_pClient->m_aClients[Kill.m_VictimID].m_RenderInfo;
+
+			for(int i = 1; i < Kill.m_TeamSize; i++)
+				Kill.m_VictimRenderInfo[i] = m_pClient->m_aClients[vStrongWeakSorted[i].first].m_RenderInfo;
+
+			str_format(Kill.m_aVictimName, sizeof(Kill.m_aVictimName), Localize("Team %d"), Kill.m_VictimDDTeam);
+		}
+
+		Kill.m_KillerID = Kill.m_VictimID;
+
+		Kill.m_Weapon = -1;
+		Kill.m_ModeSpecial = 0;
+		Kill.m_Tick = Client()->GameTick(g_Config.m_ClDummy);
+
+		Kill.m_VitctimTextWidth = Kill.m_KillerTextWidth = 0.f;
+
+		float Width = 400 * 3.0f * Graphics()->ScreenAspect();
+		float Height = 400 * 3.0f;
+
+		float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
+		Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
+		Graphics()->MapScreen(0, 0, Width * 1.5f, Height * 1.5f);
+
+		CreateKillmessageNamesIfNotCreated(Kill);
+
+		int VictimSkinsValid = 0;
+		for(int i = 0; i < Kill.m_TeamSize; i++)
+		{
+			if((Kill.m_VictimRenderInfo[i].m_CustomColoredSkin && Kill.m_VictimRenderInfo[i].m_ColorableRenderSkin.m_Body.IsValid()) || (!Kill.m_VictimRenderInfo[i].m_CustomColoredSkin && Kill.m_VictimRenderInfo[i].m_OriginalRenderSkin.m_Body.IsValid()))
+				VictimSkinsValid++;
+		}
+		bool KillMsgValid = VictimSkinsValid == Kill.m_TeamSize;
+
+		if(KillMsgValid)
+		{
+			// add the message
+			m_KillmsgCurrent = (m_KillmsgCurrent + 1) % MAX_KILLMSGS;
+
+			TextRender()->DeleteTextContainer(m_aKillmsgs[m_KillmsgCurrent].m_VictimTextContainerIndex);
+			TextRender()->DeleteTextContainer(m_aKillmsgs[m_KillmsgCurrent].m_KillerTextContainerIndex);
+
+			m_aKillmsgs[m_KillmsgCurrent] = Kill;
+		}
+
+		Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
+	}
+
 	if(MsgType == NETMSGTYPE_SV_KILLMSG)
 	{
 		CNetMsg_Sv_KillMsg *pMsg = (CNetMsg_Sv_KillMsg *)pRawMsg;
@@ -112,13 +193,15 @@ void CKillMessages::OnMessage(int MsgType, void *pRawMsg)
 		Kill.m_aVictimName[0] = '\0';
 		Kill.m_aKillerName[0] = '\0';
 
+		Kill.m_TeamSize = 1;
+
 		Kill.m_VictimID = pMsg->m_Victim;
 		if(Kill.m_VictimID >= 0 && Kill.m_VictimID < MAX_CLIENTS)
 		{
 			Kill.m_VictimTeam = m_pClient->m_aClients[Kill.m_VictimID].m_Team;
 			Kill.m_VictimDDTeam = m_pClient->m_Teams.Team(Kill.m_VictimID);
 			str_copy(Kill.m_aVictimName, m_pClient->m_aClients[Kill.m_VictimID].m_aName);
-			Kill.m_VictimRenderInfo = m_pClient->m_aClients[Kill.m_VictimID].m_RenderInfo;
+			Kill.m_VictimRenderInfo[0] = m_pClient->m_aClients[Kill.m_VictimID].m_RenderInfo;
 		}
 
 		Kill.m_KillerID = pMsg->m_Killer;
@@ -146,7 +229,7 @@ void CKillMessages::OnMessage(int MsgType, void *pRawMsg)
 
 		CreateKillmessageNamesIfNotCreated(Kill);
 
-		bool KillMsgValid = (Kill.m_VictimRenderInfo.m_CustomColoredSkin && Kill.m_VictimRenderInfo.m_ColorableRenderSkin.m_Body.IsValid()) || (!Kill.m_VictimRenderInfo.m_CustomColoredSkin && Kill.m_VictimRenderInfo.m_OriginalRenderSkin.m_Body.IsValid());
+		bool KillMsgValid = (Kill.m_VictimRenderInfo[0].m_CustomColoredSkin && Kill.m_VictimRenderInfo[0].m_ColorableRenderSkin.m_Body.IsValid()) || (!Kill.m_VictimRenderInfo[0].m_CustomColoredSkin && Kill.m_VictimRenderInfo[0].m_OriginalRenderSkin.m_Body.IsValid());
 		// if killer != victim, killer must be valid too
 		KillMsgValid &= Kill.m_KillerID == Kill.m_VictimID || ((Kill.m_KillerRenderInfo.m_CustomColoredSkin && Kill.m_KillerRenderInfo.m_ColorableRenderSkin.m_Body.IsValid()) || (!Kill.m_KillerRenderInfo.m_CustomColoredSkin && Kill.m_KillerRenderInfo.m_OriginalRenderSkin.m_Body.IsValid()));
 		if(KillMsgValid)
@@ -224,20 +307,23 @@ void CKillMessages::OnRender()
 
 		if(m_aKillmsgs[r].m_VictimID >= 0)
 		{
-			CTeeRenderInfo TeeInfo = m_aKillmsgs[r].m_VictimRenderInfo;
+			for(int j = (m_aKillmsgs[r].m_TeamSize - 1); j >= 0; j--)
+			{
+				CTeeRenderInfo TeeInfo = m_aKillmsgs[r].m_VictimRenderInfo[j];
 
-			CAnimState *pIdleState = CAnimState::GetIdle();
-			vec2 OffsetToMid;
-			RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &TeeInfo, OffsetToMid);
-			vec2 TeeRenderPos(x, y + 46.0f / 2.0f + OffsetToMid.y);
+				CAnimState *pIdleState = CAnimState::GetIdle();
+				vec2 OffsetToMid;
+				RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &TeeInfo, OffsetToMid);
+				vec2 TeeRenderPos(x, y + 46.0f / 2.0f + OffsetToMid.y);
 
-			RenderTools()->RenderTee(pIdleState, &TeeInfo, EMOTE_PAIN, vec2(-1, 0), TeeRenderPos);
+				RenderTools()->RenderTee(pIdleState, &TeeInfo, EMOTE_PAIN, vec2(-1, 0), TeeRenderPos);
+
+				x -= 44.0f;
+			}
 		}
 
-		x -= 32.0f;
-
 		// render weapon
-		x -= 44.0f;
+		x -= 32.0f;
 		if(m_aKillmsgs[r].m_Weapon >= 0)
 		{
 			Graphics()->TextureSet(GameClient()->m_GameSkin.m_aSpriteWeapons[m_aKillmsgs[r].m_Weapon]);
@@ -313,7 +399,7 @@ void CKillMessages::RefindSkins()
 		{
 			const CGameClient::CClientData &Client = GameClient()->m_aClients[m_aKillmsgs[r].m_VictimID];
 			if(Client.m_aSkinName[0] != '\0')
-				m_aKillmsgs[r].m_VictimRenderInfo = Client.m_RenderInfo;
+				m_aKillmsgs[r].m_VictimRenderInfo[0] = Client.m_RenderInfo;
 			else
 				m_aKillmsgs[r].m_VictimID = -1;
 		}

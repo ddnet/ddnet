@@ -453,7 +453,7 @@ void CGameTeams::KillTeam(int Team, int NewStrongID, int ExceptID)
 			GameServer()->m_apPlayers[i]->m_VotedForPractice = false;
 			if(i != ExceptID)
 			{
-				GameServer()->m_apPlayers[i]->KillCharacter(WEAPON_SELF);
+				GameServer()->m_apPlayers[i]->KillCharacter(WEAPON_SELF, false);
 				if(NewStrongID != -1 && i != NewStrongID)
 				{
 					GameServer()->m_apPlayers[i]->Respawn(true); // spawn the rest of team with weak hook on the killer
@@ -461,6 +461,12 @@ void CGameTeams::KillTeam(int Team, int NewStrongID, int ExceptID)
 			}
 		}
 	}
+
+	// send the team kill message
+	CNetMsg_Sv_KillMsgTeam Msg;
+	Msg.m_Team = Team;
+	Msg.m_First = NewStrongID;
+	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
 }
 
 bool CGameTeams::TeamFinished(int Team)

@@ -59,7 +59,7 @@ public:
 	void OnPredictedEarlyInput(CNetObj_PlayerInput *pNewInput);
 	void OnDisconnect();
 
-	void KillCharacter(int Weapon = WEAPON_GAME);
+	void KillCharacter(int Weapon = WEAPON_GAME, bool SendKillMsg = true);
 	CCharacter *GetCharacter();
 
 	void SpectatePlayerName(const char *pName);
