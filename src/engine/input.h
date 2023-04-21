@@ -41,10 +41,9 @@ protected:
 public:
 	enum
 	{
-		FLAG_PRESS = 1,
-		FLAG_RELEASE = 2,
-		FLAG_REPEAT = 4,
-		FLAG_TEXT = 8,
+		FLAG_PRESS = 1 << 0,
+		FLAG_RELEASE = 1 << 1,
+		FLAG_TEXT = 1 << 2,
 	};
 	enum ECursorType
 	{
