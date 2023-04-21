@@ -11,8 +11,6 @@
 
 #include "input.h"
 
-//print >>f, "int inp_key_code(const char *key_name) { int i; if (!strcmp(key_name, \"-?-\")) return -1; else for (i = 0; i < 512; i++) if (!strcmp(key_strings[i], key_name)) return i; return -1; }"
-
 // this header is protected so you don't include it from anywhere
 #define KEYS_INCLUDE
 #include "keynames.h"
