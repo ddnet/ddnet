@@ -126,7 +126,7 @@ int CBinds::GetModifierMaskOfKey(int Key)
 bool CBinds::OnInput(const IInput::CEvent &Event)
 {
 	// don't handle invalid events
-	if(Event.m_Key <= 0 || Event.m_Key >= KEY_LAST)
+	if(Event.m_Key <= KEY_FIRST || Event.m_Key >= KEY_LAST)
 		return false;
 
 	int Mask = GetModifierMask(Input());

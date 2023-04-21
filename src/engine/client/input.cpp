@@ -335,7 +335,7 @@ void CInput::Clear()
 
 bool CInput::KeyState(int Key) const
 {
-	if(Key < 0 || Key >= KEY_LAST)
+	if(Key < KEY_FIRST || Key >= KEY_LAST)
 		return false;
 	return m_aInputState[Key];
 }
@@ -618,7 +618,7 @@ int CInput::Update()
 		}
 		case SDL_TEXTINPUT:
 			m_EditingTextLen = -1;
-			AddEvent(Event.text.text, 0, IInput::FLAG_TEXT);
+			AddEvent(Event.text.text, KEY_UNKNOWN, IInput::FLAG_TEXT);
 			break;
 		// handle keys
 		case SDL_KEYDOWN:
