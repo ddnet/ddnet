@@ -33,7 +33,7 @@ void CInput::AddEvent(char *pText, int Key, int Flags)
 		m_aInputEvents[m_NumEvents].m_Key = Key;
 		m_aInputEvents[m_NumEvents].m_Flags = Flags;
 		if(pText == nullptr)
-			m_aInputEvents[m_NumEvents].m_aText[0] = 0;
+			m_aInputEvents[m_NumEvents].m_aText[0] = '\0';
 		else
 			str_copy(m_aInputEvents[m_NumEvents].m_aText, pText);
 		m_aInputEvents[m_NumEvents].m_InputCount = m_InputCounter;
@@ -61,9 +61,9 @@ CInput::CInput()
 
 	m_NumTextInputInstances = 0;
 	m_EditingTextLen = -1;
-	m_aEditingText[0] = 0;
+	m_aEditingText[0] = '\0';
 
-	m_aDropFile[0] = 0;
+	m_aDropFile[0] = '\0';
 }
 
 void CInput::Init()
@@ -612,7 +612,7 @@ int CInput::Update()
 			}
 			else
 			{
-				m_aEditingText[0] = 0;
+				m_aEditingText[0] = '\0';
 			}
 			break;
 		}
