@@ -1,5 +1,5 @@
-#include "base/rust.h"
-#include "engine/console.h"
+#include <base/rust.h>
+#include <engine/console.h>
 
 extern "C" {
 void cxxbridge1$RustVersionPrint(const ::IConsole &console) noexcept;
