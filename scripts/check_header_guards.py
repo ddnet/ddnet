@@ -21,6 +21,8 @@ def check_file(filename):
 		for line in file:
 			if line == "// This file can be included several times.\n":
 				break
+			if line == '#pragma once\n':
+				break
 			if line[0] == "/" or line[0] == "*" or line[0] == "\r" or line[0] == "\n" or line[0] == "\t":
 				continue
 			header_guard = "#ifndef " + ("_".join(filename.split(PATH)[1].split("/"))[:-2]).upper() + "_H"
@@ -40,7 +42,7 @@ def check_dir(directory):
 	for file in file_list:
 		path = directory + file
 		if os.path.isdir(path):
-			if file not in ("external", "generated", "rust-bridge"):
+			if file not in ("external", "generated"):
 				errors += check_dir(path + "/")
 		elif file.endswith(".h") and file != "keynames.h":
 			errors += check_file(path)
