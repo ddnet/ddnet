@@ -370,30 +370,29 @@ public:
 	class CMapInfo
 	{
 	public:
-		char m_aAuthorTmp[32];
-		char m_aVersionTmp[16];
-		char m_aCreditsTmp[128];
-		char m_aLicenseTmp[32];
-
-		char m_aAuthor[sizeof(m_aAuthorTmp)];
-		char m_aVersion[sizeof(m_aVersionTmp)];
-		char m_aCredits[sizeof(m_aCreditsTmp)];
-		char m_aLicense[sizeof(m_aLicenseTmp)];
+		char m_aAuthor[32];
+		char m_aVersion[16];
+		char m_aCredits[128];
+		char m_aLicense[32];
 
 		void Reset()
 		{
-			m_aAuthorTmp[0] = 0;
-			m_aVersionTmp[0] = 0;
-			m_aCreditsTmp[0] = 0;
-			m_aLicenseTmp[0] = 0;
+			m_aAuthor[0] = '\0';
+			m_aVersion[0] = '\0';
+			m_aCredits[0] = '\0';
+			m_aLicense[0] = '\0';
+		}
 
-			m_aAuthor[0] = 0;
-			m_aVersion[0] = 0;
-			m_aCredits[0] = 0;
-			m_aLicense[0] = 0;
+		void Copy(const CMapInfo &Source)
+		{
+			str_copy(m_aAuthor, Source.m_aAuthor);
+			str_copy(m_aVersion, Source.m_aVersion);
+			str_copy(m_aCredits, Source.m_aCredits);
+			str_copy(m_aLicense, Source.m_aLicense);
 		}
 	};
 	CMapInfo m_MapInfo;
+	CMapInfo m_MapInfoTmp;
 
 	struct CSetting
 	{
