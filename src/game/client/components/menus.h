@@ -55,7 +55,7 @@ public:
 	int m_ModifierCombination;
 	CMenusKeyBinder();
 	virtual int Sizeof() const override { return sizeof(*this); }
-	virtual bool OnInput(IInput::CEvent Event) override;
+	virtual bool OnInput(const IInput::CEvent &Event) override;
 };
 
 class CMenus : public CComponent
@@ -340,7 +340,7 @@ protected:
 		MAX_INPUTEVENTS = 32
 	};
 	static IInput::CEvent m_aInputEvents[MAX_INPUTEVENTS];
-	static int m_NumInputEvents;
+	static size_t m_NumInputEvents;
 
 	// some settings
 	static float ms_ButtonHeight;
@@ -593,7 +593,7 @@ public:
 	virtual void OnWindowResize() override;
 	virtual void OnReset() override;
 	virtual void OnRender() override;
-	virtual bool OnInput(IInput::CEvent Event) override;
+	virtual bool OnInput(const IInput::CEvent &Event) override;
 	virtual bool OnCursorMove(float x, float y, IInput::ECursorType CursorType) override;
 	virtual void OnShutdown() override;
 

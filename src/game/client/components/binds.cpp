@@ -8,7 +8,7 @@
 
 static const ColorRGBA gs_BindPrintColor{1.0f, 1.0f, 0.8f, 1.0f};
 
-bool CBinds::CBindsSpecial::OnInput(IInput::CEvent Event)
+bool CBinds::CBindsSpecial::OnInput(const IInput::CEvent &Event)
 {
 	// only handle F and composed F binds
 	if(((Event.m_Key >= KEY_F1 && Event.m_Key <= KEY_F12) || (Event.m_Key >= KEY_F13 && Event.m_Key <= KEY_F24)) && (Event.m_Key != KEY_F5 || !m_pClient->m_Menus.IsActive()))
@@ -123,33 +123,33 @@ int CBinds::GetModifierMaskOfKey(int Key)
 	}
 }
 
-bool CBinds::OnInput(IInput::CEvent e)
+bool CBinds::OnInput(const IInput::CEvent &Event)
 {
 	// don't handle invalid events
-	if(e.m_Key <= 0 || e.m_Key >= KEY_LAST)
+	if(Event.m_Key <= KEY_FIRST || Event.m_Key >= KEY_LAST)
 		return false;
 
 	int Mask = GetModifierMask(Input());
-	int KeyModifierMask = GetModifierMaskOfKey(e.m_Key);
+	int KeyModifierMask = GetModifierMaskOfKey(Event.m_Key);
 	Mask &= ~KeyModifierMask;
 
 	bool ret = false;
-	if(m_aapKeyBindings[Mask][e.m_Key])
+	if(m_aapKeyBindings[Mask][Event.m_Key])
 	{
-		if(e.m_Flags & IInput::FLAG_PRESS)
-			Console()->ExecuteLineStroked(1, m_aapKeyBindings[Mask][e.m_Key]);
-		if(e.m_Flags & IInput::FLAG_RELEASE)
-			Console()->ExecuteLineStroked(0, m_aapKeyBindings[Mask][e.m_Key]);
+		if(Event.m_Flags & IInput::FLAG_PRESS)
+			Console()->ExecuteLineStroked(1, m_aapKeyBindings[Mask][Event.m_Key]);
+		if(Event.m_Flags & IInput::FLAG_RELEASE)
+			Console()->ExecuteLineStroked(0, m_aapKeyBindings[Mask][Event.m_Key]);
 		ret = true;
 	}
 
-	if(m_aapKeyBindings[0][e.m_Key] && !ret)
+	if(m_aapKeyBindings[0][Event.m_Key] && !ret)
 	{
 		// When ctrl+shift are pressed (ctrl+shift binds and also the hard-coded ctrl+shift+d, ctrl+shift+g, ctrl+shift+e), ignore other +xxx binds
-		if(e.m_Flags & IInput::FLAG_PRESS && Mask != ((1 << MODIFIER_CTRL) | (1 << MODIFIER_SHIFT)) && Mask != ((1 << MODIFIER_GUI) | (1 << MODIFIER_SHIFT)))
-			Console()->ExecuteLineStroked(1, m_aapKeyBindings[0][e.m_Key]);
-		if(e.m_Flags & IInput::FLAG_RELEASE)
-			Console()->ExecuteLineStroked(0, m_aapKeyBindings[0][e.m_Key]);
+		if(Event.m_Flags & IInput::FLAG_PRESS && Mask != ((1 << MODIFIER_CTRL) | (1 << MODIFIER_SHIFT)) && Mask != ((1 << MODIFIER_GUI) | (1 << MODIFIER_SHIFT)))
+			Console()->ExecuteLineStroked(1, m_aapKeyBindings[0][Event.m_Key]);
+		if(Event.m_Flags & IInput::FLAG_RELEASE)
+			Console()->ExecuteLineStroked(0, m_aapKeyBindings[0][Event.m_Key]);
 		ret = true;
 	}
 

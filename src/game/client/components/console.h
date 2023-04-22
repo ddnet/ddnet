@@ -71,7 +71,7 @@ class CGameConsole : public CComponent
 
 		void ExecuteLine(const char *pLine);
 
-		void OnInput(IInput::CEvent Event);
+		void OnInput(const IInput::CEvent &Event);
 		void PrintLine(const char *pLine, int Len, ColorRGBA PrintColor);
 
 		const char *GetString() const { return m_Input.GetString(); }
@@ -138,7 +138,7 @@ public:
 	virtual void OnReset() override;
 	virtual void OnRender() override;
 	virtual void OnMessage(int MsgType, void *pRawMsg) override;
-	virtual bool OnInput(IInput::CEvent Events) override;
+	virtual bool OnInput(const IInput::CEvent &Event) override;
 
 	bool IsClosed() { return m_ConsoleState == CONSOLE_CLOSED; }
 };

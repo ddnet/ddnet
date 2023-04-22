@@ -6856,7 +6856,7 @@ void CEditor::OnUpdate()
 		Reset();
 	}
 
-	for(int i = 0; i < Input()->NumEvents(); i++)
+	for(size_t i = 0; i < Input()->NumEvents(); i++)
 		UI()->OnInput(Input()->GetEvent(i));
 
 	// handle cursor movement

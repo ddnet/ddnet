@@ -48,7 +48,7 @@ CMenusKeyBinder::CMenusKeyBinder()
 	m_ModifierCombination = 0;
 }
 
-bool CMenusKeyBinder::OnInput(IInput::CEvent Event)
+bool CMenusKeyBinder::OnInput(const IInput::CEvent &Event)
 {
 	if(m_TakeKey)
 	{

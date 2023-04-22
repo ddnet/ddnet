@@ -77,7 +77,7 @@ private:
 
 	void AddEvent(char *pText, int Key, int Flags);
 	void Clear() override;
-	bool IsEventValid(CEvent *pEvent) const override { return pEvent->m_InputCount == m_InputCounter; }
+	bool IsEventValid(const CEvent &Event) const override { return Event.m_InputCount == m_InputCounter; }
 
 	// quick access to input
 	unsigned short m_aInputCount[g_MaxKeys]; // tw-KEY

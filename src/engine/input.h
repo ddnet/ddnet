@@ -33,7 +33,7 @@ protected:
 	};
 
 	// quick access to events
-	int m_NumEvents;
+	size_t m_NumEvents;
 	IInput::CEvent m_aInputEvents[INPUT_BUFFER_SIZE];
 	int64_t m_LastUpdate;
 	float m_UpdateTime;
@@ -41,10 +41,9 @@ protected:
 public:
 	enum
 	{
-		FLAG_PRESS = 1,
-		FLAG_RELEASE = 2,
-		FLAG_REPEAT = 4,
-		FLAG_TEXT = 8,
+		FLAG_PRESS = 1 << 0,
+		FLAG_RELEASE = 1 << 1,
+		FLAG_TEXT = 1 << 2,
 	};
 	enum ECursorType
 	{
@@ -54,19 +53,15 @@ public:
 	};
 
 	// events
-	int NumEvents() const { return m_NumEvents; }
-	virtual bool IsEventValid(CEvent *pEvent) const = 0;
-	CEvent GetEvent(int Index) const
+	size_t NumEvents() const { return m_NumEvents; }
+	virtual bool IsEventValid(const CEvent &Event) const = 0;
+	const CEvent &GetEvent(size_t Index) const
 	{
-		if(Index < 0 || Index >= m_NumEvents)
-		{
-			IInput::CEvent e = {0, 0};
-			return e;
-		}
+		dbg_assert(Index < m_NumEvents, "Index invalid");
 		return m_aInputEvents[Index];
 	}
 	CEvent *GetEventsRaw() { return m_aInputEvents; }
-	int *GetEventCountRaw() { return &m_NumEvents; }
+	size_t *GetEventCountRaw() { return &m_NumEvents; }
 
 	/**
 	 * @return Rolling average of the time in seconds between
