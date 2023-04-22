@@ -6662,6 +6662,7 @@ void CEditorMap::Clean()
 	DeleteAll(m_vpSounds);
 
 	m_MapInfo.Reset();
+	m_MapInfoTmp.Reset();
 
 	m_vSettings.clear();
 
