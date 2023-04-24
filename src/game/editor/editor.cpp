@@ -2116,19 +2116,26 @@ void CEditor::DoQuadEnvelopes(const std::vector<CQuad> &vQuads, IGraphics::CText
 			continue;
 
 		//QuadParams
-		const CPoint *pPoints = vQuads[j].m_aPoints;
+		const CPoint *pPivotPoint = &vQuads[j].m_aPoints[4];
 		for(size_t i = 0; i < apEnvelope[j]->m_vPoints.size() - 1; i++)
 		{
-			float OffsetX = fx2f(apEnvelope[j]->m_vPoints[i].m_aValues[0]);
-			float OffsetY = fx2f(apEnvelope[j]->m_vPoints[i].m_aValues[1]);
-			vec2 Pos0 = vec2(fx2f(pPoints[4].x) + OffsetX, fx2f(pPoints[4].y) + OffsetY);
+			ColorRGBA Result;
+			apEnvelope[j]->Eval(apEnvelope[j]->m_vPoints[i].m_Time / 1000.0f + 0.000001f, Result);
+			vec2 Pos0 = vec2(fx2f(pPivotPoint->x) + Result.r, fx2f(pPivotPoint->y) + Result.g);
 
-			OffsetX = fx2f(apEnvelope[j]->m_vPoints[i + 1].m_aValues[0]);
-			OffsetY = fx2f(apEnvelope[j]->m_vPoints[i + 1].m_aValues[1]);
-			vec2 Pos1 = vec2(fx2f(pPoints[4].x) + OffsetX, fx2f(pPoints[4].y) + OffsetY);
+			const int Steps = 15;
+			for(int n = 1; n <= Steps; n++)
+			{
+				const float Time = mix(apEnvelope[j]->m_vPoints[i].m_Time, apEnvelope[j]->m_vPoints[i + 1].m_Time, (float)n / Steps);
+				apEnvelope[j]->Eval(Time / 1000.0f - 0.000001f, Result);
 
-			IGraphics::CLineItem Line = IGraphics::CLineItem(Pos0.x, Pos0.y, Pos1.x, Pos1.y);
-			Graphics()->LinesDraw(&Line, 1);
+				vec2 Pos1 = vec2(fx2f(pPivotPoint->x) + Result.r, fx2f(pPivotPoint->y) + Result.g);
+
+				IGraphics::CLineItem Line = IGraphics::CLineItem(Pos0.x, Pos0.y, Pos1.x, Pos1.y);
+				Graphics()->LinesDraw(&Line, 1);
+
+				Pos0 = Pos1;
+			}
 		}
 	}
 	Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -5528,7 +5535,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 		if(pNewEnv) // add the default points
 		{
-			if(pNewEnv->m_Channels == 4)
+			if(pNewEnv->GetChannels() == 4)
 			{
 				pNewEnv->AddPoint(0, f2fx(1.0f), f2fx(1.0f), f2fx(1.0f), f2fx(1.0f));
 				pNewEnv->AddPoint(1000, f2fx(1.0f), f2fx(1.0f), f2fx(1.0f), f2fx(1.0f));
@@ -5600,7 +5607,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 	}
 
 	bool ShowColorBar = false;
-	if(pEnvelope && pEnvelope->m_Channels == 4)
+	if(pEnvelope && pEnvelope->GetChannels() == 4)
 	{
 		ShowColorBar = true;
 		View.HSplitTop(20.0f, &ColorBar, &View);
@@ -5612,7 +5619,6 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 	if(pEnvelope)
 	{
-		static std::vector<int> s_vSelection;
 		static int s_EnvelopeEditorID = 0;
 		static int s_ActiveChannels = 0xf;
 
@@ -5642,17 +5648,17 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		for(int i = 0; i < CEnvPoint::MAX_CHANNELS; i++, Bit <<= 1)
 		{
 			ToolBar.VSplitLeft(15.0f, &Button, &ToolBar);
-			if(i < pEnvelope->m_Channels)
+			if(i < pEnvelope->GetChannels())
 			{
 				int Corners = IGraphics::CORNER_NONE;
-				if(pEnvelope->m_Channels == 1)
+				if(pEnvelope->GetChannels() == 1)
 					Corners = IGraphics::CORNER_ALL;
 				else if(i == 0)
 					Corners = IGraphics::CORNER_L;
-				else if(i == pEnvelope->m_Channels - 1)
+				else if(i == pEnvelope->GetChannels() - 1)
 					Corners = IGraphics::CORNER_R;
 
-				if(DoButton_Env(&s_aChannelButtons[i], s_aapNames[pEnvelope->m_Channels - 1][i], s_ActiveChannels & Bit, &Button, s_aapDescriptions[pEnvelope->m_Channels - 1][i], aColors[i], Corners))
+				if(DoButton_Env(&s_aChannelButtons[i], s_aapNames[pEnvelope->GetChannels() - 1][i], s_ActiveChannels & Bit, &Button, s_aapDescriptions[pEnvelope->GetChannels() - 1][i], aColors[i], Corners))
 					s_ActiveChannels ^= Bit;
 			}
 		}
@@ -5706,12 +5712,65 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			m_pTooltip = "Press right mouse button to create a new point";
 		}
 
+		// keep track of selected point to handle value/time text input
+		static const void *s_pSelectedPoint = nullptr;
+
+		// render tangents for bezier curves
+		{
+			UI()->ClipEnable(&View);
+			Graphics()->TextureClear();
+			Graphics()->LinesBegin();
+			for(int c = 0; c < pEnvelope->GetChannels(); c++)
+			{
+				if(!(s_ActiveChannels & (1 << c)))
+					continue;
+
+				for(int i = 0; i < (int)pEnvelope->m_vPoints.size(); i++)
+				{
+					const float PosX = pEnvelope->m_vPoints[i].m_Time / 1000.0f / EndTime;
+					const float PosY = (fx2f(pEnvelope->m_vPoints[i].m_aValues[c]) - Bottom) / (Top - Bottom);
+
+					// Out-Tangent
+					if(pEnvelope->m_vPoints[i].m_Curvetype == CURVETYPE_BEZIER)
+					{
+						const float OutTangentX = PosX + pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaX[c] / 1000.0f / EndTime;
+						const float OutTangentY = PosY + fx2f(pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaY[c]) / (Top - Bottom);
+
+						if(s_pSelectedPoint == &pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaX[c] || (m_SelectedQuadEnvelope == m_SelectedEnvelope && m_SelectedEnvelopePoint == i))
+							Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
+						else
+							Graphics()->SetColor(aColors[c].r, aColors[c].g, aColors[c].b, 0.4f);
+
+						IGraphics::CLineItem LineItem(View.x + PosX * View.w, View.y + View.h - PosY * View.h, View.x + OutTangentX * View.w, View.y + View.h - OutTangentY * View.h);
+						Graphics()->LinesDraw(&LineItem, 1);
+					}
+
+					// In-Tangent
+					if(i > 0 && pEnvelope->m_vPoints[i - 1].m_Curvetype == CURVETYPE_BEZIER)
+					{
+						const float InTangentX = PosX + pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaX[c] / 1000.0f / EndTime;
+						const float InTangentY = PosY + fx2f(pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaY[c]) / (Top - Bottom);
+
+						if(s_pSelectedPoint == &pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaX[c] || (m_SelectedQuadEnvelope == m_SelectedEnvelope && m_SelectedEnvelopePoint == i))
+							Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
+						else
+							Graphics()->SetColor(aColors[c].r, aColors[c].g, aColors[c].b, 0.4f);
+
+						IGraphics::CLineItem LineItem(View.x + PosX * View.w, View.y + View.h - PosY * View.h, View.x + InTangentX * View.w, View.y + View.h - InTangentY * View.h);
+						Graphics()->LinesDraw(&LineItem, 1);
+					}
+				}
+			}
+			Graphics()->LinesEnd();
+			UI()->ClipDisable();
+		}
+
 		// render lines
 		{
 			UI()->ClipEnable(&View);
 			Graphics()->TextureClear();
 			Graphics()->LinesBegin();
-			for(int c = 0; c < pEnvelope->m_Channels; c++)
+			for(int c = 0; c < pEnvelope->GetChannels(); c++)
 			{
 				if(s_ActiveChannels & (1 << c))
 					Graphics()->SetColor(aColors[c].r, aColors[c].g, aColors[c].b, 1);
@@ -5748,19 +5807,18 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 				float t0 = pEnvelope->m_vPoints[i].m_Time / 1000.0f / EndTime;
 				float t1 = pEnvelope->m_vPoints[i + 1].m_Time / 1000.0f / EndTime;
 
-				CUIRect v;
-				v.x = CurveBar.x + (t0 + (t1 - t0) * 0.5f) * CurveBar.w;
-				v.y = CurveBar.y;
-				v.h = CurveBar.h;
-				v.w = CurveBar.h;
-				v.x -= v.w / 2;
-				void *pID = &pEnvelope->m_vPoints[i].m_Curvetype;
-				const char *apTypeName[] = {
-					"N", "L", "S", "F", "M"};
-				const char *pTypeName = "Invalid";
+				CUIRect CurveButton;
+				CurveButton.x = CurveBar.x + (t0 + (t1 - t0) * 0.5f) * CurveBar.w;
+				CurveButton.y = CurveBar.y;
+				CurveButton.h = CurveBar.h;
+				CurveButton.w = CurveBar.h;
+				CurveButton.x -= CurveButton.w / 2.0f;
+				const void *pID = &pEnvelope->m_vPoints[i].m_Curvetype;
+				const char *apTypeName[] = {"N", "L", "S", "F", "M", "B"};
+				const char *pTypeName = "!?";
 				if(0 <= pEnvelope->m_vPoints[i].m_Curvetype && pEnvelope->m_vPoints[i].m_Curvetype < (int)std::size(apTypeName))
 					pTypeName = apTypeName[pEnvelope->m_vPoints[i].m_Curvetype];
-				if(DoButton_Editor(pID, pTypeName, 0, &v, 0, "Switch curve type"))
+				if(DoButton_Editor(pID, pTypeName, 0, &CurveButton, 0, "Switch curve type (N = step, L = linear, S = slow, F = fast, M = smooth, B = bezier)"))
 					pEnvelope->m_vPoints[i].m_Curvetype = (pEnvelope->m_vPoints[i].m_Curvetype + 1) % NUM_CURVETYPES;
 			}
 		}
@@ -5798,15 +5856,12 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 		// render handles
 
-		// keep track of last Env
-		static void *s_pID = nullptr;
-
 		static CLineInputNumber s_CurValueInput;
 		static CLineInputNumber s_CurTimeInput;
 
 		if(CurrentEnvelopeSwitched)
 		{
-			s_pID = nullptr;
+			s_pSelectedPoint = nullptr;
 
 			// update displayed text
 			s_CurValueInput.SetFloat(0.0f);
@@ -5814,149 +5869,351 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		}
 
 		{
-			int CurrentValue = 0, CurrentTime = 0;
-
 			Graphics()->TextureClear();
 			Graphics()->QuadsBegin();
-			for(int c = 0; c < pEnvelope->m_Channels; c++)
+			for(int c = 0; c < pEnvelope->GetChannels(); c++)
 			{
 				if(!(s_ActiveChannels & (1 << c)))
 					continue;
 
 				for(size_t i = 0; i < pEnvelope->m_vPoints.size(); i++)
 				{
-					float x0 = pEnvelope->m_vPoints[i].m_Time / 1000.0f / EndTime;
-					float y0 = (fx2f(pEnvelope->m_vPoints[i].m_aValues[c]) - Bottom) / (Top - Bottom);
-					CUIRect Final;
-					Final.x = View.x + x0 * View.w;
-					Final.y = View.y + View.h - y0 * View.h;
-					Final.x -= 2.0f;
-					Final.y -= 2.0f;
-					Final.w = 4.0f;
-					Final.h = 4.0f;
-
-					void *pID = &pEnvelope->m_vPoints[i].m_aValues[c];
-
-					if(UI()->MouseInside(&Final))
-						UI()->SetHotItem(pID);
-
-					float ColorMod = 1.0f;
-
-					if(UI()->CheckActiveItem(pID))
+					// point handle
 					{
-						if(!UI()->MouseButton(0))
-						{
-							m_SelectedQuadEnvelope = -1;
-							m_SelectedEnvelopePoint = -1;
+						const float PosX = pEnvelope->m_vPoints[i].m_Time / 1000.0f / EndTime;
+						const float PosY = (fx2f(pEnvelope->m_vPoints[i].m_aValues[c]) - Bottom) / (Top - Bottom);
+						CUIRect Final;
+						Final.x = View.x + PosX * View.w;
+						Final.y = View.y + View.h - PosY * View.h;
+						Final.x -= 2.0f;
+						Final.y -= 2.0f;
+						Final.w = 4.0f;
+						Final.h = 4.0f;
 
-							UI()->SetActiveItem(nullptr);
-						}
-						else
+						const void *pID = &pEnvelope->m_vPoints[i].m_aValues[c];
+
+						if(UI()->MouseInside(&Final))
+							UI()->SetHotItem(pID);
+
+						float ColorMod = 1.0f;
+
+						if(UI()->CheckActiveItem(pID))
 						{
-							if(Input()->ShiftIsPressed())
+							if(!UI()->MouseButton(0))
 							{
-								if(i != 0)
-								{
-									if(Input()->ModifierIsPressed())
-										pEnvelope->m_vPoints[i].m_Time += (int)((m_MouseDeltaX));
-									else
-										pEnvelope->m_vPoints[i].m_Time += (int)((m_MouseDeltaX * TimeScale) * 1000.0f);
-									if(pEnvelope->m_vPoints[i].m_Time < pEnvelope->m_vPoints[i - 1].m_Time)
-										pEnvelope->m_vPoints[i].m_Time = pEnvelope->m_vPoints[i - 1].m_Time + 1;
-									if(i + 1 != pEnvelope->m_vPoints.size() && pEnvelope->m_vPoints[i].m_Time > pEnvelope->m_vPoints[i + 1].m_Time)
-										pEnvelope->m_vPoints[i].m_Time = pEnvelope->m_vPoints[i + 1].m_Time - 1;
-								}
+								m_SelectedQuadEnvelope = -1;
+								m_SelectedEnvelopePoint = -1;
+
+								UI()->SetActiveItem(nullptr);
 							}
 							else
 							{
-								if(Input()->ModifierIsPressed())
-									pEnvelope->m_vPoints[i].m_aValues[c] -= f2fx(m_MouseDeltaY * 0.001f);
+								if(Input()->ShiftIsPressed())
+								{
+									if(i != 0)
+									{
+										float DeltaX = m_MouseDeltaX * TimeScale * (Input()->ModifierIsPressed() ? 1.0f : 1000.0f);
+										DeltaX = DeltaX < 0 ? -std::ceil(-DeltaX) : std::ceil(DeltaX);
+										pEnvelope->m_vPoints[i].m_Time += (int)DeltaX;
+
+										if(pEnvelope->m_vPoints[i].m_Time < pEnvelope->m_vPoints[i - 1].m_Time)
+											pEnvelope->m_vPoints[i].m_Time = pEnvelope->m_vPoints[i - 1].m_Time + 1;
+										if(i + 1 != pEnvelope->m_vPoints.size() && pEnvelope->m_vPoints[i].m_Time > pEnvelope->m_vPoints[i + 1].m_Time)
+											pEnvelope->m_vPoints[i].m_Time = pEnvelope->m_vPoints[i + 1].m_Time - 1;
+									}
+								}
 								else
-									pEnvelope->m_vPoints[i].m_aValues[c] -= f2fx(m_MouseDeltaY * ValueScale);
+								{
+									pEnvelope->m_vPoints[i].m_aValues[c] -= f2fx(m_MouseDeltaY * (Input()->ModifierIsPressed() ? 0.001f : ValueScale));
+								}
+
+								m_SelectedQuadEnvelope = m_SelectedEnvelope;
+								m_ShowEnvelopePreview = SHOWENV_SELECTED;
+								m_SelectedEnvelopePoint = i;
+								m_Map.OnModify();
 							}
 
-							m_SelectedQuadEnvelope = m_SelectedEnvelope;
-							m_ShowEnvelopePreview = SHOWENV_SELECTED;
-							m_SelectedEnvelopePoint = i;
-							m_Map.OnModify();
+							ColorMod = 100.0f;
+							Graphics()->SetColor(1, 1, 1, 1);
 						}
-
-						ColorMod = 100.0f;
-						Graphics()->SetColor(1, 1, 1, 1);
-					}
-					else if(UI()->HotItem() == pID)
-					{
-						if(UI()->MouseButton(0))
+						else if(UI()->HotItem() == pID)
 						{
-							s_vSelection.clear();
-							s_vSelection.push_back(i);
-							UI()->SetActiveItem(pID);
-							// track it
-							s_pID = pID;
-						}
-
-						// remove point
-						if(UI()->MouseButtonClicked(1))
-						{
-							if(s_pID == pID)
+							if(UI()->MouseButton(0))
 							{
-								s_pID = nullptr;
+								UI()->SetActiveItem(pID);
+								s_pSelectedPoint = pID;
+							}
+
+							// remove point
+							if(UI()->MouseButtonClicked(1))
+							{
+								if(s_pSelectedPoint == pID)
+								{
+									s_pSelectedPoint = nullptr;
+
+									// update displayed text
+									s_CurValueInput.SetFloat(0.0f);
+									s_CurTimeInput.SetFloat(0.0f);
+								}
+
+								pEnvelope->m_vPoints.erase(pEnvelope->m_vPoints.begin() + i);
+								m_Map.OnModify();
+							}
+
+							m_ShowEnvelopePreview = SHOWENV_SELECTED;
+							ColorMod = 100.0f;
+							Graphics()->SetColor(1, 0.75f, 0.75f, 1);
+							m_pTooltip = "Envelope point. Left mouse to drag. Hold ctrl to be more precise. Hold shift to alter time point instead of value. Right click to delete.";
+						}
+
+						if(pID == s_pSelectedPoint && UI()->ConsumeHotkey(CUI::HOTKEY_ENTER))
+						{
+							if(i != 0)
+							{
+								pEnvelope->m_vPoints[i].m_Time = s_CurTimeInput.GetFloat() * 1000.0f;
+
+								if(pEnvelope->m_vPoints[i].m_Time < pEnvelope->m_vPoints[i - 1].m_Time)
+									pEnvelope->m_vPoints[i].m_Time = pEnvelope->m_vPoints[i - 1].m_Time + 1;
+								if(i + 1 != pEnvelope->m_vPoints.size() && pEnvelope->m_vPoints[i].m_Time > pEnvelope->m_vPoints[i + 1].m_Time)
+									pEnvelope->m_vPoints[i].m_Time = pEnvelope->m_vPoints[i + 1].m_Time - 1;
+							}
+							else
+								pEnvelope->m_vPoints[i].m_Time = 0.0f;
+
+							s_CurTimeInput.SetFloat(pEnvelope->m_vPoints[i].m_Time / 1000.0f);
+
+							pEnvelope->m_vPoints[i].m_aValues[c] = f2fx(s_CurValueInput.GetFloat());
+							s_CurValueInput.SetFloat(fx2f(pEnvelope->m_vPoints[i].m_aValues[c]));
+						}
+
+						if(UI()->CheckActiveItem(pID))
+						{
+							const int CurrentTime = pEnvelope->m_vPoints[i].m_Time;
+							const int CurrentValue = pEnvelope->m_vPoints[i].m_aValues[c];
+
+							// update displayed text
+							s_CurValueInput.SetFloat(fx2f(CurrentValue));
+							s_CurTimeInput.SetFloat(CurrentTime / 1000.0f);
+						}
+
+						if(pID == s_pSelectedPoint || (m_SelectedQuadEnvelope == m_SelectedEnvelope && m_SelectedEnvelopePoint == (int)i))
+							Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+						else
+							Graphics()->SetColor(aColors[c].r * ColorMod, aColors[c].g * ColorMod, aColors[c].b * ColorMod, 1.0f);
+						IGraphics::CQuadItem QuadItem(Final.x, Final.y, Final.w, Final.h);
+						Graphics()->QuadsDrawTL(&QuadItem, 1);
+					}
+
+					// tangent handles for bezier curves
+					{
+						const float PosX = pEnvelope->m_vPoints[i].m_Time / 1000.0f / EndTime;
+						const float PosY = (fx2f(pEnvelope->m_vPoints[i].m_aValues[c]) - Bottom) / (Top - Bottom);
+
+						// Out-Tangent handle
+						if(pEnvelope->m_vPoints[i].m_Curvetype == CURVETYPE_BEZIER)
+						{
+							const float OutTangentX = PosX + (pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaX[c] / 1000.0f / EndTime);
+							const float OutTangentY = PosY + fx2f(pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaY[c]) / (Top - Bottom);
+
+							CUIRect Final;
+							Final.x = View.x + OutTangentX * View.w;
+							Final.y = View.y + View.h - OutTangentY * View.h;
+							Final.x -= 2.0f;
+							Final.y -= 2.0f;
+							Final.w = 4.0f;
+							Final.h = 4.0f;
+
+							// handle logic
+							bool Updated = false;
+							const void *pID = &pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaX[c];
+
+							float ColorMod = 1.0f;
+							if(UI()->MouseInside(&Final))
+								UI()->SetHotItem(pID);
+
+							if(UI()->CheckActiveItem(pID))
+							{
+								if(!UI()->MouseButton(0))
+								{
+									m_SelectedQuadEnvelope = -1;
+									m_SelectedEnvelopePoint = -1;
+
+									UI()->SetActiveItem(nullptr);
+								}
+								else
+								{
+									float DeltaX = m_MouseDeltaX * TimeScale * (Input()->ModifierIsPressed() ? 1.0f : 1000.0f);
+									DeltaX = DeltaX < 0 ? -std::ceil(-DeltaX) : std::ceil(DeltaX);
+									pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaX[c] += (int)DeltaX;
+									pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaY[c] -= f2fx(m_MouseDeltaY * (Input()->ModifierIsPressed() ? 0.005f : ValueScale));
+
+									// clamp time value
+									pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaX[c] = clamp<int>(pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaX[c], 0, EndTime * 1000.0f - pEnvelope->m_vPoints[i].m_Time);
+
+									m_SelectedQuadEnvelope = m_SelectedEnvelope;
+									m_ShowEnvelopePreview = SHOWENV_SELECTED;
+									m_SelectedEnvelopePoint = i;
+									m_Map.OnModify();
+								}
+								ColorMod = 100.0f;
+							}
+							else if(UI()->HotItem() == pID)
+							{
+								if(UI()->MouseButton(0))
+								{
+									UI()->SetActiveItem(pID);
+									s_pSelectedPoint = pID;
+								}
+
+								// reset
+								if(UI()->MouseButtonClicked(1))
+								{
+									UI()->SetActiveItem(pID);
+									s_pSelectedPoint = pID;
+									mem_zero(pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaX, sizeof(pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaX));
+									mem_zero(pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaY, sizeof(pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaY));
+									m_Map.OnModify();
+									Updated = true;
+								}
+
+								m_ShowEnvelopePreview = SHOWENV_SELECTED;
+								ColorMod = 100.0f;
+								m_pTooltip = "Bezier out-tangent. Left mouse to drag. Hold ctrl to be more precise. Right click to reset.";
+							}
+
+							if(pID == s_pSelectedPoint && UI()->ConsumeHotkey(CUI::HOTKEY_ENTER))
+							{
+								pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaX[c] = clamp<int>(s_CurTimeInput.GetFloat() * 1000.0f - pEnvelope->m_vPoints[i].m_Time, 0, EndTime * 1000.0f - pEnvelope->m_vPoints[i].m_Time);
+								pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaY[c] = f2fx(s_CurValueInput.GetFloat()) - pEnvelope->m_vPoints[i].m_aValues[c];
+								Updated = true;
+							}
+
+							if(UI()->CheckActiveItem(pID) || Updated)
+							{
+								const int CurrentTime = pEnvelope->m_vPoints[i].m_Time + pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaX[c];
+								const int CurrentValue = pEnvelope->m_vPoints[i].m_aValues[c] + pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaY[c];
 
 								// update displayed text
-								s_CurValueInput.SetFloat(0.0f);
-								s_CurTimeInput.SetFloat(0.0f);
+								s_CurValueInput.SetFloat(fx2f(CurrentValue));
+								s_CurTimeInput.SetFloat(CurrentTime / 1000.0f);
 							}
 
-							pEnvelope->m_vPoints.erase(pEnvelope->m_vPoints.begin() + i);
-							m_Map.OnModify();
+							if(pID == s_pSelectedPoint || (m_SelectedQuadEnvelope == m_SelectedEnvelope && m_SelectedEnvelopePoint == (int)i))
+								Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.5f);
+							else
+								Graphics()->SetColor(aColors[c].r * ColorMod, aColors[c].g * ColorMod, aColors[c].b * ColorMod, 0.5f);
+
+							// draw triangle
+							IGraphics::CFreeformItem FreeformItem(Final.x + Final.w / 2.0f, Final.y, Final.x + Final.w / 2.0f, Final.y, Final.x + Final.w, Final.y + Final.h, Final.x, Final.y + Final.h);
+							Graphics()->QuadsDrawFreeform(&FreeformItem, 1);
 						}
 
-						m_ShowEnvelopePreview = SHOWENV_SELECTED;
-						ColorMod = 100.0f;
-						Graphics()->SetColor(1, 0.75f, 0.75f, 1);
-						m_pTooltip = "Left mouse to drag. Hold ctrl to be more precise. Hold shift to alter time point as well. Right click to delete.";
-					}
-
-					if(pID == s_pID && (Input()->KeyIsPressed(KEY_RETURN) || Input()->KeyIsPressed(KEY_KP_ENTER)))
-					{
-						if(i != 0)
+						// In-Tangent handle
+						if(i > 0 && pEnvelope->m_vPoints[i - 1].m_Curvetype == CURVETYPE_BEZIER)
 						{
-							pEnvelope->m_vPoints[i].m_Time = s_CurTimeInput.GetFloat() * 1000.0f;
+							const float InTangentX = PosX + pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaX[c] / 1000.0f / EndTime;
+							const float InTangentY = PosY + fx2f(pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaY[c]) / (Top - Bottom);
 
-							if(pEnvelope->m_vPoints[i].m_Time < pEnvelope->m_vPoints[i - 1].m_Time)
-								pEnvelope->m_vPoints[i].m_Time = pEnvelope->m_vPoints[i - 1].m_Time + 1;
-							if(i + 1 != pEnvelope->m_vPoints.size() && pEnvelope->m_vPoints[i].m_Time > pEnvelope->m_vPoints[i + 1].m_Time)
-								pEnvelope->m_vPoints[i].m_Time = pEnvelope->m_vPoints[i + 1].m_Time - 1;
+							CUIRect Final;
+							Final.x = View.x + InTangentX * View.w;
+							Final.y = View.y + View.h - InTangentY * View.h;
+							Final.x -= 2.0f;
+							Final.y -= 2.0f;
+							Final.w = 4.0f;
+							Final.h = 4.0f;
+
+							// handle logic
+							bool Updated = false;
+							const void *pID = &pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaX[c];
+
+							float ColorMod = 1.0f;
+							if(UI()->MouseInside(&Final))
+								UI()->SetHotItem(pID);
+
+							if(UI()->CheckActiveItem(pID))
+							{
+								if(!UI()->MouseButton(0))
+								{
+									m_SelectedQuadEnvelope = -1;
+									m_SelectedEnvelopePoint = -1;
+
+									UI()->SetActiveItem(nullptr);
+								}
+								else
+								{
+									float DeltaX = m_MouseDeltaX * TimeScale * (Input()->ModifierIsPressed() ? 1.0f : 1000.0f);
+									DeltaX = DeltaX < 0 ? -std::ceil(-DeltaX) : std::ceil(DeltaX);
+									pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaX[c] += (int)DeltaX;
+									pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaY[c] -= f2fx(m_MouseDeltaY * (Input()->ModifierIsPressed() ? 0.005f : ValueScale));
+
+									// clamp time value
+									pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaX[c] = clamp(pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaX[c], -pEnvelope->m_vPoints[i].m_Time, 0);
+
+									m_SelectedQuadEnvelope = m_SelectedEnvelope;
+									m_ShowEnvelopePreview = SHOWENV_SELECTED;
+									m_SelectedEnvelopePoint = i;
+									m_Map.OnModify();
+								}
+								ColorMod = 100.0f;
+							}
+							else if(UI()->HotItem() == pID)
+							{
+								if(UI()->MouseButton(0))
+								{
+									UI()->SetActiveItem(pID);
+									s_pSelectedPoint = pID;
+								}
+
+								// reset
+								if(UI()->MouseButtonClicked(1))
+								{
+									UI()->SetActiveItem(pID);
+									s_pSelectedPoint = pID;
+									mem_zero(pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaX, sizeof(pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaX));
+									mem_zero(pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaY, sizeof(pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaY));
+									m_Map.OnModify();
+									Updated = true;
+								}
+
+								m_ShowEnvelopePreview = SHOWENV_SELECTED;
+								ColorMod = 100.0f;
+								m_pTooltip = "Bezier in-tangent. Left mouse to drag. Hold ctrl to be more precise. Right click to reset.";
+							}
+
+							if(pID == s_pSelectedPoint && UI()->ConsumeHotkey(CUI::HOTKEY_ENTER))
+							{
+								pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaX[c] = clamp<int>(s_CurTimeInput.GetFloat() * 1000.0f - pEnvelope->m_vPoints[i].m_Time, -pEnvelope->m_vPoints[i].m_Time, 0);
+								pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaY[c] = f2fx(s_CurValueInput.GetFloat()) - pEnvelope->m_vPoints[i].m_aValues[c];
+								Updated = true;
+							}
+
+							if(UI()->CheckActiveItem(pID) || Updated)
+							{
+								const int CurrentTime = pEnvelope->m_vPoints[i].m_Time + pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaX[c];
+								const int CurrentValue = pEnvelope->m_vPoints[i].m_aValues[c] + pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaY[c];
+
+								// update displayed text
+								s_CurValueInput.SetFloat(fx2f(CurrentValue));
+								s_CurTimeInput.SetFloat(CurrentTime / 1000.0f);
+							}
+
+							if(pID == s_pSelectedPoint || (m_SelectedQuadEnvelope == m_SelectedEnvelope && m_SelectedEnvelopePoint == (int)i))
+								Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.5f);
+							else
+								Graphics()->SetColor(aColors[c].r * ColorMod, aColors[c].g * ColorMod, aColors[c].b * ColorMod, 0.5f);
+
+							// draw triangle
+							IGraphics::CFreeformItem FreeformItem(Final.x + Final.w / 2.0f, Final.y, Final.x + Final.w / 2.0f, Final.y, Final.x + Final.w, Final.y + Final.h, Final.x, Final.y + Final.h);
+							Graphics()->QuadsDrawFreeform(&FreeformItem, 1);
 						}
-						else
-							pEnvelope->m_vPoints[i].m_Time = 0.0f;
-
-						s_CurTimeInput.SetFloat(pEnvelope->m_vPoints[i].m_Time / 1000.0f);
-
-						pEnvelope->m_vPoints[i].m_aValues[c] = f2fx(s_CurValueInput.GetFloat());
-						s_CurValueInput.SetFloat(fx2f(pEnvelope->m_vPoints[i].m_aValues[c]));
 					}
-
-					if(UI()->CheckActiveItem(pID))
-					{
-						CurrentTime = pEnvelope->m_vPoints[i].m_Time;
-						CurrentValue = pEnvelope->m_vPoints[i].m_aValues[c];
-
-						// update displayed text
-						s_CurValueInput.SetFloat(fx2f(CurrentValue));
-						s_CurTimeInput.SetFloat(CurrentTime / 1000.0f);
-					}
-
-					if(m_SelectedQuadEnvelope == m_SelectedEnvelope && m_SelectedEnvelopePoint == (int)i)
-						Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
-					else
-						Graphics()->SetColor(aColors[c].r * ColorMod, aColors[c].g * ColorMod, aColors[c].b * ColorMod, 1.0f);
-					IGraphics::CQuadItem QuadItem(Final.x, Final.y, Final.w, Final.h);
-					Graphics()->QuadsDrawTL(&QuadItem, 1);
 				}
 			}
 			Graphics()->QuadsEnd();
+		}
 
+		if(s_pSelectedPoint != nullptr)
+		{
 			CUIRect ToolBar1;
 			CUIRect ToolBar2;
 			ToolBar.VSplitMid(&ToolBar1, &ToolBar2);
@@ -5976,8 +6233,8 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 				UI()->DoLabel(&Label2, "Time (in s):", 10.0f, TEXTALIGN_MR);
 			}
 
-			DoEditBox(&s_CurValueInput, &ToolBar1, 10.0f, IGraphics::CORNER_ALL, "The value of the selected envelope point");
-			DoEditBox(&s_CurTimeInput, &ToolBar2, 10.0f, IGraphics::CORNER_ALL, "The time of the selected envelope point");
+			DoEditBox(&s_CurValueInput, &ToolBar1, 10.0f, IGraphics::CORNER_ALL, "The value of the selected element");
+			DoEditBox(&s_CurTimeInput, &ToolBar2, 10.0f, IGraphics::CORNER_ALL, "The time of the selected element");
 		}
 	}
 }

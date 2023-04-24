@@ -15,6 +15,8 @@ class CMap : public IEngineMap
 public:
 	CMap();
 
+	CDataFileReader *GetReader() { return &m_DataFile; }
+
 	void *GetData(int Index) override;
 	int GetDataSize(int Index) const override;
 	void *GetDataSwapped(int Index) override;

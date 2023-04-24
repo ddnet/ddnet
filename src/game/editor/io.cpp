@@ -345,12 +345,13 @@ bool CEditorMap::Save(const char *pFileName)
 	}
 
 	// save envelopes
+	m_pEditor->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "editor", "saving envelopes");
 	int PointCount = 0;
 	for(size_t e = 0; e < m_vpEnvelopes.size(); e++)
 	{
 		CMapItemEnvelope Item;
 		Item.m_Version = CMapItemEnvelope::CURRENT_VERSION;
-		Item.m_Channels = m_vpEnvelopes[e]->m_Channels;
+		Item.m_Channels = m_vpEnvelopes[e]->GetChannels();
 		Item.m_StartPoint = PointCount;
 		Item.m_NumPoints = m_vpEnvelopes[e]->m_vPoints.size();
 		Item.m_Synchronized = m_vpEnvelopes[e]->m_Synchronized;
@@ -361,19 +362,60 @@ bool CEditorMap::Save(const char *pFileName)
 	}
 
 	// save points
-	int TotalSize = sizeof(CEnvPoint) * PointCount;
-	CEnvPoint *pPoints = (CEnvPoint *)calloc(maximum(PointCount, 1), sizeof(*pPoints));
+	m_pEditor->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "editor", "saving envelope points");
+	bool BezierUsed = true;
+	for(const auto &pEnvelope : m_vpEnvelopes)
+	{
+		for(const auto &Point : pEnvelope->m_vPoints)
+		{
+			if(Point.m_Curvetype == CURVETYPE_BEZIER)
+			{
+				BezierUsed = true;
+				break;
+			}
+		}
+		if(BezierUsed)
+			break;
+	}
+
+	CEnvPoint *pPoints = (CEnvPoint *)calloc(maximum(PointCount, 1), sizeof(CEnvPoint));
+	CEnvPointBezier *pPointsBezier = nullptr;
+	if(BezierUsed)
+		pPointsBezier = (CEnvPointBezier *)calloc(maximum(PointCount, 1), sizeof(CEnvPointBezier));
 	PointCount = 0;
 
 	for(const auto &pEnvelope : m_vpEnvelopes)
 	{
-		int Count = pEnvelope->m_vPoints.size();
-		mem_copy(&pPoints[PointCount], pEnvelope->m_vPoints.data(), sizeof(CEnvPoint) * Count);
-		PointCount += Count;
+		const CEnvPoint_runtime *pPrevPoint = nullptr;
+		for(const auto &Point : pEnvelope->m_vPoints)
+		{
+			mem_copy(&pPoints[PointCount], &Point, sizeof(CEnvPoint));
+			if(pPointsBezier != nullptr)
+			{
+				if(Point.m_Curvetype == CURVETYPE_BEZIER)
+				{
+					mem_copy(&pPointsBezier[PointCount].m_aOutTangentDeltaX, &Point.m_Bezier.m_aOutTangentDeltaX, sizeof(Point.m_Bezier.m_aOutTangentDeltaX));
+					mem_copy(&pPointsBezier[PointCount].m_aOutTangentDeltaY, &Point.m_Bezier.m_aOutTangentDeltaY, sizeof(Point.m_Bezier.m_aOutTangentDeltaY));
+				}
+				if(pPrevPoint != nullptr && pPrevPoint->m_Curvetype == CURVETYPE_BEZIER)
+				{
+					mem_copy(&pPointsBezier[PointCount].m_aInTangentDeltaX, &Point.m_Bezier.m_aInTangentDeltaX, sizeof(Point.m_Bezier.m_aInTangentDeltaX));
+					mem_copy(&pPointsBezier[PointCount].m_aInTangentDeltaY, &Point.m_Bezier.m_aInTangentDeltaY, sizeof(Point.m_Bezier.m_aInTangentDeltaY));
+				}
+			}
+			PointCount++;
+			pPrevPoint = &Point;
+		}
 	}
 
-	df.AddItem(MAPITEMTYPE_ENVPOINTS, 0, TotalSize, pPoints);
+	df.AddItem(MAPITEMTYPE_ENVPOINTS, 0, sizeof(CEnvPoint) * PointCount, pPoints);
 	free(pPoints);
+
+	if(pPointsBezier != nullptr)
+	{
+		df.AddItem(MAPITEMTYPE_ENVPOINTS_BEZIER, 0, sizeof(CEnvPointBezier) * PointCount, pPointsBezier);
+		free(pPointsBezier);
+	}
 
 	// finish the data file
 	std::shared_ptr<CDataFileWriterFinishJob> pWriterFinishJob = std::make_shared<CDataFileWriterFinishJob>(pFileName, std::move(df));
@@ -904,37 +946,38 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 
 		// load envelopes
 		{
-			CEnvPoint *pPoints = nullptr;
+			const CMapBasedEnvelopePointAccess EnvelopePoints(&DataFile);
 
+			int EnvStart, EnvNum;
+			DataFile.GetType(MAPITEMTYPE_ENVELOPE, &EnvStart, &EnvNum);
+			for(int e = 0; e < EnvNum; e++)
 			{
-				int Start, Num;
-				DataFile.GetType(MAPITEMTYPE_ENVPOINTS, &Start, &Num);
-				if(Num)
-					pPoints = (CEnvPoint *)DataFile.GetItem(Start);
-			}
-
-			int Start, Num;
-			DataFile.GetType(MAPITEMTYPE_ENVELOPE, &Start, &Num);
-			for(int e = 0; e < Num; e++)
-			{
-				CMapItemEnvelope *pItem = (CMapItemEnvelope *)DataFile.GetItem(Start + e);
+				CMapItemEnvelope *pItem = (CMapItemEnvelope *)DataFile.GetItem(EnvStart + e);
 				CEnvelope *pEnv = new CEnvelope(pItem->m_Channels);
 				pEnv->m_vPoints.resize(pItem->m_NumPoints);
-				mem_copy(pEnv->m_vPoints.data(), &pPoints[pItem->m_StartPoint], sizeof(CEnvPoint) * pItem->m_NumPoints);
+				for(int p = 0; p < pItem->m_NumPoints; p++)
+				{
+					const CEnvPoint *pPoint = EnvelopePoints.GetPoint(pItem->m_StartPoint + p);
+					if(pPoint != nullptr)
+						mem_copy(&pEnv->m_vPoints[p], pPoint, sizeof(CEnvPoint));
+					const CEnvPointBezier *pPointBezier = EnvelopePoints.GetBezier(pItem->m_StartPoint + p);
+					if(pPointBezier != nullptr)
+						mem_copy(&pEnv->m_vPoints[p].m_Bezier, pPointBezier, sizeof(CEnvPointBezier));
+				}
 				if(pItem->m_aName[0] != -1) // compatibility with old maps
 					IntsToStr(pItem->m_aName, sizeof(pItem->m_aName) / sizeof(int), pEnv->m_aName);
 				m_vpEnvelopes.push_back(pEnv);
-				if(pItem->m_Version >= 2)
+				if(pItem->m_Version >= CMapItemEnvelope_v2::CURRENT_VERSION)
 					pEnv->m_Synchronized = pItem->m_Synchronized;
 			}
 		}
 
 		{
-			int Start, Num;
-			DataFile.GetType(MAPITEMTYPE_AUTOMAPPER_CONFIG, &Start, &Num);
-			for(int i = 0; i < Num; i++)
+			int AutomapperConfigStart, AutomapperConfigNum;
+			DataFile.GetType(MAPITEMTYPE_AUTOMAPPER_CONFIG, &AutomapperConfigStart, &AutomapperConfigNum);
+			for(int i = 0; i < AutomapperConfigNum; i++)
 			{
-				CMapItemAutoMapperConfig *pItem = (CMapItemAutoMapperConfig *)DataFile.GetItem(Start + i);
+				CMapItemAutoMapperConfig *pItem = (CMapItemAutoMapperConfig *)DataFile.GetItem(AutomapperConfigStart + i);
 				if(pItem->m_Version == CMapItemAutoMapperConfig::CURRENT_VERSION)
 				{
 					if(pItem->m_GroupId >= 0 && (size_t)pItem->m_GroupId < m_vpGroups.size() &&

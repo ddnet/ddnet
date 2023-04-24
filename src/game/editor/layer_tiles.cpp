@@ -930,7 +930,7 @@ CUI::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 		{
 			for(; Index >= -1 && Index < (int)m_pEditor->m_Map.m_vpEnvelopes.size(); Index += Step)
 			{
-				if(Index == -1 || m_pEditor->m_Map.m_vpEnvelopes[Index]->m_Channels == 4)
+				if(Index == -1 || m_pEditor->m_Map.m_vpEnvelopes[Index]->GetChannels() == 4)
 				{
 					m_ColorEnv = Index;
 					break;
