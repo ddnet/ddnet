@@ -183,13 +183,12 @@ public:
 	float m_AlignedFontSize;
 
 	ETextCursorSelectionMode m_CalculateSelectionMode;
+	float m_SelectionHeightFactor;
 
-	// these coordinates are repsected if selection mode is set to calculate @see ETextCursorSelectionMode
-	int m_PressMouseX;
-	int m_PressMouseY;
-	// these coordinates are repsected if selection/cursor mode is set to calculate @see ETextCursorSelectionMode / @see ETextCursorCursorMode
-	int m_ReleaseMouseX;
-	int m_ReleaseMouseY;
+	// these coordinates are respected if selection mode is set to calculate @see ETextCursorSelectionMode
+	vec2 m_PressMouse;
+	// these coordinates are respected if selection/cursor mode is set to calculate @see ETextCursorSelectionMode / @see ETextCursorCursorMode
+	vec2 m_ReleaseMouse;
 
 	// note m_SelectionStart can be bigger than m_SelectionEnd, depending on how the mouse cursor was dragged
 	// also note, that these are the character offsets decoded
@@ -197,8 +196,10 @@ public:
 	int m_SelectionEnd;
 
 	ETextCursorCursorMode m_CursorMode;
+	bool m_ForceCursorRendering;
 	// note this is the decoded character offset
 	int m_CursorCharacter;
+	vec2 m_CursorRenderedPosition;
 
 	float Height() const
 	{
@@ -232,7 +233,7 @@ public:
 
 	ColorRGBA DefaultTextColor() const { return ColorRGBA(1, 1, 1, 1); }
 	ColorRGBA DefaultTextOutlineColor() const { return ColorRGBA(0, 0, 0, 0.3f); }
-	ColorRGBA DefaultTextSelectionColor() const { return ColorRGBA(0, 0, 1.0f, 1.0f); }
+	ColorRGBA DefaultTextSelectionColor() const { return ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f); }
 
 	//
 	virtual void TextEx(CTextCursor *pCursor, const char *pText, int Length = -1) = 0;
@@ -271,7 +272,6 @@ public:
 	virtual void Text(float x, float y, float Size, const char *pText, float LineWidth = -1.0f) = 0;
 	virtual float TextWidth(float Size, const char *pText, int StrLength = -1, float LineWidth = -1.0f, int Flags = 0, float *pHeight = nullptr, float *pAlignedFontSize = nullptr, float *pMaxCharacterHeightInLine = nullptr) = 0;
 	virtual STextBoundingBox TextBoundingBox(float Size, const char *pText, int StrLength = -1, float LineWidth = -1.0f, int Flags = 0) = 0;
-	virtual vec2 CaretPosition(float Size, const char *pText, int StrLength = -1, float LineWidth = -1.0f, int Flags = 0) = 0;
 
 	virtual ColorRGBA GetTextColor() const = 0;
 	virtual ColorRGBA GetTextOutlineColor() const = 0;

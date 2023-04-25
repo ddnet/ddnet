@@ -9,6 +9,9 @@
 #include <engine/input.h>
 #include <engine/keys.h>
 
+#include <string>
+#include <vector>
+
 class IEngineGraphics;
 
 class CInput : public IEngineInput
@@ -75,6 +78,13 @@ private:
 	bool m_MouseFocus;
 	bool m_MouseDoubleClick;
 
+	// IME support
+	char m_aComposition[MAX_COMPOSITION_ARRAY_SIZE];
+	int m_CompositionCursor;
+	int m_CompositionLength;
+	std::vector<std::string> m_vCandidates;
+	int m_CandidateSelectedIndex;
+
 	void AddEvent(char *pText, int Key, int Flags);
 	void Clear() override;
 	bool IsEventValid(const CEvent &Event) const override { return Event.m_InputCount == m_InputCounter; }
@@ -94,18 +104,15 @@ private:
 
 	char m_aDropFile[IO_MAX_PATH_LENGTH];
 
-	// IME support
-	int m_NumTextInputInstances;
-	char m_aEditingText[INPUT_TEXT_SIZE];
-	int m_EditingTextLen;
-	int m_EditingCursor;
-
 	bool KeyState(int Key) const;
+
+	void ProcessSystemMessage(SDL_SysWMmsg *pMsg);
 
 public:
 	CInput();
 
 	void Init() override;
+	int Update() override;
 	void Shutdown() override;
 
 	bool ModifierIsPressed() const override { return KeyState(KEY_LCTRL) || KeyState(KEY_RCTRL) || KeyState(KEY_LGUI) || KeyState(KEY_RGUI); }
@@ -128,14 +135,16 @@ public:
 	const char *GetClipboardText() override;
 	void SetClipboardText(const char *pText) override;
 
-	int Update() override;
-
-	bool GetIMEState() override;
-	void SetIMEState(bool Activate) override;
-	int GetIMEEditingTextLength() const override { return m_EditingTextLen; }
-	const char *GetIMEEditingText() override;
-	int GetEditingCursor() override;
-	void SetEditingPosition(float X, float Y) override;
+	void StartTextInput() override;
+	void StopTextInput() override;
+	const char *GetComposition() const override { return m_aComposition; }
+	bool HasComposition() const override { return m_CompositionLength != COMP_LENGTH_INACTIVE; }
+	int GetCompositionCursor() const override { return m_CompositionCursor; }
+	int GetCompositionLength() const override { return m_CompositionLength; }
+	const char *GetCandidate(int Index) const override { return m_vCandidates[Index].c_str(); }
+	int GetCandidateCount() const override { return m_vCandidates.size(); }
+	int GetCandidateSelectedIndex() const override { return m_CandidateSelectedIndex; }
+	void SetCompositionWindowPosition(float X, float Y, float H) override;
 
 	bool GetDropFile(char *aBuf, int Len) override;
 };

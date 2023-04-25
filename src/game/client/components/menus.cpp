@@ -57,9 +57,6 @@ bool CMenus::ms_ValueSelectorTextMode;
 float CMenus::ms_ButtonHeight = 25.0f;
 float CMenus::ms_ListheaderHeight = 17.0f;
 
-IInput::CEvent CMenus::m_aInputEvents[MAX_INPUTEVENTS];
-size_t CMenus::m_NumInputEvents;
-
 CMenus::CMenus()
 {
 	m_Popup = POPUP_NONE;
@@ -75,10 +72,7 @@ CMenus::CMenus()
 	m_MenuActive = true;
 	m_ShowStart = true;
 
-	m_NumInputEvents = 0;
-
 	str_copy(m_aCurrentDemoFolder, "demos");
-	m_aCallvoteReason[0] = 0;
 
 	m_FriendlistSelectedIndex = -1;
 
@@ -447,21 +441,20 @@ int CMenus::DoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, bool 
 {
 	// logic
 	static float s_Value;
-	static char s_aNumStr[64];
+	static CLineInputNumber s_NumberInput;
 	static void *s_pLastTextpID = pID;
 	const bool Inside = UI()->MouseInside(pRect);
 
 	if(Inside)
 		UI()->SetHotItem(pID);
 
+	const int Base = IsHex ? 16 : 10;
+
 	if(UI()->MouseButtonReleased(1) && UI()->HotItem() == pID)
 	{
 		s_pLastTextpID = pID;
 		ms_ValueSelectorTextMode = true;
-		if(IsHex)
-			str_format(s_aNumStr, sizeof(s_aNumStr), "%06X", Current);
-		else
-			str_format(s_aNumStr, sizeof(s_aNumStr), "%d", Current);
+		s_NumberInput.SetInteger(Current, Base);
 	}
 
 	if(UI()->CheckActiveItem(pID))
@@ -476,18 +469,13 @@ int CMenus::DoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, bool 
 
 	if(ms_ValueSelectorTextMode && s_pLastTextpID == pID)
 	{
-		static float s_NumberBoxID = 0;
-		UI()->DoEditBox(&s_NumberBoxID, pRect, s_aNumStr, sizeof(s_aNumStr), 10.0f, &s_NumberBoxID, false, IGraphics::CORNER_ALL);
-
-		UI()->SetActiveItem(&s_NumberBoxID);
+		UI()->DoEditBox(&s_NumberInput, pRect, 10.0f);
+		UI()->SetActiveItem(&s_NumberInput);
 
 		if(Input()->KeyIsPressed(KEY_RETURN) || Input()->KeyIsPressed(KEY_KP_ENTER) ||
 			((UI()->MouseButtonClicked(1) || UI()->MouseButtonClicked(0)) && !Inside))
 		{
-			if(IsHex)
-				Current = clamp(str_toint_base(s_aNumStr, 16), Min, Max);
-			else
-				Current = clamp(str_toint(s_aNumStr), Min, Max);
+			Current = clamp(s_NumberInput.GetInteger(Base), Min, Max);
 			//m_LockMouse = false;
 			UI()->SetActiveItem(nullptr);
 			ms_ValueSelectorTextMode = false;
@@ -560,6 +548,9 @@ int CMenus::DoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, bool 
 		pRect->Draw(*pColor, IGraphics::CORNER_ALL, Round);
 		UI()->DoLabel(pRect, aBuf, 10.0f, TEXTALIGN_MC);
 	}
+
+	if(!ms_ValueSelectorTextMode)
+		s_NumberInput.Clear();
 
 	return Current;
 }
@@ -968,8 +959,6 @@ void CMenus::OnInit()
 		m_Popup = POPUP_LANGUAGE;
 	if(g_Config.m_ClSkipStartMenu)
 		m_ShowStart = false;
-
-	UI()->InitInputs(m_aInputEvents, &m_NumInputEvents);
 
 	m_RefreshButton.Init(UI(), -1);
 	m_ConnectButton.Init(UI(), -1);
@@ -1733,8 +1722,9 @@ int CMenus::Render()
 			TextBox.VSplitLeft(20.0f, 0, &TextBox);
 			TextBox.VSplitRight(60.0f, &TextBox, 0);
 			UI()->DoLabel(&Label, Localize("Password"), 18.0f, TEXTALIGN_ML);
-			static float s_Offset = 0.0f;
-			UI()->DoEditBox(&g_Config.m_Password, &TextBox, g_Config.m_Password, sizeof(g_Config.m_Password), 12.0f, &s_Offset, true);
+			static CLineInput s_PasswordInput(g_Config.m_Password, sizeof(g_Config.m_Password));
+			s_PasswordInput.SetHidden(true);
+			UI()->DoClearableEditBox(&s_PasswordInput, &TextBox, 12.0f);
 		}
 		else if(m_Popup == POPUP_CONNECTING)
 		{
@@ -1910,7 +1900,7 @@ int CMenus::Render()
 					char aBufOld[IO_MAX_PATH_LENGTH];
 					str_format(aBufOld, sizeof(aBufOld), "%s/%s", m_aCurrentDemoFolder, m_vDemos[m_DemolistSelectedIndex].m_aFilename);
 					char aBufNew[IO_MAX_PATH_LENGTH];
-					str_format(aBufNew, sizeof(aBufNew), "%s/%s", m_aCurrentDemoFolder, m_aCurrentDemoFile);
+					str_format(aBufNew, sizeof(aBufNew), "%s/%s", m_aCurrentDemoFolder, m_DemoRenameInput.GetString());
 					if(!str_endswith(aBufNew, ".demo"))
 						str_append(aBufNew, ".demo", sizeof(aBufNew));
 					if(Storage()->RenameFile(aBufOld, aBufNew, m_vDemos[m_DemolistSelectedIndex].m_StorageType))
@@ -1931,8 +1921,7 @@ int CMenus::Render()
 			TextBox.VSplitLeft(20.0f, 0, &TextBox);
 			TextBox.VSplitRight(60.0f, &TextBox, 0);
 			UI()->DoLabel(&Label, Localize("New name:"), 18.0f, TEXTALIGN_ML);
-			static float s_Offset = 0.0f;
-			UI()->DoEditBox(&s_Offset, &TextBox, m_aCurrentDemoFile, sizeof(m_aCurrentDemoFile), 12.0f, &s_Offset);
+			UI()->DoEditBox(&m_DemoRenameInput, &TextBox, 12.0f);
 		}
 #if defined(CONF_VIDEORECORDER)
 		else if(m_Popup == POPUP_RENDER_DEMO)
@@ -1963,14 +1952,14 @@ int CMenus::Render()
 				// name video
 				if(m_DemolistSelectedIndex >= 0 && !m_DemolistSelectedIsDir)
 				{
-					if(!str_endswith(m_aCurrentDemoFile, ".mp4"))
-						str_append(m_aCurrentDemoFile, ".mp4", sizeof(m_aCurrentDemoFile));
+					if(!str_endswith(m_DemoRenderInput.GetString(), ".mp4"))
+						m_DemoRenderInput.Append(".mp4");
 					char aWholePath[IO_MAX_PATH_LENGTH];
 					// store new video filename to origin buffer
-					if(Storage()->FindFile(m_aCurrentDemoFile, "videos", IStorage::TYPE_ALL, aWholePath, sizeof(aWholePath)))
+					if(Storage()->FindFile(m_DemoRenderInput.GetString(), "videos", IStorage::TYPE_ALL, aWholePath, sizeof(aWholePath)))
 					{
 						char aMessage[128 + IO_MAX_PATH_LENGTH];
-						str_format(aMessage, sizeof(aMessage), Localize("File '%s' already exists, do you want to overwrite it?"), m_aCurrentDemoFile);
+						str_format(aMessage, sizeof(aMessage), Localize("File '%s' already exists, do you want to overwrite it?"), m_DemoRenderInput.GetString());
 						PopupConfirm(Localize("Replace video"), aMessage, Localize("Yes"), Localize("No"), &CMenus::PopupConfirmDemoReplaceVideo, POPUP_NONE, &CMenus::DefaultButtonCallback, POPUP_RENDER_DEMO);
 					}
 					else
@@ -2043,8 +2032,7 @@ int CMenus::Render()
 			TextBox.VSplitLeft(20.0f, 0, &TextBox);
 			TextBox.VSplitRight(60.0f, &TextBox, 0);
 			UI()->DoLabel(&Label, Localize("Video name:"), 18.0f, TEXTALIGN_ML);
-			static float s_Offset = 0.0f;
-			UI()->DoEditBox(&s_Offset, &TextBox, m_aCurrentDemoFile, sizeof(m_aCurrentDemoFile), 12.0f, &s_Offset);
+			UI()->DoEditBox(&m_DemoRenderInput, &TextBox, 12.0f);
 		}
 #endif
 		else if(m_Popup == POPUP_FIRST_LAUNCH)
@@ -2093,10 +2081,9 @@ int CMenus::Render()
 			TextBox.VSplitLeft(20.0f, 0, &TextBox);
 			TextBox.VSplitRight(60.0f, &TextBox, 0);
 			UI()->DoLabel(&Label, Localize("Nickname"), 16.0f, TEXTALIGN_ML);
-			static float s_Offset = 0.0f;
-			SUIExEditBoxProperties EditProps;
-			EditProps.m_pEmptyText = Client()->PlayerName();
-			UI()->DoEditBox(&g_Config.m_PlayerName, &TextBox, g_Config.m_PlayerName, sizeof(g_Config.m_PlayerName), 12.0f, &s_Offset, false, IGraphics::CORNER_ALL, EditProps);
+			static CLineInput s_PlayerNameInput(g_Config.m_PlayerName, sizeof(g_Config.m_PlayerName));
+			s_PlayerNameInput.SetEmptyText(Client()->PlayerName());
+			UI()->DoEditBox(&s_PlayerNameInput, &TextBox, 12.0f);
 		}
 		else if(m_Popup == POPUP_POINTS)
 		{
@@ -2161,7 +2148,7 @@ void CMenus::PopupConfirmDemoReplaceVideo()
 {
 	char aBuf[IO_MAX_PATH_LENGTH];
 	str_format(aBuf, sizeof(aBuf), "%s/%s", m_aCurrentDemoFolder, m_vDemos[m_DemolistSelectedIndex].m_aFilename);
-	const char *pError = Client()->DemoPlayer_Render(aBuf, m_vDemos[m_DemolistSelectedIndex].m_StorageType, m_aCurrentDemoFile, m_Speed);
+	const char *pError = Client()->DemoPlayer_Render(aBuf, m_vDemos[m_DemolistSelectedIndex].m_StorageType, m_DemoRenderInput.GetString(), m_Speed);
 	m_Speed = 4;
 	if(pError)
 		PopupMessage(Localize("Error"), str_comp(pError, "error loading demo") ? pError : Localize("Error loading demo"), Localize("Ok"));
@@ -2245,7 +2232,6 @@ void CMenus::SetActive(bool Active)
 	if(Active != m_MenuActive)
 	{
 		ms_ColorPicker.m_Active = false;
-		Input()->SetIMEState(Active);
 		UI()->SetHotItem(nullptr);
 		UI()->SetActiveItem(nullptr);
 	}
@@ -2308,8 +2294,6 @@ bool CMenus::OnInput(const IInput::CEvent &Event)
 	}
 	if(IsActive())
 	{
-		if(m_NumInputEvents < MAX_INPUTEVENTS)
-			m_aInputEvents[m_NumInputEvents++] = Event;
 		UI()->OnInput(Event);
 		return true;
 	}
@@ -2391,7 +2375,6 @@ void CMenus::OnRender()
 	{
 		UI()->FinishCheck();
 		UI()->ClearHotkeys();
-		m_NumInputEvents = 0;
 		return;
 	}
 
@@ -2443,7 +2426,6 @@ void CMenus::OnRender()
 
 	UI()->FinishCheck();
 	UI()->ClearHotkeys();
-	m_NumInputEvents = 0;
 }
 
 void CMenus::RenderBackground()

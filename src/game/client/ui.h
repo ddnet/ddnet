@@ -3,6 +3,7 @@
 #ifndef GAME_CLIENT_UI_H
 #define GAME_CLIENT_UI_H
 
+#include "lineinput.h"
 #include "ui_rect.h"
 
 #include <engine/input.h>
@@ -83,10 +84,46 @@ public:
 	}
 };
 
-struct SUIExEditBoxProperties
+class IButtonColorFunction
 {
-	bool m_SelectText = false;
-	const char *m_pEmptyText = "";
+public:
+	virtual ColorRGBA GetColor(bool Active, bool Hovered) const = 0;
+};
+class CDarkButtonColorFunction : public IButtonColorFunction
+{
+public:
+	ColorRGBA GetColor(bool Active, bool Hovered) const override
+	{
+		if(Active)
+			return ColorRGBA(0.15f, 0.15f, 0.15f, 0.25f);
+		else if(Hovered)
+			return ColorRGBA(0.5f, 0.5f, 0.5f, 0.25f);
+		return ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f);
+	}
+};
+class CLightButtonColorFunction : public IButtonColorFunction
+{
+public:
+	ColorRGBA GetColor(bool Active, bool Hovered) const override
+	{
+		if(Active)
+			return ColorRGBA(1.0f, 1.0f, 1.0f, 0.4f);
+		else if(Hovered)
+			return ColorRGBA(1.0f, 1.0f, 1.0f, 0.6f);
+		return ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f);
+	}
+};
+class CScrollBarColorFunction : public IButtonColorFunction
+{
+public:
+	ColorRGBA GetColor(bool Active, bool Hovered) const override
+	{
+		if(Active)
+			return ColorRGBA(0.9f, 0.9f, 0.9f, 1.0f);
+		else if(Hovered)
+			return ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
+		return ColorRGBA(0.8f, 0.8f, 0.8f, 1.0f);
+	}
 };
 
 class CUI;
@@ -154,7 +191,6 @@ struct SLabelProperties
 {
 	float m_MaxWidth = -1;
 	bool m_StopAtEnd = false;
-	class CTextCursor *m_pSelCursor = nullptr;
 	bool m_EnableWidthCheck = true;
 };
 
@@ -242,22 +278,7 @@ private:
 	unsigned m_LastMouseButtons;
 	bool m_MouseSlow = false;
 
-	IInput::CEvent *m_pInputEventsArray;
-	size_t *m_pInputEventCount;
 	unsigned m_HotkeysPressed = 0;
-
-	bool m_MouseIsPress = false;
-	bool m_HasSelection = false;
-
-	int m_MousePressX = 0;
-	int m_MousePressY = 0;
-	int m_MouseCurX = 0;
-	int m_MouseCurY = 0;
-	int m_CurSelStart = 0;
-	int m_CurSelEnd = 0;
-	const void *m_pSelItem = nullptr;
-
-	int m_CurCursor = 0;
 
 	CUIRect m_Screen;
 
@@ -293,11 +314,13 @@ private:
 public:
 	static const CLinearScrollbarScale ms_LinearScrollbarScale;
 	static const CLogarithmicScrollbarScale ms_LogarithmicScrollbarScale;
+	static const CDarkButtonColorFunction ms_DarkButtonColorFunction;
+	static const CLightButtonColorFunction ms_LightButtonColorFunction;
+	static const CScrollBarColorFunction ms_ScrollBarColorFunction;
 
-	static float ms_FontmodHeight;
+	static const float ms_FontmodHeight;
 
 	void Init(IKernel *pKernel);
-	void InitInputs(IInput::CEvent *pInputEventsArray, size_t *pInputEventCount);
 	IClient *Client() const { return m_pClient; }
 	IGraphics *Graphics() const { return m_pGraphics; }
 	IInput *Input() const { return m_pInput; }
@@ -339,6 +362,7 @@ public:
 	float MouseDeltaY() const { return m_MouseDeltaY; }
 	float MouseX() const { return m_MouseX; }
 	float MouseY() const { return m_MouseY; }
+	vec2 MousePos() const { return vec2(m_MouseX, m_MouseY); }
 	float MouseWorldX() const { return m_MouseWorldX; }
 	float MouseWorldY() const { return m_MouseWorldY; }
 	int MouseButton(int Index) const { return (m_MouseButtons >> Index) & 1; }
@@ -408,15 +432,16 @@ public:
 	int DoButtonLogic(const void *pID, int Checked, const CUIRect *pRect);
 	int DoDraggableButtonLogic(const void *pID, int Checked, const CUIRect *pRect, bool *pClicked, bool *pAbrupted);
 	int DoPickerLogic(const void *pID, const CUIRect *pRect, float *pX, float *pY);
-	void DoSmoothScrollLogic(float *pScrollOffset, float *pScrollOffsetChange, float ViewPortSize, float TotalSize, float ScrollSpeed = 10.0f);
+	void DoSmoothScrollLogic(float *pScrollOffset, float *pScrollOffsetChange, float ViewPortSize, float TotalSize, bool SmoothClamp = false, float ScrollSpeed = 10.0f);
+	static vec2 CalcAlignedCursorPos(const CUIRect *pRect, vec2 TextSize, int Align);
 
 	void DoLabel(const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps = {});
 
 	void DoLabel(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps = {}, int StrLen = -1, const CTextCursor *pReadCursor = nullptr);
 	void DoLabelStreamed(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth = -1, bool StopAtEnd = false, int StrLen = -1, const CTextCursor *pReadCursor = nullptr);
 
-	bool DoEditBox(const void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden = false, int Corners = IGraphics::CORNER_ALL, const SUIExEditBoxProperties &Properties = {});
-	bool DoClearableEditBox(const void *pID, const void *pClearID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden = false, int Corners = IGraphics::CORNER_ALL, const SUIExEditBoxProperties &Properties = {});
+	bool DoEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize, int Corners = IGraphics::CORNER_ALL);
+	bool DoClearableEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize, int Corners = IGraphics::CORNER_ALL);
 
 	int DoButton_PopupMenu(CButtonContainer *pButtonContainer, const char *pText, const CUIRect *pRect, int Align);
 

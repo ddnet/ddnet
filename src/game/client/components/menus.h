@@ -334,14 +334,6 @@ protected:
 		FPopupButtonCallback pfnConfirmButtonCallback = &CMenus::DefaultButtonCallback, int ConfirmNextPopup = POPUP_NONE,
 		FPopupButtonCallback pfnCancelButtonCallback = &CMenus::DefaultButtonCallback, int CancelNextPopup = POPUP_NONE);
 
-	// TODO: this is a bit ugly but.. well.. yeah
-	enum
-	{
-		MAX_INPUTEVENTS = 32
-	};
-	static IInput::CEvent m_aInputEvents[MAX_INPUTEVENTS];
-	static size_t m_NumInputEvents;
-
 	// some settings
 	static float ms_ButtonHeight;
 	static float ms_ListheaderHeight;
@@ -366,8 +358,8 @@ protected:
 	// for call vote
 	int m_CallvoteSelectedOption;
 	int m_CallvoteSelectedPlayer;
-	char m_aCallvoteReason[VOTE_REASON_LENGTH];
-	char m_aFilterString[25];
+	CLineInputBuffered<VOTE_REASON_LENGTH> m_CallvoteReasonInput;
+	CLineInputBuffered<64> m_FilterInput;
 	bool m_ControlPageOpening;
 
 	// demo
@@ -443,7 +435,9 @@ protected:
 	};
 
 	char m_aCurrentDemoFolder[IO_MAX_PATH_LENGTH];
-	char m_aCurrentDemoFile[IO_MAX_PATH_LENGTH];
+	CLineInputBuffered<IO_MAX_PATH_LENGTH> m_DemoRenameInput;
+	CLineInputBuffered<IO_MAX_PATH_LENGTH> m_DemoSliceInput;
+	CLineInputBuffered<IO_MAX_PATH_LENGTH> m_DemoRenderInput;
 	int m_DemolistSelectedIndex;
 	bool m_DemolistSelectedIsDir;
 	int m_DemolistStorageType;

@@ -368,8 +368,9 @@ CUI::EPopupMenuFunctionResult CEditor::PopupGroup(void *pContext, CUIRect View, 
 		View.HSplitBottom(12.0f, &View, &Button);
 		pEditor->UI()->DoLabel(&Button, "Name:", 10.0f, TEXTALIGN_ML);
 		Button.VSplitLeft(40.0f, nullptr, &Button);
-		static float s_Name = 0;
-		if(pEditor->DoEditBox(&s_Name, &Button, pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_aName, sizeof(pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_aName), 10.0f, &s_Name))
+		static CLineInput s_NameInput;
+		s_NameInput.SetBuffer(pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_aName, sizeof(pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_aName));
+		if(pEditor->DoEditBox(&s_NameInput, &Button, 10.0f))
 			pEditor->m_Map.m_Modified = true;
 	}
 
@@ -538,8 +539,9 @@ CUI::EPopupMenuFunctionResult CEditor::PopupLayer(void *pContext, CUIRect View, 
 		View.HSplitBottom(12.0f, &View, &Label);
 		Label.VSplitLeft(40.0f, &Label, &EditBox);
 		pEditor->UI()->DoLabel(&Label, "Name:", 10.0f, TEXTALIGN_ML);
-		static float s_Name = 0;
-		if(pEditor->DoEditBox(&s_Name, &EditBox, pCurrentLayer->m_aName, sizeof(pCurrentLayer->m_aName), 10.0f, &s_Name))
+		static CLineInput s_NameInput;
+		s_NameInput.SetBuffer(pCurrentLayer->m_aName, sizeof(pCurrentLayer->m_aName));
+		if(pEditor->DoEditBox(&s_NameInput, &EditBox, 10.0f))
 			pEditor->m_Map.m_Modified = true;
 	}
 
@@ -1316,8 +1318,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupNewFolder(void *pContext, CUIRect Vi
 	pEditor->UI()->DoLabel(&Label, "Name:", 10.0f, TEXTALIGN_ML);
 	Label.VSplitLeft(50.0f, nullptr, &Button);
 	Button.HMargin(2.0f, &Button);
-	static float s_FolderBox = 0;
-	pEditor->DoEditBox(&s_FolderBox, &Button, pEditor->m_aFileDialogNewFolderName, sizeof(pEditor->m_aFileDialogNewFolderName), 12.0f, &s_FolderBox);
+	pEditor->DoEditBox(&pEditor->m_FileDialogNewFolderNameInput, &Button, 12.0f);
 
 	// button bar
 	ButtonBar.VSplitLeft(110.0f, &Button, &ButtonBar);
@@ -1330,10 +1331,10 @@ CUI::EPopupMenuFunctionResult CEditor::PopupNewFolder(void *pContext, CUIRect Vi
 	if(pEditor->DoButton_Editor(&s_CreateButton, "Create", 0, &Button, 0, nullptr) || (Active && pEditor->UI()->ConsumeHotkey(CUI::HOTKEY_ENTER)))
 	{
 		// create the folder
-		if(pEditor->m_aFileDialogNewFolderName[0])
+		if(!pEditor->m_FileDialogNewFolderNameInput.IsEmpty())
 		{
 			char aBuf[IO_MAX_PATH_LENGTH];
-			str_format(aBuf, sizeof(aBuf), "%s/%s", pEditor->m_pFileDialogPath, pEditor->m_aFileDialogNewFolderName);
+			str_format(aBuf, sizeof(aBuf), "%s/%s", pEditor->m_pFileDialogPath, pEditor->m_FileDialogNewFolderNameInput.GetString());
 			if(pEditor->Storage()->CreateFolder(aBuf, IStorage::TYPE_SAVE))
 			{
 				pEditor->FilelistPopulate(IStorage::TYPE_SAVE);
@@ -1368,32 +1369,36 @@ CUI::EPopupMenuFunctionResult CEditor::PopupMapInfo(void *pContext, CUIRect View
 	pEditor->UI()->DoLabel(&Label, "Author:", 10.0f, TEXTALIGN_ML);
 	Label.VSplitLeft(60.0f, nullptr, &Button);
 	Button.HMargin(3.0f, &Button);
-	static float s_AuthorBox = 0;
-	pEditor->DoEditBox(&s_AuthorBox, &Button, pEditor->m_Map.m_MapInfoTmp.m_aAuthor, sizeof(pEditor->m_Map.m_MapInfoTmp.m_aAuthor), 10.0f, &s_AuthorBox);
+	static CLineInput s_AuthorInput;
+	s_AuthorInput.SetBuffer(pEditor->m_Map.m_MapInfoTmp.m_aAuthor, sizeof(pEditor->m_Map.m_MapInfoTmp.m_aAuthor));
+	pEditor->DoEditBox(&s_AuthorInput, &Button, 10.0f);
 
 	// version box
 	View.HSplitTop(20.0f, &Label, &View);
 	pEditor->UI()->DoLabel(&Label, "Version:", 10.0f, TEXTALIGN_ML);
 	Label.VSplitLeft(60.0f, nullptr, &Button);
 	Button.HMargin(3.0f, &Button);
-	static float s_VersionBox = 0;
-	pEditor->DoEditBox(&s_VersionBox, &Button, pEditor->m_Map.m_MapInfoTmp.m_aVersion, sizeof(pEditor->m_Map.m_MapInfoTmp.m_aVersion), 10.0f, &s_VersionBox);
+	static CLineInput s_VersionInput;
+	s_VersionInput.SetBuffer(pEditor->m_Map.m_MapInfoTmp.m_aVersion, sizeof(pEditor->m_Map.m_MapInfoTmp.m_aVersion));
+	pEditor->DoEditBox(&s_VersionInput, &Button, 10.0f);
 
 	// credits box
 	View.HSplitTop(20.0f, &Label, &View);
 	pEditor->UI()->DoLabel(&Label, "Credits:", 10.0f, TEXTALIGN_ML);
 	Label.VSplitLeft(60.0f, nullptr, &Button);
 	Button.HMargin(3.0f, &Button);
-	static float s_CreditsBox = 0;
-	pEditor->DoEditBox(&s_CreditsBox, &Button, pEditor->m_Map.m_MapInfoTmp.m_aCredits, sizeof(pEditor->m_Map.m_MapInfoTmp.m_aCredits), 10.0f, &s_CreditsBox);
+	static CLineInput s_CreditsInput;
+	s_CreditsInput.SetBuffer(pEditor->m_Map.m_MapInfoTmp.m_aCredits, sizeof(pEditor->m_Map.m_MapInfoTmp.m_aCredits));
+	pEditor->DoEditBox(&s_CreditsInput, &Button, 10.0f);
 
 	// license box
 	View.HSplitTop(20.0f, &Label, &View);
 	pEditor->UI()->DoLabel(&Label, "License:", 10.0f, TEXTALIGN_ML);
 	Label.VSplitLeft(60.0f, nullptr, &Button);
 	Button.HMargin(3.0f, &Button);
-	static float s_LicenseBox = 0;
-	pEditor->DoEditBox(&s_LicenseBox, &Button, pEditor->m_Map.m_MapInfoTmp.m_aLicense, sizeof(pEditor->m_Map.m_MapInfoTmp.m_aLicense), 10.0f, &s_LicenseBox);
+	static CLineInput s_LicenseInput;
+	s_LicenseInput.SetBuffer(pEditor->m_Map.m_MapInfoTmp.m_aLicense, sizeof(pEditor->m_Map.m_MapInfoTmp.m_aLicense));
+	pEditor->DoEditBox(&s_LicenseInput, &Button, 10.0f);
 
 	// button bar
 	ButtonBar.VSplitLeft(110.0f, &Label, &ButtonBar);

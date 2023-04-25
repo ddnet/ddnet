@@ -535,7 +535,7 @@ bool CMenus::RenderServerControlServer(CUIRect MainView)
 
 	for(CVoteOptionClient *pOption = m_pClient->m_Voting.m_pFirst; pOption; pOption = pOption->m_pNext)
 	{
-		if(m_aFilterString[0] != '\0' && !str_utf8_find_nocase(pOption->m_aDescription, m_aFilterString))
+		if(!m_FilterInput.IsEmpty() && !str_utf8_find_nocase(pOption->m_aDescription, m_FilterInput.GetString()))
 			continue;
 		TotalShown++;
 	}
@@ -547,7 +547,7 @@ bool CMenus::RenderServerControlServer(CUIRect MainView)
 	for(CVoteOptionClient *pOption = m_pClient->m_Voting.m_pFirst; pOption; pOption = pOption->m_pNext)
 	{
 		i++;
-		if(m_aFilterString[0] != '\0' && !str_utf8_find_nocase(pOption->m_aDescription, m_aFilterString))
+		if(!m_FilterInput.IsEmpty() && !str_utf8_find_nocase(pOption->m_aDescription, m_FilterInput.GetString()))
 			continue;
 
 		if(NumVoteOptions < Total)
@@ -581,7 +581,7 @@ bool CMenus::RenderServerControlKick(CUIRect MainView, bool FilterSpectators)
 		if(Index == m_pClient->m_Snap.m_LocalClientID || (FilterSpectators && pInfoByName->m_Team == TEAM_SPECTATORS))
 			continue;
 
-		if(!str_utf8_find_nocase(m_pClient->m_aClients[Index].m_aName, m_aFilterString))
+		if(!str_utf8_find_nocase(m_pClient->m_aClients[Index].m_aName, m_FilterInput.GetString()))
 			continue;
 
 		if(m_CallvoteSelectedPlayer == Index)
@@ -680,18 +680,15 @@ void CMenus::RenderServerControl(CUIRect MainView)
 			TextRender()->SetCurFont(NULL);
 			QuickSearch.VSplitLeft(wSearch, 0, &QuickSearch);
 			QuickSearch.VSplitLeft(5.0f, 0, &QuickSearch);
-			static int s_ClearButton = 0;
-			static float s_Offset = 0.0f;
 
-			SUIExEditBoxProperties EditProps;
 			if(m_ControlPageOpening || (Input()->KeyPress(KEY_F) && Input()->ModifierIsPressed()))
 			{
-				UI()->SetActiveItem(&m_aFilterString);
+				UI()->SetActiveItem(&m_FilterInput);
 				m_ControlPageOpening = false;
-				EditProps.m_SelectText = true;
+				m_FilterInput.SelectAll();
 			}
-			EditProps.m_pEmptyText = Localize("Search");
-			UI()->DoClearableEditBox(&m_aFilterString, &s_ClearButton, &QuickSearch, m_aFilterString, sizeof(m_aFilterString), 14.0f, &s_Offset, false, IGraphics::CORNER_ALL, EditProps);
+			m_FilterInput.SetEmptyText(Localize("Search"));
+			UI()->DoClearableEditBox(&m_FilterInput, &QuickSearch, 14.0f);
 		}
 
 		Bottom.VSplitRight(120.0f, &Bottom, &Button);
@@ -701,7 +698,7 @@ void CMenus::RenderServerControl(CUIRect MainView)
 		{
 			if(s_ControlPage == 0)
 			{
-				m_pClient->m_Voting.CallvoteOption(m_CallvoteSelectedOption, m_aCallvoteReason);
+				m_pClient->m_Voting.CallvoteOption(m_CallvoteSelectedOption, m_CallvoteReasonInput.GetString());
 				if(g_Config.m_UiCloseWindowAfterChangingSetting)
 					SetActive(false);
 			}
@@ -710,7 +707,7 @@ void CMenus::RenderServerControl(CUIRect MainView)
 				if(m_CallvoteSelectedPlayer >= 0 && m_CallvoteSelectedPlayer < MAX_CLIENTS &&
 					m_pClient->m_Snap.m_apPlayerInfos[m_CallvoteSelectedPlayer])
 				{
-					m_pClient->m_Voting.CallvoteKick(m_CallvoteSelectedPlayer, m_aCallvoteReason);
+					m_pClient->m_Voting.CallvoteKick(m_CallvoteSelectedPlayer, m_CallvoteReasonInput.GetString());
 					SetActive(false);
 				}
 			}
@@ -719,11 +716,11 @@ void CMenus::RenderServerControl(CUIRect MainView)
 				if(m_CallvoteSelectedPlayer >= 0 && m_CallvoteSelectedPlayer < MAX_CLIENTS &&
 					m_pClient->m_Snap.m_apPlayerInfos[m_CallvoteSelectedPlayer])
 				{
-					m_pClient->m_Voting.CallvoteSpectate(m_CallvoteSelectedPlayer, m_aCallvoteReason);
+					m_pClient->m_Voting.CallvoteSpectate(m_CallvoteSelectedPlayer, m_CallvoteReasonInput.GetString());
 					SetActive(false);
 				}
 			}
-			m_aCallvoteReason[0] = 0;
+			m_CallvoteReasonInput.Clear();
 		}
 
 		// render kick reason
@@ -735,10 +732,12 @@ void CMenus::RenderServerControl(CUIRect MainView)
 		UI()->DoLabel(&Reason, pLabel, 14.0f, TEXTALIGN_ML);
 		float w = TextRender()->TextWidth(14.0f, pLabel, -1, -1.0f);
 		Reason.VSplitLeft(w + 10.0f, 0, &Reason);
-		static float s_Offset = 0.0f;
 		if(Input()->KeyPress(KEY_R) && Input()->ModifierIsPressed())
-			UI()->SetActiveItem(&m_aCallvoteReason);
-		UI()->DoEditBox(&m_aCallvoteReason, &Reason, m_aCallvoteReason, sizeof(m_aCallvoteReason), 14.0f, &s_Offset, false, IGraphics::CORNER_ALL);
+		{
+			UI()->SetActiveItem(&m_CallvoteReasonInput);
+			m_CallvoteReasonInput.SelectAll();
+		}
+		UI()->DoEditBox(&m_CallvoteReasonInput, &Reason, 14.0f);
 
 		// extended features (only available when authed in rcon)
 		if(Client()->RconAuthed())
@@ -756,13 +755,13 @@ void CMenus::RenderServerControl(CUIRect MainView)
 			if(DoButton_Menu(&s_ForceVoteButton, Localize("Force vote"), 0, &Button))
 			{
 				if(s_ControlPage == 0)
-					m_pClient->m_Voting.CallvoteOption(m_CallvoteSelectedOption, m_aCallvoteReason, true);
+					m_pClient->m_Voting.CallvoteOption(m_CallvoteSelectedOption, m_CallvoteReasonInput.GetString(), true);
 				else if(s_ControlPage == 1)
 				{
 					if(m_CallvoteSelectedPlayer >= 0 && m_CallvoteSelectedPlayer < MAX_CLIENTS &&
 						m_pClient->m_Snap.m_apPlayerInfos[m_CallvoteSelectedPlayer])
 					{
-						m_pClient->m_Voting.CallvoteKick(m_CallvoteSelectedPlayer, m_aCallvoteReason, true);
+						m_pClient->m_Voting.CallvoteKick(m_CallvoteSelectedPlayer, m_CallvoteReasonInput.GetString(), true);
 						SetActive(false);
 					}
 				}
@@ -771,11 +770,11 @@ void CMenus::RenderServerControl(CUIRect MainView)
 					if(m_CallvoteSelectedPlayer >= 0 && m_CallvoteSelectedPlayer < MAX_CLIENTS &&
 						m_pClient->m_Snap.m_apPlayerInfos[m_CallvoteSelectedPlayer])
 					{
-						m_pClient->m_Voting.CallvoteSpectate(m_CallvoteSelectedPlayer, m_aCallvoteReason, true);
+						m_pClient->m_Voting.CallvoteSpectate(m_CallvoteSelectedPlayer, m_CallvoteReasonInput.GetString(), true);
 						SetActive(false);
 					}
 				}
-				m_aCallvoteReason[0] = 0;
+				m_CallvoteReasonInput.Clear();
 			}
 
 			if(s_ControlPage == 0)
@@ -796,24 +795,22 @@ void CMenus::RenderServerControl(CUIRect MainView)
 				Bottom.VSplitLeft(20.0f, 0, &Button);
 				UI()->DoLabel(&Button, Localize("Vote command:"), 14.0f, TEXTALIGN_ML);
 
-				static char s_aVoteDescription[64] = {0};
-				static char s_aVoteCommand[512] = {0};
+				static CLineInputBuffered<64> s_VoteDescriptionInput;
+				static CLineInputBuffered<512> s_VoteCommandInput;
 				RconExtension.HSplitTop(20.0f, &Bottom, &RconExtension);
 				Bottom.VSplitRight(10.0f, &Bottom, 0);
 				Bottom.VSplitRight(120.0f, &Bottom, &Button);
 				static CButtonContainer s_AddVoteButton;
 				if(DoButton_Menu(&s_AddVoteButton, Localize("Add"), 0, &Button))
-					if(s_aVoteDescription[0] != 0 && s_aVoteCommand[0] != 0)
-						m_pClient->m_Voting.AddvoteOption(s_aVoteDescription, s_aVoteCommand);
+					if(!s_VoteDescriptionInput.IsEmpty() && !s_VoteCommandInput.IsEmpty())
+						m_pClient->m_Voting.AddvoteOption(s_VoteDescriptionInput.GetString(), s_VoteCommandInput.GetString());
 
 				Bottom.VSplitLeft(5.0f, 0, &Bottom);
 				Bottom.VSplitLeft(250.0f, &Button, &Bottom);
-				static float s_OffsetDesc = 0.0f;
-				UI()->DoEditBox(&s_aVoteDescription, &Button, s_aVoteDescription, sizeof(s_aVoteDescription), 14.0f, &s_OffsetDesc, false, IGraphics::CORNER_ALL);
+				UI()->DoEditBox(&s_VoteDescriptionInput, &Button, 14.0f);
 
 				Bottom.VMargin(20.0f, &Button);
-				static float s_OffsetCmd = 0.0f;
-				UI()->DoEditBox(&s_aVoteCommand, &Button, s_aVoteCommand, sizeof(s_aVoteCommand), 14.0f, &s_OffsetCmd, false, IGraphics::CORNER_ALL);
+				UI()->DoEditBox(&s_VoteCommandInput, &Button, 14.0f);
 			}
 		}
 	}

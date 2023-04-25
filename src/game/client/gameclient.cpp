@@ -28,6 +28,7 @@
 #include <base/vmath.h>
 
 #include "gameclient.h"
+#include "lineinput.h"
 #include "race.h"
 #include "render.h"
 
@@ -646,6 +647,8 @@ void CGameClient::OnRender()
 
 	// clear all events/input for this frame
 	Input()->Clear();
+
+	CLineInput::RenderCandidates();
 
 	// clear new tick flags
 	m_NewTick = false;

@@ -590,7 +590,7 @@ TEST(Str, Copy)
 
 TEST(Str, Utf8Stats)
 {
-	int Size, Count;
+	size_t Size, Count;
 
 	str_utf8_stats("abc", 4, 3, &Size, &Count);
 	EXPECT_EQ(Size, 3);

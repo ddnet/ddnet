@@ -3231,7 +3231,6 @@ void CClient::Run()
 				if(!m_EditorActive)
 				{
 					Input()->MouseModeRelative();
-					Input()->SetIMEState(true);
 					GameClient()->OnActivateEditor();
 					m_pEditor->ResetMentions();
 					m_EditorActive = true;
@@ -3239,7 +3238,6 @@ void CClient::Run()
 			}
 			else if(m_EditorActive)
 			{
-				Input()->SetIMEState(false);
 				m_EditorActive = false;
 			}
 
