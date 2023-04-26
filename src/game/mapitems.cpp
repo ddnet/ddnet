@@ -57,6 +57,12 @@ bool IsValidTeleTile(int Index)
 		Index == TILE_TELECHECKINEVIL);
 }
 
+bool IsTeleTileNumberUsed(int Index)
+{
+	return Index != TILE_TELECHECKIN &&
+	       Index != TILE_TELECHECKINEVIL;
+}
+
 bool IsValidSpeedupTile(int Index)
 {
 	return Index == TILE_BOOST;
@@ -79,6 +85,28 @@ bool IsValidSwitchTile(int Index)
 		Index == TILE_ALLOW_TELE_GUN ||
 		Index == TILE_ALLOW_BLUE_TELE_GUN ||
 		(IsValidEntity(Index) && Index >= ENTITY_OFFSET + ENTITY_ARMOR_1));
+}
+
+bool IsSwitchTileFlagsUsed(int Index)
+{
+	return Index != TILE_FREEZE &&
+	       Index != TILE_DFREEZE &&
+	       Index != TILE_DUNFREEZE;
+}
+
+bool IsSwitchTileNumberUsed(int Index)
+{
+	return Index != TILE_JUMP &&
+	       Index != TILE_HIT_ENABLE &&
+	       Index != TILE_HIT_DISABLE &&
+	       Index != TILE_ALLOW_TELE_GUN &&
+	       Index != TILE_ALLOW_BLUE_TELE_GUN;
+}
+
+bool IsSwitchTileDelayUsed(int Index)
+{
+	return Index != TILE_DFREEZE &&
+	       Index != TILE_DUNFREEZE;
 }
 
 bool IsValidTuneTile(int Index)

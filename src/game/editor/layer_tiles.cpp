@@ -259,11 +259,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 				for(int x = 0; x < r.w; x++)
 				{
 					pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x] = ((CLayerTele *)this)->m_pTeleTile[(r.y + y) * m_Width + (r.x + x)];
-					if(pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x].m_Type == TILE_TELEIN || pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x].m_Type == TILE_TELEOUT || pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x].m_Type == TILE_TELEINEVIL
-						// || pGrabbed->m_pTeleTile[y*pGrabbed->m_Width+x].m_Type == TILE_TELECHECKINEVIL
-						|| pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x].m_Type == TILE_TELECHECK || pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x].m_Type == TILE_TELECHECKOUT
-						// || pGrabbed->m_pTeleTile[y*pGrabbed->m_Width+x].m_Type == TILE_TELECHECKIN
-						|| pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x].m_Type == TILE_TELEINWEAPON || pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x].m_Type == TILE_TELEINHOOK)
+					if(IsValidTeleTile(pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x].m_Type) && IsTeleTileNumberUsed(pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x].m_Type))
 					{
 						m_pEditor->m_TeleNumber = pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x].m_Number;
 					}
@@ -297,7 +293,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 				for(int x = 0; x < r.w; x++)
 				{
 					pGrabbed->m_pSpeedupTile[y * pGrabbed->m_Width + x] = ((CLayerSpeedup *)this)->m_pSpeedupTile[(r.y + y) * m_Width + (r.x + x)];
-					if(pGrabbed->m_pSpeedupTile[y * pGrabbed->m_Width + x].m_Type == TILE_BOOST)
+					if(IsValidSpeedupTile(pGrabbed->m_pSpeedupTile[y * pGrabbed->m_Width + x].m_Type))
 					{
 						m_pEditor->m_SpeedupAngle = pGrabbed->m_pSpeedupTile[y * pGrabbed->m_Width + x].m_Angle;
 						m_pEditor->m_SpeedupForce = pGrabbed->m_pSpeedupTile[y * pGrabbed->m_Width + x].m_Force;
@@ -335,21 +331,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 				for(int x = 0; x < r.w; x++)
 				{
 					pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x] = ((CLayerSwitch *)this)->m_pSwitchTile[(r.y + y) * m_Width + (r.x + x)];
-					if(pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == ENTITY_DOOR + ENTITY_OFFSET ||
-						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == TILE_HIT_ENABLE ||
-						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == TILE_HIT_DISABLE ||
-						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == TILE_SWITCHOPEN ||
-						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == TILE_SWITCHCLOSE ||
-						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == TILE_SWITCHTIMEDOPEN ||
-						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == TILE_SWITCHTIMEDCLOSE ||
-						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == ENTITY_LASER_LONG + ENTITY_OFFSET ||
-						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == ENTITY_LASER_MEDIUM + ENTITY_OFFSET ||
-						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == ENTITY_LASER_SHORT + ENTITY_OFFSET ||
-						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == TILE_JUMP ||
-						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == TILE_ADD_TIME ||
-						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == TILE_SUBTRACT_TIME ||
-						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == TILE_ALLOW_TELE_GUN ||
-						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == TILE_ALLOW_BLUE_TELE_GUN)
+					if(IsValidSwitchTile(pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type))
 					{
 						m_pEditor->m_SwitchNum = pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Number;
 						m_pEditor->m_SwitchDelay = pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Delay;
@@ -386,7 +368,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 				for(int x = 0; x < r.w; x++)
 				{
 					pGrabbed->m_pTuneTile[y * pGrabbed->m_Width + x] = ((CLayerTune *)this)->m_pTuneTile[(r.y + y) * m_Width + (r.x + x)];
-					if(pGrabbed->m_pTuneTile[y * pGrabbed->m_Width + x].m_Type == TILE_TUNE)
+					if(IsValidTuneTile(pGrabbed->m_pTuneTile[y * pGrabbed->m_Width + x].m_Type))
 					{
 						m_pEditor->m_TuningNum = pGrabbed->m_pTuneTile[y * pGrabbed->m_Width + x].m_Number;
 					}
@@ -1120,7 +1102,6 @@ void CLayerTiles::ModifyEnvelopeIndex(INDEX_MODIFY_FUNC Func)
 CLayerTele::CLayerTele(int w, int h) :
 	CLayerTiles(w, h)
 {
-	//m_Type = LAYERTYPE_TELE;
 	str_copy(m_aName, "Tele", sizeof(m_aName));
 	m_Tele = 1;
 
@@ -1198,12 +1179,20 @@ void CLayerTele::BrushDraw(CLayer *pBrush, float wx, float wy)
 
 			if((m_pEditor->m_AllowPlaceUnusedTiles || IsValidTeleTile(pTeleLayer->m_pTiles[y * pTeleLayer->m_Width + x].m_Index)) && pTeleLayer->m_pTiles[y * pTeleLayer->m_Width + x].m_Index != TILE_AIR)
 			{
-				if(m_pEditor->m_TeleNumber != pTeleLayer->m_TeleNum)
+				if(!IsTeleTileNumberUsed(pTeleLayer->m_pTiles[y * pTeleLayer->m_Width + x].m_Index))
+				{
+					// Tele tile number is unused. Set a known value which is not 0,
+					// as tiles with number 0 would be ignored by previous versions.
+					m_pTeleTile[fy * m_Width + fx].m_Number = 255;
+				}
+				else if(m_pEditor->m_TeleNumber != pTeleLayer->m_TeleNum)
 				{
 					m_pTeleTile[fy * m_Width + fx].m_Number = m_pEditor->m_TeleNumber;
 				}
 				else if(pTeleLayer->m_pTeleTile[y * pTeleLayer->m_Width + x].m_Number)
+				{
 					m_pTeleTile[fy * m_Width + fx].m_Number = pTeleLayer->m_pTeleTile[y * pTeleLayer->m_Width + x].m_Number;
+				}
 				else
 				{
 					if(!m_pEditor->m_TeleNumber)
@@ -1336,11 +1325,7 @@ bool CLayerTele::ContainsElementWithId(int Id)
 	{
 		for(int x = 0; x < m_Width; ++x)
 		{
-			if(m_pTeleTile[y * m_Width + x].m_Type == TILE_TELECHECKIN)
-				continue;
-			if(m_pTeleTile[y * m_Width + x].m_Type == TILE_TELECHECKINEVIL)
-				continue;
-			if(m_pTeleTile[y * m_Width + x].m_Number == Id)
+			if(IsTeleTileNumberUsed(m_pTeleTile[y * m_Width + x].m_Type) && m_pTeleTile[y * m_Width + x].m_Number == Id)
 			{
 				return true;
 			}
@@ -1353,7 +1338,6 @@ bool CLayerTele::ContainsElementWithId(int Id)
 CLayerSpeedup::CLayerSpeedup(int w, int h) :
 	CLayerTiles(w, h)
 {
-	//m_Type = LAYERTYPE_SPEEDUP;
 	str_copy(m_aName, "Speedup", sizeof(m_aName));
 	m_Speedup = 1;
 
@@ -1591,7 +1575,6 @@ void CLayerSpeedup::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 CLayerFront::CLayerFront(int w, int h) :
 	CLayerTiles(w, h)
 {
-	//m_Type = LAYERTYPE_FRONT;
 	str_copy(m_aName, "Front", sizeof(m_aName));
 	m_Front = 1;
 }
@@ -1638,7 +1621,6 @@ void CLayerFront::Resize(int NewW, int NewH)
 CLayerSwitch::CLayerSwitch(int w, int h) :
 	CLayerTiles(w, h)
 {
-	//m_Type = LAYERTYPE_SWITCH;
 	str_copy(m_aName, "Switch", sizeof(m_aName));
 	m_Switch = 1;
 
@@ -1739,6 +1721,19 @@ void CLayerSwitch::BrushDraw(CLayer *pBrush, float wx, float wy)
 				m_pSwitchTile[fy * m_Width + fx].m_Flags = pSwitchLayer->m_pTiles[y * pSwitchLayer->m_Width + x].m_Flags;
 				m_pTiles[fy * m_Width + fx].m_Index = pSwitchLayer->m_pTiles[y * pSwitchLayer->m_Width + x].m_Index;
 				m_pTiles[fy * m_Width + fx].m_Flags = pSwitchLayer->m_pTiles[y * pSwitchLayer->m_Width + x].m_Flags;
+
+				if(!IsSwitchTileFlagsUsed(pSwitchLayer->m_pTiles[y * pSwitchLayer->m_Width + x].m_Index))
+				{
+					m_pSwitchTile[fy * m_Width + fx].m_Flags = 0;
+				}
+				if(!IsSwitchTileNumberUsed(pSwitchLayer->m_pTiles[y * pSwitchLayer->m_Width + x].m_Index))
+				{
+					m_pSwitchTile[fy * m_Width + fx].m_Number = 0;
+				}
+				if(!IsSwitchTileDelayUsed(pSwitchLayer->m_pTiles[y * pSwitchLayer->m_Width + x].m_Index))
+				{
+					m_pSwitchTile[fy * m_Width + fx].m_Delay = 0;
+				}
 			}
 			else
 			{
@@ -1747,16 +1742,6 @@ void CLayerSwitch::BrushDraw(CLayer *pBrush, float wx, float wy)
 				m_pSwitchTile[fy * m_Width + fx].m_Flags = 0;
 				m_pSwitchTile[fy * m_Width + fx].m_Delay = 0;
 				m_pTiles[fy * m_Width + fx].m_Index = 0;
-			}
-
-			if(pSwitchLayer->m_pTiles[y * pSwitchLayer->m_Width + x].m_Index == TILE_FREEZE)
-			{
-				m_pSwitchTile[fy * m_Width + fx].m_Flags = 0;
-			}
-			else if(pSwitchLayer->m_pTiles[y * pSwitchLayer->m_Width + x].m_Index == TILE_DFREEZE || pSwitchLayer->m_pTiles[y * pSwitchLayer->m_Width + x].m_Index == TILE_DUNFREEZE)
-			{
-				m_pSwitchTile[fy * m_Width + fx].m_Flags = 0;
-				m_pSwitchTile[fy * m_Width + fx].m_Delay = 0;
 			}
 		}
 	FlagModified(sx, sy, pSwitchLayer->m_Width, pSwitchLayer->m_Height);
@@ -1880,7 +1865,7 @@ bool CLayerSwitch::ContainsElementWithId(int Id)
 	{
 		for(int x = 0; x < m_Width; ++x)
 		{
-			if(m_pSwitchTile[y * m_Width + x].m_Number == Id)
+			if(IsSwitchTileNumberUsed(m_pSwitchTile[y * m_Width + x].m_Type) && m_pSwitchTile[y * m_Width + x].m_Number == Id)
 			{
 				return true;
 			}
@@ -1895,7 +1880,6 @@ bool CLayerSwitch::ContainsElementWithId(int Id)
 CLayerTune::CLayerTune(int w, int h) :
 	CLayerTiles(w, h)
 {
-	//m_Type = LAYERTYPE_TUNE;
 	str_copy(m_aName, "Tune", sizeof(m_aName));
 	m_Tune = 1;
 

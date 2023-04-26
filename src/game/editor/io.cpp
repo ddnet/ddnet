@@ -707,27 +707,15 @@ bool CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Stora
 							unsigned int Size = DataFile.GetDataSize(pTilemapItem->m_Tele);
 							if(Size >= (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CTeleTile))
 							{
-								static const int s_aTilesRep[] = {
-									TILE_TELEIN,
-									TILE_TELEINEVIL,
-									TILE_TELEOUT,
-									TILE_TELECHECK,
-									TILE_TELECHECKIN,
-									TILE_TELECHECKINEVIL,
-									TILE_TELECHECKOUT,
-									TILE_TELEINWEAPON,
-									TILE_TELEINHOOK};
 								CTeleTile *pLayerTeleTiles = ((CLayerTele *)pTiles)->m_pTeleTile;
 								mem_copy(pLayerTeleTiles, pTeleData, (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CTeleTile));
 
 								for(int i = 0; i < pTiles->m_Width * pTiles->m_Height; i++)
 								{
-									pTiles->m_pTiles[i].m_Index = 0;
-									for(int TilesRep : s_aTilesRep)
-									{
-										if(pLayerTeleTiles[i].m_Type == TilesRep)
-											pTiles->m_pTiles[i].m_Index = TilesRep;
-									}
+									if(IsValidTeleTile(pLayerTeleTiles[i].m_Type))
+										pTiles->m_pTiles[i].m_Index = pLayerTeleTiles[i].m_Type;
+									else
+										pTiles->m_pTiles[i].m_Index = 0;
 								}
 							}
 							DataFile.UnloadData(pTilemapItem->m_Tele);
@@ -744,8 +732,8 @@ bool CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Stora
 
 								for(int i = 0; i < pTiles->m_Width * pTiles->m_Height; i++)
 								{
-									if(pLayerSpeedupTiles[i].m_Force > 0)
-										pTiles->m_pTiles[i].m_Index = TILE_BOOST;
+									if(IsValidSpeedupTile(pLayerSpeedupTiles[i].m_Type) && pLayerSpeedupTiles[i].m_Force > 0)
+										pTiles->m_pTiles[i].m_Index = pLayerSpeedupTiles[i].m_Type;
 									else
 										pTiles->m_pTiles[i].m_Index = 0;
 								}
@@ -768,29 +756,12 @@ bool CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Stora
 							unsigned int Size = DataFile.GetDataSize(pTilemapItem->m_Switch);
 							if(Size >= (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CSwitchTile))
 							{
-								const int s_aTilesComp[] = {
-									TILE_SWITCHTIMEDOPEN,
-									TILE_SWITCHTIMEDCLOSE,
-									TILE_SWITCHOPEN,
-									TILE_SWITCHCLOSE,
-									TILE_FREEZE,
-									TILE_DFREEZE,
-									TILE_DUNFREEZE,
-									TILE_LFREEZE,
-									TILE_LUNFREEZE,
-									TILE_HIT_ENABLE,
-									TILE_HIT_DISABLE,
-									TILE_JUMP,
-									TILE_ADD_TIME,
-									TILE_SUBTRACT_TIME,
-									TILE_ALLOW_TELE_GUN,
-									TILE_ALLOW_BLUE_TELE_GUN};
 								CSwitchTile *pLayerSwitchTiles = ((CLayerSwitch *)pTiles)->m_pSwitchTile;
 								mem_copy(pLayerSwitchTiles, pSwitchData, (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CSwitchTile));
 
 								for(int i = 0; i < pTiles->m_Width * pTiles->m_Height; i++)
 								{
-									if(((pLayerSwitchTiles[i].m_Type > (ENTITY_CRAZY_SHOTGUN + ENTITY_OFFSET) && ((CLayerSwitch *)pTiles)->m_pSwitchTile[i].m_Type < (ENTITY_DRAGGER_WEAK + ENTITY_OFFSET)) || ((CLayerSwitch *)pTiles)->m_pSwitchTile[i].m_Type == (ENTITY_LASER_O_FAST + 1 + ENTITY_OFFSET)))
+									if(((pLayerSwitchTiles[i].m_Type > (ENTITY_CRAZY_SHOTGUN + ENTITY_OFFSET) && pLayerSwitchTiles[i].m_Type < (ENTITY_DRAGGER_WEAK + ENTITY_OFFSET)) || pLayerSwitchTiles[i].m_Type == (ENTITY_LASER_O_FAST + 1 + ENTITY_OFFSET)))
 										continue;
 									else if(pLayerSwitchTiles[i].m_Type >= (ENTITY_ARMOR_1 + ENTITY_OFFSET) && pLayerSwitchTiles[i].m_Type <= (ENTITY_DOOR + ENTITY_OFFSET))
 									{
@@ -799,13 +770,10 @@ bool CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Stora
 										continue;
 									}
 
-									for(int TilesComp : s_aTilesComp)
+									if(IsValidSwitchTile(pLayerSwitchTiles[i].m_Type))
 									{
-										if(pLayerSwitchTiles[i].m_Type == TilesComp)
-										{
-											pTiles->m_pTiles[i].m_Index = TilesComp;
-											pTiles->m_pTiles[i].m_Flags = pLayerSwitchTiles[i].m_Flags;
-										}
+										pTiles->m_pTiles[i].m_Index = pLayerSwitchTiles[i].m_Type;
+										pTiles->m_pTiles[i].m_Flags = pLayerSwitchTiles[i].m_Flags;
 									}
 								}
 							}
@@ -822,8 +790,8 @@ bool CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Stora
 
 								for(int i = 0; i < pTiles->m_Width * pTiles->m_Height; i++)
 								{
-									if(pLayerTuneTiles[i].m_Type == TILE_TUNE)
-										pTiles->m_pTiles[i].m_Index = TILE_TUNE;
+									if(IsValidTuneTile(pLayerTuneTiles[i].m_Type))
+										pTiles->m_pTiles[i].m_Index = pLayerTuneTiles[i].m_Type;
 									else
 										pTiles->m_pTiles[i].m_Index = 0;
 								}
