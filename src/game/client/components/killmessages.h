@@ -30,7 +30,7 @@ public:
 		int m_VictimDDTeam;
 		char m_aVictimName[64];
 		int m_VictimTextContainerIndex;
-		float m_VitctimTextWidth;
+		float m_VictimTextWidth;
 		CTeeRenderInfo m_VictimRenderInfo[MAX_KILLMSG_TEAM_MEMBERS];
 		int m_KillerID;
 		int m_KillerTeam;
