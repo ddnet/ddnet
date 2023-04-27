@@ -112,7 +112,7 @@ void CKillMessages::OnMessage(int MsgType, void *pRawMsg)
 		CNetMsg_Sv_KillMsgTeam *pMsg = (CNetMsg_Sv_KillMsgTeam *)pRawMsg;
 
 		// unpack messages
-		CKillMsg Kill;
+		CKillMsg Kill{};
 		Kill.m_aVictimName[0] = '\0';
 		Kill.m_aKillerName[0] = '\0';
 
@@ -132,7 +132,7 @@ void CKillMessages::OnMessage(int MsgType, void *pRawMsg)
 		if(Kill.m_TeamSize > MAX_KILLMSG_TEAM_MEMBERS)
 			Kill.m_TeamSize = MAX_KILLMSG_TEAM_MEMBERS;
 
-		Kill.m_VictimID = vStrongWeakSorted[0].first;
+		Kill.m_VictimID = vStrongWeakSorted.empty() ? -1 : vStrongWeakSorted[0].first;
 		if(Kill.m_VictimID >= 0 && Kill.m_VictimID < MAX_CLIENTS)
 		{
 			Kill.m_VictimTeam = m_pClient->m_aClients[Kill.m_VictimID].m_Team;
@@ -141,9 +141,8 @@ void CKillMessages::OnMessage(int MsgType, void *pRawMsg)
 
 			for(int i = 1; i < Kill.m_TeamSize; i++)
 				Kill.m_VictimRenderInfo[i] = m_pClient->m_aClients[vStrongWeakSorted[i].first].m_RenderInfo;
-
-			str_format(Kill.m_aVictimName, sizeof(Kill.m_aVictimName), Localize("Team %d"), Kill.m_VictimDDTeam);
 		}
+		str_format(Kill.m_aVictimName, sizeof(Kill.m_aVictimName), Localize("Team %d"), pMsg->m_Team);
 
 		Kill.m_KillerID = Kill.m_VictimID;
 
