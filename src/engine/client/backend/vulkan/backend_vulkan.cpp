@@ -1385,7 +1385,7 @@ protected:
 		}
 	}
 
-	[[nodiscard]] bool GetPresentedImageDataImpl(uint32_t &Width, uint32_t &Height, uint32_t &Format, std::vector<uint8_t> &vDstData, bool FlipImgData, bool ResetAlpha)
+	[[nodiscard]] bool GetPresentedImageDataImpl(uint32_t &Width, uint32_t &Height, CImageInfo::EImageFormat &Format, std::vector<uint8_t> &vDstData, bool FlipImgData, bool ResetAlpha)
 	{
 		bool IsB8G8R8A8 = m_VKSurfFormat.format == VK_FORMAT_B8G8R8A8_UNORM;
 		bool UsesRGBALikeFormat = m_VKSurfFormat.format == VK_FORMAT_R8G8B8A8_UNORM || IsB8G8R8A8;
@@ -1396,7 +1396,7 @@ protected:
 			Height = Viewport.height;
 			Format = CImageInfo::FORMAT_RGBA;
 
-			size_t ImageTotalSize = (size_t)Width * Height * 4;
+			const size_t ImageTotalSize = (size_t)Width * Height * CImageInfo::PixelSize(Format);
 
 			uint8_t *pResImageData;
 			if(!PreparePresentedImageDataImage(pResImageData, Width, Height))
@@ -1552,7 +1552,7 @@ protected:
 		}
 	}
 
-	[[nodiscard]] bool GetPresentedImageData(uint32_t &Width, uint32_t &Height, uint32_t &Format, std::vector<uint8_t> &vDstData) override
+	[[nodiscard]] bool GetPresentedImageData(uint32_t &Width, uint32_t &Height, CImageInfo::EImageFormat &Format, std::vector<uint8_t> &vDstData) override
 	{
 		return GetPresentedImageDataImpl(Width, Height, Format, vDstData, false, false);
 	}
@@ -2509,7 +2509,7 @@ protected:
 	* TEXTURES
 	************************/
 
-	size_t VulkanFormatToImageColorChannelCount(VkFormat Format)
+	size_t VulkanFormatToPixelSize(VkFormat Format)
 	{
 		if(Format == VK_FORMAT_R8G8B8_UNORM)
 			return 3;
@@ -2520,9 +2520,9 @@ protected:
 		return 4;
 	}
 
-	[[nodiscard]] bool UpdateTexture(size_t TextureSlot, VkFormat Format, void *&pData, int64_t XOff, int64_t YOff, size_t Width, size_t Height, size_t ColorChannelCount)
+	[[nodiscard]] bool UpdateTexture(size_t TextureSlot, VkFormat Format, void *&pData, int64_t XOff, int64_t YOff, size_t Width, size_t Height)
 	{
-		size_t ImageSize = Width * Height * ColorChannelCount;
+		const size_t ImageSize = Width * Height * VulkanFormatToPixelSize(Format);
 		SMemoryBlock<s_StagingBufferImageCacheID> StagingBuffer;
 		if(!GetStagingBufferImage(StagingBuffer, pData, ImageSize))
 			return false;
@@ -2540,7 +2540,7 @@ protected:
 				YOff /= 2;
 			}
 
-			void *pTmpData = Resize((const uint8_t *)pData, Width, Height, Width, Height, VulkanFormatToImageColorChannelCount(Format));
+			void *pTmpData = Resize((const uint8_t *)pData, Width, Height, Width, Height, VulkanFormatToPixelSize(Format));
 			free(pData);
 			pData = pTmpData;
 		}
@@ -2570,14 +2570,13 @@ protected:
 		int Slot,
 		int Width,
 		int Height,
-		int PixelSize,
 		VkFormat Format,
 		VkFormat StoreFormat,
 		int Flags,
 		void *&pData)
 	{
 		size_t ImageIndex = (size_t)Slot;
-		int ImageColorChannels = VulkanFormatToImageColorChannelCount(Format);
+		const size_t PixelSize = VulkanFormatToPixelSize(Format);
 
 		while(ImageIndex >= m_vTextures.size())
 		{
@@ -2595,7 +2594,7 @@ protected:
 				++RescaleCount;
 			} while((size_t)Width > m_MaxTextureSize || (size_t)Height > m_MaxTextureSize);
 
-			void *pTmpData = Resize((const uint8_t *)(pData), Width, Height, Width, Height, ImageColorChannels);
+			void *pTmpData = Resize((const uint8_t *)(pData), Width, Height, Width, Height, PixelSize);
 			free(pData);
 			pData = pTmpData;
 		}
@@ -2653,7 +2652,7 @@ protected:
 					dbg_msg("vulkan", "3D/2D array texture was resized");
 					int NewWidth = maximum<int>(HighestBit(ConvertWidth), 16);
 					int NewHeight = maximum<int>(HighestBit(ConvertHeight), 16);
-					uint8_t *pNewTexData = (uint8_t *)Resize((const uint8_t *)pData, ConvertWidth, ConvertHeight, NewWidth, NewHeight, ImageColorChannels);
+					uint8_t *pNewTexData = (uint8_t *)Resize((const uint8_t *)pData, ConvertWidth, ConvertHeight, NewWidth, NewHeight, PixelSize);
 
 					ConvertWidth = NewWidth;
 					ConvertHeight = NewHeight;
@@ -2667,8 +2666,8 @@ protected:
 			bool Needs3DTexDel = false;
 			if(!Is2DTextureSingleLayer)
 			{
-				p3DTexData = malloc((size_t)ImageColorChannels * ConvertWidth * ConvertHeight);
-				if(!Texture2DTo3D(pData, ConvertWidth, ConvertHeight, ImageColorChannels, 16, 16, p3DTexData, Image3DWidth, Image3DHeight))
+				p3DTexData = malloc((size_t)PixelSize * ConvertWidth * ConvertHeight);
+				if(!Texture2DTo3D(pData, ConvertWidth, ConvertHeight, PixelSize, 16, 16, p3DTexData, Image3DWidth, Image3DHeight))
 				{
 					free(p3DTexData);
 					p3DTexData = nullptr;
@@ -6581,7 +6580,7 @@ public:
 		m_MultiSamplingCount = (g_Config.m_GfxFsaaSamples & 0xFFFFFFFE); // ignore the uneven bit, only even multi sampling works
 
 		TGLBackendReadPresentedImageData &ReadPresentedImgDataFunc = *pCommand->m_pReadPresentedImageDataFunc;
-		ReadPresentedImgDataFunc = [this](uint32_t &Width, uint32_t &Height, uint32_t &Format, std::vector<uint8_t> &vDstData) { return GetPresentedImageData(Width, Height, Format, vDstData); };
+		ReadPresentedImgDataFunc = [this](uint32_t &Width, uint32_t &Height, CImageInfo::EImageFormat &Format, std::vector<uint8_t> &vDstData) { return GetPresentedImageData(Width, Height, Format, vDstData); };
 
 		m_pWindow = pCommand->m_pWindow;
 
@@ -6656,7 +6655,7 @@ public:
 
 		void *pData = pCommand->m_pData;
 
-		if(!UpdateTexture(IndexTex, VK_FORMAT_B8G8R8A8_UNORM, pData, pCommand->m_X, pCommand->m_Y, pCommand->m_Width, pCommand->m_Height, TexFormatToImageColorChannelCount(pCommand->m_Format)))
+		if(!UpdateTexture(IndexTex, VK_FORMAT_B8G8R8A8_UNORM, pData, pCommand->m_X, pCommand->m_Y, pCommand->m_Width, pCommand->m_Height))
 			return false;
 
 		free(pData);
@@ -6681,13 +6680,12 @@ public:
 		int Slot = pCommand->m_Slot;
 		int Width = pCommand->m_Width;
 		int Height = pCommand->m_Height;
-		int PixelSize = pCommand->m_PixelSize;
 		int Format = pCommand->m_Format;
 		int StoreFormat = pCommand->m_StoreFormat;
 		int Flags = pCommand->m_Flags;
 		void *pData = pCommand->m_pData;
 
-		if(!CreateTextureCMD(Slot, Width, Height, PixelSize, TextureFormatToVulkanFormat(Format), TextureFormatToVulkanFormat(StoreFormat), Flags, pData))
+		if(!CreateTextureCMD(Slot, Width, Height, TextureFormatToVulkanFormat(Format), TextureFormatToVulkanFormat(StoreFormat), Flags, pData))
 			return false;
 
 		free(pData);
@@ -6705,9 +6703,9 @@ public:
 		void *pTmpData = pCommand->m_pTextData;
 		void *pTmpData2 = pCommand->m_pTextOutlineData;
 
-		if(!CreateTextureCMD(Slot, Width, Height, 1, VK_FORMAT_R8_UNORM, VK_FORMAT_R8_UNORM, CCommandBuffer::TEXFLAG_NOMIPMAPS, pTmpData))
+		if(!CreateTextureCMD(Slot, Width, Height, VK_FORMAT_R8_UNORM, VK_FORMAT_R8_UNORM, CCommandBuffer::TEXFLAG_NOMIPMAPS, pTmpData))
 			return false;
-		if(!CreateTextureCMD(SlotOutline, Width, Height, 1, VK_FORMAT_R8_UNORM, VK_FORMAT_R8_UNORM, CCommandBuffer::TEXFLAG_NOMIPMAPS, pTmpData2))
+		if(!CreateTextureCMD(SlotOutline, Width, Height, VK_FORMAT_R8_UNORM, VK_FORMAT_R8_UNORM, CCommandBuffer::TEXFLAG_NOMIPMAPS, pTmpData2))
 			return false;
 
 		if(!CreateNewTextDescriptorSets(Slot, SlotOutline))
@@ -6740,7 +6738,7 @@ public:
 
 		void *pData = pCommand->m_pData;
 
-		if(!UpdateTexture(IndexTex, VK_FORMAT_R8_UNORM, pData, pCommand->m_X, pCommand->m_Y, pCommand->m_Width, pCommand->m_Height, 1))
+		if(!UpdateTexture(IndexTex, VK_FORMAT_R8_UNORM, pData, pCommand->m_X, pCommand->m_Y, pCommand->m_Width, pCommand->m_Height))
 			return false;
 
 		free(pData);
@@ -6814,7 +6812,7 @@ public:
 
 		uint32_t Width;
 		uint32_t Height;
-		uint32_t Format;
+		CImageInfo::EImageFormat Format;
 		if(GetPresentedImageDataImpl(Width, Height, Format, m_vScreenshotHelper, false, true))
 		{
 			size_t ImgSize = (size_t)Width * (size_t)Height * (size_t)4;
@@ -6827,7 +6825,7 @@ public:
 		}
 		pCommand->m_pImage->m_Width = (int)Width;
 		pCommand->m_pImage->m_Height = (int)Height;
-		pCommand->m_pImage->m_Format = (int)Format;
+		pCommand->m_pImage->m_Format = Format;
 
 		return true;
 	}

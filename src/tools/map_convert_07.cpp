@@ -124,7 +124,7 @@ void *ReplaceImageItem(CMapItemImage *pImgItem, CMapItemImage *pNewImgItem)
 	pNewImgItem->m_ImageData = g_NextDataItemID++;
 
 	g_apNewData[g_Index] = ImgInfo.m_pData;
-	g_aNewDataSize[g_Index] = ImgInfo.m_Width * ImgInfo.m_Height * 4;
+	g_aNewDataSize[g_Index] = (size_t)ImgInfo.m_Width * ImgInfo.m_Height * ImgInfo.PixelSize();
 	g_Index++;
 
 	return (void *)pNewImgItem;

@@ -66,29 +66,54 @@ struct SGraphicTileTexureCoords
 class CImageInfo
 {
 public:
-	enum
+	enum EImageFormat
 	{
-		FORMAT_AUTO = -1,
+		FORMAT_ERROR = -1,
 		FORMAT_RGB = 0,
 		FORMAT_RGBA = 1,
 		FORMAT_SINGLE_COMPONENT = 2,
 	};
 
-	/* Variable: width
-		Contains the width of the image */
+	/**
+	 * Contains the width of the image
+	 */
 	int m_Width = 0;
 
-	/* Variable: height
-		Contains the height of the image */
+	/**
+	 * Contains the height of the image
+	 */
 	int m_Height = 0;
 
-	/* Variable: format
-		Contains the format of the image. See <Image Formats> for more information. */
-	int m_Format = FORMAT_RGB;
+	/**
+	 * Contains the format of the image.
+	 *
+	 * @see EImageFormat
+	 */
+	EImageFormat m_Format = FORMAT_ERROR;
 
-	/* Variable: data
-		Pointer to the image data. */
+	/**
+	 * Pointer to the image data.
+	 */
 	void *m_pData = nullptr;
+
+	static size_t PixelSize(EImageFormat Format)
+	{
+		dbg_assert(Format != FORMAT_ERROR, "Format invalid");
+		static const size_t s_aSizes[] = {3, 4, 1};
+		return s_aSizes[(int)Format];
+	}
+
+	size_t PixelSize() const
+	{
+		return PixelSize(m_Format);
+	}
+
+	static EImageFormat ImageFormatFromInt(int Format)
+	{
+		if(Format < (int)FORMAT_RGB || Format > (int)FORMAT_SINGLE_COMPONENT)
+			return FORMAT_ERROR;
+		return (EImageFormat)Format;
+	}
 };
 
 /*
@@ -207,7 +232,7 @@ namespace client_data7 {
 struct CDataSprite; // NOLINT(bugprone-forward-declaration-namespace)
 }
 
-typedef std::function<bool(uint32_t &Width, uint32_t &Height, uint32_t &Format, std::vector<uint8_t> &vDstData)> TGLBackendReadPresentedImageData;
+typedef std::function<bool(uint32_t &Width, uint32_t &Height, CImageInfo::EImageFormat &Format, std::vector<uint8_t> &vDstData)> TGLBackendReadPresentedImageData;
 
 class IGraphics : public IInterface
 {
@@ -307,15 +332,15 @@ public:
 	virtual bool IsImageFormatRGBA(const char *pFileName, CImageInfo &Img) = 0;
 
 	// destination and source buffer require to have the same width and height
-	virtual void CopyTextureBufferSub(uint8_t *pDestBuffer, uint8_t *pSourceBuffer, size_t FullWidth, size_t FullHeight, size_t ColorChannelCount, size_t SubOffsetX, size_t SubOffsetY, size_t SubCopyWidth, size_t SubCopyHeight) = 0;
+	virtual void CopyTextureBufferSub(uint8_t *pDestBuffer, uint8_t *pSourceBuffer, size_t FullWidth, size_t FullHeight, size_t PixelSize, size_t SubOffsetX, size_t SubOffsetY, size_t SubCopyWidth, size_t SubCopyHeight) = 0;
 
 	// destination width must be equal to the subwidth of the source
-	virtual void CopyTextureFromTextureBufferSub(uint8_t *pDestBuffer, size_t DestWidth, size_t DestHeight, uint8_t *pSourceBuffer, size_t SrcWidth, size_t SrcHeight, size_t ColorChannelCount, size_t SrcSubOffsetX, size_t SrcSubOffsetY, size_t SrcSubCopyWidth, size_t SrcSubCopyHeight) = 0;
+	virtual void CopyTextureFromTextureBufferSub(uint8_t *pDestBuffer, size_t DestWidth, size_t DestHeight, uint8_t *pSourceBuffer, size_t SrcWidth, size_t SrcHeight, size_t PixelSize, size_t SrcSubOffsetX, size_t SrcSubOffsetY, size_t SrcSubCopyWidth, size_t SrcSubCopyHeight) = 0;
 
 	virtual int UnloadTexture(CTextureHandle *pIndex) = 0;
-	virtual CTextureHandle LoadTextureRaw(size_t Width, size_t Height, int Format, const void *pData, int StoreFormat, int Flags, const char *pTexName = nullptr) = 0;
-	virtual int LoadTextureRawSub(CTextureHandle TextureID, int x, int y, size_t Width, size_t Height, int Format, const void *pData) = 0;
-	virtual CTextureHandle LoadTexture(const char *pFilename, int StorageType, int StoreFormat, int Flags) = 0;
+	virtual CTextureHandle LoadTextureRaw(size_t Width, size_t Height, CImageInfo::EImageFormat Format, const void *pData, int Flags, const char *pTexName = nullptr) = 0;
+	virtual int LoadTextureRawSub(CTextureHandle TextureID, int x, int y, size_t Width, size_t Height, CImageInfo::EImageFormat Format, const void *pData) = 0;
+	virtual CTextureHandle LoadTexture(const char *pFilename, int StorageType, int Flags = 0) = 0;
 	virtual CTextureHandle InvalidTexture() const = 0;
 	virtual void TextureSet(CTextureHandle Texture) = 0;
 	void TextureClear() { TextureSet(CTextureHandle()); }

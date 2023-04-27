@@ -864,7 +864,7 @@ void CMenus::OnInit()
 	Console()->Chain("cl_asset_hud", ConchainAssetHud, this);
 	Console()->Chain("cl_asset_extras", ConchainAssetExtras, this);
 
-	m_TextureBlob = Graphics()->LoadTexture("blob.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
+	m_TextureBlob = Graphics()->LoadTexture("blob.png", IStorage::TYPE_ALL);
 
 	// setup load amount
 	const int NumMenuImages = 5;
@@ -2173,10 +2173,9 @@ int CMenus::MenuImageScan(const char *pName, int IsDir, int DirType, void *pUser
 		MenuImage.m_OrgTexture = pSelf->Graphics()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, Info.m_Format, 0);
 
 		unsigned char *pData = (unsigned char *)Info.m_pData;
-		//int Pitch = Info.m_Width*4;
 
 		// create colorless version
-		int Step = Info.m_Format == CImageInfo::FORMAT_RGBA ? 4 : 3;
+		const size_t Step = Info.PixelSize();
 
 		// make the texture gray scale
 		for(int i = 0; i < Info.m_Width * Info.m_Height; i++)

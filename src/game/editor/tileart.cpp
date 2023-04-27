@@ -16,27 +16,14 @@ bool operator<(const ColorRGBA &Left, const ColorRGBA &Right)
 		return Left.a < Right.a;
 }
 
-static int GetNumColorChannels(const CImageInfo &Image)
-{
-	switch(Image.m_Format)
-	{
-	case CImageInfo::FORMAT_RGB:
-		return 3;
-	case CImageInfo::FORMAT_SINGLE_COMPONENT:
-		return 1;
-	default:
-		return 4;
-	}
-}
-
-static ColorRGBA GetPixelColor(const CImageInfo &Image, int x, int y)
+static ColorRGBA GetPixelColor(const CImageInfo &Image, size_t x, size_t y)
 {
 	uint8_t *pData = static_cast<uint8_t *>(Image.m_pData);
-	int NumColorChannels = GetNumColorChannels(Image);
-	int PixelStartIndex = x * NumColorChannels + (Image.m_Width * NumColorChannels * y);
+	const size_t PixelSize = Image.PixelSize();
+	const size_t PixelStartIndex = x * PixelSize + (Image.m_Width * PixelSize * y);
 
 	ColorRGBA Color = {255, 255, 255, 255};
-	if(NumColorChannels == 1)
+	if(PixelSize == 1)
 	{
 		Color.a = pData[PixelStartIndex];
 	}
@@ -46,20 +33,20 @@ static ColorRGBA GetPixelColor(const CImageInfo &Image, int x, int y)
 		Color.g = pData[PixelStartIndex + 1];
 		Color.b = pData[PixelStartIndex + 2];
 
-		if(NumColorChannels == 4)
+		if(PixelSize == 4)
 			Color.a = pData[PixelStartIndex + 3];
 	}
 
 	return Color;
 }
 
-static void SetPixelColor(CImageInfo *pImage, int x, int y, ColorRGBA Color)
+static void SetPixelColor(CImageInfo *pImage, size_t x, size_t y, ColorRGBA Color)
 {
 	uint8_t *pData = static_cast<uint8_t *>(pImage->m_pData);
-	int NumColorChannels = GetNumColorChannels(*pImage);
-	int PixelStartIndex = x * NumColorChannels + (pImage->m_Width * NumColorChannels * y);
+	const size_t PixelSize = pImage->PixelSize();
+	const size_t PixelStartIndex = x * PixelSize + (pImage->m_Width * PixelSize * y);
 
-	if(NumColorChannels == 1)
+	if(PixelSize == 1)
 	{
 		pData[PixelStartIndex] = Color.a;
 	}
@@ -69,7 +56,7 @@ static void SetPixelColor(CImageInfo *pImage, int x, int y, ColorRGBA Color)
 		pData[PixelStartIndex + 1] = Color.g;
 		pData[PixelStartIndex + 2] = Color.b;
 
-		if(NumColorChannels == 4)
+		if(PixelSize == 4)
 			pData[PixelStartIndex + 3] = Color.a;
 	}
 }
@@ -168,7 +155,7 @@ static std::shared_ptr<CEditorImage> ImageInfoToEditorImage(CEditor *pEditor, co
 	pEditorImage->m_pData = Image.m_pData;
 
 	int TextureLoadFlag = pEditor->Graphics()->HasTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
-	pEditorImage->m_Texture = pEditor->Graphics()->LoadTextureRaw(Image.m_Width, Image.m_Height, Image.m_Format, Image.m_pData, CImageInfo::FORMAT_AUTO, TextureLoadFlag, pName);
+	pEditorImage->m_Texture = pEditor->Graphics()->LoadTextureRaw(Image.m_Width, Image.m_Height, Image.m_Format, Image.m_pData, TextureLoadFlag, pName);
 	pEditorImage->m_External = 0;
 	str_copy(pEditorImage->m_aName, pName);
 

@@ -2418,7 +2418,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupEntities(void *pContext, CUIRect Vie
 
 				char aBuf[IO_MAX_PATH_LENGTH];
 				str_format(aBuf, sizeof(aBuf), "editor/entities/%s.png", pName);
-				pEditor->m_EntitiesTexture = pEditor->Graphics()->LoadTexture(aBuf, IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, pEditor->GetTextureUsageFlag());
+				pEditor->m_EntitiesTexture = pEditor->Graphics()->LoadTexture(aBuf, IStorage::TYPE_ALL, pEditor->GetTextureUsageFlag());
 				return CUI::POPUP_CLOSE_CURRENT;
 			}
 		}
