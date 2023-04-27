@@ -116,14 +116,16 @@ bool CEditorMap::Save(const char *pFileName)
 		pImg->AnalyseTileFlags();
 
 		CMapItemImage Item;
-		Item.m_Version = 1;
+		Item.m_Version = CMapItemImage::CURRENT_VERSION;
 
 		Item.m_Width = pImg->m_Width;
 		Item.m_Height = pImg->m_Height;
 		Item.m_External = pImg->m_External;
 		Item.m_ImageName = df.AddData(str_length(pImg->m_aName) + 1, pImg->m_aName);
 		if(pImg->m_External)
+		{
 			Item.m_ImageData = -1;
+		}
 		else
 		{
 			if(pImg->m_Format == CImageInfo::FORMAT_RGB)
@@ -512,14 +514,15 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 			DataFile.GetType(MAPITEMTYPE_IMAGE, &Start, &Num);
 			for(int i = 0; i < Num; i++)
 			{
-				CMapItemImage *pItem = (CMapItemImage *)DataFile.GetItem(Start + i);
+				CMapItemImage_v2 *pItem = (CMapItemImage_v2 *)DataFile.GetItem(Start + i);
 				char *pName = (char *)DataFile.GetData(pItem->m_ImageName);
 
 				// copy base info
 				CEditorImage *pImg = new CEditorImage(m_pEditor);
 				pImg->m_External = pItem->m_External;
 
-				if(pItem->m_External)
+				const int Format = pItem->m_Version < CMapItemImage_v2::CURRENT_VERSION ? CImageInfo::FORMAT_RGBA : pItem->m_Format;
+				if(pImg->m_External || (Format != CImageInfo::FORMAT_RGB && Format != CImageInfo::FORMAT_RGBA))
 				{
 					char aBuf[IO_MAX_PATH_LENGTH];
 					str_format(aBuf, sizeof(aBuf), "mapres/%s.png", pName);
@@ -541,7 +544,7 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 				{
 					pImg->m_Width = pItem->m_Width;
 					pImg->m_Height = pItem->m_Height;
-					pImg->m_Format = CImageInfo::FORMAT_RGBA;
+					pImg->m_Format = Format;
 
 					// copy image data
 					void *pData = DataFile.GetData(pItem->m_ImageData);

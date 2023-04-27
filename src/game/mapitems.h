@@ -252,8 +252,13 @@ struct CMapItemInfoSettings : CMapItemInfo
 	int m_Settings;
 };
 
-struct CMapItemImage
+struct CMapItemImage_v1
 {
+	enum
+	{
+		CURRENT_VERSION = 1,
+	};
+
 	int m_Version;
 	int m_Width;
 	int m_Height;
@@ -261,6 +266,18 @@ struct CMapItemImage
 	int m_ImageName;
 	int m_ImageData;
 };
+
+struct CMapItemImage_v2 : public CMapItemImage_v1
+{
+	enum
+	{
+		CURRENT_VERSION = 2,
+	};
+
+	int m_Format; // Default before this version is CImageInfo::FORMAT_RGBA
+};
+
+typedef CMapItemImage_v1 CMapItemImage;
 
 struct CMapItemGroup_v1
 {
