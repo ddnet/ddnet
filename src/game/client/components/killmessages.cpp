@@ -152,8 +152,8 @@ void CKillMessages::OnMessage(int MsgType, void *pRawMsg)
 
 		Kill.m_VictimTextWidth = Kill.m_KillerTextWidth = 0.f;
 
-		float Width = 400 * 3.0f * Graphics()->ScreenAspect();
 		float Height = 400 * 3.0f;
+		float Width = Height * Graphics()->ScreenAspect();
 
 		float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 		Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
@@ -219,8 +219,8 @@ void CKillMessages::OnMessage(int MsgType, void *pRawMsg)
 
 		Kill.m_VictimTextWidth = Kill.m_KillerTextWidth = 0.f;
 
-		float Width = 400 * 3.0f * Graphics()->ScreenAspect();
 		float Height = 400 * 3.0f;
+		float Width = Height * Graphics()->ScreenAspect();
 
 		float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 		Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
@@ -251,8 +251,8 @@ void CKillMessages::OnRender()
 	if(!g_Config.m_ClShowKillMessages)
 		return;
 
-	float Width = 400 * 3.0f * Graphics()->ScreenAspect();
 	float Height = 400 * 3.0f;
+	float Width = Height * Graphics()->ScreenAspect();
 
 	Graphics()->MapScreen(0, 0, Width * 1.5f, Height * 1.5f);
 	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
