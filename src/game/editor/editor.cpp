@@ -3605,6 +3605,10 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 				if(s_Operation == OP_GROUP_DRAG && Clicked)
 					MoveGroup = true;
 			}
+			else if(s_pDraggedButton == &m_Map.m_vpGroups[g])
+			{
+				s_Operation = OP_NONE;
+			}
 		}
 
 		for(int i = 0; i < (int)m_Map.m_vpGroups[g]->m_vpLayers.size(); i++)
@@ -3799,6 +3803,10 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 				{
 					MoveLayers = true;
 				}
+			}
+			else if(s_pDraggedButton == m_Map.m_vpGroups[g]->m_vpLayers[i])
+			{
+				s_Operation = OP_NONE;
 			}
 		}
 
