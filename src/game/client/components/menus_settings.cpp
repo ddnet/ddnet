@@ -929,7 +929,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		static CLineInput s_SkinFilterInput(g_Config.m_ClSkinFilterString, sizeof(g_Config.m_ClSkinFilterString));
 		if(Input()->KeyPress(KEY_F) && Input()->ModifierIsPressed())
 		{
-			UI()->SetActiveItem(&g_Config.m_ClSkinFilterString);
+			UI()->SetActiveItem(&s_SkinFilterInput);
 			s_SkinFilterInput.SelectAll();
 		}
 		s_SkinFilterInput.SetEmptyText(Localize("Search"));

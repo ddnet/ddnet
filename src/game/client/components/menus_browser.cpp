@@ -506,7 +506,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		static CLineInput s_FilterInput(g_Config.m_BrFilterString, sizeof(g_Config.m_BrFilterString));
 		if(Input()->KeyPress(KEY_F) && Input()->ModifierIsPressed())
 		{
-			UI()->SetActiveItem(&g_Config.m_BrFilterString);
+			UI()->SetActiveItem(&s_FilterInput);
 			s_FilterInput.SelectAll();
 		}
 		if(UI()->DoClearableEditBox(&s_FilterInput, &QuickSearch, 12.0f))
