@@ -2359,14 +2359,7 @@ void CEditor::DoMapEditor(CUIRect View)
 			m_Map.m_pGameGroup->MapScreen();
 			for(auto &pLayer : m_Map.m_pGameGroup->m_vpLayers)
 			{
-				if(
-					pLayer->m_Visible &&
-					(pLayer == m_Map.m_pGameLayer ||
-						pLayer == m_Map.m_pFrontLayer ||
-						pLayer == m_Map.m_pTeleLayer ||
-						pLayer == m_Map.m_pSpeedupLayer ||
-						pLayer == m_Map.m_pSwitchLayer ||
-						pLayer == m_Map.m_pTuneLayer))
+				if(pLayer->m_Visible && pLayer->IsEntitiesLayer())
 					pLayer->Render();
 			}
 		}
@@ -3703,12 +3696,7 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 				FontSize--;
 
 			int Checked = IsLayerSelected ? 1 : 0;
-			if(m_Map.m_vpGroups[g]->m_vpLayers[i] == m_Map.m_pGameLayer ||
-				m_Map.m_vpGroups[g]->m_vpLayers[i] == m_Map.m_pFrontLayer ||
-				m_Map.m_vpGroups[g]->m_vpLayers[i] == m_Map.m_pSwitchLayer ||
-				m_Map.m_vpGroups[g]->m_vpLayers[i] == m_Map.m_pTuneLayer ||
-				m_Map.m_vpGroups[g]->m_vpLayers[i] == m_Map.m_pSpeedupLayer ||
-				m_Map.m_vpGroups[g]->m_vpLayers[i] == m_Map.m_pTeleLayer)
+			if(m_Map.m_vpGroups[g]->m_vpLayers[i]->IsEntitiesLayer())
 			{
 				Checked += 6;
 			}
