@@ -5999,7 +5999,7 @@ void CEditor::RenderMenubar(CUIRect MenuBar)
 	if(DoButton_Menu(&s_ToolsButton, "Tools", 0, &ToolsButton, 0, nullptr))
 	{
 		static SPopupMenuId s_PopupMenuToolsId;
-		UI()->DoPopupMenu(&s_PopupMenuToolsId, ToolsButton.x, ToolsButton.y + ToolsButton.h - 1.0f, 200.0f, 46.0f, this, PopupMenuTools, IGraphics::CORNER_R | IGraphics::CORNER_B);
+		UI()->DoPopupMenu(&s_PopupMenuToolsId, ToolsButton.x, ToolsButton.y + ToolsButton.h - 1.0f, 200.0f, 50.0f, this, PopupMenuTools, IGraphics::CORNER_R | IGraphics::CORNER_B);
 	}
 
 	MenuBar.VSplitLeft(5.0f, nullptr, &MenuBar);
@@ -6010,7 +6010,7 @@ void CEditor::RenderMenubar(CUIRect MenuBar)
 	if(DoButton_Menu(&s_SettingsButton, "Settings", 0, &SettingsButton, 0, nullptr))
 	{
 		static SPopupMenuId s_PopupMenuEntitiesId;
-		UI()->DoPopupMenu(&s_PopupMenuEntitiesId, SettingsButton.x, SettingsButton.y + SettingsButton.h - 1.0f, 200.0f, 34.0f, this, PopupMenuSettings, IGraphics::CORNER_R | IGraphics::CORNER_B);
+		UI()->DoPopupMenu(&s_PopupMenuEntitiesId, SettingsButton.x, SettingsButton.y + SettingsButton.h - 1.0f, 200.0f, 36.0f, this, PopupMenuSettings, IGraphics::CORNER_R | IGraphics::CORNER_B);
 	}
 
 	CUIRect Info, Close;

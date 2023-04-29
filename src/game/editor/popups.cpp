@@ -170,6 +170,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupMenuTools(void *pContext, CUIRect Vi
 	}
 
 	static int s_BorderButton = 0;
+	View.HSplitTop(2.0f, nullptr, &View);
 	View.HSplitTop(12.0f, &Slot, &View);
 	if(pEditor->DoButton_MenuItem(&s_BorderButton, "Border", 0, &Slot, 0, "Place tiles in a 2-tile wide border at the edges of the layer"))
 	{
@@ -189,6 +190,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupMenuTools(void *pContext, CUIRect Vi
 	}
 
 	static int s_GotoButton = 0;
+	View.HSplitTop(2.0f, nullptr, &View);
 	View.HSplitTop(12.0f, &Slot, &View);
 	if(pEditor->DoButton_MenuItem(&s_GotoButton, "Goto XY", 0, &Slot, 0, "Go to a specified coordinate point on the map"))
 	{
@@ -228,25 +230,28 @@ CUI::EPopupMenuFunctionResult CEditor::PopupMenuSettings(void *pContext, CUIRect
 		pEditor->UI()->DoPopupMenu(&s_PopupEntitiesId, Slot.x, Slot.y + Slot.h, 250, pEditor->m_vSelectEntitiesFiles.size() * 14.0f + 10.0f, pEditor, PopupEntities);
 	}
 
+	View.HSplitTop(2.0f, nullptr, &View);
 	View.HSplitTop(12.0f, &Slot, &View);
-	Slot.VMargin(5.0f, &Slot);
-	Slot.VSplitRight(5.0f, &Slot, nullptr); // right margin
-
-	CUIRect Label, Selector;
-	Slot.VSplitMid(&Label, &Selector);
-	CUIRect No, Yes;
-	Selector.VSplitMid(&No, &Yes);
-
-	pEditor->UI()->DoLabel(&Label, "Allow unused", 10.0f, TEXTALIGN_ML);
-	static int s_ButtonNo = 0;
-	static int s_ButtonYes = 0;
-	if(pEditor->DoButton_ButtonDec(&s_ButtonNo, "No", !pEditor->m_AllowPlaceUnusedTiles, &No, 0, "[ctrl+u] Disallow placing unused tiles"))
 	{
-		pEditor->m_AllowPlaceUnusedTiles = false;
-	}
-	if(pEditor->DoButton_ButtonInc(&s_ButtonYes, "Yes", pEditor->m_AllowPlaceUnusedTiles, &Yes, 0, "[ctrl+u] Allow placing unused tiles"))
-	{
-		pEditor->m_AllowPlaceUnusedTiles = true;
+		Slot.VMargin(5.0f, &Slot);
+		Slot.VSplitRight(5.0f, &Slot, nullptr); // right margin
+
+		CUIRect Label, Selector;
+		Slot.VSplitMid(&Label, &Selector);
+		CUIRect No, Yes;
+		Selector.VSplitMid(&No, &Yes);
+
+		pEditor->UI()->DoLabel(&Label, "Allow unused", 10.0f, TEXTALIGN_ML);
+		static int s_ButtonNo = 0;
+		static int s_ButtonYes = 0;
+		if(pEditor->DoButton_ButtonDec(&s_ButtonNo, "No", !pEditor->m_AllowPlaceUnusedTiles, &No, 0, "[ctrl+u] Disallow placing unused tiles"))
+		{
+			pEditor->m_AllowPlaceUnusedTiles = false;
+		}
+		if(pEditor->DoButton_ButtonInc(&s_ButtonYes, "Yes", pEditor->m_AllowPlaceUnusedTiles, &Yes, 0, "[ctrl+u] Allow placing unused tiles"))
+		{
+			pEditor->m_AllowPlaceUnusedTiles = true;
+		}
 	}
 
 	return CUI::POPUP_KEEP_OPEN;
