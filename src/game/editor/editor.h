@@ -808,7 +808,8 @@ public:
 		m_AnimateTime = 0;
 		m_AnimateSpeed = 1;
 
-		m_ShowEnvelopeEditor = 0;
+		m_ShowEnvelopeEditor = false;
+		m_EnvelopeEditorSplit = 250.0f;
 		m_ShowServerSettingsEditor = false;
 
 		m_ShowEnvelopePreview = SHOWENV_NONE;
@@ -1060,7 +1061,8 @@ public:
 	float m_AnimateTime;
 	float m_AnimateSpeed;
 
-	int m_ShowEnvelopeEditor;
+	bool m_ShowEnvelopeEditor;
+	float m_EnvelopeEditorSplit;
 
 	enum EShowEnvelope
 	{
