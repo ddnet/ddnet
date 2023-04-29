@@ -169,6 +169,86 @@ CUI::EPopupMenuFunctionResult CEditor::PopupMenuTools(void *pContext, CUIRect Vi
 		return CUI::POPUP_CLOSE_CURRENT;
 	}
 
+	static int s_BorderButton = 0;
+	View.HSplitTop(12.0f, &Slot, &View);
+	if(pEditor->DoButton_MenuItem(&s_BorderButton, "Border", 0, &Slot, 0, "Place tiles in a 2-tile wide border at the edges of the layer"))
+	{
+		CLayerTiles *pT = (CLayerTiles *)pEditor->GetSelectedLayerType(0, LAYERTYPE_TILES);
+		if(pT && !pT->m_Tele && !pT->m_Speedup && !pT->m_Switch && !pT->m_Front && !pT->m_Tune)
+		{
+			pEditor->m_PopupEventType = POPEVENT_PLACE_BORDER_TILES;
+			pEditor->m_PopupEventActivated = true;
+		}
+		else
+		{
+			static CUI::SMessagePopupContext s_MessagePopupContext;
+			s_MessagePopupContext.DefaultColor(pEditor->m_pTextRender);
+			str_copy(s_MessagePopupContext.m_aMessage, "No tile layer selected");
+			pEditor->UI()->ShowPopupMessage(Slot.x, Slot.y + Slot.h, &s_MessagePopupContext);
+		}
+	}
+
+	static int s_GotoButton = 0;
+	View.HSplitTop(12.0f, &Slot, &View);
+	if(pEditor->DoButton_MenuItem(&s_GotoButton, "Goto XY", 0, &Slot, 0, "Go to a specified coordinate point on the map"))
+	{
+		static SPopupMenuId s_PopupGotoId;
+		pEditor->UI()->DoPopupMenu(&s_PopupGotoId, Slot.x, Slot.y + Slot.h, 120, 52, pEditor, PopupGoto);
+	}
+
+	return CUI::POPUP_KEEP_OPEN;
+}
+
+static int EntitiesListdirCallback(const char *pName, int IsDir, int StorageType, void *pUser)
+{
+	CEditor *pEditor = (CEditor *)pUser;
+	if(!IsDir && str_endswith(pName, ".png"))
+	{
+		std::string Name = pName;
+		pEditor->m_vSelectEntitiesFiles.push_back(Name.substr(0, Name.length() - 4));
+	}
+
+	return 0;
+}
+
+CUI::EPopupMenuFunctionResult CEditor::PopupMenuSettings(void *pContext, CUIRect View, bool Active)
+{
+	CEditor *pEditor = static_cast<CEditor *>(pContext);
+
+	CUIRect Slot;
+	View.HSplitTop(12.0f, &Slot, &View);
+	static int s_EntitiesButtonID = 0;
+	if(pEditor->DoButton_MenuItem(&s_EntitiesButtonID, "Entities", 0, &Slot, 0, "Choose game layer entities image for different gametypes"))
+	{
+		pEditor->m_vSelectEntitiesFiles.clear();
+		pEditor->Storage()->ListDirectory(IStorage::TYPE_ALL, "editor/entities", EntitiesListdirCallback, pEditor);
+		std::sort(pEditor->m_vSelectEntitiesFiles.begin(), pEditor->m_vSelectEntitiesFiles.end());
+
+		static SPopupMenuId s_PopupEntitiesId;
+		pEditor->UI()->DoPopupMenu(&s_PopupEntitiesId, Slot.x, Slot.y + Slot.h, 250, pEditor->m_vSelectEntitiesFiles.size() * 14.0f + 10.0f, pEditor, PopupEntities);
+	}
+
+	View.HSplitTop(12.0f, &Slot, &View);
+	Slot.VMargin(5.0f, &Slot);
+	Slot.VSplitRight(5.0f, &Slot, nullptr); // right margin
+
+	CUIRect Label, Selector;
+	Slot.VSplitMid(&Label, &Selector);
+	CUIRect No, Yes;
+	Selector.VSplitMid(&No, &Yes);
+
+	pEditor->UI()->DoLabel(&Label, "Allow unused", 10.0f, TEXTALIGN_ML);
+	static int s_ButtonNo = 0;
+	static int s_ButtonYes = 0;
+	if(pEditor->DoButton_ButtonDec(&s_ButtonNo, "No", !pEditor->m_AllowPlaceUnusedTiles, &No, 0, "[ctrl+u] Disallow placing unused tiles"))
+	{
+		pEditor->m_AllowPlaceUnusedTiles = false;
+	}
+	if(pEditor->DoButton_ButtonInc(&s_ButtonYes, "Yes", pEditor->m_AllowPlaceUnusedTiles, &Yes, 0, "[ctrl+u] Allow placing unused tiles"))
+	{
+		pEditor->m_AllowPlaceUnusedTiles = true;
+	}
+
 	return CUI::POPUP_KEEP_OPEN;
 }
 

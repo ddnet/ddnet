@@ -881,18 +881,6 @@ bool CEditor::CallbackSaveCopyMap(const char *pFileName, int StorageType, void *
 	}
 }
 
-static int EntitiesListdirCallback(const char *pName, int IsDir, int StorageType, void *pUser)
-{
-	CEditor *pEditor = (CEditor *)pUser;
-	if(!IsDir && str_endswith(pName, ".png"))
-	{
-		std::string Name = pName;
-		pEditor->m_vSelectEntitiesFiles.push_back(Name.substr(0, Name.length() - 4));
-	}
-
-	return 0;
-}
-
 void CEditor::DoToolbar(CUIRect ToolBar)
 {
 	const bool ModPressed = Input()->ModifierIsPressed();
@@ -980,16 +968,9 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 			m_ShowEnvelopePreview = SHOWENV_NONE;
 		}
 
-		TB_Top.VSplitLeft(5.0f, nullptr, &TB_Top);
-
-		// allow place unused tiles button
-		TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
-		static int s_AllowPlaceUnusedTilesButton = 0;
-		if(DoButton_Editor(&s_AllowPlaceUnusedTilesButton, "Unused", m_AllowPlaceUnusedTiles, &Button, 0, "[ctrl+u] Allow placing unused tiles") ||
-			(m_Dialog == DIALOG_NONE && m_EditBoxActive == 0 && Input()->KeyPress(KEY_U) && ModPressed))
-		{
+		// handle shortcut for unused button
+		if(m_Dialog == DIALOG_NONE && m_EditBoxActive == 0 && Input()->KeyPress(KEY_U) && ModPressed)
 			m_AllowPlaceUnusedTiles = !m_AllowPlaceUnusedTiles;
-		}
 
 		TB_Top.VSplitLeft(5.0f, nullptr, &TB_Top);
 
@@ -998,20 +979,6 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 		if(DoButton_Editor(&s_ColorBrushButton, "Color", m_BrushColorEnabled, &Button, 0, "Toggle brush coloring"))
 		{
 			m_BrushColorEnabled = !m_BrushColorEnabled;
-		}
-
-		TB_Top.VSplitLeft(5.0f, nullptr, &TB_Top);
-
-		TB_Top.VSplitLeft(45.0f, &Button, &TB_Top);
-		static int s_EntitiesButtonID = 0;
-		if(DoButton_Editor(&s_EntitiesButtonID, "Entities", 0, &Button, 0, "Choose game layer entities image for different gametypes"))
-		{
-			m_vSelectEntitiesFiles.clear();
-			Storage()->ListDirectory(IStorage::TYPE_ALL, "editor/entities", EntitiesListdirCallback, this);
-			std::sort(m_vSelectEntitiesFiles.begin(), m_vSelectEntitiesFiles.end());
-
-			static SPopupMenuId s_PopupEntitiesId;
-			UI()->DoPopupMenu(&s_PopupEntitiesId, Button.x, Button.y + Button.h, 250, m_vSelectEntitiesFiles.size() * 14.0f + 10.0f, this, PopupEntities);
 		}
 
 		TB_Top.VSplitLeft(5.0f, nullptr, &TB_Top);
@@ -1186,33 +1153,8 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 			TB_Bottom.VSplitLeft(5.0f, nullptr, &TB_Bottom);
 		}
 
-		// goto xy button
-		{
-			TB_Bottom.VSplitLeft(50.0, &Button, &TB_Bottom);
-			static int s_GotoButton = 0;
-			if(DoButton_Editor(&s_GotoButton, "Goto XY", 0, &Button, 0, "Go to a specified coordinate point on the map"))
-			{
-				static SPopupMenuId s_PopupGotoId;
-				UI()->DoPopupMenu(&s_PopupGotoId, Button.x, Button.y + Button.h, 120, 52, this, PopupGoto);
-			}
-			TB_Bottom.VSplitLeft(5.0f, nullptr, &TB_Bottom);
-		}
-
 		// tile manipulation
 		{
-			CLayerTiles *pT = (CLayerTiles *)GetSelectedLayerType(0, LAYERTYPE_TILES);
-			if(pT && !pT->m_Tele && !pT->m_Speedup && !pT->m_Switch && !pT->m_Front && !pT->m_Tune)
-			{
-				static int s_BorderBut = 0;
-				TB_Bottom.VSplitLeft(60.0f, &Button, &TB_Bottom);
-				if(DoButton_Ex(&s_BorderBut, "Border", 0, &Button, 0, "Place tiles in a 2-tile wide border at the edges of the layer", IGraphics::CORNER_ALL))
-				{
-					m_PopupEventType = POPEVENT_PLACE_BORDER_TILES;
-					m_PopupEventActivated = true;
-				}
-				TB_Bottom.VSplitLeft(5.0f, &Button, &TB_Bottom);
-			}
-
 			// do tele/tune/switch/speedup button
 			{
 				CLayerTiles *pS = (CLayerTiles *)GetSelectedLayerType(0, LAYERTYPE_TILES);
@@ -6057,7 +5999,18 @@ void CEditor::RenderMenubar(CUIRect MenuBar)
 	if(DoButton_Menu(&s_ToolsButton, "Tools", 0, &ToolsButton, 0, nullptr))
 	{
 		static SPopupMenuId s_PopupMenuToolsId;
-		UI()->DoPopupMenu(&s_PopupMenuToolsId, ToolsButton.x, ToolsButton.y + ToolsButton.h - 1.0f, 200.0f, 22.0f, this, PopupMenuTools, IGraphics::CORNER_R | IGraphics::CORNER_B);
+		UI()->DoPopupMenu(&s_PopupMenuToolsId, ToolsButton.x, ToolsButton.y + ToolsButton.h - 1.0f, 200.0f, 46.0f, this, PopupMenuTools, IGraphics::CORNER_R | IGraphics::CORNER_B);
+	}
+
+	MenuBar.VSplitLeft(5.0f, nullptr, &MenuBar);
+
+	CUIRect SettingsButton;
+	static int s_SettingsButton = 0;
+	MenuBar.VSplitLeft(60.0f, &SettingsButton, &MenuBar);
+	if(DoButton_Menu(&s_SettingsButton, "Settings", 0, &SettingsButton, 0, nullptr))
+	{
+		static SPopupMenuId s_PopupMenuEntitiesId;
+		UI()->DoPopupMenu(&s_PopupMenuEntitiesId, SettingsButton.x, SettingsButton.y + SettingsButton.h - 1.0f, 200.0f, 34.0f, this, PopupMenuSettings, IGraphics::CORNER_R | IGraphics::CORNER_B);
 	}
 
 	CUIRect Info, Close;

@@ -1144,6 +1144,7 @@ public:
 
 	static CUI::EPopupMenuFunctionResult PopupMenuFile(void *pContext, CUIRect View, bool Active);
 	static CUI::EPopupMenuFunctionResult PopupMenuTools(void *pContext, CUIRect View, bool Active);
+	static CUI::EPopupMenuFunctionResult PopupMenuSettings(void *pContext, CUIRect View, bool Active);
 	static CUI::EPopupMenuFunctionResult PopupGroup(void *pContext, CUIRect View, bool Active);
 	struct SLayerPopupContext : public SPopupMenuId
 	{
