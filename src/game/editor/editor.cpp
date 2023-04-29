@@ -407,13 +407,13 @@ int CEditor::DoButton_Editor(const void *pID, const char *pText, int Checked, co
 	return DoButton_Editor_Common(pID, pText, Checked, pRect, Flags, pToolTip);
 }
 
-int CEditor::DoButton_Env(const void *pID, const char *pText, int Checked, const CUIRect *pRect, const char *pToolTip, ColorRGBA BaseColor)
+int CEditor::DoButton_Env(const void *pID, const char *pText, int Checked, const CUIRect *pRect, const char *pToolTip, ColorRGBA BaseColor, int Corners)
 {
 	float Bright = Checked ? 1.0f : 0.5f;
 	float Alpha = UI()->HotItem() == pID ? 1.0f : 0.75f;
 	ColorRGBA Color = ColorRGBA(BaseColor.r * Bright, BaseColor.g * Bright, BaseColor.b * Bright, Alpha);
 
-	pRect->Draw(Color, IGraphics::CORNER_ALL, 3.0f);
+	pRect->Draw(Color, Corners, 3.0f);
 	UI()->DoLabel(pRect, pText, 10.0f, TEXTALIGN_MC);
 	Checked %= 2;
 	return DoButton_Editor_Common(pID, pText, Checked, pRect, 0, pToolTip);
@@ -5549,7 +5549,15 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			ToolBar.VSplitLeft(15.0f, &Button, &ToolBar);
 			if(i < pEnvelope->m_Channels)
 			{
-				if(DoButton_Env(&s_aChannelButtons[i], s_aapNames[pEnvelope->m_Channels - 1][i], s_ActiveChannels & Bit, &Button, s_aapDescriptions[pEnvelope->m_Channels - 1][i], aColors[i]))
+				int Corners = IGraphics::CORNER_NONE;
+				if(pEnvelope->m_Channels == 1)
+					Corners = IGraphics::CORNER_ALL;
+				else if(i == 0)
+					Corners = IGraphics::CORNER_L;
+				else if(i == pEnvelope->m_Channels - 1)
+					Corners = IGraphics::CORNER_R;
+
+				if(DoButton_Env(&s_aChannelButtons[i], s_aapNames[pEnvelope->m_Channels - 1][i], s_ActiveChannels & Bit, &Button, s_aapDescriptions[pEnvelope->m_Channels - 1][i], aColors[i], Corners))
 					s_ActiveChannels ^= Bit;
 			}
 		}
