@@ -96,8 +96,8 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	m_NeededFaketuning = 0; // reset fake tunings on respawn and send the client
 	m_LockedTunings.clear();
 	m_LastLockedTunings.clear();
-	for(int i = 0; i < MAX_CLIENTS; i++)
-		m_aSentLockedTunings[i] = false;
+	for(auto &SentLockedTuning : m_aSentLockedTunings)
+		SentLockedTuning = false;
 	SendTuneMsg(GameServer()->m_aaZoneEnterMsg[m_TuneZone]); // we want a entermessage also on spawn
 	GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone);
 
@@ -924,7 +924,7 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 
 void CCharacter::HandleTuneLock(int SnappingClient, int ID)
 {
-	if(m_aSentLockedTunings[SnappingClient])
+	if(SnappingClient < 0 || m_aSentLockedTunings[SnappingClient])
 		return;
 
 	CMsgPacker Msg(NETMSGTYPE_SV_TUNELOCK);
@@ -1927,8 +1927,8 @@ void CCharacter::HandleTuneLayer()
 			SendTuneMsg(GameServer()->m_aaTuneLockMsg[TuneLock == -1 ? 0 : TuneLock]); // -1 = tune lock reset, number 0 is used to set the message
 
 			// update tunes for other players when we are snapped
-			for(int i = 0; i < MAX_CLIENTS; i++)
-				m_aSentLockedTunings[i] = false;
+			for(auto &SentLockedTuning : m_aSentLockedTunings)
+				SentLockedTuning = false;
 			m_LastLockedTunings = m_LockedTunings;
 		}
 	}

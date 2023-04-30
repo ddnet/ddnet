@@ -207,14 +207,14 @@ bool CGameContext::SetLockedTune(LOCKED_TUNES *pLockedTunings, CLockedTune Tune)
 	if(!m_Tuning.Get(pParam, &GlobalValue))
 		return false;
 
-	for(unsigned int i = 0; i < pLockedTunings->size(); i++)
+	for(auto &LockedTuning : pLockedTunings)
 	{
-		if(str_comp_nocase(pLockedTunings->at(i).m_aParam, pParam) == 0)
+		if(str_comp_nocase(LockedTuning.m_aParam, pParam) == 0)
 		{
 			if(NewValue == GlobalValue)
-				pLockedTunings->erase(pLockedTunings->begin() + i);
+				pLockedTunings->erase(LockedTuning);
 			else
-				pLockedTunings->at(i).m_Value = NewValue;
+				LockedTuning.m_Value = NewValue;
 			return true;
 		}
 	}
@@ -232,14 +232,14 @@ void CGameContext::ApplyTuneLock(LOCKED_TUNES *pLockedTunings, int TuneLock)
 		return;
 	}
 
-	for(unsigned int i = 0; i < LockedTuning()[TuneLock].size(); i++)
-		SetLockedTune(pLockedTunings, LockedTuning()[TuneLock][i]);
+	for(auto &LockedTuning : LockedTuning()[TuneLock])
+		SetLockedTune(pLockedTunings, LockedTuning);
 }
 
 CTuningParams CGameContext::ApplyLockedTunings(CTuningParams Tuning, LOCKED_TUNES LockedTunings)
 {
-	for(unsigned int i = 0; i < LockedTunings.size(); i++)
-		Tuning.Set(LockedTunings[i].m_aParam, LockedTunings[i].m_Value);
+	for(auto &LockedTuning : LockedTunings)
+		Tuning.Set(LockedTuning.m_aParam, LockedTuning.m_Value);
 	return Tuning;
 }
 
@@ -2923,9 +2923,9 @@ void CGameContext::ConTuneLockDump(IConsole::IResult *pResult, void *pUserData)
 	char aBuf[256];
 	if(List >= 0 && List < NUM_TUNEZONES)
 	{
-		for(unsigned int i = 0; i < pSelf->LockedTuning()[List].size(); i++)
+		for(auto &LockedTuning : pSelf->LockedTuning()[List])
 		{
-			str_format(aBuf, sizeof(aBuf), "lock %d: %s %.2f", List, pSelf->LockedTuning()[List][i].m_aParam, pSelf->LockedTuning()[List][i].m_Value);
+			str_format(aBuf, sizeof(aBuf), "lock %d: %s %.2f", List, LockedTuning.m_aParam, LockedTuning.m_Value);
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "tuning", aBuf);
 		}
 	}
