@@ -243,6 +243,30 @@ CUI::EPopupMenuFunctionResult CEditor::PopupMenuSettings(void *pContext, CUIRect
 		CUIRect No, Yes;
 		Selector.VSplitMid(&No, &Yes);
 
+		pEditor->UI()->DoLabel(&Label, "Enable brush coloring", 10.0f, TEXTALIGN_ML);
+		static int s_ButtonNo = 0;
+		static int s_ButtonYes = 0;
+		if(pEditor->DoButton_ButtonDec(&s_ButtonNo, "No", !pEditor->m_BrushColorEnabled, &No, 0, "Disable brush coloring"))
+		{
+			pEditor->m_BrushColorEnabled = false;
+		}
+		if(pEditor->DoButton_ButtonInc(&s_ButtonYes, "Yes", pEditor->m_BrushColorEnabled, &Yes, 0, "Enable brush coloring"))
+		{
+			pEditor->m_BrushColorEnabled = true;
+		}
+	}
+
+	View.HSplitTop(2.0f, nullptr, &View);
+	View.HSplitTop(12.0f, &Slot, &View);
+	{
+		Slot.VMargin(5.0f, &Slot);
+		Slot.VSplitRight(5.0f, &Slot, nullptr); // right margin
+
+		CUIRect Label, Selector;
+		Slot.VSplitMid(&Label, &Selector);
+		CUIRect No, Yes;
+		Selector.VSplitMid(&No, &Yes);
+
 		pEditor->UI()->DoLabel(&Label, "Allow unused", 10.0f, TEXTALIGN_ML);
 		static int s_ButtonNo = 0;
 		static int s_ButtonYes = 0;
@@ -253,6 +277,41 @@ CUI::EPopupMenuFunctionResult CEditor::PopupMenuSettings(void *pContext, CUIRect
 		if(pEditor->DoButton_ButtonInc(&s_ButtonYes, "Yes", pEditor->m_AllowPlaceUnusedTiles, &Yes, 0, "[ctrl+u] Allow placing unused tiles"))
 		{
 			pEditor->m_AllowPlaceUnusedTiles = true;
+		}
+	}
+
+	View.HSplitTop(2.0f, nullptr, &View);
+	View.HSplitTop(12.0f, &Slot, &View);
+	{
+		Slot.VMargin(5.0f, &Slot);
+		Slot.VSplitRight(5.0f, &Slot, nullptr); // right margin
+
+		CUIRect Label, Selector;
+		Slot.VSplitMid(&Label, &Selector);
+		CUIRect Off, Dec, Hex;
+		Selector.VSplitLeft(Selector.w / 3.0f, &Off, &Selector);
+		Selector.VSplitMid(&Dec, &Hex);
+
+		pEditor->UI()->DoLabel(&Label, "Show Info", 10.0f, TEXTALIGN_ML);
+		static int s_ButtonOff = 0;
+		static int s_ButtonDec = 0;
+		static int s_ButtonHex = 0;
+		if(pEditor->DoButton_ButtonDec(&s_ButtonOff, "Off", !pEditor->m_ShowTileInfo, &Off, 0, "Do not show tile information"))
+		{
+			pEditor->m_ShowTileInfo = false;
+			pEditor->m_ShowEnvelopePreview = SHOWENV_NONE;
+		}
+		if(pEditor->DoButton_Ex(&s_ButtonDec, "Dec", pEditor->m_ShowTileInfo && !pEditor->m_ShowTileHexInfo, &Dec, 0, "[ctrl+i] Show tile information", IGraphics::CORNER_NONE))
+		{
+			pEditor->m_ShowTileInfo = true;
+			pEditor->m_ShowTileHexInfo = false;
+			pEditor->m_ShowEnvelopePreview = SHOWENV_NONE;
+		}
+		if(pEditor->DoButton_ButtonInc(&s_ButtonHex, "Hex", pEditor->m_ShowTileInfo && pEditor->m_ShowTileHexInfo, &Hex, 0, "[ctrl+shift+i] Show tile information in hexadecimal"))
+		{
+			pEditor->m_ShowTileInfo = true;
+			pEditor->m_ShowTileHexInfo = true;
+			pEditor->m_ShowEnvelopePreview = SHOWENV_NONE;
 		}
 	}
 
@@ -1538,7 +1597,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupEvent(void *pContext, CUIRect View, 
 	else if(pEditor->m_PopupEventType == POPEVENT_PREVENTUNUSEDTILES)
 	{
 		pTitle = "Unused tiles disabled";
-		pMessage = "Unused tiles can't be placed by default because they could get a use later and then destroy your map.\n\nActivate the 'Unused' switch to be able to place every tile.";
+		pMessage = "Unused tiles can't be placed by default because they could get a use later and then destroy your map.\n\nActivate the 'Allow Unused' setting to be able to place every tile.";
 	}
 	else if(pEditor->m_PopupEventType == POPEVENT_IMAGEDIV16)
 	{

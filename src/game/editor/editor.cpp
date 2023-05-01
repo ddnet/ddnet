@@ -886,6 +886,37 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 	const bool ModPressed = Input()->ModifierIsPressed();
 	const bool ShiftPressed = Input()->ShiftIsPressed();
 
+	// handle shortcut for info button
+	if(m_Dialog == DIALOG_NONE && m_EditBoxActive == 0 && Input()->KeyPress(KEY_I) && ModPressed && !ShiftPressed)
+	{
+		if(m_ShowTileInfo && m_ShowTileHexInfo)
+			m_ShowTileHexInfo = false;
+		else if(m_ShowTileInfo)
+			m_ShowTileInfo = false;
+		else
+			m_ShowTileInfo = true;
+		m_ShowEnvelopePreview = SHOWENV_NONE;
+	}
+
+	// handle shortcut for hex button
+	if(m_Dialog == DIALOG_NONE && m_EditBoxActive == 0 && Input()->KeyPress(KEY_I) && ModPressed && ShiftPressed)
+	{
+		if(m_ShowTileInfo && m_ShowTileHexInfo)
+			m_ShowTileInfo = false;
+		else if(m_ShowTileInfo)
+			m_ShowTileHexInfo = true;
+		else
+		{
+			m_ShowTileInfo = true;
+			m_ShowTileHexInfo = true;
+		}
+		m_ShowEnvelopePreview = SHOWENV_NONE;
+	}
+
+	// handle shortcut for unused button
+	if(m_Dialog == DIALOG_NONE && m_EditBoxActive == 0 && Input()->KeyPress(KEY_U) && ModPressed)
+		m_AllowPlaceUnusedTiles = !m_AllowPlaceUnusedTiles;
+
 	CUIRect TB_Top, TB_Bottom;
 	CUIRect Button;
 
@@ -954,31 +985,6 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 			(m_Dialog == DIALOG_NONE && m_EditBoxActive == 0 && Input()->KeyPress(KEY_G) && ModPressed && !ShiftPressed))
 		{
 			m_GridActive = !m_GridActive;
-		}
-
-		TB_Top.VSplitLeft(5.0f, nullptr, &TB_Top);
-
-		// tile info button
-		TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
-		static int s_TileInfoButton = 0;
-		if(DoButton_Editor(&s_TileInfoButton, "Info", m_ShowTileInfo, &Button, 0, "[ctrl+i] Show tile information") ||
-			(m_Dialog == DIALOG_NONE && m_EditBoxActive == 0 && Input()->KeyPress(KEY_I) && ModPressed && !ShiftPressed))
-		{
-			m_ShowTileInfo = !m_ShowTileInfo;
-			m_ShowEnvelopePreview = SHOWENV_NONE;
-		}
-
-		// handle shortcut for unused button
-		if(m_Dialog == DIALOG_NONE && m_EditBoxActive == 0 && Input()->KeyPress(KEY_U) && ModPressed)
-			m_AllowPlaceUnusedTiles = !m_AllowPlaceUnusedTiles;
-
-		TB_Top.VSplitLeft(5.0f, nullptr, &TB_Top);
-
-		TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
-		static int s_ColorBrushButton = 0;
-		if(DoButton_Editor(&s_ColorBrushButton, "Color", m_BrushColorEnabled, &Button, 0, "Toggle brush coloring"))
-		{
-			m_BrushColorEnabled = !m_BrushColorEnabled;
 		}
 
 		TB_Top.VSplitLeft(5.0f, nullptr, &TB_Top);
@@ -1274,16 +1280,6 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 				(m_Dialog == DIALOG_NONE && m_EditBoxActive == 0 && Input()->KeyPress(KEY_D) && ModPressed && !ShiftPressed))
 				m_BrushDrawDestructive = !m_BrushDrawDestructive;
 			TB_Bottom.VSplitLeft(5.0f, &Button, &TB_Bottom);
-		}
-
-		// Hex values button
-		if(m_ShowTileInfo)
-		{
-			TB_Bottom.VSplitLeft(65.0f, &Button, &TB_Bottom);
-			static int s_TileInfoHexButton = 0;
-			if(DoButton_Editor(&s_TileInfoHexButton, "Hex Values", m_ShowTileHexInfo, &Button, 0, "[ctrl+shift+i] Show a tile's hex value") ||
-				(m_Dialog == DIALOG_NONE && m_EditBoxActive == 0 && Input()->KeyPress(KEY_I) && ModPressed && ShiftPressed))
-				m_ShowTileHexInfo = !m_ShowTileHexInfo;
 		}
 	}
 }
@@ -6010,7 +6006,7 @@ void CEditor::RenderMenubar(CUIRect MenuBar)
 	if(DoButton_Menu(&s_SettingsButton, "Settings", 0, &SettingsButton, 0, nullptr))
 	{
 		static SPopupMenuId s_PopupMenuEntitiesId;
-		UI()->DoPopupMenu(&s_PopupMenuEntitiesId, SettingsButton.x, SettingsButton.y + SettingsButton.h - 1.0f, 200.0f, 36.0f, this, PopupMenuSettings, IGraphics::CORNER_R | IGraphics::CORNER_B);
+		UI()->DoPopupMenu(&s_PopupMenuEntitiesId, SettingsButton.x, SettingsButton.y + SettingsButton.h - 1.0f, 200.0f, 64.0f, this, PopupMenuSettings, IGraphics::CORNER_R | IGraphics::CORNER_B);
 	}
 
 	CUIRect Info, Close;
