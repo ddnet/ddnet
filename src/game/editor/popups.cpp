@@ -172,7 +172,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupMenuTools(void *pContext, CUIRect Vi
 	static int s_BorderButton = 0;
 	View.HSplitTop(2.0f, nullptr, &View);
 	View.HSplitTop(12.0f, &Slot, &View);
-	if(pEditor->DoButton_MenuItem(&s_BorderButton, "Border", 0, &Slot, 0, "Place tiles in a 2-tile wide border at the edges of the layer"))
+	if(pEditor->DoButton_MenuItem(&s_BorderButton, "Place Border", 0, &Slot, 0, "Place tiles in a 2-tile wide border at the edges of the layer"))
 	{
 		CLayerTiles *pT = (CLayerTiles *)pEditor->GetSelectedLayerType(0, LAYERTYPE_TILES);
 		if(pT && !pT->m_Tele && !pT->m_Speedup && !pT->m_Switch && !pT->m_Front && !pT->m_Tune)
@@ -220,7 +220,9 @@ CUI::EPopupMenuFunctionResult CEditor::PopupMenuSettings(void *pContext, CUIRect
 	CUIRect Slot;
 	View.HSplitTop(12.0f, &Slot, &View);
 	static int s_EntitiesButtonID = 0;
-	if(pEditor->DoButton_MenuItem(&s_EntitiesButtonID, "Entities", 0, &Slot, 0, "Choose game layer entities image for different gametypes"))
+	char aButtonText[64];
+	str_format(aButtonText, sizeof(aButtonText), "Entities: %s", pEditor->m_SelectEntitiesImage.c_str());
+	if(pEditor->DoButton_MenuItem(&s_EntitiesButtonID, aButtonText, 0, &Slot, 0, "Choose game layer entities image for different gametypes"))
 	{
 		pEditor->m_vSelectEntitiesFiles.clear();
 		pEditor->Storage()->ListDirectory(IStorage::TYPE_ALL, "editor/entities", EntitiesListdirCallback, pEditor);
