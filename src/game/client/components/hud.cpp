@@ -1614,31 +1614,39 @@ void CHud::RenderDDRaceEffects()
 			str_format(aBuf, sizeof(aBuf), "Finish time: %s", aTime);
 
 			// calculate alpha (4 sec 1 than get lower the next 2 sec)
-			float alpha = 1.0f;
+			float Alpha = 1.0f;
 			if(m_FinishTimeLastReceivedTick + Client()->GameTickSpeed() * 4 < Client()->GameTick(g_Config.m_ClDummy) && m_FinishTimeLastReceivedTick + Client()->GameTickSpeed() * 6 > Client()->GameTick(g_Config.m_ClDummy))
 			{
 				// lower the alpha slowly to blend text out
-				alpha = ((float)(m_FinishTimeLastReceivedTick + Client()->GameTickSpeed() * 6) - (float)Client()->GameTick(g_Config.m_ClDummy)) / (float)(Client()->GameTickSpeed() * 2);
+				Alpha = ((float)(m_FinishTimeLastReceivedTick + Client()->GameTickSpeed() * 6) - (float)Client()->GameTick(g_Config.m_ClDummy)) / (float)(Client()->GameTickSpeed() * 2);
 			}
 
-			TextRender()->TextColor(1, 1, 1, alpha);
-			TextRender()->Text(150 * Graphics()->ScreenAspect() - TextRender()->TextWidth(12, aBuf, -1, -1.0f) / 2, 20, 12, aBuf, -1.0f);
+			TextRender()->TextColor(1, 1, 1, Alpha);
+			CTextCursor Cursor;
+			TextRender()->SetCursor(&Cursor, 150 * Graphics()->ScreenAspect() - TextRender()->TextWidth(12, aBuf, -1, -1.0f) / 2, 20, 12, TEXTFLAG_RENDER);
+			Cursor.m_LineWidth = -1.0f;
+			TextRender()->RecreateTextContainer(m_DDRaceEffectsTextContainerIndex, &Cursor, aBuf);
 			if(m_FinishTimeDiff != 0.0f)
 			{
 				if(m_FinishTimeDiff < 0)
 				{
 					str_time_float(-m_FinishTimeDiff, TIME_HOURS_CENTISECS, aTime, sizeof(aTime));
 					str_format(aBuf, sizeof(aBuf), "-%s", aTime);
-					TextRender()->TextColor(0.5f, 1.0f, 0.5f, alpha); // green
+					TextRender()->TextColor(0.5f, 1.0f, 0.5f, Alpha); // green
 				}
 				else
 				{
 					str_time_float(m_FinishTimeDiff, TIME_HOURS_CENTISECS, aTime, sizeof(aTime));
 					str_format(aBuf, sizeof(aBuf), "+%s", aTime);
-					TextRender()->TextColor(1.0f, 0.5f, 0.5f, alpha); // red
+					TextRender()->TextColor(1.0f, 0.5f, 0.5f, Alpha); // red
 				}
-				TextRender()->Text(150 * Graphics()->ScreenAspect() - TextRender()->TextWidth(10, aBuf, -1, -1.0f) / 2, 34, 10, aBuf, -1.0f);
+				TextRender()->SetCursor(&Cursor, 150 * Graphics()->ScreenAspect() - TextRender()->TextWidth(10, aBuf, -1, -1.0f) / 2, 34, 10, TEXTFLAG_RENDER);
+				Cursor.m_LineWidth = -1.0f;
+				TextRender()->AppendTextContainer(m_DDRaceEffectsTextContainerIndex, &Cursor, aBuf);
 			}
+			auto OutlineColor = TextRender()->DefaultTextOutlineColor();
+			OutlineColor.a *= Alpha;
+			TextRender()->RenderTextContainer(m_DDRaceEffectsTextContainerIndex, TextRender()->DefaultTextColor(), OutlineColor);
 			TextRender()->TextColor(1, 1, 1, 1);
 		}
 		else if(!m_ShowFinishTime && m_TimeCpLastReceivedTick + Client()->GameTickSpeed() * 6 > Client()->GameTick(g_Config.m_ClDummy))
@@ -1655,21 +1663,28 @@ void CHud::RenderDDRaceEffects()
 			}
 
 			// calculate alpha (4 sec 1 than get lower the next 2 sec)
-			float alpha = 1.0f;
+			float Alpha = 1.0f;
 			if(m_TimeCpLastReceivedTick + Client()->GameTickSpeed() * 4 < Client()->GameTick(g_Config.m_ClDummy) && m_TimeCpLastReceivedTick + Client()->GameTickSpeed() * 6 > Client()->GameTick(g_Config.m_ClDummy))
 			{
 				// lower the alpha slowly to blend text out
-				alpha = ((float)(m_TimeCpLastReceivedTick + Client()->GameTickSpeed() * 6) - (float)Client()->GameTick(g_Config.m_ClDummy)) / (float)(Client()->GameTickSpeed() * 2);
+				Alpha = ((float)(m_TimeCpLastReceivedTick + Client()->GameTickSpeed() * 6) - (float)Client()->GameTick(g_Config.m_ClDummy)) / (float)(Client()->GameTickSpeed() * 2);
 			}
 
 			if(m_TimeCpDiff > 0)
-				TextRender()->TextColor(1.0f, 0.5f, 0.5f, alpha); // red
+				TextRender()->TextColor(1.0f, 0.5f, 0.5f, Alpha); // red
 			else if(m_TimeCpDiff < 0)
-				TextRender()->TextColor(0.5f, 1.0f, 0.5f, alpha); // green
+				TextRender()->TextColor(0.5f, 1.0f, 0.5f, Alpha); // green
 			else if(!m_TimeCpDiff)
-				TextRender()->TextColor(1, 1, 1, alpha); // white
-			TextRender()->Text(150 * Graphics()->ScreenAspect() - TextRender()->TextWidth(10, aBuf, -1, -1.0f) / 2, 20, 10, aBuf, -1.0f);
+				TextRender()->TextColor(1, 1, 1, Alpha); // white
 
+			CTextCursor Cursor;
+			TextRender()->SetCursor(&Cursor, 150 * Graphics()->ScreenAspect() - TextRender()->TextWidth(10, aBuf, -1, -1.0f) / 2, 20, 10, TEXTFLAG_RENDER);
+			Cursor.m_LineWidth = -1.0f;
+			TextRender()->RecreateTextContainer(m_DDRaceEffectsTextContainerIndex, &Cursor, aBuf);
+
+			auto OutlineColor = TextRender()->DefaultTextOutlineColor();
+			OutlineColor.a *= Alpha;
+			TextRender()->RenderTextContainer(m_DDRaceEffectsTextContainerIndex, TextRender()->DefaultTextColor(), OutlineColor);
 			TextRender()->TextColor(1, 1, 1, 1);
 		}
 	}

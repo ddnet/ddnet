@@ -42,6 +42,8 @@ class CHud : public CComponent
 	SScoreInfo m_aScoreInfo[2];
 	int m_FPSTextContainerIndex;
 
+	int m_DDRaceEffectsTextContainerIndex = -1;
+
 	void RenderCursor();
 
 	void RenderTextInfo();
