@@ -2322,3 +2322,28 @@ CUI::EPopupMenuFunctionResult CEditor::PopupEntities(void *pContext, CUIRect Vie
 
 	return CUI::POPUP_KEEP_OPEN;
 }
+
+CUI::EPopupMenuFunctionResult CEditor::PopupProofMode(void *pContext, CUIRect View, bool Active)
+{
+	CEditor *pEditor = static_cast<CEditor *>(pContext);
+
+	CUIRect Button;
+	View.HSplitTop(12.0f, &Button, &View);
+	static int s_ButtonIngame;
+	if(pEditor->DoButton_MenuItem(&s_ButtonIngame, "Ingame", !pEditor->m_MenuProofBorders, &Button, 0, "These borders represent what a player maximum can see."))
+	{
+		pEditor->m_MenuProofBorders = false;
+		return CUI::POPUP_CLOSE_CURRENT;
+	}
+
+	View.HSplitTop(2.0f, nullptr, &View);
+	View.HSplitTop(12.0f, &Button, &View);
+	static int s_ButtonMenu;
+	if(pEditor->DoButton_MenuItem(&s_ButtonMenu, "Menu", pEditor->m_MenuProofBorders, &Button, 0, "These borders represent what will be shown in the menu."))
+	{
+		pEditor->m_MenuProofBorders = true;
+		return CUI::POPUP_CLOSE_CURRENT;
+	}
+
+	return CUI::POPUP_KEEP_OPEN;
+}
