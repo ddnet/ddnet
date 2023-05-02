@@ -4376,6 +4376,28 @@ int net_socket_read_wait(NETSOCKET sock, std::chrono::nanoseconds nanoseconds)
 }
 
 #if defined(CONF_FAMILY_WINDOWS)
+std::wstring windows_utf8_to_wide(const char *str)
+{
+	const int orig_length = str_length(str);
+	if(orig_length == 0)
+		return L"";
+	const int size_needed = MultiByteToWideChar(CP_UTF8, 0, str, orig_length, nullptr, 0);
+	std::wstring wide_string(size_needed, L'\0');
+	dbg_assert(MultiByteToWideChar(CP_UTF8, 0, str, orig_length, &wide_string[0], size_needed) == size_needed, "MultiByteToWideChar failure");
+	return wide_string;
+}
+
+std::string windows_wide_to_utf8(const wchar_t *wide_str)
+{
+	const int orig_length = wcslen(wide_str);
+	if(orig_length == 0)
+		return "";
+	const int size_needed = WideCharToMultiByte(CP_UTF8, 0, wide_str, orig_length, nullptr, 0, nullptr, nullptr);
+	std::string string(size_needed, '\0');
+	dbg_assert(WideCharToMultiByte(CP_UTF8, 0, wide_str, orig_length, &string[0], size_needed, nullptr, nullptr) == size_needed, "WideCharToMultiByte failure");
+	return string;
+}
+
 // See https://learn.microsoft.com/en-us/windows/win32/learnwin32/initializing-the-com-library
 CWindowsComLifecycle::CWindowsComLifecycle(bool HasWindow)
 {
@@ -4395,15 +4417,6 @@ static void windows_print_error(const char *system, const char *prefix, HRESULT 
 	free(message);
 }
 
-static std::wstring utf8_to_wstring(const char *str)
-{
-	const int orig_length = str_length(str);
-	int size_needed = MultiByteToWideChar(CP_UTF8, 0, str, orig_length, NULL, 0);
-	std::wstring wide_string(size_needed, '\0');
-	dbg_assert(MultiByteToWideChar(CP_UTF8, 0, str, orig_length, &wide_string[0], size_needed) == size_needed, "MultiByteToWideChar failure");
-	return wide_string;
-}
-
 static std::wstring filename_from_path(const std::wstring &path)
 {
 	const size_t pos = path.find_last_of(L"/\\");
@@ -4412,8 +4425,8 @@ static std::wstring filename_from_path(const std::wstring &path)
 
 bool shell_register_protocol(const char *protocol_name, const char *executable, bool *updated)
 {
-	const std::wstring protocol_name_wide = utf8_to_wstring(protocol_name);
-	const std::wstring executable_wide = utf8_to_wstring(executable);
+	const std::wstring protocol_name_wide = windows_utf8_to_wide(protocol_name);
+	const std::wstring executable_wide = windows_utf8_to_wide(executable);
 
 	// Open registry key for protocol associations of the current user
 	HKEY handle_subkey_classes;
@@ -4512,11 +4525,11 @@ bool shell_register_protocol(const char *protocol_name, const char *executable, 
 
 bool shell_register_extension(const char *extension, const char *description, const char *executable_name, const char *executable, bool *updated)
 {
-	const std::wstring extension_wide = utf8_to_wstring(extension);
-	const std::wstring executable_name_wide = utf8_to_wstring(executable_name);
-	const std::wstring description_wide = executable_name_wide + L" " + utf8_to_wstring(description);
+	const std::wstring extension_wide = windows_utf8_to_wide(extension);
+	const std::wstring executable_name_wide = windows_utf8_to_wide(executable_name);
+	const std::wstring description_wide = executable_name_wide + L" " + windows_utf8_to_wide(description);
 	const std::wstring program_id_wide = executable_name_wide + extension_wide;
-	const std::wstring executable_wide = utf8_to_wstring(executable);
+	const std::wstring executable_wide = windows_utf8_to_wide(executable);
 
 	// Open registry key for file associations of the current user
 	HKEY handle_subkey_classes;
@@ -4648,8 +4661,8 @@ bool shell_register_extension(const char *extension, const char *description, co
 
 bool shell_register_application(const char *name, const char *executable, bool *updated)
 {
-	const std::wstring name_wide = utf8_to_wstring(name);
-	const std::wstring executable_filename = filename_from_path(utf8_to_wstring(executable));
+	const std::wstring name_wide = windows_utf8_to_wide(name);
+	const std::wstring executable_filename = filename_from_path(windows_utf8_to_wide(executable));
 
 	// Open registry key for application registrations
 	HKEY handle_subkey_applications;
@@ -4697,7 +4710,7 @@ bool shell_register_application(const char *name, const char *executable, bool *
 
 bool shell_unregister_class(const char *shell_class, bool *updated)
 {
-	const std::wstring class_wide = utf8_to_wstring(shell_class);
+	const std::wstring class_wide = windows_utf8_to_wide(shell_class);
 
 	// Open registry key for protocol and file associations of the current user
 	HKEY handle_subkey_classes;
@@ -4726,7 +4739,7 @@ bool shell_unregister_class(const char *shell_class, bool *updated)
 
 bool shell_unregister_application(const char *executable, bool *updated)
 {
-	const std::wstring executable_filename = filename_from_path(utf8_to_wstring(executable));
+	const std::wstring executable_filename = filename_from_path(windows_utf8_to_wide(executable));
 
 	// Open registry key for application registrations
 	HKEY handle_subkey_applications;
