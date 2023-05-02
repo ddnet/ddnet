@@ -111,9 +111,8 @@ void CFifo::Init(IConsole *pConsole, char *pFifoFile, int Flag)
 	if(m_pPipe == INVALID_HANDLE_VALUE)
 	{
 		const DWORD LastError = GetLastError();
-		char *pErrorMsg = windows_format_system_message(LastError);
-		dbg_msg("fifo", "failed to create named pipe '%s' (%ld %s)", m_aFilename, LastError, pErrorMsg);
-		free(pErrorMsg);
+		const std::string ErrorMsg = windows_format_system_message(LastError);
+		dbg_msg("fifo", "failed to create named pipe '%s' (%ld %s)", m_aFilename, LastError, ErrorMsg.c_str());
 	}
 	else
 		dbg_msg("fifo", "created named pipe '%s'", m_aFilename);
@@ -147,9 +146,8 @@ void CFifo::Update()
 		}
 		if(LastError != ERROR_PIPE_CONNECTED) // pipe already connected, not an error
 		{
-			char *pErrorMsg = windows_format_system_message(LastError);
-			dbg_msg("fifo", "failed to connect named pipe '%s' (%ld %s)", m_aFilename, LastError, pErrorMsg);
-			free(pErrorMsg);
+			const std::string ErrorMsg = windows_format_system_message(LastError);
+			dbg_msg("fifo", "failed to connect named pipe '%s' (%ld %s)", m_aFilename, LastError, ErrorMsg.c_str());
 			return;
 		}
 	}
@@ -162,9 +160,8 @@ void CFifo::Update()
 			const DWORD LastError = GetLastError();
 			if(LastError != ERROR_BAD_PIPE) // pipe not connected, not an error
 			{
-				char *pErrorMsg = windows_format_system_message(LastError);
-				dbg_msg("fifo", "failed to peek at pipe '%s' (%ld %s)", m_aFilename, LastError, pErrorMsg);
-				free(pErrorMsg);
+				const std::string ErrorMsg = windows_format_system_message(LastError);
+				dbg_msg("fifo", "failed to peek at pipe '%s' (%ld %s)", m_aFilename, LastError, ErrorMsg.c_str());
 			}
 			return;
 		}
@@ -176,9 +173,8 @@ void CFifo::Update()
 		if(!ReadFile(m_pPipe, pBuf, BytesAvailable, &Length, NULL))
 		{
 			const DWORD LastError = GetLastError();
-			char *pErrorMsg = windows_format_system_message(LastError);
-			dbg_msg("fifo", "failed to read from pipe '%s' (%ld %s)", m_aFilename, LastError, pErrorMsg);
-			free(pErrorMsg);
+			const std::string ErrorMsg = windows_format_system_message(LastError);
+			dbg_msg("fifo", "failed to read from pipe '%s' (%ld %s)", m_aFilename, LastError, ErrorMsg.c_str());
 			free(pBuf);
 			return;
 		}

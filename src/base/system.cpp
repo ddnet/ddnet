@@ -1461,18 +1461,14 @@ static int priv_net_close_all_sockets(NETSOCKET sock)
 }
 
 #if defined(CONF_FAMILY_WINDOWS)
-char *windows_format_system_message(unsigned long error)
+std::string windows_format_system_message(unsigned long error)
 {
 	WCHAR *wide_message;
 	const DWORD flags = FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS | FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_MAX_WIDTH_MASK;
 	if(FormatMessageW(flags, NULL, error, 0, (LPWSTR)&wide_message, 0, NULL) == 0)
-	{
-		return nullptr;
-	}
-	int len = WideCharToMultiByte(CP_UTF8, 0, wide_message, -1, NULL, 0, NULL, NULL);
-	dbg_assert(len > 0, "WideCharToMultiByte failure");
-	char *message = (char *)malloc(len * sizeof(*message));
-	dbg_assert(WideCharToMultiByte(CP_UTF8, 0, wide_message, -1, message, len, NULL, NULL) == len, "WideCharToMultiByte failure");
+		return "unknown error";
+
+	const std::string message = windows_wide_to_utf8(wide_message);
 	LocalFree(wide_message);
 	return message;
 }
@@ -1488,9 +1484,8 @@ static int priv_net_create_socket(int domain, int type, struct sockaddr *addr, i
 	{
 #if defined(CONF_FAMILY_WINDOWS)
 		int error = WSAGetLastError();
-		char *message = windows_format_system_message(error);
-		dbg_msg("net", "failed to create socket with domain %d and type %d (%d '%s')", domain, type, error, message == nullptr ? "unknown error" : message);
-		free(message);
+		const std::string message = windows_format_system_message(error);
+		dbg_msg("net", "failed to create socket with domain %d and type %d (%d '%s')", domain, type, error, message.c_str());
 #else
 		dbg_msg("net", "failed to create socket with domain %d and type %d (%d '%s')", domain, type, errno, strerror(errno));
 #endif
@@ -1524,9 +1519,8 @@ static int priv_net_create_socket(int domain, int type, struct sockaddr *addr, i
 	{
 #if defined(CONF_FAMILY_WINDOWS)
 		int error = WSAGetLastError();
-		char *message = windows_format_system_message(error);
-		dbg_msg("net", "failed to bind socket with domain %d and type %d (%d '%s')", domain, type, error, message == nullptr ? "unknown error" : message);
-		free(message);
+		const std::string message = windows_format_system_message(error);
+		dbg_msg("net", "failed to bind socket with domain %d and type %d (%d '%s')", domain, type, error, message.c_str());
 #else
 		dbg_msg("net", "failed to bind socket with domain %d and type %d (%d '%s')", domain, type, errno, strerror(errno));
 #endif
@@ -4412,9 +4406,8 @@ CWindowsComLifecycle::~CWindowsComLifecycle()
 
 static void windows_print_error(const char *system, const char *prefix, HRESULT error)
 {
-	char *message = windows_format_system_message(error);
-	dbg_msg(system, "%s: %s", prefix, message == nullptr ? "unknown error" : message);
-	free(message);
+	const std::string message = windows_format_system_message(error);
+	dbg_msg(system, "%s: %s", prefix, message.c_str());
 }
 
 static std::wstring filename_from_path(const std::wstring &path)

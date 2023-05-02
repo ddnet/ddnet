@@ -1163,12 +1163,9 @@ void net_unix_close(UNIXSOCKET sock);
  *
  * @param error The Windows error code.
  *
- * @return A new string representing the error code.
- *
- * @remark Guarantees that result will contain zero-termination.
- * @remark The result must be freed after it has been used.
+ * @return A new std::string representing the error code.
  */
-char *windows_format_system_message(unsigned long error);
+std::string windows_format_system_message(unsigned long error);
 
 #endif
 
