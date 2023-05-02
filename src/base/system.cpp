@@ -4119,7 +4119,9 @@ void secure_random_fill(void *bytes, unsigned length)
 #if defined(CONF_FAMILY_WINDOWS)
 	if(!CryptGenRandom(secure_random_data.provider, length, (unsigned char *)bytes))
 	{
-		dbg_msg("secure", "CryptGenRandom failed, last_error=%ld", GetLastError());
+		const DWORD LastError = GetLastError();
+		const std::string ErrorMsg = windows_format_system_message(LastError);
+		dbg_msg("secure", "CryptGenRandom failed: %ld %s", LastError, ErrorMsg.c_str());
 		dbg_break();
 	}
 #else
@@ -4323,7 +4325,9 @@ void init_exception_handler()
 	exception_handling_module = LoadLibraryA(module_name);
 	if(exception_handling_module == nullptr)
 	{
-		dbg_msg("exception_handling", "failed to load exception handling library '%s' (error %ld)", module_name, GetLastError());
+		const DWORD LastError = GetLastError();
+		const std::string ErrorMsg = windows_format_system_message(LastError);
+		dbg_msg("exception_handling", "failed to load exception handling library '%s' (error %ld %s)", module_name, LastError, ErrorMsg.c_str());
 	}
 #else
 #error exception handling not implemented
@@ -4348,7 +4352,11 @@ void set_exception_handler_log_file(const char *log_file_path)
 #pragma GCC diagnostic pop
 #endif
 		if(exception_log_file_path_func == nullptr)
-			dbg_msg("exception_handling", "could not find function '%s' in exception handling library (error %ld)", function_name, GetLastError());
+		{
+			const DWORD LastError = GetLastError();
+			const std::string ErrorMsg = windows_format_system_message(LastError);
+			dbg_msg("exception_handling", "could not find function '%s' in exception handling library (error %ld %s)", function_name, LastError, ErrorMsg.c_str());
+		}
 		else
 			exception_log_file_path_func(wBuffer);
 	}
