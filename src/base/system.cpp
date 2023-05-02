@@ -100,18 +100,13 @@ IOHANDLE io_current_exe()
 {
 	// From https://stackoverflow.com/a/1024937.
 #if defined(CONF_FAMILY_WINDOWS)
-	wchar_t wpath[IO_MAX_PATH_LENGTH];
-	char path[IO_MAX_PATH_LENGTH];
-	if(GetModuleFileNameW(NULL, wpath, std::size(wpath)) == 0 || GetLastError() != ERROR_SUCCESS)
+	wchar_t wide_path[IO_MAX_PATH_LENGTH];
+	if(GetModuleFileNameW(NULL, wide_path, std::size(wide_path)) == 0 || GetLastError() != ERROR_SUCCESS)
 	{
 		return 0;
 	}
-	if(WideCharToMultiByte(CP_UTF8, 0, wpath, -1, path, sizeof(path), NULL, NULL) == 0)
-	{
-		dbg_assert(GetLastError() == ERROR_INSUFFICIENT_BUFFER, "WideCharToMultiByte failure");
-		return 0;
-	}
-	return io_open(path, IOFLAG_READ);
+	const std::string path = windows_wide_to_utf8(wide_path);
+	return io_open(path.c_str(), IOFLAG_READ);
 #elif defined(CONF_PLATFORM_MACOS)
 	char path[IO_MAX_PATH_LENGTH];
 	uint32_t path_size = sizeof(path);
@@ -247,14 +242,13 @@ IOHANDLE io_open_impl(const char *filename, int flags)
 {
 	dbg_assert(flags == (IOFLAG_READ | IOFLAG_SKIP_BOM) || flags == IOFLAG_READ || flags == IOFLAG_WRITE || flags == IOFLAG_APPEND, "flags must be read, read+skipbom, write or append");
 #if defined(CONF_FAMILY_WINDOWS)
-	WCHAR wBuffer[IO_MAX_PATH_LENGTH];
-	dbg_assert(MultiByteToWideChar(CP_UTF8, 0, filename, -1, wBuffer, std::size(wBuffer)) > 0, "MultiByteToWideChar failure");
+	const std::wstring wide_filename = windows_utf8_to_wide(filename);
 	if((flags & IOFLAG_READ) != 0)
-		return (IOHANDLE)_wfsopen(wBuffer, L"rb", _SH_DENYNO);
+		return (IOHANDLE)_wfsopen(wide_filename.c_str(), L"rb", _SH_DENYNO);
 	if(flags == IOFLAG_WRITE)
-		return (IOHANDLE)_wfsopen(wBuffer, L"wb", _SH_DENYNO);
+		return (IOHANDLE)_wfsopen(wide_filename.c_str(), L"wb", _SH_DENYNO);
 	if(flags == IOFLAG_APPEND)
-		return (IOHANDLE)_wfsopen(wBuffer, L"ab", _SH_DENYNO);
+		return (IOHANDLE)_wfsopen(wide_filename.c_str(), L"ab", _SH_DENYNO);
 	return 0x0;
 #else
 	if((flags & IOFLAG_READ) != 0)
@@ -2113,27 +2107,20 @@ static inline time_t filetime_to_unixtime(LPFILETIME filetime)
 void fs_listdir(const char *dir, FS_LISTDIR_CALLBACK cb, int type, void *user)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	WIN32_FIND_DATAW finddata;
-	HANDLE handle;
 	char buffer[IO_MAX_PATH_LENGTH];
-	WCHAR wBuffer[IO_MAX_PATH_LENGTH];
-
 	str_format(buffer, sizeof(buffer), "%s/*", dir);
-	dbg_assert(MultiByteToWideChar(CP_UTF8, 0, buffer, -1, wBuffer, std::size(wBuffer)) > 0, "MultiByteToWideChar failure");
+	const std::wstring wide_buffer = windows_utf8_to_wide(buffer);
 
-	handle = FindFirstFileW(wBuffer, &finddata);
+	WIN32_FIND_DATAW finddata;
+	HANDLE handle = FindFirstFileW(wide_buffer.c_str(), &finddata);
 	if(handle == INVALID_HANDLE_VALUE)
 		return;
 
 	/* add all the entries */
 	do
 	{
-		if(WideCharToMultiByte(CP_UTF8, 0, finddata.cFileName, -1, buffer, sizeof(buffer), NULL, NULL) == 0)
-		{
-			dbg_assert(GetLastError() == ERROR_INSUFFICIENT_BUFFER, "WideCharToMultiByte failure");
-			continue;
-		}
-		if(cb(buffer, (finddata.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0, type, user))
+		const std::string current_entry = windows_wide_to_utf8(finddata.cFileName);
+		if(cb(current_entry.c_str(), (finddata.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0, type, user))
 			break;
 	} while(FindNextFileW(handle, &finddata));
 
@@ -2165,29 +2152,22 @@ void fs_listdir(const char *dir, FS_LISTDIR_CALLBACK cb, int type, void *user)
 void fs_listdir_fileinfo(const char *dir, FS_LISTDIR_CALLBACK_FILEINFO cb, int type, void *user)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	WIN32_FIND_DATAW finddata;
-	HANDLE handle;
 	char buffer[IO_MAX_PATH_LENGTH];
-	WCHAR wBuffer[IO_MAX_PATH_LENGTH];
-
 	str_format(buffer, sizeof(buffer), "%s/*", dir);
-	dbg_assert(MultiByteToWideChar(CP_UTF8, 0, buffer, -1, wBuffer, std::size(wBuffer)) > 0, "MultiByteToWideChar failure");
+	const std::wstring wide_buffer = windows_utf8_to_wide(buffer);
 
-	handle = FindFirstFileW(wBuffer, &finddata);
+	WIN32_FIND_DATAW finddata;
+	HANDLE handle = FindFirstFileW(wide_buffer.c_str(), &finddata);
 	if(handle == INVALID_HANDLE_VALUE)
 		return;
 
 	/* add all the entries */
 	do
 	{
-		if(WideCharToMultiByte(CP_UTF8, 0, finddata.cFileName, -1, buffer, sizeof(buffer), NULL, NULL) == 0)
-		{
-			dbg_assert(GetLastError() == ERROR_INSUFFICIENT_BUFFER, "WideCharToMultiByte failure");
-			continue;
-		}
+		const std::string current_entry = windows_wide_to_utf8(finddata.cFileName);
 
 		CFsFileInfo info;
-		info.m_pName = buffer;
+		info.m_pName = current_entry.c_str();
 		info.m_TimeCreated = filetime_to_unixtime(&finddata.ftCreationTime);
 		info.m_TimeModified = filetime_to_unixtime(&finddata.ftLastWriteTime);
 
@@ -2232,16 +2212,11 @@ void fs_listdir_fileinfo(const char *dir, FS_LISTDIR_CALLBACK_FILEINFO cb, int t
 int fs_storage_path(const char *appname, char *path, int max)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	WCHAR *home = _wgetenv(L"APPDATA");
-	if(!home)
+	WCHAR *wide_home = _wgetenv(L"APPDATA");
+	if(!wide_home)
 		return -1;
-	char buffer[IO_MAX_PATH_LENGTH];
-	if(WideCharToMultiByte(CP_UTF8, 0, home, -1, buffer, sizeof(buffer), NULL, NULL) == 0)
-	{
-		dbg_assert(GetLastError() == ERROR_INSUFFICIENT_BUFFER, "WideCharToMultiByte failure");
-		return -1;
-	}
-	str_format(path, max, "%s/%s", buffer, appname);
+	const std::string home = windows_wide_to_utf8(wide_home);
+	str_format(path, max, "%s/%s", home.c_str(), appname);
 	return 0;
 #elif defined(CONF_PLATFORM_ANDROID)
 	// just use the data directory
@@ -2298,9 +2273,8 @@ int fs_makedir_rec_for(const char *path)
 int fs_makedir(const char *path)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	WCHAR wBuffer[IO_MAX_PATH_LENGTH];
-	dbg_assert(MultiByteToWideChar(CP_UTF8, 0, path, -1, wBuffer, std::size(wBuffer)) > 0, "MultiByteToWideChar failure");
-	if(CreateDirectoryW(wBuffer, NULL) != 0)
+	const std::wstring wide_path = windows_utf8_to_wide(path);
+	if(CreateDirectoryW(wide_path.c_str(), NULL) != 0)
 		return 0;
 	if(GetLastError() == ERROR_ALREADY_EXISTS)
 		return 0;
@@ -2322,9 +2296,8 @@ int fs_makedir(const char *path)
 int fs_removedir(const char *path)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	WCHAR wPath[IO_MAX_PATH_LENGTH];
-	dbg_assert(MultiByteToWideChar(CP_UTF8, 0, path, -1, wPath, std::size(wPath)) > 0, "MultiByteToWideChar failure");
-	if(RemoveDirectoryW(wPath) != 0)
+	const std::wstring wide_path = windows_utf8_to_wide(path);
+	if(RemoveDirectoryW(wide_path.c_str()) != 0)
 		return 0;
 	return -1;
 #else
@@ -2337,9 +2310,8 @@ int fs_removedir(const char *path)
 int fs_is_file(const char *path)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	WCHAR wPath[IO_MAX_PATH_LENGTH];
-	dbg_assert(MultiByteToWideChar(CP_UTF8, 0, path, -1, wPath, std::size(wPath)) > 0, "MultiByteToWideChar failure");
-	DWORD attributes = GetFileAttributesW(wPath);
+	const std::wstring wide_path = windows_utf8_to_wide(path);
+	DWORD attributes = GetFileAttributesW(wide_path.c_str());
 	return attributes != INVALID_FILE_ATTRIBUTES && !(attributes & FILE_ATTRIBUTE_DIRECTORY) ? 1 : 0;
 #else
 	struct stat sb;
@@ -2352,9 +2324,8 @@ int fs_is_file(const char *path)
 int fs_is_dir(const char *path)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	WCHAR wPath[IO_MAX_PATH_LENGTH];
-	dbg_assert(MultiByteToWideChar(CP_UTF8, 0, path, -1, wPath, std::size(wPath)) > 0, "MultiByteToWideChar failure");
-	DWORD attributes = GetFileAttributesW(wPath);
+	const std::wstring wide_path = windows_utf8_to_wide(path);
+	DWORD attributes = GetFileAttributesW(wide_path.c_str());
 	return attributes != INVALID_FILE_ATTRIBUTES && (attributes & FILE_ATTRIBUTE_DIRECTORY) ? 1 : 0;
 #else
 	struct stat sb;
@@ -2367,9 +2338,8 @@ int fs_is_dir(const char *path)
 int fs_is_relative_path(const char *path)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	WCHAR wPath[IO_MAX_PATH_LENGTH];
-	dbg_assert(MultiByteToWideChar(CP_UTF8, 0, path, -1, wPath, std::size(wPath)) > 0, "MultiByteToWideChar failure");
-	return PathIsRelativeW(wPath) ? 1 : 0;
+	const std::wstring wide_path = windows_utf8_to_wide(path);
+	return PathIsRelativeW(wide_path.c_str()) ? 1 : 0;
 #else
 	return path[0] == '/' ? 0 : 1; // yes, it's that simple
 #endif
@@ -2380,14 +2350,10 @@ int fs_chdir(const char *path)
 	if(fs_is_dir(path))
 	{
 #if defined(CONF_FAMILY_WINDOWS)
-		WCHAR wBuffer[IO_MAX_PATH_LENGTH];
-		dbg_assert(MultiByteToWideChar(CP_UTF8, 0, path, -1, wBuffer, std::size(wBuffer)) > 0, "MultiByteToWideChar failure");
-		return SetCurrentDirectoryW(wBuffer) != 0 ? 0 : 1;
+		const std::wstring wide_path = windows_utf8_to_wide(path);
+		return SetCurrentDirectoryW(wide_path.c_str()) != 0 ? 0 : 1;
 #else
-		if(chdir(path))
-			return 1;
-		else
-			return 0;
+		return chdir(path) ? 1 : 0;
 #endif
 	}
 	else
@@ -2397,15 +2363,18 @@ int fs_chdir(const char *path)
 char *fs_getcwd(char *buffer, int buffer_size)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	WCHAR wBuffer[IO_MAX_PATH_LENGTH];
-	DWORD result = GetCurrentDirectoryW(std::size(wBuffer), wBuffer);
-	if(result == 0 || result > std::size(wBuffer))
-		return nullptr;
-	if(WideCharToMultiByte(CP_UTF8, 0, wBuffer, -1, buffer, buffer_size, NULL, NULL) == 0)
+	const DWORD size_needed = GetCurrentDirectoryW(0, nullptr);
+	std::wstring wide_current_dir(size_needed, L'0');
+	DWORD result = GetCurrentDirectoryW(size_needed, &wide_current_dir[0]);
+	if(result == 0)
 	{
-		dbg_assert(GetLastError() == ERROR_INSUFFICIENT_BUFFER, "WideCharToMultiByte failure");
+		const DWORD LastError = GetLastError();
+		const std::string ErrorMsg = windows_format_system_message(LastError);
+		dbg_msg("filesystem", "GetCurrentDirectoryW failed: %ld %s", LastError, ErrorMsg.c_str());
 		return nullptr;
 	}
+	const std::string current_dir = windows_wide_to_utf8(wide_current_dir.c_str());
+	str_copy(buffer, current_dir.c_str(), buffer_size);
 	return buffer;
 #else
 	return getcwd(buffer, buffer_size);
@@ -2432,9 +2401,8 @@ int fs_parent_dir(char *path)
 int fs_remove(const char *filename)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	WCHAR wFilename[IO_MAX_PATH_LENGTH];
-	dbg_assert(MultiByteToWideChar(CP_UTF8, 0, filename, -1, wFilename, std::size(wFilename)) > 0, "MultiByteToWideChar failure");
-	return DeleteFileW(wFilename) == 0;
+	const std::wstring wide_filename = windows_utf8_to_wide(filename);
+	return DeleteFileW(wide_filename.c_str()) == 0;
 #else
 	return unlink(filename) != 0;
 #endif
@@ -2443,11 +2411,9 @@ int fs_remove(const char *filename)
 int fs_rename(const char *oldname, const char *newname)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	WCHAR wOldname[IO_MAX_PATH_LENGTH];
-	WCHAR wNewname[IO_MAX_PATH_LENGTH];
-	dbg_assert(MultiByteToWideChar(CP_UTF8, 0, oldname, -1, wOldname, std::size(wOldname)) > 0, "MultiByteToWideChar failure");
-	dbg_assert(MultiByteToWideChar(CP_UTF8, 0, newname, -1, wNewname, std::size(wNewname)) > 0, "MultiByteToWideChar failure");
-	if(MoveFileExW(wOldname, wNewname, MOVEFILE_REPLACE_EXISTING | MOVEFILE_COPY_ALLOWED) == 0)
+	const std::wstring wide_oldname = windows_utf8_to_wide(oldname);
+	const std::wstring wide_newname = windows_utf8_to_wide(newname);
+	if(MoveFileExW(wide_oldname.c_str(), wide_newname.c_str(), MOVEFILE_REPLACE_EXISTING | MOVEFILE_COPY_ALLOWED) == 0)
 		return 1;
 #else
 	if(rename(oldname, newname) != 0)
@@ -2460,11 +2426,8 @@ int fs_file_time(const char *name, time_t *created, time_t *modified)
 {
 #if defined(CONF_FAMILY_WINDOWS)
 	WIN32_FIND_DATAW finddata;
-	HANDLE handle;
-	WCHAR wBuffer[IO_MAX_PATH_LENGTH];
-
-	dbg_assert(MultiByteToWideChar(CP_UTF8, 0, name, -1, wBuffer, std::size(wBuffer)) > 0, "MultiByteToWideChar failure");
-	handle = FindFirstFileW(wBuffer, &finddata);
+	const std::wstring wide_name = windows_utf8_to_wide(name);
+	HANDLE handle = FindFirstFileW(wide_name.c_str(), &finddata);
 	if(handle == INVALID_HANDLE_VALUE)
 		return 1;
 
@@ -3889,13 +3852,13 @@ void cmdline_free(int argc, const char **argv)
 PROCESS shell_execute(const char *file)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	WCHAR wBuffer[IO_MAX_PATH_LENGTH];
-	dbg_assert(MultiByteToWideChar(CP_UTF8, 0, file, -1, wBuffer, std::size(wBuffer)) > 0, "MultiByteToWideChar failure");
+	const std::wstring wide_file = windows_utf8_to_wide(file);
+
 	SHELLEXECUTEINFOW info;
 	mem_zero(&info, sizeof(SHELLEXECUTEINFOW));
 	info.cbSize = sizeof(SHELLEXECUTEINFOW);
 	info.lpVerb = L"open";
-	info.lpFile = wBuffer;
+	info.lpFile = wide_file.c_str();
 	info.nShow = SW_SHOWMINNOACTIVE;
 	info.fMask = SEE_MASK_NOCLOSEPROCESS;
 	// Save and restore the FPU control word because ShellExecute might change it
@@ -3943,13 +3906,13 @@ int kill_process(PROCESS process)
 int open_link(const char *link)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	WCHAR wBuffer[IO_MAX_PATH_LENGTH];
-	dbg_assert(MultiByteToWideChar(CP_UTF8, 0, link, -1, wBuffer, std::size(wBuffer)) > 0, "MultiByteToWideChar failure");
+	const std::wstring wide_link = windows_utf8_to_wide(link);
+
 	SHELLEXECUTEINFOW info;
 	mem_zero(&info, sizeof(SHELLEXECUTEINFOW));
 	info.cbSize = sizeof(SHELLEXECUTEINFOW);
 	info.lpVerb = NULL; // NULL to use the default verb, as "open" may not be available
-	info.lpFile = wBuffer;
+	info.lpFile = wide_link.c_str();
 	info.nShow = SW_SHOWNORMAL;
 	// The SEE_MASK_NOASYNC flag ensures that the ShellExecuteEx function
 	// finishes its DDE conversation before it returns, so it's not necessary
@@ -4253,11 +4216,8 @@ void os_locale_str(char *locale, size_t length)
 	wchar_t wide_buffer[LOCALE_NAME_MAX_LENGTH];
 	dbg_assert(GetUserDefaultLocaleName(wide_buffer, std::size(wide_buffer)) > 0, "GetUserDefaultLocaleName failure");
 
-	// Assume maximum possible length for encoding as UTF-8.
-	char buffer[UTF8_BYTE_LENGTH * LOCALE_NAME_MAX_LENGTH + 1];
-	dbg_assert(WideCharToMultiByte(CP_UTF8, 0, wide_buffer, -1, buffer, sizeof(buffer), NULL, NULL) > 0, "WideCharToMultiByte failure");
-
-	str_copy(locale, buffer, length);
+	const std::string buffer = windows_wide_to_utf8(wide_buffer);
+	str_copy(locale, buffer.c_str(), length);
 #elif defined(CONF_PLATFORM_MACOS)
 	CFLocaleRef locale_ref = CFLocaleCopyCurrent();
 	CFStringRef locale_identifier_ref = static_cast<CFStringRef>(CFLocaleGetValue(locale_ref, kCFLocaleIdentifier));
@@ -4339,8 +4299,7 @@ void set_exception_handler_log_file(const char *log_file_path)
 #if defined(CONF_FAMILY_WINDOWS)
 	if(exception_handling_module != nullptr)
 	{
-		WCHAR wBuffer[IO_MAX_PATH_LENGTH];
-		dbg_assert(MultiByteToWideChar(CP_UTF8, 0, log_file_path, -1, wBuffer, std::size(wBuffer)) > 0, "MultiByteToWideChar failure");
+		const std::wstring wide_log_file_path = windows_utf8_to_wide(log_file_path);
 		// Intentional
 #ifdef __MINGW32__
 #pragma GCC diagnostic push
@@ -4358,7 +4317,7 @@ void set_exception_handler_log_file(const char *log_file_path)
 			dbg_msg("exception_handling", "could not find function '%s' in exception handling library (error %ld %s)", function_name, LastError, ErrorMsg.c_str());
 		}
 		else
-			exception_log_file_path_func(wBuffer);
+			exception_log_file_path_func(wide_log_file_path.c_str());
 	}
 #else
 #error exception handling not implemented

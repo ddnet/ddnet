@@ -95,11 +95,8 @@ void CFifo::Init(IConsole *pConsole, char *pFifoFile, int Flag)
 	str_append(m_aFilename, pFifoFile, sizeof(m_aFilename));
 	m_Flag = Flag;
 
-	const int WLen = MultiByteToWideChar(CP_UTF8, 0, m_aFilename, -1, NULL, 0);
-	dbg_assert(WLen > 0, "MultiByteToWideChar failure");
-	wchar_t *pWide = static_cast<wchar_t *>(malloc(WLen * sizeof(*pWide)));
-	dbg_assert(MultiByteToWideChar(CP_UTF8, 0, m_aFilename, -1, pWide, WLen) == WLen, "MultiByteToWideChar failure");
-	m_pPipe = CreateNamedPipeW(pWide,
+	const std::wstring WideFilename = windows_utf8_to_wide(m_aFilename);
+	m_pPipe = CreateNamedPipeW(WideFilename.c_str(),
 		PIPE_ACCESS_DUPLEX,
 		PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE | PIPE_NOWAIT | PIPE_REJECT_REMOTE_CLIENTS,
 		PIPE_UNLIMITED_INSTANCES,
@@ -107,7 +104,6 @@ void CFifo::Init(IConsole *pConsole, char *pFifoFile, int Flag)
 		8192,
 		NMPWAIT_USE_DEFAULT_WAIT,
 		NULL);
-	free(pWide);
 	if(m_pPipe == INVALID_HANDLE_VALUE)
 	{
 		const DWORD LastError = GetLastError();

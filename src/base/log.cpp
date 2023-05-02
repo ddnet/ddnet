@@ -328,12 +328,7 @@ public:
 	}
 	void Log(const CLogMessage *pMessage) override
 	{
-		int WLen = MultiByteToWideChar(CP_UTF8, 0, pMessage->m_aLine, pMessage->m_LineLength, NULL, 0);
-		dbg_assert(WLen > 0, "MultiByteToWideChar failure");
-		WCHAR *pWide = (WCHAR *)malloc((WLen + 2) * sizeof(*pWide));
-		dbg_assert(MultiByteToWideChar(CP_UTF8, 0, pMessage->m_aLine, pMessage->m_LineLength, pWide, WLen) == WLen, "MultiByteToWideChar failure");
-		pWide[WLen++] = '\r';
-		pWide[WLen++] = '\n';
+		const std::wstring WideMessage = windows_utf8_to_wide(pMessage->m_aLine) + L"\r\n";
 
 		int Color = m_BackgroundColor;
 		if(pMessage->m_HaveColor)
@@ -351,10 +346,9 @@ public:
 		if(!m_Finished)
 		{
 			SetConsoleTextAttribute(m_pConsole, Color);
-			WriteConsoleW(m_pConsole, pWide, WLen, NULL, NULL);
+			WriteConsoleW(m_pConsole, WideMessage.c_str(), WideMessage.length(), NULL, NULL);
 		}
 		m_OutputLock.unlock();
-		free(pWide);
 	}
 	void GlobalFinish() override
 	{
@@ -413,12 +407,8 @@ class CLoggerWindowsDebugger : public ILogger
 public:
 	void Log(const CLogMessage *pMessage) override
 	{
-		int WLen = MultiByteToWideChar(CP_UTF8, 0, pMessage->m_aLine, -1, NULL, 0);
-		dbg_assert(WLen > 0, "MultiByteToWideChar failure");
-		WCHAR *pWide = (WCHAR *)malloc(WLen * sizeof(*pWide));
-		dbg_assert(MultiByteToWideChar(CP_UTF8, 0, pMessage->m_aLine, -1, pWide, WLen) == WLen, "MultiByteToWideChar failure");
-		OutputDebugStringW(pWide);
-		free(pWide);
+		const std::wstring WideMessage = windows_utf8_to_wide(pMessage->m_aLine);
+		OutputDebugStringW(WideMessage.c_str());
 	}
 };
 std::unique_ptr<ILogger> log_logger_windows_debugger()
