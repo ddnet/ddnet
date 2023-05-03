@@ -20,7 +20,7 @@ private:
 public:
 	void Reset();
 	void AddInt(int i);
-	void AddString(const char *pStr, int Limit);
+	void AddString(const char *pStr, int Limit = PACKER_BUFFER_SIZE);
 	void AddRaw(const void *pData, int Size);
 
 	int Size() const { return (int)(m_pCurrent - m_aBuffer); }
