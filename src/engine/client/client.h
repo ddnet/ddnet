@@ -425,7 +425,7 @@ public:
 
 	void Run();
 
-	bool InitNetworkClient();
+	bool InitNetworkClient(char *pError, size_t ErrorSize);
 	bool CtrlShiftKey(int Key, bool &Last);
 
 	static void Con_Connect(IConsole::IResult *pResult, void *pUserData);

@@ -3007,6 +3007,7 @@ void CClient::Run()
 		if(RegisterFail || m_pGraphics->Init() != 0)
 		{
 			dbg_msg("client", "couldn't init graphics");
+			ShowMessageBox("Graphics Error", "The graphics could not be initialized.");
 			return;
 		}
 	}
@@ -3024,8 +3025,13 @@ void CClient::Run()
 #endif
 
 #ifndef CONF_WEBASM
-	if(!InitNetworkClient())
+	char aNetworkError[256];
+	if(!InitNetworkClient(aNetworkError, sizeof(aNetworkError)))
+	{
+		dbg_msg("client", "%s", aNetworkError);
+		ShowMessageBox("Network Error", aNetworkError);
 		return;
+	}
 #endif
 
 	// init font rendering
@@ -3383,7 +3389,7 @@ void CClient::Run()
 	delete m_pEditor;
 }
 
-bool CClient::InitNetworkClient()
+bool CClient::InitNetworkClient(char *pError, size_t ErrorSize)
 {
 	NETADDR BindAddr;
 	if(g_Config.m_Bindaddr[0] == '\0')
@@ -3392,7 +3398,7 @@ bool CClient::InitNetworkClient()
 	}
 	else if(net_host_lookup(g_Config.m_Bindaddr, &BindAddr, NETTYPE_ALL) != 0)
 	{
-		dbg_msg("client", "The configured bindaddr '%s' cannot be resolved", g_Config.m_Bindaddr);
+		str_format(pError, ErrorSize, "The configured bindaddr '%s' cannot be resolved.", g_Config.m_Bindaddr);
 		return false;
 	}
 	BindAddr.type = NETTYPE_ALL;
@@ -3413,9 +3419,9 @@ bool CClient::InitNetworkClient()
 				if(RemainingAttempts == 0)
 				{
 					if(g_Config.m_Bindaddr[0])
-						dbg_msg("client", "Could not open network client, try changing or unsetting the bindaddr '%s'", g_Config.m_Bindaddr);
+						str_format(pError, ErrorSize, "Could not open the network client, try changing or unsetting the bindaddr '%s'.", g_Config.m_Bindaddr);
 					else
-						dbg_msg("client", "Could not open network client");
+						str_format(pError, ErrorSize, "Could not open the network client.");
 					return false;
 				}
 			}
@@ -4614,7 +4620,9 @@ int main(int argc, const char **argv)
 
 	if(RandInitFailed)
 	{
-		dbg_msg("secure", "could not initialize secure RNG");
+		const char *pError = "Failed to initialize the secure RNG.";
+		dbg_msg("secure", "%s", pError);
+		pClient->ShowMessageBox("Secure RNG Error", pError);
 		return -1;
 	}
 
@@ -4646,6 +4654,9 @@ int main(int argc, const char **argv)
 
 		if(RegisterFail)
 		{
+			const char *pError = "Failed to register an interface.";
+			dbg_msg("client", "%s", pError);
+			pClient->ShowMessageBox("Kernel Error", pError);
 			delete pKernel;
 			pClient->~CClient();
 			free(pClient);
@@ -4729,7 +4740,10 @@ int main(int argc, const char **argv)
 	// init SDL
 	if(SDL_Init(0) < 0)
 	{
-		dbg_msg("client", "unable to init SDL base: %s", SDL_GetError());
+		char aError[256];
+		str_format(aError, sizeof(aError), "Unable to initialize SDL base: %s", SDL_GetError());
+		dbg_msg("client", "%s", aError);
+		pClient->ShowMessageBox("SDL Error", aError);
 		return -1;
 	}
 
