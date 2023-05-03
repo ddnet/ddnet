@@ -108,6 +108,9 @@ bool dbg_assert_has_failed();
 void
 dbg_break();
 
+typedef std::function<void(const char *message)> DBG_ASSERT_HANDLER;
+void dbg_assert_set_handler(DBG_ASSERT_HANDLER handler);
+
 /**
  * Prints a debug message.
  *

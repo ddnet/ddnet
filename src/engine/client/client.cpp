@@ -4534,6 +4534,7 @@ int main(int argc, const char **argv)
 	CWindowsComLifecycle WindowsComLifecycle(true);
 #endif
 	CCmdlineFix CmdlineFix(&argc, &argv);
+
 	bool Silent = false;
 	bool RandInitFailed = false;
 
@@ -4581,6 +4582,12 @@ int main(int argc, const char **argv)
 	IKernel *pKernel = IKernel::Create();
 	pKernel->RegisterInterface(pClient, false);
 	pClient->RegisterInterfaces();
+
+	dbg_assert_set_handler([pClient](const char *pMsg) {
+		char aMessage[256];
+		str_format(aMessage, sizeof(aMessage), "An assertion error occured. Please write down or take a screenshot of the following information and report this error.\n\n%s", pMsg);
+		pClient->ShowMessageBox("Assertion Error", aMessage);
+	});
 
 	// create the components
 	IEngine *pEngine = CreateEngine(GAME_NAME, pFutureConsoleLogger, 2);
