@@ -66,7 +66,7 @@ void CPacker::AddRaw(const void *pData, int Size)
 	if(m_Error)
 		return;
 
-	if(m_pCurrent + Size >= m_pEnd)
+	if(m_pCurrent + Size > m_pEnd)
 	{
 		m_Error = true;
 		return;
