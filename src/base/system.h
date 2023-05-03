@@ -18,6 +18,7 @@
 #include <cstdarg>
 #include <cstdint>
 #include <ctime>
+#include <string>
 
 #ifdef __MINGW32__
 #undef PRId64
@@ -1162,12 +1163,9 @@ void net_unix_close(UNIXSOCKET sock);
  *
  * @param error The Windows error code.
  *
- * @return A new string representing the error code.
- *
- * @remark Guarantees that result will contain zero-termination.
- * @remark The result must be freed after it has been used.
+ * @return A new std::string representing the error code.
  */
-char *windows_format_system_message(unsigned long error);
+std::string windows_format_system_message(unsigned long error);
 
 #endif
 
@@ -2655,6 +2653,30 @@ public:
 };
 
 #if defined(CONF_FAMILY_WINDOWS)
+/**
+ * Converts a utf8 encoded string to a wide character string
+ * for use with the Windows API.
+ *
+ * @param str The utf8 encoded string to convert.
+ *
+ * @return The argument as a wide character string.
+ *
+ * @remark The argument string must be zero-terminated.
+ */
+std::wstring windows_utf8_to_wide(const char *str);
+
+/**
+ * Converts a wide character string obtained from the Windows API
+ * to a utf8 encoded string.
+ *
+ * @param wide_str The wide character string to convert.
+ *
+ * @return The argument as a utf8 encoded string.
+ *
+ * @remark The argument string must be zero-terminated.
+ */
+std::string windows_wide_to_utf8(const wchar_t *wide_str);
+
 /**
  * This is a RAII wrapper to initialize/uninitialize the Windows COM library,
  * which may be necessary for using the open_file and open_link functions.

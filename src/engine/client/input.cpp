@@ -806,11 +806,7 @@ void CInput::ProcessSystemMessage(SDL_SysWMmsg *pMsg)
 				for(DWORD i = pCandidateList->dwPageStart; i < pCandidateList->dwCount && (int)m_vCandidates.size() < (int)pCandidateList->dwPageSize; i++)
 				{
 					LPCWSTR pCandidate = (LPCWSTR)((DWORD_PTR)pCandidateList + pCandidateList->dwOffset[i]);
-					const int Len = WideCharToMultiByte(CP_UTF8, 0, pCandidate, -1, nullptr, 0, nullptr, nullptr);
-					dbg_assert(Len > 0, "WideCharToMultiByte failure");
-					m_vCandidates.emplace_back();
-					m_vCandidates.back().resize(Len, '\0');
-					dbg_assert(WideCharToMultiByte(CP_UTF8, 0, pCandidate, -1, &m_vCandidates.back()[0], Len, nullptr, nullptr) == Len, "WideCharToMultiByte failure");
+					m_vCandidates.push_back(std::move(windows_wide_to_utf8(pCandidate)));
 				}
 				m_CandidateSelectedIndex = pCandidateList->dwSelection - pCandidateList->dwPageStart;
 			}
