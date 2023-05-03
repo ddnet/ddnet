@@ -128,14 +128,14 @@ int CUnpacker::GetUncompressedInt()
 	if(m_Error)
 		return 0;
 
-	if(m_pCurrent + 4 > m_pEnd)
+	if(m_pCurrent + sizeof(int) > m_pEnd)
 	{
 		m_Error = 1;
 		return 0;
 	}
 
 	int i = *(int *)m_pCurrent;
-	m_pCurrent += 4;
+	m_pCurrent += sizeof(int);
 	return i;
 }
 
