@@ -32,7 +32,7 @@ static void ExpectAddInt(int Input, int Expected)
 	CPacker Packer;
 	Packer.Reset();
 	Packer.AddInt(Input);
-	EXPECT_EQ(Packer.Error(), 0);
+	EXPECT_EQ(Packer.Error(), false);
 	ASSERT_EQ(Packer.Size(), 1);
 	EXPECT_EQ(Packer.Data()[0], Expected);
 }
@@ -42,7 +42,7 @@ static void ExpectAddExtendedInt(int Input, unsigned char *pExpected, int Size)
 	CPacker Packer;
 	Packer.Reset();
 	Packer.AddInt(Input);
-	EXPECT_EQ(Packer.Error(), 0);
+	EXPECT_EQ(Packer.Error(), false);
 	ASSERT_EQ(Packer.Size(), Size);
 	EXPECT_EQ(mem_comp(Packer.Data(), pExpected, Size), 0);
 }
