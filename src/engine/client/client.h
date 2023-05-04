@@ -550,6 +550,8 @@ public:
 	void ShellRegister() override;
 	void ShellUnregister() override;
 #endif
+
+	void ShowMessageBox(const char *pTitle, const char *pMessage, EMessageBoxType Type = MESSAGE_BOX_TYPE_ERROR) override;
 };
 
 #endif
