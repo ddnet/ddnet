@@ -5,12 +5,14 @@
 
 #include <game/client/prediction/entity.h>
 
+class CPickupData;
+
 class CPickup : public CEntity
 {
 public:
 	void Tick() override;
 
-	CPickup(CGameWorld *pGameWorld, int ID, CNetObj_Pickup *pPickup, const CNetObj_EntityEx *pEntEx = 0);
+	CPickup(CGameWorld *pGameWorld, int ID, const CPickupData *pPickup);
 	void FillInfo(CNetObj_Pickup *pPickup);
 	bool Match(CPickup *pPickup);
 	bool InDDNetTile() { return m_IsCoreActive; }

@@ -377,7 +377,8 @@ void CCharacter::FireWeapon()
 	}
 
 	DoWeaponSwitch();
-	vec2 Direction = normalize(vec2(m_LatestInput.m_TargetX, m_LatestInput.m_TargetY));
+	vec2 MouseTarget = vec2(m_LatestInput.m_TargetX, m_LatestInput.m_TargetY);
+	vec2 Direction = normalize(MouseTarget);
 
 	bool FullAuto = false;
 	if(m_Core.m_ActiveWeapon == WEAPON_GRENADE || m_Core.m_ActiveWeapon == WEAPON_SHOTGUN || m_Core.m_ActiveWeapon == WEAPON_LASER)
@@ -512,7 +513,8 @@ void CCharacter::FireWeapon()
 				Lifetime, //Span
 				false, //Freeze
 				false, //Explosive
-				-1 //SoundImpact
+				-1, //SoundImpact
+				MouseTarget //InitDir
 			);
 
 			GameServer()->CreateSound(m_Pos, SOUND_GUN_FIRE, TeamMask());
@@ -550,8 +552,9 @@ void CCharacter::FireWeapon()
 			Lifetime, //Span
 			false, //Freeze
 			true, //Explosive
-			SOUND_GRENADE_EXPLODE //SoundImpact
-		); //SoundImpact
+			SOUND_GRENADE_EXPLODE, //SoundImpact
+			MouseTarget // MouseTarget
+		);
 
 		GameServer()->CreateSound(m_Pos, SOUND_GRENADE_FIRE, TeamMask());
 	}

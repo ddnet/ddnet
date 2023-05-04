@@ -155,7 +155,7 @@ void CProjectile::SetBouncing(int Value)
 	m_Bouncing = Value;
 }
 
-CProjectile::CProjectile(CGameWorld *pGameWorld, int ID, CProjectileData *pProj, const CNetObj_EntityEx *pEntEx) :
+CProjectile::CProjectile(CGameWorld *pGameWorld, int ID, const CProjectileData *pProj) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_PROJECTILE)
 {
 	m_Pos = pProj->m_StartPos;
@@ -191,14 +191,8 @@ CProjectile::CProjectile(CGameWorld *pGameWorld, int ID, CProjectileData *pProj,
 		Lifetime = GetTuning(m_TuneZone)->m_ShotgunLifetime * GameWorld()->GameTickSpeed();
 	m_LifeSpan = Lifetime - (pGameWorld->GameTick() - m_StartTick);
 	m_ID = ID;
-	m_Layer = LAYER_GAME;
-	m_Number = 0;
-
-	if(pEntEx)
-	{
-		m_Layer = LAYER_SWITCH;
-		m_Number = pEntEx->m_SwitchNumber;
-	}
+	m_Number = pProj->m_SwitchNumber;
+	m_Layer = m_Number > 0 ? LAYER_SWITCH : LAYER_GAME;
 }
 
 CProjectileData CProjectile::GetData() const
@@ -214,6 +208,7 @@ CProjectileData CProjectile::GetData() const
 	Result.m_Bouncing = m_Bouncing;
 	Result.m_Freeze = m_Freeze;
 	Result.m_TuneZone = m_TuneZone;
+	Result.m_SwitchNumber = m_Number;
 	return Result;
 }
 

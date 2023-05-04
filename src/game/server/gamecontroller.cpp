@@ -232,6 +232,7 @@ bool IGameController::OnEntity(int Index, int x, int y, int Layer, int Flags, bo
 			true, //Freeze
 			true, //Explosive
 			(g_Config.m_SvShotgunBulletSound) ? SOUND_GRENADE_EXPLODE : -1, //SoundImpact
+			vec2(std::sin(Deg), std::cos(Deg)), // InitDir
 			Layer,
 			Number);
 		pBullet->SetBouncing(2 - (Dir % 2));
@@ -258,6 +259,7 @@ bool IGameController::OnEntity(int Index, int x, int y, int Layer, int Flags, bo
 			true, //Freeze
 			false, //Explosive
 			SOUND_GRENADE_EXPLODE,
+			vec2(std::sin(Deg), std::cos(Deg)), // InitDir
 			Layer,
 			Number);
 		pBullet->SetBouncing(2 - (Dir % 2));
