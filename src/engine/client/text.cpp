@@ -174,6 +174,9 @@ struct STextContainer
 
 	STextBoundingBox m_BoundingBox;
 
+	// prefix of the containers text stored for debugging purposes
+	char m_aDebugText[32];
+
 	void Reset()
 	{
 		m_pFont = nullptr;
@@ -199,6 +202,8 @@ struct STextContainer
 		m_SingleTimeUse = false;
 
 		m_BoundingBox = {0.0f, 0.0f, 0.0f, 0.0f};
+
+		m_aDebugText[0] = '\0';
 	}
 };
 
@@ -1016,6 +1021,7 @@ public:
 	void AppendTextContainer(int TextContainerIndex, CTextCursor *pCursor, const char *pText, int Length = -1) override
 	{
 		STextContainer &TextContainer = GetTextContainer(TextContainerIndex);
+		str_append(TextContainer.m_aDebugText, pText, sizeof(TextContainer.m_aDebugText));
 
 		// calculate the font size of the displayed glyphs
 		float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
@@ -1951,7 +1957,7 @@ public:
 		{
 			if(pTextContainer->m_StringInfo.m_QuadBufferContainerIndex != -1)
 			{
-				dbg_msg("textrender", "Found non empty text container with index %d with %d quads", pTextContainer->m_StringInfo.m_QuadBufferContainerIndex, (int)pTextContainer->m_StringInfo.m_QuadNum);
+				dbg_msg("textrender", "Found non empty text container with index %d with %d quads '%s'", pTextContainer->m_StringInfo.m_QuadBufferContainerIndex, (int)pTextContainer->m_StringInfo.m_QuadNum, pTextContainer->m_aDebugText);
 				HasNonEmptyTextContainer = true; // NOLINT(clang-analyzer-deadcode.DeadStores)
 			}
 		}
