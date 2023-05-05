@@ -355,6 +355,9 @@ protected:
 	int m_DownloadLastCheckSize;
 	float m_DownloadSpeed;
 
+	// for password popup
+	CLineInput m_PasswordInput;
+
 	// for call vote
 	int m_CallvoteSelectedOption;
 	int m_CallvoteSelectedPlayer;
