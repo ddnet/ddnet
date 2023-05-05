@@ -140,7 +140,11 @@ public:
 	bool HasSelection() const { return GetSelectionLength() > 0; }
 	void SetSelection(size_t Start, size_t End);
 	void SelectNothing() { SetSelection(GetCursorOffset(), GetCursorOffset()); }
-	void SelectAll() { SetSelection(0, GetLength()); }
+	void SelectAll()
+	{
+		SetCursorOffset(GetLength());
+		SetSelection(0, GetLength());
+	}
 
 	size_t OffsetFromActualToDisplay(size_t ActualOffset) const;
 	size_t OffsetFromDisplayToActual(size_t DisplayOffset) const;
