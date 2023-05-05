@@ -143,7 +143,7 @@ public:
 
 	public:
 		int m_UIRectQuadContainer;
-		int m_UITextContainer;
+		STextContainerIndex m_UITextContainer;
 
 		float m_X;
 		float m_Y;

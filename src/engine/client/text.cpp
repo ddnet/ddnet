@@ -242,30 +242,30 @@ class CTextRender : public IEngineTextRender
 		}
 	}
 
-	void FreeTextContainerIndex(int &Index)
+	void FreeTextContainerIndex(STextContainerIndex &Index)
 	{
-		m_vTextContainerIndices[Index] = m_FirstFreeTextContainerIndex;
-		m_FirstFreeTextContainerIndex = Index;
-		Index = -1;
+		m_vTextContainerIndices[Index.m_Index] = m_FirstFreeTextContainerIndex;
+		m_FirstFreeTextContainerIndex = Index.m_Index;
+		Index.Reset();
 	}
 
-	void FreeTextContainer(int &Index)
+	void FreeTextContainer(STextContainerIndex &Index)
 	{
-		m_vpTextContainers[Index]->Reset();
+		m_vpTextContainers[Index.m_Index]->Reset();
 		FreeTextContainerIndex(Index);
 	}
 
-	STextContainer &GetTextContainer(int Index)
+	STextContainer &GetTextContainer(STextContainerIndex Index)
 	{
-		dbg_assert(Index >= 0, "Text container index was invalid.");
-		if(Index >= (int)m_vpTextContainers.size())
+		dbg_assert(Index.Valid(), "Text container index was invalid.");
+		if(Index.m_Index >= (int)m_vpTextContainers.size())
 		{
 			int Size = (int)m_vpTextContainers.size();
-			for(int i = 0; i < (Index + 1) - Size; ++i)
+			for(int i = 0; i < (Index.m_Index + 1) - Size; ++i)
 				m_vpTextContainers.push_back(new STextContainer());
 		}
 
-		return *m_vpTextContainers[Index];
+		return *m_vpTextContainers[Index.m_Index];
 	}
 
 	int WordLength(const char *pText) const
@@ -921,10 +921,10 @@ public:
 	{
 		const unsigned OldRenderFlags = m_RenderFlags;
 		m_RenderFlags |= TEXT_RENDER_FLAG_ONE_TIME_USE;
-		int TextCont = -1;
+		STextContainerIndex TextCont;
 		CreateTextContainer(TextCont, pCursor, pText, Length);
 		m_RenderFlags = OldRenderFlags;
-		if(TextCont != -1)
+		if(TextCont.Valid())
 		{
 			if((pCursor->m_Flags & TEXTFLAG_RENDER) != 0)
 			{
@@ -936,10 +936,10 @@ public:
 		}
 	}
 
-	bool CreateTextContainer(int &TextContainerIndex, CTextCursor *pCursor, const char *pText, int Length = -1) override
+	bool CreateTextContainer(STextContainerIndex &TextContainerIndex, CTextCursor *pCursor, const char *pText, int Length = -1) override
 	{
-		dbg_assert(TextContainerIndex == -1, "Text container index was not cleared.");
-		TextContainerIndex = -1;
+		dbg_assert(!TextContainerIndex.Valid(), "Text container index was not cleared.");
+		TextContainerIndex.Reset();
 
 		CFont *pFont = pCursor->m_pFont;
 
@@ -952,7 +952,7 @@ public:
 
 		const bool IsRendered = (pCursor->m_Flags & TEXTFLAG_RENDER) != 0;
 
-		TextContainerIndex = GetFreeTextContainerIndex();
+		TextContainerIndex.m_Index = GetFreeTextContainerIndex();
 		STextContainer &TextContainer = GetTextContainer(TextContainerIndex);
 		TextContainer.m_pFont = pFont;
 
@@ -1018,7 +1018,7 @@ public:
 		}
 	}
 
-	void AppendTextContainer(int TextContainerIndex, CTextCursor *pCursor, const char *pText, int Length = -1) override
+	void AppendTextContainer(STextContainerIndex TextContainerIndex, CTextCursor *pCursor, const char *pText, int Length = -1) override
 	{
 		STextContainer &TextContainer = GetTextContainer(TextContainerIndex);
 		str_append(TextContainer.m_aDebugText, pText, sizeof(TextContainer.m_aDebugText));
@@ -1530,27 +1530,27 @@ public:
 		TextContainer.m_BoundingBox = pCursor->BoundingBox();
 	}
 
-	bool CreateOrAppendTextContainer(int &TextContainerIndex, CTextCursor *pCursor, const char *pText, int Length = -1) override
+	bool CreateOrAppendTextContainer(STextContainerIndex &TextContainerIndex, CTextCursor *pCursor, const char *pText, int Length = -1) override
 	{
-		if(TextContainerIndex == -1)
-		{
-			return CreateTextContainer(TextContainerIndex, pCursor, pText, Length);
-		}
-		else
+		if(TextContainerIndex.Valid())
 		{
 			AppendTextContainer(TextContainerIndex, pCursor, pText, Length);
 			return true;
 		}
+		else
+		{
+			return CreateTextContainer(TextContainerIndex, pCursor, pText, Length);
+		}
 	}
 
 	// just deletes and creates text container
-	void RecreateTextContainer(int &TextContainerIndex, CTextCursor *pCursor, const char *pText, int Length = -1) override
+	void RecreateTextContainer(STextContainerIndex &TextContainerIndex, CTextCursor *pCursor, const char *pText, int Length = -1) override
 	{
 		DeleteTextContainer(TextContainerIndex);
 		CreateTextContainer(TextContainerIndex, pCursor, pText, Length);
 	}
 
-	void RecreateTextContainerSoft(int &TextContainerIndex, CTextCursor *pCursor, const char *pText, int Length = -1) override
+	void RecreateTextContainerSoft(STextContainerIndex &TextContainerIndex, CTextCursor *pCursor, const char *pText, int Length = -1) override
 	{
 		STextContainer &TextContainer = GetTextContainer(TextContainerIndex);
 		TextContainer.m_StringInfo.m_vCharacterQuads.clear();
@@ -1559,9 +1559,9 @@ public:
 		AppendTextContainer(TextContainerIndex, pCursor, pText, Length);
 	}
 
-	void DeleteTextContainer(int &TextContainerIndex) override
+	void DeleteTextContainer(STextContainerIndex &TextContainerIndex) override
 	{
-		if(TextContainerIndex == -1)
+		if(!TextContainerIndex.Valid())
 			return;
 
 		STextContainer &TextContainer = GetTextContainer(TextContainerIndex);
@@ -1571,7 +1571,7 @@ public:
 		FreeTextContainer(TextContainerIndex);
 	}
 
-	void UploadTextContainer(int TextContainerIndex) override
+	void UploadTextContainer(STextContainerIndex TextContainerIndex) override
 	{
 		if(Graphics()->IsTextBufferingEnabled())
 		{
@@ -1587,7 +1587,7 @@ public:
 		}
 	}
 
-	void RenderTextContainer(int TextContainerIndex, const ColorRGBA &TextColor, const ColorRGBA &TextOutlineColor) override
+	void RenderTextContainer(STextContainerIndex TextContainerIndex, const ColorRGBA &TextColor, const ColorRGBA &TextOutlineColor) override
 	{
 		const STextContainer &TextContainer = GetTextContainer(TextContainerIndex);
 		const CFont *pFont = TextContainer.m_pFont;
@@ -1678,7 +1678,7 @@ public:
 		}
 	}
 
-	void RenderTextContainer(int TextContainerIndex, const ColorRGBA &TextColor, const ColorRGBA &TextOutlineColor, float X, float Y) override
+	void RenderTextContainer(STextContainerIndex TextContainerIndex, const ColorRGBA &TextColor, const ColorRGBA &TextOutlineColor, float X, float Y) override
 	{
 		STextContainer &TextContainer = GetTextContainer(TextContainerIndex);
 
@@ -1706,7 +1706,7 @@ public:
 		Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 	}
 
-	STextBoundingBox GetBoundingBoxTextContainer(int TextContainerIndex) override
+	STextBoundingBox GetBoundingBoxTextContainer(STextContainerIndex TextContainerIndex) override
 	{
 		const STextContainer &TextContainer = GetTextContainer(TextContainerIndex);
 		return TextContainer.m_BoundingBox;

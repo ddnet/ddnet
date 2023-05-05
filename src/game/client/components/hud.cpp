@@ -26,7 +26,8 @@ CHud::CHud()
 {
 	// won't work if zero
 	m_FrameTimeAvg = 0.0f;
-	m_FPSTextContainerIndex = -1;
+	m_FPSTextContainerIndex.Reset();
+	m_DDRaceEffectsTextContainerIndex.Reset();
 }
 
 void CHud::ResetHudContainers()
@@ -219,7 +220,7 @@ void CHud::RenderScoreHud()
 					Cursor.m_LineWidth = -1;
 					TextRender()->RecreateTextContainer(m_aScoreInfo[t].m_TextScoreContainerIndex, &Cursor, aScoreTeam[t]);
 				}
-				if(m_aScoreInfo[t].m_TextScoreContainerIndex != -1)
+				if(m_aScoreInfo[t].m_TextScoreContainerIndex.Valid())
 				{
 					ColorRGBA TColor(1.f, 1.f, 1.f, 1.f);
 					ColorRGBA TOutlineColor(0.f, 0.f, 0.f, 0.3f);
@@ -256,7 +257,7 @@ void CHud::RenderScoreHud()
 							TextRender()->RecreateTextContainer(m_aScoreInfo[t].m_OptionalNameTextContainerIndex, &Cursor, pName);
 						}
 
-						if(m_aScoreInfo[t].m_OptionalNameTextContainerIndex != -1)
+						if(m_aScoreInfo[t].m_OptionalNameTextContainerIndex.Valid())
 						{
 							ColorRGBA TColor(1.f, 1.f, 1.f, 1.f);
 							ColorRGBA TOutlineColor(0.f, 0.f, 0.f, 0.3f);
@@ -394,7 +395,7 @@ void CHud::RenderScoreHud()
 					TextRender()->RecreateTextContainer(m_aScoreInfo[t].m_TextScoreContainerIndex, &Cursor, aScore[t]);
 				}
 				// draw score
-				if(m_aScoreInfo[t].m_TextScoreContainerIndex != -1)
+				if(m_aScoreInfo[t].m_TextScoreContainerIndex.Valid())
 				{
 					ColorRGBA TColor(1.f, 1.f, 1.f, 1.f);
 					ColorRGBA TOutlineColor(0.f, 0.f, 0.f, 0.3f);
@@ -419,7 +420,7 @@ void CHud::RenderScoreHud()
 							TextRender()->RecreateTextContainer(m_aScoreInfo[t].m_OptionalNameTextContainerIndex, &Cursor, pName);
 						}
 
-						if(m_aScoreInfo[t].m_OptionalNameTextContainerIndex != -1)
+						if(m_aScoreInfo[t].m_OptionalNameTextContainerIndex.Valid())
 						{
 							ColorRGBA TColor(1.f, 1.f, 1.f, 1.f);
 							ColorRGBA TOutlineColor(0.f, 0.f, 0.f, 0.3f);
@@ -455,7 +456,7 @@ void CHud::RenderScoreHud()
 					Cursor.m_LineWidth = -1;
 					TextRender()->RecreateTextContainer(m_aScoreInfo[t].m_TextRankContainerIndex, &Cursor, aBuf);
 				}
-				if(m_aScoreInfo[t].m_TextRankContainerIndex != -1)
+				if(m_aScoreInfo[t].m_TextRankContainerIndex.Valid())
 				{
 					ColorRGBA TColor(1.f, 1.f, 1.f, 1.f);
 					ColorRGBA TOutlineColor(0.f, 0.f, 0.f, 0.3f);
@@ -513,14 +514,17 @@ void CHud::RenderTextInfo()
 		Cursor.m_LineWidth = -1;
 		auto OldFlags = TextRender()->GetRenderFlags();
 		TextRender()->SetRenderFlags(OldFlags | TEXT_RENDER_FLAG_ONE_TIME_USE);
-		if(m_FPSTextContainerIndex == -1)
-			TextRender()->CreateTextContainer(m_FPSTextContainerIndex, &Cursor, "0");
-		else
+		if(m_FPSTextContainerIndex.Valid())
 			TextRender()->RecreateTextContainerSoft(m_FPSTextContainerIndex, &Cursor, aBuf);
+		else
+			TextRender()->CreateTextContainer(m_FPSTextContainerIndex, &Cursor, "0");
 		TextRender()->SetRenderFlags(OldFlags);
-		ColorRGBA TColor(1, 1, 1, 1);
-		ColorRGBA TOutColor(0, 0, 0, 0.3f);
-		TextRender()->RenderTextContainer(m_FPSTextContainerIndex, TColor, TOutColor);
+		if(m_FPSTextContainerIndex.Valid())
+		{
+			ColorRGBA TColor(1, 1, 1, 1);
+			ColorRGBA TOutColor(0, 0, 0, 0.3f);
+			TextRender()->RenderTextContainer(m_FPSTextContainerIndex, TColor, TOutColor);
+		}
 	}
 	if(g_Config.m_ClShowpred)
 	{
@@ -1644,10 +1648,13 @@ void CHud::RenderDDRaceEffects()
 				Cursor.m_LineWidth = -1.0f;
 				TextRender()->AppendTextContainer(m_DDRaceEffectsTextContainerIndex, &Cursor, aBuf);
 			}
-			auto OutlineColor = TextRender()->DefaultTextOutlineColor();
-			OutlineColor.a *= Alpha;
-			TextRender()->RenderTextContainer(m_DDRaceEffectsTextContainerIndex, TextRender()->DefaultTextColor(), OutlineColor);
-			TextRender()->TextColor(1, 1, 1, 1);
+			if(m_DDRaceEffectsTextContainerIndex.Valid())
+			{
+				auto OutlineColor = TextRender()->DefaultTextOutlineColor();
+				OutlineColor.a *= Alpha;
+				TextRender()->RenderTextContainer(m_DDRaceEffectsTextContainerIndex, TextRender()->DefaultTextColor(), OutlineColor);
+				TextRender()->TextColor(1, 1, 1, 1);
+			}
 		}
 		else if(!m_ShowFinishTime && m_TimeCpLastReceivedTick + Client()->GameTickSpeed() * 6 > Client()->GameTick(g_Config.m_ClDummy))
 		{
@@ -1682,10 +1689,13 @@ void CHud::RenderDDRaceEffects()
 			Cursor.m_LineWidth = -1.0f;
 			TextRender()->RecreateTextContainer(m_DDRaceEffectsTextContainerIndex, &Cursor, aBuf);
 
-			auto OutlineColor = TextRender()->DefaultTextOutlineColor();
-			OutlineColor.a *= Alpha;
-			TextRender()->RenderTextContainer(m_DDRaceEffectsTextContainerIndex, TextRender()->DefaultTextColor(), OutlineColor);
-			TextRender()->TextColor(1, 1, 1, 1);
+			if(m_DDRaceEffectsTextContainerIndex.Valid())
+			{
+				auto OutlineColor = TextRender()->DefaultTextOutlineColor();
+				OutlineColor.a *= Alpha;
+				TextRender()->RenderTextContainer(m_DDRaceEffectsTextContainerIndex, TextRender()->DefaultTextColor(), OutlineColor);
+				TextRender()->TextColor(1, 1, 1, 1);
+			}
 		}
 	}
 }

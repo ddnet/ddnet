@@ -159,7 +159,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 		TOutlineColor.a *= Alpha;
 		TColor.a *= Alpha;
 
-		if(m_aNamePlates[ClientID].m_NameTextContainerIndex != -1)
+		if(m_aNamePlates[ClientID].m_NameTextContainerIndex.Valid())
 		{
 			YOffset -= FontSize;
 			TextRender()->RenderTextContainer(m_aNamePlates[ClientID].m_NameTextContainerIndex, TColor, TOutlineColor, Position.x - tw / 2.0f, YOffset);
@@ -168,7 +168,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 		if(g_Config.m_ClNameplatesClan)
 		{
 			YOffset -= FontSizeClan;
-			if(m_aNamePlates[ClientID].m_ClanNameTextContainerIndex != -1)
+			if(m_aNamePlates[ClientID].m_ClanNameTextContainerIndex.Valid())
 				TextRender()->RenderTextContainer(m_aNamePlates[ClientID].m_ClanNameTextContainerIndex, TColor, TOutlineColor, Position.x - m_aNamePlates[ClientID].m_ClanNameTextWidth / 2.0f, YOffset);
 		}
 

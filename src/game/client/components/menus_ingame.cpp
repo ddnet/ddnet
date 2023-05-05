@@ -504,7 +504,7 @@ void CMenus::RenderServerInfoMotd(CUIRect Motd)
 
 	static float s_MotdHeight = 0.0f;
 	static int64_t s_MotdLastUpdateTime = -1;
-	if(m_MotdTextContainerIndex == -1 || s_MotdLastUpdateTime == -1 || s_MotdLastUpdateTime != m_pClient->m_Motd.ServerMotdUpdateTime())
+	if(!m_MotdTextContainerIndex.Valid() || s_MotdLastUpdateTime == -1 || s_MotdLastUpdateTime != m_pClient->m_Motd.ServerMotdUpdateTime())
 	{
 		CTextCursor Cursor;
 		TextRender()->SetCursor(&Cursor, 0.0f, 0.0f, MotdFontSize, TEXTFLAG_RENDER);
@@ -518,7 +518,7 @@ void CMenus::RenderServerInfoMotd(CUIRect Motd)
 	Motd.HSplitTop(s_MotdHeight, &MotdTextArea, &Motd);
 	s_ScrollRegion.AddRect(MotdTextArea);
 
-	if(m_MotdTextContainerIndex != -1)
+	if(m_MotdTextContainerIndex.Valid())
 		TextRender()->RenderTextContainer(m_MotdTextContainerIndex, TextRender()->DefaultTextColor(), TextRender()->DefaultTextOutlineColor(), MotdTextArea.x, MotdTextArea.y);
 
 	s_ScrollRegion.End();
