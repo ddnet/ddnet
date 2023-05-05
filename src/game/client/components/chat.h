@@ -40,7 +40,7 @@ class CChat : public CComponent
 		bool m_Friend;
 		bool m_Highlighted;
 
-		int m_TextContainerIndex;
+		STextContainerIndex m_TextContainerIndex;
 		int m_QuadContainerIndex;
 
 		char m_aSkinName[std::size(g_Config.m_ClPlayerSkin)];

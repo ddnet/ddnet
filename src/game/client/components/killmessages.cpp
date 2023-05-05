@@ -64,7 +64,7 @@ void CKillMessages::OnInit()
 void CKillMessages::CreateKillmessageNamesIfNotCreated(CKillMsg &Kill)
 {
 	const float FontSize = 36.0f;
-	if(Kill.m_VictimTextContainerIndex == -1 && Kill.m_aVictimName[0] != 0)
+	if(!Kill.m_VictimTextContainerIndex.Valid() && Kill.m_aVictimName[0] != 0)
 	{
 		Kill.m_VictimTextWidth = TextRender()->TextWidth(FontSize, Kill.m_aVictimName, -1, -1.0f);
 
@@ -82,7 +82,7 @@ void CKillMessages::CreateKillmessageNamesIfNotCreated(CKillMsg &Kill)
 		TextRender()->CreateTextContainer(Kill.m_VictimTextContainerIndex, &Cursor, Kill.m_aVictimName);
 	}
 
-	if(Kill.m_KillerTextContainerIndex == -1 && Kill.m_aKillerName[0] != 0)
+	if(!Kill.m_KillerTextContainerIndex.Valid() && Kill.m_aKillerName[0] != 0)
 	{
 		Kill.m_KillerTextWidth = TextRender()->TextWidth(FontSize, Kill.m_aKillerName, -1, -1.0f);
 
@@ -281,7 +281,7 @@ void CKillMessages::OnRender()
 
 		CreateKillmessageNamesIfNotCreated(m_aKillmsgs[r]);
 
-		if(m_aKillmsgs[r].m_VictimTextContainerIndex != -1)
+		if(m_aKillmsgs[r].m_VictimTextContainerIndex.Valid())
 			TextRender()->RenderTextContainer(m_aKillmsgs[r].m_VictimTextContainerIndex, TColor, TOutlineColor, x, y + (46.f - 36.f) / 2.f);
 
 		// render victim tee
@@ -369,7 +369,7 @@ void CKillMessages::OnRender()
 			// render killer name
 			x -= m_aKillmsgs[r].m_KillerTextWidth;
 
-			if(m_aKillmsgs[r].m_KillerTextContainerIndex != -1)
+			if(m_aKillmsgs[r].m_KillerTextContainerIndex.Valid())
 				TextRender()->RenderTextContainer(m_aKillmsgs[r].m_KillerTextContainerIndex, TColor, TOutlineColor, x, y + (46.f - 36.f) / 2.f);
 		}
 

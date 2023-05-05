@@ -212,6 +212,15 @@ public:
 	}
 };
 
+struct STextContainerIndex
+{
+	int m_Index;
+
+	STextContainerIndex() { Reset(); }
+	bool Valid() const { return m_Index >= 0; }
+	void Reset() { m_Index = -1; }
+};
+
 class ITextRender : public IInterface
 {
 	MACRO_INTERFACE("textrender", 0)
@@ -237,21 +246,21 @@ public:
 
 	//
 	virtual void TextEx(CTextCursor *pCursor, const char *pText, int Length = -1) = 0;
-	virtual bool CreateTextContainer(int &TextContainerIndex, CTextCursor *pCursor, const char *pText, int Length = -1) = 0;
-	virtual void AppendTextContainer(int TextContainerIndex, CTextCursor *pCursor, const char *pText, int Length = -1) = 0;
+	virtual bool CreateTextContainer(STextContainerIndex &TextContainerIndex, CTextCursor *pCursor, const char *pText, int Length = -1) = 0;
+	virtual void AppendTextContainer(STextContainerIndex TextContainerIndex, CTextCursor *pCursor, const char *pText, int Length = -1) = 0;
 	// either creates a new text container or appends to a existing one
-	virtual bool CreateOrAppendTextContainer(int &TextContainerIndex, CTextCursor *pCursor, const char *pText, int Length = -1) = 0;
+	virtual bool CreateOrAppendTextContainer(STextContainerIndex &TextContainerIndex, CTextCursor *pCursor, const char *pText, int Length = -1) = 0;
 	// just deletes and creates text container
-	virtual void RecreateTextContainer(int &TextContainerIndex, CTextCursor *pCursor, const char *pText, int Length = -1) = 0;
-	virtual void RecreateTextContainerSoft(int &TextContainerIndex, CTextCursor *pCursor, const char *pText, int Length = -1) = 0;
-	virtual void DeleteTextContainer(int &TextContainerIndex) = 0;
+	virtual void RecreateTextContainer(STextContainerIndex &TextContainerIndex, CTextCursor *pCursor, const char *pText, int Length = -1) = 0;
+	virtual void RecreateTextContainerSoft(STextContainerIndex &TextContainerIndex, CTextCursor *pCursor, const char *pText, int Length = -1) = 0;
+	virtual void DeleteTextContainer(STextContainerIndex &TextContainerIndex) = 0;
 
-	virtual void UploadTextContainer(int TextContainerIndex) = 0;
+	virtual void UploadTextContainer(STextContainerIndex TextContainerIndex) = 0;
 
-	virtual void RenderTextContainer(int TextContainerIndex, const ColorRGBA &TextColor, const ColorRGBA &TextOutlineColor) = 0;
-	virtual void RenderTextContainer(int TextContainerIndex, const ColorRGBA &TextColor, const ColorRGBA &TextOutlineColor, float X, float Y) = 0;
+	virtual void RenderTextContainer(STextContainerIndex TextContainerIndex, const ColorRGBA &TextColor, const ColorRGBA &TextOutlineColor) = 0;
+	virtual void RenderTextContainer(STextContainerIndex TextContainerIndex, const ColorRGBA &TextColor, const ColorRGBA &TextOutlineColor, float X, float Y) = 0;
 
-	virtual STextBoundingBox GetBoundingBoxTextContainer(int TextContainerIndex) = 0;
+	virtual STextBoundingBox GetBoundingBoxTextContainer(STextContainerIndex TextContainerIndex) = 0;
 
 	virtual void UploadEntityLayerText(void *pTexBuff, size_t ImageColorChannelCount, int TexWidth, int TexHeight, int TexSubWidth, int TexSubHeight, const char *pText, int Length, float x, float y, int FontHeight) = 0;
 	virtual int AdjustFontSize(const char *pText, int TextLength, int MaxSize, int MaxWidth) const = 0;

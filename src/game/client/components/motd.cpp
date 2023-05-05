@@ -73,7 +73,7 @@ void CMotd::OnRender()
 	const float TextX = RectX + FontSize;
 	const float TextY = RectY + FontSize;
 
-	if(m_TextContainerIndex == -1)
+	if(!m_TextContainerIndex.Valid())
 	{
 		CTextCursor Cursor;
 		TextRender()->SetCursor(&Cursor, TextX, TextY, FontSize, TEXTFLAG_RENDER);
@@ -81,7 +81,7 @@ void CMotd::OnRender()
 		TextRender()->CreateTextContainer(m_TextContainerIndex, &Cursor, ServerMotd());
 	}
 
-	if(m_TextContainerIndex != -1)
+	if(m_TextContainerIndex.Valid())
 		TextRender()->RenderTextContainer(m_TextContainerIndex, TextRender()->DefaultTextColor(), TextRender()->DefaultTextOutlineColor());
 }
 

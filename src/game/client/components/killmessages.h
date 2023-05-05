@@ -18,24 +18,19 @@ public:
 	// kill messages
 	struct CKillMsg
 	{
-		CKillMsg()
-		{
-			m_KillerTextContainerIndex = m_VictimTextContainerIndex = -1;
-		}
-
 		int m_Weapon;
 
 		int m_VictimID;
 		int m_VictimTeam;
 		int m_VictimDDTeam;
 		char m_aVictimName[64];
-		int m_VictimTextContainerIndex;
+		STextContainerIndex m_VictimTextContainerIndex;
 		float m_VictimTextWidth;
 		CTeeRenderInfo m_VictimRenderInfo[MAX_KILLMSG_TEAM_MEMBERS];
 		int m_KillerID;
 		int m_KillerTeam;
 		char m_aKillerName[64];
-		int m_KillerTextContainerIndex;
+		STextContainerIndex m_KillerTextContainerIndex;
 		float m_KillerTextWidth;
 		CTeeRenderInfo m_KillerRenderInfo;
 
