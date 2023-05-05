@@ -685,7 +685,6 @@ public:
 	void UpdateOwnGhost(CGhostItem Item);
 	void DeleteGhostItem(int Index);
 
-	void setPopup(int Popup) { m_Popup = Popup; }
 	int GetCurPopup() { return m_Popup; }
 	bool CanDisplayWarning();
 
