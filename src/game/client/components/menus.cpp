@@ -100,6 +100,9 @@ CMenus::CMenus()
 		animator.m_YOffset = -2.5f;
 		animator.m_HOffset = 2.5f;
 	}
+
+	m_PasswordInput.SetBuffer(g_Config.m_Password, sizeof(g_Config.m_Password));
+	m_PasswordInput.SetHidden(true);
 }
 
 int CMenus::DoButton_Toggle(const void *pID, int Checked, const CUIRect *pRect, bool Active)
@@ -1722,9 +1725,7 @@ int CMenus::Render()
 			TextBox.VSplitLeft(20.0f, 0, &TextBox);
 			TextBox.VSplitRight(60.0f, &TextBox, 0);
 			UI()->DoLabel(&Label, Localize("Password"), 18.0f, TEXTALIGN_ML);
-			static CLineInput s_PasswordInput(g_Config.m_Password, sizeof(g_Config.m_Password));
-			s_PasswordInput.SetHidden(true);
-			UI()->DoClearableEditBox(&s_PasswordInput, &TextBox, 12.0f);
+			UI()->DoClearableEditBox(&m_PasswordInput, &TextBox, 12.0f);
 		}
 		else if(m_Popup == POPUP_CONNECTING)
 		{
@@ -2318,8 +2319,8 @@ void CMenus::OnStateChange(int NewState, int OldState)
 			if(str_find(Client()->ErrorString(), "password"))
 			{
 				m_Popup = POPUP_PASSWORD;
-				UI()->SetHotItem(&g_Config.m_Password);
-				UI()->SetActiveItem(&g_Config.m_Password);
+				m_PasswordInput.SelectAll();
+				UI()->SetActiveItem(&m_PasswordInput);
 			}
 			else
 				m_Popup = POPUP_DISCONNECTED;

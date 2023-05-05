@@ -355,6 +355,9 @@ protected:
 	int m_DownloadLastCheckSize;
 	float m_DownloadSpeed;
 
+	// for password popup
+	CLineInput m_PasswordInput;
+
 	// for call vote
 	int m_CallvoteSelectedOption;
 	int m_CallvoteSelectedPlayer;
@@ -685,7 +688,6 @@ public:
 	void UpdateOwnGhost(CGhostItem Item);
 	void DeleteGhostItem(int Index);
 
-	void setPopup(int Popup) { m_Popup = Popup; }
 	int GetCurPopup() { return m_Popup; }
 	bool CanDisplayWarning();
 
