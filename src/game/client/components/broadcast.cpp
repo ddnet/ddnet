@@ -38,36 +38,40 @@ void CBroadcast::OnMessage(int MsgType, void *pRawMsg)
 {
 	if(MsgType == NETMSGTYPE_SV_BROADCAST)
 	{
-		CNetMsg_Sv_Broadcast *pMsg = (CNetMsg_Sv_Broadcast *)pRawMsg;
-		str_copy(m_aBroadcastText, pMsg->m_pMessage);
-		CTextCursor Cursor;
-		TextRender()->SetCursor(&Cursor, 0, 0, 12.0f, TEXTFLAG_STOP_AT_END);
-		Cursor.m_LineWidth = 300 * Graphics()->ScreenAspect();
-		TextRender()->TextEx(&Cursor, m_aBroadcastText, -1);
-		m_BroadcastRenderOffset = 150 * Graphics()->ScreenAspect() - Cursor.m_X / 2;
-		m_BroadcastTick = Client()->GameTick(g_Config.m_ClDummy) + Client()->GameTickSpeed() * 10;
-		if(g_Config.m_ClPrintBroadcasts)
+		OnBroadcastMessage((CNetMsg_Sv_Broadcast *)pRawMsg);
+	}
+}
+
+void CBroadcast::OnBroadcastMessage(const CNetMsg_Sv_Broadcast *pMsg)
+{
+	str_copy(m_aBroadcastText, pMsg->m_pMessage);
+	CTextCursor Cursor;
+	TextRender()->SetCursor(&Cursor, 0, 0, 12.0f, TEXTFLAG_STOP_AT_END);
+	Cursor.m_LineWidth = 300 * Graphics()->ScreenAspect();
+	TextRender()->TextEx(&Cursor, m_aBroadcastText, -1);
+	m_BroadcastRenderOffset = 150 * Graphics()->ScreenAspect() - Cursor.m_X / 2;
+	m_BroadcastTick = Client()->GameTick(g_Config.m_ClDummy) + Client()->GameTickSpeed() * 10;
+	if(g_Config.m_ClPrintBroadcasts)
+	{
+		char aBuf[1024];
+		int i, ii;
+		for(i = 0, ii = 0; i < str_length(m_aBroadcastText); i++)
 		{
-			char aBuf[1024];
-			int i, ii;
-			for(i = 0, ii = 0; i < str_length(m_aBroadcastText); i++)
+			if(m_aBroadcastText[i] == '\n')
 			{
-				if(m_aBroadcastText[i] == '\n')
-				{
-					aBuf[ii] = '\0';
-					ii = 0;
-					if(aBuf[0])
-						m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "broadcast", aBuf, color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageHighlightColor)));
-				}
-				else
-				{
-					aBuf[ii] = m_aBroadcastText[i];
-					ii++;
-				}
+				aBuf[ii] = '\0';
+				ii = 0;
+				if(aBuf[0])
+					m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "broadcast", aBuf, color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageHighlightColor)));
 			}
-			aBuf[ii] = '\0';
-			if(aBuf[0])
-				m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "broadcast", aBuf, color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageHighlightColor)));
+			else
+			{
+				aBuf[ii] = m_aBroadcastText[i];
+				ii++;
+			}
 		}
+		aBuf[ii] = '\0';
+		if(aBuf[0])
+			m_pClient->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "broadcast", aBuf, color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClMessageHighlightColor)));
 	}
 }
