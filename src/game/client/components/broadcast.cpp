@@ -16,11 +16,13 @@
 void CBroadcast::OnReset()
 {
 	m_BroadcastTick = 0;
+	m_BroadcastRenderOffset = -1.0f;
 	TextRender()->DeleteTextContainer(m_TextContainerIndex);
 }
 
 void CBroadcast::OnWindowResize()
 {
+	m_BroadcastRenderOffset = -1.0f;
 	TextRender()->DeleteTextContainer(m_TextContainerIndex);
 }
 
@@ -46,6 +48,9 @@ void CBroadcast::RenderServerBroadcast()
 	const float Height = 300.0f;
 	const float Width = Height * Graphics()->ScreenAspect();
 	Graphics()->MapScreen(0.0f, 0.0f, Width, Height);
+
+	if(m_BroadcastRenderOffset < 0.0f)
+		m_BroadcastRenderOffset = Width / 2.0f - TextRender()->TextWidth(12.0f, m_aBroadcastText, -1, Width) / 2.0f;
 
 	if(!m_TextContainerIndex.Valid())
 	{
@@ -75,13 +80,9 @@ void CBroadcast::OnMessage(int MsgType, void *pRawMsg)
 
 void CBroadcast::OnBroadcastMessage(const CNetMsg_Sv_Broadcast *pMsg)
 {
-	const float Height = 300.0f;
-	const float Width = Height * Graphics()->ScreenAspect();
-	Graphics()->MapScreen(0.0f, 0.0f, Width, Height);
-
 	str_copy(m_aBroadcastText, pMsg->m_pMessage);
-	m_BroadcastRenderOffset = Width / 2.0f - TextRender()->TextWidth(12.0f, m_aBroadcastText, -1, Width) / 2.0f;
 	m_BroadcastTick = Client()->GameTick(g_Config.m_ClDummy) + Client()->GameTickSpeed() * 10;
+	m_BroadcastRenderOffset = -1.0f;
 	TextRender()->DeleteTextContainer(m_TextContainerIndex);
 
 	if(g_Config.m_ClPrintBroadcasts)
