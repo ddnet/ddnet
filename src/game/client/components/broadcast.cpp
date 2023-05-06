@@ -16,6 +16,12 @@
 void CBroadcast::OnReset()
 {
 	m_BroadcastTick = 0;
+	TextRender()->DeleteTextContainer(m_TextContainerIndex);
+}
+
+void CBroadcast::OnWindowResize()
+{
+	TextRender()->DeleteTextContainer(m_TextContainerIndex);
 }
 
 void CBroadcast::OnRender()
@@ -30,17 +36,32 @@ void CBroadcast::RenderServerBroadcast()
 {
 	if(m_pClient->m_Scoreboard.Active() || m_pClient->m_Motd.IsActive() || !g_Config.m_ClShowBroadcasts)
 		return;
+	const float SecondsRemaining = (m_BroadcastTick - Client()->GameTick(g_Config.m_ClDummy)) / (float)Client()->GameTickSpeed();
+	if(SecondsRemaining <= 0.0f)
+	{
+		TextRender()->DeleteTextContainer(m_TextContainerIndex);
+		return;
+	}
 
 	const float Height = 300.0f;
 	const float Width = Height * Graphics()->ScreenAspect();
 	Graphics()->MapScreen(0.0f, 0.0f, Width, Height);
 
-	if(Client()->GameTick(g_Config.m_ClDummy) < m_BroadcastTick)
+	if(!m_TextContainerIndex.Valid())
 	{
 		CTextCursor Cursor;
 		TextRender()->SetCursor(&Cursor, m_BroadcastRenderOffset, 40.0f, 12.0f, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
 		Cursor.m_LineWidth = Width - m_BroadcastRenderOffset;
-		TextRender()->TextEx(&Cursor, m_aBroadcastText, -1);
+		TextRender()->CreateTextContainer(m_TextContainerIndex, &Cursor, m_aBroadcastText);
+	}
+	if(m_TextContainerIndex.Valid())
+	{
+		const float Alpha = SecondsRemaining >= 1.0f ? 1.0f : SecondsRemaining;
+		ColorRGBA TextColor = TextRender()->DefaultTextColor();
+		TextColor.a *= Alpha;
+		ColorRGBA OutlineColor = TextRender()->DefaultTextOutlineColor();
+		OutlineColor.a *= Alpha;
+		TextRender()->RenderTextContainer(m_TextContainerIndex, TextColor, OutlineColor);
 	}
 }
 
@@ -61,6 +82,7 @@ void CBroadcast::OnBroadcastMessage(const CNetMsg_Sv_Broadcast *pMsg)
 	str_copy(m_aBroadcastText, pMsg->m_pMessage);
 	m_BroadcastRenderOffset = Width / 2.0f - TextRender()->TextWidth(12.0f, m_aBroadcastText, -1, Width, TEXTFLAG_STOP_AT_END) / 2.0f;
 	m_BroadcastTick = Client()->GameTick(g_Config.m_ClDummy) + Client()->GameTickSpeed() * 10;
+	TextRender()->DeleteTextContainer(m_TextContainerIndex);
 
 	if(g_Config.m_ClPrintBroadcasts)
 	{
