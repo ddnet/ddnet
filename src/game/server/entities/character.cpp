@@ -2,6 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "character.h"
 #include "laser.h"
+#include "pickup.h"
 #include "projectile.h"
 
 #include <antibot/antibot_data.h>
@@ -2002,10 +2003,31 @@ void CCharacter::DDRaceTick()
 		}
 	}
 
+	// check for nearby health pickups (also freeze)
+	bool InHealthPickup = false;
+	if(!m_Core.m_IsInFreeze)
+	{
+		CEntity *apEnts[9];
+		int Num = GameWorld()->FindEntities(m_Pos, GetProximityRadius() + CPickup::ms_CollisionExtraSize, apEnts, std::size(apEnts), CGameWorld::ENTTYPE_PICKUP);
+		for(int i = 0; i < Num; ++i)
+		{
+			CPickup *pPickup = static_cast<CPickup *>(apEnts[i]);
+			if(pPickup->Type() == POWERUP_HEALTH)
+			{
+				// This uses a separate variable InHealthPickup instead of setting m_Core.m_IsInFreeze
+				// as the latter causes freezebars to flicker when standing in the freeze range of a
+				// health pickup. When the same code for client prediction is added, the freezebars
+				// still flicker, but only when standing at the edge of the health pickup's freeze range.
+				InHealthPickup = true;
+				break;
+			}
+		}
+	}
+
 	// look for save position for rescue feature
 	if(g_Config.m_SvRescue || ((g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO || Team() > TEAM_FLOCK) && Team() >= TEAM_FLOCK && Team() < TEAM_SUPER))
 	{
-		if(!m_Core.m_IsInFreeze && IsGrounded() && !m_Core.m_DeepFrozen)
+		if(!m_Core.m_IsInFreeze && IsGrounded() && !m_Core.m_DeepFrozen && !InHealthPickup)
 		{
 			SetRescue();
 		}
