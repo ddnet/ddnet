@@ -50,8 +50,8 @@ void CBroadcast::RenderServerBroadcast()
 	if(!m_TextContainerIndex.Valid())
 	{
 		CTextCursor Cursor;
-		TextRender()->SetCursor(&Cursor, m_BroadcastRenderOffset, 40.0f, 12.0f, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
-		Cursor.m_LineWidth = Width - m_BroadcastRenderOffset;
+		TextRender()->SetCursor(&Cursor, m_BroadcastRenderOffset, 40.0f, 12.0f, TEXTFLAG_RENDER);
+		Cursor.m_LineWidth = Width;
 		TextRender()->CreateTextContainer(m_TextContainerIndex, &Cursor, m_aBroadcastText);
 	}
 	if(m_TextContainerIndex.Valid())
@@ -80,7 +80,7 @@ void CBroadcast::OnBroadcastMessage(const CNetMsg_Sv_Broadcast *pMsg)
 	Graphics()->MapScreen(0.0f, 0.0f, Width, Height);
 
 	str_copy(m_aBroadcastText, pMsg->m_pMessage);
-	m_BroadcastRenderOffset = Width / 2.0f - TextRender()->TextWidth(12.0f, m_aBroadcastText, -1, Width, TEXTFLAG_STOP_AT_END) / 2.0f;
+	m_BroadcastRenderOffset = Width / 2.0f - TextRender()->TextWidth(12.0f, m_aBroadcastText, -1, Width) / 2.0f;
 	m_BroadcastTick = Client()->GameTick(g_Config.m_ClDummy) + Client()->GameTickSpeed() * 10;
 	TextRender()->DeleteTextContainer(m_TextContainerIndex);
 
