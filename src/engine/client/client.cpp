@@ -3007,6 +3007,7 @@ void CClient::Run()
 		if(RegisterFail || m_pGraphics->Init() != 0)
 		{
 			dbg_msg("client", "couldn't init graphics");
+			ShowMessageBox("Graphics Error", "The graphics could not be initialized.");
 			return;
 		}
 	}
@@ -3024,45 +3025,12 @@ void CClient::Run()
 #endif
 
 #ifndef CONF_WEBASM
-	// open socket
+	char aNetworkError[256];
+	if(!InitNetworkClient(aNetworkError, sizeof(aNetworkError)))
 	{
-		NETADDR BindAddr;
-		if(g_Config.m_Bindaddr[0] == '\0')
-		{
-			mem_zero(&BindAddr, sizeof(BindAddr));
-		}
-		else if(net_host_lookup(g_Config.m_Bindaddr, &BindAddr, NETTYPE_ALL) != 0)
-		{
-			dbg_msg("client", "The configured bindaddr '%s' cannot be resolved", g_Config.m_Bindaddr);
-			return;
-		}
-		BindAddr.type = NETTYPE_ALL;
-		for(unsigned int i = 0; i < std::size(m_aNetClient); i++)
-		{
-			int &PortRef = i == CONN_MAIN ? g_Config.m_ClPort : i == CONN_DUMMY ? g_Config.m_ClDummyPort : g_Config.m_ClContactPort;
-			if(PortRef < 1024) // Reject users setting ports that we don't want to use
-			{
-				PortRef = 0;
-			}
-			BindAddr.port = PortRef;
-			unsigned RemainingAttempts = 25;
-			while(BindAddr.port == 0 || !m_aNetClient[i].Open(BindAddr))
-			{
-				if(BindAddr.port != 0)
-				{
-					--RemainingAttempts;
-					if(RemainingAttempts == 0)
-					{
-						if(g_Config.m_Bindaddr[0])
-							dbg_msg("client", "Could not open network client, try changing or unsetting the bindaddr '%s'", g_Config.m_Bindaddr);
-						else
-							dbg_msg("client", "Could not open network client");
-						return;
-					}
-				}
-				BindAddr.port = (secure_rand() % 64511) + 1024;
-			}
-		}
+		dbg_msg("client", "%s", aNetworkError);
+		ShowMessageBox("Network Error", aNetworkError);
+		return;
 	}
 #endif
 
@@ -3419,6 +3387,48 @@ void CClient::Run()
 		m_aNetClient[i].Close();
 
 	delete m_pEditor;
+}
+
+bool CClient::InitNetworkClient(char *pError, size_t ErrorSize)
+{
+	NETADDR BindAddr;
+	if(g_Config.m_Bindaddr[0] == '\0')
+	{
+		mem_zero(&BindAddr, sizeof(BindAddr));
+	}
+	else if(net_host_lookup(g_Config.m_Bindaddr, &BindAddr, NETTYPE_ALL) != 0)
+	{
+		str_format(pError, ErrorSize, "The configured bindaddr '%s' cannot be resolved.", g_Config.m_Bindaddr);
+		return false;
+	}
+	BindAddr.type = NETTYPE_ALL;
+	for(unsigned int i = 0; i < std::size(m_aNetClient); i++)
+	{
+		int &PortRef = i == CONN_MAIN ? g_Config.m_ClPort : i == CONN_DUMMY ? g_Config.m_ClDummyPort : g_Config.m_ClContactPort;
+		if(PortRef < 1024) // Reject users setting ports that we don't want to use
+		{
+			PortRef = 0;
+		}
+		BindAddr.port = PortRef;
+		unsigned RemainingAttempts = 25;
+		while(BindAddr.port == 0 || !m_aNetClient[i].Open(BindAddr))
+		{
+			if(BindAddr.port != 0)
+			{
+				--RemainingAttempts;
+				if(RemainingAttempts == 0)
+				{
+					if(g_Config.m_Bindaddr[0])
+						str_format(pError, ErrorSize, "Could not open the network client, try changing or unsetting the bindaddr '%s'.", g_Config.m_Bindaddr);
+					else
+						str_format(pError, ErrorSize, "Could not open the network client.");
+					return false;
+				}
+			}
+			BindAddr.port = (secure_rand() % 64511) + 1024;
+		}
+	}
+	return true;
 }
 
 bool CClient::CtrlShiftKey(int Key, bool &Last)
@@ -4530,6 +4540,7 @@ int main(int argc, const char **argv)
 	CWindowsComLifecycle WindowsComLifecycle(true);
 #endif
 	CCmdlineFix CmdlineFix(&argc, &argv);
+
 	bool Silent = false;
 	bool RandInitFailed = false;
 
@@ -4578,6 +4589,12 @@ int main(int argc, const char **argv)
 	pKernel->RegisterInterface(pClient, false);
 	pClient->RegisterInterfaces();
 
+	dbg_assert_set_handler([pClient](const char *pMsg) {
+		char aMessage[256];
+		str_format(aMessage, sizeof(aMessage), "An assertion error occured. Please write down or take a screenshot of the following information and report this error.\n\n%s", pMsg);
+		pClient->ShowMessageBox("Assertion Error", aMessage);
+	});
+
 	// create the components
 	IEngine *pEngine = CreateEngine(GAME_NAME, pFutureConsoleLogger, 2);
 	IConsole *pConsole = CreateConsole(CFGFLAG_CLIENT).release();
@@ -4603,7 +4620,9 @@ int main(int argc, const char **argv)
 
 	if(RandInitFailed)
 	{
-		dbg_msg("secure", "could not initialize secure RNG");
+		const char *pError = "Failed to initialize the secure RNG.";
+		dbg_msg("secure", "%s", pError);
+		pClient->ShowMessageBox("Secure RNG Error", pError);
 		return -1;
 	}
 
@@ -4635,6 +4654,9 @@ int main(int argc, const char **argv)
 
 		if(RegisterFail)
 		{
+			const char *pError = "Failed to register an interface.";
+			dbg_msg("client", "%s", pError);
+			pClient->ShowMessageBox("Kernel Error", pError);
 			delete pKernel;
 			pClient->~CClient();
 			free(pClient);
@@ -4718,7 +4740,10 @@ int main(int argc, const char **argv)
 	// init SDL
 	if(SDL_Init(0) < 0)
 	{
-		dbg_msg("client", "unable to init SDL base: %s", SDL_GetError());
+		char aError[256];
+		str_format(aError, sizeof(aError), "Unable to initialize SDL base: %s", SDL_GetError());
+		dbg_msg("client", "%s", aError);
+		pClient->ShowMessageBox("SDL Error", aError);
 		return -1;
 	}
 
@@ -4956,3 +4981,23 @@ void CClient::ShellUnregister()
 		shell_update();
 }
 #endif
+
+static Uint32 GetSdlMessageBoxFlags(IClient::EMessageBoxType Type)
+{
+	switch(Type)
+	{
+	case IClient::MESSAGE_BOX_TYPE_ERROR:
+		return SDL_MESSAGEBOX_ERROR;
+	case IClient::MESSAGE_BOX_TYPE_WARNING:
+		return SDL_MESSAGEBOX_WARNING;
+	case IClient::MESSAGE_BOX_TYPE_INFO:
+		return SDL_MESSAGEBOX_INFORMATION;
+	}
+	dbg_assert(false, "Type invalid");
+	return 0;
+}
+
+void CClient::ShowMessageBox(const char *pTitle, const char *pMessage, EMessageBoxType Type)
+{
+	SDL_ShowSimpleMessageBox(GetSdlMessageBoxFlags(Type), pTitle, pMessage, nullptr);
+}

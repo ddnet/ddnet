@@ -169,6 +169,7 @@ static NETSOCKET_INTERNAL invalid_socket = {NETTYPE_INVALID, -1, -1, -1};
 #define AF_WEBSOCKET_INET (0xee)
 
 std::atomic_bool dbg_assert_failing = false;
+DBG_ASSERT_HANDLER dbg_assert_handler;
 
 bool dbg_assert_has_failed()
 {
@@ -179,8 +180,17 @@ void dbg_assert_imp(const char *filename, int line, int test, const char *msg)
 {
 	if(!test)
 	{
+		const bool already_failing = dbg_assert_has_failed();
 		dbg_assert_failing.store(true, std::memory_order_release);
-		dbg_msg("assert", "%s(%d): %s", filename, line, msg);
+		char error[256];
+		str_format(error, sizeof(error), "%s(%d): %s", filename, line, msg);
+		dbg_msg("assert", "%s", error);
+		if(!already_failing)
+		{
+			DBG_ASSERT_HANDLER handler = dbg_assert_handler;
+			if(handler)
+				handler(error);
+		}
 		log_global_logger_finish();
 		dbg_break();
 	}
@@ -193,6 +203,11 @@ void dbg_break()
 #else
 	abort();
 #endif
+}
+
+void dbg_assert_set_handler(DBG_ASSERT_HANDLER handler)
+{
+	dbg_assert_handler = std::move(handler);
 }
 
 void dbg_msg(const char *sys, const char *fmt, ...)

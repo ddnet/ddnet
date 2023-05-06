@@ -425,6 +425,7 @@ public:
 
 	void Run();
 
+	bool InitNetworkClient(char *pError, size_t ErrorSize);
 	bool CtrlShiftKey(int Key, bool &Last);
 
 	static void Con_Connect(IConsole::IResult *pResult, void *pUserData);
@@ -549,6 +550,8 @@ public:
 	void ShellRegister() override;
 	void ShellUnregister() override;
 #endif
+
+	void ShowMessageBox(const char *pTitle, const char *pMessage, EMessageBoxType Type = MESSAGE_BOX_TYPE_ERROR) override;
 };
 
 #endif
