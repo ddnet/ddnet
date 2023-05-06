@@ -520,9 +520,7 @@ void CHud::RenderTextInfo()
 		TextRender()->SetRenderFlags(OldFlags);
 		if(m_FPSTextContainerIndex.Valid())
 		{
-			ColorRGBA TColor(1, 1, 1, 1);
-			ColorRGBA TOutColor(0, 0, 0, 0.3f);
-			TextRender()->RenderTextContainer(m_FPSTextContainerIndex, TColor, TOutColor);
+			TextRender()->RenderTextContainer(m_FPSTextContainerIndex, TextRender()->DefaultTextColor(), TextRender()->DefaultTextOutlineColor());
 		}
 	}
 	if(g_Config.m_ClShowpred)
@@ -558,7 +556,7 @@ void CHud::RenderTeambalanceWarning()
 			else
 				TextRender()->TextColor(0.7f, 0.7f, 0.2f, 1.0f);
 			TextRender()->Text(5, 50, 6, pText, -1.0f);
-			TextRender()->TextColor(1, 1, 1, 1);
+			TextRender()->TextColor(TextRender()->DefaultTextColor());
 		}
 	}
 }
@@ -570,7 +568,7 @@ void CHud::RenderVoting()
 
 	Graphics()->DrawRect(-10, 60 - 2, 100 + 10 + 4 + 5, 46, ColorRGBA(0.0f, 0.0f, 0.0f, 0.4f), IGraphics::CORNER_ALL, 5.0f);
 
-	TextRender()->TextColor(1, 1, 1, 1);
+	TextRender()->TextColor(TextRender()->DefaultTextColor());
 
 	CTextCursor Cursor;
 	char aBuf[512];
@@ -1652,8 +1650,8 @@ void CHud::RenderDDRaceEffects()
 				auto OutlineColor = TextRender()->DefaultTextOutlineColor();
 				OutlineColor.a *= Alpha;
 				TextRender()->RenderTextContainer(m_DDRaceEffectsTextContainerIndex, TextRender()->DefaultTextColor(), OutlineColor);
-				TextRender()->TextColor(1, 1, 1, 1);
 			}
+			TextRender()->TextColor(TextRender()->DefaultTextColor());
 		}
 		else if(!m_ShowFinishTime && m_TimeCpLastReceivedTick + Client()->GameTickSpeed() * 6 > Client()->GameTick(g_Config.m_ClDummy))
 		{
@@ -1693,8 +1691,8 @@ void CHud::RenderDDRaceEffects()
 				auto OutlineColor = TextRender()->DefaultTextOutlineColor();
 				OutlineColor.a *= Alpha;
 				TextRender()->RenderTextContainer(m_DDRaceEffectsTextContainerIndex, TextRender()->DefaultTextColor(), OutlineColor);
-				TextRender()->TextColor(1, 1, 1, 1);
 			}
+			TextRender()->TextColor(TextRender()->DefaultTextColor());
 		}
 	}
 }
