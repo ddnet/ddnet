@@ -20,6 +20,11 @@ void CBroadcast::OnReset()
 
 void CBroadcast::OnRender()
 {
+	RenderServerBroadcast();
+}
+
+void CBroadcast::RenderServerBroadcast()
+{
 	if(m_pClient->m_Scoreboard.Active() || m_pClient->m_Motd.IsActive() || !g_Config.m_ClShowBroadcasts)
 		return;
 

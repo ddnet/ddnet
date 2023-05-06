@@ -11,6 +11,7 @@ class CBroadcast : public CComponent
 	int m_BroadcastTick;
 	float m_BroadcastRenderOffset;
 
+	void RenderServerBroadcast();
 	void OnBroadcastMessage(const CNetMsg_Sv_Broadcast *pMsg);
 
 public:
