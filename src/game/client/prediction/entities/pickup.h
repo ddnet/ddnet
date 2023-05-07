@@ -8,6 +8,8 @@
 class CPickup : public CEntity
 {
 public:
+	static const int ms_CollisionExtraSize = 6;
+
 	void Tick() override;
 
 	CPickup(CGameWorld *pGameWorld, int ID, CNetObj_Pickup *pPickup, const CNetObj_EntityEx *pEntEx = 0);
