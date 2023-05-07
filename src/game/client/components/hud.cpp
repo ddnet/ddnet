@@ -43,6 +43,7 @@ void CHud::ResetHudContainers()
 	}
 
 	TextRender()->DeleteTextContainer(m_FPSTextContainerIndex);
+	TextRender()->DeleteTextContainer(m_DDRaceEffectsTextContainerIndex);
 }
 
 void CHud::OnWindowResize()
