@@ -18,7 +18,6 @@ public:
 private:
 	int m_Type;
 	int m_Subtype;
-	//int m_SpawnTick;
 
 	// DDRace
 
