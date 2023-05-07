@@ -15,6 +15,9 @@ public:
 	bool Match(CPickup *pPickup);
 	bool InDDNetTile() { return m_IsCoreActive; }
 
+	int Type() const { return m_Type; }
+	int Subtype() const { return m_Subtype; }
+
 private:
 	int m_Type;
 	int m_Subtype;
