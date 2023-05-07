@@ -4589,7 +4589,10 @@ int main(int argc, const char **argv)
 	pKernel->RegisterInterface(pClient, false);
 	pClient->RegisterInterfaces();
 
-	dbg_assert_set_handler([pClient](const char *pMsg) {
+	const std::thread::id MainThreadId = std::this_thread::get_id();
+	dbg_assert_set_handler([MainThreadId, pClient](const char *pMsg) {
+		if(MainThreadId != std::this_thread::get_id())
+			return;
 		char aVersionStr[128];
 		if(os_version_str(aVersionStr, sizeof(aVersionStr)))
 			str_copy(aVersionStr, "unknown");
@@ -5002,5 +5005,6 @@ static Uint32 GetSdlMessageBoxFlags(IClient::EMessageBoxType Type)
 
 void CClient::ShowMessageBox(const char *pTitle, const char *pMessage, EMessageBoxType Type)
 {
-	SDL_ShowSimpleMessageBox(GetSdlMessageBoxFlags(Type), pTitle, pMessage, nullptr);
+	if(m_pGraphics == nullptr || !m_pGraphics->ShowMessageBox(GetSdlMessageBoxFlags(Type), pTitle, pMessage))
+		SDL_ShowSimpleMessageBox(GetSdlMessageBoxFlags(Type), pTitle, pMessage, nullptr);
 }
