@@ -5005,5 +5005,6 @@ static Uint32 GetSdlMessageBoxFlags(IClient::EMessageBoxType Type)
 
 void CClient::ShowMessageBox(const char *pTitle, const char *pMessage, EMessageBoxType Type)
 {
-	SDL_ShowSimpleMessageBox(GetSdlMessageBoxFlags(Type), pTitle, pMessage, nullptr);
+	if(m_pGraphics == nullptr || !m_pGraphics->ShowMessageBox(GetSdlMessageBoxFlags(Type), pTitle, pMessage))
+		SDL_ShowSimpleMessageBox(GetSdlMessageBoxFlags(Type), pTitle, pMessage, nullptr);
 }

@@ -161,7 +161,7 @@ void CGraphicsBackend_Threaded::ProcessError()
 		else
 			VerboseStr.append(ErrStr.m_Err + "\n");
 	}
-	const auto CreatedMsgBox = TryCreateMsgBox(true, "Graphics Assertion", VerboseStr.c_str());
+	const bool CreatedMsgBox = ShowMessageBox(SDL_MESSAGEBOX_ERROR, "Graphics Assertion", VerboseStr.c_str());
 	// check if error msg can be shown, then assert
 	dbg_assert(!CreatedMsgBox, VerboseStr.c_str());
 }
@@ -774,12 +774,19 @@ void CGraphicsBackend_SDL_GL::ClampDriverVersion(EBackendType BackendType)
 	}
 }
 
-bool CGraphicsBackend_SDL_GL::TryCreateMsgBox(bool AsError, const char *pTitle, const char *pMsg)
+bool CGraphicsBackend_SDL_GL::ShowMessageBox(unsigned Type, const char *pTitle, const char *pMsg)
 {
-	m_pProcessor->ErroneousCleanup();
-	SDL_DestroyWindow(m_pWindow);
-	SDL_ShowSimpleMessageBox(AsError ? SDL_MESSAGEBOX_ERROR : SDL_MESSAGEBOX_WARNING, pTitle, pMsg, nullptr);
-	return true;
+	if(m_pProcessor != nullptr)
+		m_pProcessor->ErroneousCleanup();
+	// TODO: Remove this workaround when https://github.com/libsdl-org/SDL/issues/3750 is
+	// fixed and pass the window to SDL_ShowSimpleMessageBox to make the popup modal instead
+	// of destroying the window before opening the popup.
+	if(m_pWindow != nullptr)
+	{
+		SDL_DestroyWindow(m_pWindow);
+		m_pWindow = nullptr;
+	}
+	return SDL_ShowSimpleMessageBox(Type, pTitle, pMsg, nullptr) == 0;
 }
 
 bool CGraphicsBackend_SDL_GL::IsModernAPI(EBackendType BackendType)
@@ -1203,6 +1210,7 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 		if(m_GLContext == NULL)
 		{
 			SDL_DestroyWindow(m_pWindow);
+			m_pWindow = nullptr;
 			dbg_msg("gfx", "unable to create graphic context: %s", SDL_GetError());
 			return EGraphicsBackendErrorCodes::GRAPHICS_BACKEND_ERROR_CODE_GL_CONTEXT_FAILED;
 		}
@@ -1211,6 +1219,7 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 		{
 			SDL_GL_DeleteContext(m_GLContext);
 			SDL_DestroyWindow(m_pWindow);
+			m_pWindow = nullptr;
 			return EGraphicsBackendErrorCodes::GRAPHICS_BACKEND_ERROR_CODE_UNKNOWN;
 		}
 	}
@@ -1237,6 +1246,7 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 		if(m_GLContext)
 			SDL_GL_DeleteContext(m_GLContext);
 		SDL_DestroyWindow(m_pWindow);
+		m_pWindow = nullptr;
 
 		// try setting to glew supported version
 		g_Config.m_GfxGLMajor = GlewMajor;
@@ -1339,6 +1349,7 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 		if(m_GLContext)
 			SDL_GL_DeleteContext(m_GLContext);
 		SDL_DestroyWindow(m_pWindow);
+		m_pWindow = nullptr;
 
 		// try setting to version string's supported version
 		if(InitError == -2)
@@ -1403,6 +1414,7 @@ int CGraphicsBackend_SDL_GL::Shutdown()
 	if(m_GLContext != nullptr)
 		SDL_GL_DeleteContext(m_GLContext);
 	SDL_DestroyWindow(m_pWindow);
+	m_pWindow = nullptr;
 
 	SDL_QuitSubSystem(SDL_INIT_VIDEO);
 	return 0;

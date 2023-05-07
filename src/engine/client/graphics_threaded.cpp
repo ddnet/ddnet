@@ -3279,6 +3279,13 @@ SWarning *CGraphics_Threaded::GetCurWarning()
 	}
 }
 
+bool CGraphics_Threaded::ShowMessageBox(unsigned Type, const char *pTitle, const char *pMsg)
+{
+	if(m_pBackend == nullptr)
+		return false;
+	return m_pBackend->ShowMessageBox(Type, pTitle, pMsg);
+}
+
 const char *CGraphics_Threaded::GetVendorString()
 {
 	return m_pBackend->GetVendorString();
