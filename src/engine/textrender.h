@@ -221,6 +221,14 @@ struct STextContainerIndex
 	void Reset() { m_Index = -1; }
 };
 
+struct STextSizeProperties
+{
+	float *m_pHeight = nullptr;
+	float *m_pAlignedFontSize = nullptr;
+	float *m_pMaxCharacterHeightInLine = nullptr;
+	int *m_pLineCount = nullptr;
+};
+
 class ITextRender : public IInterface
 {
 	MACRO_INTERFACE("textrender", 0)
@@ -279,7 +287,7 @@ public:
 	virtual void TextSelectionColor(float r, float g, float b, float a) = 0;
 	virtual void TextSelectionColor(ColorRGBA rgb) = 0;
 	virtual void Text(float x, float y, float Size, const char *pText, float LineWidth = -1.0f) = 0;
-	virtual float TextWidth(float Size, const char *pText, int StrLength = -1, float LineWidth = -1.0f, int Flags = 0, float *pHeight = nullptr, float *pAlignedFontSize = nullptr, float *pMaxCharacterHeightInLine = nullptr) = 0;
+	virtual float TextWidth(float Size, const char *pText, int StrLength = -1, float LineWidth = -1.0f, int Flags = 0, const STextSizeProperties &TextSizeProps = {}) = 0;
 	virtual STextBoundingBox TextBoundingBox(float Size, const char *pText, int StrLength = -1, float LineWidth = -1.0f, int Flags = 0) = 0;
 
 	virtual ColorRGBA GetTextColor() const = 0;

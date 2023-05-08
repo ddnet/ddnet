@@ -839,18 +839,20 @@ public:
 		TextEx(&Cursor, pText, -1);
 	}
 
-	float TextWidth(float Size, const char *pText, int StrLength = -1, float LineWidth = -1.0f, int Flags = 0, float *pHeight = nullptr, float *pAlignedFontSize = nullptr, float *pMaxCharacterHeightInLine = nullptr) override
+	float TextWidth(float Size, const char *pText, int StrLength = -1, float LineWidth = -1.0f, int Flags = 0, const STextSizeProperties &TextSizeProps = {}) override
 	{
 		CTextCursor Cursor;
 		SetCursor(&Cursor, 0, 0, Size, Flags);
 		Cursor.m_LineWidth = LineWidth;
 		TextEx(&Cursor, pText, StrLength);
-		if(pHeight != nullptr)
-			*pHeight = Cursor.Height();
-		if(pAlignedFontSize != nullptr)
-			*pAlignedFontSize = Cursor.m_AlignedFontSize;
-		if(pMaxCharacterHeightInLine != nullptr)
-			*pMaxCharacterHeightInLine = Cursor.m_MaxCharacterHeight;
+		if(TextSizeProps.m_pHeight != nullptr)
+			*TextSizeProps.m_pHeight = Cursor.Height();
+		if(TextSizeProps.m_pAlignedFontSize != nullptr)
+			*TextSizeProps.m_pAlignedFontSize = Cursor.m_AlignedFontSize;
+		if(TextSizeProps.m_pMaxCharacterHeightInLine != nullptr)
+			*TextSizeProps.m_pMaxCharacterHeightInLine = Cursor.m_MaxCharacterHeight;
+		if(TextSizeProps.m_pLineCount != nullptr)
+			*TextSizeProps.m_pLineCount = Cursor.m_LineCount;
 		return Cursor.m_LongestLineWidth;
 	}
 
