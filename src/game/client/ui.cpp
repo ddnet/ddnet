@@ -547,11 +547,24 @@ void CUI::DoSmoothScrollLogic(float *pScrollOffset, float *pScrollOffsetChange, 
 	}
 }
 
-static vec2 CalcFontSizeAndBoundingBox(ITextRender *pTextRender, const char *pText, int Flags, float &Size, float MaxWidth, const SLabelProperties &LabelProps)
+struct SCursorAndBoundingBox
 {
+	vec2 m_TextSize;
+	float m_BiggestCharacterHeight;
+	int m_LineCount;
+};
+
+static SCursorAndBoundingBox CalcFontSizeCursorHeightAndBoundingBox(ITextRender *pTextRender, const char *pText, int Flags, float &Size, float MaxWidth, const SLabelProperties &LabelProps)
+{
+	float TextBoundingHeight = 0.0f;
 	float TextHeight = 0.0f;
+	int LineCount = 0;
 	float MaxTextWidth = LabelProps.m_MaxWidth != -1 ? LabelProps.m_MaxWidth : MaxWidth;
-	float TextWidth = pTextRender->TextWidth(Size, pText, -1, LabelProps.m_MaxWidth, Flags, &TextHeight);
+	STextSizeProperties TextSizeProps{};
+	TextSizeProps.m_pHeight = &TextHeight;
+	TextSizeProps.m_pMaxCharacterHeightInLine = &TextBoundingHeight;
+	TextSizeProps.m_pLineCount = &LineCount;
+	float TextWidth = pTextRender->TextWidth(Size, pText, -1, LabelProps.m_MaxWidth, Flags, TextSizeProps);
 	while(TextWidth > MaxTextWidth + 0.001f)
 	{
 		if(!LabelProps.m_EnableWidthCheck)
@@ -559,12 +572,16 @@ static vec2 CalcFontSizeAndBoundingBox(ITextRender *pTextRender, const char *pTe
 		if(Size < 4.0f)
 			break;
 		Size -= 1.0f;
-		TextWidth = pTextRender->TextWidth(Size, pText, -1, LabelProps.m_MaxWidth, Flags, &TextHeight);
+		TextWidth = pTextRender->TextWidth(Size, pText, -1, LabelProps.m_MaxWidth, Flags, TextSizeProps);
 	}
-	return vec2(TextWidth, TextHeight);
+	SCursorAndBoundingBox Res{};
+	Res.m_TextSize = vec2(TextWidth, TextHeight);
+	Res.m_BiggestCharacterHeight = TextBoundingHeight;
+	Res.m_LineCount = LineCount;
+	return Res;
 }
 
-vec2 CUI::CalcAlignedCursorPos(const CUIRect *pRect, vec2 TextSize, int Align)
+vec2 CUI::CalcAlignedCursorPos(const CUIRect *pRect, vec2 TextSize, int Align, const float *pBiggestCharHeight)
 {
 	vec2 Cursor(pRect->x, pRect->y);
 
@@ -581,7 +598,7 @@ vec2 CUI::CalcAlignedCursorPos(const CUIRect *pRect, vec2 TextSize, int Align)
 	const int VerticalAlign = Align & TEXTALIGN_MASK_VERTICAL;
 	if(VerticalAlign == TEXTALIGN_MIDDLE)
 	{
-		Cursor.y += (pRect->h - TextSize.y) / 2.0f;
+		Cursor.y += pBiggestCharHeight != nullptr ? ((pRect->h - *pBiggestCharHeight) / 2.0f - (TextSize.y - *pBiggestCharHeight)) : (pRect->h - TextSize.y) / 2.0f;
 	}
 	else if(VerticalAlign == TEXTALIGN_BOTTOM)
 	{
@@ -594,8 +611,8 @@ vec2 CUI::CalcAlignedCursorPos(const CUIRect *pRect, vec2 TextSize, int Align)
 void CUI::DoLabel(const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps)
 {
 	const int Flags = LabelProps.m_StopAtEnd ? TEXTFLAG_STOP_AT_END : 0;
-	const vec2 TextBounds = CalcFontSizeAndBoundingBox(TextRender(), pText, Flags, Size, pRect->w, LabelProps);
-	const vec2 CursorPos = CalcAlignedCursorPos(pRect, TextBounds, Align);
+	const SCursorAndBoundingBox TextBounds = CalcFontSizeCursorHeightAndBoundingBox(TextRender(), pText, Flags, Size, pRect->w, LabelProps);
+	const vec2 CursorPos = CalcAlignedCursorPos(pRect, TextBounds.m_TextSize, Align, TextBounds.m_LineCount == 1 ? &TextBounds.m_BiggestCharacterHeight : nullptr);
 
 	CTextCursor Cursor;
 	TextRender()->SetCursor(&Cursor, CursorPos.x, CursorPos.y, Size, TEXTFLAG_RENDER | Flags);
@@ -606,7 +623,7 @@ void CUI::DoLabel(const CUIRect *pRect, const char *pText, float Size, int Align
 void CUI::DoLabel(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps, int StrLen, const CTextCursor *pReadCursor)
 {
 	const int Flags = pReadCursor ? (pReadCursor->m_Flags & ~TEXTFLAG_RENDER) : LabelProps.m_StopAtEnd ? TEXTFLAG_STOP_AT_END : 0;
-	const vec2 TextBounds = CalcFontSizeAndBoundingBox(TextRender(), pText, Flags, Size, pRect->w, LabelProps);
+	const SCursorAndBoundingBox TextBounds = CalcFontSizeCursorHeightAndBoundingBox(TextRender(), pText, Flags, Size, pRect->w, LabelProps);
 
 	CTextCursor Cursor;
 	if(pReadCursor)
@@ -615,7 +632,7 @@ void CUI::DoLabel(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, cons
 	}
 	else
 	{
-		const vec2 CursorPos = CalcAlignedCursorPos(pRect, TextBounds, Align);
+		const vec2 CursorPos = CalcAlignedCursorPos(pRect, TextBounds.m_TextSize, Align);
 		TextRender()->SetCursor(&Cursor, CursorPos.x, CursorPos.y, Size, TEXTFLAG_RENDER | Flags);
 	}
 	Cursor.m_LineWidth = LabelProps.m_MaxWidth;
@@ -798,7 +815,9 @@ bool CUI::DoClearableEditBox(CLineInput *pLineInput, const CUIRect *pRect, float
 	bool ReturnValue = DoEditBox(pLineInput, &EditBox, FontSize, Corners & ~IGraphics::CORNER_R);
 
 	ClearButton.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.33f * ButtonColorMul(pLineInput->GetClearButtonId())), Corners & ~IGraphics::CORNER_L, 3.0f);
+	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
 	DoLabel(&ClearButton, "×", ClearButton.h * CUI::ms_FontmodHeight * 0.8f, TEXTALIGN_MC);
+	TextRender()->SetRenderFlags(0);
 	if(DoButtonLogic(pLineInput->GetClearButtonId(), 0, &ClearButton))
 	{
 		pLineInput->Clear();
@@ -1177,7 +1196,9 @@ void CUI::ShowPopupMessage(float X, float Y, SMessagePopupContext *pContext)
 {
 	const float TextWidth = minimum(std::ceil(TextRender()->TextWidth(SMessagePopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, -1, -1.0f)), SMessagePopupContext::POPUP_MAX_WIDTH);
 	float TextHeight = 0.0f;
-	TextRender()->TextWidth(SMessagePopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, -1, TextWidth, 0, &TextHeight);
+	STextSizeProperties TextSizeProps{};
+	TextSizeProps.m_pHeight = &TextHeight;
+	TextRender()->TextWidth(SMessagePopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, -1, TextWidth, 0, TextSizeProps);
 	pContext->m_pUI = this;
 	DoPopupMenu(pContext, X, Y, TextWidth + 10.0f, TextHeight + 10.0f, pContext, PopupMessage);
 }
@@ -1202,7 +1223,9 @@ void CUI::ShowPopupConfirm(float X, float Y, SConfirmPopupContext *pContext)
 {
 	const float TextWidth = minimum(std::ceil(TextRender()->TextWidth(SConfirmPopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, -1, -1.0f)), SConfirmPopupContext::POPUP_MAX_WIDTH);
 	float TextHeight = 0.0f;
-	TextRender()->TextWidth(SConfirmPopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, -1, TextWidth, 0, &TextHeight);
+	STextSizeProperties TextSizeProps{};
+	TextSizeProps.m_pHeight = &TextHeight;
+	TextRender()->TextWidth(SConfirmPopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, -1, TextWidth, 0, TextSizeProps);
 	const float PopupHeight = TextHeight + SConfirmPopupContext::POPUP_BUTTON_HEIGHT + SConfirmPopupContext::POPUP_BUTTON_SPACING + 10.0f;
 	pContext->m_pUI = this;
 	pContext->m_Result = SConfirmPopupContext::UNSET;
