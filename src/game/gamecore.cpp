@@ -160,7 +160,7 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 		m_Direction = m_Input.m_Direction;
 
 		// setup angle
-		float TmpAngle = atan2f(m_Input.m_TargetY, m_Input.m_TargetX);
+		float TmpAngle = std::atan2(m_Input.m_TargetY, m_Input.m_TargetX);
 		if(TmpAngle < -(pi / 2.0f))
 		{
 			m_Angle = (int)((TmpAngle + (2.0f * pi)) * 256.0f);

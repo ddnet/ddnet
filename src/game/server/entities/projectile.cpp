@@ -233,7 +233,7 @@ void CProjectile::Tick()
 		}
 		else if(m_Type == WEAPON_GUN)
 		{
-			GameServer()->CreateDamageInd(CurPos, -atan2(m_Direction.x, m_Direction.y), 10, (m_Owner != -1) ? TeamMask : CClientMask().set());
+			GameServer()->CreateDamageInd(CurPos, -std::atan2(m_Direction.x, m_Direction.y), 10, (m_Owner != -1) ? TeamMask : CClientMask().set());
 			m_MarkedForDestroy = true;
 			return;
 		}
@@ -380,7 +380,7 @@ bool CProjectile::FillExtraInfo(CNetObj_DDNetProjectile *pProj)
 		return false;
 	}
 	//Send additional/modified info, by modifying the fields of the netobj
-	float Angle = -atan2f(m_Direction.x, m_Direction.y);
+	float Angle = -std::atan2(m_Direction.x, m_Direction.y);
 
 	int Data = 0;
 	Data |= (absolute(m_Owner) & 255) << 0;

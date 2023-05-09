@@ -1381,7 +1381,7 @@ void CHud::RenderMovementInformation(const int ClientID)
 	{
 		// On DDNet servers the more accurate angle is displayed, calculated from the target coordinates
 		CNetObj_DDNetCharacter *pExtendedData = &m_pClient->m_Snap.m_aCharacters[ClientID].m_ExtendedData;
-		Angle = atan2f(pExtendedData->m_TargetY, pExtendedData->m_TargetX);
+		Angle = std::atan2(pExtendedData->m_TargetY, pExtendedData->m_TargetX);
 	}
 	else
 	{
