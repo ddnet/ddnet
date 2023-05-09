@@ -4683,7 +4683,13 @@ int main(int argc, const char **argv)
 	// execute config file
 	if(pStorage->FileExists(CONFIG_FILE, IStorage::TYPE_ALL))
 	{
-		pConsole->ExecuteFile(CONFIG_FILE);
+		if(!pConsole->ExecuteFile(CONFIG_FILE))
+		{
+			const char *pError = "Failed to load config from '" CONFIG_FILE "'.";
+			dbg_msg("client", "%s", pError);
+			pClient->ShowMessageBox("Config File Error", pError);
+			return -1;
+		}
 	}
 
 	// execute autoexec file
