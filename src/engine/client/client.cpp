@@ -4767,25 +4767,25 @@ int main(int argc, const char **argv)
 	dbg_msg("client", "starting...");
 	pClient->Run();
 
-	bool Restarting = pClient->State() == CClient::STATE_RESTARTING;
+	const bool Restarting = pClient->State() == CClient::STATE_RESTARTING;
+	char aRestartBinaryPath[IO_MAX_PATH_LENGTH];
+	if(Restarting)
+	{
+		pStorage->GetBinaryPath(PLAT_CLIENT_EXEC, aRestartBinaryPath, sizeof(aRestartBinaryPath));
+	}
 
 	pClient->~CClient();
 	free(pClient);
-
+	pKernel->Shutdown();
+	delete pKernel;
+	SDL_Quit();
 	NotificationsUninit();
 	secure_random_uninit();
 
 	if(Restarting)
 	{
-		char aBuf[512];
-		shell_execute(pStorage->GetBinaryPath(PLAT_CLIENT_EXEC, aBuf, sizeof aBuf));
+		shell_execute(aRestartBinaryPath);
 	}
-
-	pKernel->Shutdown();
-	delete pKernel;
-
-	// shutdown SDL
-	SDL_Quit();
 
 #ifdef CONF_PLATFORM_ANDROID
 	// properly close this native thread, so globals are destructed
