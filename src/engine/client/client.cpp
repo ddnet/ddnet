@@ -4743,6 +4743,12 @@ int main(int argc, const char **argv)
 	pClient->ShellRegister();
 #endif
 
+#if defined(CONF_PLATFORM_MACOS)
+	// Hints will not be set if there is an existing override hint or environment variable that takes precedence.
+	// So this respects cli environment overrides.
+	SDL_SetHint("SDL_MAC_OPENGL_ASYNC_DISPATCH", "1");
+#endif
+
 	// init SDL
 	if(SDL_Init(0) < 0)
 	{
