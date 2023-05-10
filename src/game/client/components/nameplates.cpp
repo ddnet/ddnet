@@ -185,9 +185,9 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 			YOffset -= FontSizeClan;
 			char aBuf[128];
 			str_format(aBuf, sizeof(aBuf), "%s", m_pClient->m_aClients[pPlayerInfo->m_ClientID].m_aSkinName);
-			float XOffset = TextRender()->TextWidth(0, FontSize, aBuf, -1, -1.0f) / 2.0f;
+			float XOffset = TextRender()->TextWidth(FontSize, aBuf, -1, -1.0f) / 2.0f;
 			TextRender()->TextColor(rgb);
-			TextRender()->Text(0, Position.x - XOffset, YOffset, FontSize, aBuf, -1.0f);
+			TextRender()->Text(Position.x - XOffset, YOffset, FontSize, aBuf, -1.0f);
 		}
 
 		if(g_Config.m_ClNameplatesFriendMark && m_pClient->m_aClients[ClientID].m_Friend)

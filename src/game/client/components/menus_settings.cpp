@@ -742,7 +742,6 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 				g_Config.m_ClPlayerColorFeet = ColorHSLA((std::rand() % 100) / 100.0f, (std::rand() % 100) / 100.0f, (std::rand() % 100) / 100.0f, 1).Pack(false);
 			}
 			SetNeedSendInfo();
-			m_DoubleClickIndex = -1;
 		}
 	}
 	MainView.HSplitTop(5.0f, 0, &MainView);
@@ -3321,7 +3320,6 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 				{
 					dbg_msg("menus", "couldn't open link");
 				}
-				m_DoubleClickIndex = -1;
 			}
 		}
 
@@ -3379,16 +3377,16 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		MainView.VSplitLeft(-5.0f, 0x0, &MainView);
 
 		MainView.HSplitTop(25.0f, &Section, &MainView);
-		DoLine_ColorPicker(&OutlineColorFreezeID, 25.0f, 200.0f, 14.0f, 0.0f, &Section, ("Freeze Outline Color"), &g_Config.m_ClOutlineColorFreeze, ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), false);
+		DoLine_ColorPicker(&OutlineColorFreezeID, 25.0f, 200.0f, 14.0f, &Section, ("Freeze Outline Color"), &g_Config.m_ClOutlineColorFreeze, ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), false);
 
 		MainView.HSplitTop(25.0f, &Section, &MainView);
-		DoLine_ColorPicker(&OutlineColorSolidID, 25.0f, 200.0f, 14.0f, 0.0f, &Section, ("Walls Outline Color"), &g_Config.m_ClOutlineColorSolid, ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), false);
+		DoLine_ColorPicker(&OutlineColorSolidID, 25.0f, 200.0f, 14.0f, &Section, ("Walls Outline Color"), &g_Config.m_ClOutlineColorSolid, ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), false);
 
 		MainView.HSplitTop(25.0f, &Section, &MainView);
-		DoLine_ColorPicker(&OutlineColorTeleID, 25.0f, 200.0f, 14.0f, 0.0f, &Section, ("Teleporter Outline Color"), &g_Config.m_ClOutlineColorTele, ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), false);
+		DoLine_ColorPicker(&OutlineColorTeleID, 25.0f, 200.0f, 14.0f, &Section, ("Teleporter Outline Color"), &g_Config.m_ClOutlineColorTele, ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), false);
 
 		MainView.HSplitTop(25.0f, &Section, &MainView);
-		DoLine_ColorPicker(&OutlineColorUnfreezeID, 25.0f, 200.0f, 14.0f, 0.0f, &Section, ("Unfreeze Outline Color"), &g_Config.m_ClOutlineColorUnfreeze, ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), false);
+		DoLine_ColorPicker(&OutlineColorUnfreezeID, 25.0f, 200.0f, 14.0f, &Section, ("Unfreeze Outline Color"), &g_Config.m_ClOutlineColorUnfreeze, ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), false);
 
 		// ***** ANTI LATENCY ***** //
 		// MainView.HSplitTop(5.0f, 0, &MainView);
@@ -3471,10 +3469,10 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		MainView.VSplitLeft(-5.0f, 0x0, &MainView);
 
 		MainView.HSplitTop(25.0f, &Section, &MainView);
-		DoLine_ColorPicker(&IndicatorAliveColorID, 25.0f, 200.0f, 14.0f, 0.0f, &Section, ("Indicator alive color"), &g_Config.m_ClIndicatorAlive, ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), false);
+		DoLine_ColorPicker(&IndicatorAliveColorID, 25.0f, 200.0f, 14.0f, &Section, ("Indicator alive color"), &g_Config.m_ClIndicatorAlive, ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), false);
 
 		MainView.HSplitTop(25.0f, &Section, &MainView);
-		DoLine_ColorPicker(&IndicatorDeadColorID, 25.0f, 200.0f, 14.0f, 0.0f, &Section, ("Indicator dead color"), &g_Config.m_ClIndicatorFreeze, ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), false);
+		DoLine_ColorPicker(&IndicatorDeadColorID, 25.0f, 200.0f, 14.0f, &Section, ("Indicator dead color"), &g_Config.m_ClIndicatorFreeze, ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), false);
 		{
 			CUIRect Button, Label;
 			MainView.HSplitTop(5.0f, &Button, &MainView);
@@ -3548,7 +3546,6 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		char pD[NUM_BINDWHEEL][MAX_BINDWHEEL_DESC];
 		char pC[NUM_BINDWHEEL][MAX_BINDWHEEL_CMD];
 
-		const char *pDescriptionFallback = "EMPTY";
 
 		// Draw Circle
 		Graphics()->TextureClear();
@@ -3581,14 +3578,25 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			
 			char aBuf[MAX_BINDWHEEL_DESC];
 			str_format(aBuf, sizeof(aBuf), "%s", GameClient()->m_Bindwheel.m_BindWheelList[i].description);
-			TextRender()->Text(0, Screen.w / 2 - 100.0f + NudgeX, Screen.h / 2 + NudgeY, Size, aBuf, -1.0f);
+			TextRender()->Text(Screen.w / 2 - 100.0f + NudgeX, Screen.h / 2 + NudgeY, Size, aBuf, -1.0f);
 		}
 		Graphics()->WrapNormal();
 
+		static CLineInput s_BindWheelDesc[NUM_BINDWHEEL];
+		static CLineInput s_BindWheelCmd[NUM_BINDWHEEL];
 
 
 		for(int i = 0; i < NUM_BINDWHEEL; i++)
 		{
+			if(i == NUM_BINDWHEEL / 2)
+			{
+				MainView = Column;
+				MainView.VSplitRight(500, 0, &MainView);
+
+				MainView.HSplitTop(30.0f, &Section, &MainView);
+				MainView.VSplitLeft(MainView.w * 0.5, 0, &MainView);
+			}
+
 			str_format(pD[i], sizeof(pD[i]), GameClient()->m_Bindwheel.m_BindWheelList[i].description);
 
 			str_format(pC[i], sizeof(pC[i]), GameClient()->m_Bindwheel.m_BindWheelList[i].command);
@@ -3601,13 +3609,11 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			char aBuf[MAX_BINDWHEEL_CMD];
 			str_format(aBuf, sizeof(aBuf), "%s %d:", Localize("Description"), i + 1);
 			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
-			static float s_OffsetName = 0.0f;
-			SUIExEditBoxProperties EditProps;
-			EditProps.m_pEmptyText = pDescriptionFallback;
-			if(UI()->DoEditBox(pD[i], &buttons[i], pD[i], sizeof(GameClient()->m_Bindwheel.m_BindWheelList[i].description), 14.0f, &s_OffsetName, false, IGraphics::CORNER_ALL, EditProps))
-			{
-				str_format(GameClient()->m_Bindwheel.m_BindWheelList[i].description, sizeof(GameClient()->m_Bindwheel.m_BindWheelList[i].description), pD[i]);
-			}
+
+			s_BindWheelDesc[i].SetBuffer(GameClient()->m_Bindwheel.m_BindWheelList[i].description, sizeof(GameClient()->m_Bindwheel.m_BindWheelList[i].description));
+			s_BindWheelDesc[i].SetEmptyText(Localize("Description"));
+
+			UI()->DoEditBox(&s_BindWheelDesc[i], &buttons[i], 14.0f);
 
 			// Command
 			MainView.HSplitTop(5.0f, 0, &MainView);
@@ -3616,20 +3622,13 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			buttons[i].VSplitLeft(150.0f, &buttons[i], 0);
 			str_format(aBuf, sizeof(aBuf), "%s %d:", Localize("Command"), i + 1);
 			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
-			static float s_OffsetClan = 0.0f;
-			if(UI()->DoEditBox(pC[i], &buttons[i], pC[i], sizeof(GameClient()->m_Bindwheel.m_BindWheelList[i].command), 14.0f, &s_OffsetClan))
-			{
-				str_format(GameClient()->m_Bindwheel.m_BindWheelList[i].command, sizeof(GameClient()->m_Bindwheel.m_BindWheelList[i].command), pC[i]);
-			}
 
-			if(NUM_BINDWHEEL / 2 == i + 1)
-			{
-				MainView = Column;
-				MainView.VSplitRight(500, 0, &MainView);
+			s_BindWheelCmd[i].SetBuffer(GameClient()->m_Bindwheel.m_BindWheelList[i].command, sizeof(GameClient()->m_Bindwheel.m_BindWheelList[i].command));
+			s_BindWheelCmd[i].SetEmptyText(Localize("Command"));
 
-				MainView.HSplitTop(30.0f, &Section, &MainView);
-				MainView.VSplitLeft(MainView.w * 0.5, 0, &MainView);
-			}
+
+			UI()->DoEditBox(&s_BindWheelCmd[i], &buttons[i], 14.0f);
+
 		}
 
 
@@ -3697,7 +3696,7 @@ void CMenus::RenderSettingsProfiles(CUIRect MainView)
 
 	// skin info
 	CTeeRenderInfo OwnSkinInfo;
-	const CSkin *pSkin = m_pClient->m_Skins.Get(m_pClient->m_Skins.Find(pSkinName));
+	const CSkin *pSkin = m_pClient->m_Skins.Find(pSkinName);
 	OwnSkinInfo.m_OriginalRenderSkin = pSkin->m_OriginalSkin;
 	OwnSkinInfo.m_ColorableRenderSkin = pSkin->m_ColorableSkin;
 	OwnSkinInfo.m_SkinMetrics = pSkin->m_Metrics;
@@ -3777,7 +3776,7 @@ void CMenus::RenderSettingsProfiles(CUIRect MainView)
 
 		if(doSkin && strlen(LoadProfile.SkinName) != 0)
 		{
-			const CSkin *pLoadSkin = m_pClient->m_Skins.Get(m_pClient->m_Skins.Find(LoadProfile.SkinName));
+			const CSkin *pLoadSkin = m_pClient->m_Skins.Find(LoadProfile.SkinName);
 			OwnSkinInfo.m_OriginalRenderSkin = pLoadSkin->m_OriginalSkin;
 			OwnSkinInfo.m_ColorableRenderSkin = pLoadSkin->m_ColorableSkin;
 			OwnSkinInfo.m_SkinMetrics = pLoadSkin->m_Metrics;
@@ -3909,7 +3908,6 @@ void CMenus::RenderSettingsProfiles(CUIRect MainView)
 			}
 		}
 		SetNeedSendInfo();
-		m_DoubleClickIndex = -1;
 	}
 	LabelRight.HSplitTop(5.0f, 0, &LabelRight);
 
@@ -3926,7 +3924,6 @@ void CMenus::RenderSettingsProfiles(CUIRect MainView)
 			doName ? aName : "",
 			doClan ? aClan : "");
 		GameClient()->m_SkinProfiles.SaveProfiles();
-		m_DoubleClickIndex = -1;
 	}
 	LabelRight.HSplitTop(5.0f, 0, &LabelRight);
 
@@ -3945,7 +3942,6 @@ void CMenus::RenderSettingsProfiles(CUIRect MainView)
 				GameClient()->m_SkinProfiles.m_Profiles.erase(GameClient()->m_SkinProfiles.m_Profiles.begin() + SelectedProfile);
 				GameClient()->m_SkinProfiles.SaveProfiles();
 			}
-			m_DoubleClickIndex = -1;
 		}
 		LabelRight.HSplitTop(5.0f, 0, &LabelRight);
 
@@ -3965,7 +3961,6 @@ void CMenus::RenderSettingsProfiles(CUIRect MainView)
 					doClan ? aClan : "");
 				GameClient()->m_SkinProfiles.SaveProfiles();
 			}
-			m_DoubleClickIndex = -1;
 		}
 	}
 
@@ -3978,7 +3973,10 @@ void CMenus::RenderSettingsProfiles(CUIRect MainView)
 	static int s_ProfileList;
 	static float s_ProfileScroll = 0.0f;
 
-	UiDoListboxStart(&s_ProfileList, &SelectorRect, 50.0f, Localize("Profiles"), "", pProfileList->size(), 4, SelectedProfile, s_ProfileScroll);
+    static bool s_ListBoxUsed = false;
+	static CListBox s_ListBox;
+	s_ListBox.DoStart(50.0f, pProfileList->size(), 4, 3, SelectedProfile, &SelectorRect, true, &s_ListBoxUsed);
+
 	static bool s_Indexs[1024];
 	static bool s_ToolTips[1024];
 
@@ -3992,9 +3990,13 @@ void CMenus::RenderSettingsProfiles(CUIRect MainView)
 		else
 			str_copy(RenderSkin, CurrentProfile.SkinName, sizeof(RenderSkin));
 
-		const CSkin *pSkinToBeDraw = m_pClient->m_Skins.Get(m_pClient->m_Skins.Find(RenderSkin));
+		const CSkin *pSkinToBeDraw = m_pClient->m_Skins.Find(RenderSkin);
 
-		CListboxItem Item = UiDoListboxNextItem(&s_Indexs[i], SelectedProfile >= 0 && SelectedProfile == i);
+        CListboxItem Item = s_ListBox.DoNextItem(&s_Indexs[i], SelectedProfile >= 0 && (size_t)SelectedProfile == i, &s_ListBoxUsed);
+
+		if(!Item.m_Visible)
+		continue;
+
 		if(Item.m_Visible)
 		{
 			CTeeRenderInfo Info;
@@ -4019,6 +4021,8 @@ void CMenus::RenderSettingsProfiles(CUIRect MainView)
 
 			Item.m_Rect.VSplitLeft(60.0f, 0, &Item.m_Rect);
 			CUIRect FlagRect, PlayerRect, ClanRect, FeetColorSquare, BodyColorSquare;
+
+			Item.m_Rect.VSplitLeft(60.0f, 0, &BodyColorSquare); //Delete this maybe
 
 			Item.m_Rect.VSplitRight(60.0, &BodyColorSquare, &FlagRect);
 			BodyColorSquare.x -= 11.0;
@@ -4069,7 +4073,7 @@ void CMenus::RenderSettingsProfiles(CUIRect MainView)
 		}
 	}
 
-	const int NewSelected = UiDoListboxEnd(&s_ProfileScroll, 0);
+    const int NewSelected = s_ListBox.DoEnd();
 	if(SelectedProfile != NewSelected)
 	{
 		SelectedProfile = NewSelected;

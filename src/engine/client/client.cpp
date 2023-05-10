@@ -2162,7 +2162,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 							char aBufTO[256];
 						    str_format(aBufTO, sizeof(aBufTO), "/timeout %s", m_aTimeoutCodes[Conn]);
 							TOMsgp.m_pMessage = aBufTO;
-							CMsgPacker PackerTO(TOMsgp.MsgID(), false);
+							CMsgPacker PackerTO(TOMsgp.ms_MsgID, false);
 							TOMsgp.Pack(&PackerTO);
 							SendMsg(Conn, &PackerTO, MSGFLAG_VITAL);
 

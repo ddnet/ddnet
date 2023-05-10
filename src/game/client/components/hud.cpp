@@ -572,25 +572,25 @@ void CHud::RenderTextInfo()
 			Pos = m_pClient->m_aClients[PlayerId].m_RenderPos;
 
 		str_format(aBuf, sizeof(aBuf), "X: %.2f", Pos.x / 32.0f);
-		TextRender()->Text(0, 4, yOff, FontSize, aBuf, -1.0f);
+		TextRender()->Text(4, yOff, FontSize, aBuf, -1.0f);
 
 		yOff += TextHeight;
 		str_format(aBuf, sizeof(aBuf), "Y: %.2f", Pos.y / 32.0f);
-		TextRender()->Text(0, 4, yOff, FontSize, aBuf, -1.0f);
+		TextRender()->Text(4, yOff, FontSize, aBuf, -1.0f);
 		if(m_pClient->m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW)
 		{
 			yOff += TextHeight;
 			str_format(aBuf, sizeof(aBuf), "Angle: %d", m_pClient->m_aClients[PlayerId].m_RenderCur.m_Angle);
-			TextRender()->Text(0, 4, yOff, FontSize, aBuf, -1.0f);
+			TextRender()->Text(4, yOff, FontSize, aBuf, -1.0f);
 
 			yOff += TextHeight;
 			str_format(aBuf, sizeof(aBuf), "VelY: %.2f", m_pClient->m_Snap.m_aCharacters[PlayerId].m_Cur.m_VelY / 256.0f * 50.0 / 32.0f);
-			TextRender()->Text(0, 4, yOff, FontSize, aBuf, -1.0f);
+			TextRender()->Text(4, yOff, FontSize, aBuf, -1.0f);
 
 			yOff += TextHeight;
 
 			str_format(aBuf, sizeof(aBuf), "VelX: %.2f", m_pClient->m_Snap.m_aCharacters[PlayerId].m_Cur.m_VelX / 256.0f * 50.0 / 32.0f);
-			TextRender()->Text(0, 4, yOff, FontSize, aBuf, -1.0f);
+			TextRender()->Text(4, yOff, FontSize, aBuf, -1.0f);
 		}
 	}
 
@@ -620,7 +620,7 @@ void CHud::RenderTextInfo()
 			{
 				char aBuf[64];
 				str_format(aBuf, sizeof(aBuf), "Last!");
-				TextRender()->Text(0, 170, 4, 14, aBuf, -1.0f);
+				TextRender()->Text(170, 4, 14, aBuf, -1.0f);
 			}
 		}
 		//Show freeze text
@@ -630,7 +630,7 @@ void CHud::RenderTextInfo()
 		else if(g_Config.m_ClShowFrozenText == 2)
 			str_format(aBuf, sizeof(aBuf), "%d / %d", NumFrozen, NumInTeam);
 		if(g_Config.m_ClShowFrozenText > 0)
-			TextRender()->Text(0, m_Width / 2 - TextRender()->TextWidth(0, 10, aBuf, -1, -1.0f) / 2, 12, 10, aBuf, -1.0f);
+			TextRender()->Text(m_Width / 2 - TextRender()->TextWidth(10, aBuf, -1, -1.0f) / 2, 12, 10, aBuf, -1.0f);
 
 		//str_format(aBuf, sizeof(aBuf), "%d", m_pClient->m_aClients[m_pClient->m_Snap.m_LocalClientID].m_PrevPredicted.m_FreezeEnd);
 		//str_format(aBuf, sizeof(aBuf), "%d", g_Config.m_ClWhatsMyPing);
@@ -639,18 +639,15 @@ void CHud::RenderTextInfo()
 		if(g_Config.m_ClShowFrozenHud > 0 && !m_pClient->m_Scoreboard.Active() && !(LocalTeamID == 0 && g_Config.m_ClFrozenHudTeamOnly))
 		{
 			CTeeRenderInfo FreezeInfo;
-			int Skin = m_pClient->m_Skins.Find("x_ninja");
-			if(Skin != -1)
-			{
-				const CSkin *pSkin = m_pClient->m_Skins.Get(Skin);
-				FreezeInfo.m_OriginalRenderSkin = pSkin->m_OriginalSkin;
-				FreezeInfo.m_ColorableRenderSkin = pSkin->m_ColorableSkin;
-				FreezeInfo.m_BloodColor = pSkin->m_BloodColor;
-				FreezeInfo.m_SkinMetrics = pSkin->m_Metrics;
-				FreezeInfo.m_ColorBody = ColorRGBA(1, 1, 1);
-				FreezeInfo.m_ColorFeet = ColorRGBA(1, 1, 1);
-				FreezeInfo.m_CustomColoredSkin = false;
-			}
+			const CSkin *pSkin = m_pClient->m_Skins.Find("x_ninja");
+			FreezeInfo.m_OriginalRenderSkin = pSkin->m_OriginalSkin;
+			FreezeInfo.m_ColorableRenderSkin = pSkin->m_ColorableSkin;
+			FreezeInfo.m_BloodColor = pSkin->m_BloodColor;
+			FreezeInfo.m_SkinMetrics = pSkin->m_Metrics;
+			FreezeInfo.m_ColorBody = ColorRGBA(1, 1, 1);
+			FreezeInfo.m_ColorFeet = ColorRGBA(1, 1, 1);
+			FreezeInfo.m_CustomColoredSkin = false;
+			
 
 			float progressiveOffset = 0.0f;
 			float TeeSize = g_Config.m_ClFrozenHudTeeSize;

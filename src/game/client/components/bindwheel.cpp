@@ -172,7 +172,11 @@ void CBindWheel::OnRender()
 		char aBuf[MAX_BINDWHEEL_DESC];
 		str_format(aBuf, sizeof(aBuf), "%s", m_BindWheelList[i].description);
 		//str_format(aBuf, sizeof(aBuf), "%d -> %d", inv, orgAngle);
-		TextRender()->Text(0, Screen.w / 2 + NudgeX - TextRender()->TextWidth(0, Size, aBuf, -1, -1.0f)*0.5, Screen.h / 2 + NudgeY, Size, aBuf, -1.0f);
+		float x = Screen.w / 2 + NudgeX - TextRender()->TextWidth(Size, aBuf, -1, -1.0f) * 0.5;
+		float y = Screen.h / 2 + NudgeY;
+		const char *pText = aBuf;
+		float LineWidth = -1.0f;
+		TextRender()->Text(x, y, Size, aBuf, LineWidth);
 	}
 	Graphics()->WrapNormal();
 
