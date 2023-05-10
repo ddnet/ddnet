@@ -1,34 +1,4 @@
-
-
-
-
-### ||  
-### ||  
-### ||  
-### || 
-### \\/
-### The Client is currently being maintained by kdaniel
-https://github.com/danielkempf/TaterClient-ddnet/
-### /\
-### ||  
-### ||  
-### ||  
-### ||  
-### ||  
-### ||  
-### ||  
-### ||  
-### ||  
-### || 
-
-[![DDraceNetwork](https://ddnet.tw/ddnet-small.png)](https://ddnet.tw) 
-
-### The Client is currently being maintained by kdaniel
-https://github.com/danielkempf/TaterClient-ddnet/
-
-
-### The Client is currently being maintained by kdaniel
-https://github.com/danielkempf/TaterClient-ddnet/
+[![DDraceNetwork](https://user-images.githubusercontent.com/55141362/212435433-55e4e969-64ed-4ab2-8652-91901d2314a9.png)](https://ddnet.tw) 
 
 
 ### Taters custom ddnet client with some small modifications
@@ -38,7 +8,8 @@ If ddnet devs are reading this and want to steal my changes please feel free.
 
 # Installation:
 
-Download the exe from https://github.com/sjrc6/ddnet/releases/, or build it using the build instuctions from the main repository. 
+
+Download the exe from https://github.com/danielkempf/TaterClient-ddnet/releases, or build it using the build instuctions from the main repository. 
 
 # Settings Page: 
 ![image](https://user-images.githubusercontent.com/22122579/182528606-cfb47e19-fb99-47c8-887f-43115ecf1f3e.png)
@@ -117,28 +88,4 @@ tc_rainbow
 tc_rainbow_others
 tc_rainbow_mode
 add_profile
-```
-
-Better Git Blame
-----------------
-
-First, use a better tool than `git blame` itself, e.g. [`tig`](https://jonas.github.io/tig/). There's probably a good UI for Windows, too. Alternatively, use the GitHub UI, click "Blame" in any file view.
-
-For `tig`, use `tig blame path/to/file.cpp` to open the blame view, you can navigate with arrow keys or kj, press comma to go to the previous revision of the current line, q to quit.
-
-Only then you could also set up git to ignore specific formatting revisions:
-```bash
-git config blame.ignoreRevsFile formatting-revs.txt
-```
-
-(Neo)Vim Syntax Highlighting for config files
-----------------------------------------
-Copy the file detection and syntax files to your vim config folder:
-
-```bash
-# vim
-cp -R other/vim/* ~/.vim/
-
-# neovim
-cp -R other/vim/* ~/.config/nvim/
 ```
