@@ -3304,12 +3304,14 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
         	MainView.HSplitTop(5.0f, 0, &MainView);
         	MainView.HSplitTop(20.0f, &Button, &MainView);
         	Button.VSplitLeft(15.0f, 0, &Button);
-        	SUIExEditBoxProperties EditProps;
-        	EditProps.m_pEmptyText = Localize("Last!");
-        	UI()->DoEditBox(g_Config.m_ClNotifyWhenLastText, &Button, g_Config.m_ClNotifyWhenLastText, sizeof(g_Config.m_ClNotifyWhenLastText), 12.0f, &s_NotifyWhenLastText, false, IGraphics::CORNER_ALL, EditProps);
+
+			static CLineInput s_LastInput(g_Config.m_ClNotifyWhenLastText, sizeof(g_Config.m_ClNotifyWhenLastText));
+			s_LastInput.SetEmptyText(Localize("Last!"));
+			UI()->DoEditBox(&s_LastInput, &Button, 12.0f);
+
             MainView.HSplitTop(25.0f, &Section, &MainView);
 		    
-            DoLine_ColorPicker(&NotifyWhenLastTextID, 25.0f, 200.0f, 14.0f, 0.0f, &Section, ("Notification Color"), &g_Config.m_ClNotifyWhenLastColor, ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), false);
+            DoLine_ColorPicker(&NotifyWhenLastTextID, 25.0f, 200.0f, 14.0f,  &Section, ("Notification Color"), &g_Config.m_ClNotifyWhenLastColor, ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), false);
 
         
         }
@@ -3509,10 +3511,10 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		DoLine_ColorPicker(&IndicatorAliveColorID, 25.0f, 200.0f, 14.0f, &Section, ("Indicator alive color"), &g_Config.m_ClIndicatorAlive, ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), false);
 
 		MainView.HSplitTop(25.0f, &Section, &MainView);
-		DoLine_ColorPicker(&IndicatorDeadColorID, 25.0f, 200.0f, 14.0f, 0.0f, &Section, ("Indicator dead color"), &g_Config.m_ClIndicatorFreeze, ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), false);
+		DoLine_ColorPicker(&IndicatorDeadColorID, 25.0f, 200.0f, 14.0f, &Section, ("Indicator dead color"), &g_Config.m_ClIndicatorFreeze, ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), false);
 		
         MainView.HSplitTop(25.0f, &Section, &MainView);
-		DoLine_ColorPicker(&IndicatorSavedColorID, 25.0f, 200.0f, 14.0f, 0.0f, &Section, ("Indicator save color"), &g_Config.m_ClIndicatorSaved, ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), false);
+		DoLine_ColorPicker(&IndicatorSavedColorID, 25.0f, 200.0f, 14.0f, &Section, ("Indicator save color"), &g_Config.m_ClIndicatorSaved, ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), false);
 		
         
         {
