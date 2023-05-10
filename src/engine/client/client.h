@@ -543,7 +543,7 @@ public:
 
 	IFriends *Foes() override { return &m_Foes; }
 
-    void GetSmoothFreezeTick(int *pSmoothTick, float *pSmoothIntraTick, float MixAmount);
+    void GetSmoothFreezeTick(int *pSmoothTick, float *pSmoothIntraTick, float MixAmount) override;
 	void GetSmoothTick(int *pSmoothTick, float *pSmoothIntraTick, float MixAmount) override;
 
 	SWarning *GetCurWarning() override;
