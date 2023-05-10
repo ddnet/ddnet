@@ -153,10 +153,8 @@ int main(int argc, const char **argv)
 	pServer->RegisterCommands();
 
 	// execute autoexec file
-	IOHANDLE File = pStorage->OpenFile(AUTOEXEC_SERVER_FILE, IOFLAG_READ, IStorage::TYPE_ALL);
-	if(File)
+	if(pStorage->FileExists(AUTOEXEC_SERVER_FILE, IStorage::TYPE_ALL))
 	{
-		io_close(File);
 		pConsole->ExecuteFile(AUTOEXEC_SERVER_FILE);
 	}
 	else // fallback

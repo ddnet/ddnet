@@ -149,9 +149,8 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 			{
 				m_ServerProcess.m_Process = shell_execute(aBuf);
 			}
-			else if(IOHANDLE File = io_open(aBuf, IOFLAG_READ))
+			else if(fs_is_file(aBuf))
 			{
-				io_close(File);
 				m_ServerProcess.m_Process = shell_execute(aBuf);
 			}
 			else

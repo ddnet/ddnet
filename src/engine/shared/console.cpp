@@ -622,15 +622,15 @@ void CConsole::ExecuteLineFlag(const char *pStr, int FlagMask, int ClientID, boo
 	m_FlagMask = Temp;
 }
 
-void CConsole::ExecuteFile(const char *pFilename, int ClientID, bool LogFailure, int StorageType)
+bool CConsole::ExecuteFile(const char *pFilename, int ClientID, bool LogFailure, int StorageType)
 {
 	// make sure that this isn't being executed already
 	for(CExecFile *pCur = m_pFirstExec; pCur; pCur = pCur->m_pPrev)
 		if(str_comp(pFilename, pCur->m_pFilename) == 0)
-			return;
+			return false;
 
 	if(!m_pStorage)
-		return;
+		return false;
 
 	// push this one to the stack
 	CExecFile ThisFile;
@@ -642,20 +642,22 @@ void CConsole::ExecuteFile(const char *pFilename, int ClientID, bool LogFailure,
 	// exec the file
 	IOHANDLE File = m_pStorage->OpenFile(pFilename, IOFLAG_READ | IOFLAG_SKIP_BOM, StorageType);
 
-	char aBuf[128];
+	bool Success = false;
+	char aBuf[32 + IO_MAX_PATH_LENGTH];
 	if(File)
 	{
-		char *pLine;
-		CLineReader Reader;
-
 		str_format(aBuf, sizeof(aBuf), "executing '%s'", pFilename);
 		Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+
+		CLineReader Reader;
 		Reader.Init(File);
 
+		char *pLine;
 		while((pLine = Reader.Get()))
 			ExecuteLine(pLine, ClientID);
 
 		io_close(File);
+		Success = true;
 	}
 	else if(LogFailure)
 	{
@@ -664,6 +666,7 @@ void CConsole::ExecuteFile(const char *pFilename, int ClientID, bool LogFailure,
 	}
 
 	m_pFirstExec = pPrev;
+	return Success;
 }
 
 void CConsole::Con_Echo(IResult *pResult, void *pUserData)
