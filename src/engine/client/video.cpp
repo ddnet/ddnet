@@ -28,6 +28,12 @@ using namespace std::chrono_literals;
 
 #define STREAM_PIX_FMT AV_PIX_FMT_YUV420P /* default pix_fmt */
 
+#if LIBAVCODEC_VERSION_MAJOR >= 60
+#define FRAME_NUM frame_num
+#else
+#define FRAME_NUM frame_number
+#endif
+
 const size_t FORMAT_GL_NCHANNELS = 4;
 LOCK g_WriteLock = 0;
 
@@ -325,7 +331,7 @@ void CVideo::NextVideoFrameThread()
 				}
 			}
 
-			//dbg_msg("video_recorder", "vframe: %d", m_VideoStream.pEnc->frame_number);
+			//dbg_msg("video_recorder", "vframe: %d", m_VideoStream.pEnc->FRAME_NUM);
 
 			// after reading the graphic libraries' frame buffer, go threaded
 			{
@@ -371,7 +377,7 @@ void CVideo::NextAudioFrameTimeline(ISoundMixFunc Mix)
 {
 	if(m_Recording && m_HasAudio)
 	{
-		//if(m_VideoStream.pEnc->frame_number * (double)m_AudioStream.pEnc->sample_rate / m_FPS >= (double)m_AudioStream.pEnc->frame_number * m_AudioStream.pEnc->frame_size)
+		//if(m_VideoStream.pEnc->FRAME_NUM * (double)m_AudioStream.pEnc->sample_rate / m_FPS >= (double)m_AudioStream.pEnc->FRAME_NUM * m_AudioStream.pEnc->frame_size)
 		double SamplesPerFrame = (double)m_AudioStream.pEnc->sample_rate / m_FPS;
 		while(m_AudioStream.m_SamplesFrameCount >= m_AudioStream.m_SamplesCount)
 		{
@@ -552,7 +558,7 @@ void CVideo::RunVideoThread(size_t ParentThreadIndex, size_t ThreadIndex)
 				std::unique_lock<std::mutex> LockVideo(pThreadData->m_VideoFillMutex);
 				{
 					CLockScope ls(g_WriteLock);
-					m_VideoStream.m_vpFrames[ThreadIndex]->pts = (int64_t)m_VideoStream.pEnc->frame_number;
+					m_VideoStream.m_vpFrames[ThreadIndex]->pts = (int64_t)m_VideoStream.pEnc->FRAME_NUM;
 					WriteFrame(&m_VideoStream, ThreadIndex);
 				}
 

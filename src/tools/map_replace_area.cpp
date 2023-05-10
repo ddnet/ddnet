@@ -43,12 +43,12 @@ bool AdaptVisiblePoint(const float[2][2][2], const float[2][2], const MapObject[
 
 MapObject CreateMapObject(const CMapItemGroup *, int, int, int, int);
 void SetExtendedArea(MapObject &);
-bool GetVisibleArea(const float[2][2], MapObject, float[2][2] = 0x0);
-bool GetReplaceableArea(const float[2][2], MapObject, float[2][2]);
+bool GetVisibleArea(const float[2][2], const MapObject &, float[2][2] = 0x0);
+bool GetReplaceableArea(const float[2][2], const MapObject &, float[2][2]);
 
 void GetGameAreaDistance(const float[2][2][2], const MapObject[2], const float[2][2][2], float[2]);
 void GetGameAreaDistance(const float[2][2][2], const MapObject[2], const float[2][2], float[2]);
-void GetSignificantScreenPos(MapObject, const float[2][2], const float[2][2], float[2]);
+void GetSignificantScreenPos(const MapObject &, const float[2][2], const float[2][2], float[2]);
 void ConvertToTiles(const float[2][2], int[2][2]);
 
 bool GetLineIntersection(const float[2], const float[2], float[2] = 0x0);
@@ -72,18 +72,18 @@ int main(int argc, const char *argv[])
 	}
 
 	char aaMapNames[3][64];
-	snprintf(aaMapNames[0], 64, "%s", argv[1]); //from_map
-	snprintf(aaMapNames[1], 64, "%s", argv[4]); //to_map
-	snprintf(aaMapNames[2], 64, "%s", argv[9]); //output_map
+	str_copy(aaMapNames[0], argv[1]); //from_map
+	str_copy(aaMapNames[1], argv[4]); //to_map
+	str_copy(aaMapNames[2], argv[9]); //output_map
 
 	float aaaGameAreas[2][2][2];
 
 	for(int i = 0; i < 2; i++)
 	{
-		aaaGameAreas[i][0][0] = atof(argv[2 + i * 3]) * 32; //x
-		aaaGameAreas[i][1][0] = atof(argv[3 + i * 3]) * 32; //y
-		aaaGameAreas[i][0][1] = aaaGameAreas[i][0][0] + atof(argv[7]) * 32; //x + width
-		aaaGameAreas[i][1][1] = aaaGameAreas[i][1][0] + atof(argv[8]) * 32; //y + height
+		aaaGameAreas[i][0][0] = str_tofloat(argv[2 + i * 3]) * 32; //x
+		aaaGameAreas[i][1][0] = str_tofloat(argv[3 + i * 3]) * 32; //y
+		aaaGameAreas[i][0][1] = aaaGameAreas[i][0][0] + str_tofloat(argv[7]) * 32; //x + width
+		aaaGameAreas[i][1][1] = aaaGameAreas[i][1][0] + str_tofloat(argv[8]) * 32; //y + height
 	}
 
 	cmdline_free(argc, argv);
@@ -499,7 +499,7 @@ void SetExtendedArea(MapObject &Ob)
 		{
 			float aInspectedArea[2];
 			if(GetLineIntersection(Ob.m_aaBaseArea[i], Ob.m_aaScreenOffset[i], aInspectedArea))
-				memcpy(Ob.m_aaExtendedArea[i], aInspectedArea, sizeof(float[2]));
+				mem_copy(Ob.m_aaExtendedArea[i], aInspectedArea, sizeof(float[2]));
 			continue;
 		}
 
@@ -511,7 +511,7 @@ void SetExtendedArea(MapObject &Ob)
 	}
 }
 
-bool GetVisibleArea(const float aaGameArea[2][2], const MapObject Ob, float aaVisibleArea[2][2])
+bool GetVisibleArea(const float aaGameArea[2][2], const MapObject &Ob, float aaVisibleArea[2][2])
 {
 	if(IsInexistent((float *)Ob.m_aaExtendedArea, 4))
 		return false;
@@ -520,13 +520,13 @@ bool GetVisibleArea(const float aaGameArea[2][2], const MapObject Ob, float aaVi
 		SetInexistent((float *)aaVisibleArea, 4);
 
 	float aaInspectedArea[2][2];
-	memcpy(aaInspectedArea, aaGameArea, sizeof(float[2][2]));
+	mem_copy(aaInspectedArea, aaGameArea, sizeof(float[2][2]));
 
 	for(int i = 0; i < 2; i++)
 	{
 		if(Ob.m_aSpeed[i] == 1)
 		{
-			memcpy(aaInspectedArea[i], Ob.m_aaExtendedArea[i], sizeof(float[2]));
+			mem_copy(aaInspectedArea[i], Ob.m_aaExtendedArea[i], sizeof(float[2]));
 			continue;
 		}
 
@@ -538,12 +538,12 @@ bool GetVisibleArea(const float aaGameArea[2][2], const MapObject Ob, float aaVi
 	}
 
 	if(aaVisibleArea)
-		memcpy(aaVisibleArea, aaInspectedArea, sizeof(float[2][2]));
+		mem_copy(aaVisibleArea, aaInspectedArea, sizeof(float[2][2]));
 
 	return true;
 }
 
-bool GetReplaceableArea(const float aaVisibleArea[2][2], const MapObject Ob, float aaReplaceableArea[2][2])
+bool GetReplaceableArea(const float aaVisibleArea[2][2], const MapObject &Ob, float aaReplaceableArea[2][2])
 {
 	SetInexistent((float *)aaReplaceableArea, 4);
 	if(IsInexistent((float *)aaVisibleArea, 4))
@@ -594,12 +594,12 @@ void GetGameAreaDistance(const float aaaGameAreas[2][2][2], const MapObject aObs
 void GetGameAreaDistance(const float aaaGameAreas[2][2][2], const MapObject aObs[2], const float aaVisibleArea[2][2], float aDistance[2])
 {
 	float aaaVisibleAreas[2][2][2];
-	memcpy(aaaVisibleAreas[0], aaVisibleArea[0], sizeof(float[2][2]));
-	memcpy(aaaVisibleAreas[1], aaVisibleArea[0], sizeof(float[2][2]));
+	mem_copy(aaaVisibleAreas[0], aaVisibleArea[0], sizeof(float[2][2]));
+	mem_copy(aaaVisibleAreas[1], aaVisibleArea[0], sizeof(float[2][2]));
 	GetGameAreaDistance(aaaGameAreas, aObs, aaaVisibleAreas, aDistance);
 }
 
-void GetSignificantScreenPos(const MapObject Ob, const float aaVisibleArea[2][2], const float aaReplaceableArea[2][2], float aScreen[2])
+void GetSignificantScreenPos(const MapObject &Ob, const float aaVisibleArea[2][2], const float aaReplaceableArea[2][2], float aScreen[2])
 {
 	for(int i = 0; i < 2; i++)
 	{
@@ -618,8 +618,8 @@ void ConvertToTiles(const float aaArea[2][2], int aaTiles[2][2])
 {
 	for(int i = 0; i < 2; i++)
 	{
-		aaTiles[i][0] = floor((floor(aaArea[i][0] * 100.0f) / 100.0f) / 32.0f);
-		aaTiles[i][1] = ceil((floor(aaArea[i][1] * 100.0f) / 100.0f) / 32.0f);
+		aaTiles[i][0] = std::floor((std::floor(aaArea[i][0] * 100.0f) / 100.0f) / 32.0f);
+		aaTiles[i][1] = std::ceil((std::floor(aaArea[i][1] * 100.0f) / 100.0f) / 32.0f);
 	}
 }
 
@@ -636,7 +636,7 @@ bool GetLineIntersection(const float aLine1[2], const float aLine2[2], float aIn
 		return false;
 
 	if(aIntersection)
-		memcpy(aIntersection, aBorders, sizeof(float[2]));
+		mem_copy(aIntersection, aBorders, sizeof(float[2]));
 
 	return true;
 }

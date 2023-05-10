@@ -21,7 +21,7 @@ TEST(SecureRandom, Below1)
 
 TEST(SecureRandom, Below)
 {
-	int BOUNDS[] = {2, 3, 4, 5, 10, 100, 127, 128, 129};
+	const int BOUNDS[] = {2, 3, 4, 5, 10, 100, 127, 128, 129};
 	for(auto Below : BOUNDS)
 	{
 		for(int j = 0; j < 10; j++)

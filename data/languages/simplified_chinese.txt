@@ -28,6 +28,10 @@
 # 2022-07-04 cheeser0613
 # 2022-08-08 cheeser0613
 # 2022-09-17 cheeser0613
+# 2022-10-24 cheeser0613
+# 2022-12-11 cheeser0613
+# 2023-01-11 cheeser0613
+# 2023-04-01 cheeser0613
 ##### /authors #####
 
 ##### translated strings #####
@@ -68,14 +72,8 @@ Address
 All
 == 全体
 
-Are you sure that you want to delete the demo?
-== 你确定要删除这个回放吗？
-
 Are you sure that you want to quit?
 == 你确定要退出吗？
-
-Are you sure that you want to remove the player from your friends list?
-== 你确定要把这个玩家从好友列表中删除吗？
 
 Automatically record demos
 == 自动录制回放
@@ -456,9 +454,6 @@ Show name plates
 Show only chat messages from friends
 == 只显示好友消息
 
-Skins
-== 皮肤
-
 Sound
 == 声音
 
@@ -527,9 +522,6 @@ Try again
 
 Type
 == 模式
-
-Unable to delete the demo
-== 无法删除这个回放
 
 Unable to rename the demo
 == 无法重命名这个回放
@@ -654,9 +646,6 @@ Reset to defaults
 Quit anyway?
 == 无论如何都要退出吗？
 
-Display Modes
-== 显示模式
-
 Version:
 == 版本：
 
@@ -764,9 +753,6 @@ Show other players' key presses
 
 Show tiles layers from BG map
 == 显示实体层背景地图的图块层
-
-Try fast HTTP map download first
-== 优先尝试使用 HTTP 协议快速下载地图
 
 DDNet %s is available:
 == DDNet %s 现已可用：
@@ -1071,9 +1057,6 @@ Personal best:
 Render demo
 == 渲染回放
 
-Destination file already exist
-== 目标文件已经存在
-
 Replace video
 == 替换视频
 
@@ -1091,9 +1074,6 @@ Show others (own team only)
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
 == 使用 K键 自杀以重新开始，使用 Q键 可以暂停以旁观他人或查看地图。在设置中可以查看其他按键绑定。
-
-Country / Region
-== 国家 / 地区
 
 https://wiki.ddnet.org/
 == https://wiki.ddnet.org/wiki/Main_Page/zh
@@ -1422,9 +1402,6 @@ UI controller sens.
 Controller jitter tolerance
 == 摇杆死区
 
-No controller found. Plug in a controller and restart the game.
-== 未检测到任何控制器。请尝试重新连接控制器并重启游戏。
-
 Device
 == 输入设备
 
@@ -1602,7 +1579,7 @@ Mark the beginning of a cut
 Mark the end of a cut
 == 标记裁剪终点
 
-Export cut as a seperate demo
+Export cut as a separate demo
 == 另存为新回放文件
 
 Toggle keyboard shortcuts
@@ -1634,3 +1611,119 @@ Freeze Laser Outline Color
 
 Freeze Laser Inner Color
 == 冻结激光实心颜色
+
+Menu opened. Press Esc key again to close menu.
+== 菜单已打开，再次点击 Esc 以关闭
+
+Set all to Rifle
+== 统一为激光枪颜色
+
+Cancel
+== 取消
+
+File '%s' already exists, do you want to overwrite it?
+== 文件名 "%s" 已经存在，是否要覆盖该文件？
+
+Are you sure that you want to remove the player '%s' from your friends list?
+== 你确定要将好友 "%s" 从你的好友列表中删除？
+
+Are you sure that you want to remove the clan '%s' from your friends list?
+== 你确定要将战队 "%s" 从你的好友列表中删除？
+
+Go back one tick
+== 上一个 tick
+
+Go forward one tick
+== 下一个 tick
+
+Go back one marker
+== 返回上一个标记
+
+Go forward one marker
+== 跳至下一个标记
+
+Are you sure that you want to delete the demo '%s'?
+== 你确定要删除回放文件 "%s" ？
+
+Unable to delete the demo '%s'
+== 无法删除回放文件 "%s"
+
+Reset controls
+== 恢复默认设置
+
+Are you sure that you want to reset the controls to their defaults?
+== 你确定要将当前的控制恢复至默认设置？
+
+[Graphics error]
+
+[Graphics error]
+Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== 初始化失败。请尝试打开配置目录中的设置文件（settings_ddnet.cfg）并将“gfx_backend OpenGL”修改为“gfx_backend Vulkan”（若没有前者则可直接输入后者）再重试。
+
+[Graphics error]
+Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
+== 显存不足。请尝试移除自定义资源（如皮肤，实体层等等），尤其高分辨率的自定义资源。
+
+[Graphics error]
+An error during command recording occurred. Try to update your GPU drivers.
+== 指令记录期间检测到错误。请尝试更新显卡驱动程序。
+
+[Graphics error]
+A render command failed. Try to update your GPU drivers.
+== 渲染指令错误。请尝试更新显卡驱动程序
+
+[Graphics error]
+Submitting the render commands failed. Try to update your GPU drivers.
+== 渲染指令提交失败。请尝试更新显卡驱动程序。
+
+[Graphics error]
+Failed to swap framebuffers. Try to update your GPU drivers.
+== 帧缓存交替失败。请尝试更新显卡驱动程序。
+
+[Graphics error]
+Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== 未知错误。请尝试打开配置目录中的设置文件（settings_ddnet.cfg）并将“gfx_backend OpenGL”修改为“gfx_backend Vulkan”（若没有前者则可直接输入后者）再重试。
+
+[Graphics error]
+Could not initialize the given graphics backend, reverting to the default backend now.
+== 无法初始化当前配置的图形后端，正在将配置回退至默认图形后端。
+
+Open the directory that contains the demo files
+== 打开存有回放文件的文件夹路径
+
+Save power by lowering refresh rate (higher input latency)
+== 省电模式（限制帧率上限以降低功耗但也将提高输入延迟）
+
+Open the settings file
+== 打开设置文件
+
+Open the directory that contains the configuration and user files
+== 打开存有配置文件与用户文件的文件夹路径
+
+Open the directory to add custom themes
+== 打开用以添加自定义主题的文件夹路径
+
+Open the directory to add custom skins
+== 打开用以添加自定义皮肤的文件夹路径
+
+No controller found. Plug in a controller.
+== 未检测到任何控制器。请尝试重新连接控制器。
+
+Unregister protocol and file extensions
+== 未注册的协议与扩充文件
+
+Open the directory to add custom assets
+== 打开用以添加自定义资源的文件夹路径
+
+[Graphics error]
+Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
+== 无法初始化当前配置的图形后端，请检查此电脑是否已安装集成显卡的驱动程序。
+
+Could not save downloaded map. Try manually deleting this file: %s
+== 地图下载失败，请尝试手动删除此文件：%s
+
+Copy info
+== 复制服务器信息
+
+Create a random skin
+== 随机创造皮肤

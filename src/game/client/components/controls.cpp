@@ -291,8 +291,8 @@ int CControls::SnapInput(int *pData)
 			m_aInputData[g_Config.m_ClDummy].m_Fire = ((int)(t * 10));
 			m_aInputData[g_Config.m_ClDummy].m_Hook = ((int)(t * 2)) & 1;
 			m_aInputData[g_Config.m_ClDummy].m_WantedWeapon = ((int)t) % NUM_WEAPONS;
-			m_aInputData[g_Config.m_ClDummy].m_TargetX = (int)(sinf(t * 3) * 100.0f);
-			m_aInputData[g_Config.m_ClDummy].m_TargetY = (int)(cosf(t * 3) * 100.0f);
+			m_aInputData[g_Config.m_ClDummy].m_TargetX = (int)(std::sin(t * 3) * 100.0f);
+			m_aInputData[g_Config.m_ClDummy].m_TargetY = (int)(std::cos(t * 3) * 100.0f);
 		}
 #endif
 

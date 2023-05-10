@@ -97,7 +97,7 @@ void CItems::RenderProjectile(const CProjectileData *pCurrent, int ItemID)
 	vec2 Vel = Pos - PrevPos;
 
 	// add particle for this projectile
-	// don't check for validity of the projectile for the current weapon here, so particle effects are rendered for mod compability
+	// don't check for validity of the projectile for the current weapon here, so particle effects are rendered for mod compatibility
 	if(CurWeapon == WEAPON_GRENADE)
 	{
 		m_pClient->m_Effects.SmokeTrail(Pos, Vel * -1, Alpha);
@@ -189,8 +189,7 @@ void CItems::RenderPickup(const CNetObj_Pickup *pPrev, const CNetObj_Pickup *pCu
 		if(m_pClient->m_Snap.m_pGameInfoObj && !(m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_PAUSED))
 			s_Time += LocalTime() - s_LastLocalTime;
 	}
-	Pos.x += cosf(s_Time * 2.0f + Offset) * 2.5f;
-	Pos.y += sinf(s_Time * 2.0f + Offset) * 2.5f;
+	Pos += direction(s_Time * 2.0f + Offset) * 2.5f;
 	s_LastLocalTime = LocalTime();
 
 	Graphics()->RenderQuadContainerAsSprite(m_ItemsQuadContainerIndex, QuadOffset, Pos.x, Pos.y);
@@ -424,7 +423,7 @@ void CItems::OnRender()
 				{
 					bool IsOtherTeam = m_pClient->IsOtherTeam(pProj->GetOwner());
 					if(pProj->m_LastRenderTick <= 0 && (pProj->m_Type != WEAPON_SHOTGUN || (!pProj->m_Freeze && !pProj->m_Explosive)) // skip ddrace shotgun bullets
-						&& (pProj->m_Type == WEAPON_SHOTGUN || fabs(length(pProj->m_Direction) - 1.f) < 0.02f) // workaround to skip grenades on ball mod
+						&& (pProj->m_Type == WEAPON_SHOTGUN || absolute(length(pProj->m_Direction) - 1.f) < 0.02f) // workaround to skip grenades on ball mod
 						&& (pProj->GetOwner() < 0 || !GameClient()->m_aClients[pProj->GetOwner()].m_IsPredictedLocal || IsOtherTeam) // skip locally predicted projectiles
 						&& !Client()->SnapFindItem(IClient::SNAP_PREV, Item.m_Type, Item.m_ID))
 					{
@@ -479,21 +478,18 @@ void CItems::OnRender()
 					if(Inactive && BlinkingLight)
 						continue;
 					Data.m_StartTick = DraggerStartTick;
-					Data.m_Type = LASERTYPE_FREEZE;
 				}
 				if(pEntEx->m_EntityClass >= ENTITYCLASS_GUN_NORMAL && pEntEx->m_EntityClass <= ENTITYCLASS_GUN_UNFREEZE)
 				{
 					if(Inactive && BlinkingGun)
 						continue;
 					Data.m_StartTick = GunStartTick;
-					Data.m_Type = pEntEx->m_EntityClass == ENTITYCLASS_GUN_FREEZE ? LASERTYPE_FREEZE : LASERTYPE_DOOR;
 				}
 				if(pEntEx->m_EntityClass >= ENTITYCLASS_DRAGGER_WEAK && pEntEx->m_EntityClass <= ENTITYCLASS_DRAGGER_STRONG)
 				{
 					if(Inactive && BlinkingDragger)
 						continue;
 					Data.m_StartTick = DraggerStartTick;
-					Data.m_Type = LASERTYPE_DOOR;
 				}
 				if(pEntEx->m_EntityClass == ENTITYCLASS_DOOR)
 				{
@@ -503,7 +499,6 @@ void CItems::OnRender()
 						Data.m_From.y = Data.m_To.y;
 					}
 					Data.m_StartTick = Client()->GameTick(g_Config.m_ClDummy);
-					Data.m_Type = LASERTYPE_DOOR;
 				}
 			}
 			RenderLaser(&Data);
@@ -638,7 +633,7 @@ void CItems::ReconstructSmokeTrail(const CProjectileData *pCurrent, int DestroyT
 	float Step = maximum(Client()->FrameTimeAvg(), (pCurrent->m_Type == WEAPON_GRENADE) ? 0.02f : 0.01f);
 	for(int i = 1 + (int)(Gt / Step); i < (int)(T / Step); i++)
 	{
-		float t = Step * (float)i + 0.4f * Step * (random_float() - 0.5f);
+		float t = Step * (float)i + 0.4f * Step * random_float(-0.5f, 0.5f);
 		vec2 Pos = CalcPos(pCurrent->m_StartPos, pCurrent->m_StartVel, Curvature, Speed, t);
 		vec2 PrevPos = CalcPos(pCurrent->m_StartPos, pCurrent->m_StartVel, Curvature, Speed, t - 0.001f);
 		vec2 Vel = Pos - PrevPos;

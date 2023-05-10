@@ -100,7 +100,7 @@ void InitAndroid()
 	sha256_from_str(&ShaAllFile, vLines[0].c_str());
 
 	// TODO: check files individually
-	if(!GotSHA || sha256_comp(ShaAllFile, ShaAll) != 0)
+	if(!GotSHA || ShaAllFile != ShaAll)
 	{
 		// then the files
 		for(size_t i = 1; i < vLines.size(); ++i)
@@ -149,8 +149,8 @@ void InitAndroid()
 		if(pIOR != NULL)
 		{
 			char aFileSHA[SHA256_MAXSTRSIZE];
-			sha256_str(ShaAllFile, aFileSHA, SHA256_MAXSTRSIZE);
-			io_write(pIOR, aFileSHA, SHA256_MAXSTRSIZE - 1);
+			sha256_str(ShaAllFile, aFileSHA, sizeof(aFileSHA));
+			io_write(pIOR, aFileSHA, str_length(aFileSHA));
 			io_close(pIOR);
 		}
 	}

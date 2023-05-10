@@ -47,7 +47,7 @@ void CDraggerBeam::Tick()
 	// after CDraggerBeam::Tick and only every 150ms
 	// When the dragger is disabled for the target player's team, the dragger beam dissolves. The check if a dragger
 	// is disabled is only executed every 150ms, so the beam can stay activated up to 6 extra ticks
-	if(Server()->Tick() % int(Server()->TickSpeed() * 0.15f) == 0)
+	if(Server()->Tick() % (int)(Server()->TickSpeed() * 0.15f) == 0)
 	{
 		if(m_Layer == LAYER_SWITCH && m_Number > 0 &&
 			!Switchers()[m_Number].m_aStatus[pTarget->Team()])
@@ -108,16 +108,6 @@ void CDraggerBeam::Snap(int SnappingClient)
 	{
 		return;
 	}
-	CNetObj_Laser *pObjLaser = static_cast<CNetObj_Laser *>(
-		Server()->SnapNewItem(NETOBJTYPE_LASER, GetID(), sizeof(CNetObj_Laser)));
-	if(!pObjLaser)
-	{
-		return;
-	}
-	pObjLaser->m_X = (int)m_Pos.x;
-	pObjLaser->m_Y = (int)m_Pos.y;
-	pObjLaser->m_FromX = (int)TargetPos.x;
-	pObjLaser->m_FromY = (int)TargetPos.y;
 
 	int StartTick = m_EvalTick;
 	if(StartTick < Server()->Tick() - 4)
@@ -128,5 +118,13 @@ void CDraggerBeam::Snap(int SnappingClient)
 	{
 		StartTick = Server()->Tick();
 	}
-	pObjLaser->m_StartTick = StartTick;
+
+	int SnappingClientVersion = GameServer()->GetClientVersion(SnappingClient);
+	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion), GetID(),
+		m_Pos, TargetPos, StartTick, -1, LASERTYPE_DOOR);
+}
+
+void CDraggerBeam::SwapClients(int Client1, int Client2)
+{
+	m_ForClientID = m_ForClientID == Client1 ? Client2 : m_ForClientID == Client2 ? Client1 : m_ForClientID;
 }

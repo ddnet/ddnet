@@ -13,7 +13,10 @@ struct SScoreInfo
 
 	void Reset()
 	{
-		m_TextRankContainerIndex = m_TextScoreContainerIndex = m_RoundRectQuadContainerIndex = m_OptionalNameTextContainerIndex = -1;
+		m_TextRankContainerIndex.Reset();
+		m_TextScoreContainerIndex.Reset();
+		m_RoundRectQuadContainerIndex = -1;
+		m_OptionalNameTextContainerIndex.Reset();
 		m_aScoreText[0] = 0;
 		m_aRankText[0] = 0;
 		m_aPlayerNameText[0] = 0;
@@ -21,14 +24,14 @@ struct SScoreInfo
 		m_Initialized = false;
 	}
 
-	int m_TextRankContainerIndex;
-	int m_TextScoreContainerIndex;
+	STextContainerIndex m_TextRankContainerIndex;
+	STextContainerIndex m_TextScoreContainerIndex;
 	float m_ScoreTextWidth;
 	char m_aScoreText[16];
 	char m_aRankText[16];
 	char m_aPlayerNameText[MAX_NAME_LENGTH];
 	int m_RoundRectQuadContainerIndex;
-	int m_OptionalNameTextContainerIndex;
+	STextContainerIndex m_OptionalNameTextContainerIndex;
 
 	bool m_Initialized;
 };
@@ -40,7 +43,8 @@ class CHud : public CComponent
 
 	int m_HudQuadContainerIndex;
 	SScoreInfo m_aScoreInfo[2];
-	int m_FPSTextContainerIndex;
+	STextContainerIndex m_FPSTextContainerIndex;
+	STextContainerIndex m_DDRaceEffectsTextContainerIndex;
 
 	void RenderCursor();
 

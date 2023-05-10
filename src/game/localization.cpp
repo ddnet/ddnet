@@ -35,9 +35,168 @@ CLocalizationDatabase::CLocalizationDatabase()
 	m_CurrentVersion = 0;
 }
 
-void CLocalizationDatabase::AddString(const char *pOrgStr, const char *pNewStr, const char *pContext)
+void CLocalizationDatabase::LoadIndexfile(IStorage *pStorage, IConsole *pConsole)
 {
-	m_vStrings.emplace_back(str_quickhash(pOrgStr), str_quickhash(pContext), m_StringsHeap.StoreString(*pNewStr ? pNewStr : pOrgStr));
+	m_vLanguages.clear();
+
+	const std::vector<std::string> vEnglishLanguageCodes = {"en"};
+	m_vLanguages.emplace_back("English", "", 826, vEnglishLanguageCodes);
+
+	const char *pFilename = "languages/index.txt";
+	IOHANDLE File = pStorage->OpenFile(pFilename, IOFLAG_READ | IOFLAG_SKIP_BOM, IStorage::TYPE_ALL);
+	if(!File)
+	{
+		char aBuf[64 + IO_MAX_PATH_LENGTH];
+		str_format(aBuf, sizeof(aBuf), "Couldn't open index file '%s'", pFilename);
+		pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "localization", aBuf);
+		return;
+	}
+
+	CLineReader LineReader;
+	LineReader.Init(File);
+
+	const char *pLine;
+	while((pLine = LineReader.Get()))
+	{
+		if(!str_length(pLine) || pLine[0] == '#') // skip empty lines and comments
+			continue;
+
+		char aEnglishName[128];
+		str_copy(aEnglishName, pLine);
+
+		pLine = LineReader.Get();
+		if(!pLine)
+		{
+			char aBuf[256];
+			str_format(aBuf, sizeof(aBuf), "Unexpected end of index file after language '%s'", aEnglishName);
+			pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "localization", aBuf);
+			break;
+		}
+		if(!str_startswith(pLine, "== "))
+		{
+			char aBuf[256];
+			str_format(aBuf, sizeof(aBuf), "Missing native name for language '%s'", aEnglishName);
+			pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "localization", aBuf);
+			(void)LineReader.Get();
+			(void)LineReader.Get();
+			continue;
+		}
+		char aNativeName[128];
+		str_copy(aNativeName, pLine + 3);
+
+		pLine = LineReader.Get();
+		if(!pLine)
+		{
+			char aBuf[256];
+			str_format(aBuf, sizeof(aBuf), "Unexpected end of index file after language '%s'", aEnglishName);
+			pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "localization", aBuf);
+			break;
+		}
+		if(!str_startswith(pLine, "== "))
+		{
+			char aBuf[256];
+			str_format(aBuf, sizeof(aBuf), "Missing country code for language '%s'", aEnglishName);
+			pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "localization", aBuf);
+			(void)LineReader.Get();
+			continue;
+		}
+		char aCountryCode[128];
+		str_copy(aCountryCode, pLine + 3);
+
+		pLine = LineReader.Get();
+		if(!pLine)
+		{
+			char aBuf[256];
+			str_format(aBuf, sizeof(aBuf), "Unexpected end of index file after language '%s'", aEnglishName);
+			pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "localization", aBuf);
+			break;
+		}
+		if(!str_startswith(pLine, "== "))
+		{
+			char aBuf[256];
+			str_format(aBuf, sizeof(aBuf), "Missing language codes for language '%s'", aEnglishName);
+			pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "localization", aBuf);
+			continue;
+		}
+		const char *pLanguageCodes = pLine + 3;
+		char aLanguageCode[256];
+		std::vector<std::string> vLanguageCodes;
+		while((pLanguageCodes = str_next_token(pLanguageCodes, ";", aLanguageCode, sizeof(aLanguageCode))))
+		{
+			if(aLanguageCode[0])
+			{
+				vLanguageCodes.emplace_back(aLanguageCode);
+			}
+		}
+		if(vLanguageCodes.empty())
+		{
+			char aBuf[256];
+			str_format(aBuf, sizeof(aBuf), "At least one language code required for language '%s'", aEnglishName);
+			pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "localization", aBuf);
+			continue;
+		}
+
+		char aFileName[IO_MAX_PATH_LENGTH];
+		str_format(aFileName, sizeof(aFileName), "languages/%s.txt", aEnglishName);
+		m_vLanguages.emplace_back(aNativeName, aFileName, str_toint(aCountryCode), vLanguageCodes);
+	}
+
+	io_close(File);
+
+	std::sort(m_vLanguages.begin(), m_vLanguages.end());
+}
+
+void CLocalizationDatabase::SelectDefaultLanguage(IConsole *pConsole, char *pFilename, size_t Length) const
+{
+	char aLocaleStr[128];
+	os_locale_str(aLocaleStr, sizeof(aLocaleStr));
+
+	char aBuf[256];
+	str_format(aBuf, sizeof(aBuf), "Choosing default language based on user locale '%s'", aLocaleStr);
+	pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "localization", aBuf);
+
+	while(true)
+	{
+		const CLanguage *pPrefixMatch = nullptr;
+		for(const auto &Language : Languages())
+		{
+			for(const auto &LanguageCode : Language.m_vLanguageCodes)
+			{
+				if(LanguageCode == aLocaleStr)
+				{
+					// Exact match found, use it immediately
+					str_copy(pFilename, Language.m_FileName.c_str(), Length);
+					return;
+				}
+				else if(LanguageCode.rfind(aLocaleStr, 0) == 0)
+				{
+					// Locale is prefix of language code, e.g. locale is "en" and current language is "en-US"
+					pPrefixMatch = &Language;
+				}
+			}
+		}
+		// Use prefix match if no exact match was found
+		if(pPrefixMatch)
+		{
+			str_copy(pFilename, pPrefixMatch->m_FileName.c_str(), Length);
+			return;
+		}
+
+		// Remove last segment of locale string and try again with more generic locale, e.g. "en-US" -> "en"
+		int i = str_length(aLocaleStr) - 1;
+		for(; i >= 0; --i)
+		{
+			if(aLocaleStr[i] == '-')
+			{
+				aLocaleStr[i] = '\0';
+				break;
+			}
+		}
+
+		// Stop if no more locale segments are left
+		if(i == 0)
+			break;
+	}
 }
 
 bool CLocalizationDatabase::Load(const char *pFilename, IStorage *pStorage, IConsole *pConsole)
@@ -117,6 +276,11 @@ bool CLocalizationDatabase::Load(const char *pFilename, IStorage *pStorage, ICon
 
 	m_CurrentVersion = ++m_VersionCounter;
 	return true;
+}
+
+void CLocalizationDatabase::AddString(const char *pOrgStr, const char *pNewStr, const char *pContext)
+{
+	m_vStrings.emplace_back(str_quickhash(pOrgStr), str_quickhash(pContext), m_StringsHeap.StoreString(*pNewStr ? pNewStr : pOrgStr));
 }
 
 const char *CLocalizationDatabase::FindString(unsigned Hash, unsigned ContextHash) const

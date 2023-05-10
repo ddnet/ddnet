@@ -1,8 +1,8 @@
 #ifndef ENGINE_CLIENT_GRAPHICS_DEFINES_H
 #define ENGINE_CLIENT_GRAPHICS_DEFINES_H
 
-#include <stddef.h>
-#include <stdint.h>
+#include <cstddef>
+#include <cstdint>
 
 typedef uint32_t TWGLuint;
 typedef int32_t TWGLint;

@@ -47,14 +47,8 @@ Address
 All
 == Todos
 
-Are you sure that you want to delete the demo?
-== Tens a certeza que queres apagar a demo?
-
 Are you sure that you want to quit?
 == Queres mesmo sair?
-
-Are you sure that you want to remove the player from your friends list?
-== Queres mesmo apagar o jogador da tua lista de amigos?
 
 Automatically record demos
 == Gravar demos automaticamente
@@ -420,9 +414,6 @@ Show name plates
 Show only chat messages from friends
 == Mostrar apenas mensagens dos amigos no chat
 
-Skins
-== Skins
-
 Sound
 == Som
 
@@ -482,9 +473,6 @@ Try again
 
 Type
 == Tipo
-
-Unable to delete the demo
-== Impossível eliminar a demo
 
 Unable to rename the demo
 == Impossivel renomear a demo
@@ -590,9 +578,6 @@ Reset to defaults
 
 Quit anyway?
 == Sair na mesma?
-
-Display Modes
-== Modos de exibição
 
 Version:
 == Versão:
@@ -849,12 +834,6 @@ Checking for existing player with your name
 Are you sure that you want to disconnect and switch to a different server?
 == Tens a certeza que te queres desconectar e mudar para outro servidor?
 
-Country / Region
-== País / Região
-
-Destination file already exist
-== Ficheiro de destino já existe
-
 Speed
 == Velocidade
 
@@ -974,6 +953,47 @@ Editor
 
 [Start menu]
 
+[Graphics error]
+
+[Graphics error]
+Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== 
+
+[Graphics error]
+Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
+== 
+
+[Graphics error]
+An error during command recording occurred. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+A render command failed. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+Submitting the render commands failed. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+Failed to swap framebuffers. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== 
+
+[Graphics error]
+Could not initialize the given graphics backend, reverting to the default backend now.
+== 
+
+[Graphics error]
+Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
+== 
+
+Could not save downloaded map. Try manually deleting this file: %s
+== 
+
 Successfully saved the replay!
 == 
 
@@ -1052,13 +1072,19 @@ Requesting to join the game
 Render demo
 == 
 
-Replace video
-== 
-
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
 == 
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
+== 
+
+Cancel
+== 
+
+File '%s' already exists, do you want to overwrite it?
+== 
+
+Replace video
 == 
 
 Join Tutorial Server
@@ -1106,7 +1132,16 @@ Indicate map finish
 Unfinished map
 == 
 
+Copy info
+== 
+
 Leak IP
+== 
+
+Are you sure that you want to remove the player '%s' from your friends list?
+== 
+
+Are you sure that you want to remove the clan '%s' from your friends list?
 == 
 
 Play the current demo
@@ -1116,6 +1151,12 @@ Pause the current demo
 == 
 
 Stop the current demo
+== 
+
+Go back one tick
+== 
+
+Go forward one tick
 == 
 
 Slow down the demo
@@ -1130,7 +1171,13 @@ Mark the beginning of a cut
 Mark the end of a cut
 == 
 
-Export cut as a seperate demo
+Export cut as a separate demo
+== 
+
+Go back one marker
+== 
+
+Go forward one marker
 == 
 
 Toggle keyboard shortcuts
@@ -1160,7 +1207,16 @@ Fetch Info
 Demos directory
 == 
 
+Open the directory that contains the demo files
+== 
+
+Are you sure that you want to delete the demo '%s'?
+== 
+
 Render
+== 
+
+Unable to delete the demo '%s'
 == 
 
 Kill
@@ -1172,13 +1228,28 @@ Pause
 Loading ghost files
 == 
 
+Menu opened. Press Esc key again to close menu.
+== 
+
 Smooth Dynamic Camera
 == 
 
 Skip the main menu
 == 
 
+Save power by lowering refresh rate (higher input latency)
+== 
+
+Open the settings file
+== 
+
 Config directory
+== 
+
+Open the directory that contains the configuration and user files
+== 
+
+Open the directory to add custom themes
 == 
 
 Loading skin files
@@ -1205,7 +1276,13 @@ Skin prefix
 Choose default eyes when joining a server
 == 
 
+Create a random skin
+== 
+
 Skin Database
+== 
+
+Open the directory to add custom skins
 == 
 
 Hook collisions
@@ -1282,7 +1359,7 @@ UI controller sens.
 Controller jitter tolerance
 == 
 
-No controller found. Plug in a controller and restart the game.
+No controller found. Plug in a controller.
 == 
 
 Device
@@ -1307,6 +1384,12 @@ UI mouse sens.
 == 
 
 Controller
+== 
+
+Reset controls
+== 
+
+Are you sure that you want to reset the controls to their defaults?
 == 
 
 Windowed fullscreen
@@ -1468,6 +1551,9 @@ Freeze Laser Outline Color
 Freeze Laser Inner Color
 == 
 
+Set all to Rifle
+== 
+
 Enable replays
 == 
 
@@ -1513,13 +1599,13 @@ Show tiles layers from BG map
 Regular Background Color
 == 
 
-Try fast HTTP map download first
-== 
-
 Run on join
 == 
 
 Chat command (e.g. showall 1)
+== 
+
+Unregister protocol and file extensions
 == 
 
 Emoticons
@@ -1532,6 +1618,9 @@ Loading assets
 == 
 
 Assets directory
+== 
+
+Open the directory to add custom assets
 == 
 
 Tutorial

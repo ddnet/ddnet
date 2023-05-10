@@ -6,7 +6,7 @@
 
 enum
 {
-	ANTIBOT_ABI_VERSION = 5,
+	ANTIBOT_ABI_VERSION = 6,
 
 	ANTIBOT_MSGFLAG_NONVITAL = 1,
 	ANTIBOT_MSGFLAG_FLUSH = 2,
@@ -19,6 +19,11 @@ struct CAntibotMapData
 	int m_Width;
 	int m_Height;
 	unsigned char *m_pTiles;
+};
+
+struct CAntibotPlayerData
+{
+	char m_aAddress[64];
 };
 
 struct CAntibotInputData
@@ -58,6 +63,7 @@ struct CAntibotVersion
 	int m_Size;
 
 	int m_SizeData;
+	int m_SizePlayerData;
 	int m_SizeCharacterData;
 	int m_SizeInputData;
 	int m_SizeMapData;
@@ -69,6 +75,7 @@ struct CAntibotVersion
 		ANTIBOT_ABI_VERSION, \
 			sizeof(CAntibotVersion), \
 			sizeof(CAntibotData), \
+			sizeof(CAntibotPlayerData), \
 			sizeof(CAntibotCharacterData), \
 			sizeof(CAntibotInputData), \
 			sizeof(CAntibotMapData), \
@@ -89,6 +96,7 @@ struct CAntibotData
 struct CAntibotRoundData
 {
 	int m_Tick;
+	CAntibotPlayerData m_aPlayers[ANTIBOT_MAX_CLIENTS];
 	CAntibotCharacterData m_aCharacters[ANTIBOT_MAX_CLIENTS];
 	CAntibotMapData m_Map;
 };

@@ -6,18 +6,27 @@
 #include <base/detect.h>
 #include <engine/config.h>
 
-#define TCONFIG_FILE "settings_tclient.cfg"
+// include protocol for MAX_CLIENT used in config_variables
+#include <engine/shared/protocol.h>
+
 #define CONFIG_FILE "settings_ddnet.cfg"
 #define AUTOEXEC_FILE "autoexec.cfg"
 #define AUTOEXEC_CLIENT_FILE "autoexec_client.cfg"
 #define AUTOEXEC_SERVER_FILE "autoexec_server.cfg"
+#define TCONFIG_FILE "settings_tclient.cfg"
 
 class CConfig
 {
 public:
-#define MACRO_CONFIG_INT(Name, ScriptName, Def, Min, Max, Save, Desc) int m_##Name;
-#define MACRO_CONFIG_COL(Name, ScriptName, Def, Save, Desc) unsigned m_##Name;
-#define MACRO_CONFIG_STR(Name, ScriptName, Len, Def, Save, Desc) char m_##Name[Len]; // Flawfinder: ignore
+#define MACRO_CONFIG_INT(Name, ScriptName, Def, Min, Max, Save, Desc) \
+	static constexpr int ms_##Name = Def; \
+	int m_##Name;
+#define MACRO_CONFIG_COL(Name, ScriptName, Def, Save, Desc) \
+	static constexpr unsigned ms_##Name = Def; \
+	unsigned m_##Name;
+#define MACRO_CONFIG_STR(Name, ScriptName, Len, Def, Save, Desc) \
+	static constexpr const char *ms_p##Name = Def; \
+	char m_##Name[Len]; // Flawfinder: ignore
 #include "config_variables.h"
 #undef MACRO_CONFIG_INT
 #undef MACRO_CONFIG_COL

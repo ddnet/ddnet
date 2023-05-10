@@ -2,10 +2,10 @@
 
 #include <engine/shared/protocol.h>
 
-void IDbConnection::FormatCreateRace(char *aBuf, unsigned int BufferSize)
+void IDbConnection::FormatCreateRace(char *aBuf, unsigned int BufferSize, bool Backup)
 {
 	str_format(aBuf, BufferSize,
-		"CREATE TABLE IF NOT EXISTS %s_race ("
+		"CREATE TABLE IF NOT EXISTS %s_race%s ("
 		"  Map VARCHAR(128) COLLATE %s NOT NULL, "
 		"  Name VARCHAR(%d) COLLATE %s NOT NULL, "
 		"  Timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, "
@@ -24,13 +24,14 @@ void IDbConnection::FormatCreateRace(char *aBuf, unsigned int BufferSize)
 		"  DDNet7 BOOL DEFAULT FALSE, "
 		"  PRIMARY KEY (Map, Name, Time, Timestamp, Server)"
 		")",
-		GetPrefix(), BinaryCollate(), MAX_NAME_LENGTH, BinaryCollate());
+		GetPrefix(), Backup ? "_backup" : "",
+		BinaryCollate(), MAX_NAME_LENGTH, BinaryCollate());
 }
 
-void IDbConnection::FormatCreateTeamrace(char *aBuf, unsigned int BufferSize, const char *pIdType)
+void IDbConnection::FormatCreateTeamrace(char *aBuf, unsigned int BufferSize, const char *pIdType, bool Backup)
 {
 	str_format(aBuf, BufferSize,
-		"CREATE TABLE IF NOT EXISTS %s_teamrace ("
+		"CREATE TABLE IF NOT EXISTS %s_teamrace%s ("
 		"  Map VARCHAR(128) COLLATE %s NOT NULL, "
 		"  Name VARCHAR(%d) COLLATE %s NOT NULL, "
 		"  Timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, "
@@ -40,7 +41,8 @@ void IDbConnection::FormatCreateTeamrace(char *aBuf, unsigned int BufferSize, co
 		"  DDNet7 BOOL DEFAULT FALSE, "
 		"  PRIMARY KEY (ID, Name)"
 		")",
-		GetPrefix(), BinaryCollate(), MAX_NAME_LENGTH, BinaryCollate(), pIdType);
+		GetPrefix(), Backup ? "_backup" : "",
+		BinaryCollate(), MAX_NAME_LENGTH, BinaryCollate(), pIdType);
 }
 
 void IDbConnection::FormatCreateMaps(char *aBuf, unsigned int BufferSize)
@@ -58,10 +60,10 @@ void IDbConnection::FormatCreateMaps(char *aBuf, unsigned int BufferSize)
 		GetPrefix(), BinaryCollate(), BinaryCollate(), BinaryCollate());
 }
 
-void IDbConnection::FormatCreateSaves(char *aBuf, unsigned int BufferSize)
+void IDbConnection::FormatCreateSaves(char *aBuf, unsigned int BufferSize, bool Backup)
 {
 	str_format(aBuf, BufferSize,
-		"CREATE TABLE IF NOT EXISTS %s_saves ("
+		"CREATE TABLE IF NOT EXISTS %s_saves%s ("
 		"  Savegame TEXT COLLATE %s NOT NULL, "
 		"  Map VARCHAR(128) COLLATE %s NOT NULL, "
 		"  Code VARCHAR(128) COLLATE %s NOT NULL, "
@@ -71,7 +73,8 @@ void IDbConnection::FormatCreateSaves(char *aBuf, unsigned int BufferSize)
 		"  SaveID VARCHAR(36) DEFAULT NULL, "
 		"  PRIMARY KEY (Map, Code)"
 		")",
-		GetPrefix(), BinaryCollate(), BinaryCollate(), BinaryCollate());
+		GetPrefix(), Backup ? "_backup" : "",
+		BinaryCollate(), BinaryCollate(), BinaryCollate());
 }
 
 void IDbConnection::FormatCreatePoints(char *aBuf, unsigned int BufferSize)

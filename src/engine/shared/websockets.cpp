@@ -4,9 +4,9 @@
 #include <map>
 #include <string>
 
-#include "base/system.h"
 #include "protocol.h"
 #include "ringbuffer.h"
+#include <base/system.h>
 #if defined(CONF_FAMILY_UNIX)
 #include <arpa/inet.h>
 #elif defined(CONF_FAMILY_WINDOWS)
@@ -60,8 +60,8 @@ static int receive_chunk(context_data *ctx_data, struct per_session_data *pss,
 		return 1;
 	chunk->size = len;
 	chunk->read = 0;
-	memcpy(&chunk->addr, &pss->addr, sizeof(sockaddr_in));
-	memcpy(&chunk->data[0], in, len);
+	mem_copy(&chunk->addr, &pss->addr, sizeof(sockaddr_in));
+	mem_copy(&chunk->data[0], in, len);
 	return 0;
 }
 
@@ -228,15 +228,15 @@ int websocket_recv(int socket, unsigned char *data, size_t maxsize,
 	if(maxsize >= chunk->size - chunk->read)
 	{
 		int len = chunk->size - chunk->read;
-		memcpy(data, &chunk->data[chunk->read], len);
-		memcpy(sockaddrbuf, &chunk->addr, fromLen);
+		mem_copy(data, &chunk->data[chunk->read], len);
+		mem_copy(sockaddrbuf, &chunk->addr, fromLen);
 		ctx_data->recv_buffer.PopFirst();
 		return len;
 	}
 	else
 	{
-		memcpy(data, &chunk->data[chunk->read], maxsize);
-		memcpy(sockaddrbuf, &chunk->addr, fromLen);
+		mem_copy(data, &chunk->data[chunk->read], maxsize);
+		mem_copy(sockaddrbuf, &chunk->addr, fromLen);
 		chunk->read += maxsize;
 		return maxsize;
 	}
@@ -281,8 +281,8 @@ int websocket_send(int socket, const unsigned char *data, size_t size,
 		return -1;
 	chunk->size = size;
 	chunk->read = 0;
-	memcpy(&chunk->addr, &pss->addr, sizeof(sockaddr_in));
-	memcpy(&chunk->data[LWS_SEND_BUFFER_PRE_PADDING], data, size);
+	mem_copy(&chunk->addr, &pss->addr, sizeof(sockaddr_in));
+	mem_copy(&chunk->data[LWS_SEND_BUFFER_PRE_PADDING], data, size);
 	lws_callback_on_writable(pss->wsi);
 	lws_service(context, -1);
 	return size;

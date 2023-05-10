@@ -33,7 +33,7 @@ public:
 
 	void Reset() override;
 	void Destroy() override;
-	void PreTick() override;
+	void PreTick();
 	void Tick() override;
 	void TickDeferred() override;
 	void TickPaused() override;
@@ -63,7 +63,7 @@ public:
 	void ResetInput();
 	void FireWeapon();
 
-	void Die(int Killer, int Weapon);
+	void Die(int Killer, int Weapon, bool SendKillMsg = true);
 	bool TakeDamage(vec2 Force, int Dmg, int From, int Weapon);
 
 	bool Spawn(class CPlayer *pPlayer, vec2 Pos);
@@ -85,7 +85,7 @@ public:
 	bool IsAlive() const { return m_Alive; }
 	bool IsPaused() const { return m_Paused; }
 	class CPlayer *GetPlayer() { return m_pPlayer; }
-	int64_t TeamMask();
+	CClientMask TeamMask();
 
 private:
 	// player controlling this character

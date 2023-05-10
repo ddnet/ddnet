@@ -56,7 +56,7 @@ void CLayerGame::SetTile(int x, int y, CTile tile)
 			CLayerTiles::SetTile(x, y, air);
 			if(!m_pEditor->m_PreventUnusedTilesWasWarned)
 			{
-				m_pEditor->m_PopupEventType = m_pEditor->POPEVENT_PREVENTUNUSEDTILES;
+				m_pEditor->m_PopupEventType = CEditor::POPEVENT_PREVENTUNUSEDTILES;
 				m_pEditor->m_PopupEventActivated = true;
 				m_pEditor->m_PreventUnusedTilesWasWarned = true;
 			}
@@ -64,9 +64,9 @@ void CLayerGame::SetTile(int x, int y, CTile tile)
 	}
 }
 
-int CLayerGame::RenderProperties(CUIRect *pToolbox)
+CUI::EPopupMenuFunctionResult CLayerGame::RenderProperties(CUIRect *pToolbox)
 {
-	int r = CLayerTiles::RenderProperties(pToolbox);
+	const CUI::EPopupMenuFunctionResult Result = CLayerTiles::RenderProperties(pToolbox);
 	m_Image = -1;
-	return r;
+	return Result;
 }

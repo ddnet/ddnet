@@ -44,14 +44,8 @@ Address
 All
 == Alle
 
-Are you sure that you want to delete the demo?
-== Er du sikker på at du vil slette denne demo?
-
 Are you sure that you want to quit?
 == Er du sikker på at du vil afslutte?
-
-Are you sure that you want to remove the player from your friends list?
-== Er du sikker på at du vil fjerne denne spiller fra din venneliste?
 
 Automatically record demos
 == Optag automatisk demoer
@@ -399,9 +393,6 @@ Show ingame HUD
 Show name plates
 == Vis navneskilte
 
-Skins
-== Udseende
-
 Sound
 == Lyd
 
@@ -461,9 +452,6 @@ Try again
 
 Type
 == Type
-
-Unable to delete the demo
-== Kunne ikke slette demoen
 
 Unable to rename the demo
 == Kunne ikke omdøbe demoen
@@ -575,9 +563,6 @@ Reset to defaults
 Quit anyway?
 == Afslut alligevel?
 
-Display Modes
-== Skærmopløsning
-
 Version:
 == Version:
 
@@ -682,12 +667,6 @@ Your nickname '%s' is already used (%d points). Do you still want to use it?
 
 Checking for existing player with your name
 == Kontrollerer for eksisterende spiller med dit navn
-
-Country / Region
-== Land / Region
-
-Destination file already exist
-== Destinationsfil findes allerede
 
 Speed
 == Hastighed
@@ -1061,9 +1040,6 @@ Use current map as background
 Show tiles layers from BG map
 == Vis fliselag fra baggrundskortet
 
-Try fast HTTP map download first
-== Prøv hurtig download af HTTP kort først
-
 DDNet %s is available:
 == DDNet %s er tilgængelig:
 
@@ -1191,6 +1167,47 @@ Grabs
 9+ new mentions
 == 9+ ny nævner
 
+[Graphics error]
+
+[Graphics error]
+Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== 
+
+[Graphics error]
+Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
+== 
+
+[Graphics error]
+An error during command recording occurred. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+A render command failed. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+Submitting the render commands failed. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+Failed to swap framebuffers. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== 
+
+[Graphics error]
+Could not initialize the given graphics backend, reverting to the default backend now.
+== 
+
+[Graphics error]
+Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
+== 
+
+Could not save downloaded map. Try manually deleting this file: %s
+== 
+
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
 == 
 
@@ -1251,7 +1268,10 @@ Getting game info
 Requesting to join the game
 == 
 
-Are you sure that you want to disconnect and switch to a different server?
+Cancel
+== 
+
+File '%s' already exists, do you want to overwrite it?
 == 
 
 Join Tutorial Server
@@ -1290,7 +1310,19 @@ Getting server list from master server
 Refreshing...
 == 
 
+Are you sure that you want to disconnect and switch to a different server?
+== 
+
+Copy info
+== 
+
 Leak IP
+== 
+
+Are you sure that you want to remove the player '%s' from your friends list?
+== 
+
+Are you sure that you want to remove the clan '%s' from your friends list?
 == 
 
 Play the current demo
@@ -1300,6 +1332,12 @@ Pause the current demo
 == 
 
 Stop the current demo
+== 
+
+Go back one tick
+== 
+
+Go forward one tick
 == 
 
 Slow down the demo
@@ -1314,7 +1352,13 @@ Mark the beginning of a cut
 Mark the end of a cut
 == 
 
-Export cut as a seperate demo
+Export cut as a separate demo
+== 
+
+Go back one marker
+== 
+
+Go forward one marker
 == 
 
 Toggle keyboard shortcuts
@@ -1323,13 +1367,37 @@ Toggle keyboard shortcuts
 Loading demo files
 == 
 
+Open the directory that contains the demo files
+== 
+
+Are you sure that you want to delete the demo '%s'?
+== 
+
+Unable to delete the demo '%s'
+== 
+
 Loading ghost files
+== 
+
+Menu opened. Press Esc key again to close menu.
+== 
+
+Save power by lowering refresh rate (higher input latency)
 == 
 
 Settings file
 == 
 
+Open the settings file
+== 
+
 Config directory
+== 
+
+Open the directory that contains the configuration and user files
+== 
+
+Open the directory to add custom themes
 == 
 
 Loading skin files
@@ -1342,6 +1410,12 @@ Download community skins
 == 
 
 Choose default eyes when joining a server
+== 
+
+Create a random skin
+== 
+
+Open the directory to add custom skins
 == 
 
 Chat command
@@ -1376,7 +1450,7 @@ UI controller sens.
 Controller jitter tolerance
 == 
 
-No controller found. Plug in a controller and restart the game.
+No controller found. Plug in a controller.
 == 
 
 Device
@@ -1401,6 +1475,12 @@ UI mouse sens.
 == 
 
 Controller
+== 
+
+Reset controls
+== 
+
+Are you sure that you want to reset the controls to their defaults?
 == 
 
 Dummy
@@ -1547,6 +1627,9 @@ Freeze Laser Outline Color
 Freeze Laser Inner Color
 == 
 
+Set all to Rifle
+== 
+
 When you cross the start line, show a ghost tee replicating the movements of your best time
 == 
 
@@ -1577,10 +1660,16 @@ Run on join
 Chat command (e.g. showall 1)
 == 
 
+Unregister protocol and file extensions
+== 
+
 Extras
 == 
 
 Loading assets
+== 
+
+Open the directory to add custom assets
 == 
 
 Discord

@@ -15,7 +15,7 @@
 #define TEST_TYPE_NAME "TestDDraceNetwork"
 
 CGameControllerDDRace::CGameControllerDDRace(class CGameContext *pGameServer) :
-	IGameController(pGameServer), m_Teams(pGameServer), m_pInitResult(nullptr)
+	IGameController(pGameServer), m_Teams(pGameServer), m_pLoadBestTimeResult(nullptr)
 {
 	m_pGameType = g_Config.m_SvTestingCommands ? TEST_TYPE_NAME : GAME_TYPE_NAME;
 
@@ -159,19 +159,33 @@ void CGameControllerDDRace::OnPlayerDisconnect(CPlayer *pPlayer, const char *pRe
 		m_Teams.SetForceCharacterTeam(ClientID, TEAM_FLOCK);
 }
 
+void CGameControllerDDRace::OnReset()
+{
+	IGameController::OnReset();
+	m_Teams.Reset();
+}
+
 void CGameControllerDDRace::Tick()
 {
 	IGameController::Tick();
 	m_Teams.ProcessSaveTeam();
 	m_Teams.Tick();
 
-	if(m_pInitResult != nullptr && m_pInitResult->m_Completed)
+	if(m_pLoadBestTimeResult != nullptr && m_pLoadBestTimeResult->m_Completed)
 	{
-		if(m_pInitResult->m_Success)
+		if(m_pLoadBestTimeResult->m_Success)
 		{
-			m_CurrentRecord = m_pInitResult->m_CurrentRecord;
+			m_CurrentRecord = m_pLoadBestTimeResult->m_CurrentRecord;
+
+			for(int i = 0; i < MAX_CLIENTS; i++)
+			{
+				if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetClientVersion() >= VERSION_DDRACE)
+				{
+					GameServer()->SendRecord(i);
+				}
+			}
 		}
-		m_pInitResult = nullptr;
+		m_pLoadBestTimeResult = nullptr;
 	}
 }
 
@@ -198,10 +212,10 @@ void CGameControllerDDRace::DoTeamChange(class CPlayer *pPlayer, int Team, bool 
 	IGameController::DoTeamChange(pPlayer, Team, DoChatMsg);
 }
 
-int64_t CGameControllerDDRace::GetMaskForPlayerWorldEvent(int Asker, int ExceptID)
+CClientMask CGameControllerDDRace::GetMaskForPlayerWorldEvent(int Asker, int ExceptID)
 {
 	if(Asker == -1)
-		return CmaskAllExceptOne(ExceptID);
+		return CClientMask().set().reset(ExceptID);
 
 	return m_Teams.TeamMask(GetPlayerTeam(Asker), ExceptID, Asker);
 }

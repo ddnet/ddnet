@@ -6,9 +6,9 @@ os.chdir(os.path.dirname(__file__) + "/..")
 
 PATH = "src/"
 EXCEPTIONS = [
-        "src/base/unicode/confusables.h",
+	"src/base/unicode/confusables.h",
 	"src/base/unicode/confusables_data.h",
-        "src/base/unicode/tolower.h",
+	"src/base/unicode/tolower.h",
 	"src/base/unicode/tolower_data.h",
 	"src/tools/config_common.h"
 ]
@@ -40,7 +40,7 @@ def check_dir(directory):
 	for file in file_list:
 		path = directory + file
 		if os.path.isdir(path):
-			if file not in ("external", "generated"):
+			if file not in ("external", "generated", "rust-bridge"):
 				errors += check_dir(path + "/")
 		elif file.endswith(".h") and file != "keynames.h":
 			errors += check_file(path)

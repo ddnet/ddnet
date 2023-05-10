@@ -57,13 +57,7 @@ void CPlayers::RenderHand(CTeeRenderInfo *pInfo, vec2 CenterPos, vec2 Dir, float
 	}
 }
 
-inline float NormalizeAngular(float f)
-{
-	return fmod(f + pi * 2, pi * 2);
-}
-
-inline float AngularMixDirection(float Src, float Dst) { return sinf(Dst - Src) > 0 ? 1 : -1; }
-inline float AngularDistance(float Src, float Dst) { return asinf(sinf(Dst - Src)); }
+inline float AngularMixDirection(float Src, float Dst) { return std::sin(Dst - Src) > 0 ? 1 : -1; }
 
 inline float AngularApproach(float Src, float Dst, float Amount)
 {
@@ -242,7 +236,6 @@ void CPlayers::RenderHookCollLine(
 			vec2 NewPos = OldPos;
 
 			bool DoBreak = false;
-			int Hit = 0;
 
 			do
 			{
@@ -256,7 +249,7 @@ void CPlayers::RenderHookCollLine(
 				}
 
 				int TeleNr = 0;
-				Hit = Collision()->IntersectLineTeleHook(OldPos, NewPos, &FinishPos, 0x0, &TeleNr);
+				int Hit = Collision()->IntersectLineTeleHook(OldPos, NewPos, &FinishPos, 0x0, &TeleNr);
 
 				if(!DoBreak && Hit)
 				{
@@ -468,8 +461,8 @@ void CPlayers::RenderPlayer(
 	bool Inactive = m_pClient->m_aClients[ClientID].m_Afk || m_pClient->m_aClients[ClientID].m_Paused;
 
 	// evaluate animation
-	float WalkTime = fmod(Position.x, 100.0f) / 100.0f;
-	float RunTime = fmod(Position.x, 250.0f) / 250.0f;
+	float WalkTime = std::fmod(Position.x, 100.0f) / 100.0f;
+	float RunTime = std::fmod(Position.x, 200.0f) / 200.0f;
 
 	// Don't do a moon walk outside the left border
 	if(WalkTime < 0)
@@ -639,7 +632,7 @@ void CPlayers::RenderPlayer(
 				Recoil = 0;
 				float a = AttackTicksPassed / 5.0f;
 				if(a < 1)
-					Recoil = sinf(a * pi);
+					Recoil = std::sin(a * pi);
 				WeaponPosition = Position + Dir * g_pData->m_Weapons.m_aId[CurrentWeapon].m_Offsetx - Dir * Recoil * 10.0f;
 				WeaponPosition.y += g_pData->m_Weapons.m_aId[CurrentWeapon].m_Offsety;
 				if(IsSit)
@@ -776,7 +769,7 @@ void CPlayers::RenderPlayer(
 			if(SinceStart < Client()->GameTickSpeed() / 5)
 				Wiggle = SinceStart / (Client()->GameTickSpeed() / 5.0f);
 
-			float WiggleAngle = sinf(5 * Wiggle);
+			float WiggleAngle = std::sin(5 * Wiggle);
 
 			Graphics()->QuadsSetRotation(pi / 6 * WiggleAngle);
 
@@ -813,15 +806,15 @@ void CPlayers::OnRender()
 		if(m_pClient->m_aClients[i].m_LiveFrozen)
 			m_aRenderInfo[i].m_TeeRenderFlags |= TEE_EFFECT_FROZEN;
 
-		CGameClient::CSnapState::CCharacterInfo &CharacterInfo = m_pClient->m_Snap.m_aCharacters[i];
-		if((CharacterInfo.m_Cur.m_Weapon == WEAPON_NINJA || (CharacterInfo.m_HasExtendedData && CharacterInfo.m_ExtendedData.m_FreezeEnd != 0)) && g_Config.m_ClShowNinja 
+		const CGameClient::CSnapState::CCharacterInfo &CharacterInfo = m_pClient->m_Snap.m_aCharacters[i];
+		
+		if((CharacterInfo.m_Cur.m_Weapon == WEAPON_NINJA || (CharacterInfo.m_HasExtendedData && CharacterInfo.m_ExtendedData.m_FreezeEnd != 0)) && g_Config.m_ClShowNinja
 		|| (g_Config.m_ClAmIFrozen && g_Config.m_ClFreezeUpdateFix && m_pClient->m_Snap.m_LocalClientID == i && g_Config.m_ClShowNinja))
 		{
 			// change the skin for the player to the ninja
-			int Skin = m_pClient->m_Skins.Find("x_ninja");
-			if(Skin != -1)
+			const auto *pSkin = m_pClient->m_Skins.FindOrNullptr("x_ninja");
+			if(pSkin != nullptr)
 			{
-				const CSkin *pSkin = m_pClient->m_Skins.Get(Skin);
 				m_aRenderInfo[i].m_OriginalRenderSkin = pSkin->m_OriginalSkin;
 				m_aRenderInfo[i].m_ColorableRenderSkin = pSkin->m_ColorableSkin;
 				m_aRenderInfo[i].m_BloodColor = pSkin->m_BloodColor;
@@ -835,8 +828,7 @@ void CPlayers::OnRender()
 			}
 		}
 	}
-	int Skin = m_pClient->m_Skins.Find("x_spec");
-	const CSkin *pSkin = m_pClient->m_Skins.Get(Skin);
+	const CSkin *pSkin = m_pClient->m_Skins.Find("x_spec");
 	m_RenderInfoSpec.m_OriginalRenderSkin = pSkin->m_OriginalSkin;
 	m_RenderInfoSpec.m_ColorableRenderSkin = pSkin->m_ColorableSkin;
 	m_RenderInfoSpec.m_BloodColor = pSkin->m_BloodColor;

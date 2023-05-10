@@ -52,3 +52,16 @@ void CTeamsCore::Reset()
 		m_aIsSolo[i] = false;
 	}
 }
+
+void CTeamsCore::SetSolo(int ClientID, bool Value)
+{
+	dbg_assert(ClientID >= 0 && ClientID < MAX_CLIENTS, "Invalid client id");
+	m_aIsSolo[ClientID] = Value;
+}
+
+bool CTeamsCore::GetSolo(int ClientID) const
+{
+	if(ClientID < 0 || ClientID >= MAX_CLIENTS)
+		return false;
+	return m_aIsSolo[ClientID];
+}

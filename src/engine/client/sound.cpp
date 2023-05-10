@@ -153,7 +153,7 @@ static void Mix(short *pFinalOut, unsigned Frames)
 
 					// dx and dy can be larger than 46341 and thus the calculation would go beyond the limits of a integer,
 					// therefore we cast them into float
-					int Dist = (int)sqrtf((float)dx * dx + (float)dy * dy);
+					int Dist = (int)length(vec2(dx, dy));
 					if(Dist < r)
 					{
 						InVoiceField = true;
@@ -175,8 +175,8 @@ static void Mix(short *pFinalOut, unsigned Frames)
 				{
 					RangeX = Voice.m_Rectangle.m_Width / 2.0f;
 
-					int abs_dx = abs(dx);
-					int abs_dy = abs(dy);
+					int abs_dx = absolute(dx);
+					int abs_dy = absolute(dy);
 
 					int w = Voice.m_Rectangle.m_Width / 2.0f;
 					int h = Voice.m_Rectangle.m_Height / 2.0f;
@@ -608,6 +608,8 @@ int CSound::LoadOpus(const char *pFilename)
 
 	SampleID = DecodeOpus(SampleID, pData, DataSize);
 	free(pData);
+	if(SampleID < 0)
+		return -1;
 
 	if(g_Config.m_Debug)
 		dbg_msg("sound/opus", "loaded %s", pFilename);
@@ -648,6 +650,8 @@ int CSound::LoadWV(const char *pFilename)
 
 	SampleID = DecodeWV(SampleID, pData, DataSize);
 	free(pData);
+	if(SampleID < 0)
+		return -1;
 
 	if(g_Config.m_Debug)
 		dbg_msg("sound/wv", "loaded %s", pFilename);
@@ -676,6 +680,8 @@ int CSound::LoadOpusFromMem(const void *pData, unsigned DataSize, bool FromEdito
 		return -1;
 
 	SampleID = DecodeOpus(SampleID, pData, DataSize);
+	if(SampleID < 0)
+		return -1;
 
 	RateConvert(SampleID);
 	return SampleID;
@@ -701,6 +707,8 @@ int CSound::LoadWVFromMem(const void *pData, unsigned DataSize, bool FromEditor 
 		return -1;
 
 	SampleID = DecodeWV(SampleID, pData, DataSize);
+	if(SampleID < 0)
+		return -1;
 
 	RateConvert(SampleID);
 	return SampleID;
@@ -800,7 +808,7 @@ void CSound::SetVoiceTimeOffset(CVoiceHandle Voice, float offset)
 
 			// at least 200msec off, else depend on buffer size
 			float Threshold = maximum(0.2f * m_aVoices[VoiceID].m_pSample->m_Rate, (float)m_MaxFrames);
-			if(abs(m_aVoices[VoiceID].m_Tick - Tick) > Threshold)
+			if(absolute(m_aVoices[VoiceID].m_Tick - Tick) > Threshold)
 			{
 				// take care of looping (modulo!)
 				if(!(IsLooping && (minimum(m_aVoices[VoiceID].m_Tick, Tick) + m_aVoices[VoiceID].m_pSample->m_NumFrames - maximum(m_aVoices[VoiceID].m_Tick, Tick)) <= Threshold))

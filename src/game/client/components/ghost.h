@@ -80,7 +80,7 @@ private:
 		void SetSize(int Items);
 		int Size() const { return m_NumItems; }
 
-		void Add(CGhostCharacter Char);
+		void Add(const CGhostCharacter &Char);
 		CGhostCharacter *Get(int Index);
 	};
 
@@ -158,8 +158,8 @@ public:
 	virtual void OnMessage(int MsgType, void *pRawMsg) override;
 	virtual void OnMapLoad() override;
 	virtual void OnShutdown() override;
+	virtual void OnNewSnapshot() override;
 
-	void OnNewSnapshot();
 	void OnNewPredictedSnapshot();
 
 	int FreeSlots() const;

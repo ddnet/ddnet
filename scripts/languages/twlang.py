@@ -59,17 +59,21 @@ def decode(fileobj, elements_per_key):
 				data[current_key].append(index)
 			if line in data:
 				raise LanguageDecodeError("Key defined multiple times: " + line, fileobj.name, index)
-			data[(line, current_context)] = [index]
+			data[(line, current_context)] = [index - 1 if current_context else index]
 			current_key = (line, current_context)
 	if len(data[current_key]) != 1+elements_per_key:
 		raise LanguageDecodeError("Wrong number of elements per key", fileobj.name, index)
 	data[current_key].append(index+1)
-	return data
+	new_data = {}
+	for key, value in data.items():
+		if key[0]:
+			new_data[key] = value
+	return new_data
 
 
 def check_file(path):
 	with open(path, encoding="utf-8") as fileobj:
-		matches = re.findall(r"Localize\s*\(\s*\"([^\"]+)\"(?:\s*,\s*\"([^\"]+)\")?\s*\)", fileobj.read())
+		matches = re.findall(r"(Localize|Localizable)\s*\(\s*\"([^\"]+)\"(?:\s*,\s*\"([^\"]+)\")?\s*\)", fileobj.read())
 	return matches
 
 
@@ -78,16 +82,16 @@ def check_folder(path):
 	for path2, dirs, files in os.walk(path):
 		dirs.sort()
 		for f in sorted(files):
-			if not any(f.endswith(x) for x in ".cpp .c .h".split()):
+			if not any(f.endswith(x) for x in [".cpp", ".c", ".h"]):
 				continue
 			for sentence in check_file(os.path.join(path2, f)):
-				englishlist[sentence] = None
+				englishlist[sentence[1:]] = None
 	return englishlist
 
 
 def languages():
 	with open("data/languages/index.txt", encoding="utf-8") as f:
-		index = decode(f, 2)
+		index = decode(f, 3)
 	langs = {"data/languages/"+key[0]+".txt" : [key[0]]+elements for key, elements in index.items()}
 	return langs
 

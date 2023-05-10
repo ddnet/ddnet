@@ -8,9 +8,8 @@
 // layer types
 enum
 {
-	// TODO(Shereef Marzouk): fix this for vanilla, make use of LAYERTYPE_GAME instead of using m_game variable in the editor.
 	LAYERTYPE_INVALID = 0,
-	LAYERTYPE_GAME,
+	LAYERTYPE_GAME, // unused
 	LAYERTYPE_TILES,
 	LAYERTYPE_QUADS,
 	LAYERTYPE_FRONT,
@@ -192,15 +191,15 @@ enum
 	LAYER_TUNE,
 	NUM_LAYERS,
 	//Flags
-	TILEFLAG_VFLIP = 1,
-	TILEFLAG_HFLIP = 2,
+	TILEFLAG_XFLIP = 1,
+	TILEFLAG_YFLIP = 2,
 	TILEFLAG_OPAQUE = 4,
 	TILEFLAG_ROTATE = 8,
 	//Rotation
 	ROTATION_0 = 0,
 	ROTATION_90 = TILEFLAG_ROTATE,
-	ROTATION_180 = (TILEFLAG_VFLIP | TILEFLAG_HFLIP),
-	ROTATION_270 = (TILEFLAG_VFLIP | TILEFLAG_HFLIP | TILEFLAG_ROTATE),
+	ROTATION_180 = (TILEFLAG_XFLIP | TILEFLAG_YFLIP),
+	ROTATION_270 = (TILEFLAG_XFLIP | TILEFLAG_YFLIP | TILEFLAG_ROTATE),
 
 	LAYERFLAG_DETAIL = 1,
 	TILESLAYERFLAG_GAME = 1,
@@ -343,9 +342,14 @@ struct CMapItemVersion
 
 struct CEnvPoint
 {
+	enum
+	{
+		MAX_CHANNELS = 4,
+	};
+
 	int m_Time; // in ms
 	int m_Curvetype;
-	int m_aValues[4]; // 1-4 depending on envelope (22.10 fixed point)
+	int m_aValues[MAX_CHANNELS]; // 1-4 depending on envelope (22.10 fixed point)
 
 	bool operator<(const CEnvPoint &Other) const { return m_Time < Other.m_Time; }
 };
@@ -485,8 +489,12 @@ public:
 bool IsValidGameTile(int Index);
 bool IsValidFrontTile(int Index);
 bool IsValidTeleTile(int Index);
+bool IsTeleTileNumberUsed(int Index); // Assumes that Index is a valid tele tile index
 bool IsValidSpeedupTile(int Index);
 bool IsValidSwitchTile(int Index);
+bool IsSwitchTileFlagsUsed(int Index); // Assumes that Index is a valid switch tile index
+bool IsSwitchTileNumberUsed(int Index); // Assumes that Index is a valid switch tile index
+bool IsSwitchTileDelayUsed(int Index); // Assumes that Index is a valid switch tile index
 bool IsValidTuneTile(int Index);
 bool IsValidEntity(int Index);
 bool IsRotatableTile(int Index);

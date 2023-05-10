@@ -4,8 +4,26 @@
 #define GAME_LOCALIZATION_H
 
 #include <base/system.h> // GNUC_ATTRIBUTE
+
 #include <engine/shared/memheap.h>
+
+#include <string>
 #include <vector>
+
+class CLanguage
+{
+public:
+	CLanguage() = default;
+	CLanguage(const char *pName, const char *pFileName, int Code, const std::vector<std::string> &vLanguageCodes) :
+		m_Name(pName), m_FileName(pFileName), m_CountryCode(Code), m_vLanguageCodes(vLanguageCodes) {}
+
+	std::string m_Name;
+	std::string m_FileName;
+	int m_CountryCode;
+	std::vector<std::string> m_vLanguageCodes;
+
+	bool operator<(const CLanguage &Other) const { return m_Name < Other.m_Name; }
+};
 
 class CLocalizationDatabase
 {
@@ -27,6 +45,7 @@ class CLocalizationDatabase
 		bool operator==(const CString &Other) const { return m_Hash == Other.m_Hash && m_ContextHash == Other.m_ContextHash; }
 	};
 
+	std::vector<CLanguage> m_vLanguages;
 	std::vector<CString> m_vStrings;
 	CHeap m_StringsHeap;
 	int m_VersionCounter;
@@ -34,6 +53,10 @@ class CLocalizationDatabase
 
 public:
 	CLocalizationDatabase();
+
+	void LoadIndexfile(class IStorage *pStorage, class IConsole *pConsole);
+	const std::vector<CLanguage> &Languages() const { return m_vLanguages; }
+	void SelectDefaultLanguage(class IConsole *pConsole, char *pFilename, size_t Length) const;
 
 	bool Load(const char *pFilename, class IStorage *pStorage, class IConsole *pConsole);
 

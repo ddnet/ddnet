@@ -6,7 +6,7 @@
 #include <winsock2.h>
 #endif
 
-#include <stddef.h>
+#include <cstddef>
 
 int websocket_create(const char *addr, int port);
 int websocket_destroy(int socket);

@@ -180,8 +180,8 @@ void Rotate(vec2 *pCenter, vec2 *pPoint, float Rotation)
 {
 	float x = pPoint->x - pCenter->x;
 	float y = pPoint->y - pCenter->y;
-	pPoint->x = x * cosf(Rotation) - y * sinf(Rotation) + pCenter->x;
-	pPoint->y = x * sinf(Rotation) + y * cosf(Rotation) + pCenter->y;
+	pPoint->x = x * std::cos(Rotation) - y * std::sin(Rotation) + pCenter->x;
+	pPoint->y = x * std::sin(Rotation) + y * std::cos(Rotation) + pCenter->y;
 }
 
 void CLayerQuads::BrushRotate(float Amount)
@@ -218,9 +218,8 @@ void CLayerQuads::GetSize(float *pWidth, float *pHeight)
 	}
 }
 
-int CLayerQuads::RenderProperties(CUIRect *pToolBox)
+CUI::EPopupMenuFunctionResult CLayerQuads::RenderProperties(CUIRect *pToolBox)
 {
-	// layer props
 	enum
 	{
 		PROP_IMAGE = 0,
@@ -236,7 +235,9 @@ int CLayerQuads::RenderProperties(CUIRect *pToolBox)
 	int NewVal = 0;
 	int Prop = m_pEditor->DoProperties(pToolBox, aProps, s_aIds, &NewVal);
 	if(Prop != -1)
+	{
 		m_pEditor->m_Map.m_Modified = true;
+	}
 
 	if(Prop == PROP_IMAGE)
 	{
@@ -246,7 +247,7 @@ int CLayerQuads::RenderProperties(CUIRect *pToolBox)
 			m_Image = -1;
 	}
 
-	return 0;
+	return CUI::POPUP_KEEP_OPEN;
 }
 
 void CLayerQuads::ModifyImageIndex(INDEX_MODIFY_FUNC Func)

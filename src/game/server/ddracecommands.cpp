@@ -385,7 +385,7 @@ void CGameContext::ConForcePause(IConsole::IResult *pResult, void *pUserData)
 	pPlayer->ForcePause(Seconds);
 }
 
-bool CGameContext::TryVoteMute(const NETADDR *pAddr, int Secs)
+bool CGameContext::TryVoteMute(const NETADDR *pAddr, int Secs, const char *pReason)
 {
 	// find a matching vote mute for this ip, update expiration time if found
 	for(int i = 0; i < m_NumVoteMutes; i++)
@@ -393,6 +393,7 @@ bool CGameContext::TryVoteMute(const NETADDR *pAddr, int Secs)
 		if(net_addr_comp_noport(&m_aVoteMutes[i].m_Addr, pAddr) == 0)
 		{
 			m_aVoteMutes[i].m_Expire = Server()->Tick() + Secs * Server()->TickSpeed();
+			str_copy(m_aVoteMutes[i].m_aReason, pReason, sizeof(m_aVoteMutes[i].m_aReason));
 			return true;
 		}
 	}
@@ -402,6 +403,7 @@ bool CGameContext::TryVoteMute(const NETADDR *pAddr, int Secs)
 	{
 		m_aVoteMutes[m_NumVoteMutes].m_Addr = *pAddr;
 		m_aVoteMutes[m_NumVoteMutes].m_Expire = Server()->Tick() + Secs * Server()->TickSpeed();
+		str_copy(m_aVoteMutes[m_NumVoteMutes].m_aReason, pReason, sizeof(m_aVoteMutes[m_NumVoteMutes].m_aReason));
 		m_NumVoteMutes++;
 		return true;
 	}
@@ -410,19 +412,21 @@ bool CGameContext::TryVoteMute(const NETADDR *pAddr, int Secs)
 	return false;
 }
 
-bool CGameContext::VoteMute(const NETADDR *pAddr, int Secs, const char *pDisplayName, int AuthedID)
+void CGameContext::VoteMute(const NETADDR *pAddr, int Secs, const char *pReason, const char *pDisplayName, int AuthedID)
 {
-	if(!TryVoteMute(pAddr, Secs))
-		return false;
-
+	if(!TryVoteMute(pAddr, Secs, pReason))
+		return;
 	if(!pDisplayName)
-		return true;
+		return;
 
 	char aBuf[128];
-	str_format(aBuf, sizeof aBuf, "'%s' banned '%s' for %d seconds from voting.",
-		Server()->ClientName(AuthedID), pDisplayName, Secs);
-	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "votemute", aBuf);
-	return true;
+	if(pReason[0])
+		str_format(aBuf, sizeof aBuf, "'%s' banned '%s' for %d seconds from voting (%s)",
+			Server()->ClientName(AuthedID), pDisplayName, Secs, pReason);
+	else
+		str_format(aBuf, sizeof aBuf, "'%s' banned '%s' for %d seconds from voting",
+			Server()->ClientName(AuthedID), pDisplayName, Secs);
+	SendChat(-1, CHAT_ALL, aBuf);
 }
 
 bool CGameContext::VoteUnmute(const NETADDR *pAddr, const char *pDisplayName, int AuthedID)
@@ -513,15 +517,8 @@ void CGameContext::ConVoteMute(IConsole::IResult *pResult, void *pUserData)
 	pSelf->Server()->GetClientAddr(Victim, &Addr);
 
 	int Seconds = clamp(pResult->GetInteger(1), 1, 86400);
-	bool Found = pSelf->VoteMute(&Addr, Seconds, pSelf->Server()->ClientName(Victim), pResult->m_ClientID);
-
-	if(Found)
-	{
-		char aBuf[128];
-		str_format(aBuf, sizeof aBuf, "'%s' banned '%s' for %d seconds from voting.",
-			pSelf->Server()->ClientName(pResult->m_ClientID), pSelf->Server()->ClientName(Victim), Seconds);
-		pSelf->SendChat(-1, 0, aBuf);
-	}
+	const char *pReason = pResult->NumArguments() > 2 ? pResult->GetString(2) : "";
+	pSelf->VoteMute(&Addr, Seconds, pReason, pSelf->Server()->ClientName(Victim), pResult->m_ClientID);
 }
 
 void CGameContext::ConVoteUnmute(IConsole::IResult *pResult, void *pUserData)
@@ -568,8 +565,8 @@ void CGameContext::ConVoteMutes(IConsole::IResult *pResult, void *pUserData)
 	for(int i = 0; i < pSelf->m_NumVoteMutes; i++)
 	{
 		net_addr_str(&pSelf->m_aVoteMutes[i].m_Addr, aIpBuf, sizeof(aIpBuf), false);
-		str_format(aBuf, sizeof aBuf, "%d: \"%s\", %d seconds left", i,
-			aIpBuf, (pSelf->m_aVoteMutes[i].m_Expire - pSelf->Server()->Tick()) / pSelf->Server()->TickSpeed());
+		str_format(aBuf, sizeof aBuf, "%d: \"%s\", %d seconds left (%s)", i,
+			aIpBuf, (pSelf->m_aVoteMutes[i].m_Expire - pSelf->Server()->Tick()) / pSelf->Server()->TickSpeed(), pSelf->m_aVoteMutes[i].m_aReason);
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "votemutes", aBuf);
 	}
 }
@@ -703,15 +700,11 @@ void CGameContext::ConModerate(IConsole::IResult *pResult, void *pUserData)
 	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
 	pPlayer->m_Moderating = !pPlayer->m_Moderating;
 
-	char aBuf[256];
-
 	if(!HadModerator && pPlayer->m_Moderating)
-		str_format(aBuf, sizeof(aBuf), "Server kick/spec votes will now be actively moderated.");
+		pSelf->SendChat(-1, CHAT_ALL, "Server kick/spec votes will now be actively moderated.", 0);
 
 	if(!pSelf->PlayerModerating())
-		str_format(aBuf, sizeof(aBuf), "Server kick/spec votes are no longer actively moderated.");
-
-	pSelf->SendChat(-1, CHAT_ALL, aBuf, 0);
+		pSelf->SendChat(-1, CHAT_ALL, "Server kick/spec votes are no longer actively moderated.", 0);
 
 	if(pPlayer->m_Moderating)
 		pSelf->SendChatTarget(pResult->m_ClientID, "Active moderator mode enabled for you.");
@@ -804,8 +797,8 @@ void CGameContext::ConDrySave(IConsole::IResult *pResult, void *pUserData)
 	if(!pPlayer || pSelf->Server()->GetAuthedState(pResult->m_ClientID) != AUTHED_ADMIN)
 		return;
 
-	CSaveTeam SavedTeam(pSelf->m_pController);
-	int Result = SavedTeam.Save(pPlayer->GetTeam());
+	CSaveTeam SavedTeam;
+	int Result = SavedTeam.Save(pSelf, pPlayer->GetTeam(), true);
 	if(CSaveTeam::HandleSaveError(Result, pResult->m_ClientID, pSelf))
 		return;
 
@@ -826,4 +819,53 @@ void CGameContext::ConDumpAntibot(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	pSelf->Antibot()->Dump();
+}
+
+void CGameContext::ConDumpLog(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int LimitSecs = MAX_LOG_SECONDS;
+	if(pResult->NumArguments() > 0)
+		LimitSecs = pResult->GetInteger(0);
+
+	if(LimitSecs < 0)
+		return;
+
+	for(int i = pSelf->m_FirstLog; i != pSelf->m_LastLog; i = (i + 1) % pSelf->MAX_LOGS)
+	{
+		CLog *pEntry = &pSelf->m_aLogs[i];
+
+		if(!pEntry->m_Timestamp)
+			continue;
+
+		int Seconds = (time_get() - pEntry->m_Timestamp) / time_freq();
+		if(Seconds > LimitSecs)
+			continue;
+
+		char aBuf[256];
+		if(pEntry->m_FromServer)
+			str_format(aBuf, sizeof aBuf, "%s, %d seconds ago", pEntry->m_aDescription, Seconds);
+		else
+			str_format(aBuf, sizeof aBuf, "%s, %d seconds ago < addr=<{%s}> name='%s' client=%d",
+				pEntry->m_aDescription, Seconds, pEntry->m_aClientAddrStr, pEntry->m_aClientName, pEntry->m_ClientVersion);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "log", aBuf);
+	}
+}
+
+void CGameContext::LogEvent(const char *Description, int ClientID)
+{
+	CLog *pNewEntry = &m_aLogs[m_LastLog];
+	m_LastLog = (m_LastLog + 1) % MAX_LOGS;
+	if(m_LastLog == m_FirstLog)
+		m_FirstLog++;
+
+	pNewEntry->m_Timestamp = time_get();
+	str_copy(pNewEntry->m_aDescription, Description);
+	pNewEntry->m_FromServer = ClientID < 0;
+	if(!pNewEntry->m_FromServer)
+	{
+		pNewEntry->m_ClientVersion = Server()->GetClientVersion(ClientID);
+		Server()->GetClientAddr(ClientID, pNewEntry->m_aClientAddrStr, sizeof(pNewEntry->m_aClientAddrStr));
+		str_copy(pNewEntry->m_aClientName, Server()->ClientName(ClientID));
+	}
 }

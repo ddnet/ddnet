@@ -31,12 +31,12 @@ struct CSoundSource_DEPRECATED
 	int m_SoundEnvOffset;
 };
 
-int CEditor::Save(const char *pFilename)
+bool CEditor::Save(const char *pFilename)
 {
 	return m_Map.Save(Kernel()->RequestInterface<IStorage>(), pFilename);
 }
 
-int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
+bool CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 {
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "saving to '%s'...", pFileName);
@@ -46,7 +46,7 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 	{
 		str_format(aBuf, sizeof(aBuf), "failed to open file '%s'...", pFileName);
 		m_pEditor->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "editor", aBuf);
-		return 0;
+		return false;
 	}
 
 	// save version
@@ -394,32 +394,33 @@ int CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 		}
 	}
 
-	return 1;
+	return true;
 }
 
-int CEditor::Load(const char *pFileName, int StorageType)
+bool CEditor::Load(const char *pFileName, int StorageType)
 {
 	Reset();
-	int result = m_Map.Load(Kernel()->RequestInterface<IStorage>(), pFileName, StorageType);
-	if(result)
+	bool Result = m_Map.Load(Kernel()->RequestInterface<IStorage>(), pFileName, StorageType);
+	if(Result)
 	{
 		str_copy(m_aFileName, pFileName, 512);
 		SortImages();
 		SelectGameLayer();
+		ResetMenuBackgroundPositions();
 	}
 	else
 	{
 		m_aFileName[0] = 0;
 		Reset();
 	}
-	return result;
+	return Result;
 }
 
-int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int StorageType)
+bool CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int StorageType)
 {
 	CDataFileReader DataFile;
 	if(!DataFile.Open(pStorage, pFileName, StorageType))
-		return 0;
+		return false;
 
 	Clean();
 
@@ -427,7 +428,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 	CMapItemVersion *pItemVersion = (CMapItemVersion *)DataFile.FindItem(MAPITEMTYPE_VERSION, 0);
 	if(!pItemVersion)
 	{
-		return 0;
+		return false;
 	}
 	else if(pItemVersion->m_Version == 1)
 	{
@@ -511,8 +512,9 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 
 					// copy image data
 					void *pData = DataFile.GetData(pItem->m_ImageData);
-					pImg->m_pData = malloc((size_t)pImg->m_Width * pImg->m_Height * 4);
-					mem_copy(pImg->m_pData, pData, pImg->m_Width * pImg->m_Height * 4);
+					const size_t DataSize = (size_t)pImg->m_Width * pImg->m_Height * 4;
+					pImg->m_pData = malloc(DataSize);
+					mem_copy(pImg->m_pData, pData, DataSize);
 					int TextureLoadFlag = m_pEditor->Graphics()->HasTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
 					if(pImg->m_Width % 16 != 0 || pImg->m_Height % 16 != 0)
 						TextureLoadFlag = 0;
@@ -705,27 +707,15 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 							unsigned int Size = DataFile.GetDataSize(pTilemapItem->m_Tele);
 							if(Size >= (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CTeleTile))
 							{
-								static const int s_aTilesRep[] = {
-									TILE_TELEIN,
-									TILE_TELEINEVIL,
-									TILE_TELEOUT,
-									TILE_TELECHECK,
-									TILE_TELECHECKIN,
-									TILE_TELECHECKINEVIL,
-									TILE_TELECHECKOUT,
-									TILE_TELEINWEAPON,
-									TILE_TELEINHOOK};
 								CTeleTile *pLayerTeleTiles = ((CLayerTele *)pTiles)->m_pTeleTile;
 								mem_copy(pLayerTeleTiles, pTeleData, (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CTeleTile));
 
 								for(int i = 0; i < pTiles->m_Width * pTiles->m_Height; i++)
 								{
-									pTiles->m_pTiles[i].m_Index = 0;
-									for(int TilesRep : s_aTilesRep)
-									{
-										if(pLayerTeleTiles[i].m_Type == TilesRep)
-											pTiles->m_pTiles[i].m_Index = TilesRep;
-									}
+									if(IsValidTeleTile(pLayerTeleTiles[i].m_Type))
+										pTiles->m_pTiles[i].m_Index = pLayerTeleTiles[i].m_Type;
+									else
+										pTiles->m_pTiles[i].m_Index = 0;
 								}
 							}
 							DataFile.UnloadData(pTilemapItem->m_Tele);
@@ -742,8 +732,8 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 
 								for(int i = 0; i < pTiles->m_Width * pTiles->m_Height; i++)
 								{
-									if(pLayerSpeedupTiles[i].m_Force > 0)
-										pTiles->m_pTiles[i].m_Index = TILE_BOOST;
+									if(IsValidSpeedupTile(pLayerSpeedupTiles[i].m_Type) && pLayerSpeedupTiles[i].m_Force > 0)
+										pTiles->m_pTiles[i].m_Index = pLayerSpeedupTiles[i].m_Type;
 									else
 										pTiles->m_pTiles[i].m_Index = 0;
 								}
@@ -766,29 +756,12 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 							unsigned int Size = DataFile.GetDataSize(pTilemapItem->m_Switch);
 							if(Size >= (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CSwitchTile))
 							{
-								const int s_aTilesComp[] = {
-									TILE_SWITCHTIMEDOPEN,
-									TILE_SWITCHTIMEDCLOSE,
-									TILE_SWITCHOPEN,
-									TILE_SWITCHCLOSE,
-									TILE_FREEZE,
-									TILE_DFREEZE,
-									TILE_DUNFREEZE,
-									TILE_LFREEZE,
-									TILE_LUNFREEZE,
-									TILE_HIT_ENABLE,
-									TILE_HIT_DISABLE,
-									TILE_JUMP,
-									TILE_ADD_TIME,
-									TILE_SUBTRACT_TIME,
-									TILE_ALLOW_TELE_GUN,
-									TILE_ALLOW_BLUE_TELE_GUN};
 								CSwitchTile *pLayerSwitchTiles = ((CLayerSwitch *)pTiles)->m_pSwitchTile;
 								mem_copy(pLayerSwitchTiles, pSwitchData, (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CSwitchTile));
 
 								for(int i = 0; i < pTiles->m_Width * pTiles->m_Height; i++)
 								{
-									if(((pLayerSwitchTiles[i].m_Type > (ENTITY_CRAZY_SHOTGUN + ENTITY_OFFSET) && ((CLayerSwitch *)pTiles)->m_pSwitchTile[i].m_Type < (ENTITY_DRAGGER_WEAK + ENTITY_OFFSET)) || ((CLayerSwitch *)pTiles)->m_pSwitchTile[i].m_Type == (ENTITY_LASER_O_FAST + 1 + ENTITY_OFFSET)))
+									if(((pLayerSwitchTiles[i].m_Type > (ENTITY_CRAZY_SHOTGUN + ENTITY_OFFSET) && pLayerSwitchTiles[i].m_Type < (ENTITY_DRAGGER_WEAK + ENTITY_OFFSET)) || pLayerSwitchTiles[i].m_Type == (ENTITY_LASER_O_FAST + 1 + ENTITY_OFFSET)))
 										continue;
 									else if(pLayerSwitchTiles[i].m_Type >= (ENTITY_ARMOR_1 + ENTITY_OFFSET) && pLayerSwitchTiles[i].m_Type <= (ENTITY_DOOR + ENTITY_OFFSET))
 									{
@@ -797,13 +770,10 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 										continue;
 									}
 
-									for(int TilesComp : s_aTilesComp)
+									if(IsValidSwitchTile(pLayerSwitchTiles[i].m_Type))
 									{
-										if(pLayerSwitchTiles[i].m_Type == TilesComp)
-										{
-											pTiles->m_pTiles[i].m_Index = TilesComp;
-											pTiles->m_pTiles[i].m_Flags = pLayerSwitchTiles[i].m_Flags;
-										}
+										pTiles->m_pTiles[i].m_Index = pLayerSwitchTiles[i].m_Type;
+										pTiles->m_pTiles[i].m_Flags = pLayerSwitchTiles[i].m_Flags;
 									}
 								}
 							}
@@ -820,8 +790,8 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 
 								for(int i = 0; i < pTiles->m_Width * pTiles->m_Height; i++)
 								{
-									if(pLayerTuneTiles[i].m_Type == TILE_TUNE)
-										pTiles->m_pTiles[i].m_Index = TILE_TUNE;
+									if(IsValidTuneTile(pLayerTuneTiles[i].m_Type))
+										pTiles->m_pTiles[i].m_Index = pLayerTuneTiles[i].m_Type;
 									else
 										pTiles->m_pTiles[i].m_Index = 0;
 								}
@@ -884,8 +854,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 							pSounds->m_Sound = -1;
 
 						// load layer name
-						if(pSoundsItem->m_Version >= 1)
-							IntsToStr(pSoundsItem->m_aName, sizeof(pSounds->m_aName) / sizeof(int), pSounds->m_aName);
+						IntsToStr(pSoundsItem->m_aName, sizeof(pSounds->m_aName) / sizeof(int), pSounds->m_aName);
 
 						// load data
 						void *pData = DataFile.GetDataSwapped(pSoundsItem->m_Data);
@@ -911,8 +880,7 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 							pSounds->m_Sound = -1;
 
 						// load layer name
-						if(pSoundsItem->m_Version >= 1)
-							IntsToStr(pSoundsItem->m_aName, sizeof(pSounds->m_aName) / sizeof(int), pSounds->m_aName);
+						IntsToStr(pSoundsItem->m_aName, sizeof(pSounds->m_aName) / sizeof(int), pSounds->m_aName);
 
 						// load data
 						CSoundSource_DEPRECATED *pData = (CSoundSource_DEPRECATED *)DataFile.GetDataSwapped(pSoundsItem->m_Data);
@@ -1005,10 +973,10 @@ int CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Storag
 		}
 	}
 	else
-		return 0;
+		return false;
 
 	m_Modified = false;
-	return 1;
+	return true;
 }
 
 static int gs_ModifyAddAmount = 0;
@@ -1018,19 +986,20 @@ static void ModifyAdd(int *pIndex)
 		*pIndex += gs_ModifyAddAmount;
 }
 
-int CEditor::Append(const char *pFileName, int StorageType)
+bool CEditor::Append(const char *pFileName, int StorageType)
 {
 	CEditorMap NewMap;
 	NewMap.m_pEditor = this;
 
-	int Err;
-	Err = NewMap.Load(Kernel()->RequestInterface<IStorage>(), pFileName, StorageType);
-	if(!Err)
-		return Err;
+	if(!NewMap.Load(Kernel()->RequestInterface<IStorage>(), pFileName, StorageType))
+		return false;
 
-	// modify indecies
+	// modify indices
 	gs_ModifyAddAmount = m_Map.m_vpImages.size();
 	NewMap.ModifyImageIndex(ModifyAdd);
+
+	gs_ModifyAddAmount = m_Map.m_vpSounds.size();
+	NewMap.ModifySoundIndex(ModifyAdd);
 
 	gs_ModifyAddAmount = m_Map.m_vpEnvelopes.size();
 	NewMap.ModifyEnvelopeIndex(ModifyAdd);
@@ -1040,13 +1009,17 @@ int CEditor::Append(const char *pFileName, int StorageType)
 		m_Map.m_vpImages.push_back(pImage);
 	NewMap.m_vpImages.clear();
 
+	// transfer sounds
+	for(const auto &pSound : NewMap.m_vpSounds)
+		m_Map.m_vpSounds.push_back(pSound);
+	NewMap.m_vpSounds.clear();
+
 	// transfer envelopes
 	for(const auto &pEnvelope : NewMap.m_vpEnvelopes)
 		m_Map.m_vpEnvelopes.push_back(pEnvelope);
 	NewMap.m_vpEnvelopes.clear();
 
 	// transfer groups
-
 	for(const auto &pGroup : NewMap.m_vpGroups)
 	{
 		if(pGroup == NewMap.m_pGameGroup)
@@ -1059,6 +1032,8 @@ int CEditor::Append(const char *pFileName, int StorageType)
 	}
 	NewMap.m_vpGroups.clear();
 
+	SortImages();
+
 	// all done \o/
-	return 0;
+	return true;
 }

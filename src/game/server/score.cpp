@@ -73,10 +73,7 @@ CScore::CScore(CGameContext *pGameServer, CDbConnectionPool *pPool) :
 	m_pGameServer(pGameServer),
 	m_pServer(pGameServer->Server())
 {
-	auto InitResult = std::make_shared<CScoreInitResult>();
-	auto Tmp = std::make_unique<CSqlInitData>(InitResult);
-	((CGameControllerDDRace *)(pGameServer->m_pController))->m_pInitResult = InitResult;
-	str_copy(Tmp->m_aMap, g_Config.m_SvMap, sizeof(Tmp->m_aMap));
+	LoadBestTime();
 
 	uint64_t aSeed[2];
 	secure_random_fill(aSeed, sizeof(aSeed));
@@ -109,8 +106,19 @@ CScore::CScore(CGameContext *pGameServer, CDbConnectionPool *pPool) :
 		Server()->SetErrorShutdown("sql too few words in wordlist");
 		return;
 	}
+}
 
-	m_pPool->Execute(CScoreWorker::Init, std::move(Tmp), "load best time");
+void CScore::LoadBestTime()
+{
+	if(((CGameControllerDDRace *)(m_pGameServer->m_pController))->m_pLoadBestTimeResult)
+		return; // already in progress
+
+	auto LoadBestTimeResult = std::make_shared<CScoreLoadBestTimeResult>();
+	((CGameControllerDDRace *)(m_pGameServer->m_pController))->m_pLoadBestTimeResult = LoadBestTimeResult;
+
+	auto Tmp = std::make_unique<CSqlLoadBestTimeData>(LoadBestTimeResult);
+	str_copy(Tmp->m_aMap, g_Config.m_SvMap, sizeof(Tmp->m_aMap));
+	m_pPool->Execute(CScoreWorker::LoadBestTime, std::move(Tmp), "load best time");
 }
 
 void CScore::LoadPlayerData(int ClientID, const char *pName)
@@ -132,7 +140,7 @@ void CScore::MapInfo(int ClientID, const char *pMapName)
 	ExecPlayerThread(CScoreWorker::MapInfo, "map info", ClientID, pMapName, 0);
 }
 
-void CScore::SaveScore(int ClientID, float Time, const char *pTimestamp, float aTimeCp[NUM_CHECKPOINTS], bool NotEligible)
+void CScore::SaveScore(int ClientID, float Time, const char *pTimestamp, const float aTimeCp[NUM_CHECKPOINTS], bool NotEligible)
 {
 	CConsole *pCon = (CConsole *)GameServer()->Console();
 	if(pCon->m_Cheated || NotEligible)
@@ -173,6 +181,7 @@ void CScore::SaveTeamScore(int *pClientIDs, unsigned int Size, float Time, const
 	str_copy(Tmp->m_aTimestamp, pTimestamp, sizeof(Tmp->m_aTimestamp));
 	FormatUuid(GameServer()->GameUuid(), Tmp->m_aGameUuid, sizeof(Tmp->m_aGameUuid));
 	str_copy(Tmp->m_aMap, g_Config.m_SvMap, sizeof(Tmp->m_aMap));
+	Tmp->m_TeamrankUuid = RandomUuid();
 
 	m_pPool->ExecuteWrite(CScoreWorker::SaveTeamScore, std::move(Tmp), "save team score");
 }
@@ -277,9 +286,9 @@ void CScore::SaveTeam(int ClientID, const char *pCode, const char *pServer)
 	if(pController->m_Teams.GetSaving(Team))
 		return;
 
-	auto SaveResult = std::make_shared<CScoreSaveResult>(ClientID, pController);
+	auto SaveResult = std::make_shared<CScoreSaveResult>(ClientID);
 	SaveResult->m_SaveID = RandomUuid();
-	int Result = SaveResult->m_SavedTeam.Save(Team);
+	int Result = SaveResult->m_SavedTeam.Save(GameServer(), Team);
 	if(CSaveTeam::HandleSaveError(Result, ClientID, GameServer()))
 		return;
 	pController->m_Teams.SetSaving(Team, SaveResult);
@@ -292,7 +301,24 @@ void CScore::SaveTeam(int ClientID, const char *pCode, const char *pServer)
 	Tmp->m_aGeneratedCode[0] = '\0';
 	GeneratePassphrase(Tmp->m_aGeneratedCode, sizeof(Tmp->m_aGeneratedCode));
 
+	char aBuf[512];
+	if(Tmp->m_aCode[0] == '\0')
+	{
+		str_format(aBuf,
+			sizeof(aBuf),
+			"Team save in progress. You'll be able to load with '/load %s'",
+			Tmp->m_aGeneratedCode);
+	}
+	else
+	{
+		str_format(aBuf,
+			sizeof(aBuf),
+			"Team save in progress. You'll be able to load with '/load %s' if save is successful or with '/load %s' if it fails",
+			Tmp->m_aCode,
+			Tmp->m_aGeneratedCode);
+	}
 	pController->m_Teams.KillSavedTeam(ClientID, Team);
+	GameServer()->SendChatTeam(Team, aBuf);
 	m_pPool->ExecuteWrite(CScoreWorker::SaveTeam, std::move(Tmp), "save team");
 }
 
@@ -314,7 +340,7 @@ void CScore::LoadTeam(const char *pCode, int ClientID)
 		GameServer()->SendChatTarget(ClientID, "Team can't be loaded while racing");
 		return;
 	}
-	auto SaveResult = std::make_shared<CScoreSaveResult>(ClientID, pController);
+	auto SaveResult = std::make_shared<CScoreSaveResult>(ClientID);
 	SaveResult->m_Status = CScoreSaveResult::LOAD_FAILED;
 	pController->m_Teams.SetSaving(Team, SaveResult);
 	auto Tmp = std::make_unique<CSqlTeamLoad>(SaveResult);

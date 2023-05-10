@@ -3,12 +3,14 @@
 #ifndef GAME_CLIENT_UI_H
 #define GAME_CLIENT_UI_H
 
+#include "lineinput.h"
 #include "ui_rect.h"
 
 #include <engine/input.h>
 #include <engine/textrender.h>
 
 #include <chrono>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -67,7 +69,7 @@ public:
 			Min += m_MinAdjustment;
 			Max += m_MinAdjustment;
 		}
-		return (log(AbsoluteValue) - log(Min)) / (float)(log(Max) - log(Min));
+		return (std::log(AbsoluteValue) - std::log(Min)) / (float)(std::log(Max) - std::log(Min));
 	}
 	int ToAbsolute(float RelativeValue, int Min, int Max) const override
 	{
@@ -78,14 +80,50 @@ public:
 			Max += m_MinAdjustment;
 			ResultAdjustment = -m_MinAdjustment;
 		}
-		return round_to_int(exp(RelativeValue * (log(Max) - log(Min)) + log(Min))) + ResultAdjustment;
+		return round_to_int(std::exp(RelativeValue * (std::log(Max) - std::log(Min)) + std::log(Min))) + ResultAdjustment;
 	}
 };
 
-struct SUIExEditBoxProperties
+class IButtonColorFunction
 {
-	bool m_SelectText = false;
-	const char *m_pEmptyText = "";
+public:
+	virtual ColorRGBA GetColor(bool Active, bool Hovered) const = 0;
+};
+class CDarkButtonColorFunction : public IButtonColorFunction
+{
+public:
+	ColorRGBA GetColor(bool Active, bool Hovered) const override
+	{
+		if(Active)
+			return ColorRGBA(0.15f, 0.15f, 0.15f, 0.25f);
+		else if(Hovered)
+			return ColorRGBA(0.5f, 0.5f, 0.5f, 0.25f);
+		return ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f);
+	}
+};
+class CLightButtonColorFunction : public IButtonColorFunction
+{
+public:
+	ColorRGBA GetColor(bool Active, bool Hovered) const override
+	{
+		if(Active)
+			return ColorRGBA(1.0f, 1.0f, 1.0f, 0.4f);
+		else if(Hovered)
+			return ColorRGBA(1.0f, 1.0f, 1.0f, 0.6f);
+		return ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f);
+	}
+};
+class CScrollBarColorFunction : public IButtonColorFunction
+{
+public:
+	ColorRGBA GetColor(bool Active, bool Hovered) const override
+	{
+		if(Active)
+			return ColorRGBA(0.9f, 0.9f, 0.9f, 1.0f);
+		else if(Hovered)
+			return ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
+		return ColorRGBA(0.8f, 0.8f, 0.8f, 1.0f);
+	}
 };
 
 class CUI;
@@ -105,7 +143,7 @@ public:
 
 	public:
 		int m_UIRectQuadContainer;
-		int m_UITextContainer;
+		STextContainerIndex m_UITextContainer;
 
 		float m_X;
 		float m_Y;
@@ -152,9 +190,7 @@ public:
 struct SLabelProperties
 {
 	float m_MaxWidth = -1;
-	int m_AlignVertically = 1;
 	bool m_StopAtEnd = false;
-	class CTextCursor *m_pSelCursor = nullptr;
 	bool m_EnableWidthCheck = true;
 };
 
@@ -177,8 +213,55 @@ class CButtonContainer
 {
 };
 
+/**
+ * Type safe UI ID for popup menus.
+ */
+struct SPopupMenuId
+{
+};
+
 class CUI
 {
+public:
+	/**
+	 * These enum values are returned by popup menu functions to specify the behavior.
+	 */
+	enum EPopupMenuFunctionResult
+	{
+		/**
+		 * The current popup menu will be kept open.
+		 */
+		POPUP_KEEP_OPEN = 0,
+
+		/**
+		 * The current popup menu will be closed.
+		 */
+		POPUP_CLOSE_CURRENT = 1,
+
+		/**
+		 * The current popup menu and all popup menus above it will be closed.
+		 */
+		POPUP_CLOSE_CURRENT_AND_DESCENDANTS = 2,
+	};
+
+	/**
+	 * Callback that draws a popup menu.
+	 *
+	 * @param pContext The context object of the popup menu.
+	 * @param View The UI rect where the popup menu's contents should be drawn.
+	 * @param Active Whether this popup is active (the top-most popup).
+	 * Only the active popup should handle key and mouse events.
+	 *
+	 * @return Value from the @link EPopupMenuFunctionResult @endlink enum.
+	 */
+	typedef EPopupMenuFunctionResult (*FPopupMenuFunction)(void *pContext, CUIRect View, bool Active);
+
+	/**
+	 * Callback that is called when one or more popups are closed.
+	 */
+	typedef std::function<void()> FPopupMenuClosedCallback;
+
+private:
 	bool m_Enabled;
 
 	const void *m_pHotItem;
@@ -195,27 +278,30 @@ class CUI
 	unsigned m_LastMouseButtons;
 	bool m_MouseSlow = false;
 
-	IInput::CEvent *m_pInputEventsArray;
-	int *m_pInputEventCount;
 	unsigned m_HotkeysPressed = 0;
-
-	bool m_MouseIsPress = false;
-	bool m_HasSelection = false;
-
-	int m_MousePressX = 0;
-	int m_MousePressY = 0;
-	int m_MouseCurX = 0;
-	int m_MouseCurY = 0;
-	int m_CurSelStart = 0;
-	int m_CurSelEnd = 0;
-	const void *m_pSelItem = nullptr;
-
-	int m_CurCursor = 0;
 
 	CUIRect m_Screen;
 
 	std::vector<CUIRect> m_vClips;
 	void UpdateClipping();
+
+	struct SPopupMenu
+	{
+		static constexpr float POPUP_BORDER = 1.0f;
+		static constexpr float POPUP_MARGIN = 4.0f;
+
+		const SPopupMenuId *m_pID;
+		CUIRect m_Rect;
+		int m_Corners;
+		void *m_pContext;
+		FPopupMenuFunction m_pfnFunc;
+	};
+	std::vector<SPopupMenu> m_vPopupMenus;
+	FPopupMenuClosedCallback m_pfnPopupMenuClosedCallback = nullptr;
+
+	static CUI::EPopupMenuFunctionResult PopupMessage(void *pContext, CUIRect View, bool Active);
+	static CUI::EPopupMenuFunctionResult PopupConfirm(void *pContext, CUIRect View, bool Active);
+	static CUI::EPopupMenuFunctionResult PopupSelection(void *pContext, CUIRect View, bool Active);
 
 	IClient *m_pClient;
 	IGraphics *m_pGraphics;
@@ -228,11 +314,13 @@ class CUI
 public:
 	static const CLinearScrollbarScale ms_LinearScrollbarScale;
 	static const CLogarithmicScrollbarScale ms_LogarithmicScrollbarScale;
+	static const CDarkButtonColorFunction ms_DarkButtonColorFunction;
+	static const CLightButtonColorFunction ms_LightButtonColorFunction;
+	static const CScrollBarColorFunction ms_ScrollBarColorFunction;
 
-	static float ms_FontmodHeight;
+	static const float ms_FontmodHeight;
 
 	void Init(IKernel *pKernel);
-	void InitInputs(IInput::CEvent *pInputEventsArray, int *pInputEventCount);
 	IClient *Client() const { return m_pClient; }
 	IGraphics *Graphics() const { return m_pGraphics; }
 	IInput *Input() const { return m_pInput; }
@@ -251,6 +339,10 @@ public:
 		HOTKEY_TAB = 1 << 5,
 		HOTKEY_SCROLL_UP = 1 << 6,
 		HOTKEY_SCROLL_DOWN = 1 << 7,
+		HOTKEY_PAGE_UP = 1 << 8,
+		HOTKEY_PAGE_DOWN = 1 << 9,
+		HOTKEY_HOME = 1 << 10,
+		HOTKEY_END = 1 << 11,
 	};
 
 	void ResetUIElement(CUIElement &UIElement);
@@ -270,6 +362,7 @@ public:
 	float MouseDeltaY() const { return m_MouseDeltaY; }
 	float MouseX() const { return m_MouseX; }
 	float MouseY() const { return m_MouseY; }
+	vec2 MousePos() const { return vec2(m_MouseX, m_MouseY); }
 	float MouseWorldX() const { return m_MouseWorldX; }
 	float MouseWorldY() const { return m_MouseWorldY; }
 	int MouseButton(int Index) const { return (m_MouseButtons >> Index) & 1; }
@@ -322,12 +415,12 @@ public:
 	void ClearHotkeys() { m_HotkeysPressed = 0; }
 	bool OnInput(const IInput::CEvent &Event);
 
-	float ButtonColorMulActive() { return 0.5f; }
-	float ButtonColorMulHot() { return 1.5f; }
-	float ButtonColorMulDefault() { return 1.0f; }
+	constexpr float ButtonColorMulActive() const { return 0.5f; }
+	constexpr float ButtonColorMulHot() const { return 1.5f; }
+	constexpr float ButtonColorMulDefault() const { return 1.0f; }
 	float ButtonColorMul(const void *pID);
 
-	CUIRect *Screen();
+	const CUIRect *Screen();
 	void MapScreen();
 	float PixelSize();
 
@@ -337,18 +430,20 @@ public:
 	inline bool IsClipped() const { return !m_vClips.empty(); }
 
 	int DoButtonLogic(const void *pID, int Checked, const CUIRect *pRect);
+	int DoDraggableButtonLogic(const void *pID, int Checked, const CUIRect *pRect, bool *pClicked, bool *pAbrupted);
 	int DoPickerLogic(const void *pID, const CUIRect *pRect, float *pX, float *pY);
-	void DoSmoothScrollLogic(float *pScrollOffset, float *pScrollOffsetChange, float ViewPortSize, float TotalSize, float ScrollSpeed = 10.0f);
+	void DoSmoothScrollLogic(float *pScrollOffset, float *pScrollOffsetChange, float ViewPortSize, float TotalSize, bool SmoothClamp = false, float ScrollSpeed = 10.0f);
+	static vec2 CalcAlignedCursorPos(const CUIRect *pRect, vec2 TextSize, int Align, const float *pBiggestCharHeight = nullptr);
 
-	float DoTextLabel(float x, float y, float w, float h, const char *pText, float Size, int Align, const SLabelProperties &LabelProps = {});
 	void DoLabel(const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps = {});
 
-	void DoLabel(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps, int StrLen = -1, class CTextCursor *pReadCursor = nullptr);
-	void DoLabelStreamed(CUIElement::SUIElementRect &RectEl, float x, float y, float w, float h, const char *pText, float Size, int Align, float MaxWidth = -1, int AlignVertically = 1, bool StopAtEnd = false, int StrLen = -1, class CTextCursor *pReadCursor = nullptr);
-	void DoLabelStreamed(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth = -1, int AlignVertically = 1, bool StopAtEnd = false, int StrLen = -1, class CTextCursor *pReadCursor = nullptr);
+	void DoLabel(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps = {}, int StrLen = -1, const CTextCursor *pReadCursor = nullptr);
+	void DoLabelStreamed(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth = -1, bool StopAtEnd = false, int StrLen = -1, const CTextCursor *pReadCursor = nullptr);
 
-	bool DoEditBox(const void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden = false, int Corners = IGraphics::CORNER_ALL, const SUIExEditBoxProperties &Properties = {});
-	bool DoClearableEditBox(const void *pID, const void *pClearID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden = false, int Corners = IGraphics::CORNER_ALL, const SUIExEditBoxProperties &Properties = {});
+	bool DoEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize, int Corners = IGraphics::CORNER_ALL);
+	bool DoClearableEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize, int Corners = IGraphics::CORNER_ALL);
+
+	int DoButton_PopupMenu(CButtonContainer *pButtonContainer, const char *pText, const CUIRect *pRect, int Align);
 
 	enum
 	{
@@ -359,6 +454,73 @@ public:
 	float DoScrollbarH(const void *pID, const CUIRect *pRect, float Current, const ColorRGBA *pColorInner = nullptr);
 	void DoScrollbarOption(const void *pID, int *pOption, const CUIRect *pRect, const char *pStr, int Min, int Max, const IScrollbarScale *pScale = &ms_LinearScrollbarScale, unsigned Flags = 0u);
 	void DoScrollbarOptionLabeled(const void *pID, int *pOption, const CUIRect *pRect, const char *pStr, const char **ppLabels, int NumLabels, const IScrollbarScale *pScale = &ms_LinearScrollbarScale);
+
+	// popup menu
+	void DoPopupMenu(const SPopupMenuId *pID, int X, int Y, int Width, int Height, void *pContext, FPopupMenuFunction pfnFunc, int Corners = IGraphics::CORNER_ALL);
+	void RenderPopupMenus();
+	void ClosePopupMenu(const SPopupMenuId *pID, bool IncludeDescendants = false);
+	void ClosePopupMenus();
+	bool IsPopupOpen() const;
+	bool IsPopupOpen(const SPopupMenuId *pID) const;
+	bool IsPopupHovered() const;
+	void SetPopupMenuClosedCallback(FPopupMenuClosedCallback pfnCallback);
+
+	struct SMessagePopupContext : public SPopupMenuId
+	{
+		static constexpr float POPUP_MAX_WIDTH = 200.0f;
+		static constexpr float POPUP_FONT_SIZE = 10.0f;
+
+		CUI *m_pUI; // set by CUI when popup is shown
+		char m_aMessage[1024];
+		ColorRGBA m_TextColor;
+
+		void DefaultColor(class ITextRender *pTextRender);
+		void ErrorColor();
+	};
+	void ShowPopupMessage(float X, float Y, SMessagePopupContext *pContext);
+
+	struct SConfirmPopupContext : public SPopupMenuId
+	{
+		enum EConfirmationResult
+		{
+			UNSET = 0,
+			CONFIRMED,
+			CANCELED,
+		};
+		static constexpr float POPUP_MAX_WIDTH = 200.0f;
+		static constexpr float POPUP_FONT_SIZE = 10.0f;
+		static constexpr float POPUP_BUTTON_HEIGHT = 12.0f;
+		static constexpr float POPUP_BUTTON_SPACING = 5.0f;
+
+		CUI *m_pUI; // set by CUI when popup is shown
+		char m_aPositiveButtonLabel[128];
+		char m_aNegativeButtonLabel[128];
+		char m_aMessage[1024];
+		EConfirmationResult m_Result;
+
+		SConfirmPopupContext();
+		void Reset();
+		void YesNoButtons();
+	};
+	void ShowPopupConfirm(float X, float Y, SConfirmPopupContext *pContext);
+
+	struct SSelectionPopupContext : public SPopupMenuId
+	{
+		static constexpr float POPUP_MAX_WIDTH = 300.0f;
+		static constexpr float POPUP_FONT_SIZE = 10.0f;
+		static constexpr float POPUP_ENTRY_HEIGHT = 12.0f;
+		static constexpr float POPUP_ENTRY_SPACING = 5.0f;
+
+		CUI *m_pUI; // set by CUI when popup is shown
+		char m_aMessage[256];
+		std::set<std::string> m_Entries;
+		std::vector<CButtonContainer> m_vButtonContainers;
+		const std::string *m_pSelection;
+
+		SSelectionPopupContext();
+		void Reset();
+	};
+	void ShowPopupSelection(float X, float Y, SSelectionPopupContext *pContext);
 };
 
 #endif

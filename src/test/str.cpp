@@ -58,10 +58,47 @@ TEST(Str, Utf8CompConfusables)
 {
 	EXPECT_TRUE(str_utf8_comp_confusable("abc", "abc") == 0);
 	EXPECT_TRUE(str_utf8_comp_confusable("rn", "m") == 0);
+	EXPECT_TRUE(str_utf8_comp_confusable("m", "rn") == 0);
+	EXPECT_TRUE(str_utf8_comp_confusable("rna", "ma") == 0);
+	EXPECT_TRUE(str_utf8_comp_confusable("ma", "rna") == 0);
+	EXPECT_FALSE(str_utf8_comp_confusable("mA", "rna") == 0);
+	EXPECT_FALSE(str_utf8_comp_confusable("ma", "rnA") == 0);
+	EXPECT_TRUE(str_utf8_comp_confusable("arn", "am") == 0);
+	EXPECT_TRUE(str_utf8_comp_confusable("am", "arn") == 0);
+	EXPECT_FALSE(str_utf8_comp_confusable("Am", "arn") == 0);
+	EXPECT_FALSE(str_utf8_comp_confusable("am", "Arn") == 0);
 	EXPECT_TRUE(str_utf8_comp_confusable("l", "ӏ") == 0); // CYRILLIC SMALL LETTER PALOCHKA
 	EXPECT_TRUE(str_utf8_comp_confusable("i", "¡") == 0); // INVERTED EXCLAMATION MARK
 	EXPECT_FALSE(str_utf8_comp_confusable("o", "x") == 0);
 	EXPECT_TRUE(str_utf8_comp_confusable("aceiou", "ąçęįǫų") == 0);
+}
+
+TEST(Str, Utf8ToSkeleton)
+{
+	int aBuf[32];
+	EXPECT_EQ(str_utf8_to_skeleton("abc", aBuf, 0), 0);
+	EXPECT_EQ(str_utf8_to_skeleton("", aBuf, std::size(aBuf)), 0);
+	EXPECT_EQ(str_utf8_to_skeleton("abc", aBuf, std::size(aBuf)), 3);
+	EXPECT_EQ(aBuf[0], 'a');
+	EXPECT_EQ(aBuf[1], 'b');
+	EXPECT_EQ(aBuf[2], 'c');
+	EXPECT_EQ(str_utf8_to_skeleton("m", aBuf, std::size(aBuf)), 2);
+	EXPECT_EQ(aBuf[0], 'r');
+	EXPECT_EQ(aBuf[1], 'n');
+	EXPECT_EQ(str_utf8_to_skeleton("rn", aBuf, std::size(aBuf)), 2);
+	EXPECT_EQ(aBuf[0], 'r');
+	EXPECT_EQ(aBuf[1], 'n');
+	EXPECT_EQ(str_utf8_to_skeleton("ӏ", aBuf, std::size(aBuf)), 1); // CYRILLIC SMALL LETTER PALOCHKA
+	EXPECT_EQ(aBuf[0], 'i');
+	EXPECT_EQ(str_utf8_to_skeleton("¡", aBuf, std::size(aBuf)), 1); // INVERTED EXCLAMATION MARK
+	EXPECT_EQ(aBuf[0], 'i');
+	EXPECT_EQ(str_utf8_to_skeleton("ąçęįǫų", aBuf, std::size(aBuf)), 6);
+	EXPECT_EQ(aBuf[0], 'a');
+	EXPECT_EQ(aBuf[1], 'c');
+	EXPECT_EQ(aBuf[2], 'e');
+	EXPECT_EQ(aBuf[3], 'i');
+	EXPECT_EQ(aBuf[4], 'o');
+	EXPECT_EQ(aBuf[5], 'u');
 }
 
 TEST(Str, Utf8ToLower)
@@ -180,6 +217,27 @@ TEST(Str, Endswith)
 		str_length(ABCDEFG) - str_length(DEFG));
 }
 
+TEST(StrFormat, Positional)
+{
+	char aBuf[256];
+
+	// normal
+	str_format(aBuf, sizeof(aBuf), "%s %s", "first", "second");
+	EXPECT_STREQ(aBuf, "first second");
+
+	// normal with positional arguments
+	str_format(aBuf, sizeof(aBuf), "%1$s %2$s", "first", "second");
+	EXPECT_STREQ(aBuf, "first second");
+
+	// reverse
+	str_format(aBuf, sizeof(aBuf), "%2$s %1$s", "first", "second");
+	EXPECT_STREQ(aBuf, "second first");
+
+	// duplicate
+	str_format(aBuf, sizeof(aBuf), "%1$s %1$s %2$d %1$s %2$d", "str", 1);
+	EXPECT_STREQ(aBuf, "str str 1 str 1");
+}
+
 TEST(Str, EndswithNocase)
 {
 	EXPECT_TRUE(str_endswith_nocase("abcdef", "deF"));
@@ -198,6 +256,87 @@ TEST(Str, EndswithNocase)
 	static const char DEFG[] = "defg";
 	EXPECT_EQ(str_endswith_nocase(ABCDEFG, DEFG) - ABCDEFG,
 		str_length(ABCDEFG) - str_length(DEFG));
+}
+
+TEST(Str, HexEncode)
+{
+	char aOut[64];
+	const char *pData = "ABCD";
+	str_hex(aOut, sizeof(aOut), pData, 0);
+	EXPECT_STREQ(aOut, "");
+	str_hex(aOut, sizeof(aOut), pData, 1);
+	EXPECT_STREQ(aOut, "41 ");
+	str_hex(aOut, sizeof(aOut), pData, 2);
+	EXPECT_STREQ(aOut, "41 42 ");
+	str_hex(aOut, sizeof(aOut), pData, 3);
+	EXPECT_STREQ(aOut, "41 42 43 ");
+	str_hex(aOut, sizeof(aOut), pData, 4);
+	EXPECT_STREQ(aOut, "41 42 43 44 ");
+
+	str_hex(aOut, 1, pData, 4);
+	EXPECT_STREQ(aOut, "");
+	str_hex(aOut, 2, pData, 4);
+	EXPECT_STREQ(aOut, "");
+	str_hex(aOut, 3, pData, 4);
+	EXPECT_STREQ(aOut, "");
+	str_hex(aOut, 4, pData, 4);
+	EXPECT_STREQ(aOut, "41 ");
+	str_hex(aOut, 5, pData, 4);
+	EXPECT_STREQ(aOut, "41 ");
+	str_hex(aOut, 6, pData, 4);
+	EXPECT_STREQ(aOut, "41 ");
+	str_hex(aOut, 7, pData, 4);
+	EXPECT_STREQ(aOut, "41 42 ");
+	str_hex(aOut, 8, pData, 4);
+	EXPECT_STREQ(aOut, "41 42 ");
+}
+
+TEST(Str, HexEncodeCstyle)
+{
+	char aOut[128];
+	const char *pData = "ABCD";
+	str_hex_cstyle(aOut, sizeof(aOut), pData, 0);
+	EXPECT_STREQ(aOut, "");
+	str_hex_cstyle(aOut, sizeof(aOut), pData, 1);
+	EXPECT_STREQ(aOut, "0x41");
+	str_hex_cstyle(aOut, sizeof(aOut), pData, 2);
+	EXPECT_STREQ(aOut, "0x41, 0x42");
+	str_hex_cstyle(aOut, sizeof(aOut), pData, 3);
+	EXPECT_STREQ(aOut, "0x41, 0x42, 0x43");
+	str_hex_cstyle(aOut, sizeof(aOut), pData, 4);
+	EXPECT_STREQ(aOut, "0x41, 0x42, 0x43, 0x44");
+
+	str_hex_cstyle(aOut, 1, pData, 4);
+	EXPECT_STREQ(aOut, "");
+	str_hex_cstyle(aOut, 2, pData, 4);
+	EXPECT_STREQ(aOut, "");
+	str_hex_cstyle(aOut, 3, pData, 4);
+	EXPECT_STREQ(aOut, "");
+	str_hex_cstyle(aOut, 4, pData, 4);
+	EXPECT_STREQ(aOut, "");
+	str_hex_cstyle(aOut, 5, pData, 4);
+	EXPECT_STREQ(aOut, "");
+	str_hex_cstyle(aOut, 6, pData, 4);
+	EXPECT_STREQ(aOut, "");
+	str_hex_cstyle(aOut, 7, pData, 4);
+	EXPECT_STREQ(aOut, "0x41");
+	str_hex_cstyle(aOut, 12, pData, 4);
+	EXPECT_STREQ(aOut, "0x41");
+	str_hex_cstyle(aOut, 13, pData, 4);
+	EXPECT_STREQ(aOut, "0x41, 0x42");
+	str_hex_cstyle(aOut, 14, pData, 4);
+	EXPECT_STREQ(aOut, "0x41, 0x42");
+
+	str_hex_cstyle(aOut, sizeof(aOut), pData, 4, 1);
+	EXPECT_STREQ(aOut, "0x41,\n0x42,\n0x43,\n0x44");
+	str_hex_cstyle(aOut, sizeof(aOut), pData, 4, 2);
+	EXPECT_STREQ(aOut, "0x41, 0x42,\n0x43, 0x44");
+	str_hex_cstyle(aOut, sizeof(aOut), pData, 4, 3);
+	EXPECT_STREQ(aOut, "0x41, 0x42, 0x43,\n0x44");
+	str_hex_cstyle(aOut, sizeof(aOut), pData, 4, 4);
+	EXPECT_STREQ(aOut, "0x41, 0x42, 0x43, 0x44");
+	str_hex_cstyle(aOut, sizeof(aOut), pData, 4, 500);
+	EXPECT_STREQ(aOut, "0x41, 0x42, 0x43, 0x44");
 }
 
 TEST(Str, HexDecode)
@@ -374,6 +513,30 @@ TEST(Str, FormatTruncate)
 	EXPECT_STREQ(aBuf, "DDNet最好了");
 }
 
+TEST(Str, TrimWords)
+{
+	const char *pStr1 = "aa bb ccc   dddd    eeeee";
+	EXPECT_STREQ(str_trim_words(pStr1, 0), "aa bb ccc   dddd    eeeee");
+	EXPECT_STREQ(str_trim_words(pStr1, 1), "bb ccc   dddd    eeeee");
+	EXPECT_STREQ(str_trim_words(pStr1, 2), "ccc   dddd    eeeee");
+	EXPECT_STREQ(str_trim_words(pStr1, 3), "dddd    eeeee");
+	EXPECT_STREQ(str_trim_words(pStr1, 4), "eeeee");
+	EXPECT_STREQ(str_trim_words(pStr1, 5), "");
+	EXPECT_STREQ(str_trim_words(pStr1, 100), "");
+	const char *pStr2 = "   aaa  bb   ";
+	EXPECT_STREQ(str_trim_words(pStr2, 0), "aaa  bb   ");
+	EXPECT_STREQ(str_trim_words(pStr2, 1), "bb   ");
+	EXPECT_STREQ(str_trim_words(pStr2, 2), "");
+	EXPECT_STREQ(str_trim_words(pStr2, 100), "");
+	const char *pStr3 = "\n\naa  bb\t\tccc\r\n\r\ndddd";
+	EXPECT_STREQ(str_trim_words(pStr3, 0), "aa  bb\t\tccc\r\n\r\ndddd");
+	EXPECT_STREQ(str_trim_words(pStr3, 1), "bb\t\tccc\r\n\r\ndddd");
+	EXPECT_STREQ(str_trim_words(pStr3, 2), "ccc\r\n\r\ndddd");
+	EXPECT_STREQ(str_trim_words(pStr3, 3), "dddd");
+	EXPECT_STREQ(str_trim_words(pStr3, 4), "");
+	EXPECT_STREQ(str_trim_words(pStr3, 100), "");
+}
+
 TEST(Str, CopyNum)
 {
 	const char *pFoo = "Foobaré";
@@ -427,7 +590,7 @@ TEST(Str, Copy)
 
 TEST(Str, Utf8Stats)
 {
-	int Size, Count;
+	size_t Size, Count;
 
 	str_utf8_stats("abc", 4, 3, &Size, &Count);
 	EXPECT_EQ(Size, 3);
@@ -522,6 +685,9 @@ TEST(Str, TimeFloat)
 
 	EXPECT_EQ(str_time_float(12.16, TIME_HOURS_CENTISECS, aBuf, sizeof(aBuf)), 8);
 	EXPECT_STREQ(aBuf, "00:12.16");
+
+	EXPECT_EQ(str_time_float(22.995, TIME_MINS, aBuf, sizeof(aBuf)), 5);
+	EXPECT_STREQ(aBuf, "00:22");
 }
 
 TEST(Str, HasCc)
@@ -531,11 +697,288 @@ TEST(Str, HasCc)
 	EXPECT_FALSE(str_has_cc("Merhaba dünya!"));
 
 	EXPECT_TRUE(str_has_cc("\n"));
-	EXPECT_TRUE(str_has_cc("\n"));
 	EXPECT_TRUE(str_has_cc("\r"));
 	EXPECT_TRUE(str_has_cc("\t"));
 	EXPECT_TRUE(str_has_cc("a\n"));
 	EXPECT_TRUE(str_has_cc("a\rb"));
 	EXPECT_TRUE(str_has_cc("\tb"));
 	EXPECT_TRUE(str_has_cc("\n\n"));
+	EXPECT_TRUE(str_has_cc("\x1C"));
+	EXPECT_TRUE(str_has_cc("\x1D"));
+	EXPECT_TRUE(str_has_cc("\x1E"));
+	EXPECT_TRUE(str_has_cc("\x1F"));
 }
+
+TEST(Str, SanitizeCc)
+{
+	char aBuf[64];
+	str_copy(aBuf, "");
+	str_sanitize_cc(aBuf);
+	EXPECT_STREQ(aBuf, "");
+	str_copy(aBuf, "a");
+	str_sanitize_cc(aBuf);
+	EXPECT_STREQ(aBuf, "a");
+	str_copy(aBuf, "Merhaba dünya!");
+	str_sanitize_cc(aBuf);
+	EXPECT_STREQ(aBuf, "Merhaba dünya!");
+
+	str_copy(aBuf, "\n");
+	str_sanitize_cc(aBuf);
+	EXPECT_STREQ(aBuf, " ");
+	str_copy(aBuf, "\r");
+	str_sanitize_cc(aBuf);
+	EXPECT_STREQ(aBuf, " ");
+	str_copy(aBuf, "\t");
+	str_sanitize_cc(aBuf);
+	EXPECT_STREQ(aBuf, " ");
+	str_copy(aBuf, "a\n");
+	str_sanitize_cc(aBuf);
+	EXPECT_STREQ(aBuf, "a ");
+	str_copy(aBuf, "a\rb");
+	str_sanitize_cc(aBuf);
+	EXPECT_STREQ(aBuf, "a b");
+	str_copy(aBuf, "\tb");
+	str_sanitize_cc(aBuf);
+	EXPECT_STREQ(aBuf, " b");
+	str_copy(aBuf, "\n\n");
+	str_sanitize_cc(aBuf);
+	EXPECT_STREQ(aBuf, "  ");
+	str_copy(aBuf, "\x1C");
+	str_sanitize_cc(aBuf);
+	EXPECT_STREQ(aBuf, " ");
+	str_copy(aBuf, "\x1D");
+	str_sanitize_cc(aBuf);
+	EXPECT_STREQ(aBuf, " ");
+	str_copy(aBuf, "\x1E");
+	str_sanitize_cc(aBuf);
+	EXPECT_STREQ(aBuf, " ");
+	str_copy(aBuf, "\x1F");
+	str_sanitize_cc(aBuf);
+	EXPECT_STREQ(aBuf, " ");
+}
+
+TEST(Str, Sanitize)
+{
+	char aBuf[64];
+	str_copy(aBuf, "");
+	str_sanitize(aBuf);
+	EXPECT_STREQ(aBuf, "");
+	str_copy(aBuf, "a");
+	str_sanitize(aBuf);
+	EXPECT_STREQ(aBuf, "a");
+	str_copy(aBuf, "Merhaba dünya!");
+	str_sanitize(aBuf);
+	EXPECT_STREQ(aBuf, "Merhaba dünya!");
+	str_copy(aBuf, "\n");
+	str_sanitize(aBuf);
+	EXPECT_STREQ(aBuf, "\n");
+	str_copy(aBuf, "\r");
+	str_sanitize(aBuf);
+	EXPECT_STREQ(aBuf, "\r");
+	str_copy(aBuf, "\t");
+	str_sanitize(aBuf);
+	EXPECT_STREQ(aBuf, "\t");
+	str_copy(aBuf, "a\n");
+	str_sanitize(aBuf);
+	EXPECT_STREQ(aBuf, "a\n");
+	str_copy(aBuf, "a\rb");
+	str_sanitize(aBuf);
+	EXPECT_STREQ(aBuf, "a\rb");
+	str_copy(aBuf, "\tb");
+	str_sanitize(aBuf);
+	EXPECT_STREQ(aBuf, "\tb");
+	str_copy(aBuf, "\n\n");
+	str_sanitize(aBuf);
+	EXPECT_STREQ(aBuf, "\n\n");
+
+	str_copy(aBuf, "\x1C");
+	str_sanitize(aBuf);
+	EXPECT_STREQ(aBuf, " ");
+	str_copy(aBuf, "\x1D");
+	str_sanitize(aBuf);
+	EXPECT_STREQ(aBuf, " ");
+	str_copy(aBuf, "\x1E");
+	str_sanitize(aBuf);
+	EXPECT_STREQ(aBuf, " ");
+	str_copy(aBuf, "\x1F");
+	str_sanitize(aBuf);
+	EXPECT_STREQ(aBuf, " ");
+}
+
+TEST(Str, CleanWhitespaces)
+{
+	char aBuf[64];
+	str_copy(aBuf, "aa bb ccc dddd eeeee");
+	str_clean_whitespaces(aBuf);
+	EXPECT_STREQ(aBuf, "aa bb ccc dddd eeeee");
+	str_copy(aBuf, "     ");
+	str_clean_whitespaces(aBuf);
+	EXPECT_STREQ(aBuf, "");
+	str_copy(aBuf, "     aa");
+	str_clean_whitespaces(aBuf);
+	EXPECT_STREQ(aBuf, "aa");
+	str_copy(aBuf, "aa     ");
+	str_clean_whitespaces(aBuf);
+	EXPECT_STREQ(aBuf, "aa");
+	str_copy(aBuf, "  aa   bb    ccc     dddd       eeeee    ");
+	str_clean_whitespaces(aBuf);
+	EXPECT_STREQ(aBuf, "aa bb ccc dddd eeeee");
+}
+
+TEST(Str, SkipToWhitespace)
+{
+	char aBuf[64];
+	str_copy(aBuf, "");
+	EXPECT_EQ(str_skip_to_whitespace(aBuf), aBuf);
+	EXPECT_EQ(str_skip_to_whitespace_const(aBuf), aBuf);
+	str_copy(aBuf, "    a");
+	EXPECT_EQ(str_skip_to_whitespace(aBuf), aBuf);
+	EXPECT_EQ(str_skip_to_whitespace_const(aBuf), aBuf);
+	str_copy(aBuf, "aaaa  b");
+	EXPECT_EQ(str_skip_to_whitespace(aBuf), aBuf + 4);
+	EXPECT_EQ(str_skip_to_whitespace_const(aBuf), aBuf + 4);
+	str_copy(aBuf, "aaaa\n\nb");
+	EXPECT_EQ(str_skip_to_whitespace(aBuf), aBuf + 4);
+	EXPECT_EQ(str_skip_to_whitespace_const(aBuf), aBuf + 4);
+	str_copy(aBuf, "aaaa\r\rb");
+	EXPECT_EQ(str_skip_to_whitespace(aBuf), aBuf + 4);
+	EXPECT_EQ(str_skip_to_whitespace_const(aBuf), aBuf + 4);
+	str_copy(aBuf, "aaaa\t\tb");
+	EXPECT_EQ(str_skip_to_whitespace(aBuf), aBuf + 4);
+	EXPECT_EQ(str_skip_to_whitespace_const(aBuf), aBuf + 4);
+}
+
+TEST(Str, SkipWhitespaces)
+{
+	char aBuf[64];
+	str_copy(aBuf, "");
+	EXPECT_EQ(str_skip_whitespaces(aBuf), aBuf);
+	EXPECT_EQ(str_skip_whitespaces_const(aBuf), aBuf);
+	str_copy(aBuf, "aaaa");
+	EXPECT_EQ(str_skip_whitespaces(aBuf), aBuf);
+	EXPECT_EQ(str_skip_whitespaces_const(aBuf), aBuf);
+	str_copy(aBuf, " \n\r\taaaa");
+	EXPECT_EQ(str_skip_whitespaces(aBuf), aBuf + 4);
+	EXPECT_EQ(str_skip_whitespaces_const(aBuf), aBuf + 4);
+}
+
+TEST(Str, CompFilename)
+{
+	EXPECT_EQ(str_comp_filenames("a", "a"), 0);
+	EXPECT_LT(str_comp_filenames("a", "b"), 0);
+	EXPECT_GT(str_comp_filenames("b", "a"), 0);
+	EXPECT_EQ(str_comp_filenames("A", "a"), 0);
+	EXPECT_LT(str_comp_filenames("A", "b"), 0);
+	EXPECT_GT(str_comp_filenames("b", "A"), 0);
+	EXPECT_LT(str_comp_filenames("a", "B"), 0);
+	EXPECT_GT(str_comp_filenames("B", "a"), 0);
+	EXPECT_EQ(str_comp_filenames("1A", "1a"), 0);
+	EXPECT_LT(str_comp_filenames("1a", "1B"), 0);
+	EXPECT_GT(str_comp_filenames("1B", "1a"), 0);
+	EXPECT_LT(str_comp_filenames("1a", "1b"), 0);
+	EXPECT_GT(str_comp_filenames("1b", "1a"), 0);
+	EXPECT_GT(str_comp_filenames("12a", "1B"), 0);
+	EXPECT_LT(str_comp_filenames("1B", "12a"), 0);
+	EXPECT_GT(str_comp_filenames("10a", "1B"), 0);
+	EXPECT_LT(str_comp_filenames("1B", "10a"), 0);
+	EXPECT_GT(str_comp_filenames("10a", "00B"), 0);
+	EXPECT_LT(str_comp_filenames("00B", "10a"), 0);
+	EXPECT_GT(str_comp_filenames("10a", "09B"), 0);
+	EXPECT_LT(str_comp_filenames("09B", "10a"), 0);
+	EXPECT_LT(str_comp_filenames("abc", "abcd"), 0);
+	EXPECT_GT(str_comp_filenames("abcd", "abc"), 0);
+	EXPECT_LT(str_comp_filenames("abc2", "abcd1"), 0);
+	EXPECT_GT(str_comp_filenames("abcd1", "abc2"), 0);
+	EXPECT_LT(str_comp_filenames("abc50", "abcd"), 0);
+	EXPECT_GT(str_comp_filenames("abcd", "abc50"), 0);
+	EXPECT_EQ(str_comp_filenames("file0", "file0"), 0);
+	EXPECT_LT(str_comp_filenames("file0", "file1"), 0);
+	EXPECT_GT(str_comp_filenames("file1", "file0"), 0);
+	EXPECT_LT(str_comp_filenames("file1", "file09"), 0);
+	EXPECT_GT(str_comp_filenames("file09", "file1"), 0);
+	EXPECT_LT(str_comp_filenames("file1", "file009"), 0);
+	EXPECT_GT(str_comp_filenames("file009", "file1"), 0);
+	EXPECT_GT(str_comp_filenames("file10", "file00"), 0);
+	EXPECT_LT(str_comp_filenames("file00", "file10"), 0);
+	EXPECT_GT(str_comp_filenames("file10", "file09"), 0);
+	EXPECT_LT(str_comp_filenames("file09", "file10"), 0);
+	EXPECT_LT(str_comp_filenames("file13", "file37"), 0);
+	EXPECT_GT(str_comp_filenames("file37", "file13"), 0);
+	EXPECT_LT(str_comp_filenames("file1.ext", "file09.ext"), 0);
+	EXPECT_GT(str_comp_filenames("file09.ext", "file1.ext"), 0);
+	EXPECT_LT(str_comp_filenames("file1.ext", "file009.ext"), 0);
+	EXPECT_GT(str_comp_filenames("file009.ext", "file1.ext"), 0);
+	EXPECT_EQ(str_comp_filenames("file0.ext", "file0.ext"), 0);
+	EXPECT_LT(str_comp_filenames("file13.ext", "file37.ext"), 0);
+	EXPECT_GT(str_comp_filenames("file37.ext", "file13.ext"), 0);
+	EXPECT_LT(str_comp_filenames("FILE13.EXT", "file37.ext"), 0);
+	EXPECT_GT(str_comp_filenames("file37.ext", "FILE13.EXT"), 0);
+	EXPECT_GT(str_comp_filenames("file10.ext", "file00.ext"), 0);
+	EXPECT_LT(str_comp_filenames("file00.ext", "file10.ext"), 0);
+	EXPECT_GT(str_comp_filenames("file10.ext", "file09.ext"), 0);
+	EXPECT_LT(str_comp_filenames("file09.ext", "file10.ext"), 0);
+	EXPECT_LT(str_comp_filenames("file42", "file1337"), 0);
+	EXPECT_GT(str_comp_filenames("file1337", "file42"), 0);
+	EXPECT_LT(str_comp_filenames("file42.ext", "file1337.ext"), 0);
+	EXPECT_GT(str_comp_filenames("file1337.ext", "file42.ext"), 0);
+	EXPECT_GT(str_comp_filenames("file4414520", "file2055"), 0);
+	EXPECT_LT(str_comp_filenames("file4414520", "file205523151812419"), 0);
+}
+
+TEST(Str, RightChar)
+{
+	const char *pStr = "a bb ccc dddd       eeeee";
+	EXPECT_EQ(str_rchr(pStr, 'a'), pStr);
+	EXPECT_EQ(str_rchr(pStr, 'b'), pStr + 3);
+	EXPECT_EQ(str_rchr(pStr, 'c'), pStr + 7);
+	EXPECT_EQ(str_rchr(pStr, 'd'), pStr + 12);
+	EXPECT_EQ(str_rchr(pStr, ' '), pStr + 19);
+	EXPECT_EQ(str_rchr(pStr, 'e'), pStr + 24);
+	EXPECT_EQ(str_rchr(pStr, '\0'), pStr + str_length(pStr));
+	EXPECT_EQ(str_rchr(pStr, 'y'), nullptr);
+}
+
+TEST(Str, CountChar)
+{
+	const char *pStr = "a bb ccc dddd       eeeee";
+	EXPECT_EQ(str_countchr(pStr, 'a'), 1);
+	EXPECT_EQ(str_countchr(pStr, 'b'), 2);
+	EXPECT_EQ(str_countchr(pStr, 'c'), 3);
+	EXPECT_EQ(str_countchr(pStr, 'd'), 4);
+	EXPECT_EQ(str_countchr(pStr, 'e'), 5);
+	EXPECT_EQ(str_countchr(pStr, ' '), 10);
+	EXPECT_EQ(str_countchr(pStr, '\0'), 0);
+	EXPECT_EQ(str_countchr(pStr, 'y'), 0);
+}
+
+#if defined(CONF_FAMILY_WINDOWS)
+TEST(Str, WindowsUtf8WideConversion)
+{
+	const char *apUtf8Strings[] = {
+		"",
+		"abc",
+		"a bb ccc dddd       eeeee",
+		"öüä",
+		"привет Наташа",
+		"ąçęįǫų",
+		"DDNet最好了",
+		"aβい🐘"};
+	const wchar_t *apWideStrings[] = {
+		L"",
+		L"abc",
+		L"a bb ccc dddd       eeeee",
+		L"öüä",
+		L"привет Наташа",
+		L"ąçęįǫų",
+		L"DDNet最好了",
+		L"aβい🐘"};
+	static_assert(std::size(apUtf8Strings) == std::size(apWideStrings));
+	for(size_t i = 0; i < std::size(apUtf8Strings); i++)
+	{
+		const std::string ConvertedUtf8 = windows_wide_to_utf8(apWideStrings[i]);
+		const std::wstring ConvertedWide = windows_utf8_to_wide(apUtf8Strings[i]);
+		EXPECT_STREQ(ConvertedUtf8.c_str(), apUtf8Strings[i]);
+		EXPECT_STREQ(ConvertedWide.c_str(), apWideStrings[i]);
+	}
+}
+#endif

@@ -65,8 +65,6 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 		return -1;
 	}
 
-	CDemoHeader Header;
-	CTimelineMarkers TimelineMarkers;
 	if(m_File)
 	{
 		io_close(DemoFile);
@@ -130,6 +128,7 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 		MapSize = io_length(MapFile);
 
 	// write header
+	CDemoHeader Header;
 	mem_zero(&Header, sizeof(Header));
 	mem_copy(Header.m_aMarker, gs_aHeaderMarker, sizeof(Header.m_aMarker));
 	Header.m_Version = gs_CurVersion;
@@ -141,6 +140,9 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 	// Header.m_Length - add this on stop
 	str_timestamp(Header.m_aTimestamp, sizeof(Header.m_aTimestamp));
 	io_write(DemoFile, &Header, sizeof(Header));
+
+	CTimelineMarkers TimelineMarkers;
+	mem_zero(&TimelineMarkers, sizeof(TimelineMarkers));
 	io_write(DemoFile, &TimelineMarkers, sizeof(TimelineMarkers)); // fill this on stop
 
 	//Write Sha256
@@ -223,7 +225,7 @@ void CDemoRecorder::WriteTickMarker(int Tick, int Keyframe)
 {
 	if(m_LastTickMarker == -1 || Tick - m_LastTickMarker > CHUNKMASK_TICK || Keyframe)
 	{
-		unsigned char aChunk[5];
+		unsigned char aChunk[sizeof(int32_t) + 1];
 		aChunk[0] = CHUNKTYPEFLAG_TICKMARKER;
 		uint_to_bytes_be(aChunk + 1, Tick);
 
@@ -345,19 +347,19 @@ int CDemoRecorder::Stop()
 
 	// add the demo length to the header
 	io_seek(m_File, gs_LengthOffset, IOSEEK_START);
-	unsigned char aLength[4];
-	int_to_bytes_be(aLength, Length());
+	unsigned char aLength[sizeof(int32_t)];
+	uint_to_bytes_be(aLength, Length());
 	io_write(m_File, aLength, sizeof(aLength));
 
 	// add the timeline markers to the header
 	io_seek(m_File, gs_NumMarkersOffset, IOSEEK_START);
-	unsigned char aNumMarkers[4];
-	int_to_bytes_be(aNumMarkers, m_NumTimelineMarkers);
+	unsigned char aNumMarkers[sizeof(int32_t)];
+	uint_to_bytes_be(aNumMarkers, m_NumTimelineMarkers);
 	io_write(m_File, aNumMarkers, sizeof(aNumMarkers));
 	for(int i = 0; i < m_NumTimelineMarkers; i++)
 	{
-		unsigned char aMarker[4];
-		int_to_bytes_be(aMarker, m_aTimelineMarkers[i]);
+		unsigned char aMarker[sizeof(int32_t)];
+		uint_to_bytes_be(aMarker, m_aTimelineMarkers[i]);
 		io_write(m_File, aMarker, sizeof(aMarker));
 	}
 
@@ -371,18 +373,26 @@ int CDemoRecorder::Stop()
 
 void CDemoRecorder::AddDemoMarker()
 {
-	if(m_LastTickMarker < 0 || m_NumTimelineMarkers >= MAX_TIMELINE_MARKERS)
+	if(m_LastTickMarker < 0)
+		return;
+	AddDemoMarker(m_LastTickMarker);
+}
+
+void CDemoRecorder::AddDemoMarker(int Tick)
+{
+	dbg_assert(Tick >= 0, "invalid marker tick");
+	if(m_NumTimelineMarkers >= MAX_TIMELINE_MARKERS)
 		return;
 
 	// not more than 1 marker in a second
 	if(m_NumTimelineMarkers > 0)
 	{
-		int Diff = m_LastTickMarker - m_aTimelineMarkers[m_NumTimelineMarkers - 1];
+		int Diff = Tick - m_aTimelineMarkers[m_NumTimelineMarkers - 1];
 		if(Diff < (float)SERVER_TICK_SPEED)
 			return;
 	}
 
-	m_aTimelineMarkers[m_NumTimelineMarkers++] = m_LastTickMarker;
+	m_aTimelineMarkers[m_NumTimelineMarkers++] = Tick;
 
 	if(m_pConsole)
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_recorder", "Added timeline marker", gs_DemoPrintColor);
@@ -444,10 +454,10 @@ int CDemoPlayer::ReadChunkHeader(int *pType, int *pSize, int *pTick)
 		}
 		else
 		{
-			unsigned char aTickdata[4];
+			unsigned char aTickdata[sizeof(int32_t)];
 			if(io_read(m_File, aTickdata, sizeof(aTickdata)) != sizeof(aTickdata))
 				return -1;
-			*pTick = bytes_be_to_int(aTickdata);
+			*pTick = bytes_be_to_uint(aTickdata);
 		}
 	}
 	else
@@ -814,11 +824,11 @@ int CDemoPlayer::Load(class IStorage *pStorage, class IConsole *pConsole, const 
 	if(m_Info.m_Header.m_Version > gs_OldVersion)
 	{
 		// get timeline markers
-		int Num = bytes_be_to_int(m_Info.m_TimelineMarkers.m_aNumTimelineMarkers);
+		int Num = bytes_be_to_uint(m_Info.m_TimelineMarkers.m_aNumTimelineMarkers);
 		m_Info.m_Info.m_NumTimelineMarkers = clamp<int>(Num, 0, MAX_TIMELINE_MARKERS);
 		for(int i = 0; i < m_Info.m_Info.m_NumTimelineMarkers; i++)
 		{
-			m_Info.m_Info.m_aTimelineMarkers[i] = bytes_be_to_int(m_Info.m_TimelineMarkers.m_aTimelineMarkers[i]);
+			m_Info.m_Info.m_aTimelineMarkers[i] = bytes_be_to_uint(m_Info.m_TimelineMarkers.m_aTimelineMarkers[i]);
 		}
 	}
 
@@ -924,19 +934,39 @@ int CDemoPlayer::Play()
 
 int CDemoPlayer::SeekPercent(float Percent)
 {
-	int WantedTick = m_Info.m_Info.m_FirstTick + ((m_Info.m_Info.m_LastTick - m_Info.m_Info.m_FirstTick) * Percent);
+	int WantedTick = m_Info.m_Info.m_FirstTick + round_truncate((m_Info.m_Info.m_LastTick - m_Info.m_Info.m_FirstTick) * Percent);
 	return SetPos(WantedTick);
 }
 
 int CDemoPlayer::SeekTime(float Seconds)
 {
-	int WantedTick = m_Info.m_Info.m_CurrentTick + (Seconds * (float)SERVER_TICK_SPEED);
+	int WantedTick = m_Info.m_Info.m_CurrentTick + round_truncate(Seconds * (float)SERVER_TICK_SPEED);
 	return SetPos(WantedTick);
 }
 
 int CDemoPlayer::SeekTick(ETickOffset TickOffset)
 {
-	return SetPos(m_Info.m_Info.m_CurrentTick + (int)TickOffset);
+	int WantedTick;
+	switch(TickOffset)
+	{
+	case TICK_CURRENT:
+		WantedTick = m_Info.m_Info.m_CurrentTick;
+		break;
+	case TICK_PREVIOUS:
+		WantedTick = m_Info.m_PreviousTick;
+		break;
+	case TICK_NEXT:
+		WantedTick = m_Info.m_NextTick;
+		break;
+	default:
+		dbg_assert(false, "Invalid TickOffset");
+		WantedTick = -1;
+		break;
+	}
+
+	// +1 because SetPos will seek until the given tick is the next tick that
+	// will be played back, whereas we want the wanted tick to be played now.
+	return SetPos(WantedTick + 1);
 }
 
 int CDemoPlayer::SetPos(int WantedTick)
@@ -1087,7 +1117,7 @@ bool CDemoPlayer::GetDemoInfo(class IStorage *pStorage, const char *pFilename, i
 	io_read(File, pTimelineMarkers, sizeof(CTimelineMarkers));
 
 	str_copy(pMapInfo->m_aName, pDemoHeader->m_aMapName);
-	pMapInfo->m_Crc = bytes_be_to_int(pDemoHeader->m_aMapCrc);
+	pMapInfo->m_Crc = bytes_be_to_uint(pDemoHeader->m_aMapCrc);
 
 	SHA256_DIGEST Sha256 = SHA256_ZEROED;
 	if(pDemoHeader->m_Version >= gs_Sha256Version)
@@ -1108,7 +1138,7 @@ bool CDemoPlayer::GetDemoInfo(class IStorage *pStorage, const char *pFilename, i
 	}
 	pMapInfo->m_Sha256 = Sha256;
 
-	pMapInfo->m_Size = bytes_be_to_int(pDemoHeader->m_aMapSize);
+	pMapInfo->m_Size = bytes_be_to_uint(pDemoHeader->m_aMapSize);
 
 	io_close(File);
 	return !(mem_comp(pDemoHeader->m_aMarker, gs_aHeaderMarker, sizeof(gs_aHeaderMarker)) || pDemoHeader->m_Version < gs_OldVersion);
@@ -1143,7 +1173,7 @@ void CDemoEditor::Slice(const char *pDemo, const char *pDst, int StartTick, int 
 	m_SliceTo = EndTick;
 	m_Stop = false;
 
-	if(m_pDemoPlayer->Load(m_pStorage, m_pConsole, pDemo, IStorage::TYPE_ALL) == -1)
+	if(m_pDemoPlayer->Load(m_pStorage, m_pConsole, pDemo, IStorage::TYPE_ALL_OR_ABSOLUTE) == -1)
 		return;
 
 	const CMapInfo *pMapInfo = m_pDemoPlayer->GetMapInfo();
@@ -1170,6 +1200,15 @@ void CDemoEditor::Slice(const char *pDemo, const char *pDst, int StartTick, int 
 
 		if(pInfo->m_Info.m_Paused)
 			break;
+	}
+
+	// Copy timeline markers to sliced demo
+	for(int i = 0; i < pInfo->m_Info.m_NumTimelineMarkers; i++)
+	{
+		if((m_SliceFrom == -1 || pInfo->m_Info.m_aTimelineMarkers[i] >= m_SliceFrom) && (m_SliceTo == -1 || pInfo->m_Info.m_aTimelineMarkers[i] <= m_SliceTo))
+		{
+			m_pDemoRecorder->AddDemoMarker(pInfo->m_Info.m_aTimelineMarkers[i]);
+		}
 	}
 
 	m_pDemoPlayer->Stop();

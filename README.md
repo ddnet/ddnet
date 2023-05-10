@@ -97,3 +97,27 @@ tc_profile_colors
 tc_profile_emote
 add_profile
 ```
+
+Better Git Blame
+----------------
+
+First, use a better tool than `git blame` itself, e.g. [`tig`](https://jonas.github.io/tig/). There's probably a good UI for Windows, too. Alternatively, use the GitHub UI, click "Blame" in any file view.
+
+For `tig`, use `tig blame path/to/file.cpp` to open the blame view, you can navigate with arrow keys or kj, press comma to go to the previous revision of the current line, q to quit.
+
+Only then you could also set up git to ignore specific formatting revisions:
+```bash
+git config blame.ignoreRevsFile formatting-revs.txt
+```
+
+(Neo)Vim Syntax Highlighting for config files
+----------------------------------------
+Copy the file detection and syntax files to your vim config folder:
+
+```bash
+# vim
+cp -R other/vim/* ~/.vim/
+
+# neovim
+cp -R other/vim/* ~/.config/nvim/
+```

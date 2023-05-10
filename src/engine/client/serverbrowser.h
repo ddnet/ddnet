@@ -32,7 +32,6 @@ public:
 		int64_t m_RequestTime;
 		bool m_RequestIgnoreInfo;
 		int m_GotInfo;
-		bool m_Request64Legacy;
 		CServerInfo m_Info;
 
 		CServerEntry *m_pPrevReq; // request list
@@ -84,6 +83,7 @@ public:
 	bool IsRefreshing() const override;
 	bool IsGettingServerlist() const override;
 	int LoadingProgression() const override;
+	void RequestResort() { m_NeedResort = true; }
 
 	int NumServers() const override { return m_NumServers; }
 
@@ -121,7 +121,7 @@ public:
 	void TypeFilterClean(int Network) override;
 
 	//
-	void Update(bool ForceResort);
+	void Update();
 	void OnServerInfoUpdate(const NETADDR &Addr, int Token, const CServerInfo *pInfo);
 	void SetHttpInfo(const CServerInfo *pInfo);
 	void RequestCurrentServer(const NETADDR &Addr) const;
@@ -131,10 +131,10 @@ public:
 	void SetBaseInfo(class CNetClient *pClient, const char *pNetVersion);
 	void OnInit();
 
-	void RequestImpl64(const NETADDR &Addr, CServerEntry *pEntry) const;
 	void QueueRequest(CServerEntry *pEntry);
 	CServerEntry *Find(const NETADDR &Addr);
 	int GetCurrentType() override { return m_ServerlistType; }
+	bool IsRegistered(const NETADDR &Addr);
 
 private:
 	CNetClient *m_pNetClient = nullptr;
@@ -164,10 +164,10 @@ private:
 	CServerEntry *m_pLastReqServer;
 	int m_NumRequests;
 
+	bool m_NeedResort;
+
 	// used instead of g_Config.br_max_requests to get more servers
 	int m_CurrentMaxRequests;
-
-	int m_NeedRefresh;
 
 	int m_NumSortedServers;
 	int m_NumSortedServersCapacity;
@@ -181,8 +181,6 @@ private:
 	int m_ServerlistType;
 	int64_t m_BroadcastTime;
 	unsigned char m_aTokenSeed[16];
-
-	bool m_SortOnNextUpdate;
 
 	int GenerateToken(const NETADDR &Addr) const;
 	static int GetBasicToken(int Token);

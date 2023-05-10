@@ -45,14 +45,8 @@ Address
 All
 == Mindenki
 
-Are you sure that you want to delete the demo?
-== Biztos, hogy ki akarod törölni a demót?
-
 Are you sure that you want to quit?
 == Biztos, hogy ki akarsz lépni?
-
-Are you sure that you want to remove the player from your friends list?
-== Biztos vagy benne, hogy ki akarod törölni a játékost a barátok listájáról?
 
 Automatically record demos
 == Magától rögzítse a demókat
@@ -391,9 +385,6 @@ Show ingame HUD
 Show name plates
 == Név táblák mutatása
 
-Skins
-== Karakterek
-
 Sound
 == Hang
 
@@ -444,9 +435,6 @@ Try again
 
 Type
 == Típus
-
-Unable to delete the demo
-== Nem sikerült törölni a demót
 
 Unable to rename the demo
 == Nem sikerült átnevezni a demót
@@ -552,9 +540,6 @@ Reset to defaults
 
 Quit anyway?
 == Mindenképpen kilép?
-
-Display Modes
-== Kijelző módok
 
 Version:
 == Verzió:
@@ -793,9 +778,6 @@ Max CSVs
 Strict gametype filter
 == Szigorú játékmód szűrő
 
-Try fast HTTP map download first
-== Próbáljon elősször gyors HTTP letöltést
-
 Use DDRace Scoreboard
 == DDRace pontszámtábla használata
 
@@ -1003,9 +985,6 @@ Show HUD
 Size
 == Méret
 
-Destination file already exist
-== A kiválasztott helynél ez létezik
-
 Server best:
 == Szerver legjobb:
 
@@ -1071,9 +1050,6 @@ Your nickname '%s' is already used (%d points). Do you still want to use it?
 
 Checking for existing player with your name
 == Keresés létező játékos után a neveddel
-
-Country / Region
-== Ország / Régió
 
 Speed
 == Sebesség
@@ -1393,9 +1369,6 @@ UI controller sens.
 Controller jitter tolerance
 == Kontroller jitter tolerancia
 
-No controller found. Plug in a controller and restart the game.
-== Nem találtunk kontrollert. Csatlakoztass egy kontrollert, majd indítsd újra a klienst.
-
 Device
 == Eszköz
 
@@ -1549,7 +1522,63 @@ Loading race demo files
 Loading sound files
 == Hang fájlok betöltése
 
+[Graphics error]
+
+[Graphics error]
+Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== 
+
+[Graphics error]
+Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
+== 
+
+[Graphics error]
+An error during command recording occurred. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+A render command failed. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+Submitting the render commands failed. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+Failed to swap framebuffers. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== 
+
+[Graphics error]
+Could not initialize the given graphics backend, reverting to the default backend now.
+== 
+
+[Graphics error]
+Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
+== 
+
+Could not save downloaded map. Try manually deleting this file: %s
+== 
+
 Why are you slowmo replaying to read this?
+== 
+
+Cancel
+== 
+
+File '%s' already exists, do you want to overwrite it?
+== 
+
+Copy info
+== 
+
+Are you sure that you want to remove the player '%s' from your friends list?
+== 
+
+Are you sure that you want to remove the clan '%s' from your friends list?
 == 
 
 Play the current demo
@@ -1559,6 +1588,12 @@ Pause the current demo
 == 
 
 Stop the current demo
+== 
+
+Go back one tick
+== 
+
+Go forward one tick
 == 
 
 Slow down the demo
@@ -1573,10 +1608,55 @@ Mark the beginning of a cut
 Mark the end of a cut
 == 
 
-Export cut as a seperate demo
+Export cut as a separate demo
+== 
+
+Go back one marker
+== 
+
+Go forward one marker
 == 
 
 Toggle keyboard shortcuts
+== 
+
+Open the directory that contains the demo files
+== 
+
+Are you sure that you want to delete the demo '%s'?
+== 
+
+Unable to delete the demo '%s'
+== 
+
+Menu opened. Press Esc key again to close menu.
+== 
+
+Save power by lowering refresh rate (higher input latency)
+== 
+
+Open the settings file
+== 
+
+Open the directory that contains the configuration and user files
+== 
+
+Open the directory to add custom themes
+== 
+
+Create a random skin
+== 
+
+Open the directory to add custom skins
+== 
+
+No controller found. Plug in a controller.
+== 
+
+Reset controls
+== 
+
+Are you sure that you want to reset the controls to their defaults?
 == 
 
 Weapons
@@ -1604,4 +1684,13 @@ Freeze Laser Outline Color
 == 
 
 Freeze Laser Inner Color
+== 
+
+Set all to Rifle
+== 
+
+Unregister protocol and file extensions
+== 
+
+Open the directory to add custom assets
 == 

@@ -5,6 +5,9 @@
 
 #include <base/vmath.h>
 #include <engine/map.h>
+#include <engine/shared/protocol.h>
+
+#include <vector>
 
 /*
 	Class: Game Controller
@@ -15,8 +18,7 @@ class IGameController
 {
 	friend class CSaveTeam; // need access to GameServer() and Server()
 
-	vec2 m_aaSpawnPoints[3][64];
-	int m_aNumSpawnPoints[3];
+	std::vector<vec2> m_avSpawnPoints[3];
 
 	class CGameContext *m_pGameServer;
 	class CConfig *m_pConfig;
@@ -103,12 +105,12 @@ public:
 		Returns:
 			bool?
 	*/
-	virtual bool OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Number = 0);
+	virtual bool OnEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number = 0);
 
 	virtual void OnPlayerConnect(class CPlayer *pPlayer);
 	virtual void OnPlayerDisconnect(class CPlayer *pPlayer, const char *pReason);
 
-	void OnReset();
+	virtual void OnReset();
 
 	// game
 	void DoWarmup(int Seconds);
@@ -142,7 +144,7 @@ public:
 	virtual bool CanJoinTeam(int Team, int NotThisID);
 	int ClampTeam(int Team);
 
-	virtual int64_t GetMaskForPlayerWorldEvent(int Asker, int ExceptID = -1);
+	virtual CClientMask GetMaskForPlayerWorldEvent(int Asker, int ExceptID = -1);
 
 	// DDRace
 

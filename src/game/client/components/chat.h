@@ -15,7 +15,7 @@
 
 class CChat : public CComponent
 {
-	CLineInput m_Input;
+	CLineInputBuffered<512> m_Input;
 
 	static constexpr float CHAT_WIDTH = 200.0f;
 	static constexpr float CHAT_HEIGHT_FULL = 200.0f;
@@ -40,7 +40,7 @@ class CChat : public CComponent
 		bool m_Friend;
 		bool m_Highlighted;
 
-		int m_TextContainerIndex;
+		STextContainerIndex m_TextContainerIndex;
 		int m_QuadContainerIndex;
 
 		char m_aSkinName[std::size(g_Config.m_ClPlayerSkin)];
@@ -62,9 +62,12 @@ class CChat : public CComponent
 	CLine m_aLines[MAX_LINES];
 	int m_CurrentLine;
 
-	// chat
 	enum
 	{
+		// client IDs for special messages
+		CLIENT_MSG = -2,
+		SERVER_MSG = -1,
+
 		MODE_NONE = 0,
 		MODE_ALL,
 		MODE_TEAM,
@@ -77,9 +80,6 @@ class CChat : public CComponent
 
 	int m_Mode;
 	bool m_Show;
-	bool m_InputUpdate;
-	int m_ChatStringOffset;
-	int m_OldChatStringLength;
 	bool m_CompletionUsed;
 	int m_CompletionChosen;
 	char m_aCompletionBuffer[256];
@@ -110,7 +110,6 @@ class CChat : public CComponent
 	};
 
 	std::vector<CCommand> m_vCommands;
-	bool m_ReverseTAB;
 
 	struct CHistoryEntry
 	{
@@ -164,7 +163,7 @@ public:
 	void Reset();
 	void OnRelease() override;
 	void OnMessage(int MsgType, void *pRawMsg) override;
-	bool OnInput(IInput::CEvent Event) override;
+	bool OnInput(const IInput::CEvent &Event) override;
 	void OnInit() override;
 
 	void RebuildChat();

@@ -22,7 +22,7 @@ freely, subject to the following restrictions:
 
 All content under 'data' except the assets, font, language & skin files,
 (which have their own licenses) are released under
-CC-BY-SA 3.0 (http://creativecommons.org/licenses/by-sa/3.0/).
+CC-BY-SA 3.0 (https://creativecommons.org/licenses/by-sa/3.0/).
 SIL OFL 1.1 License for the 'Icon.otf' ('Font Awesome 6 Free-Solid-900.otf') file:
 
 Copyright (c) 2022 Fonticons, Inc. (https://fontawesome.com)
@@ -35,7 +35,7 @@ http://scripts.sil.org/OFL
 SIL OPEN FONT LICENSE
 Version 1.1 - 26 February 2007
 
-The other fonts are released under CC-BY-SA 3.0 (http://creativecommons.org/licenses/by-sa/3.0/).
+The other fonts are released under CC-BY-SA 3.0 (https://creativecommons.org/licenses/by-sa/3.0/).
 
 ------------------------------------------------------------------------
 

@@ -14,7 +14,7 @@ class IInput : public IInterface
 public:
 	enum
 	{
-		INPUT_TEXT_SIZE = 128
+		INPUT_TEXT_SIZE = 32 * UTF8_BYTE_LENGTH + 1,
 	};
 
 	class CEvent
@@ -33,16 +33,17 @@ protected:
 	};
 
 	// quick access to events
-	int m_NumEvents;
-	IInput::CEvent m_aInputEvents[INPUT_BUFFER_SIZE];
+	size_t m_NumEvents;
+	CEvent m_aInputEvents[INPUT_BUFFER_SIZE];
+	int64_t m_LastUpdate;
+	float m_UpdateTime;
 
 public:
 	enum
 	{
-		FLAG_PRESS = 1,
-		FLAG_RELEASE = 2,
-		FLAG_REPEAT = 4,
-		FLAG_TEXT = 8,
+		FLAG_PRESS = 1 << 0,
+		FLAG_RELEASE = 1 << 1,
+		FLAG_TEXT = 1 << 2,
 	};
 	enum ECursorType
 	{
@@ -50,24 +51,32 @@ public:
 		CURSOR_MOUSE,
 		CURSOR_JOYSTICK,
 	};
+	enum
+	{
+		MAX_COMPOSITION_ARRAY_SIZE = 32, // SDL2 limitation
+
+		COMP_LENGTH_INACTIVE = -1,
+	};
 
 	// events
-	int NumEvents() const { return m_NumEvents; }
-	virtual bool IsEventValid(CEvent *pEvent) const = 0;
-	CEvent GetEvent(int Index) const
+	size_t NumEvents() const { return m_NumEvents; }
+	virtual bool IsEventValid(const CEvent &Event) const = 0;
+	const CEvent &GetEvent(size_t Index) const
 	{
-		if(Index < 0 || Index >= m_NumEvents)
-		{
-			IInput::CEvent e = {0, 0};
-			return e;
-		}
+		dbg_assert(Index < m_NumEvents, "Index invalid");
 		return m_aInputEvents[Index];
 	}
-	CEvent *GetEventsRaw() { return m_aInputEvents; }
-	int *GetEventCountRaw() { return &m_NumEvents; }
+
+	/**
+	 * @return Rolling average of the time in seconds between
+	 * calls of the Update function.
+	 */
+	float GetUpdateTime() const { return m_UpdateTime; }
 
 	// keys
 	virtual bool ModifierIsPressed() const = 0;
+	virtual bool ShiftIsPressed() const = 0;
+	virtual bool AltIsPressed() const = 0;
 	virtual bool KeyIsPressed(int Key) const = 0;
 	virtual bool KeyPress(int Key, bool CheckCounter = false) const = 0;
 	const char *KeyName(int Key) const { return (Key >= 0 && Key < g_MaxKeys) ? g_aaKeyStrings[Key] : g_aaKeyStrings[0]; }
@@ -84,7 +93,7 @@ public:
 		virtual int GetNumBalls() const = 0;
 		virtual int GetNumHats() const = 0;
 		virtual float GetAxisValue(int Axis) = 0;
-		virtual int GetHatValue(int Hat) = 0;
+		virtual void GetHatValue(int Hat, int (&HatKeys)[2]) = 0;
 		virtual bool Relative(float *pX, float *pY) = 0;
 		virtual bool Absolute(float *pX, float *pY) = 0;
 	};
@@ -105,12 +114,18 @@ public:
 	virtual void SetClipboardText(const char *pText) = 0;
 
 	// text editing
-	virtual bool GetIMEState() = 0;
-	virtual void SetIMEState(bool Activate) = 0;
-	virtual int GetIMEEditingTextLength() const = 0;
-	virtual const char *GetIMEEditingText() = 0;
-	virtual int GetEditingCursor() = 0;
-	virtual void SetEditingPosition(float X, float Y) = 0;
+	virtual void StartTextInput() = 0;
+	virtual void StopTextInput() = 0;
+	virtual const char *GetComposition() const = 0;
+	virtual bool HasComposition() const = 0;
+	virtual int GetCompositionCursor() const = 0;
+	virtual int GetCompositionLength() const = 0;
+	virtual const char *GetCandidate(int Index) const = 0;
+	virtual int GetCandidateCount() const = 0;
+	virtual int GetCandidateSelectedIndex() const = 0;
+	virtual void SetCompositionWindowPosition(float X, float Y, float H) = 0;
+
+	virtual bool GetDropFile(char *aBuf, int Len) = 0;
 
 	ECursorType CursorRelative(float *pX, float *pY)
 	{
@@ -130,7 +145,6 @@ public:
 	virtual void Init() = 0;
 	virtual void Shutdown() override = 0;
 	virtual int Update() = 0;
-	virtual int VideoRestartNeeded() = 0;
 };
 
 extern IEngineInput *CreateEngineInput();
