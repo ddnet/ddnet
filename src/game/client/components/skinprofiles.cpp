@@ -15,12 +15,10 @@ void CSkinProfiles::WriteLine(const char *pLine)
 {
 	if(!m_ProfilesFile ||
 		io_write(m_ProfilesFile, pLine, str_length(pLine)) != static_cast<unsigned>(str_length(pLine)) ||
-#if defined(CONF_FAMILY_WINDOWS)
-		io_write_newline(m_ProfilesFile) != 2)
-#else
-		io_write_newline(m_ProfilesFile) != 1)
-#endif
+		!io_write_newline(m_ProfilesFile))
+	{
 		return;
+	}
 }
 
 void CSkinProfiles::OnInit()
