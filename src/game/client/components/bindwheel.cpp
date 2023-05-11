@@ -67,12 +67,12 @@ void CBindWheel::OnConsoleInit()
 	{
 		if(!(str_comp(m_BindWheelList[i].description, "EMPTY") == 0))
 		{
-			str_format(m_BindWheelList[i].description, sizeof(m_BindWheelList[i].description), "EMPTY");
+			str_format(m_BindWheelList[i].description, sizeof(m_BindWheelList[i].description), "%s", "EMPTY");
 		}
 
 		if(str_comp(m_BindWheelList[i].command, "") == 0)
 		{
-			str_format(m_BindWheelList[i].command, sizeof(m_BindWheelList[i].command), "");
+			str_format(m_BindWheelList[i].command, sizeof(m_BindWheelList[i].command), "%s", "");
 		}
 	}
 }

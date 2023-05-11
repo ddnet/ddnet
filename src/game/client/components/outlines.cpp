@@ -25,7 +25,6 @@ void COutlines::OnRender()
 
 			continue;
 
-		bool PassedGameLayer = false;
 
 		CTile *pGameTiles = NULL;
 
@@ -34,22 +33,10 @@ void COutlines::OnRender()
 			CMapItemLayer *pLayer = GameClient()->Layers()->GetLayer(pGroup->m_StartLayer + l);
 			if(!pLayer)
 				return;
-			bool Render = false;
 			bool IsGameLayer = false;
-			bool IsFrontLayer = false;
-			bool IsSwitchLayer = false;
 			bool IsTeleLayer = false;
-			bool IsSpeedupLayer = false;
-			bool IsTuneLayer = false;
-			bool IsEntityLayer = false;
 
-			if(pLayer == (CMapItemLayer *)GameClient()->Layers()->GameLayer())
-			{
-				IsEntityLayer = IsGameLayer = true;
-				PassedGameLayer = true;
-			}
 			if(pLayer == (CMapItemLayer *)GameClient()->Layers()->TeleLayer())
-				IsEntityLayer = IsTeleLayer = true;
 
 			if(g_Config.m_ClOutline && IsGameLayer)
 			{
@@ -80,7 +67,6 @@ void COutlines::OnRender()
 				CTile *pTiles = (CTile *)GameClient()->Layers()->Map()->GetData(pTMap->m_Data);
 				if(!pTiles)
 					return;
-				unsigned int Size = GameClient()->Layers()->Map()->GetDataSize(pTMap->m_Data);
 				if(IsGameLayer)
 					pGameTiles = pTiles;
 				if(g_Config.m_ClOutlineTele && IsTeleLayer)

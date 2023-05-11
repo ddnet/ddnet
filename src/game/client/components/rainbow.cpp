@@ -20,10 +20,6 @@ void CRainbow::TransformColor(unsigned char mode, int tick, CTeeRenderInfo *pinf
     const ColorHSLA playercolbody = ColorHSLA(g_Config.m_ClPlayerColorBody);
     const ColorHSLA playercolfeet = ColorHSLA(g_Config.m_ClPlayerColorFeet);
  
-    const float colhue = (float)deftick / 255.0f;
-    const float colsat = fabs(sinf((float)deftick / 40.5845104884333106f));
-    const float collight = 0.5f + fabs(((float)deftick / 255.0f) - 0.5f);
-
     const ColorRGBA col = color_cast<ColorRGBA>(ColorHSLA((float)deftick / 255.0f, 1.0f, 0.5f));
     if (mode == COLORMODE_RAINBOW)
     {

@@ -2646,7 +2646,7 @@ vec2 CGameClient::GetSmoothPos(int ClientID)
 vec2 CGameClient::GetFreezePos(int ClientID)
 {
 	vec2 Pos = mix(m_aClients[ClientID].m_PrevPredicted.m_Pos, m_aClients[ClientID].m_Predicted.m_Pos, Client()->PredIntraGameTick(g_Config.m_ClDummy));
-	int64_t Now = time_get();
+	//int64_t Now = time_get();
 	for(int i = 0; i < 2; i++)
 	{
 		//int64_t Len = clamp(m_aClients[ClientID].m_SmoothLen[i], (int64_t)1, time_freq());

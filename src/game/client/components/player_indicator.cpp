@@ -38,7 +38,6 @@ void CPlayerIndicator::OnRender()
 
 
 		Graphics()->TextureClear();
-		float CircleSize = 7.0f;
 		ColorRGBA col = ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f);
 		if(!(m_pClient->m_Teams.Team(m_pClient->m_Snap.m_LocalClientID) == 0 && g_Config.m_ClIndicatorTeamOnly))
 		{
@@ -97,7 +96,6 @@ void CPlayerIndicator::OnRender()
 					}
 					col.a = Alpha;
 
-					CAnimState *pIdleState = CAnimState::GetIdle();
 					TeeInfo.m_Size = g_Config.m_ClIndicatorRadius * 4.f;
 
 					if(g_Config.m_ClIndicatorTees)

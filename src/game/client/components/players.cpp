@@ -150,7 +150,6 @@ void CPlayers::RenderHookCollLine(
 		Angle = GetPlayerTargetAngle(&Prev, &Player, ClientID, IntraTick);
 	}
 
-	vec2 Direction = direction(Angle);
 	vec2 Position;
 	if(in_range(ClientID, MAX_CLIENTS - 1))
 		Position = m_pClient->m_aClients[ClientID].m_RenderPos;
@@ -158,14 +157,13 @@ void CPlayers::RenderHookCollLine(
 		Position = mix(vec2(Prev.m_X, Prev.m_Y), vec2(Player.m_X, Player.m_Y), IntraTick);
 	// draw hook collision line
 	{
-		bool OtherTeam = m_pClient->IsOtherTeam(ClientID);
-		float Alpha = (OtherTeam || ClientID < 0) ? g_Config.m_ClShowOthersAlpha / 100.0f : 1.0f;
+		OtherTeam = m_pClient->IsOtherTeam(ClientID);
+		Alpha = (OtherTeam || ClientID < 0) ? g_Config.m_ClShowOthersAlpha / 100.0f : 1.0f;
 
-		float IntraTick = Intra;
+		IntraTick = Intra;
 		if(ClientID >= 0)
 			IntraTick = m_pClient->m_aClients[ClientID].m_IsPredicted ? Client()->PredIntraGameTick(g_Config.m_ClDummy) : Client()->IntraGameTick(g_Config.m_ClDummy);
 
-		float Angle;
 		if(Local && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		{
 			// just use the direct input if it's the local player we are rendering
@@ -189,7 +187,6 @@ void CPlayers::RenderHookCollLine(
 		}
 
 		vec2 Direction = direction(Angle);
-		vec2 Position;
 		if(in_range(ClientID, MAX_CLIENTS - 1))
 			Position = m_pClient->m_aClients[ClientID].m_RenderPos;
 		else
@@ -215,7 +212,7 @@ void CPlayers::RenderHookCollLine(
 #endif
 		if((AlwaysRenderHookColl || RenderHookCollPlayer) && RenderHookCollVideo)
 		{
-			vec2 ExDirection = Direction;
+			ExDirection = Direction;
 
 			if(Local && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 			{
@@ -812,8 +809,8 @@ void CPlayers::OnRender()
 
 		const CGameClient::CSnapState::CCharacterInfo &CharacterInfo = m_pClient->m_Snap.m_aCharacters[i];
 		
-		if((CharacterInfo.m_Cur.m_Weapon == WEAPON_NINJA || (CharacterInfo.m_HasExtendedData && CharacterInfo.m_ExtendedData.m_FreezeEnd != 0)) && g_Config.m_ClShowNinja
-		|| (g_Config.m_ClAmIFrozen && g_Config.m_ClFreezeUpdateFix && m_pClient->m_Snap.m_LocalClientID == i && g_Config.m_ClShowNinja))
+		if(((CharacterInfo.m_Cur.m_Weapon == WEAPON_NINJA || (CharacterInfo.m_HasExtendedData && CharacterInfo.m_ExtendedData.m_FreezeEnd != 0)) 
+			&& g_Config.m_ClShowNinja) || (g_Config.m_ClAmIFrozen && g_Config.m_ClFreezeUpdateFix && m_pClient->m_Snap.m_LocalClientID == i && g_Config.m_ClShowNinja))
 		{
 			// change the skin for the player to the ninja
 			const auto *pSkin = m_pClient->m_Skins.FindOrNullptr("x_ninja");

@@ -622,7 +622,7 @@ void CHud::RenderTextInfo()
 			if(NumInTeam > 1 && NumInTeam - NumFrozen == 1)
 			{
 				char aBuf[64];
-				str_format(aBuf, sizeof(aBuf), g_Config.m_ClNotifyWhenLastText);
+				str_format(aBuf, sizeof(aBuf), "%s", g_Config.m_ClNotifyWhenLastText);
                 TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClNotifyWhenLastColor)));
 				TextRender()->Text(170, 4, 14, aBuf, -1.0f);
                 TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -822,7 +822,6 @@ void CHud::RenderCursor()
 		return;
 
 	int CurWeapon = 1;
-	vec2 Pos = vec2(m_pClient->m_Controls.m_aTargetPos[g_Config.m_ClDummy].x, m_pClient->m_Controls.m_aTargetPos[g_Config.m_ClDummy].y);
 	RenderTools()->MapScreenToInterface(m_pClient->m_Camera.m_Center.x, m_pClient->m_Camera.m_Center.y);
 
 	// render cursor

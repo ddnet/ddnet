@@ -67,8 +67,7 @@ bool CSkinProfiles::SaveProfiles()
 	char aBuf[256];
 	char aBufTemp[128];
 	char aEscapeBuf[256];
-	const char *pEnd = aBuf + sizeof(aBuf) - 4;
-	for(int i = 0; i < m_Profiles.size(); ++i)
+	for(int i = 0; i < (int)m_Profiles.size(); ++i)
 	{
 		str_copy(aBuf, "add_profile ", sizeof(aBuf));
 
