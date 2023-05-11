@@ -17,7 +17,6 @@ class CBindWheel : public CComponent
 
 	vec2 m_SelectorMouse;
 	int m_SelectedBind;
-	int m_SelectedEyeEmote;
 
 	static void ConBindwheel(IConsole::IResult *pResult, void *pUserData);
 	static void ConBind(IConsole::IResult *pResult, void *pUserData);
