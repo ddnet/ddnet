@@ -6,6 +6,8 @@ Not guarenteed to be bug free, but I will try to fix them.
 
 If ddnet devs are reading this and want to steal my changes please feel free.  
 
+Thanks to tela for the logo png <3 
+
 # Installation:
 
 
@@ -89,3 +91,4 @@ tc_rainbow_others
 tc_rainbow_mode
 add_profile
 ```
+
