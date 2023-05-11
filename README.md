@@ -1,7 +1,8 @@
 [![DDraceNetwork](https://user-images.githubusercontent.com/55141362/212435433-55e4e969-64ed-4ab2-8652-91901d2314a9.png)](https://ddnet.tw) 
 
+[![Build](https://github.com/sjrc6/TaterClient-ddnet/actions/workflows/build.yaml/badge.svg)](https://github.com/sjrc6/TaterClient-ddnet/actions/workflows/build.yaml)
 
-### Taters custom ddnet client with some small modifications
+### Taters custom ddnet client with some small modifications 
 Not guarenteed to be bug free, but I will try to fix them. 
 
 If ddnet devs are reading this and want to steal my changes please feel free.  
