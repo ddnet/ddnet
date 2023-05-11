@@ -1707,8 +1707,6 @@ void CGameClient::OnNewSnapshot()
 	for(auto &pComponent : m_vpAll)
 		pComponent->OnNewSnapshot();
 
-	float Alpha = g_Config.m_ClShowOthersAlpha / 100.0f;
-
 	// detect air jump for other players
 	for(int i = 0; i < MAX_CLIENTS; i++)
 		if(m_Snap.m_aCharacters[i].m_Active && (m_Snap.m_aCharacters[i].m_Cur.m_Jumped & 2) && !(m_Snap.m_aCharacters[i].m_Prev.m_Jumped & 2))
@@ -1717,6 +1715,10 @@ void CGameClient::OnNewSnapshot()
 				vec2 Pos = mix(vec2(m_Snap.m_aCharacters[i].m_Prev.m_X, m_Snap.m_aCharacters[i].m_Prev.m_Y),
 					vec2(m_Snap.m_aCharacters[i].m_Cur.m_X, m_Snap.m_aCharacters[i].m_Cur.m_Y),
 					Client()->IntraGameTick(g_Config.m_ClDummy));
+				float Alpha = 1.0f;
+				bool SameTeam = m_Teams.SameTeam(m_Snap.m_LocalClientID, i);
+				if(!SameTeam || m_aClients[i].m_Solo || m_aClients[m_Snap.m_LocalClientID].m_Solo)
+					Alpha = g_Config.m_ClShowOthersAlpha / 100.0f;
 				m_Effects.AirJump(Pos, Alpha);
 			}
 
