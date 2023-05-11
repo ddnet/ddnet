@@ -936,30 +936,33 @@ void CGameClient::ProcessEvents()
 		IClient::CSnapItem Item;
 		const void *pData = Client()->SnapGetItem(SnapType, Index, &Item);
 
+		// We don't have enough info about us, others, to know a correct alpha value.
+		float Alpha = 1.0f;
+
 		if(Item.m_Type == NETEVENTTYPE_DAMAGEIND)
 		{
 			CNetEvent_DamageInd *pEvent = (CNetEvent_DamageInd *)pData;
-			m_Effects.DamageIndicator(vec2(pEvent->m_X, pEvent->m_Y), direction(pEvent->m_Angle / 256.0f));
+			m_Effects.DamageIndicator(vec2(pEvent->m_X, pEvent->m_Y), direction(pEvent->m_Angle / 256.0f), Alpha);
 		}
 		else if(Item.m_Type == NETEVENTTYPE_EXPLOSION)
 		{
 			CNetEvent_Explosion *pEvent = (CNetEvent_Explosion *)pData;
-			m_Effects.Explosion(vec2(pEvent->m_X, pEvent->m_Y));
+			m_Effects.Explosion(vec2(pEvent->m_X, pEvent->m_Y), Alpha);
 		}
 		else if(Item.m_Type == NETEVENTTYPE_HAMMERHIT)
 		{
 			CNetEvent_HammerHit *pEvent = (CNetEvent_HammerHit *)pData;
-			m_Effects.HammerHit(vec2(pEvent->m_X, pEvent->m_Y));
+			m_Effects.HammerHit(vec2(pEvent->m_X, pEvent->m_Y), Alpha);
 		}
 		else if(Item.m_Type == NETEVENTTYPE_SPAWN)
 		{
 			CNetEvent_Spawn *pEvent = (CNetEvent_Spawn *)pData;
-			m_Effects.PlayerSpawn(vec2(pEvent->m_X, pEvent->m_Y));
+			m_Effects.PlayerSpawn(vec2(pEvent->m_X, pEvent->m_Y), Alpha);
 		}
 		else if(Item.m_Type == NETEVENTTYPE_DEATH)
 		{
 			CNetEvent_Death *pEvent = (CNetEvent_Death *)pData;
-			m_Effects.PlayerDeath(vec2(pEvent->m_X, pEvent->m_Y), pEvent->m_ClientID);
+			m_Effects.PlayerDeath(vec2(pEvent->m_X, pEvent->m_Y), pEvent->m_ClientID, Alpha);
 		}
 		else if(Item.m_Type == NETEVENTTYPE_SOUNDWORLD)
 		{
@@ -1704,6 +1707,8 @@ void CGameClient::OnNewSnapshot()
 	for(auto &pComponent : m_vpAll)
 		pComponent->OnNewSnapshot();
 
+	float Alpha = g_Config.m_ClShowOthersAlpha / 100.0f;
+
 	// detect air jump for other players
 	for(int i = 0; i < MAX_CLIENTS; i++)
 		if(m_Snap.m_aCharacters[i].m_Active && (m_Snap.m_aCharacters[i].m_Cur.m_Jumped & 2) && !(m_Snap.m_aCharacters[i].m_Prev.m_Jumped & 2))
@@ -1712,7 +1717,7 @@ void CGameClient::OnNewSnapshot()
 				vec2 Pos = mix(vec2(m_Snap.m_aCharacters[i].m_Prev.m_X, m_Snap.m_aCharacters[i].m_Prev.m_Y),
 					vec2(m_Snap.m_aCharacters[i].m_Cur.m_X, m_Snap.m_aCharacters[i].m_Cur.m_Y),
 					Client()->IntraGameTick(g_Config.m_ClDummy));
-				m_Effects.AirJump(Pos);
+				m_Effects.AirJump(Pos, Alpha);
 			}
 
 	static int PrevLocalID = -1;
@@ -1845,7 +1850,7 @@ void CGameClient::OnPredict()
 			int Events = pLocalChar->Core()->m_TriggeredEvents;
 			if(g_Config.m_ClPredict && !m_SuppressEvents)
 				if(Events & COREEVENT_AIR_JUMP)
-					m_Effects.AirJump(Pos);
+					m_Effects.AirJump(Pos, 1.0f);
 			if(g_Config.m_SndGame && !m_SuppressEvents)
 			{
 				if(Events & COREEVENT_GROUND_JUMP)
@@ -1865,7 +1870,7 @@ void CGameClient::OnPredict()
 			int Events = pDummyChar->Core()->m_TriggeredEvents;
 			if(g_Config.m_ClPredict && !m_SuppressEvents)
 				if(Events & COREEVENT_AIR_JUMP)
-					m_Effects.AirJump(Pos);
+					m_Effects.AirJump(Pos, 1.0f);
 		}
 	}
 

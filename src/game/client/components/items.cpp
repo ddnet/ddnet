@@ -162,7 +162,7 @@ void CItems::RenderPickup(const CNetObj_Pickup *pPrev, const CNetObj_Pickup *pCu
 	else if(pCurrent->m_Type == POWERUP_NINJA)
 	{
 		QuadOffset = m_PickupNinjaOffset;
-		m_pClient->m_Effects.PowerupShine(Pos, vec2(96, 18));
+		m_pClient->m_Effects.PowerupShine(Pos, vec2(96, 18), 1.0f);
 		Pos.x -= 10.0f;
 		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpritePickupNinja);
 	}
