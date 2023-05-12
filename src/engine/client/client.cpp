@@ -4608,6 +4608,11 @@ int main(int argc, const char **argv)
 	NotificationsInit();
 	CleanerFunctions.push([]() { NotificationsUninit(); });
 
+	// Register SDL for cleanup before creating the kernel and client,
+	// so SDL is shutdown after kernel and client. Otherwise the client
+	// may crash when shutting down after SDL is already shutdown.
+	CleanerFunctions.push([]() { SDL_Quit(); });
+
 	CClient *pClient = CreateClient();
 	IKernel *pKernel = IKernel::Create();
 	pKernel->RegisterInterface(pClient, false);
@@ -4792,7 +4797,6 @@ int main(int argc, const char **argv)
 		PerformAllCleanup();
 		return -1;
 	}
-	CleanerFunctions.push([]() { SDL_Quit(); });
 
 	// run the client
 	dbg_msg("client", "starting...");
