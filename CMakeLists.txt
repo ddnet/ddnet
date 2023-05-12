@@ -1956,6 +1956,8 @@ set_src(ENGINE_SHARED GLOB_RECURSE src/engine/shared
   jobs.h
   json.cpp
   json.h
+  jsonwriter.cpp
+  jsonwriter.h
   kernel.cpp
   linereader.cpp
   linereader.h
@@ -2726,6 +2728,7 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
     io.cpp
     jobs.cpp
     json.cpp
+    jsonwriter.cpp
     linereader.cpp
     mapbugs.cpp
     name_ban.cpp
