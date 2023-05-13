@@ -11,8 +11,23 @@ CTestInfo::CTestInfo()
 {
 	const ::testing::TestInfo *pTestInfo =
 		::testing::UnitTest::GetInstance()->current_test_info();
+
+	// Typed tests have test names like "TestName/0" and "TestName/1", which would result in invalid filenames.
+	// Replace the string after the first slash with the name of the typed test and use hyphen instead of slash.
+	char aTestCaseName[128];
+	str_copy(aTestCaseName, pTestInfo->test_case_name());
+	for(int i = 0; i < str_length(aTestCaseName); i++)
+	{
+		if(aTestCaseName[i] == '/')
+		{
+			aTestCaseName[i] = '-';
+			aTestCaseName[i + 1] = '\0';
+			str_append(aTestCaseName, pTestInfo->type_param());
+			break;
+		}
+	}
 	str_format(m_aFilenamePrefix, sizeof(m_aFilenamePrefix), "%s.%s-%d",
-		pTestInfo->test_case_name(), pTestInfo->name(), pid());
+		aTestCaseName, pTestInfo->name(), pid());
 	Filename(m_aFilename, sizeof(m_aFilename), ".tmp");
 }
 
