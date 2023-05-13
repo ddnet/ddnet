@@ -43,9 +43,18 @@ jobs:
         fi
     - name: Run unit tests with ASan and UBSan
       run: |
-        export UBSAN_OPTIONS=suppressions=./ubsan.supp:log_path=./SAN:print_stacktrace=1:halt_on_errors=0
         cmake --build . --config Debug --target run_cxx_tests
         # Rust tests work locally, but still not in CI, even with the same directory
+        if test -n "$(find . -maxdepth 1 -name 'SAN.*' -print -quit)"
+        then
+          cat ./SAN.*
+          exit 1
+        fi
     - name: Run integration tests with ASan and UBSan
       run: |
         make run_integration_tests
+        if test -n "$(find . -maxdepth 1 -name 'SAN.*' -print -quit)"
+        then
+          cat ./SAN.*
+          exit 1
+        fi
