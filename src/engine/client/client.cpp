@@ -4643,7 +4643,7 @@ int main(int argc, const char **argv)
 		if(MainThreadId != std::this_thread::get_id())
 			return;
 		char aVersionStr[128];
-		if(os_version_str(aVersionStr, sizeof(aVersionStr)))
+		if(!os_version_str(aVersionStr, sizeof(aVersionStr)))
 			str_copy(aVersionStr, "unknown");
 		char aMessage[512];
 		str_format(aMessage, sizeof(aMessage), "An assertion error occured. Please write down or take a screenshot of the following information and report this error.\nPlease also share the assert log which you should find in the 'dumps' folder in your config directory.\n\n%s\n\nPlatform: %s\nGame version: %s %s\nOS version: %s", pMsg, CONF_PLATFORM_STRING, GAME_RELEASE_VERSION, GIT_SHORTREV_HASH != nullptr ? GIT_SHORTREV_HASH : "", aVersionStr);
