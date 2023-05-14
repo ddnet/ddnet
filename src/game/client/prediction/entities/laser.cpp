@@ -208,15 +208,6 @@ CLaser::CLaser(CGameWorld *pGameWorld, int ID, CLaserData *pLaser) :
 	m_ID = ID;
 }
 
-void CLaser::FillInfo(CNetObj_Laser *pLaser)
-{
-	pLaser->m_X = (int)m_Pos.x;
-	pLaser->m_Y = (int)m_Pos.y;
-	pLaser->m_FromX = (int)m_From.x;
-	pLaser->m_FromY = (int)m_From.y;
-	pLaser->m_StartTick = m_EvalTick;
-}
-
 bool CLaser::Match(CLaser *pLaser)
 {
 	if(pLaser->m_EvalTick != m_EvalTick)
@@ -240,6 +231,8 @@ CLaserData CLaser::GetData() const
 	Result.m_ExtraInfo = true;
 	Result.m_Owner = m_Owner;
 	Result.m_Type = m_Type == WEAPON_SHOTGUN ? LASERTYPE_SHOTGUN : LASERTYPE_RIFLE;
+	Result.m_Subtype = -1;
 	Result.m_TuneZone = m_TuneZone;
+	Result.m_SwitchNumber = m_Number;
 	return Result;
 }

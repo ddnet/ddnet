@@ -373,7 +373,7 @@ void CGameContext::CreateSoundGlobal(int Sound, int Target)
 	}
 }
 
-bool CGameContext::SnapLaserObject(const CSnapContext &Context, int SnapID, const vec2 &To, const vec2 &From, int StartTick, int Owner, int LaserType)
+bool CGameContext::SnapLaserObject(const CSnapContext &Context, int SnapID, const vec2 &To, const vec2 &From, int StartTick, int Owner, int LaserType, int Subtype, int SwitchNumber)
 {
 	if(Context.GetClientVersion() >= VERSION_DDNET_MULTI_LASER)
 	{
@@ -388,6 +388,8 @@ bool CGameContext::SnapLaserObject(const CSnapContext &Context, int SnapID, cons
 		pObj->m_StartTick = StartTick;
 		pObj->m_Owner = Owner;
 		pObj->m_Type = LaserType;
+		pObj->m_Subtype = Subtype;
+		pObj->m_SwitchNumber = SwitchNumber;
 	}
 	else
 	{
@@ -405,7 +407,7 @@ bool CGameContext::SnapLaserObject(const CSnapContext &Context, int SnapID, cons
 	return true;
 }
 
-bool CGameContext::SnapPickup(const CSnapContext &Context, int SnapID, const vec2 &Pos, int Type, int SubType)
+bool CGameContext::SnapPickup(const CSnapContext &Context, int SnapID, const vec2 &Pos, int Type, int SubType, int SwitchNumber)
 {
 	if(Context.IsSixup())
 	{
@@ -420,6 +422,18 @@ bool CGameContext::SnapPickup(const CSnapContext &Context, int SnapID, const vec
 			pPickup->m_Type = SubType == WEAPON_SHOTGUN ? protocol7::PICKUP_SHOTGUN : SubType == WEAPON_GRENADE ? protocol7::PICKUP_GRENADE : protocol7::PICKUP_LASER;
 		else if(Type == POWERUP_NINJA)
 			pPickup->m_Type = protocol7::PICKUP_NINJA;
+	}
+	else if(Context.GetClientVersion() >= VERSION_DDNET_ENTITY_NETOBJS)
+	{
+		CNetObj_DDNetPickup *pPickup = Server()->SnapNewItem<CNetObj_DDNetPickup>(SnapID);
+		if(!pPickup)
+			return false;
+
+		pPickup->m_X = (int)Pos.x;
+		pPickup->m_Y = (int)Pos.y;
+		pPickup->m_Type = Type;
+		pPickup->m_Subtype = SubType;
+		pPickup->m_SwitchNumber = SwitchNumber;
 	}
 	else
 	{

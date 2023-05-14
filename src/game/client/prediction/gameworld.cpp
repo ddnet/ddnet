@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <engine/shared/config.h>
 #include <game/client/laser_data.h>
+#include <game/client/pickup_data.h>
 #include <game/client/projectile_data.h>
 #include <game/mapitems.h>
 #include <utility>
@@ -408,18 +409,10 @@ void CGameWorld::NetCharAdd(int ObjID, CNetObj_Character *pCharObj, CNetObj_DDNe
 
 void CGameWorld::NetObjAdd(int ObjID, int ObjType, const void *pObjData, const CNetObj_EntityEx *pDataEx)
 {
-	if((ObjType == NETOBJTYPE_PROJECTILE || ObjType == NETOBJTYPE_DDNETPROJECTILE) && m_WorldConfig.m_PredictWeapons)
+	if((ObjType == NETOBJTYPE_PROJECTILE || ObjType == NETOBJTYPE_DDRACEPROJECTILE || ObjType == NETOBJTYPE_DDNETPROJECTILE) && m_WorldConfig.m_PredictWeapons)
 	{
-		CProjectileData Data;
-		if(ObjType == NETOBJTYPE_PROJECTILE)
-		{
-			Data = ExtractProjectileInfo((const CNetObj_Projectile *)pObjData, this);
-		}
-		else
-		{
-			Data = ExtractProjectileInfoDDNet((const CNetObj_DDNetProjectile *)pObjData, this);
-		}
-		CProjectile NetProj = CProjectile(this, ObjID, &Data, pDataEx);
+		CProjectileData Data = ExtractProjectileInfo(ObjType, pObjData, this, pDataEx);
+		CProjectile NetProj = CProjectile(this, ObjID, &Data);
 
 		if(NetProj.m_Type != WEAPON_SHOTGUN && absolute(length(NetProj.m_Direction) - 1.f) > 0.02f) // workaround to skip grenades on ball mod
 			return;
@@ -471,9 +464,10 @@ void CGameWorld::NetObjAdd(int ObjID, int ObjType, const void *pObjData, const C
 		CProjectile *pProj = new CProjectile(NetProj);
 		InsertEntity(pProj);
 	}
-	else if(ObjType == NETOBJTYPE_PICKUP && m_WorldConfig.m_PredictWeapons)
+	else if((ObjType == NETOBJTYPE_PICKUP || ObjType == NETOBJTYPE_DDNETPICKUP) && m_WorldConfig.m_PredictWeapons)
 	{
-		CPickup NetPickup = CPickup(this, ObjID, (CNetObj_Pickup *)pObjData, pDataEx);
+		CPickupData Data = ExtractPickupInfo(ObjType, pObjData, pDataEx);
+		CPickup NetPickup = CPickup(this, ObjID, &Data);
 		if(CPickup *pPickup = (CPickup *)GetEntity(ObjID, ENTTYPE_PICKUP))
 		{
 			if(NetPickup.Match(pPickup))
@@ -488,15 +482,12 @@ void CGameWorld::NetObjAdd(int ObjID, int ObjType, const void *pObjData, const C
 	}
 	else if((ObjType == NETOBJTYPE_LASER || ObjType == NETOBJTYPE_DDNETLASER) && m_WorldConfig.m_PredictWeapons)
 	{
-		CLaserData Data;
-		if(ObjType == NETOBJTYPE_LASER)
+		CLaserData Data = ExtractLaserInfo(ObjType, pObjData, this, pDataEx);
+		if(Data.m_Type >= 0 && Data.m_Type != LASERTYPE_RIFLE && Data.m_Type != LASERTYPE_SHOTGUN)
 		{
-			Data = ExtractLaserInfo((const CNetObj_Laser *)pObjData, this);
+			return;
 		}
-		else
-		{
-			Data = ExtractLaserInfoDDNet((const CNetObj_DDNetLaser *)pObjData, this);
-		}
+
 		CLaser NetLaser = CLaser(this, ObjID, &Data);
 		CLaser *pMatching = 0;
 		if(CLaser *pLaser = dynamic_cast<CLaser *>(GetEntity(ObjID, ENTTYPE_LASER)))
@@ -618,28 +609,22 @@ void CGameWorld::CopyWorld(CGameWorld *pFrom)
 
 CEntity *CGameWorld::FindMatch(int ObjID, int ObjType, const void *pObjData)
 {
-#define FindType(EntType, EntClass, ObjClass) \
-	{ \
-		CEntity *pEnt = GetEntity(ObjID, EntType); \
-		if(pEnt && EntClass(this, ObjID, (ObjClass *)pObjData).Match((EntClass *)pEnt)) \
-			return pEnt; \
-		return 0; \
-	}
 	switch(ObjType)
 	{
-	case NETOBJTYPE_CHARACTER: FindType(ENTTYPE_CHARACTER, CCharacter, CNetObj_Character);
+	case NETOBJTYPE_CHARACTER:
+	{
+		CCharacter *pEnt = (CCharacter *)GetEntity(ObjID, ENTTYPE_CHARACTER);
+		if(pEnt && CCharacter(this, ObjID, (CNetObj_Character *)pObjData).Match((CCharacter *)pEnt))
+		{
+			return pEnt;
+		}
+		return 0;
+	}
 	case NETOBJTYPE_PROJECTILE:
+	case NETOBJTYPE_DDRACEPROJECTILE:
 	case NETOBJTYPE_DDNETPROJECTILE:
 	{
-		CProjectileData Data;
-		if(ObjType == NETOBJTYPE_PROJECTILE)
-		{
-			Data = ExtractProjectileInfo((const CNetObj_Projectile *)pObjData, this);
-		}
-		else
-		{
-			Data = ExtractProjectileInfoDDNet((const CNetObj_DDNetProjectile *)pObjData, this);
-		}
+		CProjectileData Data = ExtractProjectileInfo(ObjType, pObjData, this, nullptr);
 		CProjectile *pEnt = (CProjectile *)GetEntity(ObjID, ENTTYPE_PROJECTILE);
 		if(pEnt && CProjectile(this, ObjID, &Data).Match(pEnt))
 		{
@@ -650,15 +635,7 @@ CEntity *CGameWorld::FindMatch(int ObjID, int ObjType, const void *pObjData)
 	case NETOBJTYPE_LASER:
 	case NETOBJTYPE_DDNETLASER:
 	{
-		CLaserData Data;
-		if(ObjType == NETOBJTYPE_LASER)
-		{
-			Data = ExtractLaserInfo((const CNetObj_Laser *)pObjData, this);
-		}
-		else
-		{
-			Data = ExtractLaserInfoDDNet((const CNetObj_DDNetLaser *)pObjData, this);
-		}
+		CLaserData Data = ExtractLaserInfo(ObjType, pObjData, this, nullptr);
 		CLaser *pEnt = (CLaser *)GetEntity(ObjID, ENTTYPE_LASER);
 		if(pEnt && CLaser(this, ObjID, &Data).Match(pEnt))
 		{
@@ -666,7 +643,17 @@ CEntity *CGameWorld::FindMatch(int ObjID, int ObjType, const void *pObjData)
 		}
 		return 0;
 	}
-	case NETOBJTYPE_PICKUP: FindType(ENTTYPE_PICKUP, CPickup, CNetObj_Pickup);
+	case NETOBJTYPE_PICKUP:
+	case NETOBJTYPE_DDNETPICKUP:
+	{
+		CPickupData Data = ExtractPickupInfo(ObjType, pObjData, nullptr);
+		CPickup *pEnt = (CPickup *)GetEntity(ObjID, ENTTYPE_PICKUP);
+		if(pEnt && CPickup(this, ObjID, &Data).Match(pEnt))
+		{
+			return pEnt;
+		}
+		return 0;
+	}
 	}
 	return 0;
 }
