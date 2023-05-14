@@ -40,18 +40,8 @@ public:
 	void Team(int ClientID, int Team);
 
 	void Reset();
-	void SetSolo(int ClientID, bool Value)
-	{
-		dbg_assert(ClientID >= 0 && ClientID < MAX_CLIENTS, "Invalid client id");
-		m_aIsSolo[ClientID] = Value;
-	}
-
-	bool GetSolo(int ClientID) const
-	{
-		if(ClientID < 0 || ClientID >= MAX_CLIENTS)
-			return false;
-		return m_aIsSolo[ClientID];
-	}
+	void SetSolo(int ClientID, bool Value);
+	bool GetSolo(int ClientID) const;
 };
 
 #endif

@@ -7,6 +7,8 @@
 #include <base/color.h>
 #include <engine/storage.h>
 
+#include <memory>
+
 static const ColorRGBA gs_ConsoleDefaultColor(1, 1, 1, 1);
 
 enum LEVEL : char;
@@ -48,10 +50,10 @@ public:
 		IResult() { m_NumArgs = 0; }
 		virtual ~IResult() {}
 
-		virtual int GetInteger(unsigned Index) = 0;
-		virtual float GetFloat(unsigned Index) = 0;
-		virtual const char *GetString(unsigned Index) = 0;
-		virtual ColorHSLA GetColor(unsigned Index, bool Light) = 0;
+		virtual int GetInteger(unsigned Index) const = 0;
+		virtual float GetFloat(unsigned Index) const = 0;
+		virtual const char *GetString(unsigned Index) const = 0;
+		virtual ColorHSLA GetColor(unsigned Index, bool Light) const = 0;
 
 		virtual void RemoveArgument(unsigned Index) = 0;
 
@@ -60,7 +62,7 @@ public:
 
 		// DDRace
 
-		virtual int GetVictim() = 0;
+		virtual int GetVictim() const = 0;
 	};
 
 	class CCommandInfo
@@ -107,10 +109,10 @@ public:
 	virtual void ExecuteLine(const char *pStr, int ClientID = -1, bool InterpretSemicolons = true) = 0;
 	virtual void ExecuteLineFlag(const char *pStr, int FlasgMask, int ClientID = -1, bool InterpretSemicolons = true) = 0;
 	virtual void ExecuteLineStroked(int Stroke, const char *pStr, int ClientID = -1, bool InterpretSemicolons = true) = 0;
-	virtual void ExecuteFile(const char *pFilename, int ClientID = -1, bool LogFailure = false, int StorageType = IStorage::TYPE_ALL) = 0;
+	virtual bool ExecuteFile(const char *pFilename, int ClientID = -1, bool LogFailure = false, int StorageType = IStorage::TYPE_ALL) = 0;
 
 	virtual char *Format(char *pBuf, int Size, const char *pFrom, const char *pStr) = 0;
-	virtual void Print(int Level, const char *pFrom, const char *pStr, ColorRGBA PrintColor = gs_ConsoleDefaultColor) = 0;
+	virtual void Print(int Level, const char *pFrom, const char *pStr, ColorRGBA PrintColor = gs_ConsoleDefaultColor) const = 0;
 	virtual void SetTeeHistorianCommandCallback(FTeeHistorianCommandCallback pfnCallback, void *pUser) = 0;
 	virtual void SetUnknownCommandCallback(FUnknownCommandCallback pfnCallback, void *pUser) = 0;
 	virtual void InitChecksum(CChecksumData *pData) const = 0;
@@ -127,6 +129,6 @@ public:
 	virtual void SetFlagMask(int FlagMask) = 0;
 };
 
-extern IConsole *CreateConsole(int FlagMask);
+std::unique_ptr<IConsole> CreateConsole(int FlagMask);
 
 #endif // FILE_ENGINE_CONSOLE_H

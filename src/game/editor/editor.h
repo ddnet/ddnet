@@ -3,9 +3,7 @@
 #ifndef GAME_EDITOR_EDITOR_H
 #define GAME_EDITOR_EDITOR_H
 
-#include <string>
-#include <vector>
-
+#include <base/bezier.h>
 #include <base/system.h>
 
 #include <game/client/render.h>
@@ -19,6 +17,8 @@
 #include "auto_map.h"
 
 #include <chrono>
+#include <string>
+#include <vector>
 
 using namespace std::chrono_literals;
 
@@ -152,8 +152,10 @@ public:
 	virtual void BrushFlipY() {}
 	virtual void BrushRotate(float Amount) {}
 
+	virtual bool IsEntitiesLayer() const { return false; }
+
 	virtual void Render(bool Tileset = false) {}
-	virtual int RenderProperties(CUIRect *pToolbox) { return 0; }
+	virtual CUI::EPopupMenuFunctionResult RenderProperties(CUIRect *pToolbox) { return CUI::POPUP_KEEP_OPEN; }
 
 	virtual void ModifyImageIndex(INDEX_MODIFY_FUNC pfnFunc) {}
 	virtual void ModifyEnvelopeIndex(INDEX_MODIFY_FUNC pfnFunc) {}
@@ -218,43 +220,8 @@ public:
 
 	bool IsEmpty() const
 	{
-		return m_vpLayers.size() == 0; // stupid function, since its bad for Fillselection: TODO add a function for Fillselection that returns whether a specific tile is used in the given layer
+		return m_vpLayers.empty();
 	}
-
-	/*bool IsUsedInThisLayer(int Layer, int Index) // <--------- this is what i meant but cause i don't know which Indexes belongs to which layers i can't finish yet
-	{
-		switch Layer
-		{
-			case LAYERTYPE_GAME: // security
-				return true;
-			case LAYERTYPE_FRONT:
-				return true;
-			case LAYERTYPE_TELE:
-			{
-				if (Index ==) // you could add an 2D array into mapitems.h which defines which Indexes belong to which layer(s)
-			}
-			case LAYERTYPE_SPEEDUP:
-			{
-				if (Index == TILE_BOOST)
-					return true;
-				else
-					return false;
-			}
-			case LAYERTYPE_SWITCH:
-			{
-
-			}
-			case LAYERTYPE_TUNE:
-			{
-				if (Index == TILE_TUNE)
-					return true;
-				else
-					return false;
-			}
-			default:
-				return false;
-		}
-	}*/
 
 	void OnEdited()
 	{
@@ -298,6 +265,7 @@ public:
 	{
 		m_pEditor = pEditor;
 		m_aName[0] = 0;
+		m_Texture.Invalidate();
 		m_External = 0;
 		m_Width = 0;
 		m_Height = 0;
@@ -311,7 +279,7 @@ public:
 
 	IGraphics::CTextureHandle m_Texture;
 	int m_External;
-	char m_aName[128];
+	char m_aName[IO_MAX_PATH_LENGTH];
 	unsigned char m_aTileFlags[256];
 	class CAutoMapper m_AutoMapper;
 };
@@ -334,7 +302,7 @@ public:
 	~CEditorSound();
 
 	int m_SoundID;
-	char m_aName[128];
+	char m_aName[IO_MAX_PATH_LENGTH];
 
 	void *m_pData;
 	unsigned m_DataSize;
@@ -367,11 +335,6 @@ public:
 	class CMapInfo
 	{
 	public:
-		char m_aAuthorTmp[32];
-		char m_aVersionTmp[16];
-		char m_aCreditsTmp[128];
-		char m_aLicenseTmp[32];
-
 		char m_aAuthor[32];
 		char m_aVersion[16];
 		char m_aCredits[128];
@@ -379,18 +342,22 @@ public:
 
 		void Reset()
 		{
-			m_aAuthorTmp[0] = 0;
-			m_aVersionTmp[0] = 0;
-			m_aCreditsTmp[0] = 0;
-			m_aLicenseTmp[0] = 0;
+			m_aAuthor[0] = '\0';
+			m_aVersion[0] = '\0';
+			m_aCredits[0] = '\0';
+			m_aLicense[0] = '\0';
+		}
 
-			m_aAuthor[0] = 0;
-			m_aVersion[0] = 0;
-			m_aCredits[0] = 0;
-			m_aLicense[0] = 0;
+		void Copy(const CMapInfo &Source)
+		{
+			str_copy(m_aAuthor, Source.m_aAuthor);
+			str_copy(m_aVersion, Source.m_aVersion);
+			str_copy(m_aCredits, Source.m_aCredits);
+			str_copy(m_aLicense, Source.m_aLicense);
 		}
 	};
 	CMapInfo m_MapInfo;
+	CMapInfo m_MapInfoTmp;
 
 	struct CSetting
 	{
@@ -410,6 +377,9 @@ public:
 	}
 
 	void DeleteEnvelope(int Index);
+	void SwapEnvelopes(int Index0, int Index1);
+	template<typename F>
+	void VisitEnvelopeReferences(F &&Visitor);
 
 	CLayerGroup *NewGroup()
 	{
@@ -467,8 +437,8 @@ public:
 	void CreateDefault(IGraphics::CTextureHandle EntitiesTexture);
 
 	// io
-	int Save(class IStorage *pStorage, const char *pFilename);
-	int Load(class IStorage *pStorage, const char *pFilename, int StorageType);
+	bool Save(class IStorage *pStorage, const char *pFilename);
+	bool Load(class IStorage *pStorage, const char *pFilename, int StorageType);
 
 	// DDRace
 
@@ -510,10 +480,10 @@ enum
 
 enum
 {
-	DIRECTION_LEFT = 1,
-	DIRECTION_RIGHT = 2,
-	DIRECTION_UP = 4,
-	DIRECTION_DOWN = 8,
+	DIRECTION_LEFT = 0,
+	DIRECTION_RIGHT,
+	DIRECTION_UP,
+	DIRECTION_DOWN,
 };
 
 struct RECTi
@@ -531,32 +501,45 @@ protected:
 		switch(Direction)
 		{
 		case DIRECTION_LEFT:
+			ShiftBy = minimum(ShiftBy, m_Width);
 			for(int y = 0; y < m_Height; ++y)
 			{
-				mem_move(&pTiles[y * m_Width], &pTiles[y * m_Width + ShiftBy], (m_Width - ShiftBy) * sizeof(T));
+				if(ShiftBy < m_Width)
+					mem_move(&pTiles[y * m_Width], &pTiles[y * m_Width + ShiftBy], (m_Width - ShiftBy) * sizeof(T));
 				mem_zero(&pTiles[y * m_Width + (m_Width - ShiftBy)], ShiftBy * sizeof(T));
 			}
 			break;
 		case DIRECTION_RIGHT:
+			ShiftBy = minimum(ShiftBy, m_Width);
 			for(int y = 0; y < m_Height; ++y)
 			{
-				mem_move(&pTiles[y * m_Width + ShiftBy], &pTiles[y * m_Width], (m_Width - ShiftBy) * sizeof(T));
+				if(ShiftBy < m_Width)
+					mem_move(&pTiles[y * m_Width + ShiftBy], &pTiles[y * m_Width], (m_Width - ShiftBy) * sizeof(T));
 				mem_zero(&pTiles[y * m_Width], ShiftBy * sizeof(T));
 			}
 			break;
 		case DIRECTION_UP:
-			for(int y = 0; y < m_Height - ShiftBy; ++y)
+			ShiftBy = minimum(ShiftBy, m_Height);
+			for(int y = ShiftBy; y < m_Height; ++y)
 			{
-				mem_copy(&pTiles[y * m_Width], &pTiles[(y + ShiftBy) * m_Width], m_Width * sizeof(T));
-				mem_zero(&pTiles[(y + ShiftBy) * m_Width], m_Width * sizeof(T));
+				mem_copy(&pTiles[(y - ShiftBy) * m_Width], &pTiles[y * m_Width], m_Width * sizeof(T));
+			}
+			for(int y = m_Height - ShiftBy; y < m_Height; ++y)
+			{
+				mem_zero(&pTiles[y * m_Width], m_Width * sizeof(T));
 			}
 			break;
 		case DIRECTION_DOWN:
-			for(int y = m_Height - 1; y >= ShiftBy; --y)
+			ShiftBy = minimum(ShiftBy, m_Height);
+			for(int y = m_Height - ShiftBy - 1; y >= 0; --y)
 			{
-				mem_copy(&pTiles[y * m_Width], &pTiles[(y - ShiftBy) * m_Width], m_Width * sizeof(T));
-				mem_zero(&pTiles[(y - ShiftBy) * m_Width], m_Width * sizeof(T));
+				mem_copy(&pTiles[(y + ShiftBy) * m_Width], &pTiles[y * m_Width], m_Width * sizeof(T));
 			}
+			for(int y = 0; y < ShiftBy; ++y)
+			{
+				mem_zero(&pTiles[y * m_Width], m_Width * sizeof(T));
+			}
+			break;
 		}
 	}
 	template<typename T>
@@ -594,6 +577,8 @@ public:
 	void Snap(CUIRect *pRect);
 	void Clamp(RECTi *pRect);
 
+	virtual bool IsEntitiesLayer() const override;
+
 	virtual bool IsEmpty(CLayerTiles *pLayer);
 	void BrushSelecting(CUIRect Rect) override;
 	int BrushGrab(CLayerGroup *pBrush, CUIRect Rect) override;
@@ -606,7 +591,7 @@ public:
 	CLayer *Duplicate() const override;
 
 	virtual void ShowInfo();
-	int RenderProperties(CUIRect *pToolbox) override;
+	CUI::EPopupMenuFunctionResult RenderProperties(CUIRect *pToolbox) override;
 
 	struct SCommonPropState
 	{
@@ -620,7 +605,7 @@ public:
 		int m_Height = -1;
 		int m_Color = 0;
 	};
-	static int RenderCommonProperties(SCommonPropState &State, CEditor *pEditor, CUIRect *pToolbox, std::vector<CLayerTiles *> &vpLayers);
+	static CUI::EPopupMenuFunctionResult RenderCommonProperties(SCommonPropState &State, CEditor *pEditor, CUIRect *pToolbox, std::vector<CLayerTiles *> &vpLayers);
 
 	void ModifyImageIndex(INDEX_MODIFY_FUNC pfnFunc) override;
 	void ModifyEnvelopeIndex(INDEX_MODIFY_FUNC pfnFunc) override;
@@ -676,7 +661,7 @@ public:
 	void BrushFlipY() override;
 	void BrushRotate(float Amount) override;
 
-	int RenderProperties(CUIRect *pToolbox) override;
+	CUI::EPopupMenuFunctionResult RenderProperties(CUIRect *pToolbox) override;
 
 	void ModifyImageIndex(INDEX_MODIFY_FUNC pfnFunc) override;
 	void ModifyEnvelopeIndex(INDEX_MODIFY_FUNC pfnFunc) override;
@@ -697,7 +682,7 @@ public:
 	CTile GetTile(int x, int y) override;
 	void SetTile(int x, int y, CTile tile) override;
 
-	int RenderProperties(CUIRect *pToolbox) override;
+	CUI::EPopupMenuFunctionResult RenderProperties(CUIRect *pToolbox) override;
 };
 
 class CEditor : public IEditor
@@ -725,6 +710,13 @@ class CEditor : public IEditor
 
 	int GetTextureUsageFlag();
 
+	enum EPreviewImageState
+	{
+		PREVIEWIMAGE_UNLOADED,
+		PREVIEWIMAGE_LOADED,
+		PREVIEWIMAGE_ERROR,
+	};
+
 public:
 	class IInput *Input() { return m_pInput; }
 	class IClient *Client() { return m_pClient; }
@@ -746,6 +738,13 @@ public:
 		m_pTextRender = nullptr;
 		m_pSound = nullptr;
 
+		m_EntitiesTexture.Invalidate();
+		m_FrontTexture.Invalidate();
+		m_TeleTexture.Invalidate();
+		m_SpeedupTexture.Invalidate();
+		m_SwitchTexture.Invalidate();
+		m_TuneTexture.Invalidate();
+
 		m_Mode = MODE_LAYERS;
 		m_Dialog = 0;
 		m_EditBoxActive = 0;
@@ -756,29 +755,27 @@ public:
 
 		m_BrushColorEnabled = true;
 
-		m_aFileName[0] = 0;
-		m_aFileSaveName[0] = 0;
+		m_aFileName[0] = '\0';
+		m_aFileSaveName[0] = '\0';
 		m_ValidSaveFilename = false;
 
 		m_PopupEventActivated = false;
 		m_PopupEventWasActivated = false;
-		m_MouseInsidePopup = false;
 
 		m_FileDialogStorageType = 0;
+		m_FileDialogLastPopulatedStorageType = 0;
 		m_pFileDialogTitle = nullptr;
 		m_pFileDialogButtonText = nullptr;
 		m_pFileDialogUser = nullptr;
-		m_aFileDialogFileName[0] = 0;
-		m_aFileDialogCurrentFolder[0] = 0;
-		m_aFileDialogCurrentLink[0] = 0;
+		m_aFileDialogCurrentFolder[0] = '\0';
+		m_aFileDialogCurrentLink[0] = '\0';
+		m_aFilesSelectedName[0] = '\0';
 		m_pFileDialogPath = m_aFileDialogCurrentFolder;
-		m_FileDialogActivate = false;
 		m_FileDialogOpening = false;
-		m_FileDialogScrollValue = 0.0f;
 		m_FilesSelectedIndex = -1;
-		m_FilesStartAt = 0;
-		m_FilesCur = 0;
-		m_FilesStopAt = 999;
+
+		m_FilePreviewImage.Invalidate();
+		m_PreviewImageState = PREVIEWIMAGE_UNLOADED;
 
 		m_SelectEntitiesImage = "DDNet";
 
@@ -787,8 +784,10 @@ public:
 		m_EditorOffsetX = 0.0f;
 		m_EditorOffsetY = 0.0f;
 
+		m_Zoom = 200.0f;
+		m_Zooming = false;
 		m_WorldZoom = 1.0f;
-		m_ZoomLevel = 200;
+
 		m_LockMouse = false;
 		m_ShowMousePointer = true;
 		m_MouseDeltaX = 0;
@@ -798,6 +797,8 @@ public:
 
 		m_GuiActive = true;
 		m_ProofBorders = false;
+		m_MenuProofBorders = false;
+		m_CurrentMenuProofIndex = 0;
 		m_PreviewZoom = false;
 
 		m_ShowTileInfo = false;
@@ -807,7 +808,8 @@ public:
 		m_AnimateTime = 0;
 		m_AnimateSpeed = 1;
 
-		m_ShowEnvelopeEditor = 0;
+		m_ShowEnvelopeEditor = false;
+		m_EnvelopeEditorSplit = 250.0f;
 		m_ShowServerSettingsEditor = false;
 
 		m_ShowEnvelopePreview = SHOWENV_NONE;
@@ -817,8 +819,9 @@ public:
 		m_QuadKnifeActive = false;
 		m_QuadKnifeCount = 0;
 
-		m_CommandBox = 0.0f;
-		m_aSettingsCommand[0] = 0;
+		m_CheckerTexture.Invalidate();
+		m_BackgroundTexture.Invalidate();
+		m_CursorTexture.Invalidate();
 
 		ms_pUiGotContext = nullptr;
 
@@ -835,8 +838,7 @@ public:
 		m_PreventUnusedTilesWasWarned = false;
 		m_AllowPlaceUnusedTiles = 0;
 		m_BrushDrawDestructive = true;
-		m_GotoX = 0;
-		m_GotoY = 0;
+		m_ShowTileHexInfo = false;
 
 		m_Mentions = 0;
 	}
@@ -850,17 +852,22 @@ public:
 
 	CLayerGroup *m_apSavedBrushes[10];
 
-	void FilelistPopulate(int StorageType);
+	void RefreshFilteredFileList();
+	void FilelistPopulate(int StorageType, bool KeepSelection = false);
 	void InvokeFileDialog(int StorageType, int FileType, const char *pTitle, const char *pButtonText,
 		const char *pBasepath, const char *pDefaultName,
-		void (*pfnFunc)(const char *pFilename, int StorageType, void *pUser), void *pUser);
+		bool (*pfnFunc)(const char *pFilename, int StorageType, void *pUser), void *pUser);
+	void ShowFileDialogError(const char *pFormat, ...)
+		GNUC_ATTRIBUTE((format(printf, 2, 3)));
 
 	void Reset(bool CreateDefault = true);
-	int Save(const char *pFilename) override;
-	int Load(const char *pFilename, int StorageType) override;
-	int Append(const char *pFilename, int StorageType);
+	bool Save(const char *pFilename) override;
+	bool Load(const char *pFilename, int StorageType) override;
+	bool Append(const char *pFilename, int StorageType);
 	void LoadCurrentMap();
 	void Render();
+
+	void ResetMenuBackgroundPositions();
 
 	std::vector<CQuad *> GetSelectedQuads();
 	CLayer *GetSelectedLayerType(int Index, int Type) const;
@@ -873,7 +880,6 @@ public:
 	void DeleteSelectedQuads();
 	bool IsQuadSelected(int Index) const;
 	int FindSelectedQuadIndex(int Index) const;
-	bool IsSpecialLayer(const CLayer *pLayer) const;
 
 	float ScaleFontSize(char *pText, int TextSize, float FontSize, int Width);
 	int DoProperties(CUIRect *pToolbox, CProperty *pProps, int *pIDs, int *pNewVal, ColorRGBA Color = ColorRGBA(1, 1, 1, 0.5f));
@@ -909,11 +915,11 @@ public:
 	int m_PopupEventType;
 	int m_PopupEventActivated;
 	int m_PopupEventWasActivated;
-	bool m_MouseInsidePopup;
 	bool m_LargeLayerWasWarned;
 	bool m_PreventUnusedTilesWasWarned;
 	int m_AllowPlaceUnusedTiles;
 	bool m_BrushDrawDestructive;
+	bool m_ShowTileHexInfo;
 
 	int m_Mentions;
 
@@ -925,42 +931,88 @@ public:
 	};
 
 	int m_FileDialogStorageType;
+	int m_FileDialogLastPopulatedStorageType;
 	const char *m_pFileDialogTitle;
 	const char *m_pFileDialogButtonText;
-	void (*m_pfnFileDialogFunc)(const char *pFileName, int StorageType, void *pUser);
+	bool (*m_pfnFileDialogFunc)(const char *pFileName, int StorageType, void *pUser);
 	void *m_pFileDialogUser;
-	char m_aFileDialogFileName[IO_MAX_PATH_LENGTH];
+	CLineInputBuffered<IO_MAX_PATH_LENGTH> m_FileDialogFileNameInput;
 	char m_aFileDialogCurrentFolder[IO_MAX_PATH_LENGTH];
 	char m_aFileDialogCurrentLink[IO_MAX_PATH_LENGTH];
-	char m_aFileDialogSearchText[64];
-	char m_aFileDialogPrevSearchText[64];
+	char m_aFilesSelectedName[IO_MAX_PATH_LENGTH];
+	CLineInputBuffered<IO_MAX_PATH_LENGTH> m_FileDialogFilterInput;
 	char *m_pFileDialogPath;
-	bool m_FileDialogActivate;
 	int m_FileDialogFileType;
-	float m_FileDialogScrollValue;
 	int m_FilesSelectedIndex;
-	char m_aFileDialogNewFolderName[64];
-	char m_aFileDialogErrString[64];
+	CLineInputBuffered<IO_MAX_PATH_LENGTH> m_FileDialogNewFolderNameInput;
 	IGraphics::CTextureHandle m_FilePreviewImage;
-	bool m_PreviewImageIsLoaded;
+	EPreviewImageState m_PreviewImageState;
 	CImageInfo m_FilePreviewImageInfo;
 	bool m_FileDialogOpening;
 
 	struct CFilelistItem
 	{
 		char m_aFilename[IO_MAX_PATH_LENGTH];
-		char m_aName[128];
+		char m_aName[IO_MAX_PATH_LENGTH];
 		bool m_IsDir;
 		bool m_IsLink;
 		int m_StorageType;
-		bool m_IsVisible;
-
-		bool operator<(const CFilelistItem &Other) const { return !str_comp(m_aFilename, "..") ? true : !str_comp(Other.m_aFilename, "..") ? false : m_IsDir && !Other.m_IsDir ? true : !m_IsDir && Other.m_IsDir ? false : str_comp_filenames(m_aFilename, Other.m_aFilename) < 0; }
+		time_t m_TimeModified;
 	};
-	std::vector<CFilelistItem> m_vFileList;
-	int m_FilesStartAt;
-	int m_FilesCur;
-	int m_FilesStopAt;
+	std::vector<CFilelistItem> m_vCompleteFileList;
+	std::vector<const CFilelistItem *> m_vpFilteredFileList;
+
+	static bool CompareFilenameAscending(const CFilelistItem *pLhs, const CFilelistItem *pRhs)
+	{
+		if(str_comp(pLhs->m_aFilename, "..") == 0)
+			return true;
+		if(str_comp(pRhs->m_aFilename, "..") == 0)
+			return false;
+		if(pLhs->m_IsDir != pRhs->m_IsDir)
+			return pLhs->m_IsDir;
+		return str_comp_filenames(pLhs->m_aName, pRhs->m_aName) < 0;
+	}
+
+	static bool CompareFilenameDescending(const CFilelistItem *pLhs, const CFilelistItem *pRhs)
+	{
+		if(str_comp(pLhs->m_aFilename, "..") == 0)
+			return true;
+		if(str_comp(pRhs->m_aFilename, "..") == 0)
+			return false;
+		if(pLhs->m_IsDir != pRhs->m_IsDir)
+			return pLhs->m_IsDir;
+		return str_comp_filenames(pLhs->m_aName, pRhs->m_aName) > 0;
+	}
+
+	static bool CompareTimeModifiedAscending(const CFilelistItem *pLhs, const CFilelistItem *pRhs)
+	{
+		if(str_comp(pLhs->m_aFilename, "..") == 0)
+			return true;
+		if(str_comp(pRhs->m_aFilename, "..") == 0)
+			return false;
+		if(pLhs->m_IsLink || pRhs->m_IsLink)
+			return pLhs->m_IsLink;
+		if(pLhs->m_IsDir != pRhs->m_IsDir)
+			return pLhs->m_IsDir;
+		return pLhs->m_TimeModified < pRhs->m_TimeModified;
+	}
+
+	static bool CompareTimeModifiedDescending(const CFilelistItem *pLhs, const CFilelistItem *pRhs)
+	{
+		if(str_comp(pLhs->m_aFilename, "..") == 0)
+			return true;
+		if(str_comp(pRhs->m_aFilename, "..") == 0)
+			return false;
+		if(pLhs->m_IsLink || pRhs->m_IsLink)
+			return pLhs->m_IsLink;
+		if(pLhs->m_IsDir != pRhs->m_IsDir)
+			return pLhs->m_IsDir;
+		return pLhs->m_TimeModified > pRhs->m_TimeModified;
+	}
+
+	void SortFilteredFileList();
+	int m_SortByFilename = 1;
+	int m_SortByTimeModified = 0;
 
 	std::vector<std::string> m_vSelectEntitiesFiles;
 	std::string m_SelectEntitiesImage;
@@ -969,18 +1021,34 @@ public:
 	float m_WorldOffsetY;
 	float m_EditorOffsetX;
 	float m_EditorOffsetY;
+
+	// Zooming
+	CCubicBezier m_ZoomSmoothing;
+	float m_ZoomSmoothingStart;
+	float m_ZoomSmoothingEnd;
+	bool m_Zooming;
+	float m_Zoom;
+	float m_ZoomSmoothingTarget;
 	float m_WorldZoom;
-	int m_ZoomLevel;
+
 	bool m_LockMouse;
 	bool m_ShowMousePointer;
 	bool m_GuiActive;
 	bool m_ProofBorders;
+	bool m_MenuProofBorders;
+	int m_CurrentMenuProofIndex;
+	std::vector<vec2> m_vMenuBackgroundPositions;
+	std::vector<const char *> m_vpMenuBackgroundPositionNames;
+	std::vector<std::vector<int>> m_vMenuBackgroundCollisions;
+	char m_aMenuBackgroundTooltip[256];
 	bool m_PreviewZoom;
 	float m_MouseWScale = 1.0f; // Mouse (i.e. UI) scale relative to the World (selected Group)
 	float m_MouseX = 0.0f;
 	float m_MouseY = 0.0f;
 	float m_MouseWorldX = 0.0f;
 	float m_MouseWorldY = 0.0f;
+	float m_MouseWorldNoParaX = 0.0f;
+	float m_MouseWorldNoParaY = 0.0f;
 	float m_MouseDeltaX;
 	float m_MouseDeltaY;
 	float m_MouseDeltaWx;
@@ -993,7 +1061,8 @@ public:
 	float m_AnimateTime;
 	float m_AnimateSpeed;
 
-	int m_ShowEnvelopeEditor;
+	bool m_ShowEnvelopeEditor;
+	float m_EnvelopeEditorSplit;
 
 	enum EShowEnvelope
 	{
@@ -1039,16 +1108,18 @@ public:
 
 	static void EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Channels, void *pUser);
 
-	float m_CommandBox;
-	char m_aSettingsCommand[256];
+	CLineInputBuffered<256> m_SettingsCommandInput;
 
 	void PlaceBorderTiles();
+
+	void UpdateTooltip(const void *pID, const CUIRect *pRect, const char *pToolTip);
 	int DoButton_Editor_Common(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip);
-	int DoButton_Editor(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip, int AlignVert = 1);
-	int DoButton_Env(const void *pID, const char *pText, int Checked, const CUIRect *pRect, const char *pToolTip, ColorRGBA Color);
+	int DoButton_Editor(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip);
+	int DoButton_Env(const void *pID, const char *pText, int Checked, const CUIRect *pRect, const char *pToolTip, ColorRGBA Color, int Corners);
 
 	int DoButton_Tab(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip);
-	int DoButton_Ex(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip, int Corners, float FontSize = 10.0f, int AlignVert = 1);
+	int DoButton_Ex(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip, int Corners, float FontSize = 10.0f);
+	int DoButton_FontIcon(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip, int Corners, float FontSize = 10.0f);
 	int DoButton_ButtonDec(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip);
 	int DoButton_ButtonInc(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip);
 
@@ -1059,48 +1130,52 @@ public:
 
 	int DoButton_ColorPicker(const void *pID, const CUIRect *pRect, ColorRGBA *pColor, const char *pToolTip = nullptr);
 
-	bool DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden = false, int Corners = IGraphics::CORNER_ALL);
-	bool DoClearableEditBox(void *pID, void *pClearID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden, int Corners);
+	int DoButton_DraggableEx(const void *pID, const char *pText, int Checked, const CUIRect *pRect, bool *pClicked, bool *pAbrupted, int Flags, const char *pToolTip = nullptr, int Corners = IGraphics::CORNER_ALL, float FontSize = 10.0f);
+
+	bool DoEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize, int Corners = IGraphics::CORNER_ALL, const char *pToolTip = nullptr);
+	bool DoClearableEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize, int Corners = IGraphics::CORNER_ALL, const char *pToolTip = nullptr);
 
 	void RenderBackground(CUIRect View, IGraphics::CTextureHandle Texture, float Size, float Brightness);
 
 	void RenderGrid(CLayerGroup *pGroup);
+	void SnapToGrid(float &x, float &y);
 
-	void UiInvokePopupMenu(void *pID, int Flags, float X, float Y, float W, float H, int (*pfnFunc)(CEditor *pEditor, CUIRect Rect, void *pContext), void *pContext = nullptr);
-	void UiDoPopupMenu();
-	bool UiPopupExists(void *pID);
-	bool UiPopupOpen();
+	int UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, int Current, int Min, int Max, int Step, float Scale, const char *pToolTip, bool IsDegree = false, bool IsHex = false, int corners = IGraphics::CORNER_ALL, ColorRGBA *pColor = nullptr, bool ShowValue = true);
 
-	int UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, int Current, int Min, int Max, int Step, float Scale, const char *pToolTip, bool IsDegree = false, bool IsHex = false, int corners = IGraphics::CORNER_ALL, ColorRGBA *pColor = nullptr);
-
-	static int PopupGroup(CEditor *pEditor, CUIRect View, void *pContext);
-
-	struct CLayerPopupContext
+	static CUI::EPopupMenuFunctionResult PopupMenuFile(void *pContext, CUIRect View, bool Active);
+	static CUI::EPopupMenuFunctionResult PopupMenuTools(void *pContext, CUIRect View, bool Active);
+	static CUI::EPopupMenuFunctionResult PopupGroup(void *pContext, CUIRect View, bool Active);
+	struct SLayerPopupContext : public SPopupMenuId
 	{
+		CEditor *m_pEditor;
 		std::vector<CLayerTiles *> m_vpLayers;
 		CLayerTiles::SCommonPropState m_CommonPropState;
 	};
-	static int PopupLayer(CEditor *pEditor, CUIRect View, void *pContext);
-	static int PopupQuad(CEditor *pEditor, CUIRect View, void *pContext);
-	static int PopupPoint(CEditor *pEditor, CUIRect View, void *pContext);
-	static int PopupNewFolder(CEditor *pEditor, CUIRect View, void *pContext);
-	static int PopupMapInfo(CEditor *pEditor, CUIRect View, void *pContext);
-	static int PopupEvent(CEditor *pEditor, CUIRect View, void *pContext);
-	static int PopupSelectImage(CEditor *pEditor, CUIRect View, void *pContext);
-	static int PopupSelectSound(CEditor *pEditor, CUIRect View, void *pContext);
-	static int PopupSelectGametileOp(CEditor *pEditor, CUIRect View, void *pContext);
-	static int PopupImage(CEditor *pEditor, CUIRect View, void *pContext);
-	static int PopupMenuFile(CEditor *pEditor, CUIRect View, void *pContext);
-	static int PopupSelectConfigAutoMap(CEditor *pEditor, CUIRect View, void *pContext);
-	static int PopupSound(CEditor *pEditor, CUIRect View, void *pContext);
-	static int PopupSource(CEditor *pEditor, CUIRect View, void *pContext);
-	static int PopupColorPicker(CEditor *pEditor, CUIRect View, void *pContext);
-	static int PopupEntities(CEditor *pEditor, CUIRect View, void *pContext);
+	static CUI::EPopupMenuFunctionResult PopupLayer(void *pContext, CUIRect View, bool Active);
+	static CUI::EPopupMenuFunctionResult PopupQuad(void *pContext, CUIRect View, bool Active);
+	static CUI::EPopupMenuFunctionResult PopupSource(void *pContext, CUIRect View, bool Active);
+	static CUI::EPopupMenuFunctionResult PopupPoint(void *pContext, CUIRect View, bool Active);
+	static CUI::EPopupMenuFunctionResult PopupImage(void *pContext, CUIRect View, bool Active);
+	static CUI::EPopupMenuFunctionResult PopupSound(void *pContext, CUIRect View, bool Active);
+	static CUI::EPopupMenuFunctionResult PopupNewFolder(void *pContext, CUIRect View, bool Active);
+	static CUI::EPopupMenuFunctionResult PopupMapInfo(void *pContext, CUIRect View, bool Active);
+	static CUI::EPopupMenuFunctionResult PopupEvent(void *pContext, CUIRect View, bool Active);
+	static CUI::EPopupMenuFunctionResult PopupSelectImage(void *pContext, CUIRect View, bool Active);
+	static CUI::EPopupMenuFunctionResult PopupSelectSound(void *pContext, CUIRect View, bool Active);
+	static CUI::EPopupMenuFunctionResult PopupSelectGametileOp(void *pContext, CUIRect View, bool Active);
+	static CUI::EPopupMenuFunctionResult PopupSelectConfigAutoMap(void *pContext, CUIRect View, bool Active);
+	static CUI::EPopupMenuFunctionResult PopupTele(void *pContext, CUIRect View, bool Active);
+	static CUI::EPopupMenuFunctionResult PopupSpeedup(void *pContext, CUIRect View, bool Active);
+	static CUI::EPopupMenuFunctionResult PopupSwitch(void *pContext, CUIRect View, bool Active);
+	static CUI::EPopupMenuFunctionResult PopupTune(void *pContext, CUIRect View, bool Active);
+	static CUI::EPopupMenuFunctionResult PopupGoto(void *pContext, CUIRect View, bool Active);
+	static CUI::EPopupMenuFunctionResult PopupColorPicker(void *pContext, CUIRect View, bool Active);
+	static CUI::EPopupMenuFunctionResult PopupEntities(void *pContext, CUIRect View, bool Active);
 
-	static void CallbackOpenMap(const char *pFileName, int StorageType, void *pUser);
-	static void CallbackAppendMap(const char *pFileName, int StorageType, void *pUser);
-	static void CallbackSaveMap(const char *pFileName, int StorageType, void *pUser);
-	static void CallbackSaveCopyMap(const char *pFileName, int StorageType, void *pUser);
+	static bool CallbackOpenMap(const char *pFileName, int StorageType, void *pUser);
+	static bool CallbackAppendMap(const char *pFileName, int StorageType, void *pUser);
+	static bool CallbackSaveMap(const char *pFileName, int StorageType, void *pUser);
+	static bool CallbackSaveCopyMap(const char *pFileName, int StorageType, void *pUser);
 
 	void PopupSelectImageInvoke(int Current, float x, float y);
 	int PopupSelectImageResult();
@@ -1129,12 +1204,17 @@ public:
 	void DoQuad(CQuad *pQuad, int Index);
 	ColorRGBA GetButtonColor(const void *pID, int Checked);
 
-	static void ReplaceImage(const char *pFilename, int StorageType, void *pUser);
-	static void ReplaceSound(const char *pFileName, int StorageType, void *pUser);
-	static void AddImage(const char *pFilename, int StorageType, void *pUser);
-	static void AddSound(const char *pFileName, int StorageType, void *pUser);
+	bool ReplaceImage(const char *pFilename, int StorageType, bool CheckDuplicate);
+	static bool ReplaceImageCallback(const char *pFilename, int StorageType, void *pUser);
+	bool ReplaceSound(const char *pFileName, int StorageType, bool CheckDuplicate);
+	static bool ReplaceSoundCallback(const char *pFileName, int StorageType, void *pUser);
+	static bool AddImage(const char *pFilename, int StorageType, void *pUser);
+	static bool AddSound(const char *pFileName, int StorageType, void *pUser);
 
 	bool IsEnvelopeUsed(int EnvelopeIndex) const;
+	void RemoveUnusedEnvelopes();
+
+	static bool IsVanillaImage(const char *pImage);
 
 	void RenderLayers(CUIRect LayersBox);
 	void RenderImagesList(CUIRect Toolbox);
@@ -1148,7 +1228,6 @@ public:
 	void RenderMenubar(CUIRect Menubar);
 	void RenderFileDialog();
 
-	void AddFileDialogEntry(int Index, CUIRect *pView);
 	void SelectGameLayer();
 	void SortImages();
 	bool SelectLayerByTile();
@@ -1230,7 +1309,15 @@ public:
 	static const char *Explain(int ExplanationID, int Tile, int Layer);
 
 	int GetLineDistance() const;
+
+	// Zooming
+	void SetZoom(float Target);
+	void ChangeZoom(float Amount);
 	void ZoomMouseTarget(float ZoomFactor);
+	void UpdateZoom();
+	float ZoomProgress(float CurrentTime) const;
+	float MinZoomLevel() const;
+	float MaxZoomLevel() const;
 
 	static ColorHSVA ms_PickerColor;
 	static int ms_SVPicker;
@@ -1244,11 +1331,6 @@ public:
 	IGraphics::CTextureHandle GetSwitchTexture();
 	IGraphics::CTextureHandle GetTuneTexture();
 
-	static int PopupTele(CEditor *pEditor, CUIRect View, void *pContext);
-	static int PopupSpeedup(CEditor *pEditor, CUIRect View, void *pContext);
-	static int PopupSwitch(CEditor *pEditor, CUIRect View, void *pContext);
-	static int PopupTune(CEditor *pEditor, CUIRect View, void *pContext);
-	static int PopupGoto(CEditor *pEditor, CUIRect View, void *pContext);
 	void Goto(float X, float Y);
 	unsigned char m_TeleNumber;
 
@@ -1260,9 +1342,6 @@ public:
 
 	unsigned char m_SwitchNum;
 	unsigned char m_SwitchDelay;
-
-	int m_GotoX;
-	int m_GotoY;
 };
 
 // make sure to inline this function
@@ -1375,7 +1454,7 @@ public:
 	int BrushGrab(CLayerGroup *pBrush, CUIRect Rect) override;
 	void BrushPlace(CLayer *pBrush, float wx, float wy) override;
 
-	int RenderProperties(CUIRect *pToolbox) override;
+	CUI::EPopupMenuFunctionResult RenderProperties(CUIRect *pToolbox) override;
 
 	void ModifyEnvelopeIndex(INDEX_MODIFY_FUNC pfnFunc) override;
 	void ModifySoundIndex(INDEX_MODIFY_FUNC pfnFunc) override;

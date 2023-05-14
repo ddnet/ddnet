@@ -1,0 +1,259 @@
+{
+	"folders": [
+		{
+			"path": "../.."
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"*.tcc": "cpp",
+			"array": "cpp",
+			"atomic": "cpp",
+			"cctype": "cpp",
+			"chrono": "cpp",
+			"clocale": "cpp",
+			"cmath": "cpp",
+			"condition_variable": "cpp",
+			"cstdarg": "cpp",
+			"cstddef": "cpp",
+			"cstdint": "cpp",
+			"cstdio": "cpp",
+			"cstdlib": "cpp",
+			"cstring": "cpp",
+			"ctime": "cpp",
+			"cwchar": "cpp",
+			"cwctype": "cpp",
+			"deque": "cpp",
+			"list": "cpp",
+			"unordered_map": "cpp",
+			"vector": "cpp",
+			"exception": "cpp",
+			"algorithm": "cpp",
+			"functional": "cpp",
+			"iterator": "cpp",
+			"map": "cpp",
+			"memory": "cpp",
+			"memory_resource": "cpp",
+			"numeric": "cpp",
+			"optional": "cpp",
+			"random": "cpp",
+			"ratio": "cpp",
+			"string": "cpp",
+			"string_view": "cpp",
+			"system_error": "cpp",
+			"tuple": "cpp",
+			"type_traits": "cpp",
+			"utility": "cpp",
+			"fstream": "cpp",
+			"initializer_list": "cpp",
+			"iosfwd": "cpp",
+			"istream": "cpp",
+			"limits": "cpp",
+			"mutex": "cpp",
+			"new": "cpp",
+			"ostream": "cpp",
+			"sstream": "cpp",
+			"stdexcept": "cpp",
+			"streambuf": "cpp",
+			"thread": "cpp",
+			"cinttypes": "cpp",
+			"typeinfo": "cpp",
+			"valarray": "cpp",
+			"bit": "cpp",
+			"compare": "cpp",
+			"concepts": "cpp",
+			"ranges": "cpp",
+			"stop_token": "cpp",
+			"hash_map": "cpp",
+			"hash_set": "cpp",
+			"forward_list": "cpp",
+			"set": "cpp",
+			"iomanip": "cpp",
+			"iostream": "cpp",
+			"any": "cpp",
+			"unordered_set": "cpp",
+			"variant": "cpp"
+		},
+		// clang-format-10 has to be in your PATH
+		// for linux simply grep a static built clang-format-10 from here:
+		// https://aur.archlinux.org/packages/clang-format-static-bin
+		"clang-format.executable": "clang-format-10",
+		"lldb.launch.expressions": "native",
+		"editor.defaultFormatter": "xaver.clang-format",
+		"[rust]": {
+			"editor.defaultFormatter": "rust-lang.rust-analyzer",
+		},
+		"editor.formatOnSave": true,
+		"cmake.additionalKits": [
+			"${workspaceFolder}/other/vscode/ddnet-cmake-tools-kits.json"
+		],
+		"cmake.defaultVariants": {
+			"buildType": {
+				"default": "debug",
+				"description": "build types",
+				"choices": {
+					"debug": {
+						"short": "Debug",
+						"long": "Disable optimizations",
+						"buildType": "Debug",
+						"settings": {
+							"CMAKE_CXX_FLAGS": "",
+							"CMAKE_C_FLAGS": "",
+						}
+					},
+					"release": {
+						"short": "Release",
+						"long": "Enable optimizations",
+						"buildType": "Release",
+						"settings": {
+							"CMAKE_CXX_FLAGS": "",
+							"CMAKE_C_FLAGS": "",
+						}
+					},
+					"minsize": {
+						"short": "MinSizeRel",
+						"long": "Enable optimizations, optimized for size",
+						"buildType": "MinSizeRel",
+						"settings": {
+							"CMAKE_CXX_FLAGS": "",
+							"CMAKE_C_FLAGS": "",
+						}
+					},
+					"reldeb": {
+						"short": "RelWithDebInfo",
+						"long": "Enable optimizations, provide debug symbols",
+						"buildType": "RelWithDebInfo",
+						"settings": {
+							"CMAKE_CXX_FLAGS": "",
+							"CMAKE_C_FLAGS": "",
+						}
+					},
+					"debAndASAN": {
+						"short": "Debug + ASAN (only for clang)",
+						"long": "Disable optimizations, enable ASAN & UBSAN",
+						"buildType": "Debug",
+						"settings": {
+							"CMAKE_CXX_FLAGS": "-fsanitize=address,undefined -fsanitize-recover=address,undefined -fno-omit-frame-pointer",
+							"CMAKE_C_FLAGS": "-fsanitize=address,undefined -fsanitize-recover=address,undefined -fno-omit-frame-pointer",
+						}
+					},
+					"relAndASAN": {
+						"short": "RelWithDebInfo + ASAN (only for clang)",
+						"long": "Enable optimizations, enable ASAN & UBSAN",
+						"buildType": "RelWithDebInfo",
+						"settings": {
+							"CMAKE_CXX_FLAGS": "-fsanitize=address,undefined -fsanitize-recover=address,undefined -fno-omit-frame-pointer",
+							"CMAKE_C_FLAGS": "-fsanitize=address,undefined -fsanitize-recover=address,undefined -fno-omit-frame-pointer",
+						}
+					},
+					"debAndTSAN": {
+						"short": "Debug + TSAN (only for clang)",
+						"long": "Disable optimizations, enable TSAN & UBSAN",
+						"buildType": "Debug",
+						"settings": {
+							"CMAKE_CXX_FLAGS": "-fsanitize=thread,undefined -fsanitize-recover=thread,undefined -fno-omit-frame-pointer",
+							"CMAKE_C_FLAGS": "-fsanitize=thread,undefined -fsanitize-recover=thread,undefined -fno-omit-frame-pointer",
+						}
+					},
+					"relAndTSAN": {
+						"short": "RelWithDebInfo + TSAN (only for clang)",
+						"long": "Enable optimizations, enable TSAN & UBSAN",
+						"buildType": "RelWithDebInfo",
+						"settings": {
+							"CMAKE_CXX_FLAGS": "-fsanitize=thread,undefined -fsanitize-recover=thread,undefined -fno-omit-frame-pointer",
+							"CMAKE_C_FLAGS": "-fsanitize=thread,undefined -fsanitize-recover=thread,undefined -fno-omit-frame-pointer",
+						}
+					}
+				}
+			}
+		},
+	},
+	"extensions": {
+		"recommendations": [
+			"xaver.clang-format",
+			"llvm-vs-code-extensions.vscode-clangd",
+			"twxs.cmake",
+			"ms-vscode.cmake-tools",
+			"vadimcn.vscode-lldb",
+			"rust-lang.rust-analyzer"
+		]
+	},
+	"tasks": {
+		"version": "2.0.0",
+		"tasks": [
+			{
+				"type": "cmake",
+				"label": "CMake: build client",
+				"command": "build",
+				"targets": [
+					"DDNet"
+				],
+				"group": {
+					"kind": "build",
+					"isDefault": true
+				},
+				"problemMatcher": [],
+				"detail": "Build client targets"
+			},
+			{
+				"type": "cmake",
+				"label": "CMake: build server",
+				"command": "build",
+				"targets": [
+					"DDNet-Server"
+				],
+				"group": {
+					"kind": "build",
+					"isDefault": true
+				},
+				"problemMatcher": [],
+				"detail": "Build server targets"
+			}
+		]
+	},
+	"launch": {
+		"version": "0.2.0",
+		"configurations": [
+			{
+				"type": "lldb",
+				"request": "launch",
+				"name": "Launch client",
+				"program": "${workspaceFolder}/build/DDNet",
+				"preLaunchTask": "CMake: build client",
+				// use dbg configs like this
+				// "args": [ "dbg_gfx 0" ],
+				// enable this to start the debugger with TSAN
+				// "environment": [ { "name":"TSAN_OPTIONS","value":"ignore_noninstrumented_modules=1" }],
+				"cwd": "${workspaceFolder}/build",
+			},
+			{
+				"type": "lldb",
+				"request": "launch",
+				"name": "Launch server",
+				"program": "${workspaceFolder}/build/DDNet-Server",
+				"preLaunchTask": "CMake: build server",
+				"cwd": "${workspaceFolder}/build"
+			},
+			// useful for cross debugging the windows (wine) client
+			// for these you need the microsoft cpp extension
+			// start the wine executable like this:
+			// winedbg --gdb --no-start --port 55555 DDNet.exe
+			{
+				"type": "cppdbg",
+				"request": "launch",
+				"name": "Attach to wine gdbserver",
+				"program": "${workspaceFolder}/build_win/DDNet.exe",
+				"miDebuggerServerAddress": "localhost:55555",
+				"cwd": "${workspaceFolder}/build_win/",
+				"MIMode": "gdb",
+				"setupCommands": [
+					{
+						"description": "Auto styling for \"gdb\"",
+						"text": "-enable-pretty-printing",
+						"ignoreFailures": true
+					}
+				]
+			}
+		]
+	}
+}

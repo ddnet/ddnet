@@ -44,10 +44,11 @@ public:
 
 	CPlayerData *PlayerData(int ID) { return &m_aPlayerData[ID]; }
 
+	void LoadBestTime();
 	void MapInfo(int ClientID, const char *pMapName);
 	void MapVote(int ClientID, const char *pMapName);
 	void LoadPlayerData(int ClientID, const char *pName = "");
-	void SaveScore(int ClientID, float Time, const char *pTimestamp, float aTimeCp[NUM_CHECKPOINTS], bool NotEligible);
+	void SaveScore(int ClientID, float Time, const char *pTimestamp, const float aTimeCp[NUM_CHECKPOINTS], bool NotEligible);
 
 	void SaveTeamScore(int *pClientIDs, unsigned int Size, float Time, const char *pTimestamp);
 

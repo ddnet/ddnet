@@ -215,6 +215,8 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 	if(pPacket->m_Flags & NET_PACKETFLAG_CONNLESS)
 	{
 		Sixup = (pBuffer[0] & 0x3) == 1;
+		if(Sixup && (pSecurityToken == nullptr || pResponseToken == nullptr))
+			return -1;
 		int Offset = Sixup ? 9 : 6;
 		if(Size < Offset)
 			return -1;
@@ -241,6 +243,8 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 	{
 		if(pPacket->m_Flags & NET_PACKETFLAG_UNUSED)
 			Sixup = true;
+		if(Sixup && pSecurityToken == nullptr)
+			return -1;
 		int DataStart = Sixup ? 7 : NET_PACKETHEADERSIZE;
 		if(Size < DataStart)
 			return -1;

@@ -10,8 +10,8 @@ build_cmake:
     - apt-get upgrade -y
     - apt-get install
       pkg-config
-      clang
-      cmake ninja-build
+      clang rustc
+      cargo cmake ninja-build
       libfreetype6-dev libnotify-dev libsdl2-dev libsqlite3-dev libvulkan-dev
       glslang-tools spirv-tools libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev
       libx264-dev libpng-dev

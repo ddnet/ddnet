@@ -30,7 +30,7 @@ CGun::CGun(CGameWorld *pGameWorld, vec2 Pos, bool Freeze, bool Explosive, int La
 
 void CGun::Tick()
 {
-	if(Server()->Tick() % int(Server()->TickSpeed() * 0.15f) == 0)
+	if(Server()->Tick() % (int)(Server()->TickSpeed() * 0.15f) == 0)
 	{
 		int Flags;
 		m_EvalTick = Server()->Tick();
@@ -50,11 +50,11 @@ void CGun::Tick()
 void CGun::Fire()
 {
 	// Create a list of players who are in the range of the turret
-	CCharacter *apPlayersInRange[MAX_CLIENTS];
+	CEntity *apPlayersInRange[MAX_CLIENTS];
 	mem_zero(apPlayersInRange, sizeof(apPlayersInRange));
 
 	int NumPlayersInRange = GameServer()->m_World.FindEntities(m_Pos, g_Config.m_SvPlasmaRange,
-		(CEntity **)apPlayersInRange, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
+		apPlayersInRange, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
 
 	// The closest player (within range) in a team is selected as the target
 	int aTargetIdInTeam[MAX_CLIENTS];
@@ -69,7 +69,7 @@ void CGun::Fire()
 
 	for(int i = 0; i < NumPlayersInRange; i++)
 	{
-		CCharacter *pTarget = apPlayersInRange[i];
+		CCharacter *pTarget = static_cast<CCharacter *>(apPlayersInRange[i]);
 		const int &TargetTeam = pTarget->Team();
 		// Do not fire at super players
 		if(TargetTeam == TEAM_SUPER)
@@ -186,19 +186,8 @@ void CGun::Snap(int SnappingClient)
 			return;
 	}
 
-	CNetObj_Laser *pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(
-		NETOBJTYPE_LASER, GetID(), sizeof(CNetObj_Laser)));
+	int StartTick = pEntData ? 0 : m_EvalTick;
 
-	if(!pObj)
-		return;
-
-	pObj->m_X = (int)m_Pos.x;
-	pObj->m_Y = (int)m_Pos.y;
-	pObj->m_FromX = (int)m_Pos.x;
-	pObj->m_FromY = (int)m_Pos.y;
-
-	if(pEntData)
-		pObj->m_StartTick = 0;
-	else
-		pObj->m_StartTick = m_EvalTick;
+	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion), GetID(),
+		m_Pos, m_Pos, StartTick, -1, m_Freeze ? LASERTYPE_FREEZE : LASERTYPE_RIFLE);
 }

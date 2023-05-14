@@ -130,6 +130,42 @@ bool CServerInfo2::FromJsonRaw(CServerInfo2 *pOut, const json_value *pJson)
 			pClient->m_Country = json_int_get(&Country);
 			pClient->m_Score = json_int_get(&Score);
 			pClient->m_IsPlayer = IsPlayer;
+
+			// check if a skin is also available
+			bool HasSkin = false;
+			const json_value &SkinObj = Client["skin"];
+			if(SkinObj.type == json_object)
+			{
+				const json_value &SkinName = SkinObj["name"];
+				const json_value &SkinBodyColor = SkinObj["color_body"];
+				const json_value &SkinFeetColor = SkinObj["color_feet"];
+				if(SkinName.type == json_string)
+				{
+					HasSkin = true;
+					str_copy(pClient->m_aSkin, json_string_get(&SkinName));
+					// if skin json value existed, then always at least default to "default"
+					if(pClient->m_aSkin[0] == '\0')
+						str_copy(pClient->m_aSkin, "default");
+					// if skin also has custom colors, add them
+					if(SkinBodyColor.type == json_integer && SkinFeetColor.type == json_integer)
+					{
+						pClient->m_CustomSkinColors = true;
+						pClient->m_CustomSkinColorBody = json_int_get(&SkinBodyColor);
+						pClient->m_CustomSkinColorFeet = json_int_get(&SkinFeetColor);
+					}
+					// else set custom colors off
+					else
+					{
+						pClient->m_CustomSkinColors = false;
+					}
+				}
+			}
+
+			// else make it null terminated
+			if(!HasSkin)
+			{
+				pClient->m_aSkin[0] = '\0';
+			}
 		}
 
 		pOut->m_NumClients++;
@@ -196,6 +232,11 @@ CServerInfo2::operator CServerInfo() const
 		Result.m_aClients[i].m_Country = m_aClients[i].m_Country;
 		Result.m_aClients[i].m_Score = m_aClients[i].m_Score;
 		Result.m_aClients[i].m_Player = m_aClients[i].m_IsPlayer;
+
+		str_copy(Result.m_aClients[i].m_aSkin, m_aClients[i].m_aSkin);
+		Result.m_aClients[i].m_CustomSkinColors = m_aClients[i].m_CustomSkinColors;
+		Result.m_aClients[i].m_CustomSkinColorBody = m_aClients[i].m_CustomSkinColorBody;
+		Result.m_aClients[i].m_CustomSkinColorFeet = m_aClients[i].m_CustomSkinColorFeet;
 	}
 
 	Result.m_NumReceivedClients = minimum(m_NumClients, (int)SERVERINFO_MAX_CLIENTS);

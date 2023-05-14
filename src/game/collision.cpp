@@ -160,7 +160,7 @@ enum
 
 static int GetMoveRestrictionsRaw(int Direction, int Tile, int Flags)
 {
-	Flags = Flags & (TILEFLAG_VFLIP | TILEFLAG_HFLIP | TILEFLAG_ROTATE);
+	Flags = Flags & (TILEFLAG_XFLIP | TILEFLAG_YFLIP | TILEFLAG_ROTATE);
 	switch(Tile)
 	{
 	case TILE_STOP:
@@ -171,10 +171,10 @@ static int GetMoveRestrictionsRaw(int Direction, int Tile, int Flags)
 		case ROTATION_180: return CANTMOVE_UP;
 		case ROTATION_270: return CANTMOVE_RIGHT;
 
-		case TILEFLAG_HFLIP ^ ROTATION_0: return CANTMOVE_UP;
-		case TILEFLAG_HFLIP ^ ROTATION_90: return CANTMOVE_RIGHT;
-		case TILEFLAG_HFLIP ^ ROTATION_180: return CANTMOVE_DOWN;
-		case TILEFLAG_HFLIP ^ ROTATION_270: return CANTMOVE_LEFT;
+		case TILEFLAG_YFLIP ^ ROTATION_0: return CANTMOVE_UP;
+		case TILEFLAG_YFLIP ^ ROTATION_90: return CANTMOVE_RIGHT;
+		case TILEFLAG_YFLIP ^ ROTATION_180: return CANTMOVE_DOWN;
+		case TILEFLAG_YFLIP ^ ROTATION_270: return CANTMOVE_LEFT;
 		}
 		break;
 	case TILE_STOPS:
@@ -182,13 +182,13 @@ static int GetMoveRestrictionsRaw(int Direction, int Tile, int Flags)
 		{
 		case ROTATION_0:
 		case ROTATION_180:
-		case TILEFLAG_HFLIP ^ ROTATION_0:
-		case TILEFLAG_HFLIP ^ ROTATION_180:
+		case TILEFLAG_YFLIP ^ ROTATION_0:
+		case TILEFLAG_YFLIP ^ ROTATION_180:
 			return CANTMOVE_DOWN | CANTMOVE_UP;
 		case ROTATION_90:
 		case ROTATION_270:
-		case TILEFLAG_HFLIP ^ ROTATION_90:
-		case TILEFLAG_HFLIP ^ ROTATION_270:
+		case TILEFLAG_YFLIP ^ ROTATION_90:
+		case TILEFLAG_YFLIP ^ ROTATION_270:
 			return CANTMOVE_LEFT | CANTMOVE_RIGHT;
 		}
 		break;
@@ -294,13 +294,13 @@ int CCollision::IntersectLine(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *p
 	float Distance = distance(Pos0, Pos1);
 	int End(Distance + 1);
 	vec2 Last = Pos0;
-	int ix = 0, iy = 0; // Temporary position for checking collision
 	for(int i = 0; i <= End; i++)
 	{
 		float a = i / (float)End;
 		vec2 Pos = mix(Pos0, Pos1, a);
-		ix = round_to_int(Pos.x);
-		iy = round_to_int(Pos.y);
+		// Temporary position for checking collision
+		int ix = round_to_int(Pos.x);
+		int iy = round_to_int(Pos.y);
 
 		if(CheckPoint(ix, iy))
 		{
@@ -325,15 +325,15 @@ int CCollision::IntersectLineTeleHook(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision,
 	float Distance = distance(Pos0, Pos1);
 	int End(Distance + 1);
 	vec2 Last = Pos0;
-	int ix = 0, iy = 0; // Temporary position for checking collision
 	int dx = 0, dy = 0; // Offset for checking the "through" tile
 	ThroughOffset(Pos0, Pos1, &dx, &dy);
 	for(int i = 0; i <= End; i++)
 	{
 		float a = i / (float)End;
 		vec2 Pos = mix(Pos0, Pos1, a);
-		ix = round_to_int(Pos.x);
-		iy = round_to_int(Pos.y);
+		// Temporary position for checking collision
+		int ix = round_to_int(Pos.x);
+		int iy = round_to_int(Pos.y);
 
 		int Index = GetPureMapIndex(Pos);
 		if(g_Config.m_SvOldTeleportHook)
@@ -382,13 +382,13 @@ int CCollision::IntersectLineTeleWeapon(vec2 Pos0, vec2 Pos1, vec2 *pOutCollisio
 	float Distance = distance(Pos0, Pos1);
 	int End(Distance + 1);
 	vec2 Last = Pos0;
-	int ix = 0, iy = 0; // Temporary position for checking collision
 	for(int i = 0; i <= End; i++)
 	{
 		float a = i / (float)End;
 		vec2 Pos = mix(Pos0, Pos1, a);
-		ix = round_to_int(Pos.x);
-		iy = round_to_int(Pos.y);
+		// Temporary position for checking collision
+		int ix = round_to_int(Pos.x);
+		int iy = round_to_int(Pos.y);
 
 		int Index = GetPureMapIndex(Pos);
 		if(g_Config.m_SvOldTeleportWeapons)
@@ -634,30 +634,18 @@ int CCollision::IsEvilTeleport(int Index) const
 	return 0;
 }
 
-int CCollision::IsCheckTeleport(int Index) const
+bool CCollision::IsCheckTeleport(int Index) const
 {
-	if(Index < 0)
-		return 0;
-	if(!m_pTele)
-		return 0;
-
-	if(m_pTele[Index].m_Type == TILE_TELECHECKIN)
-		return m_pTele[Index].m_Number;
-
-	return 0;
+	if(Index < 0 || !m_pTele)
+		return false;
+	return m_pTele[Index].m_Type == TILE_TELECHECKIN;
 }
 
-int CCollision::IsCheckEvilTeleport(int Index) const
+bool CCollision::IsCheckEvilTeleport(int Index) const
 {
-	if(Index < 0)
-		return 0;
-	if(!m_pTele)
-		return 0;
-
-	if(m_pTele[Index].m_Type == TILE_TELECHECKINEVIL)
-		return m_pTele[Index].m_Number;
-
-	return 0;
+	if(Index < 0 || !m_pTele)
+		return false;
+	return m_pTele[Index].m_Type == TILE_TELECHECKINEVIL;
 }
 
 int CCollision::IsTeleCheckpoint(int Index) const
@@ -724,7 +712,7 @@ void CCollision::GetSpeedup(int Index, vec2 *pDir, int *pForce, int *pMaxSpeed) 
 		return;
 	float Angle = m_pSpeedup[Index].m_Angle * (pi / 180.0f);
 	*pForce = m_pSpeedup[Index].m_Force;
-	*pDir = vec2(cos(Angle), sin(Angle));
+	*pDir = direction(Angle);
 	if(pMaxSpeed)
 		*pMaxSpeed = m_pSpeedup[Index].m_MaxSpeed;
 }
@@ -913,18 +901,14 @@ std::list<int> CCollision::GetMapIndices(vec2 PrevPos, vec2 Pos, unsigned MaxInd
 	}
 	else
 	{
-		float a = 0.0f;
-		vec2 Tmp = vec2(0, 0);
-		int Nx = 0;
-		int Ny = 0;
-		int Index, LastIndex = 0;
+		int LastIndex = 0;
 		for(int i = 0; i < End; i++)
 		{
-			a = i / d;
-			Tmp = mix(PrevPos, Pos, a);
-			Nx = clamp((int)Tmp.x / 32, 0, m_Width - 1);
-			Ny = clamp((int)Tmp.y / 32, 0, m_Height - 1);
-			Index = Ny * m_Width + Nx;
+			float a = i / d;
+			vec2 Tmp = mix(PrevPos, Pos, a);
+			int Nx = clamp((int)Tmp.x / 32, 0, m_Width - 1);
+			int Ny = clamp((int)Tmp.y / 32, 0, m_Height - 1);
+			int Index = Ny * m_Width + Nx;
 			if(TileExists(Index) && LastIndex != Index)
 			{
 				if(MaxIndices && Indices.size() > MaxIndices)
@@ -997,17 +981,12 @@ int CCollision::GetIndex(vec2 PrevPos, vec2 Pos) const
 		}
 	}
 
-	float a = 0.0f;
-	vec2 Tmp = vec2(0, 0);
-	int Nx = 0;
-	int Ny = 0;
-
-	for(int i = 0, id = (int)ceilf(Distance); i < id; i++)
+	for(int i = 0, id = std::ceil(Distance); i < id; i++)
 	{
-		a = (float)i / Distance;
-		Tmp = mix(PrevPos, Pos, a);
-		Nx = clamp((int)Tmp.x / 32, 0, m_Width - 1);
-		Ny = clamp((int)Tmp.y / 32, 0, m_Height - 1);
+		float a = (float)i / Distance;
+		vec2 Tmp = mix(PrevPos, Pos, a);
+		int Nx = clamp((int)Tmp.x / 32, 0, m_Width - 1);
+		int Ny = clamp((int)Tmp.y / 32, 0, m_Height - 1);
 		if((m_pTele) ||
 			(m_pSpeedup && m_pSpeedup[Ny * m_Width + Nx].m_Force > 0))
 		{
@@ -1039,33 +1018,33 @@ int CCollision::GetFTile(int x, int y) const
 
 int CCollision::Entity(int x, int y, int Layer) const
 {
-	if((0 > x || x >= m_Width) || (0 > y || y >= m_Height))
+	if(x < 0 || x >= m_Width || y < 0 || y >= m_Height)
 	{
-		char aBuf[12];
+		const char *pName;
 		switch(Layer)
 		{
 		case LAYER_GAME:
-			str_format(aBuf, sizeof(aBuf), "Game");
+			pName = "Game";
 			break;
 		case LAYER_FRONT:
-			str_format(aBuf, sizeof(aBuf), "Front");
+			pName = "Front";
 			break;
 		case LAYER_SWITCH:
-			str_format(aBuf, sizeof(aBuf), "Switch");
+			pName = "Switch";
 			break;
 		case LAYER_TELE:
-			str_format(aBuf, sizeof(aBuf), "Tele");
+			pName = "Tele";
 			break;
 		case LAYER_SPEEDUP:
-			str_format(aBuf, sizeof(aBuf), "Speedup");
+			pName = "Speedup";
 			break;
 		case LAYER_TUNE:
-			str_format(aBuf, sizeof(aBuf), "Tune");
+			pName = "Tune";
 			break;
 		default:
-			str_format(aBuf, sizeof(aBuf), "Unknown");
+			pName = "Unknown";
 		}
-		dbg_msg("collision", "something is VERY wrong with the %s layer please report this at https://github.com/ddnet/ddnet, you will need to post the map as well and any steps that u think may have led to this", aBuf);
+		dbg_msg("collision", "Something is VERY wrong with the %s layer near (%d, %d). Please report this at https://github.com/ddnet/ddnet/issues, you will need to post the map as well and any steps that you think may have led to this.", pName, x, y);
 		return 0;
 	}
 	switch(Layer)
@@ -1135,7 +1114,7 @@ void ThroughOffset(vec2 Pos0, vec2 Pos1, int *pOffsetX, int *pOffsetY)
 {
 	float x = Pos0.x - Pos1.x;
 	float y = Pos0.y - Pos1.y;
-	if(fabs(x) > fabs(y))
+	if(absolute(x) > absolute(y))
 	{
 		if(x < 0)
 		{
@@ -1168,7 +1147,7 @@ int CCollision::IntersectNoLaser(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2
 	float d = distance(Pos0, Pos1);
 	vec2 Last = Pos0;
 
-	for(int i = 0, id = (int)ceilf(d); i < id; i++)
+	for(int i = 0, id = std::ceil(d); i < id; i++)
 	{
 		float a = (int)i / d;
 		vec2 Pos = mix(Pos0, Pos1, a);
@@ -1199,7 +1178,7 @@ int CCollision::IntersectNoLaserNW(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, ve
 	float d = distance(Pos0, Pos1);
 	vec2 Last = Pos0;
 
-	for(int i = 0, id = (int)ceilf(d); i < id; i++)
+	for(int i = 0, id = std::ceil(d); i < id; i++)
 	{
 		float a = (float)i / d;
 		vec2 Pos = mix(Pos0, Pos1, a);
@@ -1228,7 +1207,7 @@ int CCollision::IntersectAir(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pO
 	float d = distance(Pos0, Pos1);
 	vec2 Last = Pos0;
 
-	for(int i = 0, id = (int)ceilf(d); i < id; i++)
+	for(int i = 0, id = std::ceil(d); i < id; i++)
 	{
 		float a = (float)i / d;
 		vec2 Pos = mix(Pos0, Pos1, a);

@@ -33,7 +33,7 @@ CDragger::CDragger(CGameWorld *pGameWorld, vec2 Pos, float Strength, bool Ignore
 
 void CDragger::Tick()
 {
-	if(Server()->Tick() % int(Server()->TickSpeed() * 0.15f) == 0)
+	if(Server()->Tick() % (int)(Server()->TickSpeed() * 0.15f) == 0)
 	{
 		int Flags;
 		m_EvalTick = Server()->Tick();
@@ -60,12 +60,12 @@ void CDragger::Tick()
 void CDragger::LookForPlayersToDrag()
 {
 	// Create a list of players who are in the range of the dragger
-	CCharacter *apPlayersInRange[MAX_CLIENTS];
+	CEntity *apPlayersInRange[MAX_CLIENTS];
 	mem_zero(apPlayersInRange, sizeof(apPlayersInRange));
 
 	int NumPlayersInRange = GameServer()->m_World.FindEntities(m_Pos,
 		g_Config.m_SvDraggerRange - CCharacterCore::PhysicalSize(),
-		(CEntity **)apPlayersInRange, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
+		apPlayersInRange, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
 
 	// The closest player (within range) in a team is selected as the target
 	int aClosestTargetIdInTeam[MAX_CLIENTS];
@@ -82,7 +82,7 @@ void CDragger::LookForPlayersToDrag()
 
 	for(int i = 0; i < NumPlayersInRange; i++)
 	{
-		CCharacter *pTarget = apPlayersInRange[i];
+		CCharacter *pTarget = static_cast<CCharacter *>(apPlayersInRange[i]);
 		const int &TargetTeam = pTarget->Team();
 
 		// Do not create a dragger beam for super player
@@ -189,8 +189,7 @@ void CDragger::Snap(int SnappingClient)
 	CNetObj_EntityEx *pEntData = 0;
 	if(SnappingClientVersion >= VERSION_DDNET_SWITCH)
 	{
-		pEntData = static_cast<CNetObj_EntityEx *>(Server()->SnapNewItem(NETOBJTYPE_ENTITYEX, GetID(),
-			sizeof(CNetObj_EntityEx)));
+		pEntData = Server()->SnapNewItem<CNetObj_EntityEx>(GetID());
 		if(pEntData)
 		{
 			pEntData->m_SwitchNumber = m_Number;
@@ -215,28 +214,16 @@ void CDragger::Snap(int SnappingClient)
 			return;
 	}
 
-	CNetObj_Laser *pObjLaser = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(
-		NETOBJTYPE_LASER, GetID(), sizeof(CNetObj_Laser)));
-
-	if(!pObjLaser)
-		return;
-
-	pObjLaser->m_X = (int)m_Pos.x;
-	pObjLaser->m_Y = (int)m_Pos.y;
-	pObjLaser->m_FromX = (int)m_Pos.x;
-	pObjLaser->m_FromY = (int)m_Pos.y;
-
-	if(pEntData)
+	int StartTick = 0;
+	if(!pEntData)
 	{
-		pObjLaser->m_StartTick = 0;
-	}
-	else
-	{
-		int StartTick = m_EvalTick;
+		StartTick = m_EvalTick;
 		if(StartTick < Server()->Tick() - 4)
 			StartTick = Server()->Tick() - 4;
 		else if(StartTick > Server()->Tick())
 			StartTick = Server()->Tick();
-		pObjLaser->m_StartTick = StartTick;
 	}
+
+	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion), GetID(),
+		m_Pos, m_Pos, StartTick, -1, LASERTYPE_DOOR);
 }

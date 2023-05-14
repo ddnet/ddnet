@@ -16,7 +16,7 @@ CDoor::CDoor(CGameWorld *pGameWorld, vec2 Pos, float Rotation, int Length,
 	m_Number = Number;
 	m_Pos = Pos;
 	m_Length = Length;
-	m_Direction = vec2(sin(Rotation), cos(Rotation));
+	m_Direction = vec2(std::sin(Rotation), std::cos(Rotation));
 	vec2 To = Pos + normalize(m_Direction) * m_Length;
 
 	GameServer()->Collision()->IntersectNoLaser(Pos, To, &this->m_To, 0);
@@ -40,25 +40,24 @@ void CDoor::ResetCollision()
 	}
 }
 
+void CDoor::Reset()
+{
+	m_MarkedForDestroy = true;
+}
+
 void CDoor::Snap(int SnappingClient)
 {
 	if(NetworkClipped(SnappingClient, m_Pos) && NetworkClipped(SnappingClient, m_To))
 		return;
 
-	CNetObj_Laser *pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(
-		NETOBJTYPE_LASER, GetID(), sizeof(CNetObj_Laser)));
-
-	if(!pObj)
-		return;
-
-	pObj->m_X = (int)m_Pos.x;
-	pObj->m_Y = (int)m_Pos.y;
-
 	int SnappingClientVersion = GameServer()->GetClientVersion(SnappingClient);
 
 	CNetObj_EntityEx *pEntData = 0;
 	if(SnappingClientVersion >= VERSION_DDNET_SWITCH)
-		pEntData = static_cast<CNetObj_EntityEx *>(Server()->SnapNewItem(NETOBJTYPE_ENTITYEX, GetID(), sizeof(CNetObj_EntityEx)));
+		pEntData = Server()->SnapNewItem<CNetObj_EntityEx>(GetID());
+
+	vec2 From;
+	int StartTick;
 
 	if(pEntData)
 	{
@@ -66,9 +65,8 @@ void CDoor::Snap(int SnappingClient)
 		pEntData->m_Layer = m_Layer;
 		pEntData->m_EntityClass = ENTITYCLASS_DOOR;
 
-		pObj->m_FromX = (int)m_To.x;
-		pObj->m_FromY = (int)m_To.y;
-		pObj->m_StartTick = 0;
+		From = m_To;
+		StartTick = 0;
 	}
 	else
 	{
@@ -79,14 +77,15 @@ void CDoor::Snap(int SnappingClient)
 
 		if(pChr && pChr->Team() != TEAM_SUPER && pChr->IsAlive() && !Switchers().empty() && Switchers()[m_Number].m_aStatus[pChr->Team()])
 		{
-			pObj->m_FromX = (int)m_To.x;
-			pObj->m_FromY = (int)m_To.y;
+			From = m_To;
 		}
 		else
 		{
-			pObj->m_FromX = (int)m_Pos.x;
-			pObj->m_FromY = (int)m_Pos.y;
+			From = m_Pos;
 		}
-		pObj->m_StartTick = Server()->Tick();
+		StartTick = Server()->Tick();
 	}
+
+	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion), GetID(),
+		m_Pos, From, StartTick, -1, LASERTYPE_DOOR);
 }

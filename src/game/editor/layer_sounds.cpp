@@ -182,9 +182,8 @@ void CLayerSounds::BrushPlace(CLayer *pBrush, float wx, float wy)
 	m_pEditor->m_Map.m_Modified = true;
 }
 
-int CLayerSounds::RenderProperties(CUIRect *pToolBox)
+CUI::EPopupMenuFunctionResult CLayerSounds::RenderProperties(CUIRect *pToolBox)
 {
-	//
 	enum
 	{
 		PROP_SOUND = 0,
@@ -200,7 +199,9 @@ int CLayerSounds::RenderProperties(CUIRect *pToolBox)
 	int NewVal = 0;
 	int Prop = m_pEditor->DoProperties(pToolBox, aProps, s_aIds, &NewVal);
 	if(Prop != -1)
+	{
 		m_pEditor->m_Map.m_Modified = true;
+	}
 
 	if(Prop == PROP_SOUND)
 	{
@@ -210,7 +211,7 @@ int CLayerSounds::RenderProperties(CUIRect *pToolBox)
 			m_Sound = -1;
 	}
 
-	return 0;
+	return CUI::POPUP_KEEP_OPEN;
 }
 
 void CLayerSounds::ModifySoundIndex(INDEX_MODIFY_FUNC Func)

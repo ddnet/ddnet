@@ -17,12 +17,7 @@
 
 #include "skins.h"
 
-static const char *VANILLA_SKINS[] = {"bluekitty", "bluestripe", "brownbear",
-	"cammo", "cammostripes", "coala", "default", "limekitty",
-	"pinky", "redbopp", "redstripe", "saddo", "toptri",
-	"twinbop", "twintri", "warpaint", "x_ninja", "x_spec"};
-
-static bool IsVanillaSkin(const char *pName)
+bool CSkins::IsVanillaSkin(const char *pName)
 {
 	return std::any_of(std::begin(VANILLA_SKINS), std::end(VANILLA_SKINS), [pName](const char *pVanillaSkin) { return str_comp(pName, pVanillaSkin) == 0; });
 }
@@ -80,7 +75,7 @@ int CSkins::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
 	return 0;
 }
 
-static void CheckMetrics(CSkin::SSkinMetricVariable &Metrics, uint8_t *pImg, int ImgWidth, int ImgX, int ImgY, int CheckWidth, int CheckHeight)
+static void CheckMetrics(CSkin::SSkinMetricVariable &Metrics, const uint8_t *pImg, int ImgWidth, int ImgX, int ImgY, int CheckWidth, int CheckHeight)
 {
 	int MaxY = -1;
 	int MinY = CheckHeight + 1;

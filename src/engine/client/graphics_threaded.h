@@ -5,6 +5,7 @@
 #include <engine/shared/config.h>
 
 #include <cstddef>
+#include <string>
 #include <vector>
 
 constexpr int CMD_BUFFER_DATA_BUFFER_SIZE = 1024 * 1024 * 2;
@@ -73,7 +74,7 @@ public:
 
 	enum ECommandBufferCMD
 	{
-		// commadn groups
+		// command groups
 		CMDGROUP_CORE = 0, // commands that everyone has to implement
 		CMDGROUP_PLATFORM_GL = 10000, // commands specific to a platform
 		CMDGROUP_PLATFORM_SDL = 20000,
@@ -364,7 +365,7 @@ public:
 		SCommand_RenderTileLayer() :
 			SCommand(CMD_RENDER_TILE_LAYER) {}
 		SState m_State;
-		SColorf m_Color; // the color of the whole tilelayer -- already envelopped
+		SColorf m_Color; // the color of the whole tilelayer -- already enveloped
 
 		// the char offset of all indices that should be rendered, and the amount of renders
 		char **m_pIndicesOffsets;
@@ -379,7 +380,7 @@ public:
 		SCommand_RenderBorderTile() :
 			SCommand(CMD_RENDER_BORDER_TILE) {}
 		SState m_State;
-		SColorf m_Color; // the color of the whole tilelayer -- already envelopped
+		SColorf m_Color; // the color of the whole tilelayer -- already enveloped
 		char *m_pIndicesOffset; // you should use the command buffer data to allocate vertices for this command
 		unsigned int m_DrawNum;
 		int m_BufferContainerIndex;
@@ -394,7 +395,7 @@ public:
 		SCommand_RenderBorderTileLine() :
 			SCommand(CMD_RENDER_BORDER_TILE_LINE) {}
 		SState m_State;
-		SColorf m_Color; // the color of the whole tilelayer -- already envelopped
+		SColorf m_Color; // the color of the whole tilelayer -- already enveloped
 		char *m_pIndicesOffset; // you should use the command buffer data to allocate vertices for this command
 		unsigned int m_IndexDrawNum;
 		unsigned int m_DrawNum;
@@ -714,7 +715,7 @@ public:
 		INITFLAG_DESKTOP_FULLSCREEN = 1 << 5,
 	};
 
-	virtual ~IGraphicsBackend() {}
+	virtual ~IGraphicsBackend() = default;
 
 	virtual int Init(const char *pName, int *pScreen, int *pWidth, int *pHeight, int *pRefreshRate, int *pFsaaSamples, int Flags, int *pDesktopWidth, int *pDesktopHeight, int *pCurrentWidth, int *pCurrentHeight, class IStorage *pStorage) = 0;
 	virtual int Shutdown() = 0;
@@ -770,6 +771,11 @@ public:
 
 	// be aware that this function should only be called from the graphics thread, and even then you should really know what you are doing
 	virtual TGLBackendReadPresentedImageData &GetReadPresentedImageDataFuncUnsafe() = 0;
+
+	virtual bool GetWarning(std::vector<std::string> &WarningStrings) = 0;
+
+	// returns true if the error msg was shown
+	virtual bool ShowMessageBox(unsigned Type, const char *pTitle, const char *pMsg) = 0;
 };
 
 class CGraphics_Threaded : public IEngineGraphics
@@ -799,6 +805,7 @@ class CGraphics_Threaded : public IEngineGraphics
 	//
 	class IStorage *m_pStorage;
 	class IConsole *m_pConsole;
+	class IEngine *m_pEngine;
 
 	int m_CurIndex;
 
@@ -814,7 +821,7 @@ class CGraphics_Threaded : public IEngineGraphics
 	float m_Rotation;
 	int m_Drawing;
 	bool m_DoScreenshot;
-	char m_aScreenshotName[128];
+	char m_aScreenshotName[IO_MAX_PATH_LENGTH];
 
 	CTextureHandle m_InvalidTexture;
 
@@ -875,14 +882,8 @@ class CGraphics_Threaded : public IEngineGraphics
 	std::vector<SQuadContainer> m_vQuadContainers;
 	int m_FirstFreeQuadContainer;
 
-	struct SWindowResizeListener
-	{
-		SWindowResizeListener(WINDOW_RESIZE_FUNC pFunc, void *pUser) :
-			m_pFunc(std::move(pFunc)), m_pUser(pUser) {}
-		WINDOW_RESIZE_FUNC m_pFunc;
-		void *m_pUser;
-	};
-	std::vector<SWindowResizeListener> m_vResizeListeners;
+	std::vector<WINDOW_RESIZE_FUNC> m_vResizeListeners;
+	std::vector<WINDOW_PROPS_CHANGED_FUNC> m_vPropChangeListeners;
 
 	void *AllocCommandBufferData(unsigned AllocSize);
 
@@ -893,8 +894,8 @@ class CGraphics_Threaded : public IEngineGraphics
 	template<typename TName>
 	void Rotate(const CCommandBuffer::SPoint &rCenter, TName *pPoints, int NumPoints)
 	{
-		float c = cosf(m_Rotation);
-		float s = sinf(m_Rotation);
+		float c = std::cos(m_Rotation);
+		float s = std::sin(m_Rotation);
 		float x, y;
 		int i;
 
@@ -1150,7 +1151,7 @@ public:
 	int QuadContainerAddQuads(int ContainerIndex, CQuadItem *pArray, int Num) override;
 	int QuadContainerAddQuads(int ContainerIndex, CFreeformItem *pArray, int Num) override;
 	void QuadContainerReset(int ContainerIndex) override;
-	void DeleteQuadContainer(int ContainerIndex) override;
+	void DeleteQuadContainer(int &ContainerIndex) override;
 	void RenderQuadContainer(int ContainerIndex, int QuadDrawNum) override;
 	void RenderQuadContainer(int ContainerIndex, int QuadOffset, int QuadDrawNum, bool ChangeWrapMode = true) override;
 	void RenderQuadContainerEx(int ContainerIndex, int QuadOffset, int QuadDrawNum, float X, float Y, float ScaleX = 1.f, float ScaleY = 1.f) override;
@@ -1251,7 +1252,7 @@ public:
 
 	int CreateBufferContainer(SBufferContainerInfo *pContainerInfo) override;
 	// destroying all buffer objects means, that all referenced VBOs are destroyed automatically, so the user does not need to save references to them
-	void DeleteBufferContainer(int ContainerIndex, bool DestroyAllBO = true) override;
+	void DeleteBufferContainer(int &ContainerIndex, bool DestroyAllBO = true) override;
 	void UpdateBufferContainerInternal(int ContainerIndex, SBufferContainerInfo *pContainerInfo);
 	void IndicesNumRequiredNotify(unsigned int RequiredIndicesCount) override;
 
@@ -1265,7 +1266,8 @@ public:
 	void Resize(int w, int h, int RefreshRate) override;
 	void GotResized(int w, int h, int RefreshRate) override;
 	void UpdateViewport(int X, int Y, int W, int H, bool ByResize) override;
-	void AddWindowResizeListener(WINDOW_RESIZE_FUNC pFunc, void *pUser) override;
+	void AddWindowResizeListener(WINDOW_RESIZE_FUNC pFunc) override;
+	void AddWindowPropChangeListener(WINDOW_PROPS_CHANGED_FUNC pFunc) override;
 	int GetWindowScreen() override;
 
 	void WindowDestroyNtf(uint32_t WindowID) override;
@@ -1297,6 +1299,7 @@ public:
 	void WaitForIdle() override;
 
 	SWarning *GetCurWarning() override;
+	bool ShowMessageBox(unsigned Type, const char *pTitle, const char *pMsg) override;
 
 	bool GetDriverVersion(EGraphicsDriverAgeType DriverAgeType, int &Major, int &Minor, int &Patch, const char *&pName, EBackendType BackendType) override { return m_pBackend->GetDriverVersion(DriverAgeType, Major, Minor, Patch, pName, BackendType); }
 	bool IsConfigModernAPI() override { return m_pBackend->IsConfigModernAPI(); }
@@ -1313,6 +1316,7 @@ public:
 	TGLBackendReadPresentedImageData &GetReadPresentedImageDataFuncUnsafe() override;
 };
 
-extern IGraphicsBackend *CreateGraphicsBackend();
+typedef std::function<const char *(const char *, const char *)> TTranslateFunc;
+extern IGraphicsBackend *CreateGraphicsBackend(TTranslateFunc &&TranslateFunc);
 
 #endif // ENGINE_CLIENT_GRAPHICS_THREADED_H

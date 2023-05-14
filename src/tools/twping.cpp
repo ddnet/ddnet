@@ -1,73 +1,82 @@
-#include <base/math.h>
+#include <base/logger.h>
 #include <base/system.h>
-#include <cstdio>
+
 #include <engine/shared/masterserver.h>
 #include <engine/shared/network.h>
 #include <engine/shared/packer.h>
 
-static CNetClient g_NetOp; // main
+#include <chrono>
 
 int main(int argc, const char **argv)
 {
 	CCmdlineFix CmdlineFix(&argc, &argv);
+
+	secure_random_init();
+	log_set_global_logger_default();
+
+	net_init();
 	NETADDR BindAddr;
 	mem_zero(&BindAddr, sizeof(BindAddr));
 	BindAddr.type = NETTYPE_ALL;
-	g_NetOp.Open(BindAddr);
+
+	CNetClient NetClient;
+	NetClient.Open(BindAddr);
 
 	if(argc != 2)
 	{
-		fprintf(stderr, "usage: %s server[:port] (default port: 8303)\n", argv[0]);
-		return 1;
+		log_error("twping", "usage: %s server[:port] (default port: 8303)", argv[0]);
+		return -1;
 	}
 
 	NETADDR Addr;
 	if(net_host_lookup(argv[1], &Addr, NETTYPE_ALL))
 	{
-		fprintf(stderr, "host lookup failed\n");
-		return 1;
+		log_error("twping", "host lookup failed");
+		return -1;
 	}
 
 	if(Addr.port == 0)
 		Addr.port = 8303;
 
+	const int CurToken = rand() % 256;
 	unsigned char aBuffer[sizeof(SERVERBROWSE_GETINFO) + 1];
-	CNetChunk Packet;
-
 	mem_copy(aBuffer, SERVERBROWSE_GETINFO, sizeof(SERVERBROWSE_GETINFO));
-
-	int CurToken = rand() % 256;
 	aBuffer[sizeof(SERVERBROWSE_GETINFO)] = CurToken;
 
+	CNetChunk Packet;
 	Packet.m_ClientID = -1;
 	Packet.m_Address = Addr;
 	Packet.m_Flags = NETSENDFLAG_CONNLESS;
 	Packet.m_DataSize = sizeof(aBuffer);
 	Packet.m_pData = aBuffer;
 
-	g_NetOp.Send(&Packet);
+	NetClient.Send(&Packet);
 
-	int64_t startTime = time_get();
+	const int64_t StartTime = time_get();
 
-	net_socket_read_wait(g_NetOp.m_Socket, 1000000);
+	using namespace std::chrono_literals;
+	const std::chrono::nanoseconds Timeout = std::chrono::nanoseconds(1s);
+	net_socket_read_wait(NetClient.m_Socket, Timeout);
 
-	g_NetOp.Update();
+	NetClient.Update();
 
-	while(g_NetOp.Recv(&Packet))
+	while(NetClient.Recv(&Packet))
 	{
 		if(Packet.m_DataSize >= (int)sizeof(SERVERBROWSE_INFO) && mem_comp(Packet.m_pData, SERVERBROWSE_INFO, sizeof(SERVERBROWSE_INFO)) == 0)
 		{
 			// we got ze info
-			CUnpacker Up;
-
-			Up.Reset((unsigned char *)Packet.m_pData + sizeof(SERVERBROWSE_INFO), Packet.m_DataSize - sizeof(SERVERBROWSE_INFO));
-			int Token = str_toint(Up.GetString());
+			CUnpacker Unpacker;
+			Unpacker.Reset((unsigned char *)Packet.m_pData + sizeof(SERVERBROWSE_INFO), Packet.m_DataSize - sizeof(SERVERBROWSE_INFO));
+			int Token = str_toint(Unpacker.GetString());
 			if(Token != CurToken)
 				continue;
 
-			int64_t endTime = time_get();
-			printf("%g ms\n", (double)(endTime - startTime) / time_freq() * 1000);
+			const int64_t EndTime = time_get();
+			log_info("twping", "%g ms", (double)(EndTime - StartTime) / time_freq() * 1000);
+			return 0;
 		}
 	}
-	return 0;
+
+	log_info("twping", "timeout (%" PRId64 " ms)", std::chrono::duration_cast<std::chrono::milliseconds>(Timeout).count());
+	return 1;
 }

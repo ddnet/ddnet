@@ -1,0 +1,42 @@
+name: Check Rust
+
+on:
+  push:
+    branches-ignore:
+      - staging.tmp
+      - trying.tmp
+      - staging-squash-merge.tmp
+  pull_request:
+
+jobs:
+  rustdoc:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Run Rustdoc
+      run: |
+        RUSTDOCFLAGS=-Dwarnings DDNET_TEST_NO_LINK=1 cargo doc
+
+  rustfmt:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Run Rustfmt
+      run:
+        cargo fmt -- --check
+
+  cargo-deny:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        checks:
+          - advisories
+          - bans licenses sources
+
+    continue-on-error: ${{ matrix.checks == 'advisories' }}
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: EmbarkStudios/cargo-deny-action@v1
+      with:
+        command: check ${{ matrix.checks }}

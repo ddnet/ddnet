@@ -43,7 +43,9 @@ void CGameContext::ConCredits(IConsole::IResult *pResult, void *pUserData)
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 		"Zodiac, c0d3d3v, GiuCcc, Ravie, Robyt3, simpygirl,");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
-		"sjrc6, Cellegen, srdante, Nouaa, Voxel, luk51 & others.");
+		"sjrc6, Cellegen, srdante, Nouaa, Voxel, luk51,");
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
+		"Vy0x2, Avolicious, louis, Marmare314 & others.");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 		"Based on DDRace by the DDRace developers,");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
@@ -1443,7 +1445,7 @@ void CGameContext::ConSetTimerType(IConsole::IResult *pResult, void *pUserData)
 	if(pPlayer->m_TimerType <= CPlayer::TIMERTYPE_SIXUP && pPlayer->m_TimerType >= CPlayer::TIMERTYPE_GAMETIMER)
 		str_format(aBuf, sizeof(aBuf), "Timer is displayed in %s", s_aaMsg[pPlayer->m_TimerType]);
 	else if(pPlayer->m_TimerType == CPlayer::TIMERTYPE_NONE)
-		str_format(aBuf, sizeof(aBuf), "Timer isn't displayed.");
+		str_copy(aBuf, "Timer isn't displayed.");
 
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
 }

@@ -18,6 +18,8 @@
 # Deëivid!        2022-06-22 19:26:00
 # Deëivid!        2022-07-05 22:30:00
 # Deëivid!        2022-10-08 19:20:00
+# Deëivid!        2023-01-05 21:05:00
+# Deëivid!        2023-02-26 00:35:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -58,14 +60,8 @@ Address
 All
 == Todos
 
-Are you sure that you want to delete the demo?
-== ¿Estás seguro de que quieres eliminar la demo?
-
 Are you sure that you want to quit?
 == ¿Estás seguro de que quieres salir?
-
-Are you sure that you want to remove the player from your friends list?
-== ¿Estás seguro de que quieres eliminar a este jugador de la lista de amigos?
 
 Automatically record demos
 == Grabar demos automáticamente
@@ -419,9 +415,6 @@ Show name plates
 Show only chat messages from friends
 == Recibir mensajes solo de amigos
 
-Skins
-== Skins
-
 Sound
 == Sonido
 
@@ -481,9 +474,6 @@ Try again
 
 Type
 == Tipo
-
-Unable to delete the demo
-== No se pudo eliminar la demo
 
 Unable to rename the demo
 == No se pudo renombrar la demo
@@ -569,7 +559,7 @@ Laser
 == Láser
 
 Netversion:
-== Versión Net
+== Versión Net:
 
 Map:
 == Mapa:
@@ -594,9 +584,6 @@ Reset to defaults
 
 Quit anyway?
 == ¿Salir de todos modos?
-
-Display Modes
-== Modos de video
 
 Version:
 == Versión:
@@ -681,9 +668,6 @@ It's recommended that you check the settings to adjust them to your liking befor
 
 Please enter your nickname below.
 == Por favor, introduzca su apodo a continuación.
-
-Destination file already exist
-== El archivo de destino ya existe
 
 Video name:
 == Nombre del video:
@@ -920,7 +904,7 @@ DDNet Client needs to be restarted to complete update!
 == ¡El Cliente DDNet debe reiniciarse para completar la actualización!
 
 Use DDRace Scoreboard
-== Utiliza el marcador DDRace
+== Utilizar el marcador DDRace
 
 Show score
 == Mostrar puntaje
@@ -1076,7 +1060,7 @@ Warning
 == Advertencia
 
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
-== Modo debug activado. Pulsa Ctrl+Shift+D para desactivar.
+== Modo debug activado. Pulsa Ctrl+Shift+D para desactivarlo.
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
 == Usa la tecla K para suicidarte (reiniciar), Q para pausar y ver a otros jugadores. Mira la configuración para otras teclas.
@@ -1089,9 +1073,6 @@ Your nickname '%s' is already used (%d points). Do you still want to use it?
 
 Checking for existing player with your name
 == Comprobando si ya existe un jugador con tu nombre
-
-Country / Region
-== País / Región
 
 Speed
 == Velocidad
@@ -1402,9 +1383,6 @@ UI controller sens.
 Controller jitter tolerance
 == Tolerancia a la fluctuación del mando
 
-No controller found. Plug in a controller and restart the game.
-== No se encontró un mando. Conecta uno y reinicia el juego.
-
 Device
 == Dispositivo
 
@@ -1623,3 +1601,113 @@ Loading race demo files
 
 Loading sound files
 == Cargando archivos de sonido
+
+Cancel
+== Cancelar
+
+File '%s' already exists, do you want to overwrite it?
+== El archivo '%s' ya existe, ¿quieres sobrescribirlo?
+
+Are you sure that you want to remove the player '%s' from your friends list?
+== ¿Estás seguro de que quieres quitar al jugador '%s' de tu lista de amigos?
+
+Are you sure that you want to remove the clan '%s' from your friends list?
+== ¿Estás seguro de que quieres quitar al clan '%s' de tu lista de amigos?
+
+Go back one tick
+== Retroceder un tick
+
+Go forward one tick
+== Avanzar un tick
+
+Go back one marker
+== Retroceder un marcador
+
+Go forward one marker
+== Avanzar un marcador
+
+Are you sure that you want to delete the demo '%s'?
+== ¿Estás seguro de que quieres eliminar la demo '%s'?
+
+Unable to delete the demo '%s'
+== No se pudo eliminar la demo '%s'
+
+Reset controls
+== Restablecer controles
+
+Are you sure that you want to reset the controls to their defaults?
+== ¿Estás seguro de que quieres restablecer a los controles predeterminados?
+
+[Graphics error]
+
+[Graphics error]
+Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== Error durante la iniciación. Intenta cambiar gfx_backend a OpenGL o Vulkan desde settings_ddnet.cfg en la carpeta de configuraciones e inténtalo otra vez.
+
+[Graphics error]
+Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
+== La VRAM se ha llenado. Intenta quitar recursos personalizados (skins, entidades, etc.), especialmente los de resolución alta.
+
+[Graphics error]
+An error during command recording occurred. Try to update your GPU drivers.
+== Ocurrió un error durante la grabación de comandos. Intenta actualizar los controladores de tu GPU.
+
+[Graphics error]
+A render command failed. Try to update your GPU drivers.
+== Un comando de renderización falló. Intenta actualizar los controladores de tu GPU.
+
+[Graphics error]
+Submitting the render commands failed. Try to update your GPU drivers.
+== Error al enviar los comandos de renderización. Intenta actualizar los controladores de tu GPU.
+
+[Graphics error]
+Failed to swap framebuffers. Try to update your GPU drivers.
+== Error al intercambiar búferes de fotogramas. Intenta actualizar los controladores de tu GPU.
+
+[Graphics error]
+Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== Error desconocido. Intenta cambiar gfx_backend a OpenGL o Vulkan desde settings_ddnet.cfg en el directorio de configuraciones e inténtalo otra vez.
+
+[Graphics error]
+Could not initialize the given graphics backend, reverting to the default backend now.
+== No se pudo inicializar el backend de gráficos dado, volviendo al backend predeterminado.
+
+Open the directory that contains the demo files
+== Abrir la carpeta que contiene los archivos de demo
+
+Save power by lowering refresh rate (higher input latency)
+== Ahorra energía al reducir la frecuencia de actualización (mayor latencia de entrada)
+
+Open the settings file
+== Abrir el archivo de configuraciones
+
+Open the directory that contains the configuration and user files
+== Abrir la carpeta que contiene las configuraciones y archivos del usuario
+
+Open the directory to add custom themes
+== Abrir la carpeta para agregar temas personalizados
+
+Open the directory to add custom skins
+== Abrir la carpeta para agregar skins personalizadas
+
+No controller found. Plug in a controller.
+== No se encontró un mando. Conecta uno.
+
+Unregister protocol and file extensions
+== Anular registro de protocolo y extensiones de archivo
+
+Open the directory to add custom assets
+== Abrir la carpeta para agregar recursos personalizados
+
+[Graphics error]
+Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
+== No se pudo inizializar el backend de gráficos dado, probablemente debido a que los controladores de la tarjeta gráfica integrada no están instalados.
+
+Could not save downloaded map. Try manually deleting this file: %s
+== No se pudo almacenar el mapa descargado. Intenta eliminar este archivo manualmente: %s
+
+Copy info
+== Copiar información
+
+Create a random skin
+== Crear skin aleatoria

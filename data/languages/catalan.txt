@@ -39,14 +39,8 @@ Address
 All
 == Tots
 
-Are you sure that you want to delete the demo?
-== Estàs segur que vols eliminar la repetició?
-
 Are you sure that you want to quit?
 == Estàs segur que vols sortir?
-
-Are you sure that you want to remove the player from your friends list?
-== Estàs segur que vols eliminar aquest jugador de la llista d'amics?
 
 Automatically record demos
 == Gravar repeticions automàticament
@@ -399,9 +393,6 @@ Show name plates
 Show only chat messages from friends
 == Rebre només missatges d'amics
 
-Skins
-== Skins
-
 Sound
 == So
 
@@ -461,9 +452,6 @@ Try again
 
 Type
 == Tipus
-
-Unable to delete the demo
-== No es pot eliminar la repetició
 
 Unable to rename the demo
 == No es pot reanomenar la repetició
@@ -581,9 +569,6 @@ Reset to defaults
 
 Quit anyway?
 == Sortir igualment?
-
-Display Modes
-== Modes de vídeo
 
 Version:
 == Versió:
@@ -930,9 +915,6 @@ It's recommended that you check the settings to adjust them to your liking befor
 Please enter your nickname below.
 == Si us plau, escriu el teu nom a sota.
 
-Destination file already exist
-== El fitxer de destinació ja existeix
-
 Video name:
 == Nom del vídeo:
 
@@ -1085,9 +1067,6 @@ Checking for existing player with your name
 
 Are you sure that you want to disconnect and switch to a different server?
 == Estàs segur que et vols desconnectar i entrar a un servidor diferent?
-
-Country / Region
-== País / Regió
 
 Speed
 == Velocitat
@@ -1300,6 +1279,47 @@ Tutorial
 Can't find a Tutorial server
 == No s'ha pogut trobar un servidor del tutorial
 
+[Graphics error]
+
+[Graphics error]
+Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== 
+
+[Graphics error]
+Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
+== 
+
+[Graphics error]
+An error during command recording occurred. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+A render command failed. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+Submitting the render commands failed. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+Failed to swap framebuffers. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== 
+
+[Graphics error]
+Could not initialize the given graphics backend, reverting to the default backend now.
+== 
+
+[Graphics error]
+Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
+== 
+
+Could not save downloaded map. Try manually deleting this file: %s
+== 
+
 Preparing demo playback
 == 
 
@@ -1354,7 +1374,22 @@ Getting game info
 Requesting to join the game
 == 
 
+Cancel
+== 
+
+File '%s' already exists, do you want to overwrite it?
+== 
+
 Loading menu images
+== 
+
+Copy info
+== 
+
+Are you sure that you want to remove the player '%s' from your friends list?
+== 
+
+Are you sure that you want to remove the clan '%s' from your friends list?
 == 
 
 Play the current demo
@@ -1364,6 +1399,12 @@ Pause the current demo
 == 
 
 Stop the current demo
+== 
+
+Go back one tick
+== 
+
+Go forward one tick
 == 
 
 Slow down the demo
@@ -1381,16 +1422,43 @@ Mark the end of a cut
 Export cut as a separate demo
 == 
 
+Go back one marker
+== 
+
+Go forward one marker
+== 
+
 Toggle keyboard shortcuts
 == 
 
 Loading demo files
 == 
 
-Menu opened. Press Esc key again to close menu.
+Open the directory that contains the demo files
+== 
+
+Are you sure that you want to delete the demo '%s'?
+== 
+
+Unable to delete the demo '%s'
 == 
 
 Loading ghost files
+== 
+
+Menu opened. Press Esc key again to close menu.
+== 
+
+Save power by lowering refresh rate (higher input latency)
+== 
+
+Open the settings file
+== 
+
+Open the directory that contains the configuration and user files
+== 
+
+Open the directory to add custom themes
 == 
 
 Loading skin files
@@ -1403,6 +1471,12 @@ Download community skins
 == 
 
 Choose default eyes when joining a server
+== 
+
+Create a random skin
+== 
+
+Open the directory to add custom skins
 == 
 
 Enable controller
@@ -1434,7 +1508,7 @@ UI controller sens.
 Controller jitter tolerance
 == 
 
-No controller found. Plug in a controller and restart the game.
+No controller found. Plug in a controller.
 == 
 
 Device
@@ -1459,6 +1533,12 @@ UI mouse sens.
 == 
 
 Controller
+== 
+
+Reset controls
+== 
+
+Are you sure that you want to reset the controls to their defaults?
 == 
 
 Allows maps to render with more detail
@@ -1584,10 +1664,16 @@ Quads are used for background decoration
 Tries to predict other entities to give a feel of low latency
 == 
 
+Unregister protocol and file extensions
+== 
+
 Extras
 == 
 
 Loading assets
+== 
+
+Open the directory to add custom assets
 == 
 
 Loading race demo files

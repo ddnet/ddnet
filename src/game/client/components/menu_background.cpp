@@ -19,6 +19,36 @@
 
 using namespace std::chrono_literals;
 
+std::array<vec2, CMenuBackground::NUM_POS> GenerateMenuBackgroundPositions()
+{
+	std::array<vec2, CMenuBackground::NUM_POS> Positions;
+
+	Positions[CMenuBackground::POS_START] = vec2(500.0f, 500.0f);
+	Positions[CMenuBackground::POS_BROWSER_INTERNET] = vec2(1000.0f, 1000.0f);
+	Positions[CMenuBackground::POS_BROWSER_LAN] = vec2(1100.0f, 1000.0f);
+	Positions[CMenuBackground::POS_DEMOS] = vec2(900.0f, 100.0f);
+	Positions[CMenuBackground::POS_NEWS] = vec2(500.0f, 750.0f);
+	Positions[CMenuBackground::POS_BROWSER_FAVORITES] = vec2(1250.0f, 500.0f);
+	Positions[CMenuBackground::POS_SETTINGS_LANGUAGE] = vec2(500.0f, 1200.0f);
+	Positions[CMenuBackground::POS_SETTINGS_GENERAL] = vec2(500.0f, 1000.0f);
+	Positions[CMenuBackground::POS_SETTINGS_PLAYER] = vec2(600.0f, 1000.0f);
+	Positions[CMenuBackground::POS_SETTINGS_TEE] = vec2(700.0f, 1000.0f);
+	Positions[CMenuBackground::POS_SETTINGS_APPEARANCE] = vec2(200.0f, 1000.0f);
+	Positions[CMenuBackground::POS_SETTINGS_CONTROLS] = vec2(800.0f, 1000.0f);
+	Positions[CMenuBackground::POS_SETTINGS_GRAPHICS] = vec2(900.0f, 1000.0f);
+	Positions[CMenuBackground::POS_SETTINGS_SOUND] = vec2(1000.0f, 1000.0f);
+	Positions[CMenuBackground::POS_SETTINGS_DDNET] = vec2(1200.0f, 200.0f);
+	Positions[CMenuBackground::POS_SETTINGS_ASSETS] = vec2(500.0f, 500.0f);
+	for(int i = 0; i < CMenuBackground::POS_BROWSER_CUSTOM_NUM; ++i)
+		Positions[CMenuBackground::POS_BROWSER_CUSTOM0 + i] = vec2(500.0f + (75.0f * (float)i), 650.0f - (75.0f * (float)i));
+	for(int i = 0; i < CMenuBackground::POS_SETTINGS_RESERVED_NUM; ++i)
+		Positions[CMenuBackground::POS_SETTINGS_RESERVED0 + i] = vec2(0, 0);
+	for(int i = 0; i < CMenuBackground::POS_RESERVED_NUM; ++i)
+		Positions[CMenuBackground::POS_RESERVED0 + i] = vec2(0, 0);
+
+	return Positions;
+}
+
 CMenuBackground::CMenuBackground() :
 	CBackground(CMapLayers::TYPE_FULL_DESIGN, false)
 {
@@ -56,28 +86,7 @@ void CMenuBackground::OnInit()
 
 void CMenuBackground::ResetPositions()
 {
-	m_aPositions[POS_START] = vec2(500.0f, 500.0f);
-	m_aPositions[POS_BROWSER_INTERNET] = vec2(1000.0f, 1000.0f);
-	m_aPositions[POS_BROWSER_LAN] = vec2(1100.0f, 1000.0f);
-	m_aPositions[POS_DEMOS] = vec2(900.0f, 100.0f);
-	m_aPositions[POS_NEWS] = vec2(500.0f, 750.0f);
-	m_aPositions[POS_BROWSER_FAVORITES] = vec2(1250.0f, 500.0f);
-	m_aPositions[POS_SETTINGS_LANGUAGE] = vec2(500.0f, 1200.0f);
-	m_aPositions[POS_SETTINGS_GENERAL] = vec2(500.0f, 1000.0f);
-	m_aPositions[POS_SETTINGS_PLAYER] = vec2(600.0f, 1000.0f);
-	m_aPositions[POS_SETTINGS_TEE] = vec2(700.0f, 1000.0f);
-	m_aPositions[POS_SETTINGS_APPEARANCE] = vec2(200.0f, 1000.0f);
-	m_aPositions[POS_SETTINGS_CONTROLS] = vec2(800.0f, 1000.0f);
-	m_aPositions[POS_SETTINGS_GRAPHICS] = vec2(900.0f, 1000.0f);
-	m_aPositions[POS_SETTINGS_SOUND] = vec2(1000.0f, 1000.0f);
-	m_aPositions[POS_SETTINGS_DDNET] = vec2(1200.0f, 200.0f);
-	m_aPositions[POS_SETTINGS_ASSETS] = vec2(500.0f, 500.0f);
-	for(int i = 0; i < POS_BROWSER_CUSTOM_NUM; ++i)
-		m_aPositions[POS_BROWSER_CUSTOM0 + i] = vec2(500.0f + (75.0f * (float)i), 650.0f - (75.0f * (float)i));
-	for(int i = 0; i < POS_SETTINGS_RESERVED_NUM; ++i)
-		m_aPositions[POS_SETTINGS_RESERVED0 + i] = vec2(0, 0);
-	for(int i = 0; i < POS_RESERVED_NUM; ++i)
-		m_aPositions[POS_RESERVED0 + i] = vec2(0, 0);
+	m_aPositions = GenerateMenuBackgroundPositions();
 }
 
 int CMenuBackground::ThemeScan(const char *pName, int IsDir, int DirType, void *pUser)
@@ -193,8 +202,6 @@ void CMenuBackground::LoadMenuBackground(bool HasDayHint, bool HasNightHint)
 
 	ResetPositions();
 
-	bool NeedImageLoading = false;
-
 	str_copy(m_aMapName, g_Config.m_ClMenuMap);
 
 	if(g_Config.m_ClMenuMap[0] != '\0')
@@ -265,11 +272,9 @@ void CMenuBackground::LoadMenuBackground(bool HasDayHint, bool HasNightHint)
 		if(m_Loaded)
 		{
 			m_pLayers->InitBackground(m_pMap);
-			NeedImageLoading = true;
 
 			CMapLayers::OnMapLoad();
-			if(NeedImageLoading)
-				m_pImages->LoadBackground(m_pLayers, m_pMap);
+			m_pImages->LoadBackground(m_pLayers, m_pMap);
 
 			// look for custom positions
 			CMapItemLayerTilemap *pTLayer = m_pLayers->GameLayer();
@@ -282,11 +287,9 @@ void CMenuBackground::LoadMenuBackground(bool HasDayHint, bool HasNightHint)
 
 				if(Size >= pTLayer->m_Width * pTLayer->m_Height * TileSize)
 				{
-					int x = 0;
-					int y = 0;
-					for(y = 0; y < pTLayer->m_Height; ++y)
+					for(int y = 0; y < pTLayer->m_Height; ++y)
 					{
-						for(x = 0; x < pTLayer->m_Width; ++x)
+						for(int x = 0; x < pTLayer->m_Width; ++x)
 						{
 							unsigned char Index = ((CTile *)pTiles)[y * pTLayer->m_Width + x].m_Index;
 							if(Index >= TILE_TIME_CHECKPOINT_FIRST && Index <= TILE_TIME_CHECKPOINT_LAST)
@@ -351,7 +354,7 @@ bool CMenuBackground::Render()
 		// move time
 		m_MoveTime += clamp(Client()->RenderFrameTime(), 0.0f, 0.1f) * g_Config.m_ClCameraSpeed / 10.0f;
 		float XVal = 1 - m_MoveTime;
-		XVal = pow(XVal, 7.0f);
+		XVal = std::pow(XVal, 7.0f);
 
 		m_Camera.m_Center = TargetPos + Dir * (XVal * Distance);
 		if(m_CurrentPosition < 0)

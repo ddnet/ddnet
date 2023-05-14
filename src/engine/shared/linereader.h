@@ -15,6 +15,6 @@ class CLineReader
 
 public:
 	void Init(IOHANDLE File);
-	char *Get();
+	char *Get(); // Returned string is only valid until next Get() call
 };
 #endif

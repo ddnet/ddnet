@@ -4,6 +4,7 @@
 #include <game/client/components/background.h>
 #include <game/client/components/camera.h>
 
+#include <array>
 #include <chrono>
 #include <string>
 #include <vector>
@@ -83,7 +84,7 @@ public:
 
 	vec2 m_MenuCenter;
 	vec2 m_RotationCenter;
-	vec2 m_aPositions[NUM_POS];
+	std::array<vec2, NUM_POS> m_aPositions;
 	int m_CurrentPosition;
 	vec2 m_AnimationStartPos;
 	bool m_ChangedPosition;
@@ -116,5 +117,7 @@ public:
 
 	std::vector<CTheme> &GetThemes();
 };
+
+std::array<vec2, CMenuBackground::NUM_POS> GenerateMenuBackgroundPositions();
 
 #endif

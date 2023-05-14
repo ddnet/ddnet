@@ -22,7 +22,6 @@ public:
 		int Span,
 		bool Freeze,
 		bool Explosive,
-		float Force,
 		int SoundImpact,
 		int Layer = 0,
 		int Number = 0);

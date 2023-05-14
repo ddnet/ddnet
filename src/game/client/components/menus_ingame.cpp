@@ -10,6 +10,7 @@
 #include <engine/graphics.h>
 #include <engine/serverbrowser.h>
 #include <engine/shared/config.h>
+#include <engine/shared/localization.h>
 #include <engine/textrender.h>
 
 #include <game/generated/client_data.h>
@@ -20,6 +21,7 @@
 #include <game/client/gameclient.h>
 #include <game/client/render.h>
 #include <game/client/ui.h>
+#include <game/client/ui_listbox.h>
 #include <game/client/ui_scrollregion.h>
 #include <game/localization.h>
 
@@ -33,6 +35,7 @@
 
 #include <chrono>
 
+using namespace FontIcons;
 using namespace std::chrono_literals;
 
 void CMenus::RenderGame(CUIRect MainView)
@@ -56,7 +59,7 @@ void CMenus::RenderGame(CUIRect MainView)
 	{
 		if(Client()->GetCurrentRaceTime() / 60 >= g_Config.m_ClConfirmDisconnectTime && g_Config.m_ClConfirmDisconnectTime >= 0)
 		{
-			m_Popup = POPUP_DISCONNECT;
+			PopupConfirm(Localize("Disconnect"), Localize("Are you sure that you want to disconnect?"), Localize("Yes"), Localize("No"), &CMenus::PopupConfirmDisconnect);
 		}
 		else
 		{
@@ -88,7 +91,7 @@ void CMenus::RenderGame(CUIRect MainView)
 		{
 			if(Client()->GetCurrentRaceTime() / 60 >= g_Config.m_ClConfirmDisconnectTime && g_Config.m_ClConfirmDisconnectTime >= 0)
 			{
-				m_Popup = POPUP_DISCONNECT_DUMMY;
+				PopupConfirm(Localize("Disconnect Dummy"), Localize("Are you sure that you want to disconnect your dummy?"), Localize("Yes"), Localize("No"), &CMenus::PopupConfirmDisconnectDummy);
 			}
 			else
 			{
@@ -208,6 +211,17 @@ void CMenus::RenderGame(CUIRect MainView)
 	}
 }
 
+void CMenus::PopupConfirmDisconnect()
+{
+	Client()->Disconnect();
+}
+
+void CMenus::PopupConfirmDisconnectDummy()
+{
+	Client()->DummyDisconnect(0);
+	SetActive(false);
+}
+
 void CMenus::RenderPlayers(CUIRect MainView)
 {
 	CUIRect Button, Button2, ButtonBar, Options, Player;
@@ -218,29 +232,28 @@ void CMenus::RenderPlayers(CUIRect MainView)
 	Options.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, 10.0f);
 	Options.Margin(10.0f, &Options);
 	Options.HSplitTop(50.0f, &Button, &Options);
-	UI()->DoLabel(&Button, Localize("Player options"), 34.0f, TEXTALIGN_LEFT);
+	UI()->DoLabel(&Button, Localize("Player options"), 34.0f, TEXTALIGN_ML);
 
 	// headline
 	Options.HSplitTop(34.0f, &ButtonBar, &Options);
 	ButtonBar.VSplitRight(231.0f, &Player, &ButtonBar);
-	UI()->DoLabel(&Player, Localize("Player"), 24.0f, TEXTALIGN_LEFT);
+	UI()->DoLabel(&Player, Localize("Player"), 24.0f, TEXTALIGN_ML);
 
 	ButtonBar.HMargin(1.0f, &ButtonBar);
 	float Width = ButtonBar.h * 2.0f;
 	ButtonBar.VSplitLeft(Width, &Button, &ButtonBar);
 	RenderTools()->RenderIcon(IMAGE_GUIICONS, SPRITE_GUIICON_MUTE, &Button);
 
-	ButtonBar.VSplitLeft(20.0f, 0, &ButtonBar);
+	ButtonBar.VSplitLeft(20.0f, nullptr, &ButtonBar);
 	ButtonBar.VSplitLeft(Width, &Button, &ButtonBar);
 	RenderTools()->RenderIcon(IMAGE_GUIICONS, SPRITE_GUIICON_EMOTICON_MUTE, &Button);
 
-	ButtonBar.VSplitLeft(20.0f, 0, &ButtonBar);
+	ButtonBar.VSplitLeft(20.0f, nullptr, &ButtonBar);
 	ButtonBar.VSplitLeft(Width, &Button, &ButtonBar);
 	RenderTools()->RenderIcon(IMAGE_GUIICONS, SPRITE_GUIICON_FRIEND, &Button);
 
 	int TotalPlayers = 0;
-
-	for(auto &pInfoByName : m_pClient->m_Snap.m_apInfoByName)
+	for(const auto &pInfoByName : m_pClient->m_Snap.m_apInfoByName)
 	{
 		if(!pInfoByName)
 			continue;
@@ -253,14 +266,11 @@ void CMenus::RenderPlayers(CUIRect MainView)
 		TotalPlayers++;
 	}
 
-	static int s_VoteList = 0;
-	static float s_ScrollValue = 0;
-	CUIRect List = Options;
-	// List.HSplitTop(28.0f, 0, &List);
-	UiDoListboxStart(&s_VoteList, &List, 24.0f, "", "", TotalPlayers, 1, -1, s_ScrollValue);
+	static CListBox s_ListBox;
+	s_ListBox.DoStart(24.0f, TotalPlayers, 1, 3, -1, &Options);
 
 	// options
-	static int s_aPlayerIDs[MAX_CLIENTS][3] = {{0}};
+	static char s_aPlayerIDs[MAX_CLIENTS][3] = {{0}};
 
 	for(int i = 0, Count = 0; i < MAX_CLIENTS; ++i)
 	{
@@ -268,25 +278,27 @@ void CMenus::RenderPlayers(CUIRect MainView)
 			continue;
 
 		int Index = m_pClient->m_Snap.m_apInfoByName[i]->m_ClientID;
-
 		if(Index == m_pClient->m_Snap.m_LocalClientID)
 			continue;
 
-		CListboxItem Item = UiDoListboxNextItem(&m_pClient->m_aClients[Index]);
+		CGameClient::CClientData &CurrentClient = m_pClient->m_aClients[Index];
+		const CListboxItem Item = s_ListBox.DoNextItem(&CurrentClient);
 
 		Count++;
 
 		if(!Item.m_Visible)
 			continue;
 
+		CUIRect Row = Item.m_Rect;
 		if(Count % 2 == 1)
-			Item.m_Rect.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, 10.0f);
-		Item.m_Rect.VSplitRight(300.0f, &Player, &Item.m_Rect);
+			Row.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, 5.0f);
+		Row.VSplitRight(s_ListBox.ScrollbarWidthMax() - s_ListBox.ScrollbarWidth(), &Row, nullptr);
+		Row.VSplitRight(300.0f, &Player, &Row);
 
 		// player info
 		Player.VSplitLeft(28.0f, &Button, &Player);
 
-		CTeeRenderInfo TeeInfo = m_pClient->m_aClients[Index].m_RenderInfo;
+		CTeeRenderInfo TeeInfo = CurrentClient.m_RenderInfo;
 		TeeInfo.m_Size = Button.h;
 
 		CAnimState *pIdleState = CAnimState::GetIdle();
@@ -296,59 +308,57 @@ void CMenus::RenderPlayers(CUIRect MainView)
 
 		RenderTools()->RenderTee(pIdleState, &TeeInfo, EMOTE_NORMAL, vec2(1.0f, 0.0f), TeeRenderPos);
 
-		Player.HSplitTop(1.5f, 0, &Player);
+		Player.HSplitTop(1.5f, nullptr, &Player);
 		Player.VSplitMid(&Player, &Button);
-		Item.m_Rect.VSplitRight(200.0f, &Button2, &Item.m_Rect);
+		Row.VSplitRight(210.0f, &Button2, &Row);
 		CTextCursor Cursor;
 		TextRender()->SetCursor(&Cursor, Player.x, Player.y + (Player.h - 14.f) / 2.f, 14.0f, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
 		Cursor.m_LineWidth = Player.w;
-		TextRender()->TextEx(&Cursor, m_pClient->m_aClients[Index].m_aName, -1);
+		TextRender()->TextEx(&Cursor, CurrentClient.m_aName, -1);
 
 		TextRender()->SetCursor(&Cursor, Button.x, Button.y + (Button.h - 14.f) / 2.f, 14.0f, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
 		Cursor.m_LineWidth = Button.w;
-		TextRender()->TextEx(&Cursor, m_pClient->m_aClients[Index].m_aClan, -1);
+		TextRender()->TextEx(&Cursor, CurrentClient.m_aClan, -1);
 
-		// TextRender()->SetCursor(&Cursor, Button2.x,Button2.y, 14.0f, TEXTFLAG_RENDER|TEXTFLAG_STOP_AT_END);
-		// Cursor.m_LineWidth = Button.w;
 		ColorRGBA Color(1.0f, 1.0f, 1.0f, 0.5f);
-		m_pClient->m_CountryFlags.Render(m_pClient->m_aClients[Index].m_Country, &Color,
+		m_pClient->m_CountryFlags.Render(CurrentClient.m_Country, &Color,
 			Button2.x, Button2.y + Button2.h / 2.0f - 0.75f * Button2.h / 2.0f, 1.5f * Button2.h, 0.75f * Button2.h);
 
 		// ignore chat button
-		Item.m_Rect.HMargin(2.0f, &Item.m_Rect);
-		Item.m_Rect.VSplitLeft(Width, &Button, &Item.m_Rect);
-		Button.VSplitLeft((Width - Button.h) / 4.0f, 0, &Button);
-		Button.VSplitLeft(Button.h, &Button, 0);
-		if(g_Config.m_ClShowChatFriends && !m_pClient->m_aClients[Index].m_Friend)
+		Row.HMargin(2.0f, &Row);
+		Row.VSplitLeft(Width, &Button, &Row);
+		Button.VSplitLeft((Width - Button.h) / 4.0f, nullptr, &Button);
+		Button.VSplitLeft(Button.h, &Button, nullptr);
+		if(g_Config.m_ClShowChatFriends && !CurrentClient.m_Friend)
 			DoButton_Toggle(&s_aPlayerIDs[Index][0], 1, &Button, false);
-		else if(DoButton_Toggle(&s_aPlayerIDs[Index][0], m_pClient->m_aClients[Index].m_ChatIgnore, &Button, true))
-			m_pClient->m_aClients[Index].m_ChatIgnore ^= 1;
+		else if(DoButton_Toggle(&s_aPlayerIDs[Index][0], CurrentClient.m_ChatIgnore, &Button, true))
+			CurrentClient.m_ChatIgnore ^= 1;
 
 		// ignore emoticon button
-		Item.m_Rect.VSplitLeft(20.0f, &Button, &Item.m_Rect);
-		Item.m_Rect.VSplitLeft(Width, &Button, &Item.m_Rect);
-		Button.VSplitLeft((Width - Button.h) / 4.0f, 0, &Button);
-		Button.VSplitLeft(Button.h, &Button, 0);
-		if(g_Config.m_ClShowChatFriends && !m_pClient->m_aClients[Index].m_Friend)
+		Row.VSplitLeft(30.0f, nullptr, &Row);
+		Row.VSplitLeft(Width, &Button, &Row);
+		Button.VSplitLeft((Width - Button.h) / 4.0f, nullptr, &Button);
+		Button.VSplitLeft(Button.h, &Button, nullptr);
+		if(g_Config.m_ClShowChatFriends && !CurrentClient.m_Friend)
 			DoButton_Toggle(&s_aPlayerIDs[Index][1], 1, &Button, false);
-		else if(DoButton_Toggle(&s_aPlayerIDs[Index][1], m_pClient->m_aClients[Index].m_EmoticonIgnore, &Button, true))
-			m_pClient->m_aClients[Index].m_EmoticonIgnore ^= 1;
+		else if(DoButton_Toggle(&s_aPlayerIDs[Index][1], CurrentClient.m_EmoticonIgnore, &Button, true))
+			CurrentClient.m_EmoticonIgnore ^= 1;
 
 		// friend button
-		Item.m_Rect.VSplitLeft(20.0f, &Button, &Item.m_Rect);
-		Item.m_Rect.VSplitLeft(Width, &Button, &Item.m_Rect);
-		Button.VSplitLeft((Width - Button.h) / 4.0f, 0, &Button);
-		Button.VSplitLeft(Button.h, &Button, 0);
-		if(DoButton_Toggle(&s_aPlayerIDs[Index][2], m_pClient->m_aClients[Index].m_Friend, &Button, true))
+		Row.VSplitLeft(10.0f, nullptr, &Row);
+		Row.VSplitLeft(Width, &Button, &Row);
+		Button.VSplitLeft((Width - Button.h) / 4.0f, nullptr, &Button);
+		Button.VSplitLeft(Button.h, &Button, nullptr);
+		if(DoButton_Toggle(&s_aPlayerIDs[Index][2], CurrentClient.m_Friend, &Button, true))
 		{
-			if(m_pClient->m_aClients[Index].m_Friend)
-				m_pClient->Friends()->RemoveFriend(m_pClient->m_aClients[Index].m_aName, m_pClient->m_aClients[Index].m_aClan);
+			if(CurrentClient.m_Friend)
+				m_pClient->Friends()->RemoveFriend(CurrentClient.m_aName, CurrentClient.m_aClan);
 			else
-				m_pClient->Friends()->AddFriend(m_pClient->m_aClients[Index].m_aName, m_pClient->m_aClients[Index].m_aClan);
+				m_pClient->Friends()->AddFriend(CurrentClient.m_aName, CurrentClient.m_aClan);
 		}
 	}
 
-	UiDoListboxEnd(&s_ScrollValue, 0);
+	s_ListBox.DoEnd();
 }
 
 void CMenus::RenderServerInfo(CUIRect MainView)
@@ -383,7 +393,7 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 	x = 5.0f;
 	y = 0.0f;
 
-	TextRender()->Text(0, ServerInfo.x + x, ServerInfo.y + y, 32, Localize("Server info"), 250.0f);
+	TextRender()->Text(ServerInfo.x + x, ServerInfo.y + y, 32, Localize("Server info"), -1.0f);
 	y += 32.0f + 5.0f;
 
 	mem_zero(aBuf, sizeof(aBuf));
@@ -401,8 +411,23 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 		Localize("Version"), CurrentServerInfo.m_aVersion,
 		Localize("Password"), CurrentServerInfo.m_Flags & 1 ? Localize("Yes") : Localize("No"));
 
-	TextRender()->Text(0, ServerInfo.x + x, ServerInfo.y + y, 20, aBuf, 250.0f);
+	TextRender()->Text(ServerInfo.x + x, ServerInfo.y + y, 20, aBuf, ServerInfo.w - 10.0f);
 
+	// copy info button
+	{
+		CUIRect Button;
+		ServerInfo.HSplitBottom(20.0f, &ServerInfo, &Button);
+		Button.VSplitRight(200.0f, &ServerInfo, &Button);
+		static CButtonContainer s_CopyButton;
+		if(DoButton_Menu(&s_CopyButton, Localize("Copy info"), 0, &Button))
+		{
+			char aInfo[256];
+			CurrentServerInfo.InfoToString(aInfo, sizeof(aInfo));
+			Input()->SetClipboardText(aInfo);
+		}
+	}
+
+	// favorite checkbox
 	{
 		CUIRect Button;
 		NETADDR ServerAddr = Client()->ServerAddress();
@@ -427,7 +452,7 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 	x = 5.0f;
 	y = 0.0f;
 
-	TextRender()->Text(0, GameInfo.x + x, GameInfo.y + y, 32, Localize("Game info"), 250.0f);
+	TextRender()->Text(GameInfo.x + x, GameInfo.y + y, 32, Localize("Game info"), -1.0f);
 	y += 32.0f + 5.0f;
 
 	if(m_pClient->m_Snap.m_pGameInfoObj)
@@ -448,10 +473,14 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 			Localize("Score limit"), m_pClient->m_Snap.m_pGameInfoObj->m_ScoreLimit,
 			Localize("Time limit"), m_pClient->m_Snap.m_pGameInfoObj->m_TimeLimit,
 			Localize("Players"), m_pClient->m_Snap.m_NumPlayers, CurrentServerInfo.m_MaxClients);
-		TextRender()->Text(0, GameInfo.x + x, GameInfo.y + y, 20, aBuf, 250.0f);
+		TextRender()->Text(GameInfo.x + x, GameInfo.y + y, 20, aBuf, GameInfo.w - 10.0f);
 	}
 
-	// motd
+	RenderServerInfoMotd(Motd);
+}
+
+void CMenus::RenderServerInfoMotd(CUIRect Motd)
+{
 	const float MotdFontSize = 16.0f;
 	Motd.HSplitTop(10.0f, nullptr, &Motd);
 	Motd.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
@@ -461,7 +490,10 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 	CUIRect MotdHeader;
 	Motd.HSplitTop(2.0f * MotdFontSize, &MotdHeader, &Motd);
 	Motd.HSplitTop(5.0f, nullptr, &Motd);
-	TextRender()->Text(nullptr, MotdHeader.x, MotdHeader.y, 2.0f * MotdFontSize, Localize("MOTD"), -1.0f);
+	TextRender()->Text(MotdHeader.x, MotdHeader.y, 2.0f * MotdFontSize, Localize("MOTD"), -1.0f);
+
+	if(!m_pClient->m_Motd.ServerMotd()[0])
+		return;
 
 	static CScrollRegion s_ScrollRegion;
 	vec2 ScrollOffset(0.0f, 0.0f);
@@ -470,18 +502,30 @@ void CMenus::RenderServerInfo(CUIRect MainView)
 	s_ScrollRegion.Begin(&Motd, &ScrollOffset, &ScrollParams);
 	Motd.y += ScrollOffset.y;
 
+	static float s_MotdHeight = 0.0f;
+	static int64_t s_MotdLastUpdateTime = -1;
+	if(!m_MotdTextContainerIndex.Valid() || s_MotdLastUpdateTime == -1 || s_MotdLastUpdateTime != m_pClient->m_Motd.ServerMotdUpdateTime())
+	{
+		CTextCursor Cursor;
+		TextRender()->SetCursor(&Cursor, 0.0f, 0.0f, MotdFontSize, TEXTFLAG_RENDER);
+		Cursor.m_LineWidth = Motd.w;
+		TextRender()->RecreateTextContainer(m_MotdTextContainerIndex, &Cursor, m_pClient->m_Motd.ServerMotd());
+		s_MotdHeight = Cursor.Height();
+		s_MotdLastUpdateTime = m_pClient->m_Motd.ServerMotdUpdateTime();
+	}
+
 	CUIRect MotdTextArea;
-	Motd.HSplitTop((str_countchr(m_pClient->m_Motd.m_aServerMotd, '\n') + 1) * MotdFontSize, &MotdTextArea, &Motd);
+	Motd.HSplitTop(s_MotdHeight, &MotdTextArea, &Motd);
 	s_ScrollRegion.AddRect(MotdTextArea);
-	TextRender()->Text(nullptr, MotdTextArea.x, MotdTextArea.y, MotdFontSize, m_pClient->m_Motd.m_aServerMotd, MotdTextArea.w);
+
+	if(m_MotdTextContainerIndex.Valid())
+		TextRender()->RenderTextContainer(m_MotdTextContainerIndex, TextRender()->DefaultTextColor(), TextRender()->DefaultTextOutlineColor(), MotdTextArea.x, MotdTextArea.y);
 
 	s_ScrollRegion.End();
 }
 
 bool CMenus::RenderServerControlServer(CUIRect MainView)
 {
-	static int s_VoteList = 0;
-	static float s_ScrollValue = 0;
 	CUIRect List = MainView;
 	int Total = m_pClient->m_Voting.m_NumVoteOptions;
 	int NumVoteOptions = 0;
@@ -491,35 +535,36 @@ bool CMenus::RenderServerControlServer(CUIRect MainView)
 
 	for(CVoteOptionClient *pOption = m_pClient->m_Voting.m_pFirst; pOption; pOption = pOption->m_pNext)
 	{
-		if(m_aFilterString[0] != '\0' && !str_utf8_find_nocase(pOption->m_aDescription, m_aFilterString))
+		if(!m_FilterInput.IsEmpty() && !str_utf8_find_nocase(pOption->m_aDescription, m_FilterInput.GetString()))
 			continue;
 		TotalShown++;
 	}
 
-	UiDoListboxStart(&s_VoteList, &List, 19.0f, "", "", TotalShown, 1, s_CurVoteOption, s_ScrollValue);
+	static CListBox s_ListBox;
+	s_ListBox.DoStart(19.0f, TotalShown, 1, 3, s_CurVoteOption, &List);
 
 	int i = -1;
 	for(CVoteOptionClient *pOption = m_pClient->m_Voting.m_pFirst; pOption; pOption = pOption->m_pNext)
 	{
 		i++;
-		if(m_aFilterString[0] != '\0' && !str_utf8_find_nocase(pOption->m_aDescription, m_aFilterString))
+		if(!m_FilterInput.IsEmpty() && !str_utf8_find_nocase(pOption->m_aDescription, m_FilterInput.GetString()))
 			continue;
-
-		CListboxItem Item = UiDoListboxNextItem(pOption);
-
-		if(Item.m_Visible)
-			UI()->DoLabel(&Item.m_Rect, pOption->m_aDescription, 13.0f, TEXTALIGN_LEFT);
 
 		if(NumVoteOptions < Total)
 			aIndices[NumVoteOptions] = i;
 		NumVoteOptions++;
+
+		const CListboxItem Item = s_ListBox.DoNextItem(pOption);
+		if(!Item.m_Visible)
+			continue;
+
+		UI()->DoLabel(&Item.m_Rect, pOption->m_aDescription, 13.0f, TEXTALIGN_ML);
 	}
 
-	bool Call;
-	s_CurVoteOption = UiDoListboxEnd(&s_ScrollValue, &Call);
+	s_CurVoteOption = s_ListBox.DoEnd();
 	if(s_CurVoteOption < Total)
 		m_CallvoteSelectedOption = aIndices[s_CurVoteOption];
-	return Call;
+	return s_ListBox.WasItemActivated();
 }
 
 bool CMenus::RenderServerControlKick(CUIRect MainView, bool FilterSpectators)
@@ -527,7 +572,7 @@ bool CMenus::RenderServerControlKick(CUIRect MainView, bool FilterSpectators)
 	int NumOptions = 0;
 	int Selected = 0;
 	static int aPlayerIDs[MAX_CLIENTS];
-	for(auto &pInfoByName : m_pClient->m_Snap.m_apInfoByName)
+	for(const auto &pInfoByName : m_pClient->m_Snap.m_apInfoByName)
 	{
 		if(!pInfoByName)
 			continue;
@@ -536,7 +581,7 @@ bool CMenus::RenderServerControlKick(CUIRect MainView, bool FilterSpectators)
 		if(Index == m_pClient->m_Snap.m_LocalClientID || (FilterSpectators && pInfoByName->m_Team == TEAM_SPECTATORS))
 			continue;
 
-		if(!str_utf8_find_nocase(m_pClient->m_aClients[Index].m_aName, m_aFilterString))
+		if(!str_utf8_find_nocase(m_pClient->m_aClients[Index].m_aName, m_FilterInput.GetString()))
 			continue;
 
 		if(m_CallvoteSelectedPlayer == Index)
@@ -544,36 +589,34 @@ bool CMenus::RenderServerControlKick(CUIRect MainView, bool FilterSpectators)
 		aPlayerIDs[NumOptions++] = Index;
 	}
 
-	static int s_VoteList = 0;
-	static float s_ScrollValue = 0;
-	CUIRect List = MainView;
-	UiDoListboxStart(&s_VoteList, &List, 24.0f, "", "", NumOptions, 1, Selected, s_ScrollValue);
+	static CListBox s_ListBox;
+	s_ListBox.DoStart(24.0f, NumOptions, 1, 3, Selected, &MainView);
 
 	for(int i = 0; i < NumOptions; i++)
 	{
-		CListboxItem Item = UiDoListboxNextItem(&aPlayerIDs[i]);
+		const CListboxItem Item = s_ListBox.DoNextItem(&aPlayerIDs[i]);
+		if(!Item.m_Visible)
+			continue;
 
-		if(Item.m_Visible)
-		{
-			CTeeRenderInfo TeeInfo = m_pClient->m_aClients[aPlayerIDs[i]].m_RenderInfo;
-			TeeInfo.m_Size = Item.m_Rect.h;
+		CUIRect TeeRect, Label;
+		Item.m_Rect.VSplitLeft(Item.m_Rect.h, &TeeRect, &Label);
 
-			CAnimState *pIdleState = CAnimState::GetIdle();
-			vec2 OffsetToMid;
-			RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &TeeInfo, OffsetToMid);
-			vec2 TeeRenderPos(Item.m_Rect.x + Item.m_Rect.h / 2, Item.m_Rect.y + Item.m_Rect.h / 2 + OffsetToMid.y);
+		CTeeRenderInfo TeeInfo = m_pClient->m_aClients[aPlayerIDs[i]].m_RenderInfo;
+		TeeInfo.m_Size = TeeRect.h;
 
-			RenderTools()->RenderTee(pIdleState, &TeeInfo, EMOTE_NORMAL, vec2(1.0f, 0.0f), TeeRenderPos);
+		CAnimState *pIdleState = CAnimState::GetIdle();
+		vec2 OffsetToMid;
+		RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &TeeInfo, OffsetToMid);
+		vec2 TeeRenderPos(TeeRect.x + TeeInfo.m_Size / 2, TeeRect.y + TeeInfo.m_Size / 2 + OffsetToMid.y);
 
-			Item.m_Rect.x += TeeInfo.m_Size;
-			UI()->DoLabel(&Item.m_Rect, m_pClient->m_aClients[aPlayerIDs[i]].m_aName, 16.0f, TEXTALIGN_LEFT);
-		}
+		RenderTools()->RenderTee(pIdleState, &TeeInfo, EMOTE_NORMAL, vec2(1.0f, 0.0f), TeeRenderPos);
+
+		UI()->DoLabel(&Label, m_pClient->m_aClients[aPlayerIDs[i]].m_aName, 16.0f, TEXTALIGN_ML);
 	}
 
-	bool Call;
-	Selected = UiDoListboxEnd(&s_ScrollValue, &Call);
+	Selected = s_ListBox.DoEnd();
 	m_CallvoteSelectedPlayer = Selected != -1 ? aPlayerIDs[Selected] : -1;
-	return Call;
+	return s_ListBox.WasItemActivated();
 }
 
 void CMenus::RenderServerControl(CUIRect MainView)
@@ -628,30 +671,24 @@ void CMenus::RenderServerControl(CUIRect MainView)
 		{
 			Bottom.VSplitLeft(240.0f, &QuickSearch, &Bottom);
 			QuickSearch.HSplitTop(5.0f, 0, &QuickSearch);
-			const char *pSearchLabel = "\xEF\x80\x82";
 			TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
 			TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
 
-			SLabelProperties Props;
-			Props.m_AlignVertically = 0;
-			UI()->DoLabel(&QuickSearch, pSearchLabel, 14.0f, TEXTALIGN_LEFT, Props);
-			float wSearch = TextRender()->TextWidth(0, 14.0f, pSearchLabel, -1, -1.0f);
+			UI()->DoLabel(&QuickSearch, FONT_ICON_MAGNIFYING_GLASS, 14.0f, TEXTALIGN_ML);
+			float wSearch = TextRender()->TextWidth(14.0f, FONT_ICON_MAGNIFYING_GLASS, -1, -1.0f);
 			TextRender()->SetRenderFlags(0);
 			TextRender()->SetCurFont(NULL);
 			QuickSearch.VSplitLeft(wSearch, 0, &QuickSearch);
 			QuickSearch.VSplitLeft(5.0f, 0, &QuickSearch);
-			static int s_ClearButton = 0;
-			static float s_Offset = 0.0f;
 
-			SUIExEditBoxProperties EditProps;
 			if(m_ControlPageOpening || (Input()->KeyPress(KEY_F) && Input()->ModifierIsPressed()))
 			{
-				UI()->SetActiveItem(&m_aFilterString);
+				UI()->SetActiveItem(&m_FilterInput);
 				m_ControlPageOpening = false;
-				EditProps.m_SelectText = true;
+				m_FilterInput.SelectAll();
 			}
-			EditProps.m_pEmptyText = Localize("Search");
-			UI()->DoClearableEditBox(&m_aFilterString, &s_ClearButton, &QuickSearch, m_aFilterString, sizeof(m_aFilterString), 14.0f, &s_Offset, false, IGraphics::CORNER_ALL, EditProps);
+			m_FilterInput.SetEmptyText(Localize("Search"));
+			UI()->DoClearableEditBox(&m_FilterInput, &QuickSearch, 14.0f);
 		}
 
 		Bottom.VSplitRight(120.0f, &Bottom, &Button);
@@ -661,7 +698,7 @@ void CMenus::RenderServerControl(CUIRect MainView)
 		{
 			if(s_ControlPage == 0)
 			{
-				m_pClient->m_Voting.CallvoteOption(m_CallvoteSelectedOption, m_aCallvoteReason);
+				m_pClient->m_Voting.CallvoteOption(m_CallvoteSelectedOption, m_CallvoteReasonInput.GetString());
 				if(g_Config.m_UiCloseWindowAfterChangingSetting)
 					SetActive(false);
 			}
@@ -670,7 +707,7 @@ void CMenus::RenderServerControl(CUIRect MainView)
 				if(m_CallvoteSelectedPlayer >= 0 && m_CallvoteSelectedPlayer < MAX_CLIENTS &&
 					m_pClient->m_Snap.m_apPlayerInfos[m_CallvoteSelectedPlayer])
 				{
-					m_pClient->m_Voting.CallvoteKick(m_CallvoteSelectedPlayer, m_aCallvoteReason);
+					m_pClient->m_Voting.CallvoteKick(m_CallvoteSelectedPlayer, m_CallvoteReasonInput.GetString());
 					SetActive(false);
 				}
 			}
@@ -679,11 +716,11 @@ void CMenus::RenderServerControl(CUIRect MainView)
 				if(m_CallvoteSelectedPlayer >= 0 && m_CallvoteSelectedPlayer < MAX_CLIENTS &&
 					m_pClient->m_Snap.m_apPlayerInfos[m_CallvoteSelectedPlayer])
 				{
-					m_pClient->m_Voting.CallvoteSpectate(m_CallvoteSelectedPlayer, m_aCallvoteReason);
+					m_pClient->m_Voting.CallvoteSpectate(m_CallvoteSelectedPlayer, m_CallvoteReasonInput.GetString());
 					SetActive(false);
 				}
 			}
-			m_aCallvoteReason[0] = 0;
+			m_CallvoteReasonInput.Clear();
 		}
 
 		// render kick reason
@@ -692,13 +729,15 @@ void CMenus::RenderServerControl(CUIRect MainView)
 		Bottom.VSplitRight(160.0f, &Bottom, &Reason);
 		Reason.HSplitTop(5.0f, 0, &Reason);
 		const char *pLabel = Localize("Reason:");
-		UI()->DoLabel(&Reason, pLabel, 14.0f, TEXTALIGN_LEFT);
-		float w = TextRender()->TextWidth(0, 14.0f, pLabel, -1, -1.0f);
+		UI()->DoLabel(&Reason, pLabel, 14.0f, TEXTALIGN_ML);
+		float w = TextRender()->TextWidth(14.0f, pLabel, -1, -1.0f);
 		Reason.VSplitLeft(w + 10.0f, 0, &Reason);
-		static float s_Offset = 0.0f;
 		if(Input()->KeyPress(KEY_R) && Input()->ModifierIsPressed())
-			UI()->SetActiveItem(&m_aCallvoteReason);
-		UI()->DoEditBox(&m_aCallvoteReason, &Reason, m_aCallvoteReason, sizeof(m_aCallvoteReason), 14.0f, &s_Offset, false, IGraphics::CORNER_ALL);
+		{
+			UI()->SetActiveItem(&m_CallvoteReasonInput);
+			m_CallvoteReasonInput.SelectAll();
+		}
+		UI()->DoEditBox(&m_CallvoteReasonInput, &Reason, 14.0f);
 
 		// extended features (only available when authed in rcon)
 		if(Client()->RconAuthed())
@@ -716,13 +755,13 @@ void CMenus::RenderServerControl(CUIRect MainView)
 			if(DoButton_Menu(&s_ForceVoteButton, Localize("Force vote"), 0, &Button))
 			{
 				if(s_ControlPage == 0)
-					m_pClient->m_Voting.CallvoteOption(m_CallvoteSelectedOption, m_aCallvoteReason, true);
+					m_pClient->m_Voting.CallvoteOption(m_CallvoteSelectedOption, m_CallvoteReasonInput.GetString(), true);
 				else if(s_ControlPage == 1)
 				{
 					if(m_CallvoteSelectedPlayer >= 0 && m_CallvoteSelectedPlayer < MAX_CLIENTS &&
 						m_pClient->m_Snap.m_apPlayerInfos[m_CallvoteSelectedPlayer])
 					{
-						m_pClient->m_Voting.CallvoteKick(m_CallvoteSelectedPlayer, m_aCallvoteReason, true);
+						m_pClient->m_Voting.CallvoteKick(m_CallvoteSelectedPlayer, m_CallvoteReasonInput.GetString(), true);
 						SetActive(false);
 					}
 				}
@@ -731,11 +770,11 @@ void CMenus::RenderServerControl(CUIRect MainView)
 					if(m_CallvoteSelectedPlayer >= 0 && m_CallvoteSelectedPlayer < MAX_CLIENTS &&
 						m_pClient->m_Snap.m_apPlayerInfos[m_CallvoteSelectedPlayer])
 					{
-						m_pClient->m_Voting.CallvoteSpectate(m_CallvoteSelectedPlayer, m_aCallvoteReason, true);
+						m_pClient->m_Voting.CallvoteSpectate(m_CallvoteSelectedPlayer, m_CallvoteReasonInput.GetString(), true);
 						SetActive(false);
 					}
 				}
-				m_aCallvoteReason[0] = 0;
+				m_CallvoteReasonInput.Clear();
 			}
 
 			if(s_ControlPage == 0)
@@ -751,29 +790,27 @@ void CMenus::RenderServerControl(CUIRect MainView)
 				RconExtension.HSplitTop(20.0f, &Bottom, &RconExtension);
 				Bottom.VSplitLeft(5.0f, 0, &Bottom);
 				Bottom.VSplitLeft(250.0f, &Button, &Bottom);
-				UI()->DoLabel(&Button, Localize("Vote description:"), 14.0f, TEXTALIGN_LEFT);
+				UI()->DoLabel(&Button, Localize("Vote description:"), 14.0f, TEXTALIGN_ML);
 
 				Bottom.VSplitLeft(20.0f, 0, &Button);
-				UI()->DoLabel(&Button, Localize("Vote command:"), 14.0f, TEXTALIGN_LEFT);
+				UI()->DoLabel(&Button, Localize("Vote command:"), 14.0f, TEXTALIGN_ML);
 
-				static char s_aVoteDescription[64] = {0};
-				static char s_aVoteCommand[512] = {0};
+				static CLineInputBuffered<64> s_VoteDescriptionInput;
+				static CLineInputBuffered<512> s_VoteCommandInput;
 				RconExtension.HSplitTop(20.0f, &Bottom, &RconExtension);
 				Bottom.VSplitRight(10.0f, &Bottom, 0);
 				Bottom.VSplitRight(120.0f, &Bottom, &Button);
 				static CButtonContainer s_AddVoteButton;
 				if(DoButton_Menu(&s_AddVoteButton, Localize("Add"), 0, &Button))
-					if(s_aVoteDescription[0] != 0 && s_aVoteCommand[0] != 0)
-						m_pClient->m_Voting.AddvoteOption(s_aVoteDescription, s_aVoteCommand);
+					if(!s_VoteDescriptionInput.IsEmpty() && !s_VoteCommandInput.IsEmpty())
+						m_pClient->m_Voting.AddvoteOption(s_VoteDescriptionInput.GetString(), s_VoteCommandInput.GetString());
 
 				Bottom.VSplitLeft(5.0f, 0, &Bottom);
 				Bottom.VSplitLeft(250.0f, &Button, &Bottom);
-				static float s_OffsetDesc = 0.0f;
-				UI()->DoEditBox(&s_aVoteDescription, &Button, s_aVoteDescription, sizeof(s_aVoteDescription), 14.0f, &s_OffsetDesc, false, IGraphics::CORNER_ALL);
+				UI()->DoEditBox(&s_VoteDescriptionInput, &Button, 14.0f);
 
 				Bottom.VMargin(20.0f, &Button);
-				static float s_OffsetCmd = 0.0f;
-				UI()->DoEditBox(&s_aVoteCommand, &Button, s_aVoteCommand, sizeof(s_aVoteCommand), 14.0f, &s_OffsetCmd, false, IGraphics::CORNER_ALL);
+				UI()->DoEditBox(&s_VoteCommandInput, &Button, 14.0f);
 			}
 		}
 	}
@@ -974,8 +1011,8 @@ void CMenus::RenderGhost(CUIRect MainView)
 	static CColumn s_aCols[] = {
 		{" ", -1, 2.0f, {0}, {0}},
 		{" ", COL_ACTIVE, 30.0f, {0}, {0}},
-		{"Name", COL_NAME, 300.0f, {0}, {0}}, // Localize("Name")
-		{"Time", COL_TIME, 200.0f, {0}, {0}}, // Localize("Time")
+		{Localizable("Name"), COL_NAME, 300.0f, {0}, {0}},
+		{Localizable("Time"), COL_TIME, 200.0f, {0}, {0}},
 	};
 
 	int NumCols = std::size(s_aCols);
@@ -995,70 +1032,37 @@ void CMenus::RenderGhost(CUIRect MainView)
 
 	View.Draw(ColorRGBA(0, 0, 0, 0.15f), 0, 0);
 
-	CUIRect Scroll;
-	View.VSplitRight(20.0f, &View, &Scroll);
-
-	static float s_ScrollValue = 0;
-	s_ScrollValue = UI()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
-
-	int NumGhosts = m_vGhosts.size();
+	const int NumGhosts = m_vGhosts.size();
 	static int s_SelectedIndex = 0;
-	HandleListInputs(View, s_ScrollValue, 1.0f, nullptr, s_aCols[0].m_Rect.h, s_SelectedIndex, NumGhosts);
-
-	// set clipping
-	UI()->ClipEnable(&View);
-
-	CUIRect OriginalView = View;
-	int Num = (int)(View.h / s_aCols[0].m_Rect.h) + 1;
-	int ScrollNum = maximum(NumGhosts - Num + 1, 0);
-	View.y -= s_ScrollValue * ScrollNum * s_aCols[0].m_Rect.h;
-
-	int NewSelected = -1;
-	bool DoubleClicked = false;
+	static CListBox s_ListBox;
+	s_ListBox.DoStart(17.0f, NumGhosts, 1, 3, s_SelectedIndex, &View, false);
 
 	for(int i = 0; i < NumGhosts; i++)
 	{
-		const CGhostItem *pItem = &m_vGhosts[i];
-		CUIRect Row;
-		View.HSplitTop(17.0f, &Row, &View);
-
-		// make sure that only those in view can be selected
-		if(Row.y + Row.h > OriginalView.y && Row.y < OriginalView.y + OriginalView.h)
-		{
-			if(i == s_SelectedIndex)
-			{
-				CUIRect r = Row;
-				r.Margin(1.5f, &r);
-				r.Draw(ColorRGBA(1, 1, 1, 0.5f), IGraphics::CORNER_ALL, 4.0f);
-			}
-
-			if(UI()->DoButtonLogic(pItem, 0, &Row))
-			{
-				NewSelected = i;
-				DoubleClicked |= NewSelected == m_DoubleClickIndex;
-				m_DoubleClickIndex = NewSelected;
-			}
-		}
+		const CGhostItem *pGhost = &m_vGhosts[i];
+		const CListboxItem Item = s_ListBox.DoNextItem(pGhost);
+		if(!Item.m_Visible)
+			continue;
 
 		ColorRGBA rgb = ColorRGBA(1.0f, 1.0f, 1.0f);
-		if(pItem->m_Own)
+		if(pGhost->m_Own)
 			rgb = color_cast<ColorRGBA>(ColorHSLA(0.33f, 1.0f, 0.75f));
 
-		TextRender()->TextColor(rgb.WithAlpha(pItem->HasFile() ? 1.0f : 0.5f));
+		TextRender()->TextColor(rgb.WithAlpha(pGhost->HasFile() ? 1.0f : 0.5f));
 
 		for(int c = 0; c < NumCols; c++)
 		{
 			CUIRect Button;
 			Button.x = s_aCols[c].m_Rect.x;
-			Button.y = Row.y;
-			Button.h = Row.h;
+			Button.y = Item.m_Rect.y;
+			Button.h = Item.m_Rect.h;
 			Button.w = s_aCols[c].m_Rect.w;
 
 			int Id = s_aCols[c].m_Id;
 
 			if(Id == COL_ACTIVE)
 			{
-				if(pItem->Active())
+				if(pGhost->Active())
 				{
 					Graphics()->WrapClamp();
 					Graphics()->TextureSet(GameClient()->m_EmoticonsSkin.m_aSpriteEmoticons[(SPRITE_OOP + 7) - SPRITE_OOP]);
@@ -1076,7 +1080,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 				TextRender()->SetCursor(&Cursor, Button.x, Button.y + (Button.h - 12.0f) / 2.f, 12.0f, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
 				Cursor.m_LineWidth = Button.w;
 
-				TextRender()->TextEx(&Cursor, pItem->m_aPlayer, -1);
+				TextRender()->TextEx(&Cursor, pGhost->m_aPlayer, -1);
 			}
 			else if(Id == COL_TIME)
 			{
@@ -1085,7 +1089,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 				Cursor.m_LineWidth = Button.w;
 
 				char aBuf[64];
-				str_time(pItem->m_Time / 10, TIME_HOURS_CENTISECS, aBuf, sizeof(aBuf));
+				str_time(pGhost->m_Time / 10, TIME_HOURS_CENTISECS, aBuf, sizeof(aBuf));
 				TextRender()->TextEx(&Cursor, aBuf, -1);
 			}
 		}
@@ -1093,10 +1097,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 
-	UI()->ClipDisable();
-
-	if(NewSelected != -1)
-		s_SelectedIndex = NewSelected;
+	s_SelectedIndex = s_ListBox.DoEnd();
 
 	Status.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_B, 5.0f);
 	Status.Margin(5.0f, &Status);
@@ -1124,7 +1125,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 
 		static CButtonContainer s_GhostButton;
 		const char *pText = pGhost->Active() ? Localize("Deactivate") : Localize("Activate");
-		if(DoButton_Menu(&s_GhostButton, pText, 0, &Button) || (DoubleClicked && Input()->MouseDoubleClick()))
+		if(DoButton_Menu(&s_GhostButton, pText, 0, &Button) || s_ListBox.WasItemActivated())
 		{
 			if(pGhost->Active())
 			{
@@ -1165,6 +1166,6 @@ void CMenus::RenderIngameHint()
 	float Width = 300 * Graphics()->ScreenAspect();
 	Graphics()->MapScreen(0, 0, Width, 300);
 	TextRender()->TextColor(1, 1, 1, 1);
-	TextRender()->Text(0x0, 5, 280, 5, Localize("Menu opened. Press Esc key again to close menu."), -1.0f);
+	TextRender()->Text(5, 280, 5, Localize("Menu opened. Press Esc key again to close menu."), -1.0f);
 	UI()->MapScreen();
 }

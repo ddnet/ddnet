@@ -7,7 +7,7 @@
 #include <engine/storage.h>
 
 #ifdef CONF_PLATFORM_HAIKU
-#include <stdlib.h>
+#include <cstdlib>
 #endif
 
 class CStorage : public IStorage
@@ -289,19 +289,15 @@ public:
 				char aBuf[IO_MAX_PATH_LENGTH];
 				str_copy(m_aBinarydir, pArgv0, Pos + 1);
 				str_format(aBuf, sizeof(aBuf), "%s/" PLAT_SERVER_EXEC, m_aBinarydir);
-				IOHANDLE File = io_open(aBuf, IOFLAG_READ);
-				if(File)
+				if(fs_is_file(aBuf))
 				{
-					io_close(File);
 					return;
 				}
 #if defined(CONF_PLATFORM_MACOS)
 				str_append(m_aBinarydir, "/../../../DDNet-Server.app/Contents/MacOS", sizeof(m_aBinarydir));
 				str_format(aBuf, sizeof(aBuf), "%s/" PLAT_SERVER_EXEC, m_aBinarydir);
-				IOHANDLE FileBis = io_open(aBuf, IOFLAG_READ);
-				if(FileBis)
+				if(fs_is_file(aBuf))
 				{
-					io_close(FileBis);
 					return;
 				}
 #endif
@@ -365,8 +361,18 @@ public:
 		return pBuffer;
 	}
 
+	void TranslateType(int &Type, const char *pPath)
+	{
+		if(Type == TYPE_SAVE_OR_ABSOLUTE)
+			Type = fs_is_relative_path(pPath) ? TYPE_SAVE : TYPE_ABSOLUTE;
+		else if(Type == TYPE_ALL_OR_ABSOLUTE)
+			Type = fs_is_relative_path(pPath) ? TYPE_ALL : TYPE_ABSOLUTE;
+	}
+
 	IOHANDLE OpenFile(const char *pFilename, int Flags, int Type, char *pBuffer = 0, int BufferSize = 0) override
 	{
+		TranslateType(Type, pFilename);
+
 		char aBuffer[IO_MAX_PATH_LENGTH];
 		if(!pBuffer)
 		{
@@ -376,7 +382,7 @@ public:
 
 		if(Type == TYPE_ABSOLUTE)
 		{
-			return io_open(pFilename, Flags);
+			return io_open(GetPath(TYPE_ABSOLUTE, pFilename, pBuffer, BufferSize), Flags);
 		}
 		if(str_startswith(pFilename, "mapres/../skins/"))
 		{
@@ -396,7 +402,7 @@ public:
 		}
 		else
 		{
-			if(Type <= TYPE_ALL)
+			if(Type == TYPE_ALL)
 			{
 				// check all available directories
 				for(int i = TYPE_SAVE; i < m_NumPaths; ++i)
@@ -421,6 +427,44 @@ public:
 
 		pBuffer[0] = 0;
 		return 0;
+	}
+
+	template<typename F>
+	bool GenericExists(const char *pFilename, int Type, F &&CheckFunction)
+	{
+		TranslateType(Type, pFilename);
+
+		char aBuffer[IO_MAX_PATH_LENGTH];
+		if(Type == TYPE_ALL)
+		{
+			// check all available directories
+			for(int i = TYPE_SAVE; i < m_NumPaths; ++i)
+			{
+				if(CheckFunction(GetPath(i, pFilename, aBuffer, sizeof(aBuffer))))
+					return true;
+			}
+			return false;
+		}
+		else if(Type == TYPE_ABSOLUTE || (Type >= TYPE_SAVE && Type < m_NumPaths))
+		{
+			// check wanted directory
+			return CheckFunction(GetPath(Type, pFilename, aBuffer, sizeof(aBuffer)));
+		}
+		else
+		{
+			dbg_assert(false, "Type invalid");
+			return false;
+		}
+	}
+
+	bool FileExists(const char *pFilename, int Type) override
+	{
+		return GenericExists(pFilename, Type, fs_is_file);
+	}
+
+	bool FolderExists(const char *pFilename, int Type) override
+	{
+		return GenericExists(pFilename, Type, fs_is_dir);
 	}
 
 	bool ReadFile(const char *pFilename, int Type, void **ppResult, unsigned *pResultLen) override
@@ -520,6 +564,69 @@ public:
 		return pBuffer[0] != 0;
 	}
 
+	struct SFindFilesCallbackData
+	{
+		CStorage *m_pStorage;
+		const char *m_pFilename;
+		const char *m_pPath;
+		std::set<std::string> *m_pEntries;
+	};
+
+	static int FindFilesCallback(const char *pName, int IsDir, int Type, void *pUser)
+	{
+		SFindFilesCallbackData Data = *static_cast<SFindFilesCallbackData *>(pUser);
+		if(IsDir)
+		{
+			if(pName[0] == '.')
+				return 0;
+
+			// search within the folder
+			char aBuf[IO_MAX_PATH_LENGTH];
+			char aPath[IO_MAX_PATH_LENGTH];
+			str_format(aPath, sizeof(aPath), "%s/%s", Data.m_pPath, pName);
+			Data.m_pPath = aPath;
+			fs_listdir(Data.m_pStorage->GetPath(Type, aPath, aBuf, sizeof(aBuf)), FindFilesCallback, Type, &Data);
+		}
+		else if(!str_comp(pName, Data.m_pFilename))
+		{
+			char aBuffer[IO_MAX_PATH_LENGTH];
+			str_format(aBuffer, sizeof(aBuffer), "%s/%s", Data.m_pPath, Data.m_pFilename);
+			Data.m_pEntries->emplace(aBuffer);
+		}
+
+		return 0;
+	}
+
+	size_t FindFiles(const char *pFilename, const char *pPath, int Type, std::set<std::string> *pEntries) override
+	{
+		SFindFilesCallbackData Data;
+		Data.m_pStorage = this;
+		Data.m_pFilename = pFilename;
+		Data.m_pPath = pPath;
+		Data.m_pEntries = pEntries;
+
+		char aBuf[IO_MAX_PATH_LENGTH];
+		if(Type == TYPE_ALL)
+		{
+			// search within all available directories
+			for(int i = TYPE_SAVE; i < m_NumPaths; ++i)
+			{
+				fs_listdir(GetPath(i, pPath, aBuf, sizeof(aBuf)), FindFilesCallback, i, &Data);
+			}
+		}
+		else if(Type >= TYPE_SAVE && Type < m_NumPaths)
+		{
+			// search within wanted directory
+			fs_listdir(GetPath(Type, pPath, aBuf, sizeof(aBuf)), FindFilesCallback, Type, &Data);
+		}
+		else
+		{
+			dbg_assert(false, "Type invalid");
+		}
+
+		return pEntries->size();
+	}
+
 	bool RemoveFile(const char *pFilename, int Type) override
 	{
 		dbg_assert(Type == TYPE_ABSOLUTE || (Type >= TYPE_SAVE && Type < m_NumPaths), "Type invalid");
@@ -528,6 +635,19 @@ public:
 		GetPath(Type, pFilename, aBuffer, sizeof(aBuffer));
 
 		bool Success = !fs_remove(aBuffer);
+		if(!Success)
+			dbg_msg("storage", "failed to remove: %s", aBuffer);
+		return Success;
+	}
+
+	bool RemoveFolder(const char *pFilename, int Type) override
+	{
+		dbg_assert(Type == TYPE_ABSOLUTE || (Type >= TYPE_SAVE && Type < m_NumPaths), "Type invalid");
+
+		char aBuffer[IO_MAX_PATH_LENGTH];
+		GetPath(Type, pFilename, aBuffer, sizeof(aBuffer));
+
+		bool Success = !fs_removedir(aBuffer);
 		if(!Success)
 			dbg_msg("storage", "failed to remove: %s", aBuffer);
 		return Success;
@@ -593,6 +713,7 @@ public:
 
 	void GetCompletePath(int Type, const char *pDir, char *pBuffer, unsigned BufferSize) override
 	{
+		TranslateType(Type, pDir);
 		dbg_assert(Type >= TYPE_SAVE && Type < m_NumPaths, "Type invalid");
 		GetPath(Type, pDir, pBuffer, BufferSize);
 	}
@@ -600,6 +721,25 @@ public:
 	const char *GetBinaryPath(const char *pFilename, char *pBuffer, unsigned BufferSize) override
 	{
 		str_format(pBuffer, BufferSize, "%s%s%s", m_aBinarydir, !m_aBinarydir[0] ? "" : "/", pFilename);
+		return pBuffer;
+	}
+
+	const char *GetBinaryPathAbsolute(const char *pFilename, char *pBuffer, unsigned BufferSize) override
+	{
+		char aBinaryPath[IO_MAX_PATH_LENGTH];
+		GetBinaryPath(PLAT_CLIENT_EXEC, aBinaryPath, sizeof(aBinaryPath));
+		if(fs_is_relative_path(aBinaryPath))
+		{
+			if(fs_getcwd(pBuffer, BufferSize))
+			{
+				str_append(pBuffer, "/", BufferSize);
+				str_append(pBuffer, aBinaryPath, BufferSize);
+			}
+			else
+				pBuffer[0] = '\0';
+		}
+		else
+			str_copy(pBuffer, aBinaryPath, BufferSize);
 		return pBuffer;
 	}
 

@@ -7,7 +7,7 @@
 class CSemaphore
 {
 	SEMAPHORE m_Sem;
-	// implement the counter seperatly, because the `sem_getvalue`-API is
+	// implement the counter separately, because the `sem_getvalue`-API is
 	// deprecated on macOS: https://stackoverflow.com/a/16655541
 	std::atomic_int m_Count{0};
 

@@ -5,6 +5,7 @@
 
 #include <base/hash_ctxt.h>
 #include <base/log.h>
+#include <base/math.h>
 #include <base/system.h>
 #include <engine/storage.h>
 
@@ -21,21 +22,21 @@ enum
 
 struct CItemEx
 {
-	int m_aUuid[sizeof(CUuid) / 4];
+	int m_aUuid[sizeof(CUuid) / sizeof(int32_t)];
 
 	static CItemEx FromUuid(CUuid Uuid)
 	{
 		CItemEx Result;
-		for(int i = 0; i < (int)sizeof(CUuid) / 4; i++)
-			Result.m_aUuid[i] = bytes_be_to_int(&Uuid.m_aData[i * 4]);
+		for(size_t i = 0; i < sizeof(CUuid) / sizeof(int32_t); i++)
+			Result.m_aUuid[i] = bytes_be_to_uint(&Uuid.m_aData[i * sizeof(int32_t)]);
 		return Result;
 	}
 
 	CUuid ToUuid() const
 	{
 		CUuid Result;
-		for(int i = 0; i < (int)sizeof(CUuid) / 4; i++)
-			int_to_bytes_be(&Result.m_aData[i * 4], m_aUuid[i]);
+		for(size_t i = 0; i < sizeof(CUuid) / sizeof(int32_t); i++)
+			uint_to_bytes_be(&Result.m_aData[i * sizeof(int32_t)], m_aUuid[i]);
 		return Result;
 	}
 };
@@ -64,16 +65,6 @@ struct CDatafileHeader
 	int m_NumRawData;
 	int m_ItemSize;
 	int m_DataSize;
-};
-
-struct CDatafileData
-{
-	int m_NumItemTypes;
-	int m_NumItems;
-	int m_NumRawData;
-	int m_ItemSize;
-	int m_DataSize;
-	char m_aStart[4];
 };
 
 struct CDatafileInfo
@@ -126,7 +117,7 @@ bool CDataFileReader::Open(class IStorage *pStorage, const char *pFilename, int 
 		while(true)
 		{
 			unsigned Bytes = io_read(File, aBuffer, BUFFER_SIZE);
-			if(Bytes <= 0)
+			if(Bytes == 0)
 				break;
 			Crc = crc32(Crc, aBuffer, Bytes);
 			sha256_update(&Sha256Ctxt, aBuffer, Bytes);
@@ -191,7 +182,6 @@ bool CDataFileReader::Open(class IStorage *pStorage, const char *pFilename, int 
 	{
 		io_close(pTmpDataFile->m_File);
 		free(pTmpDataFile);
-		pTmpDataFile = 0;
 		dbg_msg("datafile", "couldn't load the whole thing, wanted=%d got=%d", Size, ReadSize);
 		return false;
 	}

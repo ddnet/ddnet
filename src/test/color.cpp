@@ -17,7 +17,7 @@ TEST(Color, HRHConv)
 			EXPECT_FLOAT_EQ(hsl.l, hsl2.l);
 		else
 		{
-			EXPECT_NEAR(fmod(hsl.h, 1.0f), fmod(hsl2.h, 1.0f), 0.001f);
+			EXPECT_NEAR(std::fmod(hsl.h, 1.0f), std::fmod(hsl2.h, 1.0f), 0.001f);
 			EXPECT_NEAR(hsl.s, hsl2.s, 0.0001f);
 			EXPECT_FLOAT_EQ(hsl.l, hsl2.l);
 		}

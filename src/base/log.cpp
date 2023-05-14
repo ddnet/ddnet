@@ -19,8 +19,6 @@
 #include <android/log.h>
 #endif
 
-extern "C" {
-
 std::atomic<LEVEL> loglevel = LEVEL_INFO;
 std::atomic<ILogger *> global_logger = nullptr;
 thread_local ILogger *scope_logger = nullptr;
@@ -75,6 +73,10 @@ void log_set_scope_logger(ILogger *logger)
 	}
 }
 
+// Separate declaration, as attributes are not allowed on function definitions
+void log_log_impl(LEVEL level, bool have_color, LOG_COLOR color, const char *sys, const char *fmt, va_list args)
+	GNUC_ATTRIBUTE((format(printf, 5, 0)));
+
 void log_log_impl(LEVEL level, bool have_color, LOG_COLOR color, const char *sys, const char *fmt, va_list args)
 {
 	if(level > loglevel.load(std::memory_order_acquire))
@@ -111,18 +113,7 @@ void log_log_impl(LEVEL level, bool have_color, LOG_COLOR color, const char *sys
 
 	char *pMessage = Msg.m_aLine + Msg.m_LineMessageOffset;
 	int MessageSize = sizeof(Msg.m_aLine) - Msg.m_LineMessageOffset;
-#ifdef __GNUC__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wformat-nonliteral"
-#endif
-#if defined(CONF_FAMILY_WINDOWS)
-	_vsnprintf(pMessage, MessageSize, fmt, args);
-#else
-	vsnprintf(pMessage, MessageSize, fmt, args);
-#endif
-#ifdef __GNUC__
-#pragma GCC diagnostic pop
-#endif
+	str_format_v(pMessage, MessageSize, fmt, args);
 	Msg.m_LineLength = str_length(Msg.m_aLine);
 	scope_logger->Log(&Msg);
 	in_logger = false;
@@ -152,7 +143,6 @@ void log_log_color(LEVEL level, LOG_COLOR color, const char *sys, const char *fm
 	va_start(args, fmt);
 	log_log_impl(level, true, color, sys, fmt, args);
 	va_end(args);
-}
 }
 
 #if defined(CONF_PLATFORM_ANDROID)
@@ -338,24 +328,7 @@ public:
 	}
 	void Log(const CLogMessage *pMessage) override
 	{
-		int WLen = MultiByteToWideChar(CP_UTF8, 0, pMessage->m_aLine, pMessage->m_LineLength, NULL, 0);
-		if(!WLen)
-		{
-			WCHAR aError[] = L"Failed to obtain length of log message\r\n";
-			WriteConsoleW(m_pConsole, aError, std::size(aError) - 1, NULL, NULL);
-			return;
-		}
-		WCHAR *pWide = (WCHAR *)malloc((WLen + 2) * sizeof(*pWide));
-		WLen = MultiByteToWideChar(CP_UTF8, 0, pMessage->m_aLine, pMessage->m_LineLength, pWide, WLen);
-		if(!WLen)
-		{
-			WCHAR aError[] = L"Failed to convert log message encoding\r\n";
-			WriteConsoleW(m_pConsole, aError, std::size(aError) - 1, NULL, NULL);
-			free(pWide);
-			return;
-		}
-		pWide[WLen++] = '\r';
-		pWide[WLen++] = '\n';
+		const std::wstring WideMessage = windows_utf8_to_wide(pMessage->m_aLine) + L"\r\n";
 
 		int Color = m_BackgroundColor;
 		if(pMessage->m_HaveColor)
@@ -373,10 +346,9 @@ public:
 		if(!m_Finished)
 		{
 			SetConsoleTextAttribute(m_pConsole, Color);
-			WriteConsoleW(m_pConsole, pWide, WLen, NULL, NULL);
+			WriteConsoleW(m_pConsole, WideMessage.c_str(), WideMessage.length(), NULL, NULL);
 		}
 		m_OutputLock.unlock();
-		free(pWide);
 	}
 	void GlobalFinish() override
 	{
@@ -435,9 +407,8 @@ class CLoggerWindowsDebugger : public ILogger
 public:
 	void Log(const CLogMessage *pMessage) override
 	{
-		WCHAR aWBuffer[4096];
-		MultiByteToWideChar(CP_UTF8, 0, pMessage->m_aLine, -1, aWBuffer, sizeof(aWBuffer) / sizeof(WCHAR));
-		OutputDebugStringW(aWBuffer);
+		const std::wstring WideMessage = windows_utf8_to_wide(pMessage->m_aLine);
+		OutputDebugStringW(WideMessage.c_str());
 	}
 };
 std::unique_ptr<ILogger> log_logger_windows_debugger()

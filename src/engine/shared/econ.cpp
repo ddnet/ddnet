@@ -64,18 +64,18 @@ void CEcon::Init(CConfig *pConfig, IConsole *pConsole, CNetBan *pNetBan)
 		return;
 
 	NETADDR BindAddr;
-	if(g_Config.m_EcBindaddr[0] && net_host_lookup(g_Config.m_EcBindaddr, &BindAddr, NETTYPE_ALL) == 0)
-	{
-		// got bindaddr
-		BindAddr.type = NETTYPE_ALL;
-		BindAddr.port = g_Config.m_EcPort;
-	}
-	else
+	if(g_Config.m_EcBindaddr[0] == '\0')
 	{
 		mem_zero(&BindAddr, sizeof(BindAddr));
-		BindAddr.type = NETTYPE_ALL;
-		BindAddr.port = g_Config.m_EcPort;
 	}
+	else if(net_host_lookup(g_Config.m_EcBindaddr, &BindAddr, NETTYPE_ALL) != 0)
+	{
+		char aBuf[256];
+		str_format(aBuf, sizeof(aBuf), "The configured bindaddr '%s' cannot be resolved.", g_Config.m_Bindaddr);
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "econ", aBuf);
+	}
+	BindAddr.type = NETTYPE_ALL;
+	BindAddr.port = g_Config.m_EcPort;
 
 	if(m_NetConsole.Open(BindAddr, pNetBan))
 	{

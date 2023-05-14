@@ -12,8 +12,8 @@ TEST(CVariableInt, RoundtripPackUnpack)
 	{
 		unsigned char aPacked[CVariableInt::MAX_BYTES_PACKED];
 		int Result;
-		EXPECT_EQ(int(CVariableInt::Pack(aPacked, DATA[i], sizeof(aPacked)) - aPacked), SIZES[i]);
-		EXPECT_EQ(int(CVariableInt::Unpack(aPacked, &Result, sizeof(aPacked)) - aPacked), SIZES[i]);
+		EXPECT_EQ(CVariableInt::Pack(aPacked, DATA[i], sizeof(aPacked)) - aPacked, (ptrdiff_t)SIZES[i]);
+		EXPECT_EQ(CVariableInt::Unpack(aPacked, &Result, sizeof(aPacked)) - aPacked, (ptrdiff_t)SIZES[i]);
 		EXPECT_EQ(Result, DATA[i]);
 	}
 }
@@ -25,12 +25,12 @@ TEST(CVariableInt, UnpackInvalid)
 		Byte = 0xFF;
 
 	int Result;
-	EXPECT_EQ(int(CVariableInt::Unpack(aPacked, &Result, sizeof(aPacked)) - aPacked), int(CVariableInt::MAX_BYTES_PACKED));
+	EXPECT_EQ(CVariableInt::Unpack(aPacked, &Result, sizeof(aPacked)) - aPacked, (ptrdiff_t)CVariableInt::MAX_BYTES_PACKED);
 	EXPECT_EQ(Result, (-2147483647 - 1));
 
 	aPacked[0] &= ~0x40; // unset sign bit
 
-	EXPECT_EQ(int(CVariableInt::Unpack(aPacked, &Result, sizeof(aPacked)) - aPacked), int(CVariableInt::MAX_BYTES_PACKED));
+	EXPECT_EQ(CVariableInt::Unpack(aPacked, &Result, sizeof(aPacked)) - aPacked, (ptrdiff_t)CVariableInt::MAX_BYTES_PACKED);
 	EXPECT_EQ(Result, 2147483647);
 }
 

@@ -40,13 +40,16 @@ public:
 
 	int Start(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, const char *pNetversion, const char *pMap, SHA256_DIGEST *pSha256, unsigned MapCrc, const char *pType, unsigned MapSize, unsigned char *pMapData, IOHANDLE MapFile = nullptr, DEMOFUNC_FILTER pfnFilter = nullptr, void *pUser = nullptr);
 	int Stop() override;
+
 	void AddDemoMarker();
+	void AddDemoMarker(int Tick);
 
 	void RecordSnapshot(int Tick, const void *pData, int Size);
 	void RecordMessage(const void *pData, int Size);
 
 	bool IsRecording() const override { return m_File != nullptr; }
 	char *GetCurrentFilename() override { return m_aCurrentFilename; }
+	void ClearCurrentFilename() { m_aCurrentFilename[0] = '\0'; }
 
 	int Length() const override { return (m_LastTickMarker - m_FirstTick) / SERVER_TICK_SPEED; }
 };

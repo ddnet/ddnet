@@ -6,6 +6,8 @@
 #include <game/gamecore.h>
 #include <game/server/teehistorian.h>
 
+#include <vector>
+
 void RegisterGameUuids(CUuidManager *pManager);
 
 class TeeHistorian : public ::testing::Test
@@ -17,7 +19,7 @@ protected:
 	CUuidManager m_UuidManager;
 	CTeeHistorian::CGameInfo m_GameInfo;
 
-	CPacker m_Buffer;
+	std::vector<unsigned char> m_vBuffer;
 
 	enum
 	{
@@ -73,20 +75,30 @@ protected:
 		Reset(&m_GameInfo);
 	}
 
+	static void WriteBuffer(std::vector<unsigned char> &vBuffer, const void *pData, size_t DataSize)
+	{
+		if(DataSize <= 0)
+			return;
+
+		const size_t OldSize = vBuffer.size();
+		vBuffer.resize(OldSize + DataSize);
+		mem_copy(&vBuffer[OldSize], pData, DataSize);
+	}
+
 	static void Write(const void *pData, int DataSize, void *pUser)
 	{
 		TeeHistorian *pThis = (TeeHistorian *)pUser;
-		pThis->m_Buffer.AddRaw(pData, DataSize);
+		WriteBuffer(pThis->m_vBuffer, pData, DataSize);
 	}
 
 	void Reset(const CTeeHistorian::CGameInfo *pGameInfo)
 	{
-		m_Buffer.Reset();
+		m_vBuffer.clear();
 		m_TH.Reset(pGameInfo, Write, this);
 		m_State = STATE_NONE;
 	}
 
-	void Expect(const unsigned char *pOutput, int OutputSize)
+	void Expect(const unsigned char *pOutput, size_t OutputSize)
 	{
 		static CUuid TEEHISTORIAN_UUID = CalculateUuid("teehistorian@ddnet.tw");
 		static const char PREFIX1[] = "{\"comment\":\"teehistorian@ddnet.tw\",\"version\":\"2\",\"version_minor\":\"4\",\"game_uuid\":\"a1eb7182-796e-3b3e-941d-38ca71b2a4a8\",\"server_version\":\"DDNet test\",\"start_time\":\"";
@@ -96,36 +108,33 @@ protected:
 		char aTimeBuf[64];
 		str_timestamp_ex(m_GameInfo.m_StartTime, aTimeBuf, sizeof(aTimeBuf), "%Y-%m-%dT%H:%M:%S%z");
 
-		CPacker Buffer;
-		Buffer.Reset();
-		Buffer.AddRaw(&TEEHISTORIAN_UUID, sizeof(TEEHISTORIAN_UUID));
-		Buffer.AddRaw(PREFIX1, str_length(PREFIX1));
-		Buffer.AddRaw(aTimeBuf, str_length(aTimeBuf));
-		Buffer.AddRaw(PREFIX2, str_length(PREFIX2));
+		std::vector<unsigned char> vBuffer;
+		WriteBuffer(vBuffer, &TEEHISTORIAN_UUID, sizeof(TEEHISTORIAN_UUID));
+		WriteBuffer(vBuffer, PREFIX1, str_length(PREFIX1));
+		WriteBuffer(vBuffer, aTimeBuf, str_length(aTimeBuf));
+		WriteBuffer(vBuffer, PREFIX2, str_length(PREFIX2));
 		for(int i = 0; i < m_UuidManager.NumUuids(); i++)
 		{
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), "%s\"%s\"",
 				i == 0 ? "" : ",",
 				m_UuidManager.GetName(OFFSET_UUID + i));
-			Buffer.AddRaw(aBuf, str_length(aBuf));
+			WriteBuffer(vBuffer, aBuf, str_length(aBuf));
 		}
-		Buffer.AddRaw(PREFIX3, str_length(PREFIX3));
-		Buffer.AddRaw("", 1);
-		Buffer.AddRaw(pOutput, OutputSize);
+		WriteBuffer(vBuffer, PREFIX3, str_length(PREFIX3));
+		WriteBuffer(vBuffer, "", 1);
+		WriteBuffer(vBuffer, pOutput, OutputSize);
 
-		ASSERT_FALSE(Buffer.Error());
-
-		ExpectFull(Buffer.Data(), Buffer.Size());
+		ExpectFull(vBuffer.data(), vBuffer.size());
 	}
 
-	void ExpectFull(const unsigned char *pOutput, int OutputSize)
+	void ExpectFull(const unsigned char *pOutput, size_t OutputSize)
 	{
 		const ::testing::TestInfo *pTestInfo =
 			::testing::UnitTest::GetInstance()->current_test_info();
 		const char *pTestName = pTestInfo->name();
 
-		if(m_Buffer.Error() || m_Buffer.Size() != OutputSize || mem_comp(m_Buffer.Data(), pOutput, OutputSize) != 0)
+		if(m_vBuffer.size() != OutputSize || mem_comp(m_vBuffer.data(), pOutput, OutputSize) != 0)
 		{
 			char aFilename[IO_MAX_PATH_LENGTH];
 			IOHANDLE File;
@@ -133,7 +142,7 @@ protected:
 			str_format(aFilename, sizeof(aFilename), "%sGot.teehistorian", pTestName);
 			File = io_open(aFilename, IOFLAG_WRITE);
 			ASSERT_TRUE(File);
-			io_write(File, m_Buffer.Data(), m_Buffer.Size());
+			io_write(File, m_vBuffer.data(), m_vBuffer.size());
 			io_close(File);
 
 			str_format(aFilename, sizeof(aFilename), "%sExpected.teehistorian", pTestName);
@@ -143,15 +152,13 @@ protected:
 			io_close(File);
 		}
 
-		ASSERT_FALSE(m_Buffer.Error());
-
 		printf("pOutput = {");
-		int Start = 0; // skip over header;
-		for(int i = 0; i < m_Buffer.Size(); i++)
+		size_t Start = 0; // skip over header;
+		for(size_t i = 0; i < m_vBuffer.size(); i++)
 		{
 			if(Start == 0)
 			{
-				if(m_Buffer.Data()[i] == 0)
+				if(m_vBuffer[i] == 0)
 					Start = i + 1;
 				continue;
 			}
@@ -159,11 +166,11 @@ protected:
 				printf("\n\t");
 			else
 				printf(", ");
-			printf("0x%.2x", m_Buffer.Data()[i]);
+			printf("0x%.2x", m_vBuffer[i]);
 		}
 		printf("\n}\n");
-		ASSERT_EQ(m_Buffer.Size(), OutputSize);
-		ASSERT_TRUE(mem_comp(m_Buffer.Data(), pOutput, OutputSize) == 0);
+		ASSERT_EQ(m_vBuffer.size(), OutputSize);
+		ASSERT_TRUE(mem_comp(m_vBuffer.data(), pOutput, OutputSize) == 0);
 	}
 
 	void Tick(int Tick)

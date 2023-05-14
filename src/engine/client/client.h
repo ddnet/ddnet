@@ -37,7 +37,8 @@ class ISteam;
 class IStorage;
 class IUpdater;
 
-#define CONNECTLINK "ddnet:"
+#define CONNECTLINK_DOUBLE_SLASH "ddnet://"
+#define CONNECTLINK_NO_SLASH "ddnet:"
 
 class CGraph
 {
@@ -142,6 +143,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 
 	uint64_t m_aSnapshotParts[NUM_DUMMIES];
 	int64_t m_LocalStartTime;
+	int64_t m_GlobalStartTime;
 
 	IGraphics::CTextureHandle m_DebugFont;
 	int m_DebugSoundIndex = 0;
@@ -157,11 +159,11 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	bool m_AutoCSVRecycle;
 	bool m_EditorActive;
 	bool m_SoundInitFailed;
-	bool m_ResortServerBrowser;
 
 	int m_aAckGameTick[NUM_DUMMIES];
 	int m_aCurrentRecvTick[NUM_DUMMIES];
 	int m_aRconAuthed[NUM_DUMMIES];
+	char m_aRconUsername[32];
 	char m_aRconPassword[32];
 	int m_UseTempRconCommands;
 	char m_aPassword[32];
@@ -240,7 +242,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	int m_aSnapshotIncomingDataSize[NUM_DUMMIES];
 
 	CSnapshotStorage::CHolder m_aDemorecSnapshotHolders[NUM_SNAPSHOT_TYPES];
-	char *m_aaapDemorecSnapshotData[NUM_SNAPSHOT_TYPES][2][CSnapshot::MAX_SIZE];
+	char m_aaaDemorecSnapshotData[NUM_SNAPSHOT_TYPES][2][CSnapshot::MAX_SIZE];
 
 	CSnapshotDelta m_SnapshotDelta;
 
@@ -280,9 +282,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 
 	std::vector<SWarning> m_vWarnings;
 
-#if defined(CONF_FAMILY_UNIX)
 	CFifo m_Fifo;
-#endif
 
 	IOHANDLE m_BenchmarkFile;
 	int64_t m_BenchmarkStopTime;
@@ -367,7 +367,7 @@ public:
 	void GetServerInfo(CServerInfo *pServerInfo) const override;
 	void ServerInfoRequest();
 
-	int LoadData();
+	void LoadDebugFont();
 
 	// ---
 
@@ -425,6 +425,7 @@ public:
 
 	void Run();
 
+	bool InitNetworkClient(char *pError, size_t ErrorSize);
 	bool CtrlShiftKey(int Key, bool &Last);
 
 	static void Con_Connect(IConsole::IResult *pResult, void *pUserData);
@@ -435,12 +436,12 @@ public:
 	static void Con_DummyResetInput(IConsole::IResult *pResult, void *pUserData);
 
 	static void Con_Quit(IConsole::IResult *pResult, void *pUserData);
+	static void Con_Restart(IConsole::IResult *pResult, void *pUserData);
 	static void Con_DemoPlay(IConsole::IResult *pResult, void *pUserData);
 	static void Con_DemoSpeed(IConsole::IResult *pResult, void *pUserData);
 	static void Con_Minimize(IConsole::IResult *pResult, void *pUserData);
 	static void Con_Ping(IConsole::IResult *pResult, void *pUserData);
 	static void Con_Screenshot(IConsole::IResult *pResult, void *pUserData);
-	static void Con_Reset(IConsole::IResult *pResult, void *pUserData);
 
 #if defined(CONF_VIDEORECORDER)
 	static void StartVideo(IConsole::IResult *pResult, void *pUserData, const char *pVideoName);
@@ -545,6 +546,13 @@ public:
 	CChecksumData *ChecksumData() override { return &m_Checksum.m_Data; }
 	bool InfoTaskRunning() override { return m_pDDNetInfoTask != nullptr; }
 	int UdpConnectivity(int NetType) override;
+
+#if defined(CONF_FAMILY_WINDOWS)
+	void ShellRegister() override;
+	void ShellUnregister() override;
+#endif
+
+	void ShowMessageBox(const char *pTitle, const char *pMessage, EMessageBoxType Type = MESSAGE_BOX_TYPE_ERROR) override;
 };
 
 #endif

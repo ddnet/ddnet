@@ -10,8 +10,8 @@
 #include <base/system.h>
 
 class CHuffman;
-class CMsgPacker;
 class CNetBan;
+class CPacker;
 
 /*
 
@@ -57,7 +57,7 @@ enum
 
 	NET_MAX_PACKETSIZE = 1400,
 	NET_MAX_PAYLOAD = NET_MAX_PACKETSIZE - 6,
-	NET_MAX_CHUNKHEADERSIZE = 5,
+	NET_MAX_CHUNKHEADERSIZE = 3,
 	NET_PACKETHEADERSIZE = 3,
 	NET_MAX_CLIENTS = 64,
 	NET_MAX_CONSOLE_CLIENTS = 4,
@@ -288,7 +288,7 @@ public:
 	void SetTimedOut(const NETADDR *pAddr, int Sequence, int Ack, SECURITY_TOKEN SecurityToken, CStaticRingBuffer<CNetChunkResend, NET_CONN_BUFFERSIZE> *pResendBuffer, bool Sixup);
 
 	// anti spoof
-	void DirectInit(NETADDR &Addr, SECURITY_TOKEN SecurityToken, SECURITY_TOKEN Token, bool Sixup);
+	void DirectInit(const NETADDR &Addr, SECURITY_TOKEN SecurityToken, SECURITY_TOKEN Token, bool Sixup);
 	void SetUnknownSeq() { m_UnknownSeq = true; }
 	void SetSequence(int Sequence) { m_Sequence = Sequence; }
 
@@ -396,7 +396,7 @@ class CNetServer
 	int TryAcceptClient(NETADDR &Addr, SECURITY_TOKEN SecurityToken, bool VanillaAuth = false, bool Sixup = false, SECURITY_TOKEN Token = 0);
 	int NumClientsWithAddr(NETADDR Addr);
 	bool Connlimit(NETADDR Addr);
-	void SendMsgs(NETADDR &Addr, const CMsgPacker *apMsgs[], int Num);
+	void SendMsgs(NETADDR &Addr, const CPacker **ppMsgs, int Num);
 
 public:
 	int SetCallbacks(NETFUNC_NEWCLIENT pfnNewClient, NETFUNC_DELCLIENT pfnDelClient, void *pUser);
@@ -523,7 +523,7 @@ public:
 	CONNECTIVITY GetConnectivity(int NetType, NETADDR *pGlobalAddr);
 };
 
-// TODO: both, fix these. This feels like a junk class for stuff that doesn't fit anywere
+// TODO: both, fix these. This feels like a junk class for stuff that doesn't fit anywhere
 class CNetBase
 {
 	static IOHANDLE ms_DataLogSent;

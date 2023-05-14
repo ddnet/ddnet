@@ -5,14 +5,18 @@
 
 #include <base/detect.h>
 
-#include "engine/graphics.h"
-#include "graphics_threaded.h"
+#include <engine/graphics.h>
+
+#include <engine/client/graphics_threaded.h>
+
+#include <engine/client/backend/backend_base.h>
 
 #include <atomic>
 #include <condition_variable>
+#include <cstddef>
+#include <cstdint>
 #include <mutex>
-#include <stddef.h>
-#include <stdint.h>
+#include <vector>
 
 #if defined(CONF_PLATFORM_MACOS)
 #include <objc/objc-runtime.h>
@@ -42,25 +46,51 @@ public:
 // basic threaded backend, abstract, missing init and shutdown functions
 class CGraphicsBackend_Threaded : public IGraphicsBackend
 {
+private:
+	TTranslateFunc m_TranslateFunc;
+	SGFXWarningContainer m_Warning;
+
 public:
 	// constructed on the main thread, the rest of the functions is run on the render thread
 	class ICommandProcessor
 	{
 	public:
-		virtual ~ICommandProcessor() {}
+		virtual ~ICommandProcessor() = default;
 		virtual void RunBuffer(CCommandBuffer *pBuffer) = 0;
+
+		virtual SGFXErrorContainer &GetError() = 0;
+		virtual void ErroneousCleanup() = 0;
+
+		virtual SGFXWarningContainer &GetWarning() = 0;
+
+		bool HasError()
+		{
+			return GetError().m_ErrorType != GFX_ERROR_TYPE_NONE;
+		}
+
+		bool HasWarning()
+		{
+			return GetWarning().m_WarningType != GFX_WARNING_TYPE_NONE;
+		}
 	};
 
-	CGraphicsBackend_Threaded();
+	CGraphicsBackend_Threaded(TTranslateFunc &&TranslateFunc);
 
 	void RunBuffer(CCommandBuffer *pBuffer) override;
 	void RunBufferSingleThreadedUnsafe(CCommandBuffer *pBuffer) override;
 	bool IsIdle() const override;
 	void WaitForIdle() override;
 
+	void ProcessError();
+
 protected:
 	void StartProcessor(ICommandProcessor *pProcessor);
 	void StopProcessor();
+
+	bool HasWarning()
+	{
+		return m_Warning.m_WarningType != GFX_WARNING_TYPE_NONE;
+	}
 
 private:
 	ICommandProcessor *m_pProcessor;
@@ -73,6 +103,9 @@ private:
 	void *m_pThread;
 
 	static void ThreadFunc(void *pUser);
+
+public:
+	bool GetWarning(std::vector<std::string> &WarningStrings) override;
 };
 
 // takes care of implementation independent operations
@@ -111,8 +144,8 @@ struct SBackendCapabilites
 class CCommandProcessorFragment_SDL
 {
 	// SDL stuff
-	SDL_Window *m_pWindow;
-	SDL_GLContext m_GLContext;
+	SDL_Window *m_pWindow = nullptr;
+	SDL_GLContext m_GLContext = nullptr;
 
 public:
 	enum
@@ -149,19 +182,30 @@ public:
 	bool RunCommand(const CCommandBuffer::SCommand *pBaseCommand);
 };
 
-// command processor impelementation, uses the fragments to combine into one processor
+// command processor implementation, uses the fragments to combine into one processor
 class CCommandProcessor_SDL_GL : public CGraphicsBackend_Threaded::ICommandProcessor
 {
-	class CCommandProcessorFragment_GLBase *m_pGLBackend;
+	CCommandProcessorFragment_GLBase *m_pGLBackend;
 	CCommandProcessorFragment_SDL m_SDL;
 	CCommandProcessorFragment_General m_General;
 
 	EBackendType m_BackendType;
 
+	SGFXErrorContainer m_Error;
+	SGFXWarningContainer m_Warning;
+
 public:
 	CCommandProcessor_SDL_GL(EBackendType BackendType, int GLMajor, int GLMinor, int GLPatch);
 	virtual ~CCommandProcessor_SDL_GL();
 	void RunBuffer(CCommandBuffer *pBuffer) override;
+
+	SGFXErrorContainer &GetError() override;
+	void ErroneousCleanup() override;
+
+	SGFXWarningContainer &GetWarning() override;
+
+	void HandleError();
+	void HandleWarning();
 };
 
 static constexpr size_t gs_GPUInfoStringSize = 256;
@@ -169,8 +213,8 @@ static constexpr size_t gs_GPUInfoStringSize = 256;
 // graphics backend implemented with SDL and the graphics library @see EBackendType
 class CGraphicsBackend_SDL_GL : public CGraphicsBackend_Threaded
 {
-	SDL_Window *m_pWindow = NULL;
-	SDL_GLContext m_GLContext;
+	SDL_Window *m_pWindow = nullptr;
+	SDL_GLContext m_GLContext = nullptr;
 	ICommandProcessor *m_pProcessor = nullptr;
 	std::atomic<uint64_t> m_TextureMemoryUsage{0};
 	std::atomic<uint64_t> m_BufferMemoryUsage{0};
@@ -197,7 +241,7 @@ class CGraphicsBackend_SDL_GL : public CGraphicsBackend_Threaded
 	static void ClampDriverVersion(EBackendType BackendType);
 
 public:
-	CGraphicsBackend_SDL_GL();
+	CGraphicsBackend_SDL_GL(TTranslateFunc &&TranslateFunc);
 	int Init(const char *pName, int *pScreen, int *pWidth, int *pHeight, int *pRefreshRate, int *pFsaaSamples, int Flags, int *pDesktopWidth, int *pDesktopHeight, int *pCurrentWidth, int *pCurrentHeight, class IStorage *pStorage) override;
 	int Shutdown() override;
 
@@ -262,6 +306,8 @@ public:
 	}
 
 	TGLBackendReadPresentedImageData &GetReadPresentedImageDataFuncUnsafe() override;
+
+	bool ShowMessageBox(unsigned Type, const char *pTitle, const char *pMsg) override;
 
 	static bool IsModernAPI(EBackendType BackendType);
 };

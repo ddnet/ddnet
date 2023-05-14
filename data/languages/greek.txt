@@ -43,14 +43,8 @@ Address
 All
 == Όλοι
 
-Are you sure that you want to delete the demo?
-== Θέλετε σίγουρα να διαγράψετε αυτήν την επίδειξη;
-
 Are you sure that you want to quit?
 == Θέλετε σίγουρα να παραιτηθείτε;
-
-Are you sure that you want to remove the player from your friends list?
-== Θέλετε σίγουρα να αφερέσετε αυτόν τον παίκτη από την λίστα των φίλων σας;
 
 Automatically record demos
 == Αυτόματη καταγραφή επιδείξεων
@@ -404,9 +398,6 @@ Show name plates
 Show only chat messages from friends
 == Προβολή μηνυμάτων μόνο από φίλους
 
-Skins
-== Στολές
-
 Sound
 == Ήχος
 
@@ -466,9 +457,6 @@ Try again
 
 Type
 == Τύπος
-
-Unable to delete the demo
-== Απέτυχε η διαγραφή της επίδειξης
 
 Unable to rename the demo
 == Απέτυχε η μετονομασία της επίδειξης
@@ -580,9 +568,6 @@ Reset to defaults
 Quit anyway?
 == Έξοδος οπωσδήποτε;
 
-Display Modes
-== Ανάλυσεις Οθόνης
-
 Version:
 == Έκδοση:
 
@@ -609,6 +594,47 @@ Name plates size
 
 Type:
 == Τύπος:
+
+[Graphics error]
+
+[Graphics error]
+Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== 
+
+[Graphics error]
+Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
+== 
+
+[Graphics error]
+An error during command recording occurred. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+A render command failed. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+Submitting the render commands failed. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+Failed to swap framebuffers. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== 
+
+[Graphics error]
+Could not initialize the given graphics backend, reverting to the default backend now.
+== 
+
+[Graphics error]
+Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
+== 
+
+Could not save downloaded map. Try manually deleting this file: %s
+== 
 
 Successfully saved the replay!
 == 
@@ -709,21 +735,6 @@ Reconnect in %d sec
 Render demo
 == 
 
-Replace video
-== 
-
-File already exists, do you want to overwrite it?
-== 
-
-Are you sure that you want to disconnect?
-== 
-
-Disconnect Dummy
-== 
-
-Are you sure that you want to disconnect your dummy?
-== 
-
 Welcome to DDNet
 == 
 
@@ -748,13 +759,13 @@ Your nickname '%s' is already used (%d points). Do you still want to use it?
 Checking for existing player with your name
 == 
 
-Are you sure that you want to disconnect and switch to a different server?
+Cancel
 == 
 
-Country / Region
+File '%s' already exists, do you want to overwrite it?
 == 
 
-Destination file already exist
+Replace video
 == 
 
 Speed
@@ -826,6 +837,9 @@ Exclude
 Refreshing...
 == 
 
+Are you sure that you want to disconnect and switch to a different server?
+== 
+
 Filter connecting players
 == 
 
@@ -841,13 +855,25 @@ Countries
 Types
 == 
 
+Copy info
+== 
+
 Leak IP
+== 
+
+Are you sure that you want to remove the player '%s' from your friends list?
+== 
+
+Are you sure that you want to remove the clan '%s' from your friends list?
 == 
 
 Select a name
 == 
 
 Please use a different name
+== 
+
+File already exists, do you want to overwrite it?
 == 
 
 Remove chat
@@ -860,6 +886,12 @@ Pause the current demo
 == 
 
 Stop the current demo
+== 
+
+Go back one tick
+== 
+
+Go forward one tick
 == 
 
 Slow down the demo
@@ -875,6 +907,12 @@ Mark the end of a cut
 == 
 
 Export cut as a separate demo
+== 
+
+Go back one marker
+== 
+
+Go forward one marker
 == 
 
 Toggle keyboard shortcuts
@@ -910,16 +948,31 @@ Fetch Info
 Demos directory
 == 
 
+Open the directory that contains the demo files
+== 
+
+Are you sure that you want to delete the demo '%s'?
+== 
+
 Render
 == 
 
-Menu opened. Press Esc key again to close menu.
+Unable to delete the demo '%s'
+== 
+
+Are you sure that you want to disconnect?
 == 
 
 Connect Dummy
 == 
 
 Connecting dummy
+== 
+
+Disconnect Dummy
+== 
+
+Are you sure that you want to disconnect your dummy?
 == 
 
 Kill
@@ -946,6 +999,9 @@ Activate
 Save
 == 
 
+Menu opened. Press Esc key again to close menu.
+== 
+
 Smooth Dynamic Camera
 == 
 
@@ -958,13 +1014,25 @@ Skip the main menu
 Refresh Rate
 == 
 
+Save power by lowering refresh rate (higher input latency)
+== 
+
 Settings file
+== 
+
+Open the settings file
 == 
 
 Config directory
 == 
 
+Open the directory that contains the configuration and user files
+== 
+
 Themes directory
+== 
+
+Open the directory to add custom themes
 == 
 
 Automatically take statboard screenshot
@@ -1003,10 +1071,16 @@ Skin prefix
 Choose default eyes when joining a server
 == 
 
+Create a random skin
+== 
+
 Skin Database
 == 
 
 Skins directory
+== 
+
+Open the directory to add custom skins
 == 
 
 Hook collisions
@@ -1089,7 +1163,7 @@ UI controller sens.
 Controller jitter tolerance
 == 
 
-No controller found. Plug in a controller and restart the game.
+No controller found. Plug in a controller.
 == 
 
 Device
@@ -1114,6 +1188,12 @@ UI mouse sens.
 == 
 
 Controller
+== 
+
+Reset controls
+== 
+
+Are you sure that you want to reset the controls to their defaults?
 == 
 
 Dummy
@@ -1461,6 +1541,9 @@ Run on join
 Chat command (e.g. showall 1)
 == 
 
+Unregister protocol and file extensions
+== 
+
 DDNet %s is available:
 == 
 
@@ -1492,6 +1575,9 @@ Loading assets
 == 
 
 Assets directory
+== 
+
+Open the directory to add custom assets
 == 
 
 Discord

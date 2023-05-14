@@ -322,7 +322,7 @@ void CPlayer::Snap(int SnappingClient)
 	if(!Server()->Translate(id, SnappingClient))
 		return;
 
-	CNetObj_ClientInfo *pClientInfo = static_cast<CNetObj_ClientInfo *>(Server()->SnapNewItem(NETOBJTYPE_CLIENTINFO, id, sizeof(CNetObj_ClientInfo)));
+	CNetObj_ClientInfo *pClientInfo = Server()->SnapNewItem<CNetObj_ClientInfo>(id);
 	if(!pClientInfo)
 		return;
 
@@ -337,13 +337,14 @@ void CPlayer::Snap(int SnappingClient)
 	int SnappingClientVersion = GameServer()->GetClientVersion(SnappingClient);
 	int Latency = SnappingClient == SERVER_DEMO_CLIENT ? m_Latency.m_Min : GameServer()->m_apPlayers[SnappingClient]->m_aCurLatency[m_ClientID];
 	int Score = m_Score;
+
 	// send 0 if times of others are not shown
 	if(SnappingClient != m_ClientID && g_Config.m_SvHideScore)
 		Score = -1;
 
 	if(!Server()->IsSixup(SnappingClient))
 	{
-		CNetObj_PlayerInfo *pPlayerInfo = static_cast<CNetObj_PlayerInfo *>(Server()->SnapNewItem(NETOBJTYPE_PLAYERINFO, id, sizeof(CNetObj_PlayerInfo)));
+		CNetObj_PlayerInfo *pPlayerInfo = Server()->SnapNewItem<CNetObj_PlayerInfo>(id);
 		if(!pPlayerInfo)
 			return;
 
@@ -363,7 +364,7 @@ void CPlayer::Snap(int SnappingClient)
 	}
 	else
 	{
-		protocol7::CNetObj_PlayerInfo *pPlayerInfo = static_cast<protocol7::CNetObj_PlayerInfo *>(Server()->SnapNewItem(NETOBJTYPE_PLAYERINFO, id, sizeof(protocol7::CNetObj_PlayerInfo)));
+		protocol7::CNetObj_PlayerInfo *pPlayerInfo = Server()->SnapNewItem<protocol7::CNetObj_PlayerInfo>(id);
 		if(!pPlayerInfo)
 			return;
 
@@ -382,7 +383,7 @@ void CPlayer::Snap(int SnappingClient)
 	{
 		if(!Server()->IsSixup(SnappingClient))
 		{
-			CNetObj_SpectatorInfo *pSpectatorInfo = static_cast<CNetObj_SpectatorInfo *>(Server()->SnapNewItem(NETOBJTYPE_SPECTATORINFO, m_ClientID, sizeof(CNetObj_SpectatorInfo)));
+			CNetObj_SpectatorInfo *pSpectatorInfo = Server()->SnapNewItem<CNetObj_SpectatorInfo>(m_ClientID);
 			if(!pSpectatorInfo)
 				return;
 
@@ -392,7 +393,7 @@ void CPlayer::Snap(int SnappingClient)
 		}
 		else
 		{
-			protocol7::CNetObj_SpectatorInfo *pSpectatorInfo = static_cast<protocol7::CNetObj_SpectatorInfo *>(Server()->SnapNewItem(NETOBJTYPE_SPECTATORINFO, m_ClientID, sizeof(protocol7::CNetObj_SpectatorInfo)));
+			protocol7::CNetObj_SpectatorInfo *pSpectatorInfo = Server()->SnapNewItem<protocol7::CNetObj_SpectatorInfo>(m_ClientID);
 			if(!pSpectatorInfo)
 				return;
 
@@ -403,7 +404,7 @@ void CPlayer::Snap(int SnappingClient)
 		}
 	}
 
-	CNetObj_DDNetPlayer *pDDNetPlayer = static_cast<CNetObj_DDNetPlayer *>(Server()->SnapNewItem(NETOBJTYPE_DDNETPLAYER, id, sizeof(CNetObj_DDNetPlayer)));
+	CNetObj_DDNetPlayer *pDDNetPlayer = Server()->SnapNewItem<CNetObj_DDNetPlayer>(id);
 	if(!pDDNetPlayer)
 		return;
 
@@ -419,7 +420,7 @@ void CPlayer::Snap(int SnappingClient)
 	if(Server()->IsSixup(SnappingClient) && m_pCharacter && m_pCharacter->m_DDRaceState == DDRACE_STARTED &&
 		GameServer()->m_apPlayers[SnappingClient]->m_TimerType == TIMERTYPE_SIXUP)
 	{
-		protocol7::CNetObj_PlayerInfoRace *pRaceInfo = static_cast<protocol7::CNetObj_PlayerInfoRace *>(Server()->SnapNewItem(-protocol7::NETOBJTYPE_PLAYERINFORACE, id, sizeof(protocol7::CNetObj_PlayerInfoRace)));
+		protocol7::CNetObj_PlayerInfoRace *pRaceInfo = Server()->SnapNewItem<protocol7::CNetObj_PlayerInfoRace>(id);
 		if(!pRaceInfo)
 			return;
 		pRaceInfo->m_RaceStartTick = m_pCharacter->m_StartTime;
@@ -435,7 +436,7 @@ void CPlayer::Snap(int SnappingClient)
 
 	if(ShowSpec)
 	{
-		CNetObj_SpecChar *pSpecChar = static_cast<CNetObj_SpecChar *>(Server()->SnapNewItem(NETOBJTYPE_SPECCHAR, id, sizeof(CNetObj_SpecChar)));
+		CNetObj_SpecChar *pSpecChar = Server()->SnapNewItem<CNetObj_SpecChar>(id);
 		if(!pSpecChar)
 			return;
 
@@ -454,7 +455,7 @@ void CPlayer::FakeSnap()
 
 	int FakeID = VANILLA_MAX_CLIENTS - 1;
 
-	CNetObj_ClientInfo *pClientInfo = static_cast<CNetObj_ClientInfo *>(Server()->SnapNewItem(NETOBJTYPE_CLIENTINFO, FakeID, sizeof(CNetObj_ClientInfo)));
+	CNetObj_ClientInfo *pClientInfo = Server()->SnapNewItem<CNetObj_ClientInfo>(FakeID);
 
 	if(!pClientInfo)
 		return;
@@ -466,7 +467,7 @@ void CPlayer::FakeSnap()
 	if(m_Paused != PAUSE_PAUSED)
 		return;
 
-	CNetObj_PlayerInfo *pPlayerInfo = static_cast<CNetObj_PlayerInfo *>(Server()->SnapNewItem(NETOBJTYPE_PLAYERINFO, FakeID, sizeof(CNetObj_PlayerInfo)));
+	CNetObj_PlayerInfo *pPlayerInfo = Server()->SnapNewItem<CNetObj_PlayerInfo>(FakeID);
 	if(!pPlayerInfo)
 		return;
 
@@ -476,7 +477,7 @@ void CPlayer::FakeSnap()
 	pPlayerInfo->m_Score = -9999;
 	pPlayerInfo->m_Team = TEAM_SPECTATORS;
 
-	CNetObj_SpectatorInfo *pSpectatorInfo = static_cast<CNetObj_SpectatorInfo *>(Server()->SnapNewItem(NETOBJTYPE_SPECTATORINFO, FakeID, sizeof(CNetObj_SpectatorInfo)));
+	CNetObj_SpectatorInfo *pSpectatorInfo = Server()->SnapNewItem<CNetObj_SpectatorInfo>(FakeID);
 	if(!pSpectatorInfo)
 		return;
 
@@ -560,11 +561,11 @@ CCharacter *CPlayer::GetCharacter()
 	return 0;
 }
 
-void CPlayer::KillCharacter(int Weapon)
+void CPlayer::KillCharacter(int Weapon, bool SendKillMsg)
 {
 	if(m_pCharacter)
 	{
-		m_pCharacter->Die(m_ClientID, Weapon);
+		m_pCharacter->Die(m_ClientID, Weapon, SendKillMsg);
 
 		delete m_pCharacter;
 		m_pCharacter = 0;
@@ -687,16 +688,24 @@ void CPlayer::UpdatePlaytime()
 
 void CPlayer::AfkTimer()
 {
-	if(g_Config.m_SvMaxAfkTime == 0)
-		return;
+	m_Afk = g_Config.m_SvMaxAfkTime != 0 && m_LastPlaytime < time_get() - time_freq() * g_Config.m_SvMaxAfkTime;
+}
 
-	if(m_LastPlaytime < time_get() - time_freq() * g_Config.m_SvMaxAfkTime)
+void CPlayer::SetAfk(bool Afk)
+{
+	if(g_Config.m_SvMaxAfkTime == 0)
 	{
-		m_Afk = true;
+		m_Afk = false;
 		return;
 	}
 
-	m_Afk = false;
+	m_Afk = Afk;
+
+	// Ensure that the AFK state is not reset again automatically
+	if(Afk)
+		m_LastPlaytime = time_get() - time_freq() * g_Config.m_SvMaxAfkTime - 1;
+	else
+		m_LastPlaytime = time_get();
 }
 
 int CPlayer::GetDefaultEmote() const

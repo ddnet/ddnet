@@ -108,7 +108,7 @@ int main(int argc, const char **argv)
 	IEngine *pEngine = CreateEngine(GAME_NAME, pFutureConsoleLogger, 2);
 	IEngineMap *pEngineMap = CreateEngineMap();
 	IGameServer *pGameServer = CreateGameServer();
-	IConsole *pConsole = CreateConsole(CFGFLAG_SERVER | CFGFLAG_ECON);
+	IConsole *pConsole = CreateConsole(CFGFLAG_SERVER | CFGFLAG_ECON).release();
 	IStorage *pStorage = CreateStorage(IStorage::STORAGETYPE_SERVER, argc, argv);
 	IConfigManager *pConfigManager = CreateConfigManager();
 	IEngineAntibot *pEngineAntibot = CreateEngineAntibot();
@@ -119,7 +119,7 @@ int main(int argc, const char **argv)
 	char aBufName[IO_MAX_PATH_LENGTH];
 	char aDate[64];
 	str_timestamp(aDate, sizeof(aDate));
-	str_format(aBufName, sizeof(aBufName), "dumps/" GAME_NAME "-Server_crash_log_%d_%s.RTP", pid(), aDate);
+	str_format(aBufName, sizeof(aBufName), "dumps/" GAME_NAME "-Server_%s_crash_log_%s_%d_%s.RTP", CONF_PLATFORM_STRING, aDate, pid(), GIT_SHORTREV_HASH != nullptr ? GIT_SHORTREV_HASH : "");
 	pStorage->GetCompletePath(IStorage::TYPE_SAVE, aBufName, aBuf, sizeof(aBuf));
 	set_exception_handler_log_file(aBuf);
 #endif
@@ -153,10 +153,8 @@ int main(int argc, const char **argv)
 	pServer->RegisterCommands();
 
 	// execute autoexec file
-	IOHANDLE File = pStorage->OpenFile(AUTOEXEC_SERVER_FILE, IOFLAG_READ, IStorage::TYPE_ALL);
-	if(File)
+	if(pStorage->FileExists(AUTOEXEC_SERVER_FILE, IStorage::TYPE_ALL))
 	{
-		io_close(File);
 		pConsole->ExecuteFile(AUTOEXEC_SERVER_FILE);
 	}
 	else // fallback
@@ -174,14 +172,14 @@ int main(int argc, const char **argv)
 	log_set_loglevel((LEVEL)g_Config.m_Loglevel);
 	if(g_Config.m_Logfile[0])
 	{
-		IOHANDLE Logfile = io_open(g_Config.m_Logfile, IOFLAG_WRITE);
+		IOHANDLE Logfile = pStorage->OpenFile(g_Config.m_Logfile, IOFLAG_WRITE, IStorage::TYPE_SAVE_OR_ABSOLUTE);
 		if(Logfile)
 		{
 			pFutureFileLogger->Set(log_logger_file(Logfile));
 		}
 		else
 		{
-			dbg_msg("client", "failed to open '%s' for logging", g_Config.m_Logfile);
+			dbg_msg("server", "failed to open '%s' for logging", g_Config.m_Logfile);
 		}
 	}
 	pEngine->SetAdditionalLogger(std::make_unique<CServerLogger>(pServer));

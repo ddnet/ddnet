@@ -45,14 +45,8 @@ Address
 All
 == Kaikki
 
-Are you sure that you want to delete the demo?
-== Oletko varma, että haluat poistaa demon?
-
 Are you sure that you want to quit?
 == Oletko varma, että haluat lopettaa?
-
-Are you sure that you want to remove the player from your friends list?
-== Oletko varma, että haluat poistaa pelaajan ystävälistaltasi?
 
 Automatically record demos
 == Nauhoita demot automaattisesti
@@ -400,9 +394,6 @@ Show ingame HUD
 Show name plates
 == Näytä nimikyltit
 
-Skins
-== Ulkonäkö
-
 Sound
 == Äänet
 
@@ -462,9 +453,6 @@ Try again
 
 Type
 == Tyyppi
-
-Unable to delete the demo
-== Demon poistaminen ei onnistunut
 
 Unable to rename the demo
 == Demon nimeäminen ei onnistunut
@@ -573,9 +561,6 @@ Reset to defaults
 
 Quit anyway?
 == Lopeta siitä huolimatta?
-
-Display Modes
-== Näyttötilat
 
 Version:
 == Versio:
@@ -687,12 +672,6 @@ Your nickname '%s' is already used (%d points). Do you still want to use it?
 
 Checking for existing player with your name
 == Tarkistetaan, onko nimesi jo käytössä
-
-Country / Region
-== Maa / Alue
-
-Destination file already exist
-== Kohdetiedosto on jo olemassa
 
 Speed
 == Vauhti
@@ -1175,6 +1154,47 @@ Best
 9+ new mentions
 == 9+ uutta mainintaa
 
+[Graphics error]
+
+[Graphics error]
+Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== 
+
+[Graphics error]
+Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
+== 
+
+[Graphics error]
+An error during command recording occurred. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+A render command failed. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+Submitting the render commands failed. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+Failed to swap framebuffers. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== 
+
+[Graphics error]
+Could not initialize the given graphics backend, reverting to the default backend now.
+== 
+
+[Graphics error]
+Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
+== 
+
+Could not save downloaded map. Try manually deleting this file: %s
+== 
+
 The format of texture %s is not RGBA which will cause visual bugs.
 == 
 
@@ -1232,7 +1252,10 @@ Getting game info
 Requesting to join the game
 == 
 
-Are you sure that you want to disconnect and switch to a different server?
+Cancel
+== 
+
+File '%s' already exists, do you want to overwrite it?
 == 
 
 Join Tutorial Server
@@ -1247,6 +1270,18 @@ Loading menu images
 Refreshing...
 == 
 
+Are you sure that you want to disconnect and switch to a different server?
+== 
+
+Copy info
+== 
+
+Are you sure that you want to remove the player '%s' from your friends list?
+== 
+
+Are you sure that you want to remove the clan '%s' from your friends list?
+== 
+
 Play the current demo
 == 
 
@@ -1254,6 +1289,12 @@ Pause the current demo
 == 
 
 Stop the current demo
+== 
+
+Go back one tick
+== 
+
+Go forward one tick
 == 
 
 Slow down the demo
@@ -1271,22 +1312,49 @@ Mark the end of a cut
 Export cut as a separate demo
 == 
 
+Go back one marker
+== 
+
+Go forward one marker
+== 
+
 Toggle keyboard shortcuts
 == 
 
 Loading demo files
 == 
 
-Menu opened. Press Esc key again to close menu.
+Open the directory that contains the demo files
+== 
+
+Are you sure that you want to delete the demo '%s'?
+== 
+
+Unable to delete the demo '%s'
 == 
 
 Loading ghost files
 == 
 
+Menu opened. Press Esc key again to close menu.
+== 
+
+Save power by lowering refresh rate (higher input latency)
+== 
+
 Settings file
 == 
 
+Open the settings file
+== 
+
 Config directory
+== 
+
+Open the directory that contains the configuration and user files
+== 
+
+Open the directory to add custom themes
 == 
 
 Automatically take statboard screenshot
@@ -1311,6 +1379,12 @@ Fat skins (DDFat)
 == 
 
 Choose default eyes when joining a server
+== 
+
+Create a random skin
+== 
+
+Open the directory to add custom skins
 == 
 
 Dummy copy
@@ -1357,7 +1431,7 @@ UI controller sens.
 Controller jitter tolerance
 == 
 
-No controller found. Plug in a controller and restart the game.
+No controller found. Plug in a controller.
 == 
 
 Device
@@ -1382,6 +1456,12 @@ UI mouse sens.
 == 
 
 Controller
+== 
+
+Reset controls
+== 
+
+Are you sure that you want to reset the controls to their defaults?
 == 
 
 Windowed fullscreen
@@ -1567,6 +1647,9 @@ Run on join
 Chat command (e.g. showall 1)
 == 
 
+Unregister protocol and file extensions
+== 
+
 Particles
 == 
 
@@ -1577,6 +1660,9 @@ Loading assets
 == 
 
 Assets directory
+== 
+
+Open the directory to add custom assets
 == 
 
 Tutorial

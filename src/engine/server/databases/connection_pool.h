@@ -26,12 +26,36 @@ struct ISqlData
 		m_pResult(std::move(pResult))
 	{
 	}
-	virtual ~ISqlData(){};
+	virtual ~ISqlData() = default;
 
 	mutable std::shared_ptr<ISqlResult> m_pResult;
 };
 
+enum Write
+{
+	// write everything into the backup db first
+	BACKUP_FIRST,
+	// now try to write it into remote db
+	NORMAL,
+	// succeeded writing -> remove copy from backup
+	NORMAL_SUCCEEDED,
+	// failed writing -> notify about failure
+	NORMAL_FAILED,
+};
+
 class IConsole;
+
+struct CMysqlConfig
+{
+	char m_aDatabase[64];
+	char m_aPrefix[64];
+	char m_aUser[64];
+	char m_aPass[64];
+	char m_aIp[64];
+	char m_aBindaddr[128];
+	int m_Port;
+	bool m_Setup;
+};
 
 class CDbConnectionPool
 {
@@ -42,7 +66,7 @@ public:
 
 	// Returns false on success.
 	typedef bool (*FRead)(IDbConnection *, const ISqlData *, char *pError, int ErrorSize);
-	typedef bool (*FWrite)(IDbConnection *, const ISqlData *, bool, char *pError, int ErrorSize);
+	typedef bool (*FWrite)(IDbConnection *, const ISqlData *, Write, char *pError, int ErrorSize);
 
 	enum Mode
 	{
@@ -54,13 +78,15 @@ public:
 
 	void Print(IConsole *pConsole, Mode DatabaseMode);
 
-	void RegisterDatabase(std::unique_ptr<IDbConnection> pDatabase, Mode DatabaseMode);
+	void RegisterSqliteDatabase(Mode DatabaseMode, const char FileName[64]);
+	void RegisterMysqlDatabase(Mode DatabaseMode, const CMysqlConfig *pMysqlConfig);
 
 	void Execute(
 		FRead pFunc,
 		std::unique_ptr<const ISqlData> pSqlRequestData,
 		const char *pName);
-	// writes to WRITE_BACKUP server in case of failure
+	// writes to WRITE_BACKUP first and removes it from there when successfully
+	// executed on WRITE server
 	void ExecuteWrite(
 		FWrite pFunc,
 		std::unique_ptr<const ISqlData> pSqlRequestData,
@@ -68,18 +94,36 @@ public:
 
 	void OnShutdown();
 
+	friend class CWorker;
+	friend class CBackup;
+
 private:
-	std::vector<std::unique_ptr<IDbConnection>> m_vvpDbConnections[NUM_MODES];
+	static bool ExecSqlFunc(IDbConnection *pConnection, struct CSqlExecData *pData, Write w);
 
-	static void Worker(void *pUser);
-	void Worker();
-	bool ExecSqlFunc(IDbConnection *pConnection, struct CSqlExecData *pData, bool Failure);
+	// Only the main thread accesses this variable. It points to the index,
+	// where the next query is added to the queue.
+	int m_InsertIdx = 0;
 
-	std::atomic_bool m_Shutdown{false};
-	CSemaphore m_NumElem;
-	int m_FirstElem;
-	int m_LastElem;
-	std::unique_ptr<struct CSqlExecData> m_aTasks[512];
+	struct CSharedData
+	{
+		// Used as signal that shutdown is in progress from main thread to
+		// speed up the queries by discarding read queries and writing to
+		// the sqlite file instead of the remote mysql server.
+		// The worker thread signals the main thread that all queries are
+		// processed by setting this variable to false again.
+		std::atomic_bool m_Shutdown{false};
+		// Queries go first to the backup thread. This semaphore signals about
+		// new queries.
+		CSemaphore m_NumBackup;
+		// When the backup thread processed the query, it signals the main
+		// thread with this semaphore about the new query
+		CSemaphore m_NumWorker;
+
+		// spsc queue with additional backup worker to look at queries first.
+		std::unique_ptr<struct CSqlExecData> m_aQueries[512];
+	};
+
+	std::shared_ptr<CSharedData> m_pShared;
 };
 
 #endif // ENGINE_SERVER_DATABASES_CONNECTION_POOL_H

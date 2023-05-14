@@ -86,11 +86,22 @@ Usage:
 // Instances of CScrollRegion must be static, as member addresses are used as UI item IDs
 class CScrollRegion : private CUIElementBase
 {
+public:
+	enum EScrollRelative
+	{
+		SCROLLRELATIVE_UP = -1,
+		SCROLLRELATIVE_NONE = 0,
+		SCROLLRELATIVE_DOWN = 1,
+	};
+
 private:
 	float m_ScrollY;
 	float m_ContentH;
 	float m_RequestScrollY; // [0, ContentHeight]
+	EScrollRelative m_ScrollDirection;
+	float m_ScrollSpeedMultiplier;
 
+	float m_AnimTimeMax;
 	float m_AnimTime;
 	float m_AnimInitScrollY;
 	float m_AnimTargetScrollY;
@@ -111,10 +122,13 @@ public:
 	};
 
 	CScrollRegion();
-	void Begin(CUIRect *pClipRect, vec2 *pOutOffset, CScrollRegionParams *pParams = nullptr);
+	void Begin(CUIRect *pClipRect, vec2 *pOutOffset, const CScrollRegionParams *pParams = nullptr);
 	void End();
 	bool AddRect(const CUIRect &Rect, bool ShouldScrollHere = false); // returns true if the added rect is visible (not clipped)
 	void ScrollHere(EScrollOption Option = SCROLLHERE_KEEP_IN_VIEW);
+	void ScrollRelative(EScrollRelative Direction, float SpeedMultiplier = 1.0f);
+	const CUIRect *ClipRect() const { return &m_ClipRect; }
+	void DoEdgeScrolling();
 	bool IsRectClipped(const CUIRect &Rect) const;
 	bool IsScrollbarShown() const;
 	bool IsAnimating() const;

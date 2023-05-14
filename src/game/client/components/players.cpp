@@ -57,13 +57,7 @@ void CPlayers::RenderHand(CTeeRenderInfo *pInfo, vec2 CenterPos, vec2 Dir, float
 	}
 }
 
-inline float NormalizeAngular(float f)
-{
-	return fmod(f + pi * 2, pi * 2);
-}
-
-inline float AngularMixDirection(float Src, float Dst) { return sinf(Dst - Src) > 0 ? 1 : -1; }
-inline float AngularDistance(float Src, float Dst) { return asinf(sinf(Dst - Src)); }
+inline float AngularMixDirection(float Src, float Dst) { return std::sin(Dst - Src) > 0 ? 1 : -1; }
 
 inline float AngularApproach(float Src, float Dst, float Amount)
 {
@@ -193,7 +187,6 @@ void CPlayers::RenderHookCollLine(
 			vec2 NewPos = OldPos;
 
 			bool DoBreak = false;
-			int Hit = 0;
 
 			do
 			{
@@ -207,7 +200,7 @@ void CPlayers::RenderHookCollLine(
 				}
 
 				int TeleNr = 0;
-				Hit = Collision()->IntersectLineTeleHook(OldPos, NewPos, &FinishPos, 0x0, &TeleNr);
+				int Hit = Collision()->IntersectLineTeleHook(OldPos, NewPos, &FinishPos, 0x0, &TeleNr);
 
 				if(!DoBreak && Hit)
 				{
@@ -419,8 +412,8 @@ void CPlayers::RenderPlayer(
 	bool Inactive = m_pClient->m_aClients[ClientID].m_Afk || m_pClient->m_aClients[ClientID].m_Paused;
 
 	// evaluate animation
-	float WalkTime = fmod(Position.x, 100.0f) / 100.0f;
-	float RunTime = fmod(Position.x, 200.0f) / 200.0f;
+	float WalkTime = std::fmod(Position.x, 100.0f) / 100.0f;
+	float RunTime = std::fmod(Position.x, 200.0f) / 200.0f;
 
 	// Don't do a moon walk outside the left border
 	if(WalkTime < 0)
@@ -469,7 +462,8 @@ void CPlayers::RenderPlayer(
 
 		m_pClient->m_Effects.SkidTrail(
 			Position + vec2(-Player.m_Direction * 6, 12),
-			vec2(-Player.m_Direction * 100 * length(Vel), -50));
+			vec2(-Player.m_Direction * 100 * length(Vel), -50),
+			Alpha);
 	}
 
 	// draw gun
@@ -528,12 +522,12 @@ void CPlayers::RenderPlayer(
 				{
 					Graphics()->QuadsSetRotation(-pi / 2 - State.GetAttach()->m_Angle * pi * 2);
 					WeaponPosition.x -= g_pData->m_Weapons.m_aId[CurrentWeapon].m_Offsetx;
-					m_pClient->m_Effects.PowerupShine(WeaponPosition + vec2(32, 0), vec2(32, 12));
+					m_pClient->m_Effects.PowerupShine(WeaponPosition + vec2(32, 0), vec2(32, 12), Alpha);
 				}
 				else
 				{
 					Graphics()->QuadsSetRotation(-pi / 2 + State.GetAttach()->m_Angle * pi * 2);
-					m_pClient->m_Effects.PowerupShine(WeaponPosition - vec2(32, 0), vec2(32, 12));
+					m_pClient->m_Effects.PowerupShine(WeaponPosition - vec2(32, 0), vec2(32, 12), Alpha);
 				}
 				Graphics()->RenderQuadContainerAsSprite(m_WeaponEmoteQuadContainerIndex, QuadOffset, WeaponPosition.x, WeaponPosition.y);
 
@@ -590,7 +584,7 @@ void CPlayers::RenderPlayer(
 				Recoil = 0;
 				float a = AttackTicksPassed / 5.0f;
 				if(a < 1)
-					Recoil = sinf(a * pi);
+					Recoil = std::sin(a * pi);
 				WeaponPosition = Position + Dir * g_pData->m_Weapons.m_aId[CurrentWeapon].m_Offsetx - Dir * Recoil * 10.0f;
 				WeaponPosition.y += g_pData->m_Weapons.m_aId[CurrentWeapon].m_Offsety;
 				if(IsSit)
@@ -676,7 +670,7 @@ void CPlayers::RenderPlayer(
 	vec2 BodyPos = Position + vec2(State.GetBody()->m_X, State.GetBody()->m_Y) * TeeAnimScale;
 	if(RenderInfo.m_TeeRenderFlags & TEE_EFFECT_FROZEN)
 	{
-		GameClient()->m_Effects.FreezingFlakes(BodyPos, vec2(32, 32));
+		GameClient()->m_Effects.FreezingFlakes(BodyPos, vec2(32, 32), Alpha);
 	}
 
 	int QuadOffsetToEmoticon = NUM_WEAPONS * 2 + 2 + 2;
@@ -727,7 +721,7 @@ void CPlayers::RenderPlayer(
 			if(SinceStart < Client()->GameTickSpeed() / 5)
 				Wiggle = SinceStart / (Client()->GameTickSpeed() / 5.0f);
 
-			float WiggleAngle = sinf(5 * Wiggle);
+			float WiggleAngle = std::sin(5 * Wiggle);
 
 			Graphics()->QuadsSetRotation(pi / 6 * WiggleAngle);
 
@@ -765,7 +759,7 @@ void CPlayers::OnRender()
 		if(m_pClient->m_aClients[i].m_LiveFrozen)
 			m_aRenderInfo[i].m_TeeRenderFlags |= TEE_EFFECT_FROZEN;
 
-		CGameClient::CSnapState::CCharacterInfo &CharacterInfo = m_pClient->m_Snap.m_aCharacters[i];
+		const CGameClient::CSnapState::CCharacterInfo &CharacterInfo = m_pClient->m_Snap.m_aCharacters[i];
 		if((CharacterInfo.m_Cur.m_Weapon == WEAPON_NINJA || (CharacterInfo.m_HasExtendedData && CharacterInfo.m_ExtendedData.m_FreezeEnd != 0)) && g_Config.m_ClShowNinja)
 		{
 			// change the skin for the player to the ninja

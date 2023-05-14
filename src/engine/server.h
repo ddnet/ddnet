@@ -160,7 +160,7 @@ public:
 	int SendPackMsgOne(const T *pMsg, int Flags, int ClientID)
 	{
 		dbg_assert(ClientID != -1, "SendPackMsgOne called with -1");
-		CMsgPacker Packer(pMsg->MsgID(), false, protocol7::is_sixup<T>::value);
+		CMsgPacker Packer(T::ms_MsgID, false, protocol7::is_sixup<T>::value);
 
 		if(pMsg->Pack(&Packer))
 			return -1;
@@ -214,6 +214,13 @@ public:
 	virtual void SnapFreeID(int ID) = 0;
 	virtual void *SnapNewItem(int Type, int ID, int Size) = 0;
 
+	template<typename T>
+	T *SnapNewItem(int ID)
+	{
+		const int Type = protocol7::is_sixup<T>::value ? -T::ms_MsgID : T::ms_MsgID;
+		return static_cast<T *>(SnapNewItem(Type, ID, sizeof(T)));
+	}
+
 	virtual void SnapSetStaticsize(int ItemType, int Size) = 0;
 
 	enum
@@ -253,6 +260,8 @@ public:
 
 	virtual void SetErrorShutdown(const char *pReason) = 0;
 	virtual void ExpireServerInfo() = 0;
+
+	virtual void FillAntibot(CAntibotRoundData *pData) = 0;
 
 	virtual void SendMsgRaw(int ClientID, const void *pData, int Size, int Flags) = 0;
 
@@ -322,6 +331,14 @@ public:
 	virtual void OnClientEngineDrop(int ClientID, const char *pReason) = 0;
 
 	virtual void FillAntibot(CAntibotRoundData *pData) = 0;
+
+	/**
+	 * Used to report custom player info to master servers.
+	 * 
+	 * @param aBuf Should be the json key values to add, starting with a ',' beforehand, like: ',"skin": "default", "team": 1'
+	 * @param i The client id.
+	 */
+	virtual void OnUpdatePlayerServerInfo(char *aBuf, int BufSize, int ID) = 0;
 };
 
 extern IGameServer *CreateGameServer();
