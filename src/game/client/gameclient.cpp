@@ -902,6 +902,8 @@ void CGameClient::OnFlagGrab(int TeamID)
 
 void CGameClient::OnWindowResize()
 {
+	TextRender()->OnPreWindowResize();
+
 	for(auto &pComponent : m_vpAll)
 		pComponent->OnWindowResize();
 
