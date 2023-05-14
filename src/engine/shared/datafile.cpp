@@ -354,7 +354,7 @@ int CDataFileReader::GetExternalItemType(int InternalType)
 	{
 		return InternalType;
 	}
-	const CItemEx *pItemEx = (const CItemEx *)GetItem(TypeIndex, 0, 0);
+	const CItemEx *pItemEx = (const CItemEx *)GetItem(TypeIndex);
 	// Propagate UUID_UNKNOWN, it doesn't hurt.
 	return g_UuidManager.LookupUuid(pItemEx->ToUuid());
 }
@@ -375,7 +375,7 @@ int CDataFileReader::GetInternalItemType(int ExternalType)
 			continue;
 		}
 		int ID;
-		if(Uuid == ((const CItemEx *)GetItem(i, 0, &ID))->ToUuid())
+		if(Uuid == ((const CItemEx *)GetItem(i, nullptr, &ID))->ToUuid())
 		{
 			return ID;
 		}
@@ -439,7 +439,7 @@ int CDataFileReader::FindItemIndex(int Type, int ID)
 	for(int i = 0; i < Num; i++)
 	{
 		int ItemID;
-		GetItem(Start + i, 0, &ItemID);
+		GetItem(Start + i, nullptr, &ItemID);
 		if(ID == ItemID)
 		{
 			return Start + i;
@@ -455,7 +455,7 @@ void *CDataFileReader::FindItem(int Type, int ID)
 	{
 		return 0;
 	}
-	return GetItem(Index, 0, 0);
+	return GetItem(Index);
 }
 
 int CDataFileReader::NumItems() const

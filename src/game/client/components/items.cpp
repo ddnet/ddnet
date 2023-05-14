@@ -358,7 +358,7 @@ void CItems::RenderLaser(const CLaserData *pCurrent, bool IsPredicted)
 
 void CItems::OnRender()
 {
-	if(Client()->State() < IClient::STATE_ONLINE)
+	if(Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		return;
 
 	bool IsSuper = m_pClient->IsLocalCharSuper();

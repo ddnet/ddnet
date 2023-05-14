@@ -39,7 +39,7 @@ bool Process(IStorage *pStorage, const char *pMapName, const char *pPathSave)
 
 	for(int i = 0; i < Num; i++)
 	{
-		CMapItemImage *pItem = (CMapItemImage *)Reader.GetItem(Start + i, nullptr, nullptr);
+		CMapItemImage *pItem = (CMapItemImage *)Reader.GetItem(Start + i);
 		char *pName = (char *)Reader.GetData(pItem->m_ImageName);
 
 		if(pItem->m_External)
@@ -67,7 +67,7 @@ bool Process(IStorage *pStorage, const char *pMapName, const char *pPathSave)
 
 	for(int i = 0; i < Num; i++)
 	{
-		CMapItemSound *pItem = (CMapItemSound *)Reader.GetItem(Start + i, nullptr, nullptr);
+		CMapItemSound *pItem = (CMapItemSound *)Reader.GetItem(Start + i);
 		char *pName = (char *)Reader.GetData(pItem->m_SoundName);
 
 		if(pItem->m_External)
