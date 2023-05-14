@@ -19,12 +19,12 @@ void CLayers::Init(class IKernel *pKernel)
 	m_pMap->GetType(MAPITEMTYPE_GROUP, &m_GroupsStart, &m_GroupsNum);
 	m_pMap->GetType(MAPITEMTYPE_LAYER, &m_LayersStart, &m_LayersNum);
 
-	for(int g = 0; g < NumGroups(); g++)
+	for(int GroupIndex = 0; GroupIndex < NumGroups(); GroupIndex++)
 	{
-		CMapItemGroup *pGroup = GetGroup(g);
-		for(int l = 0; l < pGroup->m_NumLayers; l++)
+		CMapItemGroup *pGroup = GetGroup(GroupIndex);
+		for(int LayerIndex = 0; LayerIndex < pGroup->m_NumLayers; LayerIndex++)
 		{
-			CMapItemLayer *pLayer = GetLayer(pGroup->m_StartLayer + l);
+			CMapItemLayer *pLayer = GetLayer(pGroup->m_StartLayer + LayerIndex);
 
 			if(pLayer->m_Type == LAYERTYPE_TILES)
 			{
@@ -119,12 +119,12 @@ void CLayers::InitBackground(class IMap *pMap)
 	m_pMap->GetType(MAPITEMTYPE_GROUP, &m_GroupsStart, &m_GroupsNum);
 	m_pMap->GetType(MAPITEMTYPE_LAYER, &m_LayersStart, &m_LayersNum);
 
-	for(int g = 0; g < NumGroups(); g++)
+	for(int GroupIndex = 0; GroupIndex < NumGroups(); GroupIndex++)
 	{
-		CMapItemGroup *pGroup = GetGroup(g);
-		for(int l = 0; l < pGroup->m_NumLayers; l++)
+		CMapItemGroup *pGroup = GetGroup(GroupIndex);
+		for(int LayerIndex = 0; LayerIndex < pGroup->m_NumLayers; LayerIndex++)
 		{
-			CMapItemLayer *pLayer = GetLayer(pGroup->m_StartLayer + l);
+			CMapItemLayer *pLayer = GetLayer(pGroup->m_StartLayer + LayerIndex);
 
 			if(pLayer->m_Type == LAYERTYPE_TILES)
 			{
@@ -178,13 +178,13 @@ void CLayers::Unload()
 
 void CLayers::InitTilemapSkip()
 {
-	for(int g = 0; g < NumGroups(); g++)
+	for(int GroupIndex = 0; GroupIndex < NumGroups(); GroupIndex++)
 	{
-		const CMapItemGroup *pGroup = GetGroup(g);
+		const CMapItemGroup *pGroup = GetGroup(GroupIndex);
 
-		for(int l = 0; l < pGroup->m_NumLayers; l++)
+		for(int LayerIndex = 0; LayerIndex < pGroup->m_NumLayers; LayerIndex++)
 		{
-			const CMapItemLayer *pLayer = GetLayer(pGroup->m_StartLayer + l);
+			const CMapItemLayer *pLayer = GetLayer(pGroup->m_StartLayer + LayerIndex);
 
 			if(pLayer->m_Type == LAYERTYPE_TILES)
 			{
