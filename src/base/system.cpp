@@ -4146,7 +4146,7 @@ int secure_rand_below(int below)
 	}
 }
 
-int os_version_str(char *version, int length)
+bool os_version_str(char *version, size_t length)
 {
 #if defined(CONF_FAMILY_WINDOWS)
 	const WCHAR *module_path = L"kernel32.dll";
@@ -4154,20 +4154,20 @@ int os_version_str(char *version, int length)
 	DWORD size = GetFileVersionInfoSizeW(module_path, &handle);
 	if(!size)
 	{
-		return 1;
+		return false;
 	}
 	void *data = malloc(size);
 	if(!GetFileVersionInfoW(module_path, handle, size, data))
 	{
 		free(data);
-		return 1;
+		return false;
 	}
 	VS_FIXEDFILEINFO *fileinfo;
 	UINT unused;
 	if(!VerQueryValueW(data, L"\\", (void **)&fileinfo, &unused))
 	{
 		free(data);
-		return 1;
+		return false;
 	}
 	str_format(version, length, "Windows %hu.%hu.%hu.%hu",
 		HIWORD(fileinfo->dwProductVersionMS),
@@ -4175,12 +4175,12 @@ int os_version_str(char *version, int length)
 		HIWORD(fileinfo->dwProductVersionLS),
 		LOWORD(fileinfo->dwProductVersionLS));
 	free(data);
-	return 0;
+	return true;
 #else
 	struct utsname u;
 	if(uname(&u))
 	{
-		return 1;
+		return false;
 	}
 	char extra[128];
 	extra[0] = 0;
@@ -4221,7 +4221,7 @@ int os_version_str(char *version, int length)
 	} while(false);
 
 	str_format(version, length, "%s %s (%s, %s)%s", u.sysname, u.release, u.machine, u.version, extra);
-	return 0;
+	return true;
 #endif
 }
 
