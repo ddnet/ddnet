@@ -182,7 +182,6 @@ public:
 	vec2 m_ShowDistance;
 	bool m_SpecTeam;
 	bool m_NinjaJetpack;
-	bool m_HasFinishScore;
 
 	int m_ChatScore;
 

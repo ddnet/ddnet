@@ -183,7 +183,7 @@ TEST_P(SingleScore, LoadPlayerData)
 	ASSERT_FALSE(CScoreWorker::LoadPlayerData(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
 
 	EXPECT_EQ(m_pPlayerResult->m_MessageKind, CScorePlayerResult::PLAYER_INFO);
-	ASSERT_EQ(m_pPlayerResult->m_Data.m_Info.m_Time, 0.0);
+	ASSERT_EQ(m_pPlayerResult->m_Data.m_Info.m_Time, -1.0);
 	for(auto &Time : m_pPlayerResult->m_Data.m_Info.m_aTimeCp)
 	{
 		ASSERT_EQ(Time, 0);
@@ -205,7 +205,7 @@ TEST_P(SingleScore, LoadPlayerData)
 	ASSERT_FALSE(CScoreWorker::LoadPlayerData(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
 
 	EXPECT_EQ(m_pPlayerResult->m_MessageKind, CScorePlayerResult::PLAYER_INFO);
-	ASSERT_EQ(m_pPlayerResult->m_Data.m_Info.m_Time, 0.0);
+	ASSERT_EQ(m_pPlayerResult->m_Data.m_Info.m_Time, -1.0);
 	for(int i = 0; i < NUM_CHECKPOINTS; i++)
 	{
 		ASSERT_EQ(m_pPlayerResult->m_Data.m_Info.m_aTimeCp[i], i);

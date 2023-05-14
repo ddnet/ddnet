@@ -119,8 +119,7 @@ void CPlayer::Reset()
 	m_DND = false;
 
 	m_LastPause = 0;
-	m_Score = -9999;
-	m_HasFinishScore = false;
+	m_Score = -1;
 
 	// Variable initialized:
 	m_Last_Team = 0;
@@ -337,11 +336,11 @@ void CPlayer::Snap(int SnappingClient)
 
 	int SnappingClientVersion = GameServer()->GetClientVersion(SnappingClient);
 	int Latency = SnappingClient == SERVER_DEMO_CLIENT ? m_Latency.m_Min : GameServer()->m_apPlayers[SnappingClient]->m_aCurLatency[m_ClientID];
-	int Score = absolute(m_Score) * -1;
+	int Score = m_Score;
 
 	// send 0 if times of others are not shown
 	if(SnappingClient != m_ClientID && g_Config.m_SvHideScore)
-		Score = -9999;
+		Score = -1;
 
 	if(!Server()->IsSixup(SnappingClient))
 	{
@@ -350,7 +349,10 @@ void CPlayer::Snap(int SnappingClient)
 			return;
 
 		pPlayerInfo->m_Latency = Latency;
-		pPlayerInfo->m_Score = Score;
+		// -9999 stands for no time and isn't displayed in scoreboard, so
+		// shift the time by a second if the player actually took 9999
+		// seconds to finish the map.
+		pPlayerInfo->m_Score = Score == -1 ? -9999 : Score == 9999 ? -10000 : -Score;
 		pPlayerInfo->m_Local = (int)(m_ClientID == SnappingClient && (m_Paused != PAUSE_PAUSED || SnappingClientVersion >= VERSION_DDNET_OLD));
 		pPlayerInfo->m_ClientID = id;
 		pPlayerInfo->m_Team = m_Team;
@@ -373,7 +375,7 @@ void CPlayer::Snap(int SnappingClient)
 			pPlayerInfo->m_PlayerFlags |= protocol7::PLAYERFLAG_ADMIN;
 
 		// Times are in milliseconds for 0.7
-		pPlayerInfo->m_Score = Score == -9999 ? -1 : -Score * 1000;
+		pPlayerInfo->m_Score = Score == -1 ? -1 : Score * 1000;
 		pPlayerInfo->m_Latency = Latency;
 	}
 
@@ -886,13 +888,7 @@ void CPlayer::ProcessScoreResult(CScorePlayerResult &Result)
 			break;
 		case CScorePlayerResult::PLAYER_INFO:
 			GameServer()->Score()->PlayerData(m_ClientID)->Set(Result.m_Data.m_Info.m_Time, Result.m_Data.m_Info.m_aTimeCp);
-			m_Score = Result.m_Data.m_Info.m_Score;
-			m_HasFinishScore = Result.m_Data.m_Info.m_HasFinishScore;
-			// -9999 stands for no time and isn't displayed in scoreboard, so
-			// shift the time by a second if the player actually took 9999
-			// seconds to finish the map.
-			if(m_HasFinishScore && m_Score == -9999)
-				m_Score = -10000;
+			m_Score = Result.m_Data.m_Info.m_Time;
 			Server()->ExpireServerInfo();
 			int Birthday = Result.m_Data.m_Info.m_Birthday;
 			if(Birthday != 0 && !m_BirthdayAnnounced)
