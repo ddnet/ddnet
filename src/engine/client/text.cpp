@@ -132,7 +132,9 @@ public:
 struct STextString
 {
 	int m_QuadBufferObjectIndex;
+	uint32_t m_DbgShadowBytes = 0x12345678;
 	int m_QuadBufferContainerIndex;
+	uint32_t m_DbgShadowBytes2 = 0x87654321;
 	size_t m_QuadNum;
 	int m_SelectionQuadContainerIndex;
 
@@ -1970,6 +1972,7 @@ public:
 				dbg_msg("textrender", "Found non empty text container with index %d with %d quads '%s'", pTextContainer->m_StringInfo.m_QuadBufferContainerIndex, (int)pTextContainer->m_StringInfo.m_QuadNum, pTextContainer->m_aDebugText);
 				HasNonEmptyTextContainer = true; // NOLINT(clang-analyzer-deadcode.DeadStores)
 			}
+			dbg_assert(pTextContainer->m_StringInfo.m_DbgShadowBytes == STextString{}.m_DbgShadowBytes && pTextContainer->m_StringInfo.m_DbgShadowBytes2 == STextString{}.m_DbgShadowBytes2, "shadow bytes were modified in text container.");
 		}
 
 		dbg_assert(!HasNonEmptyTextContainer, "text container was not empty");
