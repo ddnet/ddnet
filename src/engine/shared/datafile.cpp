@@ -279,11 +279,11 @@ void *CDataFileReader::GetDataImpl(int Index, int Swap)
 {
 	if(!m_pDataFile)
 	{
-		return 0;
+		return nullptr;
 	}
 
 	if(Index < 0 || Index >= m_pDataFile->m_Header.m_NumRawData)
-		return 0;
+		return nullptr;
 
 	// load it if needed
 	if(!m_pDataFile->m_ppDataPtrs[Index])
@@ -353,7 +353,7 @@ void CDataFileReader::UnloadData(int Index)
 
 	//
 	free(m_pDataFile->m_ppDataPtrs[Index]);
-	m_pDataFile->m_ppDataPtrs[Index] = 0x0;
+	m_pDataFile->m_ppDataPtrs[Index] = nullptr;
 }
 
 int CDataFileReader::GetItemSize(int Index) const
@@ -413,7 +413,7 @@ void *CDataFileReader::GetItem(int Index, int *pType, int *pID)
 			*pType = 0;
 		if(pID)
 			*pID = 0;
-		return 0;
+		return nullptr;
 	}
 
 	CDatafileItem *pItem = (CDatafileItem *)(m_pDataFile->m_Info.m_pItemStart + m_pDataFile->m_Info.m_pItemOffsets[Index]);
@@ -475,7 +475,7 @@ void *CDataFileReader::FindItem(int Type, int ID)
 	int Index = FindItemIndex(Type, ID);
 	if(Index < 0)
 	{
-		return 0;
+		return nullptr;
 	}
 	return GetItem(Index);
 }
@@ -526,15 +526,15 @@ CDataFileWriter::CDataFileWriter()
 CDataFileWriter::~CDataFileWriter()
 {
 	free(m_pItemTypes);
-	m_pItemTypes = 0;
+	m_pItemTypes = nullptr;
 	for(int i = 0; i < m_NumItems; i++)
 		free(m_pItems[i].m_pData);
 	for(int i = 0; i < m_NumDatas; ++i)
 		free(m_pDatas[i].m_pCompressedData);
 	free(m_pItems);
-	m_pItems = 0;
+	m_pItems = nullptr;
 	free(m_pDatas);
-	m_pDatas = 0;
+	m_pDatas = nullptr;
 }
 
 bool CDataFileWriter::OpenFile(class IStorage *pStorage, const char *pFilename, int StorageType)
@@ -842,12 +842,12 @@ int CDataFileWriter::Finish()
 	for(int i = 0; i < m_NumItems; i++)
 	{
 		free(m_pItems[i].m_pData);
-		m_pItems[i].m_pData = 0;
+		m_pItems[i].m_pData = nullptr;
 	}
 	for(int i = 0; i < m_NumDatas; ++i)
 	{
 		free(m_pDatas[i].m_pCompressedData);
-		m_pDatas[i].m_pCompressedData = 0;
+		m_pDatas[i].m_pCompressedData = nullptr;
 	}
 
 	io_close(m_File);
