@@ -30,27 +30,27 @@ public:
 		m_pDataFile(nullptr) {}
 	~CDataFileReader() { Close(); }
 
-	bool IsOpen() const { return m_pDataFile != nullptr; }
-
 	bool Open(class IStorage *pStorage, const char *pFilename, int StorageType);
 	bool Close();
+	bool IsOpen() const { return m_pDataFile != nullptr; }
+	IOHANDLE File();
 
 	void *GetData(int Index);
 	void *GetDataSwapped(int Index); // makes sure that the data is 32bit LE ints when saved
 	int GetDataSize(int Index);
 	void UnloadData(int Index);
+	int NumData() const;
+
 	void *GetItem(int Index, int *pType = nullptr, int *pID = nullptr);
 	int GetItemSize(int Index) const;
 	void GetType(int Type, int *pStart, int *pNum);
 	int FindItemIndex(int Type, int ID);
 	void *FindItem(int Type, int ID);
 	int NumItems() const;
-	int NumData() const;
 
 	SHA256_DIGEST Sha256() const;
 	unsigned Crc() const;
 	int MapSize() const;
-	IOHANDLE File();
 };
 
 // write access
@@ -98,8 +98,8 @@ class CDataFileWriter
 	CDataInfo *m_pDatas;
 	int m_aExtendedItemTypes[MAX_EXTENDED_ITEM_TYPES];
 
-	int GetExtendedItemTypeIndex(int Type);
 	int GetTypeFromIndex(int Index);
+	int GetExtendedItemTypeIndex(int Type);
 
 public:
 	CDataFileWriter();

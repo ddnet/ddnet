@@ -25,19 +25,14 @@ public:
 	void *FindItem(int Type, int ID) override;
 	int NumItems() override;
 
-	void Unload() override;
-
 	bool Load(const char *pMapName) override;
-
+	void Unload() override;
 	bool IsLoaded() override;
+	IOHANDLE File() override;
 
 	SHA256_DIGEST Sha256() override;
-
 	unsigned Crc() override;
-
 	int MapSize() override;
-
-	IOHANDLE File() override;
 };
 
 #endif

@@ -217,6 +217,28 @@ bool CDataFileReader::Open(class IStorage *pStorage, const char *pFilename, int 
 	return true;
 }
 
+bool CDataFileReader::Close()
+{
+	if(!m_pDataFile)
+		return true;
+
+	// free the data that is loaded
+	for(int i = 0; i < m_pDataFile->m_Header.m_NumRawData; i++)
+		free(m_pDataFile->m_ppDataPtrs[i]);
+
+	io_close(m_pDataFile->m_File);
+	free(m_pDataFile);
+	m_pDataFile = nullptr;
+	return true;
+}
+
+IOHANDLE CDataFileReader::File()
+{
+	if(!m_pDataFile)
+		return 0;
+	return m_pDataFile->m_File;
+}
+
 int CDataFileReader::NumData() const
 {
 	if(!m_pDataFile)
@@ -465,22 +487,6 @@ int CDataFileReader::NumItems() const
 	return m_pDataFile->m_Header.m_NumItems;
 }
 
-bool CDataFileReader::Close()
-{
-	if(!m_pDataFile)
-		return true;
-
-	// free the data that is loaded
-	int i;
-	for(i = 0; i < m_pDataFile->m_Header.m_NumRawData; i++)
-		free(m_pDataFile->m_ppDataPtrs[i]);
-
-	io_close(m_pDataFile->m_File);
-	free(m_pDataFile);
-	m_pDataFile = 0;
-	return true;
-}
-
 SHA256_DIGEST CDataFileReader::Sha256() const
 {
 	if(!m_pDataFile)
@@ -507,13 +513,6 @@ int CDataFileReader::MapSize() const
 	if(!m_pDataFile)
 		return 0;
 	return m_pDataFile->m_Header.m_Size + 16;
-}
-
-IOHANDLE CDataFileReader::File()
-{
-	if(!m_pDataFile)
-		return 0;
-	return m_pDataFile->m_File;
 }
 
 CDataFileWriter::CDataFileWriter()
