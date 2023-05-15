@@ -89,6 +89,8 @@ void CMenus::HandleDemoSeeking(float PositionToSeek, float TimeToSeek)
 		m_pClient->m_SuppressEvents = false;
 		m_pClient->m_MapLayersBackGround.EnvelopeUpdate();
 		m_pClient->m_MapLayersForeGround.EnvelopeUpdate();
+		if(!DemoPlayer()->BaseInfo()->m_Paused && PositionToSeek == 1.0f)
+			DemoPlayer()->Pause();
 	}
 }
 
