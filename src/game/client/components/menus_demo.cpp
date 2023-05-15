@@ -1025,7 +1025,6 @@ void CMenus::RenderDemoList(CUIRect MainView)
 
 			if(i + 1 < NumCols)
 			{
-				//Cols[i].flags |= SPACER;
 				Headers.VSplitLeft(2, &s_aCols[i].m_Spacer, &Headers);
 			}
 		}
@@ -1175,7 +1174,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	}
 
 	static CButtonContainer s_PlayButton;
-	if(DoButton_Menu(&s_PlayButton, m_DemolistSelectedIsDir ? Localize("Open") : Localize("Play", "Demo browser"), 0, &PlayRect) || s_ListBox.WasItemActivated() || UI()->ConsumeHotkey(CUI::HOTKEY_ENTER) || (Input()->KeyPress(KEY_P) && m_pClient->m_GameConsole.IsClosed() && m_DemoPlayerState == DEMOPLAYER_NONE))
+	if(DoButton_Menu(&s_PlayButton, m_DemolistSelectedIsDir ? Localize("Open") : Localize("Play", "Demo browser"), 0, &PlayRect) || s_ListBox.WasItemActivated() || UI()->ConsumeHotkey(CUI::HOTKEY_ENTER) || (Input()->KeyPress(KEY_P) && m_pClient->m_GameConsole.IsClosed()))
 	{
 		if(m_DemolistSelectedIndex >= 0)
 		{
