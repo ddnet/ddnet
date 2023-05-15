@@ -46,7 +46,6 @@ public:
 	void *FindItem(int Type, int ID);
 	int NumItems() const;
 	int NumData() const;
-	void Unload();
 
 	SHA256_DIGEST Sha256() const;
 	unsigned Crc() const;
