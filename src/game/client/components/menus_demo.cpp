@@ -375,14 +375,14 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 				if(Input()->ShiftIsPressed())
 				{
 					AmountSeek = s_PrevAmount + (AmountSeek - s_PrevAmount) * 0.05f;
-					if(AmountSeek > 0.0f && AmountSeek < 1.0f && absolute(s_PrevAmount - AmountSeek) >= 0.0001f)
+					if(AmountSeek >= 0.0f && AmountSeek <= 1.0f && absolute(s_PrevAmount - AmountSeek) >= 0.0001f)
 					{
 						PositionToSeek = AmountSeek;
 					}
 				}
 				else
 				{
-					if(AmountSeek > 0.0f && AmountSeek < 1.0f && absolute(s_PrevAmount - AmountSeek) >= 0.001f)
+					if(AmountSeek >= 0.0f && AmountSeek <= 1.0f && absolute(s_PrevAmount - AmountSeek) >= 0.001f)
 					{
 						s_PrevAmount = AmountSeek;
 						PositionToSeek = AmountSeek;
