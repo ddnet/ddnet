@@ -21,7 +21,7 @@ public:
 	void UnloadData(int Index) override;
 	int NumData() const override;
 
-	void *GetItem(int Index, int *pType, int *pID) override;
+	void *GetItem(int Index, int *pType = nullptr, int *pID = nullptr) override;
 	int GetItemSize(int Index) override;
 	void GetType(int Type, int *pStart, int *pNum) override;
 	void *FindItem(int Type, int ID) override;
