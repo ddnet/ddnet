@@ -141,29 +141,27 @@ void CLayers::InitTilemapSkip()
 	for(int GroupIndex = 0; GroupIndex < NumGroups(); GroupIndex++)
 	{
 		const CMapItemGroup *pGroup = GetGroup(GroupIndex);
-
 		for(int LayerIndex = 0; LayerIndex < pGroup->m_NumLayers; LayerIndex++)
 		{
 			const CMapItemLayer *pLayer = GetLayer(pGroup->m_StartLayer + LayerIndex);
+			if(pLayer->m_Type != LAYERTYPE_TILES)
+				continue;
 
-			if(pLayer->m_Type == LAYERTYPE_TILES)
+			const CMapItemLayerTilemap *pTilemap = reinterpret_cast<const CMapItemLayerTilemap *>(pLayer);
+			CTile *pTiles = static_cast<CTile *>(m_pMap->GetData(pTilemap->m_Data));
+			for(int y = 0; y < pTilemap->m_Height; y++)
 			{
-				const CMapItemLayerTilemap *pTilemap = (CMapItemLayerTilemap *)pLayer;
-				CTile *pTiles = (CTile *)m_pMap->GetData(pTilemap->m_Data);
-				for(int y = 0; y < pTilemap->m_Height; y++)
+				for(int x = 1; x < pTilemap->m_Width;)
 				{
-					for(int x = 1; x < pTilemap->m_Width;)
+					int SkippedX;
+					for(SkippedX = 1; x + SkippedX < pTilemap->m_Width && SkippedX < 255; SkippedX++)
 					{
-						int SkippedX;
-						for(SkippedX = 1; x + SkippedX < pTilemap->m_Width && SkippedX < 255; SkippedX++)
-						{
-							if(pTiles[y * pTilemap->m_Width + x + SkippedX].m_Index)
-								break;
-						}
-
-						pTiles[y * pTilemap->m_Width + x].m_Skip = SkippedX - 1;
-						x += SkippedX;
+						if(pTiles[y * pTilemap->m_Width + x + SkippedX].m_Index)
+							break;
 					}
+
+					pTiles[y * pTilemap->m_Width + x].m_Skip = SkippedX - 1;
+					x += SkippedX;
 				}
 			}
 		}
