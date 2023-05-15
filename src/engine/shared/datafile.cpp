@@ -677,16 +677,12 @@ int CDataFileWriter::Finish()
 	if(!m_File)
 		return 1;
 
-	int ItemSize = 0;
-	int TypesSize, HeaderSize, OffsetSize, FileSize, SwapSize;
-	int DataSize = 0;
-	CDatafileHeader Header;
-
 	// we should now write this file!
 	if(DEBUG)
 		dbg_msg("datafile", "writing");
 
 	// calculate sizes
+	int ItemSize = 0;
 	for(int i = 0; i < m_NumItems; i++)
 	{
 		if(DEBUG)
@@ -694,23 +690,23 @@ int CDataFileWriter::Finish()
 		ItemSize += m_pItems[i].m_Size + sizeof(CDatafileItem);
 	}
 
+	int DataSize = 0;
 	for(int i = 0; i < m_NumDatas; i++)
 		DataSize += m_pDatas[i].m_CompressedSize;
 
 	// calculate the complete size
-	TypesSize = m_NumItemTypes * sizeof(CDatafileItemType);
-	HeaderSize = sizeof(CDatafileHeader);
-	OffsetSize = (m_NumItems + m_NumDatas + m_NumDatas) * sizeof(int); // ItemOffsets, DataOffsets, DataUncompressedSizes
-	FileSize = HeaderSize + TypesSize + OffsetSize + ItemSize + DataSize;
-	SwapSize = FileSize - DataSize;
-
-	(void)SwapSize;
+	const int TypesSize = m_NumItemTypes * sizeof(CDatafileItemType);
+	const int HeaderSize = sizeof(CDatafileHeader);
+	const int OffsetSize = (m_NumItems + m_NumDatas + m_NumDatas) * sizeof(int); // ItemOffsets, DataOffsets, DataUncompressedSizes
+	const int FileSize = HeaderSize + TypesSize + OffsetSize + ItemSize + DataSize;
+	const int SwapSize = FileSize - DataSize;
 
 	if(DEBUG)
 		dbg_msg("datafile", "num_m_aItemTypes=%d TypesSize=%d m_aItemsize=%d DataSize=%d", m_NumItemTypes, TypesSize, ItemSize, DataSize);
 
 	// construct Header
 	{
+		CDatafileHeader Header;
 		Header.m_aID[0] = 'D';
 		Header.m_aID[1] = 'A';
 		Header.m_aID[2] = 'T';
