@@ -4906,12 +4906,14 @@ void CEditor::RenderFileDialog()
 		UI()->DoLabel(&FileIcon, pIconType, 12.0f, TEXTALIGN_ML);
 		TextRender()->SetCurFont(nullptr);
 
-		char aBufTimeModified[64];
-		str_timestamp_ex(m_vpFilteredFileList[i]->m_TimeModified, aBufTimeModified, sizeof(aBufTimeModified), "%d.%m.%Y %H:%M");
-
 		UI()->DoLabel(&Button, m_vpFilteredFileList[i]->m_aName, 10.0f, TEXTALIGN_ML);
+
 		if(!m_vpFilteredFileList[i]->m_IsLink && str_comp(m_vpFilteredFileList[i]->m_aFilename, "..") != 0)
+		{
+			char aBufTimeModified[64];
+			str_timestamp_ex(m_vpFilteredFileList[i]->m_TimeModified, aBufTimeModified, sizeof(aBufTimeModified), "%d.%m.%Y %H:%M");
 			UI()->DoLabel(&TimeModified, aBufTimeModified, 10.0f, TEXTALIGN_MR);
+		}
 	}
 
 	const int NewSelection = s_ListBox.DoEnd();
@@ -5106,6 +5108,7 @@ void CEditor::FilelistPopulate(int StorageType, bool KeepSelection)
 		Item.m_IsDir = true;
 		Item.m_IsLink = true;
 		Item.m_StorageType = IStorage::TYPE_SAVE;
+		Item.m_TimeModified = 0;
 		m_vCompleteFileList.push_back(Item);
 	}
 	Storage()->ListDirectoryInfo(StorageType, m_pFileDialogPath, EditorListdirCallback, this);
