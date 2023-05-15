@@ -25,6 +25,11 @@ void CMap::UnloadData(int Index)
 	m_DataFile.UnloadData(Index);
 }
 
+int CMap::NumData() const
+{
+	return m_DataFile.NumData();
+}
+
 void *CMap::GetItem(int Index, int *pType, int *pID)
 {
 	return m_DataFile.GetItem(Index, pType, pID);

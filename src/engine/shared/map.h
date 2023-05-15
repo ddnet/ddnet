@@ -19,6 +19,8 @@ public:
 	int GetDataSize(int Index) const override;
 	void *GetDataSwapped(int Index) override;
 	void UnloadData(int Index) override;
+	int NumData() const override;
+
 	void *GetItem(int Index, int *pType, int *pID) override;
 	int GetItemSize(int Index) override;
 	void GetType(int Type, int *pStart, int *pNum) override;
