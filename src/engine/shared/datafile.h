@@ -20,7 +20,7 @@ class CDataFileReader
 {
 	struct CDatafile *m_pDataFile;
 	void *GetDataImpl(int Index, int Swap);
-	int GetFileDataSize(int Index);
+	int GetFileDataSize(int Index) const;
 
 	int GetExternalItemType(int InternalType);
 	int GetInternalItemType(int ExternalType);
@@ -33,11 +33,11 @@ public:
 	bool Open(class IStorage *pStorage, const char *pFilename, int StorageType);
 	bool Close();
 	bool IsOpen() const { return m_pDataFile != nullptr; }
-	IOHANDLE File();
+	IOHANDLE File() const;
 
 	void *GetData(int Index);
 	void *GetDataSwapped(int Index); // makes sure that the data is 32bit LE ints when saved
-	int GetDataSize(int Index);
+	int GetDataSize(int Index) const;
 	void UnloadData(int Index);
 	int NumData() const;
 
@@ -98,7 +98,7 @@ class CDataFileWriter
 	CDataInfo *m_pDatas;
 	int m_aExtendedItemTypes[MAX_EXTENDED_ITEM_TYPES];
 
-	int GetTypeFromIndex(int Index);
+	int GetTypeFromIndex(int Index) const;
 	int GetExtendedItemTypeIndex(int Type);
 
 public:

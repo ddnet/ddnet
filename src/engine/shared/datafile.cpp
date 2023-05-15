@@ -232,7 +232,7 @@ bool CDataFileReader::Close()
 	return true;
 }
 
-IOHANDLE CDataFileReader::File()
+IOHANDLE CDataFileReader::File() const
 {
 	if(!m_pDataFile)
 		return 0;
@@ -249,7 +249,7 @@ int CDataFileReader::NumData() const
 }
 
 // returns the size in the file
-int CDataFileReader::GetFileDataSize(int Index)
+int CDataFileReader::GetFileDataSize(int Index) const
 {
 	if(!m_pDataFile)
 	{
@@ -262,7 +262,7 @@ int CDataFileReader::GetFileDataSize(int Index)
 }
 
 // returns the size of the resulting data
-int CDataFileReader::GetDataSize(int Index)
+int CDataFileReader::GetDataSize(int Index) const
 {
 	if(!m_pDataFile)
 	{
@@ -567,7 +567,7 @@ bool CDataFileWriter::Open(class IStorage *pStorage, const char *pFilename, int 
 	return OpenFile(pStorage, pFilename, StorageType);
 }
 
-int CDataFileWriter::GetTypeFromIndex(int Index)
+int CDataFileWriter::GetTypeFromIndex(int Index) const
 {
 	return ITEMTYPE_EX - Index - 1;
 }

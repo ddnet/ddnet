@@ -10,7 +10,7 @@ void *CMap::GetData(int Index)
 	return m_DataFile.GetData(Index);
 }
 
-int CMap::GetDataSize(int Index)
+int CMap::GetDataSize(int Index) const
 {
 	return m_DataFile.GetDataSize(Index);
 }
@@ -45,7 +45,7 @@ void *CMap::FindItem(int Type, int ID)
 	return m_DataFile.FindItem(Type, ID);
 }
 
-int CMap::NumItems()
+int CMap::NumItems() const
 {
 	return m_DataFile.NumItems();
 }
@@ -63,27 +63,27 @@ void CMap::Unload()
 	m_DataFile.Close();
 }
 
-bool CMap::IsLoaded()
+bool CMap::IsLoaded() const
 {
 	return m_DataFile.IsOpen();
 }
 
-IOHANDLE CMap::File()
+IOHANDLE CMap::File() const
 {
 	return m_DataFile.File();
 }
 
-SHA256_DIGEST CMap::Sha256()
+SHA256_DIGEST CMap::Sha256() const
 {
 	return m_DataFile.Sha256();
 }
 
-unsigned CMap::Crc()
+unsigned CMap::Crc() const
 {
 	return m_DataFile.Crc();
 }
 
-int CMap::MapSize()
+int CMap::MapSize() const
 {
 	return m_DataFile.MapSize();
 }
