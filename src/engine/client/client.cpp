@@ -919,7 +919,7 @@ void CClient::DummyConnect()
 	if(m_LastDummyConnectTime > 0 && m_LastDummyConnectTime + GameTickSpeed() * 5 > GameTick(g_Config.m_ClDummy))
 		return;
 
-	if(m_aNetClient[CONN_MAIN].State() != NET_CONNSTATE_ONLINE && m_aNetClient[CONN_MAIN].State() != NET_CONNSTATE_PENDING)
+	if(m_aNetClient[CONN_MAIN].State() != NETSTATE_ONLINE)
 		return;
 
 	if(m_DummyConnected || !DummyAllowed())
