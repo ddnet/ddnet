@@ -327,7 +327,6 @@ CClient::CClient() :
 	m_aRconUsername[0] = '\0';
 	m_aRconPassword[0] = '\0';
 	m_aPassword[0] = '\0';
-	m_aDisconnectReason[0] = '\0';
 
 	// version-checking
 	m_aVersionStr[0] = '0';
@@ -832,13 +831,8 @@ void CClient::Connect(const char *pAddress, const char *pPassword)
 
 void CClient::DisconnectWithReason(const char *pReason)
 {
-	str_copy(m_aDisconnectReason, pReason == nullptr || pReason[0] == '\0' ? "unknown" : pReason);
-}
-
-void CClient::DisconnectWithReasonImpl(const char *pReason)
-{
 	char aBuf[512];
-	str_format(aBuf, sizeof(aBuf), "disconnecting. reason='%s'", pReason);
+	str_format(aBuf, sizeof(aBuf), "disconnecting. reason='%s'", pReason ? pReason : "unknown");
 	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf, gs_ClientNetworkPrintColor);
 
 	// stop demo playback and recorder
@@ -853,7 +847,7 @@ void CClient::DisconnectWithReasonImpl(const char *pReason)
 	m_ServerSentCapabilities = false;
 	m_UseTempRconCommands = 0;
 	m_pConsole->DeregisterTempAll();
-	m_aNetClient[CONN_MAIN].Disconnect(str_comp(pReason, "unknown") == 0 ? nullptr : pReason);
+	m_aNetClient[CONN_MAIN].Disconnect(pReason);
 	SetState(IClient::STATE_OFFLINE);
 	m_pMap->Unload();
 	m_CurrentServerPingInfoType = -1;
@@ -895,7 +889,7 @@ void CClient::Disconnect()
 	if(m_DummyConnected)
 		DummyDisconnect(0);
 	if(m_State != IClient::STATE_OFFLINE)
-		DisconnectWithReason();
+		DisconnectWithReason(0);
 
 	// make sure to remove replay tmp demo
 	if(g_Config.m_ClReplays)
@@ -2531,10 +2525,10 @@ void CClient::PumpNetwork()
 		// check for errors
 		if(State() != IClient::STATE_OFFLINE && State() < IClient::STATE_QUITTING && m_aNetClient[CONN_MAIN].State() == NETSTATE_OFFLINE)
 		{
+			Disconnect();
 			char aBuf[256];
 			str_format(aBuf, sizeof(aBuf), "offline error='%s'", m_aNetClient[CONN_MAIN].ErrorString());
 			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf, gs_ClientNetworkErrPrintColor);
-			DisconnectWithReason(m_aNetClient[CONN_MAIN].ErrorString());
 		}
 
 		if(State() != IClient::STATE_OFFLINE && State() < IClient::STATE_QUITTING && m_DummyConnected &&
@@ -3303,14 +3297,6 @@ void CClient::Run()
 				// if the client does not render, it should reset its render time to a time where it would render the first frame, when it wakes up again
 				LastRenderTime = g_Config.m_GfxRefreshRate ? (Now - (time_freq() / (int64_t)g_Config.m_GfxRefreshRate)) : Now;
 			}
-		}
-
-		// Diconnecting is delayed until after the render call, to ensure
-		// that the map is not unloaded during the render call.
-		if(m_aDisconnectReason[0] != '\0')
-		{
-			DisconnectWithReasonImpl(m_aDisconnectReason);
-			m_aDisconnectReason[0] = '\0';
 		}
 
 		AutoScreenshot_Cleanup();
