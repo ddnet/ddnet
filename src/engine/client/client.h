@@ -167,7 +167,6 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	char m_aRconPassword[32];
 	int m_UseTempRconCommands;
 	char m_aPassword[32];
-	char m_aDisconnectReason[256];
 	bool m_SendPassword;
 	bool m_ButtonRender = false;
 
@@ -354,8 +353,7 @@ public:
 	void EnterGame(int Conn) override;
 
 	void Connect(const char *pAddress, const char *pPassword = nullptr) override;
-	void DisconnectWithReason(const char *pReason = nullptr);
-	void DisconnectWithReasonImpl(const char *pReason);
+	void DisconnectWithReason(const char *pReason);
 	void Disconnect() override;
 
 	void DummyDisconnect(const char *pReason) override;
