@@ -881,22 +881,41 @@ bool CEditor::CallbackSaveCopyMap(const char *pFileName, int StorageType, void *
 	}
 }
 
-static int EntitiesListdirCallback(const char *pName, int IsDir, int StorageType, void *pUser)
-{
-	CEditor *pEditor = (CEditor *)pUser;
-	if(!IsDir && str_endswith(pName, ".png"))
-	{
-		std::string Name = pName;
-		pEditor->m_vSelectEntitiesFiles.push_back(Name.substr(0, Name.length() - 4));
-	}
-
-	return 0;
-}
-
 void CEditor::DoToolbar(CUIRect ToolBar)
 {
 	const bool ModPressed = Input()->ModifierIsPressed();
 	const bool ShiftPressed = Input()->ShiftIsPressed();
+
+	// handle shortcut for info button
+	if(m_Dialog == DIALOG_NONE && m_EditBoxActive == 0 && Input()->KeyPress(KEY_I) && ModPressed && !ShiftPressed)
+	{
+		if(m_ShowTileInfo && m_ShowTileHexInfo)
+			m_ShowTileHexInfo = false;
+		else if(m_ShowTileInfo)
+			m_ShowTileInfo = false;
+		else
+			m_ShowTileInfo = true;
+		m_ShowEnvelopePreview = SHOWENV_NONE;
+	}
+
+	// handle shortcut for hex button
+	if(m_Dialog == DIALOG_NONE && m_EditBoxActive == 0 && Input()->KeyPress(KEY_I) && ModPressed && ShiftPressed)
+	{
+		if(m_ShowTileInfo && m_ShowTileHexInfo)
+			m_ShowTileInfo = false;
+		else if(m_ShowTileInfo)
+			m_ShowTileHexInfo = true;
+		else
+		{
+			m_ShowTileInfo = true;
+			m_ShowTileHexInfo = true;
+		}
+		m_ShowEnvelopePreview = SHOWENV_NONE;
+	}
+
+	// handle shortcut for unused button
+	if(m_Dialog == DIALOG_NONE && m_EditBoxActive == 0 && Input()->KeyPress(KEY_U) && ModPressed)
+		m_AllowPlaceUnusedTiles = !m_AllowPlaceUnusedTiles;
 
 	CUIRect TB_Top, TB_Bottom;
 	CUIRect Button;
@@ -931,20 +950,18 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 		// proof button
 		TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
 		static int s_ProofButton = 0;
-		if(DoButton_Editor(&s_ProofButton, "Proof", m_ProofBorders, &Button, 0, "[ctrl+p] Toggles proof borders. These borders represent what a player maximum can see.") ||
+		if(DoButton_Ex(&s_ProofButton, "Proof", m_ProofBorders, &Button, 0, "[ctrl+p] Toggles proof borders. These borders represent what a player maximum can see.", IGraphics::CORNER_L) ||
 			(m_Dialog == DIALOG_NONE && m_EditBoxActive == 0 && Input()->KeyPress(KEY_P) && ModPressed))
 		{
-			m_ProofBorders = !m_ProofBorders && !m_MenuProofBorders;
+			m_ProofBorders = !m_ProofBorders;
 		}
 
-		TB_Top.VSplitLeft(5.0f, nullptr, &TB_Top);
-
-		// menu proof button
-		TB_Top.VSplitLeft(60.0f, &Button, &TB_Top);
+		TB_Top.VSplitLeft(10.0f, &Button, &TB_Top);
 		static int s_MenuProofButton = 0;
-		if(DoButton_Editor(&s_MenuProofButton, "Proof Menu", m_MenuProofBorders, &Button, 0, "Toggles menu proof borders. These borders represent what will be shown in the menu."))
+		if(DoButton_Ex(&s_MenuProofButton, "▾", 0, &Button, 0, "Select proof mode.", IGraphics::CORNER_R))
 		{
-			m_MenuProofBorders = !m_MenuProofBorders && !m_ProofBorders;
+			static SPopupMenuId s_PopupProofModeId;
+			UI()->DoPopupMenu(&s_PopupProofModeId, Button.x, Button.y + Button.h, 60.0f, 36.0f, this, PopupProofMode);
 		}
 
 		TB_Top.VSplitLeft(5.0f, nullptr, &TB_Top);
@@ -966,52 +983,6 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 			(m_Dialog == DIALOG_NONE && m_EditBoxActive == 0 && Input()->KeyPress(KEY_G) && ModPressed && !ShiftPressed))
 		{
 			m_GridActive = !m_GridActive;
-		}
-
-		TB_Top.VSplitLeft(5.0f, nullptr, &TB_Top);
-
-		// tile info button
-		TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
-		static int s_TileInfoButton = 0;
-		if(DoButton_Editor(&s_TileInfoButton, "Info", m_ShowTileInfo, &Button, 0, "[ctrl+i] Show tile information") ||
-			(m_Dialog == DIALOG_NONE && m_EditBoxActive == 0 && Input()->KeyPress(KEY_I) && ModPressed && !ShiftPressed))
-		{
-			m_ShowTileInfo = !m_ShowTileInfo;
-			m_ShowEnvelopePreview = SHOWENV_NONE;
-		}
-
-		TB_Top.VSplitLeft(5.0f, nullptr, &TB_Top);
-
-		// allow place unused tiles button
-		TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
-		static int s_AllowPlaceUnusedTilesButton = 0;
-		if(DoButton_Editor(&s_AllowPlaceUnusedTilesButton, "Unused", m_AllowPlaceUnusedTiles, &Button, 0, "[ctrl+u] Allow placing unused tiles") ||
-			(m_Dialog == DIALOG_NONE && m_EditBoxActive == 0 && Input()->KeyPress(KEY_U) && ModPressed))
-		{
-			m_AllowPlaceUnusedTiles = !m_AllowPlaceUnusedTiles;
-		}
-
-		TB_Top.VSplitLeft(5.0f, nullptr, &TB_Top);
-
-		TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
-		static int s_ColorBrushButton = 0;
-		if(DoButton_Editor(&s_ColorBrushButton, "Color", m_BrushColorEnabled, &Button, 0, "Toggle brush coloring"))
-		{
-			m_BrushColorEnabled = !m_BrushColorEnabled;
-		}
-
-		TB_Top.VSplitLeft(5.0f, nullptr, &TB_Top);
-
-		TB_Top.VSplitLeft(45.0f, &Button, &TB_Top);
-		static int s_EntitiesButtonID = 0;
-		if(DoButton_Editor(&s_EntitiesButtonID, "Entities", 0, &Button, 0, "Choose game layer entities image for different gametypes"))
-		{
-			m_vSelectEntitiesFiles.clear();
-			Storage()->ListDirectory(IStorage::TYPE_ALL, "editor/entities", EntitiesListdirCallback, this);
-			std::sort(m_vSelectEntitiesFiles.begin(), m_vSelectEntitiesFiles.end());
-
-			static SPopupMenuId s_PopupEntitiesId;
-			UI()->DoPopupMenu(&s_PopupEntitiesId, Button.x, Button.y + Button.h, 250, m_vSelectEntitiesFiles.size() * 14.0f + 10.0f, this, PopupEntities);
 		}
 
 		TB_Top.VSplitLeft(5.0f, nullptr, &TB_Top);
@@ -1156,7 +1127,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 			TB_Bottom.VSplitLeft(45.0f, &Button, &TB_Bottom);
 			static int s_RefocusButton = 0;
 			int FocusButtonChecked;
-			if(m_MenuProofBorders)
+			if(m_ProofBorders && m_MenuProofBorders)
 			{
 				if(distance(m_vMenuBackgroundPositions[m_CurrentMenuProofIndex], vec2(m_WorldOffsetX, m_WorldOffsetY)) < 0.0001f)
 					FocusButtonChecked = -1;
@@ -1172,7 +1143,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 			}
 			if(DoButton_Editor(&s_RefocusButton, "Refocus", FocusButtonChecked, &Button, 0, "[HOME] Restore map focus") || (m_Dialog == DIALOG_NONE && m_EditBoxActive == 0 && Input()->KeyPress(KEY_HOME)))
 			{
-				if(m_MenuProofBorders)
+				if(m_ProofBorders && m_MenuProofBorders)
 				{
 					m_WorldOffsetX = m_vMenuBackgroundPositions[m_CurrentMenuProofIndex].x;
 					m_WorldOffsetY = m_vMenuBackgroundPositions[m_CurrentMenuProofIndex].y;
@@ -1186,33 +1157,8 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 			TB_Bottom.VSplitLeft(5.0f, nullptr, &TB_Bottom);
 		}
 
-		// goto xy button
-		{
-			TB_Bottom.VSplitLeft(50.0, &Button, &TB_Bottom);
-			static int s_GotoButton = 0;
-			if(DoButton_Editor(&s_GotoButton, "Goto XY", 0, &Button, 0, "Go to a specified coordinate point on the map"))
-			{
-				static SPopupMenuId s_PopupGotoId;
-				UI()->DoPopupMenu(&s_PopupGotoId, Button.x, Button.y + Button.h, 120, 52, this, PopupGoto);
-			}
-			TB_Bottom.VSplitLeft(5.0f, nullptr, &TB_Bottom);
-		}
-
 		// tile manipulation
 		{
-			CLayerTiles *pT = (CLayerTiles *)GetSelectedLayerType(0, LAYERTYPE_TILES);
-			if(pT && !pT->m_Tele && !pT->m_Speedup && !pT->m_Switch && !pT->m_Front && !pT->m_Tune)
-			{
-				static int s_BorderBut = 0;
-				TB_Bottom.VSplitLeft(60.0f, &Button, &TB_Bottom);
-				if(DoButton_Ex(&s_BorderBut, "Border", 0, &Button, 0, "Place tiles in a 2-tile wide border at the edges of the layer", IGraphics::CORNER_ALL))
-				{
-					m_PopupEventType = POPEVENT_PLACE_BORDER_TILES;
-					m_PopupEventActivated = true;
-				}
-				TB_Bottom.VSplitLeft(5.0f, &Button, &TB_Bottom);
-			}
-
 			// do tele/tune/switch/speedup button
 			{
 				CLayerTiles *pS = (CLayerTiles *)GetSelectedLayerType(0, LAYERTYPE_TILES);
@@ -1332,16 +1278,6 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 				(m_Dialog == DIALOG_NONE && m_EditBoxActive == 0 && Input()->KeyPress(KEY_D) && ModPressed && !ShiftPressed))
 				m_BrushDrawDestructive = !m_BrushDrawDestructive;
 			TB_Bottom.VSplitLeft(5.0f, &Button, &TB_Bottom);
-		}
-
-		// Hex values button
-		if(m_ShowTileInfo)
-		{
-			TB_Bottom.VSplitLeft(65.0f, &Button, &TB_Bottom);
-			static int s_TileInfoHexButton = 0;
-			if(DoButton_Editor(&s_TileInfoHexButton, "Hex Values", m_ShowTileHexInfo, &Button, 0, "[ctrl+shift+i] Show a tile's hex value") ||
-				(m_Dialog == DIALOG_NONE && m_EditBoxActive == 0 && Input()->KeyPress(KEY_I) && ModPressed && ShiftPressed))
-				m_ShowTileHexInfo = !m_ShowTileHexInfo;
 		}
 	}
 }
@@ -2970,7 +2906,7 @@ void CEditor::DoMapEditor(CUIRect View)
 	}
 
 	// render screen sizes
-	if((m_ProofBorders || m_MenuProofBorders) && !m_ShowPicker)
+	if(m_ProofBorders && !m_ShowPicker)
 	{
 		CLayerGroup *pGameGroup = m_Map.m_pGameGroup;
 		pGameGroup->MapScreen();
@@ -2988,7 +2924,7 @@ void CEditor::DoMapEditor(CUIRect View)
 			float aPoints[4];
 			float Aspect = Start + (End - Start) * (i / (float)NumSteps);
 
-			float Zoom = m_MenuProofBorders ? 0.7f : 1.0f;
+			float Zoom = (m_ProofBorders && m_MenuProofBorders) ? 0.7f : 1.0f;
 			RenderTools()->MapScreenToWorld(
 				m_WorldOffsetX, m_WorldOffsetY,
 				100.0f, 100.0f, 100.0f, 0.0f, 0.0f, Aspect, Zoom, aPoints);
@@ -3031,7 +2967,7 @@ void CEditor::DoMapEditor(CUIRect View)
 				const float aAspects[] = {4.0f / 3.0f, 16.0f / 10.0f, 5.0f / 4.0f, 16.0f / 9.0f};
 				float Aspect = aAspects[i];
 
-				float Zoom = m_MenuProofBorders ? 0.7f : 1.0f;
+				float Zoom = (m_ProofBorders && m_MenuProofBorders) ? 0.7f : 1.0f;
 				RenderTools()->MapScreenToWorld(
 					m_WorldOffsetX, m_WorldOffsetY,
 					100.0f, 100.0f, 100.0f, 0.0f, 0.0f, Aspect, Zoom, aPoints);
@@ -3060,7 +2996,7 @@ void CEditor::DoMapEditor(CUIRect View)
 			Graphics()->SetColor(0, 0, 1, 0.3f);
 			Graphics()->DrawCircle(m_WorldOffsetX, m_WorldOffsetY - 3.0f, 20.0f, 32);
 
-			if(m_MenuProofBorders)
+			if(m_ProofBorders && m_MenuProofBorders)
 			{
 				Graphics()->SetColor(0, 1, 0, 0.3f);
 
@@ -6054,7 +5990,18 @@ void CEditor::RenderMenubar(CUIRect MenuBar)
 	if(DoButton_Menu(&s_ToolsButton, "Tools", 0, &ToolsButton, 0, nullptr))
 	{
 		static SPopupMenuId s_PopupMenuToolsId;
-		UI()->DoPopupMenu(&s_PopupMenuToolsId, ToolsButton.x, ToolsButton.y + ToolsButton.h - 1.0f, 200.0f, 22.0f, this, PopupMenuTools, IGraphics::CORNER_R | IGraphics::CORNER_B);
+		UI()->DoPopupMenu(&s_PopupMenuToolsId, ToolsButton.x, ToolsButton.y + ToolsButton.h - 1.0f, 200.0f, 50.0f, this, PopupMenuTools, IGraphics::CORNER_R | IGraphics::CORNER_B);
+	}
+
+	MenuBar.VSplitLeft(5.0f, nullptr, &MenuBar);
+
+	CUIRect SettingsButton;
+	static int s_SettingsButton = 0;
+	MenuBar.VSplitLeft(60.0f, &SettingsButton, &MenuBar);
+	if(DoButton_Menu(&s_SettingsButton, "Settings", 0, &SettingsButton, 0, nullptr))
+	{
+		static SPopupMenuId s_PopupMenuEntitiesId;
+		UI()->DoPopupMenu(&s_PopupMenuEntitiesId, SettingsButton.x, SettingsButton.y + SettingsButton.h - 1.0f, 200.0f, 64.0f, this, PopupMenuSettings, IGraphics::CORNER_R | IGraphics::CORNER_B);
 	}
 
 	CUIRect Info, Close;
