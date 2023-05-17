@@ -92,7 +92,9 @@ void CBindWheel::OnRelease()
 bool CBindWheel::OnCursorMove(float x, float y, IInput::ECursorType CursorType)
 {
 	if(!m_Active)
+	{
 		return false;
+	}
 
 	UI()->ConvertMouseMove(&x, &y, CursorType);
 	m_SelectorMouse += vec2(x, y);
@@ -108,6 +110,8 @@ void CBindWheel::OnRender()
 {
 	if(!m_Active)
 	{
+		if(g_Config.m_ClResetBindWheelMouse)
+			m_SelectorMouse = vec2(0, 0);
 		if(m_WasActive && m_SelectedBind != -1)
 			Binwheel(m_SelectedBind);
 		m_WasActive = false;

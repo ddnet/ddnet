@@ -3684,44 +3684,49 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		}
 
 		// Do Settings Key
-		{
-			CKeyInfo Key = CKeyInfo{"Bind Wheel Key", "+bindwheel", 0, 0};
-			for(int Mod = 0; Mod < CBinds::MODIFIER_COMBINATION_COUNT; Mod++)
-			{
-				for(int KeyId = 0; KeyId < KEY_LAST; KeyId++)
-				{
-					const char *pBind = m_pClient->m_Binds.Get(KeyId, Mod);
-					if(!pBind[0])
-						continue;
 
-					if(str_comp(pBind, Key.m_pCommand) == 0)
-					{
-						Key.m_KeyId = KeyId;
-						Key.m_ModifierCombination = Mod;
-						break;
-					}
+		CKeyInfo Key = CKeyInfo{"Bind Wheel Key", "+bindwheel", 0, 0};
+		for(int Mod = 0; Mod < CBinds::MODIFIER_COMBINATION_COUNT; Mod++)
+		{
+			for(int KeyId = 0; KeyId < KEY_LAST; KeyId++)
+			{
+				const char *pBind = m_pClient->m_Binds.Get(KeyId, Mod);
+				if(!pBind[0])
+					continue;
+
+				if(str_comp(pBind, Key.m_pCommand) == 0)
+				{
+					Key.m_KeyId = KeyId;
+					Key.m_ModifierCombination = Mod;
+					break;
 				}
 			}
-
-			CUIRect Button, KeyLabel;
-			LeftColumn.HSplitBottom(20.0f, &LeftColumn, 0);
-			LeftColumn.HSplitBottom(20.0f, &LeftColumn, &Button);
-			Button.VSplitLeft(120.0f, &KeyLabel, &Button);
-			Button.VSplitLeft(100, &Button, 0);
-			char aBuf[64];
-			str_format(aBuf, sizeof(aBuf), "%s:", Localize((const char *)Key.m_Name));
-
-			UI()->DoLabel(&KeyLabel, aBuf, 13.0f, TEXTALIGN_LEFT);
-			int OldId = Key.m_KeyId, OldModifierCombination = Key.m_ModifierCombination, NewModifierCombination;
-			int NewId = DoKeyReader((void *)&Key.m_Name, &Button, OldId, OldModifierCombination, &NewModifierCombination);
-			if(NewId != OldId || NewModifierCombination != OldModifierCombination)
-			{
-				if(OldId != 0 || NewId == 0)
-					m_pClient->m_Binds.Bind(OldId, "", false, OldModifierCombination);
-				if(NewId != 0)
-					m_pClient->m_Binds.Bind(NewId, Key.m_pCommand, false, NewModifierCombination);
-			}
 		}
+
+		CUIRect Button, KeyLabel;
+		LeftColumn.HSplitBottom(20.0f, &LeftColumn, 0);
+		LeftColumn.HSplitBottom(20.0f, &LeftColumn, &Button);
+		Button.VSplitLeft(120.0f, &KeyLabel, &Button);
+		Button.VSplitLeft(100, &Button, 0);
+		char aBuf[64];
+		str_format(aBuf, sizeof(aBuf), "%s:", Localize((const char *)Key.m_Name));
+
+		UI()->DoLabel(&KeyLabel, aBuf, 13.0f, TEXTALIGN_LEFT);
+		int OldId = Key.m_KeyId, OldModifierCombination = Key.m_ModifierCombination, NewModifierCombination;
+		int NewId = DoKeyReader((void *)&Key.m_Name, &Button, OldId, OldModifierCombination, &NewModifierCombination);
+		if(NewId != OldId || NewModifierCombination != OldModifierCombination)
+		{
+			if(OldId != 0 || NewId == 0)
+				m_pClient->m_Binds.Bind(OldId, "", false, OldModifierCombination);
+			if(NewId != 0)
+				m_pClient->m_Binds.Bind(NewId, Key.m_pCommand, false, NewModifierCombination);
+		}
+		LeftColumn.HSplitBottom(10.0f, &LeftColumn, 0);
+		LeftColumn.HSplitBottom(LineMargin, &LeftColumn, &Button);
+
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClResetBindWheelMouse, ("Reset position of mouse when opening bindwheel"), &g_Config.m_ClResetBindWheelMouse, &Button, LineMargin);
+
+
 	}
 }
 
