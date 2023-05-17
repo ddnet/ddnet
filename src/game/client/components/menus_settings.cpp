@@ -3295,43 +3295,39 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClWhiteFeet, ("Render all custom colored feet as white feet skin"), &g_Config.m_ClWhiteFeet, &MainView, LineMargin);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClMiniDebug, ("Show Position and angle (Mini debug)"), &g_Config.m_ClMiniDebug, &MainView, LineMargin);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClNotifyWhenLast, ("Show when you are last"), &g_Config.m_ClNotifyWhenLast, &MainView, LineMargin);
-        if (g_Config.m_ClNotifyWhenLast)
-        {
-            // create a text box for notification text 
-            CUIRect Button;
-            static CButtonContainer NotifyWhenLastTextID;
-        	MainView.HSplitTop(5.0f, 0, &MainView);
-        	MainView.HSplitTop(20.0f, &Button, &MainView);
-        	Button.VSplitLeft(15.0f, 0, &Button);
+		if(g_Config.m_ClNotifyWhenLast)
+		{
+			// create a text box for notification text
+			CUIRect Button;
+			static CButtonContainer NotifyWhenLastTextID;
+			MainView.HSplitTop(5.0f, 0, &MainView);
+			MainView.HSplitTop(20.0f, &Button, &MainView);
+
+			Button.VSplitLeft(150.0f, &Button, &Section);
 
 			static CLineInput s_LastInput(g_Config.m_ClNotifyWhenLastText, sizeof(g_Config.m_ClNotifyWhenLastText));
 			s_LastInput.SetEmptyText(Localize("Last!"));
+
 			UI()->DoEditBox(&s_LastInput, &Button, 12.0f);
 
-            MainView.HSplitTop(25.0f, &Section, &MainView);
-		    
-            DoLine_ColorPicker(&NotifyWhenLastTextID, 25.0f, 200.0f, 14.0f,  &Section, ("Notification Color"), &g_Config.m_ClNotifyWhenLastColor, ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), false);
+			DoLine_ColorPicker(&NotifyWhenLastTextID, 22.0f, 150.0f, 14.0f, &Section, ("Notification Color"), &g_Config.m_ClNotifyWhenLastColor, ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f), false);
+		}
+		CUIRect ButtonVerify, EnableVerifySection;
+		MainView.HSplitTop(LineMargin, &EnableVerifySection, &MainView);
+		EnableVerifySection.VSplitMid(&EnableVerifySection, &ButtonVerify);
 
-        
-        }
-
-        DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClAutoVerify, ("Auto Verify"), &g_Config.m_ClAutoVerify, &MainView, LineMargin);
-        if (g_Config.m_ClAutoVerify){
-            static CButtonContainer s_VerifyButton;
-            CUIRect ButtonVerify;
-
-            MainView.HSplitTop(5.0f, 0, &MainView);
-        	MainView.HSplitTop(20.0f, &ButtonVerify, &MainView);
-        	ButtonVerify.VSplitLeft(15.0f, 0, &ButtonVerify);
-
-            if(DoButton_Menu(&s_VerifyButton, Localize("Manual Verify"), 0, &ButtonVerify, 0, IGraphics::CORNER_ALL))
-            {
-                if(!open_link("https://ger10.ddnet.tw/"))
-                {
-                    dbg_msg("menus", "couldn't open link");
-                }
-		    }
-        }
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClAutoVerify, ("Auto Verify"), &g_Config.m_ClAutoVerify, &EnableVerifySection, LineMargin);
+		if(g_Config.m_ClAutoVerify)
+		{
+			static CButtonContainer s_VerifyButton;
+			if(DoButton_Menu(&s_VerifyButton, Localize("Manual Verify"), 0, &ButtonVerify, 0, IGraphics::CORNER_ALL))
+			{
+				if(!open_link("https://ger10.ddnet.tw/"))
+				{
+					dbg_msg("menus", "couldn't open link");
+				}
+			}
+		}
 
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRenderCursorSpec, ("Show your cursor when in free spectate"), &g_Config.m_ClRenderCursorSpec, &MainView, LineMargin);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowSkinName, ("Show skin names in nameplate"), &g_Config.m_ClShowSkinName, &MainView, LineMargin);
@@ -3415,64 +3411,18 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		MainView.VSplitLeft(-5.0f, 0x0, &MainView);
 
 		MainView.HSplitTop(25.0f, &Section, &MainView);
-		DoLine_ColorPicker(&OutlineColorFreezeID, 25.0f, 200.0f, 14.0f, &Section, ("Freeze Outline Color"), &g_Config.m_ClOutlineColorFreeze, ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), false);
+		DoLine_ColorPicker(&OutlineColorFreezeID, 25.0f, 240.0f, 14.0f, &Section, ("Freeze Outline Color"), &g_Config.m_ClOutlineColorFreeze, ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), false);
 
 		MainView.HSplitTop(25.0f, &Section, &MainView);
-		DoLine_ColorPicker(&OutlineColorSolidID, 25.0f, 200.0f, 14.0f, &Section, ("Walls Outline Color"), &g_Config.m_ClOutlineColorSolid, ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), false);
+		DoLine_ColorPicker(&OutlineColorSolidID, 25.0f, 240.0f, 14.0f, &Section, ("Walls Outline Color"), &g_Config.m_ClOutlineColorSolid, ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), false);
 
 		MainView.HSplitTop(25.0f, &Section, &MainView);
-		DoLine_ColorPicker(&OutlineColorTeleID, 25.0f, 200.0f, 14.0f, &Section, ("Teleporter Outline Color"), &g_Config.m_ClOutlineColorTele, ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), false);
+		DoLine_ColorPicker(&OutlineColorTeleID, 25.0f, 240.0f, 14.0f, &Section, ("Teleporter Outline Color"), &g_Config.m_ClOutlineColorTele, ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), false);
 
 		MainView.HSplitTop(25.0f, &Section, &MainView);
-		DoLine_ColorPicker(&OutlineColorUnfreezeID, 25.0f, 200.0f, 14.0f, &Section, ("Unfreeze Outline Color"), &g_Config.m_ClOutlineColorUnfreeze, ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), false);
-
-		// ***** ANTI LATENCY ***** //
-		// MainView.HSplitTop(5.0f, 0, &MainView);
-
-		// MainView.VSplitLeft(-5.0f, 0x0, &MainView);
-		MainView.HSplitTop(30.0f, &Section, &MainView);
-		UI()->DoLabel(&Section, ("Anti Latency Tools"), 20.0f, TEXTALIGN_LEFT);
-		MainView.VSplitLeft(15.0f, 0, &MainView);
-
-		MainView.HSplitTop(20.0f, &Section, &MainView);
-		UI()->DoLabel(&Section, ("Only use on gores maps! Can help mitigate latency."), 14.0f, TEXTALIGN_LEFT);
-
-		MainView.HSplitTop(5.0f, 0, &MainView);
-		{
-			CUIRect Button, Label;
-			MainView.HSplitTop(20.0f, &Button, &MainView);
-			Button.VSplitLeft(165.0f, &Label, &Button);
-			char aBuf[64];
-			str_format(aBuf, sizeof(aBuf), "%s: %ims", "Prediction Margin", g_Config.m_ClPredictionMargin);
-			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
-			int PredictionMargin = (int)(UI()->DoScrollbarH(&g_Config.m_ClPredictionMargin, &Button, (g_Config.m_ClPredictionMargin - 10) / 15.0f) * 15.0f) + 10;
-			if((PredictionMargin < 25 || g_Config.m_ClPredictionMargin <= 25) && g_Config.m_ClPredictionMargin >= 10)
-			{
-				g_Config.m_ClPredictionMargin = PredictionMargin;
-			}
-		}
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRemoveAnti, ("Remove prediction & antiping in freeze"), &g_Config.m_ClRemoveAnti, &MainView, LineMargin);
-		if(g_Config.m_ClRemoveAnti)
-		{
-			CUIRect Button, Label;
-			MainView.HSplitTop(20.0f, &Button, &MainView);
-			Button.VSplitLeft(115.0f, &Label, &Button);
-			char aBuf[64];
-			str_format(aBuf, sizeof(aBuf), "%s: %ims", "Delay", g_Config.m_ClUnfreezeLagDelayTicks * 20);
-			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
-			g_Config.m_ClUnfreezeLagDelayTicks = (int)(UI()->DoScrollbarH(&g_Config.m_ClUnfreezeLagDelayTicks, &Button, (g_Config.m_ClUnfreezeLagDelayTicks) / 200.0f) * 200.0f);
-		}
-		if(g_Config.m_ClRemoveAnti)
-		{
-			CUIRect Button, Label;
-			MainView.HSplitTop(20.0f, &Button, &MainView);
-			Button.VSplitLeft(200.0f, &Label, &Button);
-			char aBuf[64];
-			str_format(aBuf, sizeof(aBuf), "%s: %ims", "Amount Removed", g_Config.m_ClUnfreezeLagTicks * 20);
-			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
-			g_Config.m_ClUnfreezeLagTicks = (int)(UI()->DoScrollbarH(&g_Config.m_ClUnfreezeLagTicks, &Button, (g_Config.m_ClUnfreezeLagTicks) / 10.0f) * 10.0f);
-		}
+		DoLine_ColorPicker(&OutlineColorUnfreezeID, 25.0f, 240.0f, 14.0f, &Section, ("Unfreeze Outline Color"), &g_Config.m_ClOutlineColorUnfreeze, ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), false);
 	}
+	// ***** PAGE 2 ***** //
 
 	if(s_CurCustomTab == TCLIENT_TAB_PAGE2)
 	{
@@ -3500,12 +3450,11 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 
 		MainView.HSplitTop(25.0f, &Section, &MainView);
 		DoLine_ColorPicker(&IndicatorDeadColorID, 25.0f, 200.0f, 14.0f, &Section, ("Indicator dead color"), &g_Config.m_ClIndicatorFreeze, ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), false);
-		
-        MainView.HSplitTop(25.0f, &Section, &MainView);
+
+		MainView.HSplitTop(25.0f, &Section, &MainView);
 		DoLine_ColorPicker(&IndicatorSavedColorID, 25.0f, 200.0f, 14.0f, &Section, ("Indicator save color"), &g_Config.m_ClIndicatorSaved, ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), false);
-		
-        
-        {
+
+		{
 			CUIRect Button, Label;
 			MainView.HSplitTop(5.0f, &Button, &MainView);
 			MainView.HSplitTop(20.0f, &Button, &MainView);
@@ -3562,7 +3511,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			g_Config.m_ClIndicatorMaxDistance = NewValue * 50;
 		}
 
-        MainView.HSplitTop(10.0f, 0x0, &MainView); 
+		MainView.HSplitTop(10.0f, 0x0, &MainView);
 
 		MainView = Column;
 
@@ -3571,34 +3520,76 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		MainView.VSplitLeft(5.0f, 0x0, &MainView);
 		MainView.HSplitTop(5.0f, 0x0, &MainView);
 
-        // checkbox for hiding nameplates
-        DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRenderNameplateSpec, ("Hide nameplates in spec"), &g_Config.m_ClRenderNameplateSpec, &MainView, LineMargin);
+		// checkbox for hiding nameplates
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRenderNameplateSpec, ("Hide nameplates in spec"), &g_Config.m_ClRenderNameplateSpec, &MainView, LineMargin);
 
-        // create dropdown for rainbow modes
-       	static float s_ScrollValueDrop = 0;
-    	const char *apWindowModes[] = {Localize("Rainbow"), Localize("Pulse"), Localize("Black")};
-    	static const int s_NumWindowMode = std::size(apWindowModes);
-    	static int s_aWindowModeIDs[s_NumWindowMode];
-    	const void *apWindowModeIDs[s_NumWindowMode];
-    	for(int i = 0; i < s_NumWindowMode; ++i)
-    		apWindowModeIDs[i] = &s_aWindowModeIDs[i];
-    	static int s_WindowModeDropDownState = 0;
+		// create dropdown for rainbow modes
+		static float s_ScrollValueDrop = 0;
+		const char *apWindowModes[] = {Localize("Rainbow"), Localize("Pulse"), Localize("Black")};
+		static const int s_NumWindowMode = std::size(apWindowModes);
+		static int s_aWindowModeIDs[s_NumWindowMode];
+		const void *apWindowModeIDs[s_NumWindowMode];
+		for(int i = 0; i < s_NumWindowMode; ++i)
+			apWindowModeIDs[i] = &s_aWindowModeIDs[i];
+		static int s_WindowModeDropDownState = 0;
 
+		static CButtonContainer s_WindowButton;
+		int OldSelected = g_Config.m_ClRainbowMode - 1;
 
-        static CButtonContainer s_WindowButton;
-	    int OldSelected = g_Config.m_ClRainbowMode - 1;
-        
-        DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRainbow, ("Rainbow"), &g_Config.m_ClRainbow, &MainView, LineMargin);
-        DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRainbowOthers, ("Rainbow Others"), &g_Config.m_ClRainbowOthers, &MainView, LineMargin);
-        const int NewWindowMode = RenderDropDown(s_WindowModeDropDownState, &MainView, OldSelected, apWindowModeIDs, apWindowModes, s_NumWindowMode, &s_WindowButton, s_ScrollValueDrop);
-	
-        if(OldSelected != NewWindowMode)
-	    {
-            g_Config.m_ClRainbowMode = NewWindowMode+1;
-            OldSelected = NewWindowMode;
-            dbg_msg("rainbow", "rainbow mode changed to %d", g_Config.m_ClRainbowMode);
-	    }
-    }
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRainbow, ("Rainbow"), &g_Config.m_ClRainbow, &MainView, LineMargin);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRainbowOthers, ("Rainbow Others"), &g_Config.m_ClRainbowOthers, &MainView, LineMargin);
+		const int NewWindowMode = RenderDropDown(s_WindowModeDropDownState, &MainView, OldSelected, apWindowModeIDs, apWindowModes, s_NumWindowMode, &s_WindowButton, s_ScrollValueDrop);
+
+		if(OldSelected != NewWindowMode)
+		{
+			g_Config.m_ClRainbowMode = NewWindowMode + 1;
+			OldSelected = NewWindowMode;
+			dbg_msg("rainbow", "rainbow mode changed to %d", g_Config.m_ClRainbowMode);
+		}
+
+		// ***** ANTI LATENCY ***** //
+		MainView.HSplitTop(10.0f, 0, &MainView);
+
+		MainView.HSplitTop(30.0f, &Section, &MainView);
+		UI()->DoLabel(&Section, ("Anti Latency Tools"), 20.0f, TEXTALIGN_LEFT);
+		MainView.VSplitLeft(15.0f, 0, &MainView);
+
+		MainView.HSplitTop(5.0f, 0, &MainView);
+		{
+			CUIRect Button, Label;
+			MainView.HSplitTop(20.0f, &Button, &MainView);
+			Button.VSplitLeft(165.0f, &Label, &Button);
+			char aBuf[64];
+			str_format(aBuf, sizeof(aBuf), "%s: %ims", "Prediction Margin", g_Config.m_ClPredictionMargin);
+			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+			int PredictionMargin = (int)(UI()->DoScrollbarH(&g_Config.m_ClPredictionMargin, &Button, (g_Config.m_ClPredictionMargin - 10) / 15.0f) * 15.0f) + 10;
+			if((PredictionMargin < 25 || g_Config.m_ClPredictionMargin <= 25) && g_Config.m_ClPredictionMargin >= 10)
+			{
+				g_Config.m_ClPredictionMargin = PredictionMargin;
+			}
+		}
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRemoveAnti, ("Remove prediction & antiping in freeze"), &g_Config.m_ClRemoveAnti, &MainView, LineMargin);
+		if(g_Config.m_ClRemoveAnti)
+		{
+			CUIRect Button, Label;
+			MainView.HSplitTop(20.0f, &Button, &MainView);
+			Button.VSplitLeft(115.0f, &Label, &Button);
+			char aBuf[64];
+			str_format(aBuf, sizeof(aBuf), "%s: %ims", "Delay", g_Config.m_ClUnfreezeLagDelayTicks * 20);
+			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+			g_Config.m_ClUnfreezeLagDelayTicks = (int)(UI()->DoScrollbarH(&g_Config.m_ClUnfreezeLagDelayTicks, &Button, (g_Config.m_ClUnfreezeLagDelayTicks) / 200.0f) * 200.0f);
+		}
+		if(g_Config.m_ClRemoveAnti)
+		{
+			CUIRect Button, Label;
+			MainView.HSplitTop(20.0f, &Button, &MainView);
+			Button.VSplitLeft(200.0f, &Label, &Button);
+			char aBuf[64];
+			str_format(aBuf, sizeof(aBuf), "%s: %ims", "Amount Removed", g_Config.m_ClUnfreezeLagTicks * 20);
+			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+			g_Config.m_ClUnfreezeLagTicks = (int)(UI()->DoScrollbarH(&g_Config.m_ClUnfreezeLagTicks, &Button, (g_Config.m_ClUnfreezeLagTicks) / 10.0f) * 10.0f);
+		}
+	}
 
 	if(s_CurCustomTab == TCLIENT_TAB_BINDWHEEL)
 	{
@@ -3606,7 +3597,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		MainView.VSplitLeft(MainView.w * 0.5, &MainView, &Column);
 		CUIRect LeftColumn = MainView;
 		MainView.HSplitTop(30.0f, &Section, &MainView);
-		 
+
 		CUIRect buttons[NUM_BINDWHEEL];
 		char pD[NUM_BINDWHEEL][MAX_BINDWHEEL_DESC];
 		char pC[NUM_BINDWHEEL][MAX_BINDWHEEL_CMD];
@@ -3640,7 +3631,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 
 			float NudgeX = margin * cosf(Angle);
 			float NudgeY = 150.0f * sinf(Angle);
-			
+
 			char aBuf[MAX_BINDWHEEL_DESC];
 			str_format(aBuf, sizeof(aBuf), "%s", GameClient()->m_Bindwheel.m_BindWheelList[i].description);
 			TextRender()->Text(Screen.w / 2 - 100.0f + NudgeX, Screen.h / 2 + NudgeY, Size, aBuf, -1.0f);
@@ -3649,7 +3640,6 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 
 		static CLineInput s_BindWheelDesc[NUM_BINDWHEEL];
 		static CLineInput s_BindWheelCmd[NUM_BINDWHEEL];
-
 
 		for(int i = 0; i < NUM_BINDWHEEL; i++)
 		{
@@ -3691,11 +3681,8 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			s_BindWheelCmd[i].SetBuffer(GameClient()->m_Bindwheel.m_BindWheelList[i].command, sizeof(GameClient()->m_Bindwheel.m_BindWheelList[i].command));
 			s_BindWheelCmd[i].SetEmptyText(Localize("Command"));
 
-
 			UI()->DoEditBox(&s_BindWheelCmd[i], &buttons[i], 14.0f);
-
 		}
-
 
 		// Do Settings Key
 		{
@@ -4035,8 +4022,7 @@ void CMenus::RenderSettingsProfiles(CUIRect MainView)
 	SelectorRect.HSplitBottom(15.0, &SelectorRect, 0);
 	std::vector<CProfile> *pProfileList = &GameClient()->m_SkinProfiles.m_Profiles;
 
-
-    static bool s_ListBoxUsed = false;
+	static bool s_ListBoxUsed = false;
 	static CListBox s_ListBox;
 	s_ListBox.DoStart(50.0f, pProfileList->size(), 4, 3, SelectedProfile, &SelectorRect, true, &s_ListBoxUsed);
 
@@ -4054,10 +4040,10 @@ void CMenus::RenderSettingsProfiles(CUIRect MainView)
 
 		const CSkin *pSkinToBeDraw = m_pClient->m_Skins.Find(RenderSkin);
 
-        CListboxItem Item = s_ListBox.DoNextItem(&s_Indexs[i], SelectedProfile >= 0 && (size_t)SelectedProfile == i, &s_ListBoxUsed);
+		CListboxItem Item = s_ListBox.DoNextItem(&s_Indexs[i], SelectedProfile >= 0 && (size_t)SelectedProfile == i, &s_ListBoxUsed);
 
 		if(!Item.m_Visible)
-		continue;
+			continue;
 
 		if(Item.m_Visible)
 		{
@@ -4135,7 +4121,7 @@ void CMenus::RenderSettingsProfiles(CUIRect MainView)
 		}
 	}
 
-    const int NewSelected = s_ListBox.DoEnd();
+	const int NewSelected = s_ListBox.DoEnd();
 	if(SelectedProfile != NewSelected)
 	{
 		SelectedProfile = NewSelected;
