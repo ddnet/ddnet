@@ -3451,17 +3451,6 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 				g_Config.m_ClPredictionMargin = PredictionMargin;
 			}
 		}
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClUnfreezeDelayHelper, ("Remove prediction margin in freeze"), &g_Config.m_ClUnfreezeDelayHelper, &MainView, LineMargin);
-		if(g_Config.m_ClUnfreezeDelayHelper)
-		{
-			CUIRect Button, Label;
-			MainView.HSplitTop(20.0f, &Button, &MainView);
-			Button.VSplitLeft(220.0f, &Label, &Button);
-			char aBuf[64];
-			str_format(aBuf, sizeof(aBuf), "%s: %ims", "Negative margin (may lag)", g_Config.m_ClUnfreezeHelperLimit);
-			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
-			g_Config.m_ClUnfreezeHelperLimit = (int)(UI()->DoScrollbarH(&g_Config.m_ClUnfreezeHelperLimit, &Button, (g_Config.m_ClUnfreezeHelperLimit) / 40.0f) * 40.0f);
-		}
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRemoveAnti, ("Remove prediction & antiping in freeze"), &g_Config.m_ClRemoveAnti, &MainView, LineMargin);
 		if(g_Config.m_ClRemoveAnti)
 		{

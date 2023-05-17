@@ -911,7 +911,6 @@ void CPlayers::OnRender()
 	if(LocalClientID != -1 && m_pClient->m_Snap.m_aCharacters[LocalClientID].m_Active && IsPlayerInfoAvailable(LocalClientID))
 	{
 		if(m_pClient->m_Snap.m_pLocalInfo)
-			g_Config.m_ClWhatsMyPing = m_pClient->m_Snap.m_apPlayerInfos[LocalClientID]->m_Latency;
 		RenderHookCollLine(&m_pClient->m_aClients[LocalClientID].m_RenderPrev, &m_pClient->m_aClients[LocalClientID].m_RenderCur, LocalClientID);
 		const CGameClient::CClientData *pLocalClientData = &m_pClient->m_aClients[LocalClientID];
 		CNetObj_Character CurChar = pLocalClientData->m_RenderCur;
