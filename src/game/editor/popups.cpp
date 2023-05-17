@@ -236,7 +236,6 @@ CUI::EPopupMenuFunctionResult CEditor::PopupMenuSettings(void *pContext, CUIRect
 	View.HSplitTop(12.0f, &Slot, &View);
 	{
 		Slot.VMargin(5.0f, &Slot);
-		Slot.VSplitRight(5.0f, &Slot, nullptr); // right margin
 
 		CUIRect Label, Selector;
 		Slot.VSplitMid(&Label, &Selector);
@@ -260,7 +259,6 @@ CUI::EPopupMenuFunctionResult CEditor::PopupMenuSettings(void *pContext, CUIRect
 	View.HSplitTop(12.0f, &Slot, &View);
 	{
 		Slot.VMargin(5.0f, &Slot);
-		Slot.VSplitRight(5.0f, &Slot, nullptr); // right margin
 
 		CUIRect Label, Selector;
 		Slot.VSplitMid(&Label, &Selector);
@@ -284,7 +282,6 @@ CUI::EPopupMenuFunctionResult CEditor::PopupMenuSettings(void *pContext, CUIRect
 	View.HSplitTop(12.0f, &Slot, &View);
 	{
 		Slot.VMargin(5.0f, &Slot);
-		Slot.VSplitRight(5.0f, &Slot, nullptr); // right margin
 
 		CUIRect Label, Selector;
 		Slot.VSplitMid(&Label, &Selector);
