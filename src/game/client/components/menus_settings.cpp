@@ -3317,7 +3317,6 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		EnableVerifySection.VSplitMid(&EnableVerifySection, &ButtonVerify);
 
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClAutoVerify, ("Auto Verify"), &g_Config.m_ClAutoVerify, &EnableVerifySection, LineMargin);
-		if(g_Config.m_ClAutoVerify)
 		{
 			static CButtonContainer s_VerifyButton;
 			if(DoButton_Menu(&s_VerifyButton, Localize("Manual Verify"), 0, &ButtonVerify, 0, IGraphics::CORNER_ALL))
