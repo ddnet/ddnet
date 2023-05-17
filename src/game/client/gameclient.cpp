@@ -2647,6 +2647,8 @@ vec2 CGameClient::GetFreezePos(int ClientID)
 {
 	vec2 Pos = mix(m_aClients[ClientID].m_PrevPredicted.m_Pos, m_aClients[ClientID].m_Predicted.m_Pos, Client()->PredIntraGameTick(g_Config.m_ClDummy));
 	//int64_t Now = time_get();
+	CCharacter *pChar = m_PredictedWorld.GetCharacterByID(ClientID);
+
 	for(int i = 0; i < 2; i++)
 	{
 		//int64_t Len = clamp(m_aClients[ClientID].m_SmoothLen[i], (int64_t)1, time_freq());
@@ -2655,6 +2657,11 @@ vec2 CGameClient::GetFreezePos(int ClientID)
 		int SmoothTick;
 		float SmoothIntra;
 		int TicksFrozen = Client()->GameTick(g_Config.m_ClDummy) - g_Config.m_ClFreezeTick;
+
+		if (pChar && g_Config.m_ClAdjustRemovedDelay) {
+			TicksFrozen = pChar->m_FreezeAccumulation;
+		}
+
 		if(g_Config.m_ClAmIFrozen && g_Config.m_ClRemoveAnti)
 		{
 			MixAmount = mix(0.0f, 1.0f, 1.0f - (float)std::min(TicksFrozen, g_Config.m_ClUnfreezeLagDelayTicks) / (float)g_Config.m_ClUnfreezeLagDelayTicks);

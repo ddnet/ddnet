@@ -20,15 +20,12 @@ MACRO_CONFIG_INT(ClFrozenHudTeamOnly, tc_frozen_tees_only_inteam, 0, 0, 1, CFGFL
 
 MACRO_CONFIG_INT(ClPingNameCircle, tc_nameplate_ping_circle, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Shows a circle next to nameplate to indicate ping")
 
+//Anti Latency Tools
 MACRO_CONFIG_INT(ClFreezeUpdateFix, tc_freeze_update_fix, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "(WIP) Will change your skin faster when you enter freeze. ")
-
-MACRO_CONFIG_INT(ClUnfreezeHelperLimit, tc_pred_negative, 0, 0, 40, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Remove move than your excess prediction margin (will cause jitter)")
-
 MACRO_CONFIG_INT(ClRemoveAnti, tc_remove_anti, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Removes some amount of antiping & player prediction in freeze")
 MACRO_CONFIG_INT(ClUnfreezeLagTicks, tc_remove_anti_ticks, 5, 0, 10, CFGFLAG_CLIENT | CFGFLAG_SAVE, "The biggest amount of prediction ticks that are removed")
 MACRO_CONFIG_INT(ClUnfreezeLagDelayTicks, tc_remove_anti_delay_ticks, 100, 0, 200, CFGFLAG_CLIENT | CFGFLAG_SAVE, "How many ticks it takes to remove the maximum prediction after being frozen")
-
-MACRO_CONFIG_INT(ClDelayHammer, tc_kog_hammer_delay, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Fixes the timing of hammer on kog, but breaks timing of angle")
+MACRO_CONFIG_INT(ClAdjustRemovedDelay, tc_adjust_removed_delay, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Add delay back if you are not currently in freeze (helps up down saves)")
 
 //MACRO_CONFIG_INT(ClHookLineSize, tc_hook_line_width, 0, 0, 20, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Adjustable hookline width, set to 0 for old default rendering")
 

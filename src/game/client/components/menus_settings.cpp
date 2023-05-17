@@ -3598,6 +3598,11 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
 			g_Config.m_ClUnfreezeLagTicks = (int)(UI()->DoScrollbarH(&g_Config.m_ClUnfreezeLagTicks, &Button, (g_Config.m_ClUnfreezeLagTicks) / 10.0f) * 10.0f);
 		}
+		if(g_Config.m_ClRemoveAnti)
+		{
+			DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClAdjustRemovedDelay, ("Add amount back if you are not currently in freeze"), &g_Config.m_ClAdjustRemovedDelay, &MainView, LineMargin);
+		}
+
 	}
 
 	if(s_CurCustomTab == TCLIENT_TAB_BINDWHEEL)

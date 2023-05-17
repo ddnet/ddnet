@@ -964,6 +964,10 @@ void CCharacter::DDRaceTick()
 		if(m_FreezeTime == 1)
 			UnFreeze();		
 	}
+	else
+	{
+		m_FreezeAccumulation = 0;
+	}
 
 	HandleTuneLayer();
 
@@ -981,6 +985,13 @@ void CCharacter::DDRaceTick()
 			m_Core.m_IsInFreeze = true;
 			break;
 		}
+	}
+	if (m_Core.m_IsInFreeze) {
+		m_FreezeAccumulation = std::min(m_FreezeAccumulation + 1, m_FreezeTime);
+	}
+	else
+	{
+		m_FreezeAccumulation = std::max(m_FreezeAccumulation - 1, 0);
 	}
 }
 
