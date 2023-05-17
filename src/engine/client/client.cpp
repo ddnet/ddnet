@@ -2160,7 +2160,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 							CNetMsg_Cl_Say TOMsgp;
 							TOMsgp.m_Team = 0;
 							char aBufTO[256];
-						    str_format(aBufTO, sizeof(aBufTO), "/timeout %s", m_aTimeoutCodes[Conn]);
+							str_format(aBufTO, sizeof(aBufTO), "/timeout %s", m_aTimeoutCodes[Conn]);
 							TOMsgp.m_pMessage = aBufTO;
 							CMsgPacker PackerTO(TOMsgp.ms_MsgID, false);
 							TOMsgp.Pack(&PackerTO);
@@ -2215,7 +2215,8 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 							MsgP.m_pMessage = aBufMsg;
 							CMsgPacker PackerTimeout(&MsgP);
 							MsgP.Pack(&PackerTimeout);
-							SendMsg(Conn, &PackerTimeout, MSGFLAG_VITAL);
+							if(g_Config.m_ClRunOnJoin[0] || g_Config.m_ClDummyDefaultEyes || g_Config.m_ClPlayerDefaultEyes)
+								SendMsg(Conn, &PackerTimeout, MSGFLAG_VITAL);
 						}
 						m_CodeRunAfterJoin[Conn] = true;
 					}
@@ -3419,7 +3420,8 @@ bool CClient::InitNetworkClient(char *pError, size_t ErrorSize)
 	BindAddr.type = NETTYPE_ALL;
 	for(unsigned int i = 0; i < std::size(m_aNetClient); i++)
 	{
-		int &PortRef = i == CONN_MAIN ? g_Config.m_ClPort : i == CONN_DUMMY ? g_Config.m_ClDummyPort : g_Config.m_ClContactPort;
+		int &PortRef = i == CONN_MAIN ? g_Config.m_ClPort : i == CONN_DUMMY ? g_Config.m_ClDummyPort :
+                                                                                      g_Config.m_ClContactPort;
 		if(PortRef < 1024) // Reject users setting ports that we don't want to use
 		{
 			PortRef = 0;
