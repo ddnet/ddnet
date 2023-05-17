@@ -3265,7 +3265,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			}
 		}
 
-		MainView.HSplitTop(10.0f, 0x0, &MainView);
+		MainView.HSplitTop(5.0f, 0x0, &MainView);
 
 		// ***** MISCELLANEOUS ***** //
 		MainView.VSplitLeft(-5.0f, 0x0, &MainView);
@@ -3293,6 +3293,16 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowCenterLines, ("Show screen center"), &g_Config.m_ClShowCenterLines, &MainView, LineMargin);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClPingNameCircle, ("Show ping colored circle before names"), &g_Config.m_ClPingNameCircle, &MainView, LineMargin);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClWhiteFeet, ("Render all custom colored feet as white feet skin"), &g_Config.m_ClWhiteFeet, &MainView, LineMargin);
+		if(g_Config.m_ClWhiteFeet)
+		{
+			CUIRect FeetBox;
+			MainView.HSplitTop(18, &FeetBox, &MainView);
+			FeetBox.VSplitMid(&FeetBox, 0);
+			static CLineInput s_WhiteFeet(g_Config.m_ClWhiteFeetSkin, sizeof(g_Config.m_ClWhiteFeetSkin));
+			s_WhiteFeet.SetEmptyText("x_ninja");
+			UI()->DoEditBox(&s_WhiteFeet, &FeetBox, 12.0f);
+		}
+
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClMiniDebug, ("Show Position and angle (Mini debug)"), &g_Config.m_ClMiniDebug, &MainView, LineMargin);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClNotifyWhenLast, ("Show when you are last"), &g_Config.m_ClNotifyWhenLast, &MainView, LineMargin);
 		if(g_Config.m_ClNotifyWhenLast)
@@ -3303,13 +3313,13 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			MainView.HSplitTop(5.0f, 0, &MainView);
 			MainView.HSplitTop(20.0f, &Button, &MainView);
 
-			Button.VSplitLeft(150.0f, &Button, &Section);
+			Button.VSplitLeft(150.0f, &Button, 0);
 
 			static CLineInput s_LastInput(g_Config.m_ClNotifyWhenLastText, sizeof(g_Config.m_ClNotifyWhenLastText));
 			s_LastInput.SetEmptyText(Localize("Last!"));
 
 			UI()->DoEditBox(&s_LastInput, &Button, 12.0f);
-
+			MainView.HSplitTop(20.0f, &Section, &MainView);
 			DoLine_ColorPicker(&NotifyWhenLastTextID, 22.0f, 150.0f, 14.0f, &Section, ("Notification Color"), &g_Config.m_ClNotifyWhenLastColor, ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f), false);
 		}
 		CUIRect ButtonVerify, EnableVerifySection;
@@ -3330,31 +3340,15 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRenderCursorSpec, ("Show your cursor when in free spectate"), &g_Config.m_ClRenderCursorSpec, &MainView, LineMargin);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowSkinName, ("Show skin names in nameplate"), &g_Config.m_ClShowSkinName, &MainView, LineMargin);
-		{
-			CUIRect Button, Label;
-			MainView.HSplitTop(20.0f, &Button, &MainView);
-			Button.VSplitLeft(150.0f, &Label, &Button);
-			char aBuf[64];
-			str_format(aBuf, sizeof(aBuf), "%s: %i ", "Hook Line Width", g_Config.m_ClHookCollSize);
-			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
-			g_Config.m_ClHookCollSize = (int)(UI()->DoScrollbarH(&g_Config.m_ClHookCollSize, &Button, g_Config.m_ClHookCollSize / 20.0f) * 20.0f);
-		}
-
-		{
-			CUIRect Button;
-			CUIRect ExtMenu;
-			MainView.VSplitLeft(0, 0, &ExtMenu);
-			ExtMenu.VSplitLeft(130.0f, &ExtMenu, 0);
-			ExtMenu.HSplitBottom(25.0f, &ExtMenu, &Button);
-			static CButtonContainer s_DiscordButton;
-			if(DoButton_Menu(&s_DiscordButton, Localize("Discord"), 0, &Button, 0, IGraphics::CORNER_ALL, 5.0f, 0.0f, vec4(0.0f, 0.0f, 0.0f, 0.5f), vec4(0.0f, 0.0f, 0.0f, 0.25f)))
-			{
-				if(!open_link("https://discord.gg/fBvhH93Bt6"))
-				{
-					dbg_msg("menus", "couldn't open link");
-				}
-			}
-		}
+		//{
+		//	CUIRect Button, Label;
+		//	MainView.HSplitTop(20.0f, &Button, &MainView);
+		//	Button.VSplitLeft(150.0f, &Label, &Button);
+		//	char aBuf[64];
+		//	str_format(aBuf, sizeof(aBuf), "%s: %i ", "Hook Line Width", g_Config.m_ClHookCollSize);
+		//	UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+		//	g_Config.m_ClHookCollSize = (int)(UI()->DoScrollbarH(&g_Config.m_ClHookCollSize, &Button, g_Config.m_ClHookCollSize / 20.0f) * 20.0f);
+		//}
 
 		MainView.HSplitTop(10.0f, 0x0, &MainView);
 
@@ -3420,6 +3414,22 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 
 		MainView.HSplitTop(25.0f, &Section, &MainView);
 		DoLine_ColorPicker(&OutlineColorUnfreezeID, 25.0f, 240.0f, 14.0f, &Section, ("Unfreeze Outline Color"), &g_Config.m_ClOutlineColorUnfreeze, ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), false);
+
+		{
+			CUIRect Button;
+			CUIRect ExtMenu;
+			MainView.VSplitLeft(0, 0, &ExtMenu);
+			ExtMenu.VSplitRight(130.0f, 0, &ExtMenu);
+			ExtMenu.HSplitBottom(25.0f, &ExtMenu, &Button);
+			static CButtonContainer s_DiscordButton;
+			if(DoButton_Menu(&s_DiscordButton, Localize("Discord"), 0, &Button, 0, IGraphics::CORNER_ALL, 5.0f, 0.0f, vec4(0.0f, 0.0f, 0.0f, 0.5f), vec4(0.0f, 0.0f, 0.0f, 0.25f)))
+			{
+				if(!open_link("https://discord.gg/fBvhH93Bt6"))
+				{
+					dbg_msg("menus", "couldn't open link");
+				}
+			}
+		}
 	}
 	// ***** PAGE 2 ***** //
 
@@ -3725,8 +3735,6 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		LeftColumn.HSplitBottom(LineMargin, &LeftColumn, &Button);
 
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClResetBindWheelMouse, ("Reset position of mouse when opening bindwheel"), &g_Config.m_ClResetBindWheelMouse, &Button, LineMargin);
-
-
 	}
 }
 
