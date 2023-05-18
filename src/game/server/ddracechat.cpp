@@ -1523,6 +1523,59 @@ void CGameContext::ConTele(IConsole::IResult *pResult, void *pUserData)
 	pChr->Core()->m_Vel = vec2(0, 0);
 }
 
+void CGameContext::ConPracticeUnSolo(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientID(pResult->m_ClientID))
+		return;
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if(!pPlayer)
+		return;
+	CCharacter *pChr = pPlayer->GetCharacter();
+	if(!pChr)
+		return;
+
+	if(g_Config.m_SvTeam == SV_TEAM_FORBIDDEN || g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO)
+	{
+		pSelf->SendChatTarget(pPlayer->GetCID(), "Command is not available on solo servers");
+		return;
+	}
+
+	CGameTeams &Teams = ((CGameControllerDDRace *)pSelf->m_pController)->m_Teams;
+	int Team = Teams.m_Core.Team(pResult->m_ClientID);
+	if(!Teams.IsPractice(Team))
+	{
+		pSelf->SendChatTarget(pPlayer->GetCID(), "You're not in a team with /practice turned on. Note that you can't earn a rank with practice enabled.");
+		return;
+	}
+
+	pChr->SetSolo(false);
+}
+
+void CGameContext::ConPracticeUnDeep(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientID(pResult->m_ClientID))
+		return;
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if(!pPlayer)
+		return;
+	CCharacter *pChr = pPlayer->GetCharacter();
+	if(!pChr)
+		return;
+
+	CGameTeams &Teams = ((CGameControllerDDRace *)pSelf->m_pController)->m_Teams;
+	int Team = Teams.m_Core.Team(pResult->m_ClientID);
+	if(!Teams.IsPractice(Team))
+	{
+		pSelf->SendChatTarget(pPlayer->GetCID(), "You're not in a team with /practice turned on. Note that you can't earn a rank with practice enabled.");
+		return;
+	}
+
+	pChr->SetDeepFrozen(false);
+	pChr->UnFreeze();
+}
+
 void CGameContext::ConProtectedKill(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
