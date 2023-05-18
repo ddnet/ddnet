@@ -1317,7 +1317,7 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 				continue;
 
 			const int FriendIndex = CurrentClient.m_FriendState == IFriends::FRIEND_PLAYER ? FRIEND_PLAYER_ON : FRIEND_CLAN_ON;
-			m_avFriends[FriendIndex].emplace_back(CurrentClient.m_aName, CurrentClient.m_aClan, pEntry, CurrentClient.m_FriendState, CurrentClient.m_Player);
+			m_avFriends[FriendIndex].emplace_back(CurrentClient, pEntry);
 			const auto &&RemovalPredicate = [CurrentClient](const CFriendItem &Friend) {
 				return (Friend.Name()[0] == '\0' || str_comp(Friend.Name(), CurrentClient.m_aName) == 0) && ((Friend.Name()[0] != '\0' && g_Config.m_ClFriendsIgnoreClan) || str_comp(Friend.Clan(), CurrentClient.m_aClan) == 0);
 			};
@@ -1388,7 +1388,7 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 			{
 				CUIRect Rect;
 				const auto &Friend = m_avFriends[FriendType][FriendIndex];
-				List.HSplitTop((FriendType == FRIEND_OFF ? 8.0f : 20.0f) + ms_ListheaderHeight, &Rect, &List);
+				List.HSplitTop(10.0f + 10.0f + 2 * 2.0f + 1.0f + (Friend.ServerInfo() == nullptr ? 0.0f : 10.0f), &Rect, &List);
 				s_ScrollRegion.AddRect(Rect);
 				if(FriendIndex < m_avFriends[FriendType].size() - 1)
 				{
@@ -1409,29 +1409,64 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 				Rect.Draw(s_aListColors[FriendType].WithAlpha(Inside ? 0.5f : 0.3f), IGraphics::CORNER_ALL, 5.0f);
 				Rect.Margin(2.0f, &Rect);
 
-				CUIRect Label, RemoveButton;
+				CUIRect RemoveButton, NameLabel, ClanLabel, InfoLabel;
 				Rect.HSplitTop(16.0f, &RemoveButton, nullptr);
 				RemoveButton.VSplitRight(13.0f, nullptr, &RemoveButton);
 				RemoveButton.HMargin((RemoveButton.h - RemoveButton.w) / 2.0f, &RemoveButton);
 				Rect.VSplitLeft(2.0f, nullptr, &Rect);
 
+				if(Friend.ServerInfo())
+					Rect.HSplitBottom(10.0f, &Rect, &InfoLabel);
+				Rect.HSplitTop(20.0f, &Rect, nullptr);
+
+				// tee
+				if(Friend.Skin()[0] != '\0')
+				{
+					CUIRect Skin;
+					Rect.VSplitLeft(Rect.h, &Skin, &Rect);
+					Rect.VSplitLeft(2.0f, nullptr, &Rect);
+
+					CTeeRenderInfo TeeInfo;
+					const CSkin *pSkin = m_pClient->m_Skins.Find(Friend.Skin());
+					TeeInfo.m_OriginalRenderSkin = pSkin->m_OriginalSkin;
+					TeeInfo.m_ColorableRenderSkin = pSkin->m_ColorableSkin;
+					TeeInfo.m_SkinMetrics = pSkin->m_Metrics;
+					TeeInfo.m_CustomColoredSkin = Friend.CustomSkinColors();
+					if(Friend.CustomSkinColors())
+					{
+						TeeInfo.m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(Friend.CustomSkinColorBody()).UnclampLighting());
+						TeeInfo.m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(Friend.CustomSkinColorFeet()).UnclampLighting());
+					}
+					else
+					{
+						TeeInfo.m_ColorBody = ColorRGBA(1.0f, 1.0f, 1.0f);
+						TeeInfo.m_ColorFeet = ColorRGBA(1.0f, 1.0f, 1.0f);
+					}
+					TeeInfo.m_Size = minimum(Skin.w, Skin.h);
+
+					CAnimState *pIdleState = CAnimState::GetIdle();
+					vec2 OffsetToMid;
+					RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &TeeInfo, OffsetToMid);
+					vec2 TeeRenderPos(Skin.x + Skin.w / 2.0f, Skin.y + Skin.h * 0.55f + OffsetToMid.y);
+
+					RenderTools()->RenderTee(pIdleState, &TeeInfo, EMOTE_NORMAL, vec2(1.0f, 0.0f), TeeRenderPos);
+				}
+				Rect.HSplitMid(&NameLabel, &ClanLabel);
+
 				// name
-				Rect.HSplitTop(10.0f, &Label, &Rect);
-				UI()->DoLabel(&Label, Friend.Name(), FontSize - 2.0f, TEXTALIGN_ML);
+				UI()->DoLabel(&NameLabel, Friend.Name(), FontSize - 2.0f, TEXTALIGN_ML);
 
 				// clan
-				Rect.HSplitTop(10.0f, &Label, &Rect);
-				UI()->DoLabel(&Label, Friend.Clan(), FontSize - 2.0f, TEXTALIGN_ML);
+				UI()->DoLabel(&ClanLabel, Friend.Clan(), FontSize - 2.0f, TEXTALIGN_ML);
 
 				// info
 				if(Friend.ServerInfo())
 				{
-					Rect.HSplitTop(ms_ListheaderHeight, &Label, &Rect);
 					if(Friend.IsPlayer())
 						str_format(aBuf, sizeof(aBuf), Localize("Playing '%s' on '%s'", "Playing '(gametype)' on '(map)'"), Friend.ServerInfo()->m_aGameType, Friend.ServerInfo()->m_aMap);
 					else
 						str_format(aBuf, sizeof(aBuf), Localize("Spectating '%s' on '%s'", "Spectating '(gametype)' on '(map)'"), Friend.ServerInfo()->m_aGameType, Friend.ServerInfo()->m_aMap);
-					UI()->DoLabel(&Label, aBuf, FontSize - 2.0f, TEXTALIGN_ML);
+					UI()->DoLabel(&InfoLabel, aBuf, FontSize - 2.0f, TEXTALIGN_ML);
 				}
 
 				// remove button
