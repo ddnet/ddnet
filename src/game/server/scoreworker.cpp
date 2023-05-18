@@ -40,7 +40,7 @@ void CScorePlayerResult::SetVariant(Variant v)
 		break;
 	case PLAYER_INFO:
 		m_Data.m_Info.m_Birthday = 0;
-		m_Data.m_Info.m_Time = -1;
+		m_Data.m_Info.m_Time.reset();
 		for(float &TimeCp : m_Data.m_Info.m_aTimeCp)
 			TimeCp = 0;
 	}
