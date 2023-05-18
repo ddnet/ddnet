@@ -74,8 +74,6 @@ CMenus::CMenus()
 
 	str_copy(m_aCurrentDemoFolder, "demos");
 
-	m_FriendlistSelectedIndex = -1;
-
 	m_DemoPlayerState = DEMOPLAYER_NONE;
 	m_Dummy = false;
 

@@ -196,10 +196,6 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	}
 	m_SelectedIndex = -1;
 
-	// reset friend counter
-	for(auto &Friend : m_vFriends)
-		Friend.m_NumFound = 0;
-
 	auto RenderBrowserIcons = [this](CUIElement::SUIElementRect &UIRect, CUIRect *pRect, const ColorRGBA &TextColor, const ColorRGBA &TextOutlineColor, const char *pText, int TextAlign, bool SmallFont = false) {
 		float FontSize = 14.0f;
 		if(SmallFont)
@@ -239,18 +235,6 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 				if(pItem->m_aClients[j].m_FriendState != IFriends::FRIEND_NO)
 				{
 					FriendsOnServer++;
-					unsigned NameHash = str_quickhash(pItem->m_aClients[j].m_aName);
-					unsigned ClanHash = str_quickhash(pItem->m_aClients[j].m_aClan);
-					for(auto &Friend : m_vFriends)
-					{
-						if(((g_Config.m_ClFriendsIgnoreClan && Friend.m_pFriendInfo->m_aName[0]) || (ClanHash == Friend.m_pFriendInfo->m_ClanHash && !str_comp(Friend.m_pFriendInfo->m_aClan, pItem->m_aClients[j].m_aClan))) &&
-							(!Friend.m_pFriendInfo->m_aName[0] || (NameHash == Friend.m_pFriendInfo->m_NameHash && !str_comp(Friend.m_pFriendInfo->m_aName, pItem->m_aClients[j].m_aName))))
-						{
-							Friend.m_NumFound++;
-							if(Friend.m_pFriendInfo->m_aName[0])
-								break;
-						}
-					}
 				}
 			}
 		}
@@ -1286,140 +1270,246 @@ bool CMenus::PrintHighlighted(const char *pName, F &&PrintFn)
 
 void CMenus::FriendlistOnUpdate()
 {
-	m_vFriends.clear();
-	for(int i = 0; i < m_pClient->Friends()->NumFriends(); ++i)
-		m_vFriends.emplace_back(m_pClient->Friends()->GetFriend(i));
-	std::sort(m_vFriends.begin(), m_vFriends.end());
+	// TODO: friends are currently updated every frame; optimize and only update friends when necessary
 }
 
 void CMenus::RenderServerbrowserFriends(CUIRect View)
 {
-	static int s_Inited = 0;
-	if(!s_Inited)
-	{
-		FriendlistOnUpdate();
-		s_Inited = 1;
-	}
-
-	CUIRect ServerFriends = View, FilterHeader;
 	const float FontSize = 10.0f;
+	static bool s_aListExtended[NUM_FRIEND_TYPES] = {true, true, false};
+	static const ColorRGBA s_aListColors[NUM_FRIEND_TYPES] = {ColorRGBA(0.5f, 1.0f, 0.5f, 1.0f), ColorRGBA(0.4f, 0.4f, 1.0f, 1.0f), ColorRGBA(1.0f, 0.5f, 0.5f, 1.0f)};
+	const float SpacingH = 2.0f;
 
-	ServerFriends.HSplitBottom(18.0f, &ServerFriends, NULL);
+	char aBuf[256];
+	CUIRect ServerFriends, FilterHeader, List;
 
 	// header
-	ServerFriends.HSplitTop(ms_ListheaderHeight, &FilterHeader, &ServerFriends);
+	View.HSplitTop(ms_ListheaderHeight, &FilterHeader, &View);
 	FilterHeader.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_T, 4.0f);
-	ServerFriends.Draw(ColorRGBA(0, 0, 0, 0.15f), 0, 4.0f);
+	View.Draw(ColorRGBA(0, 0, 0, 0.15f), 0, 4.0f);
 	UI()->DoLabel(&FilterHeader, Localize("Friends"), FontSize + 4.0f, TEXTALIGN_MC);
 
-	CUIRect List;
-	ServerFriends.Margin(3.0f, &ServerFriends);
-	ServerFriends.VMargin(3.0f, &ServerFriends);
-	ServerFriends.HSplitBottom(100.0f, &List, &ServerFriends);
+	View.HSplitBottom(84.0f, &List, &ServerFriends);
+	List.HSplitTop(3.0f, nullptr, &List);
+	List.VSplitLeft(3.0f, nullptr, &List);
 
-	// friends list(remove friend)
-	static CListBox s_ListBox;
-	if(m_FriendlistSelectedIndex >= (int)m_vFriends.size())
-		m_FriendlistSelectedIndex = m_vFriends.size() - 1;
-	s_ListBox.DoAutoSpacing(3.0f);
-	s_ListBox.DoStart(30.0f, m_vFriends.size(), 1, 3, m_FriendlistSelectedIndex, &List);
+	// calculate friends
+	// TODO: optimize this
+	m_pRemoveFriend = nullptr;
+	for(auto &vFriends : m_avFriends)
+		vFriends.clear();
 
-	std::sort(m_vFriends.begin(), m_vFriends.end());
-	for(size_t i = 0; i < m_vFriends.size(); ++i)
+	for(int FriendIndex = 0; FriendIndex < m_pClient->Friends()->NumFriends(); ++FriendIndex)
 	{
-		const auto &Friend = m_vFriends[i];
-		const CListboxItem Item = s_ListBox.DoNextItem(&Friend, m_FriendlistSelectedIndex >= 0 && (size_t)m_FriendlistSelectedIndex == i);
-		if(!Item.m_Visible)
-			continue;
-
-		CUIRect NameClanLabels, NameLabel, ClanLabel, OnState;
-		Item.m_Rect.VSplitRight(30.0f, &NameClanLabels, &OnState);
-		NameClanLabels.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.1f), IGraphics::CORNER_L, 4.0f);
-
-		NameClanLabels.VMargin(2.5f, &NameClanLabels);
-		NameClanLabels.HSplitTop(12.0f, &NameLabel, &ClanLabel);
-		UI()->DoLabel(&NameLabel, Friend.m_pFriendInfo->m_aName, FontSize, TEXTALIGN_ML);
-		UI()->DoLabel(&ClanLabel, Friend.m_pFriendInfo->m_aClan, FontSize, TEXTALIGN_ML);
-
-		OnState.Draw(Friend.m_NumFound ? ColorRGBA(0.0f, 1.0f, 0.0f, 0.25f) : ColorRGBA(1.0f, 0.0f, 0.0f, 0.25f), IGraphics::CORNER_R, 4.0f);
-		OnState.HMargin((OnState.h - FontSize) / 3, &OnState);
-		OnState.VMargin(5.0f, &OnState);
-		char aBuf[64];
-		str_format(aBuf, sizeof(aBuf), "%i", Friend.m_NumFound);
-		UI()->DoLabel(&OnState, aBuf, FontSize + 2, TEXTALIGN_ML);
+		m_avFriends[FRIEND_OFF].emplace_back(m_pClient->Friends()->GetFriend(FriendIndex));
 	}
 
-	m_FriendlistSelectedIndex = s_ListBox.DoEnd();
-
-	// activate found server with friend
-	if(s_ListBox.WasItemActivated() && m_vFriends[m_FriendlistSelectedIndex].m_NumFound)
+	for(int ServerIndex = 0; ServerIndex < ServerBrowser()->NumSortedServers(); ++ServerIndex)
 	{
-		bool Found = false;
-		int NumServers = ServerBrowser()->NumSortedServers();
-		for(int i = 0; i < NumServers && !Found; i++)
+		const CServerInfo *pEntry = ServerBrowser()->SortedGet(ServerIndex);
+		if(pEntry->m_FriendState == IFriends::FRIEND_NO)
+			continue;
+
+		for(int ClientIndex = 0; ClientIndex < pEntry->m_NumClients; ++ClientIndex)
 		{
-			int ItemIndex = m_SelectedIndex != -1 ? (m_SelectedIndex + i + 1) % NumServers : i;
-			const CServerInfo *pItem = ServerBrowser()->SortedGet(ItemIndex);
-			if(pItem->m_FriendState != IFriends::FRIEND_NO)
+			const CServerInfo::CClient &CurrentClient = pEntry->m_aClients[ClientIndex];
+			if(CurrentClient.m_FriendState == IFriends::FRIEND_NO)
+				continue;
+
+			const int FriendIndex = CurrentClient.m_FriendState == IFriends::FRIEND_PLAYER ? FRIEND_PLAYER_ON : FRIEND_CLAN_ON;
+			m_avFriends[FriendIndex].emplace_back(CurrentClient.m_aName, CurrentClient.m_aClan, pEntry, CurrentClient.m_FriendState, CurrentClient.m_Player);
+			const auto &&RemovalPredicate = [CurrentClient](const CFriendItem &Friend) {
+				return (Friend.Name()[0] == '\0' || str_comp(Friend.Name(), CurrentClient.m_aName) == 0) && ((Friend.Name()[0] != '\0' && g_Config.m_ClFriendsIgnoreClan) || str_comp(Friend.Clan(), CurrentClient.m_aClan) == 0);
+			};
+			m_avFriends[FRIEND_OFF].erase(std::remove_if(m_avFriends[FRIEND_OFF].begin(), m_avFriends[FRIEND_OFF].end(), RemovalPredicate), m_avFriends[FRIEND_OFF].end());
+		}
+	}
+	for(auto &vFriends : m_avFriends)
+		std::sort(vFriends.begin(), vFriends.end());
+
+	// friends list
+	static CScrollRegion s_ScrollRegion;
+	if(!s_ScrollRegion.IsScrollbarShown())
+		List.VSplitRight(3.0f, &List, nullptr);
+	vec2 ScrollOffset(0.0f, 0.0f);
+	CScrollRegionParams ScrollParams;
+	ScrollParams.m_ScrollbarWidth = 14.0f;
+	ScrollParams.m_ScrollbarMargin = 4.0f;
+	ScrollParams.m_ScrollUnit = 80.0f;
+	s_ScrollRegion.Begin(&List, &ScrollOffset, &ScrollParams);
+	List.y += ScrollOffset.y;
+
+	for(size_t FriendType = 0; FriendType < NUM_FRIEND_TYPES; ++FriendType)
+	{
+		// header
+		CUIRect Header, GroupIcon, GroupLabel;
+		List.HSplitTop(ms_ListheaderHeight, &Header, &List);
+		s_ScrollRegion.AddRect(Header);
+		Header.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, UI()->MouseHovered(&Header) ? 0.4f : 0.25f), IGraphics::CORNER_ALL, 5.0f);
+		Header.VSplitLeft(Header.h, &GroupIcon, &GroupLabel);
+		GroupIcon.Margin(2.0f, &GroupIcon);
+		TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
+		TextRender()->TextColor(UI()->MouseHovered(&Header) ? TextRender()->DefaultTextColor() : ColorRGBA(0.6f, 0.6f, 0.6f, 1.0f));
+		UI()->DoLabel(&GroupIcon, s_aListExtended[FriendType] ? FONT_ICON_SQUARE_MINUS : FONT_ICON_SQUARE_PLUS, GroupIcon.h * CUI::ms_FontmodHeight, TEXTALIGN_MC);
+		TextRender()->TextColor(TextRender()->DefaultTextColor());
+		TextRender()->SetCurFont(nullptr);
+		switch(FriendType)
+		{
+		case FRIEND_PLAYER_ON:
+			str_format(aBuf, sizeof(aBuf), Localize("Online players (%d)"), (int)m_avFriends[FriendType].size());
+			break;
+		case FRIEND_CLAN_ON:
+			str_format(aBuf, sizeof(aBuf), Localize("Online clanmates (%d)"), (int)m_avFriends[FriendType].size());
+			break;
+		case FRIEND_OFF:
+			str_format(aBuf, sizeof(aBuf), Localize("Offline (%d)", "friends (server browser)"), (int)m_avFriends[FriendType].size());
+			break;
+		default:
+			dbg_assert(false, "FriendType invalid");
+			break;
+		}
+		UI()->DoLabel(&GroupLabel, aBuf, FontSize, TEXTALIGN_ML);
+		if(UI()->DoButtonLogic(&s_aListExtended[FriendType], 0, &Header))
+		{
+			s_aListExtended[FriendType] = !s_aListExtended[FriendType];
+		}
+
+		// entries
+		if(s_aListExtended[FriendType])
+		{
+			// space
 			{
-				for(int j = 0; j < pItem->m_NumReceivedClients && !Found; ++j)
+				CUIRect Space;
+				List.HSplitTop(SpacingH, &Space, &List);
+				s_ScrollRegion.AddRect(Space);
+			}
+
+			for(size_t FriendIndex = 0; FriendIndex < m_avFriends[FriendType].size(); ++FriendIndex)
+			{
+				CUIRect Rect;
+				const auto &Friend = m_avFriends[FriendType][FriendIndex];
+				List.HSplitTop((FriendType == FRIEND_OFF ? 8.0f : 20.0f) + ms_ListheaderHeight, &Rect, &List);
+				s_ScrollRegion.AddRect(Rect);
+				if(FriendIndex < m_avFriends[FriendType].size() - 1)
 				{
-					if(pItem->m_aClients[j].m_FriendState != IFriends::FRIEND_NO &&
-						((g_Config.m_ClFriendsIgnoreClan && m_vFriends[m_FriendlistSelectedIndex].m_pFriendInfo->m_aName[0]) || str_quickhash(pItem->m_aClients[j].m_aClan) == m_vFriends[m_FriendlistSelectedIndex].m_pFriendInfo->m_ClanHash) &&
-						(!m_vFriends[m_FriendlistSelectedIndex].m_pFriendInfo->m_aName[0] ||
-							str_quickhash(pItem->m_aClients[j].m_aName) == m_vFriends[m_FriendlistSelectedIndex].m_pFriendInfo->m_NameHash))
+					CUIRect Space;
+					List.HSplitTop(SpacingH, &Space, &List);
+					s_ScrollRegion.AddRect(Space);
+				}
+				if(s_ScrollRegion.IsRectClipped(Rect))
+					continue;
+
+				const bool Inside = UI()->MouseHovered(&Rect);
+				bool ButtonResult = false;
+				if(Friend.ServerInfo())
+				{
+					ButtonResult = UI()->DoButtonLogic(Friend.ListItemId(), 0, &Rect);
+					GameClient()->m_Tooltips.DoToolTip(Friend.ListItemId(), &Rect, Localize("Click to select server. Double click to join your friend."));
+				}
+				Rect.Draw(s_aListColors[FriendType].WithAlpha(Inside ? 0.5f : 0.3f), IGraphics::CORNER_ALL, 5.0f);
+				Rect.Margin(2.0f, &Rect);
+
+				CUIRect Label, RemoveButton;
+				Rect.HSplitTop(16.0f, &RemoveButton, nullptr);
+				RemoveButton.VSplitRight(13.0f, nullptr, &RemoveButton);
+				RemoveButton.HMargin((RemoveButton.h - RemoveButton.w) / 2.0f, &RemoveButton);
+				Rect.VSplitLeft(2.0f, nullptr, &Rect);
+
+				// name
+				Rect.HSplitTop(10.0f, &Label, &Rect);
+				UI()->DoLabel(&Label, Friend.Name(), FontSize - 2.0f, TEXTALIGN_ML);
+
+				// clan
+				Rect.HSplitTop(10.0f, &Label, &Rect);
+				UI()->DoLabel(&Label, Friend.Clan(), FontSize - 2.0f, TEXTALIGN_ML);
+
+				// info
+				if(Friend.ServerInfo())
+				{
+					Rect.HSplitTop(ms_ListheaderHeight, &Label, &Rect);
+					if(Friend.IsPlayer())
+						str_format(aBuf, sizeof(aBuf), Localize("Playing '%s' on '%s'", "Playing '(gametype)' on '(map)'"), Friend.ServerInfo()->m_aGameType, Friend.ServerInfo()->m_aMap);
+					else
+						str_format(aBuf, sizeof(aBuf), Localize("Spectating '%s' on '%s'", "Spectating '(gametype)' on '(map)'"), Friend.ServerInfo()->m_aGameType, Friend.ServerInfo()->m_aMap);
+					UI()->DoLabel(&Label, aBuf, FontSize - 2.0f, TEXTALIGN_ML);
+				}
+
+				// remove button
+				TextRender()->TextColor(UI()->MouseHovered(&RemoveButton) ? TextRender()->DefaultTextColor() : ColorRGBA(0.4f, 0.4f, 0.4f, 1.0f));
+				TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
+				UI()->DoLabel(&RemoveButton, "×", RemoveButton.h * CUI::ms_FontmodHeight, TEXTALIGN_MC);
+				TextRender()->SetRenderFlags(0);
+				TextRender()->TextColor(TextRender()->DefaultTextColor());
+				if(UI()->DoButtonLogic(Friend.RemoveButtonId(), 0, &RemoveButton))
+				{
+					m_pRemoveFriend = &Friend;
+					ButtonResult = false;
+				}
+				GameClient()->m_Tooltips.DoToolTip(Friend.RemoveButtonId(), &RemoveButton, Friend.FriendState() == IFriends::FRIEND_PLAYER ? Localize("Click to remove this player from your friends list.") : Localize("Click to remove this clan from your friends list."));
+
+				// handle click and double click on item
+				if(ButtonResult && Friend.ServerInfo())
+				{
+					str_copy(g_Config.m_UiServerAddress, Friend.ServerInfo()->m_aAddress);
+					if(Input()->MouseDoubleClick())
 					{
-						str_copy(g_Config.m_UiServerAddress, pItem->m_aAddress);
-						m_SelectedIndex = ItemIndex;
-						Found = true;
+						Client()->Connect(g_Config.m_UiServerAddress);
 					}
 				}
 			}
+
+			if(m_avFriends[FriendType].empty())
+			{
+				CUIRect Label;
+				List.HSplitTop(12.0f, &Label, &List);
+				s_ScrollRegion.AddRect(Label);
+				UI()->DoLabel(&Label, Localize("None"), Label.h * CUI::ms_FontmodHeight, TEXTALIGN_ML);
+			}
+		}
+
+		// space
+		{
+			CUIRect Space;
+			List.HSplitTop(SpacingH, &Space, &List);
+			s_ScrollRegion.AddRect(Space);
 		}
 	}
+	s_ScrollRegion.End();
 
-	CUIRect Button;
-	ServerFriends.HSplitTop(2.5f, 0, &ServerFriends);
-	ServerFriends.HSplitTop(20.0f, &Button, &ServerFriends);
-	if(m_FriendlistSelectedIndex != -1)
+	if(m_pRemoveFriend != nullptr)
 	{
-		static CButtonContainer s_RemoveButton;
-		if(DoButton_Menu(&s_RemoveButton, Localize("Remove"), 0, &Button))
-		{
-			const CFriendInfo *pRemoveFriend = m_vFriends[m_FriendlistSelectedIndex].m_pFriendInfo;
-			const bool IsPlayer = m_pClient->Friends()->GetFriendState(pRemoveFriend->m_aName, pRemoveFriend->m_aClan) == IFriends::FRIEND_PLAYER;
-			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf),
-				IsPlayer ? Localize("Are you sure that you want to remove the player '%s' from your friends list?") : Localize("Are you sure that you want to remove the clan '%s' from your friends list?"),
-				IsPlayer ? pRemoveFriend->m_aName : pRemoveFriend->m_aClan);
-			PopupConfirm(Localize("Remove friend"), aBuf, Localize("Yes"), Localize("No"), &CMenus::PopupConfirmRemoveFriend);
-		}
+		char aMessage[256];
+		str_format(aMessage, sizeof(aMessage),
+			m_pRemoveFriend->FriendState() == IFriends::FRIEND_PLAYER ? Localize("Are you sure that you want to remove the player '%s' from your friends list?") : Localize("Are you sure that you want to remove the clan '%s' from your friends list?"),
+			m_pRemoveFriend->FriendState() == IFriends::FRIEND_PLAYER ? m_pRemoveFriend->Name() : m_pRemoveFriend->Clan());
+		PopupConfirm(Localize("Remove friend"), aMessage, Localize("Yes"), Localize("No"), &CMenus::PopupConfirmRemoveFriend);
 	}
 
 	// add friend
 	if(m_pClient->Friends()->NumFriends() < IFriends::MAX_FRIENDS)
 	{
-		ServerFriends.HSplitTop(10.0f, 0, &ServerFriends);
-		ServerFriends.HSplitTop(19.0f, &Button, &ServerFriends);
-		char aBuf[64];
+		CUIRect Button;
+		ServerFriends.Margin(3.0f, &ServerFriends);
+
+		ServerFriends.HSplitTop(18.0f, &Button, &ServerFriends);
 		str_format(aBuf, sizeof(aBuf), "%s:", Localize("Name"));
-		UI()->DoLabel(&Button, aBuf, FontSize + 2, TEXTALIGN_ML);
-		Button.VSplitLeft(80.0f, 0, &Button);
+		UI()->DoLabel(&Button, aBuf, FontSize + 2.0f, TEXTALIGN_ML);
+		Button.VSplitLeft(80.0f, nullptr, &Button);
 		static CLineInputBuffered<MAX_NAME_LENGTH> s_NameInput;
 		UI()->DoEditBox(&s_NameInput, &Button, FontSize + 2.0f);
 
-		ServerFriends.HSplitTop(3.0f, 0, &ServerFriends);
-		ServerFriends.HSplitTop(19.0f, &Button, &ServerFriends);
+		ServerFriends.HSplitTop(3.0f, nullptr, &ServerFriends);
+		ServerFriends.HSplitTop(18.0f, &Button, &ServerFriends);
 		str_format(aBuf, sizeof(aBuf), "%s:", Localize("Clan"));
-		UI()->DoLabel(&Button, aBuf, FontSize + 2, TEXTALIGN_ML);
-		Button.VSplitLeft(80.0f, 0, &Button);
+		UI()->DoLabel(&Button, aBuf, FontSize + 2.0f, TEXTALIGN_ML);
+		Button.VSplitLeft(80.0f, nullptr, &Button);
 		static CLineInputBuffered<MAX_CLAN_LENGTH> s_ClanInput;
 		UI()->DoEditBox(&s_ClanInput, &Button, FontSize + 2.0f);
 
-		ServerFriends.HSplitTop(3.0f, 0, &ServerFriends);
-		ServerFriends.HSplitTop(20.0f, &Button, &ServerFriends);
+		ServerFriends.HSplitTop(3.0f, nullptr, &ServerFriends);
+		ServerFriends.HSplitTop(18.0f, &Button, &ServerFriends);
 		static CButtonContainer s_AddButton;
-		if(DoButton_Menu(&s_AddButton, Localize("Add Friend"), 0, &Button))
+		if(DoButton_Menu(&s_AddButton, s_NameInput.IsEmpty() && !s_ClanInput.IsEmpty() ? Localize("Add Clan") : Localize("Add Friend"), 0, &Button))
 		{
 			m_pClient->Friends()->AddFriend(s_NameInput.GetString(), s_ClanInput.GetString());
 			s_NameInput.Clear();
@@ -1432,10 +1522,10 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 
 void CMenus::PopupConfirmRemoveFriend()
 {
-	const CFriendInfo *pRemoveFriend = m_vFriends[m_FriendlistSelectedIndex].m_pFriendInfo;
-	m_pClient->Friends()->RemoveFriend(pRemoveFriend->m_aName, pRemoveFriend->m_aClan);
+	m_pClient->Friends()->RemoveFriend(m_pRemoveFriend->Name(), m_pRemoveFriend->Clan());
 	FriendlistOnUpdate();
 	Client()->ServerBrowserUpdate();
+	m_pRemoveFriend = nullptr;
 }
 
 void CMenus::RenderServerbrowser(CUIRect MainView)

@@ -452,36 +452,55 @@ protected:
 	static int DemolistFetchCallback(const CFsFileInfo *pInfo, int IsDir, int StorageType, void *pUser);
 
 	// friends
-	struct CFriendItem
+	class CFriendItem
 	{
-		const CFriendInfo *m_pFriendInfo;
-		int m_NumFound;
+		char m_aName[MAX_NAME_LENGTH];
+		char m_aClan[MAX_CLAN_LENGTH];
+		const CServerInfo *m_pServerInfo;
+		int m_FriendState;
+		bool m_IsPlayer;
 
+	public:
 		CFriendItem() {}
 		CFriendItem(const CFriendInfo *pFriendInfo) :
-			m_pFriendInfo(pFriendInfo), m_NumFound(0)
+			m_pServerInfo(nullptr), m_IsPlayer(false)
 		{
+			str_copy(m_aName, pFriendInfo->m_aName);
+			str_copy(m_aClan, pFriendInfo->m_aClan);
+			m_FriendState = m_aName[0] == '\0' ? IFriends::FRIEND_CLAN : IFriends::FRIEND_PLAYER;
 		}
+		CFriendItem(const char *pName, const char *pClan, const CServerInfo *pServerInfo, int FriendState, bool IsPlayer) :
+			m_pServerInfo(pServerInfo), m_FriendState(FriendState), m_IsPlayer(IsPlayer)
+		{
+			str_copy(m_aName, pName);
+			str_copy(m_aClan, pClan);
+		}
+
+		const char *Name() const { return m_aName; }
+		const char *Clan() const { return m_aClan; }
+		const CServerInfo *ServerInfo() const { return m_pServerInfo; }
+		int FriendState() const { return m_FriendState; }
+		bool IsPlayer() const { return m_IsPlayer; }
+
+		const void *ListItemId() const { return &m_aName; }
+		const void *RemoveButtonId() const { return &m_FriendState; }
 
 		bool operator<(const CFriendItem &Other) const
 		{
-			if(m_NumFound && !Other.m_NumFound)
-				return true;
-			else if(!m_NumFound && Other.m_NumFound)
-				return false;
-			else
-			{
-				int Result = str_comp(m_pFriendInfo->m_aName, Other.m_pFriendInfo->m_aName);
-				if(Result)
-					return Result < 0;
-				else
-					return str_comp(m_pFriendInfo->m_aClan, Other.m_pFriendInfo->m_aClan) < 0;
-			}
+			const int Result = str_comp(m_aName, Other.m_aName);
+			return Result < 0 || (Result == 0 && str_comp(m_aClan, Other.m_aClan) < 0);
 		}
 	};
 
-	std::vector<CFriendItem> m_vFriends;
-	int m_FriendlistSelectedIndex;
+	enum
+	{
+		FRIEND_PLAYER_ON = 0,
+		FRIEND_CLAN_ON,
+		FRIEND_OFF,
+		NUM_FRIEND_TYPES
+	};
+	std::vector<CFriendItem> m_avFriends[NUM_FRIEND_TYPES];
+	const CFriendItem *m_pRemoveFriend = nullptr;
 
 	void FriendlistOnUpdate();
 

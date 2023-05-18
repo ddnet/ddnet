@@ -76,6 +76,8 @@ MAYBE_UNUSED static const char *FONT_ICON_CERTIFICATE = "\xEF\x82\xA3";
 MAYBE_UNUSED static const char *FONT_ICON_FLAG_CHECKERED = "\xEF\x84\x9E";
 MAYBE_UNUSED static const char *FONT_ICON_BAN = "\xEF\x81\x9E";
 MAYBE_UNUSED static const char *FONT_ICON_CIRCLE_CHEVRON_DOWN = "\xEF\x84\xBA";
+MAYBE_UNUSED static const char *FONT_ICON_SQUARE_MINUS = "\xEF\x85\x86";
+MAYBE_UNUSED static const char *FONT_ICON_SQUARE_PLUS = "\xEF\x83\xBE";
 
 MAYBE_UNUSED static const char *FONT_ICON_HOUSE = "\xEF\x80\x95";
 MAYBE_UNUSED static const char *FONT_ICON_NEWSPAPER = "\xEF\x87\xAA";
