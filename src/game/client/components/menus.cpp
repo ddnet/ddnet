@@ -872,24 +872,21 @@ void CMenus::RenderLoading(const char *pCaption, const char *pContent, int Incre
 {
 	// TODO: not supported right now due to separate render thread
 
-	static std::chrono::nanoseconds LastLoadRender{0};
-	auto CurLoadRenderCount = m_LoadCurrent;
+	static std::chrono::nanoseconds s_LastLoadRender{0};
+	const int CurLoadRenderCount = m_LoadCurrent;
 	m_LoadCurrent += IncreaseCounter;
-	float Percent = CurLoadRenderCount / (float)m_LoadTotal;
+	const float Percent = CurLoadRenderCount / (float)m_LoadTotal;
 
 	// make sure that we don't render for each little thing we load
 	// because that will slow down loading if we have vsync
-	if(time_get_nanoseconds() - LastLoadRender < std::chrono::nanoseconds(1s) / 60l)
+	if(time_get_nanoseconds() - s_LastLoadRender < std::chrono::nanoseconds(1s) / 60l)
 		return;
 
-	LastLoadRender = time_get_nanoseconds();
+	s_LastLoadRender = time_get_nanoseconds();
 
 	// need up date this here to get correct
 	ms_GuiColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_UiColor, true));
 
-	CUIRect Screen = *UI()->Screen();
-	// some margin around the screen
-	Screen.Margin(10.0f, &Screen);
 	UI()->MapScreen();
 
 	if(!RenderMenuBackgroundMap || !m_pBackground->Render())
@@ -897,8 +894,8 @@ void CMenus::RenderLoading(const char *pCaption, const char *pContent, int Incre
 		RenderBackground();
 	}
 
-	CUIRect Box = Screen;
-	Box.Margin(150.0f, &Box);
+	CUIRect Box = *UI()->Screen();
+	Box.Margin(160.0f, &Box);
 
 	Graphics()->BlendNormal();
 
@@ -906,18 +903,14 @@ void CMenus::RenderLoading(const char *pCaption, const char *pContent, int Incre
 	Box.Draw(ColorRGBA{0, 0, 0, 0.50f}, IGraphics::CORNER_ALL, 15.0f);
 
 	CUIRect Part;
-
-	Box.HSplitTop(20.f, &Part, &Box);
+	Box.HSplitTop(20.f, nullptr, &Box);
 	Box.HSplitTop(24.f, &Part, &Box);
 	Part.VMargin(20.f, &Part);
-	SLabelProperties Props;
-	Props.m_MaxWidth = (int)Part.w;
 	UI()->DoLabel(&Part, pCaption, 24.f, TEXTALIGN_MC);
-	Box.HSplitTop(20.f, &Part, &Box);
+
+	Box.HSplitTop(20.f, nullptr, &Box);
 	Box.HSplitTop(24.f, &Part, &Box);
 	Part.VMargin(20.f, &Part);
-
-	Props.m_MaxWidth = (int)Part.w;
 	UI()->DoLabel(&Part, pContent, 20.0f, TEXTALIGN_MC);
 
 	if(RenderLoadingBar)
