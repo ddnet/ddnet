@@ -119,7 +119,7 @@ void CPlayer::Reset()
 	m_DND = false;
 
 	m_LastPause = 0;
-	m_Score = -1;
+	m_Score.reset();
 
 	// Variable initialized:
 	m_Last_Team = 0;
@@ -183,7 +183,20 @@ void CPlayer::Tick()
 	if(m_ChatScore > 0)
 		m_ChatScore--;
 
-	Server()->SetClientScore(m_ClientID, m_Score);
+	int Score;
+	if(m_Score)
+	{
+		if(*m_Score == 9999)
+			Score = -10000;
+		else
+			Score = *m_Score;
+	}
+	else
+	{
+		Score = -9999;
+	}
+
+	Server()->SetClientScore(m_ClientID, Score);
 
 	if(m_Moderating && m_Afk)
 	{
@@ -336,11 +349,26 @@ void CPlayer::Snap(int SnappingClient)
 
 	int SnappingClientVersion = GameServer()->GetClientVersion(SnappingClient);
 	int Latency = SnappingClient == SERVER_DEMO_CLIENT ? m_Latency.m_Min : GameServer()->m_apPlayers[SnappingClient]->m_aCurLatency[m_ClientID];
-	int Score = m_Score;
+
+	int Score;
+	if(m_Score)
+	{
+		// -9999 stands for no time and isn't displayed in scoreboard, so
+		// shift the time by a second if the player actually took 9999
+		// seconds to finish the map.
+		if(*m_Score == 9999)
+			Score = -10000;
+		else
+			Score = -1 * absolute(*m_Score);
+	}
+	else
+	{
+		Score = -9999;
+	}
 
 	// send 0 if times of others are not shown
 	if(SnappingClient != m_ClientID && g_Config.m_SvHideScore)
-		Score = -1;
+		Score = -9999;
 
 	if(!Server()->IsSixup(SnappingClient))
 	{
@@ -349,10 +377,7 @@ void CPlayer::Snap(int SnappingClient)
 			return;
 
 		pPlayerInfo->m_Latency = Latency;
-		// -9999 stands for no time and isn't displayed in scoreboard, so
-		// shift the time by a second if the player actually took 9999
-		// seconds to finish the map.
-		pPlayerInfo->m_Score = Score == -1 ? -9999 : Score == 9999 ? -10000 : -Score;
+		pPlayerInfo->m_Score = Score;
 		pPlayerInfo->m_Local = (int)(m_ClientID == SnappingClient && (m_Paused != PAUSE_PAUSED || SnappingClientVersion >= VERSION_DDNET_OLD));
 		pPlayerInfo->m_ClientID = id;
 		pPlayerInfo->m_Team = m_Team;
@@ -375,7 +400,7 @@ void CPlayer::Snap(int SnappingClient)
 			pPlayerInfo->m_PlayerFlags |= protocol7::PLAYERFLAG_ADMIN;
 
 		// Times are in milliseconds for 0.7
-		pPlayerInfo->m_Score = Score == -1 ? -1 : Score * 1000;
+		pPlayerInfo->m_Score = Score == -9999 ? -1 : -Score * 1000;
 		pPlayerInfo->m_Latency = Latency;
 	}
 
@@ -887,7 +912,8 @@ void CPlayer::ProcessScoreResult(CScorePlayerResult &Result)
 			GameServer()->CallVote(m_ClientID, Result.m_Data.m_MapVote.m_aMap, aCmd, "/map", aChatmsg);
 			break;
 		case CScorePlayerResult::PLAYER_INFO:
-			GameServer()->Score()->PlayerData(m_ClientID)->Set(Result.m_Data.m_Info.m_Time, Result.m_Data.m_Info.m_aTimeCp);
+			if(Result.m_Data.m_Info.m_Time)
+				GameServer()->Score()->PlayerData(m_ClientID)->Set(*Result.m_Data.m_Info.m_Time, Result.m_Data.m_Info.m_aTimeCp);
 			m_Score = Result.m_Data.m_Info.m_Time;
 			Server()->ExpireServerInfo();
 			int Birthday = Result.m_Data.m_Info.m_Birthday;
