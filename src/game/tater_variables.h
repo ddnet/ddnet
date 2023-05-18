@@ -23,9 +23,18 @@ MACRO_CONFIG_INT(ClPingNameCircle, tc_nameplate_ping_circle, 0, 0, 1, CFGFLAG_CL
 //Anti Latency Tools
 MACRO_CONFIG_INT(ClFreezeUpdateFix, tc_freeze_update_fix, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "(WIP) Will change your skin faster when you enter freeze. ")
 MACRO_CONFIG_INT(ClRemoveAnti, tc_remove_anti, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Removes some amount of antiping & player prediction in freeze")
-MACRO_CONFIG_INT(ClUnfreezeLagTicks, tc_remove_anti_ticks, 5, 0, 10, CFGFLAG_CLIENT | CFGFLAG_SAVE, "The biggest amount of prediction ticks that are removed")
+MACRO_CONFIG_INT(ClUnfreezeLagTicks, tc_remove_anti_ticks, 5, 0, 20, CFGFLAG_CLIENT | CFGFLAG_SAVE, "The biggest amount of prediction ticks that are removed")
 MACRO_CONFIG_INT(ClUnfreezeLagDelayTicks, tc_remove_anti_delay_ticks, 100, 0, 200, CFGFLAG_CLIENT | CFGFLAG_SAVE, "How many ticks it takes to remove the maximum prediction after being frozen")
 MACRO_CONFIG_INT(ClAdjustRemovedDelay, tc_adjust_removed_delay, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Add delay back if you are not currently in freeze (helps up down saves)")
+
+MACRO_CONFIG_INT(ClShowOthersGhosts, tc_show_others_ghosts, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show ghosts for other players in their unpredicted position")
+MACRO_CONFIG_INT(ClSwapGhosts, tc_swap_ghosts, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show predicted players as ghost and normal players as unpredicted")
+MACRO_CONFIG_INT(ClHideFrozenGhosts, tc_hide_frozen_ghosts, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Hide Ghosts of other players if they are frozen")
+
+MACRO_CONFIG_INT(ClPredGhostsAlpha, tc_pred_ghosts_alpha, 50, 0, 100, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Alpha of predicted ghosts (0-100)")
+MACRO_CONFIG_INT(ClUnpredGhostsAlpha, tc_unpred_ghosts_alpha, 50, 0, 100, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Alpha of unpredicted ghosts (0-100)")
+MACRO_CONFIG_INT(ClUnpredOthersInFreeze, tc_unpred_others_in_freeze, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Dont predict other players if you are frozen")
+MACRO_CONFIG_INT(ClRenderGhostAsCircle, tc_render_ghost_as_circle, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Render Ghosts as circles instead of tee")
 
 //MACRO_CONFIG_INT(ClHookLineSize, tc_hook_line_width, 0, 0, 20, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Adjustable hookline width, set to 0 for old default rendering")
 

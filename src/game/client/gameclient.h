@@ -712,6 +712,9 @@ public:
 
 	const std::vector<CSnapEntities> &SnapEntities() { return m_vSnapEntities; }
 
+	vec2 GetSmoothPos(int ClientID);
+	vec2 GetFreezePos(int ClientID);
+
 private:
 	std::vector<CSnapEntities> m_vSnapEntities;
 	void SnapCollectEntities();
@@ -722,8 +725,6 @@ private:
 	void UpdatePrediction();
 	void UpdateRenderedCharacters();
 	void DetectStrongHook();
-	vec2 GetSmoothPos(int ClientID);
-	vec2 GetFreezePos(int ClientID);
 
 	int m_PredictedDummyID;
 	int m_IsDummySwapping;

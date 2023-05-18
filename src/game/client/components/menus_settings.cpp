@@ -3594,14 +3594,80 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			MainView.HSplitTop(20.0f, &Button, &MainView);
 			Button.VSplitLeft(200.0f, &Label, &Button);
 			char aBuf[64];
-			str_format(aBuf, sizeof(aBuf), "%s: %ims", "Amount Removed", g_Config.m_ClUnfreezeLagTicks * 20);
+			str_format(aBuf, sizeof(aBuf), "%s: %ims", "Amount", g_Config.m_ClUnfreezeLagTicks * 20);
 			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
-			g_Config.m_ClUnfreezeLagTicks = (int)(UI()->DoScrollbarH(&g_Config.m_ClUnfreezeLagTicks, &Button, (g_Config.m_ClUnfreezeLagTicks) / 10.0f) * 10.0f);
+			g_Config.m_ClUnfreezeLagTicks = (int)(UI()->DoScrollbarH(&g_Config.m_ClUnfreezeLagTicks, &Button, (g_Config.m_ClUnfreezeLagTicks) / 15.0f) * 15.0f);
 		}
 		if(g_Config.m_ClRemoveAnti)
 		{
 			DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClAdjustRemovedDelay, ("Add amount back if you are not currently in freeze"), &g_Config.m_ClAdjustRemovedDelay, &MainView, LineMargin);
 		}
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClUnpredOthersInFreeze, ("Dont predict other players if you are frozen"), &g_Config.m_ClUnpredOthersInFreeze, &MainView, LineMargin);
+		
+		MainView.HSplitTop(10.0f, 0, &MainView);
+		MainView.HSplitTop(30.0f, &Section, &MainView);
+		UI()->DoLabel(&Section, ("Ghost Tools"), 18, TEXTALIGN_LEFT);
+
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowOthersGhosts, ("Show unpredicted ghosts for other players"), &g_Config.m_ClShowOthersGhosts, &MainView, LineMargin);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClSwapGhosts, ("Swap ghosts and normal players"), &g_Config.m_ClSwapGhosts, &MainView, LineMargin);
+		{
+			CUIRect Button, Label;
+			MainView.HSplitTop(20.0f, &Button, &MainView);
+			Button.VSplitLeft(200.0f, &Label, &Button);
+			char aBuf[64];
+			str_format(aBuf, sizeof(aBuf), "%s: %i%%", "Predicted Alpha", g_Config.m_ClPredGhostsAlpha);
+			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+			g_Config.m_ClPredGhostsAlpha = (int)(UI()->DoScrollbarH(&g_Config.m_ClPredGhostsAlpha, &Button, (g_Config.m_ClPredGhostsAlpha) / 100.0f) * 100.0f);
+		}
+		{
+			CUIRect Button, Label;
+			MainView.HSplitTop(20.0f, &Button, &MainView);
+			Button.VSplitLeft(200.0f, &Label, &Button);
+			char aBuf[64];
+			str_format(aBuf, sizeof(aBuf), "%s: %i%%", "Unpredicted Alpha", g_Config.m_ClUnpredGhostsAlpha);
+			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+			g_Config.m_ClUnpredGhostsAlpha = (int)(UI()->DoScrollbarH(&g_Config.m_ClUnpredGhostsAlpha, &Button, (g_Config.m_ClUnpredGhostsAlpha) / 100.0f) * 100.0f);
+		}
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClHideFrozenGhosts, ("Hide ghosts of frozen players"), &g_Config.m_ClHideFrozenGhosts, &MainView, LineMargin);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRenderGhostAsCircle, ("Render ghosts as circles"), &g_Config.m_ClRenderGhostAsCircle, &MainView, LineMargin);
+
+		CKeyInfo Key = CKeyInfo{"Toggle Ghosts Key", "toggle tc_show_others_ghosts 0 1", 0, 0};
+		for(int Mod = 0; Mod < CBinds::MODIFIER_COMBINATION_COUNT; Mod++)
+		{
+			for(int KeyId = 0; KeyId < KEY_LAST; KeyId++)
+			{
+				const char *pBind = m_pClient->m_Binds.Get(KeyId, Mod);
+				if(!pBind[0])
+					continue;
+
+				if(str_comp(pBind, Key.m_pCommand) == 0)
+				{
+					Key.m_KeyId = KeyId;
+					Key.m_ModifierCombination = Mod;
+					break;
+				}
+			}
+		}
+
+		CUIRect Button, KeyLabel;
+		MainView.HSplitTop(20.0f, &MainView, &Button);
+		Button.HSplitTop(20.0f, &Button, 0);
+		Button.VSplitLeft(120.0f, &KeyLabel, &Button);
+		Button.VSplitLeft(100, &Button, 0);
+		char aBuf[64];
+		str_format(aBuf, sizeof(aBuf), "%s:", Localize((const char *)Key.m_Name));
+
+		UI()->DoLabel(&KeyLabel, aBuf, 20.0f, TEXTALIGN_LEFT);
+		int OldId = Key.m_KeyId, OldModifierCombination = Key.m_ModifierCombination, NewModifierCombination;
+		int NewId = DoKeyReader((void *)&Key.m_Name, &Button, OldId, OldModifierCombination, &NewModifierCombination);
+		if(NewId != OldId || NewModifierCombination != OldModifierCombination)
+		{
+			if(OldId != 0 || NewId == 0)
+				m_pClient->m_Binds.Bind(OldId, "", false, OldModifierCombination);
+			if(NewId != 0)
+				m_pClient->m_Binds.Bind(NewId, Key.m_pCommand, false, NewModifierCombination);
+		}
+
 
 	}
 

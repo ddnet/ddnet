@@ -2483,6 +2483,22 @@ void CGameClient::UpdateRenderedCharacters()
 			Client()->IntraGameTick(g_Config.m_ClDummy));
 		vec2 Pos = UnpredPos;
 
+		if(i == m_Snap.m_LocalClientID)
+		{
+			CCharacter *pChar = m_PredictedWorld.GetCharacterByID(i);
+			if(pChar && pChar->m_FreezeTime > 0)
+			{
+				g_Config.m_ClAmIFrozen = 1;
+			}
+			else
+			{
+				g_Config.m_ClAmIFrozen = 0;
+				g_Config.m_ClFreezeTick = Client()->GameTick(g_Config.m_ClDummy);
+			}
+		}
+
+
+
 		if(Predict() && (i == m_Snap.m_LocalClientID || (AntiPingPlayers() && !IsOtherTeam(i))))
 		{
 			m_aClients[i].m_Predicted.Write(&m_aClients[i].m_RenderCur);
@@ -2494,6 +2510,7 @@ void CGameClient::UpdateRenderedCharacters()
 				vec2(m_aClients[i].m_RenderPrev.m_X, m_aClients[i].m_RenderPrev.m_Y),
 				vec2(m_aClients[i].m_RenderCur.m_X, m_aClients[i].m_RenderCur.m_Y),
 				m_aClients[i].m_IsPredicted ? Client()->PredIntraGameTick(g_Config.m_ClDummy) : Client()->IntraGameTick(g_Config.m_ClDummy));
+			
 			if(g_Config.m_ClRemoveAnti)
 				Pos = GetFreezePos(i);
 
@@ -2507,15 +2524,6 @@ void CGameClient::UpdateRenderedCharacters()
 					if(m_Snap.m_aCharacters[i].m_Cur.m_Weapon != WEAPON_NINJA && !(pChar->m_NinjaJetpack && pChar->Core()->m_ActiveWeapon == WEAPON_GUN))
 						m_aClients[i].m_RenderCur.m_Weapon = m_aClients[i].m_Predicted.m_ActiveWeapon;
 				}
-				if(pChar && pChar->m_FreezeTime > 0)
-				{
-					g_Config.m_ClAmIFrozen = 1;
-				}
-				else
-				{
-					g_Config.m_ClAmIFrozen = 0;
-					g_Config.m_ClFreezeTick = Client()->GameTick(g_Config.m_ClDummy);
-				}
 			}
 			else
 			{
@@ -2525,8 +2533,16 @@ void CGameClient::UpdateRenderedCharacters()
 
 				if(g_Config.m_ClAntiPingSmooth)
 					Pos = GetSmoothPos(i);
+
 				if(g_Config.m_ClRemoveAnti && g_Config.m_ClAmIFrozen)
 					Pos = GetFreezePos(i);
+
+				if(g_Config.m_ClShowOthersGhosts && g_Config.m_ClSwapGhosts && !(m_aClients[i].m_FreezeEnd > 0 && g_Config.m_ClHideFrozenGhosts))
+					Pos = UnpredPos;
+
+				if(g_Config.m_ClUnpredOthersInFreeze && g_Config.m_ClAmIFrozen)
+					Pos = UnpredPos;
+
 			}
 		}
 		m_Snap.m_aCharacters[i].m_Position = Pos;
@@ -2658,7 +2674,8 @@ vec2 CGameClient::GetFreezePos(int ClientID)
 		float SmoothIntra;
 		int TicksFrozen = Client()->GameTick(g_Config.m_ClDummy) - g_Config.m_ClFreezeTick;
 
-		if (pChar && g_Config.m_ClAdjustRemovedDelay) {
+		if(pChar && g_Config.m_ClAdjustRemovedDelay && ClientID == m_Snap.m_LocalClientID)
+		{
 			TicksFrozen = pChar->m_FreezeAccumulation;
 		}
 
