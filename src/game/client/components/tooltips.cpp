@@ -12,20 +12,18 @@ void CTooltips::OnReset()
 {
 	m_HoverTime = -1;
 	m_Tooltips.clear();
+	ClearActiveTooltip();
 }
 
 void CTooltips::SetActiveTooltip(CTooltip &Tooltip)
 {
-	if(m_ActiveTooltip.has_value())
-		return;
-
 	m_ActiveTooltip.emplace(Tooltip);
-	m_HoverTime = time_get();
 }
 
 inline void CTooltips::ClearActiveTooltip()
 {
 	m_ActiveTooltip.reset();
+	m_PreviousTooltip.reset();
 }
 
 void CTooltips::DoToolTip(const void *pID, const CUIRect *pNearRect, const char *pText, float WidthHint)
@@ -67,6 +65,13 @@ void CTooltips::OnRender()
 
 		if(!Tooltip.m_OnScreen)
 			return;
+
+		// Reset hover time if a different tooltip is active.
+		// Only reset hover time when rendering, because multiple tooltips can
+		// activated in the same frame, but only the last one should be rendered.
+		if(!m_PreviousTooltip.has_value() || m_PreviousTooltip.value().get().m_pText != Tooltip.m_pText)
+			m_HoverTime = time_get();
+		m_PreviousTooltip.emplace(Tooltip);
 
 		// Delay tooltip until 1 second passed.
 		if(m_HoverTime > time_get() - time_freq())
