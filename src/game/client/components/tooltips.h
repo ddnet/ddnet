@@ -46,11 +46,10 @@ public:
 	 *
 	 * On the first call to this function, the data passed is cached, afterwards the calls are used to detect if the tooltip should be activated.
 	 *
-	 * For now only works correctly with single line tooltips, since Text width calculation gets broken when there are multiple lines.
-	 *
 	 * @param pID The ID of the tooltip. Usually a reference to some g_Config value.
-	 * @param pNearTo Place the tooltip near this rect.
-	 * @param pText The text to display in the tooltip
+	 * @param pNearRect Place the tooltip near this rect.
+	 * @param pText The text to display in the tooltip.
+	 * @param WidthHint The maximum width of the tooltip, or -1.0f for unlimited.
 	 */
 	void DoToolTip(const void *pID, const CUIRect *pNearRect, const char *pText, float WidthHint = -1.0f);
 

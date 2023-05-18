@@ -76,19 +76,10 @@ void CTooltips::OnRender()
 		constexpr float Margin = 5.0f;
 		constexpr float Padding = 5.0f;
 
+		const STextBoundingBox BoundingBox = TextRender()->TextBoundingBox(FontSize, Tooltip.m_pText, -1, Tooltip.m_WidthHint);
 		CUIRect Rect;
-		if(Tooltip.m_WidthHint < 0.0f)
-		{
-			const STextBoundingBox BoundingBox = TextRender()->TextBoundingBox(FontSize, Tooltip.m_pText);
-			Rect.w = BoundingBox.m_W + 2 * Padding;
-			Rect.h = BoundingBox.m_H + 2 * Padding;
-		}
-		else
-		{
-			const STextBoundingBox BoundingBox = TextRender()->TextBoundingBox(FontSize, Tooltip.m_pText, -1, Tooltip.m_WidthHint);
-			Rect.w = Tooltip.m_WidthHint;
-			Rect.h = BoundingBox.m_H;
-		}
+		Rect.w = BoundingBox.m_W + 2 * Padding;
+		Rect.h = BoundingBox.m_H + 2 * Padding;
 
 		const CUIRect *pScreen = UI()->Screen();
 		Rect.w = minimum(Rect.w, pScreen->w - 2 * Margin);
@@ -121,7 +112,9 @@ void CTooltips::OnRender()
 
 		Rect.Draw(ColorRGBA(0.2f, 0.2f, 0.2f, 0.8f), IGraphics::CORNER_ALL, Padding);
 		Rect.Margin(Padding, &Rect);
-		UI()->DoLabel(&Rect, Tooltip.m_pText, FontSize, TEXTALIGN_ML);
+		SLabelProperties Props;
+		Props.m_MaxWidth = Tooltip.m_WidthHint;
+		UI()->DoLabel(&Rect, Tooltip.m_pText, FontSize, TEXTALIGN_ML, Props);
 		Tooltip.m_OnScreen = false;
 	}
 }
