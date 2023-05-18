@@ -906,12 +906,12 @@ void CMenus::RenderLoading(const char *pCaption, const char *pContent, int Incre
 	Box.Draw(ColorRGBA{0, 0, 0, 0.50f}, IGraphics::CORNER_ALL, 15.0f);
 
 	CUIRect Part;
-
-	Box.HSplitTop(20.f, &Part, &Box);
+	Box.HSplitTop(20.f, nullptr, &Box);
 	Box.HSplitTop(24.f, &Part, &Box);
 	Part.VMargin(20.f, &Part);
 	UI()->DoLabel(&Part, pCaption, 24.f, TEXTALIGN_MC);
-	Box.HSplitTop(20.f, &Part, &Box);
+
+	Box.HSplitTop(20.f, nullptr, &Box);
 	Box.HSplitTop(24.f, &Part, &Box);
 	Part.VMargin(20.f, &Part);
 	UI()->DoLabel(&Part, pContent, 20.0f, TEXTALIGN_MC);
