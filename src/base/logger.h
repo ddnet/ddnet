@@ -202,7 +202,7 @@ std::unique_ptr<ILogger> log_logger_windows_debugger();
 class CFutureLogger : public ILogger
 {
 private:
-	std::atomic<ILogger *> m_pLogger;
+	std::shared_ptr<ILogger> m_pLogger;
 	std::vector<CLogMessage> m_vPending;
 	std::mutex m_PendingLock;
 
@@ -211,7 +211,7 @@ public:
 	 * Replace the `CFutureLogger` instance with the given logger. It'll
 	 * receive all log messages sent to the `CFutureLogger` so far.
 	 */
-	void Set(std::unique_ptr<ILogger> &&pLogger);
+	void Set(std::shared_ptr<ILogger> pLogger);
 	void Log(const CLogMessage *pMessage) override;
 	void GlobalFinish() override;
 };
