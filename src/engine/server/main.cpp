@@ -182,7 +182,8 @@ int main(int argc, const char **argv)
 			dbg_msg("server", "failed to open '%s' for logging", g_Config.m_Logfile);
 		}
 	}
-	pEngine->SetAdditionalLogger(std::make_unique<CServerLogger>(pServer));
+	auto pServerLogger = std::make_shared<CServerLogger>(pServer);
+	pEngine->SetAdditionalLogger(pServerLogger);
 
 	// run the server
 	dbg_msg("server", "starting...");
@@ -191,6 +192,7 @@ int main(int argc, const char **argv)
 	MysqlUninit();
 	secure_random_uninit();
 
+	pServerLogger->OnServerDeletion();
 	// free
 	delete pKernel;
 
