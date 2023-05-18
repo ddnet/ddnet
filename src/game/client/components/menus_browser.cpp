@@ -1462,10 +1462,12 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 				// info
 				if(Friend.ServerInfo())
 				{
-					if(Friend.IsPlayer())
-						str_format(aBuf, sizeof(aBuf), Localize("Playing '%s' on '%s'", "Playing '(gametype)' on '(map)'"), Friend.ServerInfo()->m_aGameType, Friend.ServerInfo()->m_aMap);
+					char aLatency[16];
+					FormatServerbrowserPing(aLatency, sizeof(aLatency), Friend.ServerInfo());
+					if(aLatency[0] != '\0')
+						str_format(aBuf, sizeof(aBuf), "%s | %s | %s", Friend.ServerInfo()->m_aMap, Friend.ServerInfo()->m_aGameType, aLatency);
 					else
-						str_format(aBuf, sizeof(aBuf), Localize("Spectating '%s' on '%s'", "Spectating '(gametype)' on '(map)'"), Friend.ServerInfo()->m_aGameType, Friend.ServerInfo()->m_aMap);
+						str_format(aBuf, sizeof(aBuf), "%s | %s", Friend.ServerInfo()->m_aMap, Friend.ServerInfo()->m_aGameType);
 					UI()->DoLabel(&InfoLabel, aBuf, FontSize - 2.0f, TEXTALIGN_ML);
 				}
 
