@@ -872,17 +872,17 @@ void CMenus::RenderLoading(const char *pCaption, const char *pContent, int Incre
 {
 	// TODO: not supported right now due to separate render thread
 
-	static std::chrono::nanoseconds LastLoadRender{0};
+	static std::chrono::nanoseconds s_LastLoadRender{0};
 	auto CurLoadRenderCount = m_LoadCurrent;
 	m_LoadCurrent += IncreaseCounter;
 	float Percent = CurLoadRenderCount / (float)m_LoadTotal;
 
 	// make sure that we don't render for each little thing we load
 	// because that will slow down loading if we have vsync
-	if(time_get_nanoseconds() - LastLoadRender < std::chrono::nanoseconds(1s) / 60l)
+	if(time_get_nanoseconds() - s_LastLoadRender < std::chrono::nanoseconds(1s) / 60l)
 		return;
 
-	LastLoadRender = time_get_nanoseconds();
+	s_LastLoadRender = time_get_nanoseconds();
 
 	// need up date this here to get correct
 	ms_GuiColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_UiColor, true));
