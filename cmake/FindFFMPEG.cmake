@@ -12,28 +12,28 @@ endif()
 
 set_extra_dirs_lib(FFMPEG ffmpeg)
 find_library(AVCODEC_LIBRARY
-  NAMES avcodec.59 avcodec libavcodec
+  NAMES avcodec.60 avcodec libavcodec
   HINTS ${HINTS_FFMPEG_LIBDIR} ${PC_AVCODEC_LIBRARY_DIRS}
   PATHS ${PATHS_AVCODEC_LIBDIR}
   ${CROSSCOMPILING_NO_CMAKE_SYSTEM_PATH}
 )
 
 find_library(AVFORMAT_LIBRARY
-  NAMES avformat.59 avformat libavformat
+  NAMES avformat.60 avformat libavformat
   HINTS ${HINTS_FFMPEG_LIBDIR} ${PC_AVFORMAT_LIBRARY_DIRS}
   PATHS ${PATHS_AVFORMAT_LIBDIR}
   ${CROSSCOMPILING_NO_CMAKE_SYSTEM_PATH}
 )
 
 find_library(AVUTIL_LIBRARY
-  NAMES avutil.57 avutil libavutil
+  NAMES avutil.58 avutil libavutil
   HINTS ${HINTS_FFMPEG_LIBDIR} ${PC_AVUTIL_LIBRARY_DIRS}
   PATHS ${PATHS_AVUTIL_LIBDIR}
   ${CROSSCOMPILING_NO_CMAKE_SYSTEM_PATH}
 )
 
 find_library(SWSCALE_LIBRARY
-  NAMES swscale.6 swscale libswscale
+  NAMES swscale.7 swscale libswscale
   HINTS ${HINTS_FFMPEG_LIBDIR} ${PC_SWSCALE_LIBRARY_DIRS}
   PATHS ${PATHS_SWSCALE_LIBDIR}
   ${CROSSCOMPILING_NO_CMAKE_SYSTEM_PATH}
@@ -150,19 +150,19 @@ set(FFMPEG_COPY_FILES)
 if(FFMPEG_BUNDLED)
   if(TARGET_OS STREQUAL "windows")
     set(FFMPEG_COPY_FILES
-      "${EXTRA_FFMPEG_LIBDIR}/avcodec-59.dll"
-      "${EXTRA_FFMPEG_LIBDIR}/avformat-59.dll"
-      "${EXTRA_FFMPEG_LIBDIR}/avutil-57.dll"
+      "${EXTRA_FFMPEG_LIBDIR}/avcodec-60.dll"
+      "${EXTRA_FFMPEG_LIBDIR}/avformat-60.dll"
+      "${EXTRA_FFMPEG_LIBDIR}/avutil-58.dll"
       "${EXTRA_FFMPEG_LIBDIR}/swresample-4.dll"
-      "${EXTRA_FFMPEG_LIBDIR}/swscale-6.dll"
+      "${EXTRA_FFMPEG_LIBDIR}/swscale-7.dll"
     )
   elseif(TARGET_OS STREQUAL "mac")
     set(FFMPEG_COPY_FILES
-      "${EXTRA_FFMPEG_LIBDIR}/libavcodec.59.dylib"
-      "${EXTRA_FFMPEG_LIBDIR}/libavformat.59.dylib"
-      "${EXTRA_FFMPEG_LIBDIR}/libavutil.57.dylib"
+      "${EXTRA_FFMPEG_LIBDIR}/libavcodec.60.dylib"
+      "${EXTRA_FFMPEG_LIBDIR}/libavformat.60.dylib"
+      "${EXTRA_FFMPEG_LIBDIR}/libavutil.58.dylib"
       "${EXTRA_FFMPEG_LIBDIR}/libswresample.4.dylib"
-      "${EXTRA_FFMPEG_LIBDIR}/libswscale.6.dylib"
+      "${EXTRA_FFMPEG_LIBDIR}/libswscale.7.dylib"
     )
   endif()
 endif()
