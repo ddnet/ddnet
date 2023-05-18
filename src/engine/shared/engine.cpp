@@ -30,7 +30,7 @@ public:
 	IStorage *m_pStorage;
 	bool m_Logging;
 
-	std::shared_ptr<ILogger> m_pFutureLogger;
+	std::shared_ptr<CFutureLogger> m_pFutureLogger;
 
 	char m_aAppName[256];
 
@@ -115,7 +115,7 @@ public:
 
 	void SetAdditionalLogger(std::shared_ptr<ILogger> &&pLogger) override
 	{
-		m_pFutureLogger = pLogger;
+		m_pFutureLogger->Set(pLogger);
 	}
 };
 

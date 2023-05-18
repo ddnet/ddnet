@@ -5,6 +5,7 @@
 
 #include <atomic>
 #include <cstdio>
+#include <memory>
 
 #if defined(CONF_FAMILY_WINDOWS)
 #define WIN32_LEAN_AND_MEAN
@@ -423,18 +424,19 @@ std::unique_ptr<ILogger> log_logger_windows_debugger()
 }
 #endif
 
-void CFutureLogger::Set(std::unique_ptr<ILogger> &&pLogger)
+void CFutureLogger::Set(std::shared_ptr<ILogger> pLogger)
 {
-	ILogger *null = nullptr;
+	std::shared_ptr<ILogger> null;
 	m_PendingLock.lock();
-	ILogger *pLoggerRaw = pLogger.release();
-	if(!m_pLogger.compare_exchange_strong(null, pLoggerRaw, std::memory_order_acq_rel))
+	if(!std::atomic_compare_exchange_strong_explicit(&m_pLogger, &null, pLogger, std::memory_order_acq_rel, std::memory_order_acq_rel))
 	{
 		dbg_assert(false, "future logger has already been set and can only be set once");
 	}
+	m_pLogger = std::move(pLogger);
+
 	for(const auto &Pending : m_vPending)
 	{
-		pLoggerRaw->Log(&Pending);
+		m_pLogger->Log(&Pending);
 	}
 	m_vPending.clear();
 	m_vPending.shrink_to_fit();
@@ -443,7 +445,7 @@ void CFutureLogger::Set(std::unique_ptr<ILogger> &&pLogger)
 
 void CFutureLogger::Log(const CLogMessage *pMessage)
 {
-	ILogger *pLogger = m_pLogger.load(std::memory_order_acquire);
+	auto pLogger = std::atomic_load_explicit(&m_pLogger, std::memory_order_acquire);
 	if(pLogger)
 	{
 		pLogger->Log(pMessage);
@@ -456,7 +458,7 @@ void CFutureLogger::Log(const CLogMessage *pMessage)
 
 void CFutureLogger::GlobalFinish()
 {
-	ILogger *pLogger = m_pLogger.load(std::memory_order_acquire);
+	auto pLogger = std::atomic_load_explicit(&m_pLogger, std::memory_order_acquire);
 	if(pLogger)
 	{
 		pLogger->GlobalFinish();
