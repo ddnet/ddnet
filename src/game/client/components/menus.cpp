@@ -873,9 +873,9 @@ void CMenus::RenderLoading(const char *pCaption, const char *pContent, int Incre
 	// TODO: not supported right now due to separate render thread
 
 	static std::chrono::nanoseconds s_LastLoadRender{0};
-	auto CurLoadRenderCount = m_LoadCurrent;
+	const int CurLoadRenderCount = m_LoadCurrent;
 	m_LoadCurrent += IncreaseCounter;
-	float Percent = CurLoadRenderCount / (float)m_LoadTotal;
+	const float Percent = CurLoadRenderCount / (float)m_LoadTotal;
 
 	// make sure that we don't render for each little thing we load
 	// because that will slow down loading if we have vsync
