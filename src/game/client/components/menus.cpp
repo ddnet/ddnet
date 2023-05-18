@@ -887,9 +887,6 @@ void CMenus::RenderLoading(const char *pCaption, const char *pContent, int Incre
 	// need up date this here to get correct
 	ms_GuiColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_UiColor, true));
 
-	CUIRect Screen = *UI()->Screen();
-	// some margin around the screen
-	Screen.Margin(10.0f, &Screen);
 	UI()->MapScreen();
 
 	if(!RenderMenuBackgroundMap || !m_pBackground->Render())
@@ -897,8 +894,8 @@ void CMenus::RenderLoading(const char *pCaption, const char *pContent, int Incre
 		RenderBackground();
 	}
 
-	CUIRect Box = Screen;
-	Box.Margin(150.0f, &Box);
+	CUIRect Box = *UI()->Screen();
+	Box.Margin(160.0f, &Box);
 
 	Graphics()->BlendNormal();
 
