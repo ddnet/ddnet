@@ -7,22 +7,23 @@
 #include <base/vmath.h>
 
 #include <chrono>
+#include <optional>
 #include <unordered_set>
 #include <vector>
 
 #include <engine/console.h>
 #include <engine/demo.h>
 #include <engine/friends.h>
+#include <engine/serverbrowser.h>
 #include <engine/shared/config.h>
 #include <engine/shared/linereader.h>
 #include <engine/textrender.h>
-#include <game/client/components/mapimages.h>
 
 #include <game/client/component.h>
+#include <game/client/components/mapimages.h>
+#include <game/client/render.h>
 #include <game/client/ui.h>
 #include <game/voting.h>
-
-#include <game/client/render.h>
 
 struct CServerProcess
 {
@@ -459,21 +460,37 @@ protected:
 		const CServerInfo *m_pServerInfo;
 		int m_FriendState;
 		bool m_IsPlayer;
+		// skin
+		char m_aSkin[24 + 1];
+		bool m_CustomSkinColors;
+		int m_CustomSkinColorBody;
+		int m_CustomSkinColorFeet;
 
 	public:
 		CFriendItem() {}
 		CFriendItem(const CFriendInfo *pFriendInfo) :
-			m_pServerInfo(nullptr), m_IsPlayer(false)
+			m_pServerInfo(nullptr),
+			m_IsPlayer(false),
+			m_CustomSkinColors(false),
+			m_CustomSkinColorBody(0),
+			m_CustomSkinColorFeet(0)
 		{
 			str_copy(m_aName, pFriendInfo->m_aName);
 			str_copy(m_aClan, pFriendInfo->m_aClan);
 			m_FriendState = m_aName[0] == '\0' ? IFriends::FRIEND_CLAN : IFriends::FRIEND_PLAYER;
+			m_aSkin[0] = '\0';
 		}
-		CFriendItem(const char *pName, const char *pClan, const CServerInfo *pServerInfo, int FriendState, bool IsPlayer) :
-			m_pServerInfo(pServerInfo), m_FriendState(FriendState), m_IsPlayer(IsPlayer)
+		CFriendItem(const CServerInfo::CClient &CurrentClient, const CServerInfo *pServerInfo) :
+			m_pServerInfo(pServerInfo),
+			m_FriendState(CurrentClient.m_FriendState),
+			m_IsPlayer(CurrentClient.m_Player),
+			m_CustomSkinColors(CurrentClient.m_CustomSkinColors),
+			m_CustomSkinColorBody(CurrentClient.m_CustomSkinColorBody),
+			m_CustomSkinColorFeet(CurrentClient.m_CustomSkinColorFeet)
 		{
-			str_copy(m_aName, pName);
-			str_copy(m_aClan, pClan);
+			str_copy(m_aName, CurrentClient.m_aName);
+			str_copy(m_aClan, CurrentClient.m_aClan);
+			str_copy(m_aSkin, CurrentClient.m_aSkin);
 		}
 
 		const char *Name() const { return m_aName; }
@@ -481,6 +498,10 @@ protected:
 		const CServerInfo *ServerInfo() const { return m_pServerInfo; }
 		int FriendState() const { return m_FriendState; }
 		bool IsPlayer() const { return m_IsPlayer; }
+		const char *Skin() const { return m_aSkin; }
+		bool CustomSkinColors() const { return m_CustomSkinColors; }
+		int CustomSkinColorBody() const { return m_CustomSkinColorBody; }
+		int CustomSkinColorFeet() const { return m_CustomSkinColorFeet; }
 
 		const void *ListItemId() const { return &m_aName; }
 		const void *RemoveButtonId() const { return &m_FriendState; }
@@ -542,7 +563,7 @@ protected:
 	// found in menus_browser.cpp
 	int m_SelectedIndex;
 	void RenderServerbrowserServerList(CUIRect View);
-	void Connect(const char *pAddress);
+	void Connect(const char *pAddress, std::optional<bool> Official = {});
 	void PopupConfirmSwitchServer();
 	void RenderServerbrowserServerDetail(CUIRect View);
 	void RenderServerbrowserFilters(CUIRect View);

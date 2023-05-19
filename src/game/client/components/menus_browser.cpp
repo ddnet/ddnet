@@ -585,9 +585,14 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	}
 }
 
-void CMenus::Connect(const char *pAddress)
+void CMenus::Connect(const char *pAddress, std::optional<bool> Official)
 {
-	if(Client()->State() == IClient::STATE_ONLINE && Client()->GetCurrentRaceTime() / 60 >= g_Config.m_ClConfirmDisconnectTime && g_Config.m_ClConfirmDisconnectTime >= 0)
+	if(Official.has_value() && !Official.value())
+	{
+		str_copy(m_aNextServer, pAddress);
+		PopupConfirm(Localize("Non-official server"), Localize("Are you sure that you want to connect to a non-official server?"), Localize("Yes"), Localize("No"), &CMenus::PopupConfirmSwitchServer);
+	}
+	else if(Client()->State() == IClient::STATE_ONLINE && Client()->GetCurrentRaceTime() / 60 >= g_Config.m_ClConfirmDisconnectTime && g_Config.m_ClConfirmDisconnectTime >= 0)
 	{
 		str_copy(m_aNextServer, pAddress);
 		PopupConfirm(Localize("Disconnect"), Localize("Are you sure that you want to disconnect and switch to a different server?"), Localize("Yes"), Localize("No"), &CMenus::PopupConfirmSwitchServer);
@@ -1317,7 +1322,7 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 				continue;
 
 			const int FriendIndex = CurrentClient.m_FriendState == IFriends::FRIEND_PLAYER ? FRIEND_PLAYER_ON : FRIEND_CLAN_ON;
-			m_avFriends[FriendIndex].emplace_back(CurrentClient.m_aName, CurrentClient.m_aClan, pEntry, CurrentClient.m_FriendState, CurrentClient.m_Player);
+			m_avFriends[FriendIndex].emplace_back(CurrentClient, pEntry);
 			const auto &&RemovalPredicate = [CurrentClient](const CFriendItem &Friend) {
 				return (Friend.Name()[0] == '\0' || str_comp(Friend.Name(), CurrentClient.m_aName) == 0) && ((Friend.Name()[0] != '\0' && g_Config.m_ClFriendsIgnoreClan) || str_comp(Friend.Clan(), CurrentClient.m_aClan) == 0);
 			};
@@ -1377,25 +1382,19 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 		// entries
 		if(s_aListExtended[FriendType])
 		{
-			// space
-			{
-				CUIRect Space;
-				List.HSplitTop(SpacingH, &Space, &List);
-				s_ScrollRegion.AddRect(Space);
-			}
-
 			for(size_t FriendIndex = 0; FriendIndex < m_avFriends[FriendType].size(); ++FriendIndex)
 			{
-				CUIRect Rect;
-				const auto &Friend = m_avFriends[FriendType][FriendIndex];
-				List.HSplitTop((FriendType == FRIEND_OFF ? 8.0f : 20.0f) + ms_ListheaderHeight, &Rect, &List);
-				s_ScrollRegion.AddRect(Rect);
-				if(FriendIndex < m_avFriends[FriendType].size() - 1)
+				// space
 				{
 					CUIRect Space;
 					List.HSplitTop(SpacingH, &Space, &List);
 					s_ScrollRegion.AddRect(Space);
 				}
+
+				CUIRect Rect;
+				const auto &Friend = m_avFriends[FriendType][FriendIndex];
+				List.HSplitTop(10.0f + 10.0f + 2 * 2.0f + 1.0f + (Friend.ServerInfo() == nullptr ? 0.0f : 10.0f), &Rect, &List);
+				s_ScrollRegion.AddRect(Rect);
 				if(s_ScrollRegion.IsRectClipped(Rect))
 					continue;
 
@@ -1409,29 +1408,91 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 				Rect.Draw(s_aListColors[FriendType].WithAlpha(Inside ? 0.5f : 0.3f), IGraphics::CORNER_ALL, 5.0f);
 				Rect.Margin(2.0f, &Rect);
 
-				CUIRect Label, RemoveButton;
+				CUIRect RemoveButton, NameLabel, ClanLabel, InfoLabel;
 				Rect.HSplitTop(16.0f, &RemoveButton, nullptr);
 				RemoveButton.VSplitRight(13.0f, nullptr, &RemoveButton);
 				RemoveButton.HMargin((RemoveButton.h - RemoveButton.w) / 2.0f, &RemoveButton);
 				Rect.VSplitLeft(2.0f, nullptr, &Rect);
 
+				if(Friend.ServerInfo())
+					Rect.HSplitBottom(10.0f, &Rect, &InfoLabel);
+				Rect.HSplitTop(20.0f, &Rect, nullptr);
+
+				// tee
+				if(Friend.Skin()[0] != '\0')
+				{
+					CUIRect Skin;
+					Rect.VSplitLeft(Rect.h, &Skin, &Rect);
+					Rect.VSplitLeft(2.0f, nullptr, &Rect);
+
+					CTeeRenderInfo TeeInfo;
+					const CSkin *pSkin = m_pClient->m_Skins.Find(Friend.Skin());
+					TeeInfo.m_OriginalRenderSkin = pSkin->m_OriginalSkin;
+					TeeInfo.m_ColorableRenderSkin = pSkin->m_ColorableSkin;
+					TeeInfo.m_SkinMetrics = pSkin->m_Metrics;
+					TeeInfo.m_CustomColoredSkin = Friend.CustomSkinColors();
+					if(Friend.CustomSkinColors())
+					{
+						TeeInfo.m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(Friend.CustomSkinColorBody()).UnclampLighting());
+						TeeInfo.m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(Friend.CustomSkinColorFeet()).UnclampLighting());
+					}
+					else
+					{
+						TeeInfo.m_ColorBody = ColorRGBA(1.0f, 1.0f, 1.0f);
+						TeeInfo.m_ColorFeet = ColorRGBA(1.0f, 1.0f, 1.0f);
+					}
+					TeeInfo.m_Size = minimum(Skin.w, Skin.h);
+
+					CAnimState *pIdleState = CAnimState::GetIdle();
+					vec2 OffsetToMid;
+					RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &TeeInfo, OffsetToMid);
+					vec2 TeeRenderPos(Skin.x + Skin.w / 2.0f, Skin.y + Skin.h * 0.55f + OffsetToMid.y);
+
+					RenderTools()->RenderTee(pIdleState, &TeeInfo, EMOTE_NORMAL, vec2(1.0f, 0.0f), TeeRenderPos);
+				}
+				Rect.HSplitMid(&NameLabel, &ClanLabel);
+
 				// name
-				Rect.HSplitTop(10.0f, &Label, &Rect);
-				UI()->DoLabel(&Label, Friend.Name(), FontSize - 2.0f, TEXTALIGN_ML);
+				UI()->DoLabel(&NameLabel, Friend.Name(), FontSize - 2.0f, TEXTALIGN_ML);
 
 				// clan
-				Rect.HSplitTop(10.0f, &Label, &Rect);
-				UI()->DoLabel(&Label, Friend.Clan(), FontSize - 2.0f, TEXTALIGN_ML);
+				UI()->DoLabel(&ClanLabel, Friend.Clan(), FontSize - 2.0f, TEXTALIGN_ML);
 
-				// info
+				// server info
 				if(Friend.ServerInfo())
 				{
-					Rect.HSplitTop(ms_ListheaderHeight, &Label, &Rect);
-					if(Friend.IsPlayer())
-						str_format(aBuf, sizeof(aBuf), Localize("Playing '%s' on '%s'", "Playing '(gametype)' on '(map)'"), Friend.ServerInfo()->m_aGameType, Friend.ServerInfo()->m_aMap);
+					// official server icon
+					if(Friend.ServerInfo()->m_Official)
+					{
+						CUIRect OfficialIcon;
+						InfoLabel.VSplitLeft(InfoLabel.h, &OfficialIcon, &InfoLabel);
+						InfoLabel.VSplitLeft(1.0f, nullptr, &InfoLabel); // spacing
+						OfficialIcon.HSplitTop(1.0f, nullptr, &OfficialIcon); // alignment
+
+						SLabelProperties Props;
+						Props.m_EnableWidthCheck = false;
+						TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
+						TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
+						TextRender()->TextColor(0.4f, 0.7f, 0.94f, 1.0f);
+						TextRender()->TextOutlineColor(0.0f, 0.0f, 0.0f, 1.0f);
+						UI()->DoLabel(&OfficialIcon, FONT_ICON_CERTIFICATE, OfficialIcon.h, TEXTALIGN_MC, Props);
+						TextRender()->TextColor(0.0f, 0.0f, 0.0f, 1.0f);
+						TextRender()->TextOutlineColor(0.0f, 0.0f, 0.0f, 0.0f);
+						UI()->DoLabel(&OfficialIcon, FONT_ICON_CHECK, OfficialIcon.h * 0.5f, TEXTALIGN_MC, Props);
+						TextRender()->TextColor(TextRender()->DefaultTextColor());
+						TextRender()->TextOutlineColor(TextRender()->DefaultTextOutlineColor());
+						TextRender()->SetRenderFlags(0);
+						TextRender()->SetCurFont(nullptr);
+					}
+
+					// server info text
+					char aLatency[16];
+					FormatServerbrowserPing(aLatency, sizeof(aLatency), Friend.ServerInfo());
+					if(aLatency[0] != '\0')
+						str_format(aBuf, sizeof(aBuf), "%s | %s | %s", Friend.ServerInfo()->m_aMap, Friend.ServerInfo()->m_aGameType, aLatency);
 					else
-						str_format(aBuf, sizeof(aBuf), Localize("Spectating '%s' on '%s'", "Spectating '(gametype)' on '(map)'"), Friend.ServerInfo()->m_aGameType, Friend.ServerInfo()->m_aMap);
-					UI()->DoLabel(&Label, aBuf, FontSize - 2.0f, TEXTALIGN_ML);
+						str_format(aBuf, sizeof(aBuf), "%s | %s", Friend.ServerInfo()->m_aMap, Friend.ServerInfo()->m_aGameType);
+					UI()->DoLabel(&InfoLabel, aBuf, FontSize - 2.0f, TEXTALIGN_ML);
 				}
 
 				// remove button
@@ -1453,7 +1514,7 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 					str_copy(g_Config.m_UiServerAddress, Friend.ServerInfo()->m_aAddress);
 					if(Input()->MouseDoubleClick())
 					{
-						Client()->Connect(g_Config.m_UiServerAddress);
+						Connect(g_Config.m_UiServerAddress, Friend.ServerInfo()->m_Official);
 					}
 				}
 			}
