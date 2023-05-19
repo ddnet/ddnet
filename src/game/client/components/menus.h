@@ -7,7 +7,6 @@
 #include <base/vmath.h>
 
 #include <chrono>
-#include <optional>
 #include <unordered_set>
 #include <vector>
 
@@ -194,15 +193,6 @@ class CMenus : public CComponent
 		return UI()->DoButtonLogic(pID, Checked, pRect);
 	}
 
-	/**
-	 * Places and renders a tooltip near pNearRect.
-	 * For now only works correctly with single line tooltips, since Text width calculation gets broken when there are multiple lines.
-	 *
-	 * @param pID The ID of the tooltip. Usually a reference to some g_Config value.
-	 * @param pNearTo Place the tooltip near this rect.
-	 * @param pText The text to display in the tooltip
-	 */
-	void DoToolTip(const void *pID, const CUIRect *pNearRect, const char *pText, float WidthHint = -1.0f);
 	// menus_settings_assets.cpp
 public:
 	struct SCustomItem
@@ -563,7 +553,7 @@ protected:
 	// found in menus_browser.cpp
 	int m_SelectedIndex;
 	void RenderServerbrowserServerList(CUIRect View);
-	void Connect(const char *pAddress, std::optional<bool> Official = {});
+	void Connect(const char *pAddress);
 	void PopupConfirmSwitchServer();
 	void RenderServerbrowserServerDetail(CUIRect View);
 	void RenderServerbrowserFilters(CUIRect View);
