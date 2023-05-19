@@ -1526,31 +1526,31 @@ Loading sound files
 
 [Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== Probléma derült fel inicializálás közben. Változtasson a "gfx_backend" parancson "OpenGL"-re vagy "Vulkan"-ra a "settings_ddnet.cfg" fájlon és próbálja meg újra. (Windows-on: %appdata%\Roaming\ddnet\settings_ddnet.cfg | Linux-on: /home/PCNAME/.local/share/ddnet/settings_ddnet.cfg)
+== Probléma derült fel inicializálás közben. Változtasson a "gfx_backend" parancson "OpenGL"-re vagy "Vulkan"-ra a "settings_ddnet.cfg" fájlon és próbálja meg újra.
 
 [Graphics error]
 Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== Probléma derült fel Virtuális Memóriával. Nincs elég Virtuális Memória Textúrák vagy képek betöltésére (Karakterek, Entitások, stb.), főként a nagy minőségű képekre vonatkozva. (Próbáljon kevesebb Textúrát vagy képet a Kliensbe rakni, hogy rendbe jöjjön a probléma.)
+== Probléma derült fel Virtuális Memóriával. Nincs elég Virtuális Memória Textúrák vagy képek betöltésére (Karakterek, Entitások, stb.), főként a nagy minőségű képekre vonatkozva.
 
 [Graphics error]
 An error during command recording occurred. Try to update your GPU drivers.
-== Probléma derült fel felvétel közben. Próbálja felújítani a Videókártyája driver-ét. (Lehet, hogy nem észlelhető a Videókártyája, vagy a driver nem támogatott.)
+== Probléma derült fel felvétel közben. Próbálja felújítani a Videókártyája driver-ét.
 
 [Graphics error]
 A render command failed. Try to update your GPU drivers.
-== Probléma derült fel renderelés parancsa közben. Próbálja felújítani a Videókártyája driver-ét. (Lehet, hogy nem észlelhető a Videókártyája, vagy a driver nem támogatott.)
+== Probléma derült fel renderelés parancsa közben. Próbálja felújítani a Videókártyája driver-ét.
 
 [Graphics error]
 Submitting the render commands failed. Try to update your GPU drivers.
-== Probléma derült fel renderelési parancs végrehajtása közben. Próbálja felújítani a Videókártyája driver-ét. (Lehet, hogy nem észlelhető a Videókártyája, vagy a driver nem támogatott.)
+== Probléma derült fel renderelési parancs végrehajtása közben. Próbálja felújítani a Videókártyája driver-ét.
 
 [Graphics error]
 Failed to swap framebuffers. Try to update your GPU drivers.
-== Probléma derült fel a framebuffer-nél. Nem sikerült framebuffer-t cserélni. Próbálja felújítani a Videókártyája driver-ét. (Lehet, hogy nem észlelhető a Videókártyája, vagy a driver nem támogatott.)
+== Probléma derült fel a framebuffer-nél. Nem sikerült framebuffer-t cserélni. Próbálja felújítani a Videókártyája driver-ét.
 
 [Graphics error]
 Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== Ismeretlen probléma derült fel. Változtasson a "gfx_backend" parancson "OpenGL"-re vagy "Vulkan"-ra a "settings_ddnet.cfg" fájlon és próbálja meg újra. (Windows-on: %appdata%\Roaming\ddnet\settings_ddnet.cfg | Linux-on: /home/PCNAME/.local/share/ddnet/settings_ddnet.cfg)
+== Ismeretlen probléma derült fel. Változtasson a "gfx_backend" parancson "OpenGL"-re vagy "Vulkan"-ra a "settings_ddnet.cfg" fájlon és próbálja meg újra.
 
 [Graphics error]
 Could not initialize the given graphics backend, reverting to the default backend now.
@@ -1561,7 +1561,7 @@ Could not initialize the given graphics backend, this is probably because you di
 == Nem sikerült inicializálni a megadott Grafikai Renderer-re (OpenGL vagy Vulkan Renderer), lehetőleg a Integrált Videókártyája driver-e nincs telepítve, vagy nem észlelhető driver rajta.
 
 Could not save downloaded map. Try manually deleting this file: %s
-== Nem sikerült elmenteni a letöltött pályát. Próbálja meg manuális módon kitörölni a fáljt: %s. (Windows-on: %appdata%\Roaming\ddnet\downloadedmaps\. | Linux-on: /home/PCNAME/.local/share/ddnet/downloadedmaps/.)
+== Nem sikerült elmenteni a letöltött pályát. Próbálja meg manuális módon kitörölni a fáljt: %s.
 
 Why are you slowmo replaying to read this?
 == Miért lassított módon rögzítesz, hogy elolvasd ezt?
