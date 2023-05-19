@@ -1713,7 +1713,7 @@ Online players (%d)
 == Online-Spieler (%d)
 
 Online clanmates (%d)
-== Online-Clanmates (%d)
+== Online-Clanmitglieder (%d)
 
 [friends (server browser)]
 Offline (%d)
