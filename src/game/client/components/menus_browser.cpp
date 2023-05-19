@@ -1509,7 +1509,7 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 					str_copy(g_Config.m_UiServerAddress, Friend.ServerInfo()->m_aAddress);
 					if(Input()->MouseDoubleClick())
 					{
-						Client()->Connect(g_Config.m_UiServerAddress);
+						Connect(g_Config.m_UiServerAddress);
 					}
 				}
 			}
