@@ -585,7 +585,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	}
 }
 
-void CMenus::Connect(const char *pAddress, std::optional<bool> Official)
+void CMenus::Connect(const char *pAddress)
 {
 	if(Client()->State() == IClient::STATE_ONLINE && Client()->GetCurrentRaceTime() / 60 >= g_Config.m_ClConfirmDisconnectTime && g_Config.m_ClConfirmDisconnectTime >= 0)
 	{
@@ -1509,7 +1509,7 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 					str_copy(g_Config.m_UiServerAddress, Friend.ServerInfo()->m_aAddress);
 					if(Input()->MouseDoubleClick())
 					{
-						Connect(g_Config.m_UiServerAddress, Friend.ServerInfo()->m_Official);
+						Connect(g_Config.m_UiServerAddress);
 					}
 				}
 			}

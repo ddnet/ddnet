@@ -7,7 +7,6 @@
 #include <base/vmath.h>
 
 #include <chrono>
-#include <optional>
 #include <unordered_set>
 #include <vector>
 
@@ -563,7 +562,7 @@ protected:
 	// found in menus_browser.cpp
 	int m_SelectedIndex;
 	void RenderServerbrowserServerList(CUIRect View);
-	void Connect(const char *pAddress, std::optional<bool> Official = {});
+	void Connect(const char *pAddress);
 	void PopupConfirmSwitchServer();
 	void RenderServerbrowserServerDetail(CUIRect View);
 	void RenderServerbrowserFilters(CUIRect View);
