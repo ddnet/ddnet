@@ -37,6 +37,11 @@ void COutlines::OnRender()
 			bool IsTeleLayer = false;
 
 			if(pLayer == (CMapItemLayer *)GameClient()->Layers()->TeleLayer())
+				IsTeleLayer = true;
+			if(pLayer == (CMapItemLayer *)GameClient()->Layers()->GameLayer())
+			{
+				 IsGameLayer = true;
+			}
 
 			if(g_Config.m_ClOutline && IsGameLayer)
 			{
