@@ -1377,25 +1377,19 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 		// entries
 		if(s_aListExtended[FriendType])
 		{
-			// space
-			{
-				CUIRect Space;
-				List.HSplitTop(SpacingH, &Space, &List);
-				s_ScrollRegion.AddRect(Space);
-			}
-
 			for(size_t FriendIndex = 0; FriendIndex < m_avFriends[FriendType].size(); ++FriendIndex)
 			{
-				CUIRect Rect;
-				const auto &Friend = m_avFriends[FriendType][FriendIndex];
-				List.HSplitTop(10.0f + 10.0f + 2 * 2.0f + 1.0f + (Friend.ServerInfo() == nullptr ? 0.0f : 10.0f), &Rect, &List);
-				s_ScrollRegion.AddRect(Rect);
-				if(FriendIndex < m_avFriends[FriendType].size() - 1)
+				// space
 				{
 					CUIRect Space;
 					List.HSplitTop(SpacingH, &Space, &List);
 					s_ScrollRegion.AddRect(Space);
 				}
+
+				CUIRect Rect;
+				const auto &Friend = m_avFriends[FriendType][FriendIndex];
+				List.HSplitTop(10.0f + 10.0f + 2 * 2.0f + 1.0f + (Friend.ServerInfo() == nullptr ? 0.0f : 10.0f), &Rect, &List);
+				s_ScrollRegion.AddRect(Rect);
 				if(s_ScrollRegion.IsRectClipped(Rect))
 					continue;
 
