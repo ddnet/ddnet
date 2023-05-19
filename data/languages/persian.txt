@@ -1671,6 +1671,31 @@ Initializing map logic
 Copy info
 == 
 
+Online players (%d)
+== 
+
+Online clanmates (%d)
+== 
+
+[friends (server browser)]
+Offline (%d)
+== 
+
+Click to select server. Double click to join your friend.
+== 
+
+Click to remove this player from your friends list.
+== 
+
+Click to remove this clan from your friends list.
+== 
+
+None
+== 
+
+Add Clan
+== 
+
 Create a random skin
 == 
 

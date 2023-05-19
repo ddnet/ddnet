@@ -1703,3 +1703,28 @@ Copy info
 
 Create a random skin
 == Создать случайный скин
+
+Online players (%d)
+== Друзей онлайн (%d)
+
+Online clanmates (%d)
+== Участников клана онлайн (%d)
+
+[friends (server browser)]
+Offline (%d)
+== Не в сети (%d)
+
+Click to select server. Double click to join your friend.
+== Нажмите, чтобы выбрать сервер. Двойное нажатие, чтобы присоединиться к другу
+
+Click to remove this player from your friends list.
+== Нажмите, чтобы убрать игрока со списка друзей.
+
+Click to remove this clan from your friends list.
+== Нажмите, чтобы убрать клан со списка друзей.
+
+None
+== Пусто
+
+Add Clan
+== Добавить клан
