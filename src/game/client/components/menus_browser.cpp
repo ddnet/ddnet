@@ -587,12 +587,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 
 void CMenus::Connect(const char *pAddress, std::optional<bool> Official)
 {
-	if(Official.has_value() && !Official.value())
-	{
-		str_copy(m_aNextServer, pAddress);
-		PopupConfirm(Localize("Non-official server"), Localize("Are you sure that you want to connect to a non-official server?"), Localize("Yes"), Localize("No"), &CMenus::PopupConfirmSwitchServer);
-	}
-	else if(Client()->State() == IClient::STATE_ONLINE && Client()->GetCurrentRaceTime() / 60 >= g_Config.m_ClConfirmDisconnectTime && g_Config.m_ClConfirmDisconnectTime >= 0)
+	if(Client()->State() == IClient::STATE_ONLINE && Client()->GetCurrentRaceTime() / 60 >= g_Config.m_ClConfirmDisconnectTime && g_Config.m_ClConfirmDisconnectTime >= 0)
 	{
 		str_copy(m_aNextServer, pAddress);
 		PopupConfirm(Localize("Disconnect"), Localize("Are you sure that you want to disconnect and switch to a different server?"), Localize("Yes"), Localize("No"), &CMenus::PopupConfirmSwitchServer);
