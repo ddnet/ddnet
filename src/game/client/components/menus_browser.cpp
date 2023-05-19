@@ -1388,7 +1388,7 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 
 				CUIRect Rect;
 				const auto &Friend = m_avFriends[FriendType][FriendIndex];
-				List.HSplitTop(10.0f + 10.0f + 2 * 2.0f + 1.0f + (Friend.ServerInfo() == nullptr ? 0.0f : 10.0f), &Rect, &List);
+				List.HSplitTop(11.0f + 10.0f + 2 * 2.0f + 1.0f + (Friend.ServerInfo() == nullptr ? 0.0f : 10.0f), &Rect, &List);
 				s_ScrollRegion.AddRect(Rect);
 				if(s_ScrollRegion.IsRectClipped(Rect))
 					continue;
@@ -1411,7 +1411,7 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 
 				if(Friend.ServerInfo())
 					Rect.HSplitBottom(10.0f, &Rect, &InfoLabel);
-				Rect.HSplitTop(20.0f, &Rect, nullptr);
+				Rect.HSplitTop(11.0f + 10.0f, &Rect, nullptr);
 
 				// tee
 				if(Friend.Skin()[0] != '\0')
@@ -1445,10 +1445,10 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 
 					RenderTools()->RenderTee(pIdleState, &TeeInfo, EMOTE_NORMAL, vec2(1.0f, 0.0f), TeeRenderPos);
 				}
-				Rect.HSplitMid(&NameLabel, &ClanLabel);
+				Rect.HSplitTop(11.0f, &NameLabel, &ClanLabel);
 
 				// name
-				UI()->DoLabel(&NameLabel, Friend.Name(), FontSize - 2.0f, TEXTALIGN_ML);
+				UI()->DoLabel(&NameLabel, Friend.Name(), FontSize - 1.0f, TEXTALIGN_ML);
 
 				// clan
 				UI()->DoLabel(&ClanLabel, Friend.Clan(), FontSize - 2.0f, TEXTALIGN_ML);
