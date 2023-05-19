@@ -1718,10 +1718,10 @@ Click to select server. Double click to join your friend.
 == Нажмите, чтобы выбрать сервер. Двойное нажатие, чтобы присоединиться к другу
 
 Click to remove this player from your friends list.
-== Нажмите, чтобы убрать игрока со списка друзей.
+== Нажмите, чтобы убрать игрока из списка друзей.
 
 Click to remove this clan from your friends list.
-== Нажмите, чтобы убрать клан со списка друзей.
+== Нажмите, чтобы Исключить клан из списка.
 
 None
 == Пусто

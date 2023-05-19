@@ -1368,7 +1368,7 @@ Online clanmates (%d)
 
 [friends (server browser)]
 Offline (%d)
-== Не в мережі
+== Не в мережі (%d) 
 
 Click to select server. Double click to join your friend.
 == Натисніть, щоб вибрати сервер. Натисніть двічі, щоб приєднатися до друга
@@ -1511,7 +1511,7 @@ UI controller sens.
 == Чутливість контролера в меню
 
 Controller jitter tolerance
-== Чутливість до тремтіння контролера
+== Чутливість до вібрації контролера
 
 No controller found. Plug in a controller.
 == Контролер не знайдено. Підключіть контролер.
@@ -1535,7 +1535,7 @@ Ingame mouse sens.
 == Чутливість миші в грі
 
 UI mouse sens.
-== Чутливість мишу в меню
+== Чутливість миші в меню
 
 Controller
 == Контролер
@@ -1712,7 +1712,7 @@ Can't find a Tutorial server
 == Не можемо знайти сервер з туторіалом
 
 Loading race demo files
-== Завантаження демо-файлів, рейсу
+== Завантаження демо-файлів рейсу
 
 Super
 == Супер
