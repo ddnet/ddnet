@@ -1453,9 +1453,34 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 				// clan
 				UI()->DoLabel(&ClanLabel, Friend.Clan(), FontSize - 2.0f, TEXTALIGN_ML);
 
-				// info
+				// server info
 				if(Friend.ServerInfo())
 				{
+					// official server icon
+					if(Friend.ServerInfo()->m_Official)
+					{
+						CUIRect OfficialIcon;
+						InfoLabel.VSplitLeft(InfoLabel.h, &OfficialIcon, &InfoLabel);
+						InfoLabel.VSplitLeft(1.0f, nullptr, &InfoLabel); // spacing
+						OfficialIcon.HSplitTop(1.0f, nullptr, &OfficialIcon); // alignment
+
+						SLabelProperties Props;
+						Props.m_EnableWidthCheck = false;
+						TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
+						TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
+						TextRender()->TextColor(0.4f, 0.7f, 0.94f, 1.0f);
+						TextRender()->TextOutlineColor(0.0f, 0.0f, 0.0f, 1.0f);
+						UI()->DoLabel(&OfficialIcon, FONT_ICON_CERTIFICATE, OfficialIcon.h, TEXTALIGN_MC, Props);
+						TextRender()->TextColor(0.0f, 0.0f, 0.0f, 1.0f);
+						TextRender()->TextOutlineColor(0.0f, 0.0f, 0.0f, 0.0f);
+						UI()->DoLabel(&OfficialIcon, FONT_ICON_CHECK, OfficialIcon.h * 0.5f, TEXTALIGN_MC, Props);
+						TextRender()->TextColor(TextRender()->DefaultTextColor());
+						TextRender()->TextOutlineColor(TextRender()->DefaultTextOutlineColor());
+						TextRender()->SetRenderFlags(0);
+						TextRender()->SetCurFont(nullptr);
+					}
+
+					// server info text
 					char aLatency[16];
 					FormatServerbrowserPing(aLatency, sizeof(aLatency), Friend.ServerInfo());
 					if(aLatency[0] != '\0')
