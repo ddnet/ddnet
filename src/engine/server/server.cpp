@@ -3417,7 +3417,7 @@ void CServer::ConAddSqlServer(IConsole::IResult *pResult, void *pUserData)
 	str_copy(Config.m_aUser, pResult->GetString(3), sizeof(Config.m_aUser));
 	str_copy(Config.m_aPass, pResult->GetString(4), sizeof(Config.m_aPass));
 	str_copy(Config.m_aIp, pResult->GetString(5), sizeof(Config.m_aIp));
-	str_copy(Config.m_aBindaddr, Config.m_aBindaddr, sizeof(Config.m_aBindaddr));
+	Config.m_aBindaddr[0] = '\0';
 	Config.m_Port = pResult->GetInteger(6);
 	Config.m_Setup = pResult->NumArguments() == 8 ? pResult->GetInteger(7) : true;
 
