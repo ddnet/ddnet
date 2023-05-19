@@ -3604,7 +3604,20 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		}
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClUnpredOthersInFreeze, ("Dont predict other players if you are frozen"), &g_Config.m_ClUnpredOthersInFreeze, &MainView, LineMargin);
 		
-		MainView.HSplitTop(10.0f, 0, &MainView);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClPredMarginInFreeze, ("Adjust your prediction margin while frozen"), &g_Config.m_ClPredMarginInFreeze, &MainView, LineMargin);
+		if(g_Config.m_ClPredMarginInFreeze)
+		{
+			CUIRect Button, Label;
+			MainView.HSplitTop(20.0f, &Button, &MainView);
+			Button.VSplitLeft(125.0f, &Label, &Button);
+			char aBuf[64];
+			str_format(aBuf, sizeof(aBuf), "%s: %ims", "Frozen Margin", g_Config.m_ClPredMarginInFreezeAmount);
+			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
+			g_Config.m_ClPredMarginInFreezeAmount = (int)(UI()->DoScrollbarH(&g_Config.m_ClPredMarginInFreezeAmount, &Button, (g_Config.m_ClPredMarginInFreezeAmount) / 100.0f) * 100.0f);
+		}
+
+
+		//MainView.HSplitTop(10.0f, 0, &MainView);
 		MainView.HSplitTop(30.0f, &Section, &MainView);
 		UI()->DoLabel(&Section, ("Ghost Tools"), 18, TEXTALIGN_LEFT);
 
@@ -3617,7 +3630,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), "%s: %i%%", "Predicted Alpha", g_Config.m_ClPredGhostsAlpha);
 			UI()->DoLabel(&Label, aBuf, 14.0f, TEXTALIGN_LEFT);
-			g_Config.m_ClPredGhostsAlpha = (int)(UI()->DoScrollbarH(&g_Config.m_ClPredGhostsAlpha, &Button, (g_Config.m_ClPredGhostsAlpha) / 100.0f) * 100.0f);
+			g_Config.m_ClPredGhostsAlpha = (int)(UI()->DoScrollbarH(&g_Config.m_ClPredGhostsAlpha, &Button, (g_Config.m_ClPredGhostsAlpha) / 50.0f) * 50.0f);
 		}
 		{
 			CUIRect Button, Label;

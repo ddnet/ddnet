@@ -4934,6 +4934,10 @@ int CClient::MaxLatencyTicks() const
 
 int CClient::PredictionMargin() const
 {
+	if(g_Config.m_ClPredMarginInFreeze && g_Config.m_ClAmIFrozen)
+	{
+		return g_Config.m_ClPredMarginInFreezeAmount;
+	}
 	return g_Config.m_ClPredictionMargin;
 }
 
