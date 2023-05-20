@@ -1628,7 +1628,7 @@ void CHud::RenderDDRaceEffects()
 			TextRender()->SetCursor(&Cursor, 150 * Graphics()->ScreenAspect() - TextRender()->TextWidth(12, aBuf, -1, -1.0f) / 2, 20, 12, TEXTFLAG_RENDER);
 			Cursor.m_LineWidth = -1.0f;
 			TextRender()->RecreateTextContainer(m_DDRaceEffectsTextContainerIndex, &Cursor, aBuf);
-			if(m_FinishTimeDiff != 0.0f)
+			if(m_FinishTimeDiff != 0.0f && m_DDRaceEffectsTextContainerIndex.Valid())
 			{
 				if(m_FinishTimeDiff < 0)
 				{
