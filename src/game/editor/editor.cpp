@@ -1127,7 +1127,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 			TB_Bottom.VSplitLeft(45.0f, &Button, &TB_Bottom);
 			static int s_RefocusButton = 0;
 			int FocusButtonChecked;
-			if(m_ProofBorders && m_MenuProofBorders)
+			if(m_ProofBorders == PROOF_BORDER_MENU)
 			{
 				if(distance(m_vMenuBackgroundPositions[m_CurrentMenuProofIndex], vec2(m_WorldOffsetX, m_WorldOffsetY)) < 0.0001f)
 					FocusButtonChecked = -1;
@@ -1143,7 +1143,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 			}
 			if(DoButton_Editor(&s_RefocusButton, "Refocus", FocusButtonChecked, &Button, 0, "[HOME] Restore map focus") || (m_Dialog == DIALOG_NONE && m_EditBoxActive == 0 && Input()->KeyPress(KEY_HOME)))
 			{
-				if(m_ProofBorders && m_MenuProofBorders)
+				if(m_ProofBorders == PROOF_BORDER_MENU)
 				{
 					m_WorldOffsetX = m_vMenuBackgroundPositions[m_CurrentMenuProofIndex].x;
 					m_WorldOffsetY = m_vMenuBackgroundPositions[m_CurrentMenuProofIndex].y;
@@ -2924,7 +2924,7 @@ void CEditor::DoMapEditor(CUIRect View)
 			float aPoints[4];
 			float Aspect = Start + (End - Start) * (i / (float)NumSteps);
 
-			float Zoom = (m_ProofBorders && m_MenuProofBorders) ? 0.7f : 1.0f;
+			float Zoom = (m_ProofBorders == PROOF_BORDER_MENU) ? 0.7f : 1.0f;
 			RenderTools()->MapScreenToWorld(
 				m_WorldOffsetX, m_WorldOffsetY,
 				100.0f, 100.0f, 100.0f, 0.0f, 0.0f, Aspect, Zoom, aPoints);
@@ -2967,7 +2967,7 @@ void CEditor::DoMapEditor(CUIRect View)
 				const float aAspects[] = {4.0f / 3.0f, 16.0f / 10.0f, 5.0f / 4.0f, 16.0f / 9.0f};
 				float Aspect = aAspects[i];
 
-				float Zoom = (m_ProofBorders && m_MenuProofBorders) ? 0.7f : 1.0f;
+				float Zoom = (m_ProofBorders == PROOF_BORDER_MENU) ? 0.7f : 1.0f;
 				RenderTools()->MapScreenToWorld(
 					m_WorldOffsetX, m_WorldOffsetY,
 					100.0f, 100.0f, 100.0f, 0.0f, 0.0f, Aspect, Zoom, aPoints);
@@ -2996,7 +2996,7 @@ void CEditor::DoMapEditor(CUIRect View)
 			Graphics()->SetColor(0, 0, 1, 0.3f);
 			Graphics()->DrawCircle(m_WorldOffsetX, m_WorldOffsetY - 3.0f, 20.0f, 32);
 
-			if(m_ProofBorders && m_MenuProofBorders)
+			if(m_ProofBorders == PROOF_BORDER_MENU)
 			{
 				Graphics()->SetColor(0, 1, 0, 0.3f);
 

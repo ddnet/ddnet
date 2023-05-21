@@ -1034,8 +1034,15 @@ public:
 	bool m_LockMouse;
 	bool m_ShowMousePointer;
 	bool m_GuiActive;
-	bool m_ProofBorders;
-	bool m_MenuProofBorders;
+
+	enum EProofBorder
+	{
+		PROOF_BORDER_OFF,
+		PROOF_BORDER_INGAME,
+		PROOF_BORDER_MENU
+	};
+
+	EProofBorder m_ProofBorders;
 	int m_CurrentMenuProofIndex;
 	std::vector<vec2> m_vMenuBackgroundPositions;
 	std::vector<const char *> m_vpMenuBackgroundPositionNames;
