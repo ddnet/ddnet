@@ -1278,6 +1278,7 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 	const float FontSize = 10.0f;
 	static bool s_aListExtended[NUM_FRIEND_TYPES] = {true, true, false};
 	static const ColorRGBA s_aListColors[NUM_FRIEND_TYPES] = {ColorRGBA(0.5f, 1.0f, 0.5f, 1.0f), ColorRGBA(0.4f, 0.4f, 1.0f, 1.0f), ColorRGBA(1.0f, 0.5f, 0.5f, 1.0f)};
+	const ColorRGBA OfflineClanColor = ColorRGBA(0.7f, 0.45f, 0.75f, 1.0f);
 	const float SpacingH = 2.0f;
 
 	char aBuf[256];
@@ -1400,7 +1401,8 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 					ButtonResult = UI()->DoButtonLogic(Friend.ListItemId(), 0, &Rect);
 					GameClient()->m_Tooltips.DoToolTip(Friend.ListItemId(), &Rect, Localize("Click to select server. Double click to join your friend."));
 				}
-				Rect.Draw(s_aListColors[FriendType].WithAlpha(Inside ? 0.5f : 0.3f), IGraphics::CORNER_ALL, 5.0f);
+				const bool OfflineClan = Friend.FriendState() == IFriends::FRIEND_CLAN && FriendType == FRIEND_OFF;
+				Rect.Draw((OfflineClan ? OfflineClanColor : s_aListColors[FriendType]).WithAlpha(Inside ? 0.5f : 0.3f), IGraphics::CORNER_ALL, 5.0f);
 				Rect.Margin(2.0f, &Rect);
 
 				CUIRect RemoveButton, NameLabel, ClanLabel, InfoLabel;
