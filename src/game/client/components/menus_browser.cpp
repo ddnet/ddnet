@@ -559,8 +559,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		ButtonConnect.HSplitTop(5.0f, NULL, &ButtonConnect);
 		ButtonConnect.VSplitLeft(5.0f, NULL, &ButtonConnect);
 
-		static int s_RefreshButton = 0;
-		auto Func = [this]() mutable -> const char * {
+		auto RefreshLabelFunc = [this]() mutable -> const char * {
 			if(ServerBrowser()->IsRefreshing() || ServerBrowser()->IsGettingServerlist())
 				str_copy(m_aLocalStringHelper, Localize("Refreshing..."));
 			else
@@ -569,16 +568,16 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			return m_aLocalStringHelper;
 		};
 
-		if(DoButtonMenu(m_RefreshButton, &s_RefreshButton, Func, 0, &ButtonRefresh, true, false, IGraphics::CORNER_ALL) || Input()->KeyPress(KEY_F5) || (Input()->KeyPress(KEY_R) && Input()->ModifierIsPressed()))
+		static CButtonContainer s_RefreshButton;
+		if(DoButtonMenu(m_RefreshButton, &s_RefreshButton, RefreshLabelFunc, 0, &ButtonRefresh, true, false, IGraphics::CORNER_ALL) || Input()->KeyPress(KEY_F5) || (Input()->KeyPress(KEY_R) && Input()->ModifierIsPressed()))
 		{
 			RefreshBrowserTab(g_Config.m_UiPage);
 		}
 
-		static int s_JoinButton = 0;
+		auto ConnectLabelFunc = []() -> const char * { return Localize("Connect"); };
 
-		if(DoButtonMenu(
-			   m_ConnectButton, &s_JoinButton, []() -> const char * { return Localize("Connect"); }, 0, &ButtonConnect, false, false, IGraphics::CORNER_ALL, 5.0f, 0.0f, vec4(0.7f, 1, 0.7f, 0.1f), vec4(0.7f, 1, 0.7f, 0.2f)) ||
-			UI()->ConsumeHotkey(CUI::HOTKEY_ENTER))
+		static CButtonContainer s_ConnectButton;
+		if(DoButtonMenu(m_ConnectButton, &s_ConnectButton, ConnectLabelFunc, 0, &ButtonConnect, false, false, IGraphics::CORNER_ALL, 5.0f, 0.0f, vec4(0.7f, 1, 0.7f, 0.1f), vec4(0.7f, 1, 0.7f, 0.2f)))
 		{
 			Connect(g_Config.m_UiServerAddress);
 		}
