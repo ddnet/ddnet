@@ -675,7 +675,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 		float OldWidth = Rect.w;
 		Rect.w = Rect.h * 2;
 		Rect.x += (OldWidth - Rect.w) / 2.0f;
-		ColorRGBA Color(1.0f, 1.0f, 1.0f, g_Config.m_BrFilterCountry ? 1.0f : 0.5f);
+		ColorRGBA Color(1.0f, 1.0f, 1.0f, UI()->MouseHovered(&Rect) ? 1.0f : g_Config.m_BrFilterCountry ? 0.9f : 0.5f);
 		m_pClient->m_CountryFlags.Render(g_Config.m_BrFilterCountryIndex, &Color, Rect.x, Rect.y, Rect.w, Rect.h);
 
 		if(UI()->DoButtonLogic(&g_Config.m_BrFilterCountryIndex, 0, &Rect))
