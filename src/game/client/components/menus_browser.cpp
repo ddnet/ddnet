@@ -665,10 +665,10 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 	// player country
 	{
 		CUIRect Rect;
-		ServerFilter.HSplitTop(3.0f, 0, &ServerFilter);
+		ServerFilter.HSplitTop(3.0f, nullptr, &ServerFilter);
 		ServerFilter.HSplitTop(26.0f, &Button, &ServerFilter);
-		Button.VSplitRight(60.0f, &Button, &Rect);
 		Button.HMargin(3.0f, &Button);
+		Button.VSplitRight(60.0f, &Button, &Rect);
 		if(DoButton_CheckBox(&g_Config.m_BrFilterCountry, Localize("Player country:"), g_Config.m_BrFilterCountry, &Button))
 			g_Config.m_BrFilterCountry ^= 1;
 
