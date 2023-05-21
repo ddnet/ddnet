@@ -184,8 +184,10 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		g_Config.m_UiToolboxPage = (g_Config.m_UiToolboxPage + 3 + Direction) % 3;
 	}
 
+	bool ListBoxUsed = !UI()->IsPopupOpen();
+
 	static CListBox s_ListBox;
-	s_ListBox.DoStart(ms_ListheaderHeight, NumServers, 1, 3, -1, &View, false);
+	s_ListBox.DoStart(ms_ListheaderHeight, NumServers, 1, 3, -1, &View, false, &ListBoxUsed);
 
 	int NumPlayers = 0;
 	static int s_PrevSelectedIndex = -1;
@@ -222,7 +224,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			pItem->m_pUIElement = UI()->GetNewUIElement(UIRectCount);
 		}
 
-		const CListboxItem ListItem = s_ListBox.DoNextItem(pItem, str_comp(pItem->m_aAddress, g_Config.m_UiServerAddress) == 0);
+		const CListboxItem ListItem = s_ListBox.DoNextItem(pItem, str_comp(pItem->m_aAddress, g_Config.m_UiServerAddress) == 0, &ListBoxUsed);
 		if(ListItem.m_Selected)
 			m_SelectedIndex = i;
 
