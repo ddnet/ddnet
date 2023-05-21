@@ -557,6 +557,13 @@ protected:
 	void PopupConfirmSwitchServer();
 	void RenderServerbrowserServerDetail(CUIRect View);
 	void RenderServerbrowserFilters(CUIRect View);
+	struct SPopupCountrySelectionContext
+	{
+		CMenus *m_pMenus;
+		int m_Selection;
+		bool m_New;
+	};
+	static CUI::EPopupMenuFunctionResult PopupCountrySelection(void *pContext, CUIRect View, bool Active);
 	void RenderServerbrowserFriends(CUIRect View);
 	void PopupConfirmRemoveFriend();
 	void RenderServerbrowser(CUIRect MainView);
@@ -739,7 +746,6 @@ public:
 		POPUP_CONNECTING,
 		POPUP_DISCONNECTED,
 		POPUP_LANGUAGE,
-		POPUP_COUNTRY,
 		POPUP_RENAME_DEMO,
 		POPUP_RENDER_DEMO,
 		POPUP_PASSWORD,
