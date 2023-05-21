@@ -953,7 +953,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 		if(DoButton_Ex(&s_ProofButton, "Proof", m_ProofBorders, &Button, 0, "[ctrl+p] Toggles proof borders. These borders represent what a player maximum can see.", IGraphics::CORNER_L) ||
 			(m_Dialog == DIALOG_NONE && m_EditBoxActive == 0 && Input()->KeyPress(KEY_P) && ModPressed))
 		{
-			m_ProofBorders = !m_ProofBorders;
+			m_ProofBorders =  PROOF_BORDER_OFF;
 		}
 
 		TB_Top.VSplitLeft(10.0f, &Button, &TB_Top);
@@ -2764,7 +2764,7 @@ void CEditor::DoMapEditor(CUIRect View)
 		}
 
 		// menu proof selection
-		if(m_MenuProofBorders && !m_ShowPicker)
+		if(m_ProofBorders == PROOF_BORDER_MENU && !m_ShowPicker)
 		{
 			ResetMenuBackgroundPositions();
 			for(int i = 0; i < (int)m_vMenuBackgroundPositions.size(); i++)
