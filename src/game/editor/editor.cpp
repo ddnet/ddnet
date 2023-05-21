@@ -953,7 +953,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 		if(DoButton_Ex(&s_ProofButton, "Proof", m_ProofBorders, &Button, 0, "[ctrl+p] Toggles proof borders. These borders represent what a player maximum can see.", IGraphics::CORNER_L) ||
 			(m_Dialog == DIALOG_NONE && m_EditBoxActive == 0 && Input()->KeyPress(KEY_P) && ModPressed))
 		{
-			m_ProofBorders =  PROOF_BORDER_OFF;
+			m_ProofBorders = m_ProofBorders == PROOF_BORDER_OFF ? PROOF_BORDER_INGAME : PROOF_BORDER_OFF;
 		}
 
 		TB_Top.VSplitLeft(10.0f, &Button, &TB_Top);

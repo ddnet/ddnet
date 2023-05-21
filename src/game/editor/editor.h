@@ -796,7 +796,7 @@ public:
 		m_MouseDeltaWy = 0;
 
 		m_GuiActive = true;
-		m_ProofBorders =  PROOF_BORDER_OFF;
+		m_ProofBorders = PROOF_BORDER_OFF;
 		m_CurrentMenuProofIndex = 0;
 		m_PreviewZoom = false;
 
