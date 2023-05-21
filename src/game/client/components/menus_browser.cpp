@@ -616,7 +616,6 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 	UI()->DoLabel(&FilterHeader, Localize("Server filter"), FontSize + 2.0f, TEXTALIGN_MC);
 	CUIRect Button, Button2;
 
-	ServerFilter.VSplitLeft(5.0f, 0, &ServerFilter);
 	ServerFilter.Margin(3.0f, &ServerFilter);
 	ServerFilter.VMargin(5.0f, &ServerFilter);
 
