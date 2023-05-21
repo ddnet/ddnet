@@ -73,7 +73,7 @@ void CScrollRegion::End()
 	CUIRect RegionRect = m_ClipRect;
 	RegionRect.w += m_Params.m_ScrollbarWidth;
 
-	if(m_ScrollDirection != SCROLLRELATIVE_NONE || (UI()->Enabled() && UI()->MouseHovered(&RegionRect)))
+	if(m_ScrollDirection != SCROLLRELATIVE_NONE || (UI()->Enabled() && m_Params.m_Active && UI()->MouseHovered(&RegionRect)))
 	{
 		bool ProgrammaticScroll = false;
 		if(UI()->ConsumeHotkey(CUI::HOTKEY_SCROLL_UP))
