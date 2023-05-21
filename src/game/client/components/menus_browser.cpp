@@ -692,7 +692,6 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 
 	CUIRect ResetButton;
 
-	//ServerFilter.HSplitBottom(5.0f, &ServerFilter, 0);
 	ServerFilter.HSplitBottom(ms_ButtonHeight - 5.0f, &ServerFilter, &ResetButton);
 
 	// ddnet country filters
