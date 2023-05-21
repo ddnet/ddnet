@@ -1860,6 +1860,7 @@ int CMenus::Render()
 			static CButtonContainer s_OkButton;
 			if(DoButton_Menu(&s_OkButton, Localize("Ok"), 0, &OkButton) || UI()->ConsumeHotkey(CUI::HOTKEY_ENTER) || s_ListBox.WasItemActivated())
 			{
+				g_Config.m_BrFilterCountry = 1;
 				g_Config.m_BrFilterCountryIndex = s_CurSelection;
 				Client()->ServerBrowserUpdate();
 				m_Popup = POPUP_NONE;
