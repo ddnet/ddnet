@@ -1312,7 +1312,13 @@ void CLayerTele::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 				{
 					m_pTeleTile[TgtIndex].m_Type = m_pTiles[TgtIndex].m_Index;
 
-					if((pLt->m_pTeleTile[SrcIndex].m_Number == 0 && m_pEditor->m_TeleNumber) || m_pEditor->m_TeleNumber != pLt->m_TeleNum)
+					if(!IsTeleTileNumberUsed(m_pTeleTile[TgtIndex].m_Type))
+					{
+						// Tele tile number is unused. Set a known value which is not 0,
+						// as tiles with number 0 would be ignored by previous versions.
+						m_pTeleTile[TgtIndex].m_Number = 255;
+					}
+					else if((pLt->m_pTeleTile[SrcIndex].m_Number == 0 && m_pEditor->m_TeleNumber) || m_pEditor->m_TeleNumber != pLt->m_TeleNum)
 						m_pTeleTile[TgtIndex].m_Number = m_pEditor->m_TeleNumber;
 					else
 						m_pTeleTile[TgtIndex].m_Number = pLt->m_pTeleTile[SrcIndex].m_Number;
@@ -1856,17 +1862,24 @@ void CLayerSwitch::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 				m_pSwitchTile[TgtIndex].m_Type = m_pTiles[TgtIndex].m_Index;
 				if(pLt->m_Switch && m_pTiles[TgtIndex].m_Index > 0)
 				{
-					if(pLt->m_pSwitchTile[SrcIndex].m_Number == 0 || m_pEditor->m_SwitchNum != pLt->m_SwitchNumber)
+					if(!IsSwitchTileNumberUsed(m_pSwitchTile[TgtIndex].m_Type))
+						m_pSwitchTile[TgtIndex].m_Number = 0;
+					else if(pLt->m_pSwitchTile[SrcIndex].m_Number == 0 || m_pEditor->m_SwitchNum != pLt->m_SwitchNumber)
 						m_pSwitchTile[TgtIndex].m_Number = m_pEditor->m_SwitchNum;
 					else
 						m_pSwitchTile[TgtIndex].m_Number = pLt->m_pSwitchTile[SrcIndex].m_Number;
 
-					if(pLt->m_pSwitchTile[SrcIndex].m_Delay == 0 || m_pEditor->m_SwitchDelay != pLt->m_SwitchDelay)
+					if(!IsSwitchTileDelayUsed(m_pSwitchTile[TgtIndex].m_Type))
+						m_pSwitchTile[TgtIndex].m_Delay = 0;
+					else if(pLt->m_pSwitchTile[SrcIndex].m_Delay == 0 || m_pEditor->m_SwitchDelay != pLt->m_SwitchDelay)
 						m_pSwitchTile[TgtIndex].m_Delay = m_pEditor->m_SwitchDelay;
 					else
 						m_pSwitchTile[TgtIndex].m_Delay = pLt->m_pSwitchTile[SrcIndex].m_Delay;
 
-					m_pSwitchTile[TgtIndex].m_Flags = pLt->m_pSwitchTile[SrcIndex].m_Flags;
+					if(!IsSwitchTileFlagsUsed(m_pSwitchTile[TgtIndex].m_Type))
+						m_pSwitchTile[TgtIndex].m_Flags = 0;
+					else
+						m_pSwitchTile[TgtIndex].m_Flags = pLt->m_pSwitchTile[SrcIndex].m_Flags;
 				}
 			}
 		}
