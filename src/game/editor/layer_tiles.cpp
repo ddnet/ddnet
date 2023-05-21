@@ -1854,7 +1854,7 @@ void CLayerSwitch::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 			{
 				m_pTiles[TgtIndex] = pLt->m_pTiles[SrcIndex];
 				m_pSwitchTile[TgtIndex].m_Type = m_pTiles[TgtIndex].m_Index;
-				if(pLt->m_Switch && m_pEditor->m_SwitchNum && m_pTiles[TgtIndex].m_Index > 0)
+				if(pLt->m_Switch && m_pTiles[TgtIndex].m_Index > 0)
 				{
 					if(pLt->m_pSwitchTile[SrcIndex].m_Number == 0 || m_pEditor->m_SwitchNum != pLt->m_SwitchNumber)
 						m_pSwitchTile[TgtIndex].m_Number = m_pEditor->m_SwitchNum;
