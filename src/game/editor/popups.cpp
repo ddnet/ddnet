@@ -2327,7 +2327,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupProofMode(void *pContext, CUIRect Vi
 	CUIRect Button;
 	View.HSplitTop(12.0f, &Button, &View);
 	static int s_ButtonIngame;
-	if(pEditor->DoButton_MenuItem(&s_ButtonIngame, "Ingame", !pEditor->m_ProofBorders == PROOF_BORDER_INGAME, &Button, 0, "These borders represent what a player maximum can see."))
+	if(pEditor->DoButton_MenuItem(&s_ButtonIngame, "Ingame", !(pEditor->m_ProofBorders == PROOF_BORDER_INGAME), &Button, 0, "These borders represent what a player maximum can see."))
 	{
 		pEditor->m_ProofBorders = PROOF_BORDER_INGAME;
 		return CUI::POPUP_CLOSE_CURRENT;
