@@ -293,9 +293,9 @@ CUI::EPopupMenuFunctionResult CEditor::PopupMenuSettings(void *pContext, CUIRect
 		static int s_ButtonOff = 0;
 		static int s_ButtonDec = 0;
 		static int s_ButtonHex = 0;
-		if(pEditor->DoButton_ButtonDec(&s_ButtonOff, "Off", pEditor->m_ShowTileInfo == SHOW_TILE_DECIMAL, &Off, 0, "Do not show tile information"))
+		if(pEditor->DoButton_ButtonDec(&s_ButtonOff, "Off", pEditor->m_ShowTileInfo == SHOW_TILE_OFF, &Off, 0, "Do not show tile information"))
 		{
-			pEditor->m_ShowTileInfo = SHOW_TILE_DECIMAL;
+			pEditor->m_ShowTileInfo = SHOW_TILE_OFF;
 			pEditor->m_ShowEnvelopePreview = SHOWENV_NONE;
 		}
 		if(pEditor->DoButton_Ex(&s_ButtonDec, "Dec", pEditor->m_ShowTileInfo == SHOW_TILE_DECIMAL , &Dec, 0, "[ctrl+i] Show tile information", IGraphics::CORNER_NONE))
@@ -303,9 +303,9 @@ CUI::EPopupMenuFunctionResult CEditor::PopupMenuSettings(void *pContext, CUIRect
 			pEditor->m_ShowTileInfo = SHOW_TILE_DECIMAL;
 			pEditor->m_ShowEnvelopePreview = SHOWENV_NONE;
 		}
-		if(pEditor->DoButton_ButtonInc(&s_ButtonHex, "Hex", pEditor->m_ShowTileInfo == SHOW_TILE_DECIMAL, &Hex, 0, "[ctrl+shift+i] Show tile information in hexadecimal"))
+		if(pEditor->DoButton_ButtonInc(&s_ButtonHex, "Hex", pEditor->m_ShowTileInfo == SHOW_TILE_HEXADECIMAL, &Hex, 0, "[ctrl+shift+i] Show tile information in hexadecimal"))
 		{
-			pEditor->m_ShowTileInfo = SHOW_TILE_DECIMAL;
+			pEditor->m_ShowTileInfo = SHOW_TILE_HEXADECIMAL;
 			pEditor->m_ShowEnvelopePreview = SHOWENV_NONE;
 		}
 	}

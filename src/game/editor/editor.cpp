@@ -890,26 +890,18 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 	if(m_Dialog == DIALOG_NONE && m_EditBoxActive == 0 && Input()->KeyPress(KEY_I) && ModPressed && !ShiftPressed)
 	{
 		if(m_ShowTileInfo == SHOW_TILE_HEXADECIMAL)
-			m_ShowTileInfo = SHOW_TILE_OFF;
+			m_ShowTileInfo = SHOW_TILE_DECIMAL;
 		else if(m_ShowTileInfo != SHOW_TILE_OFF)
 			m_ShowTileInfo = SHOW_TILE_OFF;
 		else
-			m_ShowTileInfo = !SHOW_TILE_OFF;
+			m_ShowTileInfo = SHOW_TILE_DECIMAL;
 		m_ShowEnvelopePreview = SHOWENV_NONE;
 	}
 
 	// handle shortcut for hex button
 	if(m_Dialog == DIALOG_NONE && m_EditBoxActive == 0 && Input()->KeyPress(KEY_I) && ModPressed && ShiftPressed)
 	{
-		if(m_ShowTileInfo == SHOW_TILE_HEXADECIMAL)
-			m_ShowTileInfo = SHOW_TILE_OFF;
-		else if(m_ShowTileInfo != SHOW_TILE_OFF)
-			m_ShowTileInfo = !SHOW_TILE_OFF;
-		else
-		{
-			m_ShowTileInfo = !SHOW_TILE_OFF;
-			m_ShowTileInfo = SHOW_TILE_HEXADECIMAL;
-		}
+		m_ShowTileInfo = m_ShowTileInfo == SHOW_TILE_HEXADECIMAL ? SHOW_TILE_OFF : SHOW_TILE_HEXADECIMAL;
 		m_ShowEnvelopePreview = SHOWENV_NONE;
 	}
 

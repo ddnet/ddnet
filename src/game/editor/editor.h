@@ -837,7 +837,6 @@ public:
 		m_PreventUnusedTilesWasWarned = false;
 		m_AllowPlaceUnusedTiles = 0;
 		m_BrushDrawDestructive = true;
-		m_ShowTileInfo = SHOW_TILE_OFF;
 
 		m_Mentions = 0;
 	}
