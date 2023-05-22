@@ -341,7 +341,7 @@ void CPlayer::Snap(int SnappingClient)
 	// This is the time sent to the player while ingame (do not confuse to the one reported to the master server).
 	// Due to clients expecting this as a negative value, we have to make sure it's negative.
 	// Special numbers:
-	// - 9999: means no time and isn't displayed in the scoreboard.
+	// -9999: means no time and isn't displayed in the scoreboard.
 	if(m_Score.has_value())
 	{
 		// shift the time by a second if the player actually took 9999

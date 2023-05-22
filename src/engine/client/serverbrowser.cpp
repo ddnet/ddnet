@@ -561,6 +561,18 @@ void CServerBrowser::SetInfo(CServerEntry *pEntry, const CServerInfo &Info)
 	pEntry->m_Info.m_NumAddresses = TmpInfo.m_NumAddresses;
 	ServerBrowserFormatAddresses(pEntry->m_Info.m_aAddress, sizeof(pEntry->m_Info.m_aAddress), pEntry->m_Info.m_aAddresses, pEntry->m_Info.m_NumAddresses);
 
+	if(pEntry->m_Info.m_ClientScoreKind == CServerInfo::CLIENT_SCORE_KIND_UNSPECIFIED)
+	{
+		if((str_find_nocase(pEntry->m_Info.m_aGameType, "race") || str_find_nocase(pEntry->m_Info.m_aGameType, "fastcap")) && g_Config.m_ClDDRaceScoreBoard)
+		{
+			pEntry->m_Info.m_ClientScoreKind = CServerInfo::CLIENT_SCORE_KIND_TIME_BACKCOMPAT;
+		}
+		else
+		{
+			pEntry->m_Info.m_ClientScoreKind = CServerInfo::CLIENT_SCORE_KIND_POINTS;
+		}
+	}
+
 	class CPlayerScoreNameLess
 	{
 		int ScoreKind;
@@ -578,16 +590,10 @@ void CServerBrowser::SetInfo(CServerEntry *pEntry, const CServerInfo &Info)
 			if(!p0.m_Player && p1.m_Player)
 				return false;
 
-			int ClientScoreKind = ScoreKind;
-			if(ClientScoreKind == CServerInfo::CLIENT_SCORE_KIND_UNSPECIFIED)
-			{
-				ClientScoreKind = CServerInfo::CLIENT_SCORE_KIND_TIME_BACKCOMPAT;
-			}
-
 			int Score0 = p0.m_Score;
 			int Score1 = p1.m_Score;
 
-			if(ClientScoreKind == CServerInfo::CLIENT_SCORE_KIND_TIME)
+			if(ScoreKind == CServerInfo::CLIENT_SCORE_KIND_TIME)
 			{
 				// time is sent as a positive value to the http master, counting 0, if there is a time (finished)
 				// only positive times are meant to represent an actual time.
@@ -602,7 +608,7 @@ void CServerBrowser::SetInfo(CServerEntry *pEntry, const CServerInfo &Info)
 			}
 			else
 			{
-				if(ClientScoreKind == CServerInfo::CLIENT_SCORE_KIND_TIME_BACKCOMPAT)
+				if(ScoreKind == CServerInfo::CLIENT_SCORE_KIND_TIME_BACKCOMPAT)
 				{
 					if(Score0 == -9999)
 						Score0 = INT_MIN;
