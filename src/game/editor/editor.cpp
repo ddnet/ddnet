@@ -889,26 +889,26 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 	// handle shortcut for info button
 	if(m_Dialog == DIALOG_NONE && m_EditBoxActive == 0 && Input()->KeyPress(KEY_I) && ModPressed && !ShiftPressed)
 	{
-		if(m_ShowTileInfo && m_ShowTileHexInfo)
-			m_ShowTileHexInfo = false;
-		else if(m_ShowTileInfo)
-			m_ShowTileInfo = false;
+		if(m_ShowTileInfo == SHOW_TILE_HEXADECIMAL)
+			m_ShowTileInfo = SHOW_TILE_OFF;
+		else if(m_ShowTileInfo != SHOW_TILE_OFF)
+			m_ShowTileInfo = SHOW_TILE_OFF;
 		else
-			m_ShowTileInfo = true;
+			m_ShowTileInfo = !SHOW_TILE_OFF;
 		m_ShowEnvelopePreview = SHOWENV_NONE;
 	}
 
 	// handle shortcut for hex button
 	if(m_Dialog == DIALOG_NONE && m_EditBoxActive == 0 && Input()->KeyPress(KEY_I) && ModPressed && ShiftPressed)
 	{
-		if(m_ShowTileInfo && m_ShowTileHexInfo)
-			m_ShowTileInfo = false;
-		else if(m_ShowTileInfo)
-			m_ShowTileHexInfo = true;
+		if(m_ShowTileInfo == SHOW_TILE_HEXADECIMAL)
+			m_ShowTileInfo = SHOW_TILE_OFF;
+		else if(m_ShowTileInfo != SHOW_TILE_OFF)
+			m_ShowTileInfo = !SHOW_TILE_OFF;
 		else
 		{
-			m_ShowTileInfo = true;
-			m_ShowTileHexInfo = true;
+			m_ShowTileInfo = !SHOW_TILE_OFF;
+			m_ShowTileInfo = SHOW_TILE_HEXADECIMAL;
 		}
 		m_ShowEnvelopePreview = SHOWENV_NONE;
 	}
@@ -2301,7 +2301,7 @@ void CEditor::DoMapEditor(CUIRect View)
 		}
 
 		CLayerTiles *pT = static_cast<CLayerTiles *>(GetSelectedLayerType(0, LAYERTYPE_TILES));
-		if(m_ShowTileInfo && pT && pT->m_Visible && m_Zoom <= 300.0f)
+		if(m_ShowTileInfo != SHOW_TILE_OFF && pT && pT->m_Visible && m_Zoom <= 300.0f)
 		{
 			GetSelectedGroup()->MapScreen();
 			pT->ShowInfo();
@@ -2372,7 +2372,7 @@ void CEditor::DoMapEditor(CUIRect View)
 
 			m_TilesetPicker.Render(true);
 
-			if(m_ShowTileInfo)
+			if(m_ShowTileInfo != SHOW_TILE_OFF)
 				m_TilesetPicker.ShowInfo();
 		}
 		else
@@ -3025,7 +3025,7 @@ void CEditor::DoMapEditor(CUIRect View)
 		}
 	}
 
-	if(!m_ShowPicker && m_ShowTileInfo && m_ShowEnvelopePreview != SHOWENV_NONE && GetSelectedLayer(0) && GetSelectedLayer(0)->m_Type == LAYERTYPE_QUADS)
+	if(!m_ShowPicker && m_ShowTileInfo != SHOW_TILE_OFF && m_ShowEnvelopePreview != SHOWENV_NONE && GetSelectedLayer(0) && GetSelectedLayer(0)->m_Type == LAYERTYPE_QUADS)
 	{
 		GetSelectedGroup()->MapScreen();
 

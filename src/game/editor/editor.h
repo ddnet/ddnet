@@ -800,7 +800,7 @@ public:
 		m_CurrentMenuProofIndex = 0;
 		m_PreviewZoom = false;
 
-		m_ShowTileInfo = false;
+		m_ShowTileInfo = SHOW_TILE_OFF;
 		m_ShowDetail = true;
 		m_Animate = false;
 		m_AnimateStart = 0;
@@ -837,7 +837,7 @@ public:
 		m_PreventUnusedTilesWasWarned = false;
 		m_AllowPlaceUnusedTiles = 0;
 		m_BrushDrawDestructive = true;
-		m_ShowTileHexInfo = false;
+		m_ShowTileInfo = SHOW_TILE_OFF;
 
 		m_Mentions = 0;
 	}
@@ -918,7 +918,6 @@ public:
 	bool m_PreventUnusedTilesWasWarned;
 	int m_AllowPlaceUnusedTiles;
 	bool m_BrushDrawDestructive;
-	bool m_ShowTileHexInfo;
 
 	int m_Mentions;
 
@@ -1060,7 +1059,14 @@ public:
 	float m_MouseDeltaWx;
 	float m_MouseDeltaWy;
 
-	bool m_ShowTileInfo;
+    enum EShowTile
+	{
+		SHOW_TILE_OFF,
+		SHOW_TILE_DECIMAL,
+		SHOW_TILE_HEXADECIMAL
+	};
+
+	EShowTile m_ShowTileInfo;
 	bool m_ShowDetail;
 	bool m_Animate;
 	int64_t m_AnimateStart;
