@@ -567,6 +567,23 @@ void CScoreboard::RenderRecordingNotification(float x)
 	TextRender()->Text(x + 50.0f, (50.f - 20.f) / 2.f, 20.0f, aBuf, -1.0f);
 }
 
+void CScoreboard::RenderMapName(float x)
+{
+	char aBuf[64];
+
+	str_copy(aBuf, Client()->GetCurrentMap());
+
+	if(!aBuf[0])
+		return;
+
+	float w = TextRender()->TextWidth(20.0f, aBuf, -1, -1.0f);
+
+	// draw the box
+	Graphics()->DrawRect(x, 0.0f, w + 40.0f, 50.0f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.4f), IGraphics::CORNER_B, 15.0f);
+
+	TextRender()->Text(x + 20.0f, (50.f - 20.f) / 2.f, 20.0f, aBuf, -1.0f);
+}
+
 void CScoreboard::OnRender()
 {
 	if(!Active())
@@ -657,6 +674,8 @@ void CScoreboard::OnRender()
 	}
 
 	RenderRecordingNotification((Width / 7) * 4 + 20);
+
+	RenderMapName((Width / 7) * 5 + 40);
 }
 
 bool CScoreboard::Active()
