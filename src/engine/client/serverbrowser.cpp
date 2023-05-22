@@ -589,26 +589,32 @@ void CServerBrowser::SetInfo(CServerEntry *pEntry, const CServerInfo &Info)
 
 			if(ClientScoreKind == CServerInfo::CLIENT_SCORE_KIND_TIME)
 			{
-				// time is sent as a positive value, but sometimes buggy servers sent it as negative
-				Score0 = -absolute(Score0);
-				Score1 = -absolute(Score1);
-				if(Score0 == -9999)
-					Score0 = INT_MIN;
-				if(Score1 == -9999)
-					Score1 = INT_MIN;
+				// time is sent as a positive value to the http master, counting 0, if there is a time (finished)
+				// only positive times are meant to represent an actual time.
+				if(Score0 != Score1)
+				{
+					if(Score0 < 0)
+						return false;
+					if(Score1 < 0)
+						return true;
+					return Score0 < Score1;
+				}
 			}
-			else if(ClientScoreKind == CServerInfo::CLIENT_SCORE_KIND_TIME_BACKCOMPAT)
+			else
 			{
-				if(Score0 == -9999)
-					Score0 = INT_MIN;
-				if(Score1 == -9999)
-					Score1 = INT_MIN;
-			}
+				if(ClientScoreKind == CServerInfo::CLIENT_SCORE_KIND_TIME_BACKCOMPAT)
+				{
+					if(Score0 == -9999)
+						Score0 = INT_MIN;
+					if(Score1 == -9999)
+						Score1 = INT_MIN;
+				}
 
-			if(Score0 > Score1)
-				return true;
-			if(Score0 < Score1)
-				return false;
+				if(Score0 > Score1)
+					return true;
+				if(Score0 < Score1)
+					return false;
+			}
 
 			return str_comp_nocase(p0.m_aName, p1.m_aName) < 0;
 		}

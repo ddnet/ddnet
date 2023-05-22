@@ -3,6 +3,7 @@
 #ifndef ENGINE_SERVER_H
 #define ENGINE_SERVER_H
 
+#include <optional>
 #include <type_traits>
 
 #include <base/hash.h>
@@ -207,7 +208,7 @@ public:
 	virtual void SetClientName(int ClientID, char const *pName) = 0;
 	virtual void SetClientClan(int ClientID, char const *pClan) = 0;
 	virtual void SetClientCountry(int ClientID, int Country) = 0;
-	virtual void SetClientScore(int ClientID, int Score) = 0;
+	virtual void SetClientScore(int ClientID, std::optional<int> Score) = 0;
 	virtual void SetClientFlags(int ClientID, int Flags) = 0;
 
 	virtual int SnapNewID() = 0;
@@ -334,7 +335,7 @@ public:
 
 	/**
 	 * Used to report custom player info to master servers.
-	 * 
+	 *
 	 * @param aBuf Should be the json key values to add, starting with a ',' beforehand, like: ',"skin": "default", "team": 1'
 	 * @param i The client id.
 	 */

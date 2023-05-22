@@ -1135,8 +1135,9 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 				}
 				else
 				{
-					if(CurrentClient.m_Score != -9999)
-						Time = absolute(CurrentClient.m_Score);
+					// CServerInfo::CLIENT_SCORE_KIND_POINTS
+					if(CurrentClient.m_Score >= 0)
+						Time = CurrentClient.m_Score;
 				}
 
 				if(Time.has_value())
