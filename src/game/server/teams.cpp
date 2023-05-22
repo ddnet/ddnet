@@ -5,6 +5,7 @@
 #include "player.h"
 #include "score.h"
 #include "teehistorian.h"
+#include <base/system.h>
 
 #include <engine/shared/config.h>
 
@@ -817,8 +818,8 @@ void CGameTeams::OnFinish(CPlayer *Player, float Time, const char *pTimestamp)
 		GameServer()->SendRecord(ClientID);
 	}
 
-	int TTime = 0 - (int)Time;
-	if(!Player->m_Score || -1 * absolute(*Player->m_Score) < TTime)
+	int TTime = (int)Time;
+	if(!Player->m_Score.has_value() || TTime < Player->m_Score.value())
 	{
 		Player->m_Score = TTime;
 	}
