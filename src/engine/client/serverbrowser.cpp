@@ -563,7 +563,14 @@ void CServerBrowser::SetInfo(CServerEntry *pEntry, const CServerInfo &Info)
 
 	class CPlayerScoreNameLess
 	{
+		int ScoreKind;
+
 	public:
+		CPlayerScoreNameLess(int ClientScoreKind) :
+			ScoreKind(ClientScoreKind)
+		{
+		}
+
 		bool operator()(const CServerInfo::CClient &p0, const CServerInfo::CClient &p1)
 		{
 			if(p0.m_Player && !p1.m_Player)
@@ -571,22 +578,43 @@ void CServerBrowser::SetInfo(CServerEntry *pEntry, const CServerInfo &Info)
 			if(!p0.m_Player && p1.m_Player)
 				return false;
 
+			int ClientScoreKind = ScoreKind;
+			if(ClientScoreKind == CServerInfo::CLIENT_SCORE_KIND_UNSPECIFIED)
+			{
+				ClientScoreKind = CServerInfo::CLIENT_SCORE_KIND_TIME_BACKCOMPAT;
+			}
+
 			int Score0 = p0.m_Score;
 			int Score1 = p1.m_Score;
-			if(Score0 == -9999)
-				Score0 = INT_MIN;
-			if(Score1 == -9999)
-				Score1 = INT_MIN;
+
+			if(ClientScoreKind == CServerInfo::CLIENT_SCORE_KIND_TIME)
+			{
+				// time is sent as a positive value, but sometimes buggy servers sent it as negative
+				Score0 = -absolute(Score0);
+				Score1 = -absolute(Score1);
+				if(Score0 == -9999)
+					Score0 = INT_MIN;
+				if(Score1 == -9999)
+					Score1 = INT_MIN;
+			}
+			else if(ClientScoreKind == CServerInfo::CLIENT_SCORE_KIND_TIME_BACKCOMPAT)
+			{
+				if(Score0 == -9999)
+					Score0 = INT_MIN;
+				if(Score1 == -9999)
+					Score1 = INT_MIN;
+			}
 
 			if(Score0 > Score1)
 				return true;
 			if(Score0 < Score1)
 				return false;
+
 			return str_comp_nocase(p0.m_aName, p1.m_aName) < 0;
 		}
 	};
 
-	std::sort(pEntry->m_Info.m_aClients, pEntry->m_Info.m_aClients + Info.m_NumReceivedClients, CPlayerScoreNameLess());
+	std::sort(pEntry->m_Info.m_aClients, pEntry->m_Info.m_aClients + Info.m_NumReceivedClients, CPlayerScoreNameLess(pEntry->m_Info.m_ClientScoreKind));
 
 	pEntry->m_GotInfo = 1;
 }

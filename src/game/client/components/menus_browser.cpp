@@ -1125,23 +1125,23 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 			}
 			else
 			{
-				bool Empty = false;
-				int Time;
+				std::optional<int> Time = {};
 
 				if(ClientScoreKind == CServerInfo::CLIENT_SCORE_KIND_TIME_BACKCOMPAT)
 				{
-					Time = abs(CurrentClient.m_Score);
-					Empty = Time == 0 || Time == 9999;
+					int TempTime = absolute(CurrentClient.m_Score);
+					if(TempTime != 0 && TempTime != 9999)
+						Time = TempTime;
 				}
 				else
 				{
-					Time = CurrentClient.m_Score;
-					Empty = Time < 0;
+					if(CurrentClient.m_Score != -9999)
+						Time = absolute(CurrentClient.m_Score);
 				}
 
-				if(!Empty)
+				if(Time.has_value())
 				{
-					str_time((int64_t)Time * 100, TIME_HOURS, aTemp, sizeof(aTemp));
+					str_time((int64_t)Time.value() * 100, TIME_HOURS, aTemp, sizeof(aTemp));
 				}
 				else
 				{

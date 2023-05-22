@@ -19,6 +19,7 @@
 
 #include <list>
 #include <memory>
+#include <optional>
 #include <vector>
 
 #include "antibot.h"
@@ -182,7 +183,7 @@ public:
 		char m_aName[MAX_NAME_LENGTH];
 		char m_aClan[MAX_CLAN_LENGTH];
 		int m_Country;
-		int m_Score;
+		std::optional<int> m_Score;
 		int m_Authed;
 		int m_AuthKey;
 		int m_AuthTries;
