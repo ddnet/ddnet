@@ -115,6 +115,7 @@ void CListBox::DoStart(float RowHeight, int NumItems, int ItemsPerRow, int RowsP
 	// setup the scrollbar
 	m_ScrollOffset = vec2(0.0f, 0.0f);
 	CScrollRegionParams ScrollParams;
+	ScrollParams.m_Active = !pActive || *pActive;
 	ScrollParams.m_ScrollbarWidth = ScrollbarWidthMax();
 	ScrollParams.m_ScrollUnit = (m_ListBoxRowHeight + m_AutoSpacing) * RowsPerScroll;
 	m_ScrollRegion.Begin(&m_ListBoxView, &m_ScrollOffset, &ScrollParams);

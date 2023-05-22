@@ -184,8 +184,10 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		g_Config.m_UiToolboxPage = (g_Config.m_UiToolboxPage + 3 + Direction) % 3;
 	}
 
+	bool ListBoxUsed = !UI()->IsPopupOpen();
+
 	static CListBox s_ListBox;
-	s_ListBox.DoStart(ms_ListheaderHeight, NumServers, 1, 3, -1, &View, false);
+	s_ListBox.DoStart(ms_ListheaderHeight, NumServers, 1, 3, -1, &View, false, &ListBoxUsed);
 
 	int NumPlayers = 0;
 	static int s_PrevSelectedIndex = -1;
@@ -222,7 +224,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			pItem->m_pUIElement = UI()->GetNewUIElement(UIRectCount);
 		}
 
-		const CListboxItem ListItem = s_ListBox.DoNextItem(pItem, str_comp(pItem->m_aAddress, g_Config.m_UiServerAddress) == 0);
+		const CListboxItem ListItem = s_ListBox.DoNextItem(pItem, str_comp(pItem->m_aAddress, g_Config.m_UiServerAddress) == 0, &ListBoxUsed);
 		if(ListItem.m_Selected)
 			m_SelectedIndex = i;
 
@@ -559,8 +561,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		ButtonConnect.HSplitTop(5.0f, NULL, &ButtonConnect);
 		ButtonConnect.VSplitLeft(5.0f, NULL, &ButtonConnect);
 
-		static int s_RefreshButton = 0;
-		auto Func = [this]() mutable -> const char * {
+		auto RefreshLabelFunc = [this]() mutable -> const char * {
 			if(ServerBrowser()->IsRefreshing() || ServerBrowser()->IsGettingServerlist())
 				str_copy(m_aLocalStringHelper, Localize("Refreshing..."));
 			else
@@ -569,16 +570,16 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			return m_aLocalStringHelper;
 		};
 
-		if(DoButtonMenu(m_RefreshButton, &s_RefreshButton, Func, 0, &ButtonRefresh, true, false, IGraphics::CORNER_ALL) || Input()->KeyPress(KEY_F5) || (Input()->KeyPress(KEY_R) && Input()->ModifierIsPressed()))
+		static CButtonContainer s_RefreshButton;
+		if(DoButtonMenu(m_RefreshButton, &s_RefreshButton, RefreshLabelFunc, 0, &ButtonRefresh, true, false, IGraphics::CORNER_ALL) || Input()->KeyPress(KEY_F5) || (Input()->KeyPress(KEY_R) && Input()->ModifierIsPressed()))
 		{
 			RefreshBrowserTab(g_Config.m_UiPage);
 		}
 
-		static int s_JoinButton = 0;
+		auto ConnectLabelFunc = []() -> const char * { return Localize("Connect"); };
 
-		if(DoButtonMenu(
-			   m_ConnectButton, &s_JoinButton, []() -> const char * { return Localize("Connect"); }, 0, &ButtonConnect, false, false, IGraphics::CORNER_ALL, 5.0f, 0.0f, vec4(0.7f, 1, 0.7f, 0.1f), vec4(0.7f, 1, 0.7f, 0.2f)) ||
-			UI()->ConsumeHotkey(CUI::HOTKEY_ENTER))
+		static CButtonContainer s_ConnectButton;
+		if(DoButtonMenu(m_ConnectButton, &s_ConnectButton, ConnectLabelFunc, 0, &ButtonConnect, false, false, IGraphics::CORNER_ALL, 5.0f, 0.0f, vec4(0.7f, 1, 0.7f, 0.1f), vec4(0.7f, 1, 0.7f, 0.2f)))
 		{
 			Connect(g_Config.m_UiServerAddress);
 		}
@@ -615,7 +616,6 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 	UI()->DoLabel(&FilterHeader, Localize("Server filter"), FontSize + 2.0f, TEXTALIGN_MC);
 	CUIRect Button, Button2;
 
-	ServerFilter.VSplitLeft(5.0f, 0, &ServerFilter);
 	ServerFilter.Margin(3.0f, &ServerFilter);
 	ServerFilter.VMargin(5.0f, &ServerFilter);
 
@@ -665,21 +665,28 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 	// player country
 	{
 		CUIRect Rect;
-		ServerFilter.HSplitTop(3.0f, 0, &ServerFilter);
+		ServerFilter.HSplitTop(3.0f, nullptr, &ServerFilter);
 		ServerFilter.HSplitTop(26.0f, &Button, &ServerFilter);
-		Button.VSplitRight(60.0f, &Button, &Rect);
 		Button.HMargin(3.0f, &Button);
+		Button.VSplitRight(60.0f, &Button, &Rect);
 		if(DoButton_CheckBox(&g_Config.m_BrFilterCountry, Localize("Player country:"), g_Config.m_BrFilterCountry, &Button))
 			g_Config.m_BrFilterCountry ^= 1;
 
 		float OldWidth = Rect.w;
 		Rect.w = Rect.h * 2;
 		Rect.x += (OldWidth - Rect.w) / 2.0f;
-		ColorRGBA Color(1.0f, 1.0f, 1.0f, g_Config.m_BrFilterCountry ? 1.0f : 0.5f);
+		ColorRGBA Color(1.0f, 1.0f, 1.0f, UI()->MouseHovered(&Rect) ? 1.0f : g_Config.m_BrFilterCountry ? 0.9f : 0.5f);
 		m_pClient->m_CountryFlags.Render(g_Config.m_BrFilterCountryIndex, &Color, Rect.x, Rect.y, Rect.w, Rect.h);
 
-		if(g_Config.m_BrFilterCountry && UI()->DoButtonLogic(&g_Config.m_BrFilterCountryIndex, 0, &Rect))
-			m_Popup = POPUP_COUNTRY;
+		if(UI()->DoButtonLogic(&g_Config.m_BrFilterCountryIndex, 0, &Rect))
+		{
+			static SPopupMenuId s_PopupCountryId;
+			static SPopupCountrySelectionContext s_PopupCountryContext;
+			s_PopupCountryContext.m_pMenus = this;
+			s_PopupCountryContext.m_Selection = g_Config.m_BrFilterCountryIndex;
+			s_PopupCountryContext.m_New = true;
+			UI()->DoPopupMenu(&s_PopupCountryId, Rect.x, Rect.y + Rect.h, 490, 210, &s_PopupCountryContext, PopupCountrySelection);
+		}
 	}
 
 	ServerFilter.HSplitTop(20.0f, &Button, &ServerFilter);
@@ -691,7 +698,6 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 
 	CUIRect ResetButton;
 
-	//ServerFilter.HSplitBottom(5.0f, &ServerFilter, 0);
 	ServerFilter.HSplitBottom(ms_ButtonHeight - 5.0f, &ServerFilter, &ResetButton);
 
 	// ddnet country filters
@@ -959,6 +965,59 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 		else
 			Client()->ServerBrowserUpdate();
 	}
+}
+
+CUI::EPopupMenuFunctionResult CMenus::PopupCountrySelection(void *pContext, CUIRect View, bool Active)
+{
+	SPopupCountrySelectionContext *pPopupContext = static_cast<SPopupCountrySelectionContext *>(pContext);
+	CMenus *pMenus = pPopupContext->m_pMenus;
+
+	bool ListBoxUsed = Active;
+
+	static CListBox s_ListBox;
+	int OldSelected = -1;
+	s_ListBox.DoStart(50.0f, pMenus->m_pClient->m_CountryFlags.Num(), 8, 1, OldSelected, &View, false, &ListBoxUsed);
+
+	if(pPopupContext->m_New)
+	{
+		pPopupContext->m_New = false;
+		s_ListBox.ScrollToSelected();
+	}
+
+	for(size_t i = 0; i < pMenus->m_pClient->m_CountryFlags.Num(); ++i)
+	{
+		const CCountryFlags::CCountryFlag *pEntry = pMenus->m_pClient->m_CountryFlags.GetByIndex(i);
+		if(pEntry->m_CountryCode == pPopupContext->m_Selection)
+			OldSelected = i;
+
+		const CListboxItem Item = s_ListBox.DoNextItem(pEntry, OldSelected >= 0 && (size_t)OldSelected == i, &ListBoxUsed);
+		if(!Item.m_Visible)
+			continue;
+
+		CUIRect FlagRect, Label;
+		Item.m_Rect.Margin(5.0f, &FlagRect);
+		FlagRect.HSplitBottom(12.0f, &FlagRect, &Label);
+		Label.HSplitTop(2.0f, nullptr, &Label);
+		const float OldWidth = FlagRect.w;
+		FlagRect.w = FlagRect.h * 2.0f;
+		FlagRect.x += (OldWidth - FlagRect.w) / 2.0f;
+		ColorRGBA Color(1.0f, 1.0f, 1.0f, 1.0f);
+		pMenus->m_pClient->m_CountryFlags.Render(pEntry->m_CountryCode, &Color, FlagRect.x, FlagRect.y, FlagRect.w, FlagRect.h);
+
+		pMenus->UI()->DoLabel(&Label, pEntry->m_aCountryCodeString, 10.0f, TEXTALIGN_MC);
+	}
+
+	const int NewSelected = s_ListBox.DoEnd();
+	pPopupContext->m_Selection = pMenus->m_pClient->m_CountryFlags.GetByIndex(NewSelected)->m_CountryCode;
+	if(s_ListBox.WasItemSelected() || s_ListBox.WasItemActivated())
+	{
+		g_Config.m_BrFilterCountry = 1;
+		g_Config.m_BrFilterCountryIndex = pPopupContext->m_Selection;
+		pMenus->Client()->ServerBrowserUpdate();
+		return CUI::POPUP_CLOSE_CURRENT;
+	}
+
+	return CUI::POPUP_KEEP_OPEN;
 }
 
 void CMenus::RenderServerbrowserServerDetail(CUIRect View)
