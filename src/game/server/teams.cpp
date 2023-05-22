@@ -1,5 +1,6 @@
 /* (c) Shereef Marzouk. See "licence DDRace.txt" and the readme.txt in the root of the distribution for more information. */
 #include "teams.h"
+#include "base/system.h"
 #include "entities/character.h"
 #include "gamecontroller.h"
 #include "player.h"
@@ -817,8 +818,8 @@ void CGameTeams::OnFinish(CPlayer *Player, float Time, const char *pTimestamp)
 		GameServer()->SendRecord(ClientID);
 	}
 
-	int TTime = 0 - (int)Time;
-	if(!Player->m_Score || -1 * absolute(*Player->m_Score) < TTime)
+	int TTime = (int)Time;
+	if(!Player->m_Score.has_value() || TTime < Player->m_Score.value())
 	{
 		Player->m_Score = TTime;
 	}

@@ -283,7 +283,7 @@ public:
 	void SetClientName(int ClientID, const char *pName) override;
 	void SetClientClan(int ClientID, char const *pClan) override;
 	void SetClientCountry(int ClientID, int Country) override;
-	void SetClientScore(int ClientID, int Score) override;
+	void SetClientScore(int ClientID, std::optional<int> Score) override;
 	void SetClientFlags(int ClientID, int Flags) override;
 
 	void Kick(int ClientID, const char *pReason) override;

@@ -183,20 +183,7 @@ void CPlayer::Tick()
 	if(m_ChatScore > 0)
 		m_ChatScore--;
 
-	int Score;
-	if(m_Score)
-	{
-		if(*m_Score == 9999)
-			Score = -10000;
-		else
-			Score = *m_Score;
-	}
-	else
-	{
-		Score = -9999;
-	}
-
-	Server()->SetClientScore(m_ClientID, Score);
+	Server()->SetClientScore(m_ClientID, m_Score);
 
 	if(m_Moderating && m_Afk)
 	{
@@ -351,15 +338,18 @@ void CPlayer::Snap(int SnappingClient)
 	int Latency = SnappingClient == SERVER_DEMO_CLIENT ? m_Latency.m_Min : GameServer()->m_apPlayers[SnappingClient]->m_aCurLatency[m_ClientID];
 
 	int Score;
-	if(m_Score)
+	// This is the time sent to the player while ingame (do not confuse to the one reported to the master server).
+	// Due to clients expecting this as a negative value, we have to make sure it's negative.
+	// Special numbers:
+	// - 9999: means no time and isn't displayed in the scoreboard.
+	if(m_Score.has_value())
 	{
-		// -9999 stands for no time and isn't displayed in scoreboard, so
 		// shift the time by a second if the player actually took 9999
 		// seconds to finish the map.
-		if(*m_Score == 9999)
+		if(m_Score.value() == 9999)
 			Score = -10000;
 		else
-			Score = -1 * absolute(*m_Score);
+			Score = -m_Score.value();
 	}
 	else
 	{
@@ -912,8 +902,8 @@ void CPlayer::ProcessScoreResult(CScorePlayerResult &Result)
 			GameServer()->CallVote(m_ClientID, Result.m_Data.m_MapVote.m_aMap, aCmd, "/map", aChatmsg);
 			break;
 		case CScorePlayerResult::PLAYER_INFO:
-			if(Result.m_Data.m_Info.m_Time)
-				GameServer()->Score()->PlayerData(m_ClientID)->Set(*Result.m_Data.m_Info.m_Time, Result.m_Data.m_Info.m_aTimeCp);
+			if(Result.m_Data.m_Info.m_Time.has_value())
+				GameServer()->Score()->PlayerData(m_ClientID)->Set(Result.m_Data.m_Info.m_Time.value(), Result.m_Data.m_Info.m_aTimeCp);
 			m_Score = Result.m_Data.m_Info.m_Time;
 			Server()->ExpireServerInfo();
 			int Birthday = Result.m_Data.m_Info.m_Birthday;
