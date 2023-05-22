@@ -20,6 +20,7 @@
 # Deëivid!        2022-10-08 19:20:00
 # Deëivid!        2023-01-05 21:05:00
 # Deëivid!        2023-02-26 00:35:00
+# Deëivid!        2023-05-22 19:54:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -1713,26 +1714,26 @@ Create a random skin
 == Crear skin aleatoria
 
 Online players (%d)
-== 
+== Jugadores en línea (%d)
 
 Online clanmates (%d)
-== 
+== Compañeros de clan en línea (%d)
 
 [friends (server browser)]
 Offline (%d)
-== 
+== Desconectados (%d)
 
 Click to select server. Double click to join your friend.
-== 
+== Haz clic para seleccionar el servidor. Doble clic para unirte a tu amigo.
 
 Click to remove this player from your friends list.
-== 
+== Haz clic para quitar este jugador de tu lista de amigos.
 
 Click to remove this clan from your friends list.
-== 
+== Haz clic para quitar este clan de tu lista de amigos.
 
 None
-== 
+== Ninguno
 
 Add Clan
-== 
+== Agregar clan
