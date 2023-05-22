@@ -569,19 +569,15 @@ void CScoreboard::RenderRecordingNotification(float x)
 
 void CScoreboard::RenderMapName(float x)
 {
-	char aBuf[64];
-
-	str_copy(aBuf, Client()->GetCurrentMap());
-
-	if(!aBuf[0])
+	if(!Client()->GetCurrentMap()[0])
 		return;
 
-	float w = TextRender()->TextWidth(20.0f, aBuf, -1, -1.0f);
+	float w = TextRender()->TextWidth(20.0f, Client()->GetCurrentMap(), -1, -1.0f);
 
 	// draw the box
 	Graphics()->DrawRect(x, 0.0f, w + 40.0f, 50.0f, ColorRGBA(0.0f, 0.0f, 0.0f, 0.4f), IGraphics::CORNER_B, 15.0f);
 
-	TextRender()->Text(x + 20.0f, (50.f - 20.f) / 2.f, 20.0f, aBuf, -1.0f);
+	TextRender()->Text(x + 20.0f, (50.f - 20.f) / 2.f, 20.0f, Client()->GetCurrentMap(), -1.0f);
 }
 
 void CScoreboard::OnRender()
