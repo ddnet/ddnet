@@ -1076,17 +1076,6 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 		s_ListBox.DoStart(25.0f, pSelectedServer->m_NumReceivedClients, 1, 3, -1, &ServerScoreBoard);
 
 		int ClientScoreKind = pSelectedServer->m_ClientScoreKind;
-		if(ClientScoreKind == CServerInfo::CLIENT_SCORE_KIND_UNSPECIFIED)
-		{
-			if((str_find_nocase(pSelectedServer->m_aGameType, "race") || str_find_nocase(pSelectedServer->m_aGameType, "fastcap")) && g_Config.m_ClDDRaceScoreBoard)
-			{
-				ClientScoreKind = CServerInfo::CLIENT_SCORE_KIND_TIME_BACKCOMPAT;
-			}
-			else
-			{
-				ClientScoreKind = CServerInfo::CLIENT_SCORE_KIND_POINTS;
-			}
-		}
 
 		for(int i = 0; i < pSelectedServer->m_NumReceivedClients; i++)
 		{
