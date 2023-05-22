@@ -478,7 +478,7 @@ void CServer::SetClientScore(int ClientID, int Score)
 	if(ClientID < 0 || ClientID >= MAX_CLIENTS || m_aClients[ClientID].m_State < CClient::STATE_READY)
 		return;
 
-	if(m_aClients[ClientID].m_Score != Score)
+	if(!m_aClients[ClientID].m_Score.has_value() || m_aClients[ClientID].m_Score.value() != Score)
 		ExpireServerInfo();
 
 	m_aClients[ClientID].m_Score = Score;
@@ -2017,7 +2017,7 @@ void CServer::CacheServerInfo(CCache *pCache, int Type, bool SendClients)
 			q.AddString(ClientClan(i), MAX_CLAN_LENGTH); // client clan
 
 			ADD_INT(q, m_aClients[i].m_Country); // client country
-			ADD_INT(q, m_aClients[i].m_Score == -1 ? -9999 : m_aClients[i].m_Score == 9999 ? -10000 : -m_aClients[i].m_Score); // client score
+			ADD_INT(q, !m_aClients[i].m_Score.has_value() ? -9999 : m_aClients[i].m_Score.value() == 9999 ? -10000 : -m_aClients[i].m_Score.value()); // client score
 			ADD_INT(q, GameServer()->IsClientPlayer(i) ? 1 : 0); // is player?
 			if(Type == SERVERINFO_EXTENDED)
 				q.AddString("", 0); // extra info, reserved
@@ -2099,7 +2099,7 @@ void CServer::CacheServerInfoSixup(CCache *pCache, bool SendClients)
 				Packer.AddString(ClientName(i), MAX_NAME_LENGTH); // client name
 				Packer.AddString(ClientClan(i), MAX_CLAN_LENGTH); // client clan
 				Packer.AddInt(m_aClients[i].m_Country); // client country
-				Packer.AddInt(m_aClients[i].m_Score); // client score
+				Packer.AddInt(m_aClients[i].m_Score.value_or(-1)); // client score
 				Packer.AddInt(GameServer()->IsClientPlayer(i) ? 0 : 1); // flag spectator=1, bot=2 (player=0)
 			}
 		}
@@ -2267,7 +2267,7 @@ void CServer::UpdateRegisterServerInfo()
 				EscapeJson(aCName, sizeof(aCName), ClientName(i)),
 				EscapeJson(aCClan, sizeof(aCClan), ClientClan(i)),
 				m_aClients[i].m_Country,
-				m_aClients[i].m_Score == -1 ? -9999 : m_aClients[i].m_Score,
+				m_aClients[i].m_Score.value_or(-9999),
 				JsonBool(GameServer()->IsClientPlayer(i)),
 				aExtraPlayerInfo);
 			str_append(aInfo, aClientInfo, sizeof(aInfo));
