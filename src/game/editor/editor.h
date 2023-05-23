@@ -1057,7 +1057,6 @@ public:
 	float m_MouseDeltaY;
 	float m_MouseDeltaWx;
 	float m_MouseDeltaWy;
-
     enum EShowTile
 	{
 		SHOW_TILE_OFF,

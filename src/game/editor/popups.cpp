@@ -298,7 +298,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupMenuSettings(void *pContext, CUIRect
 			pEditor->m_ShowTileInfo = SHOW_TILE_OFF;
 			pEditor->m_ShowEnvelopePreview = SHOWENV_NONE;
 		}
-		if(pEditor->DoButton_Ex(&s_ButtonDec, "Dec", pEditor->m_ShowTileInfo == SHOW_TILE_DECIMAL , &Dec, 0, "[ctrl+i] Show tile information", IGraphics::CORNER_NONE))
+		if(pEditor->DoButton_Ex(&s_ButtonDec, "Dec", pEditor->m_ShowTileInfo == SHOW_TILE_DECIMAL, &Dec, 0, "[ctrl+i] Show tile information", IGraphics::CORNER_NONE))
 		{
 			pEditor->m_ShowTileInfo = SHOW_TILE_DECIMAL;
 			pEditor->m_ShowEnvelopePreview = SHOWENV_NONE;

@@ -651,7 +651,7 @@ void CLayerTiles::ShowInfo()
 			if(m_pTiles[c].m_Index)
 			{
 				char aBuf[64];
-				str_format(aBuf, sizeof(aBuf), m_pEditor->m_ShowTileInfo == SHOW_TILE_HEXADECIMAL ? "%02X" : "%i", m_pTiles[c].m_Index);
+				str_format(aBuf, sizeof(aBuf), m_pEditor->m_ShowTileInfo == CEditor::SHOW_TILE_HEXADECIMAL ? "%02X" : "%i", m_pTiles[c].m_Index);
 				m_pEditor->Graphics()->QuadsText(x * 32, y * 32, 16.0f, aBuf);
 
 				char aFlags[4] = {m_pTiles[c].m_Flags & TILEFLAG_XFLIP ? 'X' : ' ',
