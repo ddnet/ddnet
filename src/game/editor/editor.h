@@ -1057,13 +1057,13 @@ public:
 	float m_MouseDeltaY;
 	float m_MouseDeltaWx;
 	float m_MouseDeltaWy;
+
     enum EShowTile
 	{
 		SHOW_TILE_OFF,
 		SHOW_TILE_DECIMAL,
 		SHOW_TILE_HEXADECIMAL
 	};
-
 	EShowTile m_ShowTileInfo;
 	bool m_ShowDetail;
 	bool m_Animate;
