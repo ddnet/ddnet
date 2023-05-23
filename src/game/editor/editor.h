@@ -24,7 +24,7 @@ using namespace std::chrono_literals;
 
 typedef void (*INDEX_MODIFY_FUNC)(int *pIndex);
 
-//CRenderTools m_RenderTools;
+// CRenderTools m_RenderTools;
 
 // CEditor SPECIFIC
 enum
@@ -1058,7 +1058,7 @@ public:
 	float m_MouseDeltaWx;
 	float m_MouseDeltaWy;
 
-    enum EShowTile
+	enum EShowTile
 	{
 		SHOW_TILE_OFF,
 		SHOW_TILE_DECIMAL,
@@ -1244,7 +1244,7 @@ public:
 	void SortImages();
 	bool SelectLayerByTile();
 
-	//Tile Numbers For Explanations - TODO: Add/Improve tiles and explanations
+	// Tile Numbers For Explanations - TODO: Add/Improve tiles and explanations
 	enum
 	{
 		TILE_PUB_AIR,
@@ -1309,7 +1309,7 @@ public:
 		TILE_VANILLA_LASER,
 	};
 
-	//Explanations
+	// Explanations
 	enum
 	{
 		EXPLANATION_DDNET,
