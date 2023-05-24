@@ -307,6 +307,8 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 			int PlayerTeam = pChr->Team();
 			if((GetPlayerChar(Owner) ? GetPlayerChar(Owner)->GrenadeHitDisabled() : !g_Config.m_SvHit) || NoDamage)
 			{
+				if(PlayerTeam == TEAM_SUPER)
+					continue;
 				if(!TeamMask.test(PlayerTeam))
 					continue;
 				TeamMask.reset(PlayerTeam);
