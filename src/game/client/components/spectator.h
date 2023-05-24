@@ -10,6 +10,7 @@ class CSpectator : public CComponent
 {
 	enum
 	{
+		MULTI_VIEW = -4,
 		NO_SELECTION = -3,
 	};
 
@@ -30,6 +31,7 @@ class CSpectator : public CComponent
 	static void ConSpectateNext(IConsole::IResult *pResult, void *pUserData);
 	static void ConSpectatePrevious(IConsole::IResult *pResult, void *pUserData);
 	static void ConSpectateClosest(IConsole::IResult *pResult, void *pUserData);
+	static void ConMultiView(IConsole::IResult *pResult, void *pUserData);
 
 public:
 	CSpectator();
