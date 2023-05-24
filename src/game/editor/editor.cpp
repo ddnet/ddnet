@@ -889,27 +889,19 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 	// handle shortcut for info button
 	if(m_Dialog == DIALOG_NONE && m_EditBoxActive == 0 && Input()->KeyPress(KEY_I) && ModPressed && !ShiftPressed)
 	{
-		if(m_ShowTileInfo && m_ShowTileHexInfo)
-			m_ShowTileHexInfo = false;
-		else if(m_ShowTileInfo)
-			m_ShowTileInfo = false;
+		if(m_ShowTileInfo == SHOW_TILE_HEXADECIMAL)
+			m_ShowTileInfo = SHOW_TILE_DECIMAL;
+		else if(m_ShowTileInfo != SHOW_TILE_OFF)
+			m_ShowTileInfo = SHOW_TILE_OFF;
 		else
-			m_ShowTileInfo = true;
+			m_ShowTileInfo = SHOW_TILE_DECIMAL;
 		m_ShowEnvelopePreview = SHOWENV_NONE;
 	}
 
 	// handle shortcut for hex button
 	if(m_Dialog == DIALOG_NONE && m_EditBoxActive == 0 && Input()->KeyPress(KEY_I) && ModPressed && ShiftPressed)
 	{
-		if(m_ShowTileInfo && m_ShowTileHexInfo)
-			m_ShowTileInfo = false;
-		else if(m_ShowTileInfo)
-			m_ShowTileHexInfo = true;
-		else
-		{
-			m_ShowTileInfo = true;
-			m_ShowTileHexInfo = true;
-		}
+		m_ShowTileInfo = m_ShowTileInfo == SHOW_TILE_HEXADECIMAL ? SHOW_TILE_OFF : SHOW_TILE_HEXADECIMAL;
 		m_ShowEnvelopePreview = SHOWENV_NONE;
 	}
 
@@ -950,10 +942,10 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 		// proof button
 		TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
 		static int s_ProofButton = 0;
-		if(DoButton_Ex(&s_ProofButton, "Proof", m_ProofBorders, &Button, 0, "[ctrl+p] Toggles proof borders. These borders represent what a player maximum can see.", IGraphics::CORNER_L) ||
+		if(DoButton_Ex(&s_ProofButton, "Proof", m_ProofBorders != PROOF_BORDER_OFF, &Button, 0, "[ctrl+p] Toggles proof borders. These borders represent what a player maximum can see.", IGraphics::CORNER_L) ||
 			(m_Dialog == DIALOG_NONE && m_EditBoxActive == 0 && Input()->KeyPress(KEY_P) && ModPressed))
 		{
-			m_ProofBorders = !m_ProofBorders;
+			m_ProofBorders = m_ProofBorders == PROOF_BORDER_OFF ? PROOF_BORDER_INGAME : PROOF_BORDER_OFF;
 		}
 
 		TB_Top.VSplitLeft(10.0f, &Button, &TB_Top);
@@ -1127,7 +1119,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 			TB_Bottom.VSplitLeft(45.0f, &Button, &TB_Bottom);
 			static int s_RefocusButton = 0;
 			int FocusButtonChecked;
-			if(m_ProofBorders && m_MenuProofBorders)
+			if(m_ProofBorders == PROOF_BORDER_MENU)
 			{
 				if(distance(m_vMenuBackgroundPositions[m_CurrentMenuProofIndex], vec2(m_WorldOffsetX, m_WorldOffsetY)) < 0.0001f)
 					FocusButtonChecked = -1;
@@ -1143,7 +1135,7 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 			}
 			if(DoButton_Editor(&s_RefocusButton, "Refocus", FocusButtonChecked, &Button, 0, "[HOME] Restore map focus") || (m_Dialog == DIALOG_NONE && m_EditBoxActive == 0 && Input()->KeyPress(KEY_HOME)))
 			{
-				if(m_ProofBorders && m_MenuProofBorders)
+				if(m_ProofBorders == PROOF_BORDER_MENU)
 				{
 					m_WorldOffsetX = m_vMenuBackgroundPositions[m_CurrentMenuProofIndex].x;
 					m_WorldOffsetY = m_vMenuBackgroundPositions[m_CurrentMenuProofIndex].y;
@@ -2301,7 +2293,7 @@ void CEditor::DoMapEditor(CUIRect View)
 		}
 
 		CLayerTiles *pT = static_cast<CLayerTiles *>(GetSelectedLayerType(0, LAYERTYPE_TILES));
-		if(m_ShowTileInfo && pT && pT->m_Visible && m_Zoom <= 300.0f)
+		if(m_ShowTileInfo != SHOW_TILE_OFF && pT && pT->m_Visible && m_Zoom <= 300.0f)
 		{
 			GetSelectedGroup()->MapScreen();
 			pT->ShowInfo();
@@ -2372,7 +2364,7 @@ void CEditor::DoMapEditor(CUIRect View)
 
 			m_TilesetPicker.Render(true);
 
-			if(m_ShowTileInfo)
+			if(m_ShowTileInfo != SHOW_TILE_OFF)
 				m_TilesetPicker.ShowInfo();
 		}
 		else
@@ -2764,7 +2756,7 @@ void CEditor::DoMapEditor(CUIRect View)
 		}
 
 		// menu proof selection
-		if(m_MenuProofBorders && !m_ShowPicker)
+		if(m_ProofBorders == PROOF_BORDER_MENU && !m_ShowPicker)
 		{
 			ResetMenuBackgroundPositions();
 			for(int i = 0; i < (int)m_vMenuBackgroundPositions.size(); i++)
@@ -2906,7 +2898,7 @@ void CEditor::DoMapEditor(CUIRect View)
 	}
 
 	// render screen sizes
-	if(m_ProofBorders && !m_ShowPicker)
+	if(m_ProofBorders != PROOF_BORDER_OFF && !m_ShowPicker)
 	{
 		CLayerGroup *pGameGroup = m_Map.m_pGameGroup;
 		pGameGroup->MapScreen();
@@ -2924,7 +2916,7 @@ void CEditor::DoMapEditor(CUIRect View)
 			float aPoints[4];
 			float Aspect = Start + (End - Start) * (i / (float)NumSteps);
 
-			float Zoom = (m_ProofBorders && m_MenuProofBorders) ? 0.7f : 1.0f;
+			float Zoom = (m_ProofBorders == PROOF_BORDER_MENU) ? 0.7f : 1.0f;
 			RenderTools()->MapScreenToWorld(
 				m_WorldOffsetX, m_WorldOffsetY,
 				100.0f, 100.0f, 100.0f, 0.0f, 0.0f, Aspect, Zoom, aPoints);
@@ -2967,7 +2959,7 @@ void CEditor::DoMapEditor(CUIRect View)
 				const float aAspects[] = {4.0f / 3.0f, 16.0f / 10.0f, 5.0f / 4.0f, 16.0f / 9.0f};
 				float Aspect = aAspects[i];
 
-				float Zoom = (m_ProofBorders && m_MenuProofBorders) ? 0.7f : 1.0f;
+				float Zoom = (m_ProofBorders == PROOF_BORDER_MENU) ? 0.7f : 1.0f;
 				RenderTools()->MapScreenToWorld(
 					m_WorldOffsetX, m_WorldOffsetY,
 					100.0f, 100.0f, 100.0f, 0.0f, 0.0f, Aspect, Zoom, aPoints);
@@ -2996,7 +2988,7 @@ void CEditor::DoMapEditor(CUIRect View)
 			Graphics()->SetColor(0, 0, 1, 0.3f);
 			Graphics()->DrawCircle(m_WorldOffsetX, m_WorldOffsetY - 3.0f, 20.0f, 32);
 
-			if(m_ProofBorders && m_MenuProofBorders)
+			if(m_ProofBorders == PROOF_BORDER_MENU)
 			{
 				Graphics()->SetColor(0, 1, 0, 0.3f);
 
@@ -3025,7 +3017,7 @@ void CEditor::DoMapEditor(CUIRect View)
 		}
 	}
 
-	if(!m_ShowPicker && m_ShowTileInfo && m_ShowEnvelopePreview != SHOWENV_NONE && GetSelectedLayer(0) && GetSelectedLayer(0)->m_Type == LAYERTYPE_QUADS)
+	if(!m_ShowPicker && m_ShowTileInfo != SHOW_TILE_OFF && m_ShowEnvelopePreview != SHOWENV_NONE && GetSelectedLayer(0) && GetSelectedLayer(0)->m_Type == LAYERTYPE_QUADS)
 	{
 		GetSelectedGroup()->MapScreen();
 

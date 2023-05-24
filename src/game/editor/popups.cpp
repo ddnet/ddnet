@@ -293,21 +293,19 @@ CUI::EPopupMenuFunctionResult CEditor::PopupMenuSettings(void *pContext, CUIRect
 		static int s_ButtonOff = 0;
 		static int s_ButtonDec = 0;
 		static int s_ButtonHex = 0;
-		if(pEditor->DoButton_ButtonDec(&s_ButtonOff, "Off", !pEditor->m_ShowTileInfo, &Off, 0, "Do not show tile information"))
+		if(pEditor->DoButton_ButtonDec(&s_ButtonOff, "Off", pEditor->m_ShowTileInfo == SHOW_TILE_OFF, &Off, 0, "Do not show tile information"))
 		{
-			pEditor->m_ShowTileInfo = false;
+			pEditor->m_ShowTileInfo = SHOW_TILE_OFF;
 			pEditor->m_ShowEnvelopePreview = SHOWENV_NONE;
 		}
-		if(pEditor->DoButton_Ex(&s_ButtonDec, "Dec", pEditor->m_ShowTileInfo && !pEditor->m_ShowTileHexInfo, &Dec, 0, "[ctrl+i] Show tile information", IGraphics::CORNER_NONE))
+		if(pEditor->DoButton_Ex(&s_ButtonDec, "Dec", pEditor->m_ShowTileInfo == SHOW_TILE_DECIMAL, &Dec, 0, "[ctrl+i] Show tile information", IGraphics::CORNER_NONE))
 		{
-			pEditor->m_ShowTileInfo = true;
-			pEditor->m_ShowTileHexInfo = false;
+			pEditor->m_ShowTileInfo = SHOW_TILE_DECIMAL;
 			pEditor->m_ShowEnvelopePreview = SHOWENV_NONE;
 		}
-		if(pEditor->DoButton_ButtonInc(&s_ButtonHex, "Hex", pEditor->m_ShowTileInfo && pEditor->m_ShowTileHexInfo, &Hex, 0, "[ctrl+shift+i] Show tile information in hexadecimal"))
+		if(pEditor->DoButton_ButtonInc(&s_ButtonHex, "Hex", pEditor->m_ShowTileInfo == SHOW_TILE_HEXADECIMAL, &Hex, 0, "[ctrl+shift+i] Show tile information in hexadecimal"))
 		{
-			pEditor->m_ShowTileInfo = true;
-			pEditor->m_ShowTileHexInfo = true;
+			pEditor->m_ShowTileInfo = SHOW_TILE_HEXADECIMAL;
 			pEditor->m_ShowEnvelopePreview = SHOWENV_NONE;
 		}
 	}
@@ -2327,18 +2325,18 @@ CUI::EPopupMenuFunctionResult CEditor::PopupProofMode(void *pContext, CUIRect Vi
 	CUIRect Button;
 	View.HSplitTop(12.0f, &Button, &View);
 	static int s_ButtonIngame;
-	if(pEditor->DoButton_MenuItem(&s_ButtonIngame, "Ingame", !pEditor->m_MenuProofBorders, &Button, 0, "These borders represent what a player maximum can see."))
+	if(pEditor->DoButton_MenuItem(&s_ButtonIngame, "Ingame", pEditor->m_ProofBorders == PROOF_BORDER_INGAME, &Button, 0, "These borders represent what a player maximum can see."))
 	{
-		pEditor->m_MenuProofBorders = false;
+		pEditor->m_ProofBorders = PROOF_BORDER_INGAME;
 		return CUI::POPUP_CLOSE_CURRENT;
 	}
 
 	View.HSplitTop(2.0f, nullptr, &View);
 	View.HSplitTop(12.0f, &Button, &View);
 	static int s_ButtonMenu;
-	if(pEditor->DoButton_MenuItem(&s_ButtonMenu, "Menu", pEditor->m_MenuProofBorders, &Button, 0, "These borders represent what will be shown in the menu."))
+	if(pEditor->DoButton_MenuItem(&s_ButtonMenu, "Menu", pEditor->m_ProofBorders == PROOF_BORDER_MENU, &Button, 0, "These borders represent what will be shown in the menu."))
 	{
-		pEditor->m_MenuProofBorders = true;
+		pEditor->m_ProofBorders = PROOF_BORDER_MENU;
 		return CUI::POPUP_CLOSE_CURRENT;
 	}
 
