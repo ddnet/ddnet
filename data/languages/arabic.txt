@@ -780,9 +780,6 @@ Show tiles layers from BG map
 Remove chat
 == ﺕﺎﺸﻟﺍ ﻑﺬﺣ
 
-Threaded sound loading
-== ﺔﻳﺍﺪﺒﻟﺍ ﺕﻮﺼ
-
 Frags
 == ﻞﺑﺎﻨﻗ
 

@@ -925,9 +925,6 @@ Enable team chat sound
 Enable highlighted chat sound
 == Ota korostetun chatin äänet käyttöön
 
-Threaded sound loading
-== Säikeistetty äänilataus
-
 Game sound volume
 == Pelin äänenvoimakkuus
 

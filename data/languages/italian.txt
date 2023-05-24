@@ -940,9 +940,6 @@ Enable team chat sound
 Enable highlighted chat sound
 == Abilita suono della chat evidenziata
 
-Threaded sound loading
-== Suono filettato
-
 Game sound volume
 == Volume del gioco
 

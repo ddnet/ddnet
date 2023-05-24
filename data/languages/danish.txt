@@ -908,9 +908,6 @@ Enable team chat sound
 Enable highlighted chat sound
 == Aktivér fremhævet chatlyd
 
-Threaded sound loading
-== Trådet lydindlæsning
-
 Game sound volume
 == Spillydstyrke
 

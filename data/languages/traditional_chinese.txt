@@ -289,9 +289,6 @@ Enable team chat sound
 Enable highlighted chat sound
 == 啟用被提及時的提示音
 
-Threaded sound loading
-== 啟用多執行緒音訊載入
-
 Name
 == 名稱
 

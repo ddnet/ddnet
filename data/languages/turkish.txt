@@ -876,9 +876,6 @@ Enable team chat sound
 Enable highlighted chat sound
 == Vurgulanmış mesaj sesini etkinleştir
 
-Threaded sound loading
-== Threaded ses yükleme
-
 Map sound volume
 == Harita ses seviyesi
 

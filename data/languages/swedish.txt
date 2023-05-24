@@ -741,9 +741,6 @@ Use high DPI
 may cause delay
 == kan orsaka fördröjning
 
-Threaded sound loading
-== Threaded ljud laddning
-
 AntiPing
 == AntiPing
 

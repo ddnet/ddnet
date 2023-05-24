@@ -824,9 +824,6 @@ Show tiles layers from BG map
 Remove chat
 == Chat entfernen
 
-Threaded sound loading
-== Sounds in Threads laden
-
 Frags
 == Abschüsse
 

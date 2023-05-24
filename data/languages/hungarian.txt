@@ -853,9 +853,6 @@ Deactivate
 Welcome to DDNet
 == Üdvözlet a DDNet-en
 
-Threaded sound loading
-== Csavarmenetes hang betöltése
-
 Activate
 == Aktiválás
 

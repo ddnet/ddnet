@@ -858,9 +858,6 @@ Enable team chat sound
 Enable highlighted chat sound
 == Povolit zvuk zvýrazněné zprávy
 
-Threaded sound loading
-== Načítání Threaded zvuku
-
 Map sound volume
 == Hlasitost zvuků mapy
 

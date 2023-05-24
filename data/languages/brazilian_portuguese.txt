@@ -688,9 +688,6 @@ Ghost
 Remove chat
 == Remover chat
 
-Threaded sound loading
-== Carregamento de som em fluxos
-
 Check now
 == Verificar agora
 

@@ -1290,9 +1290,6 @@ Enable team chat sound
 Enable highlighted chat sound
 == 
 
-Threaded sound loading
-== 
-
 Game sound volume
 == 
 

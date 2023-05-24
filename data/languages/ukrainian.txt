@@ -862,9 +862,6 @@ Enable team chat sound
 Enable highlighted chat sound
 == Включити звуки виділених повідомлень
 
-Threaded sound loading
-== музика при завантаженні
-
 Map sound volume
 == Гучність звуку на карті
 

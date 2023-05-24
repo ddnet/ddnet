@@ -1447,9 +1447,6 @@ auto
 Enable long pain sound (used when shooting in freeze)
 == 
 
-Threaded sound loading
-== 
-
 Appearance
 == 
 

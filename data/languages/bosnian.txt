@@ -865,9 +865,6 @@ Enable team chat sound
 Enable highlighted chat sound
 == Omogući zvuk označavanja u čatu
 
-Threaded sound loading
-== Učitavanje tredovanog zvuka
-
 Map sound volume
 == Glasnoća zvuka mape
 
