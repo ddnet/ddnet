@@ -412,9 +412,6 @@ Laser
 Round
 == Раунду
 
-Sample rate
-== Жыштыгы
-
 Sat.
 == Канык.
 

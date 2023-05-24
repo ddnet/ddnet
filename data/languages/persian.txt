@@ -1291,9 +1291,6 @@ Enable highlighted chat sound
 Threaded sound loading
 == ﯼﺍ ﻪﺘﺷﺭ ﯼﺍﺪﺻ ﯼﺭﺍﺬﮔﺭﺎﺑ
 
-Sample rate
-== ﻪﻧﻮﻤﻧ ﺥﺮﻧ
-
 Appearance
 == ﺮﻫﺎﻇ
 

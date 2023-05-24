@@ -347,9 +347,6 @@ Rename demo
 Reset filter
 == Фильтрсене тасат
 
-Sample rate
-== Тăтăшлăх
-
 Score
 == Паллă
 

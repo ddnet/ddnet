@@ -343,9 +343,6 @@ Rename demo
 Reset filter
 == Поврати филтер
 
-Sample rate
-== Фрекфенција
-
 Score
 == Резултат
 

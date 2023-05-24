@@ -348,9 +348,6 @@ Rename demo
 Reset filter
 == Скінуць фільтр
 
-Sample rate
-== Чашчыня сэмпла
-
 Score
 == Ачкі
 

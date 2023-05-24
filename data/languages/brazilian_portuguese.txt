@@ -373,9 +373,6 @@ Rename demo
 Reset filter
 == Redefinir filtro
 
-Sample rate
-== Frequência do som
-
 Score
 == Pontos
 

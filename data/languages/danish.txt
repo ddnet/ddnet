@@ -348,9 +348,6 @@ Rename demo
 Reset filter
 == Nulstil filter
 
-Sample rate
-== Sample frekvens
-
 Score
 == Score
 

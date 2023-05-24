@@ -360,9 +360,6 @@ Rename demo
 Reset filter
 == Сбросить фильтры
 
-Sample rate
-== Частота
-
 Score
 == Счёт
 

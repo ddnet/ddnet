@@ -346,9 +346,6 @@ Rename demo
 Reset filter
 == Vymazat filtr
 
-Sample rate
-== Vzorkování:
-
 Score
 == Skóre
 

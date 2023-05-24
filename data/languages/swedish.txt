@@ -351,9 +351,6 @@ Rename demo
 Reset filter
 == Återställ filter
 
-Sample rate
-== Samplingsfrekvens
-
 Score
 == Poäng
 

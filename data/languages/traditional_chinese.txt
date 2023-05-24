@@ -395,9 +395,6 @@ Rename demo
 Reset filter
 == 重置過濾器
 
-Sample rate
-== 取樣率
-
 Score
 == 分數
 

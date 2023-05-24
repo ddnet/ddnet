@@ -352,9 +352,6 @@ Rename demo
 Reset filter
 == Azzera filtri
 
-Sample rate
-== Frequenza
-
 Score
 == Punti
 

@@ -407,9 +407,6 @@ Rename demo
 Reset filter
 == 重置筛选
 
-Sample rate
-== 采样率
-
 Score
 == 分数
 

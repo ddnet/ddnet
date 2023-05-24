@@ -260,9 +260,6 @@ Remote console
 Reset filter
 == Скинути фільтри
 
-Sample rate
-== Частота
-
 Score
 == бали
 

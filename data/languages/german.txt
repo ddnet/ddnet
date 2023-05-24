@@ -368,9 +368,6 @@ Rename demo
 Reset filter
 == Standardfilter
 
-Sample rate
-== Abtastrate
-
 Score
 == Punkte
 

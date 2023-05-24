@@ -347,9 +347,6 @@ Rename demo
 Reset filter
 == Obnoviť filter
 
-Sample rate
-== Sample rate
-
 Score
 == Skóre
 

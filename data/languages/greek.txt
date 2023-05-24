@@ -350,9 +350,6 @@ Rename demo
 Reset filter
 == Αφαίρεση φίλτρου
 
-Sample rate
-== Δειγματοληψία
-
 Score
 == Βαθμ.
 

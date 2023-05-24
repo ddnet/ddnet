@@ -349,9 +349,6 @@ Rename demo
 Reset filter
 == Nollaa suotimet
 
-Sample rate
-== Näytteenottotaajuus
-
 Score
 == Pisteet
 

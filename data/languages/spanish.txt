@@ -368,9 +368,6 @@ Rename demo
 Reset filter
 == Resetear filtro
 
-Sample rate
-== Frecuencia de muestreo
-
 Score
 == Puntos
 

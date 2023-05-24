@@ -345,9 +345,6 @@ Rename demo
 Reset filter
 == Reiniciar el filtre
 
-Sample rate
-== Freqüència de la imatge
-
 Score
 == Punts
 

@@ -356,9 +356,6 @@ Rename demo
 Reset filter
 == Filtru implicit
 
-Sample rate
-== Frecvența
-
 Score
 == Scor
 

@@ -349,9 +349,6 @@ Rename demo
 Reset filter
 == Filtreleri sıfırla
 
-Sample rate
-== Örnekleme hızı
-
 Score
 == Skor
 

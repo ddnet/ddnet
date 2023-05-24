@@ -1533,9 +1533,6 @@ Graphics cards
 auto
 == 
 
-Sample rate
-== 
-
 Appearance
 == 
 

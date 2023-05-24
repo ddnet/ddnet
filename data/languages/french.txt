@@ -371,9 +371,6 @@ Rename demo
 Reset filter
 == Filtres par défaut
 
-Sample rate
-== Taux d'échantillonnage
-
 Score
 == Score
 

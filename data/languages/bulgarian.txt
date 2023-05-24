@@ -347,9 +347,6 @@ Rename demo
 Reset filter
 == Рестартирай филтрите
 
-Sample rate
-== Честота
-
 Score
 == Точки
 

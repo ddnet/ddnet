@@ -340,9 +340,6 @@ Rename demo
 Reset filter
 == Szűrő visszaállítása
 
-Sample rate
-== Mintavételi frekvencia
-
 Score
 == Pontszám
 

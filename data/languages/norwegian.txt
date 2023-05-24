@@ -349,9 +349,6 @@ Rename demo
 Reset filter
 == Tilbakestill filter
 
-Sample rate
-== Samplingsrate
-
 Score
 == Poeng
 

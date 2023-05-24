@@ -347,9 +347,6 @@ Rename demo
 Reset filter
 == Povrati filter
 
-Sample rate
-== Frekfencija
-
 Score
 == Rezultat
 

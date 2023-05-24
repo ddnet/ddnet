@@ -350,9 +350,6 @@ Rename demo
 Reset filter
 == 필터 초기화
 
-Sample rate
-== 샘플링 속도
-
 Score
 == 점수
 

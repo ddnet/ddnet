@@ -351,9 +351,6 @@ Rename demo
 Reset filter
 == Przywróć domyślne
 
-Sample rate
-== Częstotliwość próbkowania
-
 Score
 == Wynik
 

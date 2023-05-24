@@ -360,9 +360,6 @@ Rename demo
 Reset filter
 == Herstel filter
 
-Sample rate
-== Voorbeeldssnelheid
-
 Score
 == Score
 
