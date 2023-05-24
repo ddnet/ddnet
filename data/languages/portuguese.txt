@@ -363,9 +363,6 @@ Reset
 Reset filter
 == Reiniciar filtro
 
-Sample rate
-== Frequencia de rate
-
 Score
 == Pontos
 
@@ -1448,9 +1445,6 @@ auto
 == 
 
 Enable long pain sound (used when shooting in freeze)
-== 
-
-Threaded sound loading
 == 
 
 Appearance

@@ -356,9 +356,6 @@ Rename demo
 Reset filter
 == Filtru implicit
 
-Sample rate
-== Frecvența
-
 Score
 == Scor
 
@@ -1291,9 +1288,6 @@ Enable team chat sound
 == 
 
 Enable highlighted chat sound
-== 
-
-Threaded sound loading
 == 
 
 Game sound volume

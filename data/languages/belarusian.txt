@@ -348,9 +348,6 @@ Rename demo
 Reset filter
 == Скінуць фільтр
 
-Sample rate
-== Чашчыня сэмпла
-
 Score
 == Ачкі
 
@@ -1254,9 +1251,6 @@ Enable team chat sound
 
 Enable highlighted chat sound
 == Уключыць гук падсвечаных паведамленняў
-
-Threaded sound loading
-== Шматструменная загрузка гукаў
 
 Game sound volume
 == Гучнасць гульні

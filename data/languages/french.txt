@@ -371,9 +371,6 @@ Rename demo
 Reset filter
 == Filtres par défaut
 
-Sample rate
-== Taux d'échantillonnage
-
 Score
 == Score
 
@@ -786,9 +783,6 @@ Update failed! Check log...
 
 Reset
 == Défaut
-
-Threaded sound loading
-== Chargement des sons dans un thread spécifique
 
 File already exists, do you want to overwrite it?
 == Ce fichier existe déjà, voulez-vous l'écraser ?

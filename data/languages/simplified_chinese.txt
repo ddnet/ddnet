@@ -301,9 +301,6 @@ Enable team chat sound
 Enable highlighted chat sound
 == 启用聊天被提及消息提示音
 
-Threaded sound loading
-== 启用多线程音频加载
-
 Name
 == 名称
 
@@ -406,9 +403,6 @@ Rename demo
 
 Reset filter
 == 重置筛选
-
-Sample rate
-== 采样率
 
 Score
 == 分数

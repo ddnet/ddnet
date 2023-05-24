@@ -344,9 +344,6 @@ Rename demo
 Reset filter
 == フィルタをリセット
 
-Sample rate
-== サンプルレート
-
 Score
 == スコア
 
@@ -936,9 +933,6 @@ Enable team chat sound
 
 Enable highlighted chat sound
 == メンション・メッセージ受信音
-
-Threaded sound loading
-== マルチスレッド音声読み込み
 
 Game sound volume
 == ゲーム SFX 音量

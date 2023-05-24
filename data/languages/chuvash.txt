@@ -347,9 +347,6 @@ Rename demo
 Reset filter
 == Фильтрсене тасат
 
-Sample rate
-== Тăтăшлăх
-
 Score
 == Паллă
 
@@ -1282,9 +1279,6 @@ Enable team chat sound
 == 
 
 Enable highlighted chat sound
-== 
-
-Threaded sound loading
 == 
 
 Game sound volume

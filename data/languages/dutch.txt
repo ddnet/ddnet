@@ -360,9 +360,6 @@ Rename demo
 Reset filter
 == Herstel filter
 
-Sample rate
-== Voorbeeldssnelheid
-
 Score
 == Score
 
@@ -882,9 +879,6 @@ Enable team chat sound
 
 Enable highlighted chat sound
 == Schakel gemarkeerde chat geluiden in
-
-Threaded sound loading
-== Threaded geluid laden
 
 Map sound volume
 == Map geluid volume

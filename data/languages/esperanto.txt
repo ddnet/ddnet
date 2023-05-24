@@ -1321,12 +1321,6 @@ Enable team chat sound
 Enable highlighted chat sound
 == 
 
-Threaded sound loading
-== 
-
-Sample rate
-== 
-
 Sound volume
 == 
 

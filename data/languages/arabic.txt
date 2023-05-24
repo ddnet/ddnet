@@ -780,9 +780,6 @@ Show tiles layers from BG map
 Remove chat
 == ﺕﺎﺸﻟﺍ ﻑﺬﺣ
 
-Threaded sound loading
-== ﺔﻳﺍﺪﺒﻟﺍ ﺕﻮﺼ
-
 Frags
 == ﻞﺑﺎﻨﻗ
 
@@ -1531,9 +1528,6 @@ Graphics cards
 == 
 
 auto
-== 
-
-Sample rate
 == 
 
 Appearance

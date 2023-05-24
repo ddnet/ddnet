@@ -345,9 +345,6 @@ Rename demo
 Reset filter
 == Reiniciar el filtre
 
-Sample rate
-== Freqüència de la imatge
-
 Score
 == Punts
 
@@ -707,9 +704,6 @@ Ghost
 
 Remove chat
 == Eliminar el xat
-
-Threaded sound loading
-== Càrrega de so en fils
 
 Check now
 == Comprova ara

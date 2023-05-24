@@ -349,9 +349,6 @@ Rename demo
 Reset filter
 == Nollaa suotimet
 
-Sample rate
-== Näytteenottotaajuus
-
 Score
 == Pisteet
 
@@ -927,9 +924,6 @@ Enable team chat sound
 
 Enable highlighted chat sound
 == Ota korostetun chatin äänet käyttöön
-
-Threaded sound loading
-== Säikeistetty äänilataus
 
 Game sound volume
 == Pelin äänenvoimakkuus

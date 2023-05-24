@@ -373,9 +373,6 @@ Rename demo
 Reset filter
 == Redefinir filtro
 
-Sample rate
-== Frequência do som
-
 Score
 == Pontos
 
@@ -690,9 +687,6 @@ Ghost
 
 Remove chat
 == Remover chat
-
-Threaded sound loading
-== Carregamento de som em fluxos
 
 Check now
 == Verificar agora

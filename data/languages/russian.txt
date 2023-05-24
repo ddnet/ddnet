@@ -360,9 +360,6 @@ Rename demo
 Reset filter
 == Сбросить фильтры
 
-Sample rate
-== Частота
-
 Score
 == Счёт
 
@@ -539,9 +536,6 @@ Enable team chat sound
 
 Enable highlighted chat sound
 == Звуки подсвечиваемых сообщений
-
-Threaded sound loading
-== Фоновая загрузка музыки
 
 Use DDRace Scoreboard
 == Использовать DDRace таблицу счета

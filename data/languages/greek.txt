@@ -350,9 +350,6 @@ Rename demo
 Reset filter
 == Αφαίρεση φίλτρου
 
-Sample rate
-== Δειγματοληψία
-
 Score
 == Βαθμ.
 
@@ -1285,9 +1282,6 @@ Enable team chat sound
 == 
 
 Enable highlighted chat sound
-== 
-
-Threaded sound loading
 == 
 
 Game sound volume

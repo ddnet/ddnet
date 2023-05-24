@@ -1944,14 +1944,13 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 {
 	CUIRect Button, Label;
 	static int s_SndEnable = g_Config.m_SndEnable;
-	static int s_SndRate = g_Config.m_SndRate;
 
 	MainView.HSplitTop(20.0f, &Button, &MainView);
 	if(DoButton_CheckBox(&g_Config.m_SndEnable, Localize("Use sounds"), g_Config.m_SndEnable, &Button))
 	{
 		g_Config.m_SndEnable ^= 1;
 		UpdateMusicState();
-		m_NeedRestartSound = g_Config.m_SndEnable && (!s_SndEnable || s_SndRate != g_Config.m_SndRate);
+		m_NeedRestartSound = g_Config.m_SndEnable && !s_SndEnable;
 	}
 
 	if(!g_Config.m_SndEnable)
@@ -1996,27 +1995,9 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 	if(DoButton_CheckBox(&g_Config.m_SndHighlight, Localize("Enable highlighted chat sound"), g_Config.m_SndHighlight, &Button))
 		g_Config.m_SndHighlight ^= 1;
 
-	MainView.HSplitTop(20.0f, &Button, &MainView);
-	if(DoButton_CheckBox(&g_Config.m_ClThreadsoundloading, Localize("Threaded sound loading"), g_Config.m_ClThreadsoundloading, &Button))
-		g_Config.m_ClThreadsoundloading ^= 1;
-
-	// sample rate box
-	{
-		MainView.HSplitTop(20.0f, &Button, &MainView);
-		UI()->DoLabel(&Button, Localize("Sample rate"), 14.0f, TEXTALIGN_ML);
-		Button.VSplitLeft(190.0f, 0, &Button);
-		static CLineInputNumber s_SndRateInput(g_Config.m_SndRate);
-		if(UI()->DoEditBox(&s_SndRateInput, &Button, 14.0f))
-		{
-			g_Config.m_SndRate = maximum(1, s_SndRateInput.GetInteger());
-			m_NeedRestartSound = !s_SndEnable || s_SndRate != g_Config.m_SndRate;
-		}
-		s_SndRateInput.SetInteger(g_Config.m_SndRate);
-	}
-
 	// volume slider
 	{
-		MainView.HSplitTop(5.0f, &Button, &MainView);
+		MainView.HSplitTop(5.0f, nullptr, &MainView);
 		MainView.HSplitTop(20.0f, &Button, &MainView);
 		Button.VSplitLeft(190.0f, &Label, &Button);
 		UI()->DoLabel(&Label, Localize("Sound volume"), 14.0f, TEXTALIGN_ML);
@@ -2025,7 +2006,7 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 
 	// volume slider game sounds
 	{
-		MainView.HSplitTop(5.0f, &Button, &MainView);
+		MainView.HSplitTop(5.0f, nullptr, &MainView);
 		MainView.HSplitTop(20.0f, &Button, &MainView);
 		Button.VSplitLeft(190.0f, &Label, &Button);
 		UI()->DoLabel(&Label, Localize("Game sound volume"), 14.0f, TEXTALIGN_ML);
@@ -2034,7 +2015,7 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 
 	// volume slider gui sounds
 	{
-		MainView.HSplitTop(5.0f, &Button, &MainView);
+		MainView.HSplitTop(5.0f, nullptr, &MainView);
 		MainView.HSplitTop(20.0f, &Button, &MainView);
 		Button.VSplitLeft(190.0f, &Label, &Button);
 		UI()->DoLabel(&Label, Localize("Chat sound volume"), 14.0f, TEXTALIGN_ML);
@@ -2043,7 +2024,7 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 
 	// volume slider map sounds
 	{
-		MainView.HSplitTop(5.0f, &Button, &MainView);
+		MainView.HSplitTop(5.0f, nullptr, &MainView);
 		MainView.HSplitTop(20.0f, &Button, &MainView);
 		Button.VSplitLeft(190.0f, &Label, &Button);
 		UI()->DoLabel(&Label, Localize("Map sound volume"), 14.0f, TEXTALIGN_ML);
@@ -2052,7 +2033,7 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 
 	// volume slider background music
 	{
-		MainView.HSplitTop(5.0f, &Button, &MainView);
+		MainView.HSplitTop(5.0f, nullptr, &MainView);
 		MainView.HSplitTop(20.0f, &Button, &MainView);
 		Button.VSplitLeft(190.0f, &Label, &Button);
 		UI()->DoLabel(&Label, Localize("Background music volume"), 14.0f, TEXTALIGN_ML);

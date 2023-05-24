@@ -349,9 +349,6 @@ Rename demo
 Reset filter
 == Filtreleri sıfırla
 
-Sample rate
-== Örnekleme hızı
-
 Score
 == Skor
 
@@ -878,9 +875,6 @@ Enable team chat sound
 
 Enable highlighted chat sound
 == Vurgulanmış mesaj sesini etkinleştir
-
-Threaded sound loading
-== Threaded ses yükleme
 
 Map sound volume
 == Harita ses seviyesi

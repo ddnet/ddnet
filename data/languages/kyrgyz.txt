@@ -412,9 +412,6 @@ Laser
 Round
 == Раунду
 
-Sample rate
-== Жыштыгы
-
 Sat.
 == Канык.
 
@@ -1276,9 +1273,6 @@ Enable team chat sound
 == 
 
 Enable highlighted chat sound
-== 
-
-Threaded sound loading
 == 
 
 Game sound volume

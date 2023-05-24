@@ -368,9 +368,6 @@ Rename demo
 Reset filter
 == Resetear filtro
 
-Sample rate
-== Frecuencia de muestreo
-
 Score
 == Puntos
 
@@ -888,9 +885,6 @@ Enable team chat sound
 
 Enable highlighted chat sound
 == Habilitar sonido de chat resaltado
-
-Threaded sound loading
-== Carga de sonido en un hilo
 
 Map sound volume
 == Vol. del sonido del mapa

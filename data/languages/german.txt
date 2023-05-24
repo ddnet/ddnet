@@ -368,9 +368,6 @@ Rename demo
 Reset filter
 == Standardfilter
 
-Sample rate
-== Abtastrate
-
 Score
 == Punkte
 
@@ -826,9 +823,6 @@ Show tiles layers from BG map
 
 Remove chat
 == Chat entfernen
-
-Threaded sound loading
-== Sounds in Threads laden
 
 Frags
 == Abschüsse

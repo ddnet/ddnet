@@ -347,9 +347,6 @@ Rename demo
 Reset filter
 == Povrati filter
 
-Sample rate
-== Frekfencija
-
 Score
 == Rezultat
 
@@ -904,9 +901,6 @@ Enable team chat sound
 
 Enable highlighted chat sound
 == Omogući istaknuti zvuk dopisivanja
-
-Threaded sound loading
-== Učitavanje zvuka sa navojem
 
 Map sound volume
 == Jačina zvuka na mapi

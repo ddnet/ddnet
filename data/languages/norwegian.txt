@@ -349,9 +349,6 @@ Rename demo
 Reset filter
 == Tilbakestill filter
 
-Sample rate
-== Samplingsrate
-
 Score
 == Poeng
 
@@ -872,9 +869,6 @@ Enable team chat sound
 
 Enable highlighted chat sound
 == Lyd for uthevet samtale
-
-Threaded sound loading
-== Trådet lyd-innlasting
 
 Map sound volume
 == Lydvolum bane

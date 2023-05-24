@@ -1288,12 +1288,6 @@ Enable regular chat sound
 Enable highlighted chat sound
 == ﻩﺪﺷ ﺖﯾﻼﯾﺎﻫ ﺖﭼ ﯼﺍﺪﺻ ﻥﺩﺮﮐ ﻦﺷﻭﺭ
 
-Threaded sound loading
-== ﯼﺍ ﻪﺘﺷﺭ ﯼﺍﺪﺻ ﯼﺭﺍﺬﮔﺭﺎﺑ
-
-Sample rate
-== ﻪﻧﻮﻤﻧ ﺥﺮﻧ
-
 Appearance
 == ﺮﻫﺎﻇ
 

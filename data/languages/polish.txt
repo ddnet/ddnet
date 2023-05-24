@@ -351,9 +351,6 @@ Rename demo
 Reset filter
 == Przywróć domyślne
 
-Sample rate
-== Częstotliwość próbkowania
-
 Score
 == Wynik
 
@@ -718,9 +715,6 @@ Enable team chat sound
 
 Enable highlighted chat sound
 == Włącz dźwięk wyróżnionej wiadomości
-
-Threaded sound loading
-== Wątkowe ładowanie dźwięku
 
 Map sound volume
 == Glośność dźwięków z map
