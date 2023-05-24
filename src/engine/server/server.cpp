@@ -1466,12 +1466,30 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				}
 
 				// reserved slot
-				if(ClientID >= (Config()->m_SvMaxClients - Config()->m_SvReservedSlots) && Config()->m_SvReservedSlotsPass[0] != 0 && str_comp(Config()->m_SvReservedSlotsPass, pPassword) != 0)
+				if(ClientID >= Config()->m_SvMaxClients - Config()->m_SvReservedSlots)
 				{
+					if(Config()->m_SvReservedSlotsPass[0] && !str_comp(Config()->m_SvReservedSlotsPass, pPassword))
+					{
+						goto join;
+					}
+
+					// "^#(.*?)#(.*)$"
+					if(pPassword[0] == '#')
+					{
+						char aName[sizeof(Config()->m_Password)];
+						const char *pPass = str_next_token(pPassword + 1, "#", aName, sizeof(aName));
+						int Slot = m_AuthManager.FindKey(aName);
+						if(pPass && m_AuthManager.CheckKey(Slot, pPass + 1))
+						{
+							goto join;
+						}
+					}
+
 					m_NetServer.Drop(ClientID, "This server is full");
 					return;
 				}
 
+			join:
 				m_aClients[ClientID].m_State = CClient::STATE_CONNECTING;
 				SendRconType(ClientID, m_AuthManager.NumNonDefaultKeys() > 0);
 				SendCapabilities(ClientID);
