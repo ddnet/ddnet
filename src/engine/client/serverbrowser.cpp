@@ -575,7 +575,7 @@ void CServerBrowser::SetInfo(CServerEntry *pEntry, const CServerInfo &Info)
 
 	class CPlayerScoreNameLess
 	{
-		int ScoreKind;
+		const int ScoreKind;
 
 	public:
 		CPlayerScoreNameLess(int ClientScoreKind) :
@@ -585,6 +585,7 @@ void CServerBrowser::SetInfo(CServerEntry *pEntry, const CServerInfo &Info)
 
 		bool operator()(const CServerInfo::CClient &p0, const CServerInfo::CClient &p1)
 		{
+			// Sort players before non players
 			if(p0.m_Player && !p1.m_Player)
 				return true;
 			if(!p0.m_Player && p1.m_Player)
@@ -593,33 +594,22 @@ void CServerBrowser::SetInfo(CServerEntry *pEntry, const CServerInfo &Info)
 			int Score0 = p0.m_Score;
 			int Score1 = p1.m_Score;
 
-			if(ScoreKind == CServerInfo::CLIENT_SCORE_KIND_TIME)
+			if(ScoreKind == CServerInfo::CLIENT_SCORE_KIND_TIME || ScoreKind == CServerInfo::CLIENT_SCORE_KIND_TIME_BACKCOMPAT)
 			{
-				// time is sent as a positive value to the http master, counting 0, if there is a time (finished)
-				// only positive times are meant to represent an actual time.
-				if(Score0 != Score1)
-				{
-					if(Score0 < 0)
-						return false;
-					if(Score1 < 0)
-						return true;
-					return Score0 < Score1;
-				}
-			}
-			else
-			{
-				if(ScoreKind == CServerInfo::CLIENT_SCORE_KIND_TIME_BACKCOMPAT)
-				{
-					if(Score0 == -9999)
-						Score0 = INT_MIN;
-					if(Score1 == -9999)
-						Score1 = INT_MIN;
-				}
-
-				if(Score0 > Score1)
-					return true;
-				if(Score0 < Score1)
+				// Sort unfinished (-9999) and still connecting players (-1) after others
+				if(Score0 < 0 && Score1 >= 0)
 					return false;
+				if(Score0 >= 0 && Score1 < 0)
+					return true;
+			}
+
+			if(Score0 != Score1)
+			{
+				// Handle the sign change introduced with CLIENT_SCORE_KIND_TIME
+				if(ScoreKind == CServerInfo::CLIENT_SCORE_KIND_TIME)
+					return Score0 < Score1;
+				else
+					return Score0 > Score1;
 			}
 
 			return str_comp_nocase(p0.m_aName, p1.m_aName) < 0;
