@@ -132,7 +132,9 @@ public:
 struct STextString
 {
 	int m_QuadBufferObjectIndex;
+	uint32_t m_DbgShadowBytes = 0x12345678;
 	int m_QuadBufferContainerIndex;
+	uint32_t m_DbgShadowBytes2 = 0x87654321;
 	size_t m_QuadNum;
 	int m_SelectionQuadContainerIndex;
 
@@ -177,6 +179,8 @@ struct STextContainer
 	// prefix of the containers text stored for debugging purposes
 	char m_aDebugText[32];
 
+	STextContainerIndex m_ContainerIndex;
+
 	void Reset()
 	{
 		m_pFont = nullptr;
@@ -204,6 +208,8 @@ struct STextContainer
 		m_BoundingBox = {0.0f, 0.0f, 0.0f, 0.0f};
 
 		m_aDebugText[0] = '\0';
+
+		m_ContainerIndex = STextContainerIndex{};
 	}
 };
 
@@ -255,7 +261,7 @@ class CTextRender : public IEngineTextRender
 		FreeTextContainerIndex(Index);
 	}
 
-	STextContainer &GetTextContainer(STextContainerIndex Index)
+	STextContainer &GetTextContainer(const STextContainerIndex &Index)
 	{
 		dbg_assert(Index.Valid(), "Text container index was invalid.");
 		if(Index.m_Index >= (int)m_vpTextContainers.size())
@@ -265,6 +271,10 @@ class CTextRender : public IEngineTextRender
 				m_vpTextContainers.push_back(new STextContainer());
 		}
 
+		if(m_vpTextContainers[Index.m_Index]->m_ContainerIndex.m_UseCount.get() != Index.m_UseCount.get())
+		{
+			m_vpTextContainers[Index.m_Index]->m_ContainerIndex = Index;
+		}
 		return *m_vpTextContainers[Index.m_Index];
 	}
 
@@ -1716,6 +1726,8 @@ public:
 
 	void UploadEntityLayerText(void *pTexBuff, size_t ImageColorChannelCount, int TexWidth, int TexHeight, int TexSubWidth, int TexSubHeight, const char *pText, int Length, float x, float y, int FontSize) override
 	{
+		if(m_pDefaultFont == nullptr)
+			return;
 		if(FontSize < 1)
 			return;
 
@@ -1798,6 +1810,9 @@ public:
 
 	float GetGlyphOffsetX(int FontSize, char TextCharacter) const override
 	{
+		if(m_pDefaultFont == nullptr)
+			return -1;
+
 		const CFont *pFont = m_pDefaultFont;
 		FT_Set_Pixel_Sizes(pFont->m_FtFace, 0, FontSize);
 		const char *pTmp = &TextCharacter;
@@ -1823,6 +1838,9 @@ public:
 
 	int CalculateTextWidth(const char *pText, int TextLength, int FontWidth, int FontHeight) const override
 	{
+		if(m_pDefaultFont == nullptr)
+			return 0;
+
 		const CFont *pFont = m_pDefaultFont;
 		const char *pCurrent = pText;
 		const char *pEnd = pCurrent + TextLength;
@@ -1952,6 +1970,18 @@ public:
 		return UTF8Off != -1;
 	}
 
+	void OnPreWindowResize() override
+	{
+		for(auto *pTextContainer : m_vpTextContainers)
+		{
+			if(pTextContainer->m_ContainerIndex.Valid() && pTextContainer->m_ContainerIndex.m_UseCount.use_count() <= 1)
+			{
+				dbg_msg("textrender", "Found non empty text container with index %d with %d quads '%s'", pTextContainer->m_StringInfo.m_QuadBufferContainerIndex, (int)pTextContainer->m_StringInfo.m_QuadNum, pTextContainer->m_aDebugText);
+				dbg_assert(false, "Text container was forgotten by the implementation (the index was overwritten).");
+			}
+		}
+	}
+
 	void OnWindowResize() override
 	{
 		bool HasNonEmptyTextContainer = false;
@@ -1960,8 +1990,10 @@ public:
 			if(pTextContainer->m_StringInfo.m_QuadBufferContainerIndex != -1)
 			{
 				dbg_msg("textrender", "Found non empty text container with index %d with %d quads '%s'", pTextContainer->m_StringInfo.m_QuadBufferContainerIndex, (int)pTextContainer->m_StringInfo.m_QuadNum, pTextContainer->m_aDebugText);
+				dbg_msg("textrender", "The text container index was in use by %d ", (int)pTextContainer->m_ContainerIndex.m_UseCount.use_count());
 				HasNonEmptyTextContainer = true; // NOLINT(clang-analyzer-deadcode.DeadStores)
 			}
+			dbg_assert(pTextContainer->m_StringInfo.m_DbgShadowBytes == STextString{}.m_DbgShadowBytes && pTextContainer->m_StringInfo.m_DbgShadowBytes2 == STextString{}.m_DbgShadowBytes2, "shadow bytes were modified in text container.");
 		}
 
 		dbg_assert(!HasNonEmptyTextContainer, "text container was not empty");

@@ -230,11 +230,14 @@ void CMenuBackground::LoadMenuBackground(bool HasDayHint, bool HasNightHint)
 		}
 		else if(str_comp(pMenuMap, "rand") == 0)
 		{
-			//make sure to load themes
-			std::vector<CTheme> &vThemesRef = GetThemes();
-			int RandomThemeIndex = rand() % (vThemesRef.size() - PREDEFINED_THEMES_COUNT);
-			if(RandomThemeIndex + PREDEFINED_THEMES_COUNT < (int)vThemesRef.size())
-				pMenuMap = vThemesRef[RandomThemeIndex + PREDEFINED_THEMES_COUNT].m_Name.c_str();
+			// make sure to load themes
+			const std::vector<CTheme> &vThemesRef = GetThemes();
+			if(vThemesRef.size() > PREDEFINED_THEMES_COUNT)
+			{
+				int RandomThemeIndex = rand() % (vThemesRef.size() - PREDEFINED_THEMES_COUNT);
+				if(RandomThemeIndex + PREDEFINED_THEMES_COUNT < (int)vThemesRef.size())
+					pMenuMap = vThemesRef[RandomThemeIndex + PREDEFINED_THEMES_COUNT].m_Name.c_str();
+			}
 		}
 
 		char aBuf[128];

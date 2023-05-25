@@ -52,19 +52,11 @@ void CDoor::Snap(int SnappingClient)
 
 	int SnappingClientVersion = GameServer()->GetClientVersion(SnappingClient);
 
-	CNetObj_EntityEx *pEntData = 0;
-	if(SnappingClientVersion >= VERSION_DDNET_SWITCH)
-		pEntData = Server()->SnapNewItem<CNetObj_EntityEx>(GetID());
-
 	vec2 From;
 	int StartTick;
 
-	if(pEntData)
+	if(SnappingClientVersion >= VERSION_DDNET_ENTITY_NETOBJS)
 	{
-		pEntData->m_SwitchNumber = m_Number;
-		pEntData->m_Layer = m_Layer;
-		pEntData->m_EntityClass = ENTITYCLASS_DOOR;
-
 		From = m_To;
 		StartTick = 0;
 	}
@@ -87,5 +79,5 @@ void CDoor::Snap(int SnappingClient)
 	}
 
 	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion), GetID(),
-		m_Pos, From, StartTick, -1, LASERTYPE_DOOR);
+		m_Pos, From, StartTick, -1, LASERTYPE_DOOR, 0, m_Number);
 }

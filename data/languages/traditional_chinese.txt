@@ -21,6 +21,7 @@
 # 2022-12-11 cheeser0613
 # 2023-01-11 cheeser0613
 # 2023-04-01 cheeser0613
+# 2023-05-25 cheeser0613
 ##### /authors #####
 
 ##### translated strings #####
@@ -585,7 +586,7 @@ Join game
 == 加入遊戲
 
 FSAA samples
-== 全屏抗鋸齒(FSAA)取樣倍數
+== 全屏抗鋸齒 (FSAA) 取樣倍數
 
 Sound volume
 == 音量
@@ -1383,10 +1384,10 @@ Ingame controller mode
 == 游戲内控制器瞄準模式
 
 Ingame controller sens.
-== 搖桿靈敏度（游戲）
+== 搖桿靈敏度 (游戲)
 
 UI controller sens.
-== 搖桿靈敏度（界面）
+== 搖桿靈敏度 (界面)
 
 Controller jitter tolerance
 == 搖桿錯位容錯
@@ -1407,10 +1408,10 @@ Mouse
 == 滑鼠
 
 Ingame mouse sens.
-== 滑鼠靈敏度（游戲）
+== 滑鼠靈敏度 (游戲)
 
 UI mouse sens.
-== 滑鼠靈敏度（界面）
+== 滑鼠靈敏度 (界面)
 
 Controller
 == 控制器
@@ -1503,7 +1504,7 @@ DDRace HUD
 == DDRace HUD
 
 Show client IDs in scoreboard
-== 顯示客戶端 IDs （計分板中）
+== 顯示客戶端 IDs (計分板中)
 
 Show DDRace HUD
 == 顯示 DDRace HUD
@@ -1524,7 +1525,7 @@ Hook collision line opacity
 == 輔助綫不透明度
 
 Colors of the hook collision line, in case of a possible collision with:
-== 輔助綫顔色（當瞄準以下實體物時）：
+== 輔助綫顔色 (當瞄準以下實體物時)：
 
 Your movements are not taken into account when calculating the line colors
 == 移動所造成的瞄準偏移將不計入考量
@@ -1647,11 +1648,11 @@ Are you sure that you want to reset the controls to their defaults?
 
 [Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== 初始化失敗。請嘗試打開配置目錄中的設定檔案（settings_ddnet.cfg）并將“gfx_backend OpenGL”修改為“gfx_backend Vulkan”（若沒有前者則可直接輸入後者）再重試。
+== 初始化失敗。請嘗試打開配置目錄中的設定檔案 (settings_ddnet.cfg) 并將“gfx_backend OpenGL”修改為“gfx_backend Vulkan” (若沒有前者則可直接輸入後者) 再重試。
 
 [Graphics error]
 Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== 顯存不足。請嘗試移除自定義材質（如外觀，實體層等等），尤其高分辨率的自定義材質。
+== 顯存不足。請嘗試移除自定義材質 (如外觀，實體層等等)，尤其高分辨率的自定義材質。
 
 [Graphics error]
 An error during command recording occurred. Try to update your GPU drivers.
@@ -1671,7 +1672,7 @@ Failed to swap framebuffers. Try to update your GPU drivers.
 
 [Graphics error]
 Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== 未知錯誤。請嘗試打開配置目錄中的設定檔案（settings_ddnet.cfg）并將“gfx_backend OpenGL”修改為“gfx_backend Vulkan”（若沒有前者則可直接輸入後者）再重試。
+== 未知錯誤。請嘗試打開配置目錄中的設定檔案 (settings_ddnet.cfg) 并將“gfx_backend OpenGL”修改為“gfx_backend Vulkan” (若沒有前者則可直接輸入後者) 再重試。
 
 [Graphics error]
 Could not initialize the given graphics backend, reverting to the default backend now.
@@ -1681,7 +1682,7 @@ Open the directory that contains the demo files
 == 打開存有回放檔案的資料夾路徑
 
 Save power by lowering refresh rate (higher input latency)
-== 節能模式（限制幀率上限以降低功耗但也將提高輸入延遲）
+== 節能模式 (限制幀率上限以降低功耗但也將提高輸入延遲)
 
 Open the settings file
 == 打開設定檔案
@@ -1690,10 +1691,10 @@ Open the directory that contains the configuration and user files
 == 打開存有配置檔案與用戶檔案的資料夾路徑
 
 Open the directory to add custom themes
-== 打開用以添加自定義主題的資料夾路徑
+== 打開用以新增自定義主題的資料夾路徑
 
 Open the directory to add custom skins
-== 打開用以添加自定義外觀的資料夾路徑
+== 打開用以新增自定義外觀的資料夾路徑
 
 No controller found. Plug in a controller.
 == 未檢測到任何控制器。請嘗試重新連接控制器。
@@ -1702,7 +1703,7 @@ Unregister protocol and file extensions
 == 未注冊的協議與擴充檔案
 
 Open the directory to add custom assets
-== 打開用以添加自定義材質的資料夾路徑
+== 打開用以新增自定義材質的資料夾路徑
 
 [Graphics error]
 Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
@@ -1716,3 +1717,28 @@ Copy info
 
 Create a random skin
 == 隨機創造外觀
+
+Online players (%d)
+== 在綫玩家 (%d)
+
+Online clanmates (%d)
+== 在綫戰隊隊友 (%d)
+
+[friends (server browser)]
+Offline (%d)
+== 離綫（%d）
+
+Click to select server. Double click to join your friend.
+== 點擊以選擇伺服器，雙擊以直接加入好友所在伺服器
+
+Click to remove this player from your friends list.
+== 點擊以將此好友從好友列表中移除
+
+Click to remove this clan from your friends list.
+== 點擊以將此戰隊從好友列表中移除
+
+None
+== 無
+
+Add Clan
+== 新增戰隊

@@ -299,7 +299,7 @@ void CServer::CClient::Reset()
 	m_LastAckedSnapshot = -1;
 	m_LastInputTick = -1;
 	m_SnapRate = CClient::SNAPRATE_INIT;
-	m_Score = 0;
+	m_Score = -1;
 	m_NextMapChunk = 0;
 	m_Flags = 0;
 }
@@ -473,7 +473,7 @@ void CServer::SetClientCountry(int ClientID, int Country)
 	m_aClients[ClientID].m_Country = Country;
 }
 
-void CServer::SetClientScore(int ClientID, int Score)
+void CServer::SetClientScore(int ClientID, std::optional<int> Score)
 {
 	if(ClientID < 0 || ClientID >= MAX_CLIENTS || m_aClients[ClientID].m_State < CClient::STATE_READY)
 		return;
@@ -2017,7 +2017,24 @@ void CServer::CacheServerInfo(CCache *pCache, int Type, bool SendClients)
 			q.AddString(ClientClan(i), MAX_CLAN_LENGTH); // client clan
 
 			ADD_INT(q, m_aClients[i].m_Country); // client country
-			ADD_INT(q, m_aClients[i].m_Score); // client score
+
+			int Score;
+			if(m_aClients[i].m_Score.has_value())
+			{
+				Score = m_aClients[i].m_Score.value();
+				if(Score == 9999)
+					Score = -10000;
+				else if(Score == 0) // 0 time isn't displayed otherwise.
+					Score = -1;
+				else
+					Score = -Score;
+			}
+			else
+			{
+				Score = -9999;
+			}
+
+			ADD_INT(q, Score); // client score
 			ADD_INT(q, GameServer()->IsClientPlayer(i) ? 1 : 0); // is player?
 			if(Type == SERVERINFO_EXTENDED)
 				q.AddString("", 0); // extra info, reserved
@@ -2099,7 +2116,7 @@ void CServer::CacheServerInfoSixup(CCache *pCache, bool SendClients)
 				Packer.AddString(ClientName(i), MAX_NAME_LENGTH); // client name
 				Packer.AddString(ClientClan(i), MAX_CLAN_LENGTH); // client clan
 				Packer.AddInt(m_aClients[i].m_Country); // client country
-				Packer.AddInt(m_aClients[i].m_Score == -9999 ? -1 : -m_aClients[i].m_Score); // client score
+				Packer.AddInt(m_aClients[i].m_Score.value_or(-1)); // client score
 				Packer.AddInt(GameServer()->IsClientPlayer(i) ? 0 : 1); // flag spectator=1, bot=2 (player=0)
 			}
 		}
@@ -2230,6 +2247,7 @@ void CServer::UpdateRegisterServerInfo()
 		"\"size\":%d"
 		"},"
 		"\"version\":\"%s\","
+		"\"client_score_kind\":\"time\","
 		"\"clients\":[",
 		MaxClients,
 		MaxPlayers,
@@ -2266,7 +2284,7 @@ void CServer::UpdateRegisterServerInfo()
 				EscapeJson(aCName, sizeof(aCName), ClientName(i)),
 				EscapeJson(aCClan, sizeof(aCClan), ClientClan(i)),
 				m_aClients[i].m_Country,
-				m_aClients[i].m_Score,
+				m_aClients[i].m_Score.value_or(-9999),
 				JsonBool(GameServer()->IsClientPlayer(i)),
 				aExtraPlayerInfo);
 			str_append(aInfo, aClientInfo, sizeof(aInfo));
@@ -3416,7 +3434,7 @@ void CServer::ConAddSqlServer(IConsole::IResult *pResult, void *pUserData)
 	str_copy(Config.m_aUser, pResult->GetString(3), sizeof(Config.m_aUser));
 	str_copy(Config.m_aPass, pResult->GetString(4), sizeof(Config.m_aPass));
 	str_copy(Config.m_aIp, pResult->GetString(5), sizeof(Config.m_aIp));
-	str_copy(Config.m_aBindaddr, Config.m_aBindaddr, sizeof(Config.m_aBindaddr));
+	Config.m_aBindaddr[0] = '\0';
 	Config.m_Port = pResult->GetInteger(6);
 	Config.m_Setup = pResult->NumArguments() == 8 ? pResult->GetInteger(7) : true;
 

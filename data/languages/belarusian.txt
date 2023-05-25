@@ -348,9 +348,6 @@ Rename demo
 Reset filter
 == Скінуць фільтр
 
-Sample rate
-== Чашчыня сэмпла
-
 Score
 == Ачкі
 
@@ -1255,9 +1252,6 @@ Enable team chat sound
 Enable highlighted chat sound
 == Уключыць гук падсвечаных паведамленняў
 
-Threaded sound loading
-== Шматструменная загрузка гукаў
-
 Game sound volume
 == Гучнасць гульні
 
@@ -1693,3 +1687,28 @@ Grabs
 
 9+ new mentions
 == 9+ новых згадак
+
+Online players (%d)
+== 
+
+Online clanmates (%d)
+== 
+
+[friends (server browser)]
+Offline (%d)
+== 
+
+Click to select server. Double click to join your friend.
+== 
+
+Click to remove this player from your friends list.
+== 
+
+Click to remove this clan from your friends list.
+== 
+
+None
+== 
+
+Add Clan
+== 

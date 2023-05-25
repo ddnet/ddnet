@@ -360,9 +360,6 @@ Rename demo
 Reset filter
 == Herstel filter
 
-Sample rate
-== Voorbeeldssnelheid
-
 Score
 == Score
 
@@ -882,9 +879,6 @@ Enable team chat sound
 
 Enable highlighted chat sound
 == Schakel gemarkeerde chat geluiden in
-
-Threaded sound loading
-== Threaded geluid laden
 
 Map sound volume
 == Map geluid volume
@@ -1435,10 +1429,35 @@ Loading menu images
 Copy info
 == 
 
+Online players (%d)
+== 
+
+Online clanmates (%d)
+== 
+
+[friends (server browser)]
+Offline (%d)
+== 
+
+Click to select server. Double click to join your friend.
+== 
+
+Click to remove this player from your friends list.
+== 
+
+Click to remove this clan from your friends list.
+== 
+
+None
+== 
+
 Are you sure that you want to remove the player '%s' from your friends list?
 == 
 
 Are you sure that you want to remove the clan '%s' from your friends list?
+== 
+
+Add Clan
 == 
 
 Play the current demo

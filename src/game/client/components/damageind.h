@@ -2,6 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #ifndef GAME_CLIENT_COMPONENTS_DAMAGEIND_H
 #define GAME_CLIENT_COMPONENTS_DAMAGEIND_H
+#include <base/color.h>
 #include <base/vmath.h>
 #include <game/client/component.h>
 
@@ -14,6 +15,8 @@ class CDamageInd : public CComponent
 		vec2 m_Dir;
 		float m_StartTime;
 		float m_StartAngle;
+		ColorRGBA m_Color;
+		float m_StartAlpha;
 	};
 
 	enum
@@ -33,7 +36,7 @@ public:
 	CDamageInd();
 	virtual int Sizeof() const override { return sizeof(*this); }
 
-	void Create(vec2 Pos, vec2 Dir);
+	void Create(vec2 Pos, vec2 Dir, float Alpha);
 	void Reset();
 	virtual void OnRender() override;
 	virtual void OnInit() override;

@@ -80,7 +80,7 @@ bool CheckImageDimensions(void *pLayerItem, int LayerType, const char *pFilename
 		return true;
 
 	int Type;
-	void *pItem = g_DataReader.GetItem(g_aImageIDs[pTMap->m_Image], &Type, nullptr);
+	void *pItem = g_DataReader.GetItem(g_aImageIDs[pTMap->m_Image], &Type);
 	if(Type != MAPITEMTYPE_IMAGE)
 		return true;
 
@@ -191,7 +191,7 @@ int main(int argc, const char **argv)
 	for(int Index = 0; Index < g_DataReader.NumItems(); Index++)
 	{
 		int Type;
-		g_DataReader.GetItem(Index, &Type, nullptr);
+		g_DataReader.GetItem(Index, &Type);
 		if(Type == MAPITEMTYPE_IMAGE)
 			g_aImageIDs[i++] = Index;
 	}

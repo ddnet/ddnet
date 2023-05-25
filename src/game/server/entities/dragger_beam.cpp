@@ -109,6 +109,8 @@ void CDraggerBeam::Snap(int SnappingClient)
 		return;
 	}
 
+	int Subtype = (m_IgnoreWalls ? 1 : 0) | (clamp(round_to_int(m_Strength - 1.f), 0, 2) << 1);
+
 	int StartTick = m_EvalTick;
 	if(StartTick < Server()->Tick() - 4)
 	{
@@ -121,7 +123,7 @@ void CDraggerBeam::Snap(int SnappingClient)
 
 	int SnappingClientVersion = GameServer()->GetClientVersion(SnappingClient);
 	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion), GetID(),
-		m_Pos, TargetPos, StartTick, -1, LASERTYPE_DOOR);
+		m_Pos, TargetPos, StartTick, -1, LASERTYPE_DRAGGER, Subtype, m_Number);
 }
 
 void CDraggerBeam::SwapClients(int Client1, int Client2)

@@ -479,7 +479,7 @@ bool CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Stora
 			DataFile.GetType(MAPITEMTYPE_IMAGE, &Start, &Num);
 			for(int i = 0; i < Num; i++)
 			{
-				CMapItemImage *pItem = (CMapItemImage *)DataFile.GetItem(Start + i, nullptr, nullptr);
+				CMapItemImage *pItem = (CMapItemImage *)DataFile.GetItem(Start + i);
 				char *pName = (char *)DataFile.GetData(pItem->m_ImageName);
 
 				// copy base info
@@ -542,7 +542,7 @@ bool CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Stora
 			DataFile.GetType(MAPITEMTYPE_SOUND, &Start, &Num);
 			for(int i = 0; i < Num; i++)
 			{
-				CMapItemSound *pItem = (CMapItemSound *)DataFile.GetItem(Start + i, nullptr, nullptr);
+				CMapItemSound *pItem = (CMapItemSound *)DataFile.GetItem(Start + i);
 				char *pName = (char *)DataFile.GetData(pItem->m_SoundName);
 
 				// copy base info
@@ -594,10 +594,10 @@ bool CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Stora
 			DataFile.GetType(MAPITEMTYPE_GROUP_EX, &StartEx, &NumEx);
 			for(int g = 0; g < Num; g++)
 			{
-				CMapItemGroup *pGItem = (CMapItemGroup *)DataFile.GetItem(Start + g, nullptr, nullptr);
+				CMapItemGroup *pGItem = (CMapItemGroup *)DataFile.GetItem(Start + g);
 				CMapItemGroupEx *pGItemEx = nullptr;
 				if(NumEx)
-					pGItemEx = (CMapItemGroupEx *)DataFile.GetItem(StartEx + g, nullptr, nullptr);
+					pGItemEx = (CMapItemGroupEx *)DataFile.GetItem(StartEx + g);
 
 				if(pGItem->m_Version < 1 || pGItem->m_Version > CMapItemGroup::CURRENT_VERSION)
 					continue;
@@ -627,7 +627,7 @@ bool CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Stora
 				for(int l = 0; l < pGItem->m_NumLayers; l++)
 				{
 					CLayer *pLayer = nullptr;
-					CMapItemLayer *pLayerItem = (CMapItemLayer *)DataFile.GetItem(LayersStart + pGItem->m_StartLayer + l, nullptr, nullptr);
+					CMapItemLayer *pLayerItem = (CMapItemLayer *)DataFile.GetItem(LayersStart + pGItem->m_StartLayer + l);
 					if(!pLayerItem)
 						continue;
 
@@ -924,14 +924,14 @@ bool CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Stora
 				int Start, Num;
 				DataFile.GetType(MAPITEMTYPE_ENVPOINTS, &Start, &Num);
 				if(Num)
-					pPoints = (CEnvPoint *)DataFile.GetItem(Start, nullptr, nullptr);
+					pPoints = (CEnvPoint *)DataFile.GetItem(Start);
 			}
 
 			int Start, Num;
 			DataFile.GetType(MAPITEMTYPE_ENVELOPE, &Start, &Num);
 			for(int e = 0; e < Num; e++)
 			{
-				CMapItemEnvelope *pItem = (CMapItemEnvelope *)DataFile.GetItem(Start + e, nullptr, nullptr);
+				CMapItemEnvelope *pItem = (CMapItemEnvelope *)DataFile.GetItem(Start + e);
 				CEnvelope *pEnv = new CEnvelope(pItem->m_Channels);
 				pEnv->m_vPoints.resize(pItem->m_NumPoints);
 				mem_copy(pEnv->m_vPoints.data(), &pPoints[pItem->m_StartPoint], sizeof(CEnvPoint) * pItem->m_NumPoints);
@@ -948,7 +948,7 @@ bool CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Stora
 			DataFile.GetType(MAPITEMTYPE_AUTOMAPPER_CONFIG, &Start, &Num);
 			for(int i = 0; i < Num; i++)
 			{
-				CMapItemAutoMapperConfig *pItem = (CMapItemAutoMapperConfig *)DataFile.GetItem(Start + i, nullptr, nullptr);
+				CMapItemAutoMapperConfig *pItem = (CMapItemAutoMapperConfig *)DataFile.GetItem(Start + i);
 				if(pItem->m_Version == CMapItemAutoMapperConfig::CURRENT_VERSION)
 				{
 					if(pItem->m_GroupId >= 0 && (size_t)pItem->m_GroupId < m_vpGroups.size() &&

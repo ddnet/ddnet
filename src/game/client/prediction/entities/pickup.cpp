@@ -2,6 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "pickup.h"
 #include "character.h"
+#include <game/client/pickup_data.h>
 #include <game/collision.h>
 #include <game/generated/protocol.h>
 #include <game/mapitems.h>
@@ -141,24 +142,17 @@ void CPickup::Move()
 	}
 }
 
-CPickup::CPickup(CGameWorld *pGameWorld, int ID, CNetObj_Pickup *pPickup, const CNetObj_EntityEx *pEntEx) :
+CPickup::CPickup(CGameWorld *pGameWorld, int ID, const CPickupData *pPickup) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_PICKUP)
 {
-	m_Pos.x = pPickup->m_X;
-	m_Pos.y = pPickup->m_Y;
+	m_Pos = pPickup->m_Pos;
 	m_Type = pPickup->m_Type;
 	m_Subtype = pPickup->m_Subtype;
 	m_Core = vec2(0.f, 0.f);
 	m_IsCoreActive = false;
 	m_ID = ID;
-	m_Layer = LAYER_GAME;
-	m_Number = 0;
-
-	if(pEntEx)
-	{
-		m_Layer = pEntEx->m_Layer;
-		m_Number = pEntEx->m_SwitchNumber;
-	}
+	m_Number = pPickup->m_SwitchNumber;
+	m_Layer = m_Number > 0 ? LAYER_SWITCH : LAYER_GAME;
 }
 
 void CPickup::FillInfo(CNetObj_Pickup *pPickup)

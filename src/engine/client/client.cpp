@@ -5,6 +5,7 @@
 
 #include <climits>
 #include <new>
+#include <stack>
 #include <tuple>
 
 #include <base/hash.h>
@@ -912,7 +913,7 @@ void CClient::DummyConnect()
 	if(m_LastDummyConnectTime > 0 && m_LastDummyConnectTime + GameTickSpeed() * 5 > GameTick(g_Config.m_ClDummy))
 		return;
 
-	if(m_aNetClient[CONN_MAIN].State() != NET_CONNSTATE_ONLINE && m_aNetClient[CONN_MAIN].State() != NET_CONNSTATE_PENDING)
+	if(m_aNetClient[CONN_MAIN].State() != NETSTATE_ONLINE)
 		return;
 
 	if(m_DummyConnected || !DummyAllowed())
@@ -3330,10 +3331,8 @@ void CClient::Run()
 				s_SavedConfig = true;
 			}
 
-			IOHANDLE File = m_pStorage->OpenFile(m_aDDNetInfoTmp, IOFLAG_READ | IOFLAG_SKIP_BOM, IStorage::TYPE_SAVE);
-			if(File)
+			if(m_pStorage->FileExists(m_aDDNetInfoTmp, IStorage::TYPE_SAVE))
 			{
-				io_close(File);
 				m_pStorage->RemoveFile(m_aDDNetInfoTmp, IStorage::TYPE_SAVE);
 			}
 
@@ -3495,6 +3494,12 @@ void CClient::Con_Quit(IConsole::IResult *pResult, void *pUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
 	pSelf->Quit();
+}
+
+void CClient::Con_Restart(IConsole::IResult *pResult, void *pUserData)
+{
+	CClient *pSelf = (CClient *)pUserData;
+	pSelf->Restart();
 }
 
 void CClient::Con_Minimize(IConsole::IResult *pResult, void *pUserData)
@@ -4409,9 +4414,10 @@ void CClient::RegisterCommands()
 	m_pConsole->Register("dummy_disconnect", "", CFGFLAG_CLIENT, Con_DummyDisconnect, this, "Disconnect dummy");
 	m_pConsole->Register("dummy_reset", "", CFGFLAG_CLIENT, Con_DummyResetInput, this, "Reset dummy");
 
-	m_pConsole->Register("quit", "", CFGFLAG_CLIENT | CFGFLAG_STORE, Con_Quit, this, "Quit Teeworlds");
-	m_pConsole->Register("exit", "", CFGFLAG_CLIENT | CFGFLAG_STORE, Con_Quit, this, "Quit Teeworlds");
-	m_pConsole->Register("minimize", "", CFGFLAG_CLIENT | CFGFLAG_STORE, Con_Minimize, this, "Minimize Teeworlds");
+	m_pConsole->Register("quit", "", CFGFLAG_CLIENT | CFGFLAG_STORE, Con_Quit, this, "Quit the client");
+	m_pConsole->Register("exit", "", CFGFLAG_CLIENT | CFGFLAG_STORE, Con_Quit, this, "Quit the client");
+	m_pConsole->Register("restart", "", CFGFLAG_CLIENT | CFGFLAG_STORE, Con_Restart, this, "Restart the client");
+	m_pConsole->Register("minimize", "", CFGFLAG_CLIENT | CFGFLAG_STORE, Con_Minimize, this, "Minimize the client");
 	m_pConsole->Register("connect", "r[host|ip]", CFGFLAG_CLIENT, Con_Connect, this, "Connect to the specified host/ip");
 	m_pConsole->Register("disconnect", "", CFGFLAG_CLIENT, Con_Disconnect, this, "Disconnect from the server");
 	m_pConsole->Register("ping", "", CFGFLAG_CLIENT, Con_Ping, this, "Ping the current server");
@@ -4559,7 +4565,6 @@ int main(int argc, const char **argv)
 	CCmdlineFix CmdlineFix(&argc, &argv);
 
 	bool Silent = false;
-	bool RandInitFailed = false;
 
 	for(int i = 1; i < argc; i++)
 	{
@@ -4594,28 +4599,59 @@ int main(int argc, const char **argv)
 	vpLoggers.push_back(pFutureAssertionLogger);
 	log_set_global_logger(log_logger_collection(std::move(vpLoggers)).release());
 
-	if(secure_random_init() != 0)
-	{
-		RandInitFailed = true;
-	}
+	std::stack<std::function<void()>> CleanerFunctions;
+	std::function<void()> PerformCleanup = [&CleanerFunctions]() mutable {
+		while(!CleanerFunctions.empty())
+		{
+			CleanerFunctions.top()();
+			CleanerFunctions.pop();
+		}
+	};
+	std::function<void()> PerformFinalCleanup = []() {
+#ifdef CONF_PLATFORM_ANDROID
+		// properly close this native thread, so globals are destructed
+		std::exit(0);
+#endif
+	};
+	std::function<void()> PerformAllCleanup = [PerformCleanup, PerformFinalCleanup]() mutable {
+		PerformCleanup();
+		PerformFinalCleanup();
+	};
+
+	const bool RandInitFailed = secure_random_init() != 0;
+	if(!RandInitFailed)
+		CleanerFunctions.push([]() { secure_random_uninit(); });
 
 	NotificationsInit();
+	CleanerFunctions.push([]() { NotificationsUninit(); });
+
+	// Register SDL for cleanup before creating the kernel and client,
+	// so SDL is shutdown after kernel and client. Otherwise the client
+	// may crash when shutting down after SDL is already shutdown.
+	CleanerFunctions.push([]() { SDL_Quit(); });
 
 	CClient *pClient = CreateClient();
 	IKernel *pKernel = IKernel::Create();
 	pKernel->RegisterInterface(pClient, false);
 	pClient->RegisterInterfaces();
+	CleanerFunctions.push([pKernel, pClient]() {
+		pKernel->Shutdown();
+		delete pKernel;
+		pClient->~CClient();
+		free(pClient);
+	});
 
 	const std::thread::id MainThreadId = std::this_thread::get_id();
 	dbg_assert_set_handler([MainThreadId, pClient](const char *pMsg) {
 		if(MainThreadId != std::this_thread::get_id())
 			return;
 		char aVersionStr[128];
-		if(os_version_str(aVersionStr, sizeof(aVersionStr)))
+		if(!os_version_str(aVersionStr, sizeof(aVersionStr)))
 			str_copy(aVersionStr, "unknown");
 		char aMessage[512];
 		str_format(aMessage, sizeof(aMessage), "An assertion error occured. Please write down or take a screenshot of the following information and report this error.\nPlease also share the assert log which you should find in the 'dumps' folder in your config directory.\n\n%s\n\nPlatform: %s\nGame version: %s %s\nOS version: %s", pMsg, CONF_PLATFORM_STRING, GAME_RELEASE_VERSION, GIT_SHORTREV_HASH != nullptr ? GIT_SHORTREV_HASH : "", aVersionStr);
 		pClient->ShowMessageBox("Assertion Error", aMessage);
+		// Client will crash due to assertion, don't call PerformAllCleanup in this inconsistent state
 	});
 
 	// create the components
@@ -4646,6 +4682,7 @@ int main(int argc, const char **argv)
 		const char *pError = "Failed to initialize the secure RNG.";
 		dbg_msg("secure", "%s", pError);
 		pClient->ShowMessageBox("Secure RNG Error", pError);
+		PerformAllCleanup();
 		return -1;
 	}
 
@@ -4680,9 +4717,7 @@ int main(int argc, const char **argv)
 			const char *pError = "Failed to register an interface.";
 			dbg_msg("client", "%s", pError);
 			pClient->ShowMessageBox("Kernel Error", pError);
-			delete pKernel;
-			pClient->~CClient();
-			free(pClient);
+			PerformAllCleanup();
 			return -1;
 		}
 	}
@@ -4700,11 +4735,16 @@ int main(int argc, const char **argv)
 	pClient->InitInterfaces();
 
 	// execute config file
-	IOHANDLE File = pStorage->OpenFile(CONFIG_FILE, IOFLAG_READ, IStorage::TYPE_ALL);
-	if(File)
+	if(pStorage->FileExists(CONFIG_FILE, IStorage::TYPE_ALL))
 	{
-		io_close(File);
-		pConsole->ExecuteFile(CONFIG_FILE);
+		if(!pConsole->ExecuteFile(CONFIG_FILE))
+		{
+			const char *pError = "Failed to load config from '" CONFIG_FILE "'.";
+			dbg_msg("client", "%s", pError);
+			pClient->ShowMessageBox("Config File Error", pError);
+			PerformAllCleanup();
+			return -1;
+		}
 	}
 
 	// execute tclient config file
@@ -4716,10 +4756,8 @@ int main(int argc, const char **argv)
 	}
 
 	// execute autoexec file
-	File = pStorage->OpenFile(AUTOEXEC_CLIENT_FILE, IOFLAG_READ, IStorage::TYPE_ALL);
-	if(File)
+	if(pStorage->FileExists(AUTOEXEC_CLIENT_FILE, IStorage::TYPE_ALL))
 	{
-		io_close(File);
 		pConsole->ExecuteFile(AUTOEXEC_CLIENT_FILE);
 	}
 	else // fallback
@@ -4781,41 +4819,29 @@ int main(int argc, const char **argv)
 		str_format(aError, sizeof(aError), "Unable to initialize SDL base: %s", SDL_GetError());
 		dbg_msg("client", "%s", aError);
 		pClient->ShowMessageBox("SDL Error", aError);
+		PerformAllCleanup();
 		return -1;
 	}
-
-#ifndef CONF_PLATFORM_ANDROID
-	atexit(SDL_Quit);
-#endif
 
 	// run the client
 	dbg_msg("client", "starting...");
 	pClient->Run();
 
-	bool Restarting = pClient->State() == CClient::STATE_RESTARTING;
+	const bool Restarting = pClient->State() == CClient::STATE_RESTARTING;
+	char aRestartBinaryPath[IO_MAX_PATH_LENGTH];
+	if(Restarting)
+	{
+		pStorage->GetBinaryPath(PLAT_CLIENT_EXEC, aRestartBinaryPath, sizeof(aRestartBinaryPath));
+	}
 
-	pClient->~CClient();
-	free(pClient);
-
-	NotificationsUninit();
-	secure_random_uninit();
+	PerformCleanup();
 
 	if(Restarting)
 	{
-		char aBuf[512];
-		shell_execute(pStorage->GetBinaryPath(PLAT_CLIENT_EXEC, aBuf, sizeof aBuf));
+		shell_execute(aRestartBinaryPath);
 	}
 
-	pKernel->Shutdown();
-	delete pKernel;
-
-	// shutdown SDL
-	SDL_Quit();
-
-#ifdef CONF_PLATFORM_ANDROID
-	// properly close this native thread, so globals are destructed
-	std::exit(0);
-#endif
+	PerformFinalCleanup();
 
 	return 0;
 }

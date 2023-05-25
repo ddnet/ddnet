@@ -105,7 +105,7 @@ void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
 	for(int i = 0; i < m_Count; i++)
 	{
 		int LoadFlag = (((m_aTextureUsedByTileOrQuadLayerFlag[i] & 1) != 0) ? TextureLoadFlag : 0) | (((m_aTextureUsedByTileOrQuadLayerFlag[i] & 2) != 0) ? 0 : (Graphics()->IsTileBufferingEnabled() ? IGraphics::TEXLOAD_NO_2D_TEXTURE : 0));
-		CMapItemImage *pImg = (CMapItemImage *)pMap->GetItem(Start + i, 0, 0);
+		CMapItemImage *pImg = (CMapItemImage *)pMap->GetItem(Start + i);
 		if(pImg->m_External)
 		{
 			char aPath[IO_MAX_PATH_LENGTH];

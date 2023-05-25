@@ -343,9 +343,6 @@ Rename demo
 Reset filter
 == Поврати филтер
 
-Sample rate
-== Фрекфенција
-
 Score
 == Резултат
 
@@ -903,9 +900,6 @@ Enable team chat sound
 
 Enable highlighted chat sound
 == Омогући истакнути звук дописивања
-
-Threaded sound loading
-== Учитавање звука са навојем
 
 Map sound volume
 == Јачина звука на мапи
@@ -1575,10 +1569,35 @@ File '%s' already exists, do you want to overwrite it?
 Copy info
 == 
 
+Online players (%d)
+== 
+
+Online clanmates (%d)
+== 
+
+[friends (server browser)]
+Offline (%d)
+== 
+
+Click to select server. Double click to join your friend.
+== 
+
+Click to remove this player from your friends list.
+== 
+
+Click to remove this clan from your friends list.
+== 
+
+None
+== 
+
 Are you sure that you want to remove the player '%s' from your friends list?
 == 
 
 Are you sure that you want to remove the clan '%s' from your friends list?
+== 
+
+Add Clan
 == 
 
 Play the current demo

@@ -5,6 +5,7 @@
 #include "player.h"
 #include "score.h"
 #include "teehistorian.h"
+#include <base/system.h>
 
 #include <engine/shared/config.h>
 
@@ -817,11 +818,10 @@ void CGameTeams::OnFinish(CPlayer *Player, float Time, const char *pTimestamp)
 		GameServer()->SendRecord(ClientID);
 	}
 
-	int TTime = 0 - (int)Time;
-	if(Player->m_Score < TTime || !Player->m_HasFinishScore)
+	int TTime = (int)Time;
+	if(!Player->m_Score.has_value() || TTime < Player->m_Score.value())
 	{
 		Player->m_Score = TTime;
-		Player->m_HasFinishScore = true;
 	}
 }
 
@@ -1062,14 +1062,15 @@ void CGameTeams::OnCharacterDeath(int ClientID, int Weapon)
 		{
 			ChangeTeamState(Team, CGameTeams::TEAMSTATE_OPEN);
 
-			char aBuf[512];
-			str_format(aBuf, sizeof(aBuf), "Everyone in your locked team was killed because '%s' %s.", Server()->ClientName(ClientID), Weapon == WEAPON_SELF ? "killed" : "died");
-
 			m_aPractice[Team] = false;
 
-			KillTeam(Team, Weapon == WEAPON_SELF ? ClientID : -1, ClientID);
 			if(Count(Team) > 1)
 			{
+				KillTeam(Team, Weapon == WEAPON_SELF ? ClientID : -1, ClientID);
+
+				char aBuf[512];
+				str_format(aBuf, sizeof(aBuf), "Everyone in your locked team was killed because '%s' %s.", Server()->ClientName(ClientID), Weapon == WEAPON_SELF ? "killed" : "died");
+
 				GameServer()->SendChatTeam(Team, aBuf);
 			}
 		}

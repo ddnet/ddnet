@@ -25,6 +25,7 @@
 #	Sucre			2022-07-19 20:36:00
 #	archimede67		2022-08-15 13:02:00
 #	Nouaa			2022-10-25 18:00:00
+#	Sukya			2023-05-20 19:38:00
 
 ##### /authors #####
 
@@ -369,9 +370,6 @@ Rename demo
 
 Reset filter
 == Filtres par défaut
-
-Sample rate
-== Taux d'échantillonnage
 
 Score
 == Score
@@ -785,9 +783,6 @@ Update failed! Check log...
 
 Reset
 == Défaut
-
-Threaded sound loading
-== Chargement des sons dans un thread spécifique
 
 File already exists, do you want to overwrite it?
 == Ce fichier existe déjà, voulez-vous l'écraser ?
@@ -1707,13 +1702,38 @@ Open the directory to add custom assets
 
 [Graphics error]
 Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
-== 
+== Impossible d'initialiser l'interface graphique, tu n'as probablement pas installé les pilotes de ta carte graphique.
 
 Could not save downloaded map. Try manually deleting this file: %s
-== 
+== Impossible de sauvegarder la carte téléchargé. Essayez de supprimer ce fichier manuellement: %s
 
 Copy info
-== 
+== Copier les infos
+
+Online players (%d)
+== Joueurs en ligne (%d)
+
+Online clanmates (%d)
+== Membres du clan en ligne (%d)
+
+[friends (server browser)]
+Offline (%d)
+== Hors-Ligne (%d)
+
+Click to select server. Double click to join your friend.
+== Cliquez pour sélectionner ce serveur. Double-cliquez pour rejoindre votre ami(e)
+
+Click to remove this player from your friends list.
+== Cliquez pour retirer ce joueur de votre liste d'amis
+
+Click to remove this clan from your friends list.
+== Cliquez pour retirer ce clan de votre liste d'amis
+
+None
+== Aucuns
+
+Add Clan
+== Ajouter clan
 
 Create a random skin
-== 
+== Créer un skin aléatoire

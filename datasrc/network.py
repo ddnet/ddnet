@@ -29,12 +29,17 @@ GameInfoFlags2 = [
 	"HUD_DDRACE", "NO_WEAK_HOOK"
 ]
 ExPlayerFlags = ["AFK", "PAUSED", "SPEC"]
-ProjectileFlags = [f"CLIENTID_BIT{i}" for i in range(8)] + [
+LegacyProjectileFlags = [f"CLIENTID_BIT{i}" for i in range(8)] + [
 	"NO_OWNER", "IS_DDNET", "BOUNCE_HORIZONTAL", "BOUNCE_VERTICAL",
 	"EXPLOSIVE", "FREEZE",
 ]
+ProjectileFlags = [
+	"BOUNCE_HORIZONTAL", "BOUNCE_VERTICAL", "EXPLOSIVE", "FREEZE", "NORMALIZE_VEL",
+]
 
-LaserTypes = ["RIFLE", "SHOTGUN", "DOOR", "FREEZE"]
+LaserTypes = ["RIFLE", "SHOTGUN", "DOOR", "FREEZE", "DRAGGER", "GUN", "PLASMA"]
+DraggerTypes = ["WEAK", "WEAK_NW", "NORMAL", "NORMAL_NW", "STRONG", "STRONG_NW"]
+GunTypes = ["UNFREEZE", "EXPLOSIVE", "FREEZE", "EXPFREEZE"]
 
 Emoticons = ["OOP", "EXCLAMATION", "HEARTS", "DROP", "DOTDOT", "MUSIC", "SORRY", "GHOST", "SUSHI", "SPLATTEE", "DEVILTEE", "ZOMG", "ZZZ", "WTF", "EYES", "QUESTION"]
 
@@ -81,6 +86,8 @@ Enums = [
 	Enum("AUTHED", Authed),
 	Enum("ENTITYCLASS", EntityClasses),
 	Enum("LASERTYPE", LaserTypes),
+	Enum("LASERDRAGGERTYPE", DraggerTypes),
+	Enum("LASERGUNTYPE", GunTypes),
 ]
 
 Flags = [
@@ -91,6 +98,7 @@ Flags = [
 	Flags("GAMEINFOFLAG", GameInfoFlags),
 	Flags("GAMEINFOFLAG2", GameInfoFlags2),
 	Flags("EXPLAYERFLAG", ExPlayerFlags),
+	Flags("LEGACYPROJECTILEFLAG", LegacyProjectileFlags),
 	Flags("PROJECTILEFLAG", ProjectileFlags),
 ]
 
@@ -267,7 +275,7 @@ Objects = [
 
 	# The code assumes that this has the same in-memory representation as
 	# the Projectile net object.
-	NetObjectEx("DDNetProjectile", "projectile@netobj.ddnet.tw", [
+	NetObjectEx("DDRaceProjectile", "projectile@netobj.ddnet.tw", [
 		NetIntAny("m_X"),
 		NetIntAny("m_Y"),
 		NetIntAny("m_Angle"),
@@ -284,6 +292,29 @@ Objects = [
 		NetTick("m_StartTick"),
 		NetIntRange("m_Owner", -1, 'MAX_CLIENTS-1'),
 		NetIntAny("m_Type"),
+		NetIntAny("m_SwitchNumber", -1),
+		NetIntAny("m_Subtype", -1),
+	]),
+
+	NetObjectEx("DDNetProjectile", "ddnet-projectile@netobj.ddnet.tw", [
+		NetIntAny("m_X"),
+		NetIntAny("m_Y"),
+		NetIntAny("m_VelX"),
+		NetIntAny("m_VelY"),
+		NetIntRange("m_Type", 0, 'NUM_WEAPONS-1'),
+		NetTick("m_StartTick"),
+		NetIntRange("m_Owner", -1, 'MAX_CLIENTS-1'),
+		NetIntAny("m_SwitchNumber"),
+		NetIntAny("m_TuneZone"),
+		NetIntAny("m_Flags"),
+	]),
+
+	NetObjectEx("DDNetPickup", "pickup@netobj.ddnet.tw", [
+		NetIntAny("m_X"),
+		NetIntAny("m_Y"),
+		NetIntRange("m_Type", 0, 'max_int'),
+		NetIntRange("m_Subtype", 0, 'max_int'),
+		NetIntAny("m_SwitchNumber"),
 	]),
 
 	## Events

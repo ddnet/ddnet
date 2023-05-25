@@ -169,6 +169,147 @@ CUI::EPopupMenuFunctionResult CEditor::PopupMenuTools(void *pContext, CUIRect Vi
 		return CUI::POPUP_CLOSE_CURRENT;
 	}
 
+	static int s_BorderButton = 0;
+	View.HSplitTop(2.0f, nullptr, &View);
+	View.HSplitTop(12.0f, &Slot, &View);
+	if(pEditor->DoButton_MenuItem(&s_BorderButton, "Place Border", 0, &Slot, 0, "Place tiles in a 2-tile wide border at the edges of the layer"))
+	{
+		CLayerTiles *pT = (CLayerTiles *)pEditor->GetSelectedLayerType(0, LAYERTYPE_TILES);
+		if(pT && !pT->m_Tele && !pT->m_Speedup && !pT->m_Switch && !pT->m_Front && !pT->m_Tune)
+		{
+			pEditor->m_PopupEventType = POPEVENT_PLACE_BORDER_TILES;
+			pEditor->m_PopupEventActivated = true;
+		}
+		else
+		{
+			static CUI::SMessagePopupContext s_MessagePopupContext;
+			s_MessagePopupContext.DefaultColor(pEditor->m_pTextRender);
+			str_copy(s_MessagePopupContext.m_aMessage, "No tile layer selected");
+			pEditor->UI()->ShowPopupMessage(Slot.x, Slot.y + Slot.h, &s_MessagePopupContext);
+		}
+	}
+
+	static int s_GotoButton = 0;
+	View.HSplitTop(2.0f, nullptr, &View);
+	View.HSplitTop(12.0f, &Slot, &View);
+	if(pEditor->DoButton_MenuItem(&s_GotoButton, "Goto XY", 0, &Slot, 0, "Go to a specified coordinate point on the map"))
+	{
+		static SPopupMenuId s_PopupGotoId;
+		pEditor->UI()->DoPopupMenu(&s_PopupGotoId, Slot.x, Slot.y + Slot.h, 120, 52, pEditor, PopupGoto);
+	}
+
+	return CUI::POPUP_KEEP_OPEN;
+}
+
+static int EntitiesListdirCallback(const char *pName, int IsDir, int StorageType, void *pUser)
+{
+	CEditor *pEditor = (CEditor *)pUser;
+	if(!IsDir && str_endswith(pName, ".png"))
+	{
+		std::string Name = pName;
+		pEditor->m_vSelectEntitiesFiles.push_back(Name.substr(0, Name.length() - 4));
+	}
+
+	return 0;
+}
+
+CUI::EPopupMenuFunctionResult CEditor::PopupMenuSettings(void *pContext, CUIRect View, bool Active)
+{
+	CEditor *pEditor = static_cast<CEditor *>(pContext);
+
+	CUIRect Slot;
+	View.HSplitTop(12.0f, &Slot, &View);
+	static int s_EntitiesButtonID = 0;
+	char aButtonText[64];
+	str_format(aButtonText, sizeof(aButtonText), "Entities: %s", pEditor->m_SelectEntitiesImage.c_str());
+	if(pEditor->DoButton_MenuItem(&s_EntitiesButtonID, aButtonText, 0, &Slot, 0, "Choose game layer entities image for different gametypes"))
+	{
+		pEditor->m_vSelectEntitiesFiles.clear();
+		pEditor->Storage()->ListDirectory(IStorage::TYPE_ALL, "editor/entities", EntitiesListdirCallback, pEditor);
+		std::sort(pEditor->m_vSelectEntitiesFiles.begin(), pEditor->m_vSelectEntitiesFiles.end());
+
+		static SPopupMenuId s_PopupEntitiesId;
+		pEditor->UI()->DoPopupMenu(&s_PopupEntitiesId, Slot.x, Slot.y + Slot.h, 250, pEditor->m_vSelectEntitiesFiles.size() * 14.0f + 10.0f, pEditor, PopupEntities);
+	}
+
+	View.HSplitTop(2.0f, nullptr, &View);
+	View.HSplitTop(12.0f, &Slot, &View);
+	{
+		Slot.VMargin(5.0f, &Slot);
+
+		CUIRect Label, Selector;
+		Slot.VSplitMid(&Label, &Selector);
+		CUIRect No, Yes;
+		Selector.VSplitMid(&No, &Yes);
+
+		pEditor->UI()->DoLabel(&Label, "Brush coloring", 10.0f, TEXTALIGN_ML);
+		static int s_ButtonNo = 0;
+		static int s_ButtonYes = 0;
+		if(pEditor->DoButton_ButtonDec(&s_ButtonNo, "No", !pEditor->m_BrushColorEnabled, &No, 0, "Disable brush coloring"))
+		{
+			pEditor->m_BrushColorEnabled = false;
+		}
+		if(pEditor->DoButton_ButtonInc(&s_ButtonYes, "Yes", pEditor->m_BrushColorEnabled, &Yes, 0, "Enable brush coloring"))
+		{
+			pEditor->m_BrushColorEnabled = true;
+		}
+	}
+
+	View.HSplitTop(2.0f, nullptr, &View);
+	View.HSplitTop(12.0f, &Slot, &View);
+	{
+		Slot.VMargin(5.0f, &Slot);
+
+		CUIRect Label, Selector;
+		Slot.VSplitMid(&Label, &Selector);
+		CUIRect No, Yes;
+		Selector.VSplitMid(&No, &Yes);
+
+		pEditor->UI()->DoLabel(&Label, "Allow unused", 10.0f, TEXTALIGN_ML);
+		static int s_ButtonNo = 0;
+		static int s_ButtonYes = 0;
+		if(pEditor->DoButton_ButtonDec(&s_ButtonNo, "No", !pEditor->m_AllowPlaceUnusedTiles, &No, 0, "[ctrl+u] Disallow placing unused tiles"))
+		{
+			pEditor->m_AllowPlaceUnusedTiles = false;
+		}
+		if(pEditor->DoButton_ButtonInc(&s_ButtonYes, "Yes", pEditor->m_AllowPlaceUnusedTiles, &Yes, 0, "[ctrl+u] Allow placing unused tiles"))
+		{
+			pEditor->m_AllowPlaceUnusedTiles = true;
+		}
+	}
+
+	View.HSplitTop(2.0f, nullptr, &View);
+	View.HSplitTop(12.0f, &Slot, &View);
+	{
+		Slot.VMargin(5.0f, &Slot);
+
+		CUIRect Label, Selector;
+		Slot.VSplitMid(&Label, &Selector);
+		CUIRect Off, Dec, Hex;
+		Selector.VSplitLeft(Selector.w / 3.0f, &Off, &Selector);
+		Selector.VSplitMid(&Dec, &Hex);
+
+		pEditor->UI()->DoLabel(&Label, "Show Info", 10.0f, TEXTALIGN_ML);
+		static int s_ButtonOff = 0;
+		static int s_ButtonDec = 0;
+		static int s_ButtonHex = 0;
+		if(pEditor->DoButton_ButtonDec(&s_ButtonOff, "Off", pEditor->m_ShowTileInfo == SHOW_TILE_OFF, &Off, 0, "Do not show tile information"))
+		{
+			pEditor->m_ShowTileInfo = SHOW_TILE_OFF;
+			pEditor->m_ShowEnvelopePreview = SHOWENV_NONE;
+		}
+		if(pEditor->DoButton_Ex(&s_ButtonDec, "Dec", pEditor->m_ShowTileInfo == SHOW_TILE_DECIMAL, &Dec, 0, "[ctrl+i] Show tile information", IGraphics::CORNER_NONE))
+		{
+			pEditor->m_ShowTileInfo = SHOW_TILE_DECIMAL;
+			pEditor->m_ShowEnvelopePreview = SHOWENV_NONE;
+		}
+		if(pEditor->DoButton_ButtonInc(&s_ButtonHex, "Hex", pEditor->m_ShowTileInfo == SHOW_TILE_HEXADECIMAL, &Hex, 0, "[ctrl+shift+i] Show tile information in hexadecimal"))
+		{
+			pEditor->m_ShowTileInfo = SHOW_TILE_HEXADECIMAL;
+			pEditor->m_ShowEnvelopePreview = SHOWENV_NONE;
+		}
+	}
+
 	return CUI::POPUP_KEEP_OPEN;
 }
 
@@ -1451,7 +1592,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupEvent(void *pContext, CUIRect View, 
 	else if(pEditor->m_PopupEventType == POPEVENT_PREVENTUNUSEDTILES)
 	{
 		pTitle = "Unused tiles disabled";
-		pMessage = "Unused tiles can't be placed by default because they could get a use later and then destroy your map.\n\nActivate the 'Unused' switch to be able to place every tile.";
+		pMessage = "Unused tiles can't be placed by default because they could get a use later and then destroy your map.\n\nActivate the 'Allow Unused' setting to be able to place every tile.";
 	}
 	else if(pEditor->m_PopupEventType == POPEVENT_IMAGEDIV16)
 	{
@@ -2172,6 +2313,31 @@ CUI::EPopupMenuFunctionResult CEditor::PopupEntities(void *pContext, CUIRect Vie
 				return CUI::POPUP_CLOSE_CURRENT;
 			}
 		}
+	}
+
+	return CUI::POPUP_KEEP_OPEN;
+}
+
+CUI::EPopupMenuFunctionResult CEditor::PopupProofMode(void *pContext, CUIRect View, bool Active)
+{
+	CEditor *pEditor = static_cast<CEditor *>(pContext);
+
+	CUIRect Button;
+	View.HSplitTop(12.0f, &Button, &View);
+	static int s_ButtonIngame;
+	if(pEditor->DoButton_MenuItem(&s_ButtonIngame, "Ingame", pEditor->m_ProofBorders == PROOF_BORDER_INGAME, &Button, 0, "These borders represent what a player maximum can see."))
+	{
+		pEditor->m_ProofBorders = PROOF_BORDER_INGAME;
+		return CUI::POPUP_CLOSE_CURRENT;
+	}
+
+	View.HSplitTop(2.0f, nullptr, &View);
+	View.HSplitTop(12.0f, &Button, &View);
+	static int s_ButtonMenu;
+	if(pEditor->DoButton_MenuItem(&s_ButtonMenu, "Menu", pEditor->m_ProofBorders == PROOF_BORDER_MENU, &Button, 0, "These borders represent what will be shown in the menu."))
+	{
+		pEditor->m_ProofBorders = PROOF_BORDER_MENU;
+		return CUI::POPUP_CLOSE_CURRENT;
 	}
 
 	return CUI::POPUP_KEEP_OPEN;

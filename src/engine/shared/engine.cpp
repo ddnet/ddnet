@@ -73,9 +73,9 @@ public:
 #endif
 
 			char aVersionStr[128];
-			if(!os_version_str(aVersionStr, sizeof(aVersionStr)))
+			if(os_version_str(aVersionStr, sizeof(aVersionStr)))
 			{
-				dbg_msg("engine", "operation system version: %s", aVersionStr);
+				dbg_msg("engine", "operating system version: %s", aVersionStr);
 			}
 
 			// init the network
@@ -113,9 +113,9 @@ public:
 		m_JobPool.Add(std::move(pJob));
 	}
 
-	void SetAdditionalLogger(std::unique_ptr<ILogger> &&pLogger) override
+	void SetAdditionalLogger(std::shared_ptr<ILogger> &&pLogger) override
 	{
-		m_pFutureLogger->Set(std::move(pLogger));
+		m_pFutureLogger->Set(pLogger);
 	}
 };
 

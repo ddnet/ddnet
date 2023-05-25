@@ -360,9 +360,6 @@ Rename demo
 Reset filter
 == Сбросить фильтры
 
-Sample rate
-== Частота
-
 Score
 == Счёт
 
@@ -539,9 +536,6 @@ Enable team chat sound
 
 Enable highlighted chat sound
 == Звуки подсвечиваемых сообщений
-
-Threaded sound loading
-== Фоновая загрузка музыки
 
 Use DDRace Scoreboard
 == Использовать DDRace таблицу счета
@@ -1703,3 +1697,28 @@ Copy info
 
 Create a random skin
 == Создать случайный скин
+
+Online players (%d)
+== Друзей онлайн (%d)
+
+Online clanmates (%d)
+== Участников клана онлайн (%d)
+
+[friends (server browser)]
+Offline (%d)
+== Не в сети (%d)
+
+Click to select server. Double click to join your friend.
+== Нажмите, чтобы выбрать сервер. Двойное нажатие, чтобы присоединиться к другу
+
+Click to remove this player from your friends list.
+== Нажмите, чтобы убрать игрока из списка друзей.
+
+Click to remove this clan from your friends list.
+== Нажмите, чтобы Исключить клан из списка.
+
+None
+== Пусто
+
+Add Clan
+== Добавить клан

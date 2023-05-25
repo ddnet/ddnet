@@ -20,7 +20,6 @@ public:
 	const int &GetOwner() { return m_Owner; }
 	const int &GetEvalTick() { return m_EvalTick; }
 	CLaser(CGameWorld *pGameWorld, int ID, CLaserData *pLaser);
-	void FillInfo(CNetObj_Laser *pLaser);
 	bool Match(CLaser *pLaser);
 	CLaserData GetData() const;
 

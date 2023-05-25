@@ -33,6 +33,14 @@ public:
 		NUM_LOCS,
 	};
 
+	enum
+	{
+		CLIENT_SCORE_KIND_UNSPECIFIED,
+		CLIENT_SCORE_KIND_POINTS,
+		CLIENT_SCORE_KIND_TIME,
+		CLIENT_SCORE_KIND_TIME_BACKCOMPAT,
+	};
+
 	class CClient
 	{
 	public:
@@ -68,6 +76,7 @@ public:
 	int m_MaxPlayers;
 	int m_NumPlayers;
 	int m_Flags;
+	int m_ClientScoreKind;
 	TRISTATE m_Favorite;
 	TRISTATE m_FavoriteAllowPing;
 	bool m_Official;

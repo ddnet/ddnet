@@ -16,28 +16,25 @@ public:
 	CMap();
 
 	void *GetData(int Index) override;
-	int GetDataSize(int Index) override;
+	int GetDataSize(int Index) const override;
 	void *GetDataSwapped(int Index) override;
 	void UnloadData(int Index) override;
-	void *GetItem(int Index, int *pType, int *pID) override;
+	int NumData() const override;
+
+	void *GetItem(int Index, int *pType = nullptr, int *pID = nullptr) override;
 	int GetItemSize(int Index) override;
 	void GetType(int Type, int *pStart, int *pNum) override;
 	void *FindItem(int Type, int ID) override;
-	int NumItems() override;
-
-	void Unload() override;
+	int NumItems() const override;
 
 	bool Load(const char *pMapName) override;
+	void Unload() override;
+	bool IsLoaded() const override;
+	IOHANDLE File() const override;
 
-	bool IsLoaded() override;
-
-	SHA256_DIGEST Sha256() override;
-
-	unsigned Crc() override;
-
-	int MapSize() override;
-
-	IOHANDLE File() override;
+	SHA256_DIGEST Sha256() const override;
+	unsigned Crc() const override;
+	int MapSize() const override;
 };
 
 #endif

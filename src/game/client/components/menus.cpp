@@ -74,8 +74,6 @@ CMenus::CMenus()
 
 	str_copy(m_aCurrentDemoFolder, "demos");
 
-	m_FriendlistSelectedIndex = -1;
-
 	m_DemoPlayerState = DEMOPLAYER_NONE;
 	m_Dummy = false;
 
@@ -872,24 +870,21 @@ void CMenus::RenderLoading(const char *pCaption, const char *pContent, int Incre
 {
 	// TODO: not supported right now due to separate render thread
 
-	static std::chrono::nanoseconds LastLoadRender{0};
-	auto CurLoadRenderCount = m_LoadCurrent;
+	static std::chrono::nanoseconds s_LastLoadRender{0};
+	const int CurLoadRenderCount = m_LoadCurrent;
 	m_LoadCurrent += IncreaseCounter;
-	float Percent = CurLoadRenderCount / (float)m_LoadTotal;
+	const float Percent = CurLoadRenderCount / (float)m_LoadTotal;
 
 	// make sure that we don't render for each little thing we load
 	// because that will slow down loading if we have vsync
-	if(time_get_nanoseconds() - LastLoadRender < std::chrono::nanoseconds(1s) / 60l)
+	if(time_get_nanoseconds() - s_LastLoadRender < std::chrono::nanoseconds(1s) / 60l)
 		return;
 
-	LastLoadRender = time_get_nanoseconds();
+	s_LastLoadRender = time_get_nanoseconds();
 
 	// need up date this here to get correct
 	ms_GuiColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_UiColor, true));
 
-	CUIRect Screen = *UI()->Screen();
-	// some margin around the screen
-	Screen.Margin(10.0f, &Screen);
 	UI()->MapScreen();
 
 	if(!RenderMenuBackgroundMap || !m_pBackground->Render())
@@ -897,8 +892,8 @@ void CMenus::RenderLoading(const char *pCaption, const char *pContent, int Incre
 		RenderBackground();
 	}
 
-	CUIRect Box = Screen;
-	Box.Margin(150.0f, &Box);
+	CUIRect Box = *UI()->Screen();
+	Box.Margin(160.0f, &Box);
 
 	Graphics()->BlendNormal();
 
@@ -906,18 +901,14 @@ void CMenus::RenderLoading(const char *pCaption, const char *pContent, int Incre
 	Box.Draw(ColorRGBA{0, 0, 0, 0.50f}, IGraphics::CORNER_ALL, 15.0f);
 
 	CUIRect Part;
-
-	Box.HSplitTop(20.f, &Part, &Box);
+	Box.HSplitTop(20.f, nullptr, &Box);
 	Box.HSplitTop(24.f, &Part, &Box);
 	Part.VMargin(20.f, &Part);
-	SLabelProperties Props;
-	Props.m_MaxWidth = (int)Part.w;
 	UI()->DoLabel(&Part, pCaption, 24.f, TEXTALIGN_MC);
-	Box.HSplitTop(20.f, &Part, &Box);
+
+	Box.HSplitTop(20.f, nullptr, &Box);
 	Box.HSplitTop(24.f, &Part, &Box);
 	Part.VMargin(20.f, &Part);
-
-	Props.m_MaxWidth = (int)Part.w;
 	UI()->DoLabel(&Part, pContent, 20.0f, TEXTALIGN_MC);
 
 	if(RenderLoadingBar)
@@ -1809,70 +1800,6 @@ int CMenus::Render()
 			static CButtonContainer s_Button;
 			if(DoButton_Menu(&s_Button, Localize("Ok"), 0, &Button) || UI()->ConsumeHotkey(CUI::HOTKEY_ESCAPE) || UI()->ConsumeHotkey(CUI::HOTKEY_ENTER) || Activated)
 				m_Popup = POPUP_FIRST_LAUNCH;
-		}
-		else if(m_Popup == POPUP_COUNTRY)
-		{
-			CUIRect ButtonBar;
-			Screen.Margin(150.0f, &Box);
-			Box.HSplitTop(20.0f, nullptr, &Box);
-			Box.HSplitBottom(20.0f, &Box, nullptr);
-			Box.HSplitBottom(24.0f, &Box, &ButtonBar);
-			Box.HSplitBottom(20.0f, &Box, nullptr);
-			Box.VMargin(20.0f, &Box);
-			ButtonBar.VMargin(100.0f, &ButtonBar);
-
-			static int s_CurSelection = -2;
-			if(s_CurSelection == -2)
-				s_CurSelection = g_Config.m_BrFilterCountryIndex;
-
-			static CListBox s_ListBox;
-			int OldSelected = -1;
-			s_ListBox.DoStart(50.0f, m_pClient->m_CountryFlags.Num(), 10, 1, OldSelected, &Box);
-
-			for(size_t i = 0; i < m_pClient->m_CountryFlags.Num(); ++i)
-			{
-				const CCountryFlags::CCountryFlag *pEntry = m_pClient->m_CountryFlags.GetByIndex(i);
-				if(pEntry->m_CountryCode == s_CurSelection)
-					OldSelected = i;
-
-				const CListboxItem Item = s_ListBox.DoNextItem(pEntry, OldSelected >= 0 && (size_t)OldSelected == i);
-				if(!Item.m_Visible)
-					continue;
-
-				CUIRect FlagRect, Label;
-				Item.m_Rect.Margin(5.0f, &FlagRect);
-				FlagRect.HSplitBottom(12.0f, &FlagRect, &Label);
-				Label.HSplitTop(2.0f, nullptr, &Label);
-				const float OldWidth = FlagRect.w;
-				FlagRect.w = FlagRect.h * 2.0f;
-				FlagRect.x += (OldWidth - FlagRect.w) / 2.0f;
-				ColorRGBA Color(1.0f, 1.0f, 1.0f, 1.0f);
-				m_pClient->m_CountryFlags.Render(pEntry->m_CountryCode, &Color, FlagRect.x, FlagRect.y, FlagRect.w, FlagRect.h);
-
-				UI()->DoLabel(&Label, pEntry->m_aCountryCodeString, 10.0f, TEXTALIGN_ML);
-			}
-
-			const int NewSelected = s_ListBox.DoEnd();
-			if(OldSelected != NewSelected)
-				s_CurSelection = m_pClient->m_CountryFlags.GetByIndex(NewSelected)->m_CountryCode;
-
-			CUIRect CancelButton, OkButton;
-			ButtonBar.VSplitMid(&CancelButton, &OkButton, 40.0f);
-
-			static CButtonContainer s_CancelButton;
-			if(DoButton_Menu(&s_CancelButton, Localize("Cancel"), 0, &CancelButton) || UI()->ConsumeHotkey(CUI::HOTKEY_ESCAPE))
-			{
-				s_CurSelection = g_Config.m_BrFilterCountryIndex;
-				m_Popup = POPUP_NONE;
-			}
-
-			static CButtonContainer s_OkButton;
-			if(DoButton_Menu(&s_OkButton, Localize("Ok"), 0, &OkButton) || UI()->ConsumeHotkey(CUI::HOTKEY_ENTER) || s_ListBox.WasItemActivated())
-			{
-				g_Config.m_BrFilterCountryIndex = s_CurSelection;
-				Client()->ServerBrowserUpdate();
-				m_Popup = POPUP_NONE;
-			}
 		}
 		else if(m_Popup == POPUP_RENAME_DEMO)
 		{

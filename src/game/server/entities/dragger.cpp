@@ -186,17 +186,12 @@ void CDragger::Snap(int SnappingClient)
 
 	int SnappingClientVersion = GameServer()->GetClientVersion(SnappingClient);
 
-	CNetObj_EntityEx *pEntData = 0;
-	if(SnappingClientVersion >= VERSION_DDNET_SWITCH)
+	int Subtype = (m_IgnoreWalls ? 1 : 0) | (clamp(round_to_int(m_Strength - 1.f), 0, 2) << 1);
+
+	int StartTick;
+	if(SnappingClientVersion >= VERSION_DDNET_ENTITY_NETOBJS)
 	{
-		pEntData = Server()->SnapNewItem<CNetObj_EntityEx>(GetID());
-		if(pEntData)
-		{
-			pEntData->m_SwitchNumber = m_Number;
-			pEntData->m_Layer = m_Layer;
-			pEntData->m_EntityClass = clamp(ENTITYCLASS_DRAGGER_WEAK + round_to_int(m_Strength) - 1,
-				(int)ENTITYCLASS_DRAGGER_WEAK, (int)ENTITYCLASS_DRAGGER_STRONG);
-		}
+		StartTick = 0;
 	}
 	else
 	{
@@ -212,11 +207,7 @@ void CDragger::Snap(int SnappingClient)
 		if(pChar && m_Layer == LAYER_SWITCH && m_Number > 0 &&
 			!Switchers()[m_Number].m_aStatus[pChar->Team()] && !Tick)
 			return;
-	}
 
-	int StartTick = 0;
-	if(!pEntData)
-	{
 		StartTick = m_EvalTick;
 		if(StartTick < Server()->Tick() - 4)
 			StartTick = Server()->Tick() - 4;
@@ -225,5 +216,14 @@ void CDragger::Snap(int SnappingClient)
 	}
 
 	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion), GetID(),
-		m_Pos, m_Pos, StartTick, -1, LASERTYPE_DOOR);
+		m_Pos, m_Pos, StartTick, -1, LASERTYPE_DRAGGER, Subtype, m_Number);
+}
+
+void CDragger::SwapClients(int Client1, int Client2)
+{
+	std::swap(m_apDraggerBeam[Client1], m_apDraggerBeam[Client2]);
+	for(int &TargetId : m_aTargetIdInTeam)
+	{
+		TargetId = TargetId == Client1 ? Client2 : TargetId == Client2 ? Client1 : TargetId;
+	}
 }

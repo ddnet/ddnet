@@ -368,9 +368,6 @@ Rename demo
 Reset filter
 == Standardfilter
 
-Sample rate
-== Abtastrate
-
 Score
 == Punkte
 
@@ -826,9 +823,6 @@ Show tiles layers from BG map
 
 Remove chat
 == Chat entfernen
-
-Threaded sound loading
-== Sounds in Threads laden
 
 Frags
 == Abschüsse
@@ -1438,7 +1432,7 @@ Controller %d: %s
 == Controller %d: %s
 
 Click to cycle through all available controllers.
-== Klicke, um durch die verfügbaren Controller zu wechseln.
+== Klicke um durch die verfügbaren Controller zu wechseln.
 
 [Ingame controller mode]
 Relative
@@ -1708,3 +1702,28 @@ Open the settings file
 
 Create a random skin
 == Erstelle einen zufälligen Skin
+
+Online players (%d)
+== Online-Spieler (%d)
+
+Online clanmates (%d)
+== Online-Clanmitglieder (%d)
+
+[friends (server browser)]
+Offline (%d)
+== Offline (%d)
+
+Click to select server. Double click to join your friend.
+== Klicke um den Server auszuwählen. Doppelklicke um deinem Freund beizutreten.
+
+Click to remove this player from your friends list.
+== Klicke um diesen Spieler aus deiner Freundesliste zu entfernen.
+
+Click to remove this clan from your friends list.
+== Klicke um diesen Clan aus deiner Freundesliste zu entfernen.
+
+None
+== Keine
+
+Add Clan
+== Clan hinzufügen

@@ -673,6 +673,9 @@ Server best:
 Personal best:
 == 
 
+Team %d
+== 
+
 Uploading map data to GPU
 == 
 
@@ -796,7 +799,26 @@ Copy info
 Leak IP
 == 
 
-Remove
+Online players (%d)
+== 
+
+Online clanmates (%d)
+== 
+
+[friends (server browser)]
+Offline (%d)
+== 
+
+Click to select server. Double click to join your friend.
+== 
+
+Click to remove this player from your friends list.
+== 
+
+Click to remove this clan from your friends list.
+== 
+
+None
 == 
 
 Are you sure that you want to remove the player '%s' from your friends list?
@@ -806,6 +828,9 @@ Are you sure that you want to remove the clan '%s' from your friends list?
 == 
 
 Remove friend
+== 
+
+Add Clan
 == 
 
 Info
@@ -938,6 +963,9 @@ Score limit
 == 
 
 Time limit
+== 
+
+Remove
 == 
 
 Loading ghost files
@@ -1293,12 +1321,6 @@ Enable team chat sound
 Enable highlighted chat sound
 == 
 
-Threaded sound loading
-== 
-
-Sample rate
-== 
-
 Sound volume
 == 
 
@@ -1630,9 +1652,6 @@ Score
 == 
 
 Super
-== 
-
-Team %d
 == 
 
 Manual
