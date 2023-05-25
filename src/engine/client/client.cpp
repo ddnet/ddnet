@@ -4748,7 +4748,7 @@ int main(int argc, const char **argv)
 	}
 
 	// execute tclient config file
-	File = pStorage->OpenFile(TCONFIG_FILE, IOFLAG_READ, IStorage::TYPE_ALL);
+	IOHANDLE File = pStorage->OpenFile(TCONFIG_FILE, IOFLAG_READ, IStorage::TYPE_ALL);
 	if(File)
 	{
 		io_close(File);
