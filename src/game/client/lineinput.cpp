@@ -224,7 +224,7 @@ bool CLineInput::ProcessInput(const IInput::CEvent &Event)
 
 		if(Event.m_Key == KEY_BACKSPACE)
 		{
-			if(SelectionLength && !MoveWord)
+			if(SelectionLength)
 			{
 				SetRange("", m_SelectionStart, m_SelectionEnd);
 			}
@@ -244,7 +244,7 @@ bool CLineInput::ProcessInput(const IInput::CEvent &Event)
 		}
 		else if(Event.m_Key == KEY_DELETE)
 		{
-			if(SelectionLength && !MoveWord)
+			if(SelectionLength)
 			{
 				SetRange("", m_SelectionStart, m_SelectionEnd);
 			}
