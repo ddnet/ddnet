@@ -4787,6 +4787,12 @@ int main(int argc, const char **argv)
 	SDL_SetHint("SDL_MAC_OPENGL_ASYNC_DISPATCH", "1");
 #endif
 
+#if defined(CONF_FAMILY_WINDOWS)
+	SDL_SetHint("SDL_IME_SHOW_UI", g_Config.m_InpImeNativeUi ? "1" : "0");
+#else
+	SDL_SetHint("SDL_IME_SHOW_UI", "1");
+#endif
+
 	// init SDL
 	if(SDL_Init(0) < 0)
 	{
