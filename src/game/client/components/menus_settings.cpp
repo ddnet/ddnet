@@ -3137,9 +3137,6 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 {
 	CUIRect Button, Left, Right, LeftLeft, Demo, Gameplay, Miscellaneous, Label, Background;
 
-	bool CheckSettings = false;
-	static int s_InpMouseOld = g_Config.m_InpMouseOld;
-
 	MainView.HSplitTop(100.0f, &Demo, &MainView);
 
 	Demo.HSplitTop(30.0f, &Label, &Demo);
@@ -3306,16 +3303,6 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	}
 
 	Right.HSplitTop(40.0f, 0, &Right);
-
-	Left.HSplitTop(20.0f, &Button, &Left);
-	if(DoButton_CheckBox(&g_Config.m_InpMouseOld, Localize("Old mouse mode"), g_Config.m_InpMouseOld, &Button))
-	{
-		g_Config.m_InpMouseOld ^= 1;
-		CheckSettings = true;
-	}
-
-	if(CheckSettings)
-		m_NeedRestartDDNet = s_InpMouseOld != g_Config.m_InpMouseOld;
 
 	Left.HSplitTop(5.0f, &Button, &Left);
 	Left.VSplitRight(10.0f, &Left, 0x0);
