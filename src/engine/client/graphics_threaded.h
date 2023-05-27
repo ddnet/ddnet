@@ -1300,6 +1300,7 @@ public:
 
 	SWarning *GetCurWarning() override;
 	bool ShowMessageBox(unsigned Type, const char *pTitle, const char *pMsg) override;
+	bool IsBackendInitialized() override;
 
 	bool GetDriverVersion(EGraphicsDriverAgeType DriverAgeType, int &Major, int &Minor, int &Patch, const char *&pName, EBackendType BackendType) override { return m_pBackend->GetDriverVersion(DriverAgeType, Major, Minor, Patch, pName, BackendType); }
 	bool IsConfigModernAPI() override { return m_pBackend->IsConfigModernAPI(); }
