@@ -74,8 +74,6 @@ class CMenus : public CComponent
 	static SColorPicker ms_ColorPicker;
 	static bool ms_ValueSelectorTextMode;
 
-	char m_aLocalStringHelper[1024];
-
 	int DoButton_DemoPlayer(const void *pID, const char *pText, int Checked, const CUIRect *pRect);
 	int DoButton_FontIcon(CButtonContainer *pButtonContainer, const char *pText, int Checked, const CUIRect *pRect, int Corners, bool Enabled = true);
 	int DoButton_Toggle(const void *pID, int Checked, const CUIRect *pRect, bool Active);
@@ -106,92 +104,6 @@ class CMenus : public CComponent
 	void RefreshSkins();
 
 	void RandomSkin();
-
-	// new gui with gui elements
-	template<typename T>
-	int DoButtonMenu(CUIElement &UIElement, const CButtonContainer *pID, T &&GetTextLambda, int Checked, const CUIRect *pRect, bool HintRequiresStringCheck, bool HintCanChangePositionOrSize = false, int Corners = IGraphics::CORNER_ALL, float r = 5.0f, float FontFactor = 0.0f, vec4 ColorHot = vec4(1.0f, 1.0f, 1.0f, 0.75f), vec4 Color = vec4(1, 1, 1, 0.5f))
-	{
-		CUIRect Text = *pRect;
-		Text.HMargin(pRect->h >= 20.0f ? 2.0f : 1.0f, &Text);
-		Text.HMargin((Text.h * FontFactor) / 2.0f, &Text);
-
-		if(!UIElement.AreRectsInit() || HintRequiresStringCheck || HintCanChangePositionOrSize || !UIElement.Rect(0)->m_UITextContainer.Valid())
-		{
-			bool NeedsRecalc = !UIElement.AreRectsInit() || !UIElement.Rect(0)->m_UITextContainer.Valid();
-			if(HintCanChangePositionOrSize)
-			{
-				if(UIElement.AreRectsInit())
-				{
-					if(UIElement.Rect(0)->m_X != pRect->x || UIElement.Rect(0)->m_Y != pRect->y || UIElement.Rect(0)->m_Width != pRect->w || UIElement.Rect(0)->m_Y != pRect->h)
-					{
-						NeedsRecalc = true;
-					}
-				}
-			}
-			const char *pText = nullptr;
-			if(HintRequiresStringCheck)
-			{
-				if(UIElement.AreRectsInit())
-				{
-					pText = GetTextLambda();
-					if(str_comp(UIElement.Rect(0)->m_Text.c_str(), pText) != 0)
-					{
-						NeedsRecalc = true;
-					}
-				}
-			}
-			if(NeedsRecalc)
-			{
-				if(!UIElement.AreRectsInit())
-				{
-					UIElement.InitRects(3);
-				}
-				UI()->ResetUIElement(UIElement);
-
-				vec4 RealColor = Color;
-				for(int i = 0; i < 3; ++i)
-				{
-					Color.a = RealColor.a;
-					if(i == 0)
-						Color.a *= UI()->ButtonColorMulActive();
-					else if(i == 1)
-						Color.a *= UI()->ButtonColorMulHot();
-					else if(i == 2)
-						Color.a *= UI()->ButtonColorMulDefault();
-					Graphics()->SetColor(Color);
-
-					CUIElement::SUIElementRect &NewRect = *UIElement.Rect(i);
-					NewRect.m_UIRectQuadContainer = Graphics()->CreateRectQuadContainer(pRect->x, pRect->y, pRect->w, pRect->h, r, Corners);
-
-					NewRect.m_X = pRect->x;
-					NewRect.m_Y = pRect->y;
-					NewRect.m_Width = pRect->w;
-					NewRect.m_Height = pRect->h;
-					if(i == 0)
-					{
-						if(pText == nullptr)
-							pText = GetTextLambda();
-						NewRect.m_Text = pText;
-						UI()->DoLabel(NewRect, &Text, pText, Text.h * CUI::ms_FontmodHeight, TEXTALIGN_MC);
-					}
-				}
-				Graphics()->SetColor(1, 1, 1, 1);
-			}
-		}
-		// render
-		size_t Index = 2;
-		if(UI()->CheckActiveItem(pID))
-			Index = 0;
-		else if(UI()->HotItem() == pID)
-			Index = 1;
-		Graphics()->TextureClear();
-		Graphics()->RenderQuadContainer(UIElement.Rect(Index)->m_UIRectQuadContainer, -1);
-		ColorRGBA ColorText(TextRender()->DefaultTextColor());
-		ColorRGBA ColorTextOutline(TextRender()->DefaultTextOutlineColor());
-		if(UIElement.Rect(0)->m_UITextContainer.Valid())
-			TextRender()->RenderTextContainer(UIElement.Rect(0)->m_UITextContainer, ColorText, ColorTextOutline);
-		return UI()->DoButtonLogic(pID, Checked, pRect);
-	}
 
 	// menus_settings_assets.cpp
 public:
