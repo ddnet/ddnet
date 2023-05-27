@@ -553,6 +553,7 @@ public:
 #endif
 
 	void ShowMessageBox(const char *pTitle, const char *pMessage, EMessageBoxType Type = MESSAGE_BOX_TYPE_ERROR) override;
+	void GetGPUInfoString(char (&aGPUInfo)[256]) override;
 };
 
 #endif
