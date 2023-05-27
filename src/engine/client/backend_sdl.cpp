@@ -777,7 +777,9 @@ void CGraphicsBackend_SDL_GL::ClampDriverVersion(EBackendType BackendType)
 bool CGraphicsBackend_SDL_GL::ShowMessageBox(unsigned Type, const char *pTitle, const char *pMsg)
 {
 	if(m_pProcessor != nullptr)
+	{
 		m_pProcessor->ErroneousCleanup();
+	}
 	// TODO: Remove this workaround when https://github.com/libsdl-org/SDL/issues/3750 is
 	// fixed and pass the window to SDL_ShowSimpleMessageBox to make the popup modal instead
 	// of destroying the window before opening the popup.
