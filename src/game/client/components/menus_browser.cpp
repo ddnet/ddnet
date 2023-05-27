@@ -451,7 +451,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	}
 
 	CUIRect SearchInfoAndAddr, ServersAndConnect, Status3;
-	Status.VSplitRight(250.0f, &SearchInfoAndAddr, &ServersAndConnect);
+	Status.VSplitRight(125.0f, &SearchInfoAndAddr, &ServersAndConnect);
 	if(SearchInfoAndAddr.w > 350.0f)
 		SearchInfoAndAddr.VSplitLeft(350.0f, &SearchInfoAndAddr, NULL);
 	CUIRect SearchAndInfo, ServerAddr, ConnectButtons;
@@ -544,8 +544,6 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 
 	// status box
 	{
-		CUIRect ButtonRefresh, ButtonConnect, ButtonArea;
-
 		ServerAddr.Margin(2.0f, &ServerAddr);
 
 		// address info
@@ -555,33 +553,47 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		UI()->DoClearableEditBox(&s_ServerAddressInput, &ServerAddr, 12.0f);
 
 		// button area
-		ButtonArea = ConnectButtons;
-		ButtonArea.VSplitMid(&ButtonRefresh, &ButtonConnect);
+		CUIRect ButtonRefresh, ButtonConnect;
+		ConnectButtons.VSplitMid(&ButtonRefresh, &ButtonConnect);
 		ButtonRefresh.HSplitTop(5.0f, NULL, &ButtonRefresh);
 		ButtonConnect.HSplitTop(5.0f, NULL, &ButtonConnect);
 		ButtonConnect.VSplitLeft(5.0f, NULL, &ButtonConnect);
 
-		auto RefreshLabelFunc = [this]() mutable -> const char * {
-			if(ServerBrowser()->IsRefreshing() || ServerBrowser()->IsGettingServerlist())
-				str_copy(m_aLocalStringHelper, Localize("Refreshing..."));
-			else
-				str_copy(m_aLocalStringHelper, Localize("Refresh"));
-
-			return m_aLocalStringHelper;
-		};
-
-		static CButtonContainer s_RefreshButton;
-		if(DoButtonMenu(m_RefreshButton, &s_RefreshButton, RefreshLabelFunc, 0, &ButtonRefresh, true, false, IGraphics::CORNER_ALL) || Input()->KeyPress(KEY_F5) || (Input()->KeyPress(KEY_R) && Input()->ModifierIsPressed()))
+		// refresh button
 		{
-			RefreshBrowserTab(g_Config.m_UiPage);
+			char aLabelBuf[32] = {0};
+			const auto RefreshLabelFunc = [this, aLabelBuf]() mutable {
+				if(ServerBrowser()->IsRefreshing() || ServerBrowser()->IsGettingServerlist())
+					str_format(aLabelBuf, sizeof(aLabelBuf), "%s%s", FONT_ICON_ARROW_ROTATE_RIGHT, FONT_ICON_ELLIPSIS);
+				else
+					str_copy(aLabelBuf, FONT_ICON_ARROW_ROTATE_RIGHT);
+				return aLabelBuf;
+			};
+
+			SMenuButtonProperties Props;
+			Props.m_HintRequiresStringCheck = true;
+			Props.m_UseIconFont = true;
+
+			static CButtonContainer s_RefreshButton;
+			if(UI()->DoButton_Menu(m_RefreshButton, &s_RefreshButton, RefreshLabelFunc, &ButtonRefresh, Props) || Input()->KeyPress(KEY_F5) || (Input()->KeyPress(KEY_R) && Input()->ModifierIsPressed()))
+			{
+				RefreshBrowserTab(g_Config.m_UiPage);
+			}
 		}
 
-		auto ConnectLabelFunc = []() -> const char * { return Localize("Connect"); };
-
-		static CButtonContainer s_ConnectButton;
-		if(DoButtonMenu(m_ConnectButton, &s_ConnectButton, ConnectLabelFunc, 0, &ButtonConnect, false, false, IGraphics::CORNER_ALL, 5.0f, 0.0f, vec4(0.7f, 1, 0.7f, 0.1f), vec4(0.7f, 1, 0.7f, 0.2f)))
+		// connect button
 		{
-			Connect(g_Config.m_UiServerAddress);
+			const auto ConnectLabelFunc = []() { return FONT_ICON_RIGHT_TO_BRACKET; };
+
+			SMenuButtonProperties Props;
+			Props.m_UseIconFont = true;
+			Props.m_Color = ColorRGBA(0.5f, 1.0f, 0.5f, 0.5f);
+
+			static CButtonContainer s_ConnectButton;
+			if(UI()->DoButton_Menu(m_ConnectButton, &s_ConnectButton, ConnectLabelFunc, &ButtonConnect, Props))
+			{
+				Connect(g_Config.m_UiServerAddress);
+			}
 		}
 	}
 }

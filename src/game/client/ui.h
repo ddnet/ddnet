@@ -194,6 +194,18 @@ struct SLabelProperties
 	bool m_EnableWidthCheck = true;
 };
 
+struct SMenuButtonProperties
+{
+	int m_Checked = 0;
+	bool m_HintRequiresStringCheck = false;
+	bool m_HintCanChangePositionOrSize = false;
+	bool m_UseIconFont = false;
+	int m_Corners = IGraphics::CORNER_ALL;
+	float m_Rounding = 5.0f;
+	float m_FontFactor = 0.0f;
+	ColorRGBA m_Color = ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f);
+};
+
 class CUIElementBase
 {
 private:
@@ -443,6 +455,8 @@ public:
 	bool DoEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize, int Corners = IGraphics::CORNER_ALL);
 	bool DoClearableEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize, int Corners = IGraphics::CORNER_ALL);
 
+	int DoButton_Menu(CUIElement &UIElement, const CButtonContainer *pID, const std::function<const char *()> &GetTextLambda, const CUIRect *pRect, const SMenuButtonProperties &Props = {});
+	// only used for popup menus
 	int DoButton_PopupMenu(CButtonContainer *pButtonContainer, const char *pText, const CUIRect *pRect, int Align);
 
 	enum
