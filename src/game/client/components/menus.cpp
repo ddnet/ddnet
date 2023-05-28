@@ -1831,13 +1831,20 @@ int CMenus::Render()
 					str_format(aBufNew, sizeof(aBufNew), "%s/%s", m_aCurrentDemoFolder, m_DemoRenameInput.GetString());
 					if(!str_endswith(aBufNew, ".demo"))
 						str_append(aBufNew, ".demo", sizeof(aBufNew));
-					if(Storage()->RenameFile(aBufOld, aBufNew, m_vDemos[m_DemolistSelectedIndex].m_StorageType))
+
+					if(Storage()->FileExists(aBufNew, m_vDemos[m_DemolistSelectedIndex].m_StorageType))
+					{
+						PopupMessage(Localize("Error"), Localize("A demo with this name already exists"), Localize("Ok"), POPUP_RENAME_DEMO);
+					}
+					else if(Storage()->RenameFile(aBufOld, aBufNew, m_vDemos[m_DemolistSelectedIndex].m_StorageType))
 					{
 						DemolistPopulate();
 						DemolistOnUpdate(false);
 					}
 					else
-						PopupMessage(Localize("Error"), Localize("Unable to rename the demo"), Localize("Ok"));
+					{
+						PopupMessage(Localize("Error"), Localize("Unable to rename the demo"), Localize("Ok"), POPUP_RENAME_DEMO);
+					}
 				}
 			}
 
