@@ -111,12 +111,6 @@ void CMenus::DemoSeekTick(IDemoPlayer::ETickOffset TickOffset)
 
 void CMenus::RenderDemoPlayer(CUIRect MainView)
 {
-	// render popups
-	if(m_DemoPlayerState == DEMOPLAYER_SLICE_SAVE)
-	{
-		RenderDemoPlayerSliceSavePopup(MainView);
-	}
-
 	const IDemoPlayer::CInfo *pInfo = DemoPlayer()->BaseInfo();
 	static int64_t s_LastSpeedChange = 0;
 
@@ -232,20 +226,18 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		return;
 	}
 
-	MainView.HSplitBottom(TotalHeight, 0, &MainView);
-	MainView.VSplitLeft(50.0f, 0, &MainView);
-	MainView.VSplitLeft(600.0f, &MainView, 0);
-
-	MainView.Draw(ms_ColorTabbarActive, IGraphics::CORNER_T, 10.0f);
-
-	MainView.Margin(5.0f, &MainView);
+	CUIRect DemoControls;
+	MainView.HSplitBottom(TotalHeight, nullptr, &DemoControls);
+	DemoControls.VSplitLeft(50.0f, nullptr, &DemoControls);
+	DemoControls.VSplitLeft(600.0f, &DemoControls, nullptr);
+	DemoControls.Draw(ms_ColorTabbarActive, IGraphics::CORNER_T, 10.0f);
 
 	CUIRect SeekBar, ButtonBar, NameBar, SpeedBar;
-
-	MainView.HSplitTop(SeekBarHeight, &SeekBar, &ButtonBar);
-	ButtonBar.HSplitTop(Margins, 0, &ButtonBar);
+	DemoControls.Margin(5.0f, &DemoControls);
+	DemoControls.HSplitTop(SeekBarHeight, &SeekBar, &ButtonBar);
+	ButtonBar.HSplitTop(Margins, nullptr, &ButtonBar);
 	ButtonBar.HSplitBottom(NameBarHeight, &ButtonBar, &NameBar);
-	NameBar.HSplitTop(4.0f, 0, &NameBar);
+	NameBar.HSplitTop(4.0f, nullptr, &NameBar);
 
 	// do seekbar
 	{
@@ -542,7 +534,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	str_format(aBuf, sizeof(aBuf), Localize("Demofile: %s"), aDemoName);
 	CTextCursor Cursor;
 	TextRender()->SetCursor(&Cursor, NameBar.x, NameBar.y + (NameBar.h - (Button.h * 0.5f)) / 2.f, Button.h * 0.5f, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
-	Cursor.m_LineWidth = MainView.w;
+	Cursor.m_LineWidth = DemoControls.w;
 	TextRender()->TextEx(&Cursor, aBuf, -1);
 
 	if(IncreaseDemoSpeed)
@@ -557,6 +549,17 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	}
 
 	HandleDemoSeeking(PositionToSeek, TimeToSeek);
+
+	// render popups
+	if(m_DemoPlayerState != DEMOPLAYER_NONE)
+	{
+		// prevent element under the active popup from being activated
+		UI()->SetHotItem(nullptr);
+	}
+	if(m_DemoPlayerState == DEMOPLAYER_SLICE_SAVE)
+	{
+		RenderDemoPlayerSliceSavePopup(MainView);
+	}
 }
 
 void CMenus::RenderDemoPlayerSliceSavePopup(CUIRect MainView)
