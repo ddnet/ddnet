@@ -386,7 +386,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	GameClient()->m_Tooltips.DoToolTip(&s_PlayPauseButton, &Button, pInfo->m_Paused ? Localize("Play the current demo") : Localize("Pause the current demo"));
 
 	// stop button
-	ButtonBar.VSplitLeft(Margins, 0, &ButtonBar);
+	ButtonBar.VSplitLeft(Margins, nullptr, &ButtonBar);
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
 	static CButtonContainer s_ResetButton;
 	if(DoButton_FontIcon(&s_ResetButton, FONT_ICON_STOP, false, &Button, IGraphics::CORNER_ALL))
@@ -397,7 +397,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	GameClient()->m_Tooltips.DoToolTip(&s_ResetButton, &Button, Localize("Stop the current demo"));
 
 	// one tick back
-	ButtonBar.VSplitLeft(Margins + 10.0f, 0, &ButtonBar);
+	ButtonBar.VSplitLeft(Margins + 10.0f, nullptr, &ButtonBar);
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
 	static CButtonContainer s_OneTickBackButton;
 	if(DoButton_FontIcon(&s_OneTickBackButton, FONT_ICON_CHEVRON_LEFT, 0, &Button, IGraphics::CORNER_ALL))
@@ -405,7 +405,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	GameClient()->m_Tooltips.DoToolTip(&s_OneTickBackButton, &Button, Localize("Go back one tick"));
 
 	// one tick forward
-	ButtonBar.VSplitLeft(Margins, 0, &ButtonBar);
+	ButtonBar.VSplitLeft(Margins, nullptr, &ButtonBar);
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
 	static CButtonContainer s_OneTickForwardButton;
 	if(DoButton_FontIcon(&s_OneTickForwardButton, FONT_ICON_CHEVRON_RIGHT, 0, &Button, IGraphics::CORNER_ALL))
@@ -446,7 +446,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	GameClient()->m_Tooltips.DoToolTip(&s_SliceBeginButton, &Button, Localize("Mark the beginning of a cut"));
 
 	// slice end button
-	ButtonBar.VSplitLeft(Margins, 0, &ButtonBar);
+	ButtonBar.VSplitLeft(Margins, nullptr, &ButtonBar);
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
 	static CButtonContainer s_SliceEndButton;
 	if(DoButton_FontIcon(&s_SliceEndButton, FONT_ICON_RIGHT_TO_BRACKET, 0, &Button, IGraphics::CORNER_ALL))
@@ -458,7 +458,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	GameClient()->m_Tooltips.DoToolTip(&s_SliceEndButton, &Button, Localize("Mark the end of a cut"));
 
 	// slice save button
-	ButtonBar.VSplitLeft(Margins, 0, &ButtonBar);
+	ButtonBar.VSplitLeft(Margins, nullptr, &ButtonBar);
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
 	static CButtonContainer s_SliceSaveButton;
 	if(DoButton_FontIcon(&s_SliceSaveButton, FONT_ICON_ARROW_UP_RIGHT_FROM_SQUARE, 0, &Button, IGraphics::CORNER_ALL))
@@ -477,7 +477,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	const int Threshold = 10;
 
 	// one marker back
-	ButtonBar.VSplitLeft(Margins + 20.0f, 0, &ButtonBar);
+	ButtonBar.VSplitLeft(Margins + 20.0f, nullptr, &ButtonBar);
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
 	static CButtonContainer s_OneMarkerBackButton;
 	if(DoButton_FontIcon(&s_OneMarkerBackButton, FONT_ICON_BACKWARD_STEP, 0, &Button, IGraphics::CORNER_ALL))
@@ -493,7 +493,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	GameClient()->m_Tooltips.DoToolTip(&s_OneMarkerBackButton, &Button, Localize("Go back one marker"));
 
 	// one marker forward
-	ButtonBar.VSplitLeft(Margins, 0, &ButtonBar);
+	ButtonBar.VSplitLeft(Margins, nullptr, &ButtonBar);
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
 	static CButtonContainer s_OneMarkerForwardButton;
 	if(DoButton_FontIcon(&s_OneMarkerForwardButton, FONT_ICON_FORWARD_STEP, 0, &Button, IGraphics::CORNER_ALL))
@@ -518,7 +518,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	}
 
 	// toggle keyboard shortcuts button
-	ButtonBar.VSplitRight(Margins, &ButtonBar, 0);
+	ButtonBar.VSplitRight(Margins, &ButtonBar, nullptr);
 	ButtonBar.VSplitRight(ButtonbarHeight, &ButtonBar, &Button);
 	static CButtonContainer s_KeyboardShortcutsButton;
 	if(DoButton_FontIcon(&s_KeyboardShortcutsButton, FONT_ICON_KEYBOARD, 0, &Button, IGraphics::CORNER_ALL, g_Config.m_ClDemoKeyboardShortcuts != 0))
