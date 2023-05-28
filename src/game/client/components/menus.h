@@ -443,6 +443,7 @@ protected:
 	void FetchAllHeaders();
 	void HandleDemoSeeking(float PositionToSeek, float TimeToSeek);
 	void RenderDemoPlayer(CUIRect MainView);
+	void RenderDemoPlayerSliceSavePopup(CUIRect MainView);
 	void RenderDemoList(CUIRect MainView);
 	void PopupConfirmDeleteDemo();
 

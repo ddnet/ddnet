@@ -122,95 +122,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	// render popups
 	if(m_DemoPlayerState == DEMOPLAYER_SLICE_SAVE)
 	{
-		CUIRect Screen = *UI()->Screen();
-		CUIRect Box, Part, Part2;
-		Box = Screen;
-		Box.Margin(150.0f, &Box);
-
-		// render the box
-		Box.Draw(ColorRGBA(0, 0, 0, 0.5f), IGraphics::CORNER_ALL, 15.0f);
-
-		Box.HSplitTop(20.f, 0, &Box);
-		Box.HSplitTop(24.f, &Part, &Box);
-		UI()->DoLabel(&Part, Localize("Select a name"), 24.f, TEXTALIGN_MC);
-		Box.HSplitTop(20.f, 0, &Box);
-		Box.HSplitTop(20.f, &Part, &Box);
-		Part.VMargin(20.f, &Part);
-		UI()->DoLabel(&Part, m_aDemoPlayerPopupHint, 20.f, TEXTALIGN_MC);
-		Box.HSplitTop(20.f, 0, &Box);
-
-		CUIRect Label, TextBox, Ok, Abort;
-
-		Box.HSplitBottom(20.f, &Box, 0);
-		Box.HSplitBottom(24.f, &Box, &Part);
-		Part.VMargin(80.0f, &Part);
-
-		Part.VSplitMid(&Abort, &Ok);
-
-		Ok.VMargin(20.0f, &Ok);
-		Abort.VMargin(20.0f, &Abort);
-
-		static int s_RemoveChat = 0;
-
-		static CButtonContainer s_ButtonAbort;
-		if(DoButton_Menu(&s_ButtonAbort, Localize("Abort"), 0, &Abort) || UI()->ConsumeHotkey(CUI::HOTKEY_ESCAPE))
-			m_DemoPlayerState = DEMOPLAYER_NONE;
-
-		static CButtonContainer s_ButtonOk;
-		if(DoButton_Menu(&s_ButtonOk, Localize("Ok"), 0, &Ok) || UI()->ConsumeHotkey(CUI::HOTKEY_ENTER))
-		{
-			char aDemoName[IO_MAX_PATH_LENGTH];
-			DemoPlayer()->GetDemoName(aDemoName, sizeof(aDemoName));
-			str_append(aDemoName, ".demo", sizeof(aDemoName));
-
-			if(!str_endswith(m_DemoSliceInput.GetString(), ".demo"))
-				m_DemoSliceInput.Append(".demo");
-
-			if(str_comp(aDemoName, m_DemoSliceInput.GetString()) == 0)
-				str_copy(m_aDemoPlayerPopupHint, Localize("Please use a different name"));
-			else
-			{
-				char aPath[IO_MAX_PATH_LENGTH];
-				str_format(aPath, sizeof(aPath), "%s/%s", m_aCurrentDemoFolder, m_DemoSliceInput.GetString());
-
-				IOHANDLE DemoFile = Storage()->OpenFile(aPath, IOFLAG_READ, IStorage::TYPE_SAVE);
-				const char *pStr = Localize("File already exists, do you want to overwrite it?");
-				if(DemoFile && str_comp(m_aDemoPlayerPopupHint, pStr) != 0)
-				{
-					io_close(DemoFile);
-					str_copy(m_aDemoPlayerPopupHint, pStr);
-				}
-				else
-				{
-					if(DemoFile)
-						io_close(DemoFile);
-					m_DemoPlayerState = DEMOPLAYER_NONE;
-					Client()->DemoSlice(aPath, CMenus::DemoFilterChat, &s_RemoveChat);
-					DemolistPopulate();
-					DemolistOnUpdate(false);
-				}
-			}
-		}
-
-		Box.HSplitTop(24.f, &Part, &Box);
-		Box.HSplitTop(10.f, 0, &Box);
-		Box.HSplitTop(24.f, &Part2, &Box);
-
-		Part2.VSplitLeft(60.0f, 0, &Label);
-		if(DoButton_CheckBox(&s_RemoveChat, Localize("Remove chat"), s_RemoveChat, &Label))
-		{
-			s_RemoveChat ^= 1;
-		}
-
-		Part.VSplitLeft(60.0f, 0, &Label);
-		Label.VSplitLeft(120.0f, 0, &TextBox);
-		TextBox.VSplitLeft(20.0f, 0, &TextBox);
-		TextBox.VSplitRight(60.0f, &TextBox, 0);
-		UI()->DoLabel(&Label, Localize("New name:"), 18.0f, TEXTALIGN_ML);
-		if(UI()->DoEditBox(&m_DemoSliceInput, &TextBox, 12.0f))
-		{
-			m_aDemoPlayerPopupHint[0] = '\0';
-		}
+		RenderDemoPlayerSliceSavePopup(MainView);
 	}
 
 	// handle keyboard shortcuts independent of active menu
@@ -646,6 +558,97 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	}
 
 	HandleDemoSeeking(PositionToSeek, TimeToSeek);
+}
+
+void CMenus::RenderDemoPlayerSliceSavePopup(CUIRect MainView)
+{
+	CUIRect Box, Part, Part2;
+	MainView.Margin(150.0f, &Box);
+
+	// render the box
+	Box.Draw(ColorRGBA(0, 0, 0, 0.5f), IGraphics::CORNER_ALL, 15.0f);
+
+	Box.HSplitTop(20.f, 0, &Box);
+	Box.HSplitTop(24.f, &Part, &Box);
+	UI()->DoLabel(&Part, Localize("Select a name"), 24.f, TEXTALIGN_MC);
+	Box.HSplitTop(20.f, 0, &Box);
+	Box.HSplitTop(20.f, &Part, &Box);
+	Part.VMargin(20.f, &Part);
+	UI()->DoLabel(&Part, m_aDemoPlayerPopupHint, 20.f, TEXTALIGN_MC);
+	Box.HSplitTop(20.f, 0, &Box);
+
+	CUIRect Label, TextBox, Ok, Abort;
+
+	Box.HSplitBottom(20.f, &Box, 0);
+	Box.HSplitBottom(24.f, &Box, &Part);
+	Part.VMargin(80.0f, &Part);
+
+	Part.VSplitMid(&Abort, &Ok);
+
+	Ok.VMargin(20.0f, &Ok);
+	Abort.VMargin(20.0f, &Abort);
+
+	static int s_RemoveChat = 0;
+
+	static CButtonContainer s_ButtonAbort;
+	if(DoButton_Menu(&s_ButtonAbort, Localize("Abort"), 0, &Abort) || UI()->ConsumeHotkey(CUI::HOTKEY_ESCAPE))
+		m_DemoPlayerState = DEMOPLAYER_NONE;
+
+	static CButtonContainer s_ButtonOk;
+	if(DoButton_Menu(&s_ButtonOk, Localize("Ok"), 0, &Ok) || UI()->ConsumeHotkey(CUI::HOTKEY_ENTER))
+	{
+		char aDemoName[IO_MAX_PATH_LENGTH];
+		DemoPlayer()->GetDemoName(aDemoName, sizeof(aDemoName));
+		str_append(aDemoName, ".demo", sizeof(aDemoName));
+
+		if(!str_endswith(m_DemoSliceInput.GetString(), ".demo"))
+			m_DemoSliceInput.Append(".demo");
+
+		if(str_comp(aDemoName, m_DemoSliceInput.GetString()) == 0)
+			str_copy(m_aDemoPlayerPopupHint, Localize("Please use a different name"));
+		else
+		{
+			char aPath[IO_MAX_PATH_LENGTH];
+			str_format(aPath, sizeof(aPath), "%s/%s", m_aCurrentDemoFolder, m_DemoSliceInput.GetString());
+
+			IOHANDLE DemoFile = Storage()->OpenFile(aPath, IOFLAG_READ, IStorage::TYPE_SAVE);
+			const char *pStr = Localize("File already exists, do you want to overwrite it?");
+			if(DemoFile && str_comp(m_aDemoPlayerPopupHint, pStr) != 0)
+			{
+				io_close(DemoFile);
+				str_copy(m_aDemoPlayerPopupHint, pStr);
+			}
+			else
+			{
+				if(DemoFile)
+					io_close(DemoFile);
+				m_DemoPlayerState = DEMOPLAYER_NONE;
+				Client()->DemoSlice(aPath, CMenus::DemoFilterChat, &s_RemoveChat);
+				DemolistPopulate();
+				DemolistOnUpdate(false);
+			}
+		}
+	}
+
+	Box.HSplitTop(24.f, &Part, &Box);
+	Box.HSplitTop(10.f, 0, &Box);
+	Box.HSplitTop(24.f, &Part2, &Box);
+
+	Part2.VSplitLeft(60.0f, 0, &Label);
+	if(DoButton_CheckBox(&s_RemoveChat, Localize("Remove chat"), s_RemoveChat, &Label))
+	{
+		s_RemoveChat ^= 1;
+	}
+
+	Part.VSplitLeft(60.0f, 0, &Label);
+	Label.VSplitLeft(120.0f, 0, &TextBox);
+	TextBox.VSplitLeft(20.0f, 0, &TextBox);
+	TextBox.VSplitRight(60.0f, &TextBox, 0);
+	UI()->DoLabel(&Label, Localize("New name:"), 18.0f, TEXTALIGN_ML);
+	if(UI()->DoEditBox(&m_DemoSliceInput, &TextBox, 12.0f))
+	{
+		m_aDemoPlayerPopupHint[0] = '\0';
+	}
 }
 
 int CMenus::DemolistFetchCallback(const CFsFileInfo *pInfo, int IsDir, int StorageType, void *pUser)
