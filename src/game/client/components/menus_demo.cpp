@@ -111,19 +111,14 @@ void CMenus::DemoSeekTick(IDemoPlayer::ETickOffset TickOffset)
 
 void CMenus::RenderDemoPlayer(CUIRect MainView)
 {
-	const IDemoPlayer::CInfo *pInfo = DemoPlayer()->BaseInfo();
-
-	const float SeekBarHeight = 15.0f;
-	const float ButtonbarHeight = 20.0f;
-	const float NameBarHeight = 20.0f;
-	const float Margins = 5.0f;
-	static int64_t s_LastSpeedChange = 0;
-
 	// render popups
 	if(m_DemoPlayerState == DEMOPLAYER_SLICE_SAVE)
 	{
 		RenderDemoPlayerSliceSavePopup(MainView);
 	}
+
+	const IDemoPlayer::CInfo *pInfo = DemoPlayer()->BaseInfo();
+	static int64_t s_LastSpeedChange = 0;
 
 	// handle keyboard shortcuts independent of active menu
 	float PositionToSeek = -1.0f;
@@ -206,7 +201,11 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		}
 	}
 
-	float TotalHeight = SeekBarHeight + ButtonbarHeight + NameBarHeight + Margins * 3;
+	const float SeekBarHeight = 15.0f;
+	const float ButtonbarHeight = 20.0f;
+	const float NameBarHeight = 20.0f;
+	const float Margins = 5.0f;
+	const float TotalHeight = SeekBarHeight + ButtonbarHeight + NameBarHeight + Margins * 3;
 
 	// render speed info
 	if(g_Config.m_ClDemoShowSpeed && time_get() - s_LastSpeedChange < time_freq() * 1)
