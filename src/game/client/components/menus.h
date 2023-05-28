@@ -647,7 +647,6 @@ public:
 	std::chrono::nanoseconds m_PopupWarningDuration;
 
 	int m_DemoPlayerState;
-	char m_aDemoPlayerPopupHint[256];
 
 	enum
 	{

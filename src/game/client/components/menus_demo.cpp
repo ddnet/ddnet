@@ -468,7 +468,6 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		m_DemoSliceInput.Set(aDemoName);
 		m_DemoSliceInput.Append(".demo");
 		UI()->SetActiveItem(&m_DemoSliceInput);
-		m_aDemoPlayerPopupHint[0] = '\0';
 		m_DemoPlayerState = DEMOPLAYER_SLICE_SAVE;
 	}
 	GameClient()->m_Tooltips.DoToolTip(&s_SliceSaveButton, &Button, Localize("Export cut as a separate demo"));
@@ -566,40 +565,71 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 
 void CMenus::RenderDemoPlayerSliceSavePopup(CUIRect MainView)
 {
-	CUIRect Box, Part, Part2;
+	const IDemoPlayer::CInfo *pInfo = DemoPlayer()->BaseInfo();
+
+	CUIRect Box;
 	MainView.Margin(150.0f, &Box);
 
-	// render the box
-	Box.Draw(ColorRGBA(0, 0, 0, 0.5f), IGraphics::CORNER_ALL, 15.0f);
+	// background
+	Box.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.5f), IGraphics::CORNER_ALL, 15.0f);
+	Box.Margin(24.0f, &Box);
 
-	Box.HSplitTop(20.f, 0, &Box);
-	Box.HSplitTop(24.f, &Part, &Box);
-	UI()->DoLabel(&Part, Localize("Select a name"), 24.f, TEXTALIGN_MC);
-	Box.HSplitTop(20.f, 0, &Box);
-	Box.HSplitTop(20.f, &Part, &Box);
-	Part.VMargin(20.f, &Part);
-	UI()->DoLabel(&Part, m_aDemoPlayerPopupHint, 20.f, TEXTALIGN_MC);
-	Box.HSplitTop(20.f, 0, &Box);
+	// title
+	CUIRect Title;
+	Box.HSplitTop(24.0f, &Title, &Box);
+	Box.HSplitTop(20.0f, nullptr, &Box);
+	UI()->DoLabel(&Title, Localize("Export demo cut"), 24.0f, TEXTALIGN_MC);
 
-	CUIRect Label, TextBox, Ok, Abort;
+	// slice times
+	CUIRect SliceTimesBar, SliceInterval, SliceLength;
+	Box.HSplitTop(24.0f, &SliceTimesBar, &Box);
+	SliceTimesBar.VSplitMid(&SliceInterval, &SliceLength, 40.0f);
+	Box.HSplitTop(20.0f, nullptr, &Box);
+	const int64_t RealSliceBegin = g_Config.m_ClDemoSliceBegin == -1 ? 0 : (g_Config.m_ClDemoSliceBegin - pInfo->m_FirstTick);
+	const int64_t RealSliceEnd = (g_Config.m_ClDemoSliceEnd == -1 ? pInfo->m_LastTick : g_Config.m_ClDemoSliceEnd) - pInfo->m_FirstTick;
+	char aSliceBegin[32];
+	str_time(RealSliceBegin / SERVER_TICK_SPEED * 100, TIME_HOURS, aSliceBegin, sizeof(aSliceBegin));
+	char aSliceEnd[32];
+	str_time(RealSliceEnd / SERVER_TICK_SPEED * 100, TIME_HOURS, aSliceEnd, sizeof(aSliceEnd));
+	char aSliceLength[32];
+	str_time((RealSliceEnd - RealSliceBegin) / SERVER_TICK_SPEED * 100, TIME_HOURS, aSliceLength, sizeof(aSliceLength));
+	char aBuf[256];
+	str_format(aBuf, sizeof(aBuf), "%s: %s – %s", Localize("Cut interval"), aSliceBegin, aSliceEnd);
+	UI()->DoLabel(&SliceInterval, aBuf, 18.0f, TEXTALIGN_ML);
+	str_format(aBuf, sizeof(aBuf), "%s: %s", Localize("Cut length"), aSliceLength);
+	UI()->DoLabel(&SliceLength, aBuf, 18.0f, TEXTALIGN_ML);
 
-	Box.HSplitBottom(20.f, &Box, 0);
-	Box.HSplitBottom(24.f, &Box, &Part);
-	Part.VMargin(80.0f, &Part);
+	// file name
+	CUIRect NameLabel, NameBox;
+	Box.HSplitTop(24.0f, &NameLabel, &Box);
+	Box.HSplitTop(20.0f, nullptr, &Box);
+	NameLabel.VSplitLeft(150.0f, &NameLabel, &NameBox);
+	NameBox.VSplitLeft(20.0f, nullptr, &NameBox);
+	UI()->DoLabel(&NameLabel, Localize("New name:"), 18.0f, TEXTALIGN_ML);
+	UI()->DoEditBox(&m_DemoSliceInput, &NameBox, 12.0f);
 
-	Part.VSplitMid(&Abort, &Ok);
-
-	Ok.VMargin(20.0f, &Ok);
-	Abort.VMargin(20.0f, &Abort);
-
+	// remove chat checkbox
 	static int s_RemoveChat = 0;
+	CUIRect RemoveChatCheckBox;
+	Box.HSplitTop(24.0f, &RemoveChatCheckBox, &Box);
+	Box.HSplitTop(20.0f, nullptr, &Box);
+	if(DoButton_CheckBox(&s_RemoveChat, Localize("Remove chat"), s_RemoveChat, &RemoveChatCheckBox))
+	{
+		s_RemoveChat ^= 1;
+	}
+
+	// buttons
+	CUIRect ButtonBar, AbortButton, OkButton;
+	Box.HSplitBottom(24.0f, &Box, &ButtonBar);
+	ButtonBar.VSplitMid(&AbortButton, &OkButton, 40.0f);
 
 	static CButtonContainer s_ButtonAbort;
-	if(DoButton_Menu(&s_ButtonAbort, Localize("Abort"), 0, &Abort) || UI()->ConsumeHotkey(CUI::HOTKEY_ESCAPE))
+	if(DoButton_Menu(&s_ButtonAbort, Localize("Abort"), 0, &AbortButton) || (!UI()->IsPopupOpen() && UI()->ConsumeHotkey(CUI::HOTKEY_ESCAPE)))
 		m_DemoPlayerState = DEMOPLAYER_NONE;
 
+	static CUI::SConfirmPopupContext s_ConfirmPopupContext;
 	static CButtonContainer s_ButtonOk;
-	if(DoButton_Menu(&s_ButtonOk, Localize("Ok"), 0, &Ok) || UI()->ConsumeHotkey(CUI::HOTKEY_ENTER))
+	if(DoButton_Menu(&s_ButtonOk, Localize("Ok"), 0, &OkButton) || (!UI()->IsPopupOpen() && UI()->ConsumeHotkey(CUI::HOTKEY_ENTER)))
 	{
 		char aDemoName[IO_MAX_PATH_LENGTH];
 		DemoPlayer()->GetDemoName(aDemoName, sizeof(aDemoName));
@@ -609,49 +639,40 @@ void CMenus::RenderDemoPlayerSliceSavePopup(CUIRect MainView)
 			m_DemoSliceInput.Append(".demo");
 
 		if(str_comp(aDemoName, m_DemoSliceInput.GetString()) == 0)
-			str_copy(m_aDemoPlayerPopupHint, Localize("Please use a different name"));
+		{
+			static CUI::SMessagePopupContext s_MessagePopupContext;
+			s_MessagePopupContext.ErrorColor();
+			str_copy(s_MessagePopupContext.m_aMessage, Localize("Please use a different name"));
+			UI()->ShowPopupMessage(UI()->MouseX(), OkButton.y + OkButton.h + 5.0f, &s_MessagePopupContext);
+		}
 		else
 		{
 			char aPath[IO_MAX_PATH_LENGTH];
 			str_format(aPath, sizeof(aPath), "%s/%s", m_aCurrentDemoFolder, m_DemoSliceInput.GetString());
-
-			IOHANDLE DemoFile = Storage()->OpenFile(aPath, IOFLAG_READ, IStorage::TYPE_SAVE);
-			const char *pStr = Localize("File already exists, do you want to overwrite it?");
-			if(DemoFile && str_comp(m_aDemoPlayerPopupHint, pStr) != 0)
+			if(Storage()->FileExists(aPath, IStorage::TYPE_SAVE))
 			{
-				io_close(DemoFile);
-				str_copy(m_aDemoPlayerPopupHint, pStr);
+				s_ConfirmPopupContext.Reset();
+				s_ConfirmPopupContext.YesNoButtons();
+				str_copy(s_ConfirmPopupContext.m_aMessage, Localize("File already exists, do you want to overwrite it?"));
+				UI()->ShowPopupConfirm(UI()->MouseX(), OkButton.y + OkButton.h + 5.0f, &s_ConfirmPopupContext);
 			}
 			else
-			{
-				if(DemoFile)
-					io_close(DemoFile);
-				m_DemoPlayerState = DEMOPLAYER_NONE;
-				Client()->DemoSlice(aPath, CMenus::DemoFilterChat, &s_RemoveChat);
-				DemolistPopulate();
-				DemolistOnUpdate(false);
-			}
+				s_ConfirmPopupContext.m_Result = CUI::SConfirmPopupContext::CONFIRMED;
 		}
 	}
 
-	Box.HSplitTop(24.f, &Part, &Box);
-	Box.HSplitTop(10.f, 0, &Box);
-	Box.HSplitTop(24.f, &Part2, &Box);
-
-	Part2.VSplitLeft(60.0f, 0, &Label);
-	if(DoButton_CheckBox(&s_RemoveChat, Localize("Remove chat"), s_RemoveChat, &Label))
+	if(s_ConfirmPopupContext.m_Result == CUI::SConfirmPopupContext::CONFIRMED)
 	{
-		s_RemoveChat ^= 1;
+		char aPath[IO_MAX_PATH_LENGTH];
+		str_format(aPath, sizeof(aPath), "%s/%s", m_aCurrentDemoFolder, m_DemoSliceInput.GetString());
+		m_DemoPlayerState = DEMOPLAYER_NONE;
+		Client()->DemoSlice(aPath, CMenus::DemoFilterChat, &s_RemoveChat);
+		DemolistPopulate();
+		DemolistOnUpdate(false);
 	}
-
-	Part.VSplitLeft(60.0f, 0, &Label);
-	Label.VSplitLeft(120.0f, 0, &TextBox);
-	TextBox.VSplitLeft(20.0f, 0, &TextBox);
-	TextBox.VSplitRight(60.0f, &TextBox, 0);
-	UI()->DoLabel(&Label, Localize("New name:"), 18.0f, TEXTALIGN_ML);
-	if(UI()->DoEditBox(&m_DemoSliceInput, &TextBox, 12.0f))
+	if(s_ConfirmPopupContext.m_Result != CUI::SConfirmPopupContext::UNSET)
 	{
-		m_aDemoPlayerPopupHint[0] = '\0';
+		s_ConfirmPopupContext.Reset();
 	}
 }
 
