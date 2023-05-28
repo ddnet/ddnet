@@ -443,6 +443,7 @@ protected:
 	void FetchAllHeaders();
 	void HandleDemoSeeking(float PositionToSeek, float TimeToSeek);
 	void RenderDemoPlayer(CUIRect MainView);
+	void RenderDemoPlayerSliceSavePopup(CUIRect MainView);
 	void RenderDemoList(CUIRect MainView);
 	void PopupConfirmDeleteDemo();
 
@@ -646,7 +647,6 @@ public:
 	std::chrono::nanoseconds m_PopupWarningDuration;
 
 	int m_DemoPlayerState;
-	char m_aDemoPlayerPopupHint[256];
 
 	enum
 	{
