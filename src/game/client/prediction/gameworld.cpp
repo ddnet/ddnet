@@ -377,8 +377,16 @@ void CGameWorld::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage,
 	}
 }
 
-void CGameWorld::NetObjBegin()
+bool CGameWorld::IsLocalTeam(int OwnerID)
 {
+	return OwnerID < 0 || m_Teams.CanCollide(m_LocalClientID, OwnerID);
+}
+
+void CGameWorld::NetObjBegin(CTeamsCore Teams, int LocalClientID)
+{
+	m_Teams = Teams;
+	m_LocalClientID = LocalClientID;
+
 	for(int i = 0; i < NUM_ENTTYPES; i++)
 		for(CEntity *pEnt = FindFirst(i); pEnt; pEnt = pEnt->TypeNext())
 		{
@@ -391,20 +399,23 @@ void CGameWorld::NetObjBegin()
 
 void CGameWorld::NetCharAdd(int ObjID, CNetObj_Character *pCharObj, CNetObj_DDNetCharacter *pExtended, int GameTeam, bool IsLocal)
 {
-	CCharacter *pChar;
-	if((pChar = (CCharacter *)GetEntity(ObjID, ENTTYPE_CHARACTER)))
+	if(IsLocalTeam(ObjID))
 	{
-		pChar->Read(pCharObj, pExtended, IsLocal);
-		pChar->Keep();
-	}
-	else
-	{
-		pChar = new CCharacter(this, ObjID, pCharObj, pExtended);
-		InsertEntity(pChar);
-	}
+		CCharacter *pChar;
+		if((pChar = (CCharacter *)GetEntity(ObjID, ENTTYPE_CHARACTER)))
+		{
+			pChar->Read(pCharObj, pExtended, IsLocal);
+			pChar->Keep();
+		}
+		else
+		{
+			pChar = new CCharacter(this, ObjID, pCharObj, pExtended);
+			InsertEntity(pChar);
+		}
 
-	if(pChar)
-		pChar->m_GameTeam = GameTeam;
+		if(pChar)
+			pChar->m_GameTeam = GameTeam;
+	}
 }
 
 void CGameWorld::NetObjAdd(int ObjID, int ObjType, const void *pObjData, const CNetObj_EntityEx *pDataEx)
@@ -412,6 +423,9 @@ void CGameWorld::NetObjAdd(int ObjID, int ObjType, const void *pObjData, const C
 	if((ObjType == NETOBJTYPE_PROJECTILE || ObjType == NETOBJTYPE_DDRACEPROJECTILE || ObjType == NETOBJTYPE_DDNETPROJECTILE) && m_WorldConfig.m_PredictWeapons)
 	{
 		CProjectileData Data = ExtractProjectileInfo(ObjType, pObjData, this, pDataEx);
+		if(!IsLocalTeam(Data.m_Owner))
+			return;
+
 		CProjectile NetProj = CProjectile(this, ObjID, &Data);
 
 		if(NetProj.m_Type != WEAPON_SHOTGUN && absolute(length(NetProj.m_Direction) - 1.f) > 0.02f) // workaround to skip grenades on ball mod
@@ -483,7 +497,7 @@ void CGameWorld::NetObjAdd(int ObjID, int ObjType, const void *pObjData, const C
 	else if((ObjType == NETOBJTYPE_LASER || ObjType == NETOBJTYPE_DDNETLASER) && m_WorldConfig.m_PredictWeapons)
 	{
 		CLaserData Data = ExtractLaserInfo(ObjType, pObjData, this, pDataEx);
-		if(Data.m_Type >= 0 && Data.m_Type != LASERTYPE_RIFLE && Data.m_Type != LASERTYPE_SHOTGUN)
+		if((Data.m_Type >= 0 && Data.m_Type != LASERTYPE_RIFLE && Data.m_Type != LASERTYPE_SHOTGUN) || !IsLocalTeam(Data.m_Owner))
 		{
 			return;
 		}
@@ -519,7 +533,7 @@ void CGameWorld::NetObjAdd(int ObjID, int ObjType, const void *pObjData, const C
 	}
 }
 
-void CGameWorld::NetObjEnd(int LocalID)
+void CGameWorld::NetObjEnd()
 {
 	// keep predicting hooked characters, based on hook position
 	for(int i = 0; i < MAX_CLIENTS; i++)
