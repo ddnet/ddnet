@@ -1603,7 +1603,8 @@ void CGraphicsBackend_SDL_GL::GetViewportSize(int &w, int &h)
 
 void CGraphicsBackend_SDL_GL::NotifyWindow()
 {
-#if SDL_MAJOR_VERSION > 2 || (SDL_MAJOR_VERSION == 2 && SDL_PATCHLEVEL >= 16)
+	// Minimum version 2.0.16, after version 2.0.22 the naming is changed to 2.24.0 etc.
+#if SDL_MAJOR_VERSION > 2 || (SDL_MAJOR_VERSION == 2 && SDL_MINOR_VERSION == 0 && SDL_PATCHLEVEL >= 16) || (SDL_MAJOR_VERSION == 2 && SDL_MINOR_VERSION > 0)
 	if(SDL_FlashWindow(m_pWindow, SDL_FlashOperation::SDL_FLASH_UNTIL_FOCUSED) != 0)
 	{
 		// fails if SDL hasn't implemented it
