@@ -30,6 +30,7 @@ void CTooltips::DoToolTip(const void *pID, const CUIRect *pNearRect, const char 
 {
 	uintptr_t ID = reinterpret_cast<uintptr_t>(pID);
 	const auto result = m_Tooltips.emplace(ID, CTooltip{
+							   pID,
 							   *pNearRect,
 							   pText,
 							   WidthHint,
@@ -44,7 +45,7 @@ void CTooltips::DoToolTip(const void *pID, const CUIRect *pNearRect, const char 
 
 	Tooltip.m_OnScreen = true;
 
-	if(UI()->MouseInside(&Tooltip.m_Rect))
+	if(UI()->HotItem() == Tooltip.m_pID)
 	{
 		SetActiveTooltip(Tooltip);
 	}
@@ -56,7 +57,7 @@ void CTooltips::OnRender()
 	{
 		CTooltip &Tooltip = m_ActiveTooltip.value();
 
-		if(!UI()->MouseInside(&Tooltip.m_Rect))
+		if(UI()->HotItem() != Tooltip.m_pID)
 		{
 			Tooltip.m_OnScreen = false;
 			ClearActiveTooltip();

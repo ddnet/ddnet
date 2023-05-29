@@ -11,6 +11,7 @@
 
 struct CTooltip
 {
+	const void *m_pID;
 	CUIRect m_Rect;
 	const char *m_pText;
 	float m_WidthHint;
