@@ -1366,6 +1366,34 @@ static inline int MsgFromSixup(int Msg, bool System)
 	return Msg;
 }
 
+bool CServer::CheckReservedSlotAuth(int ClientID, const char *pPassword)
+{
+	char aBuf[256];
+
+	if(Config()->m_SvReservedSlotsPass[0] && !str_comp(Config()->m_SvReservedSlotsPass, pPassword))
+	{
+		str_format(aBuf, sizeof(aBuf), "cid=%d joining reserved slot with reserved pass", ClientID);
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+		return true;
+	}
+
+	// "^#(.*?)#(.*)$"
+	if(Config()->m_SvReservedSlotsAuthLevel != 4 && pPassword[0] == '#')
+	{
+		char aName[sizeof(Config()->m_Password)];
+		const char *pPass = str_next_token(pPassword + 1, "#", aName, sizeof(aName));
+		int Slot = m_AuthManager.FindKey(aName);
+		if(pPass && m_AuthManager.CheckKey(Slot, pPass + 1) && m_AuthManager.KeyLevel(Slot) >= Config()->m_SvReservedSlotsAuthLevel)
+		{
+			str_format(aBuf, sizeof(aBuf), "cid=%d joining reserved slot with key=%s", ClientID, m_AuthManager.KeyIdent(Slot));
+			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+			return true;
+		}
+	}
+
+	return false;
+}
+
 void CServer::ProcessClientPacket(CNetChunk *pPacket)
 {
 	int ClientID = pPacket->m_ClientID;
@@ -1466,7 +1494,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				}
 
 				// reserved slot
-				if(ClientID >= (Config()->m_SvMaxClients - Config()->m_SvReservedSlots) && Config()->m_SvReservedSlotsPass[0] != 0 && str_comp(Config()->m_SvReservedSlotsPass, pPassword) != 0)
+				if(ClientID >= Config()->m_SvMaxClients - Config()->m_SvReservedSlots && !CheckReservedSlotAuth(ClientID, pPassword))
 				{
 					m_NetServer.Drop(ClientID, "This server is full");
 					return;
