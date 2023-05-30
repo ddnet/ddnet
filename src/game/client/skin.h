@@ -47,7 +47,7 @@ public:
 	struct SSkinMetricVariableInt
 	{
 		int m_Value;
-		operator int() { return m_Value; }
+		operator int() const { return m_Value; }
 		SSkinMetricVariableInt &operator=(int NewVal)
 		{
 			if(IsSizeType)
@@ -82,22 +82,22 @@ public:
 		SSkinMetricVariableInt<true> m_MaxWidth;
 		SSkinMetricVariableInt<true> m_MaxHeight;
 
-		float WidthNormalized()
+		float WidthNormalized() const
 		{
 			return (float)m_Width / (float)m_MaxWidth;
 		}
 
-		float HeightNormalized()
+		float HeightNormalized() const
 		{
 			return (float)m_Height / (float)m_MaxHeight;
 		}
 
-		float OffsetXNormalized()
+		float OffsetXNormalized() const
 		{
 			return (float)m_OffsetX / (float)m_MaxWidth;
 		}
 
-		float OffsetYNormalized()
+		float OffsetYNormalized() const
 		{
 			return (float)m_OffsetY / (float)m_MaxHeight;
 		}

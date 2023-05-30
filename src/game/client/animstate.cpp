@@ -6,7 +6,7 @@
 
 #include "animstate.h"
 
-static void AnimSeqEval(CAnimSequence *pSeq, float Time, CAnimKeyframe *pFrame)
+static void AnimSeqEval(const CAnimSequence *pSeq, float Time, CAnimKeyframe *pFrame)
 {
 	if(pSeq->m_NumFrames == 0)
 	{
@@ -21,9 +21,8 @@ static void AnimSeqEval(CAnimSequence *pSeq, float Time, CAnimKeyframe *pFrame)
 	}
 	else
 	{
-		//time = maximum(0.0f, minimum(1.0f, time / duration)); // TODO: use clamp
-		CAnimKeyframe *pFrame1 = 0;
-		CAnimKeyframe *pFrame2 = 0;
+		CAnimKeyframe *pFrame1 = nullptr;
+		CAnimKeyframe *pFrame2 = nullptr;
 		float Blend = 0.0f;
 
 		// TODO: make this smarter.. binary search
@@ -38,7 +37,7 @@ static void AnimSeqEval(CAnimSequence *pSeq, float Time, CAnimKeyframe *pFrame)
 			}
 		}
 
-		if(pFrame1 && pFrame2)
+		if(pFrame1 != nullptr && pFrame2 != nullptr)
 		{
 			pFrame->m_Time = Time;
 			pFrame->m_X = mix(pFrame1->m_X, pFrame2->m_X, Blend);
@@ -48,7 +47,7 @@ static void AnimSeqEval(CAnimSequence *pSeq, float Time, CAnimKeyframe *pFrame)
 	}
 }
 
-static void AnimAddKeyframe(CAnimKeyframe *pSeq, CAnimKeyframe *pAdded, float Amount)
+static void AnimAddKeyframe(CAnimKeyframe *pSeq, const CAnimKeyframe *pAdded, float Amount)
 {
 	// AnimSeqEval fills m_X for any case, clang-analyzer assumes going into the
 	// final else branch with pSeq->m_NumFrames < 2, which is impossible.
@@ -57,12 +56,12 @@ static void AnimAddKeyframe(CAnimKeyframe *pSeq, CAnimKeyframe *pAdded, float Am
 	pSeq->m_Angle += pAdded->m_Angle * Amount;
 }
 
-static void AnimAdd(CAnimState *pState, CAnimState *pAdded, float Amount)
+void CAnimState::AnimAdd(CAnimState *pState, const CAnimState *pAdded, float Amount)
 {
-	AnimAddKeyframe(pState->GetBody(), pAdded->GetBody(), Amount);
-	AnimAddKeyframe(pState->GetBackFoot(), pAdded->GetBackFoot(), Amount);
-	AnimAddKeyframe(pState->GetFrontFoot(), pAdded->GetFrontFoot(), Amount);
-	AnimAddKeyframe(pState->GetAttach(), pAdded->GetAttach(), Amount);
+	AnimAddKeyframe(&pState->m_Body, pAdded->GetBody(), Amount);
+	AnimAddKeyframe(&pState->m_BackFoot, pAdded->GetBackFoot(), Amount);
+	AnimAddKeyframe(&pState->m_FrontFoot, pAdded->GetFrontFoot(), Amount);
+	AnimAddKeyframe(&pState->m_Attach, pAdded->GetAttach(), Amount);
 }
 
 void CAnimState::Set(CAnimation *pAnim, float Time)
@@ -80,17 +79,17 @@ void CAnimState::Add(CAnimation *pAnim, float Time, float Amount)
 	AnimAdd(this, &Add, Amount);
 }
 
-CAnimState *CAnimState::GetIdle()
+const CAnimState *CAnimState::GetIdle()
 {
-	static CAnimState State;
-	static bool Init = true;
+	static CAnimState s_State;
+	static bool s_Init = true;
 
-	if(Init)
+	if(s_Init)
 	{
-		State.Set(&g_pData->m_aAnimations[ANIM_BASE], 0);
-		State.Add(&g_pData->m_aAnimations[ANIM_IDLE], 0, 1.0f);
-		Init = false;
+		s_State.Set(&g_pData->m_aAnimations[ANIM_BASE], 0.0f);
+		s_State.Add(&g_pData->m_aAnimations[ANIM_IDLE], 0.0f, 1.0f);
+		s_Init = false;
 	}
 
-	return &State;
+	return &s_State;
 }
