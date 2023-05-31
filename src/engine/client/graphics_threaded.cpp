@@ -3283,7 +3283,13 @@ bool CGraphics_Threaded::ShowMessageBox(unsigned Type, const char *pTitle, const
 {
 	if(m_pBackend == nullptr)
 		return false;
+	m_pBackend->WaitForIdle();
 	return m_pBackend->ShowMessageBox(Type, pTitle, pMsg);
+}
+
+bool CGraphics_Threaded::IsBackendInitialized()
+{
+	return m_pBackend != nullptr;
 }
 
 const char *CGraphics_Threaded::GetVendorString()

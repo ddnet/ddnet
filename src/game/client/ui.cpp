@@ -828,6 +828,93 @@ bool CUI::DoClearableEditBox(CLineInput *pLineInput, const CUIRect *pRect, float
 	return ReturnValue;
 }
 
+int CUI::DoButton_Menu(CUIElement &UIElement, const CButtonContainer *pID, const std::function<const char *()> &GetTextLambda, const CUIRect *pRect, const SMenuButtonProperties &Props)
+{
+	CUIRect Text = *pRect;
+	Text.HMargin(pRect->h >= 20.0f ? 2.0f : 1.0f, &Text);
+	Text.HMargin((Text.h * Props.m_FontFactor) / 2.0f, &Text);
+
+	if(!UIElement.AreRectsInit() || Props.m_HintRequiresStringCheck || Props.m_HintCanChangePositionOrSize || !UIElement.Rect(0)->m_UITextContainer.Valid())
+	{
+		bool NeedsRecalc = !UIElement.AreRectsInit() || !UIElement.Rect(0)->m_UITextContainer.Valid();
+		if(Props.m_HintCanChangePositionOrSize)
+		{
+			if(UIElement.AreRectsInit())
+			{
+				if(UIElement.Rect(0)->m_X != pRect->x || UIElement.Rect(0)->m_Y != pRect->y || UIElement.Rect(0)->m_Width != pRect->w || UIElement.Rect(0)->m_Y != pRect->h)
+				{
+					NeedsRecalc = true;
+				}
+			}
+		}
+		const char *pText = nullptr;
+		if(Props.m_HintRequiresStringCheck)
+		{
+			if(UIElement.AreRectsInit())
+			{
+				pText = GetTextLambda();
+				if(str_comp(UIElement.Rect(0)->m_Text.c_str(), pText) != 0)
+				{
+					NeedsRecalc = true;
+				}
+			}
+		}
+		if(NeedsRecalc)
+		{
+			if(!UIElement.AreRectsInit())
+			{
+				UIElement.InitRects(3);
+			}
+			ResetUIElement(UIElement);
+
+			for(int i = 0; i < 3; ++i)
+			{
+				ColorRGBA Color = Props.m_Color;
+				if(i == 0)
+					Color.a *= ButtonColorMulActive();
+				else if(i == 1)
+					Color.a *= ButtonColorMulHot();
+				else if(i == 2)
+					Color.a *= ButtonColorMulDefault();
+				Graphics()->SetColor(Color);
+
+				CUIElement::SUIElementRect &NewRect = *UIElement.Rect(i);
+				NewRect.m_UIRectQuadContainer = Graphics()->CreateRectQuadContainer(pRect->x, pRect->y, pRect->w, pRect->h, Props.m_Rounding, Props.m_Corners);
+
+				NewRect.m_X = pRect->x;
+				NewRect.m_Y = pRect->y;
+				NewRect.m_Width = pRect->w;
+				NewRect.m_Height = pRect->h;
+				if(i == 0)
+				{
+					if(pText == nullptr)
+						pText = GetTextLambda();
+					NewRect.m_Text = pText;
+					if(Props.m_UseIconFont)
+						TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
+					DoLabel(NewRect, &Text, pText, Text.h * CUI::ms_FontmodHeight, TEXTALIGN_MC);
+					if(Props.m_UseIconFont)
+						TextRender()->SetCurFont(nullptr);
+				}
+			}
+			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+		}
+	}
+	// render
+	size_t Index = 2;
+	if(CheckActiveItem(pID))
+		Index = 0;
+	else if(HotItem() == pID)
+		Index = 1;
+	Graphics()->TextureClear();
+	Graphics()->RenderQuadContainer(UIElement.Rect(Index)->m_UIRectQuadContainer, -1);
+	ColorRGBA ColorText(TextRender()->DefaultTextColor());
+	ColorRGBA ColorTextOutline(TextRender()->DefaultTextOutlineColor());
+	if(UIElement.Rect(0)->m_UITextContainer.Valid())
+		TextRender()->RenderTextContainer(UIElement.Rect(0)->m_UITextContainer, ColorText, ColorTextOutline);
+	return DoButtonLogic(pID, Props.m_Checked, pRect);
+}
+
 int CUI::DoButton_PopupMenu(CButtonContainer *pButtonContainer, const char *pText, const CUIRect *pRect, int Align)
 {
 	pRect->Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f * ButtonColorMul(pButtonContainer)), IGraphics::CORNER_ALL, 3.0f);
@@ -1194,7 +1281,7 @@ CUI::EPopupMenuFunctionResult CUI::PopupMessage(void *pContext, CUIRect View, bo
 
 void CUI::ShowPopupMessage(float X, float Y, SMessagePopupContext *pContext)
 {
-	const float TextWidth = minimum(std::ceil(TextRender()->TextWidth(SMessagePopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, -1, -1.0f)), SMessagePopupContext::POPUP_MAX_WIDTH);
+	const float TextWidth = minimum(std::ceil(TextRender()->TextWidth(SMessagePopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, -1, -1.0f) + 0.5f), SMessagePopupContext::POPUP_MAX_WIDTH);
 	float TextHeight = 0.0f;
 	STextSizeProperties TextSizeProps{};
 	TextSizeProps.m_pHeight = &TextHeight;
@@ -1221,7 +1308,7 @@ void CUI::SConfirmPopupContext::YesNoButtons()
 
 void CUI::ShowPopupConfirm(float X, float Y, SConfirmPopupContext *pContext)
 {
-	const float TextWidth = minimum(std::ceil(TextRender()->TextWidth(SConfirmPopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, -1, -1.0f)), SConfirmPopupContext::POPUP_MAX_WIDTH);
+	const float TextWidth = minimum(std::ceil(TextRender()->TextWidth(SConfirmPopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, -1, -1.0f) + 0.5f), SConfirmPopupContext::POPUP_MAX_WIDTH);
 	float TextHeight = 0.0f;
 	STextSizeProperties TextSizeProps{};
 	TextSizeProps.m_pHeight = &TextHeight;

@@ -339,6 +339,7 @@ public:
 	void SendRconCmdRem(const IConsole::CCommandInfo *pCommandInfo, int ClientID);
 	void UpdateClientRconCommands();
 
+	bool CheckReservedSlotAuth(int ClientID, const char *pPassword);
 	void ProcessClientPacket(CNetChunk *pPacket);
 
 	class CCache

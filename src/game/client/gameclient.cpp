@@ -1396,6 +1396,8 @@ void CGameClient::OnNewSnapshot()
 					pClient->m_HasTelegunLaser = pCharacterData->m_Flags & CHARACTERFLAG_TELEGUN_LASER;
 
 					pClient->m_Predicted.ReadDDNet(pCharacterData);
+
+					m_Teams.SetSolo(Item.m_ID, pClient->m_Solo);
 				}
 			}
 			else if(Item.m_Type == NETOBJTYPE_SPECCHAR)
@@ -2457,9 +2459,8 @@ void CGameClient::UpdatePrediction()
 		}
 
 	// update the local gameworld with the new snapshot
-	m_GameWorld.m_Teams = m_Teams;
+	m_GameWorld.NetObjBegin(m_Teams, m_Snap.m_LocalClientID);
 
-	m_GameWorld.NetObjBegin();
 	for(int i = 0; i < MAX_CLIENTS; i++)
 		if(m_Snap.m_aCharacters[i].m_Active)
 		{
@@ -2473,7 +2474,7 @@ void CGameClient::UpdatePrediction()
 	for(const CSnapEntities &EntData : SnapEntities())
 		m_GameWorld.NetObjAdd(EntData.m_Item.m_ID, EntData.m_Item.m_Type, EntData.m_pData, EntData.m_pDataEx);
 
-	m_GameWorld.NetObjEnd(m_Snap.m_LocalClientID);
+	m_GameWorld.NetObjEnd();
 }
 
 void CGameClient::UpdateRenderedCharacters()
@@ -2492,9 +2493,10 @@ void CGameClient::UpdateRenderedCharacters()
 			Client()->IntraGameTick(g_Config.m_ClDummy));
 		vec2 Pos = UnpredPos;
 
+		CCharacter *pChar = m_PredictedWorld.GetCharacterByID(i);
+
 		if(i == m_Snap.m_LocalClientID)
 		{
-			CCharacter *pChar = m_PredictedWorld.GetCharacterByID(i);
 			if(pChar && pChar->m_FreezeTime > 0)
 			{
 				g_Config.m_ClAmIFrozen = 1;
@@ -2506,9 +2508,7 @@ void CGameClient::UpdateRenderedCharacters()
 			}
 		}
 
-
-
-		if(Predict() && (i == m_Snap.m_LocalClientID || (AntiPingPlayers() && !IsOtherTeam(i))))
+		if(Predict() && (i == m_Snap.m_LocalClientID || (AntiPingPlayers() && !IsOtherTeam(i))) && pChar)
 		{
 			m_aClients[i].m_Predicted.Write(&m_aClients[i].m_RenderCur);
 			m_aClients[i].m_PrevPredicted.Write(&m_aClients[i].m_RenderPrev);
@@ -2526,8 +2526,7 @@ void CGameClient::UpdateRenderedCharacters()
 			if(i == m_Snap.m_LocalClientID)
 			{
 				m_aClients[i].m_IsPredictedLocal = true;
-				CCharacter *pChar = m_PredictedWorld.GetCharacterByID(i);
-				if(pChar && AntiPingGunfire() && ((pChar->m_NinjaJetpack && pChar->m_FreezeTime == 0) || m_Snap.m_aCharacters[i].m_Cur.m_Weapon != WEAPON_NINJA || m_Snap.m_aCharacters[i].m_Cur.m_Weapon == m_aClients[i].m_Predicted.m_ActiveWeapon))
+				if(AntiPingGunfire() && ((pChar->m_NinjaJetpack && pChar->m_FreezeTime == 0) || m_Snap.m_aCharacters[i].m_Cur.m_Weapon != WEAPON_NINJA || m_Snap.m_aCharacters[i].m_Cur.m_Weapon == m_aClients[i].m_Predicted.m_ActiveWeapon))
 				{
 					m_aClients[i].m_RenderCur.m_AttackTick = pChar->GetAttackTick();
 					if(m_Snap.m_aCharacters[i].m_Cur.m_Weapon != WEAPON_NINJA && !(pChar->m_NinjaJetpack && pChar->Core()->m_ActiveWeapon == WEAPON_GUN))

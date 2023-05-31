@@ -777,7 +777,9 @@ void CGraphicsBackend_SDL_GL::ClampDriverVersion(EBackendType BackendType)
 bool CGraphicsBackend_SDL_GL::ShowMessageBox(unsigned Type, const char *pTitle, const char *pMsg)
 {
 	if(m_pProcessor != nullptr)
+	{
 		m_pProcessor->ErroneousCleanup();
+	}
 	// TODO: Remove this workaround when https://github.com/libsdl-org/SDL/issues/3750 is
 	// fixed and pass the window to SDL_ShowSimpleMessageBox to make the popup modal instead
 	// of destroying the window before opening the popup.
@@ -1177,9 +1179,6 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 			SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 0);
 		}
 	}
-
-	if(g_Config.m_InpMouseOld)
-		SDL_SetHint(SDL_HINT_MOUSE_RELATIVE_MODE_WARP, "1");
 
 	m_pWindow = SDL_CreateWindow(
 		pName,
@@ -1604,7 +1603,8 @@ void CGraphicsBackend_SDL_GL::GetViewportSize(int &w, int &h)
 
 void CGraphicsBackend_SDL_GL::NotifyWindow()
 {
-#if SDL_MAJOR_VERSION > 2 || (SDL_MAJOR_VERSION == 2 && SDL_PATCHLEVEL >= 16)
+	// Minimum version 2.0.16, after version 2.0.22 the naming is changed to 2.24.0 etc.
+#if SDL_MAJOR_VERSION > 2 || (SDL_MAJOR_VERSION == 2 && SDL_MINOR_VERSION == 0 && SDL_PATCHLEVEL >= 16) || (SDL_MAJOR_VERSION == 2 && SDL_MINOR_VERSION > 0)
 	if(SDL_FlashWindow(m_pWindow, SDL_FlashOperation::SDL_FLASH_UNTIL_FOCUSED) != 0)
 	{
 		// fails if SDL hasn't implemented it

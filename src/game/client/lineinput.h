@@ -73,6 +73,7 @@ private:
 	const char *m_pEmptyText;
 	FClipboardLineCallback m_pfnClipboardLineCallback;
 	bool m_WasChanged;
+	bool m_WasRendered;
 
 	char m_ClearButtonId;
 

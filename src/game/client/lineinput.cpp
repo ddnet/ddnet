@@ -34,6 +34,7 @@ void CLineInput::SetBuffer(char *pStr, size_t MaxSize, size_t MaxChars)
 		m_Hidden = false;
 		m_pEmptyText = nullptr;
 		m_MouseSelection.m_Selecting = false;
+		m_WasRendered = false;
 	}
 	if(m_pStr && m_pStr != pLastStr)
 		UpdateStrData();
@@ -224,7 +225,7 @@ bool CLineInput::ProcessInput(const IInput::CEvent &Event)
 
 		if(Event.m_Key == KEY_BACKSPACE)
 		{
-			if(SelectionLength && !MoveWord)
+			if(SelectionLength)
 			{
 				SetRange("", m_SelectionStart, m_SelectionEnd);
 			}
@@ -244,7 +245,7 @@ bool CLineInput::ProcessInput(const IInput::CEvent &Event)
 		}
 		else if(Event.m_Key == KEY_DELETE)
 		{
-			if(SelectionLength && !MoveWord)
+			if(SelectionLength)
 			{
 				SetRange("", m_SelectionStart, m_SelectionEnd);
 			}
@@ -401,6 +402,8 @@ bool CLineInput::ProcessInput(const IInput::CEvent &Event)
 
 STextBoundingBox CLineInput::Render(const CUIRect *pRect, float FontSize, int Align, bool Changed, float LineWidth)
 {
+	m_WasRendered = true;
+
 	const char *pDisplayStr = GetDisplayedString();
 	const bool HasComposition = Input()->HasComposition();
 
@@ -528,6 +531,23 @@ STextBoundingBox CLineInput::Render(const CUIRect *pRect, float FontSize, int Al
 
 void CLineInput::RenderCandidates()
 {
+	// Check if the active line input was not rendered and deactivate it in that case.
+	// This can happen e.g. when an input in the ingame menu is active and the menu is
+	// closed or when switching between menu and editor with an active input.
+	CLineInput *pActiveInput = GetActiveInput();
+	if(pActiveInput != nullptr)
+	{
+		if(pActiveInput->m_WasRendered)
+		{
+			pActiveInput->m_WasRendered = false;
+		}
+		else
+		{
+			pActiveInput->Deactivate();
+			return;
+		}
+	}
+
 	if(!Input()->HasComposition() || !Input()->GetCandidateCount())
 		return;
 

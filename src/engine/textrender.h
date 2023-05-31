@@ -101,6 +101,7 @@ MAYBE_UNUSED static const char *FONT_ICON_ARROW_UP_RIGHT_FROM_SQUARE = "\xEF\x82
 MAYBE_UNUSED static const char *FONT_ICON_BACKWARD_STEP = "\xEF\x81\x88";
 MAYBE_UNUSED static const char *FONT_ICON_FORWARD_STEP = "\xEF\x81\x91";
 MAYBE_UNUSED static const char *FONT_ICON_KEYBOARD = "\xE2\x8C\xA8";
+MAYBE_UNUSED static const char *FONT_ICON_ELLIPSIS = "\xEF\x85\x81";
 
 MAYBE_UNUSED static const char *FONT_ICON_FOLDER = "\xEF\x81\xBB";
 MAYBE_UNUSED static const char *FONT_ICON_FOLDER_TREE = "\xEF\xA0\x82";
