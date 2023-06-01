@@ -1136,6 +1136,10 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 		Cursor.m_LineWidth = Row.w;
 		TextRender()->TextEx(&Cursor, aTemp, -1);
 	}
+	else
+	{
+		UI()->DoLabel(&ServerDetails, Localize("No server selected"), FontSize, TEXTALIGN_MC);
+	}
 
 	// server scoreboard
 	ServerScoreBoard.HSplitBottom(23.0f, &ServerScoreBoard, 0x0);
