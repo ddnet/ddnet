@@ -1099,14 +1099,14 @@ float CMenus::RenderSettingsControlsJoystick(CUIRect View)
 	}
 	const float ButtonHeight = 20.0f;
 	const float Spacing = 2.0f;
-	const float BackgroundHeight = NumOptions * (ButtonHeight + Spacing) + (NumOptions == 1 ? 0 : Spacing);
+	const float BackgroundHeight = NumOptions * (ButtonHeight + Spacing) + (NumOptions == 1 ? 0.0f : Spacing);
 	if(View.h < BackgroundHeight)
 		return BackgroundHeight;
 
-	View.HSplitTop(BackgroundHeight, &View, 0);
+	View.HSplitTop(BackgroundHeight, &View, nullptr);
 
 	CUIRect Button;
-	View.HSplitTop(Spacing, 0, &View);
+	View.HSplitTop(Spacing, nullptr, &View);
 	View.HSplitTop(ButtonHeight, &Button, &View);
 	if(DoButton_CheckBox(&g_Config.m_InpControllerEnable, Localize("Enable controller"), g_Config.m_InpControllerEnable, &Button))
 	{
@@ -1116,50 +1116,69 @@ float CMenus::RenderSettingsControlsJoystick(CUIRect View)
 	{
 		if(NumJoysticks > 0)
 		{
-			// show joystick device selection if more than one available
-			if(NumJoysticks > 1)
+			// show joystick device selection if more than one available or just the joystick name if there is only one
 			{
-				View.HSplitTop(Spacing, 0, &View);
+				View.HSplitTop(Spacing, nullptr, &View);
 				View.HSplitTop(ButtonHeight, &Button, &View);
-				static CButtonContainer s_ButtonJoystickId;
 				char aBuf[96];
 				str_format(aBuf, sizeof(aBuf), Localize("Controller %d: %s"), Input()->GetActiveJoystick()->GetIndex(), Input()->GetActiveJoystick()->GetName());
-				if(DoButton_Menu(&s_ButtonJoystickId, aBuf, 0, &Button))
-					Input()->SelectNextJoystick();
-				GameClient()->m_Tooltips.DoToolTip(&s_ButtonJoystickId, &Button, Localize("Click to cycle through all available controllers."));
+				if(NumJoysticks > 1)
+				{
+					static CButtonContainer s_ButtonJoystickId;
+					if(DoButton_Menu(&s_ButtonJoystickId, aBuf, 0, &Button))
+						Input()->SelectNextJoystick();
+					GameClient()->m_Tooltips.DoToolTip(&s_ButtonJoystickId, &Button, Localize("Click to cycle through all available controllers."));
+				}
+				else
+				{
+					UI()->DoLabel(&Button, aBuf, 13.0f, TEXTALIGN_ML);
+				}
 			}
 
 			{
-				View.HSplitTop(Spacing, 0, &View);
+				View.HSplitTop(Spacing, nullptr, &View);
 				View.HSplitTop(ButtonHeight, &Button, &View);
-				const char *apLabels[] = {Localize("Relative", "Ingame controller mode"), Localize("Absolute", "Ingame controller mode")};
-				UI()->DoScrollbarOptionLabeled(&g_Config.m_InpControllerAbsolute, &g_Config.m_InpControllerAbsolute, &Button, Localize("Ingame controller mode"), apLabels, std::size(apLabels));
+				CUIRect Label, ButtonRelative, ButtonAbsolute;
+				Button.VSplitMid(&Label, &Button, 10.0f);
+				Button.HMargin(2.0f, &Button);
+				Button.VSplitMid(&ButtonRelative, &ButtonAbsolute);
+				UI()->DoLabel(&Label, Localize("Ingame controller mode"), 13.0f, TEXTALIGN_ML);
+				CButtonContainer s_RelativeButton;
+				if(DoButton_Menu(&s_RelativeButton, Localize("Relative", "Ingame controller mode"), g_Config.m_InpControllerAbsolute == 0, &ButtonRelative, nullptr, IGraphics::CORNER_L))
+				{
+					g_Config.m_InpControllerAbsolute = 0;
+				}
+				CButtonContainer s_AbsoluteButton;
+				if(DoButton_Menu(&s_AbsoluteButton, Localize("Absolute", "Ingame controller mode"), g_Config.m_InpControllerAbsolute == 1, &ButtonAbsolute, nullptr, IGraphics::CORNER_R))
+				{
+					g_Config.m_InpControllerAbsolute = 1;
+				}
 			}
 
 			if(!g_Config.m_InpControllerAbsolute)
 			{
-				View.HSplitTop(Spacing, 0, &View);
+				View.HSplitTop(Spacing, nullptr, &View);
 				View.HSplitTop(ButtonHeight, &Button, &View);
 				UI()->DoScrollbarOption(&g_Config.m_InpControllerSens, &g_Config.m_InpControllerSens, &Button, Localize("Ingame controller sens."), 1, 500, &CUI::ms_LogarithmicScrollbarScale, CUI::SCROLLBAR_OPTION_NOCLAMPVALUE);
 			}
 
-			View.HSplitTop(Spacing, 0, &View);
+			View.HSplitTop(Spacing, nullptr, &View);
 			View.HSplitTop(ButtonHeight, &Button, &View);
 			UI()->DoScrollbarOption(&g_Config.m_UiControllerSens, &g_Config.m_UiControllerSens, &Button, Localize("UI controller sens."), 1, 500, &CUI::ms_LogarithmicScrollbarScale, CUI::SCROLLBAR_OPTION_NOCLAMPVALUE);
 
-			View.HSplitTop(Spacing, 0, &View);
+			View.HSplitTop(Spacing, nullptr, &View);
 			View.HSplitTop(ButtonHeight, &Button, &View);
 			UI()->DoScrollbarOption(&g_Config.m_InpControllerTolerance, &g_Config.m_InpControllerTolerance, &Button, Localize("Controller jitter tolerance"), 0, 50);
 
-			View.HSplitTop(Spacing, 0, &View);
+			View.HSplitTop(Spacing, nullptr, &View);
 			View.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.125f), IGraphics::CORNER_ALL, 5.0f);
 			DoJoystickAxisPicker(View);
 		}
 		else
 		{
-			View.HSplitTop(View.h - ButtonHeight, 0, &View);
+			View.HSplitTop(View.h - ButtonHeight, nullptr, &View);
 			View.HSplitTop(ButtonHeight, &Button, &View);
-			UI()->DoLabel(&Button, Localize("No controller found. Plug in a controller."), 13.0f, TEXTALIGN_MC);
+			UI()->DoLabel(&Button, Localize("No controller found. Plug in a controller."), 13.0f, TEXTALIGN_ML);
 		}
 	}
 
@@ -1168,68 +1187,70 @@ float CMenus::RenderSettingsControlsJoystick(CUIRect View)
 
 void CMenus::DoJoystickAxisPicker(CUIRect View)
 {
-	float ButtonHeight = 20.0f;
-	float Spacing = 2.0f;
-	float DeviceLabelWidth = View.w * 0.30f;
-	float StatusWidth = View.w * 0.30f;
-	float BindWidth = View.w * 0.1f;
-	float StatusMargin = View.w * 0.05f;
+	const float FontSize = 13.0f;
+	const float RowHeight = 20.0f;
+	const float SpacingH = 2.0f;
+	const float AxisWidth = 0.2f * View.w;
+	const float StatusWidth = 0.4f * View.w;
+	const float AimBindWidth = 90.0f;
+	const float SpacingV = (View.w - AxisWidth - StatusWidth - AimBindWidth) / 2.0f;
 
-	CUIRect Row, Button;
-	View.HSplitTop(Spacing, 0, &View);
-	View.HSplitTop(ButtonHeight, &Row, &View);
-	Row.VSplitLeft(StatusWidth, &Button, &Row);
-	UI()->DoLabel(&Button, Localize("Device"), 13.0f, TEXTALIGN_MC);
-	Row.VSplitLeft(StatusMargin, 0, &Row);
-	Row.VSplitLeft(StatusWidth, &Button, &Row);
-	UI()->DoLabel(&Button, Localize("Status"), 13.0f, TEXTALIGN_MC);
-	Row.VSplitLeft(2 * StatusMargin, 0, &Row);
-	Row.VSplitLeft(2 * BindWidth, &Button, &Row);
-	UI()->DoLabel(&Button, Localize("Aim bind"), 13.0f, TEXTALIGN_MC);
+	CUIRect Row, Axis, Status, AimBind;
+	View.HSplitTop(SpacingH, nullptr, &View);
+	View.HSplitTop(RowHeight, &Row, &View);
+	Row.VSplitLeft(AxisWidth, &Axis, &Row);
+	Row.VSplitLeft(SpacingV, nullptr, &Row);
+	Row.VSplitLeft(StatusWidth, &Status, &Row);
+	Row.VSplitLeft(SpacingV, nullptr, &Row);
+	Row.VSplitLeft(AimBindWidth, &AimBind, &Row);
+
+	UI()->DoLabel(&Axis, Localize("Axis"), FontSize, TEXTALIGN_MC);
+	UI()->DoLabel(&Status, Localize("Status"), FontSize, TEXTALIGN_MC);
+	UI()->DoLabel(&AimBind, Localize("Aim bind"), FontSize, TEXTALIGN_MC);
 
 	IInput::IJoystick *pJoystick = Input()->GetActiveJoystick();
 	static int s_aActive[NUM_JOYSTICK_AXES][2];
 	for(int i = 0; i < minimum<int>(pJoystick->GetNumAxes(), NUM_JOYSTICK_AXES); i++)
 	{
-		bool Active = g_Config.m_InpControllerX == i || g_Config.m_InpControllerY == i;
+		const bool Active = g_Config.m_InpControllerX == i || g_Config.m_InpControllerY == i;
 
-		View.HSplitTop(Spacing, 0, &View);
-		View.HSplitTop(ButtonHeight, &Row, &View);
+		View.HSplitTop(SpacingH, nullptr, &View);
+		View.HSplitTop(RowHeight, &Row, &View);
 		Row.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.125f), IGraphics::CORNER_ALL, 5.0f);
+		Row.VSplitLeft(AxisWidth, &Axis, &Row);
+		Row.VSplitLeft(SpacingV, nullptr, &Row);
+		Row.VSplitLeft(StatusWidth, &Status, &Row);
+		Row.VSplitLeft(SpacingV, nullptr, &Row);
+		Row.VSplitLeft(AimBindWidth, &AimBind, &Row);
 
-		// Device label
-		Row.VSplitLeft(DeviceLabelWidth, &Button, &Row);
-		char aBuf[64];
-		str_format(aBuf, sizeof(aBuf), Localize("Controller Axis #%d"), i + 1);
-		if(!Active)
-			TextRender()->TextColor(0.7f, 0.7f, 0.7f, 1.0f);
-		else
+		// Axis label
+		char aBuf[16];
+		str_format(aBuf, sizeof(aBuf), "%d", i + 1);
+		if(Active)
 			TextRender()->TextColor(TextRender()->DefaultTextColor());
-		UI()->DoLabel(&Button, aBuf, 13.0f, TEXTALIGN_MC);
+		else
+			TextRender()->TextColor(0.7f, 0.7f, 0.7f, 1.0f);
+		UI()->DoLabel(&Axis, aBuf, FontSize, TEXTALIGN_MC);
 
-		// Device status
-		Row.VSplitLeft(StatusMargin, 0, &Row);
-		Row.VSplitLeft(StatusWidth, &Button, &Row);
-		Button.HMargin((ButtonHeight - 14.0f) / 2.0f, &Button);
-		DoJoystickBar(&Button, (pJoystick->GetAxisValue(i) + 1.0f) / 2.0f, g_Config.m_InpControllerTolerance / 50.0f, Active);
+		// Axis status
+		Status.HMargin(7.0f, &Status);
+		DoJoystickBar(&Status, (pJoystick->GetAxisValue(i) + 1.0f) / 2.0f, g_Config.m_InpControllerTolerance / 50.0f, Active);
 
-		// Bind to X,Y
-		Row.VSplitLeft(2 * StatusMargin, 0, &Row);
-		Row.VSplitLeft(BindWidth, &Button, &Row);
-		if(DoButton_CheckBox(&s_aActive[i][0], "X", g_Config.m_InpControllerX == i, &Button))
+		// Bind to X/Y
+		CUIRect AimBindX, AimBindY;
+		AimBind.VSplitMid(&AimBindX, &AimBindY);
+		if(DoButton_CheckBox(&s_aActive[i][0], "X", g_Config.m_InpControllerX == i, &AimBindX))
 		{
 			if(g_Config.m_InpControllerY == i)
 				g_Config.m_InpControllerY = g_Config.m_InpControllerX;
 			g_Config.m_InpControllerX = i;
 		}
-		Row.VSplitLeft(BindWidth, &Button, &Row);
-		if(DoButton_CheckBox(&s_aActive[i][1], "Y", g_Config.m_InpControllerY == i, &Button))
+		if(DoButton_CheckBox(&s_aActive[i][1], "Y", g_Config.m_InpControllerY == i, &AimBindY))
 		{
 			if(g_Config.m_InpControllerX == i)
 				g_Config.m_InpControllerX = g_Config.m_InpControllerY;
 			g_Config.m_InpControllerY = i;
 		}
-		Row.VSplitLeft(StatusMargin, 0, &Row);
 	}
 	TextRender()->TextColor(TextRender()->DefaultTextColor());
 }
@@ -1237,24 +1258,19 @@ void CMenus::DoJoystickAxisPicker(CUIRect View)
 void CMenus::DoJoystickBar(const CUIRect *pRect, float Current, float Tolerance, bool Active)
 {
 	CUIRect Handle;
-	pRect->VSplitLeft(7.0f, &Handle, 0); // Slider size
-
+	pRect->VSplitLeft(pRect->h, &Handle, nullptr); // Slider size
 	Handle.x += (pRect->w - Handle.w) * Current;
 
-	CUIRect Rail;
-	pRect->HMargin(4.0f, &Rail);
-	Rail.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, Active ? 0.25f : 0.125f), IGraphics::CORNER_ALL, Rail.h / 2.0f);
+	pRect->Draw(ColorRGBA(1.0f, 1.0f, 1.0f, Active ? 0.25f : 0.125f), IGraphics::CORNER_ALL, pRect->h / 2.0f);
 
-	CUIRect ToleranceArea = Rail;
+	CUIRect ToleranceArea = *pRect;
 	ToleranceArea.w *= Tolerance;
-	ToleranceArea.x += (Rail.w - ToleranceArea.w) / 2.0f;
-	ColorRGBA ToleranceColor = Active ? ColorRGBA(0.8f, 0.35f, 0.35f, 1.0f) : ColorRGBA(0.7f, 0.5f, 0.5f, 1.0f);
+	ToleranceArea.x += (pRect->w - ToleranceArea.w) / 2.0f;
+	const ColorRGBA ToleranceColor = Active ? ColorRGBA(0.8f, 0.35f, 0.35f, 1.0f) : ColorRGBA(0.7f, 0.5f, 0.5f, 1.0f);
 	ToleranceArea.Draw(ToleranceColor, IGraphics::CORNER_ALL, ToleranceArea.h / 2.0f);
 
-	CUIRect Slider = Handle;
-	Slider.HMargin(4.0f, &Slider);
-	ColorRGBA SliderColor = Active ? ColorRGBA(0.95f, 0.95f, 0.95f, 1.0f) : ColorRGBA(0.8f, 0.8f, 0.8f, 1.0f);
-	Slider.Draw(SliderColor, IGraphics::CORNER_ALL, Slider.h / 2.0f);
+	const ColorRGBA SliderColor = Active ? ColorRGBA(0.95f, 0.95f, 0.95f, 1.0f) : ColorRGBA(0.8f, 0.8f, 0.8f, 1.0f);
+	Handle.Draw(SliderColor, IGraphics::CORNER_ALL, Handle.h / 2.0f);
 }
 
 void CMenus::RenderSettingsControls(CUIRect MainView)
