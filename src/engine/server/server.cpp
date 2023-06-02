@@ -1377,13 +1377,17 @@ bool CServer::CheckReservedSlotAuth(int ClientID, const char *pPassword)
 		return true;
 	}
 
-	// "^#(.*?)#(.*)$"
-	if(Config()->m_SvReservedSlotsAuthLevel != 4 && pPassword[0] == '#')
+	// "^([^:]*):(.*)$"
+	if(Config()->m_SvReservedSlotsAuthLevel != 4)
 	{
 		char aName[sizeof(Config()->m_Password)];
-		const char *pPass = str_next_token(pPassword + 1, "#", aName, sizeof(aName));
+		const char *pInnerPassword = str_next_token(pPassword, ":", aName, sizeof(aName));
+		if(!pInnerPassword)
+		{
+			return false;
+		}
 		int Slot = m_AuthManager.FindKey(aName);
-		if(pPass && m_AuthManager.CheckKey(Slot, pPass + 1) && m_AuthManager.KeyLevel(Slot) >= Config()->m_SvReservedSlotsAuthLevel)
+		if(m_AuthManager.CheckKey(Slot, pInnerPassword + 1) && m_AuthManager.KeyLevel(Slot) >= Config()->m_SvReservedSlotsAuthLevel)
 		{
 			str_format(aBuf, sizeof(aBuf), "cid=%d joining reserved slot with key=%s", ClientID, m_AuthManager.KeyIdent(Slot));
 			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
