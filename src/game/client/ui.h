@@ -498,7 +498,7 @@ public:
 
 	int DoButton_Menu(CUIElement &UIElement, const CButtonContainer *pID, const std::function<const char *()> &GetTextLambda, const CUIRect *pRect, const SMenuButtonProperties &Props = {});
 	// only used for popup menus
-	int DoButton_PopupMenu(CButtonContainer *pButtonContainer, const char *pText, const CUIRect *pRect, int Align);
+	int DoButton_PopupMenu(CButtonContainer *pButtonContainer, const char *pText, const CUIRect *pRect, float Size, int Align, float Padding = 0.0f, bool TransparentInactive = false);
 
 	// value selector
 	int64_t DoValueSelector(const void *pID, const CUIRect *pRect, const char *pLabel, int64_t Current, int64_t Min, int64_t Max, const SValueSelectorProperties &Props = {});
@@ -567,16 +567,21 @@ public:
 
 	struct SSelectionPopupContext : public SPopupMenuId
 	{
-		static constexpr float POPUP_MAX_WIDTH = 300.0f;
-		static constexpr float POPUP_FONT_SIZE = 10.0f;
-		static constexpr float POPUP_ENTRY_HEIGHT = 12.0f;
-		static constexpr float POPUP_ENTRY_SPACING = 5.0f;
-
 		CUI *m_pUI; // set by CUI when popup is shown
+		class CScrollRegion *m_pScrollRegion;
+		SPopupMenuProperties m_Props;
 		char m_aMessage[256];
-		std::set<std::string> m_Entries;
+		std::vector<std::string> m_vEntries;
 		std::vector<CButtonContainer> m_vButtonContainers;
 		const std::string *m_pSelection;
+		int m_SelectionIndex;
+		float m_EntryHeight;
+		float m_EntryPadding;
+		float m_EntrySpacing;
+		float m_FontSize;
+		float m_Width;
+		float m_AlignmentHeight;
+		bool m_TransparentButtons;
 
 		SSelectionPopupContext();
 		void Reset();
