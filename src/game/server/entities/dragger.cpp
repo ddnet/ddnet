@@ -168,17 +168,17 @@ bool CDragger::WillDraggerBeamUseDraggerID(int TargetClientID, int SnappingClien
 	CCharacter *pSnapChar = GameServer()->GetPlayerChar(SnappingClientID);
 	if(pTargetChar && pSnapChar && m_apDraggerBeam[TargetClientID] != nullptr)
 	{
-		if(pSnapChar->Teams()->m_Core.GetSolo(SnappingClientID))
+		const int SnapTeam = pSnapChar->Team();
+		const int TargetTeam = pTargetChar->Team();
+		if(SnapTeam == TargetTeam && SnapTeam < MAX_CLIENTS)
 		{
-			return TargetClientID == SnappingClientID;
-		}
-		else if(!pTargetChar->Teams()->m_Core.GetSolo(TargetClientID))
-		{
-			const int SnapTeam = pSnapChar->Team();
-			const int TargetTeam = pTargetChar->Team();
-			if(SnapTeam == TargetTeam && SnapTeam < MAX_CLIENTS && m_aTargetIdInTeam[SnapTeam] == TargetClientID)
+			if(pSnapChar->Teams()->m_Core.GetSolo(SnappingClientID) || m_aTargetIdInTeam[SnapTeam] < 0)
 			{
-				return true;
+				return SnappingClientID == TargetClientID;
+			}
+			else
+			{
+				return m_aTargetIdInTeam[SnapTeam] == TargetClientID;
 			}
 		}
 	}
