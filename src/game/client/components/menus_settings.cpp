@@ -1560,29 +1560,42 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 			Client()->SetWindowParams(1, false, true);
 	}
 
+	if(Graphics()->GetNumScreens() > 1)
+	{
+		CUIRect ScreenDropDown;
+		MainView.HSplitTop(2.0f, nullptr, &MainView);
+		MainView.HSplitTop(20.0f, &ScreenDropDown, &MainView);
+
+		const int NumScreens = Graphics()->GetNumScreens();
+		static std::vector<std::string> s_vScreenNames;
+		static std::vector<const char *> s_vpScreenNames;
+		s_vScreenNames.resize(NumScreens);
+		s_vpScreenNames.resize(NumScreens);
+
+		for(int i = 0; i < NumScreens; ++i)
+		{
+			str_format(aBuf, sizeof(aBuf), "%s %d: %s", Localize("Screen"), i, Graphics()->GetScreenName(i));
+			s_vScreenNames[i] = aBuf;
+			s_vpScreenNames[i] = s_vScreenNames[i].c_str();
+		}
+
+		static CUI::SDropDownState s_ScreenDropDownState;
+		static CScrollRegion s_ScreenDropDownScrollRegion;
+		s_ScreenDropDownState.m_SelectionPopupContext.m_pScrollRegion = &s_ScreenDropDownScrollRegion;
+		const int NewScreen = UI()->DoDropDown(&ScreenDropDown, g_Config.m_GfxScreen, s_vpScreenNames.data(), s_vpScreenNames.size(), s_ScreenDropDownState);
+		if(NewScreen != g_Config.m_GfxScreen)
+		{
+			Client()->SwitchWindowScreen(NewScreen);
+			s_NumNodes = Graphics()->GetVideoModes(s_aModes, MAX_RESOLUTIONS, g_Config.m_GfxScreen);
+		}
+	}
+
 	MainView.HSplitTop(2.0f, nullptr, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
 	str_format(aBuf, sizeof(aBuf), "%s (%s)", Localize("V-Sync"), Localize("may cause delay"));
 	if(DoButton_CheckBox(&g_Config.m_GfxVsync, aBuf, g_Config.m_GfxVsync, &Button))
 	{
 		Client()->ToggleWindowVSync();
-	}
-
-	if(Graphics()->GetNumScreens() > 1)
-	{
-		int NumScreens = Graphics()->GetNumScreens();
-		MainView.HSplitTop(20.0f, &Button, &MainView);
-		int Screen_MouseButton = DoButton_CheckBox_Number(&g_Config.m_GfxScreen, Localize("Screen"), g_Config.m_GfxScreen, &Button);
-		if(Screen_MouseButton == 1) // inc
-		{
-			Client()->SwitchWindowScreen((g_Config.m_GfxScreen + 1) % NumScreens);
-			s_NumNodes = Graphics()->GetVideoModes(s_aModes, MAX_RESOLUTIONS, g_Config.m_GfxScreen);
-		}
-		else if(Screen_MouseButton == 2) // dec
-		{
-			Client()->SwitchWindowScreen((g_Config.m_GfxScreen - 1 + NumScreens) % NumScreens);
-			s_NumNodes = Graphics()->GetVideoModes(s_aModes, MAX_RESOLUTIONS, g_Config.m_GfxScreen);
-		}
 	}
 
 	bool MultiSamplingChanged = false;
