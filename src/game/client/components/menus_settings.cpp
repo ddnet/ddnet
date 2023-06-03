@@ -1289,7 +1289,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 	const float Margin = 10.0f;
 	const float HeaderHeight = FontSize + 5.0f + Margin;
 
-	CUIRect MouseSettings, MovementSettings, WeaponSettings, VotingSettings, ChatSettings, DummySettings, MiscSettings, JoystickSettings, ResetButton;
+	CUIRect MouseSettings, MovementSettings, WeaponSettings, VotingSettings, ChatSettings, DummySettings, MiscSettings, JoystickSettings, ResetButton, Button;
 	MainView.VSplitMid(&MouseSettings, &VotingSettings);
 
 	// mouse settings
@@ -1301,15 +1301,13 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 			MouseSettings.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
 			MouseSettings.VMargin(10.0f, &MouseSettings);
 
-			TextRender()->Text(MouseSettings.x, MouseSettings.y + (HeaderHeight - FontSize) / 2.f, FontSize, Localize("Mouse"), -1.0f);
+			MouseSettings.HSplitTop(HeaderHeight, &Button, &MouseSettings);
+			UI()->DoLabel(&Button, Localize("Mouse"), FontSize, TEXTALIGN_ML);
 
-			MouseSettings.HSplitTop(HeaderHeight, 0, &MouseSettings);
-
-			CUIRect Button;
 			MouseSettings.HSplitTop(20.0f, &Button, &MouseSettings);
 			UI()->DoScrollbarOption(&g_Config.m_InpMousesens, &g_Config.m_InpMousesens, &Button, Localize("Ingame mouse sens."), 1, 500, &CUI::ms_LogarithmicScrollbarScale, CUI::SCROLLBAR_OPTION_NOCLAMPVALUE);
 
-			MouseSettings.HSplitTop(2.0f, 0, &MouseSettings);
+			MouseSettings.HSplitTop(2.0f, nullptr, &MouseSettings);
 
 			MouseSettings.HSplitTop(20.0f, &Button, &MouseSettings);
 			UI()->DoScrollbarOption(&g_Config.m_UiMousesens, &g_Config.m_UiMousesens, &Button, Localize("UI mouse sens."), 1, 500, &CUI::ms_LogarithmicScrollbarScale, CUI::SCROLLBAR_OPTION_NOCLAMPVALUE);
@@ -1318,61 +1316,60 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 
 	// joystick settings
 	{
-		JoystickSettings.HSplitTop(Margin, 0, &JoystickSettings);
+		JoystickSettings.HSplitTop(Margin, nullptr, &JoystickSettings);
 		JoystickSettings.HSplitTop(s_JoystickSettingsHeight + HeaderHeight + Margin, &JoystickSettings, &MovementSettings);
 		if(s_ScrollRegion.AddRect(JoystickSettings))
 		{
 			JoystickSettings.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
 			JoystickSettings.VMargin(Margin, &JoystickSettings);
 
-			TextRender()->Text(JoystickSettings.x, JoystickSettings.y + (HeaderHeight - FontSize) / 2.f, FontSize, Localize("Controller"), -1.0f);
+			JoystickSettings.HSplitTop(HeaderHeight, &Button, &JoystickSettings);
+			UI()->DoLabel(&Button, Localize("Controller"), FontSize, TEXTALIGN_ML);
 
-			JoystickSettings.HSplitTop(HeaderHeight, 0, &JoystickSettings);
 			s_JoystickSettingsHeight = RenderSettingsControlsJoystick(JoystickSettings);
 		}
 	}
 
 	// movement settings
 	{
-		MovementSettings.HSplitTop(Margin, 0, &MovementSettings);
+		MovementSettings.HSplitTop(Margin, nullptr, &MovementSettings);
 		MovementSettings.HSplitTop(365.0f, &MovementSettings, &WeaponSettings);
 		if(s_ScrollRegion.AddRect(MovementSettings))
 		{
 			MovementSettings.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
 			MovementSettings.VMargin(Margin, &MovementSettings);
 
-			TextRender()->Text(MovementSettings.x, MovementSettings.y + (HeaderHeight - FontSize) / 2.f, FontSize, Localize("Movement"), -1.0f);
+			MovementSettings.HSplitTop(HeaderHeight, &Button, &MovementSettings);
+			UI()->DoLabel(&Button, Localize("Movement"), FontSize, TEXTALIGN_ML);
 
-			MovementSettings.HSplitTop(HeaderHeight, 0, &MovementSettings);
 			DoSettingsControlsButtons(0, 15, MovementSettings);
 		}
 	}
 
 	// weapon settings
 	{
-		WeaponSettings.HSplitTop(Margin, 0, &WeaponSettings);
+		WeaponSettings.HSplitTop(Margin, nullptr, &WeaponSettings);
 		WeaponSettings.HSplitTop(190.0f, &WeaponSettings, &ResetButton);
 		if(s_ScrollRegion.AddRect(WeaponSettings))
 		{
 			WeaponSettings.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
 			WeaponSettings.VMargin(Margin, &WeaponSettings);
 
-			TextRender()->Text(WeaponSettings.x, WeaponSettings.y + (HeaderHeight - FontSize) / 2.f, FontSize, Localize("Weapon"), -1.0f);
+			WeaponSettings.HSplitTop(HeaderHeight, &Button, &WeaponSettings);
+			UI()->DoLabel(&Button, Localize("Weapon"), FontSize, TEXTALIGN_ML);
 
-			WeaponSettings.HSplitTop(HeaderHeight, 0, &WeaponSettings);
 			DoSettingsControlsButtons(15, 22, WeaponSettings);
 		}
 	}
 
 	// defaults
 	{
-		ResetButton.HSplitTop(Margin, 0, &ResetButton);
-		ResetButton.HSplitTop(40.0f, &ResetButton, 0);
+		ResetButton.HSplitTop(Margin, nullptr, &ResetButton);
+		ResetButton.HSplitTop(40.0f, &ResetButton, nullptr);
 		if(s_ScrollRegion.AddRect(ResetButton))
 		{
 			ResetButton.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
-			ResetButton.HMargin(10.0f, &ResetButton);
-			ResetButton.VMargin(30.0f, &ResetButton);
+			ResetButton.Margin(10.0f, &ResetButton);
 			static CButtonContainer s_DefaultButton;
 			if(DoButton_Menu(&s_DefaultButton, Localize("Reset to defaults"), 0, &ResetButton))
 			{
@@ -1391,57 +1388,57 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 			VotingSettings.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
 			VotingSettings.VMargin(Margin, &VotingSettings);
 
-			TextRender()->Text(VotingSettings.x, VotingSettings.y + (HeaderHeight - FontSize) / 2.f, FontSize, Localize("Voting"), -1.0f);
+			VotingSettings.HSplitTop(HeaderHeight, &Button, &VotingSettings);
+			UI()->DoLabel(&Button, Localize("Voting"), FontSize, TEXTALIGN_ML);
 
-			VotingSettings.HSplitTop(HeaderHeight, 0, &VotingSettings);
 			DoSettingsControlsButtons(22, 24, VotingSettings);
 		}
 	}
 
 	// chat settings
 	{
-		ChatSettings.HSplitTop(Margin, 0, &ChatSettings);
+		ChatSettings.HSplitTop(Margin, nullptr, &ChatSettings);
 		ChatSettings.HSplitTop(145.0f, &ChatSettings, &DummySettings);
 		if(s_ScrollRegion.AddRect(ChatSettings))
 		{
 			ChatSettings.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
 			ChatSettings.VMargin(Margin, &ChatSettings);
 
-			TextRender()->Text(ChatSettings.x, ChatSettings.y + (HeaderHeight - FontSize) / 2.f, FontSize, Localize("Chat"), -1.0f);
+			ChatSettings.HSplitTop(HeaderHeight, &Button, &ChatSettings);
+			UI()->DoLabel(&Button, Localize("Chat"), FontSize, TEXTALIGN_ML);
 
-			ChatSettings.HSplitTop(HeaderHeight, 0, &ChatSettings);
 			DoSettingsControlsButtons(24, 29, ChatSettings);
 		}
 	}
 
 	// dummy settings
 	{
-		DummySettings.HSplitTop(Margin, 0, &DummySettings);
+		DummySettings.HSplitTop(Margin, nullptr, &DummySettings);
 		DummySettings.HSplitTop(100.0f, &DummySettings, &MiscSettings);
 		if(s_ScrollRegion.AddRect(DummySettings))
 		{
 			DummySettings.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
 			DummySettings.VMargin(Margin, &DummySettings);
 
-			TextRender()->Text(DummySettings.x, DummySettings.y + (HeaderHeight - FontSize) / 2.f, FontSize, Localize("Dummy"), -1.0f);
+			DummySettings.HSplitTop(HeaderHeight, &Button, &DummySettings);
+			UI()->DoLabel(&Button, Localize("Dummy"), FontSize, TEXTALIGN_ML);
 
-			DummySettings.HSplitTop(HeaderHeight, 0, &DummySettings);
 			DoSettingsControlsButtons(29, 32, DummySettings);
 		}
 	}
 
 	// misc settings
 	{
-		MiscSettings.HSplitTop(Margin, 0, &MiscSettings);
+		MiscSettings.HSplitTop(Margin, nullptr, &MiscSettings);
 		MiscSettings.HSplitTop(300.0f, &MiscSettings, 0);
 		if(s_ScrollRegion.AddRect(MiscSettings))
 		{
 			MiscSettings.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
 			MiscSettings.VMargin(Margin, &MiscSettings);
 
-			TextRender()->Text(MiscSettings.x, MiscSettings.y + (HeaderHeight - FontSize) / 2.f, FontSize, Localize("Miscellaneous"), -1.0f);
+			MiscSettings.HSplitTop(HeaderHeight, &Button, &MiscSettings);
+			UI()->DoLabel(&Button, Localize("Miscellaneous"), FontSize, TEXTALIGN_ML);
 
-			MiscSettings.HSplitTop(HeaderHeight, 0, &MiscSettings);
 			DoSettingsControlsButtons(32, 44, MiscSettings);
 		}
 	}

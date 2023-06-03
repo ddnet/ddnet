@@ -577,10 +577,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	DemoPlayer()->GetDemoName(aDemoName, sizeof(aDemoName));
 	char aBuf[IO_MAX_PATH_LENGTH + 128];
 	str_format(aBuf, sizeof(aBuf), Localize("Demofile: %s"), aDemoName);
-	CTextCursor Cursor;
-	TextRender()->SetCursor(&Cursor, NameBar.x, NameBar.y + (NameBar.h - (Button.h * 0.5f)) / 2.f, Button.h * 0.5f, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
-	Cursor.m_LineWidth = DemoControls.w;
-	TextRender()->TextEx(&Cursor, aBuf, -1);
+	UI()->DoLabel(&NameBar, aBuf, Button.h * 0.5f, TEXTALIGN_ML);
 
 	if(IncreaseDemoSpeed)
 	{
