@@ -1273,29 +1273,6 @@ void CUI::DoScrollbarOption(const void *pID, int *pOption, const CUIRect *pRect,
 	*pOption = Value;
 }
 
-void CUI::DoScrollbarOptionLabeled(const void *pID, int *pOption, const CUIRect *pRect, const char *pStr, const char **ppLabels, int NumLabels, const IScrollbarScale *pScale)
-{
-	const int Max = NumLabels - 1;
-	int Value = clamp(*pOption, 0, Max);
-
-	char aBuf[256];
-	str_format(aBuf, sizeof(aBuf), "%s: %s", pStr, ppLabels[Value]);
-
-	float FontSize = pRect->h * CUI::ms_FontmodHeight * 0.8f;
-
-	CUIRect Label, ScrollBar;
-	pRect->VSplitRight(60.0f, &Label, &ScrollBar);
-	Label.VSplitRight(10.0f, &Label, 0);
-	DoLabel(&Label, aBuf, FontSize, TEXTALIGN_MC);
-
-	Value = pScale->ToAbsolute(DoScrollbarH(pID, &ScrollBar, pScale->ToRelative(Value, 0, Max)), 0, Max);
-
-	if(HotItem() != pID && !CheckActiveItem(pID) && MouseHovered(pRect) && MouseButtonClicked(0))
-		Value = (Value + 1) % NumLabels;
-
-	*pOption = clamp(Value, 0, Max);
-}
-
 void CUI::DoPopupMenu(const SPopupMenuId *pID, int X, int Y, int Width, int Height, void *pContext, FPopupMenuFunction pfnFunc, int Corners)
 {
 	constexpr float Margin = SPopupMenu::POPUP_BORDER + SPopupMenu::POPUP_MARGIN;
