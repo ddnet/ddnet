@@ -1565,6 +1565,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	static const float sc_RowHeightResList = 22.0f;
 	static const float sc_FontSizeResListHeader = 12.0f;
 	static const float sc_FontSizeResList = 10.0f;
+	bool ListBoxUsed = !UI()->IsPopupOpen();
 	int OldSelected = -1;
 	{
 		int G = std::gcd(g_Config.m_GfxScreenWidth, g_Config.m_GfxScreenHeight);
@@ -1572,7 +1573,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	}
 
 	UI()->DoLabel(&ModeLabel, aBuf, sc_FontSizeResListHeader, TEXTALIGN_MC);
-	s_ListBox.DoStart(sc_RowHeightResList, s_NumNodes, 1, 3, OldSelected, &ModeList);
+	s_ListBox.DoStart(sc_RowHeightResList, s_NumNodes, 1, 3, OldSelected, &ModeList, true, &ListBoxUsed);
 
 	for(int i = 0; i < s_NumNodes; ++i)
 	{
@@ -1585,7 +1586,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 			OldSelected = i;
 		}
 
-		const CListboxItem Item = s_ListBox.DoNextItem(&s_aModes[i], OldSelected == i);
+		const CListboxItem Item = s_ListBox.DoNextItem(&s_aModes[i], OldSelected == i, &ListBoxUsed);
 		if(!Item.m_Visible)
 			continue;
 
