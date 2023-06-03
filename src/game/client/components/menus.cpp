@@ -2220,14 +2220,8 @@ bool CMenus::OnCursorMove(float x, float y, IInput::ECursorType CursorType)
 
 bool CMenus::OnInput(const IInput::CEvent &Event)
 {
-	// special handle esc and enter for popup purposes
-	if(Event.m_Flags & IInput::FLAG_PRESS && Event.m_Key == KEY_ESCAPE)
-	{
-		SetActive(!IsActive());
-		UI()->OnInput(Event);
-		return true;
-	}
-	if(IsActive())
+	// Escape key is always handled to activate/deactivate menu
+	if((Event.m_Flags & IInput::FLAG_PRESS && Event.m_Key == KEY_ESCAPE) || IsActive())
 	{
 		UI()->OnInput(Event);
 		return true;
@@ -2308,6 +2302,8 @@ void CMenus::OnRender()
 
 	if(!IsActive())
 	{
+		if(UI()->ConsumeHotkey(CUI::HOTKEY_ESCAPE))
+			SetActive(true);
 		UI()->FinishCheck();
 		UI()->ClearHotkeys();
 		return;
@@ -2358,6 +2354,9 @@ void CMenus::OnRender()
 		TextRender()->SetCursor(&Cursor, 10, 10, 10, TEXTFLAG_RENDER);
 		TextRender()->TextEx(&Cursor, aBuf, -1);
 	}
+
+	if(UI()->ConsumeHotkey(CUI::HOTKEY_ESCAPE))
+		SetActive(false);
 
 	UI()->FinishCheck();
 	UI()->ClearHotkeys();

@@ -223,7 +223,20 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	MainView.HSplitBottom(TotalHeight, nullptr, &DemoControls);
 	DemoControls.VSplitLeft(50.0f, nullptr, &DemoControls);
 	DemoControls.VSplitLeft(600.0f, &DemoControls, nullptr);
-	DemoControls.Draw(ms_ColorTabbarActive, IGraphics::CORNER_T, 10.0f);
+	const CUIRect DemoControlsOriginal = DemoControls;
+	DemoControls.x += m_DemoControlsPositionOffset.x;
+	DemoControls.y += m_DemoControlsPositionOffset.y;
+	int Corners = IGraphics::CORNER_NONE;
+	if(DemoControls.x > 0.0f && DemoControls.y > 0.0f)
+		Corners |= IGraphics::CORNER_TL;
+	if(DemoControls.x < MainView.w - DemoControls.w && DemoControls.y > 0.0f)
+		Corners |= IGraphics::CORNER_TR;
+	if(DemoControls.x > 0.0f && DemoControls.y < MainView.h - DemoControls.h)
+		Corners |= IGraphics::CORNER_BL;
+	if(DemoControls.x < MainView.w - DemoControls.w && DemoControls.y < MainView.h - DemoControls.h)
+		Corners |= IGraphics::CORNER_BR;
+	DemoControls.Draw(ms_ColorTabbarActive, Corners, 10.0f);
+	const CUIRect DemoControlsDragRect = DemoControls;
 
 	CUIRect SeekBar, ButtonBar, NameBar, SpeedBar;
 	DemoControls.Margin(5.0f, &DemoControls);
@@ -231,6 +244,45 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	ButtonBar.HSplitTop(Margins, nullptr, &ButtonBar);
 	ButtonBar.HSplitBottom(NameBarHeight, &ButtonBar, &NameBar);
 	NameBar.HSplitTop(4.0f, nullptr, &NameBar);
+
+	// handle draggable demo controls
+	{
+		enum EDragOperation
+		{
+			OP_NONE,
+			OP_DRAGGING,
+			OP_CLICKED
+		};
+		static EDragOperation s_Operation = OP_NONE;
+		static vec2 s_InitialMouse = vec2(0.0f, 0.0f);
+
+		bool Clicked;
+		bool Abrupted;
+		if(int Result = UI()->DoDraggableButtonLogic(&s_Operation, 8, &DemoControlsDragRect, &Clicked, &Abrupted))
+		{
+			if(s_Operation == OP_NONE && Result == 1)
+			{
+				s_InitialMouse = UI()->MousePos();
+				s_Operation = OP_CLICKED;
+			}
+
+			if(Clicked || Abrupted)
+				s_Operation = OP_NONE;
+
+			if(s_Operation == OP_CLICKED && length(UI()->MousePos() - s_InitialMouse) > 5.0f)
+			{
+				s_Operation = OP_DRAGGING;
+				s_InitialMouse -= m_DemoControlsPositionOffset;
+			}
+
+			if(s_Operation == OP_DRAGGING)
+			{
+				m_DemoControlsPositionOffset = UI()->MousePos() - s_InitialMouse;
+				m_DemoControlsPositionOffset.x = clamp(m_DemoControlsPositionOffset.x, -DemoControlsOriginal.x, MainView.w - DemoControlsDragRect.w - DemoControlsOriginal.x);
+				m_DemoControlsPositionOffset.y = clamp(m_DemoControlsPositionOffset.y, -DemoControlsOriginal.y, MainView.h - DemoControlsDragRect.h - DemoControlsOriginal.y);
+			}
+		}
+	}
 
 	// do seekbar
 	{

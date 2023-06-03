@@ -2260,6 +2260,8 @@ if(CLIENT)
     pickup_data.h
     prediction/entities/character.cpp
     prediction/entities/character.h
+    prediction/entities/dragger.cpp
+    prediction/entities/dragger.h
     prediction/entities/laser.cpp
     prediction/entities/laser.h
     prediction/entities/pickup.cpp

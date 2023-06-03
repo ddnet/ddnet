@@ -810,6 +810,7 @@ public:
 		m_ShowEnvelopeEditor = false;
 		m_EnvelopeEditorSplit = 250.0f;
 		m_ShowServerSettingsEditor = false;
+		m_ServerSettingsEditorSplit = 250.0f;
 
 		m_ShowEnvelopePreview = SHOWENV_NONE;
 		m_SelectedQuadEnvelope = -1;
@@ -1073,6 +1074,8 @@ public:
 
 	bool m_ShowEnvelopeEditor;
 	float m_EnvelopeEditorSplit;
+	bool m_ShowServerSettingsEditor;
+	float m_ServerSettingsEditorSplit;
 
 	enum EShowEnvelope
 	{
@@ -1081,7 +1084,6 @@ public:
 		SHOWENV_ALL
 	};
 	EShowEnvelope m_ShowEnvelopePreview;
-	bool m_ShowServerSettingsEditor;
 	bool m_ShowPicker;
 
 	std::vector<int> m_vSelectedLayers;
@@ -1234,8 +1236,10 @@ public:
 	void RenderSounds(CUIRect Toolbox);
 	void RenderModebar(CUIRect View);
 	void RenderStatusbar(CUIRect View);
+
 	void RenderEnvelopeEditor(CUIRect View);
 	void RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEditorLast);
+	void RenderExtraEditorDragBar(CUIRect View, float *pSplit);
 
 	void RenderMenubar(CUIRect Menubar);
 	void RenderFileDialog();
