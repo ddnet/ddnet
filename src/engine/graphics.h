@@ -506,6 +506,7 @@ public:
 
 	virtual void Swap() = 0;
 	virtual int GetNumScreens() const = 0;
+	virtual const char *GetScreenName(int Screen) const = 0;
 
 	// synchronization
 	virtual void InsertSignal(class CSemaphore *pSemaphore) = 0;

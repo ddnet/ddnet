@@ -882,6 +882,12 @@ bool CGraphicsBackend_SDL_GL::GetDriverVersion(EGraphicsDriverAgeType DriverAgeT
 	return false;
 }
 
+const char *CGraphicsBackend_SDL_GL::GetScreenName(int Screen) const
+{
+	const char *pName = SDL_GetDisplayName(Screen);
+	return pName == nullptr ? "unknown/error" : pName;
+}
+
 static void DisplayToVideoMode(CVideoMode *pVMode, SDL_DisplayMode *pMode, int HiDPIScale, int RefreshRate)
 {
 	pVMode->m_CanvasWidth = pMode->w * HiDPIScale;
