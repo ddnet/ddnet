@@ -179,6 +179,11 @@ void CKillMessages::OnMessage(int MsgType, void *pRawMsg)
 
 			m_aKillmsgs[m_KillmsgCurrent] = Kill;
 		}
+		else
+		{
+			TextRender()->DeleteTextContainer(Kill.m_VictimTextContainerIndex);
+			TextRender()->DeleteTextContainer(Kill.m_KillerTextContainerIndex);
+		}
 
 		Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 	}
@@ -240,6 +245,11 @@ void CKillMessages::OnMessage(int MsgType, void *pRawMsg)
 			TextRender()->DeleteTextContainer(m_aKillmsgs[m_KillmsgCurrent].m_KillerTextContainerIndex);
 
 			m_aKillmsgs[m_KillmsgCurrent] = Kill;
+		}
+		else
+		{
+			TextRender()->DeleteTextContainer(Kill.m_VictimTextContainerIndex);
+			TextRender()->DeleteTextContainer(Kill.m_KillerTextContainerIndex);
 		}
 
 		Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
