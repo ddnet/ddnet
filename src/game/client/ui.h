@@ -332,6 +332,7 @@ private:
 	static CUI::EPopupMenuFunctionResult PopupMessage(void *pContext, CUIRect View, bool Active);
 	static CUI::EPopupMenuFunctionResult PopupConfirm(void *pContext, CUIRect View, bool Active);
 	static CUI::EPopupMenuFunctionResult PopupSelection(void *pContext, CUIRect View, bool Active);
+	static CUI::EPopupMenuFunctionResult PopupColorPicker(void *pContext, CUIRect View, bool Active);
 
 	IClient *m_pClient;
 	IGraphics *m_pGraphics;
@@ -574,6 +575,18 @@ public:
 		void Reset();
 	};
 	void ShowPopupSelection(float X, float Y, SSelectionPopupContext *pContext);
+
+	struct SColorPickerPopupContext : public SPopupMenuId
+	{
+		CUI *m_pUI; // set by CUI when popup is shown
+		bool m_Alpha = false;
+		unsigned int *m_pColor;
+		unsigned int m_HSVColor;
+		const char m_HuePickerId = 0;
+		const char m_ColorPickerId = 0;
+		const char m_aValueSelectorIds[5] = {0};
+	};
+	void ShowPopupColorPicker(float X, float Y, SColorPickerPopupContext *pContext);
 };
 
 #endif

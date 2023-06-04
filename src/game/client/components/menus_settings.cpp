@@ -2122,7 +2122,6 @@ void CMenus::RenderSettings(CUIRect MainView)
 	static CButtonContainer s_aTabButtons[sizeof(apTabs)];
 
 	int NumTabs = (int)std::size(apTabs);
-	int PreviousPage = g_Config.m_UiSettingsPage;
 
 	for(int i = 0; i < NumTabs; i++)
 	{
@@ -2131,9 +2130,6 @@ void CMenus::RenderSettings(CUIRect MainView)
 		if(DoButton_MenuTab(&s_aTabButtons[i], apTabs[i], g_Config.m_UiSettingsPage == i, &Button, IGraphics::CORNER_R, &m_aAnimatorsSettingsTab[i]))
 			g_Config.m_UiSettingsPage = i;
 	}
-
-	if(PreviousPage != g_Config.m_UiSettingsPage)
-		ms_ColorPicker.m_Active = false;
 
 	MainView.Margin(10.0f, &MainView);
 
@@ -2196,49 +2192,6 @@ void CMenus::RenderSettings(CUIRect MainView)
 	}
 	else if(m_NeedRestartGeneral || m_NeedRestartSkins || m_NeedRestartGraphics || m_NeedRestartSound || m_NeedRestartDDNet)
 		UI()->DoLabel(&RestartWarning, Localize("You must restart the game for all settings to take effect."), 14.0f, TEXTALIGN_ML);
-
-	RenderColorPicker();
-}
-
-ColorHSLA CMenus::RenderHSLColorPicker(const CUIRect *pRect, unsigned int *pColor, bool Alpha)
-{
-	ColorHSLA HSLColor(*pColor, false);
-	ColorRGBA RGBColor = color_cast<ColorRGBA>(HSLColor);
-
-	ColorRGBA Outline(1, 1, 1, 0.25f);
-	const float OutlineSize = 3.0f;
-	Outline.a *= UI()->ButtonColorMul(pColor);
-
-	CUIRect Rect;
-	pRect->Margin(OutlineSize, &Rect);
-
-	pRect->Draw(Outline, IGraphics::CORNER_ALL, 4.0f);
-	Rect.Draw(RGBColor, IGraphics::CORNER_ALL, 4.0f);
-
-	if(UI()->DoButtonLogic(pColor, 0, pRect))
-	{
-		if(ms_ColorPicker.m_Active)
-		{
-			CUIRect PickerRect;
-			PickerRect.x = ms_ColorPicker.m_X;
-			PickerRect.y = ms_ColorPicker.m_Y;
-			PickerRect.w = ms_ColorPicker.ms_Width;
-			PickerRect.h = ms_ColorPicker.ms_Height;
-
-			if(ms_ColorPicker.m_pColor == pColor || UI()->MouseInside(&PickerRect))
-				return HSLColor;
-		}
-
-		const CUIRect *pScreen = UI()->Screen();
-		ms_ColorPicker.m_X = minimum(UI()->MouseX(), pScreen->w - ms_ColorPicker.ms_Width);
-		ms_ColorPicker.m_Y = minimum(UI()->MouseY(), pScreen->h - ms_ColorPicker.ms_Height);
-		ms_ColorPicker.m_pColor = pColor;
-		ms_ColorPicker.m_Active = true;
-		ms_ColorPicker.m_AttachedRect = *pRect;
-		ms_ColorPicker.m_HSVColor = color_cast<ColorHSVA, ColorHSLA>(HSLColor).Pack(false);
-	}
-
-	return HSLColor;
 }
 
 ColorHSLA CMenus::RenderHSLScrollbars(CUIRect *pRect, unsigned int *pColor, bool Alpha, bool ClampedLight)
