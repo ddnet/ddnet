@@ -1342,11 +1342,6 @@ int CMenus::Render()
 		{
 			Screen.HSplitTop(24.0f, &TabBar, &MainView);
 
-			if(Client()->State() == IClient::STATE_OFFLINE && UI()->ConsumeHotkey(CUI::HOTKEY_ESCAPE))
-			{
-				m_ShowStart = true;
-			}
-
 			// render news
 			if(m_MenuPage < PAGE_NEWS || m_MenuPage > PAGE_SETTINGS || (Client()->State() == IClient::STATE_OFFLINE && m_MenuPage >= PAGE_GAME && m_MenuPage <= PAGE_CALLVOTE))
 			{
@@ -2074,6 +2069,12 @@ int CMenus::Render()
 	}
 
 	UI()->RenderPopupMenus();
+
+	// Handle this escape hotkey after popup menus
+	if(m_MenuPage == PAGE_SETTINGS && !m_ShowStart && Client()->State() == IClient::STATE_OFFLINE && UI()->ConsumeHotkey(CUI::HOTKEY_ESCAPE))
+	{
+		m_ShowStart = true;
+	}
 
 	return 0;
 }
