@@ -2310,29 +2310,7 @@ void CMenus::OnRender()
 		return;
 	}
 
-	// update colors
-	ms_GuiColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_UiColor, true));
-
-	ms_ColorTabbarInactiveOutgame = ColorRGBA(0, 0, 0, 0.25f);
-	ms_ColorTabbarActiveOutgame = ColorRGBA(0, 0, 0, 0.5f);
-	ms_ColorTabbarHoverOutgame = ColorRGBA(1, 1, 1, 0.25f);
-
-	float ColorIngameScaleI = 0.5f;
-	float ColorIngameAcaleA = 0.2f;
-
-	ms_ColorTabbarInactiveIngame = ColorRGBA(
-		ms_GuiColor.r * ColorIngameScaleI,
-		ms_GuiColor.g * ColorIngameScaleI,
-		ms_GuiColor.b * ColorIngameScaleI,
-		ms_GuiColor.a * 0.8f);
-
-	ms_ColorTabbarActiveIngame = ColorRGBA(
-		ms_GuiColor.r * ColorIngameAcaleA,
-		ms_GuiColor.g * ColorIngameAcaleA,
-		ms_GuiColor.b * ColorIngameAcaleA,
-		ms_GuiColor.a);
-
-	ms_ColorTabbarHoverIngame = ColorRGBA(1, 1, 1, 0.75f);
+	UpdateColors();
 
 	// update the ui
 	const CUIRect *pScreen = UI()->Screen();
@@ -2346,21 +2324,39 @@ void CMenus::OnRender()
 
 	// render debug information
 	if(g_Config.m_Debug)
-	{
-		UI()->MapScreen();
-
-		char aBuf[512];
-		str_format(aBuf, sizeof(aBuf), "%p %p %p", UI()->HotItem(), UI()->ActiveItem(), UI()->LastActiveItem());
-		CTextCursor Cursor;
-		TextRender()->SetCursor(&Cursor, 10, 10, 10, TEXTFLAG_RENDER);
-		TextRender()->TextEx(&Cursor, aBuf, -1);
-	}
+		UI()->DebugRender();
 
 	if(UI()->ConsumeHotkey(CUI::HOTKEY_ESCAPE))
 		SetActive(false);
 
 	UI()->FinishCheck();
 	UI()->ClearHotkeys();
+}
+
+void CMenus::UpdateColors()
+{
+	ms_GuiColor = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_UiColor, true));
+
+	ms_ColorTabbarInactiveOutgame = ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f);
+	ms_ColorTabbarActiveOutgame = ColorRGBA(0.0f, 0.0f, 0.0f, 0.5f);
+	ms_ColorTabbarHoverOutgame = ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f);
+
+	const float ColorIngameScaleI = 0.5f;
+	const float ColorIngameAcaleA = 0.2f;
+
+	ms_ColorTabbarInactiveIngame = ColorRGBA(
+		ms_GuiColor.r * ColorIngameScaleI,
+		ms_GuiColor.g * ColorIngameScaleI,
+		ms_GuiColor.b * ColorIngameScaleI,
+		ms_GuiColor.a * 0.8f);
+
+	ms_ColorTabbarActiveIngame = ColorRGBA(
+		ms_GuiColor.r * ColorIngameAcaleA,
+		ms_GuiColor.g * ColorIngameAcaleA,
+		ms_GuiColor.b * ColorIngameAcaleA,
+		ms_GuiColor.a);
+
+	ms_ColorTabbarHoverIngame = ColorRGBA(1.0f, 1.0f, 1.0f, 0.75f);
 }
 
 void CMenus::RenderBackground()

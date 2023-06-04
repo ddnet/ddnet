@@ -509,6 +509,7 @@ protected:
 
 	void SetNeedSendInfo();
 	void SetActive(bool Active);
+	void UpdateColors();
 
 	IGraphics::CTextureHandle m_TextureBlob;
 

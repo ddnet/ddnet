@@ -369,6 +369,7 @@ public:
 	void SetEnabled(bool Enabled) { m_Enabled = Enabled; }
 	bool Enabled() const { return m_Enabled; }
 	void Update(float MouseX, float MouseY, float MouseWorldX, float MouseWorldY);
+	void DebugRender();
 
 	float MouseDeltaX() const { return m_MouseDeltaX; }
 	float MouseDeltaY() const { return m_MouseDeltaY; }
