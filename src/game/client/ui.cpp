@@ -41,6 +41,8 @@ void CUIElement::SUIElementRect::Reset()
 	m_Y = -1;
 	m_Width = -1;
 	m_Height = -1;
+	m_Rounding = -1.0f;
+	m_Corners = -1;
 	m_Text.clear();
 	mem_zero(&m_Cursor, sizeof(m_Cursor));
 	m_TextColor = ColorRGBA(-1, -1, -1, -1);
@@ -850,7 +852,7 @@ int CUI::DoButton_Menu(CUIElement &UIElement, const CButtonContainer *pID, const
 		{
 			if(UIElement.AreRectsInit())
 			{
-				if(UIElement.Rect(0)->m_X != pRect->x || UIElement.Rect(0)->m_Y != pRect->y || UIElement.Rect(0)->m_Width != pRect->w || UIElement.Rect(0)->m_Y != pRect->h)
+				if(UIElement.Rect(0)->m_X != pRect->x || UIElement.Rect(0)->m_Y != pRect->y || UIElement.Rect(0)->m_Width != pRect->w || UIElement.Rect(0)->m_Height != pRect->h || UIElement.Rect(0)->m_Rounding != Props.m_Rounding || UIElement.Rect(0)->m_Corners != Props.m_Corners)
 				{
 					NeedsRecalc = true;
 				}
@@ -894,6 +896,8 @@ int CUI::DoButton_Menu(CUIElement &UIElement, const CButtonContainer *pID, const
 				NewRect.m_Y = pRect->y;
 				NewRect.m_Width = pRect->w;
 				NewRect.m_Height = pRect->h;
+				NewRect.m_Rounding = Props.m_Rounding;
+				NewRect.m_Corners = Props.m_Corners;
 				if(i == 0)
 				{
 					if(pText == nullptr)
