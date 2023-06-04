@@ -1724,15 +1724,9 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	if(g_Config.m_GfxRefreshRate <= 1000 || NewRefreshRate < 1000)
 		g_Config.m_GfxRefreshRate = NewRefreshRate;
 
-	CUIRect Text;
-	MainView.HSplitTop(20.0f, 0, &MainView);
-	MainView.HSplitTop(20.0f, &Text, &MainView);
-	// text.VSplitLeft(15.0f, 0, &text);
-	UI()->DoLabel(&Text, Localize("UI Color"), 14.0f, TEXTALIGN_ML);
-	CUIRect HSLBar = MainView;
-	RenderHSLScrollbars(&HSLBar, &g_Config.m_UiColor, true);
-	MainView.y = HSLBar.y;
-	MainView.h = MainView.h - MainView.y;
+	MainView.HSplitTop(2.0f, nullptr, &MainView);
+	static CButtonContainer s_UiColorResetId;
+	DoLine_ColorPicker(&s_UiColorResetId, 25.0f, 13.0f, 2.0f, &MainView, Localize("UI Color"), &g_Config.m_UiColor, color_cast<ColorRGBA>(ColorHSLA(0xE4A046AFU, true)), false, nullptr, true);
 
 	// Backend list
 	struct SMenuBackendInfo
@@ -1766,6 +1760,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 
 	if(FoundBackendCount > 1)
 	{
+		CUIRect Text;
 		MainView.HSplitTop(10.0f, nullptr, &MainView);
 		MainView.HSplitTop(20.0f, &Text, &MainView);
 		UI()->DoLabel(&Text, Localize("Renderer"), 16.0f, TEXTALIGN_MC);
@@ -1869,6 +1864,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	const auto &GPUList = Graphics()->GetGPUs();
 	if(GPUList.m_vGPUs.size() > 1)
 	{
+		CUIRect Text;
 		MainView.HSplitTop(10.0f, nullptr, &MainView);
 		MainView.HSplitTop(20.0f, &Text, &MainView);
 		UI()->DoLabel(&Text, Localize("Graphics cards"), 16.0f, TEXTALIGN_MC);
