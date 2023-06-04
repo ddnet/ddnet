@@ -181,8 +181,12 @@ void CUI::OnLanguageChange()
 
 void CUI::OnCursorMove(float X, float Y)
 {
-	m_UpdatedMousePos.x = clamp(m_UpdatedMousePos.x + X, 0.0f, (float)Graphics()->WindowWidth());
-	m_UpdatedMousePos.y = clamp(m_UpdatedMousePos.y + Y, 0.0f, (float)Graphics()->WindowHeight());
+	if(!CheckMouseLock())
+	{
+		m_UpdatedMousePos.x = clamp(m_UpdatedMousePos.x + X, 0.0f, (float)Graphics()->WindowWidth());
+		m_UpdatedMousePos.y = clamp(m_UpdatedMousePos.y + Y, 0.0f, (float)Graphics()->WindowHeight());
+	}
+
 	m_UpdatedMouseDelta += vec2(X, Y);
 }
 
@@ -957,8 +961,6 @@ int CUI::DoButton_PopupMenu(CButtonContainer *pButtonContainer, const char *pTex
 
 int64_t CUI::DoValueSelector(const void *pID, const CUIRect *pRect, const char *pLabel, int64_t Current, int64_t Min, int64_t Max, const SValueSelectorProperties &Props)
 {
-	// TODO: reimplement m_LockMouse
-
 	// logic
 	static float s_Value;
 	static CLineInputNumber s_NumberInput;
@@ -982,7 +984,7 @@ int64_t CUI::DoValueSelector(const void *pID, const CUIRect *pRect, const char *
 	{
 		if(!MouseButton(0))
 		{
-			//m_LockMouse = false;
+			DisableMouseLock();
 			SetActiveItem(nullptr);
 			m_ValueSelectorTextMode = false;
 		}
@@ -996,14 +998,14 @@ int64_t CUI::DoValueSelector(const void *pID, const CUIRect *pRect, const char *
 		if(ConsumeHotkey(HOTKEY_ENTER) || ((MouseButtonClicked(1) || MouseButtonClicked(0)) && !Inside))
 		{
 			Current = clamp(s_NumberInput.GetInteger64(Base), Min, Max);
-			//m_LockMouse = false;
+			DisableMouseLock();
 			SetActiveItem(nullptr);
 			m_ValueSelectorTextMode = false;
 		}
 
 		if(ConsumeHotkey(HOTKEY_ESCAPE))
 		{
-			//m_LockMouse = false;
+			DisableMouseLock();
 			SetActiveItem(nullptr);
 			m_ValueSelectorTextMode = false;
 		}
@@ -1038,9 +1040,10 @@ int64_t CUI::DoValueSelector(const void *pID, const CUIRect *pRect, const char *
 		{
 			if(MouseButtonClicked(0))
 			{
-				//m_LockMouse = true;
 				s_Value = 0;
 				SetActiveItem(pID);
+				if(Props.m_UseScroll)
+					EnableMouseLock(pID);
 			}
 		}
 

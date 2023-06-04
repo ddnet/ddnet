@@ -303,6 +303,8 @@ private:
 	unsigned m_MouseButtons;
 	unsigned m_LastMouseButtons;
 	bool m_MouseSlow = false;
+	bool m_MouseLock = false;
+	const void *m_pMouseLockID = nullptr;
 
 	unsigned m_HotkeysPressed = 0;
 
@@ -399,6 +401,18 @@ public:
 	int MouseButton(int Index) const { return (m_MouseButtons >> Index) & 1; }
 	int MouseButtonClicked(int Index) const { return MouseButton(Index) && !((m_LastMouseButtons >> Index) & 1); }
 	int MouseButtonReleased(int Index) const { return ((m_LastMouseButtons >> Index) & 1) && !MouseButton(Index); }
+	bool CheckMouseLock()
+	{
+		if(m_MouseLock && ActiveItem() != m_pMouseLockID)
+			DisableMouseLock();
+		return m_MouseLock;
+	}
+	void EnableMouseLock(const void *pID)
+	{
+		m_MouseLock = true;
+		m_pMouseLockID = pID;
+	}
+	void DisableMouseLock() { m_MouseLock = false; }
 
 	void SetHotItem(const void *pID) { m_pBecomingHotItem = pID; }
 	void SetActiveItem(const void *pID)

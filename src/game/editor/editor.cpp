@@ -586,7 +586,7 @@ int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, in
 	{
 		s_pLastTextID = pID;
 		s_TextMode = true;
-		m_LockMouse = false;
+		UI()->DisableMouseLock();
 		s_NumberInput.SetInteger(Current, Base);
 	}
 
@@ -594,7 +594,7 @@ int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, in
 	{
 		if(!UI()->MouseButton(0))
 		{
-			m_LockMouse = false;
+			UI()->DisableMouseLock();
 			UI()->SetActiveItem(nullptr);
 			s_TextMode = false;
 		}
@@ -612,14 +612,14 @@ int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, in
 			((UI()->MouseButton(1) || UI()->MouseButton(0)) && !Inside))
 		{
 			Current = clamp(s_NumberInput.GetInteger(Base), Min, Max);
-			m_LockMouse = false;
+			UI()->DisableMouseLock();
 			UI()->SetActiveItem(nullptr);
 			s_TextMode = false;
 		}
 
 		if(Input()->KeyIsPressed(KEY_ESCAPE))
 		{
-			m_LockMouse = false;
+			UI()->DisableMouseLock();
 			UI()->SetActiveItem(nullptr);
 			s_TextMode = false;
 		}
@@ -656,9 +656,9 @@ int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, in
 		{
 			if(UI()->MouseButton(0))
 			{
-				m_LockMouse = true;
-				s_Value = 0;
 				UI()->SetActiveItem(pID);
+				UI()->EnableMouseLock(pID);
+				s_Value = 0;
 			}
 			if(pToolTip && !s_TextMode)
 				m_pTooltip = pToolTip;
@@ -1331,7 +1331,7 @@ void CEditor::DoSoundSource(CSoundSource *pSource, int Index)
 				{
 					static SPopupMenuId s_PopupSourceId;
 					UI()->DoPopupMenu(&s_PopupSourceId, UI()->MouseX(), UI()->MouseY(), 120, 200, this, PopupSource);
-					m_LockMouse = false;
+					UI()->DisableMouseLock();
 				}
 				s_Operation = OP_NONE;
 				UI()->SetActiveItem(nullptr);
@@ -1341,7 +1341,7 @@ void CEditor::DoSoundSource(CSoundSource *pSource, int Index)
 		{
 			if(!UI()->MouseButton(0))
 			{
-				m_LockMouse = false;
+				UI()->DisableMouseLock();
 				s_Operation = OP_NONE;
 				UI()->SetActiveItem(nullptr);
 			}
@@ -1482,7 +1482,7 @@ void CEditor::DoQuad(CQuad *pQuad, int Index)
 
 					static SPopupMenuId s_PopupQuadId;
 					UI()->DoPopupMenu(&s_PopupQuadId, UI()->MouseX(), UI()->MouseY(), 120, 198, this, PopupQuad);
-					m_LockMouse = false;
+					UI()->DisableMouseLock();
 				}
 				s_Operation = OP_NONE;
 				UI()->SetActiveItem(nullptr);
@@ -1494,7 +1494,7 @@ void CEditor::DoQuad(CQuad *pQuad, int Index)
 			{
 				if(m_vSelectedLayers.size() == 1)
 				{
-					m_LockMouse = false;
+					UI()->DisableMouseLock();
 					m_Map.m_Modified = true;
 					DeleteSelectedQuads();
 				}
@@ -1506,7 +1506,7 @@ void CEditor::DoQuad(CQuad *pQuad, int Index)
 		{
 			if(!UI()->MouseButton(0))
 			{
-				m_LockMouse = false;
+				UI()->DisableMouseLock();
 				s_Operation = OP_NONE;
 				UI()->SetActiveItem(nullptr);
 			}
@@ -1531,7 +1531,7 @@ void CEditor::DoQuad(CQuad *pQuad, int Index)
 			}
 			else if(Input()->ModifierIsPressed())
 			{
-				m_LockMouse = true;
+				UI()->EnableMouseLock(pID);
 				s_Operation = OP_ROTATE;
 				s_RotateAngle = 0;
 
@@ -1711,7 +1711,7 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 						m_SelectedPoints = 1 << V;
 				}
 
-				m_LockMouse = false;
+				UI()->DisableMouseLock();
 				UI()->SetActiveItem(nullptr);
 			}
 		}
@@ -1732,7 +1732,7 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 			if(Input()->ShiftIsPressed())
 			{
 				s_Operation = OP_MOVEUV;
-				m_LockMouse = true;
+				UI()->EnableMouseLock(pID);
 			}
 			else
 				s_Operation = OP_MOVEPOINT;
@@ -2197,7 +2197,7 @@ void CEditor::DoQuadEnvPoint(const CQuad *pQuad, int QIndex, int PIndex)
 
 		if(!UI()->MouseButton(0))
 		{
-			m_LockMouse = false;
+			UI()->DisableMouseLock();
 			s_Operation = OP_NONE;
 			UI()->SetActiveItem(nullptr);
 		}
@@ -2215,7 +2215,7 @@ void CEditor::DoQuadEnvPoint(const CQuad *pQuad, int QIndex, int PIndex)
 		{
 			if(Input()->ModifierIsPressed())
 			{
-				m_LockMouse = true;
+				UI()->EnableMouseLock(pID);
 				s_Operation = OP_ROTATE;
 
 				SelectQuad(QIndex);
@@ -6728,7 +6728,6 @@ void CEditor::Init()
 	m_pSound = Kernel()->RequestInterface<ISound>();
 	m_UI.Init(Kernel());
 	m_UI.SetPopupMenuClosedCallback([this]() {
-		m_LockMouse = false;
 		m_PopupEventWasActivated = false;
 	});
 	m_RenderTools.Init(m_pGraphics, m_pTextRender);
@@ -6822,7 +6821,7 @@ void CEditor::OnUpdate()
 		m_MouseDeltaX += MouseRelX;
 		m_MouseDeltaY += MouseRelY;
 
-		if(!m_LockMouse)
+		if(!UI()->CheckMouseLock())
 		{
 			s_MouseX = clamp<float>(s_MouseX + MouseRelX, 0.0f, Graphics()->WindowWidth());
 			s_MouseY = clamp<float>(s_MouseY + MouseRelY, 0.0f, Graphics()->WindowHeight());

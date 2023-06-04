@@ -788,7 +788,6 @@ public:
 		m_Zooming = false;
 		m_WorldZoom = 1.0f;
 
-		m_LockMouse = false;
 		m_ShowMousePointer = true;
 		m_MouseDeltaX = 0;
 		m_MouseDeltaY = 0;
@@ -1029,7 +1028,6 @@ public:
 	float m_ZoomSmoothingTarget;
 	float m_WorldZoom;
 
-	bool m_LockMouse;
 	bool m_ShowMousePointer;
 	bool m_GuiActive;
 
