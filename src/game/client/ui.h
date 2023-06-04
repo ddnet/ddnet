@@ -149,6 +149,8 @@ public:
 		float m_Y;
 		float m_Width;
 		float m_Height;
+		float m_Rounding;
+		int m_Corners;
 
 		std::string m_Text;
 
