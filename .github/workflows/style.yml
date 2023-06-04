@@ -44,6 +44,8 @@ jobs:
       run: "! grep --exclude-dir rust-bridge -rE '^#include \"(antibot|base|engine|game|steam|test)/' src/"
     - name: Check standard header includes
       run: scripts/check_standard_headers.sh
+    - name: Check config variables
+      run: scripts/check_config_variables.py
     # TODO: Enable on release branches
     #- name: Out-of-date translations
     #  run: |

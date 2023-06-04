@@ -5226,6 +5226,8 @@ void CEditor::RemoveUnusedEnvelopes()
 
 void CEditor::RenderEnvelopeEditor(CUIRect View)
 {
+	RenderExtraEditorDragBar(View, &m_EnvelopeEditorSplit);
+
 	if(m_SelectedEnvelope < 0)
 		m_SelectedEnvelope = 0;
 	if(m_SelectedEnvelope >= (int)m_Map.m_vpEnvelopes.size())
@@ -5235,12 +5237,6 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 	if(m_SelectedEnvelope >= 0 && m_SelectedEnvelope < (int)m_Map.m_vpEnvelopes.size())
 		pEnvelope = m_Map.m_vpEnvelopes[m_SelectedEnvelope];
 
-	CUIRect DragBar = {
-		View.x,
-		View.y - 2.0f, // use margin
-		View.w,
-		22.0f,
-	};
 	CUIRect ToolBar, CurveBar, ColorBar;
 	View.HSplitTop(15.0f, &ToolBar, &View);
 	View.HSplitTop(15.0f, &CurveBar, &View);
@@ -5248,47 +5244,6 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 	CurveBar.Margin(2.0f, &CurveBar);
 
 	bool CurrentEnvelopeSwitched = false;
-
-	// do the dragbar
-	{
-		enum
-		{
-			OP_NONE,
-			OP_DRAG_HEADER,
-			OP_CLICK_HEADER
-		};
-		static int s_Operation = 0;
-		static float s_InitialMouseY = 0.0f;
-		static float s_InitialMouseOffsetY = 0.0f;
-
-		static int s_DragBar = 0;
-		bool Clicked;
-		bool Abrupted;
-		if(int Result = DoButton_DraggableEx(&s_DragBar, "", 8, &DragBar, &Clicked, &Abrupted, 0, "Change the size of the editor by dragging."))
-		{
-			if(s_Operation == OP_NONE && Result == 1)
-			{
-				s_InitialMouseY = UI()->MouseY();
-				s_InitialMouseOffsetY = UI()->MouseY() - DragBar.y;
-				s_Operation = OP_CLICK_HEADER;
-			}
-
-			if(Abrupted)
-				s_Operation = OP_NONE;
-
-			if(s_Operation == OP_CLICK_HEADER && absolute(UI()->MouseY() - s_InitialMouseY) > 5)
-				s_Operation = OP_DRAG_HEADER;
-
-			if(s_Operation == OP_DRAG_HEADER)
-			{
-				if(Clicked)
-					s_Operation = OP_NONE;
-
-				m_EnvelopeEditorSplit = s_InitialMouseOffsetY + View.y + View.h - UI()->MouseY();
-				m_EnvelopeEditorSplit = clamp(m_EnvelopeEditorSplit, 100.0f, 400.0f);
-			}
-		}
-	}
 
 	// do the toolbar
 	{
@@ -5818,6 +5773,8 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEditorLast)
 {
+	RenderExtraEditorDragBar(View, &m_ServerSettingsEditorSplit);
+
 	static int s_CommandSelectedIndex = -1;
 
 	CUIRect ToolBar;
@@ -5963,6 +5920,47 @@ void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEd
 	s_ScrollRegion.End();
 }
 
+void CEditor::RenderExtraEditorDragBar(CUIRect View, float *pSplit)
+{
+	const CUIRect DragBar = {
+		View.x,
+		View.y - 2.0f, // use margin
+		View.w,
+		22.0f,
+	};
+
+	enum EDragOperation
+	{
+		OP_NONE,
+		OP_DRAGGING,
+		OP_CLICKED
+	};
+	static EDragOperation s_Operation = OP_NONE;
+	static float s_InitialMouseY = 0.0f;
+	static float s_InitialMouseOffsetY = 0.0f;
+
+	bool Clicked;
+	bool Abrupted;
+	if(int Result = DoButton_DraggableEx(&s_Operation, "", 8, &DragBar, &Clicked, &Abrupted, 0, "Change the size of the editor by dragging."))
+	{
+		if(s_Operation == OP_NONE && Result == 1)
+		{
+			s_InitialMouseY = UI()->MouseY();
+			s_InitialMouseOffsetY = UI()->MouseY() - DragBar.y;
+			s_Operation = OP_CLICKED;
+		}
+
+		if(Clicked || Abrupted)
+			s_Operation = OP_NONE;
+
+		if(s_Operation == OP_CLICKED && absolute(UI()->MouseY() - s_InitialMouseY) > 5.0f)
+			s_Operation = OP_DRAGGING;
+
+		if(s_Operation == OP_DRAGGING)
+			*pSplit = clamp(s_InitialMouseOffsetY + View.y + View.h - UI()->MouseY(), 100.0f, 400.0f);
+	}
+}
+
 void CEditor::RenderMenubar(CUIRect MenuBar)
 {
 	CUIRect FileButton;
@@ -6049,7 +6047,7 @@ void CEditor::Render()
 			View.HSplitBottom(m_EnvelopeEditorSplit, &View, &ExtraEditor);
 
 		if(m_ShowServerSettingsEditor && !m_ShowPicker)
-			View.HSplitBottom(250.0f, &View, &ExtraEditor);
+			View.HSplitBottom(m_ServerSettingsEditorSplit, &View, &ExtraEditor);
 	}
 	else
 	{

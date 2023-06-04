@@ -258,18 +258,17 @@ void CGameContext::ConRules(IConsole::IResult *pResult, void *pUserData)
 			"Be nice.");
 		Printed = true;
 	}
-#define GET_SERVER_RULE_LINE(n) g_Config.m_SvRulesLine##n
 	char *apRuleLines[] = {
-		GET_SERVER_RULE_LINE(1),
-		GET_SERVER_RULE_LINE(2),
-		GET_SERVER_RULE_LINE(3),
-		GET_SERVER_RULE_LINE(4),
-		GET_SERVER_RULE_LINE(5),
-		GET_SERVER_RULE_LINE(6),
-		GET_SERVER_RULE_LINE(7),
-		GET_SERVER_RULE_LINE(8),
-		GET_SERVER_RULE_LINE(9),
-		GET_SERVER_RULE_LINE(10),
+		g_Config.m_SvRulesLine1,
+		g_Config.m_SvRulesLine2,
+		g_Config.m_SvRulesLine3,
+		g_Config.m_SvRulesLine4,
+		g_Config.m_SvRulesLine5,
+		g_Config.m_SvRulesLine6,
+		g_Config.m_SvRulesLine7,
+		g_Config.m_SvRulesLine8,
+		g_Config.m_SvRulesLine9,
+		g_Config.m_SvRulesLine10,
 	};
 	for(auto &pRuleLine : apRuleLines)
 	{
