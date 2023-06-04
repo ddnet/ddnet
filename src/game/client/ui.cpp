@@ -783,7 +783,7 @@ bool CUI::DoEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize
 	}
 
 	// Render
-	pRect->Draw(ms_LightButtonColorFunction.GetColor(Active, Inside), Corners, 3.0f);
+	pRect->Draw(ms_LightButtonColorFunction.GetColor(Active, HotItem() == pLineInput), Corners, 3.0f);
 	ClipEnable(pRect);
 	Textbox.x -= ScrollOffset;
 	const STextBoundingBox BoundingBox = pLineInput->Render(&Textbox, FontSize, TEXTALIGN_ML, Changed, -1.0f);
