@@ -2323,15 +2323,7 @@ void CMenus::OnRender()
 
 	// render debug information
 	if(g_Config.m_Debug)
-	{
-		UI()->MapScreen();
-
-		char aBuf[512];
-		str_format(aBuf, sizeof(aBuf), "%p %p %p", UI()->HotItem(), UI()->ActiveItem(), UI()->LastActiveItem());
-		CTextCursor Cursor;
-		TextRender()->SetCursor(&Cursor, 10, 10, 10, TEXTFLAG_RENDER);
-		TextRender()->TextEx(&Cursor, aBuf, -1);
-	}
+		UI()->DebugRender();
 
 	if(UI()->ConsumeHotkey(CUI::HOTKEY_ESCAPE))
 		SetActive(false);

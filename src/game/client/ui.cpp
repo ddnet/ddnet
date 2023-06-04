@@ -216,6 +216,15 @@ void CUI::Update(float MouseX, float MouseY, float MouseWorldX, float MouseWorld
 	}
 }
 
+void CUI::DebugRender()
+{
+	MapScreen();
+
+	char aBuf[128];
+	str_format(aBuf, sizeof(aBuf), "%p %p %p", HotItem(), ActiveItem(), LastActiveItem());
+	TextRender()->Text(10.0f, 10.0f, 10.0f, aBuf);
+}
+
 bool CUI::MouseInside(const CUIRect *pRect) const
 {
 	return pRect->Inside(m_MouseX, m_MouseY);
