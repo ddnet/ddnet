@@ -227,6 +227,16 @@ class CButtonContainer
 {
 };
 
+struct SValueSelectorProperties
+{
+	bool m_UseScroll = true;
+	int64_t m_Step = 1;
+	float m_Scale = 1.0f;
+	bool m_IsHex = false;
+	int m_HexPrefix = 6;
+	ColorRGBA m_Color = ColorRGBA(0.0f, 0.0f, 0.0f, 0.4f);
+};
+
 /**
  * Type safe UI ID for popup menus.
  */
@@ -298,6 +308,8 @@ private:
 
 	std::vector<CUIRect> m_vClips;
 	void UpdateClipping();
+
+	bool m_ValueSelectorTextMode = false;
 
 	struct SPopupMenu
 	{
@@ -462,6 +474,12 @@ public:
 	// only used for popup menus
 	int DoButton_PopupMenu(CButtonContainer *pButtonContainer, const char *pText, const CUIRect *pRect, int Align);
 
+	// value selector
+	int64_t DoValueSelector(const void *pID, const CUIRect *pRect, const char *pLabel, int64_t Current, int64_t Min, int64_t Max, const SValueSelectorProperties &Props = {});
+	bool IsValueSelectorTextMode() const { return m_ValueSelectorTextMode; }
+	void SetValueSelectorTextMode(bool TextMode) { m_ValueSelectorTextMode = TextMode; }
+
+	// scrollbars
 	enum
 	{
 		SCROLLBAR_OPTION_INFINITE = 1,

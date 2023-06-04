@@ -939,6 +939,121 @@ int CUI::DoButton_PopupMenu(CButtonContainer *pButtonContainer, const char *pTex
 	return DoButtonLogic(pButtonContainer, 0, pRect);
 }
 
+int64_t CUI::DoValueSelector(const void *pID, const CUIRect *pRect, const char *pLabel, int64_t Current, int64_t Min, int64_t Max, const SValueSelectorProperties &Props)
+{
+	// TODO: reimplement m_LockMouse
+
+	// logic
+	static float s_Value;
+	static CLineInputNumber s_NumberInput;
+	static const void *s_pLastTextID = pID;
+	const bool Inside = MouseInside(pRect);
+
+	if(Inside)
+		SetHotItem(pID);
+
+	const int Base = Props.m_IsHex ? 16 : 10;
+
+	if(MouseButtonReleased(1) && HotItem() == pID)
+	{
+		s_pLastTextID = pID;
+		m_ValueSelectorTextMode = true;
+		s_NumberInput.SetInteger64(Current, Base, Props.m_HexPrefix);
+		s_NumberInput.SelectAll();
+	}
+
+	if(CheckActiveItem(pID))
+	{
+		if(!MouseButton(0))
+		{
+			//m_LockMouse = false;
+			SetActiveItem(nullptr);
+			m_ValueSelectorTextMode = false;
+		}
+	}
+
+	if(m_ValueSelectorTextMode && s_pLastTextID == pID)
+	{
+		DoEditBox(&s_NumberInput, pRect, 10.0f);
+		SetActiveItem(&s_NumberInput);
+
+		if(ConsumeHotkey(HOTKEY_ENTER) || ((MouseButtonClicked(1) || MouseButtonClicked(0)) && !Inside))
+		{
+			Current = clamp(s_NumberInput.GetInteger64(Base), Min, Max);
+			//m_LockMouse = false;
+			SetActiveItem(nullptr);
+			m_ValueSelectorTextMode = false;
+		}
+
+		if(ConsumeHotkey(HOTKEY_ESCAPE))
+		{
+			//m_LockMouse = false;
+			SetActiveItem(nullptr);
+			m_ValueSelectorTextMode = false;
+		}
+	}
+	else
+	{
+		if(CheckActiveItem(pID))
+		{
+			if(Props.m_UseScroll)
+			{
+				if(MouseButton(0))
+				{
+					s_Value += MouseDeltaX() * (Input()->ShiftIsPressed() ? 0.05f : 1.0f);
+
+					if(absolute(s_Value) > Props.m_Scale)
+					{
+						const int64_t Count = (int64_t)(s_Value / Props.m_Scale);
+						s_Value = std::fmod(s_Value, Props.m_Scale);
+						Current += Props.m_Step * Count;
+						Current = clamp(Current, Min, Max);
+
+						// Constrain to discrete steps
+						if(Count > 0)
+							Current = Current / Props.m_Step * Props.m_Step;
+						else
+							Current = std::ceil(Current / (float)Props.m_Step) * Props.m_Step;
+					}
+				}
+			}
+		}
+		else if(HotItem() == pID)
+		{
+			if(MouseButtonClicked(0))
+			{
+				//m_LockMouse = true;
+				s_Value = 0;
+				SetActiveItem(pID);
+			}
+		}
+
+		// render
+		char aBuf[128];
+		if(pLabel[0] != '\0')
+		{
+			if(Props.m_IsHex)
+				str_format(aBuf, sizeof(aBuf), "%s #%0*" PRIX64, pLabel, Props.m_HexPrefix, Current);
+			else
+				str_format(aBuf, sizeof(aBuf), "%s %" PRId64, pLabel, Current);
+		}
+		else
+		{
+			if(Props.m_IsHex)
+				str_format(aBuf, sizeof(aBuf), "#%0*" PRIX64, Props.m_HexPrefix, Current);
+			else
+				str_format(aBuf, sizeof(aBuf), "%" PRId64, Current);
+		}
+		pRect->Draw(Props.m_Color, IGraphics::CORNER_ALL, 3.0f);
+		DoLabel(pRect, aBuf, 10.0f, TEXTALIGN_MC);
+	}
+
+	if(!m_ValueSelectorTextMode)
+		s_NumberInput.Clear();
+
+	return Current;
+}
+
 float CUI::DoScrollbarV(const void *pID, const CUIRect *pRect, float Current)
 {
 	Current = clamp(Current, 0.0f, 1.0f);

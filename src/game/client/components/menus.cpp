@@ -52,7 +52,6 @@ ColorRGBA CMenus::ms_ColorTabbarActiveIngame;
 ColorRGBA CMenus::ms_ColorTabbarHoverIngame;
 
 SColorPicker CMenus::ms_ColorPicker;
-bool CMenus::ms_ValueSelectorTextMode;
 
 float CMenus::ms_ButtonHeight = 25.0f;
 float CMenus::ms_ListheaderHeight = 17.0f;
@@ -436,124 +435,6 @@ int CMenus::DoButton_CheckBox_Number(const void *pID, const char *pText, int Che
 	char aBuf[16];
 	str_format(aBuf, sizeof(aBuf), "%d", Checked);
 	return DoButton_CheckBox_Common(pID, pText, aBuf, pRect);
-}
-
-int CMenus::DoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, bool UseScroll, int Current, int Min, int Max, int Step, float Scale, bool IsHex, float Round, ColorRGBA *pColor)
-{
-	// logic
-	static float s_Value;
-	static CLineInputNumber s_NumberInput;
-	static void *s_pLastTextpID = pID;
-	const bool Inside = UI()->MouseInside(pRect);
-
-	if(Inside)
-		UI()->SetHotItem(pID);
-
-	const int Base = IsHex ? 16 : 10;
-
-	if(UI()->MouseButtonReleased(1) && UI()->HotItem() == pID)
-	{
-		s_pLastTextpID = pID;
-		ms_ValueSelectorTextMode = true;
-		s_NumberInput.SetInteger(Current, Base);
-	}
-
-	if(UI()->CheckActiveItem(pID))
-	{
-		if(!UI()->MouseButton(0))
-		{
-			//m_LockMouse = false;
-			UI()->SetActiveItem(nullptr);
-			ms_ValueSelectorTextMode = false;
-		}
-	}
-
-	if(ms_ValueSelectorTextMode && s_pLastTextpID == pID)
-	{
-		UI()->DoEditBox(&s_NumberInput, pRect, 10.0f);
-		UI()->SetActiveItem(&s_NumberInput);
-
-		if(Input()->KeyIsPressed(KEY_RETURN) || Input()->KeyIsPressed(KEY_KP_ENTER) ||
-			((UI()->MouseButtonClicked(1) || UI()->MouseButtonClicked(0)) && !Inside))
-		{
-			Current = clamp(s_NumberInput.GetInteger(Base), Min, Max);
-			//m_LockMouse = false;
-			UI()->SetActiveItem(nullptr);
-			ms_ValueSelectorTextMode = false;
-		}
-
-		if(Input()->KeyIsPressed(KEY_ESCAPE))
-		{
-			//m_LockMouse = false;
-			UI()->SetActiveItem(nullptr);
-			ms_ValueSelectorTextMode = false;
-		}
-	}
-	else
-	{
-		if(UI()->CheckActiveItem(pID))
-		{
-			if(UseScroll)
-			{
-				if(UI()->MouseButton(0))
-				{
-					float delta = UI()->MouseDeltaX();
-
-					if(Input()->ShiftIsPressed())
-						s_Value += delta * 0.05f;
-					else
-						s_Value += delta;
-
-					if(absolute(s_Value) > Scale)
-					{
-						int Count = (int)(s_Value / Scale);
-						s_Value = std::fmod(s_Value, Scale);
-						Current += Step * Count;
-						Current = clamp(Current, Min, Max);
-
-						// Constrain to discrete steps
-						if(Count > 0)
-							Current = Current / Step * Step;
-						else
-							Current = std::ceil(Current / (float)Step) * Step;
-					}
-				}
-			}
-		}
-		else if(UI()->HotItem() == pID)
-		{
-			if(UI()->MouseButtonClicked(0))
-			{
-				//m_LockMouse = true;
-				s_Value = 0;
-				UI()->SetActiveItem(pID);
-			}
-		}
-
-		// render
-		char aBuf[128];
-		if(pLabel[0] != '\0')
-		{
-			if(IsHex)
-				str_format(aBuf, sizeof(aBuf), "%s #%06X", pLabel, Current);
-			else
-				str_format(aBuf, sizeof(aBuf), "%s %d", pLabel, Current);
-		}
-		else
-		{
-			if(IsHex)
-				str_format(aBuf, sizeof(aBuf), "#%06X", Current);
-			else
-				str_format(aBuf, sizeof(aBuf), "%d", Current);
-		}
-		pRect->Draw(*pColor, IGraphics::CORNER_ALL, Round);
-		UI()->DoLabel(pRect, aBuf, 10.0f, TEXTALIGN_MC);
-	}
-
-	if(!ms_ValueSelectorTextMode)
-		s_NumberInput.Clear();
-
-	return Current;
 }
 
 int CMenus::DoKeyReader(void *pID, const CUIRect *pRect, int Key, int ModifierCombination, int *pNewModifierCombination)
@@ -1078,7 +959,7 @@ void CMenus::RenderColorPicker()
 	if(UI()->ConsumeHotkey(CUI::HOTKEY_ESCAPE))
 	{
 		ms_ColorPicker.m_Active = false;
-		ms_ValueSelectorTextMode = false;
+		UI()->SetValueSelectorTextMode(false);
 		UI()->SetActiveItem(nullptr);
 		return;
 	}
@@ -1093,7 +974,7 @@ void CMenus::RenderColorPicker()
 	if(UI()->MouseButtonClicked(0) && !UI()->MouseInside(&PickerRect) && !UI()->MouseInside(&ms_ColorPicker.m_AttachedRect))
 	{
 		ms_ColorPicker.m_Active = false;
-		ms_ValueSelectorTextMode = false;
+		UI()->SetValueSelectorTextMode(false);
 		UI()->SetActiveItem(nullptr);
 		return;
 	}
@@ -1135,7 +1016,7 @@ void CMenus::RenderColorPicker()
 	if(UI()->MouseButtonReleased(1) && !UI()->MouseInside(&ValuesHitbox))
 	{
 		ms_ColorPicker.m_Active = false;
-		ms_ValueSelectorTextMode = false;
+		UI()->SetValueSelectorTextMode(false);
 		UI()->SetActiveItem(nullptr);
 		return;
 	}
@@ -1193,18 +1074,19 @@ void CMenus::RenderColorPicker()
 	}
 
 	// Editboxes Area
-	ColorRGBA EditboxBackground(0, 0, 0, 0.4f);
+	static char s_aValueSelectorIds[4];
 
-	static int s_aValueSelectorIds[4];
-
-	H = DoValueSelector(&s_aValueSelectorIds[0], &HueRect, "H:", true, H, 0, 255, 1, 1, false, 5.0f, &EditboxBackground);
-	S = DoValueSelector(&s_aValueSelectorIds[1], &SatRect, "S:", true, S, 0, 255, 1, 1, false, 5.0f, &EditboxBackground);
-	V = DoValueSelector(&s_aValueSelectorIds[2], &ValueRect, "V:", true, V, 0, 255, 1, 1, false, 5.0f, &EditboxBackground);
+	H = UI()->DoValueSelector(&s_aValueSelectorIds[0], &HueRect, "H:", H, 0, 255);
+	S = UI()->DoValueSelector(&s_aValueSelectorIds[1], &SatRect, "S:", S, 0, 255);
+	V = UI()->DoValueSelector(&s_aValueSelectorIds[2], &ValueRect, "V:", V, 0, 255);
 
 	PickerColorHSV = ColorHSVA(H / 255.0f, S / 255.0f, V / 255.0f);
 
+	SValueSelectorProperties Props;
+	Props.m_UseScroll = false;
+	Props.m_IsHex = true;
 	unsigned int Hex = color_cast<ColorRGBA>(PickerColorHSV).Pack(false);
-	unsigned int NewHex = DoValueSelector(&s_aValueSelectorIds[3], &HexRect, "HEX:", false, Hex, 0, 0xFFFFFF, 1, 1, true, 5.0f, &EditboxBackground);
+	unsigned int NewHex = UI()->DoValueSelector(&s_aValueSelectorIds[3], &HexRect, "Hex:", Hex, 0, 0xFFFFFF, Props);
 
 	if(Hex != NewHex)
 		PickerColorHSV = color_cast<ColorHSVA>(ColorRGBA(NewHex));
@@ -1215,25 +1097,23 @@ void CMenus::RenderColorPicker()
 
 	// Logic
 	float PickerX, PickerY;
-
 	static int s_ColorPickerId = 0;
-	static int s_HuePickerId = 0;
-
 	if(UI()->DoPickerLogic(&s_ColorPickerId, &ColorsArea, &PickerX, &PickerY))
 	{
 		PickerColorHSV.y = PickerX / ColorsArea.w;
 		PickerColorHSV.z = 1.0f - PickerY / ColorsArea.h;
 	}
 
+	static int s_HuePickerId = 0;
 	if(UI()->DoPickerLogic(&s_HuePickerId, &HueArea, &PickerX, &PickerY))
 		PickerColorHSV.x = 1.0f - PickerY / HueArea.h;
 
 	// Marker Color Area
-	float MarkerX = ColorsArea.x + ColorsArea.w * PickerColorHSV.y;
-	float MarkerY = ColorsArea.y + ColorsArea.h * (1.0f - PickerColorHSV.z);
+	const float MarkerX = ColorsArea.x + ColorsArea.w * PickerColorHSV.y;
+	const float MarkerY = ColorsArea.y + ColorsArea.h * (1.0f - PickerColorHSV.z);
 
 	const float MarkerOutlineInd = PickerColorHSV.z > 0.5f ? 0.0f : 1.0f;
-	ColorRGBA MarkerOutline(MarkerOutlineInd, MarkerOutlineInd, MarkerOutlineInd, 1.0f);
+	const ColorRGBA MarkerOutline = ColorRGBA(MarkerOutlineInd, MarkerOutlineInd, MarkerOutlineInd, 1.0f);
 
 	Graphics()->TextureClear();
 	Graphics()->QuadsBegin();
@@ -1249,9 +1129,9 @@ void CMenus::RenderColorPicker()
 	HueMarker.h = 6.5f;
 	HueMarker.y = (HueArea.y + HueArea.h * (1.0f - PickerColorHSV.x)) - HueMarker.h / 2.0f;
 
-	ColorRGBA HueMarkerColor = color_cast<ColorRGBA>(ColorHSVA(PickerColorHSV.x, 1, 1, 1));
+	const ColorRGBA HueMarkerColor = color_cast<ColorRGBA>(ColorHSVA(PickerColorHSV.x, 1, 1, 1));
 	const float HueMarkerOutlineColor = PickerColorHSV.x > 0.75f ? 1.0f : 0.0f;
-	ColorRGBA HueMarkerOutline(HueMarkerOutlineColor, HueMarkerOutlineColor, HueMarkerOutlineColor, 1);
+	const ColorRGBA HueMarkerOutline = ColorRGBA(HueMarkerOutlineColor, HueMarkerOutlineColor, HueMarkerOutlineColor, 1);
 
 	HueMarker.Draw(HueMarkerOutline, IGraphics::CORNER_ALL, 1.2f);
 	HueMarker.Margin(1.2f, &HueMarker);
