@@ -179,7 +179,23 @@ void CUI::OnLanguageChange()
 	OnElementsReset();
 }
 
-void CUI::Update(float MouseX, float MouseY, float MouseWorldX, float MouseWorldY)
+void CUI::OnCursorMove(float X, float Y)
+{
+	m_UpdatedMousePos.x = clamp(m_UpdatedMousePos.x + X, 0.0f, (float)Graphics()->WindowWidth());
+	m_UpdatedMousePos.y = clamp(m_UpdatedMousePos.y + Y, 0.0f, (float)Graphics()->WindowHeight());
+	m_UpdatedMouseDelta += vec2(X, Y);
+}
+
+void CUI::Update()
+{
+	const CUIRect *pScreen = Screen();
+	const float MouseX = (m_UpdatedMousePos.x / (float)Graphics()->WindowWidth()) * pScreen->w;
+	const float MouseY = (m_UpdatedMousePos.y / (float)Graphics()->WindowHeight()) * pScreen->h;
+	Update(MouseX, MouseY, m_UpdatedMouseDelta.x, m_UpdatedMouseDelta.y, MouseX * 3.0f, MouseY * 3.0f);
+	m_UpdatedMouseDelta = vec2(0.0f, 0.0f);
+}
+
+void CUI::Update(float MouseX, float MouseY, float MouseDeltaX, float MouseDeltaY, float MouseWorldX, float MouseWorldY)
 {
 	unsigned MouseButtons = 0;
 	if(Enabled())
@@ -192,8 +208,8 @@ void CUI::Update(float MouseX, float MouseY, float MouseWorldX, float MouseWorld
 			MouseButtons |= 4;
 	}
 
-	m_MouseDeltaX = MouseX - m_MouseX;
-	m_MouseDeltaY = MouseY - m_MouseY;
+	m_MouseDeltaX = MouseDeltaX;
+	m_MouseDeltaY = MouseDeltaY;
 	m_MouseX = MouseX;
 	m_MouseY = MouseY;
 	m_MouseWorldX = MouseWorldX;

@@ -176,7 +176,6 @@ protected:
 	int m_ActivePage;
 	bool m_ShowStart;
 	bool m_MenuActive;
-	vec2 m_MousePos;
 	bool m_JoinTutorial;
 
 	char m_aNextServer[256];

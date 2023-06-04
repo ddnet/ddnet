@@ -2093,9 +2093,7 @@ bool CMenus::OnCursorMove(float x, float y, IInput::ECursorType CursorType)
 		return false;
 
 	UI()->ConvertMouseMove(&x, &y, CursorType);
-
-	m_MousePos.x = clamp(m_MousePos.x + x, 0.f, (float)Graphics()->WindowWidth());
-	m_MousePos.y = clamp(m_MousePos.y + y, 0.f, (float)Graphics()->WindowHeight());
+	UI()->OnCursorMove(x, y);
 
 	return true;
 }
@@ -2193,15 +2191,10 @@ void CMenus::OnRender()
 
 	UpdateColors();
 
-	// update the ui
-	const CUIRect *pScreen = UI()->Screen();
-	float mx = (m_MousePos.x / (float)Graphics()->WindowWidth()) * pScreen->w;
-	float my = (m_MousePos.y / (float)Graphics()->WindowHeight()) * pScreen->h;
-
-	UI()->Update(mx, my, mx * 3.0f, my * 3.0f);
+	UI()->Update();
 
 	Render();
-	RenderTools()->RenderCursor(vec2(mx, my), 24.0f);
+	RenderTools()->RenderCursor(UI()->MousePos(), 24.0f);
 
 	// render debug information
 	if(g_Config.m_Debug)

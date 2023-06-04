@@ -295,6 +295,8 @@ private:
 	const void *m_pActiveTooltipItem;
 	bool m_ActiveItemValid = false;
 
+	vec2 m_UpdatedMousePos = vec2(0.0f, 0.0f);
+	vec2 m_UpdatedMouseDelta = vec2(0.0f, 0.0f);
 	float m_MouseX, m_MouseY; // in gui space
 	float m_MouseDeltaX, m_MouseDeltaY; // in gui space
 	float m_MouseWorldX, m_MouseWorldY; // in world space
@@ -379,10 +381,12 @@ public:
 	void OnElementsReset();
 	void OnWindowResize();
 	void OnLanguageChange();
+	void OnCursorMove(float X, float Y);
 
 	void SetEnabled(bool Enabled) { m_Enabled = Enabled; }
 	bool Enabled() const { return m_Enabled; }
-	void Update(float MouseX, float MouseY, float MouseWorldX, float MouseWorldY);
+	void Update();
+	void Update(float MouseX, float MouseY, float MouseDeltaX, float MouseDeltaY, float MouseWorldX, float MouseWorldY);
 	void DebugRender();
 
 	float MouseDeltaX() const { return m_MouseDeltaX; }

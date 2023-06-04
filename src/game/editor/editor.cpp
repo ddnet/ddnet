@@ -6894,7 +6894,7 @@ void CEditor::OnRender()
 	for(size_t i = 0; i < Input()->NumEvents(); i++)
 		UI()->OnInput(Input()->GetEvent(i));
 
-	UI()->Update(m_MouseX, m_MouseY, m_MouseWorldX, m_MouseWorldY);
+	UI()->Update(m_MouseX, m_MouseY, m_MouseDeltaX, m_MouseDeltaY, m_MouseWorldX, m_MouseWorldY);
 
 	Render();
 
