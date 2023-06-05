@@ -1072,15 +1072,16 @@ bool CMenus::CanDisplayWarning()
 
 void CMenus::RenderColorPicker()
 {
+	if(!ms_ColorPicker.m_Active)
+		return;
+
 	if(UI()->ConsumeHotkey(CUI::HOTKEY_ESCAPE))
 	{
 		ms_ColorPicker.m_Active = false;
 		ms_ValueSelectorTextMode = false;
 		UI()->SetActiveItem(nullptr);
-	}
-
-	if(!ms_ColorPicker.m_Active)
 		return;
+	}
 
 	// First check if we should disable color picker
 	CUIRect PickerRect;
