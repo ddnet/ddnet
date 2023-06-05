@@ -3430,10 +3430,30 @@ int str_isallnum(const char *str)
 	return 1;
 }
 
-int str_toint(const char *str) { return str_toint_base(str, 10); }
-int str_toint_base(const char *str, int base) { return strtol(str, NULL, base); }
-unsigned long str_toulong_base(const char *str, int base) { return strtoul(str, NULL, base); }
-float str_tofloat(const char *str) { return strtod(str, NULL); }
+int str_toint(const char *str)
+{
+	return str_toint_base(str, 10);
+}
+
+int str_toint_base(const char *str, int base)
+{
+	return strtol(str, nullptr, base);
+}
+
+unsigned long str_toulong_base(const char *str, int base)
+{
+	return strtoul(str, nullptr, base);
+}
+
+int64_t str_toint64_base(const char *str, int base)
+{
+	return strtoll(str, nullptr, base);
+}
+
+float str_tofloat(const char *str)
+{
+	return strtod(str, nullptr);
+}
 
 int str_utf8_comp_nocase(const char *a, const char *b)
 {
