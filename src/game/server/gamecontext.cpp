@@ -1204,9 +1204,12 @@ void CGameContext::OnTick()
 	{
 		for(int i = 0; i < g_Config.m_DbgDummies; i++)
 		{
-			CNetObj_PlayerInput Input = {0};
-			Input.m_Direction = (i & 1) ? -1 : 1;
-			m_apPlayers[MAX_CLIENTS - i - 1]->OnPredictedInput(&Input);
+			if(m_apPlayers[MAX_CLIENTS - i - 1])
+			{
+				CNetObj_PlayerInput Input = {0};
+				Input.m_Direction = (i & 1) ? -1 : 1;
+				m_apPlayers[MAX_CLIENTS - i - 1]->OnPredictedInput(&Input);
+			}
 		}
 	}
 #endif
