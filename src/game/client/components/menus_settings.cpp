@@ -1565,6 +1565,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	static const float sc_RowHeightResList = 22.0f;
 	static const float sc_FontSizeResListHeader = 12.0f;
 	static const float sc_FontSizeResList = 10.0f;
+	bool ListBoxUsed = !UI()->IsPopupOpen();
 	int OldSelected = -1;
 	{
 		int G = std::gcd(g_Config.m_GfxScreenWidth, g_Config.m_GfxScreenHeight);
@@ -1572,7 +1573,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	}
 
 	UI()->DoLabel(&ModeLabel, aBuf, sc_FontSizeResListHeader, TEXTALIGN_MC);
-	s_ListBox.DoStart(sc_RowHeightResList, s_NumNodes, 1, 3, OldSelected, &ModeList);
+	s_ListBox.DoStart(sc_RowHeightResList, s_NumNodes, 1, 3, OldSelected, &ModeList, true, &ListBoxUsed);
 
 	for(int i = 0; i < s_NumNodes; ++i)
 	{
@@ -1585,7 +1586,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 			OldSelected = i;
 		}
 
-		const CListboxItem Item = s_ListBox.DoNextItem(&s_aModes[i], OldSelected == i);
+		const CListboxItem Item = s_ListBox.DoNextItem(&s_aModes[i], OldSelected == i, &ListBoxUsed);
 		if(!Item.m_Visible)
 			continue;
 
@@ -1723,15 +1724,9 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	if(g_Config.m_GfxRefreshRate <= 1000 || NewRefreshRate < 1000)
 		g_Config.m_GfxRefreshRate = NewRefreshRate;
 
-	CUIRect Text;
-	MainView.HSplitTop(20.0f, 0, &MainView);
-	MainView.HSplitTop(20.0f, &Text, &MainView);
-	// text.VSplitLeft(15.0f, 0, &text);
-	UI()->DoLabel(&Text, Localize("UI Color"), 14.0f, TEXTALIGN_ML);
-	CUIRect HSLBar = MainView;
-	RenderHSLScrollbars(&HSLBar, &g_Config.m_UiColor, true);
-	MainView.y = HSLBar.y;
-	MainView.h = MainView.h - MainView.y;
+	MainView.HSplitTop(2.0f, nullptr, &MainView);
+	static CButtonContainer s_UiColorResetId;
+	DoLine_ColorPicker(&s_UiColorResetId, 25.0f, 13.0f, 2.0f, &MainView, Localize("UI Color"), &g_Config.m_UiColor, color_cast<ColorRGBA>(ColorHSLA(0xE4A046AFU, true)), false, nullptr, true);
 
 	// Backend list
 	struct SMenuBackendInfo
@@ -1765,6 +1760,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 
 	if(FoundBackendCount > 1)
 	{
+		CUIRect Text;
 		MainView.HSplitTop(10.0f, nullptr, &MainView);
 		MainView.HSplitTop(20.0f, &Text, &MainView);
 		UI()->DoLabel(&Text, Localize("Renderer"), 16.0f, TEXTALIGN_MC);
@@ -1868,6 +1864,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	const auto &GPUList = Graphics()->GetGPUs();
 	if(GPUList.m_vGPUs.size() > 1)
 	{
+		CUIRect Text;
 		MainView.HSplitTop(10.0f, nullptr, &MainView);
 		MainView.HSplitTop(20.0f, &Text, &MainView);
 		UI()->DoLabel(&Text, Localize("Graphics cards"), 16.0f, TEXTALIGN_MC);
@@ -2121,7 +2118,6 @@ void CMenus::RenderSettings(CUIRect MainView)
 	static CButtonContainer s_aTabButtons[sizeof(apTabs)];
 
 	int NumTabs = (int)std::size(apTabs);
-	int PreviousPage = g_Config.m_UiSettingsPage;
 
 	for(int i = 0; i < NumTabs; i++)
 	{
@@ -2130,9 +2126,6 @@ void CMenus::RenderSettings(CUIRect MainView)
 		if(DoButton_MenuTab(&s_aTabButtons[i], apTabs[i], g_Config.m_UiSettingsPage == i, &Button, IGraphics::CORNER_R, &m_aAnimatorsSettingsTab[i]))
 			g_Config.m_UiSettingsPage = i;
 	}
-
-	if(PreviousPage != g_Config.m_UiSettingsPage)
-		ms_ColorPicker.m_Active = false;
 
 	MainView.Margin(10.0f, &MainView);
 
@@ -2195,49 +2188,6 @@ void CMenus::RenderSettings(CUIRect MainView)
 	}
 	else if(m_NeedRestartGeneral || m_NeedRestartSkins || m_NeedRestartGraphics || m_NeedRestartSound || m_NeedRestartDDNet)
 		UI()->DoLabel(&RestartWarning, Localize("You must restart the game for all settings to take effect."), 14.0f, TEXTALIGN_ML);
-
-	RenderColorPicker();
-}
-
-ColorHSLA CMenus::RenderHSLColorPicker(const CUIRect *pRect, unsigned int *pColor, bool Alpha)
-{
-	ColorHSLA HSLColor(*pColor, false);
-	ColorRGBA RGBColor = color_cast<ColorRGBA>(HSLColor);
-
-	ColorRGBA Outline(1, 1, 1, 0.25f);
-	const float OutlineSize = 3.0f;
-	Outline.a *= UI()->ButtonColorMul(pColor);
-
-	CUIRect Rect;
-	pRect->Margin(OutlineSize, &Rect);
-
-	pRect->Draw(Outline, IGraphics::CORNER_ALL, 4.0f);
-	Rect.Draw(RGBColor, IGraphics::CORNER_ALL, 4.0f);
-
-	if(UI()->DoButtonLogic(pColor, 0, pRect))
-	{
-		if(ms_ColorPicker.m_Active)
-		{
-			CUIRect PickerRect;
-			PickerRect.x = ms_ColorPicker.m_X;
-			PickerRect.y = ms_ColorPicker.m_Y;
-			PickerRect.w = ms_ColorPicker.ms_Width;
-			PickerRect.h = ms_ColorPicker.ms_Height;
-
-			if(ms_ColorPicker.m_pColor == pColor || UI()->MouseInside(&PickerRect))
-				return HSLColor;
-		}
-
-		const CUIRect *pScreen = UI()->Screen();
-		ms_ColorPicker.m_X = minimum(UI()->MouseX(), pScreen->w - ms_ColorPicker.ms_Width);
-		ms_ColorPicker.m_Y = minimum(UI()->MouseY(), pScreen->h - ms_ColorPicker.ms_Height);
-		ms_ColorPicker.m_pColor = pColor;
-		ms_ColorPicker.m_Active = true;
-		ms_ColorPicker.m_AttachedRect = *pRect;
-		ms_ColorPicker.m_HSVColor = color_cast<ColorHSVA, ColorHSLA>(HSLColor).Pack(false);
-	}
-
-	return HSLColor;
 }
 
 ColorHSLA CMenus::RenderHSLScrollbars(CUIRect *pRect, unsigned int *pColor, bool Alpha, bool ClampedLight)

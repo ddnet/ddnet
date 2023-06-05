@@ -662,7 +662,7 @@ void CLineInput::OnDeactivate()
 	m_MouseSelection.m_Selecting = false;
 }
 
-void CLineInputNumber::SetInteger(int Number, int Base)
+void CLineInputNumber::SetInteger(int Number, int Base, int HexPrefix)
 {
 	char aBuf[32];
 	switch(Base)
@@ -671,7 +671,7 @@ void CLineInputNumber::SetInteger(int Number, int Base)
 		str_format(aBuf, sizeof(aBuf), "%d", Number);
 		break;
 	case 16:
-		str_format(aBuf, sizeof(aBuf), "%06X", Number);
+		str_format(aBuf, sizeof(aBuf), "%0*X", HexPrefix, Number);
 		break;
 	default:
 		dbg_assert(false, "Base unsupported");
@@ -684,6 +684,30 @@ void CLineInputNumber::SetInteger(int Number, int Base)
 int CLineInputNumber::GetInteger(int Base) const
 {
 	return str_toint_base(GetString(), Base);
+}
+
+void CLineInputNumber::SetInteger64(int64_t Number, int Base, int HexPrefix)
+{
+	char aBuf[64];
+	switch(Base)
+	{
+	case 10:
+		str_format(aBuf, sizeof(aBuf), "%" PRId64, Number);
+		break;
+	case 16:
+		str_format(aBuf, sizeof(aBuf), "%0*" PRIX64, HexPrefix, Number);
+		break;
+	default:
+		dbg_assert(false, "Base unsupported");
+		return;
+	}
+	if(str_comp(aBuf, GetString()) != 0)
+		Set(aBuf);
+}
+
+int64_t CLineInputNumber::GetInteger64(int Base) const
+{
+	return str_toint64_base(GetString(), Base);
 }
 
 void CLineInputNumber::SetFloat(float Number)

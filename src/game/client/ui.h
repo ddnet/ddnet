@@ -227,6 +227,16 @@ class CButtonContainer
 {
 };
 
+struct SValueSelectorProperties
+{
+	bool m_UseScroll = true;
+	int64_t m_Step = 1;
+	float m_Scale = 1.0f;
+	bool m_IsHex = false;
+	int m_HexPrefix = 6;
+	ColorRGBA m_Color = ColorRGBA(0.0f, 0.0f, 0.0f, 0.4f);
+};
+
 /**
  * Type safe UI ID for popup menus.
  */
@@ -285,12 +295,16 @@ private:
 	const void *m_pActiveTooltipItem;
 	bool m_ActiveItemValid = false;
 
+	vec2 m_UpdatedMousePos = vec2(0.0f, 0.0f);
+	vec2 m_UpdatedMouseDelta = vec2(0.0f, 0.0f);
 	float m_MouseX, m_MouseY; // in gui space
 	float m_MouseDeltaX, m_MouseDeltaY; // in gui space
 	float m_MouseWorldX, m_MouseWorldY; // in world space
 	unsigned m_MouseButtons;
 	unsigned m_LastMouseButtons;
 	bool m_MouseSlow = false;
+	bool m_MouseLock = false;
+	const void *m_pMouseLockID = nullptr;
 
 	unsigned m_HotkeysPressed = 0;
 
@@ -298,6 +312,8 @@ private:
 
 	std::vector<CUIRect> m_vClips;
 	void UpdateClipping();
+
+	bool m_ValueSelectorTextMode = false;
 
 	struct SPopupMenu
 	{
@@ -316,6 +332,7 @@ private:
 	static CUI::EPopupMenuFunctionResult PopupMessage(void *pContext, CUIRect View, bool Active);
 	static CUI::EPopupMenuFunctionResult PopupConfirm(void *pContext, CUIRect View, bool Active);
 	static CUI::EPopupMenuFunctionResult PopupSelection(void *pContext, CUIRect View, bool Active);
+	static CUI::EPopupMenuFunctionResult PopupColorPicker(void *pContext, CUIRect View, bool Active);
 
 	IClient *m_pClient;
 	IGraphics *m_pGraphics;
@@ -367,10 +384,12 @@ public:
 	void OnElementsReset();
 	void OnWindowResize();
 	void OnLanguageChange();
+	void OnCursorMove(float X, float Y);
 
 	void SetEnabled(bool Enabled) { m_Enabled = Enabled; }
 	bool Enabled() const { return m_Enabled; }
-	void Update(float MouseX, float MouseY, float MouseWorldX, float MouseWorldY);
+	void Update();
+	void Update(float MouseX, float MouseY, float MouseDeltaX, float MouseDeltaY, float MouseWorldX, float MouseWorldY);
 	void DebugRender();
 
 	float MouseDeltaX() const { return m_MouseDeltaX; }
@@ -383,6 +402,18 @@ public:
 	int MouseButton(int Index) const { return (m_MouseButtons >> Index) & 1; }
 	int MouseButtonClicked(int Index) const { return MouseButton(Index) && !((m_LastMouseButtons >> Index) & 1); }
 	int MouseButtonReleased(int Index) const { return ((m_LastMouseButtons >> Index) & 1) && !MouseButton(Index); }
+	bool CheckMouseLock()
+	{
+		if(m_MouseLock && ActiveItem() != m_pMouseLockID)
+			DisableMouseLock();
+		return m_MouseLock;
+	}
+	void EnableMouseLock(const void *pID)
+	{
+		m_MouseLock = true;
+		m_pMouseLockID = pID;
+	}
+	void DisableMouseLock() { m_MouseLock = false; }
 
 	void SetHotItem(const void *pID) { m_pBecomingHotItem = pID; }
 	void SetActiveItem(const void *pID)
@@ -462,6 +493,12 @@ public:
 	// only used for popup menus
 	int DoButton_PopupMenu(CButtonContainer *pButtonContainer, const char *pText, const CUIRect *pRect, int Align);
 
+	// value selector
+	int64_t DoValueSelector(const void *pID, const CUIRect *pRect, const char *pLabel, int64_t Current, int64_t Min, int64_t Max, const SValueSelectorProperties &Props = {});
+	bool IsValueSelectorTextMode() const { return m_ValueSelectorTextMode; }
+	void SetValueSelectorTextMode(bool TextMode) { m_ValueSelectorTextMode = TextMode; }
+
+	// scrollbars
 	enum
 	{
 		SCROLLBAR_OPTION_INFINITE = 1,
@@ -538,6 +575,18 @@ public:
 		void Reset();
 	};
 	void ShowPopupSelection(float X, float Y, SSelectionPopupContext *pContext);
+
+	struct SColorPickerPopupContext : public SPopupMenuId
+	{
+		CUI *m_pUI; // set by CUI when popup is shown
+		bool m_Alpha = false;
+		unsigned int *m_pColor;
+		unsigned int m_HSVColor;
+		const char m_HuePickerId = 0;
+		const char m_ColorPickerId = 0;
+		const char m_aValueSelectorIds[5] = {0};
+	};
+	void ShowPopupColorPicker(float X, float Y, SColorPickerPopupContext *pContext);
 };
 
 #endif
