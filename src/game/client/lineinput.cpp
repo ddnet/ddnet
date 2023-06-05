@@ -677,7 +677,7 @@ void CLineInputNumber::SetInteger(int Number, int Base)
 		dbg_assert(false, "Base unsupported");
 		return;
 	}
-	if(str_comp(aBuf, GetDisplayedString()) != 0)
+	if(str_comp(aBuf, GetString()) != 0)
 		Set(aBuf);
 }
 
@@ -690,7 +690,7 @@ void CLineInputNumber::SetFloat(float Number)
 {
 	char aBuf[32];
 	str_format(aBuf, sizeof(aBuf), "%.3f", Number);
-	if(str_comp(aBuf, GetDisplayedString()) != 0)
+	if(str_comp(aBuf, GetString()) != 0)
 		Set(aBuf);
 }
 
