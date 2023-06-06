@@ -599,6 +599,16 @@ public:
 		const char m_aValueSelectorIds[5] = {0};
 	};
 	void ShowPopupColorPicker(float X, float Y, SColorPickerPopupContext *pContext);
+
+	// dropdown menu
+	struct SDropDownState
+	{
+		SSelectionPopupContext m_SelectionPopupContext;
+		CUIElement m_UiElement;
+		CButtonContainer m_ButtonContainer;
+		bool m_Init = false;
+	};
+	int DoDropDown(CUIRect *pRect, int CurSelection, const char **pStrs, int Num, SDropDownState &State);
 };
 
 #endif

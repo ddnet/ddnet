@@ -1447,53 +1447,6 @@ void CMenus::ResetSettingsControls()
 	g_Config.m_UiControllerSens = 100;
 }
 
-int CMenus::RenderDropDown(int &CurDropDownState, CUIRect *pRect, int CurSelection, const void **pIDs, const char **pStr, int PickNum, CButtonContainer *pButtonContainer, float &ScrollVal)
-{
-	if(CurDropDownState != 0)
-	{
-		const float RowHeight = 24.0f;
-		const float RowSpacing = 3.0f;
-		CUIRect ListRect;
-		pRect->HSplitTop((RowHeight + RowSpacing) * PickNum, &ListRect, pRect);
-		static CListBox s_ListBox;
-		s_ListBox.DoAutoSpacing(RowSpacing);
-		s_ListBox.DoStart(RowHeight, PickNum, 1, 3, CurSelection, &ListRect);
-		for(int i = 0; i < PickNum; ++i)
-		{
-			const CListboxItem Item = s_ListBox.DoNextItem(pIDs[i], CurSelection == i);
-			if(!Item.m_Visible)
-				continue;
-
-			UI()->DoLabel(&Item.m_Rect, pStr[i], 16.0f, TEXTALIGN_MC);
-		}
-		int NewIndex = s_ListBox.DoEnd();
-		if(s_ListBox.WasItemSelected() || s_ListBox.WasItemActivated())
-		{
-			CurDropDownState = 0;
-			return NewIndex;
-		}
-		else
-			return CurSelection;
-	}
-	else
-	{
-		CUIRect Button;
-		pRect->HSplitTop(24.0f, &Button, pRect);
-		if(DoButton_MenuTab(pButtonContainer, CurSelection > -1 ? pStr[CurSelection] : "", 0, &Button, IGraphics::CORNER_ALL, NULL, NULL, NULL, NULL, 4.0f))
-			CurDropDownState = 1;
-
-		CUIRect DropDownIcon = Button;
-		DropDownIcon.HMargin(2.0f, &DropDownIcon);
-		DropDownIcon.VSplitRight(5.0f, &DropDownIcon, nullptr);
-		TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
-		TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
-		UI()->DoLabel(&DropDownIcon, FONT_ICON_CIRCLE_CHEVRON_DOWN, DropDownIcon.h * CUI::ms_FontmodHeight, TEXTALIGN_MR);
-		TextRender()->SetRenderFlags(0);
-		TextRender()->SetCurFont(NULL);
-		return CurSelection;
-	}
-}
-
 void CMenus::RenderSettingsGraphics(CUIRect MainView)
 {
 	CUIRect Button;
@@ -1581,23 +1534,19 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	}
 
 	// switches
-	static float s_ScrollValueDrop = 0;
+	CUIRect WindowModeDropDown;
+	MainView.HSplitTop(20.0f, &WindowModeDropDown, &MainView);
+
 	const char *apWindowModes[] = {Localize("Windowed"), Localize("Windowed borderless"), Localize("Windowed fullscreen"), Localize("Desktop fullscreen"), Localize("Fullscreen")};
 	static const int s_NumWindowMode = std::size(apWindowModes);
-	static int s_aWindowModeIDs[s_NumWindowMode];
-	const void *apWindowModeIDs[s_NumWindowMode];
-	for(int i = 0; i < s_NumWindowMode; ++i)
-		apWindowModeIDs[i] = &s_aWindowModeIDs[i];
-	static int s_WindowModeDropDownState = 0;
 
-	static int s_OldSelectedBackend = -1;
-	static int s_OldSelectedGPU = -1;
+	const int OldWindowMode = (g_Config.m_GfxFullscreen ? (g_Config.m_GfxFullscreen == 1 ? 4 : (g_Config.m_GfxFullscreen == 2 ? 3 : 2)) : (g_Config.m_GfxBorderless ? 1 : 0));
 
-	OldSelected = (g_Config.m_GfxFullscreen ? (g_Config.m_GfxFullscreen == 1 ? 4 : (g_Config.m_GfxFullscreen == 2 ? 3 : 2)) : (g_Config.m_GfxBorderless ? 1 : 0));
-
-	static CButtonContainer s_WindowButton;
-	const int NewWindowMode = RenderDropDown(s_WindowModeDropDownState, &MainView, OldSelected, apWindowModeIDs, apWindowModes, s_NumWindowMode, &s_WindowButton, s_ScrollValueDrop);
-	if(OldSelected != NewWindowMode)
+	static CUI::SDropDownState s_WindowModeDropDownState;
+	static CScrollRegion s_WindowModeDropDownScrollRegion;
+	s_WindowModeDropDownState.m_SelectionPopupContext.m_pScrollRegion = &s_WindowModeDropDownScrollRegion;
+	const int NewWindowMode = UI()->DoDropDown(&WindowModeDropDown, OldWindowMode, apWindowModes, s_NumWindowMode, s_WindowModeDropDownState);
+	if(OldWindowMode != NewWindowMode)
 	{
 		if(NewWindowMode == 0)
 			Client()->SetWindowParams(0, false, true);
@@ -1611,6 +1560,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 			Client()->SetWindowParams(1, false, true);
 	}
 
+	MainView.HSplitTop(2.0f, nullptr, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
 	str_format(aBuf, sizeof(aBuf), "%s (%s)", Localize("V-Sync"), Localize("may cause delay"));
 	if(DoButton_CheckBox(&g_Config.m_GfxVsync, aBuf, g_Config.m_GfxVsync, &Button))
@@ -1726,25 +1676,20 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 
 	if(FoundBackendCount > 1)
 	{
-		CUIRect Text;
+		CUIRect Text, BackendDropDown;
 		MainView.HSplitTop(10.0f, nullptr, &MainView);
 		MainView.HSplitTop(20.0f, &Text, &MainView);
+		MainView.HSplitTop(2.0f, nullptr, &MainView);
+		MainView.HSplitTop(20.0f, &BackendDropDown, &MainView);
 		UI()->DoLabel(&Text, Localize("Renderer"), 16.0f, TEXTALIGN_MC);
 
-		static float s_ScrollValueDropBackend = 0;
-		static int s_BackendDropDownState = 0;
-
-		static std::vector<std::unique_ptr<int>> s_vBackendIDs;
-		static std::vector<const void *> s_vBackendIDPtrs;
 		static std::vector<std::string> s_vBackendIDNames;
-		static std::vector<const char *> s_vBackendIDNamesCStr;
+		static std::vector<const char *> s_vpBackendIDNamesCStr;
 		static std::vector<SMenuBackendInfo> s_vBackendInfos;
 
 		size_t BackendCount = FoundBackendCount + 1;
-		s_vBackendIDs.resize(BackendCount);
-		s_vBackendIDPtrs.resize(BackendCount);
 		s_vBackendIDNames.resize(BackendCount);
-		s_vBackendIDNamesCStr.resize(BackendCount);
+		s_vpBackendIDNamesCStr.resize(BackendCount);
 		s_vBackendInfos.resize(BackendCount);
 
 		char aTmpBackendName[256];
@@ -1762,22 +1707,16 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 				auto &Info = aaSupportedBackends[i][n];
 				if(Info.m_Found)
 				{
-					if(s_vBackendIDs[CurCounter].get() == nullptr)
-						s_vBackendIDs[CurCounter] = std::make_unique<int>();
-					s_vBackendIDPtrs[CurCounter] = s_vBackendIDs[CurCounter].get();
-
+					bool IsDefault = IsInfoDefault(Info);
+					str_format(aTmpBackendName, sizeof(aTmpBackendName), "%s (%d.%d.%d)%s%s", Info.m_pBackendName, Info.m_Major, Info.m_Minor, Info.m_Patch, IsDefault ? " - " : "", IsDefault ? Localize("default") : "");
+					s_vBackendIDNames[CurCounter] = aTmpBackendName;
+					s_vpBackendIDNamesCStr[CurCounter] = s_vBackendIDNames[CurCounter].c_str();
+					if(str_comp_nocase(Info.m_pBackendName, g_Config.m_GfxBackend) == 0 && g_Config.m_GfxGLMajor == Info.m_Major && g_Config.m_GfxGLMinor == Info.m_Minor && g_Config.m_GfxGLPatch == Info.m_Patch)
 					{
-						bool IsDefault = IsInfoDefault(Info);
-						str_format(aTmpBackendName, sizeof(aTmpBackendName), "%s (%d.%d.%d)%s%s", Info.m_pBackendName, Info.m_Major, Info.m_Minor, Info.m_Patch, IsDefault ? " - " : "", IsDefault ? Localize("default") : "");
-						s_vBackendIDNames[CurCounter] = aTmpBackendName;
-						s_vBackendIDNamesCStr[CurCounter] = s_vBackendIDNames[CurCounter].c_str();
-						if(str_comp_nocase(Info.m_pBackendName, g_Config.m_GfxBackend) == 0 && g_Config.m_GfxGLMajor == Info.m_Major && g_Config.m_GfxGLMinor == Info.m_Minor && g_Config.m_GfxGLPatch == Info.m_Patch)
-						{
-							OldSelectedBackend = CurCounter;
-						}
-
-						s_vBackendInfos[CurCounter] = Info;
+						OldSelectedBackend = CurCounter;
 					}
+
+					s_vBackendInfos[CurCounter] = Info;
 					++CurCounter;
 				}
 			}
@@ -1791,13 +1730,9 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		else
 		{
 			// custom selected one
-			if(s_vBackendIDs[CurCounter].get() == nullptr)
-				s_vBackendIDs[CurCounter] = std::make_unique<int>();
-			s_vBackendIDPtrs[CurCounter] = s_vBackendIDs[CurCounter].get();
-
 			str_format(aTmpBackendName, sizeof(aTmpBackendName), "%s (%s %d.%d.%d)", Localize("custom"), g_Config.m_GfxBackend, g_Config.m_GfxGLMajor, g_Config.m_GfxGLMinor, g_Config.m_GfxGLPatch);
 			s_vBackendIDNames[CurCounter] = aTmpBackendName;
-			s_vBackendIDNamesCStr[CurCounter] = s_vBackendIDNames[CurCounter].c_str();
+			s_vpBackendIDNamesCStr[CurCounter] = s_vBackendIDNames[CurCounter].c_str();
 			OldSelectedBackend = CurCounter;
 
 			s_vBackendInfos[CurCounter].m_pBackendName = "custom";
@@ -1806,14 +1741,14 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 			s_vBackendInfos[CurCounter].m_Patch = g_Config.m_GfxGLPatch;
 		}
 
+		static int s_OldSelectedBackend = -1;
 		if(s_OldSelectedBackend == -1)
 			s_OldSelectedBackend = OldSelectedBackend;
 
-		static int s_BackendCount = 0;
-		s_BackendCount = BackendCount;
-
-		static CButtonContainer s_BackendButton;
-		const int NewBackend = RenderDropDown(s_BackendDropDownState, &MainView, OldSelectedBackend, s_vBackendIDPtrs.data(), s_vBackendIDNamesCStr.data(), s_BackendCount, &s_BackendButton, s_ScrollValueDropBackend);
+		static CUI::SDropDownState s_BackendDropDownState;
+		static CScrollRegion s_BackendDropDownScrollRegion;
+		s_BackendDropDownState.m_SelectionPopupContext.m_pScrollRegion = &s_BackendDropDownScrollRegion;
+		const int NewBackend = UI()->DoDropDown(&BackendDropDown, OldSelectedBackend, s_vpBackendIDNamesCStr.data(), BackendCount, s_BackendDropDownState);
 		if(OldSelectedBackend != NewBackend)
 		{
 			str_copy(g_Config.m_GfxBackend, s_vBackendInfos[NewBackend].m_pBackendName);
@@ -1830,35 +1765,27 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	const auto &GPUList = Graphics()->GetGPUs();
 	if(GPUList.m_vGPUs.size() > 1)
 	{
-		CUIRect Text;
+		CUIRect Text, GpuDropDown;
 		MainView.HSplitTop(10.0f, nullptr, &MainView);
 		MainView.HSplitTop(20.0f, &Text, &MainView);
-		UI()->DoLabel(&Text, Localize("Graphics cards"), 16.0f, TEXTALIGN_MC);
+		MainView.HSplitTop(2.0f, nullptr, &MainView);
+		MainView.HSplitTop(20.0f, &GpuDropDown, &MainView);
+		UI()->DoLabel(&Text, Localize("Graphics card"), 16.0f, TEXTALIGN_MC);
 
-		static float s_ScrollValueDropGPU = 0;
-		static int s_GPUDropDownState = 0;
-
-		static std::vector<std::unique_ptr<int>> s_vGPUIDs;
-		static std::vector<const void *> s_vGPUIDPtrs;
-		static std::vector<const char *> s_vGPUIDNames;
+		static std::vector<const char *> s_vpGPUIDNames;
 
 		size_t GPUCount = GPUList.m_vGPUs.size() + 1;
-		s_vGPUIDs.resize(GPUCount);
-		s_vGPUIDPtrs.resize(GPUCount);
-		s_vGPUIDNames.resize(GPUCount);
+		s_vpGPUIDNames.resize(GPUCount);
 
 		char aCurDeviceName[256 + 4];
 
 		int OldSelectedGPU = -1;
 		for(size_t i = 0; i < GPUCount; ++i)
 		{
-			if(s_vGPUIDs[i].get() == nullptr)
-				s_vGPUIDs[i] = std::make_unique<int>();
-			s_vGPUIDPtrs[i] = s_vGPUIDs[i].get();
 			if(i == 0)
 			{
-				str_format(aCurDeviceName, sizeof(aCurDeviceName), "%s(%s)", Localize("auto"), GPUList.m_AutoGPU.m_aName);
-				s_vGPUIDNames[i] = aCurDeviceName;
+				str_format(aCurDeviceName, sizeof(aCurDeviceName), "%s (%s)", Localize("auto"), GPUList.m_AutoGPU.m_aName);
+				s_vpGPUIDNames[i] = aCurDeviceName;
 				if(str_comp("auto", g_Config.m_GfxGPUName) == 0)
 				{
 					OldSelectedGPU = 0;
@@ -1866,7 +1793,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 			}
 			else
 			{
-				s_vGPUIDNames[i] = GPUList.m_vGPUs[i - 1].m_aName;
+				s_vpGPUIDNames[i] = GPUList.m_vGPUs[i - 1].m_aName;
 				if(str_comp(GPUList.m_vGPUs[i - 1].m_aName, g_Config.m_GfxGPUName) == 0)
 				{
 					OldSelectedGPU = i;
@@ -1874,14 +1801,14 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 			}
 		}
 
-		static int s_GPUCount = 0;
-		s_GPUCount = GPUCount;
-
+		static int s_OldSelectedGPU = -1;
 		if(s_OldSelectedGPU == -1)
 			s_OldSelectedGPU = OldSelectedGPU;
 
-		static CButtonContainer s_GpuButton;
-		const int NewGPU = RenderDropDown(s_GPUDropDownState, &MainView, OldSelectedGPU, s_vGPUIDPtrs.data(), s_vGPUIDNames.data(), s_GPUCount, &s_GpuButton, s_ScrollValueDropGPU);
+		static CUI::SDropDownState s_GpuDropDownState;
+		static CScrollRegion s_GpuDropDownScrollRegion;
+		s_GpuDropDownState.m_SelectionPopupContext.m_pScrollRegion = &s_GpuDropDownScrollRegion;
+		const int NewGPU = UI()->DoDropDown(&GpuDropDown, OldSelectedGPU, s_vpGPUIDNames.data(), GPUCount, s_GpuDropDownState);
 		if(OldSelectedGPU != NewGPU)
 		{
 			if(NewGPU == 0)

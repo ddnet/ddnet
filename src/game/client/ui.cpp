@@ -16,6 +16,8 @@
 
 #include <limits>
 
+using namespace FontIcons;
+
 void CUIElement::Init(CUI *pUI, int RequestedRectCount)
 {
 	m_pUI = pUI;
@@ -1570,6 +1572,58 @@ void CUI::ShowPopupSelection(float X, float Y, SSelectionPopupContext *pContext)
 		}
 	}
 	DoPopupMenu(pContext, X, Y, pContext->m_Width, PopupHeight, pContext, PopupSelection, pContext->m_Props);
+}
+
+int CUI::DoDropDown(CUIRect *pRect, int CurSelection, const char **pStrs, int Num, SDropDownState &State)
+{
+	if(!State.m_Init)
+	{
+		State.m_UiElement.Init(this, -1);
+		State.m_Init = true;
+	}
+
+	const auto LabelFunc = [CurSelection, pStrs]() {
+		return CurSelection > -1 ? pStrs[CurSelection] : "";
+	};
+
+	SMenuButtonProperties Props;
+	Props.m_HintRequiresStringCheck = true;
+	Props.m_HintCanChangePositionOrSize = true;
+	if(IsPopupOpen(&State.m_SelectionPopupContext))
+		Props.m_Corners = IGraphics::CORNER_ALL & (~State.m_SelectionPopupContext.m_Props.m_Corners);
+	if(DoButton_Menu(State.m_UiElement, &State.m_ButtonContainer, LabelFunc, pRect, Props))
+	{
+		State.m_SelectionPopupContext.Reset();
+		State.m_SelectionPopupContext.m_Props.m_BorderColor = ColorRGBA(0.7f, 0.7f, 0.7f, 0.9f);
+		State.m_SelectionPopupContext.m_Props.m_BackgroundColor = ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f);
+		for(int i = 0; i < Num; ++i)
+			State.m_SelectionPopupContext.m_vEntries.emplace_back(pStrs[i]);
+		State.m_SelectionPopupContext.m_EntryHeight = pRect->h;
+		State.m_SelectionPopupContext.m_EntryPadding = pRect->h >= 20.0f ? 2.0f : 1.0f;
+		State.m_SelectionPopupContext.m_FontSize = (State.m_SelectionPopupContext.m_EntryHeight - 2 * State.m_SelectionPopupContext.m_EntryPadding) * CUI::ms_FontmodHeight;
+		State.m_SelectionPopupContext.m_Width = pRect->w;
+		State.m_SelectionPopupContext.m_AlignmentHeight = pRect->h;
+		State.m_SelectionPopupContext.m_TransparentButtons = true;
+		ShowPopupSelection(pRect->x, pRect->y, &State.m_SelectionPopupContext);
+	}
+
+	CUIRect DropDownIcon;
+	pRect->HMargin(2.0f, &DropDownIcon);
+	DropDownIcon.VSplitRight(5.0f, &DropDownIcon, nullptr);
+	TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
+	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
+	DoLabel(&DropDownIcon, FONT_ICON_CIRCLE_CHEVRON_DOWN, DropDownIcon.h * CUI::ms_FontmodHeight, TEXTALIGN_MR);
+	TextRender()->SetRenderFlags(0);
+	TextRender()->SetCurFont(nullptr);
+
+	if(State.m_SelectionPopupContext.m_SelectionIndex >= 0)
+	{
+		const int NewSelection = State.m_SelectionPopupContext.m_SelectionIndex;
+		State.m_SelectionPopupContext.Reset();
+		return NewSelection;
+	}
+
+	return CurSelection;
 }
 
 CUI::EPopupMenuFunctionResult CUI::PopupColorPicker(void *pContext, CUIRect View, bool Active)
