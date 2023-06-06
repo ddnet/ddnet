@@ -89,6 +89,10 @@ Usage:
 class CScrollRegion : private CUIElementBase
 {
 public:
+	// TODO: Properly fix whatever is causing the 1-pixel discrepancy in scrolling rect height and remove this magic value.
+	// Currently this must be added when calculating the required height of a UI rect for a scroll region to get a perfect fit.
+	static constexpr float HEIGHT_MAGIC_FIX = 1.0f;
+
 	enum EScrollRelative
 	{
 		SCROLLRELATIVE_UP = -1,
