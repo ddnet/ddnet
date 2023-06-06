@@ -10,6 +10,7 @@ struct CScrollRegionParams
 	bool m_Active;
 	float m_ScrollbarWidth;
 	float m_ScrollbarMargin;
+	bool m_ScrollbarNoMarginRight;
 	float m_SliderMinHeight;
 	float m_ScrollUnit;
 	ColorRGBA m_ClipBgColor;
@@ -30,6 +31,7 @@ struct CScrollRegionParams
 		m_Active = true;
 		m_ScrollbarWidth = 20.0f;
 		m_ScrollbarMargin = 5.0f;
+		m_ScrollbarNoMarginRight = false;
 		m_SliderMinHeight = 25.0f;
 		m_ScrollUnit = 10.0f;
 		m_ClipBgColor = ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f);
