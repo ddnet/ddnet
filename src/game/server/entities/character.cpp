@@ -2227,12 +2227,17 @@ void CCharacter::Pause(bool Pause)
 			ResetHook();
 			GameWorld()->ReleaseHooked(GetPlayer()->GetCID());
 		}
+		m_PausedTick = Server()->Tick();
 	}
 	else
 	{
 		m_Core.m_Vel = vec2(0, 0);
 		GameServer()->m_World.m_Core.m_apCharacters[m_pPlayer->GetCID()] = &m_Core;
 		GameServer()->m_World.InsertEntity(this);
+		if(m_Core.m_FreezeStart > 0 && m_PausedTick >= 0)
+		{
+			m_Core.m_FreezeStart += Server()->Tick() - m_PausedTick;
+		}
 	}
 }
 
