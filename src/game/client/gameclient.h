@@ -25,13 +25,13 @@
 #include "components/chat.h"
 #include "components/console.h"
 #include "components/controls.h"
+#include "components/countdowns.h"
 #include "components/countryflags.h"
 #include "components/damageind.h"
 #include "components/debughud.h"
 #include "components/effects.h"
 #include "components/emoticon.h"
 #include "components/flow.h"
-#include "components/freezebars.h"
 #include "components/ghost.h"
 #include "components/hud.h"
 #include "components/items.h"
@@ -136,7 +136,7 @@ public:
 
 	CPlayers m_Players;
 	CNamePlates m_NamePlates;
-	CFreezeBars m_FreezeBars;
+	CCountdowns m_Countdowns;
 	CItems m_Items;
 	CMapImages m_MapImages;
 

@@ -43,12 +43,12 @@
 #include "components/chat.h"
 #include "components/console.h"
 #include "components/controls.h"
+#include "components/countdowns.h"
 #include "components/countryflags.h"
 #include "components/damageind.h"
 #include "components/debughud.h"
 #include "components/effects.h"
 #include "components/emoticon.h"
-#include "components/freezebars.h"
 #include "components/ghost.h"
 #include "components/hud.h"
 #include "components/items.h"
@@ -129,7 +129,7 @@ void CGameClient::OnConsoleInit()
 					      &m_NamePlates,
 					      &m_Particles.m_RenderExtra,
 					      &m_Particles.m_RenderGeneral,
-					      &m_FreezeBars,
+					      &m_Countdowns,
 					      &m_DamageInd,
 					      &m_Hud,
 					      &m_Spectator,

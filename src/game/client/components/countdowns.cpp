@@ -1,8 +1,8 @@
 #include <game/client/gameclient.h>
 
-#include "freezebars.h"
+#include "countdowns.h"
 
-void CFreezeBars::RenderFreezeBar(const int ClientID)
+void CCountdowns::RenderFreezeBar(const int ClientID)
 {
 	const float FreezeBarWidth = 64.0f;
 	const float FreezeBarHalfWidth = 32.0f;
@@ -36,7 +36,7 @@ void CFreezeBars::RenderFreezeBar(const int ClientID)
 	RenderFreezeBarPos(Position.x, Position.y, FreezeBarWidth, FreezeBarHight, FreezeProgress, Alpha);
 }
 
-void CFreezeBars::RenderFreezeBarPos(float x, const float y, const float width, const float height, float Progress, const float Alpha)
+void CCountdowns::RenderFreezeBarPos(float x, const float y, const float width, const float height, float Progress, const float Alpha)
 {
 	Progress = clamp(Progress, 0.0f, 1.0f);
 
@@ -187,19 +187,60 @@ void CFreezeBars::RenderFreezeBarPos(float x, const float y, const float width, 
 	Graphics()->WrapNormal();
 }
 
-inline bool CFreezeBars::IsPlayerInfoAvailable(int ClientID) const
+inline bool CCountdowns::IsPlayerInfoAvailable(int ClientID) const
 {
 	const void *pPrevInfo = Client()->SnapFindItem(IClient::SNAP_PREV, NETOBJTYPE_PLAYERINFO, ClientID);
 	const void *pInfo = Client()->SnapFindItem(IClient::SNAP_CURRENT, NETOBJTYPE_PLAYERINFO, ClientID);
 	return pPrevInfo && pInfo;
 }
 
-void CFreezeBars::OnRender()
+void CCountdowns::GenerateFreezeStars()
 {
-	if(!g_Config.m_ClShowFreezeBars)
+	for(int ClientID = 0; ClientID < MAX_CLIENTS; ClientID++)
 	{
-		return;
+		if(!m_pClient->m_Snap.m_aCharacters[ClientID].m_Active || !IsPlayerInfoAvailable(ClientID))
+		{
+			continue;
+		}
+		// We use GameTick here to emulate the old freeze star behaviour as good as possible (we could use PredGameTick)
+		const int GameTick = Client()->GameTick(g_Config.m_ClDummy);
+		if(m_LastGenerateTick[ClientID] >= GameTick)
+		{
+			continue;
+		}
+
+		// pCharacter contains the predicted character for local players or the last snap for players who are spectated
+		CCharacterCore *pCharacter = &m_pClient->m_aClients[ClientID].m_Predicted;
+		if(pCharacter->m_FreezeEnd <= 0 || pCharacter->m_FreezeStart == 0 || pCharacter->m_FreezeEnd <= GameTick)
+		{
+			continue;
+		}
+
+		const int FreezeTime = pCharacter->m_FreezeEnd - GameTick;
+		// Server sends not every tick a snap
+		if(FreezeTime % Client()->GameTickSpeed() == Client()->GameTickSpeed() - 1)
+		{
+			m_LastGenerateTick[ClientID] = GameTick;
+			m_pClient->m_DamageInd.CreateDamageInd(m_pClient->m_aClients[ClientID].m_RenderPos, 0, m_pClient->IsOtherTeam(ClientID) ? g_Config.m_ClShowOthersAlpha / 100.0f : 1.0f, (FreezeTime + 1) / Client()->GameTickSpeed());
+		}
+		else if(FreezeTime % Client()->GameTickSpeed() == Client()->GameTickSpeed() - 2)
+		{
+			m_LastGenerateTick[ClientID] = GameTick;
+			m_pClient->m_DamageInd.CreateDamageInd(m_pClient->m_aClients[ClientID].m_RenderPos, 0, m_pClient->IsOtherTeam(ClientID) ? g_Config.m_ClShowOthersAlpha / 100.0f : 1.0f, (FreezeTime + 2) / Client()->GameTickSpeed());
+		}
 	}
+}
+
+void CCountdowns::OnInit()
+{
+	for(int &LastGenerateTick : m_LastGenerateTick)
+	{
+		LastGenerateTick = 0;
+	}
+}
+
+void CCountdowns::RenderFreezeBars()
+{
 	// get screen edges to avoid rendering offscreen
 	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
@@ -235,5 +276,17 @@ void CFreezeBars::OnRender()
 	if(LocalClientID != -1 && m_pClient->m_Snap.m_aCharacters[LocalClientID].m_Active && IsPlayerInfoAvailable(LocalClientID))
 	{
 		RenderFreezeBar(LocalClientID);
+	}
+}
+
+void CCountdowns::OnRender()
+{
+	if(g_Config.m_ClShowFreezeCountdown == 1)
+	{
+		RenderFreezeBars();
+	}
+	else if(g_Config.m_ClShowFreezeCountdown == 2)
+	{
+		GenerateFreezeStars();
 	}
 }

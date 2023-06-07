@@ -2554,14 +2554,25 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowhudPlayerSpeed, Localize("Show player speed"), &g_Config.m_ClShowhudPlayerSpeed, &Section, LineSize);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowhudPlayerAngle, Localize("Show player target angle"), &g_Config.m_ClShowhudPlayerAngle, &Section, LineSize);
 
-		// Freeze bar settings
-		RightView.HSplitTop(SectionTotalMargin + 3 * LineSize, &Section, &RightView);
+		// Freeze countdown settings
+		RightView.HSplitTop(SectionTotalMargin + 4 * LineSize, &Section, &RightView);
 		Section.Margin(SectionMargin, &Section);
 
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowFreezeBars, Localize("Show freeze bars"), &g_Config.m_ClShowFreezeBars, &Section, LineSize);
+		static int s_ShowFreezeStars = 0;
+		Section.HSplitTop(LineSize, &Button, &Section);
+		if(DoButton_CheckBox(&s_ShowFreezeStars, Localize("Show freeze stars"), g_Config.m_ClShowFreezeCountdown == 2, &Button))
 		{
-			Section.HSplitTop(2 * LineSize, &Button, &Section);
-			if(g_Config.m_ClShowFreezeBars)
+			g_Config.m_ClShowFreezeCountdown = g_Config.m_ClShowFreezeCountdown == 2 ? 0 : 2;
+		}
+
+		Section.HSplitTop(2 * LineSize, &Button, &Section);
+		if(DoButton_CheckBox(&g_Config.m_ClShowFreezeCountdown, Localize("Show freeze bars"), g_Config.m_ClShowFreezeCountdown == 1, &Button))
+		{
+			g_Config.m_ClShowFreezeCountdown = g_Config.m_ClShowFreezeCountdown == 1 ? 0 : 1;
+		}
+
+		{
+			if(g_Config.m_ClShowFreezeCountdown == 1)
 			{
 				UI()->DoScrollbarOption(&g_Config.m_ClFreezeBarsAlphaInsideFreeze, &g_Config.m_ClFreezeBarsAlphaInsideFreeze, &Button, Localize("Opacity of freeze bars inside freeze"), 0, 100, &CUI::ms_LinearScrollbarScale, CUI::SCROLLBAR_OPTION_MULTILINE, "%");
 			}

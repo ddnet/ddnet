@@ -2189,6 +2189,8 @@ if(CLIENT)
     components/console.h
     components/controls.cpp
     components/controls.h
+    components/countdowns.cpp
+    components/countdowns.h
     components/countryflags.cpp
     components/countryflags.h
     components/damageind.cpp
@@ -2201,8 +2203,6 @@ if(CLIENT)
     components/emoticon.h
     components/flow.cpp
     components/flow.h
-    components/freezebars.cpp
-    components/freezebars.h
     components/ghost.cpp
     components/ghost.h
     components/hud.cpp
