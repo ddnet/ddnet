@@ -2003,37 +2003,33 @@ bool CMenus::RenderLanguageSelection(CUIRect MainView)
 void CMenus::RenderSettings(CUIRect MainView)
 {
 	// render background
-	CUIRect Temp, TabBar, RestartWarning;
+	CUIRect Button, TabBar, RestartWarning;
 	MainView.VSplitRight(120.0f, &MainView, &TabBar);
 	MainView.Draw(ms_ColorTabbarActive, IGraphics::CORNER_B, 10.0f);
 	MainView.Margin(10.0f, &MainView);
 	MainView.HSplitBottom(15.0f, &MainView, &RestartWarning);
-	TabBar.HSplitTop(50.0f, &Temp, &TabBar);
-	Temp.Draw(ms_ColorTabbarActive, IGraphics::CORNER_BR, 10.0f);
+	TabBar.HSplitTop(50.0f, &Button, &TabBar);
+	Button.Draw(ms_ColorTabbarActive, IGraphics::CORNER_BR, 10.0f);
 
-	MainView.HSplitTop(10.0f, 0, &MainView);
+	MainView.HSplitTop(10.0f, nullptr, &MainView);
 
-	CUIRect Button;
-
-	const char *apTabs[] = {
+	const char *apTabs[SETTINGS_LENGTH] = {
 		Localize("Language"),
 		Localize("General"),
 		Localize("Player"),
-		("Tee"),
+		"Tee",
 		Localize("Appearance"),
 		Localize("Controls"),
 		Localize("Graphics"),
 		Localize("Sound"),
 		Localize("DDNet"),
 		Localize("Assets")};
-	static CButtonContainer s_aTabButtons[sizeof(apTabs)];
+	static CButtonContainer s_aTabButtons[SETTINGS_LENGTH];
 
-	int NumTabs = (int)std::size(apTabs);
-
-	for(int i = 0; i < NumTabs; i++)
+	for(int i = 0; i < SETTINGS_LENGTH; i++)
 	{
-		TabBar.HSplitTop(10, &Button, &TabBar);
-		TabBar.HSplitTop(26, &Button, &TabBar);
+		TabBar.HSplitTop(10.0f, nullptr, &TabBar);
+		TabBar.HSplitTop(26.0f, &Button, &TabBar);
 		if(DoButton_MenuTab(&s_aTabButtons[i], apTabs[i], g_Config.m_UiSettingsPage == i, &Button, IGraphics::CORNER_R, &m_aAnimatorsSettingsTab[i]))
 			g_Config.m_UiSettingsPage = i;
 	}
@@ -2481,14 +2477,14 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 	if(DoButton_MenuTab(&s_aPageTabs[APPEARANCE_TAB_LASER], Localize("Laser"), s_CurTab == APPEARANCE_TAB_LASER, &Page6Tab, IGraphics::CORNER_R, NULL, NULL, NULL, NULL, 4))
 		s_CurTab = APPEARANCE_TAB_LASER;
 
-	MainView.HSplitTop(10.0f, 0x0, &MainView); // Margin
+	MainView.HSplitTop(10.0f, nullptr, &MainView);
 
 	const float LineSize = 20.0f;
 	const float ColorPickerLineSize = 25.0f;
 	const float SectionMargin = 5.0f;
-	const float SectionTotalMargin = 10.0f; // SectionMargin * 2;
+	const float SectionTotalMargin = SectionMargin * 2;
 	const float HeadlineFontSize = 20.0f;
-	const float HeadlineAndVMargin = 30.0f; // HeadlineFontSize + SectionTotalMargin;
+	const float HeadlineAndVMargin = HeadlineFontSize + SectionTotalMargin;
 	const float MarginToNextSection = 5.0f;
 
 	const float ColorPickerLabelSize = 13.0f;
