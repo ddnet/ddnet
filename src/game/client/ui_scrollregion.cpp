@@ -157,6 +157,7 @@ void CScrollRegion::End()
 			m_SliderGrabPos.y = UI()->MouseY() - Slider.y;
 			m_AnimTargetScrollY = m_ScrollY;
 			m_AnimTime = 0.0f;
+			m_Params.m_Active = true;
 		}
 	}
 	else if(InsideRail && UI()->MouseButtonClicked(0))
@@ -167,6 +168,7 @@ void CScrollRegion::End()
 		m_SliderGrabPos.y = Slider.h / 2.0f;
 		m_AnimTargetScrollY = m_ScrollY;
 		m_AnimTime = 0.0f;
+		m_Params.m_Active = true;
 	}
 	else if(UI()->CheckActiveItem(pID) && !UI()->MouseButton(0))
 	{

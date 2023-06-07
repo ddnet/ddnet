@@ -134,6 +134,7 @@ public:
 	bool IsRectClipped(const CUIRect &Rect) const;
 	bool IsScrollbarShown() const;
 	bool IsAnimating() const;
+	const CScrollRegionParams &Params() const { return m_Params; }
 };
 
 #endif

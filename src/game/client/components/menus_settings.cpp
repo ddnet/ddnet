@@ -363,15 +363,13 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 		m_Dummy ^= 1;
 	}
 
-	static bool s_ListBoxUsed = false;
-	if(UI()->CheckActiveItem(pClan) || UI()->CheckActiveItem(pName))
-		s_ListBoxUsed = false;
-
 	// country flag selector
 	MainView.HSplitTop(20.0f, 0, &MainView);
 	int OldSelected = -1;
 	static CListBox s_ListBox;
-	s_ListBox.DoStart(50.0f, m_pClient->m_CountryFlags.Num(), 10, 3, OldSelected, &MainView, true, &s_ListBoxUsed);
+	if(UI()->CheckActiveItem(&s_ClanInput) || UI()->CheckActiveItem(&s_NameInput))
+		s_ListBox.SetActive(false);
+	s_ListBox.DoStart(50.0f, m_pClient->m_CountryFlags.Num(), 10, 3, OldSelected, &MainView);
 
 	for(size_t i = 0; i < m_pClient->m_CountryFlags.Num(); ++i)
 	{
@@ -379,7 +377,7 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 		if(pEntry->m_CountryCode == *pCountry)
 			OldSelected = i;
 
-		const CListboxItem Item = s_ListBox.DoNextItem(&pEntry->m_CountryCode, OldSelected >= 0 && (size_t)OldSelected == i, &s_ListBoxUsed);
+		const CListboxItem Item = s_ListBox.DoNextItem(&pEntry->m_CountryCode, OldSelected >= 0 && (size_t)OldSelected == i);
 		if(!Item.m_Visible)
 			continue;
 
@@ -1565,15 +1563,16 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	static const float sc_RowHeightResList = 22.0f;
 	static const float sc_FontSizeResListHeader = 12.0f;
 	static const float sc_FontSizeResList = 10.0f;
-	bool ListBoxUsed = !UI()->IsPopupOpen();
-	int OldSelected = -1;
+
 	{
 		int G = std::gcd(g_Config.m_GfxScreenWidth, g_Config.m_GfxScreenHeight);
 		str_format(aBuf, sizeof(aBuf), "%s: %dx%d @%dhz %d bit (%d:%d)", Localize("Current"), (int)(g_Config.m_GfxScreenWidth * Graphics()->ScreenHiDPIScale()), (int)(g_Config.m_GfxScreenHeight * Graphics()->ScreenHiDPIScale()), g_Config.m_GfxScreenRefreshRate, g_Config.m_GfxColorDepth, g_Config.m_GfxScreenWidth / G, g_Config.m_GfxScreenHeight / G);
+		UI()->DoLabel(&ModeLabel, aBuf, sc_FontSizeResListHeader, TEXTALIGN_MC);
 	}
 
-	UI()->DoLabel(&ModeLabel, aBuf, sc_FontSizeResListHeader, TEXTALIGN_MC);
-	s_ListBox.DoStart(sc_RowHeightResList, s_NumNodes, 1, 3, OldSelected, &ModeList, true, &ListBoxUsed);
+	int OldSelected = -1;
+	s_ListBox.SetActive(!UI()->IsPopupOpen());
+	s_ListBox.DoStart(sc_RowHeightResList, s_NumNodes, 1, 3, OldSelected, &ModeList);
 
 	for(int i = 0; i < s_NumNodes; ++i)
 	{
@@ -1586,7 +1585,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 			OldSelected = i;
 		}
 
-		const CListboxItem Item = s_ListBox.DoNextItem(&s_aModes[i], OldSelected == i, &ListBoxUsed);
+		const CListboxItem Item = s_ListBox.DoNextItem(&s_aModes[i], OldSelected == i);
 		if(!Item.m_Visible)
 			continue;
 
@@ -2059,7 +2058,7 @@ bool CMenus::RenderLanguageSelection(CUIRect MainView)
 
 	const int OldSelected = s_SelectedLanguage;
 
-	s_ListBox.DoStart(24.0f, g_Localization.Languages().size(), 1, 3, s_SelectedLanguage, &MainView, true);
+	s_ListBox.DoStart(24.0f, g_Localization.Languages().size(), 1, 3, s_SelectedLanguage, &MainView);
 
 	for(const auto &Language : g_Localization.Languages())
 	{

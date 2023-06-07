@@ -184,10 +184,9 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		g_Config.m_UiToolboxPage = (g_Config.m_UiToolboxPage + 3 + Direction) % 3;
 	}
 
-	bool ListBoxUsed = !UI()->IsPopupOpen();
-
 	static CListBox s_ListBox;
-	s_ListBox.DoStart(ms_ListheaderHeight, NumServers, 1, 3, -1, &View, false, &ListBoxUsed);
+	s_ListBox.SetActive(!UI()->IsPopupOpen());
+	s_ListBox.DoStart(ms_ListheaderHeight, NumServers, 1, 3, -1, &View, false);
 
 	int NumPlayers = 0;
 	static int s_PrevSelectedIndex = -1;
@@ -224,7 +223,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			pItem->m_pUIElement = UI()->GetNewUIElement(UIRectCount);
 		}
 
-		const CListboxItem ListItem = s_ListBox.DoNextItem(pItem, str_comp(pItem->m_aAddress, g_Config.m_UiServerAddress) == 0, &ListBoxUsed);
+		const CListboxItem ListItem = s_ListBox.DoNextItem(pItem, str_comp(pItem->m_aAddress, g_Config.m_UiServerAddress) == 0);
 		if(ListItem.m_Selected)
 			m_SelectedIndex = i;
 
@@ -984,11 +983,9 @@ CUI::EPopupMenuFunctionResult CMenus::PopupCountrySelection(void *pContext, CUIR
 	SPopupCountrySelectionContext *pPopupContext = static_cast<SPopupCountrySelectionContext *>(pContext);
 	CMenus *pMenus = pPopupContext->m_pMenus;
 
-	bool ListBoxUsed = Active;
-
 	static CListBox s_ListBox;
-	int OldSelected = -1;
-	s_ListBox.DoStart(50.0f, pMenus->m_pClient->m_CountryFlags.Num(), 8, 1, OldSelected, &View, false, &ListBoxUsed);
+	s_ListBox.SetActive(Active);
+	s_ListBox.DoStart(50.0f, pMenus->m_pClient->m_CountryFlags.Num(), 8, 1, -1, &View, false);
 
 	if(pPopupContext->m_New)
 	{
@@ -999,10 +996,8 @@ CUI::EPopupMenuFunctionResult CMenus::PopupCountrySelection(void *pContext, CUIR
 	for(size_t i = 0; i < pMenus->m_pClient->m_CountryFlags.Num(); ++i)
 	{
 		const CCountryFlags::CCountryFlag *pEntry = pMenus->m_pClient->m_CountryFlags.GetByIndex(i);
-		if(pEntry->m_CountryCode == pPopupContext->m_Selection)
-			OldSelected = i;
 
-		const CListboxItem Item = s_ListBox.DoNextItem(pEntry, OldSelected >= 0 && (size_t)OldSelected == i, &ListBoxUsed);
+		const CListboxItem Item = s_ListBox.DoNextItem(pEntry, pEntry->m_CountryCode == pPopupContext->m_Selection);
 		if(!Item.m_Visible)
 			continue;
 
@@ -1020,7 +1015,7 @@ CUI::EPopupMenuFunctionResult CMenus::PopupCountrySelection(void *pContext, CUIR
 	}
 
 	const int NewSelected = s_ListBox.DoEnd();
-	pPopupContext->m_Selection = pMenus->m_pClient->m_CountryFlags.GetByIndex(NewSelected)->m_CountryCode;
+	pPopupContext->m_Selection = NewSelected >= 0 ? pMenus->m_pClient->m_CountryFlags.GetByIndex(NewSelected)->m_CountryCode : -1;
 	if(s_ListBox.WasItemSelected() || s_ListBox.WasItemActivated())
 	{
 		g_Config.m_BrFilterCountry = 1;
