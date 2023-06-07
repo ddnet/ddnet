@@ -1078,20 +1078,39 @@ float CMenus::RenderSettingsControlsJoystick(CUIRect View)
 		{
 			// show joystick device selection if more than one available or just the joystick name if there is only one
 			{
+				CUIRect JoystickDropDown;
 				View.HSplitTop(Spacing, nullptr, &View);
-				View.HSplitTop(ButtonHeight, &Button, &View);
-				char aBuf[96];
-				str_format(aBuf, sizeof(aBuf), Localize("Controller %d: %s"), Input()->GetActiveJoystick()->GetIndex(), Input()->GetActiveJoystick()->GetName());
+				View.HSplitTop(ButtonHeight, &JoystickDropDown, &View);
 				if(NumJoysticks > 1)
 				{
-					static CButtonContainer s_ButtonJoystickId;
-					if(DoButton_Menu(&s_ButtonJoystickId, aBuf, 0, &Button))
-						Input()->SelectNextJoystick();
-					GameClient()->m_Tooltips.DoToolTip(&s_ButtonJoystickId, &Button, Localize("Click to cycle through all available controllers."));
+					static std::vector<std::string> s_vJoystickNames;
+					static std::vector<const char *> s_vpJoystickNames;
+					s_vJoystickNames.resize(NumJoysticks);
+					s_vpJoystickNames.resize(NumJoysticks);
+
+					for(int i = 0; i < NumJoysticks; ++i)
+					{
+						char aBuf[256];
+						str_format(aBuf, sizeof(aBuf), "%s %d: %s", Localize("Controller"), i, Input()->GetJoystick(i)->GetName());
+						s_vJoystickNames[i] = aBuf;
+						s_vpJoystickNames[i] = s_vJoystickNames[i].c_str();
+					}
+
+					static CUI::SDropDownState s_JoystickDropDownState;
+					static CScrollRegion s_JoystickDropDownScrollRegion;
+					s_JoystickDropDownState.m_SelectionPopupContext.m_pScrollRegion = &s_JoystickDropDownScrollRegion;
+					const int CurrentJoystick = Input()->GetActiveJoystick()->GetIndex();
+					const int NewJoystick = UI()->DoDropDown(&JoystickDropDown, CurrentJoystick, s_vpJoystickNames.data(), s_vpJoystickNames.size(), s_JoystickDropDownState);
+					if(NewJoystick != CurrentJoystick)
+					{
+						Input()->SetActiveJoystick(NewJoystick);
+					}
 				}
 				else
 				{
-					UI()->DoLabel(&Button, aBuf, 13.0f, TEXTALIGN_ML);
+					char aBuf[256];
+					str_format(aBuf, sizeof(aBuf), "%s 0: %s", Localize("Controller"), Input()->GetJoystick(0)->GetName());
+					UI()->DoLabel(&JoystickDropDown, aBuf, 13.0f, TEXTALIGN_ML);
 				}
 			}
 
