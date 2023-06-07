@@ -164,7 +164,7 @@ void CMenus::DoButton_KeySelect(const void *pID, const char *pText, const CUIRec
 
 int CMenus::DoButton_MenuTab(CButtonContainer *pButtonContainer, const char *pText, int Checked, const CUIRect *pRect, int Corners, SUIAnimator *pAnimator, const ColorRGBA *pDefaultColor, const ColorRGBA *pActiveColor, const ColorRGBA *pHoverColor, float EdgeRounding)
 {
-	const bool MouseInside = UI()->MouseInside(pRect);
+	const bool MouseInside = UI()->HotItem() == pButtonContainer;
 	CUIRect Rect = *pRect;
 
 	if(pAnimator != NULL)
@@ -1806,7 +1806,7 @@ void CMenus::RenderThemeSelection(CUIRect MainView)
 
 	static CListBox s_ListBox;
 	s_ListBox.DoHeader(&MainView, Localize("Theme"), 20.0f);
-	s_ListBox.DoStart(20.0f, vThemes.size(), 1, 3, SelectedTheme, nullptr, true);
+	s_ListBox.DoStart(20.0f, vThemes.size(), 1, 3, SelectedTheme);
 
 	for(int i = 0; i < (int)vThemes.size(); i++)
 	{
