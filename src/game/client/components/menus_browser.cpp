@@ -617,7 +617,6 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 {
 	CUIRect ServerFilter = View, FilterHeader;
 	const float FontSize = 12.0f;
-	ServerFilter.HSplitBottom(0.0f, &ServerFilter, 0);
 
 	// server filter
 	ServerFilter.HSplitTop(ms_ListheaderHeight, &FilterHeader, &ServerFilter);
@@ -1109,7 +1108,7 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 		for(auto &Label : s_aLabels)
 		{
 			LeftColumn.HSplitTop(15.0f, &Row, &LeftColumn);
-			UI()->DoLabel(&Row, Localize(Label), FontSize, TEXTALIGN_ML);
+			UI()->DoLabel(&Row, Label, FontSize, TEXTALIGN_ML);
 		}
 
 		RightColumn.HSplitTop(15.0f, &Row, &RightColumn);
@@ -1692,7 +1691,7 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 			ToolboxPage = 0;
 
 		static CButtonContainer s_InfoTab;
-		if(DoButton_MenuTab(&s_InfoTab, Localize("Info"), ToolboxPage == 1, &TabButton1, 0, NULL, NULL, NULL, NULL, 4.0f))
+		if(DoButton_MenuTab(&s_InfoTab, Localize("Info"), ToolboxPage == 1, &TabButton1, IGraphics::CORNER_NONE, NULL, NULL, NULL, NULL, 4.0f))
 			ToolboxPage = 1;
 
 		static CButtonContainer s_FriendsTab;
