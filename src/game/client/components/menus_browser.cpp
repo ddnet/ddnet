@@ -775,7 +775,8 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 
 			CUIRect TypesRect, Left, Right;
 
-			static int s_aTypeButtons[64];
+			static std::vector<unsigned char> s_vTypeButtons;
+			s_vTypeButtons.resize(MaxTypes);
 
 			while(NumTypes > 0)
 			{
@@ -801,7 +802,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 					Rect.w = TypesWidth;
 					Rect.h = TypesHeight;
 
-					int Click = UI()->DoButtonLogic(&s_aTypeButtons[TypeIndex], 0, &Rect);
+					int Click = UI()->DoButtonLogic(&s_vTypeButtons[TypeIndex], 0, &Rect);
 					if(Click == 1 || Click == 2)
 					{
 						// left/right click to toggle filter
@@ -869,7 +870,8 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 
 			CUIRect FlagsRect;
 
-			static int s_aFlagButtons[64];
+			static std::vector<unsigned char> s_vFlagButtons;
+			s_vFlagButtons.resize(MaxFlags);
 
 			while(NumFlags > 0)
 			{
@@ -896,7 +898,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 					Rect.w = FlagWidth;
 					Rect.h = FlagHeight;
 
-					int Click = UI()->DoButtonLogic(&s_aFlagButtons[CountryIndex], 0, &Rect);
+					int Click = UI()->DoButtonLogic(&s_vFlagButtons[CountryIndex], 0, &Rect);
 					if(Click == 1 || Click == 2)
 					{
 						// left/right click to toggle filter
