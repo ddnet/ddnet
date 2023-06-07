@@ -320,8 +320,7 @@ void CMenus::RenderPlayers(CUIRect MainView)
 		Cursor.m_LineWidth = Button.w;
 		TextRender()->TextEx(&Cursor, CurrentClient.m_aClan, -1);
 
-		ColorRGBA Color(1.0f, 1.0f, 1.0f, 0.5f);
-		m_pClient->m_CountryFlags.Render(CurrentClient.m_Country, &Color,
+		m_pClient->m_CountryFlags.Render(CurrentClient.m_Country, ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f),
 			Button2.x, Button2.y + Button2.h / 2.0f - 0.75f * Button2.h / 2.0f, 1.5f * Button2.h, 0.75f * Button2.h);
 
 		// ignore chat button

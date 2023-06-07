@@ -687,8 +687,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 		float OldWidth = Rect.w;
 		Rect.w = Rect.h * 2;
 		Rect.x += (OldWidth - Rect.w) / 2.0f;
-		ColorRGBA Color(1.0f, 1.0f, 1.0f, UI()->MouseHovered(&Rect) ? 1.0f : g_Config.m_BrFilterCountry ? 0.9f : 0.5f);
-		m_pClient->m_CountryFlags.Render(g_Config.m_BrFilterCountryIndex, &Color, Rect.x, Rect.y, Rect.w, Rect.h);
+		m_pClient->m_CountryFlags.Render(g_Config.m_BrFilterCountryIndex, ColorRGBA(1.0f, 1.0f, 1.0f, UI()->MouseHovered(&Rect) ? 1.0f : g_Config.m_BrFilterCountry ? 0.9f : 0.5f), Rect.x, Rect.y, Rect.w, Rect.h);
 
 		if(UI()->DoButtonLogic(&g_Config.m_BrFilterCountryIndex, 0, &Rect))
 		{
@@ -946,8 +945,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 						ServerBrowser()->Refresh(ServerBrowser()->GetCurrentType());
 					}
 
-					ColorRGBA Color(1.0f, 1.0f, 1.0f, Active ? 1.0f : 0.2f);
-					m_pClient->m_CountryFlags.Render(FlagID, &Color, Pos.x, Pos.y, FlagWidth, FlagHeight);
+					m_pClient->m_CountryFlags.Render(FlagID, ColorRGBA(1.0f, 1.0f, 1.0f, Active ? 1.0f : 0.2f), Pos.x, Pos.y, FlagWidth, FlagHeight);
 				}
 			}
 		}
@@ -1013,8 +1011,7 @@ CUI::EPopupMenuFunctionResult CMenus::PopupCountrySelection(void *pContext, CUIR
 		const float OldWidth = FlagRect.w;
 		FlagRect.w = FlagRect.h * 2.0f;
 		FlagRect.x += (OldWidth - FlagRect.w) / 2.0f;
-		ColorRGBA Color(1.0f, 1.0f, 1.0f, 1.0f);
-		pMenus->m_pClient->m_CountryFlags.Render(pEntry->m_CountryCode, &Color, FlagRect.x, FlagRect.y, FlagRect.w, FlagRect.h);
+		pMenus->m_pClient->m_CountryFlags.Render(pEntry->m_CountryCode, ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f), FlagRect.x, FlagRect.y, FlagRect.w, FlagRect.h);
 
 		pMenus->UI()->DoLabel(&Label, pEntry->m_aCountryCodeString, 10.0f, TEXTALIGN_MC);
 	}
@@ -1284,10 +1281,8 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 				TextRender()->TextEx(&Cursor, pClan, -1);
 
 			// flag
-			ColorRGBA FColor(1.0f, 1.0f, 1.0f, 0.5f);
-			m_pClient->m_CountryFlags.Render(CurrentClient.m_Country, &FColor, Flag.x,
-				Flag.y + ((Flag.h - Flag.w / 2) / 2),
-				Flag.w, Flag.w / 2);
+			m_pClient->m_CountryFlags.Render(CurrentClient.m_Country, ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f),
+				Flag.x, Flag.y + ((Flag.h - Flag.w / 2) / 2), Flag.w, Flag.w / 2);
 		}
 
 		const int NewSelected = s_ListBox.DoEnd();

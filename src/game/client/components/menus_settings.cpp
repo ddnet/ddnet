@@ -390,8 +390,7 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 		float OldWidth = FlagRect.w;
 		FlagRect.w = FlagRect.h * 2;
 		FlagRect.x += (OldWidth - FlagRect.w) / 2.0f;
-		ColorRGBA Color(1.0f, 1.0f, 1.0f, 1.0f);
-		m_pClient->m_CountryFlags.Render(pEntry->m_CountryCode, &Color, FlagRect.x, FlagRect.y, FlagRect.w, FlagRect.h);
+		m_pClient->m_CountryFlags.Render(pEntry->m_CountryCode, ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f), FlagRect.x, FlagRect.y, FlagRect.w, FlagRect.h);
 
 		if(pEntry->m_Texture.IsValid())
 		{
@@ -2071,8 +2070,7 @@ bool CMenus::RenderLanguageSelection(CUIRect MainView)
 		Item.m_Rect.VSplitLeft(Item.m_Rect.h * 2.0f, &FlagRect, &Label);
 		FlagRect.VMargin(6.0f, &FlagRect);
 		FlagRect.HMargin(3.0f, &FlagRect);
-		ColorRGBA Color(1.0f, 1.0f, 1.0f, 1.0f);
-		m_pClient->m_CountryFlags.Render(Language.m_CountryCode, &Color, FlagRect.x, FlagRect.y, FlagRect.w, FlagRect.h);
+		m_pClient->m_CountryFlags.Render(Language.m_CountryCode, ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f), FlagRect.x, FlagRect.y, FlagRect.w, FlagRect.h);
 
 		UI()->DoLabel(&Label, Language.m_Name.c_str(), 16.0f, TEXTALIGN_ML);
 	}
