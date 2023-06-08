@@ -850,7 +850,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 						ServerBrowser()->Refresh(ServerBrowser()->GetCurrentType());
 					}
 
-					TextRender()->TextColor(1.0f, 1.0f, 1.0f, Active ? 1.0f : 0.2f);
+					TextRender()->TextColor(1.0f, 1.0f, 1.0f, (Active ? 0.9f : 0.2f) + (UI()->HotItem() == &s_vTypeButtons[TypeIndex] ? 0.1f : 0.0f));
 					UI()->DoLabel(&Rect, pName, FontSize, TEXTALIGN_MC);
 					TextRender()->TextColor(1.0, 1.0, 1.0, 1.0f);
 				}
@@ -946,7 +946,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 						ServerBrowser()->Refresh(ServerBrowser()->GetCurrentType());
 					}
 
-					m_pClient->m_CountryFlags.Render(FlagID, ColorRGBA(1.0f, 1.0f, 1.0f, Active ? 1.0f : 0.2f), Pos.x, Pos.y, FlagWidth, FlagHeight);
+					m_pClient->m_CountryFlags.Render(FlagID, ColorRGBA(1.0f, 1.0f, 1.0f, (Active ? 0.9f : 0.2f) + (UI()->HotItem() == &s_vFlagButtons[CountryIndex] ? 0.1f : 0.0f)), Pos.x, Pos.y, FlagWidth, FlagHeight);
 				}
 			}
 		}
