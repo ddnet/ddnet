@@ -124,7 +124,10 @@ int CMenus::DoButton_Menu(CButtonContainer *pButtonContainer, const char *pText,
 {
 	CUIRect Text = *pRect;
 
+	if(Checked)
+		Color = ColorRGBA(0.6f, 0.6f, 0.6f, 0.5f);
 	Color.a *= UI()->ButtonColorMul(pButtonContainer);
+
 	pRect->Draw(Color, Corners, r);
 
 	if(pImageName)

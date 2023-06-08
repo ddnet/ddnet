@@ -1224,26 +1224,23 @@ float CUI::DoScrollbarH(const void *pID, const CUIRect *pRect, float Current, co
 	return ReturnValue;
 }
 
-void CUI::DoScrollbarOption(const void *pID, int *pOption, const CUIRect *pRect, const char *pStr, int Min, int Max, const IScrollbarScale *pScale, unsigned Flags)
+void CUI::DoScrollbarOption(const void *pID, int *pOption, const CUIRect *pRect, const char *pStr, int Min, int Max, const IScrollbarScale *pScale, unsigned Flags, const char *pSuffix)
 {
 	const bool Infinite = Flags & CUI::SCROLLBAR_OPTION_INFINITE;
 	const bool NoClampValue = Flags & CUI::SCROLLBAR_OPTION_NOCLAMPVALUE;
-	dbg_assert(!(Infinite && NoClampValue), "cannot combine SCROLLBAR_OPTION_INFINITE and SCROLLBAR_OPTION_NOCLAMPVALUE");
+	const bool MultiLine = Flags & CUI::SCROLLBAR_OPTION_MULTILINE;
 
 	int Value = *pOption;
 	if(Infinite)
 	{
-		Min += 1;
 		Max += 1;
 		if(Value == 0)
 			Value = Max;
 	}
 
-	char aBufMax[256];
-	str_format(aBufMax, sizeof(aBufMax), "%s: %i", pStr, Max);
 	char aBuf[256];
 	if(!Infinite || Value != Max)
-		str_format(aBuf, sizeof(aBuf), "%s: %i", pStr, Value);
+		str_format(aBuf, sizeof(aBuf), "%s: %i%s", pStr, Value, pSuffix);
 	else
 		str_format(aBuf, sizeof(aBuf), "%s: ∞", pStr);
 
@@ -1253,49 +1250,27 @@ void CUI::DoScrollbarOption(const void *pID, int *pOption, const CUIRect *pRect,
 		Value = clamp(Value, Min, Max);
 	}
 
-	float FontSize = pRect->h * CUI::ms_FontmodHeight * 0.8f;
-	float VSplitVal = 10.0f + maximum(TextRender()->TextWidth(FontSize, aBuf, -1, std::numeric_limits<float>::max()), TextRender()->TextWidth(FontSize, aBufMax, -1, std::numeric_limits<float>::max()));
-
 	CUIRect Label, ScrollBar;
-	pRect->VSplitLeft(VSplitVal, &Label, &ScrollBar);
+	if(MultiLine)
+		pRect->HSplitMid(&Label, &ScrollBar);
+	else
+		pRect->VSplitMid(&Label, &ScrollBar, minimum(10.0f, pRect->w * 0.05f));
+
+	const float FontSize = Label.h * CUI::ms_FontmodHeight * 0.8f;
 	DoLabel(&Label, aBuf, FontSize, TEXTALIGN_ML);
 
 	Value = pScale->ToAbsolute(DoScrollbarH(pID, &ScrollBar, pScale->ToRelative(Value, Min, Max)), Min, Max);
-	if(Infinite)
+	if(NoClampValue && ((Value == Min && *pOption < Min) || (Value == Max && *pOption > Max)))
+	{
+		Value = *pOption; // use previous out of range value instead if the scrollbar is at the edge
+	}
+	else if(Infinite)
 	{
 		if(Value == Max)
 			Value = 0;
 	}
-	else if(NoClampValue)
-	{
-		if((Value == Min && *pOption < Min) || (Value == Max && *pOption > Max))
-			Value = *pOption; // use previous out of range value instead if the scrollbar is at the edge
-	}
 
 	*pOption = Value;
-}
-
-void CUI::DoScrollbarOptionLabeled(const void *pID, int *pOption, const CUIRect *pRect, const char *pStr, const char **ppLabels, int NumLabels, const IScrollbarScale *pScale)
-{
-	const int Max = NumLabels - 1;
-	int Value = clamp(*pOption, 0, Max);
-
-	char aBuf[256];
-	str_format(aBuf, sizeof(aBuf), "%s: %s", pStr, ppLabels[Value]);
-
-	float FontSize = pRect->h * CUI::ms_FontmodHeight * 0.8f;
-
-	CUIRect Label, ScrollBar;
-	pRect->VSplitRight(60.0f, &Label, &ScrollBar);
-	Label.VSplitRight(10.0f, &Label, 0);
-	DoLabel(&Label, aBuf, FontSize, TEXTALIGN_MC);
-
-	Value = pScale->ToAbsolute(DoScrollbarH(pID, &ScrollBar, pScale->ToRelative(Value, 0, Max)), 0, Max);
-
-	if(HotItem() != pID && !CheckActiveItem(pID) && MouseHovered(pRect) && MouseButtonClicked(0))
-		Value = (Value + 1) % NumLabels;
-
-	*pOption = clamp(Value, 0, Max);
 }
 
 void CUI::DoPopupMenu(const SPopupMenuId *pID, int X, int Y, int Width, int Height, void *pContext, FPopupMenuFunction pfnFunc, int Corners)
