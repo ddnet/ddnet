@@ -1769,7 +1769,7 @@ int CMenus::Render()
 	UI()->RenderPopupMenus();
 
 	// Handle this escape hotkey after popup menus
-	if(m_MenuPage == PAGE_SETTINGS && !m_ShowStart && Client()->State() == IClient::STATE_OFFLINE && UI()->ConsumeHotkey(CUI::HOTKEY_ESCAPE))
+	if(!m_ShowStart && Client()->State() == IClient::STATE_OFFLINE && UI()->ConsumeHotkey(CUI::HOTKEY_ESCAPE))
 	{
 		m_ShowStart = true;
 	}
