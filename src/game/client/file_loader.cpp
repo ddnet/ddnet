@@ -33,29 +33,29 @@ void CMassFileLoader::SetMatchExpression(const std::string& Match)
 		if(!str_comp(Name, ".") || !str_comp(Name, ".."))
 			return 0;
 
-		if(!fs_is_readable(AbsolutePath.c_str()))
+		if(!UserData->m_pThis->m_Regex.has_value() || std::regex_search(RelevantFilename, UserData->m_pThis->m_Regex.value()))
 		{
-			*UserData->m_pContinue = TryCallback<bool>(UserData->m_pThis->m_fnLoadFailedCallback, LOAD_ERROR_DIRECTORY_UNREADABLE, AbsolutePath.c_str());
-			return 0;
-		}
-
-		if(!(UserData->m_pThis->m_Flags & LOAD_FLAGS_FOLLOW_SYMBOLIC_LINKS) && fs_is_symlink(AbsolutePath.c_str()))
-		{
-			*UserData->m_pContinue = TryCallback<bool>(UserData->m_pThis->m_fnLoadFailedCallback, LOAD_ERROR_UNWANTED_SYMLINK, AbsolutePath.c_str());
-			return 0;
-		}
-
-		if(!IsDir)
-		{
-			if(!UserData->m_pThis->m_Regex.has_value() || std::regex_search(RelevantFilename, UserData->m_pThis->m_Regex.value()))
+			if(!fs_is_readable(AbsolutePath.c_str()))
+			{
+				*UserData->m_pContinue = TryCallback<bool>(UserData->m_pThis->m_fnLoadFailedCallback, LOAD_ERROR_DIRECTORY_UNREADABLE, AbsolutePath.c_str());
+				return 0;
+			}
+			if(!(UserData->m_pThis->m_Flags & LOAD_FLAGS_FOLLOW_SYMBOLIC_LINKS) && fs_is_symlink(AbsolutePath.c_str()))
+			{
+				*UserData->m_pContinue = TryCallback<bool>(UserData->m_pThis->m_fnLoadFailedCallback, LOAD_ERROR_UNWANTED_SYMLINK, AbsolutePath.c_str());
+				return 0;
+			}
+			if(!IsDir)
+			{
 				pFileList->push_back(Name);
-		}
-		else if(UserData->m_pThis->m_Flags & LOAD_FLAGS_RECURSE_SUBDIRECTORIES)
-		{
-			UserData->m_pThis->m_PathCollection.insert({AbsolutePath, new std::vector<std::string>});
-			// Note that adding data to a SORTED container that is currently being iterated on higher in scope would invalidate the iterator. This is not sorted
-			SListDirectoryCallbackUserInfo Data{&AbsolutePath, UserData->m_pThis, UserData->m_pContinue};
-			UserData->m_pThis->m_pStorage->ListDirectory(IStorage::TYPE_ALL, AbsolutePath.c_str(), ListDirectoryCallback, &Data); // Directory item is a directory, must be recursed
+			}
+			else if(UserData->m_pThis->m_Flags & LOAD_FLAGS_RECURSE_SUBDIRECTORIES)
+			{
+				UserData->m_pThis->m_PathCollection.insert({AbsolutePath, new std::vector<std::string>});
+				// Note that adding data to a SORTED container that is currently being iterated on higher in scope would invalidate the iterator. This is not sorted
+				SListDirectoryCallbackUserInfo Data{&AbsolutePath, UserData->m_pThis, UserData->m_pContinue};
+				UserData->m_pThis->m_pStorage->ListDirectory(IStorage::TYPE_ALL, AbsolutePath.c_str(), ListDirectoryCallback, &Data); // Directory item is a directory, must be recursed
+			}
 		}
 	}
 
@@ -64,7 +64,7 @@ void CMassFileLoader::SetMatchExpression(const std::string& Match)
 
 unsigned int CMassFileLoader::Load()
 {
-	m_Continue = true;
+	//	m_Continue = true;
 	if(m_PathCollection.empty() /* No valid paths added */
 		|| !m_pStorage /* Invalid storage */
 		|| !m_fnFileLoadedCallback /* File loaded callback unimplemented */
@@ -156,9 +156,9 @@ unsigned int CMassFileLoader::Load()
 }
 
 /* TODO:
- * [ ] test error callback return value, make sure if false is returned the callback is never called again
+ * [+] test error callback return value, make sure if false is returned the callback is never called again
  * [ ] test every combination of flags
- * [+, ] test symlink and readable detection on windows and unix
+ * [+,+] test symlink and readable detection on windows and unix
  * ^ (waiting on working readable/symlink detection)
  * [x] see if you can error check regex
 

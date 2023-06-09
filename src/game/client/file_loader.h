@@ -11,6 +11,84 @@
 #include <filesystem>
 #include "engine/storage.h"
 
+/* The purpose of this API is to allow loading of files en masse with minimal setup. A perk of presenting it in this way is
+ * that it's much easier to parallelize, and an asynchronous implementation is provided in CFileLoaderAsync. You must provide,
+ * at minimum, flags to define behavior of the search (can be none; see LOAD_FLAGS), a path or set of paths to search through,
+ * an error callback (through which the course of action is defined when a particular error is encountered; see LOAD_ERROR)
+ * and a file loaded callback (through which the file data is received). Optionally, a regular expression can be used to define
+ * which files or directories to include, in order to avoid the loading of an unwanted file's data before it can be filtered
+ * out in the file load callback. Files are not guaranteed to be loaded in any particular order.
+ *
+ * Usage:
+ *      1. Construct with a valid IStorage pointer and necessary flags (see LOAD_FLAGS);
+ *      2. Set file loaded and load failed callbacks (see LOAD_ERROR);
+ *      3. Add paths;
+ *      4. Add match regular expression (optional);
+ *      5. Call implementation-specific load function
+ *
+ * 1.
+ *      The constructor takes 2 parameters. The first is a pointer to an IStorage instance that must be valid at the time of loading.
+ *      The second describes the flags that will be used in the file loading process.
+ *
+ * 2.
+ *      The load failed callback takes 2 parameters and returns a bool. Its first parameter is a LOAD_ERROR which describes the nature
+ *      of the error and what the value of the second parameter (user data) will be. The second parameter can be cast into the type
+ *      specified in the LOAD_ERROR value to get error-specific data. The error callback's return value is used to determine whether
+ *      or not to proceed after a potentially non-fatal issue has been encountered in the current 'step' (defined as any direct
+ *      method call to this API; for example, returning false to an error presented by SetPaths() will not at all influence
+ *      the behavior of later steps).
+ *
+ *      You can set it by calling SetLoadFailedCallback(std::function<LoadFailedCallbackSignature> Function), where
+ *      LoadFailedCallbackSignature is bool(LOAD_ERROR Error, const void *pUser).
+ *
+ *      The file loaded callback takes 3 parameters and has no return value. Its first parameter is the name of the file loaded, the
+ *      second is a pointer to the file data, and the third is the size of the data in bytes. This data must be copied if it's meant
+ *      to be retained; the pointer cannot be held after the callback is returned from. If the flags contain LOAD_FLAGS_DONT_READ_FILE,
+ *      the second and third parameters will both be null.
+ *
+ *      You can set it by calling SetLoadFailedCallback(std::function<LoadFailedCallbackSignature> Function), where
+ *      LoadFailedCallbackSignature is bool(LOAD_ERROR Error, const void *pUser).
+ *
+ * 3.
+ *      SetPaths(...) takes any amount of paths and has no return value. For each path, the validity of it is checked and if it's
+ *      valid it will be searched through when the implementation-specific load function is called. Paths starting with ':' are treated
+ *      as "basic" paths, a distinction made by IStorage that describes paths whose locations are not absolute and can exist in a place
+ *      that only IStorage APIs know how to find. If you are not providing a basic path, it's expected that the path is absolute.
+ *      For example:
+ *              ":foo"; A directory called foo in the storage paths (usually the game's base directory and DDNet's application data folder).
+ *              "/home/user/foo/bar"; Some other absolute path, e.g., not basic.
+ *
+ *      If any errors are detected, the load failed callback is fired.
+ *
+ * 4.
+ *      SetMatchExpression() takes a single string that will be used to filter files & directories to be included in the search via.
+ *      regular expression. It has no return value. If this method is not called or it's called with an invalid expression, the load
+ *      process will match all files it finds and subsequently fire the file loaded callback with their data. If the flags contain
+ *      LOAD_FLAGS_ABSOLUTE_PATH, the string that the match is queried against will be the absolute file path of the file. If not, the
+ *      string will be only the filename.
+ *      For example (a file "bar" from a path ":foo"):
+ *              LOAD_FLAGS_ABSOLUTE_PATH on; Matches against ".../foo/bar"
+ *              LOAD_FLAGS_ABSOLUTE_PATH off; Matches against "bar"
+ *
+ *      If any errors are detected, the load failed callback is fired. Note that there is no detection in the reference or async
+ *      implementations because exceptions are disabled and std::regex's only form of error reporting is through std::regex_error,
+ *      which we cannot catch.
+ *
+ * 5.
+ *      The implementation-specific load function has undefined parameters and return type, but it is the last 'step' in the file loading
+ *      process and will always be only the step to trigger the file loaded callback (and subsequently the file read from the disk, under normal
+ *      circumstances).
+ *      In the reference implementation, it takes shape in Load(), which returns the number of files counted. This call will block
+ *      its calling thread until the entire operation has completed.
+ *      In the asynchronous implementation, it takes shape in LoadAsync(), which has no return value. This call will simply begin the process
+ *      that fires the file loaded callback and will not block its calling thread. This has the benefit of allowing time-insensitive assets
+ *      to eventually be loaded without waiting for them to load in their completion (such as skins or assets).
+ *
+
+ *
+ * You probably shouldn't pass this around or re-use it.
+ */
+
 // With exceptions disabled, we can't make use of bad_function_call so we have to do something like this in order to error properly
 
 template<typename FnArgs>
@@ -31,16 +109,6 @@ void TryCallback(std::function<Fn> Function, FnArgs... Args)
 	CallbackAssert(Function);
 	Function(Args...);
 }
-
-/* Usage:
- * 1. Construct with a pointer to a valid IStorage instance and necessary flags (see LOAD_FLAGS);
- * 2. Set file loaded and load failed callbacks (see LOAD_ERROR);
- * 3. Add paths (prepend ":" for basic paths, e.g. ":skins");
- * 4. Add match regular expression (optional);
- * 5. Call implementation-specific load function
- *
- * You probably shouldn't pass this around or re-use it.
- */
 
 // This is not a 'real' interface, it doesn't interact with the kernel or extend IInterface.
 // I just don't know which convention to use for an abstract class.
@@ -106,12 +174,9 @@ public:
 
 	IMassFileLoader(uint8_t Flags) { m_Flags = Flags; };
 
-	// Set the paths the loader will search through.
-	//    virtual void SetPaths(const std::initializer_list<std::string> &vPaths /* aPaths? */) = 0;
-	//    virtual void SetPaths(const Ts ...vPaths /* aPaths? */) = 0;
 	virtual void SetMatchExpression(const std::string &Match) = 0; // Optional; will load all files otherwise
 
-	// Do not hold this pointer (pData). Immediately dereference and copy
+	// Files are not guaranteed to come in any particular order. Do not hold this pointer (pData). Immediately dereference and copy
 	using FileLoadedCallbackSignature = void(const std::string &ItemName, const unsigned char *pData, const unsigned int Size);
 	virtual void SetFileLoadedCallback(std::function<FileLoadedCallbackSignature> Function) = 0;
 
