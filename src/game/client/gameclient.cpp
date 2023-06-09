@@ -287,7 +287,7 @@ void CGameClient::OnInit()
 	m_GameSkinLoaded = false;
 	m_ParticlesSkinLoaded = false;
 	m_EmoticonsSkinLoaded = false;
-	m_HudSkinLoaded = false;
+	m_ExtrasSkinLoaded = false;
 
 	// setup load amount, load textures
 	for(int i = 0; i < g_pData->m_NumImages; i++)
@@ -298,8 +298,6 @@ void CGameClient::OnInit()
 			LoadEmoticonsSkin(g_Config.m_ClAssetEmoticons);
 		else if(i == IMAGE_PARTICLES)
 			LoadParticlesSkin(g_Config.m_ClAssetParticles);
-		else if(i == IMAGE_HUD)
-			LoadHudSkin(g_Config.m_ClAssetHud);
 		else if(i == IMAGE_EXTRAS)
 			LoadExtrasSkin(g_Config.m_ClAssetExtras);
 		else
@@ -2741,10 +2739,6 @@ void CGameClient::LoadGameSkin(const char *pPath, bool AsDir)
 
 		Graphics()->UnloadTexture(&m_GameSkin.m_SpritePickupHealth);
 		Graphics()->UnloadTexture(&m_GameSkin.m_SpritePickupArmor);
-		Graphics()->UnloadTexture(&m_GameSkin.m_SpritePickupArmorShotgun);
-		Graphics()->UnloadTexture(&m_GameSkin.m_SpritePickupArmorGrenade);
-		Graphics()->UnloadTexture(&m_GameSkin.m_SpritePickupArmorLaser);
-		Graphics()->UnloadTexture(&m_GameSkin.m_SpritePickupArmorNinja);
 		Graphics()->UnloadTexture(&m_GameSkin.m_SpritePickupGrenade);
 		Graphics()->UnloadTexture(&m_GameSkin.m_SpritePickupShotgun);
 		Graphics()->UnloadTexture(&m_GameSkin.m_SpritePickupLaser);
@@ -2755,11 +2749,6 @@ void CGameClient::LoadGameSkin(const char *pPath, bool AsDir)
 		for(auto &SpritePickupWeapon : m_GameSkin.m_aSpritePickupWeapons)
 		{
 			SpritePickupWeapon = IGraphics::CTextureHandle();
-		}
-
-		for(auto &SpritePickupWeaponArmor : m_GameSkin.m_aSpritePickupWeaponArmor)
-		{
-			SpritePickupWeaponArmor = IGraphics::CTextureHandle();
 		}
 
 		Graphics()->UnloadTexture(&m_GameSkin.m_SpriteFlagBlue);
@@ -2889,10 +2878,6 @@ void CGameClient::LoadGameSkin(const char *pPath, bool AsDir)
 		m_GameSkin.m_SpritePickupGrenade = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_PICKUP_GRENADE]);
 		m_GameSkin.m_SpritePickupLaser = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_PICKUP_LASER]);
 		m_GameSkin.m_SpritePickupNinja = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_PICKUP_NINJA]);
-		m_GameSkin.m_SpritePickupArmorShotgun = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_PICKUP_ARMOR_SHOTGUN]);
-		m_GameSkin.m_SpritePickupArmorGrenade = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_PICKUP_ARMOR_GRENADE]);
-		m_GameSkin.m_SpritePickupArmorNinja = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_PICKUP_ARMOR_NINJA]);
-		m_GameSkin.m_SpritePickupArmorLaser = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_PICKUP_ARMOR_LASER]);
 
 		m_GameSkin.m_aSpritePickupWeapons[0] = m_GameSkin.m_SpritePickupHammer;
 		m_GameSkin.m_aSpritePickupWeapons[1] = m_GameSkin.m_SpritePickupGun;
@@ -2900,11 +2885,6 @@ void CGameClient::LoadGameSkin(const char *pPath, bool AsDir)
 		m_GameSkin.m_aSpritePickupWeapons[3] = m_GameSkin.m_SpritePickupGrenade;
 		m_GameSkin.m_aSpritePickupWeapons[4] = m_GameSkin.m_SpritePickupLaser;
 		m_GameSkin.m_aSpritePickupWeapons[5] = m_GameSkin.m_SpritePickupNinja;
-
-		m_GameSkin.m_aSpritePickupWeaponArmor[0] = m_GameSkin.m_SpritePickupArmorShotgun;
-		m_GameSkin.m_aSpritePickupWeaponArmor[1] = m_GameSkin.m_SpritePickupArmorGrenade;
-		m_GameSkin.m_aSpritePickupWeaponArmor[2] = m_GameSkin.m_SpritePickupArmorNinja;
-		m_GameSkin.m_aSpritePickupWeaponArmor[3] = m_GameSkin.m_SpritePickupArmorLaser;
 
 		// flags
 		m_GameSkin.m_SpriteFlagBlue = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_FLAG_BLUE]);
@@ -3043,10 +3023,22 @@ void CGameClient::LoadParticlesSkin(const char *pPath, bool AsDir)
 	}
 }
 
-void CGameClient::LoadHudSkin(const char *pPath, bool AsDir)
+void CGameClient::LoadExtrasSkin(const char *pPath, bool AsDir)
 {
-	if(m_HudSkinLoaded)
+	if(m_ExtrasSkinLoaded)
 	{
+		// Extra Game
+		Graphics()->UnloadTexture(&m_ExtraGameSkin.m_SpritePickupArmorShotgun);
+		Graphics()->UnloadTexture(&m_ExtraGameSkin.m_SpritePickupArmorGrenade);
+		Graphics()->UnloadTexture(&m_ExtraGameSkin.m_SpritePickupArmorLaser);
+		Graphics()->UnloadTexture(&m_ExtraGameSkin.m_SpritePickupArmorNinja);
+
+		for(auto &SpritePickupWeaponArmor : m_ExtraGameSkin.m_aSpritePickupWeaponArmor)
+		{
+			SpritePickupWeaponArmor = IGraphics::CTextureHandle();
+		}
+
+		// Head up displays
 		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudAirjump);
 		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudAirjumpEmpty);
 		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudSolo);
@@ -3054,14 +3046,6 @@ void CGameClient::LoadHudSkin(const char *pPath, bool AsDir)
 		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudEndlessJump);
 		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudEndlessHook);
 		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudJetpack);
-		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudFreezeBarFullLeft);
-		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudFreezeBarFull);
-		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudFreezeBarEmpty);
-		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudFreezeBarEmptyRight);
-		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudNinjaBarFullLeft);
-		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudNinjaBarFull);
-		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudNinjaBarEmpty);
-		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudNinjaBarEmptyRight);
 		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudHookHitDisabled);
 		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudHammerHitDisabled);
 		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudShotgunHitDisabled);
@@ -3076,78 +3060,23 @@ void CGameClient::LoadHudSkin(const char *pPath, bool AsDir)
 		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudPracticeMode);
 		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudDummyHammer);
 		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudDummyCopy);
-		m_HudSkinLoaded = false;
-	}
+		Graphics()->UnloadTexture(&m_HudSkin.m_SpriteHudAirjumpDisabled);
 
-	char aPath[IO_MAX_PATH_LENGTH];
-	bool IsDefault = false;
-	if(str_comp(pPath, "default") == 0)
-	{
-		str_copy(aPath, g_pData->m_aImages[IMAGE_HUD].m_pFilename);
-		IsDefault = true;
-	}
-	else
-	{
-		if(AsDir)
-			str_format(aPath, sizeof(aPath), "assets/hud/%s/%s", pPath, g_pData->m_aImages[IMAGE_HUD].m_pFilename);
-		else
-			str_format(aPath, sizeof(aPath), "assets/hud/%s.png", pPath);
-	}
+		// On player displays
+		Graphics()->UnloadTexture(&m_OpdSkin.m_SpriteOpdFreezeBarFull);
+		Graphics()->UnloadTexture(&m_OpdSkin.m_SpriteOpdFreezeBarEmpty);
+		Graphics()->UnloadTexture(&m_OpdSkin.m_SpriteOpdNinjaBarFull);
+		Graphics()->UnloadTexture(&m_OpdSkin.m_SpriteOpdNinjaBarEmpty);
+		Graphics()->UnloadTexture(&m_OpdSkin.m_SpriteOpdDirectionArrow);
+		Graphics()->UnloadTexture(&m_OpdSkin.m_SpriteOpdHookStrong);
+		Graphics()->UnloadTexture(&m_OpdSkin.m_SpriteOpdHookWeak);
 
-	CImageInfo ImgInfo;
-	bool PngLoaded = Graphics()->LoadPNG(&ImgInfo, aPath, IStorage::TYPE_ALL);
-	if(!PngLoaded && !IsDefault)
-	{
-		if(AsDir)
-			LoadHudSkin("default");
-		else
-			LoadHudSkin(pPath, true);
-	}
-	else if(PngLoaded && Graphics()->CheckImageDivisibility(aPath, ImgInfo, g_pData->m_aSprites[SPRITE_HUD_AIRJUMP].m_pSet->m_Gridx, g_pData->m_aSprites[SPRITE_HUD_AIRJUMP].m_pSet->m_Gridy, true) && Graphics()->IsImageFormatRGBA(aPath, ImgInfo))
-	{
-		m_HudSkin.m_SpriteHudAirjump = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_AIRJUMP]);
-		m_HudSkin.m_SpriteHudAirjumpEmpty = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_AIRJUMP_EMPTY]);
-		m_HudSkin.m_SpriteHudSolo = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_SOLO]);
-		m_HudSkin.m_SpriteHudCollisionDisabled = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_COLLISION_DISABLED]);
-		m_HudSkin.m_SpriteHudEndlessJump = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_ENDLESS_JUMP]);
-		m_HudSkin.m_SpriteHudEndlessHook = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_ENDLESS_HOOK]);
-		m_HudSkin.m_SpriteHudJetpack = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_JETPACK]);
-		m_HudSkin.m_SpriteHudFreezeBarFullLeft = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_FREEZE_BAR_FULL_LEFT]);
-		m_HudSkin.m_SpriteHudFreezeBarFull = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_FREEZE_BAR_FULL]);
-		m_HudSkin.m_SpriteHudFreezeBarEmpty = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_FREEZE_BAR_EMPTY]);
-		m_HudSkin.m_SpriteHudFreezeBarEmptyRight = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_FREEZE_BAR_EMPTY_RIGHT]);
-		m_HudSkin.m_SpriteHudNinjaBarFullLeft = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_NINJA_BAR_FULL_LEFT]);
-		m_HudSkin.m_SpriteHudNinjaBarFull = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_NINJA_BAR_FULL]);
-		m_HudSkin.m_SpriteHudNinjaBarEmpty = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_NINJA_BAR_EMPTY]);
-		m_HudSkin.m_SpriteHudNinjaBarEmptyRight = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_NINJA_BAR_EMPTY_RIGHT]);
-		m_HudSkin.m_SpriteHudHookHitDisabled = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_HOOK_HIT_DISABLED]);
-		m_HudSkin.m_SpriteHudHammerHitDisabled = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_HAMMER_HIT_DISABLED]);
-		m_HudSkin.m_SpriteHudShotgunHitDisabled = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_SHOTGUN_HIT_DISABLED]);
-		m_HudSkin.m_SpriteHudGrenadeHitDisabled = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_GRENADE_HIT_DISABLED]);
-		m_HudSkin.m_SpriteHudLaserHitDisabled = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_LASER_HIT_DISABLED]);
-		m_HudSkin.m_SpriteHudGunHitDisabled = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_GUN_HIT_DISABLED]);
-		m_HudSkin.m_SpriteHudDeepFrozen = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_DEEP_FROZEN]);
-		m_HudSkin.m_SpriteHudLiveFrozen = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_LIVE_FROZEN]);
-		m_HudSkin.m_SpriteHudTeleportGrenade = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_TELEPORT_GRENADE]);
-		m_HudSkin.m_SpriteHudTeleportGun = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_TELEPORT_GUN]);
-		m_HudSkin.m_SpriteHudTeleportLaser = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_TELEPORT_LASER]);
-		m_HudSkin.m_SpriteHudPracticeMode = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_PRACTICE_MODE]);
-		m_HudSkin.m_SpriteHudDummyHammer = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_DUMMY_HAMMER]);
-		m_HudSkin.m_SpriteHudDummyCopy = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_DUMMY_COPY]);
-
-		m_HudSkinLoaded = true;
-		free(ImgInfo.m_pData);
-	}
-}
-
-void CGameClient::LoadExtrasSkin(const char *pPath, bool AsDir)
-{
-	if(m_ExtrasSkinLoaded)
-	{
-		Graphics()->UnloadTexture(&m_ExtrasSkin.m_SpriteParticleSnowflake);
-
-		for(auto &SpriteParticle : m_ExtrasSkin.m_aSpriteParticles)
+		// Extra Particles
+		Graphics()->UnloadTexture(&m_ExtraParticlesSkin.m_SpriteParticleSnowflake);
+		for(auto &SpriteParticle : m_ExtraParticlesSkin.m_aSpriteParticles)
+		{
 			SpriteParticle = IGraphics::CTextureHandle();
+		}
 
 		m_ExtrasSkinLoaded = false;
 	}
@@ -3178,8 +3107,53 @@ void CGameClient::LoadExtrasSkin(const char *pPath, bool AsDir)
 	}
 	else if(PngLoaded && Graphics()->CheckImageDivisibility(aPath, ImgInfo, g_pData->m_aSprites[SPRITE_PART_SNOWFLAKE].m_pSet->m_Gridx, g_pData->m_aSprites[SPRITE_PART_SNOWFLAKE].m_pSet->m_Gridy, true) && Graphics()->IsImageFormatRGBA(aPath, ImgInfo))
 	{
-		m_ExtrasSkin.m_SpriteParticleSnowflake = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_PART_SNOWFLAKE]);
-		m_ExtrasSkin.m_aSpriteParticles[0] = m_ExtrasSkin.m_SpriteParticleSnowflake;
+		// Extra Game
+		m_ExtraGameSkin.m_SpritePickupArmorShotgun = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_PICKUP_ARMOR_SHOTGUN]);
+		m_ExtraGameSkin.m_SpritePickupArmorGrenade = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_PICKUP_ARMOR_GRENADE]);
+		m_ExtraGameSkin.m_SpritePickupArmorNinja = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_PICKUP_ARMOR_NINJA]);
+		m_ExtraGameSkin.m_SpritePickupArmorLaser = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_PICKUP_ARMOR_LASER]);
+
+		m_ExtraGameSkin.m_aSpritePickupWeaponArmor[0] = m_ExtraGameSkin.m_SpritePickupArmorShotgun;
+		m_ExtraGameSkin.m_aSpritePickupWeaponArmor[1] = m_ExtraGameSkin.m_SpritePickupArmorGrenade;
+		m_ExtraGameSkin.m_aSpritePickupWeaponArmor[2] = m_ExtraGameSkin.m_SpritePickupArmorNinja;
+		m_ExtraGameSkin.m_aSpritePickupWeaponArmor[3] = m_ExtraGameSkin.m_SpritePickupArmorLaser;
+
+		// Head up displays
+		m_HudSkin.m_SpriteHudAirjump = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_AIRJUMP]);
+		m_HudSkin.m_SpriteHudAirjumpEmpty = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_AIRJUMP_EMPTY]);
+		m_HudSkin.m_SpriteHudSolo = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_SOLO]);
+		m_HudSkin.m_SpriteHudCollisionDisabled = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_COLLISION_DISABLED]);
+		m_HudSkin.m_SpriteHudEndlessJump = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_ENDLESS_JUMP]);
+		m_HudSkin.m_SpriteHudEndlessHook = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_ENDLESS_HOOK]);
+		m_HudSkin.m_SpriteHudJetpack = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_JETPACK]);
+		m_HudSkin.m_SpriteHudHookHitDisabled = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_HOOK_HIT_DISABLED]);
+		m_HudSkin.m_SpriteHudHammerHitDisabled = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_HAMMER_HIT_DISABLED]);
+		m_HudSkin.m_SpriteHudShotgunHitDisabled = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_SHOTGUN_HIT_DISABLED]);
+		m_HudSkin.m_SpriteHudGrenadeHitDisabled = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_GRENADE_HIT_DISABLED]);
+		m_HudSkin.m_SpriteHudLaserHitDisabled = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_LASER_HIT_DISABLED]);
+		m_HudSkin.m_SpriteHudGunHitDisabled = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_GUN_HIT_DISABLED]);
+		m_HudSkin.m_SpriteHudDeepFrozen = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_DEEP_FROZEN]);
+		m_HudSkin.m_SpriteHudLiveFrozen = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_LIVE_FROZEN]);
+		m_HudSkin.m_SpriteHudTeleportGrenade = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_TELEPORT_GRENADE]);
+		m_HudSkin.m_SpriteHudTeleportGun = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_TELEPORT_GUN]);
+		m_HudSkin.m_SpriteHudTeleportLaser = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_TELEPORT_LASER]);
+		m_HudSkin.m_SpriteHudPracticeMode = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_PRACTICE_MODE]);
+		m_HudSkin.m_SpriteHudDummyHammer = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_DUMMY_HAMMER]);
+		m_HudSkin.m_SpriteHudDummyCopy = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_DUMMY_COPY]);
+		m_HudSkin.m_SpriteHudAirjumpDisabled = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_HUD_AIRJUMP_DISABLED]);
+		// On player displays
+		m_OpdSkin.m_SpriteOpdFreezeBarFull = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_OPD_FREEZE_BAR_FULL]);
+		m_OpdSkin.m_SpriteOpdFreezeBarEmpty = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_OPD_FREEZE_BAR_EMPTY]);
+		m_OpdSkin.m_SpriteOpdNinjaBarFull = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_OPD_NINJA_BAR_FULL]);
+		m_OpdSkin.m_SpriteOpdNinjaBarEmpty = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_OPD_NINJA_BAR_EMPTY]);
+		m_OpdSkin.m_SpriteOpdDirectionArrow = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_OPD_DIRECTION_ARROW]);
+		m_OpdSkin.m_SpriteOpdHookStrong = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_OPD_HOOK_STRONG]);
+		m_OpdSkin.m_SpriteOpdHookWeak = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_OPD_HOOK_WEAK]);
+
+		// Extra Particles
+		m_ExtraParticlesSkin.m_SpriteParticleSnowflake = Graphics()->LoadSpriteTexture(ImgInfo, &g_pData->m_aSprites[SPRITE_PART_SNOWFLAKE]);
+		m_ExtraParticlesSkin.m_aSpriteParticles[0] = m_ExtraParticlesSkin.m_SpriteParticleSnowflake;
+
 		m_ExtrasSkinLoaded = true;
 		free(ImgInfo.m_pData);
 	}

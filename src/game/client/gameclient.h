@@ -533,7 +533,6 @@ public:
 	void LoadGameSkin(const char *pPath, bool AsDir = false);
 	void LoadEmoticonsSkin(const char *pPath, bool AsDir = false);
 	void LoadParticlesSkin(const char *pPath, bool AsDir = false);
-	void LoadHudSkin(const char *pPath, bool AsDir = false);
 	void LoadExtrasSkin(const char *pPath, bool AsDir = false);
 
 	void RefindSkins();
@@ -594,10 +593,6 @@ public:
 		// pickups
 		IGraphics::CTextureHandle m_SpritePickupHealth;
 		IGraphics::CTextureHandle m_SpritePickupArmor;
-		IGraphics::CTextureHandle m_SpritePickupArmorShotgun;
-		IGraphics::CTextureHandle m_SpritePickupArmorGrenade;
-		IGraphics::CTextureHandle m_SpritePickupArmorNinja;
-		IGraphics::CTextureHandle m_SpritePickupArmorLaser;
 		IGraphics::CTextureHandle m_SpritePickupGrenade;
 		IGraphics::CTextureHandle m_SpritePickupShotgun;
 		IGraphics::CTextureHandle m_SpritePickupLaser;
@@ -606,7 +601,6 @@ public:
 		IGraphics::CTextureHandle m_SpritePickupHammer;
 
 		IGraphics::CTextureHandle m_aSpritePickupWeapons[6];
-		IGraphics::CTextureHandle m_aSpritePickupWeaponArmor[4];
 
 		// flags
 		IGraphics::CTextureHandle m_SpriteFlagBlue;
@@ -660,14 +654,6 @@ public:
 		IGraphics::CTextureHandle m_SpriteHudEndlessJump;
 		IGraphics::CTextureHandle m_SpriteHudEndlessHook;
 		IGraphics::CTextureHandle m_SpriteHudJetpack;
-		IGraphics::CTextureHandle m_SpriteHudFreezeBarFullLeft;
-		IGraphics::CTextureHandle m_SpriteHudFreezeBarFull;
-		IGraphics::CTextureHandle m_SpriteHudFreezeBarEmpty;
-		IGraphics::CTextureHandle m_SpriteHudFreezeBarEmptyRight;
-		IGraphics::CTextureHandle m_SpriteHudNinjaBarFullLeft;
-		IGraphics::CTextureHandle m_SpriteHudNinjaBarFull;
-		IGraphics::CTextureHandle m_SpriteHudNinjaBarEmpty;
-		IGraphics::CTextureHandle m_SpriteHudNinjaBarEmptyRight;
 		IGraphics::CTextureHandle m_SpriteHudHookHitDisabled;
 		IGraphics::CTextureHandle m_SpriteHudHammerHitDisabled;
 		IGraphics::CTextureHandle m_SpriteHudShotgunHitDisabled;
@@ -682,18 +668,41 @@ public:
 		IGraphics::CTextureHandle m_SpriteHudPracticeMode;
 		IGraphics::CTextureHandle m_SpriteHudDummyHammer;
 		IGraphics::CTextureHandle m_SpriteHudDummyCopy;
+		IGraphics::CTextureHandle m_SpriteHudAirjumpDisabled;
 	};
-
 	SClientHudSkin m_HudSkin;
-	bool m_HudSkinLoaded;
 
-	struct SClientExtrasSkin
+	struct SClientOpdSkin
+	{
+		IGraphics::CTextureHandle m_SpriteOpdFreezeBarFull;
+		IGraphics::CTextureHandle m_SpriteOpdFreezeBarEmpty;
+		IGraphics::CTextureHandle m_SpriteOpdNinjaBarFull;
+		IGraphics::CTextureHandle m_SpriteOpdNinjaBarEmpty;
+		IGraphics::CTextureHandle m_SpriteOpdDirectionArrow; // Key press indicator
+		IGraphics::CTextureHandle m_SpriteOpdHookStrong;
+		IGraphics::CTextureHandle m_SpriteOpdHookWeak;
+	};
+	SClientOpdSkin m_OpdSkin;
+
+	struct SClientExtraParticlesSkin
 	{
 		IGraphics::CTextureHandle m_SpriteParticleSnowflake;
 		IGraphics::CTextureHandle m_aSpriteParticles[1];
 	};
+	SClientExtraParticlesSkin m_ExtraParticlesSkin;
 
-	SClientExtrasSkin m_ExtrasSkin;
+	struct SClientExtraGameSkin
+	{
+		// pickups
+		IGraphics::CTextureHandle m_SpritePickupArmorShotgun;
+		IGraphics::CTextureHandle m_SpritePickupArmorGrenade;
+		IGraphics::CTextureHandle m_SpritePickupArmorNinja;
+		IGraphics::CTextureHandle m_SpritePickupArmorLaser;
+
+		IGraphics::CTextureHandle m_aSpritePickupWeaponArmor[4];
+	};
+
+	SClientExtraGameSkin m_ExtraGameSkin;
 	bool m_ExtrasSkinLoaded;
 
 	const std::vector<CSnapEntities> &SnapEntities() { return m_vSnapEntities; }

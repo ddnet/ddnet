@@ -2558,21 +2558,27 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		RightView.HSplitTop(SectionTotalMargin + 4 * LineSize, &Section, &RightView);
 		Section.Margin(SectionMargin, &Section);
 
-		static int s_ShowFreezeStars = 0;
+		Section.HSplitTop(LineSize, &Label, &Section);
+		UI()->DoLabel(&Label, Localize("Show a state change countdown under players"), 13.0f, TEXTALIGN_ML);
+		static int s_StateChangeCountdownToolTip;
+		GameClient()->m_Tooltips.DoToolTip(&s_StateChangeCountdownToolTip, &Label, Localize("It indicates the time till a player unfreezes and the time a player has left to be a ninja"));
+		static int s_ShowCountdownStars = 0;
 		Section.HSplitTop(LineSize, &Button, &Section);
-		if(DoButton_CheckBox(&s_ShowFreezeStars, Localize("Show freeze stars"), g_Config.m_ClShowFreezeCountdown == 2, &Button))
+		if(DoButton_CheckBox(&s_ShowCountdownStars, Localize("Show as stars"), g_Config.m_ClShowStateChangeCountdown == 2, &Button))
 		{
-			g_Config.m_ClShowFreezeCountdown = g_Config.m_ClShowFreezeCountdown == 2 ? 0 : 2;
+			g_Config.m_ClShowStateChangeCountdown = g_Config.m_ClShowStateChangeCountdown == 2 ? 0 : 2;
 		}
+		static int s_StarsCountdownToolTip;
+		GameClient()->m_Tooltips.DoToolTip(&s_StarsCountdownToolTip, &Button, Localize("Stars are emitted from the player every second of the countdown"));
 
 		Section.HSplitTop(2 * LineSize, &Button, &Section);
-		if(DoButton_CheckBox(&g_Config.m_ClShowFreezeCountdown, Localize("Show freeze bars"), g_Config.m_ClShowFreezeCountdown == 1, &Button))
+		if(DoButton_CheckBox(&g_Config.m_ClShowStateChangeCountdown, Localize("Show as bars"), g_Config.m_ClShowStateChangeCountdown == 1, &Button))
 		{
-			g_Config.m_ClShowFreezeCountdown = g_Config.m_ClShowFreezeCountdown == 1 ? 0 : 1;
+			g_Config.m_ClShowStateChangeCountdown = g_Config.m_ClShowStateChangeCountdown == 1 ? 0 : 1;
 		}
 
 		{
-			if(g_Config.m_ClShowFreezeCountdown == 1)
+			if(g_Config.m_ClShowStateChangeCountdown == 1)
 			{
 				UI()->DoScrollbarOption(&g_Config.m_ClFreezeBarsAlphaInsideFreeze, &g_Config.m_ClFreezeBarsAlphaInsideFreeze, &Button, Localize("Opacity of freeze bars inside freeze"), 0, 100, &CUI::ms_LinearScrollbarScale, CUI::SCROLLBAR_OPTION_MULTILINE, "%");
 			}

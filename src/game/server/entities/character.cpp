@@ -878,6 +878,7 @@ void CCharacter::TickPaused()
 	++m_AttackTick;
 	++m_DamageTakenTick;
 	++m_Core.m_Ninja.m_ActivationTick;
+	++m_Core.m_FreezeStart;
 	++m_ReckoningTick;
 	if(m_LastAction != -1)
 		++m_LastAction;

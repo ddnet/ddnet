@@ -211,7 +211,7 @@ void CParticles::RenderGroup(int Group)
 	int ParticleQuadContainerIndex = m_ParticleQuadContainerIndex;
 	if(Group == GROUP_EXTRA)
 	{
-		aParticles = GameClient()->m_ExtrasSkin.m_aSpriteParticles;
+		aParticles = GameClient()->m_ExtraParticlesSkin.m_aSpriteParticles;
 		FirstParticleOffset = SPRITE_PART_SNOWFLAKE;
 		ParticleQuadContainerIndex = m_ExtraParticleQuadContainerIndex;
 	}
