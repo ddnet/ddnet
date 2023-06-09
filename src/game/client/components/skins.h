@@ -27,33 +27,75 @@ public:
 		CImageInfo m_Info;
 	};
 
-	struct CDownloadSkin
-	{
-	private:
+	class ISkinLoader
+	{ // IGetSkin defines the interface of an object that will eventually return a skin PNG
+	public:
+		virtual ISkinLoader *Copy(ISkinLoader &&Other) = 0; // We cannot declare a constructor as virtual so we have to employ virtual constructor idioms
+
+		virtual bool operator<(const ISkinLoader &Other) const = 0;
+		virtual bool operator<(const char *pOther) const = 0;
+		virtual bool operator==(const char *pOther) const = 0;
+		//		virtual ISkinLoader &operator=(ISkinLoader &&Other);
+		virtual const char *GetName() const = 0;
 		char m_aName[24];
 
+	protected:
+	};
+
+	//	struct CLocalSkinLoader : ISkinLoader // Load skin from disk
+	//	{
+	//	public:
+	//		CLocalSkinLoader(CLocalSkinLoader &&Other) = delete;
+	//		CLocalSkinLoader(const char *pName)
+	//		{
+	//			str_copy(m_aName, pName);
+	//		}
+
+	//		~CLocalSkinLoader()
+	//		{
+	//			if(m_pTask)
+	//				m_pTask->Abort();
+	//		}
+	//		bool operator<(const CLocalSkinLoader &Other) const { return str_comp(m_aName, Other.m_aName) < 0; }
+	//		bool operator<(const char *pOther) const { return str_comp(m_aName, pOther) < 0; }
+	//		bool operator==(const char *pOther) const { return !str_comp(m_aName, pOther); }
+
+	//		CLocalSkinLoader &operator=(CLocalSkinLoader &&Other) = default;
+
+	//		const char *GetName() const { return m_aName; }
+	//	};
+
+	struct CSkinDownloader : ISkinLoader // Load skin from the interwebs
+	{
+	private:
 	public:
 		std::shared_ptr<CSkins::CGetPngFile> m_pTask;
 		char m_aPath[IO_MAX_PATH_LENGTH];
 
-		CDownloadSkin(CDownloadSkin &&Other) = default;
-		CDownloadSkin(const char *pName)
+		CSkinDownloader(const char *pName)
 		{
 			str_copy(m_aName, pName);
 		}
 
-		~CDownloadSkin()
+		CSkinDownloader(CSkinDownloader &&Other) = default;
+		ISkinLoader *Copy(ISkinLoader &&Other) override
+		{
+			return new CSkinDownloader(reinterpret_cast<CSkinDownloader &&>(Other));
+			// CSkinDownloader(CSkinDownloader &&Other) = default;
+		}
+
+		~CSkinDownloader()
 		{
 			if(m_pTask)
 				m_pTask->Abort();
 		}
-		bool operator<(const CDownloadSkin &Other) const { return str_comp(m_aName, Other.m_aName) < 0; }
-		bool operator<(const char *pOther) const { return str_comp(m_aName, pOther) < 0; }
-		bool operator==(const char *pOther) const { return !str_comp(m_aName, pOther); }
+		bool operator<(const ISkinLoader &Other) const override { return str_comp(m_aName, Other.m_aName) < 0; }
+		bool operator<(const char *pOther) const override { return str_comp(m_aName, pOther) < 0; }
+		bool operator==(const char *pOther) const override { return !str_comp(m_aName, pOther); }
 
-		CDownloadSkin &operator=(CDownloadSkin &&Other) = default;
+		CSkinDownloader &operator=(CSkinDownloader &&Other) = default;
 
-		const char *GetName() const { return m_aName; }
+		const char *GetName() const override { return m_aName; }
 	};
 
 	typedef std::function<void(int)> TSkinLoadedCBFunc;
@@ -78,7 +120,7 @@ public:
 
 private:
 	std::unordered_map<std::string_view, std::unique_ptr<CSkin>> m_Skins;
-	std::unordered_map<std::string_view, std::unique_ptr<CDownloadSkin>> m_DownloadSkins;
+	std::unordered_map<std::string_view, std::unique_ptr<CSkinDownloader>> m_DownloadSkins;
 	size_t m_DownloadingSkins = 0;
 	char m_aEventSkinPrefix[24];
 

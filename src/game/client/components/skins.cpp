@@ -50,6 +50,10 @@ struct SSkinScanUser
 
 int CSkins::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
 {
+	// test: takes so long
+	return 0;
+	// end test
+
 	auto *pUserReal = (SSkinScanUser *)pUser;
 	CSkins *pSelf = pUserReal->m_pThis;
 
@@ -435,7 +439,7 @@ const CSkin *CSkins::FindImpl(const char *pName)
 		return nullptr;
 	}
 
-	CDownloadSkin Skin{pName};
+	CSkinDownloader Skin{pName};
 
 	char aUrl[IO_MAX_PATH_LENGTH];
 	char aEscapedName[256];
@@ -445,7 +449,7 @@ const CSkin *CSkins::FindImpl(const char *pName)
 	str_format(Skin.m_aPath, sizeof(Skin.m_aPath), "downloadedskins/%s", IStorage::FormatTmpPath(aBuf, sizeof(aBuf), pName));
 	Skin.m_pTask = std::make_shared<CGetPngFile>(this, aUrl, Storage(), Skin.m_aPath);
 	m_pClient->Engine()->AddJob(Skin.m_pTask);
-	auto &&pDownloadSkin = std::make_unique<CDownloadSkin>(std::move(Skin));
+	auto &&pDownloadSkin = std::make_unique<CSkinDownloader>(std::move(Skin));
 	m_DownloadSkins.insert({pDownloadSkin->GetName(), std::move(pDownloadSkin)});
 	++m_DownloadingSkins;
 	return nullptr;

@@ -2250,6 +2250,8 @@ if(CLIENT)
     components/tooltips.h
     components/voting.cpp
     components/voting.h
+    file_loader.cpp
+    file_loader.h
     gameclient.cpp
     gameclient.h
     laser_data.cpp

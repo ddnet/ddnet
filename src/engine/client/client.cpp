@@ -73,6 +73,10 @@
 #include <chrono>
 #include <thread>
 
+// test: remove
+#include "game/client/file_loader.h"
+// end test
+
 using namespace std::chrono_literals;
 
 static const ColorRGBA gs_ClientNetworkPrintColor{0.7f, 1, 0.7f, 1.0f};
@@ -4450,6 +4454,59 @@ void CClient::RegisterCommands()
 	m_pConsole->Chain("gfx_fullscreen", ConchainFullscreen, this);
 	m_pConsole->Chain("gfx_borderless", ConchainWindowBordered, this);
 	m_pConsole->Chain("gfx_vsync", ConchainWindowVSync, this);
+
+	// test: remove
+	auto FileLoaderTest = [](IConsole::IResult *pResult, void *pUserData) {
+		CClient *client = reinterpret_cast<CClient *>(pUserData);
+		CMassFileLoader FileLoader(client->m_pStorage, IMassFileLoader::LOAD_FLAGS_ABSOLUTE_PATH | IMassFileLoader::LOAD_FLAGS_RECURSE_SUBDIRECTORIES);
+		FileLoader.SetLoadFailedCallback([](IMassFileLoader::LOAD_ERROR Error, const void *pUser) -> bool {
+			char Message[128];
+			switch(Error)
+			{
+			case IMassFileLoader::LOAD_ERROR_NOT_INIT:
+				strcpy(Message, "Not initialized.");
+				break;
+			case IMassFileLoader::LOAD_ERROR_INVALID_SEARCH_PATH:
+				str_format(Message, sizeof(Message), "Invalid path: '%s'", reinterpret_cast<const char *>(pUser));
+				break;
+			case IMassFileLoader::LOAD_ERROR_DIRECTORY_UNREADABLE:
+				str_format(Message, sizeof(Message), "File or directory unreadable: '%s'", reinterpret_cast<const char *>(pUser));
+				break;
+			case IMassFileLoader::LOAD_ERROR_UNWANTED_SYMLINK:
+				str_format(Message, sizeof(Message), "Unwanted symlink: '%s'", reinterpret_cast<const char *>(pUser));
+				break;
+			case IMassFileLoader::LOAD_ERROR_FILE_UNREADABLE:
+				str_format(Message, sizeof(Message), "File unreadable: '%s'", reinterpret_cast<const char *>(pUser));
+				break;
+			case IMassFileLoader::LOAD_ERROR_FILE_TOO_LARGE:
+				str_format(Message, sizeof(Message), "File too large: '%s'", reinterpret_cast<const char *>(pUser));
+				break;
+			case IMassFileLoader::LOAD_ERROR_INVALID_REGEX:
+				str_format(Message, sizeof(Message), "Invalid regex: '%s'", reinterpret_cast<const char *>(pUser));
+				break;
+			case IMassFileLoader::LOAD_ERROR_UNKNOWN:
+				[[fallthrough]];
+			default:
+				dbg_msg("test", "Unknown error. Continuing...");
+				return true;
+			}
+
+			dbg_msg("test", "%s", Message);
+			return true;
+		});
+		FileLoader.SetFileLoadedCallback([](const std::string &ItemName, const unsigned char *pData, const unsigned int Size) {
+			dbg_msg("test", "File of %d bytes loaded: '%s'", Size, ItemName.c_str());
+		});
+
+		//		FileLoader.SetPaths(":skins", "C:/Users/ewan/Documents/zibbs");
+		FileLoader.SetPaths("C:/Users/ewan/Documents/test");
+		FileLoader.SetMatchExpression("^((?!GiB_file).)*$");
+		//		FileLoader.SetMatchExpression("\\.[Tt][Xx][Tt]$");
+		FileLoader.Load();
+	};
+
+	m_pConsole->Register("file_loader_test", "", CFGFLAG_CLIENT | CFGFLAG_STORE, FileLoaderTest, this, "Test");
+	// end test
 
 	// DDRace
 
