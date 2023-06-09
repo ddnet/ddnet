@@ -2571,13 +2571,14 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		static int s_StarsCountdownToolTip;
 		GameClient()->m_Tooltips.DoToolTip(&s_StarsCountdownToolTip, &Button, Localize("Stars are emitted from the player every second of the countdown"));
 
-		Section.HSplitTop(2 * LineSize, &Button, &Section);
+		Section.HSplitTop(LineSize, &Button, &Section);
 		if(DoButton_CheckBox(&g_Config.m_ClShowStateChangeCountdown, Localize("Show as bars"), g_Config.m_ClShowStateChangeCountdown == 1, &Button))
 		{
 			g_Config.m_ClShowStateChangeCountdown = g_Config.m_ClShowStateChangeCountdown == 1 ? 0 : 1;
 		}
 
 		{
+			Section.HSplitTop(2 * LineSize, &Button, &Section);
 			if(g_Config.m_ClShowStateChangeCountdown == 1)
 			{
 				UI()->DoScrollbarOption(&g_Config.m_ClFreezeBarsAlphaInsideFreeze, &g_Config.m_ClFreezeBarsAlphaInsideFreeze, &Button, Localize("Opacity of freeze bars inside freeze"), 0, 100, &CUI::ms_LinearScrollbarScale, CUI::SCROLLBAR_OPTION_MULTILINE, "%");

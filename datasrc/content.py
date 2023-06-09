@@ -400,7 +400,7 @@ container.sprites.Add(Sprite("guiicon_friend", set_guiicons, 8,0,4,2))
 
 container.sprites.Add(Sprite("audio_source", set_audio_source, 0,0,1,1))
 
-# Pickup armor for specific weapon 
+# Pickup armor for specific weapon
 container.sprites.Add(Sprite("pickup_armor_shotgun", set_extras, 6,0,2,2))
 container.sprites.Add(Sprite("pickup_armor_grenade", set_extras, 8,0,2,2))
 container.sprites.Add(Sprite("pickup_armor_laser", set_extras, 6,2,2,2))

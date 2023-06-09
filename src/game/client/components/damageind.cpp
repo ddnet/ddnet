@@ -1,6 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <base/color.h>
+#include <base/vmath.h>
 #include <engine/demo.h>
 #include <engine/graphics.h>
 #include <game/client/gameclient.h>
@@ -8,7 +9,6 @@
 #include <game/generated/client_data.h>
 #include <game/generated/protocol.h>
 
-#include "base/vmath.h"
 #include "damageind.h"
 
 CDamageInd::CDamageInd()

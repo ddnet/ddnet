@@ -1,7 +1,7 @@
 #include <game/client/gameclient.h>
+#include <game/generated/client_data.h>
 
 #include "countdowns.h"
-#include "game/generated/client_data.h"
 
 void CCountdowns::RenderBars()
 {
@@ -206,7 +206,7 @@ void CCountdowns::GenerateNinjaCountdownStars(int ClientID)
 	{
 		return;
 	}
-	
+
 	CCharacterCore *pCharacter = &m_pClient->m_aClients[ClientID].m_Predicted;
 	if(pCharacter->m_Ninja.m_ActivationTick <= 0 || (GameTick - pCharacter->m_Ninja.m_ActivationTick) > (g_pData->m_Weapons.m_Ninja.m_Duration * Client()->GameTickSpeed() / 1000))
 	{
