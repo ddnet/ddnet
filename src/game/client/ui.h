@@ -244,6 +244,13 @@ struct SPopupMenuId
 {
 };
 
+struct SPopupMenuProperties
+{
+	int m_Corners = IGraphics::CORNER_ALL;
+	ColorRGBA m_BorderColor = ColorRGBA(0.5f, 0.5f, 0.5f, 0.75f);
+	ColorRGBA m_BackgroundColor = ColorRGBA(0.0f, 0.0f, 0.0f, 0.75f);
+};
+
 class CUI
 {
 public:
@@ -321,8 +328,8 @@ private:
 		static constexpr float POPUP_MARGIN = 4.0f;
 
 		const SPopupMenuId *m_pID;
+		SPopupMenuProperties m_Props;
 		CUIRect m_Rect;
-		int m_Corners;
 		void *m_pContext;
 		FPopupMenuFunction m_pfnFunc;
 	};
@@ -510,7 +517,7 @@ public:
 	void DoScrollbarOption(const void *pID, int *pOption, const CUIRect *pRect, const char *pStr, int Min, int Max, const IScrollbarScale *pScale = &ms_LinearScrollbarScale, unsigned Flags = 0u, const char *pSuffix = "");
 
 	// popup menu
-	void DoPopupMenu(const SPopupMenuId *pID, int X, int Y, int Width, int Height, void *pContext, FPopupMenuFunction pfnFunc, int Corners = IGraphics::CORNER_ALL);
+	void DoPopupMenu(const SPopupMenuId *pID, int X, int Y, int Width, int Height, void *pContext, FPopupMenuFunction pfnFunc, const SPopupMenuProperties &Props = {});
 	void RenderPopupMenus();
 	void ClosePopupMenu(const SPopupMenuId *pID, bool IncludeDescendants = false);
 	void ClosePopupMenus();
