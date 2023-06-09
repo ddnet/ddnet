@@ -2425,7 +2425,7 @@ int fs_is_symlink(const char *path)
 {
 	bool is_symlink = false;
 #if defined(CONF_FAMILY_WINDOWS)
-	// Windows is treated separately from other platforms in this case because std::filesystem incorrectly reports files as readable on MinGW.
+	// Windows is treated separately from other platforms in this case because std::filesystem incorrectly reports symlinks as normal items MinGW.
 	const std::wstring wide_path = windows_utf8_to_wide(path);
 	DWORD attributes = GetFileAttributesW(wide_path.c_str());
 	if(attributes != INVALID_FILE_ATTRIBUTES && attributes & FILE_ATTRIBUTE_REPARSE_POINT)
