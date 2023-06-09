@@ -84,7 +84,10 @@
  *      that fires the file loaded callback and will not block its calling thread. This has the benefit of allowing time-insensitive assets
  *      to eventually be loaded without waiting for them to load in their completion (such as skins or assets).
  *
-
+ * Depending on whether or not the flags contain LOAD_FLAGS_ABSOLUTE_PATH, pathnames provided to the callbacks will differ. If on, you should
+ * expect something like "/home/user/foo/bar.txt", without you should expect "bar.txt" for BOTH the aforementioned absolute path and any other
+ * file of the same name in the search paths, such as "/home/user/foobar/foo/bar.txt". This flag is mainly intended to be used where this
+ * distinction is important.
  *
  * You probably shouldn't pass this around or re-use it.
  */

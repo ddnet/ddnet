@@ -4499,9 +4499,9 @@ void CClient::RegisterCommands()
 			dbg_msg("test", "File of %d bytes loaded: '%s'", Size, ItemName.c_str());
 		});
 
-		FileLoader.SetPaths(":skins", "C:/Users/ewan/Documents/test");
-		//		FileLoader.SetPaths("C:/Users/ewan/Documents/test");
+		FileLoader.SetPaths(":test");
 		//		FileLoader.SetMatchExpression("^((?!unreadable).)*$");
+		//		FileLoader.SetMatchExpression("^((?!symlink).)*$");
 		//		FileLoader.SetMatchExpression("^((?!GiB_file).)*$");
 		//		FileLoader.SetMatchExpression("\\.[Tt][Xx][Tt]$");
 		FileLoader.Load();
