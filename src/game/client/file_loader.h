@@ -2,13 +2,14 @@
 #define FILE_LOADER_H
 
 #include <cstdint>
+#include <filesystem>
 #include <functional>
 #include <optional>
 #include <regex>
 #include <string>
 #include <variant>
 #include <vector>
-#include <filesystem>
+
 #include "engine/storage.h"
 
 /* The purpose of this API is to allow loading of files en masse with minimal setup. A perk of presenting it in this way is
@@ -115,37 +116,45 @@ public:
 	// or not to continue the process once a potentially non-fatal error has been encountered.
 	enum LOAD_ERROR : uint8_t
 	{
-		LOAD_ERROR_UNKNOWN, // Unknown error.
-				    // If continued, the error is ignored but is likely to happen again.
-				    // pUser = nullptr
+		LOAD_ERROR_UNKNOWN,
+		// Unknown error.
+		// If continued, the error is ignored but is likely to happen again.
+		// pUser = nullptr
 
-		LOAD_ERROR_NOT_INIT, // Implementation-specific load function called with any combination of the following issues: no file load callback, no paths, invalid IStorage pointer, or invalid flags.
-				     // This is the only error where the return value is inconsequential.
-				     // pUser = nullptr
+		LOAD_ERROR_NOT_INIT,
+		// Implementation-specific load function called with any combination of the following issues: no file load callback, no paths, invalid IStorage pointer, or invalid flags.
+		// This is the only error where the return value is inconsequential.
+		// pUser = nullptr
 
-		LOAD_ERROR_INVALID_SEARCH_PATH, // Path is a file, does not exist, or is malformed.
-						// If continued, the path is ignored.
-						// pUser = Provided invalid path (const char *)
+		LOAD_ERROR_INVALID_SEARCH_PATH,
+		// Path is a file, does not exist, or is malformed.
+		// If continued, the path is ignored.
+		// pUser = Provided invalid path (const char *)
 
-		LOAD_ERROR_UNWANTED_SYMLINK, // Path is a symlink and LOAD_FLAGS_FOLLOW_SYMBOLIC_LINKS has not been set.
-					     // If continued, the file or directory the symlink points to is ignored.
-					     // pUser = Absolute path to symlink (const char *)
+		LOAD_ERROR_UNWANTED_SYMLINK,
+		// Path is a symlink and LOAD_FLAGS_FOLLOW_SYMBOLIC_LINKS has not been set.
+		// If continued, the file or directory the symlink points to is ignored.
+		// pUser = Absolute path to symlink (const char *)
 
-		// LOAD_ERROR_DIRECTORY_UNREADABLE, // Current user does not have read access to directory.
-		//  				 // If continued, the directory is ignored.
-		//  				 // pUser = Absolute directory path (const char *)
+		// LOAD_ERROR_DIRECTORY_UNREADABLE,
+		// Current user does not have read access to directory.
+		// If continued, the directory is ignored.
+		// pUser = Absolute directory path (const char *)
 
-		LOAD_ERROR_FILE_UNREADABLE, // File within current directory is not readable by current user
-					    // If continued, the file is ignored.
-					    // pUser = Absolute file path (const char *)
+		LOAD_ERROR_FILE_UNREADABLE,
+		// File within current directory is not readable by current user
+		// If continued, the file is ignored.
+		// pUser = Absolute file path (const char *)
 
-		LOAD_ERROR_FILE_TOO_LARGE, // File is too big to have memory allocated to it without pagefile backing or something
-					   // If continued, the file is ignored.
-					   // pUser = Absolute file path (const char *)
+		LOAD_ERROR_FILE_TOO_LARGE,
+		// File is too big to have memory allocated to it without pagefile backing or something
+		// If continued, the file is ignored.
+		// pUser = Absolute file path (const char *)
 
-		LOAD_ERROR_INVALID_EXTENSION, // File extension provided is invalid
-					      // If continued, the extension is disregarded and the file load callback will be called for every file in the selected paths.
-					      // pUser = File extension (const char *)
+		LOAD_ERROR_INVALID_EXTENSION,
+		// File extension provided is invalid
+		// If continued, the extension is disregarded and the file load callback will be called for every file in the selected paths.
+		// pUser = File extension (const char *)
 	};
 
 	// All flags are opt-in
@@ -191,24 +200,6 @@ public:
 	void SetPaths(T Path, Ts... Paths)
 	{
 		m_RequestedPaths.push_back(std::string(Path));
-		//		if(m_Continue)
-		//		{
-		//			std::string PathStr(Path);
-		//			static char aPathBuffer[IO_MAX_PATH_LENGTH];
-		//			int StorageType = PathStr.find(':') == 0 ? IStorage::STORAGETYPE_BASIC : IStorage::STORAGETYPE_CLIENT;
-		//			if(StorageType == IStorage::STORAGETYPE_BASIC)
-		//				PathStr.erase(0, 1);
-		//			m_pStorage->GetCompletePath(StorageType, PathStr.c_str(), aPathBuffer, sizeof(aPathBuffer));
-		//			if(fs_is_dir(aPathBuffer)) // Exists and is a directory
-		//			{
-		//				if(fs_is_readable(aPathBuffer))
-		//					m_PathCollection.insert({std::string(aPathBuffer), new std::vector<std::string>});
-		//				else
-		//					m_Continue = TryCallback<bool>(m_fnLoadFailedCallback, LOAD_ERROR_DIRECTORY_UNREADABLE, PathStr.c_str());
-		//			}
-		//			else
-		//				m_Continue = TryCallback<bool>(m_fnLoadFailedCallback, LOAD_ERROR_INVALID_SEARCH_PATH, PathStr.c_str());
-		//		}
 		(SetPaths(std::forward<T>(Paths)), ...);
 	}
 	void SetFileExtension(const std::string &Extension) override;
@@ -239,7 +230,7 @@ private:
 };
 
 // Multi-threaded implementation (WIP)
-//class CMassFileLoaderAsync : IMassFileLoader {
+// class CMassFileLoaderAsync : IMassFileLoader {
 //  public:
 //    void Start();
 

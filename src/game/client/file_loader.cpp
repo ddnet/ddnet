@@ -9,7 +9,7 @@ CMassFileLoader::CMassFileLoader(IStorage *pStorage, uint8_t Flags) :
 
 CMassFileLoader::~CMassFileLoader()
 {
-	for(auto it : m_PathCollection)
+	for(const auto &it : m_PathCollection)
 	{
 		delete it.second;
 	}
@@ -76,14 +76,14 @@ unsigned int CMassFileLoader::Load()
 	}
 
 	char aPathBuffer[IO_MAX_PATH_LENGTH];
-	for(auto it : m_RequestedPaths)
+	for(auto &It : m_RequestedPaths)
 	{
 		if(m_Continue)
 		{
-			int StorageType = it.find(':') == 0 ? IStorage::STORAGETYPE_BASIC : IStorage::STORAGETYPE_CLIENT;
+			int StorageType = It.find(':') == 0 ? IStorage::STORAGETYPE_BASIC : IStorage::STORAGETYPE_CLIENT;
 			if(StorageType == IStorage::STORAGETYPE_BASIC)
-				it.erase(0, 1);
-			m_pStorage->GetCompletePath(StorageType, it.c_str(), aPathBuffer, sizeof(aPathBuffer));
+				It.erase(0, 1);
+			m_pStorage->GetCompletePath(StorageType, It.c_str(), aPathBuffer, sizeof(aPathBuffer));
 			if(fs_is_dir(aPathBuffer)) // Exists and is a directory
 			{
 				// if(fs_is_readable(aPathBuffer))
@@ -92,7 +92,7 @@ unsigned int CMassFileLoader::Load()
 				//	m_Continue = TryCallback<bool>(m_fnLoadFailedCallback, LOAD_ERROR_DIRECTORY_UNREADABLE, it.c_str());
 			}
 			else
-				m_Continue = TryCallback<bool>(m_fnLoadFailedCallback, LOAD_ERROR_INVALID_SEARCH_PATH, it.c_str());
+				m_Continue = TryCallback<bool>(m_fnLoadFailedCallback, LOAD_ERROR_INVALID_SEARCH_PATH, It.c_str());
 		}
 	}
 
@@ -105,11 +105,11 @@ unsigned int CMassFileLoader::Load()
 			[](unsigned char c) { return std::tolower(c); });
 	}
 
-	for(auto it : m_PathCollection)
+	for(const auto &It : m_PathCollection)
 	{
 		if(m_Continue)
 		{
-			std::string Key = it.first;
+			std::string Key = It.first;
 			SListDirectoryCallbackUserInfo Data{&Key, this, &m_Continue};
 			m_pStorage->ListDirectory(IStorage::TYPE_ALL, Key.c_str(), ListDirectoryCallback, &Data);
 		}
@@ -119,13 +119,13 @@ unsigned int CMassFileLoader::Load()
 	unsigned char *pData = nullptr;
 	unsigned int Size, Count = 0;
 	IOHANDLE Handle;
-	for(auto directory : m_PathCollection)
+	for(const auto &Directory : m_PathCollection)
 	{
-		for(auto file : *directory.second)
+		for(const auto &File : *Directory.second)
 		{
 			if(m_Continue)
 			{
-				std::string FilePath = directory.first + "/" + file;
+				std::string FilePath = Directory.first + "/" + File;
 				if(!(m_Flags & LOAD_FLAGS_FOLLOW_SYMBOLIC_LINKS) && fs_is_symlink(FilePath.c_str()))
 				{
 					m_Continue = TryCallback<bool>(m_fnLoadFailedCallback, LOAD_ERROR_UNWANTED_SYMLINK, FilePath.c_str());
@@ -134,7 +134,7 @@ unsigned int CMassFileLoader::Load()
 
 				if(m_Flags & LOAD_FLAGS_DONT_READ_FILE)
 				{
-					m_fnFileLoadedCallback(m_Flags & LOAD_FLAGS_ABSOLUTE_PATH ? FilePath : file, nullptr, 0);
+					m_fnFileLoadedCallback(m_Flags & LOAD_FLAGS_ABSOLUTE_PATH ? FilePath : File, nullptr, 0);
 					Count++;
 					continue;
 				}
@@ -175,7 +175,7 @@ unsigned int CMassFileLoader::Load()
 					continue;
 				}
 
-				m_fnFileLoadedCallback(m_Flags & LOAD_FLAGS_ABSOLUTE_PATH ? FilePath : file, pData, Size);
+				m_fnFileLoadedCallback(m_Flags & LOAD_FLAGS_ABSOLUTE_PATH ? FilePath : File, pData, Size);
 				free(pData);
 				Count++;
 				io_close(Handle);
