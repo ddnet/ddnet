@@ -2370,18 +2370,16 @@ int fs_is_symlink(const char *path)
 #if defined(CONF_FAMILY_WINDOWS)
 	// Windows is treated separately from other platforms in this case because std::filesystem incorrectly reports symlinks as normal items MinGW.
 	const std::wstring wide_path = windows_utf8_to_wide(path);
-	DWORD attributes = GetFileAttributesW(wide_path.c_str());
+	const DWORD attributes = GetFileAttributesW(wide_path.c_str());
 	if(attributes != INVALID_FILE_ATTRIBUTES && attributes & FILE_ATTRIBUTE_REPARSE_POINT)
 	{
-		HANDLE handle = CreateFileW(wide_path.c_str(), FILE_READ_EA, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_REPARSE_POINT, NULL);
+		const HANDLE handle = CreateFileW(wide_path.c_str(), FILE_READ_EA, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_REPARSE_POINT, NULL);
 		if(handle != INVALID_HANDLE_VALUE)
 		{
-			DWORD reparse_data_size = MAXIMUM_REPARSE_DATA_BUFFER_SIZE;
-			REPARSE_GUID_DATA_BUFFER *reparse_data;
-			reparse_data = static_cast<REPARSE_GUID_DATA_BUFFER *>(malloc(reparse_data_size));
+			REPARSE_GUID_DATA_BUFFER *reparse_data = static_cast<REPARSE_GUID_DATA_BUFFER *>(malloc(MAXIMUM_REPARSE_DATA_BUFFER_SIZE));
 
 			DWORD returned_length;
-			if(DeviceIoControl(handle, FSCTL_GET_REPARSE_POINT, NULL, 0, reparse_data, reparse_data_size, &returned_length, NULL))
+			if(DeviceIoControl(handle, FSCTL_GET_REPARSE_POINT, NULL, 0, reparse_data, MAXIMUM_REPARSE_DATA_BUFFER_SIZE, &returned_length, NULL))
 			{
 				if(IsReparseTagMicrosoft(reparse_data->ReparseTag))
 					is_symlink = reparse_data->ReparseTag == IO_REPARSE_TAG_SYMLINK || reparse_data->ReparseTag == IO_REPARSE_TAG_MOUNT_POINT;
