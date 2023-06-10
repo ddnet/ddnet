@@ -2393,7 +2393,7 @@ int fs_is_symlink(const char *path)
 		}
 	}
 #else
-	stat link_status;
+	struct stat link_status;
 	lstat(path, &link_status);
 	is_symlink = S_ISLNK(link_status.st_mode);
 #endif
