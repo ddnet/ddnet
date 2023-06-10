@@ -1237,7 +1237,7 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 				}
 				TeeInfo.m_Size = minimum(Skin.w, Skin.h);
 
-				CAnimState *pIdleState = CAnimState::GetIdle();
+				const CAnimState *pIdleState = CAnimState::GetIdle();
 				vec2 OffsetToMid;
 				RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &TeeInfo, OffsetToMid);
 				vec2 TeeRenderPos(Skin.x + TeeInfo.m_Size / 2, Skin.y + Skin.h / 2 + OffsetToMid.y);
@@ -1497,7 +1497,7 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 					}
 					TeeInfo.m_Size = minimum(Skin.w, Skin.h);
 
-					CAnimState *pIdleState = CAnimState::GetIdle();
+					const CAnimState *pIdleState = CAnimState::GetIdle();
 					vec2 OffsetToMid;
 					RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &TeeInfo, OffsetToMid);
 					vec2 TeeRenderPos(Skin.x + Skin.w / 2.0f, Skin.y + Skin.h * 0.55f + OffsetToMid.y);

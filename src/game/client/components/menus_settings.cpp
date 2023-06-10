@@ -586,7 +586,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 	MainView.HSplitTop(50.0f, &Label, &MainView);
 	Label.VSplitLeft(260.0f, &Label, 0);
-	CAnimState *pIdleState = CAnimState::GetIdle();
+	const CAnimState *pIdleState = CAnimState::GetIdle();
 	vec2 OffsetToMid;
 	RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &OwnSkinInfo, OffsetToMid);
 	vec2 TeeRenderPos(Label.x + 30.0f, Label.y + Label.h / 2.0f + OffsetToMid.y);
@@ -2688,7 +2688,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 
 		str_copy(aBuf, Client()->PlayerName());
 
-		CAnimState *pIdleState = CAnimState::GetIdle();
+		const CAnimState *pIdleState = CAnimState::GetIdle();
 		constexpr int PreviewTeeCount = 4;
 		constexpr float RealTeeSize = CChat::MESSAGE_TEE_SIZE * 2;
 		constexpr float RealTeeSizeHalved = CChat::MESSAGE_TEE_SIZE;

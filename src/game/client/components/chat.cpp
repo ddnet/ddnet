@@ -1179,7 +1179,7 @@ void CChat::OnRender()
 				float OffsetTeeY = MESSAGE_TEE_SIZE / 2.0f;
 				float FullHeightMinusTee = RowHeight - MESSAGE_TEE_SIZE;
 
-				CAnimState *pIdleState = CAnimState::GetIdle();
+				const CAnimState *pIdleState = CAnimState::GetIdle();
 				vec2 OffsetToMid;
 				RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &RenderInfo, OffsetToMid);
 				vec2 TeeRenderPos(x + (RealMsgPaddingX + MESSAGE_TEE_SIZE) / 2.0f, y + OffsetTeeY + FullHeightMinusTee / 2.0f + OffsetToMid.y);
