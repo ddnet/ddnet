@@ -2,15 +2,11 @@
 #define GAME_CLIENT_FILE_LOADER_H
 
 #include <cstdint>
+#include <engine/storage.h>
 #include <filesystem>
 #include <functional>
-#include <optional>
-#include <regex>
 #include <string>
-#include <variant>
 #include <vector>
-
-#include "engine/storage.h"
 
 /* The purpose of this API is to allow loading of files en masse with minimal setup. A perk of presenting it in this way is
  * that it's much easier to parallelize, and an asynchronous implementation is provided in CFileLoaderAsync. You must provide,

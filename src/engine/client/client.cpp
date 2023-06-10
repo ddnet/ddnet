@@ -74,7 +74,7 @@
 #include <thread>
 
 // test: remove
-#include "game/client/file_loader.h"
+#include <game/client/file_loader.h>
 // end test
 
 using namespace std::chrono_literals;
