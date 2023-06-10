@@ -2393,8 +2393,9 @@ int fs_is_symlink(const char *path)
 		}
 	}
 #else
-	// Can probably replace with a libc alternative if needed
-	is_symlink = std::filesystem::is_symlink(path);
+	stat link_status;
+	lstat(path, &link_status);
+	is_symlink = S_ISLNK(link_status.st_mode);
 #endif
 	return is_symlink;
 }
