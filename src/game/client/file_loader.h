@@ -1,5 +1,5 @@
-#ifndef FILE_LOADER_H
-#define FILE_LOADER_H
+#ifndef GAME_CLIENT_FILE_LOADER_H
+#define GAME_CLIENT_FILE_LOADER_H
 
 #include <cstdint>
 #include <filesystem>
@@ -237,4 +237,4 @@ private:
 //    std::function<void(unsigned int ItemsLoaded)> fnOperationCompletedCallback;
 //};
 
-#endif // FILE_LOADER_H
+#endif // GAME_CLIENT_FILE_LOADER_H
