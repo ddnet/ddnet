@@ -662,8 +662,6 @@ private:
 	void RenderSettingsAppearance(CUIRect MainView);
 	ColorHSLA RenderHSLScrollbars(CUIRect *pRect, unsigned int *pColor, bool Alpha = false, bool ClampedLight = false);
 
-	int RenderDropDown(int &CurDropDownState, CUIRect *pRect, int CurSelection, const void **pIDs, const char **pStr, int PickNum, CButtonContainer *pButtonContainer, float &ScrollVal);
-
 	CServerProcess m_ServerProcess;
 };
 #endif

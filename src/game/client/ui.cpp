@@ -1,6 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "ui.h"
+#include "ui_scrollregion.h"
 
 #include <base/math.h>
 #include <base/system.h>
@@ -14,6 +15,8 @@
 #include <game/localization.h>
 
 #include <limits>
+
+using namespace FontIcons;
 
 void CUIElement::Init(CUI *pUI, int RequestedRectCount)
 {
@@ -948,13 +951,14 @@ int CUI::DoButton_Menu(CUIElement &UIElement, const CButtonContainer *pID, const
 	return DoButtonLogic(pID, Props.m_Checked, pRect);
 }
 
-int CUI::DoButton_PopupMenu(CButtonContainer *pButtonContainer, const char *pText, const CUIRect *pRect, int Align)
+int CUI::DoButton_PopupMenu(CButtonContainer *pButtonContainer, const char *pText, const CUIRect *pRect, float Size, int Align, float Padding, bool TransparentInactive)
 {
-	pRect->Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f * ButtonColorMul(pButtonContainer)), IGraphics::CORNER_ALL, 3.0f);
+	if(!TransparentInactive || CheckActiveItem(pButtonContainer) || HotItem() == pButtonContainer)
+		pRect->Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f * ButtonColorMul(pButtonContainer)), IGraphics::CORNER_ALL, 3.0f);
 
 	CUIRect Label;
-	pRect->VMargin(2.0f, &Label);
-	DoLabel(&Label, pText, 10.0f, Align);
+	pRect->Margin(Padding, &Label);
+	DoLabel(&Label, pText, Size, Align);
 
 	return DoButtonLogic(pButtonContainer, 0, pRect);
 }
@@ -1273,7 +1277,7 @@ void CUI::DoScrollbarOption(const void *pID, int *pOption, const CUIRect *pRect,
 	*pOption = Value;
 }
 
-void CUI::DoPopupMenu(const SPopupMenuId *pID, int X, int Y, int Width, int Height, void *pContext, FPopupMenuFunction pfnFunc, int Corners)
+void CUI::DoPopupMenu(const SPopupMenuId *pID, int X, int Y, int Width, int Height, void *pContext, FPopupMenuFunction pfnFunc, const SPopupMenuProperties &Props)
 {
 	constexpr float Margin = SPopupMenu::POPUP_BORDER + SPopupMenu::POPUP_MARGIN;
 	if(X + Width > Screen()->w - Margin)
@@ -1284,11 +1288,11 @@ void CUI::DoPopupMenu(const SPopupMenuId *pID, int X, int Y, int Width, int Heig
 	m_vPopupMenus.emplace_back();
 	SPopupMenu *pNewMenu = &m_vPopupMenus.back();
 	pNewMenu->m_pID = pID;
+	pNewMenu->m_Props = Props;
 	pNewMenu->m_Rect.x = X;
 	pNewMenu->m_Rect.y = Y;
 	pNewMenu->m_Rect.w = Width;
 	pNewMenu->m_Rect.h = Height;
-	pNewMenu->m_Corners = Corners;
 	pNewMenu->m_pContext = pContext;
 	pNewMenu->m_pfnFunc = pfnFunc;
 }
@@ -1322,9 +1326,9 @@ void CUI::RenderPopupMenus()
 		}
 
 		CUIRect PopupRect = PopupMenu.m_Rect;
-		PopupRect.Draw(ColorRGBA(0.5f, 0.5f, 0.5f, 0.75f), PopupMenu.m_Corners, 3.0f);
+		PopupRect.Draw(PopupMenu.m_Props.m_BorderColor, PopupMenu.m_Props.m_Corners, 3.0f);
 		PopupRect.Margin(SPopupMenu::POPUP_BORDER, &PopupRect);
-		PopupRect.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.75f), PopupMenu.m_Corners, 3.0f);
+		PopupRect.Draw(PopupMenu.m_Props.m_BackgroundColor, PopupMenu.m_Props.m_Corners, 3.0f);
 		PopupRect.Margin(SPopupMenu::POPUP_MARGIN, &PopupRect);
 
 		EPopupMenuFunctionResult Result = PopupMenu.m_pfnFunc(PopupMenu.m_pContext, PopupRect, Active);
@@ -1453,14 +1457,14 @@ CUI::EPopupMenuFunctionResult CUI::PopupConfirm(void *pContext, CUIRect View, bo
 	pUI->TextRender()->Text(Label.x, Label.y, SConfirmPopupContext::POPUP_FONT_SIZE, pConfirmPopup->m_aMessage, Label.w);
 
 	static CButtonContainer s_CancelButton;
-	if(pUI->DoButton_PopupMenu(&s_CancelButton, pConfirmPopup->m_aNegativeButtonLabel, &CancelButton, TEXTALIGN_MC))
+	if(pUI->DoButton_PopupMenu(&s_CancelButton, pConfirmPopup->m_aNegativeButtonLabel, &CancelButton, SConfirmPopupContext::POPUP_FONT_SIZE, TEXTALIGN_MC))
 	{
 		pConfirmPopup->m_Result = SConfirmPopupContext::CANCELED;
 		return CUI::POPUP_CLOSE_CURRENT;
 	}
 
 	static CButtonContainer s_ConfirmButton;
-	if(pUI->DoButton_PopupMenu(&s_ConfirmButton, pConfirmPopup->m_aPositiveButtonLabel, &ConfirmButton, TEXTALIGN_MC) || (Active && pUI->ConsumeHotkey(HOTKEY_ENTER)))
+	if(pUI->DoButton_PopupMenu(&s_ConfirmButton, pConfirmPopup->m_aPositiveButtonLabel, &ConfirmButton, SConfirmPopupContext::POPUP_FONT_SIZE, TEXTALIGN_MC) || (Active && pUI->ConsumeHotkey(HOTKEY_ENTER)))
 	{
 		pConfirmPopup->m_Result = SConfirmPopupContext::CONFIRMED;
 		return CUI::POPUP_CLOSE_CURRENT;
@@ -1476,43 +1480,150 @@ CUI::SSelectionPopupContext::SSelectionPopupContext()
 
 void CUI::SSelectionPopupContext::Reset()
 {
+	m_Props = SPopupMenuProperties();
+	m_aMessage[0] = '\0';
 	m_pSelection = nullptr;
-	m_Entries.clear();
+	m_SelectionIndex = -1;
+	m_vEntries.clear();
+	m_vButtonContainers.clear();
+	m_EntryHeight = 12.0f;
+	m_EntryPadding = 0.0f;
+	m_EntrySpacing = 5.0f;
+	m_FontSize = 10.0f;
+	m_Width = 300.0f + (SPopupMenu::POPUP_BORDER + SPopupMenu::POPUP_MARGIN) * 2;
+	m_AlignmentHeight = -1.0f;
+	m_TransparentButtons = false;
 }
 
 CUI::EPopupMenuFunctionResult CUI::PopupSelection(void *pContext, CUIRect View, bool Active)
 {
 	SSelectionPopupContext *pSelectionPopup = static_cast<SSelectionPopupContext *>(pContext);
 	CUI *pUI = pSelectionPopup->m_pUI;
+	CScrollRegion *pScrollRegion = pSelectionPopup->m_pScrollRegion;
+
+	vec2 ScrollOffset(0.0f, 0.0f);
+	CScrollRegionParams ScrollParams;
+	ScrollParams.m_ScrollbarWidth = 10.0f;
+	ScrollParams.m_ScrollbarMargin = SPopupMenu::POPUP_MARGIN;
+	ScrollParams.m_ScrollbarNoMarginRight = true;
+	ScrollParams.m_ScrollUnit = 3 * (pSelectionPopup->m_EntryHeight + pSelectionPopup->m_EntrySpacing);
+	pScrollRegion->Begin(&View, &ScrollOffset, &ScrollParams);
+	View.y += ScrollOffset.y;
 
 	CUIRect Slot;
-	const STextBoundingBox TextBoundingBox = pUI->TextRender()->TextBoundingBox(SSelectionPopupContext::POPUP_FONT_SIZE, pSelectionPopup->m_aMessage, -1, SSelectionPopupContext::POPUP_MAX_WIDTH);
-	View.HSplitTop(TextBoundingBox.m_H, &Slot, &View);
+	if(pSelectionPopup->m_aMessage[0] != '\0')
+	{
+		const STextBoundingBox TextBoundingBox = pUI->TextRender()->TextBoundingBox(pSelectionPopup->m_FontSize, pSelectionPopup->m_aMessage, -1, pSelectionPopup->m_Width);
+		View.HSplitTop(TextBoundingBox.m_H, &Slot, &View);
+		if(pScrollRegion->AddRect(Slot))
+		{
+			pUI->TextRender()->Text(Slot.x, Slot.y, pSelectionPopup->m_FontSize, pSelectionPopup->m_aMessage, Slot.w);
+		}
+	}
 
-	pUI->TextRender()->Text(Slot.x, Slot.y, SSelectionPopupContext::POPUP_FONT_SIZE, pSelectionPopup->m_aMessage, Slot.w);
-
-	pSelectionPopup->m_vButtonContainers.resize(pSelectionPopup->m_Entries.size());
+	pSelectionPopup->m_vButtonContainers.resize(pSelectionPopup->m_vEntries.size());
 
 	size_t Index = 0;
-	for(const auto &Entry : pSelectionPopup->m_Entries)
+	for(const auto &Entry : pSelectionPopup->m_vEntries)
 	{
-		View.HSplitTop(SSelectionPopupContext::POPUP_ENTRY_SPACING, nullptr, &View);
-		View.HSplitTop(SSelectionPopupContext::POPUP_ENTRY_HEIGHT, &Slot, &View);
-		if(pUI->DoButton_PopupMenu(&pSelectionPopup->m_vButtonContainers[Index], Entry.c_str(), &Slot, TEXTALIGN_ML))
-			pSelectionPopup->m_pSelection = &Entry;
+		if(pSelectionPopup->m_aMessage[0] != '\0' || Index != 0)
+			View.HSplitTop(pSelectionPopup->m_EntrySpacing, nullptr, &View);
+		View.HSplitTop(pSelectionPopup->m_EntryHeight, &Slot, &View);
+		if(pScrollRegion->AddRect(Slot))
+		{
+			if(pUI->DoButton_PopupMenu(&pSelectionPopup->m_vButtonContainers[Index], Entry.c_str(), &Slot, pSelectionPopup->m_FontSize, TEXTALIGN_ML, pSelectionPopup->m_EntryPadding, pSelectionPopup->m_TransparentButtons))
+			{
+				pSelectionPopup->m_pSelection = &Entry;
+				pSelectionPopup->m_SelectionIndex = Index;
+			}
+		}
 		++Index;
 	}
+
+	pScrollRegion->End();
 
 	return pSelectionPopup->m_pSelection == nullptr ? CUI::POPUP_KEEP_OPEN : CUI::POPUP_CLOSE_CURRENT;
 }
 
 void CUI::ShowPopupSelection(float X, float Y, SSelectionPopupContext *pContext)
 {
-	const STextBoundingBox TextBoundingBox = TextRender()->TextBoundingBox(SSelectionPopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, -1, SSelectionPopupContext::POPUP_MAX_WIDTH);
-	const float PopupHeight = TextBoundingBox.m_H + pContext->m_Entries.size() * (SSelectionPopupContext::POPUP_ENTRY_HEIGHT + SSelectionPopupContext::POPUP_ENTRY_SPACING) + 10.0f;
+	const STextBoundingBox TextBoundingBox = TextRender()->TextBoundingBox(pContext->m_FontSize, pContext->m_aMessage, -1, pContext->m_Width);
+	const float PopupHeight = minimum((pContext->m_aMessage[0] == '\0' ? -pContext->m_EntrySpacing : TextBoundingBox.m_H) + pContext->m_vEntries.size() * (pContext->m_EntryHeight + pContext->m_EntrySpacing) + (SPopupMenu::POPUP_BORDER + SPopupMenu::POPUP_MARGIN) * 2 + CScrollRegion::HEIGHT_MAGIC_FIX, Screen()->h * 0.4f);
 	pContext->m_pUI = this;
 	pContext->m_pSelection = nullptr;
-	DoPopupMenu(pContext, X, Y, SSelectionPopupContext::POPUP_MAX_WIDTH + 10.0f, PopupHeight, pContext, PopupSelection);
+	pContext->m_SelectionIndex = -1;
+	pContext->m_Props.m_Corners = IGraphics::CORNER_ALL;
+	if(pContext->m_AlignmentHeight >= 0.0f)
+	{
+		constexpr float Margin = SPopupMenu::POPUP_BORDER + SPopupMenu::POPUP_MARGIN;
+		if(X + pContext->m_Width > Screen()->w - Margin)
+		{
+			X = maximum<float>(X - pContext->m_Width, Margin);
+		}
+		if(Y + pContext->m_AlignmentHeight + PopupHeight > Screen()->h - Margin)
+		{
+			Y -= PopupHeight;
+			pContext->m_Props.m_Corners = IGraphics::CORNER_T;
+		}
+		else
+		{
+			Y += pContext->m_AlignmentHeight;
+			pContext->m_Props.m_Corners = IGraphics::CORNER_B;
+		}
+	}
+	DoPopupMenu(pContext, X, Y, pContext->m_Width, PopupHeight, pContext, PopupSelection, pContext->m_Props);
+}
+
+int CUI::DoDropDown(CUIRect *pRect, int CurSelection, const char **pStrs, int Num, SDropDownState &State)
+{
+	if(!State.m_Init)
+	{
+		State.m_UiElement.Init(this, -1);
+		State.m_Init = true;
+	}
+
+	const auto LabelFunc = [CurSelection, pStrs]() {
+		return CurSelection > -1 ? pStrs[CurSelection] : "";
+	};
+
+	SMenuButtonProperties Props;
+	Props.m_HintRequiresStringCheck = true;
+	Props.m_HintCanChangePositionOrSize = true;
+	if(IsPopupOpen(&State.m_SelectionPopupContext))
+		Props.m_Corners = IGraphics::CORNER_ALL & (~State.m_SelectionPopupContext.m_Props.m_Corners);
+	if(DoButton_Menu(State.m_UiElement, &State.m_ButtonContainer, LabelFunc, pRect, Props))
+	{
+		State.m_SelectionPopupContext.Reset();
+		State.m_SelectionPopupContext.m_Props.m_BorderColor = ColorRGBA(0.7f, 0.7f, 0.7f, 0.9f);
+		State.m_SelectionPopupContext.m_Props.m_BackgroundColor = ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f);
+		for(int i = 0; i < Num; ++i)
+			State.m_SelectionPopupContext.m_vEntries.emplace_back(pStrs[i]);
+		State.m_SelectionPopupContext.m_EntryHeight = pRect->h;
+		State.m_SelectionPopupContext.m_EntryPadding = pRect->h >= 20.0f ? 2.0f : 1.0f;
+		State.m_SelectionPopupContext.m_FontSize = (State.m_SelectionPopupContext.m_EntryHeight - 2 * State.m_SelectionPopupContext.m_EntryPadding) * CUI::ms_FontmodHeight;
+		State.m_SelectionPopupContext.m_Width = pRect->w;
+		State.m_SelectionPopupContext.m_AlignmentHeight = pRect->h;
+		State.m_SelectionPopupContext.m_TransparentButtons = true;
+		ShowPopupSelection(pRect->x, pRect->y, &State.m_SelectionPopupContext);
+	}
+
+	CUIRect DropDownIcon;
+	pRect->HMargin(2.0f, &DropDownIcon);
+	DropDownIcon.VSplitRight(5.0f, &DropDownIcon, nullptr);
+	TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
+	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
+	DoLabel(&DropDownIcon, FONT_ICON_CIRCLE_CHEVRON_DOWN, DropDownIcon.h * CUI::ms_FontmodHeight, TEXTALIGN_MR);
+	TextRender()->SetRenderFlags(0);
+	TextRender()->SetCurFont(nullptr);
+
+	if(State.m_SelectionPopupContext.m_SelectionIndex >= 0)
+	{
+		const int NewSelection = State.m_SelectionPopupContext.m_SelectionIndex;
+		State.m_SelectionPopupContext.Reset();
+		return NewSelection;
+	}
+
+	return CurSelection;
 }
 
 CUI::EPopupMenuFunctionResult CUI::PopupColorPicker(void *pContext, CUIRect View, bool Active)

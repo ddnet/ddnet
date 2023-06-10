@@ -1327,19 +1327,24 @@ CUI::EPopupMenuFunctionResult CEditor::PopupImage(void *pContext, CUIRect View, 
 	}
 
 	static CUI::SSelectionPopupContext s_SelectionPopupContext;
+	static CScrollRegion s_SelectionPopupScrollRegion;
+	s_SelectionPopupContext.m_pScrollRegion = &s_SelectionPopupScrollRegion;
 	if(pEditor->DoButton_MenuItem(&s_ReaddButton, "Readd", 0, &Slot, 0, "Reloads the image from the mapres folder"))
 	{
 		char aFilename[IO_MAX_PATH_LENGTH];
 		str_format(aFilename, sizeof(aFilename), "%s.png", pImg->m_aName);
 		s_SelectionPopupContext.Reset();
-		pEditor->Storage()->FindFiles(aFilename, "mapres", IStorage::TYPE_ALL, &s_SelectionPopupContext.m_Entries);
-		if(s_SelectionPopupContext.m_Entries.empty())
+		std::set<std::string> EntriesSet;
+		pEditor->Storage()->FindFiles(aFilename, "mapres", IStorage::TYPE_ALL, &EntriesSet);
+		for(const auto &Entry : EntriesSet)
+			s_SelectionPopupContext.m_vEntries.push_back(Entry);
+		if(s_SelectionPopupContext.m_vEntries.empty())
 		{
 			pEditor->ShowFileDialogError("Error: could not find image '%s' in the mapres folder.", aFilename);
 		}
-		else if(s_SelectionPopupContext.m_Entries.size() == 1)
+		else if(s_SelectionPopupContext.m_vEntries.size() == 1)
 		{
-			s_SelectionPopupContext.m_pSelection = &*s_SelectionPopupContext.m_Entries.begin();
+			s_SelectionPopupContext.m_pSelection = &s_SelectionPopupContext.m_vEntries.front();
 		}
 		else
 		{
@@ -1391,19 +1396,24 @@ CUI::EPopupMenuFunctionResult CEditor::PopupSound(void *pContext, CUIRect View, 
 	CEditorSound *pSound = pEditor->m_Map.m_vpSounds[pEditor->m_SelectedSound];
 
 	static CUI::SSelectionPopupContext s_SelectionPopupContext;
+	static CScrollRegion s_SelectionPopupScrollRegion;
+	s_SelectionPopupContext.m_pScrollRegion = &s_SelectionPopupScrollRegion;
 	if(pEditor->DoButton_MenuItem(&s_ReaddButton, "Readd", 0, &Slot, 0, "Reloads the sound from the mapres folder"))
 	{
 		char aFilename[IO_MAX_PATH_LENGTH];
 		str_format(aFilename, sizeof(aFilename), "%s.opus", pSound->m_aName);
 		s_SelectionPopupContext.Reset();
-		pEditor->Storage()->FindFiles(aFilename, "mapres", IStorage::TYPE_ALL, &s_SelectionPopupContext.m_Entries);
-		if(s_SelectionPopupContext.m_Entries.empty())
+		std::set<std::string> EntriesSet;
+		pEditor->Storage()->FindFiles(aFilename, "mapres", IStorage::TYPE_ALL, &EntriesSet);
+		for(const auto &Entry : EntriesSet)
+			s_SelectionPopupContext.m_vEntries.push_back(Entry);
+		if(s_SelectionPopupContext.m_vEntries.empty())
 		{
 			pEditor->ShowFileDialogError("Error: could not find sound '%s' in the mapres folder.", aFilename);
 		}
-		else if(s_SelectionPopupContext.m_Entries.size() == 1)
+		else if(s_SelectionPopupContext.m_vEntries.size() == 1)
 		{
-			s_SelectionPopupContext.m_pSelection = &*s_SelectionPopupContext.m_Entries.begin();
+			s_SelectionPopupContext.m_pSelection = &s_SelectionPopupContext.m_vEntries.front();
 		}
 		else
 		{

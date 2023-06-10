@@ -187,14 +187,10 @@ void CInput::CloseJoysticks()
 	m_pActiveJoystick = nullptr;
 }
 
-void CInput::SelectNextJoystick()
+void CInput::SetActiveJoystick(size_t Index)
 {
-	const int Num = m_vJoysticks.size();
-	if(Num > 1)
-	{
-		m_pActiveJoystick = &m_vJoysticks[(m_pActiveJoystick->GetIndex() + 1) % Num];
-		str_copy(g_Config.m_InpControllerGUID, m_pActiveJoystick->GetGUID());
-	}
+	m_pActiveJoystick = &m_vJoysticks[Index];
+	str_copy(g_Config.m_InpControllerGUID, m_pActiveJoystick->GetGUID());
 }
 
 float CInput::CJoystick::GetAxisValue(int Axis)

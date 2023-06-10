@@ -2939,6 +2939,11 @@ int CGraphics_Threaded::GetNumScreens() const
 	return m_pBackend->GetNumScreens();
 }
 
+const char *CGraphics_Threaded::GetScreenName(int Screen) const
+{
+	return m_pBackend->GetScreenName(Screen);
+}
+
 void CGraphics_Threaded::Minimize()
 {
 	m_pBackend->Minimize();

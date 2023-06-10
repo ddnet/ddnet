@@ -34,11 +34,16 @@ void CScrollRegion::Begin(CUIRect *pClipRect, vec2 *pOutOffset, const CScrollReg
 	const bool ContentOverflows = m_ContentH > pClipRect->h;
 	const bool ForceShowScrollbar = m_Params.m_Flags & CScrollRegionParams::FLAG_CONTENT_STATIC_WIDTH;
 
+	const bool HasScrollBar = ContentOverflows || ForceShowScrollbar;
 	CUIRect ScrollBarBg;
-	bool HasScrollBar = ContentOverflows || ForceShowScrollbar;
-	CUIRect *pModifyRect = HasScrollBar ? pClipRect : nullptr;
-	pClipRect->VSplitRight(m_Params.m_ScrollbarWidth, pModifyRect, &ScrollBarBg);
-	ScrollBarBg.Margin(m_Params.m_ScrollbarMargin, &m_RailRect);
+	pClipRect->VSplitRight(m_Params.m_ScrollbarWidth, HasScrollBar ? pClipRect : nullptr, &ScrollBarBg);
+	if(m_Params.m_ScrollbarNoMarginRight)
+	{
+		ScrollBarBg.HMargin(m_Params.m_ScrollbarMargin, &m_RailRect);
+		m_RailRect.VSplitLeft(m_Params.m_ScrollbarMargin, nullptr, &m_RailRect);
+	}
+	else
+		ScrollBarBg.Margin(m_Params.m_ScrollbarMargin, &m_RailRect);
 
 	// only show scrollbar if required
 	if(HasScrollBar)
@@ -184,8 +189,8 @@ void CScrollRegion::End()
 bool CScrollRegion::AddRect(const CUIRect &Rect, bool ShouldScrollHere)
 {
 	m_LastAddedRect = Rect;
-	// Round up and add 1 to fix pixel clipping at the end of the scrolling area
-	m_ContentH = maximum(std::ceil(Rect.y + Rect.h - (m_ClipRect.y + m_ContentScrollOff.y)) + 1.0f, m_ContentH);
+	// Round up and add magic to fix pixel clipping at the end of the scrolling area
+	m_ContentH = maximum(std::ceil(Rect.y + Rect.h - (m_ClipRect.y + m_ContentScrollOff.y)) + HEIGHT_MAGIC_FIX, m_ContentH);
 	if(ShouldScrollHere)
 		ScrollHere();
 	return !IsRectClipped(Rect);
