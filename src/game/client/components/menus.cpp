@@ -1131,7 +1131,7 @@ int CMenus::Render()
 		const char *pTitle = "";
 		const char *pExtraText = "";
 		const char *pButtonText = "";
-		int ExtraAlign = 0;
+		bool TopAlign = false;
 		bool UseIpLabel = false;
 
 		ColorRGBA BgColor = ColorRGBA(0.0f, 0.0f, 0.0f, 0.5f);
@@ -1209,7 +1209,6 @@ int CMenus::Render()
 				pExtraText = aBuf;
 				pButtonText = Localize("Abort");
 			}
-			ExtraAlign = 0;
 		}
 		else if(m_Popup == POPUP_RENAME_DEMO)
 		{
@@ -1241,7 +1240,7 @@ int CMenus::Render()
 				Localize("Please enter your nickname below."));
 			pExtraText = aBuf;
 			pButtonText = Localize("Ok");
-			ExtraAlign = -1;
+			TopAlign = true;
 		}
 		else if(m_Popup == POPUP_POINTS)
 		{
@@ -1250,7 +1249,7 @@ int CMenus::Render()
 			{
 				str_format(aBuf, sizeof(aBuf), Localize("Your nickname '%s' is already used (%d points). Do you still want to use it?"), Client()->PlayerName(), Client()->m_Points);
 				pExtraText = aBuf;
-				ExtraAlign = -1;
+				TopAlign = true;
 			}
 			else if(Client()->m_Points >= 0)
 			{
@@ -1267,7 +1266,7 @@ int CMenus::Render()
 			pTitle = m_aMessageTopic;
 			pExtraText = m_aMessageBody;
 			pButtonText = m_aMessageButton;
-			ExtraAlign = -1;
+			TopAlign = true;
 		}
 
 		CUIRect Box, Part;
@@ -1303,15 +1302,12 @@ int CMenus::Render()
 		}
 
 		Props.m_MaxWidth = (int)Part.w;
-		if(ExtraAlign == -1)
+		if(TopAlign)
+			UI()->DoLabel(&Part, pExtraText, FontSize, TEXTALIGN_TL, Props);
+		else if(TextRender()->TextWidth(FontSize, pExtraText, -1, -1.0f) > Part.w)
 			UI()->DoLabel(&Part, pExtraText, FontSize, TEXTALIGN_ML, Props);
 		else
-		{
-			if(TextRender()->TextWidth(FontSize, pExtraText, -1, -1.0f) > Part.w)
-				UI()->DoLabel(&Part, pExtraText, FontSize, TEXTALIGN_ML, Props);
-			else
-				UI()->DoLabel(&Part, pExtraText, FontSize, TEXTALIGN_MC);
-		}
+			UI()->DoLabel(&Part, pExtraText, FontSize, TEXTALIGN_MC);
 
 		if(m_Popup == POPUP_MESSAGE || m_Popup == POPUP_CONFIRM)
 		{
