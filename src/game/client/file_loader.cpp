@@ -15,10 +15,18 @@ CMassFileLoader::~CMassFileLoader()
 	}
 }
 
-void CMassFileLoader::SetMatchExpression(const std::string& Match)
+void CMassFileLoader::SetFileExtension(const std::string &Extension)
 {
-	m_Regex.emplace(std::regex(Match));
-	// With exceptions disabled, we can't make use of regex_error so we can't fire LOAD_ERROR_INVALID_REGEX in this implementation. Good luck
+	m_Extension = Extension;
+}
+
+inline bool CompareExtension(const std::filesystem::path &Filename, const std::string &Extension)
+{
+	std::string FileExtension = Filename.extension().string();
+	std::transform(FileExtension.begin(), FileExtension.end(), FileExtension.begin(),
+		[](unsigned char c) { return std::tolower(c); });
+
+	return FileExtension == Extension; // Extension is already lowered
 }
 
 [[maybe_unused]] int CMassFileLoader::ListDirectoryCallback(const char *Name, int IsDir, int, void *User)
@@ -33,29 +41,22 @@ void CMassFileLoader::SetMatchExpression(const std::string& Match)
 		if(!str_comp(Name, ".") || !str_comp(Name, ".."))
 			return 0;
 
-		if(!UserData->m_pThis->m_Regex.has_value() || std::regex_search(RelevantFilename, UserData->m_pThis->m_Regex.value()))
+		if(!(UserData->m_pThis->m_Flags & LOAD_FLAGS_FOLLOW_SYMBOLIC_LINKS) && fs_is_symlink(AbsolutePath.c_str()))
 		{
-			if(!fs_is_readable(AbsolutePath.c_str()))
-			{
-				*UserData->m_pContinue = TryCallback<bool>(UserData->m_pThis->m_fnLoadFailedCallback, LOAD_ERROR_DIRECTORY_UNREADABLE, AbsolutePath.c_str());
-				return 0;
-			}
-			if(!(UserData->m_pThis->m_Flags & LOAD_FLAGS_FOLLOW_SYMBOLIC_LINKS) && fs_is_symlink(AbsolutePath.c_str()))
-			{
-				*UserData->m_pContinue = TryCallback<bool>(UserData->m_pThis->m_fnLoadFailedCallback, LOAD_ERROR_UNWANTED_SYMLINK, AbsolutePath.c_str());
-				return 0;
-			}
-			if(!IsDir)
-			{
+			*UserData->m_pContinue = TryCallback<bool>(UserData->m_pThis->m_fnLoadFailedCallback, LOAD_ERROR_UNWANTED_SYMLINK, AbsolutePath.c_str());
+			return 0;
+		}
+		if(!IsDir)
+		{
+			if(UserData->m_pThis->m_Extension.empty() || CompareExtension(Name, UserData->m_pThis->m_Extension))
 				pFileList->push_back(Name);
-			}
-			else if(UserData->m_pThis->m_Flags & LOAD_FLAGS_RECURSE_SUBDIRECTORIES)
-			{
-				UserData->m_pThis->m_PathCollection.insert({AbsolutePath, new std::vector<std::string>});
-				// Note that adding data to a SORTED container that is currently being iterated on higher in scope would invalidate the iterator. This is not sorted
-				SListDirectoryCallbackUserInfo Data{&AbsolutePath, UserData->m_pThis, UserData->m_pContinue};
-				UserData->m_pThis->m_pStorage->ListDirectory(IStorage::TYPE_ALL, AbsolutePath.c_str(), ListDirectoryCallback, &Data); // Directory item is a directory, must be recursed
-			}
+		}
+		else if(UserData->m_pThis->m_Flags & LOAD_FLAGS_RECURSE_SUBDIRECTORIES)
+		{
+			UserData->m_pThis->m_PathCollection.insert({AbsolutePath, new std::vector<std::string>});
+			// Note that adding data to a SORTED container that is currently being iterated on higher in scope would invalidate the iterator. This is not sorted
+			SListDirectoryCallbackUserInfo Data{&AbsolutePath, UserData->m_pThis, UserData->m_pContinue};
+			UserData->m_pThis->m_pStorage->ListDirectory(IStorage::TYPE_ALL, AbsolutePath.c_str(), ListDirectoryCallback, &Data); // Directory item is a directory, must be recursed
 		}
 	}
 
@@ -64,14 +65,44 @@ void CMassFileLoader::SetMatchExpression(const std::string& Match)
 
 unsigned int CMassFileLoader::Load()
 {
-	//	m_Continue = true;
-	if(m_PathCollection.empty() /* No valid paths added */
+	m_Continue = true;
+	if(m_RequestedPaths.empty() /* No valid paths added */
 		|| !m_pStorage /* Invalid storage */
 		|| !m_fnFileLoadedCallback /* File loaded callback unimplemented */
 		|| m_Flags & ~LOAD_FLAGS_MASK /* Out of bounds flag(s) */)
 	{
-		m_Continue = TryCallback<bool>(m_fnLoadFailedCallback, LOAD_ERROR_NOT_INIT, nullptr);
+		TryCallback<bool>(m_fnLoadFailedCallback, LOAD_ERROR_NOT_INIT, nullptr);
 		return 0;
+	}
+
+	char aPathBuffer[IO_MAX_PATH_LENGTH];
+	for(auto it : m_RequestedPaths)
+	{
+		if(m_Continue)
+		{
+			int StorageType = it.find(':') == 0 ? IStorage::STORAGETYPE_BASIC : IStorage::STORAGETYPE_CLIENT;
+			if(StorageType == IStorage::STORAGETYPE_BASIC)
+				it.erase(0, 1);
+			m_pStorage->GetCompletePath(StorageType, it.c_str(), aPathBuffer, sizeof(aPathBuffer));
+			if(fs_is_dir(aPathBuffer)) // Exists and is a directory
+			{
+				// if(fs_is_readable(aPathBuffer))
+				m_PathCollection.insert({std::string(aPathBuffer), new std::vector<std::string>});
+				// else
+				//	m_Continue = TryCallback<bool>(m_fnLoadFailedCallback, LOAD_ERROR_DIRECTORY_UNREADABLE, it.c_str());
+			}
+			else
+				m_Continue = TryCallback<bool>(m_fnLoadFailedCallback, LOAD_ERROR_INVALID_SEARCH_PATH, it.c_str());
+		}
+	}
+
+	if(!m_Extension.empty())
+	{
+		// must be .x at the shortest
+		if(m_Extension.size() == 1 || m_Extension.at(0) != '.')
+			m_Continue = TryCallback<bool>(m_fnLoadFailedCallback, LOAD_ERROR_INVALID_EXTENSION, m_Extension.c_str());
+		std::transform(m_Extension.begin(), m_Extension.end(), m_Extension.begin(),
+			[](unsigned char c) { return std::tolower(c); });
 	}
 
 	for(auto it : m_PathCollection)
@@ -108,17 +139,17 @@ unsigned int CMassFileLoader::Load()
 					continue;
 				}
 
-				if(!fs_is_readable(FilePath.c_str()))
-				{
-					m_Continue = TryCallback<bool>(m_fnLoadFailedCallback, LOAD_ERROR_FILE_UNREADABLE, FilePath.c_str());
-					continue;
-				}
+				// if(!fs_is_readable(FilePath.c_str()))
+				// {
+				// 	m_Continue = TryCallback<bool>(m_fnLoadFailedCallback, LOAD_ERROR_FILE_UNREADABLE, FilePath.c_str());
+				// 	continue;
+				// }
 
 				Handle = io_open(FilePath.c_str(), IOFLAG_READ | IOFLAG_SKIP_BOM);
 				if(!Handle)
 				{
-					dbg_msg("Mass file loader", "File open failed for unknown reason: '%s'", FilePath.c_str());
-					m_Continue = TryCallback<bool>(m_fnLoadFailedCallback, LOAD_ERROR_UNKNOWN, nullptr);
+					// There could be other issues than this, but I have no way to distinguish now that fs_is_readable is gone.
+					m_Continue = TryCallback<bool>(m_fnLoadFailedCallback, LOAD_ERROR_FILE_UNREADABLE, FilePath.c_str());
 					continue;
 				}
 
@@ -161,7 +192,9 @@ unsigned int CMassFileLoader::Load()
  * [+,+] test symlink and readable detection on windows and unix
  * ^ (waiting on working readable/symlink detection)
  * [x] see if you can error check regex
-
+ *
+ * [ ] fix unreadable
+ *
  * [+] test multiple directories
  * [ ] async implementation
  */

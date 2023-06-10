@@ -2364,63 +2364,6 @@ int fs_is_relative_path(const char *path)
 #endif
 }
 
-int fs_is_readable(const char *path)
-{
-	bool is_readable = false;
-#if defined(CONF_FAMILY_WINDOWS)
-	// Windows is treated separately from other platforms in this case because std::filesystem incorrectly reports files as readable on MinGW.
-	// Adapted from "How to Check Access Rights" on Aaron Ballman's blog. I don't have the patience to write something like this.
-	// https://blog.aaronballman.com/2011/08/how-to-check-access-rights/
-	const std::wstring wide_path = windows_utf8_to_wide(path);
-	DWORD generic_access_rights = GENERIC_READ;
-	DWORD security_descriptor_size = 0;
-
-	if(!GetFileSecurity(wide_path.c_str(), OWNER_SECURITY_INFORMATION | GROUP_SECURITY_INFORMATION | DACL_SECURITY_INFORMATION, NULL, 0, &security_descriptor_size) &&
-		ERROR_INSUFFICIENT_BUFFER == GetLastError())
-	{
-		PSECURITY_DESCRIPTOR security = static_cast<PSECURITY_DESCRIPTOR>(malloc(security_descriptor_size));
-		if(security && GetFileSecurity(wide_path.c_str(), OWNER_SECURITY_INFORMATION | GROUP_SECURITY_INFORMATION | DACL_SECURITY_INFORMATION, security, security_descriptor_size, &security_descriptor_size))
-		{
-			HANDLE token_handle = NULL;
-			if(OpenProcessToken(GetCurrentProcess(), TOKEN_IMPERSONATE | TOKEN_QUERY | TOKEN_DUPLICATE | STANDARD_RIGHTS_READ, &token_handle))
-			{
-				HANDLE impersonated_token_handle = NULL;
-				if(DuplicateToken(token_handle, SecurityImpersonation, &impersonated_token_handle))
-				{
-					GENERIC_MAPPING mapping = {0xFFFFFFFF};
-					PRIVILEGE_SET privileges = {0};
-					DWORD granted_access = 0, privileges_size = sizeof(privileges);
-					BOOL result = false; // must be win bool, needs dword & standard bool is 1 bit
-
-					mapping.GenericRead = FILE_GENERIC_READ;
-					mapping.GenericWrite = FILE_GENERIC_WRITE;
-					mapping.GenericExecute = FILE_GENERIC_EXECUTE;
-					mapping.GenericAll = FILE_ALL_ACCESS;
-
-					MapGenericMask(&generic_access_rights, &mapping);
-
-					if(AccessCheck(security, impersonated_token_handle, generic_access_rights,
-						   &mapping, &privileges, &privileges_size, &granted_access, &result))
-					{
-						is_readable = result == TRUE;
-					}
-					CloseHandle(impersonated_token_handle);
-				}
-				CloseHandle(token_handle);
-			}
-			free(security);
-		}
-	}
-#else
-	// Can probably replace with a libc alternative if needed
-	const std::filesystem::perms perms = std::filesystem::status(path).permissions();
-	is_readable = ((perms & std::filesystem::perms::owner_read) != std::filesystem::perms::none ||
-		       (perms & std::filesystem::perms::group_read) != std::filesystem::perms::none ||
-		       (perms & std::filesystem::perms::others_read) != std::filesystem::perms::none);
-#endif
-	return is_readable;
-}
-
 int fs_is_symlink(const char *path)
 {
 	bool is_symlink = false;

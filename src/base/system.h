@@ -1964,19 +1964,6 @@ int fs_is_dir(const char *path);
 int fs_is_relative_path(const char *path);
 
 /**
- * Checks whether a given path is readable by the current user.
- *
- * @ingroup Filesystem
- *
- * @param path Path to check.
- *
- * @return 1 if readable, 0 on failure or if not readable.
- *
- * @remark The strings are treated as zero-terminated strings.
- */
-int fs_is_readable(const char *path);
-
-/**
  * Checks whether a given path is a symbolic link (or junction on Windows).
  *
  * @ingroup Filesystem

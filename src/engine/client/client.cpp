@@ -4458,7 +4458,7 @@ void CClient::RegisterCommands()
 	// test: remove
 	auto FileLoaderTest = [](IConsole::IResult *pResult, void *pUserData) {
 		CClient *client = reinterpret_cast<CClient *>(pUserData);
-		CMassFileLoader FileLoader(client->m_pStorage, IMassFileLoader::LOAD_FLAGS_ABSOLUTE_PATH | IMassFileLoader::LOAD_FLAGS_DONT_READ_FILE | IMassFileLoader::LOAD_FLAGS_RECURSE_SUBDIRECTORIES);
+		CMassFileLoader FileLoader(client->m_pStorage, IMassFileLoader::LOAD_FLAGS_ABSOLUTE_PATH | IMassFileLoader::LOAD_FLAGS_RECURSE_SUBDIRECTORIES);
 		FileLoader.SetLoadFailedCallback([](IMassFileLoader::LOAD_ERROR Error, const void *pUser) -> bool {
 			char Message[128];
 			switch(Error)
@@ -4469,9 +4469,9 @@ void CClient::RegisterCommands()
 			case IMassFileLoader::LOAD_ERROR_INVALID_SEARCH_PATH:
 				str_format(Message, sizeof(Message), "Invalid path: '%s'", reinterpret_cast<const char *>(pUser));
 				break;
-			case IMassFileLoader::LOAD_ERROR_DIRECTORY_UNREADABLE:
-				str_format(Message, sizeof(Message), "Directory unreadable: '%s'", reinterpret_cast<const char *>(pUser));
-				break;
+				// case IMassFileLoader::LOAD_ERROR_DIRECTORY_UNREADABLE:
+				//	str_format(Message, sizeof(Message), "Directory unreadable: '%s'", reinterpret_cast<const char *>(pUser));
+				//	break;
 			case IMassFileLoader::LOAD_ERROR_UNWANTED_SYMLINK:
 				str_format(Message, sizeof(Message), "Unwanted symlink: '%s'", reinterpret_cast<const char *>(pUser));
 				break;
@@ -4481,8 +4481,8 @@ void CClient::RegisterCommands()
 			case IMassFileLoader::LOAD_ERROR_FILE_TOO_LARGE:
 				str_format(Message, sizeof(Message), "File too large: '%s'", reinterpret_cast<const char *>(pUser));
 				break;
-			case IMassFileLoader::LOAD_ERROR_INVALID_REGEX:
-				str_format(Message, sizeof(Message), "Invalid regex: '%s'", reinterpret_cast<const char *>(pUser));
+			case IMassFileLoader::LOAD_ERROR_INVALID_EXTENSION:
+				str_format(Message, sizeof(Message), "Invalid extension: '%s'", reinterpret_cast<const char *>(pUser));
 				break;
 			case IMassFileLoader::LOAD_ERROR_UNKNOWN:
 				[[fallthrough]];
@@ -4500,10 +4500,7 @@ void CClient::RegisterCommands()
 		});
 
 		FileLoader.SetPaths(":test");
-		//		FileLoader.SetMatchExpression("^((?!unreadable).)*$");
-		//		FileLoader.SetMatchExpression("^((?!symlink).)*$");
-		//		FileLoader.SetMatchExpression("^((?!GiB_file).)*$");
-		//		FileLoader.SetMatchExpression("\\.[Tt][Xx][Tt]$");
+		FileLoader.SetFileExtension(".txt");
 		FileLoader.Load();
 	};
 
