@@ -222,7 +222,8 @@ MACRO_CONFIG_INT(SvInviteFrequency, sv_invite_frequency, 1, 0, 9999, CFGFLAG_SER
 MACRO_CONFIG_INT(SvTeleOthersAuthLevel, sv_tele_others_auth_level, 1, 1, 3, CFGFLAG_SERVER, "The auth level you need to tele others")
 
 MACRO_CONFIG_INT(SvEmotionalTees, sv_emotional_tees, 1, -1, 1, CFGFLAG_SERVER, "Whether eye change of tees is enabled with emoticons = 1, not = 0, -1 not at all")
-MACRO_CONFIG_INT(SvEmoticonDelay, sv_emoticon_delay, 3, 0, 9999, CFGFLAG_SERVER, "The time in seconds between over-head emoticons")
+MACRO_CONFIG_INT(SvEmoticonMsDelay, sv_emoticon_ms_delay, 3000, 20, 999999999, CFGFLAG_SERVER, "The time in ms a player has to wait before allowing the next over-head emoticons")
+MACRO_CONFIG_INT(SvGlobalEmoticonMsDelay, sv_global_emoticon_ms_delay, 3000, 20, 999999999, CFGFLAG_SERVER, "The time in ms a player has to wait before allowing the next over-head emoticons that is send to all clients (this config must be higher or equal to sv_emoticon_ms_delay to have an effect)")
 MACRO_CONFIG_INT(SvEyeEmoteChangeDelay, sv_eye_emote_change_delay, 1, 0, 9999, CFGFLAG_SERVER, "The time in seconds between eye emoticons change")
 
 MACRO_CONFIG_INT(SvChatDelay, sv_chat_delay, 1, 0, 9999, CFGFLAG_SERVER, "The time in seconds between chat messages")

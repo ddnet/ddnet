@@ -278,7 +278,7 @@ void CPlayer::Tick()
 	{
 		if(1200 - ((Server()->Tick() - m_pCharacter->GetLastAction()) % (1200)) < 5)
 		{
-			GameServer()->SendEmoticon(GetCID(), EMOTICON_GHOST);
+			GameServer()->SendEmoticon(GetCID(), EMOTICON_GHOST, -1);
 		}
 	}
 }
