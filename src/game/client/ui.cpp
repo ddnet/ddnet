@@ -124,10 +124,8 @@ CUI::CUI()
 	m_MouseButtons = 0;
 	m_LastMouseButtons = 0;
 
-	m_Screen.x = 0;
-	m_Screen.y = 0;
-	m_Screen.w = 848.0f;
-	m_Screen.h = 480.0f;
+	m_Screen.x = 0.0f;
+	m_Screen.y = 0.0f;
 }
 
 CUI::~CUI()
@@ -337,15 +335,8 @@ float CUI::ButtonColorMul(const void *pID)
 
 const CUIRect *CUI::Screen()
 {
-	float Aspect = Graphics()->ScreenAspect();
-	float w, h;
-
-	h = 600;
-	w = Aspect * h;
-
-	m_Screen.w = w;
-	m_Screen.h = h;
-
+	m_Screen.h = 600.0f;
+	m_Screen.w = Graphics()->ScreenAspect() * m_Screen.h;
 	return &m_Screen;
 }
 
