@@ -186,7 +186,7 @@ void CCountdowns::GenerateFreezeCountdownStars(int ClientID)
 	}
 
 	const int FreezeTime = pCharacter->m_FreezeEnd - GameTick;
-	// Server sends not every tick a snap
+	// Server sends not every tick a snap, it will send on even or odd ticks
 	if(FreezeTime % Client()->GameTickSpeed() == Client()->GameTickSpeed() - 1)
 	{
 		m_aaLastGenerateTick[FREEZE_COUNTDOWN][ClientID] = GameTick;
@@ -201,7 +201,7 @@ void CCountdowns::GenerateFreezeCountdownStars(int ClientID)
 
 void CCountdowns::GenerateNinjaCountdownStars(int ClientID)
 {
-	const int GameTick = Client()->PredGameTick(g_Config.m_ClDummy);
+	const int GameTick = Client()->GameTick(g_Config.m_ClDummy);
 	if(m_aaLastGenerateTick[NINJA_COUNTDOWN][ClientID] >= GameTick)
 	{
 		return;
@@ -214,10 +214,16 @@ void CCountdowns::GenerateNinjaCountdownStars(int ClientID)
 	}
 
 	int NinjaTime = pCharacter->m_Ninja.m_ActivationTick + (g_pData->m_Weapons.m_Ninja.m_Duration * Client()->GameTickSpeed() / 1000) - GameTick;
+	// Server sends not every tick a snap, it will send on even or odd ticks
 	if(NinjaTime % Client()->GameTickSpeed() == 0 && NinjaTime / Client()->GameTickSpeed() <= 5)
 	{
 		m_aaLastGenerateTick[NINJA_COUNTDOWN][ClientID] = GameTick;
 		m_pClient->m_DamageInd.CreateDamageInd(m_pClient->m_aClients[ClientID].m_RenderPos, 0, m_pClient->IsOtherTeam(ClientID) ? g_Config.m_ClShowOthersAlpha / 100.0f : 1.0f, NinjaTime / Client()->GameTickSpeed());
+	}
+	else if(NinjaTime % Client()->GameTickSpeed() == 1 && NinjaTime / Client()->GameTickSpeed() <= 5)
+	{
+		m_aaLastGenerateTick[NINJA_COUNTDOWN][ClientID] = GameTick;
+		m_pClient->m_DamageInd.CreateDamageInd(m_pClient->m_aClients[ClientID].m_RenderPos, 0, m_pClient->IsOtherTeam(ClientID) ? g_Config.m_ClShowOthersAlpha / 100.0f : 1.0f, (NinjaTime - 1) / Client()->GameTickSpeed());
 	}
 }
 
