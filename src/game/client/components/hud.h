@@ -110,6 +110,7 @@ private:
 	int m_FlagOffset;
 	int m_AirjumpOffset;
 	int m_AirjumpEmptyOffset;
+	int m_AirjumpDisabledOffset;
 	int m_WeaponHammerOffset;
 	int m_WeaponGunOffset;
 	int m_WeaponShotgunOffset;
