@@ -243,8 +243,8 @@ void CUI::DebugRender()
 	MapScreen();
 
 	char aBuf[128];
-	str_format(aBuf, sizeof(aBuf), "%p %p %p", HotItem(), ActiveItem(), LastActiveItem());
-	TextRender()->Text(10.0f, 10.0f, 10.0f, aBuf);
+	str_format(aBuf, sizeof(aBuf), "hot=%p nexthot=%p active=%p lastactive=%p", HotItem(), NextHotItem(), ActiveItem(), LastActiveItem());
+	TextRender()->Text(2.0f, Screen()->h - 12.0f, 10.0f, aBuf);
 }
 
 bool CUI::MouseInside(const CUIRect *pRect) const
