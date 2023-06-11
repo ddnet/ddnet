@@ -2527,7 +2527,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			CNetMsg_Cl_Emoticon *pMsg = (CNetMsg_Cl_Emoticon *)pRawMsg;
 
 			if(g_Config.m_SvSpamprotection && pPlayer->m_LastEmote &&
-				pPlayer->m_LastEmote + maximum(Server()->TickSpeed() * g_Config.m_SvEmoticonDelay, g_Config.m_SvHighBandwidth ? 1 : 2) > Server()->Tick())
+				pPlayer->m_LastEmote + maximum(Server()->TickSpeed() * g_Config.m_SvEmoticonDelay, g_Config.m_SvHighBandwidth ? 2 : 4) > Server()->Tick())
 				return;
 
 			pPlayer->m_LastEmote = Server()->Tick();
