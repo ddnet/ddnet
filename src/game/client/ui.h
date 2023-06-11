@@ -299,7 +299,6 @@ private:
 	const void *m_pActiveItem;
 	const void *m_pLastActiveItem;
 	const void *m_pBecomingHotItem;
-	const void *m_pActiveTooltipItem;
 	bool m_ActiveItemValid = false;
 
 	vec2 m_UpdatedMousePos = vec2(0.0f, 0.0f);
@@ -439,12 +438,10 @@ public:
 		}
 		return false;
 	}
-	void SetActiveTooltipItem(const void *pID) { m_pActiveTooltipItem = pID; }
 	void ClearLastActiveItem() { m_pLastActiveItem = nullptr; }
 	const void *HotItem() const { return m_pHotItem; }
 	const void *NextHotItem() const { return m_pBecomingHotItem; }
 	const void *ActiveItem() const { return m_pActiveItem; }
-	const void *ActiveTooltipItem() const { return m_pActiveTooltipItem; }
 	const void *LastActiveItem() const { return m_pLastActiveItem; }
 
 	void StartCheck() { m_ActiveItemValid = false; }

@@ -116,7 +116,6 @@ CUI::CUI()
 	m_pActiveItem = 0;
 	m_pLastActiveItem = 0;
 	m_pBecomingHotItem = 0;
-	m_pActiveTooltipItem = 0;
 
 	m_MouseX = 0;
 	m_MouseY = 0;
