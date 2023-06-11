@@ -617,7 +617,6 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 {
 	CUIRect ServerFilter = View, FilterHeader;
 	const float FontSize = 12.0f;
-	ServerFilter.HSplitBottom(0.0f, &ServerFilter, 0);
 
 	// server filter
 	ServerFilter.HSplitTop(ms_ListheaderHeight, &FilterHeader, &ServerFilter);
@@ -1037,7 +1036,6 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 	ServerDetails.HSplitTop(110.0f, &ServerDetails, &ServerScoreBoard);
 
 	// server details
-	CTextCursor Cursor;
 	const float FontSize = 12.0f;
 	ServerDetails.HSplitTop(ms_ListheaderHeight, &ServerHeader, &ServerDetails);
 	ServerHeader.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_T, 4.0f);
@@ -1110,25 +1108,19 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 		for(auto &Label : s_aLabels)
 		{
 			LeftColumn.HSplitTop(15.0f, &Row, &LeftColumn);
-			UI()->DoLabel(&Row, Localize(Label), FontSize, TEXTALIGN_ML);
+			UI()->DoLabel(&Row, Label, FontSize, TEXTALIGN_ML);
 		}
 
 		RightColumn.HSplitTop(15.0f, &Row, &RightColumn);
-		TextRender()->SetCursor(&Cursor, Row.x, Row.y + (15.f - FontSize) / 2.f, FontSize, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
-		Cursor.m_LineWidth = Row.w;
-		TextRender()->TextEx(&Cursor, pSelectedServer->m_aVersion, -1);
+		UI()->DoLabel(&Row, pSelectedServer->m_aVersion, FontSize, TEXTALIGN_ML);
 
 		RightColumn.HSplitTop(15.0f, &Row, &RightColumn);
-		TextRender()->SetCursor(&Cursor, Row.x, Row.y + (15.f - FontSize) / 2.f, FontSize, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
-		Cursor.m_LineWidth = Row.w;
-		TextRender()->TextEx(&Cursor, pSelectedServer->m_aGameType, -1);
+		UI()->DoLabel(&Row, pSelectedServer->m_aGameType, FontSize, TEXTALIGN_ML);
 
 		char aTemp[16];
 		FormatServerbrowserPing(aTemp, sizeof(aTemp), pSelectedServer);
 		RightColumn.HSplitTop(15.0f, &Row, &RightColumn);
-		TextRender()->SetCursor(&Cursor, Row.x, Row.y + (15.f - FontSize) / 2.f, FontSize, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
-		Cursor.m_LineWidth = Row.w;
-		TextRender()->TextEx(&Cursor, aTemp, -1);
+		UI()->DoLabel(&Row, aTemp, FontSize, TEXTALIGN_ML);
 	}
 	else
 	{
@@ -1138,6 +1130,7 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 	// server scoreboard
 	ServerScoreBoard.HSplitBottom(23.0f, &ServerScoreBoard, 0x0);
 
+	CTextCursor Cursor;
 	if(pSelectedServer)
 	{
 		static CListBox s_ListBox;
@@ -1208,13 +1201,7 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 				}
 			}
 
-			float ScoreFontSize = 12.0f;
-			while(ScoreFontSize >= 4.0f && TextRender()->TextWidth(ScoreFontSize, aTemp, -1, -1.0f) > Score.w)
-				ScoreFontSize--;
-
-			TextRender()->SetCursor(&Cursor, Score.x, Score.y + (Score.h - ScoreFontSize) / 2.0f, ScoreFontSize, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
-			Cursor.m_LineWidth = Score.w;
-			TextRender()->TextEx(&Cursor, aTemp, -1);
+			UI()->DoLabel(&Score, aTemp, FontSize, TEXTALIGN_ML);
 
 			// render tee if available
 			if(HasTeeToRender)
@@ -1704,7 +1691,7 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 			ToolboxPage = 0;
 
 		static CButtonContainer s_InfoTab;
-		if(DoButton_MenuTab(&s_InfoTab, Localize("Info"), ToolboxPage == 1, &TabButton1, 0, NULL, NULL, NULL, NULL, 4.0f))
+		if(DoButton_MenuTab(&s_InfoTab, Localize("Info"), ToolboxPage == 1, &TabButton1, IGraphics::CORNER_NONE, NULL, NULL, NULL, NULL, 4.0f))
 			ToolboxPage = 1;
 
 		static CButtonContainer s_FriendsTab;
