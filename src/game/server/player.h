@@ -93,6 +93,7 @@ public:
 	int m_LastSetSpectatorMode;
 	int m_LastChangeInfo;
 	int m_LastEmote;
+	int m_LastEmoteGlobal;
 	int m_LastKill;
 	int m_aLastCommands[4];
 	int m_LastCommandPos;

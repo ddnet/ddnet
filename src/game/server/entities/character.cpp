@@ -1119,6 +1119,35 @@ bool CCharacter::CanSnapCharacter(int SnappingClient)
 	return true;
 }
 
+bool CCharacter::IsSnappingCharacterInView(int SnappingClientID)
+{
+	int ID = m_pPlayer->GetCID();
+
+	// A player may not be clipped away if his hook or a hook attached to him is in the field of view
+	bool PlayerAndHookNotInView = NetworkClippedLine(SnappingClientID, m_Pos, m_Core.m_HookPos);
+	bool AttachedHookInView = false;
+	if(PlayerAndHookNotInView)
+	{
+		for(const auto &AttachedPlayerID : m_Core.m_AttachedPlayers)
+		{
+			CCharacter *pOtherPlayer = GameServer()->GetPlayerChar(AttachedPlayerID);
+			if(pOtherPlayer && pOtherPlayer->m_Core.m_HookedPlayer == ID)
+			{
+				if(!NetworkClippedLine(SnappingClientID, m_Pos, pOtherPlayer->m_Pos))
+				{
+					AttachedHookInView = true;
+					break;
+				}
+			}
+		}
+	}
+	if(PlayerAndHookNotInView && !AttachedHookInView)
+	{
+		return false;
+	}
+	return true;
+}
+
 void CCharacter::Snap(int SnappingClient)
 {
 	int ID = m_pPlayer->GetCID();
@@ -1131,28 +1160,8 @@ void CCharacter::Snap(int SnappingClient)
 		return;
 	}
 
-	// A player may not be clipped away if his hook or a hook attached to him is in the field of view
-	bool PlayerAndHookNotInView = NetworkClippedLine(SnappingClient, m_Pos, m_Core.m_HookPos);
-	bool AttachedHookInView = false;
-	if(PlayerAndHookNotInView)
-	{
-		for(const auto &AttachedPlayerID : m_Core.m_AttachedPlayers)
-		{
-			CCharacter *pOtherPlayer = GameServer()->GetPlayerChar(AttachedPlayerID);
-			if(pOtherPlayer && pOtherPlayer->m_Core.m_HookedPlayer == ID)
-			{
-				if(!NetworkClippedLine(SnappingClient, m_Pos, pOtherPlayer->m_Pos))
-				{
-					AttachedHookInView = true;
-					break;
-				}
-			}
-		}
-	}
-	if(PlayerAndHookNotInView && !AttachedHookInView)
-	{
+	if(!IsSnappingCharacterInView(SnappingClient))
 		return;
-	}
 
 	SnapCharacter(SnappingClient, ID);
 

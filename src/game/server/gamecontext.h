@@ -250,7 +250,7 @@ public:
 	void SendChatTeam(int Team, const char *pText);
 	void SendChat(int ClientID, int Team, const char *pText, int SpamProtectionClientID = -1, int Flags = CHAT_SIX | CHAT_SIXUP);
 	void SendStartWarning(int ClientID, const char *pMessage);
-	void SendEmoticon(int ClientID, int Emoticon);
+	void SendEmoticon(int ClientID, int Emoticon, int TargetClientID);
 	void SendWeaponPickup(int ClientID, int Weapon);
 	void SendMotd(int ClientID);
 	void SendSettings(int ClientID);
