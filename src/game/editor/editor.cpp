@@ -218,17 +218,6 @@ int CEditor::DoButton_Env(const void *pID, const char *pText, int Checked, const
 	return DoButton_Editor_Common(pID, pText, Checked, pRect, 0, pToolTip);
 }
 
-int CEditor::DoButton_File(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip)
-{
-	if(Checked)
-		pRect->Draw(GetButtonColor(pID, Checked), IGraphics::CORNER_ALL, 3.0f);
-
-	CUIRect Rect;
-	pRect->VMargin(5.0f, &Rect);
-	UI()->DoLabel(&Rect, pText, 10.0f, TEXTALIGN_ML);
-	return DoButton_Editor_Common(pID, pText, Checked, pRect, Flags, pToolTip);
-}
-
 int CEditor::DoButton_Menu(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip)
 {
 	pRect->Draw(ColorRGBA(0.5f, 0.5f, 0.5f, 1.0f), IGraphics::CORNER_T, 3.0f);
