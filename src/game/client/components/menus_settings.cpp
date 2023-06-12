@@ -2560,7 +2560,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 
 		Section.HSplitTop(LineSize, &Label, &Section);
 		UI()->DoLabel(&Label, Localize("Show a state change countdown under players"), 13.0f, TEXTALIGN_ML);
-		static int s_StateChangeCountdownToolTip;
+		static int s_StateChangeCountdownToolTip = 0;
 		GameClient()->m_Tooltips.DoToolTip(&s_StateChangeCountdownToolTip, &Label, Localize("It indicates the time till a player unfreezes and the time a player has left to be a ninja"));
 		static int s_ShowCountdownStars = 0;
 		Section.HSplitTop(LineSize, &Button, &Section);
@@ -2568,8 +2568,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		{
 			g_Config.m_ClShowStateChangeCountdown = g_Config.m_ClShowStateChangeCountdown == 2 ? 0 : 2;
 		}
-		static int s_StarsCountdownToolTip;
-		GameClient()->m_Tooltips.DoToolTip(&s_StarsCountdownToolTip, &Button, Localize("Stars are emitted from the player every second of the countdown"));
+		GameClient()->m_Tooltips.DoToolTip(&s_ShowCountdownStars, &Button, Localize("Stars are emitted from the player every second of the countdown"));
 
 		Section.HSplitTop(LineSize, &Button, &Section);
 		if(DoButton_CheckBox(&g_Config.m_ClShowStateChangeCountdown, Localize("Show as bars"), g_Config.m_ClShowStateChangeCountdown == 1, &Button))

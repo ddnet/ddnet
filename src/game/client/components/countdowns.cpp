@@ -45,19 +45,19 @@ void CCountdowns::RenderBars()
 
 void CCountdowns::RenderPlayerBars(const int ClientID)
 {
-	CCharacterCore *pCharacter = &m_pClient->m_aClients[ClientID].m_Predicted;
+	const CCharacterCore &Character = m_pClient->m_aClients[ClientID].m_Predicted;
 
 	// Freeze Bar
 	bool ShowFreezeBar = true;
-	if(pCharacter->m_FreezeEnd <= 0.0f || pCharacter->m_FreezeStart == 0 || pCharacter->m_FreezeEnd <= pCharacter->m_FreezeStart || !m_pClient->m_Snap.m_aCharacters[ClientID].m_HasExtendedDisplayInfo || (pCharacter->m_IsInFreeze && g_Config.m_ClFreezeBarsAlphaInsideFreeze == 0))
+	if(Character.m_FreezeEnd <= 0.0f || Character.m_FreezeStart == 0 || Character.m_FreezeEnd <= Character.m_FreezeStart || !m_pClient->m_Snap.m_aCharacters[ClientID].m_HasExtendedDisplayInfo || (Character.m_IsInFreeze && g_Config.m_ClFreezeBarsAlphaInsideFreeze == 0))
 	{
 		ShowFreezeBar = false;
 	}
 
 	if(ShowFreezeBar)
 	{
-		const int Max = pCharacter->m_FreezeEnd - pCharacter->m_FreezeStart;
-		float FreezeProgress = clamp(Max - (Client()->GameTick(g_Config.m_ClDummy) - pCharacter->m_FreezeStart), 0, Max) / (float)Max;
+		const int Max = Character.m_FreezeEnd - Character.m_FreezeStart;
+		float FreezeProgress = clamp(Max - (Client()->GameTick(g_Config.m_ClDummy) - Character.m_FreezeStart), 0, Max) / (float)Max;
 		if(FreezeProgress <= 0.0f)
 		{
 			ShowFreezeBar = false;
@@ -70,7 +70,7 @@ void CCountdowns::RenderPlayerBars(const int ClientID)
 			Position.y += 26;
 
 			float Alpha = m_pClient->IsOtherTeam(ClientID) ? g_Config.m_ClShowOthersAlpha / 100.0f : 1.0f;
-			if(pCharacter->m_IsInFreeze)
+			if(Character.m_IsInFreeze)
 			{
 				Alpha *= g_Config.m_ClFreezeBarsAlphaInsideFreeze / 100.0f;
 			}
@@ -80,10 +80,10 @@ void CCountdowns::RenderPlayerBars(const int ClientID)
 	}
 
 	// Ninja Bar
-	if(pCharacter->m_Ninja.m_ActivationTick > 0.0f && m_pClient->m_Snap.m_aCharacters[ClientID].m_HasExtendedDisplayInfo)
+	if(Character.m_Ninja.m_ActivationTick > 0.0f && m_pClient->m_Snap.m_aCharacters[ClientID].m_HasExtendedDisplayInfo)
 	{
 		const int Max = g_pData->m_Weapons.m_Ninja.m_Duration * Client()->GameTickSpeed() / 1000;
-		float NinjaProgress = clamp(pCharacter->m_Ninja.m_ActivationTick + g_pData->m_Weapons.m_Ninja.m_Duration * Client()->GameTickSpeed() / 1000 - Client()->GameTick(g_Config.m_ClDummy), 0, Max) / (float)Max;
+		float NinjaProgress = clamp(Character.m_Ninja.m_ActivationTick + g_pData->m_Weapons.m_Ninja.m_Duration * Client()->GameTickSpeed() / 1000 - Client()->GameTick(g_Config.m_ClDummy), 0, Max) / (float)Max;
 		if(NinjaProgress > 0.0f)
 		{
 			vec2 Position = m_pClient->m_aClients[ClientID].m_RenderPos;
@@ -179,13 +179,13 @@ void CCountdowns::GenerateFreezeCountdownStars(int ClientID)
 		return;
 	}
 
-	CCharacterCore *pCharacter = &m_pClient->m_aClients[ClientID].m_Predicted;
-	if(pCharacter->m_FreezeEnd <= 0 || pCharacter->m_FreezeStart == 0 || pCharacter->m_FreezeEnd <= GameTick)
+	const CCharacterCore &Character = m_pClient->m_aClients[ClientID].m_Predicted;
+	if(Character.m_FreezeEnd <= 0 || Character.m_FreezeStart == 0 || Character.m_FreezeEnd <= GameTick)
 	{
 		return;
 	}
 
-	const int FreezeTime = pCharacter->m_FreezeEnd - GameTick;
+	const int FreezeTime = Character.m_FreezeEnd - GameTick;
 	// Server sends not every tick a snap, it will send on even or odd ticks
 	if(FreezeTime % Client()->GameTickSpeed() == Client()->GameTickSpeed() - 1)
 	{
@@ -207,13 +207,13 @@ void CCountdowns::GenerateNinjaCountdownStars(int ClientID)
 		return;
 	}
 
-	CCharacterCore *pCharacter = &m_pClient->m_aClients[ClientID].m_Predicted;
-	if(pCharacter->m_Ninja.m_ActivationTick <= 0 || (GameTick - pCharacter->m_Ninja.m_ActivationTick) > (g_pData->m_Weapons.m_Ninja.m_Duration * Client()->GameTickSpeed() / 1000))
+	const CCharacterCore &Character = m_pClient->m_aClients[ClientID].m_Predicted;
+	if(Character.m_Ninja.m_ActivationTick <= 0 || (GameTick - Character.m_Ninja.m_ActivationTick) > (g_pData->m_Weapons.m_Ninja.m_Duration * Client()->GameTickSpeed() / 1000))
 	{
 		return;
 	}
 
-	int NinjaTime = pCharacter->m_Ninja.m_ActivationTick + (g_pData->m_Weapons.m_Ninja.m_Duration * Client()->GameTickSpeed() / 1000) - GameTick;
+	int NinjaTime = Character.m_Ninja.m_ActivationTick + (g_pData->m_Weapons.m_Ninja.m_Duration * Client()->GameTickSpeed() / 1000) - GameTick;
 	// Server sends not every tick a snap, it will send on even or odd ticks
 	if(NinjaTime % Client()->GameTickSpeed() == 0 && NinjaTime / Client()->GameTickSpeed() <= 5)
 	{
@@ -229,13 +229,7 @@ void CCountdowns::GenerateNinjaCountdownStars(int ClientID)
 
 void CCountdowns::OnInit()
 {
-	for(auto &aLastGenerateTick : m_aaLastGenerateTick)
-	{
-		for(int &LastGenerateTick : aLastGenerateTick)
-		{
-			LastGenerateTick = 0;
-		}
-	}
+	mem_zero(m_aaLastGenerateTick, sizeof(m_aaLastGenerateTick));
 }
 
 void CCountdowns::OnRender()

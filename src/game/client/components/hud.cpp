@@ -802,8 +802,8 @@ void CHud::RenderPlayerState(const int ClientID)
 	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
 
 	// pCharacter contains the predicted character for local players or the last snap for players who are spectated
-	CCharacterCore *pCharacter = &m_pClient->m_aClients[ClientID].m_Predicted;
-	CNetObj_Character *pPlayer = &m_pClient->m_aClients[ClientID].m_RenderCur;
+	const CCharacterCore *pCharacter = &m_pClient->m_aClients[ClientID].m_Predicted;
+	const CNetObj_Character *pPlayer = &m_pClient->m_aClients[ClientID].m_RenderCur;
 	bool JumpDisplayShown = false;
 	if(g_Config.m_ClShowhudJumpsIndicator)
 	{
