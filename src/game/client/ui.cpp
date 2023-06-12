@@ -112,11 +112,10 @@ CUI::CUI()
 {
 	m_Enabled = true;
 
-	m_pHotItem = 0;
-	m_pActiveItem = 0;
-	m_pLastActiveItem = 0;
-	m_pBecomingHotItem = 0;
-	m_pActiveTooltipItem = 0;
+	m_pHotItem = nullptr;
+	m_pActiveItem = nullptr;
+	m_pLastActiveItem = nullptr;
+	m_pBecomingHotItem = nullptr;
 
 	m_MouseX = 0;
 	m_MouseY = 0;
@@ -125,10 +124,8 @@ CUI::CUI()
 	m_MouseButtons = 0;
 	m_LastMouseButtons = 0;
 
-	m_Screen.x = 0;
-	m_Screen.y = 0;
-	m_Screen.w = 848.0f;
-	m_Screen.h = 480.0f;
+	m_Screen.x = 0.0f;
+	m_Screen.y = 0.0f;
 }
 
 CUI::~CUI()
@@ -226,7 +223,7 @@ void CUI::Update(float MouseX, float MouseY, float MouseDeltaX, float MouseDelta
 	m_pHotItem = m_pBecomingHotItem;
 	if(m_pActiveItem)
 		m_pHotItem = m_pActiveItem;
-	m_pBecomingHotItem = 0;
+	m_pBecomingHotItem = nullptr;
 
 	if(Enabled())
 	{
@@ -246,8 +243,8 @@ void CUI::DebugRender()
 	MapScreen();
 
 	char aBuf[128];
-	str_format(aBuf, sizeof(aBuf), "%p %p %p", HotItem(), ActiveItem(), LastActiveItem());
-	TextRender()->Text(10.0f, 10.0f, 10.0f, aBuf);
+	str_format(aBuf, sizeof(aBuf), "hot=%p nexthot=%p active=%p lastactive=%p", HotItem(), NextHotItem(), ActiveItem(), LastActiveItem());
+	TextRender()->Text(2.0f, Screen()->h - 12.0f, 10.0f, aBuf);
 }
 
 bool CUI::MouseInside(const CUIRect *pRect) const
@@ -338,15 +335,8 @@ float CUI::ButtonColorMul(const void *pID)
 
 const CUIRect *CUI::Screen()
 {
-	float Aspect = Graphics()->ScreenAspect();
-	float w, h;
-
-	h = 600;
-	w = Aspect * h;
-
-	m_Screen.w = w;
-	m_Screen.h = h;
-
+	m_Screen.h = 600.0f;
+	m_Screen.w = Graphics()->ScreenAspect() * m_Screen.h;
 	return &m_Screen;
 }
 
@@ -763,7 +753,7 @@ bool CUI::DoEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize
 		}
 		else
 		{
-			SetActiveItem(0);
+			SetActiveItem(nullptr);
 		}
 	}
 	else if(HotItem() == pLineInput)
