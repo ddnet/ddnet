@@ -78,10 +78,10 @@ void CVoting::CallvoteOption(int OptionID, const char *pReason, bool ForceVote)
 				str_copy(aBuf, "force_vote option \"");
 				char *pDst = aBuf + str_length(aBuf);
 				str_escape(&pDst, pOption->m_aDescription, aBuf + sizeof(aBuf));
-				str_append(aBuf, "\" \"", sizeof(aBuf));
+				str_append(aBuf, "\" \"");
 				pDst = aBuf + str_length(aBuf);
 				str_escape(&pDst, pReason, aBuf + sizeof(aBuf));
-				str_append(aBuf, "\"", sizeof(aBuf));
+				str_append(aBuf, "\"");
 				Client()->Rcon(aBuf);
 			}
 			else
@@ -105,7 +105,7 @@ void CVoting::RemovevoteOption(int OptionID)
 			str_copy(aBuf, "remove_vote \"");
 			char *pDst = aBuf + str_length(aBuf);
 			str_escape(&pDst, pOption->m_aDescription, aBuf + sizeof(aBuf));
-			str_append(aBuf, "\"", sizeof(aBuf));
+			str_append(aBuf, "\"");
 			Client()->Rcon(aBuf);
 			break;
 		}
@@ -121,10 +121,10 @@ void CVoting::AddvoteOption(const char *pDescription, const char *pCommand)
 	str_copy(aBuf, "add_vote \"");
 	char *pDst = aBuf + str_length(aBuf);
 	str_escape(&pDst, pDescription, aBuf + sizeof(aBuf));
-	str_append(aBuf, "\" \"", sizeof(aBuf));
+	str_append(aBuf, "\" \"");
 	pDst = aBuf + str_length(aBuf);
 	str_escape(&pDst, pCommand, aBuf + sizeof(aBuf));
-	str_append(aBuf, "\"", sizeof(aBuf));
+	str_append(aBuf, "\"");
 	Client()->Rcon(aBuf);
 }
 

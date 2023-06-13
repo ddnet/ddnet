@@ -112,7 +112,7 @@ public:
 			{
 				char aBuffer[IO_MAX_PATH_LENGTH];
 				str_copy(aBuffer, pArgv0, Pos + 1);
-				str_append(aBuffer, "/storage.cfg", sizeof(aBuffer));
+				str_append(aBuffer, "/storage.cfg");
 				File = io_open(aBuffer, IOFLAG_READ | IOFLAG_SKIP_BOM);
 			}
 
@@ -294,7 +294,7 @@ public:
 					return;
 				}
 #if defined(CONF_PLATFORM_MACOS)
-				str_append(m_aBinarydir, "/../../../DDNet-Server.app/Contents/MacOS", sizeof(m_aBinarydir));
+				str_append(m_aBinarydir, "/../../../DDNet-Server.app/Contents/MacOS");
 				str_format(aBuf, sizeof(aBuf), "%s/" PLAT_SERVER_EXEC, m_aBinarydir);
 				if(fs_is_file(aBuf))
 				{

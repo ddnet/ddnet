@@ -1031,7 +1031,7 @@ public:
 	void AppendTextContainer(STextContainerIndex TextContainerIndex, CTextCursor *pCursor, const char *pText, int Length = -1) override
 	{
 		STextContainer &TextContainer = GetTextContainer(TextContainerIndex);
-		str_append(TextContainer.m_aDebugText, pText, sizeof(TextContainer.m_aDebugText));
+		str_append(TextContainer.m_aDebugText, pText);
 
 		// calculate the font size of the displayed glyphs
 		float ScreenX0, ScreenY0, ScreenX1, ScreenY1;

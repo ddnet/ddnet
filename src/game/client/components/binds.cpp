@@ -419,8 +419,8 @@ const char *CBinds::GetKeyBindModifiersName(int ModifierCombination)
 	{
 		if(ModifierCombination & (1 << k))
 		{
-			str_append(aModifier, GetModifierName(k), sizeof(aModifier));
-			str_append(aModifier, "+", sizeof(aModifier));
+			str_append(aModifier, GetModifierName(k));
+			str_append(aModifier, "+");
 		}
 	}
 	return aModifier;

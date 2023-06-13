@@ -3991,7 +3991,7 @@ int open_file(const char *path)
 	{
 		if(!fs_getcwd(workingDir, sizeof(workingDir)))
 			return 0;
-		str_append(workingDir, "/", sizeof(workingDir));
+		str_append(workingDir, "/");
 	}
 	else
 		workingDir[0] = '\0';

@@ -1522,7 +1522,7 @@ int CMenus::Render()
 					char aBufNew[IO_MAX_PATH_LENGTH];
 					str_format(aBufNew, sizeof(aBufNew), "%s/%s", m_aCurrentDemoFolder, m_DemoRenameInput.GetString());
 					if(!str_endswith(aBufNew, ".demo"))
-						str_append(aBufNew, ".demo", sizeof(aBufNew));
+						str_append(aBufNew, ".demo");
 
 					if(Storage()->FileExists(aBufNew, m_vDemos[m_DemolistSelectedIndex].m_StorageType))
 					{

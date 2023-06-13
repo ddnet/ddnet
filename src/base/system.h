@@ -1195,6 +1195,23 @@ std::string windows_format_system_message(unsigned long error);
 void str_append(char *dst, const char *src, int dst_size);
 
 /**
+ * Appends a string to a fixed-size array of chars.
+ *
+ * @ingroup Strings
+ *
+ * @param dst Array that shall receive the string.
+ * @param src String to append.
+ *
+ * @remark The strings are treated as zero-terminated strings.
+ * @remark Guarantees that dst string will contain zero-termination.
+ */
+template<int N>
+void str_append(char (&dst)[N], const char *src)
+{
+	str_append(dst, src, N);
+}
+
+/**
  * Copies a string to another.
  *
  * @ingroup Strings
@@ -1209,6 +1226,23 @@ void str_append(char *dst, const char *src, int dst_size);
  * @remark Guarantees that dst string will contain zero-termination.
  */
 int str_copy(char *dst, const char *src, int dst_size);
+
+/**
+ * Copies a string to a fixed-size array of chars.
+ *
+ * @ingroup Strings
+ *
+ * @param dst Array that shall receive the string.
+ * @param src String to be copied.
+ *
+ * @remark The strings are treated as zero-terminated strings.
+ * @remark Guarantees that dst string will contain zero-termination.
+ */
+template<int N>
+void str_copy(char (&dst)[N], const char *src)
+{
+	str_copy(dst, src, N);
+}
 
 /**
  * Truncates a utf8 encoded string to a given length.
@@ -2779,23 +2813,6 @@ bool shell_unregister_application(const char *executable, bool *updated);
  */
 void shell_update();
 #endif
-
-/**
- * Copies a string to a fixed-size array of chars.
- *
- * @ingroup Strings
- *
- * @param dst Array that shall receive the string.
- * @param src String to be copied.
- *
- * @remark The strings are treated as zero-terminated strings.
- * @remark Guarantees that dst string will contain zero-termination.
- */
-template<int N>
-void str_copy(char (&dst)[N], const char *src)
-{
-	str_copy(dst, src, N);
-}
 
 template<>
 struct std::hash<NETADDR>

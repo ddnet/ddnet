@@ -188,10 +188,10 @@ void CGameConsole::CInstance::PossibleArgumentsCompleteCallback(int Index, const
 		// get command
 		char aBuf[512];
 		StrCopyUntilSpace(aBuf, sizeof(aBuf), pInstance->GetString());
-		str_append(aBuf, " ", sizeof(aBuf));
+		str_append(aBuf, " ");
 
 		// append argument
-		str_append(aBuf, pStr, sizeof(aBuf));
+		str_append(aBuf, pStr);
 		pInstance->m_Input.Set(aBuf);
 	}
 }

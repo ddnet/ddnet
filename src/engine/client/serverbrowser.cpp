@@ -1415,17 +1415,17 @@ int CServerBrowser::LoadingProgression() const
 	return 100.0f * Loaded / Servers;
 }
 
-void CServerBrowser::DDNetFilterAdd(char *pFilter, const char *pName)
+void CServerBrowser::DDNetFilterAdd(char *pFilter, int FilterSize, const char *pName) const
 {
 	if(DDNetFiltered(pFilter, pName))
 		return;
 
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), ",%s", pName);
-	str_append(pFilter, aBuf, 128);
+	str_append(pFilter, aBuf, FilterSize);
 }
 
-void CServerBrowser::DDNetFilterRem(char *pFilter, const char *pName)
+void CServerBrowser::DDNetFilterRem(char *pFilter, int FilterSize, const char *pName) const
 {
 	if(!DDNetFiltered(pFilter, pName))
 		return;
@@ -1443,12 +1443,12 @@ void CServerBrowser::DDNetFilterRem(char *pFilter, const char *pName)
 		{
 			char aBuf2[128];
 			str_format(aBuf2, sizeof(aBuf2), ",%s", aToken);
-			str_append(pFilter, aBuf2, 128);
+			str_append(pFilter, aBuf2, FilterSize);
 		}
 	}
 }
 
-bool CServerBrowser::DDNetFiltered(char *pFilter, const char *pName)
+bool CServerBrowser::DDNetFiltered(const char *pFilter, const char *pName) const
 {
 	return str_in_list(pFilter, ",", pName); // country not excluded
 }
@@ -1468,7 +1468,7 @@ void CServerBrowser::CountryFilterClean(int Network)
 			{
 				char aBuf[128];
 				str_format(aBuf, sizeof(aBuf), ",%s", pName);
-				str_append(aNewList, aBuf, sizeof(aNewList));
+				str_append(aNewList, aBuf);
 			}
 		}
 	}
@@ -1489,7 +1489,7 @@ void CServerBrowser::TypeFilterClean(int Network)
 		{
 			char aBuf[128];
 			str_format(aBuf, sizeof(aBuf), ",%s", pName);
-			str_append(aNewList, aBuf, sizeof(aNewList));
+			str_append(aNewList, aBuf);
 		}
 	}
 
