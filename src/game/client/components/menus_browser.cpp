@@ -762,6 +762,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 		if(s_ActivePage == 1)
 		{
 			char *pFilterExcludeTypes = Network == IServerBrowser::NETWORK_DDNET ? g_Config.m_BrFilterExcludeTypes : g_Config.m_BrFilterExcludeTypesKoG;
+			const int FilterExcludeTypesSize = Network == IServerBrowser::NETWORK_DDNET ? sizeof(g_Config.m_BrFilterExcludeTypes) : sizeof(g_Config.m_BrFilterExcludeTypesKoG);
 			int MaxTypes = ServerBrowser()->NumTypes(Network);
 			int NumTypes = ServerBrowser()->NumTypes(Network);
 			int PerLine = 3;
@@ -811,7 +812,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 							for(int j = 0; j < MaxTypes; ++j)
 							{
 								if(j != TypeIndex)
-									ServerBrowser()->DDNetFilterAdd(pFilterExcludeTypes, ServerBrowser()->GetType(Network, j));
+									ServerBrowser()->DDNetFilterAdd(pFilterExcludeTypes, FilterExcludeTypesSize, ServerBrowser()->GetType(Network, j));
 							}
 						}
 						else
@@ -832,11 +833,11 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 							}
 							else if(Active)
 							{
-								ServerBrowser()->DDNetFilterAdd(pFilterExcludeTypes, pName);
+								ServerBrowser()->DDNetFilterAdd(pFilterExcludeTypes, FilterExcludeTypesSize, pName);
 							}
 							else
 							{
-								ServerBrowser()->DDNetFilterRem(pFilterExcludeTypes, pName);
+								ServerBrowser()->DDNetFilterRem(pFilterExcludeTypes, FilterExcludeTypesSize, pName);
 							}
 						}
 
@@ -858,6 +859,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 		else
 		{
 			char *pFilterExcludeCountries = Network == IServerBrowser::NETWORK_DDNET ? g_Config.m_BrFilterExcludeCountries : g_Config.m_BrFilterExcludeCountriesKoG;
+			const int FilterExcludeCountriesSize = Network == IServerBrowser::NETWORK_DDNET ? sizeof(g_Config.m_BrFilterExcludeCountries) : sizeof(g_Config.m_BrFilterExcludeCountriesKoG);
 			ServerFilter.HSplitTop(15.0f, &ServerFilter, &ServerFilter);
 
 			const float FlagWidth = 40.0f;
@@ -907,7 +909,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 							for(int j = 0; j < MaxFlags; ++j)
 							{
 								if(j != CountryIndex)
-									ServerBrowser()->DDNetFilterAdd(pFilterExcludeCountries, ServerBrowser()->GetCountryName(Network, j));
+									ServerBrowser()->DDNetFilterAdd(pFilterExcludeCountries, FilterExcludeCountriesSize, ServerBrowser()->GetCountryName(Network, j));
 							}
 						}
 						else
@@ -928,11 +930,11 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 							}
 							else if(Active)
 							{
-								ServerBrowser()->DDNetFilterAdd(pFilterExcludeCountries, pName);
+								ServerBrowser()->DDNetFilterAdd(pFilterExcludeCountries, FilterExcludeCountriesSize, pName);
 							}
 							else
 							{
-								ServerBrowser()->DDNetFilterRem(pFilterExcludeCountries, pName);
+								ServerBrowser()->DDNetFilterRem(pFilterExcludeCountries, FilterExcludeCountriesSize, pName);
 							}
 						}
 
