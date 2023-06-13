@@ -1293,11 +1293,11 @@ void CServer::SendRconLogLine(int ClientID, const CLogMessage *pMessage)
 	{
 		str_append(aLine, pLine, pStart - pLine + 1);
 		str_append(aLine, pStart + 2, pStart - pLine + pEnd - pStart - 1);
-		str_append(aLine, pEnd + 2, sizeof(aLine));
+		str_append(aLine, pEnd + 2);
 
 		str_append(aLineWithoutIps, pLine, pStart - pLine + 1);
-		str_append(aLineWithoutIps, "XXX", sizeof(aLineWithoutIps));
-		str_append(aLineWithoutIps, pEnd + 2, sizeof(aLineWithoutIps));
+		str_append(aLineWithoutIps, "XXX");
+		str_append(aLineWithoutIps, pEnd + 2);
 
 		pLine = aLine;
 		pLineWithoutIps = aLineWithoutIps;
@@ -2319,12 +2319,12 @@ void CServer::UpdateRegisterServerInfo()
 				m_aClients[i].m_Score.value_or(-9999),
 				JsonBool(GameServer()->IsClientPlayer(i)),
 				aExtraPlayerInfo);
-			str_append(aInfo, aClientInfo, sizeof(aInfo));
+			str_append(aInfo, aClientInfo);
 			FirstPlayer = false;
 		}
 	}
 
-	str_append(aInfo, "]}", sizeof(aInfo));
+	str_append(aInfo, "]}");
 
 	m_pRegister->OnNewInfo(aInfo);
 }

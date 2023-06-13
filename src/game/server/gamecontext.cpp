@@ -4440,16 +4440,16 @@ void CGameContext::OnUpdatePlayerServerInfo(char *aBuf, int BufSize, int ID)
 				apPartNames[i],
 				EscapeJson(aCSkinName, sizeof(aCSkinName), TeeInfo.m_apSkinPartNames[i]));
 
-			str_append(aJsonSkin, aPartBuf, sizeof(aJsonSkin));
+			str_append(aJsonSkin, aPartBuf);
 
 			if(TeeInfo.m_aUseCustomColors[i])
 			{
 				str_format(aPartBuf, sizeof(aPartBuf),
 					",\"color\":%d",
 					TeeInfo.m_aSkinPartColors[i]);
-				str_append(aJsonSkin, aPartBuf, sizeof(aJsonSkin));
+				str_append(aJsonSkin, aPartBuf);
 			}
-			str_append(aJsonSkin, "}", sizeof(aJsonSkin));
+			str_append(aJsonSkin, "}");
 		}
 	}
 

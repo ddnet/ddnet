@@ -27,7 +27,7 @@ inline void ProcessItem(const char *pItemName, IStorage *pStorage)
 
 	str_copy(aConfig, pItemName, sizeof(aConfig));
 	aConfig[Len - sizeof(".map")] = 0;
-	str_append(aConfig, ".cfg", sizeof(aConfig));
+	str_append(aConfig, ".cfg");
 	dbg_msg("config_common", "processing '%s'", pItemName);
 	Process(pStorage, pItemName, aConfig);
 }

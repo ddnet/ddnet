@@ -672,13 +672,13 @@ int CGraphics_Threaded::LoadPNG(CImageInfo *pImg, const char *pFilename, int Sto
 					{
 						if(!First)
 						{
-							str_append(Warning.m_aWarningMsg, ", ", sizeof(Warning.m_aWarningMsg));
+							str_append(Warning.m_aWarningMsg, ", ");
 						}
-						str_append(Warning.m_aWarningMsg, EXPLANATION[i], sizeof(Warning.m_aWarningMsg));
+						str_append(Warning.m_aWarningMsg, EXPLANATION[i]);
 						First = false;
 					}
 				}
-				str_append(Warning.m_aWarningMsg, " unsupported", sizeof(Warning.m_aWarningMsg));
+				str_append(Warning.m_aWarningMsg, " unsupported");
 				m_vWarnings.emplace_back(Warning);
 			}
 		}

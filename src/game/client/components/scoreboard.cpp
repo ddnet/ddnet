@@ -191,7 +191,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 			while(TextRender()->TextWidth(TitleFontsize, aBuf, -1, -1.0f) > TitleWidth)
 				aBuf[str_length(aBuf) - 1] = '\0';
 			if(str_comp(aBuf, Client()->GetCurrentMap()))
-				str_append(aBuf, "…", sizeof(aBuf));
+				str_append(aBuf, "…");
 			pTitle = aBuf;
 		}
 	}
@@ -531,25 +531,25 @@ void CScoreboard::RenderRecordingNotification(float x)
 	{
 		str_time((int64_t)m_pClient->DemoRecorder(RECORDER_MANUAL)->Length() * 100, TIME_HOURS, aTime, sizeof(aTime));
 		str_format(aBuf2, sizeof(aBuf2), "%s %s  ", Localize("Manual"), aTime);
-		str_append(aBuf, aBuf2, sizeof(aBuf));
+		str_append(aBuf, aBuf2);
 	}
 	if(m_pClient->DemoRecorder(RECORDER_RACE)->IsRecording())
 	{
 		str_time((int64_t)m_pClient->DemoRecorder(RECORDER_RACE)->Length() * 100, TIME_HOURS, aTime, sizeof(aTime));
 		str_format(aBuf2, sizeof(aBuf2), "%s %s  ", Localize("Race"), aTime);
-		str_append(aBuf, aBuf2, sizeof(aBuf));
+		str_append(aBuf, aBuf2);
 	}
 	if(m_pClient->DemoRecorder(RECORDER_AUTO)->IsRecording())
 	{
 		str_time((int64_t)m_pClient->DemoRecorder(RECORDER_AUTO)->Length() * 100, TIME_HOURS, aTime, sizeof(aTime));
 		str_format(aBuf2, sizeof(aBuf2), "%s %s  ", Localize("Auto"), aTime);
-		str_append(aBuf, aBuf2, sizeof(aBuf));
+		str_append(aBuf, aBuf2);
 	}
 	if(m_pClient->DemoRecorder(RECORDER_REPLAYS)->IsRecording())
 	{
 		str_time((int64_t)m_pClient->DemoRecorder(RECORDER_REPLAYS)->Length() * 100, TIME_HOURS, aTime, sizeof(aTime));
 		str_format(aBuf2, sizeof(aBuf2), "%s %s  ", Localize("Replay"), aTime);
-		str_append(aBuf, aBuf2, sizeof(aBuf));
+		str_append(aBuf, aBuf2);
 	}
 
 	if(!aBuf[0])

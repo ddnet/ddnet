@@ -676,7 +676,7 @@ void CMenus::RenderDemoPlayerSliceSavePopup(CUIRect MainView)
 	{
 		char aDemoName[IO_MAX_PATH_LENGTH];
 		DemoPlayer()->GetDemoName(aDemoName, sizeof(aDemoName));
-		str_append(aDemoName, ".demo", sizeof(aDemoName));
+		str_append(aDemoName, ".demo");
 
 		if(!str_endswith(m_DemoSliceInput.GetString(), ".demo"))
 			m_DemoSliceInput.Append(".demo");
@@ -1160,8 +1160,8 @@ void CMenus::RenderDemoList(CUIRect MainView)
 					fs_parent_dir(m_aCurrentDemoFolder);
 				else // sub folder
 				{
-					str_append(m_aCurrentDemoFolder, "/", sizeof(m_aCurrentDemoFolder));
-					str_append(m_aCurrentDemoFolder, m_vDemos[m_DemolistSelectedIndex].m_aFilename, sizeof(m_aCurrentDemoFolder));
+					str_append(m_aCurrentDemoFolder, "/");
+					str_append(m_aCurrentDemoFolder, m_vDemos[m_DemolistSelectedIndex].m_aFilename);
 					m_DemolistStorageType = m_vDemos[m_DemolistSelectedIndex].m_StorageType;
 				}
 				DemolistPopulate();

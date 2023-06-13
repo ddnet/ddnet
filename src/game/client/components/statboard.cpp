@@ -518,7 +518,7 @@ void CStatboard::FormatStats(char *pDest, size_t DestSize)
 			pStats->m_FlagGrabs, // Flag grabs
 			pStats->m_FlagCaptures); // Flag captures
 
-		str_append(aPlayerStats, aBuf, sizeof(aPlayerStats));
+		str_append(aPlayerStats, aBuf);
 	}
 
 	str_format(pDest, DestSize, "%s\n\n%s", aServerStats, aPlayerStats);

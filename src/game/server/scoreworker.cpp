@@ -215,7 +215,7 @@ bool CScoreWorker::MapVote(IDbConnection *pSqlServer, const ISqlData *pGameData,
 
 	char aMapPrefix[128];
 	str_copy(aMapPrefix, pData->m_aName, sizeof(aMapPrefix));
-	str_append(aMapPrefix, "%", sizeof(aMapPrefix));
+	str_append(aMapPrefix, "%");
 
 	char aBuf[768];
 	str_format(aBuf, sizeof(aBuf),
@@ -275,7 +275,7 @@ bool CScoreWorker::MapInfo(IDbConnection *pSqlServer, const ISqlData *pGameData,
 
 	char aMapPrefix[128];
 	str_copy(aMapPrefix, pData->m_aName, sizeof(aMapPrefix));
-	str_append(aMapPrefix, "%", sizeof(aMapPrefix));
+	str_append(aMapPrefix, "%");
 
 	char aCurrentTimestamp[512];
 	pSqlServer->ToUnixTimestamp("CURRENT_TIMESTAMP", aCurrentTimestamp, sizeof(aCurrentTimestamp));
@@ -876,12 +876,12 @@ bool CScoreWorker::ShowTeamRank(IDbConnection *pSqlServer, const ISqlData *pGame
 		char aFormattedNames[512] = "";
 		for(unsigned int Name = 0; Name < Teamrank.m_NumNames; Name++)
 		{
-			str_append(aFormattedNames, Teamrank.m_aaNames[Name], sizeof(aFormattedNames));
+			str_append(aFormattedNames, Teamrank.m_aaNames[Name]);
 
 			if(Name < Teamrank.m_NumNames - 2)
-				str_append(aFormattedNames, ", ", sizeof(aFormattedNames));
+				str_append(aFormattedNames, ", ");
 			else if(Name < Teamrank.m_NumNames - 1)
-				str_append(aFormattedNames, " & ", sizeof(aFormattedNames));
+				str_append(aFormattedNames, " & ");
 		}
 
 		if(g_Config.m_SvHideScore)
@@ -1051,11 +1051,11 @@ bool CScoreWorker::ShowTeamTop5(IDbConnection *pSqlServer, const ISqlData *pGame
 			{
 				char aName[MAX_NAME_LENGTH];
 				pSqlServer->GetString(1, aName, sizeof(aName));
-				str_append(aNames, aName, sizeof(aNames));
+				str_append(aNames, aName);
 				if(i < TeamSize - 2)
-					str_append(aNames, ", ", sizeof(aNames));
+					str_append(aNames, ", ");
 				else if(i == TeamSize - 2)
-					str_append(aNames, " & ", sizeof(aNames));
+					str_append(aNames, " & ");
 				if(pSqlServer->Step(&Last, pError, ErrorSize))
 				{
 					return true;
@@ -1143,12 +1143,12 @@ bool CScoreWorker::ShowPlayerTeamTop5(IDbConnection *pSqlServer, const ISqlData 
 			char aFormattedNames[512] = "";
 			for(unsigned int Name = 0; Name < Teamrank.m_NumNames; Name++)
 			{
-				str_append(aFormattedNames, Teamrank.m_aaNames[Name], sizeof(aFormattedNames));
+				str_append(aFormattedNames, Teamrank.m_aaNames[Name]);
 
 				if(Name < Teamrank.m_NumNames - 2)
-					str_append(aFormattedNames, ", ", sizeof(aFormattedNames));
+					str_append(aFormattedNames, ", ");
 				else if(Name < Teamrank.m_NumNames - 1)
-					str_append(aFormattedNames, " & ", sizeof(aFormattedNames));
+					str_append(aFormattedNames, " & ");
 			}
 
 			str_format(paMessages[Line], sizeof(paMessages[Line]), "%d. %s Team Time: %s",
@@ -1776,11 +1776,11 @@ bool CScoreWorker::GetSaves(IDbConnection *pSqlServer, const ISqlData *pGameData
 	auto *paMessages = pResult->m_Data.m_aaMessages;
 
 	char aSaveLike[128] = "";
-	str_append(aSaveLike, "%\n", sizeof(aSaveLike));
+	str_append(aSaveLike, "%\n");
 	sqlstr::EscapeLike(aSaveLike + str_length(aSaveLike),
 		pData->m_aRequestingPlayer,
 		sizeof(aSaveLike) - str_length(aSaveLike));
-	str_append(aSaveLike, "\t%", sizeof(aSaveLike));
+	str_append(aSaveLike, "\t%");
 
 	char aCurrentTimestamp[512];
 	pSqlServer->ToUnixTimestamp("CURRENT_TIMESTAMP", aCurrentTimestamp, sizeof(aCurrentTimestamp));
