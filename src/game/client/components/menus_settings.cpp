@@ -2561,6 +2561,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		Section.HSplitTop(LineSize, &Label, &Section);
 		UI()->DoLabel(&Label, Localize("Show a state change countdown under players"), 13.0f, TEXTALIGN_ML);
 		static int s_StateChangeCountdownToolTip = 0;
+		UI()->DoButtonLogic(&s_StateChangeCountdownToolTip, 0, &Label);
 		GameClient()->m_Tooltips.DoToolTip(&s_StateChangeCountdownToolTip, &Label, Localize("It indicates the time till a player unfreezes and the time a player has left to be a ninja"));
 		static int s_ShowCountdownStars = 0;
 		Section.HSplitTop(LineSize, &Button, &Section);
@@ -2869,6 +2870,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 
 		Section.HSplitTop(LineSize, &Label, &Section);
 		UI()->DoLabel(&Label, Localize("Colors of the hook collision line, in case of a possible collision with:"), 13.0f, TEXTALIGN_ML);
+		UI()->DoButtonLogic(&s_HookCollToolTip, 0, &Label);
 		GameClient()->m_Tooltips.DoToolTip(&s_HookCollToolTip, &Label, Localize("Your movements are not taken into account when calculating the line colors"));
 		DoLine_ColorPicker(&s_HookCollNoCollResetID, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Nothing hookable"), &g_Config.m_ClHookCollColorNoColl, ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f), false);
 		DoLine_ColorPicker(&s_HookCollHookableCollResetID, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Something hookable"), &g_Config.m_ClHookCollColorHookableColl, ColorRGBA(130.0f / 255.0f, 232.0f / 255.0f, 160.0f / 255.0f, 1.0f), false);
