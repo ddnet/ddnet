@@ -90,7 +90,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupMenuFile(void *pContext, CUIRect Vie
 	{
 		if(pEditor->m_aFileName[0] && pEditor->m_ValidSaveFilename)
 		{
-			str_copy(pEditor->m_aFileSaveName, pEditor->m_aFileName, sizeof(pEditor->m_aFileSaveName));
+			str_copy(pEditor->m_aFileSaveName, pEditor->m_aFileName);
 			pEditor->m_PopupEventType = POPEVENT_SAVE;
 			pEditor->m_PopupEventActivated = true;
 		}
