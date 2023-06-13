@@ -6001,7 +6001,7 @@ void CEditor::RenderMenubar(CUIRect MenuBar)
 	MenuBar.VSplitLeft(5.0f, nullptr, &MenuBar);
 	MenuBar.VSplitRight(20.0f, &MenuBar, &Close);
 	Close.VSplitLeft(5.0f, nullptr, &Close);
-	MenuBar.VSplitLeft(MenuBar.w * 0.75f, &MenuBar, &Info);
+	MenuBar.VSplitLeft(MenuBar.w * 0.6f, &MenuBar, &Info);
 	char aBuf[IO_MAX_PATH_LENGTH + 32];
 	str_format(aBuf, sizeof(aBuf), "File: %s", m_aFileName);
 	UI()->DoLabel(&MenuBar, aBuf, 10.0f, TEXTALIGN_ML);
@@ -6009,7 +6009,7 @@ void CEditor::RenderMenubar(CUIRect MenuBar)
 	char aTimeStr[6];
 	str_timestamp_format(aTimeStr, sizeof(aTimeStr), "%H:%M");
 
-	str_format(aBuf, sizeof(aBuf), "X: %i, Y: %i, Z: %.1f, A: %.1f, G: %i  %s", (int)UI()->MouseWorldX() / 32, (int)UI()->MouseWorldY() / 32, m_Zoom, m_AnimateSpeed, m_GridFactor, aTimeStr);
+	str_format(aBuf, sizeof(aBuf), "X: %.1f, Y: %.1f, Z: %.1f, A: %.1f, G: %i  %s", UI()->MouseWorldX() / 32.0f, UI()->MouseWorldY() / 32.0f, m_Zoom, m_AnimateSpeed, m_GridFactor, aTimeStr);
 	UI()->DoLabel(&Info, aBuf, 10.0f, TEXTALIGN_MR);
 
 	static int s_CloseButton = 0;
