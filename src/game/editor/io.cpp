@@ -403,7 +403,7 @@ bool CEditor::Load(const char *pFileName, int StorageType)
 	bool Result = m_Map.Load(Kernel()->RequestInterface<IStorage>(), pFileName, StorageType);
 	if(Result)
 	{
-		str_copy(m_aFileName, pFileName, 512);
+		str_copy(m_aFileName, pFileName);
 		SortImages();
 		SelectGameLayer();
 		ResetMenuBackgroundPositions();
@@ -445,13 +445,13 @@ bool CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Stora
 					continue;
 
 				if(pItem->m_Author > -1)
-					str_copy(m_MapInfo.m_aAuthor, (char *)DataFile.GetData(pItem->m_Author), sizeof(m_MapInfo.m_aAuthor));
+					str_copy(m_MapInfo.m_aAuthor, (char *)DataFile.GetData(pItem->m_Author));
 				if(pItem->m_MapVersion > -1)
-					str_copy(m_MapInfo.m_aVersion, (char *)DataFile.GetData(pItem->m_MapVersion), sizeof(m_MapInfo.m_aVersion));
+					str_copy(m_MapInfo.m_aVersion, (char *)DataFile.GetData(pItem->m_MapVersion));
 				if(pItem->m_Credits > -1)
-					str_copy(m_MapInfo.m_aCredits, (char *)DataFile.GetData(pItem->m_Credits), sizeof(m_MapInfo.m_aCredits));
+					str_copy(m_MapInfo.m_aCredits, (char *)DataFile.GetData(pItem->m_Credits));
 				if(pItem->m_License > -1)
-					str_copy(m_MapInfo.m_aLicense, (char *)DataFile.GetData(pItem->m_License), sizeof(m_MapInfo.m_aLicense));
+					str_copy(m_MapInfo.m_aLicense, (char *)DataFile.GetData(pItem->m_License));
 
 				if(pItem->m_Version != 1 || ItemSize < (int)sizeof(CMapItemInfoSettings))
 					break;
@@ -466,7 +466,7 @@ bool CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Stora
 				{
 					int StrSize = str_length(pNext) + 1;
 					CSetting Setting;
-					str_copy(Setting.m_aCommand, pNext, sizeof(Setting.m_aCommand));
+					str_copy(Setting.m_aCommand, pNext);
 					m_vSettings.push_back(Setting);
 					pNext += StrSize;
 				}
@@ -523,7 +523,7 @@ bool CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Stora
 
 				// copy image name
 				if(pName)
-					str_copy(pImg->m_aName, pName, 128);
+					str_copy(pImg->m_aName, pName);
 
 				// load auto mapper file
 				pImg->m_AutoMapper.Load(pImg->m_aName);
@@ -572,7 +572,7 @@ bool CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Stora
 
 				// copy image name
 				if(pName)
-					str_copy(pSound->m_aName, pName, sizeof(pSound->m_aName));
+					str_copy(pSound->m_aName, pName);
 
 				m_vpSounds.push_back(pSound);
 

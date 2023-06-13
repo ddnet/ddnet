@@ -844,7 +844,7 @@ bool CEditor::CallbackSaveMap(const char *pFileName, int StorageType, void *pUse
 
 	if(pEditor->Save(pFileName))
 	{
-		str_copy(pEditor->m_aFileName, pFileName, sizeof(pEditor->m_aFileName));
+		str_copy(pEditor->m_aFileName, pFileName);
 		pEditor->m_ValidSaveFilename = StorageType == IStorage::TYPE_SAVE && pEditor->m_pFileDialogPath == pEditor->m_aFileDialogCurrentFolder;
 		pEditor->m_Map.m_Modified = false;
 		pEditor->m_Dialog = DIALOG_NONE;
@@ -3208,7 +3208,7 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 		{
 			char aBuf[64];
 			if(pProps[i].m_Value < 0)
-				str_copy(aBuf, "None", sizeof(aBuf));
+				str_copy(aBuf, "None");
 			else
 				str_copy(aBuf, m_Map.m_vpImages[pProps[i].m_Value]->m_aName);
 
@@ -3260,7 +3260,7 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 		{
 			char aBuf[64];
 			if(pProps[i].m_Value < 0)
-				str_copy(aBuf, "None", sizeof(aBuf));
+				str_copy(aBuf, "None");
 			else
 				str_copy(aBuf, m_Map.m_vpSounds[pProps[i].m_Value]->m_aName);
 
@@ -3279,7 +3279,7 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 		{
 			char aBuf[64];
 			if(pProps[i].m_Value < 0 || pProps[i].m_Min < 0 || pProps[i].m_Min >= (int)m_Map.m_vpImages.size())
-				str_copy(aBuf, "None", sizeof(aBuf));
+				str_copy(aBuf, "None");
 			else
 				str_copy(aBuf, m_Map.m_vpImages[pProps[i].m_Min]->m_AutoMapper.GetConfigName(pProps[i].m_Value));
 
@@ -3304,7 +3304,7 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 			Shifter.VSplitLeft(10.0f, &Dec, &Shifter);
 
 			if(CurValue <= 0)
-				str_copy(aBuf, "None:", sizeof(aBuf));
+				str_copy(aBuf, "None:");
 			else if(m_Map.m_vpEnvelopes[CurValue - 1]->m_aName[0])
 			{
 				str_format(aBuf, sizeof(aBuf), "%s:", m_Map.m_vpEnvelopes[CurValue - 1]->m_aName);
@@ -3597,26 +3597,26 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 				m_Map.m_vpGroups[g]->m_vpLayers[i]->m_Visible = !m_Map.m_vpGroups[g]->m_vpLayers[i]->m_Visible;
 
 			if(m_Map.m_vpGroups[g]->m_vpLayers[i]->m_aName[0])
-				str_copy(aBuf, m_Map.m_vpGroups[g]->m_vpLayers[i]->m_aName, sizeof(aBuf));
+				str_copy(aBuf, m_Map.m_vpGroups[g]->m_vpLayers[i]->m_aName);
 			else
 			{
 				if(m_Map.m_vpGroups[g]->m_vpLayers[i]->m_Type == LAYERTYPE_TILES)
 				{
 					CLayerTiles *pTiles = (CLayerTiles *)m_Map.m_vpGroups[g]->m_vpLayers[i];
-					str_copy(aBuf, pTiles->m_Image >= 0 ? m_Map.m_vpImages[pTiles->m_Image]->m_aName : "Tiles", sizeof(aBuf));
+					str_copy(aBuf, pTiles->m_Image >= 0 ? m_Map.m_vpImages[pTiles->m_Image]->m_aName : "Tiles");
 				}
 				else if(m_Map.m_vpGroups[g]->m_vpLayers[i]->m_Type == LAYERTYPE_QUADS)
 				{
 					CLayerQuads *pQuads = (CLayerQuads *)m_Map.m_vpGroups[g]->m_vpLayers[i];
-					str_copy(aBuf, pQuads->m_Image >= 0 ? m_Map.m_vpImages[pQuads->m_Image]->m_aName : "Quads", sizeof(aBuf));
+					str_copy(aBuf, pQuads->m_Image >= 0 ? m_Map.m_vpImages[pQuads->m_Image]->m_aName : "Quads");
 				}
 				else if(m_Map.m_vpGroups[g]->m_vpLayers[i]->m_Type == LAYERTYPE_SOUNDS)
 				{
 					CLayerSounds *pSounds = (CLayerSounds *)m_Map.m_vpGroups[g]->m_vpLayers[i];
-					str_copy(aBuf, pSounds->m_Sound >= 0 ? m_Map.m_vpSounds[pSounds->m_Sound]->m_aName : "Sounds", sizeof(aBuf));
+					str_copy(aBuf, pSounds->m_Sound >= 0 ? m_Map.m_vpSounds[pSounds->m_Sound]->m_aName : "Sounds");
 				}
 				if(str_length(aBuf) > 11)
-					str_format(aBuf, sizeof(aBuf), "%.8s...", aBuf);
+					str_format(aBuf, sizeof(aBuf), "%.8s…", aBuf);
 			}
 
 			float FontSize = 10.0f;
@@ -4069,7 +4069,7 @@ bool CEditor::AddImage(const char *pFileName, int StorageType, void *pUser)
 		TextureLoadFlag = 0;
 	pImg->m_Texture = pEditor->Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, CImageInfo::FORMAT_AUTO, TextureLoadFlag, pFileName);
 	ImgInfo.m_pData = nullptr;
-	str_copy(pImg->m_aName, aBuf, sizeof(pImg->m_aName));
+	str_copy(pImg->m_aName, aBuf);
 	pImg->m_AutoMapper.Load(pImg->m_aName);
 	pEditor->m_Map.m_vpImages.push_back(pImg);
 	pEditor->SortImages();
@@ -4125,7 +4125,7 @@ bool CEditor::AddSound(const char *pFileName, int StorageType, void *pUser)
 	pSound->m_SoundID = SoundId;
 	pSound->m_DataSize = DataSize;
 	pSound->m_pData = pData;
-	str_copy(pSound->m_aName, aBuf, sizeof(pSound->m_aName));
+	str_copy(pSound->m_aName, aBuf);
 	pEditor->m_Map.m_vpSounds.push_back(pSound);
 
 	if(pEditor->m_SelectedSound >= 0 && (size_t)pEditor->m_SelectedSound < pEditor->m_Map.m_vpSounds.size())
@@ -4534,7 +4534,7 @@ static int EditorListdirCallback(const CFsFileInfo *pInfo, int IsDir, int Storag
 		return 0;
 
 	CEditor::CFilelistItem Item;
-	str_copy(Item.m_aFilename, pInfo->m_pName, sizeof(Item.m_aFilename));
+	str_copy(Item.m_aFilename, pInfo->m_pName);
 	if(IsDir)
 		str_format(Item.m_aName, sizeof(Item.m_aName), "%s/", pInfo->m_pName);
 	else
@@ -4889,12 +4889,12 @@ void CEditor::RenderFileDialog()
 				if(m_vpFilteredFileList[m_FilesSelectedIndex]->m_IsLink)
 				{
 					m_pFileDialogPath = m_aFileDialogCurrentLink; // follow the link
-					str_copy(m_aFileDialogCurrentLink, m_vpFilteredFileList[m_FilesSelectedIndex]->m_aFilename, sizeof(m_aFileDialogCurrentLink));
+					str_copy(m_aFileDialogCurrentLink, m_vpFilteredFileList[m_FilesSelectedIndex]->m_aFilename);
 				}
 				else
 				{
 					char aTemp[IO_MAX_PATH_LENGTH];
-					str_copy(aTemp, m_pFileDialogPath, sizeof(aTemp));
+					str_copy(aTemp, m_pFileDialogPath);
 					str_format(m_pFileDialogPath, IO_MAX_PATH_LENGTH, "%s/%s", aTemp, m_vpFilteredFileList[m_FilesSelectedIndex]->m_aFilename);
 				}
 			}
@@ -5036,8 +5036,8 @@ void CEditor::FilelistPopulate(int StorageType, bool KeepSelection)
 	if(m_FileDialogStorageType != IStorage::TYPE_SAVE && !str_comp(m_pFileDialogPath, "maps"))
 	{
 		CFilelistItem Item;
-		str_copy(Item.m_aFilename, "downloadedmaps", sizeof(Item.m_aFilename));
-		str_copy(Item.m_aName, "downloadedmaps/", sizeof(Item.m_aName));
+		str_copy(Item.m_aFilename, "downloadedmaps");
+		str_copy(Item.m_aName, "downloadedmaps/");
 		Item.m_IsDir = true;
 		Item.m_IsLink = true;
 		Item.m_StorageType = IStorage::TYPE_SAVE;
@@ -5079,7 +5079,7 @@ void CEditor::InvokeFileDialog(int StorageType, int FileType, const char *pTitle
 	if(pDefaultName)
 		m_FileDialogFileNameInput.Set(pDefaultName);
 	if(pBasePath)
-		str_copy(m_aFileDialogCurrentFolder, pBasePath, sizeof(m_aFileDialogCurrentFolder));
+		str_copy(m_aFileDialogCurrentFolder, pBasePath);
 
 	FilelistPopulate(m_FileDialogStorageType);
 
@@ -5166,7 +5166,7 @@ void CEditor::RenderStatusbar(CUIRect View)
 		if(ms_pUiGotContext && ms_pUiGotContext == UI()->HotItem())
 			str_format(aBuf, sizeof(aBuf), "%s Right click for context menu.", m_pTooltip);
 		else
-			str_copy(aBuf, m_pTooltip, sizeof(aBuf));
+			str_copy(aBuf, m_pTooltip);
 
 		float FontSize = ScaleFontSize(aBuf, sizeof(aBuf), 10.0f, View.w);
 		SLabelProperties Props;
@@ -6007,7 +6007,7 @@ void CEditor::RenderMenubar(CUIRect MenuBar)
 	MenuBar.VSplitRight(20.0f, &MenuBar, &Close);
 	Close.VSplitLeft(5.0f, nullptr, &Close);
 	MenuBar.VSplitLeft(MenuBar.w * 0.75f, &MenuBar, &Info);
-	char aBuf[128];
+	char aBuf[IO_MAX_PATH_LENGTH + 32];
 	str_format(aBuf, sizeof(aBuf), "File: %s", m_aFileName);
 	UI()->DoLabel(&MenuBar, aBuf, 10.0f, TEXTALIGN_ML);
 
@@ -6147,10 +6147,10 @@ void CEditor::Render()
 	// show mentions
 	if(m_GuiActive && m_Mentions)
 	{
-		char aBuf[16];
+		char aBuf[64];
 		if(m_Mentions == 1)
 		{
-			str_copy(aBuf, Localize("1 new mention"), sizeof(aBuf));
+			str_copy(aBuf, Localize("1 new mention"));
 		}
 		else if(m_Mentions <= 9)
 		{
@@ -6158,7 +6158,7 @@ void CEditor::Render()
 		}
 		else
 		{
-			str_copy(aBuf, Localize("9+ new mentions"), sizeof(aBuf));
+			str_copy(aBuf, Localize("9+ new mentions"));
 		}
 
 		TextRender()->TextColor(1.0f, 0.0f, 0.0f, 1.0f);
@@ -6245,7 +6245,7 @@ void CEditor::Render()
 			{
 				if(!m_PopupEventWasActivated)
 				{
-					str_copy(m_aFileSaveName, m_aFileName, sizeof(m_aFileSaveName));
+					str_copy(m_aFileSaveName, m_aFileName);
 					CallbackSaveMap(m_aFileSaveName, IStorage::TYPE_SAVE, this);
 				}
 			}
@@ -6608,7 +6608,7 @@ void CEditorMap::MakeGameGroup(CLayerGroup *pGroup)
 {
 	m_pGameGroup = pGroup;
 	m_pGameGroup->m_GameGroup = true;
-	str_copy(m_pGameGroup->m_aName, "Game", sizeof(m_pGameGroup->m_aName));
+	str_copy(m_pGameGroup->m_aName, "Game");
 }
 
 void CEditorMap::Clean()

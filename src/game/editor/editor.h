@@ -120,7 +120,7 @@ public:
 	CLayer()
 	{
 		m_Type = LAYERTYPE_INVALID;
-		str_copy(m_aName, "(invalid)", sizeof(m_aName));
+		str_copy(m_aName, "(invalid)");
 		m_Visible = true;
 		m_Readonly = false;
 		m_Flags = 0;
@@ -130,7 +130,7 @@ public:
 
 	CLayer(const CLayer &Other)
 	{
-		str_copy(m_aName, Other.m_aName, sizeof(m_aName));
+		str_copy(m_aName, Other.m_aName);
 		m_Flags = Other.m_Flags;
 		m_pEditor = Other.m_pEditor;
 		m_Type = Other.m_Type;
