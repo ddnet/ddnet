@@ -4848,10 +4848,16 @@ void CEditor::RenderFileDialog()
 	{
 		m_FilesSelectedIndex = NewSelection;
 		str_copy(m_aFilesSelectedName, m_vpFilteredFileList[m_FilesSelectedIndex]->m_aName);
+		const bool WasChanged = m_FileDialogFileNameInput.WasChanged();
 		if(!m_vpFilteredFileList[m_FilesSelectedIndex]->m_IsDir)
+		{
 			m_FileDialogFileNameInput.Set(m_vpFilteredFileList[m_FilesSelectedIndex]->m_aFilename);
+			m_FileDialogFileNameInput.SetRange("", m_FileDialogFileNameInput.GetLength() - str_length(".map"), m_FileDialogFileNameInput.GetLength());
+		}
 		else
 			m_FileDialogFileNameInput.Clear();
+		if(!WasChanged) // ensure that changed flag is not set if it wasn't previously set, as this would reset the selection after DoEditBox is called
+			m_FileDialogFileNameInput.WasChanged(); // this clears the changed flag
 		m_PreviewImageState = PREVIEWIMAGE_UNLOADED;
 	}
 
