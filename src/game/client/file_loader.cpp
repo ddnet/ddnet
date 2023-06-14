@@ -43,7 +43,7 @@ inline bool CompareExtension(const std::filesystem::path &Filename, const std::s
 
 		if(!(UserData->m_pThis->m_Flags & LOAD_FLAGS_FOLLOW_SYMBOLIC_LINKS) && fs_is_symlink(AbsolutePath.c_str()))
 		{
-			*UserData->m_pContinue = TryCallback<bool>(UserData->m_pThis->m_fnLoadFailedCallback, LOAD_ERROR_UNWANTED_SYMLINK, AbsolutePath.c_str());
+			*UserData->m_pContinue = TryCallback(UserData->m_pThis->m_fnLoadFailedCallback, LOAD_ERROR_UNWANTED_SYMLINK, AbsolutePath.c_str());
 			return 0;
 		}
 		if(!IsDir)
@@ -65,15 +65,11 @@ inline bool CompareExtension(const std::filesystem::path &Filename, const std::s
 
 unsigned int CMassFileLoader::Load()
 {
-	m_Continue = true;
-	if(m_RequestedPaths.empty() /* No valid paths added */
-		|| !m_pStorage /* Invalid storage */
-		|| !m_fnFileLoadedCallback /* File loaded callback unimplemented */
-		|| m_Flags & ~LOAD_FLAGS_MASK /* Out of bounds flag(s) */)
-	{
-		TryCallback<bool>(m_fnLoadFailedCallback, LOAD_ERROR_NOT_INIT, nullptr);
-		return 0;
-	}
+	dbg_assert(!m_RequestedPaths.empty() /* Paths have been added */
+			   && m_pStorage /* Storage is valid */
+			   && m_fnFileLoadedCallback /* File loaded callback is implemented */
+			   && !(m_Flags ^ LOAD_FLAGS_MASK) /* Flags are in bounds */,
+		"Mass file loader used without proper initialization.");
 
 	char aPathBuffer[IO_MAX_PATH_LENGTH];
 	for(auto &It : m_RequestedPaths)
@@ -92,7 +88,7 @@ unsigned int CMassFileLoader::Load()
 				//	m_Continue = TryCallback<bool>(m_fnLoadFailedCallback, LOAD_ERROR_DIRECTORY_UNREADABLE, it.c_str());
 			}
 			else
-				m_Continue = TryCallback<bool>(m_fnLoadFailedCallback, LOAD_ERROR_INVALID_SEARCH_PATH, It.c_str());
+				m_Continue = TryCallback(m_fnLoadFailedCallback, LOAD_ERROR_INVALID_SEARCH_PATH, It.c_str());
 		}
 	}
 
@@ -100,7 +96,7 @@ unsigned int CMassFileLoader::Load()
 	{
 		// must be .x at the shortest
 		if(m_Extension.size() == 1 || m_Extension.at(0) != '.')
-			m_Continue = TryCallback<bool>(m_fnLoadFailedCallback, LOAD_ERROR_INVALID_EXTENSION, m_Extension.c_str());
+			m_Continue = TryCallback(m_fnLoadFailedCallback, LOAD_ERROR_INVALID_EXTENSION, m_Extension.c_str());
 		std::transform(m_Extension.begin(), m_Extension.end(), m_Extension.begin(),
 			[](unsigned char c) { return std::tolower(c); });
 	}
@@ -128,7 +124,7 @@ unsigned int CMassFileLoader::Load()
 				std::string FilePath = Directory.first + "/" + File;
 				if(!(m_Flags & LOAD_FLAGS_FOLLOW_SYMBOLIC_LINKS) && fs_is_symlink(FilePath.c_str()))
 				{
-					m_Continue = TryCallback<bool>(m_fnLoadFailedCallback, LOAD_ERROR_UNWANTED_SYMLINK, FilePath.c_str());
+					m_Continue = TryCallback(m_fnLoadFailedCallback, LOAD_ERROR_UNWANTED_SYMLINK, FilePath.c_str());
 					continue;
 				}
 
@@ -149,7 +145,7 @@ unsigned int CMassFileLoader::Load()
 				if(!Handle)
 				{
 					// There could be other issues than this, but I have no way to distinguish now that fs_is_readable is gone.
-					m_Continue = TryCallback<bool>(m_fnLoadFailedCallback, LOAD_ERROR_FILE_UNREADABLE, FilePath.c_str());
+					m_Continue = TryCallback(m_fnLoadFailedCallback, LOAD_ERROR_FILE_UNREADABLE, FilePath.c_str());
 					continue;
 				}
 
@@ -163,7 +159,7 @@ unsigned int CMassFileLoader::Load()
 					size_t RealSize = std::filesystem::file_size(FilePath);
 					if(static_cast<size_t>(ExpectedSize) != RealSize)
 					{
-						m_Continue = TryCallback<bool>(m_fnLoadFailedCallback, LOAD_ERROR_FILE_TOO_LARGE, FilePath.c_str());
+						m_Continue = TryCallback(m_fnLoadFailedCallback, LOAD_ERROR_FILE_TOO_LARGE, FilePath.c_str());
 						continue;
 					}
 				}
@@ -171,7 +167,7 @@ unsigned int CMassFileLoader::Load()
 				io_read_all(Handle, reinterpret_cast<void **>(&pData), &Size);
 				if(static_cast<unsigned int>(ExpectedSize) != Size) // Possibly redundant, but accounts for memory allocation shortcomings and not just IO
 				{
-					m_Continue = TryCallback<bool>(m_fnLoadFailedCallback, LOAD_ERROR_FILE_TOO_LARGE, FilePath.c_str());
+					m_Continue = TryCallback(m_fnLoadFailedCallback, LOAD_ERROR_FILE_TOO_LARGE, FilePath.c_str());
 					continue;
 				}
 

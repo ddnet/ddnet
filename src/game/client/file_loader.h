@@ -89,17 +89,11 @@ constexpr void CallbackAssert(const std::function<FnArgs> &Function)
 	dbg_assert(bool(Function), "Mass file loader used without imlpementing callback.");
 }
 
-template<typename T, typename Fn, typename... FnArgs>
-T TryCallback(std::function<Fn> Function, FnArgs... Args)
+template<typename Fn, typename... FnArgs>
+[[maybe_unused]] bool TryCallback(std::function<Fn> Function, FnArgs... Args)
 {
 	CallbackAssert(Function);
 	return Function(Args...);
-}
-template<typename Fn, typename... FnArgs>
-void TryCallback(std::function<Fn> Function, FnArgs... Args)
-{
-	CallbackAssert(Function);
-	Function(Args...);
 }
 
 // This is not a 'real' interface, it doesn't interact with the kernel or extend IInterface.
@@ -110,16 +104,11 @@ public:
 	// LOAD_ERROR represents known errors that can be encountered during the file loading process.
 	// Because the file data is ultimately being processed by the caller, as the callee we don't know when to
 	// or not to continue the process once a potentially non-fatal error has been encountered.
-	enum LOAD_ERROR : uint8_t
+	enum ELoadError : uint8_t
 	{
 		LOAD_ERROR_UNKNOWN,
 		// Unknown error.
 		// If continued, the error is ignored but is likely to happen again.
-		// pUser = nullptr
-
-		LOAD_ERROR_NOT_INIT,
-		// Implementation-specific load function called with any combination of the following issues: no file load callback, no paths, invalid IStorage pointer, or invalid flags.
-		// This is the only error where the return value is inconsequential.
 		// pUser = nullptr
 
 		LOAD_ERROR_INVALID_SEARCH_PATH,
@@ -154,7 +143,7 @@ public:
 	};
 
 	// All flags are opt-in
-	enum LOAD_FLAGS : uint8_t
+	enum ELoadFlags : uint8_t
 	{
 		LOAD_FLAGS_NONE = 0b00000000, // For comparison
 		LOAD_FLAGS_MASK = 0b00001111, // For comparison
@@ -178,7 +167,7 @@ public:
 	virtual void SetFileLoadedCallback(std::function<FileLoadedCallbackSignature> Function) = 0;
 
 	// Fatal error = true, nonfatal = false
-	using LoadFailedCallbackSignature = bool(LOAD_ERROR Error, const void *pUser);
+	using LoadFailedCallbackSignature = bool(ELoadError Error, const void *pUser);
 	virtual void SetLoadFailedCallback(std::function<LoadFailedCallbackSignature> Function) = 0;
 
 protected:

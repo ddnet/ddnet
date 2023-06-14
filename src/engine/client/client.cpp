@@ -4459,13 +4459,10 @@ void CClient::RegisterCommands()
 	auto FileLoaderTest = [](IConsole::IResult *pResult, void *pUserData) {
 		CClient *client = reinterpret_cast<CClient *>(pUserData);
 		CMassFileLoader FileLoader(client->m_pStorage, IMassFileLoader::LOAD_FLAGS_ABSOLUTE_PATH | IMassFileLoader::LOAD_FLAGS_RECURSE_SUBDIRECTORIES);
-		FileLoader.SetLoadFailedCallback([](IMassFileLoader::LOAD_ERROR Error, const void *pUser) -> bool {
+		FileLoader.SetLoadFailedCallback([](IMassFileLoader::ELoadError Error, const void *pUser) -> bool {
 			char Message[128];
 			switch(Error)
 			{
-			case IMassFileLoader::LOAD_ERROR_NOT_INIT:
-				strcpy(Message, "Not initialized.");
-				break;
 			case IMassFileLoader::LOAD_ERROR_INVALID_SEARCH_PATH:
 				str_format(Message, sizeof(Message), "Invalid path: '%s'", reinterpret_cast<const char *>(pUser));
 				break;
