@@ -603,9 +603,9 @@ void thread_detach(void *thread);
  * @param user Pointer to pass to the thread.
  * @param name Name describing the use of the thread
  *
- * @return The thread if no error occurred, 0 on error.
+ * @return true on success, false on failure.
  */
-void *thread_init_and_detach(void (*threadfunc)(void *), void *user, const char *name);
+bool thread_init_and_detach(void (*threadfunc)(void *), void *user, const char *name);
 
 // Enable thread safety attributes only with clang.
 // The attributes can be safely erased when compiling with other compilers.

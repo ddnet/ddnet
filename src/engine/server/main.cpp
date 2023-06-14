@@ -190,12 +190,12 @@ int main(int argc, const char **argv)
 	dbg_msg("server", "starting...");
 	int Ret = pServer->Run();
 
-	MysqlUninit();
-	secure_random_uninit();
-
 	pServerLogger->OnServerDeletion();
 	// free
 	delete pKernel;
+
+	MysqlUninit();
+	secure_random_uninit();
 
 	return Ret;
 }
