@@ -75,10 +75,6 @@ bool CEditor::IsVanillaImage(const char *pImage)
 
 const void *CEditor::ms_pUiGotContext;
 
-ColorHSVA CEditor::ms_PickerColor;
-int CEditor::ms_SVPicker;
-int CEditor::ms_HuePicker;
-
 enum
 {
 	BUTTON_CONTEXT = 1,
@@ -486,12 +482,6 @@ int CEditor::DoButton_ButtonDec(const void *pID, const char *pText, int Checked,
 	pRect->Draw(GetButtonColor(pID, Checked), IGraphics::CORNER_L, 3.0f);
 	UI()->DoLabel(pRect, pText ? pText : "-", 10.0f, TEXTALIGN_MC);
 	return DoButton_Editor_Common(pID, pText, Checked, pRect, Flags, pToolTip);
-}
-
-int CEditor::DoButton_ColorPicker(const void *pID, const CUIRect *pRect, ColorRGBA *pColor, const char *pToolTip)
-{
-	pRect->Draw(*pColor, 0, 0.0f);
-	return DoButton_Editor_Common(pID, nullptr, 0, pRect, 0, pToolTip);
 }
 
 int CEditor::DoButton_DraggableEx(const void *pID, const char *pText, int Checked, const CUIRect *pRect, bool *pClicked, bool *pAbrupted, int Flags, const char *pToolTip, int Corners, float FontSize)
@@ -3148,8 +3138,9 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 
 			pToolBox->HSplitTop(3.0f * 13.0f, &Slot, pToolBox);
 			Slot.VSplitMid(&ColorBox, &ColorSlots);
-			ColorBox.HMargin(1.0f, &ColorBox);
-			ColorBox.VMargin(6.0f, &ColorBox);
+			ColorBox.HSplitTop(8.0f, nullptr, &ColorBox);
+			ColorBox.VMargin(12.0f, &ColorBox);
+			ColorBox.HMargin((ColorBox.h - ColorBox.w) / 2.0f, &ColorBox);
 
 			for(int c = 0; c < 4; c++)
 			{
@@ -3179,20 +3170,23 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 				1.0f);
 
 			static int s_ColorPicker;
-			if(DoButton_ColorPicker(&s_ColorPicker, &ColorBox, &ColorPick))
-			{
-				ms_PickerColor = color_cast<ColorHSVA>(ColorPick);
-				static SPopupMenuId s_PopupColorPickerId;
-				UI()->DoPopupMenu(&s_PopupColorPickerId, UI()->MouseX(), UI()->MouseY(), 180, 150, this, PopupColorPicker);
-			}
+			if(UI()->HotItem() == &s_ColorPicker)
+				ColorBox.Margin(-2.0f, &ColorBox);
+			ColorBox.Draw(ColorPick, IGraphics::CORNER_ALL, 3.0f);
 
-			if(UI()->HotItem() == &ms_SVPicker || UI()->HotItem() == &ms_HuePicker)
+			static CUI::SColorPickerPopupContext s_ColorPickerPopupContext;
+			if(DoButton_Editor_Common(&s_ColorPicker, nullptr, 0, &ColorBox, 0, "Click to show the color picker."))
 			{
-				ColorRGBA c = color_cast<ColorRGBA>(ms_PickerColor);
+				s_ColorPickerPopupContext.m_HsvaColor = color_cast<ColorHSVA>(ColorPick);
+				s_ColorPickerPopupContext.m_Alpha = true;
+				UI()->ShowPopupColorPicker(UI()->MouseX(), UI()->MouseY(), &s_ColorPickerPopupContext);
+			}
+			else if(UI()->IsPopupOpen(&s_ColorPickerPopupContext))
+			{
+				ColorRGBA c = color_cast<ColorRGBA>(s_ColorPickerPopupContext.m_HsvaColor);
 				NewColor = ((int)(c.r * 255.0f) & 0xff) << 24 | ((int)(c.g * 255.0f) & 0xff) << 16 | ((int)(c.b * 255.0f) & 0xff) << 8 | (pProps[i].m_Value & 0xff);
 			}
 
-			//
 			if(NewColor != pProps[i].m_Value)
 			{
 				*pNewVal = NewColor;
@@ -6754,8 +6748,6 @@ void CEditor::Init()
 
 	Reset(false);
 	m_Map.m_Modified = false;
-
-	ms_PickerColor = ColorHSVA(1.0f, 0.0f, 0.0f);
 
 	ResetMenuBackgroundPositions();
 	m_vpMenuBackgroundPositionNames.resize(CMenuBackground::NUM_POS);

@@ -589,8 +589,8 @@ public:
 	{
 		CUI *m_pUI; // set by CUI when popup is shown
 		bool m_Alpha = false;
-		unsigned int *m_pColor;
-		unsigned int m_HSVColor;
+		unsigned int *m_pHslaColor = nullptr; // may be nullptr
+		ColorHSVA m_HsvaColor;
 		const char m_HuePickerId = 0;
 		const char m_ColorPickerId = 0;
 		const char m_aValueSelectorIds[5] = {0};
