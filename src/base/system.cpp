@@ -833,12 +833,12 @@ void thread_detach(void *thread)
 #endif
 }
 
-void *thread_init_and_detach(void (*threadfunc)(void *), void *u, const char *name)
+bool thread_init_and_detach(void (*threadfunc)(void *), void *u, const char *name)
 {
 	void *thread = thread_init(threadfunc, u, name);
 	if(thread)
 		thread_detach(thread);
-	return thread;
+	return thread != nullptr;
 }
 
 #if defined(CONF_FAMILY_UNIX)
