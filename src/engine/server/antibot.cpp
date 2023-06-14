@@ -169,7 +169,7 @@ bool CAntibot::OnEngineClientMessage(int ClientID, const void *pData, int Size, 
 	{
 		AntibotFlags |= ANTIBOT_MSGFLAG_NONVITAL;
 	}
-	return AntibotOnEngineClientMessage(ClientID, pData, Size, Flags);
+	return AntibotOnEngineClientMessage(ClientID, pData, Size, AntibotFlags);
 }
 bool CAntibot::OnEngineServerMessage(int ClientID, const void *pData, int Size, int Flags)
 {
@@ -179,7 +179,7 @@ bool CAntibot::OnEngineServerMessage(int ClientID, const void *pData, int Size, 
 	{
 		AntibotFlags |= ANTIBOT_MSGFLAG_NONVITAL;
 	}
-	return AntibotOnEngineServerMessage(ClientID, pData, Size, Flags);
+	return AntibotOnEngineServerMessage(ClientID, pData, Size, AntibotFlags);
 }
 bool CAntibot::OnEngineSimulateClientMessage(int *pClientID, void *pBuffer, int BufferSize, int *pOutSize, int *pFlags)
 {
