@@ -1653,7 +1653,7 @@ CUI::EPopupMenuFunctionResult CUI::PopupColorPicker(void *pContext, CUIRect View
 	ColorsArea.Draw(BlackColor, IGraphics::CORNER_NONE, 0.0f);
 	ColorsArea.Margin(1.0f, &ColorsArea);
 
-	ColorHSVA PickerColorHSV = ColorHSVA(pColorPicker->m_HSVColor, pColorPicker->m_Alpha);
+	ColorHSVA PickerColorHSV = pColorPicker->m_HsvaColor;
 	unsigned H = (unsigned)(PickerColorHSV.x * 255.0f);
 	unsigned S = (unsigned)(PickerColorHSV.y * 255.0f);
 	unsigned V = (unsigned)(PickerColorHSV.z * 255.0f);
@@ -1781,8 +1781,9 @@ CUI::EPopupMenuFunctionResult CUI::PopupColorPicker(void *pContext, CUIRect View
 	HueMarker.Margin(1.2f, &HueMarker);
 	HueMarker.Draw(HueMarkerColor, IGraphics::CORNER_ALL, 1.2f);
 
-	pColorPicker->m_HSVColor = PickerColorHSV.Pack(pColorPicker->m_Alpha);
-	*pColorPicker->m_pColor = color_cast<ColorHSLA>(PickerColorHSV).Pack(pColorPicker->m_Alpha);
+	pColorPicker->m_HsvaColor = PickerColorHSV;
+	if(pColorPicker->m_pHslaColor != nullptr)
+		*pColorPicker->m_pHslaColor = color_cast<ColorHSLA>(PickerColorHSV).Pack(pColorPicker->m_Alpha);
 
 	return CUI::POPUP_KEEP_OPEN;
 }
