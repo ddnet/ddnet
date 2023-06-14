@@ -124,6 +124,8 @@ private:
 	};
 
 	std::shared_ptr<CSharedData> m_pShared;
+	void *m_pWorkerThread = nullptr;
+	void *m_pBackupThread = nullptr;
 };
 
 #endif // ENGINE_SERVER_DATABASES_CONNECTION_POOL_H
