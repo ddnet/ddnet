@@ -5511,7 +5511,7 @@ void CEditor::RenderModebar(CUIRect View)
 	}
 }
 
-void CEditor::RenderStatusbar(CUIRect View)
+void CEditor::RenderStatusbar(CUIRect View, CUIRect *pTooltipRect)
 {
 	CUIRect Button;
 	View.VSplitRight(60.0f, &View, &Button);
@@ -5531,20 +5531,24 @@ void CEditor::RenderStatusbar(CUIRect View)
 		m_ShowServerSettingsEditor ^= 1;
 	}
 
-	if(m_pTooltip)
-	{
-		char aBuf[512];
-		if(ms_pUiGotContext && ms_pUiGotContext == UI()->HotItem())
-			str_format(aBuf, sizeof(aBuf), "%s Right click for context menu.", m_pTooltip);
-		else
-			str_copy(aBuf, m_pTooltip);
+	View.VSplitRight(10.0f, pTooltipRect, nullptr);
+}
 
-		View.VSplitRight(10.0f, &View, nullptr);
-		SLabelProperties Props;
-		Props.m_MaxWidth = View.w;
-		Props.m_EllipsisAtEnd = true;
-		UI()->DoLabel(&View, aBuf, 10.0f, TEXTALIGN_ML, Props);
-	}
+void CEditor::RenderTooltip(CUIRect TooltipRect)
+{
+	if(m_pTooltip == nullptr)
+		return;
+
+	char aBuf[512];
+	if(ms_pUiGotContext && ms_pUiGotContext == UI()->HotItem())
+		str_format(aBuf, sizeof(aBuf), "%s Right click for context menu.", m_pTooltip);
+	else
+		str_copy(aBuf, m_pTooltip);
+
+	SLabelProperties Props;
+	Props.m_MaxWidth = TooltipRect.w;
+	Props.m_EllipsisAtEnd = true;
+	UI()->DoLabel(&TooltipRect, aBuf, 10.0f, TEXTALIGN_ML, Props);
 }
 
 bool CEditor::IsEnvelopeUsed(int EnvelopeIndex) const
@@ -7147,6 +7151,7 @@ void CEditor::Render()
 
 	UI()->MapScreen();
 
+	CUIRect TooltipRect;
 	if(m_GuiActive)
 	{
 		RenderMenubar(MenuBar);
@@ -7162,6 +7167,7 @@ void CEditor::Render()
 			}
 			s_ShowServerSettingsEditorLast = m_ShowServerSettingsEditor;
 		}
+		RenderStatusbar(StatusBar, &TooltipRect);
 	}
 
 	RenderPressedKeys(View);
@@ -7194,13 +7200,12 @@ void CEditor::Render()
 
 	UpdateZoomWorld();
 
-	// Popup menus must be rendered before the statusbar, because UI elements in
-	// popup menus can set tooltips, which are rendered in the status bar.
 	UI()->RenderPopupMenus();
 	FreeDynamicPopupMenus();
 
+	// The tooltip can be set in popup menus so we have to render the tooltip after the popup menus.
 	if(m_GuiActive)
-		RenderStatusbar(StatusBar);
+		RenderTooltip(TooltipRect);
 
 	RenderMousePointer();
 }

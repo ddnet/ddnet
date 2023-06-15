@@ -1413,7 +1413,8 @@ public:
 	void RenderSelectedImage(CUIRect View);
 	void RenderSounds(CUIRect Toolbox);
 	void RenderModebar(CUIRect View);
-	void RenderStatusbar(CUIRect View);
+	void RenderStatusbar(CUIRect View, CUIRect *pTooltipRect);
+	void RenderTooltip(CUIRect TooltipRect);
 
 	void RenderEnvelopeEditor(CUIRect View);
 	void RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEditorLast);
