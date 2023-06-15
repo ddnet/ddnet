@@ -1062,6 +1062,9 @@ int CServer::ClientRejoinCallback(int ClientID, void *pUser)
 
 	pThis->m_aClients[ClientID].Reset();
 
+	pThis->GameServer()->OnClientEngineJoin(ClientID, pThis->m_aClients[ClientID].m_Sixup);
+	pThis->Antibot()->OnEngineClientJoin(ClientID, pThis->m_aClients[ClientID].m_Sixup);
+
 	pThis->SendMap(ClientID);
 
 	return 0;
@@ -1086,6 +1089,9 @@ int CServer::NewClientNoAuthCallback(int ClientID, void *pUser)
 	pThis->m_aClients[ClientID].m_GotDDNetVersionPacket = false;
 	pThis->m_aClients[ClientID].m_DDNetVersionSettled = false;
 	pThis->m_aClients[ClientID].Reset();
+
+	pThis->GameServer()->OnClientEngineJoin(ClientID, false);
+	pThis->Antibot()->OnEngineClientJoin(ClientID, false);
 
 	pThis->SendCapabilities(ClientID);
 	pThis->SendMap(ClientID);
@@ -2781,6 +2787,16 @@ int CServer::Run()
 						break;
 					}
 					UpdateServerInfo(true);
+					for(int ClientID = 0; ClientID < MAX_CLIENTS; ClientID++)
+					{
+						if(m_aClients[ClientID].m_State != CClient::STATE_CONNECTING)
+							continue;
+
+						// When doing a map change, a new Teehistorian file is created. For players that are already
+						// on the server, no PlayerJoin event is produced in Teehistorian from the network engine.
+						// Record PlayerJoin events here to record the Sixup version and player join event.
+						GameServer()->OnClientEngineJoin(ClientID, m_aClients[ClientID].m_Sixup);
+					}
 				}
 				else
 				{
