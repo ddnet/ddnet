@@ -1062,7 +1062,7 @@ int CServer::ClientRejoinCallback(int ClientID, void *pUser)
 
 	pThis->m_aClients[ClientID].Reset();
 
-	pThis->GameServer()->OnClientEngineJoin(ClientID, pThis->m_aClients[ClientID].m_Sixup);
+	pThis->GameServer()->TeehistorianRecordPlayerJoin(ClientID, pThis->m_aClients[ClientID].m_Sixup);
 	pThis->Antibot()->OnEngineClientJoin(ClientID, pThis->m_aClients[ClientID].m_Sixup);
 
 	pThis->SendMap(ClientID);
@@ -1090,7 +1090,7 @@ int CServer::NewClientNoAuthCallback(int ClientID, void *pUser)
 	pThis->m_aClients[ClientID].m_DDNetVersionSettled = false;
 	pThis->m_aClients[ClientID].Reset();
 
-	pThis->GameServer()->OnClientEngineJoin(ClientID, false);
+	pThis->GameServer()->TeehistorianRecordPlayerJoin(ClientID, false);
 	pThis->Antibot()->OnEngineClientJoin(ClientID, false);
 
 	pThis->SendCapabilities(ClientID);
@@ -1122,7 +1122,7 @@ int CServer::NewClientCallback(int ClientID, void *pUser, bool Sixup)
 	mem_zero(&pThis->m_aClients[ClientID].m_Addr, sizeof(NETADDR));
 	pThis->m_aClients[ClientID].Reset();
 
-	pThis->GameServer()->OnClientEngineJoin(ClientID, Sixup);
+	pThis->GameServer()->TeehistorianRecordPlayerJoin(ClientID, Sixup);
 	pThis->Antibot()->OnEngineClientJoin(ClientID, Sixup);
 
 	pThis->m_aClients[ClientID].m_Sixup = Sixup;
@@ -1207,7 +1207,7 @@ int CServer::DelClientCallback(int ClientID, const char *pReason, void *pUser)
 	pThis->m_aClients[ClientID].m_Sixup = false;
 	pThis->m_aClients[ClientID].m_RedirectDropTime = 0;
 
-	pThis->GameServer()->OnClientEngineDrop(ClientID, pReason);
+	pThis->GameServer()->TeehistorianRecordPlayerDrop(ClientID, pReason);
 	pThis->Antibot()->OnEngineClientDrop(ClientID, pReason);
 #if defined(CONF_FAMILY_UNIX)
 	pThis->SendConnLoggingCommand(CLOSE_SESSION, pThis->m_NetServer.ClientAddr(ClientID));
@@ -2795,7 +2795,7 @@ int CServer::Run()
 						// When doing a map change, a new Teehistorian file is created. For players that are already
 						// on the server, no PlayerJoin event is produced in Teehistorian from the network engine.
 						// Record PlayerJoin events here to record the Sixup version and player join event.
-						GameServer()->OnClientEngineJoin(ClientID, m_aClients[ClientID].m_Sixup);
+						GameServer()->TeehistorianRecordPlayerJoin(ClientID, m_aClients[ClientID].m_Sixup);
 					}
 				}
 				else

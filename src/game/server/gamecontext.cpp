@@ -1660,7 +1660,7 @@ void CGameContext::OnClientDrop(int ClientID, const char *pReason)
 	Server()->ExpireServerInfo();
 }
 
-void CGameContext::OnClientEngineJoin(int ClientID, bool Sixup)
+void CGameContext::TeehistorianRecordPlayerJoin(int ClientID, bool Sixup)
 {
 	if(m_TeeHistorianActive)
 	{
@@ -1668,7 +1668,7 @@ void CGameContext::OnClientEngineJoin(int ClientID, bool Sixup)
 	}
 }
 
-void CGameContext::OnClientEngineDrop(int ClientID, const char *pReason)
+void CGameContext::TeehistorianRecordPlayerDrop(int ClientID, const char *pReason)
 {
 	if(m_TeeHistorianActive)
 	{

@@ -292,8 +292,8 @@ public:
 	void OnClientPredictedInput(int ClientID, void *pInput) override;
 	void OnClientPredictedEarlyInput(int ClientID, void *pInput) override;
 
-	void OnClientEngineJoin(int ClientID, bool Sixup) override;
-	void OnClientEngineDrop(int ClientID, const char *pReason) override;
+	void TeehistorianRecordPlayerJoin(int ClientID, bool Sixup) override;
+	void TeehistorianRecordPlayerDrop(int ClientID, const char *pReason) override;
 
 	bool IsClientReady(int ClientID) const override;
 	bool IsClientPlayer(int ClientID) const override;
