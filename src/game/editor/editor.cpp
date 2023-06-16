@@ -464,9 +464,13 @@ int CEditor::DoButton_Ex(const void *pID, const char *pText, int Checked, const 
 int CEditor::DoButton_FontIcon(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip, int Corners, float FontSize)
 {
 	pRect->Draw(GetButtonColor(pID, Checked), Corners, 3.0f);
+
 	TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
+	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING);
 	UI()->DoLabel(pRect, pText, FontSize, TEXTALIGN_MC);
+	TextRender()->SetRenderFlags(0);
 	TextRender()->SetCurFont(nullptr);
+
 	return DoButton_Editor_Common(pID, pText, Checked, pRect, Flags, pToolTip);
 }
 
@@ -938,9 +942,9 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 			m_ProofBorders = m_ProofBorders == PROOF_BORDER_OFF ? PROOF_BORDER_INGAME : PROOF_BORDER_OFF;
 		}
 
-		TB_Top.VSplitLeft(10.0f, &Button, &TB_Top);
-		static int s_MenuProofButton = 0;
-		if(DoButton_Ex(&s_MenuProofButton, "▾", 0, &Button, 0, "Select proof mode.", IGraphics::CORNER_R))
+		TB_Top.VSplitLeft(14.0f, &Button, &TB_Top);
+		static int s_ProofModeButton = 0;
+		if(DoButton_FontIcon(&s_ProofModeButton, FONT_ICON_CIRCLE_CHEVRON_DOWN, 0, &Button, 0, "Select proof mode.", IGraphics::CORNER_R, 8.0f))
 		{
 			static SPopupMenuId s_PopupProofModeId;
 			UI()->DoPopupMenu(&s_PopupProofModeId, Button.x, Button.y + Button.h, 60.0f, 36.0f, this, PopupProofMode);
