@@ -65,11 +65,12 @@ inline bool CompareExtension(const std::filesystem::path &Filename, const std::s
 
 unsigned int CMassFileLoader::Load()
 {
-	dbg_assert(!m_RequestedPaths.empty() /* Paths have been added */
-			   && m_pStorage /* Storage is valid */
-			   && m_fnFileLoadedCallback /* File loaded callback is implemented */
-			   && !(m_Flags ^ LOAD_FLAGS_MASK) /* Flags are in bounds */,
-		"Mass file loader used without proper initialization.");
+#define MASS_FILE_LOADER_ERROR_PREFIX "Mass file loader used "
+	dbg_assert(!m_RequestedPaths.empty(), MASS_FILE_LOADER_ERROR_PREFIX "without adding paths."); // Ensure paths have been added
+	dbg_assert(bool(m_pStorage), MASS_FILE_LOADER_ERROR_PREFIX "without passing a valid IStorage instance."); // Ensure storage is valid
+	dbg_assert(bool(m_fnFileLoadedCallback), MASS_FILE_LOADER_ERROR_PREFIX "without implementing file loaded callback."); // Ensure file loaded callback is implemented
+	dbg_assert(m_Flags ^ LOAD_FLAGS_MASK, MASS_FILE_LOADER_ERROR_PREFIX "with invalid flags."); // Ensure flags are in bounds
+#undef MASS_FILE_LOADER_ERROR_PREFIX
 
 	char aPathBuffer[IO_MAX_PATH_LENGTH];
 	for(auto &It : m_RequestedPaths)
