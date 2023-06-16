@@ -708,6 +708,9 @@ void CMenus::RenderDemoPlayerSliceSavePopup(CUIRect MainView)
 	{
 		char aPath[IO_MAX_PATH_LENGTH];
 		str_format(aPath, sizeof(aPath), "%s/%s", m_aCurrentDemoFolder, m_DemoSliceInput.GetString());
+		str_copy(g_Config.m_UiDemoSelected, m_DemoSliceInput.GetString());
+		if(str_endswith(g_Config.m_UiDemoSelected, ".demo"))
+			g_Config.m_UiDemoSelected[str_length(g_Config.m_UiDemoSelected) - str_length(".demo")] = '\0';
 		m_DemoPlayerState = DEMOPLAYER_NONE;
 		Client()->DemoSlice(aPath, CMenus::DemoFilterChat, &s_RemoveChat);
 		DemolistPopulate();
