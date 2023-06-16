@@ -708,6 +708,9 @@ void CMenus::RenderDemoPlayerSliceSavePopup(CUIRect MainView)
 	{
 		char aPath[IO_MAX_PATH_LENGTH];
 		str_format(aPath, sizeof(aPath), "%s/%s", m_aCurrentDemoFolder, m_DemoSliceInput.GetString());
+		str_copy(g_Config.m_UiDemoSelected, m_DemoSliceInput.GetString());
+		if(str_endswith(g_Config.m_UiDemoSelected, ".demo"))
+			g_Config.m_UiDemoSelected[str_length(g_Config.m_UiDemoSelected) - str_length(".demo")] = '\0';
 		m_DemoPlayerState = DEMOPLAYER_NONE;
 		Client()->DemoSlice(aPath, CMenus::DemoFilterChat, &s_RemoveChat);
 		DemolistPopulate();
@@ -795,6 +798,7 @@ void CMenus::DemolistOnUpdate(bool Reset)
 	m_DemolistSelectedIndex = Reset ? !m_vDemos.empty() ? 0 : -1 :
 					  m_DemolistSelectedIndex >= (int)m_vDemos.size() ? m_vDemos.size() - 1 : m_DemolistSelectedIndex;
 	m_DemolistSelectedIsDir = m_DemolistSelectedIndex < 0 ? false : m_vDemos[m_DemolistSelectedIndex].m_IsDir;
+	m_DemolistSelectedReveal = true;
 }
 
 bool CMenus::FetchHeader(CDemoItem &Item)
@@ -1047,6 +1051,11 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	}
 
 	static CListBox s_ListBox;
+	if(m_DemolistSelectedReveal)
+	{
+		s_ListBox.ScrollToSelected();
+		m_DemolistSelectedReveal = false;
+	}
 	s_ListBox.DoStart(ms_ListheaderHeight, m_vDemos.size(), 1, 3, m_DemolistSelectedIndex, &ListBox, false);
 
 	int ItemIndex = -1;

@@ -1530,6 +1530,9 @@ int CMenus::Render()
 					}
 					else if(Storage()->RenameFile(aBufOld, aBufNew, m_vDemos[m_DemolistSelectedIndex].m_StorageType))
 					{
+						str_copy(g_Config.m_UiDemoSelected, m_DemoRenameInput.GetString());
+						if(str_endswith(g_Config.m_UiDemoSelected, ".demo"))
+							g_Config.m_UiDemoSelected[str_length(g_Config.m_UiDemoSelected) - str_length(".demo")] = '\0';
 						DemolistPopulate();
 						DemolistOnUpdate(false);
 					}
