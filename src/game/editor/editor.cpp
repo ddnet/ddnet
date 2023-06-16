@@ -823,7 +823,7 @@ bool CEditor::CallbackOpenMap(const char *pFileName, int StorageType, void *pUse
 	CEditor *pEditor = (CEditor *)pUser;
 	if(pEditor->Load(pFileName, StorageType))
 	{
-		pEditor->m_ValidSaveFilename = StorageType == IStorage::TYPE_SAVE && pEditor->m_pFileDialogPath == pEditor->m_aFileDialogCurrentFolder;
+		pEditor->m_ValidSaveFilename = StorageType == IStorage::TYPE_SAVE && (pEditor->m_pFileDialogPath == pEditor->m_aFileDialogCurrentFolder || (pEditor->m_pFileDialogPath == pEditor->m_aFileDialogCurrentLink && str_comp(pEditor->m_aFileDialogCurrentLink, "themes") == 0));
 		pEditor->m_Dialog = DIALOG_NONE;
 		return true;
 	}
@@ -852,6 +852,8 @@ bool CEditor::CallbackAppendMap(const char *pFileName, int StorageType, void *pU
 
 bool CEditor::CallbackSaveMap(const char *pFileName, int StorageType, void *pUser)
 {
+	dbg_assert(StorageType == IStorage::TYPE_SAVE, "Saving only allowed for IStorage::TYPE_SAVE");
+
 	CEditor *pEditor = static_cast<CEditor *>(pUser);
 	char aBuf[IO_MAX_PATH_LENGTH];
 	// add map extension
@@ -865,7 +867,7 @@ bool CEditor::CallbackSaveMap(const char *pFileName, int StorageType, void *pUse
 	if(pEditor->Save(pFileName))
 	{
 		str_copy(pEditor->m_aFileName, pFileName);
-		pEditor->m_ValidSaveFilename = StorageType == IStorage::TYPE_SAVE && pEditor->m_pFileDialogPath == pEditor->m_aFileDialogCurrentFolder;
+		pEditor->m_ValidSaveFilename = true;
 		pEditor->m_Map.m_Modified = false;
 	}
 	else
@@ -888,6 +890,8 @@ bool CEditor::CallbackSaveMap(const char *pFileName, int StorageType, void *pUse
 
 bool CEditor::CallbackSaveCopyMap(const char *pFileName, int StorageType, void *pUser)
 {
+	dbg_assert(StorageType == IStorage::TYPE_SAVE, "Saving only allowed for IStorage::TYPE_SAVE");
+
 	CEditor *pEditor = static_cast<CEditor *>(pUser);
 	char aBuf[IO_MAX_PATH_LENGTH];
 	// add map extension
@@ -4542,7 +4546,7 @@ static int EditorListdirCallback(const CFsFileInfo *pInfo, int IsDir, int Storag
 {
 	CEditor *pEditor = (CEditor *)pUser;
 	if((pInfo->m_pName[0] == '.' && (pInfo->m_pName[1] == 0 ||
-						(pInfo->m_pName[1] == '.' && pInfo->m_pName[2] == 0 && (!str_comp(pEditor->m_pFileDialogPath, "maps") || !str_comp(pEditor->m_pFileDialogPath, "mapres"))))) ||
+						(pInfo->m_pName[1] == '.' && pInfo->m_pName[2] == 0 && (pEditor->m_FileDialogShowingRoot || (!pEditor->m_FileDialogMultipleStorages && (!str_comp(pEditor->m_pFileDialogPath, "maps") || !str_comp(pEditor->m_pFileDialogPath, "mapres"))))))) ||
 		(!IsDir && ((pEditor->m_FileDialogFileType == CEditor::FILETYPE_MAP && !str_endswith(pInfo->m_pName, ".map")) ||
 				   (pEditor->m_FileDialogFileType == CEditor::FILETYPE_IMG && !str_endswith(pInfo->m_pName, ".png")) ||
 				   (pEditor->m_FileDialogFileType == CEditor::FILETYPE_SOUND && !str_endswith(pInfo->m_pName, ".opus")))))
@@ -4614,54 +4618,57 @@ void CEditor::RenderFileDialog()
 	if(m_FileDialogFileType == CEditor::FILETYPE_IMG || m_FileDialogFileType == CEditor::FILETYPE_SOUND)
 		View.VSplitMid(&View, &Preview);
 
-	// title
-	CUIRect ButtonTimeModified, ButtonFileName;
-	Title.VSplitRight(10.0f, &Title, nullptr);
-	Title.VSplitRight(90.0f, &Title, &ButtonTimeModified);
-	Title.VSplitRight(10.0f, &Title, nullptr);
-	Title.VSplitRight(90.0f, &Title, &ButtonFileName);
-	Title.VSplitRight(10.0f, &Title, nullptr);
-
-	const char *aSortIndicator[3] = {"▼", "", "▲"};
-
-	static int s_ButtonTimeModified = 0;
-	char aBufLabelButtonTimeModified[64];
-	str_format(aBufLabelButtonTimeModified, sizeof(aBufLabelButtonTimeModified), "Time modified %s", aSortIndicator[m_SortByTimeModified + 1]);
-	if(DoButton_Editor(&s_ButtonTimeModified, aBufLabelButtonTimeModified, 0, &ButtonTimeModified, 0, "Sort by time modified"))
+	// title bar
+	if(!m_FileDialogShowingRoot)
 	{
-		if(m_SortByTimeModified == 1)
+		CUIRect ButtonTimeModified, ButtonFileName;
+		Title.VSplitRight(10.0f, &Title, nullptr);
+		Title.VSplitRight(90.0f, &Title, &ButtonTimeModified);
+		Title.VSplitRight(10.0f, &Title, nullptr);
+		Title.VSplitRight(90.0f, &Title, &ButtonFileName);
+		Title.VSplitRight(10.0f, &Title, nullptr);
+
+		const char *aSortIndicator[3] = {"▼", "", "▲"};
+
+		static int s_ButtonTimeModified = 0;
+		char aBufLabelButtonTimeModified[64];
+		str_format(aBufLabelButtonTimeModified, sizeof(aBufLabelButtonTimeModified), "Time modified %s", aSortIndicator[m_SortByTimeModified + 1]);
+		if(DoButton_Editor(&s_ButtonTimeModified, aBufLabelButtonTimeModified, 0, &ButtonTimeModified, 0, "Sort by time modified"))
 		{
-			m_SortByTimeModified = -1;
-		}
-		else if(m_SortByTimeModified == -1)
-		{
-			m_SortByTimeModified = 0;
-		}
-		else
-		{
-			m_SortByTimeModified = 1;
+			if(m_SortByTimeModified == 1)
+			{
+				m_SortByTimeModified = -1;
+			}
+			else if(m_SortByTimeModified == -1)
+			{
+				m_SortByTimeModified = 0;
+			}
+			else
+			{
+				m_SortByTimeModified = 1;
+			}
+
+			RefreshFilteredFileList();
 		}
 
-		RefreshFilteredFileList();
-	}
-
-	static int s_ButtonFileName = 0;
-	char aBufLabelButtonFilename[64];
-	str_format(aBufLabelButtonFilename, sizeof(aBufLabelButtonFilename), "Filename %s", aSortIndicator[m_SortByFilename + 1]);
-	if(DoButton_Editor(&s_ButtonFileName, aBufLabelButtonFilename, 0, &ButtonFileName, 0, "Sort by file name"))
-	{
-		if(m_SortByFilename == 1)
+		static int s_ButtonFileName = 0;
+		char aBufLabelButtonFilename[64];
+		str_format(aBufLabelButtonFilename, sizeof(aBufLabelButtonFilename), "Filename %s", aSortIndicator[m_SortByFilename + 1]);
+		if(DoButton_Editor(&s_ButtonFileName, aBufLabelButtonFilename, 0, &ButtonFileName, 0, "Sort by file name"))
 		{
-			m_SortByFilename = -1;
-			m_SortByTimeModified = 0;
-		}
-		else
-		{
-			m_SortByFilename = 1;
-			m_SortByTimeModified = 0;
-		}
+			if(m_SortByFilename == 1)
+			{
+				m_SortByFilename = -1;
+				m_SortByTimeModified = 0;
+			}
+			else
+			{
+				m_SortByFilename = 1;
+				m_SortByTimeModified = 0;
+			}
 
-		RefreshFilteredFileList();
+			RefreshFilteredFileList();
+		}
 	}
 
 	Title.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 4.0f);
@@ -4669,13 +4676,13 @@ void CEditor::RenderFileDialog()
 	UI()->DoLabel(&Title, m_pFileDialogTitle, 12.0f, TEXTALIGN_ML);
 
 	// pathbox
-	char aPath[IO_MAX_PATH_LENGTH], aBuf[128 + IO_MAX_PATH_LENGTH];
-	if(m_FilesSelectedIndex != -1)
+	if(m_FilesSelectedIndex >= 0 && m_vpFilteredFileList[m_FilesSelectedIndex]->m_StorageType >= IStorage::TYPE_SAVE)
+	{
+		char aPath[IO_MAX_PATH_LENGTH], aBuf[128 + IO_MAX_PATH_LENGTH];
 		Storage()->GetCompletePath(m_vpFilteredFileList[m_FilesSelectedIndex]->m_StorageType, m_pFileDialogPath, aPath, sizeof(aPath));
-	else
-		aPath[0] = 0;
-	str_format(aBuf, sizeof(aBuf), "Current path: %s", aPath);
-	UI()->DoLabel(&PathBox, aBuf, 10.0f, TEXTALIGN_ML);
+		str_format(aBuf, sizeof(aBuf), "Current path: %s", aPath);
+		UI()->DoLabel(&PathBox, aBuf, 10.0f, TEXTALIGN_ML);
+	}
 
 	const auto &&UpdateFileNameInput = [this]() {
 		if(m_FilesSelectedIndex >= 0 && !m_vpFilteredFileList[m_FilesSelectedIndex]->m_IsDir)
@@ -4898,14 +4905,16 @@ void CEditor::RenderFileDialog()
 		}
 		else
 		{
-			if(str_comp(m_vpFilteredFileList[i]->m_aFilename, "..") == 0)
+			if(m_vpFilteredFileList[i]->m_IsLink || str_comp(m_vpFilteredFileList[i]->m_aFilename, "..") == 0)
 				pIconType = FONT_ICON_FOLDER_TREE;
 			else
 				pIconType = FONT_ICON_FOLDER;
 		}
 
 		TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
+		TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING);
 		UI()->DoLabel(&FileIcon, pIconType, 12.0f, TEXTALIGN_ML);
+		TextRender()->SetRenderFlags(0);
 		TextRender()->SetCurFont(nullptr);
 
 		SLabelProperties Props;
@@ -4945,16 +4954,39 @@ void CEditor::RenderFileDialog()
 
 	CUIRect Button;
 	ButtonBar.VSplitRight(50.0f, &ButtonBar, &Button);
-	bool IsDir = m_FilesSelectedIndex >= 0 && m_vpFilteredFileList[m_FilesSelectedIndex]->m_IsDir;
+	const bool IsDir = m_FilesSelectedIndex >= 0 && m_vpFilteredFileList[m_FilesSelectedIndex]->m_IsDir;
 	if(DoButton_Editor(&s_OkButton, IsDir ? "Open" : m_pFileDialogButtonText, 0, &Button, 0, nullptr) || s_ListBox.WasItemActivated())
 	{
 		if(IsDir) // folder
 		{
 			m_FileDialogFilterInput.Clear();
-			if(str_comp(m_vpFilteredFileList[m_FilesSelectedIndex]->m_aFilename, "..") == 0) // parent folder
+			const bool ParentFolder = str_comp(m_vpFilteredFileList[m_FilesSelectedIndex]->m_aFilename, "..") == 0;
+			if(ParentFolder) // parent folder
 			{
+				str_copy(m_aFilesSelectedName, fs_filename(m_pFileDialogPath));
+				str_append(m_aFilesSelectedName, "/");
 				if(fs_parent_dir(m_pFileDialogPath))
-					m_pFileDialogPath = m_aFileDialogCurrentFolder; // leave the link
+				{
+					if(str_comp(m_pFileDialogPath, m_aFileDialogCurrentFolder) == 0)
+					{
+						m_FileDialogShowingRoot = true;
+						if(m_FileDialogStorageType == IStorage::TYPE_ALL)
+						{
+							m_aFilesSelectedName[0] = '\0'; // will select first list item
+						}
+						else
+						{
+							Storage()->GetCompletePath(m_FileDialogStorageType, m_pFileDialogPath, m_aFilesSelectedName, sizeof(m_aFilesSelectedName));
+							str_append(m_aFilesSelectedName, "/");
+						}
+					}
+					else
+					{
+						m_pFileDialogPath = m_aFileDialogCurrentFolder; // leave the link
+						str_copy(m_aFilesSelectedName, m_aFileDialogCurrentLink);
+						str_append(m_aFilesSelectedName, "/");
+					}
+				}
 			}
 			else // sub folder
 			{
@@ -4969,28 +5001,26 @@ void CEditor::RenderFileDialog()
 					str_copy(aTemp, m_pFileDialogPath);
 					str_format(m_pFileDialogPath, IO_MAX_PATH_LENGTH, "%s/%s", aTemp, m_vpFilteredFileList[m_FilesSelectedIndex]->m_aFilename);
 				}
+				if(m_FileDialogShowingRoot)
+					m_FileDialogStorageType = m_vpFilteredFileList[m_FilesSelectedIndex]->m_StorageType;
+				m_FileDialogShowingRoot = false;
 			}
-			FilelistPopulate(!str_comp(m_pFileDialogPath, "maps") || !str_comp(m_pFileDialogPath, "mapres") ? m_FileDialogStorageType :
-															  m_vpFilteredFileList[m_FilesSelectedIndex]->m_StorageType);
+			FilelistPopulate(m_FileDialogStorageType, ParentFolder);
 			UpdateFileNameInput();
 		}
 		else // file
 		{
+			const int StorageType = m_FilesSelectedIndex >= 0 ? m_vpFilteredFileList[m_FilesSelectedIndex]->m_StorageType : m_FileDialogStorageType;
 			str_format(m_aFileSaveName, sizeof(m_aFileSaveName), "%s/%s", m_pFileDialogPath, m_FileDialogFileNameInput.GetString());
 			if(!str_endswith(m_aFileSaveName, FILETYPE_EXTENSIONS[m_FileDialogFileType]))
 				str_append(m_aFileSaveName, FILETYPE_EXTENSIONS[m_FileDialogFileType]);
-			if(!str_comp(m_pFileDialogButtonText, "Save"))
+			if(!str_comp(m_pFileDialogButtonText, "Save") && Storage()->FileExists(m_aFileSaveName, StorageType))
 			{
-				if(Storage()->FileExists(m_aFileSaveName, IStorage::TYPE_SAVE))
-				{
-					m_PopupEventType = m_pfnFileDialogFunc == &CallbackSaveCopyMap ? POPEVENT_SAVE_COPY : POPEVENT_SAVE;
-					m_PopupEventActivated = true;
-				}
-				else if(m_pfnFileDialogFunc)
-					m_pfnFileDialogFunc(m_aFileSaveName, m_FilesSelectedIndex >= 0 ? m_vpFilteredFileList[m_FilesSelectedIndex]->m_StorageType : m_FileDialogStorageType, m_pFileDialogUser);
+				m_PopupEventType = m_pfnFileDialogFunc == &CallbackSaveCopyMap ? POPEVENT_SAVE_COPY : POPEVENT_SAVE;
+				m_PopupEventActivated = true;
 			}
 			else if(m_pfnFileDialogFunc)
-				m_pfnFileDialogFunc(m_aFileSaveName, m_FilesSelectedIndex >= 0 ? m_vpFilteredFileList[m_FilesSelectedIndex]->m_StorageType : m_FileDialogStorageType, m_pFileDialogUser);
+				m_pfnFileDialogFunc(m_aFileSaveName, StorageType, m_pFileDialogUser);
 		}
 	}
 
@@ -5008,9 +5038,11 @@ void CEditor::RenderFileDialog()
 	ButtonBar.VSplitRight(90.0f, &ButtonBar, &Button);
 	if(DoButton_Editor(&s_ShowDirectoryButton, "Show directory", 0, &Button, 0, "Open the current directory in the file browser"))
 	{
-		if(!open_file(aPath))
+		char aOpenPath[IO_MAX_PATH_LENGTH];
+		Storage()->GetCompletePath(m_FilesSelectedIndex >= 0 ? m_vpFilteredFileList[m_FilesSelectedIndex]->m_StorageType : IStorage::TYPE_SAVE, m_pFileDialogPath, aOpenPath, sizeof(aOpenPath));
+		if(!open_file(aOpenPath))
 		{
-			ShowFileDialogError("Failed to open the directory '%s'.", aPath);
+			ShowFileDialogError("Failed to open the directory '%s'.", aOpenPath);
 		}
 	}
 
@@ -5051,7 +5083,7 @@ void CEditor::RenderFileDialog()
 	else
 		s_ConfirmDeletePopupContext.Reset();
 
-	if(m_FileDialogStorageType == IStorage::TYPE_SAVE)
+	if(!m_FileDialogShowingRoot && m_FileDialogStorageType == IStorage::TYPE_SAVE)
 	{
 		ButtonBar.VSplitLeft(70.0f, &Button, &ButtonBar);
 		if(DoButton_Editor(&s_NewFolderButton, "New folder", 0, &Button, 0, nullptr))
@@ -5076,7 +5108,8 @@ void CEditor::RefreshFilteredFileList()
 			m_vpFilteredFileList.push_back(&Item);
 		}
 	}
-	SortFilteredFileList();
+	if(!m_FileDialogShowingRoot)
+		SortFilteredFileList();
 	if(!m_vpFilteredFileList.empty())
 	{
 		if(m_aFilesSelectedName[0])
@@ -5104,18 +5137,66 @@ void CEditor::FilelistPopulate(int StorageType, bool KeepSelection)
 {
 	m_FileDialogLastPopulatedStorageType = StorageType;
 	m_vCompleteFileList.clear();
-	if(m_FileDialogStorageType != IStorage::TYPE_SAVE && !str_comp(m_pFileDialogPath, "maps"))
+	if(m_FileDialogShowingRoot)
 	{
-		CFilelistItem Item;
-		str_copy(Item.m_aFilename, "downloadedmaps");
-		str_copy(Item.m_aName, "downloadedmaps/");
-		Item.m_IsDir = true;
-		Item.m_IsLink = true;
-		Item.m_StorageType = IStorage::TYPE_SAVE;
-		Item.m_TimeModified = 0;
-		m_vCompleteFileList.push_back(Item);
+		{
+			CFilelistItem Item;
+			str_copy(Item.m_aFilename, m_pFileDialogPath);
+			str_copy(Item.m_aName, "All combined");
+			Item.m_IsDir = true;
+			Item.m_IsLink = true;
+			Item.m_StorageType = IStorage::TYPE_ALL;
+			Item.m_TimeModified = 0;
+			m_vCompleteFileList.push_back(Item);
+		}
+
+		for(int CheckStorageType = IStorage::TYPE_SAVE; CheckStorageType < Storage()->NumPaths(); ++CheckStorageType)
+		{
+			if(Storage()->FolderExists(m_pFileDialogPath, CheckStorageType))
+			{
+				CFilelistItem Item;
+				str_copy(Item.m_aFilename, m_pFileDialogPath);
+				Storage()->GetCompletePath(CheckStorageType, m_pFileDialogPath, Item.m_aName, sizeof(Item.m_aName));
+				str_append(Item.m_aName, "/", sizeof(Item.m_aName));
+				Item.m_IsDir = true;
+				Item.m_IsLink = true;
+				Item.m_StorageType = CheckStorageType;
+				Item.m_TimeModified = 0;
+				m_vCompleteFileList.push_back(Item);
+			}
+		}
 	}
-	Storage()->ListDirectoryInfo(StorageType, m_pFileDialogPath, EditorListdirCallback, this);
+	else
+	{
+		// Add links for downloadedmaps and themes
+		if(!str_comp(m_pFileDialogPath, "maps"))
+		{
+			if(str_comp(m_pFileDialogButtonText, "Save") != 0 && Storage()->FolderExists("downloadedmaps", StorageType))
+			{
+				CFilelistItem Item;
+				str_copy(Item.m_aFilename, "downloadedmaps");
+				str_copy(Item.m_aName, "downloadedmaps/");
+				Item.m_IsDir = true;
+				Item.m_IsLink = true;
+				Item.m_StorageType = StorageType;
+				Item.m_TimeModified = 0;
+				m_vCompleteFileList.push_back(Item);
+			}
+
+			if(Storage()->FolderExists("themes", StorageType))
+			{
+				CFilelistItem Item;
+				str_copy(Item.m_aFilename, "themes");
+				str_copy(Item.m_aName, "themes/");
+				Item.m_IsDir = true;
+				Item.m_IsLink = true;
+				Item.m_StorageType = StorageType;
+				Item.m_TimeModified = 0;
+				m_vCompleteFileList.push_back(Item);
+			}
+		}
+		Storage()->ListDirectoryInfo(StorageType, m_pFileDialogPath, EditorListdirCallback, this);
+	}
 	RefreshFilteredFileList();
 	if(!KeepSelection)
 	{
@@ -5132,8 +5213,25 @@ void CEditor::InvokeFileDialog(int StorageType, int FileType, const char *pTitle
 	const char *pBasePath, const char *pDefaultName,
 	bool (*pfnFunc)(const char *pFileName, int StorageType, void *pUser), void *pUser)
 {
-	UI()->ClosePopupMenus();
 	m_FileDialogStorageType = StorageType;
+	if(m_FileDialogStorageType == IStorage::TYPE_ALL)
+	{
+		int NumStoragedWithFolder = 0;
+		for(int CheckStorageType = IStorage::TYPE_SAVE; CheckStorageType < Storage()->NumPaths(); ++CheckStorageType)
+		{
+			if(Storage()->FolderExists(m_pFileDialogPath, CheckStorageType))
+			{
+				NumStoragedWithFolder++;
+			}
+		}
+		m_FileDialogMultipleStorages = NumStoragedWithFolder > 1;
+	}
+	else
+	{
+		m_FileDialogMultipleStorages = false;
+	}
+
+	UI()->ClosePopupMenus();
 	m_pFileDialogTitle = pTitle;
 	m_pFileDialogButtonText = pButtonText;
 	m_pfnFileDialogFunc = pfnFunc;
@@ -5146,6 +5244,7 @@ void CEditor::InvokeFileDialog(int StorageType, int FileType, const char *pTitle
 	m_FileDialogFileType = FileType;
 	m_FilePreviewState = PREVIEW_UNLOADED;
 	m_FileDialogOpening = true;
+	m_FileDialogShowingRoot = false;
 
 	if(pDefaultName)
 		m_FileDialogFileNameInput.Set(pDefaultName);
@@ -7150,8 +7249,15 @@ void CEditor::OnRender()
 
 void CEditor::LoadCurrentMap()
 {
-	Load(m_pClient->GetCurrentMapPath(), IStorage::TYPE_ALL);
-	m_ValidSaveFilename = true;
+	if(Load(m_pClient->GetCurrentMapPath(), IStorage::TYPE_SAVE))
+	{
+		m_ValidSaveFilename = true;
+	}
+	else
+	{
+		Load(m_pClient->GetCurrentMapPath(), IStorage::TYPE_ALL);
+		m_ValidSaveFilename = false;
+	}
 
 	CGameClient *pGameClient = (CGameClient *)Kernel()->RequestInterface<IGameClient>();
 	vec2 Center = pGameClient->m_Camera.m_Center;

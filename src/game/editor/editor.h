@@ -977,6 +977,8 @@ public:
 	CLineInputBuffered<IO_MAX_PATH_LENGTH> m_FileDialogFilterInput;
 	char *m_pFileDialogPath;
 	int m_FileDialogFileType;
+	bool m_FileDialogMultipleStorages = false;
+	bool m_FileDialogShowingRoot = false;
 	int m_FilesSelectedIndex;
 	CLineInputBuffered<IO_MAX_PATH_LENGTH> m_FileDialogNewFolderNameInput;
 
@@ -1004,6 +1006,8 @@ public:
 			return true;
 		if(str_comp(pRhs->m_aFilename, "..") == 0)
 			return false;
+		if(pLhs->m_IsLink != pRhs->m_IsLink)
+			return pLhs->m_IsLink;
 		if(pLhs->m_IsDir != pRhs->m_IsDir)
 			return pLhs->m_IsDir;
 		return str_comp_filenames(pLhs->m_aName, pRhs->m_aName) < 0;
@@ -1015,6 +1019,8 @@ public:
 			return true;
 		if(str_comp(pRhs->m_aFilename, "..") == 0)
 			return false;
+		if(pLhs->m_IsLink != pRhs->m_IsLink)
+			return pLhs->m_IsLink;
 		if(pLhs->m_IsDir != pRhs->m_IsDir)
 			return pLhs->m_IsDir;
 		return str_comp_filenames(pLhs->m_aName, pRhs->m_aName) > 0;
