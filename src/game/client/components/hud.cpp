@@ -832,16 +832,18 @@ void CHud::RenderPlayerState(const int ClientID)
 				UsedJumps = pCharacter->m_Jumps - 1;
 			}
 
+			int TotalJumps = 0;
 			if(pCharacter->m_Jumps == 1)
 			{
-				TotalJumpsToDisplay = 1;
+				TotalJumps = 1;
 			}
 			else if(pCharacter->m_Jumps >= 2)
 			{
-				TotalJumpsToDisplay = maximum(minimum(pCharacter->m_Jumps - 1, 10), 0);
+				TotalJumps = pCharacter->m_Jumps - 1;
 			}
+			TotalJumpsToDisplay = maximum(minimum(TotalJumps, 10), 0);
 
-			int UnusedJumps = TotalJumpsToDisplay - UsedJumps;
+			int UnusedJumps = TotalJumps - UsedJumps;
 			if(!(pPlayer->m_Jumped & 2) && UnusedJumps <= 0)
 			{
 				// In some edge cases when the player just got another number of jumps, UnusedJumps is not correct
