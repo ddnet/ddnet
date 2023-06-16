@@ -29,11 +29,12 @@ void CLineInput::SetBuffer(char *pStr, size_t MaxSize, size_t MaxChars)
 	m_WasChanged = m_pStr && pLastStr && m_WasChanged;
 	if(!pLastStr)
 	{
+		m_CursorPos = m_SelectionStart = m_SelectionEnd = m_LastCompositionCursorPos = 0;
 		m_ScrollOffset = m_ScrollOffsetChange = 0.0f;
 		m_CaretPosition = vec2(0.0f, 0.0f);
+		m_MouseSelection.m_Selecting = false;
 		m_Hidden = false;
 		m_pEmptyText = nullptr;
-		m_MouseSelection.m_Selecting = false;
 		m_WasRendered = false;
 	}
 	if(m_pStr && m_pStr != pLastStr)
