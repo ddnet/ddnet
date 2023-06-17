@@ -309,6 +309,11 @@ public:
 		m_aBinarydir[0] = '\0';
 	}
 
+	int NumPaths() const override
+	{
+		return m_NumPaths;
+	}
+
 	void ListDirectoryInfo(int Type, const char *pPath, FS_LISTDIR_CALLBACK_FILEINFO pfnCallback, void *pUser) override
 	{
 		char aBuffer[IO_MAX_PATH_LENGTH];
