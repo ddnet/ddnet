@@ -5,6 +5,8 @@
 #include <base/math.h>
 #include <base/vmath.h>
 
+#include <optional>
+
 /*
 	Title: Color handling
 */
@@ -289,5 +291,8 @@ T color_invert(const T &col)
 {
 	return T(1.0f - col.x, 1.0f - col.y, 1.0f - col.z, 1.0f - col.a);
 }
+
+template<typename T>
+std::optional<T> color_parse(const char *pStr);
 
 #endif
