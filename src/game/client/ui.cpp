@@ -1711,32 +1711,15 @@ CUI::EPopupMenuFunctionResult CUI::PopupColorPicker(void *pContext, CUIRect View
 
 	PickerColorHSV = ColorHSVA(H / 255.0f, S / 255.0f, V / 255.0f, A / 255.0f);
 
-	const auto RotateByteLeft = [pColorPicker](unsigned Num) {
-		if(pColorPicker->m_Alpha)
-		{
-			// ARGB -> RGBA (internal -> displayed)
-			return ((Num & 0xFF000000u) >> 24) | (Num << 8);
-		}
-		return Num;
-	};
-	const auto RotateByteRight = [pColorPicker](unsigned Num) {
-		if(pColorPicker->m_Alpha)
-		{
-			// RGBA -> ARGB (displayed -> internal)
-			return ((Num & 0xFFu) << 24) | (Num >> 8);
-		}
-		return Num;
-	};
-
 	SValueSelectorProperties Props;
 	Props.m_UseScroll = false;
 	Props.m_IsHex = true;
 	Props.m_HexPrefix = pColorPicker->m_Alpha ? 8 : 6;
-	const unsigned Hex = RotateByteLeft(color_cast<ColorRGBA>(PickerColorHSV).Pack(pColorPicker->m_Alpha));
+	const unsigned Hex = color_cast<ColorRGBA>(PickerColorHSV).PackAlphaLast(pColorPicker->m_Alpha);
 	const unsigned NewHex = pUI->DoValueSelector(&pColorPicker->m_aValueSelectorIds[4], &HexRect, "Hex:", Hex, 0, pColorPicker->m_Alpha ? 0xFFFFFFFFll : 0xFFFFFFll, Props);
 	if(Hex != NewHex)
 	{
-		PickerColorHSV = color_cast<ColorHSVA>(ColorRGBA(RotateByteRight(NewHex), pColorPicker->m_Alpha));
+		PickerColorHSV = color_cast<ColorHSVA>(ColorRGBA::UnpackAlphaLast<ColorRGBA>(NewHex, pColorPicker->m_Alpha));
 		if(!pColorPicker->m_Alpha)
 			PickerColorHSV.a = A / 255.0f;
 	}
