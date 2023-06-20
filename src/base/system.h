@@ -2027,6 +2027,22 @@ int fs_chdir(const char *path);
 char *fs_getcwd(char *buffer, int buffer_size);
 
 /**
+ * Gets the name of a file or folder specified by a path,
+ * i.e. the last segment of the path.
+ *
+ * @ingroup Filesystem
+ *
+ * @param path Path from which to retrieve the filename.
+ *
+ * @return Filename of the path.
+ *
+ * @remark Supports forward and backward slashes as path segment separator.
+ * @remark No distinction between files and folders is being made.
+ * @remark The strings are treated as zero-terminated strings.
+ */
+const char *fs_filename(const char *path);
+
+/**
  * Get the parent directory of a directory.
  *
  * @ingroup Filesystem

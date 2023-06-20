@@ -2396,6 +2396,16 @@ char *fs_getcwd(char *buffer, int buffer_size)
 #endif
 }
 
+const char *fs_filename(const char *path)
+{
+	for(const char *filename = path + str_length(path); filename >= path; --filename)
+	{
+		if(filename[0] == '/' || filename[0] == '\\')
+			return filename + 1;
+	}
+	return path;
+}
+
 int fs_parent_dir(char *path)
 {
 	char *parent = 0;
