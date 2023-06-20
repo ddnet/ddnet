@@ -1688,7 +1688,7 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 					m_SelectedQuadIndex = FindSelectedQuadIndex(QuadIndex);
 
 					static SPopupMenuId s_PopupPointId;
-					UI()->DoPopupMenu(&s_PopupPointId, UI()->MouseX(), UI()->MouseY(), 120, 150, this, PopupPoint);
+					UI()->DoPopupMenu(&s_PopupPointId, UI()->MouseX(), UI()->MouseY(), 120, 75, this, PopupPoint);
 				}
 				UI()->SetActiveItem(nullptr);
 			}
@@ -3133,53 +3133,19 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 		}
 		else if(pProps[i].m_Type == PROPTYPE_COLOR)
 		{
-			static const char *s_apTexts[4] = {"R", "G", "B", "A"};
-			static const int s_aShift[] = {24, 16, 8, 0};
-			int NewColor = 0;
+			const ColorRGBA ColorPick = ColorRGBA(
+				((pProps[i].m_Value >> 24) & 0xff) / 255.0f,
+				((pProps[i].m_Value >> 16) & 0xff) / 255.0f,
+				((pProps[i].m_Value >> 8) & 0xff) / 255.0f,
+				(pProps[i].m_Value & 0xff) / 255.0f);
 
-			// extra space
-			CUIRect ColorBox, ColorSlots;
-
-			pToolBox->HSplitTop(3.0f * 13.0f, &Slot, pToolBox);
-			Slot.VSplitMid(&ColorBox, &ColorSlots);
-			ColorBox.HSplitTop(8.0f, nullptr, &ColorBox);
-			ColorBox.VMargin(12.0f, &ColorBox);
-			ColorBox.HMargin((ColorBox.h - ColorBox.w) / 2.0f, &ColorBox);
-
-			for(int c = 0; c < 4; c++)
-			{
-				int v = (pProps[i].m_Value >> s_aShift[c]) & 0xff;
-				NewColor |= UiDoValueSelector(((char *)&pIDs[i]) + c, &Shifter, s_apTexts[c], v, 0, 255, 1, 1.0f, "Use left mouse button to drag and change the color value. Hold shift to be more precise. Rightclick to edit as text.") << s_aShift[c];
-
-				if(c != 3)
-				{
-					ColorSlots.HSplitTop(13.0f, &Shifter, &ColorSlots);
-					Shifter.HMargin(1.0f, &Shifter);
-				}
-			}
-
-			// hex
-			pToolBox->HSplitTop(13.0f, &Slot, pToolBox);
-			Slot.VSplitMid(nullptr, &Shifter);
-			Shifter.HMargin(1.0f, &Shifter);
-
-			int NewColorHex = pProps[i].m_Value & 0xff;
-			NewColorHex |= UiDoValueSelector(((char *)&pIDs[i] - 1), &Shifter, "", (pProps[i].m_Value >> 8) & 0xFFFFFF, 0, 0xFFFFFF, 1, 1.0f, "Use left mouse button to drag and change the color value. Hold shift to be more precise. Rightclick to edit as text.", false, true) << 8;
-
-			// color picker
-			ColorRGBA ColorPick = ColorRGBA(
-				((pProps[i].m_Value >> s_aShift[0]) & 0xff) / 255.0f,
-				((pProps[i].m_Value >> s_aShift[1]) & 0xff) / 255.0f,
-				((pProps[i].m_Value >> s_aShift[2]) & 0xff) / 255.0f,
-				1.0f);
-
-			static int s_ColorPicker;
-			if(UI()->HotItem() == &s_ColorPicker)
-				ColorBox.Margin(-2.0f, &ColorBox);
-			ColorBox.Draw(ColorPick, IGraphics::CORNER_ALL, 3.0f);
+			CUIRect ColorRect;
+			Shifter.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f * UI()->ButtonColorMul(&pIDs[i])), IGraphics::CORNER_ALL, 5.0f);
+			Shifter.Margin(1.0f, &ColorRect);
+			ColorRect.Draw(ColorPick, IGraphics::CORNER_ALL, ColorRect.h / 2.0f);
 
 			static CUI::SColorPickerPopupContext s_ColorPickerPopupContext;
-			if(DoButton_Editor_Common(&s_ColorPicker, nullptr, 0, &ColorBox, 0, "Click to show the color picker."))
+			if(DoButton_Editor_Common(&pIDs[i], nullptr, 0, &Shifter, 0, "Click to show the color picker."))
 			{
 				s_ColorPickerPopupContext.m_HsvaColor = color_cast<ColorHSVA>(ColorPick);
 				s_ColorPickerPopupContext.m_Alpha = true;
@@ -3188,18 +3154,12 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 			else if(UI()->IsPopupOpen(&s_ColorPickerPopupContext))
 			{
 				ColorRGBA c = color_cast<ColorRGBA>(s_ColorPickerPopupContext.m_HsvaColor);
-				NewColor = ((int)(c.r * 255.0f) & 0xff) << 24 | ((int)(c.g * 255.0f) & 0xff) << 16 | ((int)(c.b * 255.0f) & 0xff) << 8 | (pProps[i].m_Value & 0xff);
-			}
-
-			if(NewColor != pProps[i].m_Value)
-			{
-				*pNewVal = NewColor;
-				Change = i;
-			}
-			else if(NewColorHex != pProps[i].m_Value)
-			{
-				*pNewVal = NewColorHex;
-				Change = i;
+				const int NewColor = ((int)(c.r * 255.0f) & 0xff) << 24 | ((int)(c.g * 255.0f) & 0xff) << 16 | ((int)(c.b * 255.0f) & 0xff) << 8 | ((int)(c.a * 255.0f) & 0xff);
+				if(NewColor != pProps[i].m_Value)
+				{
+					*pNewVal = NewColor;
+					Change = i;
+				}
 			}
 		}
 		else if(pProps[i].m_Type == PROPTYPE_IMAGE)
@@ -3709,7 +3669,7 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 						else
 							s_LayerPopupContext.m_vpLayers.clear();
 
-						UI()->DoPopupMenu(&s_LayerPopupContext, UI()->MouseX(), UI()->MouseY(), 120, 320, &s_LayerPopupContext, PopupLayer);
+						UI()->DoPopupMenu(&s_LayerPopupContext, UI()->MouseX(), UI()->MouseY(), 120, 230, &s_LayerPopupContext, PopupLayer);
 					}
 
 					s_Operation = OP_NONE;
