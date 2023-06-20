@@ -3145,7 +3145,32 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 			ColorRect.Draw(ColorPick, IGraphics::CORNER_ALL, ColorRect.h / 2.0f);
 
 			static CUI::SColorPickerPopupContext s_ColorPickerPopupContext;
-			if(DoButton_Editor_Common(&pIDs[i], nullptr, 0, &Shifter, 0, "Click to show the color picker."))
+			const int ButtonResult = DoButton_Editor_Common(&pIDs[i], nullptr, 0, &Shifter, 0, "Click to show the color picker. Shift+rightclick to copy color to clipboard. Shift+leftclick to paste color from clipboard.");
+			if(Input()->ShiftIsPressed())
+			{
+				if(ButtonResult == 1)
+				{
+					const char *pClipboard = Input()->GetClipboardText();
+					if(*pClipboard == '#' || *pClipboard == '$') // ignore leading # (web color format) and $ (console color format)
+						++pClipboard;
+					if(str_isallnum_hex(pClipboard))
+					{
+						std::optional<ColorRGBA> ParsedColor = color_parse<ColorRGBA>(pClipboard);
+						if(ParsedColor)
+						{
+							*pNewVal = ParsedColor.value().PackAlphaLast();
+							Change = i;
+						}
+					}
+				}
+				else if(ButtonResult == 2)
+				{
+					char aClipboard[9];
+					str_format(aClipboard, sizeof(aClipboard), "%08X", ColorPick.PackAlphaLast());
+					Input()->SetClipboardText(aClipboard);
+				}
+			}
+			else if(ButtonResult > 0)
 			{
 				s_ColorPickerPopupContext.m_HsvaColor = color_cast<ColorHSVA>(ColorPick);
 				s_ColorPickerPopupContext.m_Alpha = true;
