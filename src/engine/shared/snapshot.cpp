@@ -352,13 +352,6 @@ int CSnapshotDelta::CreateDelta(const CSnapshot *pFrom, CSnapshot *pTo, void *pD
 	return (int)((char *)pData - (char *)pDstData);
 }
 
-static int RangeCheck(void *pEnd, void *pPtr, int Size)
-{
-	if((const char *)pPtr + Size > (const char *)pEnd)
-		return -1;
-	return 0;
-}
-
 int CSnapshotDelta::UnpackDelta(const CSnapshot *pFrom, CSnapshot *pTo, const void *pSrcData, int DataSize)
 {
 	CData *pDelta = (CData *)pSrcData;
@@ -428,7 +421,7 @@ int CSnapshotDelta::UnpackDelta(const CSnapshot *pFrom, CSnapshot *pTo, const vo
 			ItemSize = (*pData++) * sizeof(int32_t);
 		}
 
-		if(ItemSize < 0 || RangeCheck(pEnd, pData, ItemSize))
+		if(ItemSize < 0 || (const char *)pEnd - (const char *)pData < ItemSize)
 			return -205;
 
 		const int Key = (Type << 16) | ID;
