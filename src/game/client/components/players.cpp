@@ -1165,7 +1165,7 @@ void CPlayers::RenderPlayerGhost(
 	RenderTools()->RenderTee(&State, &RenderInfo, Player.m_Emote, Direction, Position, Alpha);
 
 	float TeeAnimScale, TeeBaseSize;
-	RenderTools()->GetRenderTeeAnimScaleAndBaseSize(&State, &RenderInfo, TeeAnimScale, TeeBaseSize);
+	RenderTools()->GetRenderTeeAnimScaleAndBaseSize(&RenderInfo, TeeAnimScale, TeeBaseSize);
 	vec2 BodyPos = Position + vec2(State.GetBody()->m_X, State.GetBody()->m_Y) * TeeAnimScale;
 	if(RenderInfo.m_TeeRenderFlags & TEE_EFFECT_FROZEN)
 	{

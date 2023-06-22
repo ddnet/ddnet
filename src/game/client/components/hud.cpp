@@ -287,6 +287,7 @@ void CHud::RenderScoreHud()
 						CTeeRenderInfo TeeInfo = m_pClient->m_aClients[ID].m_RenderInfo;
 						TeeInfo.m_Size = ScoreSingleBoxHeight;
 
+						
 						const CAnimState *pIdleState = CAnimState::GetIdle();
 						vec2 OffsetToMid;
 						RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &TeeInfo, OffsetToMid);
@@ -707,7 +708,7 @@ void CHud::RenderTextInfo()
 						}
 
 						TeeInfo.m_Size = TeeSize;
-						CAnimState *pIdleState = CAnimState::GetIdle();
+						const CAnimState *pIdleState = CAnimState::GetIdle();
 						vec2 OffsetToMid;
 						RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &TeeInfo, OffsetToMid);
 						vec2 TeeRenderPos(StartPos + progressiveOffset, TeeSize * (0.7f) + CurrentRow * TeeSize);

@@ -3343,27 +3343,26 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRenderNameplateSpec, ("Hide nameplates in spec"), &g_Config.m_ClRenderNameplateSpec, &MainView, LineMargin);
 
 		// create dropdown for rainbow modes
-		static float s_ScrollValueDrop = 0;
-		const char *apWindowModes[] = {Localize("Rainbow"), Localize("Pulse"), Localize("Black")};
-		static const int s_NumWindowMode = std::size(apWindowModes);
-		static int s_aWindowModeIDs[s_NumWindowMode];
-		const void *apWindowModeIDs[s_NumWindowMode];
-		for(int i = 0; i < s_NumWindowMode; ++i)
-			apWindowModeIDs[i] = &s_aWindowModeIDs[i];
-		static CUI::SDropDownState s_WindowModeDropDownState;
 
-		static CButtonContainer s_WindowButton;
+		static std::vector<const char *> s_DropDownNames = {Localize("Rainbow"), Localize("Pulse"), Localize("Black")};
+
+		static CUI::SDropDownState s_RainbowDropDownState;
+		static CScrollRegion s_RainbowDropDownScrollRegion;
+		s_RainbowDropDownState.m_SelectionPopupContext.m_pScrollRegion = &s_RainbowDropDownScrollRegion;
+
 		int OldSelected = g_Config.m_ClRainbowMode - 1;
 
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRainbow, ("Rainbow"), &g_Config.m_ClRainbow, &MainView, LineMargin);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClRainbowOthers, ("Rainbow Others"), &g_Config.m_ClRainbowOthers, &MainView, LineMargin);
+		CUIRect DropDownRect;
+		MainView.HSplitTop(20.0f, &DropDownRect, &MainView);
 
-		const int NewWindowMode = UI()->DoDropDown(&MainView, OldSelected, apWindowModes, s_NumWindowMode, s_WindowModeDropDownState);
+		const int NewRainbowMode = UI()->DoDropDown(&DropDownRect, OldSelected, s_DropDownNames.data(), s_DropDownNames.size(), s_RainbowDropDownState);
 
-		if(OldSelected != NewWindowMode)
+		if(OldSelected != NewRainbowMode)
 		{
-			g_Config.m_ClRainbowMode = NewWindowMode + 1;
-			OldSelected = NewWindowMode;
+			g_Config.m_ClRainbowMode = NewRainbowMode + 1;
+			OldSelected = NewRainbowMode;
 			dbg_msg("rainbow", "rainbow mode changed to %d", g_Config.m_ClRainbowMode);
 		}
 
