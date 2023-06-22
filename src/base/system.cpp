@@ -833,12 +833,12 @@ void thread_detach(void *thread)
 #endif
 }
 
-void *thread_init_and_detach(void (*threadfunc)(void *), void *u, const char *name)
+bool thread_init_and_detach(void (*threadfunc)(void *), void *u, const char *name)
 {
 	void *thread = thread_init(threadfunc, u, name);
 	if(thread)
 		thread_detach(thread);
-	return thread;
+	return thread != nullptr;
 }
 
 #if defined(CONF_FAMILY_UNIX)
@@ -3430,10 +3430,30 @@ int str_isallnum(const char *str)
 	return 1;
 }
 
-int str_toint(const char *str) { return str_toint_base(str, 10); }
-int str_toint_base(const char *str, int base) { return strtol(str, NULL, base); }
-unsigned long str_toulong_base(const char *str, int base) { return strtoul(str, NULL, base); }
-float str_tofloat(const char *str) { return strtod(str, NULL); }
+int str_toint(const char *str)
+{
+	return str_toint_base(str, 10);
+}
+
+int str_toint_base(const char *str, int base)
+{
+	return strtol(str, nullptr, base);
+}
+
+unsigned long str_toulong_base(const char *str, int base)
+{
+	return strtoul(str, nullptr, base);
+}
+
+int64_t str_toint64_base(const char *str, int base)
+{
+	return strtoll(str, nullptr, base);
+}
+
+float str_tofloat(const char *str)
+{
+	return strtod(str, nullptr);
+}
 
 int str_utf8_comp_nocase(const char *a, const char *b)
 {
@@ -3971,7 +3991,7 @@ int open_file(const char *path)
 	{
 		if(!fs_getcwd(workingDir, sizeof(workingDir)))
 			return 0;
-		str_append(workingDir, "/", sizeof(workingDir));
+		str_append(workingDir, "/");
 	}
 	else
 		workingDir[0] = '\0';

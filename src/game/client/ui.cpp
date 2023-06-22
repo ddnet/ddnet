@@ -1,6 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "ui.h"
+#include "ui_scrollregion.h"
 
 #include <base/math.h>
 #include <base/system.h>
@@ -14,6 +15,8 @@
 #include <game/localization.h>
 
 #include <limits>
+
+using namespace FontIcons;
 
 void CUIElement::Init(CUI *pUI, int RequestedRectCount)
 {
@@ -41,6 +44,8 @@ void CUIElement::SUIElementRect::Reset()
 	m_Y = -1;
 	m_Width = -1;
 	m_Height = -1;
+	m_Rounding = -1.0f;
+	m_Corners = -1;
 	m_Text.clear();
 	mem_zero(&m_Cursor, sizeof(m_Cursor));
 	m_TextColor = ColorRGBA(-1, -1, -1, -1);
@@ -107,11 +112,10 @@ CUI::CUI()
 {
 	m_Enabled = true;
 
-	m_pHotItem = 0;
-	m_pActiveItem = 0;
-	m_pLastActiveItem = 0;
-	m_pBecomingHotItem = 0;
-	m_pActiveTooltipItem = 0;
+	m_pHotItem = nullptr;
+	m_pActiveItem = nullptr;
+	m_pLastActiveItem = nullptr;
+	m_pBecomingHotItem = nullptr;
 
 	m_MouseX = 0;
 	m_MouseY = 0;
@@ -120,10 +124,8 @@ CUI::CUI()
 	m_MouseButtons = 0;
 	m_LastMouseButtons = 0;
 
-	m_Screen.x = 0;
-	m_Screen.y = 0;
-	m_Screen.w = 848.0f;
-	m_Screen.h = 480.0f;
+	m_Screen.x = 0.0f;
+	m_Screen.y = 0.0f;
 }
 
 CUI::~CUI()
@@ -177,7 +179,27 @@ void CUI::OnLanguageChange()
 	OnElementsReset();
 }
 
-void CUI::Update(float MouseX, float MouseY, float MouseWorldX, float MouseWorldY)
+void CUI::OnCursorMove(float X, float Y)
+{
+	if(!CheckMouseLock())
+	{
+		m_UpdatedMousePos.x = clamp(m_UpdatedMousePos.x + X, 0.0f, (float)Graphics()->WindowWidth());
+		m_UpdatedMousePos.y = clamp(m_UpdatedMousePos.y + Y, 0.0f, (float)Graphics()->WindowHeight());
+	}
+
+	m_UpdatedMouseDelta += vec2(X, Y);
+}
+
+void CUI::Update()
+{
+	const CUIRect *pScreen = Screen();
+	const float MouseX = (m_UpdatedMousePos.x / (float)Graphics()->WindowWidth()) * pScreen->w;
+	const float MouseY = (m_UpdatedMousePos.y / (float)Graphics()->WindowHeight()) * pScreen->h;
+	Update(MouseX, MouseY, m_UpdatedMouseDelta.x, m_UpdatedMouseDelta.y, MouseX * 3.0f, MouseY * 3.0f);
+	m_UpdatedMouseDelta = vec2(0.0f, 0.0f);
+}
+
+void CUI::Update(float MouseX, float MouseY, float MouseDeltaX, float MouseDeltaY, float MouseWorldX, float MouseWorldY)
 {
 	unsigned MouseButtons = 0;
 	if(Enabled())
@@ -190,8 +212,8 @@ void CUI::Update(float MouseX, float MouseY, float MouseWorldX, float MouseWorld
 			MouseButtons |= 4;
 	}
 
-	m_MouseDeltaX = MouseX - m_MouseX;
-	m_MouseDeltaY = MouseY - m_MouseY;
+	m_MouseDeltaX = MouseDeltaX;
+	m_MouseDeltaY = MouseDeltaY;
 	m_MouseX = MouseX;
 	m_MouseY = MouseY;
 	m_MouseWorldX = MouseWorldX;
@@ -201,7 +223,7 @@ void CUI::Update(float MouseX, float MouseY, float MouseWorldX, float MouseWorld
 	m_pHotItem = m_pBecomingHotItem;
 	if(m_pActiveItem)
 		m_pHotItem = m_pActiveItem;
-	m_pBecomingHotItem = 0;
+	m_pBecomingHotItem = nullptr;
 
 	if(Enabled())
 	{
@@ -214,6 +236,15 @@ void CUI::Update(float MouseX, float MouseY, float MouseWorldX, float MouseWorld
 		m_pHotItem = nullptr;
 		m_pActiveItem = nullptr;
 	}
+}
+
+void CUI::DebugRender()
+{
+	MapScreen();
+
+	char aBuf[128];
+	str_format(aBuf, sizeof(aBuf), "hot=%p nexthot=%p active=%p lastactive=%p", HotItem(), NextHotItem(), ActiveItem(), LastActiveItem());
+	TextRender()->Text(2.0f, Screen()->h - 12.0f, 10.0f, aBuf);
 }
 
 bool CUI::MouseInside(const CUIRect *pRect) const
@@ -304,15 +335,8 @@ float CUI::ButtonColorMul(const void *pID)
 
 const CUIRect *CUI::Screen()
 {
-	float Aspect = Graphics()->ScreenAspect();
-	float w, h;
-
-	h = 600;
-	w = Aspect * h;
-
-	m_Screen.w = w;
-	m_Screen.h = h;
-
+	m_Screen.h = 600.0f;
+	m_Screen.w = Graphics()->ScreenAspect() * m_Screen.h;
 	return &m_Screen;
 }
 
@@ -729,7 +753,7 @@ bool CUI::DoEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize
 		}
 		else
 		{
-			SetActiveItem(0);
+			SetActiveItem(nullptr);
 		}
 	}
 	else if(HotItem() == pLineInput)
@@ -783,7 +807,7 @@ bool CUI::DoEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize
 	}
 
 	// Render
-	pRect->Draw(ms_LightButtonColorFunction.GetColor(Active, Inside), Corners, 3.0f);
+	pRect->Draw(ms_LightButtonColorFunction.GetColor(Active, HotItem() == pLineInput), Corners, 3.0f);
 	ClipEnable(pRect);
 	Textbox.x -= ScrollOffset;
 	const STextBoundingBox BoundingBox = pLineInput->Render(&Textbox, FontSize, TEXTALIGN_ML, Changed, -1.0f);
@@ -841,7 +865,7 @@ int CUI::DoButton_Menu(CUIElement &UIElement, const CButtonContainer *pID, const
 		{
 			if(UIElement.AreRectsInit())
 			{
-				if(UIElement.Rect(0)->m_X != pRect->x || UIElement.Rect(0)->m_Y != pRect->y || UIElement.Rect(0)->m_Width != pRect->w || UIElement.Rect(0)->m_Y != pRect->h)
+				if(UIElement.Rect(0)->m_X != pRect->x || UIElement.Rect(0)->m_Y != pRect->y || UIElement.Rect(0)->m_Width != pRect->w || UIElement.Rect(0)->m_Height != pRect->h || UIElement.Rect(0)->m_Rounding != Props.m_Rounding || UIElement.Rect(0)->m_Corners != Props.m_Corners)
 				{
 					NeedsRecalc = true;
 				}
@@ -885,6 +909,8 @@ int CUI::DoButton_Menu(CUIElement &UIElement, const CButtonContainer *pID, const
 				NewRect.m_Y = pRect->y;
 				NewRect.m_Width = pRect->w;
 				NewRect.m_Height = pRect->h;
+				NewRect.m_Rounding = Props.m_Rounding;
+				NewRect.m_Corners = Props.m_Corners;
 				if(i == 0)
 				{
 					if(pText == nullptr)
@@ -915,15 +941,130 @@ int CUI::DoButton_Menu(CUIElement &UIElement, const CButtonContainer *pID, const
 	return DoButtonLogic(pID, Props.m_Checked, pRect);
 }
 
-int CUI::DoButton_PopupMenu(CButtonContainer *pButtonContainer, const char *pText, const CUIRect *pRect, int Align)
+int CUI::DoButton_PopupMenu(CButtonContainer *pButtonContainer, const char *pText, const CUIRect *pRect, float Size, int Align, float Padding, bool TransparentInactive)
 {
-	pRect->Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f * ButtonColorMul(pButtonContainer)), IGraphics::CORNER_ALL, 3.0f);
+	if(!TransparentInactive || CheckActiveItem(pButtonContainer) || HotItem() == pButtonContainer)
+		pRect->Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f * ButtonColorMul(pButtonContainer)), IGraphics::CORNER_ALL, 3.0f);
 
 	CUIRect Label;
-	pRect->VMargin(2.0f, &Label);
-	DoLabel(&Label, pText, 10.0f, Align);
+	pRect->Margin(Padding, &Label);
+	DoLabel(&Label, pText, Size, Align);
 
 	return DoButtonLogic(pButtonContainer, 0, pRect);
+}
+
+int64_t CUI::DoValueSelector(const void *pID, const CUIRect *pRect, const char *pLabel, int64_t Current, int64_t Min, int64_t Max, const SValueSelectorProperties &Props)
+{
+	// logic
+	static float s_Value;
+	static CLineInputNumber s_NumberInput;
+	static const void *s_pLastTextID = pID;
+	const bool Inside = MouseInside(pRect);
+
+	if(Inside)
+		SetHotItem(pID);
+
+	const int Base = Props.m_IsHex ? 16 : 10;
+
+	if(MouseButtonReleased(1) && HotItem() == pID)
+	{
+		s_pLastTextID = pID;
+		m_ValueSelectorTextMode = true;
+		s_NumberInput.SetInteger64(Current, Base, Props.m_HexPrefix);
+		s_NumberInput.SelectAll();
+	}
+
+	if(CheckActiveItem(pID))
+	{
+		if(!MouseButton(0))
+		{
+			DisableMouseLock();
+			SetActiveItem(nullptr);
+			m_ValueSelectorTextMode = false;
+		}
+	}
+
+	if(m_ValueSelectorTextMode && s_pLastTextID == pID)
+	{
+		DoEditBox(&s_NumberInput, pRect, 10.0f);
+		SetActiveItem(&s_NumberInput);
+
+		if(ConsumeHotkey(HOTKEY_ENTER) || ((MouseButtonClicked(1) || MouseButtonClicked(0)) && !Inside))
+		{
+			Current = clamp(s_NumberInput.GetInteger64(Base), Min, Max);
+			DisableMouseLock();
+			SetActiveItem(nullptr);
+			m_ValueSelectorTextMode = false;
+		}
+
+		if(ConsumeHotkey(HOTKEY_ESCAPE))
+		{
+			DisableMouseLock();
+			SetActiveItem(nullptr);
+			m_ValueSelectorTextMode = false;
+		}
+	}
+	else
+	{
+		if(CheckActiveItem(pID))
+		{
+			if(Props.m_UseScroll)
+			{
+				if(MouseButton(0))
+				{
+					s_Value += MouseDeltaX() * (Input()->ShiftIsPressed() ? 0.05f : 1.0f);
+
+					if(absolute(s_Value) > Props.m_Scale)
+					{
+						const int64_t Count = (int64_t)(s_Value / Props.m_Scale);
+						s_Value = std::fmod(s_Value, Props.m_Scale);
+						Current += Props.m_Step * Count;
+						Current = clamp(Current, Min, Max);
+
+						// Constrain to discrete steps
+						if(Count > 0)
+							Current = Current / Props.m_Step * Props.m_Step;
+						else
+							Current = std::ceil(Current / (float)Props.m_Step) * Props.m_Step;
+					}
+				}
+			}
+		}
+		else if(HotItem() == pID)
+		{
+			if(MouseButtonClicked(0))
+			{
+				s_Value = 0;
+				SetActiveItem(pID);
+				if(Props.m_UseScroll)
+					EnableMouseLock(pID);
+			}
+		}
+
+		// render
+		char aBuf[128];
+		if(pLabel[0] != '\0')
+		{
+			if(Props.m_IsHex)
+				str_format(aBuf, sizeof(aBuf), "%s #%0*" PRIX64, pLabel, Props.m_HexPrefix, Current);
+			else
+				str_format(aBuf, sizeof(aBuf), "%s %" PRId64, pLabel, Current);
+		}
+		else
+		{
+			if(Props.m_IsHex)
+				str_format(aBuf, sizeof(aBuf), "#%0*" PRIX64, Props.m_HexPrefix, Current);
+			else
+				str_format(aBuf, sizeof(aBuf), "%" PRId64, Current);
+		}
+		pRect->Draw(Props.m_Color, IGraphics::CORNER_ALL, 3.0f);
+		DoLabel(pRect, aBuf, 10.0f, TEXTALIGN_MC);
+	}
+
+	if(!m_ValueSelectorTextMode)
+		s_NumberInput.Clear();
+
+	return Current;
 }
 
 float CUI::DoScrollbarV(const void *pID, const CUIRect *pRect, float Current)
@@ -1077,26 +1218,23 @@ float CUI::DoScrollbarH(const void *pID, const CUIRect *pRect, float Current, co
 	return ReturnValue;
 }
 
-void CUI::DoScrollbarOption(const void *pID, int *pOption, const CUIRect *pRect, const char *pStr, int Min, int Max, const IScrollbarScale *pScale, unsigned Flags)
+void CUI::DoScrollbarOption(const void *pID, int *pOption, const CUIRect *pRect, const char *pStr, int Min, int Max, const IScrollbarScale *pScale, unsigned Flags, const char *pSuffix)
 {
 	const bool Infinite = Flags & CUI::SCROLLBAR_OPTION_INFINITE;
 	const bool NoClampValue = Flags & CUI::SCROLLBAR_OPTION_NOCLAMPVALUE;
-	dbg_assert(!(Infinite && NoClampValue), "cannot combine SCROLLBAR_OPTION_INFINITE and SCROLLBAR_OPTION_NOCLAMPVALUE");
+	const bool MultiLine = Flags & CUI::SCROLLBAR_OPTION_MULTILINE;
 
 	int Value = *pOption;
 	if(Infinite)
 	{
-		Min += 1;
 		Max += 1;
 		if(Value == 0)
 			Value = Max;
 	}
 
-	char aBufMax[256];
-	str_format(aBufMax, sizeof(aBufMax), "%s: %i", pStr, Max);
 	char aBuf[256];
 	if(!Infinite || Value != Max)
-		str_format(aBuf, sizeof(aBuf), "%s: %i", pStr, Value);
+		str_format(aBuf, sizeof(aBuf), "%s: %i%s", pStr, Value, pSuffix);
 	else
 		str_format(aBuf, sizeof(aBuf), "%s: ∞", pStr);
 
@@ -1106,52 +1244,30 @@ void CUI::DoScrollbarOption(const void *pID, int *pOption, const CUIRect *pRect,
 		Value = clamp(Value, Min, Max);
 	}
 
-	float FontSize = pRect->h * CUI::ms_FontmodHeight * 0.8f;
-	float VSplitVal = 10.0f + maximum(TextRender()->TextWidth(FontSize, aBuf, -1, std::numeric_limits<float>::max()), TextRender()->TextWidth(FontSize, aBufMax, -1, std::numeric_limits<float>::max()));
-
 	CUIRect Label, ScrollBar;
-	pRect->VSplitLeft(VSplitVal, &Label, &ScrollBar);
+	if(MultiLine)
+		pRect->HSplitMid(&Label, &ScrollBar);
+	else
+		pRect->VSplitMid(&Label, &ScrollBar, minimum(10.0f, pRect->w * 0.05f));
+
+	const float FontSize = Label.h * CUI::ms_FontmodHeight * 0.8f;
 	DoLabel(&Label, aBuf, FontSize, TEXTALIGN_ML);
 
 	Value = pScale->ToAbsolute(DoScrollbarH(pID, &ScrollBar, pScale->ToRelative(Value, Min, Max)), Min, Max);
-	if(Infinite)
+	if(NoClampValue && ((Value == Min && *pOption < Min) || (Value == Max && *pOption > Max)))
+	{
+		Value = *pOption; // use previous out of range value instead if the scrollbar is at the edge
+	}
+	else if(Infinite)
 	{
 		if(Value == Max)
 			Value = 0;
-	}
-	else if(NoClampValue)
-	{
-		if((Value == Min && *pOption < Min) || (Value == Max && *pOption > Max))
-			Value = *pOption; // use previous out of range value instead if the scrollbar is at the edge
 	}
 
 	*pOption = Value;
 }
 
-void CUI::DoScrollbarOptionLabeled(const void *pID, int *pOption, const CUIRect *pRect, const char *pStr, const char **ppLabels, int NumLabels, const IScrollbarScale *pScale)
-{
-	const int Max = NumLabels - 1;
-	int Value = clamp(*pOption, 0, Max);
-
-	char aBuf[256];
-	str_format(aBuf, sizeof(aBuf), "%s: %s", pStr, ppLabels[Value]);
-
-	float FontSize = pRect->h * CUI::ms_FontmodHeight * 0.8f;
-
-	CUIRect Label, ScrollBar;
-	pRect->VSplitRight(60.0f, &Label, &ScrollBar);
-	Label.VSplitRight(10.0f, &Label, 0);
-	DoLabel(&Label, aBuf, FontSize, TEXTALIGN_MC);
-
-	Value = pScale->ToAbsolute(DoScrollbarH(pID, &ScrollBar, pScale->ToRelative(Value, 0, Max)), 0, Max);
-
-	if(HotItem() != pID && !CheckActiveItem(pID) && MouseHovered(pRect) && MouseButtonClicked(0))
-		Value = (Value + 1) % NumLabels;
-
-	*pOption = clamp(Value, 0, Max);
-}
-
-void CUI::DoPopupMenu(const SPopupMenuId *pID, int X, int Y, int Width, int Height, void *pContext, FPopupMenuFunction pfnFunc, int Corners)
+void CUI::DoPopupMenu(const SPopupMenuId *pID, int X, int Y, int Width, int Height, void *pContext, FPopupMenuFunction pfnFunc, const SPopupMenuProperties &Props)
 {
 	constexpr float Margin = SPopupMenu::POPUP_BORDER + SPopupMenu::POPUP_MARGIN;
 	if(X + Width > Screen()->w - Margin)
@@ -1162,11 +1278,11 @@ void CUI::DoPopupMenu(const SPopupMenuId *pID, int X, int Y, int Width, int Heig
 	m_vPopupMenus.emplace_back();
 	SPopupMenu *pNewMenu = &m_vPopupMenus.back();
 	pNewMenu->m_pID = pID;
+	pNewMenu->m_Props = Props;
 	pNewMenu->m_Rect.x = X;
 	pNewMenu->m_Rect.y = Y;
 	pNewMenu->m_Rect.w = Width;
 	pNewMenu->m_Rect.h = Height;
-	pNewMenu->m_Corners = Corners;
 	pNewMenu->m_pContext = pContext;
 	pNewMenu->m_pfnFunc = pfnFunc;
 }
@@ -1200,9 +1316,9 @@ void CUI::RenderPopupMenus()
 		}
 
 		CUIRect PopupRect = PopupMenu.m_Rect;
-		PopupRect.Draw(ColorRGBA(0.5f, 0.5f, 0.5f, 0.75f), PopupMenu.m_Corners, 3.0f);
+		PopupRect.Draw(PopupMenu.m_Props.m_BorderColor, PopupMenu.m_Props.m_Corners, 3.0f);
 		PopupRect.Margin(SPopupMenu::POPUP_BORDER, &PopupRect);
-		PopupRect.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.75f), PopupMenu.m_Corners, 3.0f);
+		PopupRect.Draw(PopupMenu.m_Props.m_BackgroundColor, PopupMenu.m_Props.m_Corners, 3.0f);
 		PopupRect.Margin(SPopupMenu::POPUP_MARGIN, &PopupRect);
 
 		EPopupMenuFunctionResult Result = PopupMenu.m_pfnFunc(PopupMenu.m_pContext, PopupRect, Active);
@@ -1331,14 +1447,14 @@ CUI::EPopupMenuFunctionResult CUI::PopupConfirm(void *pContext, CUIRect View, bo
 	pUI->TextRender()->Text(Label.x, Label.y, SConfirmPopupContext::POPUP_FONT_SIZE, pConfirmPopup->m_aMessage, Label.w);
 
 	static CButtonContainer s_CancelButton;
-	if(pUI->DoButton_PopupMenu(&s_CancelButton, pConfirmPopup->m_aNegativeButtonLabel, &CancelButton, TEXTALIGN_MC))
+	if(pUI->DoButton_PopupMenu(&s_CancelButton, pConfirmPopup->m_aNegativeButtonLabel, &CancelButton, SConfirmPopupContext::POPUP_FONT_SIZE, TEXTALIGN_MC))
 	{
 		pConfirmPopup->m_Result = SConfirmPopupContext::CANCELED;
 		return CUI::POPUP_CLOSE_CURRENT;
 	}
 
 	static CButtonContainer s_ConfirmButton;
-	if(pUI->DoButton_PopupMenu(&s_ConfirmButton, pConfirmPopup->m_aPositiveButtonLabel, &ConfirmButton, TEXTALIGN_MC) || (Active && pUI->ConsumeHotkey(HOTKEY_ENTER)))
+	if(pUI->DoButton_PopupMenu(&s_ConfirmButton, pConfirmPopup->m_aPositiveButtonLabel, &ConfirmButton, SConfirmPopupContext::POPUP_FONT_SIZE, TEXTALIGN_MC) || (Active && pUI->ConsumeHotkey(HOTKEY_ENTER)))
 	{
 		pConfirmPopup->m_Result = SConfirmPopupContext::CONFIRMED;
 		return CUI::POPUP_CLOSE_CURRENT;
@@ -1354,41 +1470,326 @@ CUI::SSelectionPopupContext::SSelectionPopupContext()
 
 void CUI::SSelectionPopupContext::Reset()
 {
+	m_Props = SPopupMenuProperties();
+	m_aMessage[0] = '\0';
 	m_pSelection = nullptr;
-	m_Entries.clear();
+	m_SelectionIndex = -1;
+	m_vEntries.clear();
+	m_vButtonContainers.clear();
+	m_EntryHeight = 12.0f;
+	m_EntryPadding = 0.0f;
+	m_EntrySpacing = 5.0f;
+	m_FontSize = 10.0f;
+	m_Width = 300.0f + (SPopupMenu::POPUP_BORDER + SPopupMenu::POPUP_MARGIN) * 2;
+	m_AlignmentHeight = -1.0f;
+	m_TransparentButtons = false;
 }
 
 CUI::EPopupMenuFunctionResult CUI::PopupSelection(void *pContext, CUIRect View, bool Active)
 {
 	SSelectionPopupContext *pSelectionPopup = static_cast<SSelectionPopupContext *>(pContext);
 	CUI *pUI = pSelectionPopup->m_pUI;
+	CScrollRegion *pScrollRegion = pSelectionPopup->m_pScrollRegion;
+
+	vec2 ScrollOffset(0.0f, 0.0f);
+	CScrollRegionParams ScrollParams;
+	ScrollParams.m_ScrollbarWidth = 10.0f;
+	ScrollParams.m_ScrollbarMargin = SPopupMenu::POPUP_MARGIN;
+	ScrollParams.m_ScrollbarNoMarginRight = true;
+	ScrollParams.m_ScrollUnit = 3 * (pSelectionPopup->m_EntryHeight + pSelectionPopup->m_EntrySpacing);
+	pScrollRegion->Begin(&View, &ScrollOffset, &ScrollParams);
+	View.y += ScrollOffset.y;
 
 	CUIRect Slot;
-	const STextBoundingBox TextBoundingBox = pUI->TextRender()->TextBoundingBox(SSelectionPopupContext::POPUP_FONT_SIZE, pSelectionPopup->m_aMessage, -1, SSelectionPopupContext::POPUP_MAX_WIDTH);
-	View.HSplitTop(TextBoundingBox.m_H, &Slot, &View);
+	if(pSelectionPopup->m_aMessage[0] != '\0')
+	{
+		const STextBoundingBox TextBoundingBox = pUI->TextRender()->TextBoundingBox(pSelectionPopup->m_FontSize, pSelectionPopup->m_aMessage, -1, pSelectionPopup->m_Width);
+		View.HSplitTop(TextBoundingBox.m_H, &Slot, &View);
+		if(pScrollRegion->AddRect(Slot))
+		{
+			pUI->TextRender()->Text(Slot.x, Slot.y, pSelectionPopup->m_FontSize, pSelectionPopup->m_aMessage, Slot.w);
+		}
+	}
 
-	pUI->TextRender()->Text(Slot.x, Slot.y, SSelectionPopupContext::POPUP_FONT_SIZE, pSelectionPopup->m_aMessage, Slot.w);
-
-	pSelectionPopup->m_vButtonContainers.resize(pSelectionPopup->m_Entries.size());
+	pSelectionPopup->m_vButtonContainers.resize(pSelectionPopup->m_vEntries.size());
 
 	size_t Index = 0;
-	for(const auto &Entry : pSelectionPopup->m_Entries)
+	for(const auto &Entry : pSelectionPopup->m_vEntries)
 	{
-		View.HSplitTop(SSelectionPopupContext::POPUP_ENTRY_SPACING, nullptr, &View);
-		View.HSplitTop(SSelectionPopupContext::POPUP_ENTRY_HEIGHT, &Slot, &View);
-		if(pUI->DoButton_PopupMenu(&pSelectionPopup->m_vButtonContainers[Index], Entry.c_str(), &Slot, TEXTALIGN_ML))
-			pSelectionPopup->m_pSelection = &Entry;
+		if(pSelectionPopup->m_aMessage[0] != '\0' || Index != 0)
+			View.HSplitTop(pSelectionPopup->m_EntrySpacing, nullptr, &View);
+		View.HSplitTop(pSelectionPopup->m_EntryHeight, &Slot, &View);
+		if(pScrollRegion->AddRect(Slot))
+		{
+			if(pUI->DoButton_PopupMenu(&pSelectionPopup->m_vButtonContainers[Index], Entry.c_str(), &Slot, pSelectionPopup->m_FontSize, TEXTALIGN_ML, pSelectionPopup->m_EntryPadding, pSelectionPopup->m_TransparentButtons))
+			{
+				pSelectionPopup->m_pSelection = &Entry;
+				pSelectionPopup->m_SelectionIndex = Index;
+			}
+		}
 		++Index;
 	}
+
+	pScrollRegion->End();
 
 	return pSelectionPopup->m_pSelection == nullptr ? CUI::POPUP_KEEP_OPEN : CUI::POPUP_CLOSE_CURRENT;
 }
 
 void CUI::ShowPopupSelection(float X, float Y, SSelectionPopupContext *pContext)
 {
-	const STextBoundingBox TextBoundingBox = TextRender()->TextBoundingBox(SSelectionPopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, -1, SSelectionPopupContext::POPUP_MAX_WIDTH);
-	const float PopupHeight = TextBoundingBox.m_H + pContext->m_Entries.size() * (SSelectionPopupContext::POPUP_ENTRY_HEIGHT + SSelectionPopupContext::POPUP_ENTRY_SPACING) + 10.0f;
+	const STextBoundingBox TextBoundingBox = TextRender()->TextBoundingBox(pContext->m_FontSize, pContext->m_aMessage, -1, pContext->m_Width);
+	const float PopupHeight = minimum((pContext->m_aMessage[0] == '\0' ? -pContext->m_EntrySpacing : TextBoundingBox.m_H) + pContext->m_vEntries.size() * (pContext->m_EntryHeight + pContext->m_EntrySpacing) + (SPopupMenu::POPUP_BORDER + SPopupMenu::POPUP_MARGIN) * 2 + CScrollRegion::HEIGHT_MAGIC_FIX, Screen()->h * 0.4f);
 	pContext->m_pUI = this;
 	pContext->m_pSelection = nullptr;
-	DoPopupMenu(pContext, X, Y, SSelectionPopupContext::POPUP_MAX_WIDTH + 10.0f, PopupHeight, pContext, PopupSelection);
+	pContext->m_SelectionIndex = -1;
+	pContext->m_Props.m_Corners = IGraphics::CORNER_ALL;
+	if(pContext->m_AlignmentHeight >= 0.0f)
+	{
+		constexpr float Margin = SPopupMenu::POPUP_BORDER + SPopupMenu::POPUP_MARGIN;
+		if(X + pContext->m_Width > Screen()->w - Margin)
+		{
+			X = maximum<float>(X - pContext->m_Width, Margin);
+		}
+		if(Y + pContext->m_AlignmentHeight + PopupHeight > Screen()->h - Margin)
+		{
+			Y -= PopupHeight;
+			pContext->m_Props.m_Corners = IGraphics::CORNER_T;
+		}
+		else
+		{
+			Y += pContext->m_AlignmentHeight;
+			pContext->m_Props.m_Corners = IGraphics::CORNER_B;
+		}
+	}
+	DoPopupMenu(pContext, X, Y, pContext->m_Width, PopupHeight, pContext, PopupSelection, pContext->m_Props);
+}
+
+int CUI::DoDropDown(CUIRect *pRect, int CurSelection, const char **pStrs, int Num, SDropDownState &State)
+{
+	if(!State.m_Init)
+	{
+		State.m_UiElement.Init(this, -1);
+		State.m_Init = true;
+	}
+
+	const auto LabelFunc = [CurSelection, pStrs]() {
+		return CurSelection > -1 ? pStrs[CurSelection] : "";
+	};
+
+	SMenuButtonProperties Props;
+	Props.m_HintRequiresStringCheck = true;
+	Props.m_HintCanChangePositionOrSize = true;
+	if(IsPopupOpen(&State.m_SelectionPopupContext))
+		Props.m_Corners = IGraphics::CORNER_ALL & (~State.m_SelectionPopupContext.m_Props.m_Corners);
+	if(DoButton_Menu(State.m_UiElement, &State.m_ButtonContainer, LabelFunc, pRect, Props))
+	{
+		State.m_SelectionPopupContext.Reset();
+		State.m_SelectionPopupContext.m_Props.m_BorderColor = ColorRGBA(0.7f, 0.7f, 0.7f, 0.9f);
+		State.m_SelectionPopupContext.m_Props.m_BackgroundColor = ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f);
+		for(int i = 0; i < Num; ++i)
+			State.m_SelectionPopupContext.m_vEntries.emplace_back(pStrs[i]);
+		State.m_SelectionPopupContext.m_EntryHeight = pRect->h;
+		State.m_SelectionPopupContext.m_EntryPadding = pRect->h >= 20.0f ? 2.0f : 1.0f;
+		State.m_SelectionPopupContext.m_FontSize = (State.m_SelectionPopupContext.m_EntryHeight - 2 * State.m_SelectionPopupContext.m_EntryPadding) * CUI::ms_FontmodHeight;
+		State.m_SelectionPopupContext.m_Width = pRect->w;
+		State.m_SelectionPopupContext.m_AlignmentHeight = pRect->h;
+		State.m_SelectionPopupContext.m_TransparentButtons = true;
+		ShowPopupSelection(pRect->x, pRect->y, &State.m_SelectionPopupContext);
+	}
+
+	CUIRect DropDownIcon;
+	pRect->HMargin(2.0f, &DropDownIcon);
+	DropDownIcon.VSplitRight(5.0f, &DropDownIcon, nullptr);
+	TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
+	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
+	DoLabel(&DropDownIcon, FONT_ICON_CIRCLE_CHEVRON_DOWN, DropDownIcon.h * CUI::ms_FontmodHeight, TEXTALIGN_MR);
+	TextRender()->SetRenderFlags(0);
+	TextRender()->SetCurFont(nullptr);
+
+	if(State.m_SelectionPopupContext.m_SelectionIndex >= 0)
+	{
+		const int NewSelection = State.m_SelectionPopupContext.m_SelectionIndex;
+		State.m_SelectionPopupContext.Reset();
+		return NewSelection;
+	}
+
+	return CurSelection;
+}
+
+CUI::EPopupMenuFunctionResult CUI::PopupColorPicker(void *pContext, CUIRect View, bool Active)
+{
+	SColorPickerPopupContext *pColorPicker = static_cast<SColorPickerPopupContext *>(pContext);
+	CUI *pUI = pColorPicker->m_pUI;
+
+	CUIRect ColorsArea = View, HueArea, BottomArea, HueRect, SatRect, ValueRect, HexRect, AlphaRect;
+
+	ColorsArea.HSplitBottom(View.h - 140.0f, &ColorsArea, &BottomArea);
+	ColorsArea.VSplitRight(20.0f, &ColorsArea, &HueArea);
+
+	BottomArea.HSplitTop(3.0f, nullptr, &BottomArea);
+	HueArea.VSplitLeft(3.0f, nullptr, &HueArea);
+
+	BottomArea.HSplitTop(20.0f, &HueRect, &BottomArea);
+	BottomArea.HSplitTop(3.0f, nullptr, &BottomArea);
+
+	constexpr float ValuePadding = 5.0f;
+	const float HsvValueWidth = (HueRect.w - ValuePadding * 2) / 3.0f;
+	const float HexValueWidth = HsvValueWidth * 2 + ValuePadding;
+
+	HueRect.VSplitLeft(HsvValueWidth, &HueRect, &SatRect);
+	SatRect.VSplitLeft(ValuePadding, nullptr, &SatRect);
+	SatRect.VSplitLeft(HsvValueWidth, &SatRect, &ValueRect);
+	ValueRect.VSplitLeft(ValuePadding, nullptr, &ValueRect);
+
+	BottomArea.HSplitTop(20.0f, &HexRect, &BottomArea);
+	HexRect.VSplitLeft(HexValueWidth, &HexRect, &AlphaRect);
+	AlphaRect.VSplitLeft(ValuePadding, nullptr, &AlphaRect);
+
+	const ColorRGBA BlackColor = ColorRGBA(0.0f, 0.0f, 0.0f, 0.5f);
+
+	HueArea.Draw(BlackColor, IGraphics::CORNER_NONE, 0.0f);
+	HueArea.Margin(1.0f, &HueArea);
+
+	ColorsArea.Draw(BlackColor, IGraphics::CORNER_NONE, 0.0f);
+	ColorsArea.Margin(1.0f, &ColorsArea);
+
+	ColorHSVA PickerColorHSV = pColorPicker->m_HsvaColor;
+	unsigned H = (unsigned)(PickerColorHSV.x * 255.0f);
+	unsigned S = (unsigned)(PickerColorHSV.y * 255.0f);
+	unsigned V = (unsigned)(PickerColorHSV.z * 255.0f);
+	unsigned A = (unsigned)(PickerColorHSV.a * 255.0f);
+
+	// Color Area
+	ColorRGBA TL, TR, BL, BR;
+	TL = BL = color_cast<ColorRGBA>(ColorHSVA(PickerColorHSV.x, 0.0f, 1.0f));
+	TR = BR = color_cast<ColorRGBA>(ColorHSVA(PickerColorHSV.x, 1.0f, 1.0f));
+	ColorsArea.Draw4(TL, TR, BL, BR, IGraphics::CORNER_NONE, 0.0f);
+
+	TL = TR = ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f);
+	BL = BR = ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f);
+	ColorsArea.Draw4(TL, TR, BL, BR, IGraphics::CORNER_NONE, 0.0f);
+
+	// Hue Area
+	static const float s_aaColorIndices[7][3] = {
+		{1.0f, 0.0f, 0.0f}, // red
+		{1.0f, 0.0f, 1.0f}, // magenta
+		{0.0f, 0.0f, 1.0f}, // blue
+		{0.0f, 1.0f, 1.0f}, // cyan
+		{0.0f, 1.0f, 0.0f}, // green
+		{1.0f, 1.0f, 0.0f}, // yellow
+		{1.0f, 0.0f, 0.0f}, // red
+	};
+
+	const float HuePickerOffset = HueArea.h / 6.0f;
+	CUIRect HuePartialArea = HueArea;
+	HuePartialArea.h = HuePickerOffset;
+
+	for(size_t j = 0; j < std::size(s_aaColorIndices) - 1; j++)
+	{
+		TL = ColorRGBA(s_aaColorIndices[j][0], s_aaColorIndices[j][1], s_aaColorIndices[j][2], 1.0f);
+		BL = ColorRGBA(s_aaColorIndices[j + 1][0], s_aaColorIndices[j + 1][1], s_aaColorIndices[j + 1][2], 1.0f);
+
+		HuePartialArea.y = HueArea.y + HuePickerOffset * j;
+		HuePartialArea.Draw4(TL, TL, BL, BL, IGraphics::CORNER_NONE, 0.0f);
+	}
+
+	// Editboxes Area
+	H = pUI->DoValueSelector(&pColorPicker->m_aValueSelectorIds[0], &HueRect, "H:", H, 0, 255);
+	S = pUI->DoValueSelector(&pColorPicker->m_aValueSelectorIds[1], &SatRect, "S:", S, 0, 255);
+	V = pUI->DoValueSelector(&pColorPicker->m_aValueSelectorIds[2], &ValueRect, "V:", V, 0, 255);
+	if(pColorPicker->m_Alpha)
+	{
+		A = pUI->DoValueSelector(&pColorPicker->m_aValueSelectorIds[3], &AlphaRect, "A:", A, 0, 255);
+	}
+	else
+	{
+		char aBuf[8];
+		str_format(aBuf, sizeof(aBuf), "A: %d", A);
+		pUI->DoLabel(&AlphaRect, aBuf, 10.0f, TEXTALIGN_MC);
+		AlphaRect.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.65f), IGraphics::CORNER_ALL, 3.0f);
+	}
+
+	PickerColorHSV = ColorHSVA(H / 255.0f, S / 255.0f, V / 255.0f, A / 255.0f);
+
+	const auto RotateByteLeft = [pColorPicker](unsigned Num) {
+		if(pColorPicker->m_Alpha)
+		{
+			// ARGB -> RGBA (internal -> displayed)
+			return ((Num & 0xFF000000u) >> 24) | (Num << 8);
+		}
+		return Num;
+	};
+	const auto RotateByteRight = [pColorPicker](unsigned Num) {
+		if(pColorPicker->m_Alpha)
+		{
+			// RGBA -> ARGB (displayed -> internal)
+			return ((Num & 0xFFu) << 24) | (Num >> 8);
+		}
+		return Num;
+	};
+
+	SValueSelectorProperties Props;
+	Props.m_UseScroll = false;
+	Props.m_IsHex = true;
+	Props.m_HexPrefix = pColorPicker->m_Alpha ? 8 : 6;
+	const unsigned Hex = RotateByteLeft(color_cast<ColorRGBA>(PickerColorHSV).Pack(pColorPicker->m_Alpha));
+	const unsigned NewHex = pUI->DoValueSelector(&pColorPicker->m_aValueSelectorIds[4], &HexRect, "Hex:", Hex, 0, pColorPicker->m_Alpha ? 0xFFFFFFFFll : 0xFFFFFFll, Props);
+	if(Hex != NewHex)
+	{
+		PickerColorHSV = color_cast<ColorHSVA>(ColorRGBA(RotateByteRight(NewHex), pColorPicker->m_Alpha));
+		if(!pColorPicker->m_Alpha)
+			PickerColorHSV.a = A / 255.0f;
+	}
+
+	// Logic
+	float PickerX, PickerY;
+	if(pUI->DoPickerLogic(&pColorPicker->m_ColorPickerId, &ColorsArea, &PickerX, &PickerY))
+	{
+		PickerColorHSV.y = PickerX / ColorsArea.w;
+		PickerColorHSV.z = 1.0f - PickerY / ColorsArea.h;
+	}
+
+	if(pUI->DoPickerLogic(&pColorPicker->m_HuePickerId, &HueArea, &PickerX, &PickerY))
+		PickerColorHSV.x = 1.0f - PickerY / HueArea.h;
+
+	// Marker Color Area
+	const float MarkerX = ColorsArea.x + ColorsArea.w * PickerColorHSV.y;
+	const float MarkerY = ColorsArea.y + ColorsArea.h * (1.0f - PickerColorHSV.z);
+
+	const float MarkerOutlineInd = PickerColorHSV.z > 0.5f ? 0.0f : 1.0f;
+	const ColorRGBA MarkerOutline = ColorRGBA(MarkerOutlineInd, MarkerOutlineInd, MarkerOutlineInd, 1.0f);
+
+	pUI->Graphics()->TextureClear();
+	pUI->Graphics()->QuadsBegin();
+	pUI->Graphics()->SetColor(MarkerOutline);
+	pUI->Graphics()->DrawCircle(MarkerX, MarkerY, 4.5f, 32);
+	pUI->Graphics()->SetColor(color_cast<ColorRGBA>(PickerColorHSV));
+	pUI->Graphics()->DrawCircle(MarkerX, MarkerY, 3.5f, 32);
+	pUI->Graphics()->QuadsEnd();
+
+	// Marker Hue Area
+	CUIRect HueMarker;
+	HueArea.Margin(-2.5f, &HueMarker);
+	HueMarker.h = 6.5f;
+	HueMarker.y = (HueArea.y + HueArea.h * (1.0f - PickerColorHSV.x)) - HueMarker.h / 2.0f;
+
+	const ColorRGBA HueMarkerColor = color_cast<ColorRGBA>(ColorHSVA(PickerColorHSV.x, 1.0f, 1.0f, 1.0f));
+	const float HueMarkerOutlineColor = PickerColorHSV.x > 0.75f ? 1.0f : 0.0f;
+	const ColorRGBA HueMarkerOutline = ColorRGBA(HueMarkerOutlineColor, HueMarkerOutlineColor, HueMarkerOutlineColor, 1.0f);
+
+	HueMarker.Draw(HueMarkerOutline, IGraphics::CORNER_ALL, 1.2f);
+	HueMarker.Margin(1.2f, &HueMarker);
+	HueMarker.Draw(HueMarkerColor, IGraphics::CORNER_ALL, 1.2f);
+
+	pColorPicker->m_HsvaColor = PickerColorHSV;
+	if(pColorPicker->m_pHslaColor != nullptr)
+		*pColorPicker->m_pHslaColor = color_cast<ColorHSLA>(PickerColorHSV).Pack(pColorPicker->m_Alpha);
+
+	return CUI::POPUP_KEEP_OPEN;
+}
+
+void CUI::ShowPopupColorPicker(float X, float Y, SColorPickerPopupContext *pContext)
+{
+	pContext->m_pUI = this;
+	DoPopupMenu(pContext, X, Y, 160.0f + 10.0f, 186.0f + 10.0f, pContext, PopupColorPicker);
 }

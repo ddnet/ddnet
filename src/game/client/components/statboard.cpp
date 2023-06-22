@@ -276,7 +276,7 @@ void CStatboard::RenderGlobalStats()
 		CTeeRenderInfo Teeinfo = m_pClient->m_aClients[pInfo->m_ClientID].m_RenderInfo;
 		Teeinfo.m_Size *= TeeSizemod;
 
-		CAnimState *pIdleState = CAnimState::GetIdle();
+		const CAnimState *pIdleState = CAnimState::GetIdle();
 		vec2 OffsetToMid;
 		RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &Teeinfo, OffsetToMid);
 		vec2 TeeRenderPos(x + Teeinfo.m_Size / 2, y + LineHeight / 2.0f + OffsetToMid.y);
@@ -518,7 +518,7 @@ void CStatboard::FormatStats(char *pDest, size_t DestSize)
 			pStats->m_FlagGrabs, // Flag grabs
 			pStats->m_FlagCaptures); // Flag captures
 
-		str_append(aPlayerStats, aBuf, sizeof(aPlayerStats));
+		str_append(aPlayerStats, aBuf);
 	}
 
 	str_format(pDest, DestSize, "%s\n\n%s", aServerStats, aPlayerStats);

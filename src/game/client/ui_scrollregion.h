@@ -10,6 +10,7 @@ struct CScrollRegionParams
 	bool m_Active;
 	float m_ScrollbarWidth;
 	float m_ScrollbarMargin;
+	bool m_ScrollbarNoMarginRight;
 	float m_SliderMinHeight;
 	float m_ScrollUnit;
 	ColorRGBA m_ClipBgColor;
@@ -30,6 +31,7 @@ struct CScrollRegionParams
 		m_Active = true;
 		m_ScrollbarWidth = 20.0f;
 		m_ScrollbarMargin = 5.0f;
+		m_ScrollbarNoMarginRight = false;
 		m_SliderMinHeight = 25.0f;
 		m_ScrollUnit = 10.0f;
 		m_ClipBgColor = ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f);
@@ -89,6 +91,10 @@ Usage:
 class CScrollRegion : private CUIElementBase
 {
 public:
+	// TODO: Properly fix whatever is causing the 1-pixel discrepancy in scrolling rect height and remove this magic value.
+	// Currently this must be added when calculating the required height of a UI rect for a scroll region to get a perfect fit.
+	static constexpr float HEIGHT_MAGIC_FIX = 1.0f;
+
 	enum EScrollRelative
 	{
 		SCROLLRELATIVE_UP = -1,
@@ -134,6 +140,7 @@ public:
 	bool IsRectClipped(const CUIRect &Rect) const;
 	bool IsScrollbarShown() const;
 	bool IsAnimating() const;
+	const CScrollRegionParams &Params() const { return m_Params; }
 };
 
 #endif

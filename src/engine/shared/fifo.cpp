@@ -92,7 +92,7 @@ void CFifo::Init(IConsole *pConsole, char *pFifoFile, int Flag)
 	}
 
 	str_copy(m_aFilename, "\\\\.\\pipe\\");
-	str_append(m_aFilename, pFifoFile, sizeof(m_aFilename));
+	str_append(m_aFilename, pFifoFile);
 	m_Flag = Flag;
 
 	const std::wstring WideFilename = windows_utf8_to_wide(m_aFilename);

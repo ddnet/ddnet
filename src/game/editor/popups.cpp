@@ -90,7 +90,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupMenuFile(void *pContext, CUIRect Vie
 	{
 		if(pEditor->m_aFileName[0] && pEditor->m_ValidSaveFilename)
 		{
-			str_copy(pEditor->m_aFileSaveName, pEditor->m_aFileName, sizeof(pEditor->m_aFileSaveName));
+			str_copy(pEditor->m_aFileSaveName, pEditor->m_aFileName);
 			pEditor->m_PopupEventType = POPEVENT_SAVE;
 			pEditor->m_PopupEventActivated = true;
 		}
@@ -1327,19 +1327,24 @@ CUI::EPopupMenuFunctionResult CEditor::PopupImage(void *pContext, CUIRect View, 
 	}
 
 	static CUI::SSelectionPopupContext s_SelectionPopupContext;
+	static CScrollRegion s_SelectionPopupScrollRegion;
+	s_SelectionPopupContext.m_pScrollRegion = &s_SelectionPopupScrollRegion;
 	if(pEditor->DoButton_MenuItem(&s_ReaddButton, "Readd", 0, &Slot, 0, "Reloads the image from the mapres folder"))
 	{
 		char aFilename[IO_MAX_PATH_LENGTH];
 		str_format(aFilename, sizeof(aFilename), "%s.png", pImg->m_aName);
 		s_SelectionPopupContext.Reset();
-		pEditor->Storage()->FindFiles(aFilename, "mapres", IStorage::TYPE_ALL, &s_SelectionPopupContext.m_Entries);
-		if(s_SelectionPopupContext.m_Entries.empty())
+		std::set<std::string> EntriesSet;
+		pEditor->Storage()->FindFiles(aFilename, "mapres", IStorage::TYPE_ALL, &EntriesSet);
+		for(const auto &Entry : EntriesSet)
+			s_SelectionPopupContext.m_vEntries.push_back(Entry);
+		if(s_SelectionPopupContext.m_vEntries.empty())
 		{
 			pEditor->ShowFileDialogError("Error: could not find image '%s' in the mapres folder.", aFilename);
 		}
-		else if(s_SelectionPopupContext.m_Entries.size() == 1)
+		else if(s_SelectionPopupContext.m_vEntries.size() == 1)
 		{
-			s_SelectionPopupContext.m_pSelection = &*s_SelectionPopupContext.m_Entries.begin();
+			s_SelectionPopupContext.m_pSelection = &s_SelectionPopupContext.m_vEntries.front();
 		}
 		else
 		{
@@ -1391,19 +1396,24 @@ CUI::EPopupMenuFunctionResult CEditor::PopupSound(void *pContext, CUIRect View, 
 	CEditorSound *pSound = pEditor->m_Map.m_vpSounds[pEditor->m_SelectedSound];
 
 	static CUI::SSelectionPopupContext s_SelectionPopupContext;
+	static CScrollRegion s_SelectionPopupScrollRegion;
+	s_SelectionPopupContext.m_pScrollRegion = &s_SelectionPopupScrollRegion;
 	if(pEditor->DoButton_MenuItem(&s_ReaddButton, "Readd", 0, &Slot, 0, "Reloads the sound from the mapres folder"))
 	{
 		char aFilename[IO_MAX_PATH_LENGTH];
 		str_format(aFilename, sizeof(aFilename), "%s.opus", pSound->m_aName);
 		s_SelectionPopupContext.Reset();
-		pEditor->Storage()->FindFiles(aFilename, "mapres", IStorage::TYPE_ALL, &s_SelectionPopupContext.m_Entries);
-		if(s_SelectionPopupContext.m_Entries.empty())
+		std::set<std::string> EntriesSet;
+		pEditor->Storage()->FindFiles(aFilename, "mapres", IStorage::TYPE_ALL, &EntriesSet);
+		for(const auto &Entry : EntriesSet)
+			s_SelectionPopupContext.m_vEntries.push_back(Entry);
+		if(s_SelectionPopupContext.m_vEntries.empty())
 		{
 			pEditor->ShowFileDialogError("Error: could not find sound '%s' in the mapres folder.", aFilename);
 		}
-		else if(s_SelectionPopupContext.m_Entries.size() == 1)
+		else if(s_SelectionPopupContext.m_vEntries.size() == 1)
 		{
-			s_SelectionPopupContext.m_pSelection = &*s_SelectionPopupContext.m_Entries.begin();
+			s_SelectionPopupContext.m_pSelection = &s_SelectionPopupContext.m_vEntries.front();
 		}
 		else
 		{
@@ -2179,109 +2189,6 @@ CUI::EPopupMenuFunctionResult CEditor::PopupGoto(void *pContext, CUIRect View, b
 	{
 		pEditor->Goto(s_GotoPos.x + 0.5f, s_GotoPos.y + 0.5f);
 	}
-
-	return CUI::POPUP_KEEP_OPEN;
-}
-
-CUI::EPopupMenuFunctionResult CEditor::PopupColorPicker(void *pContext, CUIRect View, bool Active)
-{
-	CEditor *pEditor = static_cast<CEditor *>(pContext);
-
-	CUIRect SVPicker, HuePicker;
-	View.VSplitRight(20.0f, &SVPicker, &HuePicker);
-	HuePicker.VSplitLeft(4.0f, nullptr, &HuePicker);
-
-	pEditor->Graphics()->TextureClear();
-	pEditor->Graphics()->QuadsBegin();
-
-	// base: white - hue
-	ColorHSVA Hsv = CEditor::ms_PickerColor;
-	IGraphics::CColorVertex aColors[4];
-
-	ColorRGBA Color = color_cast<ColorRGBA>(ColorHSVA(Hsv.x, 0.0f, 1.0f));
-	aColors[0] = IGraphics::CColorVertex(0, Color.r, Color.g, Color.b, 1.0f);
-	Color = color_cast<ColorRGBA>(ColorHSVA(Hsv.x, 1.0f, 1.0f));
-	aColors[1] = IGraphics::CColorVertex(1, Color.r, Color.g, Color.b, 1.0f);
-	Color = color_cast<ColorRGBA>(ColorHSVA(Hsv.x, 1.0f, 1.0f));
-	aColors[2] = IGraphics::CColorVertex(2, Color.r, Color.g, Color.b, 1.0f);
-	Color = color_cast<ColorRGBA>(ColorHSVA(Hsv.x, 0.0f, 1.0f));
-	aColors[3] = IGraphics::CColorVertex(3, Color.r, Color.g, Color.b, 1.0f);
-
-	pEditor->Graphics()->SetColorVertex(aColors, 4);
-
-	IGraphics::CQuadItem QuadItem(SVPicker.x, SVPicker.y, SVPicker.w, SVPicker.h);
-	pEditor->Graphics()->QuadsDrawTL(&QuadItem, 1);
-
-	// base: transparent - black
-	aColors[0] = IGraphics::CColorVertex(0, 0.0f, 0.0f, 0.0f, 0.0f);
-	aColors[1] = IGraphics::CColorVertex(1, 0.0f, 0.0f, 0.0f, 0.0f);
-	aColors[2] = IGraphics::CColorVertex(2, 0.0f, 0.0f, 0.0f, 1.0f);
-	aColors[3] = IGraphics::CColorVertex(3, 0.0f, 0.0f, 0.0f, 1.0f);
-
-	pEditor->Graphics()->SetColorVertex(aColors, 4);
-
-	pEditor->Graphics()->QuadsDrawTL(&QuadItem, 1);
-
-	pEditor->Graphics()->QuadsEnd();
-
-	// marker
-	const vec2 Marker = vec2(Hsv.y, (1.0f - Hsv.z)) * vec2(SVPicker.w, SVPicker.h);
-	pEditor->Graphics()->QuadsBegin();
-	pEditor->Graphics()->SetColor(0.5f, 0.5f, 0.5f, 1.0f);
-	IGraphics::CQuadItem aMarker[2];
-	aMarker[0] = IGraphics::CQuadItem(SVPicker.x + Marker.x, SVPicker.y + Marker.y - 5.0f * pEditor->UI()->PixelSize(), pEditor->UI()->PixelSize(), 11.0f * pEditor->UI()->PixelSize());
-	aMarker[1] = IGraphics::CQuadItem(SVPicker.x + Marker.x - 5.0f * pEditor->UI()->PixelSize(), SVPicker.y + Marker.y, 11.0f * pEditor->UI()->PixelSize(), pEditor->UI()->PixelSize());
-	pEditor->Graphics()->QuadsDrawTL(aMarker, 2);
-	pEditor->Graphics()->QuadsEnd();
-
-	// logic
-	float X, Y;
-	if(pEditor->UI()->DoPickerLogic(&CEditor::ms_SVPicker, &SVPicker, &X, &Y))
-	{
-		Hsv.y = X / SVPicker.w;
-		Hsv.z = 1.0f - Y / SVPicker.h;
-	}
-
-	// hue slider
-	static const float s_aaColorIndices[7][3] = {
-		{1.0f, 0.0f, 0.0f}, // red
-		{1.0f, 0.0f, 1.0f}, // magenta
-		{0.0f, 0.0f, 1.0f}, // blue
-		{0.0f, 1.0f, 1.0f}, // cyan
-		{0.0f, 1.0f, 0.0f}, // green
-		{1.0f, 1.0f, 0.0f}, // yellow
-		{1.0f, 0.0f, 0.0f}, // red
-	};
-
-	pEditor->Graphics()->QuadsBegin();
-	const float Offset = HuePicker.h / 6.0f;
-	for(size_t j = 0; j < std::size(s_aaColorIndices) - 1; ++j)
-	{
-		const ColorRGBA ColorTop = ColorRGBA(s_aaColorIndices[j][0], s_aaColorIndices[j][1], s_aaColorIndices[j][2], 1.0f);
-		const ColorRGBA ColorBottom = ColorRGBA(s_aaColorIndices[j + 1][0], s_aaColorIndices[j + 1][1], s_aaColorIndices[j + 1][2], 1.0f);
-
-		aColors[0] = IGraphics::CColorVertex(0, ColorTop.r, ColorTop.g, ColorTop.b, ColorTop.a);
-		aColors[1] = IGraphics::CColorVertex(1, ColorTop.r, ColorTop.g, ColorTop.b, ColorTop.a);
-		aColors[2] = IGraphics::CColorVertex(2, ColorBottom.r, ColorBottom.g, ColorBottom.b, ColorBottom.a);
-		aColors[3] = IGraphics::CColorVertex(3, ColorBottom.r, ColorBottom.g, ColorBottom.b, ColorBottom.a);
-		pEditor->Graphics()->SetColorVertex(aColors, 4);
-		QuadItem = IGraphics::CQuadItem(HuePicker.x, HuePicker.y + Offset * j, HuePicker.w, Offset);
-		pEditor->Graphics()->QuadsDrawTL(&QuadItem, 1);
-	}
-
-	// marker
-	pEditor->Graphics()->SetColor(0.5f, 0.5f, 0.5f, 1.0f);
-	IGraphics::CQuadItem QuadItemMarker(HuePicker.x, HuePicker.y + (1.0f - Hsv.x) * HuePicker.h, HuePicker.w, pEditor->UI()->PixelSize());
-	pEditor->Graphics()->QuadsDrawTL(&QuadItemMarker, 1);
-
-	pEditor->Graphics()->QuadsEnd();
-
-	if(pEditor->UI()->DoPickerLogic(&CEditor::ms_HuePicker, &HuePicker, &X, &Y))
-	{
-		Hsv.x = 1.0f - Y / HuePicker.h;
-	}
-
-	CEditor::ms_PickerColor = Hsv;
 
 	return CUI::POPUP_KEEP_OPEN;
 }

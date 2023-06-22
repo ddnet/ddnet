@@ -299,17 +299,17 @@ bool CChat::OnInput(const IInput::CEvent &Event)
 				str_truncate(aBuf, sizeof(aBuf), m_Input.GetString(), m_PlaceholderOffset);
 
 				// add the command
-				str_append(aBuf, "/", sizeof(aBuf));
-				str_append(aBuf, pCompletionCommand->m_pName, sizeof(aBuf));
+				str_append(aBuf, "/");
+				str_append(aBuf, pCompletionCommand->m_pName);
 
 				// add separator
 				const char *pSeparator = pCompletionCommand->m_pParams[0] == '\0' ? "" : " ";
-				str_append(aBuf, pSeparator, sizeof(aBuf));
+				str_append(aBuf, pSeparator);
 				if(*pSeparator)
-					str_append(aBuf, pSeparator, sizeof(aBuf));
+					str_append(aBuf, pSeparator);
 
 				// add part after the name
-				str_append(aBuf, m_Input.GetString() + m_PlaceholderOffset + m_PlaceholderLength, sizeof(aBuf));
+				str_append(aBuf, m_Input.GetString() + m_PlaceholderOffset + m_PlaceholderLength);
 
 				m_PlaceholderLength = str_length(pSeparator) + str_length(pCompletionCommand->m_pName) + 1;
 				m_Input.Set(aBuf);
@@ -360,7 +360,7 @@ bool CChat::OnInput(const IInput::CEvent &Event)
 				str_truncate(aBuf, sizeof(aBuf), m_Input.GetString(), m_PlaceholderOffset);
 
 				// add the name
-				str_append(aBuf, pCompletionString, sizeof(aBuf));
+				str_append(aBuf, pCompletionString);
 
 				// add separator
 				const char *pSeparator = "";
@@ -369,10 +369,10 @@ bool CChat::OnInput(const IInput::CEvent &Event)
 				else if(m_PlaceholderOffset == 0)
 					pSeparator = ":";
 				if(*pSeparator)
-					str_append(aBuf, pSeparator, sizeof(aBuf));
+					str_append(aBuf, pSeparator);
 
 				// add part after the name
-				str_append(aBuf, m_Input.GetString() + m_PlaceholderOffset + m_PlaceholderLength, sizeof(aBuf));
+				str_append(aBuf, m_Input.GetString() + m_PlaceholderOffset + m_PlaceholderLength);
 
 				m_PlaceholderLength = str_length(pSeparator) + str_length(pCompletionString);
 				m_Input.Set(aBuf);
@@ -883,7 +883,7 @@ void CChat::OnPrepareLines()
 				str_format(aName, sizeof(aName), "%d: ", m_aLines[r].m_ClientID);
 		}
 
-		str_append(aName, m_aLines[r].m_aName, sizeof(aName));
+		str_append(aName, m_aLines[r].m_aName);
 
 		char aCount[12];
 		if(m_aLines[r].m_ClientID < 0)
@@ -1179,7 +1179,7 @@ void CChat::OnRender()
 				float OffsetTeeY = MESSAGE_TEE_SIZE / 2.0f;
 				float FullHeightMinusTee = RowHeight - MESSAGE_TEE_SIZE;
 
-				CAnimState *pIdleState = CAnimState::GetIdle();
+				const CAnimState *pIdleState = CAnimState::GetIdle();
 				vec2 OffsetToMid;
 				RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &RenderInfo, OffsetToMid);
 				vec2 TeeRenderPos(x + (RealMsgPaddingX + MESSAGE_TEE_SIZE) / 2.0f, y + OffsetTeeY + FullHeightMinusTee / 2.0f + OffsetToMid.y);

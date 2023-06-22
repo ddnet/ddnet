@@ -320,7 +320,7 @@ void CKillMessages::OnRender()
 			{
 				CTeeRenderInfo TeeInfo = m_aKillmsgs[r].m_VictimRenderInfo[j];
 
-				CAnimState *pIdleState = CAnimState::GetIdle();
+				const CAnimState *pIdleState = CAnimState::GetIdle();
 				vec2 OffsetToMid;
 				RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &TeeInfo, OffsetToMid);
 				vec2 TeeRenderPos(x, y + 46.0f / 2.0f + OffsetToMid.y);
@@ -366,7 +366,7 @@ void CKillMessages::OnRender()
 			{
 				CTeeRenderInfo TeeInfo = m_aKillmsgs[r].m_KillerRenderInfo;
 
-				CAnimState *pIdleState = CAnimState::GetIdle();
+				const CAnimState *pIdleState = CAnimState::GetIdle();
 				vec2 OffsetToMid;
 				RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &TeeInfo, OffsetToMid);
 				vec2 TeeRenderPos(x, y + 46.0f / 2.0f + OffsetToMid.y);

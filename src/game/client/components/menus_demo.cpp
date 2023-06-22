@@ -577,10 +577,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	DemoPlayer()->GetDemoName(aDemoName, sizeof(aDemoName));
 	char aBuf[IO_MAX_PATH_LENGTH + 128];
 	str_format(aBuf, sizeof(aBuf), Localize("Demofile: %s"), aDemoName);
-	CTextCursor Cursor;
-	TextRender()->SetCursor(&Cursor, NameBar.x, NameBar.y + (NameBar.h - (Button.h * 0.5f)) / 2.f, Button.h * 0.5f, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
-	Cursor.m_LineWidth = DemoControls.w;
-	TextRender()->TextEx(&Cursor, aBuf, -1);
+	UI()->DoLabel(&NameBar, aBuf, Button.h * 0.5f, TEXTALIGN_ML);
 
 	if(IncreaseDemoSpeed)
 	{
@@ -679,7 +676,7 @@ void CMenus::RenderDemoPlayerSliceSavePopup(CUIRect MainView)
 	{
 		char aDemoName[IO_MAX_PATH_LENGTH];
 		DemoPlayer()->GetDemoName(aDemoName, sizeof(aDemoName));
-		str_append(aDemoName, ".demo", sizeof(aDemoName));
+		str_append(aDemoName, ".demo");
 
 		if(!str_endswith(m_DemoSliceInput.GetString(), ".demo"))
 			m_DemoSliceInput.Append(".demo");
@@ -1163,8 +1160,8 @@ void CMenus::RenderDemoList(CUIRect MainView)
 					fs_parent_dir(m_aCurrentDemoFolder);
 				else // sub folder
 				{
-					str_append(m_aCurrentDemoFolder, "/", sizeof(m_aCurrentDemoFolder));
-					str_append(m_aCurrentDemoFolder, m_vDemos[m_DemolistSelectedIndex].m_aFilename, sizeof(m_aCurrentDemoFolder));
+					str_append(m_aCurrentDemoFolder, "/");
+					str_append(m_aCurrentDemoFolder, m_vDemos[m_DemolistSelectedIndex].m_aFilename);
 					m_DemolistStorageType = m_vDemos[m_DemolistSelectedIndex].m_StorageType;
 				}
 				DemolistPopulate();

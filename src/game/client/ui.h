@@ -149,6 +149,8 @@ public:
 		float m_Y;
 		float m_Width;
 		float m_Height;
+		float m_Rounding;
+		int m_Corners;
 
 		std::string m_Text;
 
@@ -225,11 +227,28 @@ class CButtonContainer
 {
 };
 
+struct SValueSelectorProperties
+{
+	bool m_UseScroll = true;
+	int64_t m_Step = 1;
+	float m_Scale = 1.0f;
+	bool m_IsHex = false;
+	int m_HexPrefix = 6;
+	ColorRGBA m_Color = ColorRGBA(0.0f, 0.0f, 0.0f, 0.4f);
+};
+
 /**
  * Type safe UI ID for popup menus.
  */
 struct SPopupMenuId
 {
+};
+
+struct SPopupMenuProperties
+{
+	int m_Corners = IGraphics::CORNER_ALL;
+	ColorRGBA m_BorderColor = ColorRGBA(0.5f, 0.5f, 0.5f, 0.75f);
+	ColorRGBA m_BackgroundColor = ColorRGBA(0.0f, 0.0f, 0.0f, 0.75f);
 };
 
 class CUI
@@ -280,15 +299,18 @@ private:
 	const void *m_pActiveItem;
 	const void *m_pLastActiveItem;
 	const void *m_pBecomingHotItem;
-	const void *m_pActiveTooltipItem;
 	bool m_ActiveItemValid = false;
 
+	vec2 m_UpdatedMousePos = vec2(0.0f, 0.0f);
+	vec2 m_UpdatedMouseDelta = vec2(0.0f, 0.0f);
 	float m_MouseX, m_MouseY; // in gui space
 	float m_MouseDeltaX, m_MouseDeltaY; // in gui space
 	float m_MouseWorldX, m_MouseWorldY; // in world space
 	unsigned m_MouseButtons;
 	unsigned m_LastMouseButtons;
 	bool m_MouseSlow = false;
+	bool m_MouseLock = false;
+	const void *m_pMouseLockID = nullptr;
 
 	unsigned m_HotkeysPressed = 0;
 
@@ -297,14 +319,16 @@ private:
 	std::vector<CUIRect> m_vClips;
 	void UpdateClipping();
 
+	bool m_ValueSelectorTextMode = false;
+
 	struct SPopupMenu
 	{
 		static constexpr float POPUP_BORDER = 1.0f;
 		static constexpr float POPUP_MARGIN = 4.0f;
 
 		const SPopupMenuId *m_pID;
+		SPopupMenuProperties m_Props;
 		CUIRect m_Rect;
-		int m_Corners;
 		void *m_pContext;
 		FPopupMenuFunction m_pfnFunc;
 	};
@@ -314,6 +338,7 @@ private:
 	static CUI::EPopupMenuFunctionResult PopupMessage(void *pContext, CUIRect View, bool Active);
 	static CUI::EPopupMenuFunctionResult PopupConfirm(void *pContext, CUIRect View, bool Active);
 	static CUI::EPopupMenuFunctionResult PopupSelection(void *pContext, CUIRect View, bool Active);
+	static CUI::EPopupMenuFunctionResult PopupColorPicker(void *pContext, CUIRect View, bool Active);
 
 	IClient *m_pClient;
 	IGraphics *m_pGraphics;
@@ -365,10 +390,13 @@ public:
 	void OnElementsReset();
 	void OnWindowResize();
 	void OnLanguageChange();
+	void OnCursorMove(float X, float Y);
 
 	void SetEnabled(bool Enabled) { m_Enabled = Enabled; }
 	bool Enabled() const { return m_Enabled; }
-	void Update(float MouseX, float MouseY, float MouseWorldX, float MouseWorldY);
+	void Update();
+	void Update(float MouseX, float MouseY, float MouseDeltaX, float MouseDeltaY, float MouseWorldX, float MouseWorldY);
+	void DebugRender();
 
 	float MouseDeltaX() const { return m_MouseDeltaX; }
 	float MouseDeltaY() const { return m_MouseDeltaY; }
@@ -380,6 +408,18 @@ public:
 	int MouseButton(int Index) const { return (m_MouseButtons >> Index) & 1; }
 	int MouseButtonClicked(int Index) const { return MouseButton(Index) && !((m_LastMouseButtons >> Index) & 1); }
 	int MouseButtonReleased(int Index) const { return ((m_LastMouseButtons >> Index) & 1) && !MouseButton(Index); }
+	bool CheckMouseLock()
+	{
+		if(m_MouseLock && ActiveItem() != m_pMouseLockID)
+			DisableMouseLock();
+		return m_MouseLock;
+	}
+	void EnableMouseLock(const void *pID)
+	{
+		m_MouseLock = true;
+		m_pMouseLockID = pID;
+	}
+	void DisableMouseLock() { m_MouseLock = false; }
 
 	void SetHotItem(const void *pID) { m_pBecomingHotItem = pID; }
 	void SetActiveItem(const void *pID)
@@ -398,12 +438,10 @@ public:
 		}
 		return false;
 	}
-	void SetActiveTooltipItem(const void *pID) { m_pActiveTooltipItem = pID; }
 	void ClearLastActiveItem() { m_pLastActiveItem = nullptr; }
 	const void *HotItem() const { return m_pHotItem; }
 	const void *NextHotItem() const { return m_pBecomingHotItem; }
 	const void *ActiveItem() const { return m_pActiveItem; }
-	const void *ActiveTooltipItem() const { return m_pActiveTooltipItem; }
 	const void *LastActiveItem() const { return m_pLastActiveItem; }
 
 	void StartCheck() { m_ActiveItemValid = false; }
@@ -457,20 +495,26 @@ public:
 
 	int DoButton_Menu(CUIElement &UIElement, const CButtonContainer *pID, const std::function<const char *()> &GetTextLambda, const CUIRect *pRect, const SMenuButtonProperties &Props = {});
 	// only used for popup menus
-	int DoButton_PopupMenu(CButtonContainer *pButtonContainer, const char *pText, const CUIRect *pRect, int Align);
+	int DoButton_PopupMenu(CButtonContainer *pButtonContainer, const char *pText, const CUIRect *pRect, float Size, int Align, float Padding = 0.0f, bool TransparentInactive = false);
 
+	// value selector
+	int64_t DoValueSelector(const void *pID, const CUIRect *pRect, const char *pLabel, int64_t Current, int64_t Min, int64_t Max, const SValueSelectorProperties &Props = {});
+	bool IsValueSelectorTextMode() const { return m_ValueSelectorTextMode; }
+	void SetValueSelectorTextMode(bool TextMode) { m_ValueSelectorTextMode = TextMode; }
+
+	// scrollbars
 	enum
 	{
-		SCROLLBAR_OPTION_INFINITE = 1,
-		SCROLLBAR_OPTION_NOCLAMPVALUE = 2,
+		SCROLLBAR_OPTION_INFINITE = 1 << 0,
+		SCROLLBAR_OPTION_NOCLAMPVALUE = 1 << 1,
+		SCROLLBAR_OPTION_MULTILINE = 1 << 2,
 	};
 	float DoScrollbarV(const void *pID, const CUIRect *pRect, float Current);
 	float DoScrollbarH(const void *pID, const CUIRect *pRect, float Current, const ColorRGBA *pColorInner = nullptr);
-	void DoScrollbarOption(const void *pID, int *pOption, const CUIRect *pRect, const char *pStr, int Min, int Max, const IScrollbarScale *pScale = &ms_LinearScrollbarScale, unsigned Flags = 0u);
-	void DoScrollbarOptionLabeled(const void *pID, int *pOption, const CUIRect *pRect, const char *pStr, const char **ppLabels, int NumLabels, const IScrollbarScale *pScale = &ms_LinearScrollbarScale);
+	void DoScrollbarOption(const void *pID, int *pOption, const CUIRect *pRect, const char *pStr, int Min, int Max, const IScrollbarScale *pScale = &ms_LinearScrollbarScale, unsigned Flags = 0u, const char *pSuffix = "");
 
 	// popup menu
-	void DoPopupMenu(const SPopupMenuId *pID, int X, int Y, int Width, int Height, void *pContext, FPopupMenuFunction pfnFunc, int Corners = IGraphics::CORNER_ALL);
+	void DoPopupMenu(const SPopupMenuId *pID, int X, int Y, int Width, int Height, void *pContext, FPopupMenuFunction pfnFunc, const SPopupMenuProperties &Props = {});
 	void RenderPopupMenus();
 	void ClosePopupMenu(const SPopupMenuId *pID, bool IncludeDescendants = false);
 	void ClosePopupMenus();
@@ -520,21 +564,48 @@ public:
 
 	struct SSelectionPopupContext : public SPopupMenuId
 	{
-		static constexpr float POPUP_MAX_WIDTH = 300.0f;
-		static constexpr float POPUP_FONT_SIZE = 10.0f;
-		static constexpr float POPUP_ENTRY_HEIGHT = 12.0f;
-		static constexpr float POPUP_ENTRY_SPACING = 5.0f;
-
 		CUI *m_pUI; // set by CUI when popup is shown
+		class CScrollRegion *m_pScrollRegion;
+		SPopupMenuProperties m_Props;
 		char m_aMessage[256];
-		std::set<std::string> m_Entries;
+		std::vector<std::string> m_vEntries;
 		std::vector<CButtonContainer> m_vButtonContainers;
 		const std::string *m_pSelection;
+		int m_SelectionIndex;
+		float m_EntryHeight;
+		float m_EntryPadding;
+		float m_EntrySpacing;
+		float m_FontSize;
+		float m_Width;
+		float m_AlignmentHeight;
+		bool m_TransparentButtons;
 
 		SSelectionPopupContext();
 		void Reset();
 	};
 	void ShowPopupSelection(float X, float Y, SSelectionPopupContext *pContext);
+
+	struct SColorPickerPopupContext : public SPopupMenuId
+	{
+		CUI *m_pUI; // set by CUI when popup is shown
+		bool m_Alpha = false;
+		unsigned int *m_pHslaColor = nullptr; // may be nullptr
+		ColorHSVA m_HsvaColor;
+		const char m_HuePickerId = 0;
+		const char m_ColorPickerId = 0;
+		const char m_aValueSelectorIds[5] = {0};
+	};
+	void ShowPopupColorPicker(float X, float Y, SColorPickerPopupContext *pContext);
+
+	// dropdown menu
+	struct SDropDownState
+	{
+		SSelectionPopupContext m_SelectionPopupContext;
+		CUIElement m_UiElement;
+		CButtonContainer m_ButtonContainer;
+		bool m_Init = false;
+	};
+	int DoDropDown(CUIRect *pRect, int CurSelection, const char **pStrs, int Num, SDropDownState &State);
 };
 
 #endif

@@ -218,8 +218,11 @@ public:
 		SetFloat(Number);
 	}
 
-	void SetInteger(int Number, int Base = 10);
+	void SetInteger(int Number, int Base = 10, int HexPrefix = 6);
 	int GetInteger(int Base = 10) const;
+
+	void SetInteger64(int64_t Number, int Base = 10, int HexPrefix = 6);
+	int64_t GetInteger64(int Base = 10) const;
 
 	void SetFloat(float Number);
 	float GetFloat() const;

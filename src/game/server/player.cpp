@@ -109,6 +109,8 @@ void CPlayer::Reset()
 
 	GameServer()->Score()->PlayerData(m_ClientID)->Reset();
 
+	m_Last_KickVote = 0;
+	m_Last_Team = 0;
 	m_ShowOthers = g_Config.m_SvShowOthersDefault;
 	m_ShowAll = g_Config.m_SvShowAllDefault;
 	m_ShowDistance = vec2(1200, 800);
@@ -276,7 +278,7 @@ void CPlayer::Tick()
 	{
 		if(1200 - ((Server()->Tick() - m_pCharacter->GetLastAction()) % (1200)) < 5)
 		{
-			GameServer()->SendEmoticon(GetCID(), EMOTICON_GHOST);
+			GameServer()->SendEmoticon(GetCID(), EMOTICON_GHOST, -1);
 		}
 	}
 }

@@ -732,9 +732,9 @@ void CConsole::ConCommandStatus(IResult *pResult, void *pUser)
 				if(Used > 0)
 				{
 					Used += 2;
-					str_append(aBuf, ", ", sizeof(aBuf));
+					str_append(aBuf, ", ");
 				}
-				str_append(aBuf, pCommand->m_pName, sizeof(aBuf));
+				str_append(aBuf, pCommand->m_pName);
 				Used += Length;
 			}
 			else
@@ -927,7 +927,7 @@ void CConsole::ConToggle(IConsole::IResult *pResult, void *pUser)
 			str_format(aBuf, sizeof(aBuf), "%s \"", pResult->GetString(0));
 			char *pDst = aBuf + str_length(aBuf);
 			str_escape(&pDst, pStr, aBuf + sizeof(aBuf));
-			str_append(aBuf, "\"", sizeof(aBuf));
+			str_append(aBuf, "\"");
 			pConsole->ExecuteLine(aBuf);
 			aBuf[0] = 0;
 		}

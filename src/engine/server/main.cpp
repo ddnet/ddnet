@@ -170,9 +170,10 @@ int main(int argc, const char **argv)
 	pConsole->Register("sv_rescue", "", CFGFLAG_SERVER, CServer::ConRescue, pConsole, "Allow /rescue command so players can teleport themselves out of freeze (setting only works in initial config)");
 
 	log_set_loglevel((LEVEL)g_Config.m_Loglevel);
+	const int Mode = g_Config.m_Logappend ? IOFLAG_APPEND : IOFLAG_WRITE;
 	if(g_Config.m_Logfile[0])
 	{
-		IOHANDLE Logfile = pStorage->OpenFile(g_Config.m_Logfile, IOFLAG_WRITE, IStorage::TYPE_SAVE_OR_ABSOLUTE);
+		IOHANDLE Logfile = pStorage->OpenFile(g_Config.m_Logfile, Mode, IStorage::TYPE_SAVE_OR_ABSOLUTE);
 		if(Logfile)
 		{
 			pFutureFileLogger->Set(log_logger_file(Logfile));
@@ -189,12 +190,12 @@ int main(int argc, const char **argv)
 	dbg_msg("server", "starting...");
 	int Ret = pServer->Run();
 
-	MysqlUninit();
-	secure_random_uninit();
-
 	pServerLogger->OnServerDeletion();
 	// free
 	delete pKernel;
+
+	MysqlUninit();
+	secure_random_uninit();
 
 	return Ret;
 }

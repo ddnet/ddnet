@@ -315,7 +315,7 @@ void CUpdater::PerformUpdate()
 				char aBuf[512];
 				str_copy(aBuf, pFile, sizeof(aBuf)); // SDL
 				str_copy(aBuf + len - 4, "-" PLAT_NAME, sizeof(aBuf) - len + 4); // -win32
-				str_append(aBuf, pFile + len - 4, sizeof(aBuf)); // .dll
+				str_append(aBuf, pFile + len - 4); // .dll
 				FetchFile(aBuf, pFile);
 #endif
 				// Ignore DLL downloads on other platforms
@@ -326,7 +326,7 @@ void CUpdater::PerformUpdate()
 				char aBuf[512];
 				str_copy(aBuf, pFile, sizeof(aBuf)); // libsteam_api
 				str_copy(aBuf + len - 3, "-" PLAT_NAME, sizeof(aBuf) - len + 3); // -linux-x86_64
-				str_append(aBuf, pFile + len - 3, sizeof(aBuf)); // .so
+				str_append(aBuf, pFile + len - 3); // .so
 				FetchFile(aBuf, pFile);
 #endif
 				// Ignore DLL downloads on other platforms, on Linux we statically link anyway

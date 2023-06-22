@@ -165,9 +165,9 @@ public:
 	virtual int NumTypes(int Network) = 0;
 	virtual const char *GetType(int Network, int Index) = 0;
 
-	virtual void DDNetFilterAdd(char *pFilter, const char *pName) = 0;
-	virtual void DDNetFilterRem(char *pFilter, const char *pName) = 0;
-	virtual bool DDNetFiltered(char *pFilter, const char *pName) = 0;
+	virtual void DDNetFilterAdd(char *pFilter, int FilterSize, const char *pName) const = 0;
+	virtual void DDNetFilterRem(char *pFilter, int FilterSize, const char *pName) const = 0;
+	virtual bool DDNetFiltered(const char *pFilter, const char *pName) const = 0;
 	virtual void CountryFilterClean(int Network) = 0;
 	virtual void TypeFilterClean(int Network) = 0;
 	virtual int GetCurrentType() = 0;

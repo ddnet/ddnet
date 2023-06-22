@@ -253,6 +253,7 @@ public:
 	const TTWGraphicsGPUList &GetGPUs() const override;
 
 	int GetNumScreens() const override { return m_NumScreens; }
+	const char *GetScreenName(int Screen) const override;
 
 	void GetVideoModes(CVideoMode *pModes, int MaxModes, int *pNumModes, int HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int ScreenID) override;
 	void GetCurrentVideoMode(CVideoMode &CurMode, int HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int ScreenID) override;

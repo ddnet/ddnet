@@ -581,7 +581,7 @@ char *CSaveTeam::GetString()
 	{
 		char aBuf[1024];
 		str_format(aBuf, sizeof(aBuf), "\n%s", m_pSavedTees[i].GetString(this));
-		str_append(m_aString, aBuf, sizeof(m_aString));
+		str_append(m_aString, aBuf);
 	}
 
 	if(m_pSwitchers && m_HighestSwitchNumber)
@@ -590,7 +590,7 @@ char *CSaveTeam::GetString()
 		{
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), "\n%d\t%d\t%d", m_pSwitchers[i].m_Status, m_pSwitchers[i].m_EndTime, m_pSwitchers[i].m_Type);
-			str_append(m_aString, aBuf, sizeof(m_aString));
+			str_append(m_aString, aBuf);
 		}
 	}
 
