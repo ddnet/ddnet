@@ -17,6 +17,7 @@
 #include <engine/input.h>
 #include <engine/keys.h>
 #include <engine/shared/config.h>
+#include <engine/shared/filecollection.h>
 #include <engine/storage.h>
 #include <engine/textrender.h>
 
@@ -207,7 +208,7 @@ void CLayerGroup::Render()
 
 void CLayerGroup::AddLayer(CLayer *pLayer)
 {
-	m_pMap->m_Modified = true;
+	m_pMap->OnModify();
 	m_vpLayers.push_back(pLayer);
 }
 
@@ -217,7 +218,7 @@ void CLayerGroup::DeleteLayer(int Index)
 		return;
 	delete m_vpLayers[Index];
 	m_vpLayers.erase(m_vpLayers.begin() + Index);
-	m_pMap->m_Modified = true;
+	m_pMap->OnModify();
 }
 
 void CLayerGroup::DuplicateLayer(int Index)
@@ -228,7 +229,7 @@ void CLayerGroup::DuplicateLayer(int Index)
 	auto *pDup = m_vpLayers[Index]->Duplicate();
 	m_vpLayers.insert(m_vpLayers.begin() + Index + 1, pDup);
 
-	m_pMap->m_Modified = true;
+	m_pMap->OnModify();
 }
 
 void CLayerGroup::GetSize(float *pWidth, float *pHeight) const
@@ -252,7 +253,7 @@ int CLayerGroup::SwapLayers(int Index0, int Index1)
 		return Index0;
 	if(Index0 == Index1)
 		return Index0;
-	m_pMap->m_Modified = true;
+	m_pMap->OnModify();
 	std::swap(m_vpLayers[Index0], m_vpLayers[Index1]);
 	return Index1;
 }
@@ -828,7 +829,7 @@ bool CEditor::CallbackAppendMap(const char *pFileName, int StorageType, void *pU
 bool CEditor::CallbackSaveMap(const char *pFileName, int StorageType, void *pUser)
 {
 	CEditor *pEditor = static_cast<CEditor *>(pUser);
-	char aBuf[1024];
+	char aBuf[IO_MAX_PATH_LENGTH];
 	// add map extension
 	if(!str_endswith(pFileName, ".map"))
 	{
@@ -836,25 +837,35 @@ bool CEditor::CallbackSaveMap(const char *pFileName, int StorageType, void *pUse
 		pFileName = aBuf;
 	}
 
+	// Save map to specified file
 	if(pEditor->Save(pFileName))
 	{
 		str_copy(pEditor->m_aFileName, pFileName);
 		pEditor->m_ValidSaveFilename = StorageType == IStorage::TYPE_SAVE && pEditor->m_pFileDialogPath == pEditor->m_aFileDialogCurrentFolder;
 		pEditor->m_Map.m_Modified = false;
-		pEditor->m_Dialog = DIALOG_NONE;
-		return true;
 	}
 	else
 	{
 		pEditor->ShowFileDialogError("Failed to save map to file '%s'.", pFileName);
 		return false;
 	}
+
+	// Also update autosave if it's older than half the configured autosave interval, so we also have periodic backups.
+	const float Time = pEditor->Client()->GlobalTime();
+	if(g_Config.m_EdAutosaveInterval > 0 && pEditor->m_Map.m_LastSaveTime < Time && Time - pEditor->m_Map.m_LastSaveTime > 30 * g_Config.m_EdAutosaveInterval)
+	{
+		if(!pEditor->PerformAutosave())
+			return false;
+	}
+
+	pEditor->m_Dialog = DIALOG_NONE;
+	return true;
 }
 
 bool CEditor::CallbackSaveCopyMap(const char *pFileName, int StorageType, void *pUser)
 {
 	CEditor *pEditor = static_cast<CEditor *>(pUser);
-	char aBuf[1024];
+	char aBuf[IO_MAX_PATH_LENGTH];
 	// add map extension
 	if(!str_endswith(pFileName, ".map"))
 	{
@@ -864,7 +875,6 @@ bool CEditor::CallbackSaveCopyMap(const char *pFileName, int StorageType, void *
 
 	if(pEditor->Save(pFileName))
 	{
-		pEditor->m_Map.m_Modified = false;
 		pEditor->m_Dialog = DIALOG_NONE;
 		return true;
 	}
@@ -1524,7 +1534,7 @@ void CEditor::DoQuad(CQuad *pQuad, int Index)
 				if(m_vSelectedLayers.size() == 1)
 				{
 					UI()->DisableMouseLock();
-					m_Map.m_Modified = true;
+					m_Map.OnModify();
 					DeleteSelectedQuads();
 				}
 				s_Operation = OP_NONE;
@@ -3817,7 +3827,7 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 			m_SelectedGroup = GroupAfterDraggedLayer - 1;
 			m_vSelectedLayers.clear();
 			m_vSelectedQuads.clear();
-			m_Map.m_Modified = true;
+			m_Map.OnModify();
 		}
 	}
 
@@ -3834,7 +3844,7 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 		m_Map.m_vpGroups.insert(InsertPosition, pSelectedGroup);
 
 		m_SelectedGroup = InsertPosition - m_Map.m_vpGroups.begin();
-		m_Map.m_Modified = true;
+		m_Map.OnModify();
 	}
 
 	if(MoveLayers || MoveGroup)
@@ -5344,7 +5354,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		static int s_NewSoundButton = 0;
 		if(DoButton_Editor(&s_NewSoundButton, "Sound+", 0, &Button, 0, "Creates a new sound envelope"))
 		{
-			m_Map.m_Modified = true;
+			m_Map.OnModify();
 			pNewEnv = m_Map.NewEnvelope(1);
 		}
 
@@ -5353,7 +5363,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		static int s_New4dButton = 0;
 		if(DoButton_Editor(&s_New4dButton, "Color+", 0, &Button, 0, "Creates a new color envelope"))
 		{
-			m_Map.m_Modified = true;
+			m_Map.OnModify();
 			pNewEnv = m_Map.NewEnvelope(4);
 		}
 
@@ -5362,7 +5372,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		static int s_New2dButton = 0;
 		if(DoButton_Editor(&s_New2dButton, "Pos.+", 0, &Button, 0, "Creates a new position envelope"))
 		{
-			m_Map.m_Modified = true;
+			m_Map.OnModify();
 			pNewEnv = m_Map.NewEnvelope(3);
 		}
 
@@ -5473,7 +5483,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			s_NameInput.SetBuffer(pEnvelope->m_aName, sizeof(pEnvelope->m_aName));
 			if(DoEditBox(&s_NameInput, &Button, 10.0f, IGraphics::CORNER_ALL, "The name of the selected envelope"))
 			{
-				m_Map.m_Modified = true;
+				m_Map.OnModify();
 			}
 		}
 	}
@@ -5578,7 +5588,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 				pEnvelope->AddPoint(Time,
 					f2fx(Channels.r), f2fx(Channels.g),
 					f2fx(Channels.b), f2fx(Channels.a));
-				m_Map.m_Modified = true;
+				m_Map.OnModify();
 			}
 
 			m_ShowEnvelopePreview = SHOWENV_SELECTED;
@@ -5757,7 +5767,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 							m_SelectedQuadEnvelope = m_SelectedEnvelope;
 							m_ShowEnvelopePreview = SHOWENV_SELECTED;
 							m_SelectedEnvelopePoint = i;
-							m_Map.m_Modified = true;
+							m_Map.OnModify();
 						}
 
 						ColorMod = 100.0f;
@@ -5787,7 +5797,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 							}
 
 							pEnvelope->m_vPoints.erase(pEnvelope->m_vPoints.begin() + i);
-							m_Map.m_Modified = true;
+							m_Map.OnModify();
 						}
 
 						m_ShowEnvelopePreview = SHOWENV_SELECTED;
@@ -6507,6 +6517,10 @@ void CEditor::Reset(bool CreateDefault)
 	m_MouseDeltaWy = 0;
 
 	m_Map.m_Modified = false;
+	m_Map.m_ModifiedAuto = false;
+	m_Map.m_LastModifiedTime = -1.0f;
+	m_Map.m_LastSaveTime = Client()->GlobalTime();
+	m_Map.m_LastAutosaveUpdateTime = -1.0f;
 
 	m_ShowEnvelopePreview = SHOWENV_NONE;
 	m_ShiftBy = 1;
@@ -6625,12 +6639,19 @@ void CEditor::Goto(float X, float Y)
 	m_WorldOffsetY = Y * 32;
 }
 
+void CEditorMap::OnModify()
+{
+	m_Modified = true;
+	m_ModifiedAuto = true;
+	m_LastModifiedTime = m_pEditor->Client()->GlobalTime();
+}
+
 void CEditorMap::DeleteEnvelope(int Index)
 {
 	if(Index < 0 || Index >= (int)m_vpEnvelopes.size())
 		return;
 
-	m_Modified = true;
+	OnModify();
 
 	VisitEnvelopeReferences([Index](int &ElementIndex) {
 		if(ElementIndex == Index)
@@ -6651,7 +6672,7 @@ void CEditorMap::SwapEnvelopes(int Index0, int Index1)
 	if(Index0 == Index1)
 		return;
 
-	m_Modified = true;
+	OnModify();
 
 	VisitEnvelopeReferences([Index0, Index1](int &ElementIndex) {
 		if(ElementIndex == Index0)
@@ -6731,6 +6752,7 @@ void CEditorMap::Clean()
 	m_pGameGroup = nullptr;
 
 	m_Modified = false;
+	m_ModifiedAuto = false;
 
 	m_pTeleLayer = nullptr;
 	m_pSpeedupLayer = nullptr;
@@ -6856,7 +6878,6 @@ void CEditor::Init()
 	m_Brush.m_pMap = &m_Map;
 
 	Reset(false);
-	m_Map.m_Modified = false;
 
 	ResetMenuBackgroundPositions();
 	m_vpMenuBackgroundPositionNames.resize(CMenuBackground::NUM_POS);
@@ -6966,6 +6987,74 @@ void CEditor::HandleCursorMovement()
 	}
 }
 
+void CEditor::HandleAutosave()
+{
+	const float Time = Client()->GlobalTime();
+	const float LastAutosaveUpdateTime = m_Map.m_LastAutosaveUpdateTime;
+	m_Map.m_LastAutosaveUpdateTime = Time;
+
+	if(g_Config.m_EdAutosaveInterval == 0)
+		return; // autosave disabled
+	if(!m_Map.m_ModifiedAuto || m_Map.m_LastModifiedTime < 0.0f)
+		return; // no unsaved changes
+
+	// Add time to autosave timer if the editor was disabled for more than 10 seconds,
+	// to prevent autosave from immediately activating when the editor is activated
+	// after being deactivated for some time.
+	if(LastAutosaveUpdateTime >= 0.0f && Time - LastAutosaveUpdateTime > 10.0f)
+	{
+		m_Map.m_LastSaveTime += Time - LastAutosaveUpdateTime;
+	}
+
+	// Check if autosave timer has expired.
+	if(m_Map.m_LastSaveTime >= Time || Time - m_Map.m_LastSaveTime < 60 * g_Config.m_EdAutosaveInterval)
+		return;
+
+	// Wait for 5 seconds of no modification before saving, to prevent autosave
+	// from immediately activating when a map is first modified or while user is
+	// modifying the map, but don't delay the autosave for more than 1 minute.
+	if(Time - m_Map.m_LastModifiedTime < 5.0f && Time - m_Map.m_LastSaveTime < 60 * (g_Config.m_EdAutosaveInterval + 1))
+		return;
+
+	PerformAutosave();
+}
+
+bool CEditor::PerformAutosave()
+{
+	char aDate[20];
+	char aAutosavePath[IO_MAX_PATH_LENGTH];
+	str_timestamp(aDate, sizeof(aDate));
+	char aFileNameNoExt[IO_MAX_PATH_LENGTH];
+	if(m_aFileName[0] == '\0')
+	{
+		str_copy(aFileNameNoExt, "unnamed");
+	}
+	else
+	{
+		const char *pFileName = fs_filename(m_aFileName);
+		str_truncate(aFileNameNoExt, sizeof(aFileNameNoExt), pFileName, str_length(pFileName) - str_length(".map"));
+	}
+	str_format(aAutosavePath, sizeof(aAutosavePath), "maps/auto/%s_%s.map", aFileNameNoExt, aDate);
+
+	m_Map.m_LastSaveTime = Client()->GlobalTime();
+	if(Save(aAutosavePath))
+	{
+		m_Map.m_ModifiedAuto = false;
+		// Clean up autosaves
+		if(g_Config.m_EdAutosaveMax)
+		{
+			CFileCollection AutosavedMaps;
+			AutosavedMaps.Init(Storage(), "maps/auto", aFileNameNoExt, ".map", g_Config.m_EdAutosaveMax);
+		}
+		return true;
+	}
+	else
+	{
+		ShowFileDialogError("Failed to automatically save map to file '%s'.", aAutosavePath);
+		return false;
+	}
+}
+
 void CEditor::OnUpdate()
 {
 	CUIElementBase::Init(UI()); // update static pointer because game and editor use separate UI
@@ -6977,6 +7066,7 @@ void CEditor::OnUpdate()
 	}
 
 	HandleCursorMovement();
+	HandleAutosave();
 }
 
 void CEditor::OnRender()

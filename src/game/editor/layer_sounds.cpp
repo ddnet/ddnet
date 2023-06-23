@@ -101,7 +101,7 @@ void CLayerSounds::Render(bool Tileset)
 
 CSoundSource *CLayerSounds::NewSource(int x, int y)
 {
-	m_pEditor->m_Map.m_Modified = true;
+	m_pEditor->m_Map.OnModify();
 
 	m_vSources.emplace_back();
 	CSoundSource *pSource = &m_vSources[m_vSources.size() - 1];
@@ -179,7 +179,7 @@ void CLayerSounds::BrushPlace(CLayer *pBrush, float wx, float wy)
 
 		m_vSources.push_back(n);
 	}
-	m_pEditor->m_Map.m_Modified = true;
+	m_pEditor->m_Map.OnModify();
 }
 
 CUI::EPopupMenuFunctionResult CLayerSounds::RenderProperties(CUIRect *pToolBox)
@@ -200,7 +200,7 @@ CUI::EPopupMenuFunctionResult CLayerSounds::RenderProperties(CUIRect *pToolBox)
 	int Prop = m_pEditor->DoProperties(pToolBox, aProps, s_aIds, &NewVal);
 	if(Prop != -1)
 	{
-		m_pEditor->m_Map.m_Modified = true;
+		m_pEditor->m_Map.OnModify();
 	}
 
 	if(Prop == PROP_SOUND)

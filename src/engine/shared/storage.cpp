@@ -68,6 +68,7 @@ public:
 				CreateFolder("screenshots/auto", TYPE_SAVE);
 				CreateFolder("screenshots/auto/stats", TYPE_SAVE);
 				CreateFolder("maps", TYPE_SAVE);
+				CreateFolder("maps/auto", TYPE_SAVE);
 				CreateFolder("mapres", TYPE_SAVE);
 				CreateFolder("downloadedmaps", TYPE_SAVE);
 				CreateFolder("skins", TYPE_SAVE);

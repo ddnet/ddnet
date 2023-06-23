@@ -315,7 +315,6 @@ class CEditorMap
 
 public:
 	CEditor *m_pEditor;
-	bool m_Modified;
 
 	CEditorMap()
 	{
@@ -326,6 +325,13 @@ public:
 	{
 		Clean();
 	}
+
+	bool m_Modified; // unsaved changes in manual save
+	bool m_ModifiedAuto; // unsaved changes in autosave
+	float m_LastModifiedTime;
+	float m_LastSaveTime;
+	float m_LastAutosaveUpdateTime;
+	void OnModify();
 
 	std::vector<CLayerGroup *> m_vpGroups;
 	std::vector<CEditorImage *> m_vpImages;
@@ -370,7 +376,7 @@ public:
 
 	CEnvelope *NewEnvelope(int Channels)
 	{
-		m_Modified = true;
+		OnModify();
 		CEnvelope *pEnv = new CEnvelope(Channels);
 		m_vpEnvelopes.push_back(pEnv);
 		return pEnv;
@@ -383,7 +389,7 @@ public:
 
 	CLayerGroup *NewGroup()
 	{
-		m_Modified = true;
+		OnModify();
 		CLayerGroup *pGroup = new CLayerGroup;
 		pGroup->m_pMap = this;
 		m_vpGroups.push_back(pGroup);
@@ -398,7 +404,7 @@ public:
 			return Index0;
 		if(Index0 == Index1)
 			return Index0;
-		m_Modified = true;
+		OnModify();
 		std::swap(m_vpGroups[Index0], m_vpGroups[Index1]);
 		return Index1;
 	}
@@ -407,28 +413,28 @@ public:
 	{
 		if(Index < 0 || Index >= (int)m_vpGroups.size())
 			return;
-		m_Modified = true;
+		OnModify();
 		delete m_vpGroups[Index];
 		m_vpGroups.erase(m_vpGroups.begin() + Index);
 	}
 
 	void ModifyImageIndex(INDEX_MODIFY_FUNC pfnFunc)
 	{
-		m_Modified = true;
+		OnModify();
 		for(auto &pGroup : m_vpGroups)
 			pGroup->ModifyImageIndex(pfnFunc);
 	}
 
 	void ModifyEnvelopeIndex(INDEX_MODIFY_FUNC pfnFunc)
 	{
-		m_Modified = true;
+		OnModify();
 		for(auto &pGroup : m_vpGroups)
 			pGroup->ModifyEnvelopeIndex(pfnFunc);
 	}
 
 	void ModifySoundIndex(INDEX_MODIFY_FUNC pfnFunc)
 	{
-		m_Modified = true;
+		OnModify();
 		for(auto &pGroup : m_vpGroups)
 			pGroup->ModifySoundIndex(pfnFunc);
 	}
@@ -850,6 +856,8 @@ public:
 	void ResetMentions() override { m_Mentions = 0; }
 
 	void HandleCursorMovement();
+	void HandleAutosave();
+	bool PerformAutosave();
 
 	CLayerGroup *m_apSavedBrushes[10];
 
