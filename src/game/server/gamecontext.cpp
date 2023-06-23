@@ -4222,6 +4222,20 @@ bool CGameContext::IsVersionBanned(int Version)
 	return str_in_list(g_Config.m_SvBannedVersions, ",", aVersion);
 }
 
+void CGameContext::RedirectClient(int ClientID, int Port, bool Verbose)
+{
+	if(Verbose)
+	{
+		char aBuf[512];
+		str_format(aBuf, sizeof(aBuf), "redirecting '%s' to port %d", Server()->ClientName(ClientID), Port);
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "redirect", aBuf);
+	}
+
+	CMsgPacker Msg(NETMSG_REDIRECT, true);
+	Msg.AddInt(Port);
+	Server()->SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
+}
+
 void CGameContext::List(int ClientID, const char *pFilter)
 {
 	int Total = 0;
