@@ -848,6 +848,8 @@ public:
 	void UpdateMentions() override { m_Mentions++; }
 	void ResetMentions() override { m_Mentions = 0; }
 
+	void HandleCursorMovement();
+
 	CLayerGroup *m_apSavedBrushes[10];
 
 	void RefreshFilteredFileList();
