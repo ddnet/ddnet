@@ -1866,6 +1866,16 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 				SendMsg(Conn, &MsgP, MSGFLAG_VITAL);
 			}
 		}
+		else if(Msg == NETMSG_REDIRECT)
+		{
+			int RedirectPort = Unpacker.GetInt();
+			char aAddr[128];
+			char aIP[64];
+			NETADDR ServerAddr = ServerAddress();
+			net_addr_str(&ServerAddr, aIP, sizeof(aIP), 0);
+			str_format(aAddr, sizeof(aAddr), "%s:%d", aIP, RedirectPort);
+			Connect(aAddr);
+		}
 		else if(Conn == CONN_MAIN && (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_RCON_CMD_ADD)
 		{
 			const char *pName = Unpacker.GetString(CUnpacker::SANITIZE_CC);

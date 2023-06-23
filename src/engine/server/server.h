@@ -146,6 +146,7 @@ public:
 			STATE_CONNECTING,
 			STATE_READY,
 			STATE_INGAME,
+			STATE_REDIRECTED,
 
 			SNAPRATE_INIT = 0,
 			SNAPRATE_FULL,
@@ -206,6 +207,7 @@ public:
 		int m_DDNetVersion;
 		char m_aDDNetVersionStr[64];
 		CUuid m_ConnectionID;
+		int64_t m_RedirectDropTime;
 
 		// DNSBL
 		int m_DnsblState;
@@ -288,6 +290,7 @@ public:
 
 	void Kick(int ClientID, const char *pReason) override;
 	void Ban(int ClientID, int Seconds, const char *pReason) override;
+	void RedirectClient(int ClientID, int Port, bool Verbose = false) override;
 
 	void DemoRecorder_HandleAutoStart() override;
 
