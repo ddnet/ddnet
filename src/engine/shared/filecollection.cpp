@@ -207,7 +207,7 @@ void CFileCollection::AddEntry(int64_t Timestamp)
 			}
 			else
 			{
-				char aBuf[512];
+				char aBuf[IO_MAX_PATH_LENGTH];
 				char aTimestring[TIMESTAMP_LENGTH];
 				BuildTimestring(m_aTimestamps[0], aTimestring);
 
@@ -261,7 +261,7 @@ int CFileCollection::RemoveCallback(const char *pFilename, int IsDir, int Storag
 
 	if(Timestamp == pThis->m_Remove)
 	{
-		char aBuf[512];
+		char aBuf[IO_MAX_PATH_LENGTH];
 		str_format(aBuf, sizeof(aBuf), "%s/%s", pThis->m_aPath, pFilename);
 		pThis->m_pStorage->RemoveFile(aBuf, IStorage::TYPE_SAVE);
 		pThis->m_Remove = -1;
