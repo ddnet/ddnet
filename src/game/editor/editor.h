@@ -437,8 +437,8 @@ public:
 	void CreateDefault(IGraphics::CTextureHandle EntitiesTexture);
 
 	// io
-	bool Save(class IStorage *pStorage, const char *pFilename);
-	bool Load(class IStorage *pStorage, const char *pFilename, int StorageType);
+	bool Save(const char *pFilename);
+	bool Load(const char *pFilename, int StorageType);
 
 	// DDRace
 

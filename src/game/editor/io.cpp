@@ -33,16 +33,16 @@ struct CSoundSource_DEPRECATED
 
 bool CEditor::Save(const char *pFilename)
 {
-	return m_Map.Save(Kernel()->RequestInterface<IStorage>(), pFilename);
+	return m_Map.Save(pFilename);
 }
 
-bool CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
+bool CEditorMap::Save(const char *pFileName)
 {
 	char aBuf[IO_MAX_PATH_LENGTH + 64];
 	str_format(aBuf, sizeof(aBuf), "saving to '%s'...", pFileName);
 	m_pEditor->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "editor", aBuf);
 	CDataFileWriter df;
-	if(!df.Open(pStorage, pFileName))
+	if(!df.Open(m_pEditor->Storage(), pFileName))
 	{
 		str_format(aBuf, sizeof(aBuf), "failed to open file '%s'...", pFileName);
 		m_pEditor->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "editor", aBuf);
@@ -400,7 +400,7 @@ bool CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 bool CEditor::Load(const char *pFileName, int StorageType)
 {
 	Reset();
-	bool Result = m_Map.Load(Kernel()->RequestInterface<IStorage>(), pFileName, StorageType);
+	bool Result = m_Map.Load(pFileName, StorageType);
 	if(Result)
 	{
 		str_copy(m_aFileName, pFileName);
@@ -416,10 +416,10 @@ bool CEditor::Load(const char *pFileName, int StorageType)
 	return Result;
 }
 
-bool CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int StorageType)
+bool CEditorMap::Load(const char *pFileName, int StorageType)
 {
 	CDataFileReader DataFile;
-	if(!DataFile.Open(pStorage, pFileName, StorageType))
+	if(!DataFile.Open(m_pEditor->Storage(), pFileName, StorageType))
 		return false;
 
 	Clean();
@@ -554,7 +554,7 @@ bool CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Stora
 					str_format(aBuf, sizeof(aBuf), "mapres/%s.opus", pName);
 
 					// load external
-					if(pStorage->ReadFile(pName, IStorage::TYPE_ALL, &pSound->m_pData, &pSound->m_DataSize))
+					if(m_pEditor->Storage()->ReadFile(pName, IStorage::TYPE_ALL, &pSound->m_pData, &pSound->m_DataSize))
 					{
 						pSound->m_SoundID = m_pEditor->Sound()->LoadOpusFromMem(pSound->m_pData, pSound->m_DataSize, true);
 					}
@@ -991,7 +991,7 @@ bool CEditor::Append(const char *pFileName, int StorageType)
 	CEditorMap NewMap;
 	NewMap.m_pEditor = this;
 
-	if(!NewMap.Load(Kernel()->RequestInterface<IStorage>(), pFileName, StorageType))
+	if(!NewMap.Load(pFileName, StorageType))
 		return false;
 
 	// modify indices
