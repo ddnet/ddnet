@@ -2396,6 +2396,39 @@ char *fs_getcwd(char *buffer, int buffer_size)
 #endif
 }
 
+const char *fs_filename(const char *path)
+{
+	for(const char *filename = path + str_length(path); filename >= path; --filename)
+	{
+		if(filename[0] == '/' || filename[0] == '\\')
+			return filename + 1;
+	}
+	return path;
+}
+
+void fs_split_file_extension(const char *filename, char *name, size_t name_size, char *extension, size_t extension_size)
+{
+	dbg_assert(name != nullptr || extension != nullptr, "name or extension parameter required");
+	dbg_assert(name == nullptr || name_size > 0, "name_size invalid");
+	dbg_assert(extension == nullptr || extension_size > 0, "extension_size invalid");
+
+	const char *last_dot = str_rchr(filename, '.');
+	if(last_dot == nullptr || last_dot == filename)
+	{
+		if(extension != nullptr)
+			extension[0] = '\0';
+		if(name != nullptr)
+			str_copy(name, filename, name_size);
+	}
+	else
+	{
+		if(extension != nullptr)
+			str_copy(extension, last_dot + 1, extension_size);
+		if(name != nullptr)
+			str_truncate(name, name_size, filename, last_dot - filename);
+	}
+}
+
 int fs_parent_dir(char *path)
 {
 	char *parent = 0;

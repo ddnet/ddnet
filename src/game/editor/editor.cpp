@@ -4660,6 +4660,17 @@ void CEditor::RenderFileDialog()
 	str_format(aBuf, sizeof(aBuf), "Current path: %s", aPath);
 	UI()->DoLabel(&PathBox, aBuf, 10.0f, TEXTALIGN_ML);
 
+	const auto &&UpdateFileNameInput = [this]() {
+		if(m_FilesSelectedIndex >= 0 && !m_vpFilteredFileList[m_FilesSelectedIndex]->m_IsDir)
+		{
+			char aNameWithoutExt[IO_MAX_PATH_LENGTH];
+			fs_split_file_extension(m_vpFilteredFileList[m_FilesSelectedIndex]->m_aFilename, aNameWithoutExt, sizeof(aNameWithoutExt));
+			m_FileDialogFileNameInput.Set(aNameWithoutExt);
+		}
+		else
+			m_FileDialogFileNameInput.Clear();
+	};
+
 	// filebox
 	static CListBox s_ListBox;
 	s_ListBox.SetActive(!UI()->IsPopupOpen());
@@ -4732,10 +4743,7 @@ void CEditor::RenderFileDialog()
 				str_copy(m_aFilesSelectedName, m_vpFilteredFileList[m_FilesSelectedIndex]->m_aName);
 			else
 				m_aFilesSelectedName[0] = '\0';
-			if(m_FilesSelectedIndex >= 0 && !m_vpFilteredFileList[m_FilesSelectedIndex]->m_IsDir)
-				m_FileDialogFileNameInput.Set(m_vpFilteredFileList[m_FilesSelectedIndex]->m_aFilename);
-			else
-				m_FileDialogFileNameInput.Clear();
+			UpdateFileNameInput();
 			s_ListBox.ScrollToSelected();
 			m_PreviewImageState = PREVIEWIMAGE_UNLOADED;
 		}
@@ -4847,10 +4855,7 @@ void CEditor::RenderFileDialog()
 		m_FilesSelectedIndex = NewSelection;
 		str_copy(m_aFilesSelectedName, m_vpFilteredFileList[m_FilesSelectedIndex]->m_aName);
 		const bool WasChanged = m_FileDialogFileNameInput.WasChanged();
-		if(!m_vpFilteredFileList[m_FilesSelectedIndex]->m_IsDir)
-			m_FileDialogFileNameInput.Set(m_vpFilteredFileList[m_FilesSelectedIndex]->m_aFilename);
-		else
-			m_FileDialogFileNameInput.Clear();
+		UpdateFileNameInput();
 		if(!WasChanged) // ensure that changed flag is not set if it wasn't previously set, as this would reset the selection after DoEditBox is called
 			m_FileDialogFileNameInput.WasChanged(); // this clears the changed flag
 		m_PreviewImageState = PREVIEWIMAGE_UNLOADED;
@@ -4895,14 +4900,13 @@ void CEditor::RenderFileDialog()
 			}
 			FilelistPopulate(!str_comp(m_pFileDialogPath, "maps") || !str_comp(m_pFileDialogPath, "mapres") ? m_FileDialogStorageType :
 															  m_vpFilteredFileList[m_FilesSelectedIndex]->m_StorageType);
-			if(m_FilesSelectedIndex >= 0 && !m_vpFilteredFileList[m_FilesSelectedIndex]->m_IsDir)
-				m_FileDialogFileNameInput.Set(m_vpFilteredFileList[m_FilesSelectedIndex]->m_aFilename);
-			else
-				m_FileDialogFileNameInput.Clear();
+			UpdateFileNameInput();
 		}
 		else // file
 		{
 			str_format(m_aFileSaveName, sizeof(m_aFileSaveName), "%s/%s", m_pFileDialogPath, m_FileDialogFileNameInput.GetString());
+			if(!str_endswith(m_aFileSaveName, ".map"))
+				str_append(m_aFileSaveName, ".map");
 			if(!str_comp(m_pFileDialogButtonText, "Save"))
 			{
 				if(Storage()->FileExists(m_aFileSaveName, IStorage::TYPE_SAVE))
