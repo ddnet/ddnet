@@ -875,7 +875,7 @@ bool CEditor::CallbackSaveCopyMap(const char *pFileName, int StorageType, void *
 	}
 }
 
-void CEditor::DoToolbar(CUIRect ToolBar)
+void CEditor::DoToolbarLayers(CUIRect ToolBar)
 {
 	const bool ModPressed = Input()->ModifierIsPressed();
 	const bool ShiftPressed = Input()->ShiftIsPressed();
@@ -1264,6 +1264,41 @@ void CEditor::DoToolbar(CUIRect ToolBar)
 				(m_Dialog == DIALOG_NONE && m_EditBoxActive == 0 && Input()->KeyPress(KEY_D) && ModPressed && !ShiftPressed))
 				m_BrushDrawDestructive = !m_BrushDrawDestructive;
 			TB_Bottom.VSplitLeft(5.0f, &Button, &TB_Bottom);
+		}
+	}
+}
+
+void CEditor::DoToolbarSounds(CUIRect ToolBar)
+{
+	CUIRect ToolBarTop, ToolBarBottom, Button;
+	ToolBar.HSplitMid(&ToolBarTop, &ToolBarBottom, 5.0f);
+
+	if(m_SelectedSound >= 0 && (size_t)m_SelectedSound < m_Map.m_vpSounds.size())
+	{
+		const CEditorSound *pSelectedSound = m_Map.m_vpSounds[m_SelectedSound];
+
+		// play/stop button
+		{
+			ToolBarBottom.VSplitLeft(ToolBarBottom.h, &Button, &ToolBarBottom);
+			static int s_PlayStopButton;
+			if(DoButton_FontIcon(&s_PlayStopButton, Sound()->IsPlaying(pSelectedSound->m_SoundID) ? FONT_ICON_STOP : FONT_ICON_PLAY, 0, &Button, 0, "Play/stop audio preview", IGraphics::CORNER_ALL) ||
+				(m_Dialog == DIALOG_NONE && m_EditBoxActive == 0 && Input()->KeyPress(KEY_SPACE)))
+			{
+				if(Sound()->IsPlaying(pSelectedSound->m_SoundID))
+					Sound()->Stop(pSelectedSound->m_SoundID);
+				else
+					Sound()->Play(CSounds::CHN_GUI, pSelectedSound->m_SoundID, 0);
+			}
+		}
+
+		// duration
+		{
+			ToolBarBottom.VSplitLeft(5.0f, nullptr, &ToolBarBottom);
+			char aDuration[32];
+			char aDurationLabel[64];
+			str_time_float(Sound()->GetSampleDuration(pSelectedSound->m_SoundID), TIME_HOURS, aDuration, sizeof(aDuration));
+			str_format(aDurationLabel, sizeof(aDurationLabel), "Duration: %s", aDuration);
+			UI()->DoLabel(&ToolBarBottom, aDurationLabel, 12.0f, TEXTALIGN_ML);
 		}
 	}
 }
@@ -4575,7 +4610,7 @@ void CEditor::RenderFileDialog()
 	// GUI coordsys
 	UI()->MapScreen();
 	CUIRect View = *UI()->Screen();
-	CUIRect Preview;
+	CUIRect Preview = {0.0f, 0.0f, 0.0f, 0.0f};
 	float Width = View.w, Height = View.h;
 
 	View.Draw(ColorRGBA(0, 0, 0, 0.25f), 0, 0);
@@ -4594,7 +4629,7 @@ void CEditor::RenderFileDialog()
 	View.HSplitBottom(14.0f, &View, &FileBox);
 	FileBox.VSplitLeft(55.0f, &FileBoxLabel, &FileBox);
 	View.HSplitBottom(10.0f, &View, nullptr); // some spacing
-	if(m_FileDialogFileType == CEditor::FILETYPE_IMG)
+	if(m_FileDialogFileType == CEditor::FILETYPE_IMG || m_FileDialogFileType == CEditor::FILETYPE_SOUND)
 		View.VSplitMid(&View, &Preview);
 
 	// title
@@ -4737,7 +4772,7 @@ void CEditor::RenderFileDialog()
 			else
 				m_FileDialogFileNameInput.Clear();
 			s_ListBox.ScrollToSelected();
-			m_PreviewImageState = PREVIEWIMAGE_UNLOADED;
+			m_FilePreviewState = PREVIEW_UNLOADED;
 		}
 	}
 
@@ -4745,46 +4780,97 @@ void CEditor::RenderFileDialog()
 
 	if(m_FilesSelectedIndex > -1)
 	{
-		if(m_FileDialogFileType == CEditor::FILETYPE_IMG && m_PreviewImageState == PREVIEWIMAGE_UNLOADED && m_FilesSelectedIndex > -1)
+		if(m_FilePreviewState == PREVIEW_UNLOADED)
 		{
-			if(str_endswith(m_vpFilteredFileList[m_FilesSelectedIndex]->m_aFilename, ".png"))
+			if(m_FileDialogFileType == CEditor::FILETYPE_IMG && str_endswith(m_vpFilteredFileList[m_FilesSelectedIndex]->m_aFilename, ".png"))
 			{
 				char aBuffer[IO_MAX_PATH_LENGTH];
 				str_format(aBuffer, sizeof(aBuffer), "%s/%s", m_pFileDialogPath, m_vpFilteredFileList[m_FilesSelectedIndex]->m_aFilename);
-				if(Graphics()->LoadPNG(&m_FilePreviewImageInfo, aBuffer, IStorage::TYPE_ALL))
+				if(Graphics()->LoadPNG(&m_FilePreviewImageInfo, aBuffer, m_vpFilteredFileList[m_FilesSelectedIndex]->m_StorageType))
 				{
 					Graphics()->UnloadTexture(&m_FilePreviewImage);
 					m_FilePreviewImage = Graphics()->LoadTextureRaw(m_FilePreviewImageInfo.m_Width, m_FilePreviewImageInfo.m_Height, m_FilePreviewImageInfo.m_Format, m_FilePreviewImageInfo.m_pData, m_FilePreviewImageInfo.m_Format, 0);
 					Graphics()->FreePNG(&m_FilePreviewImageInfo);
-					m_PreviewImageState = PREVIEWIMAGE_LOADED;
+					m_FilePreviewState = PREVIEW_LOADED;
 				}
 				else
 				{
-					m_PreviewImageState = PREVIEWIMAGE_ERROR;
+					m_FilePreviewState = PREVIEW_ERROR;
 				}
 			}
+			else if(m_FileDialogFileType == CEditor::FILETYPE_SOUND && str_endswith(m_vpFilteredFileList[m_FilesSelectedIndex]->m_aFilename, ".opus"))
+			{
+				char aBuffer[IO_MAX_PATH_LENGTH];
+				str_format(aBuffer, sizeof(aBuffer), "%s/%s", m_pFileDialogPath, m_vpFilteredFileList[m_FilesSelectedIndex]->m_aFilename);
+				Sound()->UnloadSample(m_FilePreviewSound);
+				m_FilePreviewSound = Sound()->LoadOpus(aBuffer, m_vpFilteredFileList[m_FilesSelectedIndex]->m_StorageType);
+				m_FilePreviewState = m_FilePreviewSound == -1 ? PREVIEW_ERROR : PREVIEW_LOADED;
+			}
 		}
-		if(m_FileDialogFileType == CEditor::FILETYPE_IMG && m_PreviewImageState == PREVIEWIMAGE_LOADED)
-		{
-			int w = m_FilePreviewImageInfo.m_Width;
-			int h = m_FilePreviewImageInfo.m_Height;
-			if(m_FilePreviewImageInfo.m_Width > Preview.w) // NOLINT(clang-analyzer-core.UndefinedBinaryOperatorResult)
-			{
-				h = m_FilePreviewImageInfo.m_Height * Preview.w / m_FilePreviewImageInfo.m_Width;
-				w = Preview.w;
-			}
-			if(h > Preview.h)
-			{
-				w = w * Preview.h / h;
-				h = Preview.h;
-			}
 
-			Graphics()->TextureSet(m_FilePreviewImage);
-			Graphics()->BlendNormal();
-			Graphics()->QuadsBegin();
-			IGraphics::CQuadItem QuadItem(Preview.x, Preview.y, w, h);
-			Graphics()->QuadsDrawTL(&QuadItem, 1);
-			Graphics()->QuadsEnd();
+		if(m_FileDialogFileType == CEditor::FILETYPE_IMG)
+		{
+			Preview.Margin(10.0f, &Preview);
+			if(m_FilePreviewState == PREVIEW_LOADED)
+			{
+				int w = m_FilePreviewImageInfo.m_Width;
+				int h = m_FilePreviewImageInfo.m_Height;
+				if(m_FilePreviewImageInfo.m_Width > Preview.w)
+				{
+					h = m_FilePreviewImageInfo.m_Height * Preview.w / m_FilePreviewImageInfo.m_Width;
+					w = Preview.w;
+				}
+				if(h > Preview.h)
+				{
+					w = w * Preview.h / h;
+					h = Preview.h;
+				}
+
+				Graphics()->TextureSet(m_FilePreviewImage);
+				Graphics()->BlendNormal();
+				Graphics()->QuadsBegin();
+				IGraphics::CQuadItem QuadItem(Preview.x, Preview.y, w, h);
+				Graphics()->QuadsDrawTL(&QuadItem, 1);
+				Graphics()->QuadsEnd();
+			}
+			else if(m_FilePreviewState == PREVIEW_ERROR)
+			{
+				SLabelProperties Props;
+				Props.m_MaxWidth = Preview.w;
+				UI()->DoLabel(&Preview, "Failed to load the image (check the local console for details).", 12.0f, TEXTALIGN_TL, Props);
+			}
+		}
+		else if(m_FileDialogFileType == CEditor::FILETYPE_SOUND)
+		{
+			Preview.Margin(10.0f, &Preview);
+			if(m_FilePreviewState == PREVIEW_LOADED)
+			{
+				CUIRect Button;
+				Preview.HSplitTop(20.0f, &Preview, nullptr);
+				Preview.VSplitLeft(Preview.h, &Button, &Preview);
+				Preview.VSplitLeft(Preview.h / 4.0f, nullptr, &Preview);
+
+				static int s_PlayStopButton;
+				if(DoButton_FontIcon(&s_PlayStopButton, Sound()->IsPlaying(m_FilePreviewSound) ? FONT_ICON_STOP : FONT_ICON_PLAY, 0, &Button, 0, "Play/stop audio preview", IGraphics::CORNER_ALL))
+				{
+					if(Sound()->IsPlaying(m_FilePreviewSound))
+						Sound()->Stop(m_FilePreviewSound);
+					else
+						Sound()->Play(CSounds::CHN_GUI, m_FilePreviewSound, 0);
+				}
+
+				char aDuration[32];
+				char aDurationLabel[64];
+				str_time_float(Sound()->GetSampleDuration(m_FilePreviewSound), TIME_HOURS, aDuration, sizeof(aDuration));
+				str_format(aDurationLabel, sizeof(aDurationLabel), "Duration: %s", aDuration);
+				UI()->DoLabel(&Preview, aDurationLabel, 12.0f, TEXTALIGN_ML);
+			}
+			else if(m_FilePreviewState == PREVIEW_ERROR)
+			{
+				SLabelProperties Props;
+				Props.m_MaxWidth = Preview.w;
+				UI()->DoLabel(&Preview, "Failed to load the sound (check the local console for details). Make sure you enabled sounds in the settings.", 12.0f, TEXTALIGN_TL, Props);
+			}
 		}
 	}
 
@@ -4853,7 +4939,7 @@ void CEditor::RenderFileDialog()
 			m_FileDialogFileNameInput.Clear();
 		if(!WasChanged) // ensure that changed flag is not set if it wasn't previously set, as this would reset the selection after DoEditBox is called
 			m_FileDialogFileNameInput.WasChanged(); // this clears the changed flag
-		m_PreviewImageState = PREVIEWIMAGE_UNLOADED;
+		m_FilePreviewState = PREVIEW_UNLOADED;
 	}
 
 	const float ButtonSpacing = ButtonBar.w > 600.0f ? 40.0f : 10.0f;
@@ -5049,7 +5135,7 @@ void CEditor::FilelistPopulate(int StorageType, bool KeepSelection)
 		else
 			m_aFilesSelectedName[0] = '\0';
 	}
-	m_PreviewImageState = PREVIEWIMAGE_UNLOADED;
+	m_FilePreviewState = PREVIEW_UNLOADED;
 }
 
 void CEditor::InvokeFileDialog(int StorageType, int FileType, const char *pTitle, const char *pButtonText,
@@ -5068,7 +5154,7 @@ void CEditor::InvokeFileDialog(int StorageType, int FileType, const char *pTitle
 	m_aFileDialogCurrentLink[0] = 0;
 	m_pFileDialogPath = m_aFileDialogCurrentFolder;
 	m_FileDialogFileType = FileType;
-	m_PreviewImageState = PREVIEWIMAGE_UNLOADED;
+	m_FilePreviewState = PREVIEW_UNLOADED;
 	m_FileDialogOpening = true;
 
 	if(pDefaultName)
@@ -6176,7 +6262,9 @@ void CEditor::Render()
 
 	// do the toolbar
 	if(m_Mode == MODE_LAYERS)
-		DoToolbar(ToolBar);
+		DoToolbarLayers(ToolBar);
+	else if(m_Mode == MODE_SOUNDS)
+		DoToolbarSounds(ToolBar);
 
 	if(m_Dialog == DIALOG_NONE && m_EditBoxActive == 0)
 	{
