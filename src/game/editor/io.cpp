@@ -38,7 +38,7 @@ bool CEditor::Save(const char *pFilename)
 
 bool CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 {
-	char aBuf[256];
+	char aBuf[IO_MAX_PATH_LENGTH + 64];
 	str_format(aBuf, sizeof(aBuf), "saving to '%s'...", pFileName);
 	m_pEditor->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "editor", aBuf);
 	CDataFileWriter df;
@@ -488,7 +488,7 @@ bool CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Stora
 
 				if(pItem->m_External)
 				{
-					char aBuf[256];
+					char aBuf[IO_MAX_PATH_LENGTH];
 					str_format(aBuf, sizeof(aBuf), "mapres/%s.png", pName);
 
 					// load external
@@ -550,7 +550,7 @@ bool CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Stora
 
 				if(pItem->m_External)
 				{
-					char aBuf[256];
+					char aBuf[IO_MAX_PATH_LENGTH];
 					str_format(aBuf, sizeof(aBuf), "mapres/%s.opus", pName);
 
 					// load external
