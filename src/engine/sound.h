@@ -6,6 +6,7 @@
 #include "kernel.h"
 
 #include <engine/shared/video.h>
+#include <engine/storage.h>
 
 class ISound : public IInterface
 {
@@ -63,8 +64,8 @@ public:
 
 	virtual bool IsSoundEnabled() = 0;
 
-	virtual int LoadWV(const char *pFilename) = 0;
-	virtual int LoadOpus(const char *pFilename) = 0;
+	virtual int LoadWV(const char *pFilename, int StorageType = IStorage::TYPE_ALL) = 0;
+	virtual int LoadOpus(const char *pFilename, int StorageType = IStorage::TYPE_ALL) = 0;
 	virtual int LoadWVFromMem(const void *pData, unsigned DataSize, bool FromEditor = false) = 0;
 	virtual int LoadOpusFromMem(const void *pData, unsigned DataSize, bool FromEditor = false) = 0;
 	virtual void UnloadSample(int SampleID) = 0;
