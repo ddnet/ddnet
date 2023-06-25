@@ -4907,7 +4907,7 @@ void CEditor::RenderFileDialog()
 			{
 				if(Storage()->FileExists(m_aFileSaveName, IStorage::TYPE_SAVE))
 				{
-					m_PopupEventType = POPEVENT_SAVE;
+					m_PopupEventType = m_pfnFileDialogFunc == &CallbackSaveCopyMap ? POPEVENT_SAVE_COPY : POPEVENT_SAVE;
 					m_PopupEventActivated = true;
 				}
 				else if(m_pfnFileDialogFunc)
@@ -6240,7 +6240,7 @@ void CEditor::Render()
 			}
 		}
 
-		// ctrl+shift+alt+s to save as
+		// ctrl+shift+alt+s to save copy
 		if(Input()->KeyPress(KEY_S) && ModPressed && ShiftPressed && AltPressed)
 			InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_MAP, "Save map", "Save", "maps", "", CallbackSaveCopyMap, this);
 		// ctrl+shift+s to save as

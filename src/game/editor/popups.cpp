@@ -1589,7 +1589,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupEvent(void *pContext, CUIRect View, 
 		pTitle = "New map";
 		pMessage = "The map contains unsaved data, you might want to save it before you create a new map.\n\nContinue anyway?";
 	}
-	else if(pEditor->m_PopupEventType == POPEVENT_SAVE)
+	else if(pEditor->m_PopupEventType == POPEVENT_SAVE || pEditor->m_PopupEventType == POPEVENT_SAVE_COPY)
 	{
 		pTitle = "Save map";
 		pMessage = "The file already exists.\n\nDo you want to overwrite the map?";
@@ -1675,6 +1675,11 @@ CUI::EPopupMenuFunctionResult CEditor::PopupEvent(void *pContext, CUIRect View, 
 		else if(pEditor->m_PopupEventType == POPEVENT_SAVE)
 		{
 			CallbackSaveMap(pEditor->m_aFileSaveName, IStorage::TYPE_SAVE, pEditor);
+			return CUI::POPUP_CLOSE_CURRENT;
+		}
+		else if(pEditor->m_PopupEventType == POPEVENT_SAVE_COPY)
+		{
+			CallbackSaveCopyMap(pEditor->m_aFileSaveName, IStorage::TYPE_SAVE, pEditor);
 			return CUI::POPUP_CLOSE_CURRENT;
 		}
 		else if(pEditor->m_PopupEventType == POPEVENT_PLACE_BORDER_TILES)
