@@ -2043,6 +2043,23 @@ char *fs_getcwd(char *buffer, int buffer_size);
 const char *fs_filename(const char *path);
 
 /**
+ * Splits a filename into name (without extension) and file extension.
+ *
+ * @ingroup Filesystem
+ *
+ * @param filename The filename to split.
+ * @param name Buffer that will receive the name without extension, may be nullptr.
+ * @param name_size Size of the name buffer (ignored if name is nullptr).
+ * @param extension Buffer that will receive the extension, may be nullptr.
+ * @param extension_size Size of the extension buffer (ignored if extension is nullptr).
+ *
+ * @remark Does NOT handle forward and backward slashes.
+ * @remark No distinction between files and folders is being made.
+ * @remark The strings are treated as zero-terminated strings.
+ */
+void fs_split_file_extension(const char *filename, char *name, size_t name_size, char *extension = nullptr, size_t extension_size = 0);
+
+/**
  * Get the parent directory of a directory.
  *
  * @ingroup Filesystem
