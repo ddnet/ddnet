@@ -4907,7 +4907,7 @@ void CEditor::RenderFileDialog()
 			{
 				if(Storage()->FileExists(m_aFileSaveName, IStorage::TYPE_SAVE))
 				{
-					m_PopupEventType = POPEVENT_SAVE;
+					m_PopupEventType = m_pfnFileDialogFunc == &CallbackSaveCopyMap ? POPEVENT_SAVE_COPY : POPEVENT_SAVE;
 					m_PopupEventActivated = true;
 				}
 				else if(m_pfnFileDialogFunc)
@@ -6240,7 +6240,7 @@ void CEditor::Render()
 			}
 		}
 
-		// ctrl+shift+alt+s to save as
+		// ctrl+shift+alt+s to save copy
 		if(Input()->KeyPress(KEY_S) && ModPressed && ShiftPressed && AltPressed)
 			InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_MAP, "Save map", "Save", "maps", "", CallbackSaveCopyMap, this);
 		// ctrl+shift+s to save as
@@ -6812,6 +6812,68 @@ void CEditor::PlaceBorderTiles()
 		pT->m_pTiles[i].m_Index = 1;
 }
 
+void CEditor::HandleCursorMovement()
+{
+	static float s_MouseX = 0.0f;
+	static float s_MouseY = 0.0f;
+
+	float MouseRelX = 0.0f, MouseRelY = 0.0f;
+	IInput::ECursorType CursorType = Input()->CursorRelative(&MouseRelX, &MouseRelY);
+	if(CursorType != IInput::CURSOR_NONE)
+		UI()->ConvertMouseMove(&MouseRelX, &MouseRelY, CursorType);
+
+	m_MouseDeltaX += MouseRelX;
+	m_MouseDeltaY += MouseRelY;
+
+	if(!UI()->CheckMouseLock())
+	{
+		s_MouseX = clamp<float>(s_MouseX + MouseRelX, 0.0f, Graphics()->WindowWidth());
+		s_MouseY = clamp<float>(s_MouseY + MouseRelY, 0.0f, Graphics()->WindowHeight());
+	}
+
+	// update positions for ui, but only update ui when rendering
+	m_MouseX = UI()->Screen()->w * ((float)s_MouseX / Graphics()->WindowWidth());
+	m_MouseY = UI()->Screen()->h * ((float)s_MouseY / Graphics()->WindowHeight());
+
+	// fix correct world x and y
+	CLayerGroup *pGroup = GetSelectedGroup();
+	if(pGroup)
+	{
+		float aPoints[4];
+		pGroup->Mapping(aPoints);
+
+		float WorldWidth = aPoints[2] - aPoints[0];
+		float WorldHeight = aPoints[3] - aPoints[1];
+
+		m_MouseWScale = WorldWidth / Graphics()->WindowWidth();
+
+		m_MouseWorldX = aPoints[0] + WorldWidth * (s_MouseX / Graphics()->WindowWidth());
+		m_MouseWorldY = aPoints[1] + WorldHeight * (s_MouseY / Graphics()->WindowHeight());
+		m_MouseDeltaWx = m_MouseDeltaX * (WorldWidth / Graphics()->WindowWidth());
+		m_MouseDeltaWy = m_MouseDeltaY * (WorldHeight / Graphics()->WindowHeight());
+	}
+	else
+	{
+		m_MouseWorldX = 0.0f;
+		m_MouseWorldY = 0.0f;
+	}
+
+	for(CLayerGroup *pGameGroup : m_Map.m_vpGroups)
+	{
+		if(!pGameGroup->m_GameGroup)
+			continue;
+
+		float aPoints[4];
+		pGameGroup->Mapping(aPoints);
+
+		float WorldWidth = aPoints[2] - aPoints[0];
+		float WorldHeight = aPoints[3] - aPoints[1];
+
+		m_MouseWorldNoParaX = aPoints[0] + WorldWidth * (s_MouseX / Graphics()->WindowWidth());
+		m_MouseWorldNoParaY = aPoints[1] + WorldHeight * (s_MouseY / Graphics()->WindowHeight());
+	}
+}
+
 void CEditor::OnUpdate()
 {
 	CUIElementBase::Init(UI()); // update static pointer because game and editor use separate UI
@@ -6822,67 +6884,7 @@ void CEditor::OnUpdate()
 		Reset();
 	}
 
-	// handle cursor movement
-	{
-		static float s_MouseX = 0.0f;
-		static float s_MouseY = 0.0f;
-
-		float MouseRelX = 0.0f, MouseRelY = 0.0f;
-		IInput::ECursorType CursorType = Input()->CursorRelative(&MouseRelX, &MouseRelY);
-		if(CursorType != IInput::CURSOR_NONE)
-			UI()->ConvertMouseMove(&MouseRelX, &MouseRelY, CursorType);
-
-		m_MouseDeltaX += MouseRelX;
-		m_MouseDeltaY += MouseRelY;
-
-		if(!UI()->CheckMouseLock())
-		{
-			s_MouseX = clamp<float>(s_MouseX + MouseRelX, 0.0f, Graphics()->WindowWidth());
-			s_MouseY = clamp<float>(s_MouseY + MouseRelY, 0.0f, Graphics()->WindowHeight());
-		}
-
-		// update positions for ui, but only update ui when rendering
-		m_MouseX = UI()->Screen()->w * ((float)s_MouseX / Graphics()->WindowWidth());
-		m_MouseY = UI()->Screen()->h * ((float)s_MouseY / Graphics()->WindowHeight());
-
-		// fix correct world x and y
-		CLayerGroup *pGroup = GetSelectedGroup();
-		if(pGroup)
-		{
-			float aPoints[4];
-			pGroup->Mapping(aPoints);
-
-			float WorldWidth = aPoints[2] - aPoints[0];
-			float WorldHeight = aPoints[3] - aPoints[1];
-
-			m_MouseWScale = WorldWidth / Graphics()->WindowWidth();
-
-			m_MouseWorldX = aPoints[0] + WorldWidth * (s_MouseX / Graphics()->WindowWidth());
-			m_MouseWorldY = aPoints[1] + WorldHeight * (s_MouseY / Graphics()->WindowHeight());
-			m_MouseDeltaWx = m_MouseDeltaX * (WorldWidth / Graphics()->WindowWidth());
-			m_MouseDeltaWy = m_MouseDeltaY * (WorldHeight / Graphics()->WindowHeight());
-		}
-		else
-		{
-			m_MouseWorldX = 0.0f;
-			m_MouseWorldY = 0.0f;
-		}
-
-		for(CLayerGroup *pGameGroup : m_Map.m_vpGroups)
-		{
-			if(!pGameGroup->m_GameGroup)
-				continue;
-
-			float aPoints[4];
-			pGameGroup->Mapping(aPoints);
-
-			float WorldWidth = aPoints[2] - aPoints[0];
-			float WorldHeight = aPoints[3] - aPoints[1];
-
-			m_MouseWorldNoParaX = aPoints[0] + WorldWidth * (s_MouseX / Graphics()->WindowWidth());
-			m_MouseWorldNoParaY = aPoints[1] + WorldHeight * (s_MouseY / Graphics()->WindowHeight());
-		}
-	}
+	HandleCursorMovement();
 }
 
 void CEditor::OnRender()

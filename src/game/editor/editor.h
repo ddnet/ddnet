@@ -437,8 +437,8 @@ public:
 	void CreateDefault(IGraphics::CTextureHandle EntitiesTexture);
 
 	// io
-	bool Save(class IStorage *pStorage, const char *pFilename);
-	bool Load(class IStorage *pStorage, const char *pFilename, int StorageType);
+	bool Save(const char *pFilename);
+	bool Load(const char *pFilename, int StorageType);
 
 	// DDRace
 
@@ -848,6 +848,8 @@ public:
 	void UpdateMentions() override { m_Mentions++; }
 	void ResetMentions() override { m_Mentions = 0; }
 
+	void HandleCursorMovement();
+
 	CLayerGroup *m_apSavedBrushes[10];
 
 	void RefreshFilteredFileList();
@@ -903,6 +905,7 @@ public:
 		POPEVENT_LOADCURRENT,
 		POPEVENT_NEW,
 		POPEVENT_SAVE,
+		POPEVENT_SAVE_COPY,
 		POPEVENT_LARGELAYER,
 		POPEVENT_PREVENTUNUSEDTILES,
 		POPEVENT_IMAGEDIV16,
