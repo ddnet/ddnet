@@ -481,7 +481,7 @@ Are you sure that you want to disconnect?
 Disconnect Dummy
 == Відключити Dummy
 
-Are you sure that you want to disconnect your даммі?
+Are you sure that you want to disconnect your dummy?
 == Ви впевнені, що хочете відключити свого даммі?
 
 Welcome to DDNet
