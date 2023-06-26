@@ -877,6 +877,7 @@ public:
 	void Render();
 
 	void RenderPressedKeys(CUIRect View);
+	void RenderMousePointer();
 
 	void ResetMenuBackgroundPositions();
 

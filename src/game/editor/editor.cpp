@@ -6441,22 +6441,7 @@ void CEditor::Render()
 		RenderStatusbar(StatusBar);
 
 	RenderPressedKeys(View);
-
-	if(m_ShowMousePointer)
-	{
-		// render butt ugly mouse cursor
-		float mx = UI()->MouseX();
-		float my = UI()->MouseY();
-		Graphics()->WrapClamp();
-		Graphics()->TextureSet(m_CursorTexture);
-		Graphics()->QuadsBegin();
-		if(ms_pUiGotContext == UI()->HotItem())
-			Graphics()->SetColor(1, 0, 0, 1);
-		IGraphics::CQuadItem QuadItem(mx, my, 16.0f, 16.0f);
-		Graphics()->QuadsDrawTL(&QuadItem, 1);
-		Graphics()->QuadsEnd();
-		Graphics()->WrapNormal();
-	}
+	RenderMousePointer();
 }
 
 void CEditor::RenderPressedKeys(CUIRect View)
@@ -6479,6 +6464,22 @@ void CEditor::RenderPressedKeys(CUIRect View)
 			NKeys++;
 		}
 	}
+}
+
+void CEditor::RenderMousePointer()
+{
+	if(!m_ShowMousePointer)
+		return;
+
+	Graphics()->WrapClamp();
+	Graphics()->TextureSet(m_CursorTexture);
+	Graphics()->QuadsBegin();
+	if(ms_pUiGotContext == UI()->HotItem())
+		Graphics()->SetColor(1, 0, 0, 1);
+	IGraphics::CQuadItem QuadItem(UI()->MouseX(), UI()->MouseY(), 16.0f, 16.0f);
+	Graphics()->QuadsDrawTL(&QuadItem, 1);
+	Graphics()->QuadsEnd();
+	Graphics()->WrapNormal();
 }
 
 void CEditor::Reset(bool CreateDefault)
