@@ -37,7 +37,7 @@ void CLayerQuads::Render(bool QuadPicker)
 
 CQuad *CLayerQuads::NewQuad(int x, int y, int Width, int Height)
 {
-	m_pEditor->m_Map.m_Modified = true;
+	m_pEditor->m_Map.OnModify();
 
 	m_vQuads.emplace_back();
 	CQuad *pQuad = &m_vQuads[m_vQuads.size() - 1];
@@ -153,7 +153,7 @@ void CLayerQuads::BrushPlace(CLayer *pBrush, float wx, float wy)
 
 		m_vQuads.push_back(n);
 	}
-	m_pEditor->m_Map.m_Modified = true;
+	m_pEditor->m_Map.OnModify();
 }
 
 void CLayerQuads::BrushFlipX()
@@ -163,7 +163,7 @@ void CLayerQuads::BrushFlipX()
 		std::swap(Quad.m_aPoints[0], Quad.m_aPoints[1]);
 		std::swap(Quad.m_aPoints[2], Quad.m_aPoints[3]);
 	}
-	m_pEditor->m_Map.m_Modified = true;
+	m_pEditor->m_Map.OnModify();
 }
 
 void CLayerQuads::BrushFlipY()
@@ -173,7 +173,7 @@ void CLayerQuads::BrushFlipY()
 		std::swap(Quad.m_aPoints[0], Quad.m_aPoints[2]);
 		std::swap(Quad.m_aPoints[1], Quad.m_aPoints[3]);
 	}
-	m_pEditor->m_Map.m_Modified = true;
+	m_pEditor->m_Map.OnModify();
 }
 
 void Rotate(vec2 *pCenter, vec2 *pPoint, float Rotation)
@@ -236,7 +236,7 @@ CUI::EPopupMenuFunctionResult CLayerQuads::RenderProperties(CUIRect *pToolBox)
 	int Prop = m_pEditor->DoProperties(pToolBox, aProps, s_aIds, &NewVal);
 	if(Prop != -1)
 	{
-		m_pEditor->m_Map.m_Modified = true;
+		m_pEditor->m_Map.OnModify();
 	}
 
 	if(Prop == PROP_IMAGE)
@@ -277,7 +277,7 @@ int CLayerQuads::SwapQuads(int Index0, int Index1)
 		return Index0;
 	if(Index0 == Index1)
 		return Index0;
-	m_pEditor->m_Map.m_Modified = true;
+	m_pEditor->m_Map.OnModify();
 	std::swap(m_vQuads[Index0], m_vQuads[Index1]);
 	return Index1;
 }

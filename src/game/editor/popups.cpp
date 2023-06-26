@@ -366,7 +366,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupGroup(void *pContext, CUIRect View, 
 					if(!Found)
 					{
 						pGameLayer->m_pTiles[y * pGameLayer->m_Width + x].m_Index = TILE_AIR;
-						pEditor->m_Map.m_Modified = true;
+						pEditor->m_Map.OnModify();
 					}
 				}
 			}
@@ -512,7 +512,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupGroup(void *pContext, CUIRect View, 
 		static CLineInput s_NameInput;
 		s_NameInput.SetBuffer(pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_aName, sizeof(pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_aName));
 		if(pEditor->DoEditBox(&s_NameInput, &Button, 10.0f))
-			pEditor->m_Map.m_Modified = true;
+			pEditor->m_Map.OnModify();
 	}
 
 	enum
@@ -557,7 +557,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupGroup(void *pContext, CUIRect View, 
 	int Prop = pEditor->DoProperties(&View, aProps, s_aIds, &NewVal);
 	if(Prop != -1)
 	{
-		pEditor->m_Map.m_Modified = true;
+		pEditor->m_Map.OnModify();
 	}
 
 	if(Prop == PROP_ORDER)
@@ -683,7 +683,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupLayer(void *pContext, CUIRect View, 
 		static CLineInput s_NameInput;
 		s_NameInput.SetBuffer(pCurrentLayer->m_aName, sizeof(pCurrentLayer->m_aName));
 		if(pEditor->DoEditBox(&s_NameInput, &EditBox, 10.0f))
-			pEditor->m_Map.m_Modified = true;
+			pEditor->m_Map.OnModify();
 	}
 
 	// spacing if any button was rendered
@@ -717,7 +717,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupLayer(void *pContext, CUIRect View, 
 	int Prop = pEditor->DoProperties(&View, aProps, s_aIds, &NewVal);
 	if(Prop != -1)
 	{
-		pEditor->m_Map.m_Modified = true;
+		pEditor->m_Map.OnModify();
 	}
 
 	if(Prop == PROP_ORDER)
@@ -762,7 +762,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupQuad(void *pContext, CUIRect View, b
 	{
 		if(pLayer)
 		{
-			pEditor->m_Map.m_Modified = true;
+			pEditor->m_Map.OnModify();
 			pEditor->DeleteSelectedQuads();
 		}
 		return CUI::POPUP_CLOSE_CURRENT;
@@ -802,7 +802,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupQuad(void *pContext, CUIRect View, b
 				pQuad->m_aPoints[2].y = Top + Height;
 				pQuad->m_aPoints[3].x = Right;
 				pQuad->m_aPoints[3].y = Top + Height;
-				pEditor->m_Map.m_Modified = true;
+				pEditor->m_Map.OnModify();
 			}
 			return CUI::POPUP_CLOSE_CURRENT;
 		}
@@ -821,7 +821,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupQuad(void *pContext, CUIRect View, b
 				pQuad->m_aPoints[k].x = 1000.0f * (pQuad->m_aPoints[k].x / 1000);
 				pQuad->m_aPoints[k].y = 1000.0f * (pQuad->m_aPoints[k].y / 1000);
 			}
-			pEditor->m_Map.m_Modified = true;
+			pEditor->m_Map.OnModify();
 		}
 		return CUI::POPUP_CLOSE_CURRENT;
 	}
@@ -859,7 +859,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupQuad(void *pContext, CUIRect View, b
 			pQuad->m_aPoints[2].y = Bottom;
 			pQuad->m_aPoints[3].x = Right;
 			pQuad->m_aPoints[3].y = Bottom;
-			pEditor->m_Map.m_Modified = true;
+			pEditor->m_Map.OnModify();
 		}
 		return CUI::POPUP_CLOSE_CURRENT;
 	}
@@ -904,7 +904,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupQuad(void *pContext, CUIRect View, b
 	int Prop = pEditor->DoProperties(&View, aProps, s_aIds, &NewVal);
 	if(Prop != -1)
 	{
-		pEditor->m_Map.m_Modified = true;
+		pEditor->m_Map.OnModify();
 	}
 
 	const float OffsetX = i2fx(NewVal) - pCurrentQuad->m_aPoints[4].x;
@@ -988,7 +988,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupSource(void *pContext, CUIRect View,
 		CLayerSounds *pLayer = (CLayerSounds *)pEditor->GetSelectedLayerType(0, LAYERTYPE_SOUNDS);
 		if(pLayer)
 		{
-			pEditor->m_Map.m_Modified = true;
+			pEditor->m_Map.OnModify();
 			pLayer->m_vSources.erase(pLayer->m_vSources.begin() + pEditor->m_SelectedSource);
 			pEditor->m_SelectedSource--;
 		}
@@ -1062,7 +1062,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupSource(void *pContext, CUIRect View,
 	int Prop = pEditor->DoProperties(&View, aProps, s_aIds, &NewVal);
 	if(Prop != -1)
 	{
-		pEditor->m_Map.m_Modified = true;
+		pEditor->m_Map.OnModify();
 	}
 
 	if(Prop == PROP_POS_X)
@@ -1145,7 +1145,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupSource(void *pContext, CUIRect View,
 		Prop = pEditor->DoProperties(&View, aCircleProps, s_aCircleIds, &NewVal);
 		if(Prop != -1)
 		{
-			pEditor->m_Map.m_Modified = true;
+			pEditor->m_Map.OnModify();
 		}
 
 		if(Prop == PROP_CIRCLE_RADIUS)
@@ -1176,7 +1176,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupSource(void *pContext, CUIRect View,
 		Prop = pEditor->DoProperties(&View, aRectangleProps, s_aRectangleIds, &NewVal);
 		if(Prop != -1)
 		{
-			pEditor->m_Map.m_Modified = true;
+			pEditor->m_Map.OnModify();
 		}
 
 		if(Prop == PROP_RECTANGLE_WIDTH)
@@ -1236,7 +1236,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupPoint(void *pContext, CUIRect View, 
 	int Prop = pEditor->DoProperties(&View, aProps, s_aIds, &NewVal);
 	if(Prop != -1)
 	{
-		pEditor->m_Map.m_Modified = true;
+		pEditor->m_Map.OnModify();
 	}
 
 	for(auto &pQuad : vpQuads)
