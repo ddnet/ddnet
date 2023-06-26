@@ -146,6 +146,19 @@ void CProjectile::Tick()
 		}
 		m_MarkedForDestroy = true;
 	}
+
+	int x = Collision()->GetIndex(PrevPos, CurPos);
+	int z;
+	if(g_Config.m_SvOldTeleportWeapons)
+		z = Collision()->IsTeleport(x);
+	else
+		z = Collision()->IsTeleportWeapon(x);
+	if(z && !GameWorld()->m_pTeleOuts[z - 1].empty())
+	{
+		int TeleOut = GameWorld()->m_Core.RandomOr0(GameWorld()->m_pTeleOuts[z - 1].size());
+		m_Pos = GameWorld()->m_pTeleOuts->at(z - 1)[TeleOut];
+		m_StartTick = GameWorld()->GameTick();
+	}
 }
 
 // DDRace

@@ -150,8 +150,17 @@ void CLaser::DoBounce()
 			}
 			m_ZeroEnergyBounceInLastTick = Distance == 0.0f;
 
-			m_Bounces++;
-			m_WasTele = false;
+			if(Res == TILE_TELEINWEAPON && !GameWorld()->m_pTeleOuts[z - 1].empty())
+			{
+				int TeleOut = GameWorld()->m_Core.RandomOr0(GameWorld()->m_pTeleOuts[z - 1].size());
+				m_TelePos = GameWorld()->m_pTeleOuts->at(z - 1)[TeleOut];
+				m_WasTele = true;
+			}
+			else
+			{
+				m_Bounces++;
+				m_WasTele = false;
+			}
 
 			int BounceNum = GetTuning(m_TuneZone)->m_LaserBounceNum;
 

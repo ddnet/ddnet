@@ -551,6 +551,12 @@ void CGameWorld::NetObjAdd(int ObjID, int ObjType, const void *pObjData, const C
 	}
 }
 
+void CGameWorld::SetTeleports(std::map<int, std::vector<vec2>> *pTeleOuts, std::map<int, std::vector<vec2>> *pTeleCheckOuts)
+{
+	m_pTeleOuts = pTeleOuts;
+	m_pTeleCheckOuts = pTeleCheckOuts;
+}
+
 void CGameWorld::NetObjEnd()
 {
 	// keep predicting hooked characters, based on hook position
@@ -607,6 +613,9 @@ void CGameWorld::CopyWorld(CGameWorld *pFrom)
 	m_pTuningList = pFrom->m_pTuningList;
 	m_Teams = pFrom->m_Teams;
 	m_Core.m_vSwitchers = pFrom->m_Core.m_vSwitchers;
+
+	m_pTeleCheckOuts = pFrom->m_pTeleCheckOuts;
+	m_pTeleOuts = pFrom->m_pTeleOuts;
 	// delete the previous entities
 	Clear();
 	for(int i = 0; i < MAX_CLIENTS; i++)
