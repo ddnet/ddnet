@@ -6440,25 +6440,7 @@ void CEditor::Render()
 	if(m_GuiActive)
 		RenderStatusbar(StatusBar);
 
-	//
-	if(g_Config.m_EdShowkeys)
-	{
-		UI()->MapScreen();
-		CTextCursor Cursor;
-		TextRender()->SetCursor(&Cursor, View.x + 10, View.y + View.h - 24 - 10, 24.0f, TEXTFLAG_RENDER);
-
-		int NKeys = 0;
-		for(int i = 0; i < KEY_LAST; i++)
-		{
-			if(Input()->KeyIsPressed(i))
-			{
-				if(NKeys)
-					TextRender()->TextEx(&Cursor, " + ", -1);
-				TextRender()->TextEx(&Cursor, Input()->KeyName(i), -1);
-				NKeys++;
-			}
-		}
-	}
+	RenderPressedKeys(View);
 
 	if(m_ShowMousePointer)
 	{
@@ -6474,6 +6456,28 @@ void CEditor::Render()
 		Graphics()->QuadsDrawTL(&QuadItem, 1);
 		Graphics()->QuadsEnd();
 		Graphics()->WrapNormal();
+	}
+}
+
+void CEditor::RenderPressedKeys(CUIRect View)
+{
+	if(!g_Config.m_EdShowkeys)
+		return;
+
+	UI()->MapScreen();
+	CTextCursor Cursor;
+	TextRender()->SetCursor(&Cursor, View.x + 10, View.y + View.h - 24 - 10, 24.0f, TEXTFLAG_RENDER);
+
+	int NKeys = 0;
+	for(int i = 0; i < KEY_LAST; i++)
+	{
+		if(Input()->KeyIsPressed(i))
+		{
+			if(NKeys)
+				TextRender()->TextEx(&Cursor, " + ", -1);
+			TextRender()->TextEx(&Cursor, Input()->KeyName(i), -1);
+			NKeys++;
+		}
 	}
 }
 

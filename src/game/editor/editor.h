@@ -876,6 +876,8 @@ public:
 	void LoadCurrentMap();
 	void Render();
 
+	void RenderPressedKeys(CUIRect View);
+
 	void ResetMenuBackgroundPositions();
 
 	std::vector<CQuad *> GetSelectedQuads();
