@@ -710,11 +710,11 @@ class CEditor : public IEditor
 
 	int GetTextureUsageFlag();
 
-	enum EPreviewImageState
+	enum EPreviewState
 	{
-		PREVIEWIMAGE_UNLOADED,
-		PREVIEWIMAGE_LOADED,
-		PREVIEWIMAGE_ERROR,
+		PREVIEW_UNLOADED,
+		PREVIEW_LOADED,
+		PREVIEW_ERROR,
 	};
 
 public:
@@ -775,7 +775,8 @@ public:
 		m_FilesSelectedIndex = -1;
 
 		m_FilePreviewImage.Invalidate();
-		m_PreviewImageState = PREVIEWIMAGE_UNLOADED;
+		m_FilePreviewSound = -1;
+		m_FilePreviewState = PREVIEW_UNLOADED;
 
 		m_SelectEntitiesImage = "DDNet";
 
@@ -945,8 +946,10 @@ public:
 	int m_FileDialogFileType;
 	int m_FilesSelectedIndex;
 	CLineInputBuffered<IO_MAX_PATH_LENGTH> m_FileDialogNewFolderNameInput;
+
 	IGraphics::CTextureHandle m_FilePreviewImage;
-	EPreviewImageState m_PreviewImageState;
+	int m_FilePreviewSound;
+	EPreviewState m_FilePreviewState;
 	CImageInfo m_FilePreviewImageInfo;
 	bool m_FileDialogOpening;
 
@@ -1212,7 +1215,8 @@ public:
 	void DoSoundSource(CSoundSource *pSource, int Index);
 
 	void DoMapEditor(CUIRect View);
-	void DoToolbar(CUIRect Toolbar);
+	void DoToolbarLayers(CUIRect Toolbar);
+	void DoToolbarSounds(CUIRect Toolbar);
 	void DoQuad(CQuad *pQuad, int Index);
 	ColorRGBA GetButtonColor(const void *pID, int Checked);
 
