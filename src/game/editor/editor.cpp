@@ -6441,6 +6441,7 @@ void CEditor::Render()
 		RenderStatusbar(StatusBar);
 
 	RenderPressedKeys(View);
+	RenderSavingIndicator(View);
 	RenderMousePointer();
 }
 
@@ -6464,6 +6465,17 @@ void CEditor::RenderPressedKeys(CUIRect View)
 			NKeys++;
 		}
 	}
+}
+
+void CEditor::RenderSavingIndicator(CUIRect View)
+{
+	if(m_lpWriterFinishJobs.empty())
+		return;
+
+	UI()->MapScreen();
+	CUIRect Label;
+	View.Margin(20.0f, &Label);
+	UI()->DoLabel(&Label, "Saving…", 24.0f, TEXTALIGN_BR);
 }
 
 void CEditor::RenderMousePointer()
@@ -6857,6 +6869,7 @@ void CEditor::Init()
 	m_pClient = Kernel()->RequestInterface<IClient>();
 	m_pConfig = Kernel()->RequestInterface<IConfigManager>()->Values();
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
+	m_pEngine = Kernel()->RequestInterface<IEngine>();
 	m_pGraphics = Kernel()->RequestInterface<IGraphics>();
 	m_pTextRender = Kernel()->RequestInterface<ITextRender>();
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
@@ -7060,6 +7073,41 @@ bool CEditor::PerformAutosave()
 	}
 }
 
+void CEditor::HandleWriterFinishJobs()
+{
+	if(m_lpWriterFinishJobs.empty())
+		return;
+
+	std::shared_ptr<CDataFileWriterFinishJob> pJob = m_lpWriterFinishJobs.front();
+	if(pJob->Status() != IJob::STATE_DONE)
+		return;
+
+	char aBuf[IO_MAX_PATH_LENGTH + 32];
+	str_format(aBuf, sizeof(aBuf), "saving '%s' done", pJob->GetFileName());
+	Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "editor", aBuf);
+
+	// send rcon.. if we can
+	if(Client()->RconAuthed())
+	{
+		CServerInfo CurrentServerInfo;
+		Client()->GetServerInfo(&CurrentServerInfo);
+		NETADDR ServerAddr = Client()->ServerAddress();
+		const unsigned char aIpv4Localhost[16] = {127, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+		const unsigned char aIpv6Localhost[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
+
+		// and if we're on localhost
+		if(!mem_comp(ServerAddr.ip, aIpv4Localhost, sizeof(aIpv4Localhost)) || !mem_comp(ServerAddr.ip, aIpv6Localhost, sizeof(aIpv6Localhost)))
+		{
+			char aMapName[128];
+			IStorage::StripPathAndExtension(pJob->GetFileName(), aMapName, sizeof(aMapName));
+			if(!str_comp(aMapName, CurrentServerInfo.m_aMap))
+				Client()->Rcon("reload");
+		}
+	}
+
+	m_lpWriterFinishJobs.pop_front();
+}
+
 void CEditor::OnUpdate()
 {
 	CUIElementBase::Init(UI()); // update static pointer because game and editor use separate UI
@@ -7072,6 +7120,7 @@ void CEditor::OnUpdate()
 
 	HandleCursorMovement();
 	HandleAutosave();
+	HandleWriterFinishJobs();
 }
 
 void CEditor::OnRender()

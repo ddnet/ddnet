@@ -33,6 +33,10 @@ struct CSoundSource_DEPRECATED
 
 bool CEditor::Save(const char *pFilename)
 {
+	// Check if file with this name is already being saved at the moment
+	if(std::any_of(std::begin(m_lpWriterFinishJobs), std::end(m_lpWriterFinishJobs), [pFilename](const std::shared_ptr<CDataFileWriterFinishJob> &Job) { return str_comp(pFilename, Job->GetFileName()) == 0; }))
+		return false;
+
 	return m_Map.Save(pFilename);
 }
 
@@ -372,27 +376,9 @@ bool CEditorMap::Save(const char *pFileName)
 	free(pPoints);
 
 	// finish the data file
-	df.Finish();
-	m_pEditor->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "editor", "saving done");
-
-	// send rcon.. if we can
-	if(m_pEditor->Client()->RconAuthed())
-	{
-		CServerInfo CurrentServerInfo;
-		m_pEditor->Client()->GetServerInfo(&CurrentServerInfo);
-		NETADDR ServerAddr = m_pEditor->Client()->ServerAddress();
-		const unsigned char aIpv4Localhost[16] = {127, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-		const unsigned char aIpv6Localhost[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
-
-		// and if we're on localhost
-		if(!mem_comp(ServerAddr.ip, aIpv4Localhost, sizeof(aIpv4Localhost)) || !mem_comp(ServerAddr.ip, aIpv6Localhost, sizeof(aIpv6Localhost)))
-		{
-			char aMapName[128];
-			IStorage::StripPathAndExtension(pFileName, aMapName, sizeof(aMapName));
-			if(!str_comp(aMapName, CurrentServerInfo.m_aMap))
-				m_pEditor->Client()->Rcon("reload");
-		}
-	}
+	std::shared_ptr<CDataFileWriterFinishJob> pWriterFinishJob = std::make_shared<CDataFileWriterFinishJob>(pFileName, std::move(df));
+	m_pEditor->Engine()->AddJob(pWriterFinishJob);
+	m_pEditor->m_lpWriterFinishJobs.push_back(pWriterFinishJob);
 
 	return true;
 }

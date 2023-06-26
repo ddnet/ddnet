@@ -12,11 +12,15 @@
 #include <game/mapitems_ex.h>
 
 #include <engine/editor.h>
+#include <engine/engine.h>
 #include <engine/graphics.h>
+#include <engine/shared/datafile.h>
+#include <engine/shared/jobs.h>
 
 #include "auto_map.h"
 
 #include <chrono>
+#include <list>
 #include <string>
 #include <vector>
 
@@ -691,16 +695,37 @@ public:
 	CUI::EPopupMenuFunctionResult RenderProperties(CUIRect *pToolbox) override;
 };
 
+class CDataFileWriterFinishJob : public IJob
+{
+	char m_aFileName[IO_MAX_PATH_LENGTH];
+	CDataFileWriter m_Writer;
+
+	void Run() override
+	{
+		m_Writer.Finish();
+	}
+
+public:
+	CDataFileWriterFinishJob(const char *pFileName, CDataFileWriter &&Writer) :
+		m_Writer(std::move(Writer))
+	{
+		str_copy(m_aFileName, pFileName);
+	}
+
+	const char *GetFileName() const { return m_aFileName; }
+};
+
 class CEditor : public IEditor
 {
-	class IInput *m_pInput;
-	class IClient *m_pClient;
-	class CConfig *m_pConfig;
-	class IConsole *m_pConsole;
-	class IGraphics *m_pGraphics;
-	class ITextRender *m_pTextRender;
-	class ISound *m_pSound;
-	class IStorage *m_pStorage;
+	class IInput *m_pInput = nullptr;
+	class IClient *m_pClient = nullptr;
+	class CConfig *m_pConfig = nullptr;
+	class IConsole *m_pConsole = nullptr;
+	class IEngine *m_pEngine = nullptr;
+	class IGraphics *m_pGraphics = nullptr;
+	class ITextRender *m_pTextRender = nullptr;
+	class ISound *m_pSound = nullptr;
+	class IStorage *m_pStorage = nullptr;
 	CRenderTools m_RenderTools;
 	CUI m_UI;
 
@@ -728,6 +753,7 @@ public:
 	class IClient *Client() { return m_pClient; }
 	class CConfig *Config() { return m_pConfig; }
 	class IConsole *Console() { return m_pConsole; }
+	class IEngine *Engine() { return m_pEngine; }
 	class IGraphics *Graphics() { return m_pGraphics; }
 	class ISound *Sound() { return m_pSound; }
 	class ITextRender *TextRender() { return m_pTextRender; }
@@ -738,12 +764,6 @@ public:
 	CEditor() :
 		m_TilesetPicker(16, 16)
 	{
-		m_pInput = nullptr;
-		m_pClient = nullptr;
-		m_pGraphics = nullptr;
-		m_pTextRender = nullptr;
-		m_pSound = nullptr;
-
 		m_EntitiesTexture.Invalidate();
 		m_FrontTexture.Invalidate();
 		m_TeleTexture.Invalidate();
@@ -858,6 +878,7 @@ public:
 	void HandleCursorMovement();
 	void HandleAutosave();
 	bool PerformAutosave();
+	void HandleWriterFinishJobs();
 
 	CLayerGroup *m_apSavedBrushes[10];
 
@@ -877,6 +898,7 @@ public:
 	void Render();
 
 	void RenderPressedKeys(CUIRect View);
+	void RenderSavingIndicator(CUIRect View);
 	void RenderMousePointer();
 
 	void ResetMenuBackgroundPositions();
@@ -1131,6 +1153,8 @@ public:
 	static const void *ms_pUiGotContext;
 
 	CEditorMap m_Map;
+	std::list<std::shared_ptr<CDataFileWriterFinishJob>> m_lpWriterFinishJobs;
+
 	int m_ShiftBy;
 
 	static void EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Channels, void *pUser);
