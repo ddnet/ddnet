@@ -73,6 +73,11 @@ bool CEditor::IsVanillaImage(const char *pImage)
 	return std::any_of(std::begin(VANILLA_IMAGES), std::end(VANILLA_IMAGES), [pImage](const char *pVanillaImage) { return str_comp(pImage, pVanillaImage) == 0; });
 }
 
+static const char *FILETYPE_EXTENSIONS[CEditor::NUM_FILETYPES] = {
+	".map",
+	".png",
+	".opus"};
+
 const void *CEditor::ms_pUiGotContext;
 
 enum
@@ -4991,8 +4996,8 @@ void CEditor::RenderFileDialog()
 		else // file
 		{
 			str_format(m_aFileSaveName, sizeof(m_aFileSaveName), "%s/%s", m_pFileDialogPath, m_FileDialogFileNameInput.GetString());
-			if(!str_endswith(m_aFileSaveName, ".map"))
-				str_append(m_aFileSaveName, ".map");
+			if(!str_endswith(m_aFileSaveName, FILETYPE_EXTENSIONS[m_FileDialogFileType]))
+				str_append(m_aFileSaveName, FILETYPE_EXTENSIONS[m_FileDialogFileType]);
 			if(!str_comp(m_pFileDialogButtonText, "Save"))
 			{
 				if(Storage()->FileExists(m_aFileSaveName, IStorage::TYPE_SAVE))

@@ -929,6 +929,7 @@ public:
 		FILETYPE_MAP,
 		FILETYPE_IMG,
 		FILETYPE_SOUND,
+		NUM_FILETYPES
 	};
 
 	int m_FileDialogStorageType;
