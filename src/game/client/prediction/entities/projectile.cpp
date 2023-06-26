@@ -153,9 +153,10 @@ void CProjectile::Tick()
 		z = Collision()->IsTeleport(x);
 	else
 		z = Collision()->IsTeleportWeapon(x);
-	if(z && !GameWorld()->m_pTeleOuts[z - 1].empty())
+	if(z && !GameWorld()->m_pTeleOuts->at(z - 1).empty())
 	{
-		int TeleOut = GameWorld()->m_Core.RandomOr0(GameWorld()->m_pTeleOuts[z - 1].size());
+		uint64_t aSeed[2] = {static_cast<uint64_t>(GameWorld()->GameTick()), static_cast<uint64_t>(GetOwner())};
+		int TeleOut = g_Config.m_SvTeleportSeeded ? GameWorld()->m_Core.SeededRandomOr0(GameWorld()->m_pTeleOuts->at(z - 1).size(), aSeed) : GameWorld()->m_Core.RandomOr0(GameWorld()->m_pTeleOuts->at(z - 1).size());
 		m_Pos = GameWorld()->m_pTeleOuts->at(z - 1)[TeleOut];
 		m_StartTick = GameWorld()->GameTick();
 	}

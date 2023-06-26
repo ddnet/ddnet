@@ -500,6 +500,7 @@ public:
 
 	class CTeamsCore m_Teams;
 
+	CPrng m_Prng;
 	std::map<int, std::vector<vec2>> m_TeleOuts;
 	std::map<int, std::vector<vec2>> m_TeleCheckOuts;
 	void InitTeleporter();

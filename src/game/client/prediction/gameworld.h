@@ -109,7 +109,6 @@ public:
 	std::map<int, std::vector<vec2>> *m_pTeleCheckOuts = nullptr;
 	void SetTeleports(std::map<int, std::vector<vec2>> *pTeleOuts, std::map<int, std::vector<vec2>> *pTeleCheckOuts);
 
-
 private:
 	void RemoveEntities();
 

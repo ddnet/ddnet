@@ -484,6 +484,11 @@ void CGameClient::OnConnected()
 	InitTeleporter();
 	m_GameWorld.SetTeleports(&m_TeleOuts, &m_TeleCheckOuts);
 
+	uint64_t aSeed[2];
+	secure_random_fill(aSeed, sizeof(aSeed));
+	m_Prng.Seed(aSeed);
+	m_GameWorld.m_Core.m_pPrng = &m_Prng;
+
 	CRaceHelper::ms_aFlagIndex[0] = -1;
 	CRaceHelper::ms_aFlagIndex[1] = -1;
 

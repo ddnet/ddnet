@@ -150,9 +150,10 @@ void CLaser::DoBounce()
 			}
 			m_ZeroEnergyBounceInLastTick = Distance == 0.0f;
 
-			if(Res == TILE_TELEINWEAPON && !GameWorld()->m_pTeleOuts[z - 1].empty())
+			if(Res == TILE_TELEINWEAPON && !GameWorld()->m_pTeleOuts->at(z - 1).empty())
 			{
-				int TeleOut = GameWorld()->m_Core.RandomOr0(GameWorld()->m_pTeleOuts[z - 1].size());
+				uint64_t aSeed[2] = {static_cast<uint64_t>(GameWorld()->GameTick()), static_cast<uint64_t>(GetOwner())};
+				int TeleOut = g_Config.m_SvTeleportSeeded ? GameWorld()->m_Core.SeededRandomOr0(GameWorld()->m_pTeleOuts->at(z - 1).size(), aSeed) : GameWorld()->m_Core.RandomOr0(GameWorld()->m_pTeleOuts->at(z - 1).size());
 				m_TelePos = GameWorld()->m_pTeleOuts->at(z - 1)[TeleOut];
 				m_WasTele = true;
 			}

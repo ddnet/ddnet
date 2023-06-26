@@ -79,6 +79,7 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	m_Core.m_ActiveWeapon = WEAPON_GUN;
 	m_Core.m_Pos = m_Pos;
 	m_Core.m_Id = m_pPlayer->GetCID();
+	m_Core.m_Tick = Server()->Tick();
 	GameServer()->m_World.m_Core.m_apCharacters[m_pPlayer->GetCID()] = &m_Core;
 
 	m_ReckoningTick = 0;
@@ -780,6 +781,7 @@ void CCharacter::TickDeferred()
 		CWorldCore TempWorld;
 		m_ReckoningCore.Init(&TempWorld, Collision(), &Teams()->m_Core, m_pTeleOuts);
 		m_ReckoningCore.m_Id = m_pPlayer->GetCID();
+		m_ReckoningCore.m_Tick = Server()->Tick();
 		m_ReckoningCore.Tick(false);
 		m_ReckoningCore.Move();
 		m_ReckoningCore.Quantize();
@@ -791,6 +793,7 @@ void CCharacter::TickDeferred()
 	bool StuckBefore = Collision()->TestBox(m_Core.m_Pos, CCharacterCore::PhysicalSizeVec2());
 
 	m_Core.m_Id = m_pPlayer->GetCID();
+	m_Core.m_Tick = Server()->Tick();
 	m_Core.Move();
 	bool StuckAfterMove = Collision()->TestBox(m_Core.m_Pos, CCharacterCore::PhysicalSizeVec2());
 	m_Core.Quantize();
@@ -1790,12 +1793,14 @@ void CCharacter::HandleTiles(int Index)
 		m_LastBonus = false;
 	}
 
+	uint64_t aSeed[2] = {static_cast<uint64_t>(Server()->Tick()), static_cast<uint64_t>(GetPlayer()->GetCID())};
+
 	int z = Collision()->IsTeleport(MapIndex);
 	if(!g_Config.m_SvOldTeleportHook && !g_Config.m_SvOldTeleportWeapons && z && !(*m_pTeleOuts)[z - 1].empty())
 	{
 		if(m_Core.m_Super)
 			return;
-		int TeleOut = m_Core.m_pWorld->RandomOr0((*m_pTeleOuts)[z - 1].size());
+		int TeleOut = g_Config.m_SvTeleportSeeded ? m_Core.m_pWorld->SeededRandomOr0((*m_pTeleOuts)[z - 1].size(), aSeed) : m_Core.m_pWorld->RandomOr0((*m_pTeleOuts)[z - 1].size());
 		m_Core.m_Pos = (*m_pTeleOuts)[z - 1][TeleOut];
 		if(!g_Config.m_SvTeleportHoldHook)
 		{
@@ -1810,7 +1815,7 @@ void CCharacter::HandleTiles(int Index)
 	{
 		if(m_Core.m_Super)
 			return;
-		int TeleOut = m_Core.m_pWorld->RandomOr0((*m_pTeleOuts)[evilz - 1].size());
+		int TeleOut = g_Config.m_SvTeleportSeeded ? m_Core.m_pWorld->SeededRandomOr0((*m_pTeleOuts)[evilz - 1].size(), aSeed) : m_Core.m_pWorld->RandomOr0((*m_pTeleOuts)[evilz - 1].size());
 		m_Core.m_Pos = (*m_pTeleOuts)[evilz - 1][TeleOut];
 		if(!g_Config.m_SvOldTeleportHook && !g_Config.m_SvOldTeleportWeapons)
 		{
@@ -1837,7 +1842,7 @@ void CCharacter::HandleTiles(int Index)
 		{
 			if(!(*m_pTeleCheckOuts)[k].empty())
 			{
-				int TeleOut = m_Core.m_pWorld->RandomOr0((*m_pTeleCheckOuts)[k].size());
+				int TeleOut = g_Config.m_SvTeleportSeeded ? m_Core.m_pWorld->SeededRandomOr0((*m_pTeleCheckOuts)[k].size(), aSeed) : m_Core.m_pWorld->RandomOr0((*m_pTeleCheckOuts)[k].size());
 				m_Core.m_Pos = (*m_pTeleCheckOuts)[k][TeleOut];
 				m_Core.m_Vel = vec2(0, 0);
 
@@ -1874,7 +1879,7 @@ void CCharacter::HandleTiles(int Index)
 		{
 			if(!(*m_pTeleCheckOuts)[k].empty())
 			{
-				int TeleOut = m_Core.m_pWorld->RandomOr0((*m_pTeleCheckOuts)[k].size());
+				int TeleOut = g_Config.m_SvTeleportSeeded ? m_Core.m_pWorld->SeededRandomOr0((*m_pTeleCheckOuts)[k].size(), aSeed) : m_Core.m_pWorld->RandomOr0((*m_pTeleCheckOuts)[k].size());
 				m_Core.m_Pos = (*m_pTeleCheckOuts)[k][TeleOut];
 
 				if(!g_Config.m_SvTeleportHoldHook)
@@ -2046,6 +2051,7 @@ void CCharacter::DDRaceTick()
 	}
 
 	m_Core.m_Id = GetPlayer()->GetCID();
+	m_Core.m_Tick = Server()->Tick();
 }
 
 void CCharacter::DDRacePostCoreTick()
@@ -2245,6 +2251,7 @@ void CCharacter::DDRaceInit()
 	m_LastBroadcast = 0;
 	m_TeamBeforeSuper = 0;
 	m_Core.m_Id = GetPlayer()->GetCID();
+	m_Core.m_Tick = Server()->Tick();
 	m_TeleCheckpoint = 0;
 	m_Core.m_EndlessHook = g_Config.m_SvEndlessDrag;
 	if(g_Config.m_SvHit)
