@@ -181,7 +181,7 @@ $tool ../DDNet \
 	connect localhost:$port" > stdout_client1.txt 2> stderr_client1.txt || fail client1 "$?" &
 
 if [ "$arg_valgrind_memcheck" == "1" ]; then
-	wait_for_fifo client1.fifo 120
+	wait_for_fifo client1.fifo 180
 	sleep 20
 else
 	wait_for_fifo client1.fifo 50
@@ -205,7 +205,7 @@ $tool ../DDNet \
 	connect localhost:$port" > stdout_client2.txt 2> stderr_client2.txt || fail client2 "$?" &
 
 if [ "$arg_valgrind_memcheck" == "1" ]; then
-	wait_for_fifo client2.fifo 120
+	wait_for_fifo client2.fifo 180
 	sleep 20
 else
 	wait_for_fifo client2.fifo 50
