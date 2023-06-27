@@ -175,6 +175,7 @@ $tool ../DDNet \
 	player_name client1;
 	cl_download_skins 0;
 	gfx_fullscreen 0;
+	snd_enable 0;
 	logfile client1.log;
 	$client_args
 	connect localhost:$port" > stdout_client1.txt 2> stderr_client1.txt || fail client1 "$?" &
@@ -198,6 +199,7 @@ $tool ../DDNet \
 	player_name client2;
 	cl_download_skins 0;
 	gfx_fullscreen 0;
+	snd_enable 0;
 	logfile client2.log;
 	$client_args
 	connect localhost:$port" > stdout_client2.txt 2> stderr_client2.txt || fail client2 "$?" &
