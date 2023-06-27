@@ -5,6 +5,8 @@
 #include <base/math.h>
 #include <base/vmath.h>
 
+#include <optional>
+
 /*
 	Title: Color handling
 */
@@ -114,11 +116,39 @@ public:
 		return (Alpha ? ((unsigned)round_to_int(a * 255.0f) << 24) : 0) + ((unsigned)round_to_int(x * 255.0f) << 16) + ((unsigned)round_to_int(y * 255.0f) << 8) + (unsigned)round_to_int(z * 255.0f);
 	}
 
+	unsigned PackAlphaLast(bool Alpha = true) const
+	{
+		if(Alpha)
+			return ((unsigned)round_to_int(x * 255.0f) << 24) + ((unsigned)round_to_int(y * 255.0f) << 16) + ((unsigned)round_to_int(z * 255.0f) << 8) + (unsigned)round_to_int(a * 255.0f);
+		return ((unsigned)round_to_int(x * 255.0f) << 16) + ((unsigned)round_to_int(y * 255.0f) << 8) + (unsigned)round_to_int(z * 255.0f);
+	}
+
 	DerivedT WithAlpha(float alpha) const
 	{
 		DerivedT col(static_cast<const DerivedT &>(*this));
 		col.a = alpha;
 		return col;
+	}
+
+	template<typename UnpackT>
+	static UnpackT UnpackAlphaLast(unsigned Color, bool Alpha = true)
+	{
+		UnpackT Result;
+		if(Alpha)
+		{
+			Result.x = ((Color >> 24) & 0xFF) / 255.0f;
+			Result.y = ((Color >> 16) & 0xFF) / 255.0f;
+			Result.z = ((Color >> 8) & 0xFF) / 255.0f;
+			Result.a = ((Color >> 0) & 0xFF) / 255.0f;
+		}
+		else
+		{
+			Result.x = ((Color >> 16) & 0xFF) / 255.0f;
+			Result.y = ((Color >> 8) & 0xFF) / 255.0f;
+			Result.z = ((Color >> 0) & 0xFF) / 255.0f;
+			Result.a = 1.0f;
+		}
+		return Result;
 	}
 };
 
@@ -261,5 +291,8 @@ T color_invert(const T &col)
 {
 	return T(1.0f - col.x, 1.0f - col.y, 1.0f - col.z, 1.0f - col.a);
 }
+
+template<typename T>
+std::optional<T> color_parse(const char *pStr);
 
 #endif

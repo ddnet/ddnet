@@ -3463,6 +3463,17 @@ int str_isallnum(const char *str)
 	return 1;
 }
 
+int str_isallnum_hex(const char *str)
+{
+	while(*str)
+	{
+		if(!(*str >= '0' && *str <= '9') && !(*str >= 'a' && *str <= 'f') && !(*str >= 'A' && *str <= 'F'))
+			return 0;
+		str++;
+	}
+	return 1;
+}
+
 int str_toint(const char *str)
 {
 	return str_toint_base(str, 10);
