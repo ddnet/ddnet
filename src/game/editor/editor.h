@@ -20,7 +20,7 @@
 #include "auto_map.h"
 
 #include <chrono>
-#include <list>
+#include <deque>
 #include <string>
 #include <vector>
 
@@ -1154,7 +1154,7 @@ public:
 	static const void *ms_pUiGotContext;
 
 	CEditorMap m_Map;
-	std::list<std::shared_ptr<CDataFileWriterFinishJob>> m_lpWriterFinishJobs;
+	std::deque<std::shared_ptr<CDataFileWriterFinishJob>> m_WriterFinishJobs;
 
 	int m_ShiftBy;
 

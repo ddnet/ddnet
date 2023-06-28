@@ -28,11 +28,10 @@ CLight::CLight(CGameWorld *pGameWorld, vec2 Pos, float Rotation, int Length,
 
 bool CLight::HitCharacter()
 {
-	std::list<CCharacter *> HitCharacters =
-		GameServer()->m_World.IntersectedCharacters(m_Pos, m_To, 0.0f, 0);
-	if(HitCharacters.empty())
+	std::vector<CCharacter *> vpHitCharacters = GameServer()->m_World.IntersectedCharacters(m_Pos, m_To, 0.0f, 0);
+	if(vpHitCharacters.empty())
 		return false;
-	for(auto *pChar : HitCharacters)
+	for(auto *pChar : vpHitCharacters)
 	{
 		if(m_Layer == LAYER_SWITCH && m_Number > 0 && !Switchers()[m_Number].m_aStatus[pChar->Team()])
 			continue;

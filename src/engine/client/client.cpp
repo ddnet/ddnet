@@ -2879,18 +2879,18 @@ void CClient::Update()
 
 	if(State() == IClient::STATE_ONLINE)
 	{
-		if(!m_lpEditJobs.empty())
+		if(!m_EditJobs.empty())
 		{
-			std::shared_ptr<CDemoEdit> e = m_lpEditJobs.front();
-			if(e->Status() == IJob::STATE_DONE)
+			std::shared_ptr<CDemoEdit> pJob = m_EditJobs.front();
+			if(pJob->Status() == IJob::STATE_DONE)
 			{
-				char aBuf[256];
-				str_format(aBuf, sizeof(aBuf), "Successfully saved the replay to %s!", e->Destination());
+				char aBuf[IO_MAX_PATH_LENGTH + 64];
+				str_format(aBuf, sizeof(aBuf), "Successfully saved the replay to %s!", pJob->Destination());
 				m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", aBuf);
 
 				GameClient()->Echo(Localize("Successfully saved the replay!"));
 
-				m_lpEditJobs.pop_front();
+				m_EditJobs.pop_front();
 			}
 		}
 	}
@@ -3818,7 +3818,7 @@ void CClient::SaveReplay(const int Length, const char *pFilename)
 		// Create a job to do this slicing in background because it can be a bit long depending on the file size
 		std::shared_ptr<CDemoEdit> pDemoEditTask = std::make_shared<CDemoEdit>(GameClient()->NetVersion(), &m_SnapshotDelta, m_pStorage, pSrc, aFilename, StartTick, EndTick);
 		Engine()->AddJob(pDemoEditTask);
-		m_lpEditJobs.push_back(pDemoEditTask);
+		m_EditJobs.push_back(pDemoEditTask);
 
 		// And we restart the recorder
 		DemoRecorder_StartReplayRecorder();
