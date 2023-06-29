@@ -437,8 +437,8 @@ public:
 	void CreateDefault(IGraphics::CTextureHandle EntitiesTexture);
 
 	// io
-	bool Save(class IStorage *pStorage, const char *pFilename);
-	bool Load(class IStorage *pStorage, const char *pFilename, int StorageType);
+	bool Save(const char *pFilename);
+	bool Load(const char *pFilename, int StorageType);
 
 	// DDRace
 
@@ -710,11 +710,11 @@ class CEditor : public IEditor
 
 	int GetTextureUsageFlag();
 
-	enum EPreviewImageState
+	enum EPreviewState
 	{
-		PREVIEWIMAGE_UNLOADED,
-		PREVIEWIMAGE_LOADED,
-		PREVIEWIMAGE_ERROR,
+		PREVIEW_UNLOADED,
+		PREVIEW_LOADED,
+		PREVIEW_ERROR,
 	};
 
 public:
@@ -775,7 +775,8 @@ public:
 		m_FilesSelectedIndex = -1;
 
 		m_FilePreviewImage.Invalidate();
-		m_PreviewImageState = PREVIEWIMAGE_UNLOADED;
+		m_FilePreviewSound = -1;
+		m_FilePreviewState = PREVIEW_UNLOADED;
 
 		m_SelectEntitiesImage = "DDNet";
 
@@ -848,6 +849,8 @@ public:
 	void UpdateMentions() override { m_Mentions++; }
 	void ResetMentions() override { m_Mentions = 0; }
 
+	void HandleCursorMovement();
+
 	CLayerGroup *m_apSavedBrushes[10];
 
 	void RefreshFilteredFileList();
@@ -903,6 +906,7 @@ public:
 		POPEVENT_LOADCURRENT,
 		POPEVENT_NEW,
 		POPEVENT_SAVE,
+		POPEVENT_SAVE_COPY,
 		POPEVENT_LARGELAYER,
 		POPEVENT_PREVENTUNUSEDTILES,
 		POPEVENT_IMAGEDIV16,
@@ -942,8 +946,10 @@ public:
 	int m_FileDialogFileType;
 	int m_FilesSelectedIndex;
 	CLineInputBuffered<IO_MAX_PATH_LENGTH> m_FileDialogNewFolderNameInput;
+
 	IGraphics::CTextureHandle m_FilePreviewImage;
-	EPreviewImageState m_PreviewImageState;
+	int m_FilePreviewSound;
+	EPreviewState m_FilePreviewState;
 	CImageInfo m_FilePreviewImageInfo;
 	bool m_FileDialogOpening;
 
@@ -1209,7 +1215,8 @@ public:
 	void DoSoundSource(CSoundSource *pSource, int Index);
 
 	void DoMapEditor(CUIRect View);
-	void DoToolbar(CUIRect Toolbar);
+	void DoToolbarLayers(CUIRect Toolbar);
+	void DoToolbarSounds(CUIRect Toolbar);
 	void DoQuad(CQuad *pQuad, int Index);
 	ColorRGBA GetButtonColor(const void *pID, int Checked);
 

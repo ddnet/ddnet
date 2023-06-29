@@ -576,7 +576,7 @@ int CSound::DecodeWV(int SampleID, const void *pData, unsigned DataSize)
 	return SampleID;
 }
 
-int CSound::LoadOpus(const char *pFilename)
+int CSound::LoadOpus(const char *pFilename, int StorageType)
 {
 	// don't waste memory on sound when we are stress testing
 #ifdef CONF_DEBUG
@@ -600,7 +600,7 @@ int CSound::LoadOpus(const char *pFilename)
 
 	void *pData;
 	unsigned DataSize;
-	if(!m_pStorage->ReadFile(pFilename, IStorage::TYPE_ALL, &pData, &DataSize))
+	if(!m_pStorage->ReadFile(pFilename, StorageType, &pData, &DataSize))
 	{
 		dbg_msg("sound/opus", "failed to open file. filename='%s'", pFilename);
 		return -1;
@@ -618,7 +618,7 @@ int CSound::LoadOpus(const char *pFilename)
 	return SampleID;
 }
 
-int CSound::LoadWV(const char *pFilename)
+int CSound::LoadWV(const char *pFilename, int StorageType)
 {
 	// don't waste memory on sound when we are stress testing
 #ifdef CONF_DEBUG
@@ -642,7 +642,7 @@ int CSound::LoadWV(const char *pFilename)
 
 	void *pData;
 	unsigned DataSize;
-	if(!m_pStorage->ReadFile(pFilename, IStorage::TYPE_ALL, &pData, &DataSize))
+	if(!m_pStorage->ReadFile(pFilename, StorageType, &pData, &DataSize))
 	{
 		dbg_msg("sound/wv", "failed to open file. filename='%s'", pFilename);
 		return -1;

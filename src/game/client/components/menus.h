@@ -323,6 +323,7 @@ protected:
 	CLineInputBuffered<IO_MAX_PATH_LENGTH> m_DemoRenderInput;
 	int m_DemolistSelectedIndex;
 	bool m_DemolistSelectedIsDir;
+	bool m_DemolistSelectedReveal = false;
 	int m_DemolistStorageType;
 	int m_Speed = 4;
 

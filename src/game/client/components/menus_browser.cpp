@@ -808,11 +808,19 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 						// left/right click to toggle filter
 						if(pFilterExcludeTypes[0] == '\0')
 						{
-							// when all are active, only activate one
-							for(int j = 0; j < MaxTypes; ++j)
+							if(Click == 1)
 							{
-								if(j != TypeIndex)
-									ServerBrowser()->DDNetFilterAdd(pFilterExcludeTypes, FilterExcludeTypesSize, ServerBrowser()->GetType(Network, j));
+								// Left click: when all are active, only activate one
+								for(int j = 0; j < MaxTypes; ++j)
+								{
+									if(j != TypeIndex)
+										ServerBrowser()->DDNetFilterAdd(pFilterExcludeTypes, FilterExcludeTypesSize, ServerBrowser()->GetType(Network, j));
+								}
+							}
+							else if(Click == 2)
+							{
+								// Right click: when all are active, only deactivate one
+								ServerBrowser()->DDNetFilterAdd(pFilterExcludeTypes, FilterExcludeTypesSize, ServerBrowser()->GetType(Network, TypeIndex));
 							}
 						}
 						else
@@ -905,11 +913,19 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 						// left/right click to toggle filter
 						if(pFilterExcludeCountries[0] == '\0')
 						{
-							// when all are active, only activate one
-							for(int j = 0; j < MaxFlags; ++j)
+							if(Click == 1)
 							{
-								if(j != CountryIndex)
-									ServerBrowser()->DDNetFilterAdd(pFilterExcludeCountries, FilterExcludeCountriesSize, ServerBrowser()->GetCountryName(Network, j));
+								// Left click: when all are active, only activate one
+								for(int j = 0; j < MaxFlags; ++j)
+								{
+									if(j != CountryIndex)
+										ServerBrowser()->DDNetFilterAdd(pFilterExcludeCountries, FilterExcludeCountriesSize, ServerBrowser()->GetCountryName(Network, j));
+								}
+							}
+							else if(Click == 2)
+							{
+								// Right click: when all are active, only deactivate one
+								ServerBrowser()->DDNetFilterAdd(pFilterExcludeCountries, FilterExcludeCountriesSize, ServerBrowser()->GetCountryName(Network, CountryIndex));
 							}
 						}
 						else
