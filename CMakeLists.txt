@@ -737,6 +737,7 @@ if(TARGET_OS STREQUAL "windows")
   list(APPEND PLATFORM_LIBS bcrypt userenv) # for Rust (https://github.com/rust-lang/rust/issues/91974)
   list(APPEND PLATFORM_LIBS ole32) # CoInitialize(Ex)
   list(APPEND PLATFORM_LIBS shell32)
+  list(APPEND PLATFORM_LIBS ntdll) # https://github.com/ddnet/ddnet/issues/6725
 elseif(TARGET_OS STREQUAL "mac")
   find_library(CARBON Carbon)
   find_library(COCOA Cocoa)
@@ -1863,6 +1864,7 @@ add_custom_command(OUTPUT "src/game/generated/wordlist.h"
 set_src(BASE GLOB_RECURSE src/base
   bezier.cpp
   bezier.h
+  color.cpp
   color.h
   detect.h
   dynamic.h
@@ -2260,6 +2262,8 @@ if(CLIENT)
     pickup_data.h
     prediction/entities/character.cpp
     prediction/entities/character.h
+    prediction/entities/dragger.cpp
+    prediction/entities/dragger.h
     prediction/entities/laser.cpp
     prediction/entities/laser.h
     prediction/entities/pickup.cpp

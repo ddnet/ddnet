@@ -23,8 +23,10 @@
 #ifdef __MINGW32__
 #undef PRId64
 #undef PRIu64
+#undef PRIX64
 #define PRId64 "I64d"
 #define PRIu64 "I64u"
+#define PRIX64 "I64X"
 #define PRIzu "Iu"
 #else
 #define PRIzu "zu"
@@ -601,9 +603,9 @@ void thread_detach(void *thread);
  * @param user Pointer to pass to the thread.
  * @param name Name describing the use of the thread
  *
- * @return The thread if no error occurred, 0 on error.
+ * @return true on success, false on failure.
  */
-void *thread_init_and_detach(void (*threadfunc)(void *), void *user, const char *name);
+bool thread_init_and_detach(void (*threadfunc)(void *), void *user, const char *name);
 
 // Enable thread safety attributes only with clang.
 // The attributes can be safely erased when compiling with other compilers.
@@ -1193,6 +1195,23 @@ std::string windows_format_system_message(unsigned long error);
 void str_append(char *dst, const char *src, int dst_size);
 
 /**
+ * Appends a string to a fixed-size array of chars.
+ *
+ * @ingroup Strings
+ *
+ * @param dst Array that shall receive the string.
+ * @param src String to append.
+ *
+ * @remark The strings are treated as zero-terminated strings.
+ * @remark Guarantees that dst string will contain zero-termination.
+ */
+template<int N>
+void str_append(char (&dst)[N], const char *src)
+{
+	str_append(dst, src, N);
+}
+
+/**
  * Copies a string to another.
  *
  * @ingroup Strings
@@ -1207,6 +1226,23 @@ void str_append(char *dst, const char *src, int dst_size);
  * @remark Guarantees that dst string will contain zero-termination.
  */
 int str_copy(char *dst, const char *src, int dst_size);
+
+/**
+ * Copies a string to a fixed-size array of chars.
+ *
+ * @ingroup Strings
+ *
+ * @param dst Array that shall receive the string.
+ * @param src String to be copied.
+ *
+ * @remark The strings are treated as zero-terminated strings.
+ * @remark Guarantees that dst string will contain zero-termination.
+ */
+template<int N>
+void str_copy(char (&dst)[N], const char *src)
+{
+	str_copy(dst, src, N);
+}
 
 /**
  * Truncates a utf8 encoded string to a given length.
@@ -1991,6 +2027,39 @@ int fs_chdir(const char *path);
 char *fs_getcwd(char *buffer, int buffer_size);
 
 /**
+ * Gets the name of a file or folder specified by a path,
+ * i.e. the last segment of the path.
+ *
+ * @ingroup Filesystem
+ *
+ * @param path Path from which to retrieve the filename.
+ *
+ * @return Filename of the path.
+ *
+ * @remark Supports forward and backward slashes as path segment separator.
+ * @remark No distinction between files and folders is being made.
+ * @remark The strings are treated as zero-terminated strings.
+ */
+const char *fs_filename(const char *path);
+
+/**
+ * Splits a filename into name (without extension) and file extension.
+ *
+ * @ingroup Filesystem
+ *
+ * @param filename The filename to split.
+ * @param name Buffer that will receive the name without extension, may be nullptr.
+ * @param name_size Size of the name buffer (ignored if name is nullptr).
+ * @param extension Buffer that will receive the extension, may be nullptr.
+ * @param extension_size Size of the extension buffer (ignored if extension is nullptr).
+ *
+ * @remark Does NOT handle forward and backward slashes.
+ * @remark No distinction between files and folders is being made.
+ * @remark The strings are treated as zero-terminated strings.
+ */
+void fs_split_file_extension(const char *filename, char *name, size_t name_size, char *extension = nullptr, size_t extension_size = 0);
+
+/**
  * Get the parent directory of a directory.
  *
  * @ingroup Filesystem
@@ -2133,6 +2202,7 @@ void net_stats(NETSTATS *stats);
 int str_toint(const char *str);
 int str_toint_base(const char *str, int base);
 unsigned long str_toulong_base(const char *str, int base);
+int64_t str_toint64_base(const char *str, int base = 10);
 float str_tofloat(const char *str);
 
 /**
@@ -2149,7 +2219,11 @@ float str_tofloat(const char *str);
 int str_isspace(char c);
 
 char str_uppercase(char c);
+
 int str_isallnum(const char *str);
+
+int str_isallnum_hex(const char *str);
+
 unsigned str_quickhash(const char *str);
 
 enum
@@ -2776,23 +2850,6 @@ bool shell_unregister_application(const char *executable, bool *updated);
  */
 void shell_update();
 #endif
-
-/**
- * Copies a string to a fixed-size array of chars.
- *
- * @ingroup Strings
- *
- * @param dst Array that shall receive the string.
- * @param src String to be copied.
- *
- * @remark The strings are treated as zero-terminated strings.
- * @remark Guarantees that dst string will contain zero-termination.
- */
-template<int N>
-void str_copy(char (&dst)[N], const char *src)
-{
-	str_copy(dst, src, N);
-}
 
 template<>
 struct std::hash<NETADDR>

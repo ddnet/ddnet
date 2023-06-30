@@ -525,16 +525,35 @@ CDataFileWriter::CDataFileWriter()
 
 CDataFileWriter::~CDataFileWriter()
 {
+	if(m_File)
+	{
+		io_close(m_File);
+		m_File = 0;
+	}
+
 	free(m_pItemTypes);
 	m_pItemTypes = nullptr;
-	for(int i = 0; i < m_NumItems; i++)
-		free(m_pItems[i].m_pData);
-	for(int i = 0; i < m_NumDatas; ++i)
-		free(m_pDatas[i].m_pCompressedData);
-	free(m_pItems);
-	m_pItems = nullptr;
-	free(m_pDatas);
-	m_pDatas = nullptr;
+
+	if(m_pItems)
+	{
+		for(int i = 0; i < m_NumItems; i++)
+		{
+			free(m_pItems[i].m_pData);
+		}
+		free(m_pItems);
+		m_pItems = nullptr;
+	}
+
+	if(m_pDatas)
+	{
+		for(int i = 0; i < m_NumDatas; ++i)
+		{
+			free(m_pDatas[i].m_pUncompressedData);
+			free(m_pDatas[i].m_pCompressedData);
+		}
+		free(m_pDatas);
+		m_pDatas = nullptr;
+	}
 }
 
 bool CDataFileWriter::OpenFile(class IStorage *pStorage, const char *pFilename, int StorageType)
@@ -636,21 +655,12 @@ int CDataFileWriter::AddData(int Size, void *pData, int CompressionLevel)
 	dbg_assert(m_NumDatas < 1024, "too much data");
 
 	CDataInfo *pInfo = &m_pDatas[m_NumDatas];
-	unsigned long s = compressBound(Size);
-	void *pCompData = malloc(s); // temporary buffer that we use during compression
-
-	int Result = compress2((Bytef *)pCompData, &s, (Bytef *)pData, Size, CompressionLevel);
-	if(Result != Z_OK)
-	{
-		dbg_msg("datafile", "compression error %d", Result);
-		dbg_assert(0, "zlib error");
-	}
-
+	pInfo->m_pUncompressedData = malloc(Size);
+	mem_copy(pInfo->m_pUncompressedData, pData, Size);
 	pInfo->m_UncompressedSize = Size;
-	pInfo->m_CompressedSize = (int)s;
-	pInfo->m_pCompressedData = malloc(pInfo->m_CompressedSize);
-	mem_copy(pInfo->m_pCompressedData, pCompData, pInfo->m_CompressedSize);
-	free(pCompData);
+	pInfo->m_pCompressedData = nullptr;
+	pInfo->m_CompressedSize = 0;
+	pInfo->m_CompressionLevel = CompressionLevel;
 
 	m_NumDatas++;
 	return m_NumDatas - 1;
@@ -672,14 +682,30 @@ int CDataFileWriter::AddDataSwapped(int Size, void *pData)
 #endif
 }
 
-int CDataFileWriter::Finish()
+void CDataFileWriter::Finish()
 {
-	if(!m_File)
-		return 1;
+	dbg_assert((bool)m_File, "file not open");
 
 	// we should now write this file!
 	if(DEBUG)
 		dbg_msg("datafile", "writing");
+
+	// Compress data. This takes the majority of the time when saving a datafile,
+	// so it's delayed until the end so it can be off-loaded to another thread.
+	for(int i = 0; i < m_NumDatas; i++)
+	{
+		unsigned long CompressedSize = compressBound(m_pDatas[i].m_UncompressedSize);
+		m_pDatas[i].m_pCompressedData = malloc(CompressedSize);
+		const int Result = compress2((Bytef *)m_pDatas[i].m_pCompressedData, &CompressedSize, (Bytef *)m_pDatas[i].m_pUncompressedData, m_pDatas[i].m_UncompressedSize, m_pDatas[i].m_CompressionLevel);
+		m_pDatas[i].m_CompressedSize = CompressedSize;
+		free(m_pDatas[i].m_pUncompressedData);
+		m_pDatas[i].m_pUncompressedData = nullptr;
+		if(Result != Z_OK)
+		{
+			dbg_msg("datafile", "compression error %d", Result);
+			dbg_assert(false, "zlib error");
+		}
+	}
 
 	// calculate sizes
 	int ItemSize = 0;
@@ -851,5 +877,4 @@ int CDataFileWriter::Finish()
 
 	if(DEBUG)
 		dbg_msg("datafile", "done");
-	return 0;
 }

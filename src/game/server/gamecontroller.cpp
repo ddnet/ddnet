@@ -636,7 +636,11 @@ void IGameController::Snap(int SnappingClient)
 		if(Team == TEAM_SUPER)
 			return;
 
-		CNetObj_SwitchState *pSwitchState = Server()->SnapNewItem<CNetObj_SwitchState>(Team);
+		int SentTeam = Team;
+		if(g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO)
+			SentTeam = 0;
+
+		CNetObj_SwitchState *pSwitchState = Server()->SnapNewItem<CNetObj_SwitchState>(SentTeam);
 		if(!pSwitchState)
 			return;
 

@@ -731,6 +731,7 @@ public:
 	virtual void GetCurrentVideoMode(CVideoMode &CurMode, int HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int Screen) = 0;
 
 	virtual int GetNumScreens() const = 0;
+	virtual const char *GetScreenName(int Screen) const = 0;
 
 	virtual void Minimize() = 0;
 	virtual void Maximize() = 0;
@@ -1257,6 +1258,8 @@ public:
 	void IndicesNumRequiredNotify(unsigned int RequiredIndicesCount) override;
 
 	int GetNumScreens() const override;
+	const char *GetScreenName(int Screen) const override;
+
 	void Minimize() override;
 	void Maximize() override;
 	void WarnPngliteIncompatibleImages(bool Warn) override;
@@ -1300,6 +1303,7 @@ public:
 
 	SWarning *GetCurWarning() override;
 	bool ShowMessageBox(unsigned Type, const char *pTitle, const char *pMsg) override;
+	bool IsBackendInitialized() override;
 
 	bool GetDriverVersion(EGraphicsDriverAgeType DriverAgeType, int &Major, int &Minor, int &Patch, const char *&pName, EBackendType BackendType) override { return m_pBackend->GetDriverVersion(DriverAgeType, Major, Minor, Patch, pName, BackendType); }
 	bool IsConfigModernAPI() override { return m_pBackend->IsConfigModernAPI(); }

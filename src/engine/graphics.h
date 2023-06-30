@@ -506,6 +506,7 @@ public:
 
 	virtual void Swap() = 0;
 	virtual int GetNumScreens() const = 0;
+	virtual const char *GetScreenName(int Screen) const = 0;
 
 	// synchronization
 	virtual void InsertSignal(class CSemaphore *pSemaphore) = 0;
@@ -523,6 +524,7 @@ public:
 
 	// returns true if the error msg was shown
 	virtual bool ShowMessageBox(unsigned Type, const char *pTitle, const char *pMsg) = 0;
+	virtual bool IsBackendInitialized() = 0;
 
 protected:
 	inline CTextureHandle CreateTextureHandle(int Index)

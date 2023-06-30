@@ -12,11 +12,15 @@
 #include <game/mapitems_ex.h>
 
 #include <engine/editor.h>
+#include <engine/engine.h>
 #include <engine/graphics.h>
+#include <engine/shared/datafile.h>
+#include <engine/shared/jobs.h>
 
 #include "auto_map.h"
 
 #include <chrono>
+#include <list>
 #include <string>
 #include <vector>
 
@@ -24,7 +28,7 @@ using namespace std::chrono_literals;
 
 typedef void (*INDEX_MODIFY_FUNC)(int *pIndex);
 
-//CRenderTools m_RenderTools;
+// CRenderTools m_RenderTools;
 
 // CEditor SPECIFIC
 enum
@@ -120,7 +124,7 @@ public:
 	CLayer()
 	{
 		m_Type = LAYERTYPE_INVALID;
-		str_copy(m_aName, "(invalid)", sizeof(m_aName));
+		str_copy(m_aName, "(invalid)");
 		m_Visible = true;
 		m_Readonly = false;
 		m_Flags = 0;
@@ -130,7 +134,7 @@ public:
 
 	CLayer(const CLayer &Other)
 	{
-		str_copy(m_aName, Other.m_aName, sizeof(m_aName));
+		str_copy(m_aName, Other.m_aName);
 		m_Flags = Other.m_Flags;
 		m_pEditor = Other.m_pEditor;
 		m_Type = Other.m_Type;
@@ -315,7 +319,6 @@ class CEditorMap
 
 public:
 	CEditor *m_pEditor;
-	bool m_Modified;
 
 	CEditorMap()
 	{
@@ -326,6 +329,13 @@ public:
 	{
 		Clean();
 	}
+
+	bool m_Modified; // unsaved changes in manual save
+	bool m_ModifiedAuto; // unsaved changes in autosave
+	float m_LastModifiedTime;
+	float m_LastSaveTime;
+	float m_LastAutosaveUpdateTime;
+	void OnModify();
 
 	std::vector<CLayerGroup *> m_vpGroups;
 	std::vector<CEditorImage *> m_vpImages;
@@ -370,7 +380,7 @@ public:
 
 	CEnvelope *NewEnvelope(int Channels)
 	{
-		m_Modified = true;
+		OnModify();
 		CEnvelope *pEnv = new CEnvelope(Channels);
 		m_vpEnvelopes.push_back(pEnv);
 		return pEnv;
@@ -383,7 +393,7 @@ public:
 
 	CLayerGroup *NewGroup()
 	{
-		m_Modified = true;
+		OnModify();
 		CLayerGroup *pGroup = new CLayerGroup;
 		pGroup->m_pMap = this;
 		m_vpGroups.push_back(pGroup);
@@ -398,7 +408,7 @@ public:
 			return Index0;
 		if(Index0 == Index1)
 			return Index0;
-		m_Modified = true;
+		OnModify();
 		std::swap(m_vpGroups[Index0], m_vpGroups[Index1]);
 		return Index1;
 	}
@@ -407,28 +417,28 @@ public:
 	{
 		if(Index < 0 || Index >= (int)m_vpGroups.size())
 			return;
-		m_Modified = true;
+		OnModify();
 		delete m_vpGroups[Index];
 		m_vpGroups.erase(m_vpGroups.begin() + Index);
 	}
 
 	void ModifyImageIndex(INDEX_MODIFY_FUNC pfnFunc)
 	{
-		m_Modified = true;
+		OnModify();
 		for(auto &pGroup : m_vpGroups)
 			pGroup->ModifyImageIndex(pfnFunc);
 	}
 
 	void ModifyEnvelopeIndex(INDEX_MODIFY_FUNC pfnFunc)
 	{
-		m_Modified = true;
+		OnModify();
 		for(auto &pGroup : m_vpGroups)
 			pGroup->ModifyEnvelopeIndex(pfnFunc);
 	}
 
 	void ModifySoundIndex(INDEX_MODIFY_FUNC pfnFunc)
 	{
-		m_Modified = true;
+		OnModify();
 		for(auto &pGroup : m_vpGroups)
 			pGroup->ModifySoundIndex(pfnFunc);
 	}
@@ -437,8 +447,8 @@ public:
 	void CreateDefault(IGraphics::CTextureHandle EntitiesTexture);
 
 	// io
-	bool Save(class IStorage *pStorage, const char *pFilename);
-	bool Load(class IStorage *pStorage, const char *pFilename, int StorageType);
+	bool Save(const char *pFilename);
+	bool Load(const char *pFilename, int StorageType);
 
 	// DDRace
 
@@ -685,16 +695,37 @@ public:
 	CUI::EPopupMenuFunctionResult RenderProperties(CUIRect *pToolbox) override;
 };
 
+class CDataFileWriterFinishJob : public IJob
+{
+	char m_aFileName[IO_MAX_PATH_LENGTH];
+	CDataFileWriter m_Writer;
+
+	void Run() override
+	{
+		m_Writer.Finish();
+	}
+
+public:
+	CDataFileWriterFinishJob(const char *pFileName, CDataFileWriter &&Writer) :
+		m_Writer(std::move(Writer))
+	{
+		str_copy(m_aFileName, pFileName);
+	}
+
+	const char *GetFileName() const { return m_aFileName; }
+};
+
 class CEditor : public IEditor
 {
-	class IInput *m_pInput;
-	class IClient *m_pClient;
-	class CConfig *m_pConfig;
-	class IConsole *m_pConsole;
-	class IGraphics *m_pGraphics;
-	class ITextRender *m_pTextRender;
-	class ISound *m_pSound;
-	class IStorage *m_pStorage;
+	class IInput *m_pInput = nullptr;
+	class IClient *m_pClient = nullptr;
+	class CConfig *m_pConfig = nullptr;
+	class IConsole *m_pConsole = nullptr;
+	class IEngine *m_pEngine = nullptr;
+	class IGraphics *m_pGraphics = nullptr;
+	class ITextRender *m_pTextRender = nullptr;
+	class ISound *m_pSound = nullptr;
+	class IStorage *m_pStorage = nullptr;
 	CRenderTools m_RenderTools;
 	CUI m_UI;
 
@@ -710,11 +741,11 @@ class CEditor : public IEditor
 
 	int GetTextureUsageFlag();
 
-	enum EPreviewImageState
+	enum EPreviewState
 	{
-		PREVIEWIMAGE_UNLOADED,
-		PREVIEWIMAGE_LOADED,
-		PREVIEWIMAGE_ERROR,
+		PREVIEW_UNLOADED,
+		PREVIEW_LOADED,
+		PREVIEW_ERROR,
 	};
 
 public:
@@ -722,6 +753,7 @@ public:
 	class IClient *Client() { return m_pClient; }
 	class CConfig *Config() { return m_pConfig; }
 	class IConsole *Console() { return m_pConsole; }
+	class IEngine *Engine() { return m_pEngine; }
 	class IGraphics *Graphics() { return m_pGraphics; }
 	class ISound *Sound() { return m_pSound; }
 	class ITextRender *TextRender() { return m_pTextRender; }
@@ -732,12 +764,6 @@ public:
 	CEditor() :
 		m_TilesetPicker(16, 16)
 	{
-		m_pInput = nullptr;
-		m_pClient = nullptr;
-		m_pGraphics = nullptr;
-		m_pTextRender = nullptr;
-		m_pSound = nullptr;
-
 		m_EntitiesTexture.Invalidate();
 		m_FrontTexture.Invalidate();
 		m_TeleTexture.Invalidate();
@@ -775,7 +801,8 @@ public:
 		m_FilesSelectedIndex = -1;
 
 		m_FilePreviewImage.Invalidate();
-		m_PreviewImageState = PREVIEWIMAGE_UNLOADED;
+		m_FilePreviewSound = -1;
+		m_FilePreviewState = PREVIEW_UNLOADED;
 
 		m_SelectEntitiesImage = "DDNet";
 
@@ -788,7 +815,6 @@ public:
 		m_Zooming = false;
 		m_WorldZoom = 1.0f;
 
-		m_LockMouse = false;
 		m_ShowMousePointer = true;
 		m_MouseDeltaX = 0;
 		m_MouseDeltaY = 0;
@@ -796,12 +822,11 @@ public:
 		m_MouseDeltaWy = 0;
 
 		m_GuiActive = true;
-		m_ProofBorders = false;
-		m_MenuProofBorders = false;
+		m_ProofBorders = PROOF_BORDER_OFF;
 		m_CurrentMenuProofIndex = 0;
 		m_PreviewZoom = false;
 
-		m_ShowTileInfo = false;
+		m_ShowTileInfo = SHOW_TILE_OFF;
 		m_ShowDetail = true;
 		m_Animate = false;
 		m_AnimateStart = 0;
@@ -811,6 +836,7 @@ public:
 		m_ShowEnvelopeEditor = false;
 		m_EnvelopeEditorSplit = 250.0f;
 		m_ShowServerSettingsEditor = false;
+		m_ServerSettingsEditorSplit = 250.0f;
 
 		m_ShowEnvelopePreview = SHOWENV_NONE;
 		m_SelectedQuadEnvelope = -1;
@@ -838,7 +864,6 @@ public:
 		m_PreventUnusedTilesWasWarned = false;
 		m_AllowPlaceUnusedTiles = 0;
 		m_BrushDrawDestructive = true;
-		m_ShowTileHexInfo = false;
 
 		m_Mentions = 0;
 	}
@@ -849,6 +874,11 @@ public:
 	bool HasUnsavedData() const override { return m_Map.m_Modified; }
 	void UpdateMentions() override { m_Mentions++; }
 	void ResetMentions() override { m_Mentions = 0; }
+
+	void HandleCursorMovement();
+	void HandleAutosave();
+	bool PerformAutosave();
+	void HandleWriterFinishJobs();
 
 	CLayerGroup *m_apSavedBrushes[10];
 
@@ -866,6 +896,10 @@ public:
 	bool Append(const char *pFilename, int StorageType);
 	void LoadCurrentMap();
 	void Render();
+
+	void RenderPressedKeys(CUIRect View);
+	void RenderSavingIndicator(CUIRect View);
+	void RenderMousePointer();
 
 	void ResetMenuBackgroundPositions();
 
@@ -905,6 +939,7 @@ public:
 		POPEVENT_LOADCURRENT,
 		POPEVENT_NEW,
 		POPEVENT_SAVE,
+		POPEVENT_SAVE_COPY,
 		POPEVENT_LARGELAYER,
 		POPEVENT_PREVENTUNUSEDTILES,
 		POPEVENT_IMAGEDIV16,
@@ -919,7 +954,6 @@ public:
 	bool m_PreventUnusedTilesWasWarned;
 	int m_AllowPlaceUnusedTiles;
 	bool m_BrushDrawDestructive;
-	bool m_ShowTileHexInfo;
 
 	int m_Mentions;
 
@@ -928,6 +962,7 @@ public:
 		FILETYPE_MAP,
 		FILETYPE_IMG,
 		FILETYPE_SOUND,
+		NUM_FILETYPES
 	};
 
 	int m_FileDialogStorageType;
@@ -945,8 +980,10 @@ public:
 	int m_FileDialogFileType;
 	int m_FilesSelectedIndex;
 	CLineInputBuffered<IO_MAX_PATH_LENGTH> m_FileDialogNewFolderNameInput;
+
 	IGraphics::CTextureHandle m_FilePreviewImage;
-	EPreviewImageState m_PreviewImageState;
+	int m_FilePreviewSound;
+	EPreviewState m_FilePreviewState;
 	CImageInfo m_FilePreviewImageInfo;
 	bool m_FileDialogOpening;
 
@@ -1031,11 +1068,17 @@ public:
 	float m_ZoomSmoothingTarget;
 	float m_WorldZoom;
 
-	bool m_LockMouse;
 	bool m_ShowMousePointer;
 	bool m_GuiActive;
-	bool m_ProofBorders;
-	bool m_MenuProofBorders;
+
+	enum EProofBorder
+	{
+		PROOF_BORDER_OFF,
+		PROOF_BORDER_INGAME,
+		PROOF_BORDER_MENU
+	};
+
+	EProofBorder m_ProofBorders;
 	int m_CurrentMenuProofIndex;
 	std::vector<vec2> m_vMenuBackgroundPositions;
 	std::vector<const char *> m_vpMenuBackgroundPositionNames;
@@ -1054,7 +1097,13 @@ public:
 	float m_MouseDeltaWx;
 	float m_MouseDeltaWy;
 
-	bool m_ShowTileInfo;
+	enum EShowTile
+	{
+		SHOW_TILE_OFF,
+		SHOW_TILE_DECIMAL,
+		SHOW_TILE_HEXADECIMAL
+	};
+	EShowTile m_ShowTileInfo;
 	bool m_ShowDetail;
 	bool m_Animate;
 	int64_t m_AnimateStart;
@@ -1063,6 +1112,8 @@ public:
 
 	bool m_ShowEnvelopeEditor;
 	float m_EnvelopeEditorSplit;
+	bool m_ShowServerSettingsEditor;
+	float m_ServerSettingsEditorSplit;
 
 	enum EShowEnvelope
 	{
@@ -1071,7 +1122,6 @@ public:
 		SHOWENV_ALL
 	};
 	EShowEnvelope m_ShowEnvelopePreview;
-	bool m_ShowServerSettingsEditor;
 	bool m_ShowPicker;
 
 	std::vector<int> m_vSelectedLayers;
@@ -1104,6 +1154,8 @@ public:
 	static const void *ms_pUiGotContext;
 
 	CEditorMap m_Map;
+	std::list<std::shared_ptr<CDataFileWriterFinishJob>> m_lpWriterFinishJobs;
+
 	int m_ShiftBy;
 
 	static void EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Channels, void *pUser);
@@ -1127,8 +1179,6 @@ public:
 
 	int DoButton_Menu(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip);
 	int DoButton_MenuItem(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags = 0, const char *pToolTip = nullptr);
-
-	int DoButton_ColorPicker(const void *pID, const CUIRect *pRect, ColorRGBA *pColor, const char *pToolTip = nullptr);
 
 	int DoButton_DraggableEx(const void *pID, const char *pText, int Checked, const CUIRect *pRect, bool *pClicked, bool *pAbrupted, int Flags, const char *pToolTip = nullptr, int Corners = IGraphics::CORNER_ALL, float FontSize = 10.0f);
 
@@ -1170,7 +1220,6 @@ public:
 	static CUI::EPopupMenuFunctionResult PopupSwitch(void *pContext, CUIRect View, bool Active);
 	static CUI::EPopupMenuFunctionResult PopupTune(void *pContext, CUIRect View, bool Active);
 	static CUI::EPopupMenuFunctionResult PopupGoto(void *pContext, CUIRect View, bool Active);
-	static CUI::EPopupMenuFunctionResult PopupColorPicker(void *pContext, CUIRect View, bool Active);
 	static CUI::EPopupMenuFunctionResult PopupEntities(void *pContext, CUIRect View, bool Active);
 	static CUI::EPopupMenuFunctionResult PopupProofMode(void *pContext, CUIRect View, bool Active);
 
@@ -1202,7 +1251,8 @@ public:
 	void DoSoundSource(CSoundSource *pSource, int Index);
 
 	void DoMapEditor(CUIRect View);
-	void DoToolbar(CUIRect Toolbar);
+	void DoToolbarLayers(CUIRect Toolbar);
+	void DoToolbarSounds(CUIRect Toolbar);
 	void DoQuad(CQuad *pQuad, int Index);
 	ColorRGBA GetButtonColor(const void *pID, int Checked);
 
@@ -1224,8 +1274,10 @@ public:
 	void RenderSounds(CUIRect Toolbox);
 	void RenderModebar(CUIRect View);
 	void RenderStatusbar(CUIRect View);
+
 	void RenderEnvelopeEditor(CUIRect View);
 	void RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEditorLast);
+	void RenderExtraEditorDragBar(CUIRect View, float *pSplit);
 
 	void RenderMenubar(CUIRect Menubar);
 	void RenderFileDialog();
@@ -1234,7 +1286,7 @@ public:
 	void SortImages();
 	bool SelectLayerByTile();
 
-	//Tile Numbers For Explanations - TODO: Add/Improve tiles and explanations
+	// Tile Numbers For Explanations - TODO: Add/Improve tiles and explanations
 	enum
 	{
 		TILE_PUB_AIR,
@@ -1299,7 +1351,7 @@ public:
 		TILE_VANILLA_LASER,
 	};
 
-	//Explanations
+	// Explanations
 	enum
 	{
 		EXPLANATION_DDNET,
@@ -1320,10 +1372,6 @@ public:
 	float ZoomProgress(float CurrentTime) const;
 	float MinZoomLevel() const;
 	float MaxZoomLevel() const;
-
-	static ColorHSVA ms_PickerColor;
-	static int ms_SVPicker;
-	static int ms_HuePicker;
 
 	// DDRace
 

@@ -203,7 +203,8 @@ int CSnapshotDelta::DiffItem(const int *pPast, const int *pCurrent, int *pOut, i
 	int Needed = 0;
 	while(Size)
 	{
-		*pOut = *pCurrent - *pPast;
+		// subtraction with wrapping by casting to unsigned
+		*pOut = (unsigned)*pCurrent - (unsigned)*pPast;
 		Needed |= *pOut;
 		pOut++;
 		pPast++;

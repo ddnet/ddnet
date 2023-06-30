@@ -265,7 +265,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 					}
 				}
 		pGrabbed->m_TeleNum = m_pEditor->m_TeleNumber;
-		str_copy(pGrabbed->m_aFileName, m_pEditor->m_aFileName, sizeof(pGrabbed->m_aFileName));
+		str_copy(pGrabbed->m_aFileName, m_pEditor->m_aFileName);
 	}
 	else if(this->m_Speedup)
 	{
@@ -303,7 +303,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 		pGrabbed->m_SpeedupForce = m_pEditor->m_SpeedupForce;
 		pGrabbed->m_SpeedupMaxSpeed = m_pEditor->m_SpeedupMaxSpeed;
 		pGrabbed->m_SpeedupAngle = m_pEditor->m_SpeedupAngle;
-		str_copy(pGrabbed->m_aFileName, m_pEditor->m_aFileName, sizeof(pGrabbed->m_aFileName));
+		str_copy(pGrabbed->m_aFileName, m_pEditor->m_aFileName);
 	}
 	else if(this->m_Switch)
 	{
@@ -339,7 +339,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 				}
 		pGrabbed->m_SwitchNumber = m_pEditor->m_SwitchNum;
 		pGrabbed->m_SwitchDelay = m_pEditor->m_SwitchDelay;
-		str_copy(pGrabbed->m_aFileName, m_pEditor->m_aFileName, sizeof(pGrabbed->m_aFileName));
+		str_copy(pGrabbed->m_aFileName, m_pEditor->m_aFileName);
 	}
 
 	else if(this->m_Tune)
@@ -374,7 +374,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 					}
 				}
 		pGrabbed->m_TuningNumber = m_pEditor->m_TuningNum;
-		str_copy(pGrabbed->m_aFileName, m_pEditor->m_aFileName, sizeof(pGrabbed->m_aFileName));
+		str_copy(pGrabbed->m_aFileName, m_pEditor->m_aFileName);
 	}
 	else if(this->m_Front)
 	{
@@ -395,7 +395,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 		for(int y = 0; y < r.h; y++)
 			for(int x = 0; x < r.w; x++)
 				pGrabbed->m_pTiles[y * pGrabbed->m_Width + x] = GetTile(r.x + x, r.y + y);
-		str_copy(pGrabbed->m_aFileName, m_pEditor->m_aFileName, sizeof(pGrabbed->m_aFileName));
+		str_copy(pGrabbed->m_aFileName, m_pEditor->m_aFileName);
 	}
 	else
 	{
@@ -416,7 +416,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 		for(int y = 0; y < r.h; y++)
 			for(int x = 0; x < r.w; x++)
 				pGrabbed->m_pTiles[y * pGrabbed->m_Width + x] = GetTile(r.x + x, r.y + y);
-		str_copy(pGrabbed->m_aFileName, m_pEditor->m_aFileName, sizeof(pGrabbed->m_aFileName));
+		str_copy(pGrabbed->m_aFileName, m_pEditor->m_aFileName);
 	}
 
 	return 1;
@@ -651,7 +651,7 @@ void CLayerTiles::ShowInfo()
 			if(m_pTiles[c].m_Index)
 			{
 				char aBuf[64];
-				str_format(aBuf, sizeof(aBuf), m_pEditor->m_ShowTileHexInfo ? "%02X" : "%i", m_pTiles[c].m_Index);
+				str_format(aBuf, sizeof(aBuf), m_pEditor->m_ShowTileInfo == CEditor::SHOW_TILE_HEXADECIMAL ? "%02X" : "%i", m_pTiles[c].m_Index);
 				m_pEditor->Graphics()->QuadsText(x * 32, y * 32, 16.0f, aBuf);
 
 				char aFlags[4] = {m_pTiles[c].m_Flags & TILEFLAG_XFLIP ? 'X' : ' ',
@@ -1079,7 +1079,7 @@ CUI::EPopupMenuFunctionResult CLayerTiles::RenderCommonProperties(SCommonPropSta
 
 void CLayerTiles::FlagModified(int x, int y, int w, int h)
 {
-	m_pEditor->m_Map.m_Modified = true;
+	m_pEditor->m_Map.OnModify();
 	if(m_Seed != 0 && m_AutoMapperConfig != -1 && m_AutoAutoMap && m_Image >= 0)
 	{
 		m_pEditor->m_Map.m_vpImages[m_Image]->m_AutoMapper.ProceedLocalized(this, m_AutoMapperConfig, m_Seed, x, y, w, h);
@@ -1102,7 +1102,7 @@ void CLayerTiles::ModifyEnvelopeIndex(INDEX_MODIFY_FUNC Func)
 CLayerTele::CLayerTele(int w, int h) :
 	CLayerTiles(w, h)
 {
-	str_copy(m_aName, "Tele", sizeof(m_aName));
+	str_copy(m_aName, "Tele");
 	m_Tele = 1;
 
 	m_pTeleTile = new CTeleTile[w * h];
@@ -1348,7 +1348,7 @@ bool CLayerTele::ContainsElementWithId(int Id)
 CLayerSpeedup::CLayerSpeedup(int w, int h) :
 	CLayerTiles(w, h)
 {
-	str_copy(m_aName, "Speedup", sizeof(m_aName));
+	str_copy(m_aName, "Speedup");
 	m_Speedup = 1;
 
 	m_pSpeedupTile = new CSpeedupTile[w * h];
@@ -1591,7 +1591,7 @@ void CLayerSpeedup::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 CLayerFront::CLayerFront(int w, int h) :
 	CLayerTiles(w, h)
 {
-	str_copy(m_aName, "Front", sizeof(m_aName));
+	str_copy(m_aName, "Front");
 	m_Front = 1;
 }
 
@@ -1637,7 +1637,7 @@ void CLayerFront::Resize(int NewW, int NewH)
 CLayerSwitch::CLayerSwitch(int w, int h) :
 	CLayerTiles(w, h)
 {
-	str_copy(m_aName, "Switch", sizeof(m_aName));
+	str_copy(m_aName, "Switch");
 	m_Switch = 1;
 
 	m_pSwitchTile = new CSwitchTile[w * h];
@@ -1908,7 +1908,7 @@ bool CLayerSwitch::ContainsElementWithId(int Id)
 CLayerTune::CLayerTune(int w, int h) :
 	CLayerTiles(w, h)
 {
-	str_copy(m_aName, "Tune", sizeof(m_aName));
+	str_copy(m_aName, "Tune");
 	m_Tune = 1;
 
 	m_pTuneTile = new CTuneTile[w * h];

@@ -114,9 +114,9 @@ public:
 	int NumTypes(int Network) override { return m_aNetworks[Network].m_NumTypes; }
 	const char *GetType(int Network, int Index) override { return m_aNetworks[Network].m_aTypes[Index]; }
 
-	void DDNetFilterAdd(char *pFilter, const char *pName) override;
-	void DDNetFilterRem(char *pFilter, const char *pName) override;
-	bool DDNetFiltered(char *pFilter, const char *pName) override;
+	void DDNetFilterAdd(char *pFilter, int FilterSize, const char *pName) const override;
+	void DDNetFilterRem(char *pFilter, int FilterSize, const char *pName) const override;
+	bool DDNetFiltered(const char *pFilter, const char *pName) const override;
 	void CountryFilterClean(int Network) override;
 	void TypeFilterClean(int Network) override;
 

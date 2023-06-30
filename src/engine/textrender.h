@@ -70,6 +70,7 @@ MAYBE_UNUSED static const char *FONT_ICON_HEART = "\xEF\x80\x84";
 MAYBE_UNUSED static const char *FONT_ICON_STAR = "\xEF\x80\x85";
 MAYBE_UNUSED static const char *FONT_ICON_CHECK = "\xEF\x80\x8C";
 MAYBE_UNUSED static const char *FONT_ICON_XMARK = "\xEF\x80\x8D";
+MAYBE_UNUSED static const char *FONT_ICON_CIRCLE = "\xEF\x84\x91";
 MAYBE_UNUSED static const char *FONT_ICON_ARROW_ROTATE_LEFT = "\xEF\x83\xA2";
 MAYBE_UNUSED static const char *FONT_ICON_ARROW_ROTATE_RIGHT = "\xEF\x80\x9E";
 MAYBE_UNUSED static const char *FONT_ICON_CERTIFICATE = "\xEF\x82\xA3";
@@ -101,6 +102,7 @@ MAYBE_UNUSED static const char *FONT_ICON_ARROW_UP_RIGHT_FROM_SQUARE = "\xEF\x82
 MAYBE_UNUSED static const char *FONT_ICON_BACKWARD_STEP = "\xEF\x81\x88";
 MAYBE_UNUSED static const char *FONT_ICON_FORWARD_STEP = "\xEF\x81\x91";
 MAYBE_UNUSED static const char *FONT_ICON_KEYBOARD = "\xE2\x8C\xA8";
+MAYBE_UNUSED static const char *FONT_ICON_ELLIPSIS = "\xEF\x85\x81";
 
 MAYBE_UNUSED static const char *FONT_ICON_FOLDER = "\xEF\x81\xBB";
 MAYBE_UNUSED static const char *FONT_ICON_FOLDER_TREE = "\xEF\xA0\x82";

@@ -45,7 +45,7 @@ CAutoMapper::CAutoMapper(CEditor *pEditor)
 
 void CAutoMapper::Load(const char *pTileName)
 {
-	char aPath[256];
+	char aPath[IO_MAX_PATH_LENGTH];
 	str_format(aPath, sizeof(aPath), "editor/%s.rules", pTileName);
 	IOHANDLE RulesFile = m_pEditor->Storage()->OpenFile(aPath, IOFLAG_READ | IOFLAG_SKIP_BOM, IStorage::TYPE_ALL);
 	if(!RulesFile)
@@ -57,8 +57,6 @@ void CAutoMapper::Load(const char *pTileName)
 	CConfiguration *pCurrentConf = nullptr;
 	CRun *pCurrentRun = nullptr;
 	CIndexRule *pCurrentIndex = nullptr;
-
-	char aBuf[256];
 
 	// read each line
 	while(char *pLine = LineReader.Get())
@@ -79,7 +77,7 @@ void CAutoMapper::Load(const char *pTileName)
 				m_vConfigs.push_back(NewConf);
 				int ConfigurationID = m_vConfigs.size() - 1;
 				pCurrentConf = &m_vConfigs[ConfigurationID];
-				str_copy(pCurrentConf->m_aName, pLine, str_length(pLine));
+				str_copy(pCurrentConf->m_aName, pLine, minimum<int>(sizeof(pCurrentConf->m_aName), str_length(pLine)));
 
 				// add start run
 				CRun NewRun;
@@ -362,8 +360,9 @@ void CAutoMapper::Load(const char *pTileName)
 
 	io_close(RulesFile);
 
+	char aBuf[IO_MAX_PATH_LENGTH + 16];
 	str_format(aBuf, sizeof(aBuf), "loaded %s", aPath);
-	m_pEditor->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "editor", aBuf);
+	m_pEditor->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "editor/automap", aBuf);
 
 	m_FileLoaded = true;
 }
@@ -471,7 +470,7 @@ void CAutoMapper::Proceed(CLayerTiles *pLayer, int ConfigID, int Seed, int SeedO
 			for(int x = 0; x < pLayer->m_Width; x++)
 			{
 				CTile *pTile = &(pLayer->m_pTiles[y * pLayer->m_Width + x]);
-				m_pEditor->m_Map.m_Modified = true;
+				m_pEditor->m_Map.OnModify();
 
 				for(size_t i = 0; i < pRun->m_vIndexRules.size(); ++i)
 				{

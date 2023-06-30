@@ -132,9 +132,7 @@ public:
 struct STextString
 {
 	int m_QuadBufferObjectIndex;
-	uint32_t m_DbgShadowBytes = 0x12345678;
 	int m_QuadBufferContainerIndex;
-	uint32_t m_DbgShadowBytes2 = 0x87654321;
 	size_t m_QuadNum;
 	int m_SelectionQuadContainerIndex;
 
@@ -1033,7 +1031,7 @@ public:
 	void AppendTextContainer(STextContainerIndex TextContainerIndex, CTextCursor *pCursor, const char *pText, int Length = -1) override
 	{
 		STextContainer &TextContainer = GetTextContainer(TextContainerIndex);
-		str_append(TextContainer.m_aDebugText, pText, sizeof(TextContainer.m_aDebugText));
+		str_append(TextContainer.m_aDebugText, pText);
 
 		// calculate the font size of the displayed glyphs
 		float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
@@ -1993,7 +1991,6 @@ public:
 				dbg_msg("textrender", "The text container index was in use by %d ", (int)pTextContainer->m_ContainerIndex.m_UseCount.use_count());
 				HasNonEmptyTextContainer = true; // NOLINT(clang-analyzer-deadcode.DeadStores)
 			}
-			dbg_assert(pTextContainer->m_StringInfo.m_DbgShadowBytes == STextString{}.m_DbgShadowBytes && pTextContainer->m_StringInfo.m_DbgShadowBytes2 == STextString{}.m_DbgShadowBytes2, "shadow bytes were modified in text container.");
 		}
 
 		dbg_assert(!HasNonEmptyTextContainer, "text container was not empty");

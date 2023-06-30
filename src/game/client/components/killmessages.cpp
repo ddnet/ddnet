@@ -179,6 +179,11 @@ void CKillMessages::OnMessage(int MsgType, void *pRawMsg)
 
 			m_aKillmsgs[m_KillmsgCurrent] = Kill;
 		}
+		else
+		{
+			TextRender()->DeleteTextContainer(Kill.m_VictimTextContainerIndex);
+			TextRender()->DeleteTextContainer(Kill.m_KillerTextContainerIndex);
+		}
 
 		Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 	}
@@ -240,6 +245,11 @@ void CKillMessages::OnMessage(int MsgType, void *pRawMsg)
 			TextRender()->DeleteTextContainer(m_aKillmsgs[m_KillmsgCurrent].m_KillerTextContainerIndex);
 
 			m_aKillmsgs[m_KillmsgCurrent] = Kill;
+		}
+		else
+		{
+			TextRender()->DeleteTextContainer(Kill.m_VictimTextContainerIndex);
+			TextRender()->DeleteTextContainer(Kill.m_KillerTextContainerIndex);
 		}
 
 		Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
@@ -310,7 +320,7 @@ void CKillMessages::OnRender()
 			{
 				CTeeRenderInfo TeeInfo = m_aKillmsgs[r].m_VictimRenderInfo[j];
 
-				CAnimState *pIdleState = CAnimState::GetIdle();
+				const CAnimState *pIdleState = CAnimState::GetIdle();
 				vec2 OffsetToMid;
 				RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &TeeInfo, OffsetToMid);
 				vec2 TeeRenderPos(x, y + 46.0f / 2.0f + OffsetToMid.y);
@@ -356,7 +366,7 @@ void CKillMessages::OnRender()
 			{
 				CTeeRenderInfo TeeInfo = m_aKillmsgs[r].m_KillerRenderInfo;
 
-				CAnimState *pIdleState = CAnimState::GetIdle();
+				const CAnimState *pIdleState = CAnimState::GetIdle();
 				vec2 OffsetToMid;
 				RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &TeeInfo, OffsetToMid);
 				vec2 TeeRenderPos(x, y + 46.0f / 2.0f + OffsetToMid.y);
@@ -396,6 +406,10 @@ void CKillMessages::RefindSkins()
 
 		if(m_aKillmsgs[r].m_VictimID >= 0)
 		{
+			for(auto &VictimRenderInfo : m_aKillmsgs[r].m_VictimRenderInfo)
+			{
+				VictimRenderInfo = {};
+			}
 			const CGameClient::CClientData &Client = GameClient()->m_aClients[m_aKillmsgs[r].m_VictimID];
 			if(Client.m_aSkinName[0] != '\0')
 				m_aKillmsgs[r].m_VictimRenderInfo[0] = Client.m_RenderInfo;

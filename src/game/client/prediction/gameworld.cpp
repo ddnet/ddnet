@@ -3,6 +3,7 @@
 
 #include "gameworld.h"
 #include "entities/character.h"
+#include "entities/dragger.h"
 #include "entities/laser.h"
 #include "entities/pickup.h"
 #include "entities/projectile.h"
@@ -377,8 +378,16 @@ void CGameWorld::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage,
 	}
 }
 
-void CGameWorld::NetObjBegin()
+bool CGameWorld::IsLocalTeam(int OwnerID)
 {
+	return OwnerID < 0 || m_Teams.CanCollide(m_LocalClientID, OwnerID);
+}
+
+void CGameWorld::NetObjBegin(CTeamsCore Teams, int LocalClientID)
+{
+	m_Teams = Teams;
+	m_LocalClientID = LocalClientID;
+
 	for(int i = 0; i < NUM_ENTTYPES; i++)
 		for(CEntity *pEnt = FindFirst(i); pEnt; pEnt = pEnt->TypeNext())
 		{
@@ -391,20 +400,23 @@ void CGameWorld::NetObjBegin()
 
 void CGameWorld::NetCharAdd(int ObjID, CNetObj_Character *pCharObj, CNetObj_DDNetCharacter *pExtended, int GameTeam, bool IsLocal)
 {
-	CCharacter *pChar;
-	if((pChar = (CCharacter *)GetEntity(ObjID, ENTTYPE_CHARACTER)))
+	if(IsLocalTeam(ObjID))
 	{
-		pChar->Read(pCharObj, pExtended, IsLocal);
-		pChar->Keep();
-	}
-	else
-	{
-		pChar = new CCharacter(this, ObjID, pCharObj, pExtended);
-		InsertEntity(pChar);
-	}
+		CCharacter *pChar;
+		if((pChar = (CCharacter *)GetEntity(ObjID, ENTTYPE_CHARACTER)))
+		{
+			pChar->Read(pCharObj, pExtended, IsLocal);
+			pChar->Keep();
+		}
+		else
+		{
+			pChar = new CCharacter(this, ObjID, pCharObj, pExtended);
+			InsertEntity(pChar);
+		}
 
-	if(pChar)
-		pChar->m_GameTeam = GameTeam;
+		if(pChar)
+			pChar->m_GameTeam = GameTeam;
+	}
 }
 
 void CGameWorld::NetObjAdd(int ObjID, int ObjType, const void *pObjData, const CNetObj_EntityEx *pDataEx)
@@ -412,6 +424,9 @@ void CGameWorld::NetObjAdd(int ObjID, int ObjType, const void *pObjData, const C
 	if((ObjType == NETOBJTYPE_PROJECTILE || ObjType == NETOBJTYPE_DDRACEPROJECTILE || ObjType == NETOBJTYPE_DDNETPROJECTILE) && m_WorldConfig.m_PredictWeapons)
 	{
 		CProjectileData Data = ExtractProjectileInfo(ObjType, pObjData, this, pDataEx);
+		if(!IsLocalTeam(Data.m_Owner))
+			return;
+
 		CProjectile NetProj = CProjectile(this, ObjID, &Data);
 
 		if(NetProj.m_Type != WEAPON_SHOTGUN && absolute(length(NetProj.m_Direction) - 1.f) > 0.02f) // workaround to skip grenades on ball mod
@@ -483,43 +498,60 @@ void CGameWorld::NetObjAdd(int ObjID, int ObjType, const void *pObjData, const C
 	else if((ObjType == NETOBJTYPE_LASER || ObjType == NETOBJTYPE_DDNETLASER) && m_WorldConfig.m_PredictWeapons)
 	{
 		CLaserData Data = ExtractLaserInfo(ObjType, pObjData, this, pDataEx);
-		if(Data.m_Type >= 0 && Data.m_Type != LASERTYPE_RIFLE && Data.m_Type != LASERTYPE_SHOTGUN)
-		{
+		if(!IsLocalTeam(Data.m_Owner))
 			return;
-		}
 
-		CLaser NetLaser = CLaser(this, ObjID, &Data);
-		CLaser *pMatching = 0;
-		if(CLaser *pLaser = dynamic_cast<CLaser *>(GetEntity(ObjID, ENTTYPE_LASER)))
-			if(NetLaser.Match(pLaser))
-				pMatching = pLaser;
-		if(!pMatching)
+		if(Data.m_Type == LASERTYPE_RIFLE || Data.m_Type == LASERTYPE_SHOTGUN || Data.m_Type < 0)
 		{
-			for(CEntity *pEnt = FindFirst(CGameWorld::ENTTYPE_LASER); pEnt; pEnt = pEnt->TypeNext())
-			{
-				auto *const pLaser = dynamic_cast<CLaser *>(pEnt);
-				if(pLaser && pLaser->m_ID == -1 && NetLaser.Match(pLaser))
-				{
+			CLaser NetLaser = CLaser(this, ObjID, &Data);
+			CLaser *pMatching = 0;
+			if(CLaser *pLaser = dynamic_cast<CLaser *>(GetEntity(ObjID, ENTTYPE_LASER)))
+				if(NetLaser.Match(pLaser))
 					pMatching = pLaser;
-					pMatching->m_ID = ObjID;
-					break;
+			if(!pMatching)
+			{
+				for(CEntity *pEnt = FindFirst(CGameWorld::ENTTYPE_LASER); pEnt; pEnt = pEnt->TypeNext())
+				{
+					auto *const pLaser = dynamic_cast<CLaser *>(pEnt);
+					if(pLaser && pLaser->m_ID == -1 && NetLaser.Match(pLaser))
+					{
+						pMatching = pLaser;
+						pMatching->m_ID = ObjID;
+						break;
+					}
+				}
+			}
+			if(pMatching)
+			{
+				pMatching->Keep();
+				if(distance(NetLaser.m_From, NetLaser.m_Pos) < distance(pMatching->m_From, pMatching->m_Pos) - 2.f)
+				{
+					// if the laser stopped earlier than predicted, set the energy to 0
+					pMatching->m_Energy = 0.f;
+					pMatching->m_Pos = NetLaser.m_Pos;
 				}
 			}
 		}
-		if(pMatching)
+		else if(Data.m_Type == LASERTYPE_DRAGGER)
 		{
-			pMatching->Keep();
-			if(distance(NetLaser.m_From, NetLaser.m_Pos) < distance(pMatching->m_From, pMatching->m_Pos) - 2.f)
+			CDragger NetDragger = CDragger(this, ObjID, &Data);
+			if(NetDragger.GetStrength() > 0)
 			{
-				// if the laser stopped earlier than predicted, set the energy to 0
-				pMatching->m_Energy = 0.f;
-				pMatching->m_Pos = NetLaser.m_Pos;
+				auto *pDragger = dynamic_cast<CDragger *>(GetEntity(ObjID, ENTTYPE_DRAGGER));
+				if(pDragger && NetDragger.Match(pDragger))
+				{
+					pDragger->Keep();
+					pDragger->Read(&Data);
+					return;
+				}
+				CEntity *pEnt = new CDragger(NetDragger);
+				InsertEntity(pEnt);
 			}
 		}
 	}
 }
 
-void CGameWorld::NetObjEnd(int LocalID)
+void CGameWorld::NetObjEnd()
 {
 	// keep predicting hooked characters, based on hook position
 	for(int i = 0; i < MAX_CLIENTS; i++)
@@ -592,6 +624,8 @@ void CGameWorld::CopyWorld(CGameWorld *pFrom)
 				pCopy = new CProjectile(*((CProjectile *)pEnt));
 			else if(Type == ENTTYPE_LASER)
 				pCopy = new CLaser(*((CLaser *)pEnt));
+			else if(Type == ENTTYPE_DRAGGER)
+				pCopy = new CDragger(*((CDragger *)pEnt));
 			else if(Type == ENTTYPE_CHARACTER)
 				pCopy = new CCharacter(*((CCharacter *)pEnt));
 			else if(Type == ENTTYPE_PICKUP)
@@ -636,10 +670,21 @@ CEntity *CGameWorld::FindMatch(int ObjID, int ObjType, const void *pObjData)
 	case NETOBJTYPE_DDNETLASER:
 	{
 		CLaserData Data = ExtractLaserInfo(ObjType, pObjData, this, nullptr);
-		CLaser *pEnt = (CLaser *)GetEntity(ObjID, ENTTYPE_LASER);
-		if(pEnt && CLaser(this, ObjID, &Data).Match(pEnt))
+		if(Data.m_Type == LASERTYPE_RIFLE || Data.m_Type == LASERTYPE_SHOTGUN)
 		{
-			return pEnt;
+			CLaser *pEnt = (CLaser *)GetEntity(ObjID, ENTTYPE_LASER);
+			if(pEnt && CLaser(this, ObjID, &Data).Match(pEnt))
+			{
+				return pEnt;
+			}
+		}
+		else if(Data.m_Type == LASERTYPE_DRAGGER)
+		{
+			CDragger *pEnt = (CDragger *)GetEntity(ObjID, ENTTYPE_DRAGGER);
+			if(pEnt && CDragger(this, ObjID, &Data).Match(pEnt))
+			{
+				return pEnt;
+			}
 		}
 		return 0;
 	}

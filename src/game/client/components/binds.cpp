@@ -138,7 +138,8 @@ bool CBinds::OnInput(const IInput::CEvent &Event)
 	{
 		if(Event.m_Flags & IInput::FLAG_PRESS)
 			Console()->ExecuteLineStroked(1, m_aapKeyBindings[Mask][Event.m_Key]);
-		if(Event.m_Flags & IInput::FLAG_RELEASE)
+		// Have to check for nullptr again because the previous execute can unbind itself
+		if(Event.m_Flags & IInput::FLAG_RELEASE && m_aapKeyBindings[Mask][Event.m_Key])
 			Console()->ExecuteLineStroked(0, m_aapKeyBindings[Mask][Event.m_Key]);
 		ret = true;
 	}
@@ -148,7 +149,8 @@ bool CBinds::OnInput(const IInput::CEvent &Event)
 		// When ctrl+shift are pressed (ctrl+shift binds and also the hard-coded ctrl+shift+d, ctrl+shift+g, ctrl+shift+e), ignore other +xxx binds
 		if(Event.m_Flags & IInput::FLAG_PRESS && Mask != ((1 << MODIFIER_CTRL) | (1 << MODIFIER_SHIFT)) && Mask != ((1 << MODIFIER_GUI) | (1 << MODIFIER_SHIFT)))
 			Console()->ExecuteLineStroked(1, m_aapKeyBindings[0][Event.m_Key]);
-		if(Event.m_Flags & IInput::FLAG_RELEASE)
+		// Have to check for nullptr again because the previous execute can unbind itself
+		if(Event.m_Flags & IInput::FLAG_RELEASE && m_aapKeyBindings[0][Event.m_Key])
 			Console()->ExecuteLineStroked(0, m_aapKeyBindings[0][Event.m_Key]);
 		ret = true;
 	}
@@ -253,7 +255,7 @@ void CBinds::OnConsoleInit()
 	if(pConfigManager)
 		pConfigManager->RegisterCallback(ConfigSaveCallback, this);
 
-	Console()->Register("bind", "s[key] r[command]", CFGFLAG_CLIENT, ConBind, this, "Bind key to execute the command");
+	Console()->Register("bind", "s[key] ?r[command]", CFGFLAG_CLIENT, ConBind, this, "Bind key to execute a command or view keybindings");
 	Console()->Register("binds", "?s[key]", CFGFLAG_CLIENT, ConBinds, this, "Print command executed by this keybinding or all binds");
 	Console()->Register("unbind", "s[key]", CFGFLAG_CLIENT, ConUnbind, this, "Unbind key");
 	Console()->Register("unbindall", "", CFGFLAG_CLIENT, ConUnbindAll, this, "Unbind all keys");
@@ -273,6 +275,20 @@ void CBinds::ConBind(IConsole::IResult *pResult, void *pUserData)
 	{
 		char aBuf[256];
 		str_format(aBuf, sizeof(aBuf), "key %s not found", pBindStr);
+		pBinds->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf, gs_BindPrintColor);
+		return;
+	}
+
+	if(pResult->NumArguments() == 1)
+	{
+		char aBuf[256];
+		const char *pKeyName = pResult->GetString(0);
+
+		if(!pBinds->m_aapKeyBindings[Modifier][KeyID])
+			str_format(aBuf, sizeof(aBuf), "%s (%d) is not bound", pKeyName, KeyID);
+		else
+			str_format(aBuf, sizeof(aBuf), "%s (%d) = %s", pKeyName, KeyID, pBinds->m_aapKeyBindings[Modifier][KeyID]);
+
 		pBinds->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf, gs_BindPrintColor);
 		return;
 	}
@@ -419,8 +435,8 @@ const char *CBinds::GetKeyBindModifiersName(int ModifierCombination)
 	{
 		if(ModifierCombination & (1 << k))
 		{
-			str_append(aModifier, GetModifierName(k), sizeof(aModifier));
-			str_append(aModifier, "+", sizeof(aModifier));
+			str_append(aModifier, GetModifierName(k));
+			str_append(aModifier, "+");
 		}
 	}
 	return aModifier;

@@ -1293,11 +1293,11 @@ void CServer::SendRconLogLine(int ClientID, const CLogMessage *pMessage)
 	{
 		str_append(aLine, pLine, pStart - pLine + 1);
 		str_append(aLine, pStart + 2, pStart - pLine + pEnd - pStart - 1);
-		str_append(aLine, pEnd + 2, sizeof(aLine));
+		str_append(aLine, pEnd + 2);
 
 		str_append(aLineWithoutIps, pLine, pStart - pLine + 1);
-		str_append(aLineWithoutIps, "XXX", sizeof(aLineWithoutIps));
-		str_append(aLineWithoutIps, pEnd + 2, sizeof(aLineWithoutIps));
+		str_append(aLineWithoutIps, "XXX");
+		str_append(aLineWithoutIps, pEnd + 2);
 
 		pLine = aLine;
 		pLineWithoutIps = aLineWithoutIps;
@@ -1364,6 +1364,38 @@ static inline int MsgFromSixup(int Msg, bool System)
 	}
 
 	return Msg;
+}
+
+bool CServer::CheckReservedSlotAuth(int ClientID, const char *pPassword)
+{
+	char aBuf[256];
+
+	if(Config()->m_SvReservedSlotsPass[0] && !str_comp(Config()->m_SvReservedSlotsPass, pPassword))
+	{
+		str_format(aBuf, sizeof(aBuf), "cid=%d joining reserved slot with reserved pass", ClientID);
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+		return true;
+	}
+
+	// "^([^:]*):(.*)$"
+	if(Config()->m_SvReservedSlotsAuthLevel != 4)
+	{
+		char aName[sizeof(Config()->m_Password)];
+		const char *pInnerPassword = str_next_token(pPassword, ":", aName, sizeof(aName));
+		if(!pInnerPassword)
+		{
+			return false;
+		}
+		int Slot = m_AuthManager.FindKey(aName);
+		if(m_AuthManager.CheckKey(Slot, pInnerPassword + 1) && m_AuthManager.KeyLevel(Slot) >= Config()->m_SvReservedSlotsAuthLevel)
+		{
+			str_format(aBuf, sizeof(aBuf), "cid=%d joining reserved slot with key=%s", ClientID, m_AuthManager.KeyIdent(Slot));
+			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+			return true;
+		}
+	}
+
+	return false;
 }
 
 void CServer::ProcessClientPacket(CNetChunk *pPacket)
@@ -1466,7 +1498,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				}
 
 				// reserved slot
-				if(ClientID >= (Config()->m_SvMaxClients - Config()->m_SvReservedSlots) && Config()->m_SvReservedSlotsPass[0] != 0 && str_comp(Config()->m_SvReservedSlotsPass, pPassword) != 0)
+				if(ClientID >= Config()->m_SvMaxClients - Config()->m_SvReservedSlots && !CheckReservedSlotAuth(ClientID, pPassword))
 				{
 					m_NetServer.Drop(ClientID, "This server is full");
 					return;
@@ -2287,12 +2319,12 @@ void CServer::UpdateRegisterServerInfo()
 				m_aClients[i].m_Score.value_or(-9999),
 				JsonBool(GameServer()->IsClientPlayer(i)),
 				aExtraPlayerInfo);
-			str_append(aInfo, aClientInfo, sizeof(aInfo));
+			str_append(aInfo, aClientInfo);
 			FirstPlayer = false;
 		}
 	}
 
-	str_append(aInfo, "]}", sizeof(aInfo));
+	str_append(aInfo, "]}");
 
 	m_pRegister->OnNewInfo(aInfo);
 }

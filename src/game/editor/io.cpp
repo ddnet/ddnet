@@ -33,16 +33,20 @@ struct CSoundSource_DEPRECATED
 
 bool CEditor::Save(const char *pFilename)
 {
-	return m_Map.Save(Kernel()->RequestInterface<IStorage>(), pFilename);
+	// Check if file with this name is already being saved at the moment
+	if(std::any_of(std::begin(m_lpWriterFinishJobs), std::end(m_lpWriterFinishJobs), [pFilename](const std::shared_ptr<CDataFileWriterFinishJob> &Job) { return str_comp(pFilename, Job->GetFileName()) == 0; }))
+		return false;
+
+	return m_Map.Save(pFilename);
 }
 
-bool CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
+bool CEditorMap::Save(const char *pFileName)
 {
-	char aBuf[256];
+	char aBuf[IO_MAX_PATH_LENGTH + 64];
 	str_format(aBuf, sizeof(aBuf), "saving to '%s'...", pFileName);
 	m_pEditor->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "editor", aBuf);
 	CDataFileWriter df;
-	if(!df.Open(pStorage, pFileName))
+	if(!df.Open(m_pEditor->Storage(), pFileName))
 	{
 		str_format(aBuf, sizeof(aBuf), "failed to open file '%s'...", pFileName);
 		m_pEditor->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "editor", aBuf);
@@ -372,27 +376,9 @@ bool CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 	free(pPoints);
 
 	// finish the data file
-	df.Finish();
-	m_pEditor->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "editor", "saving done");
-
-	// send rcon.. if we can
-	if(m_pEditor->Client()->RconAuthed())
-	{
-		CServerInfo CurrentServerInfo;
-		m_pEditor->Client()->GetServerInfo(&CurrentServerInfo);
-		NETADDR ServerAddr = m_pEditor->Client()->ServerAddress();
-		const unsigned char aIpv4Localhost[16] = {127, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-		const unsigned char aIpv6Localhost[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
-
-		// and if we're on localhost
-		if(!mem_comp(ServerAddr.ip, aIpv4Localhost, sizeof(aIpv4Localhost)) || !mem_comp(ServerAddr.ip, aIpv6Localhost, sizeof(aIpv6Localhost)))
-		{
-			char aMapName[128];
-			IStorage::StripPathAndExtension(pFileName, aMapName, sizeof(aMapName));
-			if(!str_comp(aMapName, CurrentServerInfo.m_aMap))
-				m_pEditor->Client()->Rcon("reload");
-		}
-	}
+	std::shared_ptr<CDataFileWriterFinishJob> pWriterFinishJob = std::make_shared<CDataFileWriterFinishJob>(pFileName, std::move(df));
+	m_pEditor->Engine()->AddJob(pWriterFinishJob);
+	m_pEditor->m_lpWriterFinishJobs.push_back(pWriterFinishJob);
 
 	return true;
 }
@@ -400,10 +386,10 @@ bool CEditorMap::Save(class IStorage *pStorage, const char *pFileName)
 bool CEditor::Load(const char *pFileName, int StorageType)
 {
 	Reset();
-	bool Result = m_Map.Load(Kernel()->RequestInterface<IStorage>(), pFileName, StorageType);
+	bool Result = m_Map.Load(pFileName, StorageType);
 	if(Result)
 	{
-		str_copy(m_aFileName, pFileName, 512);
+		str_copy(m_aFileName, pFileName);
 		SortImages();
 		SelectGameLayer();
 		ResetMenuBackgroundPositions();
@@ -416,10 +402,10 @@ bool CEditor::Load(const char *pFileName, int StorageType)
 	return Result;
 }
 
-bool CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int StorageType)
+bool CEditorMap::Load(const char *pFileName, int StorageType)
 {
 	CDataFileReader DataFile;
-	if(!DataFile.Open(pStorage, pFileName, StorageType))
+	if(!DataFile.Open(m_pEditor->Storage(), pFileName, StorageType))
 		return false;
 
 	Clean();
@@ -445,13 +431,13 @@ bool CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Stora
 					continue;
 
 				if(pItem->m_Author > -1)
-					str_copy(m_MapInfo.m_aAuthor, (char *)DataFile.GetData(pItem->m_Author), sizeof(m_MapInfo.m_aAuthor));
+					str_copy(m_MapInfo.m_aAuthor, (char *)DataFile.GetData(pItem->m_Author));
 				if(pItem->m_MapVersion > -1)
-					str_copy(m_MapInfo.m_aVersion, (char *)DataFile.GetData(pItem->m_MapVersion), sizeof(m_MapInfo.m_aVersion));
+					str_copy(m_MapInfo.m_aVersion, (char *)DataFile.GetData(pItem->m_MapVersion));
 				if(pItem->m_Credits > -1)
-					str_copy(m_MapInfo.m_aCredits, (char *)DataFile.GetData(pItem->m_Credits), sizeof(m_MapInfo.m_aCredits));
+					str_copy(m_MapInfo.m_aCredits, (char *)DataFile.GetData(pItem->m_Credits));
 				if(pItem->m_License > -1)
-					str_copy(m_MapInfo.m_aLicense, (char *)DataFile.GetData(pItem->m_License), sizeof(m_MapInfo.m_aLicense));
+					str_copy(m_MapInfo.m_aLicense, (char *)DataFile.GetData(pItem->m_License));
 
 				if(pItem->m_Version != 1 || ItemSize < (int)sizeof(CMapItemInfoSettings))
 					break;
@@ -466,7 +452,7 @@ bool CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Stora
 				{
 					int StrSize = str_length(pNext) + 1;
 					CSetting Setting;
-					str_copy(Setting.m_aCommand, pNext, sizeof(Setting.m_aCommand));
+					str_copy(Setting.m_aCommand, pNext);
 					m_vSettings.push_back(Setting);
 					pNext += StrSize;
 				}
@@ -488,7 +474,7 @@ bool CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Stora
 
 				if(pItem->m_External)
 				{
-					char aBuf[256];
+					char aBuf[IO_MAX_PATH_LENGTH];
 					str_format(aBuf, sizeof(aBuf), "mapres/%s.png", pName);
 
 					// load external
@@ -523,7 +509,7 @@ bool CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Stora
 
 				// copy image name
 				if(pName)
-					str_copy(pImg->m_aName, pName, 128);
+					str_copy(pImg->m_aName, pName);
 
 				// load auto mapper file
 				pImg->m_AutoMapper.Load(pImg->m_aName);
@@ -550,11 +536,11 @@ bool CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Stora
 
 				if(pItem->m_External)
 				{
-					char aBuf[256];
+					char aBuf[IO_MAX_PATH_LENGTH];
 					str_format(aBuf, sizeof(aBuf), "mapres/%s.opus", pName);
 
 					// load external
-					if(pStorage->ReadFile(pName, IStorage::TYPE_ALL, &pSound->m_pData, &pSound->m_DataSize))
+					if(m_pEditor->Storage()->ReadFile(pName, IStorage::TYPE_ALL, &pSound->m_pData, &pSound->m_DataSize))
 					{
 						pSound->m_SoundID = m_pEditor->Sound()->LoadOpusFromMem(pSound->m_pData, pSound->m_DataSize, true);
 					}
@@ -572,7 +558,7 @@ bool CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Stora
 
 				// copy image name
 				if(pName)
-					str_copy(pSound->m_aName, pName, sizeof(pSound->m_aName));
+					str_copy(pSound->m_aName, pName);
 
 				m_vpSounds.push_back(pSound);
 
@@ -976,6 +962,9 @@ bool CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Stora
 		return false;
 
 	m_Modified = false;
+	m_ModifiedAuto = false;
+	m_LastModifiedTime = -1.0f;
+	m_LastSaveTime = m_pEditor->Client()->GlobalTime();
 	return true;
 }
 
@@ -991,7 +980,7 @@ bool CEditor::Append(const char *pFileName, int StorageType)
 	CEditorMap NewMap;
 	NewMap.m_pEditor = this;
 
-	if(!NewMap.Load(Kernel()->RequestInterface<IStorage>(), pFileName, StorageType))
+	if(!NewMap.Load(pFileName, StorageType))
 		return false;
 
 	// modify indices

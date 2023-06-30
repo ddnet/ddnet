@@ -18,6 +18,7 @@ CListBox::CListBox()
 	m_HasHeader = false;
 	m_AutoSpacing = 0.0f;
 	m_ScrollbarIsShown = false;
+	m_Active = true;
 }
 
 void CListBox::DoBegin(const CUIRect *pRect)
@@ -59,7 +60,7 @@ void CListBox::DoFooter(const char *pBottomText, float FooterHeight)
 	m_FooterHeight = FooterHeight;
 }
 
-void CListBox::DoStart(float RowHeight, int NumItems, int ItemsPerRow, int RowsPerScroll, int SelectedIndex, const CUIRect *pRect, bool Background, bool *pActive, int BackgroundCorners)
+void CListBox::DoStart(float RowHeight, int NumItems, int ItemsPerRow, int RowsPerScroll, int SelectedIndex, const CUIRect *pRect, bool Background, int BackgroundCorners)
 {
 	CUIRect View;
 	if(pRect)
@@ -96,7 +97,7 @@ void CListBox::DoStart(float RowHeight, int NumItems, int ItemsPerRow, int RowsP
 	m_ListBoxItemSelected = false;
 
 	// handle input
-	if(!pActive || *pActive)
+	if(m_Active)
 	{
 		if(UI()->ConsumeHotkey(CUI::HOTKEY_DOWN))
 			m_ListBoxNewSelOffset += 1;
@@ -115,7 +116,7 @@ void CListBox::DoStart(float RowHeight, int NumItems, int ItemsPerRow, int RowsP
 	// setup the scrollbar
 	m_ScrollOffset = vec2(0.0f, 0.0f);
 	CScrollRegionParams ScrollParams;
-	ScrollParams.m_Active = !pActive || *pActive;
+	ScrollParams.m_Active = m_Active;
 	ScrollParams.m_ScrollbarWidth = ScrollbarWidthMax();
 	ScrollParams.m_ScrollUnit = (m_ListBoxRowHeight + m_AutoSpacing) * RowsPerScroll;
 	m_ScrollRegion.Begin(&m_ListBoxView, &m_ScrollOffset, &ScrollParams);
@@ -144,7 +145,7 @@ CListboxItem CListBox::DoNextRow()
 	return Item;
 }
 
-CListboxItem CListBox::DoNextItem(const void *pId, bool Selected, bool *pActive)
+CListboxItem CListBox::DoNextItem(const void *pId, bool Selected)
 {
 	if(m_AutoSpacing > 0.0f && m_ListBoxItemIndex > 0)
 		DoSpacing(m_AutoSpacing);
@@ -165,18 +166,15 @@ CListboxItem CListBox::DoNextItem(const void *pId, bool Selected, bool *pActive)
 		ItemClicked = true;
 		m_ListBoxNewSelected = ThisItemIndex;
 		m_ListBoxItemSelected = true;
-		if(pActive)
-			*pActive = true;
+		m_Active = true;
 	}
 	else
 		ItemClicked = false;
 
-	const bool ProcessInput = !pActive || *pActive;
-
 	// process input, regard selected index
 	if(m_ListBoxSelectedIndex == ThisItemIndex)
 	{
-		if(ProcessInput && !m_ListBoxDoneEvents)
+		if(m_Active && !m_ListBoxDoneEvents)
 		{
 			m_ListBoxDoneEvents = true;
 
@@ -187,7 +185,7 @@ CListboxItem CListBox::DoNextItem(const void *pId, bool Selected, bool *pActive)
 			}
 		}
 
-		Item.m_Rect.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, ProcessInput ? 0.5f : 0.33f), IGraphics::CORNER_ALL, 5.0f);
+		Item.m_Rect.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, m_Active ? 0.5f : 0.33f), IGraphics::CORNER_ALL, 5.0f);
 	}
 	if(UI()->HotItem() == pId && !m_ScrollRegion.IsAnimating())
 	{
@@ -207,6 +205,8 @@ CListboxItem CListBox::DoSubheader()
 int CListBox::DoEnd()
 {
 	m_ScrollRegion.End();
+	m_Active |= m_ScrollRegion.Params().m_Active;
+
 	m_ScrollbarIsShown = m_ScrollRegion.IsScrollbarShown();
 	if(m_ListBoxNewSelOffset != 0 && m_ListBoxNumItems > 0 && m_ListBoxSelectedIndex == m_ListBoxNewSelected)
 	{

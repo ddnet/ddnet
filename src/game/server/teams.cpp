@@ -161,9 +161,9 @@ void CGameTeams::OnCharacterStart(int ClientID)
 					if(First)
 						First = false;
 					else
-						str_append(aBuf, ", ", sizeof(aBuf));
+						str_append(aBuf, ", ");
 
-					str_append(aBuf, GameServer()->Server()->ClientName(i), sizeof(aBuf));
+					str_append(aBuf, GameServer()->Server()->ClientName(i));
 				}
 			}
 		}
@@ -270,9 +270,9 @@ void CGameTeams::Tick()
 			{
 				if(aPlayerNames[0])
 				{
-					str_append(aPlayerNames, ", ", sizeof(aPlayerNames));
+					str_append(aPlayerNames, ", ");
 				}
-				str_append(aPlayerNames, Server()->ClientName(j), sizeof(aPlayerNames));
+				str_append(aPlayerNames, Server()->ClientName(j));
 				NumPlayersNotStarted += 1;
 			}
 		}

@@ -586,6 +586,37 @@ TEST(Str, Copy)
 	EXPECT_STREQ(aBuf, "DDNet最好了");
 	str_copy(aBuf, pStr, 16);
 	EXPECT_STREQ(aBuf, "DDNet最好了");
+	str_copy(aBuf, pStr);
+	EXPECT_STREQ(aBuf, "DDNet最好了");
+}
+
+TEST(Str, Append)
+{
+	char aBuf[64];
+	aBuf[0] = '\0';
+	str_append(aBuf, "DDNet最好了", 7);
+	EXPECT_STREQ(aBuf, "DDNet");
+	str_append(aBuf, "最", 8);
+	EXPECT_STREQ(aBuf, "DDNet");
+	str_append(aBuf, "最", 9);
+	EXPECT_STREQ(aBuf, "DDNet最");
+	str_append(aBuf, "好", 10);
+	EXPECT_STREQ(aBuf, "DDNet最");
+	str_append(aBuf, "好", 11);
+	EXPECT_STREQ(aBuf, "DDNet最");
+	str_append(aBuf, "好", 12);
+	EXPECT_STREQ(aBuf, "DDNet最好");
+	str_append(aBuf, "了", 13);
+	EXPECT_STREQ(aBuf, "DDNet最好");
+	str_append(aBuf, "了", 14);
+	EXPECT_STREQ(aBuf, "DDNet最好");
+	str_append(aBuf, "了", 15);
+	EXPECT_STREQ(aBuf, "DDNet最好了");
+	str_append(aBuf, "了", 16);
+	EXPECT_STREQ(aBuf, "DDNet最好了");
+	aBuf[0] = '\0';
+	str_append(aBuf, "DDNet最好了");
+	EXPECT_STREQ(aBuf, "DDNet最好了");
 }
 
 TEST(Str, Utf8Stats)

@@ -168,13 +168,13 @@ void CFriends::ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserDat
 	{
 		str_copy(aBuf, pSelf->m_Foes ? "add_foe " : "add_friend ");
 
-		str_append(aBuf, "\"", sizeof(aBuf));
+		str_append(aBuf, "\"");
 		char *pDst = aBuf + str_length(aBuf);
 		str_escape(&pDst, pSelf->m_aFriends[i].m_aName, pEnd);
-		str_append(aBuf, "\" \"", sizeof(aBuf));
+		str_append(aBuf, "\" \"");
 		pDst = aBuf + str_length(aBuf);
 		str_escape(&pDst, pSelf->m_aFriends[i].m_aClan, pEnd);
-		str_append(aBuf, "\"", sizeof(aBuf));
+		str_append(aBuf, "\"");
 
 		pConfigManager->WriteLine(aBuf);
 	}

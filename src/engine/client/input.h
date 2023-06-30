@@ -122,8 +122,9 @@ public:
 	bool KeyPress(int Key, bool CheckCounter) const override { return CheckCounter ? (m_aInputCount[Key] == m_InputCounter) : m_aInputCount[Key]; }
 
 	size_t NumJoysticks() const override { return m_vJoysticks.size(); }
+	CJoystick *GetJoystick(size_t Index) override { return &m_vJoysticks[Index]; }
 	CJoystick *GetActiveJoystick() override { return m_pActiveJoystick; }
-	void SelectNextJoystick() override;
+	void SetActiveJoystick(size_t Index) override;
 
 	bool MouseRelative(float *pX, float *pY) override;
 	void MouseModeAbsolute() override;

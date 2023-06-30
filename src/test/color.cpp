@@ -23,3 +23,19 @@ TEST(Color, HRHConv)
 		}
 	}
 }
+
+// Any color_cast should keep the same alpha value
+TEST(Color, ConvKeepsAlpha)
+{
+	const int Max = 10;
+	for(int i = 0; i <= Max; i++)
+	{
+		const float Alpha = i / (float)Max;
+		EXPECT_FLOAT_EQ(color_cast<ColorRGBA>(ColorHSLA(0.1f, 0.2f, 0.3f, Alpha)).a, Alpha);
+		EXPECT_FLOAT_EQ(color_cast<ColorRGBA>(ColorHSVA(0.1f, 0.2f, 0.3f, Alpha)).a, Alpha);
+		EXPECT_FLOAT_EQ(color_cast<ColorHSLA>(ColorRGBA(0.1f, 0.2f, 0.3f, Alpha)).a, Alpha);
+		EXPECT_FLOAT_EQ(color_cast<ColorHSLA>(ColorHSVA(0.1f, 0.2f, 0.3f, Alpha)).a, Alpha);
+		EXPECT_FLOAT_EQ(color_cast<ColorHSVA>(ColorRGBA(0.1f, 0.2f, 0.3f, Alpha)).a, Alpha);
+		EXPECT_FLOAT_EQ(color_cast<ColorHSVA>(ColorHSLA(0.1f, 0.2f, 0.3f, Alpha)).a, Alpha);
+	}
+}

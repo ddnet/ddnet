@@ -135,7 +135,7 @@ void CEmoticon::OnRender()
 		Graphics()->DrawCircle(Screen.w / 2, Screen.h / 2, 100.0f, 64);
 		Graphics()->QuadsEnd();
 
-		CTeeRenderInfo *pTeeInfo = &m_pClient->m_aClients[m_pClient->m_aLocalIDs[g_Config.m_ClDummy]].m_RenderInfo;
+		CTeeRenderInfo TeeInfo = m_pClient->m_aClients[m_pClient->m_aLocalIDs[g_Config.m_ClDummy]].m_RenderInfo;
 
 		for(int i = 0; i < NUM_EMOTES; i++)
 		{
@@ -143,12 +143,11 @@ void CEmoticon::OnRender()
 			if(Angle > pi)
 				Angle -= 2 * pi;
 
-			bool Selected = m_SelectedEyeEmote == i;
+			const bool Selected = m_SelectedEyeEmote == i;
 
 			const vec2 Nudge = direction(Angle) * 70.0f;
-			pTeeInfo->m_Size = Selected ? 64.0f : 48.0f;
-			RenderTools()->RenderTee(CAnimState::GetIdle(), pTeeInfo, i, vec2(-1, 0), vec2(Screen.w / 2 + Nudge.x, Screen.h / 2 + Nudge.y));
-			pTeeInfo->m_Size = 64.0f;
+			TeeInfo.m_Size = Selected ? 64.0f : 48.0f;
+			RenderTools()->RenderTee(CAnimState::GetIdle(), &TeeInfo, i, vec2(-1, 0), vec2(Screen.w / 2 + Nudge.x, Screen.h / 2 + Nudge.y));
 		}
 
 		Graphics()->TextureClear();

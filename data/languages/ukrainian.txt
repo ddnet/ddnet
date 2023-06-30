@@ -37,12 +37,6 @@ Call vote
 Chat
 == Чат
 
-Close
-== Зачинити
-
-Connect
-== Під’єднатись
-
 Connecting to
 == Підключення до
 
@@ -182,7 +176,7 @@ Movement
 == Переміщення
 
 Mute when not active
-== Глушити звуки, коли гра неактивна
+== Відключити звуки, коли гра неактивна
 
 Name
 == Ім'я
@@ -215,7 +209,7 @@ Password
 == Пароль
 
 Password incorrect
-== неправильний пароль
+== Неправильний пароль
 
 Ping
 == Пінг
@@ -234,7 +228,7 @@ Players
 == Гравці
 
 Please balance teams!
-== Збалансуйте команди!
+== Будь ласка збалансуйте команди!
 
 Prev. weapon
 == Попер. зброя
@@ -259,9 +253,6 @@ Remote console
 
 Reset filter
 == Скинути фільтри
-
-Sample rate
-== Частота
 
 Score
 == бали
@@ -306,10 +297,10 @@ Stop record
 == Зупинити запис
 
 Sudden Death
-== Швидка смерть
+== Раптова смерть
 
 Switch weapon on pickup
-== Перемикати зброю при підборі
+== Взяти в руку підібравшу зброю
 
 Team
 == Команда
@@ -336,7 +327,7 @@ Use sounds
 == Використовувати звуки
 
 V-Sync
-== V-Sync
+==  Вертикальна синхронізація (V-Sync)
 
 Version
 == Версія
@@ -485,7 +476,7 @@ Disconnect Dummy
 == Відключити Dummy
 
 Are you sure that you want to disconnect your dummy?
-== Ви впевнені, що хочете відключити свого Dummy?
+== Ви впевнені, що хочете відключити свого даммі?
 
 Welcome to DDNet
 == Ласкаво просимо в DDNet
@@ -530,10 +521,10 @@ Video name:
 == Назва відео
 
 Show DDNet map finishes in server browser
-== Показувати завершені карти DDNet в браузері сервера
+== Показувати пройдені карти DDNet в браузері сервера
 
 transmits your player name to info.ddnet.org
-== передає Ваш нікнейм на info.ddnet.org
+== передає ваш нікнейм на info.ddnet.org
 
 Search
 == Пошук
@@ -603,9 +594,6 @@ Update now
 
 Restart
 == Перезавантажити
-
-Select a name
-== Оберіть ім'я
 
 Please use a different name
 == Будь ласка, використовуйте інше ім’я
@@ -779,10 +767,10 @@ Kill
 == Самогубство
 
 Zoom in
-== Збільшити
+== Приблизити камеру
 
 Zoom out
-== Зменшити
+== Віддалити камеру
 
 Default zoom
 == Стандартний масштаб
@@ -800,7 +788,7 @@ Toggle dummy
 == Переключити Даммі
 
 Toggle ghost
-== Переключити примару
+== Переключити тінь
 
 Dummy copy
 == Повторення рухів Даммі
@@ -865,9 +853,6 @@ Enable team chat sound
 Enable highlighted chat sound
 == Включити звуки виділених повідомлень
 
-Threaded sound loading
-== музика при завантаженні
-
 Map sound volume
 == Гучність звуку на карті
 
@@ -893,7 +878,7 @@ Show kill messages
 == Показувати список вбивств
 
 Show votes window after voting
-== Показувати голосування після вашого голосу
+== Відображати вікно голосування після вашого голосу
 
 Messages
 == Повідомлення
@@ -922,8 +907,8 @@ Client message
 Save the best demo of each race
 == Зберігати краще демо кожної гонки
 
-Default length: %d
-== Стандартна довжина: %d
+Default length
+== Стандартна довжина
 
 Enable replays
 == Включити повтори
@@ -947,7 +932,7 @@ Show text entities
 == Текстові текстури
 
 Show others (own team only)
-== Завжди показувати тільки вашу команду
+== Показати інших гравців (Лише для комманди)
 
 Show quads
 == Показувати quads
@@ -970,9 +955,6 @@ Show other players' hook collision lines
 Show other players' key presses
 == Показувати натискання кнопок інших гравців
 
-Old mouse mode
-== Режим старої мишки
-
 Show tiles layers from BG map
 == Показувати шари з тайлами з фонової карти
 
@@ -980,7 +962,7 @@ DDNet %s is available:
 == Доступний новий DDNet %s:
 
 Updating...
-== Оновлення ...
+== Оновлення...
 
 No updates available
 == Немає доступних оновлень
@@ -1049,7 +1031,7 @@ Replay
 == Повтор
 
 Saving ddnet-settings.cfg failed
-== Збереження налаштувань невдалося
+== Збереження налаштувань ddnet-settings.cfg невдалося
 
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
 == Ширина або висота текстури %s не поділяється на %d, що може викликати візуальні помилки
@@ -1117,9 +1099,6 @@ Getting server list from master server
 %d player
 == %d Гравець
 
-Refreshing...
-== Оновлення...
-
 Leak IP
 == Стійке IP
 
@@ -1157,7 +1136,7 @@ Windowed
 == Віконний
 
 Windowed borderless
-== Віконний без меж
+== Віконний без рамок
 
 Desktop fullscreen
 == Повний робочий стіл
@@ -1316,7 +1295,7 @@ Speed:
 == Швидкість:
 
 Angle:
-== Кут
+== Кут:
 
 Team %d
 == Команда %d
@@ -1334,7 +1313,7 @@ UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or netwo
 == Здається, що IP-адреси UDP і TCP відрізняються. Спробуйте вимкнути VPN, проксі або мережеві прискорювачі.
 
 No answer from server yet.
-== Сервер ще не відповів
+== Сервер ще не відповів...
 
 Getting game info
 == Отримання ігрової інформації
@@ -1377,7 +1356,7 @@ Click to remove this player from your friends list.
 == Натисніть, щоб видалити цього гравця зі списку друзів.
 
 Click to remove this clan from your friends list.
-== Натисніть, щоб видалити цей клан зі свого списку друзів.
+== Натисніть, щоб видалити цей клан зі свого списку.
 
 None
 == Нічого
@@ -1411,12 +1390,6 @@ Slow down the demo
 
 Speed up the demo
 == Прискорити димо
-
-Mark the beginning of a cut
-== Позначити початок вирізу
-
-Mark the end of a cut
-== Позначити кінець вирізу
 
 Export cut as a separate demo
 == Експортувати виріз як окреме демо
@@ -1464,7 +1437,7 @@ Open the directory that contains the configuration and user files
 == Відкрити каталог, який містить конфігураційні та користувацькі файли
 
 Open the directory to add custom themes
-== Відкрити каталог, щоб додати власні теми
+== Відкрити каталог, щоб додати власні фони
 
 Loading skin files
 == Завантаження файлів скінів
@@ -1487,13 +1460,6 @@ Open the directory to add custom skins
 Enable controller
 == Увімкнути контролер
 
-Controller %d: %s
-== Контролер %d: %s
-
-Click to cycle through all available controllers.
-== Натисніть, щоб переглянути всі активні контролери.
-
-[Ingame controller mode]
 Relative
 == Relative
 
@@ -1516,17 +1482,11 @@ Controller jitter tolerance
 No controller found. Plug in a controller.
 == Контролер не знайдено. Підключіть контролер.
 
-Device
-== Пристрій
-
 Status
 == Стан
 
 Aim bind
 == Прив'язка до цілі
-
-Controller Axis #%d
-== Ось контролера #%d
 
 Mouse
 == Мишка
@@ -1560,9 +1520,6 @@ default
 
 custom
 == користувацькі
-
-Graphics cards
-== Відеокарти
 
 auto
 == авто
@@ -1646,34 +1603,34 @@ Weapons
 == Зброя
 
 Rifle Laser Outline Color
-== Колір контуру лазера
+== Колір лазера
 
 Rifle Laser Inner Color
-== Внутрішній колір лазера
+== Колір обводки лазера
 
 Shotgun Laser Outline Color
-== Колір контуру дробовика
+== Колір лазера дробовика
 
 Shotgun Laser Inner Color
-== Внутрішній колір дробовика
+== Колір обводки лазера дробовика
 
 Door Laser Outline Color
-== Колір контуру дверей
+== Колір лазера-дверей
 
 Door Laser Inner Color
-== Внутрішній колір дверей
+== Колір обводки лазера-дверей
 
 Freeze Laser Outline Color
-== Колір контуру фріз-лазерів
+== Колір фріз-лазера
 
 Freeze Laser Inner Color
-== Внутрішній колір фріз-дверей
+== Колір обводки фріз-лазера
 
 Set all to Rifle
-== Поставити все на колір зброї
+== Всі кольори на колір лезера
 
 When you cross the start line, show a ghost tee replicating the movements of your best time
-== При перетинанні лінію старту, відображати tee-привида, який буде повторювати рухи свого найкращого часу
+== При перетинанні лінію старту, відображати tee-привида, який буде повторювати рухи вашого найкращого часу
 
 Opacity
 == Непрозорість
@@ -1719,3 +1676,33 @@ Super
 
 Loading sound files
 == Завантаження звукових файлів
+
+A demo with this name already exists
+== 
+
+No server selected
+== 
+
+Mark the beginning of a cut (right click to reset)
+== 
+
+Mark the end of a cut (right click to reset)
+== 
+
+Close the demo player
+== 
+
+Export demo cut
+== 
+
+Cut interval
+== 
+
+Cut length
+== 
+
+Axis
+== 
+
+Graphics card
+== 

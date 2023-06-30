@@ -29,11 +29,13 @@ void CLineInput::SetBuffer(char *pStr, size_t MaxSize, size_t MaxChars)
 	m_WasChanged = m_pStr && pLastStr && m_WasChanged;
 	if(!pLastStr)
 	{
+		m_CursorPos = m_SelectionStart = m_SelectionEnd = m_LastCompositionCursorPos = 0;
 		m_ScrollOffset = m_ScrollOffsetChange = 0.0f;
 		m_CaretPosition = vec2(0.0f, 0.0f);
+		m_MouseSelection.m_Selecting = false;
 		m_Hidden = false;
 		m_pEmptyText = nullptr;
-		m_MouseSelection.m_Selecting = false;
+		m_WasRendered = false;
 	}
 	if(m_pStr && m_pStr != pLastStr)
 		UpdateStrData();
@@ -224,7 +226,7 @@ bool CLineInput::ProcessInput(const IInput::CEvent &Event)
 
 		if(Event.m_Key == KEY_BACKSPACE)
 		{
-			if(SelectionLength && !MoveWord)
+			if(SelectionLength)
 			{
 				SetRange("", m_SelectionStart, m_SelectionEnd);
 			}
@@ -244,7 +246,7 @@ bool CLineInput::ProcessInput(const IInput::CEvent &Event)
 		}
 		else if(Event.m_Key == KEY_DELETE)
 		{
-			if(SelectionLength && !MoveWord)
+			if(SelectionLength)
 			{
 				SetRange("", m_SelectionStart, m_SelectionEnd);
 			}
@@ -401,6 +403,8 @@ bool CLineInput::ProcessInput(const IInput::CEvent &Event)
 
 STextBoundingBox CLineInput::Render(const CUIRect *pRect, float FontSize, int Align, bool Changed, float LineWidth)
 {
+	m_WasRendered = true;
+
 	const char *pDisplayStr = GetDisplayedString();
 	const bool HasComposition = Input()->HasComposition();
 
@@ -528,6 +532,23 @@ STextBoundingBox CLineInput::Render(const CUIRect *pRect, float FontSize, int Al
 
 void CLineInput::RenderCandidates()
 {
+	// Check if the active line input was not rendered and deactivate it in that case.
+	// This can happen e.g. when an input in the ingame menu is active and the menu is
+	// closed or when switching between menu and editor with an active input.
+	CLineInput *pActiveInput = GetActiveInput();
+	if(pActiveInput != nullptr)
+	{
+		if(pActiveInput->m_WasRendered)
+		{
+			pActiveInput->m_WasRendered = false;
+		}
+		else
+		{
+			pActiveInput->Deactivate();
+			return;
+		}
+	}
+
 	if(!Input()->HasComposition() || !Input()->GetCandidateCount())
 		return;
 
@@ -642,7 +663,7 @@ void CLineInput::OnDeactivate()
 	m_MouseSelection.m_Selecting = false;
 }
 
-void CLineInputNumber::SetInteger(int Number, int Base)
+void CLineInputNumber::SetInteger(int Number, int Base, int HexPrefix)
 {
 	char aBuf[32];
 	switch(Base)
@@ -651,13 +672,13 @@ void CLineInputNumber::SetInteger(int Number, int Base)
 		str_format(aBuf, sizeof(aBuf), "%d", Number);
 		break;
 	case 16:
-		str_format(aBuf, sizeof(aBuf), "%06X", Number);
+		str_format(aBuf, sizeof(aBuf), "%0*X", HexPrefix, Number);
 		break;
 	default:
 		dbg_assert(false, "Base unsupported");
 		return;
 	}
-	if(str_comp(aBuf, GetDisplayedString()) != 0)
+	if(str_comp(aBuf, GetString()) != 0)
 		Set(aBuf);
 }
 
@@ -666,11 +687,35 @@ int CLineInputNumber::GetInteger(int Base) const
 	return str_toint_base(GetString(), Base);
 }
 
+void CLineInputNumber::SetInteger64(int64_t Number, int Base, int HexPrefix)
+{
+	char aBuf[64];
+	switch(Base)
+	{
+	case 10:
+		str_format(aBuf, sizeof(aBuf), "%" PRId64, Number);
+		break;
+	case 16:
+		str_format(aBuf, sizeof(aBuf), "%0*" PRIX64, HexPrefix, Number);
+		break;
+	default:
+		dbg_assert(false, "Base unsupported");
+		return;
+	}
+	if(str_comp(aBuf, GetString()) != 0)
+		Set(aBuf);
+}
+
+int64_t CLineInputNumber::GetInteger64(int Base) const
+{
+	return str_toint64_base(GetString(), Base);
+}
+
 void CLineInputNumber::SetFloat(float Number)
 {
 	char aBuf[32];
 	str_format(aBuf, sizeof(aBuf), "%.3f", Number);
-	if(str_comp(aBuf, GetDisplayedString()) != 0)
+	if(str_comp(aBuf, GetString()) != 0)
 		Set(aBuf);
 }
 

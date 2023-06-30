@@ -90,7 +90,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupMenuFile(void *pContext, CUIRect Vie
 	{
 		if(pEditor->m_aFileName[0] && pEditor->m_ValidSaveFilename)
 		{
-			str_copy(pEditor->m_aFileSaveName, pEditor->m_aFileName, sizeof(pEditor->m_aFileSaveName));
+			str_copy(pEditor->m_aFileSaveName, pEditor->m_aFileName);
 			pEditor->m_PopupEventType = POPEVENT_SAVE;
 			pEditor->m_PopupEventActivated = true;
 		}
@@ -293,21 +293,19 @@ CUI::EPopupMenuFunctionResult CEditor::PopupMenuSettings(void *pContext, CUIRect
 		static int s_ButtonOff = 0;
 		static int s_ButtonDec = 0;
 		static int s_ButtonHex = 0;
-		if(pEditor->DoButton_ButtonDec(&s_ButtonOff, "Off", !pEditor->m_ShowTileInfo, &Off, 0, "Do not show tile information"))
+		if(pEditor->DoButton_ButtonDec(&s_ButtonOff, "Off", pEditor->m_ShowTileInfo == SHOW_TILE_OFF, &Off, 0, "Do not show tile information"))
 		{
-			pEditor->m_ShowTileInfo = false;
+			pEditor->m_ShowTileInfo = SHOW_TILE_OFF;
 			pEditor->m_ShowEnvelopePreview = SHOWENV_NONE;
 		}
-		if(pEditor->DoButton_Ex(&s_ButtonDec, "Dec", pEditor->m_ShowTileInfo && !pEditor->m_ShowTileHexInfo, &Dec, 0, "[ctrl+i] Show tile information", IGraphics::CORNER_NONE))
+		if(pEditor->DoButton_Ex(&s_ButtonDec, "Dec", pEditor->m_ShowTileInfo == SHOW_TILE_DECIMAL, &Dec, 0, "[ctrl+i] Show tile information", IGraphics::CORNER_NONE))
 		{
-			pEditor->m_ShowTileInfo = true;
-			pEditor->m_ShowTileHexInfo = false;
+			pEditor->m_ShowTileInfo = SHOW_TILE_DECIMAL;
 			pEditor->m_ShowEnvelopePreview = SHOWENV_NONE;
 		}
-		if(pEditor->DoButton_ButtonInc(&s_ButtonHex, "Hex", pEditor->m_ShowTileInfo && pEditor->m_ShowTileHexInfo, &Hex, 0, "[ctrl+shift+i] Show tile information in hexadecimal"))
+		if(pEditor->DoButton_ButtonInc(&s_ButtonHex, "Hex", pEditor->m_ShowTileInfo == SHOW_TILE_HEXADECIMAL, &Hex, 0, "[ctrl+shift+i] Show tile information in hexadecimal"))
 		{
-			pEditor->m_ShowTileInfo = true;
-			pEditor->m_ShowTileHexInfo = true;
+			pEditor->m_ShowTileInfo = SHOW_TILE_HEXADECIMAL;
 			pEditor->m_ShowEnvelopePreview = SHOWENV_NONE;
 		}
 	}
@@ -368,7 +366,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupGroup(void *pContext, CUIRect View, 
 					if(!Found)
 					{
 						pGameLayer->m_pTiles[y * pGameLayer->m_Width + x].m_Index = TILE_AIR;
-						pEditor->m_Map.m_Modified = true;
+						pEditor->m_Map.OnModify();
 					}
 				}
 			}
@@ -514,7 +512,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupGroup(void *pContext, CUIRect View, 
 		static CLineInput s_NameInput;
 		s_NameInput.SetBuffer(pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_aName, sizeof(pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_aName));
 		if(pEditor->DoEditBox(&s_NameInput, &Button, 10.0f))
-			pEditor->m_Map.m_Modified = true;
+			pEditor->m_Map.OnModify();
 	}
 
 	enum
@@ -559,7 +557,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupGroup(void *pContext, CUIRect View, 
 	int Prop = pEditor->DoProperties(&View, aProps, s_aIds, &NewVal);
 	if(Prop != -1)
 	{
-		pEditor->m_Map.m_Modified = true;
+		pEditor->m_Map.OnModify();
 	}
 
 	if(Prop == PROP_ORDER)
@@ -685,7 +683,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupLayer(void *pContext, CUIRect View, 
 		static CLineInput s_NameInput;
 		s_NameInput.SetBuffer(pCurrentLayer->m_aName, sizeof(pCurrentLayer->m_aName));
 		if(pEditor->DoEditBox(&s_NameInput, &EditBox, 10.0f))
-			pEditor->m_Map.m_Modified = true;
+			pEditor->m_Map.OnModify();
 	}
 
 	// spacing if any button was rendered
@@ -719,7 +717,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupLayer(void *pContext, CUIRect View, 
 	int Prop = pEditor->DoProperties(&View, aProps, s_aIds, &NewVal);
 	if(Prop != -1)
 	{
-		pEditor->m_Map.m_Modified = true;
+		pEditor->m_Map.OnModify();
 	}
 
 	if(Prop == PROP_ORDER)
@@ -764,7 +762,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupQuad(void *pContext, CUIRect View, b
 	{
 		if(pLayer)
 		{
-			pEditor->m_Map.m_Modified = true;
+			pEditor->m_Map.OnModify();
 			pEditor->DeleteSelectedQuads();
 		}
 		return CUI::POPUP_CLOSE_CURRENT;
@@ -804,7 +802,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupQuad(void *pContext, CUIRect View, b
 				pQuad->m_aPoints[2].y = Top + Height;
 				pQuad->m_aPoints[3].x = Right;
 				pQuad->m_aPoints[3].y = Top + Height;
-				pEditor->m_Map.m_Modified = true;
+				pEditor->m_Map.OnModify();
 			}
 			return CUI::POPUP_CLOSE_CURRENT;
 		}
@@ -823,7 +821,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupQuad(void *pContext, CUIRect View, b
 				pQuad->m_aPoints[k].x = 1000.0f * (pQuad->m_aPoints[k].x / 1000);
 				pQuad->m_aPoints[k].y = 1000.0f * (pQuad->m_aPoints[k].y / 1000);
 			}
-			pEditor->m_Map.m_Modified = true;
+			pEditor->m_Map.OnModify();
 		}
 		return CUI::POPUP_CLOSE_CURRENT;
 	}
@@ -861,7 +859,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupQuad(void *pContext, CUIRect View, b
 			pQuad->m_aPoints[2].y = Bottom;
 			pQuad->m_aPoints[3].x = Right;
 			pQuad->m_aPoints[3].y = Bottom;
-			pEditor->m_Map.m_Modified = true;
+			pEditor->m_Map.OnModify();
 		}
 		return CUI::POPUP_CLOSE_CURRENT;
 	}
@@ -906,7 +904,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupQuad(void *pContext, CUIRect View, b
 	int Prop = pEditor->DoProperties(&View, aProps, s_aIds, &NewVal);
 	if(Prop != -1)
 	{
-		pEditor->m_Map.m_Modified = true;
+		pEditor->m_Map.OnModify();
 	}
 
 	const float OffsetX = i2fx(NewVal) - pCurrentQuad->m_aPoints[4].x;
@@ -990,7 +988,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupSource(void *pContext, CUIRect View,
 		CLayerSounds *pLayer = (CLayerSounds *)pEditor->GetSelectedLayerType(0, LAYERTYPE_SOUNDS);
 		if(pLayer)
 		{
-			pEditor->m_Map.m_Modified = true;
+			pEditor->m_Map.OnModify();
 			pLayer->m_vSources.erase(pLayer->m_vSources.begin() + pEditor->m_SelectedSource);
 			pEditor->m_SelectedSource--;
 		}
@@ -1064,7 +1062,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupSource(void *pContext, CUIRect View,
 	int Prop = pEditor->DoProperties(&View, aProps, s_aIds, &NewVal);
 	if(Prop != -1)
 	{
-		pEditor->m_Map.m_Modified = true;
+		pEditor->m_Map.OnModify();
 	}
 
 	if(Prop == PROP_POS_X)
@@ -1147,7 +1145,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupSource(void *pContext, CUIRect View,
 		Prop = pEditor->DoProperties(&View, aCircleProps, s_aCircleIds, &NewVal);
 		if(Prop != -1)
 		{
-			pEditor->m_Map.m_Modified = true;
+			pEditor->m_Map.OnModify();
 		}
 
 		if(Prop == PROP_CIRCLE_RADIUS)
@@ -1178,7 +1176,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupSource(void *pContext, CUIRect View,
 		Prop = pEditor->DoProperties(&View, aRectangleProps, s_aRectangleIds, &NewVal);
 		if(Prop != -1)
 		{
-			pEditor->m_Map.m_Modified = true;
+			pEditor->m_Map.OnModify();
 		}
 
 		if(Prop == PROP_RECTANGLE_WIDTH)
@@ -1238,7 +1236,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupPoint(void *pContext, CUIRect View, 
 	int Prop = pEditor->DoProperties(&View, aProps, s_aIds, &NewVal);
 	if(Prop != -1)
 	{
-		pEditor->m_Map.m_Modified = true;
+		pEditor->m_Map.OnModify();
 	}
 
 	for(auto &pQuad : vpQuads)
@@ -1329,19 +1327,24 @@ CUI::EPopupMenuFunctionResult CEditor::PopupImage(void *pContext, CUIRect View, 
 	}
 
 	static CUI::SSelectionPopupContext s_SelectionPopupContext;
+	static CScrollRegion s_SelectionPopupScrollRegion;
+	s_SelectionPopupContext.m_pScrollRegion = &s_SelectionPopupScrollRegion;
 	if(pEditor->DoButton_MenuItem(&s_ReaddButton, "Readd", 0, &Slot, 0, "Reloads the image from the mapres folder"))
 	{
 		char aFilename[IO_MAX_PATH_LENGTH];
 		str_format(aFilename, sizeof(aFilename), "%s.png", pImg->m_aName);
 		s_SelectionPopupContext.Reset();
-		pEditor->Storage()->FindFiles(aFilename, "mapres", IStorage::TYPE_ALL, &s_SelectionPopupContext.m_Entries);
-		if(s_SelectionPopupContext.m_Entries.empty())
+		std::set<std::string> EntriesSet;
+		pEditor->Storage()->FindFiles(aFilename, "mapres", IStorage::TYPE_ALL, &EntriesSet);
+		for(const auto &Entry : EntriesSet)
+			s_SelectionPopupContext.m_vEntries.push_back(Entry);
+		if(s_SelectionPopupContext.m_vEntries.empty())
 		{
 			pEditor->ShowFileDialogError("Error: could not find image '%s' in the mapres folder.", aFilename);
 		}
-		else if(s_SelectionPopupContext.m_Entries.size() == 1)
+		else if(s_SelectionPopupContext.m_vEntries.size() == 1)
 		{
-			s_SelectionPopupContext.m_pSelection = &*s_SelectionPopupContext.m_Entries.begin();
+			s_SelectionPopupContext.m_pSelection = &s_SelectionPopupContext.m_vEntries.front();
 		}
 		else
 		{
@@ -1393,19 +1396,24 @@ CUI::EPopupMenuFunctionResult CEditor::PopupSound(void *pContext, CUIRect View, 
 	CEditorSound *pSound = pEditor->m_Map.m_vpSounds[pEditor->m_SelectedSound];
 
 	static CUI::SSelectionPopupContext s_SelectionPopupContext;
+	static CScrollRegion s_SelectionPopupScrollRegion;
+	s_SelectionPopupContext.m_pScrollRegion = &s_SelectionPopupScrollRegion;
 	if(pEditor->DoButton_MenuItem(&s_ReaddButton, "Readd", 0, &Slot, 0, "Reloads the sound from the mapres folder"))
 	{
 		char aFilename[IO_MAX_PATH_LENGTH];
 		str_format(aFilename, sizeof(aFilename), "%s.opus", pSound->m_aName);
 		s_SelectionPopupContext.Reset();
-		pEditor->Storage()->FindFiles(aFilename, "mapres", IStorage::TYPE_ALL, &s_SelectionPopupContext.m_Entries);
-		if(s_SelectionPopupContext.m_Entries.empty())
+		std::set<std::string> EntriesSet;
+		pEditor->Storage()->FindFiles(aFilename, "mapres", IStorage::TYPE_ALL, &EntriesSet);
+		for(const auto &Entry : EntriesSet)
+			s_SelectionPopupContext.m_vEntries.push_back(Entry);
+		if(s_SelectionPopupContext.m_vEntries.empty())
 		{
 			pEditor->ShowFileDialogError("Error: could not find sound '%s' in the mapres folder.", aFilename);
 		}
-		else if(s_SelectionPopupContext.m_Entries.size() == 1)
+		else if(s_SelectionPopupContext.m_vEntries.size() == 1)
 		{
-			s_SelectionPopupContext.m_pSelection = &*s_SelectionPopupContext.m_Entries.begin();
+			s_SelectionPopupContext.m_pSelection = &s_SelectionPopupContext.m_vEntries.front();
 		}
 		else
 		{
@@ -1581,7 +1589,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupEvent(void *pContext, CUIRect View, 
 		pTitle = "New map";
 		pMessage = "The map contains unsaved data, you might want to save it before you create a new map.\n\nContinue anyway?";
 	}
-	else if(pEditor->m_PopupEventType == POPEVENT_SAVE)
+	else if(pEditor->m_PopupEventType == POPEVENT_SAVE || pEditor->m_PopupEventType == POPEVENT_SAVE_COPY)
 	{
 		pTitle = "Save map";
 		pMessage = "The file already exists.\n\nDo you want to overwrite the map?";
@@ -1667,6 +1675,11 @@ CUI::EPopupMenuFunctionResult CEditor::PopupEvent(void *pContext, CUIRect View, 
 		else if(pEditor->m_PopupEventType == POPEVENT_SAVE)
 		{
 			CallbackSaveMap(pEditor->m_aFileSaveName, IStorage::TYPE_SAVE, pEditor);
+			return CUI::POPUP_CLOSE_CURRENT;
+		}
+		else if(pEditor->m_PopupEventType == POPEVENT_SAVE_COPY)
+		{
+			CallbackSaveCopyMap(pEditor->m_aFileSaveName, IStorage::TYPE_SAVE, pEditor);
 			return CUI::POPUP_CLOSE_CURRENT;
 		}
 		else if(pEditor->m_PopupEventType == POPEVENT_PLACE_BORDER_TILES)
@@ -2185,109 +2198,6 @@ CUI::EPopupMenuFunctionResult CEditor::PopupGoto(void *pContext, CUIRect View, b
 	return CUI::POPUP_KEEP_OPEN;
 }
 
-CUI::EPopupMenuFunctionResult CEditor::PopupColorPicker(void *pContext, CUIRect View, bool Active)
-{
-	CEditor *pEditor = static_cast<CEditor *>(pContext);
-
-	CUIRect SVPicker, HuePicker;
-	View.VSplitRight(20.0f, &SVPicker, &HuePicker);
-	HuePicker.VSplitLeft(4.0f, nullptr, &HuePicker);
-
-	pEditor->Graphics()->TextureClear();
-	pEditor->Graphics()->QuadsBegin();
-
-	// base: white - hue
-	ColorHSVA Hsv = CEditor::ms_PickerColor;
-	IGraphics::CColorVertex aColors[4];
-
-	ColorRGBA Color = color_cast<ColorRGBA>(ColorHSVA(Hsv.x, 0.0f, 1.0f));
-	aColors[0] = IGraphics::CColorVertex(0, Color.r, Color.g, Color.b, 1.0f);
-	Color = color_cast<ColorRGBA>(ColorHSVA(Hsv.x, 1.0f, 1.0f));
-	aColors[1] = IGraphics::CColorVertex(1, Color.r, Color.g, Color.b, 1.0f);
-	Color = color_cast<ColorRGBA>(ColorHSVA(Hsv.x, 1.0f, 1.0f));
-	aColors[2] = IGraphics::CColorVertex(2, Color.r, Color.g, Color.b, 1.0f);
-	Color = color_cast<ColorRGBA>(ColorHSVA(Hsv.x, 0.0f, 1.0f));
-	aColors[3] = IGraphics::CColorVertex(3, Color.r, Color.g, Color.b, 1.0f);
-
-	pEditor->Graphics()->SetColorVertex(aColors, 4);
-
-	IGraphics::CQuadItem QuadItem(SVPicker.x, SVPicker.y, SVPicker.w, SVPicker.h);
-	pEditor->Graphics()->QuadsDrawTL(&QuadItem, 1);
-
-	// base: transparent - black
-	aColors[0] = IGraphics::CColorVertex(0, 0.0f, 0.0f, 0.0f, 0.0f);
-	aColors[1] = IGraphics::CColorVertex(1, 0.0f, 0.0f, 0.0f, 0.0f);
-	aColors[2] = IGraphics::CColorVertex(2, 0.0f, 0.0f, 0.0f, 1.0f);
-	aColors[3] = IGraphics::CColorVertex(3, 0.0f, 0.0f, 0.0f, 1.0f);
-
-	pEditor->Graphics()->SetColorVertex(aColors, 4);
-
-	pEditor->Graphics()->QuadsDrawTL(&QuadItem, 1);
-
-	pEditor->Graphics()->QuadsEnd();
-
-	// marker
-	const vec2 Marker = vec2(Hsv.y, (1.0f - Hsv.z)) * vec2(SVPicker.w, SVPicker.h);
-	pEditor->Graphics()->QuadsBegin();
-	pEditor->Graphics()->SetColor(0.5f, 0.5f, 0.5f, 1.0f);
-	IGraphics::CQuadItem aMarker[2];
-	aMarker[0] = IGraphics::CQuadItem(SVPicker.x + Marker.x, SVPicker.y + Marker.y - 5.0f * pEditor->UI()->PixelSize(), pEditor->UI()->PixelSize(), 11.0f * pEditor->UI()->PixelSize());
-	aMarker[1] = IGraphics::CQuadItem(SVPicker.x + Marker.x - 5.0f * pEditor->UI()->PixelSize(), SVPicker.y + Marker.y, 11.0f * pEditor->UI()->PixelSize(), pEditor->UI()->PixelSize());
-	pEditor->Graphics()->QuadsDrawTL(aMarker, 2);
-	pEditor->Graphics()->QuadsEnd();
-
-	// logic
-	float X, Y;
-	if(pEditor->UI()->DoPickerLogic(&CEditor::ms_SVPicker, &SVPicker, &X, &Y))
-	{
-		Hsv.y = X / SVPicker.w;
-		Hsv.z = 1.0f - Y / SVPicker.h;
-	}
-
-	// hue slider
-	static const float s_aaColorIndices[7][3] = {
-		{1.0f, 0.0f, 0.0f}, // red
-		{1.0f, 0.0f, 1.0f}, // magenta
-		{0.0f, 0.0f, 1.0f}, // blue
-		{0.0f, 1.0f, 1.0f}, // cyan
-		{0.0f, 1.0f, 0.0f}, // green
-		{1.0f, 1.0f, 0.0f}, // yellow
-		{1.0f, 0.0f, 0.0f}, // red
-	};
-
-	pEditor->Graphics()->QuadsBegin();
-	const float Offset = HuePicker.h / 6.0f;
-	for(size_t j = 0; j < std::size(s_aaColorIndices) - 1; ++j)
-	{
-		const ColorRGBA ColorTop = ColorRGBA(s_aaColorIndices[j][0], s_aaColorIndices[j][1], s_aaColorIndices[j][2], 1.0f);
-		const ColorRGBA ColorBottom = ColorRGBA(s_aaColorIndices[j + 1][0], s_aaColorIndices[j + 1][1], s_aaColorIndices[j + 1][2], 1.0f);
-
-		aColors[0] = IGraphics::CColorVertex(0, ColorTop.r, ColorTop.g, ColorTop.b, ColorTop.a);
-		aColors[1] = IGraphics::CColorVertex(1, ColorTop.r, ColorTop.g, ColorTop.b, ColorTop.a);
-		aColors[2] = IGraphics::CColorVertex(2, ColorBottom.r, ColorBottom.g, ColorBottom.b, ColorBottom.a);
-		aColors[3] = IGraphics::CColorVertex(3, ColorBottom.r, ColorBottom.g, ColorBottom.b, ColorBottom.a);
-		pEditor->Graphics()->SetColorVertex(aColors, 4);
-		QuadItem = IGraphics::CQuadItem(HuePicker.x, HuePicker.y + Offset * j, HuePicker.w, Offset);
-		pEditor->Graphics()->QuadsDrawTL(&QuadItem, 1);
-	}
-
-	// marker
-	pEditor->Graphics()->SetColor(0.5f, 0.5f, 0.5f, 1.0f);
-	IGraphics::CQuadItem QuadItemMarker(HuePicker.x, HuePicker.y + (1.0f - Hsv.x) * HuePicker.h, HuePicker.w, pEditor->UI()->PixelSize());
-	pEditor->Graphics()->QuadsDrawTL(&QuadItemMarker, 1);
-
-	pEditor->Graphics()->QuadsEnd();
-
-	if(pEditor->UI()->DoPickerLogic(&CEditor::ms_HuePicker, &HuePicker, &X, &Y))
-	{
-		Hsv.x = 1.0f - Y / HuePicker.h;
-	}
-
-	CEditor::ms_PickerColor = Hsv;
-
-	return CUI::POPUP_KEEP_OPEN;
-}
-
 CUI::EPopupMenuFunctionResult CEditor::PopupEntities(void *pContext, CUIRect View, bool Active)
 {
 	CEditor *pEditor = static_cast<CEditor *>(pContext);
@@ -2327,18 +2237,18 @@ CUI::EPopupMenuFunctionResult CEditor::PopupProofMode(void *pContext, CUIRect Vi
 	CUIRect Button;
 	View.HSplitTop(12.0f, &Button, &View);
 	static int s_ButtonIngame;
-	if(pEditor->DoButton_MenuItem(&s_ButtonIngame, "Ingame", !pEditor->m_MenuProofBorders, &Button, 0, "These borders represent what a player maximum can see."))
+	if(pEditor->DoButton_MenuItem(&s_ButtonIngame, "Ingame", pEditor->m_ProofBorders == PROOF_BORDER_INGAME, &Button, 0, "These borders represent what a player maximum can see."))
 	{
-		pEditor->m_MenuProofBorders = false;
+		pEditor->m_ProofBorders = PROOF_BORDER_INGAME;
 		return CUI::POPUP_CLOSE_CURRENT;
 	}
 
 	View.HSplitTop(2.0f, nullptr, &View);
 	View.HSplitTop(12.0f, &Button, &View);
 	static int s_ButtonMenu;
-	if(pEditor->DoButton_MenuItem(&s_ButtonMenu, "Menu", pEditor->m_MenuProofBorders, &Button, 0, "These borders represent what will be shown in the menu."))
+	if(pEditor->DoButton_MenuItem(&s_ButtonMenu, "Menu", pEditor->m_ProofBorders == PROOF_BORDER_MENU, &Button, 0, "These borders represent what will be shown in the menu."))
 	{
-		pEditor->m_MenuProofBorders = true;
+		pEditor->m_ProofBorders = PROOF_BORDER_MENU;
 		return CUI::POPUP_CLOSE_CURRENT;
 	}
 

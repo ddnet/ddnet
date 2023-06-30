@@ -175,12 +175,13 @@ $tool ../DDNet \
 	player_name client1;
 	cl_download_skins 0;
 	gfx_fullscreen 0;
+	snd_enable 0;
 	logfile client1.log;
 	$client_args
 	connect localhost:$port" > stdout_client1.txt 2> stderr_client1.txt || fail client1 "$?" &
 
 if [ "$arg_valgrind_memcheck" == "1" ]; then
-	wait_for_fifo client1.fifo 120
+	wait_for_fifo client1.fifo 180
 	sleep 20
 else
 	wait_for_fifo client1.fifo 50
@@ -198,12 +199,13 @@ $tool ../DDNet \
 	player_name client2;
 	cl_download_skins 0;
 	gfx_fullscreen 0;
+	snd_enable 0;
 	logfile client2.log;
 	$client_args
 	connect localhost:$port" > stdout_client2.txt 2> stderr_client2.txt || fail client2 "$?" &
 
 if [ "$arg_valgrind_memcheck" == "1" ]; then
-	wait_for_fifo client2.fifo 120
+	wait_for_fifo client2.fifo 180
 	sleep 20
 else
 	wait_for_fifo client2.fifo 50

@@ -55,44 +55,7 @@ ColorHSLA CConsole::CResult::GetColor(unsigned Index, bool Light) const
 	}
 	else if(*pStr == '$') // Hex RGB/RGBA
 	{
-		ColorRGBA Rgba = ColorRGBA(0, 0, 0, 1);
-		const int Len = str_length(pStr);
-		if(Len == 4)
-		{
-			const unsigned Num = str_toulong_base(pStr + 1, 16);
-			Rgba.r = (((Num >> 8) & 0x0F) + ((Num >> 4) & 0xF0)) / 255.0f;
-			Rgba.g = (((Num >> 4) & 0x0F) + ((Num >> 0) & 0xF0)) / 255.0f;
-			Rgba.b = (((Num >> 0) & 0x0F) + ((Num << 4) & 0xF0)) / 255.0f;
-		}
-		else if(Len == 5)
-		{
-			const unsigned Num = str_toulong_base(pStr + 1, 16);
-			Rgba.r = (((Num >> 12) & 0x0F) + ((Num >> 8) & 0xF0)) / 255.0f;
-			Rgba.g = (((Num >> 8) & 0x0F) + ((Num >> 4) & 0xF0)) / 255.0f;
-			Rgba.b = (((Num >> 4) & 0x0F) + ((Num >> 0) & 0xF0)) / 255.0f;
-			Rgba.a = (((Num >> 0) & 0x0F) + ((Num << 4) & 0xF0)) / 255.0f;
-		}
-		else if(Len == 7)
-		{
-			const unsigned Num = str_toulong_base(pStr + 1, 16);
-			Rgba.r = ((Num >> 16) & 0xFF) / 255.0f;
-			Rgba.g = ((Num >> 8) & 0xFF) / 255.0f;
-			Rgba.b = ((Num >> 0) & 0xFF) / 255.0f;
-		}
-		else if(Len == 9)
-		{
-			const unsigned Num = str_toulong_base(pStr + 1, 16);
-			Rgba.r = ((Num >> 24) & 0xFF) / 255.0f;
-			Rgba.g = ((Num >> 16) & 0xFF) / 255.0f;
-			Rgba.b = ((Num >> 8) & 0xFF) / 255.0f;
-			Rgba.a = ((Num >> 0) & 0xFF) / 255.0f;
-		}
-		else
-		{
-			return ColorHSLA(0, 0, 0);
-		}
-
-		return color_cast<ColorHSLA>(Rgba);
+		return color_cast<ColorHSLA>(color_parse<ColorRGBA>(pStr + 1).value_or(ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f)));
 	}
 	else if(!str_comp_nocase(pStr, "red"))
 		return ColorHSLA(0.0f / 6.0f, 1, .5f);
@@ -732,9 +695,9 @@ void CConsole::ConCommandStatus(IResult *pResult, void *pUser)
 				if(Used > 0)
 				{
 					Used += 2;
-					str_append(aBuf, ", ", sizeof(aBuf));
+					str_append(aBuf, ", ");
 				}
-				str_append(aBuf, pCommand->m_pName, sizeof(aBuf));
+				str_append(aBuf, pCommand->m_pName);
 				Used += Length;
 			}
 			else
@@ -927,7 +890,7 @@ void CConsole::ConToggle(IConsole::IResult *pResult, void *pUser)
 			str_format(aBuf, sizeof(aBuf), "%s \"", pResult->GetString(0));
 			char *pDst = aBuf + str_length(aBuf);
 			str_escape(&pDst, pStr, aBuf + sizeof(aBuf));
-			str_append(aBuf, "\"", sizeof(aBuf));
+			str_append(aBuf, "\"");
 			pConsole->ExecuteLine(aBuf);
 			aBuf[0] = 0;
 		}

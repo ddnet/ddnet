@@ -98,8 +98,9 @@ public:
 		virtual bool Absolute(float *pX, float *pY) = 0;
 	};
 	virtual size_t NumJoysticks() const = 0;
+	virtual IJoystick *GetJoystick(size_t Index) = 0;
 	virtual IJoystick *GetActiveJoystick() = 0;
-	virtual void SelectNextJoystick() = 0;
+	virtual void SetActiveJoystick(size_t Index) = 0;
 
 	// mouse
 	virtual void NativeMousePos(int *pX, int *pY) const = 0;

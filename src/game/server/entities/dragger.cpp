@@ -160,6 +160,31 @@ void CDragger::RemoveDraggerBeam(int ClientID)
 	m_apDraggerBeam[ClientID] = nullptr;
 }
 
+bool CDragger::WillDraggerBeamUseDraggerID(int TargetClientID, int SnappingClientID)
+{
+	// For each snapping client, this must return true for at most one target (i.e. only one of the dragger beams),
+	// in which case the dragger itself must not be snapped
+	CCharacter *pTargetChar = GameServer()->GetPlayerChar(TargetClientID);
+	CCharacter *pSnapChar = GameServer()->GetPlayerChar(SnappingClientID);
+	if(pTargetChar && pSnapChar && m_apDraggerBeam[TargetClientID] != nullptr)
+	{
+		const int SnapTeam = pSnapChar->Team();
+		const int TargetTeam = pTargetChar->Team();
+		if(SnapTeam == TargetTeam && SnapTeam < MAX_CLIENTS)
+		{
+			if(pSnapChar->Teams()->m_Core.GetSolo(SnappingClientID) || m_aTargetIdInTeam[SnapTeam] < 0)
+			{
+				return SnappingClientID == TargetClientID;
+			}
+			else
+			{
+				return m_aTargetIdInTeam[SnapTeam] == TargetClientID;
+			}
+		}
+	}
+	return false;
+}
+
 void CDragger::Reset()
 {
 	m_MarkedForDestroy = true;
@@ -171,16 +196,12 @@ void CDragger::Snap(int SnappingClient)
 	if(NetworkClipped(SnappingClient))
 		return;
 
-	// Send the dragger in its resting position if the player would not otherwise see a dragger beam
+	// Send the dragger in its resting position if the player would not otherwise see a dragger beam within its own team
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if(m_apDraggerBeam[i] != nullptr)
+		if(WillDraggerBeamUseDraggerID(i, SnappingClient))
 		{
-			CCharacter *pChar = GameServer()->GetPlayerChar(i);
-			if(pChar && pChar->CanSnapCharacter(SnappingClient))
-			{
-				return;
-			}
+			return;
 		}
 	}
 
@@ -222,4 +243,8 @@ void CDragger::Snap(int SnappingClient)
 void CDragger::SwapClients(int Client1, int Client2)
 {
 	std::swap(m_apDraggerBeam[Client1], m_apDraggerBeam[Client2]);
+	for(int &TargetId : m_aTargetIdInTeam)
+	{
+		TargetId = TargetId == Client1 ? Client2 : TargetId == Client2 ? Client1 : TargetId;
+	}
 }

@@ -89,12 +89,6 @@ Clan
 Client
 == Клиент
 
-Close
-== Закрыть
-
-Connect
-== Подключиться
-
 Connecting to
 == Подключение к
 
@@ -360,9 +354,6 @@ Rename demo
 Reset filter
 == Сбросить фильтры
 
-Sample rate
-== Частота
-
 Score
 == Счёт
 
@@ -540,9 +531,6 @@ Enable team chat sound
 Enable highlighted chat sound
 == Звуки подсвечиваемых сообщений
 
-Threaded sound loading
-== Фоновая загрузка музыки
-
 Use DDRace Scoreboard
 == Использовать DDRace таблицу счета
 
@@ -672,9 +660,6 @@ Show ghost
 No updates available
 == Нет доступных обновлений
 
-Select a name
-== Выберите имя
-
 Show other players' hook collision lines
 == Показывать коллизии крюка других игроков
 
@@ -689,9 +674,6 @@ Show others
 
 Game paused
 == Пауза
-
-Old mouse mode
-== Режим старой мыши
 
 Team message
 == Сообщение от команды
@@ -948,8 +930,8 @@ Friend message
 Save the best demo of each race
 == Сохранять лучшее демо каждой карты
 
-Default length: %d
-== Станд. длина: %d
+Default length
+== Станд. длина
 
 Enable replays
 == Включить записи
@@ -1243,9 +1225,6 @@ Desktop fullscreen
 Are you sure that you want to disconnect and switch to a different server?
 == Вы уверены, что хотите отключиться и перейти на другой сервер?
 
-Refreshing...
-== Обновление...
-
 Kill Messages
 == Сообщения о смерти
 
@@ -1278,9 +1257,6 @@ default
 
 custom
 == перс.
-
-Graphics cards
-== Видеокарты
 
 auto
 == авто
@@ -1330,13 +1306,6 @@ Choose default eyes when joining a server
 Enable controller
 == Включить контроллер
 
-Controller %d: %s
-== Контроллер %d: %s
-
-Click to cycle through all available controllers.
-== Нажмите для переключения между всеми доступными контроллерами.
-
-[Ingame controller mode]
 Relative
 == Относительный
 
@@ -1356,17 +1325,11 @@ UI controller sens.
 Controller jitter tolerance
 == Устойчивость к движению контроллера
 
-Device
-== Устройство
-
 Status
 == Состояние
 
 Aim bind
 == Привязка оси
-
-Controller Axis #%d
-== Ось контроллера #%d
 
 Mouse
 == Мышь
@@ -1551,12 +1514,6 @@ Slow down the demo
 Speed up the demo
 == Ускорить демо
 
-Mark the beginning of a cut
-== Отметить начало участка
-
-Mark the end of a cut
-== Отметить конец участка
-
 Export cut as a separate demo
 == Экспортировать участок отдельно
 
@@ -1728,3 +1685,33 @@ None
 
 Add Clan
 == Добавить клан
+
+A demo with this name already exists
+== 
+
+No server selected
+== 
+
+Mark the beginning of a cut (right click to reset)
+== 
+
+Mark the end of a cut (right click to reset)
+== 
+
+Close the demo player
+== 
+
+Export demo cut
+== 
+
+Cut interval
+== 
+
+Cut length
+== 
+
+Axis
+== 
+
+Graphics card
+== 
