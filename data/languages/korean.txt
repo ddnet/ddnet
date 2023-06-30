@@ -88,12 +88,6 @@ Clan
 Client
 == 클라이언트
 
-Close
-== 닫기
-
-Connect
-== 연결
-
 Connecting to
 == 연결 중
 
@@ -721,9 +715,6 @@ Exclude
 %d player
 == %d 플레이어
 
-Refreshing...
-== 새로고침 중...
-
 Filter connecting players
 == 접속 중인 플레이어 제외
 
@@ -741,9 +732,6 @@ Types
 
 Leak IP
 == IP 노출하기
-
-Select a name
-== 다른 이름으로 저장
 
 Please use a different name
 == 다른 이름을 사용해 주십시오
@@ -1030,8 +1018,8 @@ Preview
 Save the best demo of each race
 == 레이스 최고 기록의 데모를 저장
 
-Default length: %d
-== 기본 길이: %d
+Default length
+== 기본 길이
 
 Enable replays
 == 리플레이 활성화
@@ -1080,9 +1068,6 @@ Show other players' key presses
 
 Show local player's key presses
 == 주변 플레이어의 키 입력 표시
-
-Old mouse mode
-== 구식 마우스 모드
 
 Background
 == 배경
@@ -1280,9 +1265,6 @@ default
 custom
 == 커스텀
 
-Graphics cards
-== 그래픽 카드
-
 auto
 == 자동
 
@@ -1349,13 +1331,6 @@ Download community skins
 Enable controller
 == 컨트롤러 활성화
 
-Controller %d: %s
-== 컨트롤러 %d: %s
-
-Click to cycle through all available controllers.
-== 사용가능한 컨트롤러로 전환하려면 클릭하십시오.
-
-[Ingame controller mode]
 Relative
 == 상대적
 
@@ -1375,17 +1350,11 @@ UI controller sens.
 Controller jitter tolerance
 == 컨트롤러 신호 오차 허용 범위
 
-Device
-== 장치
-
 Status
 == 상태
 
 Aim bind
 == 조준 바인드
-
-Controller Axis #%d
-== 컨트롤러 축
 
 Mouse
 == 마우스
@@ -1546,12 +1515,6 @@ Slow down the demo
 Speed up the demo
 == 데모 속도 높이기
 
-Mark the beginning of a cut
-== 영상 자르기의 시작 부분
-
-Mark the end of a cut
-== 영상 자르기의 끝 부분
-
 Export cut as a separate demo
 == 자른 부분을 다른 이름으로 저장
 
@@ -1701,6 +1664,12 @@ Copy info
 Create a random skin
 == 무작위 스킨 생성
 
+A demo with this name already exists
+== 
+
+No server selected
+== 
+
 Online players (%d)
 == 
 
@@ -1724,4 +1693,28 @@ None
 == 
 
 Add Clan
+== 
+
+Mark the beginning of a cut (right click to reset)
+== 
+
+Mark the end of a cut (right click to reset)
+== 
+
+Close the demo player
+== 
+
+Export demo cut
+== 
+
+Cut interval
+== 
+
+Cut length
+== 
+
+Axis
+== 
+
+Graphics card
 == 

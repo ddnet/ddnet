@@ -99,12 +99,6 @@ Clan
 Client
 == Cliente
 
-Close
-== Fechar
-
-Connect
-== Conectar
-
 Connecting to
 == Conectando a
 
@@ -601,9 +595,6 @@ HUD
 Show names in chat in team colors
 == Mostrar nomes no chat com cores do time
 
-Select a name
-== Selecione um nome
-
 Netversion:
 == Netversion:
 
@@ -648,9 +639,6 @@ Gameplay
 
 Restart
 == Reiniciar
-
-Old mouse mode
-== Modo antigo de mouse
 
 Round
 == Turno
@@ -1000,8 +988,8 @@ Converse
 Successfully saved the replay!
 == A reprodução foi salva com sucesso
 
-Default length: %d
-== Duração padrão: %d
+Default length
+== Duração padrão
 
 Replay feature is disabled!
 == O Recurso de reprodução está desabilitado!
@@ -1247,9 +1235,6 @@ https://ddnet.org/discord
 Are you sure that you want to disconnect and switch to a different server?
 == Tem certeza que deseja desconectar e trocar para um servidor diferente?
 
-Refreshing...
-== Atualizando...
-
 Kill Messages
 == Mensagens de kill
 
@@ -1282,9 +1267,6 @@ default
 
 custom
 == personalizado
-
-Graphics cards
-== Placas de vídeo
 
 auto
 == auto
@@ -1358,13 +1340,6 @@ Download community skins
 Enable controller
 == Habilitar controle
 
-Controller %d: %s
-== Controle %d: %s
-
-Click to cycle through all available controllers.
-== Clique para trocar entre todos os controles disponíveis.
-
-[Ingame controller mode]
 Relative
 == Relativo
 
@@ -1384,17 +1359,11 @@ UI controller sens.
 Controller jitter tolerance
 == Tolerância jitter do controle
 
-Device
-== Dispositivo
-
 Status
 == Status
 
 Aim bind
 == Associação de mira
-
-Controller Axis #%d
-== Eixo #%d do controle
 
 Mouse
 == Mouse
@@ -1555,12 +1524,6 @@ Slow down the demo
 Speed up the demo
 == Acelerar a demo
 
-Mark the beginning of a cut
-== Marcar o início de um corte
-
-Mark the end of a cut
-== Marcar o fim de um corte
-
 Export cut as a separate demo
 == Exportar corte como uma demo separada
 
@@ -1710,6 +1673,12 @@ Copy info
 Create a random skin
 == Criar uma skin aleatória
 
+A demo with this name already exists
+== 
+
+No server selected
+== 
+
 Online players (%d)
 == 
 
@@ -1733,4 +1702,28 @@ None
 == 
 
 Add Clan
+== 
+
+Mark the beginning of a cut (right click to reset)
+== 
+
+Mark the end of a cut (right click to reset)
+== 
+
+Close the demo player
+== 
+
+Export demo cut
+== 
+
+Cut interval
+== 
+
+Cut length
+== 
+
+Axis
+== 
+
+Graphics card
 == 

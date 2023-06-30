@@ -80,12 +80,6 @@ Clan
 Client
 == Klient
 
-Close
-== Zamknij
-
-Connect
-== Połącz
-
 Connecting to
 == Łączenie z
 
@@ -650,9 +644,6 @@ Default zoom
 Overlay entities
 == Pokazuj entities
 
-Select a name
-== Wybierz nazwę
-
 Switch weapon when out of ammo
 == Zmień broń, gdy skończy się amunicja
 
@@ -893,9 +884,6 @@ Toggle ghost
 Replace video
 == Zamień wideo
 
-Old mouse mode
-== Tryb starej myszki
-
 Lock team
 == Zablokuj drużynę
 
@@ -947,8 +935,8 @@ Markers:
 %d new mentions
 == %d razy wspomniano o tobie
 
-Default length: %d
-== Domyślna długość: %d
+Default length
+== Domyślna długość
 
 Refresh Rate
 == Częstotliwość próbkowania
@@ -1203,9 +1191,6 @@ CHN
 Getting server list from master server
 == Pobieranie listy serwerów z serwera głównego
 
-Refreshing...
-== Odświeżanie
-
 Leak IP
 == Ujawnij IP
 
@@ -1250,9 +1235,6 @@ default
 
 custom
 == niestandardowy
-
-Graphics cards
-== Karty graficzne
 
 auto
 == automatyczny
@@ -1409,7 +1391,7 @@ Getting game info
 Requesting to join the game
 == 
 
-Cancel
+A demo with this name already exists
 == 
 
 File '%s' already exists, do you want to overwrite it?
@@ -1419,6 +1401,9 @@ Loading menu images
 == 
 
 Copy info
+== 
+
+No server selected
 == 
 
 Online players (%d)
@@ -1473,10 +1458,10 @@ Slow down the demo
 Speed up the demo
 == 
 
-Mark the beginning of a cut
+Mark the beginning of a cut (right click to reset)
 == 
 
-Mark the end of a cut
+Mark the end of a cut (right click to reset)
 == 
 
 Export cut as a separate demo
@@ -1488,7 +1473,19 @@ Go back one marker
 Go forward one marker
 == 
 
+Close the demo player
+== 
+
 Toggle keyboard shortcuts
+== 
+
+Export demo cut
+== 
+
+Cut interval
+== 
+
+Cut length
 == 
 
 Loading demo files
@@ -1536,10 +1533,10 @@ Open the directory to add custom skins
 Enable controller
 == 
 
-Controller %d: %s
+Controller
 == 
 
-Click to cycle through all available controllers.
+Ingame controller mode
 == 
 
 [Ingame controller mode]
@@ -1548,9 +1545,6 @@ Relative
 
 [Ingame controller mode]
 Absolute
-== 
-
-Ingame controller mode
 == 
 
 Ingame controller sens.
@@ -1565,16 +1559,13 @@ Controller jitter tolerance
 No controller found. Plug in a controller.
 == 
 
-Device
+Axis
 == 
 
 Status
 == 
 
 Aim bind
-== 
-
-Controller Axis #%d
 == 
 
 Mouse
@@ -1586,13 +1577,16 @@ Ingame mouse sens.
 UI mouse sens.
 == 
 
-Controller
-== 
-
 Reset controls
 == 
 
 Are you sure that you want to reset the controls to their defaults?
+== 
+
+Cancel
+== 
+
+Graphics card
 == 
 
 Appearance

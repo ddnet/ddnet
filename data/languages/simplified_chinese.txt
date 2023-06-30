@@ -106,12 +106,6 @@ Clan
 Client
 == 客户端
 
-Close
-== 关闭
-
-Connect
-== 连接
-
 Connecting to
 == 正在连接到
 
@@ -805,9 +799,6 @@ Grabs
 DDNet
 == DDNet
 
-Select a name
-== 另存为
-
 Deaths
 == 死亡数
 
@@ -816,9 +807,6 @@ Please use a different name
 
 Restart
 == 重新开始
-
-Old mouse mode
-== 旧版鼠标模式
 
 Follow
 == 跟随
@@ -1004,8 +992,8 @@ Show HUD
 Hammerfly dummy
 == 分身 Hammerfly 开关
 
-Default length: %d
-== 默认时长: %d
+Default length
+== 默认时长
 
 Toggle ghost
 == 影子记录开关
@@ -1260,9 +1248,6 @@ Desktop fullscreen
 Are you sure that you want to disconnect and switch to a different server?
 == 你确定要断开此服务器连接并进入其他服务器吗？
 
-Refreshing...
-== 正在刷新...
-
 Kill Messages
 == 击杀消息
 
@@ -1301,9 +1286,6 @@ default
 
 custom
 == 自定义
-
-Graphics cards
-== 显卡
 
 auto
 == 自动
@@ -1371,13 +1353,6 @@ Download community skins
 Enable controller
 == 启用控制器
 
-Controller %d: %s
-== 控制器 %d: %s
-
-Click to cycle through all available controllers.
-== 点击以切换其他控制器
-
-[Ingame controller mode]
 Relative
 == 相对
 
@@ -1397,17 +1372,11 @@ UI controller sens.
 Controller jitter tolerance
 == 摇杆死区
 
-Device
-== 输入设备
-
 Status
 == 状态
 
 Aim bind
 == 操作轴绑定
-
-Controller Axis #%d
-== 摇杆 #%d
 
 Mouse
 == 鼠标
@@ -1567,12 +1536,6 @@ Slow down the demo
 
 Speed up the demo
 == 加快播放速度
-
-Mark the beginning of a cut
-== 标记裁剪起点
-
-Mark the end of a cut
-== 标记裁剪终点
 
 Export cut as a separate demo
 == 另存为新回放文件
@@ -1747,3 +1710,33 @@ None
 
 Add Clan
 == 添加战队
+
+A demo with this name already exists
+== 
+
+No server selected
+== 
+
+Mark the beginning of a cut (right click to reset)
+== 
+
+Mark the end of a cut (right click to reset)
+== 
+
+Close the demo player
+== 
+
+Export demo cut
+== 
+
+Cut interval
+== 
+
+Cut length
+== 
+
+Axis
+== 
+
+Graphics card
+== 

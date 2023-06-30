@@ -71,12 +71,6 @@ Clan
 Client
 == ﺖﻨﻳﻼﻛ
 
-Close
-== ﻕﻼﻏﺍ
-
-Connect
-== ﻝﺎﺼﺗﺍ
-
 Connecting to
 == ﻰﻟﺍ ﻝﺎﺼﺗﺍ
 
@@ -747,9 +741,6 @@ Switch weapon when out of ammo
 Grabs
 == ﺕﺎﻜﺴﻣ
 
-Select a name
-== ﻢﺳﺍ ﺭﺎﻴﺘﺧﺍ
-
 Automatically take game over screenshot
 == ﺔﺷﺎﺸﻟﺍ ﺔﻄﻘﻟ ﻰﻠﻋ ﺍًﻴﺋﺎﻘﻠﺗ ﺔﺒﻌﻠﻟﺍ ﺬﺧﺃ
 
@@ -761,9 +752,6 @@ Gameplay
 
 Laser
 == ﺭﺰﻴﻟ
-
-Old mouse mode
-== ﻢﻳﺪﻘﻟﺍ ﺱﻭﺎﻤﻟﺍ ﻊﺿﻭ
 
 Follow
 == ﻊﺒﺗﺃ
@@ -963,8 +951,8 @@ Replace video
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
 == DDraceNetwork ، ﻦﻴﺋﺪﺘﺒﻤﻟﺍ ﺕﺍﺮﻓﺮﻴﺳ ﻰﻠﻋ ﺃﺪﺒﺗ ﻥﺃ ﺐﺠﻳ ، ﺍًﺪﻳﺪﺟ ﺍًﻣﺩﺎﻗ ﻚﺘﻔﺼﺑ .ﺏﺎﻤﻟﺍ ﻰﻠﻋ ﺔﻳﺎﻬﻨﻟﺍ ﻂﺧ ﻰﻟﺇ ﺕﻼﻤﺤﻤﻟﺍ ﻦﻣ ﻚﺘﻋﻮﻤﺠﻣﻭ ﺖﻧﺃ ﻚﻟﻮﺻﻭ ﻮﻫ ﻑﺪﻬﻟﺍ ﻥﻮﻜﻳ ﺚﻴﺣ ﺖﻧﺮﺘﻧﻹﺍ ﺮﺒﻋ ﺔﻴﻧﻭﺎﻌﺗ ﺔﺒﻌﻟ ﻲﻫ
 
-Default length: %d
-== ﻲﺿﺍﺮﺘﻓﻻﺍ ﻝﻮﻄﻟﺍ: %d
+Default length
+== ﻲﺿﺍﺮﺘﻓﻻﺍ ﻝﻮﻄﻟﺍ
 
 Pause
 == ﺔﺒﻗﺍﺮﻣ
@@ -1257,7 +1245,7 @@ Getting game info
 Requesting to join the game
 == 
 
-Cancel
+A demo with this name already exists
 == 
 
 File '%s' already exists, do you want to overwrite it?
@@ -1296,9 +1284,6 @@ CHN
 Getting server list from master server
 == 
 
-Refreshing...
-== 
-
 Are you sure that you want to disconnect and switch to a different server?
 == 
 
@@ -1306,6 +1291,9 @@ Copy info
 == 
 
 Leak IP
+== 
+
+No server selected
 == 
 
 Online players (%d)
@@ -1360,10 +1348,10 @@ Slow down the demo
 Speed up the demo
 == 
 
-Mark the beginning of a cut
+Mark the beginning of a cut (right click to reset)
 == 
 
-Mark the end of a cut
+Mark the end of a cut (right click to reset)
 == 
 
 Export cut as a separate demo
@@ -1375,7 +1363,19 @@ Go back one marker
 Go forward one marker
 == 
 
+Close the demo player
+== 
+
 Toggle keyboard shortcuts
+== 
+
+Export demo cut
+== 
+
+Cut interval
+== 
+
+Cut length
 == 
 
 Loading demo files
@@ -1438,10 +1438,10 @@ Chat command
 Enable controller
 == 
 
-Controller %d: %s
+Controller
 == 
 
-Click to cycle through all available controllers.
+Ingame controller mode
 == 
 
 [Ingame controller mode]
@@ -1450,9 +1450,6 @@ Relative
 
 [Ingame controller mode]
 Absolute
-== 
-
-Ingame controller mode
 == 
 
 Ingame controller sens.
@@ -1467,16 +1464,13 @@ Controller jitter tolerance
 No controller found. Plug in a controller.
 == 
 
-Device
+Axis
 == 
 
 Status
 == 
 
 Aim bind
-== 
-
-Controller Axis #%d
 == 
 
 Mouse
@@ -1488,13 +1482,13 @@ Ingame mouse sens.
 UI mouse sens.
 == 
 
-Controller
-== 
-
 Reset controls
 == 
 
 Are you sure that you want to reset the controls to their defaults?
+== 
+
+Cancel
 == 
 
 Dummy
@@ -1524,7 +1518,7 @@ default
 custom
 == 
 
-Graphics cards
+Graphics card
 == 
 
 auto

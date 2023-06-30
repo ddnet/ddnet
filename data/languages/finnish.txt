@@ -78,12 +78,6 @@ Clan
 Client
 == Asiakasohjelma
 
-Close
-== Sulje
-
-Connect
-== Yhdistä
-
 Connecting to
 == Yhdistetään
 
@@ -745,9 +739,6 @@ Types
 Leak IP
 == Vuoda IP
 
-Select a name
-== Valitse nimi
-
 Please use a different name
 == Ole hyvä ja käytä toista nimeä
 
@@ -991,8 +982,8 @@ Preview
 Save the best demo of each race
 == Tallenna jokaisen kentän paras demo
 
-Default length: %d
-== Oletuspituus: %d
+Default length
+== Oletuspituus
 
 Enable replays
 == Luo uudelleentoistoja
@@ -1029,9 +1020,6 @@ Show other players' hook collision lines
 
 Show other players' key presses
 == Näytä muiden pelaajien näppäinpainallukset
-
-Old mouse mode
-== Vanha hiiritila
 
 Background
 == Tausta
@@ -1249,7 +1237,7 @@ Getting game info
 Requesting to join the game
 == 
 
-Cancel
+A demo with this name already exists
 == 
 
 File '%s' already exists, do you want to overwrite it?
@@ -1264,13 +1252,13 @@ Skip Tutorial
 Loading menu images
 == 
 
-Refreshing...
-== 
-
 Are you sure that you want to disconnect and switch to a different server?
 == 
 
 Copy info
+== 
+
+No server selected
 == 
 
 Online players (%d)
@@ -1325,10 +1313,10 @@ Slow down the demo
 Speed up the demo
 == 
 
-Mark the beginning of a cut
+Mark the beginning of a cut (right click to reset)
 == 
 
-Mark the end of a cut
+Mark the end of a cut (right click to reset)
 == 
 
 Export cut as a separate demo
@@ -1340,7 +1328,19 @@ Go back one marker
 Go forward one marker
 == 
 
+Close the demo player
+== 
+
 Toggle keyboard shortcuts
+== 
+
+Export demo cut
+== 
+
+Cut interval
+== 
+
+Cut length
 == 
 
 Loading demo files
@@ -1427,10 +1427,10 @@ Show entities
 Enable controller
 == 
 
-Controller %d: %s
+Controller
 == 
 
-Click to cycle through all available controllers.
+Ingame controller mode
 == 
 
 [Ingame controller mode]
@@ -1439,9 +1439,6 @@ Relative
 
 [Ingame controller mode]
 Absolute
-== 
-
-Ingame controller mode
 == 
 
 Ingame controller sens.
@@ -1456,16 +1453,13 @@ Controller jitter tolerance
 No controller found. Plug in a controller.
 == 
 
-Device
+Axis
 == 
 
 Status
 == 
 
 Aim bind
-== 
-
-Controller Axis #%d
 == 
 
 Mouse
@@ -1477,13 +1471,13 @@ Ingame mouse sens.
 UI mouse sens.
 == 
 
-Controller
-== 
-
 Reset controls
 == 
 
 Are you sure that you want to reset the controls to their defaults?
+== 
+
+Cancel
 == 
 
 Windowed fullscreen
@@ -1501,7 +1495,7 @@ default
 custom
 == 
 
-Graphics cards
+Graphics card
 == 
 
 auto
