@@ -80,12 +80,6 @@ Clan
 Client
 == Cliente
 
-Close
-== Fechar
-
-Connect
-== Ligar
-
 Connecting to
 == A ligar ao endereço
 
@@ -639,9 +633,6 @@ HUD
 Show names in chat in team colors
 == Mostrar nomes no chat com cores da equipa
 
-Select a name
-== Escolha um nome
-
 Enable team chat sound
 == Ativar o som do chat de equipa
 
@@ -665,9 +656,6 @@ Gameplay
 
 Restart
 == Reiniciar
-
-Old mouse mode
-== Modo de rato antigo
 
 Browser
 == Navegador
@@ -854,9 +842,6 @@ Theme
 
 %d player
 == %d jogador
-
-Refreshing...
-== A atualizar...
 
 Date
 == Data
@@ -1078,7 +1063,7 @@ DDraceNetwork is a cooperative online game where the goal is for you and your gr
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
 == 
 
-Cancel
+A demo with this name already exists
 == 
 
 File '%s' already exists, do you want to overwrite it?
@@ -1138,6 +1123,9 @@ Copy info
 Leak IP
 == 
 
+No server selected
+== 
+
 Online players (%d)
 == 
 
@@ -1190,10 +1178,10 @@ Slow down the demo
 Speed up the demo
 == 
 
-Mark the beginning of a cut
+Mark the beginning of a cut (right click to reset)
 == 
 
-Mark the end of a cut
+Mark the end of a cut (right click to reset)
 == 
 
 Export cut as a separate demo
@@ -1205,7 +1193,19 @@ Go back one marker
 Go forward one marker
 == 
 
+Close the demo player
+== 
+
 Toggle keyboard shortcuts
+== 
+
+Export demo cut
+== 
+
+Cut interval
+== 
+
+Cut length
 == 
 
 Loading demo files
@@ -1358,10 +1358,10 @@ Chat command
 Enable controller
 == 
 
-Controller %d: %s
+Controller
 == 
 
-Click to cycle through all available controllers.
+Ingame controller mode
 == 
 
 [Ingame controller mode]
@@ -1370,9 +1370,6 @@ Relative
 
 [Ingame controller mode]
 Absolute
-== 
-
-Ingame controller mode
 == 
 
 Ingame controller sens.
@@ -1387,16 +1384,13 @@ Controller jitter tolerance
 No controller found. Plug in a controller.
 == 
 
-Device
+Axis
 == 
 
 Status
 == 
 
 Aim bind
-== 
-
-Controller Axis #%d
 == 
 
 Mouse
@@ -1408,13 +1402,13 @@ Ingame mouse sens.
 UI mouse sens.
 == 
 
-Controller
-== 
-
 Reset controls
 == 
 
 Are you sure that you want to reset the controls to their defaults?
+== 
+
+Cancel
 == 
 
 Windowed fullscreen
@@ -1438,7 +1432,7 @@ default
 custom
 == 
 
-Graphics cards
+Graphics card
 == 
 
 auto
@@ -1579,7 +1573,7 @@ Set all to Rifle
 Enable replays
 == 
 
-Default length: %d
+Default length
 == 
 
 When you cross the start line, show a ghost tee replicating the movements of your best time

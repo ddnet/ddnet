@@ -80,12 +80,6 @@ Clan
 Client
 == Klient
 
-Close
-== Stäng
-
-Connect
-== Anslut
-
 Connecting to
 == Ansluter till
 
@@ -594,9 +588,6 @@ Vanilla skins only
 New random timeout code
 == Ny slumpad timeout kod
 
-Select a name
-== Välj ett namn
-
 Enable long pain sound (used when shooting in freeze)
 == Aktivera ett långt ont ljud (använt vid sjutning i freeze)
 
@@ -660,8 +651,8 @@ Save ghost
 Browser
 == Bläddraren
 
-Default length: %d
-== Standard längd: %d
+Default length
+== Standard längd
 
 Switch weapon when out of ammo
 == Byt vapen vid slut av ammunition
@@ -969,9 +960,6 @@ Automatically take statboard screenshot
 Automatically create statboard csv
 == Automatiskt skapa poänglista csv
 
-Old mouse mode
-== Gammal mus metod
-
 Enable regular chat sound
 == Aktivera vanligt chatt ljud
 
@@ -1146,9 +1134,6 @@ CHN
 
 Getting server list from master server
 == Hämtar server lista från master server
-
-Refreshing...
-== Ladder om...
 
 Leak IP
 == Läck IP
@@ -1353,7 +1338,7 @@ Getting game info
 Requesting to join the game
 == 
 
-Cancel
+A demo with this name already exists
 == 
 
 File '%s' already exists, do you want to overwrite it?
@@ -1369,6 +1354,9 @@ Loading menu images
 == 
 
 Copy info
+== 
+
+No server selected
 == 
 
 Online players (%d)
@@ -1423,10 +1411,10 @@ Slow down the demo
 Speed up the demo
 == 
 
-Mark the beginning of a cut
+Mark the beginning of a cut (right click to reset)
 == 
 
-Mark the end of a cut
+Mark the end of a cut (right click to reset)
 == 
 
 Export cut as a separate demo
@@ -1438,7 +1426,19 @@ Go back one marker
 Go forward one marker
 == 
 
+Close the demo player
+== 
+
 Toggle keyboard shortcuts
+== 
+
+Export demo cut
+== 
+
+Cut interval
+== 
+
+Cut length
 == 
 
 Loading demo files
@@ -1492,10 +1492,10 @@ Open the directory to add custom skins
 Enable controller
 == 
 
-Controller %d: %s
+Controller
 == 
 
-Click to cycle through all available controllers.
+Ingame controller mode
 == 
 
 [Ingame controller mode]
@@ -1504,9 +1504,6 @@ Relative
 
 [Ingame controller mode]
 Absolute
-== 
-
-Ingame controller mode
 == 
 
 Ingame controller sens.
@@ -1521,16 +1518,13 @@ Controller jitter tolerance
 No controller found. Plug in a controller.
 == 
 
-Device
+Axis
 == 
 
 Status
 == 
 
 Aim bind
-== 
-
-Controller Axis #%d
 == 
 
 Mouse
@@ -1542,13 +1536,13 @@ Ingame mouse sens.
 UI mouse sens.
 == 
 
-Controller
-== 
-
 Reset controls
 == 
 
 Are you sure that you want to reset the controls to their defaults?
+== 
+
+Cancel
 == 
 
 Allows maps to render with more detail
@@ -1563,7 +1557,7 @@ default
 custom
 == 
 
-Graphics cards
+Graphics card
 == 
 
 auto

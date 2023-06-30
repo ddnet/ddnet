@@ -77,12 +77,6 @@ Clan
 Client
 == Кліент
 
-Close
-== Выйсці
-
-Connect
-== Падлучыцца
-
 Connecting to
 == Падлучэнне да
 
@@ -827,9 +821,6 @@ Exclude
 %d player
 == %d гулец
 
-Refreshing...
-== Абнаўленне...
-
 Are you sure that you want to disconnect and switch to a different server?
 == Вы ўпэўненыя, што хочаце адлучыцца і пераключыцца на іншы сервер?
 
@@ -860,9 +851,6 @@ Are you sure that you want to remove the player '%s' from your friends list?
 Are you sure that you want to remove the clan '%s' from your friends list?
 == Вы ўпэўненыя што хочаце выдаліць клан '%s' са спіса вашых сяброў?
 
-Select a name
-== Выберыце імя
-
 Please use a different name
 == Калі ласка, выкарыстайце іншае імя
 
@@ -892,12 +880,6 @@ Slow down the demo
 
 Speed up the demo
 == Паскорыць дэма
-
-Mark the beginning of a cut
-== Пазначыць пачатак адрэзка
-
-Mark the end of a cut
-== Пазначыць канец адрэзка
 
 Export cut as a separate demo
 == Экспартаваць адрэзак як асобнае дэма
@@ -1130,13 +1112,6 @@ Chat command
 Enable controller
 == Уключыць кантролер
 
-Controller %d: %s
-== Кантролер %d: %s
-
-Click to cycle through all available controllers.
-== Націсніце каб праглядзець усе дасяжныя кантролеры.
-
-[Ingame controller mode]
 Relative
 == Адносны
 
@@ -1159,17 +1134,11 @@ Controller jitter tolerance
 No controller found. Plug in a controller.
 == Кантролер не знойдзены. Падключыце кантролер.
 
-Device
-== Прылада
-
 Status
 == Статус
 
 Aim bind
 == Вось прыцэла
-
-Controller Axis #%d
-== Вось кантролера #%d
 
 Mouse
 == Мыш
@@ -1224,9 +1193,6 @@ default
 
 custom
 == карыстацкі
-
-Graphics cards
-== Відэакарты
 
 auto
 == аўта
@@ -1453,8 +1419,8 @@ Save the best demo of each race
 Enable replays
 == Уключыць запісы
 
-Default length: %d
-== Станд. працягласць: %d
+Default length
+== Станд. працягласць
 
 When you cross the start line, show a ghost tee replicating the movements of your best time
 == Пры перасячэнні стартавай лініі, паказваць прывід Tee, які паўтарае ваш лепшы час
@@ -1506,9 +1472,6 @@ AntiPing: predict weapons
 
 AntiPing: predict grenade paths
 == АнтыПінг: прадказывать траекторыі гранат
-
-Old mouse mode
-== Рэжым старой мышы
 
 Background
 == Фон
@@ -1688,6 +1651,12 @@ Grabs
 9+ new mentions
 == 9+ новых згадак
 
+A demo with this name already exists
+== 
+
+No server selected
+== 
+
 Online players (%d)
 == 
 
@@ -1711,4 +1680,28 @@ None
 == 
 
 Add Clan
+== 
+
+Mark the beginning of a cut (right click to reset)
+== 
+
+Mark the end of a cut (right click to reset)
+== 
+
+Close the demo player
+== 
+
+Export demo cut
+== 
+
+Cut interval
+== 
+
+Cut length
+== 
+
+Axis
+== 
+
+Graphics card
 == 

@@ -78,12 +78,6 @@ Clan
 Client
 == Klient
 
-Close
-== Lukk
-
-Connect
-== Koble til
-
 Connecting to
 == Kobler til
 
@@ -696,9 +690,6 @@ Update now
 Restart
 == Restart
 
-Select a name
-== Velg et navn
-
 Please use a different name
 == Vennligst velg et annet navn
 
@@ -921,8 +912,8 @@ Normal message
 Save the best demo of each race
 == Lagre beste demo for hvert løp
 
-Default length: %d
-== Standard lengde: %d
+Default length
+== Standard lengde
 
 Enable replays
 == Aktiver opptak
@@ -968,9 +959,6 @@ Show other players' hook collision lines
 
 Show other players' key presses
 == Vis andre spilleres tastetrykk
-
-Old mouse mode
-== Gammel musemodus
 
 Show tiles layers from BG map
 == Vis tile-lag fra BG-bane
@@ -1266,7 +1254,7 @@ Getting game info
 Requesting to join the game
 == 
 
-Cancel
+A demo with this name already exists
 == 
 
 File '%s' already exists, do you want to overwrite it?
@@ -1305,9 +1293,6 @@ CHN
 Getting server list from master server
 == 
 
-Refreshing...
-== 
-
 Are you sure that you want to disconnect and switch to a different server?
 == 
 
@@ -1315,6 +1300,9 @@ Copy info
 == 
 
 Leak IP
+== 
+
+No server selected
 == 
 
 Online players (%d)
@@ -1369,10 +1357,10 @@ Slow down the demo
 Speed up the demo
 == 
 
-Mark the beginning of a cut
+Mark the beginning of a cut (right click to reset)
 == 
 
-Mark the end of a cut
+Mark the end of a cut (right click to reset)
 == 
 
 Export cut as a separate demo
@@ -1384,7 +1372,19 @@ Go back one marker
 Go forward one marker
 == 
 
+Close the demo player
+== 
+
 Toggle keyboard shortcuts
+== 
+
+Export demo cut
+== 
+
+Cut interval
+== 
+
+Cut length
 == 
 
 Loading demo files
@@ -1447,10 +1447,10 @@ Chat command
 Enable controller
 == 
 
-Controller %d: %s
+Controller
 == 
 
-Click to cycle through all available controllers.
+Ingame controller mode
 == 
 
 [Ingame controller mode]
@@ -1459,9 +1459,6 @@ Relative
 
 [Ingame controller mode]
 Absolute
-== 
-
-Ingame controller mode
 == 
 
 Ingame controller sens.
@@ -1476,16 +1473,13 @@ Controller jitter tolerance
 No controller found. Plug in a controller.
 == 
 
-Device
+Axis
 == 
 
 Status
 == 
 
 Aim bind
-== 
-
-Controller Axis #%d
 == 
 
 Mouse
@@ -1497,13 +1491,13 @@ Ingame mouse sens.
 UI mouse sens.
 == 
 
-Controller
-== 
-
 Reset controls
 == 
 
 Are you sure that you want to reset the controls to their defaults?
+== 
+
+Cancel
 == 
 
 Dummy
@@ -1533,7 +1527,7 @@ default
 custom
 == 
 
-Graphics cards
+Graphics card
 == 
 
 auto

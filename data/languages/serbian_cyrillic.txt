@@ -76,12 +76,6 @@ Clan
 Client
 == Клијент
 
-Close
-== Затвори
-
-Connect
-== Повежи се
-
 Connecting to
 == Повезујем се на
 
@@ -720,9 +714,6 @@ Countries
 Types
 == Типови
 
-Select a name
-== Изаберите име
-
 Please use a different name
 == Изаберите друго име
 
@@ -955,8 +946,8 @@ Client message
 Save the best demo of each race
 == Сачувајте најбољи снимак сваке трке
 
-Default length: %d
-== Подразумевана дужина: %d
+Default length
+== Подразумевана дужина
 
 Enable replays
 == Омогући поновљене репродукције
@@ -999,9 +990,6 @@ Show other players' hook collision lines
 
 Show other players' key presses
 == Прикажи притиске тастера других играча
-
-Old mouse mode
-== Стари мод миша
 
 Show tiles layers from BG map
 == Прикажи слојеве плочица са BG мапе
@@ -1235,9 +1223,6 @@ CHN
 Getting server list from master server
 == Добијам листу сервера са мастер сервера
 
-Refreshing...
-== Освежавање
-
 Leak IP
 == Провали адресу
 
@@ -1274,13 +1259,6 @@ Chat command
 Enable controller
 == Укључи контролер
 
-Controller %d: %s
-== Контролер %d: %s
-
-Click to cycle through all available controllers.
-== Кликни да видиш све слободне контролерес
-
-[Ingame controller mode]
 Relative
 == Релативно
 
@@ -1300,17 +1278,11 @@ UI controller sens.
 Controller jitter tolerance
 == Толеранција контролера
 
-Device
-== Уређај
-
 Status
 == Статус
 
 Aim bind
 == Нишан
-
-Controller Axis #%d
-== Стик %d.
 
 Mouse
 == Миш
@@ -1350,9 +1322,6 @@ default
 
 custom
 == своје
-
-Graphics cards
-== Графичка картица
 
 auto
 == ауто
@@ -1560,13 +1529,16 @@ Could not save downloaded map. Try manually deleting this file: %s
 Initializing components
 == 
 
-Cancel
+A demo with this name already exists
 == 
 
 File '%s' already exists, do you want to overwrite it?
 == 
 
 Copy info
+== 
+
+No server selected
 == 
 
 Online players (%d)
@@ -1621,10 +1593,10 @@ Slow down the demo
 Speed up the demo
 == 
 
-Mark the beginning of a cut
+Mark the beginning of a cut (right click to reset)
 == 
 
-Mark the end of a cut
+Mark the end of a cut (right click to reset)
 == 
 
 Export cut as a separate demo
@@ -1636,7 +1608,19 @@ Go back one marker
 Go forward one marker
 == 
 
+Close the demo player
+== 
+
 Toggle keyboard shortcuts
+== 
+
+Export demo cut
+== 
+
+Cut interval
+== 
+
+Cut length
 == 
 
 Open the directory that contains the demo files
@@ -1672,10 +1656,19 @@ Open the directory to add custom skins
 No controller found. Plug in a controller.
 == 
 
+Axis
+== 
+
 Reset controls
 == 
 
 Are you sure that you want to reset the controls to their defaults?
+== 
+
+Cancel
+== 
+
+Graphics card
 == 
 
 Weapons
