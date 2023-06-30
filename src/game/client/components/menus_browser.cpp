@@ -456,6 +456,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	CUIRect SearchAndInfo, ServerAddr, ConnectButtons;
 	SearchInfoAndAddr.HSplitTop(40.0f, &SearchAndInfo, &ServerAddr);
 	ServersAndConnect.HSplitTop(35.0f, &Status3, &ConnectButtons);
+	ConnectButtons.HSplitTop(5.0f, nullptr, &ConnectButtons);
 	CUIRect QuickSearch, QuickExclude;
 
 	SearchAndInfo.HSplitTop(20.f, &QuickSearch, &QuickExclude);
@@ -553,10 +554,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 
 		// button area
 		CUIRect ButtonRefresh, ButtonConnect;
-		ConnectButtons.VSplitMid(&ButtonRefresh, &ButtonConnect);
-		ButtonRefresh.HSplitTop(5.0f, NULL, &ButtonRefresh);
-		ButtonConnect.HSplitTop(5.0f, NULL, &ButtonConnect);
-		ButtonConnect.VSplitLeft(5.0f, NULL, &ButtonConnect);
+		ConnectButtons.VSplitMid(&ButtonRefresh, &ButtonConnect, 5.0f);
 
 		// refresh button
 		{
