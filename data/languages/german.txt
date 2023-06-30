@@ -1692,31 +1692,31 @@ Add Clan
 == Clan hinzufügen
 
 A demo with this name already exists
-== 
+== Eine Demo mit diesem Namen existiert bereits
 
 No server selected
-== 
+== Kein Server ausgewählt
 
 Mark the beginning of a cut (right click to reset)
-== 
+== Den Anfang eines Schnitts markieren (Rechtsklick zum Resetten)
 
 Mark the end of a cut (right click to reset)
-== 
+== Das Ende eines Schnitts markieren (Rechtsklick zum Resetten)
 
 Close the demo player
-== 
+== Den Demo-Player schließen
 
 Export demo cut
-== 
+== Demo-Schnitt exportieren
 
 Cut interval
-== 
+== Intervall des Schnitts
 
 Cut length
-== 
+== Länge des Schnitts
 
 Axis
-== 
+== Achse
 
 Graphics card
-== 
+== Grafikkarte
