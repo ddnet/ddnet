@@ -3564,10 +3564,10 @@ float CGameClient::CalculateMultiViewZoom(vec2 MinPos, vec2 MaxPos, float Vel)
 
 	// only calc two axis if the aspect ratio is not 1:1
 	if(Ratio != 1.0f)
-		ZoomX = ZoomX = (0.001309f - 0.000328 * Ratio) * (MaxPos.x - MinPos.x) + (0.741413f - 0.032959 * Ratio);
+		ZoomX = (0.001309f - 0.000328 * Ratio) * (MaxPos.x - MinPos.x) + (0.741413f - 0.032959 * Ratio);
 
 	// calculate the according zoom with linear function
-	ZoomY = ZoomY = 0.001309f * (MaxPos.y - MinPos.y) + 0.741413f;
+	ZoomY = 0.001309f * (MaxPos.y - MinPos.y) + 0.741413f;
 	// choose the highest zoom
 	float Zoom = std::max(ZoomX, ZoomY);
 	// zoom out to maximum 10 percent of the current zoom for 70 velocity
