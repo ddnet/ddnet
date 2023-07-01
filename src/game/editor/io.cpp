@@ -34,7 +34,7 @@ struct CSoundSource_DEPRECATED
 bool CEditor::Save(const char *pFilename)
 {
 	// Check if file with this name is already being saved at the moment
-	if(std::any_of(std::begin(m_lpWriterFinishJobs), std::end(m_lpWriterFinishJobs), [pFilename](const std::shared_ptr<CDataFileWriterFinishJob> &Job) { return str_comp(pFilename, Job->GetFileName()) == 0; }))
+	if(std::any_of(std::begin(m_WriterFinishJobs), std::end(m_WriterFinishJobs), [pFilename](const std::shared_ptr<CDataFileWriterFinishJob> &Job) { return str_comp(pFilename, Job->GetFileName()) == 0; }))
 		return false;
 
 	return m_Map.Save(pFilename);
@@ -378,7 +378,7 @@ bool CEditorMap::Save(const char *pFileName)
 	// finish the data file
 	std::shared_ptr<CDataFileWriterFinishJob> pWriterFinishJob = std::make_shared<CDataFileWriterFinishJob>(pFileName, std::move(df));
 	m_pEditor->Engine()->AddJob(pWriterFinishJob);
-	m_pEditor->m_lpWriterFinishJobs.push_back(pWriterFinishJob);
+	m_pEditor->m_WriterFinishJobs.push_back(pWriterFinishJob);
 
 	return true;
 }

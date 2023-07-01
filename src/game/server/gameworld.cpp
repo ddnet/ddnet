@@ -399,10 +399,9 @@ CCharacter *CGameWorld::ClosestCharacter(vec2 Pos, float Radius, const CEntity *
 	return pClosest;
 }
 
-std::list<class CCharacter *> CGameWorld::IntersectedCharacters(vec2 Pos0, vec2 Pos1, float Radius, const CEntity *pNotThis)
+std::vector<CCharacter *> CGameWorld::IntersectedCharacters(vec2 Pos0, vec2 Pos1, float Radius, const CEntity *pNotThis)
 {
-	std::list<CCharacter *> listOfChars;
-
+	std::vector<CCharacter *> vpCharacters;
 	CCharacter *pChr = (CCharacter *)FindFirst(CGameWorld::ENTTYPE_CHARACTER);
 	for(; pChr; pChr = (CCharacter *)pChr->TypeNext())
 	{
@@ -416,11 +415,11 @@ std::list<class CCharacter *> CGameWorld::IntersectedCharacters(vec2 Pos0, vec2 
 			if(Len < pChr->m_ProximityRadius + Radius)
 			{
 				pChr->m_Intersection = IntersectPos;
-				listOfChars.push_back(pChr);
+				vpCharacters.push_back(pChr);
 			}
 		}
 	}
-	return listOfChars;
+	return vpCharacters;
 }
 
 void CGameWorld::ReleaseHooked(int ClientID)

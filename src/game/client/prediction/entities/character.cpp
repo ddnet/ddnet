@@ -1029,9 +1029,9 @@ void CCharacter::DDRacePostCoreTick()
 	HandleSkippableTiles(CurrentIndex);
 
 	// handle Anti-Skip tiles
-	std::list<int> Indices = Collision()->GetMapIndices(m_PrevPos, m_Pos);
-	if(!Indices.empty())
-		for(int Index : Indices)
+	std::vector<int> vIndices = Collision()->GetMapIndices(m_PrevPos, m_Pos);
+	if(!vIndices.empty())
+		for(int Index : vIndices)
 			HandleTiles(Index);
 	else
 	{

@@ -3,7 +3,7 @@
 #ifndef ENGINE_CLIENT_CLIENT_H
 #define ENGINE_CLIENT_CLIENT_H
 
-#include <list>
+#include <deque>
 #include <memory>
 
 #include <base/hash.h>
@@ -246,7 +246,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 
 	CSnapshotDelta m_SnapshotDelta;
 
-	std::list<std::shared_ptr<CDemoEdit>> m_lpEditJobs;
+	std::deque<std::shared_ptr<CDemoEdit>> m_EditJobs;
 
 	//
 	bool m_CanReceiveServerCapabilities;

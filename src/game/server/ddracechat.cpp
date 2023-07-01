@@ -752,6 +752,11 @@ void CGameContext::ConSwap(IConsole::IResult *pResult, void *pUserData)
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "Need to have started the map to swap with a player.");
 		return;
 	}
+	if(pSelf->m_World.m_Core.m_apCharacters[pResult->m_ClientID] == nullptr || pSelf->m_World.m_Core.m_apCharacters[TargetClientId] == nullptr)
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "You and the other player must not be paused.");
+		return;
+	}
 
 	bool SwapPending = pSwapPlayer->m_SwapTargetsClientID != pResult->m_ClientID;
 	if(SwapPending)

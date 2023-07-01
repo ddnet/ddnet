@@ -6459,7 +6459,7 @@ void CEditor::RenderPressedKeys(CUIRect View)
 
 void CEditor::RenderSavingIndicator(CUIRect View)
 {
-	if(m_lpWriterFinishJobs.empty())
+	if(m_WriterFinishJobs.empty())
 		return;
 
 	UI()->MapScreen();
@@ -7065,10 +7065,10 @@ bool CEditor::PerformAutosave()
 
 void CEditor::HandleWriterFinishJobs()
 {
-	if(m_lpWriterFinishJobs.empty())
+	if(m_WriterFinishJobs.empty())
 		return;
 
-	std::shared_ptr<CDataFileWriterFinishJob> pJob = m_lpWriterFinishJobs.front();
+	std::shared_ptr<CDataFileWriterFinishJob> pJob = m_WriterFinishJobs.front();
 	if(pJob->Status() != IJob::STATE_DONE)
 		return;
 
@@ -7095,7 +7095,7 @@ void CEditor::HandleWriterFinishJobs()
 		}
 	}
 
-	m_lpWriterFinishJobs.pop_front();
+	m_WriterFinishJobs.pop_front();
 }
 
 void CEditor::OnUpdate()
