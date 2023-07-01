@@ -277,9 +277,6 @@ class CClient : public IClient, public CDemoPlayer::IListener
 		class CHostLookup m_VersionServeraddr;
 	} m_VersionInfo;
 
-	static void GraphicsThreadProxy(void *pThis) { ((CClient *)pThis)->GraphicsThread(); }
-	void GraphicsThread();
-
 	std::vector<SWarning> m_vWarnings;
 
 	CFifo m_Fifo;
