@@ -3,6 +3,7 @@
 #	arionwt1997
 #modified by:
 #	Chill & PoKeMoN		2023-03-31 16:00:00
+#	Chill & PoKeMoN		2023-07-02 00:54:00
 #	
 ##### /authors #####
 
@@ -1643,65 +1644,65 @@ Grabs
 == Зах.
 
 1 new mention
-== 1 новая згадка
+== 1 згадка
 
 %d new mentions
-== %d новых згадак
+== %d згадак
 
 9+ new mentions
-== 9+ новых згадак
+== 9+ згадак
 
 A demo with this name already exists
-== 
+== Дэма з такой назвай ужо існуе 
 
 No server selected
-== 
+== Сервер не абраны
 
 Online players (%d)
-== 
+== Гульцоў анлайн (%d)
 
 Online clanmates (%d)
-== 
+== Членаў клана анлайн (%d)
 
 [friends (server browser)]
 Offline (%d)
-== 
+== Афлайн (%d)
 
 Click to select server. Double click to join your friend.
-== 
+== Націсніце, как абраць сервер. Націсніце двойчы, каб далучыцца да вашага сябра.
 
 Click to remove this player from your friends list.
-== 
+== Націсніце, как выдаліць гэтага гульца са свайго спіса сяброў.
 
 Click to remove this clan from your friends list.
-== 
+== Націсніце, как выдаліць гэты клан са свайго спіса сяброў.
 
 None
-== 
+== Пуста
 
 Add Clan
-== 
+== Дадаць клан
 
 Mark the beginning of a cut (right click to reset)
-== 
+== Пазначыць пачатак адрэзка (правая кнопка мышы для скіду)
 
 Mark the end of a cut (right click to reset)
-== 
+== Пазначыць канец адрэзка (правая кнопка мышы для скіду)
 
 Close the demo player
-== 
+== Закрыць прайгравальнік дэма
 
 Export demo cut
-== 
+== Экспартаваць адрэзак дэма
 
 Cut interval
-== 
+== Інтэрвал адрэзка
 
 Cut length
-== 
+== Працягласць адрэзка
 
 Axis
-== 
+== Вось
 
 Graphics card
-== 
+== Відэакарта
