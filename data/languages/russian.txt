@@ -1515,7 +1515,7 @@ Speed up the demo
 == Ускорить демо
 
 Export cut as a separate demo
-== Экспортировать участок отдельно
+== Экспортировать отрезок отдельно
 
 Toggle keyboard shortcuts
 == Включить горячие клавиши
@@ -1687,31 +1687,31 @@ Add Clan
 == Добавить клан
 
 A demo with this name already exists
-== 
+== Демо с таким именем уже существует
 
 No server selected
-== 
+== Не выбран сервер
 
 Mark the beginning of a cut (right click to reset)
-== 
+== Отметить начало отрезка (щелкните правой кнопкой мыши, чтобы сбросить)
 
 Mark the end of a cut (right click to reset)
-== 
+== Отметить конец отрезка (щелкните правой кнопкой мыши, чтобы сбросить)
 
 Close the demo player
-== 
+== Закрыть проигрыватель демок
 
 Export demo cut
-== 
+== Экспортировать отрезок демки
 
 Cut interval
-== 
+== Интервал отрезка
 
 Cut length
-== 
+== Длина отрезка
 
 Axis
-== 
+== Ось
 
 Graphics card
-== 
+== Видеокарта
