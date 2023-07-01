@@ -89,9 +89,9 @@ void CEmoticon::OnRender()
 	m_SelectedEmote = -1;
 	m_SelectedEyeEmote = -1;
 	if(length(m_SelectorMouse) > 110.0f)
-		m_SelectedEmote = (int)(SelectedAngle / (2 * pi) * NUM_EMOTICONS);
+		m_SelectedEmote = (int)(SelectedAngle / (2 * pi) * (float)NUM_EMOTICONS);
 	else if(length(m_SelectorMouse) > 40.0f)
-		m_SelectedEyeEmote = (int)(SelectedAngle / (2 * pi) * NUM_EMOTES);
+		m_SelectedEyeEmote = (int)(SelectedAngle / (2 * pi) * (float)NUM_EMOTES);
 
 	CUIRect Screen = *UI()->Screen();
 
@@ -108,7 +108,7 @@ void CEmoticon::OnRender()
 	Graphics()->WrapClamp();
 	for(int i = 0; i < NUM_EMOTICONS; i++)
 	{
-		float Angle = 2 * pi * i / NUM_EMOTICONS;
+		float Angle = 2 * pi * i / (float)NUM_EMOTICONS;
 		if(Angle > pi)
 			Angle -= 2 * pi;
 
@@ -139,7 +139,7 @@ void CEmoticon::OnRender()
 
 		for(int i = 0; i < NUM_EMOTES; i++)
 		{
-			float Angle = 2 * pi * i / NUM_EMOTES;
+			float Angle = 2 * pi * i / (float)NUM_EMOTES;
 			if(Angle > pi)
 				Angle -= 2 * pi;
 

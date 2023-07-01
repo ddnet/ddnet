@@ -391,11 +391,11 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 
 	MainView.HSplitTop(20, &TabBar, &MainView);
 	float TabsW = TabBar.w;
-	TabBar.VSplitLeft(TabsW / NUMBER_OF_ASSETS_TABS, &Page1Tab, &Page2Tab);
-	Page2Tab.VSplitLeft(TabsW / NUMBER_OF_ASSETS_TABS, &Page2Tab, &Page3Tab);
-	Page3Tab.VSplitLeft(TabsW / NUMBER_OF_ASSETS_TABS, &Page3Tab, &Page4Tab);
-	Page4Tab.VSplitLeft(TabsW / NUMBER_OF_ASSETS_TABS, &Page4Tab, &Page5Tab);
-	Page5Tab.VSplitLeft(TabsW / NUMBER_OF_ASSETS_TABS, &Page5Tab, &Page6Tab);
+	TabBar.VSplitLeft(TabsW / (float)NUMBER_OF_ASSETS_TABS, &Page1Tab, &Page2Tab);
+	Page2Tab.VSplitLeft(TabsW / (float)NUMBER_OF_ASSETS_TABS, &Page2Tab, &Page3Tab);
+	Page3Tab.VSplitLeft(TabsW / (float)NUMBER_OF_ASSETS_TABS, &Page3Tab, &Page4Tab);
+	Page4Tab.VSplitLeft(TabsW / (float)NUMBER_OF_ASSETS_TABS, &Page4Tab, &Page5Tab);
+	Page5Tab.VSplitLeft(TabsW / (float)NUMBER_OF_ASSETS_TABS, &Page5Tab, &Page6Tab);
 
 	static CButtonContainer s_aPageTabs[NUMBER_OF_ASSETS_TABS] = {};
 

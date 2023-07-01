@@ -134,7 +134,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	CFriends m_Friends;
 	CFriends m_Foes;
 
-	char m_aConnectAddressStr[MAX_SERVER_ADDRESSES * NETADDR_MAXSTRSIZE];
+	char m_aConnectAddressStr[(size_t)MAX_SERVER_ADDRESSES * (size_t)NETADDR_MAXSTRSIZE];
 
 	CUuid m_ConnectionID;
 

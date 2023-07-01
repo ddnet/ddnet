@@ -90,7 +90,7 @@ public:
 	int m_MapCrc;
 	int m_MapSize;
 	char m_aVersion[32];
-	char m_aAddress[MAX_SERVER_ADDRESSES * NETADDR_MAXSTRSIZE];
+	char m_aAddress[(size_t)MAX_SERVER_ADDRESSES * (size_t)NETADDR_MAXSTRSIZE];
 	CClient m_aClients[SERVERINFO_MAX_CLIENTS];
 	mutable int m_NumFilteredPlayers;
 
