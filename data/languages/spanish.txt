@@ -21,6 +21,7 @@
 # Deëivid!        2023-01-05 21:05:00
 # Deëivid!        2023-02-26 00:35:00
 # Deëivid!        2023-05-22 19:54:00
+# Deëivid!        2023-07-01 22:52:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -1696,31 +1697,31 @@ Add Clan
 == Agregar clan
 
 A demo with this name already exists
-== 
+== Ya existe una demo con este nombre
 
 No server selected
-== 
+== Ningún servidor seleccionado
 
 Mark the beginning of a cut (right click to reset)
-== 
+== Marcar el inicio de un corte (clic derecho para restablecer)
 
 Mark the end of a cut (right click to reset)
-== 
+== Marcar el final de un corte (clic derecho para restablecer)
 
 Close the demo player
-== 
+== Cerrar el reproductor de demos
 
 Export demo cut
-== 
+== Exportar corte de la demo
 
 Cut interval
-== 
+== Intervalo del corte
 
 Cut length
-== 
+== Largo del corte
 
 Axis
-== 
+== Eje
 
 Graphics card
-== 
+== Tarjeta gráfica
