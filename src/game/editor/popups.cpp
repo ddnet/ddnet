@@ -1853,6 +1853,8 @@ CUI::EPopupMenuFunctionResult CEditor::PopupSelectGametileOp(void *pContext, CUI
 {
 	CEditor *pEditor = static_cast<CEditor *>(pContext);
 
+	const int PreviousSelected = s_GametileOpSelected;
+
 	CUIRect Button;
 	for(size_t i = 0; i < std::size(s_apGametileOpButtonNames); ++i)
 	{
@@ -1862,7 +1864,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupSelectGametileOp(void *pContext, CUI
 			s_GametileOpSelected = i;
 	}
 
-	return CUI::POPUP_KEEP_OPEN;
+	return s_GametileOpSelected == PreviousSelected ? CUI::POPUP_KEEP_OPEN : CUI::POPUP_CLOSE_CURRENT;
 }
 
 void CEditor::PopupSelectGametileOpInvoke(float x, float y)
