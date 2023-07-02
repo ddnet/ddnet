@@ -775,8 +775,6 @@ CUI::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 					}
 				}
 			}
-
-			return CUI::POPUP_CLOSE_CURRENT;
 		}
 	}
 
