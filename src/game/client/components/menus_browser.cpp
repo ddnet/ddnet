@@ -205,7 +205,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
 		TextRender()->TextColor(TextColor);
 		TextRender()->TextOutlineColor(TextOutlineColor);
-		UI()->DoLabelStreamed(UIRect, pRect, pText, FontSize, TextAlign, -1.0f);
+		UI()->DoLabelStreamed(UIRect, pRect, pText, FontSize, TextAlign);
 		TextRender()->TextOutlineColor(TextRender()->DefaultTextOutlineColor());
 		TextRender()->TextColor(TextRender()->DefaultTextColor());
 		TextRender()->SetRenderFlags(0);
@@ -250,6 +250,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			continue;
 		}
 
+		const float FontSize = 12.0f;
 		for(int c = 0; c < NumCols; c++)
 		{
 			CUIRect Button;
@@ -285,19 +286,21 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			}
 			else if(ID == COL_NAME)
 			{
-				float FontSize = 12.0f;
+				SLabelProperties Props;
+				Props.m_MaxWidth = Button.w;
+				Props.m_StopAtEnd = true;
+				Props.m_EnableWidthCheck = false;
 				bool Printed = false;
-
 				if(g_Config.m_BrFilterString[0] && (pItem->m_QuickSearchHit & IServerBrowser::QUICK_SERVERNAME))
-					Printed = PrintHighlighted(pItem->m_aName, [this, pItem, FontSize, &Button](const char *pFilteredStr, const int FilterLen) {
-						UI()->DoLabelStreamed(*pItem->m_pUIElement->Rect(gs_OffsetColName + 0), &Button, pItem->m_aName, FontSize, TEXTALIGN_ML, Button.w, true, (int)(pFilteredStr - pItem->m_aName));
+					Printed = PrintHighlighted(pItem->m_aName, [this, pItem, FontSize, Props, &Button](const char *pFilteredStr, const int FilterLen) {
+						UI()->DoLabelStreamed(*pItem->m_pUIElement->Rect(gs_OffsetColName + 0), &Button, pItem->m_aName, FontSize, TEXTALIGN_ML, Props, (int)(pFilteredStr - pItem->m_aName));
 						TextRender()->TextColor(0.4f, 0.4f, 1.0f, 1);
-						UI()->DoLabelStreamed(*pItem->m_pUIElement->Rect(gs_OffsetColName + 1), &Button, pFilteredStr, FontSize, TEXTALIGN_ML, Button.w, true, FilterLen, &pItem->m_pUIElement->Rect(gs_OffsetColName + 0)->m_Cursor);
+						UI()->DoLabelStreamed(*pItem->m_pUIElement->Rect(gs_OffsetColName + 1), &Button, pFilteredStr, FontSize, TEXTALIGN_ML, Props, FilterLen, &pItem->m_pUIElement->Rect(gs_OffsetColName + 0)->m_Cursor);
 						TextRender()->TextColor(1, 1, 1, 1);
-						UI()->DoLabelStreamed(*pItem->m_pUIElement->Rect(gs_OffsetColName + 2), &Button, pFilteredStr + FilterLen, FontSize, TEXTALIGN_ML, Button.w, true, -1, &pItem->m_pUIElement->Rect(gs_OffsetColName + 1)->m_Cursor);
+						UI()->DoLabelStreamed(*pItem->m_pUIElement->Rect(gs_OffsetColName + 2), &Button, pFilteredStr + FilterLen, FontSize, TEXTALIGN_ML, Props, -1, &pItem->m_pUIElement->Rect(gs_OffsetColName + 1)->m_Cursor);
 					});
 				if(!Printed)
-					UI()->DoLabelStreamed(*pItem->m_pUIElement->Rect(gs_OffsetColName), &Button, pItem->m_aName, FontSize, TEXTALIGN_ML, Button.w, true);
+					UI()->DoLabelStreamed(*pItem->m_pUIElement->Rect(gs_OffsetColName), &Button, pItem->m_aName, FontSize, TEXTALIGN_ML, Props);
 			}
 			else if(ID == COL_MAP)
 			{
@@ -314,18 +317,21 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 					}
 				}
 
-				float FontSize = 12.0f;
+				SLabelProperties Props;
+				Props.m_MaxWidth = Button.w;
+				Props.m_StopAtEnd = true;
+				Props.m_EnableWidthCheck = false;
 				bool Printed = false;
 				if(g_Config.m_BrFilterString[0] && (pItem->m_QuickSearchHit & IServerBrowser::QUICK_MAPNAME))
-					Printed = PrintHighlighted(pItem->m_aMap, [this, pItem, FontSize, &Button](const char *pFilteredStr, const int FilterLen) {
-						UI()->DoLabelStreamed(*pItem->m_pUIElement->Rect(gs_OffsetColMap + 0), &Button, pItem->m_aMap, FontSize, TEXTALIGN_ML, Button.w, true, (int)(pFilteredStr - pItem->m_aMap));
+					Printed = PrintHighlighted(pItem->m_aMap, [this, pItem, FontSize, Props, &Button](const char *pFilteredStr, const int FilterLen) {
+						UI()->DoLabelStreamed(*pItem->m_pUIElement->Rect(gs_OffsetColMap + 0), &Button, pItem->m_aMap, FontSize, TEXTALIGN_ML, Props, (int)(pFilteredStr - pItem->m_aMap));
 						TextRender()->TextColor(0.4f, 0.4f, 1.0f, 1);
-						UI()->DoLabelStreamed(*pItem->m_pUIElement->Rect(gs_OffsetColMap + 1), &Button, pFilteredStr, FontSize, TEXTALIGN_ML, Button.w, true, FilterLen, &pItem->m_pUIElement->Rect(gs_OffsetColMap + 0)->m_Cursor);
+						UI()->DoLabelStreamed(*pItem->m_pUIElement->Rect(gs_OffsetColMap + 1), &Button, pFilteredStr, FontSize, TEXTALIGN_ML, Props, FilterLen, &pItem->m_pUIElement->Rect(gs_OffsetColMap + 0)->m_Cursor);
 						TextRender()->TextColor(1, 1, 1, 1);
-						UI()->DoLabelStreamed(*pItem->m_pUIElement->Rect(gs_OffsetColMap + 2), &Button, pFilteredStr + FilterLen, FontSize, TEXTALIGN_ML, Button.w, true, -1, &pItem->m_pUIElement->Rect(gs_OffsetColMap + 1)->m_Cursor);
+						UI()->DoLabelStreamed(*pItem->m_pUIElement->Rect(gs_OffsetColMap + 2), &Button, pFilteredStr + FilterLen, FontSize, TEXTALIGN_ML, Props, -1, &pItem->m_pUIElement->Rect(gs_OffsetColMap + 1)->m_Cursor);
 					});
 				if(!Printed)
-					UI()->DoLabelStreamed(*pItem->m_pUIElement->Rect(gs_OffsetColMap), &Button, pItem->m_aMap, FontSize, TEXTALIGN_ML, Button.w, true);
+					UI()->DoLabelStreamed(*pItem->m_pUIElement->Rect(gs_OffsetColMap), &Button, pItem->m_aMap, FontSize, TEXTALIGN_ML, Props);
 			}
 			else if(ID == COL_PLAYERS)
 			{
@@ -350,8 +356,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 				str_format(aTemp, sizeof(aTemp), "%i/%i", pItem->m_NumFilteredPlayers, ServerBrowser()->Max(*pItem));
 				if(g_Config.m_BrFilterString[0] && (pItem->m_QuickSearchHit & IServerBrowser::QUICK_PLAYER))
 					TextRender()->TextColor(0.4f, 0.4f, 1.0f, 1);
-				float FontSize = 12.0f;
-				UI()->DoLabelStreamed(*pItem->m_pUIElement->Rect(gs_OffsetColPlayers), &Button, aTemp, FontSize, TEXTALIGN_MR, -1.0f, false);
+				UI()->DoLabelStreamed(*pItem->m_pUIElement->Rect(gs_OffsetColPlayers), &Button, aTemp, FontSize, TEXTALIGN_MR);
 				TextRender()->TextColor(1, 1, 1, 1);
 			}
 			else if(ID == COL_PING)
@@ -364,20 +369,20 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 					TextRender()->TextColor(rgb);
 				}
 
-				float FontSize = 12.0f;
-				UI()->DoLabelStreamed(*pItem->m_pUIElement->Rect(gs_OffsetColPing), &Button, aTemp, FontSize, TEXTALIGN_MR, -1.0f, false);
+				UI()->DoLabelStreamed(*pItem->m_pUIElement->Rect(gs_OffsetColPing), &Button, aTemp, FontSize, TEXTALIGN_MR);
 				TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 			}
 			else if(ID == COL_VERSION)
 			{
 				const char *pVersion = pItem->m_aVersion;
-				float FontSize = 12.0f;
-				UI()->DoLabelStreamed(*pItem->m_pUIElement->Rect(gs_OffsetColVersion), &Button, pVersion, FontSize, TEXTALIGN_MR, -1.0f, false);
+				UI()->DoLabelStreamed(*pItem->m_pUIElement->Rect(gs_OffsetColVersion), &Button, pVersion, FontSize, TEXTALIGN_MR);
 			}
 			else if(ID == COL_GAMETYPE)
 			{
-				float FontSize = 12.0f;
-
+				SLabelProperties Props;
+				Props.m_MaxWidth = Button.w;
+				Props.m_StopAtEnd = true;
+				Props.m_EnableWidthCheck = false;
 				if(g_Config.m_UiColorizeGametype)
 				{
 					ColorHSLA hsl = ColorHSLA(1.0f, 1.0f, 1.0f);
@@ -405,11 +410,11 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 
 					ColorRGBA rgb = color_cast<ColorRGBA>(hsl);
 					TextRender()->TextColor(rgb);
-					UI()->DoLabelStreamed(*pItem->m_pUIElement->Rect(gs_OffsetColGameType), &Button, pItem->m_aGameType, FontSize, TEXTALIGN_ML, Button.w, true);
+					UI()->DoLabelStreamed(*pItem->m_pUIElement->Rect(gs_OffsetColGameType), &Button, pItem->m_aGameType, FontSize, TEXTALIGN_ML, Props);
 					TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 				}
 				else
-					UI()->DoLabelStreamed(*pItem->m_pUIElement->Rect(gs_OffsetColGameType), &Button, pItem->m_aGameType, FontSize, TEXTALIGN_ML, Button.w, true);
+					UI()->DoLabelStreamed(*pItem->m_pUIElement->Rect(gs_OffsetColGameType), &Button, pItem->m_aGameType, FontSize, TEXTALIGN_ML, Props);
 			}
 		}
 	}

@@ -449,7 +449,12 @@ int CEditor::DoButton_MenuItem(const void *pID, const char *pText, int Checked, 
 
 	CUIRect Rect;
 	pRect->VMargin(5.0f, &Rect);
-	UI()->DoLabel(&Rect, pText, 10.0f, TEXTALIGN_ML);
+
+	SLabelProperties Props;
+	Props.m_MaxWidth = Rect.w;
+	Props.m_EllipsisAtEnd = true;
+	UI()->DoLabel(&Rect, pText, 10.0f, TEXTALIGN_ML, Props);
+
 	return DoButton_Editor_Common(pID, pText, Checked, pRect, Flags, pToolTip);
 }
 
@@ -463,7 +468,15 @@ int CEditor::DoButton_Tab(const void *pID, const char *pText, int Checked, const
 int CEditor::DoButton_Ex(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip, int Corners, float FontSize)
 {
 	pRect->Draw(GetButtonColor(pID, Checked), Corners, 3.0f);
-	UI()->DoLabel(pRect, pText, FontSize, TEXTALIGN_MC);
+
+	CUIRect Rect;
+	pRect->VMargin(pRect->w > 20.0f ? 5.0f : 0.0f, &Rect);
+
+	SLabelProperties Props;
+	Props.m_MaxWidth = Rect.w;
+	Props.m_EllipsisAtEnd = true;
+	UI()->DoLabel(&Rect, pText, FontSize, TEXTALIGN_MC, Props);
+
 	return DoButton_Editor_Common(pID, pText, Checked, pRect, Flags, pToolTip);
 }
 
@@ -498,7 +511,13 @@ int CEditor::DoButton_DraggableEx(const void *pID, const char *pText, int Checke
 {
 	pRect->Draw(GetButtonColor(pID, Checked), Corners, 3.0f);
 
-	UI()->DoLabel(pRect, pText, FontSize, TEXTALIGN_MC);
+	CUIRect Rect;
+	pRect->VMargin(pRect->w > 20.0f ? 5.0f : 0.0f, &Rect);
+
+	SLabelProperties Props;
+	Props.m_MaxWidth = Rect.w;
+	Props.m_EllipsisAtEnd = true;
+	UI()->DoLabel(&Rect, pText, FontSize, TEXTALIGN_MC, Props);
 
 	if(UI()->MouseInside(pRect))
 	{
@@ -3077,23 +3096,6 @@ void CEditor::DoMapEditor(CUIRect View)
 	UI()->MapScreen();
 }
 
-float CEditor::ScaleFontSize(char *pText, int TextSize, float FontSize, int Width)
-{
-	while(TextRender()->TextWidth(FontSize, pText, -1, -1.0f) > Width)
-	{
-		if(FontSize > 6.0f)
-		{
-			FontSize--;
-		}
-		else
-		{
-			pText[str_length(pText) - 4] = '\0';
-			str_append(pText, "…", TextSize);
-		}
-	}
-	return FontSize;
-}
-
 int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *pNewVal, ColorRGBA Color)
 {
 	int Change = -1;
@@ -3239,14 +3241,13 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 		}
 		else if(pProps[i].m_Type == PROPTYPE_IMAGE)
 		{
-			char aBuf[64];
+			const char *pName;
 			if(pProps[i].m_Value < 0)
-				str_copy(aBuf, "None");
+				pName = "None";
 			else
-				str_copy(aBuf, m_Map.m_vpImages[pProps[i].m_Value]->m_aName);
+				pName = m_Map.m_vpImages[pProps[i].m_Value]->m_aName;
 
-			float FontSize = ScaleFontSize(aBuf, sizeof(aBuf), 10.0f, Shifter.w);
-			if(DoButton_Ex(&pIDs[i], aBuf, 0, &Shifter, 0, nullptr, IGraphics::CORNER_ALL, FontSize))
+			if(DoButton_Ex(&pIDs[i], pName, 0, &Shifter, 0, nullptr, IGraphics::CORNER_ALL))
 				PopupSelectImageInvoke(pProps[i].m_Value, UI()->MouseX(), UI()->MouseY());
 
 			int r = PopupSelectImageResult();
@@ -3291,14 +3292,13 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 		}
 		else if(pProps[i].m_Type == PROPTYPE_SOUND)
 		{
-			char aBuf[64];
+			const char *pName;
 			if(pProps[i].m_Value < 0)
-				str_copy(aBuf, "None");
+				pName = "None";
 			else
-				str_copy(aBuf, m_Map.m_vpSounds[pProps[i].m_Value]->m_aName);
+				pName = m_Map.m_vpSounds[pProps[i].m_Value]->m_aName;
 
-			float FontSize = ScaleFontSize(aBuf, sizeof(aBuf), 10.0f, Shifter.w);
-			if(DoButton_Ex(&pIDs[i], aBuf, 0, &Shifter, 0, nullptr, IGraphics::CORNER_ALL, FontSize))
+			if(DoButton_Ex(&pIDs[i], pName, 0, &Shifter, 0, nullptr, IGraphics::CORNER_ALL))
 				PopupSelectSoundInvoke(pProps[i].m_Value, UI()->MouseX(), UI()->MouseY());
 
 			int r = PopupSelectSoundResult();
@@ -3310,14 +3310,13 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 		}
 		else if(pProps[i].m_Type == PROPTYPE_AUTOMAPPER)
 		{
-			char aBuf[64];
+			const char *pName;
 			if(pProps[i].m_Value < 0 || pProps[i].m_Min < 0 || pProps[i].m_Min >= (int)m_Map.m_vpImages.size())
-				str_copy(aBuf, "None");
+				pName = "None";
 			else
-				str_copy(aBuf, m_Map.m_vpImages[pProps[i].m_Min]->m_AutoMapper.GetConfigName(pProps[i].m_Value));
+				pName = m_Map.m_vpImages[pProps[i].m_Min]->m_AutoMapper.GetConfigName(pProps[i].m_Value);
 
-			float FontSize = ScaleFontSize(aBuf, sizeof(aBuf), 10.0f, Shifter.w);
-			if(DoButton_Ex(&pIDs[i], aBuf, 0, &Shifter, 0, nullptr, IGraphics::CORNER_ALL, FontSize))
+			if(DoButton_Ex(&pIDs[i], pName, 0, &Shifter, 0, nullptr, IGraphics::CORNER_ALL))
 				PopupSelectConfigAutoMapInvoke(pProps[i].m_Value, UI()->MouseX(), UI()->MouseY());
 
 			int r = PopupSelectConfigAutoMapResult();
@@ -3502,14 +3501,11 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 				m_Map.m_vpGroups[g]->m_Visible = !m_Map.m_vpGroups[g]->m_Visible;
 
 			str_format(aBuf, sizeof(aBuf), "#%d %s", g, m_Map.m_vpGroups[g]->m_aName);
-			float FontSize = 10.0f;
-			while(TextRender()->TextWidth(FontSize, aBuf, -1, -1.0f) > Slot.w && FontSize >= 7.0f)
-				FontSize--;
 
 			bool Clicked;
 			bool Abrupted;
 			if(int Result = DoButton_DraggableEx(&m_Map.m_vpGroups[g], aBuf, g == m_SelectedGroup, &Slot, &Clicked, &Abrupted,
-				   BUTTON_CONTEXT, m_Map.m_vpGroups[g]->m_Collapse ? "Select group. Shift click to select all layers. Double click to expand." : "Select group. Shift click to select all layers. Double click to collapse.", IGraphics::CORNER_R, FontSize))
+				   BUTTON_CONTEXT, m_Map.m_vpGroups[g]->m_Collapse ? "Select group. Shift click to select all layers. Double click to expand." : "Select group. Shift click to select all layers. Double click to collapse.", IGraphics::CORNER_R))
 			{
 				if(s_Operation == OP_NONE)
 				{
@@ -3648,13 +3644,7 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 					CLayerSounds *pSounds = (CLayerSounds *)m_Map.m_vpGroups[g]->m_vpLayers[i];
 					str_copy(aBuf, pSounds->m_Sound >= 0 ? m_Map.m_vpSounds[pSounds->m_Sound]->m_aName : "Sounds");
 				}
-				if(str_length(aBuf) > 11)
-					str_format(aBuf, sizeof(aBuf), "%.8s…", aBuf);
 			}
-
-			float FontSize = 10.0f;
-			while(TextRender()->TextWidth(FontSize, aBuf, -1, -1.0f) > Button.w && FontSize >= 7.0f)
-				FontSize--;
 
 			int Checked = IsLayerSelected ? 1 : 0;
 			if(m_Map.m_vpGroups[g]->m_vpLayers[i]->IsEntitiesLayer())
@@ -3665,7 +3655,7 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 			bool Clicked;
 			bool Abrupted;
 			if(int Result = DoButton_DraggableEx(m_Map.m_vpGroups[g]->m_vpLayers[i], aBuf, Checked, &Button, &Clicked, &Abrupted,
-				   BUTTON_CONTEXT, "Select layer. Shift click to select multiple.", IGraphics::CORNER_R, FontSize))
+				   BUTTON_CONTEXT, "Select layer. Shift click to select multiple.", IGraphics::CORNER_R))
 			{
 				if(s_Operation == OP_NONE)
 				{
@@ -4394,12 +4384,8 @@ void CEditor::RenderImagesList(CUIRect ToolBox)
 				}
 			}
 
-			float FontSize = 10.0f;
-			while(TextRender()->TextWidth(FontSize, m_Map.m_vpImages[i]->m_aName, -1, -1.0f) > Slot.w)
-				FontSize--;
-
 			if(int Result = DoButton_Ex(&m_Map.m_vpImages[i], m_Map.m_vpImages[i]->m_aName, Selected, &Slot,
-				   BUTTON_CONTEXT, "Select image.", IGraphics::CORNER_ALL, FontSize))
+				   BUTTON_CONTEXT, "Select image.", IGraphics::CORNER_ALL))
 			{
 				m_SelectedImage = i;
 
@@ -4514,12 +4500,8 @@ void CEditor::RenderSounds(CUIRect ToolBox)
 		if(!SoundUsed)
 			Selected += 2; // Sound is unused
 
-		float FontSize = 10.0f;
-		while(TextRender()->TextWidth(FontSize, m_Map.m_vpSounds[i]->m_aName, -1, -1.0f) > Slot.w)
-			FontSize--;
-
 		if(int Result = DoButton_Ex(&m_Map.m_vpSounds[i], m_Map.m_vpSounds[i]->m_aName, Selected, &Slot,
-			   BUTTON_CONTEXT, "Select sound.", IGraphics::CORNER_ALL, FontSize))
+			   BUTTON_CONTEXT, "Select sound.", IGraphics::CORNER_ALL))
 		{
 			m_SelectedSound = i;
 
@@ -4894,6 +4876,7 @@ void CEditor::RenderFileDialog()
 		Item.m_Rect.VSplitLeft(Item.m_Rect.h, &FileIcon, &Button);
 		Button.VSplitLeft(5.0f, nullptr, &Button);
 		Button.VSplitRight(100.0f, &Button, &TimeModified);
+		Button.VSplitRight(5.0f, &Button, nullptr);
 
 		const char *pIconType;
 		if(!m_vpFilteredFileList[i]->m_IsDir)
@@ -4925,7 +4908,10 @@ void CEditor::RenderFileDialog()
 		UI()->DoLabel(&FileIcon, pIconType, 12.0f, TEXTALIGN_ML);
 		TextRender()->SetCurFont(nullptr);
 
-		UI()->DoLabel(&Button, m_vpFilteredFileList[i]->m_aName, 10.0f, TEXTALIGN_ML);
+		SLabelProperties Props;
+		Props.m_MaxWidth = Button.w;
+		Props.m_EllipsisAtEnd = true;
+		UI()->DoLabel(&Button, m_vpFilteredFileList[i]->m_aName, 10.0f, TEXTALIGN_ML, Props);
 
 		if(!m_vpFilteredFileList[i]->m_IsLink && str_comp(m_vpFilteredFileList[i]->m_aFilename, "..") != 0)
 		{
@@ -5236,8 +5222,8 @@ void CEditor::RenderStatusbar(CUIRect View)
 		m_ShowServerSettingsEditor = false;
 	}
 
-	View.VSplitRight(100.0f, &View, &Button);
-	Button.VSplitRight(10.0f, &Button, nullptr);
+	View.VSplitRight(10.0f, &View, nullptr);
+	View.VSplitRight(90.0f, &View, &Button);
 	static int s_SettingsButton = 0;
 	if(DoButton_Editor(&s_SettingsButton, "Server settings", m_ShowServerSettingsEditor, &Button, 0, "Toggles the server settings editor."))
 	{
@@ -5253,10 +5239,11 @@ void CEditor::RenderStatusbar(CUIRect View)
 		else
 			str_copy(aBuf, m_pTooltip);
 
-		float FontSize = ScaleFontSize(aBuf, sizeof(aBuf), 10.0f, View.w);
+		View.VSplitRight(10.0f, &View, nullptr);
 		SLabelProperties Props;
 		Props.m_MaxWidth = View.w;
-		UI()->DoLabel(&View, aBuf, FontSize, TEXTALIGN_ML, Props);
+		Props.m_EllipsisAtEnd = true;
+		UI()->DoLabel(&View, aBuf, 10.0f, TEXTALIGN_ML, Props);
 	}
 }
 
@@ -6093,6 +6080,7 @@ void CEditor::RenderMenubar(CUIRect MenuBar)
 	MenuBar.VSplitRight(20.0f, &MenuBar, &Close);
 	Close.VSplitLeft(5.0f, nullptr, &Close);
 	MenuBar.VSplitLeft(MenuBar.w * 0.6f, &MenuBar, &Info);
+	MenuBar.VSplitRight(5.0f, &MenuBar, nullptr);
 
 	if(m_Map.m_Modified)
 	{
@@ -6107,7 +6095,10 @@ void CEditor::RenderMenubar(CUIRect MenuBar)
 
 	char aBuf[IO_MAX_PATH_LENGTH + 32];
 	str_format(aBuf, sizeof(aBuf), "File: %s", m_aFileName);
-	UI()->DoLabel(&MenuBar, aBuf, 10.0f, TEXTALIGN_ML);
+	SLabelProperties Props;
+	Props.m_MaxWidth = MenuBar.w;
+	Props.m_EllipsisAtEnd = true;
+	UI()->DoLabel(&MenuBar, aBuf, 10.0f, TEXTALIGN_ML, Props);
 
 	char aTimeStr[6];
 	str_timestamp_format(aTimeStr, sizeof(aTimeStr), "%H:%M");
