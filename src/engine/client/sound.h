@@ -28,6 +28,7 @@ class CSound : public IEngineSound
 	static int DecodeOpus(int SampleID, const void *pData, unsigned DataSize);
 
 public:
+	CSound();
 	int Init() override;
 	int Update() override;
 	void Shutdown() override;
