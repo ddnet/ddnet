@@ -4246,41 +4246,33 @@ void CEditor::SelectGameLayer()
 	}
 }
 
-static bool ImageNameLess(const CEditorImage *const &a, const CEditorImage *const &b)
-{
-	return str_comp(a->m_aName, b->m_aName) < 0;
-}
-
-static int *gs_pSortedIndex = nullptr;
-static void ModifySortedIndex(int *pIndex)
-{
-	if(*pIndex >= 0)
-		*pIndex = gs_pSortedIndex[*pIndex];
-}
-
 void CEditor::SortImages()
 {
-	if(!std::is_sorted(m_Map.m_vpImages.begin(), m_Map.m_vpImages.end(), ImageNameLess))
+	static const auto &&s_ImageNameComparator = [](const CEditorImage *const &pLhs, const CEditorImage *const &pRhs) {
+		return str_comp(pLhs->m_aName, pRhs->m_aName) < 0;
+	};
+	if(!std::is_sorted(m_Map.m_vpImages.begin(), m_Map.m_vpImages.end(), s_ImageNameComparator))
 	{
-		std::vector<CEditorImage *> vpTemp = m_Map.m_vpImages;
-		gs_pSortedIndex = new int[vpTemp.size()];
+		const std::vector<CEditorImage *> vpTemp = m_Map.m_vpImages;
+		std::vector<int> vSortedIndex;
+		vSortedIndex.resize(vpTemp.size());
 
-		std::sort(m_Map.m_vpImages.begin(), m_Map.m_vpImages.end(), ImageNameLess);
+		std::sort(m_Map.m_vpImages.begin(), m_Map.m_vpImages.end(), s_ImageNameComparator);
 		for(size_t OldIndex = 0; OldIndex < vpTemp.size(); OldIndex++)
 		{
 			for(size_t NewIndex = 0; NewIndex < m_Map.m_vpImages.size(); NewIndex++)
 			{
 				if(vpTemp[OldIndex] == m_Map.m_vpImages[NewIndex])
 				{
-					gs_pSortedIndex[OldIndex] = NewIndex;
+					vSortedIndex[OldIndex] = NewIndex;
 					break;
 				}
 			}
 		}
-		m_Map.ModifyImageIndex(ModifySortedIndex);
-
-		delete[] gs_pSortedIndex;
-		gs_pSortedIndex = nullptr;
+		m_Map.ModifyImageIndex([vSortedIndex](int *pIndex) {
+			if(*pIndex >= 0)
+				*pIndex = vSortedIndex[*pIndex];
+		});
 	}
 }
 

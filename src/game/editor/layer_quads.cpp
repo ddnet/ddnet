@@ -250,12 +250,12 @@ CUI::EPopupMenuFunctionResult CLayerQuads::RenderProperties(CUIRect *pToolBox)
 	return CUI::POPUP_KEEP_OPEN;
 }
 
-void CLayerQuads::ModifyImageIndex(INDEX_MODIFY_FUNC Func)
+void CLayerQuads::ModifyImageIndex(FIndexModifyFunction Func)
 {
 	Func(&m_Image);
 }
 
-void CLayerQuads::ModifyEnvelopeIndex(INDEX_MODIFY_FUNC Func)
+void CLayerQuads::ModifyEnvelopeIndex(FIndexModifyFunction Func)
 {
 	for(auto &Quad : m_vQuads)
 	{

@@ -21,15 +21,14 @@
 
 #include <chrono>
 #include <deque>
+#include <functional>
 #include <map>
 #include <string>
 #include <vector>
 
 using namespace std::chrono_literals;
 
-typedef void (*INDEX_MODIFY_FUNC)(int *pIndex);
-
-// CRenderTools m_RenderTools;
+typedef std::function<void(int *pIndex)> FIndexModifyFunction;
 
 // CEditor SPECIFIC
 enum
@@ -163,9 +162,9 @@ public:
 	virtual void Render(bool Tileset = false) {}
 	virtual CUI::EPopupMenuFunctionResult RenderProperties(CUIRect *pToolbox) { return CUI::POPUP_KEEP_OPEN; }
 
-	virtual void ModifyImageIndex(INDEX_MODIFY_FUNC pfnFunc) {}
-	virtual void ModifyEnvelopeIndex(INDEX_MODIFY_FUNC pfnFunc) {}
-	virtual void ModifySoundIndex(INDEX_MODIFY_FUNC pfnFunc) {}
+	virtual void ModifyImageIndex(FIndexModifyFunction pfnFunc) {}
+	virtual void ModifyEnvelopeIndex(FIndexModifyFunction pfnFunc) {}
+	virtual void ModifySoundIndex(FIndexModifyFunction pfnFunc) {}
 
 	virtual CLayer *Duplicate() const = 0;
 
@@ -242,19 +241,19 @@ public:
 
 	void AddLayer(CLayer *pLayer);
 
-	void ModifyImageIndex(INDEX_MODIFY_FUNC Func)
+	void ModifyImageIndex(FIndexModifyFunction Func)
 	{
 		for(auto &pLayer : m_vpLayers)
 			pLayer->ModifyImageIndex(Func);
 	}
 
-	void ModifyEnvelopeIndex(INDEX_MODIFY_FUNC Func)
+	void ModifyEnvelopeIndex(FIndexModifyFunction Func)
 	{
 		for(auto &pLayer : m_vpLayers)
 			pLayer->ModifyEnvelopeIndex(Func);
 	}
 
-	void ModifySoundIndex(INDEX_MODIFY_FUNC Func)
+	void ModifySoundIndex(FIndexModifyFunction Func)
 	{
 		for(auto &pLayer : m_vpLayers)
 			pLayer->ModifySoundIndex(Func);
@@ -424,21 +423,21 @@ public:
 		m_vpGroups.erase(m_vpGroups.begin() + Index);
 	}
 
-	void ModifyImageIndex(INDEX_MODIFY_FUNC pfnFunc)
+	void ModifyImageIndex(FIndexModifyFunction pfnFunc)
 	{
 		OnModify();
 		for(auto &pGroup : m_vpGroups)
 			pGroup->ModifyImageIndex(pfnFunc);
 	}
 
-	void ModifyEnvelopeIndex(INDEX_MODIFY_FUNC pfnFunc)
+	void ModifyEnvelopeIndex(FIndexModifyFunction pfnFunc)
 	{
 		OnModify();
 		for(auto &pGroup : m_vpGroups)
 			pGroup->ModifyEnvelopeIndex(pfnFunc);
 	}
 
-	void ModifySoundIndex(INDEX_MODIFY_FUNC pfnFunc)
+	void ModifySoundIndex(FIndexModifyFunction pfnFunc)
 	{
 		OnModify();
 		for(auto &pGroup : m_vpGroups)
@@ -620,8 +619,8 @@ public:
 	};
 	static CUI::EPopupMenuFunctionResult RenderCommonProperties(SCommonPropState &State, CEditor *pEditor, CUIRect *pToolbox, std::vector<CLayerTiles *> &vpLayers);
 
-	void ModifyImageIndex(INDEX_MODIFY_FUNC pfnFunc) override;
-	void ModifyEnvelopeIndex(INDEX_MODIFY_FUNC pfnFunc) override;
+	void ModifyImageIndex(FIndexModifyFunction pfnFunc) override;
+	void ModifyEnvelopeIndex(FIndexModifyFunction pfnFunc) override;
 
 	void PrepareForSave();
 
@@ -676,8 +675,8 @@ public:
 
 	CUI::EPopupMenuFunctionResult RenderProperties(CUIRect *pToolbox) override;
 
-	void ModifyImageIndex(INDEX_MODIFY_FUNC pfnFunc) override;
-	void ModifyEnvelopeIndex(INDEX_MODIFY_FUNC pfnFunc) override;
+	void ModifyImageIndex(FIndexModifyFunction pfnFunc) override;
+	void ModifyEnvelopeIndex(FIndexModifyFunction pfnFunc) override;
 
 	void GetSize(float *pWidth, float *pHeight) override;
 	CLayer *Duplicate() const override;
@@ -1523,8 +1522,8 @@ public:
 
 	CUI::EPopupMenuFunctionResult RenderProperties(CUIRect *pToolbox) override;
 
-	void ModifyEnvelopeIndex(INDEX_MODIFY_FUNC pfnFunc) override;
-	void ModifySoundIndex(INDEX_MODIFY_FUNC pfnFunc) override;
+	void ModifyEnvelopeIndex(FIndexModifyFunction pfnFunc) override;
+	void ModifySoundIndex(FIndexModifyFunction pfnFunc) override;
 
 	CLayer *Duplicate() const override;
 
