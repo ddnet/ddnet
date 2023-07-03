@@ -1,10 +1,13 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#include "linereader.h"
 #include <base/math.h>
 #include <base/system.h>
+
 #include <engine/client/updater.h>
+#include <engine/shared/linereader.h>
 #include <engine/storage.h>
+
+#include <unordered_set>
 
 #ifdef CONF_PLATFORM_HAIKU
 #include <cstdlib>
@@ -309,14 +312,38 @@ public:
 		m_aBinarydir[0] = '\0';
 	}
 
+	int NumPaths() const override
+	{
+		return m_NumPaths;
+	}
+
+	struct SListDirectoryInfoUniqueCallbackData
+	{
+		FS_LISTDIR_CALLBACK_FILEINFO m_pfnDelegate;
+		void *m_pDelegateUser;
+		std::unordered_set<std::string> m_Seen;
+	};
+
+	static int ListDirectoryInfoUniqueCallback(const CFsFileInfo *pInfo, int IsDir, int Type, void *pUser)
+	{
+		SListDirectoryInfoUniqueCallbackData *pData = static_cast<SListDirectoryInfoUniqueCallbackData *>(pUser);
+		auto [_, InsertionTookPlace] = pData->m_Seen.emplace(pInfo->m_pName);
+		if(InsertionTookPlace)
+			return pData->m_pfnDelegate(pInfo, IsDir, Type, pData->m_pDelegateUser);
+		return 0;
+	}
+
 	void ListDirectoryInfo(int Type, const char *pPath, FS_LISTDIR_CALLBACK_FILEINFO pfnCallback, void *pUser) override
 	{
 		char aBuffer[IO_MAX_PATH_LENGTH];
 		if(Type == TYPE_ALL)
 		{
+			SListDirectoryInfoUniqueCallbackData Data;
+			Data.m_pfnDelegate = pfnCallback;
+			Data.m_pDelegateUser = pUser;
 			// list all available directories
 			for(int i = TYPE_SAVE; i < m_NumPaths; ++i)
-				fs_listdir_fileinfo(GetPath(i, pPath, aBuffer, sizeof(aBuffer)), pfnCallback, i, pUser);
+				fs_listdir_fileinfo(GetPath(i, pPath, aBuffer, sizeof(aBuffer)), ListDirectoryInfoUniqueCallback, i, &Data);
 		}
 		else if(Type >= TYPE_SAVE && Type < m_NumPaths)
 		{
@@ -329,14 +356,33 @@ public:
 		}
 	}
 
+	struct SListDirectoryUniqueCallbackData
+	{
+		FS_LISTDIR_CALLBACK m_pfnDelegate;
+		void *m_pDelegateUser;
+		std::unordered_set<std::string> m_Seen;
+	};
+
+	static int ListDirectoryUniqueCallback(const char *pName, int IsDir, int Type, void *pUser)
+	{
+		SListDirectoryUniqueCallbackData *pData = static_cast<SListDirectoryUniqueCallbackData *>(pUser);
+		auto [_, InsertionTookPlace] = pData->m_Seen.emplace(pName);
+		if(InsertionTookPlace)
+			return pData->m_pfnDelegate(pName, IsDir, Type, pData->m_pDelegateUser);
+		return 0;
+	}
+
 	void ListDirectory(int Type, const char *pPath, FS_LISTDIR_CALLBACK pfnCallback, void *pUser) override
 	{
 		char aBuffer[IO_MAX_PATH_LENGTH];
 		if(Type == TYPE_ALL)
 		{
+			SListDirectoryUniqueCallbackData Data;
+			Data.m_pfnDelegate = pfnCallback;
+			Data.m_pDelegateUser = pUser;
 			// list all available directories
 			for(int i = TYPE_SAVE; i < m_NumPaths; ++i)
-				fs_listdir(GetPath(i, pPath, aBuffer, sizeof(aBuffer)), pfnCallback, i, pUser);
+				fs_listdir(GetPath(i, pPath, aBuffer, sizeof(aBuffer)), ListDirectoryUniqueCallback, i, &Data);
 		}
 		else if(Type >= TYPE_SAVE && Type < m_NumPaths)
 		{
