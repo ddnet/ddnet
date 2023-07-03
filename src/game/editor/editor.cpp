@@ -6387,6 +6387,9 @@ void CEditor::Render()
 		}
 	}
 
+	RenderPressedKeys(View);
+	RenderSavingIndicator(View);
+
 	if(m_Dialog == DIALOG_FILE)
 	{
 		static int s_NullUiTarget = 0;
@@ -6421,8 +6424,6 @@ void CEditor::Render()
 	if(m_GuiActive)
 		RenderStatusbar(StatusBar);
 
-	RenderPressedKeys(View);
-	RenderSavingIndicator(View);
 	RenderMousePointer();
 }
 
