@@ -199,7 +199,7 @@ protected:
 		NUM_BUTTONS
 	};
 	char m_aPopupTitle[128];
-	char m_aPopupMessage[256];
+	char m_aPopupMessage[IO_MAX_PATH_LENGTH + 256];
 	struct
 	{
 		char m_aLabel[64];
