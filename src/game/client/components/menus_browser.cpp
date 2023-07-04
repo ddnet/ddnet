@@ -1645,7 +1645,7 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 
 void CMenus::PopupConfirmRemoveFriend()
 {
-	m_pClient->Friends()->RemoveFriend(m_pRemoveFriend->Name(), m_pRemoveFriend->Clan());
+	m_pClient->Friends()->RemoveFriend(m_pRemoveFriend->FriendState() == IFriends::FRIEND_PLAYER ? m_pRemoveFriend->Name() : "", m_pRemoveFriend->Clan());
 	FriendlistOnUpdate();
 	Client()->ServerBrowserUpdate();
 	m_pRemoveFriend = nullptr;
