@@ -1140,6 +1140,7 @@ int CMenus::Render()
 		{
 			pTitle = m_aPopupTitle;
 			pExtraText = m_aPopupMessage;
+			TopAlign = true;
 		}
 		else if(m_Popup == POPUP_CONNECTING)
 		{
