@@ -64,6 +64,7 @@ bool CServerInfo2::FromJsonRaw(CServerInfo2 *pOut, const json_value *pJson)
 	const json_value &ServerInfo = *pJson;
 	const json_value &MaxClients = ServerInfo["max_clients"];
 	const json_value &MaxPlayers = ServerInfo["max_players"];
+	const json_value &ClientScoreKind = ServerInfo["client_score_kind"];
 	const json_value &Passworded = ServerInfo["passworded"];
 	const json_value &GameType = ServerInfo["game_type"];
 	const json_value &Name = ServerInfo["name"];
@@ -74,6 +75,7 @@ bool CServerInfo2::FromJsonRaw(CServerInfo2 *pOut, const json_value *pJson)
 	Error = Error || MaxClients.type != json_integer;
 	Error = Error || MaxPlayers.type != json_integer;
 	Error = Error || Passworded.type != json_boolean;
+	Error = Error || (ClientScoreKind.type != json_none && ClientScoreKind.type != json_string);
 	Error = Error || GameType.type != json_string || str_has_cc(GameType);
 	Error = Error || Name.type != json_string || str_has_cc(Name);
 	Error = Error || MapName.type != json_string || str_has_cc(MapName);
@@ -85,6 +87,15 @@ bool CServerInfo2::FromJsonRaw(CServerInfo2 *pOut, const json_value *pJson)
 	}
 	pOut->m_MaxClients = json_int_get(&MaxClients);
 	pOut->m_MaxPlayers = json_int_get(&MaxPlayers);
+	pOut->m_ClientScoreKind = CServerInfo::CLIENT_SCORE_KIND_UNSPECIFIED;
+	if(ClientScoreKind.type == json_string && str_startswith(ClientScoreKind, "points"))
+	{
+		pOut->m_ClientScoreKind = CServerInfo::CLIENT_SCORE_KIND_POINTS;
+	}
+	else if(ClientScoreKind.type == json_string && str_startswith(ClientScoreKind, "time"))
+	{
+		pOut->m_ClientScoreKind = CServerInfo::CLIENT_SCORE_KIND_TIME;
+	}
 	pOut->m_Passworded = Passworded;
 	str_copy(pOut->m_aGameType, GameType);
 	str_copy(pOut->m_aName, Name);
@@ -174,6 +185,7 @@ bool CServerInfo2::operator==(const CServerInfo2 &Other) const
 	Unequal = Unequal || m_NumClients != Other.m_NumClients;
 	Unequal = Unequal || m_MaxPlayers != Other.m_MaxPlayers;
 	Unequal = Unequal || m_NumPlayers != Other.m_NumPlayers;
+	Unequal = Unequal || m_ClientScoreKind != Other.m_ClientScoreKind;
 	Unequal = Unequal || m_Passworded != Other.m_Passworded;
 	Unequal = Unequal || str_comp(m_aGameType, Other.m_aGameType) != 0;
 	Unequal = Unequal || str_comp(m_aName, Other.m_aName) != 0;
@@ -206,6 +218,7 @@ CServerInfo2::operator CServerInfo() const
 	Result.m_NumClients = m_NumClients;
 	Result.m_MaxPlayers = m_MaxPlayers;
 	Result.m_NumPlayers = m_NumPlayers;
+	Result.m_ClientScoreKind = m_ClientScoreKind;
 	Result.m_Flags = m_Passworded ? SERVER_FLAG_PASSWORD : 0;
 	str_copy(Result.m_aGameType, m_aGameType);
 	str_copy(Result.m_aName, m_aName);

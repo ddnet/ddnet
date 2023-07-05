@@ -3,86 +3,107 @@
 #ifndef GAME_SERVER_ALLOC_H
 #define GAME_SERVER_ALLOC_H
 
-#include <bitset>
-#include <iterator>
-
 #include <base/system.h>
+#include <bitset>
 
-template<typename Type, const std::size_t Size>
-class CObjectPool {
-    char m_Data[Size][sizeof(Type)]{{0}};
-    std::bitset<Size> m_Used{0};
+#ifndef __has_feature
+#define __has_feature(x) 0
+#endif
+#if __has_feature(address_sanitizer)
+#include <sanitizer/asan_interface.h>
+#else
+#define ASAN_POISON_MEMORY_REGION(addr, size) \
+	((void)(addr), (void)(size))
+#define ASAN_UNPOISON_MEMORY_REGION(addr, size) \
+	((void)(addr), (void)(size))
+#endif
+
+template<typename Type, const size_t Size>
+class CObjectPool
+{
+	char m_aaData[Size][sizeof(Type)]{{0}};
+	std::bitset<Size> m_Used{0};
 
 public:
-    CObjectPool() {
-    }
+	template<typename... TArgs>
+	Type *New(size_t ObjectId, TArgs... Args)
+	{
+		dbg_assert(!m_Used[ObjectId], "Already constructed");
+		dbg_assert(ObjectId < Size, "Invalid ObjectId");
 
-    template <typename ...TArgs>
-    Type *New(std::size_t ObjectId, TArgs ...Args) {
-        dbg_assert(!m_Used[ObjectId], "Already constructed");
-        dbg_assert(0 <= ObjectId && ObjectId < Size, "Invalid ObjectId");
+		Type *pObject = new(m_aaData[ObjectId]) Type(std::forward<TArgs>(Args)...);
+		m_Used[ObjectId] = true;
 
-        Type *Pointer = new (m_Data[ObjectId]) Type(std::forward<TArgs>(Args)...);
-        m_Used[ObjectId] = true;
+		ASAN_UNPOISON_MEMORY_REGION(&m_aaData[ObjectId], sizeof(Type));
 
-        return Pointer;
-    }
+		return pObject;
+	}
 
-    Type *Get(std::size_t ObjectId) const {
-        dbg_assert(0 <= ObjectId && ObjectId < Size, "Invalid ObjectId");
+	Type *Get(size_t ObjectId) const
+	{
+		dbg_assert(ObjectId < Size, "Invalid ObjectId");
 
-        if (!m_Used[ObjectId])
-            return nullptr;
-        return (Type *)(m_Data[ObjectId]);
-    }
+		if(!m_Used[ObjectId])
+			return nullptr;
+		return (Type *)(m_aaData[ObjectId]);
+	}
 
-    Type *operator[](std::size_t ObjectId) const
-    {
-        return Get(ObjectId);
-    }
+	Type *operator[](size_t ObjectId) const
+	{
+		return Get(ObjectId);
+	}
 
-    void Delete(std::size_t ObjectId) {
-        dbg_assert(m_Used[ObjectId], "Already unused");
-        dbg_assert(0 <= ObjectId && ObjectId < Size, "Invalid ObjectId");
+	void Delete(size_t ObjectId)
+	{
+		dbg_assert(m_Used[ObjectId], "Already unused");
+		dbg_assert(ObjectId < Size, "Invalid ObjectId");
 
-        m_Used[ObjectId] = false;
-    }
+		m_Used[ObjectId] = false;
 
-    void Reset()
-    {
-        for (std::size_t i = 0; i < Size; i++)
-            m_Used[i] = false;
-    }
+		ASAN_POISON_MEMORY_REGION(&m_aaData[ObjectId], sizeof(Type));
+	}
 
-    template<typename T>
-    class iterator
-    {
-        const CObjectPool *m_pPool;
-        std::size_t m_Id;
+	void Reset()
+	{
+		m_Used.reset();
 
-        // helper
-        T Value() const { return (T)(m_pPool->Get(m_Id)); };
+		ASAN_POISON_MEMORY_REGION(&m_aaData[0], sizeof(Type) * Size);
+	}
 
-    public:
-        using value_type = T;
-        using self_type = iterator<T>;
-        using size_type = std::size_t;
-        using difference_type = T;
+	template<typename T>
+	class iterator
+	{
+		const CObjectPool *m_pPool;
+		size_t m_Id;
 
-        iterator(const CObjectPool *pPool, std::size_t Id) : m_pPool(pPool), m_Id(Id) {}
+		// helper
+		T Value() const { return (T)(m_pPool->Get(m_Id)); };
 
-        self_type operator++() { m_Id++; return *this; }
-        self_type operator++(int) { return self_type(m_pPool, m_Id + 1); }
-        value_type operator*() { return Value(); }
-        value_type *operator->() { return &Value(); }
-        friend bool operator==(const self_type& Lhs, const self_type& Rhs) { return Lhs.m_Id == Rhs.m_Id; }
-        friend bool operator!=(const self_type& Lhs, const self_type& Rhs) { return Lhs.m_Id != Rhs.m_Id; }
-    };
+	public:
+		using value_type = T;
+		using self_type = iterator<T>;
+		using size_type = size_t;
+		using difference_type = T;
 
-    iterator<Type *> begin() const { return iterator<Type *>(this, 0); }
-    iterator<Type *> end() const { return iterator<Type *>(this, Size); }
-    iterator<const Type *> cbegin() const { return iterator<const Type *>(this, 0); }
-    iterator<const Type *> cend() const { return iterator<const Type *>(this, Size); }
+		iterator(const CObjectPool *pPool, size_t Id) :
+			m_pPool(pPool), m_Id(Id) {}
+
+		self_type operator++()
+		{
+			m_Id++;
+			return *this;
+		}
+		self_type operator++(int) { return self_type(m_pPool, m_Id + 1); }
+		value_type operator*() { return Value(); }
+		value_type *operator->() { return &Value(); }
+		friend bool operator==(const self_type &Lhs, const self_type &Rhs) { return Lhs.m_Id == Rhs.m_Id; }
+		friend bool operator!=(const self_type &Lhs, const self_type &Rhs) { return Lhs.m_Id != Rhs.m_Id; }
+	};
+
+	iterator<Type *> begin() const { return iterator<Type *>(this, 0); }
+	iterator<Type *> end() const { return iterator<Type *>(this, Size); }
+	iterator<const Type *> cbegin() const { return iterator<const Type *>(this, 0); }
+	iterator<const Type *> cend() const { return iterator<const Type *>(this, Size); }
 };
 
 #endif

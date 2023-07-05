@@ -348,9 +348,6 @@ Rename demo
 Reset filter
 == Nulstil filter
 
-Sample rate
-== Sample frekvens
-
 Score
 == Score
 
@@ -911,9 +908,6 @@ Enable team chat sound
 Enable highlighted chat sound
 == Aktivér fremhævet chatlyd
 
-Threaded sound loading
-== Trådet lydindlæsning
-
 Game sound volume
 == Spillydstyrke
 
@@ -1247,6 +1241,9 @@ Speed:
 Angle:
 == 
 
+Team %d
+== 
+
 Uploading map data to GPU
 == 
 
@@ -1319,10 +1316,35 @@ Copy info
 Leak IP
 == 
 
+Online players (%d)
+== 
+
+Online clanmates (%d)
+== 
+
+[friends (server browser)]
+Offline (%d)
+== 
+
+Click to select server. Double click to join your friend.
+== 
+
+Click to remove this player from your friends list.
+== 
+
+Click to remove this clan from your friends list.
+== 
+
+None
+== 
+
 Are you sure that you want to remove the player '%s' from your friends list?
 == 
 
 Are you sure that you want to remove the clan '%s' from your friends list?
+== 
+
+Add Clan
 == 
 
 Play the current demo
@@ -1688,9 +1710,6 @@ Loading race demo files
 == 
 
 Super
-== 
-
-Team %d
 == 
 
 Loading sound files

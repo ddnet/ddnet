@@ -52,19 +52,11 @@ void CDoor::Snap(int SnappingClient)
 
 	int SnappingClientVersion = GameServer()->GetClientVersion(SnappingClient);
 
-	CNetObj_EntityEx *pEntData = 0;
-	if(SnappingClientVersion >= VERSION_DDNET_SWITCH)
-		pEntData = Server()->SnapNewItem<CNetObj_EntityEx>(GetID());
-
 	vec2 From;
 	int StartTick;
 
-	if(pEntData)
+	if(SnappingClientVersion >= VERSION_DDNET_ENTITY_NETOBJS)
 	{
-		pEntData->m_SwitchNumber = m_Number;
-		pEntData->m_Layer = m_Layer;
-		pEntData->m_EntityClass = ENTITYCLASS_DOOR;
-
 		From = m_To;
 		StartTick = 0;
 	}
@@ -72,8 +64,8 @@ void CDoor::Snap(int SnappingClient)
 	{
 		CCharacter *pChr = GameServer()->GetPlayerChar(SnappingClient);
 
-		if(SnappingClient != SERVER_DEMO_CLIENT && (GameServer()->m_apPlayers[SnappingClient]->GetTeam() == TEAM_SPECTATORS || GameServer()->m_apPlayers[SnappingClient]->IsPaused()) && GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID != SPEC_FREEVIEW)
-			pChr = GameServer()->GetPlayerChar(GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID);
+		if(SnappingClient != SERVER_DEMO_CLIENT && (GameServer()->m_Players[SnappingClient]->GetTeam() == TEAM_SPECTATORS || GameServer()->m_Players[SnappingClient]->IsPaused()) && GameServer()->m_Players[SnappingClient]->m_SpectatorID != SPEC_FREEVIEW)
+			pChr = GameServer()->GetPlayerChar(GameServer()->m_Players[SnappingClient]->m_SpectatorID);
 
 		if(pChr && pChr->Team() != TEAM_SUPER && pChr->IsAlive() && !Switchers().empty() && Switchers()[m_Number].m_aStatus[pChr->Team()])
 		{
@@ -87,5 +79,5 @@ void CDoor::Snap(int SnappingClient)
 	}
 
 	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion), GetID(),
-		m_Pos, From, StartTick, -1, LASERTYPE_DOOR);
+		m_Pos, From, StartTick, -1, LASERTYPE_DOOR, 0, m_Number);
 }

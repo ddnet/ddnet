@@ -373,9 +373,6 @@ Rename demo
 Reset filter
 == Redefinir filtro
 
-Sample rate
-== Frequência do som
-
 Score
 == Pontos
 
@@ -690,9 +687,6 @@ Ghost
 
 Remove chat
 == Remover chat
-
-Threaded sound loading
-== Carregamento de som em fluxos
 
 Check now
 == Verificar agora
@@ -1715,3 +1709,28 @@ Copy info
 
 Create a random skin
 == Criar uma skin aleatória
+
+Online players (%d)
+== 
+
+Online clanmates (%d)
+== 
+
+[friends (server browser)]
+Offline (%d)
+== 
+
+Click to select server. Double click to join your friend.
+== 
+
+Click to remove this player from your friends list.
+== 
+
+Click to remove this clan from your friends list.
+== 
+
+None
+== 
+
+Add Clan
+== 

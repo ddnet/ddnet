@@ -32,6 +32,7 @@
 # 2022-12-11 cheeser0613
 # 2023-01-11 cheeser0613
 # 2023-04-01 cheeser0613
+# 2023-05-21 RemakePower
 ##### /authors #####
 
 ##### translated strings #####
@@ -300,9 +301,6 @@ Enable team chat sound
 Enable highlighted chat sound
 == 启用聊天被提及消息提示音
 
-Threaded sound loading
-== 启用多线程音频加载
-
 Name
 == 名称
 
@@ -405,9 +403,6 @@ Rename demo
 
 Reset filter
 == 重置筛选
-
-Sample rate
-== 采样率
 
 Score
 == 分数
@@ -1727,3 +1722,28 @@ Copy info
 
 Create a random skin
 == 随机创造皮肤
+
+Online players (%d)
+== 在线玩家 (%d人)
+
+Online clanmates (%d)
+== 在线战队成员 (%d人)
+
+[friends (server browser)]
+Offline (%d)
+== 离线 (%d人)
+
+Click to select server. Double click to join your friend.
+== 单击以选择此服务器。双击加入好友所在服务器。
+
+Click to remove this player from your friends list.
+== 单击从你的好友列表移除此玩家
+
+Click to remove this clan from your friends list.
+== 单击从你的好友列表移除此战队
+
+None
+== 无
+
+Add Clan
+== 添加战队

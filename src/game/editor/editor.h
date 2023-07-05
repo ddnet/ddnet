@@ -24,7 +24,7 @@ using namespace std::chrono_literals;
 
 typedef void (*INDEX_MODIFY_FUNC)(int *pIndex);
 
-//CRenderTools m_RenderTools;
+// CRenderTools m_RenderTools;
 
 // CEditor SPECIFIC
 enum
@@ -220,43 +220,8 @@ public:
 
 	bool IsEmpty() const
 	{
-		return m_vpLayers.size() == 0; // stupid function, since its bad for Fillselection: TODO add a function for Fillselection that returns whether a specific tile is used in the given layer
+		return m_vpLayers.empty();
 	}
-
-	/*bool IsUsedInThisLayer(int Layer, int Index) // <--------- this is what i meant but cause i don't know which Indexes belongs to which layers i can't finish yet
-	{
-		switch Layer
-		{
-			case LAYERTYPE_GAME: // security
-				return true;
-			case LAYERTYPE_FRONT:
-				return true;
-			case LAYERTYPE_TELE:
-			{
-				if (Index ==) // you could add an 2D array into mapitems.h which defines which Indexes belong to which layer(s)
-			}
-			case LAYERTYPE_SPEEDUP:
-			{
-				if (Index == TILE_BOOST)
-					return true;
-				else
-					return false;
-			}
-			case LAYERTYPE_SWITCH:
-			{
-
-			}
-			case LAYERTYPE_TUNE:
-			{
-				if (Index == TILE_TUNE)
-					return true;
-				else
-					return false;
-			}
-			default:
-				return false;
-		}
-	}*/
 
 	void OnEdited()
 	{
@@ -370,30 +335,29 @@ public:
 	class CMapInfo
 	{
 	public:
-		char m_aAuthorTmp[32];
-		char m_aVersionTmp[16];
-		char m_aCreditsTmp[128];
-		char m_aLicenseTmp[32];
-
-		char m_aAuthor[sizeof(m_aAuthorTmp)];
-		char m_aVersion[sizeof(m_aVersionTmp)];
-		char m_aCredits[sizeof(m_aCreditsTmp)];
-		char m_aLicense[sizeof(m_aLicenseTmp)];
+		char m_aAuthor[32];
+		char m_aVersion[16];
+		char m_aCredits[128];
+		char m_aLicense[32];
 
 		void Reset()
 		{
-			m_aAuthorTmp[0] = 0;
-			m_aVersionTmp[0] = 0;
-			m_aCreditsTmp[0] = 0;
-			m_aLicenseTmp[0] = 0;
+			m_aAuthor[0] = '\0';
+			m_aVersion[0] = '\0';
+			m_aCredits[0] = '\0';
+			m_aLicense[0] = '\0';
+		}
 
-			m_aAuthor[0] = 0;
-			m_aVersion[0] = 0;
-			m_aCredits[0] = 0;
-			m_aLicense[0] = 0;
+		void Copy(const CMapInfo &Source)
+		{
+			str_copy(m_aAuthor, Source.m_aAuthor);
+			str_copy(m_aVersion, Source.m_aVersion);
+			str_copy(m_aCredits, Source.m_aCredits);
+			str_copy(m_aLicense, Source.m_aLicense);
 		}
 	};
 	CMapInfo m_MapInfo;
+	CMapInfo m_MapInfoTmp;
 
 	struct CSetting
 	{
@@ -803,11 +767,9 @@ public:
 		m_pFileDialogTitle = nullptr;
 		m_pFileDialogButtonText = nullptr;
 		m_pFileDialogUser = nullptr;
-		m_aFileDialogFileName[0] = '\0';
 		m_aFileDialogCurrentFolder[0] = '\0';
 		m_aFileDialogCurrentLink[0] = '\0';
 		m_aFilesSelectedName[0] = '\0';
-		m_aFileDialogFilterString[0] = '\0';
 		m_pFileDialogPath = m_aFileDialogCurrentFolder;
 		m_FileDialogOpening = false;
 		m_FilesSelectedIndex = -1;
@@ -826,7 +788,6 @@ public:
 		m_Zooming = false;
 		m_WorldZoom = 1.0f;
 
-		m_LockMouse = false;
 		m_ShowMousePointer = true;
 		m_MouseDeltaX = 0;
 		m_MouseDeltaY = 0;
@@ -834,20 +795,21 @@ public:
 		m_MouseDeltaWy = 0;
 
 		m_GuiActive = true;
-		m_ProofBorders = false;
-		m_MenuProofBorders = false;
+		m_ProofBorders = PROOF_BORDER_OFF;
 		m_CurrentMenuProofIndex = 0;
 		m_PreviewZoom = false;
 
-		m_ShowTileInfo = false;
+		m_ShowTileInfo = SHOW_TILE_OFF;
 		m_ShowDetail = true;
 		m_Animate = false;
 		m_AnimateStart = 0;
 		m_AnimateTime = 0;
 		m_AnimateSpeed = 1;
 
-		m_ShowEnvelopeEditor = 0;
+		m_ShowEnvelopeEditor = false;
+		m_EnvelopeEditorSplit = 250.0f;
 		m_ShowServerSettingsEditor = false;
+		m_ServerSettingsEditorSplit = 250.0f;
 
 		m_ShowEnvelopePreview = SHOWENV_NONE;
 		m_SelectedQuadEnvelope = -1;
@@ -859,9 +821,6 @@ public:
 		m_CheckerTexture.Invalidate();
 		m_BackgroundTexture.Invalidate();
 		m_CursorTexture.Invalidate();
-
-		m_CommandBox = 0.0f;
-		m_aSettingsCommand[0] = 0;
 
 		ms_pUiGotContext = nullptr;
 
@@ -878,7 +837,6 @@ public:
 		m_PreventUnusedTilesWasWarned = false;
 		m_AllowPlaceUnusedTiles = 0;
 		m_BrushDrawDestructive = true;
-		m_ShowTileHexInfo = false;
 
 		m_Mentions = 0;
 	}
@@ -959,7 +917,6 @@ public:
 	bool m_PreventUnusedTilesWasWarned;
 	int m_AllowPlaceUnusedTiles;
 	bool m_BrushDrawDestructive;
-	bool m_ShowTileHexInfo;
 
 	int m_Mentions;
 
@@ -976,15 +933,15 @@ public:
 	const char *m_pFileDialogButtonText;
 	bool (*m_pfnFileDialogFunc)(const char *pFileName, int StorageType, void *pUser);
 	void *m_pFileDialogUser;
-	char m_aFileDialogFileName[IO_MAX_PATH_LENGTH];
+	CLineInputBuffered<IO_MAX_PATH_LENGTH> m_FileDialogFileNameInput;
 	char m_aFileDialogCurrentFolder[IO_MAX_PATH_LENGTH];
 	char m_aFileDialogCurrentLink[IO_MAX_PATH_LENGTH];
 	char m_aFilesSelectedName[IO_MAX_PATH_LENGTH];
-	char m_aFileDialogFilterString[IO_MAX_PATH_LENGTH];
+	CLineInputBuffered<IO_MAX_PATH_LENGTH> m_FileDialogFilterInput;
 	char *m_pFileDialogPath;
 	int m_FileDialogFileType;
 	int m_FilesSelectedIndex;
-	char m_aFileDialogNewFolderName[IO_MAX_PATH_LENGTH];
+	CLineInputBuffered<IO_MAX_PATH_LENGTH> m_FileDialogNewFolderNameInput;
 	IGraphics::CTextureHandle m_FilePreviewImage;
 	EPreviewImageState m_PreviewImageState;
 	CImageInfo m_FilePreviewImageInfo;
@@ -1071,11 +1028,17 @@ public:
 	float m_ZoomSmoothingTarget;
 	float m_WorldZoom;
 
-	bool m_LockMouse;
 	bool m_ShowMousePointer;
 	bool m_GuiActive;
-	bool m_ProofBorders;
-	bool m_MenuProofBorders;
+
+	enum EProofBorder
+	{
+		PROOF_BORDER_OFF,
+		PROOF_BORDER_INGAME,
+		PROOF_BORDER_MENU
+	};
+
+	EProofBorder m_ProofBorders;
 	int m_CurrentMenuProofIndex;
 	std::vector<vec2> m_vMenuBackgroundPositions;
 	std::vector<const char *> m_vpMenuBackgroundPositionNames;
@@ -1094,14 +1057,23 @@ public:
 	float m_MouseDeltaWx;
 	float m_MouseDeltaWy;
 
-	bool m_ShowTileInfo;
+	enum EShowTile
+	{
+		SHOW_TILE_OFF,
+		SHOW_TILE_DECIMAL,
+		SHOW_TILE_HEXADECIMAL
+	};
+	EShowTile m_ShowTileInfo;
 	bool m_ShowDetail;
 	bool m_Animate;
 	int64_t m_AnimateStart;
 	float m_AnimateTime;
 	float m_AnimateSpeed;
 
-	int m_ShowEnvelopeEditor;
+	bool m_ShowEnvelopeEditor;
+	float m_EnvelopeEditorSplit;
+	bool m_ShowServerSettingsEditor;
+	float m_ServerSettingsEditorSplit;
 
 	enum EShowEnvelope
 	{
@@ -1110,7 +1082,6 @@ public:
 		SHOWENV_ALL
 	};
 	EShowEnvelope m_ShowEnvelopePreview;
-	bool m_ShowServerSettingsEditor;
 	bool m_ShowPicker;
 
 	std::vector<int> m_vSelectedLayers;
@@ -1147,15 +1118,14 @@ public:
 
 	static void EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Channels, void *pUser);
 
-	float m_CommandBox;
-	char m_aSettingsCommand[256];
+	CLineInputBuffered<256> m_SettingsCommandInput;
 
 	void PlaceBorderTiles();
 
 	void UpdateTooltip(const void *pID, const CUIRect *pRect, const char *pToolTip);
 	int DoButton_Editor_Common(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip);
 	int DoButton_Editor(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip);
-	int DoButton_Env(const void *pID, const char *pText, int Checked, const CUIRect *pRect, const char *pToolTip, ColorRGBA Color);
+	int DoButton_Env(const void *pID, const char *pText, int Checked, const CUIRect *pRect, const char *pToolTip, ColorRGBA Color, int Corners);
 
 	int DoButton_Tab(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip);
 	int DoButton_Ex(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip, int Corners, float FontSize = 10.0f);
@@ -1172,8 +1142,8 @@ public:
 
 	int DoButton_DraggableEx(const void *pID, const char *pText, int Checked, const CUIRect *pRect, bool *pClicked, bool *pAbrupted, int Flags, const char *pToolTip = nullptr, int Corners = IGraphics::CORNER_ALL, float FontSize = 10.0f);
 
-	bool DoEditBox(void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden = false, int Corners = IGraphics::CORNER_ALL, const char *pToolTip = nullptr);
-	bool DoClearableEditBox(void *pID, void *pClearID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden = false, int Corners = IGraphics::CORNER_ALL, const char *pToolTip = nullptr);
+	bool DoEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize, int Corners = IGraphics::CORNER_ALL, const char *pToolTip = nullptr);
+	bool DoClearableEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize, int Corners = IGraphics::CORNER_ALL, const char *pToolTip = nullptr);
 
 	void RenderBackground(CUIRect View, IGraphics::CTextureHandle Texture, float Size, float Brightness);
 
@@ -1184,6 +1154,7 @@ public:
 
 	static CUI::EPopupMenuFunctionResult PopupMenuFile(void *pContext, CUIRect View, bool Active);
 	static CUI::EPopupMenuFunctionResult PopupMenuTools(void *pContext, CUIRect View, bool Active);
+	static CUI::EPopupMenuFunctionResult PopupMenuSettings(void *pContext, CUIRect View, bool Active);
 	static CUI::EPopupMenuFunctionResult PopupGroup(void *pContext, CUIRect View, bool Active);
 	struct SLayerPopupContext : public SPopupMenuId
 	{
@@ -1211,6 +1182,7 @@ public:
 	static CUI::EPopupMenuFunctionResult PopupGoto(void *pContext, CUIRect View, bool Active);
 	static CUI::EPopupMenuFunctionResult PopupColorPicker(void *pContext, CUIRect View, bool Active);
 	static CUI::EPopupMenuFunctionResult PopupEntities(void *pContext, CUIRect View, bool Active);
+	static CUI::EPopupMenuFunctionResult PopupProofMode(void *pContext, CUIRect View, bool Active);
 
 	static bool CallbackOpenMap(const char *pFileName, int StorageType, void *pUser);
 	static bool CallbackAppendMap(const char *pFileName, int StorageType, void *pUser);
@@ -1262,8 +1234,10 @@ public:
 	void RenderSounds(CUIRect Toolbox);
 	void RenderModebar(CUIRect View);
 	void RenderStatusbar(CUIRect View);
+
 	void RenderEnvelopeEditor(CUIRect View);
 	void RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEditorLast);
+	void RenderExtraEditorDragBar(CUIRect View, float *pSplit);
 
 	void RenderMenubar(CUIRect Menubar);
 	void RenderFileDialog();
@@ -1272,7 +1246,7 @@ public:
 	void SortImages();
 	bool SelectLayerByTile();
 
-	//Tile Numbers For Explanations - TODO: Add/Improve tiles and explanations
+	// Tile Numbers For Explanations - TODO: Add/Improve tiles and explanations
 	enum
 	{
 		TILE_PUB_AIR,
@@ -1337,7 +1311,7 @@ public:
 		TILE_VANILLA_LASER,
 	};
 
-	//Explanations
+	// Explanations
 	enum
 	{
 		EXPLANATION_DDNET,

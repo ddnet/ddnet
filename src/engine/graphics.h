@@ -521,6 +521,10 @@ public:
 
 	virtual SWarning *GetCurWarning() = 0;
 
+	// returns true if the error msg was shown
+	virtual bool ShowMessageBox(unsigned Type, const char *pTitle, const char *pMsg) = 0;
+	virtual bool IsBackendInitialized() = 0;
+
 protected:
 	inline CTextureHandle CreateTextureHandle(int Index)
 	{

@@ -35,7 +35,7 @@ void CPickup::Tick()
 
 	// Check if a player intersected us
 	CEntity *apEnts[MAX_CLIENTS];
-	int Num = GameWorld()->FindEntities(m_Pos, 20.0f, apEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
+	int Num = GameWorld()->FindEntities(m_Pos, GetProximityRadius() + ms_CollisionExtraSize, apEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
 	for(int i = 0; i < Num; ++i)
 	{
 		auto *pChr = static_cast<CCharacter *>(apEnts[i]);
@@ -166,33 +166,23 @@ void CPickup::Snap(int SnappingClient)
 {
 	if(NetworkClipped(SnappingClient))
 		return;
-
-	CCharacter *pChar = GameServer()->GetPlayerChar(SnappingClient);
-
-	if(SnappingClient != SERVER_DEMO_CLIENT && (GameServer()->m_apPlayers[SnappingClient]->GetTeam() == TEAM_SPECTATORS || GameServer()->m_apPlayers[SnappingClient]->IsPaused()) && GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID != SPEC_FREEVIEW)
-		pChar = GameServer()->GetPlayerChar(GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID);
-
+  
 	int SnappingClientVersion = GameServer()->GetClientVersion(SnappingClient);
 	bool Sixup = Server()->IsSixup(SnappingClient);
 
-	CNetObj_EntityEx *pEntData = 0;
-	if(SnappingClientVersion >= VERSION_DDNET_SWITCH && (m_Layer == LAYER_SWITCH || length(m_Core) > 0))
-		pEntData = Server()->SnapNewItem<CNetObj_EntityEx>(GetID());
+	if(SnappingClientVersion < VERSION_DDNET_ENTITY_NETOBJS)
+	{
+		CCharacter *pChar = GameServer()->GetPlayerChar(SnappingClient);
 
-	if(pEntData)
-	{
-		pEntData->m_SwitchNumber = m_Number;
-		pEntData->m_Layer = m_Layer;
-		pEntData->m_EntityClass = ENTITYCLASS_PICKUP;
-	}
-	else
-	{
+		if(SnappingClient != SERVER_DEMO_CLIENT && (GameServer()->m_Players[SnappingClient]->GetTeam() == TEAM_SPECTATORS || GameServer()->m_Players[SnappingClient]->IsPaused()) && GameServer()->m_Players[SnappingClient]->m_SpectatorID != SPEC_FREEVIEW)
+			pChar = GameServer()->GetPlayerChar(GameServer()->m_Players[SnappingClient]->m_SpectatorID);
+
 		int Tick = (Server()->Tick() % Server()->TickSpeed()) % 11;
 		if(pChar && pChar->IsAlive() && m_Layer == LAYER_SWITCH && m_Number > 0 && !Switchers()[m_Number].m_aStatus[pChar->Team()] && !Tick)
 			return;
 	}
 
-	GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), GetID(), m_Pos, m_Type, m_Subtype);
+	GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), GetID(), m_Pos, m_Type, m_Subtype, m_Number);
 }
 
 void CPickup::Move()

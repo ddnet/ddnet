@@ -19,6 +19,7 @@
 
 #include <list>
 #include <memory>
+#include <optional>
 #include <vector>
 
 #include "antibot.h"
@@ -182,7 +183,7 @@ public:
 		char m_aName[MAX_NAME_LENGTH];
 		char m_aClan[MAX_CLAN_LENGTH];
 		int m_Country;
-		int m_Score;
+		std::optional<int> m_Score;
 		int m_Authed;
 		int m_AuthKey;
 		int m_AuthTries;
@@ -282,7 +283,7 @@ public:
 	void SetClientName(int ClientID, const char *pName) override;
 	void SetClientClan(int ClientID, char const *pClan) override;
 	void SetClientCountry(int ClientID, int Country) override;
-	void SetClientScore(int ClientID, int Score) override;
+	void SetClientScore(int ClientID, std::optional<int> Score) override;
 	void SetClientFlags(int ClientID, int Flags) override;
 
 	void Kick(int ClientID, const char *pReason) override;
@@ -338,6 +339,7 @@ public:
 	void SendRconCmdRem(const IConsole::CCommandInfo *pCommandInfo, int ClientID);
 	void UpdateClientRconCommands();
 
+	bool CheckReservedSlotAuth(int ClientID, const char *pPassword);
 	void ProcessClientPacket(CNetChunk *pPacket);
 
 	class CCache

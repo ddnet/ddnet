@@ -217,12 +217,12 @@ void CGameWorld::UpdatePlayerMaps()
 			Dist[j].second = j;
 			if(j == i)
 				continue;
-			if(!Server()->ClientIngame(j) || !GameServer()->m_apPlayers[j])
+			if(!Server()->ClientIngame(j) || !GameServer()->m_Players[j])
 			{
 				Dist[j].first = 1e10;
 				continue;
 			}
-			CCharacter *pChr = GameServer()->m_apPlayers[j]->GetCharacter();
+			CCharacter *pChr = GameServer()->m_Players[j]->GetCharacter();
 			if(!pChr)
 			{
 				Dist[j].first = 1e9;
@@ -231,7 +231,7 @@ void CGameWorld::UpdatePlayerMaps()
 			if(!pChr->CanSnapCharacter(i))
 				Dist[j].first = 1e8;
 			else
-				Dist[j].first = length_squared(GameServer()->m_apPlayers[i]->m_ViewPos - pChr->m_Pos);
+				Dist[j].first = length_squared(GameServer()->m_Players[i]->m_ViewPos - pChr->m_Pos);
 		}
 
 		// always send the player themselves, even if all in same position

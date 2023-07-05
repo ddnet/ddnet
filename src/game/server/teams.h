@@ -72,7 +72,7 @@ public:
 	}
 	CPlayer *GetPlayer(int ClientID)
 	{
-		return GameServer()->m_apPlayers[ClientID];
+		return GameServer()->m_Players[ClientID];
 	}
 
 	class CGameContext *GameServer()

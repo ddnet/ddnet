@@ -56,29 +56,29 @@ void IGameController::DoActivityCheck()
 				break;
 		}
 #endif
-		if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS && Server()->GetAuthedState(i) == AUTHED_NO)
+		if(GameServer()->m_Players[i] && GameServer()->m_Players[i]->GetTeam() != TEAM_SPECTATORS && Server()->GetAuthedState(i) == AUTHED_NO)
 		{
-			if(Server()->Tick() > GameServer()->m_apPlayers[i]->m_LastActionTick + g_Config.m_SvInactiveKickTime * Server()->TickSpeed() * 60)
+			if(Server()->Tick() > GameServer()->m_Players[i]->m_LastActionTick + g_Config.m_SvInactiveKickTime * Server()->TickSpeed() * 60)
 			{
 				switch(g_Config.m_SvInactiveKick)
 				{
 				case 0:
 				{
 					// move player to spectator
-					DoTeamChange(GameServer()->m_apPlayers[i], TEAM_SPECTATORS);
+					DoTeamChange(GameServer()->m_Players[i], TEAM_SPECTATORS);
 				}
 				break;
 				case 1:
 				{
 					// move player to spectator if the reserved slots aren't filled yet, kick him otherwise
 					int Spectators = 0;
-					for(auto pPlayer : GameServer()->m_apPlayers)
+					for(auto pPlayer : GameServer()->m_Players)
 						if(pPlayer && pPlayer->GetTeam() == TEAM_SPECTATORS)
 							++Spectators;
 					if(Spectators >= g_Config.m_SvSpectatorSlots)
 						Server()->Kick(i, "Kicked for inactivity");
 					else
-						DoTeamChange(GameServer()->m_apPlayers[i], TEAM_SPECTATORS);
+						DoTeamChange(GameServer()->m_Players[i], TEAM_SPECTATORS);
 				}
 				break;
 				case 2:
@@ -232,6 +232,7 @@ bool IGameController::OnEntity(int Index, int x, int y, int Layer, int Flags, bo
 			true, //Freeze
 			true, //Explosive
 			(g_Config.m_SvShotgunBulletSound) ? SOUND_GRENADE_EXPLODE : -1, //SoundImpact
+			vec2(std::sin(Deg), std::cos(Deg)), // InitDir
 			Layer,
 			Number);
 		pBullet->SetBouncing(2 - (Dir % 2));
@@ -258,6 +259,7 @@ bool IGameController::OnEntity(int Index, int x, int y, int Layer, int Flags, bo
 			true, //Freeze
 			false, //Explosive
 			SOUND_GRENADE_EXPLODE,
+			vec2(std::sin(Deg), std::cos(Deg)), // InitDir
 			Layer,
 			Number);
 		pBullet->SetBouncing(2 - (Dir % 2));
@@ -464,7 +466,7 @@ void IGameController::ChangeMap(const char *pToMap)
 
 void IGameController::OnReset()
 {
-	for(auto pPlayer : GameServer()->m_apPlayers)
+	for(auto pPlayer : GameServer()->m_Players)
 		if(pPlayer)
 			pPlayer->Respawn();
 }
@@ -551,12 +553,12 @@ void IGameController::Snap(int SnappingClient)
 	pGameInfoObj->m_RoundCurrent = m_RoundCount + 1;
 
 	CCharacter *pChr;
-	CPlayer *pPlayer = SnappingClient != SERVER_DEMO_CLIENT ? GameServer()->m_apPlayers[SnappingClient] : 0;
+	CPlayer *pPlayer = SnappingClient != SERVER_DEMO_CLIENT ? GameServer()->m_Players[SnappingClient] : 0;
 	CPlayer *pPlayer2;
 
 	if(pPlayer && (pPlayer->m_TimerType == CPlayer::TIMERTYPE_GAMETIMER || pPlayer->m_TimerType == CPlayer::TIMERTYPE_GAMETIMER_AND_BROADCAST) && pPlayer->GetClientVersion() >= VERSION_DDNET_GAMETICK)
 	{
-		if((pPlayer->GetTeam() == TEAM_SPECTATORS || pPlayer->IsPaused()) && pPlayer->m_SpectatorID != SPEC_FREEVIEW && (pPlayer2 = GameServer()->m_apPlayers[pPlayer->m_SpectatorID]))
+		if((pPlayer->GetTeam() == TEAM_SPECTATORS || pPlayer->IsPaused()) && pPlayer->m_SpectatorID != SPEC_FREEVIEW && (pPlayer2 = GameServer()->m_Players[pPlayer->m_SpectatorID]))
 		{
 			if((pChr = pPlayer2->GetCharacter()) && pChr->m_DDRaceState == DDRACE_STARTED)
 			{
@@ -628,13 +630,17 @@ void IGameController::Snap(int SnappingClient)
 	{
 		int Team = pPlayer && pPlayer->GetCharacter() ? pPlayer->GetCharacter()->Team() : 0;
 
-		if(pPlayer && (pPlayer->GetTeam() == TEAM_SPECTATORS || pPlayer->IsPaused()) && pPlayer->m_SpectatorID != SPEC_FREEVIEW && GameServer()->m_apPlayers[pPlayer->m_SpectatorID] && GameServer()->m_apPlayers[pPlayer->m_SpectatorID]->GetCharacter())
-			Team = GameServer()->m_apPlayers[pPlayer->m_SpectatorID]->GetCharacter()->Team();
+		if(pPlayer && (pPlayer->GetTeam() == TEAM_SPECTATORS || pPlayer->IsPaused()) && pPlayer->m_SpectatorID != SPEC_FREEVIEW && GameServer()->m_Players[pPlayer->m_SpectatorID] && GameServer()->m_Players[pPlayer->m_SpectatorID]->GetCharacter())
+			Team = GameServer()->m_Players[pPlayer->m_SpectatorID]->GetCharacter()->Team();
 
 		if(Team == TEAM_SUPER)
 			return;
 
-		CNetObj_SwitchState *pSwitchState = Server()->SnapNewItem<CNetObj_SwitchState>(Team);
+		int SentTeam = Team;
+		if(g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO)
+			SentTeam = 0;
+
+		CNetObj_SwitchState *pSwitchState = Server()->SnapNewItem<CNetObj_SwitchState>(SentTeam);
 		if(!pSwitchState)
 			return;
 
@@ -682,10 +688,10 @@ int IGameController::GetAutoTeam(int NotThisID)
 	int aNumplayers[2] = {0, 0};
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if(GameServer()->m_apPlayers[i] && i != NotThisID)
+		if(GameServer()->m_Players[i] && i != NotThisID)
 		{
-			if(GameServer()->m_apPlayers[i]->GetTeam() >= TEAM_RED && GameServer()->m_apPlayers[i]->GetTeam() <= TEAM_BLUE)
-				aNumplayers[GameServer()->m_apPlayers[i]->GetTeam()]++;
+			if(GameServer()->m_Players[i]->GetTeam() >= TEAM_RED && GameServer()->m_Players[i]->GetTeam() <= TEAM_BLUE)
+				aNumplayers[GameServer()->m_Players[i]->GetTeam()]++;
 		}
 	}
 
@@ -698,16 +704,16 @@ int IGameController::GetAutoTeam(int NotThisID)
 
 bool IGameController::CanJoinTeam(int Team, int NotThisID)
 {
-	if(Team == TEAM_SPECTATORS || (GameServer()->m_apPlayers[NotThisID] && GameServer()->m_apPlayers[NotThisID]->GetTeam() != TEAM_SPECTATORS))
+	if(Team == TEAM_SPECTATORS || (GameServer()->m_Players[NotThisID] && GameServer()->m_Players[NotThisID]->GetTeam() != TEAM_SPECTATORS))
 		return true;
 
 	int aNumplayers[2] = {0, 0};
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if(GameServer()->m_apPlayers[i] && i != NotThisID)
+		if(GameServer()->m_Players[i] && i != NotThisID)
 		{
-			if(GameServer()->m_apPlayers[i]->GetTeam() >= TEAM_RED && GameServer()->m_apPlayers[i]->GetTeam() <= TEAM_BLUE)
-				aNumplayers[GameServer()->m_apPlayers[i]->GetTeam()]++;
+			if(GameServer()->m_Players[i]->GetTeam() >= TEAM_RED && GameServer()->m_Players[i]->GetTeam() <= TEAM_BLUE)
+				aNumplayers[GameServer()->m_Players[i]->GetTeam()]++;
 		}
 	}
 

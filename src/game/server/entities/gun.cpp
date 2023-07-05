@@ -149,25 +149,12 @@ void CGun::Snap(int SnappingClient)
 
 	int SnappingClientVersion = GameServer()->GetClientVersion(SnappingClient);
 
-	CNetObj_EntityEx *pEntData = 0;
-	if(SnappingClientVersion >= VERSION_DDNET_SWITCH)
-	{
-		pEntData = static_cast<CNetObj_EntityEx *>(Server()->SnapNewItem(NETOBJTYPE_ENTITYEX, GetID(),
-			sizeof(CNetObj_EntityEx)));
-		if(pEntData)
-		{
-			pEntData->m_SwitchNumber = m_Number;
-			pEntData->m_Layer = m_Layer;
+	int Subtype = (m_Explosive ? 1 : 0) | (m_Freeze ? 2 : 0);
 
-			if(m_Explosive && !m_Freeze)
-				pEntData->m_EntityClass = ENTITYCLASS_GUN_NORMAL;
-			else if(m_Explosive && m_Freeze)
-				pEntData->m_EntityClass = ENTITYCLASS_GUN_EXPLOSIVE;
-			else if(!m_Explosive && m_Freeze)
-				pEntData->m_EntityClass = ENTITYCLASS_GUN_FREEZE;
-			else
-				pEntData->m_EntityClass = ENTITYCLASS_GUN_UNFREEZE;
-		}
+	int StartTick;
+	if(SnappingClientVersion >= VERSION_DDNET_ENTITY_NETOBJS)
+	{
+		StartTick = 0;
 	}
 	else
 	{
@@ -175,19 +162,19 @@ void CGun::Snap(int SnappingClient)
 		CCharacter *pChar = GameServer()->GetPlayerChar(SnappingClient);
 
 		if(SnappingClient != SERVER_DEMO_CLIENT &&
-			(GameServer()->m_apPlayers[SnappingClient]->GetTeam() == TEAM_SPECTATORS ||
-				GameServer()->m_apPlayers[SnappingClient]->IsPaused()) &&
-			GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID != SPEC_FREEVIEW)
-			pChar = GameServer()->GetPlayerChar(GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID);
+			(GameServer()->m_Players[SnappingClient]->GetTeam() == TEAM_SPECTATORS ||
+				GameServer()->m_Players[SnappingClient]->IsPaused()) &&
+			GameServer()->m_Players[SnappingClient]->m_SpectatorID != SPEC_FREEVIEW)
+			pChar = GameServer()->GetPlayerChar(GameServer()->m_Players[SnappingClient]->m_SpectatorID);
 
 		int Tick = (Server()->Tick() % Server()->TickSpeed()) % 11;
 		if(pChar && m_Layer == LAYER_SWITCH && m_Number > 0 &&
 			!Switchers()[m_Number].m_aStatus[pChar->Team()] && (!Tick))
 			return;
+
+		StartTick = m_EvalTick;
 	}
 
-	int StartTick = pEntData ? 0 : m_EvalTick;
-
 	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion), GetID(),
-		m_Pos, m_Pos, StartTick, -1, m_Freeze ? LASERTYPE_FREEZE : LASERTYPE_RIFLE);
+		m_Pos, m_Pos, StartTick, -1, LASERTYPE_GUN, Subtype, m_Number);
 }

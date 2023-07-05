@@ -11,6 +11,7 @@
 
 #include <game/client/gameclient.h>
 #include <game/client/laser_data.h>
+#include <game/client/pickup_data.h>
 #include <game/client/projectile_data.h>
 #include <game/client/render.h>
 
@@ -162,7 +163,7 @@ void CItems::RenderPickup(const CNetObj_Pickup *pPrev, const CNetObj_Pickup *pCu
 	else if(pCurrent->m_Type == POWERUP_NINJA)
 	{
 		QuadOffset = m_PickupNinjaOffset;
-		m_pClient->m_Effects.PowerupShine(Pos, vec2(96, 18));
+		m_pClient->m_Effects.PowerupShine(Pos, vec2(96, 18), 1.0f);
 		Pos.x -= 10.0f;
 		Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpritePickupNinja);
 	}
@@ -257,6 +258,7 @@ void CItems::RenderLaser(const CLaserData *pCurrent, bool IsPredicted)
 		ColorOut = g_Config.m_ClLaserShotgunOutlineColor;
 		ColorIn = g_Config.m_ClLaserShotgunInnerColor;
 		break;
+	case LASERTYPE_DRAGGER:
 	case LASERTYPE_DOOR:
 		ColorOut = g_Config.m_ClLaserDoorOutlineColor;
 		ColorIn = g_Config.m_ClLaserDoorInnerColor;
@@ -264,6 +266,19 @@ void CItems::RenderLaser(const CLaserData *pCurrent, bool IsPredicted)
 	case LASERTYPE_FREEZE:
 		ColorOut = g_Config.m_ClLaserFreezeOutlineColor;
 		ColorIn = g_Config.m_ClLaserFreezeInnerColor;
+		break;
+	case LASERTYPE_GUN:
+	case LASERTYPE_PLASMA:
+		if(pCurrent->m_Subtype == LASERGUNTYPE_FREEZE || pCurrent->m_Subtype == LASERGUNTYPE_EXPFREEZE)
+		{
+			ColorOut = g_Config.m_ClLaserFreezeOutlineColor;
+			ColorIn = g_Config.m_ClLaserFreezeInnerColor;
+		}
+		else
+		{
+			ColorOut = g_Config.m_ClLaserRifleOutlineColor;
+			ColorIn = g_Config.m_ClLaserRifleInnerColor;
+		}
 		break;
 	default:
 		ColorOut = g_Config.m_ClLaserRifleOutlineColor;
@@ -343,7 +358,7 @@ void CItems::RenderLaser(const CLaserData *pCurrent, bool IsPredicted)
 
 void CItems::OnRender()
 {
-	if(Client()->State() < IClient::STATE_ONLINE)
+	if(Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		return;
 
 	bool IsSuper = m_pClient->IsLocalCharSuper();
@@ -402,22 +417,14 @@ void CItems::OnRender()
 		const void *pData = Ent.m_pData;
 		const CNetObj_EntityEx *pEntEx = Ent.m_pDataEx;
 
-		bool Inactive = false;
-		if(pEntEx)
-			Inactive = !IsSuper && pEntEx->m_SwitchNumber > 0 && pEntEx->m_SwitchNumber < (int)aSwitchers.size() && !aSwitchers[pEntEx->m_SwitchNumber].m_aStatus[SwitcherTeam];
-
-		if(Item.m_Type == NETOBJTYPE_PROJECTILE || Item.m_Type == NETOBJTYPE_DDNETPROJECTILE)
+		if(Item.m_Type == NETOBJTYPE_PROJECTILE || Item.m_Type == NETOBJTYPE_DDRACEPROJECTILE || Item.m_Type == NETOBJTYPE_DDNETPROJECTILE)
 		{
-			CProjectileData Data;
-			if(Item.m_Type == NETOBJTYPE_PROJECTILE)
-			{
-				Data = ExtractProjectileInfo((const CNetObj_Projectile *)pData, &GameClient()->m_GameWorld);
-			}
-			else
-			{
-				Data = ExtractProjectileInfoDDNet((const CNetObj_DDNetProjectile *)pData, &GameClient()->m_GameWorld);
-			}
+			CProjectileData Data = ExtractProjectileInfo(Item.m_Type, pData, &GameClient()->m_GameWorld, pEntEx);
+			bool Inactive = !IsSuper && Data.m_SwitchNumber > 0 && Data.m_SwitchNumber < (int)aSwitchers.size() && !aSwitchers[Data.m_SwitchNumber].m_aStatus[SwitcherTeam];
+			if(Inactive && (Data.m_Explosive ? BlinkingProjEx : BlinkingProj))
+				continue;
 			if(UsePredicted)
+
 			{
 				if(auto *pProj = (CProjectile *)GameClient()->m_GameWorld.FindMatch(Item.m_ID, Item.m_Type, pData))
 				{
@@ -434,12 +441,13 @@ void CItems::OnRender()
 						continue;
 				}
 			}
-			if(Inactive && (Data.m_Explosive ? BlinkingProjEx : BlinkingProj))
-				continue;
 			RenderProjectile(&Data, Item.m_ID);
 		}
-		else if(Item.m_Type == NETOBJTYPE_PICKUP)
+		else if(Item.m_Type == NETOBJTYPE_PICKUP || Item.m_Type == NETOBJTYPE_DDNETPICKUP)
 		{
+			CPickupData Data = ExtractPickupInfo(Item.m_Type, pData, pEntEx);
+			bool Inactive = !IsSuper && Data.m_SwitchNumber > 0 && Data.m_SwitchNumber < (int)aSwitchers.size() && !aSwitchers[Data.m_SwitchNumber].m_aStatus[SwitcherTeam];
+
 			if(Inactive && BlinkingPickup)
 				continue;
 			if(UsePredicted)
@@ -461,46 +469,43 @@ void CItems::OnRender()
 					continue;
 			}
 
-			CLaserData Data;
-			if(Item.m_Type == NETOBJTYPE_LASER)
+			CLaserData Data = ExtractLaserInfo(Item.m_Type, pData, &GameClient()->m_GameWorld, pEntEx);
+			bool Inactive = !IsSuper && Data.m_SwitchNumber > 0 && Data.m_SwitchNumber < (int)aSwitchers.size() && !aSwitchers[Data.m_SwitchNumber].m_aStatus[SwitcherTeam];
+
+			if(Data.m_Type == LASERTYPE_FREEZE)
 			{
-				Data = ExtractLaserInfo((const CNetObj_Laser *)pData, &GameClient()->m_GameWorld);
+				if(Inactive && BlinkingLight)
+					continue;
+				Data.m_StartTick = DraggerStartTick;
 			}
-			else
+			else if(Data.m_Type == LASERTYPE_GUN)
 			{
-				Data = ExtractLaserInfoDDNet((const CNetObj_DDNetLaser *)pData, &GameClient()->m_GameWorld);
+				if(Inactive && BlinkingGun)
+					continue;
+				Data.m_StartTick = GunStartTick;
+			}
+			else if(Data.m_Type == LASERTYPE_DRAGGER)
+			{
+				if(Inactive && BlinkingDragger)
+					continue;
+				Data.m_StartTick = DraggerStartTick;
+			}
+			else if(Data.m_Type == LASERTYPE_DOOR)
+			{
+				if(Inactive || IsSuper)
+				{
+					Data.m_From.x = Data.m_To.x;
+					Data.m_From.y = Data.m_To.y;
+				}
+				Data.m_StartTick = Client()->GameTick(g_Config.m_ClDummy);
+			}
+			else if(Data.m_Type >= NUM_LASERTYPES)
+			{
+				if(Inactive && BlinkingDragger)
+					continue;
+				Data.m_StartTick = Client()->GameTick(g_Config.m_ClDummy);
 			}
 
-			if(pEntEx)
-			{
-				if(pEntEx->m_EntityClass == ENTITYCLASS_LIGHT)
-				{
-					if(Inactive && BlinkingLight)
-						continue;
-					Data.m_StartTick = DraggerStartTick;
-				}
-				if(pEntEx->m_EntityClass >= ENTITYCLASS_GUN_NORMAL && pEntEx->m_EntityClass <= ENTITYCLASS_GUN_UNFREEZE)
-				{
-					if(Inactive && BlinkingGun)
-						continue;
-					Data.m_StartTick = GunStartTick;
-				}
-				if(pEntEx->m_EntityClass >= ENTITYCLASS_DRAGGER_WEAK && pEntEx->m_EntityClass <= ENTITYCLASS_DRAGGER_STRONG)
-				{
-					if(Inactive && BlinkingDragger)
-						continue;
-					Data.m_StartTick = DraggerStartTick;
-				}
-				if(pEntEx->m_EntityClass == ENTITYCLASS_DOOR)
-				{
-					if(Inactive || IsSuper)
-					{
-						Data.m_From.x = Data.m_To.x;
-						Data.m_From.y = Data.m_To.y;
-					}
-					Data.m_StartTick = Client()->GameTick(g_Config.m_ClDummy);
-				}
-			}
 			RenderLaser(&Data);
 		}
 	}

@@ -18,12 +18,15 @@
 #include <cstdarg>
 #include <cstdint>
 #include <ctime>
+#include <string>
 
 #ifdef __MINGW32__
 #undef PRId64
 #undef PRIu64
+#undef PRIX64
 #define PRId64 "I64d"
 #define PRIu64 "I64u"
+#define PRIX64 "I64X"
 #define PRIzu "Iu"
 #else
 #define PRIzu "zu"
@@ -106,6 +109,9 @@ bool dbg_assert_has_failed();
 #endif
 void
 dbg_break();
+
+typedef std::function<void(const char *message)> DBG_ASSERT_HANDLER;
+void dbg_assert_set_handler(DBG_ASSERT_HANDLER handler);
 
 /**
  * Prints a debug message.
@@ -1162,12 +1168,9 @@ void net_unix_close(UNIXSOCKET sock);
  *
  * @param error The Windows error code.
  *
- * @return A new string representing the error code.
- *
- * @remark Guarantees that result will contain zero-termination.
- * @remark The result must be freed after it has been used.
+ * @return A new std::string representing the error code.
  */
-char *windows_format_system_message(unsigned long error);
+std::string windows_format_system_message(unsigned long error);
 
 #endif
 
@@ -2132,6 +2135,7 @@ void net_stats(NETSTATS *stats);
 int str_toint(const char *str);
 int str_toint_base(const char *str, int base);
 unsigned long str_toulong_base(const char *str, int base);
+int64_t str_toint64_base(const char *str, int base = 10);
 float str_tofloat(const char *str);
 
 /**
@@ -2386,7 +2390,7 @@ int str_utf8_check(const char *str);
 		- The string is treated as zero-terminated utf8 string.
 		- It's the user's responsibility to make sure the bounds are aligned.
 */
-void str_utf8_stats(const char *str, int max_size, int max_count, int *size, int *count);
+void str_utf8_stats(const char *str, size_t max_size, size_t max_count, size_t *size, size_t *count);
 
 /*
 	Function: str_next_token
@@ -2588,19 +2592,15 @@ int secure_rand();
 */
 int secure_rand_below(int below);
 
-/*
-	Function: os_version_str
-		Returns a human-readable version string of the operating system
-
-	Parameters:
-		version - Buffer to use for the output.
-		length - Length of the output buffer.
-
-	Returns:
-		0 - Success in getting the version.
-		1 - Failure in getting the version.
-*/
-int os_version_str(char *version, int length);
+/**
+ * Returns a human-readable version string of the operating system.
+ *
+ * @param version Buffer to use for the output.
+ * @param length Length of the output buffer.
+ *
+ * @return true on success, false on failure.
+ */
+bool os_version_str(char *version, size_t length);
 
 /**
  * Returns a string of the preferred locale of the user / operating system.
@@ -2655,6 +2655,30 @@ public:
 };
 
 #if defined(CONF_FAMILY_WINDOWS)
+/**
+ * Converts a utf8 encoded string to a wide character string
+ * for use with the Windows API.
+ *
+ * @param str The utf8 encoded string to convert.
+ *
+ * @return The argument as a wide character string.
+ *
+ * @remark The argument string must be zero-terminated.
+ */
+std::wstring windows_utf8_to_wide(const char *str);
+
+/**
+ * Converts a wide character string obtained from the Windows API
+ * to a utf8 encoded string.
+ *
+ * @param wide_str The wide character string to convert.
+ *
+ * @return The argument as a utf8 encoded string.
+ *
+ * @remark The argument string must be zero-terminated.
+ */
+std::string windows_wide_to_utf8(const wchar_t *wide_str);
+
 /**
  * This is a RAII wrapper to initialize/uninitialize the Windows COM library,
  * which may be necessary for using the open_file and open_link functions.

@@ -73,7 +73,7 @@ void CScrollRegion::End()
 	CUIRect RegionRect = m_ClipRect;
 	RegionRect.w += m_Params.m_ScrollbarWidth;
 
-	if(m_ScrollDirection != SCROLLRELATIVE_NONE || (UI()->Enabled() && UI()->MouseHovered(&RegionRect)))
+	if(m_ScrollDirection != SCROLLRELATIVE_NONE || (UI()->Enabled() && m_Params.m_Active && UI()->MouseHovered(&RegionRect)))
 	{
 		bool ProgrammaticScroll = false;
 		if(UI()->ConsumeHotkey(CUI::HOTKEY_SCROLL_UP))
@@ -133,7 +133,6 @@ void CScrollRegion::End()
 
 	Slider.y += m_ScrollY / MaxScroll * MaxSlider;
 
-	bool Hovered = false;
 	bool Grabbed = false;
 	const void *pID = &m_ScrollY;
 	const bool InsideSlider = UI()->MouseHovered(&Slider);
@@ -158,17 +157,18 @@ void CScrollRegion::End()
 			m_SliderGrabPos.y = UI()->MouseY() - Slider.y;
 			m_AnimTargetScrollY = m_ScrollY;
 			m_AnimTime = 0.0f;
+			m_Params.m_Active = true;
 		}
-		Hovered = true;
 	}
 	else if(InsideRail && UI()->MouseButtonClicked(0))
 	{
 		m_ScrollY += (UI()->MouseY() - (Slider.y + Slider.h / 2.0f)) / MaxSlider * MaxScroll;
+		UI()->SetHotItem(pID);
 		UI()->SetActiveItem(pID);
 		m_SliderGrabPos.y = Slider.h / 2.0f;
 		m_AnimTargetScrollY = m_ScrollY;
 		m_AnimTime = 0.0f;
-		Hovered = true;
+		m_Params.m_Active = true;
 	}
 	else if(UI()->CheckActiveItem(pID) && !UI()->MouseButton(0))
 	{
@@ -178,7 +178,7 @@ void CScrollRegion::End()
 	m_ScrollY = clamp(m_ScrollY, 0.0f, MaxScroll);
 	m_ContentScrollOff.y = -m_ScrollY;
 
-	Slider.Draw(m_Params.SliderColor(Grabbed, Hovered), IGraphics::CORNER_ALL, Slider.w / 2.0f);
+	Slider.Draw(m_Params.SliderColor(Grabbed, UI()->HotItem() == pID), IGraphics::CORNER_ALL, Slider.w / 2.0f);
 }
 
 bool CScrollRegion::AddRect(const CUIRect &Rect, bool ShouldScrollHere)

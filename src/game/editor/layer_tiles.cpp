@@ -259,11 +259,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 				for(int x = 0; x < r.w; x++)
 				{
 					pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x] = ((CLayerTele *)this)->m_pTeleTile[(r.y + y) * m_Width + (r.x + x)];
-					if(pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x].m_Type == TILE_TELEIN || pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x].m_Type == TILE_TELEOUT || pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x].m_Type == TILE_TELEINEVIL
-						// || pGrabbed->m_pTeleTile[y*pGrabbed->m_Width+x].m_Type == TILE_TELECHECKINEVIL
-						|| pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x].m_Type == TILE_TELECHECK || pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x].m_Type == TILE_TELECHECKOUT
-						// || pGrabbed->m_pTeleTile[y*pGrabbed->m_Width+x].m_Type == TILE_TELECHECKIN
-						|| pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x].m_Type == TILE_TELEINWEAPON || pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x].m_Type == TILE_TELEINHOOK)
+					if(IsValidTeleTile(pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x].m_Type) && IsTeleTileNumberUsed(pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x].m_Type))
 					{
 						m_pEditor->m_TeleNumber = pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x].m_Number;
 					}
@@ -297,7 +293,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 				for(int x = 0; x < r.w; x++)
 				{
 					pGrabbed->m_pSpeedupTile[y * pGrabbed->m_Width + x] = ((CLayerSpeedup *)this)->m_pSpeedupTile[(r.y + y) * m_Width + (r.x + x)];
-					if(pGrabbed->m_pSpeedupTile[y * pGrabbed->m_Width + x].m_Type == TILE_BOOST)
+					if(IsValidSpeedupTile(pGrabbed->m_pSpeedupTile[y * pGrabbed->m_Width + x].m_Type))
 					{
 						m_pEditor->m_SpeedupAngle = pGrabbed->m_pSpeedupTile[y * pGrabbed->m_Width + x].m_Angle;
 						m_pEditor->m_SpeedupForce = pGrabbed->m_pSpeedupTile[y * pGrabbed->m_Width + x].m_Force;
@@ -335,21 +331,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 				for(int x = 0; x < r.w; x++)
 				{
 					pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x] = ((CLayerSwitch *)this)->m_pSwitchTile[(r.y + y) * m_Width + (r.x + x)];
-					if(pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == ENTITY_DOOR + ENTITY_OFFSET ||
-						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == TILE_HIT_ENABLE ||
-						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == TILE_HIT_DISABLE ||
-						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == TILE_SWITCHOPEN ||
-						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == TILE_SWITCHCLOSE ||
-						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == TILE_SWITCHTIMEDOPEN ||
-						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == TILE_SWITCHTIMEDCLOSE ||
-						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == ENTITY_LASER_LONG + ENTITY_OFFSET ||
-						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == ENTITY_LASER_MEDIUM + ENTITY_OFFSET ||
-						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == ENTITY_LASER_SHORT + ENTITY_OFFSET ||
-						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == TILE_JUMP ||
-						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == TILE_ADD_TIME ||
-						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == TILE_SUBTRACT_TIME ||
-						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == TILE_ALLOW_TELE_GUN ||
-						pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type == TILE_ALLOW_BLUE_TELE_GUN)
+					if(IsValidSwitchTile(pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type))
 					{
 						m_pEditor->m_SwitchNum = pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Number;
 						m_pEditor->m_SwitchDelay = pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Delay;
@@ -386,7 +368,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 				for(int x = 0; x < r.w; x++)
 				{
 					pGrabbed->m_pTuneTile[y * pGrabbed->m_Width + x] = ((CLayerTune *)this)->m_pTuneTile[(r.y + y) * m_Width + (r.x + x)];
-					if(pGrabbed->m_pTuneTile[y * pGrabbed->m_Width + x].m_Type == TILE_TUNE)
+					if(IsValidTuneTile(pGrabbed->m_pTuneTile[y * pGrabbed->m_Width + x].m_Type))
 					{
 						m_pEditor->m_TuningNum = pGrabbed->m_pTuneTile[y * pGrabbed->m_Width + x].m_Number;
 					}
@@ -669,7 +651,7 @@ void CLayerTiles::ShowInfo()
 			if(m_pTiles[c].m_Index)
 			{
 				char aBuf[64];
-				str_format(aBuf, sizeof(aBuf), m_pEditor->m_ShowTileHexInfo ? "%02X" : "%i", m_pTiles[c].m_Index);
+				str_format(aBuf, sizeof(aBuf), m_pEditor->m_ShowTileInfo == CEditor::SHOW_TILE_HEXADECIMAL ? "%02X" : "%i", m_pTiles[c].m_Index);
 				m_pEditor->Graphics()->QuadsText(x * 32, y * 32, 16.0f, aBuf);
 
 				char aFlags[4] = {m_pTiles[c].m_Flags & TILEFLAG_XFLIP ? 'X' : ' ',
@@ -1120,7 +1102,6 @@ void CLayerTiles::ModifyEnvelopeIndex(INDEX_MODIFY_FUNC Func)
 CLayerTele::CLayerTele(int w, int h) :
 	CLayerTiles(w, h)
 {
-	//m_Type = LAYERTYPE_TELE;
 	str_copy(m_aName, "Tele", sizeof(m_aName));
 	m_Tele = 1;
 
@@ -1198,12 +1179,20 @@ void CLayerTele::BrushDraw(CLayer *pBrush, float wx, float wy)
 
 			if((m_pEditor->m_AllowPlaceUnusedTiles || IsValidTeleTile(pTeleLayer->m_pTiles[y * pTeleLayer->m_Width + x].m_Index)) && pTeleLayer->m_pTiles[y * pTeleLayer->m_Width + x].m_Index != TILE_AIR)
 			{
-				if(m_pEditor->m_TeleNumber != pTeleLayer->m_TeleNum)
+				if(!IsTeleTileNumberUsed(pTeleLayer->m_pTiles[y * pTeleLayer->m_Width + x].m_Index))
+				{
+					// Tele tile number is unused. Set a known value which is not 0,
+					// as tiles with number 0 would be ignored by previous versions.
+					m_pTeleTile[fy * m_Width + fx].m_Number = 255;
+				}
+				else if(m_pEditor->m_TeleNumber != pTeleLayer->m_TeleNum)
 				{
 					m_pTeleTile[fy * m_Width + fx].m_Number = m_pEditor->m_TeleNumber;
 				}
 				else if(pTeleLayer->m_pTeleTile[y * pTeleLayer->m_Width + x].m_Number)
+				{
 					m_pTeleTile[fy * m_Width + fx].m_Number = pTeleLayer->m_pTeleTile[y * pTeleLayer->m_Width + x].m_Number;
+				}
 				else
 				{
 					if(!m_pEditor->m_TeleNumber)
@@ -1307,22 +1296,32 @@ void CLayerTele::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 			if(!Destructive && GetTile(fx, fy).m_Index)
 				continue;
 
-			if(Empty || (!m_pEditor->m_AllowPlaceUnusedTiles && !IsValidTeleTile((pLt->m_pTiles[(y * pLt->m_Width + x % pLt->m_Width) % (pLt->m_Width * pLt->m_Height)]).m_Index)))
+			const int SrcIndex = (y * pLt->m_Width + x % pLt->m_Width) % (pLt->m_Width * pLt->m_Height);
+			const int TgtIndex = fy * m_Width + fx;
+
+			if(Empty || (!m_pEditor->m_AllowPlaceUnusedTiles && !IsValidTeleTile((pLt->m_pTiles[SrcIndex]).m_Index)))
 			{
-				m_pTiles[fy * m_Width + fx].m_Index = 0;
-				m_pTeleTile[fy * m_Width + fx].m_Type = 0;
-				m_pTeleTile[fy * m_Width + fx].m_Number = 0;
+				m_pTiles[TgtIndex].m_Index = 0;
+				m_pTeleTile[TgtIndex].m_Type = 0;
+				m_pTeleTile[TgtIndex].m_Number = 0;
 			}
 			else
 			{
-				m_pTiles[fy * m_Width + fx] = pLt->m_pTiles[(y * pLt->m_Width + x % pLt->m_Width) % (pLt->m_Width * pLt->m_Height)];
-				if(pLt->m_Tele && m_pTiles[fy * m_Width + fx].m_Index > 0)
+				m_pTiles[TgtIndex] = pLt->m_pTiles[SrcIndex];
+				if(pLt->m_Tele && m_pTiles[TgtIndex].m_Index > 0)
 				{
-					if((!pLt->m_pTeleTile[(y * pLt->m_Width + x % pLt->m_Width) % (pLt->m_Width * pLt->m_Height)].m_Number && m_pEditor->m_TeleNumber) || m_pEditor->m_TeleNumber != pLt->m_TeleNum)
-						m_pTeleTile[fy * m_Width + fx].m_Number = m_pEditor->m_TeleNumber;
+					m_pTeleTile[TgtIndex].m_Type = m_pTiles[TgtIndex].m_Index;
+
+					if(!IsTeleTileNumberUsed(m_pTeleTile[TgtIndex].m_Type))
+					{
+						// Tele tile number is unused. Set a known value which is not 0,
+						// as tiles with number 0 would be ignored by previous versions.
+						m_pTeleTile[TgtIndex].m_Number = 255;
+					}
+					else if((pLt->m_pTeleTile[SrcIndex].m_Number == 0 && m_pEditor->m_TeleNumber) || m_pEditor->m_TeleNumber != pLt->m_TeleNum)
+						m_pTeleTile[TgtIndex].m_Number = m_pEditor->m_TeleNumber;
 					else
-						m_pTeleTile[fy * m_Width + fx].m_Number = pLt->m_pTeleTile[(y * pLt->m_Width + x % pLt->m_Width) % (pLt->m_Width * pLt->m_Height)].m_Number;
-					m_pTeleTile[fy * m_Width + fx].m_Type = m_pTiles[fy * m_Width + fx].m_Index;
+						m_pTeleTile[TgtIndex].m_Number = pLt->m_pTeleTile[SrcIndex].m_Number;
 				}
 			}
 		}
@@ -1336,11 +1335,7 @@ bool CLayerTele::ContainsElementWithId(int Id)
 	{
 		for(int x = 0; x < m_Width; ++x)
 		{
-			if(m_pTeleTile[y * m_Width + x].m_Type == TILE_TELECHECKIN)
-				continue;
-			if(m_pTeleTile[y * m_Width + x].m_Type == TILE_TELECHECKINEVIL)
-				continue;
-			if(m_pTeleTile[y * m_Width + x].m_Number == Id)
+			if(IsTeleTileNumberUsed(m_pTeleTile[y * m_Width + x].m_Type) && m_pTeleTile[y * m_Width + x].m_Number == Id)
 			{
 				return true;
 			}
@@ -1353,7 +1348,6 @@ bool CLayerTele::ContainsElementWithId(int Id)
 CLayerSpeedup::CLayerSpeedup(int w, int h) :
 	CLayerTiles(w, h)
 {
-	//m_Type = LAYERTYPE_SPEEDUP;
 	str_copy(m_aName, "Speedup", sizeof(m_aName));
 	m_Speedup = 1;
 
@@ -1557,30 +1551,36 @@ void CLayerSpeedup::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 			if(!Destructive && GetTile(fx, fy).m_Index)
 				continue;
 
-			if(Empty || (!m_pEditor->m_AllowPlaceUnusedTiles && !IsValidSpeedupTile((pLt->m_pTiles[(y * pLt->m_Width + x % pLt->m_Width) % (pLt->m_Width * pLt->m_Height)]).m_Index))) // no speed up tile chosen: reset
+			const int SrcIndex = (y * pLt->m_Width + x % pLt->m_Width) % (pLt->m_Width * pLt->m_Height);
+			const int TgtIndex = fy * m_Width + fx;
+
+			if(Empty || (!m_pEditor->m_AllowPlaceUnusedTiles && !IsValidSpeedupTile((pLt->m_pTiles[SrcIndex]).m_Index))) // no speed up tile chosen: reset
 			{
-				m_pTiles[fy * m_Width + fx].m_Index = 0;
-				m_pSpeedupTile[fy * m_Width + fx].m_Force = 0;
-				m_pSpeedupTile[fy * m_Width + fx].m_Angle = 0;
+				m_pTiles[TgtIndex].m_Index = 0;
+				m_pSpeedupTile[TgtIndex].m_Force = 0;
+				m_pSpeedupTile[TgtIndex].m_Angle = 0;
 			}
 			else
 			{
-				m_pTiles[fy * m_Width + fx] = pLt->m_pTiles[(y * pLt->m_Width + x % pLt->m_Width) % (pLt->m_Width * pLt->m_Height)];
-				if(pLt->m_Speedup && m_pTiles[fy * m_Width + fx].m_Index > 0)
+				m_pTiles[TgtIndex] = pLt->m_pTiles[SrcIndex];
+				if(pLt->m_Speedup && m_pTiles[TgtIndex].m_Index > 0)
 				{
-					if((!pLt->m_pSpeedupTile[(y * pLt->m_Width + x % pLt->m_Width) % (pLt->m_Width * pLt->m_Height)].m_Force && m_pEditor->m_SpeedupForce) || m_pEditor->m_SpeedupForce != pLt->m_SpeedupForce)
-						m_pSpeedupTile[fy * m_Width + fx].m_Force = m_pEditor->m_SpeedupForce;
+					m_pSpeedupTile[TgtIndex].m_Type = m_pTiles[TgtIndex].m_Index;
+
+					if((pLt->m_pSpeedupTile[SrcIndex].m_Force == 0 && m_pEditor->m_SpeedupForce) || m_pEditor->m_SpeedupForce != pLt->m_SpeedupForce)
+						m_pSpeedupTile[TgtIndex].m_Force = m_pEditor->m_SpeedupForce;
 					else
-						m_pSpeedupTile[fy * m_Width + fx].m_Force = pLt->m_pSpeedupTile[(y * pLt->m_Width + x % pLt->m_Width) % (pLt->m_Width * pLt->m_Height)].m_Force;
-					if((!pLt->m_pSpeedupTile[(y * pLt->m_Width + x % pLt->m_Width) % (pLt->m_Width * pLt->m_Height)].m_Angle && m_pEditor->m_SpeedupAngle) || m_pEditor->m_SpeedupAngle != pLt->m_SpeedupAngle)
-						m_pSpeedupTile[fy * m_Width + fx].m_Angle = m_pEditor->m_SpeedupAngle;
+						m_pSpeedupTile[TgtIndex].m_Force = pLt->m_pSpeedupTile[SrcIndex].m_Force;
+
+					if((pLt->m_pSpeedupTile[SrcIndex].m_Angle == 0 && m_pEditor->m_SpeedupAngle) || m_pEditor->m_SpeedupAngle != pLt->m_SpeedupAngle)
+						m_pSpeedupTile[TgtIndex].m_Angle = m_pEditor->m_SpeedupAngle;
 					else
-						m_pSpeedupTile[fy * m_Width + fx].m_Angle = pLt->m_pSpeedupTile[(y * pLt->m_Width + x % pLt->m_Width) % (pLt->m_Width * pLt->m_Height)].m_Angle;
-					if((!pLt->m_pSpeedupTile[(y * pLt->m_Width + x % pLt->m_Width) % (pLt->m_Width * pLt->m_Height)].m_MaxSpeed && m_pEditor->m_SpeedupMaxSpeed) || m_pEditor->m_SpeedupMaxSpeed != pLt->m_SpeedupMaxSpeed)
-						m_pSpeedupTile[fy * m_Width + fx].m_MaxSpeed = m_pEditor->m_SpeedupMaxSpeed;
+						m_pSpeedupTile[TgtIndex].m_Angle = pLt->m_pSpeedupTile[SrcIndex].m_Angle;
+
+					if((pLt->m_pSpeedupTile[SrcIndex].m_MaxSpeed == 0 && m_pEditor->m_SpeedupMaxSpeed) || m_pEditor->m_SpeedupMaxSpeed != pLt->m_SpeedupMaxSpeed)
+						m_pSpeedupTile[TgtIndex].m_MaxSpeed = m_pEditor->m_SpeedupMaxSpeed;
 					else
-						m_pSpeedupTile[fy * m_Width + fx].m_MaxSpeed = pLt->m_pSpeedupTile[(y * pLt->m_Width + x % pLt->m_Width) % (pLt->m_Width * pLt->m_Height)].m_MaxSpeed;
-					m_pSpeedupTile[fy * m_Width + fx].m_Type = m_pTiles[fy * m_Width + fx].m_Index;
+						m_pSpeedupTile[TgtIndex].m_MaxSpeed = pLt->m_pSpeedupTile[SrcIndex].m_MaxSpeed;
 				}
 			}
 		}
@@ -1591,7 +1591,6 @@ void CLayerSpeedup::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 CLayerFront::CLayerFront(int w, int h) :
 	CLayerTiles(w, h)
 {
-	//m_Type = LAYERTYPE_FRONT;
 	str_copy(m_aName, "Front", sizeof(m_aName));
 	m_Front = 1;
 }
@@ -1638,7 +1637,6 @@ void CLayerFront::Resize(int NewW, int NewH)
 CLayerSwitch::CLayerSwitch(int w, int h) :
 	CLayerTiles(w, h)
 {
-	//m_Type = LAYERTYPE_SWITCH;
 	str_copy(m_aName, "Switch", sizeof(m_aName));
 	m_Switch = 1;
 
@@ -1739,6 +1737,19 @@ void CLayerSwitch::BrushDraw(CLayer *pBrush, float wx, float wy)
 				m_pSwitchTile[fy * m_Width + fx].m_Flags = pSwitchLayer->m_pTiles[y * pSwitchLayer->m_Width + x].m_Flags;
 				m_pTiles[fy * m_Width + fx].m_Index = pSwitchLayer->m_pTiles[y * pSwitchLayer->m_Width + x].m_Index;
 				m_pTiles[fy * m_Width + fx].m_Flags = pSwitchLayer->m_pTiles[y * pSwitchLayer->m_Width + x].m_Flags;
+
+				if(!IsSwitchTileFlagsUsed(pSwitchLayer->m_pTiles[y * pSwitchLayer->m_Width + x].m_Index))
+				{
+					m_pSwitchTile[fy * m_Width + fx].m_Flags = 0;
+				}
+				if(!IsSwitchTileNumberUsed(pSwitchLayer->m_pTiles[y * pSwitchLayer->m_Width + x].m_Index))
+				{
+					m_pSwitchTile[fy * m_Width + fx].m_Number = 0;
+				}
+				if(!IsSwitchTileDelayUsed(pSwitchLayer->m_pTiles[y * pSwitchLayer->m_Width + x].m_Index))
+				{
+					m_pSwitchTile[fy * m_Width + fx].m_Delay = 0;
+				}
 			}
 			else
 			{
@@ -1747,16 +1758,6 @@ void CLayerSwitch::BrushDraw(CLayer *pBrush, float wx, float wy)
 				m_pSwitchTile[fy * m_Width + fx].m_Flags = 0;
 				m_pSwitchTile[fy * m_Width + fx].m_Delay = 0;
 				m_pTiles[fy * m_Width + fx].m_Index = 0;
-			}
-
-			if(pSwitchLayer->m_pTiles[y * pSwitchLayer->m_Width + x].m_Index == TILE_FREEZE)
-			{
-				m_pSwitchTile[fy * m_Width + fx].m_Flags = 0;
-			}
-			else if(pSwitchLayer->m_pTiles[y * pSwitchLayer->m_Width + x].m_Index == TILE_DFREEZE || pSwitchLayer->m_pTiles[y * pSwitchLayer->m_Width + x].m_Index == TILE_DUNFREEZE)
-			{
-				m_pSwitchTile[fy * m_Width + fx].m_Flags = 0;
-				m_pSwitchTile[fy * m_Width + fx].m_Delay = 0;
 			}
 		}
 	FlagModified(sx, sy, pSwitchLayer->m_Width, pSwitchLayer->m_Height);
@@ -1845,28 +1846,40 @@ void CLayerSwitch::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 			if(!Destructive && GetTile(fx, fy).m_Index)
 				continue;
 
-			if(Empty || (!m_pEditor->m_AllowPlaceUnusedTiles && !IsValidSwitchTile((pLt->m_pTiles[(y * pLt->m_Width + x % pLt->m_Width) % (pLt->m_Width * pLt->m_Height)]).m_Index)))
+			const int SrcIndex = (y * pLt->m_Width + x % pLt->m_Width) % (pLt->m_Width * pLt->m_Height);
+			const int TgtIndex = fy * m_Width + fx;
+
+			if(Empty || (!m_pEditor->m_AllowPlaceUnusedTiles && !IsValidSwitchTile((pLt->m_pTiles[SrcIndex]).m_Index)))
 			{
-				m_pTiles[fy * m_Width + fx].m_Index = 0;
-				m_pSwitchTile[fy * m_Width + fx].m_Type = 0;
-				m_pSwitchTile[fy * m_Width + fx].m_Number = 0;
-				m_pSwitchTile[fy * m_Width + fx].m_Delay = 0;
+				m_pTiles[TgtIndex].m_Index = 0;
+				m_pSwitchTile[TgtIndex].m_Type = 0;
+				m_pSwitchTile[TgtIndex].m_Number = 0;
+				m_pSwitchTile[TgtIndex].m_Delay = 0;
 			}
 			else
 			{
-				m_pTiles[fy * m_Width + fx] = pLt->m_pTiles[(y * pLt->m_Width + x % pLt->m_Width) % (pLt->m_Width * pLt->m_Height)];
-				m_pSwitchTile[fy * m_Width + fx].m_Type = m_pTiles[fy * m_Width + fx].m_Index;
-				if(pLt->m_Switch && m_pEditor->m_SwitchNum && m_pTiles[fy * m_Width + fx].m_Index > 0)
+				m_pTiles[TgtIndex] = pLt->m_pTiles[SrcIndex];
+				m_pSwitchTile[TgtIndex].m_Type = m_pTiles[TgtIndex].m_Index;
+				if(pLt->m_Switch && m_pTiles[TgtIndex].m_Index > 0)
 				{
-					if((!pLt->m_pSwitchTile[(y * pLt->m_Width + x % pLt->m_Width) % (pLt->m_Width * pLt->m_Height)].m_Number) || m_pEditor->m_SwitchNum != pLt->m_SwitchNumber)
-						m_pSwitchTile[fy * m_Width + fx].m_Number = m_pEditor->m_SwitchNum;
+					if(!IsSwitchTileNumberUsed(m_pSwitchTile[TgtIndex].m_Type))
+						m_pSwitchTile[TgtIndex].m_Number = 0;
+					else if(pLt->m_pSwitchTile[SrcIndex].m_Number == 0 || m_pEditor->m_SwitchNum != pLt->m_SwitchNumber)
+						m_pSwitchTile[TgtIndex].m_Number = m_pEditor->m_SwitchNum;
 					else
-						m_pSwitchTile[fy * m_Width + fx].m_Number = pLt->m_pSwitchTile[(y * pLt->m_Width + x % pLt->m_Width) % (pLt->m_Width * pLt->m_Height)].m_Number;
-					if((!pLt->m_pSwitchTile[(y * pLt->m_Width + x % pLt->m_Width) % (pLt->m_Width * pLt->m_Height)].m_Delay) || m_pEditor->m_SwitchDelay != pLt->m_SwitchDelay)
-						m_pSwitchTile[fy * m_Width + fx].m_Delay = m_pEditor->m_SwitchDelay;
+						m_pSwitchTile[TgtIndex].m_Number = pLt->m_pSwitchTile[SrcIndex].m_Number;
+
+					if(!IsSwitchTileDelayUsed(m_pSwitchTile[TgtIndex].m_Type))
+						m_pSwitchTile[TgtIndex].m_Delay = 0;
+					else if(pLt->m_pSwitchTile[SrcIndex].m_Delay == 0 || m_pEditor->m_SwitchDelay != pLt->m_SwitchDelay)
+						m_pSwitchTile[TgtIndex].m_Delay = m_pEditor->m_SwitchDelay;
 					else
-						m_pSwitchTile[fy * m_Width + fx].m_Delay = pLt->m_pSwitchTile[(y * pLt->m_Width + x % pLt->m_Width) % (pLt->m_Width * pLt->m_Height)].m_Delay;
-					m_pSwitchTile[fy * m_Width + fx].m_Flags = pLt->m_pSwitchTile[(y * pLt->m_Width + x % pLt->m_Width) % (pLt->m_Width * pLt->m_Height)].m_Flags;
+						m_pSwitchTile[TgtIndex].m_Delay = pLt->m_pSwitchTile[SrcIndex].m_Delay;
+
+					if(!IsSwitchTileFlagsUsed(m_pSwitchTile[TgtIndex].m_Type))
+						m_pSwitchTile[TgtIndex].m_Flags = 0;
+					else
+						m_pSwitchTile[TgtIndex].m_Flags = pLt->m_pSwitchTile[SrcIndex].m_Flags;
 				}
 			}
 		}
@@ -1880,7 +1893,7 @@ bool CLayerSwitch::ContainsElementWithId(int Id)
 	{
 		for(int x = 0; x < m_Width; ++x)
 		{
-			if(m_pSwitchTile[y * m_Width + x].m_Number == Id)
+			if(IsSwitchTileNumberUsed(m_pSwitchTile[y * m_Width + x].m_Type) && m_pSwitchTile[y * m_Width + x].m_Number == Id)
 			{
 				return true;
 			}
@@ -1895,7 +1908,6 @@ bool CLayerSwitch::ContainsElementWithId(int Id)
 CLayerTune::CLayerTune(int w, int h) :
 	CLayerTiles(w, h)
 {
-	//m_Type = LAYERTYPE_TUNE;
 	str_copy(m_aName, "Tune", sizeof(m_aName));
 	m_Tune = 1;
 
@@ -2082,22 +2094,26 @@ void CLayerTune::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 			if(!Destructive && GetTile(fx, fy).m_Index)
 				continue;
 
-			if(Empty || (!m_pEditor->m_AllowPlaceUnusedTiles && !IsValidTuneTile((pLt->m_pTiles[(y * pLt->m_Width + x % pLt->m_Width) % (pLt->m_Width * pLt->m_Height)]).m_Index))) // \o/ this fixes editor bug; TODO: use IsUsedInThisLayer here
+			const int SrcIndex = (y * pLt->m_Width + x % pLt->m_Width) % (pLt->m_Width * pLt->m_Height);
+			const int TgtIndex = fy * m_Width + fx;
+
+			if(Empty || (!m_pEditor->m_AllowPlaceUnusedTiles && !IsValidTuneTile((pLt->m_pTiles[SrcIndex]).m_Index)))
 			{
-				m_pTiles[fy * m_Width + fx].m_Index = 0;
-				m_pTuneTile[fy * m_Width + fx].m_Type = 0;
-				m_pTuneTile[fy * m_Width + fx].m_Number = 0;
+				m_pTiles[TgtIndex].m_Index = 0;
+				m_pTuneTile[TgtIndex].m_Type = 0;
+				m_pTuneTile[TgtIndex].m_Number = 0;
 			}
 			else
 			{
-				m_pTiles[fy * m_Width + fx] = pLt->m_pTiles[(y * pLt->m_Width + x % pLt->m_Width) % (pLt->m_Width * pLt->m_Height)];
-				if(pLt->m_Tune && m_pTiles[fy * m_Width + fx].m_Index > 0)
+				m_pTiles[TgtIndex] = pLt->m_pTiles[SrcIndex];
+				if(pLt->m_Tune && m_pTiles[TgtIndex].m_Index > 0)
 				{
-					if((!pLt->m_pTuneTile[(y * pLt->m_Width + x % pLt->m_Width) % (pLt->m_Width * pLt->m_Height)].m_Number && m_pEditor->m_TuningNum) || m_pEditor->m_TuningNum != pLt->m_TuningNumber)
-						m_pTuneTile[fy * m_Width + fx].m_Number = m_pEditor->m_TuningNum;
+					m_pTuneTile[TgtIndex].m_Type = m_pTiles[fy * m_Width + fx].m_Index;
+
+					if((pLt->m_pTuneTile[SrcIndex].m_Number == 0 && m_pEditor->m_TuningNum) || m_pEditor->m_TuningNum != pLt->m_TuningNumber)
+						m_pTuneTile[TgtIndex].m_Number = m_pEditor->m_TuningNum;
 					else
-						m_pTuneTile[fy * m_Width + fx].m_Number = pLt->m_pTuneTile[(y * pLt->m_Width + x % pLt->m_Width) % (pLt->m_Width * pLt->m_Height)].m_Number;
-					m_pTuneTile[fy * m_Width + fx].m_Type = m_pTiles[fy * m_Width + fx].m_Index;
+						m_pTuneTile[TgtIndex].m_Number = pLt->m_pTuneTile[SrcIndex].m_Number;
 				}
 			}
 		}

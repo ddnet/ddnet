@@ -541,7 +541,7 @@ void CSaveTeam::Load(CGameContext *pGameServer, int Team, bool KeepCurrentWeakSt
 	{
 		int ClientID = m_pSavedTees[i].GetClientID();
 		aPlayerCIDs[i] = ClientID;
-		if(pGameServer->m_apPlayers[ClientID] && pTeams->m_Core.Team(ClientID) == Team)
+		if(pGameServer->m_Players[ClientID] && pTeams->m_Core.Team(ClientID) == Team)
 		{
 			CCharacter *pChr = MatchCharacter(pGameServer, m_pSavedTees[i].GetClientID(), i, KeepCurrentWeakStrong);
 			m_pSavedTees[i].Load(pChr, Team);
@@ -564,13 +564,13 @@ void CSaveTeam::Load(CGameContext *pGameServer, int Team, bool KeepCurrentWeakSt
 
 CCharacter *CSaveTeam::MatchCharacter(CGameContext *pGameServer, int ClientID, int SaveID, bool KeepCurrentCharacter)
 {
-	if(KeepCurrentCharacter && pGameServer->m_apPlayers[ClientID]->GetCharacter())
+	if(KeepCurrentCharacter && pGameServer->m_Players[ClientID]->GetCharacter())
 	{
 		// keep old character to retain current weak/strong order
-		return pGameServer->m_apPlayers[ClientID]->GetCharacter();
+		return pGameServer->m_Players[ClientID]->GetCharacter();
 	}
-	pGameServer->m_apPlayers[ClientID]->KillCharacter(WEAPON_GAME);
-	return pGameServer->m_apPlayers[ClientID]->ForceSpawn(m_pSavedTees[SaveID].GetPos());
+	pGameServer->m_Players[ClientID]->KillCharacter(WEAPON_GAME);
+	return pGameServer->m_Players[ClientID]->ForceSpawn(m_pSavedTees[SaveID].GetPos());
 }
 
 char *CSaveTeam::GetString()

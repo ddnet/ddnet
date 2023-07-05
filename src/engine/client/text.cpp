@@ -167,11 +167,17 @@ struct STextContainer
 	unsigned m_RenderFlags;
 
 	bool m_HasCursor;
+	bool m_ForceCursorRendering;
 	bool m_HasSelection;
 
 	bool m_SingleTimeUse;
 
 	STextBoundingBox m_BoundingBox;
+
+	// prefix of the containers text stored for debugging purposes
+	char m_aDebugText[32];
+
+	STextContainerIndex m_ContainerIndex;
 
 	void Reset()
 	{
@@ -193,10 +199,15 @@ struct STextContainer
 
 		m_HasCursor = false;
 		m_HasSelection = false;
+		m_ForceCursorRendering = false;
 
 		m_SingleTimeUse = false;
 
 		m_BoundingBox = {0.0f, 0.0f, 0.0f, 0.0f};
+
+		m_aDebugText[0] = '\0';
+
+		m_ContainerIndex = STextContainerIndex{};
 	}
 };
 
@@ -235,30 +246,34 @@ class CTextRender : public IEngineTextRender
 		}
 	}
 
-	void FreeTextContainerIndex(int &Index)
+	void FreeTextContainerIndex(STextContainerIndex &Index)
 	{
-		m_vTextContainerIndices[Index] = m_FirstFreeTextContainerIndex;
-		m_FirstFreeTextContainerIndex = Index;
-		Index = -1;
+		m_vTextContainerIndices[Index.m_Index] = m_FirstFreeTextContainerIndex;
+		m_FirstFreeTextContainerIndex = Index.m_Index;
+		Index.Reset();
 	}
 
-	void FreeTextContainer(int &Index)
+	void FreeTextContainer(STextContainerIndex &Index)
 	{
-		m_vpTextContainers[Index]->Reset();
+		m_vpTextContainers[Index.m_Index]->Reset();
 		FreeTextContainerIndex(Index);
 	}
 
-	STextContainer &GetTextContainer(int Index)
+	STextContainer &GetTextContainer(const STextContainerIndex &Index)
 	{
-		dbg_assert(Index >= 0, "Text container index was invalid.");
-		if(Index >= (int)m_vpTextContainers.size())
+		dbg_assert(Index.Valid(), "Text container index was invalid.");
+		if(Index.m_Index >= (int)m_vpTextContainers.size())
 		{
 			int Size = (int)m_vpTextContainers.size();
-			for(int i = 0; i < (Index + 1) - Size; ++i)
+			for(int i = 0; i < (Index.m_Index + 1) - Size; ++i)
 				m_vpTextContainers.push_back(new STextContainer());
 		}
 
-		return *m_vpTextContainers[Index];
+		if(m_vpTextContainers[Index.m_Index]->m_ContainerIndex.m_UseCount.get() != Index.m_UseCount.get())
+		{
+			m_vpTextContainers[Index.m_Index]->m_ContainerIndex = Index;
+		}
+		return *m_vpTextContainers[Index.m_Index];
 	}
 
 	int WordLength(const char *pText) const
@@ -608,7 +623,7 @@ public:
 
 		m_Color = DefaultTextColor();
 		m_OutlineColor = DefaultTextOutlineColor();
-		m_SelectionColor = DefaultSelectionColor();
+		m_SelectionColor = DefaultTextSelectionColor();
 
 		m_pCurFont = nullptr;
 		m_pDefaultFont = nullptr;
@@ -800,15 +815,16 @@ public:
 		pCursor->m_LongestLineWidth = 0;
 
 		pCursor->m_CalculateSelectionMode = TEXT_CURSOR_SELECTION_MODE_NONE;
-		pCursor->m_PressMouseX = 0;
-		pCursor->m_PressMouseY = 0;
-		pCursor->m_ReleaseMouseX = 0;
-		pCursor->m_ReleaseMouseY = 0;
+		pCursor->m_SelectionHeightFactor = 1.0f;
+		pCursor->m_PressMouse = vec2(0.0f, 0.0f);
+		pCursor->m_ReleaseMouse = vec2(0.0f, 0.0f);
 		pCursor->m_SelectionStart = 0;
 		pCursor->m_SelectionEnd = 0;
 
 		pCursor->m_CursorMode = TEXT_CURSOR_CURSOR_MODE_NONE;
+		pCursor->m_ForceCursorRendering = false;
 		pCursor->m_CursorCharacter = -1;
+		pCursor->m_CursorRenderedPosition = vec2(-1.0f, -1.0f);
 	}
 
 	void MoveCursor(CTextCursor *pCursor, float x, float y) const override
@@ -823,34 +839,28 @@ public:
 		pCursor->m_Y = y;
 	}
 
-	void Text(float x, float y, float Size, const char *pText, float LineWidth) override
+	void Text(float x, float y, float Size, const char *pText, float LineWidth = -1.0f) override
 	{
 		CTextCursor Cursor;
 		SetCursor(&Cursor, x, y, Size, TEXTFLAG_RENDER);
 		Cursor.m_LineWidth = LineWidth;
-		const unsigned OldRenderFlags = m_RenderFlags;
-		if(LineWidth <= 0)
-			SetRenderFlags(OldRenderFlags | ETextRenderFlags::TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE);
 		TextEx(&Cursor, pText, -1);
-		SetRenderFlags(OldRenderFlags);
 	}
 
-	float TextWidth(float Size, const char *pText, int StrLength = -1, float LineWidth = -1.0f, int Flags = 0, float *pHeight = nullptr, float *pAlignedFontSize = nullptr, float *pMaxCharacterHeightInLine = nullptr) override
+	float TextWidth(float Size, const char *pText, int StrLength = -1, float LineWidth = -1.0f, int Flags = 0, const STextSizeProperties &TextSizeProps = {}) override
 	{
 		CTextCursor Cursor;
 		SetCursor(&Cursor, 0, 0, Size, Flags);
 		Cursor.m_LineWidth = LineWidth;
-		const unsigned OldRenderFlags = m_RenderFlags;
-		if(LineWidth <= 0)
-			SetRenderFlags(OldRenderFlags | ETextRenderFlags::TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE);
 		TextEx(&Cursor, pText, StrLength);
-		SetRenderFlags(OldRenderFlags);
-		if(pHeight != nullptr)
-			*pHeight = Cursor.Height();
-		if(pAlignedFontSize != nullptr)
-			*pAlignedFontSize = Cursor.m_AlignedFontSize;
-		if(pMaxCharacterHeightInLine != nullptr)
-			*pMaxCharacterHeightInLine = Cursor.m_MaxCharacterHeight;
+		if(TextSizeProps.m_pHeight != nullptr)
+			*TextSizeProps.m_pHeight = Cursor.Height();
+		if(TextSizeProps.m_pAlignedFontSize != nullptr)
+			*TextSizeProps.m_pAlignedFontSize = Cursor.m_AlignedFontSize;
+		if(TextSizeProps.m_pMaxCharacterHeightInLine != nullptr)
+			*TextSizeProps.m_pMaxCharacterHeightInLine = Cursor.m_MaxCharacterHeight;
+		if(TextSizeProps.m_pLineCount != nullptr)
+			*TextSizeProps.m_pLineCount = Cursor.m_LineCount;
 		return Cursor.m_LongestLineWidth;
 	}
 
@@ -859,25 +869,8 @@ public:
 		CTextCursor Cursor;
 		SetCursor(&Cursor, 0, 0, Size, Flags);
 		Cursor.m_LineWidth = LineWidth;
-		const unsigned OldRenderFlags = m_RenderFlags;
-		if(LineWidth <= 0)
-			SetRenderFlags(OldRenderFlags | ETextRenderFlags::TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE);
 		TextEx(&Cursor, pText, StrLength);
-		SetRenderFlags(OldRenderFlags);
 		return Cursor.BoundingBox();
-	}
-
-	vec2 CaretPosition(float Size, const char *pText, int StrLength = -1, float LineWidth = -1.0f, int Flags = 0) override
-	{
-		CTextCursor Cursor;
-		SetCursor(&Cursor, 0, 0, Size, Flags);
-		Cursor.m_LineWidth = LineWidth;
-		const unsigned OldRenderFlags = m_RenderFlags;
-		if(LineWidth <= 0)
-			SetRenderFlags(OldRenderFlags | ETextRenderFlags::TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_LAST_CHARACTER_ADVANCE);
-		TextEx(&Cursor, pText, StrLength);
-		SetRenderFlags(OldRenderFlags);
-		return vec2(Cursor.m_X, Cursor.m_Y);
 	}
 
 	void TextColor(float r, float g, float b, float a) override
@@ -934,14 +927,14 @@ public:
 		return m_SelectionColor;
 	}
 
-	void TextEx(CTextCursor *pCursor, const char *pText, int Length) override
+	void TextEx(CTextCursor *pCursor, const char *pText, int Length = -1) override
 	{
 		const unsigned OldRenderFlags = m_RenderFlags;
 		m_RenderFlags |= TEXT_RENDER_FLAG_ONE_TIME_USE;
-		int TextCont = -1;
+		STextContainerIndex TextCont;
 		CreateTextContainer(TextCont, pCursor, pText, Length);
 		m_RenderFlags = OldRenderFlags;
-		if(TextCont != -1)
+		if(TextCont.Valid())
 		{
 			if((pCursor->m_Flags & TEXTFLAG_RENDER) != 0)
 			{
@@ -953,10 +946,10 @@ public:
 		}
 	}
 
-	bool CreateTextContainer(int &TextContainerIndex, CTextCursor *pCursor, const char *pText, int Length = -1) override
+	bool CreateTextContainer(STextContainerIndex &TextContainerIndex, CTextCursor *pCursor, const char *pText, int Length = -1) override
 	{
-		dbg_assert(TextContainerIndex == -1, "Text container index was not cleared.");
-		TextContainerIndex = -1;
+		dbg_assert(!TextContainerIndex.Valid(), "Text container index was not cleared.");
+		TextContainerIndex.Reset();
 
 		CFont *pFont = pCursor->m_pFont;
 
@@ -969,7 +962,7 @@ public:
 
 		const bool IsRendered = (pCursor->m_Flags & TEXTFLAG_RENDER) != 0;
 
-		TextContainerIndex = GetFreeTextContainerIndex();
+		TextContainerIndex.m_Index = GetFreeTextContainerIndex();
 		STextContainer &TextContainer = GetTextContainer(TextContainerIndex);
 		TextContainer.m_pFont = pFont;
 
@@ -1035,9 +1028,10 @@ public:
 		}
 	}
 
-	void AppendTextContainer(int TextContainerIndex, CTextCursor *pCursor, const char *pText, int Length = -1) override
+	void AppendTextContainer(STextContainerIndex TextContainerIndex, CTextCursor *pCursor, const char *pText, int Length = -1) override
 	{
 		STextContainer &TextContainer = GetTextContainer(TextContainerIndex);
+		str_append(TextContainer.m_aDebugText, pText, sizeof(TextContainer.m_aDebugText));
 
 		// calculate the font size of the displayed glyphs
 		float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
@@ -1062,6 +1056,8 @@ public:
 		// string length
 		if(Length < 0)
 			Length = str_length(pText);
+		else
+			Length = minimum(Length, str_length(pText));
 
 		const float Scale = 1.0f / pSizeData->m_FontSize;
 
@@ -1098,7 +1094,6 @@ public:
 		}
 
 		int LineCount = pCursor->m_LineCount;
-		size_t CharacterCounter = 0;
 
 		const bool IsRendered = (pCursor->m_Flags & TEXTFLAG_RENDER) != 0;
 
@@ -1113,38 +1108,38 @@ public:
 		int SelectionStartChar = -1;
 		int SelectionEndChar = -1;
 
-		auto &&CheckInsideChar = [&](bool CheckOuter, int CursorX_, int CursorY_, float LastCharX, float LastCharWidth, float CharX, float CharWidth, float CharY) -> bool {
-			return (LastCharX - LastCharWidth / 2 <= CursorX_ &&
-				       CharX + CharWidth / 2 > CursorX_ &&
-				       CharY - Size <= CursorY_ &&
-				       CharY > CursorY_) ||
+		auto &&CheckInsideChar = [&](bool CheckOuter, vec2 CursorPos, float LastCharX, float LastCharWidth, float CharX, float CharWidth, float CharY) -> bool {
+			return (LastCharX - LastCharWidth / 2 <= CursorPos.x &&
+				       CharX + CharWidth / 2 > CursorPos.x &&
+				       CharY - Size <= CursorPos.y &&
+				       CharY > CursorPos.y) ||
 			       (CheckOuter &&
-				       CharY - Size > CursorY_);
+				       CharY - Size > CursorPos.y);
 		};
-		auto &&CheckSelectionStart = [&](bool CheckOuter, int CursorX_, int CursorY_, int &SelectionChar, bool &SelectionUsedCase, float LastCharX, float LastCharWidth, float CharX, float CharWidth, float CharY) {
+		auto &&CheckSelectionStart = [&](bool CheckOuter, vec2 CursorPos, int &SelectionChar, bool &SelectionUsedCase, float LastCharX, float LastCharWidth, float CharX, float CharWidth, float CharY) {
 			if(!SelectionStarted && !SelectionUsedCase)
 			{
-				if(CheckInsideChar(CheckOuter, CursorX_, CursorY_, LastCharX, LastCharWidth, CharX, CharWidth, CharY))
+				if(CheckInsideChar(CheckOuter, CursorPos, LastCharX, LastCharWidth, CharX, CharWidth, CharY))
 				{
-					SelectionChar = CharacterCounter;
+					SelectionChar = pCursor->m_GlyphCount;
 					SelectionStarted = !SelectionStarted;
 					SelectionUsedCase = true;
 				}
 			}
 		};
-		auto &&CheckOutsideChar = [&](bool CheckOuter, int CursorX_, int CursorY_, float CharX, float CharWidth, float CharY) -> bool {
-			return (CharX + CharWidth / 2 > CursorX_ &&
-				       CharY - Size <= CursorY_ &&
-				       CharY > CursorY_) ||
+		auto &&CheckOutsideChar = [&](bool CheckOuter, vec2 CursorPos, float CharX, float CharWidth, float CharY) -> bool {
+			return (CharX + CharWidth / 2 > CursorPos.x &&
+				       CharY - Size <= CursorPos.y &&
+				       CharY > CursorPos.y) ||
 			       (CheckOuter &&
-				       CharY <= CursorY_);
+				       CharY <= CursorPos.y);
 		};
-		auto &&CheckSelectionEnd = [&](bool CheckOuter, int CursorX_, int CursorY_, int &SelectionChar, bool &SelectionUsedCase, float CharX, float CharWidth, float CharY) {
+		auto &&CheckSelectionEnd = [&](bool CheckOuter, vec2 CursorPos, int &SelectionChar, bool &SelectionUsedCase, float CharX, float CharWidth, float CharY) {
 			if(SelectionStarted && !SelectionUsedCase)
 			{
-				if(CheckOutsideChar(CheckOuter, CursorX_, CursorY_, CharX, CharWidth, CharY))
+				if(CheckOutsideChar(CheckOuter, CursorPos, CharX, CharWidth, CharY))
 				{
-					SelectionChar = CharacterCounter;
+					SelectionChar = pCursor->m_GlyphCount;
 					SelectionStarted = !SelectionStarted;
 					SelectionUsedCase = true;
 				}
@@ -1249,7 +1244,6 @@ public:
 					if((pCursor->m_Flags & TEXTFLAG_DISALLOW_NEWLINE) == 0)
 					{
 						LastCharGlyphIndex = 0;
-						++CharacterCounter;
 						StartNewLine();
 						if(pCursor->m_MaxLines > 0 && LineCount > pCursor->m_MaxLines)
 							break;
@@ -1264,7 +1258,7 @@ public:
 				const SFontSizeChar *pChr = GetChar(TextContainer.m_pFont, pSizeData, Character);
 				if(pChr)
 				{
-					bool ApplyBearingX = !(((RenderFlags & TEXT_RENDER_FLAG_NO_X_BEARING) != 0) || (CharacterCounter == 0 && (RenderFlags & TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING) != 0));
+					bool ApplyBearingX = !(((RenderFlags & TEXT_RENDER_FLAG_NO_X_BEARING) != 0) || (pCursor->m_GlyphCount == 0 && (RenderFlags & TEXT_RENDER_FLAG_NO_FIRST_CHARACTER_X_BEARING) != 0));
 					float Advance = ((((RenderFlags & TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH) != 0) ? (pChr->m_Width) : (pChr->m_AdvanceX + ((!ApplyBearingX) ? (-pChr->m_OffsetX) : 0.f)))) * Scale * Size;
 
 					float OutLineRealDiff = (pChr->m_Width - pChr->m_CharWidth) * Scale * Size;
@@ -1368,49 +1362,50 @@ public:
 
 					if(pCursor->m_CursorMode == TEXT_CURSOR_CURSOR_MODE_CALCULATE)
 					{
-						if(pCursor->m_CursorCharacter == -1 && CheckInsideChar(CharacterCounter == 0, pCursor->m_ReleaseMouseX, pCursor->m_ReleaseMouseY, CharacterCounter == 0 ? std::numeric_limits<float>::lowest() : LastCharX, LastCharWidth, CharX, CharWidth, TmpY))
+						if(pCursor->m_CursorCharacter == -1 && CheckInsideChar(pCursor->m_GlyphCount == 0, pCursor->m_ReleaseMouse, pCursor->m_GlyphCount == 0 ? std::numeric_limits<float>::lowest() : LastCharX, LastCharWidth, CharX, CharWidth, TmpY))
 						{
-							pCursor->m_CursorCharacter = CharacterCounter;
+							pCursor->m_CursorCharacter = pCursor->m_GlyphCount;
 						}
 					}
 
 					if(pCursor->m_CalculateSelectionMode == TEXT_CURSOR_SELECTION_MODE_CALCULATE)
 					{
-						if(CharacterCounter == 0)
+						if(pCursor->m_GlyphCount == 0)
 						{
-							CheckSelectionStart(true, pCursor->m_PressMouseX, pCursor->m_PressMouseY, SelectionStartChar, SelectionUsedPress, std::numeric_limits<float>::lowest(), 0, CharX, CharWidth, TmpY);
-							CheckSelectionStart(true, pCursor->m_ReleaseMouseX, pCursor->m_ReleaseMouseY, SelectionEndChar, SelectionUsedRelease, std::numeric_limits<float>::lowest(), 0, CharX, CharWidth, TmpY);
+							CheckSelectionStart(true, pCursor->m_PressMouse, SelectionStartChar, SelectionUsedPress, std::numeric_limits<float>::lowest(), 0, CharX, CharWidth, TmpY);
+							CheckSelectionStart(true, pCursor->m_ReleaseMouse, SelectionEndChar, SelectionUsedRelease, std::numeric_limits<float>::lowest(), 0, CharX, CharWidth, TmpY);
 						}
 
 						// if selection didn't start and the mouse pos is at least on 50% of the right side of the character start
-						CheckSelectionStart(false, pCursor->m_PressMouseX, pCursor->m_PressMouseY, SelectionStartChar, SelectionUsedPress, LastCharX, LastCharWidth, CharX, CharWidth, TmpY);
-						CheckSelectionStart(false, pCursor->m_ReleaseMouseX, pCursor->m_ReleaseMouseY, SelectionEndChar, SelectionUsedRelease, LastCharX, LastCharWidth, CharX, CharWidth, TmpY);
-						CheckSelectionEnd(false, pCursor->m_ReleaseMouseX, pCursor->m_ReleaseMouseY, SelectionEndChar, SelectionUsedRelease, CharX, CharWidth, TmpY);
-						CheckSelectionEnd(false, pCursor->m_PressMouseX, pCursor->m_PressMouseY, SelectionStartChar, SelectionUsedPress, CharX, CharWidth, TmpY);
+						CheckSelectionStart(false, pCursor->m_PressMouse, SelectionStartChar, SelectionUsedPress, LastCharX, LastCharWidth, CharX, CharWidth, TmpY);
+						CheckSelectionStart(false, pCursor->m_ReleaseMouse, SelectionEndChar, SelectionUsedRelease, LastCharX, LastCharWidth, CharX, CharWidth, TmpY);
+						CheckSelectionEnd(false, pCursor->m_ReleaseMouse, SelectionEndChar, SelectionUsedRelease, CharX, CharWidth, TmpY);
+						CheckSelectionEnd(false, pCursor->m_PressMouse, SelectionStartChar, SelectionUsedPress, CharX, CharWidth, TmpY);
 					}
 					if(pCursor->m_CalculateSelectionMode == TEXT_CURSOR_SELECTION_MODE_SET)
 					{
-						if((int)CharacterCounter == pCursor->m_SelectionStart)
+						if((int)pCursor->m_GlyphCount == pCursor->m_SelectionStart)
 						{
 							SelectionStarted = !SelectionStarted;
-							SelectionStartChar = CharacterCounter;
+							SelectionStartChar = pCursor->m_GlyphCount;
 							SelectionUsedPress = true;
 						}
-						if((int)CharacterCounter == pCursor->m_SelectionEnd)
+						if((int)pCursor->m_GlyphCount == pCursor->m_SelectionEnd)
 						{
 							SelectionStarted = !SelectionStarted;
-							SelectionEndChar = CharacterCounter;
+							SelectionEndChar = pCursor->m_GlyphCount;
 							SelectionUsedRelease = true;
 						}
 					}
 
 					if(pCursor->m_CursorMode != TEXT_CURSOR_CURSOR_MODE_NONE)
 					{
-						if((int)CharacterCounter == pCursor->m_CursorCharacter)
+						if((int)pCursor->m_GlyphCount == pCursor->m_CursorCharacter)
 						{
 							HasCursor = true;
 							aCursorQuads[0] = IGraphics::CQuadItem(SelX - CursorOuterInnerDiff, DrawY, CursorOuterWidth, Size);
 							aCursorQuads[1] = IGraphics::CQuadItem(SelX, DrawY + CursorOuterInnerDiff, CursorInnerWidth, Size - CursorOuterInnerDiff * 2);
+							pCursor->m_CursorRenderedPosition = vec2(SelX, DrawY);
 						}
 					}
 
@@ -1422,11 +1417,10 @@ public:
 						DrawX += Advance + CharKerning;
 
 					pCursor->m_GlyphCount++;
-					++CharacterCounter;
 
 					if(SelectionStarted && IsRendered)
 					{
-						vSelectionQuads.emplace_back(SelX, DrawY, SelWidth, Size);
+						vSelectionQuads.emplace_back(SelX, DrawY + (1.0f - pCursor->m_SelectionHeightFactor) * Size, SelWidth, pCursor->m_SelectionHeightFactor * Size);
 					}
 
 					LastSelX = SelX;
@@ -1472,38 +1466,39 @@ public:
 
 			if(SelectionStarted)
 			{
-				CheckSelectionEnd(true, pCursor->m_ReleaseMouseX, pCursor->m_ReleaseMouseY, SelectionEndChar, SelectionUsedRelease, std::numeric_limits<float>::max(), 0, DrawY + Size);
-				CheckSelectionEnd(true, pCursor->m_PressMouseX, pCursor->m_PressMouseY, SelectionStartChar, SelectionUsedPress, std::numeric_limits<float>::max(), 0, DrawY + Size);
+				CheckSelectionEnd(true, pCursor->m_ReleaseMouse, SelectionEndChar, SelectionUsedRelease, std::numeric_limits<float>::max(), 0, DrawY + Size);
+				CheckSelectionEnd(true, pCursor->m_PressMouse, SelectionStartChar, SelectionUsedPress, std::numeric_limits<float>::max(), 0, DrawY + Size);
 			}
 		}
 		else if(pCursor->m_CalculateSelectionMode == TEXT_CURSOR_SELECTION_MODE_SET)
 		{
-			if((int)CharacterCounter == pCursor->m_SelectionStart)
+			if((int)pCursor->m_GlyphCount == pCursor->m_SelectionStart)
 			{
 				SelectionStarted = !SelectionStarted;
-				SelectionStartChar = CharacterCounter;
+				SelectionStartChar = pCursor->m_GlyphCount;
 				SelectionUsedPress = true;
 			}
-			if((int)CharacterCounter == pCursor->m_SelectionEnd)
+			if((int)pCursor->m_GlyphCount == pCursor->m_SelectionEnd)
 			{
 				SelectionStarted = !SelectionStarted;
-				SelectionEndChar = CharacterCounter;
+				SelectionEndChar = pCursor->m_GlyphCount;
 				SelectionUsedRelease = true;
 			}
 		}
 
 		if(pCursor->m_CursorMode != TEXT_CURSOR_CURSOR_MODE_NONE)
 		{
-			if(pCursor->m_CursorMode == TEXT_CURSOR_CURSOR_MODE_CALCULATE && pCursor->m_CursorCharacter == -1 && CheckOutsideChar(true, pCursor->m_ReleaseMouseX, pCursor->m_ReleaseMouseY, std::numeric_limits<float>::max(), 0, DrawY + Size))
+			if(pCursor->m_CursorMode == TEXT_CURSOR_CURSOR_MODE_CALCULATE && pCursor->m_CursorCharacter == -1 && CheckOutsideChar(true, pCursor->m_ReleaseMouse, std::numeric_limits<float>::max(), 0, DrawY + Size))
 			{
-				pCursor->m_CursorCharacter = CharacterCounter;
+				pCursor->m_CursorCharacter = pCursor->m_GlyphCount;
 			}
 
-			if((int)CharacterCounter == pCursor->m_CursorCharacter)
+			if((int)pCursor->m_GlyphCount == pCursor->m_CursorCharacter)
 			{
 				HasCursor = true;
 				aCursorQuads[0] = IGraphics::CQuadItem((LastSelX + LastSelWidth) - CursorOuterInnerDiff, DrawY, CursorOuterWidth, Size);
 				aCursorQuads[1] = IGraphics::CQuadItem((LastSelX + LastSelWidth), DrawY + CursorOuterInnerDiff, CursorInnerWidth, Size - CursorOuterInnerDiff * 2);
+				pCursor->m_CursorRenderedPosition = vec2(LastSelX + LastSelWidth, DrawY);
 			}
 		}
 
@@ -1521,6 +1516,7 @@ public:
 
 			TextContainer.m_HasCursor = HasCursor;
 			TextContainer.m_HasSelection = HasSelection;
+			TextContainer.m_ForceCursorRendering = pCursor->m_ForceCursorRendering;
 
 			if(HasSelection)
 			{
@@ -1544,27 +1540,27 @@ public:
 		TextContainer.m_BoundingBox = pCursor->BoundingBox();
 	}
 
-	bool CreateOrAppendTextContainer(int &TextContainerIndex, CTextCursor *pCursor, const char *pText, int Length = -1) override
+	bool CreateOrAppendTextContainer(STextContainerIndex &TextContainerIndex, CTextCursor *pCursor, const char *pText, int Length = -1) override
 	{
-		if(TextContainerIndex == -1)
-		{
-			return CreateTextContainer(TextContainerIndex, pCursor, pText, Length);
-		}
-		else
+		if(TextContainerIndex.Valid())
 		{
 			AppendTextContainer(TextContainerIndex, pCursor, pText, Length);
 			return true;
 		}
+		else
+		{
+			return CreateTextContainer(TextContainerIndex, pCursor, pText, Length);
+		}
 	}
 
 	// just deletes and creates text container
-	void RecreateTextContainer(int &TextContainerIndex, CTextCursor *pCursor, const char *pText, int Length = -1) override
+	void RecreateTextContainer(STextContainerIndex &TextContainerIndex, CTextCursor *pCursor, const char *pText, int Length = -1) override
 	{
 		DeleteTextContainer(TextContainerIndex);
 		CreateTextContainer(TextContainerIndex, pCursor, pText, Length);
 	}
 
-	void RecreateTextContainerSoft(int &TextContainerIndex, CTextCursor *pCursor, const char *pText, int Length = -1) override
+	void RecreateTextContainerSoft(STextContainerIndex &TextContainerIndex, CTextCursor *pCursor, const char *pText, int Length = -1) override
 	{
 		STextContainer &TextContainer = GetTextContainer(TextContainerIndex);
 		TextContainer.m_StringInfo.m_vCharacterQuads.clear();
@@ -1573,9 +1569,9 @@ public:
 		AppendTextContainer(TextContainerIndex, pCursor, pText, Length);
 	}
 
-	void DeleteTextContainer(int &TextContainerIndex) override
+	void DeleteTextContainer(STextContainerIndex &TextContainerIndex) override
 	{
-		if(TextContainerIndex == -1)
+		if(!TextContainerIndex.Valid())
 			return;
 
 		STextContainer &TextContainer = GetTextContainer(TextContainerIndex);
@@ -1585,7 +1581,7 @@ public:
 		FreeTextContainer(TextContainerIndex);
 	}
 
-	void UploadTextContainer(int TextContainerIndex) override
+	void UploadTextContainer(STextContainerIndex TextContainerIndex) override
 	{
 		if(Graphics()->IsTextBufferingEnabled())
 		{
@@ -1601,18 +1597,10 @@ public:
 		}
 	}
 
-	void RenderTextContainer(int TextContainerIndex, const ColorRGBA &TextColor, const ColorRGBA &TextOutlineColor) override
+	void RenderTextContainer(STextContainerIndex TextContainerIndex, const ColorRGBA &TextColor, const ColorRGBA &TextOutlineColor) override
 	{
 		const STextContainer &TextContainer = GetTextContainer(TextContainerIndex);
 		const CFont *pFont = TextContainer.m_pFont;
-
-		if(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex != -1 && TextContainer.m_HasSelection)
-		{
-			Graphics()->TextureClear();
-			Graphics()->SetColor(m_SelectionColor);
-			Graphics()->RenderQuadContainerEx(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex, TextContainer.m_HasCursor ? 2 : 0, -1, 0, 0);
-			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
-		}
 
 		if(TextContainer.m_StringInfo.m_QuadNum > 0)
 		{
@@ -1669,25 +1657,38 @@ public:
 			}
 		}
 
-		if(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex != -1 && TextContainer.m_HasCursor)
+		if(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex != -1)
 		{
-			const auto CurTime = time_get_nanoseconds();
-
-			Graphics()->TextureClear();
-			if((CurTime - m_CursorRenderTime) > 500ms)
+			if(TextContainer.m_HasSelection)
 			{
-				Graphics()->SetColor(TextOutlineColor);
-				Graphics()->RenderQuadContainerEx(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex, 0, 1, 0, 0);
-				Graphics()->SetColor(TextColor);
-				Graphics()->RenderQuadContainerEx(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex, 1, 1, 0, 0);
+				Graphics()->TextureClear();
+				Graphics()->SetColor(m_SelectionColor);
+				Graphics()->RenderQuadContainerEx(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex, TextContainer.m_HasCursor ? 2 : 0, -1, 0, 0);
+				Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 			}
-			if((CurTime - m_CursorRenderTime) > 1s)
-				m_CursorRenderTime = time_get_nanoseconds();
-			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+
+			if(TextContainer.m_HasCursor)
+			{
+				const auto CurTime = time_get_nanoseconds();
+
+				Graphics()->TextureClear();
+				if(TextContainer.m_ForceCursorRendering || (CurTime - m_CursorRenderTime) > 500ms)
+				{
+					Graphics()->SetColor(TextOutlineColor);
+					Graphics()->RenderQuadContainerEx(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex, 0, 1, 0, 0);
+					Graphics()->SetColor(TextColor);
+					Graphics()->RenderQuadContainerEx(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex, 1, 1, 0, 0);
+				}
+				if(TextContainer.m_ForceCursorRendering)
+					m_CursorRenderTime = CurTime - 501ms;
+				else if((CurTime - m_CursorRenderTime) > 1s)
+					m_CursorRenderTime = time_get_nanoseconds();
+				Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+			}
 		}
 	}
 
-	void RenderTextContainer(int TextContainerIndex, const ColorRGBA &TextColor, const ColorRGBA &TextOutlineColor, float X, float Y) override
+	void RenderTextContainer(STextContainerIndex TextContainerIndex, const ColorRGBA &TextColor, const ColorRGBA &TextOutlineColor, float X, float Y) override
 	{
 		STextContainer &TextContainer = GetTextContainer(TextContainerIndex);
 
@@ -1715,7 +1716,7 @@ public:
 		Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 	}
 
-	STextBoundingBox GetBoundingBoxTextContainer(int TextContainerIndex) override
+	STextBoundingBox GetBoundingBoxTextContainer(STextContainerIndex TextContainerIndex) override
 	{
 		const STextContainer &TextContainer = GetTextContainer(TextContainerIndex);
 		return TextContainer.m_BoundingBox;
@@ -1723,6 +1724,8 @@ public:
 
 	void UploadEntityLayerText(void *pTexBuff, size_t ImageColorChannelCount, int TexWidth, int TexHeight, int TexSubWidth, int TexSubHeight, const char *pText, int Length, float x, float y, int FontSize) override
 	{
+		if(m_pDefaultFont == nullptr)
+			return;
 		if(FontSize < 1)
 			return;
 
@@ -1805,6 +1808,9 @@ public:
 
 	float GetGlyphOffsetX(int FontSize, char TextCharacter) const override
 	{
+		if(m_pDefaultFont == nullptr)
+			return -1;
+
 		const CFont *pFont = m_pDefaultFont;
 		FT_Set_Pixel_Sizes(pFont->m_FtFace, 0, FontSize);
 		const char *pTmp = &TextCharacter;
@@ -1830,6 +1836,9 @@ public:
 
 	int CalculateTextWidth(const char *pText, int TextLength, int FontWidth, int FontHeight) const override
 	{
+		if(m_pDefaultFont == nullptr)
+			return 0;
+
 		const CFont *pFont = m_pDefaultFont;
 		const char *pCurrent = pText;
 		const char *pEnd = pCurrent + TextLength;
@@ -1959,6 +1968,18 @@ public:
 		return UTF8Off != -1;
 	}
 
+	void OnPreWindowResize() override
+	{
+		for(auto *pTextContainer : m_vpTextContainers)
+		{
+			if(pTextContainer->m_ContainerIndex.Valid() && pTextContainer->m_ContainerIndex.m_UseCount.use_count() <= 1)
+			{
+				dbg_msg("textrender", "Found non empty text container with index %d with %d quads '%s'", pTextContainer->m_StringInfo.m_QuadBufferContainerIndex, (int)pTextContainer->m_StringInfo.m_QuadNum, pTextContainer->m_aDebugText);
+				dbg_assert(false, "Text container was forgotten by the implementation (the index was overwritten).");
+			}
+		}
+	}
+
 	void OnWindowResize() override
 	{
 		bool HasNonEmptyTextContainer = false;
@@ -1966,7 +1987,8 @@ public:
 		{
 			if(pTextContainer->m_StringInfo.m_QuadBufferContainerIndex != -1)
 			{
-				dbg_msg("textrender", "Found non empty text container with index %d with %d quads", pTextContainer->m_StringInfo.m_QuadBufferContainerIndex, (int)pTextContainer->m_StringInfo.m_QuadNum);
+				dbg_msg("textrender", "Found non empty text container with index %d with %d quads '%s'", pTextContainer->m_StringInfo.m_QuadBufferContainerIndex, (int)pTextContainer->m_StringInfo.m_QuadNum, pTextContainer->m_aDebugText);
+				dbg_msg("textrender", "The text container index was in use by %d ", (int)pTextContainer->m_ContainerIndex.m_UseCount.use_count());
 				HasNonEmptyTextContainer = true; // NOLINT(clang-analyzer-deadcode.DeadStores)
 			}
 		}

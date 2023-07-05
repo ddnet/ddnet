@@ -289,19 +289,15 @@ public:
 				char aBuf[IO_MAX_PATH_LENGTH];
 				str_copy(m_aBinarydir, pArgv0, Pos + 1);
 				str_format(aBuf, sizeof(aBuf), "%s/" PLAT_SERVER_EXEC, m_aBinarydir);
-				IOHANDLE File = io_open(aBuf, IOFLAG_READ);
-				if(File)
+				if(fs_is_file(aBuf))
 				{
-					io_close(File);
 					return;
 				}
 #if defined(CONF_PLATFORM_MACOS)
 				str_append(m_aBinarydir, "/../../../DDNet-Server.app/Contents/MacOS", sizeof(m_aBinarydir));
 				str_format(aBuf, sizeof(aBuf), "%s/" PLAT_SERVER_EXEC, m_aBinarydir);
-				IOHANDLE FileBis = io_open(aBuf, IOFLAG_READ);
-				if(FileBis)
+				if(fs_is_file(aBuf))
 				{
-					io_close(FileBis);
 					return;
 				}
 #endif

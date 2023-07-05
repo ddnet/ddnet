@@ -456,7 +456,7 @@ void CRenderTools::RenderTeleOverlay(CTeleTile *pTele, int w, int h, float Scale
 			int c = mx + my * w;
 
 			unsigned char Index = pTele[c].m_Number;
-			if(Index && pTele[c].m_Type != TILE_TELECHECKIN && pTele[c].m_Type != TILE_TELECHECKINEVIL)
+			if(Index && IsTeleTileNumberUsed(pTele[c].m_Type))
 			{
 				char aBuf[16];
 				str_format(aBuf, sizeof(aBuf), "%d", Index);
@@ -575,7 +575,7 @@ void CRenderTools::RenderSwitchOverlay(CSwitchTile *pSwitch, int w, int h, float
 			int c = mx + my * w;
 
 			unsigned char Index = pSwitch[c].m_Number;
-			if(Index)
+			if(Index && IsSwitchTileNumberUsed(pSwitch[c].m_Type))
 			{
 				char aBuf[16];
 				str_format(aBuf, sizeof(aBuf), "%d", Index);
@@ -585,7 +585,7 @@ void CRenderTools::RenderSwitchOverlay(CSwitchTile *pSwitch, int w, int h, float
 			}
 
 			unsigned char Delay = pSwitch[c].m_Delay;
-			if(Delay)
+			if(Delay && IsSwitchTileDelayUsed(pSwitch[c].m_Type))
 			{
 				char aBuf[16];
 				str_format(aBuf, sizeof(aBuf), "%d", Delay);

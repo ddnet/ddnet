@@ -128,7 +128,6 @@ void CGameControllerDDRace::OnPlayerConnect(CPlayer *pPlayer)
 
 	// init the player
 	Score()->PlayerData(ClientID)->Reset();
-	pPlayer->m_Score = Score()->PlayerData(ClientID)->m_BestTime ? Score()->PlayerData(ClientID)->m_BestTime : -9999;
 
 	// Can't set score here as LoadScore() is threaded, run it in
 	// LoadScoreThreaded() instead
@@ -179,7 +178,7 @@ void CGameControllerDDRace::Tick()
 
 			for(int i = 0; i < MAX_CLIENTS; i++)
 			{
-				if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetClientVersion() >= VERSION_DDRACE)
+				if(GameServer()->m_Players[i] && GameServer()->m_Players[i]->GetClientVersion() >= VERSION_DDRACE)
 				{
 					GameServer()->SendRecord(i);
 				}

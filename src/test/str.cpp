@@ -590,7 +590,7 @@ TEST(Str, Copy)
 
 TEST(Str, Utf8Stats)
 {
-	int Size, Count;
+	size_t Size, Count;
 
 	str_utf8_stats("abc", 4, 3, &Size, &Count);
 	EXPECT_EQ(Size, 3);
@@ -950,3 +950,35 @@ TEST(Str, CountChar)
 	EXPECT_EQ(str_countchr(pStr, '\0'), 0);
 	EXPECT_EQ(str_countchr(pStr, 'y'), 0);
 }
+
+#if defined(CONF_FAMILY_WINDOWS)
+TEST(Str, WindowsUtf8WideConversion)
+{
+	const char *apUtf8Strings[] = {
+		"",
+		"abc",
+		"a bb ccc dddd       eeeee",
+		"öüä",
+		"привет Наташа",
+		"ąçęįǫų",
+		"DDNet最好了",
+		"aβい🐘"};
+	const wchar_t *apWideStrings[] = {
+		L"",
+		L"abc",
+		L"a bb ccc dddd       eeeee",
+		L"öüä",
+		L"привет Наташа",
+		L"ąçęįǫų",
+		L"DDNet最好了",
+		L"aβい🐘"};
+	static_assert(std::size(apUtf8Strings) == std::size(apWideStrings));
+	for(size_t i = 0; i < std::size(apUtf8Strings); i++)
+	{
+		const std::string ConvertedUtf8 = windows_wide_to_utf8(apWideStrings[i]);
+		const std::wstring ConvertedWide = windows_utf8_to_wide(apUtf8Strings[i]);
+		EXPECT_STREQ(ConvertedUtf8.c_str(), apUtf8Strings[i]);
+		EXPECT_STREQ(ConvertedWide.c_str(), apWideStrings[i]);
+	}
+}
+#endif

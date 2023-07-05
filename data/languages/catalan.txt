@@ -345,9 +345,6 @@ Rename demo
 Reset filter
 == Reiniciar el filtre
 
-Sample rate
-== Freqüència de la imatge
-
 Score
 == Punts
 
@@ -707,9 +704,6 @@ Ghost
 
 Remove chat
 == Eliminar el xat
-
-Threaded sound loading
-== Càrrega de so en fils
 
 Check now
 == Comprova ara
@@ -1353,6 +1347,9 @@ Speed:
 Angle:
 == 
 
+Team %d
+== 
+
 Uploading map data to GPU
 == 
 
@@ -1386,10 +1383,35 @@ Loading menu images
 Copy info
 == 
 
+Online players (%d)
+== 
+
+Online clanmates (%d)
+== 
+
+[friends (server browser)]
+Offline (%d)
+== 
+
+Click to select server. Double click to join your friend.
+== 
+
+Click to remove this player from your friends list.
+== 
+
+Click to remove this clan from your friends list.
+== 
+
+None
+== 
+
 Are you sure that you want to remove the player '%s' from your friends list?
 == 
 
 Are you sure that you want to remove the clan '%s' from your friends list?
+== 
+
+Add Clan
 == 
 
 Play the current demo
@@ -1680,9 +1702,6 @@ Loading race demo files
 == 
 
 Super
-== 
-
-Team %d
 == 
 
 Loading sound files

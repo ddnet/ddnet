@@ -167,8 +167,8 @@ public:
 	void Clear();
 
 	CEventHandler m_Events;
-	CObjectPool<CPlayer, MAX_CLIENTS> m_apPlayers;
-    CObjectPool<CCharacter, MAX_CLIENTS> m_apCharacters;
+	CObjectPool<CPlayer, MAX_CLIENTS> m_Players;
+	CObjectPool<CCharacter, MAX_CLIENTS> m_Characters;
 	// keep last input to always apply when none is sent
 	CNetObj_PlayerInput m_aLastPlayerInput[MAX_CLIENTS];
 	bool m_aPlayerHasInput[MAX_CLIENTS];
@@ -181,7 +181,7 @@ public:
 	CGameWorld m_World;
 
 	// helper functions
-    CPlayer *GetPlayer() const;
+	CPlayer *GetPlayer() const;
 	class CCharacter *GetPlayerChar(int ClientID) const;
 	bool EmulateBug(int Bug);
 	std::vector<SSwitchers> &Switchers() { return m_World.m_Core.m_vSwitchers; }
@@ -232,8 +232,8 @@ public:
 	void CreateSound(vec2 Pos, int Sound, CClientMask Mask = CClientMask().set());
 	void CreateSoundGlobal(int Sound, int Target = -1);
 
-	bool SnapLaserObject(const CSnapContext &Context, int SnapID, const vec2 &To, const vec2 &From, int StartTick, int Owner = -1, int LaserType = -1);
-	bool SnapPickup(const CSnapContext &Context, int SnapID, const vec2 &Pos, int Type, int SubType);
+	bool SnapLaserObject(const CSnapContext &Context, int SnapID, const vec2 &To, const vec2 &From, int StartTick, int Owner = -1, int LaserType = -1, int Subtype = -1, int SwitchNumber = -1);
+	bool SnapPickup(const CSnapContext &Context, int SnapID, const vec2 &Pos, int Type, int SubType, int SwitchNumber);
 
 	enum
 	{
@@ -319,7 +319,7 @@ public:
 	int64_t m_LastMapVote;
 	int GetClientVersion(int ClientID) const;
 	CClientMask ClientsMaskExcludeClientVersionAndHigher(int Version);
-	bool PlayerExists(int ClientID) const override { return m_apPlayers[ClientID]; }
+	bool PlayerExists(int ClientID) const override { return m_Players[ClientID]; }
 	// Returns true if someone is actively moderating.
 	bool PlayerModerating() const;
 	void ForceVote(int EnforcerID, bool Success);
@@ -428,6 +428,8 @@ private:
 	static void ConSetTimerType(IConsole::IResult *pResult, void *pUserData);
 	static void ConRescue(IConsole::IResult *pResult, void *pUserData);
 	static void ConTele(IConsole::IResult *pResult, void *pUserData);
+	static void ConPracticeUnSolo(IConsole::IResult *pResult, void *pUserData);
+	static void ConPracticeUnDeep(IConsole::IResult *pResult, void *pUserData);
 	static void ConProtectedKill(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConVoteMute(IConsole::IResult *pResult, void *pUserData);

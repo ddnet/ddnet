@@ -11,6 +11,7 @@
 #include "teeinfo.h"
 
 #include <memory>
+#include <optional>
 
 class CCharacter;
 class CGameContext;
@@ -57,7 +58,7 @@ public:
 	void OnPredictedEarlyInput(CNetObj_PlayerInput *pNewInput);
 	void OnDisconnect();
 
-	void KillCharacter(int Weapon = WEAPON_GAME);
+	void KillCharacter(int Weapon = WEAPON_GAME, bool SendKillMsg = true);
 	CCharacter *GetCharacter();
 
 	void SpectatePlayerName(const char *pName);
@@ -102,7 +103,7 @@ public:
 
 	int m_DieTick;
 	int m_PreviousDieTick;
-	int m_Score;
+	std::optional<int> m_Score;
 	int m_JoinTick;
 	bool m_ForceBalanced;
 	int m_LastActionTick;
@@ -180,7 +181,6 @@ public:
 	vec2 m_ShowDistance;
 	bool m_SpecTeam;
 	bool m_NinjaJetpack;
-	bool m_HasFinishScore;
 
 	int m_ChatScore;
 

@@ -350,9 +350,6 @@ Rename demo
 Reset filter
 == 필터 초기화
 
-Sample rate
-== 샘플링 속도
-
 Score
 == 점수
 
@@ -960,9 +957,6 @@ Enable team chat sound
 
 Enable highlighted chat sound
 == 언급된 채팅 소리 활성화
-
-Threaded sound loading
-== 다중 스레드 소리 로딩
 
 Game sound volume
 == 게임 음량
@@ -1706,3 +1700,28 @@ Copy info
 
 Create a random skin
 == 무작위 스킨 생성
+
+Online players (%d)
+== 
+
+Online clanmates (%d)
+== 
+
+[friends (server browser)]
+Offline (%d)
+== 
+
+Click to select server. Double click to join your friend.
+== 
+
+Click to remove this player from your friends list.
+== 
+
+Click to remove this clan from your friends list.
+== 
+
+None
+== 
+
+Add Clan
+== 

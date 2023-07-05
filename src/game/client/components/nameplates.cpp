@@ -159,7 +159,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 		TOutlineColor.a *= Alpha;
 		TColor.a *= Alpha;
 
-		if(m_aNamePlates[ClientID].m_NameTextContainerIndex != -1)
+		if(m_aNamePlates[ClientID].m_NameTextContainerIndex.Valid())
 		{
 			YOffset -= FontSize;
 			TextRender()->RenderTextContainer(m_aNamePlates[ClientID].m_NameTextContainerIndex, TColor, TOutlineColor, Position.x - tw / 2.0f, YOffset);
@@ -168,7 +168,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 		if(g_Config.m_ClNameplatesClan)
 		{
 			YOffset -= FontSizeClan;
-			if(m_aNamePlates[ClientID].m_ClanNameTextContainerIndex != -1)
+			if(m_aNamePlates[ClientID].m_ClanNameTextContainerIndex.Valid())
 				TextRender()->RenderTextContainer(m_aNamePlates[ClientID].m_ClanNameTextContainerIndex, TColor, TOutlineColor, Position.x - m_aNamePlates[ClientID].m_ClanNameTextWidth / 2.0f, YOffset);
 		}
 
@@ -176,7 +176,17 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 		{
 			YOffset -= FontSize;
 			char aFriendMark[] = "♥";
-			TextRender()->TextColor(ColorRGBA(1.0f, 0.0f, 0.0f));
+
+			ColorRGBA Color;
+
+			if(OtherTeam && !ForceAlpha)
+				Color = ColorRGBA(1.0f, 0.0f, 0.0f, g_Config.m_ClShowOthersAlpha / 100.0f);
+			else
+				Color = ColorRGBA(1.0f, 0.0f, 0.0f, a);
+
+			Color.a *= Alpha;
+
+			TextRender()->TextColor(Color);
 			float XOffSet = TextRender()->TextWidth(FontSize, aFriendMark, -1, -1.0f) / 2.0f;
 			TextRender()->Text(Position.x - XOffSet, YOffset, FontSize, aFriendMark, -1.0f);
 		}
@@ -221,6 +231,17 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 						StrongWeakStatusColor = color_cast<ColorRGBA>(ColorHSLA(41131));
 						StrongWeakSpriteID = SPRITE_HOOK_WEAK;
 					}
+
+					float ClampedAlpha = 1;
+					if(g_Config.m_ClNameplatesAlways == 0)
+						ClampedAlpha = clamp(1 - std::pow(distance(m_pClient->m_Controls.m_aTargetPos[g_Config.m_ClDummy], Position) / 200.0f, 16.0f), 0.0f, 1.0f);
+
+					if(OtherTeam && !ForceAlpha)
+						StrongWeakStatusColor.a = g_Config.m_ClShowOthersAlpha / 100.0f;
+					else
+						StrongWeakStatusColor.a = ClampedAlpha;
+
+					StrongWeakStatusColor.a *= Alpha;
 					Graphics()->SetColor(StrongWeakStatusColor);
 					RenderTools()->SelectSprite(StrongWeakSpriteID);
 					RenderTools()->GetSpriteScale(StrongWeakSpriteID, ScaleX, ScaleY);

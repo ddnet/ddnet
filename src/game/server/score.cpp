@@ -18,7 +18,7 @@ class IDbConnection;
 
 std::shared_ptr<CScorePlayerResult> CScore::NewSqlPlayerResult(int ClientID)
 {
-	CPlayer *pCurPlayer = GameServer()->m_apPlayers[ClientID];
+	CPlayer *pCurPlayer = GameServer()->m_Players[ClientID];
 	if(pCurPlayer->m_ScoreQueryResult != nullptr) // TODO: send player a message: "too many requests"
 		return nullptr;
 	pCurPlayer->m_ScoreQueryResult = std::make_shared<CScorePlayerResult>();
@@ -47,7 +47,7 @@ void CScore::ExecPlayerThread(
 
 bool CScore::RateLimitPlayer(int ClientID)
 {
-	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientID];
+	CPlayer *pPlayer = GameServer()->m_Players[ClientID];
 	if(pPlayer == 0)
 		return true;
 	if(pPlayer->m_LastSQLQuery + (int64_t)g_Config.m_SvSqlQueriesDelay * Server()->TickSpeed() >= Server()->Tick())
@@ -146,7 +146,7 @@ void CScore::SaveScore(int ClientID, float Time, const char *pTimestamp, const f
 	if(pCon->m_Cheated || NotEligible)
 		return;
 
-	CPlayer *pCurPlayer = GameServer()->m_apPlayers[ClientID];
+	CPlayer *pCurPlayer = GameServer()->m_Players[ClientID];
 	if(pCurPlayer->m_ScoreFinishResult != nullptr)
 		dbg_msg("sql", "WARNING: previous save score result didn't complete, overwriting it now");
 	pCurPlayer->m_ScoreFinishResult = std::make_shared<CScorePlayerResult>();
@@ -170,7 +170,7 @@ void CScore::SaveTeamScore(int *pClientIDs, unsigned int Size, float Time, const
 		return;
 	for(unsigned int i = 0; i < Size; i++)
 	{
-		if(GameServer()->m_apPlayers[pClientIDs[i]]->m_NotEligibleForFinish)
+		if(GameServer()->m_Players[pClientIDs[i]]->m_NotEligibleForFinish)
 			return;
 	}
 	auto Tmp = std::make_unique<CSqlTeamScoreData>();

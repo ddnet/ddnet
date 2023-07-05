@@ -5,6 +5,7 @@
 #include "player.h"
 #include "score.h"
 #include "teehistorian.h"
+#include <base/system.h>
 
 #include <engine/shared/config.h>
 
@@ -47,10 +48,10 @@ void CGameTeams::ResetRoundState(int Team)
 	m_aTeamUnfinishableKillTick[Team] = -1;
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if(m_Core.Team(i) == Team && GameServer()->m_apPlayers[i])
+		if(m_Core.Team(i) == Team && GameServer()->m_Players[i])
 		{
-			GameServer()->m_apPlayers[i]->m_VotedForPractice = false;
-			GameServer()->m_apPlayers[i]->m_SwapTargetsClientID = -1;
+			GameServer()->m_Players[i]->m_VotedForPractice = false;
+			GameServer()->m_Players[i]->m_SwapTargetsClientID = -1;
 			m_aLastSwap[i] = 0;
 		}
 	}
@@ -234,7 +235,7 @@ void CGameTeams::Tick()
 	uint64_t TeamHasWantedStartTime = 0;
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		CCharacter *pChar = GameServer()->m_apPlayers[i] ? GameServer()->m_apPlayers[i]->GetCharacter() : nullptr;
+		CCharacter *pChar = GameServer()->m_Players[i] ? GameServer()->m_Players[i]->GetCharacter() : nullptr;
 		int Team = m_Core.Team(i);
 		if(!pChar || m_aTeamState[Team] != TEAMSTATE_STARTED || m_aTeeStarted[i] || m_aPractice[m_Core.Team(i)])
 		{
@@ -448,19 +449,25 @@ void CGameTeams::KillTeam(int Team, int NewStrongID, int ExceptID)
 {
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if(m_Core.Team(i) == Team && GameServer()->m_apPlayers[i])
+		if(m_Core.Team(i) == Team && GameServer()->m_Players[i])
 		{
-			GameServer()->m_apPlayers[i]->m_VotedForPractice = false;
+			GameServer()->m_Players[i]->m_VotedForPractice = false;
 			if(i != ExceptID)
 			{
-				GameServer()->m_apPlayers[i]->KillCharacter(WEAPON_SELF);
+				GameServer()->m_Players[i]->KillCharacter(WEAPON_SELF, false);
 				if(NewStrongID != -1 && i != NewStrongID)
 				{
-					GameServer()->m_apPlayers[i]->Respawn(true); // spawn the rest of team with weak hook on the killer
+					GameServer()->m_Players[i]->Respawn(true); // spawn the rest of team with weak hook on the killer
 				}
 			}
 		}
 	}
+
+	// send the team kill message
+	CNetMsg_Sv_KillMsgTeam Msg;
+	Msg.m_Team = Team;
+	Msg.m_First = NewStrongID;
+	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
 }
 
 bool CGameTeams::TeamFinished(int Team)
@@ -555,7 +562,7 @@ void CGameTeams::SendTeamsState(int ClientID)
 	if(g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO)
 		return;
 
-	if(!m_pGameContext->m_apPlayers[ClientID])
+	if(!m_pGameContext->m_Players[ClientID])
 		return;
 
 	CMsgPacker Msg(NETMSGTYPE_SV_TEAMSSTATE);
@@ -568,7 +575,7 @@ void CGameTeams::SendTeamsState(int ClientID)
 	}
 
 	Server()->SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
-	int ClientVersion = m_pGameContext->m_apPlayers[ClientID]->GetClientVersion();
+	int ClientVersion = m_pGameContext->m_Players[ClientID]->GetClientVersion();
 	if(!Server()->IsSixup(ClientID) && VERSION_DDRACE < ClientVersion && ClientVersion < VERSION_DDNET_MSG_LEGACY)
 	{
 		Server()->SendMsg(&MsgLegacy, MSGFLAG_VITAL, ClientID);
@@ -800,7 +807,7 @@ void CGameTeams::OnFinish(CPlayer *Player, float Time, const char *pTimestamp)
 	{
 		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
-			if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetClientVersion() >= VERSION_DDRACE)
+			if(GameServer()->m_Players[i] && GameServer()->m_Players[i]->GetClientVersion() >= VERSION_DDRACE)
 			{
 				GameServer()->SendRecord(i);
 			}
@@ -811,11 +818,10 @@ void CGameTeams::OnFinish(CPlayer *Player, float Time, const char *pTimestamp)
 		GameServer()->SendRecord(ClientID);
 	}
 
-	int TTime = 0 - (int)Time;
-	if(Player->m_Score < TTime || !Player->m_HasFinishScore)
+	int TTime = (int)Time;
+	if(!Player->m_Score.has_value() || TTime < Player->m_Score.value())
 	{
 		Player->m_Score = TTime;
-		Player->m_HasFinishScore = true;
 	}
 }
 
@@ -887,9 +893,9 @@ void CGameTeams::SwapTeamCharacters(CPlayer *pPrimaryPlayer, CPlayer *pTargetPla
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if(m_Core.Team(i) == Team && GameServer()->m_apPlayers[i])
+		if(m_Core.Team(i) == Team && GameServer()->m_Players[i])
 		{
-			GameServer()->m_apPlayers[i]->m_SwapTargetsClientID = -1;
+			GameServer()->m_Players[i]->m_SwapTargetsClientID = -1;
 		}
 	}
 
@@ -916,7 +922,7 @@ void CGameTeams::SwapTeamCharacters(CPlayer *pPrimaryPlayer, CPlayer *pTargetPla
 
 	if(Team >= 1)
 	{
-		for(const auto &pPlayer : GameServer()->m_apPlayers)
+		for(const auto &pPlayer : GameServer()->m_Players)
 		{
 			CCharacter *pChar = pPlayer ? pPlayer->GetCharacter() : nullptr;
 			if(pChar && pChar->Team() == Team && pChar != pPrimaryPlayer->GetCharacter() && pChar != pTargetPlayer->GetCharacter())
@@ -967,7 +973,7 @@ void CGameTeams::ProcessSaveTeam()
 				if(m_apSaveTeamResult[Team]->m_SavedTeam.m_pSavedTees->IsHooking())
 				{
 					int ClientID = m_apSaveTeamResult[Team]->m_SavedTeam.m_pSavedTees->GetClientID();
-					if(GameServer()->m_apPlayers[ClientID] != nullptr)
+					if(GameServer()->m_Players[ClientID] != nullptr)
 						GameServer()->SendChatTarget(ClientID, "Start holding the hook before loading the savegame to keep the hook");
 				}
 			}
@@ -1056,14 +1062,15 @@ void CGameTeams::OnCharacterDeath(int ClientID, int Weapon)
 		{
 			ChangeTeamState(Team, CGameTeams::TEAMSTATE_OPEN);
 
-			char aBuf[512];
-			str_format(aBuf, sizeof(aBuf), "Everyone in your locked team was killed because '%s' %s.", Server()->ClientName(ClientID), Weapon == WEAPON_SELF ? "killed" : "died");
-
 			m_aPractice[Team] = false;
 
-			KillTeam(Team, Weapon == WEAPON_SELF ? ClientID : -1, ClientID);
 			if(Count(Team) > 1)
 			{
+				KillTeam(Team, Weapon == WEAPON_SELF ? ClientID : -1, ClientID);
+
+				char aBuf[512];
+				str_format(aBuf, sizeof(aBuf), "Everyone in your locked team was killed because '%s' %s.", Server()->ClientName(ClientID), Weapon == WEAPON_SELF ? "killed" : "died");
+
 				GameServer()->SendChatTeam(Team, aBuf);
 			}
 		}
@@ -1123,7 +1130,7 @@ void CGameTeams::ResetSavedTeam(int ClientID, int Team)
 	{
 		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
-			if(m_Core.Team(i) == Team && GameServer()->m_apPlayers[i])
+			if(m_Core.Team(i) == Team && GameServer()->m_Players[i])
 			{
 				SetForceCharacterTeam(i, TEAM_FLOCK);
 			}

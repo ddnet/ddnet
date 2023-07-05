@@ -3,6 +3,7 @@
 #ifndef GAME_CLIENT_UI_H
 #define GAME_CLIENT_UI_H
 
+#include "lineinput.h"
 #include "ui_rect.h"
 
 #include <engine/input.h>
@@ -83,10 +84,46 @@ public:
 	}
 };
 
-struct SUIExEditBoxProperties
+class IButtonColorFunction
 {
-	bool m_SelectText = false;
-	const char *m_pEmptyText = "";
+public:
+	virtual ColorRGBA GetColor(bool Active, bool Hovered) const = 0;
+};
+class CDarkButtonColorFunction : public IButtonColorFunction
+{
+public:
+	ColorRGBA GetColor(bool Active, bool Hovered) const override
+	{
+		if(Active)
+			return ColorRGBA(0.15f, 0.15f, 0.15f, 0.25f);
+		else if(Hovered)
+			return ColorRGBA(0.5f, 0.5f, 0.5f, 0.25f);
+		return ColorRGBA(0.0f, 0.0f, 0.0f, 0.25f);
+	}
+};
+class CLightButtonColorFunction : public IButtonColorFunction
+{
+public:
+	ColorRGBA GetColor(bool Active, bool Hovered) const override
+	{
+		if(Active)
+			return ColorRGBA(1.0f, 1.0f, 1.0f, 0.4f);
+		else if(Hovered)
+			return ColorRGBA(1.0f, 1.0f, 1.0f, 0.6f);
+		return ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f);
+	}
+};
+class CScrollBarColorFunction : public IButtonColorFunction
+{
+public:
+	ColorRGBA GetColor(bool Active, bool Hovered) const override
+	{
+		if(Active)
+			return ColorRGBA(0.9f, 0.9f, 0.9f, 1.0f);
+		else if(Hovered)
+			return ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
+		return ColorRGBA(0.8f, 0.8f, 0.8f, 1.0f);
+	}
 };
 
 class CUI;
@@ -106,12 +143,14 @@ public:
 
 	public:
 		int m_UIRectQuadContainer;
-		int m_UITextContainer;
+		STextContainerIndex m_UITextContainer;
 
 		float m_X;
 		float m_Y;
 		float m_Width;
 		float m_Height;
+		float m_Rounding;
+		int m_Corners;
 
 		std::string m_Text;
 
@@ -154,8 +193,19 @@ struct SLabelProperties
 {
 	float m_MaxWidth = -1;
 	bool m_StopAtEnd = false;
-	class CTextCursor *m_pSelCursor = nullptr;
 	bool m_EnableWidthCheck = true;
+};
+
+struct SMenuButtonProperties
+{
+	int m_Checked = 0;
+	bool m_HintRequiresStringCheck = false;
+	bool m_HintCanChangePositionOrSize = false;
+	bool m_UseIconFont = false;
+	int m_Corners = IGraphics::CORNER_ALL;
+	float m_Rounding = 5.0f;
+	float m_FontFactor = 0.0f;
+	ColorRGBA m_Color = ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f);
 };
 
 class CUIElementBase
@@ -175,6 +225,16 @@ public:
 
 class CButtonContainer
 {
+};
+
+struct SValueSelectorProperties
+{
+	bool m_UseScroll = true;
+	int64_t m_Step = 1;
+	float m_Scale = 1.0f;
+	bool m_IsHex = false;
+	int m_HexPrefix = 6;
+	ColorRGBA m_Color = ColorRGBA(0.0f, 0.0f, 0.0f, 0.4f);
 };
 
 /**
@@ -235,34 +295,25 @@ private:
 	const void *m_pActiveTooltipItem;
 	bool m_ActiveItemValid = false;
 
+	vec2 m_UpdatedMousePos = vec2(0.0f, 0.0f);
+	vec2 m_UpdatedMouseDelta = vec2(0.0f, 0.0f);
 	float m_MouseX, m_MouseY; // in gui space
 	float m_MouseDeltaX, m_MouseDeltaY; // in gui space
 	float m_MouseWorldX, m_MouseWorldY; // in world space
 	unsigned m_MouseButtons;
 	unsigned m_LastMouseButtons;
 	bool m_MouseSlow = false;
+	bool m_MouseLock = false;
+	const void *m_pMouseLockID = nullptr;
 
-	IInput::CEvent *m_pInputEventsArray;
-	int *m_pInputEventCount;
 	unsigned m_HotkeysPressed = 0;
-
-	bool m_MouseIsPress = false;
-	bool m_HasSelection = false;
-
-	int m_MousePressX = 0;
-	int m_MousePressY = 0;
-	int m_MouseCurX = 0;
-	int m_MouseCurY = 0;
-	int m_CurSelStart = 0;
-	int m_CurSelEnd = 0;
-	const void *m_pSelItem = nullptr;
-
-	int m_CurCursor = 0;
 
 	CUIRect m_Screen;
 
 	std::vector<CUIRect> m_vClips;
 	void UpdateClipping();
+
+	bool m_ValueSelectorTextMode = false;
 
 	struct SPopupMenu
 	{
@@ -281,6 +332,7 @@ private:
 	static CUI::EPopupMenuFunctionResult PopupMessage(void *pContext, CUIRect View, bool Active);
 	static CUI::EPopupMenuFunctionResult PopupConfirm(void *pContext, CUIRect View, bool Active);
 	static CUI::EPopupMenuFunctionResult PopupSelection(void *pContext, CUIRect View, bool Active);
+	static CUI::EPopupMenuFunctionResult PopupColorPicker(void *pContext, CUIRect View, bool Active);
 
 	IClient *m_pClient;
 	IGraphics *m_pGraphics;
@@ -293,11 +345,13 @@ private:
 public:
 	static const CLinearScrollbarScale ms_LinearScrollbarScale;
 	static const CLogarithmicScrollbarScale ms_LogarithmicScrollbarScale;
+	static const CDarkButtonColorFunction ms_DarkButtonColorFunction;
+	static const CLightButtonColorFunction ms_LightButtonColorFunction;
+	static const CScrollBarColorFunction ms_ScrollBarColorFunction;
 
-	static float ms_FontmodHeight;
+	static const float ms_FontmodHeight;
 
 	void Init(IKernel *pKernel);
-	void InitInputs(IInput::CEvent *pInputEventsArray, int *pInputEventCount);
 	IClient *Client() const { return m_pClient; }
 	IGraphics *Graphics() const { return m_pGraphics; }
 	IInput *Input() const { return m_pInput; }
@@ -330,20 +384,36 @@ public:
 	void OnElementsReset();
 	void OnWindowResize();
 	void OnLanguageChange();
+	void OnCursorMove(float X, float Y);
 
 	void SetEnabled(bool Enabled) { m_Enabled = Enabled; }
 	bool Enabled() const { return m_Enabled; }
-	void Update(float MouseX, float MouseY, float MouseWorldX, float MouseWorldY);
+	void Update();
+	void Update(float MouseX, float MouseY, float MouseDeltaX, float MouseDeltaY, float MouseWorldX, float MouseWorldY);
+	void DebugRender();
 
 	float MouseDeltaX() const { return m_MouseDeltaX; }
 	float MouseDeltaY() const { return m_MouseDeltaY; }
 	float MouseX() const { return m_MouseX; }
 	float MouseY() const { return m_MouseY; }
+	vec2 MousePos() const { return vec2(m_MouseX, m_MouseY); }
 	float MouseWorldX() const { return m_MouseWorldX; }
 	float MouseWorldY() const { return m_MouseWorldY; }
 	int MouseButton(int Index) const { return (m_MouseButtons >> Index) & 1; }
 	int MouseButtonClicked(int Index) const { return MouseButton(Index) && !((m_LastMouseButtons >> Index) & 1); }
 	int MouseButtonReleased(int Index) const { return ((m_LastMouseButtons >> Index) & 1) && !MouseButton(Index); }
+	bool CheckMouseLock()
+	{
+		if(m_MouseLock && ActiveItem() != m_pMouseLockID)
+			DisableMouseLock();
+		return m_MouseLock;
+	}
+	void EnableMouseLock(const void *pID)
+	{
+		m_MouseLock = true;
+		m_pMouseLockID = pID;
+	}
+	void DisableMouseLock() { m_MouseLock = false; }
 
 	void SetHotItem(const void *pID) { m_pBecomingHotItem = pID; }
 	void SetActiveItem(const void *pID)
@@ -408,27 +478,36 @@ public:
 	int DoButtonLogic(const void *pID, int Checked, const CUIRect *pRect);
 	int DoDraggableButtonLogic(const void *pID, int Checked, const CUIRect *pRect, bool *pClicked, bool *pAbrupted);
 	int DoPickerLogic(const void *pID, const CUIRect *pRect, float *pX, float *pY);
-	void DoSmoothScrollLogic(float *pScrollOffset, float *pScrollOffsetChange, float ViewPortSize, float TotalSize, float ScrollSpeed = 10.0f);
+	void DoSmoothScrollLogic(float *pScrollOffset, float *pScrollOffsetChange, float ViewPortSize, float TotalSize, bool SmoothClamp = false, float ScrollSpeed = 10.0f);
+	static vec2 CalcAlignedCursorPos(const CUIRect *pRect, vec2 TextSize, int Align, const float *pBiggestCharHeight = nullptr);
 
 	void DoLabel(const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps = {});
 
 	void DoLabel(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps = {}, int StrLen = -1, const CTextCursor *pReadCursor = nullptr);
 	void DoLabelStreamed(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth = -1, bool StopAtEnd = false, int StrLen = -1, const CTextCursor *pReadCursor = nullptr);
 
-	bool DoEditBox(const void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden = false, int Corners = IGraphics::CORNER_ALL, const SUIExEditBoxProperties &Properties = {});
-	bool DoClearableEditBox(const void *pID, const void *pClearID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden = false, int Corners = IGraphics::CORNER_ALL, const SUIExEditBoxProperties &Properties = {});
+	bool DoEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize, int Corners = IGraphics::CORNER_ALL);
+	bool DoClearableEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize, int Corners = IGraphics::CORNER_ALL);
 
+	int DoButton_Menu(CUIElement &UIElement, const CButtonContainer *pID, const std::function<const char *()> &GetTextLambda, const CUIRect *pRect, const SMenuButtonProperties &Props = {});
+	// only used for popup menus
 	int DoButton_PopupMenu(CButtonContainer *pButtonContainer, const char *pText, const CUIRect *pRect, int Align);
 
+	// value selector
+	int64_t DoValueSelector(const void *pID, const CUIRect *pRect, const char *pLabel, int64_t Current, int64_t Min, int64_t Max, const SValueSelectorProperties &Props = {});
+	bool IsValueSelectorTextMode() const { return m_ValueSelectorTextMode; }
+	void SetValueSelectorTextMode(bool TextMode) { m_ValueSelectorTextMode = TextMode; }
+
+	// scrollbars
 	enum
 	{
-		SCROLLBAR_OPTION_INFINITE = 1,
-		SCROLLBAR_OPTION_NOCLAMPVALUE = 2,
+		SCROLLBAR_OPTION_INFINITE = 1 << 0,
+		SCROLLBAR_OPTION_NOCLAMPVALUE = 1 << 1,
+		SCROLLBAR_OPTION_MULTILINE = 1 << 2,
 	};
 	float DoScrollbarV(const void *pID, const CUIRect *pRect, float Current);
 	float DoScrollbarH(const void *pID, const CUIRect *pRect, float Current, const ColorRGBA *pColorInner = nullptr);
-	void DoScrollbarOption(const void *pID, int *pOption, const CUIRect *pRect, const char *pStr, int Min, int Max, const IScrollbarScale *pScale = &ms_LinearScrollbarScale, unsigned Flags = 0u);
-	void DoScrollbarOptionLabeled(const void *pID, int *pOption, const CUIRect *pRect, const char *pStr, const char **ppLabels, int NumLabels, const IScrollbarScale *pScale = &ms_LinearScrollbarScale);
+	void DoScrollbarOption(const void *pID, int *pOption, const CUIRect *pRect, const char *pStr, int Min, int Max, const IScrollbarScale *pScale = &ms_LinearScrollbarScale, unsigned Flags = 0u, const char *pSuffix = "");
 
 	// popup menu
 	void DoPopupMenu(const SPopupMenuId *pID, int X, int Y, int Width, int Height, void *pContext, FPopupMenuFunction pfnFunc, int Corners = IGraphics::CORNER_ALL);
@@ -496,6 +575,18 @@ public:
 		void Reset();
 	};
 	void ShowPopupSelection(float X, float Y, SSelectionPopupContext *pContext);
+
+	struct SColorPickerPopupContext : public SPopupMenuId
+	{
+		CUI *m_pUI; // set by CUI when popup is shown
+		bool m_Alpha = false;
+		unsigned int *m_pColor;
+		unsigned int m_HSVColor;
+		const char m_HuePickerId = 0;
+		const char m_ColorPickerId = 0;
+		const char m_aValueSelectorIds[5] = {0};
+	};
+	void ShowPopupColorPicker(float X, float Y, SColorPickerPopupContext *pContext);
 };
 
 #endif

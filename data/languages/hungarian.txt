@@ -340,9 +340,6 @@ Rename demo
 Reset filter
 == Szűrő visszaállítása
 
-Sample rate
-== Mintavételi frekvencia
-
 Score
 == Pontszám
 
@@ -855,9 +852,6 @@ Deactivate
 
 Welcome to DDNet
 == Üdvözlet a DDNet-en
-
-Threaded sound loading
-== Csavarmenetes hang betöltése
 
 Activate
 == Aktiválás
@@ -1526,171 +1520,196 @@ Loading sound files
 
 [Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== 
+== Probléma derült fel inicializálás közben. Változtasson a "gfx_backend" parancson "OpenGL"-re vagy "Vulkan"-ra a "settings_ddnet.cfg" fájlon és próbálja meg újra.
 
 [Graphics error]
 Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== 
+== Probléma derült fel Virtuális Memóriával. Nincs elég Virtuális Memória Textúrák vagy képek betöltésére (Karakterek, Entitások, stb.), főként a nagy minőségű képekre vonatkozva.
 
 [Graphics error]
 An error during command recording occurred. Try to update your GPU drivers.
-== 
+== Probléma derült fel felvétel közben. Próbálja felújítani a Videókártyája driver-ét.
 
 [Graphics error]
 A render command failed. Try to update your GPU drivers.
-== 
+== Probléma derült fel renderelés parancsa közben. Próbálja felújítani a Videókártyája driver-ét.
 
 [Graphics error]
 Submitting the render commands failed. Try to update your GPU drivers.
-== 
+== Probléma derült fel renderelési parancs végrehajtása közben. Próbálja felújítani a Videókártyája driver-ét.
 
 [Graphics error]
 Failed to swap framebuffers. Try to update your GPU drivers.
-== 
+== Probléma derült fel a framebuffer-nél. Nem sikerült framebuffer-t cserélni. Próbálja felújítani a Videókártyája driver-ét.
 
 [Graphics error]
 Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== 
+== Ismeretlen probléma derült fel. Változtasson a "gfx_backend" parancson "OpenGL"-re vagy "Vulkan"-ra a "settings_ddnet.cfg" fájlon és próbálja meg újra.
 
 [Graphics error]
 Could not initialize the given graphics backend, reverting to the default backend now.
-== 
+== Nem sikerült inicializálni a megadott Grafikai Renderer-re (OpenGL vagy Vulkan Renderer), az eredeti Grafikai Renderer-re lesz visszaállítva a Kliens.
 
 [Graphics error]
 Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
-== 
+== Nem sikerült inicializálni a megadott Grafikai Renderer-re (OpenGL vagy Vulkan Renderer), lehetőleg a Integrált Videókártyája driver-e nincs telepítve, vagy nem észlelhető driver rajta.
 
 Could not save downloaded map. Try manually deleting this file: %s
-== 
+== Nem sikerült elmenteni a letöltött pályát. Próbálja meg manuális módon kitörölni a fáljt: %s.
 
 Why are you slowmo replaying to read this?
-== 
+== Miért lassított módon rögzítesz, hogy elolvasd ezt?
 
 Cancel
-== 
+== Vissza
 
 File '%s' already exists, do you want to overwrite it?
-== 
+== A Fájl '%s' már létezik, szeretné felülírni a jelenlegi Fáljt?
 
 Copy info
+== Infó Másolása
+
+Online players (%d)
+== 
+
+Online clanmates (%d)
+== 
+
+[friends (server browser)]
+Offline (%d)
+== 
+
+Click to select server. Double click to join your friend.
+== 
+
+Click to remove this player from your friends list.
+== 
+
+Click to remove this clan from your friends list.
+== 
+
+None
 == 
 
 Are you sure that you want to remove the player '%s' from your friends list?
-== 
+== Biztos, hogy ki szeretnéd törölni '%s' Játékost a barátlistádból?
 
 Are you sure that you want to remove the clan '%s' from your friends list?
+== Biztos, hogy ki szeretnéd törölni '%s' Klánt a barátlistádból?
+
+Add Clan
 == 
 
 Play the current demo
-== 
+== Jelenlegi Demó Lejátszása
 
 Pause the current demo
-== 
+== Jelenlegi Demó Szüneteltetése
 
 Stop the current demo
-== 
+== Jelenlegi Demó Megállítása
 
 Go back one tick
-== 
+== Előre menni egy képet
 
 Go forward one tick
-== 
+== Vissza menni egy képet
 
 Slow down the demo
-== 
+== Demó Lelassítása
 
 Speed up the demo
-== 
+== Demó Felgyorsítása
 
 Mark the beginning of a cut
-== 
+== Jelöld be a vágás elejét
 
 Mark the end of a cut
-== 
+== Jelöld be a vágás végét
 
 Export cut as a separate demo
-== 
+== Exportáld a vágást, mint külön Demó
 
 Go back one marker
-== 
+== Előre menni egy jelőlésre
 
 Go forward one marker
-== 
+== Vissza menni egy jelőlésre
 
 Toggle keyboard shortcuts
-== 
+== Billentyűs parancsok váltása
 
 Open the directory that contains the demo files
-== 
+== Megnyitni a Demó Fáljlok helyét
 
 Are you sure that you want to delete the demo '%s'?
-== 
+== Biztos, hogy kiszeretnéd törölni a Demót: '%s'?
 
 Unable to delete the demo '%s'
-== 
+== Nem sikerült kitörölni a Demót: '%s'
 
 Menu opened. Press Esc key again to close menu.
-== 
+== Menű megnyitva. Az "Esc" gomb megnyomásával kilép a menüből.
 
 Save power by lowering refresh rate (higher input latency)
-== 
+== Takarékoskodjon energiát azzal, hogy lejjebb veszi a frissítési értéket (magasabb késleltetés tapasztalható)
 
 Open the settings file
-== 
+== Beállítások Fáljlának megnyitása
 
 Open the directory that contains the configuration and user files
-== 
+== Megnyitni a Konfigurációs és Felhasználói Fáljok helyét
 
 Open the directory to add custom themes
-== 
+== Megnyitni az egyedi témák helyét
 
 Create a random skin
-== 
+== Random Karakter csinálása
 
 Open the directory to add custom skins
-== 
+== Megnyitni az egyedi Karakterek helyét
 
 No controller found. Plug in a controller.
-== 
+== Nem található Kontroller. Csatlakoztasson egyet, vagy nézze meg, hogy észlelhető.
 
 Reset controls
-== 
+== Irányítások Visszaállítása
 
 Are you sure that you want to reset the controls to their defaults?
-== 
+== Biztos, hogy szeretnéd visszaállítani az irányítást az eredeti értékeire?
 
 Weapons
-== 
+== Fegyverek
 
 Rifle Laser Outline Color
-== 
+== Lézer Külső Színe
 
 Rifle Laser Inner Color
-== 
+== Lézer Belső Színe
 
 Shotgun Laser Outline Color
-== 
+== Sörétes puska Külső Színe
 
 Shotgun Laser Inner Color
-== 
+== Sörétes puska Belső Színe
 
 Door Laser Outline Color
-== 
+== Lézer ajtó Külső Színe
 
 Door Laser Inner Color
-== 
+== Lézer ajtó Belső Színe
 
 Freeze Laser Outline Color
-== 
+== Fagyasztó Lézer Külső Színe
 
 Freeze Laser Inner Color
-== 
+== Fagyasztó Lézer Belső Színe
 
 Set all to Rifle
-== 
+== Minden színt a Lézerhez igazodva
 
 Unregister protocol and file extensions
-== 
+== Törölje a protokoll és a fájlkiterjesztések regisztrációját
 
 Open the directory to add custom assets
-== 
+== Megnyitni az egyedi Képek helyét

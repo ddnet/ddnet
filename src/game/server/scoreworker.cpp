@@ -39,10 +39,8 @@ void CScorePlayerResult::SetVariant(Variant v)
 		m_Data.m_MapVote.m_aServer[0] = '\0';
 		break;
 	case PLAYER_INFO:
-		m_Data.m_Info.m_Score = -9999;
 		m_Data.m_Info.m_Birthday = 0;
-		m_Data.m_Info.m_HasFinishScore = false;
-		m_Data.m_Info.m_Time = 0;
+		m_Data.m_Info.m_Time.reset();
 		for(float &TimeCp : m_Data.m_Info.m_aTimeCp)
 			TimeCp = 0;
 	}
@@ -167,8 +165,6 @@ bool CScoreWorker::LoadPlayerData(IDbConnection *pSqlServer, const ISqlData *pGa
 			// get the best time
 			float Time = pSqlServer->GetFloat(1);
 			pResult->m_Data.m_Info.m_Time = Time;
-			pResult->m_Data.m_Info.m_Score = -Time;
-			pResult->m_Data.m_Info.m_HasFinishScore = true;
 		}
 
 		for(int i = 0; i < NUM_CHECKPOINTS; i++)

@@ -260,9 +260,6 @@ Remote console
 Reset filter
 == Скинути фільтри
 
-Sample rate
-== Частота
-
 Score
 == бали
 
@@ -865,9 +862,6 @@ Enable team chat sound
 Enable highlighted chat sound
 == Включити звуки виділених повідомлень
 
-Threaded sound loading
-== музика при завантаженні
-
 Map sound volume
 == Гучність звуку на карті
 
@@ -1245,452 +1239,477 @@ Play
 
 [Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== 
+== Помилка під час ініціалізації. Спробуйте змінити gfx_backend на OpenGL або Vulkan у settings_ddnet.cfg в каталозі config і спробуйте ще раз.
 
 [Graphics error]
 Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== 
+== Не вистачає Відеопам'яті(VRAM). Спробуйте видалити користувацькі ресурси (скіни, ентіти тощо), особоливо ті, які мають високу роздільну здатність
 
 [Graphics error]
 An error during command recording occurred. Try to update your GPU drivers.
-== 
+== Виникла помилка під час запису команди. Спробуйте оновити драйвери вашогї відеокарти(GPU).
 
 [Graphics error]
 A render command failed. Try to update your GPU drivers.
-== 
+== Не вдалося виконати команду рендеру, спробуйте оновити драйвер вашої відеокарти(GPU)
 
 [Graphics error]
 Submitting the render commands failed. Try to update your GPU drivers.
-== 
+== Під час подання команди рендеру відбудаля помилка, спробуйте оновити драйвер вашої відеокарти(GPU)
 
 [Graphics error]
 Failed to swap framebuffers. Try to update your GPU drivers.
-== 
+== Помилка під час обміну фрейм-буферу. спробуйте оновити драйвер вашої відеокарти(GPU)
 
 [Graphics error]
 Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== 
+== Невідома помилка. Спробуйте змінити gfx_backend на OpenGL або Vulkan у settings_ddnet.cfg в каталозі config і спробуйте ще раз.
 
 [Graphics error]
 Could not initialize the given graphics backend, reverting to the default backend now.
-== 
+== Не вдалося ініціалізувати заданий графічний бекенд, повердаємося до бекенду за замовчуванням.
 
 [Graphics error]
 Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
-== 
+== Не вдалося ініціалізувати заданий графічний бекенд, ймовірно, пов'язано з тим, що ви не встановили драйвер інтегрованої відеокарти.
 
 Could not save downloaded map. Try manually deleting this file: %s
-== 
+== Не вдалося зберегти завантажену карту. Спробуйте видалити цей файл вручну: %s
 
 The format of texture %s is not RGBA which will cause visual bugs.
-== 
+== Заданий формат текстури не є RGBA, що може викликати візуальні помилки
 
 Preparing demo playback
-== 
+== Підготовка демо-відтворення
 
 Connected
-== 
+== З'єднано
 
 Loading map file from storage
-== 
+== Завантаження файлу карти з бази даних
 
 Why are you slowmo replaying to read this?
-== 
+== Чому ти уповільнюєш реплей? Хочеш це прочитати?:)
 
 Initializing components
-== 
+== Ініціалізація компонентів
 
 Initializing assets
-== 
+== Ініціалізація ресурсів
 
 Initializing map logic
-== 
+== Ініціалізація логіки карти
 
 Sending initial client info
-== 
+== Надсилання початкової інформації про клієнт
 
 Position:
-== 
+== Позиція:
 
 Speed:
-== 
+== Швидкість:
 
 Angle:
-== 
+== Кут
+
+Team %d
+== Команда %d
 
 Uploading map data to GPU
-== 
+== Завантаження даних карти на GPU
 
 Trying to determine UDP connectivity...
-== 
+== Намагаємося визначити UDP-підключення...
 
 UDP seems to be filtered.
-== 
+== Зачекайте, фільтрація UDP
 
 UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
-== 
+== Здається, що IP-адреси UDP і TCP відрізняються. Спробуйте вимкнути VPN, проксі або мережеві прискорювачі.
 
 No answer from server yet.
-== 
+== Сервер ще не відповів
 
 Getting game info
-== 
+== Отримання ігрової інформації
 
 Requesting to join the game
-== 
+== Запит на приєднання до гри
 
 Cancel
-== 
+== Скасувати
 
 File '%s' already exists, do you want to overwrite it?
-== 
+== Файл '%s' вже існує, чи хочете ви хочете його перезаписати?
 
 Join Tutorial Server
-== 
+== Приєднатись до серверу з навчальним курсом
 
 Skip Tutorial
-== 
+== Пропустити навчальний курс
 
 Loading menu images
-== 
+== Завантаження зображень в меню
 
 Copy info
-== 
+== Скопіювати інформацію
+
+Online players (%d)
+== Друзі онлайн (%d)
+
+Online clanmates (%d)
+== Товаришів по клану онлайн  (%d)
+
+[friends (server browser)]
+Offline (%d)
+== Не в мережі (%d)
+
+Click to select server. Double click to join your friend.
+== Натисніть, щоб вибрати сервер. Натисніть двічі, щоб приєднатися до друга
+
+Click to remove this player from your friends list.
+== Натисніть, щоб видалити цього гравця зі списку друзів.
+
+Click to remove this clan from your friends list.
+== Натисніть, щоб видалити цей клан зі свого списку друзів.
+
+None
+== Нічого
 
 Are you sure that you want to remove the player '%s' from your friends list?
-== 
+== Ви дійсно хочете видалити '%s' зі свого списку друзів?
 
 Are you sure that you want to remove the clan '%s' from your friends list?
-== 
+== Ви дійсно хочете видалити клан '%s' зі свого списку друзів?
+
+Add Clan
+== Додати клан
 
 Play the current demo
-== 
+== Відтворити поточне демо
 
 Pause the current demo
-== 
+== Призупинити поточне демо
 
 Stop the current demo
-== 
+== Зупинити поточне демо
 
 Go back one tick
-== 
+== Повернутися на одну секунду назад
 
 Go forward one tick
-== 
+== Повернутися на одну секунду вперед
 
 Slow down the demo
-== 
+== Уповільнити демо
 
 Speed up the demo
-== 
+== Прискорити димо
 
 Mark the beginning of a cut
-== 
+== Позначити початок вирізу
 
 Mark the end of a cut
-== 
+== Позначити кінець вирізу
 
 Export cut as a separate demo
-== 
+== Експортувати виріз як окреме демо
 
 Go back one marker
-== 
+== Повернутися на один маркер назад
 
 Go forward one marker
-== 
+== Перейти на один маркер вперед
 
 Toggle keyboard shortcuts
-== 
+== Перемикання комбінацій клавіш
 
 Loading demo files
-== 
+== Завантаження демо-файлів
 
 Open the directory that contains the demo files
-== 
+== Відкрийте директорію, яка містить демо файли
 
 Are you sure that you want to delete the demo '%s'?
-== 
+== Ви впевнені, що хочете видалити демо '%s'?
 
 Unable to delete the demo '%s'
-== 
+== Не вдається видалити демо '%s'
 
 Loading ghost files
-== 
+== Завантаження файлів привидів
 
 Menu opened. Press Esc key again to close menu.
-== 
+== Меню відкрито. Натисніть клавішу Esc ще раз, щоб закрити меню.
 
 Save power by lowering refresh rate (higher input latency)
-== 
+== Економія енергії за рахунок зниження частоти оновлення кадрів (більша затримка на вході)
 
 Settings file
-== 
+== Файл налаштувань
 
 Open the settings file
-== 
+== Відкрити файл налаштувань
 
 Config directory
-== 
+== Каталог конфігурації
 
 Open the directory that contains the configuration and user files
-== 
+== Відкрити каталог, який містить конфігураційні та користувацькі файли
 
 Open the directory to add custom themes
-== 
+== Відкрити каталог, щоб додати власні теми
 
 Loading skin files
-== 
+== Завантаження файлів скінів
 
 Toggle to edit your dummy settings
-== 
+== Перейти до редагування налаштувань даммі
 
 Download community skins
-== 
+== Завантажити скіни спільноти
 
 Choose default eyes when joining a server
-== 
+== Вибір очей за замовчуванням під час приєднання до сервера
 
 Create a random skin
-== 
+== Створити рандомний скін
 
 Open the directory to add custom skins
-== 
+== Відкрити каталог для додавання користувацьких скінів
 
 Enable controller
-== 
+== Увімкнути контролер
 
 Controller %d: %s
-== 
+== Контролер %d: %s
 
 Click to cycle through all available controllers.
-== 
+== Натисніть, щоб переглянути всі активні контролери.
 
 [Ingame controller mode]
 Relative
-== 
+== Relative
 
 [Ingame controller mode]
 Absolute
-== 
+== Absolute
 
 Ingame controller mode
-== 
+== Режим контролера в грі
 
 Ingame controller sens.
-== 
+== Чутливість контролера в грі
 
 UI controller sens.
-== 
+== Чутливість контролера в меню
 
 Controller jitter tolerance
-== 
+== Чутливість до вібрації контролера
 
 No controller found. Plug in a controller.
-== 
+== Контролер не знайдено. Підключіть контролер.
 
 Device
-== 
+== Пристрій
 
 Status
-== 
+== Стан
 
 Aim bind
-== 
+== Прив'язка до цілі
 
 Controller Axis #%d
-== 
+== Ось контролера #%d
 
 Mouse
-== 
+== Мишка
 
 Ingame mouse sens.
-== 
+== Чутливість миші в грі
 
 UI mouse sens.
-== 
+== Чутливість миші в меню
 
 Controller
-== 
+== Контролер
 
 Reset controls
-== 
+== Встановити контроль за замовчуванням
 
 Are you sure that you want to reset the controls to their defaults?
-== 
+== Ви впевнені, що хочете відновити налаштування за замовчуванням?
 
 Windowed fullscreen
-== 
+== Повноекранний в вікні(без рамок)
 
 Allows maps to render with more detail
-== 
+== Дозволяє рендерити карти з більшою деталізацією
 
 Renderer
-== 
+== Рендеринг
 
 default
-== 
+== за замовчуванням
 
 custom
-== 
+== користувацькі
 
 Graphics cards
-== 
+== Відеокарти
 
 auto
-== 
+== авто
 
 Appearance
-== 
+== Зовнішній вигляд
 
 Name Plate
-== 
+== Табличка з іменем
 
 Hook Collisions
-== 
+== Колізія гака
 
 Show health, shields and ammo
-== 
+== Показувати здоров'я, щити та боєприпаси
 
 DDRace HUD
-== 
+== DDRace HUD
 
 Show client IDs in scoreboard
-== 
+== Відображати ID гравців на табло
 
 Show DDRace HUD
-== 
+== Показати DDRace HUD
 
 Show jumps indicator
-== 
+== Індикатор показових стрибків
 
 Show dummy actions
-== 
+== Показувати дії вашого даммі
 
 Show player position
-== 
+== Показати позицію гравця
 
 Show player speed
-== 
+== Показати швидкість гравця
 
 Show player target angle
-== 
+== Показати кут націлювання гравця
 
 Show freeze bars
-== 
+== Показати Індикатор фрізу
 
 Opacity of freeze bars inside freeze
-== 
+== Непрозорість фрізу всередині фріза
 
 Show hook strength indicator
-== 
+== Показати індикатор міцності гака
 
 Hook collision line
-== 
+== Лінія колізій гаків
 
 Hook collision line width
-== 
+== Ширина лінії колізій гачків
 
 Hook collision line opacity
-== 
+==  Непрозорість лінії колізій гачків
 
 Colors of the hook collision line, in case of a possible collision with:
-== 
+== Кольори лінії колізій гачка, в разі можливого зіткнення з:
 
 Your movements are not taken into account when calculating the line colors
-== 
+== Ваші рухи не враховуються при розрахунку кольору лінії
 
 Nothing hookable
-== 
+== Нічим, що можна було б зачепити
 
 Something hookable
-== 
+== Чимось, що можна зачепити
 
 A Tee
-== 
+== Tee
 
 Normal Color
-== 
+== Звичайний колір
 
 Highlight Color
-== 
+== Колір при смерті
 
 Weapons
-== 
+== Зброя
 
 Rifle Laser Outline Color
-== 
+== Колір контуру лазера
 
 Rifle Laser Inner Color
-== 
+== Внутрішній колір лазера
 
 Shotgun Laser Outline Color
-== 
+== Колір контуру дробовика
 
 Shotgun Laser Inner Color
-== 
+== Внутрішній колір дробовика
 
 Door Laser Outline Color
-== 
+== Колір контуру дверей
 
 Door Laser Inner Color
-== 
+== Внутрішній колір дверей
 
 Freeze Laser Outline Color
-== 
+== Колір контуру фріз-лазерів
 
 Freeze Laser Inner Color
-== 
+== Внутрішній колір фріз-дверей
 
 Set all to Rifle
-== 
+== Поставити все на колір зброї
 
 When you cross the start line, show a ghost tee replicating the movements of your best time
-== 
+== При перетинанні лінію старту, відображати tee-привида, який буде повторювати рухи свого найкращого часу
 
 Opacity
-== 
+== Непрозорість
 
 Adjust the opacity of entities belonging to other teams, such as tees and nameplates
-== 
+== Налаштування непрозорості об'єктів, що належать іншим командам, таких як tee та її імена
 
 Quads are used for background decoration
-== 
+== Квади, яки використовуються для декорування фону
 
 Tries to predict other entities to give a feel of low latency
-== 
+== Намагається передбачити інші об'єкти, щоб створити відчуття низької затримки
 
 Run on join
-== 
+== Виконати команду при підключенні до серверу
 
 Chat command (e.g. showall 1)
-== 
+== Команда чату (наприклад, /say hi)
 
 Unregister protocol and file extensions
-== 
+== Скасувати реєстрацію протоколів та розширень файлів
 
 Extras
-== 
+== Додаткові
 
 Loading assets
-== 
+== Завантаження ресурсів
 
 Open the directory to add custom assets
-== 
+== Відкрити каталог, щоб додати власні ресурси
 
 Tutorial
-== 
+== Туторіал
 
 Can't find a Tutorial server
-== 
+== Не можемо знайти сервер з туторіалом
 
 Loading race demo files
-== 
+== Завантаження демо-файлів рейсу
 
 Super
-== 
-
-Team %d
-== 
+== Супер
 
 Loading sound files
-== 
+== Завантаження звукових файлів

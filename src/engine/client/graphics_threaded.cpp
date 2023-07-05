@@ -3279,6 +3279,19 @@ SWarning *CGraphics_Threaded::GetCurWarning()
 	}
 }
 
+bool CGraphics_Threaded::ShowMessageBox(unsigned Type, const char *pTitle, const char *pMsg)
+{
+	if(m_pBackend == nullptr)
+		return false;
+	m_pBackend->WaitForIdle();
+	return m_pBackend->ShowMessageBox(Type, pTitle, pMsg);
+}
+
+bool CGraphics_Threaded::IsBackendInitialized()
+{
+	return m_pBackend != nullptr;
+}
+
 const char *CGraphics_Threaded::GetVendorString()
 {
 	return m_pBackend->GetVendorString();
@@ -3303,20 +3316,13 @@ int CGraphics_Threaded::GetVideoModes(CVideoMode *pModes, int MaxModes, int Scre
 {
 	if(g_Config.m_GfxDisplayAllVideoModes)
 	{
-		int Count = std::size(g_aFakeModes);
-		mem_copy(pModes, g_aFakeModes, sizeof(g_aFakeModes));
-		if(MaxModes < Count)
-			Count = MaxModes;
+		const int Count = minimum<size_t>(std::size(g_aFakeModes), MaxModes);
+		mem_copy(pModes, g_aFakeModes, Count * sizeof(CVideoMode));
 		return Count;
 	}
 
-	// add videomodes command
-	CImageInfo Image;
-	mem_zero(&Image, sizeof(Image));
-
 	int NumModes = 0;
 	m_pBackend->GetVideoModes(pModes, MaxModes, &NumModes, m_ScreenHiDPIScale, g_Config.m_GfxDesktopWidth, g_Config.m_GfxDesktopHeight, Screen);
-
 	return NumModes;
 }
 

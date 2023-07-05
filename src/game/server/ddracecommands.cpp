@@ -81,9 +81,9 @@ void CGameContext::ConKillPlayer(IConsole::IResult *pResult, void *pUserData)
 		return;
 	int Victim = pResult->GetVictim();
 
-	if(pSelf->m_apPlayers[Victim])
+	if(pSelf->m_Players[Victim])
 	{
-		pSelf->m_apPlayers[Victim]->KillCharacter(WEAPON_GAME);
+		pSelf->m_Players[Victim]->KillCharacter(WEAPON_GAME);
 		char aBuf[512];
 		str_format(aBuf, sizeof(aBuf), "%s was killed by %s",
 			pSelf->Server()->ClientName(Victim),
@@ -351,7 +351,7 @@ void CGameContext::ConTeleport(IConsole::IResult *pResult, void *pUserData)
 	CCharacter *pChr = pSelf->GetPlayerChar(Tele);
 	if(pChr && pSelf->GetPlayerChar(TeleTo))
 	{
-		pSelf->Teleport(pChr, pSelf->m_apPlayers[TeleTo]->m_ViewPos);
+		pSelf->Teleport(pChr, pSelf->m_Players[TeleTo]->m_ViewPos);
 	}
 }
 
@@ -360,7 +360,7 @@ void CGameContext::ConKill(IConsole::IResult *pResult, void *pUserData)
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	if(!CheckClientID(pResult->m_ClientID))
 		return;
-	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	CPlayer *pPlayer = pSelf->m_Players[pResult->m_ClientID];
 
 	if(!pPlayer || (pPlayer->m_LastKill && pPlayer->m_LastKill + pSelf->Server()->TickSpeed() * g_Config.m_SvKillDelay > pSelf->Server()->Tick()))
 		return;
@@ -378,7 +378,7 @@ void CGameContext::ConForcePause(IConsole::IResult *pResult, void *pUserData)
 	if(pResult->NumArguments() > 1)
 		Seconds = clamp(pResult->GetInteger(1), 0, 360);
 
-	CPlayer *pPlayer = pSelf->m_apPlayers[Victim];
+	CPlayer *pPlayer = pSelf->m_Players[Victim];
 	if(!pPlayer)
 		return;
 
@@ -507,7 +507,7 @@ void CGameContext::ConVoteMute(IConsole::IResult *pResult, void *pUserData)
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	int Victim = pResult->GetVictim();
 
-	if(Victim < 0 || Victim > MAX_CLIENTS || !pSelf->m_apPlayers[Victim])
+	if(Victim < 0 || Victim > MAX_CLIENTS || !pSelf->m_Players[Victim])
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "votemute", "Client ID not found");
 		return;
@@ -526,7 +526,7 @@ void CGameContext::ConVoteUnmute(IConsole::IResult *pResult, void *pUserData)
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	int Victim = pResult->GetVictim();
 
-	if(Victim < 0 || Victim > MAX_CLIENTS || !pSelf->m_apPlayers[Victim])
+	if(Victim < 0 || Victim > MAX_CLIENTS || !pSelf->m_Players[Victim])
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "voteunmute", "Client ID not found");
 		return;
@@ -586,7 +586,7 @@ void CGameContext::ConMuteID(IConsole::IResult *pResult, void *pUserData)
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	int Victim = pResult->GetVictim();
 
-	if(Victim < 0 || Victim > MAX_CLIENTS || !pSelf->m_apPlayers[Victim])
+	if(Victim < 0 || Victim > MAX_CLIENTS || !pSelf->m_Players[Victim])
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "muteid", "Client id not found.");
 		return;
@@ -640,7 +640,7 @@ void CGameContext::ConUnmuteID(IConsole::IResult *pResult, void *pUserData)
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	int Victim = pResult->GetVictim();
 
-	if(Victim < 0 || Victim > MAX_CLIENTS || !pSelf->m_apPlayers[Victim])
+	if(Victim < 0 || Victim > MAX_CLIENTS || !pSelf->m_Players[Victim])
 		return;
 
 	NETADDR Addr;
@@ -697,7 +697,7 @@ void CGameContext::ConModerate(IConsole::IResult *pResult, void *pUserData)
 
 	bool HadModerator = pSelf->PlayerModerating();
 
-	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	CPlayer *pPlayer = pSelf->m_Players[pResult->m_ClientID];
 	pPlayer->m_Moderating = !pPlayer->m_Moderating;
 
 	if(!HadModerator && pPlayer->m_Moderating)
@@ -732,8 +732,8 @@ void CGameContext::ConSetDDRTeam(IConsole::IResult *pResult, void *pUserData)
 
 	CCharacter *pChr = pSelf->GetPlayerChar(Target);
 
-	if((pController->m_Teams.m_Core.Team(Target) && pController->m_Teams.GetDDRaceState(pSelf->m_apPlayers[Target]) == DDRACE_STARTED) || (pChr && pController->m_Teams.IsPractice(pChr->Team())))
-		pSelf->m_apPlayers[Target]->KillCharacter(WEAPON_GAME);
+	if((pController->m_Teams.m_Core.Team(Target) && pController->m_Teams.GetDDRaceState(pSelf->m_Players[Target]) == DDRACE_STARTED) || (pChr && pController->m_Teams.IsPractice(pChr->Team())))
+		pSelf->m_Players[Target]->KillCharacter(WEAPON_GAME);
 
 	pController->m_Teams.SetForceCharacterTeam(Target, Team);
 }
@@ -792,7 +792,7 @@ void CGameContext::ConDrySave(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 
-	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	CPlayer *pPlayer = pSelf->m_Players[pResult->m_ClientID];
 
 	if(!pPlayer || pSelf->Server()->GetAuthedState(pResult->m_ClientID) != AUTHED_ADMIN)
 		return;

@@ -148,6 +148,14 @@ void CLocalizationDatabase::LoadIndexfile(IStorage *pStorage, IConsole *pConsole
 
 void CLocalizationDatabase::SelectDefaultLanguage(IConsole *pConsole, char *pFilename, size_t Length) const
 {
+	if(Languages().empty())
+		return;
+	if(Languages().size() == 1)
+	{
+		str_copy(pFilename, Languages()[0].m_FileName.c_str(), Length);
+		return;
+	}
+
 	char aLocaleStr[128];
 	os_locale_str(aLocaleStr, sizeof(aLocaleStr));
 
@@ -194,7 +202,7 @@ void CLocalizationDatabase::SelectDefaultLanguage(IConsole *pConsole, char *pFil
 		}
 
 		// Stop if no more locale segments are left
-		if(i == 0)
+		if(i <= 0)
 			break;
 	}
 }

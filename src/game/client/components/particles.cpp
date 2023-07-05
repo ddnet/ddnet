@@ -145,7 +145,7 @@ void CParticles::Update(float TimePassed)
 
 void CParticles::OnRender()
 {
-	if(Client()->State() < IClient::STATE_ONLINE)
+	if(Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		return;
 
 	set_new_tick();

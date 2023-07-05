@@ -120,10 +120,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupMenuFile(void *pContext, CUIRect Vie
 	if(pEditor->DoButton_MenuItem(&s_MapInfoButton, "Map details", 0, &Slot, 0, "Adjust the map details of the current map"))
 	{
 		const CUIRect *pScreen = pEditor->UI()->Screen();
-		str_copy(pEditor->m_Map.m_MapInfo.m_aAuthorTmp, pEditor->m_Map.m_MapInfo.m_aAuthor);
-		str_copy(pEditor->m_Map.m_MapInfo.m_aVersionTmp, pEditor->m_Map.m_MapInfo.m_aVersion);
-		str_copy(pEditor->m_Map.m_MapInfo.m_aCreditsTmp, pEditor->m_Map.m_MapInfo.m_aCredits);
-		str_copy(pEditor->m_Map.m_MapInfo.m_aLicenseTmp, pEditor->m_Map.m_MapInfo.m_aLicense);
+		pEditor->m_Map.m_MapInfoTmp.Copy(pEditor->m_Map.m_MapInfo);
 		static SPopupMenuId s_PopupMapInfoId;
 		constexpr float PopupWidth = 400.0f;
 		constexpr float PopupHeight = 170.0f;
@@ -170,6 +167,147 @@ CUI::EPopupMenuFunctionResult CEditor::PopupMenuTools(void *pContext, CUIRect Vi
 	{
 		s_ConfirmPopupContext.Reset();
 		return CUI::POPUP_CLOSE_CURRENT;
+	}
+
+	static int s_BorderButton = 0;
+	View.HSplitTop(2.0f, nullptr, &View);
+	View.HSplitTop(12.0f, &Slot, &View);
+	if(pEditor->DoButton_MenuItem(&s_BorderButton, "Place Border", 0, &Slot, 0, "Place tiles in a 2-tile wide border at the edges of the layer"))
+	{
+		CLayerTiles *pT = (CLayerTiles *)pEditor->GetSelectedLayerType(0, LAYERTYPE_TILES);
+		if(pT && !pT->m_Tele && !pT->m_Speedup && !pT->m_Switch && !pT->m_Front && !pT->m_Tune)
+		{
+			pEditor->m_PopupEventType = POPEVENT_PLACE_BORDER_TILES;
+			pEditor->m_PopupEventActivated = true;
+		}
+		else
+		{
+			static CUI::SMessagePopupContext s_MessagePopupContext;
+			s_MessagePopupContext.DefaultColor(pEditor->m_pTextRender);
+			str_copy(s_MessagePopupContext.m_aMessage, "No tile layer selected");
+			pEditor->UI()->ShowPopupMessage(Slot.x, Slot.y + Slot.h, &s_MessagePopupContext);
+		}
+	}
+
+	static int s_GotoButton = 0;
+	View.HSplitTop(2.0f, nullptr, &View);
+	View.HSplitTop(12.0f, &Slot, &View);
+	if(pEditor->DoButton_MenuItem(&s_GotoButton, "Goto XY", 0, &Slot, 0, "Go to a specified coordinate point on the map"))
+	{
+		static SPopupMenuId s_PopupGotoId;
+		pEditor->UI()->DoPopupMenu(&s_PopupGotoId, Slot.x, Slot.y + Slot.h, 120, 52, pEditor, PopupGoto);
+	}
+
+	return CUI::POPUP_KEEP_OPEN;
+}
+
+static int EntitiesListdirCallback(const char *pName, int IsDir, int StorageType, void *pUser)
+{
+	CEditor *pEditor = (CEditor *)pUser;
+	if(!IsDir && str_endswith(pName, ".png"))
+	{
+		std::string Name = pName;
+		pEditor->m_vSelectEntitiesFiles.push_back(Name.substr(0, Name.length() - 4));
+	}
+
+	return 0;
+}
+
+CUI::EPopupMenuFunctionResult CEditor::PopupMenuSettings(void *pContext, CUIRect View, bool Active)
+{
+	CEditor *pEditor = static_cast<CEditor *>(pContext);
+
+	CUIRect Slot;
+	View.HSplitTop(12.0f, &Slot, &View);
+	static int s_EntitiesButtonID = 0;
+	char aButtonText[64];
+	str_format(aButtonText, sizeof(aButtonText), "Entities: %s", pEditor->m_SelectEntitiesImage.c_str());
+	if(pEditor->DoButton_MenuItem(&s_EntitiesButtonID, aButtonText, 0, &Slot, 0, "Choose game layer entities image for different gametypes"))
+	{
+		pEditor->m_vSelectEntitiesFiles.clear();
+		pEditor->Storage()->ListDirectory(IStorage::TYPE_ALL, "editor/entities", EntitiesListdirCallback, pEditor);
+		std::sort(pEditor->m_vSelectEntitiesFiles.begin(), pEditor->m_vSelectEntitiesFiles.end());
+
+		static SPopupMenuId s_PopupEntitiesId;
+		pEditor->UI()->DoPopupMenu(&s_PopupEntitiesId, Slot.x, Slot.y + Slot.h, 250, pEditor->m_vSelectEntitiesFiles.size() * 14.0f + 10.0f, pEditor, PopupEntities);
+	}
+
+	View.HSplitTop(2.0f, nullptr, &View);
+	View.HSplitTop(12.0f, &Slot, &View);
+	{
+		Slot.VMargin(5.0f, &Slot);
+
+		CUIRect Label, Selector;
+		Slot.VSplitMid(&Label, &Selector);
+		CUIRect No, Yes;
+		Selector.VSplitMid(&No, &Yes);
+
+		pEditor->UI()->DoLabel(&Label, "Brush coloring", 10.0f, TEXTALIGN_ML);
+		static int s_ButtonNo = 0;
+		static int s_ButtonYes = 0;
+		if(pEditor->DoButton_ButtonDec(&s_ButtonNo, "No", !pEditor->m_BrushColorEnabled, &No, 0, "Disable brush coloring"))
+		{
+			pEditor->m_BrushColorEnabled = false;
+		}
+		if(pEditor->DoButton_ButtonInc(&s_ButtonYes, "Yes", pEditor->m_BrushColorEnabled, &Yes, 0, "Enable brush coloring"))
+		{
+			pEditor->m_BrushColorEnabled = true;
+		}
+	}
+
+	View.HSplitTop(2.0f, nullptr, &View);
+	View.HSplitTop(12.0f, &Slot, &View);
+	{
+		Slot.VMargin(5.0f, &Slot);
+
+		CUIRect Label, Selector;
+		Slot.VSplitMid(&Label, &Selector);
+		CUIRect No, Yes;
+		Selector.VSplitMid(&No, &Yes);
+
+		pEditor->UI()->DoLabel(&Label, "Allow unused", 10.0f, TEXTALIGN_ML);
+		static int s_ButtonNo = 0;
+		static int s_ButtonYes = 0;
+		if(pEditor->DoButton_ButtonDec(&s_ButtonNo, "No", !pEditor->m_AllowPlaceUnusedTiles, &No, 0, "[ctrl+u] Disallow placing unused tiles"))
+		{
+			pEditor->m_AllowPlaceUnusedTiles = false;
+		}
+		if(pEditor->DoButton_ButtonInc(&s_ButtonYes, "Yes", pEditor->m_AllowPlaceUnusedTiles, &Yes, 0, "[ctrl+u] Allow placing unused tiles"))
+		{
+			pEditor->m_AllowPlaceUnusedTiles = true;
+		}
+	}
+
+	View.HSplitTop(2.0f, nullptr, &View);
+	View.HSplitTop(12.0f, &Slot, &View);
+	{
+		Slot.VMargin(5.0f, &Slot);
+
+		CUIRect Label, Selector;
+		Slot.VSplitMid(&Label, &Selector);
+		CUIRect Off, Dec, Hex;
+		Selector.VSplitLeft(Selector.w / 3.0f, &Off, &Selector);
+		Selector.VSplitMid(&Dec, &Hex);
+
+		pEditor->UI()->DoLabel(&Label, "Show Info", 10.0f, TEXTALIGN_ML);
+		static int s_ButtonOff = 0;
+		static int s_ButtonDec = 0;
+		static int s_ButtonHex = 0;
+		if(pEditor->DoButton_ButtonDec(&s_ButtonOff, "Off", pEditor->m_ShowTileInfo == SHOW_TILE_OFF, &Off, 0, "Do not show tile information"))
+		{
+			pEditor->m_ShowTileInfo = SHOW_TILE_OFF;
+			pEditor->m_ShowEnvelopePreview = SHOWENV_NONE;
+		}
+		if(pEditor->DoButton_Ex(&s_ButtonDec, "Dec", pEditor->m_ShowTileInfo == SHOW_TILE_DECIMAL, &Dec, 0, "[ctrl+i] Show tile information", IGraphics::CORNER_NONE))
+		{
+			pEditor->m_ShowTileInfo = SHOW_TILE_DECIMAL;
+			pEditor->m_ShowEnvelopePreview = SHOWENV_NONE;
+		}
+		if(pEditor->DoButton_ButtonInc(&s_ButtonHex, "Hex", pEditor->m_ShowTileInfo == SHOW_TILE_HEXADECIMAL, &Hex, 0, "[ctrl+shift+i] Show tile information in hexadecimal"))
+		{
+			pEditor->m_ShowTileInfo = SHOW_TILE_HEXADECIMAL;
+			pEditor->m_ShowEnvelopePreview = SHOWENV_NONE;
+		}
 	}
 
 	return CUI::POPUP_KEEP_OPEN;
@@ -371,8 +509,9 @@ CUI::EPopupMenuFunctionResult CEditor::PopupGroup(void *pContext, CUIRect View, 
 		View.HSplitBottom(12.0f, &View, &Button);
 		pEditor->UI()->DoLabel(&Button, "Name:", 10.0f, TEXTALIGN_ML);
 		Button.VSplitLeft(40.0f, nullptr, &Button);
-		static float s_Name = 0;
-		if(pEditor->DoEditBox(&s_Name, &Button, pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_aName, sizeof(pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_aName), 10.0f, &s_Name))
+		static CLineInput s_NameInput;
+		s_NameInput.SetBuffer(pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_aName, sizeof(pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_aName));
+		if(pEditor->DoEditBox(&s_NameInput, &Button, 10.0f))
 			pEditor->m_Map.m_Modified = true;
 	}
 
@@ -541,8 +680,9 @@ CUI::EPopupMenuFunctionResult CEditor::PopupLayer(void *pContext, CUIRect View, 
 		View.HSplitBottom(12.0f, &View, &Label);
 		Label.VSplitLeft(40.0f, &Label, &EditBox);
 		pEditor->UI()->DoLabel(&Label, "Name:", 10.0f, TEXTALIGN_ML);
-		static float s_Name = 0;
-		if(pEditor->DoEditBox(&s_Name, &EditBox, pCurrentLayer->m_aName, sizeof(pCurrentLayer->m_aName), 10.0f, &s_Name))
+		static CLineInput s_NameInput;
+		s_NameInput.SetBuffer(pCurrentLayer->m_aName, sizeof(pCurrentLayer->m_aName));
+		if(pEditor->DoEditBox(&s_NameInput, &EditBox, 10.0f))
 			pEditor->m_Map.m_Modified = true;
 	}
 
@@ -1319,8 +1459,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupNewFolder(void *pContext, CUIRect Vi
 	pEditor->UI()->DoLabel(&Label, "Name:", 10.0f, TEXTALIGN_ML);
 	Label.VSplitLeft(50.0f, nullptr, &Button);
 	Button.HMargin(2.0f, &Button);
-	static float s_FolderBox = 0;
-	pEditor->DoEditBox(&s_FolderBox, &Button, pEditor->m_aFileDialogNewFolderName, sizeof(pEditor->m_aFileDialogNewFolderName), 12.0f, &s_FolderBox);
+	pEditor->DoEditBox(&pEditor->m_FileDialogNewFolderNameInput, &Button, 12.0f);
 
 	// button bar
 	ButtonBar.VSplitLeft(110.0f, &Button, &ButtonBar);
@@ -1333,10 +1472,10 @@ CUI::EPopupMenuFunctionResult CEditor::PopupNewFolder(void *pContext, CUIRect Vi
 	if(pEditor->DoButton_Editor(&s_CreateButton, "Create", 0, &Button, 0, nullptr) || (Active && pEditor->UI()->ConsumeHotkey(CUI::HOTKEY_ENTER)))
 	{
 		// create the folder
-		if(pEditor->m_aFileDialogNewFolderName[0])
+		if(!pEditor->m_FileDialogNewFolderNameInput.IsEmpty())
 		{
 			char aBuf[IO_MAX_PATH_LENGTH];
-			str_format(aBuf, sizeof(aBuf), "%s/%s", pEditor->m_pFileDialogPath, pEditor->m_aFileDialogNewFolderName);
+			str_format(aBuf, sizeof(aBuf), "%s/%s", pEditor->m_pFileDialogPath, pEditor->m_FileDialogNewFolderNameInput.GetString());
 			if(pEditor->Storage()->CreateFolder(aBuf, IStorage::TYPE_SAVE))
 			{
 				pEditor->FilelistPopulate(IStorage::TYPE_SAVE);
@@ -1371,32 +1510,36 @@ CUI::EPopupMenuFunctionResult CEditor::PopupMapInfo(void *pContext, CUIRect View
 	pEditor->UI()->DoLabel(&Label, "Author:", 10.0f, TEXTALIGN_ML);
 	Label.VSplitLeft(60.0f, nullptr, &Button);
 	Button.HMargin(3.0f, &Button);
-	static float s_AuthorBox = 0;
-	pEditor->DoEditBox(&s_AuthorBox, &Button, pEditor->m_Map.m_MapInfo.m_aAuthorTmp, sizeof(pEditor->m_Map.m_MapInfo.m_aAuthorTmp), 10.0f, &s_AuthorBox);
+	static CLineInput s_AuthorInput;
+	s_AuthorInput.SetBuffer(pEditor->m_Map.m_MapInfoTmp.m_aAuthor, sizeof(pEditor->m_Map.m_MapInfoTmp.m_aAuthor));
+	pEditor->DoEditBox(&s_AuthorInput, &Button, 10.0f);
 
 	// version box
 	View.HSplitTop(20.0f, &Label, &View);
 	pEditor->UI()->DoLabel(&Label, "Version:", 10.0f, TEXTALIGN_ML);
 	Label.VSplitLeft(60.0f, nullptr, &Button);
 	Button.HMargin(3.0f, &Button);
-	static float s_VersionBox = 0;
-	pEditor->DoEditBox(&s_VersionBox, &Button, pEditor->m_Map.m_MapInfo.m_aVersionTmp, sizeof(pEditor->m_Map.m_MapInfo.m_aVersionTmp), 10.0f, &s_VersionBox);
+	static CLineInput s_VersionInput;
+	s_VersionInput.SetBuffer(pEditor->m_Map.m_MapInfoTmp.m_aVersion, sizeof(pEditor->m_Map.m_MapInfoTmp.m_aVersion));
+	pEditor->DoEditBox(&s_VersionInput, &Button, 10.0f);
 
 	// credits box
 	View.HSplitTop(20.0f, &Label, &View);
 	pEditor->UI()->DoLabel(&Label, "Credits:", 10.0f, TEXTALIGN_ML);
 	Label.VSplitLeft(60.0f, nullptr, &Button);
 	Button.HMargin(3.0f, &Button);
-	static float s_CreditsBox = 0;
-	pEditor->DoEditBox(&s_CreditsBox, &Button, pEditor->m_Map.m_MapInfo.m_aCreditsTmp, sizeof(pEditor->m_Map.m_MapInfo.m_aCreditsTmp), 10.0f, &s_CreditsBox);
+	static CLineInput s_CreditsInput;
+	s_CreditsInput.SetBuffer(pEditor->m_Map.m_MapInfoTmp.m_aCredits, sizeof(pEditor->m_Map.m_MapInfoTmp.m_aCredits));
+	pEditor->DoEditBox(&s_CreditsInput, &Button, 10.0f);
 
 	// license box
 	View.HSplitTop(20.0f, &Label, &View);
 	pEditor->UI()->DoLabel(&Label, "License:", 10.0f, TEXTALIGN_ML);
 	Label.VSplitLeft(60.0f, nullptr, &Button);
 	Button.HMargin(3.0f, &Button);
-	static float s_LicenseBox = 0;
-	pEditor->DoEditBox(&s_LicenseBox, &Button, pEditor->m_Map.m_MapInfo.m_aLicenseTmp, sizeof(pEditor->m_Map.m_MapInfo.m_aLicenseTmp), 10.0f, &s_LicenseBox);
+	static CLineInput s_LicenseInput;
+	s_LicenseInput.SetBuffer(pEditor->m_Map.m_MapInfoTmp.m_aLicense, sizeof(pEditor->m_Map.m_MapInfoTmp.m_aLicense));
+	pEditor->DoEditBox(&s_LicenseInput, &Button, 10.0f);
 
 	// button bar
 	ButtonBar.VSplitLeft(110.0f, &Label, &ButtonBar);
@@ -1408,10 +1551,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupMapInfo(void *pContext, CUIRect View
 	static int s_ConfirmButton = 0;
 	if(pEditor->DoButton_Editor(&s_ConfirmButton, "Confirm", 0, &Label, 0, nullptr) || (Active && pEditor->UI()->ConsumeHotkey(CUI::HOTKEY_ENTER)))
 	{
-		str_copy(pEditor->m_Map.m_MapInfo.m_aAuthor, pEditor->m_Map.m_MapInfo.m_aAuthorTmp);
-		str_copy(pEditor->m_Map.m_MapInfo.m_aVersion, pEditor->m_Map.m_MapInfo.m_aVersionTmp);
-		str_copy(pEditor->m_Map.m_MapInfo.m_aCredits, pEditor->m_Map.m_MapInfo.m_aCreditsTmp);
-		str_copy(pEditor->m_Map.m_MapInfo.m_aLicense, pEditor->m_Map.m_MapInfo.m_aLicenseTmp);
+		pEditor->m_Map.m_MapInfo.Copy(pEditor->m_Map.m_MapInfoTmp);
 		return CUI::POPUP_CLOSE_CURRENT;
 	}
 
@@ -1452,7 +1592,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupEvent(void *pContext, CUIRect View, 
 	else if(pEditor->m_PopupEventType == POPEVENT_PREVENTUNUSEDTILES)
 	{
 		pTitle = "Unused tiles disabled";
-		pMessage = "Unused tiles can't be placed by default because they could get a use later and then destroy your map.\n\nActivate the 'Unused' switch to be able to place every tile.";
+		pMessage = "Unused tiles can't be placed by default because they could get a use later and then destroy your map.\n\nActivate the 'Allow Unused' setting to be able to place every tile.";
 	}
 	else if(pEditor->m_PopupEventType == POPEVENT_IMAGEDIV16)
 	{
@@ -2173,6 +2313,31 @@ CUI::EPopupMenuFunctionResult CEditor::PopupEntities(void *pContext, CUIRect Vie
 				return CUI::POPUP_CLOSE_CURRENT;
 			}
 		}
+	}
+
+	return CUI::POPUP_KEEP_OPEN;
+}
+
+CUI::EPopupMenuFunctionResult CEditor::PopupProofMode(void *pContext, CUIRect View, bool Active)
+{
+	CEditor *pEditor = static_cast<CEditor *>(pContext);
+
+	CUIRect Button;
+	View.HSplitTop(12.0f, &Button, &View);
+	static int s_ButtonIngame;
+	if(pEditor->DoButton_MenuItem(&s_ButtonIngame, "Ingame", pEditor->m_ProofBorders == PROOF_BORDER_INGAME, &Button, 0, "These borders represent what a player maximum can see."))
+	{
+		pEditor->m_ProofBorders = PROOF_BORDER_INGAME;
+		return CUI::POPUP_CLOSE_CURRENT;
+	}
+
+	View.HSplitTop(2.0f, nullptr, &View);
+	View.HSplitTop(12.0f, &Button, &View);
+	static int s_ButtonMenu;
+	if(pEditor->DoButton_MenuItem(&s_ButtonMenu, "Menu", pEditor->m_ProofBorders == PROOF_BORDER_MENU, &Button, 0, "These borders represent what will be shown in the menu."))
+	{
+		pEditor->m_ProofBorders = PROOF_BORDER_MENU;
+		return CUI::POPUP_CLOSE_CURRENT;
 	}
 
 	return CUI::POPUP_KEEP_OPEN;

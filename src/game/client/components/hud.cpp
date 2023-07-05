@@ -26,7 +26,8 @@ CHud::CHud()
 {
 	// won't work if zero
 	m_FrameTimeAvg = 0.0f;
-	m_FPSTextContainerIndex = -1;
+	m_FPSTextContainerIndex.Reset();
+	m_DDRaceEffectsTextContainerIndex.Reset();
 }
 
 void CHud::ResetHudContainers()
@@ -42,6 +43,7 @@ void CHud::ResetHudContainers()
 	}
 
 	TextRender()->DeleteTextContainer(m_FPSTextContainerIndex);
+	TextRender()->DeleteTextContainer(m_DDRaceEffectsTextContainerIndex);
 }
 
 void CHud::OnWindowResize()
@@ -219,7 +221,7 @@ void CHud::RenderScoreHud()
 					Cursor.m_LineWidth = -1;
 					TextRender()->RecreateTextContainer(m_aScoreInfo[t].m_TextScoreContainerIndex, &Cursor, aScoreTeam[t]);
 				}
-				if(m_aScoreInfo[t].m_TextScoreContainerIndex != -1)
+				if(m_aScoreInfo[t].m_TextScoreContainerIndex.Valid())
 				{
 					ColorRGBA TColor(1.f, 1.f, 1.f, 1.f);
 					ColorRGBA TOutlineColor(0.f, 0.f, 0.f, 0.3f);
@@ -256,7 +258,7 @@ void CHud::RenderScoreHud()
 							TextRender()->RecreateTextContainer(m_aScoreInfo[t].m_OptionalNameTextContainerIndex, &Cursor, pName);
 						}
 
-						if(m_aScoreInfo[t].m_OptionalNameTextContainerIndex != -1)
+						if(m_aScoreInfo[t].m_OptionalNameTextContainerIndex.Valid())
 						{
 							ColorRGBA TColor(1.f, 1.f, 1.f, 1.f);
 							ColorRGBA TOutlineColor(0.f, 0.f, 0.f, 0.3f);
@@ -394,7 +396,7 @@ void CHud::RenderScoreHud()
 					TextRender()->RecreateTextContainer(m_aScoreInfo[t].m_TextScoreContainerIndex, &Cursor, aScore[t]);
 				}
 				// draw score
-				if(m_aScoreInfo[t].m_TextScoreContainerIndex != -1)
+				if(m_aScoreInfo[t].m_TextScoreContainerIndex.Valid())
 				{
 					ColorRGBA TColor(1.f, 1.f, 1.f, 1.f);
 					ColorRGBA TOutlineColor(0.f, 0.f, 0.f, 0.3f);
@@ -419,7 +421,7 @@ void CHud::RenderScoreHud()
 							TextRender()->RecreateTextContainer(m_aScoreInfo[t].m_OptionalNameTextContainerIndex, &Cursor, pName);
 						}
 
-						if(m_aScoreInfo[t].m_OptionalNameTextContainerIndex != -1)
+						if(m_aScoreInfo[t].m_OptionalNameTextContainerIndex.Valid())
 						{
 							ColorRGBA TColor(1.f, 1.f, 1.f, 1.f);
 							ColorRGBA TOutlineColor(0.f, 0.f, 0.f, 0.3f);
@@ -455,7 +457,7 @@ void CHud::RenderScoreHud()
 					Cursor.m_LineWidth = -1;
 					TextRender()->RecreateTextContainer(m_aScoreInfo[t].m_TextRankContainerIndex, &Cursor, aBuf);
 				}
-				if(m_aScoreInfo[t].m_TextRankContainerIndex != -1)
+				if(m_aScoreInfo[t].m_TextRankContainerIndex.Valid())
 				{
 					ColorRGBA TColor(1.f, 1.f, 1.f, 1.f);
 					ColorRGBA TOutlineColor(0.f, 0.f, 0.f, 0.3f);
@@ -506,21 +508,21 @@ void CHud::RenderTextInfo()
 		static const float s_aTextWidth[5] = {s_TextWidth0, s_TextWidth00, s_TextWidth000, s_TextWidth0000, s_TextWidth00000};
 
 		int DigitIndex = GetDigitsIndex(FrameTime, 4);
-		//TextRender()->Text(m_Width-10-TextRender()->TextWidth(0,12,Buf,-1,-1.0f), 5, 12, Buf, -1.0f);
 
 		CTextCursor Cursor;
 		TextRender()->SetCursor(&Cursor, m_Width - 10 - s_aTextWidth[DigitIndex], 5, 12, TEXTFLAG_RENDER);
 		Cursor.m_LineWidth = -1;
 		auto OldFlags = TextRender()->GetRenderFlags();
 		TextRender()->SetRenderFlags(OldFlags | TEXT_RENDER_FLAG_ONE_TIME_USE);
-		if(m_FPSTextContainerIndex == -1)
-			TextRender()->CreateTextContainer(m_FPSTextContainerIndex, &Cursor, "0");
-		else
+		if(m_FPSTextContainerIndex.Valid())
 			TextRender()->RecreateTextContainerSoft(m_FPSTextContainerIndex, &Cursor, aBuf);
+		else
+			TextRender()->CreateTextContainer(m_FPSTextContainerIndex, &Cursor, "0");
 		TextRender()->SetRenderFlags(OldFlags);
-		ColorRGBA TColor(1, 1, 1, 1);
-		ColorRGBA TOutColor(0, 0, 0, 0.3f);
-		TextRender()->RenderTextContainer(m_FPSTextContainerIndex, TColor, TOutColor);
+		if(m_FPSTextContainerIndex.Valid())
+		{
+			TextRender()->RenderTextContainer(m_FPSTextContainerIndex, TextRender()->DefaultTextColor(), TextRender()->DefaultTextOutlineColor());
+		}
 	}
 	if(g_Config.m_ClShowpred)
 	{
@@ -555,7 +557,7 @@ void CHud::RenderTeambalanceWarning()
 			else
 				TextRender()->TextColor(0.7f, 0.7f, 0.2f, 1.0f);
 			TextRender()->Text(5, 50, 6, pText, -1.0f);
-			TextRender()->TextColor(1, 1, 1, 1);
+			TextRender()->TextColor(TextRender()->DefaultTextColor());
 		}
 	}
 }
@@ -567,7 +569,7 @@ void CHud::RenderVoting()
 
 	Graphics()->DrawRect(-10, 60 - 2, 100 + 10 + 4 + 5, 46, ColorRGBA(0.0f, 0.0f, 0.0f, 0.4f), IGraphics::CORNER_ALL, 5.0f);
 
-	TextRender()->TextColor(1, 1, 1, 1);
+	TextRender()->TextColor(TextRender()->DefaultTextColor());
 
 	CTextCursor Cursor;
 	char aBuf[512];
@@ -1379,7 +1381,7 @@ void CHud::RenderMovementInformation(const int ClientID)
 	{
 		// On DDNet servers the more accurate angle is displayed, calculated from the target coordinates
 		CNetObj_DDNetCharacter *pExtendedData = &m_pClient->m_Snap.m_aCharacters[ClientID].m_ExtendedData;
-		Angle = atan2f(pExtendedData->m_TargetY, pExtendedData->m_TargetX);
+		Angle = std::atan2(pExtendedData->m_TargetY, pExtendedData->m_TargetX);
 	}
 	else
 	{
@@ -1614,32 +1616,43 @@ void CHud::RenderDDRaceEffects()
 			str_format(aBuf, sizeof(aBuf), "Finish time: %s", aTime);
 
 			// calculate alpha (4 sec 1 than get lower the next 2 sec)
-			float alpha = 1.0f;
+			float Alpha = 1.0f;
 			if(m_FinishTimeLastReceivedTick + Client()->GameTickSpeed() * 4 < Client()->GameTick(g_Config.m_ClDummy) && m_FinishTimeLastReceivedTick + Client()->GameTickSpeed() * 6 > Client()->GameTick(g_Config.m_ClDummy))
 			{
 				// lower the alpha slowly to blend text out
-				alpha = ((float)(m_FinishTimeLastReceivedTick + Client()->GameTickSpeed() * 6) - (float)Client()->GameTick(g_Config.m_ClDummy)) / (float)(Client()->GameTickSpeed() * 2);
+				Alpha = ((float)(m_FinishTimeLastReceivedTick + Client()->GameTickSpeed() * 6) - (float)Client()->GameTick(g_Config.m_ClDummy)) / (float)(Client()->GameTickSpeed() * 2);
 			}
 
-			TextRender()->TextColor(1, 1, 1, alpha);
-			TextRender()->Text(150 * Graphics()->ScreenAspect() - TextRender()->TextWidth(12, aBuf, -1, -1.0f) / 2, 20, 12, aBuf, -1.0f);
-			if(m_FinishTimeDiff != 0.0f)
+			TextRender()->TextColor(1, 1, 1, Alpha);
+			CTextCursor Cursor;
+			TextRender()->SetCursor(&Cursor, 150 * Graphics()->ScreenAspect() - TextRender()->TextWidth(12, aBuf, -1, -1.0f) / 2, 20, 12, TEXTFLAG_RENDER);
+			Cursor.m_LineWidth = -1.0f;
+			TextRender()->RecreateTextContainer(m_DDRaceEffectsTextContainerIndex, &Cursor, aBuf);
+			if(m_FinishTimeDiff != 0.0f && m_DDRaceEffectsTextContainerIndex.Valid())
 			{
 				if(m_FinishTimeDiff < 0)
 				{
 					str_time_float(-m_FinishTimeDiff, TIME_HOURS_CENTISECS, aTime, sizeof(aTime));
 					str_format(aBuf, sizeof(aBuf), "-%s", aTime);
-					TextRender()->TextColor(0.5f, 1.0f, 0.5f, alpha); // green
+					TextRender()->TextColor(0.5f, 1.0f, 0.5f, Alpha); // green
 				}
 				else
 				{
 					str_time_float(m_FinishTimeDiff, TIME_HOURS_CENTISECS, aTime, sizeof(aTime));
 					str_format(aBuf, sizeof(aBuf), "+%s", aTime);
-					TextRender()->TextColor(1.0f, 0.5f, 0.5f, alpha); // red
+					TextRender()->TextColor(1.0f, 0.5f, 0.5f, Alpha); // red
 				}
-				TextRender()->Text(150 * Graphics()->ScreenAspect() - TextRender()->TextWidth(10, aBuf, -1, -1.0f) / 2, 34, 10, aBuf, -1.0f);
+				TextRender()->SetCursor(&Cursor, 150 * Graphics()->ScreenAspect() - TextRender()->TextWidth(10, aBuf, -1, -1.0f) / 2, 34, 10, TEXTFLAG_RENDER);
+				Cursor.m_LineWidth = -1.0f;
+				TextRender()->AppendTextContainer(m_DDRaceEffectsTextContainerIndex, &Cursor, aBuf);
 			}
-			TextRender()->TextColor(1, 1, 1, 1);
+			if(m_DDRaceEffectsTextContainerIndex.Valid())
+			{
+				auto OutlineColor = TextRender()->DefaultTextOutlineColor();
+				OutlineColor.a *= Alpha;
+				TextRender()->RenderTextContainer(m_DDRaceEffectsTextContainerIndex, TextRender()->DefaultTextColor(), OutlineColor);
+			}
+			TextRender()->TextColor(TextRender()->DefaultTextColor());
 		}
 		else if(!m_ShowFinishTime && m_TimeCpLastReceivedTick + Client()->GameTickSpeed() * 6 > Client()->GameTick(g_Config.m_ClDummy))
 		{
@@ -1655,22 +1668,32 @@ void CHud::RenderDDRaceEffects()
 			}
 
 			// calculate alpha (4 sec 1 than get lower the next 2 sec)
-			float alpha = 1.0f;
+			float Alpha = 1.0f;
 			if(m_TimeCpLastReceivedTick + Client()->GameTickSpeed() * 4 < Client()->GameTick(g_Config.m_ClDummy) && m_TimeCpLastReceivedTick + Client()->GameTickSpeed() * 6 > Client()->GameTick(g_Config.m_ClDummy))
 			{
 				// lower the alpha slowly to blend text out
-				alpha = ((float)(m_TimeCpLastReceivedTick + Client()->GameTickSpeed() * 6) - (float)Client()->GameTick(g_Config.m_ClDummy)) / (float)(Client()->GameTickSpeed() * 2);
+				Alpha = ((float)(m_TimeCpLastReceivedTick + Client()->GameTickSpeed() * 6) - (float)Client()->GameTick(g_Config.m_ClDummy)) / (float)(Client()->GameTickSpeed() * 2);
 			}
 
 			if(m_TimeCpDiff > 0)
-				TextRender()->TextColor(1.0f, 0.5f, 0.5f, alpha); // red
+				TextRender()->TextColor(1.0f, 0.5f, 0.5f, Alpha); // red
 			else if(m_TimeCpDiff < 0)
-				TextRender()->TextColor(0.5f, 1.0f, 0.5f, alpha); // green
+				TextRender()->TextColor(0.5f, 1.0f, 0.5f, Alpha); // green
 			else if(!m_TimeCpDiff)
-				TextRender()->TextColor(1, 1, 1, alpha); // white
-			TextRender()->Text(150 * Graphics()->ScreenAspect() - TextRender()->TextWidth(10, aBuf, -1, -1.0f) / 2, 20, 10, aBuf, -1.0f);
+				TextRender()->TextColor(1, 1, 1, Alpha); // white
 
-			TextRender()->TextColor(1, 1, 1, 1);
+			CTextCursor Cursor;
+			TextRender()->SetCursor(&Cursor, 150 * Graphics()->ScreenAspect() - TextRender()->TextWidth(10, aBuf, -1, -1.0f) / 2, 20, 10, TEXTFLAG_RENDER);
+			Cursor.m_LineWidth = -1.0f;
+			TextRender()->RecreateTextContainer(m_DDRaceEffectsTextContainerIndex, &Cursor, aBuf);
+
+			if(m_DDRaceEffectsTextContainerIndex.Valid())
+			{
+				auto OutlineColor = TextRender()->DefaultTextOutlineColor();
+				OutlineColor.a *= Alpha;
+				TextRender()->RenderTextContainer(m_DDRaceEffectsTextContainerIndex, TextRender()->DefaultTextColor(), OutlineColor);
+			}
+			TextRender()->TextColor(TextRender()->DefaultTextColor());
 		}
 	}
 }

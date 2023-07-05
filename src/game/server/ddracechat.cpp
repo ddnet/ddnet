@@ -258,18 +258,17 @@ void CGameContext::ConRules(IConsole::IResult *pResult, void *pUserData)
 			"Be nice.");
 		Printed = true;
 	}
-#define GET_SERVER_RULE_LINE(n) g_Config.m_SvRulesLine##n
 	char *apRuleLines[] = {
-		GET_SERVER_RULE_LINE(1),
-		GET_SERVER_RULE_LINE(2),
-		GET_SERVER_RULE_LINE(3),
-		GET_SERVER_RULE_LINE(4),
-		GET_SERVER_RULE_LINE(5),
-		GET_SERVER_RULE_LINE(6),
-		GET_SERVER_RULE_LINE(7),
-		GET_SERVER_RULE_LINE(8),
-		GET_SERVER_RULE_LINE(9),
-		GET_SERVER_RULE_LINE(10),
+		g_Config.m_SvRulesLine1,
+		g_Config.m_SvRulesLine2,
+		g_Config.m_SvRulesLine3,
+		g_Config.m_SvRulesLine4,
+		g_Config.m_SvRulesLine5,
+		g_Config.m_SvRulesLine6,
+		g_Config.m_SvRulesLine7,
+		g_Config.m_SvRulesLine8,
+		g_Config.m_SvRulesLine9,
+		g_Config.m_SvRulesLine10,
 	};
 	for(auto &pRuleLine : apRuleLines)
 	{
@@ -294,7 +293,7 @@ void ToggleSpecPause(IConsole::IResult *pResult, void *pUserData, int PauseType)
 
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	IServer *pServ = pSelf->Server();
-	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	CPlayer *pPlayer = pSelf->m_Players[pResult->m_ClientID];
 	if(!pPlayer)
 		return;
 
@@ -333,7 +332,7 @@ void ToggleSpecPauseVoted(IConsole::IResult *pResult, void *pUserData, int Pause
 		return;
 
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	CPlayer *pPlayer = pSelf->m_Players[pResult->m_ClientID];
 	if(!pPlayer)
 		return;
 
@@ -493,7 +492,7 @@ void CGameContext::ConDND(IConsole::IResult *pResult, void *pUserData)
 	if(!CheckClientID(pResult->m_ClientID))
 		return;
 
-	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	CPlayer *pPlayer = pSelf->m_Players[pResult->m_ClientID];
 	if(!pPlayer)
 		return;
 
@@ -528,7 +527,7 @@ void CGameContext::ConMap(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
-	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	CPlayer *pPlayer = pSelf->m_Players[pResult->m_ClientID];
 	if(!pPlayer)
 		return;
 
@@ -544,7 +543,7 @@ void CGameContext::ConMapInfo(IConsole::IResult *pResult, void *pUserData)
 	if(!CheckClientID(pResult->m_ClientID))
 		return;
 
-	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	CPlayer *pPlayer = pSelf->m_Players[pResult->m_ClientID];
 	if(!pPlayer)
 		return;
 
@@ -560,7 +559,7 @@ void CGameContext::ConTimeout(IConsole::IResult *pResult, void *pUserData)
 	if(!CheckClientID(pResult->m_ClientID))
 		return;
 
-	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	CPlayer *pPlayer = pSelf->m_Players[pResult->m_ClientID];
 	if(!pPlayer)
 		return;
 
@@ -572,14 +571,14 @@ void CGameContext::ConTimeout(IConsole::IResult *pResult, void *pUserData)
 		{
 			if(i == pResult->m_ClientID)
 				continue;
-			if(!pSelf->m_apPlayers[i])
+			if(!pSelf->m_Players[i])
 				continue;
-			if(str_comp(pSelf->m_apPlayers[i]->m_aTimeoutCode, pTimeout))
+			if(str_comp(pSelf->m_Players[i]->m_aTimeoutCode, pTimeout))
 				continue;
 			if(pSelf->Server()->SetTimedOut(i, pResult->m_ClientID))
 			{
-				if(pSelf->m_apPlayers[i]->GetCharacter())
-					pSelf->SendTuningParams(i, pSelf->m_apPlayers[i]->GetCharacter()->m_TuneZone);
+				if(pSelf->m_Players[i]->GetCharacter())
+					pSelf->SendTuningParams(i, pSelf->m_Players[i]->GetCharacter()->m_TuneZone);
 				return;
 			}
 		}
@@ -600,7 +599,7 @@ void CGameContext::ConPractice(IConsole::IResult *pResult, void *pUserData)
 	if(!CheckClientID(pResult->m_ClientID))
 		return;
 
-	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	CPlayer *pPlayer = pSelf->m_Players[pResult->m_ClientID];
 	if(!pPlayer)
 		return;
 
@@ -652,7 +651,7 @@ void CGameContext::ConPractice(IConsole::IResult *pResult, void *pUserData)
 	{
 		if(Teams.m_Core.Team(i) == Team)
 		{
-			CPlayer *pPlayer2 = pSelf->m_apPlayers[i];
+			CPlayer *pPlayer2 = pSelf->m_Players[i];
 			if(pPlayer2 && pPlayer2->m_VotedForPractice)
 				NumCurrentVotes++;
 			TeamSize++;
@@ -680,7 +679,7 @@ void CGameContext::ConSwap(IConsole::IResult *pResult, void *pUserData)
 	if(!CheckClientID(pResult->m_ClientID))
 		return;
 
-	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	CPlayer *pPlayer = pSelf->m_Players[pResult->m_ClientID];
 	if(!pPlayer)
 		return;
 
@@ -709,7 +708,7 @@ void CGameContext::ConSwap(IConsole::IResult *pResult, void *pUserData)
 	int TargetClientId = -1;
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if(pSelf->m_apPlayers[i] && !str_comp(pName, pSelf->Server()->ClientName(i)))
+		if(pSelf->m_Players[i] && !str_comp(pName, pSelf->Server()->ClientName(i)))
 		{
 			TargetClientId = i;
 			break;
@@ -735,7 +734,7 @@ void CGameContext::ConSwap(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
-	CPlayer *pSwapPlayer = pSelf->m_apPlayers[TargetClientId];
+	CPlayer *pSwapPlayer = pSelf->m_Players[TargetClientId];
 	if(Team == TEAM_FLOCK && g_Config.m_SvTeam != 3)
 	{
 		CCharacter *pChr = pPlayer->GetCharacter();
@@ -967,14 +966,14 @@ void CGameContext::ConInviteTeam(IConsole::IResult *pResult, void *pUserData)
 			return;
 		}
 
-		if(pSelf->m_apPlayers[pResult->m_ClientID] && pSelf->m_apPlayers[pResult->m_ClientID]->m_LastInvited + g_Config.m_SvInviteFrequency * pSelf->Server()->TickSpeed() > pSelf->Server()->Tick())
+		if(pSelf->m_Players[pResult->m_ClientID] && pSelf->m_Players[pResult->m_ClientID]->m_LastInvited + g_Config.m_SvInviteFrequency * pSelf->Server()->TickSpeed() > pSelf->Server()->Tick())
 		{
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "Can't invite this quickly");
 			return;
 		}
 
 		pController->m_Teams.SetClientInvited(Team, Target, true);
-		pSelf->m_apPlayers[pResult->m_ClientID]->m_LastInvited = pSelf->Server()->Tick();
+		pSelf->m_Players[pResult->m_ClientID]->m_LastInvited = pSelf->Server()->Tick();
 
 		char aBuf[512];
 		str_format(aBuf, sizeof aBuf, "'%s' invited you to team %d.", pSelf->Server()->ClientName(pResult->m_ClientID), Team);
@@ -994,7 +993,7 @@ void CGameContext::ConJoinTeam(IConsole::IResult *pResult, void *pUserData)
 	if(!CheckClientID(pResult->m_ClientID))
 		return;
 
-	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	CPlayer *pPlayer = pSelf->m_Players[pResult->m_ClientID];
 	if(!pPlayer)
 		return;
 
@@ -1131,7 +1130,7 @@ void CGameContext::ConSetEyeEmote(IConsole::IResult *pResult,
 	if(!CheckClientID(pResult->m_ClientID))
 		return;
 
-	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	CPlayer *pPlayer = pSelf->m_Players[pResult->m_ClientID];
 	if(!pPlayer)
 		return;
 	if(pResult->NumArguments() == 0)
@@ -1171,7 +1170,7 @@ void CGameContext::ConEyeEmote(IConsole::IResult *pResult, void *pUserData)
 	if(!CheckClientID(pResult->m_ClientID))
 		return;
 
-	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	CPlayer *pPlayer = pSelf->m_Players[pResult->m_ClientID];
 	if(!pPlayer)
 		return;
 
@@ -1227,7 +1226,7 @@ void CGameContext::ConNinjaJetpack(IConsole::IResult *pResult, void *pUserData)
 	if(!CheckClientID(pResult->m_ClientID))
 		return;
 
-	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	CPlayer *pPlayer = pSelf->m_Players[pResult->m_ClientID];
 	if(!pPlayer)
 		return;
 	if(pResult->NumArguments())
@@ -1242,7 +1241,7 @@ void CGameContext::ConShowOthers(IConsole::IResult *pResult, void *pUserData)
 	if(!CheckClientID(pResult->m_ClientID))
 		return;
 
-	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	CPlayer *pPlayer = pSelf->m_Players[pResult->m_ClientID];
 	if(!pPlayer)
 		return;
 	if(g_Config.m_SvShowOthers)
@@ -1265,7 +1264,7 @@ void CGameContext::ConShowAll(IConsole::IResult *pResult, void *pUserData)
 	if(!CheckClientID(pResult->m_ClientID))
 		return;
 
-	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	CPlayer *pPlayer = pSelf->m_Players[pResult->m_ClientID];
 	if(!pPlayer)
 		return;
 
@@ -1293,7 +1292,7 @@ void CGameContext::ConSpecTeam(IConsole::IResult *pResult, void *pUserData)
 	if(!CheckClientID(pResult->m_ClientID))
 		return;
 
-	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	CPlayer *pPlayer = pSelf->m_Players[pResult->m_ClientID];
 	if(!pPlayer)
 		return;
 
@@ -1334,7 +1333,7 @@ void CGameContext::ConSayTime(IConsole::IResult *pResult, void *pUserData)
 		ClientID = pResult->m_ClientID;
 	}
 
-	CPlayer *pPlayer = pSelf->m_apPlayers[ClientID];
+	CPlayer *pPlayer = pSelf->m_Players[ClientID];
 	if(!pPlayer)
 		return;
 	CCharacter *pChr = pPlayer->GetCharacter();
@@ -1357,7 +1356,7 @@ void CGameContext::ConSayTimeAll(IConsole::IResult *pResult, void *pUserData)
 	if(!CheckClientID(pResult->m_ClientID))
 		return;
 
-	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	CPlayer *pPlayer = pSelf->m_Players[pResult->m_ClientID];
 	if(!pPlayer)
 		return;
 	CCharacter *pChr = pPlayer->GetCharacter();
@@ -1381,7 +1380,7 @@ void CGameContext::ConTime(IConsole::IResult *pResult, void *pUserData)
 	if(!CheckClientID(pResult->m_ClientID))
 		return;
 
-	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	CPlayer *pPlayer = pSelf->m_Players[pResult->m_ClientID];
 	if(!pPlayer)
 		return;
 	CCharacter *pChr = pPlayer->GetCharacter();
@@ -1405,7 +1404,7 @@ void CGameContext::ConSetTimerType(IConsole::IResult *pResult, void *pUserData)
 	if(!CheckClientID(pResult->m_ClientID))
 		return;
 
-	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	CPlayer *pPlayer = pSelf->m_Players[pResult->m_ClientID];
 	if(!pPlayer)
 		return;
 
@@ -1455,7 +1454,7 @@ void CGameContext::ConRescue(IConsole::IResult *pResult, void *pUserData)
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	if(!CheckClientID(pResult->m_ClientID))
 		return;
-	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	CPlayer *pPlayer = pSelf->m_Players[pResult->m_ClientID];
 	if(!pPlayer)
 		return;
 	CCharacter *pChr = pPlayer->GetCharacter();
@@ -1479,7 +1478,7 @@ void CGameContext::ConTele(IConsole::IResult *pResult, void *pUserData)
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	if(!CheckClientID(pResult->m_ClientID))
 		return;
-	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	CPlayer *pPlayer = pSelf->m_Players[pResult->m_ClientID];
 	if(!pPlayer)
 		return;
 	CCharacter *pChr = pPlayer->GetCharacter();
@@ -1509,7 +1508,7 @@ void CGameContext::ConTele(IConsole::IResult *pResult, void *pUserData)
 			pSelf->SendChatTarget(pPlayer->GetCID(), "No player with this name found.");
 			return;
 		}
-		CPlayer *pPlayerTo = pSelf->m_apPlayers[ClientID];
+		CPlayer *pPlayerTo = pSelf->m_Players[ClientID];
 		if(!pPlayerTo)
 			return;
 		CCharacter *pChrTo = pPlayerTo->GetCharacter();
@@ -1523,12 +1522,65 @@ void CGameContext::ConTele(IConsole::IResult *pResult, void *pUserData)
 	pChr->Core()->m_Vel = vec2(0, 0);
 }
 
+void CGameContext::ConPracticeUnSolo(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientID(pResult->m_ClientID))
+		return;
+	CPlayer *pPlayer = pSelf->m_Players[pResult->m_ClientID];
+	if(!pPlayer)
+		return;
+	CCharacter *pChr = pPlayer->GetCharacter();
+	if(!pChr)
+		return;
+
+	if(g_Config.m_SvTeam == SV_TEAM_FORBIDDEN || g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO)
+	{
+		pSelf->SendChatTarget(pPlayer->GetCID(), "Command is not available on solo servers");
+		return;
+	}
+
+	CGameTeams &Teams = ((CGameControllerDDRace *)pSelf->m_pController)->m_Teams;
+	int Team = Teams.m_Core.Team(pResult->m_ClientID);
+	if(!Teams.IsPractice(Team))
+	{
+		pSelf->SendChatTarget(pPlayer->GetCID(), "You're not in a team with /practice turned on. Note that you can't earn a rank with practice enabled.");
+		return;
+	}
+
+	pChr->SetSolo(false);
+}
+
+void CGameContext::ConPracticeUnDeep(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientID(pResult->m_ClientID))
+		return;
+	CPlayer *pPlayer = pSelf->m_Players[pResult->m_ClientID];
+	if(!pPlayer)
+		return;
+	CCharacter *pChr = pPlayer->GetCharacter();
+	if(!pChr)
+		return;
+
+	CGameTeams &Teams = ((CGameControllerDDRace *)pSelf->m_pController)->m_Teams;
+	int Team = Teams.m_Core.Team(pResult->m_ClientID);
+	if(!Teams.IsPractice(Team))
+	{
+		pSelf->SendChatTarget(pPlayer->GetCID(), "You're not in a team with /practice turned on. Note that you can't earn a rank with practice enabled.");
+		return;
+	}
+
+	pChr->SetDeepFrozen(false);
+	pChr->UnFreeze();
+}
+
 void CGameContext::ConProtectedKill(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	if(!CheckClientID(pResult->m_ClientID))
 		return;
-	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	CPlayer *pPlayer = pSelf->m_Players[pResult->m_ClientID];
 	if(!pPlayer)
 		return;
 	CCharacter *pChr = pPlayer->GetCharacter();
@@ -1595,7 +1647,7 @@ void CGameContext::ConTimeCP(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
-	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	CPlayer *pPlayer = pSelf->m_Players[pResult->m_ClientID];
 	if(!pPlayer)
 		return;
 

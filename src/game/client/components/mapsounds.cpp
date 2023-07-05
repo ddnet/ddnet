@@ -32,7 +32,7 @@ void CMapSounds::OnMapLoad()
 	{
 		m_aSounds[i] = 0;
 
-		CMapItemSound *pSound = (CMapItemSound *)pMap->GetItem(Start + i, 0, 0);
+		CMapItemSound *pSound = (CMapItemSound *)pMap->GetItem(Start + i);
 		if(pSound->m_External)
 		{
 			char aBuf[IO_MAX_PATH_LENGTH];

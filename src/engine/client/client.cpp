@@ -5,6 +5,7 @@
 
 #include <climits>
 #include <new>
+#include <stack>
 #include <tuple>
 
 #include <base/hash.h>
@@ -912,7 +913,7 @@ void CClient::DummyConnect()
 	if(m_LastDummyConnectTime > 0 && m_LastDummyConnectTime + GameTickSpeed() * 5 > GameTick(g_Config.m_ClDummy))
 		return;
 
-	if(m_aNetClient[CONN_MAIN].State() != NET_CONNSTATE_ONLINE && m_aNetClient[CONN_MAIN].State() != NET_CONNSTATE_PENDING)
+	if(m_aNetClient[CONN_MAIN].State() != NETSTATE_ONLINE)
 		return;
 
 	if(m_DummyConnected || !DummyAllowed())
@@ -2524,7 +2525,6 @@ void CClient::PumpNetwork()
 		// check for errors
 		if(State() != IClient::STATE_OFFLINE && State() < IClient::STATE_QUITTING && m_aNetClient[CONN_MAIN].State() == NETSTATE_OFFLINE)
 		{
-			SetState(IClient::STATE_OFFLINE);
 			Disconnect();
 			char aBuf[256];
 			str_format(aBuf, sizeof(aBuf), "offline error='%s'", m_aNetClient[CONN_MAIN].ErrorString());
@@ -3008,6 +3008,7 @@ void CClient::Run()
 		if(RegisterFail || m_pGraphics->Init() != 0)
 		{
 			dbg_msg("client", "couldn't init graphics");
+			ShowMessageBox("Graphics Error", "The graphics could not be initialized.");
 			return;
 		}
 	}
@@ -3025,45 +3026,12 @@ void CClient::Run()
 #endif
 
 #ifndef CONF_WEBASM
-	// open socket
+	char aNetworkError[256];
+	if(!InitNetworkClient(aNetworkError, sizeof(aNetworkError)))
 	{
-		NETADDR BindAddr;
-		if(g_Config.m_Bindaddr[0] == '\0')
-		{
-			mem_zero(&BindAddr, sizeof(BindAddr));
-		}
-		else if(net_host_lookup(g_Config.m_Bindaddr, &BindAddr, NETTYPE_ALL) != 0)
-		{
-			dbg_msg("client", "The configured bindaddr '%s' cannot be resolved", g_Config.m_Bindaddr);
-			return;
-		}
-		BindAddr.type = NETTYPE_ALL;
-		for(unsigned int i = 0; i < std::size(m_aNetClient); i++)
-		{
-			int &PortRef = i == CONN_MAIN ? g_Config.m_ClPort : i == CONN_DUMMY ? g_Config.m_ClDummyPort : g_Config.m_ClContactPort;
-			if(PortRef < 1024) // Reject users setting ports that we don't want to use
-			{
-				PortRef = 0;
-			}
-			BindAddr.port = PortRef;
-			unsigned RemainingAttempts = 25;
-			while(BindAddr.port == 0 || !m_aNetClient[i].Open(BindAddr))
-			{
-				if(BindAddr.port != 0)
-				{
-					--RemainingAttempts;
-					if(RemainingAttempts == 0)
-					{
-						if(g_Config.m_Bindaddr[0])
-							dbg_msg("client", "Could not open network client, try changing or unsetting the bindaddr '%s'", g_Config.m_Bindaddr);
-						else
-							dbg_msg("client", "Could not open network client");
-						return;
-					}
-				}
-				BindAddr.port = (secure_rand() % 64511) + 1024;
-			}
-		}
+		dbg_msg("client", "%s", aNetworkError);
+		ShowMessageBox("Network Error", aNetworkError);
+		return;
 	}
 #endif
 
@@ -3231,7 +3199,6 @@ void CClient::Run()
 				if(!m_EditorActive)
 				{
 					Input()->MouseModeRelative();
-					Input()->SetIMEState(true);
 					GameClient()->OnActivateEditor();
 					m_pEditor->ResetMentions();
 					m_EditorActive = true;
@@ -3239,7 +3206,6 @@ void CClient::Run()
 			}
 			else if(m_EditorActive)
 			{
-				Input()->SetIMEState(false);
 				m_EditorActive = false;
 			}
 
@@ -3349,10 +3315,8 @@ void CClient::Run()
 				s_SavedConfig = true;
 			}
 
-			IOHANDLE File = m_pStorage->OpenFile(m_aDDNetInfoTmp, IOFLAG_READ | IOFLAG_SKIP_BOM, IStorage::TYPE_SAVE);
-			if(File)
+			if(m_pStorage->FileExists(m_aDDNetInfoTmp, IStorage::TYPE_SAVE))
 			{
-				io_close(File);
 				m_pStorage->RemoveFile(m_aDDNetInfoTmp, IStorage::TYPE_SAVE);
 			}
 
@@ -3424,6 +3388,48 @@ void CClient::Run()
 	delete m_pEditor;
 }
 
+bool CClient::InitNetworkClient(char *pError, size_t ErrorSize)
+{
+	NETADDR BindAddr;
+	if(g_Config.m_Bindaddr[0] == '\0')
+	{
+		mem_zero(&BindAddr, sizeof(BindAddr));
+	}
+	else if(net_host_lookup(g_Config.m_Bindaddr, &BindAddr, NETTYPE_ALL) != 0)
+	{
+		str_format(pError, ErrorSize, "The configured bindaddr '%s' cannot be resolved.", g_Config.m_Bindaddr);
+		return false;
+	}
+	BindAddr.type = NETTYPE_ALL;
+	for(unsigned int i = 0; i < std::size(m_aNetClient); i++)
+	{
+		int &PortRef = i == CONN_MAIN ? g_Config.m_ClPort : i == CONN_DUMMY ? g_Config.m_ClDummyPort : g_Config.m_ClContactPort;
+		if(PortRef < 1024) // Reject users setting ports that we don't want to use
+		{
+			PortRef = 0;
+		}
+		BindAddr.port = PortRef;
+		unsigned RemainingAttempts = 25;
+		while(BindAddr.port == 0 || !m_aNetClient[i].Open(BindAddr))
+		{
+			if(BindAddr.port != 0)
+			{
+				--RemainingAttempts;
+				if(RemainingAttempts == 0)
+				{
+					if(g_Config.m_Bindaddr[0])
+						str_format(pError, ErrorSize, "Could not open the network client, try changing or unsetting the bindaddr '%s'.", g_Config.m_Bindaddr);
+					else
+						str_format(pError, ErrorSize, "Could not open the network client.");
+					return false;
+				}
+			}
+			BindAddr.port = (secure_rand() % 64511) + 1024;
+		}
+	}
+	return true;
+}
+
 bool CClient::CtrlShiftKey(int Key, bool &Last)
 {
 	if(Input()->ModifierIsPressed() && Input()->ShiftIsPressed() && !Last && Input()->KeyIsPressed(Key))
@@ -3471,6 +3477,12 @@ void CClient::Con_Quit(IConsole::IResult *pResult, void *pUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
 	pSelf->Quit();
+}
+
+void CClient::Con_Restart(IConsole::IResult *pResult, void *pUserData)
+{
+	CClient *pSelf = (CClient *)pUserData;
+	pSelf->Restart();
 }
 
 void CClient::Con_Minimize(IConsole::IResult *pResult, void *pUserData)
@@ -4385,9 +4397,10 @@ void CClient::RegisterCommands()
 	m_pConsole->Register("dummy_disconnect", "", CFGFLAG_CLIENT, Con_DummyDisconnect, this, "Disconnect dummy");
 	m_pConsole->Register("dummy_reset", "", CFGFLAG_CLIENT, Con_DummyResetInput, this, "Reset dummy");
 
-	m_pConsole->Register("quit", "", CFGFLAG_CLIENT | CFGFLAG_STORE, Con_Quit, this, "Quit Teeworlds");
-	m_pConsole->Register("exit", "", CFGFLAG_CLIENT | CFGFLAG_STORE, Con_Quit, this, "Quit Teeworlds");
-	m_pConsole->Register("minimize", "", CFGFLAG_CLIENT | CFGFLAG_STORE, Con_Minimize, this, "Minimize Teeworlds");
+	m_pConsole->Register("quit", "", CFGFLAG_CLIENT | CFGFLAG_STORE, Con_Quit, this, "Quit the client");
+	m_pConsole->Register("exit", "", CFGFLAG_CLIENT | CFGFLAG_STORE, Con_Quit, this, "Quit the client");
+	m_pConsole->Register("restart", "", CFGFLAG_CLIENT | CFGFLAG_STORE, Con_Restart, this, "Restart the client");
+	m_pConsole->Register("minimize", "", CFGFLAG_CLIENT | CFGFLAG_STORE, Con_Minimize, this, "Minimize the client");
 	m_pConsole->Register("connect", "r[host|ip]", CFGFLAG_CLIENT, Con_Connect, this, "Connect to the specified host/ip");
 	m_pConsole->Register("disconnect", "", CFGFLAG_CLIENT, Con_Disconnect, this, "Disconnect from the server");
 	m_pConsole->Register("ping", "", CFGFLAG_CLIENT, Con_Ping, this, "Ping the current server");
@@ -4533,8 +4546,8 @@ int main(int argc, const char **argv)
 	CWindowsComLifecycle WindowsComLifecycle(true);
 #endif
 	CCmdlineFix CmdlineFix(&argc, &argv);
+
 	bool Silent = false;
-	bool RandInitFailed = false;
 
 	for(int i = 1; i < argc; i++)
 	{
@@ -4569,17 +4582,71 @@ int main(int argc, const char **argv)
 	vpLoggers.push_back(pFutureAssertionLogger);
 	log_set_global_logger(log_logger_collection(std::move(vpLoggers)).release());
 
-	if(secure_random_init() != 0)
-	{
-		RandInitFailed = true;
-	}
+	std::stack<std::function<void()>> CleanerFunctions;
+	std::function<void()> PerformCleanup = [&CleanerFunctions]() mutable {
+		while(!CleanerFunctions.empty())
+		{
+			CleanerFunctions.top()();
+			CleanerFunctions.pop();
+		}
+	};
+	std::function<void()> PerformFinalCleanup = []() {
+#ifdef CONF_PLATFORM_ANDROID
+		// properly close this native thread, so globals are destructed
+		std::exit(0);
+#endif
+	};
+	std::function<void()> PerformAllCleanup = [PerformCleanup, PerformFinalCleanup]() mutable {
+		PerformCleanup();
+		PerformFinalCleanup();
+	};
+
+	const bool RandInitFailed = secure_random_init() != 0;
+	if(!RandInitFailed)
+		CleanerFunctions.push([]() { secure_random_uninit(); });
 
 	NotificationsInit();
+	CleanerFunctions.push([]() { NotificationsUninit(); });
+
+	// Register SDL for cleanup before creating the kernel and client,
+	// so SDL is shutdown after kernel and client. Otherwise the client
+	// may crash when shutting down after SDL is already shutdown.
+	CleanerFunctions.push([]() { SDL_Quit(); });
 
 	CClient *pClient = CreateClient();
 	IKernel *pKernel = IKernel::Create();
 	pKernel->RegisterInterface(pClient, false);
 	pClient->RegisterInterfaces();
+	CleanerFunctions.push([pKernel, pClient]() {
+		pKernel->Shutdown();
+		delete pKernel;
+		pClient->~CClient();
+		free(pClient);
+	});
+
+	const std::thread::id MainThreadId = std::this_thread::get_id();
+	dbg_assert_set_handler([MainThreadId, pClient](const char *pMsg) {
+		if(MainThreadId != std::this_thread::get_id())
+			return;
+		char aVersionStr[128];
+		if(!os_version_str(aVersionStr, sizeof(aVersionStr)))
+			str_copy(aVersionStr, "unknown");
+		char aGPUInfo[256];
+		pClient->GetGPUInfoString(aGPUInfo);
+		char aMessage[768];
+		str_format(aMessage, sizeof(aMessage),
+			"An assertion error occured. Please write down or take a screenshot of the following information and report this error.\n"
+			"Please also share the assert log which you should find in the 'dumps' folder in your config directory.\n\n"
+			"%s\n\n"
+			"Platform: %s\n"
+			"Game version: %s %s\n"
+			"OS version: %s\n\n"
+			"%s", // GPU info
+			pMsg, CONF_PLATFORM_STRING, GAME_RELEASE_VERSION, GIT_SHORTREV_HASH != nullptr ? GIT_SHORTREV_HASH : "", aVersionStr,
+			aGPUInfo);
+		pClient->ShowMessageBox("Assertion Error", aMessage);
+		// Client will crash due to assertion, don't call PerformAllCleanup in this inconsistent state
+	});
 
 	// create the components
 	IEngine *pEngine = CreateEngine(GAME_NAME, pFutureConsoleLogger, 2);
@@ -4599,14 +4666,17 @@ int main(int argc, const char **argv)
 	char aBufName[IO_MAX_PATH_LENGTH];
 	char aDate[64];
 	str_timestamp(aDate, sizeof(aDate));
-	str_format(aBufName, sizeof(aBufName), "dumps/" GAME_NAME "_crash_log_%d_%s.RTP", pid(), aDate);
+	str_format(aBufName, sizeof(aBufName), "dumps/" GAME_NAME "_%s_crash_log_%s_%d_%s.RTP", CONF_PLATFORM_STRING, aDate, pid(), GIT_SHORTREV_HASH != nullptr ? GIT_SHORTREV_HASH : "");
 	pStorage->GetCompletePath(IStorage::TYPE_SAVE, aBufName, aBufPath, sizeof(aBufPath));
 	set_exception_handler_log_file(aBufPath);
 #endif
 
 	if(RandInitFailed)
 	{
-		dbg_msg("secure", "could not initialize secure RNG");
+		const char *pError = "Failed to initialize the secure RNG.";
+		dbg_msg("secure", "%s", pError);
+		pClient->ShowMessageBox("Secure RNG Error", pError);
+		PerformAllCleanup();
 		return -1;
 	}
 
@@ -4638,9 +4708,10 @@ int main(int argc, const char **argv)
 
 		if(RegisterFail)
 		{
-			delete pKernel;
-			pClient->~CClient();
-			free(pClient);
+			const char *pError = "Failed to register an interface.";
+			dbg_msg("client", "%s", pError);
+			pClient->ShowMessageBox("Kernel Error", pError);
+			PerformAllCleanup();
 			return -1;
 		}
 	}
@@ -4658,18 +4729,21 @@ int main(int argc, const char **argv)
 	pClient->InitInterfaces();
 
 	// execute config file
-	IOHANDLE File = pStorage->OpenFile(CONFIG_FILE, IOFLAG_READ, IStorage::TYPE_ALL);
-	if(File)
+	if(pStorage->FileExists(CONFIG_FILE, IStorage::TYPE_ALL))
 	{
-		io_close(File);
-		pConsole->ExecuteFile(CONFIG_FILE);
+		if(!pConsole->ExecuteFile(CONFIG_FILE))
+		{
+			const char *pError = "Failed to load config from '" CONFIG_FILE "'.";
+			dbg_msg("client", "%s", pError);
+			pClient->ShowMessageBox("Config File Error", pError);
+			PerformAllCleanup();
+			return -1;
+		}
 	}
 
 	// execute autoexec file
-	File = pStorage->OpenFile(AUTOEXEC_CLIENT_FILE, IOFLAG_READ, IStorage::TYPE_ALL);
-	if(File)
+	if(pStorage->FileExists(AUTOEXEC_CLIENT_FILE, IStorage::TYPE_ALL))
 	{
-		io_close(File);
 		pConsole->ExecuteFile(AUTOEXEC_CLIENT_FILE);
 	}
 	else // fallback
@@ -4700,9 +4774,10 @@ int main(int argc, const char **argv)
 	}
 
 	log_set_loglevel((LEVEL)g_Config.m_Loglevel);
+	const int Mode = g_Config.m_Logappend ? IOFLAG_APPEND : IOFLAG_WRITE;
 	if(g_Config.m_Logfile[0])
 	{
-		IOHANDLE Logfile = pStorage->OpenFile(g_Config.m_Logfile, IOFLAG_WRITE, IStorage::TYPE_SAVE_OR_ABSOLUTE);
+		IOHANDLE Logfile = pStorage->OpenFile(g_Config.m_Logfile, Mode, IStorage::TYPE_SAVE_OR_ABSOLUTE);
 		if(Logfile)
 		{
 			pFutureFileLogger->Set(log_logger_file(Logfile));
@@ -4718,45 +4793,48 @@ int main(int argc, const char **argv)
 	pClient->ShellRegister();
 #endif
 
+#if defined(CONF_PLATFORM_MACOS)
+	// Hints will not be set if there is an existing override hint or environment variable that takes precedence.
+	// So this respects cli environment overrides.
+	SDL_SetHint("SDL_MAC_OPENGL_ASYNC_DISPATCH", "1");
+#endif
+
+#if defined(CONF_FAMILY_WINDOWS)
+	SDL_SetHint("SDL_IME_SHOW_UI", g_Config.m_InpImeNativeUi ? "1" : "0");
+#else
+	SDL_SetHint("SDL_IME_SHOW_UI", "1");
+#endif
+
 	// init SDL
 	if(SDL_Init(0) < 0)
 	{
-		dbg_msg("client", "unable to init SDL base: %s", SDL_GetError());
+		char aError[256];
+		str_format(aError, sizeof(aError), "Unable to initialize SDL base: %s", SDL_GetError());
+		dbg_msg("client", "%s", aError);
+		pClient->ShowMessageBox("SDL Error", aError);
+		PerformAllCleanup();
 		return -1;
 	}
-
-#ifndef CONF_PLATFORM_ANDROID
-	atexit(SDL_Quit);
-#endif
 
 	// run the client
 	dbg_msg("client", "starting...");
 	pClient->Run();
 
-	bool Restarting = pClient->State() == CClient::STATE_RESTARTING;
+	const bool Restarting = pClient->State() == CClient::STATE_RESTARTING;
+	char aRestartBinaryPath[IO_MAX_PATH_LENGTH];
+	if(Restarting)
+	{
+		pStorage->GetBinaryPath(PLAT_CLIENT_EXEC, aRestartBinaryPath, sizeof(aRestartBinaryPath));
+	}
 
-	pClient->~CClient();
-	free(pClient);
-
-	NotificationsUninit();
-	secure_random_uninit();
+	PerformCleanup();
 
 	if(Restarting)
 	{
-		char aBuf[512];
-		shell_execute(pStorage->GetBinaryPath(PLAT_CLIENT_EXEC, aBuf, sizeof aBuf));
+		shell_execute(aRestartBinaryPath);
 	}
 
-	pKernel->Shutdown();
-	delete pKernel;
-
-	// shutdown SDL
-	SDL_Quit();
-
-#ifdef CONF_PLATFORM_ANDROID
-	// properly close this native thread, so globals are destructed
-	std::exit(0);
-#endif
+	PerformFinalCleanup();
 
 	return 0;
 }
@@ -4959,3 +5037,36 @@ void CClient::ShellUnregister()
 		shell_update();
 }
 #endif
+
+static Uint32 GetSdlMessageBoxFlags(IClient::EMessageBoxType Type)
+{
+	switch(Type)
+	{
+	case IClient::MESSAGE_BOX_TYPE_ERROR:
+		return SDL_MESSAGEBOX_ERROR;
+	case IClient::MESSAGE_BOX_TYPE_WARNING:
+		return SDL_MESSAGEBOX_WARNING;
+	case IClient::MESSAGE_BOX_TYPE_INFO:
+		return SDL_MESSAGEBOX_INFORMATION;
+	}
+	dbg_assert(false, "Type invalid");
+	return 0;
+}
+
+void CClient::ShowMessageBox(const char *pTitle, const char *pMessage, EMessageBoxType Type)
+{
+	if(m_pGraphics == nullptr || !m_pGraphics->ShowMessageBox(GetSdlMessageBoxFlags(Type), pTitle, pMessage))
+		SDL_ShowSimpleMessageBox(GetSdlMessageBoxFlags(Type), pTitle, pMessage, nullptr);
+}
+
+void CClient::GetGPUInfoString(char (&aGPUInfo)[256])
+{
+	if(m_pGraphics != nullptr && m_pGraphics->IsBackendInitialized())
+	{
+		str_format(aGPUInfo, std::size(aGPUInfo), "GPU: %s - %s - %s", m_pGraphics->GetVendorString(), m_pGraphics->GetRendererString(), m_pGraphics->GetVersionString());
+	}
+	else
+	{
+		str_copy(aGPUInfo, "Graphics backend was not yet initialized.");
+	}
+}

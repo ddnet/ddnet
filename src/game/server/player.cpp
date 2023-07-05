@@ -32,8 +32,8 @@ CPlayer::~CPlayer()
 {
 	GameServer()->Antibot()->OnPlayerDestroy(m_ClientID);
 	delete m_pLastTarget;
-    if (GameServer()->m_apCharacters[m_ClientID])
-	    GameServer()->m_apCharacters.Delete(m_ClientID);
+    if (GameServer()->m_Characters[m_ClientID])
+	    GameServer()->m_Characters.Delete(m_ClientID);
 	m_pCharacter = 0;
 }
 
@@ -42,8 +42,8 @@ void CPlayer::Reset()
 	m_DieTick = Server()->Tick();
 	m_PreviousDieTick = m_DieTick;
 	m_JoinTick = Server()->Tick();
-    if (GameServer()->m_apCharacters[m_ClientID])
-	    GameServer()->m_apCharacters.Delete(m_ClientID);
+    if (GameServer()->m_Characters[m_ClientID])
+	    GameServer()->m_Characters.Delete(m_ClientID);
 	m_pCharacter = 0;
 	m_SpectatorID = SPEC_FREEVIEW;
 	m_LastActionTick = Server()->Tick();
@@ -119,8 +119,7 @@ void CPlayer::Reset()
 	m_DND = false;
 
 	m_LastPause = 0;
-	m_Score = -9999;
-	m_HasFinishScore = false;
+	m_Score.reset();
 
 	// Variable initialized:
 	m_Last_Team = 0;
@@ -243,7 +242,7 @@ void CPlayer::Tick()
 			}
 			else if(!m_pCharacter->IsPaused())
 			{
-                GameServer()->m_apCharacters.Delete(m_ClientID);
+                GameServer()->m_Characters.Delete(m_ClientID);
 				m_pCharacter = 0;
 			}
 		}
@@ -289,14 +288,14 @@ void CPlayer::PostTick()
 	{
 		for(int i = 0; i < MAX_CLIENTS; ++i)
 		{
-			if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS)
-				m_aCurLatency[i] = GameServer()->m_apPlayers[i]->m_Latency.m_Min;
+			if(GameServer()->m_Players[i] && GameServer()->m_Players[i]->GetTeam() != TEAM_SPECTATORS)
+				m_aCurLatency[i] = GameServer()->m_Players[i]->m_Latency.m_Min;
 		}
 	}
 
 	// update view pos for spectators
-	if((m_Team == TEAM_SPECTATORS || m_Paused) && m_SpectatorID != SPEC_FREEVIEW && GameServer()->m_apPlayers[m_SpectatorID] && GameServer()->m_apPlayers[m_SpectatorID]->GetCharacter())
-		m_ViewPos = GameServer()->m_apPlayers[m_SpectatorID]->GetCharacter()->m_Pos;
+	if((m_Team == TEAM_SPECTATORS || m_Paused) && m_SpectatorID != SPEC_FREEVIEW && GameServer()->m_Players[m_SpectatorID] && GameServer()->m_Players[m_SpectatorID]->GetCharacter())
+		m_ViewPos = GameServer()->m_Players[m_SpectatorID]->GetCharacter()->m_Pos;
 }
 
 void CPlayer::PostPostTick()
@@ -336,8 +335,26 @@ void CPlayer::Snap(int SnappingClient)
 	pClientInfo->m_ColorFeet = m_TeeInfos.m_ColorFeet;
 
 	int SnappingClientVersion = GameServer()->GetClientVersion(SnappingClient);
-	int Latency = SnappingClient == SERVER_DEMO_CLIENT ? m_Latency.m_Min : GameServer()->m_apPlayers[SnappingClient]->m_aCurLatency[m_ClientID];
-	int Score = absolute(m_Score) * -1;
+	int Latency = SnappingClient == SERVER_DEMO_CLIENT ? m_Latency.m_Min : GameServer()->m_Players[SnappingClient]->m_aCurLatency[m_ClientID];
+
+	int Score;
+	// This is the time sent to the player while ingame (do not confuse to the one reported to the master server).
+	// Due to clients expecting this as a negative value, we have to make sure it's negative.
+	// Special numbers:
+	// -9999: means no time and isn't displayed in the scoreboard.
+	if(m_Score.has_value())
+	{
+		// shift the time by a second if the player actually took 9999
+		// seconds to finish the map.
+		if(m_Score.value() == 9999)
+			Score = -10000;
+		else
+			Score = -m_Score.value();
+	}
+	else
+	{
+		Score = -9999;
+	}
 
 	// send 0 if times of others are not shown
 	if(SnappingClient != m_ClientID && g_Config.m_SvHideScore)
@@ -416,7 +433,7 @@ void CPlayer::Snap(int SnappingClient)
 		pDDNetPlayer->m_Flags |= EXPLAYERFLAG_PAUSED;
 
 	if(Server()->IsSixup(SnappingClient) && m_pCharacter && m_pCharacter->m_DDRaceState == DDRACE_STARTED &&
-		GameServer()->m_apPlayers[SnappingClient]->m_TimerType == TIMERTYPE_SIXUP)
+		GameServer()->m_Players[SnappingClient]->m_TimerType == TIMERTYPE_SIXUP)
 	{
 		protocol7::CNetObj_PlayerInfoRace *pRaceInfo = Server()->SnapNewItem<protocol7::CNetObj_PlayerInfoRace>(id);
 		if(!pRaceInfo)
@@ -428,7 +445,7 @@ void CPlayer::Snap(int SnappingClient)
 
 	if(SnappingClient != SERVER_DEMO_CLIENT)
 	{
-		CPlayer *pSnapPlayer = GameServer()->m_apPlayers[SnappingClient];
+		CPlayer *pSnapPlayer = GameServer()->m_Players[SnappingClient];
 		ShowSpec = ShowSpec && (GameServer()->GetDDRaceTeam(m_ClientID) == GameServer()->GetDDRaceTeam(SnappingClient) || pSnapPlayer->m_ShowOthers == SHOW_OTHERS_ON || (pSnapPlayer->GetTeam() == TEAM_SPECTATORS || pSnapPlayer->IsPaused()));
 	}
 
@@ -559,13 +576,13 @@ CCharacter *CPlayer::GetCharacter()
 	return 0;
 }
 
-void CPlayer::KillCharacter(int Weapon)
+void CPlayer::KillCharacter(int Weapon, bool SendKillMsg)
 {
 	if(m_pCharacter)
 	{
-		m_pCharacter->Die(m_ClientID, Weapon);
+		m_pCharacter->Die(m_ClientID, Weapon, SendKillMsg);
 
-		GameServer()->m_apCharacters.Delete(m_ClientID);
+		GameServer()->m_Characters.Delete(m_ClientID);
 		m_pCharacter = 0;
 	}
 }
@@ -582,7 +599,7 @@ void CPlayer::Respawn(bool WeakHook)
 CCharacter *CPlayer::ForceSpawn(vec2 Pos)
 {
 	m_Spawning = false;
-	m_pCharacter = GameServer()->m_apCharacters.New(m_ClientID, &GameServer()->m_World, GameServer()->GetLastPlayerInput(m_ClientID));
+	m_pCharacter = GameServer()->m_Characters.New(m_ClientID, &GameServer()->m_World, GameServer()->GetLastPlayerInput(m_ClientID));
 	m_pCharacter->Spawn(this, Pos);
 	m_Team = 0;
 	return m_pCharacter;
@@ -607,7 +624,7 @@ void CPlayer::SetTeam(int Team, bool DoChatMsg)
 	if(Team == TEAM_SPECTATORS)
 	{
 		// update spectator modes
-		for(auto pPlayer : GameServer()->m_apPlayers)
+		for(auto pPlayer : GameServer()->m_Players)
 		{
 			if(pPlayer && pPlayer->m_SpectatorID == m_ClientID)
 				pPlayer->m_SpectatorID = SPEC_FREEVIEW;
@@ -670,7 +687,7 @@ void CPlayer::TryRespawn()
 
 	m_WeakHookSpawn = false;
 	m_Spawning = false;
-	m_pCharacter = GameServer()->m_apCharacters.New(m_ClientID, &GameServer()->m_World, GameServer()->GetLastPlayerInput(m_ClientID));
+	m_pCharacter = GameServer()->m_Characters.New(m_ClientID, &GameServer()->m_World, GameServer()->GetLastPlayerInput(m_ClientID));
 	m_ViewPos = SpawnPos;
 	m_pCharacter->Spawn(this, SpawnPos);
 	GameServer()->CreatePlayerSpawn(SpawnPos, GameServer()->m_pController->GetMaskForPlayerWorldEvent(m_ClientID));
@@ -885,14 +902,9 @@ void CPlayer::ProcessScoreResult(CScorePlayerResult &Result)
 			GameServer()->CallVote(m_ClientID, Result.m_Data.m_MapVote.m_aMap, aCmd, "/map", aChatmsg);
 			break;
 		case CScorePlayerResult::PLAYER_INFO:
-			GameServer()->Score()->PlayerData(m_ClientID)->Set(Result.m_Data.m_Info.m_Time, Result.m_Data.m_Info.m_aTimeCp);
-			m_Score = Result.m_Data.m_Info.m_Score;
-			m_HasFinishScore = Result.m_Data.m_Info.m_HasFinishScore;
-			// -9999 stands for no time and isn't displayed in scoreboard, so
-			// shift the time by a second if the player actually took 9999
-			// seconds to finish the map.
-			if(m_HasFinishScore && m_Score == -9999)
-				m_Score = -10000;
+			if(Result.m_Data.m_Info.m_Time.has_value())
+				GameServer()->Score()->PlayerData(m_ClientID)->Set(Result.m_Data.m_Info.m_Time.value(), Result.m_Data.m_Info.m_aTimeCp);
+			m_Score = Result.m_Data.m_Info.m_Time;
 			Server()->ExpireServerInfo();
 			int Birthday = Result.m_Data.m_Info.m_Birthday;
 			if(Birthday != 0 && !m_BirthdayAnnounced)

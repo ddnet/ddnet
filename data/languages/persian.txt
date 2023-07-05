@@ -1288,12 +1288,6 @@ Enable regular chat sound
 Enable highlighted chat sound
 == ﻩﺪﺷ ﺖﯾﻼﯾﺎﻫ ﺖﭼ ﯼﺍﺪﺻ ﻥﺩﺮﮐ ﻦﺷﻭﺭ
 
-Threaded sound loading
-== ﯼﺍ ﻪﺘﺷﺭ ﯼﺍﺪﺻ ﯼﺭﺍﺬﮔﺭﺎﺑ
-
-Sample rate
-== ﻪﻧﻮﻤﻧ ﺥﺮﻧ
-
 Appearance
 == ﺮﻫﺎﻇ
 
@@ -1669,6 +1663,31 @@ Initializing map logic
 == 
 
 Copy info
+== 
+
+Online players (%d)
+== 
+
+Online clanmates (%d)
+== 
+
+[friends (server browser)]
+Offline (%d)
+== 
+
+Click to select server. Double click to join your friend.
+== 
+
+Click to remove this player from your friends list.
+== 
+
+Click to remove this clan from your friends list.
+== 
+
+None
+== 
+
+Add Clan
 == 
 
 Create a random skin

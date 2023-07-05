@@ -21,6 +21,11 @@ public:
 	{
 		ENTTYPE_PROJECTILE = 0,
 		ENTTYPE_LASER,
+		ENTTYPE_DOOR,
+		ENTTYPE_DRAGGER,
+		ENTTYPE_LIGHT,
+		ENTTYPE_GUN,
+		ENTTYPE_PLASMA,
 		ENTTYPE_PICKUP,
 		ENTTYPE_FLAG,
 		ENTTYPE_CHARACTER,
@@ -84,11 +89,14 @@ public:
 	CGameWorld *m_pParent;
 	CGameWorld *m_pChild;
 
+	int m_LocalClientID;
+
+	bool IsLocalTeam(int OwnerID);
 	void OnModified();
-	void NetObjBegin();
+	void NetObjBegin(CTeamsCore Teams, int LocalClientID);
 	void NetCharAdd(int ObjID, CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended, int GameTeam, bool IsLocal);
 	void NetObjAdd(int ObjID, int ObjType, const void *pObjData, const CNetObj_EntityEx *pDataEx);
-	void NetObjEnd(int LocalID);
+	void NetObjEnd();
 	void CopyWorld(CGameWorld *pFrom);
 	CEntity *FindMatch(int ObjID, int ObjType, const void *pObjData);
 	void Clear();

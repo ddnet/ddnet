@@ -32,7 +32,7 @@ bool GetLayerGroupIDs(CDataFileReader &InputMap, const int LayerNumber, int &Gro
 
 	for(int i = 0; i < Num; i++)
 	{
-		CMapItemGroup *pItem = (CMapItemGroup *)InputMap.GetItem(Start + i, 0, 0);
+		CMapItemGroup *pItem = (CMapItemGroup *)InputMap.GetItem(Start + i);
 		if(LayerNumber >= pItem->m_StartLayer && LayerNumber <= pItem->m_StartLayer + pItem->m_NumLayers)
 		{
 			GroupID = i;
@@ -95,7 +95,7 @@ bool FindEnv(const char aFilename[64], const int EnvID)
 	for(int i = 0; i < LayersCount; i++)
 	{
 		CMapItemLayer *pItem;
-		pItem = (CMapItemLayer *)InputMap.GetItem(LayersStart + i, 0, 0);
+		pItem = (CMapItemLayer *)InputMap.GetItem(LayersStart + i);
 
 		if(pItem->m_Type != LAYERTYPE_QUADS)
 			continue;

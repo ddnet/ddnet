@@ -32,7 +32,7 @@ static void ExpectAddInt(int Input, int Expected)
 	CPacker Packer;
 	Packer.Reset();
 	Packer.AddInt(Input);
-	EXPECT_EQ(Packer.Error(), 0);
+	EXPECT_EQ(Packer.Error(), false);
 	ASSERT_EQ(Packer.Size(), 1);
 	EXPECT_EQ(Packer.Data()[0], Expected);
 }
@@ -42,7 +42,7 @@ static void ExpectAddExtendedInt(int Input, unsigned char *pExpected, int Size)
 	CPacker Packer;
 	Packer.Reset();
 	Packer.AddInt(Input);
-	EXPECT_EQ(Packer.Error(), 0);
+	EXPECT_EQ(Packer.Error(), false);
 	ASSERT_EQ(Packer.Size(), Size);
 	EXPECT_EQ(mem_comp(Packer.Data(), pExpected, Size), 0);
 }
@@ -241,4 +241,58 @@ TEST(Packer, AddStringBroken)
 	ExpectAddString5("\x80\x80", 3, "�");
 	ExpectAddString5("\x80\x80", 5, "�");
 	ExpectAddString5("\x80\x80", 6, 0);
+}
+
+TEST(Packer, Error)
+{
+	char aData[CPacker::PACKER_BUFFER_SIZE];
+	mem_zero(aData, sizeof(aData));
+
+	{
+		CPacker Packer;
+		Packer.Reset();
+		EXPECT_EQ(Packer.Error(), false);
+		Packer.AddRaw(aData, sizeof(aData) - 1);
+		EXPECT_EQ(Packer.Error(), false);
+		EXPECT_EQ(Packer.Size(), sizeof(aData) - 1);
+		Packer.AddInt(1);
+		EXPECT_EQ(Packer.Error(), false);
+		EXPECT_EQ(Packer.Size(), sizeof(aData));
+		Packer.AddInt(2);
+		EXPECT_EQ(Packer.Error(), true);
+		Packer.AddInt(3);
+		EXPECT_EQ(Packer.Error(), true);
+	}
+
+	{
+		CPacker Packer;
+		Packer.Reset();
+		EXPECT_EQ(Packer.Error(), false);
+		Packer.AddRaw(aData, sizeof(aData) - 1);
+		EXPECT_EQ(Packer.Error(), false);
+		EXPECT_EQ(Packer.Size(), sizeof(aData) - 1);
+		Packer.AddRaw(aData, 1);
+		EXPECT_EQ(Packer.Error(), false);
+		EXPECT_EQ(Packer.Size(), sizeof(aData));
+		Packer.AddRaw(aData, 1);
+		EXPECT_EQ(Packer.Error(), true);
+		Packer.AddRaw(aData, 1);
+		EXPECT_EQ(Packer.Error(), true);
+	}
+
+	{
+		CPacker Packer;
+		Packer.Reset();
+		EXPECT_EQ(Packer.Error(), false);
+		Packer.AddRaw(aData, sizeof(aData) - 5);
+		EXPECT_EQ(Packer.Error(), false);
+		EXPECT_EQ(Packer.Size(), sizeof(aData) - 5);
+		Packer.AddString("test");
+		EXPECT_EQ(Packer.Error(), false);
+		EXPECT_EQ(Packer.Size(), sizeof(aData));
+		Packer.AddString("test");
+		EXPECT_EQ(Packer.Error(), true);
+		Packer.AddString("test");
+		EXPECT_EQ(Packer.Error(), true);
+	}
 }

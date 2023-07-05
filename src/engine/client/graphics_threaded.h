@@ -773,6 +773,9 @@ public:
 	virtual TGLBackendReadPresentedImageData &GetReadPresentedImageDataFuncUnsafe() = 0;
 
 	virtual bool GetWarning(std::vector<std::string> &WarningStrings) = 0;
+
+	// returns true if the error msg was shown
+	virtual bool ShowMessageBox(unsigned Type, const char *pTitle, const char *pMsg) = 0;
 };
 
 class CGraphics_Threaded : public IEngineGraphics
@@ -1296,6 +1299,8 @@ public:
 	void WaitForIdle() override;
 
 	SWarning *GetCurWarning() override;
+	bool ShowMessageBox(unsigned Type, const char *pTitle, const char *pMsg) override;
+	bool IsBackendInitialized() override;
 
 	bool GetDriverVersion(EGraphicsDriverAgeType DriverAgeType, int &Major, int &Minor, int &Patch, const char *&pName, EBackendType BackendType) override { return m_pBackend->GetDriverVersion(DriverAgeType, Major, Minor, Patch, pName, BackendType); }
 	bool IsConfigModernAPI() override { return m_pBackend->IsConfigModernAPI(); }
