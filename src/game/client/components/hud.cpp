@@ -952,12 +952,14 @@ void CHud::RenderPlayerState(const int ClientID)
 		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_aWeaponOffset[WEAPON_NINJA], x, y);
 		Graphics()->QuadsSetRotation(0);
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
-
+		x += 12;
+	}
+	if(pCharacter->m_aWeapons[WEAPON_NINJA].m_Got)
+	{
 		const int Max = g_pData->m_Weapons.m_Ninja.m_Duration * Client()->GameTickSpeed() / 1000;
 		float NinjaProgress = clamp(pCharacter->m_Ninja.m_ActivationTick + g_pData->m_Weapons.m_Ninja.m_Duration * Client()->GameTickSpeed() / 1000 - Client()->GameTick(g_Config.m_ClDummy), 0, Max) / (float)Max;
 		if(NinjaProgress > 0.0f && m_pClient->m_Snap.m_aCharacters[ClientID].m_HasExtendedDisplayInfo)
 		{
-			x += 12;
 			RenderNinjaBarPos(x, y - 12, 6.f, 24.f, NinjaProgress);
 		}
 	}
