@@ -3785,7 +3785,7 @@ void CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 			Writer.AddData(TotalLength, pSettings);
 			continue;
 		}
-		unsigned char *pData = (unsigned char *)Reader.GetData(i);
+		const void *pData = Reader.GetData(i);
 		int Size = Reader.GetDataSize(i);
 		Writer.AddData(Size, pData);
 		Reader.UnloadData(i);

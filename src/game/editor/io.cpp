@@ -192,7 +192,7 @@ bool CEditorMap::Save(const char *pFileName)
 		GItemEx.m_Version = CMapItemGroupEx::CURRENT_VERSION;
 		GItemEx.m_ParallaxZoom = pGroup->m_ParallaxZoom;
 
-		for(const auto &pLayer : pGroup->m_vpLayers)
+		for(CLayer *pLayer : pGroup->m_vpLayers)
 		{
 			if(pLayer->m_Type == LAYERTYPE_TILES)
 			{
