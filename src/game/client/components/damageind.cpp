@@ -1,6 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <base/color.h>
+#include <base/vmath.h>
 #include <engine/demo.h>
 #include <engine/graphics.h>
 #include <game/client/gameclient.h>
@@ -31,6 +32,18 @@ void CDamageInd::DestroyI(CDamageInd::CItem *pItem)
 {
 	m_NumItems--;
 	*pItem = m_aItems[m_NumItems];
+}
+
+void CDamageInd::CreateDamageInd(vec2 Pos, float Angle, float Alpha, int Amount)
+{
+	float a = 3 * pi / 2 + Angle;
+	float s = a - pi / 3;
+	float e = a + pi / 3;
+	for(int i = 0; i < Amount; i++)
+	{
+		float f = mix(s, e, (i + 1) / (float)(Amount + 2));
+		Create(Pos, direction(f), Alpha);
+	}
 }
 
 void CDamageInd::Create(vec2 Pos, vec2 Dir, float Alpha)
@@ -75,8 +88,7 @@ void CDamageInd::OnRender()
 			vec2 Pos = mix(m_aItems[i].m_Pos + m_aItems[i].m_Dir * 75.0f, m_aItems[i].m_Pos, clamp((Life - 0.60f) / 0.15f, 0.0f, 1.0f));
 			ColorRGBA Color = m_aItems[i].m_Color;
 
-			float LifeAlpha = Life / 0.1f;
-			Color.a = m_aItems[i].m_StartAlpha * LifeAlpha;
+			Color.a = m_aItems[i].m_StartAlpha * fmin(1, Life / 0.1f);
 			Graphics()->SetColor(Color);
 			Graphics()->QuadsSetRotation(m_aItems[i].m_StartAngle + Life * 2.0f);
 			Graphics()->RenderQuadContainerAsSprite(m_DmgIndQuadContainerIndex, 0, Pos.x, Pos.y);

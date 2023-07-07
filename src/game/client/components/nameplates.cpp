@@ -54,26 +54,23 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 		Graphics()->QuadsSetRotation(0);
 
-		const float ShowDirectionImgSize = 22.0f;
-		YOffset -= ShowDirectionImgSize;
-		vec2 ShowDirectionPos = vec2(Position.x - 11.0f, YOffset);
-
+		YOffset -= m_ShowDirectionImgSize;
 		if(m_pClient->m_Snap.m_aCharacters[pPlayerInfo->m_ClientID].m_Cur.m_Direction == -1)
 		{
-			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ARROW].m_Id);
+			Graphics()->TextureSet(m_pClient->m_OpdSkin.m_SpriteOpdDirectionArrow);
 			Graphics()->QuadsSetRotation(pi);
-			Graphics()->RenderQuadContainerAsSprite(m_DirectionQuadContainerIndex, 0, ShowDirectionPos.x - 30.f, ShowDirectionPos.y);
+			Graphics()->RenderQuadContainerAsSprite(m_NameplatesQuadContainerIndex, m_DirectionArrowOffset, Position.x - 30.f, YOffset);
 		}
 		else if(m_pClient->m_Snap.m_aCharacters[pPlayerInfo->m_ClientID].m_Cur.m_Direction == 1)
 		{
-			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ARROW].m_Id);
-			Graphics()->RenderQuadContainerAsSprite(m_DirectionQuadContainerIndex, 0, ShowDirectionPos.x + 30.f, ShowDirectionPos.y);
+			Graphics()->TextureSet(m_pClient->m_OpdSkin.m_SpriteOpdDirectionArrow);
+			Graphics()->RenderQuadContainerAsSprite(m_NameplatesQuadContainerIndex, m_DirectionArrowOffset, Position.x + 30.f, YOffset);
 		}
 		if(m_pClient->m_Snap.m_aCharacters[pPlayerInfo->m_ClientID].m_Cur.m_Jumped & 1)
 		{
-			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ARROW].m_Id);
+			Graphics()->TextureSet(m_pClient->m_OpdSkin.m_SpriteOpdDirectionArrow);
 			Graphics()->QuadsSetRotation(pi * 3 / 2);
-			Graphics()->RenderQuadContainerAsSprite(m_DirectionQuadContainerIndex, 0, ShowDirectionPos.x, ShowDirectionPos.y);
+			Graphics()->RenderQuadContainerAsSprite(m_NameplatesQuadContainerIndex, m_DirectionArrowOffset, Position.x, YOffset);
 		}
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 		Graphics()->QuadsSetRotation(0);
@@ -214,24 +211,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 					TextRender()->TextColor(rgb);
 				else
 				{
-					float ScaleX, ScaleY;
-					const float StrongWeakImgSize = 40.0f;
-					Graphics()->TextureClear();
-					Graphics()->TextureSet(g_pData->m_aImages[IMAGE_STRONGWEAK].m_Id);
-					Graphics()->QuadsBegin();
-					ColorRGBA StrongWeakStatusColor;
-					int StrongWeakSpriteID;
-					if(pLocalChar->GetStrongWeakID() > pCharacter->GetStrongWeakID())
-					{
-						StrongWeakStatusColor = color_cast<ColorRGBA>(ColorHSLA(6401973));
-						StrongWeakSpriteID = SPRITE_HOOK_STRONG;
-					}
-					else
-					{
-						StrongWeakStatusColor = color_cast<ColorRGBA>(ColorHSLA(41131));
-						StrongWeakSpriteID = SPRITE_HOOK_WEAK;
-					}
-
+					ColorRGBA StrongWeakStatusColor = ColorRGBA(1.0f, 1.0f, 1.0f);
 					float ClampedAlpha = 1;
 					if(g_Config.m_ClNameplatesAlways == 0)
 						ClampedAlpha = clamp(1 - std::pow(distance(m_pClient->m_Controls.m_aTargetPos[g_Config.m_ClDummy], Position) / 200.0f, 16.0f), 0.0f, 1.0f);
@@ -240,16 +220,22 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 						StrongWeakStatusColor.a = g_Config.m_ClShowOthersAlpha / 100.0f;
 					else
 						StrongWeakStatusColor.a = ClampedAlpha;
-
 					StrongWeakStatusColor.a *= Alpha;
+
 					Graphics()->SetColor(StrongWeakStatusColor);
-					RenderTools()->SelectSprite(StrongWeakSpriteID);
-					RenderTools()->GetSpriteScale(StrongWeakSpriteID, ScaleX, ScaleY);
 					TextRender()->TextColor(StrongWeakStatusColor);
 
-					YOffset -= StrongWeakImgSize * ScaleY;
-					RenderTools()->DrawSprite(Position.x, YOffset + (StrongWeakImgSize / 2.0f) * ScaleY, StrongWeakImgSize);
-					Graphics()->QuadsEnd();
+					YOffset -= m_StrongWeakImgSize;
+					if(pLocalChar->GetStrongWeakID() > pCharacter->GetStrongWeakID())
+					{
+						Graphics()->TextureSet(m_pClient->m_OpdSkin.m_SpriteOpdHookStrong);
+						Graphics()->RenderQuadContainerAsSprite(m_NameplatesQuadContainerIndex, m_HookStrongOffset, Position.x, YOffset);
+					}
+					else
+					{
+						Graphics()->TextureSet(m_pClient->m_OpdSkin.m_SpriteOpdHookWeak);
+						Graphics()->RenderQuadContainerAsSprite(m_NameplatesQuadContainerIndex, m_HookWeakOffset, Position.x, YOffset);
+					}
 				}
 				if(g_Config.m_Debug || g_Config.m_ClNameplatesStrong == 2)
 				{
@@ -352,7 +338,9 @@ void CNamePlates::OnInit()
 	ResetNamePlates();
 
 	// Quad for the direction arrows above the player
-	m_DirectionQuadContainerIndex = Graphics()->CreateQuadContainer(false);
-	RenderTools()->QuadContainerAddSprite(m_DirectionQuadContainerIndex, 0.f, 0.f, 22.f);
-	Graphics()->QuadContainerUpload(m_DirectionQuadContainerIndex);
+	m_NameplatesQuadContainerIndex = Graphics()->CreateQuadContainer(false);
+	m_DirectionArrowOffset = RenderTools()->QuadContainerAddSprite(m_NameplatesQuadContainerIndex, -m_ShowDirectionImgSize / 2, 0.f, m_ShowDirectionImgSize);
+	m_HookStrongOffset = RenderTools()->QuadContainerAddSprite(m_NameplatesQuadContainerIndex, -m_StrongWeakImgSize / 2, 0.f, m_StrongWeakImgSize);
+	m_HookWeakOffset = RenderTools()->QuadContainerAddSprite(m_NameplatesQuadContainerIndex, -m_StrongWeakImgSize / 2, 0.f, m_StrongWeakImgSize);
+	Graphics()->QuadContainerUpload(m_NameplatesQuadContainerIndex);
 }

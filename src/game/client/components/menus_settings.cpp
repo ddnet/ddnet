@@ -2554,14 +2554,32 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowhudPlayerSpeed, Localize("Show player speed"), &g_Config.m_ClShowhudPlayerSpeed, &Section, LineSize);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowhudPlayerAngle, Localize("Show player target angle"), &g_Config.m_ClShowhudPlayerAngle, &Section, LineSize);
 
-		// Freeze bar settings
-		RightView.HSplitTop(SectionTotalMargin + 3 * LineSize, &Section, &RightView);
+		// Freeze countdown settings
+		RightView.HSplitTop(SectionTotalMargin + 4 * LineSize, &Section, &RightView);
 		Section.Margin(SectionMargin, &Section);
 
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowFreezeBars, Localize("Show freeze bars"), &g_Config.m_ClShowFreezeBars, &Section, LineSize);
+		Section.HSplitTop(LineSize, &Label, &Section);
+		UI()->DoLabel(&Label, Localize("Show a state change countdown under players"), 13.0f, TEXTALIGN_ML);
+		static int s_StateChangeCountdownToolTip = 0;
+		UI()->DoButtonLogic(&s_StateChangeCountdownToolTip, 0, &Label);
+		GameClient()->m_Tooltips.DoToolTip(&s_StateChangeCountdownToolTip, &Label, Localize("It indicates the time till a player unfreezes and the time a player has left to be a ninja"));
+		static int s_ShowCountdownStars = 0;
+		Section.HSplitTop(LineSize, &Button, &Section);
+		if(DoButton_CheckBox(&s_ShowCountdownStars, Localize("Show as stars"), g_Config.m_ClShowStateChangeCountdown == 2, &Button))
+		{
+			g_Config.m_ClShowStateChangeCountdown = g_Config.m_ClShowStateChangeCountdown == 2 ? 0 : 2;
+		}
+		GameClient()->m_Tooltips.DoToolTip(&s_ShowCountdownStars, &Button, Localize("Stars are emitted from the player every second of the countdown"));
+
+		Section.HSplitTop(LineSize, &Button, &Section);
+		if(DoButton_CheckBox(&g_Config.m_ClShowStateChangeCountdown, Localize("Show as bars"), g_Config.m_ClShowStateChangeCountdown == 1, &Button))
+		{
+			g_Config.m_ClShowStateChangeCountdown = g_Config.m_ClShowStateChangeCountdown == 1 ? 0 : 1;
+		}
+
 		{
 			Section.HSplitTop(2 * LineSize, &Button, &Section);
-			if(g_Config.m_ClShowFreezeBars)
+			if(g_Config.m_ClShowStateChangeCountdown == 1)
 			{
 				UI()->DoScrollbarOption(&g_Config.m_ClFreezeBarsAlphaInsideFreeze, &g_Config.m_ClFreezeBarsAlphaInsideFreeze, &Button, Localize("Opacity of freeze bars inside freeze"), 0, 100, &CUI::ms_LinearScrollbarScale, CUI::SCROLLBAR_OPTION_MULTILINE, "%");
 			}
@@ -2852,6 +2870,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 
 		Section.HSplitTop(LineSize, &Label, &Section);
 		UI()->DoLabel(&Label, Localize("Colors of the hook collision line, in case of a possible collision with:"), 13.0f, TEXTALIGN_ML);
+		UI()->DoButtonLogic(&s_HookCollToolTip, 0, &Label);
 		GameClient()->m_Tooltips.DoToolTip(&s_HookCollToolTip, &Label, Localize("Your movements are not taken into account when calculating the line colors"));
 		DoLine_ColorPicker(&s_HookCollNoCollResetID, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Nothing hookable"), &g_Config.m_ClHookCollColorNoColl, ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f), false);
 		DoLine_ColorPicker(&s_HookCollHookableCollResetID, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Something hookable"), &g_Config.m_ClHookCollColorHookableColl, ColorRGBA(130.0f / 255.0f, 232.0f / 255.0f, 160.0f / 255.0f, 1.0f), false);

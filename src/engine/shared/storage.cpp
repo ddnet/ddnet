@@ -82,7 +82,6 @@ public:
 				CreateFolder("assets/entities", TYPE_SAVE);
 				CreateFolder("assets/game", TYPE_SAVE);
 				CreateFolder("assets/particles", TYPE_SAVE);
-				CreateFolder("assets/hud", TYPE_SAVE);
 				CreateFolder("assets/extras", TYPE_SAVE);
 #if defined(CONF_VIDEORECORDER)
 				CreateFolder("videos", TYPE_SAVE);

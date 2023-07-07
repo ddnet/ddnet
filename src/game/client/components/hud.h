@@ -84,7 +84,6 @@ public:
 	// DDRace
 
 	virtual void OnMessage(int MsgType, void *pRawMsg) override;
-	void RenderNinjaBarPos(float x, const float y, const float width, const float height, float Progress, float Alpha = 1.0f);
 
 private:
 	void RenderRecord();
@@ -111,6 +110,7 @@ private:
 	int m_FlagOffset;
 	int m_AirjumpOffset;
 	int m_AirjumpEmptyOffset;
+	int m_AirjumpDisabledOffset;
 	int m_WeaponHammerOffset;
 	int m_WeaponGunOffset;
 	int m_WeaponShotgunOffset;

@@ -749,6 +749,8 @@ void CHud::PreparePlayerStateQuads()
 		Array[i] = IGraphics::CQuadItem(x + i * 12, y, 12, 12);
 	m_AirjumpEmptyOffset = Graphics()->QuadContainerAddQuads(m_HudQuadContainerIndex, Array, 10);
 
+	m_AirjumpDisabledOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, x, y, 12, 12);
+
 	// Quads for displaying weapons
 	float ScaleX, ScaleY;
 	const float HudWeaponScale = 0.25f;
@@ -800,54 +802,53 @@ void CHud::RenderPlayerState(const int ClientID)
 	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
 
 	// pCharacter contains the predicted character for local players or the last snap for players who are spectated
-	CCharacterCore *pCharacter = &m_pClient->m_aClients[ClientID].m_Predicted;
-	CNetObj_Character *pPlayer = &m_pClient->m_aClients[ClientID].m_RenderCur;
-	int TotalJumpsToDisplay = 0;
+	const CCharacterCore *pCharacter = &m_pClient->m_aClients[ClientID].m_Predicted;
+	const CNetObj_Character *pPlayer = &m_pClient->m_aClients[ClientID].m_RenderCur;
+	bool JumpDisplayShown = false;
 	if(g_Config.m_ClShowhudJumpsIndicator)
 	{
-		int AvailableJumpsToDisplay;
+		int TotalJumpsToDisplay = 0;
+		int AvailableJumpsToDisplay = 0;
 		if(m_pClient->m_Snap.m_aCharacters[ClientID].m_HasExtendedDisplayInfo)
 		{
-			bool Grounded = false;
-			if(Collision()->CheckPoint(pPlayer->m_X + CCharacterCore::PhysicalSize() / 2,
-				   pPlayer->m_Y + CCharacterCore::PhysicalSize() / 2 + 5))
-			{
-				Grounded = true;
-			}
-			if(Collision()->CheckPoint(pPlayer->m_X - CCharacterCore::PhysicalSize() / 2,
-				   pPlayer->m_Y + CCharacterCore::PhysicalSize() / 2 + 5))
-			{
-				Grounded = true;
-			}
-
+			/*
+			We have 4 different cases to handle:
+			m_Jumps == -1 (255): Tee has only ground jump => display nothing
+			m_Jumps == 0: Tee has no jump at all => display air jump disabled symbol
+			m_Jumps == 1: Tee has one ground jump or one air jump => display one air jump symbol that also gets empty on ground jump
+			m_Jumps >= 2: Tee has one ground jump and (m_Jumps - 1) air jumps => display (m_Jumps - 1) air jumps
+			We do not want to display ground jump (except for m_Jumps == 1). 
+			*/
 			int UsedJumps = pCharacter->m_JumpedTotal;
-			if(pCharacter->m_Jumps > 1)
+			if(pCharacter->m_Jumps == 1)
 			{
-				UsedJumps += !Grounded;
-			}
-			else if(pCharacter->m_Jumps == 1)
-			{
-				// If the player has only one jump, each jump is the last one
+				// Tee has only one jump, each jump is the last one
 				UsedJumps = pPlayer->m_Jumped & 2;
 			}
-			else if(pCharacter->m_Jumps == -1)
+
+			if(pCharacter->m_Jumps > 0 && pCharacter->m_EndlessJump && UsedJumps >= pCharacter->m_Jumps)
 			{
-				// The player has only one ground jump
-				UsedJumps = !Grounded;
+				// Tee has endless jumps, there is always one jump left
+				UsedJumps = pCharacter->m_Jumps - 1;
 			}
 
-			if(pCharacter->m_EndlessJump && UsedJumps >= absolute(pCharacter->m_Jumps))
+			int TotalJumps = 0;
+			if(pCharacter->m_Jumps == 1)
 			{
-				UsedJumps = absolute(pCharacter->m_Jumps) - 1;
+				TotalJumps = 1;
 			}
+			else if(pCharacter->m_Jumps >= 2)
+			{
+				TotalJumps = pCharacter->m_Jumps - 1;
+			}
+			TotalJumpsToDisplay = maximum(minimum(TotalJumps, 10), 0);
 
-			int UnusedJumps = absolute(pCharacter->m_Jumps) - UsedJumps;
+			int UnusedJumps = TotalJumps - UsedJumps;
 			if(!(pPlayer->m_Jumped & 2) && UnusedJumps <= 0)
 			{
 				// In some edge cases when the player just got another number of jumps, UnusedJumps is not correct
 				UnusedJumps = 1;
 			}
-			TotalJumpsToDisplay = maximum(minimum(absolute(pCharacter->m_Jumps), 10), 0);
 			AvailableJumpsToDisplay = maximum(minimum(UnusedJumps, TotalJumpsToDisplay), 0);
 		}
 		else
@@ -855,22 +856,33 @@ void CHud::RenderPlayerState(const int ClientID)
 			TotalJumpsToDisplay = AvailableJumpsToDisplay = absolute(m_pClient->m_Snap.m_aCharacters[ClientID].m_ExtendedData.m_Jumps);
 		}
 
-		// render available and used jumps
 		int JumpsOffsetY = ((GameClient()->m_GameInfo.m_HudHealthArmor && g_Config.m_ClShowhudHealthAmmo ? 24 : 0) +
 				    (GameClient()->m_GameInfo.m_HudAmmo && g_Config.m_ClShowhudHealthAmmo ? 12 : 0));
-		if(JumpsOffsetY > 0)
+		if(TotalJumpsToDisplay > 0)
 		{
-			Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudAirjump);
-			Graphics()->RenderQuadContainerEx(m_HudQuadContainerIndex, m_AirjumpOffset, AvailableJumpsToDisplay, 0, JumpsOffsetY);
-			Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudAirjumpEmpty);
-			Graphics()->RenderQuadContainerEx(m_HudQuadContainerIndex, m_AirjumpEmptyOffset + AvailableJumpsToDisplay, TotalJumpsToDisplay - AvailableJumpsToDisplay, 0, JumpsOffsetY);
+			// render available and used jumps
+			if(JumpsOffsetY > 0)
+			{
+				Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudAirjump);
+				Graphics()->RenderQuadContainerEx(m_HudQuadContainerIndex, m_AirjumpOffset, AvailableJumpsToDisplay, 0, JumpsOffsetY);
+				Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudAirjumpEmpty);
+				Graphics()->RenderQuadContainerEx(m_HudQuadContainerIndex, m_AirjumpEmptyOffset + AvailableJumpsToDisplay, TotalJumpsToDisplay - AvailableJumpsToDisplay, 0, JumpsOffsetY);
+			}
+			else
+			{
+				Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudAirjump);
+				Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_AirjumpOffset, AvailableJumpsToDisplay);
+				Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudAirjumpEmpty);
+				Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_AirjumpEmptyOffset + AvailableJumpsToDisplay, TotalJumpsToDisplay - AvailableJumpsToDisplay);
+			}
+			JumpDisplayShown = true;
 		}
-		else
+		else if(pCharacter->m_Jumps == 0 || m_pClient->m_Snap.m_aCharacters[ClientID].m_ExtendedData.m_Jumps == 0)
 		{
-			Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudAirjump);
-			Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_AirjumpOffset, AvailableJumpsToDisplay);
-			Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudAirjumpEmpty);
-			Graphics()->RenderQuadContainer(m_HudQuadContainerIndex, m_AirjumpEmptyOffset + AvailableJumpsToDisplay, TotalJumpsToDisplay - AvailableJumpsToDisplay);
+			// render air jump disabled
+			Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudAirjumpDisabled);
+			Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_AirjumpDisabledOffset, 0, JumpsOffsetY);
+			JumpDisplayShown = true;
 		}
 	}
 
@@ -956,20 +968,12 @@ void CHud::RenderPlayerState(const int ClientID)
 		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_WeaponNinjaOffset, x, y);
 		Graphics()->QuadsSetRotation(0);
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
-
-		const int Max = g_pData->m_Weapons.m_Ninja.m_Duration * Client()->GameTickSpeed() / 1000;
-		float NinjaProgress = clamp(pCharacter->m_Ninja.m_ActivationTick + g_pData->m_Weapons.m_Ninja.m_Duration * Client()->GameTickSpeed() / 1000 - Client()->GameTick(g_Config.m_ClDummy), 0, Max) / (float)Max;
-		if(NinjaProgress > 0.0f && m_pClient->m_Snap.m_aCharacters[ClientID].m_HasExtendedDisplayInfo)
-		{
-			x += 12;
-			RenderNinjaBarPos(x, y - 12, 6.f, 24.f, NinjaProgress);
-		}
 	}
 
 	// render capabilities
 	x = 5;
 	y += 12;
-	if(TotalJumpsToDisplay > 0)
+	if(JumpDisplayShown)
 	{
 		y += 12;
 	}
@@ -1102,157 +1106,6 @@ void CHud::RenderPlayerState(const int ClientID)
 		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudLiveFrozen);
 		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_LiveFrozenOffset, x, y);
 	}
-}
-
-void CHud::RenderNinjaBarPos(const float x, float y, const float width, const float height, float Progress, const float Alpha)
-{
-	Progress = clamp(Progress, 0.0f, 1.0f);
-
-	// what percentage of the end pieces is used for the progress indicator and how much is the rest
-	// half of the ends are used for the progress display
-	const float RestPct = 0.5f;
-	const float ProgPct = 0.5f;
-
-	const float EndHeight = width; // to keep the correct scale - the width of the sprite is as long as the height
-	const float BarWidth = width;
-	const float WholeBarHeight = height;
-	const float MiddleBarHeight = WholeBarHeight - (EndHeight * 2.0f);
-	const float EndProgressHeight = EndHeight * ProgPct;
-	const float EndRestHeight = EndHeight * RestPct;
-	const float ProgressBarHeight = WholeBarHeight - (EndProgressHeight * 2.0f);
-	const float EndProgressProportion = EndProgressHeight / ProgressBarHeight;
-	const float MiddleProgressProportion = MiddleBarHeight / ProgressBarHeight;
-
-	// beginning piece
-	float BeginningPieceProgress = 1;
-	if(Progress <= 1)
-	{
-		if(Progress <= (EndProgressProportion + MiddleProgressProportion))
-		{
-			BeginningPieceProgress = 0;
-		}
-		else
-		{
-			BeginningPieceProgress = (Progress - EndProgressProportion - MiddleProgressProportion) / EndProgressProportion;
-		}
-	}
-	// empty
-	Graphics()->WrapClamp();
-	Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudNinjaBarEmptyRight);
-	Graphics()->QuadsBegin();
-	Graphics()->SetColor(1.f, 1.f, 1.f, Alpha);
-	// Subset: btm_r, top_r, top_m, btm_m | it is mirrored on the horizontal axe and rotated 90 degrees counterclockwise
-	Graphics()->QuadsSetSubsetFree(1, 1, 1, 0, ProgPct - ProgPct * (1.0f - BeginningPieceProgress), 0, ProgPct - ProgPct * (1.0f - BeginningPieceProgress), 1);
-	IGraphics::CQuadItem QuadEmptyBeginning(x, y, BarWidth, EndRestHeight + EndProgressHeight * (1.0f - BeginningPieceProgress));
-	Graphics()->QuadsDrawTL(&QuadEmptyBeginning, 1);
-	Graphics()->QuadsEnd();
-	// full
-	if(BeginningPieceProgress > 0.0f)
-	{
-		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudNinjaBarFullLeft);
-		Graphics()->QuadsBegin();
-		Graphics()->SetColor(1.f, 1.f, 1.f, Alpha);
-		// Subset: btm_m, top_m, top_r, btm_r | it is rotated 90 degrees clockwise
-		Graphics()->QuadsSetSubsetFree(RestPct + ProgPct * (1.0f - BeginningPieceProgress), 1, RestPct + ProgPct * (1.0f - BeginningPieceProgress), 0, 1, 0, 1, 1);
-		IGraphics::CQuadItem QuadFullBeginning(x, y + (EndRestHeight + EndProgressHeight * (1.0f - BeginningPieceProgress)), BarWidth, EndProgressHeight * BeginningPieceProgress);
-		Graphics()->QuadsDrawTL(&QuadFullBeginning, 1);
-		Graphics()->QuadsEnd();
-	}
-
-	// middle piece
-	y += EndHeight;
-
-	float MiddlePieceProgress = 1;
-	if(Progress <= EndProgressProportion + MiddleProgressProportion)
-	{
-		if(Progress <= EndProgressProportion)
-		{
-			MiddlePieceProgress = 0;
-		}
-		else
-		{
-			MiddlePieceProgress = (Progress - EndProgressProportion) / MiddleProgressProportion;
-		}
-	}
-
-	const float FullMiddleBarHeight = MiddleBarHeight * MiddlePieceProgress;
-	const float EmptyMiddleBarHeight = MiddleBarHeight - FullMiddleBarHeight;
-
-	// empty ninja bar
-	if(EmptyMiddleBarHeight > 0.0f)
-	{
-		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudNinjaBarEmpty);
-		Graphics()->QuadsBegin();
-		Graphics()->SetColor(1.f, 1.f, 1.f, Alpha);
-		// select the middle portion of the sprite so we don't get edge bleeding
-		if(EmptyMiddleBarHeight <= EndHeight)
-		{
-			// prevent pixel puree, select only a small slice
-			// Subset: btm_r, top_r, top_m, btm_m | it is mirrored on the horizontal axe and rotated 90 degrees counterclockwise
-			Graphics()->QuadsSetSubsetFree(1, 1, 1, 0, 1.0f - (EmptyMiddleBarHeight / EndHeight), 0, 1.0f - (EmptyMiddleBarHeight / EndHeight), 1);
-		}
-		else
-		{
-			// Subset: btm_r, top_r, top_l, btm_l | it is mirrored on the horizontal axe and rotated 90 degrees counterclockwise
-			Graphics()->QuadsSetSubsetFree(1, 1, 1, 0, 0, 0, 0, 1);
-		}
-		IGraphics::CQuadItem QuadEmpty(x, y, BarWidth, EmptyMiddleBarHeight);
-		Graphics()->QuadsDrawTL(&QuadEmpty, 1);
-		Graphics()->QuadsEnd();
-	}
-
-	// full ninja bar
-	Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudNinjaBarFull);
-	Graphics()->QuadsBegin();
-	Graphics()->SetColor(1.f, 1.f, 1.f, Alpha);
-	// select the middle portion of the sprite so we don't get edge bleeding
-	if(FullMiddleBarHeight <= EndHeight)
-	{
-		// prevent pixel puree, select only a small slice
-		// Subset: btm_m, top_m, top_r, btm_r | it is rotated 90 degrees clockwise
-		Graphics()->QuadsSetSubsetFree(1.0f - (FullMiddleBarHeight / EndHeight), 1, 1.0f - (FullMiddleBarHeight / EndHeight), 0, 1, 0, 1, 1);
-	}
-	else
-	{
-		// Subset: btm_l, top_l, top_r, btm_r | it is rotated 90 degrees clockwise
-		Graphics()->QuadsSetSubsetFree(0, 1, 0, 0, 1, 0, 1, 1);
-	}
-	IGraphics::CQuadItem QuadFull(x, y + EmptyMiddleBarHeight, BarWidth, FullMiddleBarHeight);
-	Graphics()->QuadsDrawTL(&QuadFull, 1);
-	Graphics()->QuadsEnd();
-
-	// ending piece
-	y += MiddleBarHeight;
-	float EndingPieceProgress = 1;
-	if(Progress <= EndProgressProportion)
-	{
-		EndingPieceProgress = Progress / EndProgressProportion;
-	}
-	// empty
-	if(EndingPieceProgress < 1.0f)
-	{
-		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudNinjaBarEmptyRight);
-		Graphics()->QuadsBegin();
-		Graphics()->SetColor(1.f, 1.f, 1.f, Alpha);
-		// Subset: btm_l, top_l, top_m, btm_m | it is rotated 90 degrees clockwise
-		Graphics()->QuadsSetSubsetFree(0, 1, 0, 0, ProgPct - ProgPct * EndingPieceProgress, 0, ProgPct - ProgPct * EndingPieceProgress, 1);
-		IGraphics::CQuadItem QuadEmptyEnding(x, y, BarWidth, EndProgressHeight * (1.0f - EndingPieceProgress));
-		Graphics()->QuadsDrawTL(&QuadEmptyEnding, 1);
-		Graphics()->QuadsEnd();
-	}
-	// full
-	Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudNinjaBarFullLeft);
-	Graphics()->QuadsBegin();
-	Graphics()->SetColor(1.f, 1.f, 1.f, Alpha);
-	// Subset: btm_m, top_m, top_l, btm_l | it is mirrored on the horizontal axe and rotated 90 degrees counterclockwise
-	Graphics()->QuadsSetSubsetFree(RestPct + ProgPct * EndingPieceProgress, 1, RestPct + ProgPct * EndingPieceProgress, 0, 0, 0, 0, 1);
-	IGraphics::CQuadItem QuadFullEnding(x, y + (EndProgressHeight * (1.0f - EndingPieceProgress)), BarWidth, EndRestHeight + EndProgressHeight * EndingPieceProgress);
-	Graphics()->QuadsDrawTL(&QuadFullEnding, 1);
-	Graphics()->QuadsEnd();
-
-	Graphics()->QuadsSetSubset(0, 0, 1, 1);
-	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
-	Graphics()->WrapNormal();
 }
 
 void CHud::RenderDummyActions()

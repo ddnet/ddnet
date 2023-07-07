@@ -36,6 +36,7 @@ public:
 	CDamageInd();
 	virtual int Sizeof() const override { return sizeof(*this); }
 
+	void CreateDamageInd(vec2 Pos, float Angle, float Alpha, int Amount);
 	void Create(vec2 Pos, vec2 Dir, float Alpha);
 	void Reset();
 	virtual void OnRender() override;

@@ -1012,7 +1012,6 @@ endif()
 ########################################################################
 
 set(EXPECTED_DATA
-  arrow.png
   assets/entities/comfort/ddnet.png
   assets/entities/license.txt
   assets/game/game_06.png
@@ -1453,7 +1452,6 @@ set(EXPECTED_DATA
   gui_cursor.png
   gui_icons.png
   gui_logo.png
-  hud.png
   languages/arabic.txt
   languages/belarusian.txt
   languages/bosnian.txt
@@ -1704,7 +1702,6 @@ set(EXPECTED_DATA
   skins/whis.png
   skins/x_ninja.png
   skins/x_spec.png
-  strong_weak.png
   themes/auto.png
   themes/autumn.png
   themes/autumn_day.map
@@ -2192,6 +2189,8 @@ if(CLIENT)
     components/console.h
     components/controls.cpp
     components/controls.h
+    components/countdowns.cpp
+    components/countdowns.h
     components/countryflags.cpp
     components/countryflags.h
     components/damageind.cpp
@@ -2204,8 +2203,6 @@ if(CLIENT)
     components/emoticon.h
     components/flow.cpp
     components/flow.h
-    components/freezebars.cpp
-    components/freezebars.h
     components/ghost.cpp
     components/ghost.h
     components/hud.cpp

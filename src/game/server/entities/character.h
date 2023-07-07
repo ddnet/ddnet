@@ -94,6 +94,7 @@ private:
 
 	bool m_Alive;
 	bool m_Paused;
+	int m_PausedTick;
 	int m_NeededFaketuning;
 
 	// weapon info

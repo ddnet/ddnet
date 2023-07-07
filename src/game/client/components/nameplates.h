@@ -5,6 +5,7 @@
 #include <base/vmath.h>
 
 #include <engine/shared/protocol.h>
+#include <engine/textrender.h>
 
 #include <game/client/component.h>
 
@@ -52,7 +53,13 @@ class CNamePlates : public CComponent
 
 	void ResetNamePlates();
 
-	int m_DirectionQuadContainerIndex;
+	int m_NameplatesQuadContainerIndex;
+	int m_DirectionArrowOffset;
+	int m_HookStrongOffset;
+	int m_HookWeakOffset;
+
+	const float m_ShowDirectionImgSize = 22.0f;
+	const float m_StrongWeakImgSize = 28.28f;
 
 public:
 	virtual int Sizeof() const override { return sizeof(*this); }
