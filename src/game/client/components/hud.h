@@ -111,12 +111,7 @@ private:
 	int m_FlagOffset;
 	int m_AirjumpOffset;
 	int m_AirjumpEmptyOffset;
-	int m_WeaponHammerOffset;
-	int m_WeaponGunOffset;
-	int m_WeaponShotgunOffset;
-	int m_WeaponGrenadeOffset;
-	int m_WeaponLaserOffset;
-	int m_WeaponNinjaOffset;
+	int m_aWeaponOffset[NUM_WEAPONS];
 	int m_EndlessJumpOffset;
 	int m_EndlessHookOffset;
 	int m_JetpackOffset;

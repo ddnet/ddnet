@@ -750,20 +750,16 @@ void CHud::PreparePlayerStateQuads()
 	m_AirjumpEmptyOffset = Graphics()->QuadContainerAddQuads(m_HudQuadContainerIndex, Array, 10);
 
 	// Quads for displaying weapons
-	float ScaleX, ScaleY;
-	const float HudWeaponScale = 0.25f;
-	RenderTools()->GetSpriteScale(g_pData->m_Weapons.m_aId[WEAPON_HAMMER].m_pSpriteBody, ScaleX, ScaleY);
-	m_WeaponHammerOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, g_pData->m_Weapons.m_aId[WEAPON_HAMMER].m_VisualSize * ScaleX * HudWeaponScale, g_pData->m_Weapons.m_aId[WEAPON_HAMMER].m_VisualSize * ScaleY * HudWeaponScale);
-	RenderTools()->GetSpriteScale(g_pData->m_Weapons.m_aId[WEAPON_GUN].m_pSpriteBody, ScaleX, ScaleY);
-	m_WeaponGunOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, g_pData->m_Weapons.m_aId[WEAPON_GUN].m_VisualSize * ScaleX * HudWeaponScale, g_pData->m_Weapons.m_aId[WEAPON_GUN].m_VisualSize * ScaleY * HudWeaponScale);
-	RenderTools()->GetSpriteScale(g_pData->m_Weapons.m_aId[WEAPON_SHOTGUN].m_pSpriteBody, ScaleX, ScaleY);
-	m_WeaponShotgunOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, g_pData->m_Weapons.m_aId[WEAPON_SHOTGUN].m_VisualSize * ScaleX * HudWeaponScale, g_pData->m_Weapons.m_aId[WEAPON_SHOTGUN].m_VisualSize * ScaleY * HudWeaponScale);
-	RenderTools()->GetSpriteScale(g_pData->m_Weapons.m_aId[WEAPON_GRENADE].m_pSpriteBody, ScaleX, ScaleY);
-	m_WeaponGrenadeOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, g_pData->m_Weapons.m_aId[WEAPON_GRENADE].m_VisualSize * ScaleX * HudWeaponScale, g_pData->m_Weapons.m_aId[WEAPON_GRENADE].m_VisualSize * ScaleY * HudWeaponScale);
-	RenderTools()->GetSpriteScale(g_pData->m_Weapons.m_aId[WEAPON_LASER].m_pSpriteBody, ScaleX, ScaleY);
-	m_WeaponLaserOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, g_pData->m_Weapons.m_aId[WEAPON_LASER].m_VisualSize * ScaleX * HudWeaponScale, g_pData->m_Weapons.m_aId[WEAPON_LASER].m_VisualSize * ScaleY * HudWeaponScale);
-	RenderTools()->GetSpriteScale(g_pData->m_Weapons.m_aId[WEAPON_NINJA].m_pSpriteBody, ScaleX, ScaleY);
-	m_WeaponNinjaOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, g_pData->m_Weapons.m_aId[WEAPON_NINJA].m_VisualSize * ScaleX * HudWeaponScale, g_pData->m_Weapons.m_aId[WEAPON_NINJA].m_VisualSize * ScaleY * HudWeaponScale);
+	for(int Weapon = 0; Weapon < NUM_WEAPONS; ++Weapon)
+	{
+		const CDataWeaponspec &WeaponSpec = g_pData->m_Weapons.m_aId[Weapon];
+		float ScaleX, ScaleY;
+		RenderTools()->GetSpriteScale(WeaponSpec.m_pSpriteBody, ScaleX, ScaleY);
+		constexpr float HudWeaponScale = 0.25f;
+		float Width = WeaponSpec.m_VisualSize * ScaleX * HudWeaponScale;
+		float Height = WeaponSpec.m_VisualSize * ScaleY * HudWeaponScale;
+		m_aWeaponOffset[Weapon] = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, Width, Height);
+	}
 
 	// Quads for displaying capabilities
 	m_EndlessJumpOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
@@ -888,7 +884,7 @@ void CHud::RenderPlayerState(const int ClientID)
 		x -= 3;
 		Graphics()->QuadsSetRotation(pi * 7 / 4);
 		Graphics()->TextureSet(m_pClient->m_GameSkin.m_SpritePickupHammer);
-		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_WeaponHammerOffset, x, y);
+		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_aWeaponOffset[WEAPON_HAMMER], x, y);
 		Graphics()->QuadsSetRotation(0);
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 		x += 16;
@@ -901,7 +897,7 @@ void CHud::RenderPlayerState(const int ClientID)
 		}
 		Graphics()->QuadsSetRotation(pi * 7 / 4);
 		Graphics()->TextureSet(m_pClient->m_GameSkin.m_SpritePickupGun);
-		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_WeaponGunOffset, x, y);
+		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_aWeaponOffset[WEAPON_GUN], x, y);
 		Graphics()->QuadsSetRotation(0);
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 		x += 12;
@@ -914,7 +910,7 @@ void CHud::RenderPlayerState(const int ClientID)
 		}
 		Graphics()->QuadsSetRotation(pi * 7 / 4);
 		Graphics()->TextureSet(m_pClient->m_GameSkin.m_SpritePickupShotgun);
-		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_WeaponShotgunOffset, x, y);
+		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_aWeaponOffset[WEAPON_SHOTGUN], x, y);
 		Graphics()->QuadsSetRotation(0);
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 		x += 12;
@@ -927,7 +923,7 @@ void CHud::RenderPlayerState(const int ClientID)
 		}
 		Graphics()->QuadsSetRotation(pi * 7 / 4);
 		Graphics()->TextureSet(m_pClient->m_GameSkin.m_SpritePickupGrenade);
-		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_WeaponGrenadeOffset, x, y);
+		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_aWeaponOffset[WEAPON_GRENADE], x, y);
 		Graphics()->QuadsSetRotation(0);
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 		x += 12;
@@ -940,7 +936,7 @@ void CHud::RenderPlayerState(const int ClientID)
 		}
 		Graphics()->QuadsSetRotation(pi * 7 / 4);
 		Graphics()->TextureSet(m_pClient->m_GameSkin.m_SpritePickupLaser);
-		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_WeaponLaserOffset, x, y);
+		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_aWeaponOffset[WEAPON_LASER], x, y);
 		Graphics()->QuadsSetRotation(0);
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 		x += 12;
@@ -953,7 +949,7 @@ void CHud::RenderPlayerState(const int ClientID)
 		}
 		Graphics()->QuadsSetRotation(pi * 7 / 4);
 		Graphics()->TextureSet(m_pClient->m_GameSkin.m_SpritePickupNinja);
-		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_WeaponNinjaOffset, x, y);
+		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_aWeaponOffset[WEAPON_NINJA], x, y);
 		Graphics()->QuadsSetRotation(0);
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 
