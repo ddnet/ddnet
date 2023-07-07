@@ -3928,7 +3928,6 @@ void CMenus::RenderSettingsProfiles(CUIRect MainView)
 	SelectorRect.HSplitBottom(15.0, &SelectorRect, 0);
 	std::vector<CProfile> *pProfileList = &GameClient()->m_SkinProfiles.m_Profiles;
 
-	static bool s_ListBoxUsed = false;
 	static CListBox s_ListBox;
 	s_ListBox.DoStart(50.0f, pProfileList->size(), 4, 3, SelectedProfile, &SelectorRect, true);
 
