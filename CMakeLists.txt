@@ -1393,6 +1393,7 @@ set(EXPECTED_DATA
   countryflags/XCA.png
   countryflags/XEN.png
   countryflags/XEU.png
+  countryflags/XGL.png
   countryflags/XNI.png
   countryflags/XSC.png
   countryflags/XWA.png
@@ -1466,6 +1467,7 @@ set(EXPECTED_DATA
   languages/esperanto.txt
   languages/finnish.txt
   languages/french.txt
+  languages/galician.txt
   languages/german.txt
   languages/greek.txt
   languages/hungarian.txt

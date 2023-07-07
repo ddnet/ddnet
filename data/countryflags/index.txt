@@ -24,6 +24,9 @@ XEU
 XCA
 == 906
 
+XGL
+== 907
+
 #south sudan, non official code#
 SS
 == 737
