@@ -26,6 +26,7 @@
 # Rafael Fontenelle   2022-10-25 11:22:00
 # Rafael Fontenelle   2023-01-09 10:33:00
 # Rafael Fontenelle   2023-03-26 19:11:00
+# Rafael Fontenelle   2023-07-07 12:11:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -1662,7 +1663,7 @@ Open the directory to add custom assets
 
 [Graphics error]
 Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
-== Não foi possível inicializar o backend de vídeo fornecido, isso provavelmente porque você não instalou o driver da placa de vídeo 
+== Não foi possível inicializar o backend de vídeo fornecido, isso provavelmente porque você não instalou o driver da placa de vídeo.
 
 Could not save downloaded map. Try manually deleting this file: %s
 == Não foi possível salvar o mapa baixado. Tente excluir manualmente este arquivo: %s
@@ -1674,56 +1675,56 @@ Create a random skin
 == Criar uma skin aleatória
 
 A demo with this name already exists
-== 
+== Uma demo com este nome já existe
 
 No server selected
-== 
+== Nenhum serviço selecionado
 
 Online players (%d)
-== 
+== Jogadores online (%d)
 
 Online clanmates (%d)
-== 
+== Colegas de clã online (%d)
 
 [friends (server browser)]
 Offline (%d)
-== 
+== Offline (%d)
 
 Click to select server. Double click to join your friend.
-== 
+== Clique para selecionar o servidor. Clique duplo para se juntar a seus amigos.
 
 Click to remove this player from your friends list.
-== 
+== Clique para remover este jogador de sua lista de amigos.
 
 Click to remove this clan from your friends list.
-== 
+== Clique para remover este clã a partir de sua lista de amigos.
 
 None
-== 
+== Ninguém
 
 Add Clan
-== 
+== Adicionar clã
 
 Mark the beginning of a cut (right click to reset)
-== 
+== Marcar o início de um corte (clique direito para redefinir)
 
 Mark the end of a cut (right click to reset)
-== 
+== Marcar o fim de um corte (clique direito para redefinir)
 
 Close the demo player
-== 
+== Fechar o reprodutor de demo
 
 Export demo cut
-== 
+== Exportar corte de demo
 
 Cut interval
-== 
+== Intervalo de corte
 
 Cut length
-== 
+== Comprimento do corte
 
 Axis
-== 
+== Eixo
 
 Graphics card
-== 
+== Placa de vídeo
