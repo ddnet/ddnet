@@ -182,7 +182,7 @@ $tool ../DDNet \
 
 if [ "$arg_valgrind_memcheck" == "1" ]; then
 	wait_for_fifo client1.fifo 180
-	sleep 20
+	sleep 30
 else
 	wait_for_fifo client1.fifo 50
 	sleep 1
@@ -206,7 +206,7 @@ $tool ../DDNet \
 
 if [ "$arg_valgrind_memcheck" == "1" ]; then
 	wait_for_fifo client2.fifo 180
-	sleep 20
+	sleep 30
 else
 	wait_for_fifo client2.fifo 50
 	sleep 2
