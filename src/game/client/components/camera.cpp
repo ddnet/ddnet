@@ -31,7 +31,7 @@ float CCamera::ZoomProgress(float CurrentTime) const
 void CCamera::ScaleZoom(float Factor)
 {
 	float CurrentTarget = m_Zooming ? m_ZoomSmoothingTarget : m_Zoom;
-	ChangeZoom(CurrentTarget * Factor);
+	ChangeZoom(CurrentTarget * Factor, g_Config.m_ClSmoothZoomTime);
 }
 
 float CCamera::MaxZoomLevel()
@@ -44,7 +44,7 @@ float CCamera::MinZoomLevel()
 	return 0.01f;
 }
 
-void CCamera::ChangeZoom(float Target)
+void CCamera::ChangeZoom(float Target, int Smoothness)
 {
 	if(Target > MaxZoomLevel() || Target < MinZoomLevel())
 	{
@@ -64,7 +64,7 @@ void CCamera::ChangeZoom(float Target)
 	m_ZoomSmoothingTarget = Target;
 	m_ZoomSmoothing = CCubicBezier::With(Current, Derivative, 0, m_ZoomSmoothingTarget);
 	m_ZoomSmoothingStart = Now;
-	m_ZoomSmoothingEnd = Now + (float)g_Config.m_ClSmoothZoomTime / 1000;
+	m_ZoomSmoothingEnd = Now + (float)Smoothness / 1000;
 
 	m_Zooming = true;
 }
@@ -198,6 +198,9 @@ void CCamera::ConZoomPlus(IConsole::IResult *pResult, void *pUserData)
 	if(pSelf->m_pClient->m_Snap.m_SpecInfo.m_Active || pSelf->GameClient()->m_GameInfo.m_AllowZoom || pSelf->Client()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
 		pSelf->ScaleZoom(ZoomStep);
+
+		if(pSelf->GameClient()->m_MultiViewActivated)
+			pSelf->GameClient()->m_MultiViewPersonalZoom++;
 	}
 }
 void CCamera::ConZoomMinus(IConsole::IResult *pResult, void *pUserData)
@@ -206,12 +209,19 @@ void CCamera::ConZoomMinus(IConsole::IResult *pResult, void *pUserData)
 	if(pSelf->m_pClient->m_Snap.m_SpecInfo.m_Active || pSelf->GameClient()->m_GameInfo.m_AllowZoom || pSelf->Client()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
 		pSelf->ScaleZoom(1 / ZoomStep);
+
+		if(pSelf->GameClient()->m_MultiViewActivated)
+			pSelf->GameClient()->m_MultiViewPersonalZoom--;
 	}
 }
 void CCamera::ConZoom(IConsole::IResult *pResult, void *pUserData)
 {
+	CCamera *pSelf = (CCamera *)pUserData;
 	float TargetLevel = pResult->NumArguments() ? pResult->GetFloat(0) : g_Config.m_ClDefaultZoom;
-	((CCamera *)pUserData)->ChangeZoom(std::pow(ZoomStep, TargetLevel - 10));
+	pSelf->ChangeZoom(std::pow(ZoomStep, TargetLevel - 10), g_Config.m_ClSmoothZoomTime);
+
+	if(pSelf->GameClient()->m_MultiViewActivated)
+		pSelf->GameClient()->m_MultiViewPersonalZoom = 0;
 }
 void CCamera::ConSetView(IConsole::IResult *pResult, void *pUserData)
 {
@@ -220,4 +230,9 @@ void CCamera::ConSetView(IConsole::IResult *pResult, void *pUserData)
 	pSelf->m_ForceFreeviewPos = vec2(
 		clamp(pResult->GetInteger(0) * 32.0f, 200.0f, pSelf->Collision()->GetWidth() * 32 - 200.0f),
 		clamp(pResult->GetInteger(1) * 32.0f, 200.0f, pSelf->Collision()->GetWidth() * 32 - 200.0f));
+}
+
+void CCamera::SetZoom(float Target, int Smoothness)
+{
+	ChangeZoom(Target, Smoothness);
 }
