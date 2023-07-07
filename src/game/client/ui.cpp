@@ -580,29 +580,49 @@ struct SCursorAndBoundingBox
 
 static SCursorAndBoundingBox CalcFontSizeCursorHeightAndBoundingBox(ITextRender *pTextRender, const char *pText, int Flags, float &Size, float MaxWidth, const SLabelProperties &LabelProps)
 {
+	const float MinFontSize = 5.0f;
+	const float MaxTextWidth = LabelProps.m_MaxWidth != -1.0f ? LabelProps.m_MaxWidth : MaxWidth;
+	const int FlagsWithoutStop = Flags & ~(TEXTFLAG_STOP_AT_END | TEXTFLAG_ELLIPSIS_AT_END);
+	const float MaxTextWidthWithoutStop = Flags == FlagsWithoutStop ? LabelProps.m_MaxWidth : -1.0f;
+
 	float TextBoundingHeight = 0.0f;
 	float TextHeight = 0.0f;
 	int LineCount = 0;
-	float MaxTextWidth = LabelProps.m_MaxWidth != -1 ? LabelProps.m_MaxWidth : MaxWidth;
 	STextSizeProperties TextSizeProps{};
 	TextSizeProps.m_pHeight = &TextHeight;
 	TextSizeProps.m_pMaxCharacterHeightInLine = &TextBoundingHeight;
 	TextSizeProps.m_pLineCount = &LineCount;
-	float TextWidth = pTextRender->TextWidth(Size, pText, -1, LabelProps.m_MaxWidth, Flags, TextSizeProps);
-	while(TextWidth > MaxTextWidth + 0.001f)
+
+	float TextWidth;
+	do
 	{
-		if(!LabelProps.m_EnableWidthCheck)
+		Size = maximum(Size, MinFontSize);
+		// Only consider stop-at-end and ellipsis-at-end when minimum font size reached or font scaling disabled
+		if((Size == MinFontSize || !LabelProps.m_EnableWidthCheck) && Flags != FlagsWithoutStop)
+			TextWidth = pTextRender->TextWidth(Size, pText, -1, LabelProps.m_MaxWidth, Flags, TextSizeProps);
+		else
+			TextWidth = pTextRender->TextWidth(Size, pText, -1, MaxTextWidthWithoutStop, FlagsWithoutStop, TextSizeProps);
+		if(TextWidth <= MaxTextWidth + 0.001f || !LabelProps.m_EnableWidthCheck || Size == MinFontSize)
 			break;
-		if(Size < 4.0f)
-			break;
-		Size -= 1.0f;
-		TextWidth = pTextRender->TextWidth(Size, pText, -1, LabelProps.m_MaxWidth, Flags, TextSizeProps);
-	}
+		Size--;
+	} while(true);
+
 	SCursorAndBoundingBox Res{};
 	Res.m_TextSize = vec2(TextWidth, TextHeight);
 	Res.m_BiggestCharacterHeight = TextBoundingHeight;
 	Res.m_LineCount = LineCount;
 	return Res;
+}
+
+static int GetFlagsForLabelProperties(const SLabelProperties &LabelProps, const CTextCursor *pReadCursor)
+{
+	if(pReadCursor != nullptr)
+		return pReadCursor->m_Flags & ~TEXTFLAG_RENDER;
+
+	int Flags = 0;
+	Flags |= LabelProps.m_StopAtEnd ? TEXTFLAG_STOP_AT_END : 0;
+	Flags |= LabelProps.m_EllipsisAtEnd ? TEXTFLAG_ELLIPSIS_AT_END : 0;
+	return Flags;
 }
 
 vec2 CUI::CalcAlignedCursorPos(const CUIRect *pRect, vec2 TextSize, int Align, const float *pBiggestCharHeight)
@@ -634,7 +654,7 @@ vec2 CUI::CalcAlignedCursorPos(const CUIRect *pRect, vec2 TextSize, int Align, c
 
 void CUI::DoLabel(const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps)
 {
-	const int Flags = LabelProps.m_StopAtEnd ? TEXTFLAG_STOP_AT_END : 0;
+	const int Flags = GetFlagsForLabelProperties(LabelProps, nullptr);
 	const SCursorAndBoundingBox TextBounds = CalcFontSizeCursorHeightAndBoundingBox(TextRender(), pText, Flags, Size, pRect->w, LabelProps);
 	const vec2 CursorPos = CalcAlignedCursorPos(pRect, TextBounds.m_TextSize, Align, TextBounds.m_LineCount == 1 ? &TextBounds.m_BiggestCharacterHeight : nullptr);
 
@@ -646,7 +666,7 @@ void CUI::DoLabel(const CUIRect *pRect, const char *pText, float Size, int Align
 
 void CUI::DoLabel(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps, int StrLen, const CTextCursor *pReadCursor)
 {
-	const int Flags = pReadCursor ? (pReadCursor->m_Flags & ~TEXTFLAG_RENDER) : LabelProps.m_StopAtEnd ? TEXTFLAG_STOP_AT_END : 0;
+	const int Flags = GetFlagsForLabelProperties(LabelProps, pReadCursor);
 	const SCursorAndBoundingBox TextBounds = CalcFontSizeCursorHeightAndBoundingBox(TextRender(), pText, Flags, Size, pRect->w, LabelProps);
 
 	CTextCursor Cursor;
@@ -671,7 +691,7 @@ void CUI::DoLabel(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, cons
 	RectEl.m_Cursor = Cursor;
 }
 
-void CUI::DoLabelStreamed(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth, bool StopAtEnd, int StrLen, const CTextCursor *pReadCursor)
+void CUI::DoLabelStreamed(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps, int StrLen, const CTextCursor *pReadCursor)
 {
 	bool NeedsRecreate = false;
 	bool ColorChanged = RectEl.m_TextColor != TextRender()->GetTextColor() || RectEl.m_TextOutlineColor != TextRender()->GetTextOutlineColor();
@@ -714,10 +734,7 @@ void CUI::DoLabelStreamed(CUIElement::SUIElementRect &RectEl, const CUIRect *pRe
 		TmpRect.w = pRect->w;
 		TmpRect.h = pRect->h;
 
-		SLabelProperties Props;
-		Props.m_MaxWidth = MaxWidth;
-		Props.m_StopAtEnd = StopAtEnd;
-		DoLabel(RectEl, &TmpRect, pText, Size, TEXTALIGN_TL, Props, StrLen, pReadCursor);
+		DoLabel(RectEl, &TmpRect, pText, Size, TEXTALIGN_TL, LabelProps, StrLen, pReadCursor);
 	}
 
 	ColorRGBA ColorText(RectEl.m_TextColor);
@@ -1711,32 +1728,15 @@ CUI::EPopupMenuFunctionResult CUI::PopupColorPicker(void *pContext, CUIRect View
 
 	PickerColorHSV = ColorHSVA(H / 255.0f, S / 255.0f, V / 255.0f, A / 255.0f);
 
-	const auto RotateByteLeft = [pColorPicker](unsigned Num) {
-		if(pColorPicker->m_Alpha)
-		{
-			// ARGB -> RGBA (internal -> displayed)
-			return ((Num & 0xFF000000u) >> 24) | (Num << 8);
-		}
-		return Num;
-	};
-	const auto RotateByteRight = [pColorPicker](unsigned Num) {
-		if(pColorPicker->m_Alpha)
-		{
-			// RGBA -> ARGB (displayed -> internal)
-			return ((Num & 0xFFu) << 24) | (Num >> 8);
-		}
-		return Num;
-	};
-
 	SValueSelectorProperties Props;
 	Props.m_UseScroll = false;
 	Props.m_IsHex = true;
 	Props.m_HexPrefix = pColorPicker->m_Alpha ? 8 : 6;
-	const unsigned Hex = RotateByteLeft(color_cast<ColorRGBA>(PickerColorHSV).Pack(pColorPicker->m_Alpha));
+	const unsigned Hex = color_cast<ColorRGBA>(PickerColorHSV).PackAlphaLast(pColorPicker->m_Alpha);
 	const unsigned NewHex = pUI->DoValueSelector(&pColorPicker->m_aValueSelectorIds[4], &HexRect, "Hex:", Hex, 0, pColorPicker->m_Alpha ? 0xFFFFFFFFll : 0xFFFFFFll, Props);
 	if(Hex != NewHex)
 	{
-		PickerColorHSV = color_cast<ColorHSVA>(ColorRGBA(RotateByteRight(NewHex), pColorPicker->m_Alpha));
+		PickerColorHSV = color_cast<ColorHSVA>(ColorRGBA::UnpackAlphaLast<ColorRGBA>(NewHex, pColorPicker->m_Alpha));
 		if(!pColorPicker->m_Alpha)
 			PickerColorHSV.a = A / 255.0f;
 	}

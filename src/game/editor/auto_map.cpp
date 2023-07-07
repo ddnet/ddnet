@@ -470,7 +470,7 @@ void CAutoMapper::Proceed(CLayerTiles *pLayer, int ConfigID, int Seed, int SeedO
 			for(int x = 0; x < pLayer->m_Width; x++)
 			{
 				CTile *pTile = &(pLayer->m_pTiles[y * pLayer->m_Width + x]);
-				m_pEditor->m_Map.m_Modified = true;
+				m_pEditor->m_Map.OnModify();
 
 				for(size_t i = 0; i < pRun->m_vIndexRules.size(); ++i)
 				{

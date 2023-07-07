@@ -275,6 +275,11 @@ static void SdlCallback(void *pUnused, Uint8 *pStream, int Len)
 #endif
 }
 
+CSound::CSound() :
+	m_SoundEnabled(false), m_Device(0), m_pGraphics(nullptr), m_pStorage(nullptr)
+{
+}
+
 int CSound::Init()
 {
 	m_SoundEnabled = false;

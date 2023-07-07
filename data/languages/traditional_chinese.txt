@@ -95,12 +95,6 @@ Clan
 Client
 == 客戶端
 
-Close
-== 關閉
-
-Connect
-== 連線
-
 Connecting to
 == 正在連線到
 
@@ -290,9 +284,6 @@ Enable team chat sound
 Enable highlighted chat sound
 == 啟用被提及時的提示音
 
-Threaded sound loading
-== 啟用多執行緒音訊載入
-
 Name
 == 名稱
 
@@ -395,9 +386,6 @@ Rename demo
 
 Reset filter
 == 重置過濾器
-
-Sample rate
-== 取樣率
 
 Score
 == 分數
@@ -800,9 +788,6 @@ Grabs
 DDNet
 == DDNet
 
-Select a name
-== 另存為
-
 Deaths
 == 死亡數
 
@@ -811,9 +796,6 @@ Please use a different name
 
 Restart
 == 重新開始
-
-Old mouse mode
-== 舊版滑鼠模式
 
 Follow
 == 跟隨
@@ -999,8 +981,8 @@ Show HUD
 Hammerfly dummy
 == 分身Hammerfly開關
 
-Default length: %d
-== 預設長度: %d
+Default length
+== 預設長度
 
 Toggle ghost
 == 影子記錄開關
@@ -1255,9 +1237,6 @@ https://ddnet.org/discord
 Are you sure that you want to disconnect and switch to a different server?
 == 你確定要中斷此伺服器并嘗試加入其他伺服器嗎？
 
-Refreshing...
-== 正在重整...
-
 Kill Messages
 == 擊殺訊息
 
@@ -1296,9 +1275,6 @@ default
 
 custom
 == 自定義
-
-Graphics cards
-== 顯示卡
 
 auto
 == 自動
@@ -1366,13 +1342,6 @@ Download community skins
 Enable controller
 == 啓用控制器
 
-Controller %d: %s
-== 控制器 %d: %s
-
-Click to cycle through all available controllers.
-== 點擊以切換其他控制器
-
-[Ingame controller mode]
 Relative
 == 相對
 
@@ -1392,17 +1361,11 @@ UI controller sens.
 Controller jitter tolerance
 == 搖桿錯位容錯
 
-Device
-== 輸入設備
-
 Status
 == 狀態
 
 Aim bind
 == 操作軸綁定
-
-Controller Axis #%d
-== 搖桿 #%d
 
 Mouse
 == 滑鼠
@@ -1562,12 +1525,6 @@ Slow down the demo
 
 Speed up the demo
 == 加快播放速度
-
-Mark the beginning of a cut
-== 標記裁剪起點
-
-Mark the end of a cut
-== 標記裁剪終點
 
 Export cut as a separate demo
 == 另存爲新回放檔案
@@ -1742,3 +1699,33 @@ None
 
 Add Clan
 == 新增戰隊
+
+A demo with this name already exists
+== 
+
+No server selected
+== 
+
+Mark the beginning of a cut (right click to reset)
+== 
+
+Mark the end of a cut (right click to reset)
+== 
+
+Close the demo player
+== 
+
+Export demo cut
+== 
+
+Cut interval
+== 
+
+Cut length
+== 
+
+Axis
+== 
+
+Graphics card
+== 

@@ -45,7 +45,9 @@ void CGameContext::ConCredits(IConsole::IResult *pResult, void *pUserData)
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 		"sjrc6, Cellegen, srdante, Nouaa, Voxel, luk51,");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
-		"Vy0x2, Avolicious, louis, Marmare314 & others.");
+		"Vy0x2, Avolicious, louis, Marmare314, hus3h,");
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
+		"ArijanJ & others");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 		"Based on DDRace by the DDRace developers,");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
@@ -748,6 +750,11 @@ void CGameContext::ConSwap(IConsole::IResult *pResult, void *pUserData)
 	else if(!Teams.IsStarted(Team))
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "Need to have started the map to swap with a player.");
+		return;
+	}
+	if(pSelf->m_World.m_Core.m_apCharacters[pResult->m_ClientID] == nullptr || pSelf->m_World.m_Core.m_apCharacters[TargetClientId] == nullptr)
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "You and the other player must not be paused.");
 		return;
 	}
 

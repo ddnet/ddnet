@@ -78,12 +78,6 @@ Clan
 Client
 == Kliens
 
-Close
-== Bezárás
-
-Connect
-== Csatlakozás
-
 Connecting to
 == Csatlakozás...
 
@@ -622,9 +616,6 @@ Spectate next
 Show names in chat in team colors
 == Csapatszínben jelennek meg a játékosok a chatben
 
-Select a name
-== Válassz nevet
-
 Enable team chat sound
 == Csapat chat hang engedélyezése
 
@@ -654,9 +645,6 @@ Restart
 
 Game paused
 == Játék megállítva
-
-Old mouse mode
-== Régi egér mód
 
 Browser
 == Böngésző
@@ -970,8 +958,8 @@ Toggle dyncam
 %d new mentions
 == %d új értesítés
 
-Default length: %d
-== Átlagos hossz: %d
+Default length
+== Átlagos hossz
 
 Show HUD
 == HUD mutatása
@@ -1217,9 +1205,6 @@ SA
 CHN
 == KíNA
 
-Refreshing...
-== Frissítés...
-
 Kill Messages
 == Halálüzenetek
 
@@ -1276,9 +1261,6 @@ default
 
 custom
 == egyedi
-
-Graphics cards
-== Videókártyák
 
 auto
 == automatikus
@@ -1337,13 +1319,6 @@ Download community skins
 Enable controller
 == Kontroller használata
 
-Controller %d: %s
-== Kontroller %d: %s
-
-Click to cycle through all available controllers.
-== Kattints, hogy váltogass az elérhető kontrollerek között.
-
-[Ingame controller mode]
 Relative
 == Relatív
 
@@ -1363,14 +1338,8 @@ UI controller sens.
 Controller jitter tolerance
 == Kontroller jitter tolerancia
 
-Device
-== Eszköz
-
 Status
 == Állapot
-
-Controller Axis #%d
-== Kontroller Tengely #%d
 
 Mouse
 == Egér
@@ -1569,36 +1538,11 @@ File '%s' already exists, do you want to overwrite it?
 Copy info
 == Infó Másolása
 
-Online players (%d)
-== 
-
-Online clanmates (%d)
-== 
-
-[friends (server browser)]
-Offline (%d)
-== 
-
-Click to select server. Double click to join your friend.
-== 
-
-Click to remove this player from your friends list.
-== 
-
-Click to remove this clan from your friends list.
-== 
-
-None
-== 
-
 Are you sure that you want to remove the player '%s' from your friends list?
 == Biztos, hogy ki szeretnéd törölni '%s' Játékost a barátlistádból?
 
 Are you sure that you want to remove the clan '%s' from your friends list?
 == Biztos, hogy ki szeretnéd törölni '%s' Klánt a barátlistádból?
-
-Add Clan
-== 
 
 Play the current demo
 == Jelenlegi Demó Lejátszása
@@ -1620,12 +1564,6 @@ Slow down the demo
 
 Speed up the demo
 == Demó Felgyorsítása
-
-Mark the beginning of a cut
-== Jelöld be a vágás elejét
-
-Mark the end of a cut
-== Jelöld be a vágás végét
 
 Export cut as a separate demo
 == Exportáld a vágást, mint külön Demó
@@ -1713,3 +1651,58 @@ Unregister protocol and file extensions
 
 Open the directory to add custom assets
 == Megnyitni az egyedi Képek helyét
+
+A demo with this name already exists
+== 
+
+No server selected
+== 
+
+Online players (%d)
+== 
+
+Online clanmates (%d)
+== 
+
+[friends (server browser)]
+Offline (%d)
+== 
+
+Click to select server. Double click to join your friend.
+== 
+
+Click to remove this player from your friends list.
+== 
+
+Click to remove this clan from your friends list.
+== 
+
+None
+== 
+
+Add Clan
+== 
+
+Mark the beginning of a cut (right click to reset)
+== 
+
+Mark the end of a cut (right click to reset)
+== 
+
+Close the demo player
+== 
+
+Export demo cut
+== 
+
+Cut interval
+== 
+
+Cut length
+== 
+
+Axis
+== 
+
+Graphics card
+== 

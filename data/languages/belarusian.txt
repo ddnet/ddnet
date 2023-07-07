@@ -3,6 +3,7 @@
 #	arionwt1997
 #modified by:
 #	Chill & PoKeMoN		2023-03-31 16:00:00
+#	Chill & PoKeMoN		2023-07-02 00:54:00
 #	
 ##### /authors #####
 
@@ -76,12 +77,6 @@ Clan
 
 Client
 == Кліент
-
-Close
-== Выйсці
-
-Connect
-== Падлучыцца
 
 Connecting to
 == Падлучэнне да
@@ -827,9 +822,6 @@ Exclude
 %d player
 == %d гулец
 
-Refreshing...
-== Абнаўленне...
-
 Are you sure that you want to disconnect and switch to a different server?
 == Вы ўпэўненыя, што хочаце адлучыцца і пераключыцца на іншы сервер?
 
@@ -860,9 +852,6 @@ Are you sure that you want to remove the player '%s' from your friends list?
 Are you sure that you want to remove the clan '%s' from your friends list?
 == Вы ўпэўненыя што хочаце выдаліць клан '%s' са спіса вашых сяброў?
 
-Select a name
-== Выберыце імя
-
 Please use a different name
 == Калі ласка, выкарыстайце іншае імя
 
@@ -892,12 +881,6 @@ Slow down the demo
 
 Speed up the demo
 == Паскорыць дэма
-
-Mark the beginning of a cut
-== Пазначыць пачатак адрэзка
-
-Mark the end of a cut
-== Пазначыць канец адрэзка
 
 Export cut as a separate demo
 == Экспартаваць адрэзак як асобнае дэма
@@ -1130,13 +1113,6 @@ Chat command
 Enable controller
 == Уключыць кантролер
 
-Controller %d: %s
-== Кантролер %d: %s
-
-Click to cycle through all available controllers.
-== Націсніце каб праглядзець усе дасяжныя кантролеры.
-
-[Ingame controller mode]
 Relative
 == Адносны
 
@@ -1159,17 +1135,11 @@ Controller jitter tolerance
 No controller found. Plug in a controller.
 == Кантролер не знойдзены. Падключыце кантролер.
 
-Device
-== Прылада
-
 Status
 == Статус
 
 Aim bind
 == Вось прыцэла
-
-Controller Axis #%d
-== Вось кантролера #%d
 
 Mouse
 == Мыш
@@ -1224,9 +1194,6 @@ default
 
 custom
 == карыстацкі
-
-Graphics cards
-== Відэакарты
 
 auto
 == аўта
@@ -1453,8 +1420,8 @@ Save the best demo of each race
 Enable replays
 == Уключыць запісы
 
-Default length: %d
-== Станд. працягласць: %d
+Default length
+== Станд. працягласць
 
 When you cross the start line, show a ghost tee replicating the movements of your best time
 == Пры перасячэнні стартавай лініі, паказваць прывід Tee, які паўтарае ваш лепшы час
@@ -1506,9 +1473,6 @@ AntiPing: predict weapons
 
 AntiPing: predict grenade paths
 == АнтыПінг: прадказывать траекторыі гранат
-
-Old mouse mode
-== Рэжым старой мышы
 
 Background
 == Фон
@@ -1680,35 +1644,65 @@ Grabs
 == Зах.
 
 1 new mention
-== 1 новая згадка
+== 1 згадка
 
 %d new mentions
-== %d новых згадак
+== %d згадак
 
 9+ new mentions
-== 9+ новых згадак
+== 9+ згадак
+
+A demo with this name already exists
+== Дэма з такой назвай ужо існуе 
+
+No server selected
+== Сервер не абраны
 
 Online players (%d)
-== 
+== Гульцоў анлайн (%d)
 
 Online clanmates (%d)
-== 
+== Членаў клана анлайн (%d)
 
 [friends (server browser)]
 Offline (%d)
-== 
+== Афлайн (%d)
 
 Click to select server. Double click to join your friend.
-== 
+== Націсніце, как абраць сервер. Націсніце двойчы, каб далучыцца да вашага сябра.
 
 Click to remove this player from your friends list.
-== 
+== Націсніце, как выдаліць гэтага гульца са свайго спіса сяброў.
 
 Click to remove this clan from your friends list.
-== 
+== Націсніце, как выдаліць гэты клан са свайго спіса сяброў.
 
 None
-== 
+== Пуста
 
 Add Clan
-== 
+== Дадаць клан
+
+Mark the beginning of a cut (right click to reset)
+== Пазначыць пачатак адрэзка (правая кнопка мышы для скіду)
+
+Mark the end of a cut (right click to reset)
+== Пазначыць канец адрэзка (правая кнопка мышы для скіду)
+
+Close the demo player
+== Закрыць прайгравальнік дэма
+
+Export demo cut
+== Экспартаваць адрэзак дэма
+
+Cut interval
+== Інтэрвал адрэзка
+
+Cut length
+== Працягласць адрэзка
+
+Axis
+== Вось
+
+Graphics card
+== Відэакарта

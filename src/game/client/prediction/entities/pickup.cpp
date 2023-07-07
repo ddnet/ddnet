@@ -7,6 +7,8 @@
 #include <game/generated/protocol.h>
 #include <game/mapitems.h>
 
+static constexpr int gs_PickupPhysSize = 14;
+
 void CPickup::Tick()
 {
 	Move();
@@ -143,7 +145,7 @@ void CPickup::Move()
 }
 
 CPickup::CPickup(CGameWorld *pGameWorld, int ID, const CPickupData *pPickup) :
-	CEntity(pGameWorld, CGameWorld::ENTTYPE_PICKUP)
+	CEntity(pGameWorld, CGameWorld::ENTTYPE_PICKUP, vec2(0, 0), gs_PickupPhysSize)
 {
 	m_Pos = pPickup->m_Pos;
 	m_Type = pPickup->m_Type;

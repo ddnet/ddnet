@@ -70,6 +70,7 @@ CMenus::CMenus()
 	m_ShowStart = true;
 
 	str_copy(m_aCurrentDemoFolder, "demos");
+	m_DemolistStorageType = IStorage::TYPE_ALL;
 
 	m_DemoPlayerState = DEMOPLAYER_NONE;
 	m_Dummy = false;
@@ -1139,6 +1140,7 @@ int CMenus::Render()
 		{
 			pTitle = m_aPopupTitle;
 			pExtraText = m_aPopupMessage;
+			TopAlign = true;
 		}
 		else if(m_Popup == POPUP_CONNECTING)
 		{
@@ -1530,9 +1532,9 @@ int CMenus::Render()
 					}
 					else if(Storage()->RenameFile(aBufOld, aBufNew, m_vDemos[m_DemolistSelectedIndex].m_StorageType))
 					{
-						str_copy(g_Config.m_UiDemoSelected, m_DemoRenameInput.GetString());
-						if(str_endswith(g_Config.m_UiDemoSelected, ".demo"))
-							g_Config.m_UiDemoSelected[str_length(g_Config.m_UiDemoSelected) - str_length(".demo")] = '\0';
+						str_copy(m_aCurrentDemoSelectionName, m_DemoRenameInput.GetString());
+						if(str_endswith(m_aCurrentDemoSelectionName, ".demo"))
+							m_aCurrentDemoSelectionName[str_length(m_aCurrentDemoSelectionName) - str_length(".demo")] = '\0';
 						DemolistPopulate();
 						DemolistOnUpdate(false);
 					}

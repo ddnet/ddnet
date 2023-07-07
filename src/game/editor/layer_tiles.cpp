@@ -775,8 +775,6 @@ CUI::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 					}
 				}
 			}
-
-			return CUI::POPUP_CLOSE_CURRENT;
 		}
 	}
 
@@ -1079,7 +1077,7 @@ CUI::EPopupMenuFunctionResult CLayerTiles::RenderCommonProperties(SCommonPropSta
 
 void CLayerTiles::FlagModified(int x, int y, int w, int h)
 {
-	m_pEditor->m_Map.m_Modified = true;
+	m_pEditor->m_Map.OnModify();
 	if(m_Seed != 0 && m_AutoMapperConfig != -1 && m_AutoAutoMap && m_Image >= 0)
 	{
 		m_pEditor->m_Map.m_vpImages[m_Image]->m_AutoMapper.ProceedLocalized(this, m_AutoMapperConfig, m_Seed, x, y, w, h);

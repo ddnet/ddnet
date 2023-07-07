@@ -91,14 +91,8 @@ Clan
 Client
 == Client
 
-Close
-== Schließ.
-
 Colors of the hook collision line, in case of a possible collision with:
 == Die Farbe der Hakenkollisionlinie bei einer möglichen Kollision mit:
-
-Connect
-== Verbinden
 
 Connecting to
 == Verbinden mit
@@ -791,9 +785,6 @@ Switch weapon when out of ammo
 Grabs
 == Griffe
 
-Select a name
-== Namen wählen
-
 Automatically take game over screenshot
 == Automatisches Bildschirmfoto am Spielende
 
@@ -805,9 +796,6 @@ Gameplay
 
 Laser
 == Laser
-
-Old mouse mode
-== Alter Mausmodus
 
 Follow
 == Folgen
@@ -1019,8 +1007,8 @@ Replace video
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
 == DDraceNetwork ist ein kooperatives Onlinespiel mit dem Ziel für dich und deine Gruppe von Tees das Ziel der Karte zu erreichen. Als Anfänger solltest du auf den Novice-Servern anfangen, auf denen die einfachsten Karten sind. Achte auf den Ping, um einen Server in deiner Nähe zu finden.
 
-Default length: %d
-== Standardlänge: %d
+Default length
+== Standardlänge
 
 Pause
 == Pause
@@ -1284,9 +1272,6 @@ A Tee
 Are you sure that you want to disconnect and switch to a different server?
 == Bist du sicher, dass du die Verbindung trennen und zu einem anderen Server wechseln möchtest?
 
-Refreshing...
-== Aktualisieren...
-
 Kill Messages
 == Kill-Nachrichten
 
@@ -1325,9 +1310,6 @@ default
 
 custom
 == eigene
-
-Graphics cards
-== Grafikkarte
 
 auto
 == Auto
@@ -1392,9 +1374,6 @@ No answer from server yet.
 Download community skins
 == Community-Skins runterladen
 
-Device
-== Gerät
-
 Status
 == Status
 
@@ -1428,13 +1407,6 @@ UI mouse sens.
 Enable controller
 == Controller aktivieren
 
-Controller %d: %s
-== Controller %d: %s
-
-Click to cycle through all available controllers.
-== Klicke um durch die verfügbaren Controller zu wechseln.
-
-[Ingame controller mode]
 Relative
 == Relativ
 
@@ -1453,9 +1425,6 @@ UI controller sens.
 
 Controller jitter tolerance
 == Jitter-Toleranz des Controllers
-
-Controller Axis #%d
-== Controller-Axe #%d
 
 Controller
 == Controller
@@ -1582,12 +1551,6 @@ Freeze Laser Outline Color
 
 Freeze Laser Inner Color
 == Innenfarbe Einfrier-Laser
-
-Mark the beginning of a cut
-== Den Anfang eines Schnitts markieren
-
-Mark the end of a cut
-== Das Ende eines Schnitts markieren
 
 Menu opened. Press Esc key again to close menu.
 == Menü geöffnet. Erneut Esc-Taste drücken um Menü zu schließen.
@@ -1727,3 +1690,33 @@ None
 
 Add Clan
 == Clan hinzufügen
+
+A demo with this name already exists
+== Eine Demo mit diesem Namen existiert bereits
+
+No server selected
+== Kein Server ausgewählt
+
+Mark the beginning of a cut (right click to reset)
+== Den Anfang eines Schnitts markieren (Rechtsklick zum Resetten)
+
+Mark the end of a cut (right click to reset)
+== Das Ende eines Schnitts markieren (Rechtsklick zum Resetten)
+
+Close the demo player
+== Den Demo-Player schließen
+
+Export demo cut
+== Demo-Schnitt exportieren
+
+Cut interval
+== Intervall des Schnitts
+
+Cut length
+== Länge des Schnitts
+
+Axis
+== Achse
+
+Graphics card
+== Grafikkarte
