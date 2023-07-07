@@ -875,92 +875,36 @@ void CHud::RenderPlayerState(const int ClientID)
 		   (GameClient()->m_GameInfo.m_HudAmmo && g_Config.m_ClShowhudHealthAmmo ? 12 : 0));
 
 	// render weapons
-	if(pCharacter->m_aWeapons[WEAPON_HAMMER].m_Got)
 	{
-		if(pPlayer->m_Weapon != WEAPON_HAMMER)
+		constexpr float aWeaponWidth[NUM_WEAPONS] = {16, 12, 12, 12, 12, 12};
+		constexpr float aWeaponInitialOffset[NUM_WEAPONS] = {-3, -4, -1, -1, -2, -4};
+		bool InitialOffsetAdded = false;
+		for(int Weapon = 0; Weapon < NUM_WEAPONS; ++Weapon)
 		{
-			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
+			if(!pCharacter->m_aWeapons[Weapon].m_Got)
+				continue;
+			if(!InitialOffsetAdded)
+			{
+				x += aWeaponInitialOffset[Weapon];
+				InitialOffsetAdded = true;
+			}
+			if(pPlayer->m_Weapon != Weapon)
+				Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
+			Graphics()->QuadsSetRotation(pi * 7 / 4);
+			Graphics()->TextureSet(m_pClient->m_GameSkin.m_aSpritePickupWeapons[Weapon]);
+			Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_aWeaponOffset[Weapon], x, y);
+			Graphics()->QuadsSetRotation(0);
+			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+			x += aWeaponWidth[Weapon];
 		}
-		x -= 3;
-		Graphics()->QuadsSetRotation(pi * 7 / 4);
-		Graphics()->TextureSet(m_pClient->m_GameSkin.m_SpritePickupHammer);
-		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_aWeaponOffset[WEAPON_HAMMER], x, y);
-		Graphics()->QuadsSetRotation(0);
-		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
-		x += 16;
-	}
-	if(pCharacter->m_aWeapons[WEAPON_GUN].m_Got)
-	{
-		if(pPlayer->m_Weapon != WEAPON_GUN)
+		if(pCharacter->m_aWeapons[WEAPON_NINJA].m_Got)
 		{
-			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
-		}
-		Graphics()->QuadsSetRotation(pi * 7 / 4);
-		Graphics()->TextureSet(m_pClient->m_GameSkin.m_SpritePickupGun);
-		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_aWeaponOffset[WEAPON_GUN], x, y);
-		Graphics()->QuadsSetRotation(0);
-		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
-		x += 12;
-	}
-	if(pCharacter->m_aWeapons[WEAPON_SHOTGUN].m_Got)
-	{
-		if(pPlayer->m_Weapon != WEAPON_SHOTGUN)
-		{
-			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
-		}
-		Graphics()->QuadsSetRotation(pi * 7 / 4);
-		Graphics()->TextureSet(m_pClient->m_GameSkin.m_SpritePickupShotgun);
-		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_aWeaponOffset[WEAPON_SHOTGUN], x, y);
-		Graphics()->QuadsSetRotation(0);
-		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
-		x += 12;
-	}
-	if(pCharacter->m_aWeapons[WEAPON_GRENADE].m_Got)
-	{
-		if(pPlayer->m_Weapon != WEAPON_GRENADE)
-		{
-			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
-		}
-		Graphics()->QuadsSetRotation(pi * 7 / 4);
-		Graphics()->TextureSet(m_pClient->m_GameSkin.m_SpritePickupGrenade);
-		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_aWeaponOffset[WEAPON_GRENADE], x, y);
-		Graphics()->QuadsSetRotation(0);
-		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
-		x += 12;
-	}
-	if(pCharacter->m_aWeapons[WEAPON_LASER].m_Got)
-	{
-		if(pPlayer->m_Weapon != WEAPON_LASER)
-		{
-			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
-		}
-		Graphics()->QuadsSetRotation(pi * 7 / 4);
-		Graphics()->TextureSet(m_pClient->m_GameSkin.m_SpritePickupLaser);
-		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_aWeaponOffset[WEAPON_LASER], x, y);
-		Graphics()->QuadsSetRotation(0);
-		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
-		x += 12;
-	}
-	if(pCharacter->m_aWeapons[WEAPON_NINJA].m_Got)
-	{
-		if(pPlayer->m_Weapon != WEAPON_NINJA)
-		{
-			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
-		}
-		Graphics()->QuadsSetRotation(pi * 7 / 4);
-		Graphics()->TextureSet(m_pClient->m_GameSkin.m_SpritePickupNinja);
-		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_aWeaponOffset[WEAPON_NINJA], x, y);
-		Graphics()->QuadsSetRotation(0);
-		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
-		x += 12;
-	}
-	if(pCharacter->m_aWeapons[WEAPON_NINJA].m_Got)
-	{
-		const int Max = g_pData->m_Weapons.m_Ninja.m_Duration * Client()->GameTickSpeed() / 1000;
-		float NinjaProgress = clamp(pCharacter->m_Ninja.m_ActivationTick + g_pData->m_Weapons.m_Ninja.m_Duration * Client()->GameTickSpeed() / 1000 - Client()->GameTick(g_Config.m_ClDummy), 0, Max) / (float)Max;
-		if(NinjaProgress > 0.0f && m_pClient->m_Snap.m_aCharacters[ClientID].m_HasExtendedDisplayInfo)
-		{
-			RenderNinjaBarPos(x, y - 12, 6.f, 24.f, NinjaProgress);
+			const int Max = g_pData->m_Weapons.m_Ninja.m_Duration * Client()->GameTickSpeed() / 1000;
+			float NinjaProgress = clamp(pCharacter->m_Ninja.m_ActivationTick + g_pData->m_Weapons.m_Ninja.m_Duration * Client()->GameTickSpeed() / 1000 - Client()->GameTick(g_Config.m_ClDummy), 0, Max) / (float)Max;
+			if(NinjaProgress > 0.0f && m_pClient->m_Snap.m_aCharacters[ClientID].m_HasExtendedDisplayInfo)
+			{
+				RenderNinjaBarPos(x, y - 12, 6.f, 24.f, NinjaProgress);
+			}
 		}
 	}
 
