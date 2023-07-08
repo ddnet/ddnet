@@ -6486,6 +6486,7 @@ void CEditor::RenderMousePointer()
 
 void CEditor::Reset(bool CreateDefault)
 {
+	UI()->ClosePopupMenus();
 	m_Map.Clean();
 
 	mem_zero(m_apSavedBrushes, sizeof m_apSavedBrushes);
