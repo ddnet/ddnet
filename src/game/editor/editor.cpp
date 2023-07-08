@@ -6577,11 +6577,8 @@ void CEditor::RenderMousePointer()
 
 void CEditor::Reset(bool CreateDefault)
 {
+	UI()->ClosePopupMenus();
 	m_Map.Clean();
-
-	//delete undo file
-	char aBuffer[1024];
-	m_pStorage->GetCompletePath(IStorage::TYPE_SAVE, "editor/", aBuffer, sizeof(aBuffer));
 
 	mem_zero(m_apSavedBrushes, sizeof m_apSavedBrushes);
 
