@@ -1199,6 +1199,8 @@ CUI::EPopupMenuFunctionResult CEditor::PopupPoint(void *pContext, CUIRect View, 
 {
 	CEditor *pEditor = static_cast<CEditor *>(pContext);
 	std::vector<CQuad *> vpQuads = pEditor->GetSelectedQuads();
+	if(!in_range<int>(pEditor->m_SelectedQuadIndex, 0, vpQuads.size() - 1))
+		return CUI::POPUP_CLOSE_CURRENT;
 	CQuad *pCurrentQuad = vpQuads[pEditor->m_SelectedQuadIndex];
 
 	enum
