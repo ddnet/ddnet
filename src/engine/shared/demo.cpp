@@ -1006,10 +1006,16 @@ void CDemoPlayer::SetSpeed(float Speed)
 	m_Info.m_Info.m_Speed = clamp(Speed, 0.f, 256.f);
 }
 
-void CDemoPlayer::SetSpeedIndex(int Offset)
+void CDemoPlayer::SetSpeedIndex(int SpeedIndex)
 {
-	m_SpeedIndex = clamp(m_SpeedIndex + Offset, 0, (int)(std::size(g_aSpeeds) - 1));
+	dbg_assert(SpeedIndex >= 0 && SpeedIndex < g_DemoSpeeds, "invalid SpeedIndex");
+	m_SpeedIndex = SpeedIndex;
 	SetSpeed(g_aSpeeds[m_SpeedIndex]);
+}
+
+void CDemoPlayer::AdjustSpeedIndex(int Offset)
+{
+	SetSpeedIndex(clamp(m_SpeedIndex + Offset, 0, (int)(std::size(g_aSpeeds) - 1)));
 }
 
 int CDemoPlayer::Update(bool RealTime)

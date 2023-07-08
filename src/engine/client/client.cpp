@@ -3912,7 +3912,11 @@ const char *CClient::DemoPlayer_Render(const char *pFilename, int StorageType, c
 
 	this->CClient::StartVideo(NULL, this, pVideoName);
 	m_DemoPlayer.Play();
-	m_DemoPlayer.SetSpeed(g_aSpeeds[SpeedIndex]);
+	m_DemoPlayer.SetSpeedIndex(SpeedIndex);
+	if(Config()->m_ClVideoPauseOnStart)
+	{
+		m_DemoPlayer.Pause();
+	}
 	//m_pConsole->Print(IConsole::OUTPUT_LEVEL_DEBUG, "demo_recorder", "demo eof");
 	return 0;
 }

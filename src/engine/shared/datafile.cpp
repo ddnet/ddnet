@@ -611,7 +611,7 @@ int CDataFileWriter::GetExtendedItemTypeIndex(int Type)
 	return Index;
 }
 
-int CDataFileWriter::AddItem(int Type, int ID, int Size, void *pData)
+int CDataFileWriter::AddItem(int Type, int ID, int Size, const void *pData)
 {
 	dbg_assert((Type >= 0 && Type < MAX_ITEM_TYPES) || Type >= OFFSET_UUID, "incorrect type");
 	dbg_assert(m_NumItems < 1024, "too many items");
@@ -650,7 +650,7 @@ int CDataFileWriter::AddItem(int Type, int ID, int Size, void *pData)
 	return m_NumItems - 1;
 }
 
-int CDataFileWriter::AddData(int Size, void *pData, int CompressionLevel)
+int CDataFileWriter::AddData(int Size, const void *pData, int CompressionLevel)
 {
 	dbg_assert(m_NumDatas < 1024, "too much data");
 
@@ -666,7 +666,7 @@ int CDataFileWriter::AddData(int Size, void *pData, int CompressionLevel)
 	return m_NumDatas - 1;
 }
 
-int CDataFileWriter::AddDataSwapped(int Size, void *pData)
+int CDataFileWriter::AddDataSwapped(int Size, const void *pData)
 {
 	dbg_assert(Size % sizeof(int) == 0, "incorrect boundary");
 
