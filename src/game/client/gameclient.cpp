@@ -2151,7 +2151,7 @@ void CGameClient::SendInfo(bool Start)
 		Msg.m_ColorFeet = g_Config.m_ClPlayerColorFeet;
 		CMsgPacker Packer(&Msg);
 		Msg.Pack(&Packer);
-		Client()->SendMsg(IClient::CONN_MAIN, &Packer, MSGFLAG_VITAL);
+		Client()->SendMsg(IClient::CONN_MAIN, &Packer, MSGFLAG_VITAL | MSGFLAG_FLUSH);
 		m_aCheckInfo[0] = -1;
 	}
 	else
