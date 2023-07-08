@@ -1558,7 +1558,7 @@ int CMenus::Render()
 #if defined(CONF_VIDEORECORDER)
 		else if(m_Popup == POPUP_RENDER_DEMO)
 		{
-			CUIRect Label, TextBox, Ok, Abort, IncSpeed, DecSpeed, Button;
+			CUIRect Label, TextBox, Ok, Abort, Button;
 
 			Box.HSplitBottom(20.f, &Box, &Part);
 #if defined(__ANDROID__)
@@ -1614,14 +1614,9 @@ int CMenus::Render()
 				g_Config.m_ClVideoSndEnable ^= 1;
 
 			Box.HSplitBottom(20.f, &Box, &Part);
-			Part.VSplitLeft(60.0f, 0, &Part);
+			Part.VSplitLeft(55.0f, 0, &Part);
 			Part.VSplitLeft(60.0f, 0, &Label);
-			Part.VSplitMid(&IncSpeed, &DecSpeed);
 
-			IncSpeed.VMargin(20.0f, &IncSpeed);
-			DecSpeed.VMargin(20.0f, &DecSpeed);
-
-			Part.VSplitLeft(20.0f, &Button, &Part);
 			bool IncDemoSpeed = false, DecDemoSpeed = false;
 			// slowdown
 			Part.VSplitLeft(5.0f, 0, &Part);
@@ -1629,6 +1624,13 @@ int CMenus::Render()
 			static CButtonContainer s_SlowDownButton;
 			if(DoButton_FontIcon(&s_SlowDownButton, FONT_ICON_BACKWARD, 0, &Button, IGraphics::CORNER_ALL))
 				DecDemoSpeed = true;
+
+			// paused
+			Part.VSplitLeft(5.0f, 0, &Part);
+			Part.VSplitLeft(ButtonSize, &Button, &Part);
+			static CButtonContainer s_PausedButton;
+			if(DoButton_FontIcon(&s_PausedButton, FONT_ICON_PAUSE, 0, &Button, IGraphics::CORNER_ALL))
+				g_Config.m_ClVideoPauseOnStart ^= 1;
 
 			// fastforward
 			Part.VSplitLeft(5.0f, 0, &Part);
@@ -1639,8 +1641,9 @@ int CMenus::Render()
 
 			// speed meter
 			Part.VSplitLeft(8.0f, 0, &Part);
-			char aBuffer[64];
-			str_format(aBuffer, sizeof(aBuffer), "%s: ×%g", Localize("Speed"), g_aSpeeds[m_Speed]);
+			char aBuffer[128];
+			const char *pPaused = g_Config.m_ClVideoPauseOnStart ? Localize("(paused)") : "";
+			str_format(aBuffer, sizeof(aBuffer), "%s: ×%g %s", Localize("Speed"), g_aSpeeds[m_Speed], pPaused);
 			UI()->DoLabel(&Part, aBuffer, 12.8f, TEXTALIGN_ML);
 
 			if(IncDemoSpeed)
