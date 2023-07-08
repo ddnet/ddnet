@@ -567,6 +567,9 @@ void CGameClient::OnReset()
 	m_LastDummyConnected = false;
 
 	m_ReceivedDDNetPlayer = false;
+
+	Editor()->ResetMentions();
+	Editor()->ResetIngameMoved();
 }
 
 void CGameClient::UpdatePositions()
@@ -1753,6 +1756,13 @@ void CGameClient::OnNewSnapshot()
 
 	for(auto &pComponent : m_vpAll)
 		pComponent->OnNewSnapshot();
+
+	// notify editor when local character moved
+	if(m_Snap.m_pLocalCharacter && m_Snap.m_pLocalPrevCharacter &&
+		(m_Snap.m_pLocalCharacter->m_X != m_Snap.m_pLocalPrevCharacter->m_X || m_Snap.m_pLocalCharacter->m_Y != m_Snap.m_pLocalPrevCharacter->m_Y))
+	{
+		Editor()->OnIngameMoved();
+	}
 
 	// detect air jump for other players
 	for(int i = 0; i < MAX_CLIENTS; i++)

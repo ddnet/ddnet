@@ -5263,8 +5263,10 @@ void CEditor::ShowFileDialogError(const char *pFormat, ...)
 
 void CEditor::RenderModebar(CUIRect View)
 {
-	CUIRect Mentions, ModeButton;
-	View.HSplitTop(30.0f, &Mentions, &ModeButton);
+	CUIRect Mentions, IngameMoved, ModeButton;
+	View.HSplitTop(12.0f, &Mentions, &View);
+	View.HSplitTop(12.0f, &IngameMoved, &View);
+	View.HSplitTop(8.0f, nullptr, &ModeButton);
 	ModeButton.VSplitLeft(65.0f, &ModeButton, nullptr);
 
 	// mentions
@@ -5280,6 +5282,14 @@ void CEditor::RenderModebar(CUIRect View)
 
 		TextRender()->TextColor(ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f));
 		UI()->DoLabel(&Mentions, aBuf, 10.0f, TEXTALIGN_MC);
+		TextRender()->TextColor(TextRender()->DefaultTextColor());
+	}
+
+	// ingame moved warning
+	if(m_IngameMoved)
+	{
+		TextRender()->TextColor(ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f));
+		UI()->DoLabel(&IngameMoved, Localize("Moved ingame"), 10.0f, TEXTALIGN_MC);
 		TextRender()->TextColor(TextRender()->DefaultTextColor());
 	}
 
@@ -7218,6 +7228,12 @@ void CEditor::OnRender()
 	Input()->Clear();
 
 	CLineInput::RenderCandidates();
+}
+
+void CEditor::OnActivate()
+{
+	ResetMentions();
+	ResetIngameMoved();
 }
 
 void CEditor::LoadCurrentMap()
