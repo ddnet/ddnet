@@ -440,6 +440,8 @@ void CControls::ClampMousePos()
 			RenderTools()->CalcScreenParams(Graphics()->ScreenAspect(), 1.0f, &Width, &Height);
 			Height /= 2.0f;
 			Width /= 2.0f;
+			if(g_Config.m_ClLimitMouseToScreen == 2)
+				Width = Height;
 			m_aMousePos[g_Config.m_ClDummy].y = clamp(m_aMousePos[g_Config.m_ClDummy].y, -Height, Height);
 			m_aMousePos[g_Config.m_ClDummy].x = clamp(m_aMousePos[g_Config.m_ClDummy].x, -Width, Width);
 		}
