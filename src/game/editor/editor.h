@@ -879,6 +879,7 @@ public:
 	void ResetIngameMoved() override { m_IngameMoved = false; }
 
 	void HandleCursorMovement();
+	void DispatchInputEvents();
 	void HandleAutosave();
 	bool PerformAutosave();
 	void HandleWriterFinishJobs();
