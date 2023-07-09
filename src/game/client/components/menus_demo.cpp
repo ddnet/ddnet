@@ -951,7 +951,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	MainView.VMargin(5.0f, &MainView);
 	MainView.HSplitBottom(5.0f, &MainView, 0);
 	MainView.Draw(ColorRGBA(0, 0, 0, 0.15f), IGraphics::CORNER_B, 4.0f);
-	if(!m_DemolistSelectedIsDir && m_DemolistSelectedIndex >= 0 && m_vDemos[m_DemolistSelectedIndex].m_Valid)
+	if(m_DemolistSelectedIndex >= 0 && !m_vDemos[m_DemolistSelectedIndex].m_IsDir && m_vDemos[m_DemolistSelectedIndex].m_Valid)
 	{
 		CUIRect Left, Right, Labels;
 		MainView.VMargin(20.0f, &MainView);
@@ -1290,36 +1290,51 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	}
 	GameClient()->m_Tooltips.DoToolTip(&s_DirectoryButtonID, &DirectoryButton, Localize("Open the directory that contains the demo files"));
 
-	if(m_DemolistSelectedIndex >= 0 && !m_vDemos[m_DemolistSelectedIndex].m_IsDir)
+	if(m_DemolistSelectedIndex >= 0 && m_aCurrentDemoFolder[0] != '\0')
 	{
-		static CButtonContainer s_DeleteButton;
-		if(DoButton_Menu(&s_DeleteButton, Localize("Delete"), 0, &DeleteRect) || UI()->ConsumeHotkey(CUI::HOTKEY_DELETE) || (Input()->KeyPress(KEY_D) && m_pClient->m_GameConsole.IsClosed()))
+		if(str_comp(m_vDemos[m_DemolistSelectedIndex].m_aFilename, "..") != 0 && m_vDemos[m_DemolistSelectedIndex].m_StorageType == IStorage::TYPE_SAVE)
 		{
-			char aBuf[128 + IO_MAX_PATH_LENGTH];
-			str_format(aBuf, sizeof(aBuf), Localize("Are you sure that you want to delete the demo '%s'?"), m_vDemos[m_DemolistSelectedIndex].m_aFilename);
-			PopupConfirm(Localize("Delete demo"), aBuf, Localize("Yes"), Localize("No"), &CMenus::PopupConfirmDeleteDemo);
-			return;
-		}
+			static CButtonContainer s_DeleteButton;
+			if(DoButton_Menu(&s_DeleteButton, Localize("Delete"), 0, &DeleteRect) || UI()->ConsumeHotkey(CUI::HOTKEY_DELETE) || (Input()->KeyPress(KEY_D) && m_pClient->m_GameConsole.IsClosed()))
+			{
+				char aBuf[128 + IO_MAX_PATH_LENGTH];
+				str_format(aBuf, sizeof(aBuf), m_vDemos[m_DemolistSelectedIndex].m_IsDir ? Localize("Are you sure that you want to delete the folder '%s'?") : Localize("Are you sure that you want to delete the demo '%s'?"), m_vDemos[m_DemolistSelectedIndex].m_aFilename);
+				PopupConfirm(m_vDemos[m_DemolistSelectedIndex].m_IsDir ? Localize("Delete folder") : Localize("Delete demo"), aBuf, Localize("Yes"), Localize("No"), m_vDemos[m_DemolistSelectedIndex].m_IsDir ? &CMenus::PopupConfirmDeleteFolder : &CMenus::PopupConfirmDeleteDemo);
+				return;
+			}
 
-		static CButtonContainer s_RenameButton;
-		if(DoButton_Menu(&s_RenameButton, Localize("Rename"), 0, &RenameRect))
-		{
-			m_Popup = POPUP_RENAME_DEMO;
-			m_DemoRenameInput.Set(m_vDemos[m_DemolistSelectedIndex].m_aFilename);
-			UI()->SetActiveItem(&m_DemoRenameInput);
-			return;
+			static CButtonContainer s_RenameButton;
+			if(DoButton_Menu(&s_RenameButton, Localize("Rename"), 0, &RenameRect))
+			{
+				m_Popup = POPUP_RENAME_DEMO;
+				if(m_vDemos[m_DemolistSelectedIndex].m_IsDir)
+				{
+					m_DemoRenameInput.Set(m_vDemos[m_DemolistSelectedIndex].m_aFilename);
+				}
+				else
+				{
+					char aNameWithoutExt[IO_MAX_PATH_LENGTH];
+					fs_split_file_extension(m_vDemos[m_DemolistSelectedIndex].m_aFilename, aNameWithoutExt, sizeof(aNameWithoutExt));
+					m_DemoRenameInput.Set(aNameWithoutExt);
+				}
+				UI()->SetActiveItem(&m_DemoRenameInput);
+				return;
+			}
 		}
 
 #if defined(CONF_VIDEORECORDER)
-		static CButtonContainer s_RenderButton;
-		if(DoButton_Menu(&s_RenderButton, Localize("Render"), 0, &RenderRect) || (Input()->KeyPress(KEY_R) && m_pClient->m_GameConsole.IsClosed()))
+		if(!m_vDemos[m_DemolistSelectedIndex].m_IsDir)
 		{
-			m_Popup = POPUP_RENDER_DEMO;
-			char aNameWithoutExt[IO_MAX_PATH_LENGTH];
-			fs_split_file_extension(m_vDemos[m_DemolistSelectedIndex].m_aFilename, aNameWithoutExt, sizeof(aNameWithoutExt));
-			m_DemoRenderInput.Set(aNameWithoutExt);
-			UI()->SetActiveItem(&m_DemoRenderInput);
-			return;
+			static CButtonContainer s_RenderButton;
+			if(DoButton_Menu(&s_RenderButton, Localize("Render"), 0, &RenderRect) || (Input()->KeyPress(KEY_R) && m_pClient->m_GameConsole.IsClosed()))
+			{
+				m_Popup = POPUP_RENDER_DEMO;
+				char aNameWithoutExt[IO_MAX_PATH_LENGTH];
+				fs_split_file_extension(m_vDemos[m_DemolistSelectedIndex].m_aFilename, aNameWithoutExt, sizeof(aNameWithoutExt));
+				m_DemoRenderInput.Set(aNameWithoutExt);
+				UI()->SetActiveItem(&m_DemoRenderInput);
+				return;
+			}
 		}
 #endif
 	}
@@ -1340,6 +1355,23 @@ void CMenus::PopupConfirmDeleteDemo()
 	{
 		char aError[128 + IO_MAX_PATH_LENGTH];
 		str_format(aError, sizeof(aError), Localize("Unable to delete the demo '%s'"), m_vDemos[m_DemolistSelectedIndex].m_aFilename);
+		PopupMessage(Localize("Error"), aError, Localize("Ok"));
+	}
+}
+
+void CMenus::PopupConfirmDeleteFolder()
+{
+	char aBuf[IO_MAX_PATH_LENGTH];
+	str_format(aBuf, sizeof(aBuf), "%s/%s", m_aCurrentDemoFolder, m_vDemos[m_DemolistSelectedIndex].m_aFilename);
+	if(Storage()->RemoveFolder(aBuf, m_vDemos[m_DemolistSelectedIndex].m_StorageType))
+	{
+		DemolistPopulate();
+		DemolistOnUpdate(false);
+	}
+	else
+	{
+		char aError[128 + IO_MAX_PATH_LENGTH];
+		str_format(aError, sizeof(aError), Localize("Unable to delete the folder '%s'. Make sure it's empty first."), m_vDemos[m_DemolistSelectedIndex].m_aFilename);
 		PopupMessage(Localize("Error"), aError, Localize("Ok"));
 	}
 }
