@@ -600,13 +600,26 @@ public:
 
 	struct SColorPickerPopupContext : public SPopupMenuId
 	{
+		enum EColorPickerMode
+		{
+			MODE_UNSET = -1,
+			MODE_HSVA,
+			MODE_RGBA,
+			MODE_HSLA,
+		};
+
 		CUI *m_pUI; // set by CUI when popup is shown
+		EColorPickerMode m_ColorMode = MODE_UNSET;
 		bool m_Alpha = false;
 		unsigned int *m_pHslaColor = nullptr; // may be nullptr
 		ColorHSVA m_HsvaColor;
+		ColorRGBA m_RgbaColor;
+		ColorHSLA m_HslaColor;
+		// UI element IDs
 		const char m_HuePickerId = 0;
 		const char m_ColorPickerId = 0;
 		const char m_aValueSelectorIds[5] = {0};
+		CButtonContainer m_aModeButtons[(int)MODE_HSLA + 1];
 	};
 	void ShowPopupColorPicker(float X, float Y, SColorPickerPopupContext *pContext);
 

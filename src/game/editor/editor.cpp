@@ -3133,14 +3133,17 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 			}
 			else if(ButtonResult > 0)
 			{
-				s_ColorPickerPopupContext.m_HsvaColor = color_cast<ColorHSVA>(ColorPick);
+				if(s_ColorPickerPopupContext.m_ColorMode == CUI::SColorPickerPopupContext::MODE_UNSET)
+					s_ColorPickerPopupContext.m_ColorMode = CUI::SColorPickerPopupContext::MODE_RGBA;
+				s_ColorPickerPopupContext.m_RgbaColor = ColorPick;
+				s_ColorPickerPopupContext.m_HslaColor = color_cast<ColorHSLA>(ColorPick);
+				s_ColorPickerPopupContext.m_HsvaColor = color_cast<ColorHSVA>(s_ColorPickerPopupContext.m_HslaColor);
 				s_ColorPickerPopupContext.m_Alpha = true;
 				UI()->ShowPopupColorPicker(UI()->MouseX(), UI()->MouseY(), &s_ColorPickerPopupContext);
 			}
 			else if(UI()->IsPopupOpen(&s_ColorPickerPopupContext))
 			{
-				ColorRGBA c = color_cast<ColorRGBA>(s_ColorPickerPopupContext.m_HsvaColor);
-				const int NewColor = c.PackAlphaLast(s_ColorPickerPopupContext.m_Alpha);
+				const int NewColor = s_ColorPickerPopupContext.m_RgbaColor.PackAlphaLast(s_ColorPickerPopupContext.m_Alpha);
 				if(NewColor != pProps[i].m_Value)
 				{
 					*pNewVal = NewColor;
