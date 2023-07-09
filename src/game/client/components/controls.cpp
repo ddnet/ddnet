@@ -35,8 +35,8 @@ void CControls::OnReset()
 void CControls::ResetInput(int Dummy)
 {
 	m_aLastData[Dummy].m_Direction = 0;
-	//m_aLastData[Dummy].m_Hook = 0;
-	// simulate releasing the fire button
+	// m_aLastData[Dummy].m_Hook = 0;
+	//  simulate releasing the fire button
 	if((m_aLastData[Dummy].m_Fire & 1) != 0)
 		m_aLastData[Dummy].m_Fire++;
 	m_aLastData[Dummy].m_Fire &= INPUT_STATE_MASK;
@@ -49,7 +49,7 @@ void CControls::ResetInput(int Dummy)
 
 void CControls::OnRelease()
 {
-	//OnReset();
+	// OnReset();
 }
 
 void CControls::OnPlayerDeath()
@@ -433,6 +433,16 @@ void CControls::ClampMousePos()
 		MDistance = length(m_aMousePos[g_Config.m_ClDummy]);
 		if(MDistance > MouseMax)
 			m_aMousePos[g_Config.m_ClDummy] = normalize_pre_length(m_aMousePos[g_Config.m_ClDummy], MDistance) * MouseMax;
+
+		if(g_Config.m_ClLimitMouseToScreen)
+		{
+			float Width, Height;
+			RenderTools()->CalcScreenParams(Graphics()->ScreenAspect(), 1.0f, &Width, &Height);
+			Height /= 2.0f;
+			Width /= 2.0f;
+			m_aMousePos[g_Config.m_ClDummy].y = clamp(m_aMousePos[g_Config.m_ClDummy].y, -Height, Height);
+			m_aMousePos[g_Config.m_ClDummy].x = clamp(m_aMousePos[g_Config.m_ClDummy].x, -Width, Width);
+		}
 	}
 }
 
