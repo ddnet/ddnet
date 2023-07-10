@@ -573,7 +573,7 @@ public:
 	~CLayerTiles();
 
 	virtual CTile GetTile(int x, int y);
-	virtual void SetTile(int x, int y, CTile tile);
+	virtual void SetTile(int x, int y, CTile Tile);
 
 	virtual void Resize(int NewW, int NewH);
 	virtual void Shift(int Direction);
@@ -690,7 +690,7 @@ public:
 	~CLayerGame();
 
 	CTile GetTile(int x, int y) override;
-	void SetTile(int x, int y, CTile tile) override;
+	void SetTile(int x, int y, CTile Tile) override;
 
 	CUI::EPopupMenuFunctionResult RenderProperties(CUIRect *pToolbox) override;
 };
@@ -1452,7 +1452,7 @@ public:
 	CLayerFront(int w, int h);
 
 	void Resize(int NewW, int NewH) override;
-	void SetTile(int x, int y, CTile tile) override;
+	void SetTile(int x, int y, CTile Tile) override;
 };
 
 class CLayerSwitch : public CLayerTiles

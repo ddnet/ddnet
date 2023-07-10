@@ -78,9 +78,9 @@ CTile CLayerTiles::GetTile(int x, int y)
 	return m_pTiles[y * m_Width + x];
 }
 
-void CLayerTiles::SetTile(int x, int y, CTile tile)
+void CLayerTiles::SetTile(int x, int y, CTile Tile)
 {
-	m_pTiles[y * m_Width + x] = tile;
+	m_pTiles[y * m_Width + x] = Tile;
 }
 
 void CLayerTiles::PrepareForSave()
@@ -1593,21 +1593,21 @@ CLayerFront::CLayerFront(int w, int h) :
 	m_Front = 1;
 }
 
-void CLayerFront::SetTile(int x, int y, CTile tile)
+void CLayerFront::SetTile(int x, int y, CTile Tile)
 {
-	if(tile.m_Index == TILE_THROUGH_CUT)
+	if(Tile.m_Index == TILE_THROUGH_CUT)
 	{
 		CTile nohook = {TILE_NOHOOK};
 		m_pEditor->m_Map.m_pGameLayer->CLayerTiles::SetTile(x, y, nohook); // NOLINT(bugprone-parent-virtual-call)
 	}
-	else if(tile.m_Index == TILE_AIR && CLayerTiles::GetTile(x, y).m_Index == TILE_THROUGH_CUT)
+	else if(Tile.m_Index == TILE_AIR && CLayerTiles::GetTile(x, y).m_Index == TILE_THROUGH_CUT)
 	{
 		CTile air = {TILE_AIR};
 		m_pEditor->m_Map.m_pGameLayer->CLayerTiles::SetTile(x, y, air); // NOLINT(bugprone-parent-virtual-call)
 	}
-	if(m_pEditor->m_AllowPlaceUnusedTiles || IsValidFrontTile(tile.m_Index))
+	if(m_pEditor->m_AllowPlaceUnusedTiles || IsValidFrontTile(Tile.m_Index))
 	{
-		CLayerTiles::SetTile(x, y, tile);
+		CLayerTiles::SetTile(x, y, Tile);
 	}
 	else
 	{
