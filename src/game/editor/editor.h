@@ -448,7 +448,8 @@ public:
 
 	// io
 	bool Save(const char *pFilename);
-	bool Load(const char *pFilename, int StorageType);
+	bool Load(const char *pFilename, int StorageType, const std::function<void(const char *pErrorMessage)> &ErrorHandler);
+	void PerformSanityChecks(const std::function<void(const char *pErrorMessage)> &ErrorHandler);
 
 	// DDRace
 
