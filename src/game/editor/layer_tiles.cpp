@@ -464,10 +464,7 @@ void CLayerTiles::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 			if(!Destructive && HasTile)
 				continue;
 
-			if(Empty)
-				m_pTiles[fy * m_Width + fx].m_Index = 0;
-			else
-				SetTile(fx, fy, pLt->m_pTiles[(y * pLt->m_Width + x % pLt->m_Width) % (pLt->m_Width * pLt->m_Height)]);
+			SetTile(fx, fy, Empty ? CTile{TILE_AIR} : pLt->m_pTiles[(y * pLt->m_Width + x % pLt->m_Width) % (pLt->m_Width * pLt->m_Height)]);
 		}
 	}
 	FlagModified(sx, sy, w, h);
