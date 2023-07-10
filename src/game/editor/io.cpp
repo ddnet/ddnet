@@ -385,8 +385,13 @@ bool CEditorMap::Save(const char *pFileName)
 
 bool CEditor::Load(const char *pFileName, int StorageType)
 {
+	const auto &&ErrorHandler = [this](const char *pErrorMessage) {
+		ShowFileDialogError("%s", pErrorMessage);
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "editor/load", pErrorMessage);
+	};
+
 	Reset();
-	bool Result = m_Map.Load(pFileName, StorageType);
+	bool Result = m_Map.Load(pFileName, StorageType, std::move(ErrorHandler));
 	if(Result)
 	{
 		str_copy(m_aFileName, pFileName);
@@ -402,7 +407,7 @@ bool CEditor::Load(const char *pFileName, int StorageType)
 	return Result;
 }
 
-bool CEditorMap::Load(const char *pFileName, int StorageType)
+bool CEditorMap::Load(const char *pFileName, int StorageType, const std::function<void(const char *pErrorMessage)> &ErrorHandler)
 {
 	CDataFileReader DataFile;
 	if(!DataFile.Open(m_pEditor->Storage(), pFileName, StorageType))
@@ -961,11 +966,48 @@ bool CEditorMap::Load(const char *pFileName, int StorageType)
 	else
 		return false;
 
+	PerformSanityChecks(ErrorHandler);
+
 	m_Modified = false;
 	m_ModifiedAuto = false;
 	m_LastModifiedTime = -1.0f;
 	m_LastSaveTime = m_pEditor->Client()->GlobalTime();
 	return true;
+}
+
+void CEditorMap::PerformSanityChecks(const std::function<void(const char *pErrorMessage)> &ErrorHandler)
+{
+	// Check if there are any images with a width or height that is not divisible by 16 which are
+	// used in tile layers. Reset the image for these layers, to prevent crashes with some drivers.
+	size_t ImageIndex = 0;
+	for(const CEditorImage *pImage : m_vpImages)
+	{
+		if(pImage->m_Width % 16 != 0 || pImage->m_Height % 16 != 0)
+		{
+			size_t GroupIndex = 0;
+			for(CLayerGroup *pGroup : m_vpGroups)
+			{
+				size_t LayerIndex = 0;
+				for(CLayer *pLayer : pGroup->m_vpLayers)
+				{
+					if(pLayer->m_Type == LAYERTYPE_TILES)
+					{
+						CLayerTiles *pLayerTiles = static_cast<CLayerTiles *>(pLayer);
+						if(pLayerTiles->m_Image >= 0 && (size_t)pLayerTiles->m_Image == ImageIndex)
+						{
+							pLayerTiles->m_Image = -1;
+							char aBuf[IO_MAX_PATH_LENGTH + 128];
+							str_format(aBuf, sizeof(aBuf), "Error: The image '%s' (size %dx%d) has a width or height that is not divisible by 16 and therefore cannot be used for tile layers. The image of layer #%" PRIzu " '%s' in group #%" PRIzu " '%s' has been unset.", pImage->m_aName, pImage->m_Width, pImage->m_Height, LayerIndex, pLayer->m_aName, GroupIndex, pGroup->m_aName);
+							ErrorHandler(aBuf);
+						}
+					}
+					++LayerIndex;
+				}
+				++GroupIndex;
+			}
+		}
+		++ImageIndex;
+	}
 }
 
 static int gs_ModifyAddAmount = 0;
@@ -980,7 +1022,11 @@ bool CEditor::Append(const char *pFileName, int StorageType)
 	CEditorMap NewMap;
 	NewMap.m_pEditor = this;
 
-	if(!NewMap.Load(pFileName, StorageType))
+	const auto &&ErrorHandler = [this](const char *pErrorMessage) {
+		ShowFileDialogError("%s", pErrorMessage);
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "editor/append", pErrorMessage);
+	};
+	if(!NewMap.Load(pFileName, StorageType, std::move(ErrorHandler)))
 		return false;
 
 	// modify indices
