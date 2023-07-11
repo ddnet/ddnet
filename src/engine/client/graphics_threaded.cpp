@@ -423,7 +423,7 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadTextureRaw(int Width, int Heig
 {
 	// don't waste memory on texture if we are stress testing
 #ifdef CONF_DEBUG
-	if(g_Config.m_DbgStress)
+	if(g_Config.m_DbgStress && m_InvalidTexture.IsValid())
 		return m_InvalidTexture;
 #endif
 
@@ -2897,13 +2897,34 @@ int CGraphics_Threaded::Init()
 	m_pCommandBuffer = m_apCommandBuffers[0];
 
 	// create null texture, will get id=0
-	static const unsigned char s_aNullTextureData[] = {
-		0xff, 0x00, 0x00, 0xff, 0xff, 0x00, 0x00, 0xff, 0x00, 0xff, 0x00, 0xff, 0x00, 0xff, 0x00, 0xff,
-		0xff, 0x00, 0x00, 0xff, 0xff, 0x00, 0x00, 0xff, 0x00, 0xff, 0x00, 0xff, 0x00, 0xff, 0x00, 0xff,
-		0x00, 0x00, 0xff, 0xff, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff, 0x00, 0xff, 0xff, 0xff, 0x00, 0xff,
-		0x00, 0x00, 0xff, 0xff, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff, 0x00, 0xff, 0xff, 0xff, 0x00, 0xff};
-
-	m_InvalidTexture = LoadTextureRaw(4, 4, CImageInfo::FORMAT_RGBA, s_aNullTextureData, CImageInfo::FORMAT_RGBA, 0);
+	{
+		const size_t PixelSize = 4;
+		const unsigned char aRed[] = {0xff, 0x00, 0x00, 0xff};
+		const unsigned char aGreen[] = {0x00, 0xff, 0x00, 0xff};
+		const unsigned char aBlue[] = {0x00, 0x00, 0xff, 0xff};
+		const unsigned char aYellow[] = {0xff, 0xff, 0x00, 0xff};
+		constexpr size_t InvalidTextureDimension = 16;
+		unsigned char aNullTextureData[InvalidTextureDimension * InvalidTextureDimension * PixelSize];
+		for(size_t y = 0; y < InvalidTextureDimension; ++y)
+		{
+			for(size_t x = 0; x < InvalidTextureDimension; ++x)
+			{
+				const unsigned char *pColor;
+				if(x < InvalidTextureDimension / 2 && y < InvalidTextureDimension / 2)
+					pColor = aRed;
+				else if(x >= InvalidTextureDimension / 2 && y < InvalidTextureDimension / 2)
+					pColor = aGreen;
+				else if(x < InvalidTextureDimension / 2 && y >= InvalidTextureDimension / 2)
+					pColor = aBlue;
+				else
+					pColor = aYellow;
+				mem_copy(&aNullTextureData[(y * InvalidTextureDimension + x) * PixelSize], pColor, PixelSize);
+			}
+		}
+		const int TextureLoadFlags = HasTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
+		m_InvalidTexture.Invalidate();
+		m_InvalidTexture = LoadTextureRaw(InvalidTextureDimension, InvalidTextureDimension, CImageInfo::FORMAT_RGBA, aNullTextureData, CImageInfo::FORMAT_RGBA, TextureLoadFlags);
+	}
 
 	ColorRGBA GPUInfoPrintColor{0.6f, 0.5f, 1.0f, 1.0f};
 
