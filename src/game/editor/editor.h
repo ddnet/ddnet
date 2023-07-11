@@ -21,6 +21,7 @@
 
 #include <chrono>
 #include <deque>
+#include <map>
 #include <string>
 #include <vector>
 
@@ -890,6 +891,14 @@ public:
 	void InvokeFileDialog(int StorageType, int FileType, const char *pTitle, const char *pButtonText,
 		const char *pBasepath, const char *pDefaultName,
 		bool (*pfnFunc)(const char *pFilename, int StorageType, void *pUser), void *pUser);
+	struct SStringKeyComparator
+	{
+		bool operator()(char const *pLhs, char const *pRhs) const
+		{
+			return str_comp(pLhs, pRhs) < 0;
+		}
+	};
+	std::map<const char *, CUI::SMessagePopupContext *, SStringKeyComparator> m_PopupMessageContexts;
 	void ShowFileDialogError(const char *pFormat, ...)
 		GNUC_ATTRIBUTE((format(printf, 2, 3)));
 
@@ -902,6 +911,7 @@ public:
 
 	void RenderPressedKeys(CUIRect View);
 	void RenderSavingIndicator(CUIRect View);
+	void FreeDynamicPopupMenus();
 	void RenderMousePointer();
 
 	void ResetMenuBackgroundPositions();

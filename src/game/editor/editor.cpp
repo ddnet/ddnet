@@ -5252,13 +5252,27 @@ void CEditor::InvokeFileDialog(int StorageType, int FileType, const char *pTitle
 
 void CEditor::ShowFileDialogError(const char *pFormat, ...)
 {
-	static CUI::SMessagePopupContext s_MessagePopupContext;
-	s_MessagePopupContext.ErrorColor();
+	char aMessage[1024];
 	va_list VarArgs;
 	va_start(VarArgs, pFormat);
-	str_format_v(s_MessagePopupContext.m_aMessage, sizeof(s_MessagePopupContext.m_aMessage), pFormat, VarArgs);
+	str_format_v(aMessage, sizeof(aMessage), pFormat, VarArgs);
 	va_end(VarArgs);
-	UI()->ShowPopupMessage(UI()->MouseX(), UI()->MouseY(), &s_MessagePopupContext);
+
+	auto ContextIterator = m_PopupMessageContexts.find(aMessage);
+	CUI::SMessagePopupContext *pContext;
+	if(ContextIterator != m_PopupMessageContexts.end())
+	{
+		pContext = ContextIterator->second;
+		UI()->ClosePopupMenu(pContext);
+	}
+	else
+	{
+		pContext = new CUI::SMessagePopupContext();
+		pContext->ErrorColor();
+		str_copy(pContext->m_aMessage, aMessage);
+		m_PopupMessageContexts[pContext->m_aMessage] = pContext;
+	}
+	UI()->ShowPopupMessage(UI()->MouseX(), UI()->MouseY(), pContext);
 }
 
 void CEditor::RenderModebar(CUIRect View)
@@ -6504,6 +6518,7 @@ void CEditor::Render()
 	// Popup menus must be rendered before the statusbar, because UI elements in
 	// popup menus can set tooltips, which are rendered in the status bar.
 	UI()->RenderPopupMenus();
+	FreeDynamicPopupMenus();
 
 	if(m_GuiActive)
 		RenderStatusbar(StatusBar);
@@ -6542,6 +6557,22 @@ void CEditor::RenderSavingIndicator(CUIRect View)
 	CUIRect Label;
 	View.Margin(20.0f, &Label);
 	UI()->DoLabel(&Label, "Saving…", 24.0f, TEXTALIGN_BR);
+}
+
+void CEditor::FreeDynamicPopupMenus()
+{
+	auto Iterator = m_PopupMessageContexts.begin();
+	while(Iterator != m_PopupMessageContexts.end())
+	{
+		if(!UI()->IsPopupOpen(Iterator->second))
+		{
+			CUI::SMessagePopupContext *pContext = Iterator->second;
+			Iterator = m_PopupMessageContexts.erase(Iterator);
+			delete pContext;
+		}
+		else
+			++Iterator;
+	}
 }
 
 void CEditor::RenderMousePointer()
