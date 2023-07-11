@@ -1214,7 +1214,8 @@ int CMenus::Render()
 		}
 		else if(m_Popup == POPUP_RENAME_DEMO)
 		{
-			pTitle = Localize("Rename demo");
+			dbg_assert(m_DemolistSelectedIndex >= 0, "m_DemolistSelectedIndex invalid for POPUP_RENAME_DEMO");
+			pTitle = m_vDemos[m_DemolistSelectedIndex].m_IsDir ? Localize("Rename folder") : Localize("Rename demo");
 		}
 #if defined(CONF_VIDEORECORDER)
 		else if(m_Popup == POPUP_RENDER_DEMO)
@@ -1517,31 +1518,32 @@ int CMenus::Render()
 			{
 				m_Popup = POPUP_NONE;
 				// rename demo
-				if(m_DemolistSelectedIndex >= 0 && !m_DemolistSelectedIsDir)
-				{
-					char aBufOld[IO_MAX_PATH_LENGTH];
-					str_format(aBufOld, sizeof(aBufOld), "%s/%s", m_aCurrentDemoFolder, m_vDemos[m_DemolistSelectedIndex].m_aFilename);
-					char aBufNew[IO_MAX_PATH_LENGTH];
-					str_format(aBufNew, sizeof(aBufNew), "%s/%s", m_aCurrentDemoFolder, m_DemoRenameInput.GetString());
-					if(!str_endswith(aBufNew, ".demo"))
-						str_append(aBufNew, ".demo");
+				char aBufOld[IO_MAX_PATH_LENGTH];
+				str_format(aBufOld, sizeof(aBufOld), "%s/%s", m_aCurrentDemoFolder, m_vDemos[m_DemolistSelectedIndex].m_aFilename);
+				char aBufNew[IO_MAX_PATH_LENGTH];
+				str_format(aBufNew, sizeof(aBufNew), "%s/%s", m_aCurrentDemoFolder, m_DemoRenameInput.GetString());
+				if(!m_vDemos[m_DemolistSelectedIndex].m_IsDir && !str_endswith(aBufNew, ".demo"))
+					str_append(aBufNew, ".demo");
 
-					if(Storage()->FileExists(aBufNew, m_vDemos[m_DemolistSelectedIndex].m_StorageType))
-					{
-						PopupMessage(Localize("Error"), Localize("A demo with this name already exists"), Localize("Ok"), POPUP_RENAME_DEMO);
-					}
-					else if(Storage()->RenameFile(aBufOld, aBufNew, m_vDemos[m_DemolistSelectedIndex].m_StorageType))
-					{
-						str_copy(m_aCurrentDemoSelectionName, m_DemoRenameInput.GetString());
-						if(str_endswith(m_aCurrentDemoSelectionName, ".demo"))
-							m_aCurrentDemoSelectionName[str_length(m_aCurrentDemoSelectionName) - str_length(".demo")] = '\0';
-						DemolistPopulate();
-						DemolistOnUpdate(false);
-					}
-					else
-					{
-						PopupMessage(Localize("Error"), Localize("Unable to rename the demo"), Localize("Ok"), POPUP_RENAME_DEMO);
-					}
+				if(Storage()->FileExists(aBufNew, m_vDemos[m_DemolistSelectedIndex].m_StorageType))
+				{
+					PopupMessage(Localize("Error"), Localize("A demo with this name already exists"), Localize("Ok"), POPUP_RENAME_DEMO);
+				}
+				else if(Storage()->FolderExists(aBufNew, m_vDemos[m_DemolistSelectedIndex].m_StorageType))
+				{
+					PopupMessage(Localize("Error"), Localize("A folder with this name already exists"), Localize("Ok"), POPUP_RENAME_DEMO);
+				}
+				else if(Storage()->RenameFile(aBufOld, aBufNew, m_vDemos[m_DemolistSelectedIndex].m_StorageType))
+				{
+					str_copy(m_aCurrentDemoSelectionName, m_DemoRenameInput.GetString());
+					if(!m_vDemos[m_DemolistSelectedIndex].m_IsDir)
+						fs_split_file_extension(m_DemoRenameInput.GetString(), m_aCurrentDemoSelectionName, sizeof(m_aCurrentDemoSelectionName));
+					DemolistPopulate();
+					DemolistOnUpdate(false);
+				}
+				else
+				{
+					PopupMessage(Localize("Error"), m_vDemos[m_DemolistSelectedIndex].m_IsDir ? Localize("Unable to rename the folder") : Localize("Unable to rename the demo"), Localize("Ok"), POPUP_RENAME_DEMO);
 				}
 			}
 
@@ -1558,6 +1560,8 @@ int CMenus::Render()
 #if defined(CONF_VIDEORECORDER)
 		else if(m_Popup == POPUP_RENDER_DEMO)
 		{
+			dbg_assert(m_DemolistSelectedIndex >= 0 && !m_vDemos[m_DemolistSelectedIndex].m_IsDir, "m_DemolistSelectedIndex invalid for POPUP_RENDER_DEMO");
+
 			CUIRect Label, TextBox, Ok, Abort, Button;
 
 			Box.HSplitBottom(20.f, &Box, &Part);
@@ -1581,23 +1585,24 @@ int CMenus::Render()
 			if(DoButton_Menu(&s_ButtonOk, Localize("Ok"), 0, &Ok) || UI()->ConsumeHotkey(CUI::HOTKEY_ENTER))
 			{
 				m_Popup = POPUP_NONE;
-				// name video
-				if(m_DemolistSelectedIndex >= 0 && !m_DemolistSelectedIsDir)
+				// render video
+				char aVideoPath[IO_MAX_PATH_LENGTH];
+				str_format(aVideoPath, sizeof(aVideoPath), "videos/%s", m_DemoRenderInput.GetString());
+				if(!str_endswith(aVideoPath, ".mp4"))
+					str_append(aVideoPath, ".mp4");
+				if(Storage()->FolderExists(aVideoPath, IStorage::TYPE_SAVE))
 				{
-					if(!str_endswith(m_DemoRenderInput.GetString(), ".mp4"))
-						m_DemoRenderInput.Append(".mp4");
-					char aWholePath[IO_MAX_PATH_LENGTH];
-					// store new video filename to origin buffer
-					if(Storage()->FindFile(m_DemoRenderInput.GetString(), "videos", IStorage::TYPE_ALL, aWholePath, sizeof(aWholePath)))
-					{
-						char aMessage[128 + IO_MAX_PATH_LENGTH];
-						str_format(aMessage, sizeof(aMessage), Localize("File '%s' already exists, do you want to overwrite it?"), m_DemoRenderInput.GetString());
-						PopupConfirm(Localize("Replace video"), aMessage, Localize("Yes"), Localize("No"), &CMenus::PopupConfirmDemoReplaceVideo, POPUP_NONE, &CMenus::DefaultButtonCallback, POPUP_RENDER_DEMO);
-					}
-					else
-					{
-						PopupConfirmDemoReplaceVideo();
-					}
+					PopupMessage(Localize("Error"), Localize("A folder with this name already exists"), Localize("Ok"), POPUP_RENDER_DEMO);
+				}
+				else if(Storage()->FileExists(aVideoPath, IStorage::TYPE_SAVE))
+				{
+					char aMessage[128 + IO_MAX_PATH_LENGTH];
+					str_format(aMessage, sizeof(aMessage), Localize("File '%s' already exists, do you want to overwrite it?"), m_DemoRenderInput.GetString());
+					PopupConfirm(Localize("Replace video"), aMessage, Localize("Yes"), Localize("No"), &CMenus::PopupConfirmDemoReplaceVideo, POPUP_NONE, &CMenus::DefaultButtonCallback, POPUP_RENDER_DEMO);
+				}
+				else
+				{
+					PopupConfirmDemoReplaceVideo();
 				}
 			}
 			Box.HSplitBottom(30.f, &Box, 0);
@@ -1789,7 +1794,11 @@ void CMenus::PopupConfirmDemoReplaceVideo()
 {
 	char aBuf[IO_MAX_PATH_LENGTH];
 	str_format(aBuf, sizeof(aBuf), "%s/%s", m_aCurrentDemoFolder, m_vDemos[m_DemolistSelectedIndex].m_aFilename);
-	const char *pError = Client()->DemoPlayer_Render(aBuf, m_vDemos[m_DemolistSelectedIndex].m_StorageType, m_DemoRenderInput.GetString(), m_Speed);
+	char aVideoName[IO_MAX_PATH_LENGTH];
+	str_copy(aVideoName, m_DemoRenderInput.GetString());
+	if(!str_endswith(aVideoName, ".mp4"))
+		str_append(aVideoName, ".mp4");
+	const char *pError = Client()->DemoPlayer_Render(aBuf, m_vDemos[m_DemolistSelectedIndex].m_StorageType, aVideoName, m_Speed);
 	m_Speed = 4;
 	if(pError)
 		PopupMessage(Localize("Error"), str_comp(pError, "error loading demo") ? pError : Localize("Error loading demo"), Localize("Ok"));
