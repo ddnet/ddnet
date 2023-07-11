@@ -36,6 +36,7 @@ enum
 	MODE_LAYERS = 0,
 	MODE_IMAGES,
 	MODE_SOUNDS,
+	NUM_MODES,
 
 	DIALOG_NONE = 0,
 	DIALOG_FILE,
@@ -865,16 +866,17 @@ public:
 		m_PreventUnusedTilesWasWarned = false;
 		m_AllowPlaceUnusedTiles = 0;
 		m_BrushDrawDestructive = true;
-
-		m_Mentions = 0;
 	}
 
 	void Init() override;
 	void OnUpdate() override;
 	void OnRender() override;
+	void OnActivate() override;
 	bool HasUnsavedData() const override { return m_Map.m_Modified; }
 	void UpdateMentions() override { m_Mentions++; }
 	void ResetMentions() override { m_Mentions = 0; }
+	void OnIngameMoved() override { m_IngameMoved = true; }
+	void ResetIngameMoved() override { m_IngameMoved = false; }
 
 	void HandleCursorMovement();
 	void HandleAutosave();
@@ -955,7 +957,8 @@ public:
 	int m_AllowPlaceUnusedTiles;
 	bool m_BrushDrawDestructive;
 
-	int m_Mentions;
+	int m_Mentions = 0;
+	bool m_IngameMoved = false;
 
 	enum
 	{
@@ -1175,7 +1178,6 @@ public:
 	int DoButton_Editor(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip);
 	int DoButton_Env(const void *pID, const char *pText, int Checked, const CUIRect *pRect, const char *pToolTip, ColorRGBA Color, int Corners);
 
-	int DoButton_Tab(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip);
 	int DoButton_Ex(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip, int Corners, float FontSize = 10.0f);
 	int DoButton_FontIcon(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip, int Corners, float FontSize = 10.0f);
 	int DoButton_ButtonDec(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip);

@@ -458,13 +458,6 @@ int CEditor::DoButton_MenuItem(const void *pID, const char *pText, int Checked, 
 	return DoButton_Editor_Common(pID, pText, Checked, pRect, Flags, pToolTip);
 }
 
-int CEditor::DoButton_Tab(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip)
-{
-	pRect->Draw(GetButtonColor(pID, Checked), IGraphics::CORNER_T, 5.0f);
-	UI()->DoLabel(pRect, pText, 10.0f, TEXTALIGN_MC);
-	return DoButton_Editor_Common(pID, pText, Checked, pRect, Flags, pToolTip);
-}
-
 int CEditor::DoButton_Ex(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip, int Corners, float FontSize)
 {
 	pRect->Draw(GetButtonColor(pID, Checked), Corners, 3.0f);
@@ -5270,44 +5263,59 @@ void CEditor::ShowFileDialogError(const char *pFormat, ...)
 
 void CEditor::RenderModebar(CUIRect View)
 {
-	CUIRect Button;
+	CUIRect Mentions, IngameMoved, ModeButton;
+	View.HSplitTop(12.0f, &Mentions, &View);
+	View.HSplitTop(12.0f, &IngameMoved, &View);
+	View.HSplitTop(8.0f, nullptr, &ModeButton);
+	ModeButton.VSplitLeft(65.0f, &ModeButton, nullptr);
 
-	// mode buttons
+	// mentions
+	if(m_Mentions)
 	{
-		View.VSplitLeft(65.0f, &Button, &View);
-		Button.HSplitTop(30.0f, nullptr, &Button);
-		static int s_Button = 0;
-		const char *pButName = "";
+		char aBuf[64];
+		if(m_Mentions == 1)
+			str_copy(aBuf, Localize("1 new mention"));
+		else if(m_Mentions <= 9)
+			str_format(aBuf, sizeof(aBuf), Localize("%d new mentions"), m_Mentions);
+		else
+			str_copy(aBuf, Localize("9+ new mentions"));
 
+		TextRender()->TextColor(ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f));
+		UI()->DoLabel(&Mentions, aBuf, 10.0f, TEXTALIGN_MC);
+		TextRender()->TextColor(TextRender()->DefaultTextColor());
+	}
+
+	// ingame moved warning
+	if(m_IngameMoved)
+	{
+		TextRender()->TextColor(ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f));
+		UI()->DoLabel(&IngameMoved, Localize("Moved ingame"), 10.0f, TEXTALIGN_MC);
+		TextRender()->TextColor(TextRender()->DefaultTextColor());
+	}
+
+	// mode button
+	{
+		const char *pModeLabel = "";
 		if(m_Mode == MODE_LAYERS)
-			pButName = "Layers";
+			pModeLabel = "Layers";
 		else if(m_Mode == MODE_IMAGES)
-			pButName = "Images";
+			pModeLabel = "Images";
 		else if(m_Mode == MODE_SOUNDS)
-			pButName = "Sounds";
+			pModeLabel = "Sounds";
+		else
+			dbg_assert(false, "m_Mode invalid");
 
-		int MouseButton = DoButton_Tab(&s_Button, pButName, 0, &Button, 0, "Switch between images, sounds and layers management.");
+		static int s_ModeButton = 0;
+		const int MouseButton = DoButton_Ex(&s_ModeButton, pModeLabel, 0, &ModeButton, 0, "Switch between images, sounds and layers management.", IGraphics::CORNER_T, 10.0f);
 		if(MouseButton == 2 || (Input()->KeyPress(KEY_LEFT) && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0))
 		{
-			if(m_Mode == MODE_LAYERS)
-				m_Mode = MODE_SOUNDS;
-			else if(m_Mode == MODE_IMAGES)
-				m_Mode = MODE_LAYERS;
-			else
-				m_Mode = MODE_IMAGES;
+			m_Mode = (m_Mode + NUM_MODES - 1) % NUM_MODES;
 		}
 		else if(MouseButton == 1 || (Input()->KeyPress(KEY_RIGHT) && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0))
 		{
-			if(m_Mode == MODE_LAYERS)
-				m_Mode = MODE_IMAGES;
-			else if(m_Mode == MODE_IMAGES)
-				m_Mode = MODE_SOUNDS;
-			else
-				m_Mode = MODE_LAYERS;
+			m_Mode = (m_Mode + 1) % NUM_MODES;
 		}
 	}
-
-	View.VSplitLeft(5.0f, nullptr, &View);
 }
 
 void CEditor::RenderStatusbar(CUIRect View)
@@ -6229,7 +6237,7 @@ void CEditor::Render()
 	// render checker
 	RenderBackground(View, m_CheckerTexture, 32.0f, 1.0f);
 
-	CUIRect MenuBar, CModeBar, ToolBar, StatusBar, ExtraEditor, ToolBox;
+	CUIRect MenuBar, ModeBar, ToolBar, StatusBar, ExtraEditor, ToolBox;
 	m_ShowPicker = Input()->KeyIsPressed(KEY_SPACE) && m_Dialog == DIALOG_NONE && m_EditBoxActive == 0 && UI()->LastActiveItem() != &m_SettingsCommandInput && m_vSelectedLayers.size() == 1;
 
 	if(m_GuiActive)
@@ -6326,32 +6334,10 @@ void CEditor::Render()
 
 		RenderBackground(ToolBar, m_BackgroundTexture, 128.0f, Brightness);
 		ToolBar.Margin(2.0f, &ToolBar);
-		ToolBar.VSplitLeft(100.0f, &CModeBar, &ToolBar);
+		ToolBar.VSplitLeft(100.0f, &ModeBar, &ToolBar);
 
 		RenderBackground(StatusBar, m_BackgroundTexture, 128.0f, Brightness);
 		StatusBar.Margin(2.0f, &StatusBar);
-	}
-
-	// show mentions
-	if(m_GuiActive && m_Mentions)
-	{
-		char aBuf[64];
-		if(m_Mentions == 1)
-		{
-			str_copy(aBuf, Localize("1 new mention"));
-		}
-		else if(m_Mentions <= 9)
-		{
-			str_format(aBuf, sizeof(aBuf), Localize("%d new mentions"), m_Mentions);
-		}
-		else
-		{
-			str_copy(aBuf, Localize("9+ new mentions"));
-		}
-
-		TextRender()->TextColor(1.0f, 0.0f, 0.0f, 1.0f);
-		TextRender()->Text(5.0f, 27.0f, 10.0f, aBuf, -1.0f);
-		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 
 	// do the toolbar
@@ -6471,8 +6457,7 @@ void CEditor::Render()
 	if(m_GuiActive)
 	{
 		RenderMenubar(MenuBar);
-
-		RenderModebar(CModeBar);
+		RenderModebar(ModeBar);
 		if(!m_ShowPicker)
 		{
 			if(m_ShowEnvelopeEditor)
@@ -7243,6 +7228,12 @@ void CEditor::OnRender()
 	Input()->Clear();
 
 	CLineInput::RenderCandidates();
+}
+
+void CEditor::OnActivate()
+{
+	ResetMentions();
+	ResetIngameMoved();
 }
 
 void CEditor::LoadCurrentMap()

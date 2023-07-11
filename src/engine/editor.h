@@ -12,11 +12,14 @@ public:
 	virtual void Init() = 0;
 	virtual void OnUpdate() = 0;
 	virtual void OnRender() = 0;
+	virtual void OnActivate() = 0;
 	virtual bool HasUnsavedData() const = 0;
 	virtual bool Load(const char *pFilename, int StorageType) = 0;
 	virtual bool Save(const char *pFilename) = 0;
 	virtual void UpdateMentions() = 0;
 	virtual void ResetMentions() = 0;
+	virtual void OnIngameMoved() = 0;
+	virtual void ResetIngameMoved() = 0;
 };
 
 extern IEditor *CreateEditor();
