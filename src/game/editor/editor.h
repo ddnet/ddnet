@@ -776,7 +776,6 @@ public:
 
 		m_Mode = MODE_LAYERS;
 		m_Dialog = 0;
-		m_EditBoxActive = 0;
 		m_pTooltip = nullptr;
 
 		m_GridActive = false;
@@ -880,6 +879,7 @@ public:
 	void ResetIngameMoved() override { m_IngameMoved = false; }
 
 	void HandleCursorMovement();
+	void DispatchInputEvents();
 	void HandleAutosave();
 	bool PerformAutosave();
 	void HandleWriterFinishJobs();
@@ -932,7 +932,6 @@ public:
 
 	int m_Mode;
 	int m_Dialog;
-	int m_EditBoxActive;
 	const char *m_pTooltip;
 
 	bool m_GridActive;
