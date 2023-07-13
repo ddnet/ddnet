@@ -433,8 +433,6 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			}
 		}
 	}
-	if(s_ListBox.WasItemActivated())
-		Connect(g_Config.m_UiServerAddress);
 
 	// Render bar that shows the loading progression.
 	// The bar is only shown while loading and fades out when it's done.
@@ -592,7 +590,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			Props.m_Color = ColorRGBA(0.5f, 1.0f, 0.5f, 0.5f);
 
 			static CButtonContainer s_ConnectButton;
-			if(UI()->DoButton_Menu(m_ConnectButton, &s_ConnectButton, ConnectLabelFunc, &ButtonConnect, Props))
+			if(UI()->DoButton_Menu(m_ConnectButton, &s_ConnectButton, ConnectLabelFunc, &ButtonConnect, Props) || s_ListBox.WasItemActivated() || UI()->ConsumeHotkey(CUI::HOTKEY_ENTER))
 			{
 				Connect(g_Config.m_UiServerAddress);
 			}
