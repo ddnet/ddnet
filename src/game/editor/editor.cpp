@@ -1674,6 +1674,7 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 	enum
 	{
 		OP_NONE = 0,
+		OP_SELECT,
 		OP_MOVEPOINT,
 		OP_MOVEUV,
 		OP_CONTEXT_MENU
@@ -1681,6 +1682,8 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 
 	static bool s_Moved;
 	static int s_Operation = OP_NONE;
+	static float s_MouseXStart = 0.0f;
+	static float s_MouseYStart = 0.0f;
 
 	const bool IgnoreGrid = Input()->AltIsPressed();
 
@@ -1694,6 +1697,15 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 
 		if(s_Moved)
 		{
+			if(s_Operation == OP_SELECT)
+			{
+				float x = s_MouseXStart - UI()->MouseX();
+				float y = s_MouseYStart - UI()->MouseY();
+
+				if(x * x + y * y > 20.0f)
+					s_Operation = OP_MOVEPOINT;
+			}
+
 			if(s_Operation == OP_MOVEPOINT)
 			{
 				float x = wx;
@@ -1791,7 +1803,12 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 				UI()->EnableMouseLock(pID);
 			}
 			else
-				s_Operation = OP_MOVEPOINT;
+			{
+				s_MouseXStart = UI()->MouseX();
+				s_MouseYStart = UI()->MouseY();
+
+				s_Operation = OP_SELECT;
+			}
 
 			if(!(m_SelectedPoints & (1 << V)))
 			{
