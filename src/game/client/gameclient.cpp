@@ -645,10 +645,13 @@ void CGameClient::OnRender()
 		if(m_Snap.m_SpecInfo.m_SpectatorID >= 0)
 			TeamId = m_Teams.Team(m_Snap.m_SpecInfo.m_SpectatorID);
 
-		if(!InitMultiViewFromFreeview(TeamId))
+		if(TeamId > MAX_CLIENTS || TeamId < 0)
+			TeamId = 0;
+
+		if(!InitMultiView(TeamId))
 		{
 			dbg_msg("MultiView", "No players found to spectate");
-			m_MultiViewActivated = false;
+			ResetMultiView();
 		}
 	}
 
@@ -871,13 +874,29 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 		// if we are spectating a static id set (team 0) and somebody killed, we remove him from the list
 		if(IsMultiViewIdSet() && m_aMultiViewId[pMsg->m_Victim] && !m_aClients[pMsg->m_Victim].m_Spec)
 		{
-			// is multi view even activated and we are not spectating a solo guy
-			if(m_MultiViewActivated && !m_MultiView.m_Solo && m_MultiView.m_Team == 0)
+			// is multi-view even activated and we are not spectating a solo guy
+			if(m_MultiViewActivated && !m_MultiView.m_Solo)
+			{
 				m_aMultiViewId[pMsg->m_Victim] = false;
 
-			// if everyone of a team killed, we have no ids to spectate anymore, so we disable multi view
-			if(!IsMultiViewIdSet())
-				m_MultiViewActivated = false;
+				// if everyone of a team killed, we have no ids to spectate anymore, so we disable multi-view
+				if(!IsMultiViewIdSet())
+					m_MultiViewActivated = false;
+				else
+				{
+					// the "main" tee killed, search a new one
+					if(m_Snap.m_SpecInfo.m_SpectatorID == pMsg->m_Victim)
+					{
+						int NewClientID = FindFirstMultiViewId();
+						if(NewClientID < MAX_CLIENTS && NewClientID >= 0)
+						{
+							CleanMultiViewId(NewClientID);
+							m_aMultiViewId[NewClientID] = true;
+							m_Spectator.Spectate(NewClientID);
+						}
+					}
+				}
+			}
 		}
 	}
 }
@@ -1704,7 +1723,7 @@ void CGameClient::OnNewSnapshot()
 		m_aDDRaceMsgSent[i] = true;
 	}
 
-	if(m_MultiViewActivated)
+	if(m_Snap.m_SpecInfo.m_Active && m_MultiViewActivated)
 	{
 		// dont show other teams while spectating in multi view
 		CNetMsg_Cl_ShowOthers Msg;
@@ -3435,7 +3454,7 @@ void CGameClient::HandleMultiView()
 			continue;
 
 		// the player is not in the team we are spectating
-		if(m_Teams.Team(i) != m_MultiView.m_Team)
+		if(m_Teams.Team(i) != m_MultiViewTeam)
 			continue;
 
 		vec2 PlayerPos;
@@ -3453,7 +3472,12 @@ void CGameClient::HandleMultiView()
 			if(m_MultiView.m_aLastFreeze[i] == 0.0f)
 				m_MultiView.m_aLastFreeze[i] = Client()->LocalTime();
 			else if(m_MultiView.m_aLastFreeze[i] + 3.0f <= Client()->LocalTime())
+			{
 				m_MultiView.m_aVanish[i] = true;
+				// player we want to be vanished is our "main" tee, so lets switch the tee
+				if(i == m_Snap.m_SpecInfo.m_SpectatorID)
+					m_Spectator.Spectate(FindFirstMultiViewId());
+			}
 		}
 		else if(m_MultiView.m_aLastFreeze[i] != 0)
 			m_MultiView.m_aLastFreeze[i] = 0;
@@ -3482,9 +3506,17 @@ void CGameClient::HandleMultiView()
 	// if we have found no players, we disable multi view
 	if(AmountPlayers == 0)
 	{
-		m_MultiViewActivated = false;
+		if(m_MultiView.m_SecondChance == 0.0f)
+			m_MultiView.m_SecondChance = Client()->LocalTime() + 0.3f;
+		else if(m_MultiView.m_SecondChance < Client()->LocalTime())
+		{
+			m_MultiViewActivated = false;
+			return;
+		}
 		return;
 	}
+	else if(m_MultiView.m_SecondChance != 0.0f)
+		m_MultiView.m_SecondChance = 0.0f;
 
 	vec2 TargetPos = vec2((Minpos.x + Maxpos.x) / 2.0f, (Minpos.y + Maxpos.y) / 2.0f);
 	// dont hide the position hud if its only one player
@@ -3502,7 +3534,7 @@ void CGameClient::HandleMultiView()
 	m_Snap.m_SpecInfo.m_UsePosition = true;
 }
 
-bool CGameClient::InitMultiViewFromFreeview(int Team)
+bool CGameClient::InitMultiView(int Team)
 {
 	float Width, Height;
 	CleanMultiViewIds();
@@ -3513,10 +3545,13 @@ bool CGameClient::InitMultiViewFromFreeview(int Team)
 	vec2 AxisX = vec2(m_Camera.m_Center.x - (Width / 2), m_Camera.m_Center.x + (Width / 2));
 	vec2 AxisY = vec2(m_Camera.m_Center.y - (Height / 2), m_Camera.m_Center.y + (Height / 2));
 
-	m_MultiView.m_Team = Team;
+	m_MultiViewTeam = Team;
 
 	if(Team > 0)
-		return true; // spectating a team, not necessary to search the players in view
+	{
+		for(int i = 0; i < MAX_CLIENTS; i++)
+			m_aMultiViewId[i] = m_Teams.Team(i) == Team;
+	}
 	else
 	{
 		int Count = 0;
@@ -3549,22 +3584,71 @@ bool CGameClient::InitMultiViewFromFreeview(int Team)
 
 		// we are spectating only one player
 		m_MultiView.m_Solo = Count == 1;
-
-		// found players to spectate
-		return Count > 0;
 	}
+
+	if(!g_Config.m_ClMultiViewUseFreeView && IsMultiViewIdSet())
+	{
+		int SpectatorID = m_Snap.m_SpecInfo.m_SpectatorID;
+		int NewSpectatorID = -1;
+
+		vec2 CurPosition(m_Camera.m_Center);
+		if(SpectatorID != SPEC_FREEVIEW)
+		{
+			const CNetObj_Character &CurCharacter = m_Snap.m_aCharacters[SpectatorID].m_Cur;
+			CurPosition.x = CurCharacter.m_X;
+			CurPosition.y = CurCharacter.m_Y;
+		}
+
+		int ClosestDistance = INT_MAX;
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if(!m_Snap.m_apPlayerInfos[i] || m_Snap.m_apPlayerInfos[i]->m_Team == TEAM_SPECTATORS || m_Teams.Team(i) != Team)
+				continue;
+
+			vec2 PlayerPos;
+			if(m_Snap.m_aCharacters[i].m_Active)
+				PlayerPos = vec2(m_aClients[i].m_RenderPos.x, m_aClients[i].m_RenderPos.y);
+			else if(m_aClients[i].m_Spec) // tee is in spec
+				PlayerPos = m_aClients[i].m_SpecChar;
+			else
+				continue;
+
+			int Distance = distance(CurPosition, PlayerPos);
+			if(NewSpectatorID == -1 || Distance < ClosestDistance)
+			{
+				NewSpectatorID = i;
+				ClosestDistance = Distance;
+			}
+		}
+
+		if(NewSpectatorID > -1)
+			m_Spectator.Spectate(NewSpectatorID);
+	}
+
+	return IsMultiViewIdSet();
 }
 
-float CGameClient::CalculateMultiViewMultiplier(vec2 CameraPos)
+float CGameClient::CalculateMultiViewMultiplier(vec2 TargetPos)
 {
 	float MaxCameraDist = 200.0f;
 	float MinCameraDist = 20.0f;
-	float MaxVel = 0.1f;
+	float MaxVel = g_Config.m_ClMultiViewSensitivity / 150.0f;
 	float MinVel = 0.007f;
+	float CurrentCameraDistance = distance(m_MultiView.m_OldPos, TargetPos);
+	float UpperLimit = 1.0f;
 
-	float CurrentCameraDistance = distance(m_MultiView.m_OldPos, CameraPos);
+	if(m_MultiView.m_Teleported && CurrentCameraDistance <= 100)
+		m_MultiView.m_Teleported = false;
 
-	return clamp(MapValue(MaxCameraDist, MinCameraDist, MaxVel, MinVel, CurrentCameraDistance), MinVel, 1.0f);
+	// somebody got teleported very likely
+	if((m_MultiView.m_Teleported || CurrentCameraDistance - m_MultiView.m_OldCameraDistance > 100) && m_MultiView.m_OldCameraDistance != 0.0f)
+	{
+		UpperLimit = 0.1f; // dont try to compensate it by flickering
+		m_MultiView.m_Teleported = true;
+	}
+	m_MultiView.m_OldCameraDistance = CurrentCameraDistance;
+
+	return clamp(MapValue(MaxCameraDist, MinCameraDist, MaxVel, MinVel, CurrentCameraDistance), MinVel, UpperLimit);
 }
 
 float CGameClient::CalculateMultiViewZoom(vec2 MinPos, vec2 MaxPos, float Vel)
@@ -3585,7 +3669,7 @@ float CGameClient::CalculateMultiViewZoom(vec2 MinPos, vec2 MaxPos, float Vel)
 	// zoom should stay inbetween 1.1 and 20.0
 	Zoom = clamp(Zoom + Diff, 1.1f, 20.0f);
 	// add the user preference
-	Zoom -= (Zoom * 0.075f) * m_MultiViewPersonalZoom;
+	Zoom -= (Zoom * 0.1f) * m_MultiViewPersonalZoom;
 	m_MultiView.m_OldPersonalZoom = m_MultiViewPersonalZoom;
 
 	return Zoom;
@@ -3598,10 +3682,12 @@ float CGameClient::MapValue(float MaxValue, float MinValue, float MaxRange, floa
 
 void CGameClient::ResetMultiView()
 {
+	m_MultiViewPersonalZoom = 0;
+	m_MultiViewActivated = false;
 	m_MultiView.m_Solo = false;
 	m_MultiView.m_IsInit = false;
-	m_MultiViewActivated = false;
-	m_MultiViewPersonalZoom = 0;
+	m_MultiView.m_Teleported = false;
+	m_MultiView.m_OldCameraDistance = 0.0f;
 }
 
 void CGameClient::CleanMultiViewIds()
@@ -3611,7 +3697,28 @@ void CGameClient::CleanMultiViewIds()
 	std::fill(std::begin(m_MultiView.m_aVanish), std::end(m_MultiView.m_aVanish), false);
 }
 
+void CGameClient::CleanMultiViewId(int ClientID)
+{
+	if(ClientID >= MAX_CLIENTS || ClientID < 0)
+		return;
+
+	m_aMultiViewId[ClientID] = false;
+	m_MultiView.m_aLastFreeze[ClientID] = 0.0f;
+	m_MultiView.m_aVanish[ClientID] = false;
+}
+
 bool CGameClient::IsMultiViewIdSet()
 {
 	return std::any_of(std::begin(m_aMultiViewId), std::end(m_aMultiViewId), [](bool IsSet) { return IsSet; });
+}
+
+int CGameClient::FindFirstMultiViewId()
+{
+	int ClientID = -1;
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(m_aMultiViewId[i] && !m_MultiView.m_aVanish[i])
+			return i;
+	}
+	return ClientID;
 }
