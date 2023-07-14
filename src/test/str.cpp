@@ -124,12 +124,52 @@ TEST(Str, Utf8ToLower)
 	EXPECT_TRUE(str_utf8_comp_nocase_num("ÖlÜ", "ölüa", 6) != 0);
 	EXPECT_TRUE(str_utf8_comp_nocase_num("a", "z", 0) == 0);
 	EXPECT_TRUE(str_utf8_comp_nocase_num("a", "z", 1) != 0);
+}
 
-	const char str[] = "ÄÖÜ";
-	EXPECT_TRUE(str_utf8_find_nocase(str, "ä") == str);
-	EXPECT_TRUE(str_utf8_find_nocase(str, "ö") == str + 2);
-	EXPECT_TRUE(str_utf8_find_nocase(str, "ü") == str + 4);
-	EXPECT_TRUE(str_utf8_find_nocase(str, "z") == NULL);
+TEST(Str, Utf8FindNocase)
+{
+	const char *pStr = "abc";
+	const char *pEnd;
+	EXPECT_EQ(str_utf8_find_nocase(pStr, "a", &pEnd), pStr);
+	EXPECT_EQ(pEnd, pStr + str_length("a"));
+	EXPECT_EQ(str_utf8_find_nocase(pStr, "b", &pEnd), pStr + str_length("a"));
+	EXPECT_EQ(pEnd, pStr + str_length("ab"));
+	EXPECT_EQ(str_utf8_find_nocase(pStr, "c", &pEnd), pStr + str_length("ab"));
+	EXPECT_EQ(pEnd, pStr + str_length("abc"));
+	EXPECT_EQ(str_utf8_find_nocase(pStr, "d", &pEnd), nullptr);
+	EXPECT_EQ(pEnd, nullptr);
+
+	EXPECT_EQ(str_utf8_find_nocase(pStr, "A", &pEnd), pStr);
+	EXPECT_EQ(pEnd, pStr + str_length("a"));
+	EXPECT_EQ(str_utf8_find_nocase(pStr, "B", &pEnd), pStr + str_length("a"));
+	EXPECT_EQ(pEnd, pStr + str_length("ab"));
+	EXPECT_EQ(str_utf8_find_nocase(pStr, "C", &pEnd), pStr + str_length("ab"));
+	EXPECT_EQ(pEnd, pStr + str_length("abc"));
+	EXPECT_EQ(str_utf8_find_nocase(pStr, "D", &pEnd), nullptr);
+	EXPECT_EQ(pEnd, nullptr);
+
+	pStr = "ÄÖÜ";
+	EXPECT_EQ(str_utf8_find_nocase(pStr, "ä", &pEnd), pStr);
+	EXPECT_EQ(pEnd, pStr + str_length("Ä"));
+	EXPECT_EQ(str_utf8_find_nocase(pStr, "ö", &pEnd), pStr + str_length("Ä"));
+	EXPECT_EQ(pEnd, pStr + str_length("ÄÖ"));
+	EXPECT_EQ(str_utf8_find_nocase(pStr, "ü", &pEnd), pStr + str_length("ÄÖ"));
+	EXPECT_EQ(pEnd, pStr + str_length("ÄÖÜ"));
+	EXPECT_EQ(str_utf8_find_nocase(pStr, "z", &pEnd), nullptr);
+	EXPECT_EQ(pEnd, nullptr);
+
+	// Both 'I' and 'İ' map to 'i'
+	pStr = "antimatter";
+	EXPECT_EQ(str_utf8_find_nocase(pStr, "I", &pEnd), pStr + str_length("ant"));
+	EXPECT_EQ(pEnd, pStr + str_length("anti"));
+	EXPECT_EQ(str_utf8_find_nocase(pStr, "İ", &pEnd), pStr + str_length("ant"));
+	EXPECT_EQ(pEnd, pStr + str_length("anti"));
+	pStr = "ANTIMATTER";
+	EXPECT_EQ(str_utf8_find_nocase(pStr, "i", &pEnd), pStr + str_length("ANT"));
+	EXPECT_EQ(pEnd, pStr + str_length("ANTI"));
+	pStr = "ANTİMATTER";
+	EXPECT_EQ(str_utf8_find_nocase(pStr, "i", &pEnd), pStr + str_length("ANT"));
+	EXPECT_EQ(pEnd, pStr + str_length("ANTİ"));
 }
 
 TEST(Str, Utf8FixTruncation)

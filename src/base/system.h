@@ -2300,6 +2300,9 @@ int str_utf8_comp_nocase_num(const char *a, const char *b, int num);
 	Parameters:
 		haystack - String to search in
 		needle - String to search for
+        end - A pointer that will be set to a pointer into haystack directly behind the
+            last character where the needle was found. Will be set to nullptr if needle
+            could not be found. Optional parameter.
 
 	Returns:
 		A pointer into haystack where the needle was found.
@@ -2308,7 +2311,7 @@ int str_utf8_comp_nocase_num(const char *a, const char *b, int num);
 	Remarks:
 		- The strings are treated as zero-terminated strings.
 */
-const char *str_utf8_find_nocase(const char *haystack, const char *needle);
+const char *str_utf8_find_nocase(const char *haystack, const char *needle, const char **end = nullptr);
 
 /*
 	Function: str_utf8_isspace
