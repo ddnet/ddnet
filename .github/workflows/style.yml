@@ -3,6 +3,7 @@ name: Check style
 on:
   push:
     branches-ignore:
+      - gh-readonly-queue/**
       - master
   pull_request:
   merge_group:
