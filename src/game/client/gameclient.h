@@ -182,6 +182,7 @@ private:
 
 	void ProcessEvents();
 	void UpdatePositions();
+	void UpdateEditorIngameMoved();
 
 	int m_PredictedTick;
 	int m_aLastNewPredictedTick[NUM_DUMMIES];
