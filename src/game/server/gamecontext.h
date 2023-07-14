@@ -475,8 +475,8 @@ private:
 
 	enum
 	{
-		MAX_LOG_SECONDS = 240,
-		MAX_LOGS = 256,
+		MAX_LOG_SECONDS = 600,
+		MAX_LOGS = 1024,
 	};
 	struct CLog
 	{
