@@ -1777,11 +1777,7 @@ void CGameClient::OnNewSnapshot()
 		pComponent->OnNewSnapshot();
 
 	// notify editor when local character moved
-	if(m_Snap.m_pLocalCharacter && m_Snap.m_pLocalPrevCharacter &&
-		(m_Snap.m_pLocalCharacter->m_X != m_Snap.m_pLocalPrevCharacter->m_X || m_Snap.m_pLocalCharacter->m_Y != m_Snap.m_pLocalPrevCharacter->m_Y))
-	{
-		Editor()->OnIngameMoved();
-	}
+	UpdateEditorIngameMoved();
 
 	// detect air jump for other players
 	for(int i = 0; i < MAX_CLIENTS; i++)
@@ -1809,6 +1805,24 @@ void CGameClient::OnNewSnapshot()
 	// update prediction data
 	if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		UpdatePrediction();
+}
+
+void CGameClient::UpdateEditorIngameMoved()
+{
+	const bool LocalCharacterMoved = m_Snap.m_pLocalCharacter && m_Snap.m_pLocalPrevCharacter && (m_Snap.m_pLocalCharacter->m_X != m_Snap.m_pLocalPrevCharacter->m_X || m_Snap.m_pLocalCharacter->m_Y != m_Snap.m_pLocalPrevCharacter->m_Y);
+	static int s_EditorMovementDelay = 5;
+	if(!g_Config.m_ClEditor)
+	{
+		s_EditorMovementDelay = 5;
+	}
+	else if(s_EditorMovementDelay > 0 && !LocalCharacterMoved)
+	{
+		--s_EditorMovementDelay;
+	}
+	if(s_EditorMovementDelay == 0 && LocalCharacterMoved)
+	{
+		Editor()->OnIngameMoved();
+	}
 }
 
 void CGameClient::OnPredict()
