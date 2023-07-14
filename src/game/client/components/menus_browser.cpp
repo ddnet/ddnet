@@ -1320,7 +1320,10 @@ bool CMenus::PrintHighlighted(const char *pName, F &&PrintFn)
 		}
 		else
 		{
-			pFilteredStr = str_utf8_find_nocase(pName, aFilterStr);
+			const char *pFilteredStrEnd;
+			pFilteredStr = str_utf8_find_nocase(pName, aFilterStr, &pFilteredStrEnd);
+			if(pFilteredStr != nullptr && pFilteredStrEnd != nullptr)
+				FilterLen = pFilteredStrEnd - pFilteredStr;
 		}
 		if(pFilteredStr)
 		{
