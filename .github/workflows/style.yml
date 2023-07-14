@@ -4,9 +4,6 @@ on:
   push:
     branches-ignore:
       - master
-      - staging.tmp
-      - trying.tmp
-      - staging-squash-merge.tmp
   pull_request:
   merge_group:
 

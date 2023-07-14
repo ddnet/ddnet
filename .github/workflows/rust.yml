@@ -2,10 +2,6 @@ name: Check Rust
 
 on:
   push:
-    branches-ignore:
-      - staging.tmp
-      - trying.tmp
-      - staging-squash-merge.tmp
   pull_request:
   merge_group:
 
