@@ -1279,6 +1279,55 @@ void CUI::DoScrollbarOption(const void *pID, int *pOption, const CUIRect *pRect,
 	*pOption = Value;
 }
 
+void CUI::RenderProgressSpinner(vec2 Center, float OuterRadius, const SProgressSpinnerProperties &Props)
+{
+	static float s_SpinnerOffset = 0.0f;
+	static float s_LastRender = Client()->LocalTime();
+	s_SpinnerOffset += (Client()->LocalTime() - s_LastRender) * 1.5f;
+	s_SpinnerOffset = std::fmod(s_SpinnerOffset, 1.0f);
+
+	Graphics()->TextureClear();
+	Graphics()->QuadsBegin();
+
+	// The filled and unfilled segments need to begin at the same angle offset
+	// or the differences in pixel alignment will make the filled segments flicker.
+	const float SegmentsAngle = 2.0f * pi / Props.m_Segments;
+	const float InnerRadius = OuterRadius * 0.75f;
+	const float AngleOffset = -0.5f * pi;
+	Graphics()->SetColor(Props.m_Color.WithMultipliedAlpha(0.5f));
+	for(int i = 0; i < Props.m_Segments; ++i)
+	{
+		const float Angle1 = AngleOffset + i * SegmentsAngle;
+		const float Angle2 = AngleOffset + (i + 1) * SegmentsAngle;
+		IGraphics::CFreeformItem Item = IGraphics::CFreeformItem(
+			Center.x + std::cos(Angle1) * InnerRadius, Center.y + std::sin(Angle1) * InnerRadius,
+			Center.x + std::cos(Angle2) * InnerRadius, Center.y + std::sin(Angle2) * InnerRadius,
+			Center.x + std::cos(Angle1) * OuterRadius, Center.y + std::sin(Angle1) * OuterRadius,
+			Center.x + std::cos(Angle2) * OuterRadius, Center.y + std::sin(Angle2) * OuterRadius);
+		Graphics()->QuadsDrawFreeform(&Item, 1);
+	}
+
+	const float FilledRatio = Props.m_Progress < 0.0f ? 0.333f : Props.m_Progress;
+	const int FilledSegmentOffset = Props.m_Progress < 0.0f ? round_to_int(s_SpinnerOffset * Props.m_Segments) : 0;
+	const int FilledNumSegments = minimum<int>(Props.m_Segments * FilledRatio + (Props.m_Progress < 0.0f ? 0 : 1), Props.m_Segments);
+	Graphics()->SetColor(Props.m_Color);
+	for(int i = 0; i < FilledNumSegments; ++i)
+	{
+		const float Angle1 = AngleOffset + (i + FilledSegmentOffset) * SegmentsAngle;
+		const float Angle2 = AngleOffset + ((i + 1 == FilledNumSegments && Props.m_Progress >= 0.0f) ? (2.0f * pi * Props.m_Progress) : ((i + FilledSegmentOffset + 1) * SegmentsAngle));
+		IGraphics::CFreeformItem Item = IGraphics::CFreeformItem(
+			Center.x + std::cos(Angle1) * InnerRadius, Center.y + std::sin(Angle1) * InnerRadius,
+			Center.x + std::cos(Angle2) * InnerRadius, Center.y + std::sin(Angle2) * InnerRadius,
+			Center.x + std::cos(Angle1) * OuterRadius, Center.y + std::sin(Angle1) * OuterRadius,
+			Center.x + std::cos(Angle2) * OuterRadius, Center.y + std::sin(Angle2) * OuterRadius);
+		Graphics()->QuadsDrawFreeform(&Item, 1);
+	}
+
+	Graphics()->QuadsEnd();
+
+	s_LastRender = Client()->LocalTime();
+}
+
 void CUI::DoPopupMenu(const SPopupMenuId *pID, int X, int Y, int Width, int Height, void *pContext, FPopupMenuFunction pfnFunc, const SPopupMenuProperties &Props)
 {
 	constexpr float Margin = SPopupMenu::POPUP_BORDER + SPopupMenu::POPUP_MARGIN;
