@@ -217,7 +217,7 @@ void CSpectator::OnRender()
 				if(!GameClient()->m_MultiViewActivated)
 					Spectate(m_SelectedSpectatorID);
 
-				if(GameClient()->m_MultiViewActivated && m_pClient->m_Teams.Team(m_SelectedSpectatorID) != GameClient()->m_MultiViewTeam)
+				if(GameClient()->m_MultiViewActivated && m_SelectedSpectatorID != MULTI_VIEW && m_pClient->m_Teams.Team(m_SelectedSpectatorID) != GameClient()->m_MultiViewTeam)
 				{
 					GameClient()->ResetMultiView();
 					Spectate(m_SelectedSpectatorID);
