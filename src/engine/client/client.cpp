@@ -4694,7 +4694,13 @@ int main(int argc, const char **argv)
 	{
 		bool RegisterFail = false;
 
-		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pEngine);
+		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pEngine, false);
+
+		CleanerFunctions.push([pEngine]() {
+			// Has to be before destroying graphics so that skin download thread can finish
+			delete pEngine;
+		});
+
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pConsole);
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pConfigManager);
 
