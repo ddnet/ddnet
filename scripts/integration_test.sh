@@ -182,7 +182,7 @@ $tool ../DDNet \
 
 if [ "$arg_valgrind_memcheck" == "1" ]; then
 	wait_for_fifo client1.fifo 180
-	sleep 30
+	sleep 40
 else
 	wait_for_fifo client1.fifo 50
 	sleep 1
@@ -206,7 +206,7 @@ $tool ../DDNet \
 
 if [ "$arg_valgrind_memcheck" == "1" ]; then
 	wait_for_fifo client2.fifo 180
-	sleep 30
+	sleep 40
 else
 	wait_for_fifo client2.fifo 50
 	sleep 2
@@ -255,7 +255,7 @@ sleep 1
 echo "[*] test map change"
 echo "rcon sv_map Tutorial" > client1.fifo
 if [ "$arg_valgrind_memcheck" == "1" ]; then
-	sleep 30
+	sleep 60
 else
 	sleep 15
 fi
@@ -264,9 +264,9 @@ echo "[*] play demos"
 echo "play demos/server.demo" > client1.fifo
 echo "play demos/client1.demo" > client2.fifo
 if [ "$arg_valgrind_memcheck" == "1" ]; then
-	sleep 20
+	sleep 40
 else
-	sleep 5
+	sleep 10
 fi
 
 # Kill all processes first so all outputs are fully written
