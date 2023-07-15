@@ -182,6 +182,8 @@ private:
 
 	void ProcessEvents();
 	void UpdatePositions();
+
+	int m_EditorMovementDelay = 5;
 	void UpdateEditorIngameMoved();
 
 	int m_PredictedTick;
@@ -207,6 +209,15 @@ private:
 	static void ConTuneZone(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConchainMenuMap(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+
+	// only used in OnPredict
+	vec2 m_aLastPos[MAX_CLIENTS] = {{0, 0}};
+	bool m_aLastActive[MAX_CLIENTS] = {false};
+
+	// only used in OnNewSnapshot
+	bool m_GameOver = false;
+	bool m_GamePaused = false;
+	int m_PrevLocalID = -1;
 
 public:
 	IKernel *Kernel() { return IInterface::Kernel(); }
@@ -718,7 +729,10 @@ private:
 
 	void UpdatePrediction();
 	void UpdateRenderedCharacters();
+
+	int m_aLastUpdateTick[MAX_CLIENTS] = {0};
 	void DetectStrongHook();
+
 	vec2 GetSmoothPos(int ClientID);
 
 	int m_PredictedDummyID;
