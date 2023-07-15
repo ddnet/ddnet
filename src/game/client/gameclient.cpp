@@ -1461,21 +1461,19 @@ void CGameClient::OnNewSnapshot()
 			}
 			else if(Item.m_Type == NETOBJTYPE_GAMEINFO)
 			{
-				static bool s_GameOver = false;
-				static bool s_GamePaused = false;
 				m_Snap.m_pGameInfoObj = (const CNetObj_GameInfo *)pData;
 				bool CurrentTickGameOver = (bool)(m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_GAMEOVER);
-				if(!s_GameOver && CurrentTickGameOver)
+				if(!m_GameOver && CurrentTickGameOver)
 					OnGameOver();
-				else if(s_GameOver && !CurrentTickGameOver)
+				else if(m_GameOver && !CurrentTickGameOver)
 					OnStartGame();
 				// Handle case that a new round is started (RoundStartTick changed)
 				// New round is usually started after `restart` on server
-				if(m_Snap.m_pGameInfoObj->m_RoundStartTick != m_LastRoundStartTick && !(CurrentTickGameOver || m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_PAUSED || s_GamePaused))
+				if(m_Snap.m_pGameInfoObj->m_RoundStartTick != m_LastRoundStartTick && !(CurrentTickGameOver || m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_PAUSED || m_GamePaused))
 					OnStartRound();
 				m_LastRoundStartTick = m_Snap.m_pGameInfoObj->m_RoundStartTick;
-				s_GameOver = CurrentTickGameOver;
-				s_GamePaused = (bool)(m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_PAUSED);
+				m_GameOver = CurrentTickGameOver;
+				m_GamePaused = (bool)(m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_PAUSED);
 			}
 			else if(Item.m_Type == NETOBJTYPE_GAMEINFOEX)
 			{
@@ -1794,10 +1792,9 @@ void CGameClient::OnNewSnapshot()
 				m_Effects.AirJump(Pos, Alpha);
 			}
 
-	static int PrevLocalID = -1;
-	if(m_Snap.m_LocalClientID != PrevLocalID)
-		m_PredictedDummyID = PrevLocalID;
-	PrevLocalID = m_Snap.m_LocalClientID;
+	if(m_Snap.m_LocalClientID != m_PrevLocalID)
+		m_PredictedDummyID = m_PrevLocalID;
+	m_PrevLocalID = m_Snap.m_LocalClientID;
 	m_IsDummySwapping = 0;
 
 	SnapCollectEntities(); // creates a collection that associates EntityEx snap items with the entities they belong to
@@ -1810,16 +1807,15 @@ void CGameClient::OnNewSnapshot()
 void CGameClient::UpdateEditorIngameMoved()
 {
 	const bool LocalCharacterMoved = m_Snap.m_pLocalCharacter && m_Snap.m_pLocalPrevCharacter && (m_Snap.m_pLocalCharacter->m_X != m_Snap.m_pLocalPrevCharacter->m_X || m_Snap.m_pLocalCharacter->m_Y != m_Snap.m_pLocalPrevCharacter->m_Y);
-	static int s_EditorMovementDelay = 5;
 	if(!g_Config.m_ClEditor)
 	{
-		s_EditorMovementDelay = 5;
+		m_EditorMovementDelay = 5;
 	}
-	else if(s_EditorMovementDelay > 0 && !LocalCharacterMoved)
+	else if(m_EditorMovementDelay > 0 && !LocalCharacterMoved)
 	{
-		--s_EditorMovementDelay;
+		--m_EditorMovementDelay;
 	}
-	if(s_EditorMovementDelay == 0 && LocalCharacterMoved)
+	if(m_EditorMovementDelay == 0 && LocalCharacterMoved)
 	{
 		Editor()->OnIngameMoved();
 	}
@@ -1967,9 +1963,6 @@ void CGameClient::OnPredict()
 	}
 
 	// detect mispredictions of other players and make corrections smoother when possible
-	static vec2 s_aLastPos[MAX_CLIENTS] = {{0, 0}};
-	static bool s_aLastActive[MAX_CLIENTS] = {false};
-
 	if(g_Config.m_ClAntiPingSmooth && Predict() && AntiPingPlayers() && m_NewTick && absolute(m_PredictedTick - Client()->PredGameTick(g_Config.m_ClDummy)) <= 1 && absolute(Client()->GameTick(g_Config.m_ClDummy) - Client()->PrevGameTick(g_Config.m_ClDummy)) <= 2)
 	{
 		int PredTime = clamp(Client()->GetPredictionTime(), 0, 800);
@@ -1978,10 +1971,10 @@ void CGameClient::OnPredict()
 
 		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
-			if(!m_Snap.m_aCharacters[i].m_Active || i == m_Snap.m_LocalClientID || !s_aLastActive[i])
+			if(!m_Snap.m_aCharacters[i].m_Active || i == m_Snap.m_LocalClientID || !m_aLastActive[i])
 				continue;
 			vec2 NewPos = (m_PredictedTick == Client()->PredGameTick(g_Config.m_ClDummy)) ? m_aClients[i].m_Predicted.m_Pos : m_aClients[i].m_PrevPredicted.m_Pos;
-			vec2 PredErr = (s_aLastPos[i] - NewPos) / (float)minimum(Client()->GetPredictionTime(), 200);
+			vec2 PredErr = (m_aLastPos[i] - NewPos) / (float)minimum(Client()->GetPredictionTime(), 200);
 			if(in_range(length(PredErr), 0.05f, 5.f))
 			{
 				vec2 PredPos = mix(m_aClients[i].m_PrevPredicted.m_Pos, m_aClients[i].m_Predicted.m_Pos, Client()->PredIntraGameTick(g_Config.m_ClDummy));
@@ -2030,11 +2023,11 @@ void CGameClient::OnPredict()
 	{
 		if(m_Snap.m_aCharacters[i].m_Active)
 		{
-			s_aLastPos[i] = m_aClients[i].m_Predicted.m_Pos;
-			s_aLastActive[i] = true;
+			m_aLastPos[i] = m_aClients[i].m_Predicted.m_Pos;
+			m_aLastActive[i] = true;
 		}
 		else
-			s_aLastActive[i] = false;
+			m_aLastActive[i] = false;
 	}
 
 	if(g_Config.m_Debug && g_Config.m_ClPredict && m_PredictedTick == Client()->PredGameTick(g_Config.m_ClDummy))
@@ -2605,7 +2598,6 @@ void CGameClient::UpdateRenderedCharacters()
 
 void CGameClient::DetectStrongHook()
 {
-	static int s_aLastUpdateTick[MAX_CLIENTS] = {0};
 	// attempt to detect strong/weak between players
 	for(int FromPlayer = 0; FromPlayer < MAX_CLIENTS; FromPlayer++)
 	{
@@ -2614,7 +2606,7 @@ void CGameClient::DetectStrongHook()
 		int ToPlayer = m_Snap.m_aCharacters[FromPlayer].m_Prev.m_HookedPlayer;
 		if(ToPlayer < 0 || ToPlayer >= MAX_CLIENTS || !m_Snap.m_aCharacters[ToPlayer].m_Active || ToPlayer != m_Snap.m_aCharacters[FromPlayer].m_Cur.m_HookedPlayer)
 			continue;
-		if(absolute(minimum(s_aLastUpdateTick[ToPlayer], s_aLastUpdateTick[FromPlayer]) - Client()->GameTick(g_Config.m_ClDummy)) < SERVER_TICK_SPEED / 4)
+		if(absolute(minimum(m_aLastUpdateTick[ToPlayer], m_aLastUpdateTick[FromPlayer]) - Client()->GameTick(g_Config.m_ClDummy)) < SERVER_TICK_SPEED / 4)
 			continue;
 		if(m_Snap.m_aCharacters[FromPlayer].m_Prev.m_Direction != m_Snap.m_aCharacters[FromPlayer].m_Cur.m_Direction || m_Snap.m_aCharacters[ToPlayer].m_Prev.m_Direction != m_Snap.m_aCharacters[ToPlayer].m_Cur.m_Direction)
 			continue;
@@ -2624,7 +2616,7 @@ void CGameClient::DetectStrongHook()
 		if(!pFromCharWorld || !pToCharWorld)
 			continue;
 
-		s_aLastUpdateTick[ToPlayer] = s_aLastUpdateTick[FromPlayer] = Client()->GameTick(g_Config.m_ClDummy);
+		m_aLastUpdateTick[ToPlayer] = m_aLastUpdateTick[FromPlayer] = Client()->GameTick(g_Config.m_ClDummy);
 
 		float aPredictErr[2];
 		CCharacterCore ToCharCur;
