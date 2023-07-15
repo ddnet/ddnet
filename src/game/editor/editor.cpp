@@ -7348,10 +7348,17 @@ void CEditor::RenderSavingIndicator(CUIRect View)
 	if(m_WriterFinishJobs.empty())
 		return;
 
+	const char *pText = "Saving…";
+	const float FontSize = 24.0f;
+
 	UI()->MapScreen();
-	CUIRect Label;
-	View.Margin(20.0f, &Label);
-	UI()->DoLabel(&Label, "Saving…", 24.0f, TEXTALIGN_BR);
+	CUIRect Label, Spinner;
+	View.Margin(20.0f, &View);
+	View.HSplitBottom(FontSize, nullptr, &View);
+	View.VSplitRight(TextRender()->TextWidth(FontSize, pText) + 2.0f, &Spinner, &Label);
+	Spinner.VSplitRight(Spinner.h, nullptr, &Spinner);
+	UI()->DoLabel(&Label, pText, FontSize, TEXTALIGN_MR);
+	UI()->RenderProgressSpinner(Spinner.Center(), 8.0f);
 }
 
 void CEditor::FreeDynamicPopupMenus()
