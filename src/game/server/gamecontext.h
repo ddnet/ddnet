@@ -475,8 +475,8 @@ private:
 
 	enum
 	{
-		MAX_LOG_SECONDS = 240,
-		MAX_LOGS = 256,
+		MAX_LOG_SECONDS = 600,
+		MAX_LOGS = 512,
 	};
 	struct CLog
 	{
@@ -488,8 +488,7 @@ private:
 		char m_aClientAddrStr[NETADDR_MAXSTRSIZE];
 	};
 	CLog m_aLogs[MAX_LOGS];
-	int m_FirstLog;
-	int m_LastLog;
+	int m_LatestLog;
 
 	void LogEvent(const char *Description, int ClientID);
 
