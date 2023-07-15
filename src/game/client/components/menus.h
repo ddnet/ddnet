@@ -449,6 +449,7 @@ protected:
 
 	// found in menus_browser.cpp
 	int m_SelectedIndex;
+	bool m_ServerBrowserShouldRevealSelection;
 	void RenderServerbrowserServerList(CUIRect View);
 	void Connect(const char *pAddress);
 	void PopupConfirmSwitchServer();

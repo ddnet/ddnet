@@ -188,12 +188,10 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	s_ListBox.SetActive(!UI()->IsPopupOpen());
 	s_ListBox.DoStart(ms_ListheaderHeight, NumServers, 1, 3, -1, &View, false);
 
-	int NumPlayers = 0;
-	static int s_PrevSelectedIndex = -1;
-	if(s_PrevSelectedIndex != m_SelectedIndex)
+	if(m_ServerBrowserShouldRevealSelection)
 	{
 		s_ListBox.ScrollToSelected();
-		s_PrevSelectedIndex = m_SelectedIndex;
+		m_ServerBrowserShouldRevealSelection = false;
 	}
 	m_SelectedIndex = -1;
 
@@ -212,6 +210,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		TextRender()->SetCurFont(nullptr);
 	};
 
+	int NumPlayers = 0;
 	for(int i = 0; i < NumServers; i++)
 	{
 		const CServerInfo *pItem = ServerBrowser()->SortedGet(i);
@@ -430,6 +429,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			if(pItem)
 			{
 				str_copy(g_Config.m_UiServerAddress, pItem->m_aAddress);
+				m_ServerBrowserShouldRevealSelection = true;
 			}
 		}
 	}
@@ -553,7 +553,8 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		UI()->DoLabel(&ServerAddr, Localize("Server address:"), 14.0f, TEXTALIGN_ML);
 		ServerAddr.VSplitLeft(SearchExcludeAddrStrMax + 5.0f + ExcludeSearchIconMax + 5.0f, NULL, &ServerAddr);
 		static CLineInput s_ServerAddressInput(g_Config.m_UiServerAddress, sizeof(g_Config.m_UiServerAddress));
-		UI()->DoClearableEditBox(&s_ServerAddressInput, &ServerAddr, 12.0f);
+		if(UI()->DoClearableEditBox(&s_ServerAddressInput, &ServerAddr, 12.0f))
+			m_ServerBrowserShouldRevealSelection = true;
 
 		// button area
 		CUIRect ButtonRefresh, ButtonConnect;
@@ -1575,6 +1576,7 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 				if(ButtonResult && Friend.ServerInfo())
 				{
 					str_copy(g_Config.m_UiServerAddress, Friend.ServerInfo()->m_aAddress);
+					m_ServerBrowserShouldRevealSelection = true;
 					if(Input()->MouseDoubleClick())
 					{
 						Connect(g_Config.m_UiServerAddress);
