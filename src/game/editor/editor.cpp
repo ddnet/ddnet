@@ -6027,6 +6027,7 @@ void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEd
 					str_copy(Setting.m_aCommand, m_SettingsCommandInput.GetString());
 					m_Map.m_vSettings.push_back(Setting);
 					s_CommandSelectedIndex = m_Map.m_vSettings.size() - 1;
+					m_Map.OnModify();
 				}
 			}
 			UI()->SetActiveItem(&m_SettingsCommandInput);
@@ -6058,6 +6059,7 @@ void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEd
 					{
 						str_copy(m_Map.m_vSettings[s_CommandSelectedIndex].m_aCommand, m_SettingsCommandInput.GetString());
 					}
+					m_Map.OnModify();
 				}
 				UI()->SetActiveItem(&m_SettingsCommandInput);
 			}
@@ -6073,6 +6075,7 @@ void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEd
 				if(s_CommandSelectedIndex >= 0)
 					m_SettingsCommandInput.Set(m_Map.m_vSettings[s_CommandSelectedIndex].m_aCommand);
 				UI()->SetActiveItem(&m_SettingsCommandInput);
+				m_Map.OnModify();
 			}
 
 			ToolBar.VSplitRight(25.0f, &ToolBar, &Button);
@@ -6082,6 +6085,7 @@ void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEd
 			{
 				std::swap(m_Map.m_vSettings[s_CommandSelectedIndex], m_Map.m_vSettings[s_CommandSelectedIndex + 1]);
 				s_CommandSelectedIndex++;
+				m_Map.OnModify();
 			}
 
 			ToolBar.VSplitRight(25.0f, &ToolBar, &Button);
@@ -6091,6 +6095,7 @@ void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEd
 			{
 				std::swap(m_Map.m_vSettings[s_CommandSelectedIndex], m_Map.m_vSettings[s_CommandSelectedIndex - 1]);
 				s_CommandSelectedIndex--;
+				m_Map.OnModify();
 			}
 		}
 	}
