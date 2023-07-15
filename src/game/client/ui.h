@@ -557,6 +557,9 @@ public:
 		char m_aMessage[1024];
 		EConfirmationResult m_Result;
 
+		CButtonContainer m_CancelButton;
+		CButtonContainer m_ConfirmButton;
+
 		SConfirmPopupContext();
 		void Reset();
 		void YesNoButtons();
