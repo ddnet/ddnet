@@ -770,14 +770,19 @@ void CClient::Connect(const char *pAddress, const char *pPassword)
 	while((pNextAddr = str_next_token(pNextAddr, ",", aBuffer, sizeof(aBuffer))))
 	{
 		NETADDR NextAddr;
-		if(net_host_lookup(aBuffer, &NextAddr, m_aNetClient[CONN_MAIN].NetType()) != 0)
+		char aHost[128];
+		int url = net_addr_from_url(&NextAddr, aBuffer, aHost, sizeof(aHost));
+		if(url > 0)
+			str_copy(aHost, aBuffer);
+
+		if(net_host_lookup(aHost, &NextAddr, m_aNetClient[CONN_MAIN].NetType()) != 0)
 		{
-			log_error("client", "could not find address of %s", aBuffer);
+			log_error("client", "could not find address of %s", aHost);
 			continue;
 		}
 		if(NumConnectAddrs == (int)std::size(aConnectAddrs))
 		{
-			log_warn("client", "too many connect addresses, ignoring %s", aBuffer);
+			log_warn("client", "too many connect addresses, ignoring %s", aHost);
 			continue;
 		}
 		if(NextAddr.port == 0)

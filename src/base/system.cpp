@@ -1344,6 +1344,48 @@ static int parse_uint16(unsigned short *out, const char **str)
 	return 0;
 }
 
+int net_addr_from_url(NETADDR *addr, const char *string, char *host_buf, size_t host_buf_size)
+{
+	char host[128];
+	int length;
+	int start = 0;
+	int end;
+	int failure;
+	const char *str = str_startswith(string, "tw-0.6+udp://");
+	if(!str)
+		return 1;
+
+	mem_zero(addr, sizeof(*addr));
+
+	length = str_length(str);
+	end = length;
+	for(int i = 0; i < length; i++)
+	{
+		if(str[i] == '@')
+		{
+			if(start != 0)
+			{
+				// Two at signs.
+				return true;
+			}
+			start = i + 1;
+		}
+		else if(str[i] == '/' || str[i] == '?' || str[i] == '#')
+		{
+			end = i;
+			break;
+		}
+	}
+	str_truncate(host, sizeof(host), str + start, end - start);
+	if(host_buf)
+		str_copy(host_buf, host, host_buf_size);
+
+	if((failure = net_addr_from_str(addr, host)))
+		return failure;
+
+	return failure;
+}
+
 int net_addr_from_str(NETADDR *addr, const char *string)
 {
 	const char *str = string;
