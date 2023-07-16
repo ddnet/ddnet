@@ -243,7 +243,7 @@ void CUI::DebugRender()
 	MapScreen();
 
 	char aBuf[128];
-	str_format(aBuf, sizeof(aBuf), "hot=%p nexthot=%p active=%p lastactive=%p", HotItem(), NextHotItem(), ActiveItem(), LastActiveItem());
+	str_format(aBuf, sizeof(aBuf), "hot=%p nexthot=%p active=%p lastactive=%p", HotItem(), NextHotItem(), ActiveItem(), m_pLastActiveItem);
 	TextRender()->Text(2.0f, Screen()->h - 12.0f, 10.0f, aBuf);
 }
 
@@ -749,7 +749,7 @@ void CUI::DoLabelStreamed(CUIElement::SUIElementRect &RectEl, const CUIRect *pRe
 bool CUI::DoEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize, int Corners)
 {
 	const bool Inside = MouseHovered(pRect);
-	const bool Active = LastActiveItem() == pLineInput;
+	const bool Active = m_pLastActiveItem == pLineInput;
 	const bool Changed = pLineInput->WasChanged();
 
 	const float VSpacing = 2.0f;
