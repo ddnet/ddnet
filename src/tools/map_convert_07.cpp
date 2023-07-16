@@ -96,24 +96,25 @@ bool CheckImageDimensions(void *pLayerItem, int LayerType, const char *pFilename
 	return false;
 }
 
-void *ReplaceImageItem(void *pItem, int Type, CMapItemImage *pNewImgItem)
+void *ReplaceImageItem(CMapItemImage *pImgItem, CMapItemImage *pNewImgItem)
 {
-	if(Type != MAPITEMTYPE_IMAGE)
-		return pItem;
-
-	CMapItemImage *pImgItem = (CMapItemImage *)pItem;
-
 	if(!pImgItem->m_External)
-		return pItem;
+		return pImgItem;
 
 	char *pName = (char *)g_DataReader.GetData(pImgItem->m_ImageName);
 	dbg_msg("map_convert_07", "embedding image '%s'", pName);
 
 	CImageInfo ImgInfo;
-	char aStr[64];
+	char aStr[IO_MAX_PATH_LENGTH];
 	str_format(aStr, sizeof(aStr), "data/mapres/%s.png", pName);
 	if(!LoadPNG(&ImgInfo, aStr))
-		return pItem; // keep as external if we don't have a mapres to replace
+		return pImgItem; // keep as external if we don't have a mapres to replace
+
+	if(ImgInfo.m_Format != CImageInfo::FORMAT_RGBA)
+	{
+		dbg_msg("map_convert_07", "image '%s' is not in RGBA format", aStr);
+		return pImgItem;
+	}
 
 	*pNewImgItem = *pImgItem;
 
@@ -217,9 +218,14 @@ int main(int argc, const char **argv)
 		Success &= CheckImageDimensions(pItem, Type, pSourceFileName);
 
 		CMapItemImage NewImageItem;
-		pItem = ReplaceImageItem(pItem, Type, &NewImageItem);
-		if(!pItem)
-			return -1;
+		if(Type == MAPITEMTYPE_IMAGE)
+		{
+			pItem = ReplaceImageItem((CMapItemImage *)pItem, &NewImageItem);
+			if(!pItem)
+				return -1;
+			Size = sizeof(CMapItemImage);
+			NewImageItem.m_Version = CMapItemImage::CURRENT_VERSION;
+		}
 		g_DataWriter.AddItem(Type, ID, Size, pItem);
 	}
 

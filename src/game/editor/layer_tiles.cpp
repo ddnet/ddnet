@@ -4,6 +4,7 @@
 
 #include <engine/client.h>
 #include <engine/graphics.h>
+#include <engine/shared/map.h>
 #include <engine/textrender.h>
 
 #include "editor.h"
@@ -95,6 +96,15 @@ void CLayerTiles::PrepareForSave()
 			for(int x = 0; x < m_Width; x++)
 				m_pTiles[y * m_Width + x].m_Flags |= m_pEditor->m_Map.m_vpImages[m_Image]->m_aTileFlags[m_pTiles[y * m_Width + x].m_Index];
 	}
+}
+
+void CLayerTiles::ExtractTiles(int TilemapItemVersion, const CTile *pSavedTiles, size_t SavedTilesSize)
+{
+	const size_t DestSize = (size_t)m_Width * m_Height;
+	if(TilemapItemVersion >= CMapItemLayerTilemap::TILE_SKIP_MIN_VERSION)
+		CMap::ExtractTiles(m_pTiles, DestSize, pSavedTiles, SavedTilesSize);
+	else if(SavedTilesSize >= DestSize)
+		mem_copy(m_pTiles, pSavedTiles, DestSize * sizeof(CTile));
 }
 
 void CLayerTiles::MakePalette()
@@ -920,7 +930,7 @@ CUI::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 		{
 			for(; Index >= -1 && Index < (int)m_pEditor->m_Map.m_vpEnvelopes.size(); Index += Step)
 			{
-				if(Index == -1 || m_pEditor->m_Map.m_vpEnvelopes[Index]->m_Channels == 4)
+				if(Index == -1 || m_pEditor->m_Map.m_vpEnvelopes[Index]->GetChannels() == 4)
 				{
 					m_ColorEnv = Index;
 					break;

@@ -936,7 +936,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupQuad(void *pContext, CUIRect View, b
 			{
 				for(; Index >= -1 && Index < (int)pEditor->m_Map.m_vpEnvelopes.size(); Index += StepDirection)
 				{
-					if(Index == -1 || pEditor->m_Map.m_vpEnvelopes[Index]->m_Channels == 3)
+					if(Index == -1 || pEditor->m_Map.m_vpEnvelopes[Index]->GetChannels() == 3)
 					{
 						pQuad->m_PosEnv = Index;
 						break;
@@ -956,7 +956,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupQuad(void *pContext, CUIRect View, b
 			{
 				for(; Index >= -1 && Index < (int)pEditor->m_Map.m_vpEnvelopes.size(); Index += StepDirection)
 				{
-					if(Index == -1 || pEditor->m_Map.m_vpEnvelopes[Index]->m_Channels == 4)
+					if(Index == -1 || pEditor->m_Map.m_vpEnvelopes[Index]->GetChannels() == 4)
 					{
 						pQuad->m_ColorEnv = Index;
 						break;
@@ -1095,7 +1095,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupSource(void *pContext, CUIRect View,
 		const int StepDirection = Index < pSource->m_PosEnv ? -1 : 1;
 		for(; Index >= -1 && Index < (int)pEditor->m_Map.m_vpEnvelopes.size(); Index += StepDirection)
 		{
-			if(Index == -1 || pEditor->m_Map.m_vpEnvelopes[Index]->m_Channels == 3)
+			if(Index == -1 || pEditor->m_Map.m_vpEnvelopes[Index]->GetChannels() == 3)
 			{
 				pSource->m_PosEnv = Index;
 				break;
@@ -1112,7 +1112,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupSource(void *pContext, CUIRect View,
 		const int StepDirection = Index < pSource->m_SoundEnv ? -1 : 1;
 		for(; Index >= -1 && Index < (int)pEditor->m_Map.m_vpEnvelopes.size(); Index += StepDirection)
 		{
-			if(Index == -1 || pEditor->m_Map.m_vpEnvelopes[Index]->m_Channels == 1)
+			if(Index == -1 || pEditor->m_Map.m_vpEnvelopes[Index]->GetChannels() == 1)
 			{
 				pSource->m_SoundEnv = Index;
 				break;

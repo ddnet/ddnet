@@ -67,16 +67,12 @@ int LoadPNG(CImageInfo *pImg, const char *pFilename)
 	return 1;
 }
 
-void *ReplaceImageItem(void *pItem, int Type, const char *pImgName, const char *pImgFile, CMapItemImage *pNewImgItem)
+void *ReplaceImageItem(CMapItemImage *pImgItem, const char *pImgName, const char *pImgFile, CMapItemImage *pNewImgItem)
 {
-	if(Type != MAPITEMTYPE_IMAGE)
-		return pItem;
-
-	CMapItemImage *pImgItem = (CMapItemImage *)pItem;
 	char *pName = (char *)g_DataReader.GetData(pImgItem->m_ImageName);
 
 	if(str_comp(pImgName, pName) != 0)
-		return pItem;
+		return pImgItem;
 
 	dbg_msg("map_replace_image", "found image '%s'", pImgName);
 
@@ -84,17 +80,22 @@ void *ReplaceImageItem(void *pItem, int Type, const char *pImgName, const char *
 	if(!LoadPNG(&ImgInfo, pImgFile))
 		return 0;
 
+	if(ImgInfo.m_Format != CImageInfo::FORMAT_RGBA)
+	{
+		dbg_msg("map_replace_image", "image '%s' is not in RGBA format", pImgName);
+		return 0;
+	}
+
 	*pNewImgItem = *pImgItem;
 
 	pNewImgItem->m_Width = ImgInfo.m_Width;
 	pNewImgItem->m_Height = ImgInfo.m_Height;
-	int PixelSize = ImgInfo.m_Format == CImageInfo::FORMAT_RGB ? 3 : 4;
 
 	g_NewNameID = pImgItem->m_ImageName;
 	IStorage::StripPathAndExtension(pImgFile, g_aNewName, sizeof(g_aNewName));
 	g_NewDataID = pImgItem->m_ImageData;
 	g_pNewData = ImgInfo.m_pData;
-	g_NewDataSize = ImgInfo.m_Width * ImgInfo.m_Height * PixelSize;
+	g_NewDataSize = ImgInfo.m_Width * ImgInfo.m_Height * 4;
 
 	return (void *)pNewImgItem;
 }
@@ -148,12 +149,18 @@ int main(int argc, const char **argv)
 		if(Type == ITEMTYPE_EX)
 			continue;
 
-		CMapItemImage NewImageItem;
-		pItem = ReplaceImageItem(pItem, Type, pImageName, pImageFile, &NewImageItem);
-		if(!pItem)
-			return -1;
-
 		int Size = g_DataReader.GetItemSize(Index);
+
+		CMapItemImage NewImageItem;
+		if(Type == MAPITEMTYPE_IMAGE)
+		{
+			pItem = ReplaceImageItem((CMapItemImage *)pItem, pImageName, pImageFile, &NewImageItem);
+			if(!pItem)
+				return -1;
+			Size = sizeof(CMapItemImage);
+			NewImageItem.m_Version = CMapItemImage::CURRENT_VERSION;
+		}
+
 		Writer.AddItem(Type, ID, Size, pItem);
 	}
 
