@@ -769,7 +769,8 @@ public:
 
 class CDataFileWriterFinishJob : public IJob
 {
-	char m_aFileName[IO_MAX_PATH_LENGTH];
+	char m_aRealFileName[IO_MAX_PATH_LENGTH];
+	char m_aTempFileName[IO_MAX_PATH_LENGTH];
 	CDataFileWriter m_Writer;
 
 	void Run() override
@@ -778,13 +779,15 @@ class CDataFileWriterFinishJob : public IJob
 	}
 
 public:
-	CDataFileWriterFinishJob(const char *pFileName, CDataFileWriter &&Writer) :
+	CDataFileWriterFinishJob(const char *pRealFileName, const char *pTempFileName, CDataFileWriter &&Writer) :
 		m_Writer(std::move(Writer))
 	{
-		str_copy(m_aFileName, pFileName);
+		str_copy(m_aRealFileName, pRealFileName);
+		str_copy(m_aTempFileName, pTempFileName);
 	}
 
-	const char *GetFileName() const { return m_aFileName; }
+	const char *GetRealFileName() const { return m_aRealFileName; }
+	const char *GetTempFileName() const { return m_aTempFileName; }
 };
 
 class CEditor : public IEditor

@@ -34,7 +34,7 @@ struct CSoundSource_DEPRECATED
 bool CEditor::Save(const char *pFilename)
 {
 	// Check if file with this name is already being saved at the moment
-	if(std::any_of(std::begin(m_WriterFinishJobs), std::end(m_WriterFinishJobs), [pFilename](const std::shared_ptr<CDataFileWriterFinishJob> &Job) { return str_comp(pFilename, Job->GetFileName()) == 0; }))
+	if(std::any_of(std::begin(m_WriterFinishJobs), std::end(m_WriterFinishJobs), [pFilename](const std::shared_ptr<CDataFileWriterFinishJob> &Job) { return str_comp(pFilename, Job->GetRealFileName()) == 0; }))
 		return false;
 
 	return m_Map.Save(pFilename);
@@ -42,13 +42,15 @@ bool CEditor::Save(const char *pFilename)
 
 bool CEditorMap::Save(const char *pFileName)
 {
+	char aFileNameTmp[IO_MAX_PATH_LENGTH];
+	str_format(aFileNameTmp, sizeof(aFileNameTmp), "%s.%d.tmp", pFileName, pid());
 	char aBuf[IO_MAX_PATH_LENGTH + 64];
-	str_format(aBuf, sizeof(aBuf), "saving to '%s'...", pFileName);
+	str_format(aBuf, sizeof(aBuf), "saving to '%s'...", aFileNameTmp);
 	m_pEditor->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "editor", aBuf);
-	CDataFileWriter df;
-	if(!df.Open(m_pEditor->Storage(), pFileName))
+	CDataFileWriter Writer;
+	if(!Writer.Open(m_pEditor->Storage(), aFileNameTmp))
 	{
-		str_format(aBuf, sizeof(aBuf), "failed to open file '%s'...", pFileName);
+		str_format(aBuf, sizeof(aBuf), "failed to open file '%s'...", aFileNameTmp);
 		m_pEditor->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "editor", aBuf);
 		return false;
 	}
@@ -57,7 +59,7 @@ bool CEditorMap::Save(const char *pFileName)
 	{
 		CMapItemVersion Item;
 		Item.m_Version = CMapItemVersion::CURRENT_VERSION;
-		df.AddItem(MAPITEMTYPE_VERSION, 0, sizeof(Item), &Item);
+		Writer.AddItem(MAPITEMTYPE_VERSION, 0, sizeof(Item), &Item);
 	}
 
 	// save map info
@@ -66,19 +68,19 @@ bool CEditorMap::Save(const char *pFileName)
 		Item.m_Version = 1;
 
 		if(m_MapInfo.m_aAuthor[0])
-			Item.m_Author = df.AddData(str_length(m_MapInfo.m_aAuthor) + 1, m_MapInfo.m_aAuthor);
+			Item.m_Author = Writer.AddData(str_length(m_MapInfo.m_aAuthor) + 1, m_MapInfo.m_aAuthor);
 		else
 			Item.m_Author = -1;
 		if(m_MapInfo.m_aVersion[0])
-			Item.m_MapVersion = df.AddData(str_length(m_MapInfo.m_aVersion) + 1, m_MapInfo.m_aVersion);
+			Item.m_MapVersion = Writer.AddData(str_length(m_MapInfo.m_aVersion) + 1, m_MapInfo.m_aVersion);
 		else
 			Item.m_MapVersion = -1;
 		if(m_MapInfo.m_aCredits[0])
-			Item.m_Credits = df.AddData(str_length(m_MapInfo.m_aCredits) + 1, m_MapInfo.m_aCredits);
+			Item.m_Credits = Writer.AddData(str_length(m_MapInfo.m_aCredits) + 1, m_MapInfo.m_aCredits);
 		else
 			Item.m_Credits = -1;
 		if(m_MapInfo.m_aLicense[0])
-			Item.m_License = df.AddData(str_length(m_MapInfo.m_aLicense) + 1, m_MapInfo.m_aLicense);
+			Item.m_License = Writer.AddData(str_length(m_MapInfo.m_aLicense) + 1, m_MapInfo.m_aLicense);
 		else
 			Item.m_License = -1;
 
@@ -99,11 +101,11 @@ bool CEditorMap::Save(const char *pFileName)
 				mem_copy(pNext, Setting.m_aCommand, Length);
 				pNext += Length;
 			}
-			Item.m_Settings = df.AddData(Size, pSettings);
+			Item.m_Settings = Writer.AddData(Size, pSettings);
 			free(pSettings);
 		}
 
-		df.AddItem(MAPITEMTYPE_INFO, 0, sizeof(Item), &Item);
+		Writer.AddItem(MAPITEMTYPE_INFO, 0, sizeof(Item), &Item);
 	}
 
 	// save images
@@ -121,7 +123,7 @@ bool CEditorMap::Save(const char *pFileName)
 		Item.m_Width = pImg->m_Width;
 		Item.m_Height = pImg->m_Height;
 		Item.m_External = pImg->m_External;
-		Item.m_ImageName = df.AddData(str_length(pImg->m_aName) + 1, pImg->m_aName);
+		Item.m_ImageName = Writer.AddData(str_length(pImg->m_aName) + 1, pImg->m_aName);
 		if(pImg->m_External)
 		{
 			Item.m_ImageData = -1;
@@ -140,15 +142,15 @@ bool CEditorMap::Save(const char *pFileName)
 					pDataRGBA[j * 4 + 2] = pDataRGB[j * 3 + 2];
 					pDataRGBA[j * 4 + 3] = 255;
 				}
-				Item.m_ImageData = df.AddData(Item.m_Width * Item.m_Height * 4, pDataRGBA);
+				Item.m_ImageData = Writer.AddData(Item.m_Width * Item.m_Height * 4, pDataRGBA);
 				free(pDataRGBA);
 			}
 			else
 			{
-				Item.m_ImageData = df.AddData(Item.m_Width * Item.m_Height * 4, pImg->m_pData);
+				Item.m_ImageData = Writer.AddData(Item.m_Width * Item.m_Height * 4, pImg->m_pData);
 			}
 		}
-		df.AddItem(MAPITEMTYPE_IMAGE, i, sizeof(Item), &Item);
+		Writer.AddItem(MAPITEMTYPE_IMAGE, i, sizeof(Item), &Item);
 	}
 
 	// save sounds
@@ -160,11 +162,11 @@ bool CEditorMap::Save(const char *pFileName)
 		Item.m_Version = 1;
 
 		Item.m_External = 0;
-		Item.m_SoundName = df.AddData(str_length(pSound->m_aName) + 1, pSound->m_aName);
-		Item.m_SoundData = df.AddData(pSound->m_DataSize, pSound->m_pData);
+		Item.m_SoundName = Writer.AddData(str_length(pSound->m_aName) + 1, pSound->m_aName);
+		Item.m_SoundData = Writer.AddData(pSound->m_DataSize, pSound->m_pData);
 		Item.m_SoundDataSize = pSound->m_DataSize;
 
-		df.AddItem(MAPITEMTYPE_SOUND, i, sizeof(Item), &Item);
+		Writer.AddItem(MAPITEMTYPE_SOUND, i, sizeof(Item), &Item);
 	}
 
 	// save layers
@@ -243,27 +245,27 @@ bool CEditorMap::Save(const char *pFileName)
 				{
 					CTile *pEmptyTiles = (CTile *)calloc((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height, sizeof(CTile));
 					mem_zero(pEmptyTiles, (size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CTile));
-					Item.m_Data = df.AddData((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CTile), pEmptyTiles);
+					Item.m_Data = Writer.AddData((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CTile), pEmptyTiles);
 					free(pEmptyTiles);
 
 					if(pLayerTiles->m_Tele)
-						Item.m_Tele = df.AddData((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CTeleTile), ((CLayerTele *)pLayerTiles)->m_pTeleTile);
+						Item.m_Tele = Writer.AddData((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CTeleTile), ((CLayerTele *)pLayerTiles)->m_pTeleTile);
 					else if(pLayerTiles->m_Speedup)
-						Item.m_Speedup = df.AddData((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CSpeedupTile), ((CLayerSpeedup *)pLayerTiles)->m_pSpeedupTile);
+						Item.m_Speedup = Writer.AddData((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CSpeedupTile), ((CLayerSpeedup *)pLayerTiles)->m_pSpeedupTile);
 					else if(pLayerTiles->m_Front)
-						Item.m_Front = df.AddData((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CTile), pLayerTiles->m_pTiles);
+						Item.m_Front = Writer.AddData((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CTile), pLayerTiles->m_pTiles);
 					else if(pLayerTiles->m_Switch)
-						Item.m_Switch = df.AddData((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CSwitchTile), ((CLayerSwitch *)pLayerTiles)->m_pSwitchTile);
+						Item.m_Switch = Writer.AddData((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CSwitchTile), ((CLayerSwitch *)pLayerTiles)->m_pSwitchTile);
 					else if(pLayerTiles->m_Tune)
-						Item.m_Tune = df.AddData((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CTuneTile), ((CLayerTune *)pLayerTiles)->m_pTuneTile);
+						Item.m_Tune = Writer.AddData((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CTuneTile), ((CLayerTune *)pLayerTiles)->m_pTuneTile);
 				}
 				else
-					Item.m_Data = df.AddData((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CTile), pLayerTiles->m_pTiles);
+					Item.m_Data = Writer.AddData((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CTile), pLayerTiles->m_pTiles);
 
 				// save layer name
 				StrToInts(Item.m_aName, sizeof(Item.m_aName) / sizeof(int), pLayerTiles->m_aName);
 
-				df.AddItem(MAPITEMTYPE_LAYER, LayerCount, sizeof(Item), &Item);
+				Writer.AddItem(MAPITEMTYPE_LAYER, LayerCount, sizeof(Item), &Item);
 
 				// save auto mapper of each tile layer (not physics layer)
 				if(!Item.m_Flags)
@@ -278,7 +280,7 @@ bool CEditorMap::Save(const char *pFileName)
 					if(pLayerTiles->m_AutoAutoMap)
 						ItemAutomapper.m_Flags |= CMapItemAutoMapperConfig::FLAG_AUTOMATIC;
 
-					df.AddItem(MAPITEMTYPE_AUTOMAPPER_CONFIG, AutomapperCount, sizeof(ItemAutomapper), &ItemAutomapper);
+					Writer.AddItem(MAPITEMTYPE_AUTOMAPPER_CONFIG, AutomapperCount, sizeof(ItemAutomapper), &ItemAutomapper);
 					AutomapperCount++;
 				}
 
@@ -300,12 +302,12 @@ bool CEditorMap::Save(const char *pFileName)
 
 					// add the data
 					Item.m_NumQuads = pLayerQuads->m_vQuads.size();
-					Item.m_Data = df.AddDataSwapped(pLayerQuads->m_vQuads.size() * sizeof(CQuad), pLayerQuads->m_vQuads.data());
+					Item.m_Data = Writer.AddDataSwapped(pLayerQuads->m_vQuads.size() * sizeof(CQuad), pLayerQuads->m_vQuads.data());
 
 					// save layer name
 					StrToInts(Item.m_aName, sizeof(Item.m_aName) / sizeof(int), pLayerQuads->m_aName);
 
-					df.AddItem(MAPITEMTYPE_LAYER, LayerCount, sizeof(Item), &Item);
+					Writer.AddItem(MAPITEMTYPE_LAYER, LayerCount, sizeof(Item), &Item);
 
 					// clean up
 					//mem_free(quads);
@@ -329,20 +331,20 @@ bool CEditorMap::Save(const char *pFileName)
 
 					// add the data
 					Item.m_NumSources = pLayerSounds->m_vSources.size();
-					Item.m_Data = df.AddDataSwapped(pLayerSounds->m_vSources.size() * sizeof(CSoundSource), pLayerSounds->m_vSources.data());
+					Item.m_Data = Writer.AddDataSwapped(pLayerSounds->m_vSources.size() * sizeof(CSoundSource), pLayerSounds->m_vSources.data());
 
 					// save layer name
 					StrToInts(Item.m_aName, sizeof(Item.m_aName) / sizeof(int), pLayerSounds->m_aName);
 
-					df.AddItem(MAPITEMTYPE_LAYER, LayerCount, sizeof(Item), &Item);
+					Writer.AddItem(MAPITEMTYPE_LAYER, LayerCount, sizeof(Item), &Item);
 					GItem.m_NumLayers++;
 					LayerCount++;
 				}
 			}
 		}
 
-		df.AddItem(MAPITEMTYPE_GROUP, GroupCount, sizeof(GItem), &GItem);
-		df.AddItem(MAPITEMTYPE_GROUP_EX, GroupCount, sizeof(GItemEx), &GItemEx);
+		Writer.AddItem(MAPITEMTYPE_GROUP, GroupCount, sizeof(GItem), &GItem);
+		Writer.AddItem(MAPITEMTYPE_GROUP_EX, GroupCount, sizeof(GItemEx), &GItemEx);
 		GroupCount++;
 	}
 
@@ -359,7 +361,7 @@ bool CEditorMap::Save(const char *pFileName)
 		Item.m_Synchronized = m_vpEnvelopes[e]->m_Synchronized;
 		StrToInts(Item.m_aName, sizeof(Item.m_aName) / sizeof(int), m_vpEnvelopes[e]->m_aName);
 
-		df.AddItem(MAPITEMTYPE_ENVELOPE, e, sizeof(Item), &Item);
+		Writer.AddItem(MAPITEMTYPE_ENVELOPE, e, sizeof(Item), &Item);
 		PointCount += Item.m_NumPoints;
 	}
 
@@ -410,17 +412,17 @@ bool CEditorMap::Save(const char *pFileName)
 		}
 	}
 
-	df.AddItem(MAPITEMTYPE_ENVPOINTS, 0, sizeof(CEnvPoint) * PointCount, pPoints);
+	Writer.AddItem(MAPITEMTYPE_ENVPOINTS, 0, sizeof(CEnvPoint) * PointCount, pPoints);
 	free(pPoints);
 
 	if(pPointsBezier != nullptr)
 	{
-		df.AddItem(MAPITEMTYPE_ENVPOINTS_BEZIER, 0, sizeof(CEnvPointBezier) * PointCount, pPointsBezier);
+		Writer.AddItem(MAPITEMTYPE_ENVPOINTS_BEZIER, 0, sizeof(CEnvPointBezier) * PointCount, pPointsBezier);
 		free(pPointsBezier);
 	}
 
 	// finish the data file
-	std::shared_ptr<CDataFileWriterFinishJob> pWriterFinishJob = std::make_shared<CDataFileWriterFinishJob>(pFileName, std::move(df));
+	std::shared_ptr<CDataFileWriterFinishJob> pWriterFinishJob = std::make_shared<CDataFileWriterFinishJob>(pFileName, aFileNameTmp, std::move(Writer));
 	m_pEditor->Engine()->AddJob(pWriterFinishJob);
 	m_pEditor->m_WriterFinishJobs.push_back(pWriterFinishJob);
 
