@@ -107,12 +107,17 @@ void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
 		int LoadFlag = (((m_aTextureUsedByTileOrQuadLayerFlag[i] & 1) != 0) ? TextureLoadFlag : 0) | (((m_aTextureUsedByTileOrQuadLayerFlag[i] & 2) != 0) ? 0 : (Graphics()->IsTileBufferingEnabled() ? IGraphics::TEXLOAD_NO_2D_TEXTURE : 0));
 		const CMapItemImage_v2 *pImg = (CMapItemImage_v2 *)pMap->GetItem(Start + i);
 		const int Format = pImg->m_Version < CMapItemImage_v2::CURRENT_VERSION ? CImageInfo::FORMAT_RGBA : pImg->m_Format;
-		if(pImg->m_External || (Format != CImageInfo::FORMAT_RGB && Format != CImageInfo::FORMAT_RGBA))
+		if(pImg->m_External)
 		{
 			char aPath[IO_MAX_PATH_LENGTH];
 			char *pName = (char *)pMap->GetData(pImg->m_ImageName);
 			str_format(aPath, sizeof(aPath), "mapres/%s.png", pName);
 			m_aTextures[i] = Graphics()->LoadTexture(aPath, IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, LoadFlag);
+			pMap->UnloadData(pImg->m_ImageName);
+		}
+		else if(Format != CImageInfo::FORMAT_RGBA)
+		{
+			m_aTextures[i] = Graphics()->InvalidTexture();
 			pMap->UnloadData(pImg->m_ImageName);
 		}
 		else

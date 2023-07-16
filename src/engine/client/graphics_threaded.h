@@ -969,6 +969,7 @@ public:
 	int UnloadTexture(IGraphics::CTextureHandle *pIndex) override;
 	IGraphics::CTextureHandle LoadTextureRaw(int Width, int Height, int Format, const void *pData, int StoreFormat, int Flags, const char *pTexName = NULL) override;
 	int LoadTextureRawSub(IGraphics::CTextureHandle TextureID, int x, int y, int Width, int Height, int Format, const void *pData) override;
+	IGraphics::CTextureHandle InvalidTexture() const override;
 
 	bool LoadTextTextures(int Width, int Height, CTextureHandle &TextTexture, CTextureHandle &TextOutlineTexture, void *pTextData, void *pTextOutlineData) override;
 	bool UnloadTextTextures(CTextureHandle &TextTexture, CTextureHandle &TextOutlineTexture) override;
