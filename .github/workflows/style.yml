@@ -23,7 +23,7 @@ jobs:
         pip3 install pylint
         git clone https://gitlab.com/Patiga/twmap.git/
         cd twmap/twmap-tools
-        cargo install --path=.
+        cargo install --locked --path=.
         cd ../..
         rm -rf twmap
         mkdir release
