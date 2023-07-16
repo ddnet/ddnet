@@ -1010,13 +1010,6 @@ void CEditorMap::PerformSanityChecks(const std::function<void(const char *pError
 	}
 }
 
-static int gs_ModifyAddAmount = 0;
-static void ModifyAdd(int *pIndex)
-{
-	if(*pIndex >= 0)
-		*pIndex += gs_ModifyAddAmount;
-}
-
 bool CEditor::Append(const char *pFileName, int StorageType)
 {
 	CEditorMap NewMap;
@@ -1030,14 +1023,15 @@ bool CEditor::Append(const char *pFileName, int StorageType)
 		return false;
 
 	// modify indices
-	gs_ModifyAddAmount = m_Map.m_vpImages.size();
-	NewMap.ModifyImageIndex(ModifyAdd);
-
-	gs_ModifyAddAmount = m_Map.m_vpSounds.size();
-	NewMap.ModifySoundIndex(ModifyAdd);
-
-	gs_ModifyAddAmount = m_Map.m_vpEnvelopes.size();
-	NewMap.ModifyEnvelopeIndex(ModifyAdd);
+	static const auto &&s_ModifyAddIndex = [](int AddAmount) {
+		return [AddAmount](int *pIndex) {
+			if(*pIndex >= 0)
+				*pIndex += AddAmount;
+		};
+	};
+	NewMap.ModifyImageIndex(s_ModifyAddIndex(m_Map.m_vpImages.size()));
+	NewMap.ModifySoundIndex(s_ModifyAddIndex(m_Map.m_vpSounds.size()));
+	NewMap.ModifyEnvelopeIndex(s_ModifyAddIndex(m_Map.m_vpEnvelopes.size()));
 
 	// transfer images
 	for(const auto &pImage : NewMap.m_vpImages)

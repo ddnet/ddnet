@@ -214,12 +214,12 @@ CUI::EPopupMenuFunctionResult CLayerSounds::RenderProperties(CUIRect *pToolBox)
 	return CUI::POPUP_KEEP_OPEN;
 }
 
-void CLayerSounds::ModifySoundIndex(INDEX_MODIFY_FUNC Func)
+void CLayerSounds::ModifySoundIndex(FIndexModifyFunction Func)
 {
 	Func(&m_Sound);
 }
 
-void CLayerSounds::ModifyEnvelopeIndex(INDEX_MODIFY_FUNC Func)
+void CLayerSounds::ModifyEnvelopeIndex(FIndexModifyFunction Func)
 {
 	for(auto &Source : m_vSources)
 	{

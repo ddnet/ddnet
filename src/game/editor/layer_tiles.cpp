@@ -1081,7 +1081,7 @@ void CLayerTiles::FlagModified(int x, int y, int w, int h)
 	}
 }
 
-void CLayerTiles::ModifyImageIndex(INDEX_MODIFY_FUNC Func)
+void CLayerTiles::ModifyImageIndex(FIndexModifyFunction Func)
 {
 	const auto ImgBefore = m_Image;
 	Func(&m_Image);
@@ -1089,7 +1089,7 @@ void CLayerTiles::ModifyImageIndex(INDEX_MODIFY_FUNC Func)
 		m_Texture.Invalidate();
 }
 
-void CLayerTiles::ModifyEnvelopeIndex(INDEX_MODIFY_FUNC Func)
+void CLayerTiles::ModifyEnvelopeIndex(FIndexModifyFunction Func)
 {
 	Func(&m_ColorEnv);
 }
