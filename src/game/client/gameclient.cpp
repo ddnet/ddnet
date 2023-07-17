@@ -192,7 +192,8 @@ void CGameClient::OnConsoleInit()
 	for(auto &pComponent : m_vpAll)
 		pComponent->OnConsoleInit();
 
-	//
+	Console()->Chain("cl_languagefile", ConchainLanguageUpdate, this);
+
 	Console()->Chain("player_name", ConchainSpecialInfoupdate, this);
 	Console()->Chain("player_clan", ConchainSpecialInfoupdate, this);
 	Console()->Chain("player_country", ConchainSpecialInfoupdate, this);
@@ -254,7 +255,8 @@ void CGameClient::OnInit()
 	for(int i = 0; i < NUM_NETOBJTYPES; i++)
 		Client()->SnapSetStaticsize(i, m_NetObjHandler.GetObjSize(i));
 
-	Client()->LoadFont();
+	TextRender()->LoadFonts();
+	TextRender()->SetFontLanguageVariant(g_Config.m_ClLanguagefile);
 
 	// update and swap after font loading, they are quite huge
 	Client()->UpdateAndSwap();
@@ -380,6 +382,8 @@ void CGameClient::OnInit()
 
 void CGameClient::OnUpdate()
 {
+	HandleLanguageChanged();
+
 	CUIElementBase::Init(UI()); // update static pointer because game and editor use separate UI
 
 	// handle mouse movement
@@ -969,6 +973,21 @@ void CGameClient::OnWindowResize()
 
 void CGameClient::OnLanguageChange()
 {
+	// The actual language change is delayed because it
+	// might require clearing the text render font atlas,
+	// which would invalidate text that is currently drawn.
+	m_LanguageChanged = true;
+}
+
+void CGameClient::HandleLanguageChanged()
+{
+	if(!m_LanguageChanged)
+		return;
+	m_LanguageChanged = false;
+
+	g_Localization.Load(g_Config.m_ClLanguagefile, Storage(), Console());
+	TextRender()->SetFontLanguageVariant(g_Config.m_ClLanguagefile);
+
 	UI()->OnLanguageChange();
 }
 
@@ -2262,6 +2281,13 @@ void CGameClient::ConTeam(IConsole::IResult *pResult, void *pUserData)
 void CGameClient::ConKill(IConsole::IResult *pResult, void *pUserData)
 {
 	((CGameClient *)pUserData)->SendKill(-1);
+}
+
+void CGameClient::ConchainLanguageUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	pfnCallback(pResult, pCallbackUserData);
+	if(pResult->NumArguments())
+		((CGameClient *)pUserData)->OnLanguageChange();
 }
 
 void CGameClient::ConchainSpecialInfoupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)

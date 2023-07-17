@@ -199,7 +199,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		float FontSize = 14.0f;
 		if(SmallFont)
 			FontSize = 6.0f;
-		TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
+		TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
 		TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
 		TextRender()->TextColor(TextColor);
 		TextRender()->TextOutlineColor(TextOutlineColor);
@@ -207,7 +207,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		TextRender()->TextOutlineColor(TextRender()->DefaultTextOutlineColor());
 		TextRender()->TextColor(TextRender()->DefaultTextColor());
 		TextRender()->SetRenderFlags(0);
-		TextRender()->SetCurFont(nullptr);
+		TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
 	};
 
 	int NumPlayers = 0;
@@ -474,7 +474,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 
 	// render quick search
 	{
-		TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
+		TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
 		TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
 
 		UI()->DoLabel(&QuickSearch, FONT_ICON_MAGNIFYING_GLASS, 16.0f, TEXTALIGN_ML);
@@ -482,7 +482,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		ExcludeIconWidth = TextRender()->TextWidth(16.0f, FONT_ICON_BAN, -1, -1.0f);
 		ExcludeSearchIconMax = maximum(SearchIconWidth, ExcludeIconWidth);
 		TextRender()->SetRenderFlags(0);
-		TextRender()->SetCurFont(NULL);
+		TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
 		QuickSearch.VSplitLeft(ExcludeSearchIconMax, 0, &QuickSearch);
 		QuickSearch.VSplitLeft(5.0f, 0, &QuickSearch);
 
@@ -504,12 +504,12 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 
 	// render quick exclude
 	{
-		TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
+		TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
 		TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
 
 		UI()->DoLabel(&QuickExclude, FONT_ICON_BAN, 16.0f, TEXTALIGN_ML);
 		TextRender()->SetRenderFlags(0);
-		TextRender()->SetCurFont(NULL);
+		TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
 		QuickExclude.VSplitLeft(ExcludeSearchIconMax, 0, &QuickExclude);
 		QuickExclude.VSplitLeft(5.0f, 0, &QuickExclude);
 
@@ -1416,11 +1416,11 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 		Header.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, UI()->MouseHovered(&Header) ? 0.4f : 0.25f), IGraphics::CORNER_ALL, 5.0f);
 		Header.VSplitLeft(Header.h, &GroupIcon, &GroupLabel);
 		GroupIcon.Margin(2.0f, &GroupIcon);
-		TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
+		TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
 		TextRender()->TextColor(UI()->MouseHovered(&Header) ? TextRender()->DefaultTextColor() : ColorRGBA(0.6f, 0.6f, 0.6f, 1.0f));
 		UI()->DoLabel(&GroupIcon, s_aListExtended[FriendType] ? FONT_ICON_SQUARE_MINUS : FONT_ICON_SQUARE_PLUS, GroupIcon.h * CUI::ms_FontmodHeight, TEXTALIGN_MC);
 		TextRender()->TextColor(TextRender()->DefaultTextColor());
-		TextRender()->SetCurFont(nullptr);
+		TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
 		switch(FriendType)
 		{
 		case FRIEND_PLAYER_ON:
@@ -1535,7 +1535,7 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 
 						SLabelProperties Props;
 						Props.m_EnableWidthCheck = false;
-						TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
+						TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
 						TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
 						TextRender()->TextColor(0.4f, 0.7f, 0.94f, 1.0f);
 						TextRender()->TextOutlineColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -1546,7 +1546,7 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 						TextRender()->TextColor(TextRender()->DefaultTextColor());
 						TextRender()->TextOutlineColor(TextRender()->DefaultTextOutlineColor());
 						TextRender()->SetRenderFlags(0);
-						TextRender()->SetCurFont(nullptr);
+						TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
 					}
 
 					// server info text

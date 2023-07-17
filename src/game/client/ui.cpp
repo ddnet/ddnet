@@ -934,10 +934,10 @@ int CUI::DoButton_Menu(CUIElement &UIElement, const CButtonContainer *pID, const
 						pText = GetTextLambda();
 					NewRect.m_Text = pText;
 					if(Props.m_UseIconFont)
-						TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
+						TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
 					DoLabel(NewRect, &Text, pText, Text.h * CUI::ms_FontmodHeight, TEXTALIGN_MC);
 					if(Props.m_UseIconFont)
-						TextRender()->SetCurFont(nullptr);
+						TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
 				}
 			}
 			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -1615,11 +1615,11 @@ int CUI::DoDropDown(CUIRect *pRect, int CurSelection, const char **pStrs, int Nu
 	CUIRect DropDownIcon;
 	pRect->HMargin(2.0f, &DropDownIcon);
 	DropDownIcon.VSplitRight(5.0f, &DropDownIcon, nullptr);
-	TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
+	TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
 	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
 	DoLabel(&DropDownIcon, FONT_ICON_CIRCLE_CHEVRON_DOWN, DropDownIcon.h * CUI::ms_FontmodHeight, TEXTALIGN_MR);
 	TextRender()->SetRenderFlags(0);
-	TextRender()->SetCurFont(nullptr);
+	TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
 
 	if(State.m_SelectionPopupContext.m_SelectionIndex >= 0)
 	{
