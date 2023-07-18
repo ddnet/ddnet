@@ -61,15 +61,18 @@ void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Channels
 	CMapLayers *pThis = (CMapLayers *)pUser;
 	Channels = ColorRGBA();
 
-	const CMapBasedEnvelopePointAccess EnvelopePoints(pThis->m_pLayers->Map());
-
 	int EnvStart, EnvNum;
 	pThis->m_pLayers->Map()->GetType(MAPITEMTYPE_ENVELOPE, &EnvStart, &EnvNum);
 
-	if(EnvelopePoints.NumPoints() == 0 || Env < 0 || Env >= EnvNum)
+	if(Env < 0 || Env >= EnvNum)
 		return;
 
 	const CMapItemEnvelope *pItem = (CMapItemEnvelope *)pThis->m_pLayers->Map()->GetItem(EnvStart + Env);
+
+	CMapBasedEnvelopePointAccess EnvelopePoints(pThis->m_pLayers->Map());
+	EnvelopePoints.SetPointsRange(pItem->m_StartPoint, pItem->m_NumPoints);
+	if(EnvelopePoints.NumPoints() == 0)
+		return;
 
 	const auto TickToNanoSeconds = std::chrono::nanoseconds(1s) / (int64_t)pThis->Client()->GameTickSpeed();
 

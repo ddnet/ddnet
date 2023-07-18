@@ -83,7 +83,9 @@ public:
 
 class CMapBasedEnvelopePointAccess : public IEnvelopePointAccess
 {
+	int m_StartPoint;
 	int m_NumPoints;
+	int m_NumPointsMax;
 	CEnvPoint *m_pPoints;
 	CEnvPointBezier *m_pPointsBezier;
 	CEnvPointBezier_upstream *m_pPointsBezierUpstream;
@@ -91,7 +93,10 @@ class CMapBasedEnvelopePointAccess : public IEnvelopePointAccess
 public:
 	CMapBasedEnvelopePointAccess(class CDataFileReader *pReader);
 	CMapBasedEnvelopePointAccess(class IMap *pMap);
+	void SetPointsRange(int StartPoint, int NumPoints);
+	int StartPoint() const;
 	int NumPoints() const override;
+	int NumPointsMax() const;
 	const CEnvPoint *GetPoint(int Index) const override;
 	const CEnvPointBezier *GetBezier(int Index) const override;
 };
