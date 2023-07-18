@@ -49,7 +49,7 @@ CMapBasedEnvelopePointAccess::CMapBasedEnvelopePointAccess(CDataFileReader *pRea
 		else
 			m_pPointsBezierUpstream = nullptr;
 
-		m_NumPoints = pReader->GetItemSize(EnvPointStart) / sizeof(CEnvPointBezier_upstream);
+		m_NumPointsMax = pReader->GetItemSize(EnvPointStart) / sizeof(CEnvPointBezier_upstream);
 	}
 	else
 	{
@@ -60,18 +60,20 @@ CMapBasedEnvelopePointAccess::CMapBasedEnvelopePointAccess(CDataFileReader *pRea
 		else
 			m_pPoints = nullptr;
 
-		m_NumPoints = pReader->GetItemSize(EnvPointStart) / sizeof(CEnvPoint);
+		m_NumPointsMax = pReader->GetItemSize(EnvPointStart) / sizeof(CEnvPoint);
 
 		int EnvPointBezierStart, FakeEnvPointBezierNum;
 		pReader->GetType(MAPITEMTYPE_ENVPOINTS_BEZIER, &EnvPointBezierStart, &FakeEnvPointBezierNum);
 		const int NumPointsBezier = pReader->GetItemSize(EnvPointBezierStart) / sizeof(CEnvPointBezier);
-		if(FakeEnvPointBezierNum > 0 && m_NumPoints == NumPointsBezier)
+		if(FakeEnvPointBezierNum > 0 && m_NumPointsMax == NumPointsBezier)
 			m_pPointsBezier = static_cast<CEnvPointBezier *>(pReader->GetItem(EnvPointBezierStart));
 		else
 			m_pPointsBezier = nullptr;
 
 		m_pPointsBezierUpstream = nullptr;
 	}
+
+	SetPointsRange(0, m_NumPointsMax);
 }
 
 CMapBasedEnvelopePointAccess::CMapBasedEnvelopePointAccess(IMap *pMap) :
@@ -79,9 +81,25 @@ CMapBasedEnvelopePointAccess::CMapBasedEnvelopePointAccess(IMap *pMap) :
 {
 }
 
+void CMapBasedEnvelopePointAccess::SetPointsRange(int StartPoint, int NumPoints)
+{
+	m_StartPoint = clamp(StartPoint, 0, m_NumPointsMax);
+	m_NumPoints = clamp(NumPoints, 0, maximum(m_NumPointsMax - StartPoint, 0));
+}
+
+int CMapBasedEnvelopePointAccess::StartPoint() const
+{
+	return m_StartPoint;
+}
+
 int CMapBasedEnvelopePointAccess::NumPoints() const
 {
 	return m_NumPoints;
+}
+
+int CMapBasedEnvelopePointAccess::NumPointsMax() const
+{
+	return m_NumPointsMax;
 }
 
 const CEnvPoint *CMapBasedEnvelopePointAccess::GetPoint(int Index) const
@@ -89,9 +107,9 @@ const CEnvPoint *CMapBasedEnvelopePointAccess::GetPoint(int Index) const
 	if(Index < 0 || Index >= m_NumPoints)
 		return nullptr;
 	if(m_pPoints != nullptr)
-		return &m_pPoints[Index];
+		return &m_pPoints[Index + m_StartPoint];
 	if(m_pPointsBezierUpstream != nullptr)
-		return &m_pPointsBezierUpstream[Index];
+		return &m_pPointsBezierUpstream[Index + m_StartPoint];
 	return nullptr;
 }
 
@@ -100,9 +118,9 @@ const CEnvPointBezier *CMapBasedEnvelopePointAccess::GetBezier(int Index) const
 	if(Index < 0 || Index >= m_NumPoints)
 		return nullptr;
 	if(m_pPointsBezier != nullptr)
-		return &m_pPointsBezier[Index];
+		return &m_pPointsBezier[Index + m_StartPoint];
 	if(m_pPointsBezierUpstream != nullptr)
-		return &m_pPointsBezierUpstream[Index].m_Bezier;
+		return &m_pPointsBezierUpstream[Index + m_StartPoint].m_Bezier;
 	return nullptr;
 }
 
