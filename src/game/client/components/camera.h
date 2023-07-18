@@ -53,14 +53,23 @@ public:
 	virtual void OnReset() override;
 
 	void SetZoom(float Target, int Smoothness);
+	void SetView(ivec2 Pos);
+	void GotoSwitch(int Number, int Offset = -1);
+	void GotoTele(int Number, int Offset = -1);
 
 private:
 	static void ConZoomPlus(IConsole::IResult *pResult, void *pUserData);
 	static void ConZoomMinus(IConsole::IResult *pResult, void *pUserData);
 	static void ConZoom(IConsole::IResult *pResult, void *pUserData);
 	static void ConSetView(IConsole::IResult *pResult, void *pUserData);
+	static void ConGotoSwitch(IConsole::IResult *pResult, void *pUserData);
+	static void ConGotoTele(IConsole::IResult *pResult, void *pUserData);
 
 	vec2 m_ForceFreeviewPos;
+	int m_GotoSwitchOffset;
+	int m_GotoTeleOffset;
+	ivec2 m_GotoSwitchLastPos;
+	ivec2 m_GotoTeleLastPos;
 };
 
 #endif
