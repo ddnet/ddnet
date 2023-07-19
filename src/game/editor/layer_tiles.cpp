@@ -4,6 +4,7 @@
 
 #include <engine/client.h>
 #include <engine/graphics.h>
+#include <engine/shared/map.h>
 #include <engine/textrender.h>
 
 #include "editor.h"
@@ -78,9 +79,9 @@ CTile CLayerTiles::GetTile(int x, int y)
 	return m_pTiles[y * m_Width + x];
 }
 
-void CLayerTiles::SetTile(int x, int y, CTile tile)
+void CLayerTiles::SetTile(int x, int y, CTile Tile)
 {
-	m_pTiles[y * m_Width + x] = tile;
+	m_pTiles[y * m_Width + x] = Tile;
 }
 
 void CLayerTiles::PrepareForSave()
@@ -95,6 +96,15 @@ void CLayerTiles::PrepareForSave()
 			for(int x = 0; x < m_Width; x++)
 				m_pTiles[y * m_Width + x].m_Flags |= m_pEditor->m_Map.m_vpImages[m_Image]->m_aTileFlags[m_pTiles[y * m_Width + x].m_Index];
 	}
+}
+
+void CLayerTiles::ExtractTiles(int TilemapItemVersion, const CTile *pSavedTiles, size_t SavedTilesSize)
+{
+	const size_t DestSize = (size_t)m_Width * m_Height;
+	if(TilemapItemVersion >= CMapItemLayerTilemap::TILE_SKIP_MIN_VERSION)
+		CMap::ExtractTiles(m_pTiles, DestSize, pSavedTiles, SavedTilesSize);
+	else if(SavedTilesSize >= DestSize)
+		mem_copy(m_pTiles, pSavedTiles, DestSize * sizeof(CTile));
 }
 
 void CLayerTiles::MakePalette()
@@ -464,10 +474,7 @@ void CLayerTiles::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 			if(!Destructive && HasTile)
 				continue;
 
-			if(Empty)
-				m_pTiles[fy * m_Width + fx].m_Index = 0;
-			else
-				SetTile(fx, fy, pLt->m_pTiles[(y * pLt->m_Width + x % pLt->m_Width) % (pLt->m_Width * pLt->m_Height)]);
+			SetTile(fx, fy, Empty ? CTile{TILE_AIR} : pLt->m_pTiles[(y * pLt->m_Width + x % pLt->m_Width) % (pLt->m_Width * pLt->m_Height)]);
 		}
 	}
 	FlagModified(sx, sy, w, h);
@@ -775,8 +782,6 @@ CUI::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 					}
 				}
 			}
-
-			return CUI::POPUP_CLOSE_CURRENT;
 		}
 	}
 
@@ -925,7 +930,7 @@ CUI::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 		{
 			for(; Index >= -1 && Index < (int)m_pEditor->m_Map.m_vpEnvelopes.size(); Index += Step)
 			{
-				if(Index == -1 || m_pEditor->m_Map.m_vpEnvelopes[Index]->m_Channels == 4)
+				if(Index == -1 || m_pEditor->m_Map.m_vpEnvelopes[Index]->GetChannels() == 4)
 				{
 					m_ColorEnv = Index;
 					break;
@@ -1079,14 +1084,14 @@ CUI::EPopupMenuFunctionResult CLayerTiles::RenderCommonProperties(SCommonPropSta
 
 void CLayerTiles::FlagModified(int x, int y, int w, int h)
 {
-	m_pEditor->m_Map.m_Modified = true;
+	m_pEditor->m_Map.OnModify();
 	if(m_Seed != 0 && m_AutoMapperConfig != -1 && m_AutoAutoMap && m_Image >= 0)
 	{
 		m_pEditor->m_Map.m_vpImages[m_Image]->m_AutoMapper.ProceedLocalized(this, m_AutoMapperConfig, m_Seed, x, y, w, h);
 	}
 }
 
-void CLayerTiles::ModifyImageIndex(INDEX_MODIFY_FUNC Func)
+void CLayerTiles::ModifyImageIndex(FIndexModifyFunction Func)
 {
 	const auto ImgBefore = m_Image;
 	Func(&m_Image);
@@ -1094,7 +1099,7 @@ void CLayerTiles::ModifyImageIndex(INDEX_MODIFY_FUNC Func)
 		m_Texture.Invalidate();
 }
 
-void CLayerTiles::ModifyEnvelopeIndex(INDEX_MODIFY_FUNC Func)
+void CLayerTiles::ModifyEnvelopeIndex(FIndexModifyFunction Func)
 {
 	Func(&m_ColorEnv);
 }
@@ -1296,7 +1301,7 @@ void CLayerTele::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 			if(!Destructive && GetTile(fx, fy).m_Index)
 				continue;
 
-			const int SrcIndex = (y * pLt->m_Width + x % pLt->m_Width) % (pLt->m_Width * pLt->m_Height);
+			const int SrcIndex = Empty ? 0 : (y * pLt->m_Width + x % pLt->m_Width) % (pLt->m_Width * pLt->m_Height);
 			const int TgtIndex = fy * m_Width + fx;
 
 			if(Empty || (!m_pEditor->m_AllowPlaceUnusedTiles && !IsValidTeleTile((pLt->m_pTiles[SrcIndex]).m_Index)))
@@ -1551,7 +1556,7 @@ void CLayerSpeedup::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 			if(!Destructive && GetTile(fx, fy).m_Index)
 				continue;
 
-			const int SrcIndex = (y * pLt->m_Width + x % pLt->m_Width) % (pLt->m_Width * pLt->m_Height);
+			const int SrcIndex = Empty ? 0 : (y * pLt->m_Width + x % pLt->m_Width) % (pLt->m_Width * pLt->m_Height);
 			const int TgtIndex = fy * m_Width + fx;
 
 			if(Empty || (!m_pEditor->m_AllowPlaceUnusedTiles && !IsValidSpeedupTile((pLt->m_pTiles[SrcIndex]).m_Index))) // no speed up tile chosen: reset
@@ -1595,21 +1600,21 @@ CLayerFront::CLayerFront(int w, int h) :
 	m_Front = 1;
 }
 
-void CLayerFront::SetTile(int x, int y, CTile tile)
+void CLayerFront::SetTile(int x, int y, CTile Tile)
 {
-	if(tile.m_Index == TILE_THROUGH_CUT)
+	if(Tile.m_Index == TILE_THROUGH_CUT)
 	{
 		CTile nohook = {TILE_NOHOOK};
 		m_pEditor->m_Map.m_pGameLayer->CLayerTiles::SetTile(x, y, nohook); // NOLINT(bugprone-parent-virtual-call)
 	}
-	else if(tile.m_Index == TILE_AIR && CLayerTiles::GetTile(x, y).m_Index == TILE_THROUGH_CUT)
+	else if(Tile.m_Index == TILE_AIR && CLayerTiles::GetTile(x, y).m_Index == TILE_THROUGH_CUT)
 	{
 		CTile air = {TILE_AIR};
 		m_pEditor->m_Map.m_pGameLayer->CLayerTiles::SetTile(x, y, air); // NOLINT(bugprone-parent-virtual-call)
 	}
-	if(m_pEditor->m_AllowPlaceUnusedTiles || IsValidFrontTile(tile.m_Index))
+	if(m_pEditor->m_AllowPlaceUnusedTiles || IsValidFrontTile(Tile.m_Index))
 	{
-		CLayerTiles::SetTile(x, y, tile);
+		CLayerTiles::SetTile(x, y, Tile);
 	}
 	else
 	{
@@ -1846,7 +1851,7 @@ void CLayerSwitch::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 			if(!Destructive && GetTile(fx, fy).m_Index)
 				continue;
 
-			const int SrcIndex = (y * pLt->m_Width + x % pLt->m_Width) % (pLt->m_Width * pLt->m_Height);
+			const int SrcIndex = Empty ? 0 : (y * pLt->m_Width + x % pLt->m_Width) % (pLt->m_Width * pLt->m_Height);
 			const int TgtIndex = fy * m_Width + fx;
 
 			if(Empty || (!m_pEditor->m_AllowPlaceUnusedTiles && !IsValidSwitchTile((pLt->m_pTiles[SrcIndex]).m_Index)))
@@ -2094,7 +2099,7 @@ void CLayerTune::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 			if(!Destructive && GetTile(fx, fy).m_Index)
 				continue;
 
-			const int SrcIndex = (y * pLt->m_Width + x % pLt->m_Width) % (pLt->m_Width * pLt->m_Height);
+			const int SrcIndex = Empty ? 0 : (y * pLt->m_Width + x % pLt->m_Width) % (pLt->m_Width * pLt->m_Height);
 			const int TgtIndex = fy * m_Width + fx;
 
 			if(Empty || (!m_pEditor->m_AllowPlaceUnusedTiles && !IsValidTuneTile((pLt->m_pTiles[SrcIndex]).m_Index)))

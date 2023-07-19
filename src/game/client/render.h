@@ -20,6 +20,8 @@ struct CDataSprite;
 }
 struct CDataSprite;
 struct CEnvPoint;
+struct CEnvPointBezier;
+struct CEnvPointBezier_upstream;
 struct CMapItemGroup;
 struct CMapItemGroupEx;
 struct CQuad;
@@ -71,6 +73,34 @@ enum
 	TILERENDERFLAG_EXTEND = 4,
 };
 
+class IEnvelopePointAccess
+{
+public:
+	virtual int NumPoints() const = 0;
+	virtual const CEnvPoint *GetPoint(int Index) const = 0;
+	virtual const CEnvPointBezier *GetBezier(int Index) const = 0;
+};
+
+class CMapBasedEnvelopePointAccess : public IEnvelopePointAccess
+{
+	int m_StartPoint;
+	int m_NumPoints;
+	int m_NumPointsMax;
+	CEnvPoint *m_pPoints;
+	CEnvPointBezier *m_pPointsBezier;
+	CEnvPointBezier_upstream *m_pPointsBezierUpstream;
+
+public:
+	CMapBasedEnvelopePointAccess(class CDataFileReader *pReader);
+	CMapBasedEnvelopePointAccess(class IMap *pMap);
+	void SetPointsRange(int StartPoint, int NumPoints);
+	int StartPoint() const;
+	int NumPoints() const override;
+	int NumPointsMax() const;
+	const CEnvPoint *GetPoint(int Index) const override;
+	const CEnvPointBezier *GetBezier(int Index) const override;
+};
+
 typedef void (*ENVELOPE_EVAL)(int TimeOffsetMillis, int Env, ColorRGBA &Channels, void *pUser);
 
 class CRenderTools
@@ -117,7 +147,7 @@ public:
 	void RenderTee(const CAnimState *pAnim, const CTeeRenderInfo *pInfo, int Emote, vec2 Dir, vec2 Pos, float Alpha = 1.0f);
 
 	// map render methods (render_map.cpp)
-	static void RenderEvalEnvelope(CEnvPoint *pPoints, int NumPoints, int Channels, std::chrono::nanoseconds TimeNanos, ColorRGBA &Result);
+	static void RenderEvalEnvelope(const IEnvelopePointAccess *pPoints, int Channels, std::chrono::nanoseconds TimeNanos, ColorRGBA &Result);
 	void RenderQuads(CQuad *pQuads, int NumQuads, int Flags, ENVELOPE_EVAL pfnEval, void *pUser);
 	void ForceRenderQuads(CQuad *pQuads, int NumQuads, int Flags, ENVELOPE_EVAL pfnEval, void *pUser, float Alpha = 1.0f);
 	void RenderTilemap(CTile *pTiles, int w, int h, float Scale, ColorRGBA Color, int RenderFlags, ENVELOPE_EVAL pfnEval, void *pUser, int ColorEnv, int ColorEnvOffset);

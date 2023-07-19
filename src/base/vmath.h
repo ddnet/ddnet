@@ -109,6 +109,11 @@ inline float length(const vector2_base<float> &a)
 	return std::sqrt(dot(a, a));
 }
 
+inline float length(const vector2_base<int> &a)
+{
+	return std::sqrt(dot(a, a));
+}
+
 inline float length_squared(const vector2_base<float> &a)
 {
 	return dot(a, a);

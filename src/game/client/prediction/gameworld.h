@@ -7,6 +7,7 @@
 #include <game/teamscore.h>
 
 #include <list>
+#include <vector>
 
 class CCollision;
 class CCharacter;
@@ -49,7 +50,7 @@ public:
 
 	// DDRace
 	void ReleaseHooked(int ClientID);
-	std::list<CCharacter *> IntersectedCharacters(vec2 Pos0, vec2 Pos1, float Radius, const CEntity *pNotThis = nullptr);
+	std::vector<CCharacter *> IntersectedCharacters(vec2 Pos0, vec2 Pos1, float Radius, const CEntity *pNotThis = nullptr);
 
 	int m_GameTick;
 	int m_GameTickSpeed;

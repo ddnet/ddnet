@@ -1214,7 +1214,7 @@ public:
 					Cutter.m_Flags |= TEXTFLAG_STOP_AT_END | TEXTFLAG_DISALLOW_NEWLINE;
 
 					TextEx(&Cutter, pCurrent, Wlen);
-					Wlen = maximum(Cutter.m_CharCount - 1, 0);
+					Wlen = str_utf8_rewind(pCurrent, Cutter.m_CharCount); // rewind once to skip the last character that did not fit
 					NewLine = true;
 
 					if(Cutter.m_GlyphCount <= 3 && !GotNewLineLast) // if we can't place 3 chars of the word on this line, take the next

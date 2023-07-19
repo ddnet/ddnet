@@ -3,23 +3,243 @@
 #include <base/math.h>
 
 #include <engine/graphics.h>
+#include <engine/map.h>
 #include <engine/textrender.h>
 
 #include <engine/shared/config.h>
+#include <engine/shared/datafile.h>
+#include <engine/shared/map.h>
 
 #include "render.h"
 
 #include <game/generated/client_data.h>
 
 #include <game/mapitems.h>
+#include <game/mapitems_ex.h>
 
 #include <chrono>
 #include <cmath>
 
 using namespace std::chrono_literals;
 
-void CRenderTools::RenderEvalEnvelope(CEnvPoint *pPoints, int NumPoints, int Channels, std::chrono::nanoseconds TimeNanos, ColorRGBA &Result)
+CMapBasedEnvelopePointAccess::CMapBasedEnvelopePointAccess(CDataFileReader *pReader)
 {
+	bool FoundBezierEnvelope = false;
+	int EnvStart, EnvNum;
+	pReader->GetType(MAPITEMTYPE_ENVELOPE, &EnvStart, &EnvNum);
+	for(int EnvIndex = 0; EnvIndex < EnvNum; EnvIndex++)
+	{
+		CMapItemEnvelope *pEnvelope = static_cast<CMapItemEnvelope *>(pReader->GetItem(EnvStart + EnvIndex));
+		if(pEnvelope->m_Version >= CMapItemEnvelope_v3::CURRENT_VERSION)
+		{
+			FoundBezierEnvelope = true;
+			break;
+		}
+	}
+
+	if(FoundBezierEnvelope)
+	{
+		m_pPoints = nullptr;
+		m_pPointsBezier = nullptr;
+
+		int EnvPointStart, FakeEnvPointNum;
+		pReader->GetType(MAPITEMTYPE_ENVPOINTS, &EnvPointStart, &FakeEnvPointNum);
+		if(FakeEnvPointNum > 0)
+			m_pPointsBezierUpstream = static_cast<CEnvPointBezier_upstream *>(pReader->GetItem(EnvPointStart));
+		else
+			m_pPointsBezierUpstream = nullptr;
+
+		m_NumPointsMax = pReader->GetItemSize(EnvPointStart) / sizeof(CEnvPointBezier_upstream);
+	}
+	else
+	{
+		int EnvPointStart, FakeEnvPointNum;
+		pReader->GetType(MAPITEMTYPE_ENVPOINTS, &EnvPointStart, &FakeEnvPointNum);
+		if(FakeEnvPointNum > 0)
+			m_pPoints = static_cast<CEnvPoint *>(pReader->GetItem(EnvPointStart));
+		else
+			m_pPoints = nullptr;
+
+		m_NumPointsMax = pReader->GetItemSize(EnvPointStart) / sizeof(CEnvPoint);
+
+		int EnvPointBezierStart, FakeEnvPointBezierNum;
+		pReader->GetType(MAPITEMTYPE_ENVPOINTS_BEZIER, &EnvPointBezierStart, &FakeEnvPointBezierNum);
+		const int NumPointsBezier = pReader->GetItemSize(EnvPointBezierStart) / sizeof(CEnvPointBezier);
+		if(FakeEnvPointBezierNum > 0 && m_NumPointsMax == NumPointsBezier)
+			m_pPointsBezier = static_cast<CEnvPointBezier *>(pReader->GetItem(EnvPointBezierStart));
+		else
+			m_pPointsBezier = nullptr;
+
+		m_pPointsBezierUpstream = nullptr;
+	}
+
+	SetPointsRange(0, m_NumPointsMax);
+}
+
+CMapBasedEnvelopePointAccess::CMapBasedEnvelopePointAccess(IMap *pMap) :
+	CMapBasedEnvelopePointAccess(static_cast<CMap *>(pMap)->GetReader())
+{
+}
+
+void CMapBasedEnvelopePointAccess::SetPointsRange(int StartPoint, int NumPoints)
+{
+	m_StartPoint = clamp(StartPoint, 0, m_NumPointsMax);
+	m_NumPoints = clamp(NumPoints, 0, maximum(m_NumPointsMax - StartPoint, 0));
+}
+
+int CMapBasedEnvelopePointAccess::StartPoint() const
+{
+	return m_StartPoint;
+}
+
+int CMapBasedEnvelopePointAccess::NumPoints() const
+{
+	return m_NumPoints;
+}
+
+int CMapBasedEnvelopePointAccess::NumPointsMax() const
+{
+	return m_NumPointsMax;
+}
+
+const CEnvPoint *CMapBasedEnvelopePointAccess::GetPoint(int Index) const
+{
+	if(Index < 0 || Index >= m_NumPoints)
+		return nullptr;
+	if(m_pPoints != nullptr)
+		return &m_pPoints[Index + m_StartPoint];
+	if(m_pPointsBezierUpstream != nullptr)
+		return &m_pPointsBezierUpstream[Index + m_StartPoint];
+	return nullptr;
+}
+
+const CEnvPointBezier *CMapBasedEnvelopePointAccess::GetBezier(int Index) const
+{
+	if(Index < 0 || Index >= m_NumPoints)
+		return nullptr;
+	if(m_pPointsBezier != nullptr)
+		return &m_pPointsBezier[Index + m_StartPoint];
+	if(m_pPointsBezierUpstream != nullptr)
+		return &m_pPointsBezierUpstream[Index + m_StartPoint].m_Bezier;
+	return nullptr;
+}
+
+static void ValidateFCurve(const vec2 &p0, vec2 &p1, vec2 &p2, const vec2 &p3)
+{
+	// validate the bezier curve
+	p1.x = clamp(p1.x, p0.x, p3.x);
+	p2.x = clamp(p2.x, p0.x, p3.x);
+}
+
+static double CubicRoot(double x)
+{
+	if(x == 0.0)
+		return 0.0;
+	else if(x < 0.0)
+		return -std::exp(std::log(-x) / 3.0);
+	else
+		return std::exp(std::log(x) / 3.0);
+}
+
+static float SolveBezier(float x, float p0, float p1, float p2, float p3)
+{
+	// check for valid f-curve
+	// we only take care of monotonic bezier curves, so there has to be exactly 1 real solution
+	if(!(p0 <= x && x <= p3) || !(p0 <= p1 && p1 <= p3) || !(p0 <= p2 && p2 <= p3))
+		return 0.0f;
+
+	const double x3 = -p0 + 3.0 * p1 - 3.0 * p2 + p3;
+	const double x2 = 3.0 * p0 - 6.0 * p1 + 3.0 * p2;
+	const double x1 = -3.0 * p0 + 3.0 * p1;
+	const double x0 = p0 - x;
+
+	if(x3 == 0.0 && x2 == 0.0)
+	{
+		// linear
+		// a * t + b = 0
+		const double a = x1;
+		const double b = x0;
+
+		if(a == 0.0)
+			return 0.0f;
+		return -b / a;
+	}
+	else if(x3 == 0.0)
+	{
+		// quadratic
+		// t * t + b * t +c = 0
+		const double b = x1 / x2;
+		const double c = x0 / x2;
+
+		if(c == 0.0)
+			return 0.0f;
+
+		const double D = b * b - 4.0 * c;
+		const double SqrtD = std::sqrt(D);
+
+		const double t = (-b + SqrtD) / 2.0;
+
+		if(0.0 <= t && t <= 1.0001f)
+			return t;
+		return (-b - SqrtD) / 2.0;
+	}
+	else
+	{
+		// cubic
+		// t * t * t + a * t * t + b * t * t + c = 0
+		const double a = x2 / x3;
+		const double b = x1 / x3;
+		const double c = x0 / x3;
+
+		// substitute t = y - a / 3
+		const double sub = a / 3.0;
+
+		// depressed form x^3 + px + q = 0
+		// cardano's method
+		const double p = b / 3.0 - a * a / 9.0;
+		const double q = (2.0 * a * a * a / 27.0 - a * b / 3.0 + c) / 2.0;
+
+		const double D = q * q + p * p * p;
+
+		if(D > 0.0)
+		{
+			// only one 'real' solution
+			const double s = std::sqrt(D);
+			return CubicRoot(s - q) - CubicRoot(s + q) - sub;
+		}
+		else if(D == 0.0)
+		{
+			// one single, one double solution or triple solution
+			const double s = CubicRoot(-q);
+			const double t = 2.0 * s - sub;
+
+			if(0.0 <= t && t <= 1.0001f)
+				return t;
+			return (-s - sub);
+		}
+		else
+		{
+			// Casus irreductibilis ... ,_,
+			const double phi = std::acos(-q / std::sqrt(-(p * p * p))) / 3.0;
+			const double s = 2.0 * std::sqrt(-p);
+
+			const double t1 = s * std::cos(phi) - sub;
+
+			if(0.0 <= t1 && t1 <= 1.0001f)
+				return t1;
+
+			const double t2 = -s * std::cos(phi + pi / 3.0) - sub;
+
+			if(0.0 <= t2 && t2 <= 1.0001f)
+				return t2;
+			return -s * std::cos(phi - pi / 3.0) - sub;
+		}
+	}
+}
+
+void CRenderTools::RenderEvalEnvelope(const IEnvelopePointAccess *pPoints, int Channels, std::chrono::nanoseconds TimeNanos, ColorRGBA &Result)
+{
+	const int NumPoints = pPoints->NumPoints();
 	if(NumPoints == 0)
 	{
 		Result = ColorRGBA();
@@ -28,14 +248,16 @@ void CRenderTools::RenderEvalEnvelope(CEnvPoint *pPoints, int NumPoints, int Cha
 
 	if(NumPoints == 1)
 	{
-		Result.r = fx2f(pPoints[0].m_aValues[0]);
-		Result.g = fx2f(pPoints[0].m_aValues[1]);
-		Result.b = fx2f(pPoints[0].m_aValues[2]);
-		Result.a = fx2f(pPoints[0].m_aValues[3]);
+		const CEnvPoint *pFirstPoint = pPoints->GetPoint(0);
+		Result.r = fx2f(pFirstPoint->m_aValues[0]);
+		Result.g = fx2f(pFirstPoint->m_aValues[1]);
+		Result.b = fx2f(pFirstPoint->m_aValues[2]);
+		Result.a = fx2f(pFirstPoint->m_aValues[3]);
 		return;
 	}
 
-	int64_t MaxPointTime = (int64_t)pPoints[NumPoints - 1].m_Time * std::chrono::nanoseconds(1ms).count();
+	const CEnvPoint *pLastPoint = pPoints->GetPoint(NumPoints - 1);
+	const int64_t MaxPointTime = (int64_t)pLastPoint->m_Time * std::chrono::nanoseconds(1ms).count();
 	if(MaxPointTime > 0) // TODO: remove this check when implementing a IO check for maps(in this case broken envelopes)
 		TimeNanos = std::chrono::nanoseconds(TimeNanos.count() % MaxPointTime);
 	else
@@ -44,31 +266,70 @@ void CRenderTools::RenderEvalEnvelope(CEnvPoint *pPoints, int NumPoints, int Cha
 	int TimeMillis = (int)(TimeNanos / std::chrono::nanoseconds(1ms).count()).count();
 	for(int i = 0; i < NumPoints - 1; i++)
 	{
-		if(TimeMillis >= pPoints[i].m_Time && TimeMillis <= pPoints[i + 1].m_Time)
+		const CEnvPoint *pCurrentPoint = pPoints->GetPoint(i);
+		const CEnvPoint *pNextPoint = pPoints->GetPoint(i + 1);
+		if(TimeMillis >= pCurrentPoint->m_Time && TimeMillis <= pNextPoint->m_Time)
 		{
-			float Delta = pPoints[i + 1].m_Time - pPoints[i].m_Time;
-			float a = (float)(((double)TimeNanos.count() / (double)std::chrono::nanoseconds(1ms).count()) - pPoints[i].m_Time) / Delta;
+			const float Delta = pNextPoint->m_Time - pCurrentPoint->m_Time;
+			float a = (float)(((double)TimeNanos.count() / (double)std::chrono::nanoseconds(1ms).count()) - pCurrentPoint->m_Time) / Delta;
 
-			if(pPoints[i].m_Curvetype == CURVETYPE_SMOOTH)
-				a = -2 * a * a * a + 3 * a * a; // second hermite basis
-			else if(pPoints[i].m_Curvetype == CURVETYPE_SLOW)
+			switch(pCurrentPoint->m_Curvetype)
+			{
+			case CURVETYPE_STEP:
+				a = 0.0f;
+				break;
+
+			case CURVETYPE_SLOW:
 				a = a * a * a;
-			else if(pPoints[i].m_Curvetype == CURVETYPE_FAST)
+				break;
+
+			case CURVETYPE_FAST:
+				a = 1.0f - a;
+				a = 1.0f - a * a * a;
+				break;
+
+			case CURVETYPE_SMOOTH:
+				a = -2.0f * a * a * a + 3.0f * a * a; // second hermite basis
+				break;
+
+			case CURVETYPE_BEZIER:
 			{
-				a = 1 - a;
-				a = 1 - a * a * a;
+				const CEnvPointBezier *pCurrentPointBezier = pPoints->GetBezier(i);
+				const CEnvPointBezier *pNextPointBezier = pPoints->GetBezier(i + 1);
+				if(pCurrentPointBezier == nullptr || pNextPointBezier == nullptr)
+					break; // fallback to linear
+				for(int c = 0; c < Channels; c++)
+				{
+					// monotonic 2d cubic bezier curve
+					const vec2 p0 = vec2(pCurrentPoint->m_Time / 1000.0f, fx2f(pCurrentPoint->m_aValues[c]));
+					const vec2 p3 = vec2(pNextPoint->m_Time / 1000.0f, fx2f(pNextPoint->m_aValues[c]));
+
+					const vec2 OutTang = vec2(pCurrentPointBezier->m_aOutTangentDeltaX[c] / 1000.0f, fx2f(pCurrentPointBezier->m_aOutTangentDeltaY[c]));
+					const vec2 InTang = -vec2(pNextPointBezier->m_aInTangentDeltaX[c] / 1000.0f, fx2f(pNextPointBezier->m_aInTangentDeltaY[c]));
+					vec2 p1 = p0 + OutTang;
+					vec2 p2 = p3 - InTang;
+
+					// validate bezier curve
+					ValidateFCurve(p0, p1, p2, p3);
+
+					// solve x(a) = time for a
+					a = clamp(SolveBezier(TimeMillis / 1000.0f, p0.x, p1.x, p2.x, p3.x), 0.0f, 1.0f);
+
+					// value = y(t)
+					Result[c] = bezier(p0.y, p1.y, p2.y, p3.y, a);
+				}
+				return;
 			}
-			else if(pPoints[i].m_Curvetype == CURVETYPE_STEP)
-				a = 0;
-			else
-			{
-				// linear
+
+			case CURVETYPE_LINEAR: [[fallthrough]];
+			default:
+				break;
 			}
 
 			for(int c = 0; c < Channels; c++)
 			{
-				float v0 = fx2f(pPoints[i].m_aValues[c]);
-				float v1 = fx2f(pPoints[i + 1].m_aValues[c]);
+				const float v0 = fx2f(pCurrentPoint->m_aValues[c]);
+				const float v1 = fx2f(pNextPoint->m_aValues[c]);
 				Result[c] = v0 + (v1 - v0) * a;
 			}
 
@@ -76,10 +337,10 @@ void CRenderTools::RenderEvalEnvelope(CEnvPoint *pPoints, int NumPoints, int Cha
 		}
 	}
 
-	Result.r = fx2f(pPoints[NumPoints - 1].m_aValues[0]);
-	Result.g = fx2f(pPoints[NumPoints - 1].m_aValues[1]);
-	Result.b = fx2f(pPoints[NumPoints - 1].m_aValues[2]);
-	Result.a = fx2f(pPoints[NumPoints - 1].m_aValues[3]);
+	Result.r = fx2f(pLastPoint->m_aValues[0]);
+	Result.g = fx2f(pLastPoint->m_aValues[1]);
+	Result.b = fx2f(pLastPoint->m_aValues[2]);
+	Result.a = fx2f(pLastPoint->m_aValues[3]);
 }
 
 static void Rotate(CPoint *pCenter, CPoint *pPoint, float Rotation)

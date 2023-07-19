@@ -70,6 +70,11 @@ french
 == 250
 == fr
 
+galician
+== Galego
+== 907
+== gl
+
 german
 == Deutsch
 == 276

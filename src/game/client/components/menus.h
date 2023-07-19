@@ -199,7 +199,7 @@ protected:
 		NUM_BUTTONS
 	};
 	char m_aPopupTitle[128];
-	char m_aPopupMessage[256];
+	char m_aPopupMessage[IO_MAX_PATH_LENGTH + 256];
 	struct
 	{
 		char m_aLabel[64];
@@ -259,6 +259,7 @@ protected:
 		char m_aFilename[IO_MAX_PATH_LENGTH];
 		char m_aName[IO_MAX_PATH_LENGTH];
 		bool m_IsDir;
+		bool m_IsLink;
 		int m_StorageType;
 		time_t m_Date;
 
@@ -318,13 +319,16 @@ protected:
 	};
 
 	char m_aCurrentDemoFolder[IO_MAX_PATH_LENGTH];
+	char m_aCurrentDemoSelectionName[IO_MAX_PATH_LENGTH];
 	CLineInputBuffered<IO_MAX_PATH_LENGTH> m_DemoRenameInput;
 	CLineInputBuffered<IO_MAX_PATH_LENGTH> m_DemoSliceInput;
+#if defined(CONF_VIDEORECORDER)
 	CLineInputBuffered<IO_MAX_PATH_LENGTH> m_DemoRenderInput;
+#endif
 	int m_DemolistSelectedIndex;
-	bool m_DemolistSelectedIsDir;
 	bool m_DemolistSelectedReveal = false;
 	int m_DemolistStorageType;
+	bool m_DemolistMultipleStorages = false;
 	int m_Speed = 4;
 
 	std::chrono::nanoseconds m_DemoPopulateStartTime{0};
@@ -425,6 +429,7 @@ protected:
 	void RenderDemoPlayerSliceSavePopup(CUIRect MainView);
 	void RenderDemoList(CUIRect MainView);
 	void PopupConfirmDeleteDemo();
+	void PopupConfirmDeleteFolder();
 
 	// found in menus_start.cpp
 	void RenderStartMenu(CUIRect MainView);
@@ -444,6 +449,7 @@ protected:
 
 	// found in menus_browser.cpp
 	int m_SelectedIndex;
+	bool m_ServerBrowserShouldRevealSelection;
 	void RenderServerbrowserServerList(CUIRect View);
 	void Connect(const char *pAddress);
 	void PopupConfirmSwitchServer();

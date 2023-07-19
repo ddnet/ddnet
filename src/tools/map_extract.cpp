@@ -2,6 +2,7 @@
 #include <base/logger.h>
 #include <base/system.h>
 #include <engine/gfx/image_loader.h>
+#include <engine/graphics.h>
 #include <engine/shared/datafile.h>
 #include <engine/storage.h>
 #include <game/mapitems.h>
@@ -39,7 +40,7 @@ bool Process(IStorage *pStorage, const char *pMapName, const char *pPathSave)
 
 	for(int i = 0; i < Num; i++)
 	{
-		CMapItemImage *pItem = (CMapItemImage *)Reader.GetItem(Start + i);
+		CMapItemImage_v2 *pItem = (CMapItemImage_v2 *)Reader.GetItem(Start + i);
 		char *pName = (char *)Reader.GetData(pItem->m_ImageName);
 
 		if(pItem->m_External)
@@ -49,6 +50,18 @@ bool Process(IStorage *pStorage, const char *pMapName, const char *pPathSave)
 		str_format(aBuf, sizeof(aBuf), "%s/%s.png", pPathSave, pName);
 		dbg_msg("map_extract", "writing image: %s (%dx%d)", aBuf, pItem->m_Width, pItem->m_Height);
 
+		const int Format = pItem->m_Version < CMapItemImage_v2::CURRENT_VERSION ? CImageInfo::FORMAT_RGBA : pItem->m_Format;
+		EImageFormat OutputFormat;
+		if(Format == CImageInfo::FORMAT_RGBA)
+			OutputFormat = IMAGE_FORMAT_RGBA;
+		else if(Format == CImageInfo::FORMAT_RGB)
+			OutputFormat = IMAGE_FORMAT_RGB;
+		else
+		{
+			dbg_msg("map_extract", "ignoring image '%s' with unknown format %d", aBuf, Format);
+			continue;
+		}
+
 		// copy image data
 		IOHANDLE File = io_open(aBuf, IOFLAG_WRITE);
 		if(File)
@@ -56,7 +69,7 @@ bool Process(IStorage *pStorage, const char *pMapName, const char *pPathSave)
 			TImageByteBuffer ByteBuffer;
 			SImageByteBuffer ImageByteBuffer(&ByteBuffer);
 
-			if(SavePNG(IMAGE_FORMAT_RGBA, (const uint8_t *)Reader.GetData(pItem->m_ImageData), ImageByteBuffer, pItem->m_Width, pItem->m_Height))
+			if(SavePNG(OutputFormat, (const uint8_t *)Reader.GetData(pItem->m_ImageData), ImageByteBuffer, pItem->m_Width, pItem->m_Height))
 				io_write(File, &ByteBuffer.front(), ByteBuffer.size());
 			io_close(File);
 		}

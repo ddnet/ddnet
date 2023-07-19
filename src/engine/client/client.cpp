@@ -2879,18 +2879,18 @@ void CClient::Update()
 
 	if(State() == IClient::STATE_ONLINE)
 	{
-		if(!m_lpEditJobs.empty())
+		if(!m_EditJobs.empty())
 		{
-			std::shared_ptr<CDemoEdit> e = m_lpEditJobs.front();
-			if(e->Status() == IJob::STATE_DONE)
+			std::shared_ptr<CDemoEdit> pJob = m_EditJobs.front();
+			if(pJob->Status() == IJob::STATE_DONE)
 			{
-				char aBuf[256];
-				str_format(aBuf, sizeof(aBuf), "Successfully saved the replay to %s!", e->Destination());
+				char aBuf[IO_MAX_PATH_LENGTH + 64];
+				str_format(aBuf, sizeof(aBuf), "Successfully saved the replay to %s!", pJob->Destination());
 				m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", aBuf);
 
 				GameClient()->Echo(Localize("Successfully saved the replay!"));
 
-				m_lpEditJobs.pop_front();
+				m_EditJobs.pop_front();
 			}
 		}
 	}
@@ -3200,7 +3200,7 @@ void CClient::Run()
 				{
 					Input()->MouseModeRelative();
 					GameClient()->OnActivateEditor();
-					m_pEditor->ResetMentions();
+					m_pEditor->OnActivate();
 					m_EditorActive = true;
 				}
 			}
@@ -3343,8 +3343,15 @@ void CClient::Run()
 		else if(g_Config.m_ClRefreshRate)
 		{
 			SleepTimeInNanoSeconds = (std::chrono::nanoseconds(1s) / (int64_t)g_Config.m_ClRefreshRate) - (Now - LastTime);
-			if(SleepTimeInNanoSeconds > 0ns)
-				net_socket_read_wait(m_aNetClient[CONN_MAIN].m_Socket, SleepTimeInNanoSeconds);
+			auto SleepTimeInNanoSecondsInner = SleepTimeInNanoSeconds;
+			auto NowInner = Now;
+			while((SleepTimeInNanoSecondsInner / std::chrono::nanoseconds(1us).count()) > 0ns)
+			{
+				net_socket_read_wait(m_aNetClient[CONN_MAIN].m_Socket, SleepTimeInNanoSecondsInner);
+				auto NowInnerCalc = time_get_nanoseconds();
+				SleepTimeInNanoSecondsInner -= (NowInnerCalc - NowInner);
+				NowInner = NowInnerCalc;
+			}
 			Slept = true;
 		}
 		if(Slept)
@@ -3811,7 +3818,7 @@ void CClient::SaveReplay(const int Length, const char *pFilename)
 		// Create a job to do this slicing in background because it can be a bit long depending on the file size
 		std::shared_ptr<CDemoEdit> pDemoEditTask = std::make_shared<CDemoEdit>(GameClient()->NetVersion(), &m_SnapshotDelta, m_pStorage, pSrc, aFilename, StartTick, EndTick);
 		Engine()->AddJob(pDemoEditTask);
-		m_lpEditJobs.push_back(pDemoEditTask);
+		m_EditJobs.push_back(pDemoEditTask);
 
 		// And we restart the recorder
 		DemoRecorder_StartReplayRecorder();
@@ -3905,7 +3912,11 @@ const char *CClient::DemoPlayer_Render(const char *pFilename, int StorageType, c
 
 	this->CClient::StartVideo(NULL, this, pVideoName);
 	m_DemoPlayer.Play();
-	m_DemoPlayer.SetSpeed(g_aSpeeds[SpeedIndex]);
+	m_DemoPlayer.SetSpeedIndex(SpeedIndex);
+	if(Config()->m_ClVideoPauseOnStart)
+	{
+		m_DemoPlayer.Pause();
+	}
 	//m_pConsole->Print(IConsole::OUTPUT_LEVEL_DEBUG, "demo_recorder", "demo eof");
 	return 0;
 }
@@ -4683,7 +4694,13 @@ int main(int argc, const char **argv)
 	{
 		bool RegisterFail = false;
 
-		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pEngine);
+		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pEngine, false);
+
+		CleanerFunctions.push([pEngine]() {
+			// Has to be before destroying graphics so that skin download thread can finish
+			delete pEngine;
+		});
+
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pConsole);
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pConfigManager);
 

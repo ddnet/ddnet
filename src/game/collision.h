@@ -6,7 +6,7 @@
 #include <base/vmath.h>
 #include <engine/shared/protocol.h>
 
-#include <list>
+#include <vector>
 
 enum
 {
@@ -73,7 +73,7 @@ public:
 	int Entity(int x, int y, int Layer) const;
 	int GetPureMapIndex(float x, float y) const;
 	int GetPureMapIndex(vec2 Pos) const { return GetPureMapIndex(Pos.x, Pos.y); }
-	std::list<int> GetMapIndices(vec2 PrevPos, vec2 Pos, unsigned MaxIndices = 0) const;
+	std::vector<int> GetMapIndices(vec2 PrevPos, vec2 Pos, unsigned MaxIndices = 0) const;
 	int GetMapIndex(vec2 Pos) const;
 	bool TileExists(int Index) const;
 	bool TileExistsNext(int Index) const;

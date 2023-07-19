@@ -100,12 +100,6 @@ Clan
 Client
 == Client
 
-Close
-== Fermer
-
-Connect
-== Se connecter
-
 Connecting to
 == Connexion à
 
@@ -688,9 +682,6 @@ Are you sure that you want to disconnect your dummy?
 Reload
 == Recharger
 
-Old mouse mode
-== Ancien mode de souris
-
 Server best:
 == Meilleur score du serveur
 
@@ -916,8 +907,8 @@ Show others
 Unfinished map
 == Carte non terminée
 
-Default length: %d
-== Durée par défaut : %d
+Default length
+== Durée par défaut
 
 Highlighted message
 == Message en surbrillance
@@ -945,9 +936,6 @@ Ghost
 
 Show kill messages
 == Afficher les messages d'élimination
-
-Select a name
-== Choisissez un pseudonyme
 
 Markers
 == Marqueurs
@@ -1253,9 +1241,6 @@ https://ddnet.org/discord
 Are you sure that you want to disconnect and switch to a different server?
 == Êtes vous sur de vouloir vous déconnecter et changer de serveur?
 
-Refreshing...
-== Actualisation...
-
 Show local player's key presses
 == Montrer les touches appuyées des autres joueurs
 
@@ -1300,9 +1285,6 @@ default
 
 custom
 == Personnalisé
-
-Graphics cards
-== Carte graphique
 
 auto
 == Automatique
@@ -1361,13 +1343,6 @@ Download community skins
 Enable controller
 == Activer la manette
 
-Controller %d: %s
-== Manette %d: %s
-
-Click to cycle through all available controllers.
-== Cliquez pour essayer toutes les manettes disponibles.
-
-[Ingame controller mode]
 Relative
 == Relatif
 
@@ -1387,17 +1362,11 @@ UI controller sens.
 Controller jitter tolerance
 == Tolérance gigue de la manette
 
-Device
-== Manette
-
 Status
 == Statut
 
 Aim bind
 == Touche visée
-
-Controller Axis #%d
-== Axe manette #%d
 
 Mouse
 == Souris
@@ -1557,12 +1526,6 @@ Slow down the demo
 
 Speed up the demo
 == Accélérer la démo
-
-Mark the beginning of a cut
-== Marquer le début d'une coupe
-
-Mark the end of a cut
-== Marquer la fin d'une coupe
 
 Export cut as a separate demo
 == Exporter la coupe comme une démo séparée
@@ -1737,3 +1700,33 @@ Add Clan
 
 Create a random skin
 == Créer un skin aléatoire
+
+A demo with this name already exists
+== 
+
+No server selected
+== 
+
+Mark the beginning of a cut (right click to reset)
+== 
+
+Mark the end of a cut (right click to reset)
+== 
+
+Close the demo player
+== 
+
+Export demo cut
+== 
+
+Cut interval
+== 
+
+Cut length
+== 
+
+Axis
+== 
+
+Graphics card
+== 

@@ -3,10 +3,9 @@ name: Build
 on:
   push:
     branches-ignore:
-      - staging.tmp
-      - trying.tmp
-      - staging-squash-merge.tmp
+      - gh-readonly-queue/**
   pull_request:
+  merge_group:
 
 jobs:
   build-cmake:

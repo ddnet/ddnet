@@ -76,9 +76,9 @@ bool CRaceHelper::IsStart(CGameClient *pClient, vec2 Prev, vec2 Pos)
 	}
 	else
 	{
-		std::list<int> Indices = pCollision->GetMapIndices(Prev, Pos);
-		if(!Indices.empty())
-			for(int &Indice : Indices)
+		std::vector<int> vIndices = pCollision->GetMapIndices(Prev, Pos);
+		if(!vIndices.empty())
+			for(int &Indice : vIndices)
 			{
 				if(pCollision->GetTileIndex(Indice) == TILE_START)
 					return true;

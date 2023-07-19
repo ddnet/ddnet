@@ -89,12 +89,6 @@ Clan
 Client
 == Клиент
 
-Close
-== Закрыть
-
-Connect
-== Подключиться
-
 Connecting to
 == Подключение к
 
@@ -666,9 +660,6 @@ Show ghost
 No updates available
 == Нет доступных обновлений
 
-Select a name
-== Выберите имя
-
 Show other players' hook collision lines
 == Показывать коллизии крюка других игроков
 
@@ -683,9 +674,6 @@ Show others
 
 Game paused
 == Пауза
-
-Old mouse mode
-== Режим старой мыши
 
 Team message
 == Сообщение от команды
@@ -942,8 +930,8 @@ Friend message
 Save the best demo of each race
 == Сохранять лучшее демо каждой карты
 
-Default length: %d
-== Станд. длина: %d
+Default length
+== Станд. длина
 
 Enable replays
 == Включить записи
@@ -1024,13 +1012,13 @@ Grabs
 == Захватов
 
 1 new mention
-== 1 новое упоминание
+== 1 упоминание
 
 %d new mentions
-== %d новых упоминаний
+== %d упоминаний
 
 9+ new mentions
-== 9+ новых упоминаний
+== 9+ упоминаний
 
 Client message
 == Клиентское сообщение
@@ -1237,9 +1225,6 @@ Desktop fullscreen
 Are you sure that you want to disconnect and switch to a different server?
 == Вы уверены, что хотите отключиться и перейти на другой сервер?
 
-Refreshing...
-== Обновление...
-
 Kill Messages
 == Сообщения о смерти
 
@@ -1272,9 +1257,6 @@ default
 
 custom
 == перс.
-
-Graphics cards
-== Видеокарты
 
 auto
 == авто
@@ -1324,13 +1306,6 @@ Choose default eyes when joining a server
 Enable controller
 == Включить контроллер
 
-Controller %d: %s
-== Контроллер %d: %s
-
-Click to cycle through all available controllers.
-== Нажмите для переключения между всеми доступными контроллерами.
-
-[Ingame controller mode]
 Relative
 == Относительный
 
@@ -1350,17 +1325,11 @@ UI controller sens.
 Controller jitter tolerance
 == Устойчивость к движению контроллера
 
-Device
-== Устройство
-
 Status
 == Состояние
 
 Aim bind
 == Привязка оси
-
-Controller Axis #%d
-== Ось контроллера #%d
 
 Mouse
 == Мышь
@@ -1545,14 +1514,8 @@ Slow down the demo
 Speed up the demo
 == Ускорить демо
 
-Mark the beginning of a cut
-== Отметить начало участка
-
-Mark the end of a cut
-== Отметить конец участка
-
 Export cut as a separate demo
-== Экспортировать участок отдельно
+== Экспортировать отрезок отдельно
 
 Toggle keyboard shortcuts
 == Включить горячие клавиши
@@ -1722,3 +1685,33 @@ None
 
 Add Clan
 == Добавить клан
+
+A demo with this name already exists
+== Демо с таким именем уже существует
+
+No server selected
+== Не выбран сервер
+
+Mark the beginning of a cut (right click to reset)
+== Отметить начало отрезка (щелкните правой кнопкой мыши, чтобы сбросить)
+
+Mark the end of a cut (right click to reset)
+== Отметить конец отрезка (щелкните правой кнопкой мыши, чтобы сбросить)
+
+Close the demo player
+== Закрыть проигрыватель демок
+
+Export demo cut
+== Экспортировать отрезок демки
+
+Cut interval
+== Интервал отрезка
+
+Cut length
+== Длина отрезка
+
+Axis
+== Ось
+
+Graphics card
+== Видеокарта

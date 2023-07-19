@@ -76,12 +76,6 @@ Clan
 Client
 == Klient
 
-Close
-== Zavrieť
-
-Connect
-== Pripojiť
-
 Connecting to
 == Pripojujem sa k
 
@@ -756,7 +750,7 @@ Your nickname '%s' is already used (%d points). Do you still want to use it?
 Checking for existing player with your name
 == 
 
-Cancel
+A demo with this name already exists
 == 
 
 File '%s' already exists, do you want to overwrite it?
@@ -831,9 +825,6 @@ Exclude
 %d player
 == 
 
-Refreshing...
-== 
-
 Are you sure that you want to disconnect and switch to a different server?
 == 
 
@@ -856,6 +847,9 @@ Copy info
 == 
 
 Leak IP
+== 
+
+No server selected
 == 
 
 Online players (%d)
@@ -889,18 +883,6 @@ Are you sure that you want to remove the clan '%s' from your friends list?
 Add Clan
 == 
 
-Select a name
-== 
-
-Please use a different name
-== 
-
-File already exists, do you want to overwrite it?
-== 
-
-Remove chat
-== 
-
 Play the current demo
 == 
 
@@ -922,10 +904,10 @@ Slow down the demo
 Speed up the demo
 == 
 
-Mark the beginning of a cut
+Mark the beginning of a cut (right click to reset)
 == 
 
-Mark the end of a cut
+Mark the end of a cut (right click to reset)
 == 
 
 Export cut as a separate demo
@@ -937,7 +919,28 @@ Go back one marker
 Go forward one marker
 == 
 
+Close the demo player
+== 
+
 Toggle keyboard shortcuts
+== 
+
+Export demo cut
+== 
+
+Cut interval
+== 
+
+Cut length
+== 
+
+Remove chat
+== 
+
+Please use a different name
+== 
+
+File already exists, do you want to overwrite it?
 == 
 
 Loading demo files
@@ -1159,10 +1162,10 @@ Chat command
 Enable controller
 == 
 
-Controller %d: %s
+Controller
 == 
 
-Click to cycle through all available controllers.
+Ingame controller mode
 == 
 
 [Ingame controller mode]
@@ -1171,9 +1174,6 @@ Relative
 
 [Ingame controller mode]
 Absolute
-== 
-
-Ingame controller mode
 == 
 
 Ingame controller sens.
@@ -1188,16 +1188,13 @@ Controller jitter tolerance
 No controller found. Plug in a controller.
 == 
 
-Device
+Axis
 == 
 
 Status
 == 
 
 Aim bind
-== 
-
-Controller Axis #%d
 == 
 
 Mouse
@@ -1209,13 +1206,13 @@ Ingame mouse sens.
 UI mouse sens.
 == 
 
-Controller
-== 
-
 Reset controls
 == 
 
 Are you sure that you want to reset the controls to their defaults?
+== 
+
+Cancel
 == 
 
 Dummy
@@ -1233,10 +1230,10 @@ Windowed fullscreen
 Desktop fullscreen
 == 
 
-may cause delay
+Screen
 == 
 
-Screen
+may cause delay
 == 
 
 Allows maps to render with more detail
@@ -1254,7 +1251,7 @@ default
 custom
 == 
 
-Graphics cards
+Graphics card
 == 
 
 auto
@@ -1482,7 +1479,7 @@ Save the best demo of each race
 Enable replays
 == 
 
-Default length: %d
+Default length
 == 
 
 When you cross the start line, show a ghost tee replicating the movements of your best time
@@ -1500,10 +1497,10 @@ Gameplay
 Overlay entities
 == 
 
-Size
+Show text entities
 == 
 
-Show text entities
+Size
 == 
 
 Opacity
@@ -1534,9 +1531,6 @@ AntiPing: predict weapons
 == 
 
 AntiPing: predict grenade paths
-== 
-
-Old mouse mode
 == 
 
 Background

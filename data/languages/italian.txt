@@ -81,12 +81,6 @@ Clan
 Client
 == Client
 
-Close
-== Chiudi
-
-Connect
-== Connetti
-
 Connecting to
 == Connessione a
 
@@ -763,9 +757,6 @@ Countries
 Types
 == Tipi
 
-Select a name
-== Seleziona un nome
-
 Please use a different name
 == Per favore usa un nome differente
 
@@ -1009,8 +1000,8 @@ Client message
 Save the best demo of each race
 == Salva la miglior demo di ogni partita
 
-Default length: %d
-== Lunghezza predefinita: %d
+Default length
+== Lunghezza predefinita
 
 Enable replays
 == Abilita i replay
@@ -1053,9 +1044,6 @@ Show other players' hook collision lines
 
 Show other players' key presses
 == Mostra i tasti degli altri giocatori
-
-Old mouse mode
-== Modalità mouse vecchio
 
 Use current map as background
 == Usa la mappa attuale come sfondo
@@ -1283,7 +1271,7 @@ Getting game info
 Requesting to join the game
 == 
 
-Cancel
+A demo with this name already exists
 == 
 
 File '%s' already exists, do you want to overwrite it?
@@ -1322,9 +1310,6 @@ CHN
 Getting server list from master server
 == 
 
-Refreshing...
-== 
-
 Are you sure that you want to disconnect and switch to a different server?
 == 
 
@@ -1332,6 +1317,9 @@ Copy info
 == 
 
 Leak IP
+== 
+
+No server selected
 == 
 
 Online players (%d)
@@ -1386,10 +1374,10 @@ Slow down the demo
 Speed up the demo
 == 
 
-Mark the beginning of a cut
+Mark the beginning of a cut (right click to reset)
 == 
 
-Mark the end of a cut
+Mark the end of a cut (right click to reset)
 == 
 
 Export cut as a separate demo
@@ -1401,7 +1389,19 @@ Go back one marker
 Go forward one marker
 == 
 
+Close the demo player
+== 
+
 Toggle keyboard shortcuts
+== 
+
+Export demo cut
+== 
+
+Cut interval
+== 
+
+Cut length
 == 
 
 Loading demo files
@@ -1476,10 +1476,10 @@ Chat command
 Enable controller
 == 
 
-Controller %d: %s
+Controller
 == 
 
-Click to cycle through all available controllers.
+Ingame controller mode
 == 
 
 [Ingame controller mode]
@@ -1488,9 +1488,6 @@ Relative
 
 [Ingame controller mode]
 Absolute
-== 
-
-Ingame controller mode
 == 
 
 Ingame controller sens.
@@ -1505,16 +1502,13 @@ Controller jitter tolerance
 No controller found. Plug in a controller.
 == 
 
-Device
+Axis
 == 
 
 Status
 == 
 
 Aim bind
-== 
-
-Controller Axis #%d
 == 
 
 Mouse
@@ -1526,13 +1520,13 @@ Ingame mouse sens.
 UI mouse sens.
 == 
 
-Controller
-== 
-
 Reset controls
 == 
 
 Are you sure that you want to reset the controls to their defaults?
+== 
+
+Cancel
 == 
 
 Dummy
@@ -1562,7 +1556,7 @@ default
 custom
 == 
 
-Graphics cards
+Graphics card
 == 
 
 auto

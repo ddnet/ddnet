@@ -1,27 +1,8 @@
 ##### authors #####
-#originally created by:
-#	ReGnuM
-#modified by:
-#	Ninja Style		2011-04-06 23:22:06
-#	Alexandre		2011-07-11 11:30:00
-#	GaBOr			2011-07-15 01:23:39
-#	HeroiAmarelo	2012-08-01 15:52:45
-#	Mortcheck		2012-11-03 22:58:43
-#	FeaRZ		2020-07-07 12:09:00
-#	Ryozuki         2020-07-09 12:06:00
-# Headshot        2020-11-07 12:40:00
-# Headshot        2021-05-30 17:00:00
-# Deëivid!        2021-10-27 00:49:00
-# Deëivid!        2022-02-05 21:53:00
-# Deëivid!        2022-03-27 18:40:00
-# Deëivid!        2022-05-13 18:44:00
-# Deëivid!        2022-06-22 19:26:00
-# Deëivid!        2022-07-05 22:30:00
-# Deëivid!        2022-10-08 19:20:00
-# Deëivid!        2023-01-05 21:05:00
-# Deëivid!        2023-02-26 00:35:00
-# Deëivid!        2023-05-22 19:54:00
-# Deëivid!        2023-07-01 22:52:00
+# based on Spanish translation (2023-07-05)
+#
+# originally created by:
+# TormentaDeFacha and Mercadona (2023-07-05)
 ##### /authors #####
 
 ##### translated strings #####
@@ -45,7 +26,7 @@
 == ¡%s gana!
 
 -Page %d-
-== -Página %d-
+== -Páxina %d-
 
 Abort
 == Cancelar
@@ -63,22 +44,22 @@ All
 == Todos
 
 Are you sure that you want to quit?
-== ¿Estás seguro de que quieres salir?
+== Estás seguro de que queres saír?
 
 Automatically record demos
-== Grabar demos automáticamente
+== Gravar demos automaticamente
 
 Automatically take game over screenshot
-== Captura de pantalla al final de la partida
+== Captura de pantalla ao final da partida
 
 Blue team
 == Equipo azul
 
 Blue team wins!
-== ¡El equipo azul gana!
+== O equipo azul gana!
 
 Body
-== Cuerpo
+== Corpo
 
 Call vote
 == Votar
@@ -95,6 +76,12 @@ Clan
 Client
 == Cliente
 
+Close
+== Pechar
+
+Connect
+== Conectar
+
 Connecting to
 == Conectando con
 
@@ -105,16 +92,16 @@ Console
 == Consola
 
 Controls
-== Controles
+== Controis
 
 Count players only
-== Solo contar jugadores
+== Só contar xogadores
 
 Current
 == Actual
 
 Custom colors
-== Colores personalizados
+== Cores personalizadas
 
 Delete
 == Borrar
@@ -126,7 +113,7 @@ Demo details
 == Detalles de la demo
 
 Demofile: %s
-== Archivo: %s
+== Arquivo: %s
 
 Demos
 == Demos
@@ -141,7 +128,7 @@ Downloading map
 == Descargando mapa
 
 Draw!
-== ¡Empate!
+== Empate!
 
 Dynamic Camera
 == Cámara dinámica
@@ -150,10 +137,10 @@ Emoticon
 == Emoticon
 
 Error
-== Error
+== Erro
 
 Error loading demo
-== Error al cargar la demo
+== Erro ao cargar a demo
 
 Favorite
 == Favorito
@@ -162,7 +149,7 @@ Favorites
 == Favoritos
 
 Feet
-== Pies
+== Pés
 
 Filter
 == Filtro
@@ -171,7 +158,7 @@ Fire
 == Disparar
 
 Folder
-== Carpeta
+== Cartafol
 
 Force vote
 == Forzar
@@ -186,25 +173,25 @@ Fullscreen
 == Pantalla completa
 
 Game
-== Juego
+== Xogo
 
 Game info
-== Información del juego
+== Información do xogo
 
 Game over
-== Fin de la partida
+== Fin da partida
 
 Game paused
-== Juego en Pausa
+== Xogo en Pausa
 
 Game type
 == Modo
 
 Game types:
-== Tipos de juego:
+== Tipos de Xogo:
 
 General
-== General
+== Xeneral
 
 Graphics
 == Gráficos
@@ -213,13 +200,13 @@ Grenade
 == Granada
 
 Hammer
-== Martillo
+== Martelo
 
 Has people playing
-== Hay gente jugando
+== Hai xente xogando
 
 High Detail
-== Más detalles (HD)
+== Máis detalles (HD)
 
 Hook
 == Gancho
@@ -228,16 +215,16 @@ Invalid Demo
 == Demo inválida
 
 Join blue
-== Unirse al azul
+== Unirse ao azul
 
 Join red
-== Unirse al rojo
+== Unirse ao vermello
 
 Jump
 == Saltar
 
 Kick player
-== Expulsar jugador
+== Expulsar xogador
 
 Language
 == Idioma
@@ -249,40 +236,40 @@ Map
 == Mapa
 
 Move left
-== Mover a la izquierda
+== Mover á esquerda
 
 Move player to spectators
-== Mover jugador a espectadores
+== Mover xogador a espectadores
 
 Move right
-== Mover a la derecha
+== Mover á dereita
 
 Movement
-== Movimiento
+== Movemento
 
 Mute when not active
-== Silenciar si no está activo
+== Silenciar se non está activo
 
 Name
-== Nombre
+== Nome
 
 Next weapon
-== Arma siguiente
+== Arma seguinte
 
 Nickname
-== Apodo
+== Alcume
 
 No
 == No
 
 No password
-== Sin contraseña
+== Sen contrasinal
 
 No servers found
-== Ningún servidor encontrado
+== Ningún servidor atopado
 
 No servers match your filter criteria
-== Ningún servidor corresponde a los criterios de filtrado
+== Ningún servidor corresponde aos criterios de filtrado
 
 Ok
 == Aceptar
@@ -291,13 +278,13 @@ Open
 == Abrir
 
 Parent Folder
-== Directorio padre
+== Directorio pai
 
 Password
-== Contraseña
+== Contrasinal
 
 Password incorrect
-== Contraseña incorreta
+== Contrasinal incorreta
 
 Ping
 == Ping
@@ -313,34 +300,34 @@ Play background music
 == Reproducir música de fondo
 
 Player
-== Jugador
+== Xogador
 
 Player country:
-== País del jugador
+== País do xogador
 
 Player options
-== Opciones de jugador
+== Opcións de xogador
 
 Players
-== Jugadores
+== Xogadores
 
 Please balance teams!
-== Por favor, ¡equilibrad los equipos!
+== Por favor, equilibrade os equipos!
 
 Prev. weapon
 == Arma anterior
 
 Quit
-== Salir
+== Saír
 
 Reason:
 == Motivo:
 
 Red team
-== Equipo rojo
+== Equipo vermello
 
 Red team wins!
-== ¡El equipo rojo gana!
+== O equipo vermello gana!
 
 Refresh
 == Actualizar
@@ -361,7 +348,10 @@ Rename demo
 == Renombrar demo
 
 Reset filter
-== Resetear filtro
+== Restablecer filtro
+
+Sample rate
+== Frecuencia de mostraxe
 
 Score
 == Puntos
@@ -370,25 +360,25 @@ Score limit
 == Límite puntos
 
 Scoreboard
-== Puntuación
+== Puntuaxe
 
 Screenshot
 == Captura de pantalla
 
 Server address:
-== IP del servidor:
+== IP do servidor:
 
 Server details
-== Detalles del servidor
+== Detalles do servidor
 
 Server filter
-== Filtro del servidor
+== Filtro do servidor
 
 Server info
 == Servidor
 
 Server not full
-== Servidor sin llenar
+== Servidor sen encher
 
 Shotgun
 == Escopeta
@@ -397,28 +387,28 @@ Show chat
 == Mostrar chat
 
 Show friends only
-== Solo mostrar amigos
+== Só mostrar amigos
 
 Show ingame HUD
-== Mostrar HUD durante el juego
+== Mostrar HUD durante o xogo
 
 Show name plates
-== Mostrar apodos
+== Mostrar alcumes
 
 Show only chat messages from friends
-== Recibir mensajes solo de amigos
+== Recibir mensaxes só de amigos
 
 Sound
-== Sonido
+== Son
 
 Sound error
-== Error de sonido
+== Erro de son
 
 Spectate
 == Asistir
 
 Spectate next
-== Observar siguiente
+== Observar seguinte
 
 Spectate previous
 == Observar anterior
@@ -430,16 +420,16 @@ Spectators
 == Espectadores
 
 Stop record
-== Detener grabación
+== Deter gravación
 
 Strict gametype filter
-== Filtro de tipo de juego estricto
+== Filtro de tipo de xogo estrito
 
 Sudden Death
-== Muerte súbita
+== Morte súbita
 
 Switch weapon on pickup
-== Cambiar al arma recogida
+== Cambiar á arma recollida
 
 Team
 == Equipo
@@ -448,34 +438,34 @@ Team chat
 == En equipo
 
 The audio device couldn't be initialised.
-== El dispositivo de audio no pudo ser inicializado.
+== O dispositivo de audio non puido ser inicializado.
 
 The server is running a non-standard tuning on a pure game type.
-== El servidor está ejecutando una configuración no estándar en un tipo de juego puro.
+== O servidor está a executar unha configuración non estándar nun tipo de xogo puro.
 
 There's an unsaved map in the editor, you might want to save it before you quit the game.
-== Tienes un mapa sin guardar en el editor, quizá quieras guardarlo antes de salir.
+== Tes un mapa sen gardar no editor, quizá queiras gardalo antes de saír.
 
 Time limit
-== Tiempo límite
+== Tempo límite
 
 Time limit: %d min
-== Tiempo límite: %d minutos
+== Tempo límite: %d minutos
 
 Try again
-== Intentar de nuevo
+== Tentar de novo
 
 Type
 == Tipo
 
 Unable to rename the demo
-== No se pudo renombrar la demo
+== Non se puido renombrar a demo
 
 Use sounds
-== Usar sonidos
+== Usar sons
 
 Use team colors for name plates
-== Usar el color de equipo en los apodos
+== Usar a cor de equipo nos alcumes
 
 V-Sync
 == V-Sync
@@ -487,7 +477,7 @@ Vote command:
 == Comando de votación:
 
 Vote description:
-== Descripción de la votación:
+== Descrición da votación:
 
 Vote no
 == Votar no
@@ -499,7 +489,7 @@ Voting
 == Votación
 
 Warmup
-== Calentamiento
+== Quecemento
 
 Weapon
 == Arma
@@ -508,12 +498,10 @@ Yes
 == Sí
 
 You must restart the game for all settings to take effect.
-== Debes reiniciar el juego para que los cambios tengan efecto.
-
-##### needs translation #####
+== Debes reiniciar o xogo para que os cambios teñan efecto.
 
 New name:
-== Nuevo nombre:
+== Novo nome:
 
 Sat.
 == Sat.
@@ -537,7 +525,7 @@ FSAA samples
 == Muestras FSAA
 
 Sound volume
-== Volumen del sonido
+== Volume do son
 
 Created:
 == Creado:
@@ -546,7 +534,7 @@ Max Screenshots
 == Número máximo de capturas
 
 Length:
-== Longitud:
+== Lonxitude:
 
 Laser
 == Láser
@@ -567,28 +555,28 @@ Record demo
 == Grabar demo
 
 Your skin
-== Tu skin
+== O teu skin
 
 Size:
 == Tamaño:
 
 Reset to defaults
-== Resetear por defecto
+== Restablecer por defecto
 
 Quit anyway?
-== ¿Salir de todos modos?
+== Saír de todos os xeitos?
 
 Version:
 == Versión:
 
 Round
-== Ronda
+== Rolda
 
 Lht.
 == Lum.
 
 UI Color
-== Color de menú
+== Cor de menú
 
 Crc:
 == Crc:
@@ -600,22 +588,22 @@ LAN
 == LAN
 
 Name plates size
-== Tamaño de la fuente de los apodos
+== Tamaño da fonte dos alcumes
 
 Type:
 == Tipo:
 
 Successfully saved the replay!
-== ¡Repetición guardada con éxito!
+== Repetición gardada con éxito!
 
 Replay feature is disabled!
-== ¡La función de repetición está desactivada!
+== A función de repetición está desactivada!
 
 Server best:
-== Mejor del servidor:
+== Mellor do servidor:
 
 Personal best:
-== Mejor personal:
+== Mellor persoal:
 
 Learn
 == Aprender
@@ -624,10 +612,10 @@ Browser
 == Navegador
 
 Ghost
-== Fantasma
+== Pantasma
 
 Loading DDNet Client
-== Cargando el cliente DDNet
+== Cargando o cliente DDNet
 
 Reconnect in %d sec
 == Reconectando en %d seg
@@ -636,49 +624,49 @@ Render demo
 == Renderizar demo
 
 Replace video
-== Reemplazar video
+== Substituír vídeo
 
 File already exists, do you want to overwrite it?
-== El archivo ya existe, ¿quieres sobrescribirlo?
+== O arquivo xa existe, queres sobrescribirlo?
 
 Are you sure that you want to disconnect?
-== ¿Estás seguro de que quieres desconectarte?
+== Estás seguro de que queres desconectarche?
 
 Disconnect Dummy
 == Desconectar Dummy
 
 Are you sure that you want to disconnect your dummy?
-== ¿Estás seguro de que quieres desconectar tu dummy?
+== Estás seguro de que queres desconectar o teu dummy?
 
 Welcome to DDNet
-== Bienvenido a DDNet
+== Benvido a DDNet
 
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
-== DDraceNetwork es un juego cooperativo en línea donde el objetivo es que tú y vuestro grupo de tees lleguen a la meta del mapa. Como recién llegado, deberías comenzar en los servidores Novice, que alojan los mapas más fáciles. Considera el ping para elegir un servidor cercano.
+== DDraceNetwork é un xogo cooperativo en liña onde o obxectivo é que ti e o voso grupo de tees cheguen á meta do mapa. Como recentemente chegado, deberías comezar nos servidores Novice, que aloxan os mapas máis fáciles. Considera o ping para elixir un servidor próximo
 
 It's recommended that you check the settings to adjust them to your liking before joining a server.
-== Se recomienda que verifiques la configuración para ajustarla a tu gusto antes de unirte a un servidor.
+== Recoméndase que verifiques a configuración para axustala ao teu gusto antes de unirche a un servidor.
 
 Please enter your nickname below.
-== Por favor, introduzca su apodo a continuación.
+== Por favor, introduza o seu alcume a continuación.
 
 Video name:
-== Nombre del video:
+== Nome do vídeo:
 
 Show DDNet map finishes in server browser
-== Marcar los mapas DDNet acabados en el navegador de servidores
+== Marcar os mapas DDNet acabados no navegador de servidores
 
 transmits your player name to info.ddnet.org
-== transmite tu nombre de jugador a info.ddnet.org
+== transmite o teu nome de xogador a info.ddnet.org
 
 Search
 == Buscar
 
 Exclude
-== Excluir
+== Excluír
 
 Filter connecting players
-== Filtrar jugadores conectándose
+== Filtrar xogadores conectándose
 
 Indicate map finish
 == Indicar mapa acabado
@@ -693,25 +681,28 @@ Types
 == Tipos
 
 DDNet %s is out!
-== ¡DDNet %s ya esta disponible!
+== DDNet %s xa esta dispoñible!
 
 Downloading %s:
 == Descargando %s:
 
 Update failed! Check log...
-== ¡Actualización fallida! Comprueba el registro...
+== Actualización errada! Comproba o rexistro...
 
 DDNet Client updated!
-== ¡Cliente DDNet actualizado!
+== Cliente DDNet actualizado!
 
 Update now
-== Actualizar ahora
+== Actualizar agora
 
 Restart
 == Reiniciar
 
+Select a name
+== Selecciona un nome
+
 Please use a different name
-== Por favor usa un nombre diferente
+== Por favor usa un nome diferente
 
 Remove chat
 == Eliminar chat
@@ -732,13 +723,13 @@ Markers
 == Marcadores
 
 Length
-== Longitud
+== Lonxitude
 
 Date
-== Fecha
+== Data
 
 Fetch Info
-== Obtener info.
+== Obter info.
 
 Render
 == Renderizar
@@ -759,25 +750,25 @@ Activate
 == Activar
 
 Save
-== Guardar
+== Gardar
 
 Switch weapon when out of ammo
-== Cambiar de arma cuando se acabe la munición
+== Cambiar de arma cando se acabe a munición
 
 Show clan above name plates
-== Mostrar el clan por encima de los nombres
+== Mostrar o clan por encima dos nomes
 
 Clan plates size
-== Tamaño de la fuente del clan
+== Tamaño da fonte do clan
 
 Refresh Rate
 == Frecuencia de actualización
 
 Automatically take statboard screenshot
-== Tomar automáticamente la captura de pantalla del Statboard
+== Tomar automaticamente a captura de pantalla do Statboard
 
 Automatically create statboard csv
-== Crear automáticamente el csv del Statboard
+== Crear automaticamente o csv do Statboard
 
 Max CSVs
 == CSV máx
@@ -786,16 +777,16 @@ Dummy settings
 == Config. del Dummy
 
 Vanilla skins only
-== Solo skins Vanilla
+== Só skins Vanilla
 
 Fat skins (DDFat)
 == Skins Obesas (DDFat)
 
 Skin prefix
-== Prefijo de skin
+== Prefixo de skin
 
 Hook collisions
-== Colisiones del gancho
+== Colisións do gancho
 
 Pause
 == Pausa
@@ -804,16 +795,16 @@ Kill
 == Matar
 
 Zoom in
-== Acercar
+== Achegar
 
 Zoom out
-== Alejar
+== Afastar
 
 Default zoom
 == Zoom predeterm.
 
 Show others
-== Mostrar otros
+== Mostrar outros
 
 Show all
 == Mostrar todo
@@ -825,7 +816,7 @@ Toggle dummy
 == Alternar dummy
 
 Toggle ghost
-== Alternar fantasma
+== Alternar pantasma
 
 Dummy copy
 == Copiar dummy
@@ -849,7 +840,7 @@ Show HUD
 == Mostrar HUD
 
 may cause delay
-== puede causar retraso
+== pode causar atraso
 
 Screen
 == Pantalla
@@ -858,94 +849,97 @@ Use high DPI
 == Usar DPI alto
 
 Enable game sounds
-== Habilitar sonidos del juego
+== Habilitar sons do xogo
 
 Enable gun sound
-== Habilitar sonido de pistola
+== Habilitar son de pistola
 
 Enable long pain sound (used when shooting in freeze)
-== Habilitar el sonido de dolor prolongado (se usa al disparar estando congelado)
+== Habilitar o son de dor prolongada (úsase ao disparar estando conxelado)
 
 Enable server message sound
-== Habilitar el sonido para mensajes del servidor
+== Habilitar o son para mensaxes do servidor
 
 Enable regular chat sound
-== Habilitar sonido del chat normal
+== Habilitar son do chat normal
 
 Enable team chat sound
-== Habilitar el sonido del chat del equipo
+== Habilitar o son do chat do equipo
 
 Enable highlighted chat sound
-== Habilitar sonido de chat resaltado
+== Habilitar son de chat resaltado
+
+Threaded sound loading
+== Carga de son nun fío
 
 Map sound volume
-== Vol. del sonido del mapa
+== Vol. do son do mapa
 
 HUD
-== Apariencia
+== Aparencia
 
 DDNet
 == DDNet
 
 DDNet Client needs to be restarted to complete update!
-== ¡El Cliente DDNet debe reiniciarse para completar la actualización!
+== Utilizar o marcador DDRace
 
 Use DDRace Scoreboard
-== Utilizar el marcador DDRace
+== Utilizar o marcador DDRace
 
 Show score
 == Mostrar puntaje
 
 Show names in chat in team colors
-== Mostrar nombres con colores de equipo en el chat
+== Mostrar nomes con cores de equipo no chat
 
 Show kill messages
-== Mostrar mensajes de muerte
+== Mostrar mensaxes de morte
 
 Show votes window after voting
-== Mostrar ventana de votos después de votar
+== Mostrar xanela de votos despois de votar
 
 Messages
-== Mensajes
+== Menxaxes
 
 System message
-== Mensaje del sistema
+== Menxaxe do sistema
 
 Reset
 == Reiniciar
 
 Highlighted message
-== Mensaje resaltado
+== Mensaxe resaltada
 
 Team message
-== Mensaje del equipo
+== Mensaxe do equipo
 
 Friend message
-== Mensaje de un amigo
+== Mensaxe dun amigo
 
 Normal message
-== Mensaje normal
+== Menxaxe normal
 
 Save the best demo of each race
-== Guardar la mejor demo de cada carrera
+== Gardar o mellor demo de cada carreira
 
-Default length
-== Longitud predeterminada
+Default length: %d
+== Lonxitude predeterminada: %d
 
 Enable replays
 == Habilitar repeticiones
 
 Show ghost
-== Mostrar fantasma
+== Mostrar pantasma
 
 Save ghost
-== Guardar fantasma
+== Guardar pantasma
 
 Gameplay
 == Gameplay
 
 Overlay entities
-== Entidades superpuestas
+== Entidades superpostas
 
 Size
 == Tamaño
@@ -954,7 +948,7 @@ Show text entities
 == Mostrar entidades de texto
 
 Show others (own team only)
-== Mostrar otros (solo equipo propio)
+== Mostrar outros (solo equipo propio)
 
 Show quads
 == Mostrar quads
@@ -963,49 +957,52 @@ AntiPing
 == AntiPing
 
 AntiPing: predict other players
-== AntiPing: predecir otros jugadores
+== AntiPing: predicir outros xogadores
 
 AntiPing: predict weapons
-== AntiPing: predecir armas
+== AntiPing: predicir armas
 
 AntiPing: predict grenade paths
-== AntiPing: predecir recorrido de granadas
+== AntiPing: predicir percorrido de granadas
 
 Show other players' hook collision lines
-== Mostrar las líneas de colisión de gancho de otros jugadores
+== Mostrar as liñas de colisión de gancho doutros xogadores
 
 Show other players' key presses
-== Mostrar las pulsaciones de teclas de otros jugadores
+== Mostrar as pulsacións de teclas doutros xogadores
+
+Old mouse mode
+== Modo de mouse vello
 
 Show tiles layers from BG map
-== Mostrar capas de tiles del mapa de fondo
+== Mostrar capas de tiles do mapa de fondo
 
 DDNet %s is available:
-== DDNet %s está disponible:
+== DDNet %s está dispoñible:
 
 Updating...
 == Actualizando...
 
 No updates available
-== No hay actualizaciones disponibles
+== Non hai actualizacións dispoñibles
 
 Check now
-== Chequear
+== Revisalo agora
 
 New random timeout code
-== Nuevo código de timeout aleatorio
+== Novo código de timeout aleatorio
 
 Time
-== Tiempo
+== Tempo
 
 Follow
 == Seguir
 
 Frags
-== Asesinatos
+== Asasinatos
 
 Deaths
-== Muertes
+== Mortes
 
 Suicides
 == Suicidios
@@ -1014,7 +1011,7 @@ Ratio
 == K/D
 
 Net
-== Ventaja
+== Ventaxa
 
 FPM
 == APM
@@ -1023,22 +1020,22 @@ Spree
 == Racha
 
 Best
-== Mejor
+== Mellor
 
 Grabs
-== Banderas
+== Bandeiras
 
 1 new mention
-== 1 nueva mención
+== 1 nova mención
 
 %d new mentions
-== %d nuevas menciones
+== %d novas mencións
 
 9+ new mentions
-== 9+ nuevas menciones
+== 9+ novas mencións
 
 Saving ddnet-settings.cfg failed
-== Error al guardar ddnet-settings.cfg
+== Erro ao gardar ddnet-settings.cfg
 
 Warning
 == Advertencia
@@ -1047,34 +1044,34 @@ Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
 == Modo debug activado. Pulsa Ctrl+Shift+D para desactivarlo.
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
-== Usa la tecla K para suicidarte (reiniciar), Q para pausar y ver a otros jugadores. Mira la configuración para otras teclas.
+== Usa a tecla K para suicidarche (reiniciar), Q para pausar e ver a outros xogadores. Mira a configuración para outras teclas.
 
 Existing Player
-== Este jugador ya existe
+== Este xogador xa existe
 
 Your nickname '%s' is already used (%d points). Do you still want to use it?
-== Tu nombre '%s' ya está usado (%d puntos). ¿Deseas seguir usándolo?
+== O teu nome '%s' xa está usado (%d puntos). Desexas seguir usándoo?
 
 Checking for existing player with your name
-== Comprobando si ya existe un jugador con tu nombre
+== Comprobando se xa existe un xogador co teu nome
 
 Speed
-== Velocidad
+== Velocidade
 
 Theme
 == Tema
 
 %d of %d servers
-== %d de %d servidores
+== %d dos %d servidores
 
 %d of %d server
-== %d de %d servidor
+== %d do %d servidor
 
 %d players
-== %d jugadores
+== %d xogadores
 
 %d player
-== %d jugador
+== %d xogador
 
 Demos directory
 == Directorio de demos
@@ -1083,7 +1080,7 @@ Smooth Dynamic Camera
 == Cámara dinámica suave
 
 Skip the main menu
-== Saltar el menú principal
+== Saltar ao menú principal
 
 Themes directory
 == Directorio de temas
@@ -1098,22 +1095,22 @@ Skins directory
 == Directorio de skins
 
 Game sound volume
-== Vol. del sonido del juego
+== Vol. do sonido do xogo
 
 Chat sound volume
-== Vol. del sonido del chat
+== Vol. do sonido do chat
 
 Background music volume
-== Vol. de la música de fondo
+== Vol. da música de fondo
 
 Assets
 == Recursos
 
 Use old chat style
-== Usar estilo antiguo del chat
+== Usar estilo antigo do chat
 
 Client message
-== Mensaje de cliente
+== Mensaxe do cliente
 
 Use current map as background
 == Usar mapa actual como fondo
@@ -1134,32 +1131,32 @@ https://wiki.ddnet.org/
 == https://wiki.ddnet.org/wiki/Main_Page/es
 
 Website
-== Página web
+== Páxina web
 
 Settings
 == Configuración
 
 Stop server
-== Detener servidor
+== Deter servidor
 
 Run server
 == Iniciar servidor
 
 Server executable not found, can't run server
-== Ejecutable del servidor no encontrado. No se puede iniciar el servidor
+== Executable do servidor non atopado. Non se pode iniciar o servidor
 
 Editor
 == Editor
 
 [Start menu]
 Play
-== Jugar
+== Xogar
 
 Manual
 == Manual
 
 Race
-== Carrera
+== Carreira
 
 Auto
 == Auto
@@ -1168,7 +1165,7 @@ Replay
 == Repetición
 
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
-== El ancho de la textura %s no es divisible por %d, o el alto no es divisible por %d, lo que puede causar errores visuales.
+== O ancho da textura %s non é divisible por %d, ou o alto non é divisible por %d, o que pode causar erros visuais.
 
 AFR
 == AFR
@@ -1192,7 +1189,7 @@ CHN
 == CHN
 
 Getting server list from master server
-== Obteniendo lista de servidores del servidor maestro
+== Obtendo lista de servidores do servidor mestre
 
 Leak IP
 == Filtrar tu IP
@@ -1204,10 +1201,10 @@ Dummy
 == Dummy
 
 Windowed
-== En ventana
+== En xanela
 
 Windowed borderless
-== Ventana sin bordes
+== Xanela sen bordos
 
 Desktop fullscreen
 == Pantalla completa de escritorio
@@ -1219,10 +1216,10 @@ Background
 == Fondo
 
 Entities Background color
-== Color de fondo de entidades
+== Cor de fondo de entidades
 
 Regular Background Color
-== Color de fondo regular
+== Cor de fondo regular
 
 Discord
 == Discord
@@ -1231,37 +1228,40 @@ https://ddnet.org/discord
 == https://ddnet.org/discord
 
 Are you sure that you want to disconnect and switch to a different server?
-== ¿Seguro que quieres desconectarte y cambiar de servidor?
+== Seguro que queres desconectarche e cambiar de servidor?
+
+Refreshing...
+== Actualizando...
 
 Kill Messages
-== Mensajes de Muerte
+== Mensaxes de morte
 
 Show local player's key presses
-== Mostrar las teclas presionadas por el jugador local
+== Mostrar as teclas presionadas polo xogador local
 
 Settings file
-== Archivo de configuraciones
+== Arquivo de configuraciones
 
 Config directory
 == Directorio de configuración
 
 Run on join
-== Ejec. al entrar
+== Ejec. ao entrar
 
 Chat command (e.g. showall 1)
-== Comando de chat (Ej. showall 1)
+== Comando de chat (Ex. showall 1)
 
 The format of texture %s is not RGBA which will cause visual bugs.
-== El formato de la textura %s no es RGBA, lo que puede causar errores visuales.
+== O formato da textura %s non é RGBA, o que pode causar erros visuais.
 
 Join Tutorial Server
-== Ir a un servidor Tutorial
+== Ir a un servidor Titorial
 
 Skip Tutorial
-== Saltar Tutorial
+== Saltar T`itorial
 
 Windowed fullscreen
-== Ventana a pantalla completa
+== Xanela a pantalla completa
 
 Renderer
 == Renderizador
@@ -1272,35 +1272,38 @@ default
 custom
 == personalizado
 
+Graphics cards
+== Tarxetas de vídeo
+
 auto
 == auto.
 
 Tutorial
-== Tutorial
+== Titorial
 
 Can't find a Tutorial server
-== No se pudo encontrar un servidor Tutorial
+== Non se puido atopar un servidor Titorial
 
 Toggle to edit your dummy settings
-== Actívalo para editar la configuración de tu dummy
+== Actívao para editar a configuración do téu monicreque
 
 Choose default eyes when joining a server
-== Escoge los ojos predeterminados al unirte a un servidor
+== Escolle os ollos predeterminados ao unirche a un servidor
 
 Allows maps to render with more detail
-== Permite que los mapas tengan más detalles
+== Permite que os mapas teñan máis detalles
 
 When you cross the start line, show a ghost tee replicating the movements of your best time
-== Cuando cruzas la línea de inicio, se muestra un tee fantasma replicando los movimientos de tu mejor tiempo
+== Cando cruzas a liña de inicio, móstrase un tee pantasma replicando os movementos do teu mellor tempo
 
 Opacity
-== Opacidad
+== Opacidade
 
 Quads are used for background decoration
-== Las quads se usan para la decoración del fondo
+== As quads úsanse para a decoración do fondo
 
 Tries to predict other entities to give a feel of low latency
-== Intenta predecir a otras entidades para dar una sensación de baja latencia
+== Tenta predicir a outras entidades para dar unha sensación de baixa latencia
 
 Super
 == Súper
@@ -1312,29 +1315,36 @@ Position:
 == Posición:
 
 Speed:
-== Velocidad:
+== Velocidade:
 
 Angle:
 == Ángulo:
 
 Trying to determine UDP connectivity...
-== Tratando de determinar la conexión UDP...
+== Tratando de determinar a conexión UDP...
 
 UDP seems to be filtered.
 == UDP parece estar filtrado.
 
 UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
-== Las direcciones IP TCP y UDP parecen ser diferentes. Intenta desactivar cualquier VPN, proxy o acelerador de red.
+== As direccións IP TCP e UDP parecen ser diferentes. Tenta desactivar calquera VPN, proxy ou acelerador de rede.
 
 No answer from server yet.
-== Aún no hay respuesta del servidor.
+== Aínda non hai resposta do servidor.
 
 Download community skins
-== Descargar skins de la comunidad
+== Descargar skins da comunidade
 
 Enable controller
 == Habilitar mando
 
+Controller %d: %s
+== Mando %d: %s
+
+Click to cycle through all available controllers.
+== Click aquí para percorrer todos os mandos dispoñibles.
+
+[Ingame controller mode]
 Relative
 == Relativo
 
@@ -1343,16 +1353,19 @@ Absolute
 == Absoluto
 
 Ingame controller mode
-== Modo del mando
+== Modo do mando
 
 Ingame controller sens.
-== Sens. del mando en el juego
+== Sens. do mando do xogo
 
 UI controller sens.
-== Sens. del mando en el menú
+== Sens. do mando do menú
 
 Controller jitter tolerance
-== Tolerancia a la fluctuación del mando
+== Tolerancia á fluctuación do mando
+
+Device
+== Dispositivo
 
 Status
 == Estado
@@ -1360,14 +1373,17 @@ Status
 Aim bind
 == Apuntar
 
+Controller Axis #%d
+== Eje #%d do mando
+
 Mouse
 == Ratón
 
 Ingame mouse sens.
-== Sens. del ratón en el juego
+== Sens. do ratón no xogo
 
 UI mouse sens.
-== Sens. del ratón en el menú
+== Sens. do ratón no menú
 
 Controller
 == Mando
@@ -1376,142 +1392,148 @@ Show dummy actions
 == Mostrar acciones del dummy
 
 Show freeze bars
-== Mostrar barras de freeze
+== Mostrar barras do freeze
 
 Show player position
-== Mostrar la posición del jugador
+== Mostrar a posición do xogador
 
 Show player speed
-== Mostrar la velocidad del jugador
+== Mostrar a velocidade do xogador
 
 Show player target angle
-== Mostrar el ángulo del objetivo del jugador
+== Mostrar o ángulo do obxectivo do xogador
 
 Adjust the opacity of entities belonging to other teams, such as tees and nameplates
-== Ajusta la opacidad de entidades pertenecientes a otros equipos, como los tees y los nombres.
+== Axusta a opacidade de entidades pertencentes a outros equipos, como os tees e os nomes.
 
 Opacity of freeze bars inside freeze
-== Opacidad de las barras de freeze dentro del freeze
+== Opacidade das barras de freeze dentro do freeze
 
 Normal Color
-== Color normal
+== Cor normal
 
 Highlight Color
-== Color resaltado
+== Cor resaltada
 
 Extras
 == Extras
 
 Preparing demo playback
-== Preparando la reproducción de la demo
+== Preparando a reprodución da demo
 
 Connected
 == Conectado
 
 Loading map file from storage
-== Cargando archivo de mapa desde el almacenamiento
+== Cargando arquivo de mapa desde o almacenamento
 
 Why are you slowmo replaying to read this?
-== ¿Por qué lo reproduces a cámara lenta para leer esto?
+== Por que o reproduces a cámara lenta para ler isto?
 
 Initializing components
-== Inicializando componentes
+== Inicializando compoñentes
 
 Initializing assets
 == Inicializando recursos
 
 Initializing map logic
-== Inicializando lógica de mapa
+== Inicializando lóxica de mapa
 
 Sending initial client info
-== Enviando información inicial del cliente
+== Enviando información inicial do cliente
 
 Uploading map data to GPU
-== Cargando datos del mapa a la GPU
+== Cargando datos do mapa á GPU
 
 Getting game info
-== Obteniendo información de la partida
+== Obtendo información da partida
 
 Requesting to join the game
-== Solicitando unión a la partida
+== Solicitando unión á partida
 
 Loading menu images
-== Cargando imágenes del menú
+== Cargando imaxes do menú
 
 Play the current demo
-== Reproducir la demo actual
+== Reproducir a demo actual
 
 Pause the current demo
-== Pausar la demo actual
+== Pausar a demo actual
 
 Stop the current demo
-== Detener la demo actual
+== Deter a demo actual
 
 Slow down the demo
-== Ralentizar la demo
+== Retardar a demo
 
 Speed up the demo
-== Acelerar la demo
+== Acelerar a demo
+
+Mark the beginning of a cut
+== Marca o inicio dun corte
+
+Mark the end of a cut
+== Marca o final dun corte
 
 Export cut as a separate demo
-== Exportar corte como una demo diferente
+== Exportar corte como unha demo diferente
 
 Toggle keyboard shortcuts
-== Alternar atajos de teclado
+== Alternar atallos de teclado
 
 Loading demo files
-== Cargando archivos de demos
+== Cargando arquivos de demos
 
 Menu opened. Press Esc key again to close menu.
-== Menú abierto. Presiona la tecla Esc otra vez para cerrarlo.
+== Menú aberto. Presiona a tecla Esc outra vez para pechalo.
 
 Loading ghost files
-== Cargando archivos de fantasma
+== Cargando arquivos de pantasma
 
 Loading skin files
-== Cargando archivos de skins
+== Cargando arquivos de skins
 
 Appearance
-== Apariencia
+== Aparencia
 
 Name Plate
-== Nombres
+== Nomes
 
 Hook Collisions
-== Colisiones del gancho
+== Colisións do gancho
 
 Show health, shields and ammo
-== Mostrar salud, escudos y munición
+== Mostrar saúde, escudos e munición
 
 DDRace HUD
 == HUD DDRace
 
 Show client IDs in scoreboard
-== Mostrar IDs de cliente en la tabla de puntuación
+== Mostrar IDs de cliente na táboa de puntuación
 
 Show DDRace HUD
-== Mostrar el HUD DDRace
+== Mostrar o HUD DDRace
 
 Show jumps indicator
 == Mostrar indicador de saltos
 
 Show hook strength indicator
-== Mostrar indicador de fuerza del gancho
+== Mostrar indicador de forza do gancho
 
 Hook collision line
-== Línea de colisión del gancho
+== Liña de colisión do gancho
 
 Hook collision line width
-== Ancho de la línea de colisión del gancho
+== Ancho da liña de colisión do gancho
 
 Hook collision line opacity
-== Opacidad de la lína de colisión del gancho
+== Opacidade da liña de colisión do gancho
 
 Colors of the hook collision line, in case of a possible collision with:
-== Colores de la línea de colisión del gancho, en el posible caso de que colisione con:
+== Cores da liña de colisión do gancho, no posible caso de que choque con:
 
 Your movements are not taken into account when calculating the line colors
-== Tus movimientos no cuentan al calcular los colores de la línea
+== Os teus movementos non contan ao calcular as cores da liña
 
 Nothing hookable
 == Nada enganchable
@@ -1526,52 +1548,52 @@ Weapons
 == Armas
 
 Rifle Laser Outline Color
-== Color externo del Láser de Rifle
+== Cor externa do Láser de Rifle
 
 Rifle Laser Inner Color
-== Color interno del Láser de Rifle
+== Cor interna do Láser de Rifle
 
 Shotgun Laser Outline Color
-== Color externo del Láser de la Escopeta
+== Cor externa do Láser da Escopeta
 
 Shotgun Laser Inner Color
-== Color interno del Láser de la Escopeta
+== Cor interna do Láser da Escopeta
 
 Door Laser Outline Color
-== Color externo de las Puertas Láser
+== Cor externa das Puertas Láser
 
 Door Laser Inner Color
-== Color interno de las Puertas Láser
+== Cor interna das Puertas Láser
 
 Freeze Laser Outline Color
-== Color externo del Láser Congelante
+== Cor externa do Láser Congelante
 
 Freeze Laser Inner Color
-== Color interno del Láser Congelante
+== Cor interna do Láser Congelante
 
 Set all to Rifle
-== Usar todos como el Rifle
+== Usar todos como o Rifle
 
 Loading assets
 == Cargando recursos
 
 Loading race demo files
-== Cargando archivos de demos de carreras
+== Cargando arquivos de demos de carreiras
 
 Loading sound files
-== Cargando archivos de sonido
+== Cargando arquivos de son
 
 Cancel
 == Cancelar
 
 File '%s' already exists, do you want to overwrite it?
-== El archivo '%s' ya existe, ¿quieres sobrescribirlo?
+== O arquivo '%s' xa existe, queres sobrescribirlo?
 
 Are you sure that you want to remove the player '%s' from your friends list?
-== ¿Estás seguro de que quieres quitar al jugador '%s' de tu lista de amigos?
+== Estás seguro de que queres quitar ao xogador '%s' da túa lista de amigos?
 
 Are you sure that you want to remove the clan '%s' from your friends list?
-== ¿Estás seguro de que quieres quitar al clan '%s' de tu lista de amigos?
+== Estás seguro de que queres quitar ao clan '%s' da túa lista de amigos?
 
 Go back one tick
 == Retroceder un tick
@@ -1586,84 +1608,84 @@ Go forward one marker
 == Avanzar un marcador
 
 Are you sure that you want to delete the demo '%s'?
-== ¿Estás seguro de que quieres eliminar la demo '%s'?
+== Estás seguro de que queres eliminar a demo '%s'?
 
 Unable to delete the demo '%s'
-== No se pudo eliminar la demo '%s'
+== Non se puido eliminar a demo '%s'
 
 Reset controls
-== Restablecer controles
+== Restablecer controis
 
 Are you sure that you want to reset the controls to their defaults?
-== ¿Estás seguro de que quieres restablecer a los controles predeterminados?
+== Estás seguro de que queres restablecer aos controis predeterminados?
 
 [Graphics error]
 
 [Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== Error durante la iniciación. Intenta cambiar gfx_backend a OpenGL o Vulkan desde settings_ddnet.cfg en la carpeta de configuraciones e inténtalo otra vez.
+== Erro durante a iniciación. Tenta cambiar gfx_backend a OpenGL ou Vulkan desde settings_ddnet.cfg no cartafol de configuracións e téntao outra vez.
 
 [Graphics error]
 Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== La VRAM se ha llenado. Intenta quitar recursos personalizados (skins, entidades, etc.), especialmente los de resolución alta.
+== A VRAM encheuse. Tenta quitar recursos personalizados (skins, entidades etc.)/ etc.), especialmente os de resolución alta.
 
 [Graphics error]
 An error during command recording occurred. Try to update your GPU drivers.
-== Ocurrió un error durante la grabación de comandos. Intenta actualizar los controladores de tu GPU.
+== Ocorreu un erro durante a gravación de comandos. Tenta actualizar os controladores do teu GPU.
 
 [Graphics error]
 A render command failed. Try to update your GPU drivers.
-== Un comando de renderización falló. Intenta actualizar los controladores de tu GPU.
+== Un comando de renderización fallou. Tenta actualizar os controladores do teu GPU.
 
 [Graphics error]
 Submitting the render commands failed. Try to update your GPU drivers.
-== Error al enviar los comandos de renderización. Intenta actualizar los controladores de tu GPU.
+== Erro ao enviar os comandos de renderización. Tenta actualizar os controladores do teu GPU.
 
 [Graphics error]
 Failed to swap framebuffers. Try to update your GPU drivers.
-== Error al intercambiar búferes de fotogramas. Intenta actualizar los controladores de tu GPU.
+== Erro ao intercambiar búferes de fotogramas. Tenta actualizar os controladores do teu GPU.
 
 [Graphics error]
 Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== Error desconocido. Intenta cambiar gfx_backend a OpenGL o Vulkan desde settings_ddnet.cfg en el directorio de configuraciones e inténtalo otra vez.
+== Erro descoñecido. Tenta cambiar gfx_backend a OpenGL ou Vulkan desde settings_ddnet.cfg no directorio de configuracións e téntao outra vez.
 
 [Graphics error]
 Could not initialize the given graphics backend, reverting to the default backend now.
-== No se pudo inicializar el backend de gráficos dado, volviendo al backend predeterminado.
+== Non se puido inicializar o backend de gráficos dado, volvendo ao backend predeterminado.
 
 Open the directory that contains the demo files
-== Abrir la carpeta que contiene los archivos de demo
+== Abrir o cartafol que contén os arquivos de demo
 
 Save power by lowering refresh rate (higher input latency)
-== Ahorra energía al reducir la frecuencia de actualización (mayor latencia de entrada)
+== Aforra enerxía ao reducir a frecuencia de actualización (maior latencia de entrada)
 
 Open the settings file
-== Abrir el archivo de configuraciones
+== Abrir o arquivo de configuracións
 
 Open the directory that contains the configuration and user files
-== Abrir la carpeta que contiene las configuraciones y archivos del usuario
+== Abrir o cartafol que contén as configuracións e arquivos do usuario
 
 Open the directory to add custom themes
-== Abrir la carpeta para agregar temas personalizados
+== Abrir o cartafol para agregar temas personalizados
 
 Open the directory to add custom skins
-== Abrir la carpeta para agregar skins personalizadas
+== Abrir o cartafol para agregar skins personalizadas
 
 No controller found. Plug in a controller.
-== No se encontró un mando. Conecta uno.
+== Non se atopou un mando. Conecta un.
 
 Unregister protocol and file extensions
-== Anular registro de protocolo y extensiones de archivo
+== Anular rexistro de protocolo e extensións de arquivo
 
 Open the directory to add custom assets
-== Abrir la carpeta para agregar recursos personalizados
+== Abrir o cartafol para agregar recursos personalizados
 
 [Graphics error]
 Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
 == No se pudo inizializar el backend de gráficos dado, probablemente debido a que los controladores de la tarjeta gráfica integrada no están instalados.
 
 Could not save downloaded map. Try manually deleting this file: %s
-== No se pudo almacenar el mapa descargado. Intenta eliminar este archivo manualmente: %s
+== Non se puido almacenar o mapa descargado. Tenta eliminar este arquivo manualmente: %s
 
 Copy info
 == Copiar información
@@ -1672,56 +1694,26 @@ Create a random skin
 == Crear skin aleatoria
 
 Online players (%d)
-== Jugadores en línea (%d)
+== Xogadores en línea (%d)
 
 Online clanmates (%d)
-== Compañeros de clan en línea (%d)
+== Compañeiro de clan en liña (%d)
 
 [friends (server browser)]
 Offline (%d)
 == Desconectados (%d)
 
 Click to select server. Double click to join your friend.
-== Haz clic para seleccionar el servidor. Doble clic para unirte a tu amigo.
+== Haz clic para seleccionar o servidor. Dobre clic para unirche ao teu amigo.
 
 Click to remove this player from your friends list.
-== Haz clic para quitar este jugador de tu lista de amigos.
+== Haz clic para quitar este xogador da túa lista de amigos.
 
 Click to remove this clan from your friends list.
-== Haz clic para quitar este clan de tu lista de amigos.
+== Haz clic para quitar este clan da túa lista de amigos.
 
 None
-== Ninguno
+== Ningún
 
 Add Clan
 == Agregar clan
-
-A demo with this name already exists
-== Ya existe una demo con este nombre
-
-No server selected
-== Ningún servidor seleccionado
-
-Mark the beginning of a cut (right click to reset)
-== Marcar el inicio de un corte (clic derecho para restablecer)
-
-Mark the end of a cut (right click to reset)
-== Marcar el final de un corte (clic derecho para restablecer)
-
-Close the demo player
-== Cerrar el reproductor de demos
-
-Export demo cut
-== Exportar corte de la demo
-
-Cut interval
-== Intervalo del corte
-
-Cut length
-== Largo del corte
-
-Axis
-== Eje
-
-Graphics card
-== Tarjeta gráfica

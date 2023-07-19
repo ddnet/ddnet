@@ -12,6 +12,7 @@
 
 #include <game/layers.h>
 #include <game/mapitems.h>
+#include <game/mapitems_ex.h>
 
 #include <game/client/components/camera.h>
 #include <game/client/components/mapimages.h>
@@ -60,22 +61,18 @@ void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Channels
 	CMapLayers *pThis = (CMapLayers *)pUser;
 	Channels = ColorRGBA();
 
-	CEnvPoint *pPoints = 0;
+	int EnvStart, EnvNum;
+	pThis->m_pLayers->Map()->GetType(MAPITEMTYPE_ENVELOPE, &EnvStart, &EnvNum);
 
-	{
-		int Start, Num;
-		pThis->m_pLayers->Map()->GetType(MAPITEMTYPE_ENVPOINTS, &Start, &Num);
-		if(Num)
-			pPoints = (CEnvPoint *)pThis->m_pLayers->Map()->GetItem(Start);
-	}
-
-	int Start, Num;
-	pThis->m_pLayers->Map()->GetType(MAPITEMTYPE_ENVELOPE, &Start, &Num);
-
-	if(Env >= Num)
+	if(Env < 0 || Env >= EnvNum)
 		return;
 
-	CMapItemEnvelope *pItem = (CMapItemEnvelope *)pThis->m_pLayers->Map()->GetItem(Start + Env);
+	const CMapItemEnvelope *pItem = (CMapItemEnvelope *)pThis->m_pLayers->Map()->GetItem(EnvStart + Env);
+
+	CMapBasedEnvelopePointAccess EnvelopePoints(pThis->m_pLayers->Map());
+	EnvelopePoints.SetPointsRange(pItem->m_StartPoint, pItem->m_NumPoints);
+	if(EnvelopePoints.NumPoints() == 0)
+		return;
 
 	const auto TickToNanoSeconds = std::chrono::nanoseconds(1s) / (int64_t)pThis->Client()->GameTickSpeed();
 
@@ -117,7 +114,7 @@ void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Channels
 					 MinTick * TickToNanoSeconds;
 			}
 		}
-		CRenderTools::RenderEvalEnvelope(pPoints + pItem->m_StartPoint, pItem->m_NumPoints, 4, s_Time + (int64_t)TimeOffsetMillis * std::chrono::nanoseconds(1ms), Channels);
+		CRenderTools::RenderEvalEnvelope(&EnvelopePoints, 4, s_Time + (int64_t)TimeOffsetMillis * std::chrono::nanoseconds(1ms), Channels);
 	}
 	else
 	{
@@ -142,7 +139,7 @@ void CMapLayers::EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Channels
 			s_Time += CurTime - s_LastLocalTime;
 			s_LastLocalTime = CurTime;
 		}
-		CRenderTools::RenderEvalEnvelope(pPoints + pItem->m_StartPoint, pItem->m_NumPoints, 4, s_Time + std::chrono::nanoseconds(std::chrono::milliseconds(TimeOffsetMillis)), Channels);
+		CRenderTools::RenderEvalEnvelope(&EnvelopePoints, 4, s_Time + std::chrono::nanoseconds(std::chrono::milliseconds(TimeOffsetMillis)), Channels);
 	}
 }
 

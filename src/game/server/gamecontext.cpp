@@ -94,8 +94,8 @@ void CGameContext::Construct(int Resetting)
 	m_NumMutes = 0;
 	m_NumVoteMutes = 0;
 
-	m_LastLog = 0;
-	m_FirstLog = 0;
+	m_LatestLog = 0;
+	mem_zero(&m_aLogs, sizeof(m_aLogs));
 
 	if(Resetting == NO_RESET)
 	{
@@ -1148,14 +1148,6 @@ void CGameContext::OnTick()
 		{
 			m_NumVoteMutes--;
 			m_aVoteMutes[i] = m_aVoteMutes[m_NumVoteMutes];
-		}
-	}
-	for(int i = 0; i < m_LastLog; i++)
-	{
-		if(m_aLogs[i].m_Timestamp && (time_get() - m_aLogs[i].m_Timestamp) / time_freq() > MAX_LOG_SECONDS)
-		{
-			m_FirstLog = (m_FirstLog + 1) % MAX_LOGS;
-			m_aLogs[m_FirstLog].m_Timestamp = 0;
 		}
 	}
 
@@ -3785,7 +3777,7 @@ void CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 			Writer.AddData(TotalLength, pSettings);
 			continue;
 		}
-		unsigned char *pData = (unsigned char *)Reader.GetData(i);
+		const void *pData = Reader.GetData(i);
 		int Size = Reader.GetDataSize(i);
 		Writer.AddData(Size, pData);
 		Reader.UnloadData(i);

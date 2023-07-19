@@ -139,7 +139,8 @@ public:
 	void Unpause() override;
 	int Stop();
 	void SetSpeed(float Speed) override;
-	void SetSpeedIndex(int Offset) override;
+	void SetSpeedIndex(int SpeedIndex) override;
+	void AdjustSpeedIndex(int Offset) override;
 	int SeekPercent(float Percent) override;
 	int SeekTime(float Seconds) override;
 	int SeekTick(ETickOffset TickOffset) override;

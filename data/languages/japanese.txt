@@ -76,12 +76,6 @@ Clan
 Client
 == クライアント
 
-Close
-== 閉じる
-
-Connect
-== 接続
-
 Connecting to
 == 接続先
 
@@ -721,9 +715,6 @@ Types
 Leak IP
 == IP を漏洩する
 
-Select a name
-== 名前をつけて保存
-
 Please use a different name
 == 別の名前をつけてください
 
@@ -1003,8 +994,8 @@ Preview
 Save the best demo of each race
 == レースの最高記録のデモを保存
 
-Default length: %d
-== デフォルト長さ：%D
+Default length
+== デフォルト長さ
 
 Enable replays
 == リプレイ機能
@@ -1050,9 +1041,6 @@ Show other players' hook collision lines
 
 Show other players' key presses
 == 他のプレーヤーの押したキーを表示
-
-Old mouse mode
-== 古いマウスモード
 
 Background
 == 背景
@@ -1303,7 +1291,7 @@ Getting game info
 Requesting to join the game
 == 
 
-Cancel
+A demo with this name already exists
 == 
 
 File '%s' already exists, do you want to overwrite it?
@@ -1339,13 +1327,13 @@ SA
 CHN
 == 
 
-Refreshing...
-== 
-
 Are you sure that you want to disconnect and switch to a different server?
 == 
 
 Copy info
+== 
+
+No server selected
 == 
 
 Online players (%d)
@@ -1400,10 +1388,10 @@ Slow down the demo
 Speed up the demo
 == 
 
-Mark the beginning of a cut
+Mark the beginning of a cut (right click to reset)
 == 
 
-Mark the end of a cut
+Mark the end of a cut (right click to reset)
 == 
 
 Export cut as a separate demo
@@ -1415,7 +1403,19 @@ Go back one marker
 Go forward one marker
 == 
 
+Close the demo player
+== 
+
 Toggle keyboard shortcuts
+== 
+
+Export demo cut
+== 
+
+Cut interval
+== 
+
+Cut length
 == 
 
 Loading demo files
@@ -1475,10 +1475,10 @@ Open the directory to add custom skins
 Enable controller
 == 
 
-Controller %d: %s
+Controller
 == 
 
-Click to cycle through all available controllers.
+Ingame controller mode
 == 
 
 [Ingame controller mode]
@@ -1487,9 +1487,6 @@ Relative
 
 [Ingame controller mode]
 Absolute
-== 
-
-Ingame controller mode
 == 
 
 Ingame controller sens.
@@ -1504,16 +1501,13 @@ Controller jitter tolerance
 No controller found. Plug in a controller.
 == 
 
-Device
+Axis
 == 
 
 Status
 == 
 
 Aim bind
-== 
-
-Controller Axis #%d
 == 
 
 Mouse
@@ -1525,13 +1519,13 @@ Ingame mouse sens.
 UI mouse sens.
 == 
 
-Controller
-== 
-
 Reset controls
 == 
 
 Are you sure that you want to reset the controls to their defaults?
+== 
+
+Cancel
 == 
 
 Windowed fullscreen
@@ -1549,7 +1543,7 @@ default
 custom
 == 
 
-Graphics cards
+Graphics card
 == 
 
 auto
