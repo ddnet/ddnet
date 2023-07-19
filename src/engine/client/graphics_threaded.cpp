@@ -505,18 +505,15 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadTextureRaw(int Width, int Heig
 // simple uncompressed RGBA loaders
 IGraphics::CTextureHandle CGraphics_Threaded::LoadTexture(const char *pFilename, int StorageType, int StoreFormat, int Flags)
 {
-	int l = str_length(pFilename);
-	IGraphics::CTextureHandle ID;
-	CImageInfo Img;
+	dbg_assert(pFilename[0] != '\0', "Cannot load texture from file with empty filename"); // would cause Valgrind to crash otherwise
 
-	if(l < 3)
-		return CTextureHandle();
+	CImageInfo Img;
 	if(LoadPNG(&Img, pFilename, StorageType))
 	{
 		if(StoreFormat == CImageInfo::FORMAT_AUTO)
 			StoreFormat = Img.m_Format;
 
-		ID = LoadTextureRaw(Img.m_Width, Img.m_Height, Img.m_Format, Img.m_pData, StoreFormat, Flags, pFilename);
+		IGraphics::CTextureHandle ID = LoadTextureRaw(Img.m_Width, Img.m_Height, Img.m_Format, Img.m_pData, StoreFormat, Flags, pFilename);
 		free(Img.m_pData);
 		if(ID.Id() != m_InvalidTexture.Id() && g_Config.m_Debug)
 			dbg_msg("graphics/texture", "loaded %s", pFilename);

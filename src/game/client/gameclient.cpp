@@ -302,6 +302,8 @@ void CGameClient::OnInit()
 			LoadHudSkin(g_Config.m_ClAssetHud);
 		else if(i == IMAGE_EXTRAS)
 			LoadExtrasSkin(g_Config.m_ClAssetExtras);
+		else if(g_pData->m_aImages[i].m_pFilename[0] == '\0') // handle special null image without filename
+			g_pData->m_aImages[i].m_Id = IGraphics::CTextureHandle();
 		else
 			g_pData->m_aImages[i].m_Id = Graphics()->LoadTexture(g_pData->m_aImages[i].m_pFilename, IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
 		m_Menus.RenderLoading(pLoadingDDNetCaption, Localize("Initializing assets"), 1);
