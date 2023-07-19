@@ -6258,7 +6258,7 @@ void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEd
 		// buttons
 		ToolBar.VSplitRight(50.0f, &ToolBar, &Button);
 		static int s_AddButton = 0;
-		if(DoButton_Editor(&s_AddButton, "Add", 0, &Button, 0, "Add a command to command list.") || ((Input()->KeyPress(KEY_RETURN) || Input()->KeyPress(KEY_KP_ENTER)) && UI()->LastActiveItem() == &m_SettingsCommandInput && m_Dialog == DIALOG_NONE))
+		if(DoButton_Editor(&s_AddButton, "Add", 0, &Button, 0, "Add a command to command list.") || ((Input()->KeyPress(KEY_RETURN) || Input()->KeyPress(KEY_KP_ENTER)) && m_SettingsCommandInput.IsActive() && m_Dialog == DIALOG_NONE))
 		{
 			if(!m_SettingsCommandInput.IsEmpty() && str_find(m_SettingsCommandInput.GetString(), " "))
 			{
@@ -6287,7 +6287,7 @@ void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEd
 			ToolBar.VSplitRight(50.0f, &ToolBar, &Button);
 			Button.VSplitRight(5.0f, &Button, nullptr);
 			static int s_ModButton = 0;
-			if(DoButton_Editor(&s_ModButton, "Mod", 0, &Button, 0, "Modify a command from the command list.") || (Input()->KeyPress(KEY_M) && UI()->LastActiveItem() != &m_SettingsCommandInput && m_Dialog == DIALOG_NONE))
+			if(DoButton_Editor(&s_ModButton, "Mod", 0, &Button, 0, "Modify a command from the command list.") || (Input()->KeyPress(KEY_M) && CLineInput::GetActiveInput() == nullptr && m_Dialog == DIALOG_NONE))
 			{
 				if(!m_SettingsCommandInput.IsEmpty() && str_comp(m_Map.m_vSettings[s_CommandSelectedIndex].m_aCommand, m_SettingsCommandInput.GetString()) != 0 && str_find(m_SettingsCommandInput.GetString(), " "))
 				{
@@ -6316,7 +6316,7 @@ void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEd
 			ToolBar.VSplitRight(50.0f, &ToolBar, &Button);
 			Button.VSplitRight(5.0f, &Button, nullptr);
 			static int s_DelButton = 0;
-			if(DoButton_Editor(&s_DelButton, "Del", 0, &Button, 0, "Delete a command from the command list.") || (Input()->KeyPress(KEY_DELETE) && UI()->LastActiveItem() != &m_SettingsCommandInput && m_Dialog == DIALOG_NONE))
+			if(DoButton_Editor(&s_DelButton, "Del", 0, &Button, 0, "Delete a command from the command list.") || (Input()->KeyPress(KEY_DELETE) && CLineInput::GetActiveInput() == nullptr && m_Dialog == DIALOG_NONE))
 			{
 				m_Map.m_vSettings.erase(m_Map.m_vSettings.begin() + s_CommandSelectedIndex);
 				if(s_CommandSelectedIndex >= (int)m_Map.m_vSettings.size())

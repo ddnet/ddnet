@@ -298,7 +298,7 @@ private:
 
 	const void *m_pHotItem;
 	const void *m_pActiveItem;
-	const void *m_pLastActiveItem;
+	const void *m_pLastActiveItem; // only used internally to track active CLineInput
 	const void *m_pBecomingHotItem;
 	bool m_ActiveItemValid = false;
 
@@ -439,11 +439,9 @@ public:
 		}
 		return false;
 	}
-	void ClearLastActiveItem() { m_pLastActiveItem = nullptr; }
 	const void *HotItem() const { return m_pHotItem; }
 	const void *NextHotItem() const { return m_pBecomingHotItem; }
 	const void *ActiveItem() const { return m_pActiveItem; }
-	const void *LastActiveItem() const { return m_pLastActiveItem; }
 
 	void StartCheck() { m_ActiveItemValid = false; }
 	void FinishCheck()
