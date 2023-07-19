@@ -910,24 +910,29 @@ class CGraphics_Threaded : public IEngineGraphics
 		}
 	}
 
-	template<typename TName, typename TFunc>
-	bool AddCmd(TName &Cmd, TFunc &&FailFunc, const char *pFailStr)
+	template<typename TName>
+	void AddCmd(
+		TName &Cmd, std::function<bool()> FailFunc = [] { return true; })
 	{
+		if(m_pCommandBuffer->AddCommandUnsafe(Cmd))
+			return;
+
+		// kick command buffer and try again
+		KickCommandBuffer();
+
+		if(!FailFunc())
+		{
+			char aError[256];
+			str_format(aError, sizeof(aError), "graphics: failed to run fail handler for command '%s'", typeid(TName).name());
+			dbg_assert(false, aError);
+		}
+
 		if(!m_pCommandBuffer->AddCommandUnsafe(Cmd))
 		{
-			// kick command buffer and try again
-			KickCommandBuffer();
-
-			if(!FailFunc())
-				return false;
-
-			if(!m_pCommandBuffer->AddCommandUnsafe(Cmd))
-			{
-				dbg_msg("graphics", "%s", pFailStr);
-				return false;
-			}
+			char aError[256];
+			str_format(aError, sizeof(aError), "graphics: failed to add command '%s' to command buffer", typeid(TName).name());
+			dbg_assert(false, aError);
 		}
-		return true;
 	}
 
 	void KickCommandBuffer();
@@ -1165,7 +1170,7 @@ public:
 	template<typename TName>
 	void FlushVerticesImpl(bool KeepVertices, int &PrimType, int &PrimCount, int &NumVerts, TName &Command, size_t VertSize)
 	{
-		Command.m_pVertices = NULL;
+		Command.m_pVertices = nullptr;
 		if(m_NumVertices == 0)
 			return;
 
@@ -1200,40 +1205,16 @@ public:
 		else
 			return;
 
-		Command.m_pVertices = (decltype(Command.m_pVertices))m_pCommandBuffer->AllocData(VertSize * NumVerts);
-		if(Command.m_pVertices == NULL)
-		{
-			// kick command buffer and try again
-			KickCommandBuffer();
-
-			Command.m_pVertices = (decltype(Command.m_pVertices))m_pCommandBuffer->AllocData(VertSize * NumVerts);
-			if(Command.m_pVertices == NULL)
-			{
-				dbg_msg("graphics", "failed to allocate data for vertices");
-				return;
-			}
-		}
-
+		Command.m_pVertices = (decltype(Command.m_pVertices))AllocCommandBufferData(VertSize * NumVerts);
 		Command.m_State = m_State;
 
 		Command.m_PrimType = PrimType;
 		Command.m_PrimCount = PrimCount;
 
-		if(
-			!AddCmd(
-				Command, [&] {
-					Command.m_pVertices = (decltype(Command.m_pVertices))m_pCommandBuffer->AllocData(VertSize * NumVerts);
-					if(Command.m_pVertices == NULL)
-					{
-						dbg_msg("graphics", "failed to allocate data for vertices");
-						return false;
-					}
-					return true;
-				},
-				"failed to allocate memory for render command"))
-		{
-			return;
-		}
+		AddCmd(Command, [&] {
+			Command.m_pVertices = (decltype(Command.m_pVertices))m_pCommandBuffer->AllocData(VertSize * NumVerts);
+			return Command.m_pVertices != nullptr;
+		});
 
 		m_pCommandBuffer->AddRenderCalls(1);
 	}
