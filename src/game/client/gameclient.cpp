@@ -3465,6 +3465,7 @@ void CGameClient::InitTeleporter()
 			}
 		}
 	}
+}
 
 void CGameClient::HandleMultiView()
 {
