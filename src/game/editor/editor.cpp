@@ -3978,11 +3978,15 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 			}
 
 			auto InsertPosition = std::find(vpNewGroupLayers.begin(), vpNewGroupLayers.end(), pNextLayer);
+			int InsertPositionIndex = InsertPosition - vpNewGroupLayers.begin();
 			vpNewGroupLayers.insert(InsertPosition, vpSelectedLayers.begin(), vpSelectedLayers.end());
 
-			m_SelectedGroup = GroupAfterDraggedLayer - 1;
+			int NumSelectedLayers = m_vSelectedLayers.size();
 			m_vSelectedLayers.clear();
-			m_vSelectedQuads.clear();
+			for(int i = 0; i < NumSelectedLayers; i++)
+				m_vSelectedLayers.push_back(InsertPositionIndex + i);
+
+			m_SelectedGroup = GroupAfterDraggedLayer - 1;
 			m_Map.OnModify();
 		}
 	}
