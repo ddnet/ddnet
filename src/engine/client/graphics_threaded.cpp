@@ -262,6 +262,25 @@ void CGraphics_Threaded::LinesDraw(const CLineItem *pArray, int Num)
 	AddVertices(2 * Num);
 }
 
+IGraphics::CTextureHandle CGraphics_Threaded::FindFreeTextureIndex()
+{
+	int Tex = m_FirstFreeTexture;
+	if(Tex == -1)
+	{
+		const size_t CurSize = m_vTextureIndices.size();
+		m_vTextureIndices.resize(CurSize * 2);
+		for(size_t i = 0; i < CurSize - 1; ++i)
+		{
+			m_vTextureIndices[CurSize + i] = CurSize + i + 1;
+		}
+		m_vTextureIndices.back() = -1;
+		Tex = CurSize;
+	}
+	m_FirstFreeTexture = m_vTextureIndices[Tex];
+	m_vTextureIndices[Tex] = -1;
+	return CreateTextureHandle(Tex);
+}
+
 void CGraphics_Threaded::FreeTextureIndex(CTextureHandle *pIndex)
 {
 	dbg_assert(pIndex->IsValid(), "Cannot free invalid texture index");
@@ -454,25 +473,10 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadTextureRaw(int Width, int Heig
 	if(Width == 0 || Height == 0)
 		return IGraphics::CTextureHandle();
 
-	// grab texture
-	int Tex = m_FirstFreeTexture;
-	if(Tex == -1)
-	{
-		size_t CurSize = m_vTextureIndices.size();
-		m_vTextureIndices.resize(CurSize * 2);
-		for(size_t i = 0; i < CurSize - 1; ++i)
-		{
-			m_vTextureIndices[CurSize + i] = CurSize + i + 1;
-		}
-		m_vTextureIndices.back() = -1;
-
-		Tex = CurSize;
-	}
-	m_FirstFreeTexture = m_vTextureIndices[Tex];
-	m_vTextureIndices[Tex] = -1;
+	IGraphics::CTextureHandle TextureHandle = FindFreeTextureIndex();
 
 	CCommandBuffer::SCommand_Texture_Create Cmd;
-	Cmd.m_Slot = Tex;
+	Cmd.m_Slot = TextureHandle.Id();
 	Cmd.m_Width = Width;
 	Cmd.m_Height = Height;
 	Cmd.m_PixelSize = 4;
@@ -506,7 +510,7 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadTextureRaw(int Width, int Heig
 	AddCmd(
 		Cmd, [] { return true; }, "failed to load raw texture.");
 
-	return CreateTextureHandle(Tex);
+	return TextureHandle;
 }
 
 // simple uncompressed RGBA loaders
@@ -540,42 +544,12 @@ bool CGraphics_Threaded::LoadTextTextures(int Width, int Height, CTextureHandle 
 	if(Width == 0 || Height == 0)
 		return false;
 
-	// grab texture
-	int Tex = m_FirstFreeTexture;
-	if(Tex == -1)
-	{
-		size_t CurSize = m_vTextureIndices.size();
-		m_vTextureIndices.resize(CurSize * 2);
-		for(size_t i = 0; i < CurSize - 1; ++i)
-		{
-			m_vTextureIndices[CurSize + i] = CurSize + i + 1;
-		}
-		m_vTextureIndices.back() = -1;
-
-		Tex = CurSize;
-	}
-	m_FirstFreeTexture = m_vTextureIndices[Tex];
-	m_vTextureIndices[Tex] = -1;
-
-	int Tex2 = m_FirstFreeTexture;
-	if(Tex2 == -1)
-	{
-		size_t CurSize = m_vTextureIndices.size();
-		m_vTextureIndices.resize(CurSize * 2);
-		for(size_t i = 0; i < CurSize - 1; ++i)
-		{
-			m_vTextureIndices[CurSize + i] = CurSize + i + 1;
-		}
-		m_vTextureIndices.back() = -1;
-
-		Tex2 = CurSize;
-	}
-	m_FirstFreeTexture = m_vTextureIndices[Tex2];
-	m_vTextureIndices[Tex2] = -1;
+	TextTexture = FindFreeTextureIndex();
+	TextOutlineTexture = FindFreeTextureIndex();
 
 	CCommandBuffer::SCommand_TextTextures_Create Cmd;
-	Cmd.m_Slot = Tex;
-	Cmd.m_SlotOutline = Tex2;
+	Cmd.m_Slot = TextTexture.Id();
+	Cmd.m_SlotOutline = TextOutlineTexture.Id();
 	Cmd.m_Width = Width;
 	Cmd.m_Height = Height;
 
@@ -584,9 +558,6 @@ bool CGraphics_Threaded::LoadTextTextures(int Width, int Height, CTextureHandle 
 
 	AddCmd(
 		Cmd, [] { return true; }, "failed to load text textures.");
-
-	TextTexture = CreateTextureHandle(Tex);
-	TextOutlineTexture = CreateTextureHandle(Tex2);
 
 	return true;
 }
