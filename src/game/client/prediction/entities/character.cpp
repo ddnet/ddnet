@@ -1302,6 +1302,10 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 	m_Core.Read((const CNetObj_CharacterCore *)pChar);
 	m_IsLocal = IsLocal;
 
+	m_Core.SetTeleOuts(m_pGameWorld->m_pTeleOuts);
+	m_pTeleCheckOuts = m_pGameWorld->m_pTeleCheckOuts;
+	m_pTeleOuts = m_pGameWorld->m_pTeleOuts;
+
 	if(pExtended)
 	{
 		SetSolo(pExtended->m_Flags & CHARACTERFLAG_SOLO);
