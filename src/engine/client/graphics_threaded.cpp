@@ -61,26 +61,26 @@ static CVideoMode g_aFakeModes[] = {
 void CGraphics_Threaded::FlushVertices(bool KeepVertices)
 {
 	CCommandBuffer::SCommand_Render Cmd;
-	int PrimType, PrimCount, NumVerts;
-	size_t VertSize = sizeof(CCommandBuffer::SVertex);
-	FlushVerticesImpl(KeepVertices, PrimType, PrimCount, NumVerts, Cmd, VertSize);
+	int PrimType;
+	size_t PrimCount, NumVerts;
+	FlushVerticesImpl(KeepVertices, PrimType, PrimCount, NumVerts, Cmd, sizeof(CCommandBuffer::SVertex));
 
-	if(Cmd.m_pVertices != NULL)
+	if(Cmd.m_pVertices != nullptr)
 	{
-		mem_copy(Cmd.m_pVertices, m_aVertices, VertSize * NumVerts);
+		mem_copy(Cmd.m_pVertices, m_aVertices, sizeof(CCommandBuffer::SVertex) * NumVerts);
 	}
 }
 
 void CGraphics_Threaded::FlushVerticesTex3D()
 {
 	CCommandBuffer::SCommand_RenderTex3D Cmd;
-	int PrimType, PrimCount, NumVerts;
-	size_t VertSize = sizeof(CCommandBuffer::SVertexTex3DStream);
-	FlushVerticesImpl(false, PrimType, PrimCount, NumVerts, Cmd, VertSize);
+	int PrimType;
+	size_t PrimCount, NumVerts;
+	FlushVerticesImpl(false, PrimType, PrimCount, NumVerts, Cmd, sizeof(CCommandBuffer::SVertexTex3DStream));
 
-	if(Cmd.m_pVertices != NULL)
+	if(Cmd.m_pVertices != nullptr)
 	{
-		mem_copy(Cmd.m_pVertices, m_aVerticesTex3D, VertSize * NumVerts);
+		mem_copy(Cmd.m_pVertices, m_aVerticesTex3D, sizeof(CCommandBuffer::SVertexTex3DStream) * NumVerts);
 	}
 }
 
@@ -351,7 +351,7 @@ static bool ConvertToRGBA(uint8_t *pDest, const uint8_t *pSrc, size_t SrcWidth, 
 	}
 }
 
-int CGraphics_Threaded::LoadTextureRawSub(CTextureHandle TextureID, int x, int y, int Width, int Height, int Format, const void *pData)
+int CGraphics_Threaded::LoadTextureRawSub(CTextureHandle TextureID, int x, int y, size_t Width, size_t Height, int Format, const void *pData)
 {
 	dbg_assert(TextureID.IsValid(), "Invalid texture handle used with LoadTextureRawSub.");
 
@@ -364,7 +364,7 @@ int CGraphics_Threaded::LoadTextureRawSub(CTextureHandle TextureID, int x, int y
 	Cmd.m_Format = CCommandBuffer::TEXFORMAT_RGBA;
 
 	// calculate memory usage
-	int MemSize = Width * Height * 4;
+	const size_t MemSize = Width * Height * 4;
 
 	// copy texture data
 	void *pTmpData = malloc(MemSize);
@@ -375,17 +375,12 @@ int CGraphics_Threaded::LoadTextureRawSub(CTextureHandle TextureID, int x, int y
 	return 0;
 }
 
-IGraphics::CTextureHandle CGraphics_Threaded::LoadSpriteTextureImpl(CImageInfo &FromImageInfo, int x, int y, int w, int h)
+IGraphics::CTextureHandle CGraphics_Threaded::LoadSpriteTextureImpl(CImageInfo &FromImageInfo, int x, int y, size_t w, size_t h)
 {
-	int bpp = ImageFormatToPixelSize(FromImageInfo.m_Format);
-
-	m_vSpriteHelper.resize((size_t)w * h * bpp);
-
-	CopyTextureFromTextureBufferSub(m_vSpriteHelper.data(), w, h, (uint8_t *)FromImageInfo.m_pData, FromImageInfo.m_Width, FromImageInfo.m_Height, bpp, x, y, w, h);
-
-	IGraphics::CTextureHandle RetHandle = LoadTextureRaw(w, h, FromImageInfo.m_Format, m_vSpriteHelper.data(), FromImageInfo.m_Format, 0);
-
-	return RetHandle;
+	const size_t PixelSize = ImageFormatToPixelSize(FromImageInfo.m_Format);
+	m_vSpriteHelper.resize(w * h * PixelSize);
+	CopyTextureFromTextureBufferSub(m_vSpriteHelper.data(), w, h, (uint8_t *)FromImageInfo.m_pData, FromImageInfo.m_Width, FromImageInfo.m_Height, PixelSize, x, y, w, h);
+	return LoadTextureRaw(w, h, FromImageInfo.m_Format, m_vSpriteHelper.data(), FromImageInfo.m_Format, 0);
 }
 
 IGraphics::CTextureHandle CGraphics_Threaded::LoadSpriteTexture(CImageInfo &FromImageInfo, CDataSprite *pSprite)
@@ -443,7 +438,7 @@ bool CGraphics_Threaded::IsSpriteTextureFullyTransparent(CImageInfo &FromImageIn
 	return IsImageSubFullyTransparent(FromImageInfo, x, y, w, h);
 }
 
-IGraphics::CTextureHandle CGraphics_Threaded::LoadTextureRaw(int Width, int Height, int Format, const void *pData, int StoreFormat, int Flags, const char *pTexName)
+IGraphics::CTextureHandle CGraphics_Threaded::LoadTextureRaw(size_t Width, size_t Height, int Format, const void *pData, int StoreFormat, int Flags, const char *pTexName)
 {
 	// don't waste memory on texture if we are stress testing
 #ifdef CONF_DEBUG
@@ -497,7 +492,7 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadTextureRaw(int Width, int Heig
 		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_NO_2D_TEXTURE;
 
 	// copy texture data
-	int MemSize = Width * Height * Cmd.m_PixelSize;
+	const size_t MemSize = Width * Height * Cmd.m_PixelSize;
 	void *pTmpData = malloc(MemSize);
 	if(!ConvertToRGBA((uint8_t *)pTmpData, (const uint8_t *)pData, Width, Height, Format))
 	{
@@ -535,7 +530,7 @@ IGraphics::CTextureHandle CGraphics_Threaded::InvalidTexture() const
 	return m_InvalidTexture;
 }
 
-bool CGraphics_Threaded::LoadTextTextures(int Width, int Height, CTextureHandle &TextTexture, CTextureHandle &TextOutlineTexture, void *pTextData, void *pTextOutlineData)
+bool CGraphics_Threaded::LoadTextTextures(size_t Width, size_t Height, CTextureHandle &TextTexture, CTextureHandle &TextOutlineTexture, void *pTextData, void *pTextOutlineData)
 {
 	if(Width == 0 || Height == 0)
 		return false;
@@ -569,7 +564,7 @@ bool CGraphics_Threaded::UnloadTextTextures(CTextureHandle &TextTexture, CTextur
 	return true;
 }
 
-bool CGraphics_Threaded::UpdateTextTexture(CTextureHandle TextureID, int x, int y, int Width, int Height, const void *pData)
+bool CGraphics_Threaded::UpdateTextTexture(CTextureHandle TextureID, int x, int y, size_t Width, size_t Height, const void *pData)
 {
 	CCommandBuffer::SCommand_TextTexture_Update Cmd;
 	Cmd.m_Slot = TextureID.Id();
@@ -579,7 +574,7 @@ bool CGraphics_Threaded::UpdateTextTexture(CTextureHandle TextureID, int x, int 
 	Cmd.m_Height = Height;
 
 	// calculate memory usage
-	int MemSize = Width * Height;
+	const size_t MemSize = Width * Height;
 
 	// copy texture data
 	void *pTmpData = malloc(MemSize);
@@ -633,7 +628,7 @@ int CGraphics_Threaded::LoadPNG(CImageInfo *pImg, const char *pFilename, int Sto
 				static const char *EXPLANATION[] = {"color type", "bit depth", "interlace type", "compression type", "filter type"};
 
 				bool First = true;
-				for(int i = 0; i < (int)std::size(FLAGS); i++)
+				for(size_t i = 0; i < std::size(FLAGS); ++i)
 				{
 					if((PngliteIncompatible & FLAGS[i]) != 0)
 					{
@@ -739,23 +734,23 @@ bool CGraphics_Threaded::IsImageFormatRGBA(const char *pFileName, CImageInfo &Im
 	return true;
 }
 
-void CGraphics_Threaded::CopyTextureBufferSub(uint8_t *pDestBuffer, uint8_t *pSourceBuffer, int FullWidth, int FullHeight, int ColorChannelCount, int SubOffsetX, int SubOffsetY, int SubCopyWidth, int SubCopyHeight)
+void CGraphics_Threaded::CopyTextureBufferSub(uint8_t *pDestBuffer, uint8_t *pSourceBuffer, size_t FullWidth, size_t FullHeight, size_t ColorChannelCount, size_t SubOffsetX, size_t SubOffsetY, size_t SubCopyWidth, size_t SubCopyHeight)
 {
-	for(int Y = 0; Y < SubCopyHeight; ++Y)
+	for(size_t Y = 0; Y < SubCopyHeight; ++Y)
 	{
-		int ImgOffset = ((SubOffsetY + Y) * FullWidth * ColorChannelCount) + (SubOffsetX * ColorChannelCount);
-		int CopySize = SubCopyWidth * ColorChannelCount;
+		const size_t ImgOffset = ((SubOffsetY + Y) * FullWidth * ColorChannelCount) + (SubOffsetX * ColorChannelCount);
+		const size_t CopySize = SubCopyWidth * ColorChannelCount;
 		mem_copy(&pDestBuffer[ImgOffset], &pSourceBuffer[ImgOffset], CopySize);
 	}
 }
 
-void CGraphics_Threaded::CopyTextureFromTextureBufferSub(uint8_t *pDestBuffer, int DestWidth, int DestHeight, uint8_t *pSourceBuffer, int SrcWidth, int SrcHeight, int ColorChannelCount, int SrcSubOffsetX, int SrcSubOffsetY, int SrcSubCopyWidth, int SrcSubCopyHeight)
+void CGraphics_Threaded::CopyTextureFromTextureBufferSub(uint8_t *pDestBuffer, size_t DestWidth, size_t DestHeight, uint8_t *pSourceBuffer, size_t SrcWidth, size_t SrcHeight, size_t ColorChannelCount, size_t SrcSubOffsetX, size_t SrcSubOffsetY, size_t SrcSubCopyWidth, size_t SrcSubCopyHeight)
 {
-	for(int Y = 0; Y < SrcSubCopyHeight; ++Y)
+	for(size_t Y = 0; Y < SrcSubCopyHeight; ++Y)
 	{
-		int SrcImgOffset = ((SrcSubOffsetY + Y) * SrcWidth * ColorChannelCount) + (SrcSubOffsetX * ColorChannelCount);
-		int DstImgOffset = (Y * DestWidth * ColorChannelCount);
-		int CopySize = SrcSubCopyWidth * ColorChannelCount;
+		const size_t SrcImgOffset = ((SrcSubOffsetY + Y) * SrcWidth * ColorChannelCount) + (SrcSubOffsetX * ColorChannelCount);
+		const size_t DstImgOffset = (Y * DestWidth * ColorChannelCount);
+		const size_t CopySize = SrcSubCopyWidth * ColorChannelCount;
 		mem_copy(&pDestBuffer[DstImgOffset], &pSourceBuffer[SrcImgOffset], CopySize);
 	}
 }
@@ -1695,7 +1690,7 @@ void CGraphics_Threaded::RenderBorderTileLines(int BufferContainerIndex, const C
 	m_pCommandBuffer->AddRenderCalls(1);
 }
 
-void CGraphics_Threaded::RenderQuadLayer(int BufferContainerIndex, SQuadRenderInfo *pQuadInfo, int QuadNum, int QuadOffset)
+void CGraphics_Threaded::RenderQuadLayer(int BufferContainerIndex, SQuadRenderInfo *pQuadInfo, size_t QuadNum, int QuadOffset)
 {
 	if(QuadNum == 0)
 		return;
@@ -1706,7 +1701,7 @@ void CGraphics_Threaded::RenderQuadLayer(int BufferContainerIndex, SQuadRenderIn
 	Cmd.m_QuadNum = QuadNum;
 	Cmd.m_QuadOffset = QuadOffset;
 	Cmd.m_BufferContainerIndex = BufferContainerIndex;
-	Cmd.m_pQuadInfo = (SQuadRenderInfo *)AllocCommandBufferData(QuadNum * sizeof(SQuadRenderInfo));
+	Cmd.m_pQuadInfo = (SQuadRenderInfo *)AllocCommandBufferData(Cmd.m_QuadNum * sizeof(SQuadRenderInfo));
 
 	AddCmd(Cmd, [&] {
 		Cmd.m_pQuadInfo = (SQuadRenderInfo *)m_pCommandBuffer->AllocData(QuadNum * sizeof(SQuadRenderInfo));
@@ -2184,7 +2179,7 @@ void CGraphics_Threaded::RenderQuadContainerAsSpriteMultiple(int ContainerIndex,
 	}
 }
 
-void *CGraphics_Threaded::AllocCommandBufferData(unsigned AllocSize)
+void *CGraphics_Threaded::AllocCommandBufferData(size_t AllocSize)
 {
 	void *pData = m_pCommandBuffer->AllocData(AllocSize);
 	if(pData == nullptr)
@@ -2377,7 +2372,7 @@ int CGraphics_Threaded::CreateBufferContainer(SBufferContainerInfo *pContainerIn
 
 	CCommandBuffer::SCommand_CreateBufferContainer Cmd;
 	Cmd.m_BufferContainerIndex = Index;
-	Cmd.m_AttrCount = (int)pContainerInfo->m_vAttributes.size();
+	Cmd.m_AttrCount = pContainerInfo->m_vAttributes.size();
 	Cmd.m_Stride = pContainerInfo->m_Stride;
 	Cmd.m_VertBufferBindingIndex = pContainerInfo->m_VertBufferBindingIndex;
 	Cmd.m_pAttributes = (SBufferContainerInfo::SAttribute *)AllocCommandBufferData(Cmd.m_AttrCount * sizeof(SBufferContainerInfo::SAttribute));
@@ -2427,7 +2422,7 @@ void CGraphics_Threaded::UpdateBufferContainerInternal(int ContainerIndex, SBuff
 {
 	CCommandBuffer::SCommand_UpdateBufferContainer Cmd;
 	Cmd.m_BufferContainerIndex = ContainerIndex;
-	Cmd.m_AttrCount = (int)pContainerInfo->m_vAttributes.size();
+	Cmd.m_AttrCount = pContainerInfo->m_vAttributes.size();
 	Cmd.m_Stride = pContainerInfo->m_Stride;
 	Cmd.m_VertBufferBindingIndex = pContainerInfo->m_VertBufferBindingIndex;
 	Cmd.m_pAttributes = (SBufferContainerInfo::SAttribute *)AllocCommandBufferData(Cmd.m_AttrCount * sizeof(SBufferContainerInfo::SAttribute));
@@ -2669,7 +2664,7 @@ int CGraphics_Threaded::Init()
 	// init textures
 	m_FirstFreeTexture = 0;
 	m_vTextureIndices.resize(CCommandBuffer::MAX_TEXTURES);
-	for(int i = 0; i < (int)m_vTextureIndices.size() - 1; i++)
+	for(size_t i = 0; i < m_vTextureIndices.size() - 1; ++i)
 		m_vTextureIndices[i] = i + 1;
 	m_vTextureIndices.back() = -1;
 
