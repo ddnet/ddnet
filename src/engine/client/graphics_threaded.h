@@ -966,6 +966,7 @@ public:
 	void LinesEnd() override;
 	void LinesDraw(const CLineItem *pArray, int Num) override;
 
+	void FreeTextureIndex(CTextureHandle *pIndex);
 	int UnloadTexture(IGraphics::CTextureHandle *pIndex) override;
 	IGraphics::CTextureHandle LoadTextureRaw(int Width, int Height, int Format, const void *pData, int StoreFormat, int Flags, const char *pTexName = NULL) override;
 	int LoadTextureRawSub(IGraphics::CTextureHandle TextureID, int x, int y, int Width, int Height, int Format, const void *pData) override;

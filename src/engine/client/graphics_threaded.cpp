@@ -262,6 +262,14 @@ void CGraphics_Threaded::LinesDraw(const CLineItem *pArray, int Num)
 	AddVertices(2 * Num);
 }
 
+void CGraphics_Threaded::FreeTextureIndex(CTextureHandle *pIndex)
+{
+	dbg_assert(pIndex->IsValid(), "Cannot free invalid texture index");
+	m_vTextureIndices[pIndex->Id()] = m_FirstFreeTexture;
+	m_FirstFreeTexture = pIndex->Id();
+	pIndex->Invalidate();
+}
+
 int CGraphics_Threaded::UnloadTexture(CTextureHandle *pIndex)
 {
 	if(pIndex->Id() == m_InvalidTexture.Id())
@@ -275,10 +283,7 @@ int CGraphics_Threaded::UnloadTexture(CTextureHandle *pIndex)
 	AddCmd(
 		Cmd, [] { return true; }, "failed to unload texture.");
 
-	m_vTextureIndices[pIndex->Id()] = m_FirstFreeTexture;
-	m_FirstFreeTexture = pIndex->Id();
-
-	pIndex->Invalidate();
+	FreeTextureIndex(pIndex);
 	return 0;
 }
 
@@ -594,14 +599,10 @@ bool CGraphics_Threaded::UnloadTextTextures(CTextureHandle &TextTexture, CTextur
 	AddCmd(
 		Cmd, [] { return true; }, "failed to unload text textures.");
 
-	m_vTextureIndices[TextTexture.Id()] = m_FirstFreeTexture;
-	m_FirstFreeTexture = TextTexture.Id();
-
-	m_vTextureIndices[TextOutlineTexture.Id()] = m_FirstFreeTexture;
-	m_FirstFreeTexture = TextOutlineTexture.Id();
-
-	TextTexture.Invalidate();
-	TextOutlineTexture.Invalidate();
+	if(TextTexture.IsValid())
+		FreeTextureIndex(&TextTexture);
+	if(TextOutlineTexture.IsValid())
+		FreeTextureIndex(&TextOutlineTexture);
 	return true;
 }
 
