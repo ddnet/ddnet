@@ -989,6 +989,7 @@ public:
 	void ResetMenuBackgroundPositions();
 
 	std::vector<CQuad *> GetSelectedQuads();
+	std::vector<std::pair<CQuad *, int>> GetSelectedQuadPoints();
 	CLayer *GetSelectedLayerType(int Index, int Type) const;
 	CLayer *GetSelectedLayer(int Index) const;
 	CLayerGroup *GetSelectedGroup() const;
@@ -996,9 +997,16 @@ public:
 	void SelectLayer(int LayerIndex, int GroupIndex = -1);
 	void AddSelectedLayer(int LayerIndex);
 	void SelectQuad(int Index);
+	void ToggleSelectQuad(int Index);
+	void DeselectQuads();
+	void DeselectQuadPoints();
+	void SelectQuadPoint(int QuadIndex, int Index);
+	void ToggleSelectQuadPoint(int QuadIndex, int Index);
 	void DeleteSelectedQuads();
 	bool IsQuadSelected(int Index) const;
+	bool IsQuadPointSelected(int QuadIndex, int Index) const;
 	int FindSelectedQuadIndex(int Index) const;
+	int FindSelectedQuadPointIndex(int QuadIndex) const;
 
 	int DoProperties(CUIRect *pToolbox, CProperty *pProps, int *pIDs, int *pNewVal, ColorRGBA Color = ColorRGBA(1, 1, 1, 0.5f));
 
@@ -1219,13 +1227,15 @@ public:
 	int m_SelectedQuadPoint;
 	int m_SelectedQuadIndex;
 	int m_SelectedGroup;
-	int m_SelectedPoints;
+	std::vector<std::pair<int, int>> m_vSelectedQuadPoints;
 	int m_SelectedEnvelope;
 	int m_SelectedEnvelopePoint;
 	int m_SelectedQuadEnvelope;
 	int m_SelectedImage;
 	int m_SelectedSound;
 	int m_SelectedSource;
+
+	std::vector<CQuad> m_vCopyBuffer;
 
 	bool m_QuadKnifeActive;
 	int m_QuadKnifeCount;
