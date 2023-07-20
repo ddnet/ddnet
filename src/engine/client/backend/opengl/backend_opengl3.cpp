@@ -1008,7 +1008,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_CreateBufferContainer(const CComma
 
 	BufferContainer.m_LastIndexBufferBound = 0;
 
-	for(int i = 0; i < pCommand->m_AttrCount; ++i)
+	for(size_t i = 0; i < pCommand->m_AttrCount; ++i)
 	{
 		glEnableVertexAttribArray((GLuint)i);
 
@@ -1041,7 +1041,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_UpdateBufferContainer(const CComma
 	}
 	BufferContainer.m_ContainerInfo.m_vAttributes.clear();
 
-	for(int i = 0; i < pCommand->m_AttrCount; ++i)
+	for(size_t i = 0; i < pCommand->m_AttrCount; ++i)
 	{
 		glEnableVertexAttribArray((GLuint)i);
 
