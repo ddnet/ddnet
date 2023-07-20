@@ -33,6 +33,7 @@
 # 2023-01-11 cheeser0613
 # 2023-04-01 cheeser0613
 # 2023-05-21 RemakePower
+# 2023-07-20 By
 ##### /authors #####
 
 ##### translated strings #####
@@ -1712,31 +1713,31 @@ Add Clan
 == 添加战队
 
 A demo with this name already exists
-== 
+== 已经存在同名回放
 
 No server selected
-== 
+== 未选择服务器
 
 Mark the beginning of a cut (right click to reset)
-== 
+== 标记裁剪起点 (右键重置)
 
 Mark the end of a cut (right click to reset)
-== 
+== 标记裁剪终点 (右键重置)
 
 Close the demo player
-== 
+== 关闭回放播放器
 
 Export demo cut
-== 
+== 另存裁剪部分
 
 Cut interval
-== 
+== 裁剪区间
 
 Cut length
-== 
+== 裁剪时长
 
 Axis
-== 
+== 轴
 
 Graphics card
-== 
+== 显卡
