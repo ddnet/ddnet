@@ -22,6 +22,10 @@ CCamera::CCamera()
 	m_Zoom = 1.0f;
 	m_Zooming = false;
 	m_ForceFreeviewPos = vec2(-1, -1);
+	m_GotoSwitchOffset = 0;
+	m_GotoTeleOffset = 0;
+	m_GotoSwitchLastPos = ivec2(-1, -1);
+	m_GotoTeleLastPos = ivec2(-1, -1);
 }
 
 float CCamera::ZoomProgress(float CurrentTime) const
