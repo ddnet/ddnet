@@ -22,6 +22,7 @@
 # 2023-01-11 cheeser0613
 # 2023-04-01 cheeser0613
 # 2023-05-25 cheeser0613
+# 2023-07-20 By
 ##### /authors #####
 
 ##### translated strings #####
@@ -1416,7 +1417,7 @@ Loading map file from storage
 == 正在從硬盤中加載地圖檔案
 
 Why are you slowmo replaying to read this?
-== 所以你爲什麽要慢速回放來看這個
+== 所以你爲什麽要慢速回放來看這個？
 
 Initializing components
 == 正在初始化游戲引擎
@@ -1701,31 +1702,31 @@ Add Clan
 == 新增戰隊
 
 A demo with this name already exists
-== 
+== 已經存在同名回放
 
 No server selected
-== 
+== 未選擇伺服器
 
 Mark the beginning of a cut (right click to reset)
-== 
+== 標記裁剪起點 (右鍵重置)
 
 Mark the end of a cut (right click to reset)
-== 
+== 標記裁剪終點 (右鍵重置)
 
 Close the demo player
-== 
+== 關閉回放播放器
 
 Export demo cut
-== 
+== 另存裁剪部分
 
 Cut interval
-== 
+== 裁剪區間
 
 Cut length
-== 
+== 裁剪長度
 
 Axis
-== 
+== 軸
 
 Graphics card
-== 
+== 顯示卡
