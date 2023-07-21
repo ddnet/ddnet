@@ -263,7 +263,7 @@ void CRenderTools::RenderEvalEnvelope(const IEnvelopePointAccess *pPoints, int C
 	else
 		TimeNanos = decltype(TimeNanos)::zero();
 
-	int TimeMillis = (int)(TimeNanos / std::chrono::nanoseconds(1ms).count()).count();
+	const double TimeMillis = TimeNanos.count() / (double)std::chrono::nanoseconds(1ms).count();
 	for(int i = 0; i < NumPoints - 1; i++)
 	{
 		const CEnvPoint *pCurrentPoint = pPoints->GetPoint(i);
@@ -271,7 +271,7 @@ void CRenderTools::RenderEvalEnvelope(const IEnvelopePointAccess *pPoints, int C
 		if(TimeMillis >= pCurrentPoint->m_Time && TimeMillis <= pNextPoint->m_Time)
 		{
 			const float Delta = pNextPoint->m_Time - pCurrentPoint->m_Time;
-			float a = (float)(((double)TimeNanos.count() / (double)std::chrono::nanoseconds(1ms).count()) - pCurrentPoint->m_Time) / Delta;
+			float a = (float)(TimeMillis - pCurrentPoint->m_Time) / Delta;
 
 			switch(pCurrentPoint->m_Curvetype)
 			{
