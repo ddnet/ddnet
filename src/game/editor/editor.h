@@ -442,6 +442,11 @@ public:
 	struct CSetting
 	{
 		char m_aCommand[256];
+
+		CSetting(const char *pCommand)
+		{
+			str_copy(m_aCommand, pCommand);
+		}
 	};
 	std::vector<CSetting> m_vSettings;
 
