@@ -86,7 +86,6 @@ class CGameConsole : public CComponent
 	CInstance m_RemoteConsole;
 
 	CInstance *CurrentConsole();
-	float TimeNow();
 
 	int m_ConsoleType;
 	int m_ConsoleState;

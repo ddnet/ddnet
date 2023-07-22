@@ -393,12 +393,6 @@ CGameConsole::~CGameConsole()
 		m_pConsoleLogger->OnConsoleDeletion();
 }
 
-float CGameConsole::TimeNow()
-{
-	static int64_t s_TimeStart = time_get();
-	return (time_get() - s_TimeStart) / (float)time_freq();
-}
-
 CGameConsole::CInstance *CGameConsole::CurrentConsole()
 {
 	if(m_ConsoleType == CONSOLETYPE_REMOTE)
@@ -482,7 +476,7 @@ void CGameConsole::OnRender()
 	float ConsoleMaxHeight = Screen.h * 3 / 5.0f;
 	float ConsoleHeight;
 
-	float Progress = (TimeNow() - (m_StateChangeEnd - m_StateChangeDuration)) / m_StateChangeDuration;
+	float Progress = (Client()->GlobalTime() - (m_StateChangeEnd - m_StateChangeDuration)) / m_StateChangeDuration;
 
 	if(Progress >= 1.0f)
 	{
@@ -822,7 +816,7 @@ void CGameConsole::OnMessage(int MsgType, void *pRawMsg)
 bool CGameConsole::OnInput(const IInput::CEvent &Event)
 {
 	// accept input when opening, but not at first frame to discard the input that caused the console to open
-	if(m_ConsoleState != CONSOLE_OPEN && (m_ConsoleState != CONSOLE_OPENING || m_StateChangeEnd == TimeNow() + m_StateChangeDuration))
+	if(m_ConsoleState != CONSOLE_OPEN && (m_ConsoleState != CONSOLE_OPENING || m_StateChangeEnd == Client()->GlobalTime() + m_StateChangeDuration))
 		return false;
 	if((Event.m_Key >= KEY_F1 && Event.m_Key <= KEY_F12) || (Event.m_Key >= KEY_F13 && Event.m_Key <= KEY_F24))
 		return false;
@@ -848,14 +842,14 @@ void CGameConsole::Toggle(int Type)
 	{
 		if(m_ConsoleState == CONSOLE_CLOSED || m_ConsoleState == CONSOLE_OPEN)
 		{
-			m_StateChangeEnd = TimeNow() + m_StateChangeDuration;
+			m_StateChangeEnd = Client()->GlobalTime() + m_StateChangeDuration;
 		}
 		else
 		{
-			float Progress = m_StateChangeEnd - TimeNow();
+			float Progress = m_StateChangeEnd - Client()->GlobalTime();
 			float ReversedProgress = m_StateChangeDuration - Progress;
 
-			m_StateChangeEnd = TimeNow() + ReversedProgress;
+			m_StateChangeEnd = Client()->GlobalTime() + ReversedProgress;
 		}
 
 		if(m_ConsoleState == CONSOLE_CLOSED || m_ConsoleState == CONSOLE_CLOSING)
