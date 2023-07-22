@@ -297,11 +297,11 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 		else if(Event.m_Key == KEY_PAGEUP)
 		{
 			++m_BacklogCurPage;
-			m_pGameConsole->m_HasSelection = false;
+			m_HasSelection = false;
 		}
 		else if(Event.m_Key == KEY_PAGEDOWN)
 		{
-			m_pGameConsole->m_HasSelection = false;
+			m_HasSelection = false;
 			--m_BacklogCurPage;
 			if(m_BacklogCurPage < 0)
 				m_BacklogCurPage = 0;
@@ -311,12 +311,12 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 		else if(Event.m_Key == KEY_HOME && m_Input.IsEmpty())
 		{
 			m_BacklogCurPage = INT_MAX;
-			m_pGameConsole->m_HasSelection = false;
+			m_HasSelection = false;
 		}
 		else if(Event.m_Key == KEY_END && m_Input.IsEmpty())
 		{
 			m_BacklogCurPage = 0;
-			m_pGameConsole->m_HasSelection = false;
+			m_HasSelection = false;
 		}
 	}
 
@@ -373,8 +373,7 @@ void CGameConsole::CInstance::PrintLine(const char *pLine, int Len, ColorRGBA Pr
 	pEntry->m_YOffset = -1.0f;
 	pEntry->m_PrintColor = PrintColor;
 	str_copy(pEntry->m_aText, pLine, Len + 1);
-	if(m_pGameConsole->m_ConsoleType == m_Type)
-		m_pGameConsole->m_NewLineCounter++;
+	m_NewLineCounter++;
 	m_BacklogLock.unlock();
 }
 
@@ -484,6 +483,7 @@ void CGameConsole::OnRender()
 		{
 			m_ConsoleState = CONSOLE_CLOSED;
 			pConsole->m_Input.Deactivate();
+			pConsole->m_BacklogLastActivePage = -1;
 		}
 		else if(m_ConsoleState == CONSOLE_OPENING)
 		{
@@ -601,40 +601,38 @@ void CGameConsole::OnRender()
 		TextRender()->TextEx(&Cursor, pPrompt, -1);
 
 		// check if mouse is pressed
-		if(!m_MouseIsPress && Input()->NativeMousePressed(1))
+		if(!pConsole->m_MouseIsPress && Input()->NativeMousePressed(1))
 		{
-			m_MouseIsPress = true;
+			pConsole->m_MouseIsPress = true;
 			ivec2 MousePress;
 			Input()->NativeMousePos(&MousePress.x, &MousePress.y);
-			m_MousePress.x = (MousePress.x / (float)Graphics()->WindowWidth()) * Screen.w;
-			m_MousePress.y = (MousePress.y / (float)Graphics()->WindowHeight()) * Screen.h;
+			pConsole->m_MousePress.x = (MousePress.x / (float)Graphics()->WindowWidth()) * Screen.w;
+			pConsole->m_MousePress.y = (MousePress.y / (float)Graphics()->WindowHeight()) * Screen.h;
 		}
-		if(m_MouseIsPress)
+		if(pConsole->m_MouseIsPress)
 		{
 			ivec2 MouseRelease;
 			Input()->NativeMousePos(&MouseRelease.x, &MouseRelease.y);
-			m_MouseRelease.x = (MouseRelease.x / (float)Graphics()->WindowWidth()) * Screen.w;
-			m_MouseRelease.y = (MouseRelease.y / (float)Graphics()->WindowHeight()) * Screen.h;
+			pConsole->m_MouseRelease.x = (MouseRelease.x / (float)Graphics()->WindowWidth()) * Screen.w;
+			pConsole->m_MouseRelease.y = (MouseRelease.y / (float)Graphics()->WindowHeight()) * Screen.h;
 		}
-		if(m_MouseIsPress && !Input()->NativeMousePressed(1))
+		if(pConsole->m_MouseIsPress && !Input()->NativeMousePressed(1))
 		{
-			m_MouseIsPress = false;
+			pConsole->m_MouseIsPress = false;
 		}
 
 		x = Cursor.m_X;
 
-		static STextBoundingBox s_BoundingBox = {0.0f, 0.0f, 0.0f, 0.0f};
-
 		if(m_ConsoleState == CONSOLE_OPEN)
 		{
-			if(m_MousePress.y >= s_BoundingBox.m_Y && m_MousePress.y < s_BoundingBox.m_Y + s_BoundingBox.m_H)
+			if(pConsole->m_MousePress.y >= pConsole->m_BoundingBox.m_Y && pConsole->m_MousePress.y < pConsole->m_BoundingBox.m_Y + pConsole->m_BoundingBox.m_H)
 			{
 				CLineInput::SMouseSelection *pMouseSelection = pConsole->m_Input.GetMouseSelection();
-				pMouseSelection->m_Selecting = m_MouseIsPress;
-				pMouseSelection->m_PressMouse = m_MousePress;
-				pMouseSelection->m_ReleaseMouse = m_MouseRelease;
+				pMouseSelection->m_Selecting = pConsole->m_MouseIsPress;
+				pMouseSelection->m_PressMouse = pConsole->m_MousePress;
+				pMouseSelection->m_ReleaseMouse = pConsole->m_MouseRelease;
 			}
-			else if(m_MouseIsPress)
+			else if(pConsole->m_MouseIsPress)
 			{
 				pConsole->m_Input.SelectNothing();
 			}
@@ -644,19 +642,21 @@ void CGameConsole::OnRender()
 		pConsole->m_Input.SetHidden(m_ConsoleType == CONSOLETYPE_REMOTE && Client()->State() == IClient::STATE_ONLINE && !Client()->RconAuthed() && (pConsole->m_UserGot || !pConsole->m_UsernameReq));
 		pConsole->m_Input.Activate(EInputPriority::CONSOLE); // Ensure that the input is active
 		const CUIRect InputCursorRect = {x, y + FontSize, 0.0f, 0.0f};
-		s_BoundingBox = pConsole->m_Input.Render(&InputCursorRect, FontSize, TEXTALIGN_BL, pConsole->m_Input.WasChanged(), Screen.w - 10.0f - x);
+		pConsole->m_BoundingBox = pConsole->m_Input.Render(&InputCursorRect, FontSize, TEXTALIGN_BL, pConsole->m_Input.WasChanged(), Screen.w - 10.0f - x);
+		if(pConsole->m_LastInputHeight == 0.0f && pConsole->m_BoundingBox.m_H != 0.0f)
+			pConsole->m_LastInputHeight = pConsole->m_BoundingBox.m_H;
 		if(pConsole->m_Input.HasSelection())
-			m_HasSelection = false; // Clear console selection if we have a line input selection
+			pConsole->m_HasSelection = false; // Clear console selection if we have a line input selection
 
-		y -= s_BoundingBox.m_H - FontSize;
+		y -= pConsole->m_BoundingBox.m_H - FontSize;
 		TextRender()->SetCursor(&Cursor, x, y, FontSize, TEXTFLAG_RENDER);
 		Cursor.m_LineWidth = Screen.w - 10.0f - x;
 
-		if(m_LastInputHeight != s_BoundingBox.m_H)
+		if(pConsole->m_LastInputHeight != pConsole->m_BoundingBox.m_H)
 		{
-			m_HasSelection = false;
-			m_MouseIsPress = false;
-			m_LastInputHeight = s_BoundingBox.m_H;
+			pConsole->m_HasSelection = false;
+			pConsole->m_MouseIsPress = false;
+			pConsole->m_LastInputHeight = pConsole->m_BoundingBox.m_H;
 		}
 
 		// render possible commands
@@ -711,9 +711,10 @@ void CGameConsole::OnRender()
 
 		std::string SelectionString;
 
-		static int s_LastActivePage = pConsole->m_BacklogCurPage;
+		if(pConsole->m_BacklogLastActivePage < 0)
+			pConsole->m_BacklogLastActivePage = pConsole->m_BacklogCurPage;
 		int TotalPages = 1;
-		for(int Page = 0; Page <= maximum(s_LastActivePage, pConsole->m_BacklogCurPage); ++Page, OffsetY = 0.0f)
+		for(int Page = 0; Page <= maximum(pConsole->m_BacklogLastActivePage, pConsole->m_BacklogCurPage); ++Page, OffsetY = 0.0f)
 		{
 			while(pEntry)
 			{
@@ -729,12 +730,12 @@ void CGameConsole::OnRender()
 				}
 				OffsetY += pEntry->m_YOffset;
 
-				if((m_HasSelection || m_MouseIsPress) && m_NewLineCounter > 0)
+				if((pConsole->m_HasSelection || pConsole->m_MouseIsPress) && pConsole->m_NewLineCounter > 0)
 				{
 					float MouseExtraOff = pEntry->m_YOffset;
-					m_MousePress.y -= MouseExtraOff;
-					if(!m_MouseIsPress)
-						m_MouseRelease.y -= MouseExtraOff;
+					pConsole->m_MousePress.y -= MouseExtraOff;
+					if(!pConsole->m_MouseIsPress)
+						pConsole->m_MouseRelease.y -= MouseExtraOff;
 				}
 
 				// next page when lines reach the top
@@ -742,40 +743,40 @@ void CGameConsole::OnRender()
 					break;
 
 				// just render output from current backlog page (render bottom up)
-				if(Page == s_LastActivePage)
+				if(Page == pConsole->m_BacklogLastActivePage)
 				{
 					TextRender()->SetCursor(&Cursor, 0.0f, y - OffsetY, FontSize, TEXTFLAG_RENDER);
 					Cursor.m_LineWidth = Screen.w - 10.0f;
-					Cursor.m_CalculateSelectionMode = (m_ConsoleState == CONSOLE_OPEN && m_MousePress.y < s_BoundingBox.m_Y && (m_MouseIsPress || (m_CurSelStart != m_CurSelEnd) || m_HasSelection)) ? TEXT_CURSOR_SELECTION_MODE_CALCULATE : TEXT_CURSOR_SELECTION_MODE_NONE;
-					Cursor.m_PressMouse = m_MousePress;
-					Cursor.m_ReleaseMouse = m_MouseRelease;
+					Cursor.m_CalculateSelectionMode = (m_ConsoleState == CONSOLE_OPEN && pConsole->m_MousePress.y < pConsole->m_BoundingBox.m_Y && (pConsole->m_MouseIsPress || (pConsole->m_CurSelStart != pConsole->m_CurSelEnd) || pConsole->m_HasSelection)) ? TEXT_CURSOR_SELECTION_MODE_CALCULATE : TEXT_CURSOR_SELECTION_MODE_NONE;
+					Cursor.m_PressMouse = pConsole->m_MousePress;
+					Cursor.m_ReleaseMouse = pConsole->m_MouseRelease;
 					TextRender()->TextEx(&Cursor, pEntry->m_aText, -1);
 					if(Cursor.m_CalculateSelectionMode == TEXT_CURSOR_SELECTION_MODE_CALCULATE)
 					{
-						m_CurSelStart = minimum(Cursor.m_SelectionStart, Cursor.m_SelectionEnd);
-						m_CurSelEnd = maximum(Cursor.m_SelectionStart, Cursor.m_SelectionEnd);
+						pConsole->m_CurSelStart = minimum(Cursor.m_SelectionStart, Cursor.m_SelectionEnd);
+						pConsole->m_CurSelEnd = maximum(Cursor.m_SelectionStart, Cursor.m_SelectionEnd);
 					}
-					if(m_CurSelStart != m_CurSelEnd)
+					if(pConsole->m_CurSelStart != pConsole->m_CurSelEnd)
 					{
 						if(m_WantsSelectionCopy)
 						{
 							const bool HasNewLine = !SelectionString.empty();
 							int OffUTF8Start = 0;
 							int OffUTF8End = 0;
-							if(TextRender()->SelectionToUTF8OffSets(pEntry->m_aText, m_CurSelStart, m_CurSelEnd, OffUTF8Start, OffUTF8End))
+							if(TextRender()->SelectionToUTF8OffSets(pEntry->m_aText, pConsole->m_CurSelStart, pConsole->m_CurSelEnd, OffUTF8Start, OffUTF8End))
 							{
 								SelectionString.insert(0, (std::string(&pEntry->m_aText[OffUTF8Start], OffUTF8End - OffUTF8Start) + (HasNewLine ? "\n" : "")));
 							}
 						}
-						m_HasSelection = true;
+						pConsole->m_HasSelection = true;
 					}
 				}
 				pEntry = pConsole->m_Backlog.Prev(pEntry);
 
 				// reset color
 				TextRender()->TextColor(1, 1, 1, 1);
-				if(m_NewLineCounter > 0)
-					--m_NewLineCounter;
+				if(pConsole->m_NewLineCounter > 0)
+					--pConsole->m_NewLineCounter;
 			}
 
 			if(!pEntry)
@@ -783,15 +784,15 @@ void CGameConsole::OnRender()
 			TotalPages++;
 		}
 		pConsole->m_BacklogCurPage = clamp(pConsole->m_BacklogCurPage, 0, TotalPages - 1);
-		s_LastActivePage = pConsole->m_BacklogCurPage;
+		pConsole->m_BacklogLastActivePage = pConsole->m_BacklogCurPage;
 
 		pConsole->m_BacklogLock.unlock();
 
 		if(m_WantsSelectionCopy && !SelectionString.empty())
 		{
-			m_HasSelection = false;
-			m_CurSelStart = -1;
-			m_CurSelEnd = -1;
+			pConsole->m_HasSelection = false;
+			pConsole->m_CurSelStart = -1;
+			pConsole->m_CurSelEnd = -1;
 			Input()->SetClipboardText(SelectionString.c_str());
 			m_WantsSelectionCopy = false;
 		}
@@ -865,8 +866,6 @@ void CGameConsole::Toggle(int Type)
 			m_ConsoleState = CONSOLE_CLOSING;
 		}
 	}
-	if(m_ConsoleType != Type)
-		m_HasSelection = false;
 	m_ConsoleType = Type;
 }
 
@@ -984,8 +983,9 @@ void CGameConsole::OnInit()
 	// add resize event
 	Graphics()->AddWindowResizeListener([this]() {
 		m_LocalConsole.ClearBacklogYOffsets();
+		m_LocalConsole.m_HasSelection = false;
 		m_RemoteConsole.ClearBacklogYOffsets();
-		m_HasSelection = false;
+		m_RemoteConsole.m_HasSelection = false;
 	});
 }
 
