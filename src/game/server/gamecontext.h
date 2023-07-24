@@ -472,7 +472,6 @@ private:
 	void Converse(int ClientID, char *pStr);
 	bool IsVersionBanned(int Version);
 	void UnlockTeam(int ClientID, int Team);
-	void RedirectClient(int ClientID, int Port, bool Verbose = false);
 
 	enum
 	{
