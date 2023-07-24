@@ -961,7 +961,7 @@ public:
 	void RefreshFilteredFileList();
 	void FilelistPopulate(int StorageType, bool KeepSelection = false);
 	void InvokeFileDialog(int StorageType, int FileType, const char *pTitle, const char *pButtonText,
-		const char *pBasepath, const char *pDefaultName,
+		const char *pBasepath, bool FilenameAsDefault,
 		bool (*pfnFunc)(const char *pFilename, int StorageType, void *pUser), void *pUser);
 	struct SStringKeyComparator
 	{
