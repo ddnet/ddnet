@@ -790,6 +790,34 @@ public:
 	const char *GetTempFileName() const { return m_aTempFileName; }
 };
 
+class CSmoothZoom
+{
+public:
+	CSmoothZoom(float InitialZoom, float Min, float Max, CEditor *pEditor);
+
+	void SetZoomRange(float Min, float Max);
+	void SetZoom(float Target);
+	void SetZoomInstant(float Target);
+	void ChangeZoom(float Amount);
+	bool UpdateZoom();
+	float GetZoom() const;
+
+private:
+	float ZoomProgress(float CurrentTime) const;
+
+	bool m_Zooming;
+	float m_Zoom;
+	CCubicBezier m_ZoomSmoothing;
+	float m_ZoomSmoothingTarget;
+	float m_ZoomSmoothingStart;
+	float m_ZoomSmoothingEnd;
+
+	float m_MinZoomLevel;
+	float m_MaxZoomLevel;
+
+	CEditor *m_pEditor;
+};
+
 class CEditor : public IEditor
 {
 	class IInput *m_pInput = nullptr;
@@ -837,6 +865,9 @@ public:
 	CRenderTools *RenderTools() { return &m_RenderTools; }
 
 	CEditor() :
+		m_ZoomMapView(200.0f, 10.0f, 2000.0f, this),
+		m_ZoomEnvelopeX(1.0f, 0.1f, 600.0f, this),
+		m_ZoomEnvelopeY(640.0f, 0.1f, 32000.0f, this),
 		m_TilesetPicker(16, 16)
 	{
 		m_EntitiesTexture.Invalidate();
@@ -885,9 +916,11 @@ public:
 		m_EditorOffsetX = 0.0f;
 		m_EditorOffsetY = 0.0f;
 
-		m_Zoom = 200.0f;
-		m_Zooming = false;
 		m_WorldZoom = 1.0f;
+
+		m_ResetZoomEnvelope = true;
+		m_OffsetEnvelopeX = 0.1f;
+		m_OffsetEnvelopeY = 0.5f;
 
 		m_ShowMousePointer = true;
 		m_MouseDeltaX = 0;
@@ -1158,13 +1191,16 @@ public:
 	float m_EditorOffsetY;
 
 	// Zooming
-	CCubicBezier m_ZoomSmoothing;
-	float m_ZoomSmoothingStart;
-	float m_ZoomSmoothingEnd;
-	bool m_Zooming;
-	float m_Zoom;
-	float m_ZoomSmoothingTarget;
+	CSmoothZoom m_ZoomMapView;
 	float m_WorldZoom;
+
+	CSmoothZoom m_ZoomEnvelopeX;
+	CSmoothZoom m_ZoomEnvelopeY;
+
+	bool m_ResetZoomEnvelope;
+
+	float m_OffsetEnvelopeX;
+	float m_OffsetEnvelopeY;
 
 	bool m_ShowMousePointer;
 	bool m_GuiActive;
@@ -1464,13 +1500,23 @@ public:
 	int GetLineDistance() const;
 
 	// Zooming
-	void SetZoom(float Target);
-	void ChangeZoom(float Amount);
 	void ZoomMouseTarget(float ZoomFactor);
-	void UpdateZoom();
-	float ZoomProgress(float CurrentTime) const;
-	float MinZoomLevel() const;
-	float MaxZoomLevel() const;
+	void UpdateZoomWorld();
+
+	void ZoomAdaptOffsetX(float ZoomFactor, const CUIRect &View);
+	void UpdateZoomEnvelopeX(const CUIRect &View);
+
+	void ZoomAdaptOffsetY(float ZoomFactor, const CUIRect &View);
+	void UpdateZoomEnvelopeY(const CUIRect &View);
+
+	void ResetZoomEnvelope(CEnvelope *pEnvelope, int ActiveChannels);
+	void RemoveTimeOffsetEnvelope(CEnvelope *pEnvelope);
+	float ScreenToEnvelopeX(const CUIRect &View, float x) const;
+	float EnvelopeToScreenX(const CUIRect &View, float x) const;
+	float ScreenToEnvelopeY(const CUIRect &View, float y) const;
+	float EnvelopeToScreenY(const CUIRect &View, float y) const;
+	float ScreenToEnvelopeDX(const CUIRect &View, float dx);
+	float ScreenToEnvelopeDY(const CUIRect &View, float dy);
 
 	// DDRace
 
