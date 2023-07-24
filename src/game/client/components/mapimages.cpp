@@ -318,7 +318,7 @@ IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType Entit
 						int CopyHeight = ImgInfo.m_Height / 16;
 						if(ValidTile)
 						{
-							Graphics()->CopyTextureBufferSub(pBuildImgData, pTmpImgData, ImgInfo.m_Width, ImgInfo.m_Height, ColorChannelCount, X * CopyWidth, Y * CopyHeight, CopyWidth, CopyHeight);
+							Graphics()->CopyTextureBufferSub(pBuildImgData, pTmpImgData, ImgInfo.m_Width, ImgInfo.m_Height, ColorChannelCount, (size_t)X * CopyWidth, (size_t)Y * CopyHeight, CopyWidth, CopyHeight);
 						}
 					}
 
