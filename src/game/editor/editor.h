@@ -947,7 +947,10 @@ public:
 
 		m_ShowEnvelopePreview = SHOWENV_NONE;
 		m_SelectedQuadEnvelope = -1;
-		m_SelectedEnvelopePoint = -1;
+		m_vSelectedEnvelopePoints = {};
+		m_UpdateEnvPointInfo = false;
+		m_SelectedTangentInPoint = std::pair(-1, -1);
+		m_SelectedTangentOutPoint = std::pair(-1, -1);
 
 		m_QuadKnifeActive = false;
 		m_QuadKnifeCount = 0;
@@ -1040,6 +1043,21 @@ public:
 	bool IsQuadPointSelected(int QuadIndex, int Index) const;
 	int FindSelectedQuadIndex(int Index) const;
 	int FindSelectedQuadPointIndex(int QuadIndex) const;
+
+	int FindEnvPointIndex(int Index, int Channel) const;
+	void SelectEnvPoint(int Index);
+	void SelectEnvPoint(int Index, int Channel);
+	void ToggleEnvPoint(int Index, int Channel);
+	bool IsEnvPointSelected(int Index, int Channel) const;
+	bool IsEnvPointSelected(int Index) const;
+	void DeselectEnvPoints();
+	void SelectTangentOutPoint(int Index, int Channel);
+	bool IsTangentOutPointSelected(int Index, int Channel) const;
+	void SelectTangentInPoint(int Index, int Channel);
+	bool IsTangentInPointSelected(int Index, int Channel) const;
+	bool IsTangentInSelected() const;
+	bool IsTangentOutSelected() const;
+	bool IsTangentSelected() const;
 
 	int DoProperties(CUIRect *pToolbox, CProperty *pProps, int *pIDs, int *pNewVal, ColorRGBA Color = ColorRGBA(1, 1, 1, 0.5f));
 
@@ -1270,11 +1288,14 @@ public:
 	int m_SelectedGroup;
 	std::vector<std::pair<int, int>> m_vSelectedQuadPoints;
 	int m_SelectedEnvelope;
-	int m_SelectedEnvelopePoint;
+	std::vector<std::pair<int, int>> m_vSelectedEnvelopePoints;
 	int m_SelectedQuadEnvelope;
 	int m_SelectedImage;
 	int m_SelectedSound;
 	int m_SelectedSource;
+	std::pair<int, int> m_SelectedTangentInPoint;
+	std::pair<int, int> m_SelectedTangentOutPoint;
+	bool m_UpdateEnvPointInfo;
 
 	std::vector<CQuad> m_vCopyBuffer;
 
@@ -1346,6 +1367,7 @@ public:
 	static CUI::EPopupMenuFunctionResult PopupQuad(void *pContext, CUIRect View, bool Active);
 	static CUI::EPopupMenuFunctionResult PopupSource(void *pContext, CUIRect View, bool Active);
 	static CUI::EPopupMenuFunctionResult PopupPoint(void *pContext, CUIRect View, bool Active);
+	static CUI::EPopupMenuFunctionResult PopupEnvPoint(void *pContext, CUIRect View, bool Active);
 	static CUI::EPopupMenuFunctionResult PopupImage(void *pContext, CUIRect View, bool Active);
 	static CUI::EPopupMenuFunctionResult PopupSound(void *pContext, CUIRect View, bool Active);
 	static CUI::EPopupMenuFunctionResult PopupNewFolder(void *pContext, CUIRect View, bool Active);
