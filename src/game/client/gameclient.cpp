@@ -522,6 +522,7 @@ void CGameClient::OnConnected()
 	m_GameWorld.m_WorldConfig.m_InfiniteAmmo = true;
 	mem_zero(&m_GameInfo, sizeof(m_GameInfo));
 	m_PredictedDummyID = -1;
+	Console()->ResetServerGameSettings();
 	LoadMapSettings();
 
 	if(Client()->State() != IClient::STATE_DEMOPLAYBACK && g_Config.m_ClAutoDemoOnConnect)

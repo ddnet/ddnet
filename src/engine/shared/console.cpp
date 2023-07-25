@@ -438,7 +438,11 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientID, bo
 		if(!*Result.m_pCommand)
 			return;
 
-		CCommand *pCommand = FindCommand(Result.m_pCommand, m_FlagMask);
+		CCommand *pCommand;
+		if(ClientID == IConsole::CLIENT_ID_GAME)
+			pCommand = FindCommand(Result.m_pCommand, m_FlagMask | CFGFLAG_GAME);
+		else
+			pCommand = FindCommand(Result.m_pCommand, m_FlagMask);
 
 		if(pCommand)
 		{
