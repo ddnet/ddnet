@@ -132,7 +132,7 @@ option(VULKAN "Enable the vulkan backend" ${AUTO_VULKAN_BACKEND})
 option(EXCEPTION_HANDLING "Enable exception handling (only works with Windows as of now)" OFF)
 option(IPO "Enable interprocedural optimizations" OFF)
 option(FUSE_LD "Linker to use" OFF)
-option(SECURITY_COMPILER_FLAGS "Whether to set security-relevant compiler flags like -D_FORTIFY_SOURCE=2 and -fstack-protector-all" ON)
+option(SECURITY_COMPILER_FLAGS "Whether to set security-relevant compiler flags like -D_FORTIFY_SOURCE=2 and -fstack-protector-strong" ON)
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
   include(${PROJECT_SOURCE_DIR}/cmake/toolchains/Emscripten.toolchain)
@@ -294,10 +294,9 @@ if(NOT MSVC AND NOT HAIKU)
     add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -std=gnu++17)
   endif()
 
-  if(NOT SECURITY_COMPILER_FLAGS STREQUAL OFF)
+  if(SECURITY_COMPILER_FLAGS)
     # Protect the stack pointer.
-    # -fstack-protector-all doesn't work on MinGW.
-    add_cxx_compiler_flag_if_supported(OUR_FLAGS -fstack-protector-all)
+    add_cxx_compiler_flag_if_supported(OUR_FLAGS -fstack-protector-strong)
   endif()
 
   # Disable exceptions as DDNet does not use them.
@@ -362,7 +361,7 @@ if(MSVC)
   endif()
 endif()
 
-if(NOT MSVC AND NOT HAIKU AND NOT SECURITY_COMPILER_FLAGS STREQUAL OFF)
+if(NOT MSVC AND NOT HAIKU AND SECURITY_COMPILER_FLAGS)
   check_c_compiler_flag("-O2;-Wp,-Werror;-D_FORTIFY_SOURCE=2" DEFINE_FORTIFY_SOURCE) # Some distributions define _FORTIFY_SOURCE by themselves.
 endif()
 
