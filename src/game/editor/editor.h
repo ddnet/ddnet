@@ -442,6 +442,11 @@ public:
 	struct CSetting
 	{
 		char m_aCommand[256];
+
+		CSetting(const char *pCommand)
+		{
+			str_copy(m_aCommand, pCommand);
+		}
 	};
 	std::vector<CSetting> m_vSettings;
 
@@ -940,11 +945,6 @@ public:
 		m_AnimateTime = 0;
 		m_AnimateSpeed = 1;
 
-		m_ShowEnvelopeEditor = false;
-		m_EnvelopeEditorSplit = 250.0f;
-		m_ShowServerSettingsEditor = false;
-		m_ServerSettingsEditorSplit = 250.0f;
-
 		m_ShowEnvelopePreview = SHOWENV_NONE;
 		m_SelectedQuadEnvelope = -1;
 		m_SelectedEnvelopePoint = -1;
@@ -1244,10 +1244,15 @@ public:
 	float m_AnimateTime;
 	float m_AnimateSpeed;
 
-	bool m_ShowEnvelopeEditor;
-	float m_EnvelopeEditorSplit;
-	bool m_ShowServerSettingsEditor;
-	float m_ServerSettingsEditorSplit;
+	enum EExtraEditor
+	{
+		EXTRAEDITOR_NONE = -1,
+		EXTRAEDITOR_ENVELOPES,
+		EXTRAEDITOR_SERVER_SETTINGS,
+		NUM_EXTRAEDITORS,
+	};
+	EExtraEditor m_ActiveExtraEditor = EXTRAEDITOR_NONE;
+	float m_aExtraEditorSplits[NUM_EXTRAEDITORS] = {250.0f, 250.0f};
 
 	enum EShowEnvelope
 	{
@@ -1408,11 +1413,12 @@ public:
 	void RenderSelectedImage(CUIRect View);
 	void RenderSounds(CUIRect Toolbox);
 	void RenderModebar(CUIRect View);
-	void RenderStatusbar(CUIRect View);
+	void RenderStatusbar(CUIRect View, CUIRect *pTooltipRect);
+	void RenderTooltip(CUIRect TooltipRect);
 
 	void RenderEnvelopeEditor(CUIRect View);
 	void RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEditorLast);
-	void RenderExtraEditorDragBar(CUIRect View, float *pSplit);
+	void RenderExtraEditorDragBar(CUIRect View, CUIRect DragBar);
 
 	void RenderMenubar(CUIRect Menubar);
 	void RenderFileDialog();

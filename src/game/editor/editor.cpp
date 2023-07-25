@@ -5511,40 +5511,44 @@ void CEditor::RenderModebar(CUIRect View)
 	}
 }
 
-void CEditor::RenderStatusbar(CUIRect View)
+void CEditor::RenderStatusbar(CUIRect View, CUIRect *pTooltipRect)
 {
+	const bool ButtonsDisabled = m_ShowPicker;
+
 	CUIRect Button;
-	View.VSplitRight(60.0f, &View, &Button);
+	View.VSplitRight(100.0f, &View, &Button);
 	static int s_EnvelopeButton = 0;
-	if(DoButton_Editor(&s_EnvelopeButton, "Envelopes", m_ShowEnvelopeEditor, &Button, 0, "Toggles the envelope editor."))
+	if(DoButton_Editor(&s_EnvelopeButton, "Envelopes", ButtonsDisabled ? -1 : m_ActiveExtraEditor == EXTRAEDITOR_ENVELOPES, &Button, 0, "Toggles the envelope editor.") == 1)
 	{
-		m_ShowEnvelopeEditor ^= 1;
-		m_ShowServerSettingsEditor = false;
+		m_ActiveExtraEditor = m_ActiveExtraEditor == EXTRAEDITOR_ENVELOPES ? EXTRAEDITOR_NONE : EXTRAEDITOR_ENVELOPES;
 	}
 
 	View.VSplitRight(10.0f, &View, nullptr);
-	View.VSplitRight(90.0f, &View, &Button);
+	View.VSplitRight(100.0f, &View, &Button);
 	static int s_SettingsButton = 0;
-	if(DoButton_Editor(&s_SettingsButton, "Server settings", m_ShowServerSettingsEditor, &Button, 0, "Toggles the server settings editor."))
+	if(DoButton_Editor(&s_SettingsButton, "Server settings", ButtonsDisabled ? -1 : m_ActiveExtraEditor == EXTRAEDITOR_SERVER_SETTINGS, &Button, 0, "Toggles the server settings editor.") == 1)
 	{
-		m_ShowEnvelopeEditor = false;
-		m_ShowServerSettingsEditor ^= 1;
+		m_ActiveExtraEditor = m_ActiveExtraEditor == EXTRAEDITOR_SERVER_SETTINGS ? EXTRAEDITOR_NONE : EXTRAEDITOR_SERVER_SETTINGS;
 	}
 
-	if(m_pTooltip)
-	{
-		char aBuf[512];
-		if(ms_pUiGotContext && ms_pUiGotContext == UI()->HotItem())
-			str_format(aBuf, sizeof(aBuf), "%s Right click for context menu.", m_pTooltip);
-		else
-			str_copy(aBuf, m_pTooltip);
+	View.VSplitRight(10.0f, pTooltipRect, nullptr);
+}
 
-		View.VSplitRight(10.0f, &View, nullptr);
-		SLabelProperties Props;
-		Props.m_MaxWidth = View.w;
-		Props.m_EllipsisAtEnd = true;
-		UI()->DoLabel(&View, aBuf, 10.0f, TEXTALIGN_ML, Props);
-	}
+void CEditor::RenderTooltip(CUIRect TooltipRect)
+{
+	if(m_pTooltip == nullptr)
+		return;
+
+	char aBuf[512];
+	if(ms_pUiGotContext && ms_pUiGotContext == UI()->HotItem())
+		str_format(aBuf, sizeof(aBuf), "%s Right click for context menu.", m_pTooltip);
+	else
+		str_copy(aBuf, m_pTooltip);
+
+	SLabelProperties Props;
+	Props.m_MaxWidth = TooltipRect.w;
+	Props.m_EllipsisAtEnd = true;
+	UI()->DoLabel(&TooltipRect, aBuf, 10.0f, TEXTALIGN_ML, Props);
 }
 
 bool CEditor::IsEnvelopeUsed(int EnvelopeIndex) const
@@ -5725,8 +5729,6 @@ void CEditor::RemoveTimeOffsetEnvelope(CEnvelope *pEnvelope)
 
 void CEditor::RenderEnvelopeEditor(CUIRect View)
 {
-	RenderExtraEditorDragBar(View, &m_EnvelopeEditorSplit);
-
 	if(m_SelectedEnvelope < 0)
 		m_SelectedEnvelope = 0;
 	if(m_SelectedEnvelope >= (int)m_Map.m_vpEnvelopes.size())
@@ -5747,7 +5749,12 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 	static float s_AccurateDragValueX = 0.0f;
 	static float s_AccurateDragValueY = 0.0f;
 
-	CUIRect ToolBar, CurveBar, ColorBar;
+	CUIRect ToolBar, CurveBar, ColorBar, DragBar;
+	View.HSplitTop(30.0f, &DragBar, nullptr);
+	DragBar.y -= 2.0f;
+	DragBar.w += 2.0f;
+	DragBar.h += 4.0f;
+	RenderExtraEditorDragBar(View, DragBar);
 	View.HSplitTop(15.0f, &ToolBar, &View);
 	View.HSplitTop(15.0f, &CurveBar, &View);
 	ToolBar.Margin(2.0f, &ToolBar);
@@ -6650,167 +6657,160 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEditorLast)
 {
-	RenderExtraEditorDragBar(View, &m_ServerSettingsEditorSplit);
+	// TODO: improve validation (https://github.com/ddnet/ddnet/issues/1406)
+	// Returns true if the argument is a valid server setting
+	const auto &&ValidateServerSetting = [](const char *pStr) {
+		return str_find(pStr, " ") != nullptr;
+	};
 
 	static int s_CommandSelectedIndex = -1;
+	static CListBox s_ListBox;
+	s_ListBox.SetActive(m_Dialog == DIALOG_NONE && !UI()->IsPopupOpen());
 
-	CUIRect ToolBar;
+	const bool GotSelection = s_ListBox.Active() && s_CommandSelectedIndex >= 0 && (size_t)s_CommandSelectedIndex < m_Map.m_vSettings.size();
+	const bool CurrentInputValid = ValidateServerSetting(m_SettingsCommandInput.GetString());
+
+	CUIRect ToolBar, Button, Label, List, DragBar;
+	View.HSplitTop(22.0f, &DragBar, nullptr);
+	DragBar.y -= 2.0f;
+	DragBar.w += 2.0f;
+	DragBar.h += 4.0f;
+	RenderExtraEditorDragBar(View, DragBar);
 	View.HSplitTop(20.0f, &ToolBar, &View);
-	ToolBar.Margin(2.0f, &ToolBar);
+	View.HSplitTop(2.0f, nullptr, &List);
+	ToolBar.HMargin(2.0f, &ToolBar);
 
-	// do the toolbar
+	// delete button
+	ToolBar.VSplitRight(25.0f, &ToolBar, &Button);
+	ToolBar.VSplitRight(5.0f, &ToolBar, nullptr);
+	static int s_DeleteButton = 0;
+	if(DoButton_FontIcon(&s_DeleteButton, FONT_ICON_TRASH, GotSelection ? 0 : -1, &Button, 0, "[Delete] Delete the selected command from the command list.", IGraphics::CORNER_ALL, 9.0f) == 1 || (GotSelection && CLineInput::GetActiveInput() == nullptr && m_Dialog == DIALOG_NONE && UI()->ConsumeHotkey(CUI::HOTKEY_DELETE)))
 	{
-		CUIRect Button;
-
-		// command line
-		ToolBar.VSplitLeft(5.0f, nullptr, &Button);
-		UI()->DoLabel(&Button, "Command:", 12.0f, TEXTALIGN_ML);
-
-		Button.VSplitLeft(70.0f, nullptr, &Button);
-		Button.VSplitLeft(180.0f, &Button, nullptr);
-		if(!ShowServerSettingsEditorLast) // Just activated
-			UI()->SetActiveItem(&m_SettingsCommandInput);
-		DoClearableEditBox(&m_SettingsCommandInput, &Button, 12.0f);
-
-		// buttons
-		ToolBar.VSplitRight(50.0f, &ToolBar, &Button);
-		static int s_AddButton = 0;
-		if(DoButton_Editor(&s_AddButton, "Add", 0, &Button, 0, "Add a command to command list.") || ((Input()->KeyPress(KEY_RETURN) || Input()->KeyPress(KEY_KP_ENTER)) && m_SettingsCommandInput.IsActive() && m_Dialog == DIALOG_NONE))
-		{
-			if(!m_SettingsCommandInput.IsEmpty() && str_find(m_SettingsCommandInput.GetString(), " "))
-			{
-				bool Found = false;
-				for(const auto &Setting : m_Map.m_vSettings)
-					if(!str_comp(Setting.m_aCommand, m_SettingsCommandInput.GetString()))
-					{
-						Found = true;
-						break;
-					}
-
-				if(!Found)
-				{
-					CEditorMap::CSetting Setting;
-					str_copy(Setting.m_aCommand, m_SettingsCommandInput.GetString());
-					m_Map.m_vSettings.push_back(Setting);
-					s_CommandSelectedIndex = m_Map.m_vSettings.size() - 1;
-					m_Map.OnModify();
-				}
-			}
-			UI()->SetActiveItem(&m_SettingsCommandInput);
-		}
-
-		if(!m_Map.m_vSettings.empty() && s_CommandSelectedIndex >= 0 && (size_t)s_CommandSelectedIndex < m_Map.m_vSettings.size())
-		{
-			ToolBar.VSplitRight(50.0f, &ToolBar, &Button);
-			Button.VSplitRight(5.0f, &Button, nullptr);
-			static int s_ModButton = 0;
-			if(DoButton_Editor(&s_ModButton, "Mod", 0, &Button, 0, "Modify a command from the command list.") || (Input()->KeyPress(KEY_M) && CLineInput::GetActiveInput() == nullptr && m_Dialog == DIALOG_NONE))
-			{
-				if(!m_SettingsCommandInput.IsEmpty() && str_comp(m_Map.m_vSettings[s_CommandSelectedIndex].m_aCommand, m_SettingsCommandInput.GetString()) != 0 && str_find(m_SettingsCommandInput.GetString(), " "))
-				{
-					bool Found = false;
-					int i;
-					for(i = 0; i < (int)m_Map.m_vSettings.size(); i++)
-						if(i != s_CommandSelectedIndex && !str_comp(m_Map.m_vSettings[i].m_aCommand, m_SettingsCommandInput.GetString()))
-						{
-							Found = true;
-							break;
-						}
-					if(Found)
-					{
-						m_Map.m_vSettings.erase(m_Map.m_vSettings.begin() + s_CommandSelectedIndex);
-						s_CommandSelectedIndex = i > s_CommandSelectedIndex ? i - 1 : i;
-					}
-					else
-					{
-						str_copy(m_Map.m_vSettings[s_CommandSelectedIndex].m_aCommand, m_SettingsCommandInput.GetString());
-					}
-					m_Map.OnModify();
-				}
-				UI()->SetActiveItem(&m_SettingsCommandInput);
-			}
-
-			ToolBar.VSplitRight(50.0f, &ToolBar, &Button);
-			Button.VSplitRight(5.0f, &Button, nullptr);
-			static int s_DelButton = 0;
-			if(DoButton_Editor(&s_DelButton, "Del", 0, &Button, 0, "Delete a command from the command list.") || (Input()->KeyPress(KEY_DELETE) && CLineInput::GetActiveInput() == nullptr && m_Dialog == DIALOG_NONE))
-			{
-				m_Map.m_vSettings.erase(m_Map.m_vSettings.begin() + s_CommandSelectedIndex);
-				if(s_CommandSelectedIndex >= (int)m_Map.m_vSettings.size())
-					s_CommandSelectedIndex = m_Map.m_vSettings.size() - 1;
-				if(s_CommandSelectedIndex >= 0)
-					m_SettingsCommandInput.Set(m_Map.m_vSettings[s_CommandSelectedIndex].m_aCommand);
-				UI()->SetActiveItem(&m_SettingsCommandInput);
-				m_Map.OnModify();
-			}
-
-			ToolBar.VSplitRight(25.0f, &ToolBar, &Button);
-			Button.VSplitRight(5.0f, &Button, nullptr);
-			static int s_DownButton = 0;
-			if(s_CommandSelectedIndex < (int)m_Map.m_vSettings.size() - 1 && DoButton_Editor(&s_DownButton, "▼", 0, &Button, 0, "Move command down"))
-			{
-				std::swap(m_Map.m_vSettings[s_CommandSelectedIndex], m_Map.m_vSettings[s_CommandSelectedIndex + 1]);
-				s_CommandSelectedIndex++;
-				m_Map.OnModify();
-			}
-
-			ToolBar.VSplitRight(25.0f, &ToolBar, &Button);
-			Button.VSplitRight(5.0f, &Button, nullptr);
-			static int s_UpButton = 0;
-			if(s_CommandSelectedIndex > 0 && DoButton_Editor(&s_UpButton, "▲", 0, &Button, 0, "Move command up"))
-			{
-				std::swap(m_Map.m_vSettings[s_CommandSelectedIndex], m_Map.m_vSettings[s_CommandSelectedIndex - 1]);
-				s_CommandSelectedIndex--;
-				m_Map.OnModify();
-			}
-		}
+		m_Map.m_vSettings.erase(m_Map.m_vSettings.begin() + s_CommandSelectedIndex);
+		if(s_CommandSelectedIndex >= (int)m_Map.m_vSettings.size())
+			s_CommandSelectedIndex = m_Map.m_vSettings.size() - 1;
+		if(s_CommandSelectedIndex >= 0)
+			m_SettingsCommandInput.Set(m_Map.m_vSettings[s_CommandSelectedIndex].m_aCommand);
+		m_Map.OnModify();
+		s_ListBox.ScrollToSelected();
 	}
 
-	View.HSplitTop(2.0f, nullptr, &View);
-	RenderBackground(View, m_CheckerTexture, 32.0f, 0.1f);
+	// move down button
+	ToolBar.VSplitRight(25.0f, &ToolBar, &Button);
+	const bool CanMoveDown = GotSelection && s_CommandSelectedIndex < (int)m_Map.m_vSettings.size() - 1;
+	static int s_DownButton = 0;
+	if(DoButton_FontIcon(&s_DownButton, FONT_ICON_SORT_DOWN, CanMoveDown ? 0 : -1, &Button, 0, "[Alt+Down] Move the selected command down.", IGraphics::CORNER_R, 11.0f) == 1 || (CanMoveDown && Input()->AltIsPressed() && UI()->ConsumeHotkey(CUI::HOTKEY_DOWN)))
+	{
+		std::swap(m_Map.m_vSettings[s_CommandSelectedIndex], m_Map.m_vSettings[s_CommandSelectedIndex + 1]);
+		s_CommandSelectedIndex++;
+		m_Map.OnModify();
+		s_ListBox.ScrollToSelected();
+	}
 
-	CUIRect ListBox;
-	View.Margin(1.0f, &ListBox);
+	// move up button
+	ToolBar.VSplitRight(25.0f, &ToolBar, &Button);
+	ToolBar.VSplitRight(5.0f, &ToolBar, nullptr);
+	const bool CanMoveUp = GotSelection && s_CommandSelectedIndex > 0;
+	static int s_UpButton = 0;
+	if(DoButton_FontIcon(&s_UpButton, FONT_ICON_SORT_UP, CanMoveUp ? 0 : -1, &Button, 0, "[Alt+Up] Move the selected command up.", IGraphics::CORNER_L, 11.0f) == 1 || (CanMoveUp && Input()->AltIsPressed() && UI()->ConsumeHotkey(CUI::HOTKEY_UP)))
+	{
+		std::swap(m_Map.m_vSettings[s_CommandSelectedIndex], m_Map.m_vSettings[s_CommandSelectedIndex - 1]);
+		s_CommandSelectedIndex--;
+		m_Map.OnModify();
+		s_ListBox.ScrollToSelected();
+	}
 
-	const float ButtonHeight = 15.0f;
-	const float ButtonMargin = 2.0f;
+	// update button
+	ToolBar.VSplitRight(25.0f, &ToolBar, &Button);
+	const bool CanUpdate = GotSelection && CurrentInputValid && str_comp(m_Map.m_vSettings[s_CommandSelectedIndex].m_aCommand, m_SettingsCommandInput.GetString()) != 0;
+	static int s_UpdateButton = 0;
+	if(DoButton_FontIcon(&s_UpdateButton, FONT_ICON_PENCIL, CanUpdate ? 0 : -1, &Button, 0, "[Alt+Enter] Update the selected command based on the entered value.", IGraphics::CORNER_R, 9.0f) == 1 || (CanUpdate && Input()->AltIsPressed() && m_Dialog == DIALOG_NONE && UI()->ConsumeHotkey(CUI::HOTKEY_ENTER)))
+	{
+		bool Found = false;
+		int i;
+		for(i = 0; i < (int)m_Map.m_vSettings.size(); ++i)
+		{
+			if(i != s_CommandSelectedIndex && !str_comp(m_Map.m_vSettings[i].m_aCommand, m_SettingsCommandInput.GetString()))
+			{
+				Found = true;
+				break;
+			}
+		}
+		if(Found)
+		{
+			m_Map.m_vSettings.erase(m_Map.m_vSettings.begin() + s_CommandSelectedIndex);
+			s_CommandSelectedIndex = i > s_CommandSelectedIndex ? i - 1 : i;
+		}
+		else
+		{
+			str_copy(m_Map.m_vSettings[s_CommandSelectedIndex].m_aCommand, m_SettingsCommandInput.GetString());
+		}
+		m_Map.OnModify();
+		s_ListBox.ScrollToSelected();
+		UI()->SetActiveItem(&m_SettingsCommandInput);
+	}
 
-	static CScrollRegion s_ScrollRegion;
-	vec2 ScrollOffset(0.0f, 0.0f);
-	CScrollRegionParams ScrollParams;
-	ScrollParams.m_ScrollUnit = (ButtonHeight + ButtonMargin) * 5.0f;
-	s_ScrollRegion.Begin(&ListBox, &ScrollOffset, &ScrollParams);
-	ListBox.y += ScrollOffset.y;
+	// add button
+	ToolBar.VSplitRight(25.0f, &ToolBar, &Button);
+	ToolBar.VSplitRight(100.0f, &ToolBar, nullptr);
+	const bool CanAdd = s_ListBox.Active() && CurrentInputValid;
+	static int s_AddButton = 0;
+	if(DoButton_FontIcon(&s_AddButton, FONT_ICON_PLUS, CanAdd ? 0 : -1, &Button, 0, "[Enter] Add a command to the command list.", IGraphics::CORNER_L) == 1 || (CanAdd && !Input()->AltIsPressed() && m_Dialog == DIALOG_NONE && UI()->ConsumeHotkey(CUI::HOTKEY_ENTER)))
+	{
+		bool Found = false;
+		for(size_t i = 0; i < m_Map.m_vSettings.size(); ++i)
+		{
+			if(!str_comp(m_Map.m_vSettings[i].m_aCommand, m_SettingsCommandInput.GetString()))
+			{
+				s_CommandSelectedIndex = i;
+				Found = true;
+				break;
+			}
+		}
+
+		if(!Found)
+		{
+			m_Map.m_vSettings.emplace_back(m_SettingsCommandInput.GetString());
+			s_CommandSelectedIndex = m_Map.m_vSettings.size() - 1;
+			m_Map.OnModify();
+		}
+		s_ListBox.ScrollToSelected();
+		UI()->SetActiveItem(&m_SettingsCommandInput);
+	}
+
+	// command input (use remaining toolbar width)
+	if(!ShowServerSettingsEditorLast) // Just activated
+		UI()->SetActiveItem(&m_SettingsCommandInput);
+	m_SettingsCommandInput.SetEmptyText("Command");
+	DoClearableEditBox(&m_SettingsCommandInput, &ToolBar, 12.0f, IGraphics::CORNER_ALL, "Enter a server setting.");
+
+	// command list
+	s_ListBox.DoStart(15.0f, m_Map.m_vSettings.size(), 1, 3, s_CommandSelectedIndex, &List);
 
 	for(size_t i = 0; i < m_Map.m_vSettings.size(); i++)
 	{
-		CUIRect Button;
-		ListBox.HSplitTop(ButtonHeight, &Button, &ListBox);
-		ListBox.HSplitTop(ButtonMargin, nullptr, &ListBox);
-		Button.VSplitLeft(5.0f, nullptr, &Button);
-		if(s_ScrollRegion.AddRect(Button))
-		{
-			if(DoButton_MenuItem(&m_Map.m_vSettings[i], m_Map.m_vSettings[i].m_aCommand, s_CommandSelectedIndex >= 0 && (size_t)s_CommandSelectedIndex == i, &Button, 0, nullptr))
-			{
-				s_CommandSelectedIndex = i;
-				m_SettingsCommandInput.Set(m_Map.m_vSettings[i].m_aCommand);
-				UI()->SetActiveItem(&m_SettingsCommandInput);
-			}
-		}
+		const CListboxItem Item = s_ListBox.DoNextItem(&m_Map.m_vSettings[i], s_CommandSelectedIndex >= 0 && (size_t)s_CommandSelectedIndex == i);
+		if(!Item.m_Visible)
+			continue;
+
+		Item.m_Rect.VMargin(5.0f, &Label);
+
+		SLabelProperties Props;
+		Props.m_MaxWidth = Label.w;
+		Props.m_EllipsisAtEnd = true;
+		UI()->DoLabel(&Label, m_Map.m_vSettings[i].m_aCommand, 10.0f, TEXTALIGN_ML, Props);
 	}
 
-	s_ScrollRegion.End();
+	const int NewSelected = s_ListBox.DoEnd();
+	if(s_CommandSelectedIndex != NewSelected)
+	{
+		s_CommandSelectedIndex = NewSelected;
+		m_SettingsCommandInput.Set(m_Map.m_vSettings[s_CommandSelectedIndex].m_aCommand);
+	}
 }
 
-void CEditor::RenderExtraEditorDragBar(CUIRect View, float *pSplit)
+void CEditor::RenderExtraEditorDragBar(CUIRect View, CUIRect DragBar)
 {
-	const CUIRect DragBar = {
-		View.x,
-		View.y - 2.0f, // use margin
-		View.w,
-		22.0f,
-	};
-
 	enum EDragOperation
 	{
 		OP_NONE,
@@ -6839,7 +6839,7 @@ void CEditor::RenderExtraEditorDragBar(CUIRect View, float *pSplit)
 			s_Operation = OP_DRAGGING;
 
 		if(s_Operation == OP_DRAGGING)
-			*pSplit = clamp(s_InitialMouseOffsetY + View.y + View.h - UI()->MouseY(), 100.0f, 400.0f);
+			m_aExtraEditorSplits[(int)m_ActiveExtraEditor] = clamp(s_InitialMouseOffsetY + View.y + View.h - UI()->MouseY(), 100.0f, 400.0f);
 	}
 }
 
@@ -6941,12 +6941,8 @@ void CEditor::Render()
 		View.HSplitTop(53.0f, &ToolBar, &View);
 		View.VSplitLeft(100.0f, &ToolBox, &View);
 		View.HSplitBottom(16.0f, &View, &StatusBar);
-
-		if(m_ShowEnvelopeEditor && !m_ShowPicker)
-			View.HSplitBottom(m_EnvelopeEditorSplit, &View, &ExtraEditor);
-
-		if(m_ShowServerSettingsEditor && !m_ShowPicker)
-			View.HSplitBottom(m_ServerSettingsEditorSplit, &View, &ExtraEditor);
+		if(!m_ShowPicker && m_ActiveExtraEditor != EXTRAEDITOR_NONE)
+			View.HSplitBottom(m_aExtraEditorSplits[(int)m_ActiveExtraEditor], &View, &ExtraEditor);
 	}
 	else
 	{
@@ -7125,15 +7121,6 @@ void CEditor::Render()
 
 	if(m_GuiActive)
 	{
-		if(!m_ShowPicker)
-		{
-			if(m_ShowEnvelopeEditor || m_ShowServerSettingsEditor)
-			{
-				RenderBackground(ExtraEditor, m_BackgroundTexture, 128.0f, Brightness);
-				ExtraEditor.Margin(2.0f, &ExtraEditor);
-			}
-		}
-
 		if(m_Mode == MODE_LAYERS)
 			RenderLayers(ToolBox);
 		else if(m_Mode == MODE_IMAGES)
@@ -7147,21 +7134,32 @@ void CEditor::Render()
 
 	UI()->MapScreen();
 
+	CUIRect TooltipRect;
 	if(m_GuiActive)
 	{
 		RenderMenubar(MenuBar);
 		RenderModebar(ModeBar);
 		if(!m_ShowPicker)
 		{
-			if(m_ShowEnvelopeEditor)
-				RenderEnvelopeEditor(ExtraEditor);
+			if(m_ActiveExtraEditor != EXTRAEDITOR_NONE)
+			{
+				RenderBackground(ExtraEditor, m_BackgroundTexture, 128.0f, Brightness);
+				ExtraEditor.HMargin(2.0f, &ExtraEditor);
+				ExtraEditor.VSplitRight(2.0f, &ExtraEditor, nullptr);
+			}
+
 			static bool s_ShowServerSettingsEditorLast = false;
-			if(m_ShowServerSettingsEditor)
+			if(m_ActiveExtraEditor == EXTRAEDITOR_ENVELOPES)
+			{
+				RenderEnvelopeEditor(ExtraEditor);
+			}
+			else if(m_ActiveExtraEditor == EXTRAEDITOR_SERVER_SETTINGS)
 			{
 				RenderServerSettingsEditor(ExtraEditor, s_ShowServerSettingsEditorLast);
 			}
-			s_ShowServerSettingsEditorLast = m_ShowServerSettingsEditor;
+			s_ShowServerSettingsEditorLast = m_ActiveExtraEditor == EXTRAEDITOR_SERVER_SETTINGS;
 		}
+		RenderStatusbar(StatusBar, &TooltipRect);
 	}
 
 	RenderPressedKeys(View);
@@ -7194,13 +7192,12 @@ void CEditor::Render()
 
 	UpdateZoomWorld();
 
-	// Popup menus must be rendered before the statusbar, because UI elements in
-	// popup menus can set tooltips, which are rendered in the status bar.
 	UI()->RenderPopupMenus();
 	FreeDynamicPopupMenus();
 
+	// The tooltip can be set in popup menus so we have to render the tooltip after the popup menus.
 	if(m_GuiActive)
-		RenderStatusbar(StatusBar);
+		RenderTooltip(TooltipRect);
 
 	RenderMousePointer();
 }
@@ -7314,6 +7311,7 @@ void CEditor::Reset(bool CreateDefault)
 	m_ShiftBy = 1;
 
 	m_ResetZoomEnvelope = true;
+	m_SettingsCommandInput.Clear();
 }
 
 int CEditor::GetLineDistance() const

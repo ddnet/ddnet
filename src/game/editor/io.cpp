@@ -502,9 +502,7 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 				while(pNext < pSettings + Size)
 				{
 					int StrSize = str_length(pNext) + 1;
-					CSetting Setting;
-					str_copy(Setting.m_aCommand, pNext);
-					m_vSettings.push_back(Setting);
+					m_vSettings.emplace_back(pNext);
 					pNext += StrSize;
 				}
 			}
