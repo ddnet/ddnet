@@ -3582,6 +3582,7 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 	bool MoveGroup = false;
 	bool StartDragLayer = false;
 	bool StartDragGroup = false;
+	bool AnyButtonActive = false;
 	std::vector<int> vButtonsPerGroup;
 
 	vButtonsPerGroup.reserve(m_Map.m_vpGroups.size());
@@ -3683,6 +3684,8 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 			if(int Result = DoButton_DraggableEx(&m_Map.m_vpGroups[g], aBuf, g == m_SelectedGroup, &Slot, &Clicked, &Abrupted,
 				   BUTTON_CONTEXT, m_Map.m_vpGroups[g]->m_Collapse ? "Select group. Shift click to select all layers. Double click to expand." : "Select group. Shift click to select all layers. Double click to collapse.", IGraphics::CORNER_R))
 			{
+				AnyButtonActive = true;
+
 				if(s_Operation == OP_NONE)
 				{
 					s_InitialMouseY = UI()->MouseY();
@@ -3833,6 +3836,8 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 			if(int Result = DoButton_DraggableEx(m_Map.m_vpGroups[g]->m_vpLayers[i], aBuf, Checked, &Button, &Clicked, &Abrupted,
 				   BUTTON_CONTEXT, "Select layer. Shift click to select multiple.", IGraphics::CORNER_R))
 			{
+				AnyButtonActive = true;
+
 				if(s_Operation == OP_NONE)
 				{
 					s_InitialMouseY = UI()->MouseY();
@@ -4099,6 +4104,9 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 	}
 
 	s_ScrollRegion.End();
+
+	if(!AnyButtonActive)
+		s_Operation = OP_NONE;
 }
 
 bool CEditor::SelectLayerByTile()
