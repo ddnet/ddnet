@@ -32,11 +32,11 @@ public:
 	bool Load(const char *pMapName) override;
 	void Unload() override;
 	bool IsLoaded() const override;
-	IOHANDLE File() const override;
 
 	SHA256_DIGEST Sha256() const override;
 	unsigned Crc() const override;
-	int MapSize() const override;
+	const unsigned char *FileData() const override;
+	unsigned FileSize() const override;
 
 	static void ExtractTiles(class CTile *pDest, size_t DestSize, const class CTile *pSrc, size_t SrcSize);
 };

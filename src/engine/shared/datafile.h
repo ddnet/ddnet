@@ -10,6 +10,8 @@
 
 #include <zlib.h>
 
+#include <memory>
+
 enum
 {
 	ITEMTYPE_EX = 0xffff,
@@ -18,22 +20,22 @@ enum
 // raw datafile access
 class CDataFileReader
 {
-	struct CDatafile *m_pDataFile;
-	void *GetDataImpl(int Index, int Swap);
+	std::shared_ptr<class CDataFileMemoryReader> m_pMemoryReader = nullptr;
+	struct CDatafile *m_pDataFile = nullptr;
+
+	void *GetDataImpl(int Index, bool Swap);
 	int GetFileDataSize(int Index) const;
 
 	int GetExternalItemType(int InternalType);
 	int GetInternalItemType(int ExternalType);
 
 public:
-	CDataFileReader() :
-		m_pDataFile(nullptr) {}
+	CDataFileReader() {}
 	~CDataFileReader() { Close(); }
 
 	bool Open(class IStorage *pStorage, const char *pFilename, int StorageType);
-	bool Close();
+	void Close();
 	bool IsOpen() const { return m_pDataFile != nullptr; }
-	IOHANDLE File() const;
 
 	void *GetData(int Index);
 	void *GetDataSwapped(int Index); // makes sure that the data is 32bit LE ints when saved
@@ -51,7 +53,8 @@ public:
 
 	SHA256_DIGEST Sha256() const;
 	unsigned Crc() const;
-	int MapSize() const;
+	const unsigned char *FileData() const;
+	unsigned FileSize() const;
 };
 
 // write access

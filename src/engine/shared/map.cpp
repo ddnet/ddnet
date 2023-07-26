@@ -107,11 +107,6 @@ bool CMap::IsLoaded() const
 	return m_DataFile.IsOpen();
 }
 
-IOHANDLE CMap::File() const
-{
-	return m_DataFile.File();
-}
-
 SHA256_DIGEST CMap::Sha256() const
 {
 	return m_DataFile.Sha256();
@@ -122,9 +117,14 @@ unsigned CMap::Crc() const
 	return m_DataFile.Crc();
 }
 
-int CMap::MapSize() const
+const unsigned char *CMap::FileData() const
 {
-	return m_DataFile.MapSize();
+	return m_DataFile.FileData();
+}
+
+unsigned CMap::FileSize() const
+{
+	return m_DataFile.FileSize();
 }
 
 void CMap::ExtractTiles(CTile *pDest, size_t DestSize, const CTile *pSrc, size_t SrcSize)

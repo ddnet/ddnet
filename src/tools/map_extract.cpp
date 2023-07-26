@@ -95,7 +95,8 @@ bool Process(IStorage *pStorage, const char *pMapName, const char *pPathSave)
 		io_close(Opus);
 	}
 
-	return Reader.Close();
+	Reader.Close();
+	return true;
 }
 
 int main(int argc, const char *argv[])
