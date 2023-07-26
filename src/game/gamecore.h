@@ -213,6 +213,8 @@ public:
 	{
 		if(BelowThis <= 1)
 			return 0;
+		aSeed[0] = 0xf989fe135994390f ^ aSeed[0];
+		aSeed[1] = 0x8ca60f712e344ee0 ^ aSeed[1];
 		CPrng Prng;
 		Prng.Seed(aSeed);
 		return Prng.RandomBits() % BelowThis;
