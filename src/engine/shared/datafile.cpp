@@ -295,7 +295,10 @@ int CDataFileReader::GetDataSize(int Index) const
 			return GetFileDataSize(Index);
 		}
 	}
-	return m_pDataFile->m_pDataSizes[Index];
+	const int Size = m_pDataFile->m_pDataSizes[Index];
+	if(Size < 0)
+		return 0; // summarize all errors as zero size
+	return Size;
 }
 
 void *CDataFileReader::GetDataImpl(int Index, int Swap)
@@ -311,45 +314,73 @@ void *CDataFileReader::GetDataImpl(int Index, int Swap)
 	// load it if needed
 	if(!m_pDataFile->m_ppDataPtrs[Index])
 	{
+		// don't try to load again if it previously failed
+		if(m_pDataFile->m_pDataSizes[Index] < 0)
+			return nullptr;
+
 		// fetch the data size
-		int DataSize = GetFileDataSize(Index);
+		unsigned DataSize = GetFileDataSize(Index);
 #if defined(CONF_ARCH_ENDIAN_BIG)
-		int SwapSize = DataSize;
+		unsigned SwapSize = DataSize;
 #endif
 
 		if(m_pDataFile->m_Header.m_Version == 4)
 		{
 			// v4 has compressed data
-			void *pTemp = malloc(DataSize);
-			unsigned long UncompressedSize = m_pDataFile->m_Info.m_pDataSizes[Index];
-			unsigned long s;
+			const unsigned OriginalUncompressedSize = m_pDataFile->m_Info.m_pDataSizes[Index];
+			unsigned long UncompressedSize = OriginalUncompressedSize;
 
-			log_trace("datafile", "loading data index=%d size=%d uncompressed=%lu", Index, DataSize, UncompressedSize);
-			m_pDataFile->m_ppDataPtrs[Index] = (char *)malloc(UncompressedSize);
-			m_pDataFile->m_pDataSizes[Index] = UncompressedSize;
+			log_trace("datafile", "loading data. index=%d size=%u uncompressed=%u", Index, DataSize, OriginalUncompressedSize);
 
 			// read the compressed data
-			io_seek(m_pDataFile->m_File, m_pDataFile->m_DataStartOffset + m_pDataFile->m_Info.m_pDataOffsets[Index], IOSEEK_START);
-			io_read(m_pDataFile->m_File, pTemp, DataSize);
+			void *pCompressedData = malloc(DataSize);
+			unsigned ActualDataSize = 0;
+			if(io_seek(m_pDataFile->m_File, m_pDataFile->m_DataStartOffset + m_pDataFile->m_Info.m_pDataOffsets[Index], IOSEEK_START) == 0)
+				ActualDataSize = io_read(m_pDataFile->m_File, pCompressedData, DataSize);
+			if(DataSize != ActualDataSize)
+			{
+				log_error("datafile", "truncation error, could not read all data. index=%d wanted=%u got=%u", Index, DataSize, ActualDataSize);
+				free(pCompressedData);
+				m_pDataFile->m_ppDataPtrs[Index] = nullptr;
+				m_pDataFile->m_pDataSizes[Index] = -1;
+				return nullptr;
+			}
 
-			// decompress the data, TODO: check for errors
-			s = UncompressedSize;
-			uncompress((Bytef *)m_pDataFile->m_ppDataPtrs[Index], &s, (Bytef *)pTemp, DataSize);
+			// decompress the data
+			m_pDataFile->m_ppDataPtrs[Index] = (char *)malloc(UncompressedSize);
+			m_pDataFile->m_pDataSizes[Index] = UncompressedSize;
+			const int Result = uncompress((Bytef *)m_pDataFile->m_ppDataPtrs[Index], &UncompressedSize, (Bytef *)pCompressedData, DataSize);
+			free(pCompressedData);
+			if(Result != Z_OK || UncompressedSize != OriginalUncompressedSize)
+			{
+				log_error("datafile", "uncompress error. result=%d wanted=%u got=%lu", Result, OriginalUncompressedSize, UncompressedSize);
+				free(m_pDataFile->m_ppDataPtrs[Index]);
+				m_pDataFile->m_ppDataPtrs[Index] = nullptr;
+				m_pDataFile->m_pDataSizes[Index] = -1;
+				return nullptr;
+			}
+
 #if defined(CONF_ARCH_ENDIAN_BIG)
-			SwapSize = s;
+			SwapSize = UncompressedSize;
 #endif
-
-			// clean up the temporary buffers
-			free(pTemp);
 		}
 		else
 		{
 			// load the data
-			log_trace("datafile", "loading data index=%d size=%d", Index, DataSize);
-			m_pDataFile->m_ppDataPtrs[Index] = (char *)malloc(DataSize);
+			log_trace("datafile", "loading data. index=%d size=%d", Index, DataSize);
+			m_pDataFile->m_ppDataPtrs[Index] = static_cast<char *>(malloc(DataSize));
 			m_pDataFile->m_pDataSizes[Index] = DataSize;
-			io_seek(m_pDataFile->m_File, m_pDataFile->m_DataStartOffset + m_pDataFile->m_Info.m_pDataOffsets[Index], IOSEEK_START);
-			io_read(m_pDataFile->m_File, m_pDataFile->m_ppDataPtrs[Index], DataSize);
+			unsigned ActualDataSize = 0;
+			if(io_seek(m_pDataFile->m_File, m_pDataFile->m_DataStartOffset + m_pDataFile->m_Info.m_pDataOffsets[Index], IOSEEK_START) == 0)
+				ActualDataSize = io_read(m_pDataFile->m_File, m_pDataFile->m_ppDataPtrs[Index], DataSize);
+			if(DataSize != ActualDataSize)
+			{
+				log_error("datafile", "truncation error, could not read all data. index=%d wanted=%u got=%u", Index, DataSize, ActualDataSize);
+				free(m_pDataFile->m_ppDataPtrs[Index]);
+				m_pDataFile->m_ppDataPtrs[Index] = nullptr;
+				m_pDataFile->m_pDataSizes[Index] = -1;
+				return nullptr;
+			}
 		}
 
 #if defined(CONF_ARCH_ENDIAN_BIG)
@@ -373,10 +404,7 @@ void *CDataFileReader::GetDataSwapped(int Index)
 
 void CDataFileReader::ReplaceData(int Index, char *pData, size_t Size)
 {
-	// make sure the data has been loaded
-	GetDataImpl(Index, 0);
-
-	UnloadData(Index);
+	free(m_pDataFile->m_ppDataPtrs[Index]);
 	m_pDataFile->m_ppDataPtrs[Index] = pData;
 	m_pDataFile->m_pDataSizes[Index] = Size;
 }
