@@ -5652,7 +5652,7 @@ void CEditor::ResetZoomEnvelope(CEnvelope *pEnvelope, int ActiveChannels)
 	if(ValueRange < 0.1f)
 	{
 		// Set view to some sane default if range is too small
-		m_OffsetEnvelopeY = 0.5f - Top / 0.1f;
+		m_OffsetEnvelopeY = 0.5f - ValueRange / 0.2f - Bottom / 0.1f;
 		m_ZoomEnvelopeY.SetZoomInstant(0.1f);
 	}
 	else
