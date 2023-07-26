@@ -882,7 +882,10 @@ bool CDemoPlayer::ExtractMap(class IStorage *pStorage)
 	// save map
 	IOHANDLE MapFile = pStorage->OpenFile(aMapFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
 	if(!MapFile)
+	{
+		free(pMapData);
 		return false;
+	}
 
 	io_write(MapFile, pMapData, m_MapInfo.m_Size);
 	io_close(MapFile);
