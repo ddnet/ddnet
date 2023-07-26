@@ -1263,13 +1263,13 @@ const IConsole::CCommandInfo *CConsole::GetCommandInfo(const char *pName, int Fl
 
 std::unique_ptr<IConsole> CreateConsole(int FlagMask) { return std::make_unique<CConsole>(FlagMask); }
 
-void CConsole::ResetServerGameSettings()
+void CConsole::ResetServerGameSettings(int FlagMask)
 {
 #define MACRO_CONFIG_INT(Name, ScriptName, Def, Min, Max, Flags, Desc) \
 	{ \
 		if(((Flags) & (CFGFLAG_SERVER | CFGFLAG_GAME)) == (CFGFLAG_SERVER | CFGFLAG_GAME)) \
 		{ \
-			CCommand *pCommand = FindCommand(#ScriptName, CFGFLAG_SERVER); \
+			CCommand *pCommand = FindCommand(#ScriptName, FlagMask); \
 			void *pUserData = pCommand->m_pUserData; \
 			FCommandCallback pfnCallback = pCommand->m_pfnCallback; \
 			TraverseChain(&pfnCallback, &pUserData); \
@@ -1284,7 +1284,7 @@ void CConsole::ResetServerGameSettings()
 	{ \
 		if(((Flags) & (CFGFLAG_SERVER | CFGFLAG_GAME)) == (CFGFLAG_SERVER | CFGFLAG_GAME)) \
 		{ \
-			CCommand *pCommand = FindCommand(#ScriptName, CFGFLAG_SERVER); \
+			CCommand *pCommand = FindCommand(#ScriptName, FlagMask); \
 			void *pUserData = pCommand->m_pUserData; \
 			FCommandCallback pfnCallback = pCommand->m_pfnCallback; \
 			TraverseChain(&pfnCallback, &pUserData); \
