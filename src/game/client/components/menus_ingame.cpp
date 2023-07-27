@@ -33,6 +33,7 @@
 #include <engine/keys.h>
 #include <engine/storage.h>
 
+#include <vector>
 #include <chrono>
 
 using namespace FontIcons;
@@ -523,7 +524,7 @@ bool CMenus::RenderServerControlServer(CUIRect MainView)
 	CUIRect List = MainView;
 	int Total = m_pClient->m_Voting.m_NumVoteOptions;
 	int NumVoteOptions = 0;
-	int aIndices[Total];
+	std::vector<int> vIndices;
 	static int s_CurVoteOption = 0;
 	int TotalShown = 0;
 
@@ -545,7 +546,7 @@ bool CMenus::RenderServerControlServer(CUIRect MainView)
 			continue;
 
 		if(NumVoteOptions < Total)
-			aIndices[NumVoteOptions] = i;
+			vIndices.push_back(i);
 		NumVoteOptions++;
 
 		const CListboxItem Item = s_ListBox.DoNextItem(pOption);
@@ -557,7 +558,7 @@ bool CMenus::RenderServerControlServer(CUIRect MainView)
 
 	s_CurVoteOption = s_ListBox.DoEnd();
 	if(s_CurVoteOption < Total)
-		m_CallvoteSelectedOption = aIndices[s_CurVoteOption];
+		m_CallvoteSelectedOption = vIndices[s_CurVoteOption];
 	return s_ListBox.WasItemActivated();
 }
 
