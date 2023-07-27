@@ -523,7 +523,7 @@ bool CMenus::RenderServerControlServer(CUIRect MainView)
 	CUIRect List = MainView;
 	int Total = m_pClient->m_Voting.m_NumVoteOptions;
 	int NumVoteOptions = 0;
-	int aIndices[MAX_VOTE_OPTIONS];
+	int aIndices[Total];
 	static int s_CurVoteOption = 0;
 	int TotalShown = 0;
 
