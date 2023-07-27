@@ -297,6 +297,9 @@ if(NOT MSVC AND NOT HAIKU)
   if(SECURITY_COMPILER_FLAGS)
     # Protect the stack pointer.
     add_cxx_compiler_flag_if_supported(OUR_FLAGS -fstack-protector-strong)
+    if(MINGW)
+      add_linker_flag_if_supported(OUR_FLAGS_LINK -lssp)
+    endif()
   endif()
 
   # Disable exceptions as DDNet does not use them.
