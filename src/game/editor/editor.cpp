@@ -7362,8 +7362,9 @@ void CEditor::UpdateZoomWorld()
 {
 	float OldLevel = m_ZoomMapView.GetZoom();
 	m_ZoomMapView.SetZoomRange(10.0f, g_Config.m_EdLimitMaxZoomLevel ? 2000.0f : std::numeric_limits<float>::max());
+	bool UpdatedZoom = m_ZoomMapView.UpdateZoom();
 	float NewLevel = m_ZoomMapView.GetZoom();
-	if(m_ZoomMapView.UpdateZoom() && g_Config.m_EdZoomTarget)
+	if(UpdatedZoom && g_Config.m_EdZoomTarget)
 		ZoomMouseTarget(NewLevel / OldLevel);
 	m_WorldZoom = NewLevel / 100.0f;
 }
