@@ -576,6 +576,10 @@ if(EXCEPTION_HANDLING)
   find_package(ExceptionHandling)
 endif()
 
+if(SECURITY_COMPILER_FLAGS)
+  find_package(SSP)
+endif()
+
 if(TARGET_OS AND TARGET_OS STREQUAL "mac")
   find_program(CMAKE_OTOOL otool)
   find_program(DMGBUILD dmgbuild)
@@ -1758,6 +1762,7 @@ set(COPY_FILES
   ${DISCORDSDK_COPY_FILES}
   ${VULKAN_COPY_FILES}
   ${EXCEPTION_HANDLING_COPY_FILES}
+  ${SSP_COPY_FILES}
 )
 file(COPY ${COPY_FILES} DESTINATION .)
 # Don't add integration test files to COPY_FILES since we don't want to add
