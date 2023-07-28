@@ -297,6 +297,9 @@ if(NOT MSVC AND NOT HAIKU)
   if(SECURITY_COMPILER_FLAGS)
     # Protect the stack pointer.
     add_cxx_compiler_flag_if_supported(OUR_FLAGS -fstack-protector-strong)
+    if(MINGW)
+      add_linker_flag_if_supported(OUR_FLAGS_LINK -lssp)
+    endif()
   endif()
 
   # Disable exceptions as DDNet does not use them.
@@ -571,6 +574,10 @@ endif()
 
 if(EXCEPTION_HANDLING)
   find_package(ExceptionHandling)
+endif()
+
+if(SECURITY_COMPILER_FLAGS)
+  find_package(SSP)
 endif()
 
 if(TARGET_OS AND TARGET_OS STREQUAL "mac")
@@ -1755,6 +1762,7 @@ set(COPY_FILES
   ${DISCORDSDK_COPY_FILES}
   ${VULKAN_COPY_FILES}
   ${EXCEPTION_HANDLING_COPY_FILES}
+  ${SSP_COPY_FILES}
 )
 file(COPY ${COPY_FILES} DESTINATION .)
 # Don't add integration test files to COPY_FILES since we don't want to add

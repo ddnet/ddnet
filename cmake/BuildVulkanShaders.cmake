@@ -1,4 +1,6 @@
-find_program(GLSLANG_VALIDATOR_PROGRAM glslangValidator)
+find_program(GLSLANG_VALIDATOR_PROGRAM
+  NAMES glslang glslangValidator
+)
 find_program(SPIRV_OPTIMIZER_PROGRAM spirv-opt)
 
 set(GLSLANG_VALIDATOR_PROGRAM_FOUND TRUE)
