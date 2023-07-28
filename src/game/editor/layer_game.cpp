@@ -30,7 +30,7 @@ void CLayerGame::SetTile(int x, int y, CTile Tile)
 	{
 		if(!m_pEditor->m_Map.m_pFrontLayer)
 		{
-			CLayer *pLayerFront = new CLayerFront(m_Width, m_Height);
+			std::shared_ptr<CLayer> pLayerFront = std::make_shared<CLayerFront>(m_Width, m_Height);
 			m_pEditor->m_Map.MakeFrontLayer(pLayerFront);
 			m_pEditor->m_Map.m_pGameGroup->AddLayer(pLayerFront);
 		}
