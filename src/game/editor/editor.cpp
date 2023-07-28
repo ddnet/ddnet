@@ -1647,14 +1647,6 @@ void CEditor::DoQuad(CQuad *pQuad, int Index)
 
 	const bool IgnoreGrid = Input()->AltIsPressed();
 
-	// draw selection background
-	if(IsQuadSelected(Index))
-	{
-		Graphics()->SetColor(0, 0, 0, 1);
-		IGraphics::CQuadItem QuadItem(CenterX, CenterY, 7.0f * m_MouseWScale, 7.0f * m_MouseWScale);
-		Graphics()->QuadsDraw(&QuadItem, 1);
-	}
-
 	if(UI()->CheckActiveItem(pID))
 	{
 		if(m_MouseDeltaWx * m_MouseDeltaWx + m_MouseDeltaWy * m_MouseDeltaWy > 0.0f)
@@ -1870,8 +1862,10 @@ void CEditor::DoQuad(CQuad *pQuad, int Index)
 			}
 		}
 	}
-	else
+	else if(IsQuadSelected(Index))
 		Graphics()->SetColor(0, 1, 0, 1);
+	else
+		Graphics()->SetColor(0, 0.4, 0, 1);
 
 	// Handle copy/paste operations
 	static bool s_Pasted = false;
@@ -1917,8 +1911,7 @@ void CEditor::DoQuad(CQuad *pQuad, int Index)
 	else if(!Input()->ModifierIsPressed())
 		s_Pasted = false;
 
-	IGraphics::CQuadItem QuadItem(CenterX, CenterY, 5.0f * m_MouseWScale, 5.0f * m_MouseWScale);
-	Graphics()->QuadsDraw(&QuadItem, 1);
+	Graphics()->DrawCircle(CenterX, CenterY, 3.0f * m_MouseWScale, 32);
 }
 
 void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
@@ -1930,14 +1923,6 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 
 	float px = fx2f(pQuad->m_aPoints[V].x);
 	float py = fx2f(pQuad->m_aPoints[V].y);
-
-	// draw selection background
-	if(IsQuadPointSelected(QuadIndex, V))
-	{
-		Graphics()->SetColor(0, 0, 0, 1);
-		IGraphics::CQuadItem QuadItem(px, py, 7.0f * m_MouseWScale, 7.0f * m_MouseWScale);
-		Graphics()->QuadsDraw(&QuadItem, 1);
-	}
 
 	enum
 	{
@@ -2080,11 +2065,12 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 				SelectQuadPoint(QuadIndex, V);
 		}
 	}
-	else
+	else if(IsQuadPointSelected(QuadIndex, V))
 		Graphics()->SetColor(1, 0, 0, 1);
+	else
+		Graphics()->SetColor(0.4, 0, 0, 1);
 
-	IGraphics::CQuadItem QuadItem(px, py, 5.0f * m_MouseWScale, 5.0f * m_MouseWScale);
-	Graphics()->QuadsDraw(&QuadItem, 1);
+	Graphics()->DrawCircle(px, py, 3.0f * m_MouseWScale, 32);
 }
 
 float CEditor::TriangleArea(vec2 A, vec2 B, vec2 C)
@@ -2553,10 +2539,9 @@ void CEditor::DoQuadEnvPoint(const CQuad *pQuad, int QIndex, int PIndex)
 		}
 	}
 	else
-		Graphics()->SetColor(0.0f, 1.0f, 0.0f, 1.0f);
+		Graphics()->SetColor(0.0f,  0.4f, 0.0f, 1.0f);
 
-	IGraphics::CQuadItem QuadItem(CenterX, CenterY, 5.0f * m_MouseWScale, 5.0f * m_MouseWScale);
-	Graphics()->QuadsDraw(&QuadItem, 1);
+	Graphics()->DrawCircle(CenterX, CenterY, 3.0f * m_MouseWScale, 32);
 }
 
 void CEditor::DoMapEditor(CUIRect View)
@@ -6624,18 +6609,6 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 						const void *pID = &pEnvelope->m_vPoints[i].m_aValues[c];
 
-						if(IsEnvPointSelected(i, c))
-						{
-							Graphics()->SetColor(1, 1, 1, 1);
-							CUIRect Background = {
-								Final.x - 0.2f * Final.w,
-								Final.y - 0.2f * Final.h,
-								Final.w * 1.4f,
-								Final.h * 1.4f};
-							IGraphics::CQuadItem QuadItem(Background.x, Background.y, Background.w, Background.h);
-							Graphics()->QuadsDrawTL(&QuadItem, 1);
-						}
-
 						if(UI()->CheckActiveItem(pID))
 						{
 							m_ShowEnvelopePreview = SHOWENV_SELECTED;
@@ -6798,11 +6771,12 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 							m_pTooltip = "Envelope point. Left mouse to drag. Hold ctrl to be more precise. Hold shift to alter time. Shift + right-click to delete.";
 							ms_pUiGotContext = pID;
 						}
+						else if(IsEnvPointSelected(i, c))
+							Graphics()->SetColor(aColors[c].r + 0.5f, aColors[c].g + 0.5f, aColors[c].b + 0.5f, 1.0f);
 						else
-							Graphics()->SetColor(aColors[c].r, aColors[c].g, aColors[c].b, 1.0f);
+							Graphics()->SetColor(aColors[c].r * 0.6f, aColors[c].g * 0.6f, aColors[c].b * 0.6f, 1);
 
-						IGraphics::CQuadItem QuadItem(Final.x, Final.y, Final.w, Final.h);
-						Graphics()->QuadsDrawTL(&QuadItem, 1);
+						Graphics()->DrawCircle(Final.x + 2.0f, Final.y + 2.0f, 2.5f, 32);
 					}
 
 					// tangent handles for bezier curves
@@ -6820,21 +6794,6 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 							// handle logic
 							const void *pID = &pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaX[c];
-
-							if(IsTangentOutPointSelected(i, c))
-							{
-								Graphics()->SetColor(1, 1, 1, 1);
-								IGraphics::CFreeformItem FreeformItem(
-									Final.x + Final.w / 2.0f,
-									Final.y - 1,
-									Final.x + Final.w / 2.0f,
-									Final.y - 1,
-									Final.x + Final.w + 1,
-									Final.y + Final.h + 1,
-									Final.x - 1,
-									Final.y + Final.h + 1);
-								Graphics()->QuadsDrawFreeform(&FreeformItem, 1);
-							}
 
 							if(UI()->CheckActiveItem(pID))
 							{
@@ -6932,6 +6891,8 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 								m_pTooltip = "Bezier out-tangent. Left mouse to drag. Hold ctrl to be more precise. Shift + right-click to reset.";
 								ms_pUiGotContext = pID;
 							}
+							else if(IsTangentOutPointSelected(i, c))
+								Graphics()->SetColor(aColors[c].r + 0.5f, aColors[c].g + 0.5f, aColors[c].b + 0.5f, 1.0f);
 							else
 								Graphics()->SetColor(aColors[c].r, aColors[c].g, aColors[c].b, 1.0f);
 
@@ -7065,6 +7026,8 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 								m_pTooltip = "Bezier in-tangent. Left mouse to drag. Hold ctrl to be more precise. Shift + right-click to reset.";
 								ms_pUiGotContext = pID;
 							}
+							else if(IsTangentInPointSelected(i, c))
+								Graphics()->SetColor(aColors[c].r + 0.5f, aColors[c].g + 0.5f, aColors[c].b + 0.5f, 1.0f);
 							else
 								Graphics()->SetColor(aColors[c].r, aColors[c].g, aColors[c].b, 1.0f);
 
