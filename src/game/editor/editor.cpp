@@ -35,7 +35,9 @@
 #include "auto_map.h"
 #include "editor.h"
 
+#include <chrono>
 #include <limits>
+#include <type_traits>
 
 using namespace FontIcons;
 
@@ -5856,6 +5858,81 @@ static float ClampDelta(float Val, float Delta, float Min, float Max)
 	return Delta;
 }
 
+class CTimeStep
+{
+public:
+	template<class T>
+	CTimeStep(T t)
+	{
+		if constexpr(std::is_same_v<T, std::chrono::milliseconds>)
+			m_Unit = ETimeUnit::MILLISECONDS;
+		else if constexpr(std::is_same_v<T, std::chrono::seconds>)
+			m_Unit = ETimeUnit::SECONDS;
+		else
+			m_Unit = ETimeUnit::MINUTES;
+
+		m_Value = t;
+	}
+
+	CTimeStep operator*(int k) const
+	{
+		return CTimeStep(m_Value * k, m_Unit);
+	}
+
+	CTimeStep operator-(const CTimeStep &Other)
+	{
+		return CTimeStep(m_Value - Other.m_Value, m_Unit);
+	}
+
+	void Format(char *pBuffer, size_t BufferSize)
+	{
+		int Milliseconds = m_Value.count() % 1000;
+		int Seconds = std::chrono::duration_cast<std::chrono::seconds>(m_Value).count() % 60;
+		int Minutes = std::chrono::duration_cast<std::chrono::minutes>(m_Value).count();
+
+		switch(m_Unit)
+		{
+		case ETimeUnit::MILLISECONDS:
+			if(Minutes != 0)
+				str_format(pBuffer, BufferSize, "%d:%02d.%03dmin", Minutes, Seconds, Milliseconds);
+			else if(Seconds != 0)
+				str_format(pBuffer, BufferSize, "%d.%03ds", Seconds, Milliseconds);
+			else
+				str_format(pBuffer, BufferSize, "%dms", Milliseconds);
+			break;
+		case ETimeUnit::SECONDS:
+			if(Minutes != 0)
+				str_format(pBuffer, BufferSize, "%d:%02dmin", Minutes, Seconds);
+			else
+				str_format(pBuffer, BufferSize, "%ds", Seconds);
+			break;
+		case ETimeUnit::MINUTES:
+			str_format(pBuffer, BufferSize, "%dmin", Minutes);
+			break;
+		}
+	}
+
+	float AsSeconds() const
+	{
+		return std::chrono::duration_cast<std::chrono::duration<float>>(m_Value).count();
+	}
+
+private:
+	enum class ETimeUnit
+	{
+		MILLISECONDS,
+		SECONDS,
+		MINUTES
+	} m_Unit;
+	std::chrono::milliseconds m_Value;
+
+	CTimeStep(std::chrono::milliseconds Value, ETimeUnit Unit)
+	{
+		m_Value = Value;
+		m_Unit = Unit;
+	}
+};
+
 void CEditor::RenderEnvelopeEditor(CUIRect View)
 {
 	if(m_SelectedEnvelope < 0)
@@ -6169,6 +6246,91 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 		UpdateZoomEnvelopeX(View);
 		UpdateZoomEnvelopeY(View);
+
+		{
+			float UnitsPerLineY = 0.001f;
+			static const float s_aUnitPerLineOptionsY[] = {0.005f, 0.01f, 0.025f, 0.05f, 0.1f, 0.25f, 0.5f, 1.0f, 2.0f, 4.0f, 8.0f, 16.0f, 32.0f, 2 * 32.0f, 5 * 32.0f, 10 * 32.0f, 20 * 32.0f, 50 * 32.0f, 100 * 32.0f};
+			for(float Value : s_aUnitPerLineOptionsY)
+			{
+				if(Value / m_ZoomEnvelopeY.GetZoom() * View.h < 40.0f)
+					UnitsPerLineY = Value;
+			}
+			int NumLinesY = m_ZoomEnvelopeY.GetZoom() / static_cast<float>(UnitsPerLineY) + 1;
+
+			UI()->ClipEnable(&View);
+			Graphics()->TextureClear();
+			Graphics()->LinesBegin();
+			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.2f);
+
+			float BaseValue = static_cast<int>(m_OffsetEnvelopeY * m_ZoomEnvelopeY.GetZoom() / UnitsPerLineY) * UnitsPerLineY;
+			for(int i = 0; i <= NumLinesY; i++)
+			{
+				float Value = UnitsPerLineY * i - BaseValue;
+				IGraphics::CLineItem LineItem(View.x, EnvelopeToScreenY(View, Value), View.x + View.w, EnvelopeToScreenY(View, Value));
+				Graphics()->LinesDraw(&LineItem, 1);
+			}
+
+			Graphics()->LinesEnd();
+
+			UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, 0.4f);
+			for(int i = 0; i <= NumLinesY; i++)
+			{
+				float Value = UnitsPerLineY * i - BaseValue;
+				char aValueBuffer[16];
+				if(UnitsPerLineY >= 1.0f)
+				{
+					str_format(aValueBuffer, sizeof(aValueBuffer), "%d", static_cast<int>(Value));
+				}
+				else
+				{
+					str_format(aValueBuffer, sizeof(aValueBuffer), "%.3f", Value);
+				}
+				UI()->TextRender()->Text(View.x, EnvelopeToScreenY(View, Value) + 4.0f, 8.0f, aValueBuffer);
+			}
+			UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+			UI()->ClipDisable();
+		}
+
+		{
+			CTimeStep UnitsPerLineX = 1ms;
+			static const CTimeStep s_aUnitPerLineOptionsX[] = {5ms, 10ms, 25ms, 50ms, 100ms, 250ms, 500ms, 1s, 2s, 5s, 10s, 15s, 30s, 1min};
+			for(CTimeStep Value : s_aUnitPerLineOptionsX)
+			{
+				if(Value.AsSeconds() / m_ZoomEnvelopeX.GetZoom() * View.w < 160.0f)
+					UnitsPerLineX = Value;
+			}
+			int NumLinesX = m_ZoomEnvelopeX.GetZoom() / static_cast<float>(UnitsPerLineX.AsSeconds()) + 1;
+
+			UI()->ClipEnable(&View);
+			Graphics()->TextureClear();
+			Graphics()->LinesBegin();
+			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.2f);
+
+			CTimeStep BaseValue = UnitsPerLineX * static_cast<int>(m_OffsetEnvelopeX * m_ZoomEnvelopeX.GetZoom() / UnitsPerLineX.AsSeconds());
+			for(int i = 0; i <= NumLinesX; i++)
+			{
+				float Value = UnitsPerLineX.AsSeconds() * i - BaseValue.AsSeconds();
+				IGraphics::CLineItem LineItem(EnvelopeToScreenX(View, Value), View.y, EnvelopeToScreenX(View, Value), View.y + View.h);
+				Graphics()->LinesDraw(&LineItem, 1);
+			}
+
+			Graphics()->LinesEnd();
+
+			UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, 0.4f);
+			for(int i = 0; i <= NumLinesX; i++)
+			{
+				CTimeStep Value = UnitsPerLineX * i - BaseValue;
+				if(Value.AsSeconds() >= 0)
+				{
+					char aValueBuffer[16];
+					Value.Format(aValueBuffer, sizeof(aValueBuffer));
+
+					UI()->TextRender()->Text(EnvelopeToScreenX(View, Value.AsSeconds()) + 1.0f, View.y + View.h - 8.0f, 8.0f, aValueBuffer);
+				}
+			}
+			UI()->TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+			UI()->ClipDisable();
+		}
 
 		// render tangents for bezier curves
 		{
