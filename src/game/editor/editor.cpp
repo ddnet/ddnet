@@ -5718,38 +5718,28 @@ void CEditor::RemoveUnusedEnvelopes()
 
 void CEditor::ZoomAdaptOffsetX(float ZoomFactor, const CUIRect &View)
 {
-	if(g_Config.m_EdZoomTarget)
-	{
-		float PosX = (UI()->MouseX() - View.x) / View.w;
-		m_OffsetEnvelopeX += (m_OffsetEnvelopeX - PosX) * (1.0f - ZoomFactor);
-	}
-	else
-		m_OffsetEnvelopeX += (m_OffsetEnvelopeX - 0.5f) * (1.0f - ZoomFactor);
+	float PosX = g_Config.m_EdZoomTarget ? (UI()->MouseX() - View.x) / View.w : 0.5f;
+	m_OffsetEnvelopeX = PosX - (PosX - m_OffsetEnvelopeX) * ZoomFactor;
 }
 
 void CEditor::UpdateZoomEnvelopeX(const CUIRect &View)
 {
 	float OldZoom = m_ZoomEnvelopeX.GetZoom();
 	if(m_ZoomEnvelopeX.UpdateZoom())
-		ZoomAdaptOffsetX(m_ZoomEnvelopeX.GetZoom() / OldZoom, View);
+		ZoomAdaptOffsetX(OldZoom / m_ZoomEnvelopeX.GetZoom(), View);
 }
 
 void CEditor::ZoomAdaptOffsetY(float ZoomFactor, const CUIRect &View)
 {
-	if(g_Config.m_EdZoomTarget)
-	{
-		float PosY = 1.0f - (UI()->MouseY() - View.y) / View.h;
-		m_OffsetEnvelopeY += (m_OffsetEnvelopeY - PosY) * (1.0f - ZoomFactor);
-	}
-	else
-		m_OffsetEnvelopeY += (m_OffsetEnvelopeY - 0.5f) * (1.0f - ZoomFactor);
+	float PosY = g_Config.m_EdZoomTarget ? 1.0f - (UI()->MouseY() - View.y) / View.h : 0.5f;
+	m_OffsetEnvelopeY = PosY - (PosY - m_OffsetEnvelopeY) * ZoomFactor;
 }
 
 void CEditor::UpdateZoomEnvelopeY(const CUIRect &View)
 {
 	float OldZoom = m_ZoomEnvelopeY.GetZoom();
 	if(m_ZoomEnvelopeY.UpdateZoom())
-		ZoomAdaptOffsetY(m_ZoomEnvelopeY.GetZoom() / OldZoom, View);
+		ZoomAdaptOffsetY(OldZoom / m_ZoomEnvelopeY.GetZoom(), View);
 }
 
 void CEditor::ResetZoomEnvelope(CEnvelope *pEnvelope, int ActiveChannels)
