@@ -1377,50 +1377,6 @@ void CGraphics_Threaded::DrawRectExt4(float x, float y, float w, float h, ColorR
 				x + w - r + Ca2 * r, y + h - r + Sa2 * r);
 			QuadsDrawFreeform(&ItemF, 1);
 		}
-
-		if(Corners & CORNER_ITL)
-		{
-			SetColor(ColorTopLeft);
-			IGraphics::CFreeformItem ItemF = IGraphics::CFreeformItem(
-				x, y,
-				x + (1 - Ca1) * r, y - r + Sa1 * r,
-				x + (1 - Ca3) * r, y - r + Sa3 * r,
-				x + (1 - Ca2) * r, y - r + Sa2 * r);
-			QuadsDrawFreeform(&ItemF, 1);
-		}
-
-		if(Corners & CORNER_ITR)
-		{
-			SetColor(ColorTopRight);
-			IGraphics::CFreeformItem ItemF = IGraphics::CFreeformItem(
-				x + w, y,
-				x + w - r + Ca1 * r, y - r + Sa1 * r,
-				x + w - r + Ca3 * r, y - r + Sa3 * r,
-				x + w - r + Ca2 * r, y - r + Sa2 * r);
-			QuadsDrawFreeform(&ItemF, 1);
-		}
-
-		if(Corners & CORNER_IBL)
-		{
-			SetColor(ColorBottomLeft);
-			IGraphics::CFreeformItem ItemF = IGraphics::CFreeformItem(
-				x, y + h,
-				x + (1 - Ca1) * r, y + h + (1 - Sa1) * r,
-				x + (1 - Ca3) * r, y + h + (1 - Sa3) * r,
-				x + (1 - Ca2) * r, y + h + (1 - Sa2) * r);
-			QuadsDrawFreeform(&ItemF, 1);
-		}
-
-		if(Corners & CORNER_IBR)
-		{
-			SetColor(ColorBottomRight);
-			IGraphics::CFreeformItem ItemF = IGraphics::CFreeformItem(
-				x + w, y + h,
-				x + w - r + Ca1 * r, y + h + (1 - Sa1) * r,
-				x + w - r + Ca3 * r, y + h + (1 - Sa3) * r,
-				x + w - r + Ca2 * r, y + h + (1 - Sa2) * r);
-			QuadsDrawFreeform(&ItemF, 1);
-		}
 	}
 
 	SetColor4(ColorTopLeft, ColorTopRight, ColorBottomLeft, ColorBottomRight);
