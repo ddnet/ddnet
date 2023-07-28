@@ -806,6 +806,8 @@ public:
 	void ChangeZoom(float Amount);
 	bool UpdateZoom();
 	float GetZoom() const;
+	float GetMinZoomLevel() const;
+	float GetMaxZoomLevel() const;
 
 private:
 	float ZoomProgress(float CurrentTime) const;

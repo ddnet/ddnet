@@ -5750,32 +5750,51 @@ void CEditor::ResetZoomEnvelope(CEnvelope *pEnvelope, int ActiveChannels)
 	float EndTime = pEnvelope->EndTime();
 	float ValueRange = absolute(Top - Bottom);
 
-	if(ValueRange < 0.1f)
+	if(ValueRange < m_ZoomEnvelopeY.GetMinZoomLevel())
 	{
 		// Set view to some sane default if range is too small
-		m_OffsetEnvelopeY = 0.5f - ValueRange / 0.2f - Bottom / 0.1f;
-		m_ZoomEnvelopeY.SetZoomInstant(0.1f);
+		m_OffsetEnvelopeY = 0.5f - ValueRange / m_ZoomEnvelopeY.GetMinZoomLevel() / 2.0f - Bottom / m_ZoomEnvelopeY.GetMinZoomLevel();
+		m_ZoomEnvelopeY.SetZoomInstant(m_ZoomEnvelopeY.GetMinZoomLevel());
+	}
+	else if(ValueRange > m_ZoomEnvelopeY.GetMaxZoomLevel())
+	{
+		m_OffsetEnvelopeY = -Bottom / m_ZoomEnvelopeY.GetMaxZoomLevel();
+		m_ZoomEnvelopeY.SetZoomInstant(m_ZoomEnvelopeY.GetMaxZoomLevel());
 	}
 	else
 	{
-		m_ZoomEnvelopeY.SetZoomInstant(1.25f * ValueRange);
+		// calculate biggest possible spacing
+		float SpacingFactor = minimum(1.25f, m_ZoomEnvelopeY.GetMaxZoomLevel() / ValueRange);
+		m_ZoomEnvelopeY.SetZoomInstant(SpacingFactor * ValueRange);
+		float Space = 1.0f / SpacingFactor;
+		float Spacing = (1.0f - Space) / 2.0f;
+
 		if(Top >= 0 && Bottom >= 0)
-			m_OffsetEnvelopeY = 0.1f - Bottom / m_ZoomEnvelopeY.GetZoom();
+			m_OffsetEnvelopeY = Spacing - Bottom / m_ZoomEnvelopeY.GetZoom();
 		else if(Top <= 0 && Bottom <= 0)
-			m_OffsetEnvelopeY = 0.1f - Bottom / m_ZoomEnvelopeY.GetZoom();
+			m_OffsetEnvelopeY = Spacing - Bottom / m_ZoomEnvelopeY.GetZoom();
 		else
-			m_OffsetEnvelopeY = 0.1f + 0.8f * absolute(Bottom) / ValueRange;
+			m_OffsetEnvelopeY = Spacing + Space * absolute(Bottom) / ValueRange;
 	}
 
-	if(EndTime < 0.1f)
+	if(EndTime < m_ZoomEnvelopeX.GetMinZoomLevel())
 	{
-		m_OffsetEnvelopeX = 0.5f - EndTime / 0.1f;
-		m_ZoomEnvelopeX.SetZoomInstant(0.1f);
+		m_OffsetEnvelopeX = 0.5f - EndTime / m_ZoomEnvelopeX.GetMinZoomLevel();
+		m_ZoomEnvelopeX.SetZoomInstant(m_ZoomEnvelopeX.GetMinZoomLevel());
+	}
+	else if(EndTime > m_ZoomEnvelopeX.GetMaxZoomLevel())
+	{
+		m_OffsetEnvelopeX = 0.0f;
+		m_ZoomEnvelopeX.SetZoomInstant(m_ZoomEnvelopeX.GetMaxZoomLevel());
 	}
 	else
 	{
-		m_ZoomEnvelopeX.SetZoomInstant(1.25f * EndTime);
-		m_OffsetEnvelopeX = 0.1f;
+		float SpacingFactor = minimum(1.25f, m_ZoomEnvelopeX.GetMaxZoomLevel() / EndTime);
+		m_ZoomEnvelopeX.SetZoomInstant(SpacingFactor * EndTime);
+		float Space = 1.0f / SpacingFactor;
+		float Spacing = (1.0f - Space) / 2.0f;
+
+		m_OffsetEnvelopeX = Spacing;
 	}
 }
 
@@ -8241,4 +8260,14 @@ void CSmoothZoom::SetZoomInstant(float Target)
 {
 	m_Zooming = false;
 	m_Zoom = Target;
+}
+
+float CSmoothZoom::GetMinZoomLevel() const
+{
+	return m_MinZoomLevel;
+}
+
+float CSmoothZoom::GetMaxZoomLevel() const
+{
+	return m_MaxZoomLevel;
 }
