@@ -884,6 +884,109 @@ int CEditor::FindSelectedQuadPointIndex(int QuadIndex) const
 		return -1;
 }
 
+int CEditor::FindEnvPointIndex(int Index, int Channel) const
+{
+	auto Iter = std::find(
+		m_vSelectedEnvelopePoints.begin(),
+		m_vSelectedEnvelopePoints.end(),
+		std::pair(Index, Channel));
+
+	if(Iter != m_vSelectedEnvelopePoints.end())
+		return Iter - m_vSelectedEnvelopePoints.begin();
+	else
+		return -1;
+}
+
+void CEditor::SelectEnvPoint(int Index)
+{
+	m_vSelectedEnvelopePoints.clear();
+
+	for(int c = 0; c < CEnvPoint::MAX_CHANNELS; c++)
+		m_vSelectedEnvelopePoints.emplace_back(Index, c);
+}
+
+void CEditor::SelectEnvPoint(int Index, int Channel)
+{
+	DeselectEnvPoints();
+	m_vSelectedEnvelopePoints.emplace_back(Index, Channel);
+}
+
+void CEditor::ToggleEnvPoint(int Index, int Channel)
+{
+	if(IsTangentSelected())
+		DeselectEnvPoints();
+
+	int ListIndex = FindEnvPointIndex(Index, Channel);
+
+	if(ListIndex >= 0)
+	{
+		m_vSelectedEnvelopePoints.erase(m_vSelectedEnvelopePoints.begin() + ListIndex);
+	}
+	else
+		m_vSelectedEnvelopePoints.emplace_back(Index, Channel);
+}
+
+bool CEditor::IsEnvPointSelected(int Index, int Channel) const
+{
+	int ListIndex = FindEnvPointIndex(Index, Channel);
+
+	return ListIndex >= 0;
+}
+
+bool CEditor::IsEnvPointSelected(int Index) const
+{
+	auto Iter = std::find_if(
+		m_vSelectedEnvelopePoints.begin(),
+		m_vSelectedEnvelopePoints.end(),
+		[&](auto pair) { return pair.first == Index; });
+
+	return Iter != m_vSelectedEnvelopePoints.end();
+}
+
+void CEditor::DeselectEnvPoints()
+{
+	m_vSelectedEnvelopePoints.clear();
+	m_SelectedTangentInPoint = std::pair(-1, -1);
+	m_SelectedTangentOutPoint = std::pair(-1, -1);
+}
+
+void CEditor::SelectTangentOutPoint(int Index, int Channel)
+{
+	DeselectEnvPoints();
+	m_SelectedTangentOutPoint = std::pair(Index, Channel);
+}
+
+bool CEditor::IsTangentOutPointSelected(int Index, int Channel) const
+{
+	return m_SelectedTangentOutPoint == std::pair(Index, Channel);
+}
+
+void CEditor::SelectTangentInPoint(int Index, int Channel)
+{
+	DeselectEnvPoints();
+	m_SelectedTangentInPoint = std::pair(Index, Channel);
+}
+
+bool CEditor::IsTangentInPointSelected(int Index, int Channel) const
+{
+	return m_SelectedTangentInPoint == std::pair(Index, Channel);
+}
+
+bool CEditor::IsTangentInSelected() const
+{
+	return m_SelectedTangentInPoint != std::pair(-1, -1);
+}
+
+bool CEditor::IsTangentOutSelected() const
+{
+	return m_SelectedTangentOutPoint != std::pair(-1, -1);
+}
+
+bool CEditor::IsTangentSelected() const
+{
+	return IsTangentInSelected() || IsTangentOutSelected();
+}
+
 bool CEditor::CallbackOpenMap(const char *pFileName, int StorageType, void *pUser)
 {
 	CEditor *pEditor = (CEditor *)pUser;
@@ -2306,7 +2409,7 @@ void CEditor::DoQuadEnvelopes(const std::vector<CQuad> &vQuads, IGraphics::CText
 			float Rot = fx2f(apEnvelope[j]->m_vPoints[i].m_aValues[2]) / 360.0f * pi * 2;
 
 			// Set Colours
-			float Alpha = (m_SelectedQuadEnvelope == vQuads[j].m_PosEnv && m_SelectedEnvelopePoint == (int)i) ? 0.65f : 0.35f;
+			float Alpha = (m_SelectedQuadEnvelope == vQuads[j].m_PosEnv && IsEnvPointSelected(i)) ? 0.65f : 0.35f;
 			IGraphics::CColorVertex aArray[4] = {
 				IGraphics::CColorVertex(0, vQuads[j].m_aColors[0].r, vQuads[j].m_aColors[0].g, vQuads[j].m_aColors[0].b, Alpha),
 				IGraphics::CColorVertex(1, vQuads[j].m_aColors[1].r, vQuads[j].m_aColors[1].g, vQuads[j].m_aColors[1].b, Alpha),
@@ -2452,7 +2555,7 @@ void CEditor::DoQuadEnvPoint(const CQuad *pQuad, int QIndex, int PIndex)
 				SelectQuad(QIndex);
 			}
 
-			m_SelectedEnvelopePoint = PIndex;
+			SelectEnvPoint(PIndex);
 			m_SelectedQuadEnvelope = pQuad->m_PosEnv;
 
 			UI()->SetActiveItem(pID);
@@ -2462,7 +2565,7 @@ void CEditor::DoQuadEnvPoint(const CQuad *pQuad, int QIndex, int PIndex)
 		}
 		else
 		{
-			m_SelectedEnvelopePoint = -1;
+			DeselectEnvPoints();
 			m_SelectedQuadEnvelope = -1;
 		}
 	}
@@ -5735,6 +5838,15 @@ void CEditor::RemoveTimeOffsetEnvelope(CEnvelope *pEnvelope)
 	m_OffsetEnvelopeX += fxt2f(TimeOffset) / m_ZoomEnvelopeX.GetZoom();
 };
 
+static float ClampDelta(float Val, float Delta, float Min, float Max)
+{
+	if(Val + Delta <= Min)
+		return Min - Val;
+	if(Val + Delta >= Max)
+		return Max - Val;
+	return Delta;
+}
+
 void CEditor::RenderEnvelopeEditor(CUIRect View)
 {
 	if(m_SelectedEnvelope < 0)
@@ -5749,13 +5861,17 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 	enum
 	{
 		OP_NONE,
+		OP_SELECT,
 		OP_DRAG_POINT,
 		OP_DRAG_POINT_X,
-		OP_DRAG_POINT_Y
+		OP_DRAG_POINT_Y,
+		OP_CONTEXT_MENU
 	};
 	static int s_Operation = OP_NONE;
-	static float s_AccurateDragValueX = 0.0f;
-	static float s_AccurateDragValueY = 0.0f;
+	static std::vector<float> s_vAccurateDragValuesX = {};
+	static std::vector<float> s_vAccurateDragValuesY = {};
+	static float s_MouseXStart = 0.0f;
+	static float s_MouseYStart = 0.0f;
 
 	CUIRect ToolBar, CurveBar, ColorBar, DragBar;
 	View.HSplitTop(30.0f, &DragBar, nullptr);
@@ -6001,7 +6117,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		if(UI()->HotItem() == &s_EnvelopeEditorID)
 		{
 			// do stuff
-			if(UI()->MouseButtonClicked(1))
+			if(UI()->MouseButton(0) && Input()->MouseDoubleClick())
 			{
 				// add point
 				float Time = ScreenToEnvelopeX(View, UI()->MouseX());
@@ -6039,14 +6155,11 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			}
 
 			m_ShowEnvelopePreview = SHOWENV_SELECTED;
-			m_pTooltip = "Press right mouse button to create a new point. Use shift to change the zoom axis.";
+			m_pTooltip = "Double-click to create a new point. Use shift to change the zoom axis.";
 		}
 
 		UpdateZoomEnvelopeX(View);
 		UpdateZoomEnvelopeY(View);
-
-		// keep track of selected point to handle value/time text input
-		static const void *s_pSelectedPoint = nullptr;
 
 		// render tangents for bezier curves
 		{
@@ -6069,7 +6182,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 						float TangentX = EnvelopeToScreenX(View, fxt2f(pEnvelope->m_vPoints[i].m_Time + pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaX[c]));
 						float TangentY = EnvelopeToScreenY(View, fx2f(pEnvelope->m_vPoints[i].m_aValues[c] + pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaY[c]));
 
-						if(s_pSelectedPoint == &pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaX[c] || (m_SelectedQuadEnvelope == m_SelectedEnvelope && m_SelectedEnvelopePoint == i))
+						if(IsTangentOutPointSelected(i, c))
 							Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
 						else
 							Graphics()->SetColor(aColors[c].r, aColors[c].g, aColors[c].b, 0.4f);
@@ -6084,7 +6197,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 						float TangentX = EnvelopeToScreenX(View, fxt2f(pEnvelope->m_vPoints[i].m_Time + pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaX[c]));
 						float TangentY = EnvelopeToScreenY(View, fx2f(pEnvelope->m_vPoints[i].m_aValues[c] + pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaY[c]));
 
-						if(s_pSelectedPoint == &pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaX[c] || (m_SelectedQuadEnvelope == m_SelectedEnvelope && m_SelectedEnvelopePoint == i))
+						if(IsTangentInPointSelected(i, c))
 							Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
 						else
 							Graphics()->SetColor(aColors[c].r, aColors[c].g, aColors[c].b, 0.4f);
@@ -6214,18 +6327,9 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		}
 
 		// render handles
-
-		static CLineInputNumber s_CurValueInput;
-		static CLineInputNumber s_CurTimeInput;
-
 		if(CurrentEnvelopeSwitched)
 		{
-			s_pSelectedPoint = nullptr;
-
-			// update displayed text
-			s_CurValueInput.SetFloat(0.0f);
-			s_CurTimeInput.SetFloat(0.0f);
-
+			DeselectEnvPoints();
 			m_ResetZoomEnvelope = true;
 		}
 
@@ -6255,87 +6359,146 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 						if(UI()->MouseInside(&Final) && UI()->MouseInside(&View))
 							UI()->SetHotItem(pID);
 
-						float ColorMod = 1.0f;
+						if(IsEnvPointSelected(i, c))
+						{
+							Graphics()->SetColor(1, 1, 1, 1);
+							CUIRect Background = {
+								Final.x - 0.2f * Final.w,
+								Final.y - 0.2f * Final.h,
+								Final.w * 1.4f,
+								Final.h * 1.4f};
+							IGraphics::CQuadItem QuadItem(Background.x, Background.y, Background.w, Background.h);
+							Graphics()->QuadsDrawTL(&QuadItem, 1);
+						}
 
 						if(UI()->CheckActiveItem(pID))
 						{
-							if(!UI()->MouseButton(0))
+							m_ShowEnvelopePreview = SHOWENV_SELECTED;
+
+							if(s_Operation == OP_SELECT)
 							{
-								m_SelectedQuadEnvelope = -1;
-								m_SelectedEnvelopePoint = -1;
+								float dx = s_MouseXStart - UI()->MouseX();
+								float dy = s_MouseYStart - UI()->MouseY();
 
-								s_Operation = OP_NONE;
+								if(dx * dx + dy * dy > 20.0f)
+								{
+									s_Operation = OP_DRAG_POINT;
 
-								UI()->SetActiveItem(nullptr);
+									if(!IsEnvPointSelected(i, c))
+										SelectEnvPoint(i, c);
+								}
 							}
-							else
+
+							if(s_Operation == OP_DRAG_POINT || s_Operation == OP_DRAG_POINT_X || s_Operation == OP_DRAG_POINT_Y)
 							{
 								if(Input()->ShiftIsPressed())
 								{
-									if(s_Operation == OP_NONE || s_Operation == OP_DRAG_POINT_Y)
+									if(s_Operation == OP_DRAG_POINT || s_Operation == OP_DRAG_POINT_Y)
 									{
 										s_Operation = OP_DRAG_POINT_X;
-										s_AccurateDragValueX = pEnvelope->m_vPoints[i].m_Time;
+										s_vAccurateDragValuesX.clear();
+										for(auto [SelectedIndex, _] : m_vSelectedEnvelopePoints)
+											s_vAccurateDragValuesX.push_back(pEnvelope->m_vPoints[SelectedIndex].m_Time);
 									}
 									else
 									{
 										float DeltaX = ScreenToEnvelopeDX(View, UI()->MouseDeltaX()) * (Input()->ModifierIsPressed() ? 50.0f : 1000.0f);
-										s_AccurateDragValueX += DeltaX;
 
-										pEnvelope->m_vPoints[i].m_Time = std::round(s_AccurateDragValueX);
-										if(i == 0 && pEnvelope->m_vPoints[i].m_Time != 0)
+										for(size_t k = 0; k < m_vSelectedEnvelopePoints.size(); k++)
 										{
-											RemoveTimeOffsetEnvelope(pEnvelope);
-											s_AccurateDragValueX = 0.0f;
-										}
-										if(i != 0 && pEnvelope->m_vPoints[i].m_Time < pEnvelope->m_vPoints[i - 1].m_Time)
-										{
-											pEnvelope->m_vPoints[i].m_Time = pEnvelope->m_vPoints[i - 1].m_Time + 1;
-											s_AccurateDragValueX = pEnvelope->m_vPoints[i - 1].m_Time + 1;
-										}
-										if(i < pEnvelope->m_vPoints.size() - 1 && pEnvelope->m_vPoints[i].m_Time > pEnvelope->m_vPoints[i + 1].m_Time)
-										{
-											pEnvelope->m_vPoints[i].m_Time = pEnvelope->m_vPoints[i + 1].m_Time - 1;
-											s_AccurateDragValueX = pEnvelope->m_vPoints[i + 1].m_Time - 1;
-										}
+											int SelectedIndex = m_vSelectedEnvelopePoints[k].first;
+											int BoundLow = f2fxt(ScreenToEnvelopeX(View, View.x));
+											int BoundHigh = f2fxt(ScreenToEnvelopeX(View, View.x + View.w));
+											for(int j = 0; j < SelectedIndex; j++)
+											{
+												if(!IsEnvPointSelected(j))
+													BoundLow = maximum(pEnvelope->m_vPoints[j].m_Time + 1, BoundLow);
+											}
+											for(int j = SelectedIndex + 1; j < (int)pEnvelope->m_vPoints.size(); j++)
+											{
+												if(!IsEnvPointSelected(j))
+													BoundHigh = minimum(pEnvelope->m_vPoints[j].m_Time - 1, BoundHigh);
+											}
 
-										pEnvelope->m_vPoints[i].m_Time = clamp(pEnvelope->m_vPoints[i].m_Time, f2fxt(ScreenToEnvelopeX(View, View.x)), f2fxt(ScreenToEnvelopeX(View, View.x + View.w)));
-										s_AccurateDragValueX = clamp<float>(s_AccurateDragValueX, f2fxt(ScreenToEnvelopeX(View, View.x)), f2fxt(ScreenToEnvelopeX(View, View.x + View.w)));
+											DeltaX = ClampDelta(s_vAccurateDragValuesX[k], DeltaX, BoundLow, BoundHigh);
+										}
+										for(size_t k = 0; k < m_vSelectedEnvelopePoints.size(); k++)
+										{
+											int SelectedIndex = m_vSelectedEnvelopePoints[k].first;
+											s_vAccurateDragValuesX[k] += DeltaX;
+											pEnvelope->m_vPoints[SelectedIndex].m_Time = std::round(s_vAccurateDragValuesX[k]);
+										}
+										for(size_t k = 0; k < m_vSelectedEnvelopePoints.size(); k++)
+										{
+											int SelectedIndex = m_vSelectedEnvelopePoints[k].first;
+											if(SelectedIndex == 0 && pEnvelope->m_vPoints[SelectedIndex].m_Time != 0)
+											{
+												RemoveTimeOffsetEnvelope(pEnvelope);
+												float Offset = s_vAccurateDragValuesX[k];
+												for(auto &Value : s_vAccurateDragValuesX)
+													Value -= Offset;
+												break;
+											}
+										}
 									}
 								}
 								else
 								{
-									if(s_Operation == OP_NONE || s_Operation == OP_DRAG_POINT_X)
+									if(s_Operation == OP_DRAG_POINT || s_Operation == OP_DRAG_POINT_X)
 									{
 										s_Operation = OP_DRAG_POINT_Y;
-										s_AccurateDragValueY = pEnvelope->m_vPoints[i].m_aValues[c];
+										s_vAccurateDragValuesY.clear();
+										for(auto [SelectedIndex, SelectedChannel] : m_vSelectedEnvelopePoints)
+											s_vAccurateDragValuesY.push_back(pEnvelope->m_vPoints[SelectedIndex].m_aValues[SelectedChannel]);
 									}
 									else
 									{
 										float DeltaY = ScreenToEnvelopeDY(View, UI()->MouseDeltaY()) * (Input()->ModifierIsPressed() ? 51.2f : 1024.0f);
-										s_AccurateDragValueY -= DeltaY;
+										for(size_t k = 0; k < m_vSelectedEnvelopePoints.size(); k++)
+										{
+											auto [SelectedIndex, SelectedChannel] = m_vSelectedEnvelopePoints[k];
+											s_vAccurateDragValuesY[k] -= DeltaY;
+											pEnvelope->m_vPoints[SelectedIndex].m_aValues[SelectedChannel] = std::round(s_vAccurateDragValuesY[k]);
 
-										pEnvelope->m_vPoints[i].m_aValues[c] = std::round(s_AccurateDragValueY);
-										if(pEnvelope->GetChannels() == 4)
-										{
-											pEnvelope->m_vPoints[i].m_aValues[c] = clamp(pEnvelope->m_vPoints[i].m_aValues[c], 0, 1024);
-											s_AccurateDragValueY = clamp<float>(s_AccurateDragValueY, 0, 1024);
-										}
-										else
-										{
-											pEnvelope->m_vPoints[i].m_aValues[c] = clamp(pEnvelope->m_vPoints[i].m_aValues[c], f2fx(ScreenToEnvelopeY(View, View.y + View.h)), f2fx(ScreenToEnvelopeY(View, View.y)));
-											s_AccurateDragValueY = clamp<float>(s_AccurateDragValueY, f2fx(ScreenToEnvelopeY(View, View.y + View.h)), f2fx(ScreenToEnvelopeY(View, View.y)));
+											if(pEnvelope->GetChannels() == 4)
+											{
+												pEnvelope->m_vPoints[i].m_aValues[c] = clamp(pEnvelope->m_vPoints[i].m_aValues[c], 0, 1024);
+												s_vAccurateDragValuesY[k] = clamp<float>(s_vAccurateDragValuesY[k], 0, 1024);
+											}
 										}
 									}
 								}
+							}
 
-								m_SelectedQuadEnvelope = m_SelectedEnvelope;
-								m_ShowEnvelopePreview = SHOWENV_SELECTED;
-								m_SelectedEnvelopePoint = i;
+							if(s_Operation == OP_CONTEXT_MENU)
+							{
+								if(!UI()->MouseButton(1))
+								{
+									if(m_vSelectedEnvelopePoints.size() == 1)
+									{
+										m_UpdateEnvPointInfo = true;
+										static SPopupMenuId s_PopupEnvPointId;
+										UI()->DoPopupMenu(&s_PopupEnvPointId, UI()->MouseX(), UI()->MouseY(), 150, 56, this, PopupEnvPoint);
+									}
+									UI()->SetActiveItem(nullptr);
+								}
+							}
+							else if(!UI()->MouseButton(0))
+							{
+								UI()->SetActiveItem(nullptr);
+								m_SelectedQuadEnvelope = -1;
+
+								if(s_Operation == OP_SELECT)
+								{
+									if(Input()->ShiftIsPressed())
+										ToggleEnvPoint(i, c);
+									else
+										SelectEnvPoint(i, c);
+								}
+
 								m_Map.OnModify();
 							}
 
-							ColorMod = 100.0f;
 							Graphics()->SetColor(1, 1, 1, 1);
 						}
 						else if(UI()->HotItem() == pID)
@@ -6343,65 +6506,35 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 							if(UI()->MouseButton(0))
 							{
 								UI()->SetActiveItem(pID);
-								s_pSelectedPoint = pID;
+								s_Operation = OP_SELECT;
+								m_SelectedQuadEnvelope = m_SelectedEnvelope;
+
+								s_MouseXStart = UI()->MouseX();
+								s_MouseYStart = UI()->MouseY();
 							}
-
-							// remove point
-							if(UI()->MouseButtonClicked(1) && pEnvelope->m_vPoints.size() > 2)
+							else if(UI()->MouseButtonClicked(1))
 							{
-								if(s_pSelectedPoint == pID)
+								if(Input()->ShiftIsPressed())
 								{
-									s_pSelectedPoint = nullptr;
-
-									// update displayed text
-									s_CurValueInput.SetFloat(0.0f);
-									s_CurTimeInput.SetFloat(0.0f);
+									pEnvelope->m_vPoints.erase(pEnvelope->m_vPoints.begin() + i);
+									m_Map.OnModify();
 								}
-
-								pEnvelope->m_vPoints.erase(pEnvelope->m_vPoints.begin() + i);
-								m_Map.OnModify();
+								else
+								{
+									s_Operation = OP_CONTEXT_MENU;
+									SelectEnvPoint(i, c);
+									UI()->SetActiveItem(pID);
+								}
 							}
 
 							m_ShowEnvelopePreview = SHOWENV_SELECTED;
-							ColorMod = 100.0f;
-							Graphics()->SetColor(1, 0.75f, 0.75f, 1);
-							m_pTooltip = "Envelope point. Left mouse to drag. Hold ctrl to be more precise. Hold shift to alter time point instead of value. Right click to delete.";
+							Graphics()->SetColor(1, 1, 1, 1);
+							m_pTooltip = "Envelope point. Left mouse to drag. Hold ctrl to be more precise. Hold shift to alter time. Shift + right-click to delete.";
+							ms_pUiGotContext = pID;
 						}
-
-						if(pID == s_pSelectedPoint && UI()->ConsumeHotkey(CUI::HOTKEY_ENTER))
-						{
-							if(i != 0)
-							{
-								pEnvelope->m_vPoints[i].m_Time = s_CurTimeInput.GetFloat() * 1000.0f;
-
-								if(pEnvelope->m_vPoints[i].m_Time < pEnvelope->m_vPoints[i - 1].m_Time)
-									pEnvelope->m_vPoints[i].m_Time = pEnvelope->m_vPoints[i - 1].m_Time + 1;
-								if(i + 1 != pEnvelope->m_vPoints.size() && pEnvelope->m_vPoints[i].m_Time > pEnvelope->m_vPoints[i + 1].m_Time)
-									pEnvelope->m_vPoints[i].m_Time = pEnvelope->m_vPoints[i + 1].m_Time - 1;
-							}
-							else
-								pEnvelope->m_vPoints[i].m_Time = 0.0f;
-
-							s_CurTimeInput.SetFloat(pEnvelope->m_vPoints[i].m_Time / 1000.0f);
-
-							pEnvelope->m_vPoints[i].m_aValues[c] = f2fx(s_CurValueInput.GetFloat());
-							s_CurValueInput.SetFloat(fx2f(pEnvelope->m_vPoints[i].m_aValues[c]));
-						}
-
-						if(UI()->CheckActiveItem(pID))
-						{
-							const int CurrentTime = pEnvelope->m_vPoints[i].m_Time;
-							const int CurrentValue = pEnvelope->m_vPoints[i].m_aValues[c];
-
-							// update displayed text
-							s_CurValueInput.SetFloat(fx2f(CurrentValue));
-							s_CurTimeInput.SetFloat(CurrentTime / 1000.0f);
-						}
-
-						if(pID == s_pSelectedPoint || (m_SelectedQuadEnvelope == m_SelectedEnvelope && m_SelectedEnvelopePoint == (int)i))
-							Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 						else
-							Graphics()->SetColor(aColors[c].r * ColorMod, aColors[c].g * ColorMod, aColors[c].b * ColorMod, 1.0f);
+							Graphics()->SetColor(aColors[c].r, aColors[c].g, aColors[c].b, 1.0f);
+
 						IGraphics::CQuadItem QuadItem(Final.x, Final.y, Final.w, Final.h);
 						Graphics()->QuadsDrawTL(&QuadItem, 1);
 					}
@@ -6420,99 +6553,123 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 							Final.h = 4.0f;
 
 							// handle logic
-							bool Updated = false;
 							const void *pID = &pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaX[c];
 
-							float ColorMod = 1.0f;
+							if(IsTangentOutPointSelected(i, c))
+							{
+								Graphics()->SetColor(1, 1, 1, 1);
+								IGraphics::CFreeformItem FreeformItem(
+									Final.x + Final.w / 2.0f,
+									Final.y - 1,
+									Final.x + Final.w / 2.0f,
+									Final.y - 1,
+									Final.x + Final.w + 1,
+									Final.y + Final.h + 1,
+									Final.x - 1,
+									Final.y + Final.h + 1);
+								Graphics()->QuadsDrawFreeform(&FreeformItem, 1);
+							}
+
 							if(UI()->MouseInside(&Final) && UI()->MouseInside(&View))
 								UI()->SetHotItem(pID);
 
 							if(UI()->CheckActiveItem(pID))
 							{
-								if(!UI()->MouseButton(0))
-								{
-									m_SelectedQuadEnvelope = -1;
-									m_SelectedEnvelopePoint = -1;
+								m_ShowEnvelopePreview = SHOWENV_SELECTED;
 
-									s_Operation = OP_NONE;
-
-									UI()->SetActiveItem(nullptr);
-								}
-								else
+								if(s_Operation == OP_SELECT)
 								{
-									if(s_Operation == OP_NONE)
+									float dx = s_MouseXStart - UI()->MouseX();
+									float dy = s_MouseYStart - UI()->MouseY();
+
+									if(dx * dx + dy * dy > 20.0f)
 									{
 										s_Operation = OP_DRAG_POINT;
-										s_AccurateDragValueX = pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaX[c];
-										s_AccurateDragValueY = pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaY[c];
+
+										s_vAccurateDragValuesX = {static_cast<float>(pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaX[c])};
+										s_vAccurateDragValuesY = {static_cast<float>(pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaY[c])};
+
+										if(!IsTangentOutPointSelected(i, c))
+											SelectTangentOutPoint(i, c);
 									}
-									else
+								}
+
+								if(s_Operation == OP_DRAG_POINT)
+								{
+									float DeltaX = ScreenToEnvelopeDX(View, UI()->MouseDeltaX()) * (Input()->ModifierIsPressed() ? 50.0f : 1000.0f);
+									float DeltaY = ScreenToEnvelopeDY(View, UI()->MouseDeltaY()) * (Input()->ModifierIsPressed() ? 51.2f : 1024.0f);
+									s_vAccurateDragValuesX[0] += DeltaX;
+									s_vAccurateDragValuesY[0] -= DeltaY;
+
+									pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaX[c] = std::round(s_vAccurateDragValuesX[0]);
+									pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaY[c] = std::round(s_vAccurateDragValuesY[0]);
+
+									// clamp time value
+									pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaX[c] = clamp<int>(pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaX[c], 0, f2fxt(ScreenToEnvelopeX(View, View.x + View.w)) - pEnvelope->m_vPoints[i].m_Time);
+									s_vAccurateDragValuesX[0] = clamp<float>(s_vAccurateDragValuesX[0], 0, f2fxt(ScreenToEnvelopeX(View, View.x + View.w)) - pEnvelope->m_vPoints[i].m_Time);
+								}
+
+								if(s_Operation == OP_CONTEXT_MENU)
+								{
+									if(!UI()->MouseButton(1))
 									{
-										float DeltaX = ScreenToEnvelopeDX(View, UI()->MouseDeltaX()) * (Input()->ModifierIsPressed() ? 50.0f : 1000.0f);
-										float DeltaY = ScreenToEnvelopeDY(View, UI()->MouseDeltaY()) * (Input()->ModifierIsPressed() ? 51.2f : 1024.0f);
-										s_AccurateDragValueX += DeltaX;
-										s_AccurateDragValueY -= DeltaY;
-
-										pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaX[c] = std::round(s_AccurateDragValueX);
-										pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaY[c] = std::round(s_AccurateDragValueY);
-
-										// clamp time value
-										pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaX[c] = clamp<int>(pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaX[c], 0, f2fxt(ScreenToEnvelopeX(View, View.x + View.w)) - pEnvelope->m_vPoints[i].m_Time);
-										s_AccurateDragValueX = clamp<float>(s_AccurateDragValueX, 0, f2fxt(ScreenToEnvelopeX(View, View.x + View.w)) - pEnvelope->m_vPoints[i].m_Time);
+										if(IsTangentOutPointSelected(i, c))
+										{
+											m_UpdateEnvPointInfo = true;
+											static SPopupMenuId s_PopupEnvPointId;
+											UI()->DoPopupMenu(&s_PopupEnvPointId, UI()->MouseX(), UI()->MouseY(), 150, 56, this, PopupEnvPoint);
+										}
+										UI()->SetActiveItem(nullptr);
 									}
+								}
+								else if(!UI()->MouseButton(0))
+								{
+									UI()->SetActiveItem(nullptr);
+									m_SelectedQuadEnvelope = -1;
 
-									m_SelectedQuadEnvelope = m_SelectedEnvelope;
-									m_ShowEnvelopePreview = SHOWENV_SELECTED;
-									m_SelectedEnvelopePoint = i;
+									if(s_Operation == OP_SELECT)
+										SelectTangentOutPoint(i, c);
+
 									m_Map.OnModify();
 								}
-								ColorMod = 100.0f;
+
+								Graphics()->SetColor(1, 1, 1, 1);
 							}
 							else if(UI()->HotItem() == pID)
 							{
 								if(UI()->MouseButton(0))
 								{
 									UI()->SetActiveItem(pID);
-									s_pSelectedPoint = pID;
-								}
+									s_Operation = OP_SELECT;
+									m_SelectedQuadEnvelope = m_SelectedEnvelope;
 
-								// reset
-								if(UI()->MouseButtonClicked(1))
+									s_MouseXStart = UI()->MouseX();
+									s_MouseYStart = UI()->MouseY();
+								}
+								else if(UI()->MouseButtonClicked(1))
 								{
-									UI()->SetActiveItem(pID);
-									s_pSelectedPoint = pID;
-									mem_zero(pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaX, sizeof(pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaX));
-									mem_zero(pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaY, sizeof(pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaY));
-									m_Map.OnModify();
-									Updated = true;
+									if(Input()->ShiftIsPressed())
+									{
+										SelectTangentOutPoint(i, c);
+										pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaX[c] = 0.0f;
+										pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaY[c] = 0.0f;
+										m_Map.OnModify();
+									}
+									else
+									{
+										s_Operation = OP_CONTEXT_MENU;
+										SelectTangentOutPoint(i, c);
+										UI()->SetActiveItem(pID);
+									}
 								}
 
 								m_ShowEnvelopePreview = SHOWENV_SELECTED;
-								ColorMod = 100.0f;
-								m_pTooltip = "Bezier out-tangent. Left mouse to drag. Hold ctrl to be more precise. Right click to reset.";
+								Graphics()->SetColor(1, 1, 1, 1);
+								m_pTooltip = "Bezier out-tangent. Left mouse to drag. Hold ctrl to be more precise. Shift + right-click to reset.";
+								ms_pUiGotContext = pID;
 							}
-
-							if(pID == s_pSelectedPoint && UI()->ConsumeHotkey(CUI::HOTKEY_ENTER))
-							{
-								pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaX[c] = clamp<int>(s_CurTimeInput.GetFloat() * 1000.0f - pEnvelope->m_vPoints[i].m_Time, 0, pEnvelope->m_vPoints[i + 1].m_Time - pEnvelope->m_vPoints[i].m_Time);
-								pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaY[c] = f2fx(s_CurValueInput.GetFloat()) - pEnvelope->m_vPoints[i].m_aValues[c];
-								Updated = true;
-							}
-
-							if(UI()->CheckActiveItem(pID) || Updated)
-							{
-								const int CurrentTime = pEnvelope->m_vPoints[i].m_Time + pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaX[c];
-								const int CurrentValue = pEnvelope->m_vPoints[i].m_aValues[c] + pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaY[c];
-
-								// update displayed text
-								s_CurValueInput.SetFloat(fx2f(CurrentValue));
-								s_CurTimeInput.SetFloat(CurrentTime / 1000.0f);
-							}
-
-							if(pID == s_pSelectedPoint || (m_SelectedQuadEnvelope == m_SelectedEnvelope && m_SelectedEnvelopePoint == (int)i))
-								Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.5f);
 							else
-								Graphics()->SetColor(aColors[c].r * ColorMod, aColors[c].g * ColorMod, aColors[c].b * ColorMod, 0.5f);
+								Graphics()->SetColor(aColors[c].r, aColors[c].g, aColors[c].b, 1.0f);
 
 							// draw triangle
 							IGraphics::CFreeformItem FreeformItem(Final.x + Final.w / 2.0f, Final.y, Final.x + Final.w / 2.0f, Final.y, Final.x + Final.w, Final.y + Final.h, Final.x, Final.y + Final.h);
@@ -6531,99 +6688,123 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 							Final.h = 4.0f;
 
 							// handle logic
-							bool Updated = false;
 							const void *pID = &pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaX[c];
 
-							float ColorMod = 1.0f;
+							if(IsTangentInPointSelected(i, c))
+							{
+								Graphics()->SetColor(1, 1, 1, 1);
+								IGraphics::CFreeformItem FreeformItem(
+									Final.x + Final.w / 2.0f,
+									Final.y - 1,
+									Final.x + Final.w / 2.0f,
+									Final.y - 1,
+									Final.x + Final.w + 1,
+									Final.y + Final.h + 1,
+									Final.x - 1,
+									Final.y + Final.h + 1);
+								Graphics()->QuadsDrawFreeform(&FreeformItem, 1);
+							}
+
 							if(UI()->MouseInside(&Final) && UI()->MouseInside(&View))
 								UI()->SetHotItem(pID);
 
 							if(UI()->CheckActiveItem(pID))
 							{
-								if(!UI()->MouseButton(0))
-								{
-									m_SelectedQuadEnvelope = -1;
-									m_SelectedEnvelopePoint = -1;
+								m_ShowEnvelopePreview = SHOWENV_SELECTED;
 
-									s_Operation = OP_NONE;
-
-									UI()->SetActiveItem(nullptr);
-								}
-								else
+								if(s_Operation == OP_SELECT)
 								{
-									if(s_Operation == OP_NONE)
+									float dx = s_MouseXStart - UI()->MouseX();
+									float dy = s_MouseYStart - UI()->MouseY();
+
+									if(dx * dx + dy * dy > 20.0f)
 									{
 										s_Operation = OP_DRAG_POINT;
-										s_AccurateDragValueX = pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaX[c];
-										s_AccurateDragValueY = pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaY[c];
+
+										s_vAccurateDragValuesX = {static_cast<float>(pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaX[c])};
+										s_vAccurateDragValuesY = {static_cast<float>(pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaY[c])};
+
+										if(!IsTangentInPointSelected(i, c))
+											SelectTangentInPoint(i, c);
 									}
-									else
+								}
+
+								if(s_Operation == OP_DRAG_POINT)
+								{
+									float DeltaX = ScreenToEnvelopeDX(View, UI()->MouseDeltaX()) * (Input()->ModifierIsPressed() ? 50.0f : 1000.0f);
+									float DeltaY = ScreenToEnvelopeDY(View, UI()->MouseDeltaY()) * (Input()->ModifierIsPressed() ? 51.2f : 1024.0f);
+									s_vAccurateDragValuesX[0] += DeltaX;
+									s_vAccurateDragValuesY[0] -= DeltaY;
+
+									pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaX[c] = std::round(s_vAccurateDragValuesX[0]);
+									pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaY[c] = std::round(s_vAccurateDragValuesY[0]);
+
+									// clamp time value
+									pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaX[c] = clamp(pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaX[c], f2fxt(ScreenToEnvelopeX(View, View.x)) - pEnvelope->m_vPoints[i].m_Time, 0);
+									s_vAccurateDragValuesX[0] = clamp<float>(s_vAccurateDragValuesX[0], f2fxt(ScreenToEnvelopeX(View, View.x)) - pEnvelope->m_vPoints[i].m_Time, 0);
+								}
+
+								if(s_Operation == OP_CONTEXT_MENU)
+								{
+									if(!UI()->MouseButton(1))
 									{
-										float DeltaX = ScreenToEnvelopeDX(View, UI()->MouseDeltaX()) * (Input()->ModifierIsPressed() ? 50.0f : 1000.0f);
-										float DeltaY = ScreenToEnvelopeDY(View, UI()->MouseDeltaY()) * (Input()->ModifierIsPressed() ? 51.2f : 1024.0f);
-										s_AccurateDragValueX += DeltaX;
-										s_AccurateDragValueY -= DeltaY;
-
-										pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaX[c] = std::round(s_AccurateDragValueX);
-										pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaY[c] = std::round(s_AccurateDragValueY);
-
-										// clamp time value
-										pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaX[c] = clamp(pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaX[c], f2fxt(ScreenToEnvelopeX(View, View.x)) - pEnvelope->m_vPoints[i].m_Time, 0);
-										s_AccurateDragValueX = clamp<float>(s_AccurateDragValueX, f2fxt(ScreenToEnvelopeX(View, View.x)) - pEnvelope->m_vPoints[i].m_Time, 0);
+										if(IsTangentInPointSelected(i, c))
+										{
+											m_UpdateEnvPointInfo = true;
+											static SPopupMenuId s_PopupEnvPointId;
+											UI()->DoPopupMenu(&s_PopupEnvPointId, UI()->MouseX(), UI()->MouseY(), 150, 56, this, PopupEnvPoint);
+										}
+										UI()->SetActiveItem(nullptr);
 									}
+								}
+								else if(!UI()->MouseButton(0))
+								{
+									UI()->SetActiveItem(nullptr);
+									m_SelectedQuadEnvelope = -1;
 
-									m_SelectedQuadEnvelope = m_SelectedEnvelope;
-									m_ShowEnvelopePreview = SHOWENV_SELECTED;
-									m_SelectedEnvelopePoint = i;
+									if(s_Operation == OP_SELECT)
+										SelectTangentInPoint(i, c);
+
 									m_Map.OnModify();
 								}
-								ColorMod = 100.0f;
+
+								Graphics()->SetColor(1, 1, 1, 1);
 							}
 							else if(UI()->HotItem() == pID)
 							{
 								if(UI()->MouseButton(0))
 								{
 									UI()->SetActiveItem(pID);
-									s_pSelectedPoint = pID;
-								}
+									s_Operation = OP_SELECT;
+									m_SelectedQuadEnvelope = m_SelectedEnvelope;
 
-								// reset
-								if(UI()->MouseButtonClicked(1))
+									s_MouseXStart = UI()->MouseX();
+									s_MouseYStart = UI()->MouseY();
+								}
+								else if(UI()->MouseButtonClicked(1))
 								{
-									UI()->SetActiveItem(pID);
-									s_pSelectedPoint = pID;
-									mem_zero(pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaX, sizeof(pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaX));
-									mem_zero(pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaY, sizeof(pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaY));
-									m_Map.OnModify();
-									Updated = true;
+									if(Input()->ShiftIsPressed())
+									{
+										SelectTangentInPoint(i, c);
+										pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaX[c] = 0.0f;
+										pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaY[c] = 0.0f;
+										m_Map.OnModify();
+									}
+									else
+									{
+										s_Operation = OP_CONTEXT_MENU;
+										SelectTangentInPoint(i, c);
+										UI()->SetActiveItem(pID);
+									}
 								}
 
 								m_ShowEnvelopePreview = SHOWENV_SELECTED;
-								ColorMod = 100.0f;
-								m_pTooltip = "Bezier in-tangent. Left mouse to drag. Hold ctrl to be more precise. Right click to reset.";
+								Graphics()->SetColor(1, 1, 1, 1);
+								m_pTooltip = "Bezier in-tangent. Left mouse to drag. Hold ctrl to be more precise. Shift + right-click to reset.";
+								ms_pUiGotContext = pID;
 							}
-
-							if(pID == s_pSelectedPoint && UI()->ConsumeHotkey(CUI::HOTKEY_ENTER))
-							{
-								pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaX[c] = clamp<int>(s_CurTimeInput.GetFloat() * 1000.0f - pEnvelope->m_vPoints[i].m_Time, -pEnvelope->m_vPoints[i].m_Time, 0);
-								pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaY[c] = f2fx(s_CurValueInput.GetFloat()) - pEnvelope->m_vPoints[i].m_aValues[c];
-								Updated = true;
-							}
-
-							if(UI()->CheckActiveItem(pID) || Updated)
-							{
-								const int CurrentTime = pEnvelope->m_vPoints[i].m_Time + pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaX[c];
-								const int CurrentValue = pEnvelope->m_vPoints[i].m_aValues[c] + pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaY[c];
-
-								// update displayed text
-								s_CurValueInput.SetFloat(fx2f(CurrentValue));
-								s_CurTimeInput.SetFloat(CurrentTime / 1000.0f);
-							}
-
-							if(pID == s_pSelectedPoint || (m_SelectedQuadEnvelope == m_SelectedEnvelope && m_SelectedEnvelopePoint == (int)i))
-								Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.5f);
 							else
-								Graphics()->SetColor(aColors[c].r * ColorMod, aColors[c].g * ColorMod, aColors[c].b * ColorMod, 0.5f);
+								Graphics()->SetColor(aColors[c].r, aColors[c].g, aColors[c].b, 1.0f);
 
 							// draw triangle
 							IGraphics::CFreeformItem FreeformItem(Final.x + Final.w / 2.0f, Final.y, Final.x + Final.w / 2.0f, Final.y, Final.x + Final.w, Final.y + Final.h, Final.x, Final.y + Final.h);
@@ -6634,31 +6815,6 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			}
 			Graphics()->QuadsEnd();
 			UI()->ClipDisable();
-		}
-
-		if(s_pSelectedPoint != nullptr)
-		{
-			CUIRect ToolBar1;
-			CUIRect ToolBar2;
-			ToolBar.VSplitMid(&ToolBar1, &ToolBar2);
-			ToolBar1.VSplitRight(3.0f, &ToolBar1, nullptr);
-			ToolBar2.VSplitRight(3.0f, &ToolBar2, nullptr);
-			if(ToolBar.w > ToolBar.h * 21)
-			{
-				CUIRect Label1;
-				CUIRect Label2;
-
-				ToolBar1.VSplitMid(&Label1, &ToolBar1);
-				ToolBar2.VSplitMid(&Label2, &ToolBar2);
-				Label1.VSplitRight(3.0f, &Label1, nullptr);
-				Label2.VSplitRight(3.0f, &Label2, nullptr);
-
-				UI()->DoLabel(&Label1, "Value:", 10.0f, TEXTALIGN_MR);
-				UI()->DoLabel(&Label2, "Time (in s):", 10.0f, TEXTALIGN_MR);
-			}
-
-			DoEditBox(&s_CurValueInput, &ToolBar1, 10.0f, IGraphics::CORNER_ALL, "The value of the selected element");
-			DoEditBox(&s_CurTimeInput, &ToolBar2, 10.0f, IGraphics::CORNER_ALL, "The time of the selected element");
 		}
 	}
 }

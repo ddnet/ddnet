@@ -1285,6 +1285,150 @@ CUI::EPopupMenuFunctionResult CEditor::PopupPoint(void *pContext, CUIRect View, 
 	return CUI::POPUP_KEEP_OPEN;
 }
 
+CUI::EPopupMenuFunctionResult CEditor::PopupEnvPoint(void *pContext, CUIRect View, bool Active)
+{
+	CEditor *pEditor = static_cast<CEditor *>(pContext);
+	const float RowHeight = 12.0f;
+	CUIRect Row, Label, EditBox;
+
+	pEditor->m_ShowEnvelopePreview = SHOWENV_SELECTED;
+
+	static CLineInputNumber s_CurValueInput;
+	static CLineInputNumber s_CurTimeInput;
+
+	CEnvelope *pEnvelope = pEditor->m_Map.m_vpEnvelopes[pEditor->m_SelectedEnvelope];
+	if(pEditor->m_UpdateEnvPointInfo)
+	{
+		pEditor->m_UpdateEnvPointInfo = false;
+
+		int CurrentTime;
+		int CurrentValue;
+		if(pEditor->IsTangentInSelected())
+		{
+			auto [SelectedIndex, SelectedChannel] = pEditor->m_SelectedTangentInPoint;
+
+			CurrentTime = pEnvelope->m_vPoints[SelectedIndex].m_Time + pEnvelope->m_vPoints[SelectedIndex].m_Bezier.m_aInTangentDeltaX[SelectedChannel];
+			CurrentValue = pEnvelope->m_vPoints[SelectedIndex].m_aValues[SelectedChannel] + pEnvelope->m_vPoints[SelectedIndex].m_Bezier.m_aInTangentDeltaY[SelectedChannel];
+		}
+		else if(pEditor->IsTangentOutSelected())
+		{
+			auto [SelectedIndex, SelectedChannel] = pEditor->m_SelectedTangentOutPoint;
+
+			CurrentTime = pEnvelope->m_vPoints[SelectedIndex].m_Time + pEnvelope->m_vPoints[SelectedIndex].m_Bezier.m_aOutTangentDeltaX[SelectedChannel];
+			CurrentValue = pEnvelope->m_vPoints[SelectedIndex].m_aValues[SelectedChannel] + pEnvelope->m_vPoints[SelectedIndex].m_Bezier.m_aOutTangentDeltaY[SelectedChannel];
+		}
+		else
+		{
+			auto [SelectedIndex, SelectedChannel] = pEditor->m_vSelectedEnvelopePoints.front();
+
+			CurrentTime = pEnvelope->m_vPoints[SelectedIndex].m_Time;
+			CurrentValue = pEnvelope->m_vPoints[SelectedIndex].m_aValues[SelectedChannel];
+		}
+
+		// update displayed text
+		s_CurValueInput.SetFloat(fx2f(CurrentValue));
+		s_CurTimeInput.SetFloat(CurrentTime / 1000.0f);
+	}
+
+	View.HSplitTop(RowHeight, &Row, &View);
+	Row.VSplitLeft(60.0f, &Label, &Row);
+	Row.VSplitLeft(10.0f, nullptr, &EditBox);
+	pEditor->UI()->DoLabel(&Label, "Value:", RowHeight - 2.0f, TEXTALIGN_LEFT);
+	pEditor->DoEditBox(&s_CurValueInput, &EditBox, RowHeight - 2.0f, IGraphics::CORNER_ALL, "The value of the selected envelope point");
+
+	View.HMargin(4.0f, &View);
+	View.HSplitTop(RowHeight, &Row, &View);
+	Row.VSplitLeft(60.0f, &Label, &Row);
+	Row.VSplitLeft(10.0f, nullptr, &EditBox);
+	pEditor->UI()->DoLabel(&Label, "Time (in s):", RowHeight - 2.0f, TEXTALIGN_LEFT);
+	pEditor->DoEditBox(&s_CurTimeInput, &EditBox, RowHeight - 2.0f, IGraphics::CORNER_ALL, "The time of the selected envelope point");
+
+	if(pEditor->Input()->KeyIsPressed(KEY_RETURN) || pEditor->Input()->KeyIsPressed(KEY_KP_ENTER))
+	{
+		float CurrentTime = s_CurTimeInput.GetFloat();
+		float CurrentValue = s_CurValueInput.GetFloat();
+		if(pEditor->IsTangentInSelected())
+		{
+			auto [SelectedIndex, SelectedChannel] = pEditor->m_SelectedTangentInPoint;
+
+			pEnvelope->m_vPoints[SelectedIndex].m_Bezier.m_aInTangentDeltaX[SelectedChannel] = minimum<int>(CurrentTime * 1000.0f - pEnvelope->m_vPoints[SelectedIndex].m_Time, 0);
+			CurrentTime = (pEnvelope->m_vPoints[SelectedIndex].m_Time + pEnvelope->m_vPoints[SelectedIndex].m_Bezier.m_aInTangentDeltaX[SelectedChannel]) / 1000.0f;
+
+			pEnvelope->m_vPoints[SelectedIndex].m_Bezier.m_aInTangentDeltaY[SelectedChannel] = f2fx(CurrentValue) - pEnvelope->m_vPoints[SelectedIndex].m_aValues[SelectedChannel];
+		}
+		else if(pEditor->IsTangentOutSelected())
+		{
+			auto [SelectedIndex, SelectedChannel] = pEditor->m_SelectedTangentOutPoint;
+
+			pEnvelope->m_vPoints[SelectedIndex].m_Bezier.m_aOutTangentDeltaX[SelectedChannel] = maximum<int>(CurrentTime * 1000.0f - pEnvelope->m_vPoints[SelectedIndex].m_Time, 0);
+			CurrentTime = (pEnvelope->m_vPoints[SelectedIndex].m_Time + pEnvelope->m_vPoints[SelectedIndex].m_Bezier.m_aOutTangentDeltaX[SelectedChannel]) / 1000.0f;
+
+			pEnvelope->m_vPoints[SelectedIndex].m_Bezier.m_aOutTangentDeltaY[SelectedChannel] = f2fx(CurrentValue) - pEnvelope->m_vPoints[SelectedIndex].m_aValues[SelectedChannel];
+		}
+		else
+		{
+			auto [SelectedIndex, SelectedChannel] = pEditor->m_vSelectedEnvelopePoints.front();
+
+			pEnvelope->m_vPoints[SelectedIndex].m_aValues[SelectedChannel] = f2fx(CurrentValue);
+			if(SelectedIndex != 0)
+			{
+				pEnvelope->m_vPoints[SelectedIndex].m_Time = CurrentTime * 1000.0f;
+
+				if(pEnvelope->m_vPoints[SelectedIndex].m_Time < pEnvelope->m_vPoints[SelectedIndex - 1].m_Time)
+					pEnvelope->m_vPoints[SelectedIndex].m_Time = pEnvelope->m_vPoints[SelectedIndex - 1].m_Time + 1;
+				if(static_cast<size_t>(SelectedIndex) + 1 != pEnvelope->m_vPoints.size() && pEnvelope->m_vPoints[SelectedIndex].m_Time > pEnvelope->m_vPoints[SelectedIndex + 1].m_Time)
+					pEnvelope->m_vPoints[SelectedIndex].m_Time = pEnvelope->m_vPoints[SelectedIndex + 1].m_Time - 1;
+
+				CurrentTime = pEnvelope->m_vPoints[SelectedIndex].m_Time / 1000.0f;
+			}
+			else
+			{
+				CurrentTime = 0.0f;
+				pEnvelope->m_vPoints[SelectedIndex].m_Time = 0.0f;
+			}
+		}
+
+		s_CurTimeInput.SetFloat(static_cast<int>(CurrentTime * 1000.0f) / 1000.0f);
+		s_CurValueInput.SetFloat(fx2f(f2fx(CurrentValue)));
+
+		pEditor->m_Map.OnModify();
+	}
+
+	View.HMargin(6.0f, &View);
+	View.HSplitTop(RowHeight, &Row, &View);
+	static int s_DeleteButtonID = 0;
+	const char *pButtonText = pEditor->IsTangentSelected() ? "Reset" : "Delete";
+	const char *pTooltip = pEditor->IsTangentSelected() ? "Reset tangent point to default value." : "Delete current envelope point in all channels.";
+	if(pEditor->DoButton_Editor(&s_DeleteButtonID, pButtonText, 0, &Row, 0, pTooltip))
+	{
+		if(pEditor->IsTangentInSelected())
+		{
+			auto [SelectedIndex, SelectedChannel] = pEditor->m_SelectedTangentInPoint;
+
+			pEnvelope->m_vPoints[SelectedIndex].m_Bezier.m_aInTangentDeltaX[SelectedChannel] = 0.0f;
+			pEnvelope->m_vPoints[SelectedIndex].m_Bezier.m_aInTangentDeltaY[SelectedChannel] = 0.0f;
+		}
+		else if(pEditor->IsTangentOutSelected())
+		{
+			auto [SelectedIndex, SelectedChannel] = pEditor->m_SelectedTangentOutPoint;
+
+			pEnvelope->m_vPoints[SelectedIndex].m_Bezier.m_aOutTangentDeltaX[SelectedChannel] = 0.0f;
+			pEnvelope->m_vPoints[SelectedIndex].m_Bezier.m_aOutTangentDeltaY[SelectedChannel] = 0.0f;
+		}
+		else
+		{
+			auto [SelectedIndex, SelectedChannel] = pEditor->m_vSelectedEnvelopePoints.front();
+
+			pEnvelope->m_vPoints.erase(pEnvelope->m_vPoints.begin() + SelectedIndex);
+		}
+		pEditor->m_Map.OnModify();
+
+		return CUI::POPUP_CLOSE_CURRENT;
+	}
+
+	return CUI::POPUP_KEEP_OPEN;
+}
+
 static const auto &&gs_ModifyIndexDeleted = [](int DeletedIndex) {
 	return [DeletedIndex](int *pIndex) {
 		if(*pIndex == DeletedIndex)
