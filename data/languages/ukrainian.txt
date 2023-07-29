@@ -353,8 +353,6 @@ Yes
 You must restart the game for all settings to take effect.
 == Перезапустіть гру для застосування змін.
 
-##### needs translation #####
-
 Sat.
 == Контраст.
 
@@ -523,7 +521,7 @@ Video name:
 Show DDNet map finishes in server browser
 == Показувати пройдені карти DDNet в браузері сервера
 
-transmits your player name to info.ddnet.org
+Transmits your player name to info.ddnet.org
 == передає ваш нікнейм на info.ddnet.org
 
 Search
@@ -820,7 +818,7 @@ Show entities
 Show HUD
 == Показувати HUD
 
-may cause delay
+May cause delay
 == може спричинити затримку
 
 Screen
@@ -1513,14 +1511,11 @@ Allows maps to render with more detail
 Renderer
 == Рендеринг
 
-default
+Default
 == за замовчуванням
 
-custom
+Custom
 == користувацькі
-
-auto
-== авто
 
 Appearance
 == Зовнішній вигляд

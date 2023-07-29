@@ -510,8 +510,6 @@ Yes
 You must restart the game for all settings to take effect.
 == Debes reiniciar el juego para que los cambios tengan efecto.
 
-##### needs translation #####
-
 New name:
 == Nuevo nombre:
 
@@ -668,7 +666,7 @@ Video name:
 Show DDNet map finishes in server browser
 == Marcar los mapas DDNet acabados en el navegador de servidores
 
-transmits your player name to info.ddnet.org
+Transmits your player name to info.ddnet.org
 == transmite tu nombre de jugador a info.ddnet.org
 
 Search
@@ -848,7 +846,7 @@ Show entities
 Show HUD
 == Mostrar HUD
 
-may cause delay
+May cause delay
 == puede causar retraso
 
 Screen
@@ -1266,14 +1264,11 @@ Windowed fullscreen
 Renderer
 == Renderizador
 
-default
+Default
 == por defecto
 
-custom
+Custom
 == personalizado
-
-auto
-== auto.
 
 Tutorial
 == Tutorial

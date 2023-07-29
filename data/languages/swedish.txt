@@ -687,7 +687,7 @@ Personal best:
 Show DDNet map finishes in server browser
 == Visa DDNet bana avklarningar i server bläddraren
 
-transmits your player name to info.ddnet.org
+Transmits your player name to info.ddnet.org
 == skickar ditt spel namn till info.ddnet.org
 
 9+ new mentions
@@ -729,7 +729,7 @@ Welcome to DDNet
 Use high DPI
 == Använd hög DPI
 
-may cause delay
+May cause delay
 == kan orsaka fördröjning
 
 AntiPing
@@ -1082,7 +1082,7 @@ Race
 == Race
 
 Auto
-== Auto
+== 
 
 Replay
 == Repris
@@ -1549,16 +1549,13 @@ Allows maps to render with more detail
 Renderer
 == 
 
-default
+Default
 == 
 
-custom
+Custom
 == 
 
 Graphics card
-== 
-
-auto
 == 
 
 Appearance

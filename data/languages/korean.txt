@@ -482,8 +482,6 @@ Yes
 You must restart the game for all settings to take effect.
 == 설정을 적용하기 위해서 게임을 재시작해야 합니다.
 
-##### needs translation #####
-
 Game paused
 == 게임 일시정지
 
@@ -688,7 +686,7 @@ Video name:
 Show DDNet map finishes in server browser
 == DDNet 맵 완주를 서버 브라우저에 표시
 
-transmits your player name to info.ddnet.org
+Transmits your player name to info.ddnet.org
 == info.ddnet.org에 당신의 닉네임을 전송함
 
 Theme
@@ -916,7 +914,7 @@ Windowed fullscreen
 Desktop fullscreen
 == 데스크탑 전체화면
 
-may cause delay
+May cause delay
 == 딜레이 현상 발생 가능
 
 Screen
@@ -1259,14 +1257,11 @@ CHN
 Renderer
 == 렌더러
 
-default
+Default
 == 기본
 
-custom
+Custom
 == 커스텀
-
-auto
-== 자동
 
 Tutorial
 == 튜토리얼

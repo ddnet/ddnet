@@ -487,8 +487,6 @@ Yes
 You must restart the game for all settings to take effect.
 == Du må starte spillet på nytt før alle endringene tar effekt.
 
-##### needs translation #####
-
 New name:
 == Nytt navn:
 
@@ -648,7 +646,7 @@ Video name:
 Show DDNet map finishes in server browser
 == Vis fullførte DDNet-baner i serverlisten
 
-transmits your player name to info.ddnet.org
+Transmits your player name to info.ddnet.org
 == sender spillnavnet ditt til info.ddnet.org
 
 Search
@@ -831,7 +829,7 @@ Show entities
 Show HUD
 == Vis HUD
 
-may cause delay
+May cause delay
 == kan gi forsinkelse
 
 Screen
@@ -1519,16 +1517,13 @@ Allows maps to render with more detail
 Renderer
 == 
 
-default
+Default
 == 
 
-custom
+Custom
 == 
 
 Graphics card
-== 
-
-auto
 == 
 
 Appearance

@@ -851,7 +851,7 @@ Friend message
 Fat skins (DDFat)
 == Skins Fat (DDFat)
 
-may cause delay
+May cause delay
 == pode causar atrasos
 
 Unfinished map
@@ -884,7 +884,7 @@ Date
 Show DDNet map finishes in server browser
 == Mostrar finalizações de mapas do DDNet no navegador do servidor
 
-transmits your player name to info.ddnet.org
+Transmits your player name to info.ddnet.org
 == transmite seu nome de jogador para info.ddnet.org
 
 Reload
@@ -1263,14 +1263,11 @@ Windowed fullscreen
 Renderer
 == Renderizador
 
-default
+Default
 == padrão
 
-custom
+Custom
 == personalizado
-
-auto
-== auto
 
 Run on join
 == Executar ao entrar

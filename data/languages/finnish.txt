@@ -673,7 +673,7 @@ Video name:
 Show DDNet map finishes in server browser
 == Näytä DDNet kenttäläpäisyt palvelinselaimessa
 
-transmits your player name to info.ddnet.org
+Transmits your player name to info.ddnet.org
 == lähettää nimimerkkisi osoitteeseen info.ddnet.org
 
 Theme
@@ -889,7 +889,7 @@ Windowed borderless
 Desktop fullscreen
 == Koko näyttö
 
-may cause delay
+May cause delay
 == saattaa aiheuttaa viivettä
 
 Screen
@@ -1487,16 +1487,16 @@ Allows maps to render with more detail
 Renderer
 == 
 
-default
+Default
 == 
 
-custom
+Custom
 == 
 
 Graphics card
 == 
 
-auto
+Auto
 == 
 
 Enable long pain sound (used when shooting in freeze)
@@ -1692,9 +1692,6 @@ Loading race demo files
 == 
 
 Super
-== 
-
-Auto
 == 
 
 Loading sound files

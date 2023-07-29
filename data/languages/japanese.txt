@@ -482,8 +482,6 @@ Yes
 You must restart the game for all settings to take effect.
 == 設定を反映するためにはゲームの再起動が必要です。
 
-##### needs translation #####
-
 New name:
 == 新しいファイル名:
 
@@ -670,7 +668,7 @@ Video name:
 Show DDNet map finishes in server browser
 == サーバー・ブラウザーで完成した DDNet マップを表示する
 
-transmits your player name to info.ddnet.org
+Transmits your player name to info.ddnet.org
 == ハンドルネームを info.ddnet.org に送信します
 
 Theme
@@ -895,7 +893,7 @@ Desktop fullscreen
 Fullscreen
 == 独占フルスクリーン
 
-may cause delay
+May cause delay
 == 遅延する可能性あり
 
 Screen
@@ -1535,16 +1533,13 @@ Allows maps to render with more detail
 Renderer
 == 
 
-default
+Default
 == 
 
-custom
+Custom
 == 
 
 Graphics card
-== 
-
-auto
 == 
 
 Appearance

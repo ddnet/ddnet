@@ -489,8 +489,6 @@ Yes
 You must restart the game for all settings to take effect.
 == Uruchom ponownie grę, aby użyć nowych ustawień.
 
-#####
-
 Demo
 == Demo
 
@@ -983,7 +981,7 @@ Dummy copy
 Statboard
 == Tabela wyników
 
-may cause delay
+May cause delay
 == może spowodować opóźnienie
 
 Date
@@ -1013,7 +1011,7 @@ Please enter your nickname below.
 Show DDNet map finishes in server browser
 == Pokazuj ukończone mapy DDNet w wyszukiwarce
 
-transmits your player name to info.ddnet.org
+Transmits your player name to info.ddnet.org
 == przenosi twój nick do info.ddnet.org
 
 Indicate map finish
@@ -1029,7 +1027,7 @@ Race
 == Wyścig
 
 Auto
-== Auto
+== Automatyczny
 
 Replay
 == Powtórka
@@ -1230,14 +1228,11 @@ Allows maps to render with more detail
 Renderer
 == Technologia renderowania
 
-default
+Default
 == domyślny
 
-custom
+Custom
 == niestandardowy
-
-auto
-== automatyczny
 
 Kill Messages
 == Wiadomości o zabiciu

@@ -783,8 +783,6 @@ Fat skins (DDFat)
 Ratio
 == K/D
 
-##### Ratio的算法是击杀除以死亡次数 #####
-
 AntiPing
 == 延迟补偿（AntiPing）
 
@@ -845,12 +843,8 @@ Suicides
 Net
 == 净击杀
 
-##### Net的算法是杀人+1被杀-1 #####
-
 FPM
 == 击杀/分
-
-##### 得分速度就是效率FPM #####
 
 Spree
 == 连杀
@@ -867,7 +861,7 @@ Best
 Exclude
 == 排除
 
-may cause delay
+May cause delay
 == 可能会产生延迟
 
 Unfinished map
@@ -897,7 +891,7 @@ Date
 Show DDNet map finishes in server browser
 == 在服务器浏览器中显示已完成的 DDNet 地图
 
-transmits your player name to info.ddnet.org
+Transmits your player name to info.ddnet.org
 == 将会发送你的玩家昵称到 info.ddnet.org
 
 Reload
@@ -1282,14 +1276,11 @@ Skip Tutorial
 Renderer
 == 渲染设置
 
-default
+Default
 == 默认
 
-custom
+Custom
 == 自定义
-
-auto
-== 自动
 
 Tutorial
 == 教学

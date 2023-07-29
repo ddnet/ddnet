@@ -1608,7 +1608,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 
 	MainView.HSplitTop(2.0f, nullptr, &MainView);
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	str_format(aBuf, sizeof(aBuf), "%s (%s)", Localize("V-Sync"), Localize("may cause delay"));
+	str_format(aBuf, sizeof(aBuf), "%s (%s)", Localize("V-Sync"), Localize("May cause delay"));
 	if(DoButton_CheckBox(&g_Config.m_GfxVsync, aBuf, g_Config.m_GfxVsync, &Button))
 	{
 		Client()->ToggleWindowVSync();
@@ -1616,7 +1616,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 
 	bool MultiSamplingChanged = false;
 	MainView.HSplitTop(20.0f, &Button, &MainView);
-	str_format(aBuf, sizeof(aBuf), "%s (%s)", Localize("FSAA samples"), Localize("may cause delay"));
+	str_format(aBuf, sizeof(aBuf), "%s (%s)", Localize("FSAA samples"), Localize("May cause delay"));
 	int GfxFsaaSamples_MouseButton = DoButton_CheckBox_Number(&g_Config.m_GfxFsaaSamples, aBuf, g_Config.m_GfxFsaaSamples, &Button);
 	int CurFSAA = g_Config.m_GfxFsaaSamples == 0 ? 1 : g_Config.m_GfxFsaaSamples;
 	if(GfxFsaaSamples_MouseButton == 1) // inc
@@ -1737,7 +1737,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 				if(Info.m_Found)
 				{
 					bool IsDefault = IsInfoDefault(Info);
-					str_format(aTmpBackendName, sizeof(aTmpBackendName), "%s (%d.%d.%d)%s%s", Info.m_pBackendName, Info.m_Major, Info.m_Minor, Info.m_Patch, IsDefault ? " - " : "", IsDefault ? Localize("default") : "");
+					str_format(aTmpBackendName, sizeof(aTmpBackendName), "%s (%d.%d.%d)%s%s", Info.m_pBackendName, Info.m_Major, Info.m_Minor, Info.m_Patch, IsDefault ? " - " : "", IsDefault ? Localize("Default") : "");
 					s_vBackendIDNames[CurCounter] = aTmpBackendName;
 					s_vpBackendIDNamesCStr[CurCounter] = s_vBackendIDNames[CurCounter].c_str();
 					if(str_comp_nocase(Info.m_pBackendName, g_Config.m_GfxBackend) == 0 && g_Config.m_GfxGLMajor == Info.m_Major && g_Config.m_GfxGLMinor == Info.m_Minor && g_Config.m_GfxGLPatch == Info.m_Patch)
@@ -1759,7 +1759,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		else
 		{
 			// custom selected one
-			str_format(aTmpBackendName, sizeof(aTmpBackendName), "%s (%s %d.%d.%d)", Localize("custom"), g_Config.m_GfxBackend, g_Config.m_GfxGLMajor, g_Config.m_GfxGLMinor, g_Config.m_GfxGLPatch);
+			str_format(aTmpBackendName, sizeof(aTmpBackendName), "%s (%s %d.%d.%d)", Localize("Custom"), g_Config.m_GfxBackend, g_Config.m_GfxGLMajor, g_Config.m_GfxGLMinor, g_Config.m_GfxGLPatch);
 			s_vBackendIDNames[CurCounter] = aTmpBackendName;
 			s_vpBackendIDNamesCStr[CurCounter] = s_vBackendIDNames[CurCounter].c_str();
 			OldSelectedBackend = CurCounter;
@@ -1813,7 +1813,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		{
 			if(i == 0)
 			{
-				str_format(aCurDeviceName, sizeof(aCurDeviceName), "%s (%s)", Localize("auto"), GPUList.m_AutoGPU.m_aName);
+				str_format(aCurDeviceName, sizeof(aCurDeviceName), "%s (%s)", Localize("Auto"), GPUList.m_AutoGPU.m_aName);
 				s_vpGPUIDNames[i] = aCurDeviceName;
 				if(str_comp("auto", g_Config.m_GfxGPUName) == 0)
 				{

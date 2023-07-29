@@ -137,6 +137,7 @@ Favorite
 
 Favorites
 == Preferits
+
 Feet
 == Peus
 
@@ -822,7 +823,7 @@ Fat skins (DDFat)
 Show names in chat in team colors
 == Mostrar els noms en el xat amb colors
 
-may cause delay
+May cause delay
 == pot causar retràs
 
 Unfinished map
@@ -855,7 +856,7 @@ Date
 Show DDNet map finishes in server browser
 == Mostrar finalitzacions de mapes en el buscador de servidors
 
-transmits your player name to info.ddnet.org
+Transmits your player name to info.ddnet.org
 == retransmet el teu nom de jugar a info.ddnet.org
 
 Reload
@@ -1234,14 +1235,11 @@ Windowed fullscreen
 Renderer
 == Renderitzador
 
-default
+Default
 == predeterminat
 
-custom
+Custom
 == personalitzat
-
-auto
-== auto
 
 Run on join
 == Córrer en unir-se

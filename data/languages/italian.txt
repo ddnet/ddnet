@@ -490,8 +490,6 @@ Yes
 You must restart the game for all settings to take effect.
 == Devi riavviare il gioco per rendere effettive le modifiche.
 
-##### needs translation #####
-
 New name:
 == Nuovo nome:
 
@@ -549,8 +547,6 @@ Your skin
 Size:
 == Dimensione:
 
-##### translated strings #####
-
 Reset to defaults
 == Reimposta predefinito
 
@@ -585,16 +581,16 @@ Type:
 == Tipo:
 
 DDNet %s is out!
-== DDNet %s è uscito!
+== È uscito DDNet %s!
 
 %d new mentions
 == %d nuove menzioni
 
 Disconnect Dummy
-== Disconnetti Dummy
+== Disconnetti il dummy
 
 Are you sure that you want to disconnect your dummy?
-== Sei sicuro di voler disconnettere il tuo dummy?
+== Sei sicuro di voler scollegare il tuo dummy?
 
 Filter connecting players
 == Filtra i giocatori in conness.
@@ -605,35 +601,20 @@ Filter connecting players
 Markers
 == Marcatrici
 
-Disconnect Dummy
-== Disconnetti il dummy
-
 Length
 == Lunghezza
 
 Fetch Info
 == Recuperare informazioni
 
-Length
-== Lunghezza
-
 Downloading %s:
-== Scaricando %s:
+== Scarica %s
 
 Update failed! Check log...
 == Aggiornamento non riuscito! Controlla registro...
 
-Filter connecting players
-== Filtra i giocatori in conness.
-
 Time
 == Tempo
-
-Downloading %s:
-== Scarica %s
-
-Are you sure that you want to disconnect your dummy?
-== Sei sicuro di voler scollegare il tuo dummy?
 
 1 new mention
 == 1 nuova menzione
@@ -719,7 +700,7 @@ Video name:
 Show DDNet map finishes in server browser
 == Mostra le mappe finite in DDNet nel tuo browser dei server
 
-transmits your player name to info.ddnet.org
+Transmits your player name to info.ddnet.org
 == Trasmette il tuo nome da giocatore a info.ddnet.org
 
 Theme
@@ -899,7 +880,7 @@ Show entities
 Show HUD
 == Mostra interf. utente
 
-may cause delay
+May cause delay
 == Può esserci ritardo
 
 Screen
@@ -1088,7 +1069,6 @@ Learn
 https://wiki.ddnet.org/
 == https://wiki.ddnet.org/
 
-
 Website
 == Sito web
 
@@ -1110,9 +1090,6 @@ Editor
 [Start menu]
 Play
 == Gioca
-
-DDNet %s is out!
-== È uscito DDNet %s!
 
 Restart
 == Ricomincia
@@ -1155,15 +1132,6 @@ Best
 
 Grabs
 == Agganci
-
-1 new mention
-== 1 nuova menzione
-
-%d new mentions
-== %d nuove menzioni
-
-9+ new mentions
-== +9 nuove menzioni
 
 [Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
@@ -1546,16 +1514,13 @@ Allows maps to render with more detail
 Renderer
 == 
 
-default
+Default
 == 
 
-custom
+Custom
 == 
 
 Graphics card
-== 
-
-auto
 == 
 
 Appearance

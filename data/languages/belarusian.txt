@@ -769,7 +769,7 @@ Skip Tutorial
 Show DDNet map finishes in server browser
 == Пазначаць пройдзеныя карты ў браўзэры
 
-transmits your player name to info.ddnet.org
+Transmits your player name to info.ddnet.org
 == перадае ваша імя гульца на info.ddnet.org
 
 Theme
@@ -1172,7 +1172,7 @@ Windowed fullscreen
 Desktop fullscreen
 == Поўнаэкранны
 
-may cause delay
+May cause delay
 == можа выклікаць затрымку
 
 Screen
@@ -1187,14 +1187,14 @@ Use high DPI
 Renderer
 == Рэндэрэр
 
-default
+Default
 == па змаўчанні
 
-custom
+Custom
 == карыстацкі
 
-auto
-== аўта
+Auto
+== Аўта
 
 Enable game sounds
 == Уключыць гукі гульні
@@ -1602,9 +1602,6 @@ Manual
 Race
 == Забег
 
-Auto
-== Аўта
-
 Replay
 == Запіс
 
@@ -1651,7 +1648,7 @@ Grabs
 == 9+ згадак
 
 A demo with this name already exists
-== Дэма з такой назвай ужо існуе 
+== Дэма з такой назвай ужо існуе
 
 No server selected
 == Сервер не абраны

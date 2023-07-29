@@ -484,8 +484,6 @@ Yes
 You must restart the game for all settings to take effect.
 == Změna nastavení se projeví až po restartu hry.
 
-##### needs translation #####
-
 New name:
 == Nové jméno:
 
@@ -819,7 +817,7 @@ Show entities
 Show HUD
 == Zobrazit HUD
 
-may cause delay
+May cause delay
 == může způsobit zpoždění
 
 Screen
@@ -1047,7 +1045,7 @@ Checking for existing player with your name
 Speed
 == Rychlost
 
-transmits your player name to info.ddnet.org
+Transmits your player name to info.ddnet.org
 == přenese vaše jméno hráče na info.ddnet.org
 
 Theme
@@ -1520,16 +1518,13 @@ Allows maps to render with more detail
 Renderer
 == 
 
-default
+Default
 == 
 
-custom
+Custom
 == 
 
 Graphics card
-== 
-
-auto
 == 
 
 Appearance

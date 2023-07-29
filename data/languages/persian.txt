@@ -348,7 +348,7 @@ Browser
 == ﻮﺠﺘﺴﺟ
 
 Ghost
-== ﺡﻭﺭ ﺖﻟﺎﺣ 
+== ﺡﻭﺭ ﺖﻟﺎﺣ
 
 Loading DDNet Client
 == ﺖﻨﯾﺪﯾﺩ ﺖﻨﯾﻼﮐ ﻥﺩﺮﮐ ﻩﺩﺎﻣﺁ ﻝﺎﺣﺭﺩ
@@ -382,6 +382,7 @@ Quit
 
 Are you sure that you want to disconnect?
 == ؟ﯽﻨﮐ ﻝﺎﺼﺗﺍ ﻊﻄﻗ ﯼﺍﻮﺨﯿﻣ ﯽﻨﺌﻌﻤﻄﻣ
+
 Disconnect Dummy
 == ﯽﻣﺍﺩ ﻥﺩﺮﮐ ﻊﻄﻗ
 
@@ -978,7 +979,7 @@ Join Tutorial Server
 Skip Tutorial
 == ﺵﺯﻮﻣﺁ ﺯﺍ ﻥﺩﺮﮐ ﺭﺬﮔ
 
-transmits your player name to info.ddnet.org
+Transmits your player name to info.ddnet.org
 == ﺪﻨﮐ ﯽﻣ ﻞﻘﺘﻨﻣ info.ddnet.org ﻪﺑ ﺍﺭ ﺩﻮﺧ ﺭﺎﻌﺘﺴﻣ ﻡﺎﻧ
 
 The server is running a non-standard tuning on a pure game type.
@@ -1039,7 +1040,7 @@ Speed up the demo
 == ﻮﻣﺩ ﺖﻋﺮﺳ ﻥﺩﺮﮐ ﺩﺎﯾﺯ
 
 Export cut as a separate demo
-==  ﻪﻧﺎﮔﺍﺪﺟ ﻮﻣﺩ ﻥﺍﻮﻨﻋ ﻪﺑ ﺵﺮﺑ ﻥﺩﺮﮐ ﺝﺭﺎﺧ 
+==  ﻪﻧﺎﮔﺍﺪﺟ ﻮﻣﺩ ﻥﺍﻮﻨﻋ ﻪﺑ ﺵﺮﺑ ﻥﺩﺮﮐ ﺝﺭﺎﺧ
 
 Go back one marker
 == ﺩﺮﮔﺮﺑ ﺐﻘﻋ ﻪﺑ ﺮﮕﻧﺎﺸﻧ ﮏﯾ
@@ -1205,7 +1206,7 @@ Controller
 == ﺮﻟﺮﺘﻨﮐ
 
 Reset controls
-== ﺎﻫ ﻝﺮﺘﻨﮐ ﻥﺩﺮﮐ ﺖﺴﯾﺭ 
+== ﺎﻫ ﻝﺮﺘﻨﮐ ﻥﺩﺮﮐ ﺖﺴﯾﺭ
 
 Are you sure that you want to reset the controls to their defaults?
 == ؟ﺪﯿﻧﺍﺩﺮﮔﺯﺎﺑ ﺽﺮﻓ ﺶﯿﭘ ﺖﻟﺎﺣ ﻪﺑ ﺍﺭ ﺎﻫ ﻝﺮﺘﻨﮐ ﺪﯿﻫﺍﻮﺧ ﯽﻣ ﻪﮐ ﺪﯿﺘﺴﻫ ﻦﺌﻤﻄﻣ ﺎﯾﺁ
@@ -1225,7 +1226,7 @@ Windowed fullscreen
 V-Sync
 == V-Sync
 
-may cause delay
+May cause delay
 == ﺩﻮﺷ ﺮﯿﺧﺎﺗ ﺚﻋﺎﺑ ﺖﺳﺍ ﻦﮑﻤﻣ
 
 FSAA samples
@@ -1240,13 +1241,13 @@ Use high DPI
 Renderer
 == ﻩﺪﻨﻨﮐ ﺭﺪﻧﺭ
 
-default
+Default
 == ﺽﺮﻓ ﺶﯿﭘ
 
-custom
+Custom
 == ﯽﺷﺭﺎﻔﺳ
 
-auto
+Auto
 == ﺭﺎﮐﺩﻮﺧ
 
 Enable long pain sound (used when shooting in freeze)
@@ -1575,9 +1576,6 @@ Manual
 
 Race
 == ﻪﻘﺑﺎﺴﻣ
-
-Auto
-== ﺭﺎﮐﺩﻮﺧ
 
 Loading sound files
 == ﯽﺗﻮﺻ ﯼﺎﻫ ﻞﯾﺎﻓ ﻥﺩﺮﮐ ﻩﺩﺎﻣﺁ ﻝﺎﺣ ﺭﺩ

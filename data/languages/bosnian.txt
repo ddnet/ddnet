@@ -488,8 +488,6 @@ Yes
 You must restart the game for all settings to take effect.
 == Morate ponovo pokrenuti igru da bi sve postavke bile primijenjene.
 
-##### needs translation #####
-
 New name:
 == Novo ime:
 
@@ -652,7 +650,7 @@ Video name:
 Show DDNet map finishes in server browser
 == Prikaži završene DDNet mape u pretraživaču za servere
 
-transmits your player name to info.ddnet.org
+Transmits your player name to info.ddnet.org
 == prenosi tvoje ime na info.ddnet.org
 
 Search
@@ -826,7 +824,7 @@ Show entities
 Show HUD
 == Prikaži HUD
 
-may cause delay
+May cause delay
 == može prouzrokovati kašnjenje
 
 Screen
@@ -1432,16 +1430,16 @@ Allows maps to render with more detail
 Renderer
 == 
 
-default
+Default
 == 
 
-custom
+Custom
 == 
 
 Graphics card
 == 
 
-auto
+Auto
 == 
 
 Game sound volume
@@ -1689,9 +1687,6 @@ Manual
 == 
 
 Race
-== 
-
-Auto
 == 
 
 Replay

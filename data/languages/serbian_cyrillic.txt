@@ -484,8 +484,6 @@ Yes
 You must restart the game for all settings to take effect.
 == Морате поново покренути игру да би сва подешавања била примењена
 
-##### needs translation #####
-
 Demo
 == Снимак
 
@@ -675,7 +673,7 @@ Video name:
 Show DDNet map finishes in server browser
 == Прикажи завршетка DDNet мапе у прегледачу сервера
 
-transmits your player name to info.ddnet.org
+Transmits your player name to info.ddnet.org
 == преноси име вашег играча на info.ddnet.org
 
 Theme
@@ -865,7 +863,7 @@ Show entities
 Show HUD
 == Прикажи HUD
 
-may cause delay
+May cause delay
 == може проузроковати кашњење
 
 Use high DPI
@@ -1317,14 +1315,11 @@ Allows maps to render with more detail
 Renderer
 == Рендерер
 
-default
+Default
 == базично
 
-custom
+Custom
 == своје
-
-auto
-== ауто
 
 Game sound volume
 == Игрина јачина звука
@@ -1423,7 +1418,7 @@ Highlight Color
 == Истакнута Боја
 
 When you cross the start line, show a ghost tee replicating the movements of your best time
-== Када кренеш да се тркаш, прикажи твог најбржег духа 
+== Када кренеш да се тркаш, прикажи твог најбржег духа
 
 Opacity
 == Провидност

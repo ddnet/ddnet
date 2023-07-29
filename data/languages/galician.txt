@@ -656,7 +656,7 @@ Video name:
 Show DDNet map finishes in server browser
 == Marcar os mapas DDNet acabados no navegador de servidores
 
-transmits your player name to info.ddnet.org
+Transmits your player name to info.ddnet.org
 == transmite o teu nome de xogador a info.ddnet.org
 
 Search
@@ -839,7 +839,7 @@ Show entities
 Show HUD
 == Mostrar HUD
 
-may cause delay
+May cause delay
 == pode causar atraso
 
 Screen
@@ -1266,17 +1266,14 @@ Windowed fullscreen
 Renderer
 == Renderizador
 
-default
+Default
 == por defecto
 
-custom
+Custom
 == personalizado
 
 Graphics cards
 == Tarxetas de vídeo
-
-auto
-== auto.
 
 Tutorial
 == Titorial

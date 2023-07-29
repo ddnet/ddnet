@@ -488,8 +488,6 @@ Yes
 You must restart the game for all settings to take effect.
 == Morate ponovo pokrenuti igru da bi sva podešavanja bila primenjena
 
-##### needs translation #####
-
 Demo
 == Snimak
 
@@ -866,7 +864,7 @@ Show entities
 Show HUD
 == Prikaži HUD
 
-may cause delay
+May cause delay
 == može prouzrokovati kašnjenje
 
 Use high DPI
@@ -1318,14 +1316,11 @@ Allows maps to render with more detail
 Renderer
 == Renderer
 
-default
+Default
 == bazično
 
-custom
+Custom
 == svoje
-
-auto
-== auto
 
 Game sound volume
 == Igrina jačina zvuka
@@ -1424,7 +1419,7 @@ Highlight Color
 == Istaknuta Boja
 
 When you cross the start line, show a ghost tee replicating the movements of your best time
-== Kada kreneš da se trkaš, prikaži tvog najbržeg duha 
+== Kada kreneš da se trkaš, prikaži tvog najbržeg duha
 
 Opacity
 == Providnost
@@ -1534,7 +1529,7 @@ A demo with this name already exists
 File '%s' already exists, do you want to overwrite it?
 == 
 
-transmits your player name to info.ddnet.org
+Transmits your player name to info.ddnet.org
 == 
 
 Copy info

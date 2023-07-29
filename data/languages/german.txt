@@ -869,7 +869,7 @@ Unfinished map
 Welcome to DDNet
 == Willkommen bei DDNet
 
-may cause delay
+May cause delay
 == kann verlangsamen
 
 Indicate map finish
@@ -1013,7 +1013,7 @@ Default length
 Pause
 == Pause
 
-transmits your player name to info.ddnet.org
+Transmits your player name to info.ddnet.org
 == überträgt deinen Spielernamen an info.ddnet.org
 
 Server best:
@@ -1305,14 +1305,11 @@ Skip Tutorial
 Renderer
 == Renderer
 
-default
+Default
 == Standard
 
-custom
+Custom
 == eigene
-
-auto
-== Auto
 
 Tutorial
 == Tutorial

@@ -829,7 +829,7 @@ Friend message
 Fat skins (DDFat)
 == Nagy karakterek (DDFat)
 
-may cause delay
+May cause delay
 == késleltetést okozhat
 
 Unfinished map
@@ -862,7 +862,7 @@ Date
 Show DDNet map finishes in server browser
 == Mutassa a befejezett pályákat a keresőben
 
-transmits your player name to info.ddnet.org
+Transmits your player name to info.ddnet.org
 == továbbítja a játékosnevedet az info.ddnet.org oldalra
 
 Reload
@@ -1256,14 +1256,11 @@ Allows maps to render with more detail
 Renderer
 == Renderelő
 
-default
+Default
 == alapértelmezett
 
-custom
+Custom
 == egyedi
-
-auto
-== automatikus
 
 When you cross the start line, show a ghost tee replicating the movements of your best time
 == Amikor elkezdesz egy versenyt, rekordjaid alapján replikál egy szellemet, ami a legjobb időd alapján mozdul.

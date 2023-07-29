@@ -439,11 +439,11 @@ Dummy
 Screen
 == Ekrano
 
-default
-== defaŭlta
+Default
+== Defaŭlta
 
-auto
-== aŭtomata
+Auto
+== Aŭtomata
 
 Language
 == Lingvo
@@ -734,7 +734,7 @@ Video name:
 Show DDNet map finishes in server browser
 == 
 
-transmits your player name to info.ddnet.org
+Transmits your player name to info.ddnet.org
 == 
 
 Error loading demo
@@ -1262,7 +1262,7 @@ Fullscreen
 V-Sync
 == 
 
-may cause delay
+May cause delay
 == 
 
 FSAA samples
@@ -1283,7 +1283,7 @@ UI Color
 Renderer
 == 
 
-custom
+Custom
 == 
 
 Graphics card
@@ -1650,9 +1650,6 @@ Manual
 == 
 
 Race
-== 
-
-Auto
 == 
 
 Replay

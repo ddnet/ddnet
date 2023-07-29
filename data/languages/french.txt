@@ -509,8 +509,6 @@ Yes
 You must restart the game for all settings to take effect.
 == Les changements prendront effet au prochain redémarrage.
 
-##### needs translation #####
-
 New name:
 == Nouveau nom :
 
@@ -895,7 +893,7 @@ Switch weapon when out of ammo
 Save the best demo of each race
 == Sauvegarder la meilleure démo de chaque course
 
-may cause delay
+May cause delay
 == Peut causer du délai
 
 Show others
@@ -1036,7 +1034,7 @@ Please enter your nickname below.
 Show DDNet map finishes in server browser
 == Afficher les cartes de DDNet terminées dans le navigateur
 
-transmits your player name to info.ddnet.org
+Transmits your player name to info.ddnet.org
 == transmet votre pseudonyme à info.ddnet.org
 
 Saving ddnet-settings.cfg failed
@@ -1167,7 +1165,7 @@ Race
 == Race
 
 Auto
-== Auto
+== Automatique
 
 Replay
 == Replay
@@ -1280,14 +1278,11 @@ Allows maps to render with more detail
 Renderer
 == Moteur de rendu graphique
 
-default
+Default
 == défaut
 
-custom
+Custom
 == Personnalisé
-
-auto
-== Automatique
 
 When you cross the start line, show a ghost tee replicating the movements of your best time
 == Lorsque vous franchissez la ligne de départ, montrez un fantôme reproduisant les mouvements de votre meilleur temps
@@ -1578,7 +1573,7 @@ File '%s' already exists, do you want to overwrite it?
 == Le fichier '%s' existe déjà, voulez-vous l'écraser ?
 
 Are you sure that you want to remove the player '%s' from your friends list?
-== Êtes-vous sûrs de vouloir retirer le joueur '%s' de votre liste d'amis ? 
+== Êtes-vous sûrs de vouloir retirer le joueur '%s' de votre liste d'amis ?
 
 Are you sure that you want to remove the clan '%s' from your friends list?
 == Êtes-vous sûrs de vouloir retirer le clan '%s' de votre liste d'amis ?
@@ -1647,7 +1642,7 @@ Door Laser Inner Color
 == Couleur porte laser (intérieur)
 
 Freeze Laser Outline Color
-== Couleur laser gelant (contour) 
+== Couleur laser gelant (contour)
 
 Freeze Laser Inner Color
 == Couleur laser gelant (intérieur)

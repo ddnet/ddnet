@@ -825,7 +825,7 @@ Unfinished map
 Welcome to DDNet
 == ﻲﻓ ﻚﺑ ﺎﺒﺣﺮﻣ DDNet
 
-may cause delay
+May cause delay
 == ﺮﻴﺧﺄﺗ ﺐﺒﺴﻳ
 
 Indicate map finish
@@ -957,7 +957,7 @@ Default length
 Pause
 == ﺔﺒﻗﺍﺮﻣ
 
-transmits your player name to info.ddnet.org
+Transmits your player name to info.ddnet.org
 == ﻰﻟﺇ ﻚﺑ ﺹﺎﺨﻟﺍ ﺐﻋﻼﻟﺍ ﻢﺳﺍ ﻞﻘﻨﻳ info.ddnet.org
 
 Server best:
@@ -1510,16 +1510,13 @@ Allows maps to render with more detail
 Renderer
 == 
 
-default
+Default
 == 
 
-custom
+Custom
 == 
 
 Graphics card
-== 
-
-auto
 == 
 
 Appearance

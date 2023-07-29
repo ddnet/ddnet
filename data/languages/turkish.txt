@@ -547,8 +547,6 @@ Your skin
 Size:
 == Boyut:
 
-##### translated strings #####
-
 Reset to defaults
 == Varsayılanlara getir
 
@@ -651,7 +649,7 @@ Video name:
 Show DDNet map finishes in server browser
 == Tamamlanan DDNet haritalarını sunucu listesinde göster
 
-transmits your player name to info.ddnet.org
+Transmits your player name to info.ddnet.org
 == oyuncu adını info.ddnet.org ile paylaşır
 
 Search
@@ -837,7 +835,7 @@ Show entities
 Show HUD
 == Arayüzü göster
 
-may cause delay
+May cause delay
 == gecikmelere sebep olabilir
 
 Screen
@@ -1470,16 +1468,13 @@ Allows maps to render with more detail
 Renderer
 == 
 
-default
+Default
 == 
 
-custom
+Custom
 == 
 
 Graphics card
-== 
-
-auto
 == 
 
 Game sound volume

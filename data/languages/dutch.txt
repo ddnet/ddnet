@@ -498,8 +498,6 @@ Yes
 You must restart the game for all settings to take effect.
 == Je moet het spel herstarten voordat de veranderingen effect hebben.
 
-##### needs translation #####
-
 New name:
 == Nieuwe naam:
 
@@ -659,7 +657,7 @@ Video name:
 Show DDNet map finishes in server browser
 == Laat gefinishte maps zien in de verkenner
 
-transmits your player name to info.ddnet.org
+Transmits your player name to info.ddnet.org
 == verzendt je speler naam naar info.ddnet.org
 
 Search
@@ -724,6 +722,7 @@ Markers
 
 Length
 == Lengte
+
 Date
 == Datum
 
@@ -841,7 +840,7 @@ Show entities
 Show HUD
 == Laat HUD zien
 
-may cause delay
+May cause delay
 == kan voor vertraging zorgen
 
 Screen
@@ -1174,14 +1173,11 @@ Allows maps to render with more detail
 Renderer
 == Renderer
 
-default
+Default
 == standaard
 
-custom
+Custom
 == custom
-
-auto
-== Automatisch
 
 Game sound volume
 == Game geluid volume

@@ -825,7 +825,7 @@ Speed
 Video name:
 == Nome do vídeo:
 
-transmits your player name to info.ddnet.org
+Transmits your player name to info.ddnet.org
 == transmite o teu nome de jogador para info.ddnet.org
 
 Theme
@@ -1410,7 +1410,7 @@ Cancel
 Windowed fullscreen
 == 
 
-may cause delay
+May cause delay
 == 
 
 Allows maps to render with more detail
@@ -1422,16 +1422,16 @@ Use high DPI
 Renderer
 == 
 
-default
+Default
 == 
 
-custom
+Custom
 == 
 
 Graphics card
 == 
 
-auto
+Auto
 == 
 
 Enable long pain sound (used when shooting in freeze)
@@ -1670,9 +1670,6 @@ Manual
 == 
 
 Race
-== 
-
-Auto
 == 
 
 Replay

@@ -482,8 +482,6 @@ Yes
 You must restart the game for all settings to take effect.
 == Трябва да рестартираш играта за да поемат ефект новите настройки.
 
-##### needs translation #####
-
 New name:
 == Ново име:
 
@@ -769,7 +767,7 @@ Skip Tutorial
 Show DDNet map finishes in server browser
 == 
 
-transmits your player name to info.ddnet.org
+Transmits your player name to info.ddnet.org
 == 
 
 Theme
@@ -1231,7 +1229,7 @@ Desktop fullscreen
 Screen
 == 
 
-may cause delay
+May cause delay
 == 
 
 Allows maps to render with more detail
@@ -1243,16 +1241,16 @@ Use high DPI
 Renderer
 == 
 
-default
+Default
 == 
 
-custom
+Custom
 == 
 
 Graphics card
 == 
 
-auto
+Auto
 == 
 
 Enable game sounds
@@ -1656,9 +1654,6 @@ Manual
 == 
 
 Race
-== 
-
-Auto
 == 
 
 Replay
