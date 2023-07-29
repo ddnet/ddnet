@@ -6030,7 +6030,8 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		OP_DRAG_POINT,
 		OP_DRAG_POINT_X,
 		OP_DRAG_POINT_Y,
-		OP_CONTEXT_MENU
+		OP_CONTEXT_MENU,
+		OP_BOX_SELECT
 	};
 	static int s_Operation = OP_NONE;
 	static std::vector<float> s_vAccurateDragValuesX = {};
@@ -6304,22 +6305,33 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		if(UI()->HotItem() == &s_EnvelopeEditorID)
 		{
 			// do stuff
-			if(UI()->MouseButton(0) && Input()->MouseDoubleClick())
+			if(UI()->MouseButton(0))
 			{
-				// add point
-				float Time = ScreenToEnvelopeX(View, UI()->MouseX());
-				ColorRGBA Channels;
-				if(in_range(Time, 0.0f, pEnvelope->EndTime()))
-					pEnvelope->Eval(Time, Channels);
-				else
-					Channels = {0, 0, 0, 0};
-				pEnvelope->AddPoint(f2fxt(Time),
-					f2fx(Channels.r), f2fx(Channels.g),
-					f2fx(Channels.b), f2fx(Channels.a));
+				if(Input()->MouseDoubleClick())
+				{
+					// add point
+					float Time = ScreenToEnvelopeX(View, UI()->MouseX());
+					ColorRGBA Channels;
+					if(in_range(Time, 0.0f, pEnvelope->EndTime()))
+						pEnvelope->Eval(Time, Channels);
+					else
+						Channels = {0, 0, 0, 0};
+					pEnvelope->AddPoint(f2fxt(Time),
+						f2fx(Channels.r), f2fx(Channels.g),
+						f2fx(Channels.b), f2fx(Channels.a));
 
-				if(Time < 0)
-					RemoveTimeOffsetEnvelope(pEnvelope);
-				m_Map.OnModify();
+					if(Time < 0)
+						RemoveTimeOffsetEnvelope(pEnvelope);
+					m_Map.OnModify();
+				}
+				else if(s_Operation != OP_BOX_SELECT)
+				{
+					static int s_BoxSelectID = 0;
+					UI()->SetActiveItem(&s_BoxSelectID);
+					s_Operation = OP_BOX_SELECT;
+					s_MouseXStart = UI()->MouseX();
+					s_MouseYStart = UI()->MouseY();
+				}
 			}
 
 			m_ShowEnvelopePreview = SHOWENV_SELECTED;
@@ -6587,7 +6599,8 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		}
 
 		{
-			SetHotEnvelopePoint(View, pEnvelope);
+			if(s_Operation == OP_NONE)
+				SetHotEnvelopePoint(View, pEnvelope);
 
 			UI()->ClipEnable(&View);
 			Graphics()->TextureClear();
@@ -6748,6 +6761,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 										SelectEnvPoint(i, c);
 								}
 
+								s_Operation = OP_NONE;
 								m_Map.OnModify();
 							}
 
@@ -6879,6 +6893,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 									if(s_Operation == OP_SELECT)
 										SelectTangentOutPoint(i, c);
 
+									s_Operation = OP_NONE;
 									m_Map.OnModify();
 								}
 
@@ -7011,6 +7026,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 									if(s_Operation == OP_SELECT)
 										SelectTangentInPoint(i, c);
 
+									s_Operation = OP_NONE;
 									m_Map.OnModify();
 								}
 
@@ -7061,6 +7077,55 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			}
 			Graphics()->QuadsEnd();
 			UI()->ClipDisable();
+		}
+
+		// handle box selection
+		if(s_Operation == OP_BOX_SELECT)
+		{
+			IGraphics::CLineItem aLines[4] = {
+				{s_MouseXStart, s_MouseYStart, UI()->MouseX(), s_MouseYStart},
+				{s_MouseXStart, s_MouseYStart, s_MouseXStart, UI()->MouseY()},
+				{s_MouseXStart, UI()->MouseY(), UI()->MouseX(), UI()->MouseY()},
+				{UI()->MouseX(), s_MouseYStart, UI()->MouseX(), UI()->MouseY()}};
+			UI()->ClipEnable(&View);
+			Graphics()->LinesBegin();
+			Graphics()->LinesDraw(aLines, std::size(aLines));
+			Graphics()->LinesEnd();
+			UI()->ClipDisable();
+
+			if(!UI()->MouseButton(0))
+			{
+				s_Operation = OP_NONE;
+				UI()->SetActiveItem(nullptr);
+
+				float TimeStart = ScreenToEnvelopeX(View, s_MouseXStart);
+				float TimeEnd = ScreenToEnvelopeX(View, UI()->MouseX());
+				float ValueStart = ScreenToEnvelopeY(View, s_MouseYStart);
+				float ValueEnd = ScreenToEnvelopeY(View, UI()->MouseY());
+
+				float TimeMin = minimum(TimeStart, TimeEnd);
+				float TimeMax = maximum(TimeStart, TimeEnd);
+				float ValueMin = minimum(ValueStart, ValueEnd);
+				float ValueMax = maximum(ValueStart, ValueEnd);
+
+				if(!Input()->ShiftIsPressed())
+					DeselectEnvPoints();
+
+				for(int i = 0; i < (int)pEnvelope->m_vPoints.size(); i++)
+				{
+					for(int c = 0; c < CEnvPoint::MAX_CHANNELS; c++)
+					{
+						if(!(s_ActiveChannels & (1 << c)))
+							continue;
+
+						float Time = fxt2f(pEnvelope->m_vPoints[i].m_Time);
+						float Value = fx2f(pEnvelope->m_vPoints[i].m_aValues[c]);
+
+						if(in_range(Time, TimeMin, TimeMax) && in_range(Value, ValueMin, ValueMax))
+							ToggleEnvPoint(i, c);
+					}
+				}
+			}
 		}
 	}
 }
