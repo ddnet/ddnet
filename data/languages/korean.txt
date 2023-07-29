@@ -19,6 +19,27 @@
 
 ##### translated strings #####
 
+%.2f KiB
+== %.2f KiB
+
+%.2f MiB
+== %.2f MiB
+
+%d new mentions
+== %d 건의 새 언급
+
+%d of %d server
+== %d / %d 서버
+
+%d of %d servers
+== %d / %d 서버
+
+%d player
+== %d 플레이어
+
+%d players
+== %d 플레이어
+
 %ds left
 == %d 초 남음
 
@@ -40,8 +61,29 @@
 -Page %d-
 == -페이지 %d-
 
+1 new mention
+== 1 건의 새 언급
+
+9+ new mentions
+== 9+ 건의 새 언급
+
+A Tee
+== Tee 대상
+
+AFR
+== 아프리카
+
+ASI
+== 아시아
+
+AUS
+== 호주
+
 Abort
 == 취소
+
+Activate
+== 활성화
 
 Add
 == 추가
@@ -52,17 +94,92 @@ Add Friend
 Address
 == 주소
 
+Adjust the opacity of entities belonging to other teams, such as tees and nameplates
+== Tee와 이름 표시 등 다른 팀에 속한 엔티티의 불투명도를 조정합니다.
+
+Aim bind
+== 조준 바인드
+
 All
 == 모두
 
+Allows maps to render with more detail
+== 맵의 세부사항을 렌더링합니다.
+
+Alpha
+== 투명도
+
+Angle:
+== 각도
+
+AntiPing
+== 안티 핑
+
+AntiPing: predict grenade paths
+== 안티 핑: 유탄 궤적 예측
+
+AntiPing: predict other players
+== 안티 핑: 다른 플레이어 예측
+
+AntiPing: predict weapons
+== 안티 핑: 무기 예측
+
+Appearance
+== 표시
+
+Are you sure that you want to delete the demo '%s'?
+== 데모 '%s' 을 삭제하시겠습니까?
+
+Are you sure that you want to disconnect and switch to a different server?
+== 연결을 끊고 다른 서버에 접속하시겠습니까?
+
+Are you sure that you want to disconnect your dummy?
+== 더미의 연결을 끊으시겠습니까?
+
+Are you sure that you want to disconnect?
+== 연결을 끊으시겠습니까?
+
 Are you sure that you want to quit?
 == 종료하시겠습니까?
+
+Are you sure that you want to remove the clan '%s' from your friends list?
+== '%s' 클랜을 친구 목록에서 제거하시겠습니까?
+
+Are you sure that you want to remove the player '%s' from your friends list?
+== '%s' 님을 친구 목록에서 제거하시겠습니까?
+
+Are you sure that you want to reset the controls to their defaults?
+== 조작 설정을 초기화하시겠습니까?
+
+Assets
+== 에셋
+
+Assets directory
+== 에셋 폴더
+
+Auto
+== 자동
+
+Automatically create statboard csv
+== 자동으로 통계표 csv 파일 생성
 
 Automatically record demos
 == 자동으로 데모 녹화
 
 Automatically take game over screenshot
 == 자동으로 게임 종료 스크린샷 저장
+
+Automatically take statboard screenshot
+== 자동으로 통계표 스크린샷 저장
+
+Background
+== 배경
+
+Background music volume
+== 배경 음악 음량
+
+Best
+== 최고
 
 Blue team
 == 블루팀
@@ -73,8 +190,20 @@ Blue team wins!
 Body
 == 몸
 
+Browser
+== 브라우저
+
+CHN
+== 중국
+
 Call vote
 == 투표
+
+Can't find a Tutorial server
+== 튜토리얼 서버를 찾을 수 없음
+
+Cancel
+== 취소
 
 Change settings
 == 설정 변경
@@ -82,11 +211,50 @@ Change settings
 Chat
 == 채팅
 
+Chat command
+== 채팅 명령어
+
+Chat command (e.g. showall 1)
+== 채팅 명령어 (예시: showall 1)
+
+Chat sound volume
+== 채팅 음량
+
+Check now
+== 지금 확인
+
+Checking for existing player with your name
+== 기존 플레이어 목록에서 닉네임 검색 중
+
+Choose default eyes when joining a server
+== 서버 입장 시의 기본 눈을 선택합니다.
+
 Clan
 == 클랜
 
+Clan plates size
+== 클랜 표시 크기
+
 Client
 == 클라이언트
+
+Client message
+== 클라이언트 메시지
+
+Colors of the hook collision line, in case of a possible collision with:
+== 갈고리 보조선 색상:
+
+Config directory
+== 구성 폴더
+
+Connect Dummy
+== 더미 연결
+
+Connected
+== 연결됨
+
+Connecting dummy
+== 더미 연결 중
 
 Connecting to
 == 연결 중
@@ -97,17 +265,89 @@ Connection Problems...
 Console
 == 콘솔
 
+Controller
+== 컨트롤러
+
+Controller jitter tolerance
+== 컨트롤러 신호 오차 허용 범위
+
 Controls
 == 조작
+
+Converse
+== 비밀대화 지속
+
+Copy info
+== 정보 복사
+
+Could not save downloaded map. Try manually deleting this file: %s
+== 다운로드한 맵을 저장하지 못했습니다. 다음 파일을 삭제해 보십시오: %s
 
 Count players only
 == 플레이어만 세기
 
+Countries
+== 국가
+
+Crc:
+== Crc:
+
+Create a random skin
+== 무작위 스킨 생성
+
+Created:
+== 날짜:
+
 Current
 == 현재
 
+Custom
+== 커스텀
+
 Custom colors
 == 사용자 정의 색상
+
+DDNet
+== DDNet
+
+DDNet %s is available:
+== DDNet %s 사용 가능:
+
+DDNet %s is out!
+== DDNet %s 이 공개되었습니다!
+
+DDNet Client needs to be restarted to complete update!
+== 업데이트 완료를 위해 DDNet 클라이언트 재시작이 필요합니다!
+
+DDNet Client updated!
+== DDNet 클라이언트가 업데이트되었습니다!
+
+DDRace HUD
+== DDRace HUD
+
+DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
+== DDraceNetwork는 온라인 협동 게임으로, 당신과 당신의 Tee 동료들이 맵의 결승점에 도달하는 것이 목표입니다. 당신이 초보자라면 가장 쉬운 맵들을 진행하는 Novice 서버에서 시작하는 것을 권장합니다. 핑을 고려하여 당신의 근처에 있는 서버를 선택하십시오.
+
+Date
+== 날짜
+
+Deactivate
+== 비활성화
+
+Deaths
+== 사망
+
+Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
+== 디버그 모드를 활성화했습니다. Ctrl+Shift+D를 눌러 비활성화할 수 있습니다.
+
+Default
+== 기본
+
+Default length
+== 기본 길이
+
+Default zoom
+== 기본 시야
 
 Delete
 == 삭제
@@ -115,17 +355,50 @@ Delete
 Delete demo
 == 데모 삭제
 
+Demo
+== 데모
+
 Demo details
 == 데모 세부정보
+
+Demofile: %s
+== 데모 파일: %s
 
 Demos
 == 데모
 
+Demos directory
+== 데모 폴더
+
+Desktop fullscreen
+== 데스크탑 전체화면
+
 Disconnect
 == 연결 끊기
 
+Disconnect Dummy
+== 더미 연결 끊기
+
 Disconnected
 == 연결 끊김
+
+Discord
+== 디스코드
+
+Door Laser Inner Color
+== 문 레이저 광선 색상
+
+Door Laser Outline Color
+== 문 레이저 테두리 색상
+
+Download community skins
+== 커뮤니티 스킨 다운로드
+
+Download skins
+== 스킨 다운로드
+
+Downloading %s:
+== %s 다운로드 중:
 
 Downloading map
 == 맵 다운로드 중
@@ -133,17 +406,89 @@ Downloading map
 Draw!
 == 무승부!
 
+Dummy
+== 더미
+
+Dummy copy
+== 더미 동시동작
+
+Dummy settings
+== 더미 설정
+
 Dynamic Camera
 == 다이나믹 카메라
 
+EUR
+== 유럽
+
+Editor
+== 맵 편집기
+
 Emoticon
 == 이모티콘
+
+Emoticons
+== 이모티콘
+
+Enable controller
+== 컨트롤러 활성화
+
+Enable game sounds
+== 게임 소리 활성화
+
+Enable gun sound
+== 총 소리 활성화
+
+Enable highlighted chat sound
+== 언급된 채팅 소리 활성화
+
+Enable long pain sound (used when shooting in freeze)
+== 동결 상태 비명 활성화
+
+Enable regular chat sound
+== 일반 채팅 소리 활성화
+
+Enable replays
+== 리플레이 활성화
+
+Enable server message sound
+== 서버 메시지 소리 활성화
+
+Enable team chat sound
+== 팀 채팅 소리 활성화
+
+Entities
+== 엔티티
+
+Entities Background color
+== 엔티티 배경 색상
 
 Error
 == 오류
 
 Error loading demo
 == 데모 로딩 오류
+
+Exclude
+== 제외
+
+Existing Player
+== 기존 플레이어
+
+Export cut as a separate demo
+== 자른 부분을 다른 이름으로 저장
+
+Extras
+== 기타
+
+FPM
+== 처치/분
+
+FSAA samples
+== FSAA 샘플
+
+Fat skins (DDFat)
+== 살찐 스킨 (DDFat)
 
 Favorite
 == 즐겨찾기
@@ -154,8 +499,20 @@ Favorites
 Feet
 == 발
 
+Fetch Info
+== 정보
+
+File '%s' already exists, do you want to overwrite it?
+== 파일 '%s' 이 이미 존재합니다. 덮어쓰기하시겠습니까?
+
+File already exists, do you want to overwrite it?
+== 파일이 이미 존재합니다. 덮어쓰기하시겠습니까?
+
 Filter
 == 필터
+
+Filter connecting players
+== 접속 중인 플레이어 제외
 
 Fire
 == 발사
@@ -163,11 +520,26 @@ Fire
 Folder
 == 폴더
 
+Follow
+== 팔로우
+
 Force vote
 == 강제 투표
 
+Frags
+== 처치
+
 Free-View
 == 자유 시점
+
+Freeze Laser Inner Color
+== 동결 레이저 광선 색상
+
+Freeze Laser Outline Color
+== 동결 레이저 테두리 색상
+
+Friend message
+== 친구가 보낸 메시지
 
 Friends
 == 친구
@@ -184,14 +556,47 @@ Game info
 Game over
 == 게임 종료
 
+Game paused
+== 게임 일시정지
+
+Game sound volume
+== 게임 음량
+
 Game type
 == 게임 종류
 
 Game types:
 == 게임 종류:
 
+Gameplay
+== 게임 플레이
+
 General
 == 일반
+
+Getting game info
+== 게임 정보 가져오는 중
+
+Getting server list from master server
+== 마스터 서버에서 서버 목록을 받는 중
+
+Ghost
+== 고스트
+
+Go back one marker
+== 이전 마커로 이동
+
+Go back one tick
+== 1 틱 뒤로 이동
+
+Go forward one marker
+== 다음 마커로 이동
+
+Go forward one tick
+== 1 틱 앞으로 이동
+
+Grabs
+== 획득
 
 Graphics
 == 그래픽
@@ -199,8 +604,14 @@ Graphics
 Grenade
 == 유탄 발사기
 
+HUD
+== HUD
+
 Hammer
 == 망치
+
+Hammerfly dummy
+== 해머플라이 더미
 
 Has people playing
 == 플레이어가 있는 서버
@@ -208,14 +619,74 @@ Has people playing
 High Detail
 == 맵 세부사항 표시
 
+Highlight Color
+== 강조 메시지 색상
+
+Highlighted message
+== 언급된 메시지
+
 Hook
 == 갈고리
+
+Hook Collisions
+== 갈고리 보조선
+
+Hook collision line
+== 갈고리 보조선
+
+Hook collision line opacity
+== 갈고리 보조선 불투명도
+
+Hook collision line width
+== 갈고리 보조선 폭
+
+Hook collisions
+== 갈고리 보조선
+
+Hue
+== 색조
+
+Indicate map finish
+== 완주한 맵 표시
+
+Info
+== 정보
+
+Ingame controller mode
+== 게임 내 컨트롤러 모드
+
+Ingame controller sens.
+== 게임 내 컨트롤러 감도
+
+Ingame mouse sens.
+== 게임 내 마우스 감도
+
+Initializing assets
+== 에셋 초기화 중
+
+Initializing components
+== 구성요소 초기화 중
+
+Initializing map logic
+== 맵 로직 초기화 중
+
+Internet
+== 인터넷
 
 Invalid Demo
 == 잘못된 데모
 
+It's recommended that you check the settings to adjust them to your liking before joining a server.
+== 서버 접속 전에 설정을 확인하고 여러분의 편의에 따라 조정하는 것을 권장합니다.
+
+Join Tutorial Server
+== 튜토리얼 서버 입장
+
 Join blue
 == 블루팀에 참가
+
+Join game
+== 게임 참가
 
 Join red
 == 레드팀에 참가
@@ -226,14 +697,110 @@ Jump
 Kick player
 == 플레이어 추방
 
+Kill
+== 죽기
+
+Kill Messages
+== 킬 메시지
+
+LAN
+== 랜
+
 Language
 == 언어
+
+Laser
+== 레이저
+
+Leak IP
+== IP 노출하기
+
+Learn
+== 학습터
+
+Length
+== 길이
+
+Length:
+== 길이:
+
+Lht.
+== 명도
+
+Loading DDNet Client
+== DDNet 클라이언트 로딩 중
+
+Loading assets
+== 에셋 로딩 중
+
+Loading demo files
+== 데모 파일 로딩 중
+
+Loading ghost files
+== 고스트 파일 로딩 중
+
+Loading map file from storage
+== 저장공간에서 맵 파일 로딩 중
+
+Loading menu images
+== 메뉴 이미지 로딩 중
+
+Loading race demo files
+== 레이스 데모 파일 로딩 중
+
+Loading skin files
+== 스킨 파일 로딩 중
+
+Loading sound files
+== 소리 파일 로딩 중
+
+Lock team
+== 팀 잠금
 
 MOTD
 == 설명
 
+Manual
+== 수동
+
 Map
 == 맵
+
+Map sound volume
+== 맵 음량
+
+Map:
+== 맵:
+
+Markers
+== 마커
+
+Markers:
+== 마커:
+
+Max CSVs
+== 최대 CSV 파일 수
+
+Max Screenshots
+== 최대 스크린샷 수
+
+Max demos
+== 최대 데모 수
+
+May cause delay
+== 딜레이 현상 발생 가능
+
+Menu opened. Press Esc key again to close menu.
+== 메뉴가 열려 있습니다. Esc 키를 눌러 닫을 수 있습니다.
+
+Messages
+== 메시지
+
+Miscellaneous
+== 여러가지
+
+Mouse
+== 마우스
 
 Move left
 == 왼쪽으로 이동
@@ -250,8 +817,32 @@ Movement
 Mute when not active
 == 창 비활성 시 음소거
 
+NA
+== 북미
+
 Name
 == 이름
+
+Name Plate
+== 이름 표시
+
+Name plates size
+== 이름 표시 크기
+
+Net
+== 순처치
+
+Netversion:
+== 통신 버전:
+
+New name:
+== 새 이름:
+
+New random timeout code
+== 새로운 무작위 타임아웃 코드 생성
+
+News
+== 뉴스
 
 Next weapon
 == 다음 무기
@@ -262,6 +853,12 @@ Nickname
 No
 == 아니오
 
+No answer from server yet.
+== 서버로부터 응답이 아직 없습니다.
+
+No controller found. Plug in a controller.
+== 컨트롤러가 발견되지 않았습니다. 컨트롤러를 연결해 주십시오.
+
 No password
 == 비밀번호가 없는 서버
 
@@ -271,14 +868,56 @@ No servers found
 No servers match your filter criteria
 == 필터에 일치하는 서버가 없음
 
+No updates available
+== 현재 업데이트 사항 없음
+
+Normal Color
+== 일반 메시지 색상
+
+Normal message
+== 일반 메시지
+
+Nothing hookable
+== 갈고리 불가
+
 Ok
 == 확인
+
+Opacity
+== 불투명도
+
+Opacity of freeze bars inside freeze
+== 동결 타일 내에서의 동결 상태줄 불투명도
 
 Open
 == 열기
 
+Open the directory that contains the configuration and user files
+== 구성 파일과 사용자 파일이 있는 폴더를 엽니다.
+
+Open the directory that contains the demo files
+== 데모 파일이 있는 폴더를 엽니다.
+
+Open the directory to add custom assets
+== 사용자 정의 에셋을 추가할 폴더를 엽니다.
+
+Open the directory to add custom skins
+== 사용자 정의 스킨을 추가할 폴더를 엽니다.
+
+Open the directory to add custom themes
+== 사용자 정의 테마를 추가할 폴더를 엽니다.
+
+Open the settings file
+== 설정 파일을 엽니다.
+
+Overlay entities
+== 엔티티 중첩 표시
+
 Parent Folder
 == 상위 폴더
+
+Particles
+== 파티클
 
 Password
 == 비밀번호
@@ -286,18 +925,32 @@ Password
 Password incorrect
 == 잘못된 비밀번호
 
+Pause
+== 관전
+
+Pause the current demo
+== 데모 일시정지
+
+Personal best:
+== 개인 최고 기록:
+
 Ping
 == 핑
 
 Pistol
 == 권총
 
-[Demo browser]
-Play
-== 재생
+Play background music
+== 배경 음악
+
+Play the current demo
+== 데모 재생
 
 Player
 == 플레이어
+
+Player country:
+== 플레이어 국가:
 
 Player options
 == 플레이어 옵션
@@ -308,14 +961,47 @@ Players
 Please balance teams!
 == 팀원수가 불균형함!
 
+Please enter your nickname below.
+== 아래에 닉네임을 입력해 주십시오.
+
+Please use a different name
+== 다른 이름을 사용해 주십시오
+
+Position:
+== 위치
+
+Preparing demo playback
+== 데모 재생 준비 중
+
 Prev. weapon
 == 이전 무기
+
+Preview
+== 미리보기
+
+Quads are used for background decoration
+== 맵 배경을 표시합니다.
 
 Quit
 == 종료
 
+Quit anyway?
+== 상관 않고 종료하시겠습니까?
+
+Race
+== 레이스
+
+Ratio
+== 처치율
+
 Reason:
 == 이유:
+
+Reconnect in %d sec
+== %d 초 후 재접속
+
+Record demo
+== 데모 녹화
 
 Red team
 == 레드팀
@@ -326,11 +1012,26 @@ Red team wins!
 Refresh
 == 새로고침
 
+Refresh Rate
+== 화면 주사율
+
+Regular Background Color
+== 기본 배경 색상
+
+Relative
+== 상대적
+
+Reload
+== 새로고침
+
 Remote console
 == 원격 콘솔
 
 Remove
 == 제거
+
+Remove chat
+== 채팅 제거
 
 Remove friend
 == 친구 제거
@@ -341,8 +1042,77 @@ Rename
 Rename demo
 == 데모 이름 변경
 
+Render
+== 렌더링
+
+Render demo
+== 데모 렌더링
+
+Renderer
+== 렌더러
+
+Replace video
+== 동영상 변경
+
+Replay
+== 리플레이
+
+Replay feature is disabled!
+== 리플레이 기능을 비활성화했습니다!
+
+Requesting to join the game
+== 게임 참가 요청 중
+
+Reset
+== 초기화
+
+Reset controls
+== 조작 초기화
+
 Reset filter
 == 필터 초기화
+
+Reset to defaults
+== 설정 초기화
+
+Restart
+== 재시작
+
+Rifle Laser Inner Color
+== 소총 레이저 광선 색상
+
+Rifle Laser Outline Color
+== 소총 레이저 테두리 색상
+
+Round
+== 라운드
+
+Run on join
+== 참가 시 실행
+
+Run server
+== 서버 시작
+
+SA
+== 남미
+
+Sat.
+== 채도
+
+Save
+== 저장
+
+Save ghost
+== 고스트 저장
+
+Save power by lowering refresh rate (higher input latency)
+== 화면 주사율을 낮춰 전력 절약 (입력 지연 증가)
+
+Save the best demo of each race
+== 레이스 최고 기록의 데모를 저장
+
+Saving ddnet-settings.cfg failed
+== ddnet-settings.cfg 저장 실패
 
 Score
 == 점수
@@ -353,14 +1123,29 @@ Score limit
 Scoreboard
 == 점수판
 
+Screen
+== 화면
+
 Screenshot
 == 스크린샷
+
+Search
+== 검색
+
+Sending initial client info
+== 초기 클라이언트 정보 전송 중
 
 Server address:
 == 서버 주소:
 
+Server best:
+== 서버 최고 기록:
+
 Server details
 == 서버 세부정보
+
+Server executable not found, can't run server
+== 서버 실행 파일을 찾을 수 없어, 서버를 구동할 수 없습니다.
 
 Server filter
 == 서버 필터
@@ -371,20 +1156,152 @@ Server info
 Server not full
 == 빈 자리가 있는 서버
 
+Set all to Rifle
+== 소총 색상으로 통일
+
+Settings
+== 설정
+
+Settings file
+== 설정 파일
+
 Shotgun
 == 산탄총
+
+Shotgun Laser Inner Color
+== 산탄총 레이저 광선 색상
+
+Shotgun Laser Outline Color
+== 산탄총 레이저 테두리 색상
+
+Show DDNet map finishes in server browser
+== DDNet 맵 완주를 서버 브라우저에 표시
+
+Show DDRace HUD
+== DDRace HUD 표시
+
+Show HUD
+== HUD 표시
+
+Show all
+== 모든 플레이어 표시
 
 Show chat
 == 채팅 표시
 
+Show clan above name plates
+== 이름 위에 클랜 표시
+
+Show client IDs in scoreboard
+== 점수판에 클라이언트 ID 표시
+
+Show dummy actions
+== 더미 동작 표시
+
+Show entities
+== 엔티티 표시
+
+Show freeze bars
+== 동결 상태줄 표시
+
 Show friends only
 == 친구가 있는 서버
+
+Show ghost
+== 고스트 표시
+
+Show health, shields and ammo
+== 체력과 방패, 탄약 표시
+
+Show hook strength indicator
+== 갈고리 세기 표시
 
 Show ingame HUD
 == 게임 내 HUD 표시
 
+Show jumps indicator
+== 점프 상태 표시
+
+Show kill messages
+== 킬 메시지 표시
+
+Show local player's key presses
+== 주변 플레이어의 키 입력 표시
+
 Show name plates
 == 이름 표시
+
+Show names in chat in team colors
+== 이름을 팀 색상으로 표시
+
+Show only chat messages from friends
+== 친구가 보낸 메시지만 표시
+
+Show other players' hook collision lines
+== 다른 플레이어의 갈고리 보조선 표시
+
+Show other players' key presses
+== 다른 플레이어의 키 입력 표시
+
+Show others
+== 다른 플레이어 표시
+
+Show others (own team only)
+== 팀 내의 다른 플레이어 표시
+
+Show player position
+== 플레이어 위치 표시
+
+Show player speed
+== 플레이어 속도 표시
+
+Show player target angle
+== 플레이어 조준 각도 표시
+
+Show quads
+== 배경 표시
+
+Show score
+== 점수 표시
+
+Show text entities
+== 문자 엔티티 표시
+
+Show tiles layers from BG map
+== 배경 맵의 타일 레이어 표시
+
+Show votes window after voting
+== 투표 후에도 투표 창 표시
+
+Size
+== 크기
+
+Size:
+== 사이즈:
+
+Skin Database
+== 스킨 데이터베이스
+
+Skin prefix
+== 스킨 접두사
+
+Skins directory
+== 스킨 폴더
+
+Skip Tutorial
+== 튜토리얼 건너뛰기
+
+Skip the main menu
+== 메인 메뉴 건너뛰기
+
+Slow down the demo
+== 데모 속도 낮추기
+
+Smooth Dynamic Camera
+== 부드러운 다이나믹 카메라
+
+Something hookable
+== 갈고리 가능
 
 Sound
 == 소리
@@ -392,8 +1309,17 @@ Sound
 Sound error
 == 소리 오류
 
+Sound volume
+== 음량
+
 Spectate
 == 관전
+
+Spectate next
+== 다음 플레이어 관전
+
+Spectate previous
+== 이전 플레이어 관전
 
 Spectator mode
 == 관전 모드
@@ -401,32 +1327,92 @@ Spectator mode
 Spectators
 == 관전자
 
+Speed
+== 속도
+
+Speed up the demo
+== 데모 속도 높이기
+
+Speed:
+== 속도
+
+Spree
+== 연속
+
+Statboard
+== 통계표
+
+Status
+== 상태
+
 Stop record
 == 녹화 중지
+
+Stop server
+== 서버 정지
+
+Stop the current demo
+== 데모 정지
 
 Strict gametype filter
 == 게임 종류 완전일치
 
+Successfully saved the replay!
+== 리플레이 저장에 성공했습니다!
+
 Sudden Death
 == 단판 승부
+
+Suicides
+== 자살
+
+Super
+== 무적
 
 Switch weapon on pickup
 == 획득한 무기로 교체
 
+Switch weapon when out of ammo
+== 탄약 고갈 시 무기 교체
+
+System message
+== 시스템 메시지
+
 Team
 == 팀
+
+Team %d
+== 팀 %d
 
 Team chat
 == 팀 채팅
 
+Team message
+== 팀 메시지
+
 The audio device couldn't be initialised.
 == 오디오 장치를 초기화하지 못했습니다.
+
+The format of texture %s is not RGBA which will cause visual bugs.
+== 텍스처 %s 의 형식이 RGBA가 아닙니다. 이는 시각적 오류를 발생시킬 것입니다.
 
 The server is running a non-standard tuning on a pure game type.
 == 이 서버는 조정된 비표준 게임 모드를 실행하고 있습니다.
 
+The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
+== 텍스처 %s 의 너비 또는 높이를 %d 으로 나눌 수 없습니다. 이는 시각적 오류를 발생시킬 수 있습니다.
+
+Theme
+== 테마
+
+Themes directory
+== 테마 폴더
+
 There's an unsaved map in the editor, you might want to save it before you quit the game.
 == 편집기에서 맵이 저장되지 않았습니다. 종료 전 되돌아가 저장하실 수 있습니다.
+
+Time
+== 시간
 
 Time limit
 == 시간 제한
@@ -434,14 +1420,98 @@ Time limit
 Time limit: %d min
 == 시간 제한: %d 분
 
+Toggle dummy
+== 더미 전환
+
+Toggle dyncam
+== 다이나믹캠 전환
+
+Toggle ghost
+== 고스트 표시
+
+Toggle keyboard shortcuts
+== 키보드 단축키 사용 선택
+
+Toggle to edit your dummy settings
+== 더미 설정으로 전환합니다.
+
+Transmits your player name to info.ddnet.org
+== info.ddnet.org에 당신의 닉네임을 전송함
+
+Tries to predict other entities to give a feel of low latency
+== 다른 엔티티를 예측해 지연 시간을 줄입니다.
+
 Try again
 == 재시도
+
+Trying to determine UDP connectivity...
+== UDP 연결 확인 시도 중...
+
+Tutorial
+== 튜토리얼
 
 Type
 == 종류
 
+Type:
+== 종류:
+
+Types
+== 종류
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== UDP와 TCP의 IP 주소가 다른 것으로 보입니다. VPN, 프록시 또는 네트워크 가속기를 비활성화하십시오.
+
+UDP seems to be filtered.
+== UDP가 필터링된 것으로 보입니다.
+
+UI Color
+== UI 색상
+
+UI controller sens.
+== UI 컨트롤러 감도
+
+UI mouse sens.
+== UI 마우스 감도
+
+Unable to delete the demo '%s'
+== 데모 '%s' 을 삭제할 수 없음
+
 Unable to rename the demo
 == 데모의 이름을 변경할 수 없음
+
+Unfinished map
+== 미완주 맵
+
+Unregister protocol and file extensions
+== 프로토콜과 파일 확장자 등록 해제
+
+Update failed! Check log...
+== 업데이트 실패! 로그를 확인해 주십시오...
+
+Update now
+== 지금 업데이트하기
+
+Updating...
+== 업데이트 중...
+
+Uploading map data to GPU
+== 맵 데이터를 GPU에 업로드 중
+
+Use DDRace Scoreboard
+== DDRace 점수판 사용
+
+Use current map as background
+== 현재 맵을 배경으로 사용
+
+Use high DPI
+== 높은 DPI 사용
+
+Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
+== 죽기(재시작) 위해서는 K 키를 눌러야 합니다. Q 키를 눌러 일시정지하여 다른 플레이어를 관전할 수 있습니다. 다른 키 바인드는 설정 창을 참고하십시오.
+
+Use old chat style
+== 구식 채팅 방식 사용
 
 Use sounds
 == 소리 사용
@@ -452,8 +1522,17 @@ Use team colors for name plates
 V-Sync
 == V-Sync
 
+Vanilla skins only
+== 원판 스킨만 표시
+
 Version
 == 버전
+
+Version:
+== 버전:
+
+Video name:
+== 동영상 이름:
 
 Vote command:
 == 투표 명령:
@@ -473,434 +1552,26 @@ Voting
 Warmup
 == 준비
 
-Weapon
-== 무기
-
-Yes
-== 예
-
-You must restart the game for all settings to take effect.
-== 설정을 적용하기 위해서 게임을 재시작해야 합니다.
-
-Game paused
-== 게임 일시정지
-
-Play background music
-== 배경 음악
-
-Player country:
-== 플레이어 국가:
-
-Show only chat messages from friends
-== 친구가 보낸 메시지만 표시
-
-Spectate next
-== 다음 플레이어 관전
-
-Spectate previous
-== 이전 플레이어 관전
-
-New name:
-== 새 이름:
-
-Max demos
-== 최대 데모 수
-
-Internet
-== 인터넷
-
-Round
-== 라운드
-
-Quit anyway?
-== 상관 않고 종료하시겠습니까?
-
-News
-== 뉴스
-
-Join game
-== 게임 참가
-
-Crc:
-== Crc:
-
-FSAA samples
-== FSAA 샘플
-
-Sat.
-== 채도
-
-LAN
-== 랜
-
-Sound volume
-== 음량
-
-Created:
-== 날짜:
-
-Record demo
-== 데모 녹화
-
-Miscellaneous
-== 여러가지
-
-Netversion:
-== 통신 버전:
-
-Info
-== 정보
-
-UI Color
-== UI 색상
-
-Your skin
-== 당신의 스킨
-
-Max Screenshots
-== 최대 스크린샷 수
-
-Size:
-== 사이즈:
-
-Hue
-== 색조
-
-Reset to defaults
-== 설정 초기화
-
-Laser
-== 레이저
-
-Version:
-== 버전:
-
-Map:
-== 맵:
-
-Lht.
-== 명도
-
-Alpha
-== 투명도
-
-Length:
-== 길이:
-
-Name plates size
-== 이름 표시 크기
-
-Type:
-== 종류:
-
-Successfully saved the replay!
-== 리플레이 저장에 성공했습니다!
-
-Saving ddnet-settings.cfg failed
-== ddnet-settings.cfg 저장 실패
-
-Replay feature is disabled!
-== 리플레이 기능을 비활성화했습니다!
-
-The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
-== 텍스처 %s 의 너비 또는 높이를 %d 으로 나눌 수 없습니다. 이는 시각적 오류를 발생시킬 수 있습니다.
-
 Warning
 == 주의
 
-Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
-== 디버그 모드를 활성화했습니다. Ctrl+Shift+D를 눌러 비활성화할 수 있습니다.
+Weapon
+== 무기
 
-Server best:
-== 서버 최고 기록:
+Weapons
+== 무기
 
-Personal best:
-== 개인 최고 기록:
-
-Reset
-== 초기화
-
-Browser
-== 브라우저
-
-Ghost
-== 고스트
-
-Loading DDNet Client
-== DDNet 클라이언트 로딩 중
-
-Reconnect in %d sec
-== %d 초 후 재접속
-
-Render demo
-== 데모 렌더링
-
-Replace video
-== 동영상 변경
-
-File already exists, do you want to overwrite it?
-== 파일이 이미 존재합니다. 덮어쓰기하시겠습니까?
-
-Are you sure that you want to disconnect?
-== 연결을 끊으시겠습니까?
-
-Disconnect Dummy
-== 더미 연결 끊기
-
-Are you sure that you want to disconnect your dummy?
-== 더미의 연결을 끊으시겠습니까?
+Website
+== 웹사이트
 
 Welcome to DDNet
 == DDNet에 오신 것을 환영합니다
 
-DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
-== DDraceNetwork는 온라인 협동 게임으로, 당신과 당신의 Tee 동료들이 맵의 결승점에 도달하는 것이 목표입니다. 당신이 초보자라면 가장 쉬운 맵들을 진행하는 Novice 서버에서 시작하는 것을 권장합니다. 핑을 고려하여 당신의 근처에 있는 서버를 선택하십시오.
-
-Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
-== 죽기(재시작) 위해서는 K 키를 눌러야 합니다. Q 키를 눌러 일시정지하여 다른 플레이어를 관전할 수 있습니다. 다른 키 바인드는 설정 창을 참고하십시오.
-
-It's recommended that you check the settings to adjust them to your liking before joining a server.
-== 서버 접속 전에 설정을 확인하고 여러분의 편의에 따라 조정하는 것을 권장합니다.
-
-Please enter your nickname below.
-== 아래에 닉네임을 입력해 주십시오.
-
-Existing Player
-== 기존 플레이어
-
-Your nickname '%s' is already used (%d points). Do you still want to use it?
-== 닉네임 '%s' 은 이미 사용 중입니다 (%d 포인트). 그래도 사용하시겠습니까?
-
-Checking for existing player with your name
-== 기존 플레이어 목록에서 닉네임 검색 중
-
-Are you sure that you want to disconnect and switch to a different server?
-== 연결을 끊고 다른 서버에 접속하시겠습니까?
-
-Speed
-== 속도
-
-Video name:
-== 동영상 이름:
-
-Show DDNet map finishes in server browser
-== DDNet 맵 완주를 서버 브라우저에 표시
-
-Transmits your player name to info.ddnet.org
-== info.ddnet.org에 당신의 닉네임을 전송함
-
-Theme
-== 테마
-
-Getting server list from master server
-== 마스터 서버에서 서버 목록을 받는 중
-
-Search
-== 검색
-
-Exclude
-== 제외
-
-%d of %d servers
-== %d / %d 서버
-
-%d of %d server
-== %d / %d 서버
-
-%d players
-== %d 플레이어
-
-%d player
-== %d 플레이어
-
-Filter connecting players
-== 접속 중인 플레이어 제외
-
-Indicate map finish
-== 완주한 맵 표시
-
-Unfinished map
-== 미완주 맵
-
-Countries
-== 국가
-
-Types
-== 종류
-
-Leak IP
-== IP 노출하기
-
-Please use a different name
-== 다른 이름을 사용해 주십시오
-
-Remove chat
-== 채팅 제거
-
-Demofile: %s
-== 데모 파일: %s
-
-Markers:
-== 마커:
-
-Demo
-== 데모
-
-Markers
-== 마커
-
-Length
-== 길이
-
-Date
-== 날짜
-
-Fetch Info
-== 정보
-
-Demos directory
-== 데모 폴더
-
-Render
-== 렌더링
-
-Connect Dummy
-== 더미 연결
-
-Connecting dummy
-== 더미 연결 중
-
-Kill
-== 죽기
-
-Pause
-== 관전
-
-Time
-== 시간
-
-Reload
-== 새로고침
-
-Deactivate
-== 비활성화
-
-Activate
-== 활성화
-
-Save
-== 저장
-
-Smooth Dynamic Camera
-== 부드러운 다이나믹 카메라
-
-Switch weapon when out of ammo
-== 탄약 고갈 시 무기 교체
-
-Show clan above name plates
-== 이름 위에 클랜 표시
-
-Clan plates size
-== 클랜 표시 크기
-
-Skip the main menu
-== 메인 메뉴 건너뛰기
-
-Refresh Rate
-== 화면 주사율
-
-Settings file
-== 설정 파일
-
-Config directory
-== 구성 폴더
-
-Themes directory
-== 테마 폴더
-
-Automatically take statboard screenshot
-== 자동으로 통계표 스크린샷 저장
-
-Automatically create statboard csv
-== 자동으로 통계표 csv 파일 생성
-
-Max CSVs
-== 최대 CSV 파일 수
-
-Dummy settings
-== 더미 설정
-
-Download skins
-== 스킨 다운로드
-
-Vanilla skins only
-== 원판 스킨만 표시
-
-Fat skins (DDFat)
-== 살찐 스킨 (DDFat)
-
-Skin prefix
-== 스킨 접두사
-
-Skin Database
-== 스킨 데이터베이스
-
-Skins directory
-== 스킨 폴더
-
-Hook collisions
-== 갈고리 보조선
-
-Zoom in
-== 시야 확장
-
-Zoom out
-== 시야 축소
-
-Default zoom
-== 기본 시야
-
-Show others
-== 다른 플레이어 표시
-
-Show all
-== 모든 플레이어 표시
-
-Toggle dyncam
-== 다이나믹캠 전환
-
-Toggle dummy
-== 더미 전환
-
-Toggle ghost
-== 고스트 표시
-
-Dummy copy
-== 더미 동시동작
-
-Hammerfly dummy
-== 해머플라이 더미
-
-Converse
-== 비밀대화 지속
-
-Statboard
-== 통계표
-
-Lock team
-== 팀 잠금
-
-Show entities
-== 엔티티 표시
-
-Show HUD
-== HUD 표시
-
-Chat command
-== 채팅 명령어
-
-Dummy
-== 더미
+When you cross the start line, show a ghost tee replicating the movements of your best time
+== 출발선을 넘으면 당신의 최고 기록을 재현하는 고스트 Tee가 표시됩니다.
+
+Why are you slowmo replaying to read this?
+== 왜 이것을 슬로우 모션으로 보려고 하십니까?
 
 Windowed
 == 창 모드
@@ -911,793 +1582,102 @@ Windowed borderless
 Windowed fullscreen
 == 창 모드 전체화면
 
-Desktop fullscreen
-== 데스크탑 전체화면
-
-May cause delay
-== 딜레이 현상 발생 가능
-
-Screen
-== 화면
-
-Use high DPI
-== 높은 DPI 사용
-
-Enable game sounds
-== 게임 소리 활성화
-
-Enable gun sound
-== 총 소리 활성화
-
-Enable long pain sound (used when shooting in freeze)
-== 동결 상태 비명 활성화
-
-Enable server message sound
-== 서버 메시지 소리 활성화
-
-Enable regular chat sound
-== 일반 채팅 소리 활성화
-
-Enable team chat sound
-== 팀 채팅 소리 활성화
-
-Enable highlighted chat sound
-== 언급된 채팅 소리 활성화
-
-Game sound volume
-== 게임 음량
-
-Chat sound volume
-== 채팅 음량
-
-Map sound volume
-== 맵 음량
-
-Background music volume
-== 배경 음악 음량
-
-HUD
-== HUD
-
-DDNet
-== DDNet
-
-Assets
-== 에셋
-
-DDNet Client needs to be restarted to complete update!
-== 업데이트 완료를 위해 DDNet 클라이언트 재시작이 필요합니다!
-
-Use DDRace Scoreboard
-== DDRace 점수판 사용
-
-Show score
-== 점수 표시
-
-Show names in chat in team colors
-== 이름을 팀 색상으로 표시
-
-Show votes window after voting
-== 투표 후에도 투표 창 표시
-
-Show kill messages
-== 킬 메시지 표시
-
-Kill Messages
-== 킬 메시지
-
-Use old chat style
-== 구식 채팅 방식 사용
-
-Messages
-== 메시지
-
-System message
-== 시스템 메시지
-
-Highlighted message
-== 언급된 메시지
-
-Team message
-== 팀 메시지
-
-Friend message
-== 친구가 보낸 메시지
-
-Normal message
-== 일반 메시지
-
-Client message
-== 클라이언트 메시지
-
-Preview
-== 미리보기
-
-Save the best demo of each race
-== 레이스 최고 기록의 데모를 저장
-
-Default length
-== 기본 길이
-
-Enable replays
-== 리플레이 활성화
-
-Show ghost
-== 고스트 표시
-
-Save ghost
-== 고스트 저장
-
-Gameplay
-== 게임 플레이
-
-Overlay entities
-== 엔티티 중첩 표시
-
-Size
-== 크기
-
-Show text entities
-== 문자 엔티티 표시
-
-Show others (own team only)
-== 팀 내의 다른 플레이어 표시
-
-Show quads
-== 배경 표시
-
-AntiPing
-== 안티 핑
-
-AntiPing: predict other players
-== 안티 핑: 다른 플레이어 예측
-
-AntiPing: predict weapons
-== 안티 핑: 무기 예측
-
-AntiPing: predict grenade paths
-== 안티 핑: 유탄 궤적 예측
-
-Show other players' hook collision lines
-== 다른 플레이어의 갈고리 보조선 표시
-
-Show other players' key presses
-== 다른 플레이어의 키 입력 표시
-
-Show local player's key presses
-== 주변 플레이어의 키 입력 표시
-
-Background
-== 배경
-
-Entities Background color
-== 엔티티 배경 색상
-
-Use current map as background
-== 현재 맵을 배경으로 사용
-
-Show tiles layers from BG map
-== 배경 맵의 타일 레이어 표시
-
-Regular Background Color
-== 기본 배경 색상
-
-New random timeout code
-== 새로운 무작위 타임아웃 코드 생성
-
-Run on join
-== 참가 시 실행
-
-Chat command (e.g. showall 1)
-== 채팅 명령어 (예시: showall 1)
-
-DDNet %s is available:
-== DDNet %s 사용 가능:
-
-Update now
-== 지금 업데이트하기
-
-Updating...
-== 업데이트 중...
-
-DDNet Client updated!
-== DDNet 클라이언트가 업데이트되었습니다!
-
-No updates available
-== 현재 업데이트 사항 없음
-
-Check now
-== 지금 확인
-
-Entities
-== 엔티티
-
-Emoticons
-== 이모티콘
-
-Particles
-== 파티클
-
-Assets directory
-== 에셋 폴더
-
-Discord
-== 디스코드
-
-https://ddnet.org/discord
-== https://ddnet.org/discord
-
-Learn
-== 학습터
-
-https://wiki.ddnet.org/
-== https://wiki.ddnet.org/wiki/Main_Page/ko
-
-Website
-== 웹사이트
-
-Settings
-== 설정
-
-Stop server
-== 서버 정지
-
-Run server
-== 서버 시작
-
-Server executable not found, can't run server
-== 서버 실행 파일을 찾을 수 없어, 서버를 구동할 수 없습니다.
-
-Editor
-== 맵 편집기
-
-[Start menu]
-Play
-== 플레이
-
-DDNet %s is out!
-== DDNet %s 이 공개되었습니다!
-
-Downloading %s:
-== %s 다운로드 중:
-
-Update failed! Check log...
-== 업데이트 실패! 로그를 확인해 주십시오...
-
-Restart
-== 재시작
-
-Manual
-== 수동
-
-Race
-== 레이스
-
-Auto
-== 자동
-
-Replay
-== 리플레이
-
-Follow
-== 팔로우
-
-Frags
-== 처치
-
-Deaths
-== 사망
-
-Suicides
-== 자살
-
-Ratio
-== 처치율
-
-Net
-== 순처치
-
-FPM
-== 처치/분
-
-Spree
-== 연속
-
-Best
-== 최고
-
-Grabs
-== 획득
-
-1 new mention
-== 1 건의 새 언급
-
-%d new mentions
-== %d 건의 새 언급
-
-9+ new mentions
-== 9+ 건의 새 언급
-
-The format of texture %s is not RGBA which will cause visual bugs.
-== 텍스처 %s 의 형식이 RGBA가 아닙니다. 이는 시각적 오류를 발생시킬 것입니다.
-
-Join Tutorial Server
-== 튜토리얼 서버 입장
-
-Skip Tutorial
-== 튜토리얼 건너뛰기
-
-AFR
-== 아프리카
-
-ASI
-== 아시아
-
-AUS
-== 호주
-
-EUR
-== 유럽
-
-NA
-== 북미
-
-SA
-== 남미
-
-CHN
-== 중국
-
-%.2f MiB
-== %.2f MiB
-
-%.2f KiB
-== %.2f KiB
-
-Renderer
-== 렌더러
-
-Default
-== 기본
-
-Custom
-== 커스텀
-
-Tutorial
-== 튜토리얼
-
-Can't find a Tutorial server
-== 튜토리얼 서버를 찾을 수 없음
-
-Toggle to edit your dummy settings
-== 더미 설정으로 전환합니다.
-
-Choose default eyes when joining a server
-== 서버 입장 시의 기본 눈을 선택합니다.
-
-Allows maps to render with more detail
-== 맵의 세부사항을 렌더링합니다.
-
-When you cross the start line, show a ghost tee replicating the movements of your best time
-== 출발선을 넘으면 당신의 최고 기록을 재현하는 고스트 Tee가 표시됩니다.
-
-Opacity
-== 불투명도
-
-Adjust the opacity of entities belonging to other teams, such as tees and nameplates
-== Tee와 이름 표시 등 다른 팀에 속한 엔티티의 불투명도를 조정합니다.
-
-Quads are used for background decoration
-== 맵 배경을 표시합니다.
-
-Tries to predict other entities to give a feel of low latency
-== 다른 엔티티를 예측해 지연 시간을 줄입니다.
-
-Super
-== 무적
-
-Team %d
-== 팀 %d
-
-Position:
-== 위치
-
-Speed:
-== 속도
-
-Angle:
-== 각도
-
-Trying to determine UDP connectivity...
-== UDP 연결 확인 시도 중...
-
-UDP seems to be filtered.
-== UDP가 필터링된 것으로 보입니다.
-
-UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
-== UDP와 TCP의 IP 주소가 다른 것으로 보입니다. VPN, 프록시 또는 네트워크 가속기를 비활성화하십시오.
-
-No answer from server yet.
-== 서버로부터 응답이 아직 없습니다.
-
-Download community skins
-== 커뮤니티 스킨 다운로드
-
-Enable controller
-== 컨트롤러 활성화
-
-Relative
-== 상대적
-
-[Ingame controller mode]
-Absolute
-== 절대적
-
-Ingame controller mode
-== 게임 내 컨트롤러 모드
-
-Ingame controller sens.
-== 게임 내 컨트롤러 감도
-
-UI controller sens.
-== UI 컨트롤러 감도
-
-Controller jitter tolerance
-== 컨트롤러 신호 오차 허용 범위
-
-Status
-== 상태
-
-Aim bind
-== 조준 바인드
-
-Mouse
-== 마우스
-
-Ingame mouse sens.
-== 게임 내 마우스 감도
-
-UI mouse sens.
-== UI 마우스 감도
-
-Controller
-== 컨트롤러
-
-Show dummy actions
-== 더미 동작 표시
-
-Show freeze bars
-== 동결 상태줄 표시
-
-Show player position
-== 플레이어 위치 표시
-
-Show player speed
-== 플레이어 속도 표시
-
-Show player target angle
-== 플레이어 조준 각도 표시
-
-Opacity of freeze bars inside freeze
-== 동결 타일 내에서의 동결 상태줄 불투명도
-
-Normal Color
-== 일반 메시지 색상
-
-Highlight Color
-== 강조 메시지 색상
-
-Extras
-== 기타
-
-Preparing demo playback
-== 데모 재생 준비 중
-
-Connected
-== 연결됨
-
-Loading map file from storage
-== 저장공간에서 맵 파일 로딩 중
-
-Why are you slowmo replaying to read this?
-== 왜 이것을 슬로우 모션으로 보려고 하십니까?
-
-Initializing components
-== 구성요소 초기화 중
-
-Initializing assets
-== 에셋 초기화 중
-
-Initializing map logic
-== 맵 로직 초기화 중
-
-Sending initial client info
-== 초기 클라이언트 정보 전송 중
-
-Uploading map data to GPU
-== 맵 데이터를 GPU에 업로드 중
-
-Getting game info
-== 게임 정보 가져오는 중
-
-Requesting to join the game
-== 게임 참가 요청 중
-
-Loading menu images
-== 메뉴 이미지 로딩 중
-
-Loading demo files
-== 데모 파일 로딩 중
-
-Loading ghost files
-== 고스트 파일 로딩 중
-
-Loading skin files
-== 스킨 파일 로딩 중
-
-Appearance
-== 표시
-
-Name Plate
-== 이름 표시
-
-Hook Collisions
-== 갈고리 보조선
-
-Show health, shields and ammo
-== 체력과 방패, 탄약 표시
-
-DDRace HUD
-== DDRace HUD
-
-Show client IDs in scoreboard
-== 점수판에 클라이언트 ID 표시
-
-Show DDRace HUD
-== DDRace HUD 표시
-
-Show jumps indicator
-== 점프 상태 표시
-
-Show hook strength indicator
-== 갈고리 세기 표시
-
-Hook collision line
-== 갈고리 보조선
-
-Hook collision line width
-== 갈고리 보조선 폭
-
-Hook collision line opacity
-== 갈고리 보조선 불투명도
-
-Colors of the hook collision line, in case of a possible collision with:
-== 갈고리 보조선 색상:
+Yes
+== 예
+
+You must restart the game for all settings to take effect.
+== 설정을 적용하기 위해서 게임을 재시작해야 합니다.
 
 Your movements are not taken into account when calculating the line colors
 == 움직임은 색상 추정에 고려되지 않습니다.
 
-Nothing hookable
-== 갈고리 불가
+Your nickname '%s' is already used (%d points). Do you still want to use it?
+== 닉네임 '%s' 은 이미 사용 중입니다 (%d 포인트). 그래도 사용하시겠습니까?
 
-Something hookable
-== 갈고리 가능
+Your skin
+== 당신의 스킨
 
-A Tee
-== Tee 대상
+Zoom in
+== 시야 확장
 
-Loading assets
-== 에셋 로딩 중
+Zoom out
+== 시야 축소
 
-Loading race demo files
-== 레이스 데모 파일 로딩 중
-
-Loading sound files
-== 소리 파일 로딩 중
-
-Play the current demo
-== 데모 재생
-
-Pause the current demo
-== 데모 일시정지
-
-Stop the current demo
-== 데모 정지
-
-Slow down the demo
-== 데모 속도 낮추기
-
-Speed up the demo
-== 데모 속도 높이기
-
-Export cut as a separate demo
-== 자른 부분을 다른 이름으로 저장
-
-Toggle keyboard shortcuts
-== 키보드 단축키 사용 선택
-
-Weapons
-== 무기
-
-Rifle Laser Outline Color
-== 소총 레이저 테두리 색상
-
-Rifle Laser Inner Color
-== 소총 레이저 광선 색상
-
-Shotgun Laser Outline Color
-== 산탄총 레이저 테두리 색상
-
-Shotgun Laser Inner Color
-== 산탄총 레이저 광선 색상
-
-Door Laser Outline Color
-== 문 레이저 테두리 색상
-
-Door Laser Inner Color
-== 문 레이저 광선 색상
-
-Freeze Laser Outline Color
-== 동결 레이저 테두리 색상
-
-Freeze Laser Inner Color
-== 동결 레이저 광선 색상
-
-Menu opened. Press Esc key again to close menu.
-== 메뉴가 열려 있습니다. Esc 키를 눌러 닫을 수 있습니다.
-
-Set all to Rifle
-== 소총 색상으로 통일
-
-[Graphics error]
-Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== 초기화에 실패했습니다. 구성 폴더의 settings_ddnet.cfg에서 gfx_backend를 OpenGL 또는 Vulkan으로 변경 후 재시도하십시오.
-
-[Graphics error]
-Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== VRAM이 부족합니다. 사용자 정의 에셋(스킨, 엔티티 등), 특히 고해상도 에셋을 제거해 보십시오.
-
-[Graphics error]
-An error during command recording occurred. Try to update your GPU drivers.
-== 명령 기록 중 오류가 발생했습니다. GPU 드라이버를 업데이트해 보십시오.
+[Demo browser]
+Play
+== 재생
 
 [Graphics error]
 A render command failed. Try to update your GPU drivers.
 == 렌더링 명령에 실패했습니다. GPU 드라이버를 업데이트해 보십시오.
 
 [Graphics error]
-Submitting the render commands failed. Try to update your GPU drivers.
-== 렌더링 명령 제출에 실패했습니다. GPU 드라이버를 업데이트해 보십시오.
+An error during command recording occurred. Try to update your GPU drivers.
+== 명령 기록 중 오류가 발생했습니다. GPU 드라이버를 업데이트해 보십시오.
+
+[Graphics error]
+Could not initialize the given graphics backend, reverting to the default backend now.
+== 지정된 그래픽 백엔드를 초기화하지 못했습니다. 기본 백엔드로 되돌립니다.
+
+[Graphics error]
+Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
+== 지정된 그래픽 백엔드를 초기화하지 못했습니다. 통합 그래픽 카드 드라이버가 설치되지 않은 것이 원인일 수 있습니다.
+
+[Graphics error]
+Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== 초기화에 실패했습니다. 구성 폴더의 settings_ddnet.cfg에서 gfx_backend를 OpenGL 또는 Vulkan으로 변경 후 재시도하십시오.
 
 [Graphics error]
 Failed to swap framebuffers. Try to update your GPU drivers.
 == 프레임버퍼 교환에 실패했습니다. GPU 드라이버를 업데이트해 보십시오.
 
 [Graphics error]
+Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
+== VRAM이 부족합니다. 사용자 정의 에셋(스킨, 엔티티 등), 특히 고해상도 에셋을 제거해 보십시오.
+
+[Graphics error]
+Submitting the render commands failed. Try to update your GPU drivers.
+== 렌더링 명령 제출에 실패했습니다. GPU 드라이버를 업데이트해 보십시오.
+
+[Graphics error]
 Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
 == 알 수 없는 오류가 발생했습니다. 구성 폴더의 settings_ddnet.cfg에서 gfx_backend를 OpenGL 또는 Vulkan으로 변경 후 재시도하십시오.
 
-[Graphics error]
-Could not initialize the given graphics backend, reverting to the default backend now.
-== 지정된 그래픽 백엔드를 초기화하지 못했습니다. 기본 백엔드로 되돌립니다.
+[Ingame controller mode]
+Absolute
+== 절대적
 
-Cancel
-== 취소
+[Start menu]
+Play
+== 플레이
 
-File '%s' already exists, do you want to overwrite it?
-== 파일 '%s' 이 이미 존재합니다. 덮어쓰기하시겠습니까?
+https://ddnet.org/discord
+== https://ddnet.org/discord
 
-Are you sure that you want to remove the player '%s' from your friends list?
-== '%s' 님을 친구 목록에서 제거하시겠습니까?
+https://wiki.ddnet.org/
+== https://wiki.ddnet.org/wiki/Main_Page/ko
 
-Are you sure that you want to remove the clan '%s' from your friends list?
-== '%s' 클랜을 친구 목록에서 제거하시겠습니까?
-
-Go back one tick
-== 1 틱 뒤로 이동
-
-Go forward one tick
-== 1 틱 앞으로 이동
-
-Go back one marker
-== 이전 마커로 이동
-
-Go forward one marker
-== 다음 마커로 이동
-
-Open the directory that contains the demo files
-== 데모 파일이 있는 폴더를 엽니다.
-
-Are you sure that you want to delete the demo '%s'?
-== 데모 '%s' 을 삭제하시겠습니까?
-
-Unable to delete the demo '%s'
-== 데모 '%s' 을 삭제할 수 없음
-
-Save power by lowering refresh rate (higher input latency)
-== 화면 주사율을 낮춰 전력 절약 (입력 지연 증가)
-
-Open the settings file
-== 설정 파일을 엽니다.
-
-Open the directory that contains the configuration and user files
-== 구성 파일과 사용자 파일이 있는 폴더를 엽니다.
-
-Open the directory to add custom themes
-== 사용자 정의 테마를 추가할 폴더를 엽니다.
-
-Open the directory to add custom skins
-== 사용자 정의 스킨을 추가할 폴더를 엽니다.
-
-No controller found. Plug in a controller.
-== 컨트롤러가 발견되지 않았습니다. 컨트롤러를 연결해 주십시오.
-
-Reset controls
-== 조작 초기화
-
-Are you sure that you want to reset the controls to their defaults?
-== 조작 설정을 초기화하시겠습니까?
-
-Unregister protocol and file extensions
-== 프로토콜과 파일 확장자 등록 해제
-
-Open the directory to add custom assets
-== 사용자 정의 에셋을 추가할 폴더를 엽니다.
-
-[Graphics error]
-Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
-== 지정된 그래픽 백엔드를 초기화하지 못했습니다. 통합 그래픽 카드 드라이버가 설치되지 않은 것이 원인일 수 있습니다.
-
-Could not save downloaded map. Try manually deleting this file: %s
-== 다운로드한 맵을 저장하지 못했습니다. 다음 파일을 삭제해 보십시오: %s
-
-Copy info
-== 정보 복사
-
-Create a random skin
-== 무작위 스킨 생성
+##### translation needed #####
 
 A demo with this name already exists
-== 
-
-No server selected
-== 
-
-Online players (%d)
-== 
-
-Online clanmates (%d)
-== 
-
-[friends (server browser)]
-Offline (%d)
-== 
-
-Click to select server. Double click to join your friend.
-== 
-
-Click to remove this player from your friends list.
-== 
-
-Click to remove this clan from your friends list.
-== 
-
-None
 == 
 
 Add Clan
 == 
 
-Mark the beginning of a cut (right click to reset)
+Axis
 == 
 
-Mark the end of a cut (right click to reset)
+Click to remove this clan from your friends list.
+== 
+
+Click to remove this player from your friends list.
+== 
+
+Click to select server. Double click to join your friend.
 == 
 
 Close the demo player
-== 
-
-Export demo cut
 == 
 
 Cut interval
@@ -1706,8 +1686,30 @@ Cut interval
 Cut length
 == 
 
-Axis
+Export demo cut
 == 
 
 Graphics card
+== 
+
+Mark the beginning of a cut (right click to reset)
+== 
+
+Mark the end of a cut (right click to reset)
+== 
+
+No server selected
+== 
+
+None
+== 
+
+Online clanmates (%d)
+== 
+
+Online players (%d)
+== 
+
+[friends (server browser)]
+Offline (%d)
 == 

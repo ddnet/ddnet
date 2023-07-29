@@ -5,6 +5,27 @@
 
 ##### translated strings #####
 
+%.2f KiB
+== %.2f KiB
+
+%.2f MiB
+== %.2f MiB
+
+%d new mentions
+== %d ﺓﺪﻳﺪﺟ ﺕﺍﺭﺎﻌﺷﺍ
+
+%d of %d server
+== %d ﻦﻣ ﺮﻓﺮﻴﺳ %d
+
+%d of %d servers
+== %d ﻦﻣ ﺮﻓﺮﻴﺳ %d
+
+%d player
+== %d ﺐﻋﻻ
+
+%d players
+== %d ﻦﻴﺒﻋﻻ
+
 %ds left
 == ﺖﻀﻣ %ds
 
@@ -26,8 +47,17 @@
 -Page %d-
 == -ﺔﺤﻔﺻ &d-
 
+1 new mention
+== 1 ﺪﻳﺪﺟ ﺭﺎﻌﺷﺍ
+
+9+ new mentions
+== 9+ ﺓﺪﻳﺪﺟ ﺕﺍﺭﺎﻌﺷﺍ
+
 Abort
 == ﻁﺎﺒﺣﺇ
+
+Activate
+== ﻞﻴﻌﻔﺗ
 
 Add
 == ﺔﻓﺎﺿﺍ
@@ -41,11 +71,56 @@ Address
 All
 == ﻞﻜﻟﺍ
 
+Alpha
+== ﺔﻴﻓﺎﻔﺷ
+
+AntiPing
+== AntiPing
+
+AntiPing: predict grenade paths
+== AntiPing: ﺔﻳﻭﺪﻴﻟﺍ ﻞﺑﺎﻨﻘﻟﺍ ﺕﺍﺭﺎﺴﻣ ﻊﻗﻮﺗ
+
+AntiPing: predict other players
+== AntiPing: ﻦﻳﺮﺧﻵﺍ ﻦﻴﺒﻋﻼﻟ ﻖﺒﺴﻣ ﺏﺎﺴﺣ
+
+AntiPing: predict weapons
+== AntiPing: ﺔﺤﻠﺳﻷﺍ ﺮﻴﻀﺤﺗ
+
+Are you sure that you want to disconnect your dummy?
+== ﻚﺘﻴﻣﺩ ﺝﺍﺮﺧﺍ ﺪﻳﺮﺗ ﻚﻧﺍ ﻦﻣ ﺪﻛﺎﺘﻣ ﺖﻧﺍ ﻞﻫ
+
+Are you sure that you want to disconnect?
+== ﺝﻭﺮﺨﻟﺍ ﺪﻳﺮﺗ ﻚﻧﺎﺑ ﺪﻛﺂﺘﻣ ﺖﻧﺍ ﻞﻫ
+
 Are you sure that you want to quit?
 == ﻪﺒﻌﻠﻟﺍ ﻕﻼﻏﻻ ﺪﻛﺎﺘﻣ ﺖﻧﺍ ﻞﻫ
 
+Assets
+== ﻝﺎﻜﺷﻻﺍ
+
+Assets directory
+== ﻝﺎﻜﺷﻻﺍ ﻒﻠﻣ ﺢﺘﻓ
+
+Auto
+== ﻲﺋﺎﻘﻠﺗ
+
+Automatically create statboard csv
+== statboard ﻞﻤﻋ ﻲﺋﺎﻘﻠﺗ
+
 Automatically record demos
 == ﻲﺋﺎﻘﻠﺗ ﻮﻳﺪﻴﻓ ﻞﻴﺠﺴﺗ
+
+Automatically take game over screenshot
+== ﺔﺷﺎﺸﻟﺍ ﺔﻄﻘﻟ ﻰﻠﻋ ﺍًﻴﺋﺎﻘﻠﺗ ﺔﺒﻌﻠﻟﺍ ﺬﺧﺃ
+
+Automatically take statboard screenshot
+== ﺍﻴﺋﺎﻘﻠﺗ ﺞﺋﺎﺘﻨﻟﺍ ﺔﺣﻮﻠﻟ ﺔﺷﺎﺷ ﺔﻄﻘﻟ ﺬﺧﺍ
+
+Background music volume
+== ﺔﻴﻔﻠﺨﻟﺍ ﺕﻮﺻ
+
+Best
+== ﻞﻀﻓﺍ
 
 Blue team
 == ﻕﺭﺯﻻﺍ ﻖﻳﺮﻔﻟﺍ
@@ -56,6 +131,9 @@ Blue team wins!
 Body
 == ﻢﺴﺠﻟﺍ
 
+Browser
+== ﺢﻔﺼﺘﻤﻟﺍ
+
 Call vote
 == ﺖﻳﻮﺼﺗ
 
@@ -65,11 +143,32 @@ Change settings
 Chat
 == ﺔﺷﺩﺭﺩ
 
+Chat sound volume
+== ﺔﺷﺩﺭﺪﻟﺍ ﺕﻮﺻ
+
+Check now
+== ﻥﻻﺍ ﺪﻛﺄﺗ
+
+Checking for existing player with your name
+== ﻚﻤﺳﺎﺑ ﺐﻋﻻ ﺩﻮﺟﻭ ﻦﻣ ﻖﻘﺤﺘﻟﺍ
+
 Clan
 == ﻥﻼﻛ
 
+Clan plates size
+== ﻥﻼﻜﻟﺍ ﻞﻜﺷ ﻢﺠﺣ
+
 Client
 == ﺖﻨﻳﻼﻛ
+
+Client message
+== ﺔﻟﺎﺳﺭ
+
+Connect Dummy
+== ﺔﻴﻣﺪﻟﺍ ﻝﺎﺧﺩﺍ
+
+Connecting dummy
+== ﺔﻴﻣﺪﻟﺍ ﻝﺎﺼﺗﺍ
 
 Connecting to
 == ﻰﻟﺍ ﻝﺎﺼﺗﺍ
@@ -83,8 +182,20 @@ Console
 Controls
 == ﻢﻜﺤﺘﻟﺍ
 
+Converse
+== ﺔﺛﺩﺎﺤﻣ
+
 Count players only
 == ﻂﻘﻓ ﻦﻴﺒﻋﻼﻟﺍ ﺪﻋ
+
+Countries
+== ﻥﺍﺪﻠﺒﻟﺍ
+
+Crc:
+== Crc:
+
+Created:
+== ﺊﺸﻧﺍ:
 
 Current
 == ﻲﻟﺎﺤﻟﺍ
@@ -92,11 +203,47 @@ Current
 Custom colors
 == ﺔﺼﺼﺨﻣ ﻥﺍﻮﻟﺍ
 
+DDNet
+== ﺖﻴﻧﺩﺩ
+
+DDNet %s is out!
+== DDNet %s ﺪﻳﺪﺟ ﺭﺍﺪﺻﺍ!
+
+DDNet Client needs to be restarted to complete update!
+== DDNet-Client !ﺚﻳﺪﺤﺘﻟﺍ ﻝﺎﻤﻛﻻ ﻞﻴﻐﺸﺘﻟﺍ ﺓﺩﺎﻋﻻ ﺝﺎﺘﺤﺗ
+
+DDNet Client updated!
+== DDNet-Client تحدثت!
+
+DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
+== DDraceNetwork ، ﻦﻴﺋﺪﺘﺒﻤﻟﺍ ﺕﺍﺮﻓﺮﻴﺳ ﻰﻠﻋ ﺃﺪﺒﺗ ﻥﺃ ﺐﺠﻳ ، ﺍًﺪﻳﺪﺟ ﺍًﻣﺩﺎﻗ ﻚﺘﻔﺼﺑ .ﺏﺎﻤﻟﺍ ﻰﻠﻋ ﺔﻳﺎﻬﻨﻟﺍ ﻂﺧ ﻰﻟﺇ ﺕﻼﻤﺤﻤﻟﺍ ﻦﻣ ﻚﺘﻋﻮﻤﺠﻣﻭ ﺖﻧﺃ ﻚﻟﻮﺻﻭ ﻮﻫ ﻑﺪﻬﻟﺍ ﻥﻮﻜﻳ ﺚﻴﺣ ﺖﻧﺮﺘﻧﻹﺍ ﺮﺒﻋ ﺔﻴﻧﻭﺎﻌﺗ ﺔﺒﻌﻟ ﻲﻫ
+
+Date
+== ﺦﻳﺭﺎﺗ
+
+Deactivate
+== ﻞﻴﻄﻌﺗ
+
+Deaths
+== ﺕﺍﻮﻣﻻﺍ
+
+Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
+== ﺔﻓﺎﻘﻳﻻ Ctrl+Shift+D ﻂﻐﺿﺍ .ﻝﺎﻐﺷ ﻖﻴﻗﺪﺘﻟﺍ ﻊﺿﻭ
+
+Default length
+== ﻲﺿﺍﺮﺘﻓﻻﺍ ﻝﻮﻄﻟﺍ
+
+Default zoom
+== ﻲﻌﻴﺒﻄﻟﺍ ﺮﻴﺒﻜﺘﻟﺍ
+
 Delete
 == ﻑﺬﺣ
 
 Delete demo
 == ﻮﻳﺪﻴﻔﻟﺍ ﻑﺬﺣ
+
+Demo
+== ﺕﺎﻫﻮﻳﺪﻴﻔﻟﺍ
 
 Demo details
 == :ﻮﻳﺪﻴﻔﻟﺍ ﻞﻴﺻﺎﻔﺗ
@@ -107,11 +254,23 @@ Demofile: %s
 Demos
 == ﺕﺎﻫﻮﻳﺪﻴﻔﻟﺍ
 
+Demos directory
+== ﺮﻳﻮﺼﺘﻟﺍ ﻒﻠﻣ ﺢﺘﻓ
+
 Disconnect
 == ﺝﻭﺮﺧ
 
+Disconnect Dummy
+== ﺔﻴﻣﺪﻟﺍ ﺝﺍﺮﺧﺍ
+
 Disconnected
 == ﺮﻓﺮﻴﺴﻟﺍ ﻦﻣ ﺝﺮﺧ
+
+Download skins
+== ﺕﺎﻨﻜﺴﻟﺍ ﻞﻴﻤﺤﺗ
+
+Downloading %s:
+== ﻞﻴﻤﺤﺗ %s:
 
 Downloading map
 == ﺏﺎﻤﻟﺍ ﻞﻴﻤﺤﺗ
@@ -119,17 +278,71 @@ Downloading map
 Draw!
 == !ﻝﺩﺎﻌﺗ
 
+Dummy copy
+== ﺔﻴﻣﺪﻟﺍ ﺦﺴﻧ
+
+Dummy settings
+== ﺔﻴﻣﺪﻟﺍ ﺕﺍﺩﺍﺪﻋﺍ
+
 Dynamic Camera
 == ﺍﺮﻴﻣﺎﻛ ﻚﻴﻣﺎﻨﻳﺩ
 
+Editor
+== ﻞﻳﺪﻌﺗ
+
 Emoticon
 == ﺕﻮﻤﻳﺍ
+
+Emoticons
+== ﺕﺎﺗﻮﻤﻳﻻﺍ
+
+Enable game sounds
+== ﺔﺒﻌﻟﻻﺍ ﺕﻮﺻ ﻞﻴﻌﻔﺗ
+
+Enable gun sound
+== ﺔﺤﻠﺳﻻﺍ ﺕﻮﺻ ﻞﻴﻌﻔﺗ
+
+Enable highlighted chat sound
+== ﻪﻴﺒﻨﺘﻟﺍ ﺕﻮﺻ ﻞﻴﻌﻔﺗ
+
+Enable long pain sound (used when shooting in freeze)
+== ( ﺰﻳﺮﻔﺘﻳ ﺎﻣﺪﻨﻋ ﻡﺪﺨﺘﺴﻳ ) ﻢﻟﻵﺍ ﺕﻮﺻ
+
+Enable regular chat sound
+== ﺔﻳﺩﺎﻌﻟﺍ ﺔﺷﺩﺭﺩ ﺕﻮﺻ ﻞﻴﻌﻔﺗ
+
+Enable replays
+== ﺓﺩﺎﻋﻻﺍ ﻦﻴﻜﻤﺗ
+
+Enable server message sound
+== ﺮﻓﺮﻴﺴﻟﺍ ﺔﺷﺩﺭﺩ ﺕﻮﺻ ﻞﻴﻌﻔﺗ
+
+Enable team chat sound
+== ﻖﻳﺮﻔﻟﺍ ﺔﺷﺩﺭﺩ ﺕﻮﺻ ﻞﻴﻌﻔﺗ
+
+Entities
+== ﻥﺍﺭﺪﺠﻟﺍ
 
 Error
 == ﺀﺎﻄﺧ
 
 Error loading demo
 == ﻮﻳﺪﻴﻓﻟﺍ ﻞﻴﻤﺤﺗ ﻞﺸﻓ
+
+Exclude
+== ﺩﺎﻌﺒﺘﺳﺍ
+
+Existing Player
+== ﺩﻮﺟﻮﻣ ﺐﻋﻼﻟﺍ
+
+FPM
+== فبم
+
+FSAA samples
+== Anti-Aliasing
+
+Fat skins (DDFat)
+== ﺔﻨﻴﻤﺳ ﺕﺎﻨﻜﺳ
 
 Favorite
 == ﻞﻀﻔﻤﻟﺍ
@@ -140,8 +353,17 @@ Favorites
 Feet
 == ﺔﻣﺰﺟ
 
+Fetch Info
+== ﺕﺎﻣﻮﻠﻌﻤﻟﺍ ﺭﺎﻀﺣﺍ
+
+File already exists, do you want to overwrite it?
+== ﻪﻗﻮﻓ ﺔﺑﺎﺘﻜﻟﺍ ﺪﻳﺮﺗ ﻞﻫ ، ﻞﻌﻔﻟﺎﺑ ﺩﻮﺟﻮﻣ ﻒﻠﻤﻟﺍ
+
 Filter
 == ﺔﻴﻔﺼﺗ
+
+Filter connecting players
+== ﻦﻴﻠﺼﺘﻤﻟﺍ ﻦﻴﺒﻋﻼﻟﺍ ﺔﻴﻔﺼﺗ
 
 Fire
 == ﺭﺎﻧ
@@ -149,11 +371,20 @@ Fire
 Folder
 == ﻒﻠﻣ
 
+Follow
+== ﻊﺒﺗﺃ
+
 Force vote
 == ﺖﻳﻮﺼﺘﻟﺍ ﺽﺮﻓ
 
+Frags
+== ﻞﺑﺎﻨﻗ
+
 Free-View
 == ﺮﺤﻟﺍ ﺮﻈﻨﻤﻟﺍ
+
+Friend message
+== ﻖﻳﺪﺻ ﺔﻟﺎﺳﺭ
 
 Friends
 == ﺀﺎﻗﺪﺻﻻﺍ
@@ -173,14 +404,26 @@ Game over
 Game paused
 == ﺔﺒﻌﻠﻟﺍ ﺖﻔﻗﻮﺗ
 
+Game sound volume
+== ﺔﺒﻌﻠﻟﺍ ﺕﻮﺻ
+
 Game type
 == ﺔﺒﻌﻠﻟﺍ ﺭﻮﻃ
 
 Game types:
 == ﺔﺒﻌﻠﻟﺍ ﺭﺍﻮﻃﺍ:
 
+Gameplay
+== ﺐﻌﻠﻟﺍ
+
 General
 == ﻡﺎﻋ
+
+Ghost
+== ﺢﺒﺸﻟﺍ
+
+Grabs
+== ﺕﺎﻜﺴﻣ
 
 Graphics
 == ﺲﻜﻴﻓﺍﺮﺟ
@@ -188,8 +431,14 @@ Graphics
 Grenade
 == ﺔﻠﺒﻨﻗ
 
+HUD
+== ﺔﺒﻌﻠﻟﺍ ﺮﻬﻈﻣ
+
 Hammer
 == ﺔﻗﺮﻄﻣ
+
+Hammerfly dummy
+== ﺔﻗﺮﻄﻤﻟﺎﺑ ﻥﺍﺮﻴﻃ-ﺔﻴﻣﺪﻟﺍ
 
 Has people playing
 == ﺹﺎﺨﺷﺍ ﻪﺑ ﺪﺟﻮﻳ
@@ -197,14 +446,38 @@ Has people playing
 High Detail
 == ﺔﻴﻟﺎﻋ ﻞﻴﺻﺎﻔﺗ
 
+Highlighted message
+== ﻪﻴﺒﻨﺘﻟﺍ ﻞﺋﺎﺳﺭ
+
 Hook
 == ﺐﺤﺳ
+
+Hook collisions
+== ﺐﺤﺴﻟﺍ ﺭﺰﻴﻟ ﺭﺎﻬﻇﺍ
+
+Hue
+== ﻥﻮﻟ
+
+Indicate map finish
+== ﺔﻗﺎﻄﺒﻟﺍ ﺭﺎﺼﺘﻧﺍ ﺭﺎﻬﻇﺇ
+
+Info
+== ﺕﺎﻣﻮﻠﻌﻣ
+
+Internet
+== ﺖﻧﺮﺘﻧﻻﺍ
 
 Invalid Demo
 == ﺢﻟﺎﺻ ﺮﻴﻏ ﻮﻳﺪﻴﻓ
 
+It's recommended that you check the settings to adjust them to your liking before joining a server.
+== .ﺮﻓﺮﻴﺴﻟﺍ ﻰﻟﺇ ﻡﺎﻤﻀﻧﻻﺍ ﻞﺒﻗ ﻚﺘﺒﻏﺭ ﺐﺴﺣ ﺎﻬﻄﺒﻀﻟ ﺕﺍﺩﺍﺪﻋﻹﺍ ﻦﻣ ﻖﻘﺤﺘﻟﺎﺑ ﻰﺻﻮﻳ
+
 Join blue
 == ﻕﺭﺯﻻﺍ ﻰﻟﺍ ﻡﺎﻤﻀﻧﻻﺍ
+
+Join game
+== ﺔﺒﻌﻠﻟﺍ ﻰﻟﺍ ﻉﻮﺟﺭ
 
 Join red
 == ﺮﻤﺣﻻﺍ ﻰﻟﺍ ﻡﺎﻤﻀﻧﻻﺍ
@@ -215,14 +488,74 @@ Jump
 Kick player
 == ﺐﻋﻻ ﺩﺮﻃ
 
+Kill
+== ﻞﺘﻗ
+
+LAN
+== LAN
+
 Language
 == ﺔﻐﻠﻟﺍ
+
+Laser
+== ﺭﺰﻴﻟ
+
+Learn
+== ﻢﻠﻌﺗ
+
+Length
+== ﻝﻮﻄﻟﺍ
+
+Length:
+== :ﻝﻮﻄﻟﺍ
+
+Lht.
+== ﺢﻴﺘﻔﺗ
+
+Loading DDNet Client
+== ﻞﻴﻤﺤﺘﻟﺍ ﺭﺎﺟ DDNet Client
+
+Lock team
+== ﻖﻳﺮﻔﻟﺍ ﻞﻔﻗ
 
 MOTD
 == ﻡﻮﻴﻟﺍ ﺔﻟﺎﺳﺭ
 
+Manual
+== ﻱﻭﺪﻳ
+
 Map
 == ﺏﺎﻤﻟﺍ
+
+Map sound volume
+== ﺏﺎﻤﻟﺍ ﺕﻮﺻ
+
+Map:
+== ﺏﺎﻤﻟﺍ:
+
+Markers
+== ﺕﺎﻣﻼﻌﻟﺍ
+
+Markers:
+== ﺕﺎﻣﻼﻌﻟﺍ:
+
+Max CSVs
+== Max CSVs
+
+Max Screenshots
+== ﺭﻮﺼﻠﻟ ﻰﺼﻗﻻﺍ ﺪﺤﻟﺍ
+
+Max demos
+== ﺕﺎﻫﻮﻳﺪﻴﻔﻠﻟ ﻰﺼﻗﻻﺍ ﺪﺤﻟﺍ
+
+May cause delay
+== ﺮﻴﺧﺄﺗ ﺐﺒﺴﻳ
+
+Messages
+== ﻞﺋﺎﺳﺮﻟﺍ
+
+Miscellaneous
+== ﻉﻮﻨﺘﻣ
 
 Move left
 == ﺭﺎﺴﻳ ﻙﺮﺤﺘﻟﺍ
@@ -242,6 +575,24 @@ Mute when not active
 Name
 == ﻢﺳﻻﺍ
 
+Name plates size
+== ﻲﻣﺎﺳﻻﺍ ﻢﺠﺣ
+
+Net
+== ﺔﻜﺒﺸﻟﺍ
+
+Netversion:
+== :ﻲﻓﺎﺼﻟﺍ ﺭﺍﺪﺻﻹﺍ
+
+New name:
+== ﺪﻳﺪﺟ ﻢﺳﺍ:
+
+New random timeout code
+== ﺪﻳﺪﺟ ﻲﺋﺍﻮﺸﻋ ﺔﻠﻬﻣ ﺩﻮﻛ
+
+News
+== ﺭﺎﺒﺧﻻﺍ
+
 Next weapon
 == ﻲﻟﺎﺘﻟﺍ ﻡﻼﺴﻟﺍ
 
@@ -260,14 +611,26 @@ No servers found
 No servers match your filter criteria
 == ﻚﺑ ﺔﺻﺎﺨﻟﺍ ﺔﻴﻔﺼﺘﻟﺍ ﺮﻴﻳﺎﻌﻣ ﻖﺑﺎﻄﺗ ﺮﻓﺮﻴﺳ ﺪﺟﻮﺗ ﻻ
 
+No updates available
+== ﺕﺎﺜﻳﺪﺤﺗ ﺪﺟﻮﻳﻻ
+
+Normal message
+== ﺔﻴﻌﻴﺒﻄﻟﺍ ﻞﺋﺎﺳﺮﻟﺍ
+
 Ok
 == ﻙﻭﺍ
 
 Open
 == ﺢﺘﻓ
 
+Overlay entities
+== ﻥﺍﺭﺪﺠﻟﺍ-ﺐﻛﺍﺮﺗ
+
 Parent Folder
 == ﻞﺻﻷﺍ ﺪﻠﺠﻤﻟﺍ
+
+Particles
+== ﺰﻠﻜﺗﺭﺎﺒﻟﺍ
 
 Password
 == ﺭﻭﺮﻤﻟﺍ ﺔﻤﻠﻛ
@@ -275,15 +638,17 @@ Password
 Password incorrect
 == ﺔﺌﻃﺎﺧ ﺭﻭﺮﻤﻟﺍ ﺔﻤﻠﻛ
 
+Pause
+== ﺔﺒﻗﺍﺮﻣ
+
+Personal best:
+== :ﺔﻴﺼﺨﺷ ﻞﻀﻓﺃ
+
 Ping
 == ﻖﻨﺑ
 
 Pistol
 == ﺱﺪﺴﻣ
-
-[Demo browser]
-Play
-== ﻞﻴﻐﺸﺗ
 
 Play background music
 == ﺔﻴﻔﻠﺨﻟﺍ ﺕﻮﺻ ﻞﻴﻌﻔﺗ
@@ -303,14 +668,35 @@ Players
 Please balance teams!
 == !ﻕﺮﻔﻟﺍ ﺔﻧﺯﺍﻮﻣ ﺀﺎﺟﺮﻟﺍ
 
+Please enter your nickname below.
+== ﻚﺑ ﺹﺎﺨﻟﺍ ﻢﺳﺍ ﻝﺎﺧﺩﺇ ﺀﺎﺟﺮﻟﺍ
+
+Please use a different name
+== ﺮﺧﺃ ﻢﺳﺍ ﺭﺎﻴﺘﺧﺎﺑ ﻢﻗ ﺀﺎﺟﺭ
+
 Prev. weapon
 == ﻖﺑﺎﺴﻟﺍ ﺡﻼﺴﻟﺍ
 
 Quit
 == ﺝﻭﺮﺧ
 
+Quit anyway?
+== ﻝﺎﺣ ﻞﻛ ﻰﻠﻋ ﺝﻭﺮﺨﻟﺍ
+
+Race
+== ﻕﺎﺒﺳ
+
+Ratio
+== ﺔﺒﺴﻧ
+
 Reason:
 == :ﺐﺒﺴﻟﺍ
+
+Reconnect in %d sec
+== %d ﻲﻓ ﻝﻮﺧﺪﻟﺍ ﺓﺩﺎﻋﺍ
+
+Record demo
+== ﻮﻳﺪﻴﻓ ﺮﻳﻮﺼﺗ
 
 Red team
 == ﺮﻤﺣﻻﺍ ﻖﻳﺮﻔﻟﺍ
@@ -321,11 +707,20 @@ Red team wins!
 Refresh
 == ﺚﻳﺪﺤﺗ
 
+Refresh Rate
+== ﻢﻳﺮﻔﻟﺍ ﻝﺪﻌﻣ
+
+Reload
+== ﻞﻴﻤﺤﺘﻟﺍ ﺓﺩﺎﻋﺍ
+
 Remote console
 == ﻦﻣﺩﻻﺍ ﻞﺴﻧﻮﻛ
 
 Remove
 == ﻑﺬﺣ
+
+Remove chat
+== ﺕﺎﺸﻟﺍ ﻑﺬﺣ
 
 Remove friend
 == ﻖﻳﺪﺻ ﻑﺬﺣ
@@ -336,8 +731,53 @@ Rename
 Rename demo
 == ﻮﻳﺪﻴﻓﻟﺍ ﺔﻴﻤﺴﺗ ﺓﺩﺎﻋﺍ
 
+Render
+== ﻞﻌﺟ
+
+Render demo
+== ﻮﻳﺪﻴﻓﻟﺍ ﻞﻴﻤﺤﺗ
+
+Replace video
+== ﻮﻳﺪﻴﻔﻟﺍ ﻝﺍﺪﺒﺘﺳﺍ
+
+Replay
+== ﻞﻴﻐﺸﺘﻟﺍ ﺓﺩﺎﻋﺍ
+
+Replay feature is disabled!
+== !ﺔﻔﻗﻮﻣ ﻞﻴﻐﺸﺘﻟﺍ ﺓﺩﺎﻋﺍ ﺓﺰﻴﻣ
+
+Reset
+== ﻦﻴﻴﻌﺗ ﺓﺩﺎﻋﺇ
+
 Reset filter
 == ﺔﻴﻔﺼﺘﻟﺍ ﺓﺩﺎﻋﺍ
+
+Reset to defaults
+== ﺀﻲﺷ ﻞﻛ ﺓﺩﺎﻋﺍ
+
+Restart
+== ﻞﻴﻐﺸﺘﻟﺍ ﺓﺩﺎﻋﺍ
+
+Round
+== ﺔﻟﻮﺟ
+
+Run server
+== ﺮﻓﺮﻴﺳ ﻞﻴﻐﺸﺗ
+
+Sat.
+== ﺔﻴﻓﺎﻔﺷ
+
+Save
+== ﻆﻔﺣ
+
+Save ghost
+== ﺢﺒﺸﻟﺍ ﻆﻔﺣ
+
+Save the best demo of each race
+== ﻕﺎﺒﺳ ﻞﻜﻟ ﻲﺒﻳﺮﺠﺗ ﺽﺮﻋ ﻞﻀﻓﺃ ﻆﻔﺣﺍ
+
+Saving ddnet-settings.cfg failed
+== ﻆﻔﺤﻟﺍ ﻞﺸﻓ ddnet-settings.cfg
 
 Score
 == ﻁﺎﻘﻨﻟﺍ
@@ -348,14 +788,26 @@ Score limit
 Scoreboard
 == ﻁﺎﻘﻨﻟﺍ ﺔﻤﺋﺎﻗ
 
+Screen
+== ﺔﺷﺎﺷ
+
 Screenshot
 == ﺔﺷﺎﺸﻟﺍ ﺔﻄﻘﻟ
+
+Search
+== ﺚﺤﺑ
 
 Server address:
 == ﺮﻓﺮﻴﺴﻟﺍ ﻥﺍﻮﻨﻋ:
 
+Server best:
+== :ﺮﻓﺮﻴﺳ ﻞﻀﻓﺍ
+
 Server details
 == ﺮﻓﺮﻴﺴﻟﺍ ﻞﻴﺻﺎﻔﺗ
+
+Server executable not found, can't run server
+== ﺮﻓﺮﻴﺴﻟﺍ ﻞﻴﻐﺸﺗ ﻦﻜﻤﻳ ﻻﻭ ،ﺬﻴﻔﻨﺘﻠﻟ ﻞﺑﺎﻗ ﺮﻓﺮﻴﺳ ﻰﻠﻋ ﺭﻮﺜﻌﻟﺍ ﻢﺘﻳ ﻢﻟ
 
 Server filter
 == ﺮﻓﺮﻴﺴﻟﺍ ﺔﻴﻔﺼﺗ
@@ -366,29 +818,107 @@ Server info
 Server not full
 == ﺊﻠﺘﻤﻣ ﺲﻴﻟ ﺮﻓﺮﻴﺴﻟﺍ
 
+Settings
+== ﺕﺍﺩﺍﺪﻋﻻﺍ
+
 Shotgun
 == ﻦﻘﺘﺷ
+
+Show DDNet map finishes in server browser
+== ﺭﺎﻬﻇﺍ DDNet ﺕﺍﺮﻓﺮﻴﺴﻟﺍ ﺢﻔﺼﺘﻣ ﻲﻓ ﺔﻴﻬﺘﻨﻤﻟﺍ ﺕﺎﺑﺎﻤﻟﺍ
+
+Show HUD
+== ﻞﻜﺸﻟﺍ ﺭﺎﻬﻇﺍ
+
+Show all
+== ﻞﻜﻟﺍ ﺭﺎﻬﻇﺍ
 
 Show chat
 == ﺕﺎﺸﻟﺍ ﺭﺎﻬﻇﺍ
 
+Show clan above name plates
+== ﻢﻬﻴﻣﺎﺳﺍ ﻕﻮﻓ ﻥﻼﻜﻟﺍ ﺭﺎﻬﻇﺍ
+
+Show entities
+== ﻥﺍﺭﺪﺠﻟﺍ ﺭﺎﻬﻇﺍ
+
 Show friends only
 == ﻂﻘﻓ ﺀﺎﻗﺪﺻﻻﺍ ﺭﺎﻬﻇﺍ
+
+Show ghost
+== ﺢﺒﺸﻟﺍ ﺭﺎﻬﻇﺍ
 
 Show ingame HUD
 == ﺔﺒﻌﻠﻟﺍ ﺮﻬﻈﻣ ﺭﺎﻬﻇﺍ
 
+Show kill messages
+== ﻞﺘﻘﻟﺍ ﻞﺋﺎﺳﺭ ﺭﺎﻬﻇﺍ
+
 Show name plates
 == ﻲﻣﺎﺳﻻﺍ ﺭﺎﻬﻇﺍ
 
+Show names in chat in team colors
+== ﻖﻳﺮﻔﻟﺍ ﻥﺍﻮﻟﺄﺑ ﺔﺷﺩﺭﺪﻟﺍ ﻲﻓ ﺀﺎﻤﺳﻷﺍ ﺭﺎﻬﻇﺇ
+
 Show only chat messages from friends
 == ﺀﺎﻗﺪﺻﻻﺍ ﻦﻣ ﻂﻘﻓ ﻞﺋﺎﺳﺮﻟﺍ ﺭﺎﻬﻇﺍ
+
+Show other players' hook collision lines
+== ﻦﻳﺮﺧﻵﺍ ﻦﻴﺒﻋﻼﻟﺍ ﺐﺤﺳ ﻡﺍﺪﻄﺻﺍ ﻁﻮﻄﺧ ﺮﻬﻇﺃ
+
+Show other players' key presses
+== ﻦﻳﺮﺧﻻﺍ ﻦﻴﺒﻋﻼﻟﺍ ﺎﻬﻄﻐﻀﺑ ﻡﺎﻗ ﻲﺘﻟﺍ ﺢﻴﺗﺎﻔﻤﻟﺍ ﺭﺎﻬﻇﺍ
+
+Show others
+== ﻦﻳﺮﺧﻻﺍ ﺭﺎﻬﻇﺍ
+
+Show others (own team only)
+== ﻂﻘﻓ ﻢﻴﺘﻠﻟ ﻦﻳﺮﺧﻻﺍ ﺭﺎﻬﻇﺍ
+
+Show quads
+== Quads ﺭﺎﻬﻇﺍ
+
+Show score
+== ﻁﺎﻘﻨﻟﺍ ﺭﺎﻬﻇﺍ
+
+Show text entities
+== Entities-Text ﺭﺎﻬﻇﺍ
+
+Show tiles layers from BG map
+== ﺔﻴﻔﻠﺨﻟﺍ ﺏﺎﻤﻠﻟ ﺐﻧﺎﺠﺘﻟﺍ ﺕﺎﻘﺒﻃ ﺭﺎﻬﻇﺇ
+
+Show votes window after voting
+== ﺖﻳﻮﺼﺘﻟﺍ ﺪﻌﺑ ﺕﺎﺘﻳﻮﺼﺘﻟﺍ ﺔﻤﺋﺎﻗ ﺭﺎﻬﻇﺍ
+
+Size
+== ﻢﺠﺣ
+
+Size:
+== ﻢﺠﺤﻟﺍ
+
+Skin Database
+== ﺕﺎﻨﻜﺴﻟﺍ ﺔﺒﺘﻜﻣ
+
+Skin prefix
+== ﻦﻜﺴﻟﺍ ﺲﻜﻓﺮﺑ
+
+Skins directory
+== ﺕﺎﻨﻜﺴﻟﺍ ﻒﻠﻣ ﺢﺘﻓ
+
+Skip the main menu
+== ﺔﻤﺋﺎﻘﻟﺍ ﻲﻄﺨﺗ
+
+Smooth Dynamic Camera
+== ﺔﻤﻋﺎﻧ ﺍﺮﻴﻣﺎﻛ ﻚﻴﻣﺎﻨﻳﺩ
 
 Sound
 == ﺕﻮﺼﻟﺍ
 
 Sound error
 == ﺕﻮﺼﻟﺎﺑ ﺎﻄﺧ
+
+Sound volume
+== ﺕﻮﺼﻟﺍ ﻢﺠﺣ
 
 Spectate
 == ﺓﺪﻫﺎﺸﻤﻟﺍ ﻊﺿﻭ
@@ -405,17 +935,41 @@ Spectator mode
 Spectators
 == ﻥﻭﺪﻫﺎﺸﻤﻟﺍ
 
+Speed
+== ﺔﻋﺮﺳ
+
+Spree
+== ﺡﺮﻣ
+
+Statboard
+== ﺩﺭﻮﺑ ﺕﺎﺘﺳ
+
 Stop record
 == ﺮﻳﻮﺼﺘﻟﺍ ﻑﺎﻘﻳﺍ
+
+Stop server
+== ﺮﻓﺮﻴﺴﻟﺍ ﻑﺎﻘﻳﺍ
 
 Strict gametype filter
 == ﻂﺒﻀﻟﺎﺑ ﺔﺒﻌﻠﻟﺍ ﻉﻮﻧ
 
+Successfully saved the replay!
+== !ﺡﺎﺠﻨﺑ ﺓﺩﺎﻋﻻﺍ ﻩﺬﻫ ﻆﻔﺣ ﻢﺗ
+
 Sudden Death
 == ﺊﺟﺎﻔﻤﻟﺍ ﺕﻮﻤﻟﺍ
 
+Suicides
+== ﺭﺎﺤﺘﻧﻻﺍ
+
 Switch weapon on pickup
 == ﻁﺎﻘﺘﻟﻻﺍ ﺪﻨﻋ ﺡﻼﺴﻟﺍ ﻞﻳﺪﺒﺗ
+
+Switch weapon when out of ammo
+== ﺓﺮﻴﺧﺬﻟﺍ ﺫﺎﻔﻧ ﺪﻨﻋ ﺡﻼﺴﻟﺍ ﺮﻴﻴﻐﺗ
+
+System message
+== ﻡﺎﻈﻨﻟﺍ ﻞﺋﺎﺳﺭ
 
 Team
 == ﻖﻳﺮﻔﻟﺍ
@@ -423,14 +977,26 @@ Team
 Team chat
 == ﻖﻳﺮﻔﻟﺍ ﺕﺎﺷ
 
+Team message
+== ﻖﻳﺮﻔﻟﺍ ﺔﻟﺎﺳﺭ
+
 The audio device couldn't be initialised.
 == .ﺕﻮﺼﻟﺍ ﺯﺎﻬﺟ ﺔﺌﻴﻬﺗ ﺭﺬﻌﺗ
 
 The server is running a non-standard tuning on a pure game type.
 == .ﺺﻟﺎﺧ ﺔﺒﻌﻟ ﻉﻮﻧ ﻰﻠﻋ ﻲﺳﺎﻴﻗ ﺮﻴﻏ ﻂﺒﺿ ﻞﻴﻐﺸﺘﺑ ﺮﻓﺮﻴﺳ ﻡﻮﻘﻳ
 
+Theme
+== ﺕﺎﻤﻴﺜﻟﺍ
+
+Themes directory
+== ﺕﺎﻤﻴﺜﻟﺍ ﻒﻠﻣ ﺢﺘﻓ
+
 There's an unsaved map in the editor, you might want to save it before you quit the game.
 == .ﺔﺒﻌﻠﻟﺍ ﺀﺎﻬﻧﺇ ﻞﺒﻗ ﺎﻬﻈﻔﺣ ﻲﻓ ﺐﻏﺮﺗ ﺪﻗ ، ﺭﺮﺤﻤﻟﺍ ﻲﻓ ﺔﻇﻮﻔﺤﻣ ﺮﻴﻏ ﺏﺎﻣ ﻙﺎﻨﻫ
+
+Time
+== ﺖﻗﻮﻟﺍ
 
 Time limit
 == ﺖﻗﻮﻟﺍ ﺩﻭﺪﺣ
@@ -438,14 +1004,62 @@ Time limit
 Time limit: %d min
 == ﺖﻗﻮﻟﺍ ﺩﻭﺪﺣ: %d min
 
+Toggle dummy
+== ﺔﻴﻣﺪﻠﻟ ﻞﻳﺪﺒﺗ
+
+Toggle dyncam
+== ﺔﻴﻜﻴﻣﺎﻨﻳﺪﻟﺍ ﺍﺮﻴﻣﺎﻛ
+
+Toggle ghost
+== ﺢﺒﺸﻟﺍ ﻊﺿﻭ
+
+Transmits your player name to info.ddnet.org
+== ﻰﻟﺇ ﻚﺑ ﺹﺎﺨﻟﺍ ﺐﻋﻼﻟﺍ ﻢﺳﺍ ﻞﻘﻨﻳ info.ddnet.org
+
 Try again
 == ﺍﺩﺪﺠﻣ ﻝﻭﺎﺣ
 
 Type
 == ﺭﻮﻃ
 
+Type:
+== ﺔﺑﺎﺘﻛ:
+
+Types
+== ﻉﺍﻮﻧﺃ
+
+UI Color
+== ﻥﺍﻮﻟﻻﺍ ﺔﻤﺋﺎﻗ
+
 Unable to rename the demo
 == ﻮﻳﺪﻴﻓﻟﺍ ﺔﻴﻤﺴﺗ ﺓﺩﺎﻋﺎﺑ ﻞﺸﻓ
+
+Unfinished map
+== ﺔﻴﻬﺘﻨﻣ ﺮﻴﻐﻟﺍ ﺕﺎﺑﺎﻤﻟﺍ
+
+Update failed! Check log...
+== ...ﺕﺎﻗﻮﻠﻟﺍ ﻦﻣ ﺪﻛﺎﺗ !ﻞﺸﻓ ﺚﻳﺪﺤﺘﻟﺍ
+
+Update now
+== ﻥﻻﺍ ﺚﻳﺪﺤﺘﻟﺍ
+
+Updating...
+== ...ﺚﻳﺪﺤﺘﻟﺍ ﺭﺎﺟ
+
+Use DDRace Scoreboard
+== ﻝﺎﻤﻌﺘﺳﺃ DDRace ﺩﺭﻮﺑ ﺭﻮﻜﺳ
+
+Use current map as background
+== ﺔﻴﻔﻠﺨﻛ ﻲﻟﺎﺤﻟﺍ ﺏﺎﻤﻟﺍ ﻡﺍﺪﺨﺘﺳﺍ
+
+Use high DPI
+== ﻲﻟﺎﻋ IPD ﻡﺍﺪﺨﺘﺳﺍ
+
+Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
+== .ﻯﺮﺧﻷﺍ ﺭﺍﺭﺯﻻﺍ ﻂﺑﺍﻭﺭ ﺕﺍﺩﺍﺪﻋﺇ ﻊﺟﺍﺭ .ﻦﻳﺮﺧﻻﺍ ﻦﻴﺒﻋﻻﺍ ﺓﺪﻫﺎﺸﻣ ﻭ ﻒﻗﻮﻠﻟ q ,(ﺓﺩﺎﻋﺍ) ﻞﺘﻘﻠﻟ k ﺭﺯ ﻡﺪﺨﺘﺳﺍ
+
+Use old chat style
+== ﻢﻳﺪﻘﻟﺍ ﺔﺛﺩﺎﺤﻤﻟﺍ ﻞﻜﺷ ﻡﺍﺪﺨﺘﺳﺍ
 
 Use sounds
 == ﺕﺍﻮﺻﻻﺍ ﻡﺍﺪﺨﺘﺳﺍ
@@ -456,8 +1070,17 @@ Use team colors for name plates
 V-Sync
 == V-Sync
 
+Vanilla skins only
+== ﻂﻘﻓ ﺔﻴﺳﺎﺳﻻﺍ ﺕﺎﻨﻜﺴﻟﺍ
+
 Version
 == ﺭﺍﺪﺻﻻﺍ
+
+Version:
+== :ﺭﺍﺪﺻﻻﺍ
+
+Video name:
+== :ﻮﻳﺪﻴﻓﻟﺍ ﻢﺳﺍ
 
 Vote command:
 == ﺖﻳﻮﺼﺘﻟﺍ ﺭﺯ:
@@ -477,8 +1100,17 @@ Voting
 Warmup
 == ﺔﻴﻤﺤﺗ
 
+Warning
+== ﺮﻳﺬﺤﺗ
+
 Weapon
 == ﺡﻼﺳ
+
+Website
+== ﻊﻗﻮﻣ
+
+Welcome to DDNet
+== ﻲﻓ ﻚﺑ ﺎﺒﺣﺮﻣ DDNet
 
 Yes
 == ﻢﻌﻧ
@@ -486,776 +1118,35 @@ Yes
 You must restart the game for all settings to take effect.
 == .ﻝﻮﻌﻔﻤﻟﺍ ﺔﻳﺭﺎﺳ ﺕﺍﺩﺍﺪﻋﻹﺍ ﻊﻴﻤﺟ ﺢﺒﺼﺗ ﻰﺘﺣ ﺔﺒﻌﻠﻟﺍ ﻞﻴﻐﺸﺗ ﺓﺩﺎﻋﺇ ﺐﺠﻳ
 
-New name:
-== ﺪﻳﺪﺟ ﻢﺳﺍ:
-
-Sat.
-== ﺔﻴﻓﺎﻔﺷ
-
-Miscellaneous
-== ﻉﻮﻨﺘﻣ
-
-Internet
-== ﺖﻧﺮﺘﻧﻻﺍ
-
-Max demos
-== ﺕﺎﻫﻮﻳﺪﻴﻔﻠﻟ ﻰﺼﻗﻻﺍ ﺪﺤﻟﺍ
-
-News
-== ﺭﺎﺒﺧﻻﺍ
-
-Join game
-== ﺔﺒﻌﻠﻟﺍ ﻰﻟﺍ ﻉﻮﺟﺭ
-
-FSAA samples
-== Anti-Aliasing
-
-Sound volume
-== ﺕﻮﺼﻟﺍ ﻢﺠﺣ
-
-Created:
-== ﺊﺸﻧﺍ:
-
-Max Screenshots
-== ﺭﻮﺼﻠﻟ ﻰﺼﻗﻻﺍ ﺪﺤﻟﺍ
-
-Length:
-== :ﻝﻮﻄﻟﺍ
-
-Netversion:
-== :ﻲﻓﺎﺼﻟﺍ ﺭﺍﺪﺻﻹﺍ
-
-Map:
-== ﺏﺎﻤﻟﺍ:
-
-Info
-== ﺕﺎﻣﻮﻠﻌﻣ
-
-Hue
-== ﻥﻮﻟ
-
-Record demo
-== ﻮﻳﺪﻴﻓ ﺮﻳﻮﺼﺗ
+Your nickname '%s' is already used (%d points). Do you still want to use it?
+== ﻪﻣﺍﺪﺨﺘﺳﺍ ﺪﻳﺮﺗ ﺖﻟﺯﺎﻣ ﻞﻫ '%s' ﻞﻤﻌﺘﺴﻣ ﻚﻤﺳﺍ
 
 Your skin
 == ﻚﻨﻜﺳ
 
-Size:
-== ﻢﺠﺤﻟﺍ
-
-Reset to defaults
-== ﺀﻲﺷ ﻞﻛ ﺓﺩﺎﻋﺍ
-
-Quit anyway?
-== ﻝﺎﺣ ﻞﻛ ﻰﻠﻋ ﺝﻭﺮﺨﻟﺍ
-
-Version:
-== :ﺭﺍﺪﺻﻻﺍ
-
-Round
-== ﺔﻟﻮﺟ
-
-Lht.
-== ﺢﻴﺘﻔﺗ
-
-UI Color
-== ﻥﺍﻮﻟﻻﺍ ﺔﻤﺋﺎﻗ
-
-Crc:
-== Crc:
-
-Alpha
-== ﺔﻴﻓﺎﻔﺷ
-
-LAN
-== LAN
-
-Name plates size
-== ﻲﻣﺎﺳﻻﺍ ﻢﺠﺣ
-
-Type:
-== ﺔﺑﺎﺘﻛ:
-
-Ratio
-== ﺔﺒﺴﻧ
-
-Dummy settings
-== ﺔﻴﻣﺪﻟﺍ ﺕﺍﺩﺍﺪﻋﺍ
-
-AntiPing
-== AntiPing
-
-Show quads
-== Quads ﺭﺎﻬﻇﺍ
-
-Map sound volume
-== ﺏﺎﻤﻟﺍ ﺕﻮﺻ
-
-Countries
-== ﻥﺍﺪﻠﺒﻟﺍ
-
-Types
-== ﻉﺍﻮﻧﺃ
-
-Show kill messages
-== ﻞﺘﻘﻟﺍ ﻞﺋﺎﺳﺭ ﺭﺎﻬﻇﺍ
-
-Show ghost
-== ﺢﺒﺸﻟﺍ ﺭﺎﻬﻇﺍ
-
-No updates available
-== ﺕﺎﺜﻳﺪﺤﺗ ﺪﺟﻮﻳﻻ
-
-Update now
-== ﻥﻻﺍ ﺚﻳﺪﺤﺘﻟﺍ
-
-Enable server message sound
-== ﺮﻓﺮﻴﺴﻟﺍ ﺔﺷﺩﺭﺩ ﺕﻮﺻ ﻞﻴﻌﻔﺗ
-
-Show votes window after voting
-== ﺖﻳﻮﺼﺘﻟﺍ ﺪﻌﺑ ﺕﺎﺘﻳﻮﺼﺘﻟﺍ ﺔﻤﺋﺎﻗ ﺭﺎﻬﻇﺍ
-
-HUD
-== ﺔﺒﻌﻠﻟﺍ ﺮﻬﻈﻣ
-
-Show names in chat in team colors
-== ﻖﻳﺮﻔﻟﺍ ﻥﺍﻮﻟﺄﺑ ﺔﺷﺩﺭﺪﻟﺍ ﻲﻓ ﺀﺎﻤﺳﻷﺍ ﺭﺎﻬﻇﺇ
-
-Enable team chat sound
-== ﻖﻳﺮﻔﻟﺍ ﺔﺷﺩﺭﺩ ﺕﻮﺻ ﻞﻴﻌﻔﺗ
-
-Show other players' hook collision lines
-== ﻦﻳﺮﺧﻵﺍ ﻦﻴﺒﻋﻼﻟﺍ ﺐﺤﺳ ﻡﺍﺪﻄﺻﺍ ﻁﻮﻄﺧ ﺮﻬﻇﺃ
-
-Deaths
-== ﺕﺍﻮﻣﻻﺍ
-
-Enable game sounds
-== ﺔﺒﻌﻟﻻﺍ ﺕﻮﺻ ﻞﻴﻌﻔﺗ
-
-DDNet Client needs to be restarted to complete update!
-== DDNet-Client !ﺚﻳﺪﺤﺘﻟﺍ ﻝﺎﻤﻛﻻ ﻞﻴﻐﺸﺘﻟﺍ ﺓﺩﺎﻋﻻ ﺝﺎﺘﺤﺗ
-
-Show others
-== ﻦﻳﺮﺧﻻﺍ ﺭﺎﻬﻇﺍ
-
-Restart
-== ﻞﻴﻐﺸﺘﻟﺍ ﺓﺩﺎﻋﺍ
-
-Browser
-== ﺢﻔﺼﺘﻤﻟﺍ
-
-Enable gun sound
-== ﺔﺤﻠﺳﻻﺍ ﺕﻮﺻ ﻞﻴﻌﻔﺗ
-
-Team message
-== ﻖﻳﺮﻔﻟﺍ ﺔﻟﺎﺳﺭ
-
-Save the best demo of each race
-== ﻕﺎﺒﺳ ﻞﻜﻟ ﻲﺒﻳﺮﺠﺗ ﺽﺮﻋ ﻞﻀﻓﺃ ﻆﻔﺣﺍ
-
-Are you sure that you want to disconnect?
-== ﺝﻭﺮﺨﻟﺍ ﺪﻳﺮﺗ ﻚﻧﺎﺑ ﺪﻛﺂﺘﻣ ﺖﻧﺍ ﻞﻫ
-
-Ghost
-== ﺢﺒﺸﻟﺍ
-
-Check now
-== ﻥﻻﺍ ﺪﻛﺄﺗ
-
-DDNet Client updated!
-== DDNet-Client تحدثت!
-
-AntiPing: predict other players
-== AntiPing: ﻦﻳﺮﺧﻵﺍ ﻦﻴﺒﻋﻼﻟ ﻖﺒﺴﻣ ﺏﺎﺴﺣ
-
-Show other players' key presses
-== ﻦﻳﺮﺧﻻﺍ ﻦﻴﺒﻋﻼﻟﺍ ﺎﻬﻄﻐﻀﺑ ﻡﺎﻗ ﻲﺘﻟﺍ ﺢﻴﺗﺎﻔﻤﻟﺍ ﺭﺎﻬﻇﺍ
-
-System message
-== ﻡﺎﻈﻨﻟﺍ ﻞﺋﺎﺳﺭ
-
-Updating...
-== ...ﺚﻳﺪﺤﺘﻟﺍ ﺭﺎﺟ
-
-Overlay entities
-== ﻥﺍﺭﺪﺠﻟﺍ-ﺐﻛﺍﺮﺗ
-
-Messages
-== ﻞﺋﺎﺳﺮﻟﺍ
-
-%.2f MiB
-== %.2f MiB
-
-Use DDRace Scoreboard
-== ﻝﺎﻤﻌﺘﺳﺃ DDRace ﺩﺭﻮﺑ ﺭﻮﻜﺳ
-
-Loading DDNet Client
-== ﻞﻴﻤﺤﺘﻟﺍ ﺭﺎﺟ DDNet Client
-
-Default zoom
-== ﻲﻌﻴﺒﻄﻟﺍ ﺮﻴﺒﻜﺘﻟﺍ
-
-Show score
-== ﻁﺎﻘﻨﻟﺍ ﺭﺎﻬﻇﺍ
-
-%.2f KiB
-== %.2f KiB
-
-Enable regular chat sound
-== ﺔﻳﺩﺎﻌﻟﺍ ﺔﺷﺩﺭﺩ ﺕﻮﺻ ﻞﻴﻌﻔﺗ
-
-DDNet
-== ﺖﻴﻧﺩﺩ
-
-Normal message
-== ﺔﻴﻌﻴﺒﻄﻟﺍ ﻞﺋﺎﺳﺮﻟﺍ
-
-AntiPing: predict grenade paths
-== AntiPing: ﺔﻳﻭﺪﻴﻟﺍ ﻞﺑﺎﻨﻘﻟﺍ ﺕﺍﺭﺎﺴﻣ ﻊﻗﻮﺗ
-
-Search
-== ﺚﺤﺑ
-
-Connecting dummy
-== ﺔﻴﻣﺪﻟﺍ ﻝﺎﺼﺗﺍ
-
-Show clan above name plates
-== ﻢﻬﻴﻣﺎﺳﺍ ﻕﻮﻓ ﻥﻼﻜﻟﺍ ﺭﺎﻬﻇﺍ
-
-Save ghost
-== ﺢﺒﺸﻟﺍ ﻆﻔﺣ
-
-Enable highlighted chat sound
-== ﻪﻴﺒﻨﺘﻟﺍ ﺕﻮﺻ ﻞﻴﻌﻔﺗ
-
-AntiPing: predict weapons
-== AntiPing: ﺔﺤﻠﺳﻷﺍ ﺮﻴﻀﺤﺗ
-
-Highlighted message
-== ﻪﻴﺒﻨﺘﻟﺍ ﻞﺋﺎﺳﺭ
-
-Switch weapon when out of ammo
-== ﺓﺮﻴﺧﺬﻟﺍ ﺫﺎﻔﻧ ﺪﻨﻋ ﺡﻼﺴﻟﺍ ﺮﻴﻴﻐﺗ
-
-Grabs
-== ﺕﺎﻜﺴﻣ
-
-Automatically take game over screenshot
-== ﺔﺷﺎﺸﻟﺍ ﺔﻄﻘﻟ ﻰﻠﻋ ﺍًﻴﺋﺎﻘﻠﺗ ﺔﺒﻌﻠﻟﺍ ﺬﺧﺃ
-
-Please use a different name
-== ﺮﺧﺃ ﻢﺳﺍ ﺭﺎﻴﺘﺧﺎﺑ ﻢﻗ ﺀﺎﺟﺭ
-
-Gameplay
-== ﺐﻌﻠﻟﺍ
-
-Laser
-== ﺭﺰﻴﻟ
-
-Follow
-== ﻊﺒﺗﺃ
-
-Reset
-== ﻦﻴﻴﻌﺗ ﺓﺩﺎﻋﺇ
-
-Automatically create statboard csv
-== statboard ﻞﻤﻋ ﻲﺋﺎﻘﻠﺗ
-
-Show tiles layers from BG map
-== ﺔﻴﻔﻠﺨﻟﺍ ﺏﺎﻤﻠﻟ ﺐﻧﺎﺠﺘﻟﺍ ﺕﺎﻘﺒﻃ ﺭﺎﻬﻇﺇ
-
-Remove chat
-== ﺕﺎﺸﻟﺍ ﻑﺬﺣ
-
-Frags
-== ﻞﺑﺎﻨﻗ
-
-Automatically take statboard screenshot
-== ﺍﻴﺋﺎﻘﻠﺗ ﺞﺋﺎﺘﻨﻟﺍ ﺔﺣﻮﻠﻟ ﺔﺷﺎﺷ ﺔﻄﻘﻟ ﺬﺧﺍ
-
-Enable long pain sound (used when shooting in freeze)
-== ( ﺰﻳﺮﻔﺘﻳ ﺎﻣﺪﻨﻋ ﻡﺪﺨﺘﺴﻳ ) ﻢﻟﻵﺍ ﺕﻮﺻ
-
-Vanilla skins only
-== ﻂﻘﻓ ﺔﻴﺳﺎﺳﻻﺍ ﺕﺎﻨﻜﺴﻟﺍ
-
-Refresh Rate
-== ﻢﻳﺮﻔﻟﺍ ﻝﺪﻌﻣ
-
-New random timeout code
-== ﺪﻳﺪﺟ ﻲﺋﺍﻮﺸﻋ ﺔﻠﻬﻣ ﺩﻮﻛ
-
-Suicides
-== ﺭﺎﺤﺘﻧﻻﺍ
-
-Net
-== ﺔﻜﺒﺸﻟﺍ
-
-FPM
-== فبم
-
-Spree
-== ﺡﺮﻣ
-
-Max CSVs
-== Max CSVs
-
-Best
-== ﻞﻀﻓﺍ
-
-Screen
-== ﺔﺷﺎﺷ
-
-Exclude
-== ﺩﺎﻌﺒﺘﺳﺍ
-
-Demo
-== ﺕﺎﻫﻮﻳﺪﻴﻔﻟﺍ
-
-Fat skins (DDFat)
-== ﺔﻨﻴﻤﺳ ﺕﺎﻨﻜﺳ
-
-Show DDNet map finishes in server browser
-== ﺭﺎﻬﻇﺍ DDNet ﺕﺍﺮﻓﺮﻴﺴﻟﺍ ﺢﻔﺼﺘﻣ ﻲﻓ ﺔﻴﻬﺘﻨﻤﻟﺍ ﺕﺎﺑﺎﻤﻟﺍ
-
-Unfinished map
-== ﺔﻴﻬﺘﻨﻣ ﺮﻴﻐﻟﺍ ﺕﺎﺑﺎﻤﻟﺍ
-
-Welcome to DDNet
-== ﻲﻓ ﻚﺑ ﺎﺒﺣﺮﻣ DDNet
-
-May cause delay
-== ﺮﻴﺧﺄﺗ ﺐﺒﺴﻳ
-
-Indicate map finish
-== ﺔﻗﺎﻄﺒﻟﺍ ﺭﺎﺼﺘﻧﺍ ﺭﺎﻬﻇﺇ
-
-File already exists, do you want to overwrite it?
-== ﻪﻗﻮﻓ ﺔﺑﺎﺘﻜﻟﺍ ﺪﻳﺮﺗ ﻞﻫ ، ﻞﻌﻔﻟﺎﺑ ﺩﻮﺟﻮﻣ ﻒﻠﻤﻟﺍ
-
-Clan plates size
-== ﻥﻼﻜﻟﺍ ﻞﻜﺷ ﻢﺠﺣ
-
-Friend message
-== ﻖﻳﺪﺻ ﺔﻟﺎﺳﺭ
-
-Date
-== ﺦﻳﺭﺎﺗ
-
-Skin prefix
-== ﻦﻜﺴﻟﺍ ﺲﻜﻓﺮﺑ
-
-Show HUD
-== ﻞﻜﺸﻟﺍ ﺭﺎﻬﻇﺍ
-
-Reload
-== ﻞﻴﻤﺤﺘﻟﺍ ﺓﺩﺎﻋﺍ
-
-9+ new mentions
-== 9+ ﺓﺪﻳﺪﺟ ﺕﺍﺭﺎﻌﺷﺍ
-
-Lock team
-== ﻖﻳﺮﻔﻟﺍ ﻞﻔﻗ
+Zoom in
+== ﺮﻴﺒﻜﺗ
 
 Zoom out
 == ﺮﻴﻐﺼﺗ
 
-Are you sure that you want to disconnect your dummy?
-== ﻚﺘﻴﻣﺩ ﺝﺍﺮﺧﺍ ﺪﻳﺮﺗ ﻚﻧﺍ ﻦﻣ ﺪﻛﺎﺘﻣ ﺖﻧﺍ ﻞﻫ
-
-Activate
-== ﻞﻴﻌﻔﺗ
-
-Time
-== ﺖﻗﻮﻟﺍ
-
-Successfully saved the replay!
-== !ﺡﺎﺠﻨﺑ ﺓﺩﺎﻋﻻﺍ ﻩﺬﻫ ﻆﻔﺣ ﻢﺗ
-
-Length
-== ﻝﻮﻄﻟﺍ
-
-Show text entities
-== Entities-Text ﺭﺎﻬﻇﺍ
-
-Hook collisions
-== ﺐﺤﺴﻟﺍ ﺭﺰﻴﻟ ﺭﺎﻬﻇﺍ
-
-Fetch Info
-== ﺕﺎﻣﻮﻠﻌﻤﻟﺍ ﺭﺎﻀﺣﺍ
-
-DDNet %s is out!
-== DDNet %s ﺪﻳﺪﺟ ﺭﺍﺪﺻﺍ!
-
-Save
-== ﻆﻔﺣ
-
-%d new mentions
-== %d ﺓﺪﻳﺪﺟ ﺕﺍﺭﺎﻌﺷﺍ
-
-Show all
-== ﻞﻜﻟﺍ ﺭﺎﻬﻇﺍ
-
-1 new mention
-== 1 ﺪﻳﺪﺟ ﺭﺎﻌﺷﺍ
-
-Dummy copy
-== ﺔﻴﻣﺪﻟﺍ ﺦﺴﻧ
-
-Downloading %s:
-== ﻞﻴﻤﺤﺗ %s:
-
-Show entities
-== ﻥﺍﺭﺪﺠﻟﺍ ﺭﺎﻬﻇﺍ
-
-Zoom in
-== ﺮﻴﺒﻜﺗ
-
-Disconnect Dummy
-== ﺔﻴﻣﺪﻟﺍ ﺝﺍﺮﺧﺍ
-
-Update failed! Check log...
-== ...ﺕﺎﻗﻮﻠﻟﺍ ﻦﻣ ﺪﻛﺎﺗ !ﻞﺸﻓ ﺚﻳﺪﺤﺘﻟﺍ
-
-Markers
-== ﺕﺎﻣﻼﻌﻟﺍ
-
-Enable replays
-== ﺓﺩﺎﻋﻻﺍ ﻦﻴﻜﻤﺗ
-
-Toggle dummy
-== ﺔﻴﻣﺪﻠﻟ ﻞﻳﺪﺒﺗ
-
-Markers:
-== ﺕﺎﻣﻼﻌﻟﺍ:
-
-Converse
-== ﺔﺛﺩﺎﺤﻣ
-
-Filter connecting players
-== ﻦﻴﻠﺼﺘﻤﻟﺍ ﻦﻴﺒﻋﻼﻟﺍ ﺔﻴﻔﺼﺗ
-
-Size
-== ﻢﺠﺣ
-
-Deactivate
-== ﻞﻴﻄﻌﺗ
-
-Replay feature is disabled!
-== !ﺔﻔﻗﻮﻣ ﻞﻴﻐﺸﺘﻟﺍ ﺓﺩﺎﻋﺍ ﺓﺰﻴﻣ
-
-Replace video
-== ﻮﻳﺪﻴﻔﻟﺍ ﻝﺍﺪﺒﺘﺳﺍ
-
-DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
-== DDraceNetwork ، ﻦﻴﺋﺪﺘﺒﻤﻟﺍ ﺕﺍﺮﻓﺮﻴﺳ ﻰﻠﻋ ﺃﺪﺒﺗ ﻥﺃ ﺐﺠﻳ ، ﺍًﺪﻳﺪﺟ ﺍًﻣﺩﺎﻗ ﻚﺘﻔﺼﺑ .ﺏﺎﻤﻟﺍ ﻰﻠﻋ ﺔﻳﺎﻬﻨﻟﺍ ﻂﺧ ﻰﻟﺇ ﺕﻼﻤﺤﻤﻟﺍ ﻦﻣ ﻚﺘﻋﻮﻤﺠﻣﻭ ﺖﻧﺃ ﻚﻟﻮﺻﻭ ﻮﻫ ﻑﺪﻬﻟﺍ ﻥﻮﻜﻳ ﺚﻴﺣ ﺖﻧﺮﺘﻧﻹﺍ ﺮﺒﻋ ﺔﻴﻧﻭﺎﻌﺗ ﺔﺒﻌﻟ ﻲﻫ
-
-Default length
-== ﻲﺿﺍﺮﺘﻓﻻﺍ ﻝﻮﻄﻟﺍ
-
-Pause
-== ﺔﺒﻗﺍﺮﻣ
-
-Transmits your player name to info.ddnet.org
-== ﻰﻟﺇ ﻚﺑ ﺹﺎﺨﻟﺍ ﺐﻋﻼﻟﺍ ﻢﺳﺍ ﻞﻘﻨﻳ info.ddnet.org
-
-Server best:
-== :ﺮﻓﺮﻴﺳ ﻞﻀﻓﺍ
-
-Render demo
-== ﻮﻳﺪﻴﻓﻟﺍ ﻞﻴﻤﺤﺗ
-
-Hammerfly dummy
-== ﺔﻗﺮﻄﻤﻟﺎﺑ ﻥﺍﺮﻴﻃ-ﺔﻴﻣﺪﻟﺍ
-
-Connect Dummy
-== ﺔﻴﻣﺪﻟﺍ ﻝﺎﺧﺩﺍ
-
-Toggle ghost
-== ﺢﺒﺸﻟﺍ ﻊﺿﻭ
-
-Statboard
-== ﺩﺭﻮﺑ ﺕﺎﺘﺳ
-
-Reconnect in %d sec
-== %d ﻲﻓ ﻝﻮﺧﺪﻟﺍ ﺓﺩﺎﻋﺍ
-
-Personal best:
-== :ﺔﻴﺼﺨﺷ ﻞﻀﻓﺃ
-
-Kill
-== ﻞﺘﻗ
-
-Please enter your nickname below.
-== ﻚﺑ ﺹﺎﺨﻟﺍ ﻢﺳﺍ ﻝﺎﺧﺩﺇ ﺀﺎﺟﺮﻟﺍ
-
-Render
-== ﻞﻌﺟ
-
-It's recommended that you check the settings to adjust them to your liking before joining a server.
-== .ﺮﻓﺮﻴﺴﻟﺍ ﻰﻟﺇ ﻡﺎﻤﻀﻧﻻﺍ ﻞﺒﻗ ﻚﺘﺒﻏﺭ ﺐﺴﺣ ﺎﻬﻄﺒﻀﻟ ﺕﺍﺩﺍﺪﻋﻹﺍ ﻦﻣ ﻖﻘﺤﺘﻟﺎﺑ ﻰﺻﻮﻳ
-
-Use high DPI
-== ﻲﻟﺎﻋ IPD ﻡﺍﺪﺨﺘﺳﺍ
-
-Learn
-== ﻢﻠﻌﺗ
-
-Video name:
-== :ﻮﻳﺪﻴﻓﻟﺍ ﻢﺳﺍ
-
-Toggle dyncam
-== ﺔﻴﻜﻴﻣﺎﻨﻳﺪﻟﺍ ﺍﺮﻴﻣﺎﻛ
-
-Show others (own team only)
-== ﻂﻘﻓ ﻢﻴﺘﻠﻟ ﻦﻳﺮﺧﻻﺍ ﺭﺎﻬﻇﺍ
-
-Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
-== .ﻯﺮﺧﻷﺍ ﺭﺍﺭﺯﻻﺍ ﻂﺑﺍﻭﺭ ﺕﺍﺩﺍﺪﻋﺇ ﻊﺟﺍﺭ .ﻦﻳﺮﺧﻻﺍ ﻦﻴﺒﻋﻻﺍ ﺓﺪﻫﺎﺸﻣ ﻭ ﻒﻗﻮﻠﻟ q ,(ﺓﺩﺎﻋﺍ) ﻞﺘﻘﻠﻟ k ﺭﺯ ﻡﺪﺨﺘﺳﺍ
-
-Client message
-== ﺔﻟﺎﺳﺭ
-
-Skip the main menu
-== ﺔﻤﺋﺎﻘﻟﺍ ﻲﻄﺨﺗ
-
-Settings
-== ﺕﺍﺩﺍﺪﻋﻻﺍ
-
-Run server
-== ﺮﻓﺮﻴﺳ ﻞﻴﻐﺸﺗ
-
-Stop server
-== ﺮﻓﺮﻴﺴﻟﺍ ﻑﺎﻘﻳﺍ
-
-Editor
-== ﻞﻳﺪﻌﺗ
-
-Download skins
-== ﺕﺎﻨﻜﺴﻟﺍ ﻞﻴﻤﺤﺗ
-
-Warning
-== ﺮﻳﺬﺤﺗ
-
-Speed
-== ﺔﻋﺮﺳ
-
-Website
-== ﻊﻗﻮﻣ
-
-Server executable not found, can't run server
-== ﺮﻓﺮﻴﺴﻟﺍ ﻞﻴﻐﺸﺗ ﻦﻜﻤﻳ ﻻﻭ ،ﺬﻴﻔﻨﺘﻠﻟ ﻞﺑﺎﻗ ﺮﻓﺮﻴﺳ ﻰﻠﻋ ﺭﻮﺜﻌﻟﺍ ﻢﺘﻳ ﻢﻟ
+[Demo browser]
+Play
+== ﻞﻴﻐﺸﺗ
 
 [Start menu]
 Play
 == ﺐﻌﻟ
 
-%d of %d servers
-== %d ﻦﻣ ﺮﻓﺮﻴﺳ %d
-
-%d of %d server
-== %d ﻦﻣ ﺮﻓﺮﻴﺳ %d
-
-%d players
-== %d ﻦﻴﺒﻋﻻ
-
-%d player
-== %d ﺐﻋﻻ
-
-Theme
-== ﺕﺎﻤﻴﺜﻟﺍ
-
-Demos directory
-== ﺮﻳﻮﺼﺘﻟﺍ ﻒﻠﻣ ﺢﺘﻓ
-
-Themes directory
-== ﺕﺎﻤﻴﺜﻟﺍ ﻒﻠﻣ ﺢﺘﻓ
-
-Skin Database
-== ﺕﺎﻨﻜﺴﻟﺍ ﺔﺒﺘﻜﻣ
-
-Skins directory
-== ﺕﺎﻨﻜﺴﻟﺍ ﻒﻠﻣ ﺢﺘﻓ
-
-Background music volume
-== ﺔﻴﻔﻠﺨﻟﺍ ﺕﻮﺻ
-
-Assets
-== ﻝﺎﻜﺷﻻﺍ
-
-Entities
-== ﻥﺍﺭﺪﺠﻟﺍ
-
-Emoticons
-== ﺕﺎﺗﻮﻤﻳﻻﺍ
-
-Particles
-== ﺰﻠﻜﺗﺭﺎﺒﻟﺍ
-
-Assets directory
-== ﻝﺎﻜﺷﻻﺍ ﻒﻠﻣ ﺢﺘﻓ
-
 https://wiki.ddnet.org/
 == https://wiki.ddnet.org/
 
-Saving ddnet-settings.cfg failed
-== ﻆﻔﺤﻟﺍ ﻞﺸﻓ ddnet-settings.cfg
+##### translation needed #####
 
-Use current map as background
-== ﺔﻴﻔﻠﺨﻛ ﻲﻟﺎﺤﻟﺍ ﺏﺎﻤﻟﺍ ﻡﺍﺪﺨﺘﺳﺍ
-
-Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
-== ﺔﻓﺎﻘﻳﻻ Ctrl+Shift+D ﻂﻐﺿﺍ .ﻝﺎﻐﺷ ﻖﻴﻗﺪﺘﻟﺍ ﻊﺿﻭ
-
-Existing Player
-== ﺩﻮﺟﻮﻣ ﺐﻋﻼﻟﺍ
-
-Your nickname '%s' is already used (%d points). Do you still want to use it?
-== ﻪﻣﺍﺪﺨﺘﺳﺍ ﺪﻳﺮﺗ ﺖﻟﺯﺎﻣ ﻞﻫ '%s' ﻞﻤﻌﺘﺴﻣ ﻚﻤﺳﺍ
-
-Checking for existing player with your name
-== ﻚﻤﺳﺎﺑ ﺐﻋﻻ ﺩﻮﺟﻭ ﻦﻣ ﻖﻘﺤﺘﻟﺍ
-
-Game sound volume
-== ﺔﺒﻌﻠﻟﺍ ﺕﻮﺻ
-
-Chat sound volume
-== ﺔﺷﺩﺭﺪﻟﺍ ﺕﻮﺻ
-
-Use old chat style
-== ﻢﻳﺪﻘﻟﺍ ﺔﺛﺩﺎﺤﻤﻟﺍ ﻞﻜﺷ ﻡﺍﺪﺨﺘﺳﺍ
-
-Manual
-== ﻱﻭﺪﻳ
-
-Race
-== ﻕﺎﺒﺳ
-
-Auto
-== ﻲﺋﺎﻘﻠﺗ
-
-Replay
-== ﻞﻴﻐﺸﺘﻟﺍ ﺓﺩﺎﻋﺍ
-
-Smooth Dynamic Camera
-== ﺔﻤﻋﺎﻧ ﺍﺮﻴﻣﺎﻛ ﻚﻴﻣﺎﻨﻳﺩ
-
-[Graphics error]
-Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== 
-
-[Graphics error]
-Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== 
-
-[Graphics error]
-An error during command recording occurred. Try to update your GPU drivers.
-== 
-
-[Graphics error]
-A render command failed. Try to update your GPU drivers.
-== 
-
-[Graphics error]
-Submitting the render commands failed. Try to update your GPU drivers.
-== 
-
-[Graphics error]
-Failed to swap framebuffers. Try to update your GPU drivers.
-== 
-
-[Graphics error]
-Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== 
-
-[Graphics error]
-Could not initialize the given graphics backend, reverting to the default backend now.
-== 
-
-[Graphics error]
-Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
-== 
-
-Could not save downloaded map. Try manually deleting this file: %s
-== 
-
-The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
-== 
-
-The format of texture %s is not RGBA which will cause visual bugs.
-== 
-
-Preparing demo playback
-== 
-
-Connected
-== 
-
-Loading map file from storage
-== 
-
-Why are you slowmo replaying to read this?
-== 
-
-Initializing components
-== 
-
-Initializing assets
-== 
-
-Initializing map logic
-== 
-
-Sending initial client info
-== 
-
-Position:
-== 
-
-Speed:
-== 
-
-Angle:
-== 
-
-Team %d
-== 
-
-Uploading map data to GPU
-== 
-
-Trying to determine UDP connectivity...
-== 
-
-UDP seems to be filtered.
-== 
-
-UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
-== 
-
-No answer from server yet.
-== 
-
-Getting game info
-== 
-
-Requesting to join the game
+A Tee
 == 
 
 A demo with this name already exists
-== 
-
-File '%s' already exists, do you want to overwrite it?
-== 
-
-Join Tutorial Server
-== 
-
-Skip Tutorial
-== 
-
-Loading menu images
 == 
 
 AFR
@@ -1267,107 +1158,100 @@ ASI
 AUS
 == 
 
-EUR
+Add Clan
 == 
 
-NA
+Adjust the opacity of entities belonging to other teams, such as tees and nameplates
 == 
 
-SA
+Aim bind
 == 
 
-CHN
+Allows maps to render with more detail
 == 
 
-Getting server list from master server
+Angle:
+== 
+
+Appearance
+== 
+
+Are you sure that you want to delete the demo '%s'?
 == 
 
 Are you sure that you want to disconnect and switch to a different server?
 == 
 
-Copy info
-== 
-
-Leak IP
-== 
-
-No server selected
-== 
-
-Online players (%d)
-== 
-
-Online clanmates (%d)
-== 
-
-[friends (server browser)]
-Offline (%d)
-== 
-
-Click to select server. Double click to join your friend.
-== 
-
-Click to remove this player from your friends list.
-== 
-
-Click to remove this clan from your friends list.
-== 
-
-None
+Are you sure that you want to remove the clan '%s' from your friends list?
 == 
 
 Are you sure that you want to remove the player '%s' from your friends list?
 == 
 
-Are you sure that you want to remove the clan '%s' from your friends list?
+Are you sure that you want to reset the controls to their defaults?
 == 
 
-Add Clan
+Axis
 == 
 
-Play the current demo
+Background
 == 
 
-Pause the current demo
+CHN
 == 
 
-Stop the current demo
+Can't find a Tutorial server
 == 
 
-Go back one tick
+Cancel
 == 
 
-Go forward one tick
+Chat command
 == 
 
-Slow down the demo
+Chat command (e.g. showall 1)
 == 
 
-Speed up the demo
+Choose default eyes when joining a server
 == 
 
-Mark the beginning of a cut (right click to reset)
+Click to remove this clan from your friends list.
 == 
 
-Mark the end of a cut (right click to reset)
+Click to remove this player from your friends list.
 == 
 
-Export cut as a separate demo
-== 
-
-Go back one marker
-== 
-
-Go forward one marker
+Click to select server. Double click to join your friend.
 == 
 
 Close the demo player
 == 
 
-Toggle keyboard shortcuts
+Colors of the hook collision line, in case of a possible collision with:
 == 
 
-Export demo cut
+Config directory
+== 
+
+Connected
+== 
+
+Controller
+== 
+
+Controller jitter tolerance
+== 
+
+Copy info
+== 
+
+Could not save downloaded map. Try manually deleting this file: %s
+== 
+
+Create a random skin
+== 
+
+Custom
 == 
 
 Cut interval
@@ -1376,177 +1260,295 @@ Cut interval
 Cut length
 == 
 
-Loading demo files
-== 
-
-Open the directory that contains the demo files
-== 
-
-Are you sure that you want to delete the demo '%s'?
-== 
-
-Unable to delete the demo '%s'
-== 
-
-Loading ghost files
-== 
-
-Menu opened. Press Esc key again to close menu.
-== 
-
-Save power by lowering refresh rate (higher input latency)
-== 
-
-Settings file
-== 
-
-Open the settings file
-== 
-
-Config directory
-== 
-
-Open the directory that contains the configuration and user files
-== 
-
-Open the directory to add custom themes
-== 
-
-Loading skin files
-== 
-
-Toggle to edit your dummy settings
-== 
-
-Download community skins
-== 
-
-Choose default eyes when joining a server
-== 
-
-Create a random skin
-== 
-
-Open the directory to add custom skins
-== 
-
-Chat command
-== 
-
-Enable controller
-== 
-
-Controller
-== 
-
-Ingame controller mode
-== 
-
-[Ingame controller mode]
-Relative
-== 
-
-[Ingame controller mode]
-Absolute
-== 
-
-Ingame controller sens.
-== 
-
-UI controller sens.
-== 
-
-Controller jitter tolerance
-== 
-
-No controller found. Plug in a controller.
-== 
-
-Axis
-== 
-
-Status
-== 
-
-Aim bind
-== 
-
-Mouse
-== 
-
-Ingame mouse sens.
-== 
-
-UI mouse sens.
-== 
-
-Reset controls
-== 
-
-Are you sure that you want to reset the controls to their defaults?
-== 
-
-Cancel
-== 
-
-Dummy
-== 
-
-Windowed
-== 
-
-Windowed borderless
-== 
-
-Windowed fullscreen
-== 
-
-Desktop fullscreen
-== 
-
-Allows maps to render with more detail
-== 
-
-Renderer
-== 
-
-Default
-== 
-
-Custom
-== 
-
-Graphics card
-== 
-
-Appearance
-== 
-
-Name Plate
-== 
-
-Hook Collisions
-== 
-
-Kill Messages
-== 
-
-Show health, shields and ammo
+DDNet %s is available:
 == 
 
 DDRace HUD
 == 
 
-Show client IDs in scoreboard
+Default
+== 
+
+Desktop fullscreen
+== 
+
+Discord
+== 
+
+Door Laser Inner Color
+== 
+
+Door Laser Outline Color
+== 
+
+Download community skins
+== 
+
+Dummy
+== 
+
+EUR
+== 
+
+Enable controller
+== 
+
+Entities Background color
+== 
+
+Export cut as a separate demo
+== 
+
+Export demo cut
+== 
+
+Extras
+== 
+
+File '%s' already exists, do you want to overwrite it?
+== 
+
+Freeze Laser Inner Color
+== 
+
+Freeze Laser Outline Color
+== 
+
+Getting game info
+== 
+
+Getting server list from master server
+== 
+
+Go back one marker
+== 
+
+Go back one tick
+== 
+
+Go forward one marker
+== 
+
+Go forward one tick
+== 
+
+Graphics card
+== 
+
+Highlight Color
+== 
+
+Hook Collisions
+== 
+
+Hook collision line
+== 
+
+Hook collision line opacity
+== 
+
+Hook collision line width
+== 
+
+Ingame controller mode
+== 
+
+Ingame controller sens.
+== 
+
+Ingame mouse sens.
+== 
+
+Initializing assets
+== 
+
+Initializing components
+== 
+
+Initializing map logic
+== 
+
+Join Tutorial Server
+== 
+
+Kill Messages
+== 
+
+Leak IP
+== 
+
+Loading assets
+== 
+
+Loading demo files
+== 
+
+Loading ghost files
+== 
+
+Loading map file from storage
+== 
+
+Loading menu images
+== 
+
+Loading race demo files
+== 
+
+Loading skin files
+== 
+
+Loading sound files
+== 
+
+Mark the beginning of a cut (right click to reset)
+== 
+
+Mark the end of a cut (right click to reset)
+== 
+
+Menu opened. Press Esc key again to close menu.
+== 
+
+Mouse
+== 
+
+NA
+== 
+
+Name Plate
+== 
+
+No answer from server yet.
+== 
+
+No controller found. Plug in a controller.
+== 
+
+No server selected
+== 
+
+None
+== 
+
+Normal Color
+== 
+
+Nothing hookable
+== 
+
+Online clanmates (%d)
+== 
+
+Online players (%d)
+== 
+
+Opacity
+== 
+
+Opacity of freeze bars inside freeze
+== 
+
+Open the directory that contains the configuration and user files
+== 
+
+Open the directory that contains the demo files
+== 
+
+Open the directory to add custom assets
+== 
+
+Open the directory to add custom skins
+== 
+
+Open the directory to add custom themes
+== 
+
+Open the settings file
+== 
+
+Pause the current demo
+== 
+
+Play the current demo
+== 
+
+Position:
+== 
+
+Preparing demo playback
+== 
+
+Preview
+== 
+
+Quads are used for background decoration
+== 
+
+Regular Background Color
+== 
+
+Renderer
+== 
+
+Requesting to join the game
+== 
+
+Reset controls
+== 
+
+Rifle Laser Inner Color
+== 
+
+Rifle Laser Outline Color
+== 
+
+Run on join
+== 
+
+SA
+== 
+
+Save power by lowering refresh rate (higher input latency)
+== 
+
+Sending initial client info
+== 
+
+Set all to Rifle
+== 
+
+Settings file
+== 
+
+Shotgun Laser Inner Color
+== 
+
+Shotgun Laser Outline Color
 == 
 
 Show DDRace HUD
 == 
 
-Show jumps indicator
+Show client IDs in scoreboard
 == 
 
 Show dummy actions
+== 
+
+Show freeze bars
+== 
+
+Show health, shields and ammo
+== 
+
+Show hook strength indicator
+== 
+
+Show jumps indicator
+== 
+
+Show local player's key presses
 == 
 
 Show player position
@@ -1558,143 +1560,143 @@ Show player speed
 Show player target angle
 == 
 
-Show freeze bars
+Skip Tutorial
 == 
 
-Opacity of freeze bars inside freeze
-== 
-
-Preview
-== 
-
-Show hook strength indicator
-== 
-
-Show local player's key presses
-== 
-
-Hook collision line
-== 
-
-Hook collision line width
-== 
-
-Hook collision line opacity
-== 
-
-Colors of the hook collision line, in case of a possible collision with:
-== 
-
-Your movements are not taken into account when calculating the line colors
-== 
-
-Nothing hookable
+Slow down the demo
 == 
 
 Something hookable
 == 
 
-A Tee
+Speed up the demo
 == 
 
-Normal Color
+Speed:
 == 
 
-Highlight Color
+Status
 == 
 
-Weapons
-== 
-
-Rifle Laser Outline Color
-== 
-
-Rifle Laser Inner Color
-== 
-
-Shotgun Laser Outline Color
-== 
-
-Shotgun Laser Inner Color
-== 
-
-Door Laser Outline Color
-== 
-
-Door Laser Inner Color
-== 
-
-Freeze Laser Outline Color
-== 
-
-Freeze Laser Inner Color
-== 
-
-Set all to Rifle
-== 
-
-When you cross the start line, show a ghost tee replicating the movements of your best time
-== 
-
-Opacity
-== 
-
-Adjust the opacity of entities belonging to other teams, such as tees and nameplates
-== 
-
-Quads are used for background decoration
-== 
-
-Tries to predict other entities to give a feel of low latency
-== 
-
-Background
-== 
-
-Entities Background color
-== 
-
-Regular Background Color
-== 
-
-Run on join
-== 
-
-Chat command (e.g. showall 1)
-== 
-
-Unregister protocol and file extensions
-== 
-
-DDNet %s is available:
-== 
-
-Extras
-== 
-
-Loading assets
-== 
-
-Open the directory to add custom assets
-== 
-
-Discord
-== 
-
-https://ddnet.org/discord
-== 
-
-Tutorial
-== 
-
-Can't find a Tutorial server
-== 
-
-Loading race demo files
+Stop the current demo
 == 
 
 Super
 == 
 
-Loading sound files
+Team %d
+== 
+
+The format of texture %s is not RGBA which will cause visual bugs.
+== 
+
+The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
+== 
+
+Toggle keyboard shortcuts
+== 
+
+Toggle to edit your dummy settings
+== 
+
+Tries to predict other entities to give a feel of low latency
+== 
+
+Trying to determine UDP connectivity...
+== 
+
+Tutorial
+== 
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== 
+
+UDP seems to be filtered.
+== 
+
+UI controller sens.
+== 
+
+UI mouse sens.
+== 
+
+Unable to delete the demo '%s'
+== 
+
+Unregister protocol and file extensions
+== 
+
+Uploading map data to GPU
+== 
+
+Weapons
+== 
+
+When you cross the start line, show a ghost tee replicating the movements of your best time
+== 
+
+Why are you slowmo replaying to read this?
+== 
+
+Windowed
+== 
+
+Windowed borderless
+== 
+
+Windowed fullscreen
+== 
+
+Your movements are not taken into account when calculating the line colors
+== 
+
+[Graphics error]
+A render command failed. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+An error during command recording occurred. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+Could not initialize the given graphics backend, reverting to the default backend now.
+== 
+
+[Graphics error]
+Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
+== 
+
+[Graphics error]
+Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== 
+
+[Graphics error]
+Failed to swap framebuffers. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
+== 
+
+[Graphics error]
+Submitting the render commands failed. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== 
+
+[Ingame controller mode]
+Absolute
+== 
+
+[Ingame controller mode]
+Relative
+== 
+
+[friends (server browser)]
+Offline (%d)
+== 
+
+https://ddnet.org/discord
 == 

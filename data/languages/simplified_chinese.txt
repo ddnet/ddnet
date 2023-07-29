@@ -38,6 +38,27 @@
 
 ##### translated strings #####
 
+%.2f KiB
+== %.2f KiB
+
+%.2f MiB
+== %.2f MiB
+
+%d new mentions
+== %d 条新被提及消息
+
+%d of %d server
+== 符合条件 %d / 总共 %d 个服务器
+
+%d of %d servers
+== 符合条件 %d / 总共 %d 个服务器
+
+%d player
+== %d 在线玩家
+
+%d players
+== %d 在线玩家
+
 %ds left
 == 还剩 %d 秒
 
@@ -59,11 +80,38 @@
 -Page %d-
 == -第 %d 页-
 
+1 new mention
+== 1 条新被提及消息
+
+9+ new mentions
+== 9+ 条新被提及消息
+
+A Tee
+== 其他玩家
+
+A demo with this name already exists
+== 已经存在同名回放
+
+AFR
+== 非洲
+
+ASI
+== 亚洲
+
+AUS
+== 澳洲
+
 Abort
 == 取消
 
+Activate
+== 启用
+
 Add
 == 添加
+
+Add Clan
+== 添加战队
 
 Add Friend
 == 添加好友
@@ -71,17 +119,95 @@ Add Friend
 Address
 == 地址
 
+Adjust the opacity of entities belonging to other teams, such as tees and nameplates
+== 调整单人区域或其他队伍中玩家的不透明度
+
+Aim bind
+== 操作轴绑定
+
 All
 == 全体
 
+Allows maps to render with more detail
+== 允许地图渲染更多细节
+
+Alpha
+== 透明度
+
+Angle:
+== 角度
+
+AntiPing
+== 延迟补偿（AntiPing）
+
+AntiPing: predict grenade paths
+== 延迟补偿：预测榴弹枪路径
+
+AntiPing: predict other players
+== 延迟补偿：预测其他玩家
+
+AntiPing: predict weapons
+== 延迟补偿：预测武器
+
+Appearance
+== 游戏界面
+
+Are you sure that you want to delete the demo '%s'?
+== 你确定要删除回放文件 "%s" ？
+
+Are you sure that you want to disconnect and switch to a different server?
+== 你确定要断开此服务器连接并进入其他服务器吗？
+
+Are you sure that you want to disconnect your dummy?
+== 确定要断开分身连接吗？
+
+Are you sure that you want to disconnect?
+== 确定要断开连接吗？
+
 Are you sure that you want to quit?
 == 你确定要退出吗？
+
+Are you sure that you want to remove the clan '%s' from your friends list?
+== 你确定要将战队 "%s" 从你的好友列表中删除？
+
+Are you sure that you want to remove the player '%s' from your friends list?
+== 你确定要将好友 "%s" 从你的好友列表中删除？
+
+Are you sure that you want to reset the controls to their defaults?
+== 你确定要将当前的控制恢复至默认设置？
+
+Assets
+== 资源
+
+Assets directory
+== 资源目录
+
+Auto
+== 自动
+
+Automatically create statboard csv
+== 自动将统计板导出为 csv 文件
 
 Automatically record demos
 == 自动录制回放
 
 Automatically take game over screenshot
 == 自动对游戏结束画面截图
+
+Automatically take statboard screenshot
+== 自动对统计板截图
+
+Axis
+== 轴
+
+Background
+== 背景
+
+Background music volume
+== 背景音乐音量
+
+Best
+== 最高
 
 Blue team
 == 蓝队
@@ -92,8 +218,20 @@ Blue team wins!
 Body
 == 身体
 
+Browser
+== 浏览
+
+CHN
+== 中国
+
 Call vote
 == 发起投票
+
+Can't find a Tutorial server
+== 无法找到教学服务器
+
+Cancel
+== 取消
 
 Change settings
 == 变更设置
@@ -101,11 +239,62 @@ Change settings
 Chat
 == 聊天
 
+Chat command
+== 聊天框指令（/）
+
+Chat command (e.g. showall 1)
+== 聊天指令（例如: showall 1）
+
+Chat sound volume
+== 聊天提示音量
+
+Check now
+== 检查更新
+
+Checking for existing player with your name
+== 正在查找该昵称的 DDNet 记录
+
+Choose default eyes when joining a server
+== 进入服务器时的默认表情
+
 Clan
 == 战队
 
+Clan plates size
+== 战队名称大小
+
+Click to remove this clan from your friends list.
+== 单击从你的好友列表移除此战队
+
+Click to remove this player from your friends list.
+== 单击从你的好友列表移除此玩家
+
+Click to select server. Double click to join your friend.
+== 单击以选择此服务器。双击加入好友所在服务器。
+
 Client
 == 客户端
+
+Client message
+== 客户端消息
+
+Close the demo player
+== 关闭回放播放器
+
+Colors of the hook collision line, in case of a possible collision with:
+== 辅助线颜色（当瞄准以下实体物时）：
+
+Config directory
+== 配置目录（cfg）
+
+Connect Dummy
+== 连接分身
+
+Connected
+== 连接成功
+
+Connecting dummy
+== 正在连接分身
 
 Connecting to
 == 正在连接到
@@ -116,23 +305,104 @@ Connection Problems...
 Console
 == 控制台
 
+Controller
+== 控制器
+
+Controller jitter tolerance
+== 摇杆死区
+
 Controls
 == 控制
+
+Converse
+== 继续私聊
+
+Copy info
+== 复制服务器信息
+
+Could not save downloaded map. Try manually deleting this file: %s
+== 地图下载失败，请尝试手动删除此文件：%s
 
 Count players only
 == 屏蔽旁观位
 
+Countries
+== 国家
+
+Crc:
+== Crc:
+
+Create a random skin
+== 随机创造皮肤
+
+Created:
+== 创建时间：
+
 Current
 == 当前
 
+Custom
+== 自定义
+
 Custom colors
 == 自定义颜色
+
+Cut interval
+== 裁剪区间
+
+Cut length
+== 裁剪时长
+
+DDNet
+== DDNet
+
+DDNet %s is available:
+== DDNet %s 现已可用：
+
+DDNet %s is out!
+== DDNet %s 已经更新了！
+
+DDNet Client needs to be restarted to complete update!
+== DDNet 客户端需要重新启动才能完成更新！
+
+DDNet Client updated!
+== DDNet 客户端更新成功！
+
+DDRace HUD
+== DDRace HUD
+
+DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
+== DDraceNetwork 是一款在线合作游戏，你和你团体里的 Tee 的目标是抵达地图的终点。作为新手你应该从有着最简单的地图的简单（Novice） 服务器入门。根据延迟来选择离你相近的服务器。
+
+Date
+== 日期
+
+Deactivate
+== 停用
+
+Deaths
+== 死亡数
+
+Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
+== 调试模式已启用。按 Ctrl+Shift+D 禁用调试模式。
+
+Default
+== 默认
+
+Default length
+== 默认时长
+
+Default zoom
+== 默认缩放
 
 Delete
 == 删除
 
 Delete demo
 == 删除回放
+
+Demo
+== 回放
 
 Demo details
 == 回放详情
@@ -143,11 +413,38 @@ Demofile: %s
 Demos
 == 回放
 
+Demos directory
+== 回放目录
+
+Desktop fullscreen
+== 无边框全屏
+
 Disconnect
 == 断开连接
 
+Disconnect Dummy
+== 断开分身连接
+
 Disconnected
 == 连接已断开
+
+Discord
+== 开黑啦
+
+Door Laser Inner Color
+== 激光门实心颜色
+
+Door Laser Outline Color
+== 激光门外框颜色
+
+Download community skins
+== 下载社区皮肤
+
+Download skins
+== 下载官方皮肤
+
+Downloading %s:
+== 正在下载 %s:
 
 Downloading map
 == 正在下载地图
@@ -155,17 +452,92 @@ Downloading map
 Draw!
 == 平局！
 
+Dummy
+== 分身
+
+Dummy copy
+== 分身同步动作
+
+Dummy settings
+== 分身设置
+
 Dynamic Camera
 == 动态视野
 
+EUR
+== 欧洲
+
+Editor
+== 编辑器
+
 Emoticon
 == 表情
+
+Emoticons
+== 表情
+
+Enable controller
+== 启用控制器
+
+Enable game sounds
+== 启用游戏声音
+
+Enable gun sound
+== 启用手枪声音
+
+Enable highlighted chat sound
+== 启用聊天被提及消息提示音
+
+Enable long pain sound (used when shooting in freeze)
+== 启用冻结呼叫声
+
+Enable regular chat sound
+== 启用聊天消息提示音
+
+Enable replays
+== 启用短时回放
+
+Enable server message sound
+== 启用服务器消息提示音
+
+Enable team chat sound
+== 启用队伍聊天消息提示音
+
+Entities
+== 实体层
+
+Entities Background color
+== 实体层背景颜色
 
 Error
 == 错误
 
 Error loading demo
 == 回放加载错误
+
+Exclude
+== 排除
+
+Existing Player
+== 玩家已存在
+
+Export cut as a separate demo
+== 另存为新回放文件
+
+Export demo cut
+== 另存裁剪部分
+
+Extras
+== 其他
+
+FPM
+== 击杀/分
+
+FSAA samples
+== 全屏抗锯齿（FSAA）采样倍数
+
+Fat skins (DDFat)
+== 胖胖的皮肤（DDFat）
 
 Favorite
 == 收藏
@@ -176,8 +548,20 @@ Favorites
 Feet
 == 脚
 
+Fetch Info
+== 回放信息
+
+File '%s' already exists, do you want to overwrite it?
+== 文件名 "%s" 已经存在，是否要覆盖该文件？
+
+File already exists, do you want to overwrite it?
+== 文件已存在，是否覆盖？
+
 Filter
 == 筛选
+
+Filter connecting players
+== 筛选正在连接的玩家
 
 Fire
 == 开火
@@ -185,11 +569,26 @@ Fire
 Folder
 == 文件夹
 
+Follow
+== 跟随
+
 Force vote
 == 强制投票
 
+Frags
+== 击杀数
+
 Free-View
 == 自由视野
+
+Freeze Laser Inner Color
+== 冻结激光实心颜色
+
+Freeze Laser Outline Color
+== 冻结激光外框颜色
+
+Friend message
+== 好友消息
 
 Friends
 == 好友
@@ -209,23 +608,62 @@ Game over
 Game paused
 == 游戏已暂停
 
+Game sound volume
+== 游戏音效音量
+
 Game type
 == 游戏模式
 
 Game types:
 == 游戏模式：
 
+Gameplay
+== 游戏
+
 General
 == 常规
+
+Getting game info
+== 正在获取游戏信息
+
+Getting server list from master server
+== 正在从主服务器获取服务器列表
+
+Ghost
+== 影子
+
+Go back one marker
+== 返回上一个标记
+
+Go back one tick
+== 上一个 tick
+
+Go forward one marker
+== 跳至下一个标记
+
+Go forward one tick
+== 下一个 tick
+
+Grabs
+== 得旗数
 
 Graphics
 == 图像
 
+Graphics card
+== 显卡
+
 Grenade
 == 榴弹枪
 
+HUD
+== HUD
+
 Hammer
 == 锤子
+
+Hammerfly dummy
+== 分身 Hammerfly 开关
 
 Has people playing
 == 有玩家
@@ -233,14 +671,74 @@ Has people playing
 High Detail
 == 显示地图细节
 
+Highlight Color
+== 相关信息颜色
+
+Highlighted message
+== 被提及消息
+
 Hook
 == 钩索
+
+Hook Collisions
+== 瞄准辅助
+
+Hook collision line
+== 瞄准辅助线
+
+Hook collision line opacity
+== 辅助线不透明度
+
+Hook collision line width
+== 辅助线宽度
+
+Hook collisions
+== 钩索辅助线
+
+Hue
+== 色调
+
+Indicate map finish
+== 标记已完成的地图
+
+Info
+== 信息
+
+Ingame controller mode
+== 游戏内控制器瞄准模式
+
+Ingame controller sens.
+== 摇杆灵敏度（游戏）
+
+Ingame mouse sens.
+== 鼠标灵敏度（游戏）
+
+Initializing assets
+== 正在初始化资源
+
+Initializing components
+== 正在初始化游戏引擎
+
+Initializing map logic
+== 正在初始化地图逻辑
+
+Internet
+== 互联网
 
 Invalid Demo
 == 回放文件无效或已损坏
 
+It's recommended that you check the settings to adjust them to your liking before joining a server.
+== 建议你在进入服务器前检查一下设置并根据你的喜好进行调整。
+
+Join Tutorial Server
+== 进入教学服务器
+
 Join blue
 == 加入蓝队
+
+Join game
+== 加入游戏
 
 Join red
 == 加入红队
@@ -251,17 +749,116 @@ Jump
 Kick player
 == 踢出玩家
 
+Kill
+== 自杀
+
+Kill Messages
+== 击杀消息
+
+LAN
+== 局域网
+
 Language
 == 语言
 
-DDNet Client needs to be restarted to complete update!
-== DDNet 客户端需要重新启动才能完成更新！
+Laser
+== 激光
+
+Leak IP
+== 暴露IP
+
+Learn
+== 教程 Wiki
+
+Length
+== 时长
+
+Length:
+== 时长：
+
+Lht.
+== 亮度
+
+Loading DDNet Client
+== 加载 DDNet 客户端中...
+
+Loading assets
+== 正在加载资源
+
+Loading demo files
+== 正在加载回放文件
+
+Loading ghost files
+== 正在加载影子文件
+
+Loading map file from storage
+== 正在从硬盘中加载地图文件
+
+Loading menu images
+== 正在加载主菜单图片
+
+Loading race demo files
+== 正在加载回放文件
+
+Loading skin files
+== 正在加载皮肤文件
+
+Loading sound files
+== 正在加载声音文件
+
+Lock team
+== 锁定队伍
 
 MOTD
 == 公告
 
+Manual
+== 手动
+
 Map
 == 地图
+
+Map sound volume
+== 地图音效音量
+
+Map:
+== 地图：
+
+Mark the beginning of a cut (right click to reset)
+== 标记裁剪起点 (右键重置)
+
+Mark the end of a cut (right click to reset)
+== 标记裁剪终点 (右键重置)
+
+Markers
+== 标记
+
+Markers:
+== 标记
+
+Max CSVs
+== 最大 csv 文件数
+
+Max Screenshots
+== 最大截图数
+
+Max demos
+== 最大回放数
+
+May cause delay
+== 可能会产生延迟
+
+Menu opened. Press Esc key again to close menu.
+== 菜单已打开，再次点击 Esc 以关闭
+
+Messages
+== 消息
+
+Miscellaneous
+== 杂项
+
+Mouse
+== 鼠标
 
 Move left
 == 向左移动
@@ -278,26 +875,32 @@ Movement
 Mute when not active
 == 在后台时静音
 
-Enable game sounds
-== 启用游戏声音
-
-Enable gun sound
-== 启用手枪声音
-
-Enable server message sound
-== 启用服务器消息提示音
-
-Enable regular chat sound
-== 启用聊天消息提示音
-
-Enable team chat sound
-== 启用队伍聊天消息提示音
-
-Enable highlighted chat sound
-== 启用聊天被提及消息提示音
+NA
+== 北美
 
 Name
 == 名称
+
+Name Plate
+== 昵称板块
+
+Name plates size
+== 昵称大小
+
+Net
+== 净击杀
+
+Netversion:
+== 通信版本：
+
+New name:
+== 新文件名：
+
+New random timeout code
+== 随机生成新的超时代码（Timeout 代码）
+
+News
+== 新闻
 
 Next weapon
 == 下一个武器
@@ -308,8 +911,17 @@ Nickname
 No
 == 否
 
+No answer from server yet.
+== 服务器无响应
+
+No controller found. Plug in a controller.
+== 未检测到任何控制器。请尝试重新连接控制器。
+
 No password
 == 没有密码
+
+No server selected
+== 未选择服务器
 
 No servers found
 == 未检测到任何服务器
@@ -317,14 +929,65 @@ No servers found
 No servers match your filter criteria
 == 没有服务器满足设置的筛选条件
 
+No updates available
+== 没有可用的更新
+
+None
+== 无
+
+Normal Color
+== 非相关信息颜色
+
+Normal message
+== 普通消息
+
+Nothing hookable
+== 未瞄准任何实体物
+
 Ok
 == 确定
+
+Online clanmates (%d)
+== 在线战队成员 (%d人)
+
+Online players (%d)
+== 在线玩家 (%d人)
+
+Opacity
+== 不透明度
+
+Opacity of freeze bars inside freeze
+== 解冻进度条不透明度
 
 Open
 == 打开
 
+Open the directory that contains the configuration and user files
+== 打开存有配置文件与用户文件的文件夹路径
+
+Open the directory that contains the demo files
+== 打开存有回放文件的文件夹路径
+
+Open the directory to add custom assets
+== 打开用以添加自定义资源的文件夹路径
+
+Open the directory to add custom skins
+== 打开用以添加自定义皮肤的文件夹路径
+
+Open the directory to add custom themes
+== 打开用以添加自定义主题的文件夹路径
+
+Open the settings file
+== 打开设置文件
+
+Overlay entities
+== 显示实体层
+
 Parent Folder
 == 上级目录
+
+Particles
+== 粒子
 
 Password
 == 密码
@@ -332,24 +995,29 @@ Password
 Password incorrect
 == 密码错误
 
+Pause
+== 暂停
+
+Pause the current demo
+== 暂停回放
+
+Personal best:
+== 个人最佳
+
 Ping
 == 延迟
 
 Pistol
 == 手枪
 
-[Demo browser]
-Play
-== 播放
-
 Play background music
 == 播放背景音乐
 
+Play the current demo
+== 播放回放
+
 Player
 == 玩家
-
-HUD
-== HUD
 
 Player country:
 == 玩家国家 / 地区：
@@ -363,14 +1031,47 @@ Players
 Please balance teams!
 == 队伍人数不平衡！
 
+Please enter your nickname below.
+== 请在下方输入你的昵称。
+
+Please use a different name
+== 请换一个不同的文件名
+
+Position:
+== 坐标
+
+Preparing demo playback
+== 正在准备回放
+
 Prev. weapon
 == 上一个武器
+
+Preview
+== 预览
+
+Quads are used for background decoration
+== 显示用作背景装饰的贴图
 
 Quit
 == 退出
 
+Quit anyway?
+== 无论如何都要退出吗？
+
+Race
+== 游戏
+
+Ratio
+== K/D
+
 Reason:
 == 理由：
+
+Reconnect in %d sec
+== %d 秒后重新连接
+
+Record demo
+== 录制回放
 
 Red team
 == 红队
@@ -381,11 +1082,26 @@ Red team wins!
 Refresh
 == 刷新
 
+Refresh Rate
+== 刷新率
+
+Regular Background Color
+== 背景层背景颜色
+
+Relative
+== 相对
+
+Reload
+== 刷新
+
 Remote console
 == 远程控制台
 
 Remove
 == 删除
+
+Remove chat
+== 删除消息记录
 
 Remove friend
 == 删除好友
@@ -396,8 +1112,77 @@ Rename
 Rename demo
 == 重命名回放
 
+Render
+== 渲染
+
+Render demo
+== 渲染回放
+
+Renderer
+== 渲染设置
+
+Replace video
+== 替换视频
+
+Replay
+== 回放
+
+Replay feature is disabled!
+== 短时回放功能未启用！
+
+Requesting to join the game
+== 正在请求加入游戏
+
+Reset
+== 重置
+
+Reset controls
+== 恢复默认设置
+
 Reset filter
 == 重置筛选
+
+Reset to defaults
+== 恢复默认设置
+
+Restart
+== 重新开始
+
+Rifle Laser Inner Color
+== 激光枪弹道实心颜色
+
+Rifle Laser Outline Color
+== 激光枪弹道外框颜色
+
+Round
+== 回合
+
+Run on join
+== 进入时执行
+
+Run server
+== 运行服务器
+
+SA
+== 南美
+
+Sat.
+== 饱和度
+
+Save
+== 保存
+
+Save ghost
+== 保存影子
+
+Save power by lowering refresh rate (higher input latency)
+== 省电模式（限制帧率上限以降低功耗但也将提高输入延迟）
+
+Save the best demo of each race
+== 保存每场游戏最佳记录的回放
+
+Saving ddnet-settings.cfg failed
+== 配置文件 ddnet-settings.cfg 保存失败
 
 Score
 == 分数
@@ -408,14 +1193,29 @@ Score limit
 Scoreboard
 == 计分板
 
+Screen
+== 屏幕
+
 Screenshot
 == 截图
+
+Search
+== 搜索
+
+Sending initial client info
+== 正在发送初始客户端信息
 
 Server address:
 == 服务器地址：
 
+Server best:
+== 服务器最佳
+
 Server details
 == 服务器详情
+
+Server executable not found, can't run server
+== 未检测到服务器的可执行文件，无法运行服务器
 
 Server filter
 == 服务器筛选
@@ -426,29 +1226,161 @@ Server info
 Server not full
 == 服务器未满
 
+Set all to Rifle
+== 统一为激光枪颜色
+
+Settings
+== 设置
+
+Settings file
+== 设置文件
+
 Shotgun
 == 霰弹枪
+
+Shotgun Laser Inner Color
+== 霰弹枪弹道实心颜色
+
+Shotgun Laser Outline Color
+== 霰弹枪弹道外框颜色
+
+Show DDNet map finishes in server browser
+== 在服务器浏览器中显示已完成的 DDNet 地图
+
+Show DDRace HUD
+== 显示 DDRace HUD
+
+Show HUD
+== HUD 开关
+
+Show all
+== 显示所有玩家
 
 Show chat
 == 显示聊天框
 
+Show clan above name plates
+== 显示战队名称
+
+Show client IDs in scoreboard
+== 显示客户端 IDs （计分板中）
+
+Show dummy actions
+== 显示分身状态
+
+Show entities
+== 实体层显示开关
+
+Show freeze bars
+== 显示解冻进度条
+
 Show friends only
 == 只显示好友
+
+Show ghost
+== 显示影子
+
+Show health, shields and ammo
+== 显示生命、护甲与弹药栏
+
+Show hook strength indicator
+== 显示对其他玩家的钩索强度
 
 Show ingame HUD
 == 显示 HUD
 
+Show jumps indicator
+== 显示可跳跃次数
+
+Show kill messages
+== 显示击杀消息
+
+Show local player's key presses
+== 显示自己的按键
+
 Show name plates
 == 显示昵称
 
+Show names in chat in team colors
+== 以队伍颜色显示玩家昵称
+
 Show only chat messages from friends
 == 只显示好友消息
+
+Show other players' hook collision lines
+== 显示其他玩家的钩索辅助线
+
+Show other players' key presses
+== 显示其他玩家的按键
+
+Show others
+== 显示其他玩家
+
+Show others (own team only)
+== 显示其他玩家（仅同队伍）
+
+Show player position
+== 显示玩家坐标
+
+Show player speed
+== 显示玩家速度
+
+Show player target angle
+== 显示玩家瞄准角度
+
+Show quads
+== 显示背景
+
+Show score
+== 显示分数
+
+Show text entities
+== 显示文本实体
+
+Show tiles layers from BG map
+== 显示实体层背景地图的图块层
+
+Show votes window after voting
+== 投票后不关闭投票窗口
+
+Size
+== 大小
+
+Size:
+== 大小：
+
+Skin Database
+== 皮肤数据库
+
+Skin prefix
+== 皮肤名称前缀
+
+Skins directory
+== 皮肤目录
+
+Skip Tutorial
+== 跳过教学
+
+Skip the main menu
+== 跳过主界面
+
+Slow down the demo
+== 减慢播放速度
+
+Smooth Dynamic Camera
+== 平滑动态视野
+
+Something hookable
+== 可钩索的方块
 
 Sound
 == 声音
 
 Sound error
 == 音频错误
+
+Sound volume
+== 音量
 
 Spectate
 == 旁观
@@ -465,14 +1397,47 @@ Spectator mode
 Spectators
 == 旁观者
 
+Speed
+== 速度
+
+Speed up the demo
+== 加快播放速度
+
+Speed:
+== 速度
+
+Spree
+== 连杀
+
+Statboard
+== 统计板
+
+Status
+== 状态
+
 Stop record
 == 停止录制
+
+Stop server
+== 停止服务器
+
+Stop the current demo
+== 结束回放
 
 Strict gametype filter
 == 严格游戏模式筛选
 
+Successfully saved the replay!
+== 成功保存短时回放！
+
 Sudden Death
 == 决胜
+
+Suicides
+== 自杀数
+
+Super
+== 无敌
 
 Switch weapon on pickup
 == 拾取武器时自动装备
@@ -480,26 +1445,44 @@ Switch weapon on pickup
 Switch weapon when out of ammo
 == 子弹打空时自动切换武器
 
-Show clan above name plates
-== 显示战队名称
-
-Clan plates size
-== 战队名称大小
+System message
+== 系统消息
 
 Team
 == 队伍
 
+Team %d
+== 队伍 %d
+
 Team chat
 == 队伍聊天
+
+Team message
+== 队伍消息
 
 The audio device couldn't be initialised.
 == 初始化音频设备失败。
 
+The format of texture %s is not RGBA which will cause visual bugs.
+== 纹理文件 %s 并非 RGBA 格式，这可能会导致显示错误。
+
 The server is running a non-standard tuning on a pure game type.
 == 此服务器运行着经过调整的非标准游戏模式。
 
+The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
+== 纹理文件 %s 的宽度无法被 %d 整除，或者高度无法被 %d 整除，这可能会导致显示错误。
+
+Theme
+== 主题
+
+Themes directory
+== 主题目录
+
 There's an unsaved map in the editor, you might want to save it before you quit the game.
 == 编辑器中的地图尚未保存，建议你在退出游戏之前返回编辑器进行保存。
+
+Time
+== 用时
 
 Time limit
 == 规定时限
@@ -507,14 +1490,98 @@ Time limit
 Time limit: %d min
 == 规定时限：%d 分钟
 
+Toggle dummy
+== 切换分身
+
+Toggle dyncam
+== 动态视野开关
+
+Toggle ghost
+== 影子记录开关
+
+Toggle keyboard shortcuts
+== 启用/禁用键盘快捷键
+
+Toggle to edit your dummy settings
+== 编辑分身设置
+
+Transmits your player name to info.ddnet.org
+== 将会发送你的玩家昵称到 info.ddnet.org
+
+Tries to predict other entities to give a feel of low latency
+== 尝试预测其他实体物以带来低延迟的游玩体验
+
 Try again
 == 重试
+
+Trying to determine UDP connectivity...
+== 正在尝试检测 UDP 连接...
+
+Tutorial
+== 教学
 
 Type
 == 模式
 
+Type:
+== 类型：
+
+Types
+== 模式
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== UDP 与 TCP 的 IP 地址并不相同。请尝试屏蔽 VPN 、代理网络以及网络加速器。
+
+UDP seems to be filtered.
+== UDP 疑似被过滤
+
+UI Color
+== 界面颜色
+
+UI controller sens.
+== 摇杆灵敏度（界面）
+
+UI mouse sens.
+== 鼠标灵敏度（界面）
+
+Unable to delete the demo '%s'
+== 无法删除回放文件 "%s"
+
 Unable to rename the demo
 == 无法重命名这个回放
+
+Unfinished map
+== 未完成的地图
+
+Unregister protocol and file extensions
+== 未注册的协议与扩充文件
+
+Update failed! Check log...
+== 更新失败！请检查日志...
+
+Update now
+== 现在更新
+
+Updating...
+== 更新中...
+
+Uploading map data to GPU
+== 正在将地图数据传输至显卡
+
+Use DDRace Scoreboard
+== 使用 DDRace 计分板
+
+Use current map as background
+== 使用当前地图作为实体层背景地图
+
+Use high DPI
+== 使用高 DPI
+
+Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
+== 使用 K键 自杀以重新开始，使用 Q键 可以暂停以旁观他人或查看地图。在设置中可以查看其他按键绑定。
+
+Use old chat style
+== 旧版聊天框
 
 Use sounds
 == 开启声音
@@ -525,8 +1592,17 @@ Use team colors for name plates
 V-Sync
 == 垂直同步
 
+Vanilla skins only
+== 只显示原生皮肤
+
 Version
 == 版本
+
+Version:
+== 版本：
+
+Video name:
+== 视频名称
 
 Vote command:
 == 投票命令：
@@ -546,690 +1622,26 @@ Voting
 Warmup
 == 热身
 
-Weapon
-== 武器
-
-Yes
-== 是
-
-You must restart the game for all settings to take effect.
-== 你需要重启游戏来使新设置生效。
-
-Demo
-== 回放
-
-Reset
-== 重置
-
-Screen
-== 屏幕
-
-New name:
-== 新文件名：
-
-Sat.
-== 饱和度
-
-Miscellaneous
-== 杂项
-
-Internet
-== 互联网
-
-Max demos
-== 最大回放数
-
-News
-== 新闻
-
-Join game
-== 加入游戏
-
-FSAA samples
-== 全屏抗锯齿（FSAA）采样倍数
-
-Sound volume
-== 音量
-
-Map sound volume
-== 地图音效音量
-
-Created:
-== 创建时间：
-
-Max Screenshots
-== 最大截图数
-
-Dummy settings
-== 分身设置
-
-Length:
-== 时长：
-
-Laser
-== 激光
-
-Netversion:
-== 通信版本：
-
-Map:
-== 地图：
-
-Info
-== 信息
-
-Hue
-== 色调
-
-Record demo
-== 录制回放
-
-Your skin
-== 你的皮肤
-
-Size:
-== 大小：
-
-Reset to defaults
-== 恢复默认设置
-
-Quit anyway?
-== 无论如何都要退出吗？
-
-Version:
-== 版本：
-
-Round
-== 回合
-
-Lht.
-== 亮度
-
-Automatically take statboard screenshot
-== 自动对统计板截图
-
-UI Color
-== 界面颜色
-
-Crc:
-== Crc:
-
-Alpha
-== 透明度
-
-LAN
-== 局域网
-
-Name plates size
-== 昵称大小
-
-Type:
-== 类型：
-
-Use DDRace Scoreboard
-== 使用 DDRace 计分板
-
-Show score
-== 显示分数
-
-Show names in chat in team colors
-== 以队伍颜色显示玩家昵称
-
-Show kill messages
-== 显示击杀消息
-
-Show votes window after voting
-== 投票后不关闭投票窗口
-
-Messages
-== 消息
-
-System message
-== 系统消息
-
-Highlighted message
-== 被提及消息
-
-Team message
-== 队伍消息
-
-Normal message
-== 普通消息
-
-Friend message
-== 好友消息
-
-Save the best demo of each race
-== 保存每场游戏最佳记录的回放
-
-Ghost
-== 影子
-
-Show ghost
-== 显示影子
-
-Save ghost
-== 保存影子
-
-Gameplay
-== 游戏
-
-Overlay entities
-== 显示实体层
-
-Show others
-== 显示其他玩家
-
-Show quads
-== 显示背景
-
-Default zoom
-== 默认缩放
-
-AntiPing: predict other players
-== 延迟补偿：预测其他玩家
-
-AntiPing: predict weapons
-== 延迟补偿：预测武器
-
-AntiPing: predict grenade paths
-== 延迟补偿：预测榴弹枪路径
-
-Show other players' hook collision lines
-== 显示其他玩家的钩索辅助线
-
-Show other players' key presses
-== 显示其他玩家的按键
-
-Show tiles layers from BG map
-== 显示实体层背景地图的图块层
-
-DDNet %s is available:
-== DDNet %s 现已可用：
-
-Update now
-== 现在更新
-
-Updating...
-== 更新中...
-
-DDNet Client updated!
-== DDNet 客户端更新成功！
-
-No updates available
-== 没有可用的更新
-
-Check now
-== 检查更新
-
-Loading DDNet Client
-== 加载 DDNet 客户端中...
-
-Browser
-== 浏览
-
-Connecting dummy
-== 正在连接分身
-
-Search
-== 搜索
-
-Vanilla skins only
-== 只显示原生皮肤
-
-Fat skins (DDFat)
-== 胖胖的皮肤（DDFat）
-
-Ratio
-== K/D
-
-AntiPing
-== 延迟补偿（AntiPing）
-
-Countries
-== 国家
-
-Reconnect in %d sec
-== %d 秒后重新连接
-
-Grabs
-== 得旗数
-
-DDNet
-== DDNet
-
-Deaths
-== 死亡数
-
-Please use a different name
-== 请换一个不同的文件名
-
-Restart
-== 重新开始
-
-Follow
-== 跟随
-
-Automatically create statboard csv
-== 自动将统计板导出为 csv 文件
-
-Are you sure that you want to disconnect?
-== 确定要断开连接吗？
-
-Types
-== 模式
-
-Remove chat
-== 删除消息记录
-
-Frags
-== 击杀数
-
-Enable long pain sound (used when shooting in freeze)
-== 启用冻结呼叫声
-
-%.2f MiB
-== %.2f MiB
-
-Refresh Rate
-== 刷新率
-
-New random timeout code
-== 随机生成新的超时代码（Timeout 代码）
-
-Suicides
-== 自杀数
-
-Net
-== 净击杀
-
-FPM
-== 击杀/分
-
-Spree
-== 连杀
-
-Max CSVs
-== 最大 csv 文件数
-
-%.2f KiB
-== %.2f KiB
-
-Best
-== 最高
-
-Exclude
-== 排除
-
-May cause delay
-== 可能会产生延迟
-
-Unfinished map
-== 未完成的地图
-
-Deactivate
-== 停用
-
-Welcome to DDNet
-== 欢迎来到 DDNet
-
-Activate
-== 启用
-
-File already exists, do you want to overwrite it?
-== 文件已存在，是否覆盖？
-
-Indicate map finish
-== 标记已完成的地图
-
-Save
-== 保存
-
-Date
-== 日期
-
-Show DDNet map finishes in server browser
-== 在服务器浏览器中显示已完成的 DDNet 地图
-
-Transmits your player name to info.ddnet.org
-== 将会发送你的玩家昵称到 info.ddnet.org
-
-Reload
-== 刷新
-
-Enable replays
-== 启用短时回放
-
-Time
-== 用时
-
-Show entities
-== 实体层显示开关
-
-Show all
-== 显示所有玩家
-
-Downloading %s:
-== 正在下载 %s:
-
-%d new mentions
-== %d 条新被提及消息
-
-Toggle dummy
-== 切换分身
-
-Replay feature is disabled!
-== 短时回放功能未启用！
-
-Are you sure that you want to disconnect your dummy?
-== 确定要断开分身连接吗？
-
-Hook collisions
-== 钩索辅助线
-
-DDNet %s is out!
-== DDNet %s 已经更新了！
-
-Markers
-== 标记
-
-Filter connecting players
-== 筛选正在连接的玩家
-
-Markers:
-== 标记
-
-Zoom in
-== 放大视野
-
-1 new mention
-== 1 条新被提及消息
-
-Update failed! Check log...
-== 更新失败！请检查日志...
-
-Pause
-== 暂停
-
-Length
-== 时长
-
-Converse
-== 继续私聊
-
-Successfully saved the replay!
-== 成功保存短时回放！
-
-Fetch Info
-== 回放信息
-
-Lock team
-== 锁定队伍
-
-Size
-== 大小
-
-Dummy copy
-== 分身同步动作
-
-9+ new mentions
-== 9+ 条新被提及消息
-
-Statboard
-== 统计板
-
-Disconnect Dummy
-== 断开分身连接
-
-Show HUD
-== HUD 开关
-
-Hammerfly dummy
-== 分身 Hammerfly 开关
-
-Default length
-== 默认时长
-
-Toggle ghost
-== 影子记录开关
-
-Kill
-== 自杀
-
-Zoom out
-== 缩小视野
-
-Show text entities
-== 显示文本实体
-
-Skin prefix
-== 皮肤名称前缀
-
-Toggle dyncam
-== 动态视野开关
-
-DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
-== DDraceNetwork 是一款在线合作游戏，你和你团体里的 Tee 的目标是抵达地图的终点。作为新手你应该从有着最简单的地图的简单（Novice） 服务器入门。根据延迟来选择离你相近的服务器。
-
-It's recommended that you check the settings to adjust them to your liking before joining a server.
-== 建议你在进入服务器前检查一下设置并根据你的喜好进行调整。
-
-Please enter your nickname below.
-== 请在下方输入你的昵称。
-
-Render
-== 渲染
-
-Server best:
-== 服务器最佳
-
-Learn
-== 教程 Wiki
-
-Use high DPI
-== 使用高 DPI
-
-Personal best:
-== 个人最佳
-
-Render demo
-== 渲染回放
-
-Replace video
-== 替换视频
-
-Video name:
-== 视频名称
-
-Connect Dummy
-== 连接分身
-
-Client message
-== 客户端消息
-
-Show others (own team only)
-== 显示其他玩家（仅同队伍）
-
-Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
-== 使用 K键 自杀以重新开始，使用 Q键 可以暂停以旁观他人或查看地图。在设置中可以查看其他按键绑定。
-
-https://wiki.ddnet.org/
-== https://wiki.ddnet.org/wiki/Main_Page/zh
-
 Warning
 == 警告
 
-Speed
-== 速度
+Weapon
+== 武器
 
-Skip the main menu
-== 跳过主界面
+Weapons
+== 武器
 
 Website
 == 官网
 
-Settings
-== 设置
+Welcome to DDNet
+== 欢迎来到 DDNet
 
-[Start menu]
-Play
-== 开始游戏
+When you cross the start line, show a ghost tee replicating the movements of your best time
+== 当越过起跑线时，游戏里将有影子回放你的最佳成绩
 
-Stop server
-== 停止服务器
-
-Run server
-== 运行服务器
-
-Server executable not found, can't run server
-== 未检测到服务器的可执行文件，无法运行服务器
-
-Editor
-== 编辑器
-
-Manual
-== 手动
-
-Race
-== 游戏
-
-Auto
-== 自动
-
-Replay
-== 回放
-
-Saving ddnet-settings.cfg failed
-== 配置文件 ddnet-settings.cfg 保存失败
-
-Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
-== 调试模式已启用。按 Ctrl+Shift+D 禁用调试模式。
-
-Existing Player
-== 玩家已存在
-
-Your nickname '%s' is already used (%d points). Do you still want to use it?
-== 你使用的昵称 "%s" 在 DDNet 中有 %d 分的记录，这可能表示该昵称已经被其他玩家使用过。确认要使用这个名字吗？
-
-Checking for existing player with your name
-== 正在查找该昵称的 DDNet 记录
-
-Theme
-== 主题
-
-%d of %d servers
-== 符合条件 %d / 总共 %d 个服务器
-
-%d of %d server
-== 符合条件 %d / 总共 %d 个服务器
-
-%d players
-== %d 在线玩家
-
-%d player
-== %d 在线玩家
-
-Demos directory
-== 回放目录
-
-Smooth Dynamic Camera
-== 平滑动态视野
-
-Themes directory
-== 主题目录
-
-Download skins
-== 下载官方皮肤
-
-Skin Database
-== 皮肤数据库
-
-Skins directory
-== 皮肤目录
-
-Game sound volume
-== 游戏音效音量
-
-Chat sound volume
-== 聊天提示音量
-
-Background music volume
-== 背景音乐音量
-
-Assets
-== 资源
-
-Use old chat style
-== 旧版聊天框
-
-Use current map as background
-== 使用当前地图作为实体层背景地图
-
-Entities
-== 实体层
-
-Emoticons
-== 表情
-
-Particles
-== 粒子
-
-Assets directory
-== 资源目录
-
-https://ddnet.org/discord
-== http://chat.teeworlds.cn/
-
-Discord
-== 开黑啦
-
-The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
-== 纹理文件 %s 的宽度无法被 %d 整除，或者高度无法被 %d 整除，这可能会导致显示错误。
-
-Chat command
-== 聊天框指令（/）
-
-Dummy
-== 分身
-
-Preview
-== 预览
-
-Background
-== 背景
-
-Entities Background color
-== 实体层背景颜色
-
-Regular Background Color
-== 背景层背景颜色
-
-AFR
-== 非洲
-
-ASI
-== 亚洲
-
-AUS
-== 澳洲
-
-EUR
-== 欧洲
-
-NA
-== 北美
-
-SA
-== 南美
-
-CHN
-== 中国
-
-Getting server list from master server
-== 正在从主服务器获取服务器列表
-
-Leak IP
-== 暴露IP
+Why are you slowmo replaying to read this?
+== 所以你为什么要慢速回放来看这个
 
 Windowed
 == 窗口化
@@ -1237,496 +1649,84 @@ Windowed
 Windowed borderless
 == 无边框窗口
 
-Desktop fullscreen
-== 无边框全屏
-
-Are you sure that you want to disconnect and switch to a different server?
-== 你确定要断开此服务器连接并进入其他服务器吗？
-
-Kill Messages
-== 击杀消息
-
-Show local player's key presses
-== 显示自己的按键
-
-Settings file
-== 设置文件
-
-Config directory
-== 配置目录（cfg）
-
-Run on join
-== 进入时执行
-
-Chat command (e.g. showall 1)
-== 聊天指令（例如: showall 1）
-
 Windowed fullscreen
 == 窗口化全屏
 
-The format of texture %s is not RGBA which will cause visual bugs.
-== 纹理文件 %s 并非 RGBA 格式，这可能会导致显示错误。
-
-Join Tutorial Server
-== 进入教学服务器
-
-Skip Tutorial
-== 跳过教学
-
-Renderer
-== 渲染设置
-
-Default
-== 默认
-
-Custom
-== 自定义
-
-Tutorial
-== 教学
-
-Can't find a Tutorial server
-== 无法找到教学服务器
-
-Toggle to edit your dummy settings
-== 编辑分身设置
-
-Choose default eyes when joining a server
-== 进入服务器时的默认表情
-
-Allows maps to render with more detail
-== 允许地图渲染更多细节
-
-When you cross the start line, show a ghost tee replicating the movements of your best time
-== 当越过起跑线时，游戏里将有影子回放你的最佳成绩
-
-Opacity
-== 不透明度
-
-Adjust the opacity of entities belonging to other teams, such as tees and nameplates
-== 调整单人区域或其他队伍中玩家的不透明度
-
-Quads are used for background decoration
-== 显示用作背景装饰的贴图
-
-Tries to predict other entities to give a feel of low latency
-== 尝试预测其他实体物以带来低延迟的游玩体验
-
-Super
-== 无敌
-
-Team %d
-== 队伍 %d
-
-Position:
-== 坐标
-
-Speed:
-== 速度
-
-Angle:
-== 角度
-
-Trying to determine UDP connectivity...
-== 正在尝试检测 UDP 连接...
-
-UDP seems to be filtered.
-== UDP 疑似被过滤
-
-UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
-== UDP 与 TCP 的 IP 地址并不相同。请尝试屏蔽 VPN 、代理网络以及网络加速器。
-
-No answer from server yet.
-== 服务器无响应
-
-Download community skins
-== 下载社区皮肤
-
-Enable controller
-== 启用控制器
-
-Relative
-== 相对
-
-[Ingame controller mode]
-Absolute
-== 绝对
-
-Ingame controller mode
-== 游戏内控制器瞄准模式
-
-Ingame controller sens.
-== 摇杆灵敏度（游戏）
-
-UI controller sens.
-== 摇杆灵敏度（界面）
-
-Controller jitter tolerance
-== 摇杆死区
-
-Status
-== 状态
-
-Aim bind
-== 操作轴绑定
-
-Mouse
-== 鼠标
-
-Ingame mouse sens.
-== 鼠标灵敏度（游戏）
-
-UI mouse sens.
-== 鼠标灵敏度（界面）
-
-Controller
-== 控制器
-
-Show dummy actions
-== 显示分身状态
-
-Show freeze bars
-== 显示解冻进度条
-
-Show player position
-== 显示玩家坐标
-
-Show player speed
-== 显示玩家速度
-
-Show player target angle
-== 显示玩家瞄准角度
-
-Opacity of freeze bars inside freeze
-== 解冻进度条不透明度
-
-Normal Color
-== 非相关信息颜色
-
-Highlight Color
-== 相关信息颜色
-
-Extras
-== 其他
-
-Preparing demo playback
-== 正在准备回放
-
-Connected
-== 连接成功
-
-Loading map file from storage
-== 正在从硬盘中加载地图文件
-
-Why are you slowmo replaying to read this?
-== 所以你为什么要慢速回放来看这个
-
-Initializing components
-== 正在初始化游戏引擎
-
-Initializing assets
-== 正在初始化资源
-
-Initializing map logic
-== 正在初始化地图逻辑
-
-Sending initial client info
-== 正在发送初始客户端信息
-
-Uploading map data to GPU
-== 正在将地图数据传输至显卡
-
-Getting game info
-== 正在获取游戏信息
-
-Requesting to join the game
-== 正在请求加入游戏
-
-Loading menu images
-== 正在加载主菜单图片
-
-Loading demo files
-== 正在加载回放文件
-
-Loading ghost files
-== 正在加载影子文件
-
-Loading skin files
-== 正在加载皮肤文件
-
-Appearance
-== 游戏界面
-
-Name Plate
-== 昵称板块
-
-Hook Collisions
-== 瞄准辅助
-
-Show health, shields and ammo
-== 显示生命、护甲与弹药栏
-
-DDRace HUD
-== DDRace HUD
-
-Show client IDs in scoreboard
-== 显示客户端 IDs （计分板中）
-
-Show DDRace HUD
-== 显示 DDRace HUD
-
-Show jumps indicator
-== 显示可跳跃次数
-
-Show hook strength indicator
-== 显示对其他玩家的钩索强度
-
-Hook collision line
-== 瞄准辅助线
-
-Hook collision line width
-== 辅助线宽度
-
-Hook collision line opacity
-== 辅助线不透明度
-
-Colors of the hook collision line, in case of a possible collision with:
-== 辅助线颜色（当瞄准以下实体物时）：
+Yes
+== 是
+
+You must restart the game for all settings to take effect.
+== 你需要重启游戏来使新设置生效。
 
 Your movements are not taken into account when calculating the line colors
 == 移动所造成的瞄准偏移将不计入考量
 
-Nothing hookable
-== 未瞄准任何实体物
+Your nickname '%s' is already used (%d points). Do you still want to use it?
+== 你使用的昵称 "%s" 在 DDNet 中有 %d 分的记录，这可能表示该昵称已经被其他玩家使用过。确认要使用这个名字吗？
 
-Something hookable
-== 可钩索的方块
+Your skin
+== 你的皮肤
 
-A Tee
-== 其他玩家
+Zoom in
+== 放大视野
 
-Loading assets
-== 正在加载资源
+Zoom out
+== 缩小视野
 
-Loading race demo files
-== 正在加载回放文件
-
-Loading sound files
-== 正在加载声音文件
-
-Play the current demo
-== 播放回放
-
-Pause the current demo
-== 暂停回放
-
-Stop the current demo
-== 结束回放
-
-Slow down the demo
-== 减慢播放速度
-
-Speed up the demo
-== 加快播放速度
-
-Export cut as a separate demo
-== 另存为新回放文件
-
-Toggle keyboard shortcuts
-== 启用/禁用键盘快捷键
-
-Weapons
-== 武器
-
-Rifle Laser Outline Color
-== 激光枪弹道外框颜色
-
-Rifle Laser Inner Color
-== 激光枪弹道实心颜色
-
-Shotgun Laser Outline Color
-== 霰弹枪弹道外框颜色
-
-Shotgun Laser Inner Color
-== 霰弹枪弹道实心颜色
-
-Door Laser Outline Color
-== 激光门外框颜色
-
-Door Laser Inner Color
-== 激光门实心颜色
-
-Freeze Laser Outline Color
-== 冻结激光外框颜色
-
-Freeze Laser Inner Color
-== 冻结激光实心颜色
-
-Menu opened. Press Esc key again to close menu.
-== 菜单已打开，再次点击 Esc 以关闭
-
-Set all to Rifle
-== 统一为激光枪颜色
-
-Cancel
-== 取消
-
-File '%s' already exists, do you want to overwrite it?
-== 文件名 "%s" 已经存在，是否要覆盖该文件？
-
-Are you sure that you want to remove the player '%s' from your friends list?
-== 你确定要将好友 "%s" 从你的好友列表中删除？
-
-Are you sure that you want to remove the clan '%s' from your friends list?
-== 你确定要将战队 "%s" 从你的好友列表中删除？
-
-Go back one tick
-== 上一个 tick
-
-Go forward one tick
-== 下一个 tick
-
-Go back one marker
-== 返回上一个标记
-
-Go forward one marker
-== 跳至下一个标记
-
-Are you sure that you want to delete the demo '%s'?
-== 你确定要删除回放文件 "%s" ？
-
-Unable to delete the demo '%s'
-== 无法删除回放文件 "%s"
-
-Reset controls
-== 恢复默认设置
-
-Are you sure that you want to reset the controls to their defaults?
-== 你确定要将当前的控制恢复至默认设置？
-
-[Graphics error]
-Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== 初始化失败。请尝试打开配置目录中的设置文件（settings_ddnet.cfg）并将“gfx_backend OpenGL”修改为“gfx_backend Vulkan”（若没有前者则可直接输入后者）再重试。
-
-[Graphics error]
-Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== 显存不足。请尝试移除自定义资源（如皮肤，实体层等等），尤其高分辨率的自定义资源。
-
-[Graphics error]
-An error during command recording occurred. Try to update your GPU drivers.
-== 指令记录期间检测到错误。请尝试更新显卡驱动程序。
+[Demo browser]
+Play
+== 播放
 
 [Graphics error]
 A render command failed. Try to update your GPU drivers.
 == 渲染指令错误。请尝试更新显卡驱动程序
 
 [Graphics error]
-Submitting the render commands failed. Try to update your GPU drivers.
-== 渲染指令提交失败。请尝试更新显卡驱动程序。
+An error during command recording occurred. Try to update your GPU drivers.
+== 指令记录期间检测到错误。请尝试更新显卡驱动程序。
+
+[Graphics error]
+Could not initialize the given graphics backend, reverting to the default backend now.
+== 无法初始化当前配置的图形后端，正在将配置回退至默认图形后端。
+
+[Graphics error]
+Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
+== 无法初始化当前配置的图形后端，请检查此电脑是否已安装集成显卡的驱动程序。
+
+[Graphics error]
+Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== 初始化失败。请尝试打开配置目录中的设置文件（settings_ddnet.cfg）并将“gfx_backend OpenGL”修改为“gfx_backend Vulkan”（若没有前者则可直接输入后者）再重试。
 
 [Graphics error]
 Failed to swap framebuffers. Try to update your GPU drivers.
 == 帧缓存交替失败。请尝试更新显卡驱动程序。
 
 [Graphics error]
+Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
+== 显存不足。请尝试移除自定义资源（如皮肤，实体层等等），尤其高分辨率的自定义资源。
+
+[Graphics error]
+Submitting the render commands failed. Try to update your GPU drivers.
+== 渲染指令提交失败。请尝试更新显卡驱动程序。
+
+[Graphics error]
 Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
 == 未知错误。请尝试打开配置目录中的设置文件（settings_ddnet.cfg）并将“gfx_backend OpenGL”修改为“gfx_backend Vulkan”（若没有前者则可直接输入后者）再重试。
 
-[Graphics error]
-Could not initialize the given graphics backend, reverting to the default backend now.
-== 无法初始化当前配置的图形后端，正在将配置回退至默认图形后端。
+[Ingame controller mode]
+Absolute
+== 绝对
 
-Open the directory that contains the demo files
-== 打开存有回放文件的文件夹路径
-
-Save power by lowering refresh rate (higher input latency)
-== 省电模式（限制帧率上限以降低功耗但也将提高输入延迟）
-
-Open the settings file
-== 打开设置文件
-
-Open the directory that contains the configuration and user files
-== 打开存有配置文件与用户文件的文件夹路径
-
-Open the directory to add custom themes
-== 打开用以添加自定义主题的文件夹路径
-
-Open the directory to add custom skins
-== 打开用以添加自定义皮肤的文件夹路径
-
-No controller found. Plug in a controller.
-== 未检测到任何控制器。请尝试重新连接控制器。
-
-Unregister protocol and file extensions
-== 未注册的协议与扩充文件
-
-Open the directory to add custom assets
-== 打开用以添加自定义资源的文件夹路径
-
-[Graphics error]
-Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
-== 无法初始化当前配置的图形后端，请检查此电脑是否已安装集成显卡的驱动程序。
-
-Could not save downloaded map. Try manually deleting this file: %s
-== 地图下载失败，请尝试手动删除此文件：%s
-
-Copy info
-== 复制服务器信息
-
-Create a random skin
-== 随机创造皮肤
-
-Online players (%d)
-== 在线玩家 (%d人)
-
-Online clanmates (%d)
-== 在线战队成员 (%d人)
+[Start menu]
+Play
+== 开始游戏
 
 [friends (server browser)]
 Offline (%d)
 == 离线 (%d人)
 
-Click to select server. Double click to join your friend.
-== 单击以选择此服务器。双击加入好友所在服务器。
+https://ddnet.org/discord
+== http://chat.teeworlds.cn/
 
-Click to remove this player from your friends list.
-== 单击从你的好友列表移除此玩家
-
-Click to remove this clan from your friends list.
-== 单击从你的好友列表移除此战队
-
-None
-== 无
-
-Add Clan
-== 添加战队
-
-A demo with this name already exists
-== 已经存在同名回放
-
-No server selected
-== 未选择服务器
-
-Mark the beginning of a cut (right click to reset)
-== 标记裁剪起点 (右键重置)
-
-Mark the end of a cut (right click to reset)
-== 标记裁剪终点 (右键重置)
-
-Close the demo player
-== 关闭回放播放器
-
-Export demo cut
-== 另存裁剪部分
-
-Cut interval
-== 裁剪区间
-
-Cut length
-== 裁剪时长
-
-Axis
-== 轴
-
-Graphics card
-== 显卡
+https://wiki.ddnet.org/
+== https://wiki.ddnet.org/wiki/Main_Page/zh

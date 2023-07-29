@@ -8,6 +8,27 @@
 
 ##### translated strings #####
 
+%.2f KiB
+== %.2f KiB
+
+%.2f MiB
+== %.2f MiB
+
+%d new mentions
+== %d ny nævner
+
+%d of %d server
+==  %d af %d server
+
+%d of %d servers
+== %d ud af %d servere
+
+%d player
+== %d spiller
+
+%d players
+== %d spillere
+
 %ds left
 == %d sekunder tilbage
 
@@ -29,8 +50,17 @@
 -Page %d-
 == -Side %d-
 
+1 new mention
+== 1 ny nævne
+
+9+ new mentions
+== 9+ ny nævner
+
 Abort
 == Afbryd
+
+Activate
+== Aktivér
 
 Add
 == Tilføj
@@ -44,14 +74,56 @@ Address
 All
 == Alle
 
+Alpha
+== Alpha
+
+AntiPing
+== AntiPing
+
+AntiPing: predict grenade paths
+== AbtiPing: forudsige granatstier
+
+AntiPing: predict other players
+== AntiPing: forudsige andre spillere
+
+AntiPing: predict weapons
+== AntiPing: forudsige våben
+
+Are you sure that you want to disconnect your dummy?
+== Er du sikker på, at du vil afbryde din dummy?
+
+Are you sure that you want to disconnect?
+== Er du sikker på, at du vil afbryde forbindelsen?
+
 Are you sure that you want to quit?
 == Er du sikker på at du vil afslutte?
+
+Assets
+== Assets
+
+Assets directory
+== Assets vejviser
+
+Auto
+== Auto
+
+Automatically create statboard csv
+== Opret automatisk statboard csv
 
 Automatically record demos
 == Optag automatisk demoer
 
 Automatically take game over screenshot
 == Tag  automatisk et game over screenshot
+
+Automatically take statboard screenshot
+== Tag automatisk skærmbillede på statboard
+
+Background music volume
+== Baggrundsmusikvolumen
+
+Best
+== Bedst
 
 Blue team
 == Blå hold
@@ -62,6 +134,9 @@ Blue team wins!
 Body
 == Krop
 
+Browser
+== Browser
+
 Call vote
 ==  Lav afstemning
 
@@ -71,11 +146,32 @@ Change settings
 Chat
 == Chat
 
+Chat sound volume
+== Chatlydstyrke
+
+Check now
+== Tjek nu
+
+Checking for existing player with your name
+== Kontrollerer for eksisterende spiller med dit navn
+
 Clan
 == Klan
 
+Clan plates size
+== Klanetiketstørrelse
+
 Client
 == Klient
+
+Client message
+== Klient besked
+
+Connect Dummy
+== Forbind dummy
+
+Connecting dummy
+== Forbinder dummy
 
 Connecting to
 == Forbinder til
@@ -89,8 +185,20 @@ Console
 Controls
 == Taster
 
+Converse
+== Snak
+
 Count players only
 == Tæl kun spillere
+
+Countries
+== Lande
+
+Crc:
+== Crc:
+
+Created:
+== Lavet:
 
 Current
 == Nuværende
@@ -98,11 +206,50 @@ Current
 Custom colors
 == Brugerdefinerede farver
 
+DDNet
+== DDNet
+
+DDNet %s is available:
+== DDNet %s er tilgængelig:
+
+DDNet %s is out!
+== DDNet %s er ude!
+
+DDNet Client needs to be restarted to complete update!
+== DDNet Klient skal genstartes for at fuldføre opdateringen!
+
+DDNet Client updated!
+== DDNet Klient opdateret!
+
+DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
+== DDraceNetwork er et samarbejdsvilligt onlinespil, hvor målet er, at du og din gruppe tees når målstregen på kortet. Som nybegynder skal du starte på Novice-servere, som er vært for de nemmeste kort. Overvej ping for at vælge en server tæt på dig.
+
+Date
+== Dato
+
+Deactivate
+== Deaktiver
+
+Deaths
+== Dødsfalder
+
+Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
+== Fejlfindingstilstand aktiveret. Tryk på Ctrl+Shift+D for at deaktivere fejlretningstilstand.
+
+Default length
+== Standardlængde
+
+Default zoom
+== Standard zoom
+
 Delete
 == Slet
 
 Delete demo
 == Slet demo
+
+Demo
+== Demo
 
 Demo details
 == Demoinformation
@@ -113,11 +260,23 @@ Demofile: %s
 Demos
 == Demoer
 
+Demos directory
+== Demoer vejviser
+
 Disconnect
 == Frakoble
 
+Disconnect Dummy
+== Afbryd dummy
+
 Disconnected
 == Frakoblet
+
+Download skins
+== Download skind
+
+Downloading %s:
+== Downloader %s:
 
 Downloading map
 == Downloader bane
@@ -125,17 +284,71 @@ Downloading map
 Draw!
 == Uafgjort!
 
+Dummy copy
+== Skift kopi
+
+Dummy settings
+== Dummy indstillinger
+
 Dynamic Camera
 == Dynamisk kamera
 
+Editor
+== Redaktør
+
 Emoticon
 == Humørikoner
+
+Emoticons
+== Humørikoner
+
+Enable game sounds
+== Aktivér spillyde
+
+Enable gun sound
+== Aktivér pistollyd
+
+Enable highlighted chat sound
+== Aktivér fremhævet chatlyd
+
+Enable long pain sound (used when shooting in freeze)
+== Aktivér lyd med lang smerte (bruges når du falder i frysepunkt)
+
+Enable regular chat sound
+== Aktivér regelmæssig chatlyd
+
+Enable replays
+== Aktivér gentagelser
+
+Enable server message sound
+== Aktivér serverbeskedlyd
+
+Enable team chat sound
+== Aktivér teamchat-lyd
+
+Entities
+== Entities
 
 Error
 == Fejl
 
 Error loading demo
 == Kunne ikke ikke indlæse demoen
+
+Exclude
+== Udelukke
+
+Existing Player
+== Eksisterende Spiller
+
+FPM
+== FPM
+
+FSAA samples
+== FSAA samples
+
+Fat skins (DDFat)
+== Fed skind (DDFat)
 
 Favorite
 == Favorit
@@ -146,8 +359,17 @@ Favorites
 Feet
 == Fødder
 
+Fetch Info
+== Hent info
+
+File already exists, do you want to overwrite it?
+== Filen findes allerede. Vil du overskrive den?
+
 Filter
 == Filter
+
+Filter connecting players
+== Filtrer forbindende spillere
 
 Fire
 == Skyd
@@ -155,11 +377,20 @@ Fire
 Folder
 == Mappe
 
+Follow
+== Følge med
+
 Force vote
 == Tving afstemning
 
+Frags
+== Frags
+
 Free-View
 == Free-View
+
+Friend message
+== Ven besked
 
 Friends
 == Venner
@@ -176,14 +407,29 @@ Game info
 Game over
 == Game over
 
+Game paused
+== Spillet sat på pause
+
+Game sound volume
+== Spillydstyrke
+
 Game type
 == Spiltype
 
 Game types:
 == Spiltyper:
 
+Gameplay
+== Gameplay
+
 General
 == Generelt
+
+Ghost
+== Spøgelse
+
+Grabs
+== Tager fat
 
 Graphics
 == Grafik
@@ -191,8 +437,14 @@ Graphics
 Grenade
 == Granatkaster
 
+HUD
+== HUD
+
 Hammer
 == Hammer
+
+Hammerfly dummy
+== Hammerflyve dummy
 
 Has people playing
 == Har folk som spiller
@@ -200,14 +452,38 @@ Has people playing
 High Detail
 == Extra detaljer
 
+Highlighted message
+== Fremhævet besked
+
 Hook
 == Krog
+
+Hook collisions
+== Krogkollisioner
+
+Hue
+== Farve
+
+Indicate map finish
+== Angiv, om kortet er færdigt
+
+Info
+== Info
+
+Internet
+== Internet
 
 Invalid Demo
 == Ugyldig demo
 
+It's recommended that you check the settings to adjust them to your liking before joining a server.
+== Det anbefales, at du kontrollerer indstillingerne for at justere dem efter eget valg, før du opretter forbindelse til en server.
+
 Join blue
 == Spil for blå
+
+Join game
+== Start spil
 
 Join red
 == Spil for rød
@@ -218,14 +494,74 @@ Jump
 Kick player
 == Udsmid spiller
 
+Kill
+== Dræbe
+
+LAN
+== LAN
+
 Language
 == Sprog
+
+Laser
+== Laser
+
+Learn
+== Lære
+
+Length
+== Længde
+
+Length:
+== Længde
+
+Lht.
+== Lys
+
+Loading DDNet Client
+== Indlæser DDNet Klient
+
+Lock team
+== Lås team
 
 MOTD
 == MOTD
 
+Manual
+== Manual
+
 Map
 == Kort
+
+Map sound volume
+== Kortlydstyrke
+
+Map:
+== Bane
+
+Markers
+== Markører
+
+Markers:
+== Markører:
+
+Max CSVs
+== Maks CSVs
+
+Max Screenshots
+== Max antal screenshots
+
+Max demos
+== Max antal demoer
+
+May cause delay
+== kan forårsage forsinkelse
+
+Messages
+== Beskeder
+
+Miscellaneous
+== Diverse
 
 Move left
 == Gå til venstre
@@ -245,6 +581,24 @@ Mute when not active
 Name
 == Navn
 
+Name plates size
+== Størrelse på navneskilte
+
+Net
+== Net
+
+Netversion:
+== Netversion:
+
+New name:
+== Nyt navn:
+
+New random timeout code
+== Ny tilfældig timeout kode
+
+News
+== Nyheder
+
 Next weapon
 == Næste våben
 
@@ -263,14 +617,26 @@ No servers found
 No servers match your filter criteria
 == Ingen servere matcher din filterkriterier
 
+No updates available
+== Ingen opdateringer tilgængelige
+
+Normal message
+== Normal besked
+
 Ok
 == Ok
 
 Open
 == Åben
 
+Overlay entities
+== Dække entities
+
 Parent Folder
 == Overmappe
+
+Particles
+== Partikler
 
 Password
 == Adgangskode
@@ -278,15 +644,17 @@ Password
 Password incorrect
 == Forkert adgangskode
 
+Pause
+== Pause
+
+Personal best:
+== Personlig bedst:
+
 Ping
 == Ping
 
 Pistol
 == Pistol
-
-[Demo browser]
-Play
-== Spil
 
 Play background music
 == Spil baggrunds musik
@@ -306,14 +674,35 @@ Players
 Please balance teams!
 == Balancer venligst holdet!
 
+Please enter your nickname below.
+== Indtast dit kaldenavn nedenfor.
+
+Please use a different name
+== Brug et andet navn
+
 Prev. weapon
 == Foregående våben
 
 Quit
 == Afslut
 
+Quit anyway?
+== Afslut alligevel?
+
+Race
+== Race
+
+Ratio
+== Forhold
+
 Reason:
 == Grund:
+
+Reconnect in %d sec
+== Tilslut igen om %d sek
+
+Record demo
+== Optag demo
 
 Red team
 == Rødt hold
@@ -324,11 +713,20 @@ Red team wins!
 Refresh
 == Opdater
 
+Refresh Rate
+== Opdateringshastighed
+
+Reload
+== Genindlæs
+
 Remote console
 == Serverkonsol
 
 Remove
 == Fjern
+
+Remove chat
+== Fjern chat
 
 Remove friend
 == Fjern ven
@@ -339,8 +737,53 @@ Rename
 Rename demo
 == Omdøb navn på demoen
 
+Render
+== Gør
+
+Render demo
+== Gengive demo
+
+Replace video
+== Udskift video
+
+Replay
+== Afspil igen
+
+Replay feature is disabled!
+== Afspilningsfunktionen er deaktiveret!
+
+Reset
+== Nulstil
+
 Reset filter
 == Nulstil filter
+
+Reset to defaults
+== Sæt til standard
+
+Restart
+== Genstart
+
+Round
+== Runde
+
+Run server
+== Kør server
+
+Sat.
+== Mætning
+
+Save
+== Gemme
+
+Save ghost
+== Gem spøgelse
+
+Save the best demo of each race
+== Gem den bedste demo af hvert løb
+
+Saving ddnet-settings.cfg failed
+== Gemning af ddnet-settings.cfg mislykkedes
 
 Score
 == Score
@@ -351,14 +794,26 @@ Score limit
 Scoreboard
 == Resultatliste
 
+Screen
+== Skærm
+
 Screenshot
 == Skærmbillede
+
+Search
+== Søg
 
 Server address:
 == Serveradresse
 
+Server best:
+== Server bedst:
+
 Server details
 == Serverdetaljer
+
+Server executable not found, can't run server
+== Server eksekverbar blev ikke fundet, kan ikke køre server
 
 Server filter
 == Serverfilter
@@ -369,26 +824,107 @@ Server info
 Server not full
 == Ikke fuld server
 
+Settings
+== Indstillinger
+
 Shotgun
 == Haglgevær
+
+Show DDNet map finishes in server browser
+== Vis DDNet kort færdig i serverbrowseren
+
+Show HUD
+== Vis HUD
+
+Show all
+== Vis alt
 
 Show chat
 == Vis chat
 
+Show clan above name plates
+== Vis klan over navneskilt
+
+Show entities
+== Vis entities
+
 Show friends only
 == Vis venner
+
+Show ghost
+== Vis spøgelse
 
 Show ingame HUD
 == Vis HUD i spillet
 
+Show kill messages
+== Vis dræb beskeder
+
 Show name plates
 == Vis navneskilte
+
+Show names in chat in team colors
+== Vis navne i chat i teamfarver
+
+Show only chat messages from friends
+== Vis kun chatbeskeder fra venner
+
+Show other players' hook collision lines
+== Vis andre spillers kroge kollisionslinjer
+
+Show other players' key presses
+== Vis andre spillers tastetryk
+
+Show others
+== Vis andre
+
+Show others (own team only)
+== Vis andre (kun eget hold)
+
+Show quads
+== Vis quads
+
+Show score
+== Vis score
+
+Show text entities
+== Vis tekst entities
+
+Show tiles layers from BG map
+== Vis fliselag fra baggrundskortet
+
+Show votes window after voting
+== Vis vinduet med stemmer efter afstemning
+
+Size
+== Størrelse
+
+Size:
+== Størrelse:
+
+Skin Database
+== Huddatabase
+
+Skin prefix
+== Hudpræfiks
+
+Skins directory
+== Skind vejviser
+
+Skip the main menu
+== Spring hovedmenuen over
+
+Smooth Dynamic Camera
+== Glat Dynamisk Kamera
 
 Sound
 == Lyd
 
 Sound error
 == Lyd fejl
+
+Sound volume
+== Lydstyrke
 
 Spectate
 == Kig på
@@ -405,17 +941,41 @@ Spectator mode
 Spectators
 == Tilskuer
 
+Speed
+== Hastighed
+
+Spree
+== Spree
+
+Statboard
+== Statboard
+
 Stop record
 == Stop optagelse
+
+Stop server
+== Stop server
 
 Strict gametype filter
 == Streng spiltype filter
 
+Successfully saved the replay!
+== Afspilning blev gemt!
+
 Sudden Death
 == Sudden Death
 
+Suicides
+== Selvmord
+
 Switch weapon on pickup
 == Byt våben ved anskafning
+
+Switch weapon when out of ammo
+== Skift våben, når du er ude af ammunition
+
+System message
+== Systemmeddelelse
 
 Team
 == Hold
@@ -423,14 +983,26 @@ Team
 Team chat
 == Holdchat
 
+Team message
+== Team besked
+
 The audio device couldn't be initialised.
 == Lydenheden kunne ikke startes
 
 The server is running a non-standard tuning on a pure game type.
 == Denne server kører på en ikke-standard tuning på en ren spilletype.
 
+Theme
+== Tema
+
+Themes directory
+== Tema vejviser
+
 There's an unsaved map in the editor, you might want to save it before you quit the game.
 == Der er en ikke-gemt bane i editoren, vil du gemme den før du afslutter?
+
+Time
+== Tid
 
 Time limit
 == Tidsbegrænsning
@@ -438,14 +1010,62 @@ Time limit
 Time limit: %d min
 == Tidsbegrænsning: %d min
 
+Toggle dummy
+== Skift dummy
+
+Toggle dyncam
+== Skift dyncam
+
+Toggle ghost
+== Skift spøgelse
+
+Transmits your player name to info.ddnet.org
+== sender dit spillernavn til info.ddnet.org
+
 Try again
 == Forsøg igen
 
 Type
 == Type
 
+Type:
+== Type:
+
+Types
+== Typer
+
+UI Color
+== Brugergrænseflade farve
+
 Unable to rename the demo
 == Kunne ikke omdøbe demoen
+
+Unfinished map
+== Ufærdigt kort
+
+Update failed! Check log...
+== Opdatering fejlede! Tjek log...
+
+Update now
+== Opdatere nu
+
+Updating...
+== Opdaterer...
+
+Use DDRace Scoreboard
+== Brug DDRace resultattavle
+
+Use current map as background
+== Brug det aktuelle kort som baggrund
+
+Use high DPI
+== Brug højt DPI
+
+Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
+== Brug k tasten til at dræbe (genstart), q for at sætte pause og se andre spillere. Se indstillinger for andre tastebindinger.
+
+Use old chat style
+== Brug gammel chat-stil
 
 Use sounds
 == Anvend lydeffekter
@@ -456,8 +1076,17 @@ Use team colors for name plates
 V-Sync
 == V-Sync
 
+Vanilla skins only
+== Kun vaniljeskind
+
 Version
 == Version
+
+Version:
+== Version:
+
+Video name:
+== Video navn:
 
 Vote command:
 == Afstemningsordre:
@@ -477,8 +1106,17 @@ Voting
 Warmup
 == Opvarmning
 
+Warning
+== Advarsel
+
 Weapon
 == Våben
+
+Website
+== Internet side
+
+Welcome to DDNet
+== Velkommen til DDNet
 
 Yes
 == Ja
@@ -486,341 +1124,11 @@ Yes
 You must restart the game for all settings to take effect.
 == Du skal genstarte spillet før alle indstillingerne virker.
 
-New name:
-== Nyt navn:
-
-Sat.
-== Mætning
-
-Miscellaneous
-== Diverse
-
-Internet
-== Internet
-
-Max demos
-== Max antal demoer
-
-News
-== Nyheder
-
-Join game
-== Start spil
-
-FSAA samples
-== FSAA samples
-
-Sound volume
-== Lydstyrke
-
-Created:
-== Lavet:
-
-Max Screenshots
-== Max antal screenshots
-
-Length:
-== Længde
-
-Laser
-== Laser
-
-Netversion:
-== Netversion:
-
-Map:
-== Bane
-
-Info
-== Info
-
-Hue
-== Farve
-
-Record demo
-== Optag demo
-
-Your skin
-== Dit udseende
-
-Size:
-== Størrelse:
-
-Reset to defaults
-== Sæt til standard
-
-Quit anyway?
-== Afslut alligevel?
-
-Version:
-== Version:
-
-Round
-== Runde
-
-Lht.
-== Lys
-
-UI Color
-== Brugergrænseflade farve
-
-Crc:
-== Crc:
-
-Alpha
-== Alpha
-
-LAN
-== LAN
-
-Name plates size
-== Størrelse på navneskilte
-
-Type:
-== Type:
-
-Successfully saved the replay!
-== Afspilning blev gemt!
-
-Saving ddnet-settings.cfg failed
-== Gemning af ddnet-settings.cfg mislykkedes
-
-Replay feature is disabled!
-== Afspilningsfunktionen er deaktiveret!
-
-Warning
-== Advarsel
-
-Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
-== Fejlfindingstilstand aktiveret. Tryk på Ctrl+Shift+D for at deaktivere fejlretningstilstand.
-
-Game paused
-== Spillet sat på pause
-
-Server best:
-== Server bedst:
-
-Personal best:
-== Personlig bedst:
-
-Browser
-== Browser
-
-Ghost
-== Spøgelse
-
-Loading DDNet Client
-== Indlæser DDNet Klient
-
-Reconnect in %d sec
-== Tilslut igen om %d sek
-
-Render demo
-== Gengive demo
-
-Replace video
-== Udskift video
-
-File already exists, do you want to overwrite it?
-== Filen findes allerede. Vil du overskrive den?
-
-Are you sure that you want to disconnect?
-== Er du sikker på, at du vil afbryde forbindelsen?
-
-Disconnect Dummy
-== Afbryd dummy
-
-Are you sure that you want to disconnect your dummy?
-== Er du sikker på, at du vil afbryde din dummy?
-
-Welcome to DDNet
-== Velkommen til DDNet
-
-DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
-== DDraceNetwork er et samarbejdsvilligt onlinespil, hvor målet er, at du og din gruppe tees når målstregen på kortet. Som nybegynder skal du starte på Novice-servere, som er vært for de nemmeste kort. Overvej ping for at vælge en server tæt på dig.
-
-Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
-== Brug k tasten til at dræbe (genstart), q for at sætte pause og se andre spillere. Se indstillinger for andre tastebindinger.
-
-It's recommended that you check the settings to adjust them to your liking before joining a server.
-== Det anbefales, at du kontrollerer indstillingerne for at justere dem efter eget valg, før du opretter forbindelse til en server.
-
-Please enter your nickname below.
-== Indtast dit kaldenavn nedenfor.
-
-Existing Player
-== Eksisterende Spiller
-
 Your nickname '%s' is already used (%d points). Do you still want to use it?
 == Your nickname '%s' is already in use (%d points). Do you still want to use it?
 
-Checking for existing player with your name
-== Kontrollerer for eksisterende spiller med dit navn
-
-Speed
-== Hastighed
-
-Video name:
-== Video navn:
-
-Show DDNet map finishes in server browser
-== Vis DDNet kort færdig i serverbrowseren
-
-Transmits your player name to info.ddnet.org
-== sender dit spillernavn til info.ddnet.org
-
-Theme
-== Tema
-
-Search
-== Søg
-
-Exclude
-== Udelukke
-
-%d of %d servers
-== %d ud af %d servere
-
-%d of %d server
-==  %d af %d server
-
-%d players
-== %d spillere
-
-%d player
-== %d spiller
-
-Filter connecting players
-== Filtrer forbindende spillere
-
-Indicate map finish
-== Angiv, om kortet er færdigt
-
-Unfinished map
-== Ufærdigt kort
-
-Countries
-== Lande
-
-Types
-== Typer
-
-Please use a different name
-== Brug et andet navn
-
-Remove chat
-== Fjern chat
-
-Markers:
-== Markører:
-
-%.2f MiB
-== %.2f MiB
-
-%.2f KiB
-== %.2f KiB
-
-Demo
-== Demo
-
-Markers
-== Markører
-
-Length
-== Længde
-
-Date
-== Dato
-
-Fetch Info
-== Hent info
-
-Demos directory
-== Demoer vejviser
-
-Render
-== Gør
-
-Connecting dummy
-== Forbinder dummy
-
-Connect Dummy
-== Forbind dummy
-
-Kill
-== Dræbe
-
-Pause
-== Pause
-
-Reload
-== Genindlæs
-
-Deactivate
-== Deaktiver
-
-Activate
-== Aktivér
-
-Save
-== Gemme
-
-Smooth Dynamic Camera
-== Glat Dynamisk Kamera
-
-Switch weapon when out of ammo
-== Skift våben, når du er ude af ammunition
-
-Show only chat messages from friends
-== Vis kun chatbeskeder fra venner
-
-Show clan above name plates
-== Vis klan over navneskilt
-
-Clan plates size
-== Klanetiketstørrelse
-
-Skip the main menu
-== Spring hovedmenuen over
-
-Refresh Rate
-== Opdateringshastighed
-
-Themes directory
-== Tema vejviser
-
-Automatically take statboard screenshot
-== Tag automatisk skærmbillede på statboard
-
-Automatically create statboard csv
-== Opret automatisk statboard csv
-
-Max CSVs
-== Maks CSVs
-
-Dummy settings
-== Dummy indstillinger
-
-Download skins
-== Download skind
-
-Vanilla skins only
-== Kun vaniljeskind
-
-Fat skins (DDFat)
-== Fed skind (DDFat)
-
-Skin prefix
-== Hudpræfiks
-
-Skin Database
-== Huddatabase
-
-Skins directory
-== Skind vejviser
-
-Hook collisions
-== Krogkollisioner
+Your skin
+== Dit udseende
 
 Zoom in
 == Zoome ind
@@ -828,440 +1136,23 @@ Zoom in
 Zoom out
 == Zoome ud
 
-Default zoom
-== Standard zoom
-
-Show others
-== Vis andre
-
-Show all
-== Vis alt
-
-Toggle dyncam
-== Skift dyncam
-
-Toggle dummy
-== Skift dummy
-
-Toggle ghost
-== Skift spøgelse
-
-Dummy copy
-== Skift kopi
-
-Hammerfly dummy
-== Hammerflyve dummy
-
-Converse
-== Snak
-
-Statboard
-== Statboard
-
-Lock team
-== Lås team
-
-Show entities
-== Vis entities
-
-Show HUD
-== Vis HUD
-
-May cause delay
-== kan forårsage forsinkelse
-
-Screen
-== Skærm
-
-Use high DPI
-== Brug højt DPI
-
-Enable game sounds
-== Aktivér spillyde
-
-Enable gun sound
-== Aktivér pistollyd
-
-Enable long pain sound (used when shooting in freeze)
-== Aktivér lyd med lang smerte (bruges når du falder i frysepunkt)
-
-Enable server message sound
-== Aktivér serverbeskedlyd
-
-Enable regular chat sound
-== Aktivér regelmæssig chatlyd
-
-Enable team chat sound
-== Aktivér teamchat-lyd
-
-Enable highlighted chat sound
-== Aktivér fremhævet chatlyd
-
-Game sound volume
-== Spillydstyrke
-
-Chat sound volume
-== Chatlydstyrke
-
-Map sound volume
-== Kortlydstyrke
-
-Background music volume
-== Baggrundsmusikvolumen
-
-HUD
-== HUD
-
-DDNet
-== DDNet
-
-Assets
-== Assets
-
-DDNet Client needs to be restarted to complete update!
-== DDNet Klient skal genstartes for at fuldføre opdateringen!
-
-Use DDRace Scoreboard
-== Brug DDRace resultattavle
-
-Show score
-== Vis score
-
-Use old chat style
-== Brug gammel chat-stil
-
-Show names in chat in team colors
-== Vis navne i chat i teamfarver
-
-Show kill messages
-== Vis dræb beskeder
-
-Show votes window after voting
-== Vis vinduet med stemmer efter afstemning
-
-Messages
-== Beskeder
-
-System message
-== Systemmeddelelse
-
-Reset
-== Nulstil
-
-Highlighted message
-== Fremhævet besked
-
-Team message
-== Team besked
-
-Friend message
-== Ven besked
-
-Normal message
-== Normal besked
-
-Client message
-== Klient besked
-
-Save the best demo of each race
-== Gem den bedste demo af hvert løb
-
-Default length
-== Standardlængde
-
-Enable replays
-== Aktivér gentagelser
-
-Show ghost
-== Vis spøgelse
-
-Save ghost
-== Gem spøgelse
-
-Gameplay
-== Gameplay
-
-Overlay entities
-== Dække entities
-
-Size
-== Størrelse
-
-Show text entities
-== Vis tekst entities
-
-Show others (own team only)
-== Vis andre (kun eget hold)
-
-Show quads
-== Vis quads
-
-AntiPing
-== AntiPing
-
-AntiPing: predict other players
-== AntiPing: forudsige andre spillere
-
-AntiPing: predict weapons
-== AntiPing: forudsige våben
-
-AntiPing: predict grenade paths
-== AbtiPing: forudsige granatstier
-
-Show other players' hook collision lines
-== Vis andre spillers kroge kollisionslinjer
-
-Show other players' key presses
-== Vis andre spillers tastetryk
-
-Use current map as background
-== Brug det aktuelle kort som baggrund
-
-Show tiles layers from BG map
-== Vis fliselag fra baggrundskortet
-
-DDNet %s is available:
-== DDNet %s er tilgængelig:
-
-Update now
-== Opdatere nu
-
-Updating...
-== Opdaterer...
-
-DDNet Client updated!
-== DDNet Klient opdateret!
-
-No updates available
-== Ingen opdateringer tilgængelige
-
-Check now
-== Tjek nu
-
-New random timeout code
-== Ny tilfældig timeout kode
-
-Entities
-== Entities
-
-Emoticons
-== Humørikoner
-
-Particles
-== Partikler
-
-Assets directory
-== Assets vejviser
-
-Learn
-== Lære
-
-https://wiki.ddnet.org/
-== https://wiki.ddnet.org/
-
-Website
-== Internet side
-
-Settings
-== Indstillinger
-
-Stop server
-== Stop server
-
-Run server
-== Kør server
-
-Server executable not found, can't run server
-== Server eksekverbar blev ikke fundet, kan ikke køre server
-
-Editor
-== Redaktør
+[Demo browser]
+Play
+== Spil
 
 [Start menu]
 Play
 == Spil
 
-DDNet %s is out!
-== DDNet %s er ude!
+https://wiki.ddnet.org/
+== https://wiki.ddnet.org/
 
-Downloading %s:
-== Downloader %s:
+##### translation needed #####
 
-Update failed! Check log...
-== Opdatering fejlede! Tjek log...
-
-Restart
-== Genstart
-
-Time
-== Tid
-
-Manual
-== Manual
-
-Race
-== Race
-
-Auto
-== Auto
-
-Replay
-== Afspil igen
-
-Follow
-== Følge med
-
-Frags
-== Frags
-
-Deaths
-== Dødsfalder
-
-Suicides
-== Selvmord
-
-Ratio
-== Forhold
-
-Net
-== Net
-
-FPM
-== FPM
-
-Spree
-== Spree
-
-Best
-== Bedst
-
-Grabs
-== Tager fat
-
-1 new mention
-== 1 ny nævne
-
-%d new mentions
-== %d ny nævner
-
-9+ new mentions
-== 9+ ny nævner
-
-[Graphics error]
-Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== 
-
-[Graphics error]
-Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== 
-
-[Graphics error]
-An error during command recording occurred. Try to update your GPU drivers.
-== 
-
-[Graphics error]
-A render command failed. Try to update your GPU drivers.
-== 
-
-[Graphics error]
-Submitting the render commands failed. Try to update your GPU drivers.
-== 
-
-[Graphics error]
-Failed to swap framebuffers. Try to update your GPU drivers.
-== 
-
-[Graphics error]
-Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== 
-
-[Graphics error]
-Could not initialize the given graphics backend, reverting to the default backend now.
-== 
-
-[Graphics error]
-Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
-== 
-
-Could not save downloaded map. Try manually deleting this file: %s
-== 
-
-The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
-== 
-
-The format of texture %s is not RGBA which will cause visual bugs.
-== 
-
-Preparing demo playback
-== 
-
-Connected
-== 
-
-Loading map file from storage
-== 
-
-Why are you slowmo replaying to read this?
-== 
-
-Initializing components
-== 
-
-Initializing assets
-== 
-
-Initializing map logic
-== 
-
-Sending initial client info
-== 
-
-Position:
-== 
-
-Speed:
-== 
-
-Angle:
-== 
-
-Team %d
-== 
-
-Uploading map data to GPU
-== 
-
-Trying to determine UDP connectivity...
-== 
-
-UDP seems to be filtered.
-== 
-
-UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
-== 
-
-No answer from server yet.
-== 
-
-Getting game info
-== 
-
-Requesting to join the game
+A Tee
 == 
 
 A demo with this name already exists
-== 
-
-File '%s' already exists, do you want to overwrite it?
-== 
-
-Join Tutorial Server
-== 
-
-Skip Tutorial
-== 
-
-Loading menu images
 == 
 
 AFR
@@ -1273,107 +1164,100 @@ ASI
 AUS
 == 
 
-EUR
+Add Clan
 == 
 
-NA
+Adjust the opacity of entities belonging to other teams, such as tees and nameplates
 == 
 
-SA
+Aim bind
 == 
 
-CHN
+Allows maps to render with more detail
 == 
 
-Getting server list from master server
+Angle:
+== 
+
+Appearance
+== 
+
+Are you sure that you want to delete the demo '%s'?
 == 
 
 Are you sure that you want to disconnect and switch to a different server?
 == 
 
-Copy info
-== 
-
-Leak IP
-== 
-
-No server selected
-== 
-
-Online players (%d)
-== 
-
-Online clanmates (%d)
-== 
-
-[friends (server browser)]
-Offline (%d)
-== 
-
-Click to select server. Double click to join your friend.
-== 
-
-Click to remove this player from your friends list.
-== 
-
-Click to remove this clan from your friends list.
-== 
-
-None
+Are you sure that you want to remove the clan '%s' from your friends list?
 == 
 
 Are you sure that you want to remove the player '%s' from your friends list?
 == 
 
-Are you sure that you want to remove the clan '%s' from your friends list?
+Are you sure that you want to reset the controls to their defaults?
 == 
 
-Add Clan
+Axis
 == 
 
-Play the current demo
+Background
 == 
 
-Pause the current demo
+CHN
 == 
 
-Stop the current demo
+Can't find a Tutorial server
 == 
 
-Go back one tick
+Cancel
 == 
 
-Go forward one tick
+Chat command
 == 
 
-Slow down the demo
+Chat command (e.g. showall 1)
 == 
 
-Speed up the demo
+Choose default eyes when joining a server
 == 
 
-Mark the beginning of a cut (right click to reset)
+Click to remove this clan from your friends list.
 == 
 
-Mark the end of a cut (right click to reset)
+Click to remove this player from your friends list.
 == 
 
-Export cut as a separate demo
-== 
-
-Go back one marker
-== 
-
-Go forward one marker
+Click to select server. Double click to join your friend.
 == 
 
 Close the demo player
 == 
 
-Toggle keyboard shortcuts
+Colors of the hook collision line, in case of a possible collision with:
 == 
 
-Export demo cut
+Config directory
+== 
+
+Connected
+== 
+
+Controller
+== 
+
+Controller jitter tolerance
+== 
+
+Copy info
+== 
+
+Could not save downloaded map. Try manually deleting this file: %s
+== 
+
+Create a random skin
+== 
+
+Custom
 == 
 
 Cut interval
@@ -1382,177 +1266,292 @@ Cut interval
 Cut length
 == 
 
-Loading demo files
-== 
-
-Open the directory that contains the demo files
-== 
-
-Are you sure that you want to delete the demo '%s'?
-== 
-
-Unable to delete the demo '%s'
-== 
-
-Loading ghost files
-== 
-
-Menu opened. Press Esc key again to close menu.
-== 
-
-Save power by lowering refresh rate (higher input latency)
-== 
-
-Settings file
-== 
-
-Open the settings file
-== 
-
-Config directory
-== 
-
-Open the directory that contains the configuration and user files
-== 
-
-Open the directory to add custom themes
-== 
-
-Loading skin files
-== 
-
-Toggle to edit your dummy settings
-== 
-
-Download community skins
-== 
-
-Choose default eyes when joining a server
-== 
-
-Create a random skin
-== 
-
-Open the directory to add custom skins
-== 
-
-Chat command
-== 
-
-Enable controller
-== 
-
-Controller
-== 
-
-Ingame controller mode
-== 
-
-[Ingame controller mode]
-Relative
-== 
-
-[Ingame controller mode]
-Absolute
-== 
-
-Ingame controller sens.
-== 
-
-UI controller sens.
-== 
-
-Controller jitter tolerance
-== 
-
-No controller found. Plug in a controller.
-== 
-
-Axis
-== 
-
-Status
-== 
-
-Aim bind
-== 
-
-Mouse
-== 
-
-Ingame mouse sens.
-== 
-
-UI mouse sens.
-== 
-
-Reset controls
-== 
-
-Are you sure that you want to reset the controls to their defaults?
-== 
-
-Cancel
-== 
-
-Dummy
-== 
-
-Windowed
-== 
-
-Windowed borderless
-== 
-
-Windowed fullscreen
-== 
-
-Desktop fullscreen
-== 
-
-Allows maps to render with more detail
-== 
-
-Renderer
+DDRace HUD
 == 
 
 Default
 == 
 
-Custom
+Desktop fullscreen
+== 
+
+Discord
+== 
+
+Door Laser Inner Color
+== 
+
+Door Laser Outline Color
+== 
+
+Download community skins
+== 
+
+Dummy
+== 
+
+EUR
+== 
+
+Enable controller
+== 
+
+Entities Background color
+== 
+
+Export cut as a separate demo
+== 
+
+Export demo cut
+== 
+
+Extras
+== 
+
+File '%s' already exists, do you want to overwrite it?
+== 
+
+Freeze Laser Inner Color
+== 
+
+Freeze Laser Outline Color
+== 
+
+Getting game info
+== 
+
+Getting server list from master server
+== 
+
+Go back one marker
+== 
+
+Go back one tick
+== 
+
+Go forward one marker
+== 
+
+Go forward one tick
 == 
 
 Graphics card
 == 
 
-Appearance
-== 
-
-Name Plate
+Highlight Color
 == 
 
 Hook Collisions
 == 
 
+Hook collision line
+== 
+
+Hook collision line opacity
+== 
+
+Hook collision line width
+== 
+
+Ingame controller mode
+== 
+
+Ingame controller sens.
+== 
+
+Ingame mouse sens.
+== 
+
+Initializing assets
+== 
+
+Initializing components
+== 
+
+Initializing map logic
+== 
+
+Join Tutorial Server
+== 
+
 Kill Messages
 == 
 
-Show health, shields and ammo
+Leak IP
 == 
 
-DDRace HUD
+Loading assets
 == 
 
-Show client IDs in scoreboard
+Loading demo files
+== 
+
+Loading ghost files
+== 
+
+Loading map file from storage
+== 
+
+Loading menu images
+== 
+
+Loading race demo files
+== 
+
+Loading skin files
+== 
+
+Loading sound files
+== 
+
+Mark the beginning of a cut (right click to reset)
+== 
+
+Mark the end of a cut (right click to reset)
+== 
+
+Menu opened. Press Esc key again to close menu.
+== 
+
+Mouse
+== 
+
+NA
+== 
+
+Name Plate
+== 
+
+No answer from server yet.
+== 
+
+No controller found. Plug in a controller.
+== 
+
+No server selected
+== 
+
+None
+== 
+
+Normal Color
+== 
+
+Nothing hookable
+== 
+
+Online clanmates (%d)
+== 
+
+Online players (%d)
+== 
+
+Opacity
+== 
+
+Opacity of freeze bars inside freeze
+== 
+
+Open the directory that contains the configuration and user files
+== 
+
+Open the directory that contains the demo files
+== 
+
+Open the directory to add custom assets
+== 
+
+Open the directory to add custom skins
+== 
+
+Open the directory to add custom themes
+== 
+
+Open the settings file
+== 
+
+Pause the current demo
+== 
+
+Play the current demo
+== 
+
+Position:
+== 
+
+Preparing demo playback
+== 
+
+Preview
+== 
+
+Quads are used for background decoration
+== 
+
+Regular Background Color
+== 
+
+Renderer
+== 
+
+Requesting to join the game
+== 
+
+Reset controls
+== 
+
+Rifle Laser Inner Color
+== 
+
+Rifle Laser Outline Color
+== 
+
+Run on join
+== 
+
+SA
+== 
+
+Save power by lowering refresh rate (higher input latency)
+== 
+
+Sending initial client info
+== 
+
+Set all to Rifle
+== 
+
+Settings file
+== 
+
+Shotgun Laser Inner Color
+== 
+
+Shotgun Laser Outline Color
 == 
 
 Show DDRace HUD
 == 
 
-Show jumps indicator
+Show client IDs in scoreboard
 == 
 
 Show dummy actions
+== 
+
+Show freeze bars
+== 
+
+Show health, shields and ammo
+== 
+
+Show hook strength indicator
+== 
+
+Show jumps indicator
+== 
+
+Show local player's key presses
 == 
 
 Show player position
@@ -1564,140 +1563,143 @@ Show player speed
 Show player target angle
 == 
 
-Show freeze bars
+Skip Tutorial
 == 
 
-Opacity of freeze bars inside freeze
-== 
-
-Preview
-== 
-
-Show hook strength indicator
-== 
-
-Show local player's key presses
-== 
-
-Hook collision line
-== 
-
-Hook collision line width
-== 
-
-Hook collision line opacity
-== 
-
-Colors of the hook collision line, in case of a possible collision with:
-== 
-
-Your movements are not taken into account when calculating the line colors
-== 
-
-Nothing hookable
+Slow down the demo
 == 
 
 Something hookable
 == 
 
-A Tee
+Speed up the demo
 == 
 
-Normal Color
+Speed:
 == 
 
-Highlight Color
+Status
 == 
 
-Weapons
-== 
-
-Rifle Laser Outline Color
-== 
-
-Rifle Laser Inner Color
-== 
-
-Shotgun Laser Outline Color
-== 
-
-Shotgun Laser Inner Color
-== 
-
-Door Laser Outline Color
-== 
-
-Door Laser Inner Color
-== 
-
-Freeze Laser Outline Color
-== 
-
-Freeze Laser Inner Color
-== 
-
-Set all to Rifle
-== 
-
-When you cross the start line, show a ghost tee replicating the movements of your best time
-== 
-
-Opacity
-== 
-
-Adjust the opacity of entities belonging to other teams, such as tees and nameplates
-== 
-
-Quads are used for background decoration
-== 
-
-Tries to predict other entities to give a feel of low latency
-== 
-
-Background
-== 
-
-Entities Background color
-== 
-
-Regular Background Color
-== 
-
-Run on join
-== 
-
-Chat command (e.g. showall 1)
-== 
-
-Unregister protocol and file extensions
-== 
-
-Extras
-== 
-
-Loading assets
-== 
-
-Open the directory to add custom assets
-== 
-
-Discord
-== 
-
-https://ddnet.org/discord
-== 
-
-Tutorial
-== 
-
-Can't find a Tutorial server
-== 
-
-Loading race demo files
+Stop the current demo
 == 
 
 Super
 == 
 
-Loading sound files
+Team %d
+== 
+
+The format of texture %s is not RGBA which will cause visual bugs.
+== 
+
+The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
+== 
+
+Toggle keyboard shortcuts
+== 
+
+Toggle to edit your dummy settings
+== 
+
+Tries to predict other entities to give a feel of low latency
+== 
+
+Trying to determine UDP connectivity...
+== 
+
+Tutorial
+== 
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== 
+
+UDP seems to be filtered.
+== 
+
+UI controller sens.
+== 
+
+UI mouse sens.
+== 
+
+Unable to delete the demo '%s'
+== 
+
+Unregister protocol and file extensions
+== 
+
+Uploading map data to GPU
+== 
+
+Weapons
+== 
+
+When you cross the start line, show a ghost tee replicating the movements of your best time
+== 
+
+Why are you slowmo replaying to read this?
+== 
+
+Windowed
+== 
+
+Windowed borderless
+== 
+
+Windowed fullscreen
+== 
+
+Your movements are not taken into account when calculating the line colors
+== 
+
+[Graphics error]
+A render command failed. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+An error during command recording occurred. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+Could not initialize the given graphics backend, reverting to the default backend now.
+== 
+
+[Graphics error]
+Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
+== 
+
+[Graphics error]
+Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== 
+
+[Graphics error]
+Failed to swap framebuffers. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
+== 
+
+[Graphics error]
+Submitting the render commands failed. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== 
+
+[Ingame controller mode]
+Absolute
+== 
+
+[Ingame controller mode]
+Relative
+== 
+
+[friends (server browser)]
+Offline (%d)
+== 
+
+https://ddnet.org/discord
 == 
