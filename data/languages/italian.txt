@@ -720,9 +720,7 @@ Show DDNet map finishes in server browser
 == Mostra le mappe finite in DDNet nel tuo browser dei server
 
 transmits your player name to info.ddnet.org
-
 == Trasmette il tuo nome da giocatore a info.ddnet.org
-
 
 Theme
 == Tema
@@ -1166,8 +1164,6 @@ Grabs
 
 9+ new mentions
 == +9 nuove menzioni
-
-[Graphics error]
 
 [Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.

@@ -1614,8 +1614,6 @@ Are you sure that you want to reset the controls to their defaults?
 == 你确定要将当前的控制恢复至默认设置？
 
 [Graphics error]
-
-[Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
 == 初始化失败。请尝试打开配置目录中的设置文件（settings_ddnet.cfg）并将“gfx_backend OpenGL”修改为“gfx_backend Vulkan”（若没有前者则可直接输入后者）再重试。
 

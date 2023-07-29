@@ -1221,8 +1221,6 @@ Play
 == Грати
 
 [Graphics error]
-
-[Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
 == Помилка під час ініціалізації. Спробуйте змінити gfx_backend на OpenGL або Vulkan у settings_ddnet.cfg в каталозі config і спробуйте ще раз.
 
