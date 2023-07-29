@@ -1598,8 +1598,6 @@ Are you sure that you want to reset the controls to their defaults?
 == ¿Estás seguro de que quieres restablecer a los controles predeterminados?
 
 [Graphics error]
-
-[Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
 == Error durante la iniciación. Intenta cambiar gfx_backend a OpenGL o Vulkan desde settings_ddnet.cfg en la carpeta de configuraciones e inténtalo otra vez.
 

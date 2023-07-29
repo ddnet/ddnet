@@ -578,8 +578,6 @@ Show only chat messages from friends
 == Достордун гана маек билдирүүлөрүн көрсөтүү
 
 [Graphics error]
-
-[Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
 == 
 
