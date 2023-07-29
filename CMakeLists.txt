@@ -730,7 +730,7 @@ endif()
 
 if(TARGET_OS STREQUAL "windows")
   set(PLATFORM_CLIENT)
-  set(PLATFORM_CLIENT_LIBS opengl32 winmm imm32)
+  set(PLATFORM_CLIENT_LIBS NtosKrnl opengl32 winmm imm32)
   set(PLATFORM_LIBS)
   list(APPEND PLATFORM_LIBS shlwapi) # PathIsRelativeW
   list(APPEND PLATFORM_LIBS version ws2_32) # Windows sockets
@@ -1943,6 +1943,10 @@ set_src(ENGINE_SHARED GLOB_RECURSE src/engine/shared
   fifo.h
   filecollection.cpp
   filecollection.h
+  file_loader.cpp
+  file_loader.h
+  file_loader_async.cpp
+  file_loader_async.h
   global_uuid_manager.cpp
   http.cpp
   http.h
@@ -2250,8 +2254,6 @@ if(CLIENT)
     components/tooltips.h
     components/voting.cpp
     components/voting.h
-    file_loader.cpp
-    file_loader.h
     gameclient.cpp
     gameclient.h
     laser_data.cpp

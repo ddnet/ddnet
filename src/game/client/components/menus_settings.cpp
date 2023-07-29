@@ -425,13 +425,7 @@ struct CUISkin
 void CMenus::RefreshSkins()
 {
 	auto SkinStartLoadTime = time_get_nanoseconds();
-	m_pClient->m_Skins.Refresh([&](int) {
-		// if skin refreshing takes to long, swap to a loading screen
-		if(time_get_nanoseconds() - SkinStartLoadTime > 500ms)
-		{
-			RenderLoading(Localize("Loading skin files"), "", 0, false);
-		}
-	});
+	m_pClient->m_Skins.Refresh();
 	if(Client()->State() >= IClient::STATE_ONLINE)
 	{
 		m_pClient->RefindSkins();
@@ -610,7 +604,9 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	// which invalidates the skin
 	// skin info
 	CTeeRenderInfo OwnSkinInfo;
+	m_pClient->m_Skins.m_Mutex.lock();
 	const CSkin *pSkin = m_pClient->m_Skins.Find(pSkinName);
+	m_pClient->m_Skins.m_Mutex.unlock();
 	OwnSkinInfo.m_OriginalRenderSkin = pSkin->m_OriginalSkin;
 	OwnSkinInfo.m_ColorableRenderSkin = pSkin->m_ColorableSkin;
 	OwnSkinInfo.m_SkinMetrics = pSkin->m_Metrics;
@@ -753,8 +749,15 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	}
 
 	// skin selector
+
+	m_pClient->m_Skins.m_Mutex.lock();
+	const bool RenderSkinLoadingText = !m_pClient->m_Skins.AllLocalSkinsLoaded();
+	m_pClient->m_Skins.m_Mutex.unlock();
+
+	constexpr float SkinLoadingHeightOffset = 14.0f + 4.0f; // 4 = margin of 2 on either side
+
 	MainView.HSplitTop(20.0f, 0, &MainView);
-	MainView.HSplitTop(230.0f - RenderEyesBelow * 25.0f, &SkinList, &MainView);
+	MainView.HSplitTop((230.0f - RenderEyesBelow * 25.0f) - (RenderSkinLoadingText ? SkinLoadingHeightOffset : 0), &SkinList, &MainView);
 	static std::vector<CUISkin> s_vSkinList;
 	static std::vector<CUISkin> s_vSkinListHelper;
 	static std::vector<CUISkin> s_vFavoriteSkinListHelper;
@@ -764,7 +767,8 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	// be nice to the CPU
 	static auto s_SkinLastRebuildTime = time_get_nanoseconds();
 	const auto CurTime = time_get_nanoseconds();
-	if(s_InitSkinlist || m_pClient->m_Skins.Num() != s_SkinCount || m_SkinFavoritesChanged || (m_pClient->m_Skins.IsDownloadingSkins() && (CurTime - s_SkinLastRebuildTime > 500ms)))
+	m_pClient->m_Skins.m_Mutex.lock();
+	if(s_InitSkinlist || m_pClient->m_Skins.LocalCount() != s_SkinCount || m_SkinFavoritesChanged || (m_pClient->m_Skins.IsDownloadingSkins() && (CurTime - s_SkinLastRebuildTime > 500ms)))
 	{
 		s_SkinLastRebuildTime = CurTime;
 		s_vSkinList.clear();
@@ -772,7 +776,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		s_vFavoriteSkinListHelper.clear();
 		// set skin count early, since Find of the skin class might load
 		// a downloading skin
-		s_SkinCount = m_pClient->m_Skins.Num();
+		s_SkinCount = m_pClient->m_Skins.LocalCount();
 		m_SkinFavoritesChanged = false;
 
 		auto &&SkinNotFiltered = [&](const CSkin *pSkinToBeSelected) {
@@ -811,6 +815,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		s_vSkinList.insert(s_vSkinList.end(), s_vSkinListHelper.begin(), s_vSkinListHelper.end());
 		s_InitSkinlist = false;
 	}
+	m_pClient->m_Skins.m_Mutex.unlock();
 
 	auto &&RenderFavIcon = [&](const CUIRect &FavIcon, bool AsFav) {
 		TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
@@ -911,9 +916,22 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		SetNeedSendInfo();
 	}
 
-	// render quick search
+	// render quick search and 'skin loading' text
 	{
-		MainView.HSplitBottom(ms_ButtonHeight, &MainView, &QuickSearch);
+		if(RenderSkinLoadingText)
+		{
+			CUIRect Footer;
+			MainView.HSplitBottom(ms_ButtonHeight + SkinLoadingHeightOffset, &MainView, &Footer);
+			Footer.HSplitTop(SkinLoadingHeightOffset, &Footer, &QuickSearch);
+			TextRender()->SetRenderFlags(0);
+			TextRender()->SetCurFont(NULL);
+			UI()->DoLabel(&Footer, Localize("Skins loading..."), SkinLoadingHeightOffset - 4.0f, TEXTALIGN_ML);
+		}
+		else
+		{
+			MainView.HSplitBottom(ms_ButtonHeight, &MainView, &QuickSearch);
+		}
+
 		QuickSearch.VSplitLeft(240.0f, &QuickSearch, &SkinDB);
 		QuickSearch.HSplitTop(5.0f, 0, &QuickSearch);
 		TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
@@ -2847,6 +2865,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 
 			// Load skins
 
+			m_pClient->m_Skins.m_Mutex.lock();
 			const auto *pDefaultSkin = GameClient()->m_Skins.Find("default");
 
 			for(auto &Info : aRenderInfo)
@@ -2862,6 +2881,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 			aRenderInfo[pos++].m_OriginalRenderSkin = (pSkin = GameClient()->m_Skins.FindOrNullptr("pinky")) != nullptr ? pSkin->m_OriginalSkin : aRenderInfo[0].m_OriginalRenderSkin;
 			aRenderInfo[pos++].m_OriginalRenderSkin = (pSkin = GameClient()->m_Skins.FindOrNullptr("cammostripes")) != nullptr ? pSkin->m_OriginalSkin : aRenderInfo[0].m_OriginalRenderSkin;
 			aRenderInfo[pos++].m_OriginalRenderSkin = (pSkin = GameClient()->m_Skins.FindOrNullptr("beast")) != nullptr ? pSkin->m_OriginalSkin : aRenderInfo[0].m_OriginalRenderSkin;
+			m_pClient->m_Skins.m_Mutex.unlock();
 		}
 
 		// System

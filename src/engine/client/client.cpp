@@ -74,7 +74,8 @@
 #include <thread>
 
 // test: remove
-#include <game/client/file_loader.h>
+#include <engine/shared/file_loader.h>
+#include <engine/shared/file_loader_async.h>
 // end test
 
 using namespace std::chrono_literals;
@@ -4458,28 +4459,30 @@ void CClient::RegisterCommands()
 	// test: remove
 	auto FileLoaderTest = [](IConsole::IResult *pResult, void *pUserData) {
 		CClient *client = reinterpret_cast<CClient *>(pUserData);
-		CMassFileLoader FileLoader(client->m_pStorage, IMassFileLoader::LOAD_FLAGS_ABSOLUTE_PATH | IMassFileLoader::LOAD_FLAGS_RECURSE_SUBDIRECTORIES);
-		FileLoader.SetLoadFailedCallback([](IMassFileLoader::ELoadError Error, const void *pUser) -> bool {
+		//		CMassFileLoader FileLoader(client->m_pStorage, IMassFileLoader::LOAD_FLAGS_ABSOLUTE_PATH | IMassFileLoader::LOAD_FLAGS_RECURSE_SUBDIRECTORIES);
+		auto *FileLoader = new CMassFileLoaderAsync(client->m_pStorage, IMassFileLoader::LOAD_FLAGS_ABSOLUTE_PATH | IMassFileLoader::LOAD_FLAGS_RECURSE_SUBDIRECTORIES);
+
+		FileLoader->SetLoadFailedCallback([](IMassFileLoader::ELoadError Error, const void *pData, void *) -> bool {
 			char Message[128];
 			switch(Error)
 			{
 			case IMassFileLoader::LOAD_ERROR_INVALID_SEARCH_PATH:
-				str_format(Message, sizeof(Message), "Invalid path: '%s'", reinterpret_cast<const char *>(pUser));
+				str_format(Message, sizeof(Message), "Invalid path: '%s'", reinterpret_cast<const char *>(pData));
 				break;
 				// case IMassFileLoader::LOAD_ERROR_DIRECTORY_UNREADABLE:
 				//	str_format(Message, sizeof(Message), "Directory unreadable: '%s'", reinterpret_cast<const char *>(pUser));
 				//	break;
 			case IMassFileLoader::LOAD_ERROR_UNWANTED_SYMLINK:
-				str_format(Message, sizeof(Message), "Unwanted symlink: '%s'", reinterpret_cast<const char *>(pUser));
+				str_format(Message, sizeof(Message), "Unwanted symlink: '%s'", reinterpret_cast<const char *>(pData));
 				break;
 			case IMassFileLoader::LOAD_ERROR_FILE_UNREADABLE:
-				str_format(Message, sizeof(Message), "File unreadable: '%s'", reinterpret_cast<const char *>(pUser));
+				str_format(Message, sizeof(Message), "File unreadable: '%s'", reinterpret_cast<const char *>(pData));
 				break;
 			case IMassFileLoader::LOAD_ERROR_FILE_TOO_LARGE:
-				str_format(Message, sizeof(Message), "File too large: '%s'", reinterpret_cast<const char *>(pUser));
+				str_format(Message, sizeof(Message), "File too large: '%s'", reinterpret_cast<const char *>(pData));
 				break;
 			case IMassFileLoader::LOAD_ERROR_INVALID_EXTENSION:
-				str_format(Message, sizeof(Message), "Invalid extension: '%s'", reinterpret_cast<const char *>(pUser));
+				str_format(Message, sizeof(Message), "Invalid extension: '%s'", reinterpret_cast<const char *>(pData));
 				break;
 			case IMassFileLoader::LOAD_ERROR_UNKNOWN:
 				[[fallthrough]];
@@ -4492,13 +4495,18 @@ void CClient::RegisterCommands()
 			return true;
 		});
 
-		FileLoader.SetFileLoadedCallback([](const std::string &ItemName, const unsigned char *pData, const unsigned int Size) {
+		FileLoader->SetFileLoadedCallback([](const std::string
+								  &ItemName,
+							  const unsigned char *pData, const unsigned int Size, void *) {
 			dbg_msg("test", "File of %d bytes loaded: '%s'", Size, ItemName.c_str());
+			unsigned char *pArray = reinterpret_cast<unsigned char *>(malloc(Size));
+			memcpy(pArray, pData, Size);
+			free(pArray);
 		});
 
-		FileLoader.SetPaths(":test");
-		FileLoader.SetFileExtension(".txt");
-		FileLoader.Load();
+		FileLoader->SetPaths(":test");
+		FileLoader->SetFileExtension(".txt");
+		FileLoader->BeginLoad();
 	};
 
 	m_pConsole->Register("file_loader_test", "", CFGFLAG_CLIENT | CFGFLAG_STORE, FileLoaderTest, this, "Test");

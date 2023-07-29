@@ -72,19 +72,17 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 
-#include <aclapi.h> // fs_is_readable
 #include <cerrno>
 #include <cfenv>
 #include <io.h>
 #include <objbase.h>
 #include <process.h>
-#include <securitybaseapi.h> // fs_is_readable
 #include <share.h>
 #include <shellapi.h>
 #include <shlobj.h> // SHChangeNotify
 #include <shlwapi.h>
 #include <wincrypt.h>
-#include <winioctl.h> // fs_is_symlink
+#include <winioctl.h> // FSCTL_GET_REPARSE_POINT
 #else
 #error NOT IMPLEMENTED
 #endif

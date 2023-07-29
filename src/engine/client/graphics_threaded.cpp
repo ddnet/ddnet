@@ -711,10 +711,11 @@ bool CGraphics_Threaded::CheckImageDivisibility(const char *pFileName, CImageInf
 	bool HeightBroken = Img.m_Height == 0 || (Img.m_Height % DivY) != 0;
 	if(WidthBroken || HeightBroken)
 	{
-		SWarning NewWarning;
-		str_format(NewWarning.m_aWarningMsg, sizeof(NewWarning.m_aWarningMsg), Localize("The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs."), pFileName, DivX, DivY);
+		//		SWarning NewWarning;
+		//		str_format(NewWarning.m_aWarningMsg, sizeof(NewWarning.m_aWarningMsg), Localize("The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs."), pFileName, DivX, DivY);
 
-		m_vWarnings.emplace_back(NewWarning);
+		//		m_vWarnings.emplace_back(NewWarning);
+		dbg_msg("graphics", Localize("The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs."), pFileName, DivX, DivY);
 
 		ImageIsValid = false;
 	}
@@ -757,16 +758,17 @@ bool CGraphics_Threaded::IsImageFormatRGBA(const char *pFileName, CImageInfo &Im
 {
 	if(Img.m_Format != CImageInfo::FORMAT_RGBA)
 	{
-		SWarning NewWarning;
+		//		SWarning NewWarning;
 		char aText[128];
 		aText[0] = '\0';
 		if(pFileName)
 		{
 			str_format(aText, sizeof(aText), "\"%s\"", pFileName);
 		}
-		str_format(NewWarning.m_aWarningMsg, sizeof(NewWarning.m_aWarningMsg),
-			Localize("The format of texture %s is not RGBA which will cause visual bugs."), aText);
-		m_vWarnings.emplace_back(NewWarning);
+		//		str_format(NewWarning.m_aWarningMsg, sizeof(NewWarning.m_aWarningMsg),
+		//			Localize("The format of texture %s is not RGBA which will cause visual bugs."), aText);
+		//		m_vWarnings.emplace_back(NewWarning);
+		dbg_msg("graphics", Localize("The format of texture %s is not RGBA which will cause visual bugs."), aText);
 		return false;
 	}
 	return true;

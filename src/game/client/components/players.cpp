@@ -763,7 +763,9 @@ void CPlayers::OnRender()
 		if((CharacterInfo.m_Cur.m_Weapon == WEAPON_NINJA || (CharacterInfo.m_HasExtendedData && CharacterInfo.m_ExtendedData.m_FreezeEnd != 0)) && g_Config.m_ClShowNinja)
 		{
 			// change the skin for the player to the ninja
+			m_pClient->m_Skins.m_Mutex.lock();
 			const auto *pSkin = m_pClient->m_Skins.FindOrNullptr("x_ninja");
+			m_pClient->m_Skins.m_Mutex.unlock();
 			if(pSkin != nullptr)
 			{
 				m_aRenderInfo[i].m_OriginalRenderSkin = pSkin->m_OriginalSkin;
@@ -779,13 +781,18 @@ void CPlayers::OnRender()
 			}
 		}
 	}
+	m_pClient->m_Skins.m_Mutex.lock();
 	const CSkin *pSkin = m_pClient->m_Skins.Find("x_spec");
-	m_RenderInfoSpec.m_OriginalRenderSkin = pSkin->m_OriginalSkin;
-	m_RenderInfoSpec.m_ColorableRenderSkin = pSkin->m_ColorableSkin;
-	m_RenderInfoSpec.m_BloodColor = pSkin->m_BloodColor;
-	m_RenderInfoSpec.m_SkinMetrics = pSkin->m_Metrics;
-	m_RenderInfoSpec.m_CustomColoredSkin = false;
-	m_RenderInfoSpec.m_Size = 64.0f;
+	m_pClient->m_Skins.m_Mutex.unlock();
+	if(pSkin)
+	{
+		m_RenderInfoSpec.m_OriginalRenderSkin = pSkin->m_OriginalSkin;
+		m_RenderInfoSpec.m_ColorableRenderSkin = pSkin->m_ColorableSkin;
+		m_RenderInfoSpec.m_BloodColor = pSkin->m_BloodColor;
+		m_RenderInfoSpec.m_SkinMetrics = pSkin->m_Metrics;
+		m_RenderInfoSpec.m_CustomColoredSkin = false;
+		m_RenderInfoSpec.m_Size = 64.0f;
+	}
 	int LocalClientID = m_pClient->m_Snap.m_LocalClientID;
 
 	// get screen edges to avoid rendering offscreen
