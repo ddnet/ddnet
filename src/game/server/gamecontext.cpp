@@ -3813,7 +3813,7 @@ void CGameContext::OnShutdown()
 	}
 
 	DeleteTempfile();
-	Console()->ResetServerGameSettings(CFGFLAG_SERVER);
+	Console()->ResetGameSettings();
 	Collision()->Dest();
 	delete m_pController;
 	m_pController = 0;

@@ -119,7 +119,7 @@ public:
 
 	virtual void SetAccessLevel(int AccessLevel) = 0;
 
-	virtual void ResetServerGameSettings(int FlagMask) = 0;
+	virtual void ResetGameSettings() = 0;
 
 	static LEVEL ToLogLevel(int ConsoleLevel);
 
