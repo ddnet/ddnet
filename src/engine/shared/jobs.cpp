@@ -9,17 +9,6 @@ IJob::IJob() :
 {
 }
 
-IJob::IJob(const IJob &Other) :
-	m_Status(STATE_PENDING)
-{
-}
-
-IJob &IJob::operator=(const IJob &Other)
-{
-	m_Status = STATE_PENDING;
-	return *this;
-}
-
 IJob::~IJob() = default;
 
 int IJob::Status()
