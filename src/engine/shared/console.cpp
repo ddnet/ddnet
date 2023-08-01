@@ -293,6 +293,15 @@ LEVEL IConsole::ToLogLevel(int Level)
 	return LEVEL_INFO;
 }
 
+int IConsole::ToLogLevelFilter(int Level)
+{
+	if(!(-3 <= Level && Level <= 2))
+	{
+		dbg_assert(0, "invalid log level filter");
+	}
+	return Level + 2;
+}
+
 LOG_COLOR ColorToLogColor(ColorRGBA Color)
 {
 	return LOG_COLOR{

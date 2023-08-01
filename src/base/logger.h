@@ -50,10 +50,35 @@ public:
 	}
 };
 
-class ILogger
+class CLogFilter
 {
 public:
+	/**
+	 * The highest `LEVEL` that is still logged, -1 corresponds to no
+	 * printing at all.
+	 */
+	std::atomic_int m_MaxLevel{LEVEL_INFO};
+
+	bool Filters(const CLogMessage *pMessage);
+};
+
+class ILogger
+{
+protected:
+	CLogFilter m_Filter;
+
+public:
 	virtual ~ILogger() {}
+
+	/**
+	 * Set a new filter. It's up to the logger implementation to actually
+	 * use the filter.
+	 */
+	void SetFilter(const CLogFilter &Filter)
+	{
+		m_Filter.m_MaxLevel.store(Filter.m_MaxLevel.load(std::memory_order_relaxed), std::memory_order_relaxed);
+		OnFilterChange();
+	}
 
 	/**
 	 * Send the specified message to the logging backend.
@@ -77,17 +102,11 @@ public:
 	 * @see log_global_logger_finish
 	 */
 	virtual void GlobalFinish() {}
+	/**
+	 * Notifies thte logger of a changed `m_Filter`.
+	 */
+	virtual void OnFilterChange() {}
 };
-
-/**
- * @ingroup Log
- *
- * Sets the global loglevel to the given value. Log messages with a less severe
- * loglevel will not be forwarded to loggers.
- *
- * @param level The loglevel.
- */
-void log_set_loglevel(LEVEL level);
 
 /**
  * @ingroup Log
@@ -198,6 +217,9 @@ std::unique_ptr<ILogger> log_logger_windows_debugger();
  *
  * Useful when you want to set a global logger without all logging targets
  * being configured.
+ *
+ * This logger forwards `SetFilter` calls, `SetFilter` calls before a logger is
+ * set have no effect.
  */
 class CFutureLogger : public ILogger
 {
@@ -214,6 +236,7 @@ public:
 	void Set(std::shared_ptr<ILogger> pLogger);
 	void Log(const CLogMessage *pMessage) override;
 	void GlobalFinish() override;
+	void OnFilterChange() override;
 };
 
 /**
