@@ -19,7 +19,6 @@ CLayerTiles::CLayerTiles(int w, int h)
 	m_aName[0] = '\0';
 	m_Width = w;
 	m_Height = h;
-	m_Texture.Invalidate();
 	m_Image = -1;
 	m_Game = 0;
 	m_Color.r = 255;
@@ -51,7 +50,6 @@ CLayerTiles::CLayerTiles(const CLayerTiles &Other) :
 	mem_copy(m_pTiles, Other.m_pTiles, (size_t)m_Width * m_Height * sizeof(CTile));
 
 	m_Image = Other.m_Image;
-	m_Texture = Other.m_Texture;
 	m_Game = Other.m_Game;
 	m_Color = Other.m_Color;
 	m_ColorEnv = Other.m_ColorEnv;
@@ -116,9 +114,23 @@ void CLayerTiles::MakePalette()
 
 void CLayerTiles::Render(bool Tileset)
 {
+	IGraphics::CTextureHandle Texture;
 	if(m_Image >= 0 && (size_t)m_Image < m_pEditor->m_Map.m_vpImages.size())
-		m_Texture = m_pEditor->m_Map.m_vpImages[m_Image]->m_Texture;
-	Graphics()->TextureSet(m_Texture);
+		Texture = m_pEditor->m_Map.m_vpImages[m_Image]->m_Texture;
+	else if(m_Game)
+		Texture = m_pEditor->GetEntitiesTexture();
+	else if(m_Front)
+		Texture = m_pEditor->GetFrontTexture();
+	else if(m_Tele)
+		Texture = m_pEditor->GetTeleTexture();
+	else if(m_Speedup)
+		Texture = m_pEditor->GetSpeedupTexture();
+	else if(m_Switch)
+		Texture = m_pEditor->GetSwitchTexture();
+	else if(m_Tune)
+		Texture = m_pEditor->GetTuneTexture();
+	Graphics()->TextureSet(Texture);
+
 	ColorRGBA Color = ColorRGBA(m_Color.r / 255.0f, m_Color.g / 255.0f, m_Color.b / 255.0f, m_Color.a / 255.0f);
 	Graphics()->BlendNone();
 	m_pEditor->RenderTools()->RenderTilemap(m_pTiles, m_Width, m_Height, 32.0f, Color, LAYERRENDERFLAG_OPAQUE,
@@ -131,13 +143,13 @@ void CLayerTiles::Render(bool Tileset)
 	if(!Tileset)
 	{
 		if(m_Tele)
-			m_pEditor->RenderTools()->RenderTeleOverlay(((CLayerTele *)this)->m_pTeleTile, m_Width, m_Height, 32.0f);
+			m_pEditor->RenderTools()->RenderTeleOverlay(static_cast<CLayerTele *>(this)->m_pTeleTile, m_Width, m_Height, 32.0f);
 		if(m_Speedup)
-			m_pEditor->RenderTools()->RenderSpeedupOverlay(((CLayerSpeedup *)this)->m_pSpeedupTile, m_Width, m_Height, 32.0f);
+			m_pEditor->RenderTools()->RenderSpeedupOverlay(static_cast<CLayerSpeedup *>(this)->m_pSpeedupTile, m_Width, m_Height, 32.0f);
 		if(m_Switch)
-			m_pEditor->RenderTools()->RenderSwitchOverlay(((CLayerSwitch *)this)->m_pSwitchTile, m_Width, m_Height, 32.0f);
+			m_pEditor->RenderTools()->RenderSwitchOverlay(static_cast<CLayerSwitch *>(this)->m_pSwitchTile, m_Width, m_Height, 32.0f);
 		if(m_Tune)
-			m_pEditor->RenderTools()->RenderTuneOverlay(((CLayerTune *)this)->m_pTuneTile, m_Width, m_Height, 32.0f);
+			m_pEditor->RenderTools()->RenderTuneOverlay(static_cast<CLayerTune *>(this)->m_pTuneTile, m_Width, m_Height, 32.0f);
 	}
 }
 
@@ -190,12 +202,13 @@ void CLayerTiles::Clamp(RECTi *pRect)
 
 bool CLayerTiles::IsEntitiesLayer() const
 {
-	return m_pEditor->m_Map.m_pGameLayer == this || m_pEditor->m_Map.m_pTeleLayer == this || m_pEditor->m_Map.m_pSpeedupLayer == this || m_pEditor->m_Map.m_pFrontLayer == this || m_pEditor->m_Map.m_pSwitchLayer == this || m_pEditor->m_Map.m_pTuneLayer == this;
+	return m_pEditor->m_Map.m_pGameLayer.get() == this || m_pEditor->m_Map.m_pTeleLayer.get() == this || m_pEditor->m_Map.m_pSpeedupLayer.get() == this || m_pEditor->m_Map.m_pFrontLayer.get() == this || m_pEditor->m_Map.m_pSwitchLayer.get() == this || m_pEditor->m_Map.m_pTuneLayer.get() == this;
 }
 
-bool CLayerTiles::IsEmpty(CLayerTiles *pLayer)
+bool CLayerTiles::IsEmpty(const std::shared_ptr<CLayerTiles> &pLayer)
 {
 	for(int y = 0; y < pLayer->m_Height; y++)
+	{
 		for(int x = 0; x < pLayer->m_Width; x++)
 		{
 			int Index = pLayer->GetTile(x, y).m_Index;
@@ -215,6 +228,7 @@ bool CLayerTiles::IsEmpty(CLayerTiles *pLayer)
 					return false;
 			}
 		}
+	}
 
 	return true;
 }
@@ -233,7 +247,25 @@ void CLayerTiles::BrushSelecting(CUIRect Rect)
 	TextRender()->Text(Rect.x + 3.0f, Rect.y + 3.0f, m_pEditor->m_ShowPicker ? 15.0f : 15.0f * m_pEditor->m_WorldZoom, aBuf, -1.0f);
 }
 
-int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
+template<typename T>
+static void InitGrabbedLayer(std::shared_ptr<T> pLayer, CLayerTiles *pThisLayer)
+{
+	pLayer->m_pEditor = pThisLayer->m_pEditor;
+	pLayer->m_Image = pThisLayer->m_Image;
+	pLayer->m_Game = pThisLayer->m_Game;
+	pLayer->m_Front = pThisLayer->m_Front;
+	pLayer->m_Tele = pThisLayer->m_Tele;
+	pLayer->m_Speedup = pThisLayer->m_Speedup;
+	pLayer->m_Switch = pThisLayer->m_Switch;
+	pLayer->m_Tune = pThisLayer->m_Tune;
+	if(pThisLayer->m_pEditor->m_BrushColorEnabled)
+	{
+		pLayer->m_Color = pThisLayer->m_Color;
+		pLayer->m_Color.a = 255;
+	}
+};
+
+int CLayerTiles::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
 {
 	RECTi r;
 	Convert(Rect, &r);
@@ -245,16 +277,8 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 	// create new layers
 	if(this->m_Tele)
 	{
-		CLayerTele *pGrabbed = new CLayerTele(r.w, r.h);
-		pGrabbed->m_pEditor = m_pEditor;
-		pGrabbed->m_Texture = m_Texture;
-		pGrabbed->m_Image = m_Image;
-		pGrabbed->m_Game = m_Game;
-		if(m_pEditor->m_BrushColorEnabled)
-		{
-			pGrabbed->m_Color = m_Color;
-			pGrabbed->m_Color.a = 255;
-		}
+		std::shared_ptr<CLayerTele> pGrabbed = std::make_shared<CLayerTele>(r.w, r.h);
+		InitGrabbedLayer(pGrabbed, this);
 
 		pBrush->AddLayer(pGrabbed);
 
@@ -268,7 +292,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 			for(int y = 0; y < r.h; y++)
 				for(int x = 0; x < r.w; x++)
 				{
-					pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x] = ((CLayerTele *)this)->m_pTeleTile[(r.y + y) * m_Width + (r.x + x)];
+					pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x] = static_cast<CLayerTele *>(this)->m_pTeleTile[(r.y + y) * m_Width + (r.x + x)];
 					if(IsValidTeleTile(pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x].m_Type) && IsTeleTileNumberUsed(pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x].m_Type))
 					{
 						m_pEditor->m_TeleNumber = pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x].m_Number;
@@ -279,16 +303,8 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 	}
 	else if(this->m_Speedup)
 	{
-		CLayerSpeedup *pGrabbed = new CLayerSpeedup(r.w, r.h);
-		pGrabbed->m_pEditor = m_pEditor;
-		pGrabbed->m_Texture = m_Texture;
-		pGrabbed->m_Image = m_Image;
-		pGrabbed->m_Game = m_Game;
-		if(m_pEditor->m_BrushColorEnabled)
-		{
-			pGrabbed->m_Color = m_Color;
-			pGrabbed->m_Color.a = 255;
-		}
+		std::shared_ptr<CLayerSpeedup> pGrabbed = std::make_shared<CLayerSpeedup>(r.w, r.h);
+		InitGrabbedLayer(pGrabbed, this);
 
 		pBrush->AddLayer(pGrabbed);
 
@@ -302,7 +318,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 			for(int y = 0; y < r.h; y++)
 				for(int x = 0; x < r.w; x++)
 				{
-					pGrabbed->m_pSpeedupTile[y * pGrabbed->m_Width + x] = ((CLayerSpeedup *)this)->m_pSpeedupTile[(r.y + y) * m_Width + (r.x + x)];
+					pGrabbed->m_pSpeedupTile[y * pGrabbed->m_Width + x] = static_cast<CLayerSpeedup *>(this)->m_pSpeedupTile[(r.y + y) * m_Width + (r.x + x)];
 					if(IsValidSpeedupTile(pGrabbed->m_pSpeedupTile[y * pGrabbed->m_Width + x].m_Type))
 					{
 						m_pEditor->m_SpeedupAngle = pGrabbed->m_pSpeedupTile[y * pGrabbed->m_Width + x].m_Angle;
@@ -317,16 +333,8 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 	}
 	else if(this->m_Switch)
 	{
-		CLayerSwitch *pGrabbed = new CLayerSwitch(r.w, r.h);
-		pGrabbed->m_pEditor = m_pEditor;
-		pGrabbed->m_Texture = m_Texture;
-		pGrabbed->m_Image = m_Image;
-		pGrabbed->m_Game = m_Game;
-		if(m_pEditor->m_BrushColorEnabled)
-		{
-			pGrabbed->m_Color = m_Color;
-			pGrabbed->m_Color.a = 255;
-		}
+		std::shared_ptr<CLayerSwitch> pGrabbed = std::make_shared<CLayerSwitch>(r.w, r.h);
+		InitGrabbedLayer(pGrabbed, this);
 
 		pBrush->AddLayer(pGrabbed);
 
@@ -340,7 +348,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 			for(int y = 0; y < r.h; y++)
 				for(int x = 0; x < r.w; x++)
 				{
-					pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x] = ((CLayerSwitch *)this)->m_pSwitchTile[(r.y + y) * m_Width + (r.x + x)];
+					pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x] = static_cast<CLayerSwitch *>(this)->m_pSwitchTile[(r.y + y) * m_Width + (r.x + x)];
 					if(IsValidSwitchTile(pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Type))
 					{
 						m_pEditor->m_SwitchNum = pGrabbed->m_pSwitchTile[y * pGrabbed->m_Width + x].m_Number;
@@ -354,16 +362,8 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 
 	else if(this->m_Tune)
 	{
-		CLayerTune *pGrabbed = new CLayerTune(r.w, r.h);
-		pGrabbed->m_pEditor = m_pEditor;
-		pGrabbed->m_Texture = m_Texture;
-		pGrabbed->m_Image = m_Image;
-		pGrabbed->m_Game = m_Game;
-		if(m_pEditor->m_BrushColorEnabled)
-		{
-			pGrabbed->m_Color = m_Color;
-			pGrabbed->m_Color.a = 255;
-		}
+		std::shared_ptr<CLayerTune> pGrabbed = std::make_shared<CLayerTune>(r.w, r.h);
+		InitGrabbedLayer(pGrabbed, this);
 
 		pBrush->AddLayer(pGrabbed);
 
@@ -377,7 +377,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 			for(int y = 0; y < r.h; y++)
 				for(int x = 0; x < r.w; x++)
 				{
-					pGrabbed->m_pTuneTile[y * pGrabbed->m_Width + x] = ((CLayerTune *)this)->m_pTuneTile[(r.y + y) * m_Width + (r.x + x)];
+					pGrabbed->m_pTuneTile[y * pGrabbed->m_Width + x] = static_cast<CLayerTune *>(this)->m_pTuneTile[(r.y + y) * m_Width + (r.x + x)];
 					if(IsValidTuneTile(pGrabbed->m_pTuneTile[y * pGrabbed->m_Width + x].m_Type))
 					{
 						m_pEditor->m_TuningNum = pGrabbed->m_pTuneTile[y * pGrabbed->m_Width + x].m_Number;
@@ -388,16 +388,8 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 	}
 	else if(this->m_Front)
 	{
-		CLayerFront *pGrabbed = new CLayerFront(r.w, r.h);
-		pGrabbed->m_pEditor = m_pEditor;
-		pGrabbed->m_Texture = m_Texture;
-		pGrabbed->m_Image = m_Image;
-		pGrabbed->m_Game = m_Game;
-		if(m_pEditor->m_BrushColorEnabled)
-		{
-			pGrabbed->m_Color = m_Color;
-			pGrabbed->m_Color.a = 255;
-		}
+		std::shared_ptr<CLayerFront> pGrabbed = std::make_shared<CLayerFront>(r.w, r.h);
+		InitGrabbedLayer(pGrabbed, this);
 
 		pBrush->AddLayer(pGrabbed);
 
@@ -409,16 +401,8 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 	}
 	else
 	{
-		CLayerTiles *pGrabbed = new CLayerTiles(r.w, r.h);
-		pGrabbed->m_pEditor = m_pEditor;
-		pGrabbed->m_Texture = m_Texture;
-		pGrabbed->m_Image = m_Image;
-		pGrabbed->m_Game = m_Game;
-		if(m_pEditor->m_BrushColorEnabled)
-		{
-			pGrabbed->m_Color = m_Color;
-			pGrabbed->m_Color.a = 255;
-		}
+		std::shared_ptr<CLayerTiles> pGrabbed = std::make_shared<CLayerFront>(r.w, r.h);
+		InitGrabbedLayer(pGrabbed, this);
 
 		pBrush->AddLayer(pGrabbed);
 
@@ -432,7 +416,7 @@ int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 	return 1;
 }
 
-void CLayerTiles::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
+void CLayerTiles::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIRect Rect)
 {
 	if(m_Readonly || (!Empty && pBrush->m_Type != LAYERTYPE_TILES))
 		return;
@@ -444,7 +428,7 @@ void CLayerTiles::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 	int w = ConvertX(Rect.w);
 	int h = ConvertY(Rect.h);
 
-	CLayerTiles *pLt = static_cast<CLayerTiles *>(pBrush);
+	std::shared_ptr<CLayerTiles> pLt = std::static_pointer_cast<CLayerTiles>(pBrush);
 
 	bool Destructive = m_pEditor->m_BrushDrawDestructive || Empty || IsEmpty(pLt);
 
@@ -480,13 +464,13 @@ void CLayerTiles::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 	FlagModified(sx, sy, w, h);
 }
 
-void CLayerTiles::BrushDraw(CLayer *pBrush, float wx, float wy)
+void CLayerTiles::BrushDraw(std::shared_ptr<CLayer> pBrush, float wx, float wy)
 {
 	if(m_Readonly)
 		return;
 
 	//
-	CLayerTiles *pTileLayer = (CLayerTiles *)pBrush;
+	std::shared_ptr<CLayerTiles> pTileLayer = std::static_pointer_cast<CLayerTiles>(pBrush);
 	int sx = ConvertX(wx);
 	int sy = ConvertY(wy);
 
@@ -593,9 +577,9 @@ void CLayerTiles::BrushRotate(float Amount)
 	}
 }
 
-CLayer *CLayerTiles::Duplicate() const
+std::shared_ptr<CLayer> CLayerTiles::Duplicate() const
 {
-	return new CLayerTiles(*this);
+	return std::make_shared<CLayerTiles>(*this);
 }
 
 void CLayerTiles::Resize(int NewW, int NewH)
@@ -680,7 +664,7 @@ CUI::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 
 	const bool EntitiesLayer = IsEntitiesLayer();
 
-	CLayerGroup *pGroup = m_pEditor->m_Map.m_vpGroups[m_pEditor->m_SelectedGroup];
+	std::shared_ptr<CLayerGroup> pGroup = m_pEditor->m_Map.m_vpGroups[m_pEditor->m_SelectedGroup];
 
 	// Game tiles can only be constructed if the layer is relative to the game layer
 	if(!EntitiesLayer && !(pGroup->m_OffsetX % 32) && !(pGroup->m_OffsetY % 32) && pGroup->m_ParallaxX == 100 && pGroup->m_ParallaxY == 100)
@@ -730,7 +714,7 @@ CUI::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 
 			if(Result != TILE_TELECHECKIN && Result != TILE_TELECHECKINEVIL)
 			{
-				CLayerTiles *pGLayer = m_pEditor->m_Map.m_pGameLayer;
+				std::shared_ptr<CLayerTiles> pGLayer = m_pEditor->m_Map.m_pGameLayer;
 
 				if(pGLayer->m_Width < m_Width + OffsetX || pGLayer->m_Height < m_Height + OffsetY)
 				{
@@ -755,12 +739,12 @@ CUI::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 			{
 				if(!m_pEditor->m_Map.m_pTeleLayer)
 				{
-					CLayer *pLayer = new CLayerTele(m_Width, m_Height);
+					std::shared_ptr<CLayer> pLayer = std::make_shared<CLayerTele>(m_Width, m_Height);
 					m_pEditor->m_Map.MakeTeleLayer(pLayer);
 					m_pEditor->m_Map.m_pGameGroup->AddLayer(pLayer);
 				}
 
-				CLayerTele *pTLayer = m_pEditor->m_Map.m_pTeleLayer;
+				std::shared_ptr<CLayerTele> pTLayer = m_pEditor->m_Map.m_pTeleLayer;
 
 				if(pTLayer->m_Width < m_Width + OffsetX || pTLayer->m_Height < m_Height + OffsetY)
 				{
@@ -785,7 +769,7 @@ CUI::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 		}
 	}
 
-	if(m_pEditor->m_Map.m_pGameLayer != this)
+	if(m_pEditor->m_Map.m_pGameLayer.get() != this)
 	{
 		if(m_Image >= 0 && (size_t)m_Image < m_pEditor->m_Map.m_vpImages.size() && m_pEditor->m_Map.m_vpImages[m_Image]->m_AutoMapper.IsLoaded() && m_AutoMapperConfig != -1)
 		{
@@ -897,7 +881,6 @@ CUI::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 		m_Image = NewVal;
 		if(NewVal == -1)
 		{
-			m_Texture.Invalidate();
 			m_Image = -1;
 		}
 		else
@@ -909,8 +892,6 @@ CUI::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 			{
 				m_pEditor->m_PopupEventType = CEditor::POPEVENT_IMAGEDIV16;
 				m_pEditor->m_PopupEventActivated = true;
-
-				m_Texture.Invalidate();
 				m_Image = -1;
 			}
 		}
@@ -962,7 +943,7 @@ CUI::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 	return CUI::POPUP_KEEP_OPEN;
 }
 
-CUI::EPopupMenuFunctionResult CLayerTiles::RenderCommonProperties(SCommonPropState &State, CEditor *pEditor, CUIRect *pToolbox, std::vector<CLayerTiles *> &vpLayers)
+CUI::EPopupMenuFunctionResult CLayerTiles::RenderCommonProperties(SCommonPropState &State, CEditor *pEditor, CUIRect *pToolbox, std::vector<std::shared_ptr<CLayerTiles>> &vpLayers)
 {
 	if(State.m_Modified)
 	{
@@ -1093,10 +1074,7 @@ void CLayerTiles::FlagModified(int x, int y, int w, int h)
 
 void CLayerTiles::ModifyImageIndex(FIndexModifyFunction Func)
 {
-	const auto ImgBefore = m_Image;
 	Func(&m_Image);
-	if(m_Image != ImgBefore)
-		m_Texture.Invalidate();
 }
 
 void CLayerTiles::ModifyEnvelopeIndex(FIndexModifyFunction Func)
@@ -1147,7 +1125,7 @@ void CLayerTele::Shift(int Direction)
 	ShiftImpl(m_pTeleTile, Direction, m_pEditor->m_ShiftBy);
 }
 
-bool CLayerTele::IsEmpty(CLayerTiles *pLayer)
+bool CLayerTele::IsEmpty(const std::shared_ptr<CLayerTiles> &pLayer)
 {
 	for(int y = 0; y < pLayer->m_Height; y++)
 		for(int x = 0; x < pLayer->m_Width; x++)
@@ -1157,12 +1135,12 @@ bool CLayerTele::IsEmpty(CLayerTiles *pLayer)
 	return true;
 }
 
-void CLayerTele::BrushDraw(CLayer *pBrush, float wx, float wy)
+void CLayerTele::BrushDraw(std::shared_ptr<CLayer> pBrush, float wx, float wy)
 {
 	if(m_Readonly)
 		return;
 
-	CLayerTele *pTeleLayer = (CLayerTele *)pBrush;
+	std::shared_ptr<CLayerTele> pTeleLayer = std::static_pointer_cast<CLayerTele>(pBrush);
 	int sx = ConvertX(wx);
 	int sy = ConvertY(wy);
 	if(str_comp(pTeleLayer->m_aFileName, m_pEditor->m_aFileName))
@@ -1270,7 +1248,7 @@ void CLayerTele::BrushRotate(float Amount)
 	}
 }
 
-void CLayerTele::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
+void CLayerTele::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIRect Rect)
 {
 	if(m_Readonly || (!Empty && pBrush->m_Type != LAYERTYPE_TILES))
 		return;
@@ -1284,7 +1262,7 @@ void CLayerTele::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 	int w = ConvertX(Rect.w);
 	int h = ConvertY(Rect.h);
 
-	CLayerTele *pLt = static_cast<CLayerTele *>(pBrush);
+	std::shared_ptr<CLayerTele> pLt = std::static_pointer_cast<CLayerTele>(pBrush);
 
 	bool Destructive = m_pEditor->m_BrushDrawDestructive || Empty || IsEmpty(pLt);
 
@@ -1393,7 +1371,7 @@ void CLayerSpeedup::Shift(int Direction)
 	ShiftImpl(m_pSpeedupTile, Direction, m_pEditor->m_ShiftBy);
 }
 
-bool CLayerSpeedup::IsEmpty(CLayerTiles *pLayer)
+bool CLayerSpeedup::IsEmpty(const std::shared_ptr<CLayerTiles> &pLayer)
 {
 	for(int y = 0; y < pLayer->m_Height; y++)
 		for(int x = 0; x < pLayer->m_Width; x++)
@@ -1403,12 +1381,12 @@ bool CLayerSpeedup::IsEmpty(CLayerTiles *pLayer)
 	return true;
 }
 
-void CLayerSpeedup::BrushDraw(CLayer *pBrush, float wx, float wy)
+void CLayerSpeedup::BrushDraw(std::shared_ptr<CLayer> pBrush, float wx, float wy)
 {
 	if(m_Readonly)
 		return;
 
-	CLayerSpeedup *pSpeedupLayer = (CLayerSpeedup *)pBrush;
+	std::shared_ptr<CLayerSpeedup> pSpeedupLayer = std::static_pointer_cast<CLayerSpeedup>(pBrush);
 	int sx = ConvertX(wx);
 	int sy = ConvertY(wy);
 	if(str_comp(pSpeedupLayer->m_aFileName, m_pEditor->m_aFileName))
@@ -1525,7 +1503,7 @@ void CLayerSpeedup::BrushRotate(float Amount)
 	}
 }
 
-void CLayerSpeedup::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
+void CLayerSpeedup::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIRect Rect)
 {
 	if(m_Readonly || (!Empty && pBrush->m_Type != LAYERTYPE_TILES))
 		return;
@@ -1539,7 +1517,7 @@ void CLayerSpeedup::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 	int w = ConvertX(Rect.w);
 	int h = ConvertY(Rect.h);
 
-	CLayerSpeedup *pLt = static_cast<CLayerSpeedup *>(pBrush);
+	std::shared_ptr<CLayerSpeedup> pLt = std::static_pointer_cast<CLayerSpeedup>(pBrush);
 
 	bool Destructive = m_pEditor->m_BrushDrawDestructive || Empty || IsEmpty(pLt);
 
@@ -1682,7 +1660,7 @@ void CLayerSwitch::Shift(int Direction)
 	ShiftImpl(m_pSwitchTile, Direction, m_pEditor->m_ShiftBy);
 }
 
-bool CLayerSwitch::IsEmpty(CLayerTiles *pLayer)
+bool CLayerSwitch::IsEmpty(const std::shared_ptr<CLayerTiles> &pLayer)
 {
 	for(int y = 0; y < pLayer->m_Height; y++)
 		for(int x = 0; x < pLayer->m_Width; x++)
@@ -1692,12 +1670,12 @@ bool CLayerSwitch::IsEmpty(CLayerTiles *pLayer)
 	return true;
 }
 
-void CLayerSwitch::BrushDraw(CLayer *pBrush, float wx, float wy)
+void CLayerSwitch::BrushDraw(std::shared_ptr<CLayer> pBrush, float wx, float wy)
 {
 	if(m_Readonly)
 		return;
 
-	CLayerSwitch *pSwitchLayer = (CLayerSwitch *)pBrush;
+	std::shared_ptr<CLayerSwitch> pSwitchLayer = std::static_pointer_cast<CLayerSwitch>(pBrush);
 	int sx = ConvertX(wx);
 	int sy = ConvertY(wy);
 	if(str_comp(pSwitchLayer->m_aFileName, m_pEditor->m_aFileName))
@@ -1820,7 +1798,7 @@ void CLayerSwitch::BrushRotate(float Amount)
 	}
 }
 
-void CLayerSwitch::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
+void CLayerSwitch::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIRect Rect)
 {
 	if(m_Readonly || (!Empty && pBrush->m_Type != LAYERTYPE_TILES))
 		return;
@@ -1834,7 +1812,7 @@ void CLayerSwitch::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 	int w = ConvertX(Rect.w);
 	int h = ConvertY(Rect.h);
 
-	CLayerSwitch *pLt = static_cast<CLayerSwitch *>(pBrush);
+	std::shared_ptr<CLayerSwitch> pLt = std::static_pointer_cast<CLayerSwitch>(pBrush);
 
 	bool Destructive = m_pEditor->m_BrushDrawDestructive || Empty || IsEmpty(pLt);
 
@@ -1953,7 +1931,7 @@ void CLayerTune::Shift(int Direction)
 	ShiftImpl(m_pTuneTile, Direction, m_pEditor->m_ShiftBy);
 }
 
-bool CLayerTune::IsEmpty(CLayerTiles *pLayer)
+bool CLayerTune::IsEmpty(const std::shared_ptr<CLayerTiles> &pLayer)
 {
 	for(int y = 0; y < pLayer->m_Height; y++)
 		for(int x = 0; x < pLayer->m_Width; x++)
@@ -1963,12 +1941,12 @@ bool CLayerTune::IsEmpty(CLayerTiles *pLayer)
 	return true;
 }
 
-void CLayerTune::BrushDraw(CLayer *pBrush, float wx, float wy)
+void CLayerTune::BrushDraw(std::shared_ptr<CLayer> pBrush, float wx, float wy)
 {
 	if(m_Readonly)
 		return;
 
-	CLayerTune *pTuneLayer = (CLayerTune *)pBrush;
+	std::shared_ptr<CLayerTune> pTuneLayer = std::static_pointer_cast<CLayerTune>(pBrush);
 	int sx = ConvertX(wx);
 	int sy = ConvertY(wy);
 	if(str_comp(pTuneLayer->m_aFileName, m_pEditor->m_aFileName))
@@ -2070,7 +2048,7 @@ void CLayerTune::BrushRotate(float Amount)
 	}
 }
 
-void CLayerTune::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
+void CLayerTune::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIRect Rect)
 {
 	if(m_Readonly || (!Empty && pBrush->m_Type != LAYERTYPE_TILES))
 		return;
@@ -2082,7 +2060,7 @@ void CLayerTune::FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect)
 	int w = ConvertX(Rect.w);
 	int h = ConvertY(Rect.h);
 
-	CLayerTune *pLt = static_cast<CLayerTune *>(pBrush);
+	std::shared_ptr<CLayerTune> pLt = std::static_pointer_cast<CLayerTune>(pBrush);
 
 	bool Destructive = m_pEditor->m_BrushDrawDestructive || Empty || IsEmpty(pLt);
 

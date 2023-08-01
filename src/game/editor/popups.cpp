@@ -174,7 +174,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupMenuTools(void *pContext, CUIRect Vi
 	View.HSplitTop(12.0f, &Slot, &View);
 	if(pEditor->DoButton_MenuItem(&s_BorderButton, "Place Border", 0, &Slot, 0, "Place tiles in a 2-tile wide border at the edges of the layer"))
 	{
-		CLayerTiles *pT = (CLayerTiles *)pEditor->GetSelectedLayerType(0, LAYERTYPE_TILES);
+		std::shared_ptr<CLayerTiles> pT = std::static_pointer_cast<CLayerTiles>(pEditor->GetSelectedLayerType(0, LAYERTYPE_TILES));
 		if(pT && !pT->m_Tele && !pT->m_Speedup && !pT->m_Switch && !pT->m_Front && !pT->m_Tune)
 		{
 			pEditor->m_PopupEventType = POPEVENT_PLACE_BORDER_TILES;
@@ -337,15 +337,15 @@ CUI::EPopupMenuFunctionResult CEditor::PopupGroup(void *pContext, CUIRect View, 
 		if(pEditor->DoButton_Editor(&s_DeleteButton, "Clean up game tiles", 0, &Button, 0, "Removes game tiles that aren't based on a layer"))
 		{
 			// gather all tile layers
-			std::vector<CLayerTiles *> vpLayers;
+			std::vector<std::shared_ptr<CLayerTiles>> vpLayers;
 			for(auto &pLayer : pEditor->m_Map.m_pGameGroup->m_vpLayers)
 			{
 				if(pLayer != pEditor->m_Map.m_pGameLayer && pLayer->m_Type == LAYERTYPE_TILES)
-					vpLayers.push_back(static_cast<CLayerTiles *>(pLayer));
+					vpLayers.push_back(std::static_pointer_cast<CLayerTiles>(pLayer));
 			}
 
 			// search for unneeded game tiles
-			CLayerTiles *pGameLayer = pEditor->m_Map.m_pGameLayer;
+			std::shared_ptr<CLayerTiles> pGameLayer = pEditor->m_Map.m_pGameLayer;
 			for(int y = 0; y < pGameLayer->m_Height; ++y)
 			{
 				for(int x = 0; x < pGameLayer->m_Width; ++x)
@@ -383,11 +383,11 @@ CUI::EPopupMenuFunctionResult CEditor::PopupGroup(void *pContext, CUIRect View, 
 		static int s_NewTeleLayerButton = 0;
 		if(pEditor->DoButton_Editor(&s_NewTeleLayerButton, "Add tele layer", 0, &Button, 0, "Creates a new tele layer"))
 		{
-			CLayer *pTeleLayer = new CLayerTele(pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
+			std::shared_ptr<CLayer> pTeleLayer = std::make_shared<CLayerTele>(pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
 			pEditor->m_Map.MakeTeleLayer(pTeleLayer);
 			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->AddLayer(pTeleLayer);
 			pEditor->SelectLayer(pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_vpLayers.size() - 1);
-			pEditor->m_Brush.Clear();
+			pEditor->m_pBrush->Clear();
 			return CUI::POPUP_CLOSE_CURRENT;
 		}
 	}
@@ -400,11 +400,11 @@ CUI::EPopupMenuFunctionResult CEditor::PopupGroup(void *pContext, CUIRect View, 
 		static int s_NewSpeedupLayerButton = 0;
 		if(pEditor->DoButton_Editor(&s_NewSpeedupLayerButton, "Add speedup layer", 0, &Button, 0, "Creates a new speedup layer"))
 		{
-			CLayer *pSpeedupLayer = new CLayerSpeedup(pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
+			std::shared_ptr<CLayer> pSpeedupLayer = std::make_shared<CLayerSpeedup>(pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
 			pEditor->m_Map.MakeSpeedupLayer(pSpeedupLayer);
 			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->AddLayer(pSpeedupLayer);
 			pEditor->SelectLayer(pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_vpLayers.size() - 1);
-			pEditor->m_Brush.Clear();
+			pEditor->m_pBrush->Clear();
 			return CUI::POPUP_CLOSE_CURRENT;
 		}
 	}
@@ -417,11 +417,11 @@ CUI::EPopupMenuFunctionResult CEditor::PopupGroup(void *pContext, CUIRect View, 
 		static int s_NewTuneLayerButton = 0;
 		if(pEditor->DoButton_Editor(&s_NewTuneLayerButton, "Add tune layer", 0, &Button, 0, "Creates a new tuning layer"))
 		{
-			CLayer *pTuneLayer = new CLayerTune(pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
+			std::shared_ptr<CLayer> pTuneLayer = std::make_shared<CLayerTune>(pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
 			pEditor->m_Map.MakeTuneLayer(pTuneLayer);
 			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->AddLayer(pTuneLayer);
 			pEditor->SelectLayer(pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_vpLayers.size() - 1);
-			pEditor->m_Brush.Clear();
+			pEditor->m_pBrush->Clear();
 			return CUI::POPUP_CLOSE_CURRENT;
 		}
 	}
@@ -434,11 +434,11 @@ CUI::EPopupMenuFunctionResult CEditor::PopupGroup(void *pContext, CUIRect View, 
 		static int s_NewFrontLayerButton = 0;
 		if(pEditor->DoButton_Editor(&s_NewFrontLayerButton, "Add front layer", 0, &Button, 0, "Creates a new item layer"))
 		{
-			CLayer *pFrontLayer = new CLayerFront(pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
+			std::shared_ptr<CLayer> pFrontLayer = std::make_shared<CLayerFront>(pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
 			pEditor->m_Map.MakeFrontLayer(pFrontLayer);
 			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->AddLayer(pFrontLayer);
 			pEditor->SelectLayer(pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_vpLayers.size() - 1);
-			pEditor->m_Brush.Clear();
+			pEditor->m_pBrush->Clear();
 			return CUI::POPUP_CLOSE_CURRENT;
 		}
 	}
@@ -451,11 +451,11 @@ CUI::EPopupMenuFunctionResult CEditor::PopupGroup(void *pContext, CUIRect View, 
 		static int s_NewSwitchLayerButton = 0;
 		if(pEditor->DoButton_Editor(&s_NewSwitchLayerButton, "Add switch layer", 0, &Button, 0, "Creates a new switch layer"))
 		{
-			CLayer *pSwitchLayer = new CLayerSwitch(pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
+			std::shared_ptr<CLayer> pSwitchLayer = std::make_shared<CLayerSwitch>(pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
 			pEditor->m_Map.MakeSwitchLayer(pSwitchLayer);
 			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->AddLayer(pSwitchLayer);
 			pEditor->SelectLayer(pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_vpLayers.size() - 1);
-			pEditor->m_Brush.Clear();
+			pEditor->m_pBrush->Clear();
 			return CUI::POPUP_CLOSE_CURRENT;
 		}
 	}
@@ -466,7 +466,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupGroup(void *pContext, CUIRect View, 
 	static int s_NewQuadLayerButton = 0;
 	if(pEditor->DoButton_Editor(&s_NewQuadLayerButton, "Add quads layer", 0, &Button, 0, "Creates a new quad layer"))
 	{
-		CLayer *pQuadLayer = new CLayerQuads;
+		std::shared_ptr<CLayer> pQuadLayer = std::make_shared<CLayerQuads>();
 		pQuadLayer->m_pEditor = pEditor;
 		pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->AddLayer(pQuadLayer);
 		pEditor->SelectLayer(pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_vpLayers.size() - 1);
@@ -480,7 +480,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupGroup(void *pContext, CUIRect View, 
 	static int s_NewTileLayerButton = 0;
 	if(pEditor->DoButton_Editor(&s_NewTileLayerButton, "Add tile layer", 0, &Button, 0, "Creates a new tile layer"))
 	{
-		CLayer *pTileLayer = new CLayerTiles(pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
+		std::shared_ptr<CLayer> pTileLayer = std::make_shared<CLayerTiles>(pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
 		pTileLayer->m_pEditor = pEditor;
 		pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->AddLayer(pTileLayer);
 		pEditor->SelectLayer(pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_vpLayers.size() - 1);
@@ -494,7 +494,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupGroup(void *pContext, CUIRect View, 
 	static int s_NewSoundLayerButton = 0;
 	if(pEditor->DoButton_Editor(&s_NewSoundLayerButton, "Add sound layer", 0, &Button, 0, "Creates a new sound layer"))
 	{
-		CLayer *pSoundLayer = new CLayerSounds;
+		std::shared_ptr<CLayer> pSoundLayer = std::make_shared<CLayerSounds>();
 		pSoundLayer->m_pEditor = pEditor;
 		pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->AddLayer(pSoundLayer);
 		pEditor->SelectLayer(pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_vpLayers.size() - 1);
@@ -625,8 +625,8 @@ CUI::EPopupMenuFunctionResult CEditor::PopupLayer(void *pContext, CUIRect View, 
 	SLayerPopupContext *pPopup = (SLayerPopupContext *)pContext;
 	CEditor *pEditor = pPopup->m_pEditor;
 
-	CLayerGroup *pCurrentGroup = pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup];
-	CLayer *pCurrentLayer = pEditor->GetSelectedLayer(0);
+	std::shared_ptr<CLayerGroup> pCurrentGroup = pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup];
+	std::shared_ptr<CLayer> pCurrentLayer = pEditor->GetSelectedLayer(0);
 
 	if(pPopup->m_vpLayers.size() > 1)
 	{
@@ -751,7 +751,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupQuad(void *pContext, CUIRect View, b
 	CEditor *pEditor = static_cast<CEditor *>(pContext);
 	std::vector<CQuad *> vpQuads = pEditor->GetSelectedQuads();
 	CQuad *pCurrentQuad = vpQuads[pEditor->m_SelectedQuadIndex];
-	CLayerQuads *pLayer = static_cast<CLayerQuads *>(pEditor->GetSelectedLayerType(0, LAYERTYPE_QUADS));
+	std::shared_ptr<CLayerQuads> pLayer = std::static_pointer_cast<CLayerQuads>(pEditor->GetSelectedLayerType(0, LAYERTYPE_QUADS));
 
 	CUIRect Button;
 
@@ -985,7 +985,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupSource(void *pContext, CUIRect View,
 	static int s_DeleteButton = 0;
 	if(pEditor->DoButton_Editor(&s_DeleteButton, "Delete", 0, &Button, 0, "Deletes the current source"))
 	{
-		CLayerSounds *pLayer = (CLayerSounds *)pEditor->GetSelectedLayerType(0, LAYERTYPE_SOUNDS);
+		std::shared_ptr<CLayerSounds> pLayer = std::static_pointer_cast<CLayerSounds>(pEditor->GetSelectedLayerType(0, LAYERTYPE_SOUNDS));
 		if(pLayer)
 		{
 			pEditor->m_Map.OnModify();
@@ -1296,7 +1296,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupEnvPoint(void *pContext, CUIRect Vie
 	static CLineInputNumber s_CurValueInput;
 	static CLineInputNumber s_CurTimeInput;
 
-	CEnvelope *pEnvelope = pEditor->m_Map.m_vpEnvelopes[pEditor->m_SelectedEnvelope];
+	std::shared_ptr<CEnvelope> pEnvelope = pEditor->m_Map.m_vpEnvelopes[pEditor->m_SelectedEnvelope];
 	if(pEditor->m_UpdateEnvPointInfo)
 	{
 		pEditor->m_UpdateEnvPointInfo = false;
@@ -1448,7 +1448,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupImage(void *pContext, CUIRect View, 
 
 	CUIRect Slot;
 	View.HSplitTop(12.0f, &Slot, &View);
-	CEditorImage *pImg = pEditor->m_Map.m_vpImages[pEditor->m_SelectedImage];
+	std::shared_ptr<CEditorImage> pImg = pEditor->m_Map.m_vpImages[pEditor->m_SelectedImage];
 
 	static int s_ExternalButton = 0;
 	if(pImg->m_External)
@@ -1519,7 +1519,6 @@ CUI::EPopupMenuFunctionResult CEditor::PopupImage(void *pContext, CUIRect View, 
 	View.HSplitTop(12.0f, &Slot, &View);
 	if(pEditor->DoButton_MenuItem(&s_RemoveButton, "Remove", 0, &Slot, 0, "Removes the image from the map"))
 	{
-		delete pImg;
 		pEditor->m_Map.m_vpImages.erase(pEditor->m_Map.m_vpImages.begin() + pEditor->m_SelectedImage);
 		pEditor->m_Map.ModifyImageIndex(gs_ModifyIndexDeleted(pEditor->m_SelectedImage));
 		return CUI::POPUP_CLOSE_CURRENT;
@@ -1538,7 +1537,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupSound(void *pContext, CUIRect View, 
 
 	CUIRect Slot;
 	View.HSplitTop(12.0f, &Slot, &View);
-	CEditorSound *pSound = pEditor->m_Map.m_vpSounds[pEditor->m_SelectedSound];
+	std::shared_ptr<CEditorSound> pSound = pEditor->m_Map.m_vpSounds[pEditor->m_SelectedSound];
 
 	static CUI::SSelectionPopupContext s_SelectionPopupContext;
 	static CScrollRegion s_SelectionPopupScrollRegion;
@@ -1585,7 +1584,6 @@ CUI::EPopupMenuFunctionResult CEditor::PopupSound(void *pContext, CUIRect View, 
 	View.HSplitTop(12.0f, &Slot, &View);
 	if(pEditor->DoButton_MenuItem(&s_RemoveButton, "Remove", 0, &Slot, 0, "Removes the sound from the map"))
 	{
-		delete pSound;
 		pEditor->m_Map.m_vpSounds.erase(pEditor->m_Map.m_vpSounds.begin() + pEditor->m_SelectedSound);
 		pEditor->m_Map.ModifySoundIndex(gs_ModifyIndexDeleted(pEditor->m_SelectedSound));
 		return CUI::POPUP_CLOSE_CURRENT;
@@ -2034,7 +2032,7 @@ static int s_AutoMapConfigCurrent = -100;
 CUI::EPopupMenuFunctionResult CEditor::PopupSelectConfigAutoMap(void *pContext, CUIRect View, bool Active)
 {
 	CEditor *pEditor = static_cast<CEditor *>(pContext);
-	CLayerTiles *pLayer = static_cast<CLayerTiles *>(pEditor->GetSelectedLayer(0));
+	std::shared_ptr<CLayerTiles> pLayer = std::static_pointer_cast<CLayerTiles>(pEditor->GetSelectedLayer(0));
 	CAutoMapper *pAutoMapper = &pEditor->m_Map.m_vpImages[pLayer->m_Image]->m_AutoMapper;
 
 	const float ButtonHeight = 12.0f;
@@ -2072,7 +2070,7 @@ void CEditor::PopupSelectConfigAutoMapInvoke(int Current, float x, float y)
 	static SPopupMenuId s_PopupSelectConfigAutoMapId;
 	s_AutoMapConfigSelected = -100;
 	s_AutoMapConfigCurrent = Current;
-	CLayerTiles *pLayer = static_cast<CLayerTiles *>(GetSelectedLayer(0));
+	std::shared_ptr<CLayerTiles> pLayer = std::static_pointer_cast<CLayerTiles>(GetSelectedLayer(0));
 	const int ItemCount = minimum(m_Map.m_vpImages[pLayer->m_Image]->m_AutoMapper.ConfigNamesNum(), 10);
 	// Width for buttons is 120, 15 is the scrollbar width, 2 is the margin between both.
 	UI()->DoPopupMenu(&s_PopupSelectConfigAutoMapId, x, y, 120.0f + 15.0f + 2.0f, 26.0f + 14.0f * ItemCount, this, PopupSelectConfigAutoMap);

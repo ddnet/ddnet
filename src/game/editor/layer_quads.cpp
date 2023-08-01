@@ -107,10 +107,10 @@ void CLayerQuads::BrushSelecting(CUIRect Rect)
 	Graphics()->LinesEnd();
 }
 
-int CLayerQuads::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
+int CLayerQuads::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
 {
 	// create new layers
-	CLayerQuads *pGrabbed = new CLayerQuads();
+	std::shared_ptr<CLayerQuads> pGrabbed = std::make_shared<CLayerQuads>();
 	pGrabbed->m_pEditor = m_pEditor;
 	pGrabbed->m_Image = m_Image;
 	pBrush->AddLayer(pGrabbed);
@@ -138,9 +138,9 @@ int CLayerQuads::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 	return pGrabbed->m_vQuads.empty() ? 0 : 1;
 }
 
-void CLayerQuads::BrushPlace(CLayer *pBrush, float wx, float wy)
+void CLayerQuads::BrushPlace(std::shared_ptr<CLayer> pBrush, float wx, float wy)
 {
-	CLayerQuads *pQuadLayer = (CLayerQuads *)pBrush;
+	std::shared_ptr<CLayerQuads> pQuadLayer = std::static_pointer_cast<CLayerQuads>(pBrush);
 	for(const auto &Quad : pQuadLayer->m_vQuads)
 	{
 		CQuad n = Quad;
@@ -264,9 +264,9 @@ void CLayerQuads::ModifyEnvelopeIndex(FIndexModifyFunction Func)
 	}
 }
 
-CLayer *CLayerQuads::Duplicate() const
+std::shared_ptr<CLayer> CLayerQuads::Duplicate() const
 {
-	return new CLayerQuads(*this);
+	return std::make_shared<CLayerQuads>(*this);
 }
 
 int CLayerQuads::SwapQuads(int Index0, int Index1)
