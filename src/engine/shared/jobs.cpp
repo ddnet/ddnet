@@ -51,6 +51,8 @@ void CJobPool::WorkerThread(void *pUser)
 			{
 				pJob = pPool->m_pFirstJob;
 				pPool->m_pFirstJob = pPool->m_pFirstJob->m_pNext;
+				// allow remaining objects in list to destruct, even when current object stays alive
+				pJob->m_pNext = nullptr;
 				if(!pPool->m_pFirstJob)
 					pPool->m_pLastJob = 0;
 			}
