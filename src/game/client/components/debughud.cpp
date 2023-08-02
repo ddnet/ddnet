@@ -204,10 +204,15 @@ void CDebugHud::RenderHint()
 	if(!g_Config.m_Debug)
 		return;
 
-	float Width = 300 * Graphics()->ScreenAspect();
-	Graphics()->MapScreen(0, 0, Width, 300);
-	TextRender()->TextColor(1, 1, 1, 1);
-	TextRender()->Text(5, 290, 5, Localize("Debug mode enabled. Press Ctrl+Shift+D to disable debug mode."), -1.0f);
+	const float Height = 300.0f;
+	const float Width = Height * Graphics()->ScreenAspect();
+	Graphics()->MapScreen(0.0f, 0.0f, Width, Height);
+
+	const float FontSize = 5.0f;
+	const float Spacing = 5.0f;
+
+	TextRender()->TextColor(TextRender()->DefaultTextColor());
+	TextRender()->Text(Spacing, Height - FontSize - Spacing, FontSize, Localize("Debug mode enabled. Press Ctrl+Shift+D to disable debug mode."));
 }
 
 void CDebugHud::OnRender()
