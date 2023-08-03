@@ -2,7 +2,7 @@
 extern crate log;
 
 use self::challenger::Challenger;
-use self::net::ArcFile;
+use self::net::CallbackData;
 use self::net::Tw06Addr;
 use self::net::QuicAddr;
 use self::net::Something;
@@ -35,6 +35,7 @@ pub use self::error::Error;
 pub use self::error::Result;
 pub use self::key::Identity;
 pub use self::key::PrivateIdentity;
+pub use self::net::ConnectionEvent;
 pub use self::net::Event;
 pub use self::net::Net;
 pub use self::net::NetBuilder;
@@ -47,6 +48,7 @@ pub fn client2_main() -> Result<()> {
             .parse()
             .unwrap();
     let remote = "ddnet-15+quic://127.0.0.1:4433#0026a0d653cd5f38d1002bf166167933f2f7910f26d6dd619b2b3fe769e057ee";
+    //let remote = "tw-0.6+udp://127.0.0.1:4433";
     let mut builder = Net::builder();
     builder.identity(identity);
     let mut net = builder.open().context("Net::open")?;
@@ -60,13 +62,17 @@ pub fn client2_main() -> Result<()> {
             use self::Event::*;
             match event {
                 Connect(id) => {
-                    println!("{}: connect {}", idx, id);
+                    match id {
+                        Some(id) => println!("{}: connect {}", idx, id),
+                        None => println!("{}: connect (unknown)", idx),
+                    }
                     println!("{}: send nonvital \"blab\"", idx);
                     println!("{}: send \"blub\"", idx);
                     println!("{}: send \"blob\"", idx);
                     net.send_chunk(idx, b"blab", true).unwrap();
                     net.send_chunk(idx, b"blub", false).unwrap();
                     net.send_chunk(idx, b"blob", false).unwrap();
+                    net.flush(idx).unwrap();
                 }
                 Chunk(size, nonvital) => {
                     println!(
@@ -109,7 +115,10 @@ pub fn server2_main() -> Result<()> {
         {
             use self::Event::*;
             match event {
-                Connect(id) => println!("{}: connect {}", idx, id),
+                Connect(id) => match id {
+                    Some(id) => println!("{}: connect {}", idx, id),
+                    None => println!("{}: connect (unknown)", idx),
+                }
                 Chunk(size, nonvital) => {
                     println!(
                         "{}: recv {}{:?}",

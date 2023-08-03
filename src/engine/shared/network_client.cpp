@@ -61,6 +61,7 @@ int CNetClient::Disconnect(const char *pReason)
 			log_error("net", "couldn't disconnect: %s", ddnet_net_error(m_pNet));
 			exit(1);
 		}
+		str_copy((char *)m_aBuffer, pReason, sizeof(m_aBuffer));
 		m_PeerID = -1;
 		m_State = NETSTATE_OFFLINE;
 	}
@@ -89,7 +90,8 @@ int CNetClient::Connect(const NETADDR *pAddr, int NumAddrs)
 	char aAddr[NETADDR_MAXSTRSIZE];
 	net_addr_str(&pAddr[0], aAddr, sizeof(aAddr), true);
 	char aUrl[128];
-	str_format(aUrl, sizeof(aUrl), "ddnet-15+quic://%s#0026a0d653cd5f38d1002bf166167933f2f7910f26d6dd619b2b3fe769e057ee", aAddr);
+	//str_format(aUrl, sizeof(aUrl), "ddnet-15+quic://%s#0026a0d653cd5f38d1002bf166167933f2f7910f26d6dd619b2b3fe769e057ee", aAddr);
+	str_format(aUrl, sizeof(aUrl), "tw-0.6+udp://%s", aAddr);
 	uint64_t PeerID;
 	if(ddnet_net_connect(m_pNet, aUrl, str_length(aUrl), &PeerID))
 	{
@@ -176,6 +178,7 @@ int CNetClient::Send(CNetChunk *pChunk)
 	}
 	else
 	{
+		// TODO: remove?
 		if(m_PeerID == -1)
 		{
 			return -1;

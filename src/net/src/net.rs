@@ -13,6 +13,7 @@ use mio::net::UdpSocket;
 use mio::Events;
 use mio::Poll;
 use std::collections::HashMap;
+use std::collections::HashSet;
 use std::collections::VecDeque;
 use std::env;
 use std::fmt;
@@ -31,20 +32,31 @@ use std::time::Duration;
 use std::time::Instant;
 use url::Url;
 
-// TODO: coalesce ACKs with other packets
-// TODO: coalesce dgrams with stream packets
 // TODO: remove double waits in the server (9999ms, then 0ms)
+// TODO: get rid of all the unwraps around connections
+// TODO: couldn't connect without wifi: libtw2_net::Conn::connect: UdpSocket::send_to: Network is unreachable (os error 101)
 
 // Originally `NET_MAX_PAYLOAD`.
 pub const MAX_FRAME_SIZE: u64 = 1394;
 
 pub struct CallbackData {
-    accept_connections: bool,
-    sslkeylogfile: Option<ArcFile>,
-    challenger: Challenger,
-    local_addr: SocketAddr,
-    socket: UdpSocket,
-    next_peer_index: PeerIndex,
+    pub accept_connections: bool,
+    pub sslkeylogfile: Option<ArcFile>,
+    pub challenger: Challenger,
+    pub local_addr: SocketAddr,
+    pub socket: UdpSocket,
+    pub next_peer_index: PeerIndex,
+}
+
+// TODO: replace with ordered set?
+struct ReadablePeers {
+    deque: VecDeque<PeerIndex>,
+    set: HashSet<PeerIndex>,
+}
+
+struct Peer {
+    conn: Connection,
+    userdata: Option<*mut ()>,
 }
 
 pub struct Net {
@@ -58,11 +70,11 @@ pub struct Net {
     proto_tw06: tw06::Protocol,
 
     peer_addrs: HashMap<SocketAddr, PeerIndex>,
-    peers: HashMap<PeerIndex, Connection>,
+    peers: HashMap<PeerIndex, Peer>,
     connect_errors: VecDeque<(PeerIndex, Error)>,
 
     socket_readable: bool,
-    readable_peers: VecDeque<PeerIndex>,
+    readable_peers: ReadablePeers,
 }
 
 pub struct NetBuilder {
@@ -95,14 +107,38 @@ impl PeerIndex {
     }
 }
 
+impl Peer {
+    fn new(conn: Connection) -> Peer {
+        Peer {
+            conn,
+            userdata: None,
+        }
+    }
+}
+
 #[derive(Clone, Copy)]
 pub enum Event {
-    Connect(Identity),
+    Connect(Option<Identity>),
     /// `Chunk(size, unreliable)`
     Chunk(usize, bool),
     // TODO: distinguish disconnect from error?
     /// `Disconnect(reason_size, remote)`
     Disconnect(usize, bool),
+}
+
+#[derive(Clone, Copy)]
+pub enum ConnectionEvent {
+    Normal(Event),
+    /// Asks for the connection object to be destroyed.
+    ///
+    /// This event can only be sent after a `Normal(Event::Disconnect)` event.
+    Delete,
+}
+
+impl From<Event> for ConnectionEvent {
+    fn from(event: Event) -> ConnectionEvent {
+        ConnectionEvent::Normal(event)
+    }
 }
 
 pub enum Addr {
@@ -123,24 +159,27 @@ impl Addr {
 pub struct Tw06Addr(pub SocketAddr);
 pub struct QuicAddr(pub SocketAddr, pub Identity);
 
+fn socket_addr_from_url(url: &Url) -> Result<SocketAddr> {
+    let mut ip_port: ArrayString<[u8; 64]> = ArrayString::new();
+    write!(
+        &mut ip_port,
+        "{}:{}",
+        url.host_str().ok_or_else(|| Error::from_string(
+            "connect: URL missing host".to_owned()
+        ))?,
+        url.port().ok_or_else(|| Error::from_string(
+            "connect: URL missing port".to_owned()
+        ))?,
+    )
+    .unwrap();
+    Ok(ip_port.parse().context("connect: IP addr")?)
+}
+
 impl FromStr for Addr {
     type Err = Error;
     fn from_str(addr: &str) -> Result<Addr> {
         let addr = Url::parse(addr).context("connect: URL")?;
-        let mut ip_port: ArrayString<[u8; 64]> = ArrayString::new();
-        write!(
-            &mut ip_port,
-            "{}:{}",
-            addr.host_str().ok_or_else(|| Error::from_string(
-                "connect: URL missing host".to_owned()
-            ))?,
-            addr.port().ok_or_else(|| Error::from_string(
-                "connect: URL missing port".to_owned()
-            ))?,
-        )
-        .unwrap();
-        let sock_addr: SocketAddr =
-            ip_port.parse().context("connect: IP addr")?;
+        let sock_addr = socket_addr_from_url(&addr)?;
         Ok(match addr.scheme() {
             "ddnet-15+quic" => {
                 let fragment = addr.fragment().unwrap_or("");
@@ -157,6 +196,34 @@ impl FromStr for Addr {
             "tw-0.6+udp" => Addr::Tw06(Tw06Addr(sock_addr)),
             scheme => bail!("unsupported scheme {}", scheme),
         })
+    }
+}
+
+impl fmt::Display for QuicAddr {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let QuicAddr(addr, identity) = self;
+        let mut buf: ArrayString<[u8; 128]> = ArrayString::new();
+        write!(&mut buf, "ddnet-15+quic://{}#{}", addr, identity).unwrap();
+        buf.fmt(f)
+    }
+}
+
+impl fmt::Display for Tw06Addr {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let Tw06Addr(addr) = self;
+        let mut buf: ArrayString<[u8; 128]> = ArrayString::new();
+        write!(&mut buf, "tw-0.6+udp://{}", addr).unwrap();
+        buf.fmt(f)
+    }
+}
+
+impl fmt::Display for Addr {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        use self::Addr::*;
+        match self {
+            Quic(addr) => addr.fmt(f),
+            Tw06(addr) => addr.fmt(f),
+        }
     }
 }
 
@@ -194,6 +261,37 @@ impl<C> Something<C> {
             NewConnection(idx, conn) => NewConnection(idx, conn.into()),
             ExistingConnection(idx) => ExistingConnection(idx),
         }
+    }
+}
+
+impl ReadablePeers {
+    pub fn with_capacity(cap: usize) -> ReadablePeers {
+        ReadablePeers {
+            deque: VecDeque::with_capacity(cap),
+            // Reserve some more space in the hash set, because it has a max
+            // load.
+            set: HashSet::with_capacity(2 * cap),
+        }
+    }
+    pub fn is_empty(&self) -> bool {
+        self.deque.is_empty()
+    }
+    pub fn push_back(&mut self, idx: PeerIndex) {
+        if self.set.contains(&idx) {
+            return;
+        }
+        self.deque.push_back(idx);
+        assert!(self.set.insert(idx));
+    }
+    pub fn front(&self) -> Option<PeerIndex> {
+        self.deque.front().copied()
+    }
+    pub fn pop_front(&mut self) -> Option<PeerIndex> {
+        let result = self.deque.pop_front();
+        if let Some(idx) = result {
+            assert!(self.set.remove(&idx));
+        }
+        result
     }
 }
 
@@ -268,7 +366,7 @@ impl NetBuilder {
             connect_errors: VecDeque::with_capacity(1),
 
             socket_readable: false,
-            readable_peers: VecDeque::with_capacity(4),
+            readable_peers: ReadablePeers::with_capacity(4),
         })
     }
 }
@@ -281,9 +379,24 @@ impl Net {
             accept_connections: false,
         }
     }
+    pub fn set_userdata(&mut self, idx: PeerIndex, userdata: *mut ()) {
+        self.peers.get_mut(&idx).unwrap().userdata = Some(userdata);
+    }
+    pub fn userdata(&self, idx: PeerIndex) -> *mut () {
+        self.peers[&idx].userdata.expect("userdata")
+    }
+    fn remove_peer(&mut self, idx: PeerIndex) {
+        use self::Connection::*;
+        match self.peers.remove(&idx).unwrap().conn {
+            Quic(inner) => self.proto_quic.remove_peer(idx, inner),
+            Tw06(inner) => self.proto_tw06.remove_peer(idx, inner),
+        }
+        // TODO: efficiency
+        self.peer_addrs.retain(|_, &mut i| i != idx);
+    }
     fn socket_read(&mut self) -> Result<Option<PeerIndex>> {
         loop {
-            let Some((read, from)) = self.cb.socket.recv_from(&mut self.packet_buf).no_block().context("UdpSocket::recv_from")? else { break; };
+            let Some((read, from)) = self.cb.socket.recv_from(&mut self.packet_buf[..16384]).no_block().context("UdpSocket::recv_from")? else { break; };
             let from = normalize(from);
             let idx = if let Some(&idx) = self.peer_addrs.get(&from) {
                 idx
@@ -303,51 +416,40 @@ impl Net {
                 // 11111111:          teeworlds 0.6 connless
 
                 let packet = &self.packet_buf[..read];
-                let something = match (packet.get(0), packet.get(1)) {
-                    (Some(&p0), Some(&p1))
+                let something = match (packet.get(0).copied(), packet.get(1).copied()) {
+                    (Some(0b00010000), _) => self.proto_tw06.on_recv(&self.cb, &mut self.packet_buf, read, &from).map(|something| something.map(Something::into))?,
+                    (Some(p0), Some(p1))
                         if p0 & 0b11000000 == 0b01000000
                             && p1 != 0b01100101 =>
                     {
                         self.proto_quic
                             .on_recv(
+                                &self.cb,
                                 &mut self.packet_buf,
                                 read,
                                 &from,
-                                &self.cb.challenger,
-                                if self.cb.accept_connections {
-                                    Some(&mut self.cb.next_peer_index)
-                                } else {
-                                    None
-                                },
-                                &self.cb.local_addr,
-                                self.cb.sslkeylogfile.as_ref(),
-                                &self.cb.socket,
                             )
                             .map(|something| something.map(Something::into))?
                     }
-                    (Some(&p0), _) if p0 & 0b11110000 == 0b11000000 => {
+                    (Some(p0), _) if p0 & 0b11110000 == 0b11000000 => {
                         self.proto_quic
                             .on_recv(
+                                &self.cb,
                                 &mut self.packet_buf,
                                 read,
                                 &from,
-                                &self.cb.challenger,
-                                if self.cb.accept_connections {
-                                    Some(&mut self.cb.next_peer_index)
-                                } else {
-                                    None
-                                },
-                                &self.cb.local_addr,
-                                self.cb.sslkeylogfile.as_ref(),
-                                &self.cb.socket,
                             )
                             .map(|something| something.map(Something::into))?
                     }
-                    _ => continue,
+                    _ => {
+                        error!("unknown packet");
+                        continue;
+                    }
                 };
                 match something {
                     Some(Something::NewConnection(idx, conn)) => {
-                        assert!(self.peers.insert(idx, conn).is_none());
+                        assert!(idx == self.cb.next_peer_index.get_and_increment());
+                        assert!(self.peers.insert(idx, Peer::new(conn)).is_none());
                         assert!(self.peer_addrs.insert(from, idx).is_none());
                         idx
                     }
@@ -358,15 +460,13 @@ impl Net {
                     None => continue,
                 }
             };
-            let conn = self.peers.get_mut(&idx).unwrap();
-            let _ = conn.on_recv(
-                &mut self.packet_buf[..read],
+            let peer = self.peers.get_mut(&idx).unwrap();
+            let _ = peer.conn.on_recv(
+                &self.cb,
+                &mut self.packet_buf,
+                read,
                 &from,
-                &self.cb.local_addr,
             );
-            // TODO: figure out why error packets aren't getting sent
-            conn.flush(&self.cb.local_addr, &self.cb.socket, &mut self.packet_buf)
-                .unwrap();
             return Ok(Some(idx));
         }
         Ok(None)
@@ -384,7 +484,7 @@ impl Net {
         loop {
             is_user_timeout = false;
             let mut timeout_instant =
-                self.peers.values().filter_map(|conn| conn.timeout()).min();
+                self.peers.values().filter_map(|peer| peer.conn.timeout()).min();
             if let Some(user) = user_timeout {
                 if timeout_instant.map(|to| to > user).unwrap_or(true) {
                     is_user_timeout = true;
@@ -393,11 +493,15 @@ impl Net {
             }
             timeout = timeout_instant
                 .map(|t| t.saturating_duration_since(Instant::now()));
-            if let Some(timeout) = timeout {
+            /*
+            if timeout == Some(Duration::ZERO) {
+                trace!("checking for events");
+            } else if let Some(timeout) = timeout {
                 trace!("waiting up to {:?}", timeout);
             } else {
                 trace!("waiting forever");
             }
+            */
             match self.poll.poll(&mut self.events, timeout) {
                 // Allow the caller to handle consequences of the interrupt.
                 Err(e) if e.kind() == io::ErrorKind::Interrupted => return,
@@ -406,16 +510,18 @@ impl Net {
             break;
         }
         if timeout == Some(Duration::ZERO) || self.events.is_empty() {
-            trace!("timeout");
+            /*
+            if timeout == Some(Duration::ZERO) {
+                trace!("no events");
+            } else {
+                trace!("timeout");
+            }
+            */
             if !is_user_timeout {
-                for conn in self.peers.values_mut() {
-                    conn.on_timeout();
-                    conn.flush(
-                        &self.cb.local_addr,
-                        &self.cb.socket,
-                        &mut self.packet_buf,
-                    )
-                    .unwrap();
+                for (idx, peer) in self.peers.iter_mut() {
+                    if peer.conn.on_timeout(&self.cb, &mut self.packet_buf).unwrap() {
+                        self.readable_peers.push_back(*idx);
+                    }
                 }
             }
         }
@@ -448,20 +554,23 @@ impl Net {
         }
         let mut did_nothing = true;
         loop {
-            while let Some(&idx) = self.readable_peers.front() {
+            while let Some(idx) = self.readable_peers.front() {
+                let peer = self.peers.get_mut(&idx).unwrap();
+                did_nothing = false;
                 // TODO: handle error. by dropping the peer?
                 if let Some(ev) =
-                    self.peers.get_mut(&idx).unwrap().recv(buf).unwrap()
+                    peer.conn.recv(&self.cb, &mut self.packet_buf, buf).unwrap()
                 {
-                    return Ok(Some((idx, ev)));
+                    match ev {
+                        ConnectionEvent::Normal(ev) => return Ok(Some((idx, ev))),
+                        ConnectionEvent::Delete => {
+                            self.remove_peer(idx);
+                            assert!(self.readable_peers.pop_front() == Some(idx));
+                            continue;
+                        }
+                    }
                 }
-                self.peers
-                    .get_mut(&idx)
-                    .unwrap()
-                    .flush(&self.cb.local_addr, &self.cb.socket, &mut self.packet_buf)
-                    .unwrap();
-                assert!(self.readable_peers.pop_front().is_some());
-                did_nothing = false;
+                assert!(self.readable_peers.pop_front() == Some(idx));
             }
             if self.socket_readable {
                 if let Some(readable_peer) = self.socket_read()? {
@@ -473,8 +582,8 @@ impl Net {
                 did_nothing = false;
             }
             // If we're called after returning `None` in a previous iteration
-            // and without something to do, check whether there's new stuff we
-            // can do.
+            // and without something to do, check whether there's time-related
+            // stuff we can do.
             if did_nothing {
                 did_nothing = false;
                 self.wait_timeout(Instant::now());
@@ -490,17 +599,18 @@ impl Net {
         unreliable: bool,
     ) -> Result<()> {
         assert!(frame.len() <= MAX_FRAME_SIZE as usize);
+        trace!("sending chunk, unreliable={} len={}", unreliable, frame.len());
         self.peers
             .get_mut(&idx)
             .unwrap()
-            .send_chunk(frame, unreliable)
+            .conn
+            .send_chunk(&self.cb, &mut self.packet_buf, frame, unreliable)
             .unwrap();
         Ok(())
     }
     pub fn flush(&mut self, idx: PeerIndex) -> Result<()> {
-        self.peers.get_mut(&idx).unwrap().flush(
-            &self.cb.local_addr,
-            &self.cb.socket,
+        self.peers.get_mut(&idx).unwrap().conn.flush(
+            &self.cb,
             &mut self.packet_buf,
         )
     }
@@ -519,29 +629,11 @@ impl Net {
             return Ok(idx);
         }
         use self::Addr::*;
-        let mut conn: Connection = match addr {
-            Quic(addr) => self
-                .proto_quic
-                .connect(
-                    addr,
-                    idx,
-                    &self.cb.local_addr,
-                    self.cb.sslkeylogfile.as_ref(),
-                )?
-                .into(),
-            Tw06(addr) => self
-                .proto_tw06
-                .connect(
-                    addr,
-                    idx,
-                    &self.cb.local_addr,
-                    self.cb.sslkeylogfile.as_ref(),
-                )?
-                .into(),
+        let conn: Connection = match addr {
+            Quic(addr) => self.proto_quic.connect(&self.cb, &mut self.packet_buf, addr, idx)?.into(),
+            Tw06(addr) => self.proto_tw06.connect(&self.cb, &mut self.packet_buf, addr, idx)?.into(),
         };
-        conn.flush(&self.cb.local_addr, &self.cb.socket, &mut self.packet_buf)
-            .unwrap();
-        assert!(self.peers.insert(idx, conn).is_none());
+        assert!(self.peers.insert(idx, Peer::new(conn)).is_none());
         assert!(self.peer_addrs.insert(socket_addr, idx).is_none());
         Ok(idx)
     }
@@ -550,10 +642,8 @@ impl Net {
         idx: PeerIndex,
         reason: Option<&str>,
     ) -> Result<()> {
-        let conn = self.peers.get_mut(&idx).unwrap();
-        conn.close(reason);
-        conn.flush(&self.cb.local_addr, &self.cb.socket, &mut self.packet_buf)
-            .unwrap();
+        let peer = self.peers.get_mut(&idx).unwrap();
+        peer.conn.close(&self.cb, &mut self.packet_buf, reason)?;
         self.readable_peers.push_back(idx);
         Ok(())
     }
@@ -567,35 +657,52 @@ enum Connection {
 impl Connection {
     pub fn on_recv(
         &mut self,
-        buf: &mut [u8],
+        cb: &CallbackData,
+        packet_buf: &mut [u8; 65536],
+        packet_len: usize,
         from: &SocketAddr,
-        local_addr: &SocketAddr,
     ) -> Result<()> {
         use self::Connection::*;
         match self {
-            Quic(inner) => inner.on_recv(buf, from, local_addr),
-            Tw06(inner) => inner.on_recv(buf, from, local_addr),
+            Quic(inner) => inner.on_recv(cb, packet_buf, packet_len, from),
+            Tw06(inner) => inner.on_recv(cb, packet_buf, packet_len, from),
         }
     }
-    pub fn recv(&mut self, buf: &mut [u8]) -> Result<Option<Event>> {
+    pub fn recv(
+        &mut self,
+        cb: &CallbackData,
+        packet_buf: &mut [u8; 65536],
+        buf: &mut [u8],
+    ) -> Result<Option<ConnectionEvent>> {
         use self::Connection::*;
         match self {
-            Quic(inner) => inner.recv(buf),
-            Tw06(inner) => inner.recv(buf),
+            Quic(inner) => inner.recv(cb, packet_buf, buf),
+            Tw06(inner) => inner.recv(cb, packet_buf, buf),
         }
     }
-    pub fn send_chunk(&mut self, frame: &[u8], unreliable: bool) -> Result<()> {
+    pub fn send_chunk(
+        &mut self,
+        cb: &CallbackData,
+        packet_buf: &mut [u8; 65536],
+        frame: &[u8],
+        unreliable: bool,
+    ) -> Result<()> {
         use self::Connection::*;
         match self {
-            Quic(inner) => inner.send_chunk(frame, unreliable),
-            Tw06(inner) => inner.send_chunk(frame, unreliable),
+            Quic(inner) => inner.send_chunk(cb, packet_buf, frame, unreliable),
+            Tw06(inner) => inner.send_chunk(cb, packet_buf, frame, unreliable),
         }
     }
-    pub fn close(&mut self, reason: Option<&str>) {
+    pub fn close(
+        &mut self,
+        cb: &CallbackData,
+        packet_buf: &mut [u8; 65536],
+        reason: Option<&str>,
+    ) -> Result<()> {
         use self::Connection::*;
         match self {
-            Quic(inner) => inner.close(reason),
-            Tw06(inner) => inner.close(reason),
+            Quic(inner) => inner.close(cb, packet_buf, reason),
+            Tw06(inner) => inner.close(cb, packet_buf, reason),
         }
     }
     pub fn timeout(&self) -> Option<Instant> {
@@ -605,23 +712,26 @@ impl Connection {
             Tw06(inner) => inner.timeout(),
         }
     }
-    pub fn on_timeout(&mut self) {
+    pub fn on_timeout(
+        &mut self,
+        cb: &CallbackData,
+        packet_buf: &mut [u8; 65536],
+    ) -> Result<bool> {
         use self::Connection::*;
         match self {
-            Quic(inner) => inner.on_timeout(),
-            Tw06(inner) => inner.on_timeout(),
+            Quic(inner) => inner.on_timeout(cb, packet_buf),
+            Tw06(inner) => inner.on_timeout(cb, packet_buf),
         }
     }
     pub fn flush(
         &mut self,
-        local: &SocketAddr,
-        socket: &UdpSocket,
-        buf: &mut [u8],
+        cb: &CallbackData,
+        packet_buf: &mut [u8; 65536],
     ) -> Result<()> {
         use self::Connection::*;
         match self {
-            Quic(inner) => inner.flush(local, socket, buf),
-            Tw06(inner) => inner.flush(local, socket, buf),
+            Quic(inner) => inner.flush(cb, packet_buf),
+            Tw06(inner) => inner.flush(cb, packet_buf),
         }
     }
 }

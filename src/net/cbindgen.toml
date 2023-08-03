@@ -1,4 +1,5 @@
 cpp_compat = true
+include_guard = "DDNET_NET_H"
 language = "c"
 usize_is_size_t = true
 

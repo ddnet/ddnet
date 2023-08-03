@@ -190,6 +190,13 @@ class CNetServer
 	NETFUNC_DELCLIENT m_pfnDelClient = nullptr;
 	void *m_pUser = nullptr;
 
+	// Next client ID to try.
+	int m_NextClientID = 0;
+
+	// Stores a mapping from client IDs to peer IDs of the network library.
+	// The opposite mapping is stored in the userdata of the library.
+	uint64_t m_aPeerMapping[NET_MAX_CLIENTS];
+
 public:
 	~CNetServer();
 

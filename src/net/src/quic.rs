@@ -1,8 +1,9 @@
 use crate::peek_quic_varint;
 use crate::secure_random;
 use crate::write_quic_varint;
-use crate::ArcFile;
+use crate::CallbackData;
 use crate::Challenger;
+use crate::ConnectionEvent;
 use crate::Context as _;
 use crate::Event;
 use crate::Identity;
@@ -13,7 +14,6 @@ use crate::Result;
 use crate::Something;
 use crate::MAX_FRAME_SIZE;
 use arrayvec::ArrayVec;
-use mio::net::UdpSocket;
 use std::cmp;
 use std::collections::hash_map;
 use std::collections::HashMap;
@@ -29,7 +29,7 @@ use std::time::Instant;
 
 // TODO: coalesce ACKs with other packets
 // TODO: coalesce dgrams with stream packets
-// TODO: remove double waits in the server (9999ms, then 0ms)
+// TODO: implement timeout after which packets are sent even without an explicit flush
 
 pub const QUIC_CLOSE_CODE: u64 = 0xdd40a0;
 pub const RETRY_TOKEN_LEN: usize = 20 + 4;
@@ -275,6 +275,11 @@ impl Protocol {
             connection_ids: HashMap::new(),
         })
     }
+    pub fn remove_peer(&mut self, idx: PeerIndex, conn: Connection) {
+        let _ = conn;
+        // TODO: efficiency
+        self.connection_ids.retain(|_, &mut i| i != idx);
+    }
     fn new_conn_id(&self) -> ConnectionId {
         loop {
             let result = ConnectionId::random();
@@ -285,14 +290,10 @@ impl Protocol {
     }
     pub fn on_recv(
         &mut self,
-        packet_buf: &mut [u8],
+        cb: &CallbackData,
+        packet_buf: &mut [u8; 65536],
         packet_len: usize,
         from: &SocketAddr,
-        challenger: &Challenger,
-        next_peer_index: Option<&mut PeerIndex>,
-        local_addr: &SocketAddr,
-        sslkeylogfile: Option<&ArcFile>,
-        socket: &UdpSocket,
     ) -> Result<Option<Something<Connection>>> {
         if let Ok(header) = quiche::Header::from_slice(
             &mut packet_buf[..packet_len],
@@ -302,14 +303,14 @@ impl Protocol {
             let cid = ConnectionId::from_raw(&header.dcid);
             match (
                 cid.map(|cid| self.connection_ids.entry(cid)),
-                next_peer_index,
+                cb.accept_connections,
             ) {
                 (Some(hash_map::Entry::Occupied(o)), _) => {
                     return Ok(Some(Something::ExistingConnection(*o.get())))
                 }
                 // TODO: test version negotiation
                 // token is always present in Initial packets.
-                (_, Some(_))
+                (_, true)
                     if header.ty == quiche::Type::Initial
                         && !quiche::version_is_supported(header.version) =>
                 {
@@ -319,18 +320,18 @@ impl Protocol {
                         packet_buf,
                     )
                     .unwrap();
-                    socket
+                    cb.socket
                         .send_to(&packet_buf[..written], *from)
                         .context("UdpSocket::send_to")?;
                 }
                 // token is always present in Initial packets.
-                (_, Some(_))
+                (_, true)
                     if header.ty == quiche::Type::Initial
                         && header.token.as_ref().unwrap().is_empty() =>
                 {
                     let new_scid = self.new_conn_id();
                     let token =
-                        challenger.compute_retry_token(from, &header.dcid);
+                        cb.challenger.compute_retry_token(from, &header.dcid);
                     let written = quiche::retry(
                         &header.scid,
                         &header.dcid,
@@ -341,17 +342,17 @@ impl Protocol {
                     )
                     .context("quiche::retry")?; // TODO: unwrap instead?
                     trace!("sending retry to {}", from);
-                    socket
+                    cb.socket
                         .send_to(&packet_buf[..written], *from)
                         .context("UdpSocket::send_to")?;
                 }
-                (Some(hash_map::Entry::Vacant(v)), Some(next_peer_index))
+                (Some(hash_map::Entry::Vacant(v)), true)
                     if header.ty == quiche::Type::Initial =>
                 {
                     // token is always present in Initial packets.
                     let token = header.token.unwrap();
                     let odcid =
-                        match challenger.verify_retry_token(from, &token) {
+                        match cb.challenger.verify_retry_token(from, &token) {
                             Ok(odcid) => odcid,
                             Err(()) => {
                                 debug!("rejecting invalid token from {}", from);
@@ -362,12 +363,12 @@ impl Protocol {
                     let mut conn = quiche::accept(
                         &header.dcid,
                         Some(&quiche::ConnectionId::from_ref(&odcid)),
-                        *local_addr,
+                        cb.local_addr,
                         *from,
                         self.config.server(),
                     )
                     .context("quiche::accept")?; // TODO: unwrap instead?
-                    if let Some(sslkeylogfile) = sslkeylogfile {
+                    if let Some(sslkeylogfile) = &cb.sslkeylogfile {
                         conn.set_keylog(Box::new(sslkeylogfile.clone()));
                     }
                     let cpi = self.callback_peer_identity.clone();
@@ -377,7 +378,7 @@ impl Protocol {
                         false,
                         PeerIdentity::AcceptAny,
                     );
-                    let idx = next_peer_index.get_and_increment();
+                    let idx = cb.next_peer_index;
                     v.insert(idx);
                     return Ok(Some(Something::NewConnection(idx, conn)));
                 }
@@ -390,32 +391,33 @@ impl Protocol {
     }
     pub fn connect(
         &mut self,
+        cb: &CallbackData,
+        packet_buf: &mut [u8; 65536],
         addr: Addr,
         idx: PeerIndex,
-        local_addr: &SocketAddr,
-        sslkeylogfile: Option<&ArcFile>,
     ) -> Result<Connection> {
         let Addr(sock_addr, peer_identity) = addr;
         let cid = self.new_conn_id();
         let mut conn = quiche::connect(
             None,
             &cid.as_raw(),
-            *local_addr,
+            cb.local_addr,
             sock_addr,
             self.config.client(),
         )
         .context("quiche::connect")?;
-        if let Some(sslkeylogfile) = sslkeylogfile {
+        if let Some(sslkeylogfile) = &cb.sslkeylogfile {
             conn.set_keylog(Box::new(sslkeylogfile.clone()));
         }
-        let cpi = self.callback_peer_identity.clone();
-        assert!(self.connection_ids.insert(cid, idx).is_none());
-        Ok(Connection::new(
+        let mut conn = Connection::new(
             conn,
-            cpi,
+            self.callback_peer_identity.clone(),
             true,
             PeerIdentity::Wanted(peer_identity),
-        ))
+        );
+        conn.flush(cb, packet_buf)?;
+        assert!(self.connection_ids.insert(cid, idx).is_none());
+        Ok(conn)
     }
 }
 
@@ -455,9 +457,10 @@ impl Connection {
     }
     pub fn on_recv(
         &mut self,
-        buf: &mut [u8],
+        cb: &CallbackData,
+        packet_buf: &mut [u8; 65536],
+        packet_len: usize,
         from: &SocketAddr,
-        local_addr: &SocketAddr,
     ) -> Result<()> {
         {
             let mut cpi = self.callback_peer_identity.lock().unwrap();
@@ -466,9 +469,9 @@ impl Connection {
         }
         let result = self
             .inner
-            .recv(buf, quiche::RecvInfo {
+            .recv(&mut packet_buf[..packet_len], quiche::RecvInfo {
                 from: *from,
-                to: *local_addr,
+                to: cb.local_addr,
             })
             .context("quiche::Conn::recv");
         self.peer_identity =
@@ -525,12 +528,18 @@ impl Connection {
         self.buffer_range.start = chunk_range.end;
         Ok(Some(chunk_range.len()))
     }
-    pub fn recv(&mut self, buf: &mut [u8]) -> Result<Option<Event>> {
+    pub fn recv(
+        &mut self,
+        cb: &CallbackData,
+        packet_buf: &mut [u8; 65536],
+        buf: &mut [u8],
+    ) -> Result<Option<ConnectionEvent>> {
         assert!(buf.len() >= MAX_FRAME_SIZE as usize);
 
         use self::State::*;
         match self.state {
             Connecting => {
+                self.flush(cb, packet_buf)?;
                 if self.client {
                     // Check if the QUIC handshake is complete.
                     // TODO: send an identifier?
@@ -549,20 +558,26 @@ impl Connection {
                 }
                 if self.state == Online {
                     self.check_connection_params()?;
-                    return Ok(Some(Event::Connect(
+                    return Ok(Some(Event::Connect(Some(
                         *self.peer_identity.assert_known(),
-                    )));
+                    )).into()));
                 }
             }
             Online => {}
-            Disconnected => return Ok(None),
+            Disconnected => {
+                return Ok(if !self.inner.is_closed() {
+                    None
+                } else {
+                    Some(ConnectionEvent::Delete)
+                });
+            },
         }
 
         // Check if the QUIC connection was closed.
         if self.inner.is_draining() || self.inner.local_error().is_some() {
             self.state = Disconnected;
             let (len, remote) = self.extract_error(buf);
-            return Ok(Some(Event::Disconnect(len, remote)));
+            return Ok(Some(Event::Disconnect(len, remote).into()));
         }
 
         // If we're not online, don't try to receive chunks.
@@ -586,12 +601,12 @@ impl Connection {
             let len = dgram.len() - 1;
             // Buffer was checked to be long enough above.
             buf[..len].copy_from_slice(&dgram[1..]);
-            return Ok(Some(Event::Chunk(len, true)));
+            return Ok(Some(Event::Chunk(len, true).into()));
         }
 
         // Check if we still have a chunk remaining.
         if let Some(c) = self.read_chunk_from_buffer(buf)? {
-            return Ok(Some(Event::Chunk(c, false)));
+            return Ok(Some(Event::Chunk(c, false).into()));
         }
 
         // Check if there is more data (i.e. stream is actually open,
@@ -613,7 +628,7 @@ impl Connection {
 
         // Check for a chunk again.
         if let Some(c) = self.read_chunk_from_buffer(buf)? {
-            return Ok(Some(Event::Chunk(c, false)));
+            return Ok(Some(Event::Chunk(c, false).into()));
         }
 
         // If the stream is finished and we still have data, return an error.
@@ -623,7 +638,13 @@ impl Connection {
 
         Ok(None)
     }
-    pub fn send_chunk(&mut self, frame: &[u8], unreliable: bool) -> Result<()> {
+    pub fn send_chunk(
+        &mut self,
+        _cb: &CallbackData,
+        _packet_buf: &mut [u8; 65536],
+        frame: &[u8],
+        unreliable: bool,
+    ) -> Result<()> {
         assert!(frame.len() <= MAX_FRAME_SIZE as usize);
         if !unreliable {
             // TODO: state checks?
@@ -697,44 +718,58 @@ impl Connection {
         }
         (len, remote)
     }
-    pub fn close(&mut self, reason: Option<&str>) {
+    pub fn close(
+        &mut self,
+        cb: &CallbackData,
+        packet_buf: &mut [u8; 65536],
+        reason: Option<&str>,
+    ) -> Result<()> {
         self.inner
             .close(true, QUIC_CLOSE_CODE, reason.unwrap_or("").as_bytes())
             .not_done()
-            .unwrap();
+            .context("quiche::Conn::close")?;
+        self.flush(cb, packet_buf)?;
+        Ok(())
     }
     pub fn timeout(&self) -> Option<Instant> {
         // TODO: Use `Connection::timeout_instant` once quiche > 0.16.0 is
         // released.
         self.inner.timeout().map(|t| Instant::now() + t)
     }
-    pub fn on_timeout(&mut self) {
+    pub fn on_timeout(
+        &mut self,
+        cb: &CallbackData,
+        packet_buf: &mut [u8; 65536],
+    ) -> Result<bool> {
         self.inner.on_timeout();
+        self.flush(cb, packet_buf)?;
+        Ok(false)
     }
     pub fn flush(
         &mut self,
-        local_addr: &SocketAddr,
-        socket: &UdpSocket,
-        buf: &mut [u8],
+        cb: &CallbackData,
+        packet_buf: &mut [u8; 65536],
     ) -> Result<()> {
         let mut num_bytes = 0;
         let mut num_packets = 0;
         loop {
-            let Some((written, info)) = self.inner.send(buf).not_done().context("quiche::Conn::send")? else { break; };
+            let Some((written, info)) = self.inner.send(packet_buf).not_done().context("quiche::Conn::send")? else { break; };
             let now = Instant::now();
             let delay = info.at.saturating_duration_since(now);
             if !delay.is_zero() {
                 warn!("should have delayed packet by {:?}, but haven't", delay);
             }
-            assert!(*local_addr == info.from);
-            socket
-                .send_to(&buf[..written], info.to)
+            assert!(cb.local_addr == info.from);
+            cb.socket
+                .send_to(&packet_buf[..written], info.to)
                 .context("UdpSocket::send_to")?;
             num_packets += 1;
             num_bytes += written;
         }
         if num_packets != 0 {
             trace!("sent {} packet(s) with {} byte(s)", num_packets, num_bytes);
+        } else {
+            trace!("sent no packets");
         }
         Ok(())
     }

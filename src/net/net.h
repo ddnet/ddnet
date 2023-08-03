@@ -1,3 +1,6 @@
+#ifndef DDNET_NET_H
+#define DDNET_NET_H
+
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -25,6 +28,9 @@ extern "C" {
 
 uint64_t ddnet_net_ev_kind(const union DdnetNetEvent *ev);
 
+/**
+ * Can return `nullptr`.
+ */
 const uint8_t (*ddnet_net_ev_connect_identity(const union DdnetNetEvent *ev))[32];
 
 size_t ddnet_net_ev_chunk_len(const union DdnetNetEvent *ev);
@@ -41,7 +47,7 @@ bool ddnet_net_set_bindaddr(struct DdnetNet *net, const char *addr, size_t addr_
 
 bool ddnet_net_set_identity(struct DdnetNet *net, const uint8_t (*private_identity)[32]);
 
-bool ddnet_net_set_accept_incoming_connections(struct DdnetNet *net, bool accept);
+bool ddnet_net_set_accept_connections(struct DdnetNet *net, bool accept);
 
 bool ddnet_net_open(struct DdnetNet *net);
 
@@ -50,6 +56,10 @@ void ddnet_net_free(struct DdnetNet *net);
 const char *ddnet_net_error(const struct DdnetNet *net);
 
 size_t ddnet_net_error_len(const struct DdnetNet *net);
+
+bool ddnet_net_set_userdata(struct DdnetNet *net, uint64_t peer_index, void *userdata);
+
+bool ddnet_net_userdata(struct DdnetNet *net, uint64_t peer_index, void **userdata);
 
 bool ddnet_net_wait(struct DdnetNet *net);
 
@@ -79,8 +89,14 @@ bool ddnet_net_close(struct DdnetNet *net,
                      const char *reason,
                      size_t reason_len);
 
-bool ddnet_net_set_logger(void (*log)(int32_t level, const char *sys, size_t sys_len, const char *message, size_t message_len));
+bool ddnet_net_set_logger(void (*log)(int32_t level,
+                                      const char *system,
+                                      size_t system_len,
+                                      const char *message,
+                                      size_t message_len));
 
 #ifdef __cplusplus
 } // extern "C"
 #endif // __cplusplus
+
+#endif /* DDNET_NET_H */

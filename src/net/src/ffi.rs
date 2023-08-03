@@ -156,13 +156,14 @@ pub extern "C" fn ddnet_net_ev_kind(ev: &DdnetNetEvent) -> u64 {
         Some(Disconnect(..)) => DDNET_NET_EV_DISCONNECT,
     }
 }
+/// Can return `nullptr`.
 #[no_mangle]
 pub extern "C" fn ddnet_net_ev_connect_identity(
     ev: &DdnetNetEvent,
-) -> &[u8; 32] {
+) -> Option<&[u8; 32]> {
     use self::EventImpl::*;
     match unsafe { &ev.inner } {
-        Some(Connect(id)) => id.as_bytes(),
+        Some(Connect(id)) => id.as_ref().map(|id| id.as_bytes()),
         _ => unreachable!(),
     }
 }
@@ -203,7 +204,6 @@ pub extern "C" fn ddnet_net_ev_disconnect_is_remote(
     }
 }
 
-// TODO: more extensible API for opening?
 #[no_mangle]
 pub extern "C" fn ddnet_net_new(net: *mut *mut DdnetNet) -> bool {
     let result = match catch_unwind(|| Ok(NetImpl::builder())) {
@@ -295,6 +295,21 @@ pub extern "C" fn ddnet_net_error_len(net: &DdnetNet) -> usize {
     net.error().map(|(_, l)| l).unwrap_or(NO_ERROR.len() - 1)
 }
 
+#[no_mangle]
+pub extern "C" fn ddnet_net_set_userdata(net: &mut DdnetNet, peer_index: u64, userdata: *mut ()) -> bool {
+    net.good(|impl_| {
+        impl_.set_userdata(PeerIndex(peer_index), userdata);
+        Ok(())
+    })
+}
+#[no_mangle]
+pub extern "C" fn ddnet_net_userdata(net: &mut DdnetNet, peer_index: u64, userdata: &mut *mut ()) -> bool {
+    *userdata = 0xbadc0de as *mut ();
+    net.good(|impl_| {
+        *userdata = impl_.userdata(PeerIndex(peer_index));
+        Ok(())
+    })
+}
 #[no_mangle]
 pub extern "C" fn ddnet_net_wait(net: &mut DdnetNet) -> bool {
     net.good(|impl_| {
