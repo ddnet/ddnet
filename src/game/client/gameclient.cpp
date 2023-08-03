@@ -915,6 +915,8 @@ void CGameClient::OnStateChange(int NewState, int OldState)
 
 void CGameClient::OnShutdown()
 {
+	RenderShutdownMessage();
+
 	for(auto &pComponent : m_vpAll)
 		pComponent->OnShutdown();
 }
@@ -970,6 +972,25 @@ void CGameClient::OnWindowResize()
 void CGameClient::OnLanguageChange()
 {
 	UI()->OnLanguageChange();
+}
+
+void CGameClient::RenderShutdownMessage()
+{
+	const char *pMessage = nullptr;
+	if(Client()->State() == IClient::STATE_QUITTING)
+		pMessage = Localize("Quitting. Please wait…");
+	else if(Client()->State() == IClient::STATE_RESTARTING)
+		pMessage = Localize("Restarting. Please wait…");
+	else
+		dbg_assert(false, "Invalid client state for quitting message");
+
+	// This function only gets called after the render loop has already terminated, so we have to call Swap manually.
+	Graphics()->Clear(0.0f, 0.0f, 0.0f);
+	UI()->MapScreen();
+	TextRender()->TextColor(TextRender()->DefaultTextColor());
+	UI()->DoLabel(UI()->Screen(), pMessage, 16.0f, TEXTALIGN_MC);
+	Graphics()->Swap();
+	Graphics()->Clear(0.0f, 0.0f, 0.0f);
 }
 
 void CGameClient::OnRconType(bool UsernameReq)
