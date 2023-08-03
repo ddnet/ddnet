@@ -65,6 +65,7 @@
 #include "components/race_demo.h"
 #include "components/scoreboard.h"
 #include "components/skins.h"
+#include "components/skins7.h"
 #include "components/sounds.h"
 #include "components/spectator.h"
 #include "components/statboard.h"
@@ -106,6 +107,7 @@ void CGameClient::OnConsoleInit()
 
 	// make a list of all the systems, make sure to add them in the correct render order
 	m_vpAll.insert(m_vpAll.end(), {&m_Skins,
+					      &m_Skins7,
 					      &m_CountryFlags,
 					      &m_MapImages,
 					      &m_Effects, // doesn't render anything, just updates effects
