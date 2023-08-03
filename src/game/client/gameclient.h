@@ -489,6 +489,8 @@ public:
 
 	void OnLanguageChange();
 
+	void RenderShutdownMessage();
+
 	const char *GetItemName(int Type) const override;
 	const char *Version() const override;
 	const char *NetVersion() const override;
