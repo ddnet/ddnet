@@ -283,7 +283,7 @@ void CServerBrowser::Filter()
 			Filtered = true;
 		else if(g_Config.m_BrFilterFull && Players(m_ppServerlist[i]->m_Info) == Max(m_ppServerlist[i]->m_Info))
 			Filtered = true;
-		else if(g_Config.m_BrFilterWhitelist && strstr(m_ppServerlist[i]->m_Info.m_aName, "whitelist") != NULL)
+		else if(g_Config.m_BrFilterWhitelist && str_find_nocase(m_ppServerlist[i]->m_Info.m_aName, "whitelist") != NULL)
 			Filtered = true;
 		else if(g_Config.m_BrFilterPw && m_ppServerlist[i]->m_Info.m_Flags & SERVER_FLAG_PASSWORD)
 			Filtered = true;
