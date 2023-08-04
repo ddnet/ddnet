@@ -705,7 +705,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 		g_Config.m_BrFilterConnectingPlayers ^= 1;
 
 	ServerFilter.HSplitTop(20.0f, &Button, &ServerFilter);
-	if (DoButton_CheckBox(&g_Config.m_BrFilterWhitelist, Localize("Filter whitelist servers"), g_Config.m_BrFilterWhitelist, &Button))
+	if(DoButton_CheckBox(&g_Config.m_BrFilterWhitelist, Localize("Filter whitelist servers"), g_Config.m_BrFilterWhitelist, &Button))
 	{
 		g_Config.m_BrFilterWhitelist ^= 1;
 		ServerBrowser()->Refresh(ServerBrowser()->GetCurrentType());
