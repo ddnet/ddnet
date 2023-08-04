@@ -704,6 +704,13 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 	if(DoButton_CheckBox(&g_Config.m_BrFilterConnectingPlayers, Localize("Filter connecting players"), g_Config.m_BrFilterConnectingPlayers, &Button))
 		g_Config.m_BrFilterConnectingPlayers ^= 1;
 
+	ServerFilter.HSplitTop(20.0f, &Button, &ServerFilter);
+	if (DoButton_CheckBox(&g_Config.m_BrFilterWhitelist, Localize("Filter whitelist servers"), g_Config.m_BrFilterWhitelist, &Button))
+	{
+		g_Config.m_BrFilterWhitelist ^= 1;
+		ServerBrowser()->Refresh(ServerBrowser()->GetCurrentType());
+	}
+
 	CUIRect FilterTabs;
 	ServerFilter.HSplitBottom(23, &ServerFilter, &FilterTabs);
 
