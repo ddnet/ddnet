@@ -76,10 +76,199 @@ struct SGlyphKeyEquals
 	}
 };
 
-struct STextureSkyline
+class CAtlas
 {
-	// the height of each column
-	std::vector<size_t> m_vCurHeightOfPixelColumn;
+	struct SSectionKeyHash
+	{
+		size_t operator()(const std::tuple<size_t, size_t> &Key) const
+		{
+			// Width and height should never be above 2^16 so this hash should cause no collisions
+			return (std::get<0>(Key) << 16) ^ std::get<1>(Key);
+		}
+	};
+
+	struct SSectionKeyEquals
+	{
+		bool operator()(const std::tuple<size_t, size_t> &Lhs, const std::tuple<size_t, size_t> &Rhs) const
+		{
+			return std::get<0>(Lhs) == std::get<0>(Rhs) && std::get<1>(Lhs) == std::get<1>(Rhs);
+		}
+	};
+
+	struct SSection
+	{
+		size_t m_X;
+		size_t m_Y;
+		size_t m_W;
+		size_t m_H;
+
+		SSection() = default;
+
+		SSection(size_t X, size_t Y, size_t W, size_t H) :
+			m_X(X), m_Y(Y), m_W(W), m_H(H)
+		{
+		}
+	};
+
+	/**
+	 * Sections with a smaller width or height will not be created
+	 * when cutting larger sections, to prevent collecting many
+	 * small, mostly unuseable sections.
+	 */
+	static constexpr size_t MIN_SECTION_DIMENSION = 6;
+
+	/**
+	 * Sections with larger width or height will be stored in m_vSections.
+	 * Sections with width and height equal or smaller will be stored in m_SectionsMap.
+	 * This achieves a good balance between the size of the vector storing all large
+	 * sections and the map storing vectors of all sections with specific small sizes.
+	 * Lowering this value will result in the size of m_vSections becoming the bottleneck.
+	 * Increasing this value will result in the map becoming the bottleneck.
+	 */
+	static constexpr size_t MAX_SECTION_DIMENSION_MAPPED = 8 * MIN_SECTION_DIMENSION;
+
+	size_t m_TextureDimension;
+	std::vector<SSection> m_vSections;
+	std::unordered_map<std::tuple<size_t, size_t>, std::vector<SSection>, SSectionKeyHash, SSectionKeyEquals> m_SectionsMap;
+
+	void AddSection(size_t X, size_t Y, size_t W, size_t H)
+	{
+		std::vector<SSection> &vSections = W <= MAX_SECTION_DIMENSION_MAPPED && H <= MAX_SECTION_DIMENSION_MAPPED ? m_SectionsMap[std::make_tuple(W, H)] : m_vSections;
+		vSections.emplace_back(X, Y, W, H);
+	}
+
+	void UseSection(const SSection &Section, size_t Width, size_t Height, int &PosX, int &PosY)
+	{
+		PosX = Section.m_X;
+		PosY = Section.m_Y;
+
+		// Create cut sections
+		const size_t CutW = Section.m_W - Width;
+		const size_t CutH = Section.m_H - Height;
+		if(CutW == 0)
+		{
+			if(CutH >= MIN_SECTION_DIMENSION)
+				AddSection(Section.m_X, Section.m_Y + Height, Section.m_W, CutH);
+		}
+		else if(CutH == 0)
+		{
+			if(CutW >= MIN_SECTION_DIMENSION)
+				AddSection(Section.m_X + Width, Section.m_Y, CutW, Section.m_H);
+		}
+		else if(CutW > CutH)
+		{
+			if(CutW >= MIN_SECTION_DIMENSION)
+				AddSection(Section.m_X + Width, Section.m_Y, CutW, Section.m_H);
+			if(CutH >= MIN_SECTION_DIMENSION)
+				AddSection(Section.m_X, Section.m_Y + Height, Width, CutH);
+		}
+		else
+		{
+			if(CutH >= MIN_SECTION_DIMENSION)
+				AddSection(Section.m_X, Section.m_Y + Height, Section.m_W, CutH);
+			if(CutW >= MIN_SECTION_DIMENSION)
+				AddSection(Section.m_X + Width, Section.m_Y, CutW, Height);
+		}
+	}
+
+public:
+	void Clear(size_t TextureDimension)
+	{
+		m_TextureDimension = TextureDimension;
+		m_vSections.clear();
+		m_vSections.emplace_back(0, 0, m_TextureDimension, m_TextureDimension);
+		m_SectionsMap.clear();
+	}
+
+	void IncreaseDimension(size_t NewTextureDimension)
+	{
+		dbg_assert(NewTextureDimension == m_TextureDimension * 2, "New atlas dimension must be twice the old one");
+		// Create 3 square sections to cover the new area, add the sections
+		// to the beginning of the vector so they are considered last.
+		m_vSections.emplace_back(m_TextureDimension, m_TextureDimension, m_TextureDimension, m_TextureDimension);
+		m_vSections.emplace_back(m_TextureDimension, 0, m_TextureDimension, m_TextureDimension);
+		m_vSections.emplace_back(0, m_TextureDimension, m_TextureDimension, m_TextureDimension);
+		std::rotate(m_vSections.rbegin(), m_vSections.rbegin() + 3, m_vSections.rend());
+		m_TextureDimension = NewTextureDimension;
+	}
+
+	bool Add(size_t Width, size_t Height, int &PosX, int &PosY)
+	{
+		if(m_vSections.empty() || m_TextureDimension < Width || m_TextureDimension < Height)
+			return false;
+
+		// Find small section more efficiently by using maps
+		if(Width <= MAX_SECTION_DIMENSION_MAPPED && Height <= MAX_SECTION_DIMENSION_MAPPED)
+		{
+			const auto UseSectionFromVector = [&](std::vector<SSection> &vSections) {
+				if(!vSections.empty())
+				{
+					const SSection Section = vSections.back();
+					vSections.pop_back();
+					UseSection(Section, Width, Height, PosX, PosY);
+					return true;
+				}
+				return false;
+			};
+
+			if(UseSectionFromVector(m_SectionsMap[std::make_tuple(Width, Height)]))
+				return true;
+
+			for(size_t CheckWidth = Width + 1; CheckWidth <= MAX_SECTION_DIMENSION_MAPPED; ++CheckWidth)
+			{
+				if(UseSectionFromVector(m_SectionsMap[std::make_tuple(CheckWidth, Height)]))
+					return true;
+			}
+
+			for(size_t CheckHeight = Height + 1; CheckHeight <= MAX_SECTION_DIMENSION_MAPPED; ++CheckHeight)
+			{
+				if(UseSectionFromVector(m_SectionsMap[std::make_tuple(Width, CheckHeight)]))
+					return true;
+			}
+
+			// We don't iterate sections in the map with increasing width and height at the same time,
+			// because it's slower and doesn't noticable increase the atlas utilization.
+		}
+
+		// Check vector for larger section
+		size_t SmallestLossValue = std::numeric_limits<size_t>::max();
+		size_t SmallestLossIndex = m_vSections.size();
+		size_t SectionIndex = m_vSections.size();
+		do
+		{
+			--SectionIndex;
+			const SSection &Section = m_vSections[SectionIndex];
+			if(Section.m_W < Width || Section.m_H < Height)
+				continue;
+
+			const size_t LossW = Section.m_W - Width;
+			const size_t LossH = Section.m_H - Height;
+
+			size_t Loss;
+			if(LossW == 0)
+				Loss = LossH;
+			else if(LossH == 0)
+				Loss = LossW;
+			else
+				Loss = LossW * LossH;
+
+			if(Loss < SmallestLossValue)
+			{
+				SmallestLossValue = Loss;
+				SmallestLossIndex = SectionIndex;
+				if(SmallestLossValue == 0)
+					break;
+			}
+		} while(SectionIndex > 0);
+		if(SmallestLossIndex == m_vSections.size())
+			return false; // No useable section found in vector
+
+		// Use the section with the smallest loss
+		const SSection Section = m_vSections[SmallestLossIndex];
+		m_vSections.erase(m_vSections.begin() + SmallestLossIndex);
+		UseSection(Section, Width, Height, PosX, PosY);
+		return true;
+	}
 };
 
 class CGlyphMap
@@ -129,7 +318,7 @@ private:
 	size_t m_TextureDimension = INITIAL_ATLAS_DIMENSION;
 	// Keep the full texture data, because OpenGL doesn't provide texture copying
 	uint8_t *m_apTextureData[NUM_FONT_TEXTURES];
-	STextureSkyline m_TextureSkyline;
+	CAtlas m_TextureAtlas;
 	std::unordered_map<std::tuple<FT_Face, int, int>, SGlyph, SGlyphKeyHash, SGlyphKeyEquals> m_Glyphs;
 
 	// Data used for rendering glyphs
@@ -190,7 +379,9 @@ private:
 			delete[] pTextureData;
 			pTextureData = pTmpTexBuffer;
 		}
-		m_TextureSkyline.m_vCurHeightOfPixelColumn.resize(NewTextureDimension, 0);
+
+		m_TextureAtlas.IncreaseDimension(NewTextureDimension);
+
 		m_TextureDimension = NewTextureDimension;
 
 		UploadTextures();
@@ -303,77 +494,9 @@ private:
 		Graphics()->UpdateTextTexture(m_aTextures[TextureIndex], PosX, PosY, Width, Height, pData);
 	}
 
-	bool GetCharacterSpace(size_t Width, size_t Height, int &PosX, int &PosY)
+	bool FitGlyph(size_t Width, size_t Height, int &PosX, int &PosY)
 	{
-		if(m_TextureDimension < Width || m_TextureDimension < Height)
-			return false;
-
-		// skyline bottom left algorithm
-		std::vector<size_t> &vSkylineHeights = m_TextureSkyline.m_vCurHeightOfPixelColumn;
-
-		// search a fitting area with the least pixel loss
-		size_t SmallestPixelLossAreaX = 0;
-		size_t SmallestPixelLossAreaY = m_TextureDimension + 1;
-		size_t SmallestPixelLossCurPixelLoss = m_TextureDimension * m_TextureDimension;
-
-		bool FoundAnyArea = false;
-		for(size_t i = 0; i < vSkylineHeights.size(); i++)
-		{
-			size_t CurHeight = vSkylineHeights[i];
-			size_t CurPixelLoss = 0;
-			// find width pixels, and we are happy
-			size_t AreaWidth = 1;
-			for(size_t n = i + 1; n < i + Width && n < vSkylineHeights.size(); ++n)
-			{
-				++AreaWidth;
-				if(vSkylineHeights[n] <= CurHeight)
-				{
-					CurPixelLoss += CurHeight - vSkylineHeights[n];
-				}
-				// if the height changed, we will use that new height and adjust the pixel loss
-				else
-				{
-					CurPixelLoss = 0;
-					CurHeight = vSkylineHeights[n];
-					for(size_t l = i; l <= n; ++l)
-					{
-						CurPixelLoss += CurHeight - vSkylineHeights[l];
-					}
-				}
-			}
-
-			// if the area is too high, continue
-			if(CurHeight + Height > m_TextureDimension)
-				continue;
-			// if the found area fits our needs, check if we can use it
-			if(AreaWidth == Width)
-			{
-				if(SmallestPixelLossCurPixelLoss >= CurPixelLoss)
-				{
-					if(CurHeight < SmallestPixelLossAreaY)
-					{
-						SmallestPixelLossCurPixelLoss = CurPixelLoss;
-						SmallestPixelLossAreaX = (int)i;
-						SmallestPixelLossAreaY = CurHeight;
-						FoundAnyArea = true;
-						if(CurPixelLoss == 0)
-							break;
-					}
-				}
-			}
-		}
-
-		if(FoundAnyArea)
-		{
-			PosX = SmallestPixelLossAreaX;
-			PosY = SmallestPixelLossAreaY;
-			for(size_t i = PosX; i < PosX + Width; ++i)
-			{
-				vSkylineHeights[i] = PosY + Height;
-			}
-			return true;
-		}
-		return false;
+		return m_TextureAtlas.Add(Width, Height, PosX, PosY);
 	}
 
 	bool RenderGlyph(SGlyph &Glyph)
@@ -411,7 +534,7 @@ private:
 		if(Width > 0 && Height > 0)
 		{
 			// find space in atlas, or increase size if necessary
-			while(!GetCharacterSpace(Width, Height, X, Y))
+			while(!FitGlyph(Width, Height, X, Y))
 			{
 				if(!IncreaseGlyphMapSize())
 				{
@@ -466,7 +589,7 @@ public:
 			mem_zero(pTextureData, m_TextureDimension * m_TextureDimension * sizeof(uint8_t));
 		}
 
-		m_TextureSkyline.m_vCurHeightOfPixelColumn.resize(m_TextureDimension, 0);
+		m_TextureAtlas.Clear(m_TextureDimension);
 		UploadTextures();
 	}
 
@@ -546,7 +669,7 @@ public:
 			Graphics()->UpdateTextTexture(m_aTextures[TextureIndex], 0, 0, m_TextureDimension, m_TextureDimension, m_apTextureData[TextureIndex]);
 		}
 
-		std::fill(m_TextureSkyline.m_vCurHeightOfPixelColumn.begin(), m_TextureSkyline.m_vCurHeightOfPixelColumn.end(), 0);
+		m_TextureAtlas.Clear(m_TextureDimension);
 		m_Glyphs.clear();
 	}
 
