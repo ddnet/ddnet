@@ -1030,24 +1030,23 @@ void CClient::SnapSetStaticsize(int ItemType, int Size)
 
 void CClient::DebugRender()
 {
-	static NETSTATS Prev, Current;
-	static int64_t LastSnap = 0;
-	static float FrameTimeAvg = 0;
-	char aBuffer[512];
-
 	if(!g_Config.m_Debug)
 		return;
 
-	//m_pGraphics->BlendNormal();
+	static NETSTATS s_Prev, s_Current;
+	static int64_t s_LastSnapTime = 0;
+	static float s_FrameTimeAvg = 0;
+	char aBuffer[512];
+
 	Graphics()->TextureSet(m_DebugFont);
 	Graphics()->MapScreen(0, 0, Graphics()->ScreenWidth(), Graphics()->ScreenHeight());
 	Graphics()->QuadsBegin();
 
-	if(time_get() - LastSnap > time_freq())
+	if(time_get() - s_LastSnapTime > time_freq())
 	{
-		LastSnap = time_get();
-		Prev = Current;
-		net_stats(&Current);
+		s_LastSnapTime = time_get();
+		s_Prev = s_Current;
+		net_stats(&s_Current);
 	}
 
 	/*
@@ -1056,22 +1055,22 @@ void CClient::DebugRender()
 		udp = 8
 		total = 42
 	*/
-	FrameTimeAvg = FrameTimeAvg * 0.9f + m_RenderFrameTime * 0.1f;
+	s_FrameTimeAvg = s_FrameTimeAvg * 0.9f + m_RenderFrameTime * 0.1f;
 	str_format(aBuffer, sizeof(aBuffer), "ticks: %8d %8d gfx mem(tex/buff/stream/staging): (%" PRIu64 "k/%" PRIu64 "k/%" PRIu64 "k/%" PRIu64 "k) fps: %3d",
 		m_aCurGameTick[g_Config.m_ClDummy], m_aPredTick[g_Config.m_ClDummy],
 		(Graphics()->TextureMemoryUsage() / 1024),
 		(Graphics()->BufferMemoryUsage() / 1024),
 		(Graphics()->StreamedMemoryUsage() / 1024),
 		(Graphics()->StagingMemoryUsage() / 1024),
-		(int)(1.0f / FrameTimeAvg + 0.5f));
+		(int)(1.0f / s_FrameTimeAvg + 0.5f));
 	Graphics()->QuadsText(2, 2, 16, aBuffer);
 
 	{
-		uint64_t SendPackets = (Current.sent_packets - Prev.sent_packets);
-		uint64_t SendBytes = (Current.sent_bytes - Prev.sent_bytes);
+		uint64_t SendPackets = (s_Current.sent_packets - s_Prev.sent_packets);
+		uint64_t SendBytes = (s_Current.sent_bytes - s_Prev.sent_bytes);
 		uint64_t SendTotal = SendBytes + SendPackets * 42;
-		uint64_t RecvPackets = (Current.recv_packets - Prev.recv_packets);
-		uint64_t RecvBytes = (Current.recv_bytes - Prev.recv_bytes);
+		uint64_t RecvPackets = (s_Current.recv_packets - s_Prev.recv_packets);
+		uint64_t RecvBytes = (s_Current.recv_bytes - s_Prev.recv_bytes);
 		uint64_t RecvTotal = RecvBytes + RecvPackets * 42;
 
 		if(!SendPackets)
@@ -1130,7 +1129,6 @@ void CClient::DebugRender()
 	// render graphs
 	if(g_Config.m_DbgGraphs)
 	{
-		//Graphics()->MapScreen(0,0,400.0f,300.0f);
 		float w = Graphics()->ScreenWidth() / 4.0f;
 		float h = Graphics()->ScreenHeight() / 6.0f;
 		float sp = Graphics()->ScreenWidth() / 100.0f;
