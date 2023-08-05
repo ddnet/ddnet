@@ -123,27 +123,25 @@ void CGraph::InsertAt(size_t Index, float v, float r, float g, float b)
 	m_aColors[Index][2] = b;
 }
 
-void CGraph::Render(IGraphics *pGraphics, IGraphics::CTextureHandle FontTexture, float x, float y, float w, float h, const char *pDescription)
+void CGraph::Render(IGraphics *pGraphics, ITextRender *pTextRender, float x, float y, float w, float h, const char *pDescription)
 {
-	//m_pGraphics->BlendNormal();
-
 	pGraphics->TextureClear();
 
 	pGraphics->QuadsBegin();
-	pGraphics->SetColor(0, 0, 0, 0.75f);
+	pGraphics->SetColor(0.0f, 0.0f, 0.0f, 0.75f);
 	IGraphics::CQuadItem QuadItem(x, y, w, h);
 	pGraphics->QuadsDrawTL(&QuadItem, 1);
 	pGraphics->QuadsEnd();
 
 	pGraphics->LinesBegin();
-	pGraphics->SetColor(0.95f, 0.95f, 0.95f, 1.00f);
+	pGraphics->SetColor(0.95f, 0.95f, 0.95f, 1.0f);
 	IGraphics::CLineItem LineItem(x, y + h / 2, x + w, y + h / 2);
 	pGraphics->LinesDraw(&LineItem, 1);
 	pGraphics->SetColor(0.5f, 0.5f, 0.5f, 0.75f);
 	IGraphics::CLineItem aLineItems[2] = {
 		IGraphics::CLineItem(x, y + (h * 3) / 4, x + w, y + (h * 3) / 4),
 		IGraphics::CLineItem(x, y + h / 4, x + w, y + h / 4)};
-	pGraphics->LinesDraw(aLineItems, 2);
+	pGraphics->LinesDraw(aLineItems, std::size(aLineItems));
 	for(int i = 1; i < MAX_VALUES; i++)
 	{
 		float a0 = (i - 1) / (float)MAX_VALUES;
@@ -157,23 +155,23 @@ void CGraph::Render(IGraphics *pGraphics, IGraphics::CTextureHandle FontTexture,
 		IGraphics::CColorVertex aColorVertices[2] = {
 			IGraphics::CColorVertex(0, m_aColors[i0][0], m_aColors[i0][1], m_aColors[i0][2], 0.75f),
 			IGraphics::CColorVertex(1, m_aColors[i1][0], m_aColors[i1][1], m_aColors[i1][2], 0.75f)};
-		pGraphics->SetColorVertex(aColorVertices, 2);
+		pGraphics->SetColorVertex(aColorVertices, std::size(aColorVertices));
 		IGraphics::CLineItem LineItem2(x + a0 * w, y + h - v0 * h, x + a1 * w, y + h - v1 * h);
 		pGraphics->LinesDraw(&LineItem2, 1);
 	}
 	pGraphics->LinesEnd();
 
-	pGraphics->TextureSet(FontTexture);
-	pGraphics->QuadsBegin();
-	pGraphics->QuadsText(x + 2, y + h - 16, 16, pDescription);
+	const float FontSize = 12.0f;
+	const float Spacing = 2.0f;
+
+	pTextRender->Text(x + Spacing, y + h - FontSize - Spacing, FontSize, pDescription);
 
 	char aBuf[32];
 	str_format(aBuf, sizeof(aBuf), "%.2f", m_Max);
-	pGraphics->QuadsText(x + w - 8 * str_length(aBuf) - 8, y + 2, 16, aBuf);
+	pTextRender->Text(x + w - pTextRender->TextWidth(FontSize, aBuf) - Spacing, y + Spacing, FontSize, aBuf);
 
 	str_format(aBuf, sizeof(aBuf), "%.2f", m_Min);
-	pGraphics->QuadsText(x + w - 8 * str_length(aBuf) - 8, y + h - 16, 16, aBuf);
-	pGraphics->QuadsEnd();
+	pTextRender->Text(x + w - pTextRender->TextWidth(FontSize, aBuf) - Spacing, y + h - FontSize - Spacing, FontSize, aBuf);
 }
 
 void CSmoothTime::Init(int64_t Target)
@@ -1134,12 +1132,13 @@ void CClient::DebugRender()
 		float sp = Graphics()->ScreenWidth() / 100.0f;
 		float x = Graphics()->ScreenWidth() - w - sp;
 
+		ITextRender *pTextRender = Kernel()->RequestInterface<ITextRender>();
 		m_FpsGraph.Scale();
-		m_FpsGraph.Render(Graphics(), m_DebugFont, x, sp * 5, w, h, "FPS");
+		m_FpsGraph.Render(Graphics(), pTextRender, x, sp * 5, w, h, "FPS");
 		m_InputtimeMarginGraph.Scale();
-		m_InputtimeMarginGraph.Render(Graphics(), m_DebugFont, x, sp * 5 + h + sp, w, h, "Prediction Margin");
+		m_InputtimeMarginGraph.Render(Graphics(), pTextRender, x, sp * 6 + h, w, h, "Prediction Margin");
 		m_GametimeMarginGraph.Scale();
-		m_GametimeMarginGraph.Render(Graphics(), m_DebugFont, x, sp * 5 + h + sp + h + sp, w, h, "Gametime Margin");
+		m_GametimeMarginGraph.Render(Graphics(), pTextRender, x, sp * 7 + h * 2, w, h, "Gametime Margin");
 	}
 }
 

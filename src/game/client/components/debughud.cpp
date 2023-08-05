@@ -191,11 +191,11 @@ void CDebugHud::RenderTuning()
 	}
 	char aBuf[128];
 	str_format(aBuf, sizeof(aBuf), "Velspeed.X*Ramp in Bps (Velspeed %d to %d)", StepSizeRampGraph / 32, 128 * StepSizeRampGraph / 32);
-	m_RampGraph.Render(Graphics(), Client()->GetDebugFont(), GraphX, GraphY - GraphH - sp, GraphW, GraphH, aBuf);
+	m_RampGraph.Render(Graphics(), TextRender(), GraphX, GraphY - GraphH - sp, GraphW, GraphH, aBuf);
 	str_format(aBuf, sizeof(aBuf), "Max Velspeed before it ramps off:  %.2f Bps", m_SpeedTurningPoint / 32);
 	TextRender()->Text(GraphX, GraphY - sp - GraphH - 12, 12, aBuf, -1.0f);
 	str_format(aBuf, sizeof(aBuf), "Zoomed in on turning point (Velspeed %d to %d)", ((int)MiddleOfZoomedInGraph - 64 * StepSizeZoomedInGraph) / 32, ((int)MiddleOfZoomedInGraph + 64 * StepSizeZoomedInGraph) / 32);
-	m_ZoomedInGraph.Render(Graphics(), Client()->GetDebugFont(), GraphX, GraphY, GraphW, GraphH, aBuf);
+	m_ZoomedInGraph.Render(Graphics(), TextRender(), GraphX, GraphY, GraphW, GraphH, aBuf);
 	TextRender()->TextColor(1, 1, 1, 1);
 }
 
