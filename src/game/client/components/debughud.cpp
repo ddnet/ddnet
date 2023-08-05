@@ -74,74 +74,118 @@ void CDebugHud::RenderNetCorrections()
 
 void CDebugHud::RenderTuning()
 {
-	// render tuning debugging
-	if(!g_Config.m_DbgTuning)
+	enum
+	{
+		DBG_TUNING_OFF = 0,
+		DBG_TUNING_SHOW_CHANGED,
+		DBG_TUNING_SHOW_ALL,
+	};
+
+	if(g_Config.m_DbgTuning == DBG_TUNING_OFF)
 		return;
 
-	CTuningParams StandardTuning;
+	const CCharacter *pCharacter = m_pClient->m_GameWorld.GetCharacterByID(m_pClient->m_Snap.m_LocalClientID);
 
-	Graphics()->MapScreen(0, 0, 300 * Graphics()->ScreenAspect(), 300);
+	const CTuningParams StandardTuning;
+	const CTuningParams *pGlobalTuning = m_pClient->GetTuning(0);
+	const CTuningParams *pZoneTuning = !m_pClient->m_GameWorld.m_WorldConfig.m_UseTuneZones || pCharacter == nullptr ? nullptr : m_pClient->GetTuning(pCharacter->m_TuneZone);
+	const CTuningParams *pActiveTuning = pZoneTuning == nullptr ? pGlobalTuning : pZoneTuning;
 
-	float y = 27.0f;
-	int Count = 0;
+	const float Height = 300.0f;
+	const float Width = Height * Graphics()->ScreenAspect();
+	Graphics()->MapScreen(0.0f, 0.0f, Width, Height);
+
+	const float FontSize = 5.0f;
+
+	const float StartY = 50.0f;
+	float y = StartY;
+	float StartX = 30.0f;
+	const auto &&RenderRow = [&](const char *pCol1, const char *pCol2, const char *pCol3) {
+		float x = StartX;
+		TextRender()->Text(x - TextRender()->TextWidth(FontSize, pCol1), y, FontSize, pCol1);
+
+		x += 30.0f;
+		TextRender()->Text(x - TextRender()->TextWidth(FontSize, pCol2), y, FontSize, pCol2);
+
+		x += 10.0f;
+		TextRender()->Text(x, y, FontSize, pCol3);
+
+		y += FontSize + 1.0f;
+
+		if(y >= Height - 80.0f)
+		{
+			y = StartY;
+			StartX += 130.0f;
+		}
+	};
+
 	for(int i = 0; i < CTuningParams::Num(); i++)
 	{
-		char aBuf[128];
-		float Current, Standard;
-		m_pClient->m_aTuning[g_Config.m_ClDummy].Get(i, &Current);
+		float CurrentGlobal, CurrentZone, Standard;
+		pGlobalTuning->Get(i, &CurrentGlobal);
+		if(pZoneTuning == nullptr)
+			CurrentZone = 0.0f;
+		else
+			pZoneTuning->Get(i, &CurrentZone);
 		StandardTuning.Get(i, &Standard);
 
-		if(Standard == Current)
-			TextRender()->TextColor(1, 1, 1, 1.0f);
+		if(g_Config.m_DbgTuning == DBG_TUNING_SHOW_CHANGED && Standard == CurrentGlobal && (pZoneTuning == nullptr || Standard == CurrentZone))
+			continue; // skip unchanged params
+
+		if(y == StartY)
+		{
+			TextRender()->TextColor(TextRender()->DefaultTextColor());
+			RenderRow("Standard", "Current", "Tuning");
+		}
+
+		ColorRGBA TextColor;
+		if(g_Config.m_DbgTuning == DBG_TUNING_SHOW_ALL && Standard == CurrentGlobal && (pZoneTuning == nullptr || Standard == CurrentZone))
+			TextColor = ColorRGBA(0.75f, 0.75f, 0.75f, 1.0f); // grey: value unchanged globally and in current zone
+		else if(Standard == CurrentGlobal && pZoneTuning != nullptr && Standard != CurrentZone)
+			TextColor = ColorRGBA(0.6f, 0.6f, 1.0f, 1.0f); // blue: value changed only in current zone
+		else if(Standard != CurrentGlobal && pZoneTuning != nullptr && Standard == CurrentZone)
+			TextColor = ColorRGBA(0.4f, 1.0f, 0.4f, 1.0f); // green: value changed globally but reset to default by tune zone
 		else
-			TextRender()->TextColor(1, 0.25f, 0.25f, 1.0f);
+			TextColor = ColorRGBA(1.0f, 0.5f, 0.5f, 1.0f); // red: value changed globally
+		TextRender()->TextColor(TextColor);
 
-		float w;
-		float x = 5.0f;
-
-		str_format(aBuf, sizeof(aBuf), "%.2f", Standard);
-		x += 20.0f;
-		w = TextRender()->TextWidth(5, aBuf, -1, -1.0f);
-		TextRender()->Text(x - w, y + Count * 6, 5, aBuf, -1.0f);
-
-		str_format(aBuf, sizeof(aBuf), "%.2f", Current);
-		x += 20.0f;
-		w = TextRender()->TextWidth(5, aBuf, -1, -1.0f);
-		TextRender()->Text(x - w, y + Count * 6, 5, aBuf, -1.0f);
-
-		x += 5.0f;
-		TextRender()->Text(x, y + Count * 6, 5, CTuningParams::Name(i), -1.0f);
-
-		Count++;
+		char aBufStandard[32];
+		str_format(aBufStandard, sizeof(aBufStandard), "%.2f", Standard);
+		char aBufCurrent[32];
+		str_format(aBufCurrent, sizeof(aBufCurrent), "%.2f", pZoneTuning == nullptr ? CurrentGlobal : CurrentZone);
+		RenderRow(aBufStandard, aBufCurrent, CTuningParams::Name(i));
 	}
 
-	// Rander Velspeed.X*Ramp Graphs
-	Graphics()->MapScreen(0, 0, Graphics()->ScreenWidth(), Graphics()->ScreenHeight());
-	float GraphW = Graphics()->ScreenWidth() / 4.0f;
-	float GraphH = Graphics()->ScreenHeight() / 6.0f;
-	float sp = Graphics()->ScreenWidth() / 100.0f;
-	float GraphX = GraphW;
-	float GraphY = Graphics()->ScreenHeight() - GraphH - sp;
+	TextRender()->TextColor(TextRender()->DefaultTextColor());
+	if(g_Config.m_DbgTuning == DBG_TUNING_SHOW_CHANGED)
+		return;
 
-	CTuningParams *pClientTuning = &m_pClient->m_aTuning[g_Config.m_ClDummy];
+	// Render Velspeed.X * Ramp Graphs
+	Graphics()->MapScreen(0.0f, 0.0f, Graphics()->ScreenWidth(), Graphics()->ScreenHeight());
+	const float GraphSpacing = Graphics()->ScreenWidth() / 100.0f;
+	const float GraphW = Graphics()->ScreenWidth() / 4.0f;
+	const float GraphH = Graphics()->ScreenHeight() / 6.0f;
+	const float GraphX = GraphW;
+	const float GraphY = Graphics()->ScreenHeight() - GraphH - GraphSpacing;
+
 	const int StepSizeRampGraph = 270;
 	const int StepSizeZoomedInGraph = 14;
-	if(m_OldVelrampStart != pClientTuning->m_VelrampStart || m_OldVelrampRange != pClientTuning->m_VelrampRange || m_OldVelrampCurvature != pClientTuning->m_VelrampCurvature)
+	if(m_OldVelrampStart != pActiveTuning->m_VelrampStart || m_OldVelrampRange != pActiveTuning->m_VelrampRange || m_OldVelrampCurvature != pActiveTuning->m_VelrampCurvature)
 	{
-		m_OldVelrampStart = pClientTuning->m_VelrampStart;
-		m_OldVelrampRange = pClientTuning->m_VelrampRange;
-		m_OldVelrampCurvature = pClientTuning->m_VelrampCurvature;
+		m_OldVelrampStart = pActiveTuning->m_VelrampStart;
+		m_OldVelrampRange = pActiveTuning->m_VelrampRange;
+		m_OldVelrampCurvature = pActiveTuning->m_VelrampCurvature;
 
 		m_RampGraph.Init(0.0f, 0.0f);
 		m_SpeedTurningPoint = 0;
-		float pv = 1;
+		float PreviousRampedSpeed = 1.0f;
 		for(size_t i = 0; i < CGraph::MAX_VALUES; i++)
 		{
 			// This is a calculation of the speed values per second on the X axis, from 270 to 34560 in steps of 270
-			float Speed = (i + 1) * StepSizeRampGraph;
-			float Ramp = VelocityRamp(Speed, m_pClient->m_aTuning[g_Config.m_ClDummy].m_VelrampStart, m_pClient->m_aTuning[g_Config.m_ClDummy].m_VelrampRange, m_pClient->m_aTuning[g_Config.m_ClDummy].m_VelrampCurvature);
-			float RampedSpeed = Speed * Ramp;
-			if(RampedSpeed >= pv)
+			const float Speed = (i + 1) * StepSizeRampGraph;
+			const float Ramp = VelocityRamp(Speed, m_pClient->m_aTuning[g_Config.m_ClDummy].m_VelrampStart, m_pClient->m_aTuning[g_Config.m_ClDummy].m_VelrampRange, m_pClient->m_aTuning[g_Config.m_ClDummy].m_VelrampCurvature);
+			const float RampedSpeed = Speed * Ramp;
+			if(RampedSpeed >= PreviousRampedSpeed)
 			{
 				m_RampGraph.InsertAt(i, RampedSpeed / 32, 0, 1, 0);
 				m_SpeedTurningPoint = Speed;
@@ -150,20 +194,20 @@ void CDebugHud::RenderTuning()
 			{
 				m_RampGraph.InsertAt(i, RampedSpeed / 32, 1, 0, 0);
 			}
-			pv = RampedSpeed;
+			PreviousRampedSpeed = RampedSpeed;
 		}
 		m_RampGraph.Scale();
 
 		m_ZoomedInGraph.Init(0.0f, 0.0f);
-		pv = 1;
+		PreviousRampedSpeed = 1.0f;
 		MiddleOfZoomedInGraph = m_SpeedTurningPoint;
 		for(size_t i = 0; i < CGraph::MAX_VALUES; i++)
 		{
 			// This is a calculation of the speed values per second on the X axis, from (MiddleOfZoomedInGraph - 64 * StepSize) to (MiddleOfZoomedInGraph + 64 * StepSize)
-			float Speed = MiddleOfZoomedInGraph - 64 * StepSizeZoomedInGraph + i * StepSizeZoomedInGraph;
-			float Ramp = VelocityRamp(Speed, m_pClient->m_aTuning[g_Config.m_ClDummy].m_VelrampStart, m_pClient->m_aTuning[g_Config.m_ClDummy].m_VelrampRange, m_pClient->m_aTuning[g_Config.m_ClDummy].m_VelrampCurvature);
-			float RampedSpeed = Speed * Ramp;
-			if(RampedSpeed >= pv)
+			const float Speed = MiddleOfZoomedInGraph - 64 * StepSizeZoomedInGraph + i * StepSizeZoomedInGraph;
+			const float Ramp = VelocityRamp(Speed, m_pClient->m_aTuning[g_Config.m_ClDummy].m_VelrampStart, m_pClient->m_aTuning[g_Config.m_ClDummy].m_VelrampRange, m_pClient->m_aTuning[g_Config.m_ClDummy].m_VelrampCurvature);
+			const float RampedSpeed = Speed * Ramp;
+			if(RampedSpeed >= PreviousRampedSpeed)
 			{
 				m_ZoomedInGraph.InsertAt(i, RampedSpeed / 32, 0, 1, 0);
 				m_SpeedTurningPoint = Speed;
@@ -176,18 +220,19 @@ void CDebugHud::RenderTuning()
 			{
 				m_ZoomedInGraph.SetMin(RampedSpeed);
 			}
-			pv = RampedSpeed;
+			PreviousRampedSpeed = RampedSpeed;
 		}
 		m_ZoomedInGraph.Scale();
 	}
+
+	const float GraphFontSize = 12.0f;
 	char aBuf[128];
-	str_format(aBuf, sizeof(aBuf), "Velspeed.X*Ramp in Bps (Velspeed %d to %d)", StepSizeRampGraph / 32, 128 * StepSizeRampGraph / 32);
-	m_RampGraph.Render(Graphics(), TextRender(), GraphX, GraphY - GraphH - sp, GraphW, GraphH, aBuf);
+	str_format(aBuf, sizeof(aBuf), "Velspeed.X * Ramp in Bps (Velspeed %d to %d)", StepSizeRampGraph / 32, 128 * StepSizeRampGraph / 32);
+	m_RampGraph.Render(Graphics(), TextRender(), GraphX, GraphY, GraphW, GraphH, aBuf);
 	str_format(aBuf, sizeof(aBuf), "Max Velspeed before it ramps off:  %.2f Bps", m_SpeedTurningPoint / 32);
-	TextRender()->Text(GraphX, GraphY - sp - GraphH - 12, 12, aBuf, -1.0f);
+	TextRender()->Text(GraphX, GraphY - GraphFontSize, GraphFontSize, aBuf);
 	str_format(aBuf, sizeof(aBuf), "Zoomed in on turning point (Velspeed %d to %d)", ((int)MiddleOfZoomedInGraph - 64 * StepSizeZoomedInGraph) / 32, ((int)MiddleOfZoomedInGraph + 64 * StepSizeZoomedInGraph) / 32);
-	m_ZoomedInGraph.Render(Graphics(), TextRender(), GraphX, GraphY, GraphW, GraphH, aBuf);
-	TextRender()->TextColor(1, 1, 1, 1);
+	m_ZoomedInGraph.Render(Graphics(), TextRender(), GraphX + GraphW + GraphSpacing, GraphY, GraphW, GraphH, aBuf);
 }
 
 void CDebugHud::RenderHint()
