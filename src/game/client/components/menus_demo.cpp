@@ -32,7 +32,7 @@ int CMenus::DoButton_FontIcon(CButtonContainer *pButtonContainer, const char *pT
 {
 	pRect->Draw(ColorRGBA(1.0f, 1.0f, 1.0f, (Checked ? 0.10f : 0.5f) * UI()->ButtonColorMul(pButtonContainer)), Corners, 5.0f);
 
-	TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
+	TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
 	TextRender()->TextOutlineColor(TextRender()->DefaultTextOutlineColor());
 	TextRender()->TextColor(TextRender()->DefaultTextColor());
 	CUIRect Temp;
@@ -48,7 +48,7 @@ int CMenus::DoButton_FontIcon(CButtonContainer *pButtonContainer, const char *pT
 		TextRender()->TextColor(TextRender()->DefaultTextColor());
 	}
 
-	TextRender()->SetCurFont(nullptr);
+	TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
 
 	return UI()->DoButtonLogic(pButtonContainer, Checked, pRect);
 }
@@ -1162,13 +1162,13 @@ void CMenus::RenderDemoList(CUIRect MainView)
 				else
 					IconColor = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
 
-				TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
+				TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
 				TextRender()->TextColor(IconColor);
 				TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING);
 				UI()->DoLabel(&Button, pIconType, 12.0f, TEXTALIGN_ML);
 				TextRender()->SetRenderFlags(0);
 				TextRender()->TextColor(TextRender()->DefaultTextColor());
-				TextRender()->SetCurFont(nullptr);
+				TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
 			}
 			else if(ID == COL_DEMONAME)
 			{

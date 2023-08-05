@@ -510,7 +510,6 @@ public:
 	void SwitchWindowScreen(int Index) override;
 	void SetWindowParams(int FullscreenMode, bool IsBorderless, bool AllowResizing) override;
 	void ToggleWindowVSync() override;
-	void LoadFont() override;
 	void Notify(const char *pTitle, const char *pMessage) override;
 	void BenchmarkQuit(int Seconds, const char *pFilename);
 

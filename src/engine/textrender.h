@@ -57,9 +57,10 @@ enum ETextRenderFlags
 	TEXT_RENDER_FLAG_ONE_TIME_USE = 1 << 9,
 };
 
-enum
+enum class EFontPreset
 {
-	TEXT_FONT_ICON_FONT = 0,
+	DEFAULT_FONT,
+	ICON_FONT,
 };
 
 namespace FontIcons {
@@ -133,8 +134,6 @@ MAYBE_UNUSED static const char *FONT_ICON_DICE_FIVE = "\xEF\x94\xA3";
 MAYBE_UNUSED static const char *FONT_ICON_DICE_SIX = "\xEF\x94\xA6";
 } // end namespace FontIcons
 
-class CFont;
-
 enum ETextCursorSelectionMode
 {
 	// ignore any kind of selection
@@ -186,10 +185,8 @@ public:
 	float m_LineWidth;
 	float m_X, m_Y;
 	float m_MaxCharacterHeight;
-
 	float m_LongestLineWidth;
 
-	CFont *m_pFont;
 	float m_FontSize;
 	float m_AlignedFontSize;
 
@@ -255,13 +252,9 @@ public:
 	virtual void MoveCursor(CTextCursor *pCursor, float x, float y) const = 0;
 	virtual void SetCursorPosition(CTextCursor *pCursor, float x, float y) const = 0;
 
-	virtual CFont *LoadFont(const char *pFilename, unsigned char *pBuf, size_t Size) = 0;
-	virtual bool LoadFallbackFont(CFont *pFont, const char *pFilename, unsigned char *pBuf, size_t Size) const = 0;
-	virtual CFont *GetFont(size_t FontIndex) = 0;
-	virtual CFont *GetFont(const char *pFilename) = 0;
-
-	virtual void SetDefaultFont(CFont *pFont) = 0;
-	virtual void SetCurFont(CFont *pFont) = 0;
+	virtual void LoadFonts() = 0;
+	virtual void SetFontPreset(EFontPreset FontPreset) = 0;
+	virtual void SetFontLanguageVariant(const char *pLanguageFile) = 0;
 
 	virtual void SetRenderFlags(unsigned Flags) = 0;
 	virtual unsigned GetRenderFlags() const = 0;
@@ -288,10 +281,10 @@ public:
 
 	virtual STextBoundingBox GetBoundingBoxTextContainer(STextContainerIndex TextContainerIndex) = 0;
 
-	virtual void UploadEntityLayerText(void *pTexBuff, size_t ImageColorChannelCount, int TexWidth, int TexHeight, int TexSubWidth, int TexSubHeight, const char *pText, int Length, float x, float y, int FontHeight) = 0;
+	virtual void UploadEntityLayerText(void *pTexBuff, size_t ImageColorChannelCount, int TexWidth, int TexHeight, int TexSubWidth, int TexSubHeight, const char *pText, int Length, float x, float y, int FontSize) = 0;
 	virtual int AdjustFontSize(const char *pText, int TextLength, int MaxSize, int MaxWidth) const = 0;
 	virtual float GetGlyphOffsetX(int FontSize, char TextCharacter) const = 0;
-	virtual int CalculateTextWidth(const char *pText, int TextLength, int FontWidth, int FontHeight) const = 0;
+	virtual int CalculateTextWidth(const char *pText, int TextLength, int FontWidth, int FontSize) const = 0;
 
 	virtual bool SelectionToUTF8OffSets(const char *pText, int SelStart, int SelEnd, int &OffUTF8Start, int &OffUTF8End) const = 0;
 	virtual bool UTF8OffToDecodedOff(const char *pText, int UTF8Off, int &DecodedOff) const = 0;
@@ -321,6 +314,7 @@ class IEngineTextRender : public ITextRender
 	MACRO_INTERFACE("enginetextrender", 0)
 public:
 	virtual void Init() = 0;
+	virtual void Shutdown() override = 0;
 };
 
 extern IEngineTextRender *CreateEngineTextRender();

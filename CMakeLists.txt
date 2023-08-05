@@ -1451,9 +1451,10 @@ set(EXPECTED_DATA
   emoticons.png
   extras.png
   fonts/DejaVuSans.ttf
-  fonts/GlowSansJCompressed-Book.otf
-  fonts/Icons.otf
-  fonts/SourceHanSansSC-Regular.otf
+  fonts/Font_Awesome_6_Free-Solid-900.otf
+  fonts/GlowSansJ-Compressed-Book.otf
+  fonts/SourceHanSans.ttc
+  fonts/index.json
   game.png
   gui_buttons.png
   gui_cursor.png
@@ -1731,7 +1732,7 @@ set(EXPECTED_DATA
   wordlist.txt
 )
 
-set_glob(DATA GLOB_RECURSE "cfg;frag;json;map;otf;png;rules;ttf;txt;vert;wv" data ${EXPECTED_DATA})
+set_glob(DATA GLOB_RECURSE "cfg;frag;json;map;otf;png;rules;ttc;ttf;txt;vert;wv" data ${EXPECTED_DATA})
 
 ########################################################################
 # COPY DATA AND SHARED LIBS
