@@ -2541,8 +2541,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				{
 					for(int i = 0; i < MAX_CLIENTS; ++i)
 					{
-						if(Server()->Translate(ClientID, i) &&
-							m_apPlayers[i] && pChr->CanSnapCharacter(i) && pChr->IsSnappingCharacterInView(i))
+						if(m_apPlayers[i] && pChr->CanSnapCharacter(i) && pChr->IsSnappingCharacterInView(i))
 						{
 							SendEmoticon(ClientID, pMsg->m_Emoticon, i);
 						}
