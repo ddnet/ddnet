@@ -1319,6 +1319,7 @@ Download community skins
 Enable controller
 == Kontroller használata
 
+[Ingame controller mode]
 Relative
 == Relatív
 
@@ -1650,7 +1651,28 @@ Unregister protocol and file extensions
 Open the directory to add custom assets
 == Megnyitni az egyedi Képek helyét
 
+Quitting. Please wait…
+== 
+
+Restarting. Please wait…
+== 
+
+Multi-View
+== 
+
+Rename folder
+== 
+
 A demo with this name already exists
+== 
+
+A folder with this name already exists
+== 
+
+Unable to rename the folder
+== 
+
+(paused)
 == 
 
 No server selected
@@ -1699,8 +1721,26 @@ Cut interval
 Cut length
 == 
 
+All combined
+== 
+
+Folder Link
+== 
+
+Are you sure that you want to delete the folder '%s'?
+== 
+
+Delete folder
+== 
+
+Unable to delete the folder '%s'. Make sure it's empty first.
+== 
+
 Axis
 == 
 
 Graphics card
+== 
+
+Moved ingame
 == 

@@ -641,6 +641,12 @@ Initializing map logic
 Sending initial client info
 == 
 
+Quitting. Please wait…
+== 
+
+Restarting. Please wait…
+== 
+
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
 == 
 
@@ -651,6 +657,9 @@ Position:
 == 
 
 Angle:
+== 
+
+Multi-View
 == 
 
 Server best:
@@ -695,6 +704,9 @@ Getting game info
 Requesting to join the game
 == 
 
+Rename folder
+== 
+
 Rename demo
 == 
 
@@ -716,6 +728,12 @@ It's recommended that you check the settings to adjust them to your liking befor
 A demo with this name already exists
 == 
 
+A folder with this name already exists
+== 
+
+Unable to rename the folder
+== 
+
 Unable to rename the demo
 == 
 
@@ -723,6 +741,9 @@ File '%s' already exists, do you want to overwrite it?
 == 
 
 Replace video
+== 
+
+(paused)
 == 
 
 Show ingame HUD
@@ -885,7 +906,13 @@ File already exists, do you want to overwrite it?
 Loading demo files
 == 
 
+All combined
+== 
+
 Parent Folder
+== 
+
+Folder Link
 == 
 
 Invalid Demo
@@ -942,7 +969,13 @@ Demos directory
 Open the directory that contains the demo files
 == 
 
+Are you sure that you want to delete the folder '%s'?
+== 
+
 Are you sure that you want to delete the demo '%s'?
+== 
+
+Delete folder
 == 
 
 Delete demo
@@ -952,6 +985,9 @@ Render
 == 
 
 Unable to delete the demo '%s'
+== 
+
+Unable to delete the folder '%s'. Make sure it's empty first.
 == 
 
 Stop record
@@ -1695,4 +1731,7 @@ Best
 == 
 
 Grabs
+== 
+
+Moved ingame
 == 

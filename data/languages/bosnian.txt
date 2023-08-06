@@ -1072,6 +1072,12 @@ Sending initial client info
 Warning
 == 
 
+Quitting. Please wait…
+== 
+
+Restarting. Please wait…
+== 
+
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
 == 
 
@@ -1082,6 +1088,9 @@ Speed:
 == 
 
 Angle:
+== 
+
+Multi-View
 == 
 
 Team %d
@@ -1108,6 +1117,9 @@ Getting game info
 Requesting to join the game
 == 
 
+Rename folder
+== 
+
 Existing Player
 == 
 
@@ -1120,7 +1132,16 @@ Checking for existing player with your name
 A demo with this name already exists
 == 
 
+A folder with this name already exists
+== 
+
+Unable to rename the folder
+== 
+
 File '%s' already exists, do you want to overwrite it?
+== 
+
+(paused)
 == 
 
 Speed
@@ -1271,6 +1292,12 @@ Cut length
 Loading demo files
 == 
 
+All combined
+== 
+
+Folder Link
+== 
+
 %.2f MiB
 == 
 
@@ -1283,10 +1310,19 @@ Demos directory
 Open the directory that contains the demo files
 == 
 
+Are you sure that you want to delete the folder '%s'?
+== 
+
 Are you sure that you want to delete the demo '%s'?
 == 
 
+Delete folder
+== 
+
 Unable to delete the demo '%s'
+== 
+
+Unable to delete the folder '%s'. Make sure it's empty first.
 == 
 
 Loading ghost files
@@ -1707,4 +1743,7 @@ Spree
 == 
 
 Grabs
+== 
+
+Moved ingame
 == 

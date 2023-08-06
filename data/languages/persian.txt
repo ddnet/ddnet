@@ -1164,6 +1164,7 @@ Statboard
 Enable controller
 == ﻦﮐ ﻝﺎﻌﻓ ﺍﺭ ﺮﻟﺮﺘﻨﮐ
 
+[Ingame controller mode]
 Relative
 == ﯽﺒﺴﻧ [ﯼﺯﺎﺑ ﺮﻟﺮﺘﻨﮐ ﺖﻟﺎﺣ]
 
@@ -1629,7 +1630,28 @@ The format of texture %s is not RGBA which will cause visual bugs.
 Initializing map logic
 == 
 
+Quitting. Please wait…
+== 
+
+Restarting. Please wait…
+== 
+
+Multi-View
+== 
+
+Rename folder
+== 
+
 A demo with this name already exists
+== 
+
+A folder with this name already exists
+== 
+
+Unable to rename the folder
+== 
+
+(paused)
 == 
 
 Copy info
@@ -1681,6 +1703,21 @@ Cut interval
 Cut length
 == 
 
+All combined
+== 
+
+Folder Link
+== 
+
+Are you sure that you want to delete the folder '%s'?
+== 
+
+Delete folder
+== 
+
+Unable to delete the folder '%s'. Make sure it's empty first.
+== 
+
 Create a random skin
 == 
 
@@ -1700,4 +1737,7 @@ Spree
 == 
 
 Grabs
+== 
+
+Moved ingame
 == 

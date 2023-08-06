@@ -1343,6 +1343,7 @@ Download community skins
 Enable controller
 == Activer la manette
 
+[Ingame controller mode]
 Relative
 == Relatif
 
@@ -1699,7 +1700,28 @@ Add Clan
 Create a random skin
 == Créer un skin aléatoire
 
+Quitting. Please wait…
+== 
+
+Restarting. Please wait…
+== 
+
+Multi-View
+== 
+
+Rename folder
+== 
+
 A demo with this name already exists
+== 
+
+A folder with this name already exists
+== 
+
+Unable to rename the folder
+== 
+
+(paused)
 == 
 
 No server selected
@@ -1723,8 +1745,26 @@ Cut interval
 Cut length
 == 
 
+All combined
+== 
+
+Folder Link
+== 
+
+Are you sure that you want to delete the folder '%s'?
+== 
+
+Delete folder
+== 
+
+Unable to delete the folder '%s'. Make sure it's empty first.
+== 
+
 Axis
 == 
 
 Graphics card
+== 
+
+Moved ingame
 == 
