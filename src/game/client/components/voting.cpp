@@ -148,6 +148,9 @@ CVoting::CVoting()
 
 void CVoting::AddOption(const char *pDescription)
 {
+	if(m_NumVoteOptions == MAX_VOTE_OPTIONS)
+		return;
+
 	CVoteOptionClient *pOption;
 	if(m_pRecycleFirst)
 	{
