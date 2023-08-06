@@ -223,7 +223,7 @@ enum
 	IO_MAX_PATH_LENGTH = 512,
 };
 
-typedef struct IOINTERNAL *IOHANDLE;
+typedef void *IOHANDLE;
 
 /**
  * Opens a file.

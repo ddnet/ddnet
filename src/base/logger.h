@@ -7,7 +7,7 @@
 #include <mutex>
 #include <vector>
 
-typedef struct IOINTERNAL *IOHANDLE;
+typedef void *IOHANDLE;
 
 /**
  * @ingroup Log
