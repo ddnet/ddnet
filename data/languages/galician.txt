@@ -76,12 +76,6 @@ Clan
 Client
 == Cliente
 
-Close
-== Pechar
-
-Connect
-== Conectar
-
 Connecting to
 == Conectando con
 
@@ -349,9 +343,6 @@ Rename demo
 
 Reset filter
 == Restablecer filtro
-
-Sample rate
-== Frecuencia de mostraxe
 
 Score
 == Puntos
@@ -698,9 +689,6 @@ Update now
 Restart
 == Reiniciar
 
-Select a name
-== Selecciona un nome
-
 Please use a different name
 == Por favor usa un nome diferente
 
@@ -869,9 +857,6 @@ Enable team chat sound
 Enable highlighted chat sound
 == Habilitar son de chat resaltado
 
-Threaded sound loading
-== Carga de son nun fío
-
 Map sound volume
 == Vol. do son do mapa
 
@@ -923,9 +908,6 @@ Normal message
 Save the best demo of each race
 == Gardar o mellor demo de cada carreira
 
-Default length: %d
-== Lonxitude predeterminada: %d
-
 Enable replays
 == Habilitar repeticiones
 
@@ -970,9 +952,6 @@ Show other players' hook collision lines
 
 Show other players' key presses
 == Mostrar as pulsacións de teclas doutros xogadores
-
-Old mouse mode
-== Modo de mouse vello
 
 Show tiles layers from BG map
 == Mostrar capas de tiles do mapa de fondo
@@ -1230,9 +1209,6 @@ https://ddnet.org/discord
 Are you sure that you want to disconnect and switch to a different server?
 == Seguro que queres desconectarche e cambiar de servidor?
 
-Refreshing...
-== Actualizando...
-
 Kill Messages
 == Mensaxes de morte
 
@@ -1271,9 +1247,6 @@ default
 
 custom
 == personalizado
-
-Graphics cards
-== Tarxetas de vídeo
 
 auto
 == auto.
@@ -1338,20 +1311,6 @@ Download community skins
 Enable controller
 == Habilitar mando
 
-Controller %d: %s
-== Mando %d: %s
-
-Click to cycle through all available controllers.
-== Click aquí para percorrer todos os mandos dispoñibles.
-
-[Ingame controller mode]
-Relative
-== Relativo
-
-[Ingame controller mode]
-Absolute
-== Absoluto
-
 Ingame controller mode
 == Modo do mando
 
@@ -1364,17 +1323,11 @@ UI controller sens.
 Controller jitter tolerance
 == Tolerancia á fluctuación do mando
 
-Device
-== Dispositivo
-
 Status
 == Estado
 
 Aim bind
 == Apuntar
-
-Controller Axis #%d
-== Eje #%d do mando
 
 Mouse
 == Ratón
@@ -1468,12 +1421,6 @@ Slow down the demo
 
 Speed up the demo
 == Acelerar a demo
-
-Mark the beginning of a cut
-== Marca o inicio dun corte
-
-Mark the end of a cut
-== Marca o final dun corte
 
 Export cut as a separate demo
 == Exportar corte como unha demo diferente
@@ -1715,3 +1662,83 @@ None
 
 Add Clan
 == Agregar clan
+
+[Ingame controller mode]
+Relative
+== Relativo
+
+[Ingame controller mode]
+Absolute
+== Absoluto
+
+Quitting. Please wait…
+== 
+
+Restarting. Please wait…
+== 
+
+Multi-View
+== 
+
+Rename folder
+== 
+
+A demo with this name already exists
+== 
+
+A folder with this name already exists
+== 
+
+Unable to rename the folder
+== 
+
+(paused)
+== 
+
+No server selected
+== 
+
+Mark the beginning of a cut (right click to reset)
+== 
+
+Mark the end of a cut (right click to reset)
+== 
+
+Close the demo player
+== 
+
+Export demo cut
+== 
+
+Cut interval
+== 
+
+Cut length
+== 
+
+All combined
+== 
+
+Folder Link
+== 
+
+Are you sure that you want to delete the folder '%s'?
+== 
+
+Delete folder
+== 
+
+Unable to delete the folder '%s'. Make sure it's empty first.
+== 
+
+Axis
+== 
+
+Graphics card
+== 
+
+Default length
+== 
+
+Moved ingame
+== 

@@ -1111,6 +1111,7 @@ Chat command
 Enable controller
 == Уключыць кантролер
 
+[Ingame controller mode]
 Relative
 == Адносны
 
@@ -1704,3 +1705,42 @@ Axis
 
 Graphics card
 == Відэакарта
+
+Quitting. Please wait…
+== 
+
+Restarting. Please wait…
+== 
+
+Multi-View
+== 
+
+Rename folder
+== 
+
+A folder with this name already exists
+== 
+
+Unable to rename the folder
+== 
+
+(paused)
+== 
+
+All combined
+== 
+
+Folder Link
+== 
+
+Are you sure that you want to delete the folder '%s'?
+== 
+
+Delete folder
+== 
+
+Unable to delete the folder '%s'. Make sure it's empty first.
+== 
+
+Moved ingame
+== 

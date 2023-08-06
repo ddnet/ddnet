@@ -664,6 +664,12 @@ Sending initial client info
 Warning
 == 
 
+Quitting. Please wait…
+== 
+
+Restarting. Please wait…
+== 
+
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
 == 
 
@@ -677,6 +683,9 @@ Speed:
 == 
 
 Angle:
+== 
+
+Multi-View
 == 
 
 Server best:
@@ -721,6 +730,9 @@ Requesting to join the game
 Reconnect in %d sec
 == 
 
+Rename folder
+== 
+
 Render demo
 == 
 
@@ -751,10 +763,19 @@ Checking for existing player with your name
 A demo with this name already exists
 == 
 
+A folder with this name already exists
+== 
+
+Unable to rename the folder
+== 
+
 File '%s' already exists, do you want to overwrite it?
 == 
 
 Replace video
+== 
+
+(paused)
 == 
 
 Speed
@@ -944,6 +965,12 @@ File already exists, do you want to overwrite it?
 Loading demo files
 == 
 
+All combined
+== 
+
+Folder Link
+== 
+
 Markers:
 == 
 
@@ -974,13 +1001,22 @@ Demos directory
 Open the directory that contains the demo files
 == 
 
+Are you sure that you want to delete the folder '%s'?
+== 
+
 Are you sure that you want to delete the demo '%s'?
+== 
+
+Delete folder
 == 
 
 Render
 == 
 
 Unable to delete the demo '%s'
+== 
+
+Unable to delete the folder '%s'. Make sure it's empty first.
 == 
 
 Are you sure that you want to disconnect?
@@ -1704,4 +1740,7 @@ Grabs
 == 
 
 9+ new mentions
+== 
+
+Moved ingame
 == 

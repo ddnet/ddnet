@@ -1458,6 +1458,7 @@ Open the directory to add custom skins
 Enable controller
 == Увімкнути контролер
 
+[Ingame controller mode]
 Relative
 == Relative
 
@@ -1675,7 +1676,28 @@ Super
 Loading sound files
 == Завантаження звукових файлів
 
+Quitting. Please wait…
+== 
+
+Restarting. Please wait…
+== 
+
+Multi-View
+== 
+
+Rename folder
+== 
+
 A demo with this name already exists
+== 
+
+A folder with this name already exists
+== 
+
+Unable to rename the folder
+== 
+
+(paused)
 == 
 
 No server selected
@@ -1699,8 +1721,26 @@ Cut interval
 Cut length
 == 
 
+All combined
+== 
+
+Folder Link
+== 
+
+Are you sure that you want to delete the folder '%s'?
+== 
+
+Delete folder
+== 
+
+Unable to delete the folder '%s'. Make sure it's empty first.
+== 
+
 Axis
 == 
 
 Graphics card
+== 
+
+Moved ingame
 == 

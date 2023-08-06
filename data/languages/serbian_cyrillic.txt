@@ -1259,6 +1259,7 @@ Chat command
 Enable controller
 == Укључи контролер
 
+[Ingame controller mode]
 Relative
 == Релативно
 
@@ -1527,10 +1528,31 @@ Could not save downloaded map. Try manually deleting this file: %s
 Initializing components
 == 
 
+Quitting. Please wait…
+== 
+
+Restarting. Please wait…
+== 
+
+Multi-View
+== 
+
+Rename folder
+== 
+
 A demo with this name already exists
 == 
 
+A folder with this name already exists
+== 
+
+Unable to rename the folder
+== 
+
 File '%s' already exists, do you want to overwrite it?
+== 
+
+(paused)
 == 
 
 Copy info
@@ -1621,13 +1643,28 @@ Cut interval
 Cut length
 == 
 
+All combined
+== 
+
+Folder Link
+== 
+
 Open the directory that contains the demo files
+== 
+
+Are you sure that you want to delete the folder '%s'?
 == 
 
 Are you sure that you want to delete the demo '%s'?
 == 
 
+Delete folder
+== 
+
 Unable to delete the demo '%s'
+== 
+
+Unable to delete the folder '%s'. Make sure it's empty first.
 == 
 
 Menu opened. Press Esc key again to close menu.
@@ -1703,4 +1740,7 @@ Unregister protocol and file extensions
 == 
 
 Open the directory to add custom assets
+== 
+
+Moved ingame
 == 

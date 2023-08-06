@@ -1331,6 +1331,7 @@ Download community skins
 Enable controller
 == 컨트롤러 활성화
 
+[Ingame controller mode]
 Relative
 == 상대적
 
@@ -1662,7 +1663,28 @@ Copy info
 Create a random skin
 == 무작위 스킨 생성
 
+Quitting. Please wait…
+== 
+
+Restarting. Please wait…
+== 
+
+Multi-View
+== 
+
+Rename folder
+== 
+
 A demo with this name already exists
+== 
+
+A folder with this name already exists
+== 
+
+Unable to rename the folder
+== 
+
+(paused)
 == 
 
 No server selected
@@ -1711,8 +1733,26 @@ Cut interval
 Cut length
 == 
 
+All combined
+== 
+
+Folder Link
+== 
+
+Are you sure that you want to delete the folder '%s'?
+== 
+
+Delete folder
+== 
+
+Unable to delete the folder '%s'. Make sure it's empty first.
+== 
+
 Axis
 == 
 
 Graphics card
+== 
+
+Moved ingame
 == 

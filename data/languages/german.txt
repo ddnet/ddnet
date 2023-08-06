@@ -1407,6 +1407,7 @@ UI mouse sens.
 Enable controller
 == Controller aktivieren
 
+[Ingame controller mode]
 Relative
 == Relativ
 
@@ -1720,3 +1721,42 @@ Axis
 
 Graphics card
 == Grafikkarte
+
+Quitting. Please wait…
+== Beenden. Bitte warten…
+
+Restarting. Please wait…
+== Neustarten. Bitte warten…
+
+Multi-View
+== Multi-Ansicht
+
+Rename folder
+== Ordner umbenennen
+
+A folder with this name already exists
+== Ein Ordner mit diesem Namen existiert bereits
+
+Unable to rename the folder
+== Kann den Ordner nicht umbenennen
+
+(paused)
+== (pausiert)
+
+All combined
+== Alle kombiniert
+
+Folder Link
+== Ordner-Verknüpfung
+
+Are you sure that you want to delete the folder '%s'?
+== Möchtest du wirklich den Ordner '%s' löschen?
+
+Delete folder
+== Ordner löschen
+
+Unable to delete the folder '%s'. Make sure it's empty first.
+== Kann den Ordner '%s' nicht löschen. Stell sicher dass er leer ist.
+
+Moved ingame
+== Im Spiel bewegt

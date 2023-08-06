@@ -1367,6 +1367,12 @@ Initializing map logic
 Sending initial client info
 == 
 
+Quitting. Please wait…
+== 
+
+Restarting. Please wait…
+== 
+
 Position:
 == 
 
@@ -1374,6 +1380,9 @@ Speed:
 == 
 
 Angle:
+== 
+
+Multi-View
 == 
 
 Uploading map data to GPU
@@ -1397,10 +1406,22 @@ Getting game info
 Requesting to join the game
 == 
 
+Rename folder
+== 
+
 A demo with this name already exists
 == 
 
+A folder with this name already exists
+== 
+
+Unable to rename the folder
+== 
+
 File '%s' already exists, do you want to overwrite it?
+== 
+
+(paused)
 == 
 
 Loading menu images
@@ -1497,13 +1518,28 @@ Cut length
 Loading demo files
 == 
 
+All combined
+== 
+
+Folder Link
+== 
+
 Open the directory that contains the demo files
+== 
+
+Are you sure that you want to delete the folder '%s'?
 == 
 
 Are you sure that you want to delete the demo '%s'?
 == 
 
+Delete folder
+== 
+
 Unable to delete the demo '%s'
+== 
+
+Unable to delete the folder '%s'. Make sure it's empty first.
 == 
 
 Loading ghost files
@@ -1716,4 +1752,7 @@ Loading race demo files
 == 
 
 Loading sound files
+== 
+
+Moved ingame
 == 

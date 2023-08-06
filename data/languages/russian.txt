@@ -1306,6 +1306,7 @@ Choose default eyes when joining a server
 Enable controller
 == Включить контроллер
 
+[Ingame controller mode]
 Relative
 == Относительный
 
@@ -1715,3 +1716,42 @@ Axis
 
 Graphics card
 == Видеокарта
+
+Quitting. Please wait…
+== 
+
+Restarting. Please wait…
+== 
+
+Multi-View
+== 
+
+Rename folder
+== 
+
+A folder with this name already exists
+== 
+
+Unable to rename the folder
+== 
+
+(paused)
+== 
+
+All combined
+== 
+
+Folder Link
+== 
+
+Are you sure that you want to delete the folder '%s'?
+== 
+
+Delete folder
+== 
+
+Unable to delete the folder '%s'. Make sure it's empty first.
+== 
+
+Moved ingame
+== 
