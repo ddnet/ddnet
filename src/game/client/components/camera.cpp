@@ -256,6 +256,9 @@ void CCamera::SetView(ivec2 Pos)
 
 void CCamera::GotoSwitch(int Number, int Offset)
 {
+	if(Collision()->SwitchLayer() == nullptr)
+		return;
+
 	int Match = -1;
 	ivec2 MatchPos = ivec2(-1, -1);
 
@@ -297,6 +300,9 @@ void CCamera::GotoSwitch(int Number, int Offset)
 
 void CCamera::GotoTele(int Number, int Offset)
 {
+	if(Collision()->TeleLayer() == nullptr)
+		return;
+
 	int Match = -1;
 	ivec2 MatchPos = ivec2(-1, -1);
 
