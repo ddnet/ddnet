@@ -1195,6 +1195,10 @@ void CChat::OnRender()
 
 void CChat::Say(int Team, const char *pLine)
 {
+	// don't send empty messages
+	if(*str_utf8_skip_whitespaces(pLine) == '\0')
+		return;
+
 	m_LastChatSend = time();
 
 	// send chat message
