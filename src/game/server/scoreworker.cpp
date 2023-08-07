@@ -1641,7 +1641,7 @@ bool CScoreWorker::SaveTeam(IDbConnection *pSqlServer, const ISqlData *pGameData
 
 bool CScoreWorker::LoadTeam(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize)
 {
-	if(w == Write::NORMAL_SUCCEEDED || Write::BACKUP_FIRST)
+	if(w == Write::NORMAL_SUCCEEDED || w == Write::BACKUP_FIRST)
 		return false;
 	const auto *pData = dynamic_cast<const CSqlTeamLoad *>(pGameData);
 	auto *pResult = dynamic_cast<CScoreSaveResult *>(pGameData->m_pResult.get());
