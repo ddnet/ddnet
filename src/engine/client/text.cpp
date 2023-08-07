@@ -325,10 +325,10 @@ private:
 	uint8_t m_aaGlyphData[NUM_FONT_TEXTURES][64 * 1024];
 
 	// Font faces
-	FT_Face m_DefaultFace;
-	FT_Face m_IconFace;
-	FT_Face m_VariantFace;
-	FT_Face m_SelectedFace;
+	FT_Face m_DefaultFace = nullptr;
+	FT_Face m_IconFace = nullptr;
+	FT_Face m_VariantFace = nullptr;
+	FT_Face m_SelectedFace = nullptr;
 	std::vector<FT_Face> m_vFallbackFaces;
 	std::vector<FT_Face> m_vFtFaces;
 
