@@ -140,9 +140,9 @@ void CGameConsole::CInstance::Reset()
 {
 	m_CompletionRenderOffset = 0.0f;
 	m_CompletionRenderOffsetChange = 0.0f;
-	m_pCommandName = nullptr;
-	m_pCommandHelp = nullptr;
-	m_pCommandParams = nullptr;
+	m_pCommandName = "";
+	m_pCommandHelp = "";
+	m_pCommandParams = "";
 }
 
 void CGameConsole::CInstance::ExecuteLine(const char *pLine)
@@ -692,7 +692,7 @@ void CGameConsole::OnRender()
 					pConsole->m_CompletionRenderOffset = Info.m_Offset;
 				}
 
-				if(NumArguments <= 0 && pConsole->m_IsCommand && pConsole->m_pCommandName && pConsole->m_pCommandHelp && pConsole->m_pCommandParams)
+				if(NumArguments <= 0 && pConsole->m_IsCommand)
 				{
 					char aBuf[512];
 					str_format(aBuf, sizeof(aBuf), "Help: %s ", pConsole->m_pCommandHelp);
