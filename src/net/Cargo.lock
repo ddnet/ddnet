@@ -149,7 +149,7 @@ dependencies = [
 [[package]]
 name = "common"
 version = "0.0.1"
-source = "git+https://github.com/heinrich5991/libtw2#2c77f799f0e40ff80c2580c6ff0ed8ad19041c4e"
+source = "git+https://github.com/heinrich5991/libtw2#a3a63ee0b149b52d25eff0d5446f493a54eb9d18"
 dependencies = [
  "arrayvec",
  "file_offset",
@@ -257,7 +257,7 @@ checksum = "856b5cb0902c2b6d65d5fd97dfa30f9b70c7538e770b98eab5ed52d8db923e01"
 [[package]]
 name = "huffman"
 version = "0.0.1"
-source = "git+https://github.com/heinrich5991/libtw2#2c77f799f0e40ff80c2580c6ff0ed8ad19041c4e"
+source = "git+https://github.com/heinrich5991/libtw2#a3a63ee0b149b52d25eff0d5446f493a54eb9d18"
 dependencies = [
  "arrayvec",
  "buffer",
@@ -421,7 +421,7 @@ dependencies = [
 [[package]]
 name = "net"
 version = "0.0.1"
-source = "git+https://github.com/heinrich5991/libtw2#2c77f799f0e40ff80c2580c6ff0ed8ad19041c4e"
+source = "git+https://github.com/heinrich5991/libtw2#a3a63ee0b149b52d25eff0d5446f493a54eb9d18"
 dependencies = [
  "arrayvec",
  "assert_matches",

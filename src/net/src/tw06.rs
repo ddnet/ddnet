@@ -38,12 +38,67 @@ impl Protocol {
         packet_len: usize,
         from: &SocketAddr,
     ) -> Result<Option<Something<Connection>>> {
-        if !cb.accept_connections ||
-            !libtw2_net::protocol::Packet::is_connect(&packet_buf[..packet_len])
-        {
+        let (packet_buf, decomp_buf) = {
+            let len = packet_buf.len();
+            packet_buf.split_at_mut(len - 2048)
+        };
+        let packet = &packet_buf[..packet_len];
+
+        use libtw2_net::protocol::ConnectedPacket;
+        use libtw2_net::protocol::ConnectedPacketType;
+        use libtw2_net::protocol::ControlPacket;
+        use libtw2_net::protocol::Packet;
+        use libtw2_net::protocol::Token;
+        use libtw2_net::protocol::TOKEN_NONE;
+
+        if !cb.accept_connections || !Packet::is_initial(packet) {
             return Ok(None);
         }
-        let conn = Connection::new(libtw2_net::Connection::new(), Instant::now(), false, *from);
+        let token = match Packet::read(&mut warn::Ignore, packet, None, decomp_buf) {
+            Ok(Packet::Connected(ConnectedPacket {
+                token,
+                ack: 0,
+                type_: ConnectedPacketType::Control(ctrl),
+            })) => match ctrl {
+                ControlPacket::Connect => {
+                    match token {
+                        // TODO: rate-limit connection attempts
+                        Some(TOKEN_NONE) => {
+                            let written = Packet::Connected(ConnectedPacket {
+                                token: Some(Token(cb.challenger.compute_token(from))),
+                                ack: 0,
+                                type_: ConnectedPacketType::Control(ControlPacket::ConnectAccept),
+                            }).write(packet_buf).unwrap();
+                            cb.socket.send_to(written, *from).context("UdpSocket::send_to")?;
+                            return Ok(None);
+                        }
+                        // ignore invalid tokens
+                        Some(_) => return Ok(None),
+                        // TODO: backcompat with clients not supporting tokens…
+                        None => return Ok(None),
+                    }
+                }
+                ControlPacket::Accept => {
+                    match token {
+                        Some(token) => {
+                            if cb.challenger.verify_token(from, token.0).is_ok() {
+                                token
+                            } else {
+                                return Ok(None);
+                            }
+                        }
+                        None => return Ok(None),
+                    }
+                }
+                _ => return Ok(None),
+            }
+            _ => return Ok(None),
+        };
+
+        let epoch = Instant::now();
+        let libtw2_cb = &mut Callback { socket: &cb.socket, addr: from, epoch };
+        let conn = libtw2_net::Connection::new_accept_token(libtw2_cb, token);
+        let conn = Connection::new(conn, epoch, false, *from);
         Ok(Some(Something::NewConnection(cb.next_peer_index, conn)))
     }
     pub fn connect(
@@ -107,8 +162,10 @@ impl Connection {
             return Ok(())
         }
         assert!(*from == self.addr);
-        let packet_buf_len = packet_buf.len();
-        let (packet_buf, buf) = packet_buf.split_at_mut(packet_buf_len - 2048);
+        let (packet_buf, buf) = {
+            let len = packet_buf.len();
+            packet_buf.split_at_mut(len - 2048)
+        };
         let cb = &mut Callback { socket: &cb.socket, addr: &self.addr, epoch: self.epoch };
         let (events, result) = self.inner.feed(cb, &mut warn::Ignore, &packet_buf[..packet_len], buf);
         // TODO: don't allow infinite backlog
@@ -233,8 +290,6 @@ impl<'a> libtw2_net::connection::Callback for Callback<'a> {
     type Error = Error;
     fn secure_random(&mut self, buffer: &mut [u8]) {
         getrandom(buffer).unwrap()
-        //let _ = buffer;
-        //unreachable!()
     }
     fn send(&mut self, buffer: &[u8]) -> Result<()> {
         self.socket.send_to(buffer, *self.addr).context("UdpSocket::send_to")?;
