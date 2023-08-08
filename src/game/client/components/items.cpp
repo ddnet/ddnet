@@ -30,21 +30,21 @@ void CItems::RenderProjectile(const CProjectileData *pCurrent, int ItemID)
 	// get positions
 	float Curvature = 0;
 	float Speed = 0;
-	CTuningParams Tuning = GameClient()->GetTunes(pCurrent->m_TuneZone);
+	const CTuningParams *pTuning = GameClient()->GetTuning(pCurrent->m_TuneZone);
 	if(CurWeapon == WEAPON_GRENADE)
 	{
-		Curvature = Tuning.m_GrenadeCurvature;
-		Speed = Tuning.m_GrenadeSpeed;
+		Curvature = pTuning->m_GrenadeCurvature;
+		Speed = pTuning->m_GrenadeSpeed;
 	}
 	else if(CurWeapon == WEAPON_SHOTGUN)
 	{
-		Curvature = Tuning.m_ShotgunCurvature;
-		Speed = Tuning.m_ShotgunSpeed;
+		Curvature = pTuning->m_ShotgunCurvature;
+		Speed = pTuning->m_ShotgunSpeed;
 	}
 	else if(CurWeapon == WEAPON_GUN)
 	{
-		Curvature = Tuning.m_GunCurvature;
-		Speed = Tuning.m_GunSpeed;
+		Curvature = pTuning->m_GunCurvature;
+		Speed = pTuning->m_GunSpeed;
 	}
 
 	bool LocalPlayerInGame = false;
@@ -310,7 +310,7 @@ void CItems::RenderLaser(const CLaserData *pCurrent, bool IsPredicted)
 		else
 			Ticks = (float)(Client()->GameTick(g_Config.m_ClDummy) - pCurrent->m_StartTick) + Client()->IntraGameTick(g_Config.m_ClDummy);
 		float Ms = (Ticks / 50.0f) * 1000.0f;
-		float a = Ms / m_pClient->GetTunes(TuneZone).m_LaserBounceDelay;
+		float a = Ms / m_pClient->GetTuning(TuneZone)->m_LaserBounceDelay;
 		a = clamp(a, 0.0f, 1.0f);
 		float Ia = 1 - a;
 
@@ -600,22 +600,22 @@ void CItems::ReconstructSmokeTrail(const CProjectileData *pCurrent, int DestroyT
 	// get positions
 	float Curvature = 0;
 	float Speed = 0;
-	CTuningParams Tuning = GameClient()->GetTunes(pCurrent->m_TuneZone);
+	const CTuningParams *pTuning = GameClient()->GetTuning(pCurrent->m_TuneZone);
 
 	if(pCurrent->m_Type == WEAPON_GRENADE)
 	{
-		Curvature = Tuning.m_GrenadeCurvature;
-		Speed = Tuning.m_GrenadeSpeed;
+		Curvature = pTuning->m_GrenadeCurvature;
+		Speed = pTuning->m_GrenadeSpeed;
 	}
 	else if(pCurrent->m_Type == WEAPON_SHOTGUN)
 	{
-		Curvature = Tuning.m_ShotgunCurvature;
-		Speed = Tuning.m_ShotgunSpeed;
+		Curvature = pTuning->m_ShotgunCurvature;
+		Speed = pTuning->m_ShotgunSpeed;
 	}
 	else if(pCurrent->m_Type == WEAPON_GUN)
 	{
-		Curvature = Tuning.m_GunCurvature;
-		Speed = Tuning.m_GunSpeed;
+		Curvature = pTuning->m_GunCurvature;
+		Speed = pTuning->m_GunSpeed;
 	}
 
 	float Pt = ((float)(Client()->PredGameTick(g_Config.m_ClDummy) - pCurrent->m_StartTick) + Client()->PredIntraGameTick(g_Config.m_ClDummy)) / (float)SERVER_TICK_SPEED;

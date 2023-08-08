@@ -63,7 +63,7 @@ public:
 	void Scale();
 	void Add(float v, float r, float g, float b);
 	void InsertAt(size_t Index, float v, float r, float g, float b);
-	void Render(IGraphics *pGraphics, IGraphics::CTextureHandle FontTexture, float x, float y, float w, float h, const char *pDescription);
+	void Render(IGraphics *pGraphics, ITextRender *pTextRender, float x, float y, float w, float h, const char *pDescription);
 };
 
 class CSmoothTime
