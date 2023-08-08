@@ -140,6 +140,9 @@ void CGameConsole::CInstance::Reset()
 {
 	m_CompletionRenderOffset = 0.0f;
 	m_CompletionRenderOffsetChange = 0.0f;
+	m_pCommandName = nullptr;
+	m_pCommandHelp = nullptr;
+	m_pCommandParams = nullptr;
 }
 
 void CGameConsole::CInstance::ExecuteLine(const char *pLine)
@@ -343,16 +346,16 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 
 		// find the current command
 		{
-			char aBuf[sizeof(m_aCommandName)];
+			char aBuf[128];
 			StrCopyUntilSpace(aBuf, sizeof(aBuf), GetString());
 			const IConsole::CCommandInfo *pCommand = m_pGameConsole->m_pConsole->GetCommandInfo(aBuf, m_CompletionFlagmask,
 				m_Type != CGameConsole::CONSOLETYPE_LOCAL && m_pGameConsole->Client()->RconAuthed() && m_pGameConsole->Client()->UseTempRconCommands());
 			if(pCommand)
 			{
 				m_IsCommand = true;
-				str_copy(m_aCommandName, pCommand->m_pName);
-				str_copy(m_aCommandHelp, pCommand->m_pHelp);
-				str_copy(m_aCommandParams, pCommand->m_pParams);
+				m_pCommandName = pCommand->m_pName;
+				m_pCommandHelp = pCommand->m_pHelp;
+				m_pCommandParams = pCommand->m_pParams;
 			}
 			else
 				m_IsCommand = false;
@@ -689,13 +692,13 @@ void CGameConsole::OnRender()
 					pConsole->m_CompletionRenderOffset = Info.m_Offset;
 				}
 
-				if(NumArguments <= 0 && pConsole->m_IsCommand)
+				if(NumArguments <= 0 && pConsole->m_IsCommand && pConsole->m_pCommandName && pConsole->m_pCommandHelp && pConsole->m_pCommandParams)
 				{
 					char aBuf[512];
-					str_format(aBuf, sizeof(aBuf), "Help: %s ", pConsole->m_aCommandHelp);
+					str_format(aBuf, sizeof(aBuf), "Help: %s ", pConsole->m_pCommandHelp);
 					TextRender()->TextEx(&Info.m_Cursor, aBuf, -1);
 					TextRender()->TextColor(0.75f, 0.75f, 0.75f, 1);
-					str_format(aBuf, sizeof(aBuf), "Usage: %s %s", pConsole->m_aCommandName, pConsole->m_aCommandParams);
+					str_format(aBuf, sizeof(aBuf), "Usage: %s %s", pConsole->m_pCommandName, pConsole->m_pCommandParams);
 					TextRender()->TextEx(&Info.m_Cursor, aBuf, -1);
 				}
 			}

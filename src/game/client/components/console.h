@@ -69,9 +69,9 @@ class CGameConsole : public CComponent
 		bool m_UsernameReq;
 
 		bool m_IsCommand;
-		char m_aCommandName[IConsole::TEMPCMD_NAME_LENGTH];
-		char m_aCommandHelp[IConsole::TEMPCMD_HELP_LENGTH];
-		char m_aCommandParams[IConsole::TEMPCMD_PARAMS_LENGTH];
+		const char *m_pCommandName;
+		const char *m_pCommandHelp;
+		const char *m_pCommandParams;
 
 		CInstance(int t);
 		void Init(CGameConsole *pGameConsole);
