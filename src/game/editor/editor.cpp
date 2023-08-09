@@ -6315,6 +6315,11 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 										static SPopupMenuId s_PopupEnvPointId;
 										UI()->DoPopupMenu(&s_PopupEnvPointId, UI()->MouseX(), UI()->MouseY(), 150, 56, this, PopupEnvPoint);
 									}
+									else if(m_vSelectedEnvelopePoints.size() > 1)
+									{
+										static SPopupMenuId s_PopupEnvPointMultiId;
+										UI()->DoPopupMenu(&s_PopupEnvPointMultiId, UI()->MouseX(), UI()->MouseY(), 80, 22, this, PopupEnvPointMulti);
+									}
 									UI()->SetActiveItem(nullptr);
 									s_Operation = OP_NONE;
 								}
@@ -6359,7 +6364,8 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 								else
 								{
 									s_Operation = OP_CONTEXT_MENU;
-									SelectEnvPoint(i, c);
+									if(!IsEnvPointSelected(i, c))
+										SelectEnvPoint(i, c);
 									UI()->SetActiveItem(pID);
 								}
 							}
