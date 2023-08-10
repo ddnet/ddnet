@@ -5944,7 +5944,7 @@ private:
 	}
 };
 
-void CEditor::SetHotEnvelopePoint(const CUIRect &View, const std::shared_ptr<CEnvelope> &pEnvelope)
+void CEditor::SetHotEnvelopePoint(const CUIRect &View, const std::shared_ptr<CEnvelope> &pEnvelope, int ActiveChannels)
 {
 	if(!UI()->MouseInside(&View))
 		return;
@@ -5971,6 +5971,9 @@ void CEditor::SetHotEnvelopePoint(const CUIRect &View, const std::shared_ptr<CEn
 	{
 		for(int c = 0; c < pEnvelope->GetChannels(); c++)
 		{
+			if(!(ActiveChannels & (1 << c)))
+				continue;
+
 			if(i > 0 && pEnvelope->m_vPoints[i - 1].m_Curvetype == CURVETYPE_BEZIER)
 			{
 				float px = EnvelopeToScreenX(View, fxt2f(pEnvelope->m_vPoints[i].m_Time + pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaX[c]));
@@ -6583,7 +6586,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 		{
 			if(s_Operation == OP_NONE)
-				SetHotEnvelopePoint(View, pEnvelope);
+				SetHotEnvelopePoint(View, pEnvelope, s_ActiveChannels);
 
 			UI()->ClipEnable(&View);
 			Graphics()->TextureClear();
