@@ -5969,7 +5969,7 @@ void CEditor::SetHotEnvelopePoint(const CUIRect &View, const std::shared_ptr<CEn
 
 	for(size_t i = 0; i < pEnvelope->m_vPoints.size(); i++)
 	{
-		for(int c = 0; c < pEnvelope->GetChannels(); c++)
+		for(int c = pEnvelope->GetChannels() - 1; c >= 0; c--)
 		{
 			if(!(ActiveChannels & (1 << c)))
 				continue;
