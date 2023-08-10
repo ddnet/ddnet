@@ -5969,7 +5969,7 @@ void CEditor::SetHotEnvelopePoint(const CUIRect &View, const std::shared_ptr<CEn
 
 	for(size_t i = 0; i < pEnvelope->m_vPoints.size(); i++)
 	{
-		for(int c = 0; c < pEnvelope->GetChannels(); c++)
+		for(int c = pEnvelope->GetChannels() - 1; c >= 0; c--)
 		{
 			if(i > 0 && pEnvelope->m_vPoints[i - 1].m_Curvetype == CURVETYPE_BEZIER)
 			{
