@@ -1883,6 +1883,10 @@ void CMenus::RenderSettingsSound(CUIRect MainView)
 		g_Config.m_SndGun ^= 1;
 
 	MainView.HSplitTop(20.0f, &Button, &MainView);
+	if(DoButton_CheckBox(&g_Config.m_SndHook, Localize("Enable hook sound"), g_Config.m_SndHook, &Button))
+		g_Config.m_SndHook ^= 1;
+
+	MainView.HSplitTop(20.0f, &Button, &MainView);
 	if(DoButton_CheckBox(&g_Config.m_SndLongPain, Localize("Enable long pain sound (used when shooting in freeze)"), g_Config.m_SndLongPain, &Button))
 		g_Config.m_SndLongPain ^= 1;
 

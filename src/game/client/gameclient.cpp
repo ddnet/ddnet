@@ -1068,6 +1068,9 @@ void CGameClient::ProcessEvents()
 			if(!Config()->m_SndGame)
 				continue;
 
+			if(m_GameInfo.m_RaceSounds && ((pEvent->m_SoundID == SOUND_HOOK_NOATTACH || pEvent->m_SoundID == SOUND_HOOK_ATTACH_GROUND || pEvent->m_SoundID == SOUND_HOOK_ATTACH_PLAYER) && !g_Config.m_SndHook))
+				continue;
+
 			if(m_GameInfo.m_RaceSounds && ((pEvent->m_SoundID == SOUND_GUN_FIRE && !g_Config.m_SndGun) || (pEvent->m_SoundID == SOUND_PLAYER_PAIN_LONG && !g_Config.m_SndLongPain)))
 				continue;
 
@@ -1984,6 +1987,8 @@ void CGameClient::OnPredict()
 			{
 				if(Events & COREEVENT_GROUND_JUMP)
 					m_Sounds.PlayAndRecord(CSounds::CHN_WORLD, SOUND_PLAYER_JUMP, 1.0f, Pos);
+				if(!g_Config.m_SndHook)
+					continue;
 				if(Events & COREEVENT_HOOK_ATTACH_GROUND)
 					m_Sounds.PlayAndRecord(CSounds::CHN_WORLD, SOUND_HOOK_ATTACH_GROUND, 1.0f, Pos);
 				if(Events & COREEVENT_HOOK_HIT_NOHOOK)
