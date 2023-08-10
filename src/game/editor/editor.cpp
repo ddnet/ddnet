@@ -6299,11 +6299,21 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 						pEnvelope->Eval(Time, Channels);
 					else
 						Channels = {0, 0, 0, 0};
-					pEnvelope->AddPoint(f2fxt(Time),
-						f2fx(Channels.r), f2fx(Channels.g),
-						f2fx(Channels.b), f2fx(Channels.a));
 
-					if(Time < 0)
+					int FixedTime = std::round(Time * 1000.0f);
+					bool TimeFound = false;
+					for(CEnvPoint &Point : pEnvelope->m_vPoints)
+					{
+						if(Point.m_Time == FixedTime)
+							TimeFound = true;
+					}
+
+					if(!TimeFound)
+						pEnvelope->AddPoint(FixedTime,
+							f2fx(Channels.r), f2fx(Channels.g),
+							f2fx(Channels.b), f2fx(Channels.a));
+
+					if(FixedTime < 0)
 						RemoveTimeOffsetEnvelope(pEnvelope);
 					m_Map.OnModify();
 				}
