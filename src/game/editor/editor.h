@@ -1444,7 +1444,7 @@ public:
 
 	void RenderExtraEditorDragBar(CUIRect View, CUIRect DragBar);
 
-	void SetHotEnvelopePoint(const CUIRect &View, const std::shared_ptr<CEnvelope> &pEnvelope);
+	void SetHotEnvelopePoint(const CUIRect &View, const std::shared_ptr<CEnvelope> &pEnvelope, int ActiveChannels);
 
 	void RenderMenubar(CUIRect Menubar);
 	void RenderFileDialog();
