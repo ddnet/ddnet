@@ -23,6 +23,7 @@
 # 2023-04-01 cheeser0613
 # 2023-05-25 cheeser0613
 # 2023-07-20 By
+# 2023-08-11 By
 ##### /authors #####
 
 ##### translated strings #####
@@ -1713,7 +1714,7 @@ Mark the end of a cut (right click to reset)
 == 標記裁剪終點 (右鍵重置)
 
 Close the demo player
-== 關閉回放播放器
+== 關閉回放
 
 Export demo cut
 == 另存裁剪部分
@@ -1731,40 +1732,40 @@ Graphics card
 == 顯示卡
 
 Quitting. Please wait…
-== 
+== 正在退出，請稍等
 
 Restarting. Please wait…
-== 
+== 正在重啟，請稍等
 
 Multi-View
-== 
+== 多人同框視角
 
 Rename folder
-== 
+== 重新命名資料夾
 
 A folder with this name already exists
-== 
+== 已經存在同名資料夾
 
 Unable to rename the folder
-== 
+== 無法重新命名這個資料夾
 
 (paused)
-== 
+== (暫停)
 
 All combined
-== 
+== 全部檔案
 
 Folder Link
-== 
+== 資料夾連結
 
 Are you sure that you want to delete the folder '%s'?
-== 
+== 你確定要刪除資料夾 "%s" ？
 
 Delete folder
-== 
+== 刪除資料夾
 
 Unable to delete the folder '%s'. Make sure it's empty first.
-== 
+== 無法刪除 "%s" ，請確保你已清空該資料夾
 
 Moved ingame
-== 
+== 遊戲內移動
