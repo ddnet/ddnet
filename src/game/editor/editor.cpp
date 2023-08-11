@@ -831,14 +831,51 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 
 		TB_Top.VSplitLeft(5.0f, nullptr, &TB_Top);
 
-		// animation button
+		// animation buttons
 		TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
+		static int s_JumpStartButton = 0;
+		if(DoButton_FontIcon(&s_JumpStartButton, FONT_ICON_BACKWARD_STEP, false, &Button, 0, "Jump to beggining of animation.", IGraphics::CORNER_L))
+		{
+
+		}
+
+		if(m_SelectedEnvelope >= 0)
+		{
+			TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
+			static int s_JumpPrevious = 0;
+			if(DoButton_FontIcon(&s_JumpPrevious, FONT_ICON_CHEVRON_LEFT, false, &Button, 0, "Jump to previous envelope point.", IGraphics::CORNER_NONE))
+			{
+
+			}
+		}
+
+		TB_Top.VSplitLeft(20.0f, &Button, &TB_Top);
 		static int s_AnimateButton = 0;
-		if(DoButton_Editor(&s_AnimateButton, "Anim", m_Animate, &Button, 0, "[ctrl+m] Toggle animation") ||
+		if(DoButton_FontIcon(&s_AnimateButton, m_Animate ? FONT_ICON_PAUSE : FONT_ICON_PLAY, false, &Button, 0, "[ctrl+m] Toggle animation", IGraphics::CORNER_NONE) ||
 			(m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_M) && ModPressed))
 		{
-			m_AnimateStart = time_get();
+			m_AnimateStart = time_get() - m_AnimateTime * time_freq();
 			m_Animate = !m_Animate;
+		}
+
+
+		// TODO: animation speed
+
+		if(m_SelectedEnvelope >= 0)
+		{
+			TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
+			static int s_JumpNext = 0;
+			if(DoButton_FontIcon(&s_JumpNext, FONT_ICON_CHEVRON_RIGHT, false, &Button, 0, "Jump to next envelope point.", IGraphics::CORNER_NONE))
+			{
+
+			}
+		}
+
+		TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
+		static int s_JumpEndButton = 0;
+		if(DoButton_FontIcon(&s_JumpEndButton, FONT_ICON_FORWARD_STEP, false, &Button, 0, "Jump to end of animation.", IGraphics::CORNER_R))
+		{
+			
 		}
 
 		TB_Top.VSplitLeft(5.0f, nullptr, &TB_Top);
@@ -964,28 +1001,28 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 		}
 
 		// animation speed
-		if(m_Animate)
-		{
-			TB_Top.VSplitLeft(20.0f, &Button, &TB_Top);
-			static int s_AnimSlowerButton = 0;
-			if(DoButton_FontIcon(&s_AnimSlowerButton, "-", 0, &Button, 0, "Decrease animation speed", IGraphics::CORNER_L))
-			{
-				if(m_AnimateSpeed > 0.5f)
-					m_AnimateSpeed -= 0.5f;
-			}
+		// if(m_Animate)
+		// {
+		// 	TB_Top.VSplitLeft(20.0f, &Button, &TB_Top);
+		// 	static int s_AnimSlowerButton = 0;
+		// 	if(DoButton_FontIcon(&s_AnimSlowerButton, "-", 0, &Button, 0, "Decrease animation speed", IGraphics::CORNER_L))
+		// 	{
+		// 		if(m_AnimateSpeed > 0.5f)
+		// 			m_AnimateSpeed -= 0.5f;
+		// 	}
 
-			TB_Top.VSplitLeft(25.0f, &Button, &TB_Top);
-			static int s_AnimNormalButton = 0;
-			if(DoButton_FontIcon(&s_AnimNormalButton, FONT_ICON_CIRCLE_PLAY, 0, &Button, 0, "Normal animation speed", 0))
-				m_AnimateSpeed = 1.0f;
+		// 	TB_Top.VSplitLeft(25.0f, &Button, &TB_Top);
+		// 	static int s_AnimNormalButton = 0;
+		// 	if(DoButton_FontIcon(&s_AnimNormalButton, FONT_ICON_CIRCLE_PLAY, 0, &Button, 0, "Normal animation speed", 0))
+		// 		m_AnimateSpeed = 1.0f;
 
-			TB_Top.VSplitLeft(20.0f, &Button, &TB_Top);
-			static int s_AnimFasterButton = 0;
-			if(DoButton_FontIcon(&s_AnimFasterButton, "+", 0, &Button, 0, "Increase animation speed", IGraphics::CORNER_R))
-				m_AnimateSpeed += 0.5f;
+		// 	TB_Top.VSplitLeft(20.0f, &Button, &TB_Top);
+		// 	static int s_AnimFasterButton = 0;
+		// 	if(DoButton_FontIcon(&s_AnimFasterButton, "+", 0, &Button, 0, "Increase animation speed", IGraphics::CORNER_R))
+		// 		m_AnimateSpeed += 0.5f;
 
-			TB_Top.VSplitLeft(5.0f, &Button, &TB_Top);
-		}
+		// 	TB_Top.VSplitLeft(5.0f, &Button, &TB_Top);
+		// }
 
 		// grid zoom
 		if(MapView()->MapGrid()->IsEnabled())
@@ -5431,6 +5468,12 @@ void CEditor::SetHotEnvelopePoint(const CUIRect &View, const std::shared_ptr<CEn
 
 	if(pMinPoint != nullptr)
 		UI()->SetHotItem(pMinPoint);
+	else if(!m_Animate)
+	{
+		float Time = std::fmod(m_AnimateTime, pEnvelope->EndTime());
+		if(absolute(EnvelopeToScreenX(View, m_AnimateTime) - mx) < 20.0f || absolute(EnvelopeToScreenX(View, Time) - mx) < 20.0f)
+			UI()->SetHotItem(&m_AnimateTime);
+	}
 }
 
 void CEditor::RenderEnvelopeEditor(CUIRect View)
@@ -5453,6 +5496,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		OP_DRAG_POINT_Y,
 		OP_CONTEXT_MENU,
 		OP_BOX_SELECT,
+		OP_DRAG_BAR,
 		OP_SCALE
 	};
 	static int s_Operation = OP_NONE;
@@ -5858,6 +5902,83 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			UI()->ClipDisable();
 		}
 
+		// handle time bar
+		{
+			if(s_Operation == OP_NONE)
+				SetHotEnvelopePoint(View, pEnvelope);
+			ColorRGBA BarColor;
+
+			UI()->ClipEnable(&View);
+			Graphics()->TextureClear();
+			Graphics()->QuadsBegin();
+			if(UI()->CheckActiveItem(&m_AnimateTime))
+			{
+				if(s_Operation == OP_SELECT)
+				{
+					float dx = s_MouseXStart - UI()->MouseX();
+					float dy = s_MouseYStart - UI()->MouseY();
+
+					if(dx * dx + dy * dy > 20.0f)
+						s_Operation = OP_DRAG_BAR;
+				}
+
+				if(s_Operation == OP_DRAG_BAR)
+				{
+					float DeltaX = ScreenToEnvelopeDX(View, UI()->MouseDeltaX()) * (Input()->ModifierIsPressed() ? 0.05f : 1.0f);
+					m_AnimateTime += DeltaX;
+
+					m_AnimateTime = maximum(m_AnimateTime, 0.0f);
+				}
+
+				if(!UI()->MouseButton(0))
+				{
+					UI()->SetActiveItem(nullptr);
+					s_Operation = OP_NONE;
+				}
+
+				BarColor = {1, 1, 0, 0.8f};
+				// m_pTooltip = "Timebar. Press left-click to drag.";
+			}
+			else if(UI()->HotItem() == &m_AnimateTime)
+			{
+				if(UI()->MouseButton(0))
+				{
+					UI()->SetActiveItem(&m_AnimateTime);
+					s_Operation = OP_SELECT;
+
+					s_MouseXStart = UI()->MouseX();
+					s_MouseYStart = UI()->MouseY();
+				}
+
+				BarColor = {1, 1, 0, 0.8f};
+				// m_pTooltip = "Timebar. Press left-click to drag.";
+			}
+			else
+				BarColor = {1, 1, 0, 0.5f};
+
+			const float BarWidth = 1.5f;	
+			{
+				Graphics()->SetColor(BarColor);
+				IGraphics::CQuadItem QuadItem(EnvelopeToScreenX(View, m_AnimateTime)- BarWidth / 2.0f, View.y, BarWidth, View.h);
+				Graphics()->QuadsDrawTL(&QuadItem, 1);
+			}
+
+			if(m_AnimateTime > pEnvelope->EndTime())
+			{
+				BarColor.r *= 0.5f;
+				BarColor.g *= 0.5f;
+				BarColor.b *= 0.5f;
+				Graphics()->SetColor(BarColor);
+
+				float Time = std::fmod(m_AnimateTime, pEnvelope->EndTime());
+				IGraphics::CQuadItem QuadItem(EnvelopeToScreenX(View, Time)- BarWidth / 2.0f, View.y, BarWidth, View.h);
+				Graphics()->QuadsDrawTL(&QuadItem, 1);
+			}
+
+			Graphics()->QuadsEnd();
+			UI()->ClipDisable();
+		}
+
 		// render tangents for bezier curves
 		{
 			UI()->ClipEnable(&View);
@@ -5910,8 +6031,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 		// render lines
 		{
-			float EndTimeTotal = maximum(0.000001f, pEnvelope->EndTime());
-			float EndX = clamp(EnvelopeToScreenX(View, EndTimeTotal), View.x, View.x + View.w);
+			float EndX = View.x + View.w;
 			float StartX = clamp(View.x + View.w * m_OffsetEnvelopeX, View.x, View.x + View.w);
 
 			float EndTime = ScreenToEnvelopeX(View, EndX);
@@ -5936,7 +6056,11 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 				float PrevY = EnvelopeToScreenY(View, Channels[c]);
 				for(int i = 2; i < Steps; i++)
 				{
-					pEnvelope->Eval(StartTime + i * StepTime, Channels);
+					float CurrentTime = StartTime + i * StepTime;
+					if(CurrentTime > pEnvelope->EndTime())
+						Graphics()->SetColor(aColors[c].r * 0.5f, aColors[c].g * 0.5f, aColors[c].b * 0.5f, 1);
+
+					pEnvelope->Eval(CurrentTime, Channels);
 					float CurrentY = EnvelopeToScreenY(View, Channels[c]);
 
 					IGraphics::CLineItem LineItem(
@@ -6031,9 +6155,6 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		}
 
 		{
-			if(s_Operation == OP_NONE)
-				SetHotEnvelopePoint(View, pEnvelope, s_ActiveChannels);
-
 			UI()->ClipEnable(&View);
 			Graphics()->TextureClear();
 			Graphics()->QuadsBegin();
@@ -7672,8 +7793,6 @@ void CEditor::OnRender()
 
 	if(m_Animate)
 		m_AnimateTime = (time_get() - m_AnimateStart) / (float)time_freq();
-	else
-		m_AnimateTime = 0;
 
 	ms_pUiGotContext = nullptr;
 	UI()->StartCheck();
