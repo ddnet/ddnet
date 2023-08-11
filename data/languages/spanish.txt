@@ -1726,40 +1726,40 @@ Graphics card
 == Tarjeta gráfica
 
 Quitting. Please wait…
-== 
+== Saliendo. Por favor, espera…
 
 Restarting. Please wait…
-== 
+== Reiniciando. Por favor, espera…
 
 Multi-View
-== 
+== Vista Múltiple
 
 Rename folder
-== 
+== Renombrar carpeta
 
 A folder with this name already exists
-== 
+== Ya existe una carpeta con este nombre
 
 Unable to rename the folder
-== 
+== No se pudo renombrar la carpeta
 
 (paused)
-== 
+== (en pausa)
 
 All combined
-== 
+== Todo combinado
 
 Folder Link
-== 
+== Enlace de la carpeta
 
 Are you sure that you want to delete the folder '%s'?
-== 
+== ¿Seguro que quieres eliminar la carpeta '%s'?
 
 Delete folder
-== 
+== Eliminar carpeta
 
 Unable to delete the folder '%s'. Make sure it's empty first.
-== 
+== No se pudo eliminar la carpeta '%s'. Asegúrate de que esté vacía primero.
 
 Moved ingame
-== 
+== Movido dentro del juego
