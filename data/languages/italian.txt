@@ -8,6 +8,7 @@
 #	Otacon	2011-05-02 18:21:08
 #	Apmox		2011-07-15 01:09:59
 # NeXus   2020-09-19 02:43:00
+# kio     2023-08-12 18:44:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -133,7 +134,7 @@ Dynamic Camera
 == Camera dinamica
 
 Emoticon
-== Emoticon
+== Faccina
 
 Error
 == Errore
@@ -181,10 +182,10 @@ Game over
 == Partita finita
 
 Game type
-== Tipo
+== Tipo server
 
 Game types:
-== Tipo di gioco:
+== Tipi di server:
 
 General
 == Generale
@@ -211,10 +212,10 @@ Invalid Demo
 == Demo non valida
 
 Join blue
-== Vai ai blu
+== Vai nei blu
 
 Join red
-== Vai ai rossi
+== Vai nei rossi
 
 Jump
 == Salta
@@ -226,7 +227,7 @@ Language
 == Lingua
 
 MOTD
-== MOTD
+== MOTTO
 
 Map
 == Mappa
@@ -253,7 +254,7 @@ Next weapon
 == Arma seguente
 
 Nickname
-== Nickname
+== Soprannome
 
 No
 == No
@@ -332,10 +333,10 @@ Remote console
 == Console remota
 
 Remove
-== Elimina
+== Rimuovi
 
 Remove friend
-== Elimina amico
+== Rimuovi amico
 
 Rename
 == Rinomina
@@ -344,7 +345,7 @@ Rename demo
 == Rinomina demo
 
 Reset filter
-== Azzera filtri
+== Resetta filtri
 
 Score
 == Punti
@@ -780,7 +781,7 @@ Connect Dummy
 == Connetti Dummy
 
 Kill
-== Respawn
+== Rinasci
 
 Pause
 == Pausa
