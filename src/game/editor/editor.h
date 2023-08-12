@@ -1046,7 +1046,10 @@ public:
 		POPEVENT_PREVENTUNUSEDTILES,
 		POPEVENT_IMAGEDIV16,
 		POPEVENT_IMAGE_MAX,
-		POPEVENT_PLACE_BORDER_TILES
+		POPEVENT_PLACE_BORDER_TILES,
+		POPEVENT_PIXELART_BIG_IMAGE,
+		POPEVENT_PIXELART_MANY_COLORS,
+		POPEVENT_PIXELART_TOO_MANY_COLORS
 	};
 
 	int m_PopupEventType;
@@ -1265,6 +1268,11 @@ public:
 
 	CLineInputBuffered<256> m_SettingsCommandInput;
 
+	CImageInfo m_TileartImageInfo;
+	char m_aTileartFilename[IO_MAX_PATH_LENGTH];
+	void AddTileart();
+	void TileartCheckColors();
+
 	void PlaceBorderTiles();
 
 	void UpdateTooltip(const void *pID, const CUIRect *pRect, const char *pToolTip);
@@ -1327,6 +1335,7 @@ public:
 	static bool CallbackAppendMap(const char *pFileName, int StorageType, void *pUser);
 	static bool CallbackSaveMap(const char *pFileName, int StorageType, void *pUser);
 	static bool CallbackSaveCopyMap(const char *pFileName, int StorageType, void *pUser);
+	static bool CallbackAddTileart(const char *pFilepath, int StorageType, void *pUser);
 
 	void PopupSelectImageInvoke(int Current, float x, float y);
 	int PopupSelectImageResult();
