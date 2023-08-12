@@ -1516,7 +1516,7 @@ bool CScoreWorker::SaveTeam(IDbConnection *pSqlServer, const ISqlData *pGameData
 	}
 	if(w == Write::NORMAL_FAILED)
 	{
-		char aBuf[128] = {0};
+		char aBuf[256] = {0};
 		bool End;
 		// move to non-tmp table succeded. delete from backup again
 		str_format(aBuf, sizeof(aBuf),
