@@ -15,14 +15,14 @@ class IMap : public IInterface
 {
 	MACRO_INTERFACE("map", 0)
 public:
-	virtual void *GetData(int Index) = 0;
 	virtual int GetDataSize(int Index) const = 0;
+	virtual void *GetData(int Index) = 0;
 	virtual void *GetDataSwapped(int Index) = 0;
 	virtual void UnloadData(int Index) = 0;
 	virtual int NumData() const = 0;
 
-	virtual void *GetItem(int Index, int *pType = nullptr, int *pID = nullptr) = 0;
 	virtual int GetItemSize(int Index) = 0;
+	virtual void *GetItem(int Index, int *pType = nullptr, int *pID = nullptr) = 0;
 	virtual void GetType(int Type, int *pStart, int *pNum) = 0;
 	virtual void *FindItem(int Type, int ID) = 0;
 	virtual int NumItems() const = 0;

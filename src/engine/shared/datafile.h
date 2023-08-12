@@ -42,15 +42,15 @@ public:
 	bool IsOpen() const { return m_pDataFile != nullptr; }
 	IOHANDLE File() const;
 
+	int GetDataSize(int Index) const;
 	void *GetData(int Index);
 	void *GetDataSwapped(int Index); // makes sure that the data is 32bit LE ints when saved
-	int GetDataSize(int Index) const;
 	void ReplaceData(int Index, char *pData, size_t Size); // memory for data must have been allocated with malloc
 	void UnloadData(int Index);
 	int NumData() const;
 
-	void *GetItem(int Index, int *pType = nullptr, int *pID = nullptr);
 	int GetItemSize(int Index) const;
+	void *GetItem(int Index, int *pType = nullptr, int *pID = nullptr);
 	void GetType(int Type, int *pStart, int *pNum);
 	int FindItemIndex(int Type, int ID);
 	void *FindItem(int Type, int ID);

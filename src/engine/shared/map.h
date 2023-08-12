@@ -17,14 +17,14 @@ public:
 
 	CDataFileReader *GetReader() { return &m_DataFile; }
 
-	void *GetData(int Index) override;
 	int GetDataSize(int Index) const override;
+	void *GetData(int Index) override;
 	void *GetDataSwapped(int Index) override;
 	void UnloadData(int Index) override;
 	int NumData() const override;
 
-	void *GetItem(int Index, int *pType = nullptr, int *pID = nullptr) override;
 	int GetItemSize(int Index) override;
+	void *GetItem(int Index, int *pType = nullptr, int *pID = nullptr) override;
 	void GetType(int Type, int *pStart, int *pNum) override;
 	void *FindItem(int Type, int ID) override;
 	int NumItems() const override;
