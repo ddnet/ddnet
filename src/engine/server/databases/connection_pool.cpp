@@ -176,7 +176,7 @@ void CDbConnectionPool::OnShutdown()
 }
 
 // The backup worker thread looks at write queries and stores them
-// in the sqilte database (WRITE_BACKUP). It skips over read queries.
+// in the sqlite database (WRITE_BACKUP). It skips over read queries.
 // After processing the query, it gets passed on to the Worker thread.
 // This is done to not loose ranks when the server shuts down before all
 // queries are executed on the mysql server
