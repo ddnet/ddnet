@@ -36,6 +36,7 @@ class CLogMessage;
 class CMsgPacker;
 class CPacker;
 class IEngineMap;
+class ILogger;
 
 class CSnapIDPool
 {
@@ -146,6 +147,7 @@ public:
 			STATE_CONNECTING,
 			STATE_READY,
 			STATE_INGAME,
+			STATE_REDIRECTED,
 
 			SNAPRATE_INIT = 0,
 			SNAPRATE_FULL,
@@ -206,6 +208,7 @@ public:
 		int m_DDNetVersion;
 		char m_aDDNetVersionStr[64];
 		CUuid m_ConnectionID;
+		int64_t m_RedirectDropTime;
 
 		// DNSBL
 		int m_DnsblState;
@@ -273,6 +276,9 @@ public:
 	std::vector<std::string> m_vAnnouncements;
 	char m_aAnnouncementFile[IO_MAX_PATH_LENGTH];
 
+	std::shared_ptr<ILogger> m_pFileLogger = nullptr;
+	std::shared_ptr<ILogger> m_pStdoutLogger = nullptr;
+
 	CServer();
 	~CServer();
 
@@ -288,6 +294,7 @@ public:
 
 	void Kick(int ClientID, const char *pReason) override;
 	void Ban(int ClientID, int Seconds, const char *pReason) override;
+	void RedirectClient(int ClientID, int Port, bool Verbose = false) override;
 
 	void DemoRecorder_HandleAutoStart() override;
 
@@ -418,7 +425,6 @@ public:
 	static void ConAddSqlServer(IConsole::IResult *pResult, void *pUserData);
 	static void ConDumpSqlServers(IConsole::IResult *pResult, void *pUserData);
 
-	static void ConchainLoglevel(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainSpecialInfoupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainMaxclientsperipUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainCommandAccessUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
@@ -432,6 +438,8 @@ public:
 	static void ConchainRconHelperPasswordChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainMapUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainSixupUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	static void ConchainLoglevel(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	static void ConchainStdoutOutputLevel(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
 #if defined(CONF_FAMILY_UNIX)
 	static void ConchainConnLoggingServerChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
@@ -480,6 +488,8 @@ public:
 	void SetErrorShutdown(const char *pReason) override;
 
 	bool IsSixup(int ClientID) const override { return ClientID != SERVER_DEMO_CLIENT && m_aClients[ClientID].m_Sixup; }
+
+	void SetLoggers(std::shared_ptr<ILogger> &&pFileLogger, std::shared_ptr<ILogger> &&pStdoutLogger);
 
 #ifdef CONF_FAMILY_UNIX
 	enum CONN_LOGGING_CMD

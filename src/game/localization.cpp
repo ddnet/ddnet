@@ -248,7 +248,7 @@ bool CLocalizationDatabase::Load(const char *pFilename, IStorage *pStorage, ICon
 			size_t Len = str_length(pLine);
 			if(Len < 1 || pLine[Len - 1] != ']')
 			{
-				str_format(aBuf, sizeof(aBuf), "malform context line (%d): %s", Line, pLine);
+				str_format(aBuf, sizeof(aBuf), "malformed context line (%d): %s", Line, pLine);
 				pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "localization", aBuf);
 				continue;
 			}
@@ -271,7 +271,7 @@ bool CLocalizationDatabase::Load(const char *pFilename, IStorage *pStorage, ICon
 
 		if(pReplacement[0] != '=' || pReplacement[1] != '=' || pReplacement[2] != ' ')
 		{
-			str_format(aBuf, sizeof(aBuf), "malform replacement line (%d) for '%s'", Line, aOrigin);
+			str_format(aBuf, sizeof(aBuf), "malformed replacement line (%d) for '%s'", Line, aOrigin);
 			pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "localization", aBuf);
 			continue;
 		}

@@ -119,9 +119,10 @@ public:
 
 	virtual void SetAccessLevel(int AccessLevel) = 0;
 
-	virtual void ResetServerGameSettings() = 0;
+	virtual void ResetGameSettings() = 0;
 
 	static LEVEL ToLogLevel(int ConsoleLevel);
+	static int ToLogLevelFilter(int ConsoleLevel);
 
 	// DDRace
 

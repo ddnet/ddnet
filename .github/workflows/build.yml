@@ -1,0 +1,224 @@
+name: Build
+
+on:
+  push:
+    branches-ignore:
+      - gh-readonly-queue/**
+  pull_request:
+  merge_group:
+
+jobs:
+  build-cmake:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macOS-latest, windows-latest, ubuntu-20.04]
+        include:
+        - os: ubuntu-latest
+          cmake-args: -G Ninja
+          cmake-init-env: CXXFLAGS=-Werror
+          package-file: "*-linux_x86_64.tar.xz"
+          fancy: true
+        - os: ubuntu-20.04
+          cmake-path: /usr/bin/
+          cmake-args: -G Ninja -DTEST_MYSQL=ON
+          cmake-init-env: CXXFLAGS=-Werror
+          gtest-env: GTEST_FILTER=-*SQLite*
+          package-file: "*-linux_x86_64.tar.xz"
+          fancy: false
+        - os: macOS-latest
+          cmake-args: -G Ninja
+          cmake-init-env: CXXFLAGS=-Werror
+          package-file: "*-macos.dmg"
+          fancy: false
+        - os: windows-latest
+          cmake-args: -A x64
+          cmake-init-env: CXXFLAGS=/WX LDFLAGS=/WX
+          package-file: "*-win64.zip"
+          fancy: false
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: true
+
+    - name: Prepare Linux
+      if: contains(matrix.os, 'ubuntu')
+      run: |
+        sudo apt-get update -y
+        # mount: /var/lib/grub/esp: special device /dev/disk/by-id/scsi-... does not exist.
+        # sudo apt-get upgrade -y
+        sudo apt-get install pkg-config cmake ninja-build libfreetype6-dev libnotify-dev libsdl2-dev libsqlite3-dev libvulkan-dev glslang-tools spirv-tools libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev libx264-dev libpng-dev valgrind gcovr -y
+
+    - name: Prepare Linux (non-fancy)
+      if: ${{ contains(matrix.os, 'ubuntu') && !matrix.fancy }}
+      run: |
+        rustup default 1.48.0
+        sudo rm -rf /var/lib/mysql/ /var/run/mysqld
+        sudo mkdir /var/lib/mysql/ /var/run/mysqld/
+        sudo chown mysql:mysql /var/lib/mysql/ /var/run/mysqld/
+        sudo mysqld --initialize-insecure --user=mysql --basedir=/usr --datadir=/var/lib/mysql/
+        sudo /usr/bin/mysqld_safe --basedir=/usr --datadir='/var/lib/mysql/' &
+        sleep 10
+        sudo mysql <<EOF
+        CREATE DATABASE ddnet;
+        CREATE USER 'ddnet'@'localhost' IDENTIFIED BY 'thebestpassword';
+        GRANT ALL PRIVILEGES ON ddnet.* TO 'ddnet'@'localhost';
+        FLUSH PRIVILEGES;
+        EOF
+
+    - name: Prepare Linux (fancy)
+      if: contains(matrix.os, 'ubuntu') && matrix.fancy
+      run: |
+        sudo apt-get install libmariadb-dev libwebsockets-dev mariadb-server -y
+        sudo systemctl stop mysql
+        sudo rm -rf /var/lib/mysql/
+        sudo mysql_install_db --user=mysql --datadir=/var/lib/mysql/
+        cd /usr; sudo mysqld_safe --datadir='/var/lib/mysql/' --no-watch
+        sleep 10
+        sudo mysql <<EOF
+        CREATE DATABASE ddnet;
+        CREATE USER 'ddnet'@'localhost' IDENTIFIED BY 'thebestpassword';
+        GRANT ALL PRIVILEGES ON ddnet.* TO 'ddnet'@'localhost';
+        FLUSH PRIVILEGES;
+        EOF
+
+    - name: Prepare macOS
+      if: contains(matrix.os, 'macOS')
+      run: |
+        brew update || true
+        brew install pkg-config sdl2 ffmpeg ninja molten-vk vulkan-headers glslang spirv-tools || true
+        # --overwrite for:  Target /usr/local/bin/2to3 already exists.
+        brew link --overwrite python@3.10
+        brew upgrade freetype
+        pip3 install dmgbuild
+        echo /Library/Frameworks/Python.framework/Versions/3.11/bin >> $GITHUB_PATH
+        sudo rm -rf /Library/Developer/CommandLineTools
+
+    - name: Build in debug mode
+      run: |
+        mkdir debug
+        cd debug
+        ${{ matrix.cmake-path }}cmake -E env ${{ matrix.cmake-init-env }} ${{ matrix.cmake-path }}cmake ${{ matrix.cmake-args }} -DCMAKE_BUILD_TYPE=Debug -Werror=dev -DDOWNLOAD_GTEST=ON -DDEV=ON -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG=. ..
+        ${{ matrix.cmake-path }}cmake --build . --config Debug --target everything ${{ matrix.build-args }}
+
+    - name: Test debug
+      run: |
+        cd debug
+        ${{ matrix.cmake-path }}cmake -E env ${{ matrix.gtest-env }} ${{ matrix.cmake-path }}cmake --build . --config Debug --target run_tests ${{ matrix.build-args }}
+
+    - name: Run debug server
+      run: |
+        cd debug
+        ./DDNet-Server shutdown
+
+    - name: Build in release mode
+      run: |
+        mkdir release
+        cd release
+        ${{ matrix.cmake-path }}cmake -E env ${{ matrix.cmake-init-env }} ${{ matrix.cmake-path }}cmake ${{ matrix.cmake-args }} -DCMAKE_BUILD_TYPE=Release -Werror=dev -DDOWNLOAD_GTEST=ON -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=. ..
+        ${{ matrix.cmake-path }}cmake --build . --config Release --target everything ${{ matrix.build-args }}
+
+    - name: Test release
+      run: |
+        cd release
+        ${{ matrix.cmake-path }}cmake -E env ${{ matrix.gtest-env }} ${{ matrix.cmake-path }}cmake --build . --config Release --target run_tests ${{ matrix.build-args }}
+
+    - name: Run release server
+      run: |
+        cd release
+        ./DDNet-Server shutdown
+
+    - name: Build headless client
+      if: contains(matrix.os, 'ubuntu-latest')
+      run: |
+        mkdir headless
+        cd headless
+        CFLAGS="$CFLAGS --coverage"
+        CXXFLAGS="$CXXFLAGS --coverage"
+        LDFLAGS="$LDFLAGS --coverage"
+        ${{ matrix.cmake-path }}cmake --version
+        ${{ matrix.cmake-path }}cmake -E env ${{ matrix.cmake-init-env }} ${{ matrix.cmake-path }}cmake ${{ matrix.cmake-args }} -DHEADLESS_CLIENT=ON -DCMAKE_BUILD_TYPE=Debug -Werror=dev -DDOWNLOAD_GTEST=ON -DDEV=ON -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG=. ..
+        ${{ matrix.cmake-path }}cmake --build . --config Debug  ${{ matrix.build-args }}
+
+    - name: Test headless client (unit tests)
+      if: contains(matrix.os, 'ubuntu-latest')
+      run: |
+        cd headless
+        ${{ matrix.cmake-path }}cmake --build . --config Debug --target run_tests ${{ matrix.build-args }}
+
+    - name: Upload Codecov report (unit tests)
+      if: contains(matrix.os, 'ubuntu-latest')
+      uses: codecov/codecov-action@v3
+      with:
+        gcov: true
+        gcov_include: src
+        flags: unittests
+
+    - name: Test headless client (start & connect)
+      if: contains(matrix.os, 'ubuntu-latest')
+      run: |
+        cd headless
+        # Remove old coverage data:
+        find . -name '*.gcno' -o -name '*.gcda' -delete
+        ./DDNet-Server &
+        ./DDNet "cl_download_skins 0;connect localhost:8303;quit"
+
+    - name: Upload Codecov report (start & connect)
+      if: contains(matrix.os, 'ubuntu-latest')
+      uses: codecov/codecov-action@v3
+      with:
+        gcov: true
+        gcov_include: src
+        flags: startconnect
+
+    - name: Build in release mode with debug info and all features on
+      if: matrix.fancy
+      run: |
+        mkdir fancy
+        cd fancy
+        ${{ matrix.cmake-path }}cmake -E env ${{ matrix.cmake-init-env }} ${{ matrix.cmake-path }}cmake ${{ matrix.cmake-args }} -DCMAKE_BUILD_TYPE=RelWithDebInfo -DDOWNLOAD_GTEST=ON -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=. -DANTIBOT=ON -DWEBSOCKETS=ON ..
+        ${{ matrix.cmake-path }}cmake --build . --config RelWithDebInfo --target everything ${{ matrix.build-args }}
+
+    - name: Test fancy
+      if: matrix.fancy
+      run: |
+        cd fancy
+        ${{ matrix.cmake-path }}cmake -E env ${{ matrix.gtest-env }} ${{ matrix.cmake-path }}cmake --build . --config RelWithDebInfo --target run_tests ${{ matrix.build-args }}
+
+    - name: Run fancy server
+      if: matrix.fancy
+      run: |
+        cd fancy
+        ./DDNet-Server shutdown
+
+    - name: Run integration tests with Valgrind's Memcheck
+      if: contains(matrix.os, 'ubuntu-latest')
+      run: |
+        cd headless
+        # Remove old coverage data:
+        find . -name '*.gcno' -o -name '*.gcda' -delete
+        ./integration_test.sh --valgrind-memcheck
+
+    - name: Upload Codecov report (integration tests)
+      if: contains(matrix.os, 'ubuntu-latest')
+      uses: codecov/codecov-action@v3
+      with:
+        gcov: true
+        gcov_include: src
+        flags: intgrationtests
+
+    - name: Package
+      run: |
+        cd release
+        ${{ matrix.cmake-path }}cmake --build . --config Release --target package_default ${{ matrix.build-args }}
+        mkdir artifacts
+        mv ${{ matrix.package-file }} artifacts
+
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: ddnet-${{ matrix.os }}
+        path: release/artifacts
+

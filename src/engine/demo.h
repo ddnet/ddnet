@@ -84,7 +84,8 @@ public:
 
 	~IDemoPlayer() {}
 	virtual void SetSpeed(float Speed) = 0;
-	virtual void SetSpeedIndex(int Offset) = 0;
+	virtual void SetSpeedIndex(int SpeedIndex) = 0;
+	virtual void AdjustSpeedIndex(int Offset) = 0;
 	virtual int SeekPercent(float Percent) = 0;
 	virtual int SeekTime(float Seconds) = 0;
 	virtual int SeekTick(ETickOffset TickOffset) = 0;

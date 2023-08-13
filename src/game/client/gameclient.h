@@ -198,6 +198,9 @@ private:
 	void ProcessEvents();
 	void UpdatePositions();
 
+	int m_EditorMovementDelay = 5;
+	void UpdateEditorIngameMoved();
+
 	int m_PredictedTick;
 	int m_aLastNewPredictedTick[NUM_DUMMIES];
 
@@ -212,6 +215,7 @@ private:
 	static void ConTeam(IConsole::IResult *pResult, void *pUserData);
 	static void ConKill(IConsole::IResult *pResult, void *pUserData);
 
+	static void ConchainLanguageUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainSpecialInfoupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainSpecialDummyInfoupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainSpecialDummy(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
@@ -220,6 +224,15 @@ private:
 	static void ConTuneZone(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConchainMenuMap(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+
+	// only used in OnPredict
+	vec2 m_aLastPos[MAX_CLIENTS] = {{0, 0}};
+	bool m_aLastActive[MAX_CLIENTS] = {false};
+
+	// only used in OnNewSnapshot
+	bool m_GameOver = false;
+	bool m_GamePaused = false;
+	int m_PrevLocalID = -1;
 
 public:
 	IKernel *Kernel() { return IInterface::Kernel(); }
@@ -489,7 +502,11 @@ public:
 
 	void OnWindowResize();
 
+	bool m_LanguageChanged = false;
 	void OnLanguageChange();
+	void HandleLanguageChanged();
+
+	void RenderShutdownMessage();
 
 	const char *GetItemName(int Type) const override;
 	const char *Version() const override;
@@ -526,7 +543,7 @@ public:
 	bool AntiPingGunfire() { return AntiPingGrenade() && AntiPingWeapons() && g_Config.m_ClAntiPingGunfire; }
 	bool Predict() { return g_Config.m_ClPredict && !(m_Snap.m_pGameInfoObj && m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_GAMEOVER) && !m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK && m_Snap.m_pLocalCharacter; }
 	bool PredictDummy() { return g_Config.m_ClPredictDummy && Client()->DummyConnected() && m_Snap.m_LocalClientID >= 0 && m_PredictedDummyID >= 0 && !m_aClients[m_PredictedDummyID].m_Paused; }
-	CTuningParams GetTunes(int i) { return m_aTuningList[i]; }
+	const CTuningParams *GetTuning(int i) { return &m_aTuningList[i]; }
 
 	CGameWorld m_GameWorld;
 	CGameWorld m_PredictedWorld;
@@ -714,6 +731,15 @@ public:
 
 	vec2 GetSmoothPos(int ClientID);
 	vec2 GetFreezePos(int ClientID);
+	int m_MultiViewTeam;
+	int m_MultiViewPersonalZoom;
+	bool m_MultiViewShowHud;
+	bool m_MultiViewActivated;
+	bool m_aMultiViewId[MAX_CLIENTS];
+
+	void ResetMultiView();
+	int FindFirstMultiViewId();
+	void CleanMultiViewId(int ClientID);
 
 private:
 	std::vector<CSnapEntities> m_vSnapEntities;
@@ -724,6 +750,8 @@ private:
 
 	void UpdatePrediction();
 	void UpdateRenderedCharacters();
+
+	int m_aLastUpdateTick[MAX_CLIENTS] = {0};
 	void DetectStrongHook();
 
 	int m_PredictedDummyID;
@@ -742,6 +770,29 @@ private:
 	float m_LastZoom;
 	float m_LastScreenAspect;
 	bool m_LastDummyConnected;
+
+	void HandleMultiView();
+	bool IsMultiViewIdSet();
+	void CleanMultiViewIds();
+	bool InitMultiView(int Team);
+	float CalculateMultiViewMultiplier(vec2 TargetPos);
+	float CalculateMultiViewZoom(vec2 MinPos, vec2 MaxPos, float Vel);
+	float MapValue(float MaxValue, float MinValue, float MaxRange, float MinRange, float Value);
+
+	struct SMultiView
+	{
+		bool m_Solo;
+		bool m_IsInit;
+		bool m_Teleported;
+		bool m_aVanish[MAX_CLIENTS];
+		vec2 m_OldPos;
+		int m_OldPersonalZoom;
+		float m_SecondChance;
+		float m_OldCameraDistance;
+		float m_aLastFreeze[MAX_CLIENTS];
+	};
+
+	SMultiView m_MultiView;
 };
 
 ColorRGBA CalculateNameColor(ColorHSLA TextColorHSL);

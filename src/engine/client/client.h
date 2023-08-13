@@ -63,7 +63,7 @@ public:
 	void Scale();
 	void Add(float v, float r, float g, float b);
 	void InsertAt(size_t Index, float v, float r, float g, float b);
-	void Render(IGraphics *pGraphics, IGraphics::CTextureHandle FontTexture, float x, float y, float w, float h, const char *pDescription);
+	void Render(IGraphics *pGraphics, ITextRender *pTextRender, float x, float y, float w, float h, const char *pDescription);
 };
 
 class CSmoothTime
@@ -299,6 +299,9 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	int MaxLatencyTicks() const;
 	int PredictionMargin() const;
 
+	std::shared_ptr<ILogger> m_pFileLogger = nullptr;
+	std::shared_ptr<ILogger> m_pStdoutLogger = nullptr;
+
 public:
 	IEngine *Engine() { return m_pEngine; }
 	IEngineGraphics *Graphics() { return m_pGraphics; }
@@ -466,9 +469,10 @@ public:
 	static void ConchainWindowScreen(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainWindowVSync(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainTimeoutSeed(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
-	static void ConchainLoglevel(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainPassword(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainReplays(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	static void ConchainLoglevel(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	static void ConchainStdoutOutputLevel(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
 	static void Con_DemoSlice(IConsole::IResult *pResult, void *pUserData);
 	static void Con_DemoSliceBegin(IConsole::IResult *pResult, void *pUserData);
@@ -507,7 +511,6 @@ public:
 	void SwitchWindowScreen(int Index) override;
 	void SetWindowParams(int FullscreenMode, bool IsBorderless, bool AllowResizing) override;
 	void ToggleWindowVSync() override;
-	void LoadFont() override;
 	void Notify(const char *pTitle, const char *pMessage) override;
 	void BenchmarkQuit(int Seconds, const char *pFilename);
 
@@ -553,6 +556,7 @@ public:
 
 	void ShowMessageBox(const char *pTitle, const char *pMessage, EMessageBoxType Type = MESSAGE_BOX_TYPE_ERROR) override;
 	void GetGPUInfoString(char (&aGPUInfo)[256]) override;
+	void SetLoggers(std::shared_ptr<ILogger> &&pFileLogger, std::shared_ptr<ILogger> &&pStdoutLogger);
 };
 
 #endif

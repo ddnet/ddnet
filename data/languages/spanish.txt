@@ -1335,6 +1335,7 @@ Download community skins
 Enable controller
 == Habilitar mando
 
+[Ingame controller mode]
 Relative
 == Relativo
 
@@ -1598,8 +1599,6 @@ Are you sure that you want to reset the controls to their defaults?
 == ¿Estás seguro de que quieres restablecer a los controles predeterminados?
 
 [Graphics error]
-
-[Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
 == Error durante la iniciación. Intenta cambiar gfx_backend a OpenGL o Vulkan desde settings_ddnet.cfg en la carpeta de configuraciones e inténtalo otra vez.
 
@@ -1725,3 +1724,42 @@ Axis
 
 Graphics card
 == Tarjeta gráfica
+
+Quitting. Please wait…
+== Saliendo. Por favor, espera…
+
+Restarting. Please wait…
+== Reiniciando. Por favor, espera…
+
+Multi-View
+== Vista Múltiple
+
+Rename folder
+== Renombrar carpeta
+
+A folder with this name already exists
+== Ya existe una carpeta con este nombre
+
+Unable to rename the folder
+== No se pudo renombrar la carpeta
+
+(paused)
+== (en pausa)
+
+All combined
+== Todo combinado
+
+Folder Link
+== Enlace de la carpeta
+
+Are you sure that you want to delete the folder '%s'?
+== ¿Seguro que quieres eliminar la carpeta '%s'?
+
+Delete folder
+== Eliminar carpeta
+
+Unable to delete the folder '%s'. Make sure it's empty first.
+== No se pudo eliminar la carpeta '%s'. Asegúrate de que esté vacía primero.
+
+Moved ingame
+== Movido dentro del juego

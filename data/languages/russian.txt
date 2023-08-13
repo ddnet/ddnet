@@ -16,6 +16,7 @@
 #	banan   	2022-06-12 11:36:50
 #	ban   	2023-01-5 10:22:50
 #	unban   	2023-03-10 21:50:50
+#	eblan   	2023-08-07 14:27:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -403,7 +404,7 @@ Sound error
 == Ошибка звука
 
 Spectate
-== Наблюдение за
+== Наблюдать
 
 Spectate next
 == Наблюдать за след.
@@ -769,7 +770,7 @@ Please enter your nickname below.
 == Пожалуйста, ниже укажите ваш псевдоним.
 
 Video name:
-== Название видео:
+== Название:
 
 Show DDNet map finishes in server browser
 == Показывать в браузере статус завершения карты
@@ -1306,6 +1307,7 @@ Choose default eyes when joining a server
 Enable controller
 == Включить контроллер
 
+[Ingame controller mode]
 Relative
 == Относительный
 
@@ -1693,10 +1695,10 @@ No server selected
 == Не выбран сервер
 
 Mark the beginning of a cut (right click to reset)
-== Отметить начало отрезка (щелкните правой кнопкой мыши, чтобы сбросить)
+== Отметить начало отрезка (нажмите ПКМ, чтобы сбросить)
 
 Mark the end of a cut (right click to reset)
-== Отметить конец отрезка (щелкните правой кнопкой мыши, чтобы сбросить)
+== Отметить конец отрезка (нажмите ПКМ, чтобы сбросить)
 
 Close the demo player
 == Закрыть проигрыватель демок
@@ -1715,3 +1717,42 @@ Axis
 
 Graphics card
 == Видеокарта
+
+Quitting. Please wait…
+== Выход из игры. Пожалуйста, подождите...
+
+Restarting. Please wait…
+== Перезапуск игры. Пожалуйста, подождите...
+
+Multi-View
+== Мульти-Просмотр
+
+Rename folder
+== Переименовать папку
+
+A folder with this name already exists
+== Папка с таким именем уже существует
+
+Unable to rename the folder
+== Невозможно переименовать папку
+
+(paused)
+== (приостановленно)
+
+All combined
+== Все вместе
+
+Folder Link
+== Ссылка на папку
+
+Are you sure that you want to delete the folder '%s'?
+== Вы уверены, что хотите удалить папку '%s'?
+
+Delete folder
+== Удалить папку
+
+Unable to delete the folder '%s'. Make sure it's empty first.
+== Невозможно удалить папку '%s'. Сначала убедитесь, что она пуста.
+
+Moved ingame
+== Перемещены в игре

@@ -581,8 +581,6 @@ Type:
 == Тып:
 
 [Graphics error]
-
-[Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
 == Памылка падчас ініцыялізацыі. Паспрабуйце змяніць gfx_backend на OpenGL або Vulkan у settings_ddnet.cfg ў тэчцы config і паспрабуйце зноў.
 
@@ -1113,6 +1111,7 @@ Chat command
 Enable controller
 == Уключыць кантролер
 
+[Ingame controller mode]
 Relative
 == Адносны
 
@@ -1706,3 +1705,42 @@ Axis
 
 Graphics card
 == Відэакарта
+
+Quitting. Please wait…
+== 
+
+Restarting. Please wait…
+== 
+
+Multi-View
+== 
+
+Rename folder
+== 
+
+A folder with this name already exists
+== 
+
+Unable to rename the folder
+== 
+
+(paused)
+== 
+
+All combined
+== 
+
+Folder Link
+== 
+
+Are you sure that you want to delete the folder '%s'?
+== 
+
+Delete folder
+== 
+
+Unable to delete the folder '%s'. Make sure it's empty first.
+== 
+
+Moved ingame
+== 

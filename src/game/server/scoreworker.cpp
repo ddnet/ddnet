@@ -128,7 +128,7 @@ bool CScoreWorker::LoadPlayerData(IDbConnection *pSqlServer, const ISqlData *pGa
 	auto *pResult = dynamic_cast<CScorePlayerResult *>(pGameData->m_pResult.get());
 	pResult->SetVariant(CScorePlayerResult::PLAYER_INFO);
 
-	char aBuf[512];
+	char aBuf[1024];
 	// get best race time
 	str_format(aBuf, sizeof(aBuf),
 		"SELECT"
@@ -1002,7 +1002,7 @@ bool CScoreWorker::ShowTeamTop5(IDbConnection *pSqlServer, const ISqlData *pGame
 	const char *pOrder = pData->m_Offset >= 0 ? "ASC" : "DESC";
 
 	// check sort method
-	char aBuf[512];
+	char aBuf[1024];
 
 	str_format(aBuf, sizeof(aBuf),
 		"SELECT Name, Time, Ranking, TeamSize "
@@ -1516,7 +1516,7 @@ bool CScoreWorker::SaveTeam(IDbConnection *pSqlServer, const ISqlData *pGameData
 	}
 	if(w == Write::NORMAL_FAILED)
 	{
-		char aBuf[128] = {0};
+		char aBuf[256] = {0};
 		bool End;
 		// move to non-tmp table succeded. delete from backup again
 		str_format(aBuf, sizeof(aBuf),
@@ -1641,7 +1641,7 @@ bool CScoreWorker::SaveTeam(IDbConnection *pSqlServer, const ISqlData *pGameData
 
 bool CScoreWorker::LoadTeam(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize)
 {
-	if(w == Write::NORMAL_SUCCEEDED || Write::BACKUP_FIRST)
+	if(w == Write::NORMAL_SUCCEEDED || w == Write::BACKUP_FIRST)
 		return false;
 	const auto *pData = dynamic_cast<const CSqlTeamLoad *>(pGameData);
 	auto *pResult = dynamic_cast<CScoreSaveResult *>(pGameData->m_pResult.get());

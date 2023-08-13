@@ -369,34 +369,7 @@ void CServerBrowserHttp::Refresh()
 }
 bool ServerbrowserParseUrl(NETADDR *pOut, const char *pUrl)
 {
-	char aHost[128];
-	const char *pRest = str_startswith(pUrl, "tw-0.6+udp://");
-	if(!pRest)
-	{
-		return true;
-	}
-	int Length = str_length(pRest);
-	int Start = 0;
-	int End = Length;
-	for(int i = 0; i < Length; i++)
-	{
-		if(pRest[i] == '@')
-		{
-			if(Start != 0)
-			{
-				// Two at signs.
-				return true;
-			}
-			Start = i + 1;
-		}
-		else if(pRest[i] == '/' || pRest[i] == '?' || pRest[i] == '#')
-		{
-			End = i;
-			break;
-		}
-	}
-	str_truncate(aHost, sizeof(aHost), pRest + Start, End - Start);
-	return net_addr_from_str(pOut, aHost) != 0;
+	return net_addr_from_url(pOut, pUrl, nullptr, 0) != 0;
 }
 bool CServerBrowserHttp::Validate(json_value *pJson)
 {

@@ -6,6 +6,7 @@
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
 #include <engine/shared/linereader.h>
+#include <engine/shared/localization.h>
 #include <engine/storage.h>
 #include <engine/textrender.h>
 #include <engine/updater.h>
@@ -660,7 +661,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	static CButtonContainer s_RandomSkinButtonID;
 	static const char *s_apDice[] = {FONT_ICON_DICE_ONE, FONT_ICON_DICE_TWO, FONT_ICON_DICE_THREE, FONT_ICON_DICE_FOUR, FONT_ICON_DICE_FIVE, FONT_ICON_DICE_SIX};
 	static int s_CurrentDie = rand() % std::size(s_apDice);
-	TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
+	TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
 	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
 	if(DoButton_Menu(&s_RandomSkinButtonID, s_apDice[s_CurrentDie], 1, &Button, nullptr, IGraphics::CORNER_ALL, 5.0f, -0.2f))
 	{
@@ -668,7 +669,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		s_CurrentDie = rand() % std::size(s_apDice);
 	}
 	TextRender()->SetRenderFlags(0);
-	TextRender()->SetCurFont(nullptr);
+	TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
 	GameClient()->m_Tooltips.DoToolTip(&s_RandomSkinButtonID, &Button, Localize("Create a random skin"));
 
 	// custom color selector
@@ -789,7 +790,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	}
 
 	auto &&RenderFavIcon = [&](const CUIRect &FavIcon, bool AsFav) {
-		TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
+		TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
 		TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
 		if(AsFav)
 			TextRender()->TextColor({1, 1, 0, 1});
@@ -801,7 +802,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		UI()->DoLabel(&FavIcon, FONT_ICON_STAR, 12.0f, TEXTALIGN_MR, Props);
 		TextRender()->TextColor(TextRender()->DefaultTextColor());
 		TextRender()->SetRenderFlags(0);
-		TextRender()->SetCurFont(nullptr);
+		TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
 	};
 
 	int OldSelected = -1;
@@ -892,13 +893,13 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		MainView.HSplitBottom(ms_ButtonHeight, &MainView, &QuickSearch);
 		QuickSearch.VSplitLeft(240.0f, &QuickSearch, &SkinDB);
 		QuickSearch.HSplitTop(5.0f, 0, &QuickSearch);
-		TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
+		TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
 		TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
 
 		UI()->DoLabel(&QuickSearch, FONT_ICON_MAGNIFYING_GLASS, 14.0f, TEXTALIGN_ML);
 		float wSearch = TextRender()->TextWidth(14.0f, FONT_ICON_MAGNIFYING_GLASS, -1, -1.0f);
 		TextRender()->SetRenderFlags(0);
-		TextRender()->SetCurFont(NULL);
+		TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
 		QuickSearch.VSplitLeft(wSearch, 0, &QuickSearch);
 		QuickSearch.VSplitLeft(5.0f, 0, &QuickSearch);
 		QuickSearch.VSplitLeft(QuickSearch.w - 15.0f, &QuickSearch, &QuickSearchClearButton);
@@ -941,19 +942,19 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	}
 	GameClient()->m_Tooltips.DoToolTip(&s_DirectoryButtonID, &DirectoryButton, Localize("Open the directory to add custom skins"));
 
-	TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
+	TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
 	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
 	static CButtonContainer s_SkinRefreshButtonID;
 	if(DoButton_Menu(&s_SkinRefreshButtonID, FONT_ICON_ARROW_ROTATE_RIGHT, 0, &RefreshButton, nullptr, IGraphics::CORNER_ALL, 5, 0, vec4(1.0f, 1.0f, 1.0f, 0.75f), vec4(1, 1, 1, 0.5f)))
 	{
 		// reset render flags for possible loading screen
 		TextRender()->SetRenderFlags(0);
-		TextRender()->SetCurFont(NULL);
+		TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
 		RefreshSkins();
 		s_InitSkinlist = true;
 	}
 	TextRender()->SetRenderFlags(0);
-	TextRender()->SetCurFont(NULL);
+	TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
 }
 
 typedef struct
@@ -966,69 +967,56 @@ typedef struct
 
 static CKeyInfo gs_aKeys[] =
 	{
-		{"Move left", "+left", 0, 0}, // Localize - these strings are localized within CLocConstString
-		{"Move right", "+right", 0, 0},
-		{"Jump", "+jump", 0, 0},
-		{"Fire", "+fire", 0, 0},
-		{"Hook", "+hook", 0, 0},
-		{"Hook collisions", "+showhookcoll", 0, 0},
-		{"Pause", "say /pause", 0, 0},
-		{"Kill", "kill", 0, 0},
-		{"Zoom in", "zoom+", 0, 0},
-		{"Zoom out", "zoom-", 0, 0},
-		{"Default zoom", "zoom", 0, 0},
-		{"Show others", "say /showothers", 0, 0},
-		{"Show all", "say /showall", 0, 0},
-		{"Toggle dyncam", "toggle cl_dyncam 0 1", 0, 0},
-		{"Toggle ghost", "toggle cl_race_show_ghost 0 1", 0, 0},
+		{Localizable("Move left"), "+left", 0, 0}, // Localize - these strings are localized within CLocConstString
+		{Localizable("Move right"), "+right", 0, 0},
+		{Localizable("Jump"), "+jump", 0, 0},
+		{Localizable("Fire"), "+fire", 0, 0},
+		{Localizable("Hook"), "+hook", 0, 0},
+		{Localizable("Hook collisions"), "+showhookcoll", 0, 0},
+		{Localizable("Pause"), "say /pause", 0, 0},
+		{Localizable("Kill"), "kill", 0, 0},
+		{Localizable("Zoom in"), "zoom+", 0, 0},
+		{Localizable("Zoom out"), "zoom-", 0, 0},
+		{Localizable("Default zoom"), "zoom", 0, 0},
+		{Localizable("Show others"), "say /showothers", 0, 0},
+		{Localizable("Show all"), "say /showall", 0, 0},
+		{Localizable("Toggle dyncam"), "toggle cl_dyncam 0 1", 0, 0},
+		{Localizable("Toggle ghost"), "toggle cl_race_show_ghost 0 1", 0, 0},
 
-		{"Hammer", "+weapon1", 0, 0},
-		{"Pistol", "+weapon2", 0, 0},
-		{"Shotgun", "+weapon3", 0, 0},
-		{"Grenade", "+weapon4", 0, 0},
-		{"Laser", "+weapon5", 0, 0},
-		{"Next weapon", "+nextweapon", 0, 0},
-		{"Prev. weapon", "+prevweapon", 0, 0},
+		{Localizable("Hammer"), "+weapon1", 0, 0},
+		{Localizable("Pistol"), "+weapon2", 0, 0},
+		{Localizable("Shotgun"), "+weapon3", 0, 0},
+		{Localizable("Grenade"), "+weapon4", 0, 0},
+		{Localizable("Laser"), "+weapon5", 0, 0},
+		{Localizable("Next weapon"), "+nextweapon", 0, 0},
+		{Localizable("Prev. weapon"), "+prevweapon", 0, 0},
 
-		{"Vote yes", "vote yes", 0, 0},
-		{"Vote no", "vote no", 0, 0},
+		{Localizable("Vote yes"), "vote yes", 0, 0},
+		{Localizable("Vote no"), "vote no", 0, 0},
 
-		{"Chat", "+show_chat; chat all", 0, 0},
-		{"Team chat", "+show_chat; chat team", 0, 0},
-		{"Converse", "+show_chat; chat all /c ", 0, 0},
-		{"Chat command", "+show_chat; chat all /", 0, 0},
-		{"Show chat", "+show_chat", 0, 0},
+		{Localizable("Chat"), "+show_chat; chat all", 0, 0},
+		{Localizable("Team chat"), "+show_chat; chat team", 0, 0},
+		{Localizable("Converse"), "+show_chat; chat all /c ", 0, 0},
+		{Localizable("Chat command"), "+show_chat; chat all /", 0, 0},
+		{Localizable("Show chat"), "+show_chat", 0, 0},
 
-		{"Toggle dummy", "toggle cl_dummy 0 1", 0, 0},
-		{"Dummy copy", "toggle cl_dummy_copy_moves 0 1", 0, 0},
-		{"Hammerfly dummy", "toggle cl_dummy_hammer 0 1", 0, 0},
+		{Localizable("Toggle dummy"), "toggle cl_dummy 0 1", 0, 0},
+		{Localizable("Dummy copy"), "toggle cl_dummy_copy_moves 0 1", 0, 0},
+		{Localizable("Hammerfly dummy"), "toggle cl_dummy_hammer 0 1", 0, 0},
 
-		{"Emoticon", "+emote", 0, 0},
-		{"Spectator mode", "+spectate", 0, 0},
-		{"Spectate next", "spectate_next", 0, 0},
-		{"Spectate previous", "spectate_previous", 0, 0},
-		{"Console", "toggle_local_console", 0, 0},
-		{"Remote console", "toggle_remote_console", 0, 0},
-		{"Screenshot", "screenshot", 0, 0},
-		{"Scoreboard", "+scoreboard", 0, 0},
-		{"Statboard", "+statboard", 0, 0},
-		{"Lock team", "say /lock", 0, 0},
-		{"Show entities", "toggle cl_overlay_entities 0 100", 0, 0},
-		{"Show HUD", "toggle cl_showhud 0 1", 0, 0},
+		{Localizable("Emoticon"), "+emote", 0, 0},
+		{Localizable("Spectator mode"), "+spectate", 0, 0},
+		{Localizable("Spectate next"), "spectate_next", 0, 0},
+		{Localizable("Spectate previous"), "spectate_previous", 0, 0},
+		{Localizable("Console"), "toggle_local_console", 0, 0},
+		{Localizable("Remote console"), "toggle_remote_console", 0, 0},
+		{Localizable("Screenshot"), "screenshot", 0, 0},
+		{Localizable("Scoreboard"), "+scoreboard", 0, 0},
+		{Localizable("Statboard"), "+statboard", 0, 0},
+		{Localizable("Lock team"), "say /lock", 0, 0},
+		{Localizable("Show entities"), "toggle cl_overlay_entities 0 100", 0, 0},
+		{Localizable("Show HUD"), "toggle cl_showhud 0 1", 0, 0},
 };
-
-/*	This is for scripts/languages to work, don't remove!
-	Localize("Move left");Localize("Move right");Localize("Jump");Localize("Fire");Localize("Hook");
-	Localize("Hook collisions");Localize("Pause");Localize("Kill");Localize("Zoom in");Localize("Zoom out");
-	Localize("Default zoom");Localize("Show others");Localize("Show all");Localize("Toggle dyncam");
-	Localize("Toggle dummy");Localize("Toggle ghost");Localize("Dummy copy");Localize("Hammerfly dummy");
-	Localize("Hammer");Localize("Pistol");Localize("Shotgun");Localize("Grenade");Localize("Laser");
-	Localize("Next weapon");Localize("Prev. weapon");Localize("Vote yes");Localize("Vote no");
-	Localize("Chat");Localize("Team chat");Localize("Converse");Localize("Show chat");Localize("Emoticon");
-	Localize("Spectator mode");Localize("Spectate next");Localize("Spectate previous");Localize("Console");
-	Localize("Remote console");Localize("Screenshot");Localize("Scoreboard");Localize("Statboard");
-	Localize("Lock team");Localize("Show entities");Localize("Show HUD");Localize("Chat command");
-*/
 
 void CMenus::DoSettingsControlsButtons(int Start, int Stop, CUIRect View)
 {
@@ -2012,7 +2000,6 @@ bool CMenus::RenderLanguageSelection(CUIRect MainView)
 	if(OldSelected != s_SelectedLanguage)
 	{
 		str_copy(g_Config.m_ClLanguagefile, g_Localization.Languages()[s_SelectedLanguage].m_FileName.c_str());
-		g_Localization.Load(g_Localization.Languages()[s_SelectedLanguage].m_FileName.c_str(), Storage(), Console());
 		GameClient()->OnLanguageChange();
 	}
 

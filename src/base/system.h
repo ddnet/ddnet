@@ -223,7 +223,7 @@ enum
 	IO_MAX_PATH_LENGTH = 512,
 };
 
-typedef struct IOINTERNAL *IOHANDLE;
+typedef void *IOHANDLE;
 
 /**
  * Opens a file.
@@ -936,6 +936,31 @@ int net_addr_comp_noport(const NETADDR *a, const NETADDR *b);
  * @remark The string will always be zero terminated
  */
 void net_addr_str(const NETADDR *addr, char *string, int max_length, int add_port);
+
+/**
+ * Turns url string into a network address struct.
+ * The url format is tw-0.6+udp://{ipaddr}[:{port}]
+ * ipaddr: can be ipv4 or ipv6
+ * port: is a optional internet protocol port
+ *
+ * This format is used for parsing the master server, be careful before changing it.
+ *
+ * Examples:
+ *   tw-0.6+udp://127.0.0.1
+ *   tw-0.6+udp://127.0.0.1:8303
+ *
+ * @param addr Address to fill in.
+ * @param string String to parse.
+ * @param host_buf Pointer to a buffer to write the host to
+ *                 It will include the port if one is included in the url
+ *                 It can also be set to NULL then it will be ignored
+ * @param host_buf_size Size of the host buffer or 0 if no host_buf pointer is given
+ *
+ * @return 0 on success,
+ *         positive if the input wasn't a valid DDNet URL,
+ *         negative if the input is a valid DDNet URL but the host part was not a valid IPv4/IPv6 address
+ */
+int net_addr_from_url(NETADDR *addr, const char *string, char *host_buf, size_t host_buf_size);
 
 /**
  * Turns string into a network address.
@@ -2300,6 +2325,9 @@ int str_utf8_comp_nocase_num(const char *a, const char *b, int num);
 	Parameters:
 		haystack - String to search in
 		needle - String to search for
+        end - A pointer that will be set to a pointer into haystack directly behind the
+            last character where the needle was found. Will be set to nullptr if needle
+            could not be found. Optional parameter.
 
 	Returns:
 		A pointer into haystack where the needle was found.
@@ -2308,7 +2336,7 @@ int str_utf8_comp_nocase_num(const char *a, const char *b, int num);
 	Remarks:
 		- The strings are treated as zero-terminated strings.
 */
-const char *str_utf8_find_nocase(const char *haystack, const char *needle);
+const char *str_utf8_find_nocase(const char *haystack, const char *needle, const char **end = nullptr);
 
 /*
 	Function: str_utf8_isspace

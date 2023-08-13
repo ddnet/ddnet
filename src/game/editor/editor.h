@@ -21,14 +21,15 @@
 
 #include <chrono>
 #include <deque>
+#include <functional>
+#include <map>
+#include <memory>
 #include <string>
 #include <vector>
 
 using namespace std::chrono_literals;
 
-typedef void (*INDEX_MODIFY_FUNC)(int *pIndex);
-
-// CRenderTools m_RenderTools;
+typedef std::function<void(int *pIndex)> FIndexModifyFunction;
 
 // CEditor SPECIFIC
 enum
@@ -36,6 +37,7 @@ enum
 	MODE_LAYERS = 0,
 	MODE_IMAGES,
 	MODE_SOUNDS,
+	NUM_MODES,
 
 	DIALOG_NONE = 0,
 	DIALOG_FILE,
@@ -43,17 +45,50 @@ enum
 
 class CEnvelope
 {
-public:
+	class CEnvelopePointAccess : public IEnvelopePointAccess
+	{
+		std::vector<CEnvPoint_runtime> *m_pvPoints;
+
+	public:
+		CEnvelopePointAccess(std::vector<CEnvPoint_runtime> *pvPoints)
+		{
+			m_pvPoints = pvPoints;
+		}
+
+		int NumPoints() const override
+		{
+			return m_pvPoints->size();
+		}
+
+		const CEnvPoint *GetPoint(int Index) const override
+		{
+			if(Index < 0 || (size_t)Index >= m_pvPoints->size())
+				return nullptr;
+			return &m_pvPoints->at(Index);
+		}
+
+		const CEnvPointBezier *GetBezier(int Index) const override
+		{
+			if(Index < 0 || (size_t)Index >= m_pvPoints->size())
+				return nullptr;
+			return &m_pvPoints->at(Index).m_Bezier;
+		}
+	};
+
 	int m_Channels;
-	std::vector<CEnvPoint> m_vPoints;
+
+public:
+	std::vector<CEnvPoint_runtime> m_vPoints;
+	CEnvelopePointAccess m_PointsAccess;
 	char m_aName[32];
 	float m_Bottom, m_Top;
 	bool m_Synchronized;
 
-	CEnvelope(int Chan)
+	CEnvelope(int Channels) :
+		m_PointsAccess(&m_vPoints)
 	{
-		m_Channels = Chan;
-		m_aName[0] = 0;
+		SetChannels(Channels);
+		m_aName[0] = '\0';
 		m_Bottom = 0;
 		m_Top = 0;
 		m_Synchronized = false;
@@ -69,46 +104,82 @@ public:
 	{
 		m_Top = -1000000000.0f;
 		m_Bottom = 1000000000.0f;
+		CEnvPoint_runtime *pPrevPoint = nullptr;
 		for(auto &Point : m_vPoints)
 		{
 			for(int c = 0; c < m_Channels; c++)
 			{
 				if(ChannelMask & (1 << c))
 				{
-					float v = fx2f(Point.m_aValues[c]);
-					if(v > m_Top)
-						m_Top = v;
-					if(v < m_Bottom)
-						m_Bottom = v;
+					{
+						// value handle
+						const float v = fx2f(Point.m_aValues[c]);
+						m_Top = maximum(m_Top, v);
+						m_Bottom = minimum(m_Bottom, v);
+					}
+
+					if(Point.m_Curvetype == CURVETYPE_BEZIER)
+					{
+						// out-tangent handle
+						const float v = fx2f(Point.m_aValues[c] + Point.m_Bezier.m_aOutTangentDeltaY[c]);
+						m_Top = maximum(m_Top, v);
+						m_Bottom = minimum(m_Bottom, v);
+					}
+
+					if(pPrevPoint != nullptr && pPrevPoint->m_Curvetype == CURVETYPE_BEZIER)
+					{
+						// in-tangent handle
+						const float v = fx2f(Point.m_aValues[c] + Point.m_Bezier.m_aInTangentDeltaY[c]);
+						m_Top = maximum(m_Top, v);
+						m_Bottom = minimum(m_Bottom, v);
+					}
 				}
 			}
+			pPrevPoint = &Point;
 		}
 	}
 
 	int Eval(float Time, ColorRGBA &Color)
 	{
-		CRenderTools::RenderEvalEnvelope(&m_vPoints[0], m_vPoints.size(), m_Channels, std::chrono::nanoseconds((int64_t)((double)Time * (double)std::chrono::nanoseconds(1s).count())), Color);
+		CRenderTools::RenderEvalEnvelope(&m_PointsAccess, m_Channels, std::chrono::nanoseconds((int64_t)((double)Time * (double)std::chrono::nanoseconds(1s).count())), Color);
 		return m_Channels;
 	}
 
 	void AddPoint(int Time, int v0, int v1 = 0, int v2 = 0, int v3 = 0)
 	{
-		CEnvPoint p;
+		CEnvPoint_runtime p;
 		p.m_Time = Time;
 		p.m_aValues[0] = v0;
 		p.m_aValues[1] = v1;
 		p.m_aValues[2] = v2;
 		p.m_aValues[3] = v3;
 		p.m_Curvetype = CURVETYPE_LINEAR;
+		for(int c = 0; c < CEnvPoint::MAX_CHANNELS; c++)
+		{
+			p.m_Bezier.m_aInTangentDeltaX[c] = 0;
+			p.m_Bezier.m_aInTangentDeltaY[c] = 0;
+			p.m_Bezier.m_aOutTangentDeltaX[c] = 0;
+			p.m_Bezier.m_aOutTangentDeltaY[c] = 0;
+		}
 		m_vPoints.push_back(p);
 		Resort();
 	}
 
 	float EndTime() const
 	{
-		if(!m_vPoints.empty())
-			return m_vPoints[m_vPoints.size() - 1].m_Time * (1.0f / 1000.0f);
-		return 0;
+		if(m_vPoints.empty())
+			return 0.0f;
+		return m_vPoints.back().m_Time / 1000.0f;
+	}
+
+	int GetChannels() const
+	{
+		return m_Channels;
+	}
+
+	void SetChannels(int Channels)
+	{
+		m_Channels = clamp<int>(Channels, 1, CEnvPoint::MAX_CHANNELS);
 	}
 };
 
@@ -129,7 +200,6 @@ public:
 		m_Readonly = false;
 		m_Flags = 0;
 		m_pEditor = nullptr;
-		m_BrushRefCount = 0;
 	}
 
 	CLayer(const CLayer &Other)
@@ -138,7 +208,6 @@ public:
 		m_Flags = Other.m_Flags;
 		m_pEditor = Other.m_pEditor;
 		m_Type = Other.m_Type;
-		m_BrushRefCount = 0;
 		m_Visible = true;
 		m_Readonly = false;
 	}
@@ -148,10 +217,10 @@ public:
 	}
 
 	virtual void BrushSelecting(CUIRect Rect) {}
-	virtual int BrushGrab(CLayerGroup *pBrush, CUIRect Rect) { return 0; }
-	virtual void FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect) {}
-	virtual void BrushDraw(CLayer *pBrush, float x, float y) {}
-	virtual void BrushPlace(CLayer *pBrush, float x, float y) {}
+	virtual int BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect) { return 0; }
+	virtual void FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIRect Rect) {}
+	virtual void BrushDraw(std::shared_ptr<CLayer> pBrush, float x, float y) {}
+	virtual void BrushPlace(std::shared_ptr<CLayer> pBrush, float x, float y) {}
 	virtual void BrushFlipX() {}
 	virtual void BrushFlipY() {}
 	virtual void BrushRotate(float Amount) {}
@@ -161,11 +230,11 @@ public:
 	virtual void Render(bool Tileset = false) {}
 	virtual CUI::EPopupMenuFunctionResult RenderProperties(CUIRect *pToolbox) { return CUI::POPUP_KEEP_OPEN; }
 
-	virtual void ModifyImageIndex(INDEX_MODIFY_FUNC pfnFunc) {}
-	virtual void ModifyEnvelopeIndex(INDEX_MODIFY_FUNC pfnFunc) {}
-	virtual void ModifySoundIndex(INDEX_MODIFY_FUNC pfnFunc) {}
+	virtual void ModifyImageIndex(FIndexModifyFunction pfnFunc) {}
+	virtual void ModifyEnvelopeIndex(FIndexModifyFunction pfnFunc) {}
+	virtual void ModifySoundIndex(FIndexModifyFunction pfnFunc) {}
 
-	virtual CLayer *Duplicate() const = 0;
+	virtual std::shared_ptr<CLayer> Duplicate() const = 0;
 
 	virtual void GetSize(float *pWidth, float *pHeight)
 	{
@@ -179,7 +248,6 @@ public:
 
 	bool m_Readonly;
 	bool m_Visible;
-	int m_BrushRefCount;
 };
 
 class CLayerGroup
@@ -187,7 +255,7 @@ class CLayerGroup
 public:
 	class CEditorMap *m_pMap;
 
-	std::vector<CLayer *> m_vpLayers;
+	std::vector<std::shared_ptr<CLayer>> m_vpLayers;
 
 	int m_OffsetX;
 	int m_OffsetY;
@@ -238,21 +306,21 @@ public:
 		m_vpLayers.clear();
 	}
 
-	void AddLayer(CLayer *pLayer);
+	void AddLayer(const std::shared_ptr<CLayer> &pLayer);
 
-	void ModifyImageIndex(INDEX_MODIFY_FUNC Func)
+	void ModifyImageIndex(FIndexModifyFunction Func)
 	{
 		for(auto &pLayer : m_vpLayers)
 			pLayer->ModifyImageIndex(Func);
 	}
 
-	void ModifyEnvelopeIndex(INDEX_MODIFY_FUNC Func)
+	void ModifyEnvelopeIndex(FIndexModifyFunction Func)
 	{
 		for(auto &pLayer : m_vpLayers)
 			pLayer->ModifyEnvelopeIndex(Func);
 	}
 
-	void ModifySoundIndex(INDEX_MODIFY_FUNC Func)
+	void ModifySoundIndex(FIndexModifyFunction Func)
 	{
 		for(auto &pLayer : m_vpLayers)
 			pLayer->ModifySoundIndex(Func);
@@ -314,8 +382,8 @@ public:
 
 class CEditorMap
 {
-	void MakeGameGroup(CLayerGroup *pGroup);
-	void MakeGameLayer(CLayer *pLayer);
+	void MakeGameGroup(std::shared_ptr<CLayerGroup> pGroup);
+	void MakeGameLayer(const std::shared_ptr<CLayer> &pLayer);
 
 public:
 	CEditor *m_pEditor;
@@ -337,10 +405,10 @@ public:
 	float m_LastAutosaveUpdateTime;
 	void OnModify();
 
-	std::vector<CLayerGroup *> m_vpGroups;
-	std::vector<CEditorImage *> m_vpImages;
-	std::vector<CEnvelope *> m_vpEnvelopes;
-	std::vector<CEditorSound *> m_vpSounds;
+	std::vector<std::shared_ptr<CLayerGroup>> m_vpGroups;
+	std::vector<std::shared_ptr<CEditorImage>> m_vpImages;
+	std::vector<std::shared_ptr<CEnvelope>> m_vpEnvelopes;
+	std::vector<std::shared_ptr<CEditorSound>> m_vpSounds;
 
 	class CMapInfo
 	{
@@ -372,16 +440,21 @@ public:
 	struct CSetting
 	{
 		char m_aCommand[256];
+
+		CSetting(const char *pCommand)
+		{
+			str_copy(m_aCommand, pCommand);
+		}
 	};
 	std::vector<CSetting> m_vSettings;
 
-	class CLayerGame *m_pGameLayer;
-	CLayerGroup *m_pGameGroup;
+	std::shared_ptr<class CLayerGame> m_pGameLayer;
+	std::shared_ptr<CLayerGroup> m_pGameGroup;
 
-	CEnvelope *NewEnvelope(int Channels)
+	std::shared_ptr<CEnvelope> NewEnvelope(int Channels)
 	{
 		OnModify();
-		CEnvelope *pEnv = new CEnvelope(Channels);
+		std::shared_ptr<CEnvelope> pEnv = std::make_shared<CEnvelope>(Channels);
 		m_vpEnvelopes.push_back(pEnv);
 		return pEnv;
 	}
@@ -391,10 +464,10 @@ public:
 	template<typename F>
 	void VisitEnvelopeReferences(F &&Visitor);
 
-	CLayerGroup *NewGroup()
+	std::shared_ptr<CLayerGroup> NewGroup()
 	{
 		OnModify();
-		CLayerGroup *pGroup = new CLayerGroup;
+		std::shared_ptr<CLayerGroup> pGroup = std::make_shared<CLayerGroup>();
 		pGroup->m_pMap = this;
 		m_vpGroups.push_back(pGroup);
 		return pGroup;
@@ -418,25 +491,24 @@ public:
 		if(Index < 0 || Index >= (int)m_vpGroups.size())
 			return;
 		OnModify();
-		delete m_vpGroups[Index];
 		m_vpGroups.erase(m_vpGroups.begin() + Index);
 	}
 
-	void ModifyImageIndex(INDEX_MODIFY_FUNC pfnFunc)
+	void ModifyImageIndex(FIndexModifyFunction pfnFunc)
 	{
 		OnModify();
 		for(auto &pGroup : m_vpGroups)
 			pGroup->ModifyImageIndex(pfnFunc);
 	}
 
-	void ModifyEnvelopeIndex(INDEX_MODIFY_FUNC pfnFunc)
+	void ModifyEnvelopeIndex(FIndexModifyFunction pfnFunc)
 	{
 		OnModify();
 		for(auto &pGroup : m_vpGroups)
 			pGroup->ModifyEnvelopeIndex(pfnFunc);
 	}
 
-	void ModifySoundIndex(INDEX_MODIFY_FUNC pfnFunc)
+	void ModifySoundIndex(FIndexModifyFunction pfnFunc)
 	{
 		OnModify();
 		for(auto &pGroup : m_vpGroups)
@@ -448,20 +520,21 @@ public:
 
 	// io
 	bool Save(const char *pFilename);
-	bool Load(const char *pFilename, int StorageType);
+	bool Load(const char *pFilename, int StorageType, const std::function<void(const char *pErrorMessage)> &ErrorHandler);
+	void PerformSanityChecks(const std::function<void(const char *pErrorMessage)> &ErrorHandler);
 
 	// DDRace
 
-	class CLayerTele *m_pTeleLayer;
-	class CLayerSpeedup *m_pSpeedupLayer;
-	class CLayerFront *m_pFrontLayer;
-	class CLayerSwitch *m_pSwitchLayer;
-	class CLayerTune *m_pTuneLayer;
-	void MakeTeleLayer(CLayer *pLayer);
-	void MakeSpeedupLayer(CLayer *pLayer);
-	void MakeFrontLayer(CLayer *pLayer);
-	void MakeSwitchLayer(CLayer *pLayer);
-	void MakeTuneLayer(CLayer *pLayer);
+	std::shared_ptr<class CLayerTele> m_pTeleLayer;
+	std::shared_ptr<class CLayerSpeedup> m_pSpeedupLayer;
+	std::shared_ptr<class CLayerFront> m_pFrontLayer;
+	std::shared_ptr<class CLayerSwitch> m_pSwitchLayer;
+	std::shared_ptr<class CLayerTune> m_pTuneLayer;
+	void MakeTeleLayer(const std::shared_ptr<CLayer> &pLayer);
+	void MakeSpeedupLayer(const std::shared_ptr<CLayer> &pLayer);
+	void MakeFrontLayer(const std::shared_ptr<CLayer> &pLayer);
+	void MakeSwitchLayer(const std::shared_ptr<CLayer> &pLayer);
+	void MakeTuneLayer(const std::shared_ptr<CLayer> &pLayer);
 };
 
 struct CProperty
@@ -573,7 +646,7 @@ public:
 	~CLayerTiles();
 
 	virtual CTile GetTile(int x, int y);
-	virtual void SetTile(int x, int y, CTile tile);
+	virtual void SetTile(int x, int y, CTile Tile);
 
 	virtual void Resize(int NewW, int NewH);
 	virtual void Shift(int Direction);
@@ -589,16 +662,16 @@ public:
 
 	virtual bool IsEntitiesLayer() const override;
 
-	virtual bool IsEmpty(CLayerTiles *pLayer);
+	virtual bool IsEmpty(const std::shared_ptr<CLayerTiles> &pLayer);
 	void BrushSelecting(CUIRect Rect) override;
-	int BrushGrab(CLayerGroup *pBrush, CUIRect Rect) override;
-	void FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect) override;
-	void BrushDraw(CLayer *pBrush, float wx, float wy) override;
+	int BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect) override;
+	void FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIRect Rect) override;
+	void BrushDraw(std::shared_ptr<CLayer> pBrush, float wx, float wy) override;
 	void BrushFlipX() override;
 	void BrushFlipY() override;
 	void BrushRotate(float Amount) override;
 
-	CLayer *Duplicate() const override;
+	std::shared_ptr<CLayer> Duplicate() const override;
 
 	virtual void ShowInfo();
 	CUI::EPopupMenuFunctionResult RenderProperties(CUIRect *pToolbox) override;
@@ -615,12 +688,13 @@ public:
 		int m_Height = -1;
 		int m_Color = 0;
 	};
-	static CUI::EPopupMenuFunctionResult RenderCommonProperties(SCommonPropState &State, CEditor *pEditor, CUIRect *pToolbox, std::vector<CLayerTiles *> &vpLayers);
+	static CUI::EPopupMenuFunctionResult RenderCommonProperties(SCommonPropState &State, CEditor *pEditor, CUIRect *pToolbox, std::vector<std::shared_ptr<CLayerTiles>> &vpLayers);
 
-	void ModifyImageIndex(INDEX_MODIFY_FUNC pfnFunc) override;
-	void ModifyEnvelopeIndex(INDEX_MODIFY_FUNC pfnFunc) override;
+	void ModifyImageIndex(FIndexModifyFunction pfnFunc) override;
+	void ModifyEnvelopeIndex(FIndexModifyFunction pfnFunc) override;
 
 	void PrepareForSave();
+	void ExtractTiles(int TilemapItemVersion, const CTile *pSavedTiles, size_t SavedTilesSize);
 
 	void GetSize(float *pWidth, float *pHeight) override
 	{
@@ -630,7 +704,6 @@ public:
 
 	void FlagModified(int x, int y, int w, int h);
 
-	IGraphics::CTextureHandle m_Texture;
 	int m_Game;
 	int m_Image;
 	int m_Width;
@@ -665,19 +738,19 @@ public:
 	int SwapQuads(int Index0, int Index1);
 
 	void BrushSelecting(CUIRect Rect) override;
-	int BrushGrab(CLayerGroup *pBrush, CUIRect Rect) override;
-	void BrushPlace(CLayer *pBrush, float wx, float wy) override;
+	int BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect) override;
+	void BrushPlace(std::shared_ptr<CLayer> pBrush, float wx, float wy) override;
 	void BrushFlipX() override;
 	void BrushFlipY() override;
 	void BrushRotate(float Amount) override;
 
 	CUI::EPopupMenuFunctionResult RenderProperties(CUIRect *pToolbox) override;
 
-	void ModifyImageIndex(INDEX_MODIFY_FUNC pfnFunc) override;
-	void ModifyEnvelopeIndex(INDEX_MODIFY_FUNC pfnFunc) override;
+	void ModifyImageIndex(FIndexModifyFunction pfnFunc) override;
+	void ModifyEnvelopeIndex(FIndexModifyFunction pfnFunc) override;
 
 	void GetSize(float *pWidth, float *pHeight) override;
-	CLayer *Duplicate() const override;
+	std::shared_ptr<CLayer> Duplicate() const override;
 
 	int m_Image;
 	std::vector<CQuad> m_vQuads;
@@ -690,14 +763,15 @@ public:
 	~CLayerGame();
 
 	CTile GetTile(int x, int y) override;
-	void SetTile(int x, int y, CTile tile) override;
+	void SetTile(int x, int y, CTile Tile) override;
 
 	CUI::EPopupMenuFunctionResult RenderProperties(CUIRect *pToolbox) override;
 };
 
 class CDataFileWriterFinishJob : public IJob
 {
-	char m_aFileName[IO_MAX_PATH_LENGTH];
+	char m_aRealFileName[IO_MAX_PATH_LENGTH];
+	char m_aTempFileName[IO_MAX_PATH_LENGTH];
 	CDataFileWriter m_Writer;
 
 	void Run() override
@@ -706,13 +780,45 @@ class CDataFileWriterFinishJob : public IJob
 	}
 
 public:
-	CDataFileWriterFinishJob(const char *pFileName, CDataFileWriter &&Writer) :
+	CDataFileWriterFinishJob(const char *pRealFileName, const char *pTempFileName, CDataFileWriter &&Writer) :
 		m_Writer(std::move(Writer))
 	{
-		str_copy(m_aFileName, pFileName);
+		str_copy(m_aRealFileName, pRealFileName);
+		str_copy(m_aTempFileName, pTempFileName);
 	}
 
-	const char *GetFileName() const { return m_aFileName; }
+	const char *GetRealFileName() const { return m_aRealFileName; }
+	const char *GetTempFileName() const { return m_aTempFileName; }
+};
+
+class CSmoothZoom
+{
+public:
+	CSmoothZoom(float InitialZoom, float Min, float Max, CEditor *pEditor);
+
+	void SetZoomRange(float Min, float Max);
+	void SetZoom(float Target);
+	void SetZoomInstant(float Target);
+	void ChangeZoom(float Amount);
+	bool UpdateZoom();
+	float GetZoom() const;
+	float GetMinZoomLevel() const;
+	float GetMaxZoomLevel() const;
+
+private:
+	float ZoomProgress(float CurrentTime) const;
+
+	bool m_Zooming;
+	float m_Zoom;
+	CCubicBezier m_ZoomSmoothing;
+	float m_ZoomSmoothingTarget;
+	float m_ZoomSmoothingStart;
+	float m_ZoomSmoothingEnd;
+
+	float m_MinZoomLevel;
+	float m_MaxZoomLevel;
+
+	CEditor *m_pEditor;
 };
 
 class CEditor : public IEditor
@@ -748,6 +854,8 @@ class CEditor : public IEditor
 		PREVIEW_ERROR,
 	};
 
+	std::shared_ptr<CLayerGroup> m_apSavedBrushes[10];
+
 public:
 	class IInput *Input() { return m_pInput; }
 	class IClient *Client() { return m_pClient; }
@@ -762,7 +870,9 @@ public:
 	CRenderTools *RenderTools() { return &m_RenderTools; }
 
 	CEditor() :
-		m_TilesetPicker(16, 16)
+		m_ZoomMapView(200.0f, 10.0f, 2000.0f, this),
+		m_ZoomEnvelopeX(1.0f, 0.1f, 600.0f, this),
+		m_ZoomEnvelopeY(640.0f, 0.1f, 32000.0f, this)
 	{
 		m_EntitiesTexture.Invalidate();
 		m_FrontTexture.Invalidate();
@@ -773,7 +883,6 @@ public:
 
 		m_Mode = MODE_LAYERS;
 		m_Dialog = 0;
-		m_EditBoxActive = 0;
 		m_pTooltip = nullptr;
 
 		m_GridActive = false;
@@ -811,9 +920,11 @@ public:
 		m_EditorOffsetX = 0.0f;
 		m_EditorOffsetY = 0.0f;
 
-		m_Zoom = 200.0f;
-		m_Zooming = false;
 		m_WorldZoom = 1.0f;
+
+		m_ResetZoomEnvelope = true;
+		m_OffsetEnvelopeX = 0.1f;
+		m_OffsetEnvelopeY = 0.5f;
 
 		m_ShowMousePointer = true;
 		m_MouseDeltaX = 0;
@@ -833,14 +944,14 @@ public:
 		m_AnimateTime = 0;
 		m_AnimateSpeed = 1;
 
-		m_ShowEnvelopeEditor = false;
-		m_EnvelopeEditorSplit = 250.0f;
-		m_ShowServerSettingsEditor = false;
-		m_ServerSettingsEditorSplit = 250.0f;
-
 		m_ShowEnvelopePreview = SHOWENV_NONE;
 		m_SelectedQuadEnvelope = -1;
-		m_SelectedEnvelopePoint = -1;
+
+		m_vSelectedEnvelopePoints = {};
+		m_UpdateEnvPointInfo = false;
+		m_SelectedTangentInPoint = std::pair(-1, -1);
+		m_SelectedTangentOutPoint = std::pair(-1, -1);
+		m_CurrentQuadIndex = -1;
 
 		m_QuadKnifeActive = false;
 		m_QuadKnifeCount = 0;
@@ -864,29 +975,37 @@ public:
 		m_PreventUnusedTilesWasWarned = false;
 		m_AllowPlaceUnusedTiles = 0;
 		m_BrushDrawDestructive = true;
-
-		m_Mentions = 0;
 	}
 
 	void Init() override;
 	void OnUpdate() override;
 	void OnRender() override;
+	void OnActivate() override;
 	bool HasUnsavedData() const override { return m_Map.m_Modified; }
 	void UpdateMentions() override { m_Mentions++; }
 	void ResetMentions() override { m_Mentions = 0; }
+	void OnIngameMoved() override { m_IngameMoved = true; }
+	void ResetIngameMoved() override { m_IngameMoved = false; }
 
 	void HandleCursorMovement();
+	void DispatchInputEvents();
 	void HandleAutosave();
 	bool PerformAutosave();
 	void HandleWriterFinishJobs();
 
-	CLayerGroup *m_apSavedBrushes[10];
-
 	void RefreshFilteredFileList();
 	void FilelistPopulate(int StorageType, bool KeepSelection = false);
 	void InvokeFileDialog(int StorageType, int FileType, const char *pTitle, const char *pButtonText,
-		const char *pBasepath, const char *pDefaultName,
+		const char *pBasepath, bool FilenameAsDefault,
 		bool (*pfnFunc)(const char *pFilename, int StorageType, void *pUser), void *pUser);
+	struct SStringKeyComparator
+	{
+		bool operator()(char const *pLhs, char const *pRhs) const
+		{
+			return str_comp(pLhs, pRhs) < 0;
+		}
+	};
+	std::map<const char *, CUI::SMessagePopupContext *, SStringKeyComparator> m_PopupMessageContexts;
 	void ShowFileDialogError(const char *pFormat, ...)
 		GNUC_ATTRIBUTE((format(printf, 2, 3)));
 
@@ -899,27 +1018,50 @@ public:
 
 	void RenderPressedKeys(CUIRect View);
 	void RenderSavingIndicator(CUIRect View);
+	void FreeDynamicPopupMenus();
 	void RenderMousePointer();
 
 	void ResetMenuBackgroundPositions();
 
 	std::vector<CQuad *> GetSelectedQuads();
-	CLayer *GetSelectedLayerType(int Index, int Type) const;
-	CLayer *GetSelectedLayer(int Index) const;
-	CLayerGroup *GetSelectedGroup() const;
+	std::vector<std::pair<CQuad *, int>> GetSelectedQuadPoints();
+	std::shared_ptr<CLayer> GetSelectedLayerType(int Index, int Type) const;
+	std::shared_ptr<CLayer> GetSelectedLayer(int Index) const;
+	std::shared_ptr<CLayerGroup> GetSelectedGroup() const;
 	CSoundSource *GetSelectedSource();
 	void SelectLayer(int LayerIndex, int GroupIndex = -1);
 	void AddSelectedLayer(int LayerIndex);
 	void SelectQuad(int Index);
+	void ToggleSelectQuad(int Index);
+	void DeselectQuads();
+	void DeselectQuadPoints();
+	void SelectQuadPoint(int QuadIndex, int Index);
+	void ToggleSelectQuadPoint(int QuadIndex, int Index);
 	void DeleteSelectedQuads();
 	bool IsQuadSelected(int Index) const;
+	bool IsQuadPointSelected(int QuadIndex, int Index) const;
 	int FindSelectedQuadIndex(int Index) const;
+	int FindSelectedQuadPointIndex(int QuadIndex) const;
+
+	int FindEnvPointIndex(int Index, int Channel) const;
+	void SelectEnvPoint(int Index);
+	void SelectEnvPoint(int Index, int Channel);
+	void ToggleEnvPoint(int Index, int Channel);
+	bool IsEnvPointSelected(int Index, int Channel) const;
+	bool IsEnvPointSelected(int Index) const;
+	void DeselectEnvPoints();
+	void SelectTangentOutPoint(int Index, int Channel);
+	bool IsTangentOutPointSelected(int Index, int Channel) const;
+	void SelectTangentInPoint(int Index, int Channel);
+	bool IsTangentInPointSelected(int Index, int Channel) const;
+	bool IsTangentInSelected() const;
+	bool IsTangentOutSelected() const;
+	bool IsTangentSelected() const;
 
 	int DoProperties(CUIRect *pToolbox, CProperty *pProps, int *pIDs, int *pNewVal, ColorRGBA Color = ColorRGBA(1, 1, 1, 0.5f));
 
 	int m_Mode;
 	int m_Dialog;
-	int m_EditBoxActive;
 	const char *m_pTooltip;
 
 	bool m_GridActive;
@@ -954,7 +1096,8 @@ public:
 	int m_AllowPlaceUnusedTiles;
 	bool m_BrushDrawDestructive;
 
-	int m_Mentions;
+	int m_Mentions = 0;
+	bool m_IngameMoved = false;
 
 	enum
 	{
@@ -1065,13 +1208,16 @@ public:
 	float m_EditorOffsetY;
 
 	// Zooming
-	CCubicBezier m_ZoomSmoothing;
-	float m_ZoomSmoothingStart;
-	float m_ZoomSmoothingEnd;
-	bool m_Zooming;
-	float m_Zoom;
-	float m_ZoomSmoothingTarget;
+	CSmoothZoom m_ZoomMapView;
 	float m_WorldZoom;
+
+	CSmoothZoom m_ZoomEnvelopeX;
+	CSmoothZoom m_ZoomEnvelopeY;
+
+	bool m_ResetZoomEnvelope;
+
+	float m_OffsetEnvelopeX;
+	float m_OffsetEnvelopeY;
 
 	bool m_ShowMousePointer;
 	bool m_GuiActive;
@@ -1115,10 +1261,15 @@ public:
 	float m_AnimateTime;
 	float m_AnimateSpeed;
 
-	bool m_ShowEnvelopeEditor;
-	float m_EnvelopeEditorSplit;
-	bool m_ShowServerSettingsEditor;
-	float m_ServerSettingsEditorSplit;
+	enum EExtraEditor
+	{
+		EXTRAEDITOR_NONE = -1,
+		EXTRAEDITOR_ENVELOPES,
+		EXTRAEDITOR_SERVER_SETTINGS,
+		NUM_EXTRAEDITORS,
+	};
+	EExtraEditor m_ActiveExtraEditor = EXTRAEDITOR_NONE;
+	float m_aExtraEditorSplits[NUM_EXTRAEDITORS] = {250.0f, 250.0f};
 
 	enum EShowEnvelope
 	{
@@ -1134,13 +1285,19 @@ public:
 	int m_SelectedQuadPoint;
 	int m_SelectedQuadIndex;
 	int m_SelectedGroup;
-	int m_SelectedPoints;
+	std::vector<std::pair<int, int>> m_vSelectedQuadPoints;
 	int m_SelectedEnvelope;
-	int m_SelectedEnvelopePoint;
+	std::vector<std::pair<int, int>> m_vSelectedEnvelopePoints;
 	int m_SelectedQuadEnvelope;
+	int m_CurrentQuadIndex;
 	int m_SelectedImage;
 	int m_SelectedSound;
 	int m_SelectedSource;
+	std::pair<int, int> m_SelectedTangentInPoint;
+	std::pair<int, int> m_SelectedTangentOutPoint;
+	bool m_UpdateEnvPointInfo;
+
+	std::vector<CQuad> m_vCopyBuffer;
 
 	bool m_QuadKnifeActive;
 	int m_QuadKnifeCount;
@@ -1152,9 +1309,9 @@ public:
 
 	IGraphics::CTextureHandle GetEntitiesTexture();
 
-	CLayerGroup m_Brush;
-	CLayerTiles m_TilesetPicker;
-	CLayerQuads m_QuadsetPicker;
+	std::shared_ptr<CLayerGroup> m_pBrush;
+	std::shared_ptr<CLayerTiles> m_pTilesetPicker;
+	std::shared_ptr<CLayerQuads> m_pQuadsetPicker;
 
 	static const void *ms_pUiGotContext;
 
@@ -1174,7 +1331,6 @@ public:
 	int DoButton_Editor(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip);
 	int DoButton_Env(const void *pID, const char *pText, int Checked, const CUIRect *pRect, const char *pToolTip, ColorRGBA Color, int Corners);
 
-	int DoButton_Tab(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip);
 	int DoButton_Ex(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip, int Corners, float FontSize = 10.0f);
 	int DoButton_FontIcon(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip, int Corners, float FontSize = 10.0f);
 	int DoButton_ButtonDec(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip);
@@ -1192,7 +1348,7 @@ public:
 
 	void RenderBackground(CUIRect View, IGraphics::CTextureHandle Texture, float Size, float Brightness);
 
-	void RenderGrid(CLayerGroup *pGroup);
+	void RenderGrid(const std::shared_ptr<CLayerGroup> &pGroup);
 	void SnapToGrid(float &x, float &y);
 
 	int UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, int Current, int Min, int Max, int Step, float Scale, const char *pToolTip, bool IsDegree = false, bool IsHex = false, int corners = IGraphics::CORNER_ALL, ColorRGBA *pColor = nullptr, bool ShowValue = true);
@@ -1204,13 +1360,14 @@ public:
 	struct SLayerPopupContext : public SPopupMenuId
 	{
 		CEditor *m_pEditor;
-		std::vector<CLayerTiles *> m_vpLayers;
+		std::vector<std::shared_ptr<CLayerTiles>> m_vpLayers;
 		CLayerTiles::SCommonPropState m_CommonPropState;
 	};
 	static CUI::EPopupMenuFunctionResult PopupLayer(void *pContext, CUIRect View, bool Active);
 	static CUI::EPopupMenuFunctionResult PopupQuad(void *pContext, CUIRect View, bool Active);
 	static CUI::EPopupMenuFunctionResult PopupSource(void *pContext, CUIRect View, bool Active);
 	static CUI::EPopupMenuFunctionResult PopupPoint(void *pContext, CUIRect View, bool Active);
+	static CUI::EPopupMenuFunctionResult PopupEnvPoint(void *pContext, CUIRect View, bool Active);
 	static CUI::EPopupMenuFunctionResult PopupImage(void *pContext, CUIRect View, bool Active);
 	static CUI::EPopupMenuFunctionResult PopupSound(void *pContext, CUIRect View, bool Active);
 	static CUI::EPopupMenuFunctionResult PopupNewFolder(void *pContext, CUIRect View, bool Active);
@@ -1248,6 +1405,7 @@ public:
 	void DoQuadEnvelopes(const std::vector<CQuad> &vQuads, IGraphics::CTextureHandle Texture = IGraphics::CTextureHandle());
 	void DoQuadEnvPoint(const CQuad *pQuad, int QIndex, int pIndex);
 	void DoQuadPoint(CQuad *pQuad, int QuadIndex, int v);
+	void SetHotQuadPoint(const std::shared_ptr<CLayerQuads> &pLayer);
 
 	float TriangleArea(vec2 A, vec2 B, vec2 C);
 	bool IsInTriangle(vec2 Point, vec2 A, vec2 B, vec2 C);
@@ -1278,11 +1436,15 @@ public:
 	void RenderSelectedImage(CUIRect View);
 	void RenderSounds(CUIRect Toolbox);
 	void RenderModebar(CUIRect View);
-	void RenderStatusbar(CUIRect View);
+	void RenderStatusbar(CUIRect View, CUIRect *pTooltipRect);
+	void RenderTooltip(CUIRect TooltipRect);
 
 	void RenderEnvelopeEditor(CUIRect View);
 	void RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEditorLast);
-	void RenderExtraEditorDragBar(CUIRect View, float *pSplit);
+
+	void RenderExtraEditorDragBar(CUIRect View, CUIRect DragBar);
+
+	void SetHotEnvelopePoint(const CUIRect &View, const std::shared_ptr<CEnvelope> &pEnvelope, int ActiveChannels);
 
 	void RenderMenubar(CUIRect Menubar);
 	void RenderFileDialog();
@@ -1370,13 +1532,23 @@ public:
 	int GetLineDistance() const;
 
 	// Zooming
-	void SetZoom(float Target);
-	void ChangeZoom(float Amount);
 	void ZoomMouseTarget(float ZoomFactor);
-	void UpdateZoom();
-	float ZoomProgress(float CurrentTime) const;
-	float MinZoomLevel() const;
-	float MaxZoomLevel() const;
+	void UpdateZoomWorld();
+
+	void ZoomAdaptOffsetX(float ZoomFactor, const CUIRect &View);
+	void UpdateZoomEnvelopeX(const CUIRect &View);
+
+	void ZoomAdaptOffsetY(float ZoomFactor, const CUIRect &View);
+	void UpdateZoomEnvelopeY(const CUIRect &View);
+
+	void ResetZoomEnvelope(const std::shared_ptr<CEnvelope> &pEnvelope, int ActiveChannels);
+	void RemoveTimeOffsetEnvelope(const std::shared_ptr<CEnvelope> &pEnvelope);
+	float ScreenToEnvelopeX(const CUIRect &View, float x) const;
+	float EnvelopeToScreenX(const CUIRect &View, float x) const;
+	float ScreenToEnvelopeY(const CUIRect &View, float y) const;
+	float EnvelopeToScreenY(const CUIRect &View, float y) const;
+	float ScreenToEnvelopeDX(const CUIRect &View, float dx);
+	float ScreenToEnvelopeDY(const CUIRect &View, float dy);
 
 	// DDRace
 
@@ -1416,12 +1588,12 @@ public:
 
 	void Resize(int NewW, int NewH) override;
 	void Shift(int Direction) override;
-	bool IsEmpty(CLayerTiles *pLayer) override;
-	void BrushDraw(CLayer *pBrush, float wx, float wy) override;
+	bool IsEmpty(const std::shared_ptr<CLayerTiles> &pLayer) override;
+	void BrushDraw(std::shared_ptr<CLayer> pBrush, float wx, float wy) override;
 	void BrushFlipX() override;
 	void BrushFlipY() override;
 	void BrushRotate(float Amount) override;
-	void FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect) override;
+	void FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIRect Rect) override;
 	virtual bool ContainsElementWithId(int Id);
 };
 
@@ -1438,12 +1610,12 @@ public:
 
 	void Resize(int NewW, int NewH) override;
 	void Shift(int Direction) override;
-	bool IsEmpty(CLayerTiles *pLayer) override;
-	void BrushDraw(CLayer *pBrush, float wx, float wy) override;
+	bool IsEmpty(const std::shared_ptr<CLayerTiles> &pLayer) override;
+	void BrushDraw(std::shared_ptr<CLayer> pBrush, float wx, float wy) override;
 	void BrushFlipX() override;
 	void BrushFlipY() override;
 	void BrushRotate(float Amount) override;
-	void FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect) override;
+	void FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIRect Rect) override;
 };
 
 class CLayerFront : public CLayerTiles
@@ -1452,7 +1624,7 @@ public:
 	CLayerFront(int w, int h);
 
 	void Resize(int NewW, int NewH) override;
-	void SetTile(int x, int y, CTile tile) override;
+	void SetTile(int x, int y, CTile Tile) override;
 };
 
 class CLayerSwitch : public CLayerTiles
@@ -1467,12 +1639,12 @@ public:
 
 	void Resize(int NewW, int NewH) override;
 	void Shift(int Direction) override;
-	bool IsEmpty(CLayerTiles *pLayer) override;
-	void BrushDraw(CLayer *pBrush, float wx, float wy) override;
+	bool IsEmpty(const std::shared_ptr<CLayerTiles> &pLayer) override;
+	void BrushDraw(std::shared_ptr<CLayer> pBrush, float wx, float wy) override;
 	void BrushFlipX() override;
 	void BrushFlipY() override;
 	void BrushRotate(float Amount) override;
-	void FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect) override;
+	void FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIRect Rect) override;
 	virtual bool ContainsElementWithId(int Id);
 };
 
@@ -1487,12 +1659,12 @@ public:
 
 	void Resize(int NewW, int NewH) override;
 	void Shift(int Direction) override;
-	bool IsEmpty(CLayerTiles *pLayer) override;
-	void BrushDraw(CLayer *pBrush, float wx, float wy) override;
+	bool IsEmpty(const std::shared_ptr<CLayerTiles> &pLayer) override;
+	void BrushDraw(std::shared_ptr<CLayer> pBrush, float wx, float wy) override;
 	void BrushFlipX() override;
 	void BrushFlipY() override;
 	void BrushRotate(float Amount) override;
-	void FillSelection(bool Empty, CLayer *pBrush, CUIRect Rect) override;
+	void FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIRect Rect) override;
 };
 
 class CLayerSounds : public CLayer
@@ -1506,15 +1678,15 @@ public:
 	CSoundSource *NewSource(int x, int y);
 
 	void BrushSelecting(CUIRect Rect) override;
-	int BrushGrab(CLayerGroup *pBrush, CUIRect Rect) override;
-	void BrushPlace(CLayer *pBrush, float wx, float wy) override;
+	int BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect) override;
+	void BrushPlace(std::shared_ptr<CLayer> pBrush, float wx, float wy) override;
 
 	CUI::EPopupMenuFunctionResult RenderProperties(CUIRect *pToolbox) override;
 
-	void ModifyEnvelopeIndex(INDEX_MODIFY_FUNC pfnFunc) override;
-	void ModifySoundIndex(INDEX_MODIFY_FUNC pfnFunc) override;
+	void ModifyEnvelopeIndex(FIndexModifyFunction pfnFunc) override;
+	void ModifySoundIndex(FIndexModifyFunction pfnFunc) override;
 
-	CLayer *Duplicate() const override;
+	std::shared_ptr<CLayer> Duplicate() const override;
 
 	int m_Sound;
 	std::vector<CSoundSource> m_vSources;

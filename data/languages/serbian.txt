@@ -1260,6 +1260,7 @@ Chat command
 Enable controller
 == Uključi kontroler
 
+[Ingame controller mode]
 Relative
 == Relativno
 
@@ -1487,8 +1488,6 @@ Loading sound files
 == Učitavam zvučne fajlove
 
 [Graphics error]
-
-[Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
 == 
 
@@ -1530,10 +1529,31 @@ Could not save downloaded map. Try manually deleting this file: %s
 Initializing components
 == 
 
+Quitting. Please wait…
+== 
+
+Restarting. Please wait…
+== 
+
+Multi-View
+== 
+
+Rename folder
+== 
+
 A demo with this name already exists
 == 
 
+A folder with this name already exists
+== 
+
+Unable to rename the folder
+== 
+
 File '%s' already exists, do you want to overwrite it?
+== 
+
+(paused)
 == 
 
 transmits your player name to info.ddnet.org
@@ -1627,13 +1647,28 @@ Cut interval
 Cut length
 == 
 
+All combined
+== 
+
+Folder Link
+== 
+
 Open the directory that contains the demo files
+== 
+
+Are you sure that you want to delete the folder '%s'?
 == 
 
 Are you sure that you want to delete the demo '%s'?
 == 
 
+Delete folder
+== 
+
 Unable to delete the demo '%s'
+== 
+
+Unable to delete the folder '%s'. Make sure it's empty first.
 == 
 
 Menu opened. Press Esc key again to close menu.
@@ -1709,4 +1744,7 @@ Unregister protocol and file extensions
 == 
 
 Open the directory to add custom assets
+== 
+
+Moved ingame
 == 

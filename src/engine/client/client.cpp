@@ -123,27 +123,25 @@ void CGraph::InsertAt(size_t Index, float v, float r, float g, float b)
 	m_aColors[Index][2] = b;
 }
 
-void CGraph::Render(IGraphics *pGraphics, IGraphics::CTextureHandle FontTexture, float x, float y, float w, float h, const char *pDescription)
+void CGraph::Render(IGraphics *pGraphics, ITextRender *pTextRender, float x, float y, float w, float h, const char *pDescription)
 {
-	//m_pGraphics->BlendNormal();
-
 	pGraphics->TextureClear();
 
 	pGraphics->QuadsBegin();
-	pGraphics->SetColor(0, 0, 0, 0.75f);
+	pGraphics->SetColor(0.0f, 0.0f, 0.0f, 0.75f);
 	IGraphics::CQuadItem QuadItem(x, y, w, h);
 	pGraphics->QuadsDrawTL(&QuadItem, 1);
 	pGraphics->QuadsEnd();
 
 	pGraphics->LinesBegin();
-	pGraphics->SetColor(0.95f, 0.95f, 0.95f, 1.00f);
+	pGraphics->SetColor(0.95f, 0.95f, 0.95f, 1.0f);
 	IGraphics::CLineItem LineItem(x, y + h / 2, x + w, y + h / 2);
 	pGraphics->LinesDraw(&LineItem, 1);
 	pGraphics->SetColor(0.5f, 0.5f, 0.5f, 0.75f);
 	IGraphics::CLineItem aLineItems[2] = {
 		IGraphics::CLineItem(x, y + (h * 3) / 4, x + w, y + (h * 3) / 4),
 		IGraphics::CLineItem(x, y + h / 4, x + w, y + h / 4)};
-	pGraphics->LinesDraw(aLineItems, 2);
+	pGraphics->LinesDraw(aLineItems, std::size(aLineItems));
 	for(int i = 1; i < MAX_VALUES; i++)
 	{
 		float a0 = (i - 1) / (float)MAX_VALUES;
@@ -157,23 +155,23 @@ void CGraph::Render(IGraphics *pGraphics, IGraphics::CTextureHandle FontTexture,
 		IGraphics::CColorVertex aColorVertices[2] = {
 			IGraphics::CColorVertex(0, m_aColors[i0][0], m_aColors[i0][1], m_aColors[i0][2], 0.75f),
 			IGraphics::CColorVertex(1, m_aColors[i1][0], m_aColors[i1][1], m_aColors[i1][2], 0.75f)};
-		pGraphics->SetColorVertex(aColorVertices, 2);
+		pGraphics->SetColorVertex(aColorVertices, std::size(aColorVertices));
 		IGraphics::CLineItem LineItem2(x + a0 * w, y + h - v0 * h, x + a1 * w, y + h - v1 * h);
 		pGraphics->LinesDraw(&LineItem2, 1);
 	}
 	pGraphics->LinesEnd();
 
-	pGraphics->TextureSet(FontTexture);
-	pGraphics->QuadsBegin();
-	pGraphics->QuadsText(x + 2, y + h - 16, 16, pDescription);
+	const float FontSize = 12.0f;
+	const float Spacing = 2.0f;
+
+	pTextRender->Text(x + Spacing, y + h - FontSize - Spacing, FontSize, pDescription);
 
 	char aBuf[32];
 	str_format(aBuf, sizeof(aBuf), "%.2f", m_Max);
-	pGraphics->QuadsText(x + w - 8 * str_length(aBuf) - 8, y + 2, 16, aBuf);
+	pTextRender->Text(x + w - pTextRender->TextWidth(FontSize, aBuf) - Spacing, y + Spacing, FontSize, aBuf);
 
 	str_format(aBuf, sizeof(aBuf), "%.2f", m_Min);
-	pGraphics->QuadsText(x + w - 8 * str_length(aBuf) - 8, y + h - 16, 16, aBuf);
-	pGraphics->QuadsEnd();
+	pTextRender->Text(x + w - pTextRender->TextWidth(FontSize, aBuf) - Spacing, y + h - FontSize - Spacing, FontSize, aBuf);
 }
 
 void CSmoothTime::Init(int64_t Target)
@@ -770,14 +768,19 @@ void CClient::Connect(const char *pAddress, const char *pPassword)
 	while((pNextAddr = str_next_token(pNextAddr, ",", aBuffer, sizeof(aBuffer))))
 	{
 		NETADDR NextAddr;
-		if(net_host_lookup(aBuffer, &NextAddr, m_aNetClient[CONN_MAIN].NetType()) != 0)
+		char aHost[128];
+		int url = net_addr_from_url(&NextAddr, aBuffer, aHost, sizeof(aHost));
+		if(url > 0)
+			str_copy(aHost, aBuffer);
+
+		if(net_host_lookup(aHost, &NextAddr, m_aNetClient[CONN_MAIN].NetType()) != 0)
 		{
-			log_error("client", "could not find address of %s", aBuffer);
+			log_error("client", "could not find address of %s", aHost);
 			continue;
 		}
 		if(NumConnectAddrs == (int)std::size(aConnectAddrs))
 		{
-			log_warn("client", "too many connect addresses, ignoring %s", aBuffer);
+			log_warn("client", "too many connect addresses, ignoring %s", aHost);
 			continue;
 		}
 		if(NextAddr.port == 0)
@@ -1025,24 +1028,23 @@ void CClient::SnapSetStaticsize(int ItemType, int Size)
 
 void CClient::DebugRender()
 {
-	static NETSTATS Prev, Current;
-	static int64_t LastSnap = 0;
-	static float FrameTimeAvg = 0;
-	char aBuffer[512];
-
 	if(!g_Config.m_Debug)
 		return;
 
-	//m_pGraphics->BlendNormal();
+	static NETSTATS s_Prev, s_Current;
+	static int64_t s_LastSnapTime = 0;
+	static float s_FrameTimeAvg = 0;
+	char aBuffer[512];
+
 	Graphics()->TextureSet(m_DebugFont);
 	Graphics()->MapScreen(0, 0, Graphics()->ScreenWidth(), Graphics()->ScreenHeight());
 	Graphics()->QuadsBegin();
 
-	if(time_get() - LastSnap > time_freq())
+	if(time_get() - s_LastSnapTime > time_freq())
 	{
-		LastSnap = time_get();
-		Prev = Current;
-		net_stats(&Current);
+		s_LastSnapTime = time_get();
+		s_Prev = s_Current;
+		net_stats(&s_Current);
 	}
 
 	/*
@@ -1051,22 +1053,22 @@ void CClient::DebugRender()
 		udp = 8
 		total = 42
 	*/
-	FrameTimeAvg = FrameTimeAvg * 0.9f + m_RenderFrameTime * 0.1f;
+	s_FrameTimeAvg = s_FrameTimeAvg * 0.9f + m_RenderFrameTime * 0.1f;
 	str_format(aBuffer, sizeof(aBuffer), "ticks: %8d %8d gfx mem(tex/buff/stream/staging): (%" PRIu64 "k/%" PRIu64 "k/%" PRIu64 "k/%" PRIu64 "k) fps: %3d",
 		m_aCurGameTick[g_Config.m_ClDummy], m_aPredTick[g_Config.m_ClDummy],
 		(Graphics()->TextureMemoryUsage() / 1024),
 		(Graphics()->BufferMemoryUsage() / 1024),
 		(Graphics()->StreamedMemoryUsage() / 1024),
 		(Graphics()->StagingMemoryUsage() / 1024),
-		(int)(1.0f / FrameTimeAvg + 0.5f));
+		(int)(1.0f / s_FrameTimeAvg + 0.5f));
 	Graphics()->QuadsText(2, 2, 16, aBuffer);
 
 	{
-		uint64_t SendPackets = (Current.sent_packets - Prev.sent_packets);
-		uint64_t SendBytes = (Current.sent_bytes - Prev.sent_bytes);
+		uint64_t SendPackets = (s_Current.sent_packets - s_Prev.sent_packets);
+		uint64_t SendBytes = (s_Current.sent_bytes - s_Prev.sent_bytes);
 		uint64_t SendTotal = SendBytes + SendPackets * 42;
-		uint64_t RecvPackets = (Current.recv_packets - Prev.recv_packets);
-		uint64_t RecvBytes = (Current.recv_bytes - Prev.recv_bytes);
+		uint64_t RecvPackets = (s_Current.recv_packets - s_Prev.recv_packets);
+		uint64_t RecvBytes = (s_Current.recv_bytes - s_Prev.recv_bytes);
 		uint64_t RecvTotal = RecvBytes + RecvPackets * 42;
 
 		if(!SendPackets)
@@ -1125,18 +1127,18 @@ void CClient::DebugRender()
 	// render graphs
 	if(g_Config.m_DbgGraphs)
 	{
-		//Graphics()->MapScreen(0,0,400.0f,300.0f);
 		float w = Graphics()->ScreenWidth() / 4.0f;
 		float h = Graphics()->ScreenHeight() / 6.0f;
 		float sp = Graphics()->ScreenWidth() / 100.0f;
 		float x = Graphics()->ScreenWidth() - w - sp;
 
+		ITextRender *pTextRender = Kernel()->RequestInterface<ITextRender>();
 		m_FpsGraph.Scale();
-		m_FpsGraph.Render(Graphics(), m_DebugFont, x, sp * 5, w, h, "FPS");
+		m_FpsGraph.Render(Graphics(), pTextRender, x, sp * 5, w, h, "FPS");
 		m_InputtimeMarginGraph.Scale();
-		m_InputtimeMarginGraph.Render(Graphics(), m_DebugFont, x, sp * 5 + h + sp, w, h, "Prediction Margin");
+		m_InputtimeMarginGraph.Render(Graphics(), pTextRender, x, sp * 6 + h, w, h, "Prediction Margin");
 		m_GametimeMarginGraph.Scale();
-		m_GametimeMarginGraph.Render(Graphics(), m_DebugFont, x, sp * 5 + h + sp + h + sp, w, h, "Gametime Margin");
+		m_GametimeMarginGraph.Render(Graphics(), pTextRender, x, sp * 7 + h * 2, w, h, "Gametime Margin");
 	}
 }
 
@@ -1865,6 +1867,16 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 				MsgP.AddInt(ResultCheck);
 				SendMsg(Conn, &MsgP, MSGFLAG_VITAL);
 			}
+		}
+		else if(Msg == NETMSG_REDIRECT)
+		{
+			int RedirectPort = Unpacker.GetInt();
+			char aAddr[128];
+			char aIP[64];
+			NETADDR ServerAddr = ServerAddress();
+			net_addr_str(&ServerAddr, aIP, sizeof(aIP), 0);
+			str_format(aAddr, sizeof(aAddr), "%s:%d", aIP, RedirectPort);
+			Connect(aAddr);
 		}
 		else if(Conn == CONN_MAIN && (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_RCON_CMD_ADD)
 		{
@@ -3051,8 +3063,9 @@ void CClient::Run()
 	}
 #endif
 
-	// init font rendering
-	Kernel()->RequestInterface<IEngineTextRender>()->Init();
+	// init text render
+	IEngineTextRender *pTextRender = Kernel()->RequestInterface<IEngineTextRender>();
+	pTextRender->Init();
 
 	// init the input
 	Input()->Init();
@@ -3216,7 +3229,7 @@ void CClient::Run()
 				{
 					Input()->MouseModeRelative();
 					GameClient()->OnActivateEditor();
-					m_pEditor->ResetMentions();
+					m_pEditor->OnActivate();
 					m_EditorActive = true;
 				}
 			}
@@ -3409,6 +3422,9 @@ void CClient::Run()
 		m_aNetClient[i].Close();
 
 	delete m_pEditor;
+
+	// shutdown text render while graphics are still available
+	pTextRender->Shutdown();
 }
 
 bool CClient::InitNetworkClient(char *pError, size_t ErrorSize)
@@ -3929,7 +3945,11 @@ const char *CClient::DemoPlayer_Render(const char *pFilename, int StorageType, c
 
 	this->CClient::StartVideo(NULL, this, pVideoName);
 	m_DemoPlayer.Play();
-	m_DemoPlayer.SetSpeed(g_aSpeeds[SpeedIndex]);
+	m_DemoPlayer.SetSpeedIndex(SpeedIndex);
+	if(Config()->m_ClVideoPauseOnStart)
+	{
+		m_DemoPlayer.Pause();
+	}
 	//m_pConsole->Print(IConsole::OUTPUT_LEVEL_DEBUG, "demo_recorder", "demo eof");
 	return 0;
 }
@@ -4285,61 +4305,6 @@ void CClient::ToggleWindowVSync()
 		g_Config.m_GfxVsync ^= 1;
 }
 
-void CClient::LoadFont()
-{
-	static CFont *pDefaultFont = 0;
-	char aFilename[IO_MAX_PATH_LENGTH];
-	char aBuff[1024];
-	const char *pFontFile = "fonts/DejaVuSans.ttf";
-	const char *apFallbackFontFiles[] =
-		{
-			"fonts/GlowSansJCompressed-Book.otf",
-			"fonts/SourceHanSansSC-Regular.otf",
-		};
-	IOHANDLE File = Storage()->OpenFile(pFontFile, IOFLAG_READ, IStorage::TYPE_ALL, aFilename, sizeof(aFilename));
-	if(File)
-	{
-		IEngineTextRender *pTextRender = Kernel()->RequestInterface<IEngineTextRender>();
-		pDefaultFont = pTextRender->GetFont(aFilename);
-		if(pDefaultFont == NULL)
-		{
-			void *pBuf;
-			unsigned Size;
-			io_read_all(File, &pBuf, &Size);
-			pDefaultFont = pTextRender->LoadFont(aFilename, (unsigned char *)pBuf, Size);
-		}
-		io_close(File);
-
-		for(auto &pFallbackFontFile : apFallbackFontFiles)
-		{
-			bool FontLoaded = false;
-			File = Storage()->OpenFile(pFallbackFontFile, IOFLAG_READ, IStorage::TYPE_ALL, aFilename, sizeof(aFilename));
-			if(File)
-			{
-				void *pBuf;
-				unsigned Size;
-				io_read_all(File, &pBuf, &Size);
-				io_close(File);
-				FontLoaded = pTextRender->LoadFallbackFont(pDefaultFont, aFilename, (unsigned char *)pBuf, Size);
-			}
-
-			if(!FontLoaded)
-			{
-				str_format(aBuff, std::size(aBuff), "failed to load the fallback font. filename='%s'", pFallbackFontFile);
-				m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "gameclient", aBuff);
-			}
-		}
-
-		pTextRender->SetDefaultFont(pDefaultFont);
-	}
-
-	if(!pDefaultFont)
-	{
-		str_format(aBuff, std::size(aBuff), "failed to load font. filename='%s'", pFontFile);
-		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "gameclient", aBuff);
-	}
-}
-
 void CClient::Notify(const char *pTitle, const char *pMessage)
 {
 	if(m_pGraphics->WindowActive() || !g_Config.m_ClShowNotifications)
@@ -4369,12 +4334,6 @@ void CClient::ConchainTimeoutSeed(IConsole::IResult *pResult, void *pUserData, I
 		pSelf->m_GenerateTimeoutSeed = false;
 }
 
-void CClient::ConchainLoglevel(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
-{
-	pfnCallback(pResult, pCallbackUserData);
-	log_set_loglevel((LEVEL)g_Config.m_Loglevel);
-}
-
 void CClient::ConchainPassword(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
@@ -4400,6 +4359,26 @@ void CClient::ConchainReplays(IConsole::IResult *pResult, void *pUserData, ICons
 			// start recording
 			pSelf->DemoRecorder_HandleAutoStart();
 		}
+	}
+}
+
+void CClient::ConchainLoglevel(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	CClient *pSelf = (CClient *)pUserData;
+	pfnCallback(pResult, pCallbackUserData);
+	if(pResult->NumArguments())
+	{
+		pSelf->m_pFileLogger->SetFilter(CLogFilter{IConsole::ToLogLevelFilter(g_Config.m_Loglevel)});
+	}
+}
+
+void CClient::ConchainStdoutOutputLevel(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	CClient *pSelf = (CClient *)pUserData;
+	pfnCallback(pResult, pCallbackUserData);
+	if(pResult->NumArguments() && pSelf->m_pStdoutLogger)
+	{
+		pSelf->m_pStdoutLogger->SetFilter(CLogFilter{IConsole::ToLogLevelFilter(g_Config.m_StdoutOutputLevel)});
 	}
 }
 
@@ -4459,7 +4438,6 @@ void CClient::RegisterCommands()
 	m_pConsole->Chain("cl_timeout_seed", ConchainTimeoutSeed, this);
 	m_pConsole->Chain("cl_replays", ConchainReplays, this);
 
-	m_pConsole->Chain("loglevel", ConchainLoglevel, this);
 	m_pConsole->Chain("password", ConchainPassword, this);
 
 	// used for server browser update
@@ -4474,6 +4452,9 @@ void CClient::RegisterCommands()
 	m_pConsole->Chain("gfx_fullscreen", ConchainFullscreen, this);
 	m_pConsole->Chain("gfx_borderless", ConchainWindowBordered, this);
 	m_pConsole->Chain("gfx_vsync", ConchainWindowVSync, this);
+
+	m_pConsole->Chain("loglevel", ConchainLoglevel, this);
+	m_pConsole->Chain("stdout_output_level", ConchainStdoutOutputLevel, this);
 
 	// DDRace
 
@@ -4590,14 +4571,19 @@ int main(int argc, const char **argv)
 #endif
 
 	std::vector<std::shared_ptr<ILogger>> vpLoggers;
+	std::shared_ptr<ILogger> pStdoutLogger = nullptr;
 #if defined(CONF_PLATFORM_ANDROID)
-	vpLoggers.push_back(std::shared_ptr<ILogger>(log_logger_android()));
+	pStdoutLogger = std::shared_ptr<ILogger>(log_logger_android());
 #else
 	if(!Silent)
 	{
-		vpLoggers.push_back(std::shared_ptr<ILogger>(log_logger_stdout()));
+		pStdoutLogger = std::shared_ptr<ILogger>(log_logger_stdout());
 	}
 #endif
+	if(pStdoutLogger)
+	{
+		vpLoggers.push_back(pStdoutLogger);
+	}
 	std::shared_ptr<CFutureLogger> pFutureFileLogger = std::make_shared<CFutureLogger>();
 	vpLoggers.push_back(pFutureFileLogger);
 	std::shared_ptr<CFutureLogger> pFutureConsoleLogger = std::make_shared<CFutureLogger>();
@@ -4638,6 +4624,8 @@ int main(int argc, const char **argv)
 	CleanerFunctions.push([]() { SDL_Quit(); });
 
 	CClient *pClient = CreateClient();
+	pClient->SetLoggers(pFutureFileLogger, std::move(pStdoutLogger));
+
 	IKernel *pKernel = IKernel::Create();
 	pKernel->RegisterInterface(pClient, false);
 	pClient->RegisterInterfaces();
@@ -4707,7 +4695,13 @@ int main(int argc, const char **argv)
 	{
 		bool RegisterFail = false;
 
-		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pEngine);
+		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pEngine, false);
+
+		CleanerFunctions.push([pEngine]() {
+			// Has to be before destroying graphics so that skin download thread can finish
+			delete pEngine;
+		});
+
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pConsole);
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pConfigManager);
 
@@ -4805,7 +4799,6 @@ int main(int argc, const char **argv)
 		pSteam->ClearConnectAddress();
 	}
 
-	log_set_loglevel((LEVEL)g_Config.m_Loglevel);
 	const int Mode = g_Config.m_Logappend ? IOFLAG_APPEND : IOFLAG_WRITE;
 	if(g_Config.m_Logfile[0])
 	{
@@ -5115,4 +5108,10 @@ void CClient::GetGPUInfoString(char (&aGPUInfo)[256])
 	{
 		str_copy(aGPUInfo, "Graphics backend was not yet initialized.");
 	}
+}
+
+void CClient::SetLoggers(std::shared_ptr<ILogger> &&pFileLogger, std::shared_ptr<ILogger> &&pStdoutLogger)
+{
+	m_pFileLogger = pFileLogger;
+	m_pStdoutLogger = pStdoutLogger;
 }

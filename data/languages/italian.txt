@@ -8,6 +8,7 @@
 #	Otacon	2011-05-02 18:21:08
 #	Apmox		2011-07-15 01:09:59
 # NeXus   2020-09-19 02:43:00
+# kio     2023-08-12 18:44:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -133,7 +134,7 @@ Dynamic Camera
 == Camera dinamica
 
 Emoticon
-== Emoticon
+== Faccina
 
 Error
 == Errore
@@ -181,10 +182,10 @@ Game over
 == Partita finita
 
 Game type
-== Tipo
+== Tipo server
 
 Game types:
-== Tipo di gioco:
+== Tipi di server:
 
 General
 == Generale
@@ -211,10 +212,10 @@ Invalid Demo
 == Demo non valida
 
 Join blue
-== Vai ai blu
+== Vai nei blu
 
 Join red
-== Vai ai rossi
+== Vai nei rossi
 
 Jump
 == Salta
@@ -226,7 +227,7 @@ Language
 == Lingua
 
 MOTD
-== MOTD
+== MOTTO
 
 Map
 == Mappa
@@ -253,7 +254,7 @@ Next weapon
 == Arma seguente
 
 Nickname
-== Nickname
+== Soprannome
 
 No
 == No
@@ -332,10 +333,10 @@ Remote console
 == Console remota
 
 Remove
-== Elimina
+== Rimuovi
 
 Remove friend
-== Elimina amico
+== Rimuovi amico
 
 Rename
 == Rinomina
@@ -344,7 +345,7 @@ Rename demo
 == Rinomina demo
 
 Reset filter
-== Azzera filtri
+== Resetta filtri
 
 Score
 == Punti
@@ -720,9 +721,7 @@ Show DDNet map finishes in server browser
 == Mostra le mappe finite in DDNet nel tuo browser dei server
 
 transmits your player name to info.ddnet.org
-
 == Trasmette il tuo nome da giocatore a info.ddnet.org
-
 
 Theme
 == Tema
@@ -782,7 +781,7 @@ Connect Dummy
 == Connetti Dummy
 
 Kill
-== Respawn
+== Rinasci
 
 Pause
 == Pausa
@@ -1168,8 +1167,6 @@ Grabs
 == +9 nuove menzioni
 
 [Graphics error]
-
-[Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
 == 
 
@@ -1238,6 +1235,12 @@ Initializing map logic
 Sending initial client info
 == 
 
+Quitting. Please wait…
+== 
+
+Restarting. Please wait…
+== 
+
 Position:
 == 
 
@@ -1245,6 +1248,9 @@ Speed:
 == 
 
 Angle:
+== 
+
+Multi-View
 == 
 
 Team %d
@@ -1271,10 +1277,22 @@ Getting game info
 Requesting to join the game
 == 
 
+Rename folder
+== 
+
 A demo with this name already exists
 == 
 
+A folder with this name already exists
+== 
+
+Unable to rename the folder
+== 
+
 File '%s' already exists, do you want to overwrite it?
+== 
+
+(paused)
 == 
 
 Join Tutorial Server
@@ -1407,6 +1425,12 @@ Cut length
 Loading demo files
 == 
 
+All combined
+== 
+
+Folder Link
+== 
+
 Markers:
 == 
 
@@ -1419,10 +1443,19 @@ Markers:
 Open the directory that contains the demo files
 == 
 
+Are you sure that you want to delete the folder '%s'?
+== 
+
 Are you sure that you want to delete the demo '%s'?
 == 
 
+Delete folder
+== 
+
 Unable to delete the demo '%s'
+== 
+
+Unable to delete the folder '%s'. Make sure it's empty first.
 == 
 
 Loading ghost files
@@ -1743,4 +1776,7 @@ Loading sound files
 == 
 
 FPM
+== 
+
+Moved ingame
 == 

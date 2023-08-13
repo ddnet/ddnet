@@ -38,6 +38,7 @@ public:
 	void *GetData(int Index);
 	void *GetDataSwapped(int Index); // makes sure that the data is 32bit LE ints when saved
 	int GetDataSize(int Index) const;
+	void ReplaceData(int Index, char *pData, size_t Size); // memory for data must have been allocated with malloc
 	void UnloadData(int Index);
 	int NumData() const;
 
@@ -126,9 +127,9 @@ public:
 	void Init();
 	bool OpenFile(class IStorage *pStorage, const char *pFilename, int StorageType = IStorage::TYPE_SAVE);
 	bool Open(class IStorage *pStorage, const char *pFilename, int StorageType = IStorage::TYPE_SAVE);
-	int AddData(int Size, void *pData, int CompressionLevel = Z_DEFAULT_COMPRESSION);
-	int AddDataSwapped(int Size, void *pData);
-	int AddItem(int Type, int ID, int Size, void *pData);
+	int AddData(int Size, const void *pData, int CompressionLevel = Z_DEFAULT_COMPRESSION);
+	int AddDataSwapped(int Size, const void *pData);
+	int AddItem(int Type, int ID, int Size, const void *pData);
 	void Finish();
 };
 

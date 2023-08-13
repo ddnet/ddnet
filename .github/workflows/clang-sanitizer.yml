@@ -3,11 +3,10 @@ name: Check ASan & UBSan
 on:
   push:
     branches-ignore:
+      - gh-readonly-queue/**
       - master
-      - staging.tmp
-      - trying.tmp
-      - staging-squash-merge.tmp
   pull_request:
+  merge_group:
 
 jobs:
   check-clang-san:

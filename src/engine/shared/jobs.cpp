@@ -9,17 +9,6 @@ IJob::IJob() :
 {
 }
 
-IJob::IJob(const IJob &Other) :
-	m_Status(STATE_PENDING)
-{
-}
-
-IJob &IJob::operator=(const IJob &Other)
-{
-	m_Status = STATE_PENDING;
-	return *this;
-}
-
 IJob::~IJob() = default;
 
 int IJob::Status()
@@ -62,6 +51,8 @@ void CJobPool::WorkerThread(void *pUser)
 			{
 				pJob = pPool->m_pFirstJob;
 				pPool->m_pFirstJob = pPool->m_pFirstJob->m_pNext;
+				// allow remaining objects in list to destruct, even when current object stays alive
+				pJob->m_pNext = nullptr;
 				if(!pPool->m_pFirstJob)
 					pPool->m_pLastJob = 0;
 			}

@@ -322,9 +322,10 @@ protected:
 	char m_aCurrentDemoSelectionName[IO_MAX_PATH_LENGTH];
 	CLineInputBuffered<IO_MAX_PATH_LENGTH> m_DemoRenameInput;
 	CLineInputBuffered<IO_MAX_PATH_LENGTH> m_DemoSliceInput;
+#if defined(CONF_VIDEORECORDER)
 	CLineInputBuffered<IO_MAX_PATH_LENGTH> m_DemoRenderInput;
+#endif
 	int m_DemolistSelectedIndex;
-	bool m_DemolistSelectedIsDir;
 	bool m_DemolistSelectedReveal = false;
 	int m_DemolistStorageType;
 	bool m_DemolistMultipleStorages = false;
@@ -428,6 +429,7 @@ protected:
 	void RenderDemoPlayerSliceSavePopup(CUIRect MainView);
 	void RenderDemoList(CUIRect MainView);
 	void PopupConfirmDeleteDemo();
+	void PopupConfirmDeleteFolder();
 
 	// found in menus_start.cpp
 	void RenderStartMenu(CUIRect MainView);
@@ -447,6 +449,7 @@ protected:
 
 	// found in menus_browser.cpp
 	int m_SelectedIndex;
+	bool m_ServerBrowserShouldRevealSelection;
 	void RenderServerbrowserServerList(CUIRect View);
 	void Connect(const char *pAddress);
 	void PopupConfirmSwitchServer();

@@ -41,6 +41,18 @@ class CGameConsole : public CComponent
 		const char *m_pName;
 		int m_Type;
 		int m_BacklogCurPage;
+		int m_BacklogLastActivePage = -1;
+
+		STextBoundingBox m_BoundingBox = {0.0f, 0.0f, 0.0f, 0.0f};
+		float m_LastInputHeight = 0.0f;
+
+		bool m_MouseIsPress = false;
+		vec2 m_MousePress = vec2(0.0f, 0.0f);
+		vec2 m_MouseRelease = vec2(0.0f, 0.0f);
+		int m_CurSelStart = 0;
+		int m_CurSelEnd = 0;
+		bool m_HasSelection = false;
+		int m_NewLineCounter = 0;
 
 		CGameConsole *m_pGameConsole;
 
@@ -57,9 +69,9 @@ class CGameConsole : public CComponent
 		bool m_UsernameReq;
 
 		bool m_IsCommand;
-		char m_aCommandName[IConsole::TEMPCMD_NAME_LENGTH];
-		char m_aCommandHelp[IConsole::TEMPCMD_HELP_LENGTH];
-		char m_aCommandParams[IConsole::TEMPCMD_PARAMS_LENGTH];
+		const char *m_pCommandName;
+		const char *m_pCommandHelp;
+		const char *m_pCommandParams;
 
 		CInstance(int t);
 		void Init(CGameConsole *pGameConsole);
@@ -86,23 +98,13 @@ class CGameConsole : public CComponent
 	CInstance m_RemoteConsole;
 
 	CInstance *CurrentConsole();
-	float TimeNow();
 
 	int m_ConsoleType;
 	int m_ConsoleState;
 	float m_StateChangeEnd;
 	float m_StateChangeDuration;
 
-	bool m_MouseIsPress = false;
-	vec2 m_MousePress = vec2(0.0f, 0.0f);
-	vec2 m_MouseRelease = vec2(0.0f, 0.0f);
-	int m_CurSelStart = 0;
-	int m_CurSelEnd = 0;
-	bool m_HasSelection = false;
-	int m_NewLineCounter = 0;
 	bool m_WantsSelectionCopy = false;
-
-	float m_LastInputHeight = 0.0f;
 
 	void Toggle(int Type);
 	void Dump(int Type);
@@ -116,6 +118,7 @@ class CGameConsole : public CComponent
 	static void ConDumpRemoteConsole(IConsole::IResult *pResult, void *pUserData);
 	static void ConConsolePageUp(IConsole::IResult *pResult, void *pUserData);
 	static void ConConsolePageDown(IConsole::IResult *pResult, void *pUserData);
+	static void ConchainConsoleOutputLevel(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
 public:
 	enum

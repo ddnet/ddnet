@@ -15,6 +15,8 @@ class CMap : public IEngineMap
 public:
 	CMap();
 
+	CDataFileReader *GetReader() { return &m_DataFile; }
+
 	void *GetData(int Index) override;
 	int GetDataSize(int Index) const override;
 	void *GetDataSwapped(int Index) override;
@@ -35,6 +37,8 @@ public:
 	SHA256_DIGEST Sha256() const override;
 	unsigned Crc() const override;
 	int MapSize() const override;
+
+	static void ExtractTiles(class CTile *pDest, size_t DestSize, const class CTile *pSrc, size_t SrcSize);
 };
 
 #endif

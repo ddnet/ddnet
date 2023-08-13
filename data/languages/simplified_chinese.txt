@@ -33,6 +33,8 @@
 # 2023-01-11 cheeser0613
 # 2023-04-01 cheeser0613
 # 2023-05-21 RemakePower
+# 2023-07-20 By
+# 2023-08-11 By
 ##### /authors #####
 
 ##### translated strings #####
@@ -188,7 +190,7 @@ Force vote
 == 强制投票
 
 Free-View
-== 自由视野
+== 自由视角
 
 Friends
 == 好友
@@ -1353,6 +1355,7 @@ Download community skins
 Enable controller
 == 启用控制器
 
+[Ingame controller mode]
 Relative
 == 相对
 
@@ -1613,8 +1616,6 @@ Are you sure that you want to reset the controls to their defaults?
 == 你确定要将当前的控制恢复至默认设置？
 
 [Graphics error]
-
-[Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
 == 初始化失败。请尝试打开配置目录中的设置文件（settings_ddnet.cfg）并将“gfx_backend OpenGL”修改为“gfx_backend Vulkan”（若没有前者则可直接输入后者）再重试。
 
@@ -1712,31 +1713,70 @@ Add Clan
 == 添加战队
 
 A demo with this name already exists
-== 
+== 已经存在同名回放
 
 No server selected
-== 
+== 未选择服务器
 
 Mark the beginning of a cut (right click to reset)
-== 
+== 标记裁剪起点 (右键重置)
 
 Mark the end of a cut (right click to reset)
-== 
+== 标记裁剪终点 (右键重置)
 
 Close the demo player
-== 
+== 关闭回放
 
 Export demo cut
-== 
+== 另存裁剪部分
 
 Cut interval
-== 
+== 裁剪区间
 
 Cut length
-== 
+== 裁剪时长
 
 Axis
-== 
+== 轴
 
 Graphics card
-== 
+== 显卡
+
+Quitting. Please wait…
+== 正在退出，请稍等
+
+Restarting. Please wait…
+== 正在重启，请稍等
+
+Multi-View
+== 多人同框视角
+
+Rename folder
+== 重命名文件夹
+
+A folder with this name already exists
+== 已经存在同名文件夹
+
+Unable to rename the folder
+== 无法重命名这个文件夹
+
+(paused)
+== (暂停)
+
+All combined
+== 全部文件
+
+Folder Link
+== 文件夹链接
+
+Are you sure that you want to delete the folder '%s'?
+== 你确定要删除文件夹 "%s" ？
+
+Delete folder
+== 删除文件夹
+
+Unable to delete the folder '%s'. Make sure it's empty first.
+== 无法删除 "%s" ，请确保你已清空该文件夹
+
+Moved ingame
+== 游戏内移动

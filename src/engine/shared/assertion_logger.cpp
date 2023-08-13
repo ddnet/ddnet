@@ -30,6 +30,10 @@ public:
 
 void CAssertionLogger::Log(const CLogMessage *pMessage)
 {
+	if(m_Filter.Filters(pMessage))
+	{
+		return;
+	}
 	std::unique_lock<std::mutex> Lock(m_DbgMessageMutex);
 	SDebugMessageItem *pMsgItem = (SDebugMessageItem *)m_DbgMessages.Allocate(sizeof(SDebugMessageItem));
 	str_copy(pMsgItem->m_aMessage, pMessage->m_aLine);

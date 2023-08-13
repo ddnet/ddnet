@@ -27,8 +27,12 @@ CC-BY-SA license
 bomb, kitty_bluekitty, kitty_bluestripe, kitty_brownbear, kitty_cammo,
 kitty_coala, kitty_default, kitty_limekitty, kitty_pinky, kitty_redbopp,
 kitty_redstripe, kitty_saddo, kitty_toptri, kitty_twinbop, kitty_twintri,
-kitty_warpaint, kitty_x_ninja:
+kitty_warpaint:
 Copyright Ravie
+CC0 license
+
+kitty_x_ninja:
+Copyright patwo.*
 CC0 license
 
 demonlimekitty, nanas, nersif:

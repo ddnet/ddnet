@@ -243,7 +243,7 @@ void CUI::DebugRender()
 	MapScreen();
 
 	char aBuf[128];
-	str_format(aBuf, sizeof(aBuf), "hot=%p nexthot=%p active=%p lastactive=%p", HotItem(), NextHotItem(), ActiveItem(), LastActiveItem());
+	str_format(aBuf, sizeof(aBuf), "hot=%p nexthot=%p active=%p lastactive=%p", HotItem(), NextHotItem(), ActiveItem(), m_pLastActiveItem);
 	TextRender()->Text(2.0f, Screen()->h - 12.0f, 10.0f, aBuf);
 }
 
@@ -749,7 +749,7 @@ void CUI::DoLabelStreamed(CUIElement::SUIElementRect &RectEl, const CUIRect *pRe
 bool CUI::DoEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize, int Corners)
 {
 	const bool Inside = MouseHovered(pRect);
-	const bool Active = LastActiveItem() == pLineInput;
+	const bool Active = m_pLastActiveItem == pLineInput;
 	const bool Changed = pLineInput->WasChanged();
 
 	const float VSpacing = 2.0f;
@@ -934,10 +934,10 @@ int CUI::DoButton_Menu(CUIElement &UIElement, const CButtonContainer *pID, const
 						pText = GetTextLambda();
 					NewRect.m_Text = pText;
 					if(Props.m_UseIconFont)
-						TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
+						TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
 					DoLabel(NewRect, &Text, pText, Text.h * CUI::ms_FontmodHeight, TEXTALIGN_MC);
 					if(Props.m_UseIconFont)
-						TextRender()->SetCurFont(nullptr);
+						TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
 				}
 			}
 			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -1463,15 +1463,13 @@ CUI::EPopupMenuFunctionResult CUI::PopupConfirm(void *pContext, CUIRect View, bo
 
 	pUI->TextRender()->Text(Label.x, Label.y, SConfirmPopupContext::POPUP_FONT_SIZE, pConfirmPopup->m_aMessage, Label.w);
 
-	static CButtonContainer s_CancelButton;
-	if(pUI->DoButton_PopupMenu(&s_CancelButton, pConfirmPopup->m_aNegativeButtonLabel, &CancelButton, SConfirmPopupContext::POPUP_FONT_SIZE, TEXTALIGN_MC))
+	if(pUI->DoButton_PopupMenu(&pConfirmPopup->m_CancelButton, pConfirmPopup->m_aNegativeButtonLabel, &CancelButton, SConfirmPopupContext::POPUP_FONT_SIZE, TEXTALIGN_MC))
 	{
 		pConfirmPopup->m_Result = SConfirmPopupContext::CANCELED;
 		return CUI::POPUP_CLOSE_CURRENT;
 	}
 
-	static CButtonContainer s_ConfirmButton;
-	if(pUI->DoButton_PopupMenu(&s_ConfirmButton, pConfirmPopup->m_aPositiveButtonLabel, &ConfirmButton, SConfirmPopupContext::POPUP_FONT_SIZE, TEXTALIGN_MC) || (Active && pUI->ConsumeHotkey(HOTKEY_ENTER)))
+	if(pUI->DoButton_PopupMenu(&pConfirmPopup->m_ConfirmButton, pConfirmPopup->m_aPositiveButtonLabel, &ConfirmButton, SConfirmPopupContext::POPUP_FONT_SIZE, TEXTALIGN_MC) || (Active && pUI->ConsumeHotkey(HOTKEY_ENTER)))
 	{
 		pConfirmPopup->m_Result = SConfirmPopupContext::CONFIRMED;
 		return CUI::POPUP_CLOSE_CURRENT;
@@ -1617,11 +1615,11 @@ int CUI::DoDropDown(CUIRect *pRect, int CurSelection, const char **pStrs, int Nu
 	CUIRect DropDownIcon;
 	pRect->HMargin(2.0f, &DropDownIcon);
 	DropDownIcon.VSplitRight(5.0f, &DropDownIcon, nullptr);
-	TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
+	TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
 	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
 	DoLabel(&DropDownIcon, FONT_ICON_CIRCLE_CHEVRON_DOWN, DropDownIcon.h * CUI::ms_FontmodHeight, TEXTALIGN_MR);
 	TextRender()->SetRenderFlags(0);
-	TextRender()->SetCurFont(nullptr);
+	TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
 
 	if(State.m_SelectionPopupContext.m_SelectionIndex >= 0)
 	{
