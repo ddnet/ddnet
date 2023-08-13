@@ -5,9 +5,9 @@
 		<key>CFBundleDevelopmentRegion</key>
 		<string>English</string>
 		<key>CFBundleExecutable</key>
-		<string>${TARGET_CLIENT}</string>
+		<string>${CLIENT_EXECUTABLE}</string>
 		<key>CFBundleIconFile</key>
-		<string>${TARGET_CLIENT}</string>
+		<string>${CLIENT_EXECUTABLE}</string>
 		<key>CFBundleInfoDictionaryVersion</key>
 		<string>6.0</string>
 		<key>CFBundlePackageType</key>
