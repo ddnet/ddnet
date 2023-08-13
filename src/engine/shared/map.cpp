@@ -50,6 +50,11 @@ void CMap::GetType(int Type, int *pStart, int *pNum)
 	m_DataFile.GetType(Type, pStart, pNum);
 }
 
+int CMap::FindItemIndex(int Type, int ID)
+{
+	return m_DataFile.FindItemIndex(Type, ID);
+}
+
 void *CMap::FindItem(int Type, int ID)
 {
 	return m_DataFile.FindItem(Type, ID);
