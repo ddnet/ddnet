@@ -404,6 +404,8 @@ void *CDataFileReader::GetDataSwapped(int Index)
 
 void CDataFileReader::ReplaceData(int Index, char *pData, size_t Size)
 {
+	dbg_assert(Index >= 0 && Index < m_pDataFile->m_Header.m_NumRawData, "Index invalid");
+
 	free(m_pDataFile->m_ppDataPtrs[Index]);
 	m_pDataFile->m_ppDataPtrs[Index] = pData;
 	m_pDataFile->m_pDataSizes[Index] = Size;
