@@ -301,7 +301,7 @@ int CDataFileReader::GetDataSize(int Index) const
 	return Size;
 }
 
-void *CDataFileReader::GetDataImpl(int Index, int Swap)
+void *CDataFileReader::GetDataImpl(int Index, bool Swap)
 {
 	if(!m_pDataFile)
 	{
@@ -394,12 +394,12 @@ void *CDataFileReader::GetDataImpl(int Index, int Swap)
 
 void *CDataFileReader::GetData(int Index)
 {
-	return GetDataImpl(Index, 0);
+	return GetDataImpl(Index, false);
 }
 
 void *CDataFileReader::GetDataSwapped(int Index)
 {
-	return GetDataImpl(Index, 1);
+	return GetDataImpl(Index, true);
 }
 
 void CDataFileReader::ReplaceData(int Index, char *pData, size_t Size)

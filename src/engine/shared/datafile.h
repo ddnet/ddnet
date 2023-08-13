@@ -19,7 +19,7 @@ enum
 class CDataFileReader
 {
 	struct CDatafile *m_pDataFile;
-	void *GetDataImpl(int Index, int Swap);
+	void *GetDataImpl(int Index, bool Swap);
 	int GetFileDataSize(int Index) const;
 
 	int GetExternalItemType(int InternalType);
