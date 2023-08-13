@@ -51,6 +51,53 @@ TEST(Datafile, ExtendedType)
 		EXPECT_EQ(pTest->m_aFields[1], ItemTest.m_aFields[1]);
 		EXPECT_EQ(pTest->m_Field3, ItemTest.m_Field3);
 		EXPECT_EQ(pTest->m_Field4, ItemTest.m_Field4);
+
+		Reader.Close();
+	}
+
+	if(!HasFailure())
+	{
+		pStorage->RemoveFile(Info.m_aFilename, IStorage::TYPE_SAVE);
+	}
+}
+
+TEST(Datafile, StringData)
+{
+	auto pStorage = std::unique_ptr<IStorage>(CreateLocalStorage());
+	CTestInfo Info;
+
+	{
+		CDataFileWriter Writer;
+		Writer.Open(pStorage.get(), Info.m_aFilename);
+
+		EXPECT_EQ(Writer.AddDataString(""), -1); // Empty string is not added
+		EXPECT_EQ(Writer.AddDataString("Abc"), 0);
+		EXPECT_EQ(Writer.AddDataString("DDNet最好了"), 1);
+		EXPECT_EQ(Writer.AddDataString("aβい🐘"), 2);
+		EXPECT_EQ(Writer.AddData(3, "Abc"), 3); // Not zero-terminated
+		EXPECT_EQ(Writer.AddData(7, "foo\0bar"), 4); // Early zero-terminator
+		EXPECT_EQ(Writer.AddData(5, "xyz\xff\0"), 5); // Truncated UTF-8
+		EXPECT_EQ(Writer.AddData(4, "XYZ\xff"), 6); // Truncated UTF-8 and not zero-terminated
+
+		Writer.Finish();
+	}
+
+	{
+		CDataFileReader Reader;
+		Reader.Open(pStorage.get(), Info.m_aFilename, IStorage::TYPE_ALL);
+
+		EXPECT_EQ(Reader.GetDataString(-1000), nullptr);
+		EXPECT_STREQ(Reader.GetDataString(-1), "");
+		EXPECT_STREQ(Reader.GetDataString(0), "Abc");
+		EXPECT_STREQ(Reader.GetDataString(1), "DDNet最好了");
+		EXPECT_STREQ(Reader.GetDataString(2), "aβい🐘");
+		EXPECT_EQ(Reader.GetDataString(3), nullptr);
+		EXPECT_EQ(Reader.GetDataString(4), nullptr);
+		EXPECT_EQ(Reader.GetDataString(5), nullptr);
+		EXPECT_EQ(Reader.GetDataString(6), nullptr);
+		EXPECT_EQ(Reader.GetDataString(1000), nullptr);
+
+		Reader.Close();
 	}
 
 	if(!HasFailure())

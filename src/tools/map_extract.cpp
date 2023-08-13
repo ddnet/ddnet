@@ -27,10 +27,14 @@ bool Process(IStorage *pStorage, const char *pMapName, const char *pPathSave)
 
 	if(pInfo)
 	{
-		dbg_msg("map_extract", "author:  %s", (char *)Reader.GetData(pInfo->m_Author));
-		dbg_msg("map_extract", "version: %s", (char *)Reader.GetData(pInfo->m_MapVersion));
-		dbg_msg("map_extract", "credits: %s", (char *)Reader.GetData(pInfo->m_Credits));
-		dbg_msg("map_extract", "license: %s", (char *)Reader.GetData(pInfo->m_License));
+		const char *pAuthor = Reader.GetDataString(pInfo->m_Author);
+		dbg_msg("map_extract", "author:  %s", pAuthor == nullptr ? "(error)" : pAuthor);
+		const char *pMapVersion = Reader.GetDataString(pInfo->m_MapVersion);
+		dbg_msg("map_extract", "version: %s", pMapVersion == nullptr ? "(error)" : pMapVersion);
+		const char *pCredits = Reader.GetDataString(pInfo->m_Credits);
+		dbg_msg("map_extract", "credits: %s", pCredits == nullptr ? "(error)" : pCredits);
+		const char *pLicense = Reader.GetDataString(pInfo->m_License);
+		dbg_msg("map_extract", "license: %s", pLicense == nullptr ? "(error)" : pLicense);
 	}
 
 	int Start, Num;
@@ -41,12 +45,17 @@ bool Process(IStorage *pStorage, const char *pMapName, const char *pPathSave)
 	for(int i = 0; i < Num; i++)
 	{
 		CMapItemImage_v2 *pItem = (CMapItemImage_v2 *)Reader.GetItem(Start + i);
-		char *pName = (char *)Reader.GetData(pItem->m_ImageName);
-
 		if(pItem->m_External)
 			continue;
 
-		char aBuf[512];
+		const char *pName = Reader.GetDataString(pItem->m_ImageName);
+		if(pName == nullptr || pName[0] == '\0')
+		{
+			dbg_msg("map_extract", "failed to load name of image %d", i);
+			continue;
+		}
+
+		char aBuf[IO_MAX_PATH_LENGTH];
 		str_format(aBuf, sizeof(aBuf), "%s/%s.png", pPathSave, pName);
 		dbg_msg("map_extract", "writing image: %s (%dx%d)", aBuf, pItem->m_Width, pItem->m_Height);
 
@@ -81,12 +90,17 @@ bool Process(IStorage *pStorage, const char *pMapName, const char *pPathSave)
 	for(int i = 0; i < Num; i++)
 	{
 		CMapItemSound *pItem = (CMapItemSound *)Reader.GetItem(Start + i);
-		char *pName = (char *)Reader.GetData(pItem->m_SoundName);
-
 		if(pItem->m_External)
 			continue;
 
-		char aBuf[512];
+		const char *pName = Reader.GetDataString(pItem->m_SoundName);
+		if(pName == nullptr || pName[0] == '\0')
+		{
+			dbg_msg("map_extract", "failed to load name of sound %d", i);
+			continue;
+		}
+
+		char aBuf[IO_MAX_PATH_LENGTH];
 		str_format(aBuf, sizeof(aBuf), "%s/%s.opus", pPathSave, pName);
 		dbg_msg("map_extract", "writing sound: %s (%d B)", aBuf, pItem->m_SoundDataSize);
 

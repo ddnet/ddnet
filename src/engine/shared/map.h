@@ -20,6 +20,7 @@ public:
 	int GetDataSize(int Index) const override;
 	void *GetData(int Index) override;
 	void *GetDataSwapped(int Index) override;
+	const char *GetDataString(int Index) override;
 	void UnloadData(int Index) override;
 	int NumData() const override;
 

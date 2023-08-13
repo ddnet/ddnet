@@ -25,6 +25,11 @@ void *CMap::GetDataSwapped(int Index)
 	return m_DataFile.GetDataSwapped(Index);
 }
 
+const char *CMap::GetDataString(int Index)
+{
+	return m_DataFile.GetDataString(Index);
+}
+
 void CMap::UnloadData(int Index)
 {
 	m_DataFile.UnloadData(Index);

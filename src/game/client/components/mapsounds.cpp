@@ -1,12 +1,11 @@
+#include <base/log.h>
+
 #include <engine/demo.h>
 #include <engine/sound.h>
 
 #include <game/client/components/camera.h>
-#include <game/client/components/maplayers.h> // envelope
 #include <game/client/components/sounds.h>
-
 #include <game/client/gameclient.h>
-
 #include <game/layers.h>
 #include <game/mapitems.h>
 
@@ -30,15 +29,20 @@ void CMapSounds::OnMapLoad()
 	// load new samples
 	for(int i = 0; i < m_Count; i++)
 	{
-		m_aSounds[i] = 0;
-
 		CMapItemSound *pSound = (CMapItemSound *)pMap->GetItem(Start + i);
 		if(pSound->m_External)
 		{
+			const char *pName = pMap->GetDataString(pSound->m_SoundName);
+			if(pName == nullptr || pName[0] == '\0')
+			{
+				log_error("mapsounds", "Failed to load map sound %d: failed to load name.", i);
+				continue;
+			}
+
 			char aBuf[IO_MAX_PATH_LENGTH];
-			char *pName = (char *)pMap->GetData(pSound->m_SoundName);
 			str_format(aBuf, sizeof(aBuf), "mapres/%s.opus", pName);
 			m_aSounds[i] = Sound()->LoadOpus(aBuf);
+			pMap->UnloadData(pSound->m_SoundName);
 		}
 		else
 		{

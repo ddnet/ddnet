@@ -59,23 +59,10 @@ bool CEditorMap::Save(const char *pFileName)
 	{
 		CMapItemInfoSettings Item;
 		Item.m_Version = 1;
-
-		if(m_MapInfo.m_aAuthor[0])
-			Item.m_Author = Writer.AddData(str_length(m_MapInfo.m_aAuthor) + 1, m_MapInfo.m_aAuthor);
-		else
-			Item.m_Author = -1;
-		if(m_MapInfo.m_aVersion[0])
-			Item.m_MapVersion = Writer.AddData(str_length(m_MapInfo.m_aVersion) + 1, m_MapInfo.m_aVersion);
-		else
-			Item.m_MapVersion = -1;
-		if(m_MapInfo.m_aCredits[0])
-			Item.m_Credits = Writer.AddData(str_length(m_MapInfo.m_aCredits) + 1, m_MapInfo.m_aCredits);
-		else
-			Item.m_Credits = -1;
-		if(m_MapInfo.m_aLicense[0])
-			Item.m_License = Writer.AddData(str_length(m_MapInfo.m_aLicense) + 1, m_MapInfo.m_aLicense);
-		else
-			Item.m_License = -1;
+		Item.m_Author = Writer.AddDataString(m_MapInfo.m_aAuthor);
+		Item.m_MapVersion = Writer.AddDataString(m_MapInfo.m_aVersion);
+		Item.m_Credits = Writer.AddDataString(m_MapInfo.m_aCredits);
+		Item.m_License = Writer.AddDataString(m_MapInfo.m_aLicense);
 
 		Item.m_Settings = -1;
 		if(!m_vSettings.empty())
@@ -116,7 +103,7 @@ bool CEditorMap::Save(const char *pFileName)
 		Item.m_Width = pImg->m_Width;
 		Item.m_Height = pImg->m_Height;
 		Item.m_External = pImg->m_External;
-		Item.m_ImageName = Writer.AddData(str_length(pImg->m_aName) + 1, pImg->m_aName);
+		Item.m_ImageName = Writer.AddDataString(pImg->m_aName);
 		if(pImg->m_External)
 		{
 			Item.m_ImageData = -1;
@@ -157,7 +144,7 @@ bool CEditorMap::Save(const char *pFileName)
 		Item.m_Version = 1;
 
 		Item.m_External = 0;
-		Item.m_SoundName = Writer.AddData(str_length(pSound->m_aName) + 1, pSound->m_aName);
+		Item.m_SoundName = Writer.AddDataString(pSound->m_aName);
 		Item.m_SoundData = Writer.AddData(pSound->m_DataSize, pSound->m_pData);
 		Item.m_SoundDataSize = pSound->m_DataSize;
 
@@ -449,14 +436,25 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 			if(!pItem || ItemID != 0)
 				continue;
 
-			if(pItem->m_Author > -1)
-				str_copy(m_MapInfo.m_aAuthor, (char *)DataFile.GetData(pItem->m_Author));
-			if(pItem->m_MapVersion > -1)
-				str_copy(m_MapInfo.m_aVersion, (char *)DataFile.GetData(pItem->m_MapVersion));
-			if(pItem->m_Credits > -1)
-				str_copy(m_MapInfo.m_aCredits, (char *)DataFile.GetData(pItem->m_Credits));
-			if(pItem->m_License > -1)
-				str_copy(m_MapInfo.m_aLicense, (char *)DataFile.GetData(pItem->m_License));
+			const auto &&ReadStringInfo = [&](int Index, char *pBuffer, size_t BufferSize, const char *pErrorContext) {
+				const char *pStr = DataFile.GetDataString(Index);
+				if(pStr == nullptr)
+				{
+					char aBuf[128];
+					str_format(aBuf, sizeof(aBuf), "Error: Failed to read %s from map info.", pErrorContext);
+					ErrorHandler(aBuf);
+					pBuffer[0] = '\0';
+				}
+				else
+				{
+					str_copy(pBuffer, pStr, BufferSize);
+				}
+			};
+
+			ReadStringInfo(pItem->m_Author, m_MapInfo.m_aAuthor, sizeof(m_MapInfo.m_aAuthor), "author");
+			ReadStringInfo(pItem->m_MapVersion, m_MapInfo.m_aVersion, sizeof(m_MapInfo.m_aVersion), "version");
+			ReadStringInfo(pItem->m_Credits, m_MapInfo.m_aCredits, sizeof(m_MapInfo.m_aCredits), "credits");
+			ReadStringInfo(pItem->m_License, m_MapInfo.m_aLicense, sizeof(m_MapInfo.m_aLicense), "license");
 
 			if(pItem->m_Version != 1 || ItemSize < (int)sizeof(CMapItemInfoSettings))
 				break;
@@ -483,17 +481,26 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 		for(int i = 0; i < Num; i++)
 		{
 			CMapItemImage_v2 *pItem = (CMapItemImage_v2 *)DataFile.GetItem(Start + i);
-			char *pName = (char *)DataFile.GetData(pItem->m_ImageName);
 
 			// copy base info
 			std::shared_ptr<CEditorImage> pImg = std::make_shared<CEditorImage>(m_pEditor);
 			pImg->m_External = pItem->m_External;
 
+			const char *pName = DataFile.GetDataString(pItem->m_ImageName);
+			if(pName == nullptr || pName[0] == '\0')
+			{
+				char aBuf[128];
+				str_format(aBuf, sizeof(aBuf), "Error: Failed to read name of image %d.", i);
+				ErrorHandler(aBuf);
+			}
+			else
+				str_copy(pImg->m_aName, pName);
+
 			const CImageInfo::EImageFormat Format = pItem->m_Version < CMapItemImage_v2::CURRENT_VERSION ? CImageInfo::FORMAT_RGBA : CImageInfo::ImageFormatFromInt(pItem->m_Format);
 			if(pImg->m_External || (Format != CImageInfo::FORMAT_RGB && Format != CImageInfo::FORMAT_RGBA))
 			{
 				char aBuf[IO_MAX_PATH_LENGTH];
-				str_format(aBuf, sizeof(aBuf), "mapres/%s.png", pName);
+				str_format(aBuf, sizeof(aBuf), "mapres/%s.png", pImg->m_aName);
 
 				// load external
 				CEditorImage ImgInfo(m_pEditor);
@@ -525,10 +532,6 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 				pImg->m_Texture = m_pEditor->Graphics()->LoadTextureRaw(pImg->m_Width, pImg->m_Height, pImg->m_Format, pImg->m_pData, TextureLoadFlag);
 			}
 
-			// copy image name
-			if(pName)
-				str_copy(pImg->m_aName, pName);
-
 			// load auto mapper file
 			pImg->m_AutoMapper.Load(pImg->m_aName);
 
@@ -547,17 +550,27 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 		for(int i = 0; i < Num; i++)
 		{
 			CMapItemSound *pItem = (CMapItemSound *)DataFile.GetItem(Start + i);
-			char *pName = (char *)DataFile.GetData(pItem->m_SoundName);
 
 			// copy base info
 			std::shared_ptr<CEditorSound> pSound = std::make_shared<CEditorSound>(m_pEditor);
+
+			const char *pName = DataFile.GetDataString(pItem->m_SoundName);
+			if(pName == nullptr || pName[0] == '\0')
+			{
+				char aBuf[128];
+				str_format(aBuf, sizeof(aBuf), "Error: Failed to read name of sound %d.", i);
+				ErrorHandler(aBuf);
+			}
+			else
+				str_copy(pSound->m_aName, pName);
+
 			if(pItem->m_External)
 			{
 				char aBuf[IO_MAX_PATH_LENGTH];
-				str_format(aBuf, sizeof(aBuf), "mapres/%s.opus", pName);
+				str_format(aBuf, sizeof(aBuf), "mapres/%s.opus", pSound->m_aName);
 
 				// load external
-				if(m_pEditor->Storage()->ReadFile(pName, IStorage::TYPE_ALL, &pSound->m_pData, &pSound->m_DataSize))
+				if(m_pEditor->Storage()->ReadFile(aBuf, IStorage::TYPE_ALL, &pSound->m_pData, &pSound->m_DataSize))
 				{
 					pSound->m_SoundID = m_pEditor->Sound()->LoadOpusFromMem(pSound->m_pData, pSound->m_DataSize, true);
 				}
@@ -573,13 +586,9 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 				pSound->m_SoundID = m_pEditor->Sound()->LoadOpusFromMem(pSound->m_pData, pSound->m_DataSize, true);
 			}
 
-			// copy image name
-			if(pName)
-				str_copy(pSound->m_aName, pName);
-
 			m_vpSounds.push_back(pSound);
 
-			// unload image
+			// unload sound
 			DataFile.UnloadData(pItem->m_SoundData);
 			DataFile.UnloadData(pItem->m_SoundName);
 		}
