@@ -390,7 +390,6 @@ public:
 	void AddUIElement(CUIElement *pElement);
 	void OnElementsReset();
 	void OnWindowResize();
-	void OnLanguageChange();
 	void OnCursorMove(float X, float Y);
 
 	void SetEnabled(bool Enabled) { m_Enabled = Enabled; }

@@ -990,7 +990,8 @@ void CGameClient::HandleLanguageChanged()
 	g_Localization.Load(g_Config.m_ClLanguagefile, Storage(), Console());
 	TextRender()->SetFontLanguageVariant(g_Config.m_ClLanguagefile);
 
-	UI()->OnLanguageChange();
+	// Clear all text containers
+	OnWindowResize();
 }
 
 void CGameClient::RenderShutdownMessage()
