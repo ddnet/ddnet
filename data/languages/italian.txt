@@ -9,6 +9,7 @@
 #	Apmox		2011-07-15 01:09:59
 # NeXus   2020-09-19 02:43:00
 # kio     2023-08-12 18:44:00
+# kio     2023-08-14 11:30:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -134,7 +135,7 @@ Dynamic Camera
 == Camera dinamica
 
 Emoticon
-== Faccina
+== Reazioni
 
 Error
 == Errore
@@ -1212,94 +1213,94 @@ The format of texture %s is not RGBA which will cause visual bugs.
 == 
 
 Preparing demo playback
-== 
+== Preparando la riproduzione della demo
 
 Connected
-== 
+== Connesso
 
 Loading map file from storage
-== 
+== Caricando il file mappa dalla memoria
 
 Why are you slowmo replaying to read this?
 == 
 
 Initializing components
-== 
+== Inizializzando i componenti
 
 Initializing assets
-== 
+== Inizializzando gli assets
 
 Initializing map logic
-== 
+== Inizializzando la map logic
 
 Sending initial client info
-== 
+== Inviando le informazioni del client
 
 Quitting. Please wait…
-== 
+== Uscendo. Perfavore aspetta...
 
 Restarting. Please wait…
-== 
+== Riavviando. Perfavore aspetta...
 
 Position:
-== 
+== Posizione:
 
 Speed:
-== 
+== Velocitá:
 
 Angle:
-== 
+== Angolo:
 
 Multi-View
-== 
+== Visione-Multipla
 
 Team %d
-== 
+== Squadra %d
 
 Uploading map data to GPU
-== 
+== Caricando dati mappa alla GPU
 
 Trying to determine UDP connectivity...
-== 
+== Provando a determinare l'UDP connectivity...
 
 UDP seems to be filtered.
-== 
+== UDP sembra essere filtrato.
 
 UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
-== 
+== UDP e TCP IP addresses sembrano essere diversi. Prova a disabilitare la VPN, proxy o network accelerators.
 
 No answer from server yet.
-== 
+== Nessuna risposta dal server ancora
 
 Getting game info
-== 
+== Ricevendo informazioni
 
 Requesting to join the game
-== 
+== Richiedendo di entrare in partita
 
 Rename folder
-== 
+== Rinomina cartella
 
 A demo with this name already exists
-== 
+== Una demo con questo nome esiste giá
 
 A folder with this name already exists
-== 
+== Una cartella con questo nome esiste giá
 
 Unable to rename the folder
-== 
+== Impossibile rinominare la cartella
 
 File '%s' already exists, do you want to overwrite it?
-== 
+== File '%s' giá esistente, vuoi sovrascriverlo?
 
 (paused)
-== 
+== (in pausa)
 
 Join Tutorial Server
-== 
+== Entra nel Server Tutorial
 
 Skip Tutorial
-== 
+== Salta Tutorial
 
 Loading menu images
 == 
@@ -1326,10 +1327,10 @@ CHN
 == 
 
 Getting server list from master server
-== 
+== Ottenere l'elenco dei server dal server principale
 
 Are you sure that you want to disconnect and switch to a different server?
-== 
+== Sei sicuro di voler disconnetterti e passare a un altro server?
 
 Copy info
 == 
@@ -1338,38 +1339,38 @@ Leak IP
 == 
 
 No server selected
-== 
+== Nessun server selezionato
 
 Online players (%d)
 == 
 
 Online clanmates (%d)
-== 
+== Compagni di clan online
 
 [friends (server browser)]
 Offline (%d)
 == 
 
 Click to select server. Double click to join your friend.
-== 
+== Fare click per selezionare il server. Fai doppio click per unirti al tuo amico.
 
 Click to remove this player from your friends list.
-== 
+== Fai click per rimuovere questo giocatore dall'elenco dei tuoi amici.
 
 Click to remove this clan from your friends list.
-== 
+== Fai click per rimuovere questo clan dall'elenco dei tuoi amici.
 
 None
-== 
+== Nessuno
 
 Are you sure that you want to remove the player '%s' from your friends list?
-== 
+== Sei sicuro di voler rimuovere il giocatore '%s' dalla tua lista amici?
 
 Are you sure that you want to remove the clan '%s' from your friends list?
-== 
+== Sei sicuro di voler rimuovere il clan '%s' dalla tua lista di amici?
 
 Add Clan
-== 
+== Aggiungi Clan
 
 Play the current demo
 == 
@@ -1450,7 +1451,7 @@ Are you sure that you want to delete the demo '%s'?
 == 
 
 Delete folder
-== 
+== Cancella cartella
 
 Unable to delete the demo '%s'
 == 
@@ -1489,16 +1490,16 @@ Toggle to edit your dummy settings
 == 
 
 Download community skins
-== 
+== Scarica skin comunitá 
 
 Choose default eyes when joining a server
-== 
+== Scegli degli occhi di default quando entri in un server
 
 Create a random skin
-== 
+== Crea una skin randomica
 
 Open the directory to add custom skins
-== 
+== Apri la cartella per aggiungere una skin custom
 
 Converse
 == 
@@ -1507,17 +1508,17 @@ Chat command
 == 
 
 Enable controller
-== 
+== Abilitá controller
 
 Controller
 == 
 
 Ingame controller mode
-== 
+== Modalitá controller in gioco
 
 [Ingame controller mode]
 Relative
-== 
+== Relativo
 
 [Ingame controller mode]
 Absolute
@@ -1533,13 +1534,13 @@ Controller jitter tolerance
 == 
 
 No controller found. Plug in a controller.
-== 
+== Nessun controller trovato. Collega un controller.
 
 Axis
-== 
+== Assi
 
 Status
-== 
+== Stato
 
 Aim bind
 == 
@@ -1548,34 +1549,34 @@ Mouse
 == 
 
 Ingame mouse sens.
-== 
+== Sens. mouse in gioco
 
 UI mouse sens.
-== 
+== Sens. mouse UI
 
 Reset controls
-== 
+== Reimposta i controlli
 
 Are you sure that you want to reset the controls to their defaults?
-== 
+== Sei sicuro di voler ripristinare i controlli ai loro valori predefiniti?
 
 Cancel
-== 
+== Cancella
 
 Dummy
 == 
 
 Windowed
-== 
+== Finestra
 
 Windowed borderless
-== 
+== Finestra senza bordi
 
 Windowed fullscreen
-== 
+== Finestra schermo intero
 
 Desktop fullscreen
-== 
+== Desktop schermo intero
 
 Allows maps to render with more detail
 == 
@@ -1590,7 +1591,7 @@ custom
 == 
 
 Graphics card
-== 
+== Scheda grafica
 
 auto
 == 
@@ -1602,73 +1603,73 @@ Name Plate
 == 
 
 Hook Collisions
-== 
+== Collisione Hook
 
 Kill Messages
 == 
 
 Show health, shields and ammo
-== 
+== Mostra vita, scudi e munizioni
 
 DDRace HUD
 == 
 
 Show client IDs in scoreboard
-== 
+== Mostra gli ID clienti nella scoreboard
 
 Show DDRace HUD
-== 
+== Mostra l'HUD DDRace
 
 Show jumps indicator
-== 
+== Mostra indicatori salti
 
 Show dummy actions
-== 
+== Mostra azioni dummy
 
 Show player position
-== 
+== Mostra posizione player
 
 Show player speed
-== 
+== Mostra velocitá player
 
 Show player target angle
-== 
+== Mostra l'angolo di target del player
 
 Show freeze bars
-== 
+== Mostra la barra freeze
 
 Opacity of freeze bars inside freeze
-== 
+== Opacitá della barra del freeze dentro il freeze
 
 Preview
-== 
+== Anteprima
 
 Show hook strength indicator
-== 
+== Mostra l'indicatore della forza del gancio
 
 Show local player's key presses
-== 
+== Mostra le pressioni dei tasti del giocatore locale
 
 Hook collision line
-== 
+== Hook line collisione
 
 Hook collision line width
-== 
+== Larghezza hook line collisione
 
 Hook collision line opacity
-== 
+== Opacità hook line di collisione
 
 Colors of the hook collision line, in case of a possible collision with:
-== 
+== Colori della linea di collisione del gancio, in caso di possibile collisione con:
 
 Your movements are not taken into account when calculating the line colors
-== 
+== I tuoi movimenti non vengono presi in considerazione nel calcolo dei colori delle linee
 
 Nothing hookable
-== 
+== Niente hookabile
 
 Something hookable
-== 
+== Qualcosa hookabile
 
 A Tee
 == 
@@ -1680,7 +1681,7 @@ Highlight Color
 == 
 
 Weapons
-== 
+== Armi
 
 Rifle Laser Outline Color
 == 
@@ -1710,49 +1711,49 @@ Set all to Rifle
 == 
 
 When you cross the start line, show a ghost tee replicating the movements of your best time
-== 
+== Quando attraversi la linea di partenza, mostra una maglietta fantasma che riproduce i movimenti del tuo miglior tempo
 
 Overlay entities
 == 
 
 Opacity
-== 
+== Opacitá 
 
 Adjust the opacity of entities belonging to other teams, such as tees and nameplates
-== 
+== Regola l'opacità delle entità appartenenti ad altri team, come magliette e targhette
 
 Quads are used for background decoration
-== 
+== I quads sono usati per decorare lo sfondo
 
 Tries to predict other entities to give a feel of low latency
-== 
+== Provare a predirre altre entitá causa una sensazione di lag
 
 Background
-== 
+== Sfondo
 
 Entities Background color
-== 
+== Colore sfondo entities
 
 Regular Background Color
-== 
+== Colore sfondo normale
 
 Run on join
-== 
+== Esegui quando entri
 
 Chat command (e.g. showall 1)
-== 
+== Comando chat (es. showall 1)
 
 Unregister protocol and file extensions
-== 
+== Protocollo ed estensioni file non registrati
 
 Extras
 == 
 
 Loading assets
-== 
+== Caricando assets
 
 Open the directory to add custom assets
-== 
+== Apri la cartella per aggiungere assets custom
 
 Discord
 == 
@@ -1764,19 +1765,19 @@ Tutorial
 == 
 
 Can't find a Tutorial server
-== 
+== Impossibile trovare un Server Tutorial
 
 Loading race demo files
-== 
+== Caricando i file della demo della gara
 
 Super
 == 
 
 Loading sound files
-== 
+== Caricando file musica
 
 FPM
 == 
 
 Moved ingame
-== 
+== Spostato in gioco
