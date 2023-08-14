@@ -4,18 +4,18 @@
 
 void CEditorComponent::Init(CEditor *pEditor)
 {
-    m_pEditor = pEditor;
-    m_pInput = pEditor->Input();
-    m_pClient = pEditor->Client();
-    m_pConfig = pEditor->Config();
-    m_pConsole = pEditor->Console();
-    m_pEngine = pEditor->Engine();
-    m_pGraphics = pEditor->Graphics();
-    m_pSound = pEditor->Sound();
-    m_pTextRender = pEditor->TextRender();
-    m_pStorage = pEditor->Storage();
-    m_pUI = pEditor->UI();
-    m_pRenderTools = pEditor->RenderTools();
+	m_pEditor = pEditor;
+	m_pInput = pEditor->Input();
+	m_pClient = pEditor->Client();
+	m_pConfig = pEditor->Config();
+	m_pConsole = pEditor->Console();
+	m_pEngine = pEditor->Engine();
+	m_pGraphics = pEditor->Graphics();
+	m_pSound = pEditor->Sound();
+	m_pTextRender = pEditor->TextRender();
+	m_pStorage = pEditor->Storage();
+	m_pUI = pEditor->UI();
+	m_pRenderTools = pEditor->RenderTools();
 }
 
 void CEditorComponent::OnRender() {}
