@@ -2336,7 +2336,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupGoto(void *pContext, CUIRect View, b
 	static int s_Button;
 	if(pEditor->DoButton_Editor(&s_Button, "Go", 0, &Button, 0, nullptr))
 	{
-		pEditor->Goto(s_GotoPos.x + 0.5f, s_GotoPos.y + 0.5f);
+		pEditor->MapView()->m_WorldOffset = vec2(32.0f * s_GotoPos.x + 0.5f, 32.0f * s_GotoPos.y + 0.5f);
 	}
 
 	return CUI::POPUP_KEEP_OPEN;
