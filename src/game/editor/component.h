@@ -1,8 +1,6 @@
 #ifndef GAME_EDITOR_COMPONENT_H
 #define GAME_EDITOR_COMPONENT_H
 
-#include <initializer_list>
-
 class CEditor;
 class IInput;
 class IClient;
