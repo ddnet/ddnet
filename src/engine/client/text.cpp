@@ -2341,8 +2341,6 @@ public:
 		}
 
 		dbg_assert(!HasNonEmptyTextContainer, "text container was not empty");
-
-		m_pGlyphMap->Clear();
 	}
 };
 
