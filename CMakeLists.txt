@@ -2316,9 +2316,13 @@ if(CLIENT)
     layer_quads.cpp
     layer_sounds.cpp
     layer_tiles.cpp
+    map_grid.cpp
+    map_grid.h
     map_view.cpp
     map_view.h
     popups.cpp
+    proof_mode.cpp
+    proof_mode.h
     smooth_value.cpp
     smooth_value.h
   )
