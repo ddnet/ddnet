@@ -18,7 +18,14 @@ void CEditorComponent::Init(CEditor *pEditor)
 	m_pRenderTools = pEditor->RenderTools();
 }
 
-void CEditorComponent::OnRender() {}
+void CEditorComponent::OnUpdate(CUIRect View)
+{
+	OnInput();
+	OnRender(View);
+}
+
+void CEditorComponent::OnInput() {}
+void CEditorComponent::OnRender(CUIRect View) {}
 
 CEditor *CEditorComponent::Editor() { return m_pEditor; }
 IInput *CEditorComponent::Input() { return m_pInput; }

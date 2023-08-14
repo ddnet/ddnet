@@ -1,6 +1,8 @@
 #ifndef GAME_EDITOR_COMPONENT_H
 #define GAME_EDITOR_COMPONENT_H
 
+#include <game/client/ui.h>
+
 class CEditor;
 class IInput;
 class IClient;
@@ -11,7 +13,6 @@ class IGraphics;
 class ISound;
 class ITextRender;
 class IStorage;
-class CUI;
 class CRenderTools;
 
 class CEditorComponent
@@ -20,7 +21,10 @@ public:
 	virtual ~CEditorComponent() = default;
 
 	virtual void Init(CEditor *pEditor);
-	virtual void OnRender();
+
+	void OnUpdate(CUIRect View);
+	virtual void OnInput();
+	virtual void OnRender(CUIRect View);
 
 	CEditor *Editor();
 	IInput *Input();

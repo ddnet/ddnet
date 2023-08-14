@@ -19,7 +19,7 @@ void CMapView::ResetZoom()
 
 float CMapView::ScaleLength(float Value)
 {
-	return m_Zoom.GetValue() * Value;
+	return m_WorldZoom * Value;
 }
 
 void CMapView::ZoomMouseTarget(float ZoomFactor)
