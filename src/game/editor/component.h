@@ -19,13 +19,13 @@ class CRenderTools;
 class CEditorComponent
 {
 public:
-    virtual ~CEditorComponent() = default;
+	virtual ~CEditorComponent() = default;
 
-    virtual void Init(CEditor *pEditor);
-    virtual void OnRender();
+	virtual void Init(CEditor *pEditor);
+	virtual void OnRender();
 
-    CEditor *Editor();
-    IInput *Input();
+	CEditor *Editor();
+	IInput *Input();
 	IClient *Client();
 	CConfig *Config();
 	IConsole *Console();
@@ -38,18 +38,18 @@ public:
 	CRenderTools *RenderTools();
 
 private:
-    CEditor *m_pEditor;
-    IInput *m_pInput;
-    IClient *m_pClient;
-    CConfig *m_pConfig;
-    IConsole *m_pConsole;
-    IEngine *m_pEngine;
-    IGraphics *m_pGraphics;
-    ISound *m_pSound;
-    ITextRender *m_pTextRender;
-    IStorage *m_pStorage;
-    CUI *m_pUI;
-    CRenderTools *m_pRenderTools;
+	CEditor *m_pEditor;
+	IInput *m_pInput;
+	IClient *m_pClient;
+	CConfig *m_pConfig;
+	IConsole *m_pConsole;
+	IEngine *m_pEngine;
+	IGraphics *m_pGraphics;
+	ISound *m_pSound;
+	ITextRender *m_pTextRender;
+	IStorage *m_pStorage;
+	CUI *m_pUI;
+	CRenderTools *m_pRenderTools;
 };
 
 #endif

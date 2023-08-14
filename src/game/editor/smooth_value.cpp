@@ -1,7 +1,7 @@
 #include "smooth_value.h"
 
-#include <engine/shared/config.h>
 #include <engine/client.h>
+#include <engine/shared/config.h>
 
 CSmoothValue::CSmoothValue(float InitialValue, float MinValue, float MaxValue) :
 	m_Smoothing(false), m_Value(InitialValue), m_MinValue(MinValue), m_MaxValue(MaxValue) {}

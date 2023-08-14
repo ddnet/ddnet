@@ -18,7 +18,6 @@
 #include <engine/shared/jobs.h>
 
 #include "auto_map.h"
-#include "game/client/component.h"
 #include "map_view.h"
 #include "smooth_value.h"
 

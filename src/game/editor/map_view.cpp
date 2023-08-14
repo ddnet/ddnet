@@ -2,8 +2,8 @@
 
 #include <engine/shared/config.h>
 
-#include <game/client/ui.h>
 #include <game/client/render.h>
+#include <game/client/ui.h>
 
 void CMapView::Init(CEditor *pEditor)
 {
@@ -13,13 +13,13 @@ void CMapView::Init(CEditor *pEditor)
 
 void CMapView::ResetZoom()
 {
-    m_EditorOffset = vec2(0, 0);
-    m_Zoom.SetValue(100.0f);
+	m_EditorOffset = vec2(0, 0);
+	m_Zoom.SetValue(100.0f);
 }
 
 float CMapView::ScaleLength(float Value)
 {
-    return m_Zoom.GetValue() * Value;
+	return m_Zoom.GetValue() * Value;
 }
 
 void CMapView::ZoomMouseTarget(float ZoomFactor)
@@ -38,7 +38,7 @@ void CMapView::ZoomMouseTarget(float ZoomFactor)
 	float Mwy = aPoints[1] + WorldHeight * (UI()->MouseY() / UI()->Screen()->h);
 
 	// adjust camera
-    m_WorldOffset += (vec2(Mwx, Mwy) - m_WorldOffset) * (1.0f - ZoomFactor);
+	m_WorldOffset += (vec2(Mwx, Mwy) - m_WorldOffset) * (1.0f - ZoomFactor);
 }
 
 void CMapView::UpdateZoom()
