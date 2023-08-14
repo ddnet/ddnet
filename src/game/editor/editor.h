@@ -18,6 +18,9 @@
 #include <engine/shared/jobs.h>
 
 #include "auto_map.h"
+#include "game/client/component.h"
+#include "map_view.h"
+#include "smooth_value.h"
 
 #include <chrono>
 #include <deque>
@@ -791,36 +794,6 @@ public:
 	const char *GetTempFileName() const { return m_aTempFileName; }
 };
 
-class CSmoothZoom
-{
-public:
-	CSmoothZoom(float InitialZoom, float Min, float Max, CEditor *pEditor);
-
-	void SetZoomRange(float Min, float Max);
-	void SetZoom(float Target);
-	void SetZoomInstant(float Target);
-	void ChangeZoom(float Amount);
-	bool UpdateZoom();
-	float GetZoom() const;
-	float GetMinZoomLevel() const;
-	float GetMaxZoomLevel() const;
-
-private:
-	float ZoomProgress(float CurrentTime) const;
-
-	bool m_Zooming;
-	float m_Zoom;
-	CCubicBezier m_ZoomSmoothing;
-	float m_ZoomSmoothingTarget;
-	float m_ZoomSmoothingStart;
-	float m_ZoomSmoothingEnd;
-
-	float m_MinZoomLevel;
-	float m_MaxZoomLevel;
-
-	CEditor *m_pEditor;
-};
-
 class CEditor : public IEditor
 {
 	class IInput *m_pInput = nullptr;
@@ -834,6 +807,8 @@ class CEditor : public IEditor
 	class IStorage *m_pStorage = nullptr;
 	CRenderTools m_RenderTools;
 	CUI m_UI;
+
+	CMapView m_MapView;
 
 	bool m_EditorWasUsedBefore = false;
 
@@ -869,10 +844,12 @@ public:
 	CUI *UI() { return &m_UI; }
 	CRenderTools *RenderTools() { return &m_RenderTools; }
 
+	CMapView *MapView() { return &m_MapView; }
+	const CMapView *MapView() const { return &m_MapView; }
+
 	CEditor() :
-		m_ZoomMapView(200.0f, 10.0f, 2000.0f, this),
-		m_ZoomEnvelopeX(1.0f, 0.1f, 600.0f, this),
-		m_ZoomEnvelopeY(640.0f, 0.1f, 32000.0f, this)
+		m_ZoomEnvelopeX(1.0f, 0.1f, 600.0f),
+		m_ZoomEnvelopeY(640.0f, 0.1f, 32000.0f)
 	{
 		m_EntitiesTexture.Invalidate();
 		m_FrontTexture.Invalidate();
@@ -914,13 +891,6 @@ public:
 		m_FilePreviewState = PREVIEW_UNLOADED;
 
 		m_SelectEntitiesImage = "DDNet";
-
-		m_WorldOffsetX = 0;
-		m_WorldOffsetY = 0;
-		m_EditorOffsetX = 0.0f;
-		m_EditorOffsetY = 0.0f;
-
-		m_WorldZoom = 1.0f;
 
 		m_ResetZoomEnvelope = true;
 		m_OffsetEnvelopeX = 0.1f;
@@ -1202,17 +1172,9 @@ public:
 	std::vector<std::string> m_vSelectEntitiesFiles;
 	std::string m_SelectEntitiesImage;
 
-	float m_WorldOffsetX;
-	float m_WorldOffsetY;
-	float m_EditorOffsetX;
-	float m_EditorOffsetY;
-
 	// Zooming
-	CSmoothZoom m_ZoomMapView;
-	float m_WorldZoom;
-
-	CSmoothZoom m_ZoomEnvelopeX;
-	CSmoothZoom m_ZoomEnvelopeY;
+	CSmoothValue m_ZoomEnvelopeX;
+	CSmoothValue m_ZoomEnvelopeY;
 
 	bool m_ResetZoomEnvelope;
 
@@ -1532,9 +1494,6 @@ public:
 	int GetLineDistance() const;
 
 	// Zooming
-	void ZoomMouseTarget(float ZoomFactor);
-	void UpdateZoomWorld();
-
 	void ZoomAdaptOffsetX(float ZoomFactor, const CUIRect &View);
 	void UpdateZoomEnvelopeX(const CUIRect &View);
 
@@ -1558,7 +1517,6 @@ public:
 	IGraphics::CTextureHandle GetSwitchTexture();
 	IGraphics::CTextureHandle GetTuneTexture();
 
-	void Goto(float X, float Y);
 	unsigned char m_TeleNumber;
 
 	unsigned char m_TuningNum;

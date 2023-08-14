@@ -139,14 +139,14 @@ void CLayerGroup::Mapping(float *pPoints)
 	float ParallaxZoom = m_pMap->m_pEditor->m_PreviewZoom ? m_ParallaxZoom : 100.0f;
 
 	m_pMap->m_pEditor->RenderTools()->MapScreenToWorld(
-		m_pMap->m_pEditor->m_WorldOffsetX, m_pMap->m_pEditor->m_WorldOffsetY,
+		m_pMap->m_pEditor->MapView()->m_WorldOffset.x, m_pMap->m_pEditor->MapView()->m_WorldOffset.y,
 		m_ParallaxX, m_ParallaxY, ParallaxZoom, m_OffsetX, m_OffsetY,
-		m_pMap->m_pEditor->Graphics()->ScreenAspect(), m_pMap->m_pEditor->m_WorldZoom, pPoints);
+		m_pMap->m_pEditor->Graphics()->ScreenAspect(), m_pMap->m_pEditor->MapView()->m_WorldZoom, pPoints);
 
-	pPoints[0] += m_pMap->m_pEditor->m_EditorOffsetX;
-	pPoints[1] += m_pMap->m_pEditor->m_EditorOffsetY;
-	pPoints[2] += m_pMap->m_pEditor->m_EditorOffsetX;
-	pPoints[3] += m_pMap->m_pEditor->m_EditorOffsetY;
+	pPoints[0] += m_pMap->m_pEditor->MapView()->m_EditorOffset.x;
+	pPoints[1] += m_pMap->m_pEditor->MapView()->m_EditorOffset.y;
+	pPoints[2] += m_pMap->m_pEditor->MapView()->m_EditorOffset.x;
+	pPoints[3] += m_pMap->m_pEditor->MapView()->m_EditorOffset.y;
 }
 
 void CLayerGroup::MapScreen()
@@ -1178,23 +1178,21 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 		static int s_ZoomOutButton = 0;
 		if(DoButton_FontIcon(&s_ZoomOutButton, "-", 0, &Button, 0, "[NumPad-] Zoom out", IGraphics::CORNER_L))
 		{
-			m_ZoomMapView.ChangeZoom(50.0f);
+			MapView()->m_Zoom.ChangeValue(50.0f);
 		}
 
 		TB_Top.VSplitLeft(25.0f, &Button, &TB_Top);
 		static int s_ZoomNormalButton = 0;
 		if(DoButton_FontIcon(&s_ZoomNormalButton, FONT_ICON_MAGNIFYING_GLASS, 0, &Button, 0, "[NumPad*] Zoom to normal and remove editor offset", IGraphics::CORNER_NONE))
 		{
-			m_EditorOffsetX = 0;
-			m_EditorOffsetY = 0;
-			m_ZoomMapView.SetZoom(100.0f);
+			MapView()->ResetZoom();
 		}
 
 		TB_Top.VSplitLeft(20.0f, &Button, &TB_Top);
 		static int s_ZoomInButton = 0;
 		if(DoButton_FontIcon(&s_ZoomInButton, "+", 0, &Button, 0, "[NumPad+] Zoom in", IGraphics::CORNER_R))
 		{
-			m_ZoomMapView.ChangeZoom(-50.0f);
+			MapView()->m_Zoom.ChangeValue(-50.0f);
 		}
 
 		TB_Top.VSplitLeft(5.0f, nullptr, &TB_Top);
@@ -1315,14 +1313,14 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 			int FocusButtonChecked;
 			if(m_ProofBorders == PROOF_BORDER_MENU)
 			{
-				if(distance(m_vMenuBackgroundPositions[m_CurrentMenuProofIndex], vec2(m_WorldOffsetX, m_WorldOffsetY)) < 0.0001f)
+				if(MapView()->m_WorldOffset == m_vMenuBackgroundPositions[m_CurrentMenuProofIndex])
 					FocusButtonChecked = -1;
 				else
 					FocusButtonChecked = 1;
 			}
 			else
 			{
-				if(m_WorldOffsetX == 0 && m_WorldOffsetY == 0)
+				if(MapView()->m_WorldOffset == vec2(0, 0))
 					FocusButtonChecked = -1;
 				else
 					FocusButtonChecked = 1;
@@ -1330,15 +1328,9 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 			if(DoButton_Editor(&s_RefocusButton, "Refocus", FocusButtonChecked, &Button, 0, "[HOME] Restore map focus") || (m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_HOME)))
 			{
 				if(m_ProofBorders == PROOF_BORDER_MENU)
-				{
-					m_WorldOffsetX = m_vMenuBackgroundPositions[m_CurrentMenuProofIndex].x;
-					m_WorldOffsetY = m_vMenuBackgroundPositions[m_CurrentMenuProofIndex].y;
-				}
+					MapView()->m_WorldOffset = m_vMenuBackgroundPositions[m_CurrentMenuProofIndex];
 				else
-				{
-					m_WorldOffsetX = 0;
-					m_WorldOffsetY = 0;
-				}
+					MapView()->m_WorldOffset = vec2(0, 0);
 			}
 			TB_Bottom.VSplitLeft(5.0f, nullptr, &TB_Bottom);
 		}
@@ -1429,8 +1421,8 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 				int y = aMapping[1] + (aMapping[3] - aMapping[1]) / 2;
 				if(m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_Q) && ModPressed)
 				{
-					x += UI()->MouseWorldX() - (m_WorldOffsetX * pGroup->m_ParallaxX / 100) - pGroup->m_OffsetX;
-					y += UI()->MouseWorldY() - (m_WorldOffsetY * pGroup->m_ParallaxY / 100) - pGroup->m_OffsetY;
+					x += UI()->MouseWorldX() - (MapView()->m_WorldOffset.x * pGroup->m_ParallaxX / 100) - pGroup->m_OffsetX;
+					y += UI()->MouseWorldY() - (MapView()->m_WorldOffset.y * pGroup->m_ParallaxY / 100) - pGroup->m_OffsetY;
 				}
 
 				if(pLayer->m_Type == LAYERTYPE_QUADS)
@@ -2596,7 +2588,7 @@ void CEditor::DoMapEditor(CUIRect View)
 		}
 
 		std::shared_ptr<CLayerTiles> pT = std::static_pointer_cast<CLayerTiles>(GetSelectedLayerType(0, LAYERTYPE_TILES));
-		if(m_ShowTileInfo != SHOW_TILE_OFF && pT && pT->m_Visible && m_ZoomMapView.GetZoom() <= 300.0f)
+		if(m_ShowTileInfo != SHOW_TILE_OFF && pT && pT->m_Visible && MapView()->m_Zoom.GetValue() <= 300.0f)
 		{
 			GetSelectedGroup()->MapScreen();
 			pT->ShowInfo();
@@ -3072,7 +3064,7 @@ void CEditor::DoMapEditor(CUIRect View)
 			for(int i = 0; i < (int)m_vMenuBackgroundPositions.size(); i++)
 			{
 				vec2 Pos = m_vMenuBackgroundPositions[i];
-				Pos += vec2(m_WorldOffsetX, m_WorldOffsetY) - m_vMenuBackgroundPositions[m_CurrentMenuProofIndex];
+				Pos += MapView()->m_WorldOffset - m_vMenuBackgroundPositions[m_CurrentMenuProofIndex];
 				Pos.y -= 3.0f;
 
 				vec2 MousePos(m_MouseWorldNoParaX, m_MouseWorldNoParaY);
@@ -3085,8 +3077,7 @@ void CEditor::DoMapEditor(CUIRect View)
 						if(!UI()->MouseButton(0))
 						{
 							m_CurrentMenuProofIndex = i;
-							m_WorldOffsetX = m_vMenuBackgroundPositions[i].x;
-							m_WorldOffsetY = m_vMenuBackgroundPositions[i].y;
+							MapView()->m_WorldOffset = m_vMenuBackgroundPositions[i];
 							UI()->SetActiveItem(nullptr);
 						}
 					}
@@ -3111,7 +3102,7 @@ void CEditor::DoMapEditor(CUIRect View)
 								str_copy(aTooltipPrefix, "Current proof position at");
 
 							Pos = m_vMenuBackgroundPositions[k];
-							Pos += vec2(m_WorldOffsetX, m_WorldOffsetY) - m_vMenuBackgroundPositions[m_CurrentMenuProofIndex];
+							Pos += MapView()->m_WorldOffset - m_vMenuBackgroundPositions[m_CurrentMenuProofIndex];
 							Pos.y -= 3.0f;
 
 							MousePos = vec2(m_MouseWorldNoParaX, m_MouseWorldNoParaY);
@@ -3142,15 +3133,9 @@ void CEditor::DoMapEditor(CUIRect View)
 		if(UI()->CheckActiveItem(s_pEditorID))
 		{
 			if(s_Operation == OP_PAN_WORLD)
-			{
-				m_WorldOffsetX -= m_MouseDeltaX * m_MouseWScale;
-				m_WorldOffsetY -= m_MouseDeltaY * m_MouseWScale;
-			}
+				MapView()->m_WorldOffset -= vec2(m_MouseDeltaX, m_MouseDeltaY) * m_MouseWScale;
 			else if(s_Operation == OP_PAN_EDITOR)
-			{
-				m_EditorOffsetX -= m_MouseDeltaX * m_MouseWScale;
-				m_EditorOffsetY -= m_MouseDeltaY * m_MouseWScale;
-			}
+				MapView()->m_EditorOffset -= vec2(m_MouseDeltaX, m_MouseDeltaY) * m_MouseWScale;
 
 			// release mouse
 			if(!UI()->MouseButton(0))
@@ -3163,13 +3148,13 @@ void CEditor::DoMapEditor(CUIRect View)
 		{
 			float PanSpeed = 64.0f;
 			if(Input()->KeyPress(KEY_A))
-				m_WorldOffsetX -= PanSpeed * m_MouseWScale;
+				MapView()->m_WorldOffset.x -= PanSpeed * m_MouseWScale;
 			else if(Input()->KeyPress(KEY_D))
-				m_WorldOffsetX += PanSpeed * m_MouseWScale;
+				MapView()->m_WorldOffset.x += PanSpeed * m_MouseWScale;
 			if(Input()->KeyPress(KEY_W))
-				m_WorldOffsetY -= PanSpeed * m_MouseWScale;
+				MapView()->m_WorldOffset.y -= PanSpeed * m_MouseWScale;
 			else if(Input()->KeyPress(KEY_S))
-				m_WorldOffsetY += PanSpeed * m_MouseWScale;
+				MapView()->m_WorldOffset.y += PanSpeed * m_MouseWScale;
 		}
 	}
 	else if(UI()->CheckActiveItem(s_pEditorID))
@@ -3228,7 +3213,7 @@ void CEditor::DoMapEditor(CUIRect View)
 
 			float Zoom = (m_ProofBorders == PROOF_BORDER_MENU) ? 0.7f : 1.0f;
 			RenderTools()->MapScreenToWorld(
-				m_WorldOffsetX, m_WorldOffsetY,
+				MapView()->m_WorldOffset.x, MapView()->m_WorldOffset.y,
 				100.0f, 100.0f, 100.0f, 0.0f, 0.0f, Aspect, Zoom, aPoints);
 
 			if(i == 0)
@@ -3271,7 +3256,7 @@ void CEditor::DoMapEditor(CUIRect View)
 
 				float Zoom = (m_ProofBorders == PROOF_BORDER_MENU) ? 0.7f : 1.0f;
 				RenderTools()->MapScreenToWorld(
-					m_WorldOffsetX, m_WorldOffsetY,
+					MapView()->m_WorldOffset.x, MapView()->m_WorldOffset.y,
 					100.0f, 100.0f, 100.0f, 0.0f, 0.0f, Aspect, Zoom, aPoints);
 
 				CUIRect r;
@@ -3296,7 +3281,7 @@ void CEditor::DoMapEditor(CUIRect View)
 			Graphics()->TextureClear();
 			Graphics()->QuadsBegin();
 			Graphics()->SetColor(0, 0, 1, 0.3f);
-			Graphics()->DrawCircle(m_WorldOffsetX, m_WorldOffsetY - 3.0f, 20.0f, 32);
+			Graphics()->DrawCircle(MapView()->m_WorldOffset.x, MapView()->m_WorldOffset.y - 3.0f, 20.0f, 32);
 
 			if(m_ProofBorders == PROOF_BORDER_MENU)
 			{
@@ -3314,9 +3299,9 @@ void CEditor::DoMapEditor(CUIRect View)
 						indices.erase(k);
 
 					vec2 Pos = m_vMenuBackgroundPositions[i];
-					Pos += vec2(m_WorldOffsetX, m_WorldOffsetY) - m_vMenuBackgroundPositions[m_CurrentMenuProofIndex];
+					Pos += MapView()->m_WorldOffset - m_vMenuBackgroundPositions[m_CurrentMenuProofIndex];
 
-					if(distance(Pos, vec2(m_WorldOffsetX, m_WorldOffsetY)) < 0.001f)
+					if(Pos == MapView()->m_WorldOffset)
 						continue;
 
 					Graphics()->DrawCircle(Pos.x, Pos.y - 3.0f, 20.0f, 32);
@@ -5737,9 +5722,9 @@ void CEditor::ZoomAdaptOffsetX(float ZoomFactor, const CUIRect &View)
 
 void CEditor::UpdateZoomEnvelopeX(const CUIRect &View)
 {
-	float OldZoom = m_ZoomEnvelopeX.GetZoom();
-	if(m_ZoomEnvelopeX.UpdateZoom())
-		ZoomAdaptOffsetX(OldZoom / m_ZoomEnvelopeX.GetZoom(), View);
+	float OldZoom = m_ZoomEnvelopeX.GetValue();
+	if(m_ZoomEnvelopeX.UpdateValue())
+		ZoomAdaptOffsetX(OldZoom / m_ZoomEnvelopeX.GetValue(), View);
 }
 
 void CEditor::ZoomAdaptOffsetY(float ZoomFactor, const CUIRect &View)
@@ -5750,9 +5735,9 @@ void CEditor::ZoomAdaptOffsetY(float ZoomFactor, const CUIRect &View)
 
 void CEditor::UpdateZoomEnvelopeY(const CUIRect &View)
 {
-	float OldZoom = m_ZoomEnvelopeY.GetZoom();
-	if(m_ZoomEnvelopeY.UpdateZoom())
-		ZoomAdaptOffsetY(OldZoom / m_ZoomEnvelopeY.GetZoom(), View);
+	float OldZoom = m_ZoomEnvelopeY.GetValue();
+	if(m_ZoomEnvelopeY.UpdateValue())
+		ZoomAdaptOffsetY(OldZoom / m_ZoomEnvelopeY.GetValue(), View);
 }
 
 void CEditor::ResetZoomEnvelope(const std::shared_ptr<CEnvelope> &pEnvelope, int ActiveChannels)
@@ -5763,47 +5748,47 @@ void CEditor::ResetZoomEnvelope(const std::shared_ptr<CEnvelope> &pEnvelope, int
 	float EndTime = pEnvelope->EndTime();
 	float ValueRange = absolute(Top - Bottom);
 
-	if(ValueRange < m_ZoomEnvelopeY.GetMinZoomLevel())
+	if(ValueRange < m_ZoomEnvelopeY.GetMinValue())
 	{
 		// Set view to some sane default if range is too small
-		m_OffsetEnvelopeY = 0.5f - ValueRange / m_ZoomEnvelopeY.GetMinZoomLevel() / 2.0f - Bottom / m_ZoomEnvelopeY.GetMinZoomLevel();
-		m_ZoomEnvelopeY.SetZoomInstant(m_ZoomEnvelopeY.GetMinZoomLevel());
+		m_OffsetEnvelopeY = 0.5f - ValueRange / m_ZoomEnvelopeY.GetMinValue() / 2.0f - Bottom / m_ZoomEnvelopeY.GetMinValue();
+		m_ZoomEnvelopeY.SetValueInstant(m_ZoomEnvelopeY.GetMinValue());
 	}
-	else if(ValueRange > m_ZoomEnvelopeY.GetMaxZoomLevel())
+	else if(ValueRange > m_ZoomEnvelopeY.GetMaxValue())
 	{
-		m_OffsetEnvelopeY = -Bottom / m_ZoomEnvelopeY.GetMaxZoomLevel();
-		m_ZoomEnvelopeY.SetZoomInstant(m_ZoomEnvelopeY.GetMaxZoomLevel());
+		m_OffsetEnvelopeY = -Bottom / m_ZoomEnvelopeY.GetMaxValue();
+		m_ZoomEnvelopeY.SetValueInstant(m_ZoomEnvelopeY.GetMaxValue());
 	}
 	else
 	{
 		// calculate biggest possible spacing
-		float SpacingFactor = minimum(1.25f, m_ZoomEnvelopeY.GetMaxZoomLevel() / ValueRange);
-		m_ZoomEnvelopeY.SetZoomInstant(SpacingFactor * ValueRange);
+		float SpacingFactor = minimum(1.25f, m_ZoomEnvelopeY.GetMaxValue() / ValueRange);
+		m_ZoomEnvelopeY.SetValueInstant(SpacingFactor * ValueRange);
 		float Space = 1.0f / SpacingFactor;
 		float Spacing = (1.0f - Space) / 2.0f;
 
 		if(Top >= 0 && Bottom >= 0)
-			m_OffsetEnvelopeY = Spacing - Bottom / m_ZoomEnvelopeY.GetZoom();
+			m_OffsetEnvelopeY = Spacing - Bottom / m_ZoomEnvelopeY.GetValue();
 		else if(Top <= 0 && Bottom <= 0)
-			m_OffsetEnvelopeY = Spacing - Bottom / m_ZoomEnvelopeY.GetZoom();
+			m_OffsetEnvelopeY = Spacing - Bottom / m_ZoomEnvelopeY.GetValue();
 		else
 			m_OffsetEnvelopeY = Spacing + Space * absolute(Bottom) / ValueRange;
 	}
 
-	if(EndTime < m_ZoomEnvelopeX.GetMinZoomLevel())
+	if(EndTime < m_ZoomEnvelopeX.GetMinValue())
 	{
-		m_OffsetEnvelopeX = 0.5f - EndTime / m_ZoomEnvelopeX.GetMinZoomLevel();
-		m_ZoomEnvelopeX.SetZoomInstant(m_ZoomEnvelopeX.GetMinZoomLevel());
+		m_OffsetEnvelopeX = 0.5f - EndTime / m_ZoomEnvelopeX.GetMinValue();
+		m_ZoomEnvelopeX.SetValueInstant(m_ZoomEnvelopeX.GetMinValue());
 	}
-	else if(EndTime > m_ZoomEnvelopeX.GetMaxZoomLevel())
+	else if(EndTime > m_ZoomEnvelopeX.GetMaxValue())
 	{
 		m_OffsetEnvelopeX = 0.0f;
-		m_ZoomEnvelopeX.SetZoomInstant(m_ZoomEnvelopeX.GetMaxZoomLevel());
+		m_ZoomEnvelopeX.SetValueInstant(m_ZoomEnvelopeX.GetMaxValue());
 	}
 	else
 	{
-		float SpacingFactor = minimum(1.25f, m_ZoomEnvelopeX.GetMaxZoomLevel() / EndTime);
-		m_ZoomEnvelopeX.SetZoomInstant(SpacingFactor * EndTime);
+		float SpacingFactor = minimum(1.25f, m_ZoomEnvelopeX.GetMaxValue() / EndTime);
+		m_ZoomEnvelopeX.SetValueInstant(SpacingFactor * EndTime);
 		float Space = 1.0f / SpacingFactor;
 		float Spacing = (1.0f - Space) / 2.0f;
 
@@ -5823,32 +5808,32 @@ int f2fxt(float t)
 
 float CEditor::ScreenToEnvelopeX(const CUIRect &View, float x) const
 {
-	return (x - View.x - View.w * m_OffsetEnvelopeX) / View.w * m_ZoomEnvelopeX.GetZoom();
+	return (x - View.x - View.w * m_OffsetEnvelopeX) / View.w * m_ZoomEnvelopeX.GetValue();
 }
 
 float CEditor::EnvelopeToScreenX(const CUIRect &View, float x) const
 {
-	return View.x + View.w * m_OffsetEnvelopeX + x / m_ZoomEnvelopeX.GetZoom() * View.w;
+	return View.x + View.w * m_OffsetEnvelopeX + x / m_ZoomEnvelopeX.GetValue() * View.w;
 }
 
 float CEditor::ScreenToEnvelopeY(const CUIRect &View, float y) const
 {
-	return (View.h - y + View.y) / View.h * m_ZoomEnvelopeY.GetZoom() - m_OffsetEnvelopeY * m_ZoomEnvelopeY.GetZoom();
+	return (View.h - y + View.y) / View.h * m_ZoomEnvelopeY.GetValue() - m_OffsetEnvelopeY * m_ZoomEnvelopeY.GetValue();
 }
 
 float CEditor::EnvelopeToScreenY(const CUIRect &View, float y) const
 {
-	return View.y + View.h - y / m_ZoomEnvelopeY.GetZoom() * View.h - m_OffsetEnvelopeY * View.h;
+	return View.y + View.h - y / m_ZoomEnvelopeY.GetValue() * View.h - m_OffsetEnvelopeY * View.h;
 }
 
 float CEditor::ScreenToEnvelopeDX(const CUIRect &View, float dx)
 {
-	return dx / Graphics()->ScreenWidth() * UI()->Screen()->w / View.w * m_ZoomEnvelopeX.GetZoom();
+	return dx / Graphics()->ScreenWidth() * UI()->Screen()->w / View.w * m_ZoomEnvelopeX.GetValue();
 }
 
 float CEditor::ScreenToEnvelopeDY(const CUIRect &View, float dy)
 {
-	return dy / Graphics()->ScreenHeight() * UI()->Screen()->h / View.h * m_ZoomEnvelopeY.GetZoom();
+	return dy / Graphics()->ScreenHeight() * UI()->Screen()->h / View.h * m_ZoomEnvelopeY.GetValue();
 }
 
 void CEditor::RemoveTimeOffsetEnvelope(const std::shared_ptr<CEnvelope> &pEnvelope)
@@ -5857,7 +5842,7 @@ void CEditor::RemoveTimeOffsetEnvelope(const std::shared_ptr<CEnvelope> &pEnvelo
 	for(auto &Point : pEnvelope->m_vPoints)
 		Point.m_Time -= TimeOffset;
 
-	m_OffsetEnvelopeX += fxt2f(TimeOffset) / m_ZoomEnvelopeX.GetZoom();
+	m_OffsetEnvelopeX += fxt2f(TimeOffset) / m_ZoomEnvelopeX.GetValue();
 };
 
 static float ClampDelta(float Val, float Delta, float Min, float Max)
@@ -6275,16 +6260,16 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			if(Input()->ShiftIsPressed())
 			{
 				if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
-					m_ZoomEnvelopeY.ChangeZoom(0.1f * m_ZoomEnvelopeY.GetZoom());
+					m_ZoomEnvelopeY.ChangeValue(0.1f * m_ZoomEnvelopeY.GetValue());
 				if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
-					m_ZoomEnvelopeY.ChangeZoom(-0.1f * m_ZoomEnvelopeY.GetZoom());
+					m_ZoomEnvelopeY.ChangeValue(-0.1f * m_ZoomEnvelopeY.GetValue());
 			}
 			else
 			{
 				if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
-					m_ZoomEnvelopeX.ChangeZoom(0.1f * m_ZoomEnvelopeX.GetZoom());
+					m_ZoomEnvelopeX.ChangeValue(0.1f * m_ZoomEnvelopeX.GetValue());
 				if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
-					m_ZoomEnvelopeX.ChangeZoom(-0.1f * m_ZoomEnvelopeX.GetZoom());
+					m_ZoomEnvelopeX.ChangeValue(-0.1f * m_ZoomEnvelopeX.GetValue());
 			}
 		}
 
@@ -6342,17 +6327,17 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			static const float s_aUnitPerLineOptionsY[] = {0.005f, 0.01f, 0.025f, 0.05f, 0.1f, 0.25f, 0.5f, 1.0f, 2.0f, 4.0f, 8.0f, 16.0f, 32.0f, 2 * 32.0f, 5 * 32.0f, 10 * 32.0f, 20 * 32.0f, 50 * 32.0f, 100 * 32.0f};
 			for(float Value : s_aUnitPerLineOptionsY)
 			{
-				if(Value / m_ZoomEnvelopeY.GetZoom() * View.h < 40.0f)
+				if(Value / m_ZoomEnvelopeY.GetValue() * View.h < 40.0f)
 					UnitsPerLineY = Value;
 			}
-			int NumLinesY = m_ZoomEnvelopeY.GetZoom() / static_cast<float>(UnitsPerLineY) + 1;
+			int NumLinesY = m_ZoomEnvelopeY.GetValue() / static_cast<float>(UnitsPerLineY) + 1;
 
 			UI()->ClipEnable(&View);
 			Graphics()->TextureClear();
 			Graphics()->LinesBegin();
 			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.2f);
 
-			float BaseValue = static_cast<int>(m_OffsetEnvelopeY * m_ZoomEnvelopeY.GetZoom() / UnitsPerLineY) * UnitsPerLineY;
+			float BaseValue = static_cast<int>(m_OffsetEnvelopeY * m_ZoomEnvelopeY.GetValue() / UnitsPerLineY) * UnitsPerLineY;
 			for(int i = 0; i <= NumLinesY; i++)
 			{
 				float Value = UnitsPerLineY * i - BaseValue;
@@ -6386,17 +6371,17 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			static const CTimeStep s_aUnitPerLineOptionsX[] = {5ms, 10ms, 25ms, 50ms, 100ms, 250ms, 500ms, 1s, 2s, 5s, 10s, 15s, 30s, 1min};
 			for(CTimeStep Value : s_aUnitPerLineOptionsX)
 			{
-				if(Value.AsSeconds() / m_ZoomEnvelopeX.GetZoom() * View.w < 160.0f)
+				if(Value.AsSeconds() / m_ZoomEnvelopeX.GetValue() * View.w < 160.0f)
 					UnitsPerLineX = Value;
 			}
-			int NumLinesX = m_ZoomEnvelopeX.GetZoom() / static_cast<float>(UnitsPerLineX.AsSeconds()) + 1;
+			int NumLinesX = m_ZoomEnvelopeX.GetValue() / static_cast<float>(UnitsPerLineX.AsSeconds()) + 1;
 
 			UI()->ClipEnable(&View);
 			Graphics()->TextureClear();
 			Graphics()->LinesBegin();
 			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.2f);
 
-			CTimeStep BaseValue = UnitsPerLineX * static_cast<int>(m_OffsetEnvelopeX * m_ZoomEnvelopeX.GetZoom() / UnitsPerLineX.AsSeconds());
+			CTimeStep BaseValue = UnitsPerLineX * static_cast<int>(m_OffsetEnvelopeX * m_ZoomEnvelopeX.GetValue() / UnitsPerLineX.AsSeconds());
 			for(int i = 0; i <= NumLinesX; i++)
 			{
 				float Value = UnitsPerLineX.AsSeconds() * i - BaseValue.AsSeconds();
@@ -7379,7 +7364,7 @@ void CEditor::RenderMenubar(CUIRect MenuBar)
 	char aTimeStr[6];
 	str_timestamp_format(aTimeStr, sizeof(aTimeStr), "%H:%M");
 
-	str_format(aBuf, sizeof(aBuf), "X: %.1f, Y: %.1f, Z: %.1f, A: %.1f, G: %i  %s", UI()->MouseWorldX() / 32.0f, UI()->MouseWorldY() / 32.0f, m_ZoomMapView.GetZoom(), m_AnimateSpeed, m_GridFactor, aTimeStr);
+	str_format(aBuf, sizeof(aBuf), "X: %.1f, Y: %.1f, Z: %.1f, A: %.1f, G: %i  %s", UI()->MouseWorldX() / 32.0f, UI()->MouseWorldY() / 32.0f, MapView()->m_Zoom.GetValue(), m_AnimateSpeed, m_GridFactor, aTimeStr);
 	UI()->DoLabel(&Info, aBuf, 10.0f, TEXTALIGN_MR);
 
 	static int s_CloseButton = 0;
@@ -7432,15 +7417,11 @@ void CEditor::Render()
 	{
 		// handle zoom hotkeys
 		if(Input()->KeyPress(KEY_KP_MINUS))
-			m_ZoomMapView.ChangeZoom(50.0f);
+			MapView()->m_Zoom.ChangeValue(50.0f);
 		if(Input()->KeyPress(KEY_KP_PLUS))
-			m_ZoomMapView.ChangeZoom(-50.0f);
+			MapView()->m_Zoom.ChangeValue(-50.0f);
 		if(Input()->KeyPress(KEY_KP_MULTIPLY))
-		{
-			m_EditorOffsetX = 0;
-			m_EditorOffsetY = 0;
-			m_ZoomMapView.SetZoom(100.0f);
-		}
+			MapView()->ResetZoom();
 
 		// handle brush save/load hotkeys
 		for(int i = KEY_1; i <= KEY_0; i++)
@@ -7636,12 +7617,12 @@ void CEditor::Render()
 	if(m_Dialog == DIALOG_NONE && !UI()->IsPopupHovered() && (!m_GuiActive || UI()->MouseInside(&View)))
 	{
 		if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
-			m_ZoomMapView.ChangeZoom(20.0f);
+			MapView()->m_Zoom.ChangeValue(20.0f);
 		if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
-			m_ZoomMapView.ChangeZoom(-20.0f);
+			MapView()->m_Zoom.ChangeValue(-20.0f);
 	}
 
-	UpdateZoomWorld();
+	MapView()->UpdateZoom();
 
 	UI()->RenderPopupMenus();
 	FreeDynamicPopupMenus();
@@ -7742,13 +7723,6 @@ void CEditor::Reset(bool CreateDefault)
 	m_SelectedSound = 0;
 	m_SelectedSource = -1;
 
-	m_WorldOffsetX = 0;
-	m_WorldOffsetY = 0;
-	m_EditorOffsetX = 0.0f;
-	m_EditorOffsetY = 0.0f;
-
-	m_WorldZoom = 1.0f;
-
 	m_MouseDeltaX = 0;
 	m_MouseDeltaY = 0;
 	m_MouseDeltaWx = 0;
@@ -7769,55 +7743,18 @@ void CEditor::Reset(bool CreateDefault)
 
 int CEditor::GetLineDistance() const
 {
-	if(m_ZoomMapView.GetZoom() <= 100.0f)
+	if(MapView()->m_Zoom.GetValue() <= 100.0f)
 		return 16;
-	else if(m_ZoomMapView.GetZoom() <= 250.0f)
+	else if(MapView()->m_Zoom.GetValue() <= 250.0f)
 		return 32;
-	else if(m_ZoomMapView.GetZoom() <= 450.0f)
+	else if(MapView()->m_Zoom.GetValue() <= 450.0f)
 		return 64;
-	else if(m_ZoomMapView.GetZoom() <= 850.0f)
+	else if(MapView()->m_Zoom.GetValue() <= 850.0f)
 		return 128;
-	else if(m_ZoomMapView.GetZoom() <= 1550.0f)
+	else if(MapView()->m_Zoom.GetValue() <= 1550.0f)
 		return 256;
 	else
 		return 512;
-}
-
-void CEditor::ZoomMouseTarget(float ZoomFactor)
-{
-	// zoom to the current mouse position
-	// get absolute mouse position
-	float aPoints[4];
-	RenderTools()->MapScreenToWorld(
-		m_WorldOffsetX, m_WorldOffsetY,
-		100.0f, 100.0f, 100.0f, 0.0f, 0.0f, Graphics()->ScreenAspect(), m_WorldZoom, aPoints);
-
-	float WorldWidth = aPoints[2] - aPoints[0];
-	float WorldHeight = aPoints[3] - aPoints[1];
-
-	float Mwx = aPoints[0] + WorldWidth * (UI()->MouseX() / UI()->Screen()->w);
-	float Mwy = aPoints[1] + WorldHeight * (UI()->MouseY() / UI()->Screen()->h);
-
-	// adjust camera
-	m_WorldOffsetX += (Mwx - m_WorldOffsetX) * (1.0f - ZoomFactor);
-	m_WorldOffsetY += (Mwy - m_WorldOffsetY) * (1.0f - ZoomFactor);
-}
-
-void CEditor::UpdateZoomWorld()
-{
-	float OldLevel = m_ZoomMapView.GetZoom();
-	m_ZoomMapView.SetZoomRange(10.0f, g_Config.m_EdLimitMaxZoomLevel ? 2000.0f : std::numeric_limits<float>::max());
-	bool UpdatedZoom = m_ZoomMapView.UpdateZoom();
-	float NewLevel = m_ZoomMapView.GetZoom();
-	if(UpdatedZoom && g_Config.m_EdZoomTarget)
-		ZoomMouseTarget(NewLevel / OldLevel);
-	m_WorldZoom = NewLevel / 100.0f;
-}
-
-void CEditor::Goto(float X, float Y)
-{
-	m_WorldOffsetX = X * 32;
-	m_WorldOffsetY = Y * 32;
 }
 
 void CEditorMap::OnModify()
@@ -8031,6 +7968,9 @@ void CEditor::Init()
 		m_PopupEventWasActivated = false;
 	});
 	m_RenderTools.Init(m_pGraphics, m_pTextRender);
+	m_ZoomEnvelopeX.Init(this);
+	m_ZoomEnvelopeY.Init(this);
+	m_MapView.Init(this);
 	m_Map.m_pEditor = this;
 
 	m_CheckerTexture = Graphics()->LoadTexture("editor/checker.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
@@ -8367,8 +8307,7 @@ void CEditor::LoadCurrentMap()
 	CGameClient *pGameClient = (CGameClient *)Kernel()->RequestInterface<IGameClient>();
 	vec2 Center = pGameClient->m_Camera.m_Center;
 
-	m_WorldOffsetX = Center.x;
-	m_WorldOffsetY = Center.y;
+	MapView()->m_WorldOffset = Center;
 }
 
 IEditor *CreateEditor() { return new CEditor; }
@@ -8438,101 +8377,4 @@ void CEditorMap::MakeTuneLayer(const std::shared_ptr<CLayer> &pLayer)
 {
 	m_pTuneLayer = std::static_pointer_cast<CLayerTune>(pLayer);
 	m_pTuneLayer->m_pEditor = m_pEditor;
-}
-
-CSmoothZoom::CSmoothZoom(float InitialZoom, float Min, float Max, CEditor *pEditor)
-{
-	m_Zoom = InitialZoom;
-	m_MinZoomLevel = Min;
-	m_MaxZoomLevel = Max;
-	m_pEditor = pEditor;
-	m_Zooming = false;
-}
-
-void CSmoothZoom::SetZoom(float Target)
-{
-	Target = clamp(Target, m_MinZoomLevel, m_MaxZoomLevel);
-
-	const float Now = m_pEditor->Client()->GlobalTime();
-	float Current = m_Zoom;
-	float Derivative = 0.0f;
-	if(m_Zooming)
-	{
-		const float Progress = ZoomProgress(Now);
-		Current = m_ZoomSmoothing.Evaluate(Progress);
-		Derivative = m_ZoomSmoothing.Derivative(Progress);
-	}
-
-	m_ZoomSmoothingTarget = Target;
-	m_ZoomSmoothing = CCubicBezier::With(Current, Derivative, 0.0f, m_ZoomSmoothingTarget);
-	m_ZoomSmoothingStart = Now;
-	m_ZoomSmoothingEnd = Now + g_Config.m_EdSmoothZoomTime / 1000.0f;
-
-	m_Zooming = true;
-}
-
-void CSmoothZoom::ChangeZoom(float Amount)
-{
-	const float CurrentTarget = m_Zooming ? m_ZoomSmoothingTarget : m_Zoom;
-	SetZoom(CurrentTarget + Amount);
-}
-
-bool CSmoothZoom::UpdateZoom()
-{
-	if(m_Zooming)
-	{
-		const float Time = m_pEditor->Client()->GlobalTime();
-		const float OldLevel = m_Zoom;
-		if(Time >= m_ZoomSmoothingEnd)
-		{
-			m_Zoom = m_ZoomSmoothingTarget;
-			m_Zooming = false;
-		}
-		else
-		{
-			m_Zoom = m_ZoomSmoothing.Evaluate(ZoomProgress(Time));
-			if((OldLevel < m_ZoomSmoothingTarget && m_Zoom > m_ZoomSmoothingTarget) || (OldLevel > m_ZoomSmoothingTarget && m_Zoom < m_ZoomSmoothingTarget))
-			{
-				m_Zoom = m_ZoomSmoothingTarget;
-				m_Zooming = false;
-			}
-		}
-		m_Zoom = clamp(m_Zoom, m_MinZoomLevel, m_MaxZoomLevel);
-
-		return true;
-	}
-
-	return false;
-}
-
-float CSmoothZoom::ZoomProgress(float CurrentTime) const
-{
-	return (CurrentTime - m_ZoomSmoothingStart) / (m_ZoomSmoothingEnd - m_ZoomSmoothingStart);
-}
-
-float CSmoothZoom::GetZoom() const
-{
-	return m_Zoom;
-}
-
-void CSmoothZoom::SetZoomRange(float Min, float Max)
-{
-	m_MinZoomLevel = Min;
-	m_MaxZoomLevel = Max;
-}
-
-void CSmoothZoom::SetZoomInstant(float Target)
-{
-	m_Zooming = false;
-	m_Zoom = Target;
-}
-
-float CSmoothZoom::GetMinZoomLevel() const
-{
-	return m_MinZoomLevel;
-}
-
-float CSmoothZoom::GetMaxZoomLevel() const
-{
-	return m_MaxZoomLevel;
 }
