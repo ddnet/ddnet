@@ -13,7 +13,6 @@
 
 #include <limits>
 
-const float ZoomStep = 0.866025f;
 
 CCamera::CCamera()
 {
