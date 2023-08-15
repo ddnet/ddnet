@@ -15,7 +15,6 @@ class CMapView : public CEditorComponent
 public:
 	void Init(CEditor *pEditor) override;
 	void OnReset() override;
-	void OnMapLoad() override;
 
 	void ZoomMouseTarget(float ZoomFactor);
 	void UpdateZoom();

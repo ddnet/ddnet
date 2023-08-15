@@ -68,6 +68,7 @@ public:
 	 */
 	void InitSubComponents();
 	void RegisterSubComponent(CEditorComponent &Component);
+	void ResetSubComponents();
 
 	CEditor *Editor();
 	const CEditor *Editor() const;

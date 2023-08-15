@@ -5,6 +5,8 @@
 #include <engine/shared/linereader.h>
 #include <engine/storage.h>
 
+#include <game/editor/mapitems/layer_tiles.h>
+
 #include "auto_map.h"
 #include "editor.h"
 

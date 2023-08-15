@@ -8,7 +8,6 @@ class CProofMode : public CEditorComponent
 public:
 	void Init(CEditor *pEditor) override;
 	void OnReset() override;
-	void OnMapLoad() override;
 	void RenderScreenSizes();
 
 	bool IsEnabled() const;

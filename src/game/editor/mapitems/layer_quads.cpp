@@ -1,11 +1,15 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include "layer_quads.h"
+
 #include <base/math.h>
 
 #include <engine/graphics.h>
 
-#include "editor.h"
 #include <game/client/render.h>
+#include <game/editor/editor.h>
+
+#include "layer_group.h"
 
 CLayerQuads::CLayerQuads()
 {
@@ -26,18 +30,18 @@ CLayerQuads::~CLayerQuads() = default;
 void CLayerQuads::Render(bool QuadPicker)
 {
 	Graphics()->TextureClear();
-	if(m_Image >= 0 && (size_t)m_Image < m_pEditor->m_Map.m_vpImages.size())
-		Graphics()->TextureSet(m_pEditor->m_Map.m_vpImages[m_Image]->m_Texture);
+	if(m_Image >= 0 && (size_t)m_Image < Editor()->m_Map.m_vpImages.size())
+		Graphics()->TextureSet(Editor()->m_Map.m_vpImages[m_Image]->m_Texture);
 
 	Graphics()->BlendNone();
-	m_pEditor->RenderTools()->ForceRenderQuads(m_vQuads.data(), m_vQuads.size(), LAYERRENDERFLAG_OPAQUE, m_pEditor->EnvelopeEval, m_pEditor);
+	RenderTools()->ForceRenderQuads(m_vQuads.data(), m_vQuads.size(), LAYERRENDERFLAG_OPAQUE, Editor()->EnvelopeEval, Editor());
 	Graphics()->BlendNormal();
-	m_pEditor->RenderTools()->ForceRenderQuads(m_vQuads.data(), m_vQuads.size(), LAYERRENDERFLAG_TRANSPARENT, m_pEditor->EnvelopeEval, m_pEditor);
+	RenderTools()->ForceRenderQuads(m_vQuads.data(), m_vQuads.size(), LAYERRENDERFLAG_TRANSPARENT, Editor()->EnvelopeEval, Editor());
 }
 
 CQuad *CLayerQuads::NewQuad(int x, int y, int Width, int Height)
 {
-	m_pEditor->m_Map.OnModify();
+	Editor()->m_Map.OnModify();
 
 	m_vQuads.emplace_back();
 	CQuad *pQuad = &m_vQuads[m_vQuads.size() - 1];
@@ -107,11 +111,11 @@ void CLayerQuads::BrushSelecting(CUIRect Rect)
 	Graphics()->LinesEnd();
 }
 
-int CLayerQuads::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
+int CLayerQuads::BrushGrab(const std::shared_ptr<CLayerGroup> &pBrush, CUIRect Rect)
 {
 	// create new layers
 	std::shared_ptr<CLayerQuads> pGrabbed = std::make_shared<CLayerQuads>();
-	pGrabbed->m_pEditor = m_pEditor;
+	pGrabbed->Init(Editor());
 	pGrabbed->m_Image = m_Image;
 	pBrush->AddLayer(pGrabbed);
 
@@ -138,7 +142,7 @@ int CLayerQuads::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
 	return pGrabbed->m_vQuads.empty() ? 0 : 1;
 }
 
-void CLayerQuads::BrushPlace(std::shared_ptr<CLayer> pBrush, float wx, float wy)
+void CLayerQuads::BrushPlace(const std::shared_ptr<CLayer> &pBrush, float wx, float wy)
 {
 	std::shared_ptr<CLayerQuads> pQuadLayer = std::static_pointer_cast<CLayerQuads>(pBrush);
 	for(const auto &Quad : pQuadLayer->m_vQuads)
@@ -153,7 +157,7 @@ void CLayerQuads::BrushPlace(std::shared_ptr<CLayer> pBrush, float wx, float wy)
 
 		m_vQuads.push_back(n);
 	}
-	m_pEditor->m_Map.OnModify();
+	Editor()->m_Map.OnModify();
 }
 
 void CLayerQuads::BrushFlipX()
@@ -163,7 +167,7 @@ void CLayerQuads::BrushFlipX()
 		std::swap(Quad.m_aPoints[0], Quad.m_aPoints[1]);
 		std::swap(Quad.m_aPoints[2], Quad.m_aPoints[3]);
 	}
-	m_pEditor->m_Map.OnModify();
+	Editor()->m_Map.OnModify();
 }
 
 void CLayerQuads::BrushFlipY()
@@ -173,7 +177,7 @@ void CLayerQuads::BrushFlipY()
 		std::swap(Quad.m_aPoints[0], Quad.m_aPoints[2]);
 		std::swap(Quad.m_aPoints[1], Quad.m_aPoints[3]);
 	}
-	m_pEditor->m_Map.OnModify();
+	Editor()->m_Map.OnModify();
 }
 
 void Rotate(vec2 *pCenter, vec2 *pPoint, float Rotation)
@@ -233,16 +237,16 @@ CUI::EPopupMenuFunctionResult CLayerQuads::RenderProperties(CUIRect *pToolBox)
 
 	static int s_aIds[NUM_PROPS] = {0};
 	int NewVal = 0;
-	int Prop = m_pEditor->DoProperties(pToolBox, aProps, s_aIds, &NewVal);
+	int Prop = Editor()->DoProperties(pToolBox, aProps, s_aIds, &NewVal);
 	if(Prop != -1)
 	{
-		m_pEditor->m_Map.OnModify();
+		Editor()->m_Map.OnModify();
 	}
 
 	if(Prop == PROP_IMAGE)
 	{
 		if(NewVal >= 0)
-			m_Image = NewVal % m_pEditor->m_Map.m_vpImages.size();
+			m_Image = NewVal % Editor()->m_Map.m_vpImages.size();
 		else
 			m_Image = -1;
 	}
@@ -250,12 +254,12 @@ CUI::EPopupMenuFunctionResult CLayerQuads::RenderProperties(CUIRect *pToolBox)
 	return CUI::POPUP_KEEP_OPEN;
 }
 
-void CLayerQuads::ModifyImageIndex(FIndexModifyFunction Func)
+void CLayerQuads::ModifyImageIndex(const FIndexModifyFunction &Func)
 {
 	Func(&m_Image);
 }
 
-void CLayerQuads::ModifyEnvelopeIndex(FIndexModifyFunction Func)
+void CLayerQuads::ModifyEnvelopeIndex(const FIndexModifyFunction &Func)
 {
 	for(auto &Quad : m_vQuads)
 	{
@@ -277,7 +281,7 @@ int CLayerQuads::SwapQuads(int Index0, int Index1)
 		return Index0;
 	if(Index0 == Index1)
 		return Index0;
-	m_pEditor->m_Map.OnModify();
+	Editor()->m_Map.OnModify();
 	std::swap(m_vQuads[Index0], m_vQuads[Index1]);
 	return Index1;
 }

@@ -1,6 +1,8 @@
 #include "proof_mode.h"
 
 #include <game/client/components/menu_background.h>
+#include <game/editor/mapitems/layer_game.h>
+#include <game/editor/mapitems/layer_group.h>
 
 #include "editor.h"
 
@@ -9,18 +11,12 @@ void CProofMode::Init(CEditor *pEditor)
 	CEditorComponent::Init(pEditor);
 	SetMenuBackgroundPositionNames();
 	OnReset();
-	OnMapLoad();
 }
 
 void CProofMode::OnReset()
 {
 	m_ProofBorders = PROOF_BORDER_OFF;
 	m_CurrentMenuProofIndex = 0;
-}
-
-void CProofMode::OnMapLoad()
-{
-	m_vMenuBackgroundCollisions = {};
 	ResetMenuBackgroundPositions();
 }
 

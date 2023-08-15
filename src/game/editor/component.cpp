@@ -94,6 +94,14 @@ void CEditorComponent::RegisterSubComponent(CEditorComponent &Component)
 	m_vSubComponents.emplace_back(Component);
 }
 
+void CEditorComponent::ResetSubComponents()
+{
+	for(CEditorComponent &Component : m_vSubComponents)
+	{
+		Component.OnReset();
+	}
+}
+
 CEditor *CEditorComponent::Editor() { return m_pEditor; }
 const CEditor *CEditorComponent::Editor() const { return m_pEditor; }
 IInput *CEditorComponent::Input() { return m_pInput; }

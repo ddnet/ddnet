@@ -28,6 +28,16 @@
 #include <game/client/ui.h>
 #include <game/client/ui_listbox.h>
 #include <game/client/ui_scrollregion.h>
+#include <game/editor/mapitems/layer_front.h>
+#include <game/editor/mapitems/layer_game.h>
+#include <game/editor/mapitems/layer_group.h>
+#include <game/editor/mapitems/layer_quads.h>
+#include <game/editor/mapitems/layer_sounds.h>
+#include <game/editor/mapitems/layer_speedup.h>
+#include <game/editor/mapitems/layer_switch.h>
+#include <game/editor/mapitems/layer_tele.h>
+#include <game/editor/mapitems/layer_tiles.h>
+#include <game/editor/mapitems/layer_tune.h>
 #include <game/generated/client_data.h>
 #include <game/localization.h>
 
@@ -99,160 +109,6 @@ CEditorSound::~CEditorSound()
 	m_pEditor->Sound()->UnloadSample(m_SoundID);
 	free(m_pData);
 	m_pData = nullptr;
-}
-
-CLayerGroup::CLayerGroup()
-{
-	m_vpLayers.clear();
-	m_aName[0] = 0;
-	m_Visible = true;
-	m_Collapse = false;
-	m_GameGroup = false;
-	m_OffsetX = 0;
-	m_OffsetY = 0;
-	m_ParallaxX = 100;
-	m_ParallaxY = 100;
-	m_CustomParallaxZoom = 0;
-	m_ParallaxZoom = 100;
-
-	m_UseClipping = 0;
-	m_ClipX = 0;
-	m_ClipY = 0;
-	m_ClipW = 0;
-	m_ClipH = 0;
-}
-
-CLayerGroup::~CLayerGroup()
-{
-	m_vpLayers.clear();
-}
-
-void CLayerGroup::Convert(CUIRect *pRect)
-{
-	pRect->x += m_OffsetX;
-	pRect->y += m_OffsetY;
-}
-
-void CLayerGroup::Mapping(float *pPoints)
-{
-	float ParallaxZoom = m_pMap->m_pEditor->m_PreviewZoom ? m_ParallaxZoom : 100.0f;
-
-	m_pMap->m_pEditor->RenderTools()->MapScreenToWorld(
-		m_pMap->m_pEditor->MapView()->GetWorldOffset().x, m_pMap->m_pEditor->MapView()->GetWorldOffset().y,
-		m_ParallaxX, m_ParallaxY, ParallaxZoom, m_OffsetX, m_OffsetY,
-		m_pMap->m_pEditor->Graphics()->ScreenAspect(), m_pMap->m_pEditor->MapView()->WorldZoom(), pPoints);
-
-	pPoints[0] += m_pMap->m_pEditor->MapView()->GetEditorOffset().x;
-	pPoints[1] += m_pMap->m_pEditor->MapView()->GetEditorOffset().y;
-	pPoints[2] += m_pMap->m_pEditor->MapView()->GetEditorOffset().x;
-	pPoints[3] += m_pMap->m_pEditor->MapView()->GetEditorOffset().y;
-}
-
-void CLayerGroup::MapScreen()
-{
-	float aPoints[4];
-	Mapping(aPoints);
-	m_pMap->m_pEditor->Graphics()->MapScreen(aPoints[0], aPoints[1], aPoints[2], aPoints[3]);
-}
-
-void CLayerGroup::Render()
-{
-	MapScreen();
-	IGraphics *pGraphics = m_pMap->m_pEditor->Graphics();
-
-	if(m_UseClipping)
-	{
-		float aPoints[4];
-		m_pMap->m_pGameGroup->Mapping(aPoints);
-		float x0 = (m_ClipX - aPoints[0]) / (aPoints[2] - aPoints[0]);
-		float y0 = (m_ClipY - aPoints[1]) / (aPoints[3] - aPoints[1]);
-		float x1 = ((m_ClipX + m_ClipW) - aPoints[0]) / (aPoints[2] - aPoints[0]);
-		float y1 = ((m_ClipY + m_ClipH) - aPoints[1]) / (aPoints[3] - aPoints[1]);
-
-		pGraphics->ClipEnable((int)(x0 * pGraphics->ScreenWidth()), (int)(y0 * pGraphics->ScreenHeight()),
-			(int)((x1 - x0) * pGraphics->ScreenWidth()), (int)((y1 - y0) * pGraphics->ScreenHeight()));
-	}
-
-	for(auto &pLayer : m_vpLayers)
-	{
-		if(pLayer->m_Visible)
-		{
-			if(pLayer->m_Type == LAYERTYPE_TILES)
-			{
-				std::shared_ptr<CLayerTiles> pTiles = std::static_pointer_cast<CLayerTiles>(pLayer);
-				if(pTiles->m_Game || pTiles->m_Front || pTiles->m_Tele || pTiles->m_Speedup || pTiles->m_Tune || pTiles->m_Switch)
-					continue;
-			}
-			if(m_pMap->m_pEditor->m_ShowDetail || !(pLayer->m_Flags & LAYERFLAG_DETAIL))
-				pLayer->Render();
-		}
-	}
-
-	for(auto &pLayer : m_vpLayers)
-	{
-		if(pLayer->m_Visible && pLayer->m_Type == LAYERTYPE_TILES && pLayer != m_pMap->m_pGameLayer && pLayer != m_pMap->m_pFrontLayer && pLayer != m_pMap->m_pTeleLayer && pLayer != m_pMap->m_pSpeedupLayer && pLayer != m_pMap->m_pSwitchLayer && pLayer != m_pMap->m_pTuneLayer)
-		{
-			std::shared_ptr<CLayerTiles> pTiles = std::static_pointer_cast<CLayerTiles>(pLayer);
-			if(pTiles->m_Game || pTiles->m_Front || pTiles->m_Tele || pTiles->m_Speedup || pTiles->m_Tune || pTiles->m_Switch)
-			{
-				pLayer->Render();
-			}
-		}
-	}
-
-	if(m_UseClipping)
-		pGraphics->ClipDisable();
-}
-
-void CLayerGroup::AddLayer(const std::shared_ptr<CLayer> &pLayer)
-{
-	m_pMap->OnModify();
-	m_vpLayers.push_back(pLayer);
-}
-
-void CLayerGroup::DeleteLayer(int Index)
-{
-	if(Index < 0 || Index >= (int)m_vpLayers.size())
-		return;
-	m_vpLayers.erase(m_vpLayers.begin() + Index);
-	m_pMap->OnModify();
-}
-
-void CLayerGroup::DuplicateLayer(int Index)
-{
-	if(Index < 0 || Index >= (int)m_vpLayers.size())
-		return;
-
-	std::shared_ptr<CLayer> pDup = m_vpLayers[Index]->Duplicate();
-	m_vpLayers.insert(m_vpLayers.begin() + Index + 1, pDup);
-
-	m_pMap->OnModify();
-}
-
-void CLayerGroup::GetSize(float *pWidth, float *pHeight) const
-{
-	*pWidth = 0;
-	*pHeight = 0;
-	for(const auto &pLayer : m_vpLayers)
-	{
-		float lw, lh;
-		pLayer->GetSize(&lw, &lh);
-		*pWidth = maximum(*pWidth, lw);
-		*pHeight = maximum(*pHeight, lh);
-	}
-}
-
-int CLayerGroup::SwapLayers(int Index0, int Index1)
-{
-	if(Index0 < 0 || Index0 >= (int)m_vpLayers.size())
-		return Index0;
-	if(Index1 < 0 || Index1 >= (int)m_vpLayers.size())
-		return Index0;
-	if(Index0 == Index1)
-		return Index0;
-	m_pMap->OnModify();
-	std::swap(m_vpLayers[Index0], m_vpLayers[Index1]);
-	return Index1;
 }
 
 void CEditorImage::AnalyseTileFlags()
@@ -1798,7 +1654,7 @@ void CEditor::DoQuad(CQuad *pQuad, int Index)
 		std::shared_ptr<CLayerQuads> pLayer = std::static_pointer_cast<CLayerQuads>(GetSelectedLayerType(0, LAYERTYPE_QUADS));
 
 		std::shared_ptr<CLayerQuads> pLayerQuads = std::make_shared<CLayerQuads>();
-		pLayerQuads->m_pEditor = pLayer->m_pEditor;
+		pLayerQuads->Init(this);
 		pLayerQuads->m_Image = pLayer->m_Image;
 
 		int MinX = m_vCopyBuffer.front().m_aPoints[4].x;
@@ -7624,154 +7480,6 @@ void CEditor::Reset(bool CreateDefault)
 	m_SettingsCommandInput.Clear();
 }
 
-void CEditorMap::OnModify()
-{
-	m_Modified = true;
-	m_ModifiedAuto = true;
-	m_LastModifiedTime = m_pEditor->Client()->GlobalTime();
-}
-
-void CEditorMap::DeleteEnvelope(int Index)
-{
-	if(Index < 0 || Index >= (int)m_vpEnvelopes.size())
-		return;
-
-	OnModify();
-
-	VisitEnvelopeReferences([Index](int &ElementIndex) {
-		if(ElementIndex == Index)
-			ElementIndex = -1;
-		else if(ElementIndex > Index)
-			ElementIndex--;
-	});
-
-	m_vpEnvelopes.erase(m_vpEnvelopes.begin() + Index);
-}
-
-void CEditorMap::SwapEnvelopes(int Index0, int Index1)
-{
-	if(Index0 < 0 || Index0 >= (int)m_vpEnvelopes.size())
-		return;
-	if(Index1 < 0 || Index1 >= (int)m_vpEnvelopes.size())
-		return;
-	if(Index0 == Index1)
-		return;
-
-	OnModify();
-
-	VisitEnvelopeReferences([Index0, Index1](int &ElementIndex) {
-		if(ElementIndex == Index0)
-			ElementIndex = Index1;
-		else if(ElementIndex == Index1)
-			ElementIndex = Index0;
-	});
-
-	std::swap(m_vpEnvelopes[Index0], m_vpEnvelopes[Index1]);
-}
-
-template<typename F>
-void CEditorMap::VisitEnvelopeReferences(F &&Visitor)
-{
-	for(auto &pGroup : m_vpGroups)
-	{
-		for(auto &pLayer : pGroup->m_vpLayers)
-		{
-			if(pLayer->m_Type == LAYERTYPE_QUADS)
-			{
-				std::shared_ptr<CLayerQuads> pLayerQuads = std::static_pointer_cast<CLayerQuads>(pLayer);
-				for(auto &Quad : pLayerQuads->m_vQuads)
-				{
-					Visitor(Quad.m_PosEnv);
-					Visitor(Quad.m_ColorEnv);
-				}
-			}
-			else if(pLayer->m_Type == LAYERTYPE_TILES)
-			{
-				std::shared_ptr<CLayerTiles> pLayerTiles = std::static_pointer_cast<CLayerTiles>(pLayer);
-				Visitor(pLayerTiles->m_ColorEnv);
-			}
-			else if(pLayer->m_Type == LAYERTYPE_SOUNDS)
-			{
-				std::shared_ptr<CLayerSounds> pLayerSounds = std::static_pointer_cast<CLayerSounds>(pLayer);
-				for(auto &Source : pLayerSounds->m_vSources)
-				{
-					Visitor(Source.m_PosEnv);
-					Visitor(Source.m_SoundEnv);
-				}
-			}
-		}
-	}
-}
-
-void CEditorMap::MakeGameLayer(const std::shared_ptr<CLayer> &pLayer)
-{
-	m_pGameLayer = std::static_pointer_cast<CLayerGame>(pLayer);
-	m_pGameLayer->m_pEditor = m_pEditor;
-}
-
-void CEditorMap::MakeGameGroup(std::shared_ptr<CLayerGroup> pGroup)
-{
-	m_pGameGroup = std::move(pGroup);
-	m_pGameGroup->m_GameGroup = true;
-	str_copy(m_pGameGroup->m_aName, "Game");
-}
-
-void CEditorMap::Clean()
-{
-	m_vpGroups.clear();
-	m_vpEnvelopes.clear();
-	m_vpImages.clear();
-	m_vpSounds.clear();
-
-	m_MapInfo.Reset();
-	m_MapInfoTmp.Reset();
-
-	m_vSettings.clear();
-
-	m_pGameLayer = nullptr;
-	m_pGameGroup = nullptr;
-
-	m_Modified = false;
-	m_ModifiedAuto = false;
-
-	m_pTeleLayer = nullptr;
-	m_pSpeedupLayer = nullptr;
-	m_pFrontLayer = nullptr;
-	m_pSwitchLayer = nullptr;
-	m_pTuneLayer = nullptr;
-}
-
-void CEditorMap::CreateDefault(IGraphics::CTextureHandle EntitiesTexture)
-{
-	// add background
-	std::shared_ptr<CLayerGroup> pGroup = NewGroup();
-	pGroup->m_ParallaxX = 0;
-	pGroup->m_ParallaxY = 0;
-	pGroup->m_CustomParallaxZoom = 0;
-	pGroup->m_ParallaxZoom = 0;
-	std::shared_ptr<CLayerQuads> pLayer = std::make_shared<CLayerQuads>();
-	pLayer->m_pEditor = m_pEditor;
-	CQuad *pQuad = pLayer->NewQuad(0, 0, 1600, 1200);
-	pQuad->m_aColors[0].r = pQuad->m_aColors[1].r = 94;
-	pQuad->m_aColors[0].g = pQuad->m_aColors[1].g = 132;
-	pQuad->m_aColors[0].b = pQuad->m_aColors[1].b = 174;
-	pQuad->m_aColors[2].r = pQuad->m_aColors[3].r = 204;
-	pQuad->m_aColors[2].g = pQuad->m_aColors[3].g = 232;
-	pQuad->m_aColors[2].b = pQuad->m_aColors[3].b = 255;
-	pGroup->AddLayer(pLayer);
-
-	// add game layer and reset front, tele, speedup, tune and switch layer pointers
-	MakeGameGroup(NewGroup());
-	MakeGameLayer(std::make_shared<CLayerGame>(50, 50));
-	m_pGameGroup->AddLayer(m_pGameLayer);
-
-	m_pFrontLayer = nullptr;
-	m_pTeleLayer = nullptr;
-	m_pSpeedupLayer = nullptr;
-	m_pSwitchLayer = nullptr;
-	m_pTuneLayer = nullptr;
-}
-
 int CEditor::GetTextureUsageFlag()
 {
 	return Graphics()->HasTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
@@ -7837,9 +7545,9 @@ void CEditor::Init()
 	m_RenderTools.Init(m_pGraphics, m_pTextRender);
 	m_ZoomEnvelopeX.Init(this);
 	m_ZoomEnvelopeY.Init(this);
-	m_Map.m_pEditor = this;
 
 	m_vComponents.emplace_back(m_MapView);
+	m_vComponents.emplace_back(m_Map);
 	for(CEditorComponent &Component : m_vComponents)
 		Component.Init(this);
 
@@ -7848,17 +7556,17 @@ void CEditor::Init()
 	m_CursorTexture = Graphics()->LoadTexture("editor/cursor.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
 
 	m_pTilesetPicker = std::make_shared<CLayerTiles>(16, 16);
-	m_pTilesetPicker->m_pEditor = this;
+	m_pTilesetPicker->Init(this);
 	m_pTilesetPicker->MakePalette();
 	m_pTilesetPicker->m_Readonly = true;
 
 	m_pQuadsetPicker = std::make_shared<CLayerQuads>();
-	m_pQuadsetPicker->m_pEditor = this;
+	m_pQuadsetPicker->Init(this);
 	m_pQuadsetPicker->NewQuad(0, 0, 64, 64);
 	m_pQuadsetPicker->m_Readonly = true;
 
 	m_pBrush = std::make_shared<CLayerGroup>();
-	m_pBrush->m_pMap = &m_Map;
+	m_pBrush->Init(this);
 
 	Reset(false);
 }
@@ -8171,36 +7879,90 @@ void CEditor::LoadCurrentMap()
 	MapView()->SetWorldOffset(Center);
 }
 
+bool CEditor::Save(const char *pFilename)
+{
+	// Check if file with this name is already being saved at the moment
+	if(std::any_of(std::begin(m_WriterFinishJobs), std::end(m_WriterFinishJobs), [pFilename](const std::shared_ptr<CDataFileWriterFinishJob> &Job) { return str_comp(pFilename, Job->GetRealFileName()) == 0; }))
+		return false;
+
+	return m_Map.Save(pFilename);
+}
+
+bool CEditor::Load(const char *pFileName, int StorageType)
+{
+	const auto &&ErrorHandler = [this](const char *pErrorMessage) {
+		ShowFileDialogError("%s", pErrorMessage);
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "editor/load", pErrorMessage);
+	};
+
+	Reset();
+	bool Result = m_Map.Load(pFileName, StorageType, std::move(ErrorHandler));
+	if(Result)
+	{
+		str_copy(m_aFileName, pFileName);
+		SortImages();
+		SelectGameLayer();
+	}
+	else
+	{
+		m_aFileName[0] = 0;
+		Reset();
+	}
+	return Result;
+}
+
+bool CEditor::Append(const char *pFileName, int StorageType)
+{
+	CEditorMap NewMap;
+	NewMap.Init(this);
+
+	const auto &&ErrorHandler = [this](const char *pErrorMessage) {
+		ShowFileDialogError("%s", pErrorMessage);
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "editor/append", pErrorMessage);
+	};
+	if(!NewMap.Load(pFileName, StorageType, std::move(ErrorHandler)))
+		return false;
+
+	// modify indices
+	static const auto &&s_ModifyAddIndex = [](int AddAmount) {
+		return [AddAmount](int *pIndex) {
+			if(*pIndex >= 0)
+				*pIndex += AddAmount;
+		};
+	};
+	NewMap.ModifyImageIndex(s_ModifyAddIndex(m_Map.m_vpImages.size()));
+	NewMap.ModifySoundIndex(s_ModifyAddIndex(m_Map.m_vpSounds.size()));
+	NewMap.ModifyEnvelopeIndex(s_ModifyAddIndex(m_Map.m_vpEnvelopes.size()));
+
+	// transfer images
+	for(const auto &pImage : NewMap.m_vpImages)
+		m_Map.m_vpImages.push_back(pImage);
+	NewMap.m_vpImages.clear();
+
+	// transfer sounds
+	for(const auto &pSound : NewMap.m_vpSounds)
+		m_Map.m_vpSounds.push_back(pSound);
+	NewMap.m_vpSounds.clear();
+
+	// transfer envelopes
+	for(const auto &pEnvelope : NewMap.m_vpEnvelopes)
+		m_Map.m_vpEnvelopes.push_back(pEnvelope);
+	NewMap.m_vpEnvelopes.clear();
+
+	// transfer groups
+	for(const auto &pGroup : NewMap.m_vpGroups)
+	{
+		if(pGroup != NewMap.m_pGameGroup)
+		{
+			m_Map.m_vpGroups.push_back(pGroup);
+		}
+	}
+	NewMap.m_vpGroups.clear();
+
+	SortImages();
+
+	// all done \o/
+	return true;
+}
+
 IEditor *CreateEditor() { return new CEditor; }
-
-// DDRace
-
-void CEditorMap::MakeTeleLayer(const std::shared_ptr<CLayer> &pLayer)
-{
-	m_pTeleLayer = std::static_pointer_cast<CLayerTele>(pLayer);
-	m_pTeleLayer->m_pEditor = m_pEditor;
-}
-
-void CEditorMap::MakeSpeedupLayer(const std::shared_ptr<CLayer> &pLayer)
-{
-	m_pSpeedupLayer = std::static_pointer_cast<CLayerSpeedup>(pLayer);
-	m_pSpeedupLayer->m_pEditor = m_pEditor;
-}
-
-void CEditorMap::MakeFrontLayer(const std::shared_ptr<CLayer> &pLayer)
-{
-	m_pFrontLayer = std::static_pointer_cast<CLayerFront>(pLayer);
-	m_pFrontLayer->m_pEditor = m_pEditor;
-}
-
-void CEditorMap::MakeSwitchLayer(const std::shared_ptr<CLayer> &pLayer)
-{
-	m_pSwitchLayer = std::static_pointer_cast<CLayerSwitch>(pLayer);
-	m_pSwitchLayer->m_pEditor = m_pEditor;
-}
-
-void CEditorMap::MakeTuneLayer(const std::shared_ptr<CLayer> &pLayer)
-{
-	m_pTuneLayer = std::static_pointer_cast<CLayerTune>(pLayer);
-	m_pTuneLayer->m_pEditor = m_pEditor;
-}

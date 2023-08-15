@@ -5,6 +5,13 @@
 
 #include <game/client/render.h>
 #include <game/client/ui.h>
+#include <game/editor/mapitems/layer_front.h>
+#include <game/editor/mapitems/layer_game.h>
+#include <game/editor/mapitems/layer_group.h>
+#include <game/editor/mapitems/layer_speedup.h>
+#include <game/editor/mapitems/layer_switch.h>
+#include <game/editor/mapitems/layer_tele.h>
+#include <game/editor/mapitems/layer_tune.h>
 
 #include "editor.h"
 
@@ -13,26 +20,19 @@ void CMapView::Init(CEditor *pEditor)
 	CEditorComponent::Init(pEditor);
 	RegisterSubComponent(m_MapGrid);
 	RegisterSubComponent(m_ProofMode);
+	RegisterSubComponent(m_Zoom);
 	InitSubComponents();
 }
 
 void CMapView::OnReset()
 {
-	m_Zoom = CSmoothValue(200.0f, 10.0f, 2000.0f);
-	m_Zoom.Init(Editor());
 	m_WorldZoom = 1.0f;
 
 	SetWorldOffset({0, 0});
 	SetEditorOffset({0, 0});
 
-	m_ProofMode.OnReset();
-	m_MapGrid.OnReset();
+	ResetSubComponents();
 	m_ShowPicker = false;
-}
-
-void CMapView::OnMapLoad()
-{
-	m_ProofMode.OnMapLoad();
 }
 
 bool CMapView::IsFocused()
