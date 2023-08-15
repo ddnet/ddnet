@@ -146,7 +146,6 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	int64_t m_GlobalStartTime;
 
 	IGraphics::CTextureHandle m_DebugFont;
-	int m_DebugSoundIndex = 0;
 
 	int64_t m_LastRenderTime;
 	float m_RenderFrameTimeLow;
