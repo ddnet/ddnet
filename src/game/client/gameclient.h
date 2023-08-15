@@ -485,8 +485,7 @@ public:
 	virtual void OnStartGame();
 	virtual void OnStartRound();
 	virtual void OnFlagGrab(int TeamID);
-
-	void OnWindowResize();
+	void OnWindowResize() override;
 
 	bool m_LanguageChanged = false;
 	void OnLanguageChange();

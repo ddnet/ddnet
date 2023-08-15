@@ -121,6 +121,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	IEngineSound *m_pSound = nullptr;
 	ISteam *m_pSteam = nullptr;
 	IStorage *m_pStorage = nullptr;
+	IEngineTextRender *m_pTextRender = nullptr;
 	IUpdater *m_pUpdater = nullptr;
 
 	CNetClient m_aNetClient[NUM_CONNS];
@@ -311,6 +312,7 @@ public:
 	IEngineSound *Sound() { return m_pSound; }
 	ISteam *Steam() { return m_pSteam; }
 	IStorage *Storage() { return m_pStorage; }
+	IEngineTextRender *TextRender() { return m_pTextRender; }
 	IUpdater *Updater() { return m_pUpdater; }
 
 	CClient();
@@ -510,6 +512,7 @@ public:
 	void SetWindowParams(int FullscreenMode, bool IsBorderless, bool AllowResizing) override;
 	void ToggleWindowVSync() override;
 	void Notify(const char *pTitle, const char *pMessage) override;
+	void OnWindowResize() override;
 	void BenchmarkQuit(int Seconds, const char *pFilename);
 
 	void UpdateAndSwap() override;

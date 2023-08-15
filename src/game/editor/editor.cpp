@@ -8292,6 +8292,11 @@ void CEditor::OnActivate()
 	ResetIngameMoved();
 }
 
+void CEditor::OnWindowResize()
+{
+	UI()->OnWindowResize();
+}
+
 void CEditor::LoadCurrentMap()
 {
 	if(Load(m_pClient->GetCurrentMapPath(), IStorage::TYPE_SAVE))
