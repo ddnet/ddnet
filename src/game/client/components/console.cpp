@@ -765,12 +765,9 @@ void CGameConsole::OnRender()
 						if(m_WantsSelectionCopy)
 						{
 							const bool HasNewLine = !SelectionString.empty();
-							int OffUTF8Start = 0;
-							int OffUTF8End = 0;
-							if(TextRender()->SelectionToUTF8OffSets(pEntry->m_aText, pConsole->m_CurSelStart, pConsole->m_CurSelEnd, OffUTF8Start, OffUTF8End))
-							{
-								SelectionString.insert(0, (std::string(&pEntry->m_aText[OffUTF8Start], OffUTF8End - OffUTF8Start) + (HasNewLine ? "\n" : "")));
-							}
+							const size_t OffUTF8Start = str_utf8_offset_chars_to_bytes(pEntry->m_aText, pConsole->m_CurSelStart);
+							const size_t OffUTF8End = str_utf8_offset_chars_to_bytes(pEntry->m_aText, pConsole->m_CurSelEnd);
+							SelectionString.insert(0, (std::string(&pEntry->m_aText[OffUTF8Start], OffUTF8End - OffUTF8Start) + (HasNewLine ? "\n" : "")));
 						}
 						pConsole->m_HasSelection = true;
 					}
