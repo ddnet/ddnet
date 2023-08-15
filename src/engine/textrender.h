@@ -286,10 +286,6 @@ public:
 	virtual float GetGlyphOffsetX(int FontSize, char TextCharacter) const = 0;
 	virtual int CalculateTextWidth(const char *pText, int TextLength, int FontWidth, int FontSize) const = 0;
 
-	virtual bool SelectionToUTF8OffSets(const char *pText, int SelStart, int SelEnd, int &OffUTF8Start, int &OffUTF8End) const = 0;
-	virtual bool UTF8OffToDecodedOff(const char *pText, int UTF8Off, int &DecodedOff) const = 0;
-	virtual bool DecodedOffToUTF8Off(const char *pText, int DecodedOff, int &UTF8Off) const = 0;
-
 	// old foolish interface
 	virtual void TextColor(float r, float g, float b, float a) = 0;
 	virtual void TextColor(ColorRGBA rgb) = 0;
