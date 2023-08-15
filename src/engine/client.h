@@ -181,6 +181,7 @@ public:
 	virtual void SetWindowParams(int FullscreenMode, bool IsBorderless, bool AllowResizing) = 0;
 	virtual void ToggleWindowVSync() = 0;
 	virtual void Notify(const char *pTitle, const char *pMessage) = 0;
+	virtual void OnWindowResize() = 0;
 
 	virtual void UpdateAndSwap() = 0;
 
@@ -316,6 +317,7 @@ public:
 	virtual void OnMessage(int MsgID, CUnpacker *pUnpacker, int Conn, bool Dummy) = 0;
 	virtual void OnPredict() = 0;
 	virtual void OnActivateEditor() = 0;
+	virtual void OnWindowResize() = 0;
 
 	virtual int OnSnapInput(int *pData, bool Dummy, bool Force) = 0;
 	virtual void OnDummySwap() = 0;

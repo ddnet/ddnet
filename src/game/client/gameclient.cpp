@@ -227,8 +227,6 @@ void CGameClient::OnInit()
 
 	m_pGraphics = Kernel()->RequestInterface<IGraphics>();
 
-	m_pGraphics->AddWindowResizeListener([this] { OnWindowResize(); });
-
 	// propagate pointers
 	m_UI.Init(Kernel());
 	m_RenderTools.Init(Graphics(), TextRender());
@@ -964,13 +962,10 @@ void CGameClient::OnFlagGrab(int TeamID)
 
 void CGameClient::OnWindowResize()
 {
-	TextRender()->OnPreWindowResize();
-
 	for(auto &pComponent : m_vpAll)
 		pComponent->OnWindowResize();
 
 	UI()->OnWindowResize();
-	TextRender()->OnWindowResize();
 }
 
 void CGameClient::OnLanguageChange()
@@ -991,7 +986,7 @@ void CGameClient::HandleLanguageChanged()
 	TextRender()->SetFontLanguageVariant(g_Config.m_ClLanguagefile);
 
 	// Clear all text containers
-	OnWindowResize();
+	Client()->OnWindowResize();
 }
 
 void CGameClient::RenderShutdownMessage()
