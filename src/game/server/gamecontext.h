@@ -293,6 +293,7 @@ public:
 	void OnVoteNetMessage(const CNetMsg_Cl_Vote *pMsg, int ClientID);
 	void OnSetTeamNetMessage(const CNetMsg_Cl_SetTeam *pMsg, int ClientID);
 	void OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int ClientID);
+	void OnEmoticonNetMessage(const CNetMsg_Cl_Emoticon *pMsg, int ClientID);
 
 	bool OnClientDataPersist(int ClientID, void *pData) override;
 	void OnClientConnected(int ClientID, void *pData) override;

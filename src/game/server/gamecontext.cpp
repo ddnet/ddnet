@@ -1997,79 +1997,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		else if(MsgID == NETMSGTYPE_CL_CHANGEINFO)
 			OnChangeInfoNetMessage(static_cast<CNetMsg_Cl_ChangeInfo *>(pRawMsg), ClientID);
 		else if(MsgID == NETMSGTYPE_CL_EMOTICON && !m_World.m_Paused)
-		{
-			CNetMsg_Cl_Emoticon *pMsg = (CNetMsg_Cl_Emoticon *)pRawMsg;
-
-			auto &&CheckPreventEmote = [&](int64_t LastEmote, int64_t DelayInMs) {
-				return (LastEmote * (int64_t)1000) + (int64_t)Server()->TickSpeed() * DelayInMs > ((int64_t)Server()->Tick() * (int64_t)1000);
-			};
-
-			if(g_Config.m_SvSpamprotection && CheckPreventEmote((int64_t)pPlayer->m_LastEmote, (int64_t)g_Config.m_SvEmoticonMsDelay))
-				return;
-
-			CCharacter *pChr = pPlayer->GetCharacter();
-			// player needs a character to send emotes
-			if(pChr != nullptr)
-			{
-				pPlayer->m_LastEmote = Server()->Tick();
-				pPlayer->UpdatePlaytime();
-
-				// check if the global emoticon is prevented and emotes are only send to nearby players
-				if(g_Config.m_SvSpamprotection && CheckPreventEmote((int64_t)pPlayer->m_LastEmoteGlobal, (int64_t)g_Config.m_SvGlobalEmoticonMsDelay))
-				{
-					for(int i = 0; i < MAX_CLIENTS; ++i)
-					{
-						if(m_apPlayers[i] && pChr->CanSnapCharacter(i) && pChr->IsSnappingCharacterInView(i))
-						{
-							SendEmoticon(ClientID, pMsg->m_Emoticon, i);
-						}
-					}
-				}
-				else
-				{
-					// else send emoticons to all players
-					pPlayer->m_LastEmoteGlobal = Server()->Tick();
-					SendEmoticon(ClientID, pMsg->m_Emoticon, -1);
-				}
-
-				if(g_Config.m_SvEmotionalTees && pPlayer->m_EyeEmoteEnabled)
-				{
-					int EmoteType = EMOTE_NORMAL;
-					switch(pMsg->m_Emoticon)
-					{
-					case EMOTICON_EXCLAMATION:
-					case EMOTICON_GHOST:
-					case EMOTICON_QUESTION:
-					case EMOTICON_WTF:
-						EmoteType = EMOTE_SURPRISE;
-						break;
-					case EMOTICON_DOTDOT:
-					case EMOTICON_DROP:
-					case EMOTICON_ZZZ:
-						EmoteType = EMOTE_BLINK;
-						break;
-					case EMOTICON_EYES:
-					case EMOTICON_HEARTS:
-					case EMOTICON_MUSIC:
-						EmoteType = EMOTE_HAPPY;
-						break;
-					case EMOTICON_OOP:
-					case EMOTICON_SORRY:
-					case EMOTICON_SUSHI:
-						EmoteType = EMOTE_PAIN;
-						break;
-					case EMOTICON_DEVILTEE:
-					case EMOTICON_SPLATTEE:
-					case EMOTICON_ZOMG:
-						EmoteType = EMOTE_ANGRY;
-						break;
-					default:
-						break;
-					}
-					pChr->SetEmote(EmoteType, Server()->Tick() + 2 * Server()->TickSpeed());
-				}
-			}
-		}
+			OnEmoticonNetMessage(static_cast<CNetMsg_Cl_Emoticon *>(pRawMsg), ClientID);
 		else if(MsgID == NETMSGTYPE_CL_KILL && !m_World.m_Paused)
 		{
 			if(m_VoteCloseTime && m_VoteCreator == ClientID && GetDDRaceTeam(ClientID) && (IsKickVote() || IsSpecVote()))
@@ -2710,6 +2638,82 @@ void CGameContext::OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int
 	}
 
 	Server()->ExpireServerInfo();
+}
+
+void CGameContext::OnEmoticonNetMessage(const CNetMsg_Cl_Emoticon *pMsg, int ClientID)
+{
+	CPlayer *pPlayer = m_apPlayers[ClientID];
+
+	auto &&CheckPreventEmote = [&](int64_t LastEmote, int64_t DelayInMs) {
+		return (LastEmote * (int64_t)1000) + (int64_t)Server()->TickSpeed() * DelayInMs > ((int64_t)Server()->Tick() * (int64_t)1000);
+	};
+
+	if(g_Config.m_SvSpamprotection && CheckPreventEmote((int64_t)pPlayer->m_LastEmote, (int64_t)g_Config.m_SvEmoticonMsDelay))
+		return;
+
+	CCharacter *pChr = pPlayer->GetCharacter();
+
+	// player needs a character to send emotes
+	if(!pChr)
+		return;
+
+	pPlayer->m_LastEmote = Server()->Tick();
+	pPlayer->UpdatePlaytime();
+
+	// check if the global emoticon is prevented and emotes are only send to nearby players
+	if(g_Config.m_SvSpamprotection && CheckPreventEmote((int64_t)pPlayer->m_LastEmoteGlobal, (int64_t)g_Config.m_SvGlobalEmoticonMsDelay))
+	{
+		for(int i = 0; i < MAX_CLIENTS; ++i)
+		{
+			if(m_apPlayers[i] && pChr->CanSnapCharacter(i) && pChr->IsSnappingCharacterInView(i))
+			{
+				SendEmoticon(ClientID, pMsg->m_Emoticon, i);
+			}
+		}
+	}
+	else
+	{
+		// else send emoticons to all players
+		pPlayer->m_LastEmoteGlobal = Server()->Tick();
+		SendEmoticon(ClientID, pMsg->m_Emoticon, -1);
+	}
+
+	if(g_Config.m_SvEmotionalTees && pPlayer->m_EyeEmoteEnabled)
+	{
+		int EmoteType = EMOTE_NORMAL;
+		switch(pMsg->m_Emoticon)
+		{
+		case EMOTICON_EXCLAMATION:
+		case EMOTICON_GHOST:
+		case EMOTICON_QUESTION:
+		case EMOTICON_WTF:
+			EmoteType = EMOTE_SURPRISE;
+			break;
+		case EMOTICON_DOTDOT:
+		case EMOTICON_DROP:
+		case EMOTICON_ZZZ:
+			EmoteType = EMOTE_BLINK;
+			break;
+		case EMOTICON_EYES:
+		case EMOTICON_HEARTS:
+		case EMOTICON_MUSIC:
+			EmoteType = EMOTE_HAPPY;
+			break;
+		case EMOTICON_OOP:
+		case EMOTICON_SORRY:
+		case EMOTICON_SUSHI:
+			EmoteType = EMOTE_PAIN;
+			break;
+		case EMOTICON_DEVILTEE:
+		case EMOTICON_SPLATTEE:
+		case EMOTICON_ZOMG:
+			EmoteType = EMOTE_ANGRY;
+			break;
+		default:
+			break;
+		}
+		pChr->SetEmote(EmoteType, Server()->Tick() + 2 * Server()->TickSpeed());
+	}
 }
 
 void CGameContext::ConTuneParam(IConsole::IResult *pResult, void *pUserData)
