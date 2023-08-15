@@ -1062,8 +1062,9 @@ int CServer::ClientRejoinCallback(int ClientID, void *pUser)
 
 	pThis->m_aClients[ClientID].Reset();
 
-	pThis->GameServer()->TeehistorianRecordPlayerJoin(ClientID, pThis->m_aClients[ClientID].m_Sixup);
-	pThis->Antibot()->OnEngineClientJoin(ClientID, pThis->m_aClients[ClientID].m_Sixup);
+	pThis->GameServer()->TeehistorianRecordPlayerRejoin(ClientID);
+	pThis->Antibot()->OnEngineClientDrop(ClientID, "rejoin");
+	pThis->Antibot()->OnEngineClientJoin(ClientID, false);
 
 	pThis->SendMap(ClientID);
 

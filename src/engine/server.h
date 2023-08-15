@@ -331,6 +331,7 @@ public:
 
 	virtual void TeehistorianRecordPlayerJoin(int ClientID, bool Sixup) = 0;
 	virtual void TeehistorianRecordPlayerDrop(int ClientID, const char *pReason) = 0;
+	virtual void TeehistorianRecordPlayerRejoin(int ClientID) = 0;
 
 	virtual void FillAntibot(CAntibotRoundData *pData) = 0;
 

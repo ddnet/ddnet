@@ -64,6 +64,7 @@ public:
 	void RecordPlayerInput(int ClientID, uint32_t UniqueClientID, const CNetObj_PlayerInput *pInput);
 	void RecordPlayerMessage(int ClientID, const void *pMsg, int MsgSize);
 	void RecordPlayerJoin(int ClientID, int Protocol);
+	void RecordPlayerRejoin(int ClientID);
 	void RecordPlayerReady(int ClientID);
 	void RecordPlayerDrop(int ClientID, const char *pReason);
 	void RecordConsoleCommand(int ClientID, int FlagMask, const char *pCmd, IConsole::IResult *pResult);
