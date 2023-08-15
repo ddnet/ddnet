@@ -2029,61 +2029,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 	}
 	if(MsgID == NETMSGTYPE_CL_STARTINFO)
 	{
-		if(pPlayer->m_IsReady)
-			return;
-
-		CNetMsg_Cl_StartInfo *pMsg = (CNetMsg_Cl_StartInfo *)pRawMsg;
-
-		if(!str_utf8_check(pMsg->m_pName))
-		{
-			Server()->Kick(ClientID, "name is not valid utf8");
-			return;
-		}
-		if(!str_utf8_check(pMsg->m_pClan))
-		{
-			Server()->Kick(ClientID, "clan is not valid utf8");
-			return;
-		}
-		if(!str_utf8_check(pMsg->m_pSkin))
-		{
-			Server()->Kick(ClientID, "skin is not valid utf8");
-			return;
-		}
-
-		pPlayer->m_LastChangeInfo = Server()->Tick();
-
-		// set start infos
-		Server()->SetClientName(ClientID, pMsg->m_pName);
-		// trying to set client name can delete the player object, check if it still exists
-		if(!m_apPlayers[ClientID])
-		{
-			return;
-		}
-		Server()->SetClientClan(ClientID, pMsg->m_pClan);
-		Server()->SetClientCountry(ClientID, pMsg->m_Country);
-		str_copy(pPlayer->m_TeeInfos.m_aSkinName, pMsg->m_pSkin, sizeof(pPlayer->m_TeeInfos.m_aSkinName));
-		pPlayer->m_TeeInfos.m_UseCustomColor = pMsg->m_UseCustomColor;
-		pPlayer->m_TeeInfos.m_ColorBody = pMsg->m_ColorBody;
-		pPlayer->m_TeeInfos.m_ColorFeet = pMsg->m_ColorFeet;
-		if(!Server()->IsSixup(ClientID))
-			pPlayer->m_TeeInfos.ToSixup();
-
-		// send clear vote options
-		CNetMsg_Sv_VoteClearOptions ClearMsg;
-		Server()->SendPackMsg(&ClearMsg, MSGFLAG_VITAL, ClientID);
-
-		// begin sending vote options
-		pPlayer->m_SendVoteIndex = 0;
-
-		// send tuning parameters to client
-		SendTuningParams(ClientID, pPlayer->m_TuneZone);
-
-		// client is ready to enter
-		pPlayer->m_IsReady = true;
-		CNetMsg_Sv_ReadyToEnter m;
-		Server()->SendPackMsg(&m, MSGFLAG_VITAL | MSGFLAG_FLUSH, ClientID);
-
-		Server()->ExpireServerInfo();
+		OnStartInfoNetMessage(static_cast<CNetMsg_Cl_StartInfo *>(pRawMsg), ClientID);
 	}
 }
 
@@ -2714,6 +2660,65 @@ void CGameContext::OnEmoticonNetMessage(const CNetMsg_Cl_Emoticon *pMsg, int Cli
 		}
 		pChr->SetEmote(EmoteType, Server()->Tick() + 2 * Server()->TickSpeed());
 	}
+}
+
+void CGameContext::OnStartInfoNetMessage(const CNetMsg_Cl_StartInfo *pMsg, int ClientID)
+{
+	CPlayer *pPlayer = m_apPlayers[ClientID];
+
+	if(pPlayer->m_IsReady)
+		return;
+
+	if(!str_utf8_check(pMsg->m_pName))
+	{
+		Server()->Kick(ClientID, "name is not valid utf8");
+		return;
+	}
+	if(!str_utf8_check(pMsg->m_pClan))
+	{
+		Server()->Kick(ClientID, "clan is not valid utf8");
+		return;
+	}
+	if(!str_utf8_check(pMsg->m_pSkin))
+	{
+		Server()->Kick(ClientID, "skin is not valid utf8");
+		return;
+	}
+
+	pPlayer->m_LastChangeInfo = Server()->Tick();
+
+	// set start infos
+	Server()->SetClientName(ClientID, pMsg->m_pName);
+	// trying to set client name can delete the player object, check if it still exists
+	if(!m_apPlayers[ClientID])
+	{
+		return;
+	}
+	Server()->SetClientClan(ClientID, pMsg->m_pClan);
+	Server()->SetClientCountry(ClientID, pMsg->m_Country);
+	str_copy(pPlayer->m_TeeInfos.m_aSkinName, pMsg->m_pSkin, sizeof(pPlayer->m_TeeInfos.m_aSkinName));
+	pPlayer->m_TeeInfos.m_UseCustomColor = pMsg->m_UseCustomColor;
+	pPlayer->m_TeeInfos.m_ColorBody = pMsg->m_ColorBody;
+	pPlayer->m_TeeInfos.m_ColorFeet = pMsg->m_ColorFeet;
+	if(!Server()->IsSixup(ClientID))
+		pPlayer->m_TeeInfos.ToSixup();
+
+	// send clear vote options
+	CNetMsg_Sv_VoteClearOptions ClearMsg;
+	Server()->SendPackMsg(&ClearMsg, MSGFLAG_VITAL, ClientID);
+
+	// begin sending vote options
+	pPlayer->m_SendVoteIndex = 0;
+
+	// send tuning parameters to client
+	SendTuningParams(ClientID, pPlayer->m_TuneZone);
+
+	// client is ready to enter
+	pPlayer->m_IsReady = true;
+	CNetMsg_Sv_ReadyToEnter m;
+	Server()->SendPackMsg(&m, MSGFLAG_VITAL | MSGFLAG_FLUSH, ClientID);
+
+	Server()->ExpireServerInfo();
 }
 
 void CGameContext::ConTuneParam(IConsole::IResult *pResult, void *pUserData)
