@@ -292,16 +292,6 @@ CClient::CClient() :
 	for(auto &DemoRecorder : m_aDemoRecorder)
 		DemoRecorder = CDemoRecorder(&m_SnapshotDelta);
 
-	m_pEditor = 0;
-	m_pInput = 0;
-	m_pGraphics = 0;
-	m_pSound = 0;
-	m_pGameClient = 0;
-	m_pMap = 0;
-	m_pConfigManager = 0;
-	m_pConfig = 0;
-	m_pConsole = 0;
-
 	m_RenderFrameTime = 0.0001f;
 	m_RenderFrameTimeLow = 1.0f;
 	m_RenderFrameTimeHigh = 0.0f;

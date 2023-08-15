@@ -107,21 +107,21 @@ public:
 class CClient : public IClient, public CDemoPlayer::IListener
 {
 	// needed interfaces
-	IEngine *m_pEngine;
-	IEditor *m_pEditor;
-	IEngineInput *m_pInput;
-	IEngineGraphics *m_pGraphics;
-	IEngineSound *m_pSound;
-	IFavorites *m_pFavorites;
-	IGameClient *m_pGameClient;
-	IEngineMap *m_pMap;
-	IConfigManager *m_pConfigManager;
-	CConfig *m_pConfig;
-	IConsole *m_pConsole;
-	IStorage *m_pStorage;
-	IUpdater *m_pUpdater;
-	IDiscord *m_pDiscord;
-	ISteam *m_pSteam;
+	IConfigManager *m_pConfigManager = nullptr;
+	CConfig *m_pConfig = nullptr;
+	IConsole *m_pConsole = nullptr;
+	IDiscord *m_pDiscord = nullptr;
+	IEditor *m_pEditor = nullptr;
+	IEngine *m_pEngine = nullptr;
+	IFavorites *m_pFavorites = nullptr;
+	IGameClient *m_pGameClient = nullptr;
+	IEngineGraphics *m_pGraphics = nullptr;
+	IEngineInput *m_pInput = nullptr;
+	IEngineMap *m_pMap = nullptr;
+	IEngineSound *m_pSound = nullptr;
+	ISteam *m_pSteam = nullptr;
+	IStorage *m_pStorage = nullptr;
+	IUpdater *m_pUpdater = nullptr;
 
 	CNetClient m_aNetClient[NUM_CONNS];
 	CDemoPlayer m_DemoPlayer;
@@ -301,17 +301,17 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	std::shared_ptr<ILogger> m_pStdoutLogger = nullptr;
 
 public:
+	IConfigManager *ConfigManager() { return m_pConfigManager; }
+	CConfig *Config() { return m_pConfig; }
+	IDiscord *Discord() { return m_pDiscord; }
 	IEngine *Engine() { return m_pEngine; }
+	IGameClient *GameClient() { return m_pGameClient; }
 	IEngineGraphics *Graphics() { return m_pGraphics; }
 	IEngineInput *Input() { return m_pInput; }
 	IEngineSound *Sound() { return m_pSound; }
-	IGameClient *GameClient() { return m_pGameClient; }
-	IConfigManager *ConfigManager() { return m_pConfigManager; }
-	CConfig *Config() { return m_pConfig; }
+	ISteam *Steam() { return m_pSteam; }
 	IStorage *Storage() { return m_pStorage; }
 	IUpdater *Updater() { return m_pUpdater; }
-	IDiscord *Discord() { return m_pDiscord; }
-	ISteam *Steam() { return m_pSteam; }
 
 	CClient();
 
