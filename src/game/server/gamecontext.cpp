@@ -1936,7 +1936,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			OnCallVoteNetMessage(static_cast<CNetMsg_Cl_CallVote *>(pRawMsg), ClientID);
 		else if(MsgID == NETMSGTYPE_CL_VOTE)
 			OnVoteNetMessage(static_cast<CNetMsg_Cl_Vote *>(pRawMsg), ClientID);
-		else if(MsgID == NETMSGTYPE_CL_SETTEAM && !m_World.m_Paused)
+		else if(MsgID == NETMSGTYPE_CL_SETTEAM)
 			OnSetTeamNetMessage(static_cast<CNetMsg_Cl_SetTeam *>(pRawMsg), ClientID);
 		else if(MsgID == NETMSGTYPE_CL_ISDDNETLEGACY)
 		{
@@ -2656,6 +2656,9 @@ void CGameContext::OnVoteNetMessage(const CNetMsg_Cl_Vote *pMsg, int ClientID)
 
 void CGameContext::OnSetTeamNetMessage(const CNetMsg_Cl_SetTeam *pMsg, int ClientID)
 {
+	if(m_World.m_Paused)
+		return;
+
 	CPlayer *pPlayer = m_apPlayers[ClientID];
 
 	if(pPlayer->GetTeam() == pMsg->m_Team || (g_Config.m_SvSpamprotection && pPlayer->m_LastSetTeam && pPlayer->m_LastSetTeam + Server()->TickSpeed() * g_Config.m_SvTeamChangeDelay > Server()->Tick()))
