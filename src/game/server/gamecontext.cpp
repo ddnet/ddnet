@@ -1931,127 +1931,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 	if(Server()->ClientIngame(ClientID))
 	{
 		if(MsgID == NETMSGTYPE_CL_SAY)
-		{
-			CNetMsg_Cl_Say *pMsg = (CNetMsg_Cl_Say *)pRawMsg;
-			if(!str_utf8_check(pMsg->m_pMessage))
-			{
-				return;
-			}
-			bool Check = !pPlayer->m_NotEligibleForFinish && pPlayer->m_EligibleForFinishCheck + 10 * time_freq() >= time_get();
-			if(Check && str_comp(pMsg->m_pMessage, "xd sure chillerbot.png is lyfe") == 0 && pMsg->m_Team == 0)
-			{
-				if(m_TeeHistorianActive)
-				{
-					m_TeeHistorian.RecordPlayerMessage(ClientID, pUnpacker->CompleteData(), pUnpacker->CompleteSize());
-				}
-
-				pPlayer->m_NotEligibleForFinish = true;
-				dbg_msg("hack", "bot detected, cid=%d", ClientID);
-				return;
-			}
-			int Team = pMsg->m_Team;
-
-			// trim right and set maximum length to 256 utf8-characters
-			int Length = 0;
-			const char *p = pMsg->m_pMessage;
-			const char *pEnd = 0;
-			while(*p)
-			{
-				const char *pStrOld = p;
-				int Code = str_utf8_decode(&p);
-
-				// check if unicode is not empty
-				if(!str_utf8_isspace(Code))
-				{
-					pEnd = 0;
-				}
-				else if(pEnd == 0)
-					pEnd = pStrOld;
-
-				if(++Length >= 256)
-				{
-					*(const_cast<char *>(p)) = 0;
-					break;
-				}
-			}
-			if(pEnd != 0)
-				*(const_cast<char *>(pEnd)) = 0;
-
-			// drop empty and autocreated spam messages (more than 32 characters per second)
-			if(Length == 0 || (pMsg->m_pMessage[0] != '/' && (g_Config.m_SvSpamprotection && pPlayer->m_LastChat && pPlayer->m_LastChat + Server()->TickSpeed() * ((31 + Length) / 32) > Server()->Tick())))
-				return;
-
-			int GameTeam = ((CGameControllerDDRace *)m_pController)->m_Teams.m_Core.Team(pPlayer->GetCID());
-			if(Team)
-				Team = ((pPlayer->GetTeam() == TEAM_SPECTATORS) ? CHAT_SPEC : GameTeam);
-			else
-				Team = CHAT_ALL;
-
-			if(pMsg->m_pMessage[0] == '/')
-			{
-				if(str_startswith_nocase(pMsg->m_pMessage + 1, "w "))
-				{
-					char aWhisperMsg[256];
-					str_copy(aWhisperMsg, pMsg->m_pMessage + 3, 256);
-					Whisper(pPlayer->GetCID(), aWhisperMsg);
-				}
-				else if(str_startswith_nocase(pMsg->m_pMessage + 1, "whisper "))
-				{
-					char aWhisperMsg[256];
-					str_copy(aWhisperMsg, pMsg->m_pMessage + 9, 256);
-					Whisper(pPlayer->GetCID(), aWhisperMsg);
-				}
-				else if(str_startswith_nocase(pMsg->m_pMessage + 1, "c "))
-				{
-					char aWhisperMsg[256];
-					str_copy(aWhisperMsg, pMsg->m_pMessage + 3, 256);
-					Converse(pPlayer->GetCID(), aWhisperMsg);
-				}
-				else if(str_startswith_nocase(pMsg->m_pMessage + 1, "converse "))
-				{
-					char aWhisperMsg[256];
-					str_copy(aWhisperMsg, pMsg->m_pMessage + 10, 256);
-					Converse(pPlayer->GetCID(), aWhisperMsg);
-				}
-				else
-				{
-					if(g_Config.m_SvSpamprotection && !str_startswith(pMsg->m_pMessage + 1, "timeout ") && pPlayer->m_aLastCommands[0] && pPlayer->m_aLastCommands[0] + Server()->TickSpeed() > Server()->Tick() && pPlayer->m_aLastCommands[1] && pPlayer->m_aLastCommands[1] + Server()->TickSpeed() > Server()->Tick() && pPlayer->m_aLastCommands[2] && pPlayer->m_aLastCommands[2] + Server()->TickSpeed() > Server()->Tick() && pPlayer->m_aLastCommands[3] && pPlayer->m_aLastCommands[3] + Server()->TickSpeed() > Server()->Tick())
-						return;
-
-					int64_t Now = Server()->Tick();
-					pPlayer->m_aLastCommands[pPlayer->m_LastCommandPos] = Now;
-					pPlayer->m_LastCommandPos = (pPlayer->m_LastCommandPos + 1) % 4;
-
-					Console()->SetFlagMask(CFGFLAG_CHAT);
-					int Authed = Server()->GetAuthedState(ClientID);
-					if(Authed)
-						Console()->SetAccessLevel(Authed == AUTHED_ADMIN ? IConsole::ACCESS_LEVEL_ADMIN : Authed == AUTHED_MOD ? IConsole::ACCESS_LEVEL_MOD : IConsole::ACCESS_LEVEL_HELPER);
-					else
-						Console()->SetAccessLevel(IConsole::ACCESS_LEVEL_USER);
-
-					{
-						CClientChatLogger Logger(this, ClientID, log_get_scope_logger());
-						CLogScope Scope(&Logger);
-						Console()->ExecuteLine(pMsg->m_pMessage + 1, ClientID, false);
-					}
-					// m_apPlayers[ClientID] can be NULL, if the player used a
-					// timeout code and replaced another client.
-					char aBuf[256];
-					str_format(aBuf, sizeof(aBuf), "%d used %s", ClientID, pMsg->m_pMessage);
-					Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "chat-command", aBuf);
-
-					Console()->SetAccessLevel(IConsole::ACCESS_LEVEL_ADMIN);
-					Console()->SetFlagMask(CFGFLAG_SERVER);
-				}
-			}
-			else
-			{
-				pPlayer->UpdatePlaytime();
-				char aCensoredMessage[256];
-				CensorMessage(aCensoredMessage, pMsg->m_pMessage, sizeof(aCensoredMessage));
-				SendChat(ClientID, Team, aCensoredMessage, ClientID);
-			}
-		}
+			OnSayNetMessage(static_cast<CNetMsg_Cl_Say *>(pRawMsg), ClientID, pUnpacker);
 		else if(MsgID == NETMSGTYPE_CL_CALLVOTE)
 			OnCallVoteNetMessage(static_cast<CNetMsg_Cl_CallVote *>(pRawMsg), ClientID);
 		else if(MsgID == NETMSGTYPE_CL_VOTE)
@@ -2423,6 +2303,129 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		Server()->SendPackMsg(&m, MSGFLAG_VITAL | MSGFLAG_FLUSH, ClientID);
 
 		Server()->ExpireServerInfo();
+	}
+}
+
+void CGameContext::OnSayNetMessage(const CNetMsg_Cl_Say *pMsg, int ClientID, const CUnpacker *pUnpacker)
+{
+	if(!str_utf8_check(pMsg->m_pMessage))
+	{
+		return;
+	}
+	CPlayer *pPlayer = m_apPlayers[ClientID];
+	bool Check = !pPlayer->m_NotEligibleForFinish && pPlayer->m_EligibleForFinishCheck + 10 * time_freq() >= time_get();
+	if(Check && str_comp(pMsg->m_pMessage, "xd sure chillerbot.png is lyfe") == 0 && pMsg->m_Team == 0)
+	{
+		if(m_TeeHistorianActive)
+		{
+			m_TeeHistorian.RecordPlayerMessage(ClientID, pUnpacker->CompleteData(), pUnpacker->CompleteSize());
+		}
+
+		pPlayer->m_NotEligibleForFinish = true;
+		dbg_msg("hack", "bot detected, cid=%d", ClientID);
+		return;
+	}
+	int Team = pMsg->m_Team;
+
+	// trim right and set maximum length to 256 utf8-characters
+	int Length = 0;
+	const char *p = pMsg->m_pMessage;
+	const char *pEnd = 0;
+	while(*p)
+	{
+		const char *pStrOld = p;
+		int Code = str_utf8_decode(&p);
+
+		// check if unicode is not empty
+		if(!str_utf8_isspace(Code))
+		{
+			pEnd = 0;
+		}
+		else if(pEnd == 0)
+			pEnd = pStrOld;
+
+		if(++Length >= 256)
+		{
+			*(const_cast<char *>(p)) = 0;
+			break;
+		}
+	}
+	if(pEnd != 0)
+		*(const_cast<char *>(pEnd)) = 0;
+
+	// drop empty and autocreated spam messages (more than 32 characters per second)
+	if(Length == 0 || (pMsg->m_pMessage[0] != '/' && (g_Config.m_SvSpamprotection && pPlayer->m_LastChat && pPlayer->m_LastChat + Server()->TickSpeed() * ((31 + Length) / 32) > Server()->Tick())))
+		return;
+
+	int GameTeam = ((CGameControllerDDRace *)m_pController)->m_Teams.m_Core.Team(pPlayer->GetCID());
+	if(Team)
+		Team = ((pPlayer->GetTeam() == TEAM_SPECTATORS) ? CHAT_SPEC : GameTeam);
+	else
+		Team = CHAT_ALL;
+
+	if(pMsg->m_pMessage[0] == '/')
+	{
+		if(str_startswith_nocase(pMsg->m_pMessage + 1, "w "))
+		{
+			char aWhisperMsg[256];
+			str_copy(aWhisperMsg, pMsg->m_pMessage + 3, 256);
+			Whisper(pPlayer->GetCID(), aWhisperMsg);
+		}
+		else if(str_startswith_nocase(pMsg->m_pMessage + 1, "whisper "))
+		{
+			char aWhisperMsg[256];
+			str_copy(aWhisperMsg, pMsg->m_pMessage + 9, 256);
+			Whisper(pPlayer->GetCID(), aWhisperMsg);
+		}
+		else if(str_startswith_nocase(pMsg->m_pMessage + 1, "c "))
+		{
+			char aWhisperMsg[256];
+			str_copy(aWhisperMsg, pMsg->m_pMessage + 3, 256);
+			Converse(pPlayer->GetCID(), aWhisperMsg);
+		}
+		else if(str_startswith_nocase(pMsg->m_pMessage + 1, "converse "))
+		{
+			char aWhisperMsg[256];
+			str_copy(aWhisperMsg, pMsg->m_pMessage + 10, 256);
+			Converse(pPlayer->GetCID(), aWhisperMsg);
+		}
+		else
+		{
+			if(g_Config.m_SvSpamprotection && !str_startswith(pMsg->m_pMessage + 1, "timeout ") && pPlayer->m_aLastCommands[0] && pPlayer->m_aLastCommands[0] + Server()->TickSpeed() > Server()->Tick() && pPlayer->m_aLastCommands[1] && pPlayer->m_aLastCommands[1] + Server()->TickSpeed() > Server()->Tick() && pPlayer->m_aLastCommands[2] && pPlayer->m_aLastCommands[2] + Server()->TickSpeed() > Server()->Tick() && pPlayer->m_aLastCommands[3] && pPlayer->m_aLastCommands[3] + Server()->TickSpeed() > Server()->Tick())
+				return;
+
+			int64_t Now = Server()->Tick();
+			pPlayer->m_aLastCommands[pPlayer->m_LastCommandPos] = Now;
+			pPlayer->m_LastCommandPos = (pPlayer->m_LastCommandPos + 1) % 4;
+
+			Console()->SetFlagMask(CFGFLAG_CHAT);
+			int Authed = Server()->GetAuthedState(ClientID);
+			if(Authed)
+				Console()->SetAccessLevel(Authed == AUTHED_ADMIN ? IConsole::ACCESS_LEVEL_ADMIN : Authed == AUTHED_MOD ? IConsole::ACCESS_LEVEL_MOD : IConsole::ACCESS_LEVEL_HELPER);
+			else
+				Console()->SetAccessLevel(IConsole::ACCESS_LEVEL_USER);
+
+			{
+				CClientChatLogger Logger(this, ClientID, log_get_scope_logger());
+				CLogScope Scope(&Logger);
+				Console()->ExecuteLine(pMsg->m_pMessage + 1, ClientID, false);
+			}
+			// m_apPlayers[ClientID] can be NULL, if the player used a
+			// timeout code and replaced another client.
+			char aBuf[256];
+			str_format(aBuf, sizeof(aBuf), "%d used %s", ClientID, pMsg->m_pMessage);
+			Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "chat-command", aBuf);
+
+			Console()->SetAccessLevel(IConsole::ACCESS_LEVEL_ADMIN);
+			Console()->SetFlagMask(CFGFLAG_SERVER);
+		}
+	}
+	else
+	{
+		pPlayer->UpdatePlaytime();
+		char aCensoredMessage[256];
+		CensorMessage(aCensoredMessage, pMsg->m_pMessage, sizeof(aCensoredMessage));
+		SendChat(ClientID, Team, aCensoredMessage, ClientID);
 	}
 }
 

@@ -288,6 +288,7 @@ public:
 	void *PreProcessMsg(int *pMsgID, CUnpacker *pUnpacker, int ClientID);
 	void CensorMessage(char *pCensoredMessage, const char *pMessage, int Size);
 	void OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID) override;
+	void OnSayNetMessage(const CNetMsg_Cl_Say *pMsg, int ClientID, const CUnpacker *pUnpacker);
 	void OnCallVoteNetMessage(const CNetMsg_Cl_CallVote *pMsg, int ClientID);
 	void OnVoteNetMessage(const CNetMsg_Cl_Vote *pMsg, int ClientID);
 
