@@ -113,8 +113,8 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 	}
 
 	/************************
-	* STRUCT DEFINITIONS
-	************************/
+	 * STRUCT DEFINITIONS
+	 ************************/
 
 	static constexpr size_t s_StagingBufferCacheID = 0;
 	static constexpr size_t s_StagingBufferImageCacheID = 1;
@@ -689,8 +689,8 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 	};
 
 	/*******************************
-	* UNIFORM PUSH CONSTANT LAYOUTS
-	********************************/
+	 * UNIFORM PUSH CONSTANT LAYOUTS
+	 ********************************/
 
 	struct SUniformGPos
 	{
@@ -856,8 +856,8 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 	};
 
 	/************************
-	* MEMBER VARIABLES
-	************************/
+	 * MEMBER VARIABLES
+	 ************************/
 
 	std::unordered_map<std::string, SShaderFileCache> m_ShaderFiles;
 
@@ -1093,8 +1093,8 @@ private:
 
 protected:
 	/************************
-	* ERROR MANAGEMENT
-	************************/
+	 * ERROR MANAGEMENT
+	 ************************/
 	std::mutex m_ErrWarnMutex;
 	std::string m_ErrorHelper;
 
@@ -1239,8 +1239,8 @@ protected:
 	}
 
 	/************************
-	* COMMAND CALLBACKS
-	************************/
+	 * COMMAND CALLBACKS
+	 ************************/
 
 	size_t CommandBufferCMDOff(CCommandBuffer::ECommandBufferCMD CommandBufferCMD)
 	{
@@ -1301,8 +1301,8 @@ protected:
 	}
 
 	/*****************************
-	* VIDEO AND SCREENSHOT HELPER
-	******************************/
+	 * VIDEO AND SCREENSHOT HELPER
+	 ******************************/
 
 	[[nodiscard]] bool PreparePresentedImageDataImage(uint8_t *&pResImageData, uint32_t Width, uint32_t Height)
 	{
@@ -1559,8 +1559,8 @@ protected:
 	}
 
 	/************************
-	* MEMORY MANAGEMENT
-	************************/
+	 * MEMORY MANAGEMENT
+	 ************************/
 
 	[[nodiscard]] bool AllocateVulkanMemory(const VkMemoryAllocateInfo *pAllocateInfo, VkDeviceMemory *pMemory)
 	{
@@ -2149,8 +2149,8 @@ protected:
 	}
 
 	/************************
-	* SWAPPING MECHANISM
-	************************/
+	 * SWAPPING MECHANISM
+	 ************************/
 
 	void StartRenderThread(size_t ThreadIndex)
 	{
@@ -2507,8 +2507,8 @@ protected:
 	}
 
 	/************************
-	* TEXTURES
-	************************/
+	 * TEXTURES
+	 ************************/
 
 	size_t VulkanFormatToImageColorChannelCount(VkFormat Format)
 	{
@@ -3073,8 +3073,8 @@ protected:
 	}
 
 	/************************
-	* BUFFERS
-	************************/
+	 * BUFFERS
+	 ************************/
 
 	[[nodiscard]] bool CreateBufferObject(size_t BufferIndex, const void *pUploadData, VkDeviceSize BufferDataSize, bool IsOneFrameBuffer)
 	{
@@ -3154,8 +3154,8 @@ protected:
 	}
 
 	/************************
-	* RENDER STATES
-	************************/
+	 * RENDER STATES
+	 ************************/
 
 	void GetStateMatrix(const CCommandBuffer::SState &State, std::array<float, (size_t)4 * 2> &Matrix)
 	{
@@ -3350,8 +3350,8 @@ protected:
 	}
 
 	/**************************
-	* RENDERING IMPLEMENTATION
-	***************************/
+	 * RENDERING IMPLEMENTATION
+	 ***************************/
 
 	void RenderTileLayer_FillExecuteBuffer(SRenderCommandExecuteBuffer &ExecBuffer, size_t DrawCalls, const CCommandBuffer::SState &State, size_t BufferContainerIndex)
 	{
@@ -3510,8 +3510,8 @@ public:
 	}
 
 	/************************
-	* VULKAN SETUP CODE
-	************************/
+	 * VULKAN SETUP CODE
+	 ************************/
 
 	[[nodiscard]] bool GetVulkanExtensions(SDL_Window *pWindow, std::vector<std::string> &vVKExtensions)
 	{
@@ -5420,8 +5420,8 @@ public:
 	}
 
 	/*************
-	* SWAP CHAIN
-	**************/
+	 * SWAP CHAIN
+	 **************/
 
 	void CleanupVulkanSwapChain(bool ForceSwapChainDestruct)
 	{
@@ -5642,8 +5642,8 @@ public:
 	}
 
 	/************************
-	* MEMORY MANAGEMENT
-	************************/
+	 * MEMORY MANAGEMENT
+	 ************************/
 
 	uint32_t FindMemoryType(VkPhysicalDevice PhyDevice, uint32_t TypeFilter, VkMemoryPropertyFlags Properties)
 	{
@@ -6295,8 +6295,8 @@ public:
 	}
 
 	/************************
-	* STREAM BUFFERS SETUP
-	************************/
+	 * STREAM BUFFERS SETUP
+	 ************************/
 
 	typedef std::function<bool(SFrameBuffers &, VkBuffer, VkDeviceSize)> TNewMemFunc;
 
@@ -6443,8 +6443,8 @@ public:
 	}
 
 	/************************
-	* COMMAND IMPLEMENTATION
-	************************/
+	 * COMMAND IMPLEMENTATION
+	 ************************/
 	template<typename TName>
 	[[nodiscard]] static bool IsInCommandRange(TName CMD, TName Min, TName Max)
 	{
@@ -7629,8 +7629,8 @@ public:
 	}
 
 	/****************
-	* RENDER THREADS
-	*****************/
+	 * RENDER THREADS
+	 *****************/
 
 	void RunThread(size_t ThreadIndex)
 	{

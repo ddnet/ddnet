@@ -101,7 +101,7 @@ void CBackground::OnMapLoad()
 
 void CBackground::OnRender()
 {
-	//probably not the best place for this
+	// probably not the best place for this
 	if(g_Config.m_ClBackgroundEntities[0] != '\0' && str_comp(g_Config.m_ClBackgroundEntities, m_aMapName))
 		LoadBackground();
 

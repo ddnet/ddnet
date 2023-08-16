@@ -32,7 +32,7 @@ public:
 	void DetachShaderByID(TWGLuint ShaderID);
 	void DetachAllShaders();
 
-	//Support various types
+	// Support various types
 	void SetUniformVec2(int Loc, int Count, const float *pValue);
 	void SetUniformVec4(int Loc, int Count, const float *pValue);
 	void SetUniform(int Loc, int Value);
@@ -40,7 +40,7 @@ public:
 	void SetUniform(int Loc, float Value);
 	void SetUniform(int Loc, int Count, const float *pValues);
 
-	//for performance reason we do not use SetUniform with using strings... save the Locations of the variables instead
+	// for performance reason we do not use SetUniform with using strings... save the Locations of the variables instead
 	int GetUniformLoc(const char *pName);
 
 	CGLSLProgram();

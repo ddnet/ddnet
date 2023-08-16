@@ -54,7 +54,7 @@ enum
 	ENTITY_WEAPON_GRENADE,
 	ENTITY_POWERUP_NINJA,
 	ENTITY_WEAPON_LASER,
-	//DDRace - Main Lasers
+	// DDRace - Main Lasers
 	ENTITY_LASER_FAST_CCW,
 	ENTITY_LASER_NORMAL_CCW,
 	ENTITY_LASER_SLOW_CCW,
@@ -62,7 +62,7 @@ enum
 	ENTITY_LASER_SLOW_CW,
 	ENTITY_LASER_NORMAL_CW,
 	ENTITY_LASER_FAST_CW,
-	//DDRace - Laser Modifiers
+	// DDRace - Laser Modifiers
 	ENTITY_LASER_SHORT,
 	ENTITY_LASER_MEDIUM,
 	ENTITY_LASER_LONG,
@@ -72,33 +72,33 @@ enum
 	ENTITY_LASER_O_SLOW,
 	ENTITY_LASER_O_NORMAL,
 	ENTITY_LASER_O_FAST,
-	//DDRace - Plasma
+	// DDRace - Plasma
 	ENTITY_PLASMAE = 29,
 	ENTITY_PLASMAF,
 	ENTITY_PLASMA,
 	ENTITY_PLASMAU,
-	//DDRace - Shotgun
+	// DDRace - Shotgun
 	ENTITY_CRAZY_SHOTGUN_EX,
 	ENTITY_CRAZY_SHOTGUN,
-	//DDNet - Removing specific weapon
+	// DDNet - Removing specific weapon
 	ENTITY_ARMOR_SHOTGUN,
 	ENTITY_ARMOR_GRENADE,
 	ENTITY_ARMOR_NINJA,
 	ENTITY_ARMOR_LASER,
-	//DDRace - Draggers
+	// DDRace - Draggers
 	ENTITY_DRAGGER_WEAK = 42,
 	ENTITY_DRAGGER_NORMAL,
 	ENTITY_DRAGGER_STRONG,
-	//Draggers Behind Walls
+	// Draggers Behind Walls
 	ENTITY_DRAGGER_WEAK_NW,
 	ENTITY_DRAGGER_NORMAL_NW,
 	ENTITY_DRAGGER_STRONG_NW,
-	//Doors
+	// Doors
 	ENTITY_DOOR = 49,
-	//End Of Lower Tiles
+	// End Of Lower Tiles
 	NUM_ENTITIES,
-	//Start From Top Left
-	//Tile Controllers
+	// Start From Top Left
+	// Tile Controllers
 	TILE_AIR = 0,
 	TILE_SOLID,
 	TILE_DEATH,
@@ -121,7 +121,7 @@ enum
 	TILE_HIT_DISABLE,
 	TILE_SOLO_ENABLE,
 	TILE_SOLO_DISABLE,
-	//Switches
+	// Switches
 	TILE_SWITCHTIMEDOPEN = 22,
 	TILE_SWITCHTIMEDCLOSE,
 	TILE_SWITCHOPEN,
@@ -182,8 +182,8 @@ enum
 	TILE_CREDITS_8 = 159,
 	TILE_ENTITIES_OFF_1 = 190,
 	TILE_ENTITIES_OFF_2,
-	//End of higher tiles
-	//Layers
+	// End of higher tiles
+	// Layers
 	LAYER_GAME = 0,
 	LAYER_FRONT,
 	LAYER_TELE,
@@ -191,12 +191,12 @@ enum
 	LAYER_SWITCH,
 	LAYER_TUNE,
 	NUM_LAYERS,
-	//Flags
+	// Flags
 	TILEFLAG_XFLIP = 1,
 	TILEFLAG_YFLIP = 2,
 	TILEFLAG_OPAQUE = 4,
 	TILEFLAG_ROTATE = 8,
-	//Rotation
+	// Rotation
 	ROTATION_0 = 0,
 	ROTATION_90 = TILEFLAG_ROTATE,
 	ROTATION_180 = (TILEFLAG_XFLIP | TILEFLAG_YFLIP),

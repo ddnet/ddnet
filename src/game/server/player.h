@@ -217,7 +217,7 @@ public:
 	bool m_NotEligibleForFinish;
 	int64_t m_EligibleForFinishCheck;
 	bool m_VotedForPractice;
-	int m_SwapTargetsClientID; //Client ID of the swap target for the given player
+	int m_SwapTargetsClientID; // Client ID of the swap target for the given player
 	bool m_BirthdayAnnounced;
 };
 

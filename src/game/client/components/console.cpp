@@ -513,7 +513,7 @@ void CGameConsole::OnRender()
 		ConsoleHeightScale = ConsoleScaleFunc(Progress);
 	else if(m_ConsoleState == CONSOLE_CLOSING)
 		ConsoleHeightScale = ConsoleScaleFunc(1.0f - Progress);
-	else //if (console_state == CONSOLE_OPEN)
+	else // if (console_state == CONSOLE_OPEN)
 		ConsoleHeightScale = ConsoleScaleFunc(1.0f);
 
 	ConsoleHeight = ConsoleHeightScale * ConsoleMaxHeight;

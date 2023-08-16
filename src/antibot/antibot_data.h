@@ -33,7 +33,7 @@ struct CAntibotInputData
 };
 
 // Defined by the network protocol, unlikely to change.
-//enum
+// enum
 //{
 //	TEAM_SPECTATORS=-1,
 //	TEAM_RED=0,

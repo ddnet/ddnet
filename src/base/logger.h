@@ -260,7 +260,7 @@ public:
 	}
 	~CLogScope()
 	{
-		//dbg_assert(log_get_scope_logger() == new_scope_logger, "loggers weren't properly scoped");
+		// dbg_assert(log_get_scope_logger() == new_scope_logger, "loggers weren't properly scoped");
 		log_set_scope_logger(old_scope_logger);
 	}
 };

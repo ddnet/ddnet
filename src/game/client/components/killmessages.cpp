@@ -122,7 +122,8 @@ void CKillMessages::OnMessage(int MsgType, void *pRawMsg)
 			if(m_pClient->m_Teams.Team(i) == pMsg->m_Team)
 			{
 				CCharacter *pChr = m_pClient->m_GameWorld.GetCharacterByID(i);
-				vStrongWeakSorted.emplace_back(i, pMsg->m_First == i ? MAX_CLIENTS : pChr ? pChr->GetStrongWeakID() : 0);
+				vStrongWeakSorted.emplace_back(i, pMsg->m_First == i ? MAX_CLIENTS : pChr ? pChr->GetStrongWeakID() :
+													    0);
 			}
 		}
 

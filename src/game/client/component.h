@@ -12,10 +12,10 @@
 class CGameClient;
 
 /**
-* This class is inherited by all the client components.
-*
-* These components can implement the virtual methods such as OnInit(), OnMessage(int Msg, void *pRawMsg) to provide their functionality.
-*/
+ * This class is inherited by all the client components.
+ *
+ * These components can implement the virtual methods such as OnInit(), OnMessage(int Msg, void *pRawMsg) to provide their functionality.
+ */
 class CComponent
 {
 protected:

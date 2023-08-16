@@ -88,7 +88,7 @@ private:
 	int m_Width;
 	int m_Height;
 	char m_aName[256];
-	//FILE *m_dbgfile;
+	// FILE *m_dbgfile;
 	uint64_t m_VSeq = 0;
 	uint64_t m_ASeq = 0;
 	uint64_t m_Vframe;

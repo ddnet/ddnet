@@ -115,7 +115,7 @@ int CLayerQuads::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
 	pGrabbed->m_Image = m_Image;
 	pBrush->AddLayer(pGrabbed);
 
-	//dbg_msg("", "%f %f %f %f", rect.x, rect.y, rect.w, rect.h);
+	// dbg_msg("", "%f %f %f %f", rect.x, rect.y, rect.w, rect.h);
 	for(const auto &Quad : m_vQuads)
 	{
 		float px = fx2f(Quad.m_aPoints[4].x);

@@ -637,7 +637,7 @@ void CScoreboard::OnRender()
 				TextRender()->Text(Width / 2 - TextWidth / 2, 39, 86.0f, aText, -1.0f);
 			}
 
-			//decrease width, because team games use additional offsets
+			// decrease width, because team games use additional offsets
 			w -= 10.0f;
 
 			int NumPlayers = maximum(m_pClient->m_Snap.m_aTeamSize[TEAM_RED], m_pClient->m_Snap.m_aTeamSize[TEAM_BLUE]);

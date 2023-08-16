@@ -31,7 +31,7 @@ CProjectile::CProjectile(
 	m_Direction = Dir;
 	m_LifeSpan = Span;
 	m_Owner = Owner;
-	//m_Damage = Damage;
+	// m_Damage = Damage;
 	m_SoundImpact = SoundImpact;
 	m_StartTick = Server()->Tick();
 	m_Explosive = Explosive;
@@ -362,7 +362,8 @@ void CProjectile::Snap(int SnappingClient)
 
 void CProjectile::SwapClients(int Client1, int Client2)
 {
-	m_Owner = m_Owner == Client1 ? Client2 : m_Owner == Client2 ? Client1 : m_Owner;
+	m_Owner = m_Owner == Client1 ? Client2 : m_Owner == Client2 ? Client1 :
+								      m_Owner;
 }
 
 // DDRace
@@ -377,17 +378,17 @@ bool CProjectile::FillExtraInfoLegacy(CNetObj_DDRaceProjectile *pProj)
 	const int MaxPos = 0x7fffffff / 100;
 	if(absolute((int)m_Pos.y) + 1 >= MaxPos || absolute((int)m_Pos.x) + 1 >= MaxPos)
 	{
-		//If the modified data would be too large to fit in an integer, send normal data instead
+		// If the modified data would be too large to fit in an integer, send normal data instead
 		return false;
 	}
-	//Send additional/modified info, by modifying the fields of the netobj
+	// Send additional/modified info, by modifying the fields of the netobj
 	float Angle = -std::atan2(m_Direction.x, m_Direction.y);
 
 	int Data = 0;
 	Data |= (absolute(m_Owner) & 255) << 0;
 	if(m_Owner < 0)
 		Data |= LEGACYPROJECTILEFLAG_NO_OWNER;
-	//This bit tells the client to use the extra info
+	// This bit tells the client to use the extra info
 	Data |= LEGACYPROJECTILEFLAG_IS_DDNET;
 	// LEGACYPROJECTILEFLAG_BOUNCE_HORIZONTAL, LEGACYPROJECTILEFLAG_BOUNCE_VERTICAL
 	Data |= (m_Bouncing & 3) << 10;

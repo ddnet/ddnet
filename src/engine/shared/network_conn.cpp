@@ -36,11 +36,11 @@ void CNetConnection::Reset(bool Rejoin)
 
 	m_LastSendTime = 0;
 	m_LastRecvTime = 0;
-	//m_LastUpdateTime = 0;
+	// m_LastUpdateTime = 0;
 
 	mem_zero(&m_aConnectAddrs, sizeof(m_aConnectAddrs));
 	m_NumConnectAddrs = 0;
-	//mem_zero(&m_PeerAddr, sizeof(m_PeerAddr));
+	// mem_zero(&m_PeerAddr, sizeof(m_PeerAddr));
 	m_UnknownSeq = false;
 
 	m_Buffer.Init();

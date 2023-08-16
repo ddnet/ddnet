@@ -863,8 +863,9 @@ void CMenus::DemolistOnUpdate(bool Reset)
 			m_DemolistSelectedIndex = SelectedIndex;
 	}
 
-	m_DemolistSelectedIndex = Reset ? !m_vDemos.empty() ? 0 : -1 :
-					  m_DemolistSelectedIndex >= (int)m_vDemos.size() ? m_vDemos.size() - 1 : m_DemolistSelectedIndex;
+	m_DemolistSelectedIndex = Reset                                           ? !m_vDemos.empty() ? 0 : -1 :
+				  m_DemolistSelectedIndex >= (int)m_vDemos.size() ? m_vDemos.size() - 1 :
+										    m_DemolistSelectedIndex;
 	m_DemolistSelectedReveal = true;
 }
 

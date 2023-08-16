@@ -26,7 +26,10 @@ public:
 
 #define MACRO_INTERFACE(Name, ver) \
 public: \
-	static const char *InterfaceName() { return Name; } \
+	static const char *InterfaceName() \
+	{ \
+		return Name; \
+	} \
 \
 private:
 

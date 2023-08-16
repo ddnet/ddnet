@@ -168,7 +168,7 @@ class CConsole : public IConsole
 			CQueueEntry *m_pNext;
 			CCommand *m_pCommand;
 			CResult m_Result;
-		} * m_pFirst, *m_pLast;
+		} *m_pFirst, *m_pLast;
 
 		void AddEntry()
 		{

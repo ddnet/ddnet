@@ -1,7 +1,7 @@
 #include "editor.h"
 
 // DDNet entity explanations by Lady Saavik
-const char *CEditor::Explain(int ExplanationID, int Tile, int Layer) //TODO: Add other entities' tiles' explanations and improve new ones
+const char *CEditor::Explain(int ExplanationID, int Tile, int Layer) // TODO: Add other entities' tiles' explanations and improve new ones
 {
 	if(ExplanationID == EXPLANATION_DDNET)
 	{

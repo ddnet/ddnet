@@ -35,8 +35,8 @@ void CControls::OnReset()
 void CControls::ResetInput(int Dummy)
 {
 	m_aLastData[Dummy].m_Direction = 0;
-	//m_aLastData[Dummy].m_Hook = 0;
-	// simulate releasing the fire button
+	// m_aLastData[Dummy].m_Hook = 0;
+	//  simulate releasing the fire button
 	if((m_aLastData[Dummy].m_Fire & 1) != 0)
 		m_aLastData[Dummy].m_Fire++;
 	m_aLastData[Dummy].m_Fire &= INPUT_STATE_MASK;
@@ -49,7 +49,7 @@ void CControls::ResetInput(int Dummy)
 
 void CControls::OnRelease()
 {
-	//OnReset();
+	// OnReset();
 }
 
 void CControls::OnPlayerDeath()

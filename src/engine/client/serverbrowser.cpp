@@ -1134,9 +1134,9 @@ void CServerBrowser::Update()
 		pEntry = pEntry->m_pNextReq;
 	}
 
-	if(m_pFirstReqServer && Count == 0 && m_CurrentMaxRequests > 1) //NO More current Server Requests
+	if(m_pFirstReqServer && Count == 0 && m_CurrentMaxRequests > 1) // NO More current Server Requests
 	{
-		//reset old ones
+		// reset old ones
 		pEntry = m_pFirstReqServer;
 		while(true)
 		{
@@ -1146,12 +1146,12 @@ void CServerBrowser::Update()
 			pEntry = pEntry->m_pNextReq;
 		}
 
-		//update max-requests
+		// update max-requests
 		m_CurrentMaxRequests = m_CurrentMaxRequests / 2;
 		if(m_CurrentMaxRequests < 1)
 			m_CurrentMaxRequests = 1;
 	}
-	else if(Count == 0 && m_CurrentMaxRequests == 1) //we reached the limit, just release all left requests. IF a server sends us a packet, a new request will be added automatically, so we can delete all
+	else if(Count == 0 && m_CurrentMaxRequests == 1) // we reached the limit, just release all left requests. IF a server sends us a packet, a new request will be added automatically, so we can delete all
 	{
 		pEntry = m_pFirstReqServer;
 		while(true)
@@ -1159,7 +1159,7 @@ void CServerBrowser::Update()
 			if(!pEntry) // no more entries
 				break;
 			CServerEntry *pNext = pEntry->m_pNextReq;
-			RemoveRequest(pEntry); //release request
+			RemoveRequest(pEntry); // release request
 			pEntry = pNext;
 		}
 	}

@@ -46,17 +46,17 @@ int main(int argc, const char **argv)
 	}
 
 	char aFilenames[3][64];
-	str_copy(aFilenames[0], argv[3]); //input_map
-	str_copy(aFilenames[1], argv[9]); //output_map
-	str_copy(aFilenames[2], argv[1]); //image_file
+	str_copy(aFilenames[0], argv[3]); // input_map
+	str_copy(aFilenames[1], argv[9]); // output_map
+	str_copy(aFilenames[2], argv[1]); // image_file
 
-	int aLayerID[2] = {str_toint(argv[4]), str_toint(argv[5])}; //layergroup_id, layer_id
-	int aStartingPos[2] = {str_toint(argv[6]) * 32, str_toint(argv[7]) * 32}; //pos_x, pos_y
-	int aPixelSizes[2] = {str_toint(argv[2]), str_toint(argv[8])}; //quad_pixelsize, img_pixelsize
+	int aLayerID[2] = {str_toint(argv[4]), str_toint(argv[5])}; // layergroup_id, layer_id
+	int aStartingPos[2] = {str_toint(argv[6]) * 32, str_toint(argv[7]) * 32}; // pos_x, pos_y
+	int aPixelSizes[2] = {str_toint(argv[2]), str_toint(argv[8])}; // quad_pixelsize, img_pixelsize
 
 	bool aArtOptions[3];
-	aArtOptions[0] = argc >= 10 ? str_toint(argv[10]) : true; //optimize
-	aArtOptions[1] = argc >= 11 ? str_toint(argv[11]) : false; //centralize
+	aArtOptions[0] = argc >= 10 ? str_toint(argv[10]) : true; // optimize
+	aArtOptions[1] = argc >= 11 ? str_toint(argv[11]) : false; // centralize
 
 	dbg_msg("map_create_pixelart", "image_file='%s'; image_pixelsize='%dpx'; input_map='%s'; layergroup_id='#%d'; layer_id='#%d'; pos_x='#%dpx'; pos_y='%dpx'; quad_pixelsize='%dpx'; output_map='%s'; optimize='%d'; centralize='%d'",
 		aFilenames[2], aPixelSizes[0], aFilenames[1], aLayerID[0], aLayerID[1], aStartingPos[0], aStartingPos[1], aPixelSizes[1], aFilenames[2], aArtOptions[0], aArtOptions[1]);

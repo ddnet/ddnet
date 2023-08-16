@@ -299,7 +299,7 @@ void CNamePlates::OnRender()
 	// this may need to be changed or calculated differently in the future
 	ScreenX0 -= 400;
 	ScreenX1 += 400;
-	//ScreenY0 -= 0;
+	// ScreenY0 -= 0;
 	ScreenY1 += 800;
 
 	for(int i = 0; i < MAX_CLIENTS; i++)

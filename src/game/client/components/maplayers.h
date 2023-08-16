@@ -93,7 +93,7 @@ class CMapLayers : public CComponent
 		STileVisual m_BorderBottomRight;
 		STileVisual m_BorderBottomLeft;
 
-		STileVisual m_BorderKillTile; //end of map kill tile -- game layer only
+		STileVisual m_BorderKillTile; // end of map kill tile -- game layer only
 
 		STileVisual *m_pBorderTop;
 		STileVisual *m_pBorderLeft;

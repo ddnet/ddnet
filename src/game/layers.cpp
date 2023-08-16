@@ -76,7 +76,7 @@ void CLayers::Init(class IKernel *pKernel)
 					if(pGroupEx)
 						pGroupEx->m_ParallaxZoom = 100;
 
-					//break;
+					// break;
 				}
 				if(pTilemap->m_Flags & TILESLAYERFLAG_TELE)
 				{
@@ -132,7 +132,7 @@ void CLayers::InitBackground(class IMap *pMap)
 	m_pMap->GetType(MAPITEMTYPE_GROUP_EX, &m_GroupsExStart, &m_GroupsExNum);
 	m_pMap->GetType(MAPITEMTYPE_LAYER, &m_LayersStart, &m_LayersNum);
 
-	//following is here to prevent crash using standard map as background
+	// following is here to prevent crash using standard map as background
 	m_pTeleLayer = 0;
 	m_pSpeedupLayer = 0;
 	m_pFrontLayer = 0;
@@ -175,7 +175,7 @@ void CLayers::InitBackground(class IMap *pMap)
 					if(pGroupEx)
 						pGroupEx->m_ParallaxZoom = 100;
 
-					//We don't care about tile layers.
+					// We don't care about tile layers.
 				}
 			}
 		}

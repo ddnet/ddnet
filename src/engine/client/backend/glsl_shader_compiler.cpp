@@ -61,7 +61,7 @@ void CGLSLCompiler::ParseLine(std::string &Line, const char *pReadLine, EGLSLSha
 				TmpStrSize = 0;
 				if(str_comp(aTmpStr, "layout") == 0)
 				{
-					//search for ' in'
+					// search for ' in'
 					while(*pBuff && (*pBuff != ' ' || (*(pBuff + 1) && *(pBuff + 1) != 'i') || *(pBuff + 2) != 'n'))
 					{
 						++pBuff;
@@ -81,7 +81,7 @@ void CGLSLCompiler::ParseLine(std::string &Line, const char *pReadLine, EGLSLSha
 				}
 				else if(str_comp(aTmpStr, "noperspective") == 0 || str_comp(aTmpStr, "smooth") == 0 || str_comp(aTmpStr, "flat") == 0)
 				{
-					//search for 'in' or 'out'
+					// search for 'in' or 'out'
 					while(*pBuff && ((*pBuff != 'i' || *(pBuff + 1) != 'n') && (*pBuff != 'o' || (*(pBuff + 1) && *(pBuff + 1) != 'u') || *(pBuff + 2) != 't')))
 					{
 						++pBuff;

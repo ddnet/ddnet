@@ -64,7 +64,7 @@ void CGLSLProgram::LinkProgram()
 		dbg_msg("glslprogram", "%s", aFinalMessage);
 	}
 
-	//detach all shaders attached to this program
+	// detach all shaders attached to this program
 	DetachAllShaders();
 }
 

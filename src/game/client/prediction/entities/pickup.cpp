@@ -29,7 +29,7 @@ void CPickup::Tick()
 			switch(m_Type)
 			{
 			case POWERUP_HEALTH:
-				//pChr->Freeze();
+				// pChr->Freeze();
 				break;
 
 			case POWERUP_ARMOR:

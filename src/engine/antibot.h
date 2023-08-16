@@ -44,4 +44,4 @@ public:
 	virtual ~IEngineAntibot(){};
 };
 
-#endif //ENGINE_ANTIBOT_H
+#endif // ENGINE_ANTIBOT_H

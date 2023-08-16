@@ -39,11 +39,11 @@ class CGameTeams
 	class CGameContext *m_pGameContext;
 
 	/**
-	* Kill the whole team.
-	* @param Team The team id to kill
-	* @param NewStrongID The player with that id will get strong hook on everyone else, -1 will set the normal spawning order
-	* @param ExceptID The player that should not get killed
-	*/
+	 * Kill the whole team.
+	 * @param Team The team id to kill
+	 * @param NewStrongID The player with that id will get strong hook on everyone else, -1 will set the normal spawning order
+	 * @param ExceptID The player that should not get killed
+	 */
 	void KillTeam(int Team, int NewStrongID, int ExceptID = -1);
 	bool TeamFinished(int Team);
 	void OnTeamFinish(CPlayer **Players, unsigned int Size, float Time, const char *pTimestamp);

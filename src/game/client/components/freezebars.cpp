@@ -223,7 +223,7 @@ void CFreezeBars::OnRender()
 			continue;
 		}
 
-		//don't render if the tee is offscreen
+		// don't render if the tee is offscreen
 		vec2 *pRenderPos = &m_pClient->m_aClients[ClientID].m_RenderPos;
 		if(pRenderPos->x < ScreenX0 || pRenderPos->x > ScreenX1 || pRenderPos->y < ScreenY0 || pRenderPos->y > ScreenY1)
 		{

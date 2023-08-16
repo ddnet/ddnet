@@ -201,11 +201,11 @@ bool IGameController::OnEntity(int Index, int x, int y, int Layer, int Flags, bo
 			if(aSides[i] >= ENTITY_LASER_SHORT && aSides[i] <= ENTITY_LASER_LONG)
 			{
 				new CDoor(
-					&GameServer()->m_World, //GameWorld
-					Pos, //Pos
-					pi / 4 * i, //Rotation
-					32 * 3 + 32 * (aSides[i] - ENTITY_LASER_SHORT) * 3, //Length
-					Number //Number
+					&GameServer()->m_World, // GameWorld
+					Pos, // Pos
+					pi / 4 * i, // Rotation
+					32 * 3 + 32 * (aSides[i] - ENTITY_LASER_SHORT) * 3, // Length
+					Number // Number
 				);
 			}
 		}
@@ -224,14 +224,14 @@ bool IGameController::OnEntity(int Index, int x, int y, int Layer, int Flags, bo
 		float Deg = Dir * (pi / 2);
 		CProjectile *pBullet = new CProjectile(
 			&GameServer()->m_World,
-			WEAPON_SHOTGUN, //Type
-			-1, //Owner
-			Pos, //Pos
-			vec2(std::sin(Deg), std::cos(Deg)), //Dir
-			-2, //Span
-			true, //Freeze
-			true, //Explosive
-			(g_Config.m_SvShotgunBulletSound) ? SOUND_GRENADE_EXPLODE : -1, //SoundImpact
+			WEAPON_SHOTGUN, // Type
+			-1, // Owner
+			Pos, // Pos
+			vec2(std::sin(Deg), std::cos(Deg)), // Dir
+			-2, // Span
+			true, // Freeze
+			true, // Explosive
+			(g_Config.m_SvShotgunBulletSound) ? SOUND_GRENADE_EXPLODE : -1, // SoundImpact
 			vec2(std::sin(Deg), std::cos(Deg)), // InitDir
 			Layer,
 			Number);
@@ -251,13 +251,13 @@ bool IGameController::OnEntity(int Index, int x, int y, int Layer, int Flags, bo
 		float Deg = Dir * (pi / 2);
 		CProjectile *pBullet = new CProjectile(
 			&GameServer()->m_World,
-			WEAPON_SHOTGUN, //Type
-			-1, //Owner
-			Pos, //Pos
-			vec2(std::sin(Deg), std::cos(Deg)), //Dir
-			-2, //Span
-			true, //Freeze
-			false, //Explosive
+			WEAPON_SHOTGUN, // Type
+			-1, // Owner
+			Pos, // Pos
+			vec2(std::sin(Deg), std::cos(Deg)), // Dir
+			-2, // Span
+			true, // Freeze
+			false, // Explosive
 			SOUND_GRENADE_EXPLODE,
 			vec2(std::sin(Deg), std::cos(Deg)), // InitDir
 			Layer,

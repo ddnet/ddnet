@@ -410,11 +410,11 @@ bool CServerBrowserHttp::Parse(json_value *pJson, std::vector<CServerInfo> *pvSe
 		}
 		if(CServerInfo2::FromJson(&ParsedInfo, &Info))
 		{
-			//dbg_msg("dbg/serverbrowser", "skipped due to info, i=%d", i);
-			// Only skip the current server on parsing
-			// failure; the server info is "user input" by
-			// the game server and can be set to arbitrary
-			// values.
+			// dbg_msg("dbg/serverbrowser", "skipped due to info, i=%d", i);
+			//  Only skip the current server on parsing
+			//  failure; the server info is "user input" by
+			//  the game server and can be set to arbitrary
+			//  values.
 			continue;
 		}
 		CServerInfo SetInfo = ParsedInfo;
@@ -430,8 +430,8 @@ bool CServerBrowserHttp::Parse(json_value *pJson, std::vector<CServerInfo> *pvSe
 			NETADDR ParsedAddr;
 			if(ServerbrowserParseUrl(&ParsedAddr, Addresses[a]))
 			{
-				//dbg_msg("dbg/serverbrowser", "unknown address, i=%d a=%d", i, a);
-				// Skip unknown addresses.
+				// dbg_msg("dbg/serverbrowser", "unknown address, i=%d a=%d", i, a);
+				//  Skip unknown addresses.
 				continue;
 			}
 			if(SetInfo.m_NumAddresses < (int)std::size(SetInfo.m_aAddresses))
