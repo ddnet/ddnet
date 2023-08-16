@@ -1677,70 +1677,70 @@ Loading sound files
 == Завантаження звукових файлів
 
 Quitting. Please wait…
-== 
+== Закриваєму гру. Будь-ласка зачекайте<3
 
 Restarting. Please wait…
-== 
+==  Перезапуськаємо гру. Будь-ласка зачекайте...
 
 Multi-View
-== 
+== Мульти-Перегляд
 
 Rename folder
-== 
+== Змінити назву папки
 
 A demo with this name already exists
-== 
+== Дефо-файл з таким іменем вже існує 
 
 A folder with this name already exists
-== 
+== Папка з цим іменем вже існує
 
 Unable to rename the folder
-== 
+== Неможливо змінити назву папки
 
 (paused)
-== 
+== (paused)
 
 No server selected
-== 
+== Немає вибраного серверу
 
 Mark the beginning of a cut (right click to reset)
-== 
+== Помітити початок відрізка (Права кнопка миші для відміни)
 
 Mark the end of a cut (right click to reset)
-== 
+== Помітити кінець відрізка (Права кнопка миші для відміни)
 
 Close the demo player
-== 
+== Закрити демо програвач
 
 Export demo cut
-== 
+== Єкспортувати демо відрізок
 
 Cut interval
-== 
+== Інтервал відрізка
 
 Cut length
-== 
+== Довжина відрізка
 
 All combined
-== 
+== Все разом
 
 Folder Link
-== 
+== Знаходження папки
 
 Are you sure that you want to delete the folder '%s'?
-== 
+== Ви впевнені що хочете видалити папку '%s'?
 
 Delete folder
-== 
+== Видалити папку
 
 Unable to delete the folder '%s'. Make sure it's empty first.
-== 
+== Неможливо видалити папку '%s'. Впевніться що папка пуста
 
 Axis
-== 
+== Вісь
 
 Graphics card
-== 
+== Відеокарта(GPU)
 
 Moved ingame
-== 
+== Перенести в гру
