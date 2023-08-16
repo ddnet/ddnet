@@ -6252,7 +6252,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		{
 			UI()->SetHotItem(&s_EnvelopeEditorID);
 
-			if(UI()->MouseButton(2) || (UI()->MouseButton(0) && Input()->ModifierIsPressed()))
+			if(s_Operation == OP_NONE && (UI()->MouseButton(2) || (UI()->MouseButton(0) && Input()->ModifierIsPressed())))
 			{
 				m_OffsetEnvelopeX += UI()->MouseDeltaX() / Graphics()->ScreenWidth() * UI()->Screen()->w / View.w;
 				m_OffsetEnvelopeY -= UI()->MouseDeltaY() / Graphics()->ScreenHeight() * UI()->Screen()->h / View.h;
@@ -6305,7 +6305,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 						RemoveTimeOffsetEnvelope(pEnvelope);
 					m_Map.OnModify();
 				}
-				else if(s_Operation != OP_BOX_SELECT)
+				else if(s_Operation != OP_BOX_SELECT && !Input()->ModifierIsPressed())
 				{
 					static int s_BoxSelectID = 0;
 					UI()->SetActiveItem(&s_BoxSelectID);
