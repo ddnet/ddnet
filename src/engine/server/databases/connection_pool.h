@@ -104,6 +104,8 @@ private:
 	// where the next query is added to the queue.
 	int m_InsertIdx = 0;
 
+	bool m_Shutdown = false;
+
 	struct CSharedData
 	{
 		// Used as signal that shutdown is in progress from main thread to

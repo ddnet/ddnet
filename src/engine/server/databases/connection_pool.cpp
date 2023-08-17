@@ -160,6 +160,9 @@ void CDbConnectionPool::ExecuteWrite(
 
 void CDbConnectionPool::OnShutdown()
 {
+	if(m_Shutdown)
+		return;
+	m_Shutdown = true;
 	m_pShared->m_Shutdown.store(true);
 	m_pShared->m_NumBackup.Signal();
 	int i = 0;
@@ -470,6 +473,7 @@ CDbConnectionPool::CDbConnectionPool()
 
 CDbConnectionPool::~CDbConnectionPool()
 {
+	OnShutdown();
 	if(m_pWorkerThread)
 		thread_wait(m_pWorkerThread);
 	if(m_pBackupThread)
