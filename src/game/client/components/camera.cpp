@@ -10,7 +10,6 @@
 
 #include "camera.h"
 #include "controls.h"
-
 #include <limits>
 
 

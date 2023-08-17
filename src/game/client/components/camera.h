@@ -37,7 +37,7 @@ class CCamera : public CComponent
 	float MaxZoomLevel();
 
 public:
-	static constexpr const float ZoomStep = 0.866025f;
+	static constexpr float ZOOM_STEP = 0.866025f;
 
 	vec2 m_Center;
 	bool m_ZoomSet;

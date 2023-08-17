@@ -641,7 +641,7 @@ void CGameClient::UpdatePositions()
 		ResetMultiView();
 	else if(!m_Snap.m_SpecInfo.m_Active)
 	{
-		m_Camera.SetZoom(std::pow(m_Camera.ZoomStep, g_Config.m_ClDefaultZoom - 10), g_Config.m_ClSmoothZoomTime);
+		m_Camera.SetZoom(std::pow(CCamera::ZOOM_STEP, g_Config.m_ClDefaultZoom - 10), g_Config.m_ClSmoothZoomTime);
 		m_MultiViewPersonalZoom = 0;
 	}
 
