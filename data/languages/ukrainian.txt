@@ -1094,7 +1094,7 @@ Getting server list from master server
 == %d З %d сервера
 
 %d players
-== %dГравців
+== %d Гравців
 
 %d player
 == %d Гравець
