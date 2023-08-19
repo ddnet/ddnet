@@ -14,8 +14,6 @@ public:
 	virtual ~CSqliteConnection();
 	void Print(IConsole *pConsole, const char *pMode) override;
 
-	CSqliteConnection *Copy() override;
-
 	const char *BinaryCollate() const override { return "BINARY"; }
 	void ToUnixTimestamp(const char *pTimestamp, char *aBuf, unsigned int BufferSize) override;
 	const char *InsertTimestampAsUtc() const override { return "DATETIME(?, 'utc')"; }
@@ -106,11 +104,6 @@ void CSqliteConnection::Print(IConsole *pConsole, const char *pMode)
 void CSqliteConnection::ToUnixTimestamp(const char *pTimestamp, char *aBuf, unsigned int BufferSize)
 {
 	str_format(aBuf, BufferSize, "strftime('%%s', %s)", pTimestamp);
-}
-
-CSqliteConnection *CSqliteConnection::Copy()
-{
-	return new CSqliteConnection(m_aFilename, m_Setup);
 }
 
 bool CSqliteConnection::Connect(char *pError, int ErrorSize)
