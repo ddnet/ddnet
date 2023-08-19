@@ -65,6 +65,8 @@ private:
 	bool m_Done; // no more rows available for Step
 	// returns false, if the query succeeded
 	bool Execute(const char *pQuery, char *pError, int ErrorSize);
+	// returns true on failure
+	bool ConnectImpl(char *pError, int ErrorSize);
 
 	// returns true if an error was formatted
 	bool FormatError(int Result, char *pError, int ErrorSize);
@@ -110,9 +112,18 @@ bool CSqliteConnection::Connect(char *pError, int ErrorSize)
 {
 	if(m_InUse.exchange(true))
 	{
-		dbg_assert(0, "Tried connecting while the connection is in use");
+		dbg_assert(false, "Tried connecting while the connection is in use");
 	}
+	if(ConnectImpl(pError, ErrorSize))
+	{
+		m_InUse.store(false);
+		return true;
+	}
+	return false;
+}
 
+bool CSqliteConnection::ConnectImpl(char *pError, int ErrorSize)
+{
 	if(m_pDb != nullptr)
 	{
 		return false;
