@@ -1329,6 +1329,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 			if(DoButton_Menu(&s_RenderButton, Localize("Render"), 0, &RenderRect) || (Input()->KeyPress(KEY_R) && m_pClient->m_GameConsole.IsClosed()))
 			{
 				m_Popup = POPUP_RENDER_DEMO;
+				m_StartPaused = false;
 				char aNameWithoutExt[IO_MAX_PATH_LENGTH];
 				fs_split_file_extension(m_vDemos[m_DemolistSelectedIndex].m_aFilename, aNameWithoutExt, sizeof(aNameWithoutExt));
 				m_DemoRenderInput.Set(aNameWithoutExt);
