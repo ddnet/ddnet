@@ -6002,7 +6002,8 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		OP_DRAG_POINT_X,
 		OP_DRAG_POINT_Y,
 		OP_CONTEXT_MENU,
-		OP_BOX_SELECT
+		OP_BOX_SELECT,
+		OP_SCALE
 	};
 	static int s_Operation = OP_NONE;
 	static std::vector<float> s_vAccurateDragValuesX = {};
@@ -6316,7 +6317,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			}
 
 			m_ShowEnvelopePreview = SHOWENV_SELECTED;
-			m_pTooltip = "Double-click to create a new point. Use shift to change the zoom axis.";
+			m_pTooltip = "Double-click to create a new point. Use shift to change the zoom axis. Press S to scale selected envelope points.";
 		}
 
 		UpdateZoomEnvelopeX(View);
@@ -7058,6 +7059,139 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			}
 			Graphics()->QuadsEnd();
 			UI()->ClipDisable();
+		}
+
+		// handle scaling
+		static float s_ScaleFactorX = 1.0f;
+		static float s_ScaleFactorY = 1.0f;
+		static float s_MidpointX = 0.0f;
+		static float s_MidpointY = 0.0f;
+		static std::vector<float> s_vInitialPositionsX;
+		static std::vector<float> s_vInitialPositionsY;
+		if(s_Operation == OP_NONE && Input()->KeyIsPressed(KEY_S) && !m_vSelectedEnvelopePoints.empty())
+		{
+			s_Operation = OP_SCALE;
+			s_ScaleFactorX = 1.0f;
+			s_ScaleFactorY = 1.0f;
+			auto [FirstPointIndex, FirstPointChannel] = m_vSelectedEnvelopePoints.front();
+
+			float MaximumX = pEnvelope->m_vPoints[FirstPointIndex].m_Time;
+			float MinimumX = MaximumX;
+			s_vInitialPositionsX.clear();
+			for(auto [SelectedIndex, _] : m_vSelectedEnvelopePoints)
+			{
+				float Value = pEnvelope->m_vPoints[SelectedIndex].m_Time;
+				s_vInitialPositionsX.push_back(Value);
+				MaximumX = maximum(MaximumX, Value);
+				MinimumX = minimum(MinimumX, Value);
+			}
+			s_MidpointX = (MaximumX - MinimumX) / 2.0f + MinimumX;
+
+			float MaximumY = pEnvelope->m_vPoints[FirstPointIndex].m_aValues[FirstPointChannel];
+			float MinimumY = MaximumY;
+			s_vInitialPositionsY.clear();
+			for(auto [SelectedIndex, SelectedChannel] : m_vSelectedEnvelopePoints)
+			{
+				float Value = pEnvelope->m_vPoints[SelectedIndex].m_aValues[SelectedChannel];
+				s_vInitialPositionsY.push_back(Value);
+				MaximumY = maximum(MaximumY, Value);
+				MinimumY = minimum(MinimumY, Value);
+			}
+			s_MidpointY = (MaximumY - MinimumY) / 2.0f + MinimumY;
+		}
+
+		if(s_Operation == OP_SCALE)
+		{
+			m_pTooltip = "Press shift to scale the time. Press alt to scale along midpoint. Press ctrl to be more precise.";
+
+			if(Input()->ShiftIsPressed())
+			{
+				s_ScaleFactorX += UI()->MouseDeltaX() / Graphics()->ScreenWidth() * (Input()->ModifierIsPressed() ? 0.5f : 10.0f);
+				float Midpoint = Input()->AltIsPressed() ? s_MidpointX : 0.0f;
+				for(size_t k = 0; k < m_vSelectedEnvelopePoints.size(); k++)
+				{
+					int SelectedIndex = m_vSelectedEnvelopePoints[k].first;
+					int BoundLow = f2fxt(ScreenToEnvelopeX(View, View.x));
+					int BoundHigh = f2fxt(ScreenToEnvelopeX(View, View.x + View.w));
+					for(int j = 0; j < SelectedIndex; j++)
+					{
+						if(!IsEnvPointSelected(j))
+							BoundLow = maximum(pEnvelope->m_vPoints[j].m_Time + 1, BoundLow);
+					}
+					for(int j = SelectedIndex + 1; j < (int)pEnvelope->m_vPoints.size(); j++)
+					{
+						if(!IsEnvPointSelected(j))
+							BoundHigh = minimum(pEnvelope->m_vPoints[j].m_Time - 1, BoundHigh);
+					}
+
+					float Value = s_vInitialPositionsX[k];
+					float ScaleBoundLow = (BoundLow - Midpoint) / (Value - Midpoint);
+					float ScaleBoundHigh = (BoundHigh - Midpoint) / (Value - Midpoint);
+					float ScaleBoundMin = minimum(ScaleBoundLow, ScaleBoundHigh);
+					float ScaleBoundMax = maximum(ScaleBoundLow, ScaleBoundHigh);
+					s_ScaleFactorX = clamp(s_ScaleFactorX, ScaleBoundMin, ScaleBoundMax);
+				}
+
+				for(size_t k = 0; k < m_vSelectedEnvelopePoints.size(); k++)
+				{
+					int SelectedIndex = m_vSelectedEnvelopePoints[k].first;
+					float ScaleMinimum = s_vInitialPositionsX[k] - Midpoint > fxt2f(1) ? fxt2f(1) / (s_vInitialPositionsX[k] - Midpoint) : 0.0f;
+					float ScaleFactor = maximum(ScaleMinimum, s_ScaleFactorX);
+					pEnvelope->m_vPoints[SelectedIndex].m_Time = std::round((s_vInitialPositionsX[k] - Midpoint) * ScaleFactor + Midpoint);
+				}
+				for(size_t k = 1; k < pEnvelope->m_vPoints.size(); k++)
+				{
+					if(pEnvelope->m_vPoints[k].m_Time <= pEnvelope->m_vPoints[k - 1].m_Time)
+						pEnvelope->m_vPoints[k].m_Time = pEnvelope->m_vPoints[k - 1].m_Time + 1;
+				}
+				for(auto [SelectedIndex, _] : m_vSelectedEnvelopePoints)
+				{
+					if(SelectedIndex == 0 && pEnvelope->m_vPoints[SelectedIndex].m_Time != 0)
+					{
+						float Offset = pEnvelope->m_vPoints[0].m_Time;
+						RemoveTimeOffsetEnvelope(pEnvelope);
+						s_MidpointX -= Offset;
+						for(auto &Value : s_vInitialPositionsX)
+							Value -= Offset;
+						break;
+					}
+				}
+			}
+			else
+			{
+				s_ScaleFactorY -= UI()->MouseDeltaY() / Graphics()->ScreenHeight() * (Input()->ModifierIsPressed() ? 0.5f : 10.0f);
+				for(size_t k = 0; k < m_vSelectedEnvelopePoints.size(); k++)
+				{
+					auto [SelectedIndex, SelectedChannel] = m_vSelectedEnvelopePoints[k];
+					if(Input()->AltIsPressed())
+						pEnvelope->m_vPoints[SelectedIndex].m_aValues[SelectedChannel] = std::round((s_vInitialPositionsY[k] - s_MidpointY) * s_ScaleFactorY + s_MidpointY);
+					else
+						pEnvelope->m_vPoints[SelectedIndex].m_aValues[SelectedChannel] = std::round(s_vInitialPositionsY[k] * s_ScaleFactorY);
+
+					if(pEnvelope->GetChannels() == 4)
+						pEnvelope->m_vPoints[SelectedIndex].m_aValues[SelectedChannel] = clamp(pEnvelope->m_vPoints[SelectedIndex].m_aValues[SelectedChannel], 0, 1024);
+				}
+			}
+
+			if(UI()->MouseButton(0))
+			{
+				s_Operation = OP_NONE;
+			}
+			else if(UI()->MouseButton(1))
+			{
+				for(size_t k = 0; k < m_vSelectedEnvelopePoints.size(); k++)
+				{
+					int SelectedIndex = m_vSelectedEnvelopePoints[k].first;
+					pEnvelope->m_vPoints[SelectedIndex].m_Time = std::round(s_vInitialPositionsX[k]);
+				}
+				for(size_t k = 0; k < m_vSelectedEnvelopePoints.size(); k++)
+				{
+					auto [SelectedIndex, SelectedChannel] = m_vSelectedEnvelopePoints[k];
+					pEnvelope->m_vPoints[SelectedIndex].m_aValues[SelectedChannel] = std::round(s_vInitialPositionsY[k]);
+				}
+				RemoveTimeOffsetEnvelope(pEnvelope);
+				s_Operation = OP_NONE;
+			}
 		}
 
 		// handle box selection
