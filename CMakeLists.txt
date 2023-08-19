@@ -1411,14 +1411,25 @@ set(EXPECTED_DATA
   countryflags/index.txt
   debug_font.png
   editor/audio_source.png
+  editor/automap/basic_freeze.rules
+  editor/automap/ddmax_freeze.rules
+  editor/automap/ddnet_tiles.rules
+  editor/automap/ddnet_walls.rules
+  editor/automap/desert_main.rules
+  editor/automap/fadeout.rules
+  editor/automap/generic_clear.rules
+  editor/automap/generic_unhookable.rules
+  editor/automap/generic_unhookable_0.7.rules
+  editor/automap/grass_main.rules
+  editor/automap/grass_main_0.7.rules
+  editor/automap/jungle_main.rules
+  editor/automap/jungle_midground.rules
+  editor/automap/round_tiles.rules
+  editor/automap/water.rules
+  editor/automap/winter_main.rules
   editor/background.png
-  editor/basic_freeze.rules
   editor/checker.png
   editor/cursor.png
-  editor/ddmax_freeze.rules
-  editor/ddnet_tiles.rules
-  editor/ddnet_walls.rules
-  editor/desert_main.rules
   editor/entities/DDNet.png
   editor/entities/FNG.png
   editor/entities/Race.png
@@ -1431,23 +1442,12 @@ set(EXPECTED_DATA
   editor/entities_clear/fng.png
   editor/entities_clear/race.png
   editor/entities_clear/vanilla.png
-  editor/fadeout.rules
   editor/front.png
-  editor/generic_clear.rules
-  editor/generic_unhookable.rules
-  editor/generic_unhookable_0.7.rules
-  editor/grass_main.rules
-  editor/grass_main_0.7.rules
-  editor/jungle_main.rules
-  editor/jungle_midground.rules
-  editor/round_tiles.rules
   editor/speed_arrow.png
   editor/speedup.png
   editor/switch.png
   editor/tele.png
   editor/tune.png
-  editor/water.rules
-  editor/winter_main.rules
   emoticons.png
   extras.png
   fonts/DejaVuSans.ttf
