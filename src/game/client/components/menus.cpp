@@ -1635,7 +1635,7 @@ int CMenus::Render()
 			Part.VSplitLeft(ButtonSize, &Button, &Part);
 			static CButtonContainer s_PausedButton;
 			if(DoButton_FontIcon(&s_PausedButton, FONT_ICON_PAUSE, 0, &Button, IGraphics::CORNER_ALL))
-				g_Config.m_ClVideoPauseOnStart ^= 1;
+				m_StartPaused ^= 1;
 
 			// fastforward
 			Part.VSplitLeft(5.0f, 0, &Part);
@@ -1647,7 +1647,7 @@ int CMenus::Render()
 			// speed meter
 			Part.VSplitLeft(8.0f, 0, &Part);
 			char aBuffer[128];
-			const char *pPaused = g_Config.m_ClVideoPauseOnStart ? Localize("(paused)") : "";
+			const char *pPaused = m_StartPaused ? Localize("(paused)") : "";
 			str_format(aBuffer, sizeof(aBuffer), "%s: ×%g %s", Localize("Speed"), g_aSpeeds[m_Speed], pPaused);
 			UI()->DoLabel(&Part, aBuffer, 12.8f, TEXTALIGN_ML);
 
@@ -1798,8 +1798,9 @@ void CMenus::PopupConfirmDemoReplaceVideo()
 	str_copy(aVideoName, m_DemoRenderInput.GetString());
 	if(!str_endswith(aVideoName, ".mp4"))
 		str_append(aVideoName, ".mp4");
-	const char *pError = Client()->DemoPlayer_Render(aBuf, m_vDemos[m_DemolistSelectedIndex].m_StorageType, aVideoName, m_Speed);
+	const char *pError = Client()->DemoPlayer_Render(aBuf, m_vDemos[m_DemolistSelectedIndex].m_StorageType, aVideoName, m_Speed, m_StartPaused);
 	m_Speed = 4;
+	m_StartPaused = false;
 	if(pError)
 		PopupMessage(Localize("Error"), str_comp(pError, "error loading demo") ? pError : Localize("Error loading demo"), Localize("Ok"));
 }

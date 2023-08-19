@@ -3910,7 +3910,7 @@ const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
 }
 
 #if defined(CONF_VIDEORECORDER)
-const char *CClient::DemoPlayer_Render(const char *pFilename, int StorageType, const char *pVideoName, int SpeedIndex)
+const char *CClient::DemoPlayer_Render(const char *pFilename, int StorageType, const char *pVideoName, int SpeedIndex, bool StartPaused)
 {
 	const char *pError = DemoPlayer_Play(pFilename, StorageType);
 	if(pError)
@@ -3920,7 +3920,7 @@ const char *CClient::DemoPlayer_Render(const char *pFilename, int StorageType, c
 	this->CClient::StartVideo(NULL, this, pVideoName);
 	m_DemoPlayer.Play();
 	m_DemoPlayer.SetSpeedIndex(SpeedIndex);
-	if(Config()->m_ClVideoPauseOnStart)
+	if(StartPaused)
 	{
 		m_DemoPlayer.Pause();
 	}

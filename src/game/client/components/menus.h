@@ -330,6 +330,7 @@ protected:
 	int m_DemolistStorageType;
 	bool m_DemolistMultipleStorages = false;
 	int m_Speed = 4;
+	bool m_StartPaused = false;
 
 	std::chrono::nanoseconds m_DemoPopulateStartTime{0};
 
