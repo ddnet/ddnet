@@ -307,8 +307,6 @@ void CMenuBackground::LoadMenuBackground(bool HasDayHint, bool HasNightHint)
 				}
 			}
 		}
-
-		m_LastLoad = time_get();
 	}
 }
 
