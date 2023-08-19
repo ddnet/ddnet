@@ -7838,10 +7838,6 @@ void CEditor::Reset(bool CreateDefault)
 	UI()->ClosePopupMenus();
 	m_Map.Clean();
 
-	m_pBrush->Clear();
-	for(std::shared_ptr<CLayerGroup> &pSavedBrush : m_apSavedBrushes)
-		pSavedBrush.reset();
-
 	// create default layers
 	if(CreateDefault)
 	{
