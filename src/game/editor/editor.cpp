@@ -1,8 +1,6 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
-#include "base/math.h"
-#include "game/mapitems.h"
 #include <algorithm>
 
 #include <base/color.h>
@@ -887,7 +885,6 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 			m_AnimateStart = time_get() - m_AnimateTime * time_freq();
 			m_Animate = !m_Animate;
 		}
-
 
 		// TODO: animation speed
 
@@ -6023,10 +6020,10 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			else
 				BarColor = {1, 1, 0, 0.5f};
 
-			const float BarWidth = 1.5f;	
+			const float BarWidth = 1.5f;
 			{
 				Graphics()->SetColor(BarColor);
-				IGraphics::CQuadItem QuadItem(EnvelopeToScreenX(View, m_AnimateTime)- BarWidth / 2.0f, View.y, BarWidth, View.h);
+				IGraphics::CQuadItem QuadItem(EnvelopeToScreenX(View, m_AnimateTime) - BarWidth / 2.0f, View.y, BarWidth, View.h);
 				Graphics()->QuadsDrawTL(&QuadItem, 1);
 			}
 
@@ -6038,7 +6035,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 				Graphics()->SetColor(BarColor);
 
 				float Time = std::fmod(m_AnimateTime, pEnvelope->EndTime());
-				IGraphics::CQuadItem QuadItem(EnvelopeToScreenX(View, Time)- BarWidth / 2.0f, View.y, BarWidth, View.h);
+				IGraphics::CQuadItem QuadItem(EnvelopeToScreenX(View, Time) - BarWidth / 2.0f, View.y, BarWidth, View.h);
 				Graphics()->QuadsDrawTL(&QuadItem, 1);
 			}
 
