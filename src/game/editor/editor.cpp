@@ -682,7 +682,7 @@ int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, in
 		else if(IsHex)
 			str_format(aBuf, sizeof(aBuf), "#%06X", Current);
 		else
-			str_format(aBuf, sizeof(aBuf), "%d", Current);
+			str_from_int(Current, aBuf);
 		pRect->Draw(pColor ? *pColor : GetButtonColor(pID, 0), Corners, 5.0f);
 		UI()->DoLabel(pRect, aBuf, 10, TEXTALIGN_MC);
 	}
@@ -3393,7 +3393,7 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 
 			Shifter.VSplitRight(10.0f, &Shifter, &Inc);
 			Shifter.VSplitLeft(10.0f, &Dec, &Shifter);
-			str_format(aBuf, sizeof(aBuf), "%d", pProps[i].m_Value);
+			str_from_int(pProps[i].m_Value, aBuf);
 			int NewValue = UiDoValueSelector((char *)&pIDs[i], &Shifter, "", pProps[i].m_Value, pProps[i].m_Min, pProps[i].m_Max, 1, 1.0f, "Use left mouse button to drag and change the value. Hold shift to be more precise. Rightclick to edit as text.", false, false, 0, &Color);
 			if(NewValue != pProps[i].m_Value)
 			{
@@ -6355,7 +6355,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 				char aValueBuffer[16];
 				if(UnitsPerLineY >= 1.0f)
 				{
-					str_format(aValueBuffer, sizeof(aValueBuffer), "%d", static_cast<int>(Value));
+					str_from_int(static_cast<int>(Value), aValueBuffer);
 				}
 				else
 				{

@@ -171,8 +171,8 @@ void CHud::RenderScoreHud()
 		if(GameFlags & GAMEFLAG_TEAMS && m_pClient->m_Snap.m_pGameDataObj)
 		{
 			char aScoreTeam[2][16];
-			str_format(aScoreTeam[TEAM_RED], sizeof(aScoreTeam), "%d", m_pClient->m_Snap.m_pGameDataObj->m_TeamscoreRed);
-			str_format(aScoreTeam[TEAM_BLUE], sizeof(aScoreTeam), "%d", m_pClient->m_Snap.m_pGameDataObj->m_TeamscoreBlue);
+			str_from_int(m_pClient->m_Snap.m_pGameDataObj->m_TeamscoreRed, aScoreTeam[TEAM_RED]);
+			str_from_int(m_pClient->m_Snap.m_pGameDataObj->m_TeamscoreBlue, aScoreTeam[TEAM_BLUE]);
 
 			bool aRecreateTeamScore[2] = {str_comp(aScoreTeam[0], m_aScoreInfo[0].m_aScoreText) != 0, str_comp(aScoreTeam[1], m_aScoreInfo[1].m_aScoreText) != 0};
 
@@ -324,7 +324,7 @@ void CHud::RenderScoreHud()
 							aScore[t][0] = 0;
 					}
 					else
-						str_format(aScore[t], sizeof(aScore) / 2, "%d", apPlayerInfo[t]->m_Score);
+						str_from_int(apPlayerInfo[t]->m_Score, aScore[t]);
 				}
 				else
 					aScore[t][0] = 0;
@@ -484,7 +484,7 @@ void CHud::RenderWarmupTimer()
 		if(Seconds < 5)
 			str_format(aBuf, sizeof(aBuf), "%d.%d", Seconds, (m_pClient->m_Snap.m_pGameInfoObj->m_WarmupTimer * 10 / SERVER_TICK_SPEED) % 10);
 		else
-			str_format(aBuf, sizeof(aBuf), "%d", Seconds);
+			str_from_int(Seconds, aBuf);
 		w = TextRender()->TextWidth(FontSize, aBuf, -1, -1.0f);
 		TextRender()->Text(150 * Graphics()->ScreenAspect() + -w / 2, 75, FontSize, aBuf, -1.0f);
 	}
@@ -498,7 +498,7 @@ void CHud::RenderTextInfo()
 		m_FrameTimeAvg = m_FrameTimeAvg * 0.9f + Client()->RenderFrameTime() * 0.1f;
 		char aBuf[64];
 		int FrameTime = (int)(1.0f / m_FrameTimeAvg + 0.5f);
-		str_format(aBuf, sizeof(aBuf), "%d", FrameTime);
+		str_from_int(FrameTime, aBuf);
 
 		static float s_TextWidth0 = TextRender()->TextWidth(12.f, "0", -1, -1.0f);
 		static float s_TextWidth00 = TextRender()->TextWidth(12.f, "00", -1, -1.0f);
@@ -527,7 +527,7 @@ void CHud::RenderTextInfo()
 	if(g_Config.m_ClShowpred)
 	{
 		char aBuf[64];
-		str_format(aBuf, sizeof(aBuf), "%d", Client()->GetPredictionTime());
+		str_from_int(Client()->GetPredictionTime(), aBuf);
 		TextRender()->Text(m_Width - 10 - TextRender()->TextWidth(12, aBuf, -1, -1.0f), g_Config.m_ClShowfps ? 20 : 5, 12, aBuf, -1.0f);
 	}
 }

@@ -444,7 +444,7 @@ int CMenus::DoButton_CheckBox(const void *pID, const char *pText, int Checked, c
 int CMenus::DoButton_CheckBox_Number(const void *pID, const char *pText, int Checked, const CUIRect *pRect)
 {
 	char aBuf[16];
-	str_format(aBuf, sizeof(aBuf), "%d", Checked);
+	str_from_int(Checked, aBuf);
 	return DoButton_CheckBox_Common(pID, pText, aBuf, pRect);
 }
 

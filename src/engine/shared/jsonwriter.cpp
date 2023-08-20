@@ -79,7 +79,7 @@ void CJsonWriter::WriteIntValue(int Value)
 	dbg_assert(CanWriteDatatype(), "Cannot write value here");
 	WriteIndent(false);
 	char aBuf[32];
-	str_format(aBuf, sizeof(aBuf), "%d", Value);
+	str_from_int(Value, aBuf);
 	WriteInternal(aBuf);
 	CompleteDataType();
 }

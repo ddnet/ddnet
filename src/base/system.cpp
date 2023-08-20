@@ -2,6 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <atomic>
 #include <cctype>
+#include <charconv>
 #include <cmath>
 #include <cstdarg>
 #include <cstdio>
@@ -3638,6 +3639,13 @@ int64_t str_toint64_base(const char *str, int base)
 float str_tofloat(const char *str)
 {
 	return strtod(str, nullptr);
+}
+
+void str_from_int(int value, char *buffer, size_t buffer_size)
+{
+	buffer[0] = '\0'; // Fix false positive clang-analyzer-core.UndefinedBinaryOperatorResult when using result
+	auto result = std::to_chars(buffer, buffer + buffer_size - 1, value);
+	result.ptr[0] = '\0';
 }
 
 int str_utf8_comp_nocase(const char *a, const char *b)

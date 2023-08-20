@@ -643,7 +643,7 @@ void CLineInputNumber::SetInteger(int Number, int Base, int HexPrefix)
 	switch(Base)
 	{
 	case 10:
-		str_format(aBuf, sizeof(aBuf), "%d", Number);
+		str_from_int(Number, aBuf);
 		break;
 	case 16:
 		str_format(aBuf, sizeof(aBuf), "%0*X", HexPrefix, Number);
