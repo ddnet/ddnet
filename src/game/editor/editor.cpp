@@ -5972,7 +5972,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		// handle time bar
 		{
 			if(s_Operation == OP_NONE)
-				SetHotEnvelopePoint(View, pEnvelope);
+				SetHotEnvelopePoint(View, pEnvelope, s_ActiveChannels);
 			ColorRGBA BarColor;
 
 			UI()->ClipEnable(&View);
