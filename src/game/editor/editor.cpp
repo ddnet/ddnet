@@ -2774,11 +2774,10 @@ void CEditor::DoMapEditor(CUIRect View)
 		// brush editing
 		if(UI()->HotItem() == s_pEditorID)
 		{
-			int Layer = NUM_LAYERS;
-			bool IsQuadLayerSelected = GetSelectedLayerType(0, LAYERTYPE_QUADS) != nullptr;
 			if(m_ShowPicker)
 			{
 				std::shared_ptr<CLayer> pLayer = GetSelectedLayer(0);
+				int Layer;
 				if(pLayer == m_Map.m_pGameLayer)
 					Layer = LAYER_GAME;
 				else if(pLayer == m_Map.m_pFrontLayer)
@@ -2791,17 +2790,27 @@ void CEditor::DoMapEditor(CUIRect View)
 					Layer = LAYER_SPEEDUP;
 				else if(pLayer == m_Map.m_pTuneLayer)
 					Layer = LAYER_TUNE;
-			}
-			if(m_ShowPicker && Layer != NUM_LAYERS)
-			{
+				else
+					Layer = NUM_LAYERS;
+
+				EExplanation Explanation = EExplanation::DDNET;
 				if(m_SelectEntitiesImage == "DDNet")
-					m_pTooltip = Explain(EXPLANATION_DDNET, (int)wx / 32 + (int)wy / 32 * 16, Layer);
+					Explanation = EExplanation::DDNET;
 				else if(m_SelectEntitiesImage == "FNG")
-					m_pTooltip = Explain(EXPLANATION_FNG, (int)wx / 32 + (int)wy / 32 * 16, Layer);
+					Explanation = EExplanation::FNG;
+				else if(m_SelectEntitiesImage == "Race")
+					Explanation = EExplanation::RACE;
 				else if(m_SelectEntitiesImage == "Vanilla")
-					m_pTooltip = Explain(EXPLANATION_VANILLA, (int)wx / 32 + (int)wy / 32 * 16, Layer);
+					Explanation = EExplanation::VANILLA;
+				else if(m_SelectEntitiesImage == "blockworlds")
+					Explanation = EExplanation::BLOCKWORLDS;
+				else
+					dbg_assert(false, "Unhandled entities image for explanations");
+
+				if(Layer != NUM_LAYERS)
+					m_pTooltip = Explain(Explanation, (int)wx / 32 + (int)wy / 32 * 16, Layer);
 			}
-			else if(m_pBrush->IsEmpty() && IsQuadLayerSelected)
+			else if(m_pBrush->IsEmpty() && GetSelectedLayerType(0, LAYERTYPE_QUADS) != nullptr)
 				m_pTooltip = "Hold shift to select multiple quads. Use ctrl + c and ctrl + v to copy and paste quads. Press R to rotate selected quads.";
 			else if(m_pBrush->IsEmpty())
 				m_pTooltip = "Use left mouse button to drag and create a brush. Use ctrl+right mouse to select layer.";

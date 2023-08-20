@@ -1481,15 +1481,18 @@ public:
 	};
 
 	// Explanations
-	enum
+	enum class EExplanation
 	{
-		EXPLANATION_DDNET,
-		EXPLANATION_FNG,
-		EXPLANATION_RACE,
-		EXPLANATION_VANILLA,
-		EXPLANATION_BLOCKWORLDS
+		DDNET,
+		FNG,
+		RACE,
+		VANILLA,
+		BLOCKWORLDS
 	};
-	static const char *Explain(int ExplanationID, int Tile, int Layer);
+	static const char *ExplainDDNet(int Tile, int Layer);
+	static const char *ExplainFNG(int Tile, int Layer);
+	static const char *ExplainVanilla(int Tile, int Layer);
+	static const char *Explain(EExplanation Explanation, int Tile, int Layer);
 
 	int GetLineDistance() const;
 
