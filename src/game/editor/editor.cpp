@@ -1,6 +1,8 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
+#include "base/math.h"
+#include "game/mapitems.h"
 #include <algorithm>
 
 #include <base/color.h>
@@ -832,20 +834,48 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 		TB_Top.VSplitLeft(5.0f, nullptr, &TB_Top);
 
 		// animation buttons
-		TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
+		TB_Top.VSplitLeft(20.0f, &Button, &TB_Top);
 		static int s_JumpStartButton = 0;
 		if(DoButton_FontIcon(&s_JumpStartButton, FONT_ICON_BACKWARD_STEP, false, &Button, 0, "Jump to beggining of animation.", IGraphics::CORNER_L))
 		{
-
+			m_AnimateTime = 0;
+			m_Animate = false;
 		}
 
+		float EnvelopeSectionStart = 0.0f;
+		float EnvelopeTime = 0.0f;
 		if(m_SelectedEnvelope >= 0)
 		{
-			TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
+			std::shared_ptr<CEnvelope> pSelectedEnvelope = m_Map.m_vpEnvelopes[m_SelectedEnvelope];
+			EnvelopeTime = std::fmod(m_AnimateTime, pSelectedEnvelope->EndTime());
+			EnvelopeSectionStart = m_AnimateTime - EnvelopeTime;
+
+			TB_Top.VSplitLeft(20.0f, &Button, &TB_Top);
+			static int s_JumpFirst = 0;
+			if(DoButton_FontIcon(&s_JumpFirst, FONT_ICON_BACKWARD, false, &Button, 0, "Jump to first envelope point.", IGraphics::CORNER_NONE))
+			{
+				m_AnimateTime = EnvelopeSectionStart;
+				m_Animate = false;
+			}
+
+			TB_Top.VSplitLeft(20.0f, &Button, &TB_Top);
 			static int s_JumpPrevious = 0;
 			if(DoButton_FontIcon(&s_JumpPrevious, FONT_ICON_CHEVRON_LEFT, false, &Button, 0, "Jump to previous envelope point.", IGraphics::CORNER_NONE))
 			{
+				if(EnvelopeTime == 0)
+				{
+					EnvelopeTime = pSelectedEnvelope->EndTime();
+					EnvelopeSectionStart -= pSelectedEnvelope->EndTime();
+				}
 
+				auto PreviousPoint = pSelectedEnvelope->m_vPoints.begin();
+				for(auto it = pSelectedEnvelope->m_vPoints.begin(); it != pSelectedEnvelope->m_vPoints.end(); it++)
+				{
+					if(it->m_Time / 1000.0f <= EnvelopeTime - 1.0f / 1000.0f)
+						PreviousPoint = it;
+				}
+				m_AnimateTime = EnvelopeSectionStart + PreviousPoint->m_Time / 1000.0f;
+				m_Animate = false;
 			}
 		}
 
@@ -863,19 +893,42 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 
 		if(m_SelectedEnvelope >= 0)
 		{
-			TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
+			std::shared_ptr<CEnvelope> pSelectedEnvelope = m_Map.m_vpEnvelopes[m_SelectedEnvelope];
+
+			TB_Top.VSplitLeft(20.0f, &Button, &TB_Top);
 			static int s_JumpNext = 0;
 			if(DoButton_FontIcon(&s_JumpNext, FONT_ICON_CHEVRON_RIGHT, false, &Button, 0, "Jump to next envelope point.", IGraphics::CORNER_NONE))
 			{
+				auto NextPoint = pSelectedEnvelope->m_vPoints.rbegin();
+				for(auto it = pSelectedEnvelope->m_vPoints.rbegin(); it != pSelectedEnvelope->m_vPoints.rend(); it++)
+				{
+					if(it->m_Time / 1000.0f >= EnvelopeTime + 1.0f / 1000.0f)
+						NextPoint = it;
+				}
+				m_AnimateTime = EnvelopeSectionStart + NextPoint->m_Time / 1000.0f;
+				m_Animate = false;
+			}
 
+			TB_Top.VSplitLeft(20.0f, &Button, &TB_Top);
+			static int s_JumpLast = 0;
+			if(DoButton_FontIcon(&s_JumpLast, FONT_ICON_FORWARD, false, &Button, 0, "Jump to last envelope point.", IGraphics::CORNER_NONE))
+			{
+				if(EnvelopeTime != 0)
+					m_AnimateTime = EnvelopeSectionStart + pSelectedEnvelope->EndTime();
+				m_Animate = false;
 			}
 		}
 
-		TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
+		TB_Top.VSplitLeft(20.0f, &Button, &TB_Top);
 		static int s_JumpEndButton = 0;
 		if(DoButton_FontIcon(&s_JumpEndButton, FONT_ICON_FORWARD_STEP, false, &Button, 0, "Jump to end of animation.", IGraphics::CORNER_R))
 		{
-			
+			float TotalEndTime = 0.0f;
+			for(const std::shared_ptr<CEnvelope> &pEnvelope : m_Map.m_vpEnvelopes)
+				TotalEndTime = maximum(TotalEndTime, pEnvelope->EndTime());
+
+			m_AnimateTime = TotalEndTime;
+			m_Animate = false;
 		}
 
 		TB_Top.VSplitLeft(5.0f, nullptr, &TB_Top);
@@ -5683,6 +5736,20 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 	if(pEnvelope)
 	{
+		CUIRect UnusedRegionLeft{
+			View.x,
+			View.y,
+			maximum(0.0f, EnvelopeToScreenX(View, 0) - View.x),
+			View.h};
+		CUIRect UnusedRegionRight{
+			EnvelopeToScreenX(View, pEnvelope->EndTime()),
+			View.y,
+			maximum(0.0f, View.x + View.w - EnvelopeToScreenX(View, pEnvelope->EndTime())),
+			View.h};
+
+		Graphics()->DrawRect(UnusedRegionLeft.x, UnusedRegionLeft.y, UnusedRegionLeft.w, UnusedRegionLeft.h, {0, 0, 0, 100}, IGraphics::CORNER_NONE, 0);
+		Graphics()->DrawRect(UnusedRegionRight.x, UnusedRegionRight.y, UnusedRegionRight.w, UnusedRegionRight.h, {0, 0, 0, 100}, IGraphics::CORNER_NONE, 0);
+
 		if(m_ResetZoomEnvelope)
 		{
 			m_ResetZoomEnvelope = false;
@@ -6057,9 +6124,6 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 				for(int i = 2; i < Steps; i++)
 				{
 					float CurrentTime = StartTime + i * StepTime;
-					if(CurrentTime > pEnvelope->EndTime())
-						Graphics()->SetColor(aColors[c].r * 0.5f, aColors[c].g * 0.5f, aColors[c].b * 0.5f, 1);
-
 					pEnvelope->Eval(CurrentTime, Channels);
 					float CurrentY = EnvelopeToScreenY(View, Channels[c]);
 
@@ -7428,7 +7492,7 @@ void CEditor::Reset(bool CreateDefault)
 	SelectGameLayer();
 	DeselectQuads();
 	DeselectQuadPoints();
-	m_SelectedEnvelope = 0;
+	m_SelectedEnvelope = -1;
 	m_SelectedImage = 0;
 	m_SelectedSound = 0;
 	m_SelectedSource = -1;
