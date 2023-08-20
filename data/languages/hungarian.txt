@@ -1744,3 +1744,607 @@ Graphics card
 
 Moved ingame
 == 
+
+[Editor Explanation]
+EMPTY: Can be used as an eraser.
+== 
+
+[Editor Explanation]
+HOOKABLE: It's possible to hook and collide with it.
+== 
+
+[Editor Explanation]
+KILL: Kills the tee.
+== 
+
+[Editor Explanation]
+UNHOOKABLE: It's not possible to hook it, but can collide with it.
+== 
+
+[Editor Explanation]
+LASER BLOCKER: Doesn't let DRAGGING & SPINNING LASER and PLASMA TURRET reach tees through it.
+== 
+
+[Editor Explanation]
+HOOKTHROUGH: Shortcut for new hookthrough.
+== 
+
+[Editor Explanation]
+HOOKTHROUGH: Combined with a collision tile is new hookthrough, otherwise stops hooks, from all directions.
+== 
+
+[Editor Explanation]
+HOOKTHROUGH: Combined with a collision tile is new hookthrough, otherwise stops hook, from one direction.
+== 
+
+[Editor Explanation]
+HOOKTHROUGH: Combined with (UN)HOOKABLE tiles, allows to hook through the walls.
+== 
+
+[Editor Explanation]
+JUMP: Sets defined amount of jumps (default is 2).
+== 
+
+[Editor Explanation]
+FREEZE: Freezes tees for 3 seconds.
+== 
+
+[Editor Explanation]
+FREEZE: Freezes tees for defined amount of seconds.
+== 
+
+[Editor Explanation]
+UNFREEZE: Unfreezes tees immediately.
+== 
+
+[Editor Explanation]
+RED TELEPORT: After falling into this tile, tees appear on TO with the same number. Speed and hooks are reset.
+== 
+
+[Editor Explanation]
+DEEP FREEZE: Permanent freeze. Only UNDEEP tile can cancel this effect.
+== 
+
+[Editor Explanation]
+UNDEEP: Removes DEEP FREEZE effect.
+== 
+
+[Editor Explanation]
+LIVE FREEZE: Live frozen tees cannot move or jump, while hook and weapons can still be used.
+== 
+
+[Editor Explanation]
+LIVE UNFREEZE: Removes LIVE FREEZE effect.
+== 
+
+[Editor Explanation]
+WEAPON TELEPORT: Teleports bullets shot into it to TELEPORT TO, where it comes out. Direction, angle and length are kept.
+== 
+
+[Editor Explanation]
+HOOK TELEPORT: Teleports hooks entering into it to TELEPORT TO, where it comes out. Direction, angle and length are kept.
+== 
+
+[Editor Explanation]
+WALLJUMP: Placed next to a wall. Enables climbing up the wall.
+== 
+
+[Editor Explanation]
+ENDLESS HOOK: Activates endless hook.
+== 
+
+[Editor Explanation]
+ENDLESS HOOK OFF: Deactivates endless hook.
+== 
+
+[Editor Explanation]
+HIT OTHERS: You can hit others.
+== 
+
+[Editor Explanation]
+HIT OTHERS: You can activate hitting others for single weapons, using delay number to select which.
+== 
+
+[Editor Explanation]
+HIT OTHERS: You can't hit others.
+== 
+
+[Editor Explanation]
+HIT OTHERS: You can deactivate hitting others for single weapons, using delay number to select which.
+== 
+
+[Editor Explanation]
+SOLO: You are now in a solo part.
+== 
+
+[Editor Explanation]
+SOLO: You are now out of the solo part.
+== 
+
+[Editor Explanation]
+TIME SWITCH: Activates switch (e.g. closes door) with the same number for a set amount of seconds.
+== 
+
+[Editor Explanation]
+TIME SWITCH: Deactivates switch (e.g. opens door) with the same number for a set amount of seconds.
+== 
+
+[Editor Explanation]
+SWITCH: Activates switch (e.g. closes door) with the same number.
+== 
+
+[Editor Explanation]
+SWITCH: Deactivates switch (e.g. opens door) with the same number.
+== 
+
+[Editor Explanation]
+BLUE TELEPORT: After falling into this tile, tees appear on TO with the same number. Speed and hook are kept.
+== 
+
+[Editor Explanation]
+TELEPORT TO: Destination tile for FROMs, WEAPON & HOOK TELEPORTs with the same numbers.
+== 
+
+[Editor Explanation]
+SPEEDUP: Gives tee defined speed. Arrow shows direction and angle.
+== 
+
+[Editor Explanation]
+CHECKPOINT TELEPORT: After having touched this tile, any CFRM will teleport you to CTO with the same number.
+== 
+
+[Editor Explanation]
+CHECKPOINT TELEPORT TO: Tees will appear here after touching TELEPORT CHECKPOINT with the same number and falling into CFROM TELEPORT.
+== 
+
+[Editor Explanation]
+BLUE CHECKPOINT TELEPORT: Sends tees to CTO with the same number as the last touched TELEPORT CHECKPOINT. Speed and hook are kept.
+== 
+
+[Editor Explanation]
+REFILL JUMPS: Restores all jumps.
+== 
+
+[Editor Explanation]
+START: Starts counting your race time.
+== 
+
+[Editor Explanation]
+FINISH: End of race.
+== 
+
+[Editor Explanation]
+STOPPER: You can hook and shoot through it. You can't go through it against the arrow.
+== 
+
+[Editor Explanation]
+STOPPER: You can hook and shoot through it. You can't go through it against the arrows.
+== 
+
+[Editor Explanation]
+STOPPER: You can hook and shoot through it. You can't go through it.
+== 
+
+[Editor Explanation]
+RED CHECKPOINT TELEPORT: Send tees to CTO with the same number as the last touched TELEPORT CHECKPOINT. Speed and hook are reset.
+== 
+
+[Editor Explanation]
+SPEEDER: Causes weapons, SHIELD, HEART and SPINNING LASER to move slowly.
+== 
+
+[Editor Explanation]
+SPEEDER: Causes weapons, SHIELD, HEART and SPINNING LASER to move quickly.
+== 
+
+[Editor Explanation]
+TUNE ZONE: Area where defined tunes work.
+== 
+
+[Editor Explanation]
+GLOBAL OLD SHOTGUN: Shotgun drags others always towards the shooter, even after having bounced. Shooter can't hit themselves. Place only one tile somewhere on the map.
+== 
+
+[Editor Explanation]
+GLOBAL COLLISION OFF: Nobody can collide with others. Place only one tile somewhere on the map.
+== 
+
+[Editor Explanation]
+GLOBAL ENDLESS HOOK ON: Everyone has endless hook. Place only one tile somewhere on the map.
+== 
+
+[Editor Explanation]
+GLOBAL HIT OTHERS OFF: Nobody can hit others. Place only one tile somewhere on the map.
+== 
+
+[Editor Explanation]
+GLOBAL HOOK OTHERS OFF: Nobody can hook others. Place only one tile somewhere on the map.
+== 
+
+[Editor Explanation]
+UNLOCK TEAM: Forces team to be unlocked so that team doesn't get killed when one dies.
+== 
+
+[Editor Explanation]
+PENALTY: Adds time to your current race time. Opposite of BONUS.
+== 
+
+[Editor Explanation]
+COLLISION OFF: You can't collide with others.
+== 
+
+[Editor Explanation]
+SUPER JUMP OFF: You don't have unlimited air jumps.
+== 
+
+[Editor Explanation]
+JETPACK OFF: You lose your jetpack gun.
+== 
+
+[Editor Explanation]
+HOOK OTHERS OFF: You can't hook others.
+== 
+
+[Editor Explanation]
+BONUS: Subtracts time from your current race time. Opposite of PENALTY.
+== 
+
+[Editor Explanation]
+COLLISION: You can collide with others.
+== 
+
+[Editor Explanation]
+SUPER JUMP: You have unlimited air jumps.
+== 
+
+[Editor Explanation]
+JETPACK: You have a jetpack gun.
+== 
+
+[Editor Explanation]
+HOOK OTHERS: You can hook others.
+== 
+
+[Editor Explanation]
+CREDITS: Who designed the entities.
+== 
+
+[Editor Explanation]
+ENTITIES OFF SIGN: Informs people playing with entities about important marks, tips, information or text on the map.
+== 
+
+[Editor Explanation]
+SPAWN: Here tees will appear after joining the game or dying somewhere on the map.
+== 
+
+[Editor Explanation]
+SPAWN: Red team members spawn here, same as normal spawn in DDRace.
+== 
+
+[Editor Explanation]
+SPAWN: Blue team members spawn here, same as normal spawn in DDRace.
+== 
+
+[Editor Explanation]
+FLAG: Not used in DDRace. Place where red team flag is.
+== 
+
+[Editor Explanation]
+FLAG: Not used in DDRace. Place where blue team flag is.
+== 
+
+[Editor Explanation]
+SHIELD: Takes all weapons (except hammer and pistol) away.
+== 
+
+[Editor Explanation]
+HEART: Works like a FREEZE tile. Freezes tees for 3 seconds by default.
+== 
+
+[Editor Explanation]
+SHOTGUN: Drags the tees towards it. Bounces off the walls.
+== 
+
+[Editor Explanation]
+GRENADE LAUNCHER: Throws exploding bullets. Also known as rocket.
+== 
+
+[Editor Explanation]
+NINJA: Makes you invisible in the darkest nights.
+== 
+
+[Editor Explanation]
+LASER: Unfreezes hit tee. Bounces off the walls. Also known as laser.
+== 
+
+[Editor Explanation]
+SPINNING LASER: Tile where freezing laser (made with LASER LENGTH) begins. Counter-Clockwise, fast.
+== 
+
+[Editor Explanation]
+SPINNING LASER: Tile where freezing laser (made with LASER LENGTH) begins. Counter-Clockwise, medium speed.
+== 
+
+[Editor Explanation]
+SPINNING LASER: Tile where freezing laser (made with LASER LENGTH) begins. Counter-Clockwise, slow.
+== 
+
+[Editor Explanation]
+NON-SPINNING LASER: Tile where freezing laser (made with LASER LENGTH) begins.
+== 
+
+[Editor Explanation]
+SPINNING LASER: Tile where freezing laser (made with LASER LENGTH) begins. Clockwise, slow.
+== 
+
+[Editor Explanation]
+SPINNING LASER: Tile where freezing laser (made with LASER LENGTH) begins. Clockwise, medium speed.
+== 
+
+[Editor Explanation]
+SPINNING LASER: Tile where freezing laser (made with LASER LENGTH) begins. Clockwise, fast.
+== 
+
+[Editor Explanation]
+LASER LENGTH: Put next to DOOR or SPINNING LASER, makes it 3 tiles long.
+== 
+
+[Editor Explanation]
+LASER LENGTH: Put next to DOOR or SPINNING LASER, makes it 6 tiles long.
+== 
+
+[Editor Explanation]
+LASER LENGTH: Put next to DOOR or SPINNING LASER, makes it 9 tiles long.
+== 
+
+[Editor Explanation]
+LASER LENGTH CHANGE: Put next to LASER LENGTH, causes it to length and shorten constantly. Works only on (NON-)SPINNING LASER, not on DOOR. Lengthen, slow.
+== 
+
+[Editor Explanation]
+LASER LENGTH CHANGE: Put next to LASER LENGTH, causes it to length and shorten constantly. Works only on (NON-)SPINNING LASER, not on DOOR. Lengthen, medium speed.
+== 
+
+[Editor Explanation]
+LASER LENGTH CHANGE: Put next to LASER LENGTH, causes it to length and shorten constantly. Works only on (NON-)SPINNING LASER, not on DOOR. Lengthen, fast.
+== 
+
+[Editor Explanation]
+LASER LENGTH CHANGE: Put next to LASER LENGTH, causes it to length and shorten constantly. Works only on (NON-)SPINNING LASER, not on DOOR. Shorten, slow.
+== 
+
+[Editor Explanation]
+LASER LENGTH CHANGE: Put next to LASER LENGTH, causes it to length and shorten constantly. Works only on (NON-)SPINNING LASER, not on DOOR. Shorten, medium speed.
+== 
+
+[Editor Explanation]
+LASER LENGTH CHANGE: Put next to LASER LENGTH, causes it to length and shorten constantly. Works only on (NON-)SPINNING LASER, not on DOOR. Shorten, fast.
+== 
+
+[Editor Explanation]
+PLASMA TURRET: Shoots plasma bullets at the closest tee. They explode on an obstactle they hit (wall or tee).
+== 
+
+[Editor Explanation]
+PLASMA TURRET: Shoots plasma bullets that work like FREEZE at the closest tee.
+== 
+
+[Editor Explanation]
+PLASMA TURRET: Shoots plasma bullets that work like FREEZE at the closest tee. They also explode on an obstactly they hit (wall or tee).
+== 
+
+[Editor Explanation]
+PLASMA TURRET: Shoots plasma bullets that work like UNFREEZE at the closest tee.
+== 
+
+[Editor Explanation]
+EXPLODING BULLET: Bounces off the walls with explosion. Touching the bullet works like FREEZE tile (freezes for 3 seconds by default).
+== 
+
+[Editor Explanation]
+BULLET: Bounces off the walls without explosion. Touching the bullet works like FREEZE tile (freezes for 3 seconds by default).
+== 
+
+[Editor Explanation]
+SHOTGUN SHIELD: Takes shotgun away.
+== 
+
+[Editor Explanation]
+GRENADE SHIELD: Takes grenade away.
+== 
+
+[Editor Explanation]
+NINJA SHIELD: Takes ninja away.
+== 
+
+[Editor Explanation]
+LASER SHIELD: Takes laser away.
+== 
+
+[Editor Explanation]
+DRAGGING LASER: Grabs and attracts the closest tee to it. Can't reach tees through walls and LASER BLOCKER. Weak.
+== 
+
+[Editor Explanation]
+DRAGGING LASER: Grabs and attracts the closest tee to it. Can't reach tees through walls and LASER BLOCKER. Medium strength.
+== 
+
+[Editor Explanation]
+DRAGGING LASER: Grabs and attracts the closest tee to it. Can't reach tees through walls and LASER BLOCKER. Strong.
+== 
+
+[Editor Explanation]
+DRAGGING LASER: Grabs and attracts the closest tee to it. Can reach tees through walls but not through LASER BLOCKER. Weak.
+== 
+
+[Editor Explanation]
+DRAGGING LASER: Grabs and attracts the closest tee to it. Can reach tees through walls but not through LASER BLOCKER. Medium strength.
+== 
+
+[Editor Explanation]
+DRAGGING LASER: Grabs and attracts the closest tee to it. Can reach tees through walls but not through LASER BLOCKER. Strong.
+== 
+
+[Editor Explanation]
+DOOR: Combined with LASER LENGTH creates doors. Doesn't allow to go through it (only with NINJA).
+== 
+
+[Editor Explanation]
+TELEGUN: Turn gun on as telegun weapon.
+== 
+
+[Editor Explanation]
+TELEGUN OFF: Turn gun off as telegun weapon.
+== 
+
+[Editor Explanation]
+TELEGUN: Place on top of a collision tile, activates a spot to teleport to, cancels movement.
+== 
+
+[Editor Explanation]
+TELEGUN: Place on top of a collision tile, activates a spot to teleport to, cancels movement, for single weapons, using delay number to select which.
+== 
+
+[Editor Explanation]
+TELEGUN: Place on top of a collision tile, activates a spot to teleport to, preserves movement.
+== 
+
+[Editor Explanation]
+TELEGUN: Place on top of a collision tile, activates a spot to teleport to, preserves movement, for single weapons, using delay number to select which.
+== 
+
+[Editor Explanation]
+TELEGRENADE: Turn grenade on as telegun weapon.
+== 
+
+[Editor Explanation]
+TELEGRENADE OFF: Turn grenade off as telegun weapon.
+== 
+
+[Editor Explanation]
+TELELASER: Turn laser on as telegun weapon.
+== 
+
+[Editor Explanation]
+TELELASER OFF: Turn laser off as telegun weapon.
+== 
+
+[Editor Explanation]
+TIME CHECKPOINT: Compares your current race time with your record to show you whether you are running faster or slower.
+== 
+
+[Editor Explanation]
+DEATH: Kills the tee.
+== 
+
+[Editor Explanation]
+GOLDEN SPIKE: Kills the tee and gives points to the killer. (Amount of points given is set inside the server)
+== 
+
+[Editor Explanation]
+NORMAL SPIKE: Kills the tee and gives points to the killer. (Amount of points given is set inside the server)
+== 
+
+[Editor Explanation]
+RED SPIKE: Red team spikes. Gives negative points when killer is in blue team (Amount of points given is set inside the server)
+== 
+
+[Editor Explanation]
+BLUE SPIKE: Blue team spikes. Gives negative points when killer is in red team (Amount of points given is set inside the server)
+== 
+
+[Editor Explanation]
+SCORE: Old tile used for showing red team score using laser text. No longer usable in FNG2
+== 
+
+[Editor Explanation]
+SCORE: Old tile used for showing blue team score using laser text. No longer usable in FNG2
+== 
+
+[Editor Explanation]
+GREEN SPIKE: Kills the tee and gives points to the killer. (Amount of points given is set inside the server)
+== 
+
+[Editor Explanation]
+PURPLE SPIKE: Kills the tee and gives points to the killer. (Amount of points given is set inside the server)
+== 
+
+[Editor Explanation]
+SPAWN: Here tees will appear after joining the game or dying.
+== 
+
+[Editor Explanation]
+SPAWN: Red team members spawn here.
+== 
+
+[Editor Explanation]
+SPAWN: Blue team members spawn here.
+== 
+
+[Editor Explanation]
+FLAG: Not used in FNG. Place where red team flag is.
+== 
+
+[Editor Explanation]
+FLAG: Not used in FNG. Place where blue team flag is.
+== 
+
+[Editor Explanation]
+SHIELD: Does nothing in FNG.
+== 
+
+[Editor Explanation]
+HEART: Does nothing in FNG.
+== 
+
+[Editor Explanation]
+SHOTGUN: Not used in FNG. Gives you shotgun with 10 charges.
+== 
+
+[Editor Explanation]
+GRENADE: Gives you grenade weapon with 10 charges. Not really useful in FNG.
+== 
+
+[Editor Explanation]
+NINJA: Does nothing in FNG.
+== 
+
+[Editor Explanation]
+LASER: Gives you laser weapon with 10 charges. Not really useful in FNG.
+== 
+
+[Editor Explanation]
+SPIKE: Old FNG spikes. Deprecated.
+== 
+
+[Editor Explanation]
+FLAG: Place where red team flag is.
+== 
+
+[Editor Explanation]
+FLAG: Place where blue team flag is.
+== 
+
+[Editor Explanation]
+SHIELD: Gives player +1 shield.
+== 
+
+[Editor Explanation]
+HEART: Gives player +1 health
+== 
+
+[Editor Explanation]
+SHOTGUN: Gives you shotgun weapon with 10 charges.
+== 
+
+[Editor Explanation]
+GRENADE: Gives you grenade weapon with 10 charges.
+== 
+
+[Editor Explanation]
+NINJA: Gives you ninja for a period of time.
+== 
+
+[Editor Explanation]
+LASER: Gives you laser weapon with 10 charges.
+== 
