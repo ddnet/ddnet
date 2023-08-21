@@ -130,6 +130,13 @@ public:
 		return col;
 	}
 
+	DerivedT WithMultipliedAlpha(float alpha) const
+	{
+		DerivedT col(static_cast<const DerivedT &>(*this));
+		col.a *= alpha;
+		return col;
+	}
+
 	template<typename UnpackT>
 	static UnpackT UnpackAlphaLast(unsigned Color, bool Alpha = true)
 	{
