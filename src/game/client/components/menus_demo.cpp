@@ -109,7 +109,24 @@ void CMenus::DemoSeekTick(IDemoPlayer::ETickOffset TickOffset)
 void CMenus::RenderDemoPlayer(CUIRect MainView)
 {
 	const IDemoPlayer::CInfo *pInfo = DemoPlayer()->BaseInfo();
-	static int64_t s_LastSpeedChange = 0;
+
+	// When rendering a demo and starting paused, render the pause indicator permanently.
+#if defined(CONF_VIDEORECORDER)
+	const bool VideoRendering = IVideo::Current() != nullptr;
+	bool InitialVideoPause = VideoRendering && m_LastPauseChange < 0.0f && pInfo->m_Paused;
+#else
+	const bool VideoRendering = false;
+	bool InitialVideoPause = false;
+#endif
+
+	const auto &&UpdateLastPauseChange = [&]() {
+		// Immediately hide the pause indicator when unpausing the initial pause when rendering a demo.
+		m_LastPauseChange = InitialVideoPause ? 0.0f : Client()->GlobalTime();
+		InitialVideoPause = false;
+	};
+	const auto &&UpdateLastSpeedChange = [&]() {
+		m_LastSpeedChange = Client()->GlobalTime();
+	};
 
 	// handle keyboard shortcuts independent of active menu
 	float PositionToSeek = -1.0f;
@@ -122,12 +139,12 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 			if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP) || Input()->KeyPress(KEY_UP))
 			{
 				DemoPlayer()->AdjustSpeedIndex(+1);
-				s_LastSpeedChange = time_get();
+				UpdateLastSpeedChange();
 			}
 			else if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN) || Input()->KeyPress(KEY_DOWN))
 			{
 				DemoPlayer()->AdjustSpeedIndex(-1);
-				s_LastSpeedChange = time_get();
+				UpdateLastSpeedChange();
 			}
 		}
 
@@ -142,6 +159,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 			{
 				DemoPlayer()->Pause();
 			}
+			UpdateLastPauseChange();
 		}
 
 		// seek backward/forward 10/5 seconds
@@ -184,11 +202,13 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		}
 
 		// Advance single frame forward/backward with period/comma key
-		const bool TickForwards = Input()->KeyPress(KEY_PERIOD);
-		const bool TickBackwards = Input()->KeyPress(KEY_COMMA);
-		if(TickForwards || TickBackwards)
+		if(Input()->KeyPress(KEY_PERIOD))
 		{
-			DemoSeekTick(TickForwards ? IDemoPlayer::TICK_NEXT : IDemoPlayer::TICK_PREVIOUS);
+			DemoSeekTick(IDemoPlayer::TICK_NEXT);
+		}
+		else if(Input()->KeyPress(KEY_COMMA))
+		{
+			DemoSeekTick(IDemoPlayer::TICK_PREVIOUS);
 		}
 	}
 
@@ -198,14 +218,43 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	const float Margins = 5.0f;
 	const float TotalHeight = SeekBarHeight + ButtonbarHeight + NameBarHeight + Margins * 3;
 
-	// render speed info
-	if(g_Config.m_ClDemoShowSpeed && time_get() - s_LastSpeedChange < time_freq() * 1)
+	if(!m_MenuActive)
 	{
-		CUIRect Screen = *UI()->Screen();
+		// Render pause indicator
+		if(g_Config.m_ClDemoShowPause && (InitialVideoPause || (!VideoRendering && Client()->GlobalTime() - m_LastPauseChange < 0.5f)))
+		{
+			const float Time = InitialVideoPause ? 0.5f : ((Client()->GlobalTime() - m_LastPauseChange) / 0.5f);
+			const float Alpha = (Time < 0.5f ? Time : (1.0f - Time)) * 2.0f;
+			if(Alpha > 0.0f)
+			{
+				TextRender()->TextColor(TextRender()->DefaultTextColor().WithMultipliedAlpha(Alpha));
+				TextRender()->TextOutlineColor(TextRender()->DefaultTextOutlineColor().WithMultipliedAlpha(Alpha));
+				TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
+				TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING);
+				UI()->DoLabel(UI()->Screen(), pInfo->m_Paused ? FONT_ICON_PAUSE : FONT_ICON_PLAY, 36.0f + Time * 12.0f, TEXTALIGN_MC);
+				TextRender()->TextColor(TextRender()->DefaultTextColor());
+				TextRender()->TextOutlineColor(TextRender()->DefaultTextOutlineColor());
+				TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
+				TextRender()->SetRenderFlags(0);
+			}
+		}
 
-		char aSpeedBuf[256];
-		str_format(aSpeedBuf, sizeof(aSpeedBuf), "×%.2f", pInfo->m_Speed);
-		TextRender()->Text(120.0f, Screen.y + Screen.h - 120.0f - TotalHeight, 60.0f, aSpeedBuf, -1.0f);
+		// Render speed info
+		if(g_Config.m_ClDemoShowSpeed && Client()->GlobalTime() - m_LastSpeedChange < 1.0f)
+		{
+			CUIRect Screen = *UI()->Screen();
+
+			char aSpeedBuf[16];
+			str_format(aSpeedBuf, sizeof(aSpeedBuf), "×%.2f", pInfo->m_Speed);
+			TextRender()->Text(120.0f, Screen.y + Screen.h - 120.0f - TotalHeight, 60.0f, aSpeedBuf, -1.0f);
+		}
+	}
+	else
+	{
+		if(m_LastPauseChange > 0.0f)
+			m_LastPauseChange = 0.0f;
+		if(m_LastSpeedChange > 0.0f)
+			m_LastSpeedChange = 0.0f;
 	}
 
 	const int CurrentTick = pInfo->m_CurrentTick - pInfo->m_FirstTick;
@@ -215,6 +264,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	{
 		DemoPlayer()->Pause();
 		PositionToSeek = 0.0f;
+		UpdateLastPauseChange();
 	}
 
 	if(!m_MenuActive)
@@ -431,6 +481,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		{
 			DemoPlayer()->Pause();
 		}
+		UpdateLastPauseChange();
 	}
 	GameClient()->m_Tooltips.DoToolTip(&s_PlayPauseButton, &Button, pInfo->m_Paused ? Localize("Play the current demo") : Localize("Pause the current demo"));
 
@@ -604,12 +655,12 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	if(IncreaseDemoSpeed)
 	{
 		DemoPlayer()->AdjustSpeedIndex(+1);
-		s_LastSpeedChange = time_get();
+		UpdateLastSpeedChange();
 	}
 	else if(DecreaseDemoSpeed)
 	{
 		DemoPlayer()->AdjustSpeedIndex(-1);
-		s_LastSpeedChange = time_get();
+		UpdateLastSpeedChange();
 	}
 
 	HandleDemoSeeking(PositionToSeek, TimeToSeek);
@@ -1269,6 +1320,8 @@ void CMenus::RenderDemoList(CUIRect MainView)
 				char aBuf[IO_MAX_PATH_LENGTH];
 				str_format(aBuf, sizeof(aBuf), "%s/%s", m_aCurrentDemoFolder, m_vDemos[m_DemolistSelectedIndex].m_aFilename);
 				const char *pError = Client()->DemoPlayer_Play(aBuf, m_vDemos[m_DemolistSelectedIndex].m_StorageType);
+				m_LastPauseChange = -1.0f;
+				m_LastSpeedChange = -1.0f;
 				if(pError)
 					PopupMessage(Localize("Error"), str_comp(pError, "error loading demo") ? pError : Localize("Error loading demo"), Localize("Ok"));
 				else
