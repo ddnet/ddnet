@@ -1047,11 +1047,11 @@ https://wiki.ddnet.org/
 
 [Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== Başlatma başarısız oldu. Konfigürasyon klasöründe settings_ddnet.cfg dosyası içerisindeki gfx_backend ayarını OpenGL veya Vulkan olarak değiştirmeyi deneyin.
+== Başlatma başarısız oldu. Konfigürasyon klasöründeki settings_ddnet.cfg dosyasında gfx_backend ayarını OpenGL veya Vulkan olarak değiştirmeyi deneyin.
 
 [Graphics error]
 Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== VRAM tükendi. Özel kaynakları (skinler, yapılar, vb.), özellikle yüksek çözünürlüklü olanları, silmeyi deneyin.
+== VRAM tükendi. Özellikle yüksek çözünürlüklü olan özel kaynakları (skinler, yapılar, vb.) silmeyi deneyin.
 
 [Graphics error]
 An error during command recording occurred. Try to update your GPU drivers.
@@ -1071,7 +1071,7 @@ Failed to swap framebuffers. Try to update your GPU drivers.
 
 [Graphics error]
 Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== Bilinmeyen hata. Konfigürasyon klasöründe settings_ddnet.cfg dosyası içerisindeki gfx_backend ayarını OpenGL veya Vulkan olarak değiştirmeyi deneyin.
+== Bilinmeyen hata. Konfigürasyon klasöründeki settings_ddnet.cfg dosyasında gfx_backend ayarını OpenGL veya Vulkan olarak değiştirmeyi deneyin.
 
 [Graphics error]
 Could not initialize the given graphics backend, reverting to the default backend now.
@@ -1100,7 +1100,7 @@ Connected
 == Bağlandı
 
 Loading map file from storage
-== Map dosyası yükleniyor
+== Harita dosyası yükleniyor
 
 Why are you slowmo replaying to read this?
 == Neden bunu okumak için ağır çekimde izliyorsunuz?
