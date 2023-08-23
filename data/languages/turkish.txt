@@ -8,6 +8,7 @@
 #	Learath2		2012-01-01 22:54:29
 #	ardadem			2020-08-20 00:00:00
 #	ardadem			2020-08-22 00:00:00
+#   h-kaan          2023-08-23 15:57:36
 ##### /authors #####
 
 ##### translated strings #####
@@ -157,7 +158,7 @@ Fire
 == Ateş
 
 Folder
-== Dosya
+== Klasör
 
 Force vote
 == Oylamayı zorla
@@ -302,7 +303,7 @@ Player options
 == Oyuncu ayarları
 
 Players
-== Oyuncu
+== Oyuncular
 
 Please balance teams!
 == Takımları dengeleyin!
@@ -488,7 +489,7 @@ You must restart the game for all settings to take effect.
 == Bütün ayarların aktif olması için oyunu yeniden başlatmalısınız.
 
 New name:
-== Yeni isim :
+== Yeni isim:
 
 Sat.
 == Doygunluk
@@ -527,7 +528,7 @@ Laser
 == Lazer
 
 Netversion:
-== Netversion :
+== Netversion:
 
 Map:
 == Harita:
@@ -556,10 +557,10 @@ Quit anyway?
 == Çıkmak istediğinize emin misiniz?
 
 Version:
-== Versiyon :
+== Versiyon:
 
 Round
-== Raund
+== Raunt
 
 Lht.
 == Parlaklık
@@ -1046,706 +1047,706 @@ https://wiki.ddnet.org/
 
 [Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== 
+== Başlatma başarısız oldu. Konfigürasyon klasöründe settings_ddnet.cfg dosyası içerisindeki gfx_backend ayarını OpenGL veya Vulkan olarak değiştirmeyi deneyin.
 
 [Graphics error]
 Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== 
+== VRAM tükendi. Özel kaynakları (skinler, yapılar, vb.), özellikle yüksek çözünürlüklü olanları, silmeyi deneyin.
 
 [Graphics error]
 An error during command recording occurred. Try to update your GPU drivers.
-== 
+== Komut kaydı sırasında hata oluştu. GPU sürücülerini güncellemeyi deneyin.
 
 [Graphics error]
 A render command failed. Try to update your GPU drivers.
-== 
+== Render komutu başarısız oldu. GPU sürücülerini güncellemeyi deneyin.
 
 [Graphics error]
 Submitting the render commands failed. Try to update your GPU drivers.
-== 
+== Render komutları gönderilemedi. GPU sürücülerini güncellemeyi deneyin.
 
 [Graphics error]
 Failed to swap framebuffers. Try to update your GPU drivers.
-== 
+== Arabellek değiştirilemedi. GPU sürücülerini güncellemeyi deneyin.
 
 [Graphics error]
 Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== 
+== Bilinmeyen hata. Konfigürasyon klasöründe settings_ddnet.cfg dosyası içerisindeki gfx_backend ayarını OpenGL veya Vulkan olarak değiştirmeyi deneyin.
 
 [Graphics error]
 Could not initialize the given graphics backend, reverting to the default backend now.
-== 
+== Verilen grafik renderer başlatılamadı, varsayılan ayarlara dönülüyor.
 
 [Graphics error]
 Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
-== 
+== Verilen grafik renderer başlatılamadı, muhtemelen dahili ekran kartının sürücülerini yüklemediğinizden kaynaklanıyor.
 
 Could not save downloaded map. Try manually deleting this file: %s
-== 
+== İndirilen map kaydedilemedi. Bu dosyayı manuel olarak silmeyi deneyin: %s
 
 Saving ddnet-settings.cfg failed
-== 
+== ddnet-settings.cfg dosyası kaydedilemedi
 
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
-== 
+== %s dokusunun genişliği %d'ye veya yüksekliği %d'ye bölünmüyor, bu görsel hatalara neden olabilir.
 
 The format of texture %s is not RGBA which will cause visual bugs.
-== 
+== %s dokusunun formatı RGBA değil, bu görsel hatalara neden olacak.
 
 Preparing demo playback
-== 
+== Demo oynatmaya hazırlanıyor
 
 Connected
-== 
+== Bağlandı
 
 Loading map file from storage
-== 
+== Map dosyası yükleniyor
 
 Why are you slowmo replaying to read this?
-== 
+== Neden bunu okumak için ağır çekimde izliyorsunuz?
 
 Initializing components
-== 
+== Bileşenler başlatılıyor
 
 Initializing assets
-== 
+== Kaynaklar yükleniyor
 
 Initializing map logic
-== 
+== Harita içeriği yükleniyor
 
 Sending initial client info
-== 
+== İstemciye ilk bilgiler gönderiliyor
 
 Warning
-== 
+== Uyarı
 
 Quitting. Please wait…
-== 
+== Çıkılıyor. Lütfen bekleyin...
 
 Restarting. Please wait…
-== 
+== Yeniden başlatılıyor. Lütfen bekleyin...
 
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
-== 
+== Hata ayıklama modu etkinleştirildi. Devre dışı bırakmak için Ctrl+Shift+D tuşlarına basın.
 
 Position:
-== 
+== Pozisyon
 
 Speed:
-== 
+== Hız
 
 Angle:
-== 
+== Açı
 
 Multi-View
-== 
+== Çoklu İzle
 
 Team %d
-== 
+== Takım %d
 
 Uploading map data to GPU
-== 
+== Harita verisi GPU'ya yükleniyor
 
 Trying to determine UDP connectivity...
-== 
+== UDP bağlantısı belirlenmeye çalışılıyor...
 
 UDP seems to be filtered.
-== 
+== UDP filtrelenmiş görünüyor.
 
 UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
-== 
+== UPD ve TCP IP adresleri farklı görünüyor. Proxy, VPN veya ağ hızlandırıcılarını devre dışı bırakmayı deneyin.
 
 No answer from server yet.
-== 
+== Henüz sunucudan cevap alınamadı.
 
 Getting game info
-== 
+== Oyun bilgisi alınıyor
 
 Requesting to join the game
-== 
+== Oyuna girmeye çalışıyor
 
 Rename folder
-== 
+== Klasör ismini değiştir
 
 Existing Player
-== 
+== Var olan oyuncu
 
 Your nickname '%s' is already used (%d points). Do you still want to use it?
-== 
+== Takma adınız '%s' başkası tarafından kullanılıyor (%d points). Yine de kullanmak istiyor musunuz?
 
 Checking for existing player with your name
-== 
+== Adınıza sahip diğer oyuncular aranıyor
 
 A demo with this name already exists
-== 
+== Bu ada sahip bir demo zaten var
 
 A folder with this name already exists
-== 
+== Bu ada sahip bir klasör zaten var
 
 Unable to rename the folder
-== 
+== Klasör yeniden adlandırılamıyor
 
 File '%s' already exists, do you want to overwrite it?
-== 
+== '%s' dosyası zaten var, üzerine yazmak istiyor musunuz?
 
 (paused)
-== 
+== (duraklatıldı)
 
 Speed
-== 
+== Hız
 
 Join Tutorial Server
-== 
+== Öğretici sunucuya gir
 
 Skip Tutorial
-== 
+== Öğreticiyi atla
 
 Theme
-== 
+== Tema
 
 Loading menu images
-== 
+== Menü resimleri yükleniyor
 
 AFR
-== 
+== AFR
 
 ASI
-== 
+== ASI
 
 AUS
-== 
+== AUS
 
 EUR
-== 
+== EUR
 
 NA
-== 
+== NA
 
 SA
-== 
+== SA
 
 CHN
-== 
+== CHN
 
 Getting server list from master server
-== 
+== Ana sunucudan sunucu listesi alınıyor
 
 %d of %d servers
-== 
+== %2$d sunucunun %1$d tanesi
 
 %d of %d server
-== 
+== %2$d sunucunun %1$d tanesi
 
 %d players
-== 
+== %d oyuncular
 
 %d player
-== 
+== %d oyuncu
 
 Are you sure that you want to disconnect and switch to a different server?
-== 
+== Bağlantınızı kesip başka bir sunucuya girmek istediğinizden emin misiniz?
 
 Copy info
-== 
+== Bilgiyi kopyala
 
 Leak IP
-== 
+== IP'yi sızdır
 
 No server selected
-== 
+== Sunucu seçilmedi
 
 Online players (%d)
-== 
+== Çevrimiçi oyuncular (%d)
 
 Online clanmates (%d)
-== 
+== Çevrimiçi klan arkadaşları (%d)
 
 [friends (server browser)]
 Offline (%d)
-== 
+== Çevrimdışı (%d)
 
 Click to select server. Double click to join your friend.
-== 
+== Sunucu seçmek için tıklayın. Arkadaşınıza katılmak için çift tıklayın.
 
 Click to remove this player from your friends list.
-== 
+== Bu oyuncuyu arkadaş listesinden silmek için tıkla.
 
 Click to remove this clan from your friends list.
-== 
+== Bu klanı arkadaş listesinden silmek için tıkla.
 
 None
-== 
+== Yok
 
 Are you sure that you want to remove the player '%s' from your friends list?
-== 
+== '%s' oyuncusunu arkadaş listenizden silmek istediğinize emin misiniz?
 
 Are you sure that you want to remove the clan '%s' from your friends list?
-== 
+== '%s' klanını arkadaş listenizden silmek istediğinize emin misiniz?
 
 Add Clan
-== 
+== Klan ekle
 
 Play the current demo
-== 
+== Demoyu oynat
 
 Pause the current demo
-== 
+== Demoyu duraklat
 
 Stop the current demo
-== 
+== Demoyu durdur
 
 Go back one tick
-== 
+== Bir tık geri git
 
 Go forward one tick
-== 
+== Bir tık ileri git
 
 Slow down the demo
-== 
+== Demoyu yavaşlat
 
 Speed up the demo
-== 
+== Demoyu hızlandır
 
 Mark the beginning of a cut (right click to reset)
-== 
+== Bir kesimin başlangıcını işaretleyin (sıfırlamak için sağ tıkla)
 
 Mark the end of a cut (right click to reset)
-== 
+== Bir kesimin bitişini işaretleyin (sıfırlamak için sağ tıkla)
 
 Export cut as a separate demo
-== 
+== Kesimi ayrı bir demo olarak dışarı aktar
 
 Go back one marker
-== 
+== Bir işaret geri git
 
 Go forward one marker
-== 
+== Bir işaret ileri git
 
 Close the demo player
-== 
+== Demo oynatıcısını kapat
 
 Toggle keyboard shortcuts
-== 
+== Klavye kısayollarını kullan
 
 Export demo cut
-== 
+== Kesimi dışarı aktar
 
 Cut interval
-== 
+== Kesim aralığı
 
 Cut length
-== 
+== Kesim uzunluğu
 
 Loading demo files
-== 
+== Demo dosyaları yükleniyor
 
 All combined
-== 
+== Hepsi birlikte
 
 Folder Link
-== 
+== Klasör Linki
 
 Demos directory
-== 
+== Demo klasörü
 
 Open the directory that contains the demo files
-== 
+== Demo dosyalarını içeren klasörü aç
 
 Are you sure that you want to delete the folder '%s'?
-== 
+== '%s' klasörünü silmek istediğine emin misin?
 
 Are you sure that you want to delete the demo '%s'?
-== 
+== '%s' demosunu silmek istediğine emin misin?
 
 Delete folder
-== 
+== Klasörü sil
 
 Unable to delete the demo '%s'
-== 
+== '%s' demosu silinemiyor
 
 Unable to delete the folder '%s'. Make sure it's empty first.
-== 
+== '%s' klasörü silinemiyor. Önce boş olduğundan emin olun.
 
 Loading ghost files
-== 
+== Hayalet dosyaları yükleniyor
 
 Menu opened. Press Esc key again to close menu.
-== 
+== Menü açıldı. Menüyü kapatmak için Esc tuşuna tekrar basın.
 
 Smooth Dynamic Camera
-== 
+== Yumuşak dinamik kamera
 
 Skip the main menu
-== 
+== Ana menüyü atla
 
 Save power by lowering refresh rate (higher input latency)
-== 
+== Tazeleme hızını düşürerek güç tasarrufu yap (daha yüksek girdi gecikmesi)
 
 Settings file
-== 
+== Ayarlar dosyası
 
 Open the settings file
-== 
+== Ayarlar dosyasını aç
 
 Config directory
-== 
+== Konfigürasyon klasörü
 
 Open the directory that contains the configuration and user files
-== 
+== Konfigürasyon ve kullanıcı dosyalarını içeren klasörü aç
 
 Themes directory
-== 
+== Tema klasörü
 
 Open the directory to add custom themes
-== 
+== Özel temalar eklemek için klasörü aç
 
 Loading skin files
-== 
+== Skin dosyaları yükleniyor
 
 Toggle to edit your dummy settings
-== 
+== Dummy ayarlarını düzenle
 
 Download skins
-== 
+== Skinleri indir
 
 Download community skins
-== 
+== Topluluk skinlerini indir
 
 Choose default eyes when joining a server
-== 
+== Bir sunucuya girerken kullanılacak varsayılan gözleri seçin
 
 Create a random skin
-== 
+== Rastgele skin oluştur
 
 Skin Database
-== 
+== Skin Veri Tabanı
 
 Skins directory
-== 
+== Skin klasörü
 
 Open the directory to add custom skins
-== 
+== Özel skinler eklemek için klasörü açın
 
 Chat command
-== 
+== Sohbet komutu
 
 Enable controller
-== 
+== Kontrolcüyü etkinleştir
 
 Controller
-== 
+== Kontrolcü
 
 Ingame controller mode
-== 
+== Oyun içi kontrolcü modu
 
 [Ingame controller mode]
 Relative
-== 
+== Bağıl
 
 [Ingame controller mode]
 Absolute
-== 
+== Mutlak
 
 Ingame controller sens.
-== 
+== Oyun içi kontrolcü hassasiyeti
 
 UI controller sens.
-== 
+== Arayüz kontrolcü hassasiyeti 
 
 Controller jitter tolerance
-== 
+== Kontrolcü titreşim toleransı
 
 No controller found. Plug in a controller.
-== 
+== Kontrolcü bulunamadı. Bir Kontrolcü bağlayın.
 
 Axis
-== 
+== Eksen
 
 Status
-== 
+== Durum
 
 Aim bind
-== 
+== Nişan alma
 
 Mouse
-== 
+== Fare
 
 Ingame mouse sens.
-== 
+== Oyun içi fare hassasiyeti
 
 UI mouse sens.
-== 
+== Arayüz fare hassasiyeti
 
 Reset controls
-== 
+== Kontrolleri sıfırla
 
 Are you sure that you want to reset the controls to their defaults?
-== 
+== Kontrolleri varsayılan değerlerine döndürmek istediğine emin misin?
 
 Cancel
-== 
+== İptal et
 
 Dummy
-== 
+== Dummy
 
 Windowed
-== 
+== Pencereli
 
 Windowed borderless
-== 
+== Kenarsız pencereli
 
 Windowed fullscreen
-== 
+== Pencereli tam ekran
 
 Desktop fullscreen
-== 
+== Masaüstü tam ekran
 
 Allows maps to render with more detail
-== 
+== Haritaların daha detaylı işlenmesine izin ver
 
 Renderer
-== 
+== Renderer
 
 default
-== 
+== varsayılan
 
 custom
-== 
+== özel
 
 Graphics card
-== 
+== Ekran kartı
 
 auto
-== 
+== otomatik
 
 Game sound volume
-== 
+== Oyun ses seviyesi
 
 Chat sound volume
-== 
+== Sohbet ses seviyesi
 
 Background music volume
-== 
+== Arkaplan müziği ses seviyesi
 
 Appearance
-== 
+== Görünüm
 
 Assets
-== 
+== Kaynaklar
 
 Name Plate
-== 
+== İsim Etiketi
 
 Hook Collisions
-== 
+== Kanca kesişmeleri
 
 Kill Messages
-== 
+== Ölüm mesajları
 
 Show health, shields and ammo
-== 
+== Can, kalkan ve cephaneyi göster 
 
 DDRace HUD
-== 
+== DDRace HUD
 
 Show client IDs in scoreboard
-== 
+== Skor tahtasında istemci ID'lerini göster
 
 Show DDRace HUD
-== 
+== DDRace HUD göster
 
 Show jumps indicator
-== 
+== Zıplama göstergesini göster
 
 Show dummy actions
-== 
+== Dummy aksiyonlarını göster
 
 Show player position
-== 
+== Oyuncu pozisyonunu göster
 
 Show player speed
-== 
+== Oyuncu hızını göster
 
 Show player target angle
-== 
+== Oyuncu hedef açısını göster
 
 Show freeze bars
-== 
+== Freeze barını göster
 
 Opacity of freeze bars inside freeze
-== 
+== Freeze içerisindeyken freeze barının opaklığı
 
 Use old chat style
-== 
+== Eski sohbet stilini kullan
 
 Preview
-== 
+== Önizleme
 
 Show hook strength indicator
-== 
+== Kanca gücü göstergesini göster
 
 Show local player's key presses
-== 
+== Yerel oyuncunun tuş basışlarını göster
 
 Hook collision line
-== 
+== Kanca çizgisi
 
 Hook collision line width
-== 
+== Kanca çizgisi kalınlığı
 
 Hook collision line opacity
-== 
+== Kanca çizgisi opaklığı
 
 Colors of the hook collision line, in case of a possible collision with:
-== 
+== Olası bir kesişme durumunda kanca çizgisinin renkleri:
 
 Your movements are not taken into account when calculating the line colors
-== 
+== Çizgi renkleri hesaplanırken hareketleriniz dikkate alınmaz
 
 Nothing hookable
-== 
+== Kanca atılamaz
 
 Something hookable
-== 
+== Kanca atılabilir
 
 A Tee
-== 
+== Bir tee
 
 Normal Color
-== 
+== Normal rengi
 
 Highlight Color
-== 
+== Vurgu rengi
 
 Weapons
-== 
+== Silahlar
 
 Rifle Laser Outline Color
-== 
+== Tüfek Lazeri Dış Rengi
 
 Rifle Laser Inner Color
-== 
+== Tüfek Lazeri İç Rengi
 
 Shotgun Laser Outline Color
-== 
+== Pompalı Tüfek Lazeri Dış Rengi
 
 Shotgun Laser Inner Color
-== 
+== Pompalı Tüfek Lazeri İç Rengi
 
 Entities
-== 
+== Yapılar
 
 Door Laser Outline Color
-== 
+== Kapı Lazeri Dış Rengi
 
 Door Laser Inner Color
-== 
+== Kapı Lazeri İç Rengi
 
 Freeze Laser Outline Color
-== 
+== Freeze Lazeri Dış Rengi
 
 Freeze Laser Inner Color
-== 
+== Freeze Lazeri İç Rengi
 
 Set all to Rifle
-== 
+== Hepsini tüfeğe ayarla
 
 When you cross the start line, show a ghost tee replicating the movements of your best time
-== 
+== Başlangıç çizgisini geçtiğinizde en iyi zamanınızın hareketlerini kopyalayan bir hayalet tee göster
 
 Opacity
-== 
+== Opaklık
 
 Adjust the opacity of entities belonging to other teams, such as tees and nameplates
-== 
+== Teeler ve isim etiketleri gibi diğer takımlara ait varlıkların opaklığını ayarlayın
 
 Quads are used for background decoration
-== 
+== Dörtgen yapılar arkaplan dekorasyonu için kullanılır
 
 Tries to predict other entities to give a feel of low latency
-== 
+== Düşük gecikme hissi vermek için diğer yapıları tahmin etmeye çalışır
 
 Background
-== 
+== Arkaplan
 
 Entities Background color
-== 
+== Yapıların arkaplan rengi
 
 Use current map as background
-== 
+== Mevcut haritayı arkaplan olarak kullan
 
 Regular Background Color
-== 
+== Normal arkaplan rengi
 
 Run on join
-== 
+== Katılınca çalıştır
 
 Chat command (e.g. showall 1)
-== 
+== Sohbet komutu (örn. showall 1)
 
 Unregister protocol and file extensions
-== 
+== Protokol ve dosya uzantılarının kaydını sil
 
 Emoticons
-== 
+== İfadeler
 
 Particles
-== 
+== Parçacıklar
 
 Extras
-== 
+== Ekstralar
 
 Loading assets
-== 
+== Kaynaklar yükleniyor
 
 Assets directory
-== 
+== Kaynak klasörü
 
 Open the directory to add custom assets
-== 
+== Özel kaynak eklemek için klasörü açın
 
 Discord
-== 
+== Discord
 
 https://ddnet.org/discord
-== 
+== https://ddnet.org/discord
 
 Tutorial
-== 
+== Öğretici
 
 Can't find a Tutorial server
-== 
+== Öğretici sunucu bulunamıyor
 
 Website
-== 
+== Website
 
 Settings
-== 
+== Ayarlar
 
 Stop server
-== 
+== Sunucuyu durdur
 
 Run server
-== 
+== Sunucu aç
 
 Server executable not found, can't run server
-== 
+== Yürütülebilir sunucu bulunamadı, sunucu başlatılamıyor
 
 Editor
-== 
+== Editör
 
 [Start menu]
 Play
-== 
+== Oyna
 
 Loading race demo files
-== 
+== Yarış demo dosyaları yükleniyor
 
 Super
-== 
+== Süper
 
 Loading sound files
-== 
+== Ses dosyaları yükleniyor
 
 Moved ingame
-== 
+== Hareket edildi
