@@ -322,6 +322,7 @@ public:
 	// Send via the currently active client (main/dummy)
 	int SendMsgActive(CMsgPacker *pMsg, int Flags) override;
 
+	void SendTaterInfo(int Conn);
 	void SendInfo();
 	void SendEnterGame(int Conn);
 	void SendReady();
