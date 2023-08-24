@@ -50,6 +50,9 @@ jobs:
         # Prefix the list here with "+" to use these queries and those in the config file.
         # queries: ./path/to/local/query, your-org/your-repo/queries@main
 
+    - name: Cache Rust dependencies
+      uses: Swatinem/rust-cache@v2
+
     - name: Build in release mode
       if: matrix.language == 'cpp'
       run: |
