@@ -368,6 +368,7 @@ CServer::~CServer()
 			free(Client.m_pPersistentData);
 		}
 	}
+	free(m_pPersistentData);
 
 	delete m_pRegister;
 	delete m_pConnectionPool;
@@ -2636,6 +2637,7 @@ int CServer::Run()
 			Client.m_pPersistentData = malloc(Size);
 		}
 	}
+	m_pPersistentData = malloc(GameServer()->PersistentDataSize());
 
 	// load map
 	if(!LoadMap(Config()->m_SvMap))
@@ -2704,7 +2706,7 @@ int CServer::Run()
 	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 
 	Antibot()->Init();
-	GameServer()->OnInit();
+	GameServer()->OnInit(nullptr);
 	if(ErrorShutdown())
 	{
 		m_RunServer = STOPPING;
@@ -2762,7 +2764,7 @@ int CServer::Run()
 						}
 					}
 
-					GameServer()->OnShutdown();
+					GameServer()->OnShutdown(m_pPersistentData);
 
 					for(int ClientID = 0; ClientID < MAX_CLIENTS; ClientID++)
 					{
@@ -2780,7 +2782,7 @@ int CServer::Run()
 					m_CurrentGameTick = MIN_TICK;
 					m_ServerInfoFirstRequest = 0;
 					Kernel()->ReregisterInterface(GameServer());
-					GameServer()->OnInit();
+					GameServer()->OnInit(m_pPersistentData);
 					if(ErrorShutdown())
 					{
 						break;
@@ -2989,7 +2991,7 @@ int CServer::Run()
 
 	m_Fifo.Shutdown();
 
-	GameServer()->OnShutdown();
+	GameServer()->OnShutdown(nullptr);
 	m_pMap->Unload();
 
 	DbPool()->OnShutdown();

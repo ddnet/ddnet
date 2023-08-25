@@ -3369,8 +3369,10 @@ void CGameContext::OnConsoleInit()
 #include <game/ddracechat.h>
 }
 
-void CGameContext::OnInit()
+void CGameContext::OnInit(const void *pPersistentData)
 {
+	const CPersistentData *pPersistent = (const CPersistentData *)pPersistentData;
+
 	m_pServer = Kernel()->RequestInterface<IServer>();
 	m_pConfig = Kernel()->RequestInterface<IConfigManager>()->Values();
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
@@ -3813,8 +3815,10 @@ void CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 	str_copy(m_aDeleteTempfile, aTemp, sizeof(m_aDeleteTempfile));
 }
 
-void CGameContext::OnShutdown()
+void CGameContext::OnShutdown(void *pPersistentData)
 {
+	CPersistentData *pPersistent = (CPersistentData *)pPersistentData;
+
 	Antibot()->RoundEnd();
 
 	if(m_TeeHistorianActive)
