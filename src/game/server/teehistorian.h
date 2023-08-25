@@ -85,6 +85,8 @@ public:
 	void RecordAuthLogin(int ClientID, int Level, const char *pAuthName);
 	void RecordAuthLogout(int ClientID);
 
+	void RecordAntibot(const void *pData, int DataSize);
+
 	int m_Debug; // Possible values: 0, 1, 2.
 
 private:

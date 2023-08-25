@@ -769,6 +769,16 @@ void CTeeHistorian::RecordAuthLogout(int ClientID)
 	WriteExtra(UUID_TEEHISTORIAN_AUTH_LOGOUT, Buffer.Data(), Buffer.Size());
 }
 
+void CTeeHistorian::RecordAntibot(const void *pData, int DataSize)
+{
+	if(m_Debug)
+	{
+		dbg_msg("teehistorian", "antibot data_size=%d", DataSize);
+	}
+
+	WriteExtra(UUID_TEEHISTORIAN_ANTIBOT, pData, DataSize);
+}
+
 void CTeeHistorian::Finish()
 {
 	dbg_assert(m_State == STATE_START || m_State == STATE_INPUTS || m_State == STATE_BEFORE_ENDTICK || m_State == STATE_BEFORE_TICK, "invalid teehistorian state");

@@ -782,3 +782,54 @@ TEST_F(TeeHistorian, PlayerReadyMultiple)
 	Finish();
 	Expect(EXPECTED, sizeof(EXPECTED));
 }
+
+TEST_F(TeeHistorian, AntibotEmpty)
+{
+	const unsigned char EXPECTED[] = {
+		// EX uuid=866bfdac-fb49-3c0b-a887-5fe1f3ea00b8 datalen=0
+		0x4a,
+		0x86, 0x6b, 0xfd, 0xac, 0xfb, 0x49, 0x3c, 0x0b,
+		0xa8, 0x87, 0x5f, 0xe1, 0xf3, 0xea, 0x00, 0xb8,
+		0x00,
+		// (ANTIBOT) antibot_data
+	};
+
+	m_TH.RecordAntibot("", 0);
+	Expect(EXPECTED, sizeof(EXPECTED));
+}
+
+TEST_F(TeeHistorian, AntibotEmptyNulBytes)
+{
+	const unsigned char EXPECTED[] = {
+		// EX uuid=866bfdac-fb49-3c0b-a887-5fe1f3ea00b8 datalen=4
+		0x4a,
+		0x86, 0x6b, 0xfd, 0xac, 0xfb, 0x49, 0x3c, 0x0b,
+		0xa8, 0x87, 0x5f, 0xe1, 0xf3, 0xea, 0x00, 0xb8,
+		0x04,
+		// (ANTIBOT) antibot_data
+		0x00,
+		0x00,
+		0x00,
+		0x00};
+
+	m_TH.RecordAntibot("\0\0\0\0", 4);
+	Expect(EXPECTED, sizeof(EXPECTED));
+}
+
+TEST_F(TeeHistorian, AntibotEmptyMessage)
+{
+	const unsigned char EXPECTED[] = {
+		// EX uuid=866bfdac-fb49-3c0b-a887-5fe1f3ea00b8 datalen=4
+		0x4a,
+		0x86, 0x6b, 0xfd, 0xac, 0xfb, 0x49, 0x3c, 0x0b,
+		0xa8, 0x87, 0x5f, 0xe1, 0xf3, 0xea, 0x00, 0xb8,
+		0x04,
+		// (ANTIBOT) antibot_data
+		0xf0,
+		0x9f,
+		0xa4,
+		0x96};
+
+	m_TH.RecordAntibot("🤖", 4);
+	Expect(EXPECTED, sizeof(EXPECTED));
+}
