@@ -1660,6 +1660,14 @@ void CGameContext::OnClientDrop(int ClientID, const char *pReason)
 	Server()->ExpireServerInfo();
 }
 
+void CGameContext::TeehistorianRecordAntibot(const void *pData, int DataSize)
+{
+	if(m_TeeHistorianActive)
+	{
+		m_TeeHistorian.RecordAntibot(pData, DataSize);
+	}
+}
+
 void CGameContext::TeehistorianRecordPlayerJoin(int ClientID, bool Sixup)
 {
 	if(m_TeeHistorianActive)

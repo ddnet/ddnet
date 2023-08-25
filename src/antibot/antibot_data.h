@@ -6,7 +6,7 @@
 
 enum
 {
-	ANTIBOT_ABI_VERSION = 6,
+	ANTIBOT_ABI_VERSION = 7,
 
 	ANTIBOT_MSGFLAG_NONVITAL = 1,
 	ANTIBOT_MSGFLAG_FLUSH = 2,
@@ -91,6 +91,7 @@ struct CAntibotData
 	void (*m_pfnLog)(const char *pMessage, void *pUser);
 	void (*m_pfnReport)(int ClientID, const char *pMessage, void *pUser);
 	void (*m_pfnSend)(int ClientID, const void *pData, int DataSize, int Flags, void *pUser);
+	void (*m_pfnTeehistorian)(const void *pData, int DataSize, void *pUser);
 	void *m_pUser;
 };
 struct CAntibotRoundData
