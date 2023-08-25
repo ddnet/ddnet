@@ -139,7 +139,7 @@ unsigned int CMassFileLoader::Load()
 				// 	continue;
 				// }
 
-				Handle = io_open(FilePath.c_str(), IOFLAG_READ | IOFLAG_SKIP_BOM);
+				Handle = io_open(FilePath.c_str(), LOAD_FLAGS_SKIP_BOM ? IOFLAG_READ | IOFLAG_SKIP_BOM : IOFLAG_READ);
 				if(!Handle)
 				{
 					// There could be other issues than this, but I have no way to distinguish now that fs_is_readable is gone.

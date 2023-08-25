@@ -155,6 +155,7 @@ public:
 									// This is useful for weeding out duplicates because there can be multiple storage paths the game searches through for one provided pathname (e.g. "skins")
 		LOAD_FLAGS_DONT_READ_FILE =		0b00001000,	// Do not read file contents.
 									// This is useful if you are doing a dry-run of a path or set of paths. pData and Size in the file loaded callback will be null.
+		LOAD_FLAGS_SKIP_BOM =			0b00010000,	// Whether or not to use IOFLAG_SKIP_BOM
 		// clang-format on
 	};
 
