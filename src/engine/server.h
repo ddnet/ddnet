@@ -329,8 +329,9 @@ public:
 	virtual void OnSetAuthed(int ClientID, int Level) = 0;
 	virtual bool PlayerExists(int ClientID) const = 0;
 
-	virtual void OnClientEngineJoin(int ClientID, bool Sixup) = 0;
-	virtual void OnClientEngineDrop(int ClientID, const char *pReason) = 0;
+	virtual void TeehistorianRecordPlayerJoin(int ClientID, bool Sixup) = 0;
+	virtual void TeehistorianRecordPlayerDrop(int ClientID, const char *pReason) = 0;
+	virtual void TeehistorianRecordPlayerRejoin(int ClientID) = 0;
 
 	virtual void FillAntibot(CAntibotRoundData *pData) = 0;
 
