@@ -3545,6 +3545,17 @@ void CGameContext::OnInit(const void *pPersistentData)
 		GameInfo.m_MapSha256 = MapSha256;
 		GameInfo.m_MapCrc = MapCrc;
 
+		if(pPersistent)
+		{
+			GameInfo.m_HavePrevGameUuid = true;
+			GameInfo.m_PrevGameUuid = pPersistent->m_PrevGameUuid;
+		}
+		else
+		{
+			GameInfo.m_HavePrevGameUuid = false;
+			mem_zero(&GameInfo.m_PrevGameUuid, sizeof(GameInfo.m_PrevGameUuid));
+		}
+
 		m_TeeHistorian.Reset(&GameInfo, TeeHistorianWrite, this);
 
 		for(int i = 0; i < MAX_CLIENTS; i++)
@@ -3818,6 +3829,11 @@ void CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 void CGameContext::OnShutdown(void *pPersistentData)
 {
 	CPersistentData *pPersistent = (CPersistentData *)pPersistentData;
+
+	if(pPersistent)
+	{
+		pPersistent->m_PrevGameUuid = m_GameUuid;
+	}
 
 	Antibot()->RoundEnd();
 

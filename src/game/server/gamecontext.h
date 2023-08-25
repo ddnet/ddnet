@@ -141,6 +141,7 @@ class CGameContext : public IGameServer
 
 	struct CPersistentData
 	{
+		CUuid m_PrevGameUuid;
 	};
 
 	struct CPersistentClientData
