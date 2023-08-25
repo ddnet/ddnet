@@ -1801,6 +1801,8 @@ void CMenus::PopupConfirmDemoReplaceVideo()
 	const char *pError = Client()->DemoPlayer_Render(aBuf, m_vDemos[m_DemolistSelectedIndex].m_StorageType, aVideoName, m_Speed, m_StartPaused);
 	m_Speed = 4;
 	m_StartPaused = false;
+	m_LastPauseChange = -1.0f;
+	m_LastSpeedChange = -1.0f;
 	if(pError)
 		PopupMessage(Localize("Error"), str_comp(pError, "error loading demo") ? pError : Localize("Error loading demo"), Localize("Ok"));
 }
