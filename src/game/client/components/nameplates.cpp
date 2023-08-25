@@ -206,7 +206,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 		{
 			YOffset -= FontSize;
 			char aBuf[128];
-			str_format(aBuf, sizeof(aBuf), "%d", pPlayerInfo->m_ClientID);
+			str_from_int(pPlayerInfo->m_ClientID, aBuf);
 			float XOffset = TextRender()->TextWidth(FontSize, aBuf, -1, -1.0f) / 2.0f;
 			TextRender()->TextColor(rgb);
 			TextRender()->Text(Position.x - XOffset, YOffset, FontSize, aBuf, -1.0f);
@@ -266,7 +266,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 				{
 					YOffset -= FontSize;
 					char aBuf[12];
-					str_format(aBuf, sizeof(aBuf), "%d", pCharacter->GetStrongWeakID());
+					str_from_int(pCharacter->GetStrongWeakID(), aBuf);
 					float XOffset = TextRender()->TextWidth(FontSize, aBuf, -1, -1.0f) / 2.0f;
 					TextRender()->Text(Position.x - XOffset, YOffset, FontSize, aBuf, -1.0f);
 				}

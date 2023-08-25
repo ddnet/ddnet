@@ -984,13 +984,13 @@ void CMenus::RenderDemoList(CUIRect MainView)
 		Labels.HSplitTop(20.0f, &Left, &Labels);
 		Left.VSplitLeft(150.0f, &Left, &Right);
 		UI()->DoLabel(&Left, Localize("Version:"), 14.0f, TEXTALIGN_ML);
-		str_format(aBuf, sizeof(aBuf), "%d", m_vDemos[m_DemolistSelectedIndex].m_Info.m_Version);
+		str_from_int(m_vDemos[m_DemolistSelectedIndex].m_Info.m_Version, aBuf);
 		UI()->DoLabel(&Right, aBuf, 14.0f, TEXTALIGN_ML);
 		Labels.HSplitTop(5.0f, 0, &Labels);
 		Labels.HSplitTop(20.0f, &Left, &Labels);
 		Left.VSplitLeft(150.0f, &Left, &Right);
 		UI()->DoLabel(&Left, Localize("Markers:"), 14.0f, TEXTALIGN_ML);
-		str_format(aBuf, sizeof(aBuf), "%d", m_vDemos[m_DemolistSelectedIndex].NumMarkers());
+		str_from_int(m_vDemos[m_DemolistSelectedIndex].NumMarkers(), aBuf);
 		UI()->DoLabel(&Right, aBuf, 14.0f, TEXTALIGN_ML);
 
 		// right side
@@ -1181,7 +1181,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 			else if(ID == COL_MARKERS && !Item.m_IsDir && Item.m_InfosLoaded && Item.m_Valid)
 			{
 				char aBuf[3];
-				str_format(aBuf, sizeof(aBuf), "%d", Item.NumMarkers());
+				str_from_int(Item.NumMarkers(), aBuf);
 				Button.VMargin(4.0f, &Button);
 				UI()->DoLabel(&Button, aBuf, 12.0f, TEXTALIGN_MR);
 			}

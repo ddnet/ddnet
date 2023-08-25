@@ -2230,6 +2230,14 @@ unsigned long str_toulong_base(const char *str, int base);
 int64_t str_toint64_base(const char *str, int base = 10);
 float str_tofloat(const char *str);
 
+void str_from_int(int value, char *buffer, size_t buffer_size);
+
+template<size_t N>
+void str_from_int(int value, char (&dst)[N])
+{
+	str_from_int(value, dst, N);
+}
+
 /**
  * Determines whether a character is whitespace.
  *

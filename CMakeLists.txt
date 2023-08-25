@@ -3,9 +3,9 @@ if(CMAKE_VERSION VERSION_LESS 3.12)
   cmake_policy(VERSION ${CMAKE_VERSION})
 endif()
 
-set(CMAKE_OSX_DEPLOYMENT_TARGET 10.13 CACHE INTERNAL "Minimum macOS deployment version")
-if(CMAKE_OSX_DEPLOYMENT_TARGET VERSION_LESS 10.13)
-  message(WARNING "Building for macOS < 10.13 is not supported")
+set(CMAKE_OSX_DEPLOYMENT_TARGET 10.15 CACHE INTERNAL "Minimum macOS deployment version")
+if(CMAKE_OSX_DEPLOYMENT_TARGET VERSION_LESS 10.15)
+  message(WARNING "Building for macOS < 10.15 is not supported")
 endif()
 
 file(STRINGS src/game/version.h VERSION_LINE

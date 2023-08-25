@@ -1192,7 +1192,7 @@ void CMenus::DoJoystickAxisPicker(CUIRect View)
 
 		// Axis label
 		char aBuf[16];
-		str_format(aBuf, sizeof(aBuf), "%d", i + 1);
+		str_from_int(i + 1, aBuf);
 		if(Active)
 			TextRender()->TextColor(TextRender()->DefaultTextColor());
 		else
