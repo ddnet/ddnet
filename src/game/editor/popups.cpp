@@ -1786,22 +1786,12 @@ CUI::EPopupMenuFunctionResult CEditor::PopupEvent(void *pContext, CUIRect View, 
 	if(pEditor->m_PopupEventType != POPEVENT_LARGELAYER && pEditor->m_PopupEventType != POPEVENT_PREVENTUNUSEDTILES && pEditor->m_PopupEventType != POPEVENT_IMAGEDIV16 && pEditor->m_PopupEventType != POPEVENT_IMAGE_MAX)
 	{
 		static int s_CancelButton = 0;
-		if(pEditor->m_PopupEventType == POPEVENT_LOADDROP)
+		if(pEditor->DoButton_Editor(&s_CancelButton, "Cancel", 0, &Button, 0, nullptr))
 		{
-			if(pEditor->DoButton_Editor(&s_CancelButton, "Cancel", 0, &Button, 0, nullptr))
-			{
+			if(pEditor->m_PopupEventType == POPEVENT_LOADDROP)
 				pEditor->m_aFileNamePending[0] = 0;
-				pEditor->m_PopupEventWasActivated = false;
-				return CUI::POPUP_CLOSE_CURRENT;
-			}
-		}
-		else
-		{
-			if(pEditor->DoButton_Editor(&s_CancelButton, "Cancel", 0, &Button, 0, nullptr))
-			{
-				pEditor->m_PopupEventWasActivated = false;
-				return CUI::POPUP_CLOSE_CURRENT;
-			}
+			pEditor->m_PopupEventWasActivated = false;
+			return CUI::POPUP_CLOSE_CURRENT;
 		}
 	}
 
