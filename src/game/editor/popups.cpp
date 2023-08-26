@@ -1822,12 +1822,12 @@ CUI::EPopupMenuFunctionResult CEditor::PopupEvent(void *pContext, CUIRect View, 
 			pEditor->LoadCurrentMap();
 		}
 		else if(pEditor->m_PopupEventType == POPEVENT_LOADDROP)
-		{	
+		{
 			int Result = pEditor->Load(pEditor->m_aFileNamePending, IStorage::TYPE_ALL_OR_ABSOLUTE);
 			if(!Result)
 				dbg_msg("editor", "editing passed map file '%s' failed", pEditor->m_aFileNamePending);
 			pEditor->m_aFileNamePending[0] = 0;
-		}	
+		}
 		else if(pEditor->m_PopupEventType == POPEVENT_NEW)
 		{
 			pEditor->Reset();

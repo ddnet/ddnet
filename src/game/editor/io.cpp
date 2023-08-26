@@ -432,7 +432,7 @@ void CEditor::HandleMapDrop(const char *pFileName, int StorageType)
 }
 
 void CEditorMap::HandleMapDrop(const char *pFileName, int StorageType)
-{	
+{
 	if(m_pEditor->HasUnsavedData())
 	{
 		str_copy(m_pEditor->m_aFileNamePending, pFileName);
