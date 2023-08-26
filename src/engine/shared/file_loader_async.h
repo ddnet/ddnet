@@ -1,58 +1,57 @@
-#ifndef FILE_LOADER_ASYNC_H
-#define FILE_LOADER_ASYNC_H
+// #ifndef FILE_LOADER_ASYNC_H
+// #define FILE_LOADER_ASYNC_H
 
-#include "engine/shared/uuid_manager.h"
-#include "file_loader.h"
-#include <mutex>
-#include <utility>
+// #include "file_loader.h"
+// #include "engine/shared/uuid_manager.h"
+// #include <mutex>
+// #include <utility>
 
-class CMassFileLoaderAsync : public IMassFileLoader
-{
-public:
-	CMassFileLoaderAsync(IStorage *pStorage, uint8_t Flags = LOAD_FLAGS_NONE);
-	virtual ~CMassFileLoaderAsync();
+// class CMassFileLoaderAsync : public CMassFileLoader
+//{
+// public:
+//	CMassFileLoaderAsync(IStorage *pStorage, uint8_t Flags = LOAD_FLAGS_NONE);
+//	virtual ~CMassFileLoaderAsync();
 
-	template<typename T, typename... Ts>
-	void SetPaths(T Path, Ts... Paths)
-	{
-		m_RequestedPaths.push_back(std::string(Path));
-		(SetPaths(std::forward<T>(Paths)), ...);
-	}
-	void SetFileExtension(const std::string &Extension) override;
-	void SetFileLoadedCallback(std::function<FileLoadedCallbackSignature> Function) override { m_fnFileLoadedCallback = Function; }
-	void SetLoadFailedCallback(std::function<LoadFailedCallbackSignature> Function) override { m_fnLoadFailedCallback = Function; }
-	bool IsFinished() { return m_Finished; } // Is ready for deletion
+//	template<typename T, typename... Ts>
+//	void SetPaths(T Path, Ts... Paths)
+//	{
+//		m_RequestedPaths.push_back(std::string(Path));
+//		(SetPaths(std::forward<T>(Paths)), ...);
+//	}
+//	void SetFileExtension(const std::string &Extension) override;
+//	void SetFileLoadedCallback(std::function<FileLoadedCallbackSignature> Function) override { m_fnFileLoadedCallback = Function; }
+//	void SetLoadFailedCallback(std::function<LoadFailedCallbackSignature> Function) override { m_fnLoadFailedCallback = Function; }
+//	bool IsFinished() { return m_Finished; } // Is ready for deletion
 
-	// If this is implemented, it is expected that the object is deleted by the caller.
-	using LoadFinishedCallbackSignature = void(unsigned int Count, void *pUser);
-	void SetLoadFinishedCallback(std::function<LoadFinishedCallbackSignature> Function) { m_fnLoadFinishedCallback = std::move(Function); }
+//	// If this is implemented, it is expected that the object is deleted by the caller.
+//	using LoadFinishedCallbackSignature = void(unsigned int Count, void *pUser);
+//	void SetLoadFinishedCallback(std::function<LoadFinishedCallbackSignature> Function) { m_fnLoadFinishedCallback = std::move(Function); }
 
-	void BeginLoad();
+//	std::optional<unsigned int> BeginLoad();
 
-private:
-	static void Load(void *pUser);
+// private:
+//	//	static void Load(void *pUser);
 
-	CUuid ThreadId;
+//	CUuid ThreadId;
 
-	bool m_Continue = true, m_Finished = false;
-	std::function<FileLoadedCallbackSignature> m_fnFileLoadedCallback;
-	std::function<LoadFailedCallbackSignature> m_fnLoadFailedCallback;
-	std::function<LoadFinishedCallbackSignature> m_fnLoadFinishedCallback;
+//	bool m_Continue = true, m_Finished = false;
+//	std::function<FileLoadedCallbackSignature> m_fnFileLoadedCallback;
+//	std::function<LoadFailedCallbackSignature> m_fnLoadFailedCallback;
+//	std::function<LoadFinishedCallbackSignature> m_fnLoadFinishedCallback;
 
-	std::vector<std::string> m_RequestedPaths;
-	std::unordered_map<std::string, std::vector<std::string> *> m_PathCollection; // oh geez
-	std::string m_Extension;
+//	std::vector<std::string> m_RequestedPaths;
+//	std::unordered_map<std::string, std::vector<std::string> *> m_PathCollection; // oh geez
+//	std::string m_Extension;
 
-	IStorage *m_pStorage = nullptr;
+//	IStorage *m_pStorage = nullptr;
 
-	static int ListDirectoryCallback(const char *Name, int IsDir, int, void *User);
-	using FileIndex = std::vector<std::string>;
-	struct SListDirectoryCallbackUserInfo
-	{
-		std::string *m_pCurrentDirectory;
-		CMassFileLoaderAsync *m_pThis;
-		bool *m_pContinue;
-	};
-};
+//	using FileIndex = std::vector<std::string>;
+//	struct SListDirectoryCallbackUserInfo
+//	{
+//		std::string *m_pCurrentDirectory;
+//		CMassFileLoader *m_pThis;
+//		bool *m_pContinue;
+//	};
+//};
 
-#endif // FILE_LOADER_ASYNC_H
+// #endif // FILE_LOADER_ASYNC_H

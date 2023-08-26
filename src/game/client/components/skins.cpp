@@ -315,26 +315,26 @@ void CSkins::OnRender()
 	}
 }
 
-bool CSkins::SkinLoadErrorCallback(IMassFileLoader::ELoadError Error, const void *pData, void *pUser)
+bool CSkins::SkinLoadErrorCallback(CMassFileLoader::ELoadError Error, const void *pData, void *pUser)
 {
 	static char aMessage[128];
 	switch(Error)
 	{
-	case IMassFileLoader::LOAD_ERROR_INVALID_SEARCH_PATH:
+	case CMassFileLoader::LOAD_ERROR_INVALID_SEARCH_PATH:
 		str_format(aMessage, sizeof(aMessage), "Invalid skins path: '%s'", reinterpret_cast<const char *>(pData));
 		break;
-	case IMassFileLoader::LOAD_ERROR_UNWANTED_SYMLINK:
+	case CMassFileLoader::LOAD_ERROR_UNWANTED_SYMLINK:
 		str_format(aMessage, sizeof(aMessage), "Unwanted symlink in skins folder ('%s')", reinterpret_cast<const char *>(pData));
 		break;
-	case IMassFileLoader::LOAD_ERROR_FILE_UNREADABLE:
+	case CMassFileLoader::LOAD_ERROR_FILE_UNREADABLE:
 		str_format(aMessage, sizeof(aMessage), "Unreadable file in skins folder ('%s')", reinterpret_cast<const char *>(pData));
 		break;
-	case IMassFileLoader::LOAD_ERROR_FILE_TOO_LARGE:
+	case CMassFileLoader::LOAD_ERROR_FILE_TOO_LARGE:
 		str_format(aMessage, sizeof(aMessage), "Skin too large ('%s')", reinterpret_cast<const char *>(pData));
 		break;
-	case IMassFileLoader::LOAD_ERROR_INVALID_EXTENSION:
+	case CMassFileLoader::LOAD_ERROR_INVALID_EXTENSION:
 		break;
-	case IMassFileLoader::LOAD_ERROR_UNKNOWN:
+	case CMassFileLoader::LOAD_ERROR_UNKNOWN:
 		[[fallthrough]];
 	default:
 		dbg_msg("gameclient", "Unknown error encountered while loading skins.");
@@ -345,8 +345,8 @@ bool CSkins::SkinLoadErrorCallback(IMassFileLoader::ELoadError Error, const void
 	return true;
 }
 
-void CSkins::SkinLoadedCallback(const std::string
-					&ItemName,
+void CSkins::SkinLoadedCallback(const std::string_view
+					ItemName,
 	const unsigned char *pData, const unsigned int Size, void *pUser)
 {
 	auto *pThis = reinterpret_cast<CSkins *>(pUser);
@@ -357,7 +357,7 @@ void CSkins::SkinLoadedCallback(const std::string
 
 	// Name should have extension at this point, guaranteeing it is at least 4 bytes.
 	const int idx = ItemName.find_last_of('/') + 1;
-	std::string NameWithoutExtension = ItemName.substr(idx, ItemName.size() - idx - 4);
+	std::string NameWithoutExtension = ItemName.substr(idx, ItemName.size() - idx - 4).data();
 
 	if(g_Config.m_ClVanillaSkinsOnly && !CSkins::IsVanillaSkin(NameWithoutExtension.c_str()))
 		return;
@@ -384,9 +384,9 @@ void CSkins::SkinLoadedCallback(const std::string
 	EImageFormat ImageFormat;
 	int PngliteIncompatible;
 
-	if(!::LoadPNG(ImageByteBuffer, ItemName.c_str(), PngliteIncompatible, Info->m_Width, Info->m_Height, pImgBuffer, ImageFormat))
+	if(!::LoadPNG(ImageByteBuffer, ItemName.data(), PngliteIncompatible, Info->m_Width, Info->m_Height, pImgBuffer, ImageFormat))
 	{
-		dbg_msg("gameclient", "Skin isn't valid PNG ('%s', %d bytes)", ItemName.c_str(), Size);
+		dbg_msg("gameclient", "Skin isn't valid PNG ('%s', %d bytes)", ItemName.data(), Size);
 		return;
 	}
 
@@ -398,13 +398,13 @@ void CSkins::SkinLoadedCallback(const std::string
 	else
 	{
 		free(pImgBuffer);
-		dbg_msg("gameclient", "Skin format is not RGB or RGBA ('%s', %d bytes)", ItemName.c_str(), Size);
+		dbg_msg("gameclient", "Skin format is not RGB or RGBA ('%s', %d bytes)", ItemName.data(), Size);
 		return;
 	}
 
 	pThis->m_ReadySkinTextures.insert({NameWithoutExtension, std::move(Info)});
 
-	dbg_msg("gameclient", "Skin loaded ('%s', %d bytes)", ItemName.c_str(), Size);
+	dbg_msg("gameclient", "Skin loaded ('%s', %d bytes)", ItemName.data(), Size);
 }
 
 void CSkins::SkinLoadFinishedCallback(unsigned int Count, void *pUser)
@@ -433,14 +433,14 @@ void CSkins::Refresh()
 	}
 	m_Mutex.unlock();
 
-	m_FileLoader = new CMassFileLoaderAsync(Storage(), IMassFileLoader::LOAD_FLAGS_ABSOLUTE_PATH | IMassFileLoader::LOAD_FLAGS_RECURSE_SUBDIRECTORIES);
+	m_FileLoader = new CMassFileLoader(Storage(), CMassFileLoader::LOAD_FLAGS_ABSOLUTE_PATH | CMassFileLoader::LOAD_FLAGS_ASYNC | CMassFileLoader::LOAD_FLAGS_RECURSE_SUBDIRECTORIES);
 	m_FileLoader->SetLoadFailedCallback(SkinLoadErrorCallback);
 	m_FileLoader->SetFileLoadedCallback(SkinLoadedCallback);
 	m_FileLoader->SetLoadFinishedCallback(SkinLoadFinishedCallback);
 	m_FileLoader->SetPaths(":skins"); // Configurable?
 	m_FileLoader->SetUserData(this);
 	m_FileLoader->SetFileExtension(".png"); // Multiple in the future?
-	m_FileLoader->BeginLoad();
+	m_FileLoader->Load();
 }
 
 bool CSkins::AllLocalSkinsLoaded()

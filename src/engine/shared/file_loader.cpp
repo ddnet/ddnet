@@ -1,111 +1,105 @@
 #include "file_loader.h"
 #include <base/system.h>
 
-CMassFileLoader::CMassFileLoader(IStorage *pStorage, uint8_t Flags) :
-	IMassFileLoader(Flags)
+CMassFileLoader::CMassFileLoader(IStorage *pStorage, uint8_t Flags)
 {
 	m_pStorage = pStorage;
+	m_Flags = Flags;
 }
 
 CMassFileLoader::~CMassFileLoader()
 {
+	if(m_pExtension)
+		free(m_pExtension);
 	for(const auto &it : m_PathCollection)
 	{
 		delete it.second;
 	}
 }
 
-void CMassFileLoader::SetFileExtension(const std::string &Extension)
+void CMassFileLoader::SetFileExtension(const std::string_view Extension)
 {
-	m_Extension = Extension;
+	m_pExtension = static_cast<char *>(malloc((Extension.size() + 1) * sizeof(char)));
+	str_copy(m_pExtension, Extension.data(), Extension.size());
 }
 
-inline bool CompareExtension(const std::filesystem::path &Filename, const std::string &Extension)
+inline bool CMassFileLoader::CompareExtension(const std::filesystem::path &Filename, const std::string_view Extension)
 {
+	// std::string is justified here because of std::transform, and because std::filesystem::path::c_str() will return const wchar_t *, but char width is handled automatically when using string
 	std::string FileExtension = Filename.extension().string();
 	std::transform(FileExtension.begin(), FileExtension.end(), FileExtension.begin(),
 		[](unsigned char c) { return std::tolower(c); });
-
 	return FileExtension == Extension; // Extension is already lowered
 }
 
 [[maybe_unused]] int CMassFileLoader::ListDirectoryCallback(const char *Name, int IsDir, int, void *User)
 {
-	auto *UserData = reinterpret_cast<SListDirectoryCallbackUserInfo *>(User);
-	if(*UserData->m_pContinue)
+	auto *pUserData = reinterpret_cast<SListDirectoryCallbackUserInfo *>(User);
+	if(*pUserData->m_pContinue)
 	{
-		auto *pFileList = UserData->m_pThis->m_PathCollection.find(*UserData->m_pCurrentDirectory)->second;
-		std::string AbsolutePath = *UserData->m_pCurrentDirectory + "/" + Name;
-		std::string RelevantFilename = UserData->m_pThis->m_Flags & LOAD_FLAGS_ABSOLUTE_PATH ? AbsolutePath : Name;
+		auto *pFileList = pUserData->m_pThis->m_PathCollection.find(pUserData->m_pCurrentDirectory)->second;
+		char AbsolutePath[IO_MAX_PATH_LENGTH];
+		str_format(AbsolutePath, sizeof(AbsolutePath), "%s/%s", pUserData->m_pCurrentDirectory, Name);
 
 		if(!str_comp(Name, ".") || !str_comp(Name, ".."))
 			return 0;
 
-		if(!(UserData->m_pThis->m_Flags & LOAD_FLAGS_FOLLOW_SYMBOLIC_LINKS) && fs_is_symlink(AbsolutePath.c_str()))
+		if(!(pUserData->m_pThis->m_Flags & LOAD_FLAGS_FOLLOW_SYMBOLIC_LINKS) && fs_is_symlink(AbsolutePath))
 		{
-			*UserData->m_pContinue = TryCallback(UserData->m_pThis->m_fnLoadFailedCallback, LOAD_ERROR_UNWANTED_SYMLINK, AbsolutePath.c_str(), UserData->m_pThis->m_pUser);
+			*pUserData->m_pContinue = TryCallback(pUserData->m_pThis->m_fnLoadFailedCallback, LOAD_ERROR_UNWANTED_SYMLINK, AbsolutePath, pUserData->m_pThis->m_pUser);
 			return 0;
 		}
 		if(!IsDir)
 		{
-			if(UserData->m_pThis->m_Extension.empty() || CompareExtension(Name, UserData->m_pThis->m_Extension))
+			if(str_comp(pUserData->m_pThis->m_pExtension, "") || CompareExtension(Name, pUserData->m_pThis->m_pExtension))
 				pFileList->push_back(Name);
 		}
-		else if(UserData->m_pThis->m_Flags & LOAD_FLAGS_RECURSE_SUBDIRECTORIES)
+		else if(pUserData->m_pThis->m_Flags & LOAD_FLAGS_RECURSE_SUBDIRECTORIES)
 		{
-			UserData->m_pThis->m_PathCollection.insert({AbsolutePath, new std::vector<std::string>});
+			pUserData->m_pThis->m_PathCollection.insert({AbsolutePath, new std::vector<std::string>});
 			// Note that adding data to a SORTED container that is currently being iterated on higher in scope would invalidate the iterator. This is not sorted
-			SListDirectoryCallbackUserInfo Data{&AbsolutePath, UserData->m_pThis, UserData->m_pContinue};
-			UserData->m_pThis->m_pStorage->ListDirectory(IStorage::TYPE_ALL, AbsolutePath.c_str(), ListDirectoryCallback, &Data); // Directory item is a directory, must be recursed
+			SListDirectoryCallbackUserInfo Data{AbsolutePath, pUserData->m_pThis, pUserData->m_pContinue};
+			pUserData->m_pThis->m_pStorage->ListDirectory(IStorage::TYPE_ALL, AbsolutePath, ListDirectoryCallback, &Data); // Directory item is a directory, must be recursed
 		}
 	}
 
 	return 0;
 }
 
-unsigned int CMassFileLoader::Load()
+unsigned int CMassFileLoader::Begin(CMassFileLoader *pUserData)
 {
-#define MASS_FILE_LOADER_ERROR_PREFIX "Mass file loader used "
-	dbg_assert(!m_RequestedPaths.empty(), MASS_FILE_LOADER_ERROR_PREFIX "without adding paths."); // Ensure paths have been added
-	dbg_assert(bool(m_pStorage), MASS_FILE_LOADER_ERROR_PREFIX "without passing a valid IStorage instance."); // Ensure storage is valid
-	dbg_assert(bool(m_fnFileLoadedCallback), MASS_FILE_LOADER_ERROR_PREFIX "without implementing file loaded callback."); // Ensure file loaded callback is implemented
-	dbg_assert(m_Flags ^ LOAD_FLAGS_MASK, MASS_FILE_LOADER_ERROR_PREFIX "with invalid flags."); // Ensure flags are in bounds
-#undef MASS_FILE_LOADER_ERROR_PREFIX
-
 	char aPathBuffer[IO_MAX_PATH_LENGTH];
-	for(auto &It : m_RequestedPaths)
+	for(auto &It : pUserData->m_RequestedPaths)
 	{
-		if(m_Continue)
+		if(pUserData->m_Continue)
 		{
 			int StorageType = It.find(':') == 0 ? IStorage::STORAGETYPE_BASIC : IStorage::STORAGETYPE_CLIENT;
 			if(StorageType == IStorage::STORAGETYPE_BASIC)
 				It.erase(0, 1);
-			m_pStorage->GetCompletePath(StorageType, It.c_str(), aPathBuffer, sizeof(aPathBuffer));
+			pUserData->m_pStorage->GetCompletePath(StorageType, It.c_str(), aPathBuffer, sizeof(aPathBuffer));
 			if(fs_is_dir(aPathBuffer)) // Exists and is a directory
-			{
-				m_PathCollection.insert({std::string(aPathBuffer), new std::vector<std::string>});
-			}
+				pUserData->m_PathCollection.insert({std::string(aPathBuffer), new std::vector<std::string>});
 			else
-				m_Continue = TryCallback(m_fnLoadFailedCallback, LOAD_ERROR_INVALID_SEARCH_PATH, It.c_str(), m_pUser);
+				pUserData->m_Continue = TryCallback(pUserData->m_fnLoadFailedCallback, LOAD_ERROR_INVALID_SEARCH_PATH, It.c_str(), pUserData->m_pUser);
 		}
 	}
 
-	if(!m_Extension.empty())
+	if(!str_comp(pUserData->m_pExtension, ""))
 	{
 		// must be .x at the shortest
-		if(m_Extension.size() == 1 || m_Extension.at(0) != '.')
-			m_Continue = TryCallback(m_fnLoadFailedCallback, LOAD_ERROR_INVALID_EXTENSION, m_Extension.c_str(), m_pUser);
-		std::transform(m_Extension.begin(), m_Extension.end(), m_Extension.begin(),
-			[](unsigned char c) { return std::tolower(c); });
+		if(str_length(pUserData->m_pExtension) == 1 || pUserData->m_pExtension[0] != '.')
+			pUserData->m_Continue = TryCallback(pUserData->m_fnLoadFailedCallback, LOAD_ERROR_INVALID_EXTENSION, pUserData->m_pExtension, pUserData->m_pUser);
+		for(int i = 0; i < str_length(pUserData->m_pExtension); i++)
+			pUserData->m_pExtension[i] = std::tolower(pUserData->m_pExtension[i]);
 	}
 
-	for(const auto &It : m_PathCollection)
+	for(const auto &It : pUserData->m_PathCollection)
 	{
-		if(m_Continue)
+		if(pUserData->m_Continue)
 		{
-			std::string Key = It.first;
-			SListDirectoryCallbackUserInfo Data{&Key, this, &m_Continue};
-			m_pStorage->ListDirectory(IStorage::TYPE_ALL, Key.c_str(), ListDirectoryCallback, &Data);
+			const char *Key = It.first.c_str();
+			SListDirectoryCallbackUserInfo Data{Key, pUserData, &pUserData->m_Continue};
+			pUserData->m_pStorage->ListDirectory(IStorage::TYPE_ALL, Key, ListDirectoryCallback, &Data);
 		}
 	}
 
@@ -113,37 +107,31 @@ unsigned int CMassFileLoader::Load()
 	unsigned char *pData = nullptr;
 	unsigned int Size, Count = 0;
 	IOHANDLE Handle;
-	for(const auto &Directory : m_PathCollection)
+	for(const auto &Directory : pUserData->m_PathCollection)
 	{
 		for(const auto &File : *Directory.second)
 		{
-			if(m_Continue)
+			if(pUserData->m_Continue)
 			{
-				std::string FilePath = Directory.first + "/" + File;
-				if(!(m_Flags & LOAD_FLAGS_FOLLOW_SYMBOLIC_LINKS) && fs_is_symlink(FilePath.c_str()))
+				char FilePath[IO_MAX_PATH_LENGTH];
+				str_format(FilePath, sizeof(FilePath), "%s/%s", Directory.first.c_str(), File.c_str());
+				if(!(pUserData->m_Flags & LOAD_FLAGS_FOLLOW_SYMBOLIC_LINKS) && fs_is_symlink(FilePath))
 				{
-					m_Continue = TryCallback(m_fnLoadFailedCallback, LOAD_ERROR_UNWANTED_SYMLINK, FilePath.c_str(), m_pUser);
+					pUserData->m_Continue = TryCallback(pUserData->m_fnLoadFailedCallback, LOAD_ERROR_UNWANTED_SYMLINK, FilePath, pUserData->m_pUser);
 					continue;
 				}
 
-				if(m_Flags & LOAD_FLAGS_DONT_READ_FILE)
+				if(pUserData->m_Flags & LOAD_FLAGS_DONT_READ_FILE)
 				{
-					m_fnFileLoadedCallback(m_Flags & LOAD_FLAGS_ABSOLUTE_PATH ? FilePath : File, nullptr, 0, m_pUser);
+					pUserData->m_fnFileLoadedCallback(pUserData->m_Flags & LOAD_FLAGS_ABSOLUTE_PATH ? FilePath : File, nullptr, 0, pUserData->m_pUser);
 					Count++;
 					continue;
 				}
 
-				// if(!fs_is_readable(FilePath.c_str()))
-				// {
-				// 	m_Continue = TryCallback<bool>(m_fnLoadFailedCallback, LOAD_ERROR_FILE_UNREADABLE, FilePath.c_str());
-				// 	continue;
-				// }
-
-				Handle = io_open(FilePath.c_str(), LOAD_FLAGS_SKIP_BOM ? IOFLAG_READ | IOFLAG_SKIP_BOM : IOFLAG_READ);
+				Handle = io_open(FilePath, pUserData->m_Flags & IOFLAG_READ | (pUserData->m_Flags & LOAD_FLAGS_SKIP_BOM ? IOFLAG_SKIP_BOM : 0));
 				if(!Handle)
 				{
-					// There could be other issues than this, but I have no way to distinguish now that fs_is_readable is gone.
-					m_Continue = TryCallback(m_fnLoadFailedCallback, LOAD_ERROR_FILE_UNREADABLE, FilePath.c_str(), m_pUser);
+					pUserData->m_Continue = TryCallback(pUserData->m_fnLoadFailedCallback, LOAD_ERROR_FILE_UNREADABLE, FilePath, pUserData->m_pUser);
 					continue;
 				}
 
@@ -157,27 +145,68 @@ unsigned int CMassFileLoader::Load()
 					size_t RealSize = std::filesystem::file_size(FilePath);
 					if(static_cast<size_t>(ExpectedSize) != RealSize)
 					{
-						m_Continue = TryCallback(m_fnLoadFailedCallback, LOAD_ERROR_FILE_TOO_LARGE, FilePath.c_str(), m_pUser);
+						pUserData->m_Continue = TryCallback(pUserData->m_fnLoadFailedCallback, LOAD_ERROR_FILE_TOO_LARGE, FilePath, pUserData->m_pUser);
 						continue;
 					}
 				}
-
 				io_read_all(Handle, reinterpret_cast<void **>(&pData), &Size);
 				if(static_cast<unsigned int>(ExpectedSize) != Size) // Possibly redundant, but accounts for memory allocation shortcomings and not just IO
 				{
-					m_Continue = TryCallback(m_fnLoadFailedCallback, LOAD_ERROR_FILE_TOO_LARGE, FilePath.c_str(), m_pUser);
+					pUserData->m_Continue = TryCallback(pUserData->m_fnLoadFailedCallback, LOAD_ERROR_FILE_TOO_LARGE, FilePath, pUserData->m_pUser);
 					continue;
 				}
 
-				m_fnFileLoadedCallback(m_Flags & LOAD_FLAGS_ABSOLUTE_PATH ? FilePath : File, pData, Size, m_pUser);
+				pUserData->m_fnFileLoadedCallback(pUserData->m_Flags & LOAD_FLAGS_ABSOLUTE_PATH ? FilePath : File, pData, Size, pUserData->m_pUser);
 				free(pData);
 				Count++;
 				io_close(Handle);
+				if(pUserData->m_Flags & LOAD_FLAGS_ASYNC)
+					std::this_thread::sleep_for(std::chrono::milliseconds(20)); // i really, really dislike this. i would love to find a way to access the skin textures from the main thread in a lockfree way, so we do not have to wait and give the main thread a chance to access the lock.
 			}
 		}
 	}
 
-	return Count;
+	if(pUserData->m_Flags & LOAD_FLAGS_ASYNC)
+	{
+		if(pUserData->m_fnLoadFinishedCallback)
+			pUserData->m_fnLoadFinishedCallback(Count, pUserData->m_pUser);
+		pUserData->m_Finished = true;
+		return 0;
+	}
+	else
+		return Count;
+}
+
+std::optional<unsigned int> CMassFileLoader::Load()
+{
+#define MASS_FILE_LOADER_ERROR_PREFIX "Mass file loader used "
+	dbg_assert(!m_RequestedPaths.empty(), MASS_FILE_LOADER_ERROR_PREFIX "without adding paths."); // Ensure paths have been added
+	dbg_assert(bool(m_pStorage), MASS_FILE_LOADER_ERROR_PREFIX "without passing a valid IStorage instance."); // Ensure storage is valid
+	dbg_assert(bool(m_fnFileLoadedCallback), MASS_FILE_LOADER_ERROR_PREFIX "without implementing file loaded callback."); // Ensure file loaded callback is implemented
+	dbg_assert(m_Flags ^ LOAD_FLAGS_MASK, MASS_FILE_LOADER_ERROR_PREFIX "with invalid flags."); // Ensure flags are in bounds
+	dbg_assert(!m_Finished, MASS_FILE_LOADER_ERROR_PREFIX "after having already been used."); // Ensure is not reused
+#undef MASS_FILE_LOADER_ERROR_PREFIX
+	if(m_Flags & LOAD_FLAGS_ASYNC)
+	{
+		static constexpr const char aThreadIdPrefix[] = "fileloadjob-";
+		ThreadId = RandomUuid();
+
+		char aAux[UUID_MAXSTRSIZE];
+		FormatUuid(ThreadId, aAux, sizeof(aAux));
+
+		char aId[sizeof(aThreadIdPrefix) + sizeof(aAux)];
+		str_format(aId, sizeof(aId), "%s%s", aThreadIdPrefix, aAux);
+
+		char aAuxBuf[512];
+		str_format(aAuxBuf, sizeof(aAuxBuf), "Unable to create file loader thread with id \"%s\"", aId);
+		auto f0 = reinterpret_cast<void (*)(void *)>(&CMassFileLoader::Begin);
+		dbg_assert(thread_init_and_detach(f0, this, aId) != 0, aAuxBuf);
+		return std::nullopt;
+	}
+	else
+	{
+		return Begin(this);
+	}
 }
 
 /* TODO:
