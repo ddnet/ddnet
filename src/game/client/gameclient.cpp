@@ -757,7 +757,7 @@ bool CGameClient::Predict() const
 
 	if(m_Snap.m_pGameInfoObj)
 	{
-		if(m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_GAMEOVER)
+		if(m_Snap.m_pGameInfoObj->m_GameStateFlags & (GAMESTATEFLAG_GAMEOVER | GAMESTATEFLAG_PAUSED))
 		{
 			return false;
 		}
