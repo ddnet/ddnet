@@ -594,8 +594,9 @@ public:
 	// DDRace
 	int DoButton_CheckBox_Tristate(const void *pID, const char *pText, TRISTATE Checked, const CUIRect *pRect);
 	std::vector<CDemoItem> m_vDemos;
-	std::vector<CDemoItem> m_vFilteredDemos;
+	std::vector<CDemoItem *> m_vpFilteredDemos;
 	void DemolistPopulate();
+	void RefreshFilteredDemos();
 	void DemoSeekTick(IDemoPlayer::ETickOffset TickOffset);
 	bool m_Dummy;
 
