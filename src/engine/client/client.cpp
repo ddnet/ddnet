@@ -464,8 +464,17 @@ int CClient::SendMsgActive(CMsgPacker *pMsg, int Flags)
 	return SendMsg(g_Config.m_ClDummy, pMsg, Flags);
 }
 
+void CClient::SendTaterInfo(int Conn)
+{
+	CMsgPacker Msg(NETMSG_IAMTATER, true);
+	Msg.AddString("Built on " __DATE__ ", " __TIME__);
+	SendMsg(Conn, &Msg, MSGFLAG_VITAL);
+}
+
 void CClient::SendInfo()
 {
+	SendTaterInfo(CONN_MAIN);
+
 	CMsgPacker MsgVer(NETMSG_CLIENTVER, true);
 	MsgVer.AddRaw(&m_ConnectionID, sizeof(m_ConnectionID));
 	MsgVer.AddInt(GameClient()->DDNetVersion());
@@ -3159,6 +3168,7 @@ void CClient::Run()
 			m_DummySendConnInfo = false;
 
 			// send client info
+			SendTaterInfo(CONN_DUMMY);
 			CMsgPacker MsgVer(NETMSG_CLIENTVER, true);
 			MsgVer.AddRaw(&m_ConnectionID, sizeof(m_ConnectionID));
 			MsgVer.AddInt(GameClient()->DDNetVersion());
