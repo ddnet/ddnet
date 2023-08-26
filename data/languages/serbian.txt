@@ -1017,7 +1017,7 @@ New random timeout code
 == Novi slučajni kod isteka vremena
 
 Entities
-== Entities
+== Текстуре
 
 Emoticons
 == Ikonice osećanja
@@ -1489,23 +1489,23 @@ Loading sound files
 
 [Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== 
+== Неуспешно за време иницијализације. Покушајте променити gfx_backend у OpenGL или Vulkan у settings_ddnet.cfg у директоријуму конфигурације и покушајте поново.
 
 [Graphics error]
 Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== 
+== Недостаток ВРАМ-а. Покушајте уклонити прилагођене ресурсе (скинове, објекте итд.), особито оне са високом резолуцијом.
 
 [Graphics error]
 An error during command recording occurred. Try to update your GPU drivers.
-== 
+== Дошло је до грешке при записивању команде. Покушајте ажурирати драјвере за вашу графичку картицу.
 
 [Graphics error]
 A render command failed. Try to update your GPU drivers.
-== 
+== Извршена је грешка рендеринг команде. Покушајте ажурирати драјвере за вашу графичку картицу.
 
 [Graphics error]
 Submitting the render commands failed. Try to update your GPU drivers.
-== 
+== Неуспешно слање рендерних команди. Покушајте ажурирати драјвере за вашу графичку картицу.
 
 [Graphics error]
 Failed to swap framebuffers. Try to update your GPU drivers.
@@ -1513,7 +1513,7 @@ Failed to swap framebuffers. Try to update your GPU drivers.
 
 [Graphics error]
 Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== 
+== Неуспешно замена бафера фреймова. Покушајте ажурирати драјвере за вашу графичку картицу.
 
 [Graphics error]
 Could not initialize the given graphics backend, reverting to the default backend now.
@@ -1527,13 +1527,13 @@ Could not save downloaded map. Try manually deleting this file: %s
 == 
 
 Initializing components
-== 
+== Иницијализација компоненти
 
 Quitting. Please wait…
-== 
+== Излазим. Молим вас да почекате…
 
 Restarting. Please wait…
-== 
+== Поновно покрећем се. Молим вас да почекате…
 
 Multi-View
 == 
@@ -1681,70 +1681,70 @@ Open the settings file
 == 
 
 Open the directory that contains the configuration and user files
-== 
+== Отворите директоријум који садржи конфигурационе и корисничке датотеке.
 
 Open the directory to add custom themes
-== 
+== Отворите директоријум за додавање прилагођених тема.
 
 Create a random skin
-== 
+== Направите насумичан скин.
 
 Open the directory to add custom skins
-== 
+== Отворите директоријум за додавање прилагођених скинова.
 
 No controller found. Plug in a controller.
-== 
+== Контролер није пронађен. Прикључите контролер.
 
 Axis
-== 
+== Оса
 
 Reset controls
-== 
+== Ресетујте контроле
 
 Are you sure that you want to reset the controls to their defaults?
-== 
+== Да ли сте сигурни да желите вратити контроле на њихове подразумеване вредности?
 
 Cancel
-== 
+== Откажи
 
 Graphics card
-== 
+== Графичка картица
 
 Weapons
-== 
+== Оружје
 
 Rifle Laser Outline Color
-== 
+== Боја контуре ласера за пушку
 
 Rifle Laser Inner Color
-== 
+== Боја унутрашњости ласера за пушку
 
 Shotgun Laser Outline Color
-== 
+== Боја контуре ласера за пушку са једним цеветом
 
 Shotgun Laser Inner Color
-== 
+== Боја унутрашњости ласера за пушку са једним цеветом
 
 Door Laser Outline Color
-== 
+== Боја контуре ласера за врата
 
 Door Laser Inner Color
-== 
+== Боја унутрашњости ласера за врата
 
 Freeze Laser Outline Color
-== 
+== Боја ободова замрзавајућег ласера
 
 Freeze Laser Inner Color
-== 
+== Боја унутрашњости замрзавајућег ласера
 
 Set all to Rifle
-== 
+== Постави све на пушку
 
 Unregister protocol and file extensions
-== 
+== Отказивање протокола и проширења датотека
 
 Open the directory to add custom assets
-== 
+== Отворите директоријум за додавање прилагођених ресурса
 
 Moved ingame
 == 
