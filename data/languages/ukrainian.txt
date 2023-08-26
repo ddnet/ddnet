@@ -188,7 +188,7 @@ Nickname
 == Нік
 
 No
-== Ні
+== Немає
 
 No password
 == Без пароля
@@ -473,7 +473,7 @@ Are you sure that you want to disconnect?
 == Ви впевнені, що хочете відключитися?
 
 Disconnect Dummy
-== Відключити Dummy
+== Відключити даммі
 
 Are you sure that you want to disconnect your dummy?
 == Ви впевнені, що хочете відключити свого даммі?
@@ -1124,10 +1124,10 @@ Skin Database
 == Бази даних скінів
 
 Skins directory
-== Каталог скінав
+== Каталог скінів
 
 Chat command
-== командний чат
+== Чат для команд
 
 Dummy
 == Даммі
