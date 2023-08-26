@@ -98,6 +98,8 @@ MAYBE_UNUSED static const char *FONT_ICON_PAUSE = "\xEF\x81\x8C";
 MAYBE_UNUSED static const char *FONT_ICON_STOP = "\xEF\x81\x8D";
 MAYBE_UNUSED static const char *FONT_ICON_CHEVRON_LEFT = "\xEF\x81\x93";
 MAYBE_UNUSED static const char *FONT_ICON_CHEVRON_RIGHT = "\xEF\x81\x94";
+MAYBE_UNUSED static const char *FONT_ICON_CHEVRON_UP = "\xEF\x81\xB7";
+MAYBE_UNUSED static const char *FONT_ICON_CHEVRON_DOWN = "\xEF\x81\xB8";
 MAYBE_UNUSED static const char *FONT_ICON_BACKWARD = "\xEF\x81\x8A";
 MAYBE_UNUSED static const char *FONT_ICON_FORWARD = "\xEF\x81\x8E";
 MAYBE_UNUSED static const char *FONT_ICON_RIGHT_FROM_BRACKET = "\xEF\x8B\xB5";
@@ -105,6 +107,8 @@ MAYBE_UNUSED static const char *FONT_ICON_RIGHT_TO_BRACKET = "\xEF\x8B\xB6";
 MAYBE_UNUSED static const char *FONT_ICON_ARROW_UP_RIGHT_FROM_SQUARE = "\xEF\x82\x8E";
 MAYBE_UNUSED static const char *FONT_ICON_BACKWARD_STEP = "\xEF\x81\x88";
 MAYBE_UNUSED static const char *FONT_ICON_FORWARD_STEP = "\xEF\x81\x91";
+MAYBE_UNUSED static const char *FONT_ICON_BACKWARD_FAST = "\xEF\x81\x89";
+MAYBE_UNUSED static const char *FONT_ICON_FORWARD_FAST = "\xEF\x81\x90";
 MAYBE_UNUSED static const char *FONT_ICON_KEYBOARD = "\xE2\x8C\xA8";
 MAYBE_UNUSED static const char *FONT_ICON_ELLIPSIS = "\xEF\x85\x81";
 

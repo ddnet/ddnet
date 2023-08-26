@@ -109,6 +109,8 @@ void CMenus::DemoSeekTick(IDemoPlayer::ETickOffset TickOffset)
 void CMenus::RenderDemoPlayer(CUIRect MainView)
 {
 	const IDemoPlayer::CInfo *pInfo = DemoPlayer()->BaseInfo();
+	const int CurrentTick = pInfo->m_CurrentTick - pInfo->m_FirstTick;
+	const int TotalTicks = pInfo->m_LastTick - pInfo->m_FirstTick;
 
 	// When rendering a demo and starting paused, render the pause indicator permanently.
 #if defined(CONF_VIDEORECORDER)
@@ -128,13 +130,49 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		m_LastSpeedChange = Client()->GlobalTime();
 	};
 
+	// threshold value, accounts for slight inaccuracy when setting demo position
+	constexpr int Threshold = 10;
+	const auto &&FindPreviousMarkerPosition = [&]() {
+		for(int i = pInfo->m_NumTimelineMarkers - 1; i >= 0; i--)
+		{
+			if((pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) < CurrentTick && absolute(((pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) - CurrentTick)) > Threshold)
+			{
+				return (float)(pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) / TotalTicks;
+			}
+		}
+		return 0.0f;
+	};
+	const auto &&FindNextMarkerPosition = [&]() {
+		for(int i = 0; i < pInfo->m_NumTimelineMarkers; i++)
+		{
+			if((pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) > CurrentTick && absolute(((pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) - CurrentTick)) > Threshold)
+			{
+				return (float)(pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) / TotalTicks;
+			}
+		}
+		return 1.0f;
+	};
+
+	static int s_SkipDurationIndex = 1;
+	static const int s_aSkipDurationsSeconds[] = {1, 5, 10, 30, 60, 5 * 60, 10 * 60};
+	const int DemoLengthSeconds = TotalTicks / SERVER_TICK_SPEED;
+	int NumDurationLabels = 0;
+	for(size_t i = 0; i < std::size(s_aSkipDurationsSeconds); ++i)
+	{
+		if(s_aSkipDurationsSeconds[i] >= DemoLengthSeconds)
+			break;
+		NumDurationLabels = i + 1;
+	}
+	if(NumDurationLabels > 0 && s_SkipDurationIndex >= NumDurationLabels)
+		s_SkipDurationIndex = maximum(0, NumDurationLabels - 1);
+
 	// handle keyboard shortcuts independent of active menu
 	float PositionToSeek = -1.0f;
 	float TimeToSeek = 0.0f;
-	if(m_pClient->m_GameConsole.IsClosed() && m_DemoPlayerState == DEMOPLAYER_NONE && g_Config.m_ClDemoKeyboardShortcuts)
+	if(m_pClient->m_GameConsole.IsClosed() && m_DemoPlayerState == DEMOPLAYER_NONE && g_Config.m_ClDemoKeyboardShortcuts && !UI()->IsPopupOpen())
 	{
 		// increase/decrease speed
-		if(!Input()->ShiftIsPressed())
+		if(!Input()->ModifierIsPressed() && !Input()->ShiftIsPressed() && !Input()->AltIsPressed())
 		{
 			if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP) || Input()->KeyPress(KEY_UP))
 			{
@@ -149,7 +187,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		}
 
 		// pause/unpause
-		if(Input()->KeyPress(KEY_SPACE) || Input()->KeyPress(KEY_RETURN) || Input()->KeyPress(KEY_K))
+		if(Input()->KeyPress(KEY_SPACE) || Input()->KeyPress(KEY_RETURN) || Input()->KeyPress(KEY_KP_ENTER) || Input()->KeyPress(KEY_K))
 		{
 			if(pInfo->m_Paused)
 			{
@@ -162,22 +200,24 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 			UpdateLastPauseChange();
 		}
 
-		// seek backward/forward 10/5 seconds
-		if(Input()->KeyPress(KEY_J))
+		// seek backward/forward configured time
+		if(Input()->KeyPress(KEY_LEFT) || Input()->KeyPress(KEY_J))
 		{
-			TimeToSeek = -10.0f;
+			if(Input()->ModifierIsPressed())
+				PositionToSeek = FindPreviousMarkerPosition();
+			else if(Input()->ShiftIsPressed())
+				s_SkipDurationIndex = maximum(s_SkipDurationIndex - 1, 0);
+			else
+				TimeToSeek = -s_aSkipDurationsSeconds[s_SkipDurationIndex];
 		}
-		else if(Input()->KeyPress(KEY_L))
+		else if(Input()->KeyPress(KEY_RIGHT) || Input()->KeyPress(KEY_L))
 		{
-			TimeToSeek = 10.0f;
-		}
-		else if(Input()->KeyPress(KEY_LEFT))
-		{
-			TimeToSeek = -5.0f;
-		}
-		else if(Input()->KeyPress(KEY_RIGHT))
-		{
-			TimeToSeek = 5.0f;
+			if(Input()->ModifierIsPressed())
+				PositionToSeek = FindNextMarkerPosition();
+			else if(Input()->ShiftIsPressed())
+				s_SkipDurationIndex = minimum(s_SkipDurationIndex + 1, NumDurationLabels - 1);
+			else
+				TimeToSeek = s_aSkipDurationsSeconds[s_SkipDurationIndex];
 		}
 
 		// seek to 0-90%
@@ -256,9 +296,6 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		if(m_LastSpeedChange > 0.0f)
 			m_LastSpeedChange = 0.0f;
 	}
-
-	const int CurrentTick = pInfo->m_CurrentTick - pInfo->m_FirstTick;
-	const int TotalTicks = pInfo->m_LastTick - pInfo->m_FirstTick;
 
 	if(CurrentTick == TotalTicks)
 	{
@@ -496,37 +533,110 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	}
 	GameClient()->m_Tooltips.DoToolTip(&s_ResetButton, &Button, Localize("Stop the current demo"));
 
+	// skip time back
+	ButtonBar.VSplitLeft(Margins + 10.0f, nullptr, &ButtonBar);
+	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
+	static CButtonContainer s_TimeBackButton;
+	if(DoButton_FontIcon(&s_TimeBackButton, FONT_ICON_BACKWARD, 0, &Button, IGraphics::CORNER_ALL))
+	{
+		TimeToSeek = -s_aSkipDurationsSeconds[s_SkipDurationIndex];
+	}
+	GameClient()->m_Tooltips.DoToolTip(&s_TimeBackButton, &Button, Localize("Go back the specified duration"));
+
+	// skip time dropdown
+	if(NumDurationLabels >= 2)
+	{
+		ButtonBar.VSplitLeft(Margins, nullptr, &ButtonBar);
+		ButtonBar.VSplitLeft(4 * ButtonbarHeight, &Button, &ButtonBar);
+
+		static std::vector<std::string> s_vDurationNames;
+		static std::vector<const char *> s_vpDurationNames;
+		s_vDurationNames.resize(NumDurationLabels);
+		s_vpDurationNames.resize(NumDurationLabels);
+
+		for(int i = 0; i < NumDurationLabels; ++i)
+		{
+			char aBuf[256];
+			if(s_aSkipDurationsSeconds[i] >= 60)
+				str_format(aBuf, sizeof(aBuf), Localize("%d min.", "Demo player duration"), s_aSkipDurationsSeconds[i] / 60);
+			else
+				str_format(aBuf, sizeof(aBuf), Localize("%d sec.", "Demo player duration"), s_aSkipDurationsSeconds[i]);
+			s_vDurationNames[i] = aBuf;
+			s_vpDurationNames[i] = s_vDurationNames[i].c_str();
+		}
+
+		static CUI::SDropDownState s_SkipDurationDropDownState;
+		static CScrollRegion s_SkipDurationDropDownScrollRegion;
+		s_SkipDurationDropDownState.m_SelectionPopupContext.m_pScrollRegion = &s_SkipDurationDropDownScrollRegion;
+		s_SkipDurationIndex = UI()->DoDropDown(&Button, s_SkipDurationIndex, s_vpDurationNames.data(), NumDurationLabels, s_SkipDurationDropDownState);
+		GameClient()->m_Tooltips.DoToolTip(&s_SkipDurationDropDownState.m_ButtonContainer, &Button, Localize("Change the skip duration"));
+	}
+
+	// skip time forward
+	ButtonBar.VSplitLeft(Margins, nullptr, &ButtonBar);
+	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
+	static CButtonContainer s_TimeForwardButton;
+	if(DoButton_FontIcon(&s_TimeForwardButton, FONT_ICON_FORWARD, 0, &Button, IGraphics::CORNER_ALL))
+	{
+		TimeToSeek = s_aSkipDurationsSeconds[s_SkipDurationIndex];
+	}
+	GameClient()->m_Tooltips.DoToolTip(&s_TimeForwardButton, &Button, Localize("Go forward the specified duration"));
+
 	// one tick back
 	ButtonBar.VSplitLeft(Margins + 10.0f, nullptr, &ButtonBar);
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
 	static CButtonContainer s_OneTickBackButton;
-	if(DoButton_FontIcon(&s_OneTickBackButton, FONT_ICON_CHEVRON_LEFT, 0, &Button, IGraphics::CORNER_ALL))
+	if(DoButton_FontIcon(&s_OneTickBackButton, FONT_ICON_BACKWARD_STEP, 0, &Button, IGraphics::CORNER_ALL))
+	{
 		DemoSeekTick(IDemoPlayer::TICK_PREVIOUS);
+	}
 	GameClient()->m_Tooltips.DoToolTip(&s_OneTickBackButton, &Button, Localize("Go back one tick"));
 
 	// one tick forward
 	ButtonBar.VSplitLeft(Margins, nullptr, &ButtonBar);
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
 	static CButtonContainer s_OneTickForwardButton;
-	if(DoButton_FontIcon(&s_OneTickForwardButton, FONT_ICON_CHEVRON_RIGHT, 0, &Button, IGraphics::CORNER_ALL))
+	if(DoButton_FontIcon(&s_OneTickForwardButton, FONT_ICON_FORWARD_STEP, 0, &Button, IGraphics::CORNER_ALL))
+	{
 		DemoSeekTick(IDemoPlayer::TICK_NEXT);
+	}
 	GameClient()->m_Tooltips.DoToolTip(&s_OneTickForwardButton, &Button, Localize("Go forward one tick"));
+
+	// one marker back
+	ButtonBar.VSplitLeft(Margins + 10.0f, nullptr, &ButtonBar);
+	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
+	static CButtonContainer s_OneMarkerBackButton;
+	if(DoButton_FontIcon(&s_OneMarkerBackButton, FONT_ICON_BACKWARD_FAST, 0, &Button, IGraphics::CORNER_ALL))
+	{
+		PositionToSeek = FindPreviousMarkerPosition();
+	}
+	GameClient()->m_Tooltips.DoToolTip(&s_OneMarkerBackButton, &Button, Localize("Go back one marker"));
+
+	// one marker forward
+	ButtonBar.VSplitLeft(Margins, nullptr, &ButtonBar);
+	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
+	static CButtonContainer s_OneMarkerForwardButton;
+	if(DoButton_FontIcon(&s_OneMarkerForwardButton, FONT_ICON_FORWARD_FAST, 0, &Button, IGraphics::CORNER_ALL))
+	{
+		PositionToSeek = FindNextMarkerPosition();
+	}
+	GameClient()->m_Tooltips.DoToolTip(&s_OneMarkerForwardButton, &Button, Localize("Go forward one marker"));
 
 	// slowdown
 	ButtonBar.VSplitLeft(Margins + 10.0f, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
 	static CButtonContainer s_SlowDownButton;
-	if(DoButton_FontIcon(&s_SlowDownButton, FONT_ICON_BACKWARD, 0, &Button, IGraphics::CORNER_ALL))
+	if(DoButton_FontIcon(&s_SlowDownButton, FONT_ICON_CHEVRON_DOWN, 0, &Button, IGraphics::CORNER_ALL))
 		DecreaseDemoSpeed = true;
 	GameClient()->m_Tooltips.DoToolTip(&s_SlowDownButton, &Button, Localize("Slow down the demo"));
 
 	// fastforward
 	ButtonBar.VSplitLeft(Margins, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
-	static CButtonContainer s_FastForwardButton;
-	if(DoButton_FontIcon(&s_FastForwardButton, FONT_ICON_FORWARD, 0, &Button, IGraphics::CORNER_ALL))
+	static CButtonContainer s_SpeedUpButton;
+	if(DoButton_FontIcon(&s_SpeedUpButton, FONT_ICON_CHEVRON_UP, 0, &Button, IGraphics::CORNER_ALL))
 		IncreaseDemoSpeed = true;
-	GameClient()->m_Tooltips.DoToolTip(&s_FastForwardButton, &Button, Localize("Speed up the demo"));
+	GameClient()->m_Tooltips.DoToolTip(&s_SpeedUpButton, &Button, Localize("Speed up the demo"));
 
 	// speed meter
 	ButtonBar.VSplitLeft(Margins * 12, &SpeedBar, &ButtonBar);
@@ -581,45 +691,6 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		m_DemoPlayerState = DEMOPLAYER_SLICE_SAVE;
 	}
 	GameClient()->m_Tooltips.DoToolTip(&s_SliceSaveButton, &Button, Localize("Export cut as a separate demo"));
-
-	// threshold value, accounts for slight inaccuracy when setting demo position
-	const int Threshold = 10;
-
-	// one marker back
-	ButtonBar.VSplitLeft(Margins + 20.0f, nullptr, &ButtonBar);
-	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
-	static CButtonContainer s_OneMarkerBackButton;
-	if(DoButton_FontIcon(&s_OneMarkerBackButton, FONT_ICON_BACKWARD_STEP, 0, &Button, IGraphics::CORNER_ALL))
-	{
-		PositionToSeek = 0.0f;
-		for(int i = pInfo->m_NumTimelineMarkers - 1; i >= 0; i--)
-		{
-			if((pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) < CurrentTick && absolute(((pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) - CurrentTick)) > Threshold)
-			{
-				PositionToSeek = (float)(pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) / TotalTicks;
-				break;
-			}
-		}
-	}
-	GameClient()->m_Tooltips.DoToolTip(&s_OneMarkerBackButton, &Button, Localize("Go back one marker"));
-
-	// one marker forward
-	ButtonBar.VSplitLeft(Margins, nullptr, &ButtonBar);
-	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
-	static CButtonContainer s_OneMarkerForwardButton;
-	if(DoButton_FontIcon(&s_OneMarkerForwardButton, FONT_ICON_FORWARD_STEP, 0, &Button, IGraphics::CORNER_ALL))
-	{
-		PositionToSeek = 1.0f;
-		for(int i = 0; i < pInfo->m_NumTimelineMarkers; i++)
-		{
-			if((pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) > CurrentTick && absolute(((pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) - CurrentTick)) > Threshold)
-			{
-				PositionToSeek = (float)(pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) / TotalTicks;
-				break;
-			}
-		}
-	}
-	GameClient()->m_Tooltips.DoToolTip(&s_OneMarkerForwardButton, &Button, Localize("Go forward one marker"));
 
 	// close button
 	ButtonBar.VSplitRight(ButtonbarHeight, &ButtonBar, &Button);
