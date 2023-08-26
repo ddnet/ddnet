@@ -1048,13 +1048,13 @@ void CMenus::RenderDemoList(CUIRect MainView)
 		Labels.HSplitTop(20.0f, &Left, &Labels);
 		Left.VSplitLeft(150.0f, &Left, &Right);
 		UI()->DoLabel(&Left, Localize("Version:"), 14.0f, TEXTALIGN_ML);
-		str_format(aBuf, sizeof(aBuf), "%d", m_vFilteredDemos[m_DemolistSelectedIndex].m_Info.m_Version);
+		str_from_int(m_vFilteredDemos[m_DemolistSelectedIndex].m_Info.m_Version, aBuf);
 		UI()->DoLabel(&Right, aBuf, 14.0f, TEXTALIGN_ML);
 		Labels.HSplitTop(5.0f, 0, &Labels);
 		Labels.HSplitTop(20.0f, &Left, &Labels);
 		Left.VSplitLeft(150.0f, &Left, &Right);
 		UI()->DoLabel(&Left, Localize("Markers:"), 14.0f, TEXTALIGN_ML);
-		str_format(aBuf, sizeof(aBuf), "%d", m_vFilteredDemos[m_DemolistSelectedIndex].NumMarkers());
+		str_from_int(m_vFilteredDemos[m_DemolistSelectedIndex].NumMarkers(), aBuf);
 		UI()->DoLabel(&Right, aBuf, 14.0f, TEXTALIGN_ML);
 
 		// right side
