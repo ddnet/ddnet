@@ -6480,6 +6480,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 										UI()->DoPopupMenu(&s_PopupEnvPointId, UI()->MouseX(), UI()->MouseY(), 150, 56, this, PopupEnvPoint);
 									}
 									UI()->SetActiveItem(nullptr);
+									s_Operation = OP_NONE;
 								}
 							}
 							else if(!UI()->MouseButton(0))
