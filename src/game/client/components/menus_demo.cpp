@@ -969,7 +969,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	char aFooterLabel[128] = {0};
 	if(m_DemolistSelectedIndex >= 0)
 	{
-		CDemoItem* pItem = m_vpFilteredDemos[m_DemolistSelectedIndex];
+		CDemoItem *pItem = m_vpFilteredDemos[m_DemolistSelectedIndex];
 		if(str_comp(pItem->m_aFilename, "..") == 0)
 			str_copy(aFooterLabel, Localize("Parent Folder"));
 		else if(m_vpFilteredDemos[m_DemolistSelectedIndex]->m_IsLink)
