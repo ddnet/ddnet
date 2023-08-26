@@ -426,24 +426,23 @@ bool CEditorMap::Save(const char *pFileName)
 	return true;
 }
 
-void CEditor::HandleMapDrop(const char *pFileName, int StorageType)
+bool CEditor::HandleMapDrop(const char *pFileName, int StorageType)
 {
-	m_Map.HandleMapDrop(pFileName, IStorage::TYPE_ALL_OR_ABSOLUTE);
+	return m_Map.HandleMapDrop(pFileName, IStorage::TYPE_ALL_OR_ABSOLUTE);
 }
 
-void CEditorMap::HandleMapDrop(const char *pFileName, int StorageType)
+bool CEditorMap::HandleMapDrop(const char *pFileName, int StorageType)
 {
 	if(m_pEditor->HasUnsavedData())
 	{
 		str_copy(m_pEditor->m_aFileNamePending, pFileName);
 		m_pEditor->m_PopupEventType = CEditor::POPEVENT_LOADDROP;
 		m_pEditor->m_PopupEventActivated = true;
+		return true;
 	}
 	else
 	{
-		int Result = m_pEditor->Load(pFileName, IStorage::TYPE_ALL_OR_ABSOLUTE);
-		if(!Result)
-			dbg_msg("editor", "editing passed map file '%s' failed", pFileName);
+		return m_pEditor->Load(pFileName, IStorage::TYPE_ALL_OR_ABSOLUTE);
 	}
 }
 

@@ -523,7 +523,7 @@ public:
 	// io
 	bool Save(const char *pFilename);
 	bool Load(const char *pFilename, int StorageType, const std::function<void(const char *pErrorMessage)> &ErrorHandler);
-	void HandleMapDrop(const char *pFilename, int StorageType);
+	bool HandleMapDrop(const char *pFilename, int StorageType);
 	void PerformSanityChecks(const std::function<void(const char *pErrorMessage)> &ErrorHandler);
 
 	// DDRace
@@ -984,7 +984,7 @@ public:
 	void Reset(bool CreateDefault = true);
 	bool Save(const char *pFilename) override;
 	bool Load(const char *pFilename, int StorageType) override;
-	void HandleMapDrop(const char *pFilename, int StorageType) override;
+	bool HandleMapDrop(const char *pFilename, int StorageType) override;
 	bool Append(const char *pFilename, int StorageType);
 	void LoadCurrentMap();
 	void Render();
