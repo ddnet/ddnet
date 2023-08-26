@@ -79,6 +79,7 @@
 		// https://aur.archlinux.org/packages/clang-format-static-bin
 		"clang-format.executable": "clang-format-10",
 		"lldb.launch.expressions": "native",
+		"lldb.launch.initCommands": ["target stop-hook add --one-liner \"command script import ${workspaceFolder}/other/vscode/lldbinit.py\""],
 		"editor.defaultFormatter": "xaver.clang-format",
 		"[rust]": {
 			"editor.defaultFormatter": "rust-lang.rust-analyzer",
