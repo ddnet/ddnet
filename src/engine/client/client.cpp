@@ -4459,8 +4459,7 @@ void CClient::RegisterCommands()
 	// test: remove
 	auto FileLoaderTest = [](IConsole::IResult *pResult, void *pUserData) {
 		CClient *client = reinterpret_cast<CClient *>(pUserData);
-		//		CMassFileLoader FileLoader(client->m_pStorage, CMassFileLoader::LOAD_FLAGS_ABSOLUTE_PATH | CMassFileLoader::LOAD_FLAGS_RECURSE_SUBDIRECTORIES);
-		auto *FileLoader = new CMassFileLoader(client->m_pStorage, CMassFileLoader::LOAD_FLAGS_ABSOLUTE_PATH | CMassFileLoader::LOAD_FLAGS_ASYNC | CMassFileLoader::LOAD_FLAGS_RECURSE_SUBDIRECTORIES);
+		auto *FileLoader = new CMassFileLoader(client->m_pEngine, client->m_pStorage, CMassFileLoader::LOAD_FLAGS_ABSOLUTE_PATH | /*CMassFileLoader::LOAD_FLAGS_ASYNC |*/ CMassFileLoader::LOAD_FLAGS_RECURSE_SUBDIRECTORIES);
 
 		FileLoader->SetLoadFailedCallback([](CMassFileLoader::ELoadError Error, const void *pData, void *) -> bool {
 			char Message[128];
@@ -4468,12 +4467,6 @@ void CClient::RegisterCommands()
 			{
 			case CMassFileLoader::LOAD_ERROR_INVALID_SEARCH_PATH:
 				str_format(Message, sizeof(Message), "Invalid path: '%s'", reinterpret_cast<const char *>(pData));
-				break;
-				// case CMassFileLoader::LOAD_ERROR_DIRECTORY_UNREADABLE:
-				//	str_format(Message, sizeof(Message), "Directory unreadable: '%s'", reinterpret_cast<const char *>(pUser));
-				//	break;
-			case CMassFileLoader::LOAD_ERROR_UNWANTED_SYMLINK:
-				str_format(Message, sizeof(Message), "Unwanted symlink: '%s'", reinterpret_cast<const char *>(pData));
 				break;
 			case CMassFileLoader::LOAD_ERROR_FILE_UNREADABLE:
 				str_format(Message, sizeof(Message), "File unreadable: '%s'", reinterpret_cast<const char *>(pData));
@@ -4505,7 +4498,7 @@ void CClient::RegisterCommands()
 		});
 
 		FileLoader->SetPaths(":test");
-		FileLoader->SetFileExtension(".txt");
+		//		FileLoader->SetFileExtension("");
 		FileLoader->Load();
 	};
 

@@ -323,9 +323,6 @@ bool CSkins::SkinLoadErrorCallback(CMassFileLoader::ELoadError Error, const void
 	case CMassFileLoader::LOAD_ERROR_INVALID_SEARCH_PATH:
 		str_format(aMessage, sizeof(aMessage), "Invalid skins path: '%s'", reinterpret_cast<const char *>(pData));
 		break;
-	case CMassFileLoader::LOAD_ERROR_UNWANTED_SYMLINK:
-		str_format(aMessage, sizeof(aMessage), "Unwanted symlink in skins folder ('%s')", reinterpret_cast<const char *>(pData));
-		break;
 	case CMassFileLoader::LOAD_ERROR_FILE_UNREADABLE:
 		str_format(aMessage, sizeof(aMessage), "Unreadable file in skins folder ('%s')", reinterpret_cast<const char *>(pData));
 		break;
@@ -433,7 +430,7 @@ void CSkins::Refresh()
 	}
 	m_Mutex.unlock();
 
-	m_FileLoader = new CMassFileLoader(Storage(), CMassFileLoader::LOAD_FLAGS_ABSOLUTE_PATH | CMassFileLoader::LOAD_FLAGS_ASYNC | CMassFileLoader::LOAD_FLAGS_RECURSE_SUBDIRECTORIES);
+	m_FileLoader = new CMassFileLoader(Engine(), Storage(), CMassFileLoader::LOAD_FLAGS_ABSOLUTE_PATH | CMassFileLoader::LOAD_FLAGS_ASYNC | CMassFileLoader::LOAD_FLAGS_RECURSE_SUBDIRECTORIES);
 	m_FileLoader->SetLoadFailedCallback(SkinLoadErrorCallback);
 	m_FileLoader->SetFileLoadedCallback(SkinLoadedCallback);
 	m_FileLoader->SetLoadFinishedCallback(SkinLoadFinishedCallback);

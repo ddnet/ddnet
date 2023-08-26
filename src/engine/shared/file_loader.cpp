@@ -1,8 +1,9 @@
 #include "file_loader.h"
 #include <base/system.h>
 
-CMassFileLoader::CMassFileLoader(IStorage *pStorage, uint8_t Flags)
+CMassFileLoader::CMassFileLoader(IEngine *pEngine, IStorage *pStorage, uint8_t Flags)
 {
+	m_pEngine = pEngine;
 	m_pStorage = pStorage;
 	m_Flags = Flags;
 }
@@ -46,7 +47,7 @@ inline bool CMassFileLoader::CompareExtension(const std::filesystem::path &Filen
 
 		if(!IsDir)
 		{
-			if(str_comp(pUserData->m_pThis->m_pExtension, "") || CompareExtension(Name, pUserData->m_pThis->m_pExtension))
+			if((pUserData->m_pThis->m_pExtension == nullptr || str_comp(pUserData->m_pThis->m_pExtension, "")) || CompareExtension(Name, pUserData->m_pThis->m_pExtension))
 				pFileList->push_back(Name);
 		}
 		else if(pUserData->m_pThis->m_Flags & LOAD_FLAGS_RECURSE_SUBDIRECTORIES)
@@ -79,7 +80,7 @@ unsigned int CMassFileLoader::Begin(CMassFileLoader *pUserData)
 		}
 	}
 
-	if(!str_comp(pUserData->m_pExtension, ""))
+	if(pUserData->m_pExtension != nullptr && !str_comp(pUserData->m_pExtension, ""))
 	{
 		// must be .x at the shortest
 		if(str_length(pUserData->m_pExtension) == 1 || pUserData->m_pExtension[0] != '.')
@@ -172,10 +173,38 @@ unsigned int CMassFileLoader::Begin(CMassFileLoader *pUserData)
 		return Count;
 }
 
+#include "config.h"
+#include "console.h"
+#include "jobs.h"
+
+class CFileLoadJob : public IJob
+{
+	void (*m_Function)(void *);
+	CMassFileLoader *m_pData;
+	void Run() override
+	{
+		m_Function(m_pData);
+		//		auto f0 = reinterpret_cast<void (*)(void *)>(&CMassFileLoader::Begin);
+		//		f0(m_pData);
+	}
+
+public:
+	CFileLoadJob(void (*Function)(void *), CMassFileLoader *pData)
+	{
+		m_pData = pData;
+		m_Function = Function;
+	}
+
+	virtual ~CFileLoadJob()
+	{
+	}
+};
+
 std::optional<unsigned int> CMassFileLoader::Load()
 {
 #define MASS_FILE_LOADER_ERROR_PREFIX "Mass file loader used "
 	dbg_assert(!m_RequestedPaths.empty(), MASS_FILE_LOADER_ERROR_PREFIX "without adding paths."); // Ensure paths have been added
+	dbg_assert(bool(m_pEngine), MASS_FILE_LOADER_ERROR_PREFIX "without passing a valid IEngine instance."); // Ensure engine is valid
 	dbg_assert(bool(m_pStorage), MASS_FILE_LOADER_ERROR_PREFIX "without passing a valid IStorage instance."); // Ensure storage is valid
 	dbg_assert(bool(m_fnFileLoadedCallback), MASS_FILE_LOADER_ERROR_PREFIX "without implementing file loaded callback."); // Ensure file loaded callback is implemented
 	dbg_assert(m_Flags ^ LOAD_FLAGS_MASK, MASS_FILE_LOADER_ERROR_PREFIX "with invalid flags."); // Ensure flags are in bounds
@@ -183,20 +212,24 @@ std::optional<unsigned int> CMassFileLoader::Load()
 #undef MASS_FILE_LOADER_ERROR_PREFIX
 	if(m_Flags & LOAD_FLAGS_ASYNC)
 	{
-		static constexpr const char aThreadIdPrefix[] = "fileloadjob-";
-		ThreadId = RandomUuid();
-
-		char aAux[UUID_MAXSTRSIZE];
-		FormatUuid(ThreadId, aAux, sizeof(aAux));
-
-		char aId[sizeof(aThreadIdPrefix) + sizeof(aAux)];
-		str_format(aId, sizeof(aId), "%s%s", aThreadIdPrefix, aAux);
-
-		char aAuxBuf[512];
-		str_format(aAuxBuf, sizeof(aAuxBuf), "Unable to create file loader thread with id \"%s\"", aId);
 		auto f0 = reinterpret_cast<void (*)(void *)>(&CMassFileLoader::Begin);
-		dbg_assert(thread_init_and_detach(f0, this, aId) != 0, aAuxBuf);
+		m_pEngine->AddJob(std::make_shared<CFileLoadJob>(f0, this));
 		return std::nullopt;
+
+		//		static constexpr const char aThreadIdPrefix[] = "fileloadjob-";
+		//		ThreadId = RandomUuid();
+
+		//		char aAux[UUID_MAXSTRSIZE];
+		//		FormatUuid(ThreadId, aAux, sizeof(aAux));
+
+		//		char aId[sizeof(aThreadIdPrefix) + sizeof(aAux)];
+		//		str_format(aId, sizeof(aId), "%s%s", aThreadIdPrefix, aAux);
+
+		//		char aAuxBuf[512];
+		//		str_format(aAuxBuf, sizeof(aAuxBuf), "Unable to create file loader thread with id \"%s\"", aId);
+		//		auto f0 = reinterpret_cast<void (*)(void *)>(&CMassFileLoader::Begin);
+		//		dbg_assert(thread_init_and_detach(f0, this, aId) != 0, aAuxBuf);
+		//		return std::nullopt;
 	}
 	else
 	{

@@ -1,6 +1,7 @@
 #ifndef ENGINE_SHARED_FILE_LOADER_H
 #define ENGINE_SHARED_FILE_LOADER_H
 
+#include "engine/engine.h"
 #include "engine/shared/uuid_manager.h"
 #include <cstdint>
 #include <engine/storage.h>
@@ -119,16 +120,6 @@ public:
 		// If continued, the path is ignored.
 		// pUser = Provided invalid path (const char *)
 
-		LOAD_ERROR_UNWANTED_SYMLINK,
-		// Path is a symlink and LOAD_FLAGS_FOLLOW_SYMBOLIC_LINKS has not been set.
-		// If continued, the file or directory the symlink points to is ignored.
-		// pUser = Absolute path to symlink (const char *)
-
-		// LOAD_ERROR_DIRECTORY_UNREADABLE,
-		// Current user does not have read access to directory.
-		// If continued, the directory is ignored.
-		// pUser = Absolute directory path (const char *)
-
 		LOAD_ERROR_FILE_UNREADABLE,
 		// File within current directory is not readable by current user
 		// If continued, the file is ignored.
@@ -177,7 +168,7 @@ public:
 	using LoadFinishedCallbackSignature = void(unsigned int Count, void *pUser);
 	void SetLoadFinishedCallback(std::function<LoadFinishedCallbackSignature> Function);
 
-	explicit CMassFileLoader(IStorage *pStorage, uint8_t Flags = LOAD_FLAGS_NONE);
+	explicit CMassFileLoader(IEngine *pEngine, IStorage *pStorage, uint8_t Flags = LOAD_FLAGS_NONE);
 	~CMassFileLoader();
 
 	template<typename T, typename... Ts>
@@ -206,6 +197,7 @@ private:
 	std::unordered_map<std::string, std::vector<std::string> *> m_PathCollection; // oh geez
 	char *m_pExtension = nullptr;
 
+	IEngine *m_pEngine = nullptr;
 	IStorage *m_pStorage = nullptr;
 
 	using FileIndex = std::vector<std::string>;
