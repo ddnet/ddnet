@@ -748,6 +748,25 @@ int CGameClient::GetLastRaceTick()
 	return m_Ghost.GetLastRaceTick();
 }
 
+bool CGameClient::Predict() const
+{
+	if(!g_Config.m_ClPredict)
+		return false;
+
+	if(m_Snap.m_pGameInfoObj)
+	{
+		if(m_Snap.m_pGameInfoObj->m_GameStateFlags & (GAMESTATEFLAG_GAMEOVER | GAMESTATEFLAG_PAUSED))
+		{
+			return false;
+		}
+	}
+
+	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
+		return false;
+
+	return !m_Snap.m_SpecInfo.m_Active && m_Snap.m_pLocalCharacter;
+}
+
 void CGameClient::OnRelease()
 {
 	// release all systems
