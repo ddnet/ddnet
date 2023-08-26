@@ -2362,40 +2362,6 @@ int fs_is_relative_path(const char *path)
 #endif
 }
 
-int fs_is_symlink(const char *path)
-{
-	bool is_symlink = false;
-#if defined(CONF_FAMILY_WINDOWS)
-	// Windows is treated separately from other platforms in this case because std::filesystem incorrectly reports symlinks as normal items MinGW.
-	const std::wstring wide_path = windows_utf8_to_wide(path);
-	const DWORD attributes = GetFileAttributesW(wide_path.c_str());
-	if(attributes != INVALID_FILE_ATTRIBUTES && attributes & FILE_ATTRIBUTE_REPARSE_POINT)
-	{
-		const HANDLE handle = CreateFileW(wide_path.c_str(), FILE_READ_EA, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_REPARSE_POINT, NULL);
-		if(handle != INVALID_HANDLE_VALUE)
-		{
-			REPARSE_GUID_DATA_BUFFER *reparse_data = static_cast<REPARSE_GUID_DATA_BUFFER *>(malloc(MAXIMUM_REPARSE_DATA_BUFFER_SIZE));
-
-			DWORD returned_length;
-			if(DeviceIoControl(handle, FSCTL_GET_REPARSE_POINT, NULL, 0, reparse_data, MAXIMUM_REPARSE_DATA_BUFFER_SIZE, &returned_length, NULL))
-			{
-				if(IsReparseTagMicrosoft(reparse_data->ReparseTag))
-					is_symlink = reparse_data->ReparseTag == IO_REPARSE_TAG_SYMLINK || reparse_data->ReparseTag == IO_REPARSE_TAG_MOUNT_POINT;
-				// IO_REPARSE_TAG_SYMLINK = symlink (on windows, link->file); IO_REPARSE_TAG_MOUNT_POINT = junction (on windows, link->directory).
-			}
-			else
-				CloseHandle(handle);
-			free(reparse_data);
-		}
-	}
-#else
-	struct stat link_status;
-	lstat(path, &link_status);
-	is_symlink = S_ISLNK(link_status.st_mode);
-#endif
-	return is_symlink;
-}
-
 int fs_chdir(const char *path)
 {
 	if(fs_is_dir(path))

@@ -101,15 +101,6 @@ template<typename Fn, typename... FnArgs>
 	return Function(Args...);
 }
 
-// This is not a 'real' interface, it doesn't interact with the kernel or extend IInterface.
-// I just don't know which convention to use for an abstract class.
-// class CMassFileLoader
-//{
-// public:
-//	CMassFileLoader(uint8_t Flags) { m_Flags = Flags; };
-
-//};
-
 class CMassFileLoader
 {
 public:
@@ -158,34 +149,33 @@ public:
 	enum ELoadFlags : uint8_t
 	{
 		LOAD_FLAGS_NONE = 0b00000000, // For comparison
-		LOAD_FLAGS_MASK = 0b00111111, // For comparison
+		LOAD_FLAGS_MASK = 0b00011111, // For comparison
 
 		// clang-format off
 		LOAD_FLAGS_RECURSE_SUBDIRECTORIES =	0b00000001,	// Enter directories of any of the provided directories when loading
-		LOAD_FLAGS_FOLLOW_SYMBOLIC_LINKS =	0b00000010,	// Follow symlinks (may hang)
-		LOAD_FLAGS_ABSOLUTE_PATH =		0b00000100,	// Return an absolute file path instead of just the filename. This will influence the regex.
+		LOAD_FLAGS_ABSOLUTE_PATH =		0b00000010,	// Return an absolute file path instead of just the filename. This will influence the regex.
 									// This is useful for weeding out duplicates because there can be multiple storage paths the game searches through for one provided pathname (e.g. "skins")
-		LOAD_FLAGS_DONT_READ_FILE =		0b00001000,	// Do not read file contents.
+		LOAD_FLAGS_DONT_READ_FILE =		0b00000100,	// Do not read file contents.
 									// This is useful if you are doing a dry-run of a path or set of paths. pData and Size in the file loaded callback will be null.
-		LOAD_FLAGS_SKIP_BOM =			0b00010000,	// Whether or not to use IOFLAG_SKIP_BOM (string?)
-		LOAD_FLAGS_ASYNC =			0b00100000,	// Load asynchronously instead; return value of Begin() is not used and a file load finished callback is fired instead
+		LOAD_FLAGS_SKIP_BOM =			0b00001000,	// Whether or not to use IOFLAG_SKIP_BOM (string?)
+		LOAD_FLAGS_ASYNC =			0b00010000,	// Load asynchronously instead; return value of Begin() is not used and a file load finished callback is fired instead
 		// clang-format on
 	};
 
-	void SetFileExtension(const std::string_view Extension); // Optional; will load all files otherwise
-	void SetUserData(void *pUser) { m_pUser = pUser; }
+	void SetFileExtension(std::string_view Extension); // Optional; will load all files otherwise
+	void SetUserData(void *pUser);
 
 	// Files are not guaranteed to come in any particular order. Do not hold this pointer (pData). Immediately dereference and copy
 	using FileLoadedCallbackSignature = void(const std::string_view ItemName, const unsigned char *pData, const unsigned int Size, void *pUser);
-	void SetFileLoadedCallback(std::function<FileLoadedCallbackSignature> Function) { m_fnFileLoadedCallback = Function; }
+	void SetFileLoadedCallback(std::function<FileLoadedCallbackSignature> Function);
 
 	// Fatal error = true, nonfatal = false
 	using LoadFailedCallbackSignature = bool(ELoadError Error, const void *pData, void *pUser);
-	void SetLoadFailedCallback(std::function<LoadFailedCallbackSignature> Function) { m_fnLoadFailedCallback = Function; }
+	void SetLoadFailedCallback(std::function<LoadFailedCallbackSignature> Function);
 
 	// If this is implemented, it is expected that the object is deleted by the caller.
 	using LoadFinishedCallbackSignature = void(unsigned int Count, void *pUser);
-	void SetLoadFinishedCallback(std::function<LoadFinishedCallbackSignature> Function) { m_fnLoadFinishedCallback = std::move(Function); }
+	void SetLoadFinishedCallback(std::function<LoadFinishedCallbackSignature> Function);
 
 	explicit CMassFileLoader(IStorage *pStorage, uint8_t Flags = LOAD_FLAGS_NONE);
 	~CMassFileLoader();
@@ -202,7 +192,7 @@ public:
 protected:
 	static int ListDirectoryCallback(const char *Name, int IsDir, int, void *User);
 	static unsigned int Begin(CMassFileLoader *pUserData);
-	inline static bool CompareExtension(const std::filesystem::path &Filename, const std::string_view Extension);
+	inline static bool CompareExtension(const std::filesystem::path &Filename, std::string_view Extension);
 
 	void *m_pUser = nullptr;
 	uint8_t m_Flags = LOAD_FLAGS_NONE; // LOAD_FLAGS
@@ -230,6 +220,12 @@ private:
 	CUuid ThreadId;
 	std::function<LoadFinishedCallbackSignature> m_fnLoadFinishedCallback;
 };
+
+inline void CMassFileLoader::SetUserData(void *pUser) { m_pUser = pUser; }
+
+inline void CMassFileLoader::SetFileLoadedCallback(std::function<FileLoadedCallbackSignature> Function) { m_fnFileLoadedCallback = std::move(Function); }
+inline void CMassFileLoader::SetLoadFailedCallback(std::function<LoadFailedCallbackSignature> Function) { m_fnLoadFailedCallback = std::move(Function); }
+inline void CMassFileLoader::SetLoadFinishedCallback(std::function<LoadFinishedCallbackSignature> Function) { m_fnLoadFinishedCallback = std::move(Function); }
 
 // Multi-threaded implementation (WIP)
 // class CMassFileLoaderAsync : CMassFileLoader {

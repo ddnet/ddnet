@@ -44,11 +44,6 @@ inline bool CMassFileLoader::CompareExtension(const std::filesystem::path &Filen
 		if(!str_comp(Name, ".") || !str_comp(Name, ".."))
 			return 0;
 
-		if(!(pUserData->m_pThis->m_Flags & LOAD_FLAGS_FOLLOW_SYMBOLIC_LINKS) && fs_is_symlink(AbsolutePath))
-		{
-			*pUserData->m_pContinue = TryCallback(pUserData->m_pThis->m_fnLoadFailedCallback, LOAD_ERROR_UNWANTED_SYMLINK, AbsolutePath, pUserData->m_pThis->m_pUser);
-			return 0;
-		}
 		if(!IsDir)
 		{
 			if(str_comp(pUserData->m_pThis->m_pExtension, "") || CompareExtension(Name, pUserData->m_pThis->m_pExtension))
@@ -115,11 +110,11 @@ unsigned int CMassFileLoader::Begin(CMassFileLoader *pUserData)
 			{
 				char FilePath[IO_MAX_PATH_LENGTH];
 				str_format(FilePath, sizeof(FilePath), "%s/%s", Directory.first.c_str(), File.c_str());
-				if(!(pUserData->m_Flags & LOAD_FLAGS_FOLLOW_SYMBOLIC_LINKS) && fs_is_symlink(FilePath))
-				{
-					pUserData->m_Continue = TryCallback(pUserData->m_fnLoadFailedCallback, LOAD_ERROR_UNWANTED_SYMLINK, FilePath, pUserData->m_pUser);
-					continue;
-				}
+				//				if(!(pUserData->m_Flags & LOAD_FLAGS_FOLLOW_SYMBOLIC_LINKS) && fs_is_symlink(FilePath))
+				//				{
+				//					pUserData->m_Continue = TryCallback(pUserData->m_fnLoadFailedCallback, LOAD_ERROR_UNWANTED_SYMLINK, FilePath, pUserData->m_pUser);
+				//					continue;
+				//				}
 
 				if(pUserData->m_Flags & LOAD_FLAGS_DONT_READ_FILE)
 				{
@@ -128,7 +123,7 @@ unsigned int CMassFileLoader::Begin(CMassFileLoader *pUserData)
 					continue;
 				}
 
-				Handle = io_open(FilePath, pUserData->m_Flags & IOFLAG_READ | (pUserData->m_Flags & LOAD_FLAGS_SKIP_BOM ? IOFLAG_SKIP_BOM : 0));
+				Handle = io_open(FilePath, IOFLAG_READ | (pUserData->m_Flags & LOAD_FLAGS_SKIP_BOM ? IOFLAG_SKIP_BOM : 0));
 				if(!Handle)
 				{
 					pUserData->m_Continue = TryCallback(pUserData->m_fnLoadFailedCallback, LOAD_ERROR_FILE_UNREADABLE, FilePath, pUserData->m_pUser);
