@@ -1369,7 +1369,10 @@ CUI::EPopupMenuFunctionResult CEditor::PopupEnvPoint(void *pContext, CUIRect Vie
 		{
 			auto [SelectedIndex, SelectedChannel] = pEditor->m_vSelectedEnvelopePoints.front();
 
+			if(pEnvelope->GetChannels() == 4)
+				CurrentValue = clamp(CurrentValue, 0.0f, 1.0f);
 			pEnvelope->m_vPoints[SelectedIndex].m_aValues[SelectedChannel] = f2fx(CurrentValue);
+
 			if(SelectedIndex != 0)
 			{
 				pEnvelope->m_vPoints[SelectedIndex].m_Time = CurrentTime * 1000.0f;
