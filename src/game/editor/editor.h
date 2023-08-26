@@ -807,6 +807,7 @@ class CEditor : public IEditor
 	CRenderTools m_RenderTools;
 	CUI m_UI;
 
+	std::vector<std::reference_wrapper<CEditorComponent>> m_vComponents;
 	CMapView m_MapView;
 
 	bool m_EditorWasUsedBefore = false;
@@ -861,9 +862,6 @@ public:
 		m_Dialog = 0;
 		m_pTooltip = nullptr;
 
-		m_GridActive = false;
-		m_GridFactor = 1;
-
 		m_BrushColorEnabled = true;
 
 		m_aFileName[0] = '\0';
@@ -902,8 +900,6 @@ public:
 		m_MouseDeltaWy = 0;
 
 		m_GuiActive = true;
-		m_ProofBorders = PROOF_BORDER_OFF;
-		m_CurrentMenuProofIndex = 0;
 		m_PreviewZoom = false;
 
 		m_ShowTileInfo = SHOW_TILE_OFF;
@@ -991,8 +987,6 @@ public:
 	void FreeDynamicPopupMenus();
 	void RenderMousePointer();
 
-	void ResetMenuBackgroundPositions();
-
 	std::vector<CQuad *> GetSelectedQuads();
 	std::vector<std::pair<CQuad *, int>> GetSelectedQuadPoints();
 	std::shared_ptr<CLayer> GetSelectedLayerType(int Index, int Type) const;
@@ -1033,9 +1027,6 @@ public:
 	int m_Mode;
 	int m_Dialog;
 	const char *m_pTooltip;
-
-	bool m_GridActive;
-	int m_GridFactor;
 
 	bool m_BrushColorEnabled;
 
@@ -1184,18 +1175,6 @@ public:
 	bool m_ShowMousePointer;
 	bool m_GuiActive;
 
-	enum EProofBorder
-	{
-		PROOF_BORDER_OFF,
-		PROOF_BORDER_INGAME,
-		PROOF_BORDER_MENU
-	};
-
-	EProofBorder m_ProofBorders;
-	int m_CurrentMenuProofIndex;
-	std::vector<vec2> m_vMenuBackgroundPositions;
-	std::vector<const char *> m_vpMenuBackgroundPositionNames;
-	std::vector<std::vector<int>> m_vMenuBackgroundCollisions;
 	char m_aMenuBackgroundTooltip[256];
 	bool m_PreviewZoom;
 	float m_MouseWScale = 1.0f; // Mouse (i.e. UI) scale relative to the World (selected Group)
@@ -1309,9 +1288,6 @@ public:
 	bool DoClearableEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize, int Corners = IGraphics::CORNER_ALL, const char *pToolTip = nullptr);
 
 	void RenderBackground(CUIRect View, IGraphics::CTextureHandle Texture, float Size, float Brightness);
-
-	void RenderGrid(const std::shared_ptr<CLayerGroup> &pGroup);
-	void SnapToGrid(float &x, float &y);
 
 	int UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, int Current, int Min, int Max, int Step, float Scale, const char *pToolTip, bool IsDegree = false, bool IsHex = false, int corners = IGraphics::CORNER_ALL, ColorRGBA *pColor = nullptr, bool ShowValue = true);
 
@@ -1493,8 +1469,6 @@ public:
 	static const char *ExplainFNG(int Tile, int Layer);
 	static const char *ExplainVanilla(int Tile, int Layer);
 	static const char *Explain(EExplanation Explanation, int Tile, int Layer);
-
-	int GetLineDistance() const;
 
 	// Zooming
 	void ZoomAdaptOffsetX(float ZoomFactor, const CUIRect &View);

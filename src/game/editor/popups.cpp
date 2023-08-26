@@ -2336,7 +2336,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupGoto(void *pContext, CUIRect View, b
 	static int s_Button;
 	if(pEditor->DoButton_Editor(&s_Button, "Go", 0, &Button, 0, nullptr))
 	{
-		pEditor->MapView()->m_WorldOffset = vec2(32.0f * s_GotoPos.x + 0.5f, 32.0f * s_GotoPos.y + 0.5f);
+		pEditor->MapView()->SetWorldOffset({32.0f * s_GotoPos.x + 0.5f, 32.0f * s_GotoPos.y + 0.5f});
 	}
 
 	return CUI::POPUP_KEEP_OPEN;
@@ -2381,18 +2381,18 @@ CUI::EPopupMenuFunctionResult CEditor::PopupProofMode(void *pContext, CUIRect Vi
 	CUIRect Button;
 	View.HSplitTop(12.0f, &Button, &View);
 	static int s_ButtonIngame;
-	if(pEditor->DoButton_MenuItem(&s_ButtonIngame, "Ingame", pEditor->m_ProofBorders == PROOF_BORDER_INGAME, &Button, 0, "These borders represent what a player maximum can see."))
+	if(pEditor->DoButton_MenuItem(&s_ButtonIngame, "Ingame", pEditor->MapView()->ProofMode()->IsModeIngame(), &Button, 0, "These borders represent what a player maximum can see."))
 	{
-		pEditor->m_ProofBorders = PROOF_BORDER_INGAME;
+		pEditor->MapView()->ProofMode()->SetModeIngame();
 		return CUI::POPUP_CLOSE_CURRENT;
 	}
 
 	View.HSplitTop(2.0f, nullptr, &View);
 	View.HSplitTop(12.0f, &Button, &View);
 	static int s_ButtonMenu;
-	if(pEditor->DoButton_MenuItem(&s_ButtonMenu, "Menu", pEditor->m_ProofBorders == PROOF_BORDER_MENU, &Button, 0, "These borders represent what will be shown in the menu."))
+	if(pEditor->DoButton_MenuItem(&s_ButtonMenu, "Menu", pEditor->MapView()->ProofMode()->IsModeMenu(), &Button, 0, "These borders represent what will be shown in the menu."))
 	{
-		pEditor->m_ProofBorders = PROOF_BORDER_MENU;
+		pEditor->MapView()->ProofMode()->SetModeMenu();
 		return CUI::POPUP_CLOSE_CURRENT;
 	}
 
