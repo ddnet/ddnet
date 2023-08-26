@@ -26,7 +26,8 @@ void CMassFileLoader::SetFileExtension(const std::string_view Extension)
 
 inline bool CMassFileLoader::CompareExtension(const std::filesystem::path &Filename, const std::string_view Extension)
 {
-	// std::string is justified here because of std::transform, and because std::filesystem::path::c_str() will return const wchar_t *, but char width is handled automatically when using string
+	// std::string is justified here because of std::transform, and because std::filesystem::path::c_str() will
+	// return const wchar_t *, but char width is handled automatically when using string
 	std::string FileExtension = Filename.extension().string();
 	std::transform(FileExtension.begin(), FileExtension.end(), FileExtension.begin(),
 		[](unsigned char c) { return std::tolower(c); });
@@ -52,10 +53,13 @@ inline bool CMassFileLoader::CompareExtension(const std::filesystem::path &Filen
 		}
 		else if(pUserData->m_pThis->m_Flags & LOAD_FLAGS_RECURSE_SUBDIRECTORIES)
 		{
+			// Note that adding data to a SORTED container that is currently being iterated on higher in
+			// scope would invalidate the iterator. This is not sorted
 			pUserData->m_pThis->m_PathCollection.insert({AbsolutePath, new std::vector<std::string>});
-			// Note that adding data to a SORTED container that is currently being iterated on higher in scope would invalidate the iterator. This is not sorted
 			SListDirectoryCallbackUserInfo Data{AbsolutePath, pUserData->m_pThis, pUserData->m_pContinue};
-			pUserData->m_pThis->m_pStorage->ListDirectory(IStorage::TYPE_ALL, AbsolutePath, ListDirectoryCallback, &Data); // Directory item is a directory, must be recursed
+
+			// Directory item is a directory, must be recursed
+			pUserData->m_pThis->m_pStorage->ListDirectory(IStorage::TYPE_ALL, AbsolutePath, ListDirectoryCallback, &Data);
 		}
 	}
 
@@ -111,11 +115,6 @@ unsigned int CMassFileLoader::Begin(CMassFileLoader *pUserData)
 			{
 				char FilePath[IO_MAX_PATH_LENGTH];
 				str_format(FilePath, sizeof(FilePath), "%s/%s", Directory.first.c_str(), File.c_str());
-				//				if(!(pUserData->m_Flags & LOAD_FLAGS_FOLLOW_SYMBOLIC_LINKS) && fs_is_symlink(FilePath))
-				//				{
-				//					pUserData->m_Continue = TryCallback(pUserData->m_fnLoadFailedCallback, LOAD_ERROR_UNWANTED_SYMLINK, FilePath, pUserData->m_pUser);
-				//					continue;
-				//				}
 
 				if(pUserData->m_Flags & LOAD_FLAGS_DONT_READ_FILE)
 				{
@@ -136,7 +135,8 @@ unsigned int CMassFileLoader::Begin(CMassFileLoader *pUserData)
 				long ExpectedSize = io_tell(Handle);
 				io_seek(Handle, 0, IOSEEK_START);
 
-				if(ExpectedSize <= 0) // File is either too large for io_tell/ftell to say or it's actually empty (MinGW returns 0; MSVC returns -1)
+				// File is either too large for io_tell/ftell to say or it's actually empty (MinGW returns 0; MSVC returns -1)
+				if(ExpectedSize <= 0)
 				{
 					size_t RealSize = std::filesystem::file_size(FilePath);
 					if(static_cast<size_t>(ExpectedSize) != RealSize)
@@ -157,7 +157,10 @@ unsigned int CMassFileLoader::Begin(CMassFileLoader *pUserData)
 				Count++;
 				io_close(Handle);
 				if(pUserData->m_Flags & LOAD_FLAGS_ASYNC)
-					std::this_thread::sleep_for(std::chrono::milliseconds(20)); // i really, really dislike this. i would love to find a way to access the skin textures from the main thread in a lockfree way, so we do not have to wait and give the main thread a chance to access the lock.
+					std::this_thread::sleep_for(std::chrono::milliseconds(20));
+				// i really, really dislike this. i would love to find a way to access the skin
+				// textures from the main thread in a lockfree way, so we do not have to wait and give
+				// the main thread a chance to access the lock.
 			}
 		}
 	}
@@ -173,45 +176,17 @@ unsigned int CMassFileLoader::Begin(CMassFileLoader *pUserData)
 		return Count;
 }
 
-#include "config.h"
-#include "console.h"
-#include "jobs.h"
-
-class CFileLoadJob : public IJob
-{
-	void (*m_Function)(void *);
-	CMassFileLoader *m_pData;
-	void Run() override
-	{
-		m_Function(m_pData);
-		//		auto f0 = reinterpret_cast<void (*)(void *)>(&CMassFileLoader::Begin);
-		//		f0(m_pData);
-	}
-
-public:
-	CFileLoadJob(void (*Function)(void *), CMassFileLoader *pData)
-	{
-		m_pData = pData;
-		m_Function = Function;
-	}
-
-	virtual ~CFileLoadJob()
-	{
-	}
-};
-
 std::optional<unsigned int> CMassFileLoader::Load()
 {
 #define MASS_FILE_LOADER_ERROR_PREFIX "Mass file loader used "
 	dbg_assert(!m_RequestedPaths.empty(), MASS_FILE_LOADER_ERROR_PREFIX "without adding paths."); // Ensure paths have been added
-	dbg_assert(bool(m_pEngine), MASS_FILE_LOADER_ERROR_PREFIX "without passing a valid IEngine instance."); // Ensure engine is valid
 	dbg_assert(bool(m_pStorage), MASS_FILE_LOADER_ERROR_PREFIX "without passing a valid IStorage instance."); // Ensure storage is valid
 	dbg_assert(bool(m_fnFileLoadedCallback), MASS_FILE_LOADER_ERROR_PREFIX "without implementing file loaded callback."); // Ensure file loaded callback is implemented
 	dbg_assert(m_Flags ^ LOAD_FLAGS_MASK, MASS_FILE_LOADER_ERROR_PREFIX "with invalid flags."); // Ensure flags are in bounds
 	dbg_assert(!m_Finished, MASS_FILE_LOADER_ERROR_PREFIX "after having already been used."); // Ensure is not reused
-#undef MASS_FILE_LOADER_ERROR_PREFIX
 	if(m_Flags & LOAD_FLAGS_ASYNC)
 	{
+		dbg_assert(bool(m_pEngine), MASS_FILE_LOADER_ERROR_PREFIX "without passing a valid IEngine instance."); // Ensure engine is valid
 		auto f0 = reinterpret_cast<void (*)(void *)>(&CMassFileLoader::Begin);
 		m_pEngine->AddJob(std::make_shared<CFileLoadJob>(f0, this));
 		return std::nullopt;
@@ -235,6 +210,7 @@ std::optional<unsigned int> CMassFileLoader::Load()
 	{
 		return Begin(this);
 	}
+#undef MASS_FILE_LOADER_ERROR_PREFIX
 }
 
 /* TODO:

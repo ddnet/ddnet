@@ -37,6 +37,8 @@ enum
 
 void CMenus::LoadEntities(SCustomEntities *pEntitiesItem, void *pUser)
 {
+	return;
+
 	auto *pRealUser = (SMenuAssetScanUser *)pUser;
 	auto *pThis = (CMenus *)pRealUser->m_pUser;
 
@@ -90,6 +92,8 @@ void CMenus::LoadEntities(SCustomEntities *pEntitiesItem, void *pUser)
 
 int CMenus::EntitiesScan(const char *pName, int IsDir, int DirType, void *pUser)
 {
+	return 0;
+
 	auto *pRealUser = (SMenuAssetScanUser *)pUser;
 	auto *pThis = (CMenus *)pRealUser->m_pUser;
 	if(IsDir)
@@ -131,6 +135,8 @@ int CMenus::EntitiesScan(const char *pName, int IsDir, int DirType, void *pUser)
 template<typename TName>
 static void LoadAsset(TName *pAssetItem, const char *pAssetName, IGraphics *pGraphics, void *pUser)
 {
+	return;
+
 	char aBuff[IO_MAX_PATH_LENGTH];
 
 	if(str_comp(pAssetItem->m_aName, "default") == 0)
@@ -167,6 +173,8 @@ static void LoadAsset(TName *pAssetItem, const char *pAssetName, IGraphics *pGra
 template<typename TName>
 static int AssetScan(const char *pName, int IsDir, int DirType, std::vector<TName> &vAssetList, const char *pAssetName, IGraphics *pGraphics, void *pUser)
 {
+	return 0;
+
 	auto *pRealUser = (SMenuAssetScanUser *)pUser;
 	if(IsDir)
 	{
@@ -206,6 +214,8 @@ static int AssetScan(const char *pName, int IsDir, int DirType, std::vector<TNam
 
 int CMenus::GameScan(const char *pName, int IsDir, int DirType, void *pUser)
 {
+	return 0;
+
 	auto *pRealUser = (SMenuAssetScanUser *)pUser;
 	auto *pThis = (CMenus *)pRealUser->m_pUser;
 	IGraphics *pGraphics = pThis->Graphics();
@@ -214,6 +224,8 @@ int CMenus::GameScan(const char *pName, int IsDir, int DirType, void *pUser)
 
 int CMenus::EmoticonsScan(const char *pName, int IsDir, int DirType, void *pUser)
 {
+	return 0;
+
 	auto *pRealUser = (SMenuAssetScanUser *)pUser;
 	auto *pThis = (CMenus *)pRealUser->m_pUser;
 	IGraphics *pGraphics = pThis->Graphics();
@@ -222,6 +234,8 @@ int CMenus::EmoticonsScan(const char *pName, int IsDir, int DirType, void *pUser
 
 int CMenus::ParticlesScan(const char *pName, int IsDir, int DirType, void *pUser)
 {
+	return 0;
+
 	auto *pRealUser = (SMenuAssetScanUser *)pUser;
 	auto *pThis = (CMenus *)pRealUser->m_pUser;
 	IGraphics *pGraphics = pThis->Graphics();
@@ -230,6 +244,8 @@ int CMenus::ParticlesScan(const char *pName, int IsDir, int DirType, void *pUser
 
 int CMenus::HudScan(const char *pName, int IsDir, int DirType, void *pUser)
 {
+	return 0;
+
 	auto *pRealUser = (SMenuAssetScanUser *)pUser;
 	auto *pThis = (CMenus *)pRealUser->m_pUser;
 	IGraphics *pGraphics = pThis->Graphics();
@@ -238,6 +254,8 @@ int CMenus::HudScan(const char *pName, int IsDir, int DirType, void *pUser)
 
 int CMenus::ExtrasScan(const char *pName, int IsDir, int DirType, void *pUser)
 {
+	return 0;
+
 	auto *pRealUser = (SMenuAssetScanUser *)pUser;
 	auto *pThis = (CMenus *)pRealUser->m_pUser;
 	IGraphics *pGraphics = pThis->Graphics();
@@ -284,6 +302,8 @@ static const CMenus::SCustomItem *GetCustomItem(int CurTab, size_t Index)
 template<typename TName>
 void ClearAssetList(std::vector<TName> &vList, IGraphics *pGraphics)
 {
+	return;
+
 	for(size_t i = 0; i < vList.size(); ++i)
 	{
 		if(vList[i].m_RenderTexture.IsValid())
