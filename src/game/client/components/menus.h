@@ -322,6 +322,7 @@ protected:
 	char m_aCurrentDemoSelectionName[IO_MAX_PATH_LENGTH];
 	CLineInputBuffered<IO_MAX_PATH_LENGTH> m_DemoRenameInput;
 	CLineInputBuffered<IO_MAX_PATH_LENGTH> m_DemoSliceInput;
+	CLineInputBuffered<IO_MAX_PATH_LENGTH> m_DemoSearchInput;
 #if defined(CONF_VIDEORECORDER)
 	CLineInputBuffered<IO_MAX_PATH_LENGTH> m_DemoRenderInput;
 #endif
@@ -593,7 +594,9 @@ public:
 	// DDRace
 	int DoButton_CheckBox_Tristate(const void *pID, const char *pText, TRISTATE Checked, const CUIRect *pRect);
 	std::vector<CDemoItem> m_vDemos;
+	std::vector<CDemoItem *> m_vpFilteredDemos;
 	void DemolistPopulate();
+	void RefreshFilteredDemos();
 	void DemoSeekTick(IDemoPlayer::ETickOffset TickOffset);
 	bool m_Dummy;
 
