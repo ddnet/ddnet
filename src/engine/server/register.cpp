@@ -257,7 +257,7 @@ void CRegister::ConchainOnConfigChange(IConsole::IResult *pResult, void *pUserDa
 
 void CRegister::CProtocol::SendRegister()
 {
-	if(g_Config.m_SvIpv4Only && (m_Protocol == PROTOCOL_TW6_IPV6 || m_Protocol == PROTOCOL_TW7_IPV6) )
+	if(g_Config.m_SvIpv4Only && (m_Protocol == PROTOCOL_TW6_IPV6 || m_Protocol == PROTOCOL_TW7_IPV6))
 		return;
 
 	int64_t Now = time_get();
