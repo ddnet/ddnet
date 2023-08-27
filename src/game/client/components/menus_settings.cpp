@@ -3128,7 +3128,7 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 			static CButtonContainer s_VerifyButton;
 			if(DoButton_Menu(&s_VerifyButton, Localize("Manual Verify"), 0, &ButtonVerify, 0, IGraphics::CORNER_ALL))
 			{
-				if(!open_link("https://ger10.ddnet.tw/"))
+				if(!open_link("https://ger10.ddnet.org/"))
 				{
 					dbg_msg("menus", "couldn't open link");
 				}
