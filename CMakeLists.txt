@@ -2325,6 +2325,7 @@ if(CLIENT)
     proof_mode.h
     smooth_value.cpp
     smooth_value.h
+    tileart.cpp
   )
   set(GAME_GENERATED_CLIENT
     src/game/generated/checksum.cpp

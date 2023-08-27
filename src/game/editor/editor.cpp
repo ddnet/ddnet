@@ -7208,7 +7208,7 @@ void CEditor::RenderMenubar(CUIRect MenuBar)
 	if(DoButton_Menu(&s_ToolsButton, "Tools", 0, &ToolsButton, 0, nullptr))
 	{
 		static SPopupMenuId s_PopupMenuToolsId;
-		UI()->DoPopupMenu(&s_PopupMenuToolsId, ToolsButton.x, ToolsButton.y + ToolsButton.h - 1.0f, 200.0f, 50.0f, this, PopupMenuTools, PopupProperties);
+		UI()->DoPopupMenu(&s_PopupMenuToolsId, ToolsButton.x, ToolsButton.y + ToolsButton.h - 1.0f, 200.0f, 64.0f, this, PopupMenuTools, PopupProperties);
 	}
 
 	MenuBar.VSplitLeft(5.0f, nullptr, &MenuBar);
