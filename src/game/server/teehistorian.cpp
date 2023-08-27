@@ -9,7 +9,7 @@
 static const char TEEHISTORIAN_NAME[] = "teehistorian@ddnet.tw";
 static const CUuid TEEHISTORIAN_UUID = CalculateUuid(TEEHISTORIAN_NAME);
 static const char TEEHISTORIAN_VERSION[] = "2";
-static const char TEEHISTORIAN_VERSION_MINOR[] = "5";
+static const char TEEHISTORIAN_VERSION_MINOR[] = "6";
 
 #define UUID(id, name) static const CUuid UUID_##id = CalculateUuid(name);
 #include <engine/shared/teehistorian_ex_chunks.h>
@@ -87,11 +87,11 @@ void CTeeHistorian::WriteHeader(const CGameInfo *pGameInfo)
 	if(pGameInfo->m_HavePrevGameUuid)
 	{
 		FormatUuid(pGameInfo->m_PrevGameUuid, aPrevGameUuid, sizeof(aPrevGameUuid));
-		str_format(aPrevGameUuidJson, sizeof(aPrevGameUuidJson), "\"%s\"", aPrevGameUuid);
+		str_format(aPrevGameUuidJson, sizeof(aPrevGameUuidJson), "\"prev_game_uuid\":\"%s\",", aPrevGameUuid);
 	}
 	else
 	{
-		str_copy(aPrevGameUuidJson, "null");
+		aPrevGameUuidJson[0] = 0;
 	}
 
 	char aCommentBuffer[128];
@@ -113,7 +113,7 @@ void CTeeHistorian::WriteHeader(const CGameInfo *pGameInfo)
 		"\"version\":\"%s\","
 		"\"version_minor\":\"%s\","
 		"\"game_uuid\":\"%s\","
-		"\"prev_game_uuid\":%s,"
+		"%s"
 		"\"server_version\":\"%s\","
 		"\"start_time\":\"%s\","
 		"\"server_name\":\"%s\","
