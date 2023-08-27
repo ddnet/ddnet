@@ -2303,7 +2303,7 @@ if(CLIENT)
     ui_scrollregion.cpp
     ui_scrollregion.h
   )
-  set_src(GAME_EDITOR GLOB src/game/editor
+  set_src(GAME_EDITOR GLOB_RECURSE src/game/editor
     auto_map.cpp
     auto_map.h
     component.cpp
@@ -2312,14 +2312,23 @@ if(CLIENT)
     editor.h
     explanations.cpp
     io.cpp
-    layer_game.cpp
-    layer_quads.cpp
-    layer_sounds.cpp
-    layer_tiles.cpp
     map_grid.cpp
     map_grid.h
     map_view.cpp
     map_view.h
+    mapitems/image.cpp
+    mapitems/layer_front.cpp
+    mapitems/layer_game.cpp
+    mapitems/layer_group.cpp
+    mapitems/layer_quads.cpp
+    mapitems/layer_sounds.cpp
+    mapitems/layer_speedup.cpp
+    mapitems/layer_switch.cpp
+    mapitems/layer_tele.cpp
+    mapitems/layer_tiles.cpp
+    mapitems/layer_tune.cpp
+    mapitems/map.cpp
+    mapitems/sound.cpp
     popups.cpp
     proof_mode.cpp
     proof_mode.h
