@@ -127,9 +127,12 @@ protected:
 	void *m_pData;
 	void Run() override
 	{
-		m_Status = FILE_LOAD_JOB_STATUS_RUNNING;
+		m_CustomStatus = FILE_LOAD_JOB_STATUS_RUNNING;
 		m_Function(m_pData);
+		m_CustomStatus = FILE_LOAD_JOB_STATUS_DONE;
 	}
+
+	std::atomic<int> m_CustomStatus = FILE_LOAD_JOB_STATUS_PENDING; // I don't want to override this; I think it should be protected in IJob
 
 public:
 	CFileLoadJob(void (*Function)(void *), void *pData)
@@ -137,9 +140,16 @@ public:
 		m_pData = pData;
 		m_Function = Function;
 	}
-	std::atomic<int> m_Status = FILE_LOAD_JOB_STATUS_PENDING;
-
 	virtual ~CFileLoadJob() = default;
+
+	void SetCustomStatus(int Status)
+	{
+		m_CustomStatus.store(Status);
+	}
+	int GetStatus()
+	{
+		return m_CustomStatus.load();
+	}
 
 	enum
 	{
@@ -245,11 +255,11 @@ public:
 		m_RequestedPaths.push_back(std::string(Path));
 		(SetPaths(std::forward<T>(Paths)), ...);
 	}
-	int GetJobStatus() { return m_FileLoadJob ? m_FileLoadJob->m_Status.load() : CFileLoadJob::FILE_LOAD_JOB_STATUS_PENDING; }
+	int GetJobStatus() { return m_FileLoadJob ? m_FileLoadJob->GetStatus() : CFileLoadJob::FILE_LOAD_JOB_STATUS_PENDING; }
 	void SetJobStatus(int Status)
 	{
 		if(m_FileLoadJob)
-			m_FileLoadJob->m_Status.store(Status);
+			m_FileLoadJob->SetCustomStatus(Status);
 	}
 
 	std::optional<unsigned int> Load();

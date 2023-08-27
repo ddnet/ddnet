@@ -370,20 +370,22 @@ void CSkins::SkinLoadedCallback(const std::string_view
 
 		// Name should have extension at this point, guaranteeing it is at least 4 bytes.
 		const int idx = ItemName.find_last_of('/') + 1;
-		std::string NameWithoutExtension = ItemName.substr(idx, ItemName.size() - idx - 4).data();
+		const int len = ItemName.length() - idx - 3;
+		char NameWithoutExtension[len];
+		str_format(NameWithoutExtension, len, "%s", ItemName.substr(idx, len).data());
 
-		if(g_Config.m_ClVanillaSkinsOnly && !CSkins::IsVanillaSkin(NameWithoutExtension.c_str()))
+		if(g_Config.m_ClVanillaSkinsOnly && !CSkins::IsVanillaSkin(NameWithoutExtension))
 			return;
 
 		for(const auto &It : pThis->BASE_SKINS) // If it's a base skin, it's already been loaded
-			if(!str_comp(NameWithoutExtension.c_str(), It))
+			if(!str_comp(NameWithoutExtension, It))
 				return;
 
 		// Don't add duplicate skins (one from user's config directory, other from
 		// client itself)
-		if(pThis->IsDuplicateSkin(NameWithoutExtension.c_str()))
+		if(pThis->IsDuplicateSkin(NameWithoutExtension))
 		{
-			dbg_msg("gameclient", "Duplicate skin '%s' will be ignored.", NameWithoutExtension.c_str());
+			dbg_msg("gameclient", "Duplicate skin '%s' will be ignored.", NameWithoutExtension);
 			return;
 		}
 
@@ -415,7 +417,7 @@ void CSkins::SkinLoadedCallback(const std::string_view
 			return;
 		}
 
-		pThis->m_ReadySkinTextures.insert({NameWithoutExtension, std::move(Info)});
+		pThis->m_ReadySkinTextures.insert({std::string(NameWithoutExtension), std::move(Info)});
 	}
 	pThis->m_pFileLoader->SetJobStatus(CFileLoadJob::FILE_LOAD_JOB_STATUS_YIELD);
 
@@ -439,11 +441,13 @@ void CSkins::Refresh()
 
 	ClearSkins();
 
+	char aBuf[IO_MAX_PATH_LENGTH];
 	for(const auto &it : BASE_SKINS)
 	{
 		dbg_msg("gameclient", "Loading base skin %s", it);
 		CImageInfo Info;
-		if(LoadSkinPNG(Info, it, ("skins/" + std::string(it) + ".png").c_str(), IStorage::TYPE_ALL))
+		str_format(aBuf, sizeof(aBuf), "skins/%s.png", it);
+		if(LoadSkinPNG(Info, it, aBuf, IStorage::TYPE_ALL))
 			LoadSkin(it, Info, m_BaseSkins);
 	}
 	m_Mutex.unlock();

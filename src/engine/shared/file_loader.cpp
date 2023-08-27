@@ -84,7 +84,7 @@ unsigned int CMassFileLoader::Begin(CMassFileLoader *pUserData)
 		}
 	}
 
-	if(pUserData->m_pExtension != nullptr && !str_comp(pUserData->m_pExtension, ""))
+	if(pUserData->m_pExtension && !str_comp(pUserData->m_pExtension, ""))
 	{
 		// must be .x at the shortest
 		if(str_length(pUserData->m_pExtension) == 1 || pUserData->m_pExtension[0] != '.')
