@@ -1943,8 +1943,6 @@ set_src(ENGINE_SHARED GLOB_RECURSE src/engine/shared
   fifo.h
   file_loader.cpp
   file_loader.h
-  file_loader_async.cpp
-  file_loader_async.h
   filecollection.cpp
   filecollection.h
   global_uuid_manager.cpp
