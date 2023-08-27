@@ -157,11 +157,6 @@ unsigned int CMassFileLoader::Begin(CMassFileLoader *pUserData)
 				free(pData);
 				Count++;
 				io_close(Handle);
-
-				//				std::this_thread::sleep_for(std::chrono::milliseconds(20));
-				// i really, really dislike this. i would love to find a way to access the skin
-				// textures from the main thread in a lockfree way, so we do not have to wait and give
-				// the main thread a chance to access the lock.
 			}
 		}
 	}
@@ -177,9 +172,9 @@ unsigned int CMassFileLoader::Begin(CMassFileLoader *pUserData)
 		return Count;
 }
 
+#define MASS_FILE_LOADER_ERROR_PREFIX "Mass file loader used "
 std::optional<unsigned int> CMassFileLoader::Load()
 {
-#define MASS_FILE_LOADER_ERROR_PREFIX "Mass file loader used "
 	dbg_assert(!m_RequestedPaths.empty(), MASS_FILE_LOADER_ERROR_PREFIX "without adding paths."); // Ensure paths have been added
 	dbg_assert(bool(m_pStorage), MASS_FILE_LOADER_ERROR_PREFIX "without passing a valid IStorage instance."); // Ensure storage is valid
 	dbg_assert(bool(m_fnFileLoadedCallback), MASS_FILE_LOADER_ERROR_PREFIX "without implementing file loaded callback."); // Ensure file loaded callback is implemented
@@ -188,32 +183,14 @@ std::optional<unsigned int> CMassFileLoader::Load()
 	if(m_Flags & LOAD_FLAGS_ASYNC)
 	{
 		dbg_assert(bool(m_pEngine), MASS_FILE_LOADER_ERROR_PREFIX "without passing a valid IEngine instance."); // Ensure engine is valid
-		auto f0 = reinterpret_cast<void (*)(void *)>(&CMassFileLoader::Begin);
-		m_FileLoadJob = std::make_shared<CFileLoadJob>(f0, this);
+		m_FileLoadJob = std::make_shared<CFileLoadJob>(&CMassFileLoader::Begin, this);
 		m_pEngine->AddJob(m_FileLoadJob);
 		return std::nullopt;
-
-		//		static constexpr const char aThreadIdPrefix[] = "fileloadjob-";
-		//		ThreadId = RandomUuid();
-
-		//		char aAux[UUID_MAXSTRSIZE];
-		//		FormatUuid(ThreadId, aAux, sizeof(aAux));
-
-		//		char aId[sizeof(aThreadIdPrefix) + sizeof(aAux)];
-		//		str_format(aId, sizeof(aId), "%s%s", aThreadIdPrefix, aAux);
-
-		//		char aAuxBuf[512];
-		//		str_format(aAuxBuf, sizeof(aAuxBuf), "Unable to create file loader thread with id \"%s\"", aId);
-		//		auto f0 = reinterpret_cast<void (*)(void *)>(&CMassFileLoader::Begin);
-		//		dbg_assert(thread_init_and_detach(f0, this, aId) != 0, aAuxBuf);
-		//		return std::nullopt;
 	}
 	else
-	{
 		return Begin(this);
-	}
-#undef MASS_FILE_LOADER_ERROR_PREFIX
 }
+#undef MASS_FILE_LOADER_ERROR_PREFIX
 
 /* TODO:
  * [+] test error callback return value, make sure if false is returned the callback is never called again

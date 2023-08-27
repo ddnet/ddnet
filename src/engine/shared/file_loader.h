@@ -123,21 +123,22 @@ class CMassFileLoader;
 class CFileLoadJob : public IJob
 {
 protected:
-	void (*m_Function)(void *);
-	void *m_pData;
+	unsigned int (*m_Function)(CMassFileLoader *);
+	CMassFileLoader *m_pFileLoader;
 	void Run() override
 	{
 		m_CustomStatus = FILE_LOAD_JOB_STATUS_RUNNING;
-		m_Function(m_pData);
+		m_Function(m_pFileLoader);
 		m_CustomStatus = FILE_LOAD_JOB_STATUS_DONE;
 	}
 
-	std::atomic<int> m_CustomStatus = FILE_LOAD_JOB_STATUS_PENDING; // I don't want to override this; I think it should be protected in IJob
+private:
+	std::atomic<int> m_CustomStatus = FILE_LOAD_JOB_STATUS_PENDING;
 
 public:
-	CFileLoadJob(void (*Function)(void *), void *pData)
+	CFileLoadJob(unsigned int (*Function)(CMassFileLoader *), CMassFileLoader *pFileLoader)
 	{
-		m_pData = pData;
+		m_pFileLoader = pFileLoader;
 		m_Function = Function;
 	}
 	virtual ~CFileLoadJob() = default;
@@ -170,16 +171,19 @@ public:
 	{
 		LOAD_ERROR_UNKNOWN,
 		// Unknown error.
+
 		// If continued, the error is ignored but is likely to happen again.
 		// pUser = nullptr
 
 		LOAD_ERROR_INVALID_SEARCH_PATH,
 		// Path describes a file, a directory which does not exist, or is malformed.
+
 		// If continued, the path is ignored.
 		// pUser = Provided invalid path (const char *)
 
 		LOAD_ERROR_FILE_UNREADABLE,
 		// File within current directory is not readable by current user
+
 		// If continued, the file is ignored.
 		// pUser = Absolute file path (const char *)
 
@@ -187,11 +191,13 @@ public:
 		// File is too big, either requiring too much memory to be allocated to it without something like
 		// pagefile backing, or it is bigger than 2GiB on a system which DDNet cannot address as much memory as
 		// required in order to load it (e.g., 32 bit)
+
 		// If continued, the file is ignored.
 		// pUser = Absolute file path (const char *)
 
 		LOAD_ERROR_INVALID_EXTENSION,
 		// File extension provided is invalid
+
 		// If continued, the extension is disregarded and the file load callback will be called for every file
 		// in the selected paths.
 		// pUser = File extension (const char *)
@@ -279,7 +285,7 @@ private:
 	std::function<LoadFailedCallbackSignature> m_fnLoadFailedCallback;
 
 	std::vector<std::string> m_RequestedPaths;
-	std::unordered_map<std::string, std::vector<std::string> *> m_PathCollection; // oh geez
+	std::unordered_map<std::string, std::vector<std::string> *> m_PathCollection;
 	char *m_pExtension = nullptr;
 
 	IEngine *m_pEngine = nullptr;
@@ -293,7 +299,7 @@ private:
 		bool *m_pContinue;
 	};
 
-	// async specific
+	// Async only
 	std::shared_ptr<CFileLoadJob> m_FileLoadJob;
 	std::function<LoadFinishedCallbackSignature> m_fnLoadFinishedCallback;
 };
