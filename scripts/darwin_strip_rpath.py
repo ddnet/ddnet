@@ -12,7 +12,7 @@ def split_cmds(lines):
 			current = []
 			continue
 
- 		current.append(line.strip())
+		current.append(line.strip())
 
 	return cmds[1:]
 
