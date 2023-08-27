@@ -1,7 +1,6 @@
 #ifndef ENGINE_SHARED_FILE_LOADER_H
 #define ENGINE_SHARED_FILE_LOADER_H
 
-// clang-format off
 #include "config.h"
 #include "console.h"
 #include "engine/engine.h"
@@ -68,7 +67,7 @@
  *    SetPaths(...) takes any amount of paths and has no return value. Paths starting with ':' are treated as "basic"
  *    paths, a distinction made by IStorage that describes paths whose locations are not absolute and can exist in a
  *    place that only IStorage APIs know how to find. If you are not providing a basic path, it's expected that the
- *    path is absolute. 
+ *    path is absolute.
  *    For example:
  *        ":foo"; A directory called foo in the storage paths (the game's working directory and its app data folder).
  *        "/home/user/foo/bar"; Some other absolute path, e.g., not basic.
@@ -119,6 +118,38 @@ template<typename Fn, typename... FnArgs>
 	return Function(Args...);
 }
 
+class CMassFileLoader;
+
+class CFileLoadJob : public IJob
+{
+protected:
+	void (*m_Function)(void *);
+	void *m_pData;
+	void Run() override
+	{
+		m_Status = FILE_LOAD_JOB_STATUS_RUNNING;
+		m_Function(m_pData);
+	}
+
+public:
+	CFileLoadJob(void (*Function)(void *), void *pData)
+	{
+		m_pData = pData;
+		m_Function = Function;
+	}
+	std::atomic<int> m_Status = FILE_LOAD_JOB_STATUS_PENDING;
+
+	virtual ~CFileLoadJob() = default;
+
+	enum
+	{
+		FILE_LOAD_JOB_STATUS_PENDING = IJob::STATE_PENDING,
+		FILE_LOAD_JOB_STATUS_RUNNING = IJob::STATE_RUNNING,
+		FILE_LOAD_JOB_STATUS_DONE = IJob::STATE_DONE,
+		FILE_LOAD_JOB_STATUS_YIELD = IJob::STATE_DONE + 1
+	};
+};
+
 class CMassFileLoader
 {
 public:
@@ -163,25 +194,25 @@ public:
 		LOAD_FLAGS_MASK = 0b00011111, // For comparison
 
 		// clang-format off
-
-		// Enter directories of any of the provided directories when loading
-		LOAD_FLAGS_RECURSE_SUBDIRECTORIES =	0b00000001,
-
-		// Return an absolute file path instead of just the filename. This will influence the regex. This is
-		// useful for weeding out duplicates because there can be multiple storage paths the game searches
-		// through for one provided pathname (e.g. "skins")
-		LOAD_FLAGS_ABSOLUTE_PATH =		0b00000010,
-
-		// Do not read file contents. This is useful if you are doing a dry-run of a path or set of paths.
-		// pData and Size in the file loaded callback will be null.
-		LOAD_FLAGS_DONT_READ_FILE =		0b00000100,
-
-		// Whether or not to use skip the UTF-8 BOM
-		LOAD_FLAGS_SKIP_BOM =			0b00001000,
-		
-		// Load asynchronously instead; return value of Begin() is not used and a file load finished callback
-		// is fired instead
-		LOAD_FLAGS_ASYNC =			0b00010000,
+ 
+ 		// Enter directories of any of the provided directories when loading
+ 		LOAD_FLAGS_RECURSE_SUBDIRECTORIES =	0b00000001,
+ 
+ 		// Return an absolute file path instead of just the filename. This will influence the regex. This is
+ 		// useful for weeding out duplicates because there can be multiple storage paths the game searches
+ 		// through for one provided pathname (e.g. "skins")
+ 		LOAD_FLAGS_ABSOLUTE_PATH =		0b00000010,
+ 
+ 		// Do not read file contents. This is useful if you are doing a dry-run of a path or set of paths.
+ 		// pData and Size in the file loaded callback will be null.
+ 		LOAD_FLAGS_DONT_READ_FILE =		0b00000100,
+ 
+ 		// Whether or not to use skip the UTF-8 BOM
+ 		LOAD_FLAGS_SKIP_BOM =			0b00001000,
+ 		
+ 		// Load asynchronously instead; return value of Begin() is not used and a file load finished callback
+ 		// is fired instead
+ 		LOAD_FLAGS_ASYNC =			0b00010000,
 
 		// clang-format on
 	};
@@ -213,6 +244,12 @@ public:
 	{
 		m_RequestedPaths.push_back(std::string(Path));
 		(SetPaths(std::forward<T>(Paths)), ...);
+	}
+	int GetJobStatus() { return m_FileLoadJob ? m_FileLoadJob->m_Status.load() : CFileLoadJob::FILE_LOAD_JOB_STATUS_PENDING; }
+	void SetJobStatus(int Status)
+	{
+		if(m_FileLoadJob)
+			m_FileLoadJob->m_Status.store(Status);
 	}
 
 	std::optional<unsigned int> Load();
@@ -247,7 +284,7 @@ private:
 	};
 
 	// async specific
-	CUuid ThreadId;
+	std::shared_ptr<CFileLoadJob> m_FileLoadJob;
 	std::function<LoadFinishedCallbackSignature> m_fnLoadFinishedCallback;
 };
 
@@ -255,21 +292,5 @@ inline void CMassFileLoader::SetUserData(void *pUser) { m_pUser = pUser; }
 inline void CMassFileLoader::SetFileLoadedCallback(std::function<FileLoadedCallbackSignature> Function) { m_fnFileLoadedCallback = std::move(Function); }
 inline void CMassFileLoader::SetLoadFailedCallback(std::function<LoadFailedCallbackSignature> Function) { m_fnLoadFailedCallback = std::move(Function); }
 inline void CMassFileLoader::SetLoadFinishedCallback(std::function<LoadFinishedCallbackSignature> Function) { m_fnLoadFinishedCallback = std::move(Function); }
-
-class CFileLoadJob : public IJob
-{
-	void (*m_Function)(void *);
-	CMassFileLoader *m_pData;
-	void Run() override { m_Function(m_pData); }
-
-public:
-	CFileLoadJob(void (*Function)(void *), CMassFileLoader *pData)
-	{
-		m_pData = pData;
-		m_Function = Function;
-	}
-
-	virtual ~CFileLoadJob() = default;
-};
 
 #endif // ENGINE_SHARED_FILE_LOADER_H

@@ -20,8 +20,8 @@ CMassFileLoader::~CMassFileLoader()
 
 void CMassFileLoader::SetFileExtension(const std::string_view Extension)
 {
-	m_pExtension = static_cast<char *>(malloc((Extension.size() + 1) * sizeof(char)));
-	str_copy(m_pExtension, Extension.data(), Extension.size());
+	m_pExtension = static_cast<char *>(malloc((Extension.length()) + 1 * sizeof(char)));
+	str_format(m_pExtension, Extension.length() + 1, "%s", Extension.data());
 }
 
 inline bool CMassFileLoader::CompareExtension(const std::filesystem::path &Filename, const std::string_view Extension)
@@ -113,6 +113,7 @@ unsigned int CMassFileLoader::Begin(CMassFileLoader *pUserData)
 		{
 			if(pUserData->m_Continue)
 			{
+				while(pUserData->GetJobStatus() != CFileLoadJob::FILE_LOAD_JOB_STATUS_RUNNING) {}
 				char FilePath[IO_MAX_PATH_LENGTH];
 				str_format(FilePath, sizeof(FilePath), "%s/%s", Directory.first.c_str(), File.c_str());
 
@@ -156,8 +157,8 @@ unsigned int CMassFileLoader::Begin(CMassFileLoader *pUserData)
 				free(pData);
 				Count++;
 				io_close(Handle);
-				if(pUserData->m_Flags & LOAD_FLAGS_ASYNC)
-					std::this_thread::sleep_for(std::chrono::milliseconds(20));
+
+				//				std::this_thread::sleep_for(std::chrono::milliseconds(20));
 				// i really, really dislike this. i would love to find a way to access the skin
 				// textures from the main thread in a lockfree way, so we do not have to wait and give
 				// the main thread a chance to access the lock.
@@ -188,7 +189,8 @@ std::optional<unsigned int> CMassFileLoader::Load()
 	{
 		dbg_assert(bool(m_pEngine), MASS_FILE_LOADER_ERROR_PREFIX "without passing a valid IEngine instance."); // Ensure engine is valid
 		auto f0 = reinterpret_cast<void (*)(void *)>(&CMassFileLoader::Begin);
-		m_pEngine->AddJob(std::make_shared<CFileLoadJob>(f0, this));
+		m_FileLoadJob = std::make_shared<CFileLoadJob>(f0, this);
+		m_pEngine->AddJob(m_FileLoadJob);
 		return std::nullopt;
 
 		//		static constexpr const char aThreadIdPrefix[] = "fileloadjob-";

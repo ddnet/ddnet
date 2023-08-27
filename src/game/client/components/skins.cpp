@@ -277,7 +277,7 @@ CSkins::~CSkins()
 	UnloadSkins(m_BaseSkins);
 	m_BaseSkins.clear();
 
-	delete m_FileLoader;
+	delete m_pFileLoader;
 }
 
 void CSkins::OnInit()
@@ -303,14 +303,29 @@ void CSkins::OnRender()
 {
 	if(m_LoadingSkinsFromDisk)
 	{
-		std::lock_guard Lock(m_Mutex); // Not ideal but necessary. Maybe a lockfree method can be devised in the future
-		if(!m_ReadySkinTextures.empty())
+		switch(m_pFileLoader->GetJobStatus())
 		{
-			for(const auto &It : m_ReadySkinTextures)
+		case CFileLoadJob::FILE_LOAD_JOB_STATUS_YIELD: // Other thread is waiting for more textures
+			if(!m_ReadySkinTextures.empty())
 			{
-				LoadSkin(It.first.data(), *It.second, m_Skins); // Upload skins that have been loaded on the file loader thread since last frame
+				std::lock_guard Lock(m_Mutex); // Not ideal but necessary. Maybe a lockfree method can be devised in the future
+				for(const auto &It : m_ReadySkinTextures)
+				{
+					LoadSkin(It.first.data(), *It.second, m_Skins); // Upload skins that have been loaded on the file loader thread since last frame
+				}
+				m_ReadySkinTextures.clear();
 			}
-			m_ReadySkinTextures.clear();
+			m_pFileLoader->SetJobStatus(CFileLoadJob::FILE_LOAD_JOB_STATUS_RUNNING);
+			break;
+		case CFileLoadJob::FILE_LOAD_JOB_STATUS_DONE: // Other thread's task has finished
+			m_LoadingSkinsFromDisk = false;
+			break;
+		case CFileLoadJob::FILE_LOAD_JOB_STATUS_PENDING: // Other thread's task has yet to be run
+			break;
+		case CFileLoadJob::FILE_LOAD_JOB_STATUS_RUNNING: // Other thread is working
+			break;
+		default:
+			break;
 		}
 	}
 }
@@ -350,56 +365,59 @@ void CSkins::SkinLoadedCallback(const std::string_view
 	if(!pThis)
 		return;
 
-	std::lock_guard Lock(pThis->m_Mutex);
+	{
+		std::lock_guard Lock(pThis->m_Mutex);
 
-	// Name should have extension at this point, guaranteeing it is at least 4 bytes.
-	const int idx = ItemName.find_last_of('/') + 1;
-	std::string NameWithoutExtension = ItemName.substr(idx, ItemName.size() - idx - 4).data();
+		// Name should have extension at this point, guaranteeing it is at least 4 bytes.
+		const int idx = ItemName.find_last_of('/') + 1;
+		std::string NameWithoutExtension = ItemName.substr(idx, ItemName.size() - idx - 4).data();
 
-	if(g_Config.m_ClVanillaSkinsOnly && !CSkins::IsVanillaSkin(NameWithoutExtension.c_str()))
-		return;
-
-	for(const auto &It : pThis->BASE_SKINS) // If it's a base skin, it's already been loaded
-		if(!str_comp(NameWithoutExtension.c_str(), It))
+		if(g_Config.m_ClVanillaSkinsOnly && !CSkins::IsVanillaSkin(NameWithoutExtension.c_str()))
 			return;
 
-	// Don't add duplicate skins (one from user's config directory, other from
-	// client itself)
-	if(pThis->IsDuplicateSkin(NameWithoutExtension.c_str()))
-	{
-		dbg_msg("gameclient", "Duplicate skin '%s' will be ignored.", NameWithoutExtension.c_str());
-		return;
+		for(const auto &It : pThis->BASE_SKINS) // If it's a base skin, it's already been loaded
+			if(!str_comp(NameWithoutExtension.c_str(), It))
+				return;
+
+		// Don't add duplicate skins (one from user's config directory, other from
+		// client itself)
+		if(pThis->IsDuplicateSkin(NameWithoutExtension.c_str()))
+		{
+			dbg_msg("gameclient", "Duplicate skin '%s' will be ignored.", NameWithoutExtension.c_str());
+			return;
+		}
+
+		TImageByteBuffer ByteBuffer;
+		SImageByteBuffer ImageByteBuffer(&ByteBuffer);
+		ByteBuffer.resize(Size);
+		memcpy(&ByteBuffer.front(), pData, Size);
+
+		std::unique_ptr<CImageInfo> Info = std::make_unique<CImageInfo>();
+		uint8_t *pImgBuffer = NULL;
+		EImageFormat ImageFormat;
+		int PngliteIncompatible;
+
+		if(!::LoadPNG(ImageByteBuffer, ItemName.data(), PngliteIncompatible, Info->m_Width, Info->m_Height, pImgBuffer, ImageFormat))
+		{
+			dbg_msg("gameclient", "Skin isn't valid PNG ('%s', %d bytes)", ItemName.data(), Size);
+			return;
+		}
+
+		Info->m_pData = pImgBuffer;
+		if(ImageFormat == IMAGE_FORMAT_RGB) // ignore_convention
+			Info->m_Format = CImageInfo::FORMAT_RGB;
+		else if(ImageFormat == IMAGE_FORMAT_RGBA) // ignore_convention
+			Info->m_Format = CImageInfo::FORMAT_RGBA;
+		else
+		{
+			free(pImgBuffer);
+			dbg_msg("gameclient", "Skin format is not RGB or RGBA ('%s', %d bytes)", ItemName.data(), Size);
+			return;
+		}
+
+		pThis->m_ReadySkinTextures.insert({NameWithoutExtension, std::move(Info)});
 	}
-
-	TImageByteBuffer ByteBuffer;
-	SImageByteBuffer ImageByteBuffer(&ByteBuffer);
-	ByteBuffer.resize(Size);
-	memcpy(&ByteBuffer.front(), pData, Size);
-
-	std::unique_ptr<CImageInfo> Info = std::make_unique<CImageInfo>();
-	uint8_t *pImgBuffer = NULL;
-	EImageFormat ImageFormat;
-	int PngliteIncompatible;
-
-	if(!::LoadPNG(ImageByteBuffer, ItemName.data(), PngliteIncompatible, Info->m_Width, Info->m_Height, pImgBuffer, ImageFormat))
-	{
-		dbg_msg("gameclient", "Skin isn't valid PNG ('%s', %d bytes)", ItemName.data(), Size);
-		return;
-	}
-
-	Info->m_pData = pImgBuffer;
-	if(ImageFormat == IMAGE_FORMAT_RGB) // ignore_convention
-		Info->m_Format = CImageInfo::FORMAT_RGB;
-	else if(ImageFormat == IMAGE_FORMAT_RGBA) // ignore_convention
-		Info->m_Format = CImageInfo::FORMAT_RGBA;
-	else
-	{
-		free(pImgBuffer);
-		dbg_msg("gameclient", "Skin format is not RGB or RGBA ('%s', %d bytes)", ItemName.data(), Size);
-		return;
-	}
-
-	pThis->m_ReadySkinTextures.insert({NameWithoutExtension, std::move(Info)});
+	pThis->m_pFileLoader->SetJobStatus(CFileLoadJob::FILE_LOAD_JOB_STATUS_YIELD);
 
 	dbg_msg("gameclient", "Skin loaded ('%s', %d bytes)", ItemName.data(), Size);
 }
@@ -430,14 +448,14 @@ void CSkins::Refresh()
 	}
 	m_Mutex.unlock();
 
-	m_FileLoader = new CMassFileLoader(Engine(), Storage(), CMassFileLoader::LOAD_FLAGS_ABSOLUTE_PATH | CMassFileLoader::LOAD_FLAGS_ASYNC | CMassFileLoader::LOAD_FLAGS_RECURSE_SUBDIRECTORIES);
-	m_FileLoader->SetLoadFailedCallback(SkinLoadErrorCallback);
-	m_FileLoader->SetFileLoadedCallback(SkinLoadedCallback);
-	m_FileLoader->SetLoadFinishedCallback(SkinLoadFinishedCallback);
-	m_FileLoader->SetPaths(":skins"); // Configurable?
-	m_FileLoader->SetUserData(this);
-	m_FileLoader->SetFileExtension(".png"); // Multiple in the future?
-	m_FileLoader->Load();
+	m_pFileLoader = new CMassFileLoader(Engine(), Storage(), CMassFileLoader::LOAD_FLAGS_ABSOLUTE_PATH | CMassFileLoader::LOAD_FLAGS_ASYNC | CMassFileLoader::LOAD_FLAGS_RECURSE_SUBDIRECTORIES);
+	m_pFileLoader->SetLoadFailedCallback(SkinLoadErrorCallback);
+	m_pFileLoader->SetFileLoadedCallback(SkinLoadedCallback);
+	m_pFileLoader->SetLoadFinishedCallback(SkinLoadFinishedCallback);
+	m_pFileLoader->SetPaths(":skins"); // Configurable?
+	m_pFileLoader->SetUserData(this);
+	m_pFileLoader->SetFileExtension(".png"); // Multiple in the future?
+	m_pFileLoader->Load();
 }
 
 bool CSkins::AllLocalSkinsLoaded()

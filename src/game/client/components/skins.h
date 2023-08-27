@@ -114,7 +114,7 @@ private:
 
 	char m_aEventSkinPrefix[24];
 	SkinsContainer<CSkin> m_BaseSkins; // Any skin required for the game to work right (default, x_ninja, x_spec). Should not change throughout its lifetime
-	CMassFileLoader *m_FileLoader = nullptr; // This is initialized & only used in Refresh()
+	CMassFileLoader *m_pFileLoader = nullptr; // This is initialized & only used in Refresh()
 
 	static void SkinLoadedCallback(const std::string_view ItemName, const unsigned char *pData, unsigned int Size, void *pUser);
 	static bool SkinLoadErrorCallback(CMassFileLoader::ELoadError Error, const void *pData, void *pUser);
