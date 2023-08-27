@@ -12,7 +12,7 @@ def split_cmds(lines):
 			current = []
 			continue
 
-		current.append(line.strip())
+ 		current.append(line.strip())
 
 	return cmds[1:]
 
@@ -28,16 +28,26 @@ def main():
 	install_name_tool = args.install_name_tool
 	executable = args.executable
 
-	cmds = split_cmds(subprocess.check_output([otool, "-l", executable]).decode().splitlines())
+	try:
+		output = subprocess.check_output([otool, "-l", executable], stderr=subprocess.STDOUT)
+	except subprocess.CalledProcessError as e:
+		print("Error running otool:", e.output.decode())
+		return
+
+	cmds = split_cmds(output.decode().splitlines())
 	lc_rpath_cmds = [cmd for cmd in cmds if cmd[0] == "cmd LC_RPATH"]
 
 	path_regex = re.compile(r"^path (.*) \(offset \d+\)$")
-	rpaths = {k[0] for k in [[path_regex.match(part).group(1) for part in cmd if path_regex.match(part)] for cmd in lc_rpath_cmds]}
-	print("Found paths:")
+	rpaths = {path_regex.match(part).group(1) for cmd in lc_rpath_cmds for part in cmd if 			path_regex.match(part)}
 
+	print("Found paths:")
 	for path in rpaths:
 		print("\t" + path)
-		subprocess.check_call([install_name_tool, "-delete_rpath", path, executable])
+		try:
+			subprocess.check_call([install_name_tool, "-delete_rpath", path, executable])
+			print(f"Deleted rpath {path} from {executable}")
+		except subprocess.CalledProcessError as e:
+			print("Error running install_name_tool:", e)
 
 if __name__ == '__main__':
 	main()
