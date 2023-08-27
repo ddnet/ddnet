@@ -3377,7 +3377,6 @@ void CGameContext::OnInit()
 	m_pEngine = Kernel()->RequestInterface<IEngine>();
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 	m_pAntibot = Kernel()->RequestInterface<IAntibot>();
-	m_pAntibot->RoundStart(this);
 	m_World.SetGameServer(this);
 	m_Events.SetGameServer(this);
 
@@ -3565,6 +3564,8 @@ void CGameContext::OnInit()
 
 	if(GIT_SHORTREV_HASH)
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "git-revision", GIT_SHORTREV_HASH);
+
+	m_pAntibot->RoundStart(this);
 
 #ifdef CONF_DEBUG
 	if(g_Config.m_DbgDummies)
