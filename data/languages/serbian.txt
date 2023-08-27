@@ -1521,8 +1521,7 @@ Could not initialize the given graphics backend, reverting to the default backen
 
 [Graphics error]
 Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
-== 
-Није било могуће иницијализовати дати графички позадину, највероватније зато што нисте инсталирали драјвер за интегрисану графичку картицу.
+== Није било могуће иницијализовати дати графички позадину, највероватније зато што нисте инсталирали драјвер за интегрисану графичку картицу.
 
 Could not save downloaded map. Try manually deleting this file: %s
 == Није могуће сачувати преузету мапу. Покушајте ручно обрисати овај фајл: %s.
