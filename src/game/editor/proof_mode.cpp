@@ -119,28 +119,28 @@ void CProofMode::RenderScreenSizes()
 
 			if(i == 0)
 			{
-				IGraphics::CLineItem Array[2] = {
+				IGraphics::CLineItem aArray[2] = {
 					IGraphics::CLineItem(aPoints[0], aPoints[1], aPoints[2], aPoints[1]),
 					IGraphics::CLineItem(aPoints[0], aPoints[3], aPoints[2], aPoints[3])};
-				Graphics()->LinesDraw(Array, 2);
+				Graphics()->LinesDraw(aArray, std::size(aArray));
 			}
 
 			if(i != 0)
 			{
-				IGraphics::CLineItem Array[4] = {
+				IGraphics::CLineItem aArray[4] = {
 					IGraphics::CLineItem(aPoints[0], aPoints[1], aLastPoints[0], aLastPoints[1]),
 					IGraphics::CLineItem(aPoints[2], aPoints[1], aLastPoints[2], aLastPoints[1]),
 					IGraphics::CLineItem(aPoints[0], aPoints[3], aLastPoints[0], aLastPoints[3]),
 					IGraphics::CLineItem(aPoints[2], aPoints[3], aLastPoints[2], aLastPoints[3])};
-				Graphics()->LinesDraw(Array, 4);
+				Graphics()->LinesDraw(aArray, std::size(aArray));
 			}
 
 			if(i == NumSteps)
 			{
-				IGraphics::CLineItem Array[2] = {
+				IGraphics::CLineItem aArray[2] = {
 					IGraphics::CLineItem(aPoints[0], aPoints[1], aPoints[0], aPoints[3]),
 					IGraphics::CLineItem(aPoints[2], aPoints[1], aPoints[2], aPoints[3])};
-				Graphics()->LinesDraw(Array, 2);
+				Graphics()->LinesDraw(aArray, std::size(aArray));
 			}
 
 			mem_copy(aLastPoints, aPoints, sizeof(aPoints));
@@ -166,12 +166,12 @@ void CProofMode::RenderScreenSizes()
 				r.w = aPoints[2] - aPoints[0];
 				r.h = aPoints[3] - aPoints[1];
 
-				IGraphics::CLineItem Array[4] = {
+				IGraphics::CLineItem aArray[4] = {
 					IGraphics::CLineItem(r.x, r.y, r.x + r.w, r.y),
 					IGraphics::CLineItem(r.x + r.w, r.y, r.x + r.w, r.y + r.h),
 					IGraphics::CLineItem(r.x + r.w, r.y + r.h, r.x, r.y + r.h),
 					IGraphics::CLineItem(r.x, r.y + r.h, r.x, r.y)};
-				Graphics()->LinesDraw(Array, 4);
+				Graphics()->LinesDraw(aArray, std::size(aArray));
 				Graphics()->SetColor(0, 1, 0, 1);
 			}
 		}
@@ -188,16 +188,16 @@ void CProofMode::RenderScreenSizes()
 			{
 				Graphics()->SetColor(0, 1, 0, 0.3f);
 
-				std::set<int> indices;
+				std::set<int> Indices;
 				for(int i = 0; i < (int)m_vMenuBackgroundPositions.size(); i++)
-					indices.insert(i);
+					Indices.insert(i);
 
-				while(!indices.empty())
+				while(!Indices.empty())
 				{
-					int i = *indices.begin();
-					indices.erase(i);
+					int i = *Indices.begin();
+					Indices.erase(i);
 					for(int k : m_vMenuBackgroundCollisions.at(i))
-						indices.erase(k);
+						Indices.erase(k);
 
 					vec2 Pos = m_vMenuBackgroundPositions[i];
 					Pos += WorldOffset - m_vMenuBackgroundPositions[m_CurrentMenuProofIndex];

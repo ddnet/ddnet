@@ -66,14 +66,14 @@ void CMapView::RenderGroupBorder()
 				float w, h;
 				pLayer->GetSize(&w, &h);
 
-				IGraphics::CLineItem Array[4] = {
+				IGraphics::CLineItem aArray[4] = {
 					IGraphics::CLineItem(0, 0, w, 0),
 					IGraphics::CLineItem(w, 0, w, h),
 					IGraphics::CLineItem(w, h, 0, h),
 					IGraphics::CLineItem(0, h, 0, 0)};
 				Graphics()->TextureClear();
 				Graphics()->LinesBegin();
-				Graphics()->LinesDraw(Array, 4);
+				Graphics()->LinesDraw(aArray, std::size(aArray));
 				Graphics()->LinesEnd();
 			}
 		}
@@ -121,11 +121,11 @@ void CMapView::RenderMap()
 		}
 	}
 
-	std::shared_ptr<CLayerTiles> pT = std::static_pointer_cast<CLayerTiles>(Editor()->GetSelectedLayerType(0, LAYERTYPE_TILES));
-	if(Editor()->m_ShowTileInfo != CEditor::SHOW_TILE_OFF && pT && pT->m_Visible && m_Zoom.GetValue() <= 300.0f)
+	std::shared_ptr<CLayerTiles> pSelectedTilesLayer = std::static_pointer_cast<CLayerTiles>(Editor()->GetSelectedLayerType(0, LAYERTYPE_TILES));
+	if(Editor()->m_ShowTileInfo != CEditor::SHOW_TILE_OFF && pSelectedTilesLayer && pSelectedTilesLayer->m_Visible && m_Zoom.GetValue() <= 300.0f)
 	{
 		Editor()->GetSelectedGroup()->MapScreen();
-		pT->ShowInfo();
+		pSelectedTilesLayer->ShowInfo();
 	}
 }
 
@@ -230,7 +230,7 @@ vec2 CMapView::GetEditorOffset() const
 	return m_EditorOffset;
 }
 
-float CMapView::WorldZoom() const
+float CMapView::GetWorldZoom() const
 {
 	return m_WorldZoom;
 }
