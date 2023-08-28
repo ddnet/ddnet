@@ -2330,6 +2330,7 @@ if(CLIENT)
     mapitems/map.cpp
     mapitems/map_io.cpp
     mapitems/sound.cpp
+    mapitems/sound.h
     popups.cpp
     proof_mode.cpp
     proof_mode.h

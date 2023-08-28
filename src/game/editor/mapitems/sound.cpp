@@ -1,6 +1,8 @@
-#include <game/editor/editor.h>
+#include "sound.h"
 
 #include <engine/sound.h>
+
+#include <game/editor/editor.h>
 
 CEditorSound::~CEditorSound()
 {

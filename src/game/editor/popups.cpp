@@ -13,6 +13,7 @@
 
 #include <game/client/ui_scrollregion.h>
 #include <game/editor/mapitems/image.h>
+#include <game/editor/mapitems/sound.h>
 
 #include "editor.h"
 

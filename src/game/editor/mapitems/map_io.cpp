@@ -12,6 +12,7 @@
 #include <game/mapitems_ex.h>
 
 #include "image.h"
+#include "sound.h"
 
 template<typename T>
 static int MakeVersion(int i, const T &v)
