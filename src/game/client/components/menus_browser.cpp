@@ -2,6 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <base/log.h>
 
+#include <engine/engine.h>
 #include <engine/favorites.h>
 #include <engine/friends.h>
 #include <engine/keys.h>
@@ -103,7 +104,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 	{
 		COL_FLAG_LOCK = 0,
 		COL_FLAG_FAV,
-		COL_FLAG_OFFICIAL,
+		COL_COMMUNITY,
 		COL_NAME,
 		COL_GAMETYPE,
 		COL_MAP,
@@ -112,8 +113,6 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 
 		UI_ELEM_LOCK_ICON = 0,
 		UI_ELEM_FAVORITE_ICON,
-		UI_ELEM_OFFICIAL_ICON_1,
-		UI_ELEM_OFFICIAL_ICON_2,
 		UI_ELEM_NAME_1,
 		UI_ELEM_NAME_2,
 		UI_ELEM_NAME_3,
@@ -132,12 +131,12 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 		{-1, -1, "", -1, 2.0f, {0}},
 		{COL_FLAG_LOCK, -1, "", -1, 14.0f, {0}},
 		{COL_FLAG_FAV, -1, "", -1, 14.0f, {0}},
-		{COL_FLAG_OFFICIAL, -1, "", -1, 14.0f, {0}},
+		{COL_COMMUNITY, -1, "", -1, 28.0f, {0}},
 		{COL_NAME, IServerBrowser::SORT_NAME, Localizable("Name"), 0, 50.0f, {0}},
 		{COL_GAMETYPE, IServerBrowser::SORT_GAMETYPE, Localizable("Type"), 1, 50.0f, {0}},
 		{COL_MAP, IServerBrowser::SORT_MAP, Localizable("Map"), 1, 120.0f + (Headers.w - 480) / 8, {0}},
 		{COL_PLAYERS, IServerBrowser::SORT_NUMPLAYERS, Localizable("Players"), 1, 85.0f, {0}},
-		{-1, -1, "", 1, 10.0f, {0}},
+		{-1, -1, "", 1, 4.0f, {0}},
 		{COL_PING, IServerBrowser::SORT_PING, Localizable("Ping"), 1, 40.0f, {0}},
 	};
 
@@ -237,6 +236,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 	for(int i = 0; i < NumServers; i++)
 	{
 		const CServerInfo *pItem = ServerBrowser()->SortedGet(i);
+		const CCommunity *pCommunity = ServerBrowser()->Community(pItem->m_aCommunityId);
 
 		if(vpServerBrowserUiElements[i] == nullptr)
 		{
@@ -283,12 +283,19 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 					RenderBrowserIcons(*pUiElement->Rect(UI_ELEM_FAVORITE_ICON), &Button, ColorRGBA(0.94f, 0.4f, 0.4f, 1.0f), TextRender()->DefaultTextOutlineColor(), FONT_ICON_HEART, TEXTALIGN_MC);
 				}
 			}
-			else if(ID == COL_FLAG_OFFICIAL)
+			else if(ID == COL_COMMUNITY)
 			{
-				if(pItem->m_Official && g_Config.m_UiPage != PAGE_DDNET && g_Config.m_UiPage != PAGE_KOG)
+				if(pCommunity != nullptr)
 				{
-					RenderBrowserIcons(*pUiElement->Rect(UI_ELEM_OFFICIAL_ICON_1), &Button, ColorRGBA(0.4f, 0.7f, 0.94f, 1.0f), ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), FONT_ICON_CERTIFICATE, TEXTALIGN_MC);
-					RenderBrowserIcons(*pUiElement->Rect(UI_ELEM_OFFICIAL_ICON_2), &Button, ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f), FONT_ICON_CHECK, TEXTALIGN_MC, true);
+					const SCommunityIcon *pIcon = FindCommunityIcon(pCommunity->Id());
+					if(pIcon != nullptr)
+					{
+						CUIRect CommunityIcon;
+						Button.Margin(2.0f, &CommunityIcon);
+						RenderCommunityIcon(pIcon, CommunityIcon, true);
+						UI()->DoButtonLogic(&pItem->m_aCommunityId, 0, &CommunityIcon);
+						GameClient()->m_Tooltips.DoToolTip(&pItem->m_aCommunityId, &CommunityIcon, pCommunity->Name());
+					}
 				}
 			}
 			else if(ID == COL_NAME)
@@ -324,7 +331,6 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 			}
 			else if(ID == COL_MAP)
 			{
-				if(g_Config.m_UiPage == PAGE_DDNET)
 				{
 					CUIRect Icon;
 					Button.VMargin(4.0f, &Button);
@@ -361,6 +367,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 					Button.VSplitRight(50.0f, &Icon, &Button);
 					Icon.Margin(2.0f, &Icon);
 					RenderBrowserIcons(*pUiElement->Rect(UI_ELEM_FRIEND_ICON), &Icon, ColorRGBA(0.94f, 0.4f, 0.4f, 1.0f), TextRender()->DefaultTextOutlineColor(), FONT_ICON_HEART, TEXTALIGN_MC);
+
 					if(pItem->m_FriendNum > 1)
 					{
 						str_from_int(pItem->m_FriendNum, aTemp);
@@ -678,8 +685,25 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 	if(DoButton_CheckBox(&g_Config.m_BrFilterConnectingPlayers, Localize("Filter connecting players"), g_Config.m_BrFilterConnectingPlayers, &Button))
 		g_Config.m_BrFilterConnectingPlayers ^= 1;
 
-	// ddnet country filters
-	if(g_Config.m_UiPage == PAGE_DDNET)
+	// community filter
+	if((g_Config.m_UiPage == PAGE_INTERNET || g_Config.m_UiPage == PAGE_FAVORITES) && !ServerBrowser()->Communities().empty())
+	{
+		ServerBrowser()->CleanFilters();
+
+		CUIRect Row;
+		View.HSplitTop(6.0f, nullptr, &View);
+		View.HSplitTop(19.0f, &Row, &View);
+		Row.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.3f), IGraphics::CORNER_T, 4.0f);
+		UI()->DoLabel(&Row, Localize("Communities"), 12.0f, TEXTALIGN_MC);
+
+		View.HSplitTop(4.0f * 17.0f + CScrollRegion::HEIGHT_MAGIC_FIX, &Row, &View);
+		View.HSplitTop(3.0f, nullptr, &View);
+		Row.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.15f), IGraphics::CORNER_B, 4.0f);
+		RenderServerbrowserCommunitiesFilter(Row);
+	}
+
+	// map finish filters
+	if(m_CommunityCache.m_AnyRanksAvailable)
 	{
 		View.HSplitTop(RowHeight, &Button, &View);
 		if(DoButton_CheckBox(&g_Config.m_BrIndicateFinished, Localize("Indicate map finish"), g_Config.m_BrIndicateFinished, &Button))
@@ -701,17 +725,15 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 		}
 	}
 
-	if(g_Config.m_UiPage == PAGE_DDNET || g_Config.m_UiPage == PAGE_KOG)
+	if(!m_CommunityCache.m_vpSelectableCountries.empty() || !m_CommunityCache.m_vpSelectableTypes.empty())
 	{
 		const ColorRGBA ColorActive = ColorRGBA(0.0f, 0.0f, 0.0f, 0.3f);
 		const ColorRGBA ColorInactive = ColorRGBA(0.0f, 0.0f, 0.0f, 0.15f);
 
-		const CCommunity &Community = ServerBrowser()->Communities()[g_Config.m_UiPage == PAGE_DDNET ? IServerBrowser::NETWORK_DDNET : IServerBrowser::NETWORK_KOG];
-
 		CUIRect TabContents, CountriesTab, TypesTab;
 		View.HSplitTop(6.0f, nullptr, &View);
 		View.HSplitTop(19.0f, &Button, &View);
-		View.HSplitTop(minimum(120.0f + CScrollRegion::HEIGHT_MAGIC_FIX, View.h), &TabContents, &View);
+		View.HSplitTop(minimum(4.0f * 22.0f + CScrollRegion::HEIGHT_MAGIC_FIX, View.h), &TabContents, &View);
 		Button.VSplitMid(&CountriesTab, &TypesTab);
 		TabContents.Draw(ColorActive, IGraphics::CORNER_B, 4.0f);
 
@@ -736,11 +758,11 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 
 		if(s_ActiveTab == FILTERTAB_COUNTRIES)
 		{
-			RenderServerbrowserCountriesFilter(TabContents, Community);
+			RenderServerbrowserCountriesFilter(TabContents);
 		}
 		else if(s_ActiveTab == FILTERTAB_TYPES)
 		{
-			RenderServerbrowserTypesFilter(TabContents, Community);
+			RenderServerbrowserTypesFilter(TabContents);
 		}
 	}
 
@@ -761,19 +783,19 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 		g_Config.m_BrFilterConnectingPlayers = 1;
 		g_Config.m_BrFilterUnfinishedMap = 0;
 		g_Config.m_BrFilterServerAddress[0] = '\0';
-		g_Config.m_BrFilterExcludeCountries[0] = '\0';
-		g_Config.m_BrFilterExcludeTypes[0] = '\0';
-		if(g_Config.m_UiPage == PAGE_DDNET || g_Config.m_UiPage == PAGE_KOG)
-			ServerBrowser()->Refresh(ServerBrowser()->GetCurrentType());
-		else
-			Client()->ServerBrowserUpdate();
+		ConfigManager()->Reset("br_filter_exclude_communities");
+		ConfigManager()->Reset("br_filter_exclude_countries");
+		ConfigManager()->Reset("br_filter_exclude_types");
+		Client()->ServerBrowserUpdate();
+		UpdateCommunityCache(true);
 	}
 }
 
 void CMenus::RenderServerbrowserDDNetFilter(CUIRect View,
-	char *pFilterExclude, int FilterExcludeSize,
+	IFilterList &Filter,
 	float ItemHeight, int MaxItems, int ItemsPerRow,
 	CScrollRegion &ScrollRegion, std::vector<unsigned char> &vItemIds,
+	bool UpdateCommunityCacheOnChange,
 	const std::function<const char *(int ItemIndex)> &GetItemName,
 	const std::function<void(int ItemIndex, CUIRect Item, const void *pItemId, bool Active)> &RenderItem)
 {
@@ -801,13 +823,13 @@ void CMenus::RenderServerbrowserDDNetFilter(CUIRect View,
 
 		const void *pItemId = &vItemIds[ItemIndex];
 		const char *pName = GetItemName(ItemIndex);
-		const bool Active = !ServerBrowser()->DDNetFiltered(pFilterExclude, pName);
+		const bool Active = !Filter.Filtered(pName);
 
 		const int Click = UI()->DoButtonLogic(pItemId, 0, &Item);
 		if(Click == 1 || Click == 2)
 		{
 			// left/right click to toggle filter
-			if(pFilterExclude[0] == '\0')
+			if(Filter.Empty())
 			{
 				if(Click == 1)
 				{
@@ -815,13 +837,13 @@ void CMenus::RenderServerbrowserDDNetFilter(CUIRect View,
 					for(int j = 0; j < MaxItems; ++j)
 					{
 						if(j != ItemIndex)
-							ServerBrowser()->DDNetFilterAdd(pFilterExclude, FilterExcludeSize, GetItemName(j));
+							Filter.Add(GetItemName(j));
 					}
 				}
 				else if(Click == 2)
 				{
 					// Right click: when all are active, only deactivate one
-					ServerBrowser()->DDNetFilterAdd(pFilterExclude, FilterExcludeSize, GetItemName(ItemIndex));
+					Filter.Add(GetItemName(ItemIndex));
 				}
 			}
 			else
@@ -829,7 +851,7 @@ void CMenus::RenderServerbrowserDDNetFilter(CUIRect View,
 				bool AllFilteredExceptUs = true;
 				for(int j = 0; j < MaxItems; ++j)
 				{
-					if(j != ItemIndex && !ServerBrowser()->DDNetFiltered(pFilterExclude, GetItemName(j)))
+					if(j != ItemIndex && !Filter.Filtered(GetItemName(j)))
 					{
 						AllFilteredExceptUs = false;
 						break;
@@ -838,25 +860,29 @@ void CMenus::RenderServerbrowserDDNetFilter(CUIRect View,
 				// when last one is removed, reset (re-enable all)
 				if(AllFilteredExceptUs)
 				{
-					pFilterExclude[0] = '\0';
+					Filter.Clear();
 				}
 				else if(Active)
 				{
-					ServerBrowser()->DDNetFilterAdd(pFilterExclude, FilterExcludeSize, pName);
+					Filter.Add(pName);
 				}
 				else
 				{
-					ServerBrowser()->DDNetFilterRem(pFilterExclude, FilterExcludeSize, pName);
+					Filter.Remove(pName);
 				}
 			}
 
-			ServerBrowser()->Refresh(ServerBrowser()->GetCurrentType());
+			Client()->ServerBrowserUpdate();
+			if(UpdateCommunityCacheOnChange)
+				UpdateCommunityCache(true);
 		}
 		else if(Click == 3)
 		{
 			// middle click to reset (re-enable all)
-			pFilterExclude[0] = '\0';
-			ServerBrowser()->Refresh(ServerBrowser()->GetCurrentType());
+			Filter.Clear();
+			Client()->ServerBrowserUpdate();
+			if(UpdateCommunityCacheOnChange)
+				UpdateCommunityCache(true);
 		}
 
 		if(UI()->HotItem() == pItemId && !ScrollRegion.Animating())
@@ -867,38 +893,73 @@ void CMenus::RenderServerbrowserDDNetFilter(CUIRect View,
 	ScrollRegion.End();
 }
 
-void CMenus::RenderServerbrowserCountriesFilter(CUIRect View, const CCommunity &Community)
+void CMenus::RenderServerbrowserCommunitiesFilter(CUIRect View)
 {
-	char *pFilterExcludeCountries = str_comp(Community.Id(), IServerBrowser::COMMUNITY_DDNET) == 0 ? g_Config.m_BrFilterExcludeCountries : g_Config.m_BrFilterExcludeCountriesKoG;
-	const int FilterExcludeCountriesSize = str_comp(Community.Id(), IServerBrowser::COMMUNITY_DDNET) == 0 ? sizeof(g_Config.m_BrFilterExcludeCountries) : sizeof(g_Config.m_BrFilterExcludeCountriesKoG);
-	const int MaxEntries = Community.Countries().size();
+	const int MaxEntries = ServerBrowser()->Communities().size();
+	const int EntriesPerRow = 1;
+
+	static CScrollRegion s_ScrollRegion;
+	static std::vector<unsigned char> s_vItemIds;
+
+	const float ItemHeight = 13.0f;
+	const float Spacing = 2.0f;
+
+	const auto &&GetItemName = [&](int ItemIndex) {
+		return ServerBrowser()->Communities()[ItemIndex].Id();
+	};
+	const auto &&GetItemDisplayName = [&](int ItemIndex) {
+		return ServerBrowser()->Communities()[ItemIndex].Name();
+	};
+	const auto &&RenderItem = [&](int ItemIndex, CUIRect Item, const void *pItemId, bool Active) {
+		const float Alpha = (Active ? 0.9f : 0.2f) + (UI()->HotItem() == pItemId ? 0.1f : 0.0f);
+
+		CUIRect Icon, Label;
+		Item.Margin(Spacing, &Item);
+		Item.VSplitLeft(Item.h * 2.0f, &Icon, &Label);
+		Label.VSplitLeft(Spacing, nullptr, &Label);
+
+		const SCommunityIcon *pIcon = FindCommunityIcon(GetItemName(ItemIndex));
+		if(pIcon != nullptr)
+		{
+			RenderCommunityIcon(pIcon, Icon, Active);
+		}
+
+		TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
+		UI()->DoLabel(&Label, GetItemDisplayName(ItemIndex), Label.h * CUI::ms_FontmodHeight, TEXTALIGN_ML);
+		TextRender()->TextColor(TextRender()->DefaultTextColor());
+	};
+
+	RenderServerbrowserDDNetFilter(View, ServerBrowser()->CommunitiesFilter(), ItemHeight + 2.0f * Spacing, MaxEntries, EntriesPerRow, s_ScrollRegion, s_vItemIds, true, GetItemName, RenderItem);
+}
+
+void CMenus::RenderServerbrowserCountriesFilter(CUIRect View)
+{
+	const int MaxEntries = m_CommunityCache.m_vpSelectableCountries.size();
 	const int EntriesPerRow = MaxEntries > 8 ? 5 : 4;
 
 	static CScrollRegion s_ScrollRegion;
 	static std::vector<unsigned char> s_vItemIds;
 
-	const float ItemHeight = 20.0f;
+	const float ItemHeight = 18.0f;
 	const float Spacing = 2.0f;
 
 	const auto &&GetItemName = [&](int ItemIndex) {
-		return Community.Countries()[ItemIndex].Name();
+		return m_CommunityCache.m_vpSelectableCountries[ItemIndex]->Name();
 	};
 	const auto &&RenderItem = [&](int ItemIndex, CUIRect Item, const void *pItemId, bool Active) {
 		Item.Margin(Spacing, &Item);
 		const float OldWidth = Item.w;
 		Item.w = Item.h * 2.0f;
 		Item.x += (OldWidth - Item.w) / 2.0f;
-		m_pClient->m_CountryFlags.Render(Community.Countries()[ItemIndex].FlagId(), ColorRGBA(1.0f, 1.0f, 1.0f, (Active ? 0.9f : 0.2f) + (UI()->HotItem() == pItemId ? 0.1f : 0.0f)), Item.x, Item.y, Item.w, Item.h);
+		m_pClient->m_CountryFlags.Render(m_CommunityCache.m_vpSelectableCountries[ItemIndex]->FlagId(), ColorRGBA(1.0f, 1.0f, 1.0f, (Active ? 0.9f : 0.2f) + (UI()->HotItem() == pItemId ? 0.1f : 0.0f)), Item.x, Item.y, Item.w, Item.h);
 	};
 
-	RenderServerbrowserDDNetFilter(View, pFilterExcludeCountries, FilterExcludeCountriesSize, ItemHeight + 2.0f * Spacing, MaxEntries, EntriesPerRow, s_ScrollRegion, s_vItemIds, GetItemName, RenderItem);
+	RenderServerbrowserDDNetFilter(View, ServerBrowser()->CountriesFilter(), ItemHeight + 2.0f * Spacing, MaxEntries, EntriesPerRow, s_ScrollRegion, s_vItemIds, false, GetItemName, RenderItem);
 }
 
-void CMenus::RenderServerbrowserTypesFilter(CUIRect View, const CCommunity &Community)
+void CMenus::RenderServerbrowserTypesFilter(CUIRect View)
 {
-	char *pFilterExcludeTypes = str_comp(Community.Id(), IServerBrowser::COMMUNITY_DDNET) == 0 ? g_Config.m_BrFilterExcludeTypes : g_Config.m_BrFilterExcludeTypesKoG;
-	const int FilterExcludeTypesSize = str_comp(Community.Id(), IServerBrowser::COMMUNITY_DDNET) == 0 ? sizeof(g_Config.m_BrFilterExcludeTypes) : sizeof(g_Config.m_BrFilterExcludeTypesKoG);
-	const int MaxEntries = Community.Types().size();
+	const int MaxEntries = m_CommunityCache.m_vpSelectableTypes.size();
 	const int EntriesPerRow = 3;
 
 	static CScrollRegion s_ScrollRegion;
@@ -908,7 +969,7 @@ void CMenus::RenderServerbrowserTypesFilter(CUIRect View, const CCommunity &Comm
 	const float Spacing = 2.0f;
 
 	const auto &&GetItemName = [&](int ItemIndex) {
-		return Community.Types()[ItemIndex].Name();
+		return m_CommunityCache.m_vpSelectableTypes[ItemIndex]->Name();
 	};
 	const auto &&RenderItem = [&](int ItemIndex, CUIRect Item, const void *pItemId, bool Active) {
 		Item.Margin(Spacing, &Item);
@@ -917,7 +978,7 @@ void CMenus::RenderServerbrowserTypesFilter(CUIRect View, const CCommunity &Comm
 		TextRender()->TextColor(TextRender()->DefaultTextColor());
 	};
 
-	RenderServerbrowserDDNetFilter(View, pFilterExcludeTypes, FilterExcludeTypesSize, ItemHeight + 2.0f * Spacing, MaxEntries, EntriesPerRow, s_ScrollRegion, s_vItemIds, GetItemName, RenderItem);
+	RenderServerbrowserDDNetFilter(View, ServerBrowser()->TypesFilter(), ItemHeight + 2.0f * Spacing, MaxEntries, EntriesPerRow, s_ScrollRegion, s_vItemIds, false, GetItemName, RenderItem);
 }
 
 CUI::EPopupMenuFunctionResult CMenus::PopupCountrySelection(void *pContext, CUIRect View, bool Active)
@@ -1334,7 +1395,7 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 				if(s_ScrollRegion.RectClipped(Rect))
 					continue;
 
-				const bool Inside = UI()->HotItem() == Friend.ListItemId() || UI()->HotItem() == Friend.RemoveButtonId();
+				const bool Inside = UI()->HotItem() == Friend.ListItemId() || UI()->HotItem() == Friend.RemoveButtonId() || UI()->HotItem() == Friend.CommunityTooltipId();
 				bool ButtonResult = UI()->DoButtonLogic(Friend.ListItemId(), 0, &Rect);
 				if(Friend.ServerInfo())
 				{
@@ -1379,28 +1440,20 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 				// server info
 				if(Friend.ServerInfo())
 				{
-					// official server icon
-					if(Friend.ServerInfo()->m_Official)
+					// community icon
+					const CCommunity *pCommunity = ServerBrowser()->Community(Friend.ServerInfo()->m_aCommunityId);
+					if(pCommunity != nullptr)
 					{
-						CUIRect OfficialIcon;
-						InfoLabel.VSplitLeft(InfoLabel.h, &OfficialIcon, &InfoLabel);
-						InfoLabel.VSplitLeft(1.0f, nullptr, &InfoLabel); // spacing
-						OfficialIcon.HSplitTop(1.0f, nullptr, &OfficialIcon); // alignment
-
-						SLabelProperties Props;
-						Props.m_EnableWidthCheck = false;
-						TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
-						TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
-						TextRender()->TextColor(0.4f, 0.7f, 0.94f, 1.0f);
-						TextRender()->TextOutlineColor(0.0f, 0.0f, 0.0f, 1.0f);
-						UI()->DoLabel(&OfficialIcon, FONT_ICON_CERTIFICATE, OfficialIcon.h, TEXTALIGN_MC, Props);
-						TextRender()->TextColor(0.0f, 0.0f, 0.0f, 1.0f);
-						TextRender()->TextOutlineColor(0.0f, 0.0f, 0.0f, 0.0f);
-						UI()->DoLabel(&OfficialIcon, FONT_ICON_CHECK, OfficialIcon.h * 0.5f, TEXTALIGN_MC, Props);
-						TextRender()->TextColor(TextRender()->DefaultTextColor());
-						TextRender()->TextOutlineColor(TextRender()->DefaultTextOutlineColor());
-						TextRender()->SetRenderFlags(0);
-						TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
+						const SCommunityIcon *pIcon = FindCommunityIcon(pCommunity->Id());
+						if(pIcon != nullptr)
+						{
+							CUIRect CommunityIcon;
+							InfoLabel.VSplitLeft(21.0f, &CommunityIcon, &InfoLabel);
+							InfoLabel.VSplitLeft(2.0f, nullptr, &InfoLabel);
+							RenderCommunityIcon(pIcon, CommunityIcon, true);
+							UI()->DoButtonLogic(Friend.CommunityTooltipId(), 0, &CommunityIcon);
+							GameClient()->m_Tooltips.DoToolTip(Friend.CommunityTooltipId(), &CommunityIcon, pCommunity->Name());
+						}
 					}
 
 					// server info text
@@ -1583,6 +1636,9 @@ void CMenus::RenderServerbrowserToolBox(CUIRect ToolBox)
 
 void CMenus::RenderServerbrowser(CUIRect MainView)
 {
+	UpdateCommunityCache(false);
+	UpdateCommunityIcons();
+
 	/*
 		+-----------------+	+--tabs--+
 		|				  |	|		 |
@@ -1676,9 +1732,279 @@ void CMenus::ConchainFriendlistUpdate(IConsole::IResult *pResult, void *pUserDat
 	}
 }
 
-void CMenus::ConchainServerbrowserUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+void CMenus::ConchainFavoritesUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	pfnCallback(pResult, pCallbackUserData);
 	if(pResult->NumArguments() >= 1 && g_Config.m_UiPage == PAGE_FAVORITES)
 		((CMenus *)pUserData)->ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
+}
+
+void CMenus::ConchainCommunitiesUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	pfnCallback(pResult, pCallbackUserData);
+	if(pResult->NumArguments() >= 1 && (g_Config.m_UiPage == PAGE_INTERNET || g_Config.m_UiPage == PAGE_FAVORITES))
+		((CMenus *)pUserData)->UpdateCommunityCache(true);
+}
+
+void CMenus::UpdateCommunityCache(bool Force)
+{
+	const bool PageWithCommunities = g_Config.m_UiPage == PAGE_INTERNET || g_Config.m_UiPage == PAGE_FAVORITES;
+	if(!Force && m_CommunityCache.m_UpdateTime != 0 && m_CommunityCache.m_UpdateTime == ServerBrowser()->DDNetInfoUpdateTime() && m_CommunityCache.m_PageWithCommunities == PageWithCommunities)
+		return;
+
+	m_CommunityCache.m_UpdateTime = ServerBrowser()->DDNetInfoUpdateTime();
+	m_CommunityCache.m_PageWithCommunities = PageWithCommunities;
+
+	if(m_CommunityCache.m_PageWithCommunities)
+		m_CommunityCache.m_vpSelectedCommunities = ServerBrowser()->SelectedCommunities();
+	else
+		m_CommunityCache.m_vpSelectedCommunities.clear();
+
+	m_CommunityCache.m_vpSelectableCountries.clear();
+	m_CommunityCache.m_vpSelectableTypes.clear();
+	for(const CCommunity *pCommunity : m_CommunityCache.m_vpSelectedCommunities)
+	{
+		for(const auto &Country : pCommunity->Countries())
+		{
+			const auto ExistingCountry = std::find_if(m_CommunityCache.m_vpSelectableCountries.begin(), m_CommunityCache.m_vpSelectableCountries.end(), [&](const CCommunityCountry *pOther) {
+				return str_comp(Country.Name(), pOther->Name()) == 0 && Country.FlagId() == pOther->FlagId();
+			});
+			if(ExistingCountry == m_CommunityCache.m_vpSelectableCountries.end())
+			{
+				m_CommunityCache.m_vpSelectableCountries.push_back(&Country);
+			}
+		}
+		for(const auto &Type : pCommunity->Types())
+		{
+			const auto ExistingType = std::find_if(m_CommunityCache.m_vpSelectableTypes.begin(), m_CommunityCache.m_vpSelectableTypes.end(), [&](const CCommunityType *pOther) {
+				return str_comp(Type.Name(), pOther->Name()) == 0;
+			});
+			if(ExistingType == m_CommunityCache.m_vpSelectableTypes.end())
+			{
+				m_CommunityCache.m_vpSelectableTypes.push_back(&Type);
+			}
+		}
+	}
+
+	m_CommunityCache.m_AnyRanksAvailable = std::any_of(m_CommunityCache.m_vpSelectedCommunities.begin(), m_CommunityCache.m_vpSelectedCommunities.end(), [](const CCommunity *pCommunity) {
+		return pCommunity->HasRanks();
+	});
+}
+
+CMenus::CAbstractCommunityIconJob::CAbstractCommunityIconJob(CMenus *pMenus, const char *pCommunityId, int StorageType) :
+	m_pMenus(pMenus),
+	m_StorageType(StorageType)
+{
+	str_copy(m_aCommunityId, pCommunityId);
+	str_format(m_aPath, sizeof(m_aPath), "communityicons/%s.png", pCommunityId);
+}
+
+int CMenus::CCommunityIconDownloadJob::OnCompletion(int State)
+{
+	State = CHttpRequest::OnCompletion(State);
+	if(State == HTTP_DONE)
+	{
+		if(m_pMenus->LoadCommunityIconFile(Dest(), IStorage::TYPE_SAVE, m_ImageInfo, m_Sha256))
+			m_Success = true;
+		else
+			State = HTTP_ERROR;
+	}
+	return State;
+}
+
+CMenus::CCommunityIconDownloadJob::CCommunityIconDownloadJob(CMenus *pMenus, const char *pCommunityId, const char *pUrl) :
+	CHttpRequest(pUrl),
+	CAbstractCommunityIconJob(pMenus, pCommunityId, IStorage::TYPE_SAVE)
+{
+	WriteToFile(pMenus->Storage(), m_aPath, IStorage::TYPE_SAVE);
+	Timeout(CTimeout{0, 0, 0, 0});
+	LogProgress(HTTPLOG::FAILURE);
+}
+
+void CMenus::CCommunityIconLoadJob::Run()
+{
+	m_Success = m_pMenus->LoadCommunityIconFile(m_aPath, m_StorageType, m_ImageInfo, m_Sha256);
+}
+
+CMenus::CCommunityIconLoadJob::CCommunityIconLoadJob(CMenus *pMenus, const char *pCommunityId, int StorageType) :
+	CAbstractCommunityIconJob(pMenus, pCommunityId, StorageType)
+{
+}
+
+int CMenus::CommunityIconScan(const char *pName, int IsDir, int DirType, void *pUser)
+{
+	const char *pExtension = ".png";
+	CMenus *pSelf = static_cast<CMenus *>(pUser);
+	if(IsDir || !str_endswith(pName, pExtension) || str_length(pName) - str_length(pExtension) >= (int)CServerInfo::MAX_COMMUNITY_ID_LENGTH)
+		return 0;
+
+	char aCommunityId[CServerInfo::MAX_COMMUNITY_ID_LENGTH];
+	str_truncate(aCommunityId, sizeof(aCommunityId), pName, str_length(pName) - str_length(pExtension));
+
+	std::shared_ptr<CCommunityIconLoadJob> pJob = std::make_shared<CCommunityIconLoadJob>(pSelf, aCommunityId, DirType);
+	pSelf->Engine()->AddJob(pJob);
+	pSelf->m_CommunityIconLoadJobs.push_back(pJob);
+	return 0;
+}
+
+const CMenus::SCommunityIcon *CMenus::FindCommunityIcon(const char *pCommunityId)
+{
+	auto Icon = std::find_if(m_vCommunityIcons.begin(), m_vCommunityIcons.end(), [pCommunityId](const SCommunityIcon &Element) {
+		return str_comp(Element.m_aCommunityId, pCommunityId) == 0;
+	});
+	return Icon == m_vCommunityIcons.end() ? nullptr : &(*Icon);
+}
+
+bool CMenus::LoadCommunityIconFile(const char *pPath, int DirType, CImageInfo &Info, SHA256_DIGEST &Sha256)
+{
+	char aError[IO_MAX_PATH_LENGTH + 128];
+	if(!Graphics()->LoadPNG(&Info, pPath, DirType))
+	{
+		str_format(aError, sizeof(aError), "Failed to load community icon from '%s'", pPath);
+		Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "menus/browser", aError);
+		return false;
+	}
+	if(Info.m_Format != CImageInfo::FORMAT_RGBA)
+	{
+		Graphics()->FreePNG(&Info);
+		str_format(aError, sizeof(aError), "Failed to load community icon from '%s': must be an RGBA image", pPath);
+		Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "menus/browser", aError);
+		return false;
+	}
+	if(!Storage()->CalculateHashes(pPath, DirType, &Sha256))
+	{
+		Graphics()->FreePNG(&Info);
+		str_format(aError, sizeof(aError), "Failed to load community icon from '%s': could not calculate hash", pPath);
+		Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "menus/browser", aError);
+		return false;
+	}
+	return true;
+}
+
+void CMenus::LoadCommunityIconFinish(const char *pCommunityId, CImageInfo &&Info, SHA256_DIGEST &&Sha256)
+{
+	SCommunityIcon CommunityIcon;
+	str_copy(CommunityIcon.m_aCommunityId, pCommunityId);
+	CommunityIcon.m_Sha256 = Sha256;
+	CommunityIcon.m_OrgTexture = Graphics()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, 0);
+
+	// create gray scale version
+	unsigned char *pData = static_cast<unsigned char *>(Info.m_pData);
+	const size_t Step = Info.PixelSize();
+	for(int i = 0; i < Info.m_Width * Info.m_Height; i++)
+	{
+		int v = (pData[i * Step] + pData[i * Step + 1] + pData[i * Step + 2]) / 3;
+		pData[i * Step] = v;
+		pData[i * Step + 1] = v;
+		pData[i * Step + 2] = v;
+	}
+	CommunityIcon.m_GreyTexture = Graphics()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, 0);
+	Graphics()->FreePNG(&Info);
+
+	auto ExistingIcon = std::find_if(m_vCommunityIcons.begin(), m_vCommunityIcons.end(), [pCommunityId](const SCommunityIcon &Element) {
+		return str_comp(Element.m_aCommunityId, pCommunityId) == 0;
+	});
+	if(ExistingIcon == m_vCommunityIcons.end())
+	{
+		m_vCommunityIcons.push_back(CommunityIcon);
+	}
+	else
+	{
+		Graphics()->UnloadTexture(&ExistingIcon->m_OrgTexture);
+		Graphics()->UnloadTexture(&ExistingIcon->m_GreyTexture);
+		*ExistingIcon = CommunityIcon;
+	}
+
+	char aBuf[CServerInfo::MAX_COMMUNITY_ID_LENGTH + 32];
+	str_format(aBuf, sizeof(aBuf), "Loaded community icon '%s'", pCommunityId);
+	Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "menus/browser", aBuf);
+}
+
+void CMenus::RenderCommunityIcon(const SCommunityIcon *pIcon, CUIRect Rect, bool Active)
+{
+	Rect.VMargin(Rect.w / 2.0f - Rect.h, &Rect);
+
+	Graphics()->TextureSet(Active ? pIcon->m_OrgTexture : pIcon->m_GreyTexture);
+	Graphics()->QuadsBegin();
+	Graphics()->SetColor(1.0f, 1.0f, 1.0f, Active ? 1.0f : 0.5f);
+	IGraphics::CQuadItem QuadItem(Rect.x, Rect.y, Rect.w, Rect.h);
+	Graphics()->QuadsDrawTL(&QuadItem, 1);
+	Graphics()->QuadsEnd();
+}
+
+void CMenus::UpdateCommunityIcons()
+{
+	// Update load jobs (icon is loaded from existing file)
+	if(!m_CommunityIconLoadJobs.empty())
+	{
+		std::shared_ptr<CCommunityIconLoadJob> pJob = m_CommunityIconLoadJobs.front();
+		if(pJob->Status() == IJob::STATE_DONE)
+		{
+			if(pJob->Success())
+				LoadCommunityIconFinish(pJob->CommunityId(), pJob->ImageInfo(), pJob->Sha256());
+			m_CommunityIconLoadJobs.pop_front();
+		}
+
+		// Don't start download jobs until all load jobs are done
+		if(!m_CommunityIconLoadJobs.empty())
+			return;
+	}
+
+	// Update download jobs (icon is downloaded and loaded from new file)
+	if(!m_CommunityIconDownloadJobs.empty())
+	{
+		std::shared_ptr<CCommunityIconDownloadJob> pJob = m_CommunityIconDownloadJobs.front();
+		if(pJob->Status() == IJob::STATE_DONE)
+		{
+			if(pJob->Success())
+				LoadCommunityIconFinish(pJob->CommunityId(), pJob->ImageInfo(), pJob->Sha256());
+			m_CommunityIconDownloadJobs.pop_front();
+		}
+	}
+
+	// Rescan for changed communities only when necessary
+	if(m_CommunityIconsUpdateTime != 0 && m_CommunityIconsUpdateTime == ServerBrowser()->DDNetInfoUpdateTime())
+		return;
+	m_CommunityIconsUpdateTime = ServerBrowser()->DDNetInfoUpdateTime();
+
+	// Remove icons for removed communities
+	auto RemovalIterator = m_vCommunityIcons.begin();
+	while(RemovalIterator != m_vCommunityIcons.end())
+	{
+		if(ServerBrowser()->Community(RemovalIterator->m_aCommunityId) == nullptr)
+		{
+			Graphics()->UnloadTexture(&RemovalIterator->m_OrgTexture);
+			Graphics()->UnloadTexture(&RemovalIterator->m_GreyTexture);
+			RemovalIterator = m_vCommunityIcons.erase(RemovalIterator);
+		}
+		else
+		{
+			++RemovalIterator;
+		}
+	}
+
+	const char *pDownloadUrl = Client()->CommunityIconsDownloadUrl();
+	if(pDownloadUrl[0] == '\0')
+		return;
+
+	// Find added and updated community icons
+	for(const auto &Community : ServerBrowser()->Communities())
+	{
+		if(str_comp(Community.Id(), IServerBrowser::COMMUNITY_NONE) == 0)
+			continue;
+		auto ExistingIcon = std::find_if(m_vCommunityIcons.begin(), m_vCommunityIcons.end(), [Community](const auto &Element) {
+			return str_comp(Element.m_aCommunityId, Community.Id()) == 0;
+		});
+		auto pExistingDownload = std::find_if(m_CommunityIconDownloadJobs.begin(), m_CommunityIconDownloadJobs.end(), [Community](const auto &Element) {
+			return str_comp(Element->CommunityId(), Community.Id()) == 0;
+		});
+		if(pExistingDownload == m_CommunityIconDownloadJobs.end() && (ExistingIcon == m_vCommunityIcons.end() || ExistingIcon->m_Sha256 != Community.IconSha256()))
+		{
+			char aUrl[256];
+			str_format(aUrl, sizeof(aUrl), "%s/%s.png", pDownloadUrl, Community.Id());
+			std::shared_ptr<CCommunityIconDownloadJob> pJob = std::make_shared<CCommunityIconDownloadJob>(this, Community.Id(), aUrl);
+			Engine()->AddJob(pJob);
+			m_CommunityIconDownloadJobs.push_back(pJob);
+		}
+	}
 }

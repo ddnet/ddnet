@@ -80,6 +80,7 @@ public:
 				CreateFolder("skins", TYPE_SAVE);
 				CreateFolder("downloadedskins", TYPE_SAVE);
 				CreateFolder("themes", TYPE_SAVE);
+				CreateFolder("communityicons", TYPE_SAVE);
 				CreateFolder("assets", TYPE_SAVE);
 				CreateFolder("assets/emoticons", TYPE_SAVE);
 				CreateFolder("assets/entities", TYPE_SAVE);

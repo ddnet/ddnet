@@ -131,10 +131,11 @@ CClient::CClient() :
 	m_MapDetailsCrc = 0;
 	m_aMapDetailsUrl[0] = 0;
 
-	IStorage::FormatTmpPath(m_aDDNetInfoTmp, sizeof(m_aDDNetInfoTmp), DDNET_INFO);
+	IStorage::FormatTmpPath(m_aDDNetInfoTmp, sizeof(m_aDDNetInfoTmp), DDNET_INFO_FILE);
 	m_pDDNetInfoTask = NULL;
 	m_aNews[0] = '\0';
 	m_aMapDownloadUrl[0] = '\0';
+	m_aCommunityIconsDownloadUrl[0] = '\0';
 	m_Points = -1;
 
 	m_CurrentServerInfoRequestTime = -1;
@@ -1195,8 +1196,6 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 		GET_INT(Info.m_MaxPlayers);
 		GET_INT(Info.m_NumClients);
 		GET_INT(Info.m_MaxClients);
-		if(Info.m_aMap[0])
-			Info.m_HasRank = m_ServerBrowser.HasRank(Info.m_aMap);
 
 		// don't add invalid info to the server browser list
 		if(Info.m_NumClients < 0 || Info.m_MaxClients < 0 ||
@@ -1205,6 +1204,9 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 		{
 			return;
 		}
+
+		m_ServerBrowser.UpdateServerCommunity(&Info);
+		m_ServerBrowser.UpdateServerRank(&Info);
 
 		switch(SavedType)
 		{
@@ -2128,7 +2130,7 @@ void CClient::ResetDDNetInfo()
 
 bool CClient::IsDDNetInfoChanged()
 {
-	IOHANDLE OldFile = m_pStorage->OpenFile(DDNET_INFO, IOFLAG_READ | IOFLAG_SKIP_BOM, IStorage::TYPE_SAVE);
+	IOHANDLE OldFile = m_pStorage->OpenFile(DDNET_INFO_FILE, IOFLAG_READ | IOFLAG_SKIP_BOM, IStorage::TYPE_SAVE);
 
 	if(!OldFile)
 		return true;
@@ -2167,9 +2169,9 @@ void CClient::FinishDDNetInfo()
 	ResetDDNetInfo();
 	if(IsDDNetInfoChanged())
 	{
-		m_pStorage->RenameFile(m_aDDNetInfoTmp, DDNET_INFO, IStorage::TYPE_SAVE);
+		m_pStorage->RenameFile(m_aDDNetInfoTmp, DDNET_INFO_FILE, IStorage::TYPE_SAVE);
 		LoadDDNetInfo();
-		if(m_ServerBrowser.GetCurrentType() == IServerBrowser::TYPE_DDNET || m_ServerBrowser.GetCurrentType() == IServerBrowser::TYPE_KOG)
+		if(m_ServerBrowser.GetCurrentType() == IServerBrowser::TYPE_INTERNET || m_ServerBrowser.GetCurrentType() == IServerBrowser::TYPE_FAVORITES)
 			m_ServerBrowser.Refresh(m_ServerBrowser.GetCurrentType());
 	}
 	else
@@ -2241,6 +2243,12 @@ void CClient::LoadDDNetInfo()
 	if(MapDownloadUrl.type == json_string)
 	{
 		str_copy(m_aMapDownloadUrl, MapDownloadUrl);
+	}
+
+	const json_value &CommunityIconsDownloadUrl = DDNetInfo["community-icons-download-url"];
+	if(CommunityIconsDownloadUrl.type == json_string)
+	{
+		str_copy(m_aCommunityIconsDownloadUrl, CommunityIconsDownloadUrl);
 	}
 
 	const json_value &Points = DDNetInfo["points"];
@@ -4629,7 +4637,7 @@ bool CClient::RaceRecord_IsRecording()
 void CClient::RequestDDNetInfo()
 {
 	char aUrl[256];
-	str_copy(aUrl, "https://info.ddnet.org/info");
+	str_copy(aUrl, DDNET_INFO_URL);
 
 	if(g_Config.m_BrIndicateFinished)
 	{
