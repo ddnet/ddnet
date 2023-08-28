@@ -1182,7 +1182,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 			}
 
 			// Don't rescan in order to keep fetched headers, just resort
-			std::stable_sort(m_vpFilteredDemos.begin(), m_vpFilteredDemos.end());
+			std::stable_sort(m_vDemos.begin(), m_vDemos.end());
 			DemolistOnUpdate(false);
 		}
 	}
