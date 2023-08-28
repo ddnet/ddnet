@@ -1733,7 +1733,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupEvent(void *pContext, CUIRect View, 
 		pTitle = "Exit the editor";
 		pMessage = "The map contains unsaved data, you might want to save it before you exit the editor.\n\nContinue anyway?";
 	}
-	else if(pEditor->m_PopupEventType == POPEVENT_LOAD || pEditor->m_PopupEventType == POPEVENT_LOADCURRENT)
+	else if(pEditor->m_PopupEventType == POPEVENT_LOAD || pEditor->m_PopupEventType == POPEVENT_LOADCURRENT || pEditor->m_PopupEventType == POPEVENT_LOADDROP)
 	{
 		pTitle = "Load map";
 		pMessage = "The map contains unsaved data, you might want to save it before you load a new map.\n\nContinue anyway?";
@@ -1815,6 +1815,8 @@ CUI::EPopupMenuFunctionResult CEditor::PopupEvent(void *pContext, CUIRect View, 
 		static int s_CancelButton = 0;
 		if(pEditor->DoButton_Editor(&s_CancelButton, "Cancel", 0, &Button, 0, nullptr))
 		{
+			if(pEditor->m_PopupEventType == POPEVENT_LOADDROP)
+				pEditor->m_aFileNamePending[0] = 0;
 			pEditor->m_PopupEventWasActivated = false;
 
 			if(pEditor->m_PopupEventType == POPEVENT_PIXELART_BIG_IMAGE || pEditor->m_PopupEventType == POPEVENT_PIXELART_MANY_COLORS)
@@ -1842,6 +1844,13 @@ CUI::EPopupMenuFunctionResult CEditor::PopupEvent(void *pContext, CUIRect View, 
 		else if(pEditor->m_PopupEventType == POPEVENT_LOADCURRENT)
 		{
 			pEditor->LoadCurrentMap();
+		}
+		else if(pEditor->m_PopupEventType == POPEVENT_LOADDROP)
+		{
+			int Result = pEditor->Load(pEditor->m_aFileNamePending, IStorage::TYPE_ALL_OR_ABSOLUTE);
+			if(!Result)
+				dbg_msg("editor", "editing passed map file '%s' failed", pEditor->m_aFileNamePending);
+			pEditor->m_aFileNamePending[0] = 0;
 		}
 		else if(pEditor->m_PopupEventType == POPEVENT_NEW)
 		{

@@ -523,6 +523,7 @@ public:
 	// io
 	bool Save(const char *pFilename);
 	bool Load(const char *pFilename, int StorageType, const std::function<void(const char *pErrorMessage)> &ErrorHandler);
+	bool HandleMapDrop(const char *pFilename, int StorageType);
 	void PerformSanityChecks(const std::function<void(const char *pErrorMessage)> &ErrorHandler);
 
 	// DDRace
@@ -865,6 +866,7 @@ public:
 		m_BrushColorEnabled = true;
 
 		m_aFileName[0] = '\0';
+		m_aFileNamePending[0] = '\0';
 		m_aFileSaveName[0] = '\0';
 		m_ValidSaveFilename = false;
 
@@ -978,6 +980,7 @@ public:
 	void Reset(bool CreateDefault = true);
 	bool Save(const char *pFilename) override;
 	bool Load(const char *pFilename, int StorageType) override;
+	bool HandleMapDrop(const char *pFilename, int StorageType) override;
 	bool Append(const char *pFilename, int StorageType);
 	void LoadCurrentMap();
 	void Render();
@@ -1031,6 +1034,7 @@ public:
 	bool m_BrushColorEnabled;
 
 	char m_aFileName[IO_MAX_PATH_LENGTH];
+	char m_aFileNamePending[IO_MAX_PATH_LENGTH];
 	char m_aFileSaveName[IO_MAX_PATH_LENGTH];
 	bool m_ValidSaveFilename;
 
@@ -1039,6 +1043,7 @@ public:
 		POPEVENT_EXIT = 0,
 		POPEVENT_LOAD,
 		POPEVENT_LOADCURRENT,
+		POPEVENT_LOADDROP,
 		POPEVENT_NEW,
 		POPEVENT_SAVE,
 		POPEVENT_SAVE_COPY,
