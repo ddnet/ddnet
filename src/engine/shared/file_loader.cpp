@@ -113,16 +113,32 @@ unsigned int CMassFileLoader::Begin(CMassFileLoader *pUserData)
 		{
 			if(pUserData->m_Continue)
 			{
-				pUserData->m_Continue = pUserData->GetJobStatus() != CFileLoadJob::FILE_LOAD_JOB_STATUS_DONE;
-
-				while(pUserData->GetJobStatus() != CFileLoadJob::FILE_LOAD_JOB_STATUS_RUNNING)
+				// Wait for our turn
+				if(pUserData->m_Flags & LOAD_FLAGS_ASYNC)
 				{
-					//					std::this_thread::yield();
+					bool Wait = true;
+					while(Wait)
+					{
+						switch(pUserData->GetJobStatus())
+						{
+						case CFileLoadJob::FILE_LOAD_JOB_STATUS_YIELD:
+							std::this_thread::yield();
+							break;
+						case CFileLoadJob::FILE_LOAD_JOB_STATUS_DONE:
+							pUserData->m_Continue = false;
+							[[fallthrough]];
+						default:
+							Wait = false;
+							break;
+						}
+					}
 				}
 
+				// Construct file path
 				char FilePath[IO_MAX_PATH_LENGTH];
 				str_format(FilePath, sizeof(FilePath), "%s/%s", Directory.first.c_str(), File.c_str());
 
+				// Return if dry run
 				if(pUserData->m_Flags & LOAD_FLAGS_DONT_READ_FILE)
 				{
 					pUserData->m_fnFileLoadedCallback(pUserData->m_Flags & LOAD_FLAGS_ABSOLUTE_PATH ? FilePath : File, nullptr, 0, pUserData->m_pUser);
@@ -130,6 +146,7 @@ unsigned int CMassFileLoader::Begin(CMassFileLoader *pUserData)
 					continue;
 				}
 
+				// Probe readability
 				Handle = io_open(FilePath, IOFLAG_READ | (pUserData->m_Flags & LOAD_FLAGS_SKIP_BOM ? IOFLAG_SKIP_BOM : 0));
 				if(!Handle)
 				{
@@ -137,6 +154,7 @@ unsigned int CMassFileLoader::Begin(CMassFileLoader *pUserData)
 					continue;
 				}
 
+				// Check size
 				// system.cpp APIs are only good up to 2 GiB at the moment (signed long cannot describe a size any larger)
 				io_seek(Handle, 0, IOSEEK_END);
 				long ExpectedSize = io_tell(Handle);
@@ -152,6 +170,8 @@ unsigned int CMassFileLoader::Begin(CMassFileLoader *pUserData)
 						continue;
 					}
 				}
+
+				// Load file
 				io_read_all(Handle, reinterpret_cast<void **>(&pData), &Size);
 				if(static_cast<unsigned int>(ExpectedSize) != Size) // Possibly redundant, but accounts for memory allocation shortcomings and not just IO
 				{
@@ -159,6 +179,7 @@ unsigned int CMassFileLoader::Begin(CMassFileLoader *pUserData)
 					continue;
 				}
 
+				// Return & cleanup
 				pUserData->m_fnFileLoadedCallback(pUserData->m_Flags & LOAD_FLAGS_ABSOLUTE_PATH ? FilePath : File, pData, Size, pUserData->m_pUser);
 				free(pData);
 				Count++;
