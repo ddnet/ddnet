@@ -549,7 +549,6 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 
 				// copy base info
 				std::shared_ptr<CEditorSound> pSound = std::make_shared<CEditorSound>(m_pEditor);
-
 				if(pItem->m_External)
 				{
 					char aBuf[IO_MAX_PATH_LENGTH];

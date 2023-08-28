@@ -3,30 +3,19 @@
 
 #include <base/system.h>
 
-class CEditor;
+#include <game/editor/component.h>
 
-class CEditorSound
+class CEditorSound : public CEditorComponent
 {
 public:
-	CEditor *m_pEditor;
-
-	CEditorSound(CEditor *pEditor)
-	{
-		m_pEditor = pEditor;
-		m_aName[0] = 0;
-		m_SoundID = 0;
-
-		m_pData = nullptr;
-		m_DataSize = 0;
-	}
-
+	explicit CEditorSound(CEditor *pEditor);
 	~CEditorSound();
 
-	int m_SoundID;
-	char m_aName[IO_MAX_PATH_LENGTH];
+	int m_SoundID = 0;
+	char m_aName[IO_MAX_PATH_LENGTH] = "";
 
-	void *m_pData;
-	unsigned m_DataSize;
+	void *m_pData = nullptr;
+	unsigned m_DataSize = 0;
 };
 
 #endif

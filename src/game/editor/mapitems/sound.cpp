@@ -2,11 +2,14 @@
 
 #include <engine/sound.h>
 
-#include <game/editor/editor.h>
+CEditorSound::CEditorSound(CEditor *pEditor)
+{
+	Init(pEditor);
+}
 
 CEditorSound::~CEditorSound()
 {
-	m_pEditor->Sound()->UnloadSample(m_SoundID);
+	Sound()->UnloadSample(m_SoundID);
 	free(m_pData);
 	m_pData = nullptr;
 }
