@@ -5,6 +5,8 @@
 #include <engine/keys.h>
 #include <engine/shared/map.h>
 
+#include "image.h"
+
 CLayerTiles::CLayerTiles(int w, int h)
 {
 	m_Type = LAYERTYPE_TILES;

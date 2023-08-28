@@ -2316,6 +2316,7 @@ if(CLIENT)
     map_view.cpp
     map_view.h
     mapitems/image.cpp
+    mapitems/image.h
     mapitems/layer_front.cpp
     mapitems/layer_game.cpp
     mapitems/layer_group.cpp

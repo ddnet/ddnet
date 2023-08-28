@@ -1,3 +1,5 @@
+#include "image.h"
+
 #include <game/editor/editor.h>
 
 CEditorImage::~CEditorImage()
