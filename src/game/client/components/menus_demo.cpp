@@ -913,6 +913,8 @@ void CMenus::DemolistOnUpdate(bool Reset)
 	{
 		bool Found = false;
 		int SelectedIndex = -1;
+		RefreshFilteredDemos();
+
 		// search for selected index
 		for(auto &Item : m_vpFilteredDemos)
 		{
@@ -924,7 +926,6 @@ void CMenus::DemolistOnUpdate(bool Reset)
 				break;
 			}
 		}
-		RefreshFilteredDemos();
 
 		if(Found)
 			m_DemolistSelectedIndex = SelectedIndex;
@@ -1182,7 +1183,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 			}
 
 			// Don't rescan in order to keep fetched headers, just resort
-			std::stable_sort(m_vpFilteredDemos.begin(), m_vpFilteredDemos.end());
+			std::stable_sort(m_vDemos.begin(), m_vDemos.end());
 			DemolistOnUpdate(false);
 		}
 	}
