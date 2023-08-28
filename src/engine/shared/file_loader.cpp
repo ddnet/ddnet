@@ -37,7 +37,7 @@ inline bool CMassFileLoader::CompareExtension(const std::filesystem::path &Filen
 [[maybe_unused]] int CMassFileLoader::ListDirectoryCallback(const char *Name, int IsDir, int, void *User)
 {
 	auto *pUserData = reinterpret_cast<SListDirectoryCallbackUserInfo *>(User);
-	if(*pUserData->m_pContinue)
+	if(pUserData->m_pThis->m_Continue)
 	{
 		auto *pFileList = pUserData->m_pThis->m_PathCollection.find(pUserData->m_pCurrentDirectory)->second;
 		char AbsolutePath[IO_MAX_PATH_LENGTH];
@@ -56,7 +56,7 @@ inline bool CMassFileLoader::CompareExtension(const std::filesystem::path &Filen
 			// Note that adding data to a SORTED container that is currently being iterated on higher in
 			// scope would invalidate the iterator. This is not sorted
 			pUserData->m_pThis->m_PathCollection.insert({AbsolutePath, new std::vector<std::string>});
-			SListDirectoryCallbackUserInfo Data{AbsolutePath, pUserData->m_pThis, pUserData->m_pContinue};
+			SListDirectoryCallbackUserInfo Data{AbsolutePath, pUserData->m_pThis};
 
 			// Directory item is a directory, must be recursed
 			pUserData->m_pThis->m_pStorage->ListDirectory(IStorage::TYPE_ALL, AbsolutePath, ListDirectoryCallback, &Data);
@@ -98,7 +98,7 @@ unsigned int CMassFileLoader::Begin(CMassFileLoader *pUserData)
 		if(pUserData->m_Continue)
 		{
 			const char *Key = It.first.c_str();
-			SListDirectoryCallbackUserInfo Data{Key, pUserData, &pUserData->m_Continue};
+			SListDirectoryCallbackUserInfo Data{Key, pUserData};
 			pUserData->m_pStorage->ListDirectory(IStorage::TYPE_ALL, Key, ListDirectoryCallback, &Data);
 		}
 	}
@@ -113,10 +113,12 @@ unsigned int CMassFileLoader::Begin(CMassFileLoader *pUserData)
 		{
 			if(pUserData->m_Continue)
 			{
-				while(pUserData->GetJobStatus() == CFileLoadJob::FILE_LOAD_JOB_STATUS_YIELD)
+				pUserData->m_Continue = pUserData->GetJobStatus() != CFileLoadJob::FILE_LOAD_JOB_STATUS_DONE;
+
+				while(pUserData->GetJobStatus() != CFileLoadJob::FILE_LOAD_JOB_STATUS_RUNNING)
 				{
+					//					std::this_thread::yield();
 				}
-				//	std::this_thread::yield();
 
 				char FilePath[IO_MAX_PATH_LENGTH];
 				str_format(FilePath, sizeof(FilePath), "%s/%s", Directory.first.c_str(), File.c_str());
@@ -194,6 +196,7 @@ std::optional<unsigned int> CMassFileLoader::Load()
 	else
 		return Begin(this);
 }
+
 #undef MASS_FILE_LOADER_ERROR_PREFIX
 
 /* TODO:

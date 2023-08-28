@@ -261,7 +261,7 @@ public:
 		m_RequestedPaths.push_back(std::string(Path));
 		(SetPaths(std::forward<T>(Paths)), ...);
 	}
-	int GetJobStatus() { return m_FileLoadJob ? m_FileLoadJob->GetStatus() : CFileLoadJob::FILE_LOAD_JOB_STATUS_PENDING; }
+	int GetJobStatus() { return bool(m_FileLoadJob) ? m_FileLoadJob->GetStatus() : CFileLoadJob::FILE_LOAD_JOB_STATUS_PENDING; }
 	void SetJobStatus(int Status)
 	{
 		if(m_FileLoadJob)
@@ -296,7 +296,6 @@ private:
 	{
 		const char *m_pCurrentDirectory;
 		CMassFileLoader *m_pThis;
-		bool *m_pContinue;
 	};
 
 	// Async only

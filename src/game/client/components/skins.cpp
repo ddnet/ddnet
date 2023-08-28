@@ -273,6 +273,8 @@ const CSkin *CSkins::LoadSkin(const char *pName, CImageInfo &Info, SkinsContaine
 // CSkins::~CSkins()
 void CSkins::OnShutdown()
 {
+	m_pFileLoader->SetJobStatus(CFileLoadJob::FILE_LOAD_JOB_STATUS_DONE);
+
 	ClearSkins();
 
 	UnloadSkins(m_BaseSkins);
@@ -302,21 +304,30 @@ void CSkins::OnInit()
 
 void CSkins::OnRender()
 {
+	auto Process = [&] {
+		if(!m_ReadySkinTextures.empty())
+		{
+			std::lock_guard Lock(m_Mutex); // Not ideal but necessary. Maybe a lockfree method can be devised in the future
+			for(const auto &It : m_ReadySkinTextures)
+			{
+				LoadSkin(It.first.data(), *It.second, m_Skins); // Upload skins that have been loaded on the file loader thread since last frame
+			}
+			m_ReadySkinTextures.clear();
+		}
+		if(m_pFileLoader)
+			m_pFileLoader->SetJobStatus(CFileLoadJob::FILE_LOAD_JOB_STATUS_RUNNING);
+	};
 	if(m_LoadingSkinsFromDisk)
 	{
+		if(!m_pFileLoader)
+		{
+			Process();
+			return;
+		}
 		switch(m_pFileLoader->GetJobStatus())
 		{
 		case CFileLoadJob::FILE_LOAD_JOB_STATUS_YIELD: // Other thread is waiting for more textures
-			if(!m_ReadySkinTextures.empty())
-			{
-				std::lock_guard Lock(m_Mutex); // Not ideal but necessary. Maybe a lockfree method can be devised in the future
-				for(const auto &It : m_ReadySkinTextures)
-				{
-					LoadSkin(It.first.data(), *It.second, m_Skins); // Upload skins that have been loaded on the file loader thread since last frame
-				}
-				m_ReadySkinTextures.clear();
-			}
-			m_pFileLoader->SetJobStatus(CFileLoadJob::FILE_LOAD_JOB_STATUS_RUNNING);
+			Process();
 			break;
 		case CFileLoadJob::FILE_LOAD_JOB_STATUS_DONE: // Other thread's task has finished
 			m_LoadingSkinsFromDisk = false;
@@ -420,7 +431,8 @@ void CSkins::SkinLoadedCallback(const std::string_view
 
 		pThis->m_ReadySkinTextures.insert({std::string(NameWithoutExtension), std::move(Info)});
 	}
-	pThis->m_pFileLoader->SetJobStatus(CFileLoadJob::FILE_LOAD_JOB_STATUS_YIELD);
+	if(pThis->m_pFileLoader)
+		pThis->m_pFileLoader->SetJobStatus(CFileLoadJob::FILE_LOAD_JOB_STATUS_YIELD);
 
 	dbg_msg("gameclient", "Skin loaded ('%s', %d bytes)", ItemName.data(), Size);
 }
