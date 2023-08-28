@@ -2311,7 +2311,6 @@ if(CLIENT)
     editor.cpp
     editor.h
     explanations.cpp
-    io.cpp
     map_grid.cpp
     map_grid.h
     map_view.cpp
@@ -2328,6 +2327,7 @@ if(CLIENT)
     mapitems/layer_tiles.cpp
     mapitems/layer_tune.cpp
     mapitems/map.cpp
+    mapitems/map_io.cpp
     mapitems/sound.cpp
     popups.cpp
     proof_mode.cpp

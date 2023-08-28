@@ -177,3 +177,18 @@ void CEditorMap::MakeTuneLayer(const std::shared_ptr<CLayer> &pLayer)
 	m_pTuneLayer = std::static_pointer_cast<CLayerTune>(pLayer);
 	m_pTuneLayer->m_pEditor = m_pEditor;
 }
+
+bool CEditorMap::HandleMapDrop(const char *pFileName, int StorageType)
+{
+	if(m_pEditor->HasUnsavedData())
+	{
+		str_copy(m_pEditor->m_aFileNamePending, pFileName);
+		m_pEditor->m_PopupEventType = CEditor::POPEVENT_LOADDROP;
+		m_pEditor->m_PopupEventActivated = true;
+		return true;
+	}
+	else
+	{
+		return m_pEditor->Load(pFileName, IStorage::TYPE_ALL_OR_ABSOLUTE);
+	}
+}
