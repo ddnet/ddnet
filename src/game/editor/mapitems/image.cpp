@@ -1,12 +1,26 @@
 #include "image.h"
 
-#include <game/editor/editor.h>
+#include <game/mapitems.h>
+
+CEditorImage::CEditorImage(CEditor *pEditor) :
+	m_AutoMapper(pEditor)
+{
+	Init(pEditor);
+	m_Texture.Invalidate();
+}
 
 CEditorImage::~CEditorImage()
 {
-	m_pEditor->Graphics()->UnloadTexture(&m_Texture);
+	Graphics()->UnloadTexture(&m_Texture);
 	free(m_pData);
 	m_pData = nullptr;
+}
+
+void CEditorImage::Init(CEditor *pEditor)
+{
+	CEditorComponent::Init(pEditor);
+	RegisterSubComponent(m_AutoMapper);
+	InitSubComponents();
 }
 
 void CEditorImage::AnalyseTileFlags()

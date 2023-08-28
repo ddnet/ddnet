@@ -76,19 +76,19 @@ public:
 
 	/* Variable: width
 		Contains the width of the image */
-	int m_Width;
+	int m_Width = 0;
 
 	/* Variable: height
 		Contains the height of the image */
-	int m_Height;
+	int m_Height = 0;
 
 	/* Variable: format
 		Contains the format of the image. See <Image Formats> for more information. */
-	int m_Format;
+	int m_Format = FORMAT_RGB;
 
 	/* Variable: data
 		Pointer to the image data. */
-	void *m_pData;
+	void *m_pData = nullptr;
 };
 
 /*
