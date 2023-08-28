@@ -913,6 +913,8 @@ void CMenus::DemolistOnUpdate(bool Reset)
 	{
 		bool Found = false;
 		int SelectedIndex = -1;
+		RefreshFilteredDemos();
+
 		// search for selected index
 		for(auto &Item : m_vpFilteredDemos)
 		{
@@ -924,7 +926,6 @@ void CMenus::DemolistOnUpdate(bool Reset)
 				break;
 			}
 		}
-		RefreshFilteredDemos();
 
 		if(Found)
 			m_DemolistSelectedIndex = SelectedIndex;
