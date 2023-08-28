@@ -75,7 +75,6 @@
 
 // test: remove
 #include <engine/shared/file_loader.h>
-#include <engine/shared/file_loader_async.h>
 // end test
 
 using namespace std::chrono_literals;

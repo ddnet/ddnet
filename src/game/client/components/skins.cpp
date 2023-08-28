@@ -270,7 +270,8 @@ const CSkin *CSkins::LoadSkin(const char *pName, CImageInfo &Info, SkinsContaine
 	return SkinInsertIt.first->second.get();
 }
 
-CSkins::~CSkins()
+// CSkins::~CSkins()
+void CSkins::OnShutdown()
 {
 	ClearSkins();
 
@@ -371,7 +372,7 @@ void CSkins::SkinLoadedCallback(const std::string_view
 		// Name should have extension at this point, guaranteeing it is at least 4 bytes.
 		const int idx = ItemName.find_last_of('/') + 1;
 		const int len = ItemName.length() - idx - 3;
-		char NameWithoutExtension[len];
+		char NameWithoutExtension[IO_MAX_PATH_LENGTH];
 		str_format(NameWithoutExtension, len, "%s", ItemName.substr(idx, len).data());
 
 		if(g_Config.m_ClVanillaSkinsOnly && !CSkins::IsVanillaSkin(NameWithoutExtension))

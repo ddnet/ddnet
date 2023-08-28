@@ -113,7 +113,11 @@ unsigned int CMassFileLoader::Begin(CMassFileLoader *pUserData)
 		{
 			if(pUserData->m_Continue)
 			{
-				while(pUserData->GetJobStatus() != CFileLoadJob::FILE_LOAD_JOB_STATUS_RUNNING) {}
+				while(pUserData->GetJobStatus() == CFileLoadJob::FILE_LOAD_JOB_STATUS_YIELD)
+				{
+				}
+				//	std::this_thread::yield();
+
 				char FilePath[IO_MAX_PATH_LENGTH];
 				str_format(FilePath, sizeof(FilePath), "%s/%s", Directory.first.c_str(), File.c_str());
 

@@ -3,7 +3,6 @@
 #ifndef GAME_CLIENT_COMPONENTS_SKINS_H
 #define GAME_CLIENT_COMPONENTS_SKINS_H
 
-#include "engine/shared/file_loader_async.h"
 #include <base/system.h>
 #include <engine/shared/file_loader.h>
 #include <engine/shared/http.h>
@@ -18,7 +17,7 @@ class CSkins : public CComponent
 {
 public:
 	CSkins() = default;
-	virtual ~CSkins();
+	//	virtual ~CSkins();
 
 	class CGetPngFile : public CHttpRequest
 	{
@@ -66,6 +65,7 @@ public:
 	// Component-related
 	virtual int Sizeof() const override { return sizeof(*this); }
 	void OnInit() override;
+	void OnShutdown() override;
 	void OnRender() override;
 
 	// This triggers a skin refresh.
@@ -150,7 +150,7 @@ private:
 			for(auto &Eye : pSkin->m_ColorableSkin.m_aEyes)
 				Graphics()->UnloadTexture(&Eye);
 		}
-	};
+	}
 
 	const CSkin *FindImpl(const char *pName);
 
