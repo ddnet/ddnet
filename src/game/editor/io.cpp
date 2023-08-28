@@ -364,7 +364,7 @@ bool CEditorMap::Save(const char *pFileName)
 
 	// save points
 	m_pEditor->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "editor", "saving envelope points");
-	bool BezierUsed = true;
+	bool BezierUsed = false;
 	for(const auto &pEnvelope : m_vpEnvelopes)
 	{
 		for(const auto &Point : pEnvelope->m_vPoints)
