@@ -12,8 +12,7 @@ class CEditorImage : public CImageInfo
 public:
 	CEditor *m_pEditor;
 
-	CEditorImage(CEditor *pEditor) :
-		m_AutoMapper(pEditor)
+	CEditorImage(CEditor *pEditor): m_AutoMapper(pEditor)
 	{
 		m_pEditor = pEditor;
 		m_aName[0] = 0;
