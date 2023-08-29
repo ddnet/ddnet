@@ -3742,7 +3742,7 @@ float CGameClient::MapValue(float MaxValue, float MinValue, float MaxRange, floa
 
 void CGameClient::ResetMultiView()
 {
-	m_Camera.SetZoom(std::pow(0.866025f, g_Config.m_ClDefaultZoom - 10), g_Config.m_ClSmoothZoomTime);
+	m_Camera.SetZoom(std::pow(CCamera::ZOOM_STEP, g_Config.m_ClDefaultZoom - 10), g_Config.m_ClSmoothZoomTime);
 	m_MultiViewPersonalZoom = 0;
 	m_MultiViewActivated = false;
 	m_MultiView.m_Solo = false;
