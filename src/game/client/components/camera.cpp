@@ -12,7 +12,6 @@
 #include "controls.h"
 #include <limits>
 
-
 CCamera::CCamera()
 {
 	m_CamType = CAMTYPE_UNDEFINED;
