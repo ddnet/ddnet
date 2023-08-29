@@ -482,7 +482,7 @@ public:
 	void RegisterCommands();
 
 	const char *DemoPlayer_Play(const char *pFilename, int StorageType) override;
-	void DemoRecorder_Start(const char *pFilename, bool WithTimestamp, int Recorder) override;
+	void DemoRecorder_Start(const char *pFilename, bool WithTimestamp, int Recorder, bool Verbose = false) override;
 	void DemoRecorder_HandleAutoStart() override;
 	void DemoRecorder_StartReplayRecorder();
 	void DemoRecorder_Stop(int Recorder, bool RemoveFile = false) override;
