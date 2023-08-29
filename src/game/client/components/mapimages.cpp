@@ -46,11 +46,11 @@ void CMapImages::OnInit()
 {
 	InitOverlayTextures();
 
-	if(str_comp(g_Config.m_ClAssetsEntites, "default") == 0)
+	if(str_comp(g_Config.m_ClAssetsEntities, "default") == 0)
 		str_copy(m_aEntitiesPath, "editor/entities_clear");
 	else
 	{
-		str_format(m_aEntitiesPath, sizeof(m_aEntitiesPath), "assets/entities/%s", g_Config.m_ClAssetsEntites);
+		str_format(m_aEntitiesPath, sizeof(m_aEntitiesPath), "assets/entities/%s", g_Config.m_ClAssetsEntities);
 	}
 }
 
