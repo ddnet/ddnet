@@ -7838,7 +7838,17 @@ bool CEditor::Save(const char *pFilename)
 
 bool CEditor::HandleMapDrop(const char *pFileName, int StorageType)
 {
-	return m_Map.HandleMapDrop(pFileName, IStorage::TYPE_ALL_OR_ABSOLUTE);
+	if(HasUnsavedData())
+	{
+		str_copy(m_aFileNamePending, pFileName);
+		m_PopupEventType = CEditor::POPEVENT_LOADDROP;
+		m_PopupEventActivated = true;
+		return true;
+	}
+	else
+	{
+		return Load(pFileName, IStorage::TYPE_ALL_OR_ABSOLUTE);
+	}
 }
 
 bool CEditor::Load(const char *pFileName, int StorageType)

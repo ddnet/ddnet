@@ -473,7 +473,6 @@ public:
 	// io
 	bool Save(const char *pFilename);
 	bool Load(const char *pFilename, int StorageType, const std::function<void(const char *pErrorMessage)> &ErrorHandler);
-	bool HandleMapDrop(const char *pFilename, int StorageType);
 	void PerformSanityChecks(const std::function<void(const char *pErrorMessage)> &ErrorHandler);
 
 	// DDRace
