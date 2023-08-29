@@ -1022,7 +1022,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 
 	// do headers
 	for(int i = 0; i < NumCols; i++)
-		DoButton_GridHeader(s_aCols[i].m_Caption, Localize(s_aCols[i].m_Caption), 0, &s_aCols[i].m_Rect);
+		DoButton_GridHeader(s_aCols[i].m_Caption, s_aCols[i].m_Caption, 0, &s_aCols[i].m_Rect);
 
 	View.Draw(ColorRGBA(0, 0, 0, 0.15f), 0, 0);
 

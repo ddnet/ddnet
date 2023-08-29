@@ -143,7 +143,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		if(PlayersOrPing && g_Config.m_BrSortOrder == 2 && (s_aCols[i].m_Sort == IServerBrowser::SORT_NUMPLAYERS || s_aCols[i].m_Sort == IServerBrowser::SORT_PING))
 			Checked = 2;
 
-		if(DoButton_GridHeader(s_aCols[i].m_Caption, Localize(s_aCols[i].m_Caption), Checked, &s_aCols[i].m_Rect))
+		if(DoButton_GridHeader(s_aCols[i].m_Caption, s_aCols[i].m_Caption, Checked, &s_aCols[i].m_Rect))
 		{
 			if(s_aCols[i].m_Sort != -1)
 			{

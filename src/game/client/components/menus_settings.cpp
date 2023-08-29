@@ -1009,7 +1009,7 @@ void CMenus::DoSettingsControlsButtons(int Start, int Stop, CUIRect View)
 		Button.VSplitLeft(135.0f, &Label, &Button);
 
 		char aBuf[64];
-		str_format(aBuf, sizeof(aBuf), "%s:", Localize((const char *)Key.m_Name));
+		str_format(aBuf, sizeof(aBuf), "%s:", (const char *)Key.m_Name);
 
 		UI()->DoLabel(&Label, aBuf, 13.0f, TEXTALIGN_ML);
 		int OldId = Key.m_KeyId, OldModifierCombination = Key.m_ModifierCombination, NewModifierCombination;
