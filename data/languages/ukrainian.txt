@@ -101,7 +101,7 @@ Fire
 == Постріл
 
 Folder
-== Папка
+== Папку
 
 Force vote
 == Форсувати
@@ -188,7 +188,7 @@ Nickname
 == Нік
 
 No
-== Ні
+== Немає
 
 No password
 == Без пароля
@@ -473,7 +473,7 @@ Are you sure that you want to disconnect?
 == Ви впевнені, що хочете відключитися?
 
 Disconnect Dummy
-== Відключити Dummy
+== Відключити даммі
 
 Are you sure that you want to disconnect your dummy?
 == Ви впевнені, що хочете відключити свого даммі?
@@ -656,7 +656,7 @@ Fetch Info
 == Отримати інформацію
 
 Rename
-== Перейменуватися
+== Перейменувати
 
 Render
 == Почати рендер
@@ -746,7 +746,7 @@ Max CSVs
 == Максимум CSV
 
 Dummy settings
-== Налаштування dummy
+== Налаштування даммі
 
 Vanilla skins only
 == Тільки базові скіни
@@ -1094,7 +1094,7 @@ Getting server list from master server
 == %d З %d сервера
 
 %d players
-== %dГравців
+== %d Гравців
 
 %d player
 == %d Гравець
@@ -1112,7 +1112,7 @@ Smooth Dynamic Camera
 == Гладка динамічна камера
 
 Skip the main menu
-== пропускати головне меняю
+== Пропускати головне меню
 
 Themes directory
 == Каталог тем
@@ -1124,10 +1124,10 @@ Skin Database
 == Бази даних скінів
 
 Skins directory
-== Каталог скінав
+== Каталог скінів
 
 Chat command
-== командний чат
+== Чат для команд
 
 Dummy
 == Даммі
@@ -1169,10 +1169,10 @@ Background
 == Задній фон
 
 Entities Background color
-== колір текстури заднього фону
+== Колір текстури заднього фону
 
 Use current map as background
-== використовувати поточну карту як задній фон
+== Використовувати поточну карту як задній фон
 
 Regular Background Color
 == Звичайний колір заднього фону
@@ -1184,7 +1184,7 @@ Emoticons
 == Емоції
 
 Particles
-== частинки
+== Частинки
 
 Assets directory
 == Каталог текстур
@@ -1677,70 +1677,70 @@ Loading sound files
 == Завантаження звукових файлів
 
 Quitting. Please wait…
-== 
+== Припинення гри. Зачекайте будь ласка...
 
 Restarting. Please wait…
-== 
+== Перезавантаження. Зачекайте будь ласка...
 
 Multi-View
-== 
+== Дінамічний перегляд
 
 Rename folder
-== 
+== Перейменувати папку
 
 A demo with this name already exists
-== 
+== Демо з такою назвою вже існує
 
 A folder with this name already exists
-== 
+== Папка с такою назвою вже існує
 
 Unable to rename the folder
-== 
+== Неможливо перейменувати папку
 
 (paused)
-== 
+== (пауза)
 
 No server selected
-== 
+== Жоден сервер не вибран
 
 Mark the beginning of a cut (right click to reset)
-== 
+== Позначте початок відрізка (натисніть праву кнопку миші, щоб скинути позначку)
 
 Mark the end of a cut (right click to reset)
-== 
+== Позначте кінець відрізка (натисніть праву кнопку миші, щоб скинути позначку)
 
 Close the demo player
-== 
+== Закрити програвач демо
 
 Export demo cut
-== 
+== Експорт відрізку з демо
 
 Cut interval
-== 
+== Інтервал відрізку
 
 Cut length
-== 
+== Довжина відрізку
 
 All combined
-== 
+== Все разом
 
 Folder Link
-== 
+== Посилання папки
 
 Are you sure that you want to delete the folder '%s'?
-== 
+== Ви впевнені, що хочете видалити папку '%s'?
 
 Delete folder
-== 
+== Видалити папку
 
 Unable to delete the folder '%s'. Make sure it's empty first.
-== 
+== Неможливо видалити папку '%s'. Спочатку переконайтеся, що вона порожня.
 
 Axis
-== 
+== Вісь
 
 Graphics card
-== 
+== Відеокарта
 
 Moved ingame
-== 
+== Перемістився в грі

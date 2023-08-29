@@ -198,6 +198,15 @@ CUI::EPopupMenuFunctionResult CEditor::PopupMenuTools(void *pContext, CUIRect Vi
 		pEditor->UI()->DoPopupMenu(&s_PopupGotoId, Slot.x, Slot.y + Slot.h, 120, 52, pEditor, PopupGoto);
 	}
 
+	static int s_TileartButton = 0;
+	View.HSplitTop(2.0f, nullptr, &View);
+	View.HSplitTop(12.0f, &Slot, &View);
+	if(pEditor->DoButton_MenuItem(&s_TileartButton, "Add tileart", 0, &Slot, 0, "Generate tileart from image"))
+	{
+		pEditor->InvokeFileDialog(IStorage::TYPE_ALL, FILETYPE_IMG, "Add tileart", "Open", "mapres", false, CallbackAddTileart, pEditor);
+		return CUI::POPUP_CLOSE_CURRENT;
+	}
+
 	return CUI::POPUP_KEEP_OPEN;
 }
 
@@ -1369,7 +1378,10 @@ CUI::EPopupMenuFunctionResult CEditor::PopupEnvPoint(void *pContext, CUIRect Vie
 		{
 			auto [SelectedIndex, SelectedChannel] = pEditor->m_vSelectedEnvelopePoints.front();
 
+			if(pEnvelope->GetChannels() == 4)
+				CurrentValue = clamp(CurrentValue, 0.0f, 1.0f);
 			pEnvelope->m_vPoints[SelectedIndex].m_aValues[SelectedChannel] = f2fx(CurrentValue);
+
 			if(SelectedIndex != 0)
 			{
 				pEnvelope->m_vPoints[SelectedIndex].m_Time = CurrentTime * 1000.0f;
@@ -1721,7 +1733,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupEvent(void *pContext, CUIRect View, 
 		pTitle = "Exit the editor";
 		pMessage = "The map contains unsaved data, you might want to save it before you exit the editor.\n\nContinue anyway?";
 	}
-	else if(pEditor->m_PopupEventType == POPEVENT_LOAD || pEditor->m_PopupEventType == POPEVENT_LOADCURRENT)
+	else if(pEditor->m_PopupEventType == POPEVENT_LOAD || pEditor->m_PopupEventType == POPEVENT_LOADCURRENT || pEditor->m_PopupEventType == POPEVENT_LOADDROP)
 	{
 		pTitle = "Load map";
 		pMessage = "The map contains unsaved data, you might want to save it before you load a new map.\n\nContinue anyway?";
@@ -1761,6 +1773,21 @@ CUI::EPopupMenuFunctionResult CEditor::PopupEvent(void *pContext, CUIRect View, 
 		pTitle = "Place border tiles";
 		pMessage = "This is going to overwrite any existing tiles around the edges of the layer.\n\nContinue?";
 	}
+	else if(pEditor->m_PopupEventType == POPEVENT_PIXELART_BIG_IMAGE)
+	{
+		pTitle = "Big image";
+		pMessage = "The selected image is big. Converting it to tileart may take some time.\n\nContinue anyway?";
+	}
+	else if(pEditor->m_PopupEventType == POPEVENT_PIXELART_MANY_COLORS)
+	{
+		pTitle = "Many colors";
+		pMessage = "The selected image contains many colors, which will lead to a big mapfile. You may want to consider reducing the number of colors.\n\nContinue anyway?";
+	}
+	else if(pEditor->m_PopupEventType == POPEVENT_PIXELART_TOO_MANY_COLORS)
+	{
+		pTitle = "Too many colors";
+		pMessage = "The client only supports 64 images but more would be needed to add the selected image as tileart.";
+	}
 	else
 	{
 		dbg_assert(false, "m_PopupEventType invalid");
@@ -1783,12 +1810,21 @@ CUI::EPopupMenuFunctionResult CEditor::PopupEvent(void *pContext, CUIRect View, 
 
 	// button bar
 	ButtonBar.VSplitLeft(110.0f, &Button, &ButtonBar);
-	if(pEditor->m_PopupEventType != POPEVENT_LARGELAYER && pEditor->m_PopupEventType != POPEVENT_PREVENTUNUSEDTILES && pEditor->m_PopupEventType != POPEVENT_IMAGEDIV16 && pEditor->m_PopupEventType != POPEVENT_IMAGE_MAX)
+	if(pEditor->m_PopupEventType != POPEVENT_LARGELAYER && pEditor->m_PopupEventType != POPEVENT_PREVENTUNUSEDTILES && pEditor->m_PopupEventType != POPEVENT_IMAGEDIV16 && pEditor->m_PopupEventType != POPEVENT_IMAGE_MAX && pEditor->m_PopupEventType != POPEVENT_PIXELART_TOO_MANY_COLORS)
 	{
 		static int s_CancelButton = 0;
 		if(pEditor->DoButton_Editor(&s_CancelButton, "Cancel", 0, &Button, 0, nullptr))
 		{
+			if(pEditor->m_PopupEventType == POPEVENT_LOADDROP)
+				pEditor->m_aFileNamePending[0] = 0;
 			pEditor->m_PopupEventWasActivated = false;
+
+			if(pEditor->m_PopupEventType == POPEVENT_PIXELART_BIG_IMAGE || pEditor->m_PopupEventType == POPEVENT_PIXELART_MANY_COLORS)
+			{
+				free(pEditor->m_TileartImageInfo.m_pData);
+				pEditor->m_TileartImageInfo.m_pData = nullptr;
+			}
+
 			return CUI::POPUP_CLOSE_CURRENT;
 		}
 	}
@@ -1809,6 +1845,13 @@ CUI::EPopupMenuFunctionResult CEditor::PopupEvent(void *pContext, CUIRect View, 
 		{
 			pEditor->LoadCurrentMap();
 		}
+		else if(pEditor->m_PopupEventType == POPEVENT_LOADDROP)
+		{
+			int Result = pEditor->Load(pEditor->m_aFileNamePending, IStorage::TYPE_ALL_OR_ABSOLUTE);
+			if(!Result)
+				dbg_msg("editor", "editing passed map file '%s' failed", pEditor->m_aFileNamePending);
+			pEditor->m_aFileNamePending[0] = 0;
+		}
 		else if(pEditor->m_PopupEventType == POPEVENT_NEW)
 		{
 			pEditor->Reset();
@@ -1827,6 +1870,14 @@ CUI::EPopupMenuFunctionResult CEditor::PopupEvent(void *pContext, CUIRect View, 
 		else if(pEditor->m_PopupEventType == POPEVENT_PLACE_BORDER_TILES)
 		{
 			pEditor->PlaceBorderTiles();
+		}
+		else if(pEditor->m_PopupEventType == POPEVENT_PIXELART_BIG_IMAGE)
+		{
+			pEditor->TileartCheckColors();
+		}
+		else if(pEditor->m_PopupEventType == POPEVENT_PIXELART_MANY_COLORS)
+		{
+			pEditor->AddTileart();
 		}
 		pEditor->m_PopupEventWasActivated = false;
 		return CUI::POPUP_CLOSE_CURRENT;
@@ -2336,7 +2387,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupGoto(void *pContext, CUIRect View, b
 	static int s_Button;
 	if(pEditor->DoButton_Editor(&s_Button, "Go", 0, &Button, 0, nullptr))
 	{
-		pEditor->Goto(s_GotoPos.x + 0.5f, s_GotoPos.y + 0.5f);
+		pEditor->MapView()->SetWorldOffset({32.0f * s_GotoPos.x + 0.5f, 32.0f * s_GotoPos.y + 0.5f});
 	}
 
 	return CUI::POPUP_KEEP_OPEN;
@@ -2381,18 +2432,18 @@ CUI::EPopupMenuFunctionResult CEditor::PopupProofMode(void *pContext, CUIRect Vi
 	CUIRect Button;
 	View.HSplitTop(12.0f, &Button, &View);
 	static int s_ButtonIngame;
-	if(pEditor->DoButton_MenuItem(&s_ButtonIngame, "Ingame", pEditor->m_ProofBorders == PROOF_BORDER_INGAME, &Button, 0, "These borders represent what a player maximum can see."))
+	if(pEditor->DoButton_MenuItem(&s_ButtonIngame, "Ingame", pEditor->MapView()->ProofMode()->IsModeIngame(), &Button, 0, "These borders represent what a player maximum can see."))
 	{
-		pEditor->m_ProofBorders = PROOF_BORDER_INGAME;
+		pEditor->MapView()->ProofMode()->SetModeIngame();
 		return CUI::POPUP_CLOSE_CURRENT;
 	}
 
 	View.HSplitTop(2.0f, nullptr, &View);
 	View.HSplitTop(12.0f, &Button, &View);
 	static int s_ButtonMenu;
-	if(pEditor->DoButton_MenuItem(&s_ButtonMenu, "Menu", pEditor->m_ProofBorders == PROOF_BORDER_MENU, &Button, 0, "These borders represent what will be shown in the menu."))
+	if(pEditor->DoButton_MenuItem(&s_ButtonMenu, "Menu", pEditor->MapView()->ProofMode()->IsModeMenu(), &Button, 0, "These borders represent what will be shown in the menu."))
 	{
-		pEditor->m_ProofBorders = PROOF_BORDER_MENU;
+		pEditor->MapView()->ProofMode()->SetModeMenu();
 		return CUI::POPUP_CLOSE_CURRENT;
 	}
 

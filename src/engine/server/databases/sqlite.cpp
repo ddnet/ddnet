@@ -14,8 +14,6 @@ public:
 	virtual ~CSqliteConnection();
 	void Print(IConsole *pConsole, const char *pMode) override;
 
-	CSqliteConnection *Copy() override;
-
 	const char *BinaryCollate() const override { return "BINARY"; }
 	void ToUnixTimestamp(const char *pTimestamp, char *aBuf, unsigned int BufferSize) override;
 	const char *InsertTimestampAsUtc() const override { return "DATETIME(?, 'utc')"; }
@@ -67,6 +65,8 @@ private:
 	bool m_Done; // no more rows available for Step
 	// returns false, if the query succeeded
 	bool Execute(const char *pQuery, char *pError, int ErrorSize);
+	// returns true on failure
+	bool ConnectImpl(char *pError, int ErrorSize);
 
 	// returns true if an error was formatted
 	bool FormatError(int Result, char *pError, int ErrorSize);
@@ -108,18 +108,22 @@ void CSqliteConnection::ToUnixTimestamp(const char *pTimestamp, char *aBuf, unsi
 	str_format(aBuf, BufferSize, "strftime('%%s', %s)", pTimestamp);
 }
 
-CSqliteConnection *CSqliteConnection::Copy()
-{
-	return new CSqliteConnection(m_aFilename, m_Setup);
-}
-
 bool CSqliteConnection::Connect(char *pError, int ErrorSize)
 {
 	if(m_InUse.exchange(true))
 	{
-		dbg_assert(0, "Tried connecting while the connection is in use");
+		dbg_assert(false, "Tried connecting while the connection is in use");
 	}
+	if(ConnectImpl(pError, ErrorSize))
+	{
+		m_InUse.store(false);
+		return true;
+	}
+	return false;
+}
 
+bool CSqliteConnection::ConnectImpl(char *pError, int ErrorSize)
+{
 	if(m_pDb != nullptr)
 	{
 		return false;

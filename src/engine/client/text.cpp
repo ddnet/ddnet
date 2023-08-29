@@ -2218,103 +2218,6 @@ public:
 		return WidthOfText;
 	}
 
-	bool SelectionToUTF8OffSets(const char *pText, int SelStart, int SelEnd, int &OffUTF8Start, int &OffUTF8End) const override
-	{
-		const char *pIt = pText;
-
-		OffUTF8Start = -1;
-		OffUTF8End = -1;
-
-		int CharCount = 0;
-		while(*pIt)
-		{
-			const char *pTmp = pIt;
-			int Character = str_utf8_decode(&pTmp);
-			if(Character == -1)
-				return false;
-
-			if(CharCount == SelStart)
-				OffUTF8Start = (int)((std::intptr_t)(pIt - pText));
-
-			if(CharCount == SelEnd)
-				OffUTF8End = (int)((std::intptr_t)(pIt - pText));
-
-			pIt = pTmp;
-			++CharCount;
-		}
-
-		if(CharCount == SelStart)
-			OffUTF8Start = (int)((std::intptr_t)(pIt - pText));
-
-		if(CharCount == SelEnd)
-			OffUTF8End = (int)((std::intptr_t)(pIt - pText));
-
-		return OffUTF8Start != -1 && OffUTF8End != -1;
-	}
-
-	bool UTF8OffToDecodedOff(const char *pText, int UTF8Off, int &DecodedOff) const override
-	{
-		const char *pIt = pText;
-
-		DecodedOff = -1;
-
-		int CharCount = 0;
-		while(*pIt)
-		{
-			if((int)(intptr_t)(pIt - pText) == UTF8Off)
-			{
-				DecodedOff = CharCount;
-				return true;
-			}
-
-			const char *pTmp = pIt;
-			int Character = str_utf8_decode(&pTmp);
-			if(Character == -1)
-				return false;
-
-			pIt = pTmp;
-			++CharCount;
-		}
-
-		if((int)(std::intptr_t)(pIt - pText) == UTF8Off)
-		{
-			DecodedOff = CharCount;
-			return true;
-		}
-
-		return false;
-	}
-
-	bool DecodedOffToUTF8Off(const char *pText, int DecodedOff, int &UTF8Off) const override
-	{
-		const char *pIt = pText;
-
-		UTF8Off = -1;
-
-		int CharCount = 0;
-		while(*pIt)
-		{
-			const char *pTmp = pIt;
-			int Character = str_utf8_decode(&pTmp);
-			if(Character == -1)
-				return false;
-
-			if(CharCount == DecodedOff)
-			{
-				UTF8Off = (int)((std::intptr_t)(pIt - pText));
-				return true;
-			}
-
-			pIt = pTmp;
-			++CharCount;
-		}
-
-		if(CharCount == DecodedOff)
-			UTF8Off = (int)((std::intptr_t)(pIt - pText));
-
-		return UTF8Off != -1;
-	}
-
 	void OnPreWindowResize() override
 	{
 		for(auto *pTextContainer : m_vpTextContainers)
@@ -2341,8 +2244,6 @@ public:
 		}
 
 		dbg_assert(!HasNonEmptyTextContainer, "text container was not empty");
-
-		m_pGlyphMap->Clear();
 	}
 };
 

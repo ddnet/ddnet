@@ -696,6 +696,60 @@ TEST(Str, Utf8Stats)
 	EXPECT_EQ(Count, 3);
 }
 
+TEST(Str, Utf8OffsetBytesToChars)
+{
+	EXPECT_EQ(str_utf8_offset_bytes_to_chars("", 0), 0);
+	EXPECT_EQ(str_utf8_offset_bytes_to_chars("", 100), 0);
+
+	EXPECT_EQ(str_utf8_offset_bytes_to_chars("abc", 0), 0);
+	EXPECT_EQ(str_utf8_offset_bytes_to_chars("abc", 1), 1);
+	EXPECT_EQ(str_utf8_offset_bytes_to_chars("abc", 2), 2);
+	EXPECT_EQ(str_utf8_offset_bytes_to_chars("abc", 3), 3);
+	EXPECT_EQ(str_utf8_offset_bytes_to_chars("abc", 100), 3);
+
+	EXPECT_EQ(str_utf8_offset_bytes_to_chars("любовь", 0), 0);
+	EXPECT_EQ(str_utf8_offset_bytes_to_chars("любовь", 2), 1);
+	EXPECT_EQ(str_utf8_offset_bytes_to_chars("любовь", 4), 2);
+	EXPECT_EQ(str_utf8_offset_bytes_to_chars("любовь", 6), 3);
+	EXPECT_EQ(str_utf8_offset_bytes_to_chars("любовь", 8), 4);
+	EXPECT_EQ(str_utf8_offset_bytes_to_chars("любовь", 10), 5);
+	EXPECT_EQ(str_utf8_offset_bytes_to_chars("любовь", 12), 6);
+	EXPECT_EQ(str_utf8_offset_bytes_to_chars("любовь", 100), 6);
+
+	EXPECT_EQ(str_utf8_offset_bytes_to_chars("DDNet最好了", 5), 5);
+	EXPECT_EQ(str_utf8_offset_bytes_to_chars("DDNet最好了", 8), 6);
+	EXPECT_EQ(str_utf8_offset_bytes_to_chars("DDNet最好了", 11), 7);
+	EXPECT_EQ(str_utf8_offset_bytes_to_chars("DDNet最好了", 14), 8);
+	EXPECT_EQ(str_utf8_offset_bytes_to_chars("DDNet最好了", 100), 8);
+}
+
+TEST(Str, Utf8OffsetCharsToBytes)
+{
+	EXPECT_EQ(str_utf8_offset_chars_to_bytes("", 0), 0);
+	EXPECT_EQ(str_utf8_offset_chars_to_bytes("", 100), 0);
+
+	EXPECT_EQ(str_utf8_offset_chars_to_bytes("abc", 0), 0);
+	EXPECT_EQ(str_utf8_offset_chars_to_bytes("abc", 1), 1);
+	EXPECT_EQ(str_utf8_offset_chars_to_bytes("abc", 2), 2);
+	EXPECT_EQ(str_utf8_offset_chars_to_bytes("abc", 3), 3);
+	EXPECT_EQ(str_utf8_offset_chars_to_bytes("abc", 100), 3);
+
+	EXPECT_EQ(str_utf8_offset_chars_to_bytes("любовь", 0), 0);
+	EXPECT_EQ(str_utf8_offset_chars_to_bytes("любовь", 1), 2);
+	EXPECT_EQ(str_utf8_offset_chars_to_bytes("любовь", 2), 4);
+	EXPECT_EQ(str_utf8_offset_chars_to_bytes("любовь", 3), 6);
+	EXPECT_EQ(str_utf8_offset_chars_to_bytes("любовь", 4), 8);
+	EXPECT_EQ(str_utf8_offset_chars_to_bytes("любовь", 5), 10);
+	EXPECT_EQ(str_utf8_offset_chars_to_bytes("любовь", 6), 12);
+	EXPECT_EQ(str_utf8_offset_chars_to_bytes("любовь", 100), 12);
+
+	EXPECT_EQ(str_utf8_offset_chars_to_bytes("DDNet最好了", 5), 5);
+	EXPECT_EQ(str_utf8_offset_chars_to_bytes("DDNet最好了", 6), 8);
+	EXPECT_EQ(str_utf8_offset_chars_to_bytes("DDNet最好了", 7), 11);
+	EXPECT_EQ(str_utf8_offset_chars_to_bytes("DDNet最好了", 8), 14);
+	EXPECT_EQ(str_utf8_offset_chars_to_bytes("DDNet最好了", 100), 14);
+}
+
 TEST(Str, Time)
 {
 	char aBuf[32] = "foobar";

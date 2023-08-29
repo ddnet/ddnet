@@ -27,6 +27,7 @@
 # Rafael Fontenelle   2023-01-09 10:33:00
 # Rafael Fontenelle   2023-03-26 19:11:00
 # Rafael Fontenelle   2023-07-07 12:11:00
+# Rafael Fontenelle   2023-08-14 14:17:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -1729,40 +1730,40 @@ Graphics card
 == Placa de vídeo
 
 Quitting. Please wait…
-== 
+== Saindo. Por favor, aguarde…
 
 Restarting. Please wait…
-== 
+== Reiniciando. Por favor, aguarde…
 
 Multi-View
-== 
+== Multivisão
 
 Rename folder
-== 
+== Renomear pasta
 
 A folder with this name already exists
-== 
+== Uma pasta com este nome já existe
 
 Unable to rename the folder
-== 
+== Não foi possível renomear a pasta
 
 (paused)
-== 
+== (pausado)
 
 All combined
-== 
+== Tudo combinado
 
 Folder Link
-== 
+== Link da pasta
 
 Are you sure that you want to delete the folder '%s'?
-== 
+== Tem certeza que você deseja excluir a pasta "%s"?
 
 Delete folder
-== 
+== Excluir pasta
 
 Unable to delete the folder '%s'. Make sure it's empty first.
-== 
+== Não foi possível excluir a pasta "%s". Certifique-se que ela esteja vazia primeiro.
 
 Moved ingame
-== 
+== Movido no jogo

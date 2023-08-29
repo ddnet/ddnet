@@ -174,11 +174,6 @@ void CUI::OnWindowResize()
 	OnElementsReset();
 }
 
-void CUI::OnLanguageChange()
-{
-	OnElementsReset();
-}
-
 void CUI::OnCursorMove(float X, float Y)
 {
 	if(!CheckMouseLock())

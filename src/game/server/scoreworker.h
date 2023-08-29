@@ -56,7 +56,7 @@ struct CScorePlayerResult : ISqlResult
 			char m_aServer[32 + 1];
 			char m_aMap[MAX_MAP_LENGTH + 1];
 		} m_MapVote;
-	} m_Data; // PLAYER_INFO
+	} m_Data = {}; // PLAYER_INFO
 
 	void SetVariant(Variant v);
 };

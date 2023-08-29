@@ -69,8 +69,6 @@ public:
 	~CMysqlConnection();
 	void Print(IConsole *pConsole, const char *pMode) override;
 
-	CMysqlConnection *Copy() override;
-
 	const char *BinaryCollate() const override { return "utf8mb4_bin"; }
 	void ToUnixTimestamp(const char *pTimestamp, char *aBuf, unsigned int BufferSize) override;
 	const char *InsertTimestampAsUtc() const override { return "?"; }
@@ -195,11 +193,6 @@ void CMysqlConnection::Print(IConsole *pConsole, const char *pMode)
 		"MySQL-%s: DB: '%s' Prefix: '%s' User: '%s' IP: <{'%s'}> Port: %d",
 		pMode, m_Config.m_aDatabase, GetPrefix(), m_Config.m_aUser, m_Config.m_aIp, m_Config.m_Port);
 	pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
-}
-
-CMysqlConnection *CMysqlConnection::Copy()
-{
-	return new CMysqlConnection(m_Config);
 }
 
 void CMysqlConnection::ToUnixTimestamp(const char *pTimestamp, char *aBuf, unsigned int BufferSize)

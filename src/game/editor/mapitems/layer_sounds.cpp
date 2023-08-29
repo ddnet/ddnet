@@ -1,7 +1,6 @@
+#include <game/editor/editor.h>
 
 #include <game/generated/client_data.h>
-
-#include "editor.h"
 
 static const float s_SourceVisualSize = 32.0f;
 
@@ -93,7 +92,7 @@ void CLayerSounds::Render(bool Tileset)
 			OffsetY = Channels.g;
 		}
 
-		m_pEditor->RenderTools()->DrawSprite(fx2f(Source.m_Position.x) + OffsetX, fx2f(Source.m_Position.y) + OffsetY, s_SourceVisualSize * m_pEditor->m_WorldZoom);
+		m_pEditor->RenderTools()->DrawSprite(fx2f(Source.m_Position.x) + OffsetX, fx2f(Source.m_Position.y) + OffsetY, m_pEditor->MapView()->ScaleLength(s_SourceVisualSize));
 	}
 
 	Graphics()->QuadsEnd();

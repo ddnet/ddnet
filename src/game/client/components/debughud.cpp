@@ -52,10 +52,10 @@ void CDebugHud::RenderNetCorrections()
 	str_format(aBuf, sizeof(aBuf), "%.2f", Ramp);
 	RenderRow("Ramp:", aBuf);
 
-	str_format(aBuf, sizeof(aBuf), "%d", pCharacter == nullptr ? -1 : pCharacter->m_TeleCheckpoint);
+	str_from_int(pCharacter == nullptr ? -1 : pCharacter->m_TeleCheckpoint, aBuf);
 	RenderRow("Checkpoint:", aBuf);
 
-	str_format(aBuf, sizeof(aBuf), "%d", pCharacter == nullptr ? -1 : pCharacter->m_TuneZone);
+	str_from_int(pCharacter == nullptr ? -1 : pCharacter->m_TuneZone, aBuf);
 	RenderRow("Tune zone:", aBuf);
 
 	str_format(aBuf, sizeof(aBuf), "%.2f", m_pClient->m_Snap.m_pLocalCharacter->m_X / 32.0f);
@@ -64,10 +64,10 @@ void CDebugHud::RenderNetCorrections()
 	str_format(aBuf, sizeof(aBuf), "%.2f", m_pClient->m_Snap.m_pLocalCharacter->m_Y / 32.0f);
 	RenderRow("Pos.y:", aBuf);
 
-	str_format(aBuf, sizeof(aBuf), "%d", m_pClient->m_Snap.m_pLocalCharacter->m_Angle);
+	str_from_int(m_pClient->m_Snap.m_pLocalCharacter->m_Angle, aBuf);
 	RenderRow("Angle:", aBuf);
 
-	str_format(aBuf, sizeof(aBuf), "%d", m_pClient->NetobjNumCorrections());
+	str_from_int(m_pClient->NetobjNumCorrections(), aBuf);
 	RenderRow("Netobj corrections", aBuf);
 	RenderRow(" on:", m_pClient->NetobjCorrectedOn());
 }

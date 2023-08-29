@@ -732,7 +732,7 @@ void CConsole::ConUserCommandStatus(IResult *pResult, void *pUser)
 	CResult Result;
 	Result.m_pCommand = "access_status";
 	char aBuf[4];
-	str_format(aBuf, sizeof(aBuf), "%d", IConsole::ACCESS_LEVEL_USER);
+	str_from_int((int)IConsole::ACCESS_LEVEL_USER, aBuf);
 	Result.AddArgument(aBuf);
 
 	pConsole->ConCommandStatus(&Result, pConsole);

@@ -368,6 +368,7 @@ CServer::~CServer()
 			free(Client.m_pPersistentData);
 		}
 	}
+	free(m_pPersistentData);
 
 	delete m_pRegister;
 	delete m_pConnectionPool;
@@ -786,9 +787,7 @@ static inline bool RepackMsg(const CMsgPacker *pMsg, CPacker &Packer, bool Sixup
 				MsgId += 1;
 			else if(MsgId == NETMSG_RCON_LINE)
 				MsgId = protocol7::NETMSG_RCON_LINE;
-			else if(MsgId >= NETMSG_AUTH_CHALLENGE && MsgId <= NETMSG_AUTH_RESULT)
-				MsgId += 4;
-			else if(MsgId >= NETMSG_PING && MsgId <= NETMSG_ERROR)
+			else if(MsgId >= NETMSG_PING && MsgId <= NETMSG_PING_REPLY)
 				MsgId += 4;
 			else if(MsgId >= NETMSG_RCON_CMD_ADD && MsgId <= NETMSG_RCON_CMD_REM)
 				MsgId -= 11;
@@ -1062,6 +1061,10 @@ int CServer::ClientRejoinCallback(int ClientID, void *pUser)
 
 	pThis->m_aClients[ClientID].Reset();
 
+	pThis->GameServer()->TeehistorianRecordPlayerRejoin(ClientID);
+	pThis->Antibot()->OnEngineClientDrop(ClientID, "rejoin");
+	pThis->Antibot()->OnEngineClientJoin(ClientID, false);
+
 	pThis->SendMap(ClientID);
 
 	return 0;
@@ -1086,6 +1089,9 @@ int CServer::NewClientNoAuthCallback(int ClientID, void *pUser)
 	pThis->m_aClients[ClientID].m_GotDDNetVersionPacket = false;
 	pThis->m_aClients[ClientID].m_DDNetVersionSettled = false;
 	pThis->m_aClients[ClientID].Reset();
+
+	pThis->GameServer()->TeehistorianRecordPlayerJoin(ClientID, false);
+	pThis->Antibot()->OnEngineClientJoin(ClientID, false);
 
 	pThis->SendCapabilities(ClientID);
 	pThis->SendMap(ClientID);
@@ -1116,7 +1122,7 @@ int CServer::NewClientCallback(int ClientID, void *pUser, bool Sixup)
 	mem_zero(&pThis->m_aClients[ClientID].m_Addr, sizeof(NETADDR));
 	pThis->m_aClients[ClientID].Reset();
 
-	pThis->GameServer()->OnClientEngineJoin(ClientID, Sixup);
+	pThis->GameServer()->TeehistorianRecordPlayerJoin(ClientID, Sixup);
 	pThis->Antibot()->OnEngineClientJoin(ClientID, Sixup);
 
 	pThis->m_aClients[ClientID].m_Sixup = Sixup;
@@ -1201,7 +1207,7 @@ int CServer::DelClientCallback(int ClientID, const char *pReason, void *pUser)
 	pThis->m_aClients[ClientID].m_Sixup = false;
 	pThis->m_aClients[ClientID].m_RedirectDropTime = 0;
 
-	pThis->GameServer()->OnClientEngineDrop(ClientID, pReason);
+	pThis->GameServer()->TeehistorianRecordPlayerDrop(ClientID, pReason);
 	pThis->Antibot()->OnEngineClientDrop(ClientID, pReason);
 #if defined(CONF_FAMILY_UNIX)
 	pThis->SendConnLoggingCommand(CLOSE_SESSION, pThis->m_NetServer.ClientAddr(ClientID));
@@ -1617,7 +1623,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				}
 				else
 				{
-					CMsgPacker Msgp(4, true, true); //NETMSG_SERVERINFO //TODO: Import the shared protocol from 7 as well
+					CMsgPacker Msgp(protocol7::NETMSG_SERVERINFO, true, true);
 					GetServerInfoSixup(&Msgp, -1, false);
 					SendMsg(&Msgp, MSGFLAG_VITAL | MSGFLAG_FLUSH, ClientID);
 				}
@@ -1944,7 +1950,7 @@ void CServer::CacheServerInfo(CCache *pCache, int Type, bool SendClients)
 #define ADD_INT(p, x) \
 	do \
 	{ \
-		str_format(aBuf, sizeof(aBuf), "%d", x); \
+		str_from_int(x, aBuf); \
 		(p).AddString(aBuf, 0); \
 	} while(0)
 
@@ -2205,7 +2211,7 @@ void CServer::SendServerInfo(const NETADDR *pAddr, int Token, int Type, bool Sen
 #define ADD_INT(p, x) \
 	do \
 	{ \
-		str_format(aBuf, sizeof(aBuf), "%d", x); \
+		str_from_int(x, aBuf); \
 		(p).AddString(aBuf, 0); \
 	} while(0)
 
@@ -2389,7 +2395,7 @@ void CServer::UpdateServerInfo(bool Resend)
 					SendServerInfo(m_NetServer.ClientAddr(i), -1, SERVERINFO_INGAME, false);
 				else
 				{
-					CMsgPacker Msg(4, true, true); //NETMSG_SERVERINFO //TODO: Import the shared protocol from 7 as well
+					CMsgPacker Msg(protocol7::NETMSG_SERVERINFO, true, true);
 					GetServerInfoSixup(&Msg, -1, false);
 					SendMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_FLUSH, i);
 				}
@@ -2631,6 +2637,7 @@ int CServer::Run()
 			Client.m_pPersistentData = malloc(Size);
 		}
 	}
+	m_pPersistentData = malloc(GameServer()->PersistentDataSize());
 
 	// load map
 	if(!LoadMap(Config()->m_SvMap))
@@ -2699,7 +2706,7 @@ int CServer::Run()
 	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 
 	Antibot()->Init();
-	GameServer()->OnInit();
+	GameServer()->OnInit(nullptr);
 	if(ErrorShutdown())
 	{
 		m_RunServer = STOPPING;
@@ -2757,7 +2764,7 @@ int CServer::Run()
 						}
 					}
 
-					GameServer()->OnShutdown();
+					GameServer()->OnShutdown(m_pPersistentData);
 
 					for(int ClientID = 0; ClientID < MAX_CLIENTS; ClientID++)
 					{
@@ -2775,12 +2782,22 @@ int CServer::Run()
 					m_CurrentGameTick = MIN_TICK;
 					m_ServerInfoFirstRequest = 0;
 					Kernel()->ReregisterInterface(GameServer());
-					GameServer()->OnInit();
+					GameServer()->OnInit(m_pPersistentData);
 					if(ErrorShutdown())
 					{
 						break;
 					}
 					UpdateServerInfo(true);
+					for(int ClientID = 0; ClientID < MAX_CLIENTS; ClientID++)
+					{
+						if(m_aClients[ClientID].m_State != CClient::STATE_CONNECTING)
+							continue;
+
+						// When doing a map change, a new Teehistorian file is created. For players that are already
+						// on the server, no PlayerJoin event is produced in Teehistorian from the network engine.
+						// Record PlayerJoin events here to record the Sixup version and player join event.
+						GameServer()->TeehistorianRecordPlayerJoin(ClientID, m_aClients[ClientID].m_Sixup);
+					}
 				}
 				else
 				{
@@ -2974,7 +2991,7 @@ int CServer::Run()
 
 	m_Fifo.Shutdown();
 
-	GameServer()->OnShutdown();
+	GameServer()->OnShutdown(nullptr);
 	m_pMap->Unload();
 
 	DbPool()->OnShutdown();

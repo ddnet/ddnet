@@ -376,7 +376,7 @@ ColorHSLA CMenus::DoLine_ColorPicker(CButtonContainer *pResetID, const float Lin
 		Section.VSplitLeft(5.0f, nullptr, &Section);
 	}
 
-	Section.VSplitMid(&Label, &Section, Section.h);
+	Section.VSplitMid(&Label, &Section, 4.0f);
 	Section.VSplitRight(60.0f, &Section, &ResetButton);
 	Section.VSplitRight(8.0f, &Section, nullptr);
 	Section.VSplitRight(Section.h, &Section, &ColorPickerButton);
@@ -386,7 +386,7 @@ ColorHSLA CMenus::DoLine_ColorPicker(CButtonContainer *pResetID, const float Lin
 	ColorHSLA PickedColor = DoButton_ColorPicker(&ColorPickerButton, pColorValue, Alpha);
 
 	ResetButton.HMargin(2.0f, &ResetButton);
-	if(DoButton_Menu(pResetID, Localize("Reset"), 0, &ResetButton, nullptr, IGraphics::CORNER_ALL, 8.0f, 0.0f, vec4(1, 1, 1, 0.5f), vec4(1, 1, 1, 0.25f)))
+	if(DoButton_Menu(pResetID, Localize("Reset"), 0, &ResetButton, nullptr, IGraphics::CORNER_ALL, 4.0f, 0.1f, vec4(1, 1, 1, 0.5f), vec4(1, 1, 1, 0.25f)))
 	{
 		*pColorValue = color_cast<ColorHSLA>(DefaultColor).Pack(Alpha);
 	}
@@ -444,7 +444,7 @@ int CMenus::DoButton_CheckBox(const void *pID, const char *pText, int Checked, c
 int CMenus::DoButton_CheckBox_Number(const void *pID, const char *pText, int Checked, const CUIRect *pRect)
 {
 	char aBuf[16];
-	str_format(aBuf, sizeof(aBuf), "%d", Checked);
+	str_from_int(Checked, aBuf);
 	return DoButton_CheckBox_Common(pID, pText, aBuf, pRect);
 }
 
@@ -1215,7 +1215,7 @@ int CMenus::Render()
 		else if(m_Popup == POPUP_RENAME_DEMO)
 		{
 			dbg_assert(m_DemolistSelectedIndex >= 0, "m_DemolistSelectedIndex invalid for POPUP_RENAME_DEMO");
-			pTitle = m_vDemos[m_DemolistSelectedIndex].m_IsDir ? Localize("Rename folder") : Localize("Rename demo");
+			pTitle = m_vpFilteredDemos[m_DemolistSelectedIndex]->m_IsDir ? Localize("Rename folder") : Localize("Rename demo");
 		}
 #if defined(CONF_VIDEORECORDER)
 		else if(m_Popup == POPUP_RENDER_DEMO)
@@ -1519,31 +1519,31 @@ int CMenus::Render()
 				m_Popup = POPUP_NONE;
 				// rename demo
 				char aBufOld[IO_MAX_PATH_LENGTH];
-				str_format(aBufOld, sizeof(aBufOld), "%s/%s", m_aCurrentDemoFolder, m_vDemos[m_DemolistSelectedIndex].m_aFilename);
+				str_format(aBufOld, sizeof(aBufOld), "%s/%s", m_aCurrentDemoFolder, m_vpFilteredDemos[m_DemolistSelectedIndex]->m_aFilename);
 				char aBufNew[IO_MAX_PATH_LENGTH];
 				str_format(aBufNew, sizeof(aBufNew), "%s/%s", m_aCurrentDemoFolder, m_DemoRenameInput.GetString());
-				if(!m_vDemos[m_DemolistSelectedIndex].m_IsDir && !str_endswith(aBufNew, ".demo"))
+				if(!m_vpFilteredDemos[m_DemolistSelectedIndex]->m_IsDir && !str_endswith(aBufNew, ".demo"))
 					str_append(aBufNew, ".demo");
 
-				if(Storage()->FileExists(aBufNew, m_vDemos[m_DemolistSelectedIndex].m_StorageType))
+				if(Storage()->FileExists(aBufNew, m_vpFilteredDemos[m_DemolistSelectedIndex]->m_StorageType))
 				{
 					PopupMessage(Localize("Error"), Localize("A demo with this name already exists"), Localize("Ok"), POPUP_RENAME_DEMO);
 				}
-				else if(Storage()->FolderExists(aBufNew, m_vDemos[m_DemolistSelectedIndex].m_StorageType))
+				else if(Storage()->FolderExists(aBufNew, m_vpFilteredDemos[m_DemolistSelectedIndex]->m_StorageType))
 				{
 					PopupMessage(Localize("Error"), Localize("A folder with this name already exists"), Localize("Ok"), POPUP_RENAME_DEMO);
 				}
-				else if(Storage()->RenameFile(aBufOld, aBufNew, m_vDemos[m_DemolistSelectedIndex].m_StorageType))
+				else if(Storage()->RenameFile(aBufOld, aBufNew, m_vpFilteredDemos[m_DemolistSelectedIndex]->m_StorageType))
 				{
 					str_copy(m_aCurrentDemoSelectionName, m_DemoRenameInput.GetString());
-					if(!m_vDemos[m_DemolistSelectedIndex].m_IsDir)
+					if(!m_vpFilteredDemos[m_DemolistSelectedIndex]->m_IsDir)
 						fs_split_file_extension(m_DemoRenameInput.GetString(), m_aCurrentDemoSelectionName, sizeof(m_aCurrentDemoSelectionName));
 					DemolistPopulate();
 					DemolistOnUpdate(false);
 				}
 				else
 				{
-					PopupMessage(Localize("Error"), m_vDemos[m_DemolistSelectedIndex].m_IsDir ? Localize("Unable to rename the folder") : Localize("Unable to rename the demo"), Localize("Ok"), POPUP_RENAME_DEMO);
+					PopupMessage(Localize("Error"), m_vpFilteredDemos[m_DemolistSelectedIndex]->m_IsDir ? Localize("Unable to rename the folder") : Localize("Unable to rename the demo"), Localize("Ok"), POPUP_RENAME_DEMO);
 				}
 			}
 
@@ -1560,7 +1560,7 @@ int CMenus::Render()
 #if defined(CONF_VIDEORECORDER)
 		else if(m_Popup == POPUP_RENDER_DEMO)
 		{
-			dbg_assert(m_DemolistSelectedIndex >= 0 && !m_vDemos[m_DemolistSelectedIndex].m_IsDir, "m_DemolistSelectedIndex invalid for POPUP_RENDER_DEMO");
+			dbg_assert(m_DemolistSelectedIndex >= 0 && !m_vpFilteredDemos[m_DemolistSelectedIndex]->m_IsDir, "m_DemolistSelectedIndex invalid for POPUP_RENDER_DEMO");
 
 			CUIRect Label, TextBox, Ok, Abort, Button;
 
@@ -1635,7 +1635,7 @@ int CMenus::Render()
 			Part.VSplitLeft(ButtonSize, &Button, &Part);
 			static CButtonContainer s_PausedButton;
 			if(DoButton_FontIcon(&s_PausedButton, FONT_ICON_PAUSE, 0, &Button, IGraphics::CORNER_ALL))
-				g_Config.m_ClVideoPauseOnStart ^= 1;
+				m_StartPaused ^= 1;
 
 			// fastforward
 			Part.VSplitLeft(5.0f, 0, &Part);
@@ -1647,7 +1647,7 @@ int CMenus::Render()
 			// speed meter
 			Part.VSplitLeft(8.0f, 0, &Part);
 			char aBuffer[128];
-			const char *pPaused = g_Config.m_ClVideoPauseOnStart ? Localize("(paused)") : "";
+			const char *pPaused = m_StartPaused ? Localize("(paused)") : "";
 			str_format(aBuffer, sizeof(aBuffer), "%s: ×%g %s", Localize("Speed"), g_aSpeeds[m_Speed], pPaused);
 			UI()->DoLabel(&Part, aBuffer, 12.8f, TEXTALIGN_ML);
 
@@ -1793,13 +1793,16 @@ int CMenus::Render()
 void CMenus::PopupConfirmDemoReplaceVideo()
 {
 	char aBuf[IO_MAX_PATH_LENGTH];
-	str_format(aBuf, sizeof(aBuf), "%s/%s", m_aCurrentDemoFolder, m_vDemos[m_DemolistSelectedIndex].m_aFilename);
+	str_format(aBuf, sizeof(aBuf), "%s/%s", m_aCurrentDemoFolder, m_vpFilteredDemos[m_DemolistSelectedIndex]->m_aFilename);
 	char aVideoName[IO_MAX_PATH_LENGTH];
 	str_copy(aVideoName, m_DemoRenderInput.GetString());
 	if(!str_endswith(aVideoName, ".mp4"))
 		str_append(aVideoName, ".mp4");
-	const char *pError = Client()->DemoPlayer_Render(aBuf, m_vDemos[m_DemolistSelectedIndex].m_StorageType, aVideoName, m_Speed);
+	const char *pError = Client()->DemoPlayer_Render(aBuf, m_vpFilteredDemos[m_DemolistSelectedIndex]->m_StorageType, aVideoName, m_Speed, m_StartPaused);
 	m_Speed = 4;
+	m_StartPaused = false;
+	m_LastPauseChange = -1.0f;
+	m_LastSpeedChange = -1.0f;
 	if(pError)
 		PopupMessage(Localize("Error"), str_comp(pError, "error loading demo") ? pError : Localize("Error loading demo"), Localize("Ok"));
 }

@@ -1048,7 +1048,7 @@ void CRenderTools::RenderTeleOverlay(CTeleTile *pTele, int w, int h, float Scale
 			if(Index && IsTeleTileNumberUsed(pTele[c].m_Type))
 			{
 				char aBuf[16];
-				str_format(aBuf, sizeof(aBuf), "%d", Index);
+				str_from_int(Index, aBuf);
 				TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
 				TextRender()->Text(mx * Scale - 3.f, (my + ToCenterOffset) * Scale, Size * Scale, aBuf, -1.0f);
 				TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -1110,13 +1110,13 @@ void CRenderTools::RenderSpeedupOverlay(CSpeedupTile *pSpeedup, int w, int h, fl
 				{
 					// draw force
 					char aBuf[16];
-					str_format(aBuf, sizeof(aBuf), "%d", Force);
+					str_from_int(Force, aBuf);
 					TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
 					TextRender()->Text(mx * Scale, (my + 0.5f + ToCenterOffset / 2) * Scale, Size * Scale / 2.f, aBuf, -1.0f);
 					TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 					if(MaxSpeed)
 					{
-						str_format(aBuf, sizeof(aBuf), "%d", MaxSpeed);
+						str_from_int(MaxSpeed, aBuf);
 						TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
 						TextRender()->Text(mx * Scale, (my + ToCenterOffset / 2) * Scale, Size * Scale / 2.f, aBuf, -1.0f);
 						TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -1167,7 +1167,7 @@ void CRenderTools::RenderSwitchOverlay(CSwitchTile *pSwitch, int w, int h, float
 			if(Index && IsSwitchTileNumberUsed(pSwitch[c].m_Type))
 			{
 				char aBuf[16];
-				str_format(aBuf, sizeof(aBuf), "%d", Index);
+				str_from_int(Index, aBuf);
 				TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
 				TextRender()->Text(mx * Scale, (my + ToCenterOffset / 2) * Scale, Size * Scale / 2.f, aBuf, -1.0f);
 				TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -1177,7 +1177,7 @@ void CRenderTools::RenderSwitchOverlay(CSwitchTile *pSwitch, int w, int h, float
 			if(Delay && IsSwitchTileDelayUsed(pSwitch[c].m_Type))
 			{
 				char aBuf[16];
-				str_format(aBuf, sizeof(aBuf), "%d", Delay);
+				str_from_int(Delay, aBuf);
 				TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
 				TextRender()->Text(mx * Scale, (my + 0.5f + ToCenterOffset / 2) * Scale, Size * Scale / 2.f, aBuf, -1.0f);
 				TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -1226,7 +1226,7 @@ void CRenderTools::RenderTuneOverlay(CTuneTile *pTune, int w, int h, float Scale
 			if(Index)
 			{
 				char aBuf[16];
-				str_format(aBuf, sizeof(aBuf), "%d", Index);
+				str_from_int(Index, aBuf);
 				TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
 				TextRender()->Text(mx * Scale + 11.f, my * Scale + 6.f, Size * Scale / 1.5f - 5.f, aBuf, -1.0f); // numbers shouldn't be too big and in the center of the tile
 				TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);

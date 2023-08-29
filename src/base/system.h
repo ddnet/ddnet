@@ -2230,6 +2230,14 @@ unsigned long str_toulong_base(const char *str, int base);
 int64_t str_toint64_base(const char *str, int base = 10);
 float str_tofloat(const char *str);
 
+void str_from_int(int value, char *buffer, size_t buffer_size);
+
+template<size_t N>
+void str_from_int(int value, char (&dst)[N])
+{
+	str_from_int(value, dst, N);
+}
+
 /**
  * Determines whether a character is whitespace.
  *
@@ -2490,6 +2498,32 @@ int str_utf8_check(const char *str);
 		- It's the user's responsibility to make sure the bounds are aligned.
 */
 void str_utf8_stats(const char *str, size_t max_size, size_t max_count, size_t *size, size_t *count);
+
+/**
+ * Converts a byte offset of a utf8 string to the utf8 character offset.
+ *
+ * @param text Pointer to the string.
+ * @param byte_offset Offset in bytes.
+ *
+ * @return Offset in utf8 characters. Clamped to the maximum length of the string in utf8 characters.
+ *
+ * @remark The string is treated as a zero-terminated utf8 string.
+ * @remark It's the user's responsibility to make sure the bounds are aligned.
+ */
+size_t str_utf8_offset_bytes_to_chars(const char *str, size_t byte_offset);
+
+/**
+ * Converts a utf8 character offset of a utf8 string to the byte offset.
+ *
+ * @param text Pointer to the string.
+ * @param char_offset Offset in utf8 characters.
+ *
+ * @return Offset in bytes. Clamped to the maximum length of the string in bytes.
+ *
+ * @remark The string is treated as a zero-terminated utf8 string.
+ * @remark It's the user's responsibility to make sure the bounds are aligned.
+ */
+size_t str_utf8_offset_chars_to_bytes(const char *str, size_t char_offset);
 
 /*
 	Function: str_next_token

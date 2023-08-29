@@ -3,9 +3,9 @@ if(CMAKE_VERSION VERSION_LESS 3.12)
   cmake_policy(VERSION ${CMAKE_VERSION})
 endif()
 
-set(CMAKE_OSX_DEPLOYMENT_TARGET 10.13 CACHE INTERNAL "Minimum macOS deployment version")
-if(CMAKE_OSX_DEPLOYMENT_TARGET VERSION_LESS 10.13)
-  message(WARNING "Building for macOS < 10.13 is not supported")
+set(CMAKE_OSX_DEPLOYMENT_TARGET 10.15 CACHE INTERNAL "Minimum macOS deployment version")
+if(CMAKE_OSX_DEPLOYMENT_TARGET VERSION_LESS 10.15)
+  message(WARNING "Building for macOS < 10.15 is not supported")
 endif()
 
 file(STRINGS src/game/version.h VERSION_LINE
@@ -2318,18 +2318,38 @@ if(CLIENT)
     ui_scrollregion.cpp
     ui_scrollregion.h
   )
-  set_src(GAME_EDITOR GLOB src/game/editor
+  set_src(GAME_EDITOR GLOB_RECURSE src/game/editor
     auto_map.cpp
     auto_map.h
+    component.cpp
+    component.h
     editor.cpp
     editor.h
     explanations.cpp
     io.cpp
-    layer_game.cpp
-    layer_quads.cpp
-    layer_sounds.cpp
-    layer_tiles.cpp
+    map_grid.cpp
+    map_grid.h
+    map_view.cpp
+    map_view.h
+    mapitems/image.cpp
+    mapitems/layer_front.cpp
+    mapitems/layer_game.cpp
+    mapitems/layer_group.cpp
+    mapitems/layer_quads.cpp
+    mapitems/layer_sounds.cpp
+    mapitems/layer_speedup.cpp
+    mapitems/layer_switch.cpp
+    mapitems/layer_tele.cpp
+    mapitems/layer_tiles.cpp
+    mapitems/layer_tune.cpp
+    mapitems/map.cpp
+    mapitems/sound.cpp
     popups.cpp
+    proof_mode.cpp
+    proof_mode.h
+    smooth_value.cpp
+    smooth_value.h
+    tileart.cpp
   )
   set(GAME_GENERATED_CLIENT
     src/game/generated/checksum.cpp

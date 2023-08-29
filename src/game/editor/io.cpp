@@ -364,7 +364,7 @@ bool CEditorMap::Save(const char *pFileName)
 
 	// save points
 	m_pEditor->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "editor", "saving envelope points");
-	bool BezierUsed = true;
+	bool BezierUsed = false;
 	for(const auto &pEnvelope : m_vpEnvelopes)
 	{
 		for(const auto &Point : pEnvelope->m_vPoints)
@@ -426,6 +426,26 @@ bool CEditorMap::Save(const char *pFileName)
 	return true;
 }
 
+bool CEditor::HandleMapDrop(const char *pFileName, int StorageType)
+{
+	return m_Map.HandleMapDrop(pFileName, IStorage::TYPE_ALL_OR_ABSOLUTE);
+}
+
+bool CEditorMap::HandleMapDrop(const char *pFileName, int StorageType)
+{
+	if(m_pEditor->HasUnsavedData())
+	{
+		str_copy(m_pEditor->m_aFileNamePending, pFileName);
+		m_pEditor->m_PopupEventType = CEditor::POPEVENT_LOADDROP;
+		m_pEditor->m_PopupEventActivated = true;
+		return true;
+	}
+	else
+	{
+		return m_pEditor->Load(pFileName, IStorage::TYPE_ALL_OR_ABSOLUTE);
+	}
+}
+
 bool CEditor::Load(const char *pFileName, int StorageType)
 {
 	const auto &&ErrorHandler = [this](const char *pErrorMessage) {
@@ -440,7 +460,7 @@ bool CEditor::Load(const char *pFileName, int StorageType)
 		str_copy(m_aFileName, pFileName);
 		SortImages();
 		SelectGameLayer();
-		ResetMenuBackgroundPositions();
+		MapView()->OnMapLoad();
 	}
 	else
 	{

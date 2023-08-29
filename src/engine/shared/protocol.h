@@ -47,8 +47,8 @@ enum
 	NETMSG_RCON_AUTH_STATUS, // result of the authentication
 	NETMSG_RCON_LINE, // line that should be printed to the remote console
 
-	NETMSG_AUTH_CHALLENGE, //
-	NETMSG_AUTH_RESULT, //
+	NETMSG_UNUSED1,
+	NETMSG_UNUSED2,
 
 	// sent by client
 	NETMSG_READY, //
@@ -58,13 +58,13 @@ enum
 	NETMSG_RCON_AUTH, //
 	NETMSG_REQUEST_MAP_DATA, //
 
-	NETMSG_AUTH_START, //
-	NETMSG_AUTH_RESPONSE, //
+	NETMSG_UNUSED3,
+	NETMSG_UNUSED4,
 
 	// sent by both
 	NETMSG_PING,
 	NETMSG_PING_REPLY,
-	NETMSG_ERROR,
+	NETMSG_UNUSED5,
 
 	// sent by server (todo: move it up)
 	NETMSG_RCON_CMD_ADD,

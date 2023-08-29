@@ -1,5 +1,6 @@
 #include "teehistorian.h"
 
+#include <engine/external/json-parser/json.h>
 #include <engine/shared/config.h>
 #include <engine/shared/json.h>
 #include <engine/shared/snapshot.h>
@@ -8,7 +9,7 @@
 static const char TEEHISTORIAN_NAME[] = "teehistorian@ddnet.tw";
 static const CUuid TEEHISTORIAN_UUID = CalculateUuid(TEEHISTORIAN_NAME);
 static const char TEEHISTORIAN_VERSION[] = "2";
-static const char TEEHISTORIAN_VERSION_MINOR[] = "4";
+static const char TEEHISTORIAN_VERSION_MINOR[] = "6";
 
 #define UUID(id, name) static const CUuid UUID_##id = CalculateUuid(name);
 #include <engine/shared/teehistorian_ex_chunks.h>
@@ -81,6 +82,18 @@ void CTeeHistorian::WriteHeader(const CGameInfo *pGameInfo)
 	str_timestamp_ex(pGameInfo->m_StartTime, aStartTime, sizeof(aStartTime), "%Y-%m-%dT%H:%M:%S%z");
 	sha256_str(pGameInfo->m_MapSha256, aMapSha256, sizeof(aMapSha256));
 
+	char aPrevGameUuid[UUID_MAXSTRSIZE];
+	char aPrevGameUuidJson[64];
+	if(pGameInfo->m_HavePrevGameUuid)
+	{
+		FormatUuid(pGameInfo->m_PrevGameUuid, aPrevGameUuid, sizeof(aPrevGameUuid));
+		str_format(aPrevGameUuidJson, sizeof(aPrevGameUuidJson), "\"prev_game_uuid\":\"%s\",", aPrevGameUuid);
+	}
+	else
+	{
+		aPrevGameUuidJson[0] = 0;
+	}
+
 	char aCommentBuffer[128];
 	char aServerVersionBuffer[128];
 	char aStartTimeBuffer[128];
@@ -100,6 +113,7 @@ void CTeeHistorian::WriteHeader(const CGameInfo *pGameInfo)
 		"\"version\":\"%s\","
 		"\"version_minor\":\"%s\","
 		"\"game_uuid\":\"%s\","
+		"%s"
 		"\"server_version\":\"%s\","
 		"\"start_time\":\"%s\","
 		"\"server_name\":\"%s\","
@@ -115,6 +129,7 @@ void CTeeHistorian::WriteHeader(const CGameInfo *pGameInfo)
 		TEEHISTORIAN_VERSION,
 		TEEHISTORIAN_VERSION_MINOR,
 		aGameUuid,
+		aPrevGameUuidJson,
 		E(aServerVersionBuffer, pGameInfo->m_pServerVersion),
 		E(aStartTimeBuffer, aStartTime),
 		E(aServerNameBuffer, pGameInfo->m_pServerName),
@@ -508,6 +523,22 @@ void CTeeHistorian::RecordPlayerJoin(int ClientID, int Protocol)
 	Write(Buffer.Data(), Buffer.Size());
 }
 
+void CTeeHistorian::RecordPlayerRejoin(int ClientID)
+{
+	EnsureTickWritten();
+
+	CPacker Buffer;
+	Buffer.Reset();
+	Buffer.AddInt(ClientID);
+
+	if(m_Debug)
+	{
+		dbg_msg("teehistorian", "player_rejoin cid=%d", ClientID);
+	}
+
+	WriteExtra(UUID_TEEHISTORIAN_PLAYER_REJOIN, Buffer.Data(), Buffer.Size());
+}
+
 void CTeeHistorian::RecordPlayerReady(int ClientID)
 {
 	EnsureTickWritten();
@@ -751,6 +782,16 @@ void CTeeHistorian::RecordAuthLogout(int ClientID)
 	}
 
 	WriteExtra(UUID_TEEHISTORIAN_AUTH_LOGOUT, Buffer.Data(), Buffer.Size());
+}
+
+void CTeeHistorian::RecordAntibot(const void *pData, int DataSize)
+{
+	if(m_Debug)
+	{
+		dbg_msg("teehistorian", "antibot data_size=%d", DataSize);
+	}
+
+	WriteExtra(UUID_TEEHISTORIAN_ANTIBOT, pData, DataSize);
 }
 
 void CTeeHistorian::Finish()

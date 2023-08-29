@@ -18,6 +18,8 @@
 #include <engine/shared/jobs.h>
 
 #include "auto_map.h"
+#include "map_view.h"
+#include "smooth_value.h"
 
 #include <chrono>
 #include <deque>
@@ -521,6 +523,7 @@ public:
 	// io
 	bool Save(const char *pFilename);
 	bool Load(const char *pFilename, int StorageType, const std::function<void(const char *pErrorMessage)> &ErrorHandler);
+	bool HandleMapDrop(const char *pFilename, int StorageType);
 	void PerformSanityChecks(const std::function<void(const char *pErrorMessage)> &ErrorHandler);
 
 	// DDRace
@@ -791,36 +794,6 @@ public:
 	const char *GetTempFileName() const { return m_aTempFileName; }
 };
 
-class CSmoothZoom
-{
-public:
-	CSmoothZoom(float InitialZoom, float Min, float Max, CEditor *pEditor);
-
-	void SetZoomRange(float Min, float Max);
-	void SetZoom(float Target);
-	void SetZoomInstant(float Target);
-	void ChangeZoom(float Amount);
-	bool UpdateZoom();
-	float GetZoom() const;
-	float GetMinZoomLevel() const;
-	float GetMaxZoomLevel() const;
-
-private:
-	float ZoomProgress(float CurrentTime) const;
-
-	bool m_Zooming;
-	float m_Zoom;
-	CCubicBezier m_ZoomSmoothing;
-	float m_ZoomSmoothingTarget;
-	float m_ZoomSmoothingStart;
-	float m_ZoomSmoothingEnd;
-
-	float m_MinZoomLevel;
-	float m_MaxZoomLevel;
-
-	CEditor *m_pEditor;
-};
-
 class CEditor : public IEditor
 {
 	class IInput *m_pInput = nullptr;
@@ -834,6 +807,9 @@ class CEditor : public IEditor
 	class IStorage *m_pStorage = nullptr;
 	CRenderTools m_RenderTools;
 	CUI m_UI;
+
+	std::vector<std::reference_wrapper<CEditorComponent>> m_vComponents;
+	CMapView m_MapView;
 
 	bool m_EditorWasUsedBefore = false;
 
@@ -869,10 +845,12 @@ public:
 	CUI *UI() { return &m_UI; }
 	CRenderTools *RenderTools() { return &m_RenderTools; }
 
+	CMapView *MapView() { return &m_MapView; }
+	const CMapView *MapView() const { return &m_MapView; }
+
 	CEditor() :
-		m_ZoomMapView(200.0f, 10.0f, 2000.0f, this),
-		m_ZoomEnvelopeX(1.0f, 0.1f, 600.0f, this),
-		m_ZoomEnvelopeY(640.0f, 0.1f, 32000.0f, this)
+		m_ZoomEnvelopeX(1.0f, 0.1f, 600.0f),
+		m_ZoomEnvelopeY(640.0f, 0.1f, 32000.0f)
 	{
 		m_EntitiesTexture.Invalidate();
 		m_FrontTexture.Invalidate();
@@ -885,12 +863,10 @@ public:
 		m_Dialog = 0;
 		m_pTooltip = nullptr;
 
-		m_GridActive = false;
-		m_GridFactor = 1;
-
 		m_BrushColorEnabled = true;
 
 		m_aFileName[0] = '\0';
+		m_aFileNamePending[0] = '\0';
 		m_aFileSaveName[0] = '\0';
 		m_ValidSaveFilename = false;
 
@@ -915,13 +891,6 @@ public:
 
 		m_SelectEntitiesImage = "DDNet";
 
-		m_WorldOffsetX = 0;
-		m_WorldOffsetY = 0;
-		m_EditorOffsetX = 0.0f;
-		m_EditorOffsetY = 0.0f;
-
-		m_WorldZoom = 1.0f;
-
 		m_ResetZoomEnvelope = true;
 		m_OffsetEnvelopeX = 0.1f;
 		m_OffsetEnvelopeY = 0.5f;
@@ -933,8 +902,6 @@ public:
 		m_MouseDeltaWy = 0;
 
 		m_GuiActive = true;
-		m_ProofBorders = PROOF_BORDER_OFF;
-		m_CurrentMenuProofIndex = 0;
 		m_PreviewZoom = false;
 
 		m_ShowTileInfo = SHOW_TILE_OFF;
@@ -981,6 +948,7 @@ public:
 	void OnUpdate() override;
 	void OnRender() override;
 	void OnActivate() override;
+	void OnWindowResize() override;
 	bool HasUnsavedData() const override { return m_Map.m_Modified; }
 	void UpdateMentions() override { m_Mentions++; }
 	void ResetMentions() override { m_Mentions = 0; }
@@ -1012,6 +980,7 @@ public:
 	void Reset(bool CreateDefault = true);
 	bool Save(const char *pFilename) override;
 	bool Load(const char *pFilename, int StorageType) override;
+	bool HandleMapDrop(const char *pFilename, int StorageType) override;
 	bool Append(const char *pFilename, int StorageType);
 	void LoadCurrentMap();
 	void Render();
@@ -1020,8 +989,6 @@ public:
 	void RenderSavingIndicator(CUIRect View);
 	void FreeDynamicPopupMenus();
 	void RenderMousePointer();
-
-	void ResetMenuBackgroundPositions();
 
 	std::vector<CQuad *> GetSelectedQuads();
 	std::vector<std::pair<CQuad *, int>> GetSelectedQuadPoints();
@@ -1064,12 +1031,10 @@ public:
 	int m_Dialog;
 	const char *m_pTooltip;
 
-	bool m_GridActive;
-	int m_GridFactor;
-
 	bool m_BrushColorEnabled;
 
 	char m_aFileName[IO_MAX_PATH_LENGTH];
+	char m_aFileNamePending[IO_MAX_PATH_LENGTH];
 	char m_aFileSaveName[IO_MAX_PATH_LENGTH];
 	bool m_ValidSaveFilename;
 
@@ -1078,6 +1043,7 @@ public:
 		POPEVENT_EXIT = 0,
 		POPEVENT_LOAD,
 		POPEVENT_LOADCURRENT,
+		POPEVENT_LOADDROP,
 		POPEVENT_NEW,
 		POPEVENT_SAVE,
 		POPEVENT_SAVE_COPY,
@@ -1085,7 +1051,10 @@ public:
 		POPEVENT_PREVENTUNUSEDTILES,
 		POPEVENT_IMAGEDIV16,
 		POPEVENT_IMAGE_MAX,
-		POPEVENT_PLACE_BORDER_TILES
+		POPEVENT_PLACE_BORDER_TILES,
+		POPEVENT_PIXELART_BIG_IMAGE,
+		POPEVENT_PIXELART_MANY_COLORS,
+		POPEVENT_PIXELART_TOO_MANY_COLORS
 	};
 
 	int m_PopupEventType;
@@ -1202,17 +1171,9 @@ public:
 	std::vector<std::string> m_vSelectEntitiesFiles;
 	std::string m_SelectEntitiesImage;
 
-	float m_WorldOffsetX;
-	float m_WorldOffsetY;
-	float m_EditorOffsetX;
-	float m_EditorOffsetY;
-
 	// Zooming
-	CSmoothZoom m_ZoomMapView;
-	float m_WorldZoom;
-
-	CSmoothZoom m_ZoomEnvelopeX;
-	CSmoothZoom m_ZoomEnvelopeY;
+	CSmoothValue m_ZoomEnvelopeX;
+	CSmoothValue m_ZoomEnvelopeY;
 
 	bool m_ResetZoomEnvelope;
 
@@ -1222,18 +1183,6 @@ public:
 	bool m_ShowMousePointer;
 	bool m_GuiActive;
 
-	enum EProofBorder
-	{
-		PROOF_BORDER_OFF,
-		PROOF_BORDER_INGAME,
-		PROOF_BORDER_MENU
-	};
-
-	EProofBorder m_ProofBorders;
-	int m_CurrentMenuProofIndex;
-	std::vector<vec2> m_vMenuBackgroundPositions;
-	std::vector<const char *> m_vpMenuBackgroundPositionNames;
-	std::vector<std::vector<int>> m_vMenuBackgroundCollisions;
 	char m_aMenuBackgroundTooltip[256];
 	bool m_PreviewZoom;
 	float m_MouseWScale = 1.0f; // Mouse (i.e. UI) scale relative to the World (selected Group)
@@ -1324,6 +1273,11 @@ public:
 
 	CLineInputBuffered<256> m_SettingsCommandInput;
 
+	CImageInfo m_TileartImageInfo;
+	char m_aTileartFilename[IO_MAX_PATH_LENGTH];
+	void AddTileart();
+	void TileartCheckColors();
+
 	void PlaceBorderTiles();
 
 	void UpdateTooltip(const void *pID, const CUIRect *pRect, const char *pToolTip);
@@ -1347,9 +1301,6 @@ public:
 	bool DoClearableEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize, int Corners = IGraphics::CORNER_ALL, const char *pToolTip = nullptr);
 
 	void RenderBackground(CUIRect View, IGraphics::CTextureHandle Texture, float Size, float Brightness);
-
-	void RenderGrid(const std::shared_ptr<CLayerGroup> &pGroup);
-	void SnapToGrid(float &x, float &y);
 
 	int UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, int Current, int Min, int Max, int Step, float Scale, const char *pToolTip, bool IsDegree = false, bool IsHex = false, int corners = IGraphics::CORNER_ALL, ColorRGBA *pColor = nullptr, bool ShowValue = true);
 
@@ -1389,6 +1340,7 @@ public:
 	static bool CallbackAppendMap(const char *pFileName, int StorageType, void *pUser);
 	static bool CallbackSaveMap(const char *pFileName, int StorageType, void *pUser);
 	static bool CallbackSaveCopyMap(const char *pFileName, int StorageType, void *pUser);
+	static bool CallbackAddTileart(const char *pFilepath, int StorageType, void *pUser);
 
 	void PopupSelectImageInvoke(int Current, float x, float y);
 	int PopupSelectImageResult();
@@ -1519,22 +1471,20 @@ public:
 	};
 
 	// Explanations
-	enum
+	enum class EExplanation
 	{
-		EXPLANATION_DDNET,
-		EXPLANATION_FNG,
-		EXPLANATION_RACE,
-		EXPLANATION_VANILLA,
-		EXPLANATION_BLOCKWORLDS
+		DDNET,
+		FNG,
+		RACE,
+		VANILLA,
+		BLOCKWORLDS
 	};
-	static const char *Explain(int ExplanationID, int Tile, int Layer);
-
-	int GetLineDistance() const;
+	static const char *ExplainDDNet(int Tile, int Layer);
+	static const char *ExplainFNG(int Tile, int Layer);
+	static const char *ExplainVanilla(int Tile, int Layer);
+	static const char *Explain(EExplanation Explanation, int Tile, int Layer);
 
 	// Zooming
-	void ZoomMouseTarget(float ZoomFactor);
-	void UpdateZoomWorld();
-
 	void ZoomAdaptOffsetX(float ZoomFactor, const CUIRect &View);
 	void UpdateZoomEnvelopeX(const CUIRect &View);
 
@@ -1558,7 +1508,6 @@ public:
 	IGraphics::CTextureHandle GetSwitchTexture();
 	IGraphics::CTextureHandle GetTuneTexture();
 
-	void Goto(float X, float Y);
 	unsigned char m_TeleNumber;
 
 	unsigned char m_TuningNum;

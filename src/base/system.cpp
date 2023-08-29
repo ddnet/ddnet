@@ -2,6 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <atomic>
 #include <cctype>
+#include <charconv>
 #include <cmath>
 #include <cstdarg>
 #include <cstdio>
@@ -3640,6 +3641,13 @@ float str_tofloat(const char *str)
 	return strtod(str, nullptr);
 }
 
+void str_from_int(int value, char *buffer, size_t buffer_size)
+{
+	buffer[0] = '\0'; // Fix false positive clang-analyzer-core.UndefinedBinaryOperatorResult when using result
+	auto result = std::to_chars(buffer, buffer + buffer_size - 1, value);
+	result.ptr[0] = '\0';
+}
+
 int str_utf8_comp_nocase(const char *a, const char *b)
 {
 	int code_a;
@@ -3953,6 +3961,34 @@ void str_utf8_stats(const char *str, size_t max_size, size_t max_count, size_t *
 	}
 }
 
+size_t str_utf8_offset_bytes_to_chars(const char *str, size_t byte_offset)
+{
+	size_t char_offset = 0;
+	size_t current_offset = 0;
+	while(current_offset < byte_offset)
+	{
+		const size_t prev_byte_offset = current_offset;
+		current_offset = str_utf8_forward(str, current_offset);
+		if(current_offset == prev_byte_offset)
+			break;
+		char_offset++;
+	}
+	return char_offset;
+}
+
+size_t str_utf8_offset_chars_to_bytes(const char *str, size_t char_offset)
+{
+	size_t byte_offset = 0;
+	for(size_t i = 0; i < char_offset; i++)
+	{
+		const size_t prev_byte_offset = byte_offset;
+		byte_offset = str_utf8_forward(str, byte_offset);
+		if(byte_offset == prev_byte_offset)
+			break;
+	}
+	return byte_offset;
+}
+
 unsigned str_quickhash(const char *str)
 {
 	unsigned hash = 5381;
@@ -4125,7 +4161,7 @@ int kill_process(PROCESS process)
 #elif defined(CONF_FAMILY_UNIX)
 	int status;
 	kill(process, SIGTERM);
-	return !waitpid(process, &status, 0);
+	return waitpid(process, &status, 0) != -1;
 #endif
 }
 

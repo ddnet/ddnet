@@ -600,6 +600,11 @@ void CRegister::OnConfigChange()
 		m_aProtocolEnabled[PROTOCOL_TW7_IPV6] = false;
 		m_aProtocolEnabled[PROTOCOL_TW7_IPV4] = false;
 	}
+	if(m_pConfig->m_SvIpv4Only)
+	{
+		m_aProtocolEnabled[PROTOCOL_TW6_IPV6] = false;
+		m_aProtocolEnabled[PROTOCOL_TW7_IPV6] = false;
+	}
 	m_NumExtraHeaders = 0;
 	const char *pRegisterExtra = m_pConfig->m_SvRegisterExtra;
 	char aHeader[128];

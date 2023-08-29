@@ -96,6 +96,9 @@ jobs:
         echo /Library/Frameworks/Python.framework/Versions/3.11/bin >> $GITHUB_PATH
         sudo rm -rf /Library/Developer/CommandLineTools
 
+    - name: Cache Rust dependencies
+      uses: Swatinem/rust-cache@v2
+
     - name: Build in debug mode
       run: |
         mkdir debug

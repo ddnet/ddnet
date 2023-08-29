@@ -292,16 +292,6 @@ CClient::CClient() :
 	for(auto &DemoRecorder : m_aDemoRecorder)
 		DemoRecorder = CDemoRecorder(&m_SnapshotDelta);
 
-	m_pEditor = 0;
-	m_pInput = 0;
-	m_pGraphics = 0;
-	m_pSound = 0;
-	m_pGameClient = 0;
-	m_pMap = 0;
-	m_pConfigManager = 0;
-	m_pConfig = 0;
-	m_pConsole = 0;
-
 	m_RenderFrameTime = 0.0001f;
 	m_RenderFrameTimeLow = 1.0f;
 	m_RenderFrameTimeHigh = 0.0f;
@@ -1141,13 +1131,12 @@ void CClient::DebugRender()
 		float sp = Graphics()->ScreenWidth() / 100.0f;
 		float x = Graphics()->ScreenWidth() - w - sp;
 
-		ITextRender *pTextRender = Kernel()->RequestInterface<ITextRender>();
 		m_FpsGraph.Scale();
-		m_FpsGraph.Render(Graphics(), pTextRender, x, sp * 5, w, h, "FPS");
+		m_FpsGraph.Render(Graphics(), TextRender(), x, sp * 5, w, h, "FPS");
 		m_InputtimeMarginGraph.Scale();
-		m_InputtimeMarginGraph.Render(Graphics(), pTextRender, x, sp * 6 + h, w, h, "Prediction Margin");
+		m_InputtimeMarginGraph.Render(Graphics(), TextRender(), x, sp * 6 + h, w, h, "Prediction Margin");
 		m_GametimeMarginGraph.Scale();
-		m_GametimeMarginGraph.Render(Graphics(), pTextRender, x, sp * 7 + h * 2, w, h, "Gametime Margin");
+		m_GametimeMarginGraph.Render(Graphics(), TextRender(), x, sp * 7 + h * 2, w, h, "Gametime Margin");
 	}
 }
 
@@ -3073,8 +3062,8 @@ void CClient::Run()
 #endif
 
 	// init text render
-	IEngineTextRender *pTextRender = Kernel()->RequestInterface<IEngineTextRender>();
-	pTextRender->Init();
+	m_pTextRender = Kernel()->RequestInterface<IEngineTextRender>();
+	m_pTextRender->Init();
 
 	// init the input
 	Input()->Init();
@@ -3092,6 +3081,8 @@ void CClient::Run()
 	{
 		str_copy(g_Config.m_SteamName, Steam()->GetPlayerName());
 	}
+
+	Graphics()->AddWindowResizeListener([this] { OnWindowResize(); });
 
 	GameClient()->OnInit();
 
@@ -3154,7 +3145,7 @@ void CClient::Run()
 		// handle pending map edits
 		if(m_aCmdEditMap[0])
 		{
-			int Result = m_pEditor->Load(m_aCmdEditMap, IStorage::TYPE_ALL_OR_ABSOLUTE);
+			int Result = m_pEditor->HandleMapDrop(m_aCmdEditMap, IStorage::TYPE_ALL_OR_ABSOLUTE);
 			if(Result)
 				g_Config.m_ClEditor = true;
 			else
@@ -3434,7 +3425,7 @@ void CClient::Run()
 	delete m_pEditor;
 
 	// shutdown text render while graphics are still available
-	pTextRender->Shutdown();
+	m_pTextRender->Shutdown();
 }
 
 bool CClient::InitNetworkClient(char *pError, size_t ErrorSize)
@@ -3946,7 +3937,7 @@ const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
 }
 
 #if defined(CONF_VIDEORECORDER)
-const char *CClient::DemoPlayer_Render(const char *pFilename, int StorageType, const char *pVideoName, int SpeedIndex)
+const char *CClient::DemoPlayer_Render(const char *pFilename, int StorageType, const char *pVideoName, int SpeedIndex, bool StartPaused)
 {
 	const char *pError = DemoPlayer_Play(pFilename, StorageType);
 	if(pError)
@@ -3956,7 +3947,7 @@ const char *CClient::DemoPlayer_Render(const char *pFilename, int StorageType, c
 	this->CClient::StartVideo(NULL, this, pVideoName);
 	m_DemoPlayer.Play();
 	m_DemoPlayer.SetSpeedIndex(SpeedIndex);
-	if(Config()->m_ClVideoPauseOnStart)
+	if(StartPaused)
 	{
 		m_DemoPlayer.Pause();
 	}
@@ -4322,6 +4313,14 @@ void CClient::Notify(const char *pTitle, const char *pMessage)
 
 	NotificationsNotify(pTitle, pMessage);
 	Graphics()->NotifyWindow();
+}
+
+void CClient::OnWindowResize()
+{
+	TextRender()->OnPreWindowResize();
+	GameClient()->OnWindowResize();
+	m_pEditor->OnWindowResize();
+	TextRender()->OnWindowResize();
 }
 
 void CClient::ConchainWindowVSync(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
