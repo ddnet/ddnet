@@ -142,6 +142,30 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 			}
 		}
 
+		if(g_Config.m_Debug || g_Config.m_ClNameplatesSkin)
+		{
+			const char *pSkin = m_pClient->m_aClients[ClientID].m_aSkinName;
+			if(str_comp(pSkin, m_aNamePlates[ClientID].m_aSkinName) != 0 || FontSizeClan != m_aNamePlates[ClientID].m_SkinNameTextFontSize)
+			{
+				mem_copy(m_aNamePlates[ClientID].m_aSkinName, pSkin, sizeof(m_aNamePlates[ClientID].m_aSkinName));
+				m_aNamePlates[ClientID].m_SkinNameTextFontSize = FontSizeClan;
+
+				CTextCursor Cursor;
+				TextRender()->SetCursor(&Cursor, 0, 0, FontSizeClan, TEXTFLAG_RENDER);
+				Cursor.m_LineWidth = -1;
+
+				// create nameplates at standard zoom
+				float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
+				Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
+				RenderTools()->MapScreenToInterface(m_pClient->m_Camera.m_Center.x, m_pClient->m_Camera.m_Center.y);
+
+				m_aNamePlates[ClientID].m_SkinNameTextWidth = TextRender()->TextWidth(FontSizeClan, pSkin, -1, -1.0f);
+
+				TextRender()->RecreateTextContainer(m_aNamePlates[ClientID].m_SkinNameTextContainerIndex, &Cursor, pSkin);
+				Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
+			}
+		}
+
 		float tw = m_aNamePlates[ClientID].m_NameTextWidth;
 		if(g_Config.m_ClNameplatesTeamcolors && m_pClient->m_Teams.Team(ClientID))
 			rgb = color_cast<ColorRGBA>(ColorHSLA(m_pClient->m_Teams.Team(ClientID) / 64.0f, 1.0f, 0.75f));
@@ -210,6 +234,13 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 			float XOffset = TextRender()->TextWidth(FontSize, aBuf, -1, -1.0f) / 2.0f;
 			TextRender()->TextColor(rgb);
 			TextRender()->Text(Position.x - XOffset, YOffset, FontSize, aBuf, -1.0f);
+		}
+
+		if(g_Config.m_Debug || g_Config.m_ClNameplatesSkin)
+		{
+			YOffset -= FontSizeClan;
+			if(m_aNamePlates[ClientID].m_SkinNameTextContainerIndex.Valid())
+				TextRender()->RenderTextContainer(m_aNamePlates[ClientID].m_SkinNameTextContainerIndex, TColor, TOutlineColor, Position.x - m_aNamePlates[ClientID].m_SkinNameTextWidth / 2.0f, YOffset);
 		}
 	}
 
@@ -348,6 +379,7 @@ void CNamePlates::ResetNamePlates()
 	{
 		TextRender()->DeleteTextContainer(NamePlate.m_NameTextContainerIndex);
 		TextRender()->DeleteTextContainer(NamePlate.m_ClanNameTextContainerIndex);
+		TextRender()->DeleteTextContainer(NamePlate.m_SkinNameTextContainerIndex);
 
 		NamePlate.Reset();
 	}
