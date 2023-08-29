@@ -159,6 +159,7 @@ void CLineInput::SetCursorOffset(size_t Offset)
 
 void CLineInput::SetSelection(size_t Start, size_t End)
 {
+	dbg_assert(m_CursorPos == Start || m_CursorPos == End, "Selection and cursor offset got desynchronized");
 	if(Start > End)
 		std::swap(Start, End);
 	m_SelectionStart = clamp<size_t>(Start, 0, m_Len);
@@ -472,12 +473,12 @@ STextBoundingBox CLineInput::Render(const CUIRect *pRect, float FontSize, int Al
 			TextRender()->TextEx(&Cursor, pDisplayStr);
 		}
 
-		if(Cursor.m_CursorMode == TEXT_CURSOR_CURSOR_MODE_CALCULATE)
+		if(Cursor.m_CursorMode == TEXT_CURSOR_CURSOR_MODE_CALCULATE && Cursor.m_CursorCharacter >= 0)
 		{
 			const size_t NewCursorOffset = str_utf8_offset_chars_to_bytes(pDisplayStr, Cursor.m_CursorCharacter);
 			SetCursorOffset(OffsetFromDisplayToActual(NewCursorOffset));
 		}
-		if(Cursor.m_CalculateSelectionMode == TEXT_CURSOR_SELECTION_MODE_CALCULATE)
+		if(Cursor.m_CalculateSelectionMode == TEXT_CURSOR_SELECTION_MODE_CALCULATE && Cursor.m_SelectionStart >= 0 && Cursor.m_SelectionEnd >= 0)
 		{
 			const size_t NewSelectionStart = str_utf8_offset_chars_to_bytes(pDisplayStr, Cursor.m_SelectionStart);
 			const size_t NewSelectionEnd = str_utf8_offset_chars_to_bytes(pDisplayStr, Cursor.m_SelectionEnd);
