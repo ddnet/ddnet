@@ -7,6 +7,7 @@
 #	3edcxzaq1		2020-06-25 00:00:00
 #	cur.ie			2020-09-28 00:00:00
 #	simpygirl		2022-02-20 00:00:00
+#	furo			2023-08-29 00:00:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -207,7 +208,7 @@ Hook
 == Hook
 
 Invalid Demo
-== Ogiltigt deo
+== Ogiltig demo
 
 Join blue
 == Spela i blått
@@ -343,7 +344,7 @@ Rename demo
 == Byt namn på demo
 
 Reset filter
-== Återställ filter
+== Nollställ filter
 
 Score
 == Poäng
@@ -415,7 +416,7 @@ Strict gametype filter
 == Strikt speltypsfilter
 
 Sudden Death
-== Plötslig död
+== Sudden Death
 
 Switch weapon on pickup
 == Byt vapen vid anskaffning
@@ -433,7 +434,7 @@ The server is running a non-standard tuning on a pure game type.
 == Denna server kör inte standardinställningar på en reserverad speltyp.
 
 There's an unsaved map in the editor, you might want to save it before you quit the game.
-== Det finns en osparad bana i redigeraden, du kanske vill spara den innan du avslutar.
+== Det finns en osparad bana i redigeraren, du kanske vill spara den innan du avslutar.
 
 Time limit
 == Tidsbegränsning
@@ -550,7 +551,7 @@ Size:
 == Storlek:
 
 Reset to defaults
-== Återställ till standard
+== Nollställ till standard
 
 Quit anyway?
 == Avsluta i alla fall?
@@ -607,7 +608,7 @@ Show kill messages
 == Visa döds meddelanden
 
 Reset
-== Återställ
+== Nollställ
 
 DDNet
 == DDNet
@@ -643,7 +644,7 @@ Reconnect in %d sec
 == Återkopplar om %d sekunder
 
 Successfully saved the replay!
-== Lyckades med att spara repris
+== Lyckades med att spara repris!
 
 Save ghost
 == Spara spöken
@@ -676,13 +677,13 @@ Show votes window after voting
 == Visa röstnings fönster efter röstning
 
 DDNet Client needs to be restarted to complete update!
-== DDNet Klienten behöves startas om för att genomföra updateringen!
+== DDNet Klienten behövs startas om för att genomföra uppdateringen!
 
 Kill
 == Dö
 
 Personal best:
-== Personligs bästa:
+== Personligt bästa:
 
 Show DDNet map finishes in server browser
 == Visa DDNet bana avklarningar i server bläddraren
@@ -706,7 +707,7 @@ Render
 == Rendera
 
 Are you sure that you want to disconnect?
-== Är du säker att du vill koppla ifrån?
+== Är du säker på att du vill koppla ifrån?
 
 Grabs
 == Grabs
@@ -808,7 +809,7 @@ Date
 == Datum
 
 Show other players' hook collision lines
-== Visa andra spelares hook kollision linor
+== Visa andra spelares hook kollisions linjer
 
 Fetch Info
 == Hämta Info
@@ -874,7 +875,7 @@ Show only chat messages from friends
 == Visa bara chatt meddelanden från vänner
 
 DDNet Client updated!
-== DDNet Klienten updaterades!
+== DDNet Klienten uppdaterades!
 
 Converse
 == Konversera
@@ -916,7 +917,7 @@ Best
 == Bäst
 
 Updating...
-== Updaterar...
+== Uppdaterar...
 
 Clan plates size
 == Klanskylt storlek
@@ -925,7 +926,7 @@ Size
 == Storlek
 
 Save the best demo of each race
-== Spara the bästa demon av varje race
+== Spara den bästa demot av varje race
 
 Frags
 == Frags
@@ -997,7 +998,7 @@ Show names in chat in team colors
 == Visa namn in chatten med lagets färger
 
 Update now
-== Updatera nu
+== Uppdatera nu
 
 Toggle ghost
 == Växla spöke
@@ -1009,7 +1010,7 @@ Team message
 == Lag meddelande
 
 File already exists, do you want to overwrite it?
-== Filen finns redan, vill du skriv över den?
+== Filen finns redan, vill du skriva över den?
 
 Hook collisions
 == Hook kollisioner
@@ -1069,7 +1070,7 @@ Server executable not found, can't run server
 == Server exekveringsfil hittades ej, kan ej starta servern
 
 Editor
-== Editor
+== Redigeraren
 
 [Start menu]
 Play
@@ -1091,7 +1092,7 @@ Saving ddnet-settings.cfg failed
 == Det gick inte att spara ddnet-settings.cfg
 
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
-== Bredden på texturen %s är inte delbar med %d, eller höjden är inte delbar med %d, vilket kan orsaka visuella buggar.
+== Bredden på texturen %s är inte delbar med %d, eller är höjden inte delbar med %d, vilket kan orsaka visuella buggar.
 
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
 == Felsökningsläge är aktiverad, Klicka Ctrl+Shift+D för att stänga av felsökningsläge.
@@ -1106,7 +1107,7 @@ Checking for existing player with your name
 == Söker efter en befintlig spelare med ditt namn
 
 Are you sure that you want to disconnect and switch to a different server?
-== Är du säker att du vill koppla ifrån och byta server?
+== Är du säker på att du vill koppla ifrån och byta server?
 
 Theme
 == Tema
@@ -1223,7 +1224,7 @@ Entities
 == Entities
 
 Emoticons
-== Emoticons
+== Känsloikoner
 
 Particles
 == Partiklar
@@ -1239,510 +1240,510 @@ https://ddnet.org/discord
 
 [Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== 
+== Misslyckades under uppstart. Testa att ändra gfx_backend till OpenGL eller Vulkan i settings_ddnet.cfg i konfig nappen och försök igen.
 
 [Graphics error]
 Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== 
+== Slut på VRAM. Testa att ta bort assets (skins, entities, etc.), speciellt dem i hög upplösning.
 
 [Graphics error]
 An error during command recording occurred. Try to update your GPU drivers.
-== 
+== Ett fel uppstod under "command recording". Testa att uppdatera ditt grafikkorts drivrutiner.
 
 [Graphics error]
 A render command failed. Try to update your GPU drivers.
-== 
+== Ett "render command" misslyckades. Testa att uppdatera ditt grafikkorts drivrutiner.
 
 [Graphics error]
 Submitting the render commands failed. Try to update your GPU drivers.
-== 
+== Inskickning av "render commands" misslyckades. Testa att uppdatera ditt grafikkorts drivrutiner.
 
 [Graphics error]
 Failed to swap framebuffers. Try to update your GPU drivers.
-== 
+== Misslyckades att "swap framebuffers". Testa att uppdatera ditt grafikkorts drivrutiner.
 
 [Graphics error]
 Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== 
+== Okänt fel. Testa att ändra gfx_backend till OpenGL eller Vulkan i settings_ddnet.cfg i konfig nappen och försök igen.
 
 [Graphics error]
 Could not initialize the given graphics backend, reverting to the default backend now.
-== 
+== Kunde inte starta den angivna grafikbackend, återgår till standard backend nu.
 
 [Graphics error]
 Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
-== 
+== Kunde inte starta den angivna grafikbackend, detta beror någ på att du inte har installerad drivrutinerna för ditt integrerade grafikkort.
 
 Could not save downloaded map. Try manually deleting this file: %s
-== 
+== Kunde inte spara nedladdade bana. Testa att manuellt ta bort denna fil: %s
 
 The format of texture %s is not RGBA which will cause visual bugs.
-== 
+== Formatet av texturn %s är inte RGBA, vilket kommer att orsaka visuella buggar.
 
 Preparing demo playback
-== 
+== Förbreder för demo uppspelning
 
 Connected
-== 
+== Ansluten
 
 Loading map file from storage
-== 
+== Laddar bana fil från lagring
 
 Why are you slowmo replaying to read this?
-== 
+== Varför försöker du att läsa detta?
 
 Initializing components
-== 
+== Initierar komponenter
 
 Initializing assets
-== 
+== Initierar assets
 
 Initializing map logic
-== 
+== Initierar bana logik
 
 Sending initial client info
-== 
+== Skickar första klient info
 
 Quitting. Please wait…
-== 
+== Lämnar. Vänligen vänta…
 
 Restarting. Please wait…
-== 
+== Startar om. Vänligen vänta…
 
 Position:
-== 
+== Position
 
 Speed:
-== 
+== Hastighet:
 
 Angle:
-== 
+== Vinkel:
 
 Multi-View
-== 
+== Multi-Vy
 
 Team %d
-== 
+== Lag %d
 
 Uploading map data to GPU
-== 
+== Laddar upp bana data till grafikkortet
 
 Trying to determine UDP connectivity...
-== 
+== Försöker att bestämma UDP anslutning...
 
 UDP seems to be filtered.
-== 
+== UDP verkar vara filtrerad.
 
 UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
-== 
+== UDP och TCP IP adresser verkar vara olika. Testa att stänga av VPN, proxy eller nätverksacceleratorer.
 
 No answer from server yet.
-== 
+== Inget svar från servern än.
 
 Getting game info
-== 
+== Hämtar spel info
 
 Requesting to join the game
-== 
+== Begär att få ansluta till spelet.
 
 Rename folder
-== 
+== Döp om mapp.
 
 A demo with this name already exists
-== 
+== Ett demo med detta namn finns redan
 
 A folder with this name already exists
-== 
+== En mapp finns redan med detta namn
 
 Unable to rename the folder
-== 
+== Misslyckades att döpa om mappen
 
 File '%s' already exists, do you want to overwrite it?
-== 
+== Fil '%s' finns redan, vill du skriva över den?
 
 (paused)
-== 
+== (pausad)
 
 Join Tutorial Server
-== 
+== Anslut till Tutorial
 
 Skip Tutorial
-== 
+== Skippa Tutorial
 
 Loading menu images
-== 
+== Laddar meny bilder
 
 Copy info
-== 
+== Kopiera info
 
 No server selected
-== 
+== Ingen server vald
 
 Online players (%d)
-== 
+== Online spelare (%d)
 
 Online clanmates (%d)
-== 
+== Online klanmedlemmar (%d)
 
 [friends (server browser)]
 Offline (%d)
-== 
+== Offline (%d)
 
 Click to select server. Double click to join your friend.
-== 
+== Klicka för att välja server. Dubbel klicka för att ansluta till din kamrat.
 
 Click to remove this player from your friends list.
-== 
+== Klicka för att ta bort denna spelare från din kompis lista.
 
 Click to remove this clan from your friends list.
-== 
+== Klicka för att ta bort denna klan från din kompis lista.
 
 None
-== 
+== Ingen
 
 Are you sure that you want to remove the player '%s' from your friends list?
-== 
+== Är du säker på att du vill ta bort spelare '%s' från din kompis lista?
 
 Are you sure that you want to remove the clan '%s' from your friends list?
-== 
+== Är du säker på att du vill ta bort klanen '%s' från din kompis lista?
 
 Add Clan
-== 
+== Lägg till klan
 
 Play the current demo
-== 
+== Spela demo
 
 Pause the current demo
-== 
+== Pausa demo
 
 Stop the current demo
-== 
+== Stoppa demo
 
 Go back one tick
-== 
+== Gå tillbaka en tick
 
 Go forward one tick
-== 
+== Gå framåt en tick
 
 Slow down the demo
-== 
+== Sakta ner demot
 
 Speed up the demo
-== 
+== Snabba up demot
 
 Mark the beginning of a cut (right click to reset)
-== 
+== Markera start av snittet (höger klicka för att nollställa)
 
 Mark the end of a cut (right click to reset)
-== 
+== Markera slutet av snittet (höger klicka för att nollställa)
 
 Export cut as a separate demo
-== 
+== Exportera snitt till en seperat demo fil
 
 Go back one marker
-== 
+== Gå tillbaka en markör
 
 Go forward one marker
-== 
+== Gå framåt en markör
 
 Close the demo player
-== 
+== Stäng demo spelaren
 
 Toggle keyboard shortcuts
-== 
+== Växla kortkommandon 
 
 Export demo cut
-== 
+== Exportera demo snitt
 
 Cut interval
-== 
+== Snitt interval
 
 Cut length
-== 
+== Snitt längd
 
 Loading demo files
-== 
+== Laddar demo filer
 
 All combined
-== 
+== Alla kombinerade
 
 Folder Link
-== 
+== Mapp länk
 
 Open the directory that contains the demo files
-== 
+== Öppna mappen som innehåller demo filerna
 
 Are you sure that you want to delete the folder '%s'?
-== 
+== Är du säker på att du vill ta bort mappen '%s'?
 
 Are you sure that you want to delete the demo '%s'?
-== 
+== Är du säker på att du vill ta bort demot '%s'?
 
 Delete folder
-== 
+== Ta bort mapp
 
 Unable to delete the demo '%s'
-== 
+== Misslyckades att ta bort demot '%s'
 
 Unable to delete the folder '%s'. Make sure it's empty first.
-== 
+== Misslyckades att ta bort mappen '%s'. Den måste vara tom först.
 
 Loading ghost files
-== 
+== Laddar spök filer
 
 Menu opened. Press Esc key again to close menu.
-== 
+== Meny öppnad. Klicka Esc igen för att stänga menyn.
 
 Save power by lowering refresh rate (higher input latency)
-== 
+== Spara batteri genom att sänka uppdateringsfrekvensen (högre inmatnings latens)
 
 Open the settings file
-== 
+== Öppna inställningsfil
 
 Open the directory that contains the configuration and user files
-== 
+== Öppna mappen som innehåller konfigurationen och användarfiler
 
 Open the directory to add custom themes
-== 
+== Öppna mappen för att lägga till egna teman 
 
 Loading skin files
-== 
+== Laddar skin filer
 
 Toggle to edit your dummy settings
-== 
+== Växla till att ändra dina dummy inställningar
 
 Download community skins
-== 
+== Ladda ner community skins
 
 Choose default eyes when joining a server
-== 
+== Välj standard ögon när du ansluter till en server
 
 Create a random skin
-== 
+== Skapa ett slumpad skin
 
 Open the directory to add custom skins
-== 
+== Öppna mappen för att lägga till egna skins
 
 Enable controller
-== 
+== Aktivera kontroller
 
 Controller
-== 
+== Kontroller
 
 Ingame controller mode
-== 
+== Kontroller läge under spel
 
 [Ingame controller mode]
 Relative
-== 
+== Relativ
 
 [Ingame controller mode]
 Absolute
-== 
+== Absolut
 
 Ingame controller sens.
-== 
+== Kontroller känslighet i spelet.
 
 UI controller sens.
-== 
+== Kontroller känslighet i menyer.
 
 Controller jitter tolerance
-== 
+== Kontroller skaka tolerans
 
 No controller found. Plug in a controller.
-== 
+== Ingen kontroller hittad. Anslut en kontroller.
 
 Axis
-== 
+== Axel
 
 Status
-== 
+== Status
 
 Aim bind
-== 
+== Aim bind
 
 Mouse
-== 
+== Mus
 
 Ingame mouse sens.
-== 
+== Mus känslighet i spelet.
 
 UI mouse sens.
-== 
+== Mus känslighet i menyer.
 
 Reset controls
-== 
+== Nollställ kontrollerna
 
 Are you sure that you want to reset the controls to their defaults?
-== 
+== Är du säker på att du vill nollställa kontrollerna till standard?
 
 Cancel
-== 
+== Avbryt
 
 Allows maps to render with more detail
-== 
+== Tillåt banor att visa mer detaljer
 
 Renderer
-== 
+== Renderer
 
 default
-== 
+== standard
 
 custom
-== 
+== egna
 
 Graphics card
-== 
+== Grafikkort
 
 auto
-== 
+== auto
 
 Appearance
-== 
+== Utseende
 
 Name Plate
-== 
+== Namnskylt
 
 Hook Collisions
-== 
+== Hook kollisioner
 
 Show health, shields and ammo
-== 
+== Visa hälsa, sköldar och ammunition
 
 DDRace HUD
-== 
+== DDRace HUD
 
 Show client IDs in scoreboard
-== 
+== Visa klient ID i poänglista
 
 Show DDRace HUD
-== 
+== Visa DDRace HUD
 
 Show jumps indicator
-== 
+== Visa hopp indikator
 
 Show dummy actions
-== 
+== Visa dummy actions
 
 Show player position
-== 
+== Visa spelarens position
 
 Show player speed
-== 
+== Visa spelarens hastighet
 
 Show player target angle
-== 
+== Visa spelarens vinkel
 
 Show freeze bars
-== 
+== Visa freeze bars
 
 Opacity of freeze bars inside freeze
-== 
+== Opacitet av freeze bars i freeze
 
 Show hook strength indicator
-== 
+== Visa hook styrka indikator
 
 Hook collision line
-== 
+== Hook kollisions linje
 
 Hook collision line width
-== 
+== Hook kollisions linje bredd
 
 Hook collision line opacity
-== 
+== Hook kollisions linje opacitet
 
 Colors of the hook collision line, in case of a possible collision with:
-== 
+== Färger av hook kollisions linje, ifall det finns en kollision med:
 
 Your movements are not taken into account when calculating the line colors
-== 
+== Dina rörelser tas inte med i beräkningen av linjefärgerna
 
 Nothing hookable
-== 
+== Inget hookable
 
 Something hookable
-== 
+== Något hookable
 
 A Tee
-== 
+== En Tee
 
 Normal Color
-== 
+== Normal Färg
 
 Highlight Color
-== 
+== Betonad Färg
 
 Weapons
-== 
+== Vapen
 
 Rifle Laser Outline Color
-== 
+== Gevär Laser Kontur Färg
 
 Rifle Laser Inner Color
-== 
+== Gevär Laser Inre Färg
 
 Shotgun Laser Outline Color
-== 
+== Hagelgevär Laser Kontur Färg
 
 Shotgun Laser Inner Color
-== 
+== Hagelgevär Inre Färg
 
 Door Laser Outline Color
-== 
+== Dörr Laser Kontur Färg
 
 Door Laser Inner Color
-== 
+== Dörr Laser Inre Färg
 
 Freeze Laser Outline Color
-== 
+== Freeze Laser Kontur Färg
 
 Freeze Laser Inner Color
-== 
+== Freeze Laser Inre Färg
 
 Set all to Rifle
-== 
+== Sätt alla till Gevär
 
 When you cross the start line, show a ghost tee replicating the movements of your best time
-== 
+== När du passera start linjen, visa en spök tee som visar rörelsen av din bästa tid
 
 Opacity
-== 
+== Opacitet
 
 Adjust the opacity of entities belonging to other teams, such as tees and nameplates
-== 
+== Justera opaciteten av entities som tillhör ett annat lag, som t.ex. tees och namnskyltar
 
 Quads are used for background decoration
-== 
+== Quads används till bakgrunds decorationer
 
 Tries to predict other entities to give a feel of low latency
-== 
+== Försöker att predicera andra entities för att ge känslan av låg latens.
 
 Unregister protocol and file extensions
-== 
+== Avregistera protokoll och filtillägg
 
 Extras
-== 
+== Extras
 
 Loading assets
-== 
+== Laddar assets
 
 Open the directory to add custom assets
-== 
+== Öppna mappen för att lägga till egna assets
 
 Tutorial
-== 
+== Tutorial
 
 Can't find a Tutorial server
-== 
+== Kunde inte hitta en Tutorial server
 
 Loading race demo files
-== 
+== Laddar race demo filer
 
 Super
-== 
+== Super
 
 Loading sound files
-== 
+== Laddar ljud filer
 
 Moved ingame
-== 
+== Förflyttades i spelet
