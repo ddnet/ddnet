@@ -22,7 +22,7 @@ void CVerify::OnRender()
 
 		CTimeout Timeout{10000, 0, 8000, 10};
 		auto StartTime = time_get_nanoseconds();
-		CHttpRequest *pGet = HttpGet("https://ger10.ddnet.tw/").release();
+		CHttpRequest *pGet = HttpGet("https://ger10.ddnet.org/").release();
 		pGet->Timeout(Timeout);
 		IEngine::RunJobBlocking(pGet);
 		auto Time = std::chrono::duration_cast<std::chrono::milliseconds>(time_get_nanoseconds() - StartTime);
