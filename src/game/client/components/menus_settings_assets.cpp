@@ -309,7 +309,7 @@ void CMenus::ClearCustomItems(int CurTab)
 		m_vEntitiesList.clear();
 
 		// reload current entities
-		m_pClient->m_MapImages.ChangeEntitiesPath(g_Config.m_ClAssetsEntites);
+		m_pClient->m_MapImages.ChangeEntitiesPath(g_Config.m_ClAssetsEntities);
 	}
 	else if(CurTab == ASSETS_TAB_GAME)
 	{
@@ -545,7 +545,7 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 
 		if(s_CurCustomTab == ASSETS_TAB_ENTITIES)
 		{
-			if(str_comp(pItem->m_aName, g_Config.m_ClAssetsEntites) == 0)
+			if(str_comp(pItem->m_aName, g_Config.m_ClAssetsEntities) == 0)
 				OldSelected = i;
 		}
 		else if(s_CurCustomTab == ASSETS_TAB_GAME)
@@ -604,7 +604,7 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 		{
 			if(s_CurCustomTab == ASSETS_TAB_ENTITIES)
 			{
-				str_copy(g_Config.m_ClAssetsEntites, GetCustomItem(s_CurCustomTab, NewSelected)->m_aName);
+				str_copy(g_Config.m_ClAssetsEntities, GetCustomItem(s_CurCustomTab, NewSelected)->m_aName);
 				m_pClient->m_MapImages.ChangeEntitiesPath(GetCustomItem(s_CurCustomTab, NewSelected)->m_aName);
 			}
 			else if(s_CurCustomTab == ASSETS_TAB_GAME)
@@ -708,7 +708,7 @@ void CMenus::ConchainAssetsEntities(IConsole::IResult *pResult, void *pUserData,
 	if(pResult->NumArguments() == 1)
 	{
 		const char *pArg = pResult->GetString(0);
-		if(str_comp(pArg, g_Config.m_ClAssetsEntites) != 0)
+		if(str_comp(pArg, g_Config.m_ClAssetsEntities) != 0)
 		{
 			pThis->m_pClient->m_MapImages.ChangeEntitiesPath(pArg);
 		}

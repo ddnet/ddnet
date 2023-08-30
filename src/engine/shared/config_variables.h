@@ -24,7 +24,7 @@ MACRO_CONFIG_INT(ConsoleEnableColors, console_enable_colors, 1, 0, 1, CFGFLAG_SA
 MACRO_CONFIG_INT(ClSaveSettings, cl_save_settings, 1, 0, 1, CFGFLAG_CLIENT, "Write the settings file on exit")
 MACRO_CONFIG_INT(ClRefreshRate, cl_refresh_rate, 0, 0, 10000, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Refresh rate for updating the game (in Hz)")
 MACRO_CONFIG_INT(ClRefreshRateInactive, cl_refresh_rate_inactive, 120, 0, 10000, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Refresh rate for updating the game when the window is inactive (in Hz)")
-MACRO_CONFIG_INT(ClEditor, cl_editor, 0, 0, 1, CFGFLAG_CLIENT, "")
+MACRO_CONFIG_INT(ClEditor, cl_editor, 0, 0, 1, CFGFLAG_CLIENT, "Open the map editor")
 MACRO_CONFIG_INT(ClEditorDilate, cl_editor_dilate, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Automatically dilates embedded images")
 MACRO_CONFIG_STR(ClSkinFilterString, cl_skin_filter_string, 25, "", CFGFLAG_SAVE | CFGFLAG_CLIENT, "Skin filtering string")
 
@@ -40,7 +40,7 @@ MACRO_CONFIG_INT(ClPrintBroadcasts, cl_print_broadcasts, 1, 0, 1, CFGFLAG_CLIENT
 MACRO_CONFIG_INT(ClPrintMotd, cl_print_motd, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Print motd to console")
 MACRO_CONFIG_INT(ClFriendsIgnoreClan, cl_friends_ignore_clan, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Ignore clan tag when searching for friends")
 
-MACRO_CONFIG_STR(ClAssetsEntites, cl_assets_entities, 50, "default", CFGFLAG_SAVE | CFGFLAG_CLIENT, "The asset/assets for entities")
+MACRO_CONFIG_STR(ClAssetsEntities, cl_assets_entities, 50, "default", CFGFLAG_SAVE | CFGFLAG_CLIENT, "The asset/assets for entities")
 MACRO_CONFIG_STR(ClAssetGame, cl_asset_game, 50, "default", CFGFLAG_SAVE | CFGFLAG_CLIENT, "The asset for game")
 MACRO_CONFIG_STR(ClAssetEmoticons, cl_asset_emoticons, 50, "default", CFGFLAG_SAVE | CFGFLAG_CLIENT, "The asset for emoticons")
 MACRO_CONFIG_STR(ClAssetParticles, cl_asset_particles, 50, "default", CFGFLAG_SAVE | CFGFLAG_CLIENT, "The asset for particles")
@@ -89,7 +89,7 @@ MACRO_CONFIG_INT(SndGameSoundVolume, snd_game_volume, 30, 0, 100, CFGFLAG_SAVE |
 MACRO_CONFIG_INT(SndMapSoundVolume, snd_ambient_volume, 30, 0, 100, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Map Sound sound volume")
 MACRO_CONFIG_INT(SndBackgroundMusicVolume, snd_background_music_volume, 30, 0, 100, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Background music sound volume")
 
-MACRO_CONFIG_INT(SndNonactiveMute, snd_nonactive_mute, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "")
+MACRO_CONFIG_INT(SndNonactiveMute, snd_nonactive_mute, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Mute sounds when window is not active")
 MACRO_CONFIG_INT(SndGame, snd_game, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Enable game sounds")
 MACRO_CONFIG_INT(SndGun, snd_gun, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Enable gun sound")
 MACRO_CONFIG_INT(SndLongPain, snd_long_pain, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Enable long pain sound (used when shooting in freeze)")
@@ -121,12 +121,11 @@ MACRO_CONFIG_INT(GfxColorDepth, gfx_color_depth, 24, 16, 24, CFGFLAG_SAVE | CFGF
 MACRO_CONFIG_INT(GfxVsync, gfx_vsync, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Vertical sync (may cause delay)")
 MACRO_CONFIG_INT(GfxDisplayAllVideoModes, gfx_display_all_video_modes, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Show all video modes")
 MACRO_CONFIG_INT(GfxHighDetail, gfx_high_detail, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "High detail")
-MACRO_CONFIG_INT(GfxFsaaSamples, gfx_fsaa_samples, 0, 0, 64, CFGFLAG_SAVE | CFGFLAG_CLIENT, "FSAA Samples")
+MACRO_CONFIG_INT(GfxFsaaSamples, gfx_fsaa_samples, 0, 0, 64, CFGFLAG_SAVE | CFGFLAG_CLIENT, "FSAA samples (may cause delay)")
 MACRO_CONFIG_INT(GfxRefreshRate, gfx_refresh_rate, 0, 0, 10000, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Screen refresh rate")
-MACRO_CONFIG_INT(GfxFinish, gfx_finish, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "")
 MACRO_CONFIG_INT(GfxBackgroundRender, gfx_backgroundrender, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Render graphics when window is in background")
 MACRO_CONFIG_INT(GfxTextOverlay, gfx_text_overlay, 10, 1, 100, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Stop rendering textoverlay in editor or with entities: high value = less details = more speed")
-MACRO_CONFIG_INT(GfxAsyncRenderOld, gfx_asyncrender_old, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Do rendering async from the the update")
+MACRO_CONFIG_INT(GfxAsyncRenderOld, gfx_asyncrender_old, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "During an update cycle, skip the render cycle, if the render cycle would need to wait for the previous render cycle to finish")
 MACRO_CONFIG_INT(GfxQuadAsTriangle, gfx_quad_as_triangle, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Render quads as triangles (fixes quad coloring on some GPUs)")
 
 MACRO_CONFIG_INT(InpMousesens, inp_mousesens, 200, 1, 100000, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Mouse sensitivity")
@@ -194,7 +193,6 @@ MACRO_CONFIG_INT(EcOutputLevel, ec_output_level, 1, 0, 2, CFGFLAG_ECON, "Adjusts
 MACRO_CONFIG_INT(Debug, debug, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SERVER, "Debug mode")
 MACRO_CONFIG_INT(DbgCurl, dbg_curl, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SERVER, "Debug curl")
 MACRO_CONFIG_INT(DbgGraphs, dbg_graphs, 0, 0, 1, CFGFLAG_CLIENT, "Performance graphs")
-MACRO_CONFIG_INT(DbgHitch, dbg_hitch, 0, 0, 0, CFGFLAG_SERVER, "Hitch warnings")
 MACRO_CONFIG_INT(DbgGfx, dbg_gfx, 0, 0, 4, CFGFLAG_CLIENT, "Show graphic library warnings and errors, if the GPU supports it (0: none, 1: minimal, 2: affects performance, 3: verbose, 4: all)")
 #ifdef CONF_DEBUG
 MACRO_CONFIG_INT(DbgStress, dbg_stress, 0, 0, 0, CFGFLAG_CLIENT | CFGFLAG_SERVER, "Stress systems (Debug build only)")

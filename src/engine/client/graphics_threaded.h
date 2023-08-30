@@ -126,7 +126,6 @@ public:
 
 		// swap
 		CMD_SWAP,
-		CMD_FINISH,
 
 		// misc
 		CMD_MULTISAMPLING,
@@ -493,12 +492,6 @@ public:
 	{
 		SCommand_Swap() :
 			SCommand(CMD_SWAP) {}
-	};
-
-	struct SCommand_Finish : public SCommand
-	{
-		SCommand_Finish() :
-			SCommand(CMD_FINISH) {}
 	};
 
 	struct SCommand_VSync : public SCommand

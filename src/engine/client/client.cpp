@@ -3376,12 +3376,6 @@ void CClient::Run()
 		else
 			LastTime = Now;
 
-		if(g_Config.m_DbgHitch)
-		{
-			std::this_thread::sleep_for(g_Config.m_DbgHitch * 1ms);
-			g_Config.m_DbgHitch = 0;
-		}
-
 		// update local and global time
 		m_LocalTime = (time_get() - m_LocalStartTime) / (float)time_freq();
 		m_GlobalTime = (time_get() - m_GlobalStartTime) / (float)time_freq();

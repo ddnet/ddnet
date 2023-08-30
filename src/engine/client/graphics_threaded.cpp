@@ -2939,12 +2939,6 @@ void CGraphics_Threaded::Swap()
 		AddCmd(Cmd);
 	}
 
-	if(g_Config.m_GfxFinish)
-	{
-		CCommandBuffer::SCommand_Finish Cmd;
-		AddCmd(Cmd);
-	}
-
 	// kick the command buffer
 	KickCommandBuffer();
 	// TODO: Remove when https://github.com/libsdl-org/SDL/issues/5203 is fixed
