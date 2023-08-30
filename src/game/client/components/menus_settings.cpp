@@ -940,7 +940,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 typedef struct
 {
-	CLocConstString m_Name;
+	const char *m_pName;
 	const char *m_pCommand;
 	int m_KeyId;
 	int m_ModifierCombination;
@@ -948,7 +948,7 @@ typedef struct
 
 static CKeyInfo gs_aKeys[] =
 	{
-		{Localizable("Move left"), "+left", 0, 0}, // Localize - these strings are localized within CLocConstString
+		{Localizable("Move left"), "+left", 0, 0},
 		{Localizable("Move right"), "+right", 0, 0},
 		{Localizable("Jump"), "+jump", 0, 0},
 		{Localizable("Fire"), "+fire", 0, 0},
@@ -1003,23 +1003,24 @@ void CMenus::DoSettingsControlsButtons(int Start, int Stop, CUIRect View)
 {
 	for(int i = Start; i < Stop; i++)
 	{
-		CKeyInfo &Key = gs_aKeys[i];
+		const CKeyInfo &Key = gs_aKeys[i];
+
 		CUIRect Button, Label;
 		View.HSplitTop(20.0f, &Button, &View);
 		Button.VSplitLeft(135.0f, &Label, &Button);
 
 		char aBuf[64];
-		str_format(aBuf, sizeof(aBuf), "%s:", Localize((const char *)Key.m_Name));
+		str_format(aBuf, sizeof(aBuf), "%s:", Localize(Key.m_pName));
 
 		UI()->DoLabel(&Label, aBuf, 13.0f, TEXTALIGN_ML);
 		int OldId = Key.m_KeyId, OldModifierCombination = Key.m_ModifierCombination, NewModifierCombination;
-		int NewId = DoKeyReader((void *)&Key.m_Name, &Button, OldId, OldModifierCombination, &NewModifierCombination);
+		int NewId = DoKeyReader(&Key.m_KeyId, &Button, OldId, OldModifierCombination, &NewModifierCombination);
 		if(NewId != OldId || NewModifierCombination != OldModifierCombination)
 		{
 			if(OldId != 0 || NewId == 0)
 				m_pClient->m_Binds.Bind(OldId, "", false, OldModifierCombination);
 			if(NewId != 0)
-				m_pClient->m_Binds.Bind(NewId, gs_aKeys[i].m_pCommand, false, NewModifierCombination);
+				m_pClient->m_Binds.Bind(NewId, Key.m_pCommand, false, NewModifierCombination);
 		}
 
 		View.HSplitTop(2.0f, 0, &View);

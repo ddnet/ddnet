@@ -48,45 +48,19 @@ class CLocalizationDatabase
 	std::vector<CLanguage> m_vLanguages;
 	std::vector<CString> m_vStrings;
 	CHeap m_StringsHeap;
-	int m_VersionCounter;
-	int m_CurrentVersion;
 
 public:
-	CLocalizationDatabase();
-
 	void LoadIndexfile(class IStorage *pStorage, class IConsole *pConsole);
 	const std::vector<CLanguage> &Languages() const { return m_vLanguages; }
 	void SelectDefaultLanguage(class IConsole *pConsole, char *pFilename, size_t Length) const;
 
 	bool Load(const char *pFilename, class IStorage *pStorage, class IConsole *pConsole);
 
-	int Version() const { return m_CurrentVersion; }
-
 	void AddString(const char *pOrgStr, const char *pNewStr, const char *pContext);
 	const char *FindString(unsigned Hash, unsigned ContextHash) const;
 };
 
 extern CLocalizationDatabase g_Localization;
-
-class CLocConstString
-{
-	const char *m_pDefaultStr;
-	const char *m_pCurrentStr;
-	unsigned m_Hash;
-	unsigned m_ContextHash;
-	int m_Version;
-
-public:
-	CLocConstString(const char *pStr, const char *pContext = "");
-	void Reload();
-
-	inline operator const char *()
-	{
-		if(m_Version != g_Localization.Version())
-			Reload();
-		return m_pCurrentStr;
-	}
-};
 
 extern const char *Localize(const char *pStr, const char *pContext = "")
 	GNUC_ATTRIBUTE((format_arg(1)));

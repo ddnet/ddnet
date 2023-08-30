@@ -1113,7 +1113,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	{
 		int m_ID;
 		int m_Sort;
-		CLocConstString m_Caption;
+		const char *m_pCaption;
 		int m_Direction;
 		float m_Width;
 		CUIRect m_Rect;
@@ -1171,7 +1171,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	// do headers
 	for(auto &Col : s_aCols)
 	{
-		if(DoButton_GridHeader(&Col.m_ID, Col.m_Caption, g_Config.m_BrDemoSort == Col.m_Sort, &Col.m_Rect))
+		if(DoButton_GridHeader(&Col.m_ID, Localize(Col.m_pCaption), g_Config.m_BrDemoSort == Col.m_Sort, &Col.m_Rect))
 		{
 			if(Col.m_Sort != -1)
 			{
