@@ -70,7 +70,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 	{
 		int m_ID;
 		int m_Sort;
-		CLocConstString m_Caption;
+		const char *m_pCaption;
 		int m_Direction;
 		float m_Width;
 		CUIRect m_Rect;
@@ -90,17 +90,17 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		COL_VERSION,
 	};
 
-	CColumn s_aCols[] = {
-		{-1, -1, " ", -1, 2.0f, {0}, {0}},
-		{COL_FLAG_LOCK, -1, " ", -1, 14.0f, {0}, {0}},
-		{COL_FLAG_FAV, -1, " ", -1, 14.0f, {0}, {0}},
-		{COL_FLAG_OFFICIAL, -1, " ", -1, 14.0f, {0}, {0}},
-		{COL_NAME, IServerBrowser::SORT_NAME, "Name", 0, 50.0f, {0}, {0}}, // Localize - these strings are localized within CLocConstString
+	static CColumn s_aCols[] = {
+		{-1, -1, "", -1, 2.0f, {0}, {0}},
+		{COL_FLAG_LOCK, -1, "", -1, 14.0f, {0}, {0}},
+		{COL_FLAG_FAV, -1, "", -1, 14.0f, {0}, {0}},
+		{COL_FLAG_OFFICIAL, -1, "", -1, 14.0f, {0}, {0}},
+		{COL_NAME, IServerBrowser::SORT_NAME, Localizable("Name"), 0, 50.0f, {0}, {0}},
 		{COL_GAMETYPE, IServerBrowser::SORT_GAMETYPE, Localizable("Type"), 1, 50.0f, {0}, {0}},
-		{COL_MAP, IServerBrowser::SORT_MAP, "Map", 1, 120.0f + (Headers.w - 480) / 8, {0}, {0}},
-		{COL_PLAYERS, IServerBrowser::SORT_NUMPLAYERS, "Players", 1, 85.0f, {0}, {0}},
-		{-1, -1, " ", 1, 10.0f, {0}, {0}},
-		{COL_PING, IServerBrowser::SORT_PING, "Ping", 1, 40.0f, {0}, {0}},
+		{COL_MAP, IServerBrowser::SORT_MAP, Localizable("Map"), 1, 120.0f + (Headers.w - 480) / 8, {0}, {0}},
+		{COL_PLAYERS, IServerBrowser::SORT_NUMPLAYERS, Localizable("Players"), 1, 85.0f, {0}, {0}},
+		{-1, -1, "", 1, 10.0f, {0}, {0}},
+		{COL_PING, IServerBrowser::SORT_PING, Localizable("Ping"), 1, 40.0f, {0}, {0}},
 	};
 
 	int NumCols = std::size(s_aCols);
@@ -143,7 +143,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		if(PlayersOrPing && g_Config.m_BrSortOrder == 2 && (s_aCols[i].m_Sort == IServerBrowser::SORT_NUMPLAYERS || s_aCols[i].m_Sort == IServerBrowser::SORT_PING))
 			Checked = 2;
 
-		if(DoButton_GridHeader(s_aCols[i].m_Caption, Localize(s_aCols[i].m_Caption), Checked, &s_aCols[i].m_Rect))
+		if(DoButton_GridHeader(&s_aCols[i].m_ID, Localize(s_aCols[i].m_pCaption), Checked, &s_aCols[i].m_Rect))
 		{
 			if(s_aCols[i].m_Sort != -1)
 			{
@@ -1066,12 +1066,6 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 	{
 		ServerDetails.Margin(5.0f, &ServerDetails);
 
-		CUIRect Row;
-		static CLocConstString s_aLabels[] = {
-			"Version", // Localize - these strings are localized within CLocConstString
-			"Game type",
-			"Ping"};
-
 		// copy info button
 		{
 			CUIRect Button;
@@ -1122,20 +1116,23 @@ void CMenus::RenderServerbrowserServerDetail(CUIRect View)
 			}
 		}
 
-		CUIRect LeftColumn, RightColumn;
+		CUIRect LeftColumn, RightColumn, Row;
 		ServerDetails.VSplitLeft(80.0f, &LeftColumn, &RightColumn);
 
-		for(auto &Label : s_aLabels)
-		{
-			LeftColumn.HSplitTop(15.0f, &Row, &LeftColumn);
-			UI()->DoLabel(&Row, Label, FontSize, TEXTALIGN_ML);
-		}
+		LeftColumn.HSplitTop(15.0f, &Row, &LeftColumn);
+		UI()->DoLabel(&Row, Localize("Version"), FontSize, TEXTALIGN_ML);
 
 		RightColumn.HSplitTop(15.0f, &Row, &RightColumn);
 		UI()->DoLabel(&Row, pSelectedServer->m_aVersion, FontSize, TEXTALIGN_ML);
 
+		LeftColumn.HSplitTop(15.0f, &Row, &LeftColumn);
+		UI()->DoLabel(&Row, Localize("Game type"), FontSize, TEXTALIGN_ML);
+
 		RightColumn.HSplitTop(15.0f, &Row, &RightColumn);
 		UI()->DoLabel(&Row, pSelectedServer->m_aGameType, FontSize, TEXTALIGN_ML);
+
+		LeftColumn.HSplitTop(15.0f, &Row, &LeftColumn);
+		UI()->DoLabel(&Row, Localize("Ping"), FontSize, TEXTALIGN_ML);
 
 		char aTemp[16];
 		FormatServerbrowserPing(aTemp, sizeof(aTemp), pSelectedServer);

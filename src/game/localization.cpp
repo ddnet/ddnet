@@ -13,28 +13,6 @@ const char *Localize(const char *pStr, const char *pContext)
 	return pNewStr ? pNewStr : pStr;
 }
 
-CLocConstString::CLocConstString(const char *pStr, const char *pContext)
-{
-	m_pDefaultStr = pStr;
-	m_Hash = str_quickhash(m_pDefaultStr);
-	m_Version = -1;
-}
-
-void CLocConstString::Reload()
-{
-	m_Version = g_Localization.Version();
-	const char *pNewStr = g_Localization.FindString(m_Hash, m_ContextHash);
-	m_pCurrentStr = pNewStr;
-	if(!m_pCurrentStr)
-		m_pCurrentStr = m_pDefaultStr;
-}
-
-CLocalizationDatabase::CLocalizationDatabase()
-{
-	m_VersionCounter = 0;
-	m_CurrentVersion = 0;
-}
-
 void CLocalizationDatabase::LoadIndexfile(IStorage *pStorage, IConsole *pConsole)
 {
 	m_vLanguages.clear();
@@ -214,7 +192,6 @@ bool CLocalizationDatabase::Load(const char *pFilename, IStorage *pStorage, ICon
 	{
 		m_vStrings.clear();
 		m_StringsHeap.Reset();
-		m_CurrentVersion = 0;
 		return true;
 	}
 
@@ -281,8 +258,6 @@ bool CLocalizationDatabase::Load(const char *pFilename, IStorage *pStorage, ICon
 	}
 	io_close(IoHandle);
 	std::sort(m_vStrings.begin(), m_vStrings.end());
-
-	m_CurrentVersion = ++m_VersionCounter;
 	return true;
 }
 

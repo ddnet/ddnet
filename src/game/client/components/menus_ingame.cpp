@@ -988,7 +988,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 
 	struct CColumn
 	{
-		CLocConstString m_Caption;
+		const char *m_pCaption;
 		int m_Id;
 		float m_Width;
 		CUIRect m_Rect;
@@ -1003,8 +1003,8 @@ void CMenus::RenderGhost(CUIRect MainView)
 	};
 
 	static CColumn s_aCols[] = {
-		{" ", -1, 2.0f, {0}, {0}},
-		{" ", COL_ACTIVE, 30.0f, {0}, {0}},
+		{"", -1, 2.0f, {0}, {0}},
+		{"", COL_ACTIVE, 30.0f, {0}, {0}},
 		{Localizable("Name"), COL_NAME, 300.0f, {0}, {0}},
 		{Localizable("Time"), COL_TIME, 200.0f, {0}, {0}},
 	};
@@ -1022,7 +1022,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 
 	// do headers
 	for(int i = 0; i < NumCols; i++)
-		DoButton_GridHeader(s_aCols[i].m_Caption, Localize(s_aCols[i].m_Caption), 0, &s_aCols[i].m_Rect);
+		DoButton_GridHeader(&s_aCols[i].m_Id, Localize(s_aCols[i].m_pCaption), 0, &s_aCols[i].m_Rect);
 
 	View.Draw(ColorRGBA(0, 0, 0, 0.15f), 0, 0);
 
