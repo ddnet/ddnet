@@ -8,7 +8,8 @@
 #	Learath2		2012-01-01 22:54:29
 #	ardadem			2020-08-20 00:00:00
 #	ardadem			2020-08-22 00:00:00
-#   h-kaan          2023-08-23 15:57:36
+# h-kaan      2023-08-23 15:57:36
+# h-kaan      2023-08-30 01:52:04
 ##### /authors #####
 
 ##### translated strings #####
@@ -1130,13 +1131,13 @@ Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
 == Hata ayıklama modu etkinleştirildi. Devre dışı bırakmak için Ctrl+Shift+D tuşlarına basın.
 
 Position:
-== Pozisyon
+== Pozisyon:
 
 Speed:
-== Hız
+== Hız:
 
 Angle:
-== Açı
+== Açı:
 
 Multi-View
 == Çoklu İzle
@@ -1154,7 +1155,7 @@ UDP seems to be filtered.
 == UDP filtrelenmiş görünüyor.
 
 UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
-== UPD ve TCP IP adresleri farklı görünüyor. Proxy, VPN veya ağ hızlandırıcılarını devre dışı bırakmayı deneyin.
+== UDP ve TCP IP adresleri farklı görünüyor. Proxy, VPN veya ağ hızlandırıcılarını devre dışı bırakmayı deneyin.
 
 No answer from server yet.
 == Henüz sunucudan cevap alınamadı.
@@ -1172,7 +1173,7 @@ Existing Player
 == Var olan oyuncu
 
 Your nickname '%s' is already used (%d points). Do you still want to use it?
-== Takma adınız '%s' başkası tarafından kullanılıyor (%d points). Yine de kullanmak istiyor musunuz?
+== Takma adınız '%s' başkası tarafından kullanılıyor (%d puan). Yine de kullanmak istiyor musunuz?
 
 Checking for existing player with your name
 == Adınıza sahip diğer oyuncular aranıyor
@@ -1238,7 +1239,7 @@ Getting server list from master server
 == %2$d sunucunun %1$d tanesi
 
 %d players
-== %d oyuncular
+== %d oyuncu
 
 %d player
 == %d oyuncu
@@ -1308,13 +1309,13 @@ Speed up the demo
 == Demoyu hızlandır
 
 Mark the beginning of a cut (right click to reset)
-== Bir kesimin başlangıcını işaretleyin (sıfırlamak için sağ tıkla)
+== Bir kesitin başlangıcını işaretleyin (sıfırlamak için sağ tıkla)
 
 Mark the end of a cut (right click to reset)
-== Bir kesimin bitişini işaretleyin (sıfırlamak için sağ tıkla)
+== Bir kesitin bitişini işaretleyin (sıfırlamak için sağ tıkla)
 
 Export cut as a separate demo
-== Kesimi ayrı bir demo olarak dışarı aktar
+== Kesiti ayrı bir demo olarak dışarı aktar
 
 Go back one marker
 == Bir işaret geri git
@@ -1329,13 +1330,13 @@ Toggle keyboard shortcuts
 == Klavye kısayollarını kullan
 
 Export demo cut
-== Kesimi dışarı aktar
+== Kesiti dışarı aktar
 
 Cut interval
-== Kesim aralığı
+== Kesit aralığı
 
 Cut length
-== Kesim uzunluğu
+== Kesit uzunluğu
 
 Loading demo files
 == Demo dosyaları yükleniyor
@@ -1472,10 +1473,10 @@ Mouse
 == Fare
 
 Ingame mouse sens.
-== Oyun içi fare hassasiyeti
+== Oyun hassasiyeti
 
 UI mouse sens.
-== Arayüz fare hassasiyeti
+== Arayüz hassasiyeti
 
 Reset controls
 == Kontrolleri sıfırla
@@ -1556,7 +1557,7 @@ Show DDRace HUD
 == DDRace HUD göster
 
 Show jumps indicator
-== Zıplama göstergesini göster
+== Kaç zıplama kaldığını göster
 
 Show dummy actions
 == Dummy aksiyonlarını göster
