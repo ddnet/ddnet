@@ -1031,7 +1031,7 @@ void CChat::OnPrepareLines()
 			TextRender()->UploadTextContainer(m_aLines[r].m_TextContainerIndex);
 	}
 
-	TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+	TextRender()->TextColor(TextRender()->DefaultTextColor());
 }
 
 void CChat::OnRender()
@@ -1180,9 +1180,9 @@ void CChat::OnRender()
 				RenderTools()->RenderTee(pIdleState, &RenderInfo, EMOTE_NORMAL, vec2(1, 0.1f), TeeRenderPos, Blend);
 			}
 
-			ColorRGBA TextOutline(0.f, 0.f, 0.f, 0.3f * Blend);
-			ColorRGBA Text(1.f, 1.f, 1.f, Blend);
-			TextRender()->RenderTextContainer(m_aLines[r].m_TextContainerIndex, Text, TextOutline, 0, (y + RealMsgPaddingY / 2.0f) - m_aLines[r].m_TextYOffset);
+			const ColorRGBA TextColor = TextRender()->DefaultTextColor().WithMultipliedAlpha(Blend);
+			const ColorRGBA TextOutlineColor = TextRender()->DefaultTextOutlineColor().WithMultipliedAlpha(Blend);
+			TextRender()->RenderTextContainer(m_aLines[r].m_TextContainerIndex, TextColor, TextOutlineColor, 0, (y + RealMsgPaddingY / 2.0f) - m_aLines[r].m_TextYOffset);
 		}
 	}
 }
