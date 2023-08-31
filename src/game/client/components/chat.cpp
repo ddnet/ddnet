@@ -11,12 +11,10 @@
 #include <game/generated/protocol.h>
 
 #include <game/client/animstate.h>
-#include <game/client/gameclient.h>
-
-#include <game/client/components/console.h>
 #include <game/client/components/scoreboard.h>
 #include <game/client/components/skins.h>
 #include <game/client/components/sounds.h>
+#include <game/client/gameclient.h>
 #include <game/localization.h>
 
 #include "chat.h"
