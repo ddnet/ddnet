@@ -53,6 +53,7 @@
 #include "components/statboard.h"
 #include "components/tooltips.h"
 #include "components/voting.h"
+#include "game/client/python/PythonController.h"
 
 class CGameInfo
 {
@@ -151,6 +152,7 @@ public:
 	CGhost m_Ghost;
 
 	CTooltips m_Tooltips;
+	PythonController pythonController;
 
 private:
 	std::vector<class CComponent *> m_vpAll;

@@ -552,8 +552,7 @@ find_package(Ogg)
 find_package(Opus)
 find_package(Opusfile)
 find_package(PNG)
-find_package(Python3 REQUIRED)
-find_package(Python REQUIRED Development)
+find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
 find_package(Rust)
 find_package(SDL2)
 find_package(SQLite3)
@@ -2289,6 +2288,14 @@ if(CLIENT)
     prediction/gameworld.h
     projectile_data.cpp
     projectile_data.h
+    python/PythonController.cpp
+    python/PythonController.h
+    python/PythonScript.cpp
+    python/PythonScript.h
+    python/ScriptsScanner.cpp
+    python/ScriptsScanner.h
+    python/api.cpp
+    python/api.h
     race.cpp
     race.h
     render.cpp
@@ -2356,7 +2363,7 @@ if(CLIENT)
     ${SDL2_LIBRARIES}
     ${WAVPACK_LIBRARIES}
     ${FFMPEG_LIBRARIES}
-    Python::Python
+    ${Python3_LIBRARIES}
 
     # Order of these three is important.
     ${OPUSFILE_LIBRARIES}
@@ -2418,6 +2425,9 @@ if(CLIENT)
       $<TARGET_OBJECTS:rust-bridge-shared>
     )
   endif()
+  add_custom_command(TARGET game-client POST_BUILD
+          COMMAND ${CMAKE_COMMAND} -E copy_directory
+          ${CMAKE_SOURCE_DIR}/python $<TARGET_FILE_DIR:game-client>/python)
   set_property(TARGET game-client
       PROPERTY OUTPUT_NAME ${CLIENT_EXECUTABLE}
   )
@@ -2438,6 +2448,7 @@ if(CLIENT)
     ${WAVPACK_INCLUDE_DIRS}
     ${FFMPEG_INCLUDE_DIRS}
     ${DISCORDSDK_INCLUDE_DIRS}
+    ${Python3_INCLUDE_DIRS}
 
     ${VULKAN_INCLUDE_DIRS}
 
@@ -2480,7 +2491,6 @@ if(CLIENT)
   list(APPEND TARGETS_OWN game-client)
   list(APPEND TARGETS_LINK game-client)
 endif()
-
 
 ########################################################################
 # SERVER
