@@ -178,7 +178,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			UI()->DoLabel(&MsgBox, Localize("No servers match your filter criteria"), 16.0f, TEXTALIGN_MC);
 	}
 
-	if(UI()->ConsumeHotkey(CUI::HOTKEY_TAB))
+	if(!UI()->IsPopupOpen() && UI()->ConsumeHotkey(CUI::HOTKEY_TAB))
 	{
 		const int Direction = Input()->ShiftIsPressed() ? -1 : 1;
 		g_Config.m_UiToolboxPage = (g_Config.m_UiToolboxPage + 3 + Direction) % 3;
@@ -493,7 +493,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		QuickSearch.VSplitLeft(5.0f, 0, &QuickSearch);
 
 		static CLineInput s_FilterInput(g_Config.m_BrFilterString, sizeof(g_Config.m_BrFilterString));
-		if(Input()->KeyPress(KEY_F) && Input()->ModifierIsPressed())
+		if(!UI()->IsPopupOpen() && Input()->KeyPress(KEY_F) && Input()->ModifierIsPressed())
 		{
 			UI()->SetActiveItem(&s_FilterInput);
 			s_FilterInput.SelectAll();
@@ -520,7 +520,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 		QuickExclude.VSplitLeft(5.0f, 0, &QuickExclude);
 
 		static CLineInput s_ExcludeInput(g_Config.m_BrExcludeString, sizeof(g_Config.m_BrExcludeString));
-		if(Input()->KeyPress(KEY_X) && Input()->ShiftIsPressed() && Input()->ModifierIsPressed())
+		if(!UI()->IsPopupOpen() && Input()->KeyPress(KEY_X) && Input()->ShiftIsPressed() && Input()->ModifierIsPressed())
 			UI()->SetActiveItem(&s_ExcludeInput);
 		if(UI()->DoClearableEditBox(&s_ExcludeInput, &QuickExclude, 12.0f))
 			Client()->ServerBrowserUpdate();
@@ -576,7 +576,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			Props.m_UseIconFont = true;
 
 			static CButtonContainer s_RefreshButton;
-			if(UI()->DoButton_Menu(m_RefreshButton, &s_RefreshButton, RefreshLabelFunc, &ButtonRefresh, Props) || Input()->KeyPress(KEY_F5) || (Input()->KeyPress(KEY_R) && Input()->ModifierIsPressed()))
+			if(UI()->DoButton_Menu(m_RefreshButton, &s_RefreshButton, RefreshLabelFunc, &ButtonRefresh, Props) || (!UI()->IsPopupOpen() && (Input()->KeyPress(KEY_F5) || (Input()->KeyPress(KEY_R) && Input()->ModifierIsPressed()))))
 			{
 				RefreshBrowserTab(g_Config.m_UiPage);
 			}
@@ -591,7 +591,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View)
 			Props.m_Color = ColorRGBA(0.5f, 1.0f, 0.5f, 0.5f);
 
 			static CButtonContainer s_ConnectButton;
-			if(UI()->DoButton_Menu(m_ConnectButton, &s_ConnectButton, ConnectLabelFunc, &ButtonConnect, Props) || s_ListBox.WasItemActivated() || UI()->ConsumeHotkey(CUI::HOTKEY_ENTER))
+			if(UI()->DoButton_Menu(m_ConnectButton, &s_ConnectButton, ConnectLabelFunc, &ButtonConnect, Props) || s_ListBox.WasItemActivated() || (!UI()->IsPopupOpen() && UI()->ConsumeHotkey(CUI::HOTKEY_ENTER)))
 			{
 				Connect(g_Config.m_UiServerAddress);
 			}
