@@ -1988,6 +1988,11 @@ bool CMenus::RenderLanguageSelection(CUIRect MainView)
 	return s_ListBox.WasItemActivated();
 }
 
+void CMenus::RenderSettingsPython(CUIRect MainView)
+{
+        CUIRect Button;
+}
+
 void CMenus::RenderSettings(CUIRect MainView)
 {
 	// render background
@@ -2011,7 +2016,8 @@ void CMenus::RenderSettings(CUIRect MainView)
 		Localize("Graphics"),
 		Localize("Sound"),
 		Localize("DDNet"),
-		Localize("Assets")};
+		Localize("Assets"),
+		"Python"};
 	static CButtonContainer s_aTabButtons[SETTINGS_LENGTH];
 
 	for(int i = 0; i < SETTINGS_LENGTH; i++)
@@ -2075,6 +2081,11 @@ void CMenus::RenderSettings(CUIRect MainView)
 		m_pBackground->ChangePosition(CMenuBackground::POS_SETTINGS_ASSETS);
 		RenderSettingsCustom(MainView);
 	}
+        else if(g_Config.m_UiSettingsPage == SETTINGS_PYTHON)
+        {
+                m_pBackground->ChangePosition(CMenuBackground::POS_SETTINGS_PYTHON);
+                RenderSettingsPython(MainView);
+        }
 
 	if(m_NeedRestartUpdate)
 	{
