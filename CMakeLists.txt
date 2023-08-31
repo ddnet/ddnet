@@ -552,7 +552,8 @@ find_package(Ogg)
 find_package(Opus)
 find_package(Opusfile)
 find_package(PNG)
-find_package(Python3)
+find_package(Python3 REQUIRED)
+find_package(Python REQUIRED Development)
 find_package(Rust)
 find_package(SDL2)
 find_package(SQLite3)
@@ -2355,6 +2356,7 @@ if(CLIENT)
     ${SDL2_LIBRARIES}
     ${WAVPACK_LIBRARIES}
     ${FFMPEG_LIBRARIES}
+    Python::Python
 
     # Order of these three is important.
     ${OPUSFILE_LIBRARIES}

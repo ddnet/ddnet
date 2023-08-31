@@ -1614,7 +1614,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				net_addr_str(m_NetServer.ClientAddr(ClientID), aAddrStr, sizeof(aAddrStr), true);
 
 				char aBuf[256];
-				str_format(aBuf, sizeof(aBuf), "player has entered the game. ClientID=%d addr=<{%s}> sixup=%d", ClientID, aAddrStr, IsSixup(ClientID));
+				str_format(aBuf, sizeof(aBuf), "player has entered the game. ClientID=%d addr=<{%s}> sixup=%d. Version: '%s'", ClientID, aAddrStr, IsSixup(ClientID), m_aClients[ClientID].m_aDDNetVersionStr);
 				Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 				m_aClients[ClientID].m_State = CClient::STATE_INGAME;
 				if(!IsSixup(ClientID))
@@ -1701,7 +1701,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				if(GameServer()->PlayerExists(ClientID))
 				{
 					char aBuf[256];
-					str_format(aBuf, sizeof(aBuf), "ClientID=%d rcon='%s'", ClientID, pCmd);
+					str_format(aBuf, sizeof(aBuf), "ClientID=%d rcon='%s'. Version: '%s'", ClientID, pCmd, m_aClients[ClientID].m_DDNetVersion);
 					Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 					m_RconClientID = ClientID;
 					m_RconAuthLevel = m_aClients[ClientID].m_Authed;
