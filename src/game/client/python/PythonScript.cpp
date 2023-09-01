@@ -23,3 +23,8 @@ PythonScript::PythonScript(const char* filepath)
 		this->name = "Python Script";
 	}
 }
+
+PythonScript::~PythonScript()
+{
+	Py_XDECREF(this->module);
+}

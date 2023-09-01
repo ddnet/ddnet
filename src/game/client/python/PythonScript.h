@@ -9,6 +9,8 @@ public:
 	PythonScript() : filepath(nullptr) {}
 	PythonScript(const char* filepath);
 
+	~PythonScript();
+
 	const char* filepath;
 	const char* name;
 

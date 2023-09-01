@@ -127,8 +127,6 @@ public:
 protected:
 	ScriptsScanner scriptsScanner;
 
-	std::vector<PythonScript*> m_PythonScripts;
-
 	std::vector<SCustomEntities> m_vEntitiesList;
 	std::vector<SCustomGame> m_vGameList;
 	std::vector<SCustomEmoticon> m_vEmoticonList;

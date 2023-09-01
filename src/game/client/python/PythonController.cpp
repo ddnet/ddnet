@@ -98,20 +98,19 @@ int PythonController::SnapInput(int *pData, int inputId)
 		this->inputs[inputId].m_Hook = 0;
 	}
 
-	this->m_pClient->m_Chat.AddLine(g_Config.m_ClDummy, 0, "On snap input");
 
-	if (input.m_Fire == 0 || this->blockUserInput) {
-		if (this->inputs[inputId].m_Fire > 0) {
-			input.m_Fire = 1;
+	if (this->inputs[inputId].m_Fire > 0 || this->blockUserInput) {
+		input.m_Fire = this->inputs[inputId].m_Fire;
+		if (this->inputs[inputId].m_Fire > 0 && !this->blockUserInput) {
+			this->m_pClient->m_Controls.m_aInputData[inputId].m_Fire = (this->m_pClient->m_Controls.m_aInputData[inputId].m_Fire + 1) % 64;
 		}
+		this->inputs[inputId].m_Fire = 0;
+		this->m_pClient->m_Chat.AddLine(g_Config.m_ClDummy, 0, ("On snap input" + std::to_string(input.m_Fire)).c_str());
 	}
 
 	mem_copy(pData, &input, sizeof(input));
 	if (this->inputs[inputId].m_Jump > 0) {
 		this->inputs[inputId].m_Jump--;
-	}
-	if (this->inputs[inputId].m_Fire > 0) {
-		this->inputs[inputId].m_Fire--;
 	}
 
 	return sizeData;
