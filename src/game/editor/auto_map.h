@@ -3,7 +3,9 @@
 
 #include <vector>
 
-class CAutoMapper
+#include "component.h"
+
+class CAutoMapper : public CEditorComponent
 {
 	struct CIndexInfo
 	{
@@ -55,7 +57,7 @@ class CAutoMapper
 	};
 
 public:
-	CAutoMapper(class CEditor *pEditor);
+	explicit CAutoMapper(CEditor *pEditor);
 
 	void Load(const char *pTileName);
 	void ProceedLocalized(class CLayerTiles *pLayer, int ConfigID, int Seed = 0, int X = 0, int Y = 0, int Width = -1, int Height = -1);
@@ -67,9 +69,8 @@ public:
 	bool IsLoaded() const { return m_FileLoaded; }
 
 private:
-	std::vector<CConfiguration> m_vConfigs;
-	class CEditor *m_pEditor;
-	bool m_FileLoaded;
+	std::vector<CConfiguration> m_vConfigs = {};
+	bool m_FileLoaded = false;
 };
 
 #endif

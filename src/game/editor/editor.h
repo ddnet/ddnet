@@ -329,58 +329,8 @@ public:
 	}
 };
 
-class CEditorImage : public CImageInfo
-{
-public:
-	CEditor *m_pEditor;
-
-	CEditorImage(CEditor *pEditor) :
-		m_AutoMapper(pEditor)
-	{
-		m_pEditor = pEditor;
-		m_aName[0] = 0;
-		m_Texture.Invalidate();
-		m_External = 0;
-		m_Width = 0;
-		m_Height = 0;
-		m_pData = nullptr;
-		m_Format = 0;
-	}
-
-	~CEditorImage();
-
-	void AnalyseTileFlags();
-
-	IGraphics::CTextureHandle m_Texture;
-	int m_External;
-	char m_aName[IO_MAX_PATH_LENGTH];
-	unsigned char m_aTileFlags[256];
-	class CAutoMapper m_AutoMapper;
-};
-
-class CEditorSound
-{
-public:
-	CEditor *m_pEditor;
-
-	CEditorSound(CEditor *pEditor)
-	{
-		m_pEditor = pEditor;
-		m_aName[0] = 0;
-		m_SoundID = 0;
-
-		m_pData = nullptr;
-		m_DataSize = 0;
-	}
-
-	~CEditorSound();
-
-	int m_SoundID;
-	char m_aName[IO_MAX_PATH_LENGTH];
-
-	void *m_pData;
-	unsigned m_DataSize;
-};
+class CEditorImage;
+class CEditorSound;
 
 class CEditorMap
 {
@@ -523,7 +473,6 @@ public:
 	// io
 	bool Save(const char *pFilename);
 	bool Load(const char *pFilename, int StorageType, const std::function<void(const char *pErrorMessage)> &ErrorHandler);
-	bool HandleMapDrop(const char *pFilename, int StorageType);
 	void PerformSanityChecks(const std::function<void(const char *pErrorMessage)> &ErrorHandler);
 
 	// DDRace

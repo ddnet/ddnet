@@ -1,6 +1,5 @@
-/* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
-/* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#include "editor.h"
+#include <game/editor/editor.h>
+
 #include <engine/client.h>
 #include <engine/console.h>
 #include <engine/graphics.h>
@@ -11,6 +10,9 @@
 
 #include <game/gamecore.h>
 #include <game/mapitems_ex.h>
+
+#include "image.h"
+#include "sound.h"
 
 template<typename T>
 static int MakeVersion(int i, const T &v)
@@ -30,15 +32,6 @@ struct CSoundSource_DEPRECATED
 	int m_SoundEnv;
 	int m_SoundEnvOffset;
 };
-
-bool CEditor::Save(const char *pFilename)
-{
-	// Check if file with this name is already being saved at the moment
-	if(std::any_of(std::begin(m_WriterFinishJobs), std::end(m_WriterFinishJobs), [pFilename](const std::shared_ptr<CDataFileWriterFinishJob> &Job) { return str_comp(pFilename, Job->GetRealFileName()) == 0; }))
-		return false;
-
-	return m_Map.Save(pFilename);
-}
 
 bool CEditorMap::Save(const char *pFileName)
 {
@@ -426,50 +419,6 @@ bool CEditorMap::Save(const char *pFileName)
 	return true;
 }
 
-bool CEditor::HandleMapDrop(const char *pFileName, int StorageType)
-{
-	return m_Map.HandleMapDrop(pFileName, IStorage::TYPE_ALL_OR_ABSOLUTE);
-}
-
-bool CEditorMap::HandleMapDrop(const char *pFileName, int StorageType)
-{
-	if(m_pEditor->HasUnsavedData())
-	{
-		str_copy(m_pEditor->m_aFileNamePending, pFileName);
-		m_pEditor->m_PopupEventType = CEditor::POPEVENT_LOADDROP;
-		m_pEditor->m_PopupEventActivated = true;
-		return true;
-	}
-	else
-	{
-		return m_pEditor->Load(pFileName, IStorage::TYPE_ALL_OR_ABSOLUTE);
-	}
-}
-
-bool CEditor::Load(const char *pFileName, int StorageType)
-{
-	const auto &&ErrorHandler = [this](const char *pErrorMessage) {
-		ShowFileDialogError("%s", pErrorMessage);
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "editor/load", pErrorMessage);
-	};
-
-	Reset();
-	bool Result = m_Map.Load(pFileName, StorageType, std::move(ErrorHandler));
-	if(Result)
-	{
-		str_copy(m_aFileName, pFileName);
-		SortImages();
-		SelectGameLayer();
-		MapView()->OnMapLoad();
-	}
-	else
-	{
-		m_aFileName[0] = 0;
-		Reset();
-	}
-	return Result;
-}
-
 bool CEditorMap::Load(const char *pFileName, int StorageType, const std::function<void(const char *pErrorMessage)> &ErrorHandler)
 {
 	CDataFileReader DataFile;
@@ -600,7 +549,6 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 
 				// copy base info
 				std::shared_ptr<CEditorSound> pSound = std::make_shared<CEditorSound>(m_pEditor);
-
 				if(pItem->m_External)
 				{
 					char aBuf[IO_MAX_PATH_LENGTH];
@@ -1063,59 +1011,4 @@ void CEditorMap::PerformSanityChecks(const std::function<void(const char *pError
 		}
 		++ImageIndex;
 	}
-}
-
-bool CEditor::Append(const char *pFileName, int StorageType)
-{
-	CEditorMap NewMap;
-	NewMap.m_pEditor = this;
-
-	const auto &&ErrorHandler = [this](const char *pErrorMessage) {
-		ShowFileDialogError("%s", pErrorMessage);
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "editor/append", pErrorMessage);
-	};
-	if(!NewMap.Load(pFileName, StorageType, std::move(ErrorHandler)))
-		return false;
-
-	// modify indices
-	static const auto &&s_ModifyAddIndex = [](int AddAmount) {
-		return [AddAmount](int *pIndex) {
-			if(*pIndex >= 0)
-				*pIndex += AddAmount;
-		};
-	};
-	NewMap.ModifyImageIndex(s_ModifyAddIndex(m_Map.m_vpImages.size()));
-	NewMap.ModifySoundIndex(s_ModifyAddIndex(m_Map.m_vpSounds.size()));
-	NewMap.ModifyEnvelopeIndex(s_ModifyAddIndex(m_Map.m_vpEnvelopes.size()));
-
-	// transfer images
-	for(const auto &pImage : NewMap.m_vpImages)
-		m_Map.m_vpImages.push_back(pImage);
-	NewMap.m_vpImages.clear();
-
-	// transfer sounds
-	for(const auto &pSound : NewMap.m_vpSounds)
-		m_Map.m_vpSounds.push_back(pSound);
-	NewMap.m_vpSounds.clear();
-
-	// transfer envelopes
-	for(const auto &pEnvelope : NewMap.m_vpEnvelopes)
-		m_Map.m_vpEnvelopes.push_back(pEnvelope);
-	NewMap.m_vpEnvelopes.clear();
-
-	// transfer groups
-	for(const auto &pGroup : NewMap.m_vpGroups)
-	{
-		if(pGroup != NewMap.m_pGameGroup)
-		{
-			pGroup->m_pMap = &m_Map;
-			m_Map.m_vpGroups.push_back(pGroup);
-		}
-	}
-	NewMap.m_vpGroups.clear();
-
-	SortImages();
-
-	// all done \o/
-	return true;
 }

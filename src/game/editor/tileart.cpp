@@ -1,5 +1,7 @@
 #include "editor.h"
 
+#include <game/editor/mapitems/image.h>
+
 #include <array>
 
 bool operator<(const ColorRGBA &Left, const ColorRGBA &Right)
