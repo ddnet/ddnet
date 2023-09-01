@@ -14,7 +14,9 @@ PythonScript::PythonScript(const char* filepath)
 	PyObject* getScriptNameFunction = PyObject_GetAttrString(this->module, "getScriptName");
 
 	if (getScriptNameFunction && PyCallable_Check(getScriptNameFunction)) {
-		PyObject* getScriptNameFunctionReturn = PyObject_CallObject(getScriptNameFunction, PyTuple_Pack(0));
+		PyObject* args = PyTuple_Pack(0);
+		PyObject* getScriptNameFunctionReturn = PyObject_CallObject(getScriptNameFunction, args);
+		Py_XDECREF(args);
 		this->name = PyUnicode_AsUTF8(getScriptNameFunctionReturn);
 	} else {
 		PyErr_Print();

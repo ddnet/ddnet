@@ -1,17 +1,26 @@
 #ifndef DDNET_PYTHONCONTROLLER_H
 #define DDNET_PYTHONCONTROLLER_H
 
+#include "engine/client.h"
+#include "engine/input.h"
+#include "game/client/component.h"
 #include "game/client/python/PythonScript.h"
 
-class PythonController
+class PythonController : public CComponent
 {
 public:
 	PythonController();
 	void StartExecuteScript(PythonScript* pythonScript);
 	void StopExecuteScript(PythonScript* pythonScript);
+	bool isExecutedScript(PythonScript* pythonScript);
+	virtual int Sizeof() const override { return sizeof(*this); }
+	int SnapInput(int* pData, int inputId);
+	bool needForceInput(int inputId);
+	CNetObj_PlayerInput inputs[NUM_DUMMIES];
+	bool blockUserInput = false;
 protected:
-	PythonScript executedPythonScripts[32];
-	int countExecutedPythonScripts = 0;
+	std::vector<PythonScript*> executedPythonScripts;
+	bool OnInput(const IInput::CEvent &Event);
 };
 
 #endif // DDNET_PYTHONCONTROLLER_H

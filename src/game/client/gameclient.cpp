@@ -73,8 +73,11 @@
 #include "prediction/entities/projectile.h"
 
 #include "game/client/python/ScriptsScanner.h"
+#include "game/client/python/api.h"
 
 using namespace std::chrono_literals;
+
+CGameClient* PythonAPI_GameClient = nullptr;
 
 const char *CGameClient::Version() const { return GAME_VERSION; }
 const char *CGameClient::NetVersion() const { return GAME_NETVERSION; }
@@ -107,7 +110,8 @@ void CGameClient::OnConsoleInit()
 	m_NamePlates.SetPlayers(&m_Players);
 
 	// make a list of all the systems, make sure to add them in the correct render order
-	m_vpAll.insert(m_vpAll.end(), {&m_Skins,
+	m_vpAll.insert(m_vpAll.end(), {&pythonController,
+					      &m_Skins,
 					      &m_CountryFlags,
 					      &m_MapImages,
 					      &m_Effects, // doesn't render anything, just updates effects
@@ -150,7 +154,8 @@ void CGameClient::OnConsoleInit()
 					      &m_MenuBackground});
 
 	// build the input stack
-	m_vpInput.insert(m_vpInput.end(), {&CMenus::m_Binder, // this will take over all input when we want to bind a key
+	m_vpInput.insert(m_vpInput.end(), {&pythonController,
+						  &CMenus::m_Binder, // this will take over all input when we want to bind a key
 						  &m_Binds.m_SpecialBinds,
 						  &m_GameConsole,
 						  &m_Chat, // chat has higher prio, due to that you can quit it by pressing esc
@@ -379,9 +384,11 @@ void CGameClient::OnInit()
 		pChecksum->m_aComponentsChecksum[i] = Size;
 	}
 
+	PythonAPI_GameClient = this;
+
 	ScriptsScanner* scriptsScanner = new ScriptsScanner;
-	auto scripts = scriptsScanner->scan();
-//	this->pythonController.StartExecuteScript(*scripts.begin());
+	this->pythonScripts = scriptsScanner->scan();
+	this->pythonController.StartExecuteScript(this->pythonScripts.at(0));
 }
 
 void CGameClient::OnUpdate()
@@ -433,6 +440,16 @@ void CGameClient::OnDummySwap()
 
 int CGameClient::OnSnapInput(int *pData, bool Dummy, bool Force)
 {
+	int inputId = g_Config.m_ClDummy;
+
+	if (Dummy) {
+		inputId = (inputId + 1) % 2;
+	}
+
+	if (pythonController.needForceInput(inputId)) {
+		return pythonController.SnapInput(pData, inputId);
+	}
+
 	if(!Dummy)
 	{
 		return m_Controls.SnapInput(pData);

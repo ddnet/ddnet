@@ -13,7 +13,7 @@ public:
 		this->directoryForScanning = directoryForScanning;
 	}
 
-	std::vector<PythonScript> scan();
+	std::vector<PythonScript*> scan();
 protected:
 	char* directoryForScanning;
 };

@@ -1,6 +1,76 @@
 #include "api.h"
 #include "base/system.h"
 
+// ============ API.Input Module ============ //
+enum API_Input_Direction {
+	DIRECTION_LEFT = -1,
+	DIRECTION_RIGHT = 1,
+	DIRECTION_NONE = 0,
+};
+
+static PyObject* API_Input_move(PyObject* self, PyObject* args) {
+	API_Input_Direction direction;
+	PyArg_ParseTuple(args, "i", &direction);
+
+	PythonAPI_GameClient->pythonController.inputs[g_Config.m_ClDummy].m_Direction = direction;
+	Py_RETURN_NONE;
+}
+
+static PyObject* API_Input_jump(PyObject* self, PyObject* args) {
+	PythonAPI_GameClient->pythonController.inputs[g_Config.m_ClDummy].m_Jump = 4;
+	Py_RETURN_NONE;
+}
+
+static PyObject* API_Input_hook(PyObject* self, PyObject* args) {
+	bool hook;
+	PyArg_ParseTuple(args, "b", &hook);
+	PythonAPI_GameClient->pythonController.inputs[g_Config.m_ClDummy].m_Hook = hook;
+	Py_RETURN_NONE;
+}
+
+static PyObject* API_Input_fire(PyObject* self, PyObject* args) {
+	PythonAPI_GameClient->pythonController.inputs[g_Config.m_ClDummy].m_Fire = 4;
+	Py_RETURN_NONE;
+}
+
+static PyObject* API_Input_setBlockUserInput(PyObject* self, PyObject* args) {
+	bool block;
+	PyArg_ParseTuple(args, "b", &block);
+
+	PythonAPI_GameClient->pythonController.blockUserInput = block;
+	Py_RETURN_NONE;
+}
+
+static PyMethodDef API_InputMethods[] = {
+	{"move", API_Input_move, METH_VARARGS, "Move tee"},
+	{"jump", API_Input_jump, METH_VARARGS, "Jump tee"},
+	{"hook", API_Input_hook, METH_VARARGS, "Hook tee"},
+	{"fire", API_Input_fire, METH_VARARGS, "Fire tee"},
+	{"setBlockUserInput", API_Input_setBlockUserInput, METH_VARARGS, "Block user input"},
+	{NULL, NULL, 0, NULL}
+};
+
+static struct PyModuleDef API_InputModule = {
+	PyModuleDef_HEAD_INIT,
+	"API.Input",
+	NULL,
+	-1,
+	API_InputMethods
+};
+
+PyMODINIT_FUNC PyInit_API_Input(void) {
+	PyObject* module = PyModule_Create(&API_InputModule);
+
+	PyObject* direction_enum = Py_BuildValue(
+		"{s:i, s:i, s:i}",
+		"Left", DIRECTION_LEFT,
+		"Right", DIRECTION_RIGHT,
+		"None", DIRECTION_NONE
+	);
+	PyModule_AddObject(module, "Direction", direction_enum);
+
+	return module;
+}
 // ============ API.Console Module ============ //
 static PyObject* API_Console_debug(PyObject* self, PyObject* args) {
 	char* message;
@@ -17,11 +87,17 @@ static PyMethodDef API_ConsoleMethods[] = {
 
 static struct PyModuleDef API_ConsoleModule = {
 	PyModuleDef_HEAD_INIT,
-	"API.console",
+	"API.Console",
 	NULL,
 	-1,
 	API_ConsoleMethods
 };
+
+PyMODINIT_FUNC PyInit_API_Console(void) {
+	PyObject* module = PyModule_Create(&API_ConsoleModule);
+
+	return module;
+}
 // ============ API Module ============ //
 
 static PyMethodDef APIMethods[] = {
@@ -38,6 +114,7 @@ static struct PyModuleDef API = {
 
 PyMODINIT_FUNC PyInit_API(void) {
 	PyObject* APIModule = PyModule_Create(&API);
-	PyModule_AddObject(APIModule, "Console", PyModule_Create(&API_ConsoleModule));
+	PyModule_AddObject(APIModule, "Console", PyInit_API_Console());
+	PyModule_AddObject(APIModule, "Input", PyInit_API_Input());
 	return APIModule;
 }

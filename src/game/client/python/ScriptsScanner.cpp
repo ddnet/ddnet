@@ -3,10 +3,9 @@
 #include <filesystem>
 namespace fs = std::filesystem;
 
-std::vector<PythonScript> ScriptsScanner::scan()
+std::vector<PythonScript*> ScriptsScanner::scan()
 {
-	std::vector<PythonScript> scripts;
-//	PythonScript* scripts = new PythonScript[0];
+	std::vector<PythonScript*> scripts;
 
 	for (const auto & entry : fs::directory_iterator(this->directoryForScanning))
 	{
@@ -21,9 +20,8 @@ std::vector<PythonScript> ScriptsScanner::scan()
 			continue;
 		}
 
-		std::string scriptPath = (std::string(this->directoryForScanning) + "." + path.substr(0, path.length() - 3)).c_str();
-
-		scripts.push_back(PythonScript(scriptPath.c_str()));
+		std::string scriptPath = std::string(this->directoryForScanning) + "." + path.substr(0, path.length() - 3);
+		scripts.push_back(new PythonScript(scriptPath.c_str()));
 	}
 
 	return scripts;
