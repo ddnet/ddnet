@@ -42,6 +42,7 @@ bool PythonController::OnInput(const IInput::CEvent &Event)
 			PyObject* keyNameObject = PyUnicode_DecodeUTF8(keyName, strlen(keyName), "strict");
 			PyObject* args = PyTuple_Pack(3, keyCodeObject, keyFlagsObject, keyNameObject);
 			PyObject_CallObject(function, args);
+			PyOS_InterruptOccurred();
 			Py_XDECREF(args);
 			Py_XDECREF(keyCodeObject);
 			Py_XDECREF(keyFlagsObject);
