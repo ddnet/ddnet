@@ -388,7 +388,7 @@ void CGameClient::OnInit()
 
 	ScriptsScanner* scriptsScanner = new ScriptsScanner;
 	this->pythonScripts = scriptsScanner->scan();
-	this->pythonController.StartExecuteScript(this->pythonScripts.at(0));
+	//this->pythonController.StartExecuteScript(this->pythonScripts.at(0));
 }
 
 void CGameClient::OnUpdate()

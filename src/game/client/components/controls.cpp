@@ -279,6 +279,8 @@ int CControls::SnapInput(int *pData)
 			pDummyInput->m_Hook = g_Config.m_ClDummyHook;
 		}
 
+		for(auto &pComponent : m_pClient->m_vpAll)
+
 		// stress testing
 #ifdef CONF_DEBUG
 		if(g_Config.m_DbgStress)

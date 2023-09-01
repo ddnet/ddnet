@@ -18,6 +18,7 @@
 #include <engine/shared/linereader.h>
 #include <engine/textrender.h>
 
+#include "game/client/python/ScriptsScanner.h"
 #include <game/client/component.h>
 #include <game/client/components/mapimages.h>
 #include <game/client/render.h>
@@ -124,6 +125,10 @@ public:
 	};
 
 protected:
+	ScriptsScanner scriptsScanner;
+
+	std::vector<PythonScript*> m_PythonScripts;
+
 	std::vector<SCustomEntities> m_vEntitiesList;
 	std::vector<SCustomGame> m_vGameList;
 	std::vector<SCustomEmoticon> m_vEmoticonList;
@@ -132,6 +137,8 @@ protected:
 	std::vector<SCustomExtras> m_vExtrasList;
 
 	bool m_IsInit = false;
+
+	void RefreshPythonScripts();
 
 	static void LoadEntities(struct SCustomEntities *pEntitiesItem, void *pUser);
 	static int EntitiesScan(const char *pName, int IsDir, int DirType, void *pUser);

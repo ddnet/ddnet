@@ -1990,7 +1990,135 @@ bool CMenus::RenderLanguageSelection(CUIRect MainView)
 
 void CMenus::RenderSettingsPython(CUIRect MainView)
 {
-        CUIRect Button;
+	CUIRect ListView, Button, BottomBar, ScriptBox;
+
+	static int s_PythonSelectedScript = -1;
+
+	MainView.VSplitLeft(MainView.w/2.0f, &ListView, &ScriptBox);
+	ListView.HSplitBottom(60.0f + 5.0f, &ListView, &BottomBar);
+	ListView.HSplitTop(20.0f, &Button, &ListView);
+
+	if(DoButton_CheckBox(&g_Config.m_DTHPython, "Enable Python Scripts", g_Config.m_DTHPython, &Button))
+	{
+		g_Config.m_DTHPython ^= 1;
+		if(!g_Config.m_DTHPython)
+			s_PythonSelectedScript = -1;
+	}
+
+	if(!g_Config.m_DTHPython)
+		return;
+
+	ListView.HSplitTop(13.0f, &MainView, &ListView); //Отступ
+	//Кнопка обновления
+	{
+		CUIRect RefreshButton;
+		static CButtonContainer s_RefreshButton;
+
+		ListView.Draw(ms_ColorTabbarActiveOutgame, IGraphics::CORNER_ALL, 10.0f);
+
+		Button.VSplitRight(100.0f, &Button, &RefreshButton);
+		if(DoButton_Menu(&s_RefreshButton, Localize("Refresh"), 0, &RefreshButton))
+			RefreshPythonScripts();
+	}
+
+	static CButtonContainer s_ListBox;
+	static int ShowOnlyActive = 0;
+
+
+
+
+	static float ScrollValue = 0;
+
+	static CListBox listBox;
+	static int ActiveScripts = 0, NumListedFiles = 0;
+	CUIRect ListBox = ListView;
+	listBox.DoStart(50.0f, NumListedFiles, 1, 1, -1, &ListBox, true,0, true);
+
+
+	{
+		//receive scripts
+
+
+		const int ScriptMaxCount = 512;
+
+		static CButtonContainer pItemID[ScriptMaxCount];
+		static CButtonContainer pIDButtonToggleScript[ScriptMaxCount];
+
+		int i = 0;
+
+		for(auto PythonScript : this->m_PythonScripts)
+		{
+
+			const CListboxItem Item = listBox.DoNextItem(&pItemID[i]);
+
+			NumListedFiles++;
+
+			if(Item.m_Visible)
+			{
+				CUIRect Label, Buttons, Button;
+
+				CUIRect Row = Item.m_Rect;
+
+				Row.HMargin(7.0f, &Row);
+				Row.HSplitTop(5.0f, 0, &Label);
+				UI()->DoLabel(&Label, PythonScript->name, 24.0f, TEXTALIGN_LEFT);
+
+				Row.VSplitRight(Row.h, &Row, &Button);
+				if(UI()->MouseInside(&Row) && Input()->KeyPress(KEY_MOUSE_1))
+					s_PythonSelectedScript = i;
+
+				if(i == s_PythonSelectedScript)
+					Row.Draw(vec4(0.7f,0.7f,0.7f,0.5f), IGraphics::CORNER_L, 10.0f);
+
+				if(DoButton_Menu(&pIDButtonToggleScript[i], GameClient()->pythonController.isExecutedScript(PythonScript) ? "Deactivate" : "Activate", 0, &Button,  nullptr, IGraphics::CORNER_R, 5.0f, 0.0f, vec4(0.0f, 0.0f, 0.0f, 0.5f), vec4(0.0f, 0.0f, 0.0f, 0.5f)))
+				{
+					bool toggle = GameClient()->pythonController.isExecutedScript(PythonScript);
+
+					if(!toggle)
+						GameClient()->pythonController.StartExecuteScript(PythonScript);
+					else if(toggle)
+						GameClient()->pythonController.StopExecuteScript(PythonScript);
+				}
+			}
+			i++;
+		}
+
+		if(NumListedFiles == 0)
+		{
+			CUIRect Lbl;
+
+			ListView.HSplitBottom(ListView.h/2+15.0f, 0, &Lbl);
+			UI()->DoLabel(&Lbl, "No Python scripts available. Try to click Refresh.", 20.0f, TEXTALIGN_CENTER);
+		}
+
+	}
+	listBox.DoEnd();
+
+	//Правое меню
+	{
+		if(s_PythonSelectedScript > -1 && s_PythonSelectedScript < m_PythonScripts.size())
+		{
+			static CButtonContainer s_ToggleButton;
+			CUIRect ToggleButton;
+
+			ScriptBox.VSplitLeft(15.0f, 0, &ScriptBox);
+			ScriptBox.HSplitBottom(15.0f, &ScriptBox, 0);
+			ScriptBox.Draw(vec4(1,1,1,0.25f), IGraphics::CORNER_ALL, 5.5f);
+
+			ScriptBox.VSplitLeft(10.0f, &Button, &ScriptBox);
+			ScriptBox.HSplitBottom(13.0f, &ScriptBox, &Button);
+			ScriptBox.VSplitLeft(100.0f+10.0f, &ToggleButton, &ScriptBox);
+
+
+			ToggleButton.HSplitBottom(30.0f+7.0f, &ScriptBox, &Button);
+			//DoButton_Menu(&s_ToggleButton, GameClient()->pythonController.isExecutedScript() ? "Toggle", 0, &Button, nullptr, IGraphics::CORNER_ALL, 10.0f, 0.0f, vec4(1.f, 1.f, 1.f, 0.75f), vec4(1.f, 1.f, 1.f, 0.5f));
+		}
+	}
+}
+
+void CMenus::RefreshPythonScripts()
+{
+	this->m_PythonScripts = this->scriptsScanner.scan();
 }
 
 void CMenus::RenderSettings(CUIRect MainView)
