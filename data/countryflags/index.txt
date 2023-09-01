@@ -6,30 +6,30 @@
 default
 == -1
 
-XEN
+##### ISO 3166-2 subdivisions #####
+
+GB-ENG
 == 901
 
-XNI
+GB-NIR
 == 902
 
-XSC
+GB-SCT
 == 903
 
-XWA
+GB-WLS
 == 904
 
-XEU
-== 905
-
-XCA
+ES-CT
 == 906
 
-XGL
+ES-GA
 == 907
 
-#south sudan, non official code#
-SS
-== 737
+##### ISO 3166/MA exceptional reservations #####
+
+EU
+== 905
 
 ##### ISO 3166-1 based #####
 
@@ -647,6 +647,9 @@ SB
 
 SO
 == 706
+
+SS
+== 737
 
 ZA
 == 710

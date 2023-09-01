@@ -1222,8 +1222,11 @@ set(EXPECTED_DATA
   countryflags/EG.png
   countryflags/EH.png
   countryflags/ER.png
+  countryflags/ES-CT.png
+  countryflags/ES-GA.png
   countryflags/ES.png
   countryflags/ET.png
+  countryflags/EU.png
   countryflags/FI.png
   countryflags/FJ.png
   countryflags/FK.png
@@ -1231,6 +1234,10 @@ set(EXPECTED_DATA
   countryflags/FO.png
   countryflags/FR.png
   countryflags/GA.png
+  countryflags/GB-ENG.png
+  countryflags/GB-NIR.png
+  countryflags/GB-SCT.png
+  countryflags/GB-WLS.png
   countryflags/GB.png
   countryflags/GD.png
   countryflags/GE.png
@@ -1396,13 +1403,6 @@ set(EXPECTED_DATA
   countryflags/VU.png
   countryflags/WF.png
   countryflags/WS.png
-  countryflags/XCA.png
-  countryflags/XEN.png
-  countryflags/XEU.png
-  countryflags/XGL.png
-  countryflags/XNI.png
-  countryflags/XSC.png
-  countryflags/XWA.png
   countryflags/YE.png
   countryflags/ZA.png
   countryflags/ZM.png
