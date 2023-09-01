@@ -42,11 +42,38 @@ static PyObject* API_Input_setBlockUserInput(PyObject* self, PyObject* args) {
 	Py_RETURN_NONE;
 }
 
+static PyObject* API_Input_setTarget(PyObject* self, PyObject* args) {
+	PyObject *positionObject;
+	if (!PyArg_ParseTuple(args, "O", &positionObject)) {
+		return NULL;
+	}
+	if (!PyDict_Check(positionObject)) {
+		PyErr_SetString(PyExc_TypeError, "parameter must be a dictionary.");
+		return NULL;
+	}
+
+	PyObject *xObject = PyDict_GetItemString(positionObject, "x");
+	PyObject *yObject = PyDict_GetItemString(positionObject, "y");
+
+	if (xObject == NULL || yObject == NULL) {
+		PyErr_SetString(PyExc_KeyError, "key not found in dictionary");
+		return NULL;
+	}
+	int x = PyLong_AsLong(xObject);
+	int y = PyLong_AsLong(yObject);
+
+	PythonAPI_GameClient->pythonController.inputs[g_Config.m_ClDummy].m_TargetX = x;
+	PythonAPI_GameClient->pythonController.inputs[g_Config.m_ClDummy].m_TargetY = y;
+
+	Py_RETURN_NONE;
+}
+
 static PyMethodDef API_InputMethods[] = {
 	{"move", API_Input_move, METH_VARARGS, "Move tee"},
 	{"jump", API_Input_jump, METH_VARARGS, "Jump tee"},
 	{"hook", API_Input_hook, METH_VARARGS, "Hook tee"},
 	{"fire", API_Input_fire, METH_VARARGS, "Fire tee"},
+	{"setTarget", API_Input_setTarget, METH_VARARGS, "Set Target position(arg: {'x': int, 'y': int}"},
 	{"setBlockUserInput", API_Input_setBlockUserInput, METH_VARARGS, "Block user input"},
 	{NULL, NULL, 0, NULL}
 };

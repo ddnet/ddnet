@@ -70,6 +70,8 @@ bool PythonController::needForceInput(int inputId)
 	       this->inputs[inputId].m_Jump != 0 ||
 	       this->inputs[inputId].m_Hook != 0 ||
 	       this->inputs[inputId].m_Fire != 0 ||
+	       this->inputs[inputId].m_TargetX != 0 ||
+	       this->inputs[inputId].m_TargetY != 0 ||
 		blockUserInput;
 }
 
@@ -99,7 +101,6 @@ int PythonController::SnapInput(int *pData, int inputId)
 		this->inputs[inputId].m_Hook = 0;
 	}
 
-
 	if (this->inputs[inputId].m_Fire > 0 || this->blockUserInput) {
 		input.m_Fire = this->inputs[inputId].m_Fire;
 		if (this->inputs[inputId].m_Fire > 0 && !this->blockUserInput) {
@@ -107,6 +108,11 @@ int PythonController::SnapInput(int *pData, int inputId)
 		}
 		this->inputs[inputId].m_Fire = 0;
 		this->m_pClient->m_Chat.AddLine(g_Config.m_ClDummy, 0, ("On snap input" + std::to_string(input.m_Fire)).c_str());
+	}
+
+	if (this->inputs[inputId].m_TargetX != 0 || this->inputs[inputId].m_TargetY != 0) {
+		input.m_TargetX = this->inputs[inputId].m_TargetX;
+		input.m_TargetY = this->inputs[inputId].m_TargetY;
 	}
 
 	mem_copy(pData, &input, sizeof(input));
