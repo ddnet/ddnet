@@ -80,7 +80,7 @@ static void LibPNGDeleteReadStruct(png_structp pPNGStruct, png_infop pPNGInfo)
 {
 	if(pPNGInfo != nullptr)
 		png_destroy_info_struct(pPNGStruct, &pPNGInfo);
-	png_destroy_read_struct(&pPNGStruct, NULL, NULL);
+	png_destroy_read_struct(&pPNGStruct, nullptr, nullptr);
 }
 
 static int PngliteIncompatibility(png_structp pPNGStruct, png_infop pPNGInfo)
@@ -133,9 +133,9 @@ bool LoadPNG(SImageByteBuffer &ByteLoader, const char *pFileName, int &PngliteIn
 {
 	SLibPNGWarningItem UserErrorStruct = {&ByteLoader, pFileName, {}};
 
-	png_structp pPNGStruct = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+	png_structp pPNGStruct = png_create_read_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
 
-	if(pPNGStruct == NULL)
+	if(pPNGStruct == nullptr)
 	{
 		dbg_msg("png", "libpng internal failure: png_create_read_struct failed.");
 		return false;
@@ -161,9 +161,9 @@ bool LoadPNG(SImageByteBuffer &ByteLoader, const char *pFileName, int &PngliteIn
 
 	pPNGInfo = png_create_info_struct(pPNGStruct);
 
-	if(pPNGInfo == NULL)
+	if(pPNGInfo == nullptr)
 	{
-		png_destroy_read_struct(&pPNGStruct, NULL, NULL);
+		png_destroy_read_struct(&pPNGStruct, nullptr, nullptr);
 		dbg_msg("png", "libpng internal failure: png_create_info_struct failed.");
 		return false;
 	}
@@ -267,7 +267,7 @@ bool LoadPNG(SImageByteBuffer &ByteLoader, const char *pFileName, int &PngliteIn
 	}
 
 	png_destroy_info_struct(pPNGStruct, &pPNGInfo);
-	png_destroy_read_struct(&pPNGStruct, NULL, NULL);
+	png_destroy_read_struct(&pPNGStruct, nullptr, nullptr);
 
 	return true;
 }
@@ -304,9 +304,9 @@ static int ImageLoaderHelperFormatToColorChannel(EImageFormat Format)
 
 bool SavePNG(EImageFormat ImageFormat, const uint8_t *pRawBuffer, SImageByteBuffer &WrittenBytes, int Width, int Height)
 {
-	png_structp pPNGStruct = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+	png_structp pPNGStruct = png_create_write_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
 
-	if(pPNGStruct == NULL)
+	if(pPNGStruct == nullptr)
 	{
 		dbg_msg("png", "libpng internal failure: png_create_write_struct failed.");
 		return false;
@@ -314,9 +314,9 @@ bool SavePNG(EImageFormat ImageFormat, const uint8_t *pRawBuffer, SImageByteBuff
 
 	png_infop pPNGInfo = png_create_info_struct(pPNGStruct);
 
-	if(pPNGInfo == NULL)
+	if(pPNGInfo == nullptr)
 	{
-		png_destroy_read_struct(&pPNGStruct, NULL, NULL);
+		png_destroy_read_struct(&pPNGStruct, nullptr, nullptr);
 		dbg_msg("png", "libpng internal failure: png_create_info_struct failed.");
 		return false;
 	}
@@ -361,7 +361,7 @@ bool SavePNG(EImageFormat ImageFormat, const uint8_t *pRawBuffer, SImageByteBuff
 	delete[](pRowPointers);
 
 	png_destroy_info_struct(pPNGStruct, &pPNGInfo);
-	png_destroy_write_struct(&pPNGStruct, NULL);
+	png_destroy_write_struct(&pPNGStruct, nullptr);
 
 	return true;
 }
