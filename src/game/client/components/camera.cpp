@@ -10,6 +10,7 @@
 
 #include "camera.h"
 #include "controls.h"
+
 #include <limits>
 
 CCamera::CCamera()
@@ -224,7 +225,7 @@ void CCamera::ConZoom(IConsole::IResult *pResult, void *pUserData)
 	float TargetLevel = pResult->NumArguments() ? pResult->GetFloat(0) : g_Config.m_ClDefaultZoom;
 	pSelf->ChangeZoom(std::pow(CCamera::ZOOM_STEP, TargetLevel - 10), pSelf->m_pClient->m_Snap.m_SpecInfo.m_Active && pSelf->GameClient()->m_MultiViewActivated ? g_Config.m_ClMultiViewZoomSmoothness : g_Config.m_ClSmoothZoomTime);
 
-	if(pSelf->GameClient()->m_MultiViewActivated)
+	if(pSelf->GameClient()->m_MultiViewActivated && pSelf->m_pClient->m_Snap.m_SpecInfo.m_Active)
 		pSelf->GameClient()->m_MultiViewPersonalZoom = 0;
 }
 void CCamera::ConSetView(IConsole::IResult *pResult, void *pUserData)
