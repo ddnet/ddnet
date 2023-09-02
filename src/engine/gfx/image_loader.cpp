@@ -17,14 +17,14 @@ struct SLibPNGWarningItem
 {
 	SLibPNGWarningItem *pUserStruct = (SLibPNGWarningItem *)png_get_error_ptr(png_ptr);
 	pUserStruct->m_pByteLoader->m_Err = -1;
-	dbg_msg("libpng", "error for file \"%s\": %s", pUserStruct->m_pFileName, error_msg);
+	dbg_msg("png", "error for file \"%s\": %s", pUserStruct->m_pFileName, error_msg);
 	std::longjmp(pUserStruct->m_Buf, 1);
 }
 
 static void LibPNGWarning(png_structp png_ptr, png_const_charp warning_msg)
 {
 	SLibPNGWarningItem *pUserStruct = (SLibPNGWarningItem *)png_get_error_ptr(png_ptr);
-	dbg_msg("libpng", "warning for file \"%s\": %s", pUserStruct->m_pFileName, warning_msg);
+	dbg_msg("png", "warning for file \"%s\": %s", pUserStruct->m_pFileName, warning_msg);
 }
 
 static bool FileMatchesImageType(SImageByteBuffer &ByteLoader)
@@ -175,6 +175,7 @@ bool LoadPNG(SImageByteBuffer &ByteLoader, const char *pFileName, int &PngliteIn
 	if(!FileMatchesImageType(ByteLoader))
 	{
 		LibPNGDeleteReadStruct(pPNGStruct, pPNGInfo);
+		dbg_msg("png", "file does not match image type.");
 		return false;
 	}
 
@@ -189,6 +190,7 @@ bool LoadPNG(SImageByteBuffer &ByteLoader, const char *pFileName, int &PngliteIn
 	if(ByteLoader.m_Err != 0)
 	{
 		LibPNGDeleteReadStruct(pPNGStruct, pPNGInfo);
+		dbg_msg("png", "byte loader error.");
 		return false;
 	}
 
@@ -255,6 +257,7 @@ bool LoadPNG(SImageByteBuffer &ByteLoader, const char *pFileName, int &PngliteIn
 		if(ByteLoader.m_Err != 0)
 		{
 			LibPNGDeleteReadStruct(pPNGStruct, pPNGInfo);
+			dbg_msg("png", "byte loader error.");
 			return false;
 		}
 
@@ -263,6 +266,7 @@ bool LoadPNG(SImageByteBuffer &ByteLoader, const char *pFileName, int &PngliteIn
 	else
 	{
 		LibPNGDeleteReadStruct(pPNGStruct, pPNGInfo);
+		dbg_msg("png", "bytes in row incorrect.");
 		return false;
 	}
 
