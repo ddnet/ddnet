@@ -131,13 +131,6 @@ static int PngliteIncompatibility(png_structp pPNGStruct, png_infop pPNGInfo)
 
 bool LoadPNG(SImageByteBuffer &ByteLoader, const char *pFileName, int &PngliteIncompatible, int &Width, int &Height, uint8_t *&pImageBuff, EImageFormat &ImageFormat)
 {
-	png_infop pPNGInfo = nullptr;
-	int ColorType;
-	png_byte BitDepth;
-	int ColorChannelCount;
-	int BytesInRow;
-	Height = 0;
-	png_bytepp pRowPointers = nullptr;
 	SLibPNGWarningItem UserErrorStruct = {&ByteLoader, pFileName, {}};
 
 	png_structp pPNGStruct = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
@@ -148,6 +141,9 @@ bool LoadPNG(SImageByteBuffer &ByteLoader, const char *pFileName, int &PngliteIn
 		return false;
 	}
 
+	png_infop pPNGInfo = nullptr;
+	png_bytepp pRowPointers = nullptr;
+	Height = 0; // ensure this is not undefined for the error handler
 	if(setjmp(UserErrorStruct.m_Buf))
 	{
 		if(pRowPointers != nullptr)
@@ -196,8 +192,8 @@ bool LoadPNG(SImageByteBuffer &ByteLoader, const char *pFileName, int &PngliteIn
 
 	Width = png_get_image_width(pPNGStruct, pPNGInfo);
 	Height = png_get_image_height(pPNGStruct, pPNGInfo);
-	ColorType = png_get_color_type(pPNGStruct, pPNGInfo);
-	BitDepth = png_get_bit_depth(pPNGStruct, pPNGInfo);
+	const int ColorType = png_get_color_type(pPNGStruct, pPNGInfo);
+	const png_byte BitDepth = png_get_bit_depth(pPNGStruct, pPNGInfo);
 	PngliteIncompatible = PngliteIncompatibility(pPNGStruct, pPNGInfo);
 
 	if(BitDepth == 16)
@@ -229,8 +225,8 @@ bool LoadPNG(SImageByteBuffer &ByteLoader, const char *pFileName, int &PngliteIn
 
 	png_read_update_info(pPNGStruct, pPNGInfo);
 
-	ColorChannelCount = LibPNGGetColorChannelCount(ColorType);
-	BytesInRow = png_get_rowbytes(pPNGStruct, pPNGInfo);
+	const int ColorChannelCount = LibPNGGetColorChannelCount(ColorType);
+	const int BytesInRow = png_get_rowbytes(pPNGStruct, pPNGInfo);
 
 	if(BytesInRow == Width * ColorChannelCount)
 	{
