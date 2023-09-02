@@ -637,11 +637,6 @@ void CGameClient::UpdatePositions()
 
 	if(!m_MultiViewActivated && m_MultiView.m_IsInit)
 		ResetMultiView();
-	else if(!m_Snap.m_SpecInfo.m_Active)
-	{
-		m_Camera.SetZoom(std::pow(CCamera::ZOOM_STEP, g_Config.m_ClDefaultZoom - 10), g_Config.m_ClSmoothZoomTime);
-		m_MultiViewPersonalZoom = 0;
-	}
 
 	UpdateRenderedCharacters();
 }
@@ -907,7 +902,7 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 
 			// if everyone of a team killed, we have no ids to spectate anymore, so we disable multi view
 			if(!IsMultiViewIdSet())
-				m_MultiViewActivated = false;
+				ResetMultiView();
 			else
 			{
 				// the "main" tee killed, search a new one
@@ -3582,7 +3577,7 @@ void CGameClient::HandleMultiView()
 			m_MultiView.m_SecondChance = Client()->LocalTime() + 0.3f;
 		else if(m_MultiView.m_SecondChance < Client()->LocalTime())
 		{
-			m_MultiViewActivated = false;
+			ResetMultiView();
 			return;
 		}
 		return;
