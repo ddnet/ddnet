@@ -47,10 +47,15 @@ CAutoMapper::CAutoMapper(CEditor *pEditor)
 void CAutoMapper::Load(const char *pTileName)
 {
 	char aPath[IO_MAX_PATH_LENGTH];
-	str_format(aPath, sizeof(aPath), "editor/%s.rules", pTileName);
+	str_format(aPath, sizeof(aPath), "editor/automap/%s.rules", pTileName);
 	IOHANDLE RulesFile = Storage()->OpenFile(aPath, IOFLAG_READ | IOFLAG_SKIP_BOM, IStorage::TYPE_ALL);
 	if(!RulesFile)
+	{
+		char aBuf[IO_MAX_PATH_LENGTH + 32];
+		str_format(aBuf, sizeof(aBuf), "failed to load %s", aPath);
+		Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "editor/automap", aBuf);
 		return;
+	}
 
 	CLineReader LineReader;
 	LineReader.Init(RulesFile);
