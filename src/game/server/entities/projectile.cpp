@@ -455,12 +455,12 @@ void CProjectile::SetAffected(int ClientID, bool Affected)
 		if(Affected)
 		{
 			// CmaskOne
-			m_AffectedCharacters = CClientMask().set(ClientID);
+			m_AffectedCharacters.set(ClientID);
 		}
 		else
 		{
 			// CmaskAllExceptOne
-			m_AffectedCharacters = CClientMask().set().reset(ClientID);
+			m_AffectedCharacters.reset(ClientID);
 		}
 	}
 }
