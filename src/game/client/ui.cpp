@@ -51,27 +51,27 @@ void CUIElement::SUIElementRect::Reset()
 void CUIElement::SUIElementRect::Draw(const CUIRect *pRect, ColorRGBA Color, int Corners, float Rounding)
 {
 	bool NeedsRecreate = false;
-	if(m_UIRectQuadContainer == -1 || m_X != pRect->x || m_Y != pRect->y || m_Width != pRect->w || m_Height != pRect->h || mem_comp(&m_QuadColor, &Color, sizeof(Color)) != 0)
+	if(m_UIRectQuadContainer == -1 || m_Width != pRect->w || m_Height != pRect->h || mem_comp(&m_QuadColor, &Color, sizeof(Color)) != 0)
 	{
-		if(m_UIRectQuadContainer != -1)
-			m_pParent->UI()->Graphics()->DeleteQuadContainer(m_UIRectQuadContainer);
+		m_pParent->UI()->Graphics()->DeleteQuadContainer(m_UIRectQuadContainer);
 		NeedsRecreate = true;
 	}
+	m_X = pRect->x;
+	m_Y = pRect->y;
 	if(NeedsRecreate)
 	{
-		m_X = pRect->x;
-		m_Y = pRect->y;
 		m_Width = pRect->w;
 		m_Height = pRect->h;
 		m_QuadColor = Color;
 
 		m_pParent->UI()->Graphics()->SetColor(Color);
-		m_UIRectQuadContainer = m_pParent->UI()->Graphics()->CreateRectQuadContainer(pRect->x, pRect->y, pRect->w, pRect->h, Rounding, Corners);
+		m_UIRectQuadContainer = m_pParent->UI()->Graphics()->CreateRectQuadContainer(0, 0, pRect->w, pRect->h, Rounding, Corners);
 		m_pParent->UI()->Graphics()->SetColor(1, 1, 1, 1);
 	}
 
 	m_pParent->UI()->Graphics()->TextureClear();
-	m_pParent->UI()->Graphics()->RenderQuadContainer(m_UIRectQuadContainer, -1);
+	m_pParent->UI()->Graphics()->RenderQuadContainerEx(m_UIRectQuadContainer,
+		0, -1, m_X, m_Y, 1, 1);
 }
 
 /********************************************************
@@ -156,11 +156,8 @@ void CUI::ResetUIElement(CUIElement &UIElement)
 {
 	for(CUIElement::SUIElementRect &Rect : UIElement.m_vUIRects)
 	{
-		if(Rect.m_UIRectQuadContainer != -1)
-			Graphics()->DeleteQuadContainer(Rect.m_UIRectQuadContainer);
-		Rect.m_UIRectQuadContainer = -1;
+		Graphics()->DeleteQuadContainer(Rect.m_UIRectQuadContainer);
 		TextRender()->DeleteTextContainer(Rect.m_UITextContainer);
-
 		Rect.Reset();
 	}
 }
@@ -275,6 +272,14 @@ bool CUI::OnInput(const IInput::CEvent &Event)
 			m_HotkeysPressed |= HOTKEY_SCROLL_UP;
 		else if(Event.m_Key == KEY_MOUSE_WHEEL_DOWN)
 			m_HotkeysPressed |= HOTKEY_SCROLL_DOWN;
+		else if(Event.m_Key == KEY_PAGEUP)
+			m_HotkeysPressed |= HOTKEY_PAGE_UP;
+		else if(Event.m_Key == KEY_PAGEDOWN)
+			m_HotkeysPressed |= HOTKEY_PAGE_DOWN;
+		else if(Event.m_Key == KEY_HOME)
+			m_HotkeysPressed |= HOTKEY_HOME;
+		else if(Event.m_Key == KEY_END)
+			m_HotkeysPressed |= HOTKEY_END;
 		return LastHotkeysPressed != m_HotkeysPressed;
 	}
 	return false;
@@ -396,6 +401,67 @@ int CUI::DoButtonLogic(const void *pID, int Checked, const CUIRect *pRect)
 	return ReturnValue;
 }
 
+int CUI::DoDraggableButtonLogic(const void *pID, int Checked, const CUIRect *pRect, bool *pClicked, bool *pAbrupted)
+{
+	// logic
+	int ReturnValue = 0;
+	const bool Inside = MouseHovered(pRect);
+	static int s_ButtonUsed = -1;
+
+	if(pClicked != nullptr)
+		*pClicked = false;
+	if(pAbrupted != nullptr)
+		*pAbrupted = false;
+
+	if(CheckActiveItem(pID))
+	{
+		if(s_ButtonUsed == 0)
+		{
+			if(Checked >= 0)
+				ReturnValue = 1 + s_ButtonUsed;
+			if(!MouseButton(s_ButtonUsed))
+			{
+				if(pClicked != nullptr)
+					*pClicked = true;
+				SetActiveItem(nullptr);
+				s_ButtonUsed = -1;
+			}
+			if(MouseButton(1))
+			{
+				if(pAbrupted != nullptr)
+					*pAbrupted = true;
+				SetActiveItem(nullptr);
+				s_ButtonUsed = -1;
+			}
+		}
+		else if(s_ButtonUsed > 0 && !MouseButton(s_ButtonUsed))
+		{
+			if(Inside && Checked >= 0)
+				ReturnValue = 1 + s_ButtonUsed;
+			if(pClicked != nullptr)
+				*pClicked = true;
+			SetActiveItem(nullptr);
+			s_ButtonUsed = -1;
+		}
+	}
+	else if(HotItem() == pID)
+	{
+		for(int i = 0; i < 3; ++i)
+		{
+			if(MouseButton(i))
+			{
+				SetActiveItem(pID);
+				s_ButtonUsed = i;
+			}
+		}
+	}
+
+	if(Inside && !MouseButton(0) && !MouseButton(1) && !MouseButton(2))
+		SetHotItem(pID);
+
+	return ReturnValue;
+}
+
 int CUI::DoPickerLogic(const void *pID, const CUIRect *pRect, float *pX, float *pY)
 {
 	if(MouseHovered(pRect))
@@ -409,6 +475,9 @@ int CUI::DoPickerLogic(const void *pID, const CUIRect *pRect, float *pX, float *
 
 	if(!CheckActiveItem(pID))
 		return 0;
+
+	if(Input()->ShiftIsPressed())
+		m_MouseSlow = true;
 
 	if(pX)
 		*pX = clamp(m_MouseX - pRect->x, 0.0f, pRect->w);
@@ -452,7 +521,7 @@ float CUI::DoTextLabel(float x, float y, float w, float h, const char *pText, fl
 	float AlignedSize = 0;
 	float MaxCharacterHeightInLine = 0;
 	float MaxTextWidth = LabelProps.m_MaxWidth != -1 ? LabelProps.m_MaxWidth : w;
-	float tw = TextRender()->TextWidth(0, Size, pText, -1, LabelProps.m_MaxWidth, &AlignedSize, &MaxCharacterHeightInLine);
+	float tw = TextRender()->TextWidth(Size, pText, -1, LabelProps.m_MaxWidth, &AlignedSize, &MaxCharacterHeightInLine);
 	while(tw > MaxTextWidth + 0.001f)
 	{
 		if(!LabelProps.m_EnableWidthCheck)
@@ -460,7 +529,7 @@ float CUI::DoTextLabel(float x, float y, float w, float h, const char *pText, fl
 		if(Size < 4.0f)
 			break;
 		Size -= 1.0f;
-		tw = TextRender()->TextWidth(0, Size, pText, -1, LabelProps.m_MaxWidth, &AlignedSize, &MaxCharacterHeightInLine);
+		tw = TextRender()->TextWidth(Size, pText, -1, LabelProps.m_MaxWidth, &AlignedSize, &MaxCharacterHeightInLine);
 	}
 
 	int Flags = TEXTFLAG_RENDER | (LabelProps.m_StopAtEnd ? TEXTFLAG_STOP_AT_END : 0);
@@ -524,7 +593,7 @@ void CUI::DoLabel(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, cons
 	float AlignedSize = 0;
 	float MaxCharacterHeightInLine = 0;
 	float MaxTextWidth = LabelProps.m_MaxWidth != -1 ? LabelProps.m_MaxWidth : pRect->w;
-	float tw = TextRender()->TextWidth(0, Size, pText, -1, LabelProps.m_MaxWidth, &AlignedSize, &MaxCharacterHeightInLine);
+	float tw = TextRender()->TextWidth(Size, pText, -1, LabelProps.m_MaxWidth, &AlignedSize, &MaxCharacterHeightInLine);
 	while(tw > MaxTextWidth + 0.001f)
 	{
 		if(!LabelProps.m_EnableWidthCheck)
@@ -532,7 +601,7 @@ void CUI::DoLabel(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, cons
 		if(Size < 4.0f)
 			break;
 		Size -= 1.0f;
-		tw = TextRender()->TextWidth(0, Size, pText, -1, LabelProps.m_MaxWidth, &AlignedSize, &MaxCharacterHeightInLine);
+		tw = TextRender()->TextWidth(Size, pText, -1, LabelProps.m_MaxWidth, &AlignedSize, &MaxCharacterHeightInLine);
 	}
 	float AlignmentVert = pRect->y + (pRect->h - AlignedSize) / 2.f;
 	float AlignmentHori = 0;
@@ -585,7 +654,7 @@ void CUI::DoLabelStreamed(CUIElement::SUIElementRect &RectEl, float x, float y, 
 {
 	bool NeedsRecreate = false;
 	bool ColorChanged = RectEl.m_TextColor != TextRender()->GetTextColor() || RectEl.m_TextOutlineColor != TextRender()->GetTextOutlineColor();
-	if(RectEl.m_UITextContainer == -1 || RectEl.m_X != x || RectEl.m_Y != y || RectEl.m_Width != w || RectEl.m_Height != h || ColorChanged)
+	if(RectEl.m_UITextContainer == -1 || RectEl.m_Width != w || RectEl.m_Height != h || ColorChanged)
 	{
 		NeedsRecreate = true;
 	}
@@ -602,12 +671,12 @@ void CUI::DoLabelStreamed(CUIElement::SUIElementRect &RectEl, float x, float y, 
 				NeedsRecreate = true;
 		}
 	}
+	RectEl.m_X = x;
+	RectEl.m_Y = y;
 	if(NeedsRecreate)
 	{
 		TextRender()->DeleteTextContainer(RectEl.m_UITextContainer);
 
-		RectEl.m_X = x;
-		RectEl.m_Y = y;
 		RectEl.m_Width = w;
 		RectEl.m_Height = h;
 
@@ -619,8 +688,8 @@ void CUI::DoLabelStreamed(CUIElement::SUIElementRect &RectEl, float x, float y, 
 			RectEl.m_Text.clear();
 
 		CUIRect TmpRect;
-		TmpRect.x = x;
-		TmpRect.y = y;
+		TmpRect.x = 0;
+		TmpRect.y = 0;
 		TmpRect.w = w;
 		TmpRect.h = h;
 
@@ -634,7 +703,10 @@ void CUI::DoLabelStreamed(CUIElement::SUIElementRect &RectEl, float x, float y, 
 	ColorRGBA ColorText(RectEl.m_TextColor);
 	ColorRGBA ColorTextOutline(RectEl.m_TextOutlineColor);
 	if(RectEl.m_UITextContainer != -1)
-		TextRender()->RenderTextContainer(RectEl.m_UITextContainer, ColorText, ColorTextOutline);
+	{
+		TextRender()->RenderTextContainer(RectEl.m_UITextContainer,
+			ColorText, ColorTextOutline, x, y);
+	}
 }
 
 void CUI::DoLabelStreamed(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth, int AlignVertically, bool StopAtEnd, int StrLen, const CTextCursor *pReadCursor)
@@ -955,11 +1027,11 @@ bool CUI::DoEditBox(const void *pID, const CUIRect *pRect, char *pStr, unsigned 
 	// check if the text has to be moved
 	if(LastActiveItem() == pID && !JustGotActive && (UpdateOffset || *m_pInputEventCount))
 	{
-		float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, DispCursorPos, std::numeric_limits<float>::max());
+		float w = TextRender()->TextWidth(FontSize, pDisplayStr, DispCursorPos, std::numeric_limits<float>::max());
 		if(w - *pOffset > Textbox.w)
 		{
 			// move to the left
-			float wt = TextRender()->TextWidth(0, FontSize, pDisplayStr, -1, std::numeric_limits<float>::max());
+			float wt = TextRender()->TextWidth(FontSize, pDisplayStr, -1, std::numeric_limits<float>::max());
 			do
 			{
 				*pOffset += minimum(wt - *pOffset - Textbox.w, Textbox.w / 3);
@@ -1043,7 +1115,7 @@ bool CUI::DoEditBox(const void *pID, const CUIRect *pRect, char *pStr, unsigned 
 	// set the ime cursor
 	if(LastActiveItem() == pID && !JustGotActive)
 	{
-		float w = TextRender()->TextWidth(0, FontSize, pDisplayStr, DispCursorPos, std::numeric_limits<float>::max());
+		float w = TextRender()->TextWidth(FontSize, pDisplayStr, DispCursorPos, std::numeric_limits<float>::max());
 		Textbox.x += w;
 		Input()->SetEditingPosition(Textbox.x, Textbox.y + FontSize);
 	}
@@ -1275,7 +1347,7 @@ void CUI::DoScrollbarOption(const void *pID, int *pOption, const CUIRect *pRect,
 	}
 
 	float FontSize = pRect->h * CUI::ms_FontmodHeight * 0.8f;
-	float VSplitVal = 10.0f + maximum(TextRender()->TextWidth(0, FontSize, aBuf, -1, std::numeric_limits<float>::max()), TextRender()->TextWidth(0, FontSize, aBufMax, -1, std::numeric_limits<float>::max()));
+	float VSplitVal = 10.0f + maximum(TextRender()->TextWidth(FontSize, aBuf, -1, std::numeric_limits<float>::max()), TextRender()->TextWidth(FontSize, aBufMax, -1, std::numeric_limits<float>::max()));
 
 	CUIRect Label, ScrollBar;
 	pRect->VSplitLeft(VSplitVal, &Label, &ScrollBar);

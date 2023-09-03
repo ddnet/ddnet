@@ -1,9 +1,9 @@
-#include "engine/server/databases/connection_pool.h"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 #include <base/detect.h>
 #include <engine/server/databases/connection.h>
+#include <engine/server/databases/connection_pool.h>
 #include <engine/shared/config.h>
 #include <game/server/scoreworker.h>
 
@@ -41,7 +41,7 @@ struct Score : public testing::TestWithParam<IDbConnection *>
 	Score()
 	{
 		Connect();
-		Init();
+		LoadBestTime();
 		InsertMap();
 	}
 
@@ -68,11 +68,11 @@ struct Score : public testing::TestWithParam<IDbConnection *>
 		ASSERT_FALSE(m_pConn->ExecuteUpdate(&NumInserted, m_aError, sizeof(m_aError))) << m_aError;
 	}
 
-	void Init()
+	void LoadBestTime()
 	{
-		CSqlInitData initData(std::make_shared<CScoreInitResult>());
-		str_copy(initData.m_aMap, "Kobra 3", sizeof(initData.m_aMap));
-		ASSERT_FALSE(CScoreWorker::Init(m_pConn, &initData, m_aError, sizeof(m_aError))) << m_aError;
+		CSqlLoadBestTimeData loadBestTimeData(std::make_shared<CScoreLoadBestTimeResult>());
+		str_copy(loadBestTimeData.m_aMap, "Kobra 3", sizeof(loadBestTimeData.m_aMap));
+		ASSERT_FALSE(CScoreWorker::LoadBestTime(m_pConn, &loadBestTimeData, m_aError, sizeof(m_aError))) << m_aError;
 	}
 
 	void InsertMap()

@@ -13,6 +13,7 @@
 # 2022-08-17 CHaBek
 # 2022-09-18 CHaBek
 # 2022-10-20 CHaBek
+# 2023-01-08 CHaBek
 ##### /authors #####
 
 ##### translated strings #####
@@ -334,10 +335,10 @@ Remote console
 == 원격 콘솔
 
 Remove
-== 삭제
+== 제거
 
 Remove friend
-== 친구 삭제
+== 친구 제거
 
 Rename
 == 이름 변경
@@ -393,9 +394,6 @@ Show ingame HUD
 Show name plates
 == 이름 표시
 
-Skins
-== 스킨
-
 Sound
 == 소리
 
@@ -436,13 +434,13 @@ The server is running a non-standard tuning on a pure game type.
 == 이 서버는 조정된 비표준 게임 모드를 실행하고 있습니다.
 
 There's an unsaved map in the editor, you might want to save it before you quit the game.
-== 편집기에서 맵이 저장되지 않았습니다. 종료 전에 되돌아가 저장하실 수 있습니다.
+== 편집기에서 맵이 저장되지 않았습니다. 종료 전 되돌아가 저장하실 수 있습니다.
 
 Time limit
 == 시간 제한
 
 Time limit: %d min
-== 시간 제한: %d min
+== 시간 제한: %d 분
 
 Try again
 == 재시도
@@ -584,9 +582,6 @@ Reset to defaults
 Laser
 == 레이저
 
-Display Modes
-== 디스플레이 모드
-
 Version:
 == 버전:
 
@@ -618,7 +613,7 @@ Replay feature is disabled!
 == 리플레이 기능을 비활성화했습니다!
 
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
-== 텍스처 %s 의 너비 또는 높이를 %d 로 나눌 수 없습니다. 이는 시각적 오류를 발생시킬 수 있습니다.
+== 텍스처 %s 의 너비 또는 높이를 %d 으로 나눌 수 없습니다. 이는 시각적 오류를 발생시킬 수 있습니다.
 
 Warning
 == 주의
@@ -627,10 +622,10 @@ Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
 == 디버그 모드를 활성화했습니다. Ctrl+Shift+D를 눌러 비활성화할 수 있습니다.
 
 Server best:
-== 서버 최고 기록
+== 서버 최고 기록:
 
 Personal best:
-== 개인 최고 기록
+== 개인 최고 기록:
 
 Reset
 == 초기화
@@ -645,7 +640,7 @@ Loading DDNet Client
 == DDNet 클라이언트 로딩 중
 
 Reconnect in %d sec
-== %d 초 후에 재접속
+== %d 초 후 재접속
 
 Render demo
 == 데모 렌더링
@@ -692,14 +687,11 @@ Checking for existing player with your name
 Are you sure that you want to disconnect and switch to a different server?
 == 연결을 끊고 다른 서버에 접속하시겠습니까?
 
-Country / Region
-== 국가 / 지역
-
 Speed
 == 속도
 
 Video name:
-== 동영상 이름
+== 동영상 이름:
 
 Show DDNet map finishes in server browser
 == DDNet 맵 완주를 서버 브라우저에 표시
@@ -759,19 +751,19 @@ Please use a different name
 == 다른 이름을 사용해 주십시오
 
 Remove chat
-== 채팅 기록 삭제
+== 채팅 제거
 
 Demofile: %s
 == 데모 파일: %s
 
 Markers:
-== 책갈피
+== 마커:
 
 Demo
 == 데모
 
 Markers
-== 책갈피
+== 마커
 
 Length
 == 길이
@@ -1186,7 +1178,7 @@ Play
 == 플레이
 
 DDNet %s is out!
-== DDNet %s 가 공개되었습니다!
+== DDNet %s 이 공개되었습니다!
 
 Downloading %s:
 == %s 다운로드 중:
@@ -1327,7 +1319,7 @@ Quads are used for background decoration
 == 맵 배경을 표시합니다.
 
 Tries to predict other entities to give a feel of low latency
-== 다른 엔티티를 예측하여 지연 시간을 줄입니다.
+== 다른 엔티티를 예측해 지연 시간을 줄입니다.
 
 Super
 == 무적
@@ -1387,9 +1379,6 @@ UI controller sens.
 
 Controller jitter tolerance
 == 컨트롤러 신호 오차 허용 범위
-
-No controller found. Plug in a controller and restart the game.
-== 컨트롤러가 발견되지 않았습니다. 컨트롤러 연결 후 게임을 재시작 하십시오.
 
 Device
 == 장치
@@ -1607,38 +1596,112 @@ Menu opened. Press Esc key again to close menu.
 Set all to Rifle
 == 소총 색상으로 통일
 
+[Graphics error]
+
+[Graphics error]
+Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== 초기화에 실패했습니다. 구성 폴더의 settings_ddnet.cfg에서 gfx_backend를 OpenGL 또는 Vulkan으로 변경 후 재시도하십시오.
+
+[Graphics error]
+Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
+== VRAM이 부족합니다. 사용자 정의 에셋(스킨, 엔티티 등), 특히 고해상도 에셋을 제거해 보십시오.
+
+[Graphics error]
+An error during command recording occurred. Try to update your GPU drivers.
+== 명령 기록 중 오류가 발생했습니다. GPU 드라이버를 업데이트해 보십시오.
+
+[Graphics error]
+A render command failed. Try to update your GPU drivers.
+== 렌더링 명령에 실패했습니다. GPU 드라이버를 업데이트해 보십시오.
+
+[Graphics error]
+Submitting the render commands failed. Try to update your GPU drivers.
+== 렌더링 명령 제출에 실패했습니다. GPU 드라이버를 업데이트해 보십시오.
+
+[Graphics error]
+Failed to swap framebuffers. Try to update your GPU drivers.
+== 프레임버퍼 교환에 실패했습니다. GPU 드라이버를 업데이트해 보십시오.
+
+[Graphics error]
+Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== 알 수 없는 오류가 발생했습니다. 구성 폴더의 settings_ddnet.cfg에서 gfx_backend를 OpenGL 또는 Vulkan으로 변경 후 재시도하십시오.
+
+[Graphics error]
+Could not initialize the given graphics backend, reverting to the default backend now.
+== 지정된 그래픽 백엔드를 초기화할 수 없습니다. 기본 백엔드로 되돌립니다.
+
 Cancel
-== 
+== 취소
 
 File '%s' already exists, do you want to overwrite it?
-== 
+== 파일 '%s' 이 이미 존재합니다. 덮어쓰기하시겠습니까?
 
 Are you sure that you want to remove the player '%s' from your friends list?
-== 
+== '%s' 님을 친구 목록에서 제거하시겠습니까?
 
 Are you sure that you want to remove the clan '%s' from your friends list?
-== 
+== '%s' 클랜을 친구 목록에서 제거하시겠습니까?
 
 Go back one tick
-== 
+== 1 틱 뒤로 이동
 
 Go forward one tick
-== 
+== 1 틱 앞으로 이동
 
 Go back one marker
-== 
+== 이전 마커로 이동
 
 Go forward one marker
-== 
+== 다음 마커로 이동
+
+Open the directory that contains the demo files
+== 데모 파일이 있는 폴더를 엽니다.
 
 Are you sure that you want to delete the demo '%s'?
-== 
+== 데모 '%s' 을 삭제하시겠습니까?
 
 Unable to delete the demo '%s'
-== 
+== 데모 '%s' 을 삭제할 수 없음
+
+Save power by lowering refresh rate (higher input latency)
+== 화면 주사율을 낮춰 전력 절약 (입력 지연 증가)
+
+Open the settings file
+== 설정 파일을 엽니다.
+
+Open the directory that contains the configuration and user files
+== 구성 파일과 사용자 파일이 있는 폴더를 엽니다.
+
+Open the directory to add custom themes
+== 사용자 정의 테마를 추가할 폴더를 엽니다.
+
+Open the directory to add custom skins
+== 사용자 정의 스킨을 추가할 폴더를 엽니다.
+
+No controller found. Plug in a controller.
+== 컨트롤러가 발견되지 않았습니다. 컨트롤러를 연결해 주십시오.
 
 Reset controls
-== 
+== 조작 초기화
 
 Are you sure that you want to reset the controls to their defaults?
+== 조작 설정을 초기화하시겠습니까?
+
+Unregister protocol and file extensions
+== 프로토콜과 파일 확장자 등록 해제
+
+Open the directory to add custom assets
+== 사용자 정의 에셋을 추가할 폴더를 엽니다.
+
+[Graphics error]
+Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
+== 
+
+Could not save downloaded map. Try manually deleting this file: %s
+== 
+
+Search:
+== 
+
+Copy info
 == 

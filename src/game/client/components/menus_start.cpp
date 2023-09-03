@@ -49,7 +49,6 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 		{
 			dbg_msg("menus", "couldn't open link '%s'", pLink);
 		}
-		m_DoubleClickIndex = -1;
 	}
 
 	ExtMenu.HSplitBottom(5.0f, &ExtMenu, 0); // little space
@@ -62,7 +61,6 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 		{
 			dbg_msg("menus", "couldn't open link '%s'", pLink);
 		}
-		m_DoubleClickIndex = -1;
 	}
 
 	ExtMenu.HSplitBottom(5.0f, &ExtMenu, 0); // little space
@@ -88,7 +86,6 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 			PopupWarning(Localize("Warning"), Localize("Can't find a Tutorial server"), Localize("Ok"), 10s);
 			s_JoinTutorialTime = 0.0f;
 		}
-		m_DoubleClickIndex = -1;
 	}
 
 	ExtMenu.HSplitBottom(5.0f, &ExtMenu, 0); // little space
@@ -101,7 +98,6 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 		{
 			dbg_msg("menus", "couldn't open link '%s'", pLink);
 		}
-		m_DoubleClickIndex = -1;
 	}
 
 	ExtMenu.HSplitBottom(5.0f, &ExtMenu, 0); // little space
@@ -138,9 +134,9 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 	Menu.HSplitBottom(5.0f, &Menu, 0); // little space
 	Menu.HSplitBottom(40.0f, &Menu, &Button);
 	static CButtonContainer s_LocalServerButton;
-	if(DoButton_Menu(&s_LocalServerButton, m_ServerProcess.Process ? Localize("Stop server") : Localize("Run server"), 0, &Button, g_Config.m_ClShowStartMenuImages ? "local_server" : 0, IGraphics::CORNER_ALL, Rounding, 0.5f, vec4(0.0f, 0.0f, 0.0f, 0.5f), m_ServerProcess.Process ? vec4(0.0f, 1.0f, 0.0f, 0.25f) : vec4(0.0f, 0.0f, 0.0f, 0.25f)) || (CheckHotKey(KEY_R) && Input()->KeyPress(KEY_R)))
+	if(DoButton_Menu(&s_LocalServerButton, m_ServerProcess.m_Process ? Localize("Stop server") : Localize("Run server"), 0, &Button, g_Config.m_ClShowStartMenuImages ? "local_server" : 0, IGraphics::CORNER_ALL, Rounding, 0.5f, vec4(0.0f, 0.0f, 0.0f, 0.5f), m_ServerProcess.m_Process ? vec4(0.0f, 1.0f, 0.0f, 0.25f) : vec4(0.0f, 0.0f, 0.0f, 0.25f)) || (CheckHotKey(KEY_R) && Input()->KeyPress(KEY_R)))
 	{
-		if(m_ServerProcess.Process)
+		if(m_ServerProcess.m_Process)
 		{
 			KillServer();
 		}
@@ -151,12 +147,12 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 			// No / in binary path means to search in $PATH, so it is expected that the file can't be opened. Just try executing anyway.
 			if(str_find(aBuf, "/") == 0)
 			{
-				m_ServerProcess.Process = shell_execute(aBuf);
+				m_ServerProcess.m_Process = shell_execute(aBuf);
 			}
 			else if(IOHANDLE File = io_open(aBuf, IOFLAG_READ))
 			{
 				io_close(File);
-				m_ServerProcess.Process = shell_execute(aBuf);
+				m_ServerProcess.m_Process = shell_execute(aBuf);
 			}
 			else
 			{
@@ -239,7 +235,7 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 	UI()->DoLabel(&VersionUpdate, aBuf, 14.0f, TEXTALIGN_LEFT);
 	TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 
-	VersionUpdate.VSplitLeft(TextRender()->TextWidth(0, 14.0f, aBuf, -1, -1.0f) + 10.0f, 0, &Part);
+	VersionUpdate.VSplitLeft(TextRender()->TextWidth(14.0f, aBuf, -1, -1.0f) + 10.0f, 0, &Part);
 
 	if(State == IUpdater::CLEAN && NeedUpdate)
 	{
@@ -295,9 +291,11 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 
 void CMenus::KillServer()
 {
-	if(m_ServerProcess.Process)
+	if(m_ServerProcess.m_Process)
 	{
-		kill_process(m_ServerProcess.Process);
-		m_ServerProcess.Process = 0;
+		if(kill_process(m_ServerProcess.m_Process))
+		{
+			m_ServerProcess.m_Process = INVALID_PROCESS;
+		}
 	}
 }

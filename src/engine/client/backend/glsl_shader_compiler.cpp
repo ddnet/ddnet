@@ -19,7 +19,7 @@ CGLSLCompiler::CGLSLCompiler(int OpenGLVersionMajor, int OpenGLVersionMinor, int
 
 void CGLSLCompiler::AddDefine(const std::string &DefineName, const std::string &DefineValue)
 {
-	m_vDefines.emplace_back(SGLSLCompilerDefine(DefineName, DefineValue));
+	m_vDefines.emplace_back(DefineName, DefineValue);
 }
 
 void CGLSLCompiler::AddDefine(const char *pDefineName, const char *pDefineValue)

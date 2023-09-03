@@ -217,6 +217,27 @@ TEST(Str, Endswith)
 		str_length(ABCDEFG) - str_length(DEFG));
 }
 
+TEST(StrFormat, Positional)
+{
+	char aBuf[256];
+
+	// normal
+	str_format(aBuf, sizeof(aBuf), "%s %s", "first", "second");
+	EXPECT_STREQ(aBuf, "first second");
+
+	// normal with positional arguments
+	str_format(aBuf, sizeof(aBuf), "%1$s %2$s", "first", "second");
+	EXPECT_STREQ(aBuf, "first second");
+
+	// reverse
+	str_format(aBuf, sizeof(aBuf), "%2$s %1$s", "first", "second");
+	EXPECT_STREQ(aBuf, "second first");
+
+	// duplicate
+	str_format(aBuf, sizeof(aBuf), "%1$s %1$s %2$d %1$s %2$d", "str", 1);
+	EXPECT_STREQ(aBuf, "str str 1 str 1");
+}
+
 TEST(Str, EndswithNocase)
 {
 	EXPECT_TRUE(str_endswith_nocase("abcdef", "deF"));
@@ -251,6 +272,7 @@ TEST(Str, HexEncode)
 	EXPECT_STREQ(aOut, "41 42 43 ");
 	str_hex(aOut, sizeof(aOut), pData, 4);
 	EXPECT_STREQ(aOut, "41 42 43 44 ");
+
 	str_hex(aOut, 1, pData, 4);
 	EXPECT_STREQ(aOut, "");
 	str_hex(aOut, 2, pData, 4);
@@ -267,6 +289,54 @@ TEST(Str, HexEncode)
 	EXPECT_STREQ(aOut, "41 42 ");
 	str_hex(aOut, 8, pData, 4);
 	EXPECT_STREQ(aOut, "41 42 ");
+}
+
+TEST(Str, HexEncodeCstyle)
+{
+	char aOut[128];
+	const char *pData = "ABCD";
+	str_hex_cstyle(aOut, sizeof(aOut), pData, 0);
+	EXPECT_STREQ(aOut, "");
+	str_hex_cstyle(aOut, sizeof(aOut), pData, 1);
+	EXPECT_STREQ(aOut, "0x41");
+	str_hex_cstyle(aOut, sizeof(aOut), pData, 2);
+	EXPECT_STREQ(aOut, "0x41, 0x42");
+	str_hex_cstyle(aOut, sizeof(aOut), pData, 3);
+	EXPECT_STREQ(aOut, "0x41, 0x42, 0x43");
+	str_hex_cstyle(aOut, sizeof(aOut), pData, 4);
+	EXPECT_STREQ(aOut, "0x41, 0x42, 0x43, 0x44");
+
+	str_hex_cstyle(aOut, 1, pData, 4);
+	EXPECT_STREQ(aOut, "");
+	str_hex_cstyle(aOut, 2, pData, 4);
+	EXPECT_STREQ(aOut, "");
+	str_hex_cstyle(aOut, 3, pData, 4);
+	EXPECT_STREQ(aOut, "");
+	str_hex_cstyle(aOut, 4, pData, 4);
+	EXPECT_STREQ(aOut, "");
+	str_hex_cstyle(aOut, 5, pData, 4);
+	EXPECT_STREQ(aOut, "");
+	str_hex_cstyle(aOut, 6, pData, 4);
+	EXPECT_STREQ(aOut, "");
+	str_hex_cstyle(aOut, 7, pData, 4);
+	EXPECT_STREQ(aOut, "0x41");
+	str_hex_cstyle(aOut, 12, pData, 4);
+	EXPECT_STREQ(aOut, "0x41");
+	str_hex_cstyle(aOut, 13, pData, 4);
+	EXPECT_STREQ(aOut, "0x41, 0x42");
+	str_hex_cstyle(aOut, 14, pData, 4);
+	EXPECT_STREQ(aOut, "0x41, 0x42");
+
+	str_hex_cstyle(aOut, sizeof(aOut), pData, 4, 1);
+	EXPECT_STREQ(aOut, "0x41,\n0x42,\n0x43,\n0x44");
+	str_hex_cstyle(aOut, sizeof(aOut), pData, 4, 2);
+	EXPECT_STREQ(aOut, "0x41, 0x42,\n0x43, 0x44");
+	str_hex_cstyle(aOut, sizeof(aOut), pData, 4, 3);
+	EXPECT_STREQ(aOut, "0x41, 0x42, 0x43,\n0x44");
+	str_hex_cstyle(aOut, sizeof(aOut), pData, 4, 4);
+	EXPECT_STREQ(aOut, "0x41, 0x42, 0x43, 0x44");
+	str_hex_cstyle(aOut, sizeof(aOut), pData, 4, 500);
+	EXPECT_STREQ(aOut, "0x41, 0x42, 0x43, 0x44");
 }
 
 TEST(Str, HexDecode)
@@ -615,6 +685,9 @@ TEST(Str, TimeFloat)
 
 	EXPECT_EQ(str_time_float(12.16, TIME_HOURS_CENTISECS, aBuf, sizeof(aBuf)), 8);
 	EXPECT_STREQ(aBuf, "00:12.16");
+
+	EXPECT_EQ(str_time_float(22.995, TIME_MINS, aBuf, sizeof(aBuf)), 5);
+	EXPECT_STREQ(aBuf, "00:22");
 }
 
 TEST(Str, HasCc)
@@ -799,6 +872,19 @@ TEST(Str, CompFilename)
 	EXPECT_GT(str_comp_filenames("b", "A"), 0);
 	EXPECT_LT(str_comp_filenames("a", "B"), 0);
 	EXPECT_GT(str_comp_filenames("B", "a"), 0);
+	EXPECT_EQ(str_comp_filenames("1A", "1a"), 0);
+	EXPECT_LT(str_comp_filenames("1a", "1B"), 0);
+	EXPECT_GT(str_comp_filenames("1B", "1a"), 0);
+	EXPECT_LT(str_comp_filenames("1a", "1b"), 0);
+	EXPECT_GT(str_comp_filenames("1b", "1a"), 0);
+	EXPECT_GT(str_comp_filenames("12a", "1B"), 0);
+	EXPECT_LT(str_comp_filenames("1B", "12a"), 0);
+	EXPECT_GT(str_comp_filenames("10a", "1B"), 0);
+	EXPECT_LT(str_comp_filenames("1B", "10a"), 0);
+	EXPECT_GT(str_comp_filenames("10a", "00B"), 0);
+	EXPECT_LT(str_comp_filenames("00B", "10a"), 0);
+	EXPECT_GT(str_comp_filenames("10a", "09B"), 0);
+	EXPECT_LT(str_comp_filenames("09B", "10a"), 0);
 	EXPECT_LT(str_comp_filenames("abc", "abcd"), 0);
 	EXPECT_GT(str_comp_filenames("abcd", "abc"), 0);
 	EXPECT_LT(str_comp_filenames("abc2", "abcd1"), 0);
@@ -808,12 +894,29 @@ TEST(Str, CompFilename)
 	EXPECT_EQ(str_comp_filenames("file0", "file0"), 0);
 	EXPECT_LT(str_comp_filenames("file0", "file1"), 0);
 	EXPECT_GT(str_comp_filenames("file1", "file0"), 0);
+	EXPECT_LT(str_comp_filenames("file1", "file09"), 0);
+	EXPECT_GT(str_comp_filenames("file09", "file1"), 0);
+	EXPECT_LT(str_comp_filenames("file1", "file009"), 0);
+	EXPECT_GT(str_comp_filenames("file009", "file1"), 0);
+	EXPECT_GT(str_comp_filenames("file10", "file00"), 0);
+	EXPECT_LT(str_comp_filenames("file00", "file10"), 0);
+	EXPECT_GT(str_comp_filenames("file10", "file09"), 0);
+	EXPECT_LT(str_comp_filenames("file09", "file10"), 0);
 	EXPECT_LT(str_comp_filenames("file13", "file37"), 0);
 	EXPECT_GT(str_comp_filenames("file37", "file13"), 0);
+	EXPECT_LT(str_comp_filenames("file1.ext", "file09.ext"), 0);
+	EXPECT_GT(str_comp_filenames("file09.ext", "file1.ext"), 0);
+	EXPECT_LT(str_comp_filenames("file1.ext", "file009.ext"), 0);
+	EXPECT_GT(str_comp_filenames("file009.ext", "file1.ext"), 0);
+	EXPECT_EQ(str_comp_filenames("file0.ext", "file0.ext"), 0);
 	EXPECT_LT(str_comp_filenames("file13.ext", "file37.ext"), 0);
 	EXPECT_GT(str_comp_filenames("file37.ext", "file13.ext"), 0);
 	EXPECT_LT(str_comp_filenames("FILE13.EXT", "file37.ext"), 0);
 	EXPECT_GT(str_comp_filenames("file37.ext", "FILE13.EXT"), 0);
+	EXPECT_GT(str_comp_filenames("file10.ext", "file00.ext"), 0);
+	EXPECT_LT(str_comp_filenames("file00.ext", "file10.ext"), 0);
+	EXPECT_GT(str_comp_filenames("file10.ext", "file09.ext"), 0);
+	EXPECT_LT(str_comp_filenames("file09.ext", "file10.ext"), 0);
 	EXPECT_LT(str_comp_filenames("file42", "file1337"), 0);
 	EXPECT_GT(str_comp_filenames("file1337", "file42"), 0);
 	EXPECT_LT(str_comp_filenames("file42.ext", "file1337.ext"), 0);

@@ -50,6 +50,7 @@ enum EGFXWarningType
 {
 	GFX_WARNING_TYPE_NONE = 0,
 	GFX_WARNING_TYPE_INIT_FAILED,
+	GFX_WARNING_TYPE_INIT_FAILED_MISSING_INTEGRATED_GPU_DRIVER,
 	GFX_WARNING_LOW_ON_MEMORY,
 	GFX_WARNING_MISSING_EXTENSION,
 	GFX_WARNING_TYPE_UNKNOWN,
@@ -57,8 +58,18 @@ enum EGFXWarningType
 
 struct SGFXErrorContainer
 {
+	struct SError
+	{
+		bool m_RequiresTranslation;
+		std::string m_Err;
+
+		bool operator==(const SError &Other) const
+		{
+			return m_RequiresTranslation == Other.m_RequiresTranslation && m_Err == Other.m_Err;
+		}
+	};
 	EGFXErrorType m_ErrorType = EGFXErrorType::GFX_ERROR_TYPE_NONE;
-	std::vector<std::string> m_vErrors;
+	std::vector<SError> m_vErrors;
 };
 
 struct SGFXWarningContainer

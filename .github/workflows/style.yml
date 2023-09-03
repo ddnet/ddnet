@@ -21,7 +21,7 @@ jobs:
         sudo apt-get update -y
         sudo apt-get install clang-format imagemagick ddnet-tools shellcheck pkg-config cmake ninja-build libfreetype6-dev libnotify-dev libsdl2-dev libsqlite3-dev libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev libx264-dev python3-clang libvulkan-dev glslang-tools spirv-tools rustc cargo -y
         pip3 install pylint
-        git clone https://gitlab.com/Patiga/twmap
+        git clone https://gitlab.com/Patiga/twmap.git/
         cd twmap/twmap-tools
         cargo install --path=.
         cd ../..
@@ -40,6 +40,10 @@ jobs:
       run: scripts/languages/update_all.py
     - name: Check dilated images
       run: scripts/check_dilate.sh release data
+    - name: Check absolute includes
+      run: "! grep --exclude-dir rust-bridge -rE '^#include \"(antibot|base|engine|game|steam|test)/' src/"
+    - name: Check standard header includes
+      run: scripts/check_standard_headers.sh
     # TODO: Enable on release branches
     #- name: Out-of-date translations
     #  run: |
@@ -73,8 +77,8 @@ jobs:
         findings=$(find data -type f -name '*.map' -print0 | xargs -0 ~/.cargo/bin/twmap-check-ddnet 2>&1 | \
           grep -v -E "\"data/maps/(ctf|dm).*\.map\": Time cps are missing on the map" | \
           grep -v -E "\"data/themes/.*\.map\": Time cps are missing on the map" | \
-          grep -v -E "\"data/maps/ctf4\.map\": Map - Image error at index 3 : 'jungle_doodads_old' is not a valid external image in version DDNet06" | \
-          grep -v -E "\"data/themes/autumn_night\.map\": Map - Image error at index 3 : 'generic_lamps' is not a valid external image in version DDNet06" | \
+          grep -v -E "\"data/maps/ctf4\.map\": Map - In Image at index 3 -> Image 'jungle_doodads_old' is not a valid external image for DDNet06" | \
+          grep -v -E "\"data/themes/autumn_night\.map\": Map - In Image at index 3 -> Image 'generic_lamps' is not a valid external image for DDNet06" | \
           grep -v -E "\"data/maps7?/Tutorial\.map\": Map setting - Unusual: 'sv_show_others_default'" || true)
         if [ -n "$findings" ]; then
           echo "$findings"

@@ -18,6 +18,7 @@ CLayerTiles::CLayerTiles(int w, int h)
 	m_aName[0] = '\0';
 	m_Width = w;
 	m_Height = h;
+	m_Texture.Invalidate();
 	m_Image = -1;
 	m_Game = 0;
 	m_Color.r = 255;
@@ -86,7 +87,7 @@ void CLayerTiles::PrepareForSave()
 {
 	for(int y = 0; y < m_Height; y++)
 		for(int x = 0; x < m_Width; x++)
-			m_pTiles[y * m_Width + x].m_Flags &= TILEFLAG_FLIP_HORIZONTAL | TILEFLAG_FLIP_VERTICAL | TILEFLAG_ROTATE;
+			m_pTiles[y * m_Width + x].m_Flags &= TILEFLAG_XFLIP | TILEFLAG_YFLIP | TILEFLAG_ROTATE;
 
 	if(m_Image != -1 && m_Color.a == 255)
 	{
@@ -177,6 +178,11 @@ void CLayerTiles::Clamp(RECTi *pRect)
 		pRect->w = 0;
 }
 
+bool CLayerTiles::IsEntitiesLayer() const
+{
+	return m_pEditor->m_Map.m_pGameLayer == this || m_pEditor->m_Map.m_pTeleLayer == this || m_pEditor->m_Map.m_pSpeedupLayer == this || m_pEditor->m_Map.m_pFrontLayer == this || m_pEditor->m_Map.m_pSwitchLayer == this || m_pEditor->m_Map.m_pTuneLayer == this;
+}
+
 bool CLayerTiles::IsEmpty(CLayerTiles *pLayer)
 {
 	for(int y = 0; y < pLayer->m_Height; y++)
@@ -214,7 +220,7 @@ void CLayerTiles::BrushSelecting(CUIRect Rect)
 	m_pEditor->Graphics()->QuadsEnd();
 	char aBuf[16];
 	str_format(aBuf, sizeof(aBuf), "%d,%d", ConvertX(Rect.w), ConvertY(Rect.h));
-	TextRender()->Text(nullptr, Rect.x + 3.0f, Rect.y + 3.0f, m_pEditor->m_ShowPicker ? 15.0f : 15.0f * m_pEditor->m_WorldZoom, aBuf, -1.0f);
+	TextRender()->Text(Rect.x + 3.0f, Rect.y + 3.0f, m_pEditor->m_ShowPicker ? 15.0f : 15.0f * m_pEditor->m_WorldZoom, aBuf, -1.0f);
 }
 
 int CLayerTiles::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
@@ -541,7 +547,7 @@ void CLayerTiles::BrushFlipX()
 			if(!Rotate && !IsRotatableTile(m_pTiles[y * m_Width + x].m_Index))
 				m_pTiles[y * m_Width + x].m_Flags = 0;
 			else
-				m_pTiles[y * m_Width + x].m_Flags ^= (m_pTiles[y * m_Width + x].m_Flags & TILEFLAG_ROTATE) ? TILEFLAG_FLIP_VERTICAL : TILEFLAG_FLIP_HORIZONTAL;
+				m_pTiles[y * m_Width + x].m_Flags ^= (m_pTiles[y * m_Width + x].m_Flags & TILEFLAG_ROTATE) ? TILEFLAG_YFLIP : TILEFLAG_XFLIP;
 }
 
 void CLayerTiles::BrushFlipY()
@@ -557,7 +563,7 @@ void CLayerTiles::BrushFlipY()
 			if(!Rotate && !IsRotatableTile(m_pTiles[y * m_Width + x].m_Index))
 				m_pTiles[y * m_Width + x].m_Flags = 0;
 			else
-				m_pTiles[y * m_Width + x].m_Flags ^= (m_pTiles[y * m_Width + x].m_Flags & TILEFLAG_ROTATE) ? TILEFLAG_FLIP_HORIZONTAL : TILEFLAG_FLIP_VERTICAL;
+				m_pTiles[y * m_Width + x].m_Flags ^= (m_pTiles[y * m_Width + x].m_Flags & TILEFLAG_ROTATE) ? TILEFLAG_XFLIP : TILEFLAG_YFLIP;
 }
 
 void CLayerTiles::BrushRotate(float Amount)
@@ -582,7 +588,7 @@ void CLayerTiles::BrushRotate(float Amount)
 				else
 				{
 					if(pDst->m_Flags & TILEFLAG_ROTATE)
-						pDst->m_Flags ^= (TILEFLAG_FLIP_VERTICAL | TILEFLAG_FLIP_HORIZONTAL);
+						pDst->m_Flags ^= (TILEFLAG_YFLIP | TILEFLAG_XFLIP);
 					pDst->m_Flags ^= TILEFLAG_ROTATE;
 				}
 			}
@@ -666,8 +672,8 @@ void CLayerTiles::ShowInfo()
 				str_format(aBuf, sizeof(aBuf), m_pEditor->m_ShowTileHexInfo ? "%02X" : "%i", m_pTiles[c].m_Index);
 				m_pEditor->Graphics()->QuadsText(x * 32, y * 32, 16.0f, aBuf);
 
-				char aFlags[4] = {m_pTiles[c].m_Flags & TILEFLAG_FLIP_HORIZONTAL ? 'H' : ' ',
-					m_pTiles[c].m_Flags & TILEFLAG_FLIP_VERTICAL ? 'V' : ' ',
+				char aFlags[4] = {m_pTiles[c].m_Flags & TILEFLAG_XFLIP ? 'X' : ' ',
+					m_pTiles[c].m_Flags & TILEFLAG_YFLIP ? 'Y' : ' ',
 					m_pTiles[c].m_Flags & TILEFLAG_ROTATE ? 'R' : ' ',
 					0};
 				m_pEditor->Graphics()->QuadsText(x * 32, y * 32 + 16, 16.0f, aFlags);
@@ -683,12 +689,12 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 {
 	CUIRect Button;
 
-	bool IsGameLayer = (m_pEditor->m_Map.m_pGameLayer == this || m_pEditor->m_Map.m_pTeleLayer == this || m_pEditor->m_Map.m_pSpeedupLayer == this || m_pEditor->m_Map.m_pFrontLayer == this || m_pEditor->m_Map.m_pSwitchLayer == this || m_pEditor->m_Map.m_pTuneLayer == this);
+	const bool EntitiesLayer = IsEntitiesLayer();
 
 	CLayerGroup *pGroup = m_pEditor->m_Map.m_vpGroups[m_pEditor->m_SelectedGroup];
 
 	// Game tiles can only be constructed if the layer is relative to the game layer
-	if(!IsGameLayer && !(pGroup->m_OffsetX % 32) && !(pGroup->m_OffsetY % 32) && pGroup->m_ParallaxX == 100 && pGroup->m_ParallaxY == 100)
+	if(!EntitiesLayer && !(pGroup->m_OffsetX % 32) && !(pGroup->m_OffsetY % 32) && pGroup->m_ParallaxX == 100 && pGroup->m_ParallaxY == 100)
 	{
 		pToolBox->HSplitBottom(12.0f, pToolBox, &Button);
 		static int s_ColclButton = 0;
@@ -847,7 +853,7 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 		{nullptr},
 	};
 
-	if(IsGameLayer) // remove the image and color properties if this is a game layer
+	if(EntitiesLayer) // remove the image and color properties if this is a game layer
 	{
 		aProps[PROP_IMAGE].m_pName = nullptr;
 		aProps[PROP_COLOR].m_pName = nullptr;
@@ -905,7 +911,7 @@ int CLayerTiles::RenderProperties(CUIRect *pToolBox)
 				m_pEditor->m_PopupEventType = m_pEditor->POPEVENT_IMAGEDIV16;
 				m_pEditor->m_PopupEventActivated = true;
 
-				m_Texture = IGraphics::CTextureHandle();
+				m_Texture.Invalidate();
 				m_Image = -1;
 			}
 		}
@@ -1306,6 +1312,10 @@ bool CLayerTele::ContainsElementWithId(int Id)
 	{
 		for(int x = 0; x < m_Width; ++x)
 		{
+			if(m_pTeleTile[y * m_Width + x].m_Type == TILE_TELECHECKIN)
+				continue;
+			if(m_pTeleTile[y * m_Width + x].m_Type == TILE_TELECHECKINEVIL)
+				continue;
 			if(m_pTeleTile[y * m_Width + x].m_Number == Id)
 			{
 				return true;
@@ -1763,7 +1773,7 @@ void CLayerSwitch::BrushRotate(float Amount)
 				if(IsRotatableTile(pDst2->m_Index))
 				{
 					if(pDst2->m_Flags & TILEFLAG_ROTATE)
-						pDst2->m_Flags ^= (TILEFLAG_FLIP_VERTICAL | TILEFLAG_FLIP_HORIZONTAL);
+						pDst2->m_Flags ^= (TILEFLAG_YFLIP | TILEFLAG_XFLIP);
 					pDst2->m_Flags ^= TILEFLAG_ROTATE;
 				}
 			}

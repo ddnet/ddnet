@@ -7,7 +7,7 @@
 #include <engine/storage.h>
 
 #ifdef CONF_PLATFORM_HAIKU
-#include <stdlib.h>
+#include <cstdlib>
 #endif
 
 class CStorage : public IStorage
@@ -433,6 +433,44 @@ public:
 		return 0;
 	}
 
+	template<typename F>
+	bool GenericExists(const char *pFilename, int Type, F &&CheckFunction)
+	{
+		TranslateType(Type, pFilename);
+
+		char aBuffer[IO_MAX_PATH_LENGTH];
+		if(Type == TYPE_ALL)
+		{
+			// check all available directories
+			for(int i = TYPE_SAVE; i < m_NumPaths; ++i)
+			{
+				if(CheckFunction(GetPath(i, pFilename, aBuffer, sizeof(aBuffer))))
+					return true;
+			}
+			return false;
+		}
+		else if(Type == TYPE_ABSOLUTE || (Type >= TYPE_SAVE && Type < m_NumPaths))
+		{
+			// check wanted directory
+			return CheckFunction(GetPath(Type, pFilename, aBuffer, sizeof(aBuffer)));
+		}
+		else
+		{
+			dbg_assert(false, "Type invalid");
+			return false;
+		}
+	}
+
+	bool FileExists(const char *pFilename, int Type) override
+	{
+		return GenericExists(pFilename, Type, fs_is_file);
+	}
+
+	bool FolderExists(const char *pFilename, int Type) override
+	{
+		return GenericExists(pFilename, Type, fs_is_dir);
+	}
+
 	bool ReadFile(const char *pFilename, int Type, void **ppResult, unsigned *pResultLen) override
 	{
 		IOHANDLE File = OpenFile(pFilename, IOFLAG_READ, Type);
@@ -674,6 +712,25 @@ public:
 	const char *GetBinaryPath(const char *pFilename, char *pBuffer, unsigned BufferSize) override
 	{
 		str_format(pBuffer, BufferSize, "%s%s%s", m_aBinarydir, !m_aBinarydir[0] ? "" : "/", pFilename);
+		return pBuffer;
+	}
+
+	const char *GetBinaryPathAbsolute(const char *pFilename, char *pBuffer, unsigned BufferSize) override
+	{
+		char aBinaryPath[IO_MAX_PATH_LENGTH];
+		GetBinaryPath(PLAT_CLIENT_EXEC, aBinaryPath, sizeof(aBinaryPath));
+		if(fs_is_relative_path(aBinaryPath))
+		{
+			if(fs_getcwd(pBuffer, BufferSize))
+			{
+				str_append(pBuffer, "/", BufferSize);
+				str_append(pBuffer, aBinaryPath, BufferSize);
+			}
+			else
+				pBuffer[0] = '\0';
+		}
+		else
+			str_copy(pBuffer, aBinaryPath, BufferSize);
 		return pBuffer;
 	}
 

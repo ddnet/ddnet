@@ -428,9 +428,6 @@ Show name plates
 Show only chat messages from friends
 == Nur Nachrichten von Freunden anzeigen
 
-Skins
-== Skins
-
 Sound
 == Ton
 
@@ -598,9 +595,6 @@ Reset to defaults
 
 Quit anyway?
 == Trotzdem beenden?
-
-Display Modes
-== Auflösungen
 
 Version:
 == Version:
@@ -1097,9 +1091,6 @@ Use k key to kill (restart), q to pause and watch other players. See settings fo
 Client message
 == Client-Nachricht
 
-Country / Region
-== Land / Region
-
 Skip the main menu
 == Hauptmenü überspringen
 
@@ -1469,9 +1460,6 @@ UI controller sens.
 Controller jitter tolerance
 == Jitter-Toleranz des Controllers
 
-No controller found. Plug in a controller and restart the game.
-== Keine Controller gefunden. Schließ einen Controller an und starte das Spiel neu.
-
 Controller Axis #%d
 == Controller-Axe #%d
 
@@ -1648,3 +1636,75 @@ Reset controls
 
 Are you sure that you want to reset the controls to their defaults?
 == Willst du wirklich die Bedienungen zum Standard zurücksetzen?
+
+[Graphics error]
+Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== Fehler während der Initialisierung. Versuch gfx_backend zu OpenGL oder Vulkan zu ändern in settings_ddnet.cfg im Konfigurations-Ordner und versuche es erneut.
+
+[Graphics error]
+Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
+== Kein VRAM mehr verfügbar. Versuch eigene Assets (Skins, Entities, usw.) zu löschen, insbesondere solche mit hoher Auflösung.
+
+[Graphics error]
+An error during command recording occurred. Try to update your GPU drivers.
+== Ein Fehler ist währen dem Aufnahme-Befehl aufgetreten. Versuch deinen Grafiktreiber zu aktualisieren.
+
+[Graphics error]
+A render command failed. Try to update your GPU drivers.
+== Ein Render-Befehl ist fehlgeschlagen. Versuch deinen Grafiktreiber zu aktualisieren.
+
+[Graphics error]
+Submitting the render commands failed. Try to update your GPU drivers.
+== Einreichen der Render-Befhle fehlgeschlagen. Versuch deinen Grafiktreiber zu aktualisieren.
+
+[Graphics error]
+Failed to swap framebuffers. Try to update your GPU drivers.
+== Framebuffer konnten nicht getauscht werden. Versuch deinen Grafiktreiber zu aktualisieren.
+
+[Graphics error]
+Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== Unbekannter Fehler. Versuch gfx_backend zu OpenGL oder Vulkan zu ändern in settings_ddnet.cfg im Konfigurations-Ordner und versuche es erneut.
+
+[Graphics error]
+Could not initialize the given graphics backend, reverting to the default backend now.
+== Konnte eingestelltes Grafik-Backend nicht initialisieren, setze zu Standard-Backend zurück.
+
+Open the directory that contains the configuration and user files
+== Öffne den Ordner der die Konfigurations- und Benutzer-Dateien enthält
+
+Open the directory to add custom themes
+== Öffne den Ordner um eigene Themes hinzuzufügen
+
+Open the directory to add custom skins
+== Öffne den Ordner um eigene Skins hinzuzufügen
+
+No controller found. Plug in a controller.
+== Kein Controller gefunden. Schließ einen Controller an.
+
+Unregister protocol and file extensions
+== Entferne die Registrierungen für Protokoll- und Datei-Erweiterungen
+
+Open the directory to add custom assets
+== Öffne den Ordner um eigene Assets hinzuzufügen
+
+Save power by lowering refresh rate (higher input latency)
+== Spare Energie durch geringere Bildwiederholrate (höhere Inputverzögerung)
+
+[Graphics error]
+Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
+== Konnte eingestelltes Grafik-Backend nicht initialisieren, wahrscheinlich weil du die Treiber für die integrierte Grafikkarte nicht installiert hast.
+
+Could not save downloaded map. Try manually deleting this file: %s
+== Konnte heruntergeladene Map nicht speichern. Versuch die Datei händisch zu löschen: %s
+
+Search:
+== Suche:
+
+Copy info
+== Kopier Info
+
+Open the directory that contains the demo files
+== Öffne den Ordner der die Demo-Dateien enthält
+
+Open the settings file
+== Öffne die Einstellungs-Datei

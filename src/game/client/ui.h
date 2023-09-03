@@ -67,7 +67,7 @@ public:
 			Min += m_MinAdjustment;
 			Max += m_MinAdjustment;
 		}
-		return (log(AbsoluteValue) - log(Min)) / (float)(log(Max) - log(Min));
+		return (std::log(AbsoluteValue) - std::log(Min)) / (float)(std::log(Max) - std::log(Min));
 	}
 	int ToAbsolute(float RelativeValue, int Min, int Max) const override
 	{
@@ -78,7 +78,7 @@ public:
 			Max += m_MinAdjustment;
 			ResultAdjustment = -m_MinAdjustment;
 		}
-		return round_to_int(exp(RelativeValue * (log(Max) - log(Min)) + log(Min))) + ResultAdjustment;
+		return round_to_int(std::exp(RelativeValue * (std::log(Max) - std::log(Min)) + std::log(Min))) + ResultAdjustment;
 	}
 };
 
@@ -251,6 +251,10 @@ public:
 		HOTKEY_TAB = 1 << 5,
 		HOTKEY_SCROLL_UP = 1 << 6,
 		HOTKEY_SCROLL_DOWN = 1 << 7,
+		HOTKEY_PAGE_UP = 1 << 8,
+		HOTKEY_PAGE_DOWN = 1 << 9,
+		HOTKEY_HOME = 1 << 10,
+		HOTKEY_END = 1 << 11,
 	};
 
 	void ResetUIElement(CUIElement &UIElement);
@@ -337,6 +341,7 @@ public:
 	inline bool IsClipped() const { return !m_vClips.empty(); }
 
 	int DoButtonLogic(const void *pID, int Checked, const CUIRect *pRect);
+	int DoDraggableButtonLogic(const void *pID, int Checked, const CUIRect *pRect, bool *pClicked, bool *pAbrupted);
 	int DoPickerLogic(const void *pID, const CUIRect *pRect, float *pX, float *pY);
 	void DoSmoothScrollLogic(float *pScrollOffset, float *pScrollOffsetChange, float ViewPortSize, float TotalSize, float ScrollSpeed = 10.0f);
 

@@ -511,8 +511,9 @@ bool CEditorMap::Load(class IStorage *pStorage, const char *pFileName, int Stora
 
 					// copy image data
 					void *pData = DataFile.GetData(pItem->m_ImageData);
-					pImg->m_pData = malloc((size_t)pImg->m_Width * pImg->m_Height * 4);
-					mem_copy(pImg->m_pData, pData, pImg->m_Width * pImg->m_Height * 4);
+					const size_t DataSize = (size_t)pImg->m_Width * pImg->m_Height * 4;
+					pImg->m_pData = malloc(DataSize);
+					mem_copy(pImg->m_pData, pData, DataSize);
 					int TextureLoadFlag = m_pEditor->Graphics()->HasTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
 					if(pImg->m_Width % 16 != 0 || pImg->m_Height % 16 != 0)
 						TextureLoadFlag = 0;

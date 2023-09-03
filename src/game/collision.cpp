@@ -160,7 +160,7 @@ enum
 
 static int GetMoveRestrictionsRaw(int Direction, int Tile, int Flags)
 {
-	Flags = Flags & (TILEFLAG_FLIP_HORIZONTAL | TILEFLAG_FLIP_VERTICAL | TILEFLAG_ROTATE);
+	Flags = Flags & (TILEFLAG_XFLIP | TILEFLAG_YFLIP | TILEFLAG_ROTATE);
 	switch(Tile)
 	{
 	case TILE_STOP:
@@ -171,10 +171,10 @@ static int GetMoveRestrictionsRaw(int Direction, int Tile, int Flags)
 		case ROTATION_180: return CANTMOVE_UP;
 		case ROTATION_270: return CANTMOVE_RIGHT;
 
-		case TILEFLAG_FLIP_VERTICAL ^ ROTATION_0: return CANTMOVE_UP;
-		case TILEFLAG_FLIP_VERTICAL ^ ROTATION_90: return CANTMOVE_RIGHT;
-		case TILEFLAG_FLIP_VERTICAL ^ ROTATION_180: return CANTMOVE_DOWN;
-		case TILEFLAG_FLIP_VERTICAL ^ ROTATION_270: return CANTMOVE_LEFT;
+		case TILEFLAG_YFLIP ^ ROTATION_0: return CANTMOVE_UP;
+		case TILEFLAG_YFLIP ^ ROTATION_90: return CANTMOVE_RIGHT;
+		case TILEFLAG_YFLIP ^ ROTATION_180: return CANTMOVE_DOWN;
+		case TILEFLAG_YFLIP ^ ROTATION_270: return CANTMOVE_LEFT;
 		}
 		break;
 	case TILE_STOPS:
@@ -182,13 +182,13 @@ static int GetMoveRestrictionsRaw(int Direction, int Tile, int Flags)
 		{
 		case ROTATION_0:
 		case ROTATION_180:
-		case TILEFLAG_FLIP_VERTICAL ^ ROTATION_0:
-		case TILEFLAG_FLIP_VERTICAL ^ ROTATION_180:
+		case TILEFLAG_YFLIP ^ ROTATION_0:
+		case TILEFLAG_YFLIP ^ ROTATION_180:
 			return CANTMOVE_DOWN | CANTMOVE_UP;
 		case ROTATION_90:
 		case ROTATION_270:
-		case TILEFLAG_FLIP_VERTICAL ^ ROTATION_90:
-		case TILEFLAG_FLIP_VERTICAL ^ ROTATION_270:
+		case TILEFLAG_YFLIP ^ ROTATION_90:
+		case TILEFLAG_YFLIP ^ ROTATION_270:
 			return CANTMOVE_LEFT | CANTMOVE_RIGHT;
 		}
 		break;
@@ -724,7 +724,7 @@ void CCollision::GetSpeedup(int Index, vec2 *pDir, int *pForce, int *pMaxSpeed) 
 		return;
 	float Angle = m_pSpeedup[Index].m_Angle * (pi / 180.0f);
 	*pForce = m_pSpeedup[Index].m_Force;
-	*pDir = vec2(cos(Angle), sin(Angle));
+	*pDir = direction(Angle);
 	if(pMaxSpeed)
 		*pMaxSpeed = m_pSpeedup[Index].m_MaxSpeed;
 }
@@ -993,7 +993,7 @@ int CCollision::GetIndex(vec2 PrevPos, vec2 Pos) const
 		}
 	}
 
-	for(int i = 0, id = (int)ceilf(Distance); i < id; i++)
+	for(int i = 0, id = std::ceil(Distance); i < id; i++)
 	{
 		float a = (float)i / Distance;
 		vec2 Tmp = mix(PrevPos, Pos, a);
@@ -1032,31 +1032,31 @@ int CCollision::Entity(int x, int y, int Layer) const
 {
 	if((0 > x || x >= m_Width) || (0 > y || y >= m_Height))
 	{
-		char aBuf[12];
+		const char *pName;
 		switch(Layer)
 		{
 		case LAYER_GAME:
-			str_format(aBuf, sizeof(aBuf), "Game");
+			pName = "Game";
 			break;
 		case LAYER_FRONT:
-			str_format(aBuf, sizeof(aBuf), "Front");
+			pName = "Front";
 			break;
 		case LAYER_SWITCH:
-			str_format(aBuf, sizeof(aBuf), "Switch");
+			pName = "Switch";
 			break;
 		case LAYER_TELE:
-			str_format(aBuf, sizeof(aBuf), "Tele");
+			pName = "Tele";
 			break;
 		case LAYER_SPEEDUP:
-			str_format(aBuf, sizeof(aBuf), "Speedup");
+			pName = "Speedup";
 			break;
 		case LAYER_TUNE:
-			str_format(aBuf, sizeof(aBuf), "Tune");
+			pName = "Tune";
 			break;
 		default:
-			str_format(aBuf, sizeof(aBuf), "Unknown");
+			pName = "Unknown";
 		}
-		dbg_msg("collision", "something is VERY wrong with the %s layer please report this at https://github.com/ddnet/ddnet, you will need to post the map as well and any steps that u think may have led to this", aBuf);
+		dbg_msg("collision", "something is VERY wrong with the %s layer please report this at https://github.com/ddnet/ddnet, you will need to post the map as well and any steps that u think may have led to this", pName);
 		return 0;
 	}
 	switch(Layer)
@@ -1126,7 +1126,7 @@ void ThroughOffset(vec2 Pos0, vec2 Pos1, int *pOffsetX, int *pOffsetY)
 {
 	float x = Pos0.x - Pos1.x;
 	float y = Pos0.y - Pos1.y;
-	if(fabs(x) > fabs(y))
+	if(absolute(x) > absolute(y))
 	{
 		if(x < 0)
 		{
@@ -1159,7 +1159,7 @@ int CCollision::IntersectNoLaser(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2
 	float d = distance(Pos0, Pos1);
 	vec2 Last = Pos0;
 
-	for(int i = 0, id = (int)ceilf(d); i < id; i++)
+	for(int i = 0, id = std::ceil(d); i < id; i++)
 	{
 		float a = (int)i / d;
 		vec2 Pos = mix(Pos0, Pos1, a);
@@ -1190,7 +1190,7 @@ int CCollision::IntersectNoLaserNW(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, ve
 	float d = distance(Pos0, Pos1);
 	vec2 Last = Pos0;
 
-	for(int i = 0, id = (int)ceilf(d); i < id; i++)
+	for(int i = 0, id = std::ceil(d); i < id; i++)
 	{
 		float a = (float)i / d;
 		vec2 Pos = mix(Pos0, Pos1, a);
@@ -1219,7 +1219,7 @@ int CCollision::IntersectAir(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pO
 	float d = distance(Pos0, Pos1);
 	vec2 Last = Pos0;
 
-	for(int i = 0, id = (int)ceilf(d); i < id; i++)
+	for(int i = 0, id = std::ceil(d); i < id; i++)
 	{
 		float a = (float)i / d;
 		vec2 Pos = mix(Pos0, Pos1, a);

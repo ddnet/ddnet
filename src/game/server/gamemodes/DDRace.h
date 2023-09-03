@@ -8,7 +8,7 @@
 #include <map>
 #include <vector>
 
-struct CScoreInitResult;
+struct CScoreLoadBestTimeResult;
 class CGameControllerDDRace : public IGameController
 {
 	// gctf
@@ -33,7 +33,7 @@ public:
 
 	void DoTeamChange(class CPlayer *pPlayer, int Team, bool DoChatMsg = true) override;
 
-	int64_t GetMaskForPlayerWorldEvent(int Asker, int ExceptID = -1) override;
+	CClientMask GetMaskForPlayerWorldEvent(int Asker, int ExceptID = -1) override;
 
 	void InitTeleporter();
 
@@ -44,14 +44,16 @@ public:
 	std::map<int, std::vector<vec2>> m_TeleOuts;
 	std::map<int, std::vector<vec2>> m_TeleCheckOuts;
 
-	std::shared_ptr<CScoreInitResult> m_pInitResult;
+	// std::shared_ptr<CScoreInitResult> m_pInitResult;
+	std::shared_ptr<CScoreLoadBestTimeResult> m_pLoadBestTimeResult;
 
 	// gctf
 
 	virtual void Snap(int SnappingClient) override;
 	virtual int OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon) override;
 	virtual void OnFlagReturn(class CFlag *pFlag) override;
-	bool OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Number) override;
+	bool OnEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number) override;
+
 	void FlagTick();
 };
 #endif // GAME_SERVER_GAMEMODES_DDRACE_H

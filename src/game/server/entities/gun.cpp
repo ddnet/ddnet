@@ -186,19 +186,8 @@ void CGun::Snap(int SnappingClient)
 			return;
 	}
 
-	CNetObj_Laser *pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(
-		NETOBJTYPE_LASER, GetID(), sizeof(CNetObj_Laser)));
+	int StartTick = pEntData ? 0 : m_EvalTick;
 
-	if(!pObj)
-		return;
-
-	pObj->m_X = (int)m_Pos.x;
-	pObj->m_Y = (int)m_Pos.y;
-	pObj->m_FromX = (int)m_Pos.x;
-	pObj->m_FromY = (int)m_Pos.y;
-
-	if(pEntData)
-		pObj->m_StartTick = 0;
-	else
-		pObj->m_StartTick = m_EvalTick;
+	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion), GetID(),
+		m_Pos, m_Pos, StartTick, -1, m_Freeze ? LASERTYPE_FREEZE : LASERTYPE_RIFLE);
 }

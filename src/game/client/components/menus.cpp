@@ -30,6 +30,7 @@
 #include <game/client/components/menu_background.h>
 #include <game/client/components/sounds.h>
 #include <game/client/gameclient.h>
+#include <game/client/ui_listbox.h>
 #include <game/generated/client_data.h>
 #include <game/localization.h>
 
@@ -79,13 +80,11 @@ CMenus::CMenus()
 	m_aCallvoteReason[0] = 0;
 
 	m_FriendlistSelectedIndex = -1;
-	m_DoubleClickIndex = -1;
 
 	m_DemoPlayerState = DEMOPLAYER_NONE;
 	m_Dummy = false;
 
-	m_ServerProcess.Process = 0;
-	m_ServerProcess.Initialized = false;
+	m_ServerProcess.m_Process = INVALID_PROCESS;
 
 	for(SUIAnimator &animator : m_aAnimatorsSettingsTab)
 	{
@@ -387,51 +386,39 @@ void CMenus::DoLaserPreview(const CUIRect *pRect, const ColorHSLA LaserOutlineCo
 	}
 }
 
-ColorHSLA CMenus::DoLine_ColorPicker(CButtonContainer *pResetID, const float LineSize, const float WantedPickerPosition, const float LabelSize, const float BottomMargin, CUIRect *pMainRect, const char *pText, unsigned int *pColorValue, const ColorRGBA DefaultColor, bool CheckBoxSpacing, bool UseCheckBox, int *pCheckBoxValue)
+ColorHSLA CMenus::DoLine_ColorPicker(CButtonContainer *pResetID, const float LineSize, const float LabelSize, const float BottomMargin, CUIRect *pMainRect, const char *pText, unsigned int *pColorValue, const ColorRGBA DefaultColor, bool CheckBoxSpacing, int *pCheckBoxValue)
 {
-	CUIRect Section, Button, Label;
+	CUIRect Section, ColorPickerButton, ResetButton, Label;
 
 	pMainRect->HSplitTop(LineSize, &Section, pMainRect);
-	pMainRect->HSplitTop(BottomMargin, 0x0, pMainRect);
+	pMainRect->HSplitTop(BottomMargin, nullptr, pMainRect);
 
-	float SectionWidth = Section.w;
-
-	if(CheckBoxSpacing || UseCheckBox)
-		Section.VSplitLeft(20.0f, &Button, &Section);
-
-	if(UseCheckBox)
+	if(CheckBoxSpacing || pCheckBoxValue != nullptr)
 	{
 		CUIRect CheckBox;
-		Button.Margin(2.0f, &CheckBox);
-
-		if(DoButton_CheckBox(pCheckBoxValue, "", *pCheckBoxValue, &CheckBox))
-			*pCheckBoxValue ^= 1;
+		Section.VSplitLeft(Section.h, &CheckBox, &Section);
+		if(pCheckBoxValue != nullptr)
+		{
+			CheckBox.Margin(2.0f, &CheckBox);
+			if(DoButton_CheckBox(pCheckBoxValue, "", *pCheckBoxValue, &CheckBox))
+				*pCheckBoxValue ^= 1;
+		}
 	}
 
-	Section.VSplitLeft(5.0f, 0x0, &Section);
-	float LabelWidth = TextRender()->TextWidth(0, 14.0f, pText, -1, -1.0f);
-	Section.VSplitLeft(LabelWidth, &Label, &Section);
+	Section.VSplitLeft(5.0f, nullptr, &Section);
+	Section.VSplitMid(&Label, &Section, Section.h);
+	Section.VSplitRight(60.0f, &Section, &ResetButton);
+	Section.VSplitRight(8.0f, &Section, nullptr);
+	Section.VSplitRight(Section.h, &Section, &ColorPickerButton);
 
 	UI()->DoLabel(&Label, pText, LabelSize, TEXTALIGN_LEFT);
 
-	float Cut = WantedPickerPosition - (SectionWidth - Section.w);
-	if(Cut < 5)
-		Cut = 5.0f;
+	ColorHSLA PickedColor = RenderHSLColorPicker(&ColorPickerButton, pColorValue, false);
 
-	Section.VSplitLeft(Cut, 0x0, &Section);
-	Section.VSplitLeft(LineSize, &Button, &Section);
-
-	ColorHSLA PickedColor = RenderHSLColorPicker(&Button, pColorValue, false);
-
-	Section.VSplitLeft(7.5f, 0x0, &Section);
-	Section.VSplitLeft(55.0f, &Button, &Section);
-	Button.HSplitTop(2.0f, 0x0, &Button);
-	Button.HSplitBottom(2.0f, &Button, 0x0);
-
-	if(DoButton_Menu(pResetID, Localize("Reset"), 0, &Button, 0, IGraphics::CORNER_ALL, 8.0f, 0, vec4(1, 1, 1, 0.5f), vec4(1, 1, 1, 0.25f), 1, true))
+	ResetButton.HMargin(2.0f, &ResetButton);
+	if(DoButton_Menu(pResetID, Localize("Reset"), 0, &ResetButton, nullptr, IGraphics::CORNER_ALL, 8.0f, 0.0f, vec4(1, 1, 1, 0.5f), vec4(1, 1, 1, 0.25f), 1, true))
 	{
-		ColorHSLA HSL = color_cast<ColorHSLA>(DefaultColor);
-		*pColorValue = HSL.Pack(false);
+		*pColorValue = color_cast<ColorHSLA>(DefaultColor).Pack(false);
 	}
 
 	return PickedColor;
@@ -537,7 +524,7 @@ int CMenus::DoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, bool 
 					if(absolute(s_Value) > Scale)
 					{
 						int Count = (int)(s_Value / Scale);
-						s_Value = fmod(s_Value, Scale);
+						s_Value = std::fmod(s_Value, Scale);
 						Current += Step * Count;
 						Current = clamp(Current, Min, Max);
 
@@ -545,7 +532,7 @@ int CMenus::DoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, bool 
 						if(Count > 0)
 							Current = Current / Step * Step;
 						else
-							Current = round_ceil(Current / (float)Step) * Step;
+							Current = std::ceil(Current / (float)Step) * Step;
 					}
 				}
 			}
@@ -705,7 +692,6 @@ int CMenus::RenderMenubar(CUIRect r)
 		if(DoButton_MenuTab(&s_StartButton, pHomeScreenButtonLabel, false, &Button, IGraphics::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_HOME], pHomeButtonColor, pHomeButtonColor, pHomeButtonColorHover, 10.0f, 0))
 		{
 			m_ShowStart = true;
-			m_DoubleClickIndex = -1;
 		}
 
 		TextRender()->SetRenderFlags(0);
@@ -721,7 +707,6 @@ int CMenus::RenderMenubar(CUIRect r)
 			if(DoButton_MenuTab(&s_NewsButton, Localize("News"), m_ActivePage == PAGE_NEWS, &Button, IGraphics::CORNER_T, &m_aAnimatorsBigPage[BIG_TAB_NEWS]))
 			{
 				NewPage = PAGE_NEWS;
-				m_DoubleClickIndex = -1;
 			}
 		}
 		else if(m_ActivePage == PAGE_DEMOS)
@@ -732,7 +717,6 @@ int CMenus::RenderMenubar(CUIRect r)
 			{
 				DemolistPopulate();
 				NewPage = PAGE_DEMOS;
-				m_DoubleClickIndex = -1;
 			}
 		}
 		else
@@ -744,7 +728,6 @@ int CMenus::RenderMenubar(CUIRect r)
 				if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_INTERNET)
 					ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
 				NewPage = PAGE_INTERNET;
-				m_DoubleClickIndex = -1;
 			}
 
 			Box.VSplitLeft(100.0f, &Button, &Box);
@@ -754,7 +737,6 @@ int CMenus::RenderMenubar(CUIRect r)
 				if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_LAN)
 					ServerBrowser()->Refresh(IServerBrowser::TYPE_LAN);
 				NewPage = PAGE_LAN;
-				m_DoubleClickIndex = -1;
 			}
 
 			Box.VSplitLeft(100.0f, &Button, &Box);
@@ -764,7 +746,6 @@ int CMenus::RenderMenubar(CUIRect r)
 				if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_FAVORITES)
 					ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
 				NewPage = PAGE_FAVORITES;
-				m_DoubleClickIndex = -1;
 			}
 
 			Box.VSplitLeft(90.0f, &Button, &Box);
@@ -777,7 +758,6 @@ int CMenus::RenderMenubar(CUIRect r)
 					ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
 				}
 				NewPage = PAGE_DDNET;
-				m_DoubleClickIndex = -1;
 			}
 
 			Box.VSplitLeft(90.0f, &Button, &Box);
@@ -790,7 +770,6 @@ int CMenus::RenderMenubar(CUIRect r)
 					ServerBrowser()->Refresh(IServerBrowser::TYPE_KOG);
 				}
 				NewPage = PAGE_KOG;
-				m_DoubleClickIndex = -1;
 			}
 		}
 	}
@@ -1323,7 +1302,6 @@ int CMenus::Render()
 	{
 		UpdateMusicState();
 		s_Frame++;
-		m_DoubleClickIndex = -1;
 
 		RefreshBrowserTab(g_Config.m_UiPage);
 		if(g_Config.m_UiPage == PAGE_INTERNET)
@@ -1397,7 +1375,6 @@ int CMenus::Render()
 			{
 				ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
 				SetMenuPage(PAGE_INTERNET);
-				m_DoubleClickIndex = -1;
 			}
 
 			// render current page
@@ -1637,7 +1614,7 @@ int CMenus::Render()
 		SLabelProperties Props;
 		Props.m_MaxWidth = (int)Part.w;
 
-		if(TextRender()->TextWidth(0, 24.f, pTitle, -1, -1.0f) > Part.w)
+		if(TextRender()->TextWidth(24.f, pTitle, -1, -1.0f) > Part.w)
 			UI()->DoLabel(&Part, pTitle, 24.f, TEXTALIGN_LEFT, Props);
 		else
 			UI()->DoLabel(&Part, pTitle, 24.f, TEXTALIGN_CENTER);
@@ -1660,7 +1637,7 @@ int CMenus::Render()
 			UI()->DoLabel(&Part, pExtraText, FontSize, TEXTALIGN_LEFT, Props);
 		else
 		{
-			if(TextRender()->TextWidth(0, FontSize, pExtraText, -1, -1.0f) > Part.w)
+			if(TextRender()->TextWidth(FontSize, pExtraText, -1, -1.0f) > Part.w)
 				UI()->DoLabel(&Part, pExtraText, FontSize, TEXTALIGN_LEFT, Props);
 			else
 				UI()->DoLabel(&Part, pExtraText, FontSize, TEXTALIGN_CENTER);
@@ -1837,36 +1814,38 @@ int CMenus::Render()
 		}
 		else if(m_Popup == POPUP_LANGUAGE)
 		{
-			Box = Screen;
-			Box.Margin(150.0f, &Box);
-			Box.HSplitTop(20.f, &Part, &Box);
-			Box.HSplitBottom(20.f, &Box, &Part);
-			Box.HSplitBottom(24.f, &Box, &Part);
-			Box.HSplitBottom(20.f, &Box, 0);
+			CUIRect Button;
+			Screen.Margin(150.0f, &Box);
+			Box.HSplitTop(20.0f, nullptr, &Box);
+			Box.HSplitBottom(20.0f, &Box, nullptr);
+			Box.HSplitBottom(24.0f, &Box, &Button);
+			Box.HSplitBottom(20.0f, &Box, nullptr);
 			Box.VMargin(20.0f, &Box);
-			RenderLanguageSelection(Box);
-			Part.VMargin(120.0f, &Part);
+			const bool Activated = RenderLanguageSelection(Box);
+			Button.VMargin(120.0f, &Button);
 
 			static CButtonContainer s_Button;
-			if(DoButton_Menu(&s_Button, Localize("Ok"), 0, &Part) || UI()->ConsumeHotkey(CUI::HOTKEY_ESCAPE) || UI()->ConsumeHotkey(CUI::HOTKEY_ENTER))
+			if(DoButton_Menu(&s_Button, Localize("Ok"), 0, &Button) || UI()->ConsumeHotkey(CUI::HOTKEY_ESCAPE) || UI()->ConsumeHotkey(CUI::HOTKEY_ENTER) || Activated)
 				m_Popup = POPUP_FIRST_LAUNCH;
 		}
 		else if(m_Popup == POPUP_COUNTRY)
 		{
-			Box = Screen;
-			Box.Margin(150.0f, &Box);
-			Box.HSplitTop(20.f, &Part, &Box);
-			Box.HSplitBottom(20.f, &Box, &Part);
-			Box.HSplitBottom(24.f, &Box, &Part);
-			Box.HSplitBottom(20.f, &Box, 0);
+			CUIRect ButtonBar;
+			Screen.Margin(150.0f, &Box);
+			Box.HSplitTop(20.0f, nullptr, &Box);
+			Box.HSplitBottom(20.0f, &Box, nullptr);
+			Box.HSplitBottom(24.0f, &Box, &ButtonBar);
+			Box.HSplitBottom(20.0f, &Box, nullptr);
 			Box.VMargin(20.0f, &Box);
+			ButtonBar.VMargin(100.0f, &ButtonBar);
 
 			static int s_CurSelection = -2;
 			if(s_CurSelection == -2)
 				s_CurSelection = g_Config.m_BrFilterCountryIndex;
-			static float s_ScrollValue = 0.0f;
+
+			static CListBox s_ListBox;
 			int OldSelected = -1;
-			UiDoListboxStart(&s_ScrollValue, &Box, 50.0f, Localize("Country / Region"), "", m_pClient->m_CountryFlags.Num(), 6, OldSelected, s_ScrollValue);
+			s_ListBox.DoStart(50.0f, m_pClient->m_CountryFlags.Num(), 10, 1, OldSelected, &Box);
 
 			for(size_t i = 0; i < m_pClient->m_CountryFlags.Num(); ++i)
 			{
@@ -1874,29 +1853,31 @@ int CMenus::Render()
 				if(pEntry->m_CountryCode == s_CurSelection)
 					OldSelected = i;
 
-				CListboxItem Item = UiDoListboxNextItem(&pEntry->m_CountryCode, OldSelected >= 0 && (size_t)OldSelected == i);
-				if(Item.m_Visible)
-				{
-					CUIRect Label;
-					Item.m_Rect.Margin(5.0f, &Item.m_Rect);
-					Item.m_Rect.HSplitBottom(10.0f, &Item.m_Rect, &Label);
-					float OldWidth = Item.m_Rect.w;
-					Item.m_Rect.w = Item.m_Rect.h * 2;
-					Item.m_Rect.x += (OldWidth - Item.m_Rect.w) / 2.0f;
-					ColorRGBA Color(1.0f, 1.0f, 1.0f, 1.0f);
-					m_pClient->m_CountryFlags.Render(pEntry->m_CountryCode, &Color, Item.m_Rect.x, Item.m_Rect.y, Item.m_Rect.w, Item.m_Rect.h);
-					UI()->DoLabel(&Label, pEntry->m_aCountryCodeString, 10.0f, TEXTALIGN_CENTER);
-				}
+				const CListboxItem Item = s_ListBox.DoNextItem(pEntry, OldSelected >= 0 && (size_t)OldSelected == i);
+				if(!Item.m_Visible)
+					continue;
+
+				CUIRect FlagRect, Label;
+				Item.m_Rect.Margin(5.0f, &FlagRect);
+				FlagRect.HSplitBottom(12.0f, &FlagRect, &Label);
+				Label.HSplitTop(2.0f, nullptr, &Label);
+				const float OldWidth = FlagRect.w;
+				FlagRect.w = FlagRect.h * 2.0f;
+				FlagRect.x += (OldWidth - FlagRect.w) / 2.0f;
+				ColorRGBA Color(1.0f, 1.0f, 1.0f, 1.0f);
+				m_pClient->m_CountryFlags.Render(pEntry->m_CountryCode, &Color, FlagRect.x, FlagRect.y, FlagRect.w, FlagRect.h);
+
+				SLabelProperties ItemLabelProps;
+				ItemLabelProps.m_AlignVertically = 0;
+				UI()->DoLabel(&Label, pEntry->m_aCountryCodeString, 10.0f, TEXTALIGN_CENTER, ItemLabelProps);
 			}
 
-			bool Activated = false;
-			const int NewSelected = UiDoListboxEnd(&s_ScrollValue, &Activated);
+			const int NewSelected = s_ListBox.DoEnd();
 			if(OldSelected != NewSelected)
 				s_CurSelection = m_pClient->m_CountryFlags.GetByIndex(NewSelected)->m_CountryCode;
 
 			CUIRect CancelButton, OkButton;
-			Part.VMargin(100.0f, &Part);
-			Part.VSplitMid(&CancelButton, &OkButton, 40.0f);
+			ButtonBar.VSplitMid(&CancelButton, &OkButton, 40.0f);
 
 			static CButtonContainer s_CancelButton;
 			if(DoButton_Menu(&s_CancelButton, Localize("Cancel"), 0, &CancelButton) || UI()->ConsumeHotkey(CUI::HOTKEY_ESCAPE))
@@ -1906,7 +1887,7 @@ int CMenus::Render()
 			}
 
 			static CButtonContainer s_OkButton;
-			if(DoButton_Menu(&s_OkButton, Localize("Ok"), 0, &OkButton) || UI()->ConsumeHotkey(CUI::HOTKEY_ENTER) || Activated)
+			if(DoButton_Menu(&s_OkButton, Localize("Ok"), 0, &OkButton) || UI()->ConsumeHotkey(CUI::HOTKEY_ENTER) || s_ListBox.WasItemActivated())
 			{
 				g_Config.m_BrFilterCountryIndex = s_CurSelection;
 				Client()->ServerBrowserUpdate();
@@ -2195,35 +2176,35 @@ void CMenus::PopupConfirmDemoReplaceVideo()
 }
 #endif
 
-void CMenus::RenderThemeSelection(CUIRect MainView, bool Header)
+void CMenus::RenderThemeSelection(CUIRect MainView)
 {
-	std::vector<CTheme> &vThemesRef = m_pBackground->GetThemes();
+	const std::vector<CTheme> &vThemes = m_pBackground->GetThemes();
 
 	int SelectedTheme = -1;
-	for(int i = 0; i < (int)vThemesRef.size(); i++)
+	for(int i = 0; i < (int)vThemes.size(); i++)
 	{
-		if(str_comp(vThemesRef[i].m_Name.c_str(), g_Config.m_ClMenuMap) == 0)
+		if(str_comp(vThemes[i].m_Name.c_str(), g_Config.m_ClMenuMap) == 0)
 		{
 			SelectedTheme = i;
 			break;
 		}
 	}
+	const int OldSelected = SelectedTheme;
 
-	static int s_ListBox = 0;
-	static float s_ScrollValue = 0.0f;
-	UiDoListboxStart(&s_ListBox, &MainView, 26.0f, Localize("Theme"), "", vThemesRef.size(), 1, -1, s_ScrollValue);
+	static CListBox s_ListBox;
+	s_ListBox.DoHeader(&MainView, Localize("Theme"), 20.0f);
+	s_ListBox.DoStart(20.0f, vThemes.size(), 1, 3, SelectedTheme, nullptr, true);
 
-	for(int i = 0; i < (int)vThemesRef.size(); i++)
+	for(int i = 0; i < (int)vThemes.size(); i++)
 	{
-		CListboxItem Item = UiDoListboxNextItem(&vThemesRef[i].m_Name, i == SelectedTheme);
-
-		CTheme &Theme = vThemesRef[i];
+		const CTheme &Theme = vThemes[i];
+		const CListboxItem Item = s_ListBox.DoNextItem(&Theme.m_Name, i == SelectedTheme);
 
 		if(!Item.m_Visible)
 			continue;
 
-		CUIRect Icon;
-		Item.m_Rect.VSplitLeft(Item.m_Rect.h * 2.0f, &Icon, &Item.m_Rect);
+		CUIRect Icon, Label;
+		Item.m_Rect.VSplitLeft(Item.m_Rect.h * 2.0f, &Icon, &Label);
 
 		// draw icon if it exists
 		if(Theme.m_IconTexture.IsValid())
@@ -2254,16 +2235,18 @@ void CMenus::RenderThemeSelection(CUIRect MainView, bool Header)
 		else // generic
 			str_copy(aName, Theme.m_Name.c_str());
 
-		UI()->DoLabel(&Item.m_Rect, aName, 16 * CUI::ms_FontmodHeight, TEXTALIGN_LEFT);
+		SLabelProperties Props;
+		Props.m_AlignVertically = 0;
+		UI()->DoLabel(&Label, aName, 16.0f * CUI::ms_FontmodHeight, TEXTALIGN_LEFT, Props);
 	}
 
-	bool ItemActive = false;
-	int NewSelected = UiDoListboxEnd(&s_ScrollValue, 0, &ItemActive);
+	SelectedTheme = s_ListBox.DoEnd();
 
-	if(ItemActive && NewSelected != SelectedTheme)
+	if(OldSelected != SelectedTheme)
 	{
-		str_copy(g_Config.m_ClMenuMap, vThemesRef[NewSelected].m_Name.c_str());
-		m_pBackground->LoadMenuBackground(vThemesRef[NewSelected].m_HasDay, vThemesRef[NewSelected].m_HasNight);
+		const CTheme &Theme = vThemes[SelectedTheme];
+		str_copy(g_Config.m_ClMenuMap, Theme.m_Name.c_str());
+		m_pBackground->LoadMenuBackground(Theme.m_HasDay, Theme.m_HasNight);
 	}
 }
 
@@ -2348,6 +2331,9 @@ void CMenus::OnStateChange(int NewState, int OldState)
 	// reset active item
 	UI()->SetActiveItem(nullptr);
 
+	if(OldState == IClient::STATE_ONLINE || OldState == IClient::STATE_OFFLINE)
+		TextRender()->DeleteTextContainer(m_MotdTextContainerIndex);
+
 	if(NewState == IClient::STATE_OFFLINE)
 	{
 		if(OldState >= IClient::STATE_ONLINE && NewState < IClient::STATE_QUITTING)
@@ -2384,6 +2370,11 @@ void CMenus::OnStateChange(int NewState, int OldState)
 			SetActive(false);
 		}
 	}
+}
+
+void CMenus::OnWindowResize()
+{
+	TextRender()->DeleteTextContainer(m_MotdTextContainerIndex);
 }
 
 void CMenus::OnRender()
@@ -2492,7 +2483,7 @@ void CMenus::RenderBackground()
 	Graphics()->TextureClear();
 	Graphics()->QuadsBegin();
 	float Size = 15.0f;
-	float OffsetTime = fmod(LocalTime() * 0.15f, 2.0f);
+	float OffsetTime = std::fmod(LocalTime() * 0.15f, 2.0f);
 	for(int y = -2; y < (int)(sw / Size); y++)
 		for(int x = -2; x < (int)(sh / Size); x++)
 		{
@@ -2630,77 +2621,4 @@ void CMenus::RefreshBrowserTab(int UiPage)
 		Client()->RequestDDNetInfo();
 		ServerBrowser()->Refresh(IServerBrowser::TYPE_KOG);
 	}
-}
-
-bool CMenus::HandleListInputs(const CUIRect &View, float &ScrollValue, const float ScrollAmount, int *pScrollOffset, const float ElemHeight, int &SelectedIndex, const int NumElems)
-{
-	if(NumElems == 0)
-	{
-		ScrollValue = 0;
-		SelectedIndex = 0;
-		return false;
-	}
-
-	int NewIndex = -1;
-	int Num = (int)(View.h / ElemHeight);
-	int ScrollNum = maximum(NumElems - Num, 0);
-	if(ScrollNum > 0)
-	{
-		if(pScrollOffset && *pScrollOffset >= 0)
-		{
-			ScrollValue = (float)(*pScrollOffset) / ScrollNum;
-			*pScrollOffset = -1;
-		}
-		if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP) && UI()->MouseInside(&View))
-			ScrollValue -= 3.0f / ScrollNum;
-		if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN) && UI()->MouseInside(&View))
-			ScrollValue += 3.0f / ScrollNum;
-	}
-
-	ScrollValue = clamp(ScrollValue, 0.0f, 1.0f);
-	SelectedIndex = clamp(SelectedIndex, 0, NumElems - 1);
-
-	for(int i = 0; i < m_NumInputEvents; i++)
-	{
-		if(m_aInputEvents[i].m_Flags & IInput::FLAG_PRESS)
-		{
-			if(UI()->LastActiveItem() == &g_Config.m_UiServerAddress)
-				return false;
-			else if(m_aInputEvents[i].m_Key == KEY_DOWN)
-				NewIndex = minimum(SelectedIndex + 1, NumElems - 1);
-			else if(m_aInputEvents[i].m_Key == KEY_UP)
-				NewIndex = maximum(SelectedIndex - 1, 0);
-			else if(m_aInputEvents[i].m_Key == KEY_PAGEUP)
-				NewIndex = maximum(SelectedIndex - 25, 0);
-			else if(m_aInputEvents[i].m_Key == KEY_PAGEDOWN)
-				NewIndex = minimum(SelectedIndex + 25, NumElems - 1);
-			else if(m_aInputEvents[i].m_Key == KEY_HOME)
-				NewIndex = 0;
-			else if(m_aInputEvents[i].m_Key == KEY_END)
-				NewIndex = NumElems - 1;
-		}
-		if(NewIndex > -1 && NewIndex < NumElems)
-		{
-			//scroll
-			float IndexY = View.y - ScrollValue * ScrollNum * ElemHeight + NewIndex * ElemHeight;
-			int Scroll = View.y > IndexY ? -1 : View.y + View.h < IndexY + ElemHeight ? 1 : 0;
-			if(Scroll)
-			{
-				if(Scroll < 0)
-				{
-					int NumScrolls = (View.y - IndexY + ElemHeight - 1.0f) / ElemHeight;
-					ScrollValue -= (1.0f / ScrollNum) * NumScrolls;
-				}
-				else
-				{
-					int NumScrolls = (IndexY + ElemHeight - (View.y + View.h) + ElemHeight - 1.0f) / ElemHeight;
-					ScrollValue += (1.0f / ScrollNum) * NumScrolls;
-				}
-			}
-
-			SelectedIndex = NewIndex;
-		}
-	}
-
-	return NewIndex != -1;
 }

@@ -7,7 +7,9 @@
 #include <climits>
 #include <cstdlib>
 
+#include <base/math.h>
 #include <base/system.h>
+
 #include <game/generated/protocolglue.h>
 
 // CSnapshot
@@ -44,8 +46,8 @@ int CSnapshot::GetExternalItemType(int InternalType) const
 	}
 	const CSnapshotItem *pTypeItem = GetItem(TypeItemIndex);
 	CUuid Uuid;
-	for(int i = 0; i < (int)sizeof(CUuid) / 4; i++)
-		int_to_bytes_be(&Uuid.m_aData[i * 4], pTypeItem->Data()[i]);
+	for(size_t i = 0; i < sizeof(CUuid) / sizeof(int32_t); i++)
+		uint_to_bytes_be(&Uuid.m_aData[i * sizeof(int32_t)], pTypeItem->Data()[i]);
 
 	return g_UuidManager.LookupUuid(Uuid);
 }
@@ -67,9 +69,9 @@ const void *CSnapshot::FindItem(int Type, int ID) const
 	if(Type >= OFFSET_UUID)
 	{
 		CUuid TypeUuid = g_UuidManager.GetUuid(Type);
-		int aTypeUuidItem[sizeof(CUuid) / 4];
-		for(int i = 0; i < (int)sizeof(CUuid) / 4; i++)
-			aTypeUuidItem[i] = bytes_be_to_int(&TypeUuid.m_aData[i * 4]);
+		int aTypeUuidItem[sizeof(CUuid) / sizeof(int32_t)];
+		for(size_t i = 0; i < sizeof(CUuid) / sizeof(int32_t); i++)
+			aTypeUuidItem[i] = bytes_be_to_uint(&TypeUuid.m_aData[i * sizeof(int32_t)]);
 
 		bool Found = false;
 		for(int i = 0; i < m_NumItems; i++)
@@ -103,7 +105,7 @@ unsigned CSnapshot::Crc()
 		const CSnapshotItem *pItem = GetItem(i);
 		int Size = GetItemSize(i);
 
-		for(int b = 0; b < Size / 4; b++)
+		for(size_t b = 0; b < Size / sizeof(int32_t); b++)
 			Crc += pItem->Data()[b];
 	}
 	return Crc;
@@ -117,8 +119,8 @@ void CSnapshot::DebugDump()
 		const CSnapshotItem *pItem = GetItem(i);
 		int Size = GetItemSize(i);
 		dbg_msg("snapshot", "\ttype=%d id=%d", pItem->Type(), pItem->ID());
-		for(int b = 0; b < Size / 4; b++)
-			dbg_msg("snapshot", "\t\t%3d %12d\t%08x", b, pItem->Data()[b], pItem->Data()[b]);
+		for(size_t b = 0; b < Size / sizeof(int32_t); b++)
+			dbg_msg("snapshot", "\t\t%3d %12d\t%08x", (int)b, pItem->Data()[b], pItem->Data()[b]);
 	}
 }
 
@@ -216,7 +218,8 @@ void CSnapshotDelta::UndiffItem(const int *pPast, int *pDiff, int *pOut, int Siz
 {
 	while(Size)
 	{
-		*pOut = *pPast + *pDiff;
+		// addition with wrapping by casting to unsigned
+		*pOut = (unsigned)*pPast + (unsigned)*pDiff;
 
 		if(*pDiff == 0)
 			*pDataRate += 1;
@@ -317,13 +320,13 @@ int CSnapshotDelta::CreateDelta(CSnapshot *pFrom, CSnapshot *pTo, void *pDstData
 			if(!IncludeSize)
 				pItemDataDst = pData + 2;
 
-			if(DiffItem(pPastItem->Data(), pCurItem->Data(), pItemDataDst, ItemSize / 4))
+			if(DiffItem(pPastItem->Data(), pCurItem->Data(), pItemDataDst, ItemSize / sizeof(int32_t)))
 			{
 				*pData++ = pCurItem->Type();
 				*pData++ = pCurItem->ID();
 				if(IncludeSize)
-					*pData++ = ItemSize / 4;
-				pData += ItemSize / 4;
+					*pData++ = ItemSize / sizeof(int32_t);
+				pData += ItemSize / sizeof(int32_t);
 				pDelta->m_NumUpdateItems++;
 			}
 		}
@@ -332,10 +335,10 @@ int CSnapshotDelta::CreateDelta(CSnapshot *pFrom, CSnapshot *pTo, void *pDstData
 			*pData++ = pCurItem->Type();
 			*pData++ = pCurItem->ID();
 			if(IncludeSize)
-				*pData++ = ItemSize / 4;
+				*pData++ = ItemSize / sizeof(int32_t);
 
 			mem_copy(pData, pCurItem->Data(), ItemSize);
-			pData += ItemSize / 4;
+			pData += ItemSize / sizeof(int32_t);
 			pDelta->m_NumUpdateItems++;
 		}
 	}
@@ -365,10 +368,10 @@ int CSnapshotDelta::UnpackDelta(CSnapshot *pFrom, CSnapshot *pTo, const void *pS
 	// unpack deleted stuff
 	int *pDeleted = pData;
 	if(pDelta->m_NumDeletedItems < 0)
-		return -1;
+		return -201;
 	pData += pDelta->m_NumDeletedItems;
 	if(pData > pEnd)
-		return -1;
+		return -101;
 
 	// copy all non deleted stuff
 	for(int i = 0; i < pFrom->NumItems(); i++)
@@ -389,7 +392,7 @@ int CSnapshotDelta::UnpackDelta(CSnapshot *pFrom, CSnapshot *pTo, const void *pS
 		{
 			void *pObj = Builder.NewItem(pFromItem->Type(), pFromItem->ID(), ItemSize);
 			if(!pObj)
-				return -4;
+				return -301;
 
 			// keep it
 			mem_copy(pObj, pFromItem->Data(), ItemSize);
@@ -400,15 +403,15 @@ int CSnapshotDelta::UnpackDelta(CSnapshot *pFrom, CSnapshot *pTo, const void *pS
 	for(int i = 0; i < pDelta->m_NumUpdateItems; i++)
 	{
 		if(pData + 2 > pEnd)
-			return -1;
+			return -102;
 
 		const int Type = *pData++;
 		if(Type < 0 || Type > CSnapshot::MAX_TYPE)
-			return -3;
+			return -202;
 
 		const int ID = *pData++;
 		if(ID < 0 || ID > CSnapshot::MAX_ID)
-			return -3;
+			return -203;
 
 		int ItemSize;
 		if(Type < MAX_NETOBJSIZES && m_aItemSizes[Type])
@@ -416,14 +419,14 @@ int CSnapshotDelta::UnpackDelta(CSnapshot *pFrom, CSnapshot *pTo, const void *pS
 		else
 		{
 			if(pData + 1 > pEnd)
-				return -2;
-			if(*pData < 0 || *pData > INT_MAX / 4)
-				return -3;
-			ItemSize = (*pData++) * 4;
+				return -103;
+			if(*pData < 0 || (size_t)*pData > INT_MAX / sizeof(int32_t))
+				return -204;
+			ItemSize = (*pData++) * sizeof(int32_t);
 		}
 
 		if(ItemSize < 0 || RangeCheck(pEnd, pData, ItemSize))
-			return -3;
+			return -205;
 
 		const int Key = (Type << 16) | ID;
 
@@ -433,13 +436,13 @@ int CSnapshotDelta::UnpackDelta(CSnapshot *pFrom, CSnapshot *pTo, const void *pS
 			pNewData = (int *)Builder.NewItem(Type, ID, ItemSize);
 
 		if(!pNewData)
-			return -4;
+			return -302;
 
 		const int FromIndex = pFrom->GetItemIndex(Key);
 		if(FromIndex != -1)
 		{
 			// we got an update so we need to apply the diff
-			UndiffItem(pFrom->GetItem(FromIndex)->Data(), pData, pNewData, ItemSize / 4, &m_aSnapshotDataRate[Type]);
+			UndiffItem(pFrom->GetItem(FromIndex)->Data(), pData, pNewData, ItemSize / sizeof(int32_t), &m_aSnapshotDataRate[Type]);
 		}
 		else // no previous, just copy the pData
 		{
@@ -448,7 +451,7 @@ int CSnapshotDelta::UnpackDelta(CSnapshot *pFrom, CSnapshot *pTo, const void *pS
 		}
 		m_aSnapshotDataUpdates[Type]++;
 
-		pData += ItemSize / 4;
+		pData += ItemSize / sizeof(int32_t);
 	}
 
 	// finish up
@@ -626,8 +629,8 @@ void CSnapshotBuilder::AddExtendedItemType(int Index)
 	int *pUuidItem = (int *)NewItem(0, GetTypeFromIndex(Index), sizeof(Uuid)); // NETOBJTYPE_EX
 	if(pUuidItem)
 	{
-		for(int i = 0; i < (int)sizeof(CUuid) / 4; i++)
-			pUuidItem[i] = bytes_be_to_int(&Uuid.m_aData[i * 4]);
+		for(size_t i = 0; i < sizeof(CUuid) / sizeof(int32_t); i++)
+			pUuidItem[i] = bytes_be_to_uint(&Uuid.m_aData[i * sizeof(int32_t)]);
 	}
 }
 
@@ -681,6 +684,8 @@ void *CSnapshotBuilder::NewItem(int Type, int ID, int Size)
 		if(Type < 0)
 			return pObj;
 	}
+	else if(Type < 0)
+		return nullptr;
 
 	mem_zero(pObj, sizeof(CSnapshotItem) + Size);
 	pObj->m_TypeAndID = (Type << 16) | ID;

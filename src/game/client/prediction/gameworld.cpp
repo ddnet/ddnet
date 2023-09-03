@@ -188,24 +188,29 @@ bool distCompare(std::pair<float, int> a, std::pair<float, int> b)
 void CGameWorld::Tick()
 {
 	// update all objects
-	if(m_WorldConfig.m_NoWeakHookAndBounce)
+	for(int i = 0; i < NUM_ENTTYPES; i++)
 	{
-		for(auto *pEnt : m_apFirstEntityTypes)
+		// It's important to call PreTick() and Tick() after each other.
+		// If we call PreTick() before, and Tick() after other entities have been processed, it causes physics changes such as a stronger shotgun or grenade.
+		if(m_WorldConfig.m_NoWeakHookAndBounce && i == ENTTYPE_CHARACTER)
+		{
+			auto *pEnt = m_apFirstEntityTypes[i];
 			for(; pEnt;)
 			{
 				m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
-				pEnt->PreTick();
+				((CCharacter *)pEnt)->PreTick();
 				pEnt = m_pNextTraverseEntity;
 			}
-	}
+		}
 
-	for(auto *pEnt : m_apFirstEntityTypes)
+		auto *pEnt = m_apFirstEntityTypes[i];
 		for(; pEnt;)
 		{
 			m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
 			pEnt->Tick();
 			pEnt = m_pNextTraverseEntity;
 		}
+	}
 
 	for(auto *pEnt : m_apFirstEntityTypes)
 		for(; pEnt;)
@@ -331,7 +336,7 @@ CEntity *CGameWorld::GetEntity(int ID, int EntityType)
 	return 0;
 }
 
-void CGameWorld::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage, int ActivatedTeam, int64_t Mask)
+void CGameWorld::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage, int ActivatedTeam, CClientMask Mask)
 {
 	if(Owner < 0 && m_WorldConfig.m_IsSolo && !(Weapon == WEAPON_SHOTGUN && m_WorldConfig.m_IsDDRace))
 		return;
@@ -416,7 +421,7 @@ void CGameWorld::NetObjAdd(int ObjID, int ObjType, const void *pObjData, const C
 		}
 		CProjectile NetProj = CProjectile(this, ObjID, &Data, pDataEx);
 
-		if(NetProj.m_Type != WEAPON_SHOTGUN && fabs(length(NetProj.m_Direction) - 1.f) > 0.02f) // workaround to skip grenades on ball mod
+		if(NetProj.m_Type != WEAPON_SHOTGUN && absolute(length(NetProj.m_Direction) - 1.f) > 0.02f) // workaround to skip grenades on ball mod
 			return;
 
 		if(CProjectile *pProj = (CProjectile *)GetEntity(ObjID, ENTTYPE_PROJECTILE))
@@ -677,5 +682,5 @@ void CGameWorld::Clear()
 	// delete all entities
 	for(auto &pFirstEntityType : m_apFirstEntityTypes)
 		while(pFirstEntityType)
-			delete pFirstEntityType;
+			delete pFirstEntityType; // NOLINT(clang-analyzer-cplusplus.NewDelete)
 }

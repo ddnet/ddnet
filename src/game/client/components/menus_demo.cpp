@@ -14,11 +14,10 @@
 #include <game/client/components/console.h>
 #include <game/client/gameclient.h>
 #include <game/client/render.h>
-#include <game/localization.h>
-
 #include <game/client/ui.h>
-
+#include <game/client/ui_listbox.h>
 #include <game/generated/client_data.h>
+#include <game/localization.h>
 
 #include "maplayers.h"
 #include "menus.h"
@@ -305,7 +304,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 
 		char aSpeedBuf[256];
 		str_format(aSpeedBuf, sizeof(aSpeedBuf), "×%.2f", pInfo->m_Speed);
-		TextRender()->Text(0, 120.0f, Screen.y + Screen.h - 120.0f - TotalHeight, 60.0f, aSpeedBuf, -1.0f);
+		TextRender()->Text(120.0f, Screen.y + Screen.h - 120.0f - TotalHeight, 60.0f, aSpeedBuf, -1.0f);
 	}
 
 	const int CurrentTick = pInfo->m_CurrentTick - pInfo->m_FirstTick;
@@ -340,29 +339,31 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 
 	// do seekbar
 	{
+		const float Rounding = 5.0f;
+
 		static int s_SeekBarID = 0;
 		void *pId = &s_SeekBarID;
 		char aBuffer[128];
 
 		// draw seek bar
-		SeekBar.Draw(ColorRGBA(0, 0, 0, 0.5f), IGraphics::CORNER_ALL, 5.0f);
+		SeekBar.Draw(ColorRGBA(0, 0, 0, 0.5f), IGraphics::CORNER_ALL, Rounding);
 
 		// draw filled bar
 		float Amount = CurrentTick / (float)TotalTicks;
 		CUIRect FilledBar = SeekBar;
-		FilledBar.w = 10.0f + (FilledBar.w - 10.0f) * Amount;
-		FilledBar.Draw(ColorRGBA(1, 1, 1, 0.5f), IGraphics::CORNER_ALL, 5.0f);
+		FilledBar.w = 2 * Rounding + (FilledBar.w - 2 * Rounding) * Amount;
+		FilledBar.Draw(ColorRGBA(1, 1, 1, 0.5f), IGraphics::CORNER_ALL, Rounding);
 
 		// draw highlighting
 		if(g_Config.m_ClDemoSliceBegin != -1 && g_Config.m_ClDemoSliceEnd != -1)
 		{
 			float RatioBegin = (g_Config.m_ClDemoSliceBegin - pInfo->m_FirstTick) / (float)TotalTicks;
 			float RatioEnd = (g_Config.m_ClDemoSliceEnd - pInfo->m_FirstTick) / (float)TotalTicks;
-			float Span = ((SeekBar.w - 10.0f) * RatioEnd) - ((SeekBar.w - 10.0f) * RatioBegin);
+			float Span = ((SeekBar.w - 2 * Rounding) * RatioEnd) - ((SeekBar.w - 2 * Rounding) * RatioBegin);
 			Graphics()->TextureClear();
 			Graphics()->QuadsBegin();
 			Graphics()->SetColor(1.0f, 0.0f, 0.0f, 0.25f);
-			IGraphics::CQuadItem QuadItem(10.0f + SeekBar.x + (SeekBar.w - 10.0f) * RatioBegin, SeekBar.y, Span, SeekBar.h);
+			IGraphics::CQuadItem QuadItem(2 * Rounding + SeekBar.x + (SeekBar.w - 2 * Rounding) * RatioBegin, SeekBar.y, Span, SeekBar.h);
 			Graphics()->QuadsDrawTL(&QuadItem, 1);
 			Graphics()->QuadsEnd();
 		}
@@ -374,7 +375,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 			Graphics()->TextureClear();
 			Graphics()->QuadsBegin();
 			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
-			IGraphics::CQuadItem QuadItem(8.0f + SeekBar.x + (SeekBar.w - 10.0f) * Ratio, SeekBar.y, UI()->PixelSize(), SeekBar.h);
+			IGraphics::CQuadItem QuadItem(2 * Rounding + SeekBar.x + (SeekBar.w - 2 * Rounding) * Ratio, SeekBar.y, UI()->PixelSize(), SeekBar.h);
 			Graphics()->QuadsDrawTL(&QuadItem, 1);
 			Graphics()->QuadsEnd();
 		}
@@ -387,7 +388,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 			Graphics()->TextureClear();
 			Graphics()->QuadsBegin();
 			Graphics()->SetColor(1.0f, 0.0f, 0.0f, 1.0f);
-			IGraphics::CQuadItem QuadItem(10.0f + SeekBar.x + (SeekBar.w - 10.0f) * Ratio, SeekBar.y, UI()->PixelSize(), SeekBar.h);
+			IGraphics::CQuadItem QuadItem(2 * Rounding + SeekBar.x + (SeekBar.w - 2 * Rounding) * Ratio, SeekBar.y, UI()->PixelSize(), SeekBar.h);
 			Graphics()->QuadsDrawTL(&QuadItem, 1);
 			Graphics()->QuadsEnd();
 		}
@@ -399,7 +400,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 			Graphics()->TextureClear();
 			Graphics()->QuadsBegin();
 			Graphics()->SetColor(1.0f, 0.0f, 0.0f, 1.0f);
-			IGraphics::CQuadItem QuadItem(10.0f + SeekBar.x + (SeekBar.w - 10.0f) * Ratio, SeekBar.y, UI()->PixelSize(), SeekBar.h);
+			IGraphics::CQuadItem QuadItem(2 * Rounding + SeekBar.x + (SeekBar.w - 2 * Rounding) * Ratio, SeekBar.y, UI()->PixelSize(), SeekBar.h);
 			Graphics()->QuadsDrawTL(&QuadItem, 1);
 			Graphics()->QuadsEnd();
 		}
@@ -422,7 +423,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 			else
 			{
 				static float s_PrevAmount = 0.0f;
-				float AmountSeek = (UI()->MouseX() - SeekBar.x) / SeekBar.w;
+				float AmountSeek = clamp((UI()->MouseX() - SeekBar.x - Rounding) / (float)(SeekBar.w - 2 * Rounding), 0.0f, 1.0f);
 
 				if(Input()->ShiftIsPressed())
 				{
@@ -445,7 +446,16 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		else if(UI()->HotItem() == pId)
 		{
 			if(UI()->MouseButton(0))
+			{
 				UI()->SetActiveItem(pId);
+			}
+			else
+			{
+				const int HoveredTick = (int)(clamp((UI()->MouseX() - SeekBar.x - Rounding) / (float)(SeekBar.w - 2 * Rounding), 0.0f, 1.0f) * TotalTicks);
+				static char s_aHoveredTime[32];
+				str_time((int64_t)HoveredTick / SERVER_TICK_SPEED * 100, TIME_HOURS, s_aHoveredTime, sizeof(s_aHoveredTime));
+				GameClient()->m_Tooltips.DoToolTip(pId, &SeekBar, s_aHoveredTime);
+			}
 		}
 
 		if(Inside)
@@ -634,246 +644,6 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	}
 
 	HandleDemoSeeking(PositionToSeek, TimeToSeek);
-}
-
-static CUIRect gs_ListBoxOriginalView;
-static CUIRect gs_ListBoxView;
-static float gs_ListBoxRowHeight;
-static int gs_ListBoxItemIndex;
-static int gs_ListBoxSelectedIndex;
-static int gs_ListBoxNewSelected;
-static int gs_ListBoxDoneEvents;
-static int gs_ListBoxNumItems;
-static int gs_ListBoxItemsPerRow;
-static float gs_ListBoxScrollValue;
-static bool gs_ListBoxItemActivated;
-static bool gs_ListBoxClicked;
-
-void CMenus::UiDoListboxStart(const void *pID, const CUIRect *pRect, float RowHeight, const char *pTitle, const char *pBottomText, int NumItems,
-	int ItemsPerRow, int SelectedIndex, float ScrollValue, bool LogicOnly)
-{
-	CUIRect Scroll, Row;
-	CUIRect View = *pRect;
-
-	if(!LogicOnly)
-	{
-		// background
-		View.Draw(ColorRGBA(0, 0, 0, 0.15f), IGraphics::CORNER_ALL, 5.0f);
-	}
-
-	View.VSplitRight(20.0f, &View, &Scroll);
-
-	// setup the variables
-	gs_ListBoxOriginalView = View;
-	gs_ListBoxSelectedIndex = SelectedIndex;
-	gs_ListBoxNewSelected = SelectedIndex;
-	gs_ListBoxItemIndex = 0;
-	gs_ListBoxRowHeight = RowHeight;
-	gs_ListBoxNumItems = NumItems;
-	gs_ListBoxItemsPerRow = ItemsPerRow;
-	gs_ListBoxDoneEvents = 0;
-	gs_ListBoxScrollValue = ScrollValue;
-	gs_ListBoxItemActivated = false;
-	gs_ListBoxClicked = false;
-
-	// do the scrollbar
-	View.HSplitTop(gs_ListBoxRowHeight, &Row, 0);
-
-	int NumViewable = (int)(gs_ListBoxOriginalView.h / Row.h) * gs_ListBoxItemsPerRow;
-	//int Num = (NumItems + gs_ListBoxItemsPerRow - 1) / gs_ListBoxItemsPerRow - NumViewable + 1;
-	int Num = ceil((NumItems - NumViewable) / (float)gs_ListBoxItemsPerRow);
-	if(Num <= 0)
-	{
-		Num = 0;
-	}
-	else
-	{
-		if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP) && UI()->MouseInside(&View))
-			gs_ListBoxScrollValue -= Num == 1 ? 0.1f : 3.0f / Num;
-		if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN) && UI()->MouseInside(&View))
-			gs_ListBoxScrollValue += Num == 1 ? 0.1f : 3.0f / Num;
-	}
-
-	if(Num == 0)
-		gs_ListBoxScrollValue = 0;
-	else
-		gs_ListBoxScrollValue = UI()->DoScrollbarV(pID, &Scroll, gs_ListBoxScrollValue);
-
-	// the list
-	gs_ListBoxView = gs_ListBoxOriginalView;
-	gs_ListBoxView.VMargin(5.0f, &gs_ListBoxView);
-	UI()->ClipEnable(&gs_ListBoxView);
-	gs_ListBoxView.y -= gs_ListBoxScrollValue * Num * Row.h;
-}
-
-CMenus::CListboxItem CMenus::UiDoListboxNextRow()
-{
-	static CUIRect s_RowView;
-	CListboxItem Item = {0};
-	if(gs_ListBoxItemIndex % gs_ListBoxItemsPerRow == 0)
-		gs_ListBoxView.HSplitTop(gs_ListBoxRowHeight /*-2.0f*/, &s_RowView, &gs_ListBoxView);
-
-	s_RowView.VSplitLeft(s_RowView.w / (gs_ListBoxItemsPerRow - gs_ListBoxItemIndex % gs_ListBoxItemsPerRow), &Item.m_Rect, &s_RowView);
-
-	Item.m_Visible = 1;
-	//item.rect = row;
-
-	Item.m_HitRect = Item.m_Rect;
-
-	//CUIRect select_hit_box = item.rect;
-
-	if(gs_ListBoxSelectedIndex == gs_ListBoxItemIndex)
-		Item.m_Selected = 1;
-
-	// make sure that only those in view can be selected
-	if(Item.m_Rect.y + Item.m_Rect.h > gs_ListBoxOriginalView.y)
-	{
-		if(Item.m_HitRect.y < Item.m_HitRect.y) // clip the selection
-		{
-			Item.m_HitRect.h -= gs_ListBoxOriginalView.y - Item.m_HitRect.y;
-			Item.m_HitRect.y = gs_ListBoxOriginalView.y;
-		}
-	}
-	else
-		Item.m_Visible = 0;
-
-	// check if we need to do more
-	if(Item.m_Rect.y > gs_ListBoxOriginalView.y + gs_ListBoxOriginalView.h)
-		Item.m_Visible = 0;
-
-	gs_ListBoxItemIndex++;
-	return Item;
-}
-
-CMenus::CListboxItem CMenus::UiDoListboxNextItem(const void *pId, bool Selected, bool KeyEvents, bool NoHoverEffects)
-{
-	int ThisItemIndex = gs_ListBoxItemIndex;
-	if(Selected)
-	{
-		if(gs_ListBoxSelectedIndex == gs_ListBoxNewSelected)
-			gs_ListBoxNewSelected = ThisItemIndex;
-		gs_ListBoxSelectedIndex = ThisItemIndex;
-	}
-
-	CListboxItem Item = UiDoListboxNextRow();
-
-	CUIRect HitRect = Item.m_HitRect;
-
-	if(HitRect.y < gs_ListBoxOriginalView.y)
-	{
-		float TmpDiff = gs_ListBoxOriginalView.y - HitRect.y;
-		HitRect.y = gs_ListBoxOriginalView.y;
-		HitRect.h -= TmpDiff;
-	}
-
-	HitRect.h = minimum(HitRect.h, (gs_ListBoxOriginalView.y + gs_ListBoxOriginalView.h) - HitRect.y);
-
-	bool DoubleClickable = false;
-	if(Item.m_Visible && UI()->DoButtonLogic(pId, gs_ListBoxSelectedIndex == gs_ListBoxItemIndex, &HitRect))
-	{
-		DoubleClickable |= gs_ListBoxNewSelected == ThisItemIndex;
-		gs_ListBoxClicked = true;
-		gs_ListBoxNewSelected = ThisItemIndex;
-	}
-
-	// process input, regard selected index
-	if(gs_ListBoxSelectedIndex == ThisItemIndex)
-	{
-		if(!gs_ListBoxDoneEvents)
-		{
-			gs_ListBoxDoneEvents = 1;
-
-			if(UI()->ConsumeHotkey(CUI::HOTKEY_ENTER) || (DoubleClickable && Input()->MouseDoubleClick()))
-			{
-				gs_ListBoxItemActivated = true;
-				UI()->SetActiveItem(nullptr);
-			}
-			else if(KeyEvents)
-			{
-				for(int i = 0; i < m_NumInputEvents; i++)
-				{
-					int NewIndex = -1;
-					if(m_aInputEvents[i].m_Flags & IInput::FLAG_PRESS)
-					{
-						if(m_aInputEvents[i].m_Key == KEY_DOWN)
-							NewIndex = gs_ListBoxNewSelected + 1;
-						else if(m_aInputEvents[i].m_Key == KEY_UP)
-							NewIndex = gs_ListBoxNewSelected - 1;
-						else if(m_aInputEvents[i].m_Key == KEY_PAGEUP)
-							NewIndex = maximum(gs_ListBoxNewSelected - 20, 0);
-						else if(m_aInputEvents[i].m_Key == KEY_PAGEDOWN)
-							NewIndex = minimum(gs_ListBoxNewSelected + 20, gs_ListBoxNumItems - 1);
-						else if(m_aInputEvents[i].m_Key == KEY_HOME)
-							NewIndex = 0;
-						else if(m_aInputEvents[i].m_Key == KEY_END)
-							NewIndex = gs_ListBoxNumItems - 1;
-					}
-					if(NewIndex > -1 && NewIndex < gs_ListBoxNumItems)
-					{
-						// scroll
-						float Offset = (NewIndex / gs_ListBoxItemsPerRow - gs_ListBoxNewSelected / gs_ListBoxItemsPerRow) * gs_ListBoxRowHeight;
-						int Scroll = gs_ListBoxOriginalView.y > Item.m_Rect.y + Offset ? -1 :
-														 gs_ListBoxOriginalView.y + gs_ListBoxOriginalView.h < Item.m_Rect.y + Item.m_Rect.h + Offset ? 1 : 0;
-						if(Scroll)
-						{
-							int NumViewable = (int)(gs_ListBoxOriginalView.h / gs_ListBoxRowHeight) + 1;
-							int ScrollNum = (gs_ListBoxNumItems + gs_ListBoxItemsPerRow - 1) / gs_ListBoxItemsPerRow - NumViewable + 1;
-							if(Scroll < 0)
-							{
-								int Num = (gs_ListBoxOriginalView.y - Item.m_Rect.y - Offset + gs_ListBoxRowHeight - 1.0f) / gs_ListBoxRowHeight;
-								gs_ListBoxScrollValue -= (1.0f / ScrollNum) * Num;
-							}
-							else
-							{
-								int Num = (Item.m_Rect.y + Item.m_Rect.h + Offset - (gs_ListBoxOriginalView.y + gs_ListBoxOriginalView.h) + gs_ListBoxRowHeight - 1.0f) /
-									  gs_ListBoxRowHeight;
-								gs_ListBoxScrollValue += (1.0f / ScrollNum) * Num;
-							}
-							if(gs_ListBoxScrollValue < 0.0f)
-								gs_ListBoxScrollValue = 0.0f;
-							if(gs_ListBoxScrollValue > 1.0f)
-								gs_ListBoxScrollValue = 1.0f;
-						}
-
-						gs_ListBoxNewSelected = NewIndex;
-					}
-				}
-			}
-		}
-
-		//selected_index = i;
-		CUIRect r = Item.m_Rect;
-		r.Margin(1.5f, &r);
-		r.Draw(ColorRGBA(1, 1, 1, 0.5f), IGraphics::CORNER_ALL, 4.0f);
-	}
-	else if(UI()->MouseInside(&HitRect) && !NoHoverEffects)
-	{
-		CUIRect r = Item.m_Rect;
-		r.Margin(1.5f, &r);
-		r.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 4.0f);
-	}
-
-	return Item;
-}
-
-int CMenus::UiDoListboxEnd(float *pScrollValue, bool *pItemActivated, bool *pListBoxActive)
-{
-	UI()->ClipDisable();
-	if(pScrollValue)
-		*pScrollValue = gs_ListBoxScrollValue;
-	if(pItemActivated)
-		*pItemActivated = gs_ListBoxItemActivated;
-	if(pListBoxActive)
-		*pListBoxActive = gs_ListBoxClicked;
-	return gs_ListBoxNewSelected;
-}
-
-int CMenus::UiLogicGetCurrentClickedItem()
-{
-	if(gs_ListBoxClicked)
-		return gs_ListBoxNewSelected;
-	else
-		return -1;
 }
 
 int CMenus::DemolistFetchCallback(const CFsFileInfo *pInfo, int IsDir, int StorageType, void *pUser)
@@ -1206,78 +976,26 @@ void CMenus::RenderDemoList(CUIRect MainView)
 		}
 	}
 
-	// scrollbar
-	CUIRect Scroll;
-	ListBox.VSplitRight(20.0f, &ListBox, &Scroll);
-
-	static float s_ScrollValue = 0;
-	s_ScrollValue = UI()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
-
-	int PreviousIndex = m_DemolistSelectedIndex;
-	HandleListInputs(ListBox, s_ScrollValue, 3.0f, &m_ScrollOffset, s_aCols[0].m_Rect.h, m_DemolistSelectedIndex, m_vDemos.size());
-	if(PreviousIndex != m_DemolistSelectedIndex)
-	{
-		str_copy(g_Config.m_UiDemoSelected, m_vDemos[m_DemolistSelectedIndex].m_aName);
-		DemolistOnUpdate(false);
-	}
-
-	// set clipping
-	UI()->ClipEnable(&ListBox);
-
-	CUIRect OriginalView = ListBox;
-	int Num = (int)(ListBox.h / s_aCols[0].m_Rect.h) + 1;
-	int ScrollNum = maximum<int>(m_vDemos.size() - Num + 1, 0);
-	ListBox.y -= s_ScrollValue * ScrollNum * s_aCols[0].m_Rect.h;
+	static CListBox s_ListBox;
+	s_ListBox.DoStart(ms_ListheaderHeight, m_vDemos.size(), 1, 3, m_DemolistSelectedIndex, &ListBox, false);
 
 	int ItemIndex = -1;
-	bool DoubleClicked = false;
-
 	for(auto &Item : m_vDemos)
 	{
 		ItemIndex++;
 
-		CUIRect Row;
-		ListBox.HSplitTop(ms_ListheaderHeight, &Row, &ListBox);
-
-		int Selected = ItemIndex == m_DemolistSelectedIndex;
-
-		// make sure that only those in view can be selected
-		if(Row.y + Row.h > OriginalView.y && Row.y < OriginalView.y + OriginalView.h)
-		{
-			if(Selected)
-			{
-				CUIRect Rect = Row;
-				Rect.Margin(0.5f, &Rect);
-				Rect.Draw(ColorRGBA(1, 1, 1, 0.5f), IGraphics::CORNER_ALL, 4.0f);
-			}
-			else if(UI()->MouseHovered(&Row))
-			{
-				CUIRect Rect = Row;
-				Rect.Margin(0.5f, &Rect);
-				Rect.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 4.0f);
-			}
-
-			if(UI()->DoButtonLogic(Item.m_aName, Selected, &Row))
-			{
-				DoubleClicked |= ItemIndex == m_DoubleClickIndex;
-				str_copy(g_Config.m_UiDemoSelected, Item.m_aName);
-				DemolistOnUpdate(false);
-				m_DoubleClickIndex = ItemIndex;
-			}
-		}
-		else
-		{
-			// don't render invisible items
+		const CListboxItem ListItem = s_ListBox.DoNextItem(&Item, ItemIndex == m_DemolistSelectedIndex);
+		if(!ListItem.m_Visible)
 			continue;
-		}
 
+		CUIRect Row = ListItem.m_Rect;
 		CUIRect FileIcon;
 		Row.VSplitLeft(Row.h, &FileIcon, &Row);
 		Row.VSplitLeft(5.0f, 0, &Row);
 		FileIcon.Margin(1.0f, &FileIcon);
 		FileIcon.x += 2.0f;
-		const char *pIconType;
 
+		const char *pIconType;
 		if(str_comp(Item.m_aFilename, "..") == 0)
 			pIconType = "\xEF\xA0\x82";
 		else if(Item.m_IsDir)
@@ -1338,13 +1056,13 @@ void CMenus::RenderDemoList(CUIRect MainView)
 		}
 	}
 
-	UI()->ClipDisable();
-
-	bool Activated = false;
-	if(UI()->ConsumeHotkey(CUI::HOTKEY_ENTER) || (DoubleClicked && Input()->MouseDoubleClick()))
+	const int NewSelected = s_ListBox.DoEnd();
+	if(NewSelected != m_DemolistSelectedIndex)
 	{
-		UI()->SetActiveItem(nullptr);
-		Activated = true;
+		m_DemolistSelectedIndex = NewSelected;
+		if(m_DemolistSelectedIndex >= 0)
+			str_copy(g_Config.m_UiDemoSelected, m_vDemos[m_DemolistSelectedIndex].m_aName);
+		DemolistOnUpdate(false);
 	}
 
 	static CButtonContainer s_RefreshButton;
@@ -1362,7 +1080,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	}
 
 	static CButtonContainer s_PlayButton;
-	if(DoButton_Menu(&s_PlayButton, m_DemolistSelectedIsDir ? Localize("Open") : Localize("Play", "Demo browser"), 0, &PlayRect) || Activated || (Input()->KeyPress(KEY_P) && m_pClient->m_GameConsole.IsClosed() && m_DemoPlayerState == DEMOPLAYER_NONE))
+	if(DoButton_Menu(&s_PlayButton, m_DemolistSelectedIsDir ? Localize("Open") : Localize("Play", "Demo browser"), 0, &PlayRect) || s_ListBox.WasItemActivated() || UI()->ConsumeHotkey(CUI::HOTKEY_ENTER) || (Input()->KeyPress(KEY_P) && m_pClient->m_GameConsole.IsClosed() && m_DemoPlayerState == DEMOPLAYER_NONE))
 	{
 		if(m_DemolistSelectedIndex >= 0)
 		{
@@ -1406,6 +1124,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 			dbg_msg("menus", "couldn't open file '%s'", aBuf);
 		}
 	}
+	GameClient()->m_Tooltips.DoToolTip(&s_DirectoryButtonID, &DirectoryButton, Localize("Open the directory that contains the demo files"));
 
 	if(!m_DemolistSelectedIsDir)
 	{

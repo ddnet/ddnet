@@ -80,7 +80,7 @@ float VelocityRamp(float Value, float Start, float Range, float Curvature)
 {
 	if(Value < Start)
 		return 1.0f;
-	return 1.0f / powf(Curvature, (Value - Start) / Range);
+	return 1.0f / std::pow(Curvature, (Value - Start) / Range);
 }
 
 void CCharacterCore::Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore *pTeams, std::map<int, std::vector<vec2>> *pTeleOuts)
@@ -251,7 +251,6 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 	if(m_HookState == HOOK_IDLE)
 	{
 		SetHookedPlayer(-1);
-		m_HookState = HOOK_IDLE;
 		m_HookPos = m_Pos;
 	}
 	else if(m_HookState >= HOOK_RETRACT_START && m_HookState < HOOK_RETRACT_END)

@@ -404,9 +404,6 @@ Show name plates
 Show only chat messages from friends
 == Arată doar chatul prietenilor
 
-Skins
-== Costume
-
 Sound
 == Sunet
 
@@ -577,9 +574,6 @@ Reset to defaults
 Quit anyway?
 == Ieși oricum?
 
-Display Modes
-== Moduri de afișare
-
 Version:
 == Versiune:
 
@@ -606,6 +600,47 @@ Name plates size
 
 Type:
 == Tip:
+
+[Graphics error]
+
+[Graphics error]
+Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== 
+
+[Graphics error]
+Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
+== 
+
+[Graphics error]
+An error during command recording occurred. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+A render command failed. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+Submitting the render commands failed. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+Failed to swap framebuffers. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== 
+
+[Graphics error]
+Could not initialize the given graphics backend, reverting to the default backend now.
+== 
+
+[Graphics error]
+Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
+== 
+
+Could not save downloaded map. Try manually deleting this file: %s
+== 
 
 Successfully saved the replay!
 == 
@@ -650,6 +685,9 @@ Sending initial client info
 == 
 
 Warning
+== 
+
+Search:
 == 
 
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
@@ -728,9 +766,6 @@ Your nickname '%s' is already used (%d points). Do you still want to use it?
 == 
 
 Checking for existing player with your name
-== 
-
-Country / Region
 == 
 
 Cancel
@@ -829,6 +864,9 @@ Countries
 Types
 == 
 
+Copy info
+== 
+
 Leak IP
 == 
 
@@ -919,6 +957,9 @@ Fetch Info
 Demos directory
 == 
 
+Open the directory that contains the demo files
+== 
+
 Are you sure that you want to delete the demo '%s'?
 == 
 
@@ -982,13 +1023,25 @@ Skip the main menu
 Refresh Rate
 == 
 
+Save power by lowering refresh rate (higher input latency)
+== 
+
 Settings file
+== 
+
+Open the settings file
 == 
 
 Config directory
 == 
 
+Open the directory that contains the configuration and user files
+== 
+
 Themes directory
+== 
+
+Open the directory to add custom themes
 == 
 
 Automatically take statboard screenshot
@@ -1031,6 +1084,9 @@ Skin Database
 == 
 
 Skins directory
+== 
+
+Open the directory to add custom skins
 == 
 
 Hook collisions
@@ -1113,7 +1169,7 @@ UI controller sens.
 Controller jitter tolerance
 == 
 
-No controller found. Plug in a controller and restart the game.
+No controller found. Plug in a controller.
 == 
 
 Device
@@ -1491,6 +1547,9 @@ Run on join
 Chat command (e.g. showall 1)
 == 
 
+Unregister protocol and file extensions
+== 
+
 DDNet %s is available:
 == 
 
@@ -1522,6 +1581,9 @@ Loading assets
 == 
 
 Assets directory
+== 
+
+Open the directory to add custom assets
 == 
 
 Discord

@@ -21,7 +21,6 @@ CProjectile::CProjectile(
 	int Span,
 	bool Freeze,
 	bool Explosive,
-	float Force,
 	int SoundImpact,
 	int Layer,
 	int Number) :
@@ -32,7 +31,6 @@ CProjectile::CProjectile(
 	m_Direction = Dir;
 	m_LifeSpan = Span;
 	m_Owner = Owner;
-	m_Force = Force;
 	//m_Damage = Damage;
 	m_SoundImpact = SoundImpact;
 	m_StartTick = Server()->Tick();
@@ -47,11 +45,11 @@ CProjectile::CProjectile(
 	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
 	m_BelongsToPracticeTeam = pOwnerChar && pOwnerChar->Teams()->IsPractice(pOwnerChar->Team());
 
-	m_AffectedCharacters = CmaskAll();
+	m_AffectedCharacters = CClientMask().set();
 
 	if(m_Type == WEAPON_GRENADE)
 	{
-		m_AffectedCharacters = 0;
+		m_AffectedCharacters = CClientMask().set().reset();
 
 		if(Owner >= 0 && Owner <= MAX_CLIENTS)
 		{
@@ -77,8 +75,7 @@ CProjectile::CProjectile(
 
 void CProjectile::Reset()
 {
-	if(m_LifeSpan > -2)
-		m_MarkedForDestroy = true;
+	m_MarkedForDestroy = true;
 }
 
 vec2 CProjectile::GetPos(float Time)
@@ -155,7 +152,7 @@ void CProjectile::Tick()
 	if(m_LifeSpan > -1)
 		m_LifeSpan--;
 
-	int64_t TeamMask = -1LL;
+	CClientMask TeamMask = CClientMask().set();
 	bool IsWeaponCollide = false;
 	if(
 		pOwnerChar &&
@@ -188,9 +185,9 @@ void CProjectile::Tick()
 			for(int i = 0; i < Number; i++)
 			{
 				GameServer()->CreateExplosion(ColPos, m_Owner, m_Type, m_Owner == -1, (!pTargetChr ? -1 : pTargetChr->Team()),
-					(m_Owner != -1) ? TeamMask : -1LL, m_AffectedCharacters);
+					(m_Owner != -1) ? TeamMask : CClientMask().set(), m_AffectedCharacters);
 				GameServer()->CreateSound(ColPos, m_SoundImpact,
-					(m_Owner != -1) ? TeamMask : -1LL);
+					(m_Owner != -1) ? TeamMask : CClientMask().set());
 			}
 		}
 		else if(m_Freeze)
@@ -254,15 +251,15 @@ void CProjectile::Tick()
 				m_Direction.x = -m_Direction.x;
 			else if(m_Bouncing == 2)
 				m_Direction.y = -m_Direction.y;
-			if(fabs(m_Direction.x) < 1e-6f)
+			if(absolute(m_Direction.x) < 1e-6f)
 				m_Direction.x = 0;
-			if(fabs(m_Direction.y) < 1e-6f)
+			if(absolute(m_Direction.y) < 1e-6f)
 				m_Direction.y = 0;
 			m_Pos += m_Direction;
 		}
 		else if(m_Type == WEAPON_GUN)
 		{
-			GameServer()->CreateDamageInd(CurPos, -atan2(m_Direction.x, m_Direction.y), 10, (m_Owner != -1) ? TeamMask : -1LL);
+			GameServer()->CreateDamageInd(CurPos, -atan2(m_Direction.x, m_Direction.y), 10, (m_Owner != -1) ? TeamMask : CClientMask().set());
 			m_MarkedForDestroy = true;
 			return;
 		}
@@ -282,16 +279,16 @@ void CProjectile::Tick()
 			if(m_Owner >= 0)
 				pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
 
-			TeamMask = -1LL;
+			TeamMask = CClientMask().set();
 			if(pOwnerChar && pOwnerChar->IsAlive())
 			{
 				TeamMask = pOwnerChar->TeamMask();
 			}
 
 			GameServer()->CreateExplosion(ColPos, m_Owner, m_Type, m_Owner == -1, (!pOwnerChar ? -1 : pOwnerChar->Team()),
-				(m_Owner != -1) ? TeamMask : -1LL, m_AffectedCharacters);
+				(m_Owner != -1) ? TeamMask : CClientMask().set(), m_AffectedCharacters);
 			GameServer()->CreateSound(ColPos, m_SoundImpact,
-				(m_Owner != -1) ? TeamMask : -1LL);
+				(m_Owner != -1) ? TeamMask : CClientMask().set());
 		}
 		m_MarkedForDestroy = true;
 		return;
@@ -336,7 +333,7 @@ void CProjectile::Snap(int SnappingClient)
 
 	if(m_LifeSpan == -2)
 	{
-		CNetObj_EntityEx *pEntData = static_cast<CNetObj_EntityEx *>(Server()->SnapNewItem(NETOBJTYPE_ENTITYEX, GetID(), sizeof(CNetObj_EntityEx)));
+		CNetObj_EntityEx *pEntData = Server()->SnapNewItem<CNetObj_EntityEx>(GetID());
 		if(!pEntData)
 			return;
 
@@ -355,7 +352,7 @@ void CProjectile::Snap(int SnappingClient)
 	}
 
 	CCharacter *pOwnerChar = 0;
-	int64_t TeamMask = -1LL;
+	CClientMask TeamMask = CClientMask().set();
 
 	if(m_Owner >= 0)
 		pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
@@ -363,7 +360,7 @@ void CProjectile::Snap(int SnappingClient)
 	if(pOwnerChar && pOwnerChar->IsAlive())
 		TeamMask = pOwnerChar->TeamMask();
 
-	if(SnappingClient != SERVER_DEMO_CLIENT && m_Owner != -1 && !CmaskIsSet(TeamMask, SnappingClient))
+	if(SnappingClient != SERVER_DEMO_CLIENT && m_Owner != -1 && !TeamMask.test(SnappingClient))
 		return;
 
 	CNetObj_DDNetProjectile DDNetProjectile;
@@ -379,7 +376,7 @@ void CProjectile::Snap(int SnappingClient)
 	}
 	else
 	{
-		CNetObj_Projectile *pProj = static_cast<CNetObj_Projectile *>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, GetID(), sizeof(CNetObj_Projectile)));
+		CNetObj_Projectile *pProj = Server()->SnapNewItem<CNetObj_Projectile>(GetID());
 		if(!pProj)
 		{
 			return;
@@ -403,7 +400,7 @@ void CProjectile::SetBouncing(int Value)
 bool CProjectile::FillExtraInfo(CNetObj_DDNetProjectile *pProj)
 {
 	const int MaxPos = 0x7fffffff / 100;
-	if(abs((int)m_Pos.y) + 1 >= MaxPos || abs((int)m_Pos.x) + 1 >= MaxPos)
+	if(absolute((int)m_Pos.y) + 1 >= MaxPos || absolute((int)m_Pos.x) + 1 >= MaxPos)
 	{
 		//If the modified data would be too large to fit in an integer, send normal data instead
 		return false;
@@ -412,7 +409,7 @@ bool CProjectile::FillExtraInfo(CNetObj_DDNetProjectile *pProj)
 	float Angle = -atan2f(m_Direction.x, m_Direction.y);
 
 	int Data = 0;
-	Data |= (abs(m_Owner) & 255) << 0;
+	Data |= (absolute(m_Owner) & 255) << 0;
 	if(m_Owner < 0)
 		Data |= PROJECTILEFLAG_NO_OWNER;
 	//This bit tells the client to use the extra info
@@ -447,7 +444,7 @@ bool CProjectile::IsAffected(int ClientID) const
 	}
 	else
 	{
-		return CmaskIsSet(m_AffectedCharacters, ClientID);
+		return m_AffectedCharacters.test(ClientID);
 	}
 }
 
@@ -457,11 +454,13 @@ void CProjectile::SetAffected(int ClientID, bool Affected)
 	{
 		if(Affected)
 		{
-			m_AffectedCharacters |= CmaskOne(ClientID);
+			// CmaskOne
+			m_AffectedCharacters = CClientMask().set(ClientID);
 		}
 		else
 		{
-			m_AffectedCharacters &= CmaskAllExceptOne(ClientID);
+			// CmaskAllExceptOne
+			m_AffectedCharacters = CClientMask().set().reset(ClientID);
 		}
 	}
 }

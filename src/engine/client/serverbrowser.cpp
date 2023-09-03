@@ -46,6 +46,16 @@ public:
 	bool operator()(int a, int b) { return (g_Config.m_BrSortOrder ? (m_pThis->*m_pfnSort)(b, a) : (m_pThis->*m_pfnSort)(a, b)); }
 };
 
+bool matchesPart(const char *a, const char *b)
+{
+	return str_utf8_find_nocase(a, b) != nullptr;
+}
+
+bool matchesExactly(const char *a, const char *b)
+{
+	return str_comp(a, &b[1]) == 0;
+}
+
 CServerBrowser::CServerBrowser()
 {
 	m_ppServerlist = nullptr;
@@ -311,9 +321,16 @@ void CServerBrowser::Filter()
 					{
 						continue;
 					}
+					auto MatchesFn = matchesPart;
+					const int FilterLen = str_length(aFilterStr);
+					if(aFilterStr[0] == '"' && aFilterStr[FilterLen - 1] == '"')
+					{
+						aFilterStr[FilterLen - 1] = '\0';
+						MatchesFn = matchesExactly;
+					}
 
 					// match against server name
-					if(str_utf8_find_nocase(m_ppServerlist[i]->m_Info.m_aName, aFilterStr))
+					if(MatchesFn(m_ppServerlist[i]->m_Info.m_aName, aFilterStr))
 					{
 						m_ppServerlist[i]->m_Info.m_QuickSearchHit |= IServerBrowser::QUICK_SERVERNAME;
 					}
@@ -321,16 +338,22 @@ void CServerBrowser::Filter()
 					// match against players
 					for(int p = 0; p < minimum(m_ppServerlist[i]->m_Info.m_NumClients, (int)MAX_CLIENTS); p++)
 					{
-						if(str_utf8_find_nocase(m_ppServerlist[i]->m_Info.m_aClients[p].m_aName, aFilterStr) ||
-							str_utf8_find_nocase(m_ppServerlist[i]->m_Info.m_aClients[p].m_aClan, aFilterStr))
+						if(MatchesFn(m_ppServerlist[i]->m_Info.m_aClients[p].m_aName, aFilterStr) ||
+							MatchesFn(m_ppServerlist[i]->m_Info.m_aClients[p].m_aClan, aFilterStr))
 						{
+							if(g_Config.m_BrFilterConnectingPlayers &&
+								str_comp(m_ppServerlist[i]->m_Info.m_aClients[p].m_aName, "(connecting)") == 0 &&
+								m_ppServerlist[i]->m_Info.m_aClients[p].m_aClan[0] == '\0')
+							{
+								continue;
+							}
 							m_ppServerlist[i]->m_Info.m_QuickSearchHit |= IServerBrowser::QUICK_PLAYER;
 							break;
 						}
 					}
 
 					// match against map
-					if(str_utf8_find_nocase(m_ppServerlist[i]->m_Info.m_aMap, aFilterStr))
+					if(MatchesFn(m_ppServerlist[i]->m_Info.m_aMap, aFilterStr))
 					{
 						m_ppServerlist[i]->m_Info.m_QuickSearchHit |= IServerBrowser::QUICK_MAPNAME;
 					}
@@ -350,23 +373,30 @@ void CServerBrowser::Filter()
 					{
 						continue;
 					}
+					auto MatchesFn = matchesPart;
+					const int FilterLen = str_length(aExcludeStr);
+					if(aExcludeStr[0] == '"' && aExcludeStr[FilterLen - 1] == '"')
+					{
+						aExcludeStr[FilterLen - 1] = '\0';
+						MatchesFn = matchesExactly;
+					}
 
 					// match against server name
-					if(str_utf8_find_nocase(m_ppServerlist[i]->m_Info.m_aName, aExcludeStr))
+					if(MatchesFn(m_ppServerlist[i]->m_Info.m_aName, aExcludeStr))
 					{
 						Filtered = true;
 						break;
 					}
 
 					// match against map
-					if(str_utf8_find_nocase(m_ppServerlist[i]->m_Info.m_aMap, aExcludeStr))
+					if(MatchesFn(m_ppServerlist[i]->m_Info.m_aMap, aExcludeStr))
 					{
 						Filtered = true;
 						break;
 					}
 
 					// match against gametype
-					if(str_utf8_find_nocase(m_ppServerlist[i]->m_Info.m_aGameType, aExcludeStr))
+					if(MatchesFn(m_ppServerlist[i]->m_Info.m_aGameType, aExcludeStr))
 					{
 						Filtered = true;
 						break;
@@ -1475,6 +1505,7 @@ int CServerInfo::EstimateLatency(int Loc1, int Loc2)
 	}
 	return 99;
 }
+
 bool CServerInfo::ParseLocation(int *pResult, const char *pString)
 {
 	*pResult = LOC_UNKNOWN;
@@ -1503,4 +1534,17 @@ bool CServerInfo::ParseLocation(int *pResult, const char *pString)
 		}
 	}
 	return true;
+}
+
+void CServerInfo::InfoToString(char *pBuffer, int BufferSize) const
+{
+	str_format(
+		pBuffer,
+		BufferSize,
+		"%s\n"
+		"Address: ddnet://%s\n"
+		"My IGN: %s\n",
+		m_aName,
+		m_aAddress,
+		g_Config.m_PlayerName);
 }

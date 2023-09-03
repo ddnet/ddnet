@@ -28,6 +28,7 @@
 #include <engine/shared/network.h>
 #include <engine/shared/packer.h>
 #include <engine/shared/protocol.h>
+#include <engine/shared/protocol7.h>
 #include <engine/shared/protocol_ex.h>
 #include <engine/shared/rust_version.h>
 #include <engine/shared/snapshot.h>
@@ -314,7 +315,7 @@ CServer::CServer()
 
 	m_pGameServer = 0;
 
-	m_CurrentGameTick = 0;
+	m_CurrentGameTick = MIN_TICK;
 	m_RunServer = UNINITIALIZED;
 
 	m_aShutdownReason[0] = 0;
@@ -541,9 +542,10 @@ int CServer::Init()
 		Client.m_Sixup = false;
 	}
 
-	m_CurrentGameTick = 0;
+	m_CurrentGameTick = MIN_TICK;
 
 	m_AnnouncementLastLine = 0;
+	m_aAnnouncementFile[0] = '\0';
 	mem_zero(m_aPrevStates, sizeof(m_aPrevStates));
 
 	return 0;
@@ -702,7 +704,8 @@ int CServer::DistinctClientCount() const
 	int ClientCount = 0;
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if(m_aClients[i].m_State != CClient::STATE_EMPTY)
+		// connecting clients with spoofed ips can clog slots without being ingame
+		if(ClientIngame(i))
 		{
 			ClientCount++;
 			for(int j = 0; j < i; j++)
@@ -747,8 +750,8 @@ static inline bool RepackMsg(const CMsgPacker *pMsg, CPacker &Packer, bool Sixup
 			else if(MsgId >= NETMSG_CON_READY && MsgId <= NETMSG_INPUTTIMING)
 				MsgId += 1;
 			else if(MsgId == NETMSG_RCON_LINE)
-				MsgId = 13;
-			else if(MsgId >= NETMSG_AUTH_CHALLANGE && MsgId <= NETMSG_AUTH_RESULT)
+				MsgId = protocol7::NETMSG_RCON_LINE;
+			else if(MsgId >= NETMSG_AUTH_CHALLENGE && MsgId <= NETMSG_AUTH_RESULT)
 				MsgId += 4;
 			else if(MsgId >= NETMSG_PING && MsgId <= NETMSG_ERROR)
 				MsgId += 4;
@@ -1555,20 +1558,18 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		}
 		else if(Msg == NETMSG_INPUT)
 		{
-			CClient::CInput *pInput;
-			int64_t TagTime;
-
 			m_aClients[ClientID].m_LastAckedSnapshot = Unpacker.GetInt();
 			int IntendedTick = Unpacker.GetInt();
 			int Size = Unpacker.GetInt();
 
 			// check for errors
-			if(Unpacker.Error() || Size / 4 > MAX_INPUT_SIZE)
+			if(Unpacker.Error() || Size / 4 > MAX_INPUT_SIZE || IntendedTick < MIN_TICK || IntendedTick >= MAX_TICK)
 				return;
 
 			if(m_aClients[ClientID].m_LastAckedSnapshot > 0)
 				m_aClients[ClientID].m_SnapRate = CClient::SNAPRATE_FULL;
 
+			int64_t TagTime;
 			if(m_aClients[ClientID].m_Snapshots.Get(m_aClients[ClientID].m_LastAckedSnapshot, &TagTime, 0, 0) >= 0)
 				m_aClients[ClientID].m_Latency = (int)(((time_get() - TagTime) * 1000) / time_freq());
 
@@ -1576,7 +1577,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 			// skip packets that are old
 			if(IntendedTick > m_aClients[ClientID].m_LastInputTick)
 			{
-				int TimeLeft = ((TickStartTime(IntendedTick) - time_get()) * 1000) / time_freq();
+				const int TimeLeft = (TickStartTime(IntendedTick) - time_get()) / (time_freq() / 1000);
 
 				CMsgPacker Msgp(NETMSG_INPUTTIMING, true);
 				Msgp.AddInt(IntendedTick);
@@ -1586,7 +1587,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 
 			m_aClients[ClientID].m_LastInputTick = IntendedTick;
 
-			pInput = &m_aClients[ClientID].m_aInputs[m_aClients[ClientID].m_CurrentInput];
+			CClient::CInput *pInput = &m_aClients[ClientID].m_aInputs[m_aClients[ClientID].m_CurrentInput];
 
 			if(IntendedTick <= Tick())
 				IntendedTick = Tick() + 1;
@@ -1687,7 +1688,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 						}
 						else
 						{
-							CMsgPacker Msgp(11, true, true); //NETMSG_RCON_AUTH_ON
+							CMsgPacker Msgp(protocol7::NETMSG_RCON_AUTH_ON, true, true);
 							SendMsg(&Msgp, MSGFLAG_VITAL, ClientID);
 						}
 
@@ -1750,7 +1751,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		else if(Msg == NETMSG_PING)
 		{
 			CMsgPacker Msgp(NETMSG_PING_REPLY, true);
-			SendMsg(&Msgp, 0, ClientID);
+			SendMsg(&Msgp, MSGFLAG_FLUSH, ClientID);
 		}
 		else if(Msg == NETMSG_PINGEX)
 		{
@@ -2176,6 +2177,15 @@ void CServer::GetServerInfoSixup(CPacker *pPacker, int Token, bool SendClients)
 	pPacker->AddRaw(FirstChunk.m_vData.data(), FirstChunk.m_vData.size());
 }
 
+void CServer::FillAntibot(CAntibotRoundData *pData)
+{
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		CAntibotPlayerData *pPlayer = &pData->m_aPlayers[i];
+		net_addr_str(m_NetServer.ClientAddr(i), pPlayer->m_aAddress, sizeof(pPlayer->m_aAddress), true);
+	}
+}
+
 void CServer::ExpireServerInfo()
 {
 	m_ServerInfoNeedsUpdate = true;
@@ -2589,9 +2599,7 @@ int CServer::Run()
 
 	m_Econ.Init(Config(), Console(), &m_ServerBan);
 
-#if defined(CONF_FAMILY_UNIX)
 	m_Fifo.Init(Console(), Config()->m_SvInputFifo, CFGFLAG_SERVER);
-#endif
 
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "server name is '%s'", Config()->m_SvName);
@@ -2640,7 +2648,7 @@ int CServer::Run()
 			int NewTicks = 0;
 
 			// load new map
-			if(m_MapReload || m_CurrentGameTick >= 0x6FFFFFFF) // force reload to make sure the ticks stay within a valid range
+			if(m_MapReload || m_CurrentGameTick >= MAX_TICK) // force reload to make sure the ticks stay within a valid range
 			{
 				// load map
 				if(LoadMap(Config()->m_SvMap))
@@ -2671,7 +2679,7 @@ int CServer::Run()
 					}
 
 					m_GameStartTime = time_get();
-					m_CurrentGameTick = 0;
+					m_CurrentGameTick = MIN_TICK;
 					m_ServerInfoFirstRequest = 0;
 					Kernel()->ReregisterInterface(GameServer());
 					GameServer()->OnInit();
@@ -2789,9 +2797,7 @@ int CServer::Run()
 
 				UpdateClientRconCommands();
 
-#if defined(CONF_FAMILY_UNIX)
 				m_Fifo.Update();
-#endif
 			}
 
 			// master server stuff
@@ -2870,9 +2876,7 @@ int CServer::Run()
 
 	m_Econ.Shutdown();
 
-#if defined(CONF_FAMILY_UNIX)
 	m_Fifo.Shutdown();
-#endif
 
 	GameServer()->OnShutdown();
 	m_pMap->Unload();
@@ -3507,7 +3511,7 @@ void CServer::LogoutClient(int ClientID, const char *pReason)
 	}
 	else
 	{
-		CMsgPacker Msg(12, true, true); //NETMSG_RCON_AUTH_OFF
+		CMsgPacker Msg(protocol7::NETMSG_RCON_AUTH_OFF, true, true);
 		SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
 	}
 
@@ -3734,46 +3738,50 @@ void CServer::GetClientAddr(int ClientID, NETADDR *pAddr) const
 
 const char *CServer::GetAnnouncementLine(char const *pFileName)
 {
-	IOHANDLE File = m_pStorage->OpenFile(pFileName, IOFLAG_READ | IOFLAG_SKIP_BOM, IStorage::TYPE_ALL);
-	if(!File)
-		return 0;
+	if(str_comp(pFileName, m_aAnnouncementFile) != 0)
+	{
+		str_copy(m_aAnnouncementFile, pFileName);
+		m_vAnnouncements.clear();
 
-	std::vector<char *> vpLines;
-	char *pLine;
-	CLineReader Reader;
-	Reader.Init(File);
-	while((pLine = Reader.Get()))
-		if(str_length(pLine))
-			if(pLine[0] != '#')
-				vpLines.push_back(pLine);
+		IOHANDLE File = m_pStorage->OpenFile(pFileName, IOFLAG_READ | IOFLAG_SKIP_BOM, IStorage::TYPE_ALL);
+		if(!File)
+			return 0;
 
-	if(vpLines.empty())
+		char *pLine;
+		CLineReader Reader;
+		Reader.Init(File);
+		while((pLine = Reader.Get()))
+			if(str_length(pLine) && pLine[0] != '#')
+				m_vAnnouncements.emplace_back(pLine);
+
+		io_close(File);
+	}
+
+	if(m_vAnnouncements.empty())
 	{
 		return 0;
 	}
-	else if(vpLines.size() == 1)
+	else if(m_vAnnouncements.size() == 1)
 	{
 		m_AnnouncementLastLine = 0;
 	}
 	else if(!Config()->m_SvAnnouncementRandom)
 	{
-		if(++m_AnnouncementLastLine >= vpLines.size())
-			m_AnnouncementLastLine %= vpLines.size();
+		if(++m_AnnouncementLastLine >= m_vAnnouncements.size())
+			m_AnnouncementLastLine %= m_vAnnouncements.size();
 	}
 	else
 	{
 		unsigned Rand;
 		do
 		{
-			Rand = rand() % vpLines.size();
+			Rand = rand() % m_vAnnouncements.size();
 		} while(Rand == m_AnnouncementLastLine);
 
 		m_AnnouncementLastLine = Rand;
 	}
 
-	io_close(File);
-
-	return vpLines[m_AnnouncementLastLine];
+	return m_vAnnouncements[m_AnnouncementLastLine].c_str();
 }
 
 int *CServer::GetIdMap(int ClientID)

@@ -84,6 +84,7 @@ protected:
 	float m_aPredIntraTick[NUM_DUMMIES];
 
 	float m_LocalTime;
+	float m_GlobalTime;
 	float m_RenderFrameTime;
 
 	int m_GameTickSpeed;
@@ -146,6 +147,7 @@ public:
 	// other time access
 	inline float RenderFrameTime() const { return m_RenderFrameTime; }
 	inline float LocalTime() const { return m_LocalTime; }
+	inline float GlobalTime() const { return m_GlobalTime; }
 	inline float FrameTimeAvg() const { return m_FrameTimeAvg; }
 
 	// actions
@@ -231,7 +233,7 @@ public:
 	template<class T>
 	int SendPackMsgActive(T *pMsg, int Flags)
 	{
-		CMsgPacker Packer(pMsg->MsgID(), false);
+		CMsgPacker Packer(T::ms_MsgID, false);
 		if(pMsg->Pack(&Packer))
 			return -1;
 		return SendMsgActive(&Packer, Flags);
@@ -278,6 +280,11 @@ public:
 	virtual CChecksumData *ChecksumData() = 0;
 	virtual bool InfoTaskRunning() = 0;
 	virtual int UdpConnectivity(int NetType) = 0;
+
+#if defined(CONF_FAMILY_WINDOWS)
+	virtual void ShellRegister() = 0;
+	virtual void ShellUnregister() = 0;
+#endif
 };
 
 class IGameClient : public IInterface

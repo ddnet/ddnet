@@ -24,6 +24,7 @@
 # pv                  2022-06-01 20:44:00
 # Rafael Fontenelle   2022-09-17 23:23:00
 # Rafael Fontenelle   2022-10-25 11:22:00
+# Rafael Fontenelle   2023-01-09 10:33:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -419,9 +420,6 @@ Show name plates
 Show only chat messages from friends
 == Mostrar apenas mensagens de amigos
 
-Skins
-== Skins
-
 Sound
 == Som
 
@@ -655,9 +653,6 @@ Restart
 
 Old mouse mode
 == Modo antigo de mouse
-
-Display Modes
-== Modos de exibição
 
 Round
 == Turno
@@ -1070,9 +1065,6 @@ Show others (own team only)
 Warning
 == Atenção
 
-Country / Region
-== País / Região
-
 Speed
 == Velocidade
 
@@ -1258,7 +1250,7 @@ https://ddnet.org/discord
 == https://ddnet.org/discord
 
 Are you sure that you want to disconnect and switch to a different server?
-== Tem certeza que deseja desconectar e trocar pata um servidor diferente?
+== Tem certeza que deseja desconectar e trocar para um servidor diferente?
 
 Refreshing...
 == Atualizando...
@@ -1396,9 +1388,6 @@ UI controller sens.
 
 Controller jitter tolerance
 == Tolerância jitter do controle
-
-No controller found. Plug in a controller and restart the game.
-== Nenhum controle encontrado. Conecte um controle e reinicie o jogo.
 
 Device
 == Dispositivo
@@ -1651,3 +1640,77 @@ Reset controls
 
 Are you sure that you want to reset the controls to their defaults?
 == Tem certeza que deseja redefinir os controles para seu padrão?
+
+[Graphics error]
+
+[Graphics error]
+Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== Falha durante a inicialização. Tente alterar gfx_backend para OpenGL ou Vulkan em settings_ddnet.cfg no diretório de configuração e tente novamente.
+
+[Graphics error]
+Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
+== VRAM insuficiente. Tente remover ativos personalizados (skins, entidades, etc.), especialmente aqueles com alta resolução.
+
+[Graphics error]
+An error during command recording occurred. Try to update your GPU drivers.
+== Ocorreu um erro durante a gravação do comando. Tente atualizar seus drivers de GPU.
+
+[Graphics error]
+A render command failed. Try to update your GPU drivers.
+== Um comando de renderização falhou. Tente atualizar seus drivers de GPU.
+
+[Graphics error]
+Submitting the render commands failed. Try to update your GPU drivers.
+== O envio dos comandos de renderização falhou. Tente atualizar seus drivers de GPU.
+
+[Graphics error]
+Failed to swap framebuffers. Try to update your GPU drivers.
+== Falha ao trocar framebuffers. Tente atualizar seus drivers de GPU.
+
+[Graphics error]
+Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== Erro desconhecido. Tente alterar gfx_backend para OpenGL ou Vulkan em settings_ddnet.cfg no diretório de configuração e tente novamente.
+
+[Graphics error]
+Could not initialize the given graphics backend, reverting to the default backend now.
+== Não foi possível inicializar o backend gráfico fornecido, revertendo para o backend padrão agora.
+
+Open the directory that contains the demo files
+== Abre o diretório que contém os arquivos de demonstração
+
+Save power by lowering refresh rate (higher input latency)
+== Economiza energia diminuindo a taxa de atualização (maior latência de entrada)
+
+Open the settings file
+== Abre o arquivo de configurações
+
+Open the directory that contains the configuration and user files
+== Abre o diretório que contém os arquivos de configuração e do usuário
+
+Open the directory to add custom themes
+== Abre o diretório para adicionar os temas personalizados
+
+Open the directory to add custom skins
+== Abre o diretório para adicionar skins personalizadas
+
+No controller found. Plug in a controller.
+== Nenhum controle encontrado. Conecte um controle.
+
+Unregister protocol and file extensions
+== Protoloco e arquivos de extensões não registrados
+
+Open the directory to add custom assets
+== Abre o diretório para adicionar os ativos personalizados
+
+[Graphics error]
+Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
+== Não foi possível inicializar o backend de vídeo fornecido, isso provavelmente porque você não instalou o driver da placa de vídeo 
+
+Could not save downloaded map. Try manually deleting this file: %s
+== Não foi possível salvar o mapa baixado. Tente excluir manualmente este arquivo: %s
+
+Search:
+== Pesquisa:
+
+Copy info
+== Copiar informação

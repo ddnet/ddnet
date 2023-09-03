@@ -802,6 +802,7 @@ class CGraphics_Threaded : public IEngineGraphics
 	//
 	class IStorage *m_pStorage;
 	class IConsole *m_pConsole;
+	class IEngine *m_pEngine;
 
 	int m_CurIndex;
 
@@ -817,7 +818,7 @@ class CGraphics_Threaded : public IEngineGraphics
 	float m_Rotation;
 	int m_Drawing;
 	bool m_DoScreenshot;
-	char m_aScreenshotName[128];
+	char m_aScreenshotName[IO_MAX_PATH_LENGTH];
 
 	CTextureHandle m_InvalidTexture;
 
@@ -878,14 +879,8 @@ class CGraphics_Threaded : public IEngineGraphics
 	std::vector<SQuadContainer> m_vQuadContainers;
 	int m_FirstFreeQuadContainer;
 
-	struct SWindowResizeListener
-	{
-		SWindowResizeListener(WINDOW_RESIZE_FUNC pFunc, void *pUser) :
-			m_pFunc(std::move(pFunc)), m_pUser(pUser) {}
-		WINDOW_RESIZE_FUNC m_pFunc;
-		void *m_pUser;
-	};
-	std::vector<SWindowResizeListener> m_vResizeListeners;
+	std::vector<WINDOW_RESIZE_FUNC> m_vResizeListeners;
+	std::vector<WINDOW_PROPS_CHANGED_FUNC> m_vPropChangeListeners;
 
 	void *AllocCommandBufferData(unsigned AllocSize);
 
@@ -896,8 +891,8 @@ class CGraphics_Threaded : public IEngineGraphics
 	template<typename TName>
 	void Rotate(const CCommandBuffer::SPoint &rCenter, TName *pPoints, int NumPoints)
 	{
-		float c = cosf(m_Rotation);
-		float s = sinf(m_Rotation);
+		float c = std::cos(m_Rotation);
+		float s = std::sin(m_Rotation);
 		float x, y;
 		int i;
 
@@ -1153,7 +1148,7 @@ public:
 	int QuadContainerAddQuads(int ContainerIndex, CQuadItem *pArray, int Num) override;
 	int QuadContainerAddQuads(int ContainerIndex, CFreeformItem *pArray, int Num) override;
 	void QuadContainerReset(int ContainerIndex) override;
-	void DeleteQuadContainer(int ContainerIndex) override;
+	void DeleteQuadContainer(int &ContainerIndex) override;
 	void RenderQuadContainer(int ContainerIndex, int QuadDrawNum) override;
 	void RenderQuadContainer(int ContainerIndex, int QuadOffset, int QuadDrawNum, bool ChangeWrapMode = true) override;
 	void RenderQuadContainerEx(int ContainerIndex, int QuadOffset, int QuadDrawNum, float X, float Y, float ScaleX = 1.f, float ScaleY = 1.f) override;
@@ -1254,7 +1249,7 @@ public:
 
 	int CreateBufferContainer(SBufferContainerInfo *pContainerInfo) override;
 	// destroying all buffer objects means, that all referenced VBOs are destroyed automatically, so the user does not need to save references to them
-	void DeleteBufferContainer(int ContainerIndex, bool DestroyAllBO = true) override;
+	void DeleteBufferContainer(int &ContainerIndex, bool DestroyAllBO = true) override;
 	void UpdateBufferContainerInternal(int ContainerIndex, SBufferContainerInfo *pContainerInfo);
 	void IndicesNumRequiredNotify(unsigned int RequiredIndicesCount) override;
 
@@ -1268,7 +1263,8 @@ public:
 	void Resize(int w, int h, int RefreshRate) override;
 	void GotResized(int w, int h, int RefreshRate) override;
 	void UpdateViewport(int X, int Y, int W, int H, bool ByResize) override;
-	void AddWindowResizeListener(WINDOW_RESIZE_FUNC pFunc, void *pUser) override;
+	void AddWindowResizeListener(WINDOW_RESIZE_FUNC pFunc) override;
+	void AddWindowPropChangeListener(WINDOW_PROPS_CHANGED_FUNC pFunc) override;
 	int GetWindowScreen() override;
 
 	void WindowDestroyNtf(uint32_t WindowID) override;

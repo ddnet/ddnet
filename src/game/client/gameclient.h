@@ -470,10 +470,10 @@ public:
 	void OnRconLine(const char *pLine) override;
 	virtual void OnGameOver();
 	virtual void OnStartGame();
+	virtual void OnStartRound();
 	virtual void OnFlagGrab(int TeamID);
 
 	void OnWindowResize();
-	static void OnWindowResizeCB(void *pUser);
 
 	void OnLanguageChange();
 

@@ -35,6 +35,8 @@ protected:
 	// quick access to events
 	int m_NumEvents;
 	IInput::CEvent m_aInputEvents[INPUT_BUFFER_SIZE];
+	int64_t m_LastUpdate;
+	float m_UpdateTime;
 
 public:
 	enum
@@ -66,6 +68,12 @@ public:
 	CEvent *GetEventsRaw() { return m_aInputEvents; }
 	int *GetEventCountRaw() { return &m_NumEvents; }
 
+	/**
+	 * @return Rolling average of the time in seconds between
+	 * calls of the Update function.
+	 */
+	float GetUpdateTime() const { return m_UpdateTime; }
+
 	// keys
 	virtual bool ModifierIsPressed() const = 0;
 	virtual bool ShiftIsPressed() const = 0;
@@ -86,7 +94,7 @@ public:
 		virtual int GetNumBalls() const = 0;
 		virtual int GetNumHats() const = 0;
 		virtual float GetAxisValue(int Axis) = 0;
-		virtual int GetHatValue(int Hat) = 0;
+		virtual void GetHatValue(int Hat, int (&HatKeys)[2]) = 0;
 		virtual bool Relative(float *pX, float *pY) = 0;
 		virtual bool Absolute(float *pX, float *pY) = 0;
 	};
@@ -114,6 +122,8 @@ public:
 	virtual int GetEditingCursor() = 0;
 	virtual void SetEditingPosition(float X, float Y) = 0;
 
+	virtual bool GetDropFile(char *aBuf, int Len) = 0;
+
 	ECursorType CursorRelative(float *pX, float *pY)
 	{
 		if(MouseRelative(pX, pY))
@@ -132,7 +142,6 @@ public:
 	virtual void Init() = 0;
 	virtual void Shutdown() override = 0;
 	virtual int Update() = 0;
-	virtual int VideoRestartNeeded() = 0;
 };
 
 extern IEngineInput *CreateEngineInput();

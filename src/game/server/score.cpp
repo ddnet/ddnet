@@ -73,10 +73,7 @@ CScore::CScore(CGameContext *pGameServer, CDbConnectionPool *pPool) :
 	m_pGameServer(pGameServer),
 	m_pServer(pGameServer->Server())
 {
-	auto InitResult = std::make_shared<CScoreInitResult>();
-	auto Tmp = std::make_unique<CSqlInitData>(InitResult);
-	((CGameControllerDDRace *)(pGameServer->m_pController))->m_pInitResult = InitResult;
-	str_copy(Tmp->m_aMap, g_Config.m_SvMap, sizeof(Tmp->m_aMap));
+	LoadBestTime();
 
 	uint64_t aSeed[2];
 	secure_random_fill(aSeed, sizeof(aSeed));
@@ -109,8 +106,19 @@ CScore::CScore(CGameContext *pGameServer, CDbConnectionPool *pPool) :
 		Server()->SetErrorShutdown("sql too few words in wordlist");
 		return;
 	}
+}
 
-	m_pPool->Execute(CScoreWorker::Init, std::move(Tmp), "load best time");
+void CScore::LoadBestTime()
+{
+	if(((CGameControllerDDRace *)(m_pGameServer->m_pController))->m_pLoadBestTimeResult)
+		return; // already in progress
+
+	auto LoadBestTimeResult = std::make_shared<CScoreLoadBestTimeResult>();
+	((CGameControllerDDRace *)(m_pGameServer->m_pController))->m_pLoadBestTimeResult = LoadBestTimeResult;
+
+	auto Tmp = std::make_unique<CSqlLoadBestTimeData>(LoadBestTimeResult);
+	str_copy(Tmp->m_aMap, g_Config.m_SvMap, sizeof(Tmp->m_aMap));
+	m_pPool->Execute(CScoreWorker::LoadBestTime, std::move(Tmp), "load best time");
 }
 
 void CScore::LoadPlayerData(int ClientID, const char *pName)
@@ -278,9 +286,9 @@ void CScore::SaveTeam(int ClientID, const char *pCode, const char *pServer)
 	if(pController->m_Teams.GetSaving(Team))
 		return;
 
-	auto SaveResult = std::make_shared<CScoreSaveResult>(ClientID, pController);
+	auto SaveResult = std::make_shared<CScoreSaveResult>(ClientID);
 	SaveResult->m_SaveID = RandomUuid();
-	int Result = SaveResult->m_SavedTeam.Save(Team);
+	int Result = SaveResult->m_SavedTeam.Save(GameServer(), Team);
 	if(CSaveTeam::HandleSaveError(Result, ClientID, GameServer()))
 		return;
 	pController->m_Teams.SetSaving(Team, SaveResult);
@@ -332,7 +340,7 @@ void CScore::LoadTeam(const char *pCode, int ClientID)
 		GameServer()->SendChatTarget(ClientID, "Team can't be loaded while racing");
 		return;
 	}
-	auto SaveResult = std::make_shared<CScoreSaveResult>(ClientID, pController);
+	auto SaveResult = std::make_shared<CScoreSaveResult>(ClientID);
 	SaveResult->m_Status = CScoreSaveResult::LOAD_FAILED;
 	pController->m_Teams.SetSaving(Team, SaveResult);
 	auto Tmp = std::make_unique<CSqlTeamLoad>(SaveResult);

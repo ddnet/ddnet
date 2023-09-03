@@ -155,7 +155,12 @@ void CGraphicsBackend_Threaded::ProcessError()
 	const auto &Error = m_pProcessor->GetError();
 	std::string VerboseStr;
 	for(const auto &ErrStr : Error.m_vErrors)
-		VerboseStr.append(std::string(m_TranslateFunc(ErrStr.c_str(), "")) + "\n");
+	{
+		if(ErrStr.m_RequiresTranslation)
+			VerboseStr.append(std::string(m_TranslateFunc(ErrStr.m_Err.c_str(), "")) + "\n");
+		else
+			VerboseStr.append(ErrStr.m_Err + "\n");
+	}
 	const auto CreatedMsgBox = TryCreateMsgBox(true, "Graphics Assertion", VerboseStr.c_str());
 	// check if error msg can be shown, then assert
 	dbg_assert(!CreatedMsgBox, VerboseStr.c_str());
@@ -269,31 +274,31 @@ void CCommandProcessor_SDL_GL::HandleError()
 	switch(Error.m_ErrorType)
 	{
 	case GFX_ERROR_TYPE_INIT:
-		Error.m_vErrors.emplace_back(Localizable("Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan from settings_ddnet.cfg in the config directory and try again."));
+		Error.m_vErrors.emplace_back(SGFXErrorContainer::SError{true, Localizable("Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.", "Graphics error")});
 		break;
 	case GFX_ERROR_TYPE_OUT_OF_MEMORY_IMAGE:
 		[[fallthrough]];
 	case GFX_ERROR_TYPE_OUT_OF_MEMORY_BUFFER:
 		[[fallthrough]];
 	case GFX_ERROR_TYPE_OUT_OF_MEMORY_STAGING:
-		Error.m_vErrors.emplace_back(Localizable("Out of VRAM. Try removing custom assets (skins, entities etc.), especially with high resolution."));
+		Error.m_vErrors.emplace_back(SGFXErrorContainer::SError{true, Localizable("Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.", "Graphics error")});
 		break;
 	case GFX_ERROR_TYPE_RENDER_RECORDING:
-		Error.m_vErrors.emplace_back(Localizable("An error during command recording occurred. Try to update your GPU drivers."));
+		Error.m_vErrors.emplace_back(SGFXErrorContainer::SError{true, Localizable("An error during command recording occurred. Try to update your GPU drivers.", "Graphics error")});
 		break;
 	case GFX_ERROR_TYPE_RENDER_CMD_FAILED:
-		Error.m_vErrors.emplace_back(Localizable("A render command failed. Try to update your GPU drivers."));
+		Error.m_vErrors.emplace_back(SGFXErrorContainer::SError{true, Localizable("A render command failed. Try to update your GPU drivers.", "Graphics error")});
 		break;
 	case GFX_ERROR_TYPE_RENDER_SUBMIT_FAILED:
-		Error.m_vErrors.emplace_back(Localizable("Submitting the render commands failed. Try to update your GPU drivers."));
+		Error.m_vErrors.emplace_back(SGFXErrorContainer::SError{true, Localizable("Submitting the render commands failed. Try to update your GPU drivers.", "Graphics error")});
 		break;
 	case GFX_ERROR_TYPE_SWAP_FAILED:
-		Error.m_vErrors.emplace_back(Localizable("Failed to swap framebuffers. Try to update your GPU drivers."));
+		Error.m_vErrors.emplace_back(SGFXErrorContainer::SError{true, Localizable("Failed to swap framebuffers. Try to update your GPU drivers.", "Graphics error")});
 		break;
 	case GFX_ERROR_TYPE_UNKNOWN:
 		[[fallthrough]];
 	default:
-		Error.m_vErrors.emplace_back(Localizable("Unknown error. Try to change gfx_backend to OpenGL or Vulkan from settings_ddnet.cfg in the config directory and try again."));
+		Error.m_vErrors.emplace_back(SGFXErrorContainer::SError{true, Localizable("Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.", "Graphics error")});
 		break;
 	}
 }
@@ -304,7 +309,10 @@ void CCommandProcessor_SDL_GL::HandleWarning()
 	switch(Warn.m_WarningType)
 	{
 	case GFX_WARNING_TYPE_INIT_FAILED:
-		Warn.m_vWarnings.emplace_back(Localizable("Could not initialize the given graphics backend, reverting to the default backend now."));
+		Warn.m_vWarnings.emplace_back(Localizable("Could not initialize the given graphics backend, reverting to the default backend now.", "Graphics error"));
+		break;
+	case GFX_WARNING_TYPE_INIT_FAILED_MISSING_INTEGRATED_GPU_DRIVER:
+		Warn.m_vWarnings.emplace_back(Localizable("Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.", "Graphics error"));
 		break;
 	case GFX_WARNING_MISSING_EXTENSION:
 		// ignore this warning for now

@@ -40,7 +40,6 @@ pack_*/
 release
 rules.ninja
 testrunner\[1\]_include.cmake
-vulkan_shaders_sha256.txt
 
 /SDL2.framework
 
@@ -90,6 +89,7 @@ target
 .cache
 .cproject
 .cmake
+.gdb_history
 .idea
 .project
 .settings
@@ -131,7 +131,10 @@ tags
 *.sdf
 *.sln
 *.so
+*.spv
 *.sqlite
+*.sqlite-shm
+*.sqlite-wal
 *.suo
 *.swp
 *.tar.gz

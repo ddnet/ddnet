@@ -33,7 +33,7 @@ CGameWorld::~CGameWorld()
 	// delete all entities
 	for(auto &pFirstEntityType : m_apFirstEntityTypes)
 		while(pFirstEntityType)
-			delete pFirstEntityType;
+			delete pFirstEntityType; // NOLINT(clang-analyzer-cplusplus.NewDelete)
 }
 
 void CGameWorld::SetGameServer(CGameContext *pGameServer)
@@ -146,6 +146,34 @@ void CGameWorld::Reset()
 	RemoveEntities();
 
 	m_ResetRequested = false;
+
+	GameServer()->CreateAllEntities(false);
+}
+
+void CGameWorld::RemoveEntitiesFromPlayer(int PlayerId)
+{
+	RemoveEntitiesFromPlayers(&PlayerId, 1);
+}
+
+void CGameWorld::RemoveEntitiesFromPlayers(int PlayerIds[], int NumPlayers)
+{
+	for(auto *pEnt : m_apFirstEntityTypes)
+	{
+		for(; pEnt;)
+		{
+			m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
+			for(int i = 0; i < NumPlayers; i++)
+			{
+				if(pEnt->GetOwnerID() == PlayerIds[i])
+				{
+					RemoveEntity(pEnt);
+					pEnt->Destroy();
+					break;
+				}
+			}
+			pEnt = m_pNextTraverseEntity;
+		}
+	}
 }
 
 void CGameWorld::RemoveEntities()
@@ -179,12 +207,16 @@ void CGameWorld::UpdatePlayerMaps()
 	{
 		if(!Server()->ClientIngame(i))
 			continue;
+		if(Server()->GetClientVersion(i) >= VERSION_DDNET_OLD)
+			continue;
 		int *pMap = Server()->GetIdMap(i);
 
 		// compute distances
 		for(int j = 0; j < MAX_CLIENTS; j++)
 		{
 			Dist[j].second = j;
+			if(j == i)
+				continue;
 			if(!Server()->ClientIngame(j) || !GameServer()->m_apPlayers[j])
 			{
 				Dist[j].first = 1e10;
@@ -196,65 +228,29 @@ void CGameWorld::UpdatePlayerMaps()
 				Dist[j].first = 1e9;
 				continue;
 			}
-			// copypasted chunk from character.cpp Snap() follows
-			CCharacter *pSnapChar = GameServer()->GetPlayerChar(i);
-			if(pSnapChar && !pSnapChar->IsSuper() &&
-				!GameServer()->m_apPlayers[i]->IsPaused() && GameServer()->m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS &&
-				!pChr->CanCollide(i) &&
-				(!GameServer()->m_apPlayers[i] ||
-					GameServer()->m_apPlayers[i]->GetClientVersion() == VERSION_VANILLA ||
-					(GameServer()->m_apPlayers[i]->GetClientVersion() >= VERSION_DDRACE &&
-						(GameServer()->m_apPlayers[i]->m_ShowOthers == SHOW_OTHERS_OFF ||
-							(GameServer()->m_apPlayers[i]->m_ShowOthers == SHOW_OTHERS_ONLY_TEAM && !GameServer()->m_apPlayers[i]->GetCharacter()->SameTeam(j))))))
+			if(!pChr->CanSnapCharacter(i))
 				Dist[j].first = 1e8;
 			else
-				Dist[j].first = 0;
-
-			Dist[j].first += distance(GameServer()->m_apPlayers[i]->m_ViewPos, GameServer()->m_apPlayers[j]->GetCharacter()->m_Pos);
+				Dist[j].first = length_squared(GameServer()->m_apPlayers[i]->m_ViewPos - pChr->m_Pos);
 		}
 
-		// always send the player themselves
-		Dist[i].first = 0;
-
-		// compute reverse map
-		int aReverseMap[MAX_CLIENTS];
-		for(int &j : aReverseMap)
-		{
-			j = -1;
-		}
-		for(int j = 0; j < VANILLA_MAX_CLIENTS; j++)
-		{
-			if(pMap[j] == -1)
-				continue;
-			if(Dist[pMap[j]].first > 5e9f)
-				pMap[j] = -1;
-			else
-				aReverseMap[pMap[j]] = j;
-		}
+		// always send the player themselves, even if all in same position
+		Dist[i].first = -1;
 
 		std::nth_element(&Dist[0], &Dist[VANILLA_MAX_CLIENTS - 1], &Dist[MAX_CLIENTS], distCompare);
 
-		int Mapc = 0;
-		int Demand = 0;
+		int Index = 1; // exclude self client id
 		for(int j = 0; j < VANILLA_MAX_CLIENTS - 1; j++)
 		{
-			int k = Dist[j].second;
-			if(aReverseMap[k] != -1 || Dist[j].first > 5e9f)
+			pMap[j + 1] = -1; // also fill player with empty name to say chat msgs
+			if(Dist[j].second == i || Dist[j].first > 5e9f)
 				continue;
-			while(Mapc < VANILLA_MAX_CLIENTS && pMap[Mapc] != -1)
-				Mapc++;
-			if(Mapc < VANILLA_MAX_CLIENTS - 1)
-				pMap[Mapc] = k;
-			else
-				Demand++;
+			pMap[Index++] = Dist[j].second;
 		}
-		for(int j = MAX_CLIENTS - 1; j > VANILLA_MAX_CLIENTS - 2; j--)
-		{
-			int k = Dist[j].second;
-			if(aReverseMap[k] != -1 && Demand-- > 0)
-				pMap[aReverseMap[k]] = -1;
-		}
-		pMap[VANILLA_MAX_CLIENTS - 1] = -1; // player with empty name to say chat msgs
+
+		// sort by real client ids, guarantee order on distance changes, O(Nlog(N)) worst case
+		// sort just clients in game always except first (self client id) and last (fake client id) indexes
+		std::sort(&pMap[1], &pMap[minimum(Index, VANILLA_MAX_CLIENTS - 1)]);
 	}
 }
 

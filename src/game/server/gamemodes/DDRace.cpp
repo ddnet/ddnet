@@ -16,7 +16,7 @@
 #define TEST_TYPE_NAME "gCTF-test"
 
 CGameControllerDDRace::CGameControllerDDRace(class CGameContext *pGameServer) :
-	IGameController(pGameServer), m_Teams(pGameServer), m_pInitResult(nullptr)
+	IGameController(pGameServer), m_Teams(pGameServer), m_pLoadBestTimeResult(nullptr)
 {
 	// game
 	m_apFlags[0] = 0;
@@ -177,13 +177,21 @@ void CGameControllerDDRace::Tick()
 	m_Teams.Tick();
 	FlagTick(); // gctf
 
-	if(m_pInitResult != nullptr && m_pInitResult->m_Completed)
+	if(m_pLoadBestTimeResult != nullptr && m_pLoadBestTimeResult->m_Completed)
 	{
-		if(m_pInitResult->m_Success)
+		if(m_pLoadBestTimeResult->m_Success)
 		{
-			m_CurrentRecord = m_pInitResult->m_CurrentRecord;
+			m_CurrentRecord = m_pLoadBestTimeResult->m_CurrentRecord;
+
+			for(int i = 0; i < MAX_CLIENTS; i++)
+			{
+				if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetClientVersion() >= VERSION_DDRACE)
+				{
+					GameServer()->SendRecord(i);
+				}
+			}
 		}
-		m_pInitResult = nullptr;
+		m_pLoadBestTimeResult = nullptr;
 	}
 }
 
@@ -210,10 +218,10 @@ void CGameControllerDDRace::DoTeamChange(class CPlayer *pPlayer, int Team, bool 
 	IGameController::DoTeamChange(pPlayer, Team, DoChatMsg);
 }
 
-int64_t CGameControllerDDRace::GetMaskForPlayerWorldEvent(int Asker, int ExceptID)
+CClientMask CGameControllerDDRace::GetMaskForPlayerWorldEvent(int Asker, int ExceptID)
 {
 	if(Asker == -1)
-		return CmaskAllExceptOne(ExceptID);
+		return CClientMask().set().reset(ExceptID);
 
 	return m_Teams.TeamMask(GetPlayerTeam(Asker), ExceptID, Asker);
 }
@@ -282,10 +290,11 @@ int CGameControllerDDRace::OnCharacterDeath(class CCharacter *pVictim, class CPl
 	return HadFlag;
 }
 
-bool CGameControllerDDRace::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Number)
+bool CGameControllerDDRace::OnEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number)
 {
-	IGameController::OnEntity(Index, Pos, Layer, Flags, Number);
+	IGameController::OnEntity(Index, x, y, Layer, Flags, Initial, Number);
 
+	vec2 Pos = vec2(x, y);
 	int Team = -1;
 	if(Index == ENTITY_FLAGSTAND_RED)
 		Team = TEAM_RED;

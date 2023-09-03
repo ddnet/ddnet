@@ -83,7 +83,7 @@ bool CreatePixelArt(const char aFilenames[3][64], const int aLayerID[2], const i
 	if(!pQuadLayer)
 		return false;
 
-	int MaxNewQuads = ceil((Img.m_Width * Img.m_Height) / aPixelSizes[0]);
+	int MaxNewQuads = std::ceil((Img.m_Width * Img.m_Height) / aPixelSizes[0]);
 	CQuad *pQuads = new CQuad[pQuadLayer->m_NumQuads + MaxNewQuads];
 
 	InsertCurrentQuads(InputMap, pQuadLayer, pQuads);

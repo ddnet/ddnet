@@ -147,12 +147,10 @@ void CConfigManager::WriteLine(const char *pLine)
 {
 	if(!m_ConfigFile ||
 		io_write(m_ConfigFile, pLine, str_length(pLine)) != static_cast<unsigned>(str_length(pLine)) ||
-#if defined(CONF_FAMILY_WINDOWS)
-		io_write_newline(m_ConfigFile) != 2)
-#else
-		io_write_newline(m_ConfigFile) != 1)
-#endif
+		!io_write_newline(m_ConfigFile))
+	{
 		m_Failed = true;
+	}
 }
 
 IConfigManager *CreateConfigManager() { return new CConfigManager; }

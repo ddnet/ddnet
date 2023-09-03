@@ -144,7 +144,9 @@ mod ffi {
         ///
         /// It supports the following formats:
         /// - `$XXX` (RGB, e.g. `$f00` for red)
+        /// - `$XXXX` (RGBA, e.g. `$f00f` for red with maximum opacity)
         /// - `$XXXXXX` (RGB, e.g. `$ffa500` for DDNet's logo color)
+        /// - `$XXXXXXXX` (RGBA, e.g. `$ffa500ff` for DDNet's logo color with maximum opacity)
         /// - base 10 integers (24/32 bit HSL in base 10, e.g. `0` for black)
         /// - the following color names: `red`, `yellow`, `green`, `cyan`,
         /// `blue`, `magenta`, `white`, `gray`, `black`.
@@ -169,11 +171,11 @@ mod ffi {
         /// #
         /// # let mut console = CreateConsole(CFGFLAG_SERVER);
         /// # let mut executed = false;
-        /// # console.pin_mut().Register(s!("command"), s!("ssssss"), CFGFLAG_SERVER, IConsole_FCommandCallback(callback), UserPtr::from(&mut executed), s!(""));
-        /// # console.pin_mut().ExecuteLine(s!(r#"command "$f00" $ffa500 $1234 shiny cyan -16777216"#), -1, true);
+        /// # console.pin_mut().Register(s!("command"), s!("ssssssss"), CFGFLAG_SERVER, IConsole_FCommandCallback(callback), UserPtr::from(&mut executed), s!(""));
+        /// # console.pin_mut().ExecuteLine(s!(r#"command "$f00" $ffa500 $12345 shiny cyan -16777216 $f008 $00ffff80"#), -1, true);
         /// # extern "C" fn callback(result_param: &IConsole_IResult, mut user: UserPtr) {
         /// # unsafe { *user.cast_mut::<bool>() = true; }
-        /// let result: &IConsole_IResult /* = `command "$f00" $ffa500 $1234 shiny cyan -16777216` */;
+        /// let result: &IConsole_IResult /* = `command "$f00" $ffa500 $12345 shiny cyan -16777216 $f008 $00ffff80` */;
         /// # result = result_param;
         /// assert_eq!(result.GetColor(0, false), ColorHSLA { h: 0.0, s: 1.0, l: 0.5, a: 1.0 }); // red
         /// assert_eq!(result.GetColor(1, false), ColorHSLA { h: 0.10784314, s: 1.0, l: 0.5, a: 1.0 }); // DDNet logo color
@@ -181,7 +183,9 @@ mod ffi {
         /// assert_eq!(result.GetColor(3, false), ColorHSLA { h: 0.0, s: 0.0, l: 0.0, a: 1.0 }); // unknown color name => black
         /// assert_eq!(result.GetColor(4, false), ColorHSLA { h: 0.5, s: 1.0, l: 0.5, a: 1.0 }); // cyan
         /// assert_eq!(result.GetColor(5, false), ColorHSLA { h: 0.0, s: 0.0, l: 0.0, a: 1.0 }); // black
-        /// assert_eq!(result.GetColor(6, false), ColorHSLA { h: 0.0, s: 0.0, l: 0.0, a: 1.0 }); // out of range => black
+        /// assert_eq!(result.GetColor(6, false), ColorHSLA { h: 0.0, s: 1.0, l: 0.5, a: 0.53333336 }); // red with alpha specified
+        /// assert_eq!(result.GetColor(7, false), ColorHSLA { h: 0.5, s: 1.0, l: 0.5, a: 0.5019608 }); // cyan with alpha specified
+        /// assert_eq!(result.GetColor(8, false), ColorHSLA { h: 0.0, s: 0.0, l: 0.0, a: 1.0 }); // out of range => black
         ///
         /// assert_eq!(result.GetColor(0, true), result.GetColor(0, false));
         /// assert_eq!(result.GetColor(1, true), result.GetColor(1, false));
@@ -190,6 +194,8 @@ mod ffi {
         /// assert_eq!(result.GetColor(4, true), result.GetColor(4, false));
         /// assert_eq!(result.GetColor(5, true), ColorHSLA { h: 0.0, s: 0.0, l: 0.5, a: 1.0 }); // black, but has the `Light` parameter set
         /// assert_eq!(result.GetColor(6, true), result.GetColor(6, false));
+        /// assert_eq!(result.GetColor(7, true), result.GetColor(7, false));
+        /// assert_eq!(result.GetColor(8, true), result.GetColor(8, false));
         /// # }
         /// # assert!(executed);
         /// ```

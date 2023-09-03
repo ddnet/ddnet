@@ -499,7 +499,7 @@ void SetExtendedArea(MapObject &Ob)
 		{
 			float aInspectedArea[2];
 			if(GetLineIntersection(Ob.m_aaBaseArea[i], Ob.m_aaScreenOffset[i], aInspectedArea))
-				memcpy(Ob.m_aaExtendedArea[i], aInspectedArea, sizeof(float[2]));
+				mem_copy(Ob.m_aaExtendedArea[i], aInspectedArea, sizeof(float[2]));
 			continue;
 		}
 
@@ -520,13 +520,13 @@ bool GetVisibleArea(const float aaGameArea[2][2], const MapObject &Ob, float aaV
 		SetInexistent((float *)aaVisibleArea, 4);
 
 	float aaInspectedArea[2][2];
-	memcpy(aaInspectedArea, aaGameArea, sizeof(float[2][2]));
+	mem_copy(aaInspectedArea, aaGameArea, sizeof(float[2][2]));
 
 	for(int i = 0; i < 2; i++)
 	{
 		if(Ob.m_aSpeed[i] == 1)
 		{
-			memcpy(aaInspectedArea[i], Ob.m_aaExtendedArea[i], sizeof(float[2]));
+			mem_copy(aaInspectedArea[i], Ob.m_aaExtendedArea[i], sizeof(float[2]));
 			continue;
 		}
 
@@ -538,7 +538,7 @@ bool GetVisibleArea(const float aaGameArea[2][2], const MapObject &Ob, float aaV
 	}
 
 	if(aaVisibleArea)
-		memcpy(aaVisibleArea, aaInspectedArea, sizeof(float[2][2]));
+		mem_copy(aaVisibleArea, aaInspectedArea, sizeof(float[2][2]));
 
 	return true;
 }
@@ -594,8 +594,8 @@ void GetGameAreaDistance(const float aaaGameAreas[2][2][2], const MapObject aObs
 void GetGameAreaDistance(const float aaaGameAreas[2][2][2], const MapObject aObs[2], const float aaVisibleArea[2][2], float aDistance[2])
 {
 	float aaaVisibleAreas[2][2][2];
-	memcpy(aaaVisibleAreas[0], aaVisibleArea[0], sizeof(float[2][2]));
-	memcpy(aaaVisibleAreas[1], aaVisibleArea[0], sizeof(float[2][2]));
+	mem_copy(aaaVisibleAreas[0], aaVisibleArea[0], sizeof(float[2][2]));
+	mem_copy(aaaVisibleAreas[1], aaVisibleArea[0], sizeof(float[2][2]));
 	GetGameAreaDistance(aaaGameAreas, aObs, aaaVisibleAreas, aDistance);
 }
 
@@ -618,8 +618,8 @@ void ConvertToTiles(const float aaArea[2][2], int aaTiles[2][2])
 {
 	for(int i = 0; i < 2; i++)
 	{
-		aaTiles[i][0] = floor((floor(aaArea[i][0] * 100.0f) / 100.0f) / 32.0f);
-		aaTiles[i][1] = ceil((floor(aaArea[i][1] * 100.0f) / 100.0f) / 32.0f);
+		aaTiles[i][0] = std::floor((std::floor(aaArea[i][0] * 100.0f) / 100.0f) / 32.0f);
+		aaTiles[i][1] = std::ceil((std::floor(aaArea[i][1] * 100.0f) / 100.0f) / 32.0f);
 	}
 }
 
@@ -636,7 +636,7 @@ bool GetLineIntersection(const float aLine1[2], const float aLine2[2], float aIn
 		return false;
 
 	if(aIntersection)
-		memcpy(aIntersection, aBorders, sizeof(float[2]));
+		mem_copy(aIntersection, aBorders, sizeof(float[2]));
 
 	return true;
 }

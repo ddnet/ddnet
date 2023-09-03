@@ -71,7 +71,7 @@ void CLight::Move()
 void CLight::Step()
 {
 	Move();
-	vec2 dir(sin(m_Rotation), cos(m_Rotation));
+	vec2 dir(std::sin(m_Rotation), std::cos(m_Rotation));
 	vec2 to2 = m_Pos + normalize(dir) * m_CurveLength;
 	GameServer()->Collision()->IntersectNoLaser(m_Pos, to2, &m_To, 0);
 }
@@ -129,47 +129,31 @@ void CLight::Snap(int SnappingClient)
 			return;
 	}
 
-	CNetObj_Laser *pObj = static_cast<CNetObj_Laser *>(Server()->SnapNewItem(
-		NETOBJTYPE_LASER, GetID(), sizeof(CNetObj_Laser)));
-
-	if(!pObj)
-		return;
-
-	pObj->m_X = (int)m_Pos.x;
-	pObj->m_Y = (int)m_Pos.y;
+	vec2 From = m_Pos;
+	int StartTick = 0;
 
 	if(pChr && pChr->Team() == TEAM_SUPER)
 	{
-		pObj->m_FromX = (int)m_Pos.x;
-		pObj->m_FromY = (int)m_Pos.y;
+		From = m_Pos;
 	}
 	else if(pChr && m_Layer == LAYER_SWITCH && Switchers()[m_Number].m_aStatus[pChr->Team()])
 	{
-		pObj->m_FromX = (int)m_To.x;
-		pObj->m_FromY = (int)m_To.y;
+		From = m_To;
 	}
 	else if(m_Layer != LAYER_SWITCH)
 	{
-		pObj->m_FromX = (int)m_To.x;
-		pObj->m_FromY = (int)m_To.y;
-	}
-	else
-	{
-		pObj->m_FromX = (int)m_Pos.x;
-		pObj->m_FromY = (int)m_Pos.y;
+		From = m_To;
 	}
 
-	if(pEntData)
+	if(!pEntData)
 	{
-		pObj->m_StartTick = 0;
-	}
-	else
-	{
-		int StartTick = m_EvalTick;
+		StartTick = m_EvalTick;
 		if(StartTick < Server()->Tick() - 4)
 			StartTick = Server()->Tick() - 4;
 		else if(StartTick > Server()->Tick())
 			StartTick = Server()->Tick();
-		pObj->m_StartTick = StartTick;
 	}
+
+	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion), GetID(),
+		m_Pos, From, StartTick, -1, LASERTYPE_FREEZE);
 }

@@ -143,6 +143,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 
 	uint64_t m_aSnapshotParts[NUM_DUMMIES];
 	int64_t m_LocalStartTime;
+	int64_t m_GlobalStartTime;
 
 	IGraphics::CTextureHandle m_DebugFont;
 	int m_DebugSoundIndex = 0;
@@ -280,9 +281,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 
 	std::vector<SWarning> m_vWarnings;
 
-#if defined(CONF_FAMILY_UNIX)
 	CFifo m_Fifo;
-#endif
 
 	IOHANDLE m_BenchmarkFile;
 	int64_t m_BenchmarkStopTime;
@@ -440,7 +439,6 @@ public:
 	static void Con_Minimize(IConsole::IResult *pResult, void *pUserData);
 	static void Con_Ping(IConsole::IResult *pResult, void *pUserData);
 	static void Con_Screenshot(IConsole::IResult *pResult, void *pUserData);
-	static void Con_Reset(IConsole::IResult *pResult, void *pUserData);
 
 #if defined(CONF_VIDEORECORDER)
 	static void StartVideo(IConsole::IResult *pResult, void *pUserData, const char *pVideoName);
@@ -545,6 +543,11 @@ public:
 	CChecksumData *ChecksumData() override { return &m_Checksum.m_Data; }
 	bool InfoTaskRunning() override { return m_pDDNetInfoTask != nullptr; }
 	int UdpConnectivity(int NetType) override;
+
+#if defined(CONF_FAMILY_WINDOWS)
+	void ShellRegister() override;
+	void ShellUnregister() override;
+#endif
 };
 
 #endif

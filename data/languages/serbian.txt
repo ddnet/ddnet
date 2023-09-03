@@ -395,9 +395,6 @@ Show ingame HUD
 Show name plates
 == Prikaži pločice sa imenima
 
-Skins
-== Teme
-
 Sound
 == Zvuk
 
@@ -595,9 +592,6 @@ Reset to defaults
 Quit anyway?
 == Izlaz?
 
-Display Modes
-== Rezolucija i način prikaza
-
 Version:
 == Verzija:
 
@@ -684,9 +678,6 @@ It's recommended that you check the settings to adjust them to your liking befor
 
 Please enter your nickname below.
 == Molimo vas napišite vaš nadimak ispod.
-
-Country / Region
-== Zemlja / region
 
 Speed
 == Brzina
@@ -1316,9 +1307,6 @@ UI controller sens.
 Controller jitter tolerance
 == Tolerancija kontrolera
 
-No controller found. Plug in a controller and restart the game.
-== Nema pronađenog kontrolera, uključite ga i ponovo pokrenite igru.
-
 Device
 == Uređaj
 
@@ -1535,7 +1523,51 @@ Team %d
 Loading sound files
 == Učitavam zvučne fajlove
 
+[Graphics error]
+
+[Graphics error]
+Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== 
+
+[Graphics error]
+Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
+== 
+
+[Graphics error]
+An error during command recording occurred. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+A render command failed. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+Submitting the render commands failed. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+Failed to swap framebuffers. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== 
+
+[Graphics error]
+Could not initialize the given graphics backend, reverting to the default backend now.
+== 
+
+[Graphics error]
+Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
+== 
+
+Could not save downloaded map. Try manually deleting this file: %s
+== 
+
 Initializing components
+== 
+
+Search:
 == 
 
 Cancel
@@ -1545,6 +1577,9 @@ File '%s' already exists, do you want to overwrite it?
 == 
 
 transmits your player name to info.ddnet.org
+== 
+
+Copy info
 == 
 
 Are you sure that you want to remove the player '%s' from your friends list?
@@ -1592,6 +1627,9 @@ Go forward one marker
 Toggle keyboard shortcuts
 == 
 
+Open the directory that contains the demo files
+== 
+
 Are you sure that you want to delete the demo '%s'?
 == 
 
@@ -1599,6 +1637,24 @@ Unable to delete the demo '%s'
 == 
 
 Menu opened. Press Esc key again to close menu.
+== 
+
+Save power by lowering refresh rate (higher input latency)
+== 
+
+Open the settings file
+== 
+
+Open the directory that contains the configuration and user files
+== 
+
+Open the directory to add custom themes
+== 
+
+Open the directory to add custom skins
+== 
+
+No controller found. Plug in a controller.
 == 
 
 Reset controls
@@ -1635,4 +1691,10 @@ Freeze Laser Inner Color
 == 
 
 Set all to Rifle
+== 
+
+Unregister protocol and file extensions
+== 
+
+Open the directory to add custom assets
 == 

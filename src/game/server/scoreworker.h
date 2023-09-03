@@ -62,18 +62,18 @@ struct CScorePlayerResult : ISqlResult
 	void SetVariant(Variant v);
 };
 
-struct CScoreInitResult : ISqlResult
+struct CScoreLoadBestTimeResult : ISqlResult
 {
-	CScoreInitResult() :
+	CScoreLoadBestTimeResult() :
 		m_CurrentRecord(0)
 	{
 	}
 	float m_CurrentRecord;
 };
 
-struct CSqlInitData : ISqlData
+struct CSqlLoadBestTimeData : ISqlData
 {
-	CSqlInitData(std::shared_ptr<CScoreInitResult> pResult) :
+	CSqlLoadBestTimeData(std::shared_ptr<CScoreLoadBestTimeResult> pResult) :
 		ISqlData(std::move(pResult))
 	{
 	}
@@ -149,9 +149,8 @@ struct CSqlScoreData : ISqlData
 
 struct CScoreSaveResult : ISqlResult
 {
-	CScoreSaveResult(int PlayerID, IGameController *pController) :
+	CScoreSaveResult(int PlayerID) :
 		m_Status(SAVE_FAILED),
-		m_SavedTeam(CSaveTeam(pController)),
 		m_RequestingPlayer(PlayerID)
 	{
 		m_aMessage[0] = '\0';
@@ -274,7 +273,7 @@ struct CTeamrank
 
 struct CScoreWorker
 {
-	static bool Init(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize);
+	static bool LoadBestTime(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize);
 
 	static bool RandomMap(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize);
 	static bool RandomUnfinishedMap(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize);

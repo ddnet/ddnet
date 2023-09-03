@@ -4,7 +4,7 @@
 #define ENGINE_SHARED_SNAPSHOT_H
 
 #include <cstddef>
-#include <stdint.h>
+#include <cstdint>
 
 // CSnapshot
 

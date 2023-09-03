@@ -111,7 +111,7 @@ void CRenderTools::GetSpriteScale(int Id, float &ScaleX, float &ScaleY)
 
 void CRenderTools::GetSpriteScaleImpl(int Width, int Height, float &ScaleX, float &ScaleY)
 {
-	float f = sqrtf(Height * Height + Width * Width);
+	const float f = length(vec2(Width, Height));
 	ScaleX = Width / f;
 	ScaleY = Height / f;
 }
@@ -381,7 +381,7 @@ void CRenderTools::CalcScreenParams(float Aspect, float Zoom, float *pWidth, flo
 	const float WMax = 1500;
 	const float HMax = 1050;
 
-	float f = sqrtf(Amount) / sqrtf(Aspect);
+	const float f = std::sqrt(Amount) / std::sqrt(Aspect);
 	*pWidth = f * Aspect;
 	*pHeight = f;
 

@@ -5,15 +5,17 @@
 #include "kernel.h"
 
 #include <base/color.h>
+
 #include <engine/graphics.h>
-#include <stdint.h>
+
+#include <cstdint>
 
 enum
 {
-	TEXTFLAG_RENDER = 1,
-	TEXTFLAG_ALLOW_NEWLINE = 2,
-	TEXTFLAG_STOP_AT_END = 4,
-	TEXTFLAG_ELLIPSIS_AT_END = 8,
+	TEXTFLAG_RENDER = 1 << 0,
+	TEXTFLAG_DISALLOW_NEWLINE = 1 << 1,
+	TEXTFLAG_STOP_AT_END = 1 << 2,
+	TEXTFLAG_ELLIPSIS_AT_END = 1 << 3,
 };
 
 enum ETextAlignment
@@ -103,30 +105,35 @@ public:
 	ETextCursorCursorMode m_CursorMode;
 	// note this is the decoded character offset
 	int m_CursorCharacter;
+
+	float Height() const
+	{
+		return m_LineCount * m_AlignedFontSize;
+	}
 };
 
 class ITextRender : public IInterface
 {
 	MACRO_INTERFACE("textrender", 0)
 public:
-	virtual void SetCursor(CTextCursor *pCursor, float x, float y, float FontSize, int Flags) = 0;
-	virtual void MoveCursor(CTextCursor *pCursor, float x, float y) = 0;
-	virtual void SetCursorPosition(CTextCursor *pCursor, float x, float y) = 0;
+	virtual void SetCursor(CTextCursor *pCursor, float x, float y, float FontSize, int Flags) const = 0;
+	virtual void MoveCursor(CTextCursor *pCursor, float x, float y) const = 0;
+	virtual void SetCursorPosition(CTextCursor *pCursor, float x, float y) const = 0;
 
-	virtual CFont *LoadFont(const char *pFilename, const unsigned char *pBuf, size_t Size) = 0;
-	virtual bool LoadFallbackFont(CFont *pFont, const char *pFilename, const unsigned char *pBuf, size_t Size) = 0;
-	virtual CFont *GetFont(int FontIndex) = 0;
+	virtual CFont *LoadFont(const char *pFilename, unsigned char *pBuf, size_t Size) = 0;
+	virtual bool LoadFallbackFont(CFont *pFont, const char *pFilename, unsigned char *pBuf, size_t Size) const = 0;
+	virtual CFont *GetFont(size_t FontIndex) = 0;
 	virtual CFont *GetFont(const char *pFilename) = 0;
 
 	virtual void SetDefaultFont(CFont *pFont) = 0;
 	virtual void SetCurFont(CFont *pFont) = 0;
 
-	virtual void SetRenderFlags(unsigned int Flags) = 0;
-	virtual unsigned int GetRenderFlags() = 0;
+	virtual void SetRenderFlags(unsigned Flags) = 0;
+	virtual unsigned GetRenderFlags() const = 0;
 
-	ColorRGBA DefaultTextColor() { return ColorRGBA(1, 1, 1, 1); }
-	ColorRGBA DefaultTextOutlineColor() { return ColorRGBA(0, 0, 0, 0.3f); }
-	ColorRGBA DefaultSelectionColor() { return ColorRGBA(0, 0, 1.0f, 1.0f); }
+	ColorRGBA DefaultTextColor() const { return ColorRGBA(1, 1, 1, 1); }
+	ColorRGBA DefaultTextOutlineColor() const { return ColorRGBA(0, 0, 0, 0.3f); }
+	ColorRGBA DefaultSelectionColor() const { return ColorRGBA(0, 0, 1.0f, 1.0f); }
 
 	//
 	virtual void TextEx(CTextCursor *pCursor, const char *pText, int Length) = 0;
@@ -135,8 +142,8 @@ public:
 	// either creates a new text container or appends to a existing one
 	virtual bool CreateOrAppendTextContainer(int &TextContainerIndex, CTextCursor *pCursor, const char *pText, int Length = -1) = 0;
 	// just deletes and creates text container
-	virtual void RecreateTextContainer(CTextCursor *pCursor, int &TextContainerIndex, const char *pText, int Length = -1) = 0;
-	virtual void RecreateTextContainerSoft(CTextCursor *pCursor, int &TextContainerIndex, const char *pText, int Length = -1) = 0;
+	virtual void RecreateTextContainer(int &TextContainerIndex, CTextCursor *pCursor, const char *pText, int Length = -1) = 0;
+	virtual void RecreateTextContainerSoft(int &TextContainerIndex, CTextCursor *pCursor, const char *pText, int Length = -1) = 0;
 	virtual void DeleteTextContainer(int &TextContainerIndex) = 0;
 
 	virtual void UploadTextContainer(int TextContainerIndex) = 0;
@@ -144,13 +151,14 @@ public:
 	virtual void RenderTextContainer(int TextContainerIndex, const ColorRGBA &TextColor, const ColorRGBA &TextOutlineColor) = 0;
 	virtual void RenderTextContainer(int TextContainerIndex, const ColorRGBA &TextColor, const ColorRGBA &TextOutlineColor, float X, float Y) = 0;
 
-	virtual void UploadEntityLayerText(void *pTexBuff, int ImageColorChannelCount, int TexWidth, int TexHeight, int TexSubWidth, int TexSubHeight, const char *pText, int Length, float x, float y, int FontHeight) = 0;
-	virtual int AdjustFontSize(const char *pText, int TextLength, int MaxSize, int MaxWidth) = 0;
-	virtual int CalculateTextWidth(const char *pText, int TextLength, int FontWidth, int FontHeight) = 0;
+	virtual void UploadEntityLayerText(void *pTexBuff, size_t ImageColorChannelCount, int TexWidth, int TexHeight, int TexSubWidth, int TexSubHeight, const char *pText, int Length, float x, float y, int FontHeight) = 0;
+	virtual int AdjustFontSize(const char *pText, int TextLength, int MaxSize, int MaxWidth) const = 0;
+	virtual float GetGlyphOffsetX(int FontSize, char TextCharacter) const = 0;
+	virtual int CalculateTextWidth(const char *pText, int TextLength, int FontWidth, int FontHeight) const = 0;
 
-	virtual bool SelectionToUTF8OffSets(const char *pText, int SelStart, int SelEnd, int &OffUTF8Start, int &OffUTF8End) = 0;
-	virtual bool UTF8OffToDecodedOff(const char *pText, int UTF8Off, int &DecodedOff) = 0;
-	virtual bool DecodedOffToUTF8Off(const char *pText, int DecodedOff, int &UTF8Off) = 0;
+	virtual bool SelectionToUTF8OffSets(const char *pText, int SelStart, int SelEnd, int &OffUTF8Start, int &OffUTF8End) const = 0;
+	virtual bool UTF8OffToDecodedOff(const char *pText, int UTF8Off, int &DecodedOff) const = 0;
+	virtual bool DecodedOffToUTF8Off(const char *pText, int DecodedOff, int &UTF8Off) const = 0;
 
 	// old foolish interface
 	virtual void TextColor(float r, float g, float b, float a) = 0;
@@ -159,17 +167,15 @@ public:
 	virtual void TextOutlineColor(ColorRGBA rgb) = 0;
 	virtual void TextSelectionColor(float r, float g, float b, float a) = 0;
 	virtual void TextSelectionColor(ColorRGBA rgb) = 0;
-	virtual void Text(void *pFontSetV, float x, float y, float Size, const char *pText, float LineWidth) = 0;
-	virtual float TextWidth(void *pFontSetV, float Size, const char *pText, int StrLength, float LineWidth, float *pAlignedHeight = nullptr, float *pMaxCharacterHeightInLine = nullptr) = 0;
-	virtual int TextLineCount(void *pFontSetV, float Size, const char *pText, float LineWidth) = 0;
+	virtual void Text(float x, float y, float Size, const char *pText, float LineWidth) = 0;
+	virtual float TextWidth(float Size, const char *pText, int StrLength, float LineWidth, float *pAlignedHeight = nullptr, float *pMaxCharacterHeightInLine = nullptr) = 0;
+	virtual int TextLineCount(float Size, const char *pText, float LineWidth) = 0;
 
-	virtual ColorRGBA GetTextColor() = 0;
-	virtual ColorRGBA GetTextOutlineColor() = 0;
-	virtual ColorRGBA GetTextSelectionColor() = 0;
+	virtual ColorRGBA GetTextColor() const = 0;
+	virtual ColorRGBA GetTextOutlineColor() const = 0;
+	virtual ColorRGBA GetTextSelectionColor() const = 0;
 
 	virtual void OnWindowResize() = 0;
-
-	virtual float GetGlyphOffsetX(int FontSize, char TextCharacter) = 0;
 };
 
 class IEngineTextRender : public ITextRender

@@ -181,7 +181,7 @@ int main(int argc, const char **argv)
 		}
 		else
 		{
-			dbg_msg("client", "failed to open '%s' for logging", g_Config.m_Logfile);
+			dbg_msg("server", "failed to open '%s' for logging", g_Config.m_Logfile);
 		}
 	}
 	pEngine->SetAdditionalLogger(std::make_unique<CServerLogger>(pServer));

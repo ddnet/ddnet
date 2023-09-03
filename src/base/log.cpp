@@ -19,8 +19,6 @@
 #include <android/log.h>
 #endif
 
-extern "C" {
-
 std::atomic<LEVEL> loglevel = LEVEL_INFO;
 std::atomic<ILogger *> global_logger = nullptr;
 thread_local ILogger *scope_logger = nullptr;
@@ -75,6 +73,10 @@ void log_set_scope_logger(ILogger *logger)
 	}
 }
 
+// Separate declaration, as attributes are not allowed on function definitions
+void log_log_impl(LEVEL level, bool have_color, LOG_COLOR color, const char *sys, const char *fmt, va_list args)
+	GNUC_ATTRIBUTE((format(printf, 5, 0)));
+
 void log_log_impl(LEVEL level, bool have_color, LOG_COLOR color, const char *sys, const char *fmt, va_list args)
 {
 	if(level > loglevel.load(std::memory_order_acquire))
@@ -111,18 +113,7 @@ void log_log_impl(LEVEL level, bool have_color, LOG_COLOR color, const char *sys
 
 	char *pMessage = Msg.m_aLine + Msg.m_LineMessageOffset;
 	int MessageSize = sizeof(Msg.m_aLine) - Msg.m_LineMessageOffset;
-#ifdef __GNUC__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wformat-nonliteral"
-#endif
-#if defined(CONF_FAMILY_WINDOWS)
-	_vsnprintf(pMessage, MessageSize, fmt, args);
-#else
-	vsnprintf(pMessage, MessageSize, fmt, args);
-#endif
-#ifdef __GNUC__
-#pragma GCC diagnostic pop
-#endif
+	str_format_v(pMessage, MessageSize, fmt, args);
 	Msg.m_LineLength = str_length(Msg.m_aLine);
 	scope_logger->Log(&Msg);
 	in_logger = false;
@@ -152,7 +143,6 @@ void log_log_color(LEVEL level, LOG_COLOR color, const char *sys, const char *fm
 	va_start(args, fmt);
 	log_log_impl(level, true, color, sys, fmt, args);
 	va_end(args);
-}
 }
 
 #if defined(CONF_PLATFORM_ANDROID)

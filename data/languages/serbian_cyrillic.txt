@@ -391,9 +391,6 @@ Show ingame HUD
 Show name plates
 == Прикажи плочице са именима
 
-Skins
-== Теме
-
 Sound
 == Звук
 
@@ -591,9 +588,6 @@ Reset to defaults
 Quit anyway?
 == Излаз?
 
-Display Modes
-== Резолуција и начин приказа
-
 Version:
 == Верзија:
 
@@ -680,9 +674,6 @@ It's recommended that you check the settings to adjust them to your liking befor
 
 Please enter your nickname below.
 == Молимо вас напишите ваш надимак испод.
-
-Country / Region
-== Земља / регион
 
 Speed
 == Брзина
@@ -1315,9 +1306,6 @@ UI controller sens.
 Controller jitter tolerance
 == Толеранција контролера
 
-No controller found. Plug in a controller and restart the game.
-== Нема пронађеног контролера, укључите га и поново покрените игру.
-
 Device
 == Уређај
 
@@ -1534,13 +1522,60 @@ Team %d
 Loading sound files
 == Учитавам звучне фајлове
 
+[Graphics error]
+
+[Graphics error]
+Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== 
+
+[Graphics error]
+Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
+== 
+
+[Graphics error]
+An error during command recording occurred. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+A render command failed. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+Submitting the render commands failed. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+Failed to swap framebuffers. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== 
+
+[Graphics error]
+Could not initialize the given graphics backend, reverting to the default backend now.
+== 
+
+[Graphics error]
+Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
+== 
+
+Could not save downloaded map. Try manually deleting this file: %s
+== 
+
 Initializing components
+== 
+
+Search:
 == 
 
 Cancel
 == 
 
 File '%s' already exists, do you want to overwrite it?
+== 
+
+Copy info
 == 
 
 Are you sure that you want to remove the player '%s' from your friends list?
@@ -1588,6 +1623,9 @@ Go forward one marker
 Toggle keyboard shortcuts
 == 
 
+Open the directory that contains the demo files
+== 
+
 Are you sure that you want to delete the demo '%s'?
 == 
 
@@ -1595,6 +1633,24 @@ Unable to delete the demo '%s'
 == 
 
 Menu opened. Press Esc key again to close menu.
+== 
+
+Save power by lowering refresh rate (higher input latency)
+== 
+
+Open the settings file
+== 
+
+Open the directory that contains the configuration and user files
+== 
+
+Open the directory to add custom themes
+== 
+
+Open the directory to add custom skins
+== 
+
+No controller found. Plug in a controller.
 == 
 
 Reset controls
@@ -1631,4 +1687,10 @@ Freeze Laser Inner Color
 == 
 
 Set all to Rifle
+== 
+
+Unregister protocol and file extensions
+== 
+
+Open the directory to add custom assets
 == 

@@ -700,15 +700,11 @@ void CGameContext::ConModerate(IConsole::IResult *pResult, void *pUserData)
 	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
 	pPlayer->m_Moderating = !pPlayer->m_Moderating;
 
-	char aBuf[256];
-
 	if(!HadModerator && pPlayer->m_Moderating)
-		str_format(aBuf, sizeof(aBuf), "Server kick/spec votes will now be actively moderated.");
+		pSelf->SendChat(-1, CHAT_ALL, "Server kick/spec votes will now be actively moderated.", 0);
 
 	if(!pSelf->PlayerModerating())
-		str_format(aBuf, sizeof(aBuf), "Server kick/spec votes are no longer actively moderated.");
-
-	pSelf->SendChat(-1, CHAT_ALL, aBuf, 0);
+		pSelf->SendChat(-1, CHAT_ALL, "Server kick/spec votes are no longer actively moderated.", 0);
 
 	if(pPlayer->m_Moderating)
 		pSelf->SendChatTarget(pResult->m_ClientID, "Active moderator mode enabled for you.");
@@ -801,8 +797,8 @@ void CGameContext::ConDrySave(IConsole::IResult *pResult, void *pUserData)
 	if(!pPlayer || pSelf->Server()->GetAuthedState(pResult->m_ClientID) != AUTHED_ADMIN)
 		return;
 
-	CSaveTeam SavedTeam(pSelf->m_pController);
-	int Result = SavedTeam.Save(pPlayer->GetTeam());
+	CSaveTeam SavedTeam;
+	int Result = SavedTeam.Save(pSelf, pPlayer->GetTeam(), true);
 	if(CSaveTeam::HandleSaveError(Result, pResult->m_ClientID, pSelf))
 		return;
 

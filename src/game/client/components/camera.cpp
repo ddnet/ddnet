@@ -81,7 +81,13 @@ void CCamera::OnRender()
 		}
 		else
 		{
+			const float OldLevel = m_Zoom;
 			m_Zoom = m_ZoomSmoothing.Evaluate(ZoomProgress(Time));
+			if((OldLevel < m_ZoomSmoothingTarget && m_Zoom > m_ZoomSmoothingTarget) || (OldLevel > m_ZoomSmoothingTarget && m_Zoom < m_ZoomSmoothingTarget))
+			{
+				m_Zoom = m_ZoomSmoothingTarget;
+				m_Zooming = false;
+			}
 		}
 		m_Zoom = clamp(m_Zoom, MinZoomLevel(), MaxZoomLevel());
 	}
@@ -132,7 +138,7 @@ void CCamera::OnRender()
 			s_SpeedBias += CameraSpeed * DeltaTime;
 			if(g_Config.m_ClDyncam)
 			{
-				s_SpeedBias -= length(m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy] - s_LastMousePos) * log10f(CameraStabilizingFactor) * 0.02f;
+				s_SpeedBias -= length(m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy] - s_LastMousePos) * std::log10(CameraStabilizingFactor) * 0.02f;
 				s_SpeedBias = clamp(s_SpeedBias, 0.5f, CameraSpeed);
 			}
 			else
@@ -182,7 +188,7 @@ void CCamera::OnConsoleInit()
 
 void CCamera::OnReset()
 {
-	m_Zoom = pow(ZoomStep, g_Config.m_ClDefaultZoom - 10);
+	m_Zoom = std::pow(ZoomStep, g_Config.m_ClDefaultZoom - 10);
 	m_Zooming = false;
 }
 
@@ -205,7 +211,7 @@ void CCamera::ConZoomMinus(IConsole::IResult *pResult, void *pUserData)
 void CCamera::ConZoom(IConsole::IResult *pResult, void *pUserData)
 {
 	float TargetLevel = pResult->NumArguments() ? pResult->GetFloat(0) : g_Config.m_ClDefaultZoom;
-	((CCamera *)pUserData)->ChangeZoom(pow(ZoomStep, TargetLevel - 10));
+	((CCamera *)pUserData)->ChangeZoom(std::pow(ZoomStep, TargetLevel - 10));
 }
 void CCamera::ConSetView(IConsole::IResult *pResult, void *pUserData)
 {

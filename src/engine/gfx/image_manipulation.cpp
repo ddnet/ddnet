@@ -143,11 +143,11 @@ static void SampleBicubic(const uint8_t *pSourceImage, float u, float v, uint32_
 {
 	float X = (u * W) - 0.5f;
 	int xInt = (int)X;
-	float xFract = X - floorf(X);
+	float xFract = X - std::floor(X);
 
 	float Y = (v * H) - 0.5f;
 	int yInt = (int)Y;
-	float yFract = Y - floorf(Y);
+	float yFract = Y - std::floor(Y);
 
 	uint8_t aPX00[4];
 	uint8_t aPX10[4];

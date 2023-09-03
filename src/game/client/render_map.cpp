@@ -86,8 +86,8 @@ static void Rotate(CPoint *pCenter, CPoint *pPoint, float Rotation)
 {
 	int x = pPoint->x - pCenter->x;
 	int y = pPoint->y - pCenter->y;
-	pPoint->x = (int)(x * cosf(Rotation) - y * sinf(Rotation) + pCenter->x);
-	pPoint->y = (int)(x * sinf(Rotation) + y * cosf(Rotation) + pCenter->y);
+	pPoint->x = (int)(x * std::cos(Rotation) - y * std::sin(Rotation) + pCenter->x);
+	pPoint->y = (int)(x * std::sin(Rotation) + y * std::cos(Rotation) + pCenter->y);
 }
 
 void CRenderTools::RenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags, ENVELOPE_EVAL pfnEval, void *pUser)
@@ -364,7 +364,7 @@ void CRenderTools::RenderTilemap(CTile *pTiles, int w, int h, float Scale, Color
 						y3 = y0 + 1;
 					}
 
-					if(Flags & TILEFLAG_FLIP_HORIZONTAL)
+					if(Flags & TILEFLAG_XFLIP)
 					{
 						x0 = x2;
 						x1 = x3;
@@ -372,7 +372,7 @@ void CRenderTools::RenderTilemap(CTile *pTiles, int w, int h, float Scale, Color
 						x3 = x0;
 					}
 
-					if(Flags & TILEFLAG_FLIP_VERTICAL)
+					if(Flags & TILEFLAG_YFLIP)
 					{
 						y0 = y3;
 						y2 = y1;
@@ -461,7 +461,7 @@ void CRenderTools::RenderTeleOverlay(CTeleTile *pTele, int w, int h, float Scale
 				char aBuf[16];
 				str_format(aBuf, sizeof(aBuf), "%d", Index);
 				TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
-				TextRender()->Text(0, mx * Scale - 3.f, (my + ToCenterOffset) * Scale, Size * Scale, aBuf, -1.0f);
+				TextRender()->Text(mx * Scale - 3.f, (my + ToCenterOffset) * Scale, Size * Scale, aBuf, -1.0f);
 				TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 			}
 		}
@@ -523,13 +523,13 @@ void CRenderTools::RenderSpeedupOverlay(CSpeedupTile *pSpeedup, int w, int h, fl
 					char aBuf[16];
 					str_format(aBuf, sizeof(aBuf), "%d", Force);
 					TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
-					TextRender()->Text(0, mx * Scale, (my + 0.5f + ToCenterOffset / 2) * Scale, Size * Scale / 2.f, aBuf, -1.0f);
+					TextRender()->Text(mx * Scale, (my + 0.5f + ToCenterOffset / 2) * Scale, Size * Scale / 2.f, aBuf, -1.0f);
 					TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 					if(MaxSpeed)
 					{
 						str_format(aBuf, sizeof(aBuf), "%d", MaxSpeed);
 						TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
-						TextRender()->Text(0, mx * Scale, (my + ToCenterOffset / 2) * Scale, Size * Scale / 2.f, aBuf, -1.0f);
+						TextRender()->Text(mx * Scale, (my + ToCenterOffset / 2) * Scale, Size * Scale / 2.f, aBuf, -1.0f);
 						TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 					}
 				}
@@ -580,7 +580,7 @@ void CRenderTools::RenderSwitchOverlay(CSwitchTile *pSwitch, int w, int h, float
 				char aBuf[16];
 				str_format(aBuf, sizeof(aBuf), "%d", Index);
 				TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
-				TextRender()->Text(0, mx * Scale, (my + ToCenterOffset / 2) * Scale, Size * Scale / 2.f, aBuf, -1.0f);
+				TextRender()->Text(mx * Scale, (my + ToCenterOffset / 2) * Scale, Size * Scale / 2.f, aBuf, -1.0f);
 				TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 			}
 
@@ -590,7 +590,7 @@ void CRenderTools::RenderSwitchOverlay(CSwitchTile *pSwitch, int w, int h, float
 				char aBuf[16];
 				str_format(aBuf, sizeof(aBuf), "%d", Delay);
 				TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
-				TextRender()->Text(0, mx * Scale, (my + 0.5f + ToCenterOffset / 2) * Scale, Size * Scale / 2.f, aBuf, -1.0f);
+				TextRender()->Text(mx * Scale, (my + 0.5f + ToCenterOffset / 2) * Scale, Size * Scale / 2.f, aBuf, -1.0f);
 				TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 			}
 		}
@@ -639,7 +639,7 @@ void CRenderTools::RenderTuneOverlay(CTuneTile *pTune, int w, int h, float Scale
 				char aBuf[16];
 				str_format(aBuf, sizeof(aBuf), "%d", Index);
 				TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
-				TextRender()->Text(0, mx * Scale + 11.f, my * Scale + 6.f, Size * Scale / 1.5f - 5.f, aBuf, -1.0f); // numbers shouldn't be too big and in the center of the tile
+				TextRender()->Text(mx * Scale + 11.f, my * Scale + 6.f, Size * Scale / 1.5f - 5.f, aBuf, -1.0f); // numbers shouldn't be too big and in the center of the tile
 				TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 			}
 		}
@@ -923,7 +923,7 @@ void CRenderTools::RenderSwitchmap(CSwitchTile *pSwitchTile, int w, int h, float
 					float x3 = Nudge + Px0 / TexSize + Frac;
 					float y3 = Nudge + Py1 / TexSize - Frac;
 
-					if(Flags & TILEFLAG_FLIP_HORIZONTAL)
+					if(Flags & TILEFLAG_XFLIP)
 					{
 						x0 = x2;
 						x1 = x3;
@@ -931,7 +931,7 @@ void CRenderTools::RenderSwitchmap(CSwitchTile *pSwitchTile, int w, int h, float
 						x3 = x0;
 					}
 
-					if(Flags & TILEFLAG_FLIP_VERTICAL)
+					if(Flags & TILEFLAG_YFLIP)
 					{
 						y0 = y3;
 						y2 = y1;

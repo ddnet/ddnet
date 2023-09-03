@@ -16,6 +16,8 @@ public:
 	virtual void Snap(int SnappingClient) override;
 	virtual void SwapClients(int Client1, int Client2) override;
 
+	virtual int GetOwnerID() const override { return m_Owner; }
+
 protected:
 	bool HitCharacter(vec2 From, vec2 To);
 	void DoBounce();
@@ -29,7 +31,7 @@ private:
 	int m_Bounces;
 	int m_EvalTick;
 	int m_Owner;
-	int m_TeamMask;
+	CClientMask m_TeamMask;
 	bool m_ZeroEnergyBounceInLastTick;
 
 	// DDRace

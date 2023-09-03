@@ -394,9 +394,6 @@ Show ingame HUD
 Show name plates
 == Oyuncu isimlerini göster
 
-Skins
-== Skinler
-
 Sound
 == Ses
 
@@ -566,9 +563,6 @@ Reset to defaults
 
 Quit anyway?
 == Çıkmak istediğinize emin misiniz?
-
-Display Modes
-== Çözünürlük
 
 Version:
 == Versiyon :
@@ -1068,6 +1062,47 @@ Replay
 https://wiki.ddnet.org/
 == https://wiki.ddnet.org/wiki/Main_Page/tr
 
+[Graphics error]
+
+[Graphics error]
+Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== 
+
+[Graphics error]
+Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
+== 
+
+[Graphics error]
+An error during command recording occurred. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+A render command failed. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+Submitting the render commands failed. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+Failed to swap framebuffers. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== 
+
+[Graphics error]
+Could not initialize the given graphics backend, reverting to the default backend now.
+== 
+
+[Graphics error]
+Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
+== 
+
+Could not save downloaded map. Try manually deleting this file: %s
+== 
+
 Saving ddnet-settings.cfg failed
 == 
 
@@ -1102,6 +1137,9 @@ Sending initial client info
 == 
 
 Warning
+== 
+
+Search:
 == 
 
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
@@ -1144,9 +1182,6 @@ Your nickname '%s' is already used (%d points). Do you still want to use it?
 == 
 
 Checking for existing player with your name
-== 
-
-Country / Region
 == 
 
 Cancel
@@ -1212,6 +1247,9 @@ Refreshing...
 Are you sure that you want to disconnect and switch to a different server?
 == 
 
+Copy info
+== 
+
 Leak IP
 == 
 
@@ -1266,6 +1304,9 @@ Loading demo files
 Demos directory
 == 
 
+Open the directory that contains the demo files
+== 
+
 Are you sure that you want to delete the demo '%s'?
 == 
 
@@ -1284,13 +1325,25 @@ Smooth Dynamic Camera
 Skip the main menu
 == 
 
+Save power by lowering refresh rate (higher input latency)
+== 
+
 Settings file
+== 
+
+Open the settings file
 == 
 
 Config directory
 == 
 
+Open the directory that contains the configuration and user files
+== 
+
 Themes directory
+== 
+
+Open the directory to add custom themes
 == 
 
 Loading skin files
@@ -1312,6 +1365,9 @@ Skin Database
 == 
 
 Skins directory
+== 
+
+Open the directory to add custom skins
 == 
 
 Chat command
@@ -1346,7 +1402,7 @@ UI controller sens.
 Controller jitter tolerance
 == 
 
-No controller found. Plug in a controller and restart the game.
+No controller found. Plug in a controller.
 == 
 
 Device
@@ -1577,6 +1633,9 @@ Run on join
 Chat command (e.g. showall 1)
 == 
 
+Unregister protocol and file extensions
+== 
+
 Emoticons
 == 
 
@@ -1590,6 +1649,9 @@ Loading assets
 == 
 
 Assets directory
+== 
+
+Open the directory to add custom assets
 == 
 
 Discord
