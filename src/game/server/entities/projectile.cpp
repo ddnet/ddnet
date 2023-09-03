@@ -63,7 +63,7 @@ CProjectile::CProjectile(
 						pPlayer->GetCharacter()->IsAlive() &&
 						!NetworkClipped(Owner, pPlayer->GetCharacter()->GetPos()))
 					{
-						SetAffected(i, true);
+						m_AffectedCharacters.set(i);
 					}
 				}
 			}
@@ -428,39 +428,4 @@ bool CProjectile::FillExtraInfo(CNetObj_DDNetProjectile *pProj)
 	pProj->m_StartTick = m_StartTick;
 	pProj->m_Type = m_Type;
 	return true;
-}
-
-// gctf
-
-bool CProjectile::IsAffected(int ClientID) const
-{
-	if(!g_Config.m_SvSprayprotection)
-	{
-		return true;
-	}
-	if(ClientID < 0 || ClientID > MAX_CLIENTS)
-	{
-		return true;
-	}
-	else
-	{
-		return m_AffectedCharacters.test(ClientID);
-	}
-}
-
-void CProjectile::SetAffected(int ClientID, bool Affected)
-{
-	if(ClientID >= 0 && ClientID < MAX_CLIENTS)
-	{
-		if(Affected)
-		{
-			// CmaskOne
-			m_AffectedCharacters.set(ClientID);
-		}
-		else
-		{
-			// CmaskAllExceptOne
-			m_AffectedCharacters.reset(ClientID);
-		}
-	}
 }

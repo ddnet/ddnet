@@ -24,10 +24,6 @@ public:
 	vec2 GetPos(float Time);
 	void FillInfo(CNetObj_Projectile *pProj);
 
-	// gctf
-	bool IsAffected(int ClientID) const;
-	void SetAffected(int ClientID, bool Affected);
-
 	virtual void Reset() override;
 	virtual void Tick() override;
 	virtual void TickPaused() override;

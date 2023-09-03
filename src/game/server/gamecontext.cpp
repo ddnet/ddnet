@@ -312,7 +312,7 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 				TeamMask.reset(PlayerTeam);
 			}
 
-			if(SprayMask.test(pChr->GetPlayer()->GetCID()))
+			if(!g_Config.m_SvSprayprotection || SprayMask.test(pChr->GetPlayer()->GetCID()))
 				pChr->TakeDamage(ForceDir * Dmg * 2, (int)Dmg, Owner, Weapon);
 		}
 	}
