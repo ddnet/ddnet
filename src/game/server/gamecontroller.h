@@ -6,8 +6,8 @@
 #include <base/vmath.h>
 #include <engine/map.h>
 
-#include <game/generated/protocol7.h>
 #include <game/generated/protocol.h>
+#include <game/generated/protocol7.h>
 
 /*
 	Class: Game Controller

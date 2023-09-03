@@ -4394,7 +4394,6 @@ void CGameContext::OnUpdatePlayerServerInfo(char *aBuf, int BufSize, int ID)
 		m_apPlayers[ID]->GetTeam());
 }
 
-
 // gctf
 
 void CGameContext::SendGameMsg(int GameMsgID, int ClientID)
