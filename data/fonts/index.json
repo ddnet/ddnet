@@ -1,0 +1,19 @@
+{
+    "font files": [
+        "DejaVuSans.ttf",
+        "Font_Awesome_6_Free-Solid-900.otf",
+        "GlowSansJ-Compressed-Book.otf",
+        "SourceHanSans.ttc"
+    ],
+    "default": "DejaVu Sans",
+    "language variants": {
+        "japanese": "Glow Sans J Compressed Book",
+        "korean": "Source Han Sans K",
+        "simplified_chinese": "Source Han Sans SC",
+        "traditional_chinese": "Source Han Sans TC"
+    },
+    "fallbacks": [
+        "Source Han Sans"
+    ],
+    "icon": "Font Awesome 6 Free"
+}

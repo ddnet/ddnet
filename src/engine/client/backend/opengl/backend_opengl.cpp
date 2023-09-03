@@ -42,11 +42,6 @@ void CCommandProcessorFragment_OpenGL::Cmd_Update_Viewport(const CCommandBuffer:
 	glViewport(pCommand->m_X, pCommand->m_Y, pCommand->m_Width, pCommand->m_Height);
 }
 
-void CCommandProcessorFragment_OpenGL::Cmd_Finish(const CCommandBuffer::SCommand_Finish *pCommand)
-{
-	glFinish();
-}
-
 int CCommandProcessorFragment_OpenGL::TexFormatToOpenGLFormat(int TexFormat)
 {
 	if(TexFormat == CCommandBuffer::TEXFORMAT_RGBA)
@@ -1102,9 +1097,6 @@ ERunCommandReturnTypes CCommandProcessorFragment_OpenGL::RunCommand(const CComma
 	case CCommandBuffer::CMD_UPDATE_VIEWPORT:
 		Cmd_Update_Viewport(static_cast<const CCommandBuffer::SCommand_Update_Viewport *>(pBaseCommand));
 		break;
-	case CCommandBuffer::CMD_FINISH:
-		Cmd_Finish(static_cast<const CCommandBuffer::SCommand_Finish *>(pBaseCommand));
-		break;
 
 	case CCommandBuffer::CMD_CREATE_BUFFER_OBJECT: Cmd_CreateBufferObject(static_cast<const CCommandBuffer::SCommand_CreateBufferObject *>(pBaseCommand)); break;
 	case CCommandBuffer::CMD_UPDATE_BUFFER_OBJECT: Cmd_UpdateBufferObject(static_cast<const CCommandBuffer::SCommand_UpdateBufferObject *>(pBaseCommand)); break;
@@ -1964,10 +1956,9 @@ void CCommandProcessorFragment_OpenGL2::Cmd_CreateBufferContainer(const CCommand
 
 	SBufferContainer &BufferContainer = m_vBufferContainers[Index];
 
-	for(int i = 0; i < pCommand->m_AttrCount; ++i)
+	for(size_t i = 0; i < pCommand->m_AttrCount; ++i)
 	{
-		SBufferContainerInfo::SAttribute &Attr = pCommand->m_pAttributes[i];
-		BufferContainer.m_ContainerInfo.m_vAttributes.push_back(Attr);
+		BufferContainer.m_ContainerInfo.m_vAttributes.push_back(pCommand->m_pAttributes[i]);
 	}
 
 	BufferContainer.m_ContainerInfo.m_Stride = pCommand->m_Stride;
@@ -1980,10 +1971,9 @@ void CCommandProcessorFragment_OpenGL2::Cmd_UpdateBufferContainer(const CCommand
 
 	BufferContainer.m_ContainerInfo.m_vAttributes.clear();
 
-	for(int i = 0; i < pCommand->m_AttrCount; ++i)
+	for(size_t i = 0; i < pCommand->m_AttrCount; ++i)
 	{
-		SBufferContainerInfo::SAttribute &Attr = pCommand->m_pAttributes[i];
-		BufferContainer.m_ContainerInfo.m_vAttributes.push_back(Attr);
+		BufferContainer.m_ContainerInfo.m_vAttributes.push_back(pCommand->m_pAttributes[i]);
 	}
 
 	BufferContainer.m_ContainerInfo.m_Stride = pCommand->m_Stride;

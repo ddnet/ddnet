@@ -19,6 +19,7 @@
 
 #include <list>
 #include <memory>
+#include <optional>
 #include <vector>
 
 #include "antibot.h"
@@ -35,6 +36,7 @@ class CLogMessage;
 class CMsgPacker;
 class CPacker;
 class IEngineMap;
+class ILogger;
 
 class CSnapIDPool
 {
@@ -145,6 +147,7 @@ public:
 			STATE_CONNECTING,
 			STATE_READY,
 			STATE_INGAME,
+			STATE_REDIRECTED,
 
 			SNAPRATE_INIT = 0,
 			SNAPRATE_FULL,
@@ -182,7 +185,7 @@ public:
 		char m_aName[MAX_NAME_LENGTH];
 		char m_aClan[MAX_CLAN_LENGTH];
 		int m_Country;
-		int m_Score;
+		std::optional<int> m_Score;
 		int m_Authed;
 		int m_AuthKey;
 		int m_AuthTries;
@@ -205,6 +208,7 @@ public:
 		int m_DDNetVersion;
 		char m_aDDNetVersionStr[64];
 		CUuid m_ConnectionID;
+		int64_t m_RedirectDropTime;
 
 		// DNSBL
 		int m_DnsblState;
@@ -244,6 +248,7 @@ public:
 	int m_RconAuthLevel;
 	int m_PrintCBIndex;
 	char m_aShutdownReason[128];
+	void *m_pPersistentData;
 
 	enum
 	{
@@ -272,6 +277,9 @@ public:
 	std::vector<std::string> m_vAnnouncements;
 	char m_aAnnouncementFile[IO_MAX_PATH_LENGTH];
 
+	std::shared_ptr<ILogger> m_pFileLogger = nullptr;
+	std::shared_ptr<ILogger> m_pStdoutLogger = nullptr;
+
 	CServer();
 	~CServer();
 
@@ -282,11 +290,12 @@ public:
 	void SetClientName(int ClientID, const char *pName) override;
 	void SetClientClan(int ClientID, char const *pClan) override;
 	void SetClientCountry(int ClientID, int Country) override;
-	void SetClientScore(int ClientID, int Score) override;
+	void SetClientScore(int ClientID, std::optional<int> Score) override;
 	void SetClientFlags(int ClientID, int Flags) override;
 
 	void Kick(int ClientID, const char *pReason) override;
 	void Ban(int ClientID, int Seconds, const char *pReason) override;
+	void RedirectClient(int ClientID, int Port, bool Verbose = false) override;
 
 	void DemoRecorder_HandleAutoStart() override;
 
@@ -338,6 +347,7 @@ public:
 	void SendRconCmdRem(const IConsole::CCommandInfo *pCommandInfo, int ClientID);
 	void UpdateClientRconCommands();
 
+	bool CheckReservedSlotAuth(int ClientID, const char *pPassword);
 	void ProcessClientPacket(CNetChunk *pPacket);
 
 	class CCache
@@ -348,11 +358,12 @@ public:
 		public:
 			CCacheChunk(const void *pData, int Size);
 			CCacheChunk(const CCacheChunk &) = delete;
+			CCacheChunk(CCacheChunk &&) = default;
 
 			std::vector<uint8_t> m_vData;
 		};
 
-		std::list<CCacheChunk> m_Cache;
+		std::vector<CCacheChunk> m_vCache;
 
 		CCache();
 		~CCache();
@@ -415,7 +426,6 @@ public:
 	static void ConAddSqlServer(IConsole::IResult *pResult, void *pUserData);
 	static void ConDumpSqlServers(IConsole::IResult *pResult, void *pUserData);
 
-	static void ConchainLoglevel(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainSpecialInfoupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainMaxclientsperipUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainCommandAccessUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
@@ -429,6 +439,8 @@ public:
 	static void ConchainRconHelperPasswordChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainMapUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainSixupUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	static void ConchainLoglevel(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	static void ConchainStdoutOutputLevel(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
 #if defined(CONF_FAMILY_UNIX)
 	static void ConchainConnLoggingServerChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
@@ -477,6 +489,8 @@ public:
 	void SetErrorShutdown(const char *pReason) override;
 
 	bool IsSixup(int ClientID) const override { return ClientID != SERVER_DEMO_CLIENT && m_aClients[ClientID].m_Sixup; }
+
+	void SetLoggers(std::shared_ptr<ILogger> &&pFileLogger, std::shared_ptr<ILogger> &&pStdoutLogger);
 
 #ifdef CONF_FAMILY_UNIX
 	enum CONN_LOGGING_CMD

@@ -48,7 +48,7 @@ For nginx, add `proxy_set_header Connecting-IP $remote_addr;`
 
 For Caddy, add `header_up Connecting-IP {http.request.remote}`.
 
-For Apache, add `RequestHeader set Connecting-IP "%{REMOTE_ADDR}s"` to the
+For Apache, run `a2enmod headers` and add `RequestHeader set Connecting-IP "%{REMOTE_ADDR}s"` to the
 config.
 
 If you're behind Cloudflare, instead use `--connecting-ip-header

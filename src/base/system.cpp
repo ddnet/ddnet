@@ -2,6 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <atomic>
 #include <cctype>
+#include <charconv>
 #include <cmath>
 #include <cstdarg>
 #include <cstdio>
@@ -91,27 +92,42 @@
 
 IOHANDLE io_stdin()
 {
-	return (IOHANDLE)stdin;
+#if defined(CONF_FAMILY_WINDOWS)
+	return GetStdHandle(STD_INPUT_HANDLE);
+#else
+	return stdin;
+#endif
 }
-IOHANDLE io_stdout() { return (IOHANDLE)stdout; }
-IOHANDLE io_stderr() { return (IOHANDLE)stderr; }
+
+IOHANDLE io_stdout()
+{
+#if defined(CONF_FAMILY_WINDOWS)
+	return GetStdHandle(STD_OUTPUT_HANDLE);
+#else
+	return stdout;
+#endif
+}
+
+IOHANDLE io_stderr()
+{
+#if defined(CONF_FAMILY_WINDOWS)
+	return GetStdHandle(STD_ERROR_HANDLE);
+#else
+	return stderr;
+#endif
+}
 
 IOHANDLE io_current_exe()
 {
 	// From https://stackoverflow.com/a/1024937.
 #if defined(CONF_FAMILY_WINDOWS)
-	wchar_t wpath[IO_MAX_PATH_LENGTH];
-	char path[IO_MAX_PATH_LENGTH];
-	if(GetModuleFileNameW(NULL, wpath, std::size(wpath)) == 0 || GetLastError() != ERROR_SUCCESS)
+	wchar_t wide_path[IO_MAX_PATH_LENGTH];
+	if(GetModuleFileNameW(NULL, wide_path, std::size(wide_path)) == 0 || GetLastError() != ERROR_SUCCESS)
 	{
 		return 0;
 	}
-	if(WideCharToMultiByte(CP_UTF8, 0, wpath, -1, path, sizeof(path), NULL, NULL) == 0)
-	{
-		dbg_assert(GetLastError() == ERROR_INSUFFICIENT_BUFFER, "WideCharToMultiByte failure");
-		return 0;
-	}
-	return io_open(path, IOFLAG_READ);
+	const std::string path = windows_wide_to_utf8(wide_path);
+	return io_open(path.c_str(), IOFLAG_READ);
 #elif defined(CONF_PLATFORM_MACOS)
 	char path[IO_MAX_PATH_LENGTH];
 	uint32_t path_size = sizeof(path);
@@ -174,6 +190,7 @@ static NETSOCKET_INTERNAL invalid_socket = {NETTYPE_INVALID, -1, -1, -1};
 #define AF_WEBSOCKET_INET (0xee)
 
 std::atomic_bool dbg_assert_failing = false;
+DBG_ASSERT_HANDLER dbg_assert_handler;
 
 bool dbg_assert_has_failed()
 {
@@ -184,8 +201,17 @@ void dbg_assert_imp(const char *filename, int line, int test, const char *msg)
 {
 	if(!test)
 	{
+		const bool already_failing = dbg_assert_has_failed();
 		dbg_assert_failing.store(true, std::memory_order_release);
-		dbg_msg("assert", "%s(%d): %s", filename, line, msg);
+		char error[256];
+		str_format(error, sizeof(error), "%s(%d): %s", filename, line, msg);
+		dbg_msg("assert", "%s", error);
+		if(!already_failing)
+		{
+			DBG_ASSERT_HANDLER handler = dbg_assert_handler;
+			if(handler)
+				handler(error);
+		}
 		log_global_logger_finish();
 		dbg_break();
 	}
@@ -198,6 +224,11 @@ void dbg_break()
 #else
 	abort();
 #endif
+}
+
+void dbg_assert_set_handler(DBG_ASSERT_HANDLER handler)
+{
+	dbg_assert_handler = std::move(handler);
 }
 
 void dbg_msg(const char *sys, const char *fmt, ...)
@@ -247,23 +278,53 @@ IOHANDLE io_open_impl(const char *filename, int flags)
 {
 	dbg_assert(flags == (IOFLAG_READ | IOFLAG_SKIP_BOM) || flags == IOFLAG_READ || flags == IOFLAG_WRITE || flags == IOFLAG_APPEND, "flags must be read, read+skipbom, write or append");
 #if defined(CONF_FAMILY_WINDOWS)
-	WCHAR wBuffer[IO_MAX_PATH_LENGTH];
-	dbg_assert(MultiByteToWideChar(CP_UTF8, 0, filename, -1, wBuffer, std::size(wBuffer)) > 0, "MultiByteToWideChar failure");
+	const std::wstring wide_filename = windows_utf8_to_wide(filename);
+	DWORD desired_access;
+	DWORD creation_disposition;
 	if((flags & IOFLAG_READ) != 0)
-		return (IOHANDLE)_wfsopen(wBuffer, L"rb", _SH_DENYNO);
-	if(flags == IOFLAG_WRITE)
-		return (IOHANDLE)_wfsopen(wBuffer, L"wb", _SH_DENYNO);
-	if(flags == IOFLAG_APPEND)
-		return (IOHANDLE)_wfsopen(wBuffer, L"ab", _SH_DENYNO);
-	return 0x0;
+	{
+		desired_access = FILE_READ_DATA;
+		creation_disposition = OPEN_EXISTING;
+	}
+	else if(flags == IOFLAG_WRITE)
+	{
+		desired_access = FILE_WRITE_DATA;
+		creation_disposition = OPEN_ALWAYS;
+	}
+	else if(flags == IOFLAG_APPEND)
+	{
+		desired_access = FILE_APPEND_DATA;
+		creation_disposition = OPEN_ALWAYS;
+	}
+	else
+	{
+		dbg_assert(false, "logic error");
+		return nullptr;
+	}
+	HANDLE handle = CreateFileW(wide_filename.c_str(), desired_access, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, nullptr, creation_disposition, FILE_ATTRIBUTE_NORMAL, nullptr);
+	if(handle == INVALID_HANDLE_VALUE)
+		return nullptr; // otherwise all existing checks don't work for the invalid handle
+	return handle;
 #else
+	const char *open_mode;
 	if((flags & IOFLAG_READ) != 0)
-		return (IOHANDLE)fopen(filename, "rb");
-	if(flags == IOFLAG_WRITE)
-		return (IOHANDLE)fopen(filename, "wb");
-	if(flags == IOFLAG_APPEND)
-		return (IOHANDLE)fopen(filename, "ab");
-	return 0x0;
+	{
+		open_mode = "rb";
+	}
+	else if(flags == IOFLAG_WRITE)
+	{
+		open_mode = "wb";
+	}
+	else if(flags == IOFLAG_APPEND)
+	{
+		open_mode = "ab";
+	}
+	else
+	{
+		dbg_assert(false, "logic error");
+		return nullptr;
+	}
+	return fopen(filename, open_mode);
 #endif
 }
 
@@ -284,7 +345,13 @@ IOHANDLE io_open(const char *filename, int flags)
 
 unsigned io_read(IOHANDLE io, void *buffer, unsigned size)
 {
+#if defined(CONF_FAMILY_WINDOWS)
+	DWORD actual_size;
+	ReadFile((HANDLE)io, buffer, size, &actual_size, nullptr);
+	return actual_size;
+#else
 	return fread(buffer, 1, size, (FILE *)io);
+#endif
 }
 
 void io_read_all(IOHANDLE io, void **result, unsigned *result_len)
@@ -334,14 +401,31 @@ char *io_read_all_str(IOHANDLE io)
 
 unsigned io_skip(IOHANDLE io, int size)
 {
-	fseek((FILE *)io, size, SEEK_CUR);
-	return size;
+	return io_seek(io, size, IOSEEK_CUR);
 }
 
 int io_seek(IOHANDLE io, int offset, int origin)
 {
+#if defined(CONF_FAMILY_WINDOWS)
+	DWORD move_method;
+	switch(origin)
+	{
+	case IOSEEK_START:
+		move_method = FILE_BEGIN;
+		break;
+	case IOSEEK_CUR:
+		move_method = FILE_CURRENT;
+		break;
+	case IOSEEK_END:
+		move_method = FILE_END;
+		break;
+	default:
+		dbg_assert(false, "origin invalid");
+		return -1;
+	}
+	return SetFilePointer((HANDLE)io, offset, nullptr, move_method) == INVALID_SET_FILE_POINTER ? -1 : 0;
+#else
 	int real_origin;
-
 	switch(origin)
 	{
 	case IOSEEK_START:
@@ -354,15 +438,21 @@ int io_seek(IOHANDLE io, int offset, int origin)
 		real_origin = SEEK_END;
 		break;
 	default:
+		dbg_assert(false, "origin invalid");
 		return -1;
 	}
-
 	return fseek((FILE *)io, offset, real_origin);
+#endif
 }
 
 long int io_tell(IOHANDLE io)
 {
+#if defined(CONF_FAMILY_WINDOWS)
+	const DWORD position = SetFilePointer((HANDLE)io, 0, nullptr, FILE_CURRENT);
+	return position == INVALID_SET_FILE_POINTER ? -1 : position;
+#else
 	return ftell((FILE *)io);
+#endif
 }
 
 long int io_length(IOHANDLE io)
@@ -376,12 +466,23 @@ long int io_length(IOHANDLE io)
 
 int io_error(IOHANDLE io)
 {
+#if defined(CONF_FAMILY_WINDOWS)
+	// Only works when called directly after the operation that failed
+	return GetLastError();
+#else
 	return ferror((FILE *)io);
+#endif
 }
 
 unsigned io_write(IOHANDLE io, const void *buffer, unsigned size)
 {
+#if defined(CONF_FAMILY_WINDOWS)
+	DWORD actual_size;
+	WriteFile((HANDLE)io, buffer, size, &actual_size, nullptr);
+	return actual_size;
+#else
 	return fwrite(buffer, 1, size, (FILE *)io);
+#endif
 }
 
 bool io_write_newline(IOHANDLE io)
@@ -395,12 +496,20 @@ bool io_write_newline(IOHANDLE io)
 
 int io_close(IOHANDLE io)
 {
+#if defined(CONF_FAMILY_WINDOWS)
+	return CloseHandle((HANDLE)io) == 0;
+#else
 	return fclose((FILE *)io) != 0;
+#endif
 }
 
 int io_flush(IOHANDLE io)
 {
+#if defined(CONF_FAMILY_WINDOWS)
+	return FlushFileBuffers((HANDLE)io) == FALSE;
+#else
 	return fflush((FILE *)io);
+#endif
 }
 
 int io_sync(IOHANDLE io)
@@ -410,7 +519,7 @@ int io_sync(IOHANDLE io)
 		return 1;
 	}
 #if defined(CONF_FAMILY_WINDOWS)
-	return FlushFileBuffers((HANDLE)_get_osfhandle(_fileno((FILE *)io))) == 0;
+	return FlushFileBuffers((HANDLE)io) == 0;
 #else
 	return fsync(fileno((FILE *)io)) != 0;
 #endif
@@ -824,12 +933,12 @@ void thread_detach(void *thread)
 #endif
 }
 
-void *thread_init_and_detach(void (*threadfunc)(void *), void *u, const char *name)
+bool thread_init_and_detach(void (*threadfunc)(void *), void *u, const char *name)
 {
 	void *thread = thread_init(threadfunc, u, name);
 	if(thread)
 		thread_detach(thread);
-	return thread;
+	return thread != nullptr;
 }
 
 #if defined(CONF_FAMILY_UNIX)
@@ -1335,6 +1444,48 @@ static int parse_uint16(unsigned short *out, const char **str)
 	return 0;
 }
 
+int net_addr_from_url(NETADDR *addr, const char *string, char *host_buf, size_t host_buf_size)
+{
+	char host[128];
+	int length;
+	int start = 0;
+	int end;
+	int failure;
+	const char *str = str_startswith(string, "tw-0.6+udp://");
+	if(!str)
+		return 1;
+
+	mem_zero(addr, sizeof(*addr));
+
+	length = str_length(str);
+	end = length;
+	for(int i = 0; i < length; i++)
+	{
+		if(str[i] == '@')
+		{
+			if(start != 0)
+			{
+				// Two at signs.
+				return true;
+			}
+			start = i + 1;
+		}
+		else if(str[i] == '/' || str[i] == '?' || str[i] == '#')
+		{
+			end = i;
+			break;
+		}
+	}
+	str_truncate(host, sizeof(host), str + start, end - start);
+	if(host_buf)
+		str_copy(host_buf, host, host_buf_size);
+
+	if((failure = net_addr_from_str(addr, host)))
+		return failure;
+
+	return failure;
+}
+
 int net_addr_from_str(NETADDR *addr, const char *string)
 {
 	const char *str = string;
@@ -1461,18 +1612,14 @@ static int priv_net_close_all_sockets(NETSOCKET sock)
 }
 
 #if defined(CONF_FAMILY_WINDOWS)
-char *windows_format_system_message(unsigned long error)
+std::string windows_format_system_message(unsigned long error)
 {
 	WCHAR *wide_message;
 	const DWORD flags = FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS | FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_MAX_WIDTH_MASK;
 	if(FormatMessageW(flags, NULL, error, 0, (LPWSTR)&wide_message, 0, NULL) == 0)
-	{
-		return nullptr;
-	}
-	int len = WideCharToMultiByte(CP_UTF8, 0, wide_message, -1, NULL, 0, NULL, NULL);
-	dbg_assert(len > 0, "WideCharToMultiByte failure");
-	char *message = (char *)malloc(len * sizeof(*message));
-	dbg_assert(WideCharToMultiByte(CP_UTF8, 0, wide_message, -1, message, len, NULL, NULL) == len, "WideCharToMultiByte failure");
+		return "unknown error";
+
+	const std::string message = windows_wide_to_utf8(wide_message);
 	LocalFree(wide_message);
 	return message;
 }
@@ -1488,9 +1635,8 @@ static int priv_net_create_socket(int domain, int type, struct sockaddr *addr, i
 	{
 #if defined(CONF_FAMILY_WINDOWS)
 		int error = WSAGetLastError();
-		char *message = windows_format_system_message(error);
-		dbg_msg("net", "failed to create socket with domain %d and type %d (%d '%s')", domain, type, error, message == nullptr ? "unknown error" : message);
-		free(message);
+		const std::string message = windows_format_system_message(error);
+		dbg_msg("net", "failed to create socket with domain %d and type %d (%d '%s')", domain, type, error, message.c_str());
 #else
 		dbg_msg("net", "failed to create socket with domain %d and type %d (%d '%s')", domain, type, errno, strerror(errno));
 #endif
@@ -1524,9 +1670,8 @@ static int priv_net_create_socket(int domain, int type, struct sockaddr *addr, i
 	{
 #if defined(CONF_FAMILY_WINDOWS)
 		int error = WSAGetLastError();
-		char *message = windows_format_system_message(error);
-		dbg_msg("net", "failed to bind socket with domain %d and type %d (%d '%s')", domain, type, error, message == nullptr ? "unknown error" : message);
-		free(message);
+		const std::string message = windows_format_system_message(error);
+		dbg_msg("net", "failed to bind socket with domain %d and type %d (%d '%s')", domain, type, error, message.c_str());
 #else
 		dbg_msg("net", "failed to bind socket with domain %d and type %d (%d '%s')", domain, type, errno, strerror(errno));
 #endif
@@ -2119,27 +2264,20 @@ static inline time_t filetime_to_unixtime(LPFILETIME filetime)
 void fs_listdir(const char *dir, FS_LISTDIR_CALLBACK cb, int type, void *user)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	WIN32_FIND_DATAW finddata;
-	HANDLE handle;
 	char buffer[IO_MAX_PATH_LENGTH];
-	WCHAR wBuffer[IO_MAX_PATH_LENGTH];
-
 	str_format(buffer, sizeof(buffer), "%s/*", dir);
-	dbg_assert(MultiByteToWideChar(CP_UTF8, 0, buffer, -1, wBuffer, std::size(wBuffer)) > 0, "MultiByteToWideChar failure");
+	const std::wstring wide_buffer = windows_utf8_to_wide(buffer);
 
-	handle = FindFirstFileW(wBuffer, &finddata);
+	WIN32_FIND_DATAW finddata;
+	HANDLE handle = FindFirstFileW(wide_buffer.c_str(), &finddata);
 	if(handle == INVALID_HANDLE_VALUE)
 		return;
 
 	/* add all the entries */
 	do
 	{
-		if(WideCharToMultiByte(CP_UTF8, 0, finddata.cFileName, -1, buffer, sizeof(buffer), NULL, NULL) == 0)
-		{
-			dbg_assert(GetLastError() == ERROR_INSUFFICIENT_BUFFER, "WideCharToMultiByte failure");
-			continue;
-		}
-		if(cb(buffer, (finddata.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0, type, user))
+		const std::string current_entry = windows_wide_to_utf8(finddata.cFileName);
+		if(cb(current_entry.c_str(), (finddata.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0, type, user))
 			break;
 	} while(FindNextFileW(handle, &finddata));
 
@@ -2171,29 +2309,22 @@ void fs_listdir(const char *dir, FS_LISTDIR_CALLBACK cb, int type, void *user)
 void fs_listdir_fileinfo(const char *dir, FS_LISTDIR_CALLBACK_FILEINFO cb, int type, void *user)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	WIN32_FIND_DATAW finddata;
-	HANDLE handle;
 	char buffer[IO_MAX_PATH_LENGTH];
-	WCHAR wBuffer[IO_MAX_PATH_LENGTH];
-
 	str_format(buffer, sizeof(buffer), "%s/*", dir);
-	dbg_assert(MultiByteToWideChar(CP_UTF8, 0, buffer, -1, wBuffer, std::size(wBuffer)) > 0, "MultiByteToWideChar failure");
+	const std::wstring wide_buffer = windows_utf8_to_wide(buffer);
 
-	handle = FindFirstFileW(wBuffer, &finddata);
+	WIN32_FIND_DATAW finddata;
+	HANDLE handle = FindFirstFileW(wide_buffer.c_str(), &finddata);
 	if(handle == INVALID_HANDLE_VALUE)
 		return;
 
 	/* add all the entries */
 	do
 	{
-		if(WideCharToMultiByte(CP_UTF8, 0, finddata.cFileName, -1, buffer, sizeof(buffer), NULL, NULL) == 0)
-		{
-			dbg_assert(GetLastError() == ERROR_INSUFFICIENT_BUFFER, "WideCharToMultiByte failure");
-			continue;
-		}
+		const std::string current_entry = windows_wide_to_utf8(finddata.cFileName);
 
 		CFsFileInfo info;
-		info.m_pName = buffer;
+		info.m_pName = current_entry.c_str();
 		info.m_TimeCreated = filetime_to_unixtime(&finddata.ftCreationTime);
 		info.m_TimeModified = filetime_to_unixtime(&finddata.ftLastWriteTime);
 
@@ -2238,16 +2369,11 @@ void fs_listdir_fileinfo(const char *dir, FS_LISTDIR_CALLBACK_FILEINFO cb, int t
 int fs_storage_path(const char *appname, char *path, int max)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	WCHAR *home = _wgetenv(L"APPDATA");
-	if(!home)
+	WCHAR *wide_home = _wgetenv(L"APPDATA");
+	if(!wide_home)
 		return -1;
-	char buffer[IO_MAX_PATH_LENGTH];
-	if(WideCharToMultiByte(CP_UTF8, 0, home, -1, buffer, sizeof(buffer), NULL, NULL) == 0)
-	{
-		dbg_assert(GetLastError() == ERROR_INSUFFICIENT_BUFFER, "WideCharToMultiByte failure");
-		return -1;
-	}
-	str_format(path, max, "%s/%s", buffer, appname);
+	const std::string home = windows_wide_to_utf8(wide_home);
+	str_format(path, max, "%s/%s", home.c_str(), appname);
 	return 0;
 #elif defined(CONF_PLATFORM_ANDROID)
 	// just use the data directory
@@ -2304,9 +2430,8 @@ int fs_makedir_rec_for(const char *path)
 int fs_makedir(const char *path)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	WCHAR wBuffer[IO_MAX_PATH_LENGTH];
-	dbg_assert(MultiByteToWideChar(CP_UTF8, 0, path, -1, wBuffer, std::size(wBuffer)) > 0, "MultiByteToWideChar failure");
-	if(CreateDirectoryW(wBuffer, NULL) != 0)
+	const std::wstring wide_path = windows_utf8_to_wide(path);
+	if(CreateDirectoryW(wide_path.c_str(), NULL) != 0)
 		return 0;
 	if(GetLastError() == ERROR_ALREADY_EXISTS)
 		return 0;
@@ -2328,9 +2453,8 @@ int fs_makedir(const char *path)
 int fs_removedir(const char *path)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	WCHAR wPath[IO_MAX_PATH_LENGTH];
-	dbg_assert(MultiByteToWideChar(CP_UTF8, 0, path, -1, wPath, std::size(wPath)) > 0, "MultiByteToWideChar failure");
-	if(RemoveDirectoryW(wPath) != 0)
+	const std::wstring wide_path = windows_utf8_to_wide(path);
+	if(RemoveDirectoryW(wide_path.c_str()) != 0)
 		return 0;
 	return -1;
 #else
@@ -2343,9 +2467,8 @@ int fs_removedir(const char *path)
 int fs_is_file(const char *path)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	WCHAR wPath[IO_MAX_PATH_LENGTH];
-	dbg_assert(MultiByteToWideChar(CP_UTF8, 0, path, -1, wPath, std::size(wPath)) > 0, "MultiByteToWideChar failure");
-	DWORD attributes = GetFileAttributesW(wPath);
+	const std::wstring wide_path = windows_utf8_to_wide(path);
+	DWORD attributes = GetFileAttributesW(wide_path.c_str());
 	return attributes != INVALID_FILE_ATTRIBUTES && !(attributes & FILE_ATTRIBUTE_DIRECTORY) ? 1 : 0;
 #else
 	struct stat sb;
@@ -2358,9 +2481,8 @@ int fs_is_file(const char *path)
 int fs_is_dir(const char *path)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	WCHAR wPath[IO_MAX_PATH_LENGTH];
-	dbg_assert(MultiByteToWideChar(CP_UTF8, 0, path, -1, wPath, std::size(wPath)) > 0, "MultiByteToWideChar failure");
-	DWORD attributes = GetFileAttributesW(wPath);
+	const std::wstring wide_path = windows_utf8_to_wide(path);
+	DWORD attributes = GetFileAttributesW(wide_path.c_str());
 	return attributes != INVALID_FILE_ATTRIBUTES && (attributes & FILE_ATTRIBUTE_DIRECTORY) ? 1 : 0;
 #else
 	struct stat sb;
@@ -2373,9 +2495,8 @@ int fs_is_dir(const char *path)
 int fs_is_relative_path(const char *path)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	WCHAR wPath[IO_MAX_PATH_LENGTH];
-	dbg_assert(MultiByteToWideChar(CP_UTF8, 0, path, -1, wPath, std::size(wPath)) > 0, "MultiByteToWideChar failure");
-	return PathIsRelativeW(wPath) ? 1 : 0;
+	const std::wstring wide_path = windows_utf8_to_wide(path);
+	return PathIsRelativeW(wide_path.c_str()) ? 1 : 0;
 #else
 	return path[0] == '/' ? 0 : 1; // yes, it's that simple
 #endif
@@ -2386,14 +2507,10 @@ int fs_chdir(const char *path)
 	if(fs_is_dir(path))
 	{
 #if defined(CONF_FAMILY_WINDOWS)
-		WCHAR wBuffer[IO_MAX_PATH_LENGTH];
-		dbg_assert(MultiByteToWideChar(CP_UTF8, 0, path, -1, wBuffer, std::size(wBuffer)) > 0, "MultiByteToWideChar failure");
-		return SetCurrentDirectoryW(wBuffer) != 0 ? 0 : 1;
+		const std::wstring wide_path = windows_utf8_to_wide(path);
+		return SetCurrentDirectoryW(wide_path.c_str()) != 0 ? 0 : 1;
 #else
-		if(chdir(path))
-			return 1;
-		else
-			return 0;
+		return chdir(path) ? 1 : 0;
 #endif
 	}
 	else
@@ -2403,19 +2520,55 @@ int fs_chdir(const char *path)
 char *fs_getcwd(char *buffer, int buffer_size)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	WCHAR wBuffer[IO_MAX_PATH_LENGTH];
-	DWORD result = GetCurrentDirectoryW(std::size(wBuffer), wBuffer);
-	if(result == 0 || result > std::size(wBuffer))
-		return nullptr;
-	if(WideCharToMultiByte(CP_UTF8, 0, wBuffer, -1, buffer, buffer_size, NULL, NULL) == 0)
+	const DWORD size_needed = GetCurrentDirectoryW(0, nullptr);
+	std::wstring wide_current_dir(size_needed, L'0');
+	DWORD result = GetCurrentDirectoryW(size_needed, &wide_current_dir[0]);
+	if(result == 0)
 	{
-		dbg_assert(GetLastError() == ERROR_INSUFFICIENT_BUFFER, "WideCharToMultiByte failure");
+		const DWORD LastError = GetLastError();
+		const std::string ErrorMsg = windows_format_system_message(LastError);
+		dbg_msg("filesystem", "GetCurrentDirectoryW failed: %ld %s", LastError, ErrorMsg.c_str());
 		return nullptr;
 	}
+	const std::string current_dir = windows_wide_to_utf8(wide_current_dir.c_str());
+	str_copy(buffer, current_dir.c_str(), buffer_size);
 	return buffer;
 #else
 	return getcwd(buffer, buffer_size);
 #endif
+}
+
+const char *fs_filename(const char *path)
+{
+	for(const char *filename = path + str_length(path); filename >= path; --filename)
+	{
+		if(filename[0] == '/' || filename[0] == '\\')
+			return filename + 1;
+	}
+	return path;
+}
+
+void fs_split_file_extension(const char *filename, char *name, size_t name_size, char *extension, size_t extension_size)
+{
+	dbg_assert(name != nullptr || extension != nullptr, "name or extension parameter required");
+	dbg_assert(name == nullptr || name_size > 0, "name_size invalid");
+	dbg_assert(extension == nullptr || extension_size > 0, "extension_size invalid");
+
+	const char *last_dot = str_rchr(filename, '.');
+	if(last_dot == nullptr || last_dot == filename)
+	{
+		if(extension != nullptr)
+			extension[0] = '\0';
+		if(name != nullptr)
+			str_copy(name, filename, name_size);
+	}
+	else
+	{
+		if(extension != nullptr)
+			str_copy(extension, last_dot + 1, extension_size);
+		if(name != nullptr)
+			str_truncate(name, name_size, filename, last_dot - filename);
+	}
 }
 
 int fs_parent_dir(char *path)
@@ -2438,9 +2591,8 @@ int fs_parent_dir(char *path)
 int fs_remove(const char *filename)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	WCHAR wFilename[IO_MAX_PATH_LENGTH];
-	dbg_assert(MultiByteToWideChar(CP_UTF8, 0, filename, -1, wFilename, std::size(wFilename)) > 0, "MultiByteToWideChar failure");
-	return DeleteFileW(wFilename) == 0;
+	const std::wstring wide_filename = windows_utf8_to_wide(filename);
+	return DeleteFileW(wide_filename.c_str()) == 0;
 #else
 	return unlink(filename) != 0;
 #endif
@@ -2449,11 +2601,9 @@ int fs_remove(const char *filename)
 int fs_rename(const char *oldname, const char *newname)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	WCHAR wOldname[IO_MAX_PATH_LENGTH];
-	WCHAR wNewname[IO_MAX_PATH_LENGTH];
-	dbg_assert(MultiByteToWideChar(CP_UTF8, 0, oldname, -1, wOldname, std::size(wOldname)) > 0, "MultiByteToWideChar failure");
-	dbg_assert(MultiByteToWideChar(CP_UTF8, 0, newname, -1, wNewname, std::size(wNewname)) > 0, "MultiByteToWideChar failure");
-	if(MoveFileExW(wOldname, wNewname, MOVEFILE_REPLACE_EXISTING | MOVEFILE_COPY_ALLOWED) == 0)
+	const std::wstring wide_oldname = windows_utf8_to_wide(oldname);
+	const std::wstring wide_newname = windows_utf8_to_wide(newname);
+	if(MoveFileExW(wide_oldname.c_str(), wide_newname.c_str(), MOVEFILE_REPLACE_EXISTING | MOVEFILE_COPY_ALLOWED) == 0)
 		return 1;
 #else
 	if(rename(oldname, newname) != 0)
@@ -2466,11 +2616,8 @@ int fs_file_time(const char *name, time_t *created, time_t *modified)
 {
 #if defined(CONF_FAMILY_WINDOWS)
 	WIN32_FIND_DATAW finddata;
-	HANDLE handle;
-	WCHAR wBuffer[IO_MAX_PATH_LENGTH];
-
-	dbg_assert(MultiByteToWideChar(CP_UTF8, 0, name, -1, wBuffer, std::size(wBuffer)) > 0, "MultiByteToWideChar failure");
-	handle = FindFirstFileW(wBuffer, &finddata);
+	const std::wstring wide_name = windows_utf8_to_wide(name);
+	HANDLE handle = FindFirstFileW(wide_name.c_str(), &finddata);
 	if(handle == INVALID_HANDLE_VALUE)
 		return 1;
 
@@ -3458,10 +3605,48 @@ int str_isallnum(const char *str)
 	return 1;
 }
 
-int str_toint(const char *str) { return str_toint_base(str, 10); }
-int str_toint_base(const char *str, int base) { return strtol(str, NULL, base); }
-unsigned long str_toulong_base(const char *str, int base) { return strtoul(str, NULL, base); }
-float str_tofloat(const char *str) { return strtod(str, NULL); }
+int str_isallnum_hex(const char *str)
+{
+	while(*str)
+	{
+		if(!(*str >= '0' && *str <= '9') && !(*str >= 'a' && *str <= 'f') && !(*str >= 'A' && *str <= 'F'))
+			return 0;
+		str++;
+	}
+	return 1;
+}
+
+int str_toint(const char *str)
+{
+	return str_toint_base(str, 10);
+}
+
+int str_toint_base(const char *str, int base)
+{
+	return strtol(str, nullptr, base);
+}
+
+unsigned long str_toulong_base(const char *str, int base)
+{
+	return strtoul(str, nullptr, base);
+}
+
+int64_t str_toint64_base(const char *str, int base)
+{
+	return strtoll(str, nullptr, base);
+}
+
+float str_tofloat(const char *str)
+{
+	return strtod(str, nullptr);
+}
+
+void str_from_int(int value, char *buffer, size_t buffer_size)
+{
+	buffer[0] = '\0'; // Fix false positive clang-analyzer-core.UndefinedBinaryOperatorResult when using result
+	auto result = std::to_chars(buffer, buffer + buffer_size - 1, value);
+	result.ptr[0] = '\0';
+}
 
 int str_utf8_comp_nocase(const char *a, const char *b)
 {
@@ -3503,7 +3688,7 @@ int str_utf8_comp_nocase_num(const char *a, const char *b, int num)
 	return (unsigned char)*a - (unsigned char)*b;
 }
 
-const char *str_utf8_find_nocase(const char *haystack, const char *needle)
+const char *str_utf8_find_nocase(const char *haystack, const char *needle, const char **end)
 {
 	while(*haystack) /* native implementation */
 	{
@@ -3517,11 +3702,17 @@ const char *str_utf8_find_nocase(const char *haystack, const char *needle)
 			b = b_next;
 		}
 		if(!(*b))
+		{
+			if(end != nullptr)
+				*end = a_next;
 			return haystack;
+		}
 		str_utf8_decode(&haystack);
 	}
 
-	return 0;
+	if(end != nullptr)
+		*end = nullptr;
+	return nullptr;
 }
 
 int str_utf8_isspace(int code)
@@ -3750,7 +3941,7 @@ int str_utf8_check(const char *str)
 	return 1;
 }
 
-void str_utf8_stats(const char *str, int max_size, int max_count, int *size, int *count)
+void str_utf8_stats(const char *str, size_t max_size, size_t max_count, size_t *size, size_t *count)
 {
 	const char *cursor = str;
 	*size = 0;
@@ -3761,13 +3952,41 @@ void str_utf8_stats(const char *str, int max_size, int max_count, int *size, int
 		{
 			break;
 		}
-		if(cursor - str >= max_size)
+		if((size_t)(cursor - str) >= max_size)
 		{
 			break;
 		}
 		*size = cursor - str;
 		++(*count);
 	}
+}
+
+size_t str_utf8_offset_bytes_to_chars(const char *str, size_t byte_offset)
+{
+	size_t char_offset = 0;
+	size_t current_offset = 0;
+	while(current_offset < byte_offset)
+	{
+		const size_t prev_byte_offset = current_offset;
+		current_offset = str_utf8_forward(str, current_offset);
+		if(current_offset == prev_byte_offset)
+			break;
+		char_offset++;
+	}
+	return char_offset;
+}
+
+size_t str_utf8_offset_chars_to_bytes(const char *str, size_t char_offset)
+{
+	size_t byte_offset = 0;
+	for(size_t i = 0; i < char_offset; i++)
+	{
+		const size_t prev_byte_offset = byte_offset;
+		byte_offset = str_utf8_forward(str, byte_offset);
+		if(byte_offset == prev_byte_offset)
+			break;
+	}
+	return byte_offset;
 }
 
 unsigned str_quickhash(const char *str)
@@ -3895,13 +4114,13 @@ void cmdline_free(int argc, const char **argv)
 PROCESS shell_execute(const char *file)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	WCHAR wBuffer[IO_MAX_PATH_LENGTH];
-	dbg_assert(MultiByteToWideChar(CP_UTF8, 0, file, -1, wBuffer, std::size(wBuffer)) > 0, "MultiByteToWideChar failure");
+	const std::wstring wide_file = windows_utf8_to_wide(file);
+
 	SHELLEXECUTEINFOW info;
 	mem_zero(&info, sizeof(SHELLEXECUTEINFOW));
 	info.cbSize = sizeof(SHELLEXECUTEINFOW);
 	info.lpVerb = L"open";
-	info.lpFile = wBuffer;
+	info.lpFile = wide_file.c_str();
 	info.nShow = SW_SHOWMINNOACTIVE;
 	info.fMask = SEE_MASK_NOCLOSEPROCESS;
 	// Save and restore the FPU control word because ShellExecute might change it
@@ -3942,20 +4161,20 @@ int kill_process(PROCESS process)
 #elif defined(CONF_FAMILY_UNIX)
 	int status;
 	kill(process, SIGTERM);
-	return !waitpid(process, &status, 0);
+	return waitpid(process, &status, 0) != -1;
 #endif
 }
 
 int open_link(const char *link)
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	WCHAR wBuffer[IO_MAX_PATH_LENGTH];
-	dbg_assert(MultiByteToWideChar(CP_UTF8, 0, link, -1, wBuffer, std::size(wBuffer)) > 0, "MultiByteToWideChar failure");
+	const std::wstring wide_link = windows_utf8_to_wide(link);
+
 	SHELLEXECUTEINFOW info;
 	mem_zero(&info, sizeof(SHELLEXECUTEINFOW));
 	info.cbSize = sizeof(SHELLEXECUTEINFOW);
 	info.lpVerb = NULL; // NULL to use the default verb, as "open" may not be available
-	info.lpFile = wBuffer;
+	info.lpFile = wide_link.c_str();
 	info.nShow = SW_SHOWNORMAL;
 	// The SEE_MASK_NOASYNC flag ensures that the ShellExecuteEx function
 	// finishes its DDE conversation before it returns, so it's not necessary
@@ -3999,7 +4218,7 @@ int open_file(const char *path)
 	{
 		if(!fs_getcwd(workingDir, sizeof(workingDir)))
 			return 0;
-		str_append(workingDir, "/", sizeof(workingDir));
+		str_append(workingDir, "/");
 	}
 	else
 		workingDir[0] = '\0';
@@ -4125,7 +4344,9 @@ void secure_random_fill(void *bytes, unsigned length)
 #if defined(CONF_FAMILY_WINDOWS)
 	if(!CryptGenRandom(secure_random_data.provider, length, (unsigned char *)bytes))
 	{
-		dbg_msg("secure", "CryptGenRandom failed, last_error=%ld", GetLastError());
+		const DWORD LastError = GetLastError();
+		const std::string ErrorMsg = windows_format_system_message(LastError);
+		dbg_msg("secure", "CryptGenRandom failed: %ld %s", LastError, ErrorMsg.c_str());
 		dbg_break();
 	}
 #else
@@ -4172,7 +4393,7 @@ int secure_rand_below(int below)
 	}
 }
 
-int os_version_str(char *version, int length)
+bool os_version_str(char *version, size_t length)
 {
 #if defined(CONF_FAMILY_WINDOWS)
 	const WCHAR *module_path = L"kernel32.dll";
@@ -4180,20 +4401,20 @@ int os_version_str(char *version, int length)
 	DWORD size = GetFileVersionInfoSizeW(module_path, &handle);
 	if(!size)
 	{
-		return 1;
+		return false;
 	}
 	void *data = malloc(size);
 	if(!GetFileVersionInfoW(module_path, handle, size, data))
 	{
 		free(data);
-		return 1;
+		return false;
 	}
 	VS_FIXEDFILEINFO *fileinfo;
 	UINT unused;
 	if(!VerQueryValueW(data, L"\\", (void **)&fileinfo, &unused))
 	{
 		free(data);
-		return 1;
+		return false;
 	}
 	str_format(version, length, "Windows %hu.%hu.%hu.%hu",
 		HIWORD(fileinfo->dwProductVersionMS),
@@ -4201,12 +4422,12 @@ int os_version_str(char *version, int length)
 		HIWORD(fileinfo->dwProductVersionLS),
 		LOWORD(fileinfo->dwProductVersionLS));
 	free(data);
-	return 0;
+	return true;
 #else
 	struct utsname u;
 	if(uname(&u))
 	{
-		return 1;
+		return false;
 	}
 	char extra[128];
 	extra[0] = 0;
@@ -4247,7 +4468,7 @@ int os_version_str(char *version, int length)
 	} while(false);
 
 	str_format(version, length, "%s %s (%s, %s)%s", u.sysname, u.release, u.machine, u.version, extra);
-	return 0;
+	return true;
 #endif
 }
 
@@ -4257,11 +4478,8 @@ void os_locale_str(char *locale, size_t length)
 	wchar_t wide_buffer[LOCALE_NAME_MAX_LENGTH];
 	dbg_assert(GetUserDefaultLocaleName(wide_buffer, std::size(wide_buffer)) > 0, "GetUserDefaultLocaleName failure");
 
-	// Assume maximum possible length for encoding as UTF-8.
-	char buffer[UTF8_BYTE_LENGTH * LOCALE_NAME_MAX_LENGTH + 1];
-	dbg_assert(WideCharToMultiByte(CP_UTF8, 0, wide_buffer, -1, buffer, sizeof(buffer), NULL, NULL) > 0, "WideCharToMultiByte failure");
-
-	str_copy(locale, buffer, length);
+	const std::string buffer = windows_wide_to_utf8(wide_buffer);
+	str_copy(locale, buffer.c_str(), length);
 #elif defined(CONF_PLATFORM_MACOS)
 	CFLocaleRef locale_ref = CFLocaleCopyCurrent();
 	CFStringRef locale_identifier_ref = static_cast<CFStringRef>(CFLocaleGetValue(locale_ref, kCFLocaleIdentifier));
@@ -4329,7 +4547,9 @@ void init_exception_handler()
 	exception_handling_module = LoadLibraryA(module_name);
 	if(exception_handling_module == nullptr)
 	{
-		dbg_msg("exception_handling", "failed to load exception handling library '%s' (error %ld)", module_name, GetLastError());
+		const DWORD LastError = GetLastError();
+		const std::string ErrorMsg = windows_format_system_message(LastError);
+		dbg_msg("exception_handling", "failed to load exception handling library '%s' (error %ld %s)", module_name, LastError, ErrorMsg.c_str());
 	}
 #else
 #error exception handling not implemented
@@ -4341,8 +4561,7 @@ void set_exception_handler_log_file(const char *log_file_path)
 #if defined(CONF_FAMILY_WINDOWS)
 	if(exception_handling_module != nullptr)
 	{
-		WCHAR wBuffer[IO_MAX_PATH_LENGTH];
-		dbg_assert(MultiByteToWideChar(CP_UTF8, 0, log_file_path, -1, wBuffer, std::size(wBuffer)) > 0, "MultiByteToWideChar failure");
+		const std::wstring wide_log_file_path = windows_utf8_to_wide(log_file_path);
 		// Intentional
 #ifdef __MINGW32__
 #pragma GCC diagnostic push
@@ -4354,9 +4573,13 @@ void set_exception_handler_log_file(const char *log_file_path)
 #pragma GCC diagnostic pop
 #endif
 		if(exception_log_file_path_func == nullptr)
-			dbg_msg("exception_handling", "could not find function '%s' in exception handling library (error %ld)", function_name, GetLastError());
+		{
+			const DWORD LastError = GetLastError();
+			const std::string ErrorMsg = windows_format_system_message(LastError);
+			dbg_msg("exception_handling", "could not find function '%s' in exception handling library (error %ld %s)", function_name, LastError, ErrorMsg.c_str());
+		}
 		else
-			exception_log_file_path_func(wBuffer);
+			exception_log_file_path_func(wide_log_file_path.c_str());
 	}
 #else
 #error exception handling not implemented
@@ -4376,6 +4599,28 @@ int net_socket_read_wait(NETSOCKET sock, std::chrono::nanoseconds nanoseconds)
 }
 
 #if defined(CONF_FAMILY_WINDOWS)
+std::wstring windows_utf8_to_wide(const char *str)
+{
+	const int orig_length = str_length(str);
+	if(orig_length == 0)
+		return L"";
+	const int size_needed = MultiByteToWideChar(CP_UTF8, 0, str, orig_length, nullptr, 0);
+	std::wstring wide_string(size_needed, L'\0');
+	dbg_assert(MultiByteToWideChar(CP_UTF8, 0, str, orig_length, &wide_string[0], size_needed) == size_needed, "MultiByteToWideChar failure");
+	return wide_string;
+}
+
+std::string windows_wide_to_utf8(const wchar_t *wide_str)
+{
+	const int orig_length = wcslen(wide_str);
+	if(orig_length == 0)
+		return "";
+	const int size_needed = WideCharToMultiByte(CP_UTF8, 0, wide_str, orig_length, nullptr, 0, nullptr, nullptr);
+	std::string string(size_needed, '\0');
+	dbg_assert(WideCharToMultiByte(CP_UTF8, 0, wide_str, orig_length, &string[0], size_needed, nullptr, nullptr) == size_needed, "WideCharToMultiByte failure");
+	return string;
+}
+
 // See https://learn.microsoft.com/en-us/windows/win32/learnwin32/initializing-the-com-library
 CWindowsComLifecycle::CWindowsComLifecycle(bool HasWindow)
 {
@@ -4390,18 +4635,8 @@ CWindowsComLifecycle::~CWindowsComLifecycle()
 
 static void windows_print_error(const char *system, const char *prefix, HRESULT error)
 {
-	char *message = windows_format_system_message(error);
-	dbg_msg(system, "%s: %s", prefix, message == nullptr ? "unknown error" : message);
-	free(message);
-}
-
-static std::wstring utf8_to_wstring(const char *str)
-{
-	const int orig_length = str_length(str);
-	int size_needed = MultiByteToWideChar(CP_UTF8, 0, str, orig_length, NULL, 0);
-	std::wstring wide_string(size_needed, '\0');
-	dbg_assert(MultiByteToWideChar(CP_UTF8, 0, str, orig_length, &wide_string[0], size_needed) == size_needed, "MultiByteToWideChar failure");
-	return wide_string;
+	const std::string message = windows_format_system_message(error);
+	dbg_msg(system, "%s: %s", prefix, message.c_str());
 }
 
 static std::wstring filename_from_path(const std::wstring &path)
@@ -4412,8 +4647,8 @@ static std::wstring filename_from_path(const std::wstring &path)
 
 bool shell_register_protocol(const char *protocol_name, const char *executable, bool *updated)
 {
-	const std::wstring protocol_name_wide = utf8_to_wstring(protocol_name);
-	const std::wstring executable_wide = utf8_to_wstring(executable);
+	const std::wstring protocol_name_wide = windows_utf8_to_wide(protocol_name);
+	const std::wstring executable_wide = windows_utf8_to_wide(executable);
 
 	// Open registry key for protocol associations of the current user
 	HKEY handle_subkey_classes;
@@ -4512,11 +4747,11 @@ bool shell_register_protocol(const char *protocol_name, const char *executable, 
 
 bool shell_register_extension(const char *extension, const char *description, const char *executable_name, const char *executable, bool *updated)
 {
-	const std::wstring extension_wide = utf8_to_wstring(extension);
-	const std::wstring executable_name_wide = utf8_to_wstring(executable_name);
-	const std::wstring description_wide = executable_name_wide + L" " + utf8_to_wstring(description);
+	const std::wstring extension_wide = windows_utf8_to_wide(extension);
+	const std::wstring executable_name_wide = windows_utf8_to_wide(executable_name);
+	const std::wstring description_wide = executable_name_wide + L" " + windows_utf8_to_wide(description);
 	const std::wstring program_id_wide = executable_name_wide + extension_wide;
-	const std::wstring executable_wide = utf8_to_wstring(executable);
+	const std::wstring executable_wide = windows_utf8_to_wide(executable);
 
 	// Open registry key for file associations of the current user
 	HKEY handle_subkey_classes;
@@ -4648,8 +4883,8 @@ bool shell_register_extension(const char *extension, const char *description, co
 
 bool shell_register_application(const char *name, const char *executable, bool *updated)
 {
-	const std::wstring name_wide = utf8_to_wstring(name);
-	const std::wstring executable_filename = filename_from_path(utf8_to_wstring(executable));
+	const std::wstring name_wide = windows_utf8_to_wide(name);
+	const std::wstring executable_filename = filename_from_path(windows_utf8_to_wide(executable));
 
 	// Open registry key for application registrations
 	HKEY handle_subkey_applications;
@@ -4697,7 +4932,7 @@ bool shell_register_application(const char *name, const char *executable, bool *
 
 bool shell_unregister_class(const char *shell_class, bool *updated)
 {
-	const std::wstring class_wide = utf8_to_wstring(shell_class);
+	const std::wstring class_wide = windows_utf8_to_wide(shell_class);
 
 	// Open registry key for protocol and file associations of the current user
 	HKEY handle_subkey_classes;
@@ -4726,7 +4961,7 @@ bool shell_unregister_class(const char *shell_class, bool *updated)
 
 bool shell_unregister_application(const char *executable, bool *updated)
 {
-	const std::wstring executable_filename = filename_from_path(utf8_to_wstring(executable));
+	const std::wstring executable_filename = filename_from_path(windows_utf8_to_wide(executable));
 
 	// Open registry key for application registrations
 	HKEY handle_subkey_applications;

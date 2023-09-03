@@ -1282,7 +1282,6 @@ protected:
 		m_aCommandCallbacks[CommandBufferCMDOff(CCommandBuffer::CMD_RENDER_QUAD_CONTAINER_SPRITE_MULTIPLE)] = {true, [this](SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand *pBaseCommand) { Cmd_RenderQuadContainerAsSpriteMultiple_FillExecuteBuffer(ExecBuffer, static_cast<const CCommandBuffer::SCommand_RenderQuadContainerAsSpriteMultiple *>(pBaseCommand)); }, [this](const CCommandBuffer::SCommand *pBaseCommand, SRenderCommandExecuteBuffer &ExecBuffer) { return Cmd_RenderQuadContainerAsSpriteMultiple(static_cast<const CCommandBuffer::SCommand_RenderQuadContainerAsSpriteMultiple *>(pBaseCommand), ExecBuffer); }};
 
 		m_aCommandCallbacks[CommandBufferCMDOff(CCommandBuffer::CMD_SWAP)] = {false, [](SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand *pBaseCommand) {}, [this](const CCommandBuffer::SCommand *pBaseCommand, SRenderCommandExecuteBuffer &ExecBuffer) { return Cmd_Swap(static_cast<const CCommandBuffer::SCommand_Swap *>(pBaseCommand)); }};
-		m_aCommandCallbacks[CommandBufferCMDOff(CCommandBuffer::CMD_FINISH)] = {false, [](SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand *pBaseCommand) {}, [this](const CCommandBuffer::SCommand *pBaseCommand, SRenderCommandExecuteBuffer &ExecBuffer) { return Cmd_Finish(static_cast<const CCommandBuffer::SCommand_Finish *>(pBaseCommand)); }};
 
 		m_aCommandCallbacks[CommandBufferCMDOff(CCommandBuffer::CMD_VSYNC)] = {false, [](SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand *pBaseCommand) {}, [this](const CCommandBuffer::SCommand *pBaseCommand, SRenderCommandExecuteBuffer &ExecBuffer) { return Cmd_VSync(static_cast<const CCommandBuffer::SCommand_VSync *>(pBaseCommand)); }};
 		m_aCommandCallbacks[CommandBufferCMDOff(CCommandBuffer::CMD_MULTISAMPLING)] = {false, [](SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand *pBaseCommand) {}, [this](const CCommandBuffer::SCommand *pBaseCommand, SRenderCommandExecuteBuffer &ExecBuffer) { return Cmd_MultiSampling(static_cast<const CCommandBuffer::SCommand_MultiSampling *>(pBaseCommand)); }};
@@ -6467,7 +6466,7 @@ public:
 			Buffer.m_pRawCommand = pBaseCommand;
 			Buffer.m_ThreadIndex = 0;
 
-			if(m_CurCommandInPipe + 1 == m_CommandsInPipe && Buffer.m_Command != CCommandBuffer::CMD_FINISH)
+			if(m_CurCommandInPipe + 1 == m_CommandsInPipe)
 			{
 				m_LastCommandsInPipeThreadIndex = std::numeric_limits<decltype(m_LastCommandsInPipeThreadIndex)>::max();
 			}
@@ -6918,12 +6917,6 @@ public:
 		*pCommand->m_pRetMultiSamplingCount = MSCount;
 		*pCommand->m_pRetOk = true;
 
-		return true;
-	}
-
-	[[nodiscard]] bool Cmd_Finish(const CCommandBuffer::SCommand_Finish *pCommand)
-	{
-		// just ignore it with vulkan
 		return true;
 	}
 

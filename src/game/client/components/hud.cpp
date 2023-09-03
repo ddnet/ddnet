@@ -26,7 +26,8 @@ CHud::CHud()
 {
 	// won't work if zero
 	m_FrameTimeAvg = 0.0f;
-	m_FPSTextContainerIndex = -1;
+	m_FPSTextContainerIndex.Reset();
+	m_DDRaceEffectsTextContainerIndex.Reset();
 }
 
 void CHud::ResetHudContainers()
@@ -42,6 +43,7 @@ void CHud::ResetHudContainers()
 	}
 
 	TextRender()->DeleteTextContainer(m_FPSTextContainerIndex);
+	TextRender()->DeleteTextContainer(m_DDRaceEffectsTextContainerIndex);
 }
 
 void CHud::OnWindowResize()
@@ -104,7 +106,7 @@ void CHud::RenderGameTimer()
 		}
 		else if(m_pClient->m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_RACETIME)
 		{
-			//The Warmup timer is negative in this case to make sure that incompatible clients will not see a warmup timer
+			// The Warmup timer is negative in this case to make sure that incompatible clients will not see a warmup timer
 			Time = (Client()->GameTick(g_Config.m_ClDummy) + m_pClient->m_Snap.m_pGameInfoObj->m_WarmupTimer) / Client()->GameTickSpeed();
 		}
 		else
@@ -169,8 +171,8 @@ void CHud::RenderScoreHud()
 		if(GameFlags & GAMEFLAG_TEAMS && m_pClient->m_Snap.m_pGameDataObj)
 		{
 			char aScoreTeam[2][16];
-			str_format(aScoreTeam[TEAM_RED], sizeof(aScoreTeam), "%d", m_pClient->m_Snap.m_pGameDataObj->m_TeamscoreRed);
-			str_format(aScoreTeam[TEAM_BLUE], sizeof(aScoreTeam), "%d", m_pClient->m_Snap.m_pGameDataObj->m_TeamscoreBlue);
+			str_from_int(m_pClient->m_Snap.m_pGameDataObj->m_TeamscoreRed, aScoreTeam[TEAM_RED]);
+			str_from_int(m_pClient->m_Snap.m_pGameDataObj->m_TeamscoreBlue, aScoreTeam[TEAM_BLUE]);
 
 			bool aRecreateTeamScore[2] = {str_comp(aScoreTeam[0], m_aScoreInfo[0].m_aScoreText) != 0, str_comp(aScoreTeam[1], m_aScoreInfo[1].m_aScoreText) != 0};
 
@@ -219,7 +221,7 @@ void CHud::RenderScoreHud()
 					Cursor.m_LineWidth = -1;
 					TextRender()->RecreateTextContainer(m_aScoreInfo[t].m_TextScoreContainerIndex, &Cursor, aScoreTeam[t]);
 				}
-				if(m_aScoreInfo[t].m_TextScoreContainerIndex != -1)
+				if(m_aScoreInfo[t].m_TextScoreContainerIndex.Valid())
 				{
 					ColorRGBA TColor(1.f, 1.f, 1.f, 1.f);
 					ColorRGBA TOutlineColor(0.f, 0.f, 0.f, 0.3f);
@@ -256,7 +258,7 @@ void CHud::RenderScoreHud()
 							TextRender()->RecreateTextContainer(m_aScoreInfo[t].m_OptionalNameTextContainerIndex, &Cursor, pName);
 						}
 
-						if(m_aScoreInfo[t].m_OptionalNameTextContainerIndex != -1)
+						if(m_aScoreInfo[t].m_OptionalNameTextContainerIndex.Valid())
 						{
 							ColorRGBA TColor(1.f, 1.f, 1.f, 1.f);
 							ColorRGBA TOutlineColor(0.f, 0.f, 0.f, 0.3f);
@@ -267,7 +269,7 @@ void CHud::RenderScoreHud()
 						CTeeRenderInfo TeeInfo = m_pClient->m_aClients[ID].m_RenderInfo;
 						TeeInfo.m_Size = ScoreSingleBoxHeight;
 
-						CAnimState *pIdleState = CAnimState::GetIdle();
+						const CAnimState *pIdleState = CAnimState::GetIdle();
 						vec2 OffsetToMid;
 						RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &TeeInfo, OffsetToMid);
 						vec2 TeeRenderPos(m_Width - ScoreWidthMax - TeeInfo.m_Size / 2 - Split, StartY + (t * 20) + ScoreSingleBoxHeight / 2.0f + OffsetToMid.y);
@@ -322,7 +324,7 @@ void CHud::RenderScoreHud()
 							aScore[t][0] = 0;
 					}
 					else
-						str_format(aScore[t], sizeof(aScore) / 2, "%d", apPlayerInfo[t]->m_Score);
+						str_from_int(apPlayerInfo[t]->m_Score, aScore[t]);
 				}
 				else
 					aScore[t][0] = 0;
@@ -394,7 +396,7 @@ void CHud::RenderScoreHud()
 					TextRender()->RecreateTextContainer(m_aScoreInfo[t].m_TextScoreContainerIndex, &Cursor, aScore[t]);
 				}
 				// draw score
-				if(m_aScoreInfo[t].m_TextScoreContainerIndex != -1)
+				if(m_aScoreInfo[t].m_TextScoreContainerIndex.Valid())
 				{
 					ColorRGBA TColor(1.f, 1.f, 1.f, 1.f);
 					ColorRGBA TOutlineColor(0.f, 0.f, 0.f, 0.3f);
@@ -419,7 +421,7 @@ void CHud::RenderScoreHud()
 							TextRender()->RecreateTextContainer(m_aScoreInfo[t].m_OptionalNameTextContainerIndex, &Cursor, pName);
 						}
 
-						if(m_aScoreInfo[t].m_OptionalNameTextContainerIndex != -1)
+						if(m_aScoreInfo[t].m_OptionalNameTextContainerIndex.Valid())
 						{
 							ColorRGBA TColor(1.f, 1.f, 1.f, 1.f);
 							ColorRGBA TOutlineColor(0.f, 0.f, 0.f, 0.3f);
@@ -430,7 +432,7 @@ void CHud::RenderScoreHud()
 						CTeeRenderInfo TeeInfo = m_pClient->m_aClients[ID].m_RenderInfo;
 						TeeInfo.m_Size = ScoreSingleBoxHeight;
 
-						CAnimState *pIdleState = CAnimState::GetIdle();
+						const CAnimState *pIdleState = CAnimState::GetIdle();
 						vec2 OffsetToMid;
 						RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &TeeInfo, OffsetToMid);
 						vec2 TeeRenderPos(m_Width - ScoreWidthMax - TeeInfo.m_Size / 2 - Split, StartY + (t * 20) + ScoreSingleBoxHeight / 2.0f + OffsetToMid.y);
@@ -455,7 +457,7 @@ void CHud::RenderScoreHud()
 					Cursor.m_LineWidth = -1;
 					TextRender()->RecreateTextContainer(m_aScoreInfo[t].m_TextRankContainerIndex, &Cursor, aBuf);
 				}
-				if(m_aScoreInfo[t].m_TextRankContainerIndex != -1)
+				if(m_aScoreInfo[t].m_TextRankContainerIndex.Valid())
 				{
 					ColorRGBA TColor(1.f, 1.f, 1.f, 1.f);
 					ColorRGBA TOutlineColor(0.f, 0.f, 0.f, 0.3f);
@@ -482,7 +484,7 @@ void CHud::RenderWarmupTimer()
 		if(Seconds < 5)
 			str_format(aBuf, sizeof(aBuf), "%d.%d", Seconds, (m_pClient->m_Snap.m_pGameInfoObj->m_WarmupTimer * 10 / SERVER_TICK_SPEED) % 10);
 		else
-			str_format(aBuf, sizeof(aBuf), "%d", Seconds);
+			str_from_int(Seconds, aBuf);
 		w = TextRender()->TextWidth(FontSize, aBuf, -1, -1.0f);
 		TextRender()->Text(150 * Graphics()->ScreenAspect() + -w / 2, 75, FontSize, aBuf, -1.0f);
 	}
@@ -496,7 +498,7 @@ void CHud::RenderTextInfo()
 		m_FrameTimeAvg = m_FrameTimeAvg * 0.9f + Client()->RenderFrameTime() * 0.1f;
 		char aBuf[64];
 		int FrameTime = (int)(1.0f / m_FrameTimeAvg + 0.5f);
-		str_format(aBuf, sizeof(aBuf), "%d", FrameTime);
+		str_from_int(FrameTime, aBuf);
 
 		static float s_TextWidth0 = TextRender()->TextWidth(12.f, "0", -1, -1.0f);
 		static float s_TextWidth00 = TextRender()->TextWidth(12.f, "00", -1, -1.0f);
@@ -506,26 +508,26 @@ void CHud::RenderTextInfo()
 		static const float s_aTextWidth[5] = {s_TextWidth0, s_TextWidth00, s_TextWidth000, s_TextWidth0000, s_TextWidth00000};
 
 		int DigitIndex = GetDigitsIndex(FrameTime, 4);
-		//TextRender()->Text(m_Width-10-TextRender()->TextWidth(0,12,Buf,-1,-1.0f), 5, 12, Buf, -1.0f);
 
 		CTextCursor Cursor;
 		TextRender()->SetCursor(&Cursor, m_Width - 10 - s_aTextWidth[DigitIndex], 5, 12, TEXTFLAG_RENDER);
 		Cursor.m_LineWidth = -1;
 		auto OldFlags = TextRender()->GetRenderFlags();
 		TextRender()->SetRenderFlags(OldFlags | TEXT_RENDER_FLAG_ONE_TIME_USE);
-		if(m_FPSTextContainerIndex == -1)
-			TextRender()->CreateTextContainer(m_FPSTextContainerIndex, &Cursor, "0");
-		else
+		if(m_FPSTextContainerIndex.Valid())
 			TextRender()->RecreateTextContainerSoft(m_FPSTextContainerIndex, &Cursor, aBuf);
+		else
+			TextRender()->CreateTextContainer(m_FPSTextContainerIndex, &Cursor, "0");
 		TextRender()->SetRenderFlags(OldFlags);
-		ColorRGBA TColor(1, 1, 1, 1);
-		ColorRGBA TOutColor(0, 0, 0, 0.3f);
-		TextRender()->RenderTextContainer(m_FPSTextContainerIndex, TColor, TOutColor);
+		if(m_FPSTextContainerIndex.Valid())
+		{
+			TextRender()->RenderTextContainer(m_FPSTextContainerIndex, TextRender()->DefaultTextColor(), TextRender()->DefaultTextOutlineColor());
+		}
 	}
 	if(g_Config.m_ClShowpred)
 	{
 		char aBuf[64];
-		str_format(aBuf, sizeof(aBuf), "%d", Client()->GetPredictionTime());
+		str_from_int(Client()->GetPredictionTime(), aBuf);
 		TextRender()->Text(m_Width - 10 - TextRender()->TextWidth(12, aBuf, -1, -1.0f), g_Config.m_ClShowfps ? 20 : 5, 12, aBuf, -1.0f);
 	}
 }
@@ -555,7 +557,7 @@ void CHud::RenderTeambalanceWarning()
 			else
 				TextRender()->TextColor(0.7f, 0.7f, 0.2f, 1.0f);
 			TextRender()->Text(5, 50, 6, pText, -1.0f);
-			TextRender()->TextColor(1, 1, 1, 1);
+			TextRender()->TextColor(TextRender()->DefaultTextColor());
 		}
 	}
 }
@@ -567,7 +569,7 @@ void CHud::RenderVoting()
 
 	Graphics()->DrawRect(-10, 60 - 2, 100 + 10 + 4 + 5, 46, ColorRGBA(0.0f, 0.0f, 0.0f, 0.4f), IGraphics::CORNER_ALL, 5.0f);
 
-	TextRender()->TextColor(1, 1, 1, 1);
+	TextRender()->TextColor(TextRender()->DefaultTextColor());
 
 	CTextCursor Cursor;
 	char aBuf[512];
@@ -595,12 +597,12 @@ void CHud::RenderVoting()
 
 	str_format(aBuf, sizeof(aBuf), "%s - %s", aKey, Localize("Vote yes"));
 	Base.y += Base.h;
-	Base.h = 11.f;
-	UI()->DoLabel(&Base, aBuf, 6.0f, TEXTALIGN_LEFT);
+	Base.h = 12.0f;
+	UI()->DoLabel(&Base, aBuf, 6.0f, TEXTALIGN_ML);
 
 	m_pClient->m_Binds.GetKey("vote no", aKey, sizeof(aKey));
 	str_format(aBuf, sizeof(aBuf), "%s - %s", Localize("Vote no"), aKey);
-	UI()->DoLabel(&Base, aBuf, 6.0f, TEXTALIGN_RIGHT);
+	UI()->DoLabel(&Base, aBuf, 6.0f, TEXTALIGN_MR);
 }
 
 void CHud::RenderCursor()
@@ -748,20 +750,16 @@ void CHud::PreparePlayerStateQuads()
 	m_AirjumpEmptyOffset = Graphics()->QuadContainerAddQuads(m_HudQuadContainerIndex, Array, 10);
 
 	// Quads for displaying weapons
-	float ScaleX, ScaleY;
-	const float HudWeaponScale = 0.25f;
-	RenderTools()->GetSpriteScale(g_pData->m_Weapons.m_aId[WEAPON_HAMMER].m_pSpriteBody, ScaleX, ScaleY);
-	m_WeaponHammerOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, g_pData->m_Weapons.m_aId[WEAPON_HAMMER].m_VisualSize * ScaleX * HudWeaponScale, g_pData->m_Weapons.m_aId[WEAPON_HAMMER].m_VisualSize * ScaleY * HudWeaponScale);
-	RenderTools()->GetSpriteScale(g_pData->m_Weapons.m_aId[WEAPON_GUN].m_pSpriteBody, ScaleX, ScaleY);
-	m_WeaponGunOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, g_pData->m_Weapons.m_aId[WEAPON_GUN].m_VisualSize * ScaleX * HudWeaponScale, g_pData->m_Weapons.m_aId[WEAPON_GUN].m_VisualSize * ScaleY * HudWeaponScale);
-	RenderTools()->GetSpriteScale(g_pData->m_Weapons.m_aId[WEAPON_SHOTGUN].m_pSpriteBody, ScaleX, ScaleY);
-	m_WeaponShotgunOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, g_pData->m_Weapons.m_aId[WEAPON_SHOTGUN].m_VisualSize * ScaleX * HudWeaponScale, g_pData->m_Weapons.m_aId[WEAPON_SHOTGUN].m_VisualSize * ScaleY * HudWeaponScale);
-	RenderTools()->GetSpriteScale(g_pData->m_Weapons.m_aId[WEAPON_GRENADE].m_pSpriteBody, ScaleX, ScaleY);
-	m_WeaponGrenadeOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, g_pData->m_Weapons.m_aId[WEAPON_GRENADE].m_VisualSize * ScaleX * HudWeaponScale, g_pData->m_Weapons.m_aId[WEAPON_GRENADE].m_VisualSize * ScaleY * HudWeaponScale);
-	RenderTools()->GetSpriteScale(g_pData->m_Weapons.m_aId[WEAPON_LASER].m_pSpriteBody, ScaleX, ScaleY);
-	m_WeaponLaserOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, g_pData->m_Weapons.m_aId[WEAPON_LASER].m_VisualSize * ScaleX * HudWeaponScale, g_pData->m_Weapons.m_aId[WEAPON_LASER].m_VisualSize * ScaleY * HudWeaponScale);
-	RenderTools()->GetSpriteScale(g_pData->m_Weapons.m_aId[WEAPON_NINJA].m_pSpriteBody, ScaleX, ScaleY);
-	m_WeaponNinjaOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, g_pData->m_Weapons.m_aId[WEAPON_NINJA].m_VisualSize * ScaleX * HudWeaponScale, g_pData->m_Weapons.m_aId[WEAPON_NINJA].m_VisualSize * ScaleY * HudWeaponScale);
+	for(int Weapon = 0; Weapon < NUM_WEAPONS; ++Weapon)
+	{
+		const CDataWeaponspec &WeaponSpec = g_pData->m_Weapons.m_aId[Weapon];
+		float ScaleX, ScaleY;
+		RenderTools()->GetSpriteScale(WeaponSpec.m_pSpriteBody, ScaleX, ScaleY);
+		constexpr float HudWeaponScale = 0.25f;
+		float Width = WeaponSpec.m_VisualSize * ScaleX * HudWeaponScale;
+		float Height = WeaponSpec.m_VisualSize * ScaleY * HudWeaponScale;
+		m_aWeaponOffset[Weapon] = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, Width, Height);
+	}
 
 	// Quads for displaying capabilities
 	m_EndlessJumpOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
@@ -877,90 +875,36 @@ void CHud::RenderPlayerState(const int ClientID)
 		   (GameClient()->m_GameInfo.m_HudAmmo && g_Config.m_ClShowhudHealthAmmo ? 12 : 0));
 
 	// render weapons
-	if(pCharacter->m_aWeapons[WEAPON_HAMMER].m_Got)
 	{
-		if(pPlayer->m_Weapon != WEAPON_HAMMER)
+		constexpr float aWeaponWidth[NUM_WEAPONS] = {16, 12, 12, 12, 12, 12};
+		constexpr float aWeaponInitialOffset[NUM_WEAPONS] = {-3, -4, -1, -1, -2, -4};
+		bool InitialOffsetAdded = false;
+		for(int Weapon = 0; Weapon < NUM_WEAPONS; ++Weapon)
 		{
-			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
+			if(!pCharacter->m_aWeapons[Weapon].m_Got)
+				continue;
+			if(!InitialOffsetAdded)
+			{
+				x += aWeaponInitialOffset[Weapon];
+				InitialOffsetAdded = true;
+			}
+			if(pPlayer->m_Weapon != Weapon)
+				Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
+			Graphics()->QuadsSetRotation(pi * 7 / 4);
+			Graphics()->TextureSet(m_pClient->m_GameSkin.m_aSpritePickupWeapons[Weapon]);
+			Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_aWeaponOffset[Weapon], x, y);
+			Graphics()->QuadsSetRotation(0);
+			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+			x += aWeaponWidth[Weapon];
 		}
-		x -= 3;
-		Graphics()->QuadsSetRotation(pi * 7 / 4);
-		Graphics()->TextureSet(m_pClient->m_GameSkin.m_SpritePickupHammer);
-		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_WeaponHammerOffset, x, y);
-		Graphics()->QuadsSetRotation(0);
-		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
-		x += 16;
-	}
-	if(pCharacter->m_aWeapons[WEAPON_GUN].m_Got)
-	{
-		if(pPlayer->m_Weapon != WEAPON_GUN)
+		if(pCharacter->m_aWeapons[WEAPON_NINJA].m_Got)
 		{
-			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
-		}
-		Graphics()->QuadsSetRotation(pi * 7 / 4);
-		Graphics()->TextureSet(m_pClient->m_GameSkin.m_SpritePickupGun);
-		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_WeaponGunOffset, x, y);
-		Graphics()->QuadsSetRotation(0);
-		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
-		x += 12;
-	}
-	if(pCharacter->m_aWeapons[WEAPON_SHOTGUN].m_Got)
-	{
-		if(pPlayer->m_Weapon != WEAPON_SHOTGUN)
-		{
-			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
-		}
-		Graphics()->QuadsSetRotation(pi * 7 / 4);
-		Graphics()->TextureSet(m_pClient->m_GameSkin.m_SpritePickupShotgun);
-		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_WeaponShotgunOffset, x, y);
-		Graphics()->QuadsSetRotation(0);
-		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
-		x += 12;
-	}
-	if(pCharacter->m_aWeapons[WEAPON_GRENADE].m_Got)
-	{
-		if(pPlayer->m_Weapon != WEAPON_GRENADE)
-		{
-			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
-		}
-		Graphics()->QuadsSetRotation(pi * 7 / 4);
-		Graphics()->TextureSet(m_pClient->m_GameSkin.m_SpritePickupGrenade);
-		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_WeaponGrenadeOffset, x, y);
-		Graphics()->QuadsSetRotation(0);
-		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
-		x += 12;
-	}
-	if(pCharacter->m_aWeapons[WEAPON_LASER].m_Got)
-	{
-		if(pPlayer->m_Weapon != WEAPON_LASER)
-		{
-			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
-		}
-		Graphics()->QuadsSetRotation(pi * 7 / 4);
-		Graphics()->TextureSet(m_pClient->m_GameSkin.m_SpritePickupLaser);
-		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_WeaponLaserOffset, x, y);
-		Graphics()->QuadsSetRotation(0);
-		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
-		x += 12;
-	}
-	if(pCharacter->m_aWeapons[WEAPON_NINJA].m_Got)
-	{
-		if(pPlayer->m_Weapon != WEAPON_NINJA)
-		{
-			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
-		}
-		Graphics()->QuadsSetRotation(pi * 7 / 4);
-		Graphics()->TextureSet(m_pClient->m_GameSkin.m_SpritePickupNinja);
-		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_WeaponNinjaOffset, x, y);
-		Graphics()->QuadsSetRotation(0);
-		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
-
-		const int Max = g_pData->m_Weapons.m_Ninja.m_Duration * Client()->GameTickSpeed() / 1000;
-		float NinjaProgress = clamp(pCharacter->m_Ninja.m_ActivationTick + g_pData->m_Weapons.m_Ninja.m_Duration * Client()->GameTickSpeed() / 1000 - Client()->GameTick(g_Config.m_ClDummy), 0, Max) / (float)Max;
-		if(NinjaProgress > 0.0f && m_pClient->m_Snap.m_aCharacters[ClientID].m_HasExtendedDisplayInfo)
-		{
-			x += 12;
-			RenderNinjaBarPos(x, y - 12, 6.f, 24.f, NinjaProgress);
+			const int Max = g_pData->m_Weapons.m_Ninja.m_Duration * Client()->GameTickSpeed() / 1000;
+			float NinjaProgress = clamp(pCharacter->m_Ninja.m_ActivationTick + g_pData->m_Weapons.m_Ninja.m_Duration * Client()->GameTickSpeed() / 1000 - Client()->GameTick(g_Config.m_ClDummy), 0, Max) / (float)Max;
+			if(NinjaProgress > 0.0f && m_pClient->m_Snap.m_aCharacters[ClientID].m_HasExtendedDisplayInfo)
+			{
+				RenderNinjaBarPos(x, y - 12, 6.f, 24.f, NinjaProgress);
+			}
 		}
 	}
 
@@ -1379,7 +1323,7 @@ void CHud::RenderMovementInformation(const int ClientID)
 	{
 		// On DDNet servers the more accurate angle is displayed, calculated from the target coordinates
 		CNetObj_DDNetCharacter *pExtendedData = &m_pClient->m_Snap.m_aCharacters[ClientID].m_ExtendedData;
-		Angle = atan2f(pExtendedData->m_TargetY, pExtendedData->m_TargetX);
+		Angle = std::atan2(pExtendedData->m_TargetY, pExtendedData->m_TargetX);
 	}
 	else
 	{
@@ -1472,7 +1416,7 @@ void CHud::RenderSpectatorHud()
 
 	// draw the text
 	char aBuf[128];
-	str_format(aBuf, sizeof(aBuf), "%s: %s", Localize("Spectate"), m_pClient->m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW ? m_pClient->m_aClients[m_pClient->m_Snap.m_SpecInfo.m_SpectatorID].m_aName : Localize("Free-View"));
+	str_format(aBuf, sizeof(aBuf), "%s: %s", Localize("Spectate"), GameClient()->m_MultiViewActivated ? Localize("Multi-View") : m_pClient->m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW ? m_pClient->m_aClients[m_pClient->m_Snap.m_SpecInfo.m_SpectatorID].m_aName : Localize("Free-View"));
 	TextRender()->Text(m_Width - 174.0f, m_Height - 15.0f + (15.f - 8.f) / 2.f, 8.0f, aBuf, -1.0f);
 }
 
@@ -1525,7 +1469,11 @@ void CHud::OnRender()
 			{
 				RenderAmmoHealthAndArmor(&m_pClient->m_Snap.m_aCharacters[SpectatorID].m_Cur);
 			}
-			if(SpectatorID != SPEC_FREEVIEW && m_pClient->m_Snap.m_aCharacters[SpectatorID].m_HasExtendedData && g_Config.m_ClShowhudDDRace && GameClient()->m_GameInfo.m_HudDDRace)
+			if(SpectatorID != SPEC_FREEVIEW &&
+				m_pClient->m_Snap.m_aCharacters[SpectatorID].m_HasExtendedData &&
+				g_Config.m_ClShowhudDDRace &&
+				(!GameClient()->m_MultiViewActivated || GameClient()->m_MultiViewShowHud) &&
+				GameClient()->m_GameInfo.m_HudDDRace)
 			{
 				RenderPlayerState(SpectatorID);
 			}
@@ -1614,32 +1562,43 @@ void CHud::RenderDDRaceEffects()
 			str_format(aBuf, sizeof(aBuf), "Finish time: %s", aTime);
 
 			// calculate alpha (4 sec 1 than get lower the next 2 sec)
-			float alpha = 1.0f;
+			float Alpha = 1.0f;
 			if(m_FinishTimeLastReceivedTick + Client()->GameTickSpeed() * 4 < Client()->GameTick(g_Config.m_ClDummy) && m_FinishTimeLastReceivedTick + Client()->GameTickSpeed() * 6 > Client()->GameTick(g_Config.m_ClDummy))
 			{
 				// lower the alpha slowly to blend text out
-				alpha = ((float)(m_FinishTimeLastReceivedTick + Client()->GameTickSpeed() * 6) - (float)Client()->GameTick(g_Config.m_ClDummy)) / (float)(Client()->GameTickSpeed() * 2);
+				Alpha = ((float)(m_FinishTimeLastReceivedTick + Client()->GameTickSpeed() * 6) - (float)Client()->GameTick(g_Config.m_ClDummy)) / (float)(Client()->GameTickSpeed() * 2);
 			}
 
-			TextRender()->TextColor(1, 1, 1, alpha);
-			TextRender()->Text(150 * Graphics()->ScreenAspect() - TextRender()->TextWidth(12, aBuf, -1, -1.0f) / 2, 20, 12, aBuf, -1.0f);
-			if(m_FinishTimeDiff != 0.0f)
+			TextRender()->TextColor(1, 1, 1, Alpha);
+			CTextCursor Cursor;
+			TextRender()->SetCursor(&Cursor, 150 * Graphics()->ScreenAspect() - TextRender()->TextWidth(12, aBuf, -1, -1.0f) / 2, 20, 12, TEXTFLAG_RENDER);
+			Cursor.m_LineWidth = -1.0f;
+			TextRender()->RecreateTextContainer(m_DDRaceEffectsTextContainerIndex, &Cursor, aBuf);
+			if(m_FinishTimeDiff != 0.0f && m_DDRaceEffectsTextContainerIndex.Valid())
 			{
 				if(m_FinishTimeDiff < 0)
 				{
 					str_time_float(-m_FinishTimeDiff, TIME_HOURS_CENTISECS, aTime, sizeof(aTime));
 					str_format(aBuf, sizeof(aBuf), "-%s", aTime);
-					TextRender()->TextColor(0.5f, 1.0f, 0.5f, alpha); // green
+					TextRender()->TextColor(0.5f, 1.0f, 0.5f, Alpha); // green
 				}
 				else
 				{
 					str_time_float(m_FinishTimeDiff, TIME_HOURS_CENTISECS, aTime, sizeof(aTime));
 					str_format(aBuf, sizeof(aBuf), "+%s", aTime);
-					TextRender()->TextColor(1.0f, 0.5f, 0.5f, alpha); // red
+					TextRender()->TextColor(1.0f, 0.5f, 0.5f, Alpha); // red
 				}
-				TextRender()->Text(150 * Graphics()->ScreenAspect() - TextRender()->TextWidth(10, aBuf, -1, -1.0f) / 2, 34, 10, aBuf, -1.0f);
+				TextRender()->SetCursor(&Cursor, 150 * Graphics()->ScreenAspect() - TextRender()->TextWidth(10, aBuf, -1, -1.0f) / 2, 34, 10, TEXTFLAG_RENDER);
+				Cursor.m_LineWidth = -1.0f;
+				TextRender()->AppendTextContainer(m_DDRaceEffectsTextContainerIndex, &Cursor, aBuf);
 			}
-			TextRender()->TextColor(1, 1, 1, 1);
+			if(m_DDRaceEffectsTextContainerIndex.Valid())
+			{
+				auto OutlineColor = TextRender()->DefaultTextOutlineColor();
+				OutlineColor.a *= Alpha;
+				TextRender()->RenderTextContainer(m_DDRaceEffectsTextContainerIndex, TextRender()->DefaultTextColor(), OutlineColor);
+			}
+			TextRender()->TextColor(TextRender()->DefaultTextColor());
 		}
 		else if(!m_ShowFinishTime && m_TimeCpLastReceivedTick + Client()->GameTickSpeed() * 6 > Client()->GameTick(g_Config.m_ClDummy))
 		{
@@ -1655,22 +1614,32 @@ void CHud::RenderDDRaceEffects()
 			}
 
 			// calculate alpha (4 sec 1 than get lower the next 2 sec)
-			float alpha = 1.0f;
+			float Alpha = 1.0f;
 			if(m_TimeCpLastReceivedTick + Client()->GameTickSpeed() * 4 < Client()->GameTick(g_Config.m_ClDummy) && m_TimeCpLastReceivedTick + Client()->GameTickSpeed() * 6 > Client()->GameTick(g_Config.m_ClDummy))
 			{
 				// lower the alpha slowly to blend text out
-				alpha = ((float)(m_TimeCpLastReceivedTick + Client()->GameTickSpeed() * 6) - (float)Client()->GameTick(g_Config.m_ClDummy)) / (float)(Client()->GameTickSpeed() * 2);
+				Alpha = ((float)(m_TimeCpLastReceivedTick + Client()->GameTickSpeed() * 6) - (float)Client()->GameTick(g_Config.m_ClDummy)) / (float)(Client()->GameTickSpeed() * 2);
 			}
 
 			if(m_TimeCpDiff > 0)
-				TextRender()->TextColor(1.0f, 0.5f, 0.5f, alpha); // red
+				TextRender()->TextColor(1.0f, 0.5f, 0.5f, Alpha); // red
 			else if(m_TimeCpDiff < 0)
-				TextRender()->TextColor(0.5f, 1.0f, 0.5f, alpha); // green
+				TextRender()->TextColor(0.5f, 1.0f, 0.5f, Alpha); // green
 			else if(!m_TimeCpDiff)
-				TextRender()->TextColor(1, 1, 1, alpha); // white
-			TextRender()->Text(150 * Graphics()->ScreenAspect() - TextRender()->TextWidth(10, aBuf, -1, -1.0f) / 2, 20, 10, aBuf, -1.0f);
+				TextRender()->TextColor(1, 1, 1, Alpha); // white
 
-			TextRender()->TextColor(1, 1, 1, 1);
+			CTextCursor Cursor;
+			TextRender()->SetCursor(&Cursor, 150 * Graphics()->ScreenAspect() - TextRender()->TextWidth(10, aBuf, -1, -1.0f) / 2, 20, 10, TEXTFLAG_RENDER);
+			Cursor.m_LineWidth = -1.0f;
+			TextRender()->RecreateTextContainer(m_DDRaceEffectsTextContainerIndex, &Cursor, aBuf);
+
+			if(m_DDRaceEffectsTextContainerIndex.Valid())
+			{
+				auto OutlineColor = TextRender()->DefaultTextOutlineColor();
+				OutlineColor.a *= Alpha;
+				TextRender()->RenderTextContainer(m_DDRaceEffectsTextContainerIndex, TextRender()->DefaultTextColor(), OutlineColor);
+			}
+			TextRender()->TextColor(TextRender()->DefaultTextColor());
 		}
 	}
 }

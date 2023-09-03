@@ -33,6 +33,14 @@ public:
 		NUM_LOCS,
 	};
 
+	enum
+	{
+		CLIENT_SCORE_KIND_UNSPECIFIED,
+		CLIENT_SCORE_KIND_POINTS,
+		CLIENT_SCORE_KIND_TIME,
+		CLIENT_SCORE_KIND_TIME_BACKCOMPAT,
+	};
+
 	class CClient
 	{
 	public:
@@ -68,6 +76,7 @@ public:
 	int m_MaxPlayers;
 	int m_NumPlayers;
 	int m_Flags;
+	int m_ClientScoreKind;
 	TRISTATE m_Favorite;
 	TRISTATE m_FavoriteAllowPing;
 	bool m_Official;
@@ -122,13 +131,6 @@ public:
 		TYPE_DDNET = 4,
 		TYPE_KOG = 5,
 
-		SET_MASTER_ADD = 1,
-		SET_FAV_ADD,
-		SET_DDNET_ADD,
-		SET_KOG_ADD,
-		SET_TOKEN,
-		SET_HTTPINFO,
-
 		NETWORK_DDNET = 0,
 		NETWORK_KOG = 1,
 		NUM_NETWORKS,
@@ -156,9 +158,9 @@ public:
 	virtual int NumTypes(int Network) = 0;
 	virtual const char *GetType(int Network, int Index) = 0;
 
-	virtual void DDNetFilterAdd(char *pFilter, const char *pName) = 0;
-	virtual void DDNetFilterRem(char *pFilter, const char *pName) = 0;
-	virtual bool DDNetFiltered(char *pFilter, const char *pName) = 0;
+	virtual void DDNetFilterAdd(char *pFilter, int FilterSize, const char *pName) const = 0;
+	virtual void DDNetFilterRem(char *pFilter, int FilterSize, const char *pName) const = 0;
+	virtual bool DDNetFiltered(const char *pFilter, const char *pName) const = 0;
 	virtual void CountryFilterClean(int Network) = 0;
 	virtual void TypeFilterClean(int Network) = 0;
 	virtual int GetCurrentType() = 0;

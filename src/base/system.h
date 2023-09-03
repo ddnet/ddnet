@@ -18,12 +18,15 @@
 #include <cstdarg>
 #include <cstdint>
 #include <ctime>
+#include <string>
 
 #ifdef __MINGW32__
 #undef PRId64
 #undef PRIu64
+#undef PRIX64
 #define PRId64 "I64d"
 #define PRIu64 "I64u"
+#define PRIX64 "I64X"
 #define PRIzu "Iu"
 #else
 #define PRIzu "zu"
@@ -40,6 +43,14 @@
 
 #include <chrono>
 #include <functional>
+
+#if __cplusplus >= 201703L
+#define MAYBE_UNUSED [[maybe_unused]]
+#elif defined(__GNUC__)
+#define MAYBE_UNUSED __attribute__((unused))
+#else
+#define MAYBE_UNUSED
+#endif
 
 /**
  * @defgroup Debug
@@ -98,6 +109,9 @@ bool dbg_assert_has_failed();
 #endif
 void
 dbg_break();
+
+typedef std::function<void(const char *message)> DBG_ASSERT_HANDLER;
+void dbg_assert_set_handler(DBG_ASSERT_HANDLER handler);
 
 /**
  * Prints a debug message.
@@ -209,7 +223,7 @@ enum
 	IO_MAX_PATH_LENGTH = 512,
 };
 
-typedef struct IOINTERNAL *IOHANDLE;
+typedef void *IOHANDLE;
 
 /**
  * Opens a file.
@@ -589,9 +603,9 @@ void thread_detach(void *thread);
  * @param user Pointer to pass to the thread.
  * @param name Name describing the use of the thread
  *
- * @return The thread if no error occurred, 0 on error.
+ * @return true on success, false on failure.
  */
-void *thread_init_and_detach(void (*threadfunc)(void *), void *user, const char *name);
+bool thread_init_and_detach(void (*threadfunc)(void *), void *user, const char *name);
 
 // Enable thread safety attributes only with clang.
 // The attributes can be safely erased when compiling with other compilers.
@@ -924,6 +938,31 @@ int net_addr_comp_noport(const NETADDR *a, const NETADDR *b);
 void net_addr_str(const NETADDR *addr, char *string, int max_length, int add_port);
 
 /**
+ * Turns url string into a network address struct.
+ * The url format is tw-0.6+udp://{ipaddr}[:{port}]
+ * ipaddr: can be ipv4 or ipv6
+ * port: is a optional internet protocol port
+ *
+ * This format is used for parsing the master server, be careful before changing it.
+ *
+ * Examples:
+ *   tw-0.6+udp://127.0.0.1
+ *   tw-0.6+udp://127.0.0.1:8303
+ *
+ * @param addr Address to fill in.
+ * @param string String to parse.
+ * @param host_buf Pointer to a buffer to write the host to
+ *                 It will include the port if one is included in the url
+ *                 It can also be set to NULL then it will be ignored
+ * @param host_buf_size Size of the host buffer or 0 if no host_buf pointer is given
+ *
+ * @return 0 on success,
+ *         positive if the input wasn't a valid DDNet URL,
+ *         negative if the input is a valid DDNet URL but the host part was not a valid IPv4/IPv6 address
+ */
+int net_addr_from_url(NETADDR *addr, const char *string, char *host_buf, size_t host_buf_size);
+
+/**
  * Turns string into a network address.
  *
  * @param addr Address to fill in.
@@ -1154,12 +1193,9 @@ void net_unix_close(UNIXSOCKET sock);
  *
  * @param error The Windows error code.
  *
- * @return A new string representing the error code.
- *
- * @remark Guarantees that result will contain zero-termination.
- * @remark The result must be freed after it has been used.
+ * @return A new std::string representing the error code.
  */
-char *windows_format_system_message(unsigned long error);
+std::string windows_format_system_message(unsigned long error);
 
 #endif
 
@@ -1184,6 +1220,23 @@ char *windows_format_system_message(unsigned long error);
 void str_append(char *dst, const char *src, int dst_size);
 
 /**
+ * Appends a string to a fixed-size array of chars.
+ *
+ * @ingroup Strings
+ *
+ * @param dst Array that shall receive the string.
+ * @param src String to append.
+ *
+ * @remark The strings are treated as zero-terminated strings.
+ * @remark Guarantees that dst string will contain zero-termination.
+ */
+template<int N>
+void str_append(char (&dst)[N], const char *src)
+{
+	str_append(dst, src, N);
+}
+
+/**
  * Copies a string to another.
  *
  * @ingroup Strings
@@ -1198,6 +1251,23 @@ void str_append(char *dst, const char *src, int dst_size);
  * @remark Guarantees that dst string will contain zero-termination.
  */
 int str_copy(char *dst, const char *src, int dst_size);
+
+/**
+ * Copies a string to a fixed-size array of chars.
+ *
+ * @ingroup Strings
+ *
+ * @param dst Array that shall receive the string.
+ * @param src String to be copied.
+ *
+ * @remark The strings are treated as zero-terminated strings.
+ * @remark Guarantees that dst string will contain zero-termination.
+ */
+template<int N>
+void str_copy(char (&dst)[N], const char *src)
+{
+	str_copy(dst, src, N);
+}
 
 /**
  * Truncates a utf8 encoded string to a given length.
@@ -1982,6 +2052,39 @@ int fs_chdir(const char *path);
 char *fs_getcwd(char *buffer, int buffer_size);
 
 /**
+ * Gets the name of a file or folder specified by a path,
+ * i.e. the last segment of the path.
+ *
+ * @ingroup Filesystem
+ *
+ * @param path Path from which to retrieve the filename.
+ *
+ * @return Filename of the path.
+ *
+ * @remark Supports forward and backward slashes as path segment separator.
+ * @remark No distinction between files and folders is being made.
+ * @remark The strings are treated as zero-terminated strings.
+ */
+const char *fs_filename(const char *path);
+
+/**
+ * Splits a filename into name (without extension) and file extension.
+ *
+ * @ingroup Filesystem
+ *
+ * @param filename The filename to split.
+ * @param name Buffer that will receive the name without extension, may be nullptr.
+ * @param name_size Size of the name buffer (ignored if name is nullptr).
+ * @param extension Buffer that will receive the extension, may be nullptr.
+ * @param extension_size Size of the extension buffer (ignored if extension is nullptr).
+ *
+ * @remark Does NOT handle forward and backward slashes.
+ * @remark No distinction between files and folders is being made.
+ * @remark The strings are treated as zero-terminated strings.
+ */
+void fs_split_file_extension(const char *filename, char *name, size_t name_size, char *extension = nullptr, size_t extension_size = 0);
+
+/**
  * Get the parent directory of a directory.
  *
  * @ingroup Filesystem
@@ -2124,7 +2227,16 @@ void net_stats(NETSTATS *stats);
 int str_toint(const char *str);
 int str_toint_base(const char *str, int base);
 unsigned long str_toulong_base(const char *str, int base);
+int64_t str_toint64_base(const char *str, int base = 10);
 float str_tofloat(const char *str);
+
+void str_from_int(int value, char *buffer, size_t buffer_size);
+
+template<size_t N>
+void str_from_int(int value, char (&dst)[N])
+{
+	str_from_int(value, dst, N);
+}
 
 /**
  * Determines whether a character is whitespace.
@@ -2140,7 +2252,11 @@ float str_tofloat(const char *str);
 int str_isspace(char c);
 
 char str_uppercase(char c);
+
 int str_isallnum(const char *str);
+
+int str_isallnum_hex(const char *str);
+
 unsigned str_quickhash(const char *str);
 
 enum
@@ -2217,6 +2333,9 @@ int str_utf8_comp_nocase_num(const char *a, const char *b, int num);
 	Parameters:
 		haystack - String to search in
 		needle - String to search for
+        end - A pointer that will be set to a pointer into haystack directly behind the
+            last character where the needle was found. Will be set to nullptr if needle
+            could not be found. Optional parameter.
 
 	Returns:
 		A pointer into haystack where the needle was found.
@@ -2225,7 +2344,7 @@ int str_utf8_comp_nocase_num(const char *a, const char *b, int num);
 	Remarks:
 		- The strings are treated as zero-terminated strings.
 */
-const char *str_utf8_find_nocase(const char *haystack, const char *needle);
+const char *str_utf8_find_nocase(const char *haystack, const char *needle, const char **end = nullptr);
 
 /*
 	Function: str_utf8_isspace
@@ -2378,7 +2497,33 @@ int str_utf8_check(const char *str);
 		- The string is treated as zero-terminated utf8 string.
 		- It's the user's responsibility to make sure the bounds are aligned.
 */
-void str_utf8_stats(const char *str, int max_size, int max_count, int *size, int *count);
+void str_utf8_stats(const char *str, size_t max_size, size_t max_count, size_t *size, size_t *count);
+
+/**
+ * Converts a byte offset of a utf8 string to the utf8 character offset.
+ *
+ * @param text Pointer to the string.
+ * @param byte_offset Offset in bytes.
+ *
+ * @return Offset in utf8 characters. Clamped to the maximum length of the string in utf8 characters.
+ *
+ * @remark The string is treated as a zero-terminated utf8 string.
+ * @remark It's the user's responsibility to make sure the bounds are aligned.
+ */
+size_t str_utf8_offset_bytes_to_chars(const char *str, size_t byte_offset);
+
+/**
+ * Converts a utf8 character offset of a utf8 string to the byte offset.
+ *
+ * @param text Pointer to the string.
+ * @param char_offset Offset in utf8 characters.
+ *
+ * @return Offset in bytes. Clamped to the maximum length of the string in bytes.
+ *
+ * @remark The string is treated as a zero-terminated utf8 string.
+ * @remark It's the user's responsibility to make sure the bounds are aligned.
+ */
+size_t str_utf8_offset_chars_to_bytes(const char *str, size_t char_offset);
 
 /*
 	Function: str_next_token
@@ -2580,19 +2725,15 @@ int secure_rand();
 */
 int secure_rand_below(int below);
 
-/*
-	Function: os_version_str
-		Returns a human-readable version string of the operating system
-
-	Parameters:
-		version - Buffer to use for the output.
-		length - Length of the output buffer.
-
-	Returns:
-		0 - Success in getting the version.
-		1 - Failure in getting the version.
-*/
-int os_version_str(char *version, int length);
+/**
+ * Returns a human-readable version string of the operating system.
+ *
+ * @param version Buffer to use for the output.
+ * @param length Length of the output buffer.
+ *
+ * @return true on success, false on failure.
+ */
+bool os_version_str(char *version, size_t length);
 
 /**
  * Returns a string of the preferred locale of the user / operating system.
@@ -2647,6 +2788,30 @@ public:
 };
 
 #if defined(CONF_FAMILY_WINDOWS)
+/**
+ * Converts a utf8 encoded string to a wide character string
+ * for use with the Windows API.
+ *
+ * @param str The utf8 encoded string to convert.
+ *
+ * @return The argument as a wide character string.
+ *
+ * @remark The argument string must be zero-terminated.
+ */
+std::wstring windows_utf8_to_wide(const char *str);
+
+/**
+ * Converts a wide character string obtained from the Windows API
+ * to a utf8 encoded string.
+ *
+ * @param wide_str The wide character string to convert.
+ *
+ * @return The argument as a utf8 encoded string.
+ *
+ * @remark The argument string must be zero-terminated.
+ */
+std::string windows_wide_to_utf8(const wchar_t *wide_str);
+
 /**
  * This is a RAII wrapper to initialize/uninitialize the Windows COM library,
  * which may be necessary for using the open_file and open_link functions.
@@ -2747,23 +2912,6 @@ bool shell_unregister_application(const char *executable, bool *updated);
  */
 void shell_update();
 #endif
-
-/**
- * Copies a string to a fixed-size array of chars.
- *
- * @ingroup Strings
- *
- * @param dst Array that shall receive the string.
- * @param src String to be copied.
- *
- * @remark The strings are treated as zero-terminated strings.
- * @remark Guarantees that dst string will contain zero-termination.
- */
-template<int N>
-void str_copy(char (&dst)[N], const char *src)
-{
-	str_copy(dst, src, N);
-}
 
 template<>
 struct std::hash<NETADDR>

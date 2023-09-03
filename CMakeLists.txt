@@ -3,9 +3,9 @@ if(CMAKE_VERSION VERSION_LESS 3.12)
   cmake_policy(VERSION ${CMAKE_VERSION})
 endif()
 
-set(CMAKE_OSX_DEPLOYMENT_TARGET 10.13 CACHE INTERNAL "Minimum macOS deployment version")
-if(CMAKE_OSX_DEPLOYMENT_TARGET VERSION_LESS 10.13)
-  message(WARNING "Building for macOS < 10.13 is not supported")
+set(CMAKE_OSX_DEPLOYMENT_TARGET 10.15 CACHE INTERNAL "Minimum macOS deployment version")
+if(CMAKE_OSX_DEPLOYMENT_TARGET VERSION_LESS 10.15)
+  message(WARNING "Building for macOS < 10.15 is not supported")
 endif()
 
 file(STRINGS src/game/version.h VERSION_LINE
@@ -132,7 +132,7 @@ option(VULKAN "Enable the vulkan backend" ${AUTO_VULKAN_BACKEND})
 option(EXCEPTION_HANDLING "Enable exception handling (only works with Windows as of now)" OFF)
 option(IPO "Enable interprocedural optimizations" OFF)
 option(FUSE_LD "Linker to use" OFF)
-option(SECURITY_COMPILER_FLAGS "Whether to set security-relevant compiler flags like -D_FORTIFY_SOURCE=2 and -fstack-protector-all" ON)
+option(SECURITY_COMPILER_FLAGS "Whether to set security-relevant compiler flags like -D_FORTIFY_SOURCE=2 and -fstack-protector-strong" ON)
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
   include(${PROJECT_SOURCE_DIR}/cmake/toolchains/Emscripten.toolchain)
@@ -294,10 +294,12 @@ if(NOT MSVC AND NOT HAIKU)
     add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -std=gnu++17)
   endif()
 
-  if(NOT SECURITY_COMPILER_FLAGS STREQUAL OFF)
+  if(SECURITY_COMPILER_FLAGS)
     # Protect the stack pointer.
-    # -fstack-protector-all doesn't work on MinGW.
-    add_cxx_compiler_flag_if_supported(OUR_FLAGS -fstack-protector-all)
+    add_cxx_compiler_flag_if_supported(OUR_FLAGS -fstack-protector-strong)
+    if(MINGW)
+      add_linker_flag_if_supported(OUR_FLAGS_LINK -lssp)
+    endif()
   endif()
 
   # Disable exceptions as DDNet does not use them.
@@ -362,7 +364,7 @@ if(MSVC)
   endif()
 endif()
 
-if(NOT MSVC AND NOT HAIKU AND NOT SECURITY_COMPILER_FLAGS STREQUAL OFF)
+if(NOT MSVC AND NOT HAIKU AND SECURITY_COMPILER_FLAGS)
   check_c_compiler_flag("-O2;-Wp,-Werror;-D_FORTIFY_SOURCE=2" DEFINE_FORTIFY_SOURCE) # Some distributions define _FORTIFY_SOURCE by themselves.
 endif()
 
@@ -550,7 +552,7 @@ find_package(Ogg)
 find_package(Opus)
 find_package(Opusfile)
 find_package(PNG)
-find_package(PythonInterp 3)
+find_package(Python3)
 find_package(Rust)
 find_package(SDL2)
 find_package(SQLite3)
@@ -572,6 +574,10 @@ endif()
 
 if(EXCEPTION_HANDLING)
   find_package(ExceptionHandling)
+endif()
+
+if(SECURITY_COMPILER_FLAGS)
+  find_package(SSP)
 endif()
 
 if(TARGET_OS AND TARGET_OS STREQUAL "mac")
@@ -639,7 +645,7 @@ show_dependency_status("OpenSSL Crypto" CRYPTO)
 show_dependency_status("Opus" OPUS)
 show_dependency_status("Opusfile" OPUSFILE)
 show_dependency_status("PNG" PNG)
-show_dependency_status("PythonInterp" PYTHONINTERP)
+show_dependency_status("Python3" Python3)
 show_dependency_status("SDL2" SDL2)
 show_dependency_status("SQLite3" SQLite3)
 show_dependency_status("Wavpack" WAVPACK)
@@ -658,7 +664,7 @@ endif()
 if(NOT(CURL_FOUND))
   message(SEND_ERROR "You must install Curl to compile ${CMAKE_PROJECT_NAME}")
 endif()
-if(NOT(PYTHONINTERP_FOUND))
+if(NOT(Python3_FOUND))
   message(SEND_ERROR "You must install Python to compile ${CMAKE_PROJECT_NAME}")
 endif()
 if(NOT(RUST_FOUND))
@@ -730,13 +736,14 @@ endif()
 
 if(TARGET_OS STREQUAL "windows")
   set(PLATFORM_CLIENT)
-  set(PLATFORM_CLIENT_LIBS opengl32 winmm)
+  set(PLATFORM_CLIENT_LIBS opengl32 winmm imm32)
   set(PLATFORM_LIBS)
   list(APPEND PLATFORM_LIBS shlwapi) # PathIsRelativeW
   list(APPEND PLATFORM_LIBS version ws2_32) # Windows sockets
   list(APPEND PLATFORM_LIBS bcrypt userenv) # for Rust (https://github.com/rust-lang/rust/issues/91974)
   list(APPEND PLATFORM_LIBS ole32) # CoInitialize(Ex)
   list(APPEND PLATFORM_LIBS shell32)
+  list(APPEND PLATFORM_LIBS ntdll) # https://github.com/ddnet/ddnet/issues/6725
 elseif(TARGET_OS STREQUAL "mac")
   find_library(CARBON Carbon)
   find_library(COCOA Cocoa)
@@ -787,7 +794,7 @@ endif()
 ########################################################################
 
 if(NOT(GTEST_FOUND) AND DOWNLOAD_GTEST)
-  set(DDNET_GTEST_VERSION 5c8ca58edfb304b2dd5e6061f83387470826dd87) # master as of 2021-04-07
+  set(DDNET_GTEST_VERSION v1.13.0)
   configure_file(cmake/Download_GTest_CMakeLists.txt.in googletest-download/CMakeLists.txt)
   execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
     RESULT_VARIABLE result
@@ -1215,8 +1222,11 @@ set(EXPECTED_DATA
   countryflags/EG.png
   countryflags/EH.png
   countryflags/ER.png
+  countryflags/ES-CT.png
+  countryflags/ES-GA.png
   countryflags/ES.png
   countryflags/ET.png
+  countryflags/EU.png
   countryflags/FI.png
   countryflags/FJ.png
   countryflags/FK.png
@@ -1224,6 +1234,10 @@ set(EXPECTED_DATA
   countryflags/FO.png
   countryflags/FR.png
   countryflags/GA.png
+  countryflags/GB-ENG.png
+  countryflags/GB-NIR.png
+  countryflags/GB-SCT.png
+  countryflags/GB-WLS.png
   countryflags/GB.png
   countryflags/GD.png
   countryflags/GE.png
@@ -1389,12 +1403,6 @@ set(EXPECTED_DATA
   countryflags/VU.png
   countryflags/WF.png
   countryflags/WS.png
-  countryflags/XCA.png
-  countryflags/XEN.png
-  countryflags/XEU.png
-  countryflags/XNI.png
-  countryflags/XSC.png
-  countryflags/XWA.png
   countryflags/YE.png
   countryflags/ZA.png
   countryflags/ZM.png
@@ -1403,14 +1411,25 @@ set(EXPECTED_DATA
   countryflags/index.txt
   debug_font.png
   editor/audio_source.png
+  editor/automap/basic_freeze.rules
+  editor/automap/ddmax_freeze.rules
+  editor/automap/ddnet_tiles.rules
+  editor/automap/ddnet_walls.rules
+  editor/automap/desert_main.rules
+  editor/automap/fadeout.rules
+  editor/automap/generic_clear.rules
+  editor/automap/generic_unhookable.rules
+  editor/automap/generic_unhookable_0.7.rules
+  editor/automap/grass_main.rules
+  editor/automap/grass_main_0.7.rules
+  editor/automap/jungle_main.rules
+  editor/automap/jungle_midground.rules
+  editor/automap/round_tiles.rules
+  editor/automap/water.rules
+  editor/automap/winter_main.rules
   editor/background.png
-  editor/basic_freeze.rules
   editor/checker.png
   editor/cursor.png
-  editor/ddmax_freeze.rules
-  editor/ddnet_tiles.rules
-  editor/ddnet_walls.rules
-  editor/desert_main.rules
   editor/entities/DDNet.png
   editor/entities/FNG.png
   editor/entities/Race.png
@@ -1423,29 +1442,19 @@ set(EXPECTED_DATA
   editor/entities_clear/fng.png
   editor/entities_clear/race.png
   editor/entities_clear/vanilla.png
-  editor/fadeout.rules
   editor/front.png
-  editor/generic_clear.rules
-  editor/generic_unhookable.rules
-  editor/generic_unhookable_0.7.rules
-  editor/grass_main.rules
-  editor/grass_main_0.7.rules
-  editor/jungle_main.rules
-  editor/jungle_midground.rules
-  editor/round_tiles.rules
   editor/speed_arrow.png
   editor/speedup.png
   editor/switch.png
   editor/tele.png
   editor/tune.png
-  editor/water.rules
-  editor/winter_main.rules
   emoticons.png
   extras.png
   fonts/DejaVuSans.ttf
-  fonts/GlowSansJCompressed-Book.otf
-  fonts/Icons.otf
-  fonts/SourceHanSansSC-Regular.otf
+  fonts/Font_Awesome_6_Free-Solid-900.otf
+  fonts/GlowSansJ-Compressed-Book.otf
+  fonts/SourceHanSans.ttc
+  fonts/index.json
   game.png
   gui_buttons.png
   gui_cursor.png
@@ -1465,6 +1474,7 @@ set(EXPECTED_DATA
   languages/esperanto.txt
   languages/finnish.txt
   languages/french.txt
+  languages/galician.txt
   languages/german.txt
   languages/greek.txt
   languages/hungarian.txt
@@ -1722,7 +1732,7 @@ set(EXPECTED_DATA
   wordlist.txt
 )
 
-set_glob(DATA GLOB_RECURSE "cfg;frag;json;map;otf;png;rules;ttf;txt;vert;wv" data ${EXPECTED_DATA})
+set_glob(DATA GLOB_RECURSE "cfg;frag;json;map;otf;png;rules;ttc;ttf;txt;vert;wv" data ${EXPECTED_DATA})
 
 ########################################################################
 # COPY DATA AND SHARED LIBS
@@ -1753,6 +1763,7 @@ set(COPY_FILES
   ${DISCORDSDK_COPY_FILES}
   ${VULKAN_COPY_FILES}
   ${EXCEPTION_HANDLING_COPY_FILES}
+  ${SSP_COPY_FILES}
 )
 file(COPY ${COPY_FILES} DESTINATION .)
 # Don't add integration test files to COPY_FILES since we don't want to add
@@ -1768,7 +1779,7 @@ file(COPY ${COPY_DIRS} DESTINATION .)
 
 function(generate_source output_file script_parameter)
   add_custom_command(OUTPUT ${output_file}
-    COMMAND ${PYTHON_EXECUTABLE} datasrc/compile.py ${script_parameter}
+    COMMAND ${Python3_EXECUTABLE} datasrc/compile.py ${script_parameter}
       > "${PROJECT_BINARY_DIR}/${output_file}"
     DEPENDS
       datasrc/compile.py
@@ -1781,7 +1792,7 @@ endfunction()
 
 function(generate_source7 output_file script_parameter)
   add_custom_command(OUTPUT ${output_file}
-    COMMAND ${PYTHON_EXECUTABLE} -m datasrc.seven.compile ${script_parameter}
+    COMMAND ${Python3_EXECUTABLE} -m datasrc.seven.compile ${script_parameter}
       > "${PROJECT_BINARY_DIR}/${output_file}"
     DEPENDS
       datasrc/seven/compile.py
@@ -1794,7 +1805,7 @@ endfunction()
 
 function(generate_maps output_file script_parameter)
   add_custom_command(OUTPUT ${output_file}
-    COMMAND ${PYTHON_EXECUTABLE} datasrc/crosscompile.py ${script_parameter}
+    COMMAND ${Python3_EXECUTABLE} datasrc/crosscompile.py ${script_parameter}
       > "${PROJECT_BINARY_DIR}/${output_file}"
     DEPENDS
       datasrc/crosscompile.py
@@ -1825,7 +1836,7 @@ if(NOT PROJECT_GIT_DIR_ERROR)
   )
 endif()
 add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/src/game/generated/git_revision.cpp
-  COMMAND ${PYTHON_EXECUTABLE}
+  COMMAND ${Python3_EXECUTABLE}
     scripts/git_revision.py
     > ${PROJECT_BINARY_DIR}/src/game/generated/git_revision.cpp
   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
@@ -1849,7 +1860,7 @@ generate_maps("src/game/generated/protocolglue.h" "map_header")
 generate_maps("src/game/generated/protocolglue.cpp" "map_source")
 
 add_custom_command(OUTPUT "src/game/generated/wordlist.h"
-  COMMAND ${PYTHON_EXECUTABLE} scripts/wordlist.py > ${PROJECT_BINARY_DIR}/src/game/generated/wordlist.h
+  COMMAND ${Python3_EXECUTABLE} scripts/wordlist.py > ${PROJECT_BINARY_DIR}/src/game/generated/wordlist.h
   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
   DEPENDS
     scripts/wordlist.py
@@ -1863,6 +1874,7 @@ add_custom_command(OUTPUT "src/game/generated/wordlist.h"
 set_src(BASE GLOB_RECURSE src/base
   bezier.cpp
   bezier.h
+  color.cpp
   color.h
   detect.h
   dynamic.h
@@ -1952,6 +1964,8 @@ set_src(ENGINE_SHARED GLOB_RECURSE src/engine/shared
   jobs.h
   json.cpp
   json.h
+  jsonwriter.cpp
+  jsonwriter.h
   kernel.cpp
   linereader.cpp
   linereader.h
@@ -2256,8 +2270,12 @@ if(CLIENT)
     laser_data.h
     lineinput.cpp
     lineinput.h
+    pickup_data.cpp
+    pickup_data.h
     prediction/entities/character.cpp
     prediction/entities/character.h
+    prediction/entities/dragger.cpp
+    prediction/entities/dragger.h
     prediction/entities/laser.cpp
     prediction/entities/laser.h
     prediction/entities/pickup.cpp
@@ -2285,18 +2303,40 @@ if(CLIENT)
     ui_scrollregion.cpp
     ui_scrollregion.h
   )
-  set_src(GAME_EDITOR GLOB src/game/editor
+  set_src(GAME_EDITOR GLOB_RECURSE src/game/editor
     auto_map.cpp
     auto_map.h
+    component.cpp
+    component.h
     editor.cpp
     editor.h
     explanations.cpp
-    io.cpp
-    layer_game.cpp
-    layer_quads.cpp
-    layer_sounds.cpp
-    layer_tiles.cpp
+    map_grid.cpp
+    map_grid.h
+    map_view.cpp
+    map_view.h
+    mapitems/image.cpp
+    mapitems/image.h
+    mapitems/layer_front.cpp
+    mapitems/layer_game.cpp
+    mapitems/layer_group.cpp
+    mapitems/layer_quads.cpp
+    mapitems/layer_sounds.cpp
+    mapitems/layer_speedup.cpp
+    mapitems/layer_switch.cpp
+    mapitems/layer_tele.cpp
+    mapitems/layer_tiles.cpp
+    mapitems/layer_tune.cpp
+    mapitems/map.cpp
+    mapitems/map_io.cpp
+    mapitems/sound.cpp
+    mapitems/sound.h
     popups.cpp
+    proof_mode.cpp
+    proof_mode.h
+    smooth_value.cpp
+    smooth_value.h
+    tileart.cpp
   )
   set(GAME_GENERATED_CLIENT
     src/game/generated/checksum.cpp
@@ -2686,7 +2726,7 @@ string(REPLACE ";" "\n" CHECKSUM_SRC_FILE "${CHECKSUM_SRC}")
 file(WRITE ${PROJECT_BINARY_DIR}/checksummed_files.txt ${CHECKSUM_SRC_FILE})
 
 add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/src/game/generated/checksum.cpp
-  COMMAND ${PYTHON_EXECUTABLE}
+  COMMAND ${Python3_EXECUTABLE}
     scripts/checksum.py
     ${PROJECT_BINARY_DIR}/checksummed_files.txt
     ${PROJECT_BINARY_DIR}/checksummed_extra.txt
@@ -2720,6 +2760,7 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
     io.cpp
     jobs.cpp
     json.cpp
+    jsonwriter.cpp
     linereader.cpp
     mapbugs.cpp
     name_ban.cpp
@@ -3105,13 +3146,13 @@ if(CLIENT AND DMGBUILD)
     COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/discord/${LIB_DIR}/discord_game_sdk.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
     COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/freetype/${LIB_DIR}/libfreetype.6.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
     COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/png/${LIB_DIR}/libpng16.16.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
-    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/ffmpeg/${LIB_DIR}/libavcodec.59.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
-    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/ffmpeg/${LIB_DIR}/libavformat.59.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
-    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/ffmpeg/${LIB_DIR}/libavutil.57.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
+    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/ffmpeg/${LIB_DIR}/libavcodec.60.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
+    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/ffmpeg/${LIB_DIR}/libavformat.60.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
+    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/ffmpeg/${LIB_DIR}/libavutil.58.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
     COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/ffmpeg/${LIB_DIR}/libswresample.4.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
-    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/ffmpeg/${LIB_DIR}/libswscale.6.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
+    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/ddnet-libs/ffmpeg/${LIB_DIR}/libswscale.7.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
     COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/libsteam_api.dylib ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/Frameworks/
-    COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/scripts/darwin_strip_rpath.py ${CMAKE_OTOOL} ${CMAKE_INSTALL_NAME_TOOL} ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/MacOS/${CLIENT_EXECUTABLE}
+    COMMAND ${Python3_EXECUTABLE} ${PROJECT_SOURCE_DIR}/scripts/darwin_strip_rpath.py ${CMAKE_OTOOL} ${CMAKE_INSTALL_NAME_TOOL} ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/MacOS/${CLIENT_EXECUTABLE}
     COMMAND ${CMAKE_INSTALL_NAME_TOOL} -add_rpath @loader_path/../Frameworks ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/MacOS/${CLIENT_EXECUTABLE}
 
     # SERVER
@@ -3119,7 +3160,7 @@ if(CLIENT AND DMGBUILD)
     COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/other/icons/${SERVER_EXECUTABLE}.icns ${DMG_TMPDIR}/${SERVER_EXECUTABLE}.app/Contents/Resources/
     COMMAND ${CMAKE_COMMAND} -E copy bundle/server/Info.plist ${PROJECT_SOURCE_DIR}/other/bundle/server/PkgInfo ${DMG_TMPDIR}/${SERVER_EXECUTABLE}.app/Contents/
     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:game-server> $<TARGET_FILE:game-server-launcher> ${DMG_TMPDIR}/${SERVER_EXECUTABLE}.app/Contents/MacOS/
-    COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_SOURCE_DIR}/scripts/darwin_strip_rpath.py ${CMAKE_OTOOL} ${CMAKE_INSTALL_NAME_TOOL} ${DMG_TMPDIR}/${SERVER_EXECUTABLE}.app/Contents/MacOS/${SERVER_EXECUTABLE}
+    COMMAND ${Python3_EXECUTABLE} ${PROJECT_SOURCE_DIR}/scripts/darwin_strip_rpath.py ${CMAKE_OTOOL} ${CMAKE_INSTALL_NAME_TOOL} ${DMG_TMPDIR}/${SERVER_EXECUTABLE}.app/Contents/MacOS/${SERVER_EXECUTABLE}
     COMMAND ${CMAKE_COMMAND} -E copy ${DMG_TMPDIR}/${SERVER_EXECUTABLE}.app/Contents/MacOS/${SERVER_EXECUTABLE} ${DMG_TMPDIR}/${CLIENT_EXECUTABLE}.app/Contents/MacOS/${SERVER_EXECUTABLE}
 
     # DMG

@@ -9,19 +9,22 @@
 MACRO_CONFIG_STR(PlayerName, player_name, 16, "", CFGFLAG_SAVE | CFGFLAG_CLIENT | CFGFLAG_INSENSITIVE, "Name of the player")
 MACRO_CONFIG_STR(PlayerClan, player_clan, 12, "", CFGFLAG_SAVE | CFGFLAG_CLIENT | CFGFLAG_INSENSITIVE, "Clan of the player")
 MACRO_CONFIG_INT(PlayerCountry, player_country, -1, -1, 1000, CFGFLAG_SAVE | CFGFLAG_CLIENT | CFGFLAG_INSENSITIVE, "Country of the player")
-MACRO_CONFIG_STR(Password, password, 32, "", CFGFLAG_CLIENT | CFGFLAG_SERVER | CFGFLAG_NONTEEHISTORIC, "Password to the server")
-MACRO_CONFIG_STR(Logfile, logfile, 128, "", CFGFLAG_SAVE | CFGFLAG_CLIENT | CFGFLAG_SERVER, "Filename to log all output to")
-MACRO_CONFIG_INT(Loglevel, loglevel, 2, 0, 4, CFGFLAG_SAVE | CFGFLAG_CLIENT | CFGFLAG_SERVER, "Log level (0 = Error, 1 = Warn, 2 = Info, 3 = Debug, 4 = Trace)")
-MACRO_CONFIG_INT(ConsoleOutputLevel, console_output_level, 0, 0, 2, CFGFLAG_CLIENT | CFGFLAG_SERVER, "Adjusts the amount of information in the console")
-MACRO_CONFIG_INT(ConsoleEnableColors, console_enable_colors, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SERVER, "Enable colors in console output")
-MACRO_CONFIG_INT(Events, events, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT | CFGFLAG_SERVER, "Enable triggering of events, (eye emotes on some holidays in server, christmas skins in client).")
 
+MACRO_CONFIG_STR(Password, password, 32, "", CFGFLAG_CLIENT | CFGFLAG_SERVER | CFGFLAG_NONTEEHISTORIC, "Password to the server")
+MACRO_CONFIG_INT(Events, events, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT | CFGFLAG_SERVER, "Enable triggering of events, (eye emotes on some holidays in server, christmas skins in client).")
 MACRO_CONFIG_STR(SteamName, steam_name, 16, "", CFGFLAG_SAVE | CFGFLAG_CLIENT, "Last seen name of the Steam profile")
+
+MACRO_CONFIG_STR(Logfile, logfile, 128, "", CFGFLAG_SAVE | CFGFLAG_CLIENT | CFGFLAG_SERVER, "Filename to log all output to")
+MACRO_CONFIG_INT(Logappend, logappend, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT | CFGFLAG_SERVER, "Append to logfile instead of overwriting it every time")
+MACRO_CONFIG_INT(Loglevel, loglevel, 0, -3, 2, CFGFLAG_SAVE | CFGFLAG_CLIENT | CFGFLAG_SERVER, "Adjusts the amount of information in the logfile (-3 = none, -2 = error only, -1 = warn, 0 = info, 1 = debug, 2 = trace)")
+MACRO_CONFIG_INT(StdoutOutputLevel, stdout_output_level, 0, -3, 2, CFGFLAG_SAVE | CFGFLAG_CLIENT | CFGFLAG_SERVER, "Adjusts the amount of information in the system console (-3 = none, -2 = error only, -1 = warn, 0 = info, 1 = debug, 2 = trace)")
+MACRO_CONFIG_INT(ConsoleOutputLevel, console_output_level, 0, -3, 2, CFGFLAG_SAVE | CFGFLAG_CLIENT | CFGFLAG_SERVER, "Adjusts the amount of information in the local/remote console (-3 = none, -2 = error only, -1 = warn, 0 = info, 1 = debug, 2 = trace)")
+MACRO_CONFIG_INT(ConsoleEnableColors, console_enable_colors, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT | CFGFLAG_SERVER, "Enable colors in console output")
 
 MACRO_CONFIG_INT(ClSaveSettings, cl_save_settings, 1, 0, 1, CFGFLAG_CLIENT, "Write the settings file on exit")
 MACRO_CONFIG_INT(ClRefreshRate, cl_refresh_rate, 0, 0, 10000, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Refresh rate for updating the game (in Hz)")
 MACRO_CONFIG_INT(ClRefreshRateInactive, cl_refresh_rate_inactive, 120, 0, 10000, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Refresh rate for updating the game when the window is inactive (in Hz)")
-MACRO_CONFIG_INT(ClEditor, cl_editor, 0, 0, 1, CFGFLAG_CLIENT, "")
+MACRO_CONFIG_INT(ClEditor, cl_editor, 0, 0, 1, CFGFLAG_CLIENT, "Open the map editor")
 MACRO_CONFIG_INT(ClEditorDilate, cl_editor_dilate, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Automatically dilates embedded images")
 MACRO_CONFIG_STR(ClSkinFilterString, cl_skin_filter_string, 25, "", CFGFLAG_SAVE | CFGFLAG_CLIENT, "Skin filtering string")
 
@@ -37,7 +40,7 @@ MACRO_CONFIG_INT(ClPrintBroadcasts, cl_print_broadcasts, 1, 0, 1, CFGFLAG_CLIENT
 MACRO_CONFIG_INT(ClPrintMotd, cl_print_motd, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Print motd to console")
 MACRO_CONFIG_INT(ClFriendsIgnoreClan, cl_friends_ignore_clan, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Ignore clan tag when searching for friends")
 
-MACRO_CONFIG_STR(ClAssetsEntites, cl_assets_entities, 50, "default", CFGFLAG_SAVE | CFGFLAG_CLIENT, "The asset/assets for entities")
+MACRO_CONFIG_STR(ClAssetsEntities, cl_assets_entities, 50, "default", CFGFLAG_SAVE | CFGFLAG_CLIENT, "The asset/assets for entities")
 MACRO_CONFIG_STR(ClAssetGame, cl_asset_game, 50, "default", CFGFLAG_SAVE | CFGFLAG_CLIENT, "The asset for game")
 MACRO_CONFIG_STR(ClAssetEmoticons, cl_asset_emoticons, 50, "default", CFGFLAG_SAVE | CFGFLAG_CLIENT, "The asset for emoticons")
 MACRO_CONFIG_STR(ClAssetParticles, cl_asset_particles, 50, "default", CFGFLAG_SAVE | CFGFLAG_CLIENT, "The asset for particles")
@@ -77,17 +80,16 @@ MACRO_CONFIG_INT(BrDemoSortOrder, br_demo_sort_order, 0, 0, 1, CFGFLAG_SAVE | CF
 MACRO_CONFIG_INT(BrDemoFetchInfo, br_demo_fetch_info, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Whether to auto fetch demo infos on refresh")
 
 MACRO_CONFIG_INT(SndBufferSize, snd_buffer_size, 512, 128, 32768, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Sound buffer size")
-MACRO_CONFIG_INT(SndRate, snd_rate, 48000, 0, 0, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Sound mixing rate")
+MACRO_CONFIG_INT(SndRate, snd_rate, 48000, 5512, 384000, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Sound mixing rate")
 MACRO_CONFIG_INT(SndEnable, snd_enable, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Sound enable")
 MACRO_CONFIG_INT(SndMusic, snd_enable_music, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Play background music")
 MACRO_CONFIG_INT(SndVolume, snd_volume, 30, 0, 100, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Sound volume")
-MACRO_CONFIG_INT(SndDevice, snd_device, -1, 0, 0, CFGFLAG_SAVE | CFGFLAG_CLIENT, "(deprecated) Sound device to use")
 MACRO_CONFIG_INT(SndChatSoundVolume, snd_chat_volume, 30, 0, 100, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Chat sound volume")
 MACRO_CONFIG_INT(SndGameSoundVolume, snd_game_volume, 30, 0, 100, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Game sound volume")
 MACRO_CONFIG_INT(SndMapSoundVolume, snd_ambient_volume, 30, 0, 100, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Map Sound sound volume")
 MACRO_CONFIG_INT(SndBackgroundMusicVolume, snd_background_music_volume, 30, 0, 100, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Background music sound volume")
 
-MACRO_CONFIG_INT(SndNonactiveMute, snd_nonactive_mute, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "")
+MACRO_CONFIG_INT(SndNonactiveMute, snd_nonactive_mute, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Mute sounds when window is not active")
 MACRO_CONFIG_INT(SndGame, snd_game, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Enable game sounds")
 MACRO_CONFIG_INT(SndGun, snd_gun, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Enable gun sound")
 MACRO_CONFIG_INT(SndLongPain, snd_long_pain, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Enable long pain sound (used when shooting in freeze)")
@@ -119,19 +121,19 @@ MACRO_CONFIG_INT(GfxColorDepth, gfx_color_depth, 24, 16, 24, CFGFLAG_SAVE | CFGF
 MACRO_CONFIG_INT(GfxVsync, gfx_vsync, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Vertical sync (may cause delay)")
 MACRO_CONFIG_INT(GfxDisplayAllVideoModes, gfx_display_all_video_modes, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Show all video modes")
 MACRO_CONFIG_INT(GfxHighDetail, gfx_high_detail, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "High detail")
-MACRO_CONFIG_INT(GfxFsaaSamples, gfx_fsaa_samples, 0, 0, 64, CFGFLAG_SAVE | CFGFLAG_CLIENT, "FSAA Samples")
+MACRO_CONFIG_INT(GfxFsaaSamples, gfx_fsaa_samples, 0, 0, 64, CFGFLAG_SAVE | CFGFLAG_CLIENT, "FSAA samples (may cause delay)")
 MACRO_CONFIG_INT(GfxRefreshRate, gfx_refresh_rate, 0, 0, 10000, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Screen refresh rate")
-MACRO_CONFIG_INT(GfxFinish, gfx_finish, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "")
 MACRO_CONFIG_INT(GfxBackgroundRender, gfx_backgroundrender, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Render graphics when window is in background")
 MACRO_CONFIG_INT(GfxTextOverlay, gfx_text_overlay, 10, 1, 100, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Stop rendering textoverlay in editor or with entities: high value = less details = more speed")
-MACRO_CONFIG_INT(GfxAsyncRenderOld, gfx_asyncrender_old, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Do rendering async from the the update")
-MACRO_CONFIG_INT(GfxTuneOverlay, gfx_tune_overlay, 20, 1, 100, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Stop rendering text overlay in tuning zone in editor: high value = less details = more speed")
+MACRO_CONFIG_INT(GfxAsyncRenderOld, gfx_asyncrender_old, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "During an update cycle, skip the render cycle, if the render cycle would need to wait for the previous render cycle to finish")
 MACRO_CONFIG_INT(GfxQuadAsTriangle, gfx_quad_as_triangle, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Render quads as triangles (fixes quad coloring on some GPUs)")
 
 MACRO_CONFIG_INT(InpMousesens, inp_mousesens, 200, 1, 100000, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Mouse sensitivity")
-MACRO_CONFIG_INT(InpMouseOld, inp_mouseold, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Use old mouse mode (warp mouse instead of raw input)")
 MACRO_CONFIG_INT(InpTranslatedKeys, inp_translated_keys, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Translate keys before interpreting them, respects keyboard layouts")
 MACRO_CONFIG_INT(InpIgnoredModifiers, inp_ignored_modifiers, 0, 0, 65536, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Ignored keyboard modifier mask")
+#if defined(CONF_FAMILY_WINDOWS)
+MACRO_CONFIG_INT(InpImeNativeUi, inp_ime_native_ui, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Use native UI for IME (may cause IME to not work in fullscreen mode) (changing requires restart)")
+#endif
 
 MACRO_CONFIG_INT(InpControllerEnable, inp_controller_enable, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Enable controller")
 MACRO_CONFIG_STR(InpControllerGUID, inp_controller_guid, 34, "", CFGFLAG_SAVE | CFGFLAG_CLIENT, "Controller GUID which uniquely identifies the active controller")
@@ -149,7 +151,6 @@ MACRO_CONFIG_STR(SvName, sv_name, 128, "unnamed server", CFGFLAG_SERVER, "Server
 MACRO_CONFIG_STR(Bindaddr, bindaddr, 128, "", CFGFLAG_CLIENT | CFGFLAG_SERVER | CFGFLAG_MASTER, "Address to bind the client/server to")
 MACRO_CONFIG_INT(SvIpv4Only, sv_ipv4only, 0, 0, 1, CFGFLAG_SERVER, "Whether to bind only to ipv4, otherwise bind to all available interfaces")
 MACRO_CONFIG_INT(SvPort, sv_port, 0, 0, 0, CFGFLAG_SERVER, "Port to use for the server (Only ports 8303-8310 work in LAN server browser, 0 to automatically find a free port in 8303-8310)")
-MACRO_CONFIG_INT(SvExternalPort, sv_external_port, 0, 0, 0, CFGFLAG_SERVER, "External port to report to the master servers")
 MACRO_CONFIG_STR(SvHostname, sv_hostname, 128, "", CFGFLAG_SAVE | CFGFLAG_SERVER, "Server hostname (0.7 only)")
 MACRO_CONFIG_STR(SvMap, sv_map, 128, "Sunny Side Up", CFGFLAG_SERVER, "Map to use on the server")
 MACRO_CONFIG_INT(SvMaxClients, sv_max_clients, MAX_CLIENTS, 1, MAX_CLIENTS, CFGFLAG_SERVER, "Maximum number of clients that are allowed on a server")
@@ -191,13 +192,10 @@ MACRO_CONFIG_INT(EcOutputLevel, ec_output_level, 1, 0, 2, CFGFLAG_ECON, "Adjusts
 
 MACRO_CONFIG_INT(Debug, debug, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SERVER, "Debug mode")
 MACRO_CONFIG_INT(DbgCurl, dbg_curl, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SERVER, "Debug curl")
-MACRO_CONFIG_INT(DbgPref, dbg_pref, 0, 0, 1, CFGFLAG_SERVER, "Performance outputs")
 MACRO_CONFIG_INT(DbgGraphs, dbg_graphs, 0, 0, 1, CFGFLAG_CLIENT, "Performance graphs")
-MACRO_CONFIG_INT(DbgHitch, dbg_hitch, 0, 0, 0, CFGFLAG_SERVER, "Hitch warnings")
 MACRO_CONFIG_INT(DbgGfx, dbg_gfx, 0, 0, 4, CFGFLAG_CLIENT, "Show graphic library warnings and errors, if the GPU supports it (0: none, 1: minimal, 2: affects performance, 3: verbose, 4: all)")
 #ifdef CONF_DEBUG
 MACRO_CONFIG_INT(DbgStress, dbg_stress, 0, 0, 0, CFGFLAG_CLIENT | CFGFLAG_SERVER, "Stress systems (Debug build only)")
-MACRO_CONFIG_INT(DbgStressNetwork, dbg_stress_network, 0, 0, 0, CFGFLAG_CLIENT | CFGFLAG_SERVER, "Stress network (Debug build only)")
 MACRO_CONFIG_STR(DbgStressServer, dbg_stress_server, 32, "localhost", CFGFLAG_CLIENT, "Server to stress (Debug build only)")
 #endif
 
@@ -207,6 +205,7 @@ MACRO_CONFIG_INT(HttpAllowInsecure, http_allow_insecure, 0, 0, 1, CFGFLAG_CLIENT
 MACRO_CONFIG_STR(SvWelcome, sv_welcome, 64, "", CFGFLAG_SERVER, "Message that will be displayed to players who join the server")
 MACRO_CONFIG_INT(SvReservedSlots, sv_reserved_slots, 0, 0, MAX_CLIENTS, CFGFLAG_SERVER, "The number of slots that are reserved for special players")
 MACRO_CONFIG_STR(SvReservedSlotsPass, sv_reserved_slots_pass, 32, "", CFGFLAG_SERVER | CFGFLAG_NONTEEHISTORIC, "The password that is required to use a reserved slot")
+MACRO_CONFIG_INT(SvReservedSlotsAuthLevel, sv_reserved_slots_auth_level, 1, 1, 4, CFGFLAG_SERVER, "Minimum rcon auth level needed to use a reserved slot. 4 = rcon auth disabled")
 MACRO_CONFIG_INT(SvHit, sv_hit, 1, 0, 1, CFGFLAG_SERVER | CFGFLAG_GAME, "Whether players can hammer/grenade/laser each other or not")
 MACRO_CONFIG_INT(SvEndlessDrag, sv_endless_drag, 0, 0, 1, CFGFLAG_SERVER | CFGFLAG_GAME, "Turns endless hooking on/off")
 MACRO_CONFIG_INT(SvTestingCommands, sv_test_cmds, 0, 0, 1, CFGFLAG_SERVER, "Turns testing commands aka cheats on/off (setting only works in initial config)")
@@ -223,7 +222,8 @@ MACRO_CONFIG_INT(SvInviteFrequency, sv_invite_frequency, 1, 0, 9999, CFGFLAG_SER
 MACRO_CONFIG_INT(SvTeleOthersAuthLevel, sv_tele_others_auth_level, 1, 1, 3, CFGFLAG_SERVER, "The auth level you need to tele others")
 
 MACRO_CONFIG_INT(SvEmotionalTees, sv_emotional_tees, 1, -1, 1, CFGFLAG_SERVER, "Whether eye change of tees is enabled with emoticons = 1, not = 0, -1 not at all")
-MACRO_CONFIG_INT(SvEmoticonDelay, sv_emoticon_delay, 3, 0, 9999, CFGFLAG_SERVER, "The time in seconds between over-head emoticons")
+MACRO_CONFIG_INT(SvEmoticonMsDelay, sv_emoticon_ms_delay, 3000, 20, 999999999, CFGFLAG_SERVER, "The time in ms a player has to wait before allowing the next over-head emoticons")
+MACRO_CONFIG_INT(SvGlobalEmoticonMsDelay, sv_global_emoticon_ms_delay, 3000, 20, 999999999, CFGFLAG_SERVER, "The time in ms a player has to wait before allowing the next over-head emoticons that is send to all clients (this config must be higher or equal to sv_emoticon_ms_delay to have an effect)")
 MACRO_CONFIG_INT(SvEyeEmoteChangeDelay, sv_eye_emote_change_delay, 1, 0, 9999, CFGFLAG_SERVER, "The time in seconds between eye emoticons change")
 
 MACRO_CONFIG_INT(SvChatDelay, sv_chat_delay, 1, 0, 9999, CFGFLAG_SERVER, "The time in seconds between chat messages")
@@ -245,8 +245,6 @@ MACRO_CONFIG_INT(SvFastDownload, sv_fast_download, 1, 0, 1, CFGFLAG_SERVER, "Ena
 
 MACRO_CONFIG_INT(SvShotgunBulletSound, sv_shotgun_bullet_sound, 0, 0, 1, CFGFLAG_SERVER, "Crazy shotgun bullet sound on/off")
 
-MACRO_CONFIG_STR(SvScoreFolder, sv_score_folder, 32, "records", CFGFLAG_SERVER, "Folder to save score files to")
-
 MACRO_CONFIG_STR(SvRegionName, sv_region_name, 5, "UNK", CFGFLAG_SERVER, "Server region. Used for regional bans")
 MACRO_CONFIG_STR(SvSqlServerName, sv_sql_servername, 5, "UNK", CFGFLAG_SERVER, "SQL Server name that is inserted into record table")
 MACRO_CONFIG_INT(SvSaveGames, sv_savegames, 1, 0, 1, CFGFLAG_SERVER, "Enables savegames (/save and /load)")
@@ -257,7 +255,6 @@ MACRO_CONFIG_INT(SvSwap, sv_swap, 1, 0, 1, CFGFLAG_SERVER, "Enable /swap")
 MACRO_CONFIG_INT(SvUseSQL, sv_use_sql, 0, 0, 1, CFGFLAG_SERVER, "Enables MySQL backend instead of SQLite backend (sv_sqlite_file is still used as fallback write server when no MySQL server is reachable)")
 MACRO_CONFIG_INT(SvSqlQueriesDelay, sv_sql_queries_delay, 1, 0, 20, CFGFLAG_SERVER, "Delay in seconds between SQL queries of a single player")
 MACRO_CONFIG_STR(SvSqliteFile, sv_sqlite_file, 64, "ddnet-server.sqlite", CFGFLAG_SERVER, "File to store ranks in case sv_use_sql is turned off or used as backup sql server")
-MACRO_CONFIG_STR(SvSqlBindaddr, sv_sql_bindaddr, 128, "", CFGFLAG_SERVER, "Address to bind the SQL connections to")
 
 #if defined(CONF_UPNP)
 MACRO_CONFIG_INT(SvUseUPnP, sv_use_upnp, 0, 0, 1, CFGFLAG_SERVER, "Enables UPnP support. (Requires -DCONF_UPNP=ON when compiling)")
@@ -368,7 +365,6 @@ MACRO_CONFIG_INT(SvChatPenalty, sv_chat_penalty, 250, 50, 1000, CFGFLAG_SERVER, 
 MACRO_CONFIG_INT(SvChatThreshold, sv_chat_threshold, 1000, 50, 10000, CFGFLAG_SERVER, "if chats core exceeds this, the player will be muted for sv_spam_mute_duration seconds")
 MACRO_CONFIG_INT(SvSpamMuteDuration, sv_spam_mute_duration, 60, 0, 3600, CFGFLAG_SERVER, "how many seconds to mute, if player triggers mute on spam. 0 = off")
 
-MACRO_CONFIG_INT(SvRankCheats, sv_rank_cheats, 0, 0, 1, CFGFLAG_SERVER, "Enable ranks after cheats have been used (file based server only)")
 MACRO_CONFIG_INT(SvShutdownWhenEmpty, sv_shutdown_when_empty, 0, 0, 1, CFGFLAG_SERVER, "Shutdown server as soon as no one is on it anymore")
 MACRO_CONFIG_INT(SvReloadWhenEmpty, sv_reload_when_empty, 0, 0, 2, CFGFLAG_SERVER, "Reload map when server is empty (1 = reload once, 2 = reload every time server gets empty)")
 MACRO_CONFIG_INT(SvKillProtection, sv_kill_protection, 20, 0, 9999, CFGFLAG_SERVER, "0 - Disable, 1-9999 minutes")
@@ -419,6 +415,7 @@ MACRO_CONFIG_INT(ClConfigVersion, cl_config_version, 0, 0, 0, CFGFLAG_CLIENT | C
 MACRO_CONFIG_INT(ClDemoSliceBegin, cl_demo_slice_begin, -1, 0, 0, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Begin marker for demo slice")
 MACRO_CONFIG_INT(ClDemoSliceEnd, cl_demo_slice_end, -1, 0, 0, CFGFLAG_SAVE | CFGFLAG_CLIENT, "End marker for demo slice")
 MACRO_CONFIG_INT(ClDemoShowSpeed, cl_demo_show_speed, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Show speed meter on change")
+MACRO_CONFIG_INT(ClDemoShowPause, cl_demo_show_pause, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Show pause/play indicator on change")
 MACRO_CONFIG_INT(ClDemoKeyboardShortcuts, cl_demo_keyboard_shortcuts, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Enable keyboard shortcuts in demo player")
 
 // graphic library

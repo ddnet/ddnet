@@ -176,7 +176,7 @@ int CRenderTools::QuadContainerAddSprite(int QuadContainerIndex, float X, float 
 	return Graphics()->QuadContainerAddQuads(QuadContainerIndex, &QuadItem, 1);
 }
 
-void CRenderTools::GetRenderTeeAnimScaleAndBaseSize(CAnimState *pAnim, CTeeRenderInfo *pInfo, float &AnimScale, float &BaseSize)
+void CRenderTools::GetRenderTeeAnimScaleAndBaseSize(const CTeeRenderInfo *pInfo, float &AnimScale, float &BaseSize)
 {
 	AnimScale = pInfo->m_Size * 1.0f / 64.0f;
 	BaseSize = pInfo->m_Size;
@@ -194,10 +194,10 @@ void CRenderTools::GetRenderTeeFeetScale(float BaseSize, float &FeetScaleWidth, 
 	FeetScaleHeight = (BaseSize / 2) / 32.0f;
 }
 
-void CRenderTools::GetRenderTeeBodySize(CAnimState *pAnim, CTeeRenderInfo *pInfo, vec2 &BodyOffset, float &Width, float &Height)
+void CRenderTools::GetRenderTeeBodySize(const CAnimState *pAnim, const CTeeRenderInfo *pInfo, vec2 &BodyOffset, float &Width, float &Height)
 {
 	float AnimScale, BaseSize;
-	GetRenderTeeAnimScaleAndBaseSize(pAnim, pInfo, AnimScale, BaseSize);
+	GetRenderTeeAnimScaleAndBaseSize(pInfo, AnimScale, BaseSize);
 
 	float BodyScale;
 	GetRenderTeeBodyScale(BaseSize, BodyScale);
@@ -208,10 +208,10 @@ void CRenderTools::GetRenderTeeBodySize(CAnimState *pAnim, CTeeRenderInfo *pInfo
 	BodyOffset.y = pInfo->m_SkinMetrics.m_Body.OffsetYNormalized() * 64.0f * BodyScale;
 }
 
-void CRenderTools::GetRenderTeeFeetSize(CAnimState *pAnim, CTeeRenderInfo *pInfo, vec2 &FeetOffset, float &Width, float &Height)
+void CRenderTools::GetRenderTeeFeetSize(const CAnimState *pAnim, const CTeeRenderInfo *pInfo, vec2 &FeetOffset, float &Width, float &Height)
 {
 	float AnimScale, BaseSize;
-	GetRenderTeeAnimScaleAndBaseSize(pAnim, pInfo, AnimScale, BaseSize);
+	GetRenderTeeAnimScaleAndBaseSize(pInfo, AnimScale, BaseSize);
 
 	float FeetScaleWidth, FeetScaleHeight;
 	GetRenderTeeFeetScale(BaseSize, FeetScaleWidth, FeetScaleHeight);
@@ -222,17 +222,17 @@ void CRenderTools::GetRenderTeeFeetSize(CAnimState *pAnim, CTeeRenderInfo *pInfo
 	FeetOffset.y = pInfo->m_SkinMetrics.m_Feet.OffsetYNormalized() * 32.0f * FeetScaleHeight;
 }
 
-void CRenderTools::GetRenderTeeOffsetToRenderedTee(CAnimState *pAnim, CTeeRenderInfo *pInfo, vec2 &TeeOffsetToMid)
+void CRenderTools::GetRenderTeeOffsetToRenderedTee(const CAnimState *pAnim, const CTeeRenderInfo *pInfo, vec2 &TeeOffsetToMid)
 {
 	float AnimScale, BaseSize;
-	GetRenderTeeAnimScaleAndBaseSize(pAnim, pInfo, AnimScale, BaseSize);
+	GetRenderTeeAnimScaleAndBaseSize(pInfo, AnimScale, BaseSize);
 	vec2 BodyPos = vec2(pAnim->GetBody()->m_X, pAnim->GetBody()->m_Y) * AnimScale;
 
 	float AssumedScale = BaseSize / 64.0f;
 
 	// just use the lowest feet
 	vec2 FeetPos;
-	CAnimKeyframe *pFoot = pAnim->GetFrontFoot();
+	const CAnimKeyframe *pFoot = pAnim->GetFrontFoot();
 	FeetPos = vec2(pFoot->m_X * AnimScale, pFoot->m_Y * AnimScale);
 	pFoot = pAnim->GetBackFoot();
 	FeetPos = vec2(FeetPos.x, maximum(FeetPos.y, pFoot->m_Y * AnimScale));
@@ -270,7 +270,7 @@ void CRenderTools::GetRenderTeeOffsetToRenderedTee(CAnimState *pAnim, CTeeRender
 	TeeOffsetToMid.y = -MidOfRendered;
 }
 
-void CRenderTools::RenderTee(CAnimState *pAnim, CTeeRenderInfo *pInfo, int Emote, vec2 Dir, vec2 Pos, float Alpha)
+void CRenderTools::RenderTee(const CAnimState *pAnim, const CTeeRenderInfo *pInfo, int Emote, vec2 Dir, vec2 Pos, float Alpha)
 {
 	vec2 Direction = Dir;
 	vec2 Position = Pos;
@@ -286,7 +286,7 @@ void CRenderTools::RenderTee(CAnimState *pAnim, CTeeRenderInfo *pInfo, int Emote
 		for(int f = 0; f < 2; f++)
 		{
 			float AnimScale, BaseSize;
-			GetRenderTeeAnimScaleAndBaseSize(pAnim, pInfo, AnimScale, BaseSize);
+			GetRenderTeeAnimScaleAndBaseSize(pInfo, AnimScale, BaseSize);
 			if(f == 1)
 			{
 				Graphics()->QuadsSetRotation(pAnim->GetBody()->m_Angle * pi * 2);
@@ -341,7 +341,7 @@ void CRenderTools::RenderTee(CAnimState *pAnim, CTeeRenderInfo *pInfo, int Emote
 			}
 
 			// draw feet
-			CAnimKeyframe *pFoot = f ? pAnim->GetFrontFoot() : pAnim->GetBackFoot();
+			const CAnimKeyframe *pFoot = f ? pAnim->GetFrontFoot() : pAnim->GetBackFoot();
 
 			float w = BaseSize;
 			float h = BaseSize / 2;

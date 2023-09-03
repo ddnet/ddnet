@@ -5,6 +5,7 @@
 
 #include <climits>
 #include <new>
+#include <stack>
 #include <tuple>
 
 #include <base/hash.h>
@@ -122,27 +123,25 @@ void CGraph::InsertAt(size_t Index, float v, float r, float g, float b)
 	m_aColors[Index][2] = b;
 }
 
-void CGraph::Render(IGraphics *pGraphics, IGraphics::CTextureHandle FontTexture, float x, float y, float w, float h, const char *pDescription)
+void CGraph::Render(IGraphics *pGraphics, ITextRender *pTextRender, float x, float y, float w, float h, const char *pDescription)
 {
-	//m_pGraphics->BlendNormal();
-
 	pGraphics->TextureClear();
 
 	pGraphics->QuadsBegin();
-	pGraphics->SetColor(0, 0, 0, 0.75f);
+	pGraphics->SetColor(0.0f, 0.0f, 0.0f, 0.75f);
 	IGraphics::CQuadItem QuadItem(x, y, w, h);
 	pGraphics->QuadsDrawTL(&QuadItem, 1);
 	pGraphics->QuadsEnd();
 
 	pGraphics->LinesBegin();
-	pGraphics->SetColor(0.95f, 0.95f, 0.95f, 1.00f);
+	pGraphics->SetColor(0.95f, 0.95f, 0.95f, 1.0f);
 	IGraphics::CLineItem LineItem(x, y + h / 2, x + w, y + h / 2);
 	pGraphics->LinesDraw(&LineItem, 1);
 	pGraphics->SetColor(0.5f, 0.5f, 0.5f, 0.75f);
 	IGraphics::CLineItem aLineItems[2] = {
 		IGraphics::CLineItem(x, y + (h * 3) / 4, x + w, y + (h * 3) / 4),
 		IGraphics::CLineItem(x, y + h / 4, x + w, y + h / 4)};
-	pGraphics->LinesDraw(aLineItems, 2);
+	pGraphics->LinesDraw(aLineItems, std::size(aLineItems));
 	for(int i = 1; i < MAX_VALUES; i++)
 	{
 		float a0 = (i - 1) / (float)MAX_VALUES;
@@ -156,23 +155,23 @@ void CGraph::Render(IGraphics *pGraphics, IGraphics::CTextureHandle FontTexture,
 		IGraphics::CColorVertex aColorVertices[2] = {
 			IGraphics::CColorVertex(0, m_aColors[i0][0], m_aColors[i0][1], m_aColors[i0][2], 0.75f),
 			IGraphics::CColorVertex(1, m_aColors[i1][0], m_aColors[i1][1], m_aColors[i1][2], 0.75f)};
-		pGraphics->SetColorVertex(aColorVertices, 2);
+		pGraphics->SetColorVertex(aColorVertices, std::size(aColorVertices));
 		IGraphics::CLineItem LineItem2(x + a0 * w, y + h - v0 * h, x + a1 * w, y + h - v1 * h);
 		pGraphics->LinesDraw(&LineItem2, 1);
 	}
 	pGraphics->LinesEnd();
 
-	pGraphics->TextureSet(FontTexture);
-	pGraphics->QuadsBegin();
-	pGraphics->QuadsText(x + 2, y + h - 16, 16, pDescription);
+	const float FontSize = 12.0f;
+	const float Spacing = 2.0f;
+
+	pTextRender->Text(x + Spacing, y + h - FontSize - Spacing, FontSize, pDescription);
 
 	char aBuf[32];
 	str_format(aBuf, sizeof(aBuf), "%.2f", m_Max);
-	pGraphics->QuadsText(x + w - 8 * str_length(aBuf) - 8, y + 2, 16, aBuf);
+	pTextRender->Text(x + w - pTextRender->TextWidth(FontSize, aBuf) - Spacing, y + Spacing, FontSize, aBuf);
 
 	str_format(aBuf, sizeof(aBuf), "%.2f", m_Min);
-	pGraphics->QuadsText(x + w - 8 * str_length(aBuf) - 8, y + h - 16, 16, aBuf);
-	pGraphics->QuadsEnd();
+	pTextRender->Text(x + w - pTextRender->TextWidth(FontSize, aBuf) - Spacing, y + h - FontSize - Spacing, FontSize, aBuf);
 }
 
 void CSmoothTime::Init(int64_t Target)
@@ -293,16 +292,6 @@ CClient::CClient() :
 	for(auto &DemoRecorder : m_aDemoRecorder)
 		DemoRecorder = CDemoRecorder(&m_SnapshotDelta);
 
-	m_pEditor = 0;
-	m_pInput = 0;
-	m_pGraphics = 0;
-	m_pSound = 0;
-	m_pGameClient = 0;
-	m_pMap = 0;
-	m_pConfigManager = 0;
-	m_pConfig = 0;
-	m_pConsole = 0;
-
 	m_RenderFrameTime = 0.0001f;
 	m_RenderFrameTimeLow = 1.0f;
 	m_RenderFrameTimeHigh = 0.0f;
@@ -323,6 +312,7 @@ CClient::CClient() :
 	m_aCurrentRecvTick[1] = 0;
 	m_aRconAuthed[0] = 0;
 	m_aRconAuthed[1] = 0;
+	m_aRconUsername[0] = '\0';
 	m_aRconPassword[0] = '\0';
 	m_aPassword[0] = '\0';
 
@@ -508,6 +498,8 @@ void CClient::RconAuth(const char *pName, const char *pPassword)
 	if(RconAuthed())
 		return;
 
+	if(pName != m_aRconUsername)
+		str_copy(m_aRconUsername, pName);
 	if(pPassword != m_aRconPassword)
 		str_copy(m_aRconPassword, pPassword);
 
@@ -766,14 +758,19 @@ void CClient::Connect(const char *pAddress, const char *pPassword)
 	while((pNextAddr = str_next_token(pNextAddr, ",", aBuffer, sizeof(aBuffer))))
 	{
 		NETADDR NextAddr;
-		if(net_host_lookup(aBuffer, &NextAddr, m_aNetClient[CONN_MAIN].NetType()) != 0)
+		char aHost[128];
+		int url = net_addr_from_url(&NextAddr, aBuffer, aHost, sizeof(aHost));
+		if(url > 0)
+			str_copy(aHost, aBuffer);
+
+		if(net_host_lookup(aHost, &NextAddr, m_aNetClient[CONN_MAIN].NetType()) != 0)
 		{
-			log_error("client", "could not find address of %s", aBuffer);
+			log_error("client", "could not find address of %s", aHost);
 			continue;
 		}
 		if(NumConnectAddrs == (int)std::size(aConnectAddrs))
 		{
-			log_warn("client", "too many connect addresses, ignoring %s", aBuffer);
+			log_warn("client", "too many connect addresses, ignoring %s", aHost);
 			continue;
 		}
 		if(NextAddr.port == 0)
@@ -838,6 +835,8 @@ void CClient::DisconnectWithReason(const char *pReason)
 
 	//
 	m_aRconAuthed[0] = 0;
+	mem_zero(m_aRconUsername, sizeof(m_aRconUsername));
+	mem_zero(m_aRconPassword, sizeof(m_aRconPassword));
 	m_ServerSentCapabilities = false;
 	m_UseTempRconCommands = 0;
 	m_pConsole->DeregisterTempAll();
@@ -907,7 +906,7 @@ void CClient::DummyConnect()
 	if(m_LastDummyConnectTime > 0 && m_LastDummyConnectTime + GameTickSpeed() * 5 > GameTick(g_Config.m_ClDummy))
 		return;
 
-	if(m_aNetClient[CONN_MAIN].State() != NET_CONNSTATE_ONLINE && m_aNetClient[CONN_MAIN].State() != NET_CONNSTATE_PENDING)
+	if(m_aNetClient[CONN_MAIN].State() != NETSTATE_ONLINE)
 		return;
 
 	if(m_DummyConnected || !DummyAllowed())
@@ -933,7 +932,13 @@ void CClient::DummyDisconnect(const char *pReason)
 
 	m_aNetClient[CONN_DUMMY].Disconnect(pReason);
 	g_Config.m_ClDummy = 0;
+
+	if(!m_aRconAuthed[0] && m_aRconAuthed[1])
+	{
+		RconAuth(m_aRconUsername, m_aRconPassword);
+	}
 	m_aRconAuthed[1] = 0;
+
 	m_aapSnapshots[1][SNAP_CURRENT] = 0;
 	m_aapSnapshots[1][SNAP_PREV] = 0;
 	m_aReceivedSnapshots[1] = 0;
@@ -967,10 +972,9 @@ void CClient::ServerInfoRequest()
 	m_CurrentServerInfoRequestTime = 0;
 }
 
-int CClient::LoadData()
+void CClient::LoadDebugFont()
 {
 	m_DebugFont = Graphics()->LoadTexture("debug_font.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
-	return 1;
 }
 
 // ---
@@ -1014,24 +1018,23 @@ void CClient::SnapSetStaticsize(int ItemType, int Size)
 
 void CClient::DebugRender()
 {
-	static NETSTATS Prev, Current;
-	static int64_t LastSnap = 0;
-	static float FrameTimeAvg = 0;
-	char aBuffer[512];
-
 	if(!g_Config.m_Debug)
 		return;
 
-	//m_pGraphics->BlendNormal();
+	static NETSTATS s_Prev, s_Current;
+	static int64_t s_LastSnapTime = 0;
+	static float s_FrameTimeAvg = 0;
+	char aBuffer[512];
+
 	Graphics()->TextureSet(m_DebugFont);
 	Graphics()->MapScreen(0, 0, Graphics()->ScreenWidth(), Graphics()->ScreenHeight());
 	Graphics()->QuadsBegin();
 
-	if(time_get() - LastSnap > time_freq())
+	if(time_get() - s_LastSnapTime > time_freq())
 	{
-		LastSnap = time_get();
-		Prev = Current;
-		net_stats(&Current);
+		s_LastSnapTime = time_get();
+		s_Prev = s_Current;
+		net_stats(&s_Current);
 	}
 
 	/*
@@ -1040,22 +1043,22 @@ void CClient::DebugRender()
 		udp = 8
 		total = 42
 	*/
-	FrameTimeAvg = FrameTimeAvg * 0.9f + m_RenderFrameTime * 0.1f;
+	s_FrameTimeAvg = s_FrameTimeAvg * 0.9f + m_RenderFrameTime * 0.1f;
 	str_format(aBuffer, sizeof(aBuffer), "ticks: %8d %8d gfx mem(tex/buff/stream/staging): (%" PRIu64 "k/%" PRIu64 "k/%" PRIu64 "k/%" PRIu64 "k) fps: %3d",
 		m_aCurGameTick[g_Config.m_ClDummy], m_aPredTick[g_Config.m_ClDummy],
 		(Graphics()->TextureMemoryUsage() / 1024),
 		(Graphics()->BufferMemoryUsage() / 1024),
 		(Graphics()->StreamedMemoryUsage() / 1024),
 		(Graphics()->StagingMemoryUsage() / 1024),
-		(int)(1.0f / FrameTimeAvg + 0.5f));
+		(int)(1.0f / s_FrameTimeAvg + 0.5f));
 	Graphics()->QuadsText(2, 2, 16, aBuffer);
 
 	{
-		uint64_t SendPackets = (Current.sent_packets - Prev.sent_packets);
-		uint64_t SendBytes = (Current.sent_bytes - Prev.sent_bytes);
+		uint64_t SendPackets = (s_Current.sent_packets - s_Prev.sent_packets);
+		uint64_t SendBytes = (s_Current.sent_bytes - s_Prev.sent_bytes);
 		uint64_t SendTotal = SendBytes + SendPackets * 42;
-		uint64_t RecvPackets = (Current.recv_packets - Prev.recv_packets);
-		uint64_t RecvBytes = (Current.recv_bytes - Prev.recv_bytes);
+		uint64_t RecvPackets = (s_Current.recv_packets - s_Prev.recv_packets);
+		uint64_t RecvBytes = (s_Current.recv_bytes - s_Prev.recv_bytes);
 		uint64_t RecvTotal = RecvBytes + RecvPackets * 42;
 
 		if(!SendPackets)
@@ -1114,18 +1117,17 @@ void CClient::DebugRender()
 	// render graphs
 	if(g_Config.m_DbgGraphs)
 	{
-		//Graphics()->MapScreen(0,0,400.0f,300.0f);
 		float w = Graphics()->ScreenWidth() / 4.0f;
 		float h = Graphics()->ScreenHeight() / 6.0f;
 		float sp = Graphics()->ScreenWidth() / 100.0f;
 		float x = Graphics()->ScreenWidth() - w - sp;
 
 		m_FpsGraph.Scale();
-		m_FpsGraph.Render(Graphics(), m_DebugFont, x, sp * 5, w, h, "FPS");
+		m_FpsGraph.Render(Graphics(), TextRender(), x, sp * 5, w, h, "FPS");
 		m_InputtimeMarginGraph.Scale();
-		m_InputtimeMarginGraph.Render(Graphics(), m_DebugFont, x, sp * 5 + h + sp, w, h, "Prediction Margin");
+		m_InputtimeMarginGraph.Render(Graphics(), TextRender(), x, sp * 6 + h, w, h, "Prediction Margin");
 		m_GametimeMarginGraph.Scale();
-		m_GametimeMarginGraph.Render(Graphics(), m_DebugFont, x, sp * 5 + h + sp + h + sp, w, h, "Gametime Margin");
+		m_GametimeMarginGraph.Render(Graphics(), TextRender(), x, sp * 7 + h * 2, w, h, "Gametime Margin");
 	}
 }
 
@@ -1803,7 +1805,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 			g_Config.m_ClDummy = 1;
 			Rcon("crashmeplx");
 			if(m_aRconAuthed[0])
-				RconAuth("", m_aRconPassword);
+				RconAuth(m_aRconUsername, m_aRconPassword);
 		}
 		else if(Msg == NETMSG_PING)
 		{
@@ -1854,6 +1856,16 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 				MsgP.AddInt(ResultCheck);
 				SendMsg(Conn, &MsgP, MSGFLAG_VITAL);
 			}
+		}
+		else if(Msg == NETMSG_REDIRECT)
+		{
+			int RedirectPort = Unpacker.GetInt();
+			char aAddr[128];
+			char aIP[64];
+			NETADDR ServerAddr = ServerAddress();
+			net_addr_str(&ServerAddr, aIP, sizeof(aIP), 0);
+			str_format(aAddr, sizeof(aAddr), "%s:%d", aIP, RedirectPort);
+			Connect(aAddr);
 		}
 		else if(Conn == CONN_MAIN && (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_RCON_CMD_ADD)
 		{
@@ -2154,7 +2166,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 							if(g_Config.m_ClRunOnJoin[0])
 							{
 								str_format(aBuf, sizeof(aBuf), ";%s", g_Config.m_ClRunOnJoin);
-								str_append(aBufMsg, aBuf, sizeof(aBufMsg));
+								str_append(aBufMsg, aBuf);
 							}
 							if(g_Config.m_ClDummyDefaultEyes || g_Config.m_ClPlayerDefaultEyes)
 							{
@@ -2184,7 +2196,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 								if(aBufEmote[0])
 								{
 									str_format(aBuf, sizeof(aBuf), ";%s", aBufEmote);
-									str_append(aBufMsg, aBuf, sizeof(aBufMsg));
+									str_append(aBufMsg, aBuf);
 								}
 							}
 							MsgP.m_pMessage = aBufMsg;
@@ -2514,7 +2526,6 @@ void CClient::PumpNetwork()
 		// check for errors
 		if(State() != IClient::STATE_OFFLINE && State() < IClient::STATE_QUITTING && m_aNetClient[CONN_MAIN].State() == NETSTATE_OFFLINE)
 		{
-			SetState(IClient::STATE_OFFLINE);
 			Disconnect();
 			char aBuf[256];
 			str_format(aBuf, sizeof(aBuf), "offline error='%s'", m_aNetClient[CONN_MAIN].ErrorString());
@@ -2869,18 +2880,18 @@ void CClient::Update()
 
 	if(State() == IClient::STATE_ONLINE)
 	{
-		if(!m_lpEditJobs.empty())
+		if(!m_EditJobs.empty())
 		{
-			std::shared_ptr<CDemoEdit> e = m_lpEditJobs.front();
-			if(e->Status() == IJob::STATE_DONE)
+			std::shared_ptr<CDemoEdit> pJob = m_EditJobs.front();
+			if(pJob->Status() == IJob::STATE_DONE)
 			{
-				char aBuf[256];
-				str_format(aBuf, sizeof(aBuf), "Successfully saved the replay to %s!", e->Destination());
+				char aBuf[IO_MAX_PATH_LENGTH + 64];
+				str_format(aBuf, sizeof(aBuf), "Successfully saved the replay to %s!", pJob->Destination());
 				m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", aBuf);
 
 				GameClient()->Echo(Localize("Successfully saved the replay!"));
 
-				m_lpEditJobs.pop_front();
+				m_EditJobs.pop_front();
 			}
 		}
 	}
@@ -2998,6 +3009,7 @@ void CClient::Run()
 		if(RegisterFail || m_pGraphics->Init() != 0)
 		{
 			dbg_msg("client", "couldn't init graphics");
+			ShowMessageBox("Graphics Error", "The graphics could not be initialized.");
 			return;
 		}
 	}
@@ -3015,37 +3027,18 @@ void CClient::Run()
 #endif
 
 #ifndef CONF_WEBASM
-	// open socket
+	char aNetworkError[256];
+	if(!InitNetworkClient(aNetworkError, sizeof(aNetworkError)))
 	{
-		NETADDR BindAddr;
-		if(g_Config.m_Bindaddr[0] && net_host_lookup(g_Config.m_Bindaddr, &BindAddr, NETTYPE_ALL) == 0)
-		{
-			// got bindaddr
-			BindAddr.type = NETTYPE_ALL;
-		}
-		else
-		{
-			mem_zero(&BindAddr, sizeof(BindAddr));
-			BindAddr.type = NETTYPE_ALL;
-		}
-		for(unsigned int i = 0; i < std::size(m_aNetClient); i++)
-		{
-			int &PortRef = i == CONN_MAIN ? g_Config.m_ClPort : i == CONN_DUMMY ? g_Config.m_ClDummyPort : g_Config.m_ClContactPort;
-			if(PortRef < 1024) // Reject users setting ports that we don't want to use
-			{
-				PortRef = 0;
-			}
-			BindAddr.port = PortRef;
-			while(BindAddr.port == 0 || !m_aNetClient[i].Open(BindAddr))
-			{
-				BindAddr.port = (secure_rand() % 64511) + 1024;
-			}
-		}
+		dbg_msg("client", "%s", aNetworkError);
+		ShowMessageBox("Network Error", aNetworkError);
+		return;
 	}
 #endif
 
-	// init font rendering
-	Kernel()->RequestInterface<IEngineTextRender>()->Init();
+	// init text render
+	m_pTextRender = Kernel()->RequestInterface<IEngineTextRender>();
+	m_pTextRender->Init();
 
 	// init the input
 	Input()->Init();
@@ -3057,14 +3050,14 @@ void CClient::Run()
 	// loads the existing ddnet info file if it exists
 	LoadDDNetInfo();
 
-	// load data
-	if(!LoadData())
-		return;
+	LoadDebugFont();
 
 	if(Steam()->GetPlayerName())
 	{
 		str_copy(g_Config.m_SteamName, Steam()->GetPlayerName());
 	}
+
+	Graphics()->AddWindowResizeListener([this] { OnWindowResize(); });
 
 	GameClient()->OnInit();
 
@@ -3127,7 +3120,7 @@ void CClient::Run()
 		// handle pending map edits
 		if(m_aCmdEditMap[0])
 		{
-			int Result = m_pEditor->Load(m_aCmdEditMap, IStorage::TYPE_ALL_OR_ABSOLUTE);
+			int Result = m_pEditor->HandleMapDrop(m_aCmdEditMap, IStorage::TYPE_ALL_OR_ABSOLUTE);
 			if(Result)
 				g_Config.m_ClEditor = true;
 			else
@@ -3210,15 +3203,13 @@ void CClient::Run()
 				if(!m_EditorActive)
 				{
 					Input()->MouseModeRelative();
-					Input()->SetIMEState(true);
 					GameClient()->OnActivateEditor();
-					m_pEditor->ResetMentions();
+					m_pEditor->OnActivate();
 					m_EditorActive = true;
 				}
 			}
 			else if(m_EditorActive)
 			{
-				Input()->SetIMEState(false);
 				m_EditorActive = false;
 			}
 
@@ -3328,10 +3319,8 @@ void CClient::Run()
 				s_SavedConfig = true;
 			}
 
-			IOHANDLE File = m_pStorage->OpenFile(m_aDDNetInfoTmp, IOFLAG_READ | IOFLAG_SKIP_BOM, IStorage::TYPE_SAVE);
-			if(File)
+			if(m_pStorage->FileExists(m_aDDNetInfoTmp, IStorage::TYPE_SAVE))
 			{
-				io_close(File);
 				m_pStorage->RemoveFile(m_aDDNetInfoTmp, IStorage::TYPE_SAVE);
 			}
 
@@ -3358,8 +3347,15 @@ void CClient::Run()
 		else if(g_Config.m_ClRefreshRate)
 		{
 			SleepTimeInNanoSeconds = (std::chrono::nanoseconds(1s) / (int64_t)g_Config.m_ClRefreshRate) - (Now - LastTime);
-			if(SleepTimeInNanoSeconds > 0ns)
-				net_socket_read_wait(m_aNetClient[CONN_MAIN].m_Socket, SleepTimeInNanoSeconds);
+			auto SleepTimeInNanoSecondsInner = SleepTimeInNanoSeconds;
+			auto NowInner = Now;
+			while((SleepTimeInNanoSecondsInner / std::chrono::nanoseconds(1us).count()) > 0ns)
+			{
+				net_socket_read_wait(m_aNetClient[CONN_MAIN].m_Socket, SleepTimeInNanoSecondsInner);
+				auto NowInnerCalc = time_get_nanoseconds();
+				SleepTimeInNanoSecondsInner -= (NowInnerCalc - NowInner);
+				NowInner = NowInnerCalc;
+			}
 			Slept = true;
 		}
 		if(Slept)
@@ -3380,12 +3376,6 @@ void CClient::Run()
 		else
 			LastTime = Now;
 
-		if(g_Config.m_DbgHitch)
-		{
-			std::this_thread::sleep_for(g_Config.m_DbgHitch * 1ms);
-			g_Config.m_DbgHitch = 0;
-		}
-
 		// update local and global time
 		m_LocalTime = (time_get() - m_LocalStartTime) / (float)time_freq();
 		m_GlobalTime = (time_get() - m_GlobalStartTime) / (float)time_freq();
@@ -3401,6 +3391,51 @@ void CClient::Run()
 		m_aNetClient[i].Close();
 
 	delete m_pEditor;
+
+	// shutdown text render while graphics are still available
+	m_pTextRender->Shutdown();
+}
+
+bool CClient::InitNetworkClient(char *pError, size_t ErrorSize)
+{
+	NETADDR BindAddr;
+	if(g_Config.m_Bindaddr[0] == '\0')
+	{
+		mem_zero(&BindAddr, sizeof(BindAddr));
+	}
+	else if(net_host_lookup(g_Config.m_Bindaddr, &BindAddr, NETTYPE_ALL) != 0)
+	{
+		str_format(pError, ErrorSize, "The configured bindaddr '%s' cannot be resolved.", g_Config.m_Bindaddr);
+		return false;
+	}
+	BindAddr.type = NETTYPE_ALL;
+	for(unsigned int i = 0; i < std::size(m_aNetClient); i++)
+	{
+		int &PortRef = i == CONN_MAIN ? g_Config.m_ClPort : i == CONN_DUMMY ? g_Config.m_ClDummyPort : g_Config.m_ClContactPort;
+		if(PortRef < 1024) // Reject users setting ports that we don't want to use
+		{
+			PortRef = 0;
+		}
+		BindAddr.port = PortRef;
+		unsigned RemainingAttempts = 25;
+		while(BindAddr.port == 0 || !m_aNetClient[i].Open(BindAddr))
+		{
+			if(BindAddr.port != 0)
+			{
+				--RemainingAttempts;
+				if(RemainingAttempts == 0)
+				{
+					if(g_Config.m_Bindaddr[0])
+						str_format(pError, ErrorSize, "Could not open the network client, try changing or unsetting the bindaddr '%s'.", g_Config.m_Bindaddr);
+					else
+						str_format(pError, ErrorSize, "Could not open the network client.");
+					return false;
+				}
+			}
+			BindAddr.port = (secure_rand() % 64511) + 1024;
+		}
+	}
+	return true;
 }
 
 bool CClient::CtrlShiftKey(int Key, bool &Last)
@@ -3450,6 +3485,12 @@ void CClient::Con_Quit(IConsole::IResult *pResult, void *pUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
 	pSelf->Quit();
+}
+
+void CClient::Con_Restart(IConsole::IResult *pResult, void *pUserData)
+{
+	CClient *pSelf = (CClient *)pUserData;
+	pSelf->Restart();
 }
 
 void CClient::Con_Minimize(IConsole::IResult *pResult, void *pUserData)
@@ -3778,7 +3819,7 @@ void CClient::SaveReplay(const int Length, const char *pFilename)
 		// Create a job to do this slicing in background because it can be a bit long depending on the file size
 		std::shared_ptr<CDemoEdit> pDemoEditTask = std::make_shared<CDemoEdit>(GameClient()->NetVersion(), &m_SnapshotDelta, m_pStorage, pSrc, aFilename, StartTick, EndTick);
 		Engine()->AddJob(pDemoEditTask);
-		m_lpEditJobs.push_back(pDemoEditTask);
+		m_EditJobs.push_back(pDemoEditTask);
 
 		// And we restart the recorder
 		DemoRecorder_StartReplayRecorder();
@@ -3863,7 +3904,7 @@ const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
 }
 
 #if defined(CONF_VIDEORECORDER)
-const char *CClient::DemoPlayer_Render(const char *pFilename, int StorageType, const char *pVideoName, int SpeedIndex)
+const char *CClient::DemoPlayer_Render(const char *pFilename, int StorageType, const char *pVideoName, int SpeedIndex, bool StartPaused)
 {
 	const char *pError = DemoPlayer_Play(pFilename, StorageType);
 	if(pError)
@@ -3872,7 +3913,11 @@ const char *CClient::DemoPlayer_Render(const char *pFilename, int StorageType, c
 
 	this->CClient::StartVideo(NULL, this, pVideoName);
 	m_DemoPlayer.Play();
-	m_DemoPlayer.SetSpeed(g_aSpeeds[SpeedIndex]);
+	m_DemoPlayer.SetSpeedIndex(SpeedIndex);
+	if(StartPaused)
+	{
+		m_DemoPlayer.Pause();
+	}
 	//m_pConsole->Print(IConsole::OUTPUT_LEVEL_DEBUG, "demo_recorder", "demo eof");
 	return 0;
 }
@@ -3906,10 +3951,13 @@ void CClient::Con_DemoSpeed(IConsole::IResult *pResult, void *pUserData)
 	pSelf->m_DemoPlayer.SetSpeed(pResult->GetFloat(0));
 }
 
-void CClient::DemoRecorder_Start(const char *pFilename, bool WithTimestamp, int Recorder)
+void CClient::DemoRecorder_Start(const char *pFilename, bool WithTimestamp, int Recorder, bool Verbose)
 {
 	if(State() != IClient::STATE_ONLINE)
-		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demorec/record", "client is not online");
+	{
+		if(Verbose)
+			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demorec/record", "client is not online");
+	}
 	else
 	{
 		char aFilename[IO_MAX_PATH_LENGTH];
@@ -3987,9 +4035,9 @@ void CClient::Con_Record(IConsole::IResult *pResult, void *pUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
 	if(pResult->NumArguments())
-		pSelf->DemoRecorder_Start(pResult->GetString(0), false, RECORDER_MANUAL);
+		pSelf->DemoRecorder_Start(pResult->GetString(0), false, RECORDER_MANUAL, true);
 	else
-		pSelf->DemoRecorder_Start(pSelf->m_aCurrentMap, true, RECORDER_MANUAL);
+		pSelf->DemoRecorder_Start(pSelf->m_aCurrentMap, true, RECORDER_MANUAL, true);
 }
 
 void CClient::Con_StopRecord(IConsole::IResult *pResult, void *pUserData)
@@ -4228,61 +4276,6 @@ void CClient::ToggleWindowVSync()
 		g_Config.m_GfxVsync ^= 1;
 }
 
-void CClient::LoadFont()
-{
-	static CFont *pDefaultFont = 0;
-	char aFilename[IO_MAX_PATH_LENGTH];
-	char aBuff[1024];
-	const char *pFontFile = "fonts/DejaVuSans.ttf";
-	const char *apFallbackFontFiles[] =
-		{
-			"fonts/GlowSansJCompressed-Book.otf",
-			"fonts/SourceHanSansSC-Regular.otf",
-		};
-	IOHANDLE File = Storage()->OpenFile(pFontFile, IOFLAG_READ, IStorage::TYPE_ALL, aFilename, sizeof(aFilename));
-	if(File)
-	{
-		IEngineTextRender *pTextRender = Kernel()->RequestInterface<IEngineTextRender>();
-		pDefaultFont = pTextRender->GetFont(aFilename);
-		if(pDefaultFont == NULL)
-		{
-			void *pBuf;
-			unsigned Size;
-			io_read_all(File, &pBuf, &Size);
-			pDefaultFont = pTextRender->LoadFont(aFilename, (unsigned char *)pBuf, Size);
-		}
-		io_close(File);
-
-		for(auto &pFallbackFontFile : apFallbackFontFiles)
-		{
-			bool FontLoaded = false;
-			File = Storage()->OpenFile(pFallbackFontFile, IOFLAG_READ, IStorage::TYPE_ALL, aFilename, sizeof(aFilename));
-			if(File)
-			{
-				void *pBuf;
-				unsigned Size;
-				io_read_all(File, &pBuf, &Size);
-				io_close(File);
-				FontLoaded = pTextRender->LoadFallbackFont(pDefaultFont, aFilename, (unsigned char *)pBuf, Size);
-			}
-
-			if(!FontLoaded)
-			{
-				str_format(aBuff, std::size(aBuff), "failed to load the fallback font. filename='%s'", pFallbackFontFile);
-				m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "gameclient", aBuff);
-			}
-		}
-
-		pTextRender->SetDefaultFont(pDefaultFont);
-	}
-
-	if(!pDefaultFont)
-	{
-		str_format(aBuff, std::size(aBuff), "failed to load font. filename='%s'", pFontFile);
-		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "gameclient", aBuff);
-	}
-}
-
 void CClient::Notify(const char *pTitle, const char *pMessage)
 {
 	if(m_pGraphics->WindowActive() || !g_Config.m_ClShowNotifications)
@@ -4290,6 +4283,14 @@ void CClient::Notify(const char *pTitle, const char *pMessage)
 
 	NotificationsNotify(pTitle, pMessage);
 	Graphics()->NotifyWindow();
+}
+
+void CClient::OnWindowResize()
+{
+	TextRender()->OnPreWindowResize();
+	GameClient()->OnWindowResize();
+	m_pEditor->OnWindowResize();
+	TextRender()->OnWindowResize();
 }
 
 void CClient::ConchainWindowVSync(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
@@ -4310,12 +4311,6 @@ void CClient::ConchainTimeoutSeed(IConsole::IResult *pResult, void *pUserData, I
 	pfnCallback(pResult, pCallbackUserData);
 	if(pResult->NumArguments())
 		pSelf->m_GenerateTimeoutSeed = false;
-}
-
-void CClient::ConchainLoglevel(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
-{
-	pfnCallback(pResult, pCallbackUserData);
-	log_set_loglevel((LEVEL)g_Config.m_Loglevel);
 }
 
 void CClient::ConchainPassword(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
@@ -4346,6 +4341,26 @@ void CClient::ConchainReplays(IConsole::IResult *pResult, void *pUserData, ICons
 	}
 }
 
+void CClient::ConchainLoglevel(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	CClient *pSelf = (CClient *)pUserData;
+	pfnCallback(pResult, pCallbackUserData);
+	if(pResult->NumArguments())
+	{
+		pSelf->m_pFileLogger->SetFilter(CLogFilter{IConsole::ToLogLevelFilter(g_Config.m_Loglevel)});
+	}
+}
+
+void CClient::ConchainStdoutOutputLevel(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	CClient *pSelf = (CClient *)pUserData;
+	pfnCallback(pResult, pCallbackUserData);
+	if(pResult->NumArguments() && pSelf->m_pStdoutLogger)
+	{
+		pSelf->m_pStdoutLogger->SetFilter(CLogFilter{IConsole::ToLogLevelFilter(g_Config.m_StdoutOutputLevel)});
+	}
+}
+
 void CClient::RegisterCommands()
 {
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
@@ -4364,9 +4379,10 @@ void CClient::RegisterCommands()
 	m_pConsole->Register("dummy_disconnect", "", CFGFLAG_CLIENT, Con_DummyDisconnect, this, "Disconnect dummy");
 	m_pConsole->Register("dummy_reset", "", CFGFLAG_CLIENT, Con_DummyResetInput, this, "Reset dummy");
 
-	m_pConsole->Register("quit", "", CFGFLAG_CLIENT | CFGFLAG_STORE, Con_Quit, this, "Quit Teeworlds");
-	m_pConsole->Register("exit", "", CFGFLAG_CLIENT | CFGFLAG_STORE, Con_Quit, this, "Quit Teeworlds");
-	m_pConsole->Register("minimize", "", CFGFLAG_CLIENT | CFGFLAG_STORE, Con_Minimize, this, "Minimize Teeworlds");
+	m_pConsole->Register("quit", "", CFGFLAG_CLIENT | CFGFLAG_STORE, Con_Quit, this, "Quit the client");
+	m_pConsole->Register("exit", "", CFGFLAG_CLIENT | CFGFLAG_STORE, Con_Quit, this, "Quit the client");
+	m_pConsole->Register("restart", "", CFGFLAG_CLIENT | CFGFLAG_STORE, Con_Restart, this, "Restart the client");
+	m_pConsole->Register("minimize", "", CFGFLAG_CLIENT | CFGFLAG_STORE, Con_Minimize, this, "Minimize the client");
 	m_pConsole->Register("connect", "r[host|ip]", CFGFLAG_CLIENT, Con_Connect, this, "Connect to the specified host/ip");
 	m_pConsole->Register("disconnect", "", CFGFLAG_CLIENT, Con_Disconnect, this, "Disconnect from the server");
 	m_pConsole->Register("ping", "", CFGFLAG_CLIENT, Con_Ping, this, "Ping the current server");
@@ -4401,7 +4417,6 @@ void CClient::RegisterCommands()
 	m_pConsole->Chain("cl_timeout_seed", ConchainTimeoutSeed, this);
 	m_pConsole->Chain("cl_replays", ConchainReplays, this);
 
-	m_pConsole->Chain("loglevel", ConchainLoglevel, this);
 	m_pConsole->Chain("password", ConchainPassword, this);
 
 	// used for server browser update
@@ -4416,6 +4431,9 @@ void CClient::RegisterCommands()
 	m_pConsole->Chain("gfx_fullscreen", ConchainFullscreen, this);
 	m_pConsole->Chain("gfx_borderless", ConchainWindowBordered, this);
 	m_pConsole->Chain("gfx_vsync", ConchainWindowVSync, this);
+
+	m_pConsole->Chain("loglevel", ConchainLoglevel, this);
+	m_pConsole->Chain("stdout_output_level", ConchainStdoutOutputLevel, this);
 
 	// DDRace
 
@@ -4512,8 +4530,8 @@ int main(int argc, const char **argv)
 	CWindowsComLifecycle WindowsComLifecycle(true);
 #endif
 	CCmdlineFix CmdlineFix(&argc, &argv);
+
 	bool Silent = false;
-	bool RandInitFailed = false;
 
 	for(int i = 1; i < argc; i++)
 	{
@@ -4532,14 +4550,19 @@ int main(int argc, const char **argv)
 #endif
 
 	std::vector<std::shared_ptr<ILogger>> vpLoggers;
+	std::shared_ptr<ILogger> pStdoutLogger = nullptr;
 #if defined(CONF_PLATFORM_ANDROID)
-	vpLoggers.push_back(std::shared_ptr<ILogger>(log_logger_android()));
+	pStdoutLogger = std::shared_ptr<ILogger>(log_logger_android());
 #else
 	if(!Silent)
 	{
-		vpLoggers.push_back(std::shared_ptr<ILogger>(log_logger_stdout()));
+		pStdoutLogger = std::shared_ptr<ILogger>(log_logger_stdout());
 	}
 #endif
+	if(pStdoutLogger)
+	{
+		vpLoggers.push_back(pStdoutLogger);
+	}
 	std::shared_ptr<CFutureLogger> pFutureFileLogger = std::make_shared<CFutureLogger>();
 	vpLoggers.push_back(pFutureFileLogger);
 	std::shared_ptr<CFutureLogger> pFutureConsoleLogger = std::make_shared<CFutureLogger>();
@@ -4548,17 +4571,73 @@ int main(int argc, const char **argv)
 	vpLoggers.push_back(pFutureAssertionLogger);
 	log_set_global_logger(log_logger_collection(std::move(vpLoggers)).release());
 
-	if(secure_random_init() != 0)
-	{
-		RandInitFailed = true;
-	}
+	std::stack<std::function<void()>> CleanerFunctions;
+	std::function<void()> PerformCleanup = [&CleanerFunctions]() mutable {
+		while(!CleanerFunctions.empty())
+		{
+			CleanerFunctions.top()();
+			CleanerFunctions.pop();
+		}
+	};
+	std::function<void()> PerformFinalCleanup = []() {
+#ifdef CONF_PLATFORM_ANDROID
+		// properly close this native thread, so globals are destructed
+		std::exit(0);
+#endif
+	};
+	std::function<void()> PerformAllCleanup = [PerformCleanup, PerformFinalCleanup]() mutable {
+		PerformCleanup();
+		PerformFinalCleanup();
+	};
+
+	const bool RandInitFailed = secure_random_init() != 0;
+	if(!RandInitFailed)
+		CleanerFunctions.push([]() { secure_random_uninit(); });
 
 	NotificationsInit();
+	CleanerFunctions.push([]() { NotificationsUninit(); });
+
+	// Register SDL for cleanup before creating the kernel and client,
+	// so SDL is shutdown after kernel and client. Otherwise the client
+	// may crash when shutting down after SDL is already shutdown.
+	CleanerFunctions.push([]() { SDL_Quit(); });
 
 	CClient *pClient = CreateClient();
+	pClient->SetLoggers(pFutureFileLogger, std::move(pStdoutLogger));
+
 	IKernel *pKernel = IKernel::Create();
 	pKernel->RegisterInterface(pClient, false);
 	pClient->RegisterInterfaces();
+	CleanerFunctions.push([pKernel, pClient]() {
+		pKernel->Shutdown();
+		delete pKernel;
+		pClient->~CClient();
+		free(pClient);
+	});
+
+	const std::thread::id MainThreadId = std::this_thread::get_id();
+	dbg_assert_set_handler([MainThreadId, pClient](const char *pMsg) {
+		if(MainThreadId != std::this_thread::get_id())
+			return;
+		char aVersionStr[128];
+		if(!os_version_str(aVersionStr, sizeof(aVersionStr)))
+			str_copy(aVersionStr, "unknown");
+		char aGPUInfo[256];
+		pClient->GetGPUInfoString(aGPUInfo);
+		char aMessage[768];
+		str_format(aMessage, sizeof(aMessage),
+			"An assertion error occured. Please write down or take a screenshot of the following information and report this error.\n"
+			"Please also share the assert log which you should find in the 'dumps' folder in your config directory.\n\n"
+			"%s\n\n"
+			"Platform: %s\n"
+			"Game version: %s %s\n"
+			"OS version: %s\n\n"
+			"%s", // GPU info
+			pMsg, CONF_PLATFORM_STRING, GAME_RELEASE_VERSION, GIT_SHORTREV_HASH != nullptr ? GIT_SHORTREV_HASH : "", aVersionStr,
+			aGPUInfo);
+		pClient->ShowMessageBox("Assertion Error", aMessage);
+		// Client will crash due to assertion, don't call PerformAllCleanup in this inconsistent state
+	});
 
 	// create the components
 	IEngine *pEngine = CreateEngine(GAME_NAME, pFutureConsoleLogger, 2);
@@ -4578,21 +4657,30 @@ int main(int argc, const char **argv)
 	char aBufName[IO_MAX_PATH_LENGTH];
 	char aDate[64];
 	str_timestamp(aDate, sizeof(aDate));
-	str_format(aBufName, sizeof(aBufName), "dumps/" GAME_NAME "_crash_log_%d_%s.RTP", pid(), aDate);
+	str_format(aBufName, sizeof(aBufName), "dumps/" GAME_NAME "_%s_crash_log_%s_%d_%s.RTP", CONF_PLATFORM_STRING, aDate, pid(), GIT_SHORTREV_HASH != nullptr ? GIT_SHORTREV_HASH : "");
 	pStorage->GetCompletePath(IStorage::TYPE_SAVE, aBufName, aBufPath, sizeof(aBufPath));
 	set_exception_handler_log_file(aBufPath);
 #endif
 
 	if(RandInitFailed)
 	{
-		dbg_msg("secure", "could not initialize secure RNG");
+		const char *pError = "Failed to initialize the secure RNG.";
+		dbg_msg("secure", "%s", pError);
+		pClient->ShowMessageBox("Secure RNG Error", pError);
+		PerformAllCleanup();
 		return -1;
 	}
 
 	{
 		bool RegisterFail = false;
 
-		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pEngine);
+		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pEngine, false);
+
+		CleanerFunctions.push([pEngine]() {
+			// Has to be before destroying graphics so that skin download thread can finish
+			delete pEngine;
+		});
+
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pConsole);
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pConfigManager);
 
@@ -4617,9 +4705,10 @@ int main(int argc, const char **argv)
 
 		if(RegisterFail)
 		{
-			delete pKernel;
-			pClient->~CClient();
-			free(pClient);
+			const char *pError = "Failed to register an interface.";
+			dbg_msg("client", "%s", pError);
+			pClient->ShowMessageBox("Kernel Error", pError);
+			PerformAllCleanup();
 			return -1;
 		}
 	}
@@ -4637,18 +4726,21 @@ int main(int argc, const char **argv)
 	pClient->InitInterfaces();
 
 	// execute config file
-	IOHANDLE File = pStorage->OpenFile(CONFIG_FILE, IOFLAG_READ, IStorage::TYPE_ALL);
-	if(File)
+	if(pStorage->FileExists(CONFIG_FILE, IStorage::TYPE_ALL))
 	{
-		io_close(File);
-		pConsole->ExecuteFile(CONFIG_FILE);
+		if(!pConsole->ExecuteFile(CONFIG_FILE))
+		{
+			const char *pError = "Failed to load config from '" CONFIG_FILE "'.";
+			dbg_msg("client", "%s", pError);
+			pClient->ShowMessageBox("Config File Error", pError);
+			PerformAllCleanup();
+			return -1;
+		}
 	}
 
 	// execute autoexec file
-	File = pStorage->OpenFile(AUTOEXEC_CLIENT_FILE, IOFLAG_READ, IStorage::TYPE_ALL);
-	if(File)
+	if(pStorage->FileExists(AUTOEXEC_CLIENT_FILE, IStorage::TYPE_ALL))
 	{
-		io_close(File);
 		pConsole->ExecuteFile(AUTOEXEC_CLIENT_FILE);
 	}
 	else // fallback
@@ -4678,10 +4770,10 @@ int main(int argc, const char **argv)
 		pSteam->ClearConnectAddress();
 	}
 
-	log_set_loglevel((LEVEL)g_Config.m_Loglevel);
+	const int Mode = g_Config.m_Logappend ? IOFLAG_APPEND : IOFLAG_WRITE;
 	if(g_Config.m_Logfile[0])
 	{
-		IOHANDLE Logfile = pStorage->OpenFile(g_Config.m_Logfile, IOFLAG_WRITE, IStorage::TYPE_SAVE_OR_ABSOLUTE);
+		IOHANDLE Logfile = pStorage->OpenFile(g_Config.m_Logfile, Mode, IStorage::TYPE_SAVE_OR_ABSOLUTE);
 		if(Logfile)
 		{
 			pFutureFileLogger->Set(log_logger_file(Logfile));
@@ -4697,45 +4789,48 @@ int main(int argc, const char **argv)
 	pClient->ShellRegister();
 #endif
 
+#if defined(CONF_PLATFORM_MACOS)
+	// Hints will not be set if there is an existing override hint or environment variable that takes precedence.
+	// So this respects cli environment overrides.
+	SDL_SetHint("SDL_MAC_OPENGL_ASYNC_DISPATCH", "1");
+#endif
+
+#if defined(CONF_FAMILY_WINDOWS)
+	SDL_SetHint("SDL_IME_SHOW_UI", g_Config.m_InpImeNativeUi ? "1" : "0");
+#else
+	SDL_SetHint("SDL_IME_SHOW_UI", "1");
+#endif
+
 	// init SDL
 	if(SDL_Init(0) < 0)
 	{
-		dbg_msg("client", "unable to init SDL base: %s", SDL_GetError());
+		char aError[256];
+		str_format(aError, sizeof(aError), "Unable to initialize SDL base: %s", SDL_GetError());
+		dbg_msg("client", "%s", aError);
+		pClient->ShowMessageBox("SDL Error", aError);
+		PerformAllCleanup();
 		return -1;
 	}
-
-#ifndef CONF_PLATFORM_ANDROID
-	atexit(SDL_Quit);
-#endif
 
 	// run the client
 	dbg_msg("client", "starting...");
 	pClient->Run();
 
-	bool Restarting = pClient->State() == CClient::STATE_RESTARTING;
+	const bool Restarting = pClient->State() == CClient::STATE_RESTARTING;
+	char aRestartBinaryPath[IO_MAX_PATH_LENGTH];
+	if(Restarting)
+	{
+		pStorage->GetBinaryPath(PLAT_CLIENT_EXEC, aRestartBinaryPath, sizeof(aRestartBinaryPath));
+	}
 
-	pClient->~CClient();
-	free(pClient);
-
-	NotificationsUninit();
-	secure_random_uninit();
+	PerformCleanup();
 
 	if(Restarting)
 	{
-		char aBuf[512];
-		shell_execute(pStorage->GetBinaryPath(PLAT_CLIENT_EXEC, aBuf, sizeof aBuf));
+		shell_execute(aRestartBinaryPath);
 	}
 
-	pKernel->Shutdown();
-	delete pKernel;
-
-	// shutdown SDL
-	SDL_Quit();
-
-#ifdef CONF_PLATFORM_ANDROID
-	// properly close this native thread, so globals are destructed
-	std::exit(0);
-#endif
+	PerformFinalCleanup();
 
 	return 0;
 }
@@ -4793,8 +4888,8 @@ void CClient::RequestDDNetInfo()
 	{
 		char aEscaped[128];
 		EscapeUrl(aEscaped, sizeof(aEscaped), PlayerName());
-		str_append(aUrl, "?name=", sizeof(aUrl));
-		str_append(aUrl, aEscaped, sizeof(aUrl));
+		str_append(aUrl, "?name=");
+		str_append(aUrl, aEscaped);
 	}
 
 	// Use ipv4 so we can know the ingame ip addresses of players before they join game servers
@@ -4938,3 +5033,42 @@ void CClient::ShellUnregister()
 		shell_update();
 }
 #endif
+
+static Uint32 GetSdlMessageBoxFlags(IClient::EMessageBoxType Type)
+{
+	switch(Type)
+	{
+	case IClient::MESSAGE_BOX_TYPE_ERROR:
+		return SDL_MESSAGEBOX_ERROR;
+	case IClient::MESSAGE_BOX_TYPE_WARNING:
+		return SDL_MESSAGEBOX_WARNING;
+	case IClient::MESSAGE_BOX_TYPE_INFO:
+		return SDL_MESSAGEBOX_INFORMATION;
+	}
+	dbg_assert(false, "Type invalid");
+	return 0;
+}
+
+void CClient::ShowMessageBox(const char *pTitle, const char *pMessage, EMessageBoxType Type)
+{
+	if(m_pGraphics == nullptr || !m_pGraphics->ShowMessageBox(GetSdlMessageBoxFlags(Type), pTitle, pMessage))
+		SDL_ShowSimpleMessageBox(GetSdlMessageBoxFlags(Type), pTitle, pMessage, nullptr);
+}
+
+void CClient::GetGPUInfoString(char (&aGPUInfo)[256])
+{
+	if(m_pGraphics != nullptr && m_pGraphics->IsBackendInitialized())
+	{
+		str_format(aGPUInfo, std::size(aGPUInfo), "GPU: %s - %s - %s", m_pGraphics->GetVendorString(), m_pGraphics->GetRendererString(), m_pGraphics->GetVersionString());
+	}
+	else
+	{
+		str_copy(aGPUInfo, "Graphics backend was not yet initialized.");
+	}
+}
+
+void CClient::SetLoggers(std::shared_ptr<ILogger> &&pFileLogger, std::shared_ptr<ILogger> &&pStdoutLogger)
+{
+	m_pFileLogger = pFileLogger;
+	m_pStdoutLogger = pStdoutLogger;
+}

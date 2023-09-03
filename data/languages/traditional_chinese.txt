@@ -20,6 +20,10 @@
 # 2022-10-24 cheeser0613
 # 2022-12-11 cheeser0613
 # 2023-01-11 cheeser0613
+# 2023-04-01 cheeser0613
+# 2023-05-25 cheeser0613
+# 2023-07-20 By
+# 2023-08-11 By
 ##### /authors #####
 
 ##### translated strings #####
@@ -92,12 +96,6 @@ Clan
 
 Client
 == 客戶端
-
-Close
-== 關閉
-
-Connect
-== 連線
 
 Connecting to
 == 正在連線到
@@ -288,9 +286,6 @@ Enable team chat sound
 Enable highlighted chat sound
 == 啟用被提及時的提示音
 
-Threaded sound loading
-== 啟用多執行緒音訊載入
-
 Name
 == 名稱
 
@@ -393,9 +388,6 @@ Rename demo
 
 Reset filter
 == 重置過濾器
-
-Sample rate
-== 取樣率
 
 Score
 == 分數
@@ -584,7 +576,7 @@ Join game
 == 加入遊戲
 
 FSAA samples
-== 全屏抗鋸齒(FSAA)取樣倍數
+== 全屏抗鋸齒 (FSAA) 取樣倍數
 
 Sound volume
 == 音量
@@ -798,9 +790,6 @@ Grabs
 DDNet
 == DDNet
 
-Select a name
-== 另存為
-
 Deaths
 == 死亡數
 
@@ -809,9 +798,6 @@ Please use a different name
 
 Restart
 == 重新開始
-
-Old mouse mode
-== 舊版滑鼠模式
 
 Follow
 == 跟隨
@@ -997,8 +983,8 @@ Show HUD
 Hammerfly dummy
 == 分身Hammerfly開關
 
-Default length: %d
-== 預設長度: %d
+Default length
+== 預設長度
 
 Toggle ghost
 == 影子記錄開關
@@ -1253,9 +1239,6 @@ https://ddnet.org/discord
 Are you sure that you want to disconnect and switch to a different server?
 == 你確定要中斷此伺服器并嘗試加入其他伺服器嗎？
 
-Refreshing...
-== 正在重整...
-
 Kill Messages
 == 擊殺訊息
 
@@ -1278,7 +1261,7 @@ Windowed fullscreen
 == 視窗化全螢幕
 
 The format of texture %s is not RGBA which will cause visual bugs.
-== 紋理文件 %s 并非 RGBA 格式，這可能會導致顯示錯誤
+== 紋理檔案 %s 并非 RGBA 格式，這可能會導致顯示錯誤
 
 Join Tutorial Server
 == 加入教學伺服器
@@ -1294,9 +1277,6 @@ default
 
 custom
 == 自定義
-
-Graphics cards
-== 顯示卡
 
 auto
 == 自動
@@ -1364,12 +1344,6 @@ Download community skins
 Enable controller
 == 啓用控制器
 
-Controller %d: %s
-== 控制器 %d: %s
-
-Click to cycle through all available controllers.
-== 點擊以切換其他控制器
-
 [Ingame controller mode]
 Relative
 == 相對
@@ -1382,16 +1356,13 @@ Ingame controller mode
 == 游戲内控制器瞄準模式
 
 Ingame controller sens.
-== 搖桿靈敏度（游戲）
+== 搖桿靈敏度 (游戲)
 
 UI controller sens.
-== 搖桿靈敏度（界面）
+== 搖桿靈敏度 (界面)
 
 Controller jitter tolerance
 == 搖桿錯位容錯
-
-Device
-== 輸入設備
 
 Status
 == 狀態
@@ -1399,17 +1370,14 @@ Status
 Aim bind
 == 操作軸綁定
 
-Controller Axis #%d
-== 搖桿 #%d
-
 Mouse
 == 滑鼠
 
 Ingame mouse sens.
-== 滑鼠靈敏度（游戲）
+== 滑鼠靈敏度 (游戲)
 
 UI mouse sens.
-== 滑鼠靈敏度（界面）
+== 滑鼠靈敏度 (界面)
 
 Controller
 == 控制器
@@ -1451,7 +1419,7 @@ Loading map file from storage
 == 正在從硬盤中加載地圖檔案
 
 Why are you slowmo replaying to read this?
-== 所以你爲什麽要慢速回放來看這個
+== 所以你爲什麽要慢速回放來看這個？
 
 Initializing components
 == 正在初始化游戲引擎
@@ -1502,7 +1470,7 @@ DDRace HUD
 == DDRace HUD
 
 Show client IDs in scoreboard
-== 顯示客戶端 IDs （計分板中）
+== 顯示客戶端 IDs (計分板中)
 
 Show DDRace HUD
 == 顯示 DDRace HUD
@@ -1523,7 +1491,7 @@ Hook collision line opacity
 == 輔助綫不透明度
 
 Colors of the hook collision line, in case of a possible collision with:
-== 輔助綫顔色（當瞄準以下實體物時）：
+== 輔助綫顔色 (當瞄準以下實體物時)：
 
 Your movements are not taken into account when calculating the line colors
 == 移動所造成的瞄準偏移將不計入考量
@@ -1560,12 +1528,6 @@ Slow down the demo
 
 Speed up the demo
 == 加快播放速度
-
-Mark the beginning of a cut
-== 標記裁剪起點
-
-Mark the end of a cut
-== 標記裁剪終點
 
 Export cut as a separate demo
 == 另存爲新回放檔案
@@ -1643,34 +1605,32 @@ Are you sure that you want to reset the controls to their defaults?
 == 你確定要將當前的控制恢復至預設設定
 
 [Graphics error]
-
-[Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== 初始化失敗。請嘗試打開配置目錄中的設定檔案（settings_ddnet.cfg）并將“gfx_backend OpenGL”修改為“gfx_backend Vulkan”（若沒有前者則可直接輸入後者）再重試。
+== 初始化失敗。請嘗試打開配置目錄中的設定檔案 (settings_ddnet.cfg) 并將“gfx_backend OpenGL”修改為“gfx_backend Vulkan” (若沒有前者則可直接輸入後者) 再重試。
 
 [Graphics error]
 Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== 顯存不足。請嘗試移除自定義材質（如外觀，實體層等等），尤其高分辨率的自定義材質。
+== 顯存不足。請嘗試移除自定義材質 (如外觀，實體層等等)，尤其高分辨率的自定義材質。
 
 [Graphics error]
 An error during command recording occurred. Try to update your GPU drivers.
-== 指令記錄期間檢測到錯誤。請嘗試更新顯示卡驅動程序。
+== 指令記錄期間檢測到錯誤。請嘗試更新顯示卡驅動程式。
 
 [Graphics error]
 A render command failed. Try to update your GPU drivers.
-== 渲染指令錯誤。請嘗試更新顯示卡驅動程序。
+== 渲染指令錯誤。請嘗試更新顯示卡驅動程式。
 
 [Graphics error]
 Submitting the render commands failed. Try to update your GPU drivers.
-== 渲染指令提交失敗。請嘗試更新顯示卡驅動程序。
+== 渲染指令提交失敗。請嘗試更新顯示卡驅動程式。
 
 [Graphics error]
 Failed to swap framebuffers. Try to update your GPU drivers.
-== 幀緩存交替失敗。請嘗試更新顯示卡驅動程序。
+== 幀緩存交替失敗。請嘗試更新顯示卡驅動程式。
 
 [Graphics error]
 Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== 未知錯誤。請嘗試打開配置目錄中的設定檔案（settings_ddnet.cfg）并將“gfx_backend OpenGL”修改為“gfx_backend Vulkan”（若沒有前者則可直接輸入後者）再重試。
+== 未知錯誤。請嘗試打開配置目錄中的設定檔案 (settings_ddnet.cfg) 并將“gfx_backend OpenGL”修改為“gfx_backend Vulkan” (若沒有前者則可直接輸入後者) 再重試。
 
 [Graphics error]
 Could not initialize the given graphics backend, reverting to the default backend now.
@@ -1680,7 +1640,7 @@ Open the directory that contains the demo files
 == 打開存有回放檔案的資料夾路徑
 
 Save power by lowering refresh rate (higher input latency)
-== 節能模式（限制幀率上限以降低功耗但也將提高輸入延遲）
+== 節能模式 (限制幀率上限以降低功耗但也將提高輸入延遲)
 
 Open the settings file
 == 打開設定檔案
@@ -1689,10 +1649,10 @@ Open the directory that contains the configuration and user files
 == 打開存有配置檔案與用戶檔案的資料夾路徑
 
 Open the directory to add custom themes
-== 打開用以添加自定義主題的資料夾路徑
+== 打開用以新增自定義主題的資料夾路徑
 
 Open the directory to add custom skins
-== 打開用以添加自定義外觀的資料夾路徑
+== 打開用以新增自定義外觀的資料夾路徑
 
 No controller found. Plug in a controller.
 == 未檢測到任何控制器。請嘗試重新連接控制器。
@@ -1701,17 +1661,111 @@ Unregister protocol and file extensions
 == 未注冊的協議與擴充檔案
 
 Open the directory to add custom assets
-== 打開用以添加自定義材質的資料夾路徑
+== 打開用以新增自定義材質的資料夾路徑
 
 [Graphics error]
 Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
-== 
+== 無法初始化當前配置的圖形後端，請檢查此電腦是否已安裝集成顯卡的驅動程式。
 
 Could not save downloaded map. Try manually deleting this file: %s
-== 
-
-Search:
-== 
+== 地圖下載失敗，請嘗試手動刪除此檔案：%s
 
 Copy info
-== 
+== 複製伺服器資訊
+
+Create a random skin
+== 隨機創造外觀
+
+Online players (%d)
+== 在綫玩家 (%d)
+
+Online clanmates (%d)
+== 在綫戰隊隊友 (%d)
+
+[friends (server browser)]
+Offline (%d)
+== 離綫（%d）
+
+Click to select server. Double click to join your friend.
+== 點擊以選擇伺服器，雙擊以直接加入好友所在伺服器
+
+Click to remove this player from your friends list.
+== 點擊以將此好友從好友列表中移除
+
+Click to remove this clan from your friends list.
+== 點擊以將此戰隊從好友列表中移除
+
+None
+== 無
+
+Add Clan
+== 新增戰隊
+
+A demo with this name already exists
+== 已經存在同名回放
+
+No server selected
+== 未選擇伺服器
+
+Mark the beginning of a cut (right click to reset)
+== 標記裁剪起點 (右鍵重置)
+
+Mark the end of a cut (right click to reset)
+== 標記裁剪終點 (右鍵重置)
+
+Close the demo player
+== 關閉回放
+
+Export demo cut
+== 另存裁剪部分
+
+Cut interval
+== 裁剪區間
+
+Cut length
+== 裁剪長度
+
+Axis
+== 軸
+
+Graphics card
+== 顯示卡
+
+Quitting. Please wait…
+== 正在退出，請稍等
+
+Restarting. Please wait…
+== 正在重啟，請稍等
+
+Multi-View
+== 多人同框視角
+
+Rename folder
+== 重新命名資料夾
+
+A folder with this name already exists
+== 已經存在同名資料夾
+
+Unable to rename the folder
+== 無法重新命名這個資料夾
+
+(paused)
+== (暫停)
+
+All combined
+== 全部檔案
+
+Folder Link
+== 資料夾連結
+
+Are you sure that you want to delete the folder '%s'?
+== 你確定要刪除資料夾 "%s" ？
+
+Delete folder
+== 刪除資料夾
+
+Unable to delete the folder '%s'. Make sure it's empty first.
+== 無法刪除 "%s" ，請確保你已清空該資料夾
+
+Moved ingame
+== 遊戲內移動

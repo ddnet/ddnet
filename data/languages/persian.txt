@@ -76,12 +76,6 @@ Clan
 Client
 == ﺖﻨﯾﻼﻛ
 
-Close
-== ﻦﺘﺴﺑ
-
-Connect
-== ﻝﺎﺼﺗﺍ
-
 Connecting to
 == ﻪﺑ ﻥﺪﺷ ﻞﺻﻭ
 
@@ -478,9 +472,6 @@ Server address:
 Refresh
 == ﯼﺯﺎﺳ ﻩﺯﺎﺗ
 
-Refreshing...
-== ... ﯼﺯﺎﺳ ﻩﺯﺎﺗ ﻝﺎﺣ ﺭﺩ
-
 Server filter
 == ﺭﻭﺮﺳ ﺮﺘﻠﯿﻓ
 
@@ -525,9 +516,6 @@ Remove
 
 Info
 == ﺕﺎﻋﻼﻃﺍ
-
-Select a name
-== ﻡﺎﻧ ﮏﯾ ﺏﺎﺨﺘﻧﺍ
 
 Please use a different name
 == ﻦﮐ ﻩﺩﺎﻔﺘﺳﺍ ﺕﻭﺎﻔﺘﻣ ﻡﺎﻧ ﮏﯾ ﺯﺍ ﺎﻔﻄﻟ
@@ -879,8 +867,6 @@ Follow
 == ﻥﺩﺮﮐ ﻝﺎﺒﻧﺩ
 
 [Graphics error]
-
-[Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
 == .ﺪﯿﻨﮐ ﺵﻼﺗ ﻩﺭﺎﺑﻭﺩ ﻭ ﺪﯿﻫﺩ ﺮﯿﯿﻐﺗ Vulkan ﺎﯾ OpenGL ﻪﺑ ﺍﺭ gfx_backend ، settings_ddnet.cfg ﺭﺩ ،ﮓﯿﻔﻧﺎﮐ ﻪﺷﻮﭘ ﺭﺩ ﺪﯿﻨﮐ ﯽﻌﺳ. ﯼﺯﺍﺪﻧﺍ ﻩﺍﺭ ﻡﺎﮕﻨﻫ ﺭﺩ ﺎﻄﺧ
 
@@ -1052,12 +1038,6 @@ Slow down the demo
 Speed up the demo
 == ﻮﻣﺩ ﺖﻋﺮﺳ ﻥﺩﺮﮐ ﺩﺎﯾﺯ
 
-Mark the beginning of a cut
-== ﺵﺮﺑ ﻉﻭﺮﺷ ﻥﺩﺯ ﺖﻣﻼﻋ
-
-Mark the end of a cut
-== ﺵﺮﺑ ﻥﺎﯾﺎﭘ ﻥﺩﺯ ﺖﻣﻼﻋ
-
 Export cut as a separate demo
 ==  ﻪﻧﺎﮔﺍﺪﺟ ﻮﻣﺩ ﻥﺍﻮﻨﻋ ﻪﺑ ﺵﺮﺑ ﻥﺩﺮﮐ ﺝﺭﺎﺧ 
 
@@ -1184,9 +1164,6 @@ Statboard
 Enable controller
 == ﻦﮐ ﻝﺎﻌﻓ ﺍﺭ ﺮﻟﺮﺘﻨﮐ
 
-Click to cycle through all available controllers.
-== ﺪﯿﻨﮐ ﮏﯿﻠﮐ ﺩﻮﺟﻮﻣ ﯼﺎﻫﺮﻟﺮﺘﻨﮐ ﻡﺎﻤﺗ ﺭﺩ ﺶﺧﺮﭼ ﯼﺍﺮﺑ
-
 [Ingame controller mode]
 Relative
 == ﯽﺒﺴﻧ [ﯼﺯﺎﺑ ﺮﻟﺮﺘﻨﮐ ﺖﻟﺎﺣ]
@@ -1209,9 +1186,6 @@ Controller jitter tolerance
 
 No controller found. Plug in a controller.
 == ﺪﯿﻨﮐ ﻞﺻﻭ ﺮﻟﺮﺘﻨﮐ ﮏﯾ .ﺪﺸﻧ ﺍﺪﯿﭘ ﯼﺮﻟﺮﺘﻨﮐ ﭻﯿﻫ
-
-Device
-== ﻩﺎﮕﺘﺳﺩ
 
 Status
 == ﺖﯿﻌﺿﻭ
@@ -1273,9 +1247,6 @@ default
 custom
 == ﯽﺷﺭﺎﻔﺳ
 
-Graphics cards
-== ﮏﯿﻓﺍﺮﮔ ﯼﺎﻫ ﺕﺭﺎﮐ
-
 auto
 == ﺭﺎﮐﺩﻮﺧ
 
@@ -1287,12 +1258,6 @@ Enable regular chat sound
 
 Enable highlighted chat sound
 == ﻩﺪﺷ ﺖﯾﻼﯾﺎﻫ ﺖﭼ ﯼﺍﺪﺻ ﻥﺩﺮﮐ ﻦﺷﻭﺭ
-
-Threaded sound loading
-== ﯼﺍ ﻪﺘﺷﺭ ﯼﺍﺪﺻ ﯼﺭﺍﺬﮔﺭﺎﺑ
-
-Sample rate
-== ﻪﻧﻮﻤﻧ ﺥﺮﻧ
 
 Appearance
 == ﺮﻫﺎﻇ
@@ -1483,8 +1448,8 @@ Set all to Rifle
 Save the best demo of each race
 == ﻪﻘﺑﺎﺴﻣ ﺮﻫ ﻮﻣﺩ ﻦﯾﺮﺘﻬﺑ ﻩﺮﯿﺧﺫ
 
-Default length: %d
-== %d :ﺽﺮﻓ‌ﺶﯿﭘ ﻝﻮﻃ
+Default length
+== ﺽﺮﻓ‌ﺶﯿﭘ ﻝﻮﻃ
 
 When you cross the start line, show a ghost tee replicating the movements of your best time
 == ﺪﻨﮐ ﯽﻣ ﺭﺍﺮﮑﺗ ﺍﺭ ﺎﻤﺷ ﻥﺎﻣﺯ ﻦﯾﺮﺘﻬﺑ ﺕﺎﮐﺮﺣ ﻪﮐ ﻩﺪﺑ ﺶﯾﺎﻤﻧ ﺍﺭ ﺡﻭﺭ ،ﺪﯿﻨﮐ ﯽﻣ ﺭﻮﺒﻋ ﻉﻭﺮﺷ ﻂﺧ ﺯﺍ ﻪﮐ ﯽﻣﺎﮕﻨﻫ
@@ -1527,9 +1492,6 @@ AntiPing: predict weapons
 
 AntiPing: predict grenade paths
 == ﺎﻫ ﮏﺠﻧﺭﺎﻧ ﺮﯿﺴﻣ ﯽﻨﯿﺑ‌ﺶﯿﭘ AntiPing:
-
-Old mouse mode
-== ﯽﻤﯾﺪﻗ ﺱﻮﻣ ﺖﻟﺎﺣ
 
 Entities Background color
 == ﺎﻫ ﺖﯾﺩﻮﺟﻮﻣ ﻪﻨﯿﻣﺯﺲﭘ ﮓﻧﺭ
@@ -1668,16 +1630,101 @@ The format of texture %s is not RGBA which will cause visual bugs.
 Initializing map logic
 == 
 
-Search:
+Quitting. Please wait…
+== 
+
+Restarting. Please wait…
+== 
+
+Multi-View
+== 
+
+Rename folder
+== 
+
+A demo with this name already exists
+== 
+
+A folder with this name already exists
+== 
+
+Unable to rename the folder
+== 
+
+(paused)
 == 
 
 Copy info
 == 
 
-Controller %d: %s
+No server selected
 == 
 
-Controller Axis #%d
+Online players (%d)
+== 
+
+Online clanmates (%d)
+== 
+
+[friends (server browser)]
+Offline (%d)
+== 
+
+Click to select server. Double click to join your friend.
+== 
+
+Click to remove this player from your friends list.
+== 
+
+Click to remove this clan from your friends list.
+== 
+
+None
+== 
+
+Add Clan
+== 
+
+Mark the beginning of a cut (right click to reset)
+== 
+
+Mark the end of a cut (right click to reset)
+== 
+
+Close the demo player
+== 
+
+Export demo cut
+== 
+
+Cut interval
+== 
+
+Cut length
+== 
+
+All combined
+== 
+
+Folder Link
+== 
+
+Are you sure that you want to delete the folder '%s'?
+== 
+
+Delete folder
+== 
+
+Unable to delete the folder '%s'. Make sure it's empty first.
+== 
+
+Create a random skin
+== 
+
+Axis
+== 
+
+Graphics card
 == 
 
 Unregister protocol and file extensions
@@ -1690,4 +1737,7 @@ Spree
 == 
 
 Grabs
+== 
+
+Moved ingame
 == 

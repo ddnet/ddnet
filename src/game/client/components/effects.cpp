@@ -22,7 +22,7 @@ CEffects::CEffects()
 	m_Add100hz = false;
 }
 
-void CEffects::AirJump(vec2 Pos)
+void CEffects::AirJump(vec2 Pos, float Alpha)
 {
 	CParticle p;
 	p.SetDefault();
@@ -37,6 +37,8 @@ void CEffects::AirJump(vec2 Pos)
 	p.m_Gravity = 500;
 	p.m_Friction = 0.7f;
 	p.m_FlowAffected = 0.0f;
+	p.m_Color.a = Alpha;
+	p.m_StartAlpha = Alpha;
 	m_pClient->m_Particles.Add(CParticles::GROUP_GENERAL, &p);
 
 	p.m_Pos = Pos + vec2(6.0f, 16.0f);
@@ -46,9 +48,9 @@ void CEffects::AirJump(vec2 Pos)
 		m_pClient->m_Sounds.PlayAt(CSounds::CHN_WORLD, SOUND_PLAYER_AIRJUMP, 1.0f, Pos);
 }
 
-void CEffects::DamageIndicator(vec2 Pos, vec2 Dir)
+void CEffects::DamageIndicator(vec2 Pos, vec2 Dir, float Alpha)
 {
-	m_pClient->m_DamageInd.Create(Pos, Dir);
+	m_pClient->m_DamageInd.Create(Pos, Dir, Alpha);
 }
 
 void CEffects::ResetDamageIndicator()
@@ -56,7 +58,7 @@ void CEffects::ResetDamageIndicator()
 	m_pClient->m_DamageInd.Reset();
 }
 
-void CEffects::PowerupShine(vec2 Pos, vec2 Size)
+void CEffects::PowerupShine(vec2 Pos, vec2 Size, float Alpha)
 {
 	if(!m_Add50hz)
 		return;
@@ -74,10 +76,12 @@ void CEffects::PowerupShine(vec2 Pos, vec2 Size)
 	p.m_Gravity = 500;
 	p.m_Friction = 0.9f;
 	p.m_FlowAffected = 0.0f;
+	p.m_Color.a = Alpha;
+	p.m_StartAlpha = Alpha;
 	m_pClient->m_Particles.Add(CParticles::GROUP_GENERAL, &p);
 }
 
-void CEffects::FreezingFlakes(vec2 Pos, vec2 Size)
+void CEffects::FreezingFlakes(vec2 Pos, vec2 Size, float Alpha)
 {
 	if(!m_Add5hz)
 		return;
@@ -88,7 +92,7 @@ void CEffects::FreezingFlakes(vec2 Pos, vec2 Size)
 	p.m_Pos = Pos + vec2(random_float(-0.5f, 0.5f), random_float(-0.5f, 0.5f)) * Size;
 	p.m_Vel = vec2(0, 0);
 	p.m_LifeSpan = 1.5f;
-	p.m_StartSize = random_float(1.0f, 1.5f) * 16.0f;
+	p.m_StartSize = random_float(0.5f, 1.5f) * 16.0f;
 	p.m_EndSize = p.m_StartSize * 0.5f;
 	p.m_UseAlphaFading = true;
 	p.m_StartAlpha = 1.0f;
@@ -99,6 +103,8 @@ void CEffects::FreezingFlakes(vec2 Pos, vec2 Size)
 	p.m_Friction = 0.9f;
 	p.m_FlowAffected = 0.0f;
 	p.m_Collides = false;
+	p.m_Color.a = Alpha;
+	p.m_StartAlpha = Alpha;
 	m_pClient->m_Particles.Add(CParticles::GROUP_EXTRA, &p);
 }
 
@@ -117,11 +123,12 @@ void CEffects::SmokeTrail(vec2 Pos, vec2 Vel, float Alpha, float TimePassed)
 	p.m_EndSize = 0;
 	p.m_Friction = 0.7f;
 	p.m_Gravity = random_float(-500.0f);
-	p.m_Color.a *= Alpha;
+	p.m_Color.a = Alpha;
+	p.m_StartAlpha = Alpha;
 	m_pClient->m_Particles.Add(CParticles::GROUP_PROJECTILE_TRAIL, &p, TimePassed);
 }
 
-void CEffects::SkidTrail(vec2 Pos, vec2 Vel)
+void CEffects::SkidTrail(vec2 Pos, vec2 Vel, float Alpha)
 {
 	if(!m_Add100hz)
 		return;
@@ -136,7 +143,8 @@ void CEffects::SkidTrail(vec2 Pos, vec2 Vel)
 	p.m_EndSize = 0;
 	p.m_Friction = 0.7f;
 	p.m_Gravity = random_float(-500.0f);
-	p.m_Color = ColorRGBA(0.75f, 0.75f, 0.75f, 1.0f);
+	p.m_Color = ColorRGBA(0.75f, 0.75f, 0.75f, Alpha);
+	p.m_StartAlpha = Alpha;
 	m_pClient->m_Particles.Add(CParticles::GROUP_GENERAL, &p);
 }
 
@@ -154,10 +162,11 @@ void CEffects::BulletTrail(vec2 Pos, float Alpha, float TimePassed)
 	p.m_EndSize = 0;
 	p.m_Friction = 0.7f;
 	p.m_Color.a *= Alpha;
+	p.m_StartAlpha = Alpha;
 	m_pClient->m_Particles.Add(CParticles::GROUP_PROJECTILE_TRAIL, &p, TimePassed);
 }
 
-void CEffects::PlayerSpawn(vec2 Pos)
+void CEffects::PlayerSpawn(vec2 Pos, float Alpha)
 {
 	for(int i = 0; i < 32; i++)
 	{
@@ -173,14 +182,15 @@ void CEffects::PlayerSpawn(vec2 Pos)
 		p.m_Rotspeed = random_float();
 		p.m_Gravity = random_float(-400.0f);
 		p.m_Friction = 0.7f;
-		p.m_Color = ColorRGBA(0xb5 / 255.0f, 0x50 / 255.0f, 0xcb / 255.0f, 1.0f);
+		p.m_Color = ColorRGBA(0xb5 / 255.0f, 0x50 / 255.0f, 0xcb / 255.0f, Alpha);
+		p.m_StartAlpha = Alpha;
 		m_pClient->m_Particles.Add(CParticles::GROUP_GENERAL, &p);
 	}
 	if(g_Config.m_SndGame)
 		m_pClient->m_Sounds.PlayAt(CSounds::CHN_WORLD, SOUND_PLAYER_SPAWN, 1.0f, Pos);
 }
 
-void CEffects::PlayerDeath(vec2 Pos, int ClientID)
+void CEffects::PlayerDeath(vec2 Pos, int ClientID, float Alpha)
 {
 	ColorRGBA BloodColor(1.0f, 1.0f, 1.0f);
 
@@ -206,7 +216,7 @@ void CEffects::PlayerDeath(vec2 Pos, int ClientID)
 		p.SetDefault();
 		p.m_Spr = SPRITE_PART_SPLAT01 + (rand() % 3);
 		p.m_Pos = Pos;
-		p.m_Vel = random_direction() * (random_float(1.0f, 1.1f) * 900.0f);
+		p.m_Vel = random_direction() * (random_float(0.1f, 1.1f) * 900.0f);
 		p.m_LifeSpan = random_float(0.3f, 0.6f);
 		p.m_StartSize = random_float(24.0f, 40.0f);
 		p.m_EndSize = 0;
@@ -215,12 +225,13 @@ void CEffects::PlayerDeath(vec2 Pos, int ClientID)
 		p.m_Gravity = 800.0f;
 		p.m_Friction = 0.8f;
 		ColorRGBA c = BloodColor.v4() * random_float(0.75f, 1.0f);
-		p.m_Color = ColorRGBA(c.r, c.g, c.b, 0.75f);
+		p.m_Color = ColorRGBA(c.r, c.g, c.b, 0.75f * Alpha);
+		p.m_StartAlpha = Alpha;
 		m_pClient->m_Particles.Add(CParticles::GROUP_GENERAL, &p);
 	}
 }
 
-void CEffects::Explosion(vec2 Pos)
+void CEffects::Explosion(vec2 Pos, float Alpha)
 {
 	// add to flow
 	for(int y = -8; y <= 8; y++)
@@ -242,6 +253,8 @@ void CEffects::Explosion(vec2 Pos)
 	p.m_StartSize = 150.0f;
 	p.m_EndSize = 0;
 	p.m_Rot = random_angle();
+	p.m_Color.a = Alpha;
+	p.m_StartAlpha = Alpha;
 	m_pClient->m_Particles.Add(CParticles::GROUP_EXPLOSIONS, &p);
 
 	// add the smoke
@@ -257,11 +270,13 @@ void CEffects::Explosion(vec2 Pos)
 		p.m_Gravity = random_float(-800.0f);
 		p.m_Friction = 0.4f;
 		p.m_Color = mix(vec4(0.75f, 0.75f, 0.75f, 1.0f), vec4(0.5f, 0.5f, 0.5f, 1.0f), random_float());
+		p.m_Color.a *= Alpha;
+		p.m_StartAlpha = p.m_Color.a;
 		m_pClient->m_Particles.Add(CParticles::GROUP_GENERAL, &p);
 	}
 }
 
-void CEffects::HammerHit(vec2 Pos)
+void CEffects::HammerHit(vec2 Pos, float Alpha)
 {
 	// add the explosion
 	CParticle p;
@@ -272,6 +287,8 @@ void CEffects::HammerHit(vec2 Pos)
 	p.m_StartSize = 120.0f;
 	p.m_EndSize = 0;
 	p.m_Rot = random_angle();
+	p.m_Color.a = Alpha;
+	p.m_StartAlpha = Alpha;
 	m_pClient->m_Particles.Add(CParticles::GROUP_EXPLOSIONS, &p);
 	if(g_Config.m_SndGame)
 		m_pClient->m_Sounds.PlayAt(CSounds::CHN_WORLD, SOUND_HAMMER_HIT, 1.0f, Pos);

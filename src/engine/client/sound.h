@@ -28,15 +28,16 @@ class CSound : public IEngineSound
 	static int DecodeOpus(int SampleID, const void *pData, unsigned DataSize);
 
 public:
+	CSound();
 	int Init() override;
 	int Update() override;
 	void Shutdown() override;
 
 	bool IsSoundEnabled() override { return m_SoundEnabled; }
 
-	int LoadWV(const char *pFilename) override;
+	int LoadWV(const char *pFilename, int StorageType = IStorage::TYPE_ALL) override;
 	int LoadWVFromMem(const void *pData, unsigned DataSize, bool FromEditor) override;
-	int LoadOpus(const char *pFilename) override;
+	int LoadOpus(const char *pFilename, int StorageType = IStorage::TYPE_ALL) override;
 	int LoadOpusFromMem(const void *pData, unsigned DataSize, bool FromEditor) override;
 	void UnloadSample(int SampleID) override;
 

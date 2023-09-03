@@ -2,6 +2,7 @@
 #define GAME_SERVER_SCOREWORKER_H
 
 #include <memory>
+#include <optional>
 #include <string>
 #include <utility>
 #include <vector>
@@ -45,19 +46,17 @@ struct CScorePlayerResult : ISqlResult
 		char m_aBroadcast[1024];
 		struct
 		{
-			float m_Time;
+			std::optional<float> m_Time;
 			float m_aTimeCp[NUM_CHECKPOINTS];
-			int m_Score;
-			int m_HasFinishScore;
 			int m_Birthday; // 0 indicates no birthday
-		} m_Info;
+		} m_Info = {};
 		struct
 		{
 			char m_aReason[VOTE_REASON_LENGTH];
 			char m_aServer[32 + 1];
 			char m_aMap[MAX_MAP_LENGTH + 1];
 		} m_MapVote;
-	} m_Data; // PLAYER_INFO
+	} m_Data = {}; // PLAYER_INFO
 
 	void SetVariant(Variant v);
 };

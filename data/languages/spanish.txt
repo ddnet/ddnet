@@ -20,6 +20,8 @@
 # Deëivid!        2022-10-08 19:20:00
 # Deëivid!        2023-01-05 21:05:00
 # Deëivid!        2023-02-26 00:35:00
+# Deëivid!        2023-05-22 19:54:00
+# Deëivid!        2023-07-01 22:52:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -92,12 +94,6 @@ Clan
 
 Client
 == Cliente
-
-Close
-== Cerrar
-
-Connect
-== Conectar
 
 Connecting to
 == Conectando con
@@ -366,9 +362,6 @@ Rename demo
 
 Reset filter
 == Resetear filtro
-
-Sample rate
-== Frecuencia de muestreo
 
 Score
 == Puntos
@@ -717,9 +710,6 @@ Update now
 Restart
 == Reiniciar
 
-Select a name
-== Selecciona un nombre
-
 Please use a different name
 == Por favor usa un nombre diferente
 
@@ -888,9 +878,6 @@ Enable team chat sound
 Enable highlighted chat sound
 == Habilitar sonido de chat resaltado
 
-Threaded sound loading
-== Carga de sonido en un hilo
-
 Map sound volume
 == Vol. del sonido del mapa
 
@@ -942,8 +929,8 @@ Normal message
 Save the best demo of each race
 == Guardar la mejor demo de cada carrera
 
-Default length: %d
-== Longitud predeterminada: %d
+Default length
+== Longitud predeterminada
 
 Enable replays
 == Habilitar repeticiones
@@ -989,9 +976,6 @@ Show other players' hook collision lines
 
 Show other players' key presses
 == Mostrar las pulsaciones de teclas de otros jugadores
-
-Old mouse mode
-== Modo de mouse viejo
 
 Show tiles layers from BG map
 == Mostrar capas de tiles del mapa de fondo
@@ -1249,9 +1233,6 @@ https://ddnet.org/discord
 Are you sure that you want to disconnect and switch to a different server?
 == ¿Seguro que quieres desconectarte y cambiar de servidor?
 
-Refreshing...
-== Actualizando...
-
 Kill Messages
 == Mensajes de Muerte
 
@@ -1290,9 +1271,6 @@ default
 
 custom
 == personalizado
-
-Graphics cards
-== Tarjetas de video
 
 auto
 == auto.
@@ -1357,12 +1335,6 @@ Download community skins
 Enable controller
 == Habilitar mando
 
-Controller %d: %s
-== Mando %d: %s
-
-Click to cycle through all available controllers.
-== Click acá para recorrer todos los mandos disponibles.
-
 [Ingame controller mode]
 Relative
 == Relativo
@@ -1383,17 +1355,11 @@ UI controller sens.
 Controller jitter tolerance
 == Tolerancia a la fluctuación del mando
 
-Device
-== Dispositivo
-
 Status
 == Estado
 
 Aim bind
 == Apuntar
-
-Controller Axis #%d
-== Eje #%d del mando
 
 Mouse
 == Ratón
@@ -1487,12 +1453,6 @@ Slow down the demo
 
 Speed up the demo
 == Acelerar la demo
-
-Mark the beginning of a cut
-== Marca el inicio de un corte
-
-Mark the end of a cut
-== Marca el final de un corte
 
 Export cut as a separate demo
 == Exportar corte como una demo diferente
@@ -1639,8 +1599,6 @@ Are you sure that you want to reset the controls to their defaults?
 == ¿Estás seguro de que quieres restablecer a los controles predeterminados?
 
 [Graphics error]
-
-[Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
 == Error durante la iniciación. Intenta cambiar gfx_backend a OpenGL o Vulkan desde settings_ddnet.cfg en la carpeta de configuraciones e inténtalo otra vez.
 
@@ -1706,8 +1664,102 @@ Could not initialize the given graphics backend, this is probably because you di
 Could not save downloaded map. Try manually deleting this file: %s
 == No se pudo almacenar el mapa descargado. Intenta eliminar este archivo manualmente: %s
 
-Search:
-== Buscar:
-
 Copy info
 == Copiar información
+
+Create a random skin
+== Crear skin aleatoria
+
+Online players (%d)
+== Jugadores en línea (%d)
+
+Online clanmates (%d)
+== Compañeros de clan en línea (%d)
+
+[friends (server browser)]
+Offline (%d)
+== Desconectados (%d)
+
+Click to select server. Double click to join your friend.
+== Haz clic para seleccionar el servidor. Doble clic para unirte a tu amigo.
+
+Click to remove this player from your friends list.
+== Haz clic para quitar este jugador de tu lista de amigos.
+
+Click to remove this clan from your friends list.
+== Haz clic para quitar este clan de tu lista de amigos.
+
+None
+== Ninguno
+
+Add Clan
+== Agregar clan
+
+A demo with this name already exists
+== Ya existe una demo con este nombre
+
+No server selected
+== Ningún servidor seleccionado
+
+Mark the beginning of a cut (right click to reset)
+== Marcar el inicio de un corte (clic derecho para restablecer)
+
+Mark the end of a cut (right click to reset)
+== Marcar el final de un corte (clic derecho para restablecer)
+
+Close the demo player
+== Cerrar el reproductor de demos
+
+Export demo cut
+== Exportar corte de la demo
+
+Cut interval
+== Intervalo del corte
+
+Cut length
+== Largo del corte
+
+Axis
+== Eje
+
+Graphics card
+== Tarjeta gráfica
+
+Quitting. Please wait…
+== Saliendo. Por favor, espera…
+
+Restarting. Please wait…
+== Reiniciando. Por favor, espera…
+
+Multi-View
+== Vista Múltiple
+
+Rename folder
+== Renombrar carpeta
+
+A folder with this name already exists
+== Ya existe una carpeta con este nombre
+
+Unable to rename the folder
+== No se pudo renombrar la carpeta
+
+(paused)
+== (en pausa)
+
+All combined
+== Todo combinado
+
+Folder Link
+== Enlace de la carpeta
+
+Are you sure that you want to delete the folder '%s'?
+== ¿Seguro que quieres eliminar la carpeta '%s'?
+
+Delete folder
+== Eliminar carpeta
+
+Unable to delete the folder '%s'. Make sure it's empty first.
+== No se pudo eliminar la carpeta '%s'. Asegúrate de que esté vacía primero.
+
+Moved ingame
+== Movido dentro del juego

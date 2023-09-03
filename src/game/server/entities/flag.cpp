@@ -71,7 +71,12 @@ void CFlag::TickDefered()
 			else
 			{
 				m_Vel.y += GameWorld()->m_Core.m_aTuning[0].m_Gravity;
-				GameServer()->Collision()->MoveBox(&m_Pos, &m_Vel, vec2(ms_PhysSize, ms_PhysSize), 0.5f);
+				vec2 GroundElasticity;
+				// if(!m_TuneZone)
+				GroundElasticity = vec2(GameServer()->Tuning()->m_GroundElasticityX, GameServer()->Tuning()->m_GroundElasticityY);
+				// else
+				// 	GroundElasticity = vec2(GameServer()->TuningList()[m_TuneZone].m_GroundElasticityX, GameServer()->TuningList()[m_TuneZone].m_GroundElasticityY);
+				GameServer()->Collision()->MoveBox(&m_Pos, &m_Vel, vec2(ms_PhysSize, ms_PhysSize), GroundElasticity);
 			}
 		}
 	}

@@ -23,6 +23,17 @@ CAntibot::~CAntibot()
 	if(m_Initialized)
 		AntibotDestroy();
 }
+void CAntibot::Log(const char *pMessage, void *pUser)
+{
+	CAntibot *pAntibot = (CAntibot *)pUser;
+	pAntibot->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "antibot", pMessage);
+}
+void CAntibot::Report(int ClientID, const char *pMessage, void *pUser)
+{
+	char aBuf[256];
+	str_format(aBuf, sizeof(aBuf), "%d: %s", ClientID, pMessage);
+	Log(aBuf, pUser);
+}
 void CAntibot::Send(int ClientID, const void *pData, int Size, int Flags, void *pUser)
 {
 	CAntibot *pAntibot = (CAntibot *)pUser;
@@ -38,16 +49,10 @@ void CAntibot::Send(int ClientID, const void *pData, int Size, int Flags, void *
 	}
 	pAntibot->Server()->SendMsgRaw(ClientID, pData, Size, RealFlags);
 }
-void CAntibot::Log(const char *pMessage, void *pUser)
+void CAntibot::Teehistorian(const void *pData, int Size, void *pUser)
 {
 	CAntibot *pAntibot = (CAntibot *)pUser;
-	pAntibot->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "antibot", pMessage);
-}
-void CAntibot::Report(int ClientID, const char *pMessage, void *pUser)
-{
-	char aBuf[256];
-	str_format(aBuf, sizeof(aBuf), "%d: %s", ClientID, pMessage);
-	Log(aBuf, pUser);
+	pAntibot->m_pGameServer->TeehistorianRecordAntibot(pData, Size);
 }
 void CAntibot::Init()
 {
@@ -65,6 +70,7 @@ void CAntibot::Init()
 	m_Data.m_pfnLog = Log;
 	m_Data.m_pfnReport = Report;
 	m_Data.m_pfnSend = Send;
+	m_Data.m_pfnTeehistorian = Teehistorian;
 	m_Data.m_pUser = this;
 	AntibotInit(&m_Data);
 
@@ -169,7 +175,7 @@ bool CAntibot::OnEngineClientMessage(int ClientID, const void *pData, int Size, 
 	{
 		AntibotFlags |= ANTIBOT_MSGFLAG_NONVITAL;
 	}
-	return AntibotOnEngineClientMessage(ClientID, pData, Size, Flags);
+	return AntibotOnEngineClientMessage(ClientID, pData, Size, AntibotFlags);
 }
 bool CAntibot::OnEngineServerMessage(int ClientID, const void *pData, int Size, int Flags)
 {
@@ -179,7 +185,7 @@ bool CAntibot::OnEngineServerMessage(int ClientID, const void *pData, int Size, 
 	{
 		AntibotFlags |= ANTIBOT_MSGFLAG_NONVITAL;
 	}
-	return AntibotOnEngineServerMessage(ClientID, pData, Size, Flags);
+	return AntibotOnEngineServerMessage(ClientID, pData, Size, AntibotFlags);
 }
 bool CAntibot::OnEngineSimulateClientMessage(int *pClientID, void *pBuffer, int BufferSize, int *pOutSize, int *pFlags)
 {

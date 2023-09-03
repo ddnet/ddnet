@@ -5,6 +5,7 @@
 #include "player.h"
 #include "score.h"
 #include "teehistorian.h"
+#include <base/system.h>
 
 #include <engine/shared/config.h>
 
@@ -160,9 +161,9 @@ void CGameTeams::OnCharacterStart(int ClientID)
 					if(First)
 						First = false;
 					else
-						str_append(aBuf, ", ", sizeof(aBuf));
+						str_append(aBuf, ", ");
 
-					str_append(aBuf, GameServer()->Server()->ClientName(i), sizeof(aBuf));
+					str_append(aBuf, GameServer()->Server()->ClientName(i));
 				}
 			}
 		}
@@ -269,9 +270,9 @@ void CGameTeams::Tick()
 			{
 				if(aPlayerNames[0])
 				{
-					str_append(aPlayerNames, ", ", sizeof(aPlayerNames));
+					str_append(aPlayerNames, ", ");
 				}
-				str_append(aPlayerNames, Server()->ClientName(j), sizeof(aPlayerNames));
+				str_append(aPlayerNames, Server()->ClientName(j));
 				NumPlayersNotStarted += 1;
 			}
 		}
@@ -453,7 +454,7 @@ void CGameTeams::KillTeam(int Team, int NewStrongID, int ExceptID)
 			GameServer()->m_apPlayers[i]->m_VotedForPractice = false;
 			if(i != ExceptID)
 			{
-				GameServer()->m_apPlayers[i]->KillCharacter(WEAPON_SELF);
+				GameServer()->m_apPlayers[i]->KillCharacter(WEAPON_SELF, false);
 				if(NewStrongID != -1 && i != NewStrongID)
 				{
 					GameServer()->m_apPlayers[i]->Respawn(true); // spawn the rest of team with weak hook on the killer
@@ -461,6 +462,12 @@ void CGameTeams::KillTeam(int Team, int NewStrongID, int ExceptID)
 			}
 		}
 	}
+
+	// send the team kill message
+	CNetMsg_Sv_KillMsgTeam Msg;
+	Msg.m_Team = Team;
+	Msg.m_First = NewStrongID;
+	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
 }
 
 bool CGameTeams::TeamFinished(int Team)
@@ -811,11 +818,10 @@ void CGameTeams::OnFinish(CPlayer *Player, float Time, const char *pTimestamp)
 		GameServer()->SendRecord(ClientID);
 	}
 
-	int TTime = 0 - (int)Time;
-	if(Player->m_Score < TTime || !Player->m_HasFinishScore)
+	int TTime = (int)Time;
+	if(!Player->m_Score.has_value() || TTime < Player->m_Score.value())
 	{
 		Player->m_Score = TTime;
-		Player->m_HasFinishScore = true;
 	}
 }
 
@@ -1056,14 +1062,15 @@ void CGameTeams::OnCharacterDeath(int ClientID, int Weapon)
 		{
 			ChangeTeamState(Team, CGameTeams::TEAMSTATE_OPEN);
 
-			char aBuf[512];
-			str_format(aBuf, sizeof(aBuf), "Everyone in your locked team was killed because '%s' %s.", Server()->ClientName(ClientID), Weapon == WEAPON_SELF ? "killed" : "died");
-
 			m_aPractice[Team] = false;
 
-			KillTeam(Team, Weapon == WEAPON_SELF ? ClientID : -1, ClientID);
 			if(Count(Team) > 1)
 			{
+				KillTeam(Team, Weapon == WEAPON_SELF ? ClientID : -1, ClientID);
+
+				char aBuf[512];
+				str_format(aBuf, sizeof(aBuf), "Everyone in your locked team was killed because '%s' %s.", Server()->ClientName(ClientID), Weapon == WEAPON_SELF ? "killed" : "died");
+
 				GameServer()->SendChatTeam(Team, aBuf);
 			}
 		}

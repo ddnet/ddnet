@@ -24,7 +24,7 @@ int main(int argc, const char **argv)
 	for(int Index = 0; Index < Reader.NumItems(); Index++)
 	{
 		int Type, ID;
-		void *pPtr = Reader.GetItem(Index, &Type, &ID);
+		const void *pPtr = Reader.GetItem(Index, &Type, &ID);
 
 		// filter ITEMTYPE_EX items, they will be automatically added again
 		if(Type == ITEMTYPE_EX)
@@ -37,7 +37,7 @@ int main(int argc, const char **argv)
 	// add all data
 	for(int Index = 0; Index < Reader.NumData(); Index++)
 	{
-		void *pPtr = Reader.GetData(Index);
+		const void *pPtr = Reader.GetData(Index);
 		int Size = Reader.GetDataSize(Index);
 		Writer.AddData(Size, pPtr);
 	}

@@ -102,7 +102,6 @@ protected:
 	virtual void Cmd_Screenshot(const CCommandBuffer::SCommand_TrySwapAndScreenshot *pCommand);
 
 	virtual void Cmd_Update_Viewport(const CCommandBuffer::SCommand_Update_Viewport *pCommand);
-	virtual void Cmd_Finish(const CCommandBuffer::SCommand_Finish *pCommand);
 
 	virtual void Cmd_CreateBufferObject(const CCommandBuffer::SCommand_CreateBufferObject *pCommand) { dbg_assert(false, "Call of unsupported Cmd_CreateBufferObject"); }
 	virtual void Cmd_RecreateBufferObject(const CCommandBuffer::SCommand_RecreateBufferObject *pCommand) { dbg_assert(false, "Call of unsupported Cmd_RecreateBufferObject"); }

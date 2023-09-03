@@ -831,9 +831,11 @@ void CGameContext::ConDumpLog(IConsole::IResult *pResult, void *pUserData)
 	if(LimitSecs < 0)
 		return;
 
-	for(int i = pSelf->m_FirstLog; i != pSelf->m_LastLog; i = (i + 1) % pSelf->MAX_LOGS)
+	int Iterator = pSelf->m_LatestLog;
+	for(int i = 0; i < MAX_LOGS; i++)
 	{
-		CLog *pEntry = &pSelf->m_aLogs[i];
+		CLog *pEntry = &pSelf->m_aLogs[Iterator];
+		Iterator = (Iterator + 1) % MAX_LOGS;
 
 		if(!pEntry->m_Timestamp)
 			continue;
@@ -854,10 +856,8 @@ void CGameContext::ConDumpLog(IConsole::IResult *pResult, void *pUserData)
 
 void CGameContext::LogEvent(const char *Description, int ClientID)
 {
-	CLog *pNewEntry = &m_aLogs[m_LastLog];
-	m_LastLog = (m_LastLog + 1) % MAX_LOGS;
-	if(m_LastLog == m_FirstLog)
-		m_FirstLog++;
+	CLog *pNewEntry = &m_aLogs[m_LatestLog];
+	m_LatestLog = (m_LatestLog + 1) % MAX_LOGS;
 
 	pNewEntry->m_Timestamp = time_get();
 	str_copy(pNewEntry->m_aDescription, Description);

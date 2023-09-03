@@ -10,17 +10,21 @@ class CSpectator : public CComponent
 {
 	enum
 	{
+		MULTI_VIEW = -4,
 		NO_SELECTION = -3,
 	};
 
 	bool m_Active;
 	bool m_WasActive;
+	bool m_Clicked;
 
 	int m_SelectedSpectatorID;
 	vec2 m_SelectorMouse;
 
 	float m_OldMouseX;
 	float m_OldMouseY;
+
+	float m_MultiViewActivateDelay;
 
 	bool CanChangeSpectator();
 	void SpectateNext(bool Reverse);
@@ -30,6 +34,7 @@ class CSpectator : public CComponent
 	static void ConSpectateNext(IConsole::IResult *pResult, void *pUserData);
 	static void ConSpectatePrevious(IConsole::IResult *pResult, void *pUserData);
 	static void ConSpectateClosest(IConsole::IResult *pResult, void *pUserData);
+	static void ConMultiView(IConsole::IResult *pResult, void *pUserData);
 
 public:
 	CSpectator();
@@ -40,8 +45,10 @@ public:
 	virtual void OnRender() override;
 	virtual void OnRelease() override;
 	virtual void OnReset() override;
+	virtual bool OnInput(const IInput::CEvent &Event) override;
 
 	void Spectate(int SpectatorID);
+	void SpectateClosest();
 };
 
 #endif

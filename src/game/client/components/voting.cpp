@@ -44,7 +44,7 @@ void CVoting::CallvoteSpectate(int ClientID, const char *pReason, bool ForceVote
 	else
 	{
 		char aBuf[32];
-		str_format(aBuf, sizeof(aBuf), "%d", ClientID);
+		str_from_int(ClientID, aBuf);
 		Callvote("spectate", aBuf, pReason);
 	}
 }
@@ -60,7 +60,7 @@ void CVoting::CallvoteKick(int ClientID, const char *pReason, bool ForceVote)
 	else
 	{
 		char aBuf[32];
-		str_format(aBuf, sizeof(aBuf), "%d", ClientID);
+		str_from_int(ClientID, aBuf);
 		Callvote("kick", aBuf, pReason);
 	}
 }
@@ -78,10 +78,10 @@ void CVoting::CallvoteOption(int OptionID, const char *pReason, bool ForceVote)
 				str_copy(aBuf, "force_vote option \"");
 				char *pDst = aBuf + str_length(aBuf);
 				str_escape(&pDst, pOption->m_aDescription, aBuf + sizeof(aBuf));
-				str_append(aBuf, "\" \"", sizeof(aBuf));
+				str_append(aBuf, "\" \"");
 				pDst = aBuf + str_length(aBuf);
 				str_escape(&pDst, pReason, aBuf + sizeof(aBuf));
-				str_append(aBuf, "\"", sizeof(aBuf));
+				str_append(aBuf, "\"");
 				Client()->Rcon(aBuf);
 			}
 			else
@@ -105,7 +105,7 @@ void CVoting::RemovevoteOption(int OptionID)
 			str_copy(aBuf, "remove_vote \"");
 			char *pDst = aBuf + str_length(aBuf);
 			str_escape(&pDst, pOption->m_aDescription, aBuf + sizeof(aBuf));
-			str_append(aBuf, "\"", sizeof(aBuf));
+			str_append(aBuf, "\"");
 			Client()->Rcon(aBuf);
 			break;
 		}
@@ -121,10 +121,10 @@ void CVoting::AddvoteOption(const char *pDescription, const char *pCommand)
 	str_copy(aBuf, "add_vote \"");
 	char *pDst = aBuf + str_length(aBuf);
 	str_escape(&pDst, pDescription, aBuf + sizeof(aBuf));
-	str_append(aBuf, "\" \"", sizeof(aBuf));
+	str_append(aBuf, "\" \"");
 	pDst = aBuf + str_length(aBuf);
 	str_escape(&pDst, pCommand, aBuf + sizeof(aBuf));
-	str_append(aBuf, "\"", sizeof(aBuf));
+	str_append(aBuf, "\"");
 	Client()->Rcon(aBuf);
 }
 
@@ -148,6 +148,9 @@ CVoting::CVoting()
 
 void CVoting::AddOption(const char *pDescription)
 {
+	if(m_NumVoteOptions == MAX_VOTE_OPTIONS)
+		return;
+
 	CVoteOptionClient *pOption;
 	if(m_pRecycleFirst)
 	{
@@ -324,8 +327,8 @@ void CVoting::RenderBars(CUIRect Bars, bool Text)
 			if(Text)
 			{
 				char aBuf[256];
-				str_format(aBuf, sizeof(aBuf), "%d", m_Yes);
-				UI()->DoLabel(&YesArea, aBuf, Bars.h * 0.75f, TEXTALIGN_CENTER);
+				str_from_int(m_Yes, aBuf);
+				UI()->DoLabel(&YesArea, aBuf, Bars.h * 0.75f, TEXTALIGN_MC);
 			}
 
 			PassArea.x += YesArea.w;
@@ -342,8 +345,8 @@ void CVoting::RenderBars(CUIRect Bars, bool Text)
 			if(Text)
 			{
 				char aBuf[256];
-				str_format(aBuf, sizeof(aBuf), "%d", m_No);
-				UI()->DoLabel(&NoArea, aBuf, Bars.h * 0.75f, TEXTALIGN_CENTER);
+				str_from_int(m_No, aBuf);
+				UI()->DoLabel(&NoArea, aBuf, Bars.h * 0.75f, TEXTALIGN_MC);
 			}
 
 			PassArea.w -= NoArea.w;
@@ -352,8 +355,8 @@ void CVoting::RenderBars(CUIRect Bars, bool Text)
 		if(Text && m_Pass)
 		{
 			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "%d", m_Pass);
-			UI()->DoLabel(&PassArea, aBuf, Bars.h * 0.75f, TEXTALIGN_CENTER);
+			str_from_int(m_Pass, aBuf);
+			UI()->DoLabel(&PassArea, aBuf, Bars.h * 0.75f, TEXTALIGN_MC);
 		}
 	}
 }

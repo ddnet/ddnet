@@ -76,12 +76,6 @@ Clan
 Client
 == クライアント
 
-Close
-== 閉じる
-
-Connect
-== 接続
-
 Connecting to
 == 接続先
 
@@ -343,9 +337,6 @@ Rename demo
 
 Reset filter
 == フィルタをリセット
-
-Sample rate
-== サンプルレート
 
 Score
 == スコア
@@ -724,9 +715,6 @@ Types
 Leak IP
 == IP を漏洩する
 
-Select a name
-== 名前をつけて保存
-
 Please use a different name
 == 別の名前をつけてください
 
@@ -937,9 +925,6 @@ Enable team chat sound
 Enable highlighted chat sound
 == メンション・メッセージ受信音
 
-Threaded sound loading
-== マルチスレッド音声読み込み
-
 Game sound volume
 == ゲーム SFX 音量
 
@@ -1009,8 +994,8 @@ Preview
 Save the best demo of each race
 == レースの最高記録のデモを保存
 
-Default length: %d
-== デフォルト長さ：%D
+Default length
+== デフォルト長さ
 
 Enable replays
 == リプレイ機能
@@ -1056,9 +1041,6 @@ Show other players' hook collision lines
 
 Show other players' key presses
 == 他のプレーヤーの押したキーを表示
-
-Old mouse mode
-== 古いマウスモード
 
 Background
 == 背景
@@ -1209,8 +1191,6 @@ Grabs
 == 9+ 件の新しいメンション
 
 [Graphics error]
-
-[Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
 == 
 
@@ -1276,7 +1256,10 @@ Initializing map logic
 Sending initial client info
 == 
 
-Search:
+Quitting. Please wait…
+== 
+
+Restarting. Please wait…
 == 
 
 Position:
@@ -1286,6 +1269,12 @@ Speed:
 == 
 
 Angle:
+== 
+
+Multi-View
+== 
+
+Team %d
 == 
 
 Uploading map data to GPU
@@ -1309,10 +1298,22 @@ Getting game info
 Requesting to join the game
 == 
 
-Cancel
+Rename folder
+== 
+
+A demo with this name already exists
+== 
+
+A folder with this name already exists
+== 
+
+Unable to rename the folder
 == 
 
 File '%s' already exists, do you want to overwrite it?
+== 
+
+(paused)
 == 
 
 Join Tutorial Server
@@ -1345,19 +1346,44 @@ SA
 CHN
 == 
 
-Refreshing...
-== 
-
 Are you sure that you want to disconnect and switch to a different server?
 == 
 
 Copy info
 == 
 
+No server selected
+== 
+
+Online players (%d)
+== 
+
+Online clanmates (%d)
+== 
+
+[friends (server browser)]
+Offline (%d)
+== 
+
+Click to select server. Double click to join your friend.
+== 
+
+Click to remove this player from your friends list.
+== 
+
+Click to remove this clan from your friends list.
+== 
+
+None
+== 
+
 Are you sure that you want to remove the player '%s' from your friends list?
 == 
 
 Are you sure that you want to remove the clan '%s' from your friends list?
+== 
+
+Add Clan
 == 
 
 Play the current demo
@@ -1381,10 +1407,10 @@ Slow down the demo
 Speed up the demo
 == 
 
-Mark the beginning of a cut
+Mark the beginning of a cut (right click to reset)
 == 
 
-Mark the end of a cut
+Mark the end of a cut (right click to reset)
 == 
 
 Export cut as a separate demo
@@ -1396,19 +1422,46 @@ Go back one marker
 Go forward one marker
 == 
 
+Close the demo player
+== 
+
 Toggle keyboard shortcuts
+== 
+
+Export demo cut
+== 
+
+Cut interval
+== 
+
+Cut length
 == 
 
 Loading demo files
 == 
 
+All combined
+== 
+
+Folder Link
+== 
+
 Open the directory that contains the demo files
+== 
+
+Are you sure that you want to delete the folder '%s'?
 == 
 
 Are you sure that you want to delete the demo '%s'?
 == 
 
+Delete folder
+== 
+
 Unable to delete the demo '%s'
+== 
+
+Unable to delete the folder '%s'. Make sure it's empty first.
 == 
 
 Loading ghost files
@@ -1447,16 +1500,19 @@ Download community skins
 Choose default eyes when joining a server
 == 
 
+Create a random skin
+== 
+
 Open the directory to add custom skins
 == 
 
 Enable controller
 == 
 
-Controller %d: %s
+Controller
 == 
 
-Click to cycle through all available controllers.
+Ingame controller mode
 == 
 
 [Ingame controller mode]
@@ -1465,9 +1521,6 @@ Relative
 
 [Ingame controller mode]
 Absolute
-== 
-
-Ingame controller mode
 == 
 
 Ingame controller sens.
@@ -1482,16 +1535,13 @@ Controller jitter tolerance
 No controller found. Plug in a controller.
 == 
 
-Device
+Axis
 == 
 
 Status
 == 
 
 Aim bind
-== 
-
-Controller Axis #%d
 == 
 
 Mouse
@@ -1503,13 +1553,13 @@ Ingame mouse sens.
 UI mouse sens.
 == 
 
-Controller
-== 
-
 Reset controls
 == 
 
 Are you sure that you want to reset the controls to their defaults?
+== 
+
+Cancel
 == 
 
 Windowed fullscreen
@@ -1527,7 +1577,7 @@ default
 custom
 == 
 
-Graphics cards
+Graphics card
 == 
 
 auto
@@ -1689,8 +1739,8 @@ Loading race demo files
 Super
 == 
 
-Team %d
+Loading sound files
 == 
 
-Loading sound files
+Moved ingame
 == 

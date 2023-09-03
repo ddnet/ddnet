@@ -2,6 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "character.h"
 #include "laser.h"
+#include "pickup.h"
 #include "projectile.h"
 
 #include <antibot/antibot_data.h>
@@ -132,13 +133,6 @@ void CCharacter::SetSolo(bool Solo)
 {
 	m_Core.m_Solo = Solo;
 	Teams()->m_Core.SetSolo(m_pPlayer->GetCID(), Solo);
-
-	if(Solo)
-		m_NeededFaketuning |= FAKETUNE_SOLO;
-	else
-		m_NeededFaketuning &= ~FAKETUNE_SOLO;
-
-	GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone); // update tunings
 }
 
 void CCharacter::SetSuper(bool Super)
@@ -258,7 +252,14 @@ void CCharacter::HandleNinja()
 		// Set velocity
 		m_Core.m_Vel = m_Core.m_Ninja.m_ActivationDir * g_pData->m_Weapons.m_Ninja.m_Velocity;
 		vec2 OldPos = m_Pos;
-		Collision()->MoveBox(&m_Core.m_Pos, &m_Core.m_Vel, vec2(GetProximityRadius(), GetProximityRadius()), 0.f);
+		vec2 GroundElasticity;
+
+		if(!m_TuneZone)
+			GroundElasticity = vec2(GameServer()->Tuning()->m_GroundElasticityX, GameServer()->Tuning()->m_GroundElasticityY);
+		else
+			GroundElasticity = vec2(GameServer()->TuningList()[m_TuneZone].m_GroundElasticityX, GameServer()->TuningList()[m_TuneZone].m_GroundElasticityY);
+
+		Collision()->MoveBox(&m_Core.m_Pos, &m_Core.m_Vel, vec2(GetProximityRadius(), GetProximityRadius()), GroundElasticity);
 
 		// reset velocity so the client doesn't predict stuff
 		m_Core.m_Vel = vec2(0.f, 0.f);
@@ -384,7 +385,8 @@ void CCharacter::FireWeapon()
 	}
 
 	DoWeaponSwitch();
-	vec2 Direction = normalize(vec2(m_LatestInput.m_TargetX, m_LatestInput.m_TargetY));
+	vec2 MouseTarget = vec2(m_LatestInput.m_TargetX, m_LatestInput.m_TargetY);
+	vec2 Direction = normalize(MouseTarget);
 
 	bool FullAuto = false;
 	if(m_Core.m_ActiveWeapon == WEAPON_GRENADE || m_Core.m_ActiveWeapon == WEAPON_SHOTGUN || m_Core.m_ActiveWeapon == WEAPON_LASER)
@@ -519,7 +521,8 @@ void CCharacter::FireWeapon()
 				Lifetime, //Span
 				false, //Freeze
 				false, //Explosive
-				-1 //SoundImpact
+				-1, //SoundImpact
+				MouseTarget //InitDir
 			);
 
 			GameServer()->CreateSound(m_Pos, SOUND_GUN_FIRE, TeamMask());
@@ -557,8 +560,9 @@ void CCharacter::FireWeapon()
 			Lifetime, //Span
 			false, //Freeze
 			true, //Explosive
-			SOUND_GRENADE_EXPLODE //SoundImpact
-		); //SoundImpact
+			SOUND_GRENADE_EXPLODE, //SoundImpact
+			MouseTarget // MouseTarget
+		);
 
 		GameServer()->CreateSound(m_Pos, SOUND_GRENADE_FIRE, TeamMask());
 	}
@@ -944,7 +948,7 @@ bool CCharacter::IncreaseArmor(int Amount)
 	return true;
 }
 
-void CCharacter::Die(int Killer, int Weapon)
+void CCharacter::Die(int Killer, int Weapon, bool SendKillMsg)
 {
 	if(Server()->IsRecording(m_pPlayer->GetCID()))
 		Server()->StopRecord(m_pPlayer->GetCID());
@@ -959,12 +963,15 @@ void CCharacter::Die(int Killer, int Weapon)
 	GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
 
 	// send the kill message
-	CNetMsg_Sv_KillMsg Msg;
-	Msg.m_Killer = Killer;
-	Msg.m_Victim = m_pPlayer->GetCID();
-	Msg.m_Weapon = Weapon;
-	Msg.m_ModeSpecial = ModeSpecial;
-	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
+	if(SendKillMsg && (Team() == TEAM_FLOCK || Teams()->Count(Team()) == 1 || Teams()->GetTeamState(Team()) == CGameTeams::TEAMSTATE_OPEN || Teams()->TeamLocked(Team()) == false))
+	{
+		CNetMsg_Sv_KillMsg Msg;
+		Msg.m_Killer = Killer;
+		Msg.m_Victim = m_pPlayer->GetCID();
+		Msg.m_Weapon = Weapon;
+		Msg.m_ModeSpecial = ModeSpecial;
+		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
+	}
 
 	// a nice sound
 	GameServer()->CreateSound(m_Pos, SOUND_PLAYER_DIE, TeamMask());
@@ -1129,25 +1136,29 @@ void CCharacter::SnapCharacter(int SnappingClient, int ID)
 			Weapon = WEAPON_NINJA;
 	}
 
-	// This could probably happen when m_Jetpack changes instead
-	// jetpack and ninjajetpack prediction
+	// solo, collision, jetpack and ninjajetpack prediction
 	if(m_pPlayer->GetCID() == SnappingClient)
 	{
-		if(m_Core.m_Jetpack && Weapon != WEAPON_NINJA)
+		int Faketuning = 0;
+		if(m_pPlayer->GetClientVersion() < VERSION_DDNET_NEW_HUD)
 		{
-			if(!(m_NeededFaketuning & FAKETUNE_JETPACK))
-			{
-				m_NeededFaketuning |= FAKETUNE_JETPACK;
-				GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone);
-			}
+			if(m_Core.m_Jetpack && Weapon != WEAPON_NINJA)
+				Faketuning |= FAKETUNE_JETPACK;
+			if(m_Core.m_Solo)
+				Faketuning |= FAKETUNE_SOLO;
+			if(m_Core.m_HammerHitDisabled)
+				Faketuning |= FAKETUNE_NOHAMMER;
+			if(m_Core.m_CollisionDisabled)
+				Faketuning |= FAKETUNE_NOCOLL;
+			if(m_Core.m_HookHitDisabled)
+				Faketuning |= FAKETUNE_NOHOOK;
+			if(!m_Core.m_EndlessJump && m_Core.m_Jumps == 0)
+				Faketuning |= FAKETUNE_NOJUMP;
 		}
-		else
+		if(Faketuning != m_NeededFaketuning)
 		{
-			if(m_NeededFaketuning & FAKETUNE_JETPACK)
-			{
-				m_NeededFaketuning &= ~FAKETUNE_JETPACK;
-				GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone);
-			}
+			m_NeededFaketuning = Faketuning;
+			GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone); // update tunings
 		}
 	}
 
@@ -1166,7 +1177,7 @@ void CCharacter::SnapCharacter(int SnappingClient, int ID)
 		Health = m_Health;
 		Armor = m_Armor;
 		if(m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo > 0)
-			AmmoCount = (m_FreezeTime > 0) ? m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo : 0;
+			AmmoCount = (m_FreezeTime == 0) ? m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo : 0;
 	}
 
 	if(GetPlayer()->IsAfk() || GetPlayer()->IsPaused())
@@ -1259,6 +1270,35 @@ bool CCharacter::CanSnapCharacter(int SnappingClient)
 	return true;
 }
 
+bool CCharacter::IsSnappingCharacterInView(int SnappingClientID)
+{
+	int ID = m_pPlayer->GetCID();
+
+	// A player may not be clipped away if his hook or a hook attached to him is in the field of view
+	bool PlayerAndHookNotInView = NetworkClippedLine(SnappingClientID, m_Pos, m_Core.m_HookPos);
+	bool AttachedHookInView = false;
+	if(PlayerAndHookNotInView)
+	{
+		for(const auto &AttachedPlayerID : m_Core.m_AttachedPlayers)
+		{
+			CCharacter *pOtherPlayer = GameServer()->GetPlayerChar(AttachedPlayerID);
+			if(pOtherPlayer && pOtherPlayer->m_Core.m_HookedPlayer == ID)
+			{
+				if(!NetworkClippedLine(SnappingClientID, m_Pos, pOtherPlayer->m_Pos))
+				{
+					AttachedHookInView = true;
+					break;
+				}
+			}
+		}
+	}
+	if(PlayerAndHookNotInView && !AttachedHookInView)
+	{
+		return false;
+	}
+	return true;
+}
+
 void CCharacter::Snap(int SnappingClient)
 {
 	int ID = m_pPlayer->GetCID();
@@ -1271,28 +1311,8 @@ void CCharacter::Snap(int SnappingClient)
 		return;
 	}
 
-	// A player may not be clipped away if his hook or a hook attached to him is in the field of view
-	bool PlayerAndHookNotInView = NetworkClippedLine(SnappingClient, m_Pos, m_Core.m_HookPos);
-	bool AttachedHookInView = false;
-	if(PlayerAndHookNotInView)
-	{
-		for(const auto &AttachedPlayerID : m_Core.m_AttachedPlayers)
-		{
-			CCharacter *pOtherPlayer = GameServer()->GetPlayerChar(AttachedPlayerID);
-			if(pOtherPlayer && pOtherPlayer->m_Core.m_HookedPlayer == ID)
-			{
-				if(!NetworkClippedLine(SnappingClient, m_Pos, pOtherPlayer->m_Pos))
-				{
-					AttachedHookInView = true;
-					break;
-				}
-			}
-		}
-	}
-	if(PlayerAndHookNotInView && !AttachedHookInView)
-	{
+	if(!IsSnappingCharacterInView(SnappingClient))
 		return;
-	}
 
 	SnapCharacter(SnappingClient, ID);
 
@@ -1610,8 +1630,6 @@ void CCharacter::HandleTiles(int Index)
 		m_Core.m_ShotgunHitDisabled = true;
 		m_Core.m_GrenadeHitDisabled = true;
 		m_Core.m_LaserHitDisabled = true;
-		m_NeededFaketuning |= FAKETUNE_NOHAMMER;
-		GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone); // update tunings
 	}
 	else if(((m_TileIndex == TILE_HIT_ENABLE) || (m_TileFIndex == TILE_HIT_ENABLE)) && (m_Core.m_HammerHitDisabled || m_Core.m_ShotgunHitDisabled || m_Core.m_GrenadeHitDisabled || m_Core.m_LaserHitDisabled))
 	{
@@ -1620,8 +1638,6 @@ void CCharacter::HandleTiles(int Index)
 		m_Core.m_GrenadeHitDisabled = false;
 		m_Core.m_HammerHitDisabled = false;
 		m_Core.m_LaserHitDisabled = false;
-		m_NeededFaketuning &= ~FAKETUNE_NOHAMMER;
-		GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone); // update tunings
 	}
 
 	// collide with others
@@ -1629,15 +1645,11 @@ void CCharacter::HandleTiles(int Index)
 	{
 		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You can't collide with others");
 		m_Core.m_CollisionDisabled = true;
-		m_NeededFaketuning |= FAKETUNE_NOCOLL;
-		GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone); // update tunings
 	}
 	else if(((m_TileIndex == TILE_NPC_ENABLE) || (m_TileFIndex == TILE_NPC_ENABLE)) && m_Core.m_CollisionDisabled)
 	{
 		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You can collide with others");
 		m_Core.m_CollisionDisabled = false;
-		m_NeededFaketuning &= ~FAKETUNE_NOCOLL;
-		GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone); // update tunings
 	}
 
 	// hook others
@@ -1645,15 +1657,11 @@ void CCharacter::HandleTiles(int Index)
 	{
 		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You can't hook others");
 		m_Core.m_HookHitDisabled = true;
-		m_NeededFaketuning |= FAKETUNE_NOHOOK;
-		GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone); // update tunings
 	}
 	else if(((m_TileIndex == TILE_NPH_ENABLE) || (m_TileFIndex == TILE_NPH_ENABLE)) && m_Core.m_HookHitDisabled)
 	{
 		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You can hook others");
 		m_Core.m_HookHitDisabled = false;
-		m_NeededFaketuning &= ~FAKETUNE_NOHOOK;
-		GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone); // update tunings
 	}
 
 	// unlimited air jumps
@@ -1661,21 +1669,11 @@ void CCharacter::HandleTiles(int Index)
 	{
 		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You have unlimited air jumps");
 		m_Core.m_EndlessJump = true;
-		if(m_Core.m_Jumps == 0)
-		{
-			m_NeededFaketuning &= ~FAKETUNE_NOJUMP;
-			GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone); // update tunings
-		}
 	}
 	else if(((m_TileIndex == TILE_UNLIMITED_JUMPS_DISABLE) || (m_TileFIndex == TILE_UNLIMITED_JUMPS_DISABLE)) && m_Core.m_EndlessJump)
 	{
 		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You don't have unlimited air jumps");
 		m_Core.m_EndlessJump = false;
-		if(m_Core.m_Jumps == 0)
-		{
-			m_NeededFaketuning |= FAKETUNE_NOJUMP;
-			GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone); // update tunings
-		}
 	}
 
 	// walljump
@@ -1824,16 +1822,12 @@ void CCharacter::HandleTiles(int Index)
 	else if(Collision()->GetSwitchType(MapIndex) == TILE_HIT_ENABLE && m_Core.m_HammerHitDisabled && Collision()->GetSwitchDelay(MapIndex) == WEAPON_HAMMER)
 	{
 		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You can hammer hit others");
-		m_NeededFaketuning &= ~FAKETUNE_NOHAMMER;
 		m_Core.m_HammerHitDisabled = false;
-		GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone); // update tunings
 	}
 	else if(Collision()->GetSwitchType(MapIndex) == TILE_HIT_DISABLE && !(m_Core.m_HammerHitDisabled) && Collision()->GetSwitchDelay(MapIndex) == WEAPON_HAMMER)
 	{
 		GameServer()->SendChatTarget(GetPlayer()->GetCID(), "You can't hammer hit others");
-		m_NeededFaketuning |= FAKETUNE_NOHAMMER;
 		m_Core.m_HammerHitDisabled = true;
-		GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone); // update tunings
 	}
 	else if(Collision()->GetSwitchType(MapIndex) == TILE_HIT_ENABLE && m_Core.m_ShotgunHitDisabled && Collision()->GetSwitchDelay(MapIndex) == WEAPON_SHOTGUN)
 	{
@@ -1883,18 +1877,6 @@ void CCharacter::HandleTiles(int Index)
 			else
 				str_format(aBuf, sizeof(aBuf), "You can jump %d times", NewJumps);
 			GameServer()->SendChatTarget(GetPlayer()->GetCID(), aBuf);
-
-			if(NewJumps == 0 && !m_Core.m_EndlessJump)
-			{
-				m_NeededFaketuning |= FAKETUNE_NOJUMP;
-				GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone); // update tunings
-			}
-			else if(m_Core.m_Jumps == 0)
-			{
-				m_NeededFaketuning &= ~FAKETUNE_NOJUMP;
-				GameServer()->SendTuningParams(m_pPlayer->GetCID(), m_TuneZone); // update tunings
-			}
-
 			m_Core.m_Jumps = NewJumps;
 		}
 	}
@@ -2184,10 +2166,31 @@ void CCharacter::DDRaceTick()
 		}
 	}
 
+	// check for nearby health pickups (also freeze)
+	bool InHealthPickup = false;
+	if(!m_Core.m_IsInFreeze)
+	{
+		CEntity *apEnts[9];
+		int Num = GameWorld()->FindEntities(m_Pos, GetProximityRadius() + CPickup::ms_CollisionExtraSize, apEnts, std::size(apEnts), CGameWorld::ENTTYPE_PICKUP);
+		for(int i = 0; i < Num; ++i)
+		{
+			CPickup *pPickup = static_cast<CPickup *>(apEnts[i]);
+			if(pPickup->Type() == POWERUP_HEALTH)
+			{
+				// This uses a separate variable InHealthPickup instead of setting m_Core.m_IsInFreeze
+				// as the latter causes freezebars to flicker when standing in the freeze range of a
+				// health pickup. When the same code for client prediction is added, the freezebars
+				// still flicker, but only when standing at the edge of the health pickup's freeze range.
+				InHealthPickup = true;
+				break;
+			}
+		}
+	}
+
 	// look for save position for rescue feature
 	if(g_Config.m_SvRescue || ((g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO || Team() > TEAM_FLOCK) && Team() >= TEAM_FLOCK && Team() < TEAM_SUPER))
 	{
-		if(!m_Core.m_IsInFreeze && IsGrounded() && !m_Core.m_DeepFrozen)
+		if(!m_Core.m_IsInFreeze && IsGrounded() && !m_Core.m_DeepFrozen && !InHealthPickup)
 		{
 			SetRescue();
 		}
@@ -2242,10 +2245,10 @@ void CCharacter::DDRacePostCoreTick()
 		return;
 
 	// handle Anti-Skip tiles
-	std::list<int> Indices = Collision()->GetMapIndices(m_PrevPos, m_Pos);
-	if(!Indices.empty())
+	std::vector<int> vIndices = Collision()->GetMapIndices(m_PrevPos, m_Pos);
+	if(!vIndices.empty())
 	{
-		for(int &Index : Indices)
+		for(int &Index : vIndices)
 		{
 			HandleTiles(Index);
 			if(!m_Alive)

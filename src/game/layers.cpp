@@ -220,7 +220,7 @@ void CLayers::InitTilemapSkip()
 
 CMapItemGroup *CLayers::GetGroup(int Index) const
 {
-	return static_cast<CMapItemGroup *>(m_pMap->GetItem(m_GroupsStart + Index, 0, 0));
+	return static_cast<CMapItemGroup *>(m_pMap->GetItem(m_GroupsStart + Index));
 }
 
 CMapItemGroupEx *CLayers::GetGroupEx(int Index) const
@@ -229,10 +229,10 @@ CMapItemGroupEx *CLayers::GetGroupEx(int Index) const
 	if(m_GroupsExNum != m_GroupsNum)
 		return nullptr;
 
-	return static_cast<CMapItemGroupEx *>(m_pMap->GetItem(m_GroupsExStart + Index, 0, 0));
+	return static_cast<CMapItemGroupEx *>(m_pMap->GetItem(m_GroupsExStart + Index));
 }
 
 CMapItemLayer *CLayers::GetLayer(int Index) const
 {
-	return static_cast<CMapItemLayer *>(m_pMap->GetItem(m_LayersStart + Index, 0, 0));
+	return static_cast<CMapItemLayer *>(m_pMap->GetItem(m_LayersStart + Index));
 }

@@ -6,13 +6,12 @@
 #include <base/math.h>
 #include <game/client/gameclient.h>
 #include <game/collision.h>
+#include <game/mapitems.h>
 
 #include "camera.h"
 #include "controls.h"
 
 #include <limits>
-
-const float ZoomStep = 0.866025f;
 
 CCamera::CCamera()
 {
@@ -21,6 +20,10 @@ CCamera::CCamera()
 	m_Zoom = 1.0f;
 	m_Zooming = false;
 	m_ForceFreeviewPos = vec2(-1, -1);
+	m_GotoSwitchOffset = 0;
+	m_GotoTeleOffset = 0;
+	m_GotoSwitchLastPos = ivec2(-1, -1);
+	m_GotoTeleLastPos = ivec2(-1, -1);
 }
 
 float CCamera::ZoomProgress(float CurrentTime) const
@@ -31,7 +34,7 @@ float CCamera::ZoomProgress(float CurrentTime) const
 void CCamera::ScaleZoom(float Factor)
 {
 	float CurrentTarget = m_Zooming ? m_ZoomSmoothingTarget : m_Zoom;
-	ChangeZoom(CurrentTarget * Factor);
+	ChangeZoom(CurrentTarget * Factor, m_pClient->m_Snap.m_SpecInfo.m_Active && GameClient()->m_MultiViewActivated ? g_Config.m_ClMultiViewZoomSmoothness : g_Config.m_ClSmoothZoomTime);
 }
 
 float CCamera::MaxZoomLevel()
@@ -44,7 +47,7 @@ float CCamera::MinZoomLevel()
 	return 0.01f;
 }
 
-void CCamera::ChangeZoom(float Target)
+void CCamera::ChangeZoom(float Target, int Smoothness)
 {
 	if(Target > MaxZoomLevel() || Target < MinZoomLevel())
 	{
@@ -64,7 +67,7 @@ void CCamera::ChangeZoom(float Target)
 	m_ZoomSmoothingTarget = Target;
 	m_ZoomSmoothing = CCubicBezier::With(Current, Derivative, 0, m_ZoomSmoothingTarget);
 	m_ZoomSmoothingStart = Now;
-	m_ZoomSmoothingEnd = Now + (float)g_Config.m_ClSmoothZoomTime / 1000;
+	m_ZoomSmoothingEnd = Now + (float)Smoothness / 1000;
 
 	m_Zooming = true;
 }
@@ -184,11 +187,13 @@ void CCamera::OnConsoleInit()
 	Console()->Register("zoom-", "", CFGFLAG_CLIENT, ConZoomMinus, this, "Zoom decrease");
 	Console()->Register("zoom", "?i", CFGFLAG_CLIENT, ConZoom, this, "Change zoom");
 	Console()->Register("set_view", "i[x]i[y]", CFGFLAG_CLIENT, ConSetView, this, "Set camera position to x and y in the map");
+	Console()->Register("goto_switch", "i[number]?i[offset]", CFGFLAG_CLIENT, ConGotoSwitch, this, "View switch found (at offset) with given number");
+	Console()->Register("goto_tele", "i[number]?i[offset]", CFGFLAG_CLIENT, ConGotoTele, this, "View tele found (at offset) with given number");
 }
 
 void CCamera::OnReset()
 {
-	m_Zoom = std::pow(ZoomStep, g_Config.m_ClDefaultZoom - 10);
+	m_Zoom = std::pow(CCamera::ZOOM_STEP, g_Config.m_ClDefaultZoom - 10);
 	m_Zooming = false;
 }
 
@@ -197,7 +202,10 @@ void CCamera::ConZoomPlus(IConsole::IResult *pResult, void *pUserData)
 	CCamera *pSelf = (CCamera *)pUserData;
 	if(pSelf->m_pClient->m_Snap.m_SpecInfo.m_Active || pSelf->GameClient()->m_GameInfo.m_AllowZoom || pSelf->Client()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
-		pSelf->ScaleZoom(ZoomStep);
+		pSelf->ScaleZoom(CCamera::ZOOM_STEP);
+
+		if(pSelf->GameClient()->m_MultiViewActivated)
+			pSelf->GameClient()->m_MultiViewPersonalZoom++;
 	}
 }
 void CCamera::ConZoomMinus(IConsole::IResult *pResult, void *pUserData)
@@ -205,19 +213,144 @@ void CCamera::ConZoomMinus(IConsole::IResult *pResult, void *pUserData)
 	CCamera *pSelf = (CCamera *)pUserData;
 	if(pSelf->m_pClient->m_Snap.m_SpecInfo.m_Active || pSelf->GameClient()->m_GameInfo.m_AllowZoom || pSelf->Client()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
-		pSelf->ScaleZoom(1 / ZoomStep);
+		pSelf->ScaleZoom(1 / CCamera::ZOOM_STEP);
+
+		if(pSelf->GameClient()->m_MultiViewActivated)
+			pSelf->GameClient()->m_MultiViewPersonalZoom--;
 	}
 }
 void CCamera::ConZoom(IConsole::IResult *pResult, void *pUserData)
 {
+	CCamera *pSelf = (CCamera *)pUserData;
 	float TargetLevel = pResult->NumArguments() ? pResult->GetFloat(0) : g_Config.m_ClDefaultZoom;
-	((CCamera *)pUserData)->ChangeZoom(std::pow(ZoomStep, TargetLevel - 10));
+	pSelf->ChangeZoom(std::pow(CCamera::ZOOM_STEP, TargetLevel - 10), pSelf->m_pClient->m_Snap.m_SpecInfo.m_Active && pSelf->GameClient()->m_MultiViewActivated ? g_Config.m_ClMultiViewZoomSmoothness : g_Config.m_ClSmoothZoomTime);
+
+	if(pSelf->GameClient()->m_MultiViewActivated && pSelf->m_pClient->m_Snap.m_SpecInfo.m_Active)
+		pSelf->GameClient()->m_MultiViewPersonalZoom = 0;
 }
 void CCamera::ConSetView(IConsole::IResult *pResult, void *pUserData)
 {
 	CCamera *pSelf = (CCamera *)pUserData;
 	// wait until free view camera type to update the position
-	pSelf->m_ForceFreeviewPos = vec2(
-		clamp(pResult->GetInteger(0) * 32.0f, 200.0f, pSelf->Collision()->GetWidth() * 32 - 200.0f),
-		clamp(pResult->GetInteger(1) * 32.0f, 200.0f, pSelf->Collision()->GetWidth() * 32 - 200.0f));
+	pSelf->SetView(ivec2(pResult->GetInteger(0), pResult->GetInteger(1)));
+}
+void CCamera::ConGotoSwitch(IConsole::IResult *pResult, void *pUserData)
+{
+	CCamera *pSelf = (CCamera *)pUserData;
+	pSelf->GotoSwitch(pResult->GetInteger(0), pResult->NumArguments() > 1 ? pResult->GetInteger(1) : -1);
+}
+void CCamera::ConGotoTele(IConsole::IResult *pResult, void *pUserData)
+{
+	CCamera *pSelf = (CCamera *)pUserData;
+	pSelf->GotoTele(pResult->GetInteger(0), pResult->NumArguments() > 1 ? pResult->GetInteger(1) : -1);
+}
+
+void CCamera::SetView(ivec2 Pos)
+{
+	m_ForceFreeviewPos = vec2(
+		clamp(Pos.x * 32.0f, 200.0f, Collision()->GetWidth() * 32 - 200.0f),
+		clamp(Pos.y * 32.0f, 200.0f, Collision()->GetWidth() * 32 - 200.0f));
+}
+
+void CCamera::GotoSwitch(int Number, int Offset)
+{
+	if(Collision()->SwitchLayer() == nullptr)
+		return;
+
+	int Match = -1;
+	ivec2 MatchPos = ivec2(-1, -1);
+
+	auto FindTile = [this, &Match, &MatchPos, &Number, &Offset]() {
+		for(int x = 0; x < Collision()->GetWidth(); x++)
+		{
+			for(int y = 0; y < Collision()->GetHeight(); y++)
+			{
+				int i = y * Collision()->GetWidth() + x;
+				if(Number == Collision()->GetSwitchNumber(i))
+				{
+					Match++;
+					if(Offset != -1)
+					{
+						if(Match == Offset)
+						{
+							MatchPos = ivec2(x, y);
+							m_GotoSwitchOffset = Match;
+							return;
+						}
+						continue;
+					}
+					MatchPos = ivec2(x, y);
+					if(Match == m_GotoSwitchOffset)
+						return;
+				}
+			}
+		}
+	};
+	FindTile();
+
+	if(MatchPos == ivec2(-1, -1))
+		return;
+	if(Match < m_GotoSwitchOffset)
+		m_GotoSwitchOffset = -1;
+	SetView(MatchPos);
+	m_GotoSwitchOffset++;
+}
+
+void CCamera::GotoTele(int Number, int Offset)
+{
+	if(Collision()->TeleLayer() == nullptr)
+		return;
+
+	int Match = -1;
+	ivec2 MatchPos = ivec2(-1, -1);
+
+	auto FindTile = [this, &Match, &MatchPos, &Number, &Offset]() {
+		for(int x = 0; x < Collision()->GetWidth(); x++)
+		{
+			for(int y = 0; y < Collision()->GetHeight(); y++)
+			{
+				int i = y * Collision()->GetWidth() + x;
+				int Tele = Collision()->TeleLayer()[i].m_Number;
+				if(Number == Tele)
+				{
+					Match++;
+					if(Offset != -1)
+					{
+						if(Match == Offset)
+						{
+							MatchPos = ivec2(x, y);
+							m_GotoTeleOffset = Match;
+							return;
+						}
+						continue;
+					}
+					MatchPos = ivec2(x, y);
+					if(m_GotoTeleLastPos != ivec2(-1, -1))
+					{
+						if(distance(m_GotoTeleLastPos, MatchPos) < 10.0f)
+						{
+							m_GotoTeleOffset++;
+							continue;
+						}
+					}
+					m_GotoTeleLastPos = MatchPos;
+					if(Match == m_GotoTeleOffset)
+						return;
+				}
+			}
+		}
+	};
+	FindTile();
+
+	if(MatchPos == ivec2(-1, -1))
+		return;
+	if(Match < m_GotoTeleOffset)
+		m_GotoTeleOffset = -1;
+	SetView(MatchPos);
+	m_GotoTeleOffset++;
+}
+
+void CCamera::SetZoom(float Target, int Smoothness)
+{
+	ChangeZoom(Target, Smoothness);
 }

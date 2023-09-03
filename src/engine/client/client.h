@@ -3,7 +3,7 @@
 #ifndef ENGINE_CLIENT_CLIENT_H
 #define ENGINE_CLIENT_CLIENT_H
 
-#include <list>
+#include <deque>
 #include <memory>
 
 #include <base/hash.h>
@@ -63,7 +63,7 @@ public:
 	void Scale();
 	void Add(float v, float r, float g, float b);
 	void InsertAt(size_t Index, float v, float r, float g, float b);
-	void Render(IGraphics *pGraphics, IGraphics::CTextureHandle FontTexture, float x, float y, float w, float h, const char *pDescription);
+	void Render(IGraphics *pGraphics, ITextRender *pTextRender, float x, float y, float w, float h, const char *pDescription);
 };
 
 class CSmoothTime
@@ -107,21 +107,22 @@ public:
 class CClient : public IClient, public CDemoPlayer::IListener
 {
 	// needed interfaces
-	IEngine *m_pEngine;
-	IEditor *m_pEditor;
-	IEngineInput *m_pInput;
-	IEngineGraphics *m_pGraphics;
-	IEngineSound *m_pSound;
-	IFavorites *m_pFavorites;
-	IGameClient *m_pGameClient;
-	IEngineMap *m_pMap;
-	IConfigManager *m_pConfigManager;
-	CConfig *m_pConfig;
-	IConsole *m_pConsole;
-	IStorage *m_pStorage;
-	IUpdater *m_pUpdater;
-	IDiscord *m_pDiscord;
-	ISteam *m_pSteam;
+	IConfigManager *m_pConfigManager = nullptr;
+	CConfig *m_pConfig = nullptr;
+	IConsole *m_pConsole = nullptr;
+	IDiscord *m_pDiscord = nullptr;
+	IEditor *m_pEditor = nullptr;
+	IEngine *m_pEngine = nullptr;
+	IFavorites *m_pFavorites = nullptr;
+	IGameClient *m_pGameClient = nullptr;
+	IEngineGraphics *m_pGraphics = nullptr;
+	IEngineInput *m_pInput = nullptr;
+	IEngineMap *m_pMap = nullptr;
+	IEngineSound *m_pSound = nullptr;
+	ISteam *m_pSteam = nullptr;
+	IStorage *m_pStorage = nullptr;
+	IEngineTextRender *m_pTextRender = nullptr;
+	IUpdater *m_pUpdater = nullptr;
 
 	CNetClient m_aNetClient[NUM_CONNS];
 	CDemoPlayer m_DemoPlayer;
@@ -146,7 +147,6 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	int64_t m_GlobalStartTime;
 
 	IGraphics::CTextureHandle m_DebugFont;
-	int m_DebugSoundIndex = 0;
 
 	int64_t m_LastRenderTime;
 	float m_RenderFrameTimeLow;
@@ -163,6 +163,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	int m_aAckGameTick[NUM_DUMMIES];
 	int m_aCurrentRecvTick[NUM_DUMMIES];
 	int m_aRconAuthed[NUM_DUMMIES];
+	char m_aRconUsername[32];
 	char m_aRconPassword[32];
 	int m_UseTempRconCommands;
 	char m_aPassword[32];
@@ -245,7 +246,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 
 	CSnapshotDelta m_SnapshotDelta;
 
-	std::list<std::shared_ptr<CDemoEdit>> m_lpEditJobs;
+	std::deque<std::shared_ptr<CDemoEdit>> m_EditJobs;
 
 	//
 	bool m_CanReceiveServerCapabilities;
@@ -276,9 +277,6 @@ class CClient : public IClient, public CDemoPlayer::IListener
 		class CHostLookup m_VersionServeraddr;
 	} m_VersionInfo;
 
-	static void GraphicsThreadProxy(void *pThis) { ((CClient *)pThis)->GraphicsThread(); }
-	void GraphicsThread();
-
 	std::vector<SWarning> m_vWarnings;
 
 	CFifo m_Fifo;
@@ -300,18 +298,22 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	int MaxLatencyTicks() const;
 	int PredictionMargin() const;
 
+	std::shared_ptr<ILogger> m_pFileLogger = nullptr;
+	std::shared_ptr<ILogger> m_pStdoutLogger = nullptr;
+
 public:
+	IConfigManager *ConfigManager() { return m_pConfigManager; }
+	CConfig *Config() { return m_pConfig; }
+	IDiscord *Discord() { return m_pDiscord; }
 	IEngine *Engine() { return m_pEngine; }
+	IGameClient *GameClient() { return m_pGameClient; }
 	IEngineGraphics *Graphics() { return m_pGraphics; }
 	IEngineInput *Input() { return m_pInput; }
 	IEngineSound *Sound() { return m_pSound; }
-	IGameClient *GameClient() { return m_pGameClient; }
-	IConfigManager *ConfigManager() { return m_pConfigManager; }
-	CConfig *Config() { return m_pConfig; }
-	IStorage *Storage() { return m_pStorage; }
-	IUpdater *Updater() { return m_pUpdater; }
-	IDiscord *Discord() { return m_pDiscord; }
 	ISteam *Steam() { return m_pSteam; }
+	IStorage *Storage() { return m_pStorage; }
+	IEngineTextRender *TextRender() { return m_pTextRender; }
+	IUpdater *Updater() { return m_pUpdater; }
 
 	CClient();
 
@@ -366,7 +368,7 @@ public:
 	void GetServerInfo(CServerInfo *pServerInfo) const override;
 	void ServerInfoRequest();
 
-	int LoadData();
+	void LoadDebugFont();
 
 	// ---
 
@@ -424,6 +426,7 @@ public:
 
 	void Run();
 
+	bool InitNetworkClient(char *pError, size_t ErrorSize);
 	bool CtrlShiftKey(int Key, bool &Last);
 
 	static void Con_Connect(IConsole::IResult *pResult, void *pUserData);
@@ -434,6 +437,7 @@ public:
 	static void Con_DummyResetInput(IConsole::IResult *pResult, void *pUserData);
 
 	static void Con_Quit(IConsole::IResult *pResult, void *pUserData);
+	static void Con_Restart(IConsole::IResult *pResult, void *pUserData);
 	static void Con_DemoPlay(IConsole::IResult *pResult, void *pUserData);
 	static void Con_DemoSpeed(IConsole::IResult *pResult, void *pUserData);
 	static void Con_Minimize(IConsole::IResult *pResult, void *pUserData);
@@ -444,7 +448,7 @@ public:
 	static void StartVideo(IConsole::IResult *pResult, void *pUserData, const char *pVideoName);
 	static void Con_StartVideo(IConsole::IResult *pResult, void *pUserData);
 	static void Con_StopVideo(IConsole::IResult *pResult, void *pUserData);
-	const char *DemoPlayer_Render(const char *pFilename, int StorageType, const char *pVideoName, int SpeedIndex) override;
+	const char *DemoPlayer_Render(const char *pFilename, int StorageType, const char *pVideoName, int SpeedIndex, bool StartPaused = false) override;
 #endif
 
 	static void Con_Rcon(IConsole::IResult *pResult, void *pUserData);
@@ -465,9 +469,10 @@ public:
 	static void ConchainWindowScreen(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainWindowVSync(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainTimeoutSeed(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
-	static void ConchainLoglevel(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainPassword(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainReplays(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	static void ConchainLoglevel(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	static void ConchainStdoutOutputLevel(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
 	static void Con_DemoSlice(IConsole::IResult *pResult, void *pUserData);
 	static void Con_DemoSliceBegin(IConsole::IResult *pResult, void *pUserData);
@@ -477,7 +482,7 @@ public:
 	void RegisterCommands();
 
 	const char *DemoPlayer_Play(const char *pFilename, int StorageType) override;
-	void DemoRecorder_Start(const char *pFilename, bool WithTimestamp, int Recorder) override;
+	void DemoRecorder_Start(const char *pFilename, bool WithTimestamp, int Recorder, bool Verbose = false) override;
 	void DemoRecorder_HandleAutoStart() override;
 	void DemoRecorder_StartReplayRecorder();
 	void DemoRecorder_Stop(int Recorder, bool RemoveFile = false) override;
@@ -506,8 +511,8 @@ public:
 	void SwitchWindowScreen(int Index) override;
 	void SetWindowParams(int FullscreenMode, bool IsBorderless, bool AllowResizing) override;
 	void ToggleWindowVSync() override;
-	void LoadFont() override;
 	void Notify(const char *pTitle, const char *pMessage) override;
+	void OnWindowResize() override;
 	void BenchmarkQuit(int Seconds, const char *pFilename);
 
 	void UpdateAndSwap() override;
@@ -548,6 +553,10 @@ public:
 	void ShellRegister() override;
 	void ShellUnregister() override;
 #endif
+
+	void ShowMessageBox(const char *pTitle, const char *pMessage, EMessageBoxType Type = MESSAGE_BOX_TYPE_ERROR) override;
+	void GetGPUInfoString(char (&aGPUInfo)[256]) override;
+	void SetLoggers(std::shared_ptr<ILogger> &&pFileLogger, std::shared_ptr<ILogger> &&pStdoutLogger);
 };
 
 #endif

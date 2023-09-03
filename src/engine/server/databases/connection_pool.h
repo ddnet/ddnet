@@ -104,6 +104,8 @@ private:
 	// where the next query is added to the queue.
 	int m_InsertIdx = 0;
 
+	bool m_Shutdown = false;
+
 	struct CSharedData
 	{
 		// Used as signal that shutdown is in progress from main thread to
@@ -124,6 +126,8 @@ private:
 	};
 
 	std::shared_ptr<CSharedData> m_pShared;
+	void *m_pWorkerThread = nullptr;
+	void *m_pBackupThread = nullptr;
 };
 
 #endif // ENGINE_SERVER_DATABASES_CONNECTION_POOL_H

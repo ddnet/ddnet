@@ -14,11 +14,11 @@ CListBox::CListBox()
 {
 	m_ScrollOffset = vec2(0.0f, 0.0f);
 	m_ListBoxUpdateScroll = false;
-	m_aFilterString[0] = '\0';
 	m_FilterOffset = 0.0f;
 	m_HasHeader = false;
 	m_AutoSpacing = 0.0f;
 	m_ScrollbarIsShown = false;
+	m_Active = true;
 }
 
 void CListBox::DoBegin(const CUIRect *pRect)
@@ -38,9 +38,7 @@ void CListBox::DoHeader(const CUIRect *pRect, const char *pTitle, float HeaderHe
 
 	// draw header
 	View.HSplitTop(HeaderHeight, &Header, &View);
-	SLabelProperties Props;
-	Props.m_AlignVertically = 0;
-	UI()->DoLabel(&Header, pTitle, Header.h * CUI::ms_FontmodHeight * 0.8f, TEXTALIGN_CENTER, Props);
+	UI()->DoLabel(&Header, pTitle, Header.h * CUI::ms_FontmodHeight * 0.8f, TEXTALIGN_MC);
 
 	View.HSplitTop(Spacing, &Header, &View);
 
@@ -56,41 +54,13 @@ void CListBox::DoSpacing(float Spacing)
 	m_ListBoxView = View;
 }
 
-bool CListBox::DoFilter(float FilterHeight, float Spacing)
-{
-	CUIRect Filter;
-	CUIRect View = m_ListBoxView;
-
-	// background
-	View.HSplitTop(FilterHeight + Spacing, &Filter, 0);
-	Filter.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.15f), IGraphics::CORNER_NONE, 0.0f);
-
-	// draw filter
-	View.HSplitTop(FilterHeight, &Filter, &View);
-	Filter.Margin(Spacing, &Filter);
-
-	const float FontSize = Filter.h * CUI::ms_FontmodHeight * 0.8f;
-
-	CUIRect Label, EditBox;
-	Filter.VSplitLeft(Filter.w / 5.0f, &Label, &EditBox);
-	Label.y += Spacing;
-	UI()->DoLabel(&Label, Localize("Search:"), FontSize, TEXTALIGN_CENTER);
-	bool Changed = UI()->DoClearableEditBox(m_aFilterString, m_aFilterString + 1, &EditBox, m_aFilterString, sizeof(m_aFilterString), FontSize, &m_FilterOffset);
-
-	View.HSplitTop(Spacing, &Filter, &View);
-
-	m_ListBoxView = View;
-
-	return Changed;
-}
-
 void CListBox::DoFooter(const char *pBottomText, float FooterHeight)
 {
 	m_pBottomText = pBottomText;
 	m_FooterHeight = FooterHeight;
 }
 
-void CListBox::DoStart(float RowHeight, int NumItems, int ItemsPerRow, int RowsPerScroll, int SelectedIndex, const CUIRect *pRect, bool Background, bool *pActive, int BackgroundCorners)
+void CListBox::DoStart(float RowHeight, int NumItems, int ItemsPerRow, int RowsPerScroll, int SelectedIndex, const CUIRect *pRect, bool Background, int BackgroundCorners, bool ForceShowScrollbar)
 {
 	CUIRect View;
 	if(pRect)
@@ -109,9 +79,7 @@ void CListBox::DoStart(float RowHeight, int NumItems, int ItemsPerRow, int RowsP
 		CUIRect Footer;
 		View.HSplitBottom(m_FooterHeight, &View, &Footer);
 		Footer.VSplitLeft(10.0f, 0, &Footer);
-		SLabelProperties Props;
-		Props.m_AlignVertically = 0;
-		UI()->DoLabel(&Footer, m_pBottomText, Footer.h * CUI::ms_FontmodHeight * 0.8f, TEXTALIGN_CENTER, Props);
+		UI()->DoLabel(&Footer, m_pBottomText, Footer.h * CUI::ms_FontmodHeight * 0.8f, TEXTALIGN_MC);
 	}
 
 	// setup the variables
@@ -129,7 +97,7 @@ void CListBox::DoStart(float RowHeight, int NumItems, int ItemsPerRow, int RowsP
 	m_ListBoxItemSelected = false;
 
 	// handle input
-	if(!pActive || *pActive)
+	if(m_Active && !Input()->ModifierIsPressed() && !Input()->ShiftIsPressed() && !Input()->AltIsPressed())
 	{
 		if(UI()->ConsumeHotkey(CUI::HOTKEY_DOWN))
 			m_ListBoxNewSelOffset += 1;
@@ -148,8 +116,10 @@ void CListBox::DoStart(float RowHeight, int NumItems, int ItemsPerRow, int RowsP
 	// setup the scrollbar
 	m_ScrollOffset = vec2(0.0f, 0.0f);
 	CScrollRegionParams ScrollParams;
+	ScrollParams.m_Active = m_Active;
 	ScrollParams.m_ScrollbarWidth = ScrollbarWidthMax();
 	ScrollParams.m_ScrollUnit = (m_ListBoxRowHeight + m_AutoSpacing) * RowsPerScroll;
+	ScrollParams.m_Flags = ForceShowScrollbar ? CScrollRegionParams::FLAG_CONTENT_STATIC_WIDTH : 0;
 	m_ScrollRegion.Begin(&m_ListBoxView, &m_ScrollOffset, &ScrollParams);
 	m_ListBoxView.y += m_ScrollOffset.y;
 }
@@ -176,7 +146,7 @@ CListboxItem CListBox::DoNextRow()
 	return Item;
 }
 
-CListboxItem CListBox::DoNextItem(const void *pId, bool Selected, bool *pActive)
+CListboxItem CListBox::DoNextItem(const void *pId, bool Selected)
 {
 	if(m_AutoSpacing > 0.0f && m_ListBoxItemIndex > 0)
 		DoSpacing(m_AutoSpacing);
@@ -197,18 +167,15 @@ CListboxItem CListBox::DoNextItem(const void *pId, bool Selected, bool *pActive)
 		ItemClicked = true;
 		m_ListBoxNewSelected = ThisItemIndex;
 		m_ListBoxItemSelected = true;
-		if(pActive)
-			*pActive = true;
+		m_Active = true;
 	}
 	else
 		ItemClicked = false;
 
-	const bool ProcessInput = !pActive || *pActive;
-
 	// process input, regard selected index
 	if(m_ListBoxSelectedIndex == ThisItemIndex)
 	{
-		if(ProcessInput && !m_ListBoxDoneEvents)
+		if(m_Active && !m_ListBoxDoneEvents)
 		{
 			m_ListBoxDoneEvents = true;
 
@@ -219,7 +186,7 @@ CListboxItem CListBox::DoNextItem(const void *pId, bool Selected, bool *pActive)
 			}
 		}
 
-		Item.m_Rect.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, ProcessInput ? 0.5f : 0.33f), IGraphics::CORNER_ALL, 5.0f);
+		Item.m_Rect.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, m_Active ? 0.5f : 0.33f), IGraphics::CORNER_ALL, 5.0f);
 	}
 	if(UI()->HotItem() == pId && !m_ScrollRegion.IsAnimating())
 	{
@@ -239,6 +206,8 @@ CListboxItem CListBox::DoSubheader()
 int CListBox::DoEnd()
 {
 	m_ScrollRegion.End();
+	m_Active |= m_ScrollRegion.Params().m_Active;
+
 	m_ScrollbarIsShown = m_ScrollRegion.IsScrollbarShown();
 	if(m_ListBoxNewSelOffset != 0 && m_ListBoxNumItems > 0 && m_ListBoxSelectedIndex == m_ListBoxNewSelected)
 	{
@@ -246,9 +215,4 @@ int CListBox::DoEnd()
 		ScrollToSelected();
 	}
 	return m_ListBoxNewSelected;
-}
-
-bool CListBox::FilterMatches(const char *pNeedle) const
-{
-	return !m_aFilterString[0] || str_find_nocase(pNeedle, m_aFilterString);
 }

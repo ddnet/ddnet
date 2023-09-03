@@ -30,6 +30,10 @@ public:
 
 void CAssertionLogger::Log(const CLogMessage *pMessage)
 {
+	if(m_Filter.Filters(pMessage))
+	{
+		return;
+	}
 	std::unique_lock<std::mutex> Lock(m_DbgMessageMutex);
 	SDebugMessageItem *pMsgItem = (SDebugMessageItem *)m_DbgMessages.Allocate(sizeof(SDebugMessageItem));
 	str_copy(pMsgItem->m_aMessage, pMessage->m_aLine);
@@ -48,7 +52,7 @@ void CAssertionLogger::Dump()
 	char aAssertLogFile[IO_MAX_PATH_LENGTH];
 	char aDate[64];
 	str_timestamp(aDate, sizeof(aDate));
-	str_format(aAssertLogFile, std::size(aAssertLogFile), "%s%s_assert_log_%d_%s.txt", m_aAssertLogPath, m_aGameName, pid(), aDate);
+	str_format(aAssertLogFile, std::size(aAssertLogFile), "%s%s_assert_log_%s_%d.txt", m_aAssertLogPath, m_aGameName, aDate, pid());
 	std::unique_lock<std::mutex> Lock(m_DbgMessageMutex);
 	IOHANDLE FileHandle = io_open(aAssertLogFile, IOFLAG_WRITE);
 	if(FileHandle)

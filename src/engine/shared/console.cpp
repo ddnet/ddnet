@@ -55,44 +55,7 @@ ColorHSLA CConsole::CResult::GetColor(unsigned Index, bool Light) const
 	}
 	else if(*pStr == '$') // Hex RGB/RGBA
 	{
-		ColorRGBA Rgba = ColorRGBA(0, 0, 0, 1);
-		const int Len = str_length(pStr);
-		if(Len == 4)
-		{
-			const unsigned Num = str_toulong_base(pStr + 1, 16);
-			Rgba.r = (((Num >> 8) & 0x0F) + ((Num >> 4) & 0xF0)) / 255.0f;
-			Rgba.g = (((Num >> 4) & 0x0F) + ((Num >> 0) & 0xF0)) / 255.0f;
-			Rgba.b = (((Num >> 0) & 0x0F) + ((Num << 4) & 0xF0)) / 255.0f;
-		}
-		else if(Len == 5)
-		{
-			const unsigned Num = str_toulong_base(pStr + 1, 16);
-			Rgba.r = (((Num >> 12) & 0x0F) + ((Num >> 8) & 0xF0)) / 255.0f;
-			Rgba.g = (((Num >> 8) & 0x0F) + ((Num >> 4) & 0xF0)) / 255.0f;
-			Rgba.b = (((Num >> 4) & 0x0F) + ((Num >> 0) & 0xF0)) / 255.0f;
-			Rgba.a = (((Num >> 0) & 0x0F) + ((Num << 4) & 0xF0)) / 255.0f;
-		}
-		else if(Len == 7)
-		{
-			const unsigned Num = str_toulong_base(pStr + 1, 16);
-			Rgba.r = ((Num >> 16) & 0xFF) / 255.0f;
-			Rgba.g = ((Num >> 8) & 0xFF) / 255.0f;
-			Rgba.b = ((Num >> 0) & 0xFF) / 255.0f;
-		}
-		else if(Len == 9)
-		{
-			const unsigned Num = str_toulong_base(pStr + 1, 16);
-			Rgba.r = ((Num >> 24) & 0xFF) / 255.0f;
-			Rgba.g = ((Num >> 16) & 0xFF) / 255.0f;
-			Rgba.b = ((Num >> 8) & 0xFF) / 255.0f;
-			Rgba.a = ((Num >> 0) & 0xFF) / 255.0f;
-		}
-		else
-		{
-			return ColorHSLA(0, 0, 0);
-		}
-
-		return color_cast<ColorHSLA>(Rgba);
+		return color_cast<ColorHSLA>(color_parse<ColorRGBA>(pStr + 1).value_or(ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f)));
 	}
 	else if(!str_comp_nocase(pStr, "red"))
 		return ColorHSLA(0.0f / 6.0f, 1, .5f);
@@ -330,6 +293,15 @@ LEVEL IConsole::ToLogLevel(int Level)
 	return LEVEL_INFO;
 }
 
+int IConsole::ToLogLevelFilter(int Level)
+{
+	if(!(-3 <= Level && Level <= 2))
+	{
+		dbg_assert(0, "invalid log level filter");
+	}
+	return Level + 2;
+}
+
 LOG_COLOR ColorToLogColor(ColorRGBA Color)
 {
 	return LOG_COLOR{
@@ -341,8 +313,8 @@ LOG_COLOR ColorToLogColor(ColorRGBA Color)
 void CConsole::Print(int Level, const char *pFrom, const char *pStr, ColorRGBA PrintColor) const
 {
 	LEVEL LogLevel = IConsole::ToLogLevel(Level);
-	// if the color is pure white, use default terminal color
-	if(mem_comp(&PrintColor, &gs_ConsoleDefaultColor, sizeof(ColorRGBA)) != 0)
+	// if console colors are not enabled or if the color is pure white, use default terminal color
+	if(g_Config.m_ConsoleEnableColors && mem_comp(&PrintColor, &gs_ConsoleDefaultColor, sizeof(ColorRGBA)) != 0)
 	{
 		log_log_color(LogLevel, ColorToLogColor(PrintColor), pFrom, "%s", pStr);
 	}
@@ -475,7 +447,11 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientID, bo
 		if(!*Result.m_pCommand)
 			return;
 
-		CCommand *pCommand = FindCommand(Result.m_pCommand, m_FlagMask);
+		CCommand *pCommand;
+		if(ClientID == IConsole::CLIENT_ID_GAME)
+			pCommand = FindCommand(Result.m_pCommand, m_FlagMask | CFGFLAG_GAME);
+		else
+			pCommand = FindCommand(Result.m_pCommand, m_FlagMask);
 
 		if(pCommand)
 		{
@@ -622,15 +598,15 @@ void CConsole::ExecuteLineFlag(const char *pStr, int FlagMask, int ClientID, boo
 	m_FlagMask = Temp;
 }
 
-void CConsole::ExecuteFile(const char *pFilename, int ClientID, bool LogFailure, int StorageType)
+bool CConsole::ExecuteFile(const char *pFilename, int ClientID, bool LogFailure, int StorageType)
 {
 	// make sure that this isn't being executed already
 	for(CExecFile *pCur = m_pFirstExec; pCur; pCur = pCur->m_pPrev)
 		if(str_comp(pFilename, pCur->m_pFilename) == 0)
-			return;
+			return false;
 
 	if(!m_pStorage)
-		return;
+		return false;
 
 	// push this one to the stack
 	CExecFile ThisFile;
@@ -642,20 +618,22 @@ void CConsole::ExecuteFile(const char *pFilename, int ClientID, bool LogFailure,
 	// exec the file
 	IOHANDLE File = m_pStorage->OpenFile(pFilename, IOFLAG_READ | IOFLAG_SKIP_BOM, StorageType);
 
-	char aBuf[128];
+	bool Success = false;
+	char aBuf[32 + IO_MAX_PATH_LENGTH];
 	if(File)
 	{
-		char *pLine;
-		CLineReader Reader;
-
 		str_format(aBuf, sizeof(aBuf), "executing '%s'", pFilename);
 		Print(IConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
+
+		CLineReader Reader;
 		Reader.Init(File);
 
+		char *pLine;
 		while((pLine = Reader.Get()))
 			ExecuteLine(pLine, ClientID);
 
 		io_close(File);
+		Success = true;
 	}
 	else if(LogFailure)
 	{
@@ -664,6 +642,7 @@ void CConsole::ExecuteFile(const char *pFilename, int ClientID, bool LogFailure,
 	}
 
 	m_pFirstExec = pPrev;
+	return Success;
 }
 
 void CConsole::Con_Echo(IResult *pResult, void *pUserData)
@@ -729,9 +708,9 @@ void CConsole::ConCommandStatus(IResult *pResult, void *pUser)
 				if(Used > 0)
 				{
 					Used += 2;
-					str_append(aBuf, ", ", sizeof(aBuf));
+					str_append(aBuf, ", ");
 				}
-				str_append(aBuf, pCommand->m_pName, sizeof(aBuf));
+				str_append(aBuf, pCommand->m_pName);
 				Used += Length;
 			}
 			else
@@ -753,7 +732,7 @@ void CConsole::ConUserCommandStatus(IResult *pResult, void *pUser)
 	CResult Result;
 	Result.m_pCommand = "access_status";
 	char aBuf[4];
-	str_format(aBuf, sizeof(aBuf), "%d", IConsole::ACCESS_LEVEL_USER);
+	str_from_int((int)IConsole::ACCESS_LEVEL_USER, aBuf);
 	Result.AddArgument(aBuf);
 
 	pConsole->ConCommandStatus(&Result, pConsole);
@@ -924,7 +903,7 @@ void CConsole::ConToggle(IConsole::IResult *pResult, void *pUser)
 			str_format(aBuf, sizeof(aBuf), "%s \"", pResult->GetString(0));
 			char *pDst = aBuf + str_length(aBuf);
 			str_escape(&pDst, pStr, aBuf + sizeof(aBuf));
-			str_append(aBuf, "\"", sizeof(aBuf));
+			str_append(aBuf, "\"");
 			pConsole->ExecuteLine(aBuf);
 			aBuf[0] = 0;
 		}
@@ -1293,13 +1272,13 @@ const IConsole::CCommandInfo *CConsole::GetCommandInfo(const char *pName, int Fl
 
 std::unique_ptr<IConsole> CreateConsole(int FlagMask) { return std::make_unique<CConsole>(FlagMask); }
 
-void CConsole::ResetServerGameSettings()
+void CConsole::ResetGameSettings()
 {
 #define MACRO_CONFIG_INT(Name, ScriptName, Def, Min, Max, Flags, Desc) \
 	{ \
-		if(((Flags) & (CFGFLAG_SERVER | CFGFLAG_GAME)) == (CFGFLAG_SERVER | CFGFLAG_GAME)) \
+		if(((Flags)&CFGFLAG_GAME) == CFGFLAG_GAME) \
 		{ \
-			CCommand *pCommand = FindCommand(#ScriptName, CFGFLAG_SERVER); \
+			CCommand *pCommand = FindCommand(#ScriptName, CFGFLAG_GAME); \
 			void *pUserData = pCommand->m_pUserData; \
 			FCommandCallback pfnCallback = pCommand->m_pfnCallback; \
 			TraverseChain(&pfnCallback, &pUserData); \
@@ -1312,9 +1291,9 @@ void CConsole::ResetServerGameSettings()
 
 #define MACRO_CONFIG_STR(Name, ScriptName, Len, Def, Flags, Desc) \
 	{ \
-		if(((Flags) & (CFGFLAG_SERVER | CFGFLAG_GAME)) == (CFGFLAG_SERVER | CFGFLAG_GAME)) \
+		if(((Flags)&CFGFLAG_GAME) == CFGFLAG_GAME) \
 		{ \
-			CCommand *pCommand = FindCommand(#ScriptName, CFGFLAG_SERVER); \
+			CCommand *pCommand = FindCommand(#ScriptName, CFGFLAG_GAME); \
 			void *pUserData = pCommand->m_pUserData; \
 			FCommandCallback pfnCallback = pCommand->m_pfnCallback; \
 			TraverseChain(&pfnCallback, &pUserData); \

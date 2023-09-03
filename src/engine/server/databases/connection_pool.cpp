@@ -117,8 +117,6 @@ CSqlExecData::CSqlExecData(IConsole *pConsole, CDbConnectionPool::Mode m) :
 	m_Ptr.m_Print.m_Mode = m;
 }
 
-CDbConnectionPool::~CDbConnectionPool() = default;
-
 void CDbConnectionPool::Print(IConsole *pConsole, Mode DatabaseMode)
 {
 	m_pShared->m_aQueries[m_InsertIdx++] = std::make_unique<CSqlExecData>(pConsole, DatabaseMode);
@@ -162,6 +160,9 @@ void CDbConnectionPool::ExecuteWrite(
 
 void CDbConnectionPool::OnShutdown()
 {
+	if(m_Shutdown)
+		return;
+	m_Shutdown = true;
 	m_pShared->m_Shutdown.store(true);
 	m_pShared->m_NumBackup.Signal();
 	int i = 0;
@@ -178,7 +179,7 @@ void CDbConnectionPool::OnShutdown()
 }
 
 // The backup worker thread looks at write queries and stores them
-// in the sqilte database (WRITE_BACKUP). It skips over read queries.
+// in the sqlite database (WRITE_BACKUP). It skips over read queries.
 // After processing the query, it gets passed on to the Worker thread.
 // This is done to not loose ranks when the server shuts down before all
 // queries are executed on the mysql server
@@ -466,7 +467,15 @@ bool CDbConnectionPool::ExecSqlFunc(IDbConnection *pConnection, CSqlExecData *pD
 CDbConnectionPool::CDbConnectionPool()
 {
 	m_pShared = std::make_shared<CSharedData>();
+	m_pWorkerThread = thread_init(CWorker::Start, new CWorker(m_pShared), "database worker thread");
+	m_pBackupThread = thread_init(CBackup::Start, new CBackup(m_pShared), "database backup worker thread");
+}
 
-	thread_init_and_detach(CWorker::Start, new CWorker(m_pShared), "database worker thread");
-	thread_init_and_detach(CBackup::Start, new CBackup(m_pShared), "database backup worker thread");
+CDbConnectionPool::~CDbConnectionPool()
+{
+	OnShutdown();
+	if(m_pWorkerThread)
+		thread_wait(m_pWorkerThread);
+	if(m_pBackupThread)
+		thread_wait(m_pBackupThread);
 }

@@ -255,12 +255,6 @@ Server address:
 Refresh
 == Aktualigi
 
-Refreshing...
-== Aktualas...
-
-Connect
-== Konektiĝi
-
 Count players only
 == Nur nombri ludantojn
 
@@ -294,17 +288,11 @@ Add Friend
 Filter
 == Filtri
 
-Select a name
-== Elekti nomon
-
 Please use a different name
 == Bonvolu uzi malsaman nomon
 
 Remove chat
 == Malmontri la diskutejon
-
-Close
-== Fermi
 
 Folder
 == Dosierujo
@@ -582,8 +570,6 @@ Deaths
 == 9+ novaj mencioj
 
 [Graphics error]
-
-[Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
 == 
 
@@ -655,7 +641,10 @@ Initializing map logic
 Sending initial client info
 == 
 
-Search:
+Quitting. Please wait…
+== 
+
+Restarting. Please wait…
 == 
 
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
@@ -670,10 +659,16 @@ Position:
 Angle:
 == 
 
+Multi-View
+== 
+
 Server best:
 == 
 
 Personal best:
+== 
+
+Team %d
 == 
 
 Uploading map data to GPU
@@ -709,6 +704,9 @@ Getting game info
 Requesting to join the game
 == 
 
+Rename folder
+== 
+
 Rename demo
 == 
 
@@ -727,7 +725,13 @@ Use k key to kill (restart), q to pause and watch other players. See settings fo
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == 
 
-Cancel
+A demo with this name already exists
+== 
+
+A folder with this name already exists
+== 
+
+Unable to rename the folder
 == 
 
 Unable to rename the demo
@@ -737,6 +741,9 @@ File '%s' already exists, do you want to overwrite it?
 == 
 
 Replace video
+== 
+
+(paused)
 == 
 
 Show ingame HUD
@@ -799,7 +806,29 @@ Copy info
 Leak IP
 == 
 
-Remove
+No server selected
+== 
+
+Online players (%d)
+== 
+
+Online clanmates (%d)
+== 
+
+[friends (server browser)]
+Offline (%d)
+== 
+
+Click to select server. Double click to join your friend.
+== 
+
+Click to remove this player from your friends list.
+== 
+
+Click to remove this clan from your friends list.
+== 
+
+None
 == 
 
 Are you sure that you want to remove the player '%s' from your friends list?
@@ -811,10 +840,10 @@ Are you sure that you want to remove the clan '%s' from your friends list?
 Remove friend
 == 
 
-Info
+Add Clan
 == 
 
-File already exists, do you want to overwrite it?
+Info
 == 
 
 Play the current demo
@@ -838,10 +867,10 @@ Slow down the demo
 Speed up the demo
 == 
 
-Mark the beginning of a cut
+Mark the beginning of a cut (right click to reset)
 == 
 
-Mark the end of a cut
+Mark the end of a cut (right click to reset)
 == 
 
 Export cut as a separate demo
@@ -853,16 +882,37 @@ Go back one marker
 Go forward one marker
 == 
 
+Close the demo player
+== 
+
 Toggle keyboard shortcuts
 == 
 
 Demofile: %s
 == 
 
+Export demo cut
+== 
+
+Cut interval
+== 
+
+Cut length
+== 
+
+File already exists, do you want to overwrite it?
+== 
+
 Loading demo files
 == 
 
+All combined
+== 
+
 Parent Folder
+== 
+
+Folder Link
 == 
 
 Invalid Demo
@@ -919,7 +969,13 @@ Demos directory
 Open the directory that contains the demo files
 == 
 
+Are you sure that you want to delete the folder '%s'?
+== 
+
 Are you sure that you want to delete the demo '%s'?
+== 
+
+Delete folder
 == 
 
 Delete demo
@@ -929,6 +985,9 @@ Render
 == 
 
 Unable to delete the demo '%s'
+== 
+
+Unable to delete the folder '%s'. Make sure it's empty first.
 == 
 
 Stop record
@@ -941,6 +1000,9 @@ Score limit
 == 
 
 Time limit
+== 
+
+Remove
 == 
 
 Loading ghost files
@@ -1051,6 +1113,9 @@ Skin prefix
 Choose default eyes when joining a server
 == 
 
+Create a random skin
+== 
+
 Custom colors
 == 
 
@@ -1150,10 +1215,10 @@ Chat command
 Enable controller
 == 
 
-Controller %d: %s
+Controller
 == 
 
-Click to cycle through all available controllers.
+Ingame controller mode
 == 
 
 [Ingame controller mode]
@@ -1162,9 +1227,6 @@ Relative
 
 [Ingame controller mode]
 Absolute
-== 
-
-Ingame controller mode
 == 
 
 Ingame controller sens.
@@ -1179,7 +1241,7 @@ Controller jitter tolerance
 No controller found. Plug in a controller.
 == 
 
-Device
+Axis
 == 
 
 Status
@@ -1188,16 +1250,10 @@ Status
 Aim bind
 == 
 
-Controller Axis #%d
-== 
-
 Ingame mouse sens.
 == 
 
 UI mouse sens.
-== 
-
-Controller
 == 
 
 Movement
@@ -1210,6 +1266,9 @@ Reset controls
 == 
 
 Are you sure that you want to reset the controls to their defaults?
+== 
+
+Cancel
 == 
 
 Voting
@@ -1263,7 +1322,7 @@ Renderer
 custom
 == 
 
-Graphics cards
+Graphics card
 == 
 
 Play background music
@@ -1291,12 +1350,6 @@ Enable team chat sound
 == 
 
 Enable highlighted chat sound
-== 
-
-Threaded sound loading
-== 
-
-Sample rate
 == 
 
 Sound volume
@@ -1497,7 +1550,7 @@ Save the best demo of each race
 Enable replays
 == 
 
-Default length: %d
+Default length
 == 
 
 When you cross the start line, show a ghost tee replicating the movements of your best time
@@ -1515,10 +1568,10 @@ Gameplay
 Overlay entities
 == 
 
-Size
+Show text entities
 == 
 
-Show text entities
+Size
 == 
 
 Opacity
@@ -1549,9 +1602,6 @@ AntiPing: predict weapons
 == 
 
 AntiPing: predict grenade paths
-== 
-
-Old mouse mode
 == 
 
 Background
@@ -1632,9 +1682,6 @@ Score
 Super
 == 
 
-Team %d
-== 
-
 Manual
 == 
 
@@ -1684,4 +1731,7 @@ Best
 == 
 
 Grabs
+== 
+
+Moved ingame
 == 

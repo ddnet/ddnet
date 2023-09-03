@@ -54,6 +54,10 @@ void CClientChatLogger::Log(const CLogMessage *pMessage)
 {
 	if(str_comp(pMessage->m_aSystem, "chatresp") == 0)
 	{
+		if(m_Filter.Filters(pMessage))
+		{
+			return;
+		}
 		m_pGameServer->SendChatTarget(m_ClientID, pMessage->Message());
 	}
 	else
@@ -94,8 +98,8 @@ void CGameContext::Construct(int Resetting)
 	m_NumMutes = 0;
 	m_NumVoteMutes = 0;
 
-	m_LastLog = 0;
-	m_FirstLog = 0;
+	m_LatestLog = 0;
+	mem_zero(&m_aLogs, sizeof(m_aLogs));
 
 	if(Resetting == NO_RESET)
 	{
@@ -307,6 +311,8 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 			int PlayerTeam = pChr->Team();
 			if((GetPlayerChar(Owner) ? GetPlayerChar(Owner)->GrenadeHitDisabled() : !g_Config.m_SvHit) || NoDamage)
 			{
+				if(PlayerTeam == TEAM_SUPER)
+					continue;
 				if(!TeamMask.test(PlayerTeam))
 					continue;
 				TeamMask.reset(PlayerTeam);
@@ -374,7 +380,7 @@ void CGameContext::CreateSoundGlobal(int Sound, int Target)
 	}
 }
 
-bool CGameContext::SnapLaserObject(const CSnapContext &Context, int SnapID, const vec2 &To, const vec2 &From, int StartTick, int Owner, int LaserType)
+bool CGameContext::SnapLaserObject(const CSnapContext &Context, int SnapID, const vec2 &To, const vec2 &From, int StartTick, int Owner, int LaserType, int Subtype, int SwitchNumber)
 {
 	if(Context.GetClientVersion() >= VERSION_DDNET_MULTI_LASER)
 	{
@@ -389,6 +395,8 @@ bool CGameContext::SnapLaserObject(const CSnapContext &Context, int SnapID, cons
 		pObj->m_StartTick = StartTick;
 		pObj->m_Owner = Owner;
 		pObj->m_Type = LaserType;
+		pObj->m_Subtype = Subtype;
+		pObj->m_SwitchNumber = SwitchNumber;
 	}
 	else
 	{
@@ -406,7 +414,7 @@ bool CGameContext::SnapLaserObject(const CSnapContext &Context, int SnapID, cons
 	return true;
 }
 
-bool CGameContext::SnapPickup(const CSnapContext &Context, int SnapID, const vec2 &Pos, int Type, int SubType)
+bool CGameContext::SnapPickup(const CSnapContext &Context, int SnapID, const vec2 &Pos, int Type, int SubType, int SwitchNumber)
 {
 	if(Context.IsSixup())
 	{
@@ -421,6 +429,18 @@ bool CGameContext::SnapPickup(const CSnapContext &Context, int SnapID, const vec
 			pPickup->m_Type = SubType == WEAPON_SHOTGUN ? protocol7::PICKUP_SHOTGUN : SubType == WEAPON_GRENADE ? protocol7::PICKUP_GRENADE : protocol7::PICKUP_LASER;
 		else if(Type == POWERUP_NINJA)
 			pPickup->m_Type = protocol7::PICKUP_NINJA;
+	}
+	else if(Context.GetClientVersion() >= VERSION_DDNET_ENTITY_NETOBJS)
+	{
+		CNetObj_DDNetPickup *pPickup = Server()->SnapNewItem<CNetObj_DDNetPickup>(SnapID);
+		if(!pPickup)
+			return false;
+
+		pPickup->m_X = (int)Pos.x;
+		pPickup->m_Y = (int)Pos.y;
+		pPickup->m_Type = Type;
+		pPickup->m_Subtype = SubType;
+		pPickup->m_SwitchNumber = SwitchNumber;
 	}
 	else
 	{
@@ -599,12 +619,12 @@ void CGameContext::SendStartWarning(int ClientID, const char *pMessage)
 	}
 }
 
-void CGameContext::SendEmoticon(int ClientID, int Emoticon)
+void CGameContext::SendEmoticon(int ClientID, int Emoticon, int TargetClientID)
 {
 	CNetMsg_Sv_Emoticon Msg;
 	Msg.m_ClientID = ClientID;
 	Msg.m_Emoticon = Emoticon;
-	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
+	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, TargetClientID);
 }
 
 void CGameContext::SendWeaponPickup(int ClientID, int Weapon)
@@ -1136,14 +1156,6 @@ void CGameContext::OnTick()
 			m_aVoteMutes[i] = m_aVoteMutes[m_NumVoteMutes];
 		}
 	}
-	for(int i = 0; i < m_LastLog; i++)
-	{
-		if(m_aLogs[i].m_Timestamp && (time_get() - m_aLogs[i].m_Timestamp) / time_freq() > MAX_LOG_SECONDS)
-		{
-			m_FirstLog = (m_FirstLog + 1) % MAX_LOGS;
-			m_aLogs[m_FirstLog].m_Timestamp = 0;
-		}
-	}
 
 	if(Server()->Tick() % (g_Config.m_SvAnnouncementInterval * Server()->TickSpeed() * 60) == 0)
 	{
@@ -1190,9 +1202,12 @@ void CGameContext::OnTick()
 	{
 		for(int i = 0; i < g_Config.m_DbgDummies; i++)
 		{
-			CNetObj_PlayerInput Input = {0};
-			Input.m_Direction = (i & 1) ? -1 : 1;
-			m_apPlayers[MAX_CLIENTS - i - 1]->OnPredictedInput(&Input);
+			if(m_apPlayers[MAX_CLIENTS - i - 1])
+			{
+				CNetObj_PlayerInput Input = {0};
+				Input.m_Direction = (i & 1) ? -1 : 1;
+				m_apPlayers[MAX_CLIENTS - i - 1]->OnPredictedInput(&Input);
+			}
 		}
 	}
 #endif
@@ -1648,7 +1663,15 @@ void CGameContext::OnClientDrop(int ClientID, const char *pReason)
 	Server()->ExpireServerInfo();
 }
 
-void CGameContext::OnClientEngineJoin(int ClientID, bool Sixup)
+void CGameContext::TeehistorianRecordAntibot(const void *pData, int DataSize)
+{
+	if(m_TeeHistorianActive)
+	{
+		m_TeeHistorian.RecordAntibot(pData, DataSize);
+	}
+}
+
+void CGameContext::TeehistorianRecordPlayerJoin(int ClientID, bool Sixup)
 {
 	if(m_TeeHistorianActive)
 	{
@@ -1656,11 +1679,19 @@ void CGameContext::OnClientEngineJoin(int ClientID, bool Sixup)
 	}
 }
 
-void CGameContext::OnClientEngineDrop(int ClientID, const char *pReason)
+void CGameContext::TeehistorianRecordPlayerDrop(int ClientID, const char *pReason)
 {
 	if(m_TeeHistorianActive)
 	{
 		m_TeeHistorian.RecordPlayerDrop(ClientID, pReason);
+	}
+}
+
+void CGameContext::TeehistorianRecordPlayerRejoin(int ClientID)
+{
+	if(m_TeeHistorianActive)
+	{
+		m_TeeHistorian.RecordPlayerRejoin(ClientID);
 	}
 }
 
@@ -2436,7 +2467,7 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 				// reload scores
 				Score()->PlayerData(ClientID)->Reset();
-				m_apPlayers[ClientID]->m_Score = -9999;
+				m_apPlayers[ClientID]->m_Score.reset();
 				m_apPlayers[ClientID]->m_Score = 0; // gctf
 				Score()->LoadPlayerData(ClientID);
 
@@ -2512,49 +2543,74 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		{
 			CNetMsg_Cl_Emoticon *pMsg = (CNetMsg_Cl_Emoticon *)pRawMsg;
 
-			if(g_Config.m_SvSpamprotection && pPlayer->m_LastEmote && pPlayer->m_LastEmote + Server()->TickSpeed() * g_Config.m_SvEmoticonDelay > Server()->Tick())
+			auto &&CheckPreventEmote = [&](int64_t LastEmote, int64_t DelayInMs) {
+				return (LastEmote * (int64_t)1000) + (int64_t)Server()->TickSpeed() * DelayInMs > ((int64_t)Server()->Tick() * (int64_t)1000);
+			};
+
+			if(g_Config.m_SvSpamprotection && CheckPreventEmote((int64_t)pPlayer->m_LastEmote, (int64_t)g_Config.m_SvEmoticonMsDelay))
 				return;
 
-			pPlayer->m_LastEmote = Server()->Tick();
-			pPlayer->UpdatePlaytime();
-
-			SendEmoticon(ClientID, pMsg->m_Emoticon);
 			CCharacter *pChr = pPlayer->GetCharacter();
-			if(pChr && g_Config.m_SvEmotionalTees && pPlayer->m_EyeEmoteEnabled)
+			// player needs a character to send emotes
+			if(pChr != nullptr)
 			{
-				int EmoteType = EMOTE_NORMAL;
-				switch(pMsg->m_Emoticon)
+				pPlayer->m_LastEmote = Server()->Tick();
+				pPlayer->UpdatePlaytime();
+
+				// check if the global emoticon is prevented and emotes are only send to nearby players
+				if(g_Config.m_SvSpamprotection && CheckPreventEmote((int64_t)pPlayer->m_LastEmoteGlobal, (int64_t)g_Config.m_SvGlobalEmoticonMsDelay))
 				{
-				case EMOTICON_EXCLAMATION:
-				case EMOTICON_GHOST:
-				case EMOTICON_QUESTION:
-				case EMOTICON_WTF:
-					EmoteType = EMOTE_SURPRISE;
-					break;
-				case EMOTICON_DOTDOT:
-				case EMOTICON_DROP:
-				case EMOTICON_ZZZ:
-					EmoteType = EMOTE_BLINK;
-					break;
-				case EMOTICON_EYES:
-				case EMOTICON_HEARTS:
-				case EMOTICON_MUSIC:
-					EmoteType = EMOTE_HAPPY;
-					break;
-				case EMOTICON_OOP:
-				case EMOTICON_SORRY:
-				case EMOTICON_SUSHI:
-					EmoteType = EMOTE_PAIN;
-					break;
-				case EMOTICON_DEVILTEE:
-				case EMOTICON_SPLATTEE:
-				case EMOTICON_ZOMG:
-					EmoteType = EMOTE_ANGRY;
-					break;
-				default:
-					break;
+					for(int i = 0; i < MAX_CLIENTS; ++i)
+					{
+						if(m_apPlayers[i] && pChr->CanSnapCharacter(i) && pChr->IsSnappingCharacterInView(i))
+						{
+							SendEmoticon(ClientID, pMsg->m_Emoticon, i);
+						}
+					}
 				}
-				pChr->SetEmote(EmoteType, Server()->Tick() + 2 * Server()->TickSpeed());
+				else
+				{
+					// else send emoticons to all players
+					pPlayer->m_LastEmoteGlobal = Server()->Tick();
+					SendEmoticon(ClientID, pMsg->m_Emoticon, -1);
+				}
+
+				if(g_Config.m_SvEmotionalTees && pPlayer->m_EyeEmoteEnabled)
+				{
+					int EmoteType = EMOTE_NORMAL;
+					switch(pMsg->m_Emoticon)
+					{
+					case EMOTICON_EXCLAMATION:
+					case EMOTICON_GHOST:
+					case EMOTICON_QUESTION:
+					case EMOTICON_WTF:
+						EmoteType = EMOTE_SURPRISE;
+						break;
+					case EMOTICON_DOTDOT:
+					case EMOTICON_DROP:
+					case EMOTICON_ZZZ:
+						EmoteType = EMOTE_BLINK;
+						break;
+					case EMOTICON_EYES:
+					case EMOTICON_HEARTS:
+					case EMOTICON_MUSIC:
+						EmoteType = EMOTE_HAPPY;
+						break;
+					case EMOTICON_OOP:
+					case EMOTICON_SORRY:
+					case EMOTICON_SUSHI:
+						EmoteType = EMOTE_PAIN;
+						break;
+					case EMOTICON_DEVILTEE:
+					case EMOTICON_SPLATTEE:
+					case EMOTICON_ZOMG:
+						EmoteType = EMOTE_ANGRY;
+						break;
+					default:
+						break;
+					}
+					pChr->SetEmote(EmoteType, Server()->Tick() + 2 * Server()->TickSpeed());
+				}
 			}
 		}
 		else if(MsgID == NETMSGTYPE_CL_KILL && !m_World.m_Paused)
@@ -3331,15 +3387,16 @@ void CGameContext::OnConsoleInit()
 #include <game/ddracechat.h>
 }
 
-void CGameContext::OnInit()
+void CGameContext::OnInit(const void *pPersistentData)
 {
+	const CPersistentData *pPersistent = (const CPersistentData *)pPersistentData;
+
 	m_pServer = Kernel()->RequestInterface<IServer>();
 	m_pConfig = Kernel()->RequestInterface<IConfigManager>()->Values();
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
 	m_pEngine = Kernel()->RequestInterface<IEngine>();
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 	m_pAntibot = Kernel()->RequestInterface<IAntibot>();
-	m_pAntibot->RoundStart(this);
 	m_World.SetGameServer(this);
 	m_Events.SetGameServer(this);
 
@@ -3505,6 +3562,17 @@ void CGameContext::OnInit()
 		GameInfo.m_MapSha256 = MapSha256;
 		GameInfo.m_MapCrc = MapCrc;
 
+		if(pPersistent)
+		{
+			GameInfo.m_HavePrevGameUuid = true;
+			GameInfo.m_PrevGameUuid = pPersistent->m_PrevGameUuid;
+		}
+		else
+		{
+			GameInfo.m_HavePrevGameUuid = false;
+			mem_zero(&GameInfo.m_PrevGameUuid, sizeof(GameInfo.m_PrevGameUuid));
+		}
+
 		m_TeeHistorian.Reset(&GameInfo, TeeHistorianWrite, this);
 
 		for(int i = 0; i < MAX_CLIENTS; i++)
@@ -3527,6 +3595,8 @@ void CGameContext::OnInit()
 
 	if(GIT_SHORTREV_HASH)
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "git-revision", GIT_SHORTREV_HASH);
+
+	m_pAntibot->RoundStart(this);
 
 #ifdef CONF_DEBUG
 	if(g_Config.m_DbgDummies)
@@ -3758,7 +3828,7 @@ void CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 			Writer.AddData(TotalLength, pSettings);
 			continue;
 		}
-		unsigned char *pData = (unsigned char *)Reader.GetData(i);
+		const void *pData = Reader.GetData(i);
 		int Size = Reader.GetDataSize(i);
 		Writer.AddData(Size, pData);
 		Reader.UnloadData(i);
@@ -3775,8 +3845,15 @@ void CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 	str_copy(m_aDeleteTempfile, aTemp, sizeof(m_aDeleteTempfile));
 }
 
-void CGameContext::OnShutdown()
+void CGameContext::OnShutdown(void *pPersistentData)
 {
+	CPersistentData *pPersistent = (CPersistentData *)pPersistentData;
+
+	if(pPersistent)
+	{
+		pPersistent->m_PrevGameUuid = m_GameUuid;
+	}
+
 	Antibot()->RoundEnd();
 
 	if(m_TeeHistorianActive)
@@ -3794,7 +3871,7 @@ void CGameContext::OnShutdown()
 	}
 
 	DeleteTempfile();
-	Console()->ResetServerGameSettings();
+	Console()->ResetGameSettings();
 	Collision()->Dest();
 	delete m_pController;
 	m_pController = 0;
@@ -3809,7 +3886,7 @@ void CGameContext::LoadMapSettings()
 	for(int i = Start; i < Start + Num; i++)
 	{
 		int ItemID;
-		CMapItemInfoSettings *pItem = (CMapItemInfoSettings *)pMap->GetItem(i, 0, &ItemID);
+		CMapItemInfoSettings *pItem = (CMapItemInfoSettings *)pMap->GetItem(i, nullptr, &ItemID);
 		int ItemSize = pMap->GetItemSize(i);
 		if(!pItem || ItemID != 0)
 			continue;
@@ -4190,7 +4267,7 @@ void CGameContext::Converse(int ClientID, char *pStr)
 bool CGameContext::IsVersionBanned(int Version)
 {
 	char aVersion[16];
-	str_format(aVersion, sizeof(aVersion), "%d", Version);
+	str_from_int(Version, aVersion);
 
 	return str_in_list(g_Config.m_SvBannedVersions, ",", aVersion);
 }
@@ -4413,16 +4490,16 @@ void CGameContext::OnUpdatePlayerServerInfo(char *aBuf, int BufSize, int ID)
 				apPartNames[i],
 				EscapeJson(aCSkinName, sizeof(aCSkinName), TeeInfo.m_apSkinPartNames[i]));
 
-			str_append(aJsonSkin, aPartBuf, sizeof(aJsonSkin));
+			str_append(aJsonSkin, aPartBuf);
 
 			if(TeeInfo.m_aUseCustomColors[i])
 			{
 				str_format(aPartBuf, sizeof(aPartBuf),
 					",\"color\":%d",
 					TeeInfo.m_aSkinPartColors[i]);
-				str_append(aJsonSkin, aPartBuf, sizeof(aJsonSkin));
+				str_append(aJsonSkin, aPartBuf);
 			}
-			str_append(aJsonSkin, "}", sizeof(aJsonSkin));
+			str_append(aJsonSkin, "}");
 		}
 	}
 

@@ -35,10 +35,10 @@ private:
 	float m_AutoSpacing;
 	CScrollRegion m_ScrollRegion;
 	vec2 m_ScrollOffset;
-	char m_aFilterString[128];
 	float m_FilterOffset;
 	int m_BackgroundCorners;
 	bool m_HasHeader;
+	bool m_Active;
 
 protected:
 	CListboxItem DoNextRow();
@@ -50,16 +50,20 @@ public:
 	void DoHeader(const CUIRect *pRect, const char *pTitle, float HeaderHeight = 20.0f, float Spacing = 2.0f);
 	void DoAutoSpacing(float Spacing = 20.0f) { m_AutoSpacing = Spacing; }
 	void DoSpacing(float Spacing = 20.0f);
-	bool DoFilter(float FilterHeight = 20.0f, float Spacing = 2.0f);
 	void DoFooter(const char *pBottomText, float FooterHeight = 20.0f); // call before DoStart to create a footer
-	void DoStart(float RowHeight, int NumItems, int ItemsPerRow, int RowsPerScroll, int SelectedIndex, const CUIRect *pRect = nullptr, bool Background = true, bool *pActive = nullptr, int BackgroundCorners = IGraphics::CORNER_ALL);
+	void DoStart(float RowHeight, int NumItems, int ItemsPerRow, int RowsPerScroll, int SelectedIndex, const CUIRect *pRect = nullptr, bool Background = true, int BackgroundCorners = IGraphics::CORNER_ALL, bool ForceShowScrollbar = false);
 	void ScrollToSelected() { m_ListBoxUpdateScroll = true; }
-	CListboxItem DoNextItem(const void *pID, bool Selected = false, bool *pActive = nullptr);
+	CListboxItem DoNextItem(const void *pID, bool Selected = false);
 	CListboxItem DoSubheader();
 	int DoEnd();
-	bool FilterMatches(const char *pNeedle) const;
+
+	// Active state must be set before calling DoStart.
+	bool Active() const { return m_Active; }
+	void SetActive(bool Active) { m_Active = Active; }
+
 	bool WasItemSelected() const { return m_ListBoxItemSelected; }
 	bool WasItemActivated() const { return m_ListBoxItemActivated; }
+
 	bool ScrollbarIsShown() const { return m_ScrollbarIsShown; }
 	float ScrollbarWidth() const { return ScrollbarIsShown() ? ScrollbarWidthMax() : 0.0f; }
 	float ScrollbarWidthMax() const { return 20.0f; }

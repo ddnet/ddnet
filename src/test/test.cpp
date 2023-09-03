@@ -11,9 +11,29 @@ CTestInfo::CTestInfo()
 {
 	const ::testing::TestInfo *pTestInfo =
 		::testing::UnitTest::GetInstance()->current_test_info();
-	char aBuf[IO_MAX_PATH_LENGTH];
-	str_format(aBuf, sizeof(aBuf), "%s.%s", pTestInfo->test_case_name(), pTestInfo->name());
-	IStorage::FormatTmpPath(m_aFilename, sizeof(m_aFilename), aBuf);
+
+	// Typed tests have test names like "TestName/0" and "TestName/1", which would result in invalid filenames.
+	// Replace the string after the first slash with the name of the typed test and use hyphen instead of slash.
+	char aTestCaseName[128];
+	str_copy(aTestCaseName, pTestInfo->test_case_name());
+	for(int i = 0; i < str_length(aTestCaseName); i++)
+	{
+		if(aTestCaseName[i] == '/')
+		{
+			aTestCaseName[i] = '-';
+			aTestCaseName[i + 1] = '\0';
+			str_append(aTestCaseName, pTestInfo->type_param());
+			break;
+		}
+	}
+	str_format(m_aFilenamePrefix, sizeof(m_aFilenamePrefix), "%s.%s-%d",
+		aTestCaseName, pTestInfo->name(), pid());
+	Filename(m_aFilename, sizeof(m_aFilename), ".tmp");
+}
+
+void CTestInfo::Filename(char *pBuffer, size_t BufferLength, const char *pSuffix)
+{
+	str_format(pBuffer, BufferLength, "%s%s", m_aFilenamePrefix, pSuffix);
 }
 
 IStorage *CTestInfo::CreateTestStorage()

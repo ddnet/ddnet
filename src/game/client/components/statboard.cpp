@@ -276,7 +276,7 @@ void CStatboard::RenderGlobalStats()
 		CTeeRenderInfo Teeinfo = m_pClient->m_aClients[pInfo->m_ClientID].m_RenderInfo;
 		Teeinfo.m_Size *= TeeSizemod;
 
-		CAnimState *pIdleState = CAnimState::GetIdle();
+		const CAnimState *pIdleState = CAnimState::GetIdle();
 		vec2 OffsetToMid;
 		RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &Teeinfo, OffsetToMid);
 		vec2 TeeRenderPos(x + Teeinfo.m_Size / 2, y + LineHeight / 2.0f + OffsetToMid.y);
@@ -293,14 +293,14 @@ void CStatboard::RenderGlobalStats()
 
 		// FRAGS
 		{
-			str_format(aBuf, sizeof(aBuf), "%d", pStats->m_Frags);
+			str_from_int(pStats->m_Frags, aBuf);
 			tw = TextRender()->TextWidth(FontSize, aBuf, -1, -1.0f);
 			TextRender()->Text(x - tw + px, y + (LineHeight * 0.95f - FontSize) / 2.f, FontSize, aBuf, -1.0f);
 			px += 85;
 		}
 		// DEATHS
 		{
-			str_format(aBuf, sizeof(aBuf), "%d", pStats->m_Deaths);
+			str_from_int(pStats->m_Deaths, aBuf);
 			tw = TextRender()->TextWidth(FontSize, aBuf, -1, -1.0f);
 			TextRender()->Text(x - tw + px, y + (LineHeight * 0.95f - FontSize) / 2.f, FontSize, aBuf, -1.0f);
 			px += 85;
@@ -308,7 +308,7 @@ void CStatboard::RenderGlobalStats()
 		// SUICIDES
 		{
 			px += 10;
-			str_format(aBuf, sizeof(aBuf), "%d", pStats->m_Suicides);
+			str_from_int(pStats->m_Suicides, aBuf);
 			tw = TextRender()->TextWidth(FontSize, aBuf, -1, -1.0f);
 			TextRender()->Text(x - tw + px, y + (LineHeight * 0.95f - FontSize) / 2.f, FontSize, aBuf, -1.0f);
 			px += 85;
@@ -340,14 +340,14 @@ void CStatboard::RenderGlobalStats()
 		}
 		// SPREE
 		{
-			str_format(aBuf, sizeof(aBuf), "%d", pStats->m_CurrentSpree);
+			str_from_int(pStats->m_CurrentSpree, aBuf);
 			tw = TextRender()->TextWidth(FontSize, aBuf, -1, -1.0f);
 			TextRender()->Text(x - tw + px, y + (LineHeight * 0.95f - FontSize) / 2.f, FontSize, aBuf, -1.0f);
 			px += 85;
 		}
 		// BEST SPREE
 		{
-			str_format(aBuf, sizeof(aBuf), "%d", pStats->m_BestSpree);
+			str_from_int(pStats->m_BestSpree, aBuf);
 			tw = TextRender()->TextWidth(FontSize, aBuf, -1, -1.0f);
 			TextRender()->Text(x - tw + px, y + (LineHeight * 0.95f - FontSize) / 2.f, FontSize, aBuf, -1.0f);
 			px += 85;
@@ -355,7 +355,7 @@ void CStatboard::RenderGlobalStats()
 		// GRABS
 		if(GameWithFlags)
 		{
-			str_format(aBuf, sizeof(aBuf), "%d", pStats->m_FlagGrabs);
+			str_from_int(pStats->m_FlagGrabs, aBuf);
 			tw = TextRender()->TextWidth(FontSize, aBuf, -1, -1.0f);
 			TextRender()->Text(x - tw + px, y + (LineHeight * 0.95f - FontSize) / 2.f, FontSize, aBuf, -1.0f);
 			px += 85;
@@ -375,7 +375,7 @@ void CStatboard::RenderGlobalStats()
 		// FLAGS
 		if(GameWithFlags)
 		{
-			str_format(aBuf, sizeof(aBuf), "%d", pStats->m_FlagCaptures);
+			str_from_int(pStats->m_FlagCaptures, aBuf);
 			tw = TextRender()->TextWidth(FontSize, aBuf, -1, -1.0f);
 			TextRender()->Text(x - tw + px, y + (LineHeight * 0.95f - FontSize) / 2.f, FontSize, aBuf, -1.0f);
 		}
@@ -518,7 +518,7 @@ void CStatboard::FormatStats(char *pDest, size_t DestSize)
 			pStats->m_FlagGrabs, // Flag grabs
 			pStats->m_FlagCaptures); // Flag captures
 
-		str_append(aPlayerStats, aBuf, sizeof(aPlayerStats));
+		str_append(aPlayerStats, aBuf);
 	}
 
 	str_format(pDest, DestSize, "%s\n\n%s", aServerStats, aPlayerStats);

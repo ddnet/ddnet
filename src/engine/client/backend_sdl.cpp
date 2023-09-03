@@ -161,7 +161,7 @@ void CGraphicsBackend_Threaded::ProcessError()
 		else
 			VerboseStr.append(ErrStr.m_Err + "\n");
 	}
-	const auto CreatedMsgBox = TryCreateMsgBox(true, "Graphics Assertion", VerboseStr.c_str());
+	const bool CreatedMsgBox = ShowMessageBox(SDL_MESSAGEBOX_ERROR, "Graphics Assertion", VerboseStr.c_str());
 	// check if error msg can be shown, then assert
 	dbg_assert(!CreatedMsgBox, VerboseStr.c_str());
 }
@@ -774,12 +774,21 @@ void CGraphicsBackend_SDL_GL::ClampDriverVersion(EBackendType BackendType)
 	}
 }
 
-bool CGraphicsBackend_SDL_GL::TryCreateMsgBox(bool AsError, const char *pTitle, const char *pMsg)
+bool CGraphicsBackend_SDL_GL::ShowMessageBox(unsigned Type, const char *pTitle, const char *pMsg)
 {
-	m_pProcessor->ErroneousCleanup();
-	SDL_DestroyWindow(m_pWindow);
-	SDL_ShowSimpleMessageBox(AsError ? SDL_MESSAGEBOX_ERROR : SDL_MESSAGEBOX_WARNING, pTitle, pMsg, nullptr);
-	return true;
+	if(m_pProcessor != nullptr)
+	{
+		m_pProcessor->ErroneousCleanup();
+	}
+	// TODO: Remove this workaround when https://github.com/libsdl-org/SDL/issues/3750 is
+	// fixed and pass the window to SDL_ShowSimpleMessageBox to make the popup modal instead
+	// of destroying the window before opening the popup.
+	if(m_pWindow != nullptr)
+	{
+		SDL_DestroyWindow(m_pWindow);
+		m_pWindow = nullptr;
+	}
+	return SDL_ShowSimpleMessageBox(Type, pTitle, pMsg, nullptr) == 0;
 }
 
 bool CGraphicsBackend_SDL_GL::IsModernAPI(EBackendType BackendType)
@@ -871,6 +880,12 @@ bool CGraphicsBackend_SDL_GL::GetDriverVersion(EGraphicsDriverAgeType DriverAgeT
 #endif
 	}
 	return false;
+}
+
+const char *CGraphicsBackend_SDL_GL::GetScreenName(int Screen) const
+{
+	const char *pName = SDL_GetDisplayName(Screen);
+	return pName == nullptr ? "unknown/error" : pName;
 }
 
 static void DisplayToVideoMode(CVideoMode *pVMode, SDL_DisplayMode *pMode, int HiDPIScale, int RefreshRate)
@@ -1171,9 +1186,6 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 		}
 	}
 
-	if(g_Config.m_InpMouseOld)
-		SDL_SetHint(SDL_HINT_MOUSE_RELATIVE_MODE_WARP, "1");
-
 	m_pWindow = SDL_CreateWindow(
 		pName,
 		SDL_WINDOWPOS_CENTERED_DISPLAY(*pScreen),
@@ -1203,6 +1215,7 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 		if(m_GLContext == NULL)
 		{
 			SDL_DestroyWindow(m_pWindow);
+			m_pWindow = nullptr;
 			dbg_msg("gfx", "unable to create graphic context: %s", SDL_GetError());
 			return EGraphicsBackendErrorCodes::GRAPHICS_BACKEND_ERROR_CODE_GL_CONTEXT_FAILED;
 		}
@@ -1211,6 +1224,7 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 		{
 			SDL_GL_DeleteContext(m_GLContext);
 			SDL_DestroyWindow(m_pWindow);
+			m_pWindow = nullptr;
 			return EGraphicsBackendErrorCodes::GRAPHICS_BACKEND_ERROR_CODE_UNKNOWN;
 		}
 	}
@@ -1237,6 +1251,7 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 		if(m_GLContext)
 			SDL_GL_DeleteContext(m_GLContext);
 		SDL_DestroyWindow(m_pWindow);
+		m_pWindow = nullptr;
 
 		// try setting to glew supported version
 		g_Config.m_GfxGLMajor = GlewMajor;
@@ -1339,6 +1354,7 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 		if(m_GLContext)
 			SDL_GL_DeleteContext(m_GLContext);
 		SDL_DestroyWindow(m_pWindow);
+		m_pWindow = nullptr;
 
 		// try setting to version string's supported version
 		if(InitError == -2)
@@ -1403,6 +1419,7 @@ int CGraphicsBackend_SDL_GL::Shutdown()
 	if(m_GLContext != nullptr)
 		SDL_GL_DeleteContext(m_GLContext);
 	SDL_DestroyWindow(m_pWindow);
+	m_pWindow = nullptr;
 
 	SDL_QuitSubSystem(SDL_INIT_VIDEO);
 	return 0;
@@ -1592,7 +1609,8 @@ void CGraphicsBackend_SDL_GL::GetViewportSize(int &w, int &h)
 
 void CGraphicsBackend_SDL_GL::NotifyWindow()
 {
-#if SDL_MAJOR_VERSION > 2 || (SDL_MAJOR_VERSION == 2 && SDL_PATCHLEVEL >= 16)
+	// Minimum version 2.0.16, after version 2.0.22 the naming is changed to 2.24.0 etc.
+#if SDL_MAJOR_VERSION > 2 || (SDL_MAJOR_VERSION == 2 && SDL_MINOR_VERSION == 0 && SDL_PATCHLEVEL >= 16) || (SDL_MAJOR_VERSION == 2 && SDL_MINOR_VERSION > 0)
 	if(SDL_FlashWindow(m_pWindow, SDL_FlashOperation::SDL_FLASH_UNTIL_FOCUSED) != 0)
 	{
 		// fails if SDL hasn't implemented it

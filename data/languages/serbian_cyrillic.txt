@@ -76,12 +76,6 @@ Clan
 Client
 == Клијент
 
-Close
-== Затвори
-
-Connect
-== Повежи се
-
 Connecting to
 == Повезујем се на
 
@@ -342,9 +336,6 @@ Rename demo
 
 Reset filter
 == Поврати филтер
-
-Sample rate
-== Фрекфенција
 
 Score
 == Резултат
@@ -723,9 +714,6 @@ Countries
 Types
 == Типови
 
-Select a name
-== Изаберите име
-
 Please use a different name
 == Изаберите друго име
 
@@ -904,9 +892,6 @@ Enable team chat sound
 Enable highlighted chat sound
 == Омогући истакнути звук дописивања
 
-Threaded sound loading
-== Учитавање звука са навојем
-
 Map sound volume
 == Јачина звука на мапи
 
@@ -961,8 +946,8 @@ Client message
 Save the best demo of each race
 == Сачувајте најбољи снимак сваке трке
 
-Default length: %d
-== Подразумевана дужина: %d
+Default length
+== Подразумевана дужина
 
 Enable replays
 == Омогући поновљене репродукције
@@ -1005,9 +990,6 @@ Show other players' hook collision lines
 
 Show other players' key presses
 == Прикажи притиске тастера других играча
-
-Old mouse mode
-== Стари мод миша
 
 Show tiles layers from BG map
 == Прикажи слојеве плочица са BG мапе
@@ -1241,9 +1223,6 @@ CHN
 Getting server list from master server
 == Добијам листу сервера са мастер сервера
 
-Refreshing...
-== Освежавање
-
 Leak IP
 == Провали адресу
 
@@ -1280,12 +1259,6 @@ Chat command
 Enable controller
 == Укључи контролер
 
-Controller %d: %s
-== Контролер %d: %s
-
-Click to cycle through all available controllers.
-== Кликни да видиш све слободне контролерес
-
 [Ingame controller mode]
 Relative
 == Релативно
@@ -1306,17 +1279,11 @@ UI controller sens.
 Controller jitter tolerance
 == Толеранција контролера
 
-Device
-== Уређај
-
 Status
 == Статус
 
 Aim bind
 == Нишан
-
-Controller Axis #%d
-== Стик %d.
 
 Mouse
 == Миш
@@ -1356,9 +1323,6 @@ default
 
 custom
 == своје
-
-Graphics cards
-== Графичка картица
 
 auto
 == ауто
@@ -1523,8 +1487,6 @@ Loading sound files
 == Учитавам звучне фајлове
 
 [Graphics error]
-
-[Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
 == 
 
@@ -1566,22 +1528,68 @@ Could not save downloaded map. Try manually deleting this file: %s
 Initializing components
 == 
 
-Search:
+Quitting. Please wait…
 == 
 
-Cancel
+Restarting. Please wait…
+== 
+
+Multi-View
+== 
+
+Rename folder
+== 
+
+A demo with this name already exists
+== 
+
+A folder with this name already exists
+== 
+
+Unable to rename the folder
 == 
 
 File '%s' already exists, do you want to overwrite it?
 == 
 
+(paused)
+== 
+
 Copy info
+== 
+
+No server selected
+== 
+
+Online players (%d)
+== 
+
+Online clanmates (%d)
+== 
+
+[friends (server browser)]
+Offline (%d)
+== 
+
+Click to select server. Double click to join your friend.
+== 
+
+Click to remove this player from your friends list.
+== 
+
+Click to remove this clan from your friends list.
+== 
+
+None
 == 
 
 Are you sure that you want to remove the player '%s' from your friends list?
 == 
 
 Are you sure that you want to remove the clan '%s' from your friends list?
+== 
+
+Add Clan
 == 
 
 Play the current demo
@@ -1605,10 +1613,10 @@ Slow down the demo
 Speed up the demo
 == 
 
-Mark the beginning of a cut
+Mark the beginning of a cut (right click to reset)
 == 
 
-Mark the end of a cut
+Mark the end of a cut (right click to reset)
 == 
 
 Export cut as a separate demo
@@ -1620,16 +1628,43 @@ Go back one marker
 Go forward one marker
 == 
 
+Close the demo player
+== 
+
 Toggle keyboard shortcuts
+== 
+
+Export demo cut
+== 
+
+Cut interval
+== 
+
+Cut length
+== 
+
+All combined
+== 
+
+Folder Link
 == 
 
 Open the directory that contains the demo files
 == 
 
+Are you sure that you want to delete the folder '%s'?
+== 
+
 Are you sure that you want to delete the demo '%s'?
 == 
 
+Delete folder
+== 
+
 Unable to delete the demo '%s'
+== 
+
+Unable to delete the folder '%s'. Make sure it's empty first.
 == 
 
 Menu opened. Press Esc key again to close menu.
@@ -1647,16 +1682,28 @@ Open the directory that contains the configuration and user files
 Open the directory to add custom themes
 == 
 
+Create a random skin
+== 
+
 Open the directory to add custom skins
 == 
 
 No controller found. Plug in a controller.
 == 
 
+Axis
+== 
+
 Reset controls
 == 
 
 Are you sure that you want to reset the controls to their defaults?
+== 
+
+Cancel
+== 
+
+Graphics card
 == 
 
 Weapons
@@ -1693,4 +1740,7 @@ Unregister protocol and file extensions
 == 
 
 Open the directory to add custom assets
+== 
+
+Moved ingame
 == 

@@ -58,18 +58,29 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 		YOffset -= ShowDirectionImgSize;
 		vec2 ShowDirectionPos = vec2(Position.x - 11.0f, YOffset);
 
-		if(m_pClient->m_Snap.m_aCharacters[pPlayerInfo->m_ClientID].m_Cur.m_Direction == -1)
+		bool DirLeft = m_pClient->m_Snap.m_aCharacters[pPlayerInfo->m_ClientID].m_Cur.m_Direction == -1;
+		bool DirRight = m_pClient->m_Snap.m_aCharacters[pPlayerInfo->m_ClientID].m_Cur.m_Direction == 1;
+		bool Jump = m_pClient->m_Snap.m_aCharacters[pPlayerInfo->m_ClientID].m_Cur.m_Jumped & 1;
+
+		if(pPlayerInfo->m_Local && Client()->State() != IClient::STATE_DEMOPLAYBACK)
+		{
+			DirLeft = m_pClient->m_Controls.m_aInputData[g_Config.m_ClDummy].m_Direction == -1;
+			DirRight = m_pClient->m_Controls.m_aInputData[g_Config.m_ClDummy].m_Direction == 1;
+			Jump = m_pClient->m_Controls.m_aInputData[g_Config.m_ClDummy].m_Jump == 1;
+		}
+
+		if(DirLeft)
 		{
 			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ARROW].m_Id);
 			Graphics()->QuadsSetRotation(pi);
 			Graphics()->RenderQuadContainerAsSprite(m_DirectionQuadContainerIndex, 0, ShowDirectionPos.x - 30.f, ShowDirectionPos.y);
 		}
-		else if(m_pClient->m_Snap.m_aCharacters[pPlayerInfo->m_ClientID].m_Cur.m_Direction == 1)
+		else if(DirRight)
 		{
 			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ARROW].m_Id);
 			Graphics()->RenderQuadContainerAsSprite(m_DirectionQuadContainerIndex, 0, ShowDirectionPos.x + 30.f, ShowDirectionPos.y);
 		}
-		if(m_pClient->m_Snap.m_aCharacters[pPlayerInfo->m_ClientID].m_Cur.m_Jumped & 1)
+		if(Jump)
 		{
 			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ARROW].m_Id);
 			Graphics()->QuadsSetRotation(pi * 3 / 2);
@@ -159,7 +170,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 		TOutlineColor.a *= Alpha;
 		TColor.a *= Alpha;
 
-		if(m_aNamePlates[ClientID].m_NameTextContainerIndex != -1)
+		if(m_aNamePlates[ClientID].m_NameTextContainerIndex.Valid())
 		{
 			YOffset -= FontSize;
 			TextRender()->RenderTextContainer(m_aNamePlates[ClientID].m_NameTextContainerIndex, TColor, TOutlineColor, Position.x - tw / 2.0f, YOffset);
@@ -168,7 +179,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 		if(g_Config.m_ClNameplatesClan)
 		{
 			YOffset -= FontSizeClan;
-			if(m_aNamePlates[ClientID].m_ClanNameTextContainerIndex != -1)
+			if(m_aNamePlates[ClientID].m_ClanNameTextContainerIndex.Valid())
 				TextRender()->RenderTextContainer(m_aNamePlates[ClientID].m_ClanNameTextContainerIndex, TColor, TOutlineColor, Position.x - m_aNamePlates[ClientID].m_ClanNameTextWidth / 2.0f, YOffset);
 		}
 
@@ -176,7 +187,17 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 		{
 			YOffset -= FontSize;
 			char aFriendMark[] = "♥";
-			TextRender()->TextColor(ColorRGBA(1.0f, 0.0f, 0.0f));
+
+			ColorRGBA Color;
+
+			if(OtherTeam && !ForceAlpha)
+				Color = ColorRGBA(1.0f, 0.0f, 0.0f, g_Config.m_ClShowOthersAlpha / 100.0f);
+			else
+				Color = ColorRGBA(1.0f, 0.0f, 0.0f, a);
+
+			Color.a *= Alpha;
+
+			TextRender()->TextColor(Color);
 			float XOffSet = TextRender()->TextWidth(FontSize, aFriendMark, -1, -1.0f) / 2.0f;
 			TextRender()->Text(Position.x - XOffSet, YOffset, FontSize, aFriendMark, -1.0f);
 		}
@@ -185,7 +206,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 		{
 			YOffset -= FontSize;
 			char aBuf[128];
-			str_format(aBuf, sizeof(aBuf), "%d", pPlayerInfo->m_ClientID);
+			str_from_int(pPlayerInfo->m_ClientID, aBuf);
 			float XOffset = TextRender()->TextWidth(FontSize, aBuf, -1, -1.0f) / 2.0f;
 			TextRender()->TextColor(rgb);
 			TextRender()->Text(Position.x - XOffset, YOffset, FontSize, aBuf, -1.0f);
@@ -221,6 +242,17 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 						StrongWeakStatusColor = color_cast<ColorRGBA>(ColorHSLA(41131));
 						StrongWeakSpriteID = SPRITE_HOOK_WEAK;
 					}
+
+					float ClampedAlpha = 1;
+					if(g_Config.m_ClNameplatesAlways == 0)
+						ClampedAlpha = clamp(1 - std::pow(distance(m_pClient->m_Controls.m_aTargetPos[g_Config.m_ClDummy], Position) / 200.0f, 16.0f), 0.0f, 1.0f);
+
+					if(OtherTeam && !ForceAlpha)
+						StrongWeakStatusColor.a = g_Config.m_ClShowOthersAlpha / 100.0f;
+					else
+						StrongWeakStatusColor.a = ClampedAlpha;
+
+					StrongWeakStatusColor.a *= Alpha;
 					Graphics()->SetColor(StrongWeakStatusColor);
 					RenderTools()->SelectSprite(StrongWeakSpriteID);
 					RenderTools()->GetSpriteScale(StrongWeakSpriteID, ScaleX, ScaleY);
@@ -234,7 +266,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 				{
 					YOffset -= FontSize;
 					char aBuf[12];
-					str_format(aBuf, sizeof(aBuf), "%d", pCharacter->GetStrongWeakID());
+					str_from_int(pCharacter->GetStrongWeakID(), aBuf);
 					float XOffset = TextRender()->TextWidth(FontSize, aBuf, -1, -1.0f) / 2.0f;
 					TextRender()->Text(Position.x - XOffset, YOffset, FontSize, aBuf, -1.0f);
 				}

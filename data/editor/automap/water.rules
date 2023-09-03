@@ -1,0 +1,1278 @@
+#Original by DoNe for DDNet-Walls.
+
+[Blue Water]
+Index 16
+
+#1W2W3W4W
+Index 17
+Pos 0 -1 EMPTY
+Pos 0 1 EMPTY
+Pos -1 0 EMPTY
+Pos 1 0 EMPTY
+
+#1W2W3S4W
+Index 18
+Pos 0 -1 EMPTY
+Pos -1 0 EMPTY
+Pos 0 1 FULL
+Pos 1 0 EMPTY
+
+#1W2W3S4W
+Index 18 YFLIP
+Pos 0 -1 FULL
+Pos -1 0 EMPTY
+Pos 0 1 EMPTY
+Pos 1 0 EMPTY
+
+#1W2S3S4W
+Index 19
+Pos 0 -1 EMPTY
+Pos -1 0 EMPTY
+Pos 0 1 FULL
+Pos 1 0 FULL
+Pos 1 1 FULL
+
+#1W2S3S4W
+Index 19 YFLIP
+Pos 0 -1 FULL
+Pos -1 0 EMPTY
+Pos 0 1 EMPTY
+Pos 1 0 FULL
+Pos 1 -1 FULL
+
+#1W2S3S4W
+Index 19 XFLIP
+Pos 0 -1 EMPTY
+Pos 0 1 FULL
+Pos -1 0 FULL
+Pos 1 0 EMPTY
+Pos -1 1 FULL
+
+#1W2S3S4W
+Index 19 XFLIP YFLIP
+Pos -1 -1 FULL
+Pos 0 -1 FULL
+Pos -1 0 FULL
+Pos 1 0 EMPTY
+Pos 0 1 EMPTY
+
+#1W2S3W4S
+Index 20
+Pos -1 0 FULL
+Pos 1 0 FULL
+Pos 0 -1 EMPTY
+Pos 0 1 EMPTY
+
+#1W2S3S4S
+Index 21
+Pos -1 1 FULL
+Pos 0 1 FULL
+Pos 1 1 FULL
+Pos 1 0 FULL
+Pos -1 0 FULL
+Pos 0 -1 EMPTY
+
+#1W2S3S4S
+Index 21 YFLIP
+Pos -1 -1 FULL
+Pos 1 -1 FULL
+Pos 0 -1 FULL
+Pos 1 0 FULL
+Pos -1 0 FULL
+Pos 0 1 EMPTY
+
+#1D2D3D4D
+Index 32
+Pos -1 -1 EMPTY
+Pos 0 -1 FULL
+Pos 1 -1 EMPTY
+Pos -1 0 FULL
+Pos 1 0 FULL
+Pos -1 1 EMPTY
+Pos 0 1 FULL
+Pos 1 1 EMPTY
+
+#1D2S3D4D
+Index 33
+Pos -1 -1 EMPTY
+Pos 0 -1 FULL
+Pos 1 -1 EMPTY
+Pos -1 0 FULL
+Pos 1 0 FULL
+Pos -1 1 EMPTY
+Pos 0 1 FULL
+Pos 1 1 FULL
+
+#1D2S3D4D
+Index 33 XFLIP
+Pos -1 -1 EMPTY
+Pos 0 -1 FULL
+Pos 1 -1 EMPTY
+Pos -1 0 FULL
+Pos 1 0 FULL
+Pos -1 1 FULL
+Pos 0 1 FULL
+Pos 1 1 EMPTY
+
+#1D2S3D4D
+Index 33 YFLIP
+Pos -1 -1 EMPTY
+Pos 0 -1 FULL
+Pos 1 -1 FULL
+Pos -1 0 FULL
+Pos 1 0 FULL
+Pos -1 1 EMPTY
+Pos 0 1 FULL
+Pos 1 1 EMPTY
+
+#1D2S3D4D
+Index 33 XFLIP YFLIP
+Pos -1 -1 FULL
+Pos 0 -1 FULL
+Pos 1 -1 EMPTY
+Pos -1 0 FULL
+Pos 1 0 FULL
+Pos -1 1 EMPTY
+Pos 0 1 FULL
+Pos 1 1 EMPTY
+
+#1D2S3S4D
+Index 34
+Pos -1 -1 EMPTY
+Pos 0 -1 FULL
+Pos 1 -1 EMPTY
+Pos -1 0 FULL
+Pos 1 0 FULL
+Pos -1 1 FULL
+Pos 0 1 FULL
+Pos 1 1 FULL
+
+#1D2S3S4D
+Index 34 YFLIP
+Pos -1 -1 FULL
+Pos 0 -1 FULL
+Pos 1 -1 FULL
+Pos -1 0 FULL
+Pos 1 0 FULL
+Pos -1 1 EMPTY
+Pos 0 1 FULL
+Pos 1 1 EMPTY
+
+#1S2S3S4D
+Index 35
+Pos -1 -1 EMPTY
+Pos 0 -1 FULL
+Pos 1 -1 FULL
+Pos -1 0 FULL
+Pos 1 0 FULL
+Pos -1 1 FULL
+Pos 0 1 FULL
+Pos 1 1 FULL
+
+#1S2S3S4D
+Index 35 XFLIP
+Pos -1 -1 FULL
+Pos 0 -1 FULL
+Pos 1 -1 EMPTY
+Pos -1 0 FULL
+Pos 1 0 FULL
+Pos -1 1 FULL
+Pos 0 1 FULL
+Pos 1 1 FULL
+
+#1S2S3S4D
+Index 35 YFLIP
+Pos -1 -1 FULL
+Pos 0 -1 FULL
+Pos 1 -1 FULL
+Pos -1 0 FULL
+Pos 1 0 FULL
+Pos -1 1 EMPTY
+Pos 0 1 FULL
+Pos 1 1 FULL
+
+#1S2S3S4D
+Index 35 XFLIP YFLIP
+Pos -1 -1 FULL
+Pos 0 -1 FULL
+Pos 1 -1 FULL
+Pos -1 0 FULL
+Pos 1 0 FULL
+Pos -1 1 FULL
+Pos 0 1 FULL
+Pos 1 1 EMPTY
+
+#1S2D3S4D
+Index 36
+Pos -1 -1 EMPTY
+Pos 0 -1 FULL
+Pos 1 -1 FULL
+Pos -1 0 FULL
+Pos 1 0 FULL
+Pos -1 1 FULL
+Pos 0 1 FULL
+Pos 1 1 EMPTY
+
+#1S2D3S4D
+Index 36 XFLIP
+Pos -1 -1 FULL
+Pos 0 -1 FULL
+Pos 1 -1 EMPTY
+Pos -1 0 FULL
+Pos 1 0 FULL
+Pos -1 1 EMPTY
+Pos 0 1 FULL
+Pos 1 1 FULL
+
+#1S2S3D4D
+Index 37
+Pos -1 -1 EMPTY
+Pos 0 -1 FULL
+Pos 1 -1 FULL
+Pos -1 0 FULL
+Pos 1 0 FULL
+Pos -1 1 EMPTY
+Pos 0 1 FULL
+Pos 1 1 FULL
+
+#1S2S3D4D
+Index 37 XFLIP
+Pos -1 -1 FULL
+Pos 0 -1 FULL
+Pos 1 -1 EMPTY
+Pos -1 0 FULL
+Pos 1 0 FULL
+Pos -1 1 FULL
+Pos 0 1 FULL
+Pos 1 1 EMPTY
+
+#1W2D3S4W
+Index 48
+Pos 0 -1 EMPTY
+Pos -1 0 EMPTY
+Pos 0 1 FULL
+Pos 1 1 EMPTY
+Pos 1 0 FULL
+
+#1W2D3S4W
+Index 48 XFLIP
+Pos 0 -1 EMPTY
+Pos 1 0 EMPTY
+Pos -1 1 EMPTY
+Pos 0 1 FULL
+Pos -1 0 FULL
+
+#1W2D3S4W
+Index 48 YFLIP
+Pos -1 0 EMPTY
+Pos 0 1 EMPTY
+Pos 1 -1 EMPTY
+Pos 0 -1 FULL
+Pos 1 0 FULL
+
+#1W2D3S4W
+Index 48 XFLIP YFLIP
+Pos 1 0 EMPTY
+Pos 0 1 EMPTY
+Pos -1 -1 EMPTY
+Pos 0 -1 FULL
+Pos -1 0 FULL
+
+#1W2D3D4S
+Index 49
+Pos -1 1 EMPTY
+Pos 0 1 FULL
+Pos 1 1 EMPTY
+Pos 1 0 FULL
+Pos -1 0 FULL
+Pos 0 -1 EMPTY
+
+#1W2D3D4S
+Index 49 YFLIP
+Pos -1 -1 EMPTY
+Pos 1 -1 EMPTY
+Pos 0 -1 FULL
+Pos 1 0 FULL
+Pos -1 0 FULL
+Pos 0 1 EMPTY
+
+#1W2S3D4S
+Index 50
+Pos -1 1 EMPTY
+Pos 0 1 FULL
+Pos 1 1 FULL
+Pos 1 0 FULL
+Pos -1 0 FULL
+Pos 0 -1 EMPTY
+
+#1W2S3D4S
+Index 50 XFLIP
+Pos -1 1 FULL
+Pos 0 1 FULL
+Pos 1 1 EMPTY
+Pos 1 0 FULL
+Pos -1 0 FULL
+Pos 0 -1 EMPTY
+
+#1W2S3D4S
+Index 50 YFLIP
+Pos -1 -1 EMPTY
+Pos 1 -1 FULL
+Pos 0 -1 FULL
+Pos 1 0 FULL
+Pos -1 0 FULL
+Pos 0 1 EMPTY
+
+#1W2S3D4S
+Index 50 XFLIP YFLIP
+Pos -1 -1 FULL
+Pos 1 -1 EMPTY
+Pos 0 -1 FULL
+Pos 1 0 FULL
+Pos -1 0 FULL
+Pos 0 1 EMPTY
+
+#1S2W3S4W
+Index 51
+Pos -1 0 EMPTY
+Pos 1 0 EMPTY
+Pos 0 -1 FULL
+Pos 0 1 FULL
+
+#1W2S3W4W
+Index 52
+Pos 0 -1 EMPTY
+Pos -1 0 EMPTY
+Pos 1 0 FULL
+Pos 0 1 EMPTY
+
+#1W2S3W4W
+Index 52 XFLIP
+Pos 0 -1 EMPTY
+Pos -1 0 FULL
+Pos 1 0 EMPTY
+Pos 0 1 EMPTY
+
+#1S2S3S4W
+Index 53
+Pos 0 -1 FULL
+Pos -1 0 EMPTY
+Pos 1 0 FULL
+Pos 0 1 FULL
+Pos 1 -1 FULL
+Pos 1 1 FULL
+
+#1S2S3S4W
+Index 53 XFLIP
+Pos 0 -1 FULL
+Pos -1 -1 FULL
+Pos -1 0 FULL
+Pos -1 1 FULL
+Pos 1 0 EMPTY
+Pos 0 1 FULL
+
+#1D2D3S4W
+Index 64
+Pos 0 -1 FULL
+Pos -1 0 EMPTY
+Pos 1 0 FULL
+Pos 0 1 FULL
+Pos 1 -1 EMPTY
+Pos 1 1 EMPTY
+
+#1D2D3S4W
+Index 64 XFLIP
+Pos 0 -1 FULL
+Pos -1 -1 EMPTY
+Pos -1 0 FULL
+Pos -1 1 EMPTY
+Pos 1 0 EMPTY
+Pos 0 1 FULL
+
+#1S2W3D4S
+Index 65
+Pos 0 -1 FULL
+Pos -1 -1 FULL
+Pos -1 0 FULL
+Pos -1 1 EMPTY
+Pos 1 0 EMPTY
+Pos 0 1 FULL
+
+#1S2W3D4S
+Index 65 XFLIP
+Pos 0 -1 FULL
+Pos -1 0 EMPTY
+Pos 1 0 FULL
+Pos 0 1 FULL
+Pos 1 -1 FULL
+Pos 1 1 EMPTY
+
+#1S2W3D4S
+Index 65 YFLIP
+Pos 0 -1 FULL
+Pos -1 -1 EMPTY
+Pos -1 0 FULL
+Pos -1 1 FULL
+Pos 1 0 EMPTY
+Pos 0 1 FULL
+
+#1S2W3D4S
+Index 65 XFLIP YFLIP
+Pos 0 -1 FULL
+Pos -1 0 EMPTY
+Pos 1 0 FULL
+Pos 0 1 FULL
+Pos 1 -1 EMPTY
+Pos 1 1 FULL
+
+
+[White Water]
+Index 23
+
+#1W2W3W4W
+Index 24
+Pos 0 -1 EMPTY
+Pos 0 1 EMPTY
+Pos -1 0 EMPTY
+Pos 1 0 EMPTY
+
+#1W2W3S4W
+Index 25
+Pos 0 -1 EMPTY
+Pos -1 0 EMPTY
+Pos 0 1 FULL
+Pos 1 0 EMPTY
+
+#1W2W3S4W
+Index 25 YFLIP
+Pos 0 -1 FULL
+Pos -1 0 EMPTY
+Pos 0 1 EMPTY
+Pos 1 0 EMPTY
+
+#1W2S3S4W
+Index 26
+Pos 0 -1 EMPTY
+Pos -1 0 EMPTY
+Pos 0 1 FULL
+Pos 1 0 FULL
+Pos 1 1 FULL
+
+#1W2S3S4W
+Index 26 YFLIP
+Pos 0 -1 FULL
+Pos -1 0 EMPTY
+Pos 0 1 EMPTY
+Pos 1 0 FULL
+Pos 1 -1 FULL
+
+#1W2S3S4W
+Index 26 XFLIP
+Pos 0 -1 EMPTY
+Pos 0 1 FULL
+Pos -1 0 FULL
+Pos 1 0 EMPTY
+Pos -1 1 FULL
+
+#1W2S3S4W
+Index 26 XFLIP YFLIP
+Pos -1 -1 FULL
+Pos 0 -1 FULL
+Pos -1 0 FULL
+Pos 1 0 EMPTY
+Pos 0 1 EMPTY
+
+#1W2S3W4S
+Index 27
+Pos -1 0 FULL
+Pos 1 0 FULL
+Pos 0 -1 EMPTY
+Pos 0 1 EMPTY
+
+#1W2S3S4W
+Index 28
+Pos -1 1 FULL
+Pos 0 1 FULL
+Pos 1 1 FULL
+Pos 1 0 FULL
+Pos -1 0 FULL
+Pos 0 -1 EMPTY
+
+#1W2S3S4S
+Index 28 YFLIP
+Pos -1 -1 FULL
+Pos 1 -1 FULL
+Pos 0 -1 FULL
+Pos 1 0 FULL
+Pos -1 0 FULL
+Pos 0 1 EMPTY
+
+#1D2D3D4D
+Index 39
+Pos -1 -1 EMPTY
+Pos 0 -1 FULL
+Pos 1 -1 EMPTY
+Pos -1 0 FULL
+Pos 1 0 FULL
+Pos -1 1 EMPTY
+Pos 0 1 FULL
+Pos 1 1 EMPTY
+
+#1D2S3D4D
+Index 40
+Pos -1 -1 EMPTY
+Pos 0 -1 FULL
+Pos 1 -1 EMPTY
+Pos -1 0 FULL
+Pos 1 0 FULL
+Pos -1 1 EMPTY
+Pos 0 1 FULL
+Pos 1 1 FULL
+
+#1D2S3D4D
+Index 40 XFLIP
+Pos -1 -1 EMPTY
+Pos 0 -1 FULL
+Pos 1 -1 EMPTY
+Pos -1 0 FULL
+Pos 1 0 FULL
+Pos -1 1 FULL
+Pos 0 1 FULL
+Pos 1 1 EMPTY
+
+#1D2S3D4D
+Index 40 YFLIP
+Pos -1 -1 EMPTY
+Pos 0 -1 FULL
+Pos 1 -1 FULL
+Pos -1 0 FULL
+Pos 1 0 FULL
+Pos -1 1 EMPTY
+Pos 0 1 FULL
+Pos 1 1 EMPTY
+
+#1D2S3D4D
+Index 40 XFLIP YFLIP
+Pos -1 -1 FULL
+Pos 0 -1 FULL
+Pos 1 -1 EMPTY
+Pos -1 0 FULL
+Pos 1 0 FULL
+Pos -1 1 EMPTY
+Pos 0 1 FULL
+Pos 1 1 EMPTY
+
+#1D2S3S4D
+Index 41
+Pos -1 -1 EMPTY
+Pos 0 -1 FULL
+Pos 1 -1 EMPTY
+Pos -1 0 FULL
+Pos 1 0 FULL
+Pos -1 1 FULL
+Pos 0 1 FULL
+Pos 1 1 FULL
+
+#1D2S3S4D
+Index 41 YFLIP
+Pos -1 -1 FULL
+Pos 0 -1 FULL
+Pos 1 -1 FULL
+Pos -1 0 FULL
+Pos 1 0 FULL
+Pos -1 1 EMPTY
+Pos 0 1 FULL
+Pos 1 1 EMPTY
+
+#1S2S3S4D
+Index 42
+Pos -1 -1 EMPTY
+Pos 0 -1 FULL
+Pos 1 -1 FULL
+Pos -1 0 FULL
+Pos 1 0 FULL
+Pos -1 1 FULL
+Pos 0 1 FULL
+Pos 1 1 FULL
+
+#1S2S3S4D
+Index 42 XFLIP
+Pos -1 -1 FULL
+Pos 0 -1 FULL
+Pos 1 -1 EMPTY
+Pos -1 0 FULL
+Pos 1 0 FULL
+Pos -1 1 FULL
+Pos 0 1 FULL
+Pos 1 1 FULL
+
+#1S2S3S4D
+Index 42 YFLIP
+Pos -1 -1 FULL
+Pos 0 -1 FULL
+Pos 1 -1 FULL
+Pos -1 0 FULL
+Pos 1 0 FULL
+Pos -1 1 EMPTY
+Pos 0 1 FULL
+Pos 1 1 FULL
+
+#1S2S3S4D
+Index 42 XFLIP YFLIP
+Pos -1 -1 FULL
+Pos 0 -1 FULL
+Pos 1 -1 FULL
+Pos -1 0 FULL
+Pos 1 0 FULL
+Pos -1 1 FULL
+Pos 0 1 FULL
+Pos 1 1 EMPTY
+
+#1S2D3S4D
+Index 43
+Pos -1 -1 EMPTY
+Pos 0 -1 FULL
+Pos 1 -1 FULL
+Pos -1 0 FULL
+Pos 1 0 FULL
+Pos -1 1 FULL
+Pos 0 1 FULL
+Pos 1 1 EMPTY
+
+#1S2D3S4D
+Index 43 XFLIP
+Pos -1 -1 FULL
+Pos 0 -1 FULL
+Pos 1 -1 EMPTY
+Pos -1 0 FULL
+Pos 1 0 FULL
+Pos -1 1 EMPTY
+Pos 0 1 FULL
+Pos 1 1 FULL
+
+#1S2S3D4D
+Index 44
+Pos -1 -1 EMPTY
+Pos 0 -1 FULL
+Pos 1 -1 FULL
+Pos -1 0 FULL
+Pos 1 0 FULL
+Pos -1 1 EMPTY
+Pos 0 1 FULL
+Pos 1 1 FULL
+
+#1S2S3D4D
+Index 44 XFLIP
+Pos -1 -1 FULL
+Pos 0 -1 FULL
+Pos 1 -1 EMPTY
+Pos -1 0 FULL
+Pos 1 0 FULL
+Pos -1 1 FULL
+Pos 0 1 FULL
+Pos 1 1 EMPTY
+
+#1W2D3S4W
+Index 55
+Pos 0 -1 EMPTY
+Pos -1 0 EMPTY
+Pos 0 1 FULL
+Pos 1 1 EMPTY
+Pos 1 0 FULL
+
+#1W2D3S4W
+Index 55 XFLIP
+Pos 0 -1 EMPTY
+Pos 1 0 EMPTY
+Pos -1 1 EMPTY
+Pos 0 1 FULL
+Pos -1 0 FULL
+
+#1W2D3S4W
+Index 55 YFLIP
+Pos -1 0 EMPTY
+Pos 0 1 EMPTY
+Pos 1 -1 EMPTY
+Pos 0 -1 FULL
+Pos 1 0 FULL
+
+#1W2D3S4W
+Index 55 XFLIP YFLIP
+Pos 1 0 EMPTY
+Pos 0 1 EMPTY
+Pos -1 -1 EMPTY
+Pos 0 -1 FULL
+Pos -1 0 FULL
+
+#1W2D3D4S
+Index 56
+Pos -1 1 EMPTY
+Pos 0 1 FULL
+Pos 1 1 EMPTY
+Pos 1 0 FULL
+Pos -1 0 FULL
+Pos 0 -1 EMPTY
+
+#1W2D3D4S
+Index 56 YFLIP
+Pos -1 -1 EMPTY
+Pos 1 -1 EMPTY
+Pos 0 -1 FULL
+Pos 1 0 FULL
+Pos -1 0 FULL
+Pos 0 1 EMPTY
+
+#1W2S3D4S
+Index 57
+Pos -1 1 EMPTY
+Pos 0 1 FULL
+Pos 1 1 FULL
+Pos 1 0 FULL
+Pos -1 0 FULL
+Pos 0 -1 EMPTY
+
+#1W2S3D4S
+Index 57 XFLIP
+Pos -1 1 FULL
+Pos 0 1 FULL
+Pos 1 1 EMPTY
+Pos 1 0 FULL
+Pos -1 0 FULL
+Pos 0 -1 EMPTY
+
+#1W2S3D4S
+Index 57 YFLIP
+Pos -1 -1 EMPTY
+Pos 1 -1 FULL
+Pos 0 -1 FULL
+Pos 1 0 FULL
+Pos -1 0 FULL
+Pos 0 1 EMPTY
+
+#1W2S3D4S
+Index 57 XFLIP YFLIP
+Pos -1 -1 FULL
+Pos 1 -1 EMPTY
+Pos 0 -1 FULL
+Pos 1 0 FULL
+Pos -1 0 FULL
+Pos 0 1 EMPTY
+
+#1S2W3S4W
+Index 58
+Pos -1 0 EMPTY
+Pos 1 0 EMPTY
+Pos 0 -1 FULL
+Pos 0 1 FULL
+
+#1W2S3W4W
+Index 59
+Pos 0 -1 EMPTY
+Pos -1 0 EMPTY
+Pos 1 0 FULL
+Pos 0 1 EMPTY
+
+#1W2S3W4W
+Index 59 XFLIP
+Pos 0 -1 EMPTY
+Pos -1 0 FULL
+Pos 1 0 EMPTY
+Pos 0 1 EMPTY
+
+#1S2S3S4W
+Index 60
+Pos 0 -1 FULL
+Pos -1 0 EMPTY
+Pos 1 0 FULL
+Pos 0 1 FULL
+Pos 1 -1 FULL
+Pos 1 1 FULL
+
+#1S2S3S4W
+Index 60 XFLIP
+Pos 0 -1 FULL
+Pos -1 -1 FULL
+Pos -1 0 FULL
+Pos -1 1 FULL
+Pos 1 0 EMPTY
+Pos 0 1 FULL
+
+#1D2D3S4W
+Index 71
+Pos 0 -1 FULL
+Pos -1 0 EMPTY
+Pos 1 0 FULL
+Pos 0 1 FULL
+Pos 1 -1 EMPTY
+Pos 1 1 EMPTY
+
+#1D2D3S4W
+Index 71 XFLIP
+Pos 0 -1 FULL
+Pos -1 -1 EMPTY
+Pos -1 0 FULL
+Pos -1 1 EMPTY
+Pos 1 0 EMPTY
+Pos 0 1 FULL
+
+#1S2W3D4S
+Index 72
+Pos 0 -1 FULL
+Pos -1 -1 FULL
+Pos -1 0 FULL
+Pos -1 1 EMPTY
+Pos 1 0 EMPTY
+Pos 0 1 FULL
+
+#1S2W3D4S
+Index 72 XFLIP
+Pos 0 -1 FULL
+Pos -1 0 EMPTY
+Pos 1 0 FULL
+Pos 0 1 FULL
+Pos 1 -1 FULL
+Pos 1 1 EMPTY
+
+#1S2W3D4S
+Index 72 YFLIP
+Pos 0 -1 FULL
+Pos -1 -1 EMPTY
+Pos -1 0 FULL
+Pos -1 1 FULL
+Pos 1 0 EMPTY
+Pos 0 1 FULL
+
+#1S2W3D4S
+Index 72 XFLIP YFLIP
+Pos 0 -1 FULL
+Pos -1 0 EMPTY
+Pos 1 0 FULL
+Pos 0 1 FULL
+Pos 1 -1 EMPTY
+Pos 1 1 FULL
+
+
+[Green Water]
+Index 96
+
+#1W2W3W4W
+Index 97
+Pos 0 -1 EMPTY
+Pos 0 1 EMPTY
+Pos -1 0 EMPTY
+Pos 1 0 EMPTY
+
+#1W2W3S4W
+Index 98
+Pos 0 -1 EMPTY
+Pos -1 0 EMPTY
+Pos 0 1 FULL
+Pos 1 0 EMPTY
+
+#1W2W3S4W
+Index 98 YFLIP
+Pos 0 -1 FULL
+Pos -1 0 EMPTY
+Pos 0 1 EMPTY
+Pos 1 0 EMPTY
+
+#1W2S3S4W
+Index 99
+Pos 0 -1 EMPTY
+Pos -1 0 EMPTY
+Pos 0 1 FULL
+Pos 1 0 FULL
+Pos 1 1 FULL
+
+#1W2S3S4W
+Index 99 YFLIP
+Pos 0 -1 FULL
+Pos -1 0 EMPTY
+Pos 0 1 EMPTY
+Pos 1 0 FULL
+Pos 1 -1 FULL
+
+#1W2S3S4W
+Index 99 XFLIP
+Pos 0 -1 EMPTY
+Pos 0 1 FULL
+Pos -1 0 FULL
+Pos 1 0 EMPTY
+Pos -1 1 FULL
+
+#1W2S3S4W
+Index 99 XFLIP YFLIP
+Pos -1 -1 FULL
+Pos 0 -1 FULL
+Pos -1 0 FULL
+Pos 1 0 EMPTY
+Pos 0 1 EMPTY
+
+#1W2S3W4S
+Index 100
+Pos -1 0 FULL
+Pos 1 0 FULL
+Pos 0 -1 EMPTY
+Pos 0 1 EMPTY
+
+#1W2S3S4S
+Index 101
+Pos -1 1 FULL
+Pos 0 1 FULL
+Pos 1 1 FULL
+Pos 1 0 FULL
+Pos -1 0 FULL
+Pos 0 -1 EMPTY
+
+#1W2S3S4S
+Index 101 YFLIP
+Pos -1 -1 FULL
+Pos 1 -1 FULL
+Pos 0 -1 FULL
+Pos 1 0 FULL
+Pos -1 0 FULL
+Pos 0 1 EMPTY
+
+#1D2D3D4D
+Index 112
+Pos -1 -1 EMPTY
+Pos 0 -1 FULL
+Pos 1 -1 EMPTY
+Pos -1 0 FULL
+Pos 1 0 FULL
+Pos -1 1 EMPTY
+Pos 0 1 FULL
+Pos 1 1 EMPTY
+
+#1D2S3D4D
+Index 113
+Pos -1 -1 EMPTY
+Pos 0 -1 FULL
+Pos 1 -1 EMPTY
+Pos -1 0 FULL
+Pos 1 0 FULL
+Pos -1 1 EMPTY
+Pos 0 1 FULL
+Pos 1 1 FULL
+
+#1D2S3D4D
+Index 113 XFLIP
+Pos -1 -1 EMPTY
+Pos 0 -1 FULL
+Pos 1 -1 EMPTY
+Pos -1 0 FULL
+Pos 1 0 FULL
+Pos -1 1 FULL
+Pos 0 1 FULL
+Pos 1 1 EMPTY
+
+#1D2S3D4D
+Index 113 YFLIP
+Pos -1 -1 EMPTY
+Pos 0 -1 FULL
+Pos 1 -1 FULL
+Pos -1 0 FULL
+Pos 1 0 FULL
+Pos -1 1 EMPTY
+Pos 0 1 FULL
+Pos 1 1 EMPTY
+
+#1D2S3D4D
+Index 113 XFLIP YFLIP
+Pos -1 -1 FULL
+Pos 0 -1 FULL
+Pos 1 -1 EMPTY
+Pos -1 0 FULL
+Pos 1 0 FULL
+Pos -1 1 EMPTY
+Pos 0 1 FULL
+Pos 1 1 EMPTY
+
+#1D2S3S4D
+Index 114
+Pos -1 -1 EMPTY
+Pos 0 -1 FULL
+Pos 1 -1 EMPTY
+Pos -1 0 FULL
+Pos 1 0 FULL
+Pos -1 1 FULL
+Pos 0 1 FULL
+Pos 1 1 FULL
+
+#1D2S3S4D
+Index 114 YFLIP
+Pos -1 -1 FULL
+Pos 0 -1 FULL
+Pos 1 -1 FULL
+Pos -1 0 FULL
+Pos 1 0 FULL
+Pos -1 1 EMPTY
+Pos 0 1 FULL
+Pos 1 1 EMPTY
+
+#1S2S3S4D
+Index 115
+Pos -1 -1 EMPTY
+Pos 0 -1 FULL
+Pos 1 -1 FULL
+Pos -1 0 FULL
+Pos 1 0 FULL
+Pos -1 1 FULL
+Pos 0 1 FULL
+Pos 1 1 FULL
+
+#1S2S3S4D
+Index 115 XFLIP
+Pos -1 -1 FULL
+Pos 0 -1 FULL
+Pos 1 -1 EMPTY
+Pos -1 0 FULL
+Pos 1 0 FULL
+Pos -1 1 FULL
+Pos 0 1 FULL
+Pos 1 1 FULL
+
+#1S2S3S4D
+Index 115 YFLIP
+Pos -1 -1 FULL
+Pos 0 -1 FULL
+Pos 1 -1 FULL
+Pos -1 0 FULL
+Pos 1 0 FULL
+Pos -1 1 EMPTY
+Pos 0 1 FULL
+Pos 1 1 FULL
+
+#1S2S3S4D
+Index 115 XFLIP YFLIP
+Pos -1 -1 FULL
+Pos 0 -1 FULL
+Pos 1 -1 FULL
+Pos -1 0 FULL
+Pos 1 0 FULL
+Pos -1 1 FULL
+Pos 0 1 FULL
+Pos 1 1 EMPTY
+
+#1S2D3S4D
+Index 116
+Pos -1 -1 EMPTY
+Pos 0 -1 FULL
+Pos 1 -1 FULL
+Pos -1 0 FULL
+Pos 1 0 FULL
+Pos -1 1 FULL
+Pos 0 1 FULL
+Pos 1 1 EMPTY
+
+#1S2D3S4D
+Index 116 XFLIP
+Pos -1 -1 FULL
+Pos 0 -1 FULL
+Pos 1 -1 EMPTY
+Pos -1 0 FULL
+Pos 1 0 FULL
+Pos -1 1 EMPTY
+Pos 0 1 FULL
+Pos 1 1 FULL
+
+#1S2S3D4D
+Index 117
+Pos -1 -1 EMPTY
+Pos 0 -1 FULL
+Pos 1 -1 FULL
+Pos -1 0 FULL
+Pos 1 0 FULL
+Pos -1 1 EMPTY
+Pos 0 1 FULL
+Pos 1 1 FULL
+
+#1S2S3D4D
+Index 117 XFLIP
+Pos -1 -1 FULL
+Pos 0 -1 FULL
+Pos 1 -1 EMPTY
+Pos -1 0 FULL
+Pos 1 0 FULL
+Pos -1 1 FULL
+Pos 0 1 FULL
+Pos 1 1 EMPTY
+
+#1W2D3S4W
+Index 128
+Pos 0 -1 EMPTY
+Pos -1 0 EMPTY
+Pos 0 1 FULL
+Pos 1 1 EMPTY
+Pos 1 0 FULL
+
+#1W2D3S4W
+Index 128 XFLIP
+Pos 0 -1 EMPTY
+Pos 1 0 EMPTY
+Pos -1 1 EMPTY
+Pos 0 1 FULL
+Pos -1 0 FULL
+
+#1W2D3S4W
+Index 128 YFLIP
+Pos -1 0 EMPTY
+Pos 0 1 EMPTY
+Pos 1 -1 EMPTY
+Pos 0 -1 FULL
+Pos 1 0 FULL
+
+#1W2D3S4W
+Index 128 XFLIP YFLIP
+Pos 1 0 EMPTY
+Pos 0 1 EMPTY
+Pos -1 -1 EMPTY
+Pos 0 -1 FULL
+Pos -1 0 FULL
+
+#1W2D3D4S
+Index 129
+Pos -1 1 EMPTY
+Pos 0 1 FULL
+Pos 1 1 EMPTY
+Pos 1 0 FULL
+Pos -1 0 FULL
+Pos 0 -1 EMPTY
+
+#1W2D3D4S
+Index 129 YFLIP
+Pos -1 -1 EMPTY
+Pos 1 -1 EMPTY
+Pos 0 -1 FULL
+Pos 1 0 FULL
+Pos -1 0 FULL
+Pos 0 1 EMPTY
+
+#1W2S3D4S
+Index 130
+Pos -1 1 EMPTY
+Pos 0 1 FULL
+Pos 1 1 FULL
+Pos 1 0 FULL
+Pos -1 0 FULL
+Pos 0 -1 EMPTY
+
+#1W2S3D4S
+Index 130 XFLIP
+Pos -1 1 FULL
+Pos 0 1 FULL
+Pos 1 1 EMPTY
+Pos 1 0 FULL
+Pos -1 0 FULL
+Pos 0 -1 EMPTY
+
+#1W2S3D4S
+Index 130 YFLIP
+Pos -1 -1 EMPTY
+Pos 1 -1 FULL
+Pos 0 -1 FULL
+Pos 1 0 FULL
+Pos -1 0 FULL
+Pos 0 1 EMPTY
+
+#1W2S3D4S
+Index 130 XFLIP YFLIP
+Pos -1 -1 FULL
+Pos 1 -1 EMPTY
+Pos 0 -1 FULL
+Pos 1 0 FULL
+Pos -1 0 FULL
+Pos 0 1 EMPTY
+
+#1S2W3S4W
+Index 131
+Pos -1 0 EMPTY
+Pos 1 0 EMPTY
+Pos 0 -1 FULL
+Pos 0 1 FULL
+
+#1W2S3W4W
+Index 132
+Pos 0 -1 EMPTY
+Pos -1 0 EMPTY
+Pos 1 0 FULL
+Pos 0 1 EMPTY
+
+#1W2S3W4W
+Index 132 XFLIP
+Pos 0 -1 EMPTY
+Pos -1 0 FULL
+Pos 1 0 EMPTY
+Pos 0 1 EMPTY
+
+#1S2S3S4W
+Index 133
+Pos 0 -1 FULL
+Pos -1 0 EMPTY
+Pos 1 0 FULL
+Pos 0 1 FULL
+Pos 1 -1 FULL
+Pos 1 1 FULL
+
+#1S2S3S4W
+Index 133 XFLIP
+Pos 0 -1 FULL
+Pos -1 -1 FULL
+Pos -1 0 FULL
+Pos -1 1 FULL
+Pos 1 0 EMPTY
+Pos 0 1 FULL
+
+#1D2D3S4W
+Index 144
+Pos 0 -1 FULL
+Pos -1 0 EMPTY
+Pos 1 0 FULL
+Pos 0 1 FULL
+Pos 1 -1 EMPTY
+Pos 1 1 EMPTY
+
+#1D2D3S4W
+Index 144 XFLIP
+Pos 0 -1 FULL
+Pos -1 -1 EMPTY
+Pos -1 0 FULL
+Pos -1 1 EMPTY
+Pos 1 0 EMPTY
+Pos 0 1 FULL
+
+#1S2W3D4S
+Index 145
+Pos 0 -1 FULL
+Pos -1 -1 FULL
+Pos -1 0 FULL
+Pos -1 1 EMPTY
+Pos 1 0 EMPTY
+Pos 0 1 FULL
+
+#1S2W3D4S
+Index 145 XFLIP
+Pos 0 -1 FULL
+Pos -1 0 EMPTY
+Pos 1 0 FULL
+Pos 0 1 FULL
+Pos 1 -1 FULL
+Pos 1 1 EMPTY
+
+#1S2W3D4S
+Index 145 YFLIP
+Pos 0 -1 FULL
+Pos -1 -1 EMPTY
+Pos -1 0 FULL
+Pos -1 1 FULL
+Pos 1 0 EMPTY
+Pos 0 1 FULL
+
+#1S2W3D4S
+Index 145 XFLIP YFLIP
+Pos 0 -1 FULL
+Pos -1 0 EMPTY
+Pos 1 0 FULL
+Pos 0 1 FULL
+Pos 1 -1 EMPTY
+Pos 1 1 FULL

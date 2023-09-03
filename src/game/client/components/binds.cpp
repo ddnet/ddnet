@@ -8,7 +8,7 @@
 
 static const ColorRGBA gs_BindPrintColor{1.0f, 1.0f, 0.8f, 1.0f};
 
-bool CBinds::CBindsSpecial::OnInput(IInput::CEvent Event)
+bool CBinds::CBindsSpecial::OnInput(const IInput::CEvent &Event)
 {
 	// only handle F and composed F binds
 	if(((Event.m_Key >= KEY_F1 && Event.m_Key <= KEY_F12) || (Event.m_Key >= KEY_F13 && Event.m_Key <= KEY_F24)) && (Event.m_Key != KEY_F5 || !m_pClient->m_Menus.IsActive()))
@@ -123,33 +123,35 @@ int CBinds::GetModifierMaskOfKey(int Key)
 	}
 }
 
-bool CBinds::OnInput(IInput::CEvent e)
+bool CBinds::OnInput(const IInput::CEvent &Event)
 {
 	// don't handle invalid events
-	if(e.m_Key <= 0 || e.m_Key >= KEY_LAST)
+	if(Event.m_Key <= KEY_FIRST || Event.m_Key >= KEY_LAST)
 		return false;
 
 	int Mask = GetModifierMask(Input());
-	int KeyModifierMask = GetModifierMaskOfKey(e.m_Key);
+	int KeyModifierMask = GetModifierMaskOfKey(Event.m_Key);
 	Mask &= ~KeyModifierMask;
 
 	bool ret = false;
-	if(m_aapKeyBindings[Mask][e.m_Key])
+	if(m_aapKeyBindings[Mask][Event.m_Key])
 	{
-		if(e.m_Flags & IInput::FLAG_PRESS)
-			Console()->ExecuteLineStroked(1, m_aapKeyBindings[Mask][e.m_Key]);
-		if(e.m_Flags & IInput::FLAG_RELEASE)
-			Console()->ExecuteLineStroked(0, m_aapKeyBindings[Mask][e.m_Key]);
+		if(Event.m_Flags & IInput::FLAG_PRESS)
+			Console()->ExecuteLineStroked(1, m_aapKeyBindings[Mask][Event.m_Key]);
+		// Have to check for nullptr again because the previous execute can unbind itself
+		if(Event.m_Flags & IInput::FLAG_RELEASE && m_aapKeyBindings[Mask][Event.m_Key])
+			Console()->ExecuteLineStroked(0, m_aapKeyBindings[Mask][Event.m_Key]);
 		ret = true;
 	}
 
-	if(m_aapKeyBindings[0][e.m_Key] && !ret)
+	if(m_aapKeyBindings[0][Event.m_Key] && !ret)
 	{
 		// When ctrl+shift are pressed (ctrl+shift binds and also the hard-coded ctrl+shift+d, ctrl+shift+g, ctrl+shift+e), ignore other +xxx binds
-		if(e.m_Flags & IInput::FLAG_PRESS && Mask != ((1 << MODIFIER_CTRL) | (1 << MODIFIER_SHIFT)) && Mask != ((1 << MODIFIER_GUI) | (1 << MODIFIER_SHIFT)))
-			Console()->ExecuteLineStroked(1, m_aapKeyBindings[0][e.m_Key]);
-		if(e.m_Flags & IInput::FLAG_RELEASE)
-			Console()->ExecuteLineStroked(0, m_aapKeyBindings[0][e.m_Key]);
+		if(Event.m_Flags & IInput::FLAG_PRESS && Mask != ((1 << MODIFIER_CTRL) | (1 << MODIFIER_SHIFT)) && Mask != ((1 << MODIFIER_GUI) | (1 << MODIFIER_SHIFT)))
+			Console()->ExecuteLineStroked(1, m_aapKeyBindings[0][Event.m_Key]);
+		// Have to check for nullptr again because the previous execute can unbind itself
+		if(Event.m_Flags & IInput::FLAG_RELEASE && m_aapKeyBindings[0][Event.m_Key])
+			Console()->ExecuteLineStroked(0, m_aapKeyBindings[0][Event.m_Key]);
 		ret = true;
 	}
 
@@ -253,7 +255,7 @@ void CBinds::OnConsoleInit()
 	if(pConfigManager)
 		pConfigManager->RegisterCallback(ConfigSaveCallback, this);
 
-	Console()->Register("bind", "s[key] r[command]", CFGFLAG_CLIENT, ConBind, this, "Bind key to execute the command");
+	Console()->Register("bind", "s[key] ?r[command]", CFGFLAG_CLIENT, ConBind, this, "Bind key to execute a command or view keybindings");
 	Console()->Register("binds", "?s[key]", CFGFLAG_CLIENT, ConBinds, this, "Print command executed by this keybinding or all binds");
 	Console()->Register("unbind", "s[key]", CFGFLAG_CLIENT, ConUnbind, this, "Unbind key");
 	Console()->Register("unbindall", "", CFGFLAG_CLIENT, ConUnbindAll, this, "Unbind all keys");
@@ -273,6 +275,20 @@ void CBinds::ConBind(IConsole::IResult *pResult, void *pUserData)
 	{
 		char aBuf[256];
 		str_format(aBuf, sizeof(aBuf), "key %s not found", pBindStr);
+		pBinds->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf, gs_BindPrintColor);
+		return;
+	}
+
+	if(pResult->NumArguments() == 1)
+	{
+		char aBuf[256];
+		const char *pKeyName = pResult->GetString(0);
+
+		if(!pBinds->m_aapKeyBindings[Modifier][KeyID])
+			str_format(aBuf, sizeof(aBuf), "%s (%d) is not bound", pKeyName, KeyID);
+		else
+			str_format(aBuf, sizeof(aBuf), "%s (%d) = %s", pKeyName, KeyID, pBinds->m_aapKeyBindings[Modifier][KeyID]);
+
 		pBinds->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf, gs_BindPrintColor);
 		return;
 	}
@@ -419,8 +435,8 @@ const char *CBinds::GetKeyBindModifiersName(int ModifierCombination)
 	{
 		if(ModifierCombination & (1 << k))
 		{
-			str_append(aModifier, GetModifierName(k), sizeof(aModifier));
-			str_append(aModifier, "+", sizeof(aModifier));
+			str_append(aModifier, GetModifierName(k));
+			str_append(aModifier, "+");
 		}
 	}
 	return aModifier;

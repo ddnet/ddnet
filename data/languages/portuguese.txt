@@ -80,12 +80,6 @@ Clan
 Client
 == Cliente
 
-Close
-== Fechar
-
-Connect
-== Ligar
-
 Connecting to
 == A ligar ao endereço
 
@@ -363,9 +357,6 @@ Reset
 Reset filter
 == Reiniciar filtro
 
-Sample rate
-== Frequencia de rate
-
 Score
 == Pontos
 
@@ -642,9 +633,6 @@ HUD
 Show names in chat in team colors
 == Mostrar nomes no chat com cores da equipa
 
-Select a name
-== Escolha um nome
-
 Enable team chat sound
 == Ativar o som do chat de equipa
 
@@ -668,9 +656,6 @@ Gameplay
 
 Restart
 == Reiniciar
-
-Old mouse mode
-== Modo de rato antigo
 
 Browser
 == Navegador
@@ -858,9 +843,6 @@ Theme
 %d player
 == %d jogador
 
-Refreshing...
-== A atualizar...
-
 Date
 == Data
 
@@ -951,10 +933,6 @@ Stop server
 Editor
 == Editor
 
-[Start menu]
-
-[Graphics error]
-
 [Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
 == 
@@ -1030,7 +1008,10 @@ Initializing map logic
 Sending initial client info
 == 
 
-Search:
+Quitting. Please wait…
+== 
+
+Restarting. Please wait…
 == 
 
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
@@ -1045,10 +1026,16 @@ Speed:
 Angle:
 == 
 
+Multi-View
+== 
+
 Server best:
 == 
 
 Personal best:
+== 
+
+Team %d
 == 
 
 Uploading map data to GPU
@@ -1072,6 +1059,9 @@ Getting game info
 Requesting to join the game
 == 
 
+Rename folder
+== 
+
 Render demo
 == 
 
@@ -1081,13 +1071,22 @@ DDraceNetwork is a cooperative online game where the goal is for you and your gr
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
 == 
 
-Cancel
+A demo with this name already exists
+== 
+
+A folder with this name already exists
+== 
+
+Unable to rename the folder
 == 
 
 File '%s' already exists, do you want to overwrite it?
 == 
 
 Replace video
+== 
+
+(paused)
 == 
 
 Join Tutorial Server
@@ -1141,10 +1140,38 @@ Copy info
 Leak IP
 == 
 
+No server selected
+== 
+
+Online players (%d)
+== 
+
+Online clanmates (%d)
+== 
+
+[friends (server browser)]
+Offline (%d)
+== 
+
+Click to select server. Double click to join your friend.
+== 
+
+Click to remove this player from your friends list.
+== 
+
+Click to remove this clan from your friends list.
+== 
+
+None
+== 
+
 Are you sure that you want to remove the player '%s' from your friends list?
 == 
 
 Are you sure that you want to remove the clan '%s' from your friends list?
+== 
+
+Add Clan
 == 
 
 Play the current demo
@@ -1168,10 +1195,10 @@ Slow down the demo
 Speed up the demo
 == 
 
-Mark the beginning of a cut
+Mark the beginning of a cut (right click to reset)
 == 
 
-Mark the end of a cut
+Mark the end of a cut (right click to reset)
 == 
 
 Export cut as a separate demo
@@ -1183,10 +1210,28 @@ Go back one marker
 Go forward one marker
 == 
 
+Close the demo player
+== 
+
 Toggle keyboard shortcuts
 == 
 
+Export demo cut
+== 
+
+Cut interval
+== 
+
+Cut length
+== 
+
 Loading demo files
+== 
+
+All combined
+== 
+
+Folder Link
 == 
 
 Markers:
@@ -1213,13 +1258,22 @@ Demos directory
 Open the directory that contains the demo files
 == 
 
+Are you sure that you want to delete the folder '%s'?
+== 
+
 Are you sure that you want to delete the demo '%s'?
+== 
+
+Delete folder
 == 
 
 Render
 == 
 
 Unable to delete the demo '%s'
+== 
+
+Unable to delete the folder '%s'. Make sure it's empty first.
 == 
 
 Kill
@@ -1279,6 +1333,9 @@ Skin prefix
 Choose default eyes when joining a server
 == 
 
+Create a random skin
+== 
+
 Skin Database
 == 
 
@@ -1333,10 +1390,10 @@ Chat command
 Enable controller
 == 
 
-Controller %d: %s
+Controller
 == 
 
-Click to cycle through all available controllers.
+Ingame controller mode
 == 
 
 [Ingame controller mode]
@@ -1345,9 +1402,6 @@ Relative
 
 [Ingame controller mode]
 Absolute
-== 
-
-Ingame controller mode
 == 
 
 Ingame controller sens.
@@ -1362,16 +1416,13 @@ Controller jitter tolerance
 No controller found. Plug in a controller.
 == 
 
-Device
+Axis
 == 
 
 Status
 == 
 
 Aim bind
-== 
-
-Controller Axis #%d
 == 
 
 Mouse
@@ -1383,13 +1434,13 @@ Ingame mouse sens.
 UI mouse sens.
 == 
 
-Controller
-== 
-
 Reset controls
 == 
 
 Are you sure that you want to reset the controls to their defaults?
+== 
+
+Cancel
 == 
 
 Windowed fullscreen
@@ -1413,16 +1464,13 @@ default
 custom
 == 
 
-Graphics cards
+Graphics card
 == 
 
 auto
 == 
 
 Enable long pain sound (used when shooting in freeze)
-== 
-
-Threaded sound loading
 == 
 
 Appearance
@@ -1557,7 +1605,7 @@ Set all to Rifle
 Enable replays
 == 
 
-Default length: %d
+Default length
 == 
 
 When you cross the start line, show a ghost tee replicating the movements of your best time
@@ -1654,9 +1702,6 @@ Loading race demo files
 Super
 == 
 
-Team %d
-== 
-
 Manual
 == 
 
@@ -1697,4 +1742,7 @@ Grabs
 == 
 
 9+ new mentions
+== 
+
+Moved ingame
 == 

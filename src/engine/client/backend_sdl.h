@@ -92,9 +92,6 @@ protected:
 		return m_Warning.m_WarningType != GFX_WARNING_TYPE_NONE;
 	}
 
-	// returns true if the error msg was shown
-	virtual bool TryCreateMsgBox(bool AsError, const char *pTitle, const char *pMsg) = 0;
-
 private:
 	ICommandProcessor *m_pProcessor;
 	std::mutex m_BufferSwapMutex;
@@ -243,9 +240,6 @@ class CGraphicsBackend_SDL_GL : public CGraphicsBackend_Threaded
 	static EBackendType DetectBackend();
 	static void ClampDriverVersion(EBackendType BackendType);
 
-protected:
-	bool TryCreateMsgBox(bool AsError, const char *pTitle, const char *pMsg) override;
-
 public:
 	CGraphicsBackend_SDL_GL(TTranslateFunc &&TranslateFunc);
 	int Init(const char *pName, int *pScreen, int *pWidth, int *pHeight, int *pRefreshRate, int *pFsaaSamples, int Flags, int *pDesktopWidth, int *pDesktopHeight, int *pCurrentWidth, int *pCurrentHeight, class IStorage *pStorage) override;
@@ -259,6 +253,7 @@ public:
 	const TTWGraphicsGPUList &GetGPUs() const override;
 
 	int GetNumScreens() const override { return m_NumScreens; }
+	const char *GetScreenName(int Screen) const override;
 
 	void GetVideoModes(CVideoMode *pModes, int MaxModes, int *pNumModes, int HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int ScreenID) override;
 	void GetCurrentVideoMode(CVideoMode &CurMode, int HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int ScreenID) override;
@@ -312,6 +307,8 @@ public:
 	}
 
 	TGLBackendReadPresentedImageData &GetReadPresentedImageDataFuncUnsafe() override;
+
+	bool ShowMessageBox(unsigned Type, const char *pTitle, const char *pMsg) override;
 
 	static bool IsModernAPI(EBackendType BackendType);
 };

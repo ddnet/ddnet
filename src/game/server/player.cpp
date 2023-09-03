@@ -111,6 +111,8 @@ void CPlayer::Reset()
 
 	GameServer()->Score()->PlayerData(m_ClientID)->Reset();
 
+	m_Last_KickVote = 0;
+	m_Last_Team = 0;
 	m_ShowOthers = g_Config.m_SvShowOthersDefault;
 	m_ShowAll = g_Config.m_SvShowAllDefault;
 	m_ShowDistance = vec2(1200, 800);
@@ -121,9 +123,8 @@ void CPlayer::Reset()
 	m_DND = false;
 
 	m_LastPause = 0;
-	m_Score = -9999;
+	m_Score.reset();
 	m_Score = 0; // gctf
-	m_HasFinishScore = false;
 
 	// Variable initialized:
 	m_Last_Team = 0;
@@ -279,7 +280,7 @@ void CPlayer::Tick()
 	{
 		if(1200 - ((Server()->Tick() - m_pCharacter->GetLastAction()) % (1200)) < 5)
 		{
-			GameServer()->SendEmoticon(GetCID(), EMOTICON_GHOST);
+			GameServer()->SendEmoticon(GetCID(), EMOTICON_GHOST, -1);
 		}
 	}
 }
@@ -336,12 +337,31 @@ void CPlayer::Snap(int SnappingClient)
 
 	int SnappingClientVersion = GameServer()->GetClientVersion(SnappingClient);
 	int Latency = SnappingClient == SERVER_DEMO_CLIENT ? m_Latency.m_Min : GameServer()->m_apPlayers[SnappingClient]->m_aCurLatency[m_ClientID];
-	// int Score = absolute(m_Score) * -1;
-	int Score = m_Score; // gctf
+
+	int Score;
+	// This is the time sent to the player while ingame (do not confuse to the one reported to the master server).
+	// Due to clients expecting this as a negative value, we have to make sure it's negative.
+	// Special numbers:
+	// -9999: means no time and isn't displayed in the scoreboard.
+	if(m_Score.has_value())
+	{
+		// shift the time by a second if the player actually took 9999
+		// seconds to finish the map.
+		if(m_Score.value() == 9999)
+			Score = -10000;
+		else
+			Score = -m_Score.value();
+	}
+	else
+	{
+		Score = -9999;
+	}
 
 	// send 0 if times of others are not shown
 	if(SnappingClient != m_ClientID && g_Config.m_SvHideScore)
 		Score = -9999;
+
+	Score = m_Score.has_value() ? m_Score.value() : 0; // gctf
 
 	if(!Server()->IsSixup(SnappingClient))
 	{
@@ -560,11 +580,11 @@ CCharacter *CPlayer::GetCharacter()
 	return 0;
 }
 
-void CPlayer::KillCharacter(int Weapon)
+void CPlayer::KillCharacter(int Weapon, bool SendKillMsg)
 {
 	if(m_pCharacter)
 	{
-		m_pCharacter->Die(m_ClientID, Weapon);
+		m_pCharacter->Die(m_ClientID, Weapon, SendKillMsg);
 
 		delete m_pCharacter;
 		m_pCharacter = 0;
@@ -889,14 +909,11 @@ void CPlayer::ProcessScoreResult(CScorePlayerResult &Result)
 			GameServer()->CallVote(m_ClientID, Result.m_Data.m_MapVote.m_aMap, aCmd, "/map", aChatmsg);
 			break;
 		case CScorePlayerResult::PLAYER_INFO:
-			GameServer()->Score()->PlayerData(m_ClientID)->Set(Result.m_Data.m_Info.m_Time, Result.m_Data.m_Info.m_aTimeCp);
-			m_Score = Result.m_Data.m_Info.m_Score;
-			m_HasFinishScore = Result.m_Data.m_Info.m_HasFinishScore;
-			// -9999 stands for no time and isn't displayed in scoreboard, so
-			// shift the time by a second if the player actually took 9999
-			// seconds to finish the map.
-			if(m_HasFinishScore && m_Score == -9999)
-				m_Score = -10000;
+			if(Result.m_Data.m_Info.m_Time.has_value())
+			{
+				GameServer()->Score()->PlayerData(m_ClientID)->Set(Result.m_Data.m_Info.m_Time.value(), Result.m_Data.m_Info.m_aTimeCp);
+				m_Score = Result.m_Data.m_Info.m_Time;
+			}
 			Server()->ExpireServerInfo();
 			int Birthday = Result.m_Data.m_Info.m_Birthday;
 			if(Birthday != 0 && !m_BirthdayAnnounced)

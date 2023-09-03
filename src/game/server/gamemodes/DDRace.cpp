@@ -133,7 +133,6 @@ void CGameControllerDDRace::OnPlayerConnect(CPlayer *pPlayer)
 
 	// init the player
 	Score()->PlayerData(ClientID)->Reset();
-	pPlayer->m_Score = Score()->PlayerData(ClientID)->m_BestTime ? Score()->PlayerData(ClientID)->m_BestTime : -9999;
 
 	// Can't set score here as LoadScore() is threaded, run it in
 	// LoadScoreThreaded() instead
@@ -343,7 +342,7 @@ void CGameControllerDDRace::FlagTick()
 				{
 					// CAPTURE! \o/
 					m_aTeamscore[fi ^ 1] += 100;
-					F->GetCarrier()->GetPlayer()->m_Score += 5;
+					F->GetCarrier()->GetPlayer()->AddScore(5);
 					float Diff = Server()->Tick() - F->GetGrabTick();
 
 					char aBuf[64];
@@ -401,7 +400,7 @@ void CGameControllerDDRace::FlagTick()
 					if(!F->IsAtStand())
 					{
 						CCharacter *pChr = apCloseCCharacters[i];
-						pChr->GetPlayer()->m_Score += 1;
+						pChr->GetPlayer()->IncrementScore();
 
 						char aBuf[256];
 						str_format(aBuf, sizeof(aBuf), "flag_return player='%d:%s' team=%d",
@@ -422,7 +421,7 @@ void CGameControllerDDRace::FlagTick()
 
 					F->Grab(apCloseCCharacters[i]);
 
-					F->GetCarrier()->GetPlayer()->m_Score += 1;
+					F->GetCarrier()->GetPlayer()->IncrementScore();
 
 					char aBuf[256];
 					str_format(aBuf, sizeof(aBuf), "flag_grab player='%d:%s' team=%d",

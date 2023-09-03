@@ -126,7 +126,6 @@ public:
 
 		// swap
 		CMD_SWAP,
-		CMD_FINISH,
 
 		// misc
 		CMD_MULTISAMPLING,
@@ -325,7 +324,7 @@ public:
 		int m_Stride;
 		int m_VertBufferBindingIndex;
 
-		int m_AttrCount;
+		size_t m_AttrCount;
 		SBufferContainerInfo::SAttribute *m_pAttributes;
 	};
 
@@ -339,7 +338,7 @@ public:
 		int m_Stride;
 		int m_VertBufferBindingIndex;
 
-		int m_AttrCount;
+		size_t m_AttrCount;
 		SBufferContainerInfo::SAttribute *m_pAttributes;
 	};
 
@@ -413,7 +412,7 @@ public:
 
 		int m_BufferContainerIndex;
 		SQuadRenderInfo *m_pQuadInfo;
-		int m_QuadNum;
+		size_t m_QuadNum;
 		int m_QuadOffset;
 	};
 
@@ -495,12 +494,6 @@ public:
 			SCommand(CMD_SWAP) {}
 	};
 
-	struct SCommand_Finish : public SCommand
-	{
-		SCommand_Finish() :
-			SCommand(CMD_FINISH) {}
-	};
-
 	struct SCommand_VSync : public SCommand
 	{
 		SCommand_VSync() :
@@ -540,8 +533,8 @@ public:
 		// texture information
 		int m_Slot;
 
-		int m_Width;
-		int m_Height;
+		size_t m_Width;
+		size_t m_Height;
 		int m_PixelSize;
 		int m_Format;
 		int m_StoreFormat;
@@ -559,8 +552,8 @@ public:
 
 		int m_X;
 		int m_Y;
-		int m_Width;
-		int m_Height;
+		size_t m_Width;
+		size_t m_Height;
 		int m_Format;
 		void *m_pData; // will be freed by the command processor
 	};
@@ -583,8 +576,8 @@ public:
 		int m_Slot;
 		int m_SlotOutline;
 
-		int m_Width;
-		int m_Height;
+		size_t m_Width;
+		size_t m_Height;
 
 		void *m_pTextData;
 		void *m_pTextOutlineData;
@@ -610,8 +603,8 @@ public:
 
 		int m_X;
 		int m_Y;
-		int m_Width;
-		int m_Height;
+		size_t m_Width;
+		size_t m_Height;
 		void *m_pData; // will be freed by the command processor
 	};
 
@@ -731,6 +724,7 @@ public:
 	virtual void GetCurrentVideoMode(CVideoMode &CurMode, int HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int Screen) = 0;
 
 	virtual int GetNumScreens() const = 0;
+	virtual const char *GetScreenName(int Screen) const = 0;
 
 	virtual void Minimize() = 0;
 	virtual void Maximize() = 0;
@@ -773,6 +767,9 @@ public:
 	virtual TGLBackendReadPresentedImageData &GetReadPresentedImageDataFuncUnsafe() = 0;
 
 	virtual bool GetWarning(std::vector<std::string> &WarningStrings) = 0;
+
+	// returns true if the error msg was shown
+	virtual bool ShowMessageBox(unsigned Type, const char *pTitle, const char *pMsg) = 0;
 };
 
 class CGraphics_Threaded : public IEngineGraphics
@@ -882,7 +879,7 @@ class CGraphics_Threaded : public IEngineGraphics
 	std::vector<WINDOW_RESIZE_FUNC> m_vResizeListeners;
 	std::vector<WINDOW_PROPS_CHANGED_FUNC> m_vPropChangeListeners;
 
-	void *AllocCommandBufferData(unsigned AllocSize);
+	void *AllocCommandBufferData(size_t AllocSize);
 
 	void AddVertices(int Count);
 	void AddVertices(int Count, CCommandBuffer::SVertex *pVertices);
@@ -906,24 +903,29 @@ class CGraphics_Threaded : public IEngineGraphics
 		}
 	}
 
-	template<typename TName, typename TFunc>
-	bool AddCmd(TName &Cmd, TFunc &&FailFunc, const char *pFailStr)
+	template<typename TName>
+	void AddCmd(
+		TName &Cmd, std::function<bool()> FailFunc = [] { return true; })
 	{
+		if(m_pCommandBuffer->AddCommandUnsafe(Cmd))
+			return;
+
+		// kick command buffer and try again
+		KickCommandBuffer();
+
+		if(!FailFunc())
+		{
+			char aError[256];
+			str_format(aError, sizeof(aError), "graphics: failed to run fail handler for command '%s'", typeid(TName).name());
+			dbg_assert(false, aError);
+		}
+
 		if(!m_pCommandBuffer->AddCommandUnsafe(Cmd))
 		{
-			// kick command buffer and try again
-			KickCommandBuffer();
-
-			if(!FailFunc())
-				return false;
-
-			if(!m_pCommandBuffer->AddCommandUnsafe(Cmd))
-			{
-				dbg_msg("graphics", "%s", pFailStr);
-				return false;
-			}
+			char aError[256];
+			str_format(aError, sizeof(aError), "graphics: failed to add command '%s' to command buffer", typeid(TName).name());
+			dbg_assert(false, aError);
 		}
-		return true;
 	}
 
 	void KickCommandBuffer();
@@ -962,15 +964,18 @@ public:
 	void LinesEnd() override;
 	void LinesDraw(const CLineItem *pArray, int Num) override;
 
+	IGraphics::CTextureHandle FindFreeTextureIndex();
+	void FreeTextureIndex(CTextureHandle *pIndex);
 	int UnloadTexture(IGraphics::CTextureHandle *pIndex) override;
-	IGraphics::CTextureHandle LoadTextureRaw(int Width, int Height, int Format, const void *pData, int StoreFormat, int Flags, const char *pTexName = NULL) override;
-	int LoadTextureRawSub(IGraphics::CTextureHandle TextureID, int x, int y, int Width, int Height, int Format, const void *pData) override;
+	IGraphics::CTextureHandle LoadTextureRaw(size_t Width, size_t Height, int Format, const void *pData, int StoreFormat, int Flags, const char *pTexName = NULL) override;
+	int LoadTextureRawSub(IGraphics::CTextureHandle TextureID, int x, int y, size_t Width, size_t Height, int Format, const void *pData) override;
+	IGraphics::CTextureHandle InvalidTexture() const override;
 
-	bool LoadTextTextures(int Width, int Height, CTextureHandle &TextTexture, CTextureHandle &TextOutlineTexture, void *pTextData, void *pTextOutlineData) override;
+	bool LoadTextTextures(size_t Width, size_t Height, CTextureHandle &TextTexture, CTextureHandle &TextOutlineTexture, void *pTextData, void *pTextOutlineData) override;
 	bool UnloadTextTextures(CTextureHandle &TextTexture, CTextureHandle &TextOutlineTexture) override;
-	bool UpdateTextTexture(CTextureHandle TextureID, int x, int y, int Width, int Height, const void *pData) override;
+	bool UpdateTextTexture(CTextureHandle TextureID, int x, int y, size_t Width, size_t Height, const void *pData) override;
 
-	CTextureHandle LoadSpriteTextureImpl(CImageInfo &FromImageInfo, int x, int y, int w, int h);
+	CTextureHandle LoadSpriteTextureImpl(CImageInfo &FromImageInfo, int x, int y, size_t w, size_t h);
 	CTextureHandle LoadSpriteTexture(CImageInfo &FromImageInfo, struct CDataSprite *pSprite) override;
 	CTextureHandle LoadSpriteTexture(CImageInfo &FromImageInfo, struct client_data7::CDataSprite *pSprite) override;
 
@@ -985,8 +990,8 @@ public:
 	bool CheckImageDivisibility(const char *pFileName, CImageInfo &Img, int DivX, int DivY, bool AllowResize) override;
 	bool IsImageFormatRGBA(const char *pFileName, CImageInfo &Img) override;
 
-	void CopyTextureBufferSub(uint8_t *pDestBuffer, uint8_t *pSourceBuffer, int FullWidth, int FullHeight, int ColorChannelCount, int SubOffsetX, int SubOffsetY, int SubCopyWidth, int SubCopyHeight) override;
-	void CopyTextureFromTextureBufferSub(uint8_t *pDestBuffer, int DestWidth, int DestHeight, uint8_t *pSourceBuffer, int SrcWidth, int SrcHeight, int ColorChannelCount, int SrcSubOffsetX, int SrcSubOffsetY, int SrcSubCopyWidth, int SrcSubCopyHeight) override;
+	void CopyTextureBufferSub(uint8_t *pDestBuffer, uint8_t *pSourceBuffer, size_t FullWidth, size_t FullHeight, size_t ColorChannelCount, size_t SubOffsetX, size_t SubOffsetY, size_t SubCopyWidth, size_t SubCopyHeight) override;
+	void CopyTextureFromTextureBufferSub(uint8_t *pDestBuffer, size_t DestWidth, size_t DestHeight, uint8_t *pSourceBuffer, size_t SrcWidth, size_t SrcHeight, size_t ColorChannelCount, size_t SrcSubOffsetX, size_t SrcSubOffsetY, size_t SrcSubCopyWidth, size_t SrcSubCopyHeight) override;
 
 	bool ScreenshotDirect();
 
@@ -1156,9 +1161,9 @@ public:
 	void RenderQuadContainerAsSpriteMultiple(int ContainerIndex, int QuadOffset, int DrawCount, SRenderSpriteInfo *pRenderInfo) override;
 
 	template<typename TName>
-	void FlushVerticesImpl(bool KeepVertices, int &PrimType, int &PrimCount, int &NumVerts, TName &Command, size_t VertSize)
+	void FlushVerticesImpl(bool KeepVertices, int &PrimType, size_t &PrimCount, size_t &NumVerts, TName &Command, size_t VertSize)
 	{
-		Command.m_pVertices = NULL;
+		Command.m_pVertices = nullptr;
 		if(m_NumVertices == 0)
 			return;
 
@@ -1193,40 +1198,16 @@ public:
 		else
 			return;
 
-		Command.m_pVertices = (decltype(Command.m_pVertices))m_pCommandBuffer->AllocData(VertSize * NumVerts);
-		if(Command.m_pVertices == NULL)
-		{
-			// kick command buffer and try again
-			KickCommandBuffer();
-
-			Command.m_pVertices = (decltype(Command.m_pVertices))m_pCommandBuffer->AllocData(VertSize * NumVerts);
-			if(Command.m_pVertices == NULL)
-			{
-				dbg_msg("graphics", "failed to allocate data for vertices");
-				return;
-			}
-		}
-
+		Command.m_pVertices = (decltype(Command.m_pVertices))AllocCommandBufferData(VertSize * NumVerts);
 		Command.m_State = m_State;
 
 		Command.m_PrimType = PrimType;
 		Command.m_PrimCount = PrimCount;
 
-		if(
-			!AddCmd(
-				Command, [&] {
-					Command.m_pVertices = (decltype(Command.m_pVertices))m_pCommandBuffer->AllocData(VertSize * NumVerts);
-					if(Command.m_pVertices == NULL)
-					{
-						dbg_msg("graphics", "failed to allocate data for vertices");
-						return false;
-					}
-					return true;
-				},
-				"failed to allocate memory for render command"))
-		{
-			return;
-		}
+		AddCmd(Command, [&] {
+			Command.m_pVertices = (decltype(Command.m_pVertices))m_pCommandBuffer->AllocData(VertSize * NumVerts);
+			return Command.m_pVertices != nullptr;
+		});
 
 		m_pCommandBuffer->AddRenderCalls(1);
 	}
@@ -1237,7 +1218,7 @@ public:
 	void RenderTileLayer(int BufferContainerIndex, const ColorRGBA &Color, char **pOffsets, unsigned int *pIndicedVertexDrawNum, size_t NumIndicesOffset) override;
 	void RenderBorderTiles(int BufferContainerIndex, const ColorRGBA &Color, char *pIndexBufferOffset, const vec2 &Offset, const vec2 &Dir, int JumpIndex, unsigned int DrawNum) override;
 	void RenderBorderTileLines(int BufferContainerIndex, const ColorRGBA &Color, char *pIndexBufferOffset, const vec2 &Offset, const vec2 &Dir, unsigned int IndexDrawNum, unsigned int RedrawNum) override;
-	void RenderQuadLayer(int BufferContainerIndex, SQuadRenderInfo *pQuadInfo, int QuadNum, int QuadOffset) override;
+	void RenderQuadLayer(int BufferContainerIndex, SQuadRenderInfo *pQuadInfo, size_t QuadNum, int QuadOffset) override;
 	void RenderText(int BufferContainerIndex, int TextQuadNum, int TextureSize, int TextureTextIndex, int TextureTextOutlineIndex, const ColorRGBA &TextColor, const ColorRGBA &TextOutlineColor) override;
 
 	// modern GL functions
@@ -1254,6 +1235,8 @@ public:
 	void IndicesNumRequiredNotify(unsigned int RequiredIndicesCount) override;
 
 	int GetNumScreens() const override;
+	const char *GetScreenName(int Screen) const override;
+
 	void Minimize() override;
 	void Maximize() override;
 	void WarnPngliteIncompatibleImages(bool Warn) override;
@@ -1296,6 +1279,8 @@ public:
 	void WaitForIdle() override;
 
 	SWarning *GetCurWarning() override;
+	bool ShowMessageBox(unsigned Type, const char *pTitle, const char *pMsg) override;
+	bool IsBackendInitialized() override;
 
 	bool GetDriverVersion(EGraphicsDriverAgeType DriverAgeType, int &Major, int &Minor, int &Patch, const char *&pName, EBackendType BackendType) override { return m_pBackend->GetDriverVersion(DriverAgeType, Major, Minor, Patch, pName, BackendType); }
 	bool IsConfigModernAPI() override { return m_pBackend->IsConfigModernAPI(); }

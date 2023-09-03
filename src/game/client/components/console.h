@@ -37,10 +37,22 @@ class CGameConsole : public CComponent
 		CStaticRingBuffer<char, 64 * 1024, CRingBufferBase::FLAG_RECYCLE> m_History;
 		char *m_pHistoryEntry;
 
-		CLineInput m_Input;
+		CLineInputBuffered<512> m_Input;
 		const char *m_pName;
 		int m_Type;
 		int m_BacklogCurPage;
+		int m_BacklogLastActivePage = -1;
+
+		STextBoundingBox m_BoundingBox = {0.0f, 0.0f, 0.0f, 0.0f};
+		float m_LastInputHeight = 0.0f;
+
+		bool m_MouseIsPress = false;
+		vec2 m_MousePress = vec2(0.0f, 0.0f);
+		vec2 m_MouseRelease = vec2(0.0f, 0.0f);
+		int m_CurSelStart = 0;
+		int m_CurSelEnd = 0;
+		bool m_HasSelection = false;
+		int m_NewLineCounter = 0;
 
 		CGameConsole *m_pGameConsole;
 
@@ -57,9 +69,9 @@ class CGameConsole : public CComponent
 		bool m_UsernameReq;
 
 		bool m_IsCommand;
-		char m_aCommandName[IConsole::TEMPCMD_NAME_LENGTH];
-		char m_aCommandHelp[IConsole::TEMPCMD_HELP_LENGTH];
-		char m_aCommandParams[IConsole::TEMPCMD_PARAMS_LENGTH];
+		const char *m_pCommandName;
+		const char *m_pCommandHelp;
+		const char *m_pCommandParams;
 
 		CInstance(int t);
 		void Init(CGameConsole *pGameConsole);
@@ -71,7 +83,7 @@ class CGameConsole : public CComponent
 
 		void ExecuteLine(const char *pLine);
 
-		void OnInput(IInput::CEvent Event);
+		bool OnInput(const IInput::CEvent &Event);
 		void PrintLine(const char *pLine, int Len, ColorRGBA PrintColor);
 
 		const char *GetString() const { return m_Input.GetString(); }
@@ -86,24 +98,13 @@ class CGameConsole : public CComponent
 	CInstance m_RemoteConsole;
 
 	CInstance *CurrentConsole();
-	float TimeNow();
 
 	int m_ConsoleType;
 	int m_ConsoleState;
 	float m_StateChangeEnd;
 	float m_StateChangeDuration;
 
-	bool m_MouseIsPress = false;
-	int m_MousePressX = 0;
-	int m_MousePressY = 0;
-	int m_MouseCurX = 0;
-	int m_MouseCurY = 0;
-	int m_CurSelStart = 0;
-	int m_CurSelEnd = 0;
-	bool m_HasSelection = false;
-	int m_NewLineCounter = 0;
-
-	int m_LastInputLineCount = 0;
+	bool m_WantsSelectionCopy = false;
 
 	void Toggle(int Type);
 	void Dump(int Type);
@@ -117,6 +118,7 @@ class CGameConsole : public CComponent
 	static void ConDumpRemoteConsole(IConsole::IResult *pResult, void *pUserData);
 	static void ConConsolePageUp(IConsole::IResult *pResult, void *pUserData);
 	static void ConConsolePageDown(IConsole::IResult *pResult, void *pUserData);
+	static void ConchainConsoleOutputLevel(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
 public:
 	enum
@@ -138,7 +140,7 @@ public:
 	virtual void OnReset() override;
 	virtual void OnRender() override;
 	virtual void OnMessage(int MsgType, void *pRawMsg) override;
-	virtual bool OnInput(IInput::CEvent Events) override;
+	virtual bool OnInput(const IInput::CEvent &Event) override;
 
 	bool IsClosed() { return m_ConsoleState == CONSOLE_CLOSED; }
 };

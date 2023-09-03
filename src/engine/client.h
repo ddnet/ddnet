@@ -165,9 +165,9 @@ public:
 	virtual void Quit() = 0;
 	virtual const char *DemoPlayer_Play(const char *pFilename, int StorageType) = 0;
 #if defined(CONF_VIDEORECORDER)
-	virtual const char *DemoPlayer_Render(const char *pFilename, int StorageType, const char *pVideoName, int SpeedIndex) = 0;
+	virtual const char *DemoPlayer_Render(const char *pFilename, int StorageType, const char *pVideoName, int SpeedIndex, bool StartPaused = false) = 0;
 #endif
-	virtual void DemoRecorder_Start(const char *pFilename, bool WithTimestamp, int Recorder) = 0;
+	virtual void DemoRecorder_Start(const char *pFilename, bool WithTimestamp, int Recorder, bool Verbose = false) = 0;
 	virtual void DemoRecorder_HandleAutoStart() = 0;
 	virtual void DemoRecorder_Stop(int Recorder, bool RemoveFile = false) = 0;
 	virtual class IDemoRecorder *DemoRecorder(int Recorder) = 0;
@@ -180,8 +180,8 @@ public:
 	virtual void SwitchWindowScreen(int Index) = 0;
 	virtual void SetWindowParams(int FullscreenMode, bool IsBorderless, bool AllowResizing) = 0;
 	virtual void ToggleWindowVSync() = 0;
-	virtual void LoadFont() = 0;
 	virtual void Notify(const char *pTitle, const char *pMessage) = 0;
+	virtual void OnWindowResize() = 0;
 
 	virtual void UpdateAndSwap() = 0;
 
@@ -285,6 +285,15 @@ public:
 	virtual void ShellRegister() = 0;
 	virtual void ShellUnregister() = 0;
 #endif
+
+	enum EMessageBoxType
+	{
+		MESSAGE_BOX_TYPE_ERROR,
+		MESSAGE_BOX_TYPE_WARNING,
+		MESSAGE_BOX_TYPE_INFO,
+	};
+	virtual void ShowMessageBox(const char *pTitle, const char *pMessage, EMessageBoxType Type = MESSAGE_BOX_TYPE_ERROR) = 0;
+	virtual void GetGPUInfoString(char (&aGPUInfo)[256]) = 0;
 };
 
 class IGameClient : public IInterface
@@ -308,6 +317,7 @@ public:
 	virtual void OnMessage(int MsgID, CUnpacker *pUnpacker, int Conn, bool Dummy) = 0;
 	virtual void OnPredict() = 0;
 	virtual void OnActivateEditor() = 0;
+	virtual void OnWindowResize() = 0;
 
 	virtual int OnSnapInput(int *pData, bool Dummy, bool Force) = 0;
 	virtual void OnDummySwap() = 0;

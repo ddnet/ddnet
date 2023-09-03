@@ -25,7 +25,7 @@
 #include <base/color.h>
 #include <base/math.h>
 
-void CPlayers::RenderHand(CTeeRenderInfo *pInfo, vec2 CenterPos, vec2 Dir, float AngleOffset, vec2 PostRotOffset, float Alpha)
+void CPlayers::RenderHand(const CTeeRenderInfo *pInfo, vec2 CenterPos, vec2 Dir, float AngleOffset, vec2 PostRotOffset, float Alpha)
 {
 	vec2 HandPos = CenterPos + Dir;
 	float Angle = angle(Dir);
@@ -156,6 +156,9 @@ void CPlayers::RenderHookCollLine(
 	{
 		bool AlwaysRenderHookColl = GameClient()->m_GameInfo.m_AllowHookColl && (Local ? g_Config.m_ClShowHookCollOwn : g_Config.m_ClShowHookCollOther) == 2;
 		bool RenderHookCollPlayer = ClientID >= 0 && Player.m_PlayerFlags & PLAYERFLAG_AIM && (Local ? g_Config.m_ClShowHookCollOwn : g_Config.m_ClShowHookCollOther) > 0;
+		if(Local && GameClient()->m_GameInfo.m_AllowHookColl && Client()->State() != IClient::STATE_DEMOPLAYBACK)
+			RenderHookCollPlayer = GameClient()->m_Controls.m_aShowHookColl[g_Config.m_ClDummy] && g_Config.m_ClShowHookCollOwn > 0;
+
 		bool RenderHookCollVideo = true;
 #if defined(CONF_VIDEORECORDER)
 		RenderHookCollVideo = !IVideo::Current() || g_Config.m_ClVideoShowHookCollOther || Local;
@@ -462,7 +465,8 @@ void CPlayers::RenderPlayer(
 
 		m_pClient->m_Effects.SkidTrail(
 			Position + vec2(-Player.m_Direction * 6, 12),
-			vec2(-Player.m_Direction * 100 * length(Vel), -50));
+			vec2(-Player.m_Direction * 100 * length(Vel), -50),
+			Alpha);
 	}
 
 	// draw gun
@@ -521,12 +525,12 @@ void CPlayers::RenderPlayer(
 				{
 					Graphics()->QuadsSetRotation(-pi / 2 - State.GetAttach()->m_Angle * pi * 2);
 					WeaponPosition.x -= g_pData->m_Weapons.m_aId[CurrentWeapon].m_Offsetx;
-					m_pClient->m_Effects.PowerupShine(WeaponPosition + vec2(32, 0), vec2(32, 12));
+					m_pClient->m_Effects.PowerupShine(WeaponPosition + vec2(32, 0), vec2(32, 12), Alpha);
 				}
 				else
 				{
 					Graphics()->QuadsSetRotation(-pi / 2 + State.GetAttach()->m_Angle * pi * 2);
-					m_pClient->m_Effects.PowerupShine(WeaponPosition - vec2(32, 0), vec2(32, 12));
+					m_pClient->m_Effects.PowerupShine(WeaponPosition - vec2(32, 0), vec2(32, 12), Alpha);
 				}
 				Graphics()->RenderQuadContainerAsSprite(m_WeaponEmoteQuadContainerIndex, QuadOffset, WeaponPosition.x, WeaponPosition.y);
 
@@ -665,11 +669,11 @@ void CPlayers::RenderPlayer(
 	RenderTools()->RenderTee(&State, &RenderInfo, Player.m_Emote, Direction, Position, Alpha);
 
 	float TeeAnimScale, TeeBaseSize;
-	RenderTools()->GetRenderTeeAnimScaleAndBaseSize(&State, &RenderInfo, TeeAnimScale, TeeBaseSize);
+	RenderTools()->GetRenderTeeAnimScaleAndBaseSize(&RenderInfo, TeeAnimScale, TeeBaseSize);
 	vec2 BodyPos = Position + vec2(State.GetBody()->m_X, State.GetBody()->m_Y) * TeeAnimScale;
 	if(RenderInfo.m_TeeRenderFlags & TEE_EFFECT_FROZEN)
 	{
-		GameClient()->m_Effects.FreezingFlakes(BodyPos, vec2(32, 32));
+		GameClient()->m_Effects.FreezingFlakes(BodyPos, vec2(32, 32), Alpha);
 	}
 
 	int QuadOffsetToEmoticon = NUM_WEAPONS * 2 + 2 + 2;

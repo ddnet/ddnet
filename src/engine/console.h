@@ -109,7 +109,7 @@ public:
 	virtual void ExecuteLine(const char *pStr, int ClientID = -1, bool InterpretSemicolons = true) = 0;
 	virtual void ExecuteLineFlag(const char *pStr, int FlasgMask, int ClientID = -1, bool InterpretSemicolons = true) = 0;
 	virtual void ExecuteLineStroked(int Stroke, const char *pStr, int ClientID = -1, bool InterpretSemicolons = true) = 0;
-	virtual void ExecuteFile(const char *pFilename, int ClientID = -1, bool LogFailure = false, int StorageType = IStorage::TYPE_ALL) = 0;
+	virtual bool ExecuteFile(const char *pFilename, int ClientID = -1, bool LogFailure = false, int StorageType = IStorage::TYPE_ALL) = 0;
 
 	virtual char *Format(char *pBuf, int Size, const char *pFrom, const char *pStr) = 0;
 	virtual void Print(int Level, const char *pFrom, const char *pStr, ColorRGBA PrintColor = gs_ConsoleDefaultColor) const = 0;
@@ -119,9 +119,10 @@ public:
 
 	virtual void SetAccessLevel(int AccessLevel) = 0;
 
-	virtual void ResetServerGameSettings() = 0;
+	virtual void ResetGameSettings() = 0;
 
 	static LEVEL ToLogLevel(int ConsoleLevel);
+	static int ToLogLevelFilter(int ConsoleLevel);
 
 	// DDRace
 

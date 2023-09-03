@@ -180,6 +180,10 @@ public:
 	 */
 	virtual void OnRender(){};
 	/**
+	 * Called when a new snapshot is received.
+	 */
+	virtual void OnNewSnapshot(){};
+	/**
 	 * Called when the input gets released, for example when a text box loses focus.
 	 */
 	virtual void OnRelease(){};
@@ -205,9 +209,9 @@ public:
 	virtual bool OnCursorMove(float x, float y, IInput::ECursorType CursorType) { return false; }
 	/**
 	 * Called on a input event.
-	 * @param e The input event.
+	 * @param Event The input event.
 	 */
-	virtual bool OnInput(IInput::CEvent e) { return false; }
+	virtual bool OnInput(const IInput::CEvent &Event) { return false; }
 };
 
 #endif

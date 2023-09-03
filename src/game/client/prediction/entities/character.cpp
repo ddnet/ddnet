@@ -130,7 +130,7 @@ void CCharacter::HandleNinja()
 		// Set velocity
 		m_Core.m_Vel = m_Core.m_Ninja.m_ActivationDir * g_pData->m_Weapons.m_Ninja.m_Velocity;
 		vec2 OldPos = m_Pos;
-		Collision()->MoveBox(&m_Core.m_Pos, &m_Core.m_Vel, vec2(m_ProximityRadius, m_ProximityRadius), 0.f);
+		Collision()->MoveBox(&m_Core.m_Pos, &m_Core.m_Vel, vec2(m_ProximityRadius, m_ProximityRadius), vec2(GetTuning(m_TuneZone)->m_GroundElasticityX, GetTuning(m_TuneZone)->m_GroundElasticityY));
 
 		// reset velocity so the client doesn't predict stuff
 		m_Core.m_Vel = vec2(0.f, 0.f);
@@ -489,11 +489,11 @@ void CCharacter::GiveNinja()
 {
 	m_Core.m_Ninja.m_ActivationTick = GameWorld()->GameTick();
 	m_Core.m_aWeapons[WEAPON_NINJA].m_Got = true;
-	if(m_FreezeTime > 0)
+	if(m_FreezeTime == 0)
 		m_Core.m_aWeapons[WEAPON_NINJA].m_Ammo = -1;
 	if(m_Core.m_ActiveWeapon != WEAPON_NINJA)
 		m_LastWeapon = m_Core.m_ActiveWeapon;
-	m_Core.m_ActiveWeapon = WEAPON_NINJA;
+	SetActiveWeapon(WEAPON_NINJA);
 }
 
 void CCharacter::OnPredictedInput(CNetObj_PlayerInput *pNewInput)
@@ -1029,9 +1029,9 @@ void CCharacter::DDRacePostCoreTick()
 	HandleSkippableTiles(CurrentIndex);
 
 	// handle Anti-Skip tiles
-	std::list<int> Indices = Collision()->GetMapIndices(m_PrevPos, m_Pos);
-	if(!Indices.empty())
-		for(int Index : Indices)
+	std::vector<int> vIndices = Collision()->GetMapIndices(m_PrevPos, m_Pos);
+	if(!vIndices.empty())
+		for(int Index : vIndices)
 			HandleTiles(Index);
 	else
 	{
@@ -1205,7 +1205,7 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 			{
 				if(m_FreezeTime == 0)
 					Freeze();
-				m_FreezeTime = pExtended->m_FreezeEnd - GameWorld()->GameTick();
+				m_FreezeTime = maximum(1, pExtended->m_FreezeEnd - GameWorld()->GameTick());
 			}
 			else if(pExtended->m_FreezeEnd == -1)
 				m_Core.m_DeepFrozen = true;
@@ -1341,7 +1341,7 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 
 	// in most cases the reload timer can be determined from the last attack tick
 	// (this is only needed for autofire weapons to prevent the predicted reload timer from desyncing)
-	if(IsLocal && m_Core.m_ActiveWeapon != WEAPON_HAMMER)
+	if(IsLocal && m_Core.m_ActiveWeapon != WEAPON_HAMMER && !m_Core.m_aWeapons[WEAPON_NINJA].m_Got)
 	{
 		if(maximum(m_LastTuneZoneTick, m_LastWeaponSwitchTick) + GameWorld()->GameTickSpeed() < GameWorld()->GameTick())
 		{

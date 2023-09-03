@@ -475,7 +475,7 @@ bool CCollision::TestBox(vec2 Pos, vec2 Size) const
 	return false;
 }
 
-void CCollision::MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, float Elasticity) const
+void CCollision::MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, vec2 Elasticity, bool *pGrounded) const
 {
 	// do the move
 	vec2 Pos = *pInoutPos;
@@ -487,6 +487,9 @@ void CCollision::MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, float Elas
 	if(Distance > 0.00001f)
 	{
 		float Fraction = 1.0f / (float)(Max + 1);
+		float ElasticityX = clamp(Elasticity.x, -1.0f, 1.0f);
+		float ElasticityY = clamp(Elasticity.y, -1.0f, 1.0f);
+
 		for(int i = 0; i <= Max; i++)
 		{
 			// Early break as optimization to stop checking for collisions for
@@ -512,15 +515,17 @@ void CCollision::MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, float Elas
 
 				if(TestBox(vec2(Pos.x, NewPos.y), Size))
 				{
+					if(pGrounded && ElasticityY > 0 && Vel.y > 0)
+						*pGrounded = true;
 					NewPos.y = Pos.y;
-					Vel.y *= -Elasticity;
+					Vel.y *= -ElasticityY;
 					Hits++;
 				}
 
 				if(TestBox(vec2(NewPos.x, Pos.y), Size))
 				{
 					NewPos.x = Pos.x;
-					Vel.x *= -Elasticity;
+					Vel.x *= -ElasticityX;
 					Hits++;
 				}
 
@@ -528,10 +533,12 @@ void CCollision::MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, float Elas
 				// this is a real _corner case_!
 				if(Hits == 0)
 				{
+					if(pGrounded && ElasticityY > 0 && Vel.y > 0)
+						*pGrounded = true;
 					NewPos.y = Pos.y;
-					Vel.y *= -Elasticity;
+					Vel.y *= -ElasticityY;
 					NewPos.x = Pos.x;
-					Vel.x *= -Elasticity;
+					Vel.x *= -ElasticityX;
 				}
 			}
 
@@ -634,30 +641,18 @@ int CCollision::IsEvilTeleport(int Index) const
 	return 0;
 }
 
-int CCollision::IsCheckTeleport(int Index) const
+bool CCollision::IsCheckTeleport(int Index) const
 {
-	if(Index < 0)
-		return 0;
-	if(!m_pTele)
-		return 0;
-
-	if(m_pTele[Index].m_Type == TILE_TELECHECKIN)
-		return m_pTele[Index].m_Number;
-
-	return 0;
+	if(Index < 0 || !m_pTele)
+		return false;
+	return m_pTele[Index].m_Type == TILE_TELECHECKIN;
 }
 
-int CCollision::IsCheckEvilTeleport(int Index) const
+bool CCollision::IsCheckEvilTeleport(int Index) const
 {
-	if(Index < 0)
-		return 0;
-	if(!m_pTele)
-		return 0;
-
-	if(m_pTele[Index].m_Type == TILE_TELECHECKINEVIL)
-		return m_pTele[Index].m_Number;
-
-	return 0;
+	if(Index < 0 || !m_pTele)
+		return false;
+	return m_pTele[Index].m_Type == TILE_TELECHECKINEVIL;
 }
 
 int CCollision::IsTeleCheckpoint(int Index) const
@@ -892,9 +887,9 @@ int CCollision::GetMapIndex(vec2 Pos) const
 		return -1;
 }
 
-std::list<int> CCollision::GetMapIndices(vec2 PrevPos, vec2 Pos, unsigned MaxIndices) const
+std::vector<int> CCollision::GetMapIndices(vec2 PrevPos, vec2 Pos, unsigned MaxIndices) const
 {
-	std::list<int> Indices;
+	std::vector<int> vIndices;
 	float d = distance(PrevPos, Pos);
 	int End(d + 1);
 	if(!d)
@@ -905,11 +900,11 @@ std::list<int> CCollision::GetMapIndices(vec2 PrevPos, vec2 Pos, unsigned MaxInd
 
 		if(TileExists(Index))
 		{
-			Indices.push_back(Index);
-			return Indices;
+			vIndices.push_back(Index);
+			return vIndices;
 		}
 		else
-			return Indices;
+			return vIndices;
 	}
 	else
 	{
@@ -923,14 +918,14 @@ std::list<int> CCollision::GetMapIndices(vec2 PrevPos, vec2 Pos, unsigned MaxInd
 			int Index = Ny * m_Width + Nx;
 			if(TileExists(Index) && LastIndex != Index)
 			{
-				if(MaxIndices && Indices.size() > MaxIndices)
-					return Indices;
-				Indices.push_back(Index);
+				if(MaxIndices && vIndices.size() > MaxIndices)
+					return vIndices;
+				vIndices.push_back(Index);
 				LastIndex = Index;
 			}
 		}
 
-		return Indices;
+		return vIndices;
 	}
 }
 
@@ -1030,7 +1025,7 @@ int CCollision::GetFTile(int x, int y) const
 
 int CCollision::Entity(int x, int y, int Layer) const
 {
-	if((0 > x || x >= m_Width) || (0 > y || y >= m_Height))
+	if(x < 0 || x >= m_Width || y < 0 || y >= m_Height)
 	{
 		const char *pName;
 		switch(Layer)
@@ -1056,7 +1051,7 @@ int CCollision::Entity(int x, int y, int Layer) const
 		default:
 			pName = "Unknown";
 		}
-		dbg_msg("collision", "something is VERY wrong with the %s layer please report this at https://github.com/ddnet/ddnet, you will need to post the map as well and any steps that u think may have led to this", pName);
+		dbg_msg("collision", "Something is VERY wrong with the %s layer near (%d, %d). Please report this at https://github.com/ddnet/ddnet/issues, you will need to post the map as well and any steps that you think may have led to this.", pName, x, y);
 		return 0;
 	}
 	switch(Layer)

@@ -76,19 +76,19 @@ public:
 
 	/* Variable: width
 		Contains the width of the image */
-	int m_Width;
+	int m_Width = 0;
 
 	/* Variable: height
 		Contains the height of the image */
-	int m_Height;
+	int m_Height = 0;
 
 	/* Variable: format
 		Contains the format of the image. See <Image Formats> for more information. */
-	int m_Format;
+	int m_Format = FORMAT_RGB;
 
 	/* Variable: data
 		Pointer to the image data. */
-	void *m_pData;
+	void *m_pData = nullptr;
 };
 
 /*
@@ -307,22 +307,23 @@ public:
 	virtual bool IsImageFormatRGBA(const char *pFileName, CImageInfo &Img) = 0;
 
 	// destination and source buffer require to have the same width and height
-	virtual void CopyTextureBufferSub(uint8_t *pDestBuffer, uint8_t *pSourceBuffer, int FullWidth, int FullHeight, int ColorChannelCount, int SubOffsetX, int SubOffsetY, int SubCopyWidth, int SubCopyHeight) = 0;
+	virtual void CopyTextureBufferSub(uint8_t *pDestBuffer, uint8_t *pSourceBuffer, size_t FullWidth, size_t FullHeight, size_t ColorChannelCount, size_t SubOffsetX, size_t SubOffsetY, size_t SubCopyWidth, size_t SubCopyHeight) = 0;
 
 	// destination width must be equal to the subwidth of the source
-	virtual void CopyTextureFromTextureBufferSub(uint8_t *pDestBuffer, int DestWidth, int DestHeight, uint8_t *pSourceBuffer, int SrcWidth, int SrcHeight, int ColorChannelCount, int SrcSubOffsetX, int SrcSubOffsetY, int SrcSubCopyWidth, int SrcSubCopyHeight) = 0;
+	virtual void CopyTextureFromTextureBufferSub(uint8_t *pDestBuffer, size_t DestWidth, size_t DestHeight, uint8_t *pSourceBuffer, size_t SrcWidth, size_t SrcHeight, size_t ColorChannelCount, size_t SrcSubOffsetX, size_t SrcSubOffsetY, size_t SrcSubCopyWidth, size_t SrcSubCopyHeight) = 0;
 
 	virtual int UnloadTexture(CTextureHandle *pIndex) = 0;
-	virtual CTextureHandle LoadTextureRaw(int Width, int Height, int Format, const void *pData, int StoreFormat, int Flags, const char *pTexName = nullptr) = 0;
-	virtual int LoadTextureRawSub(CTextureHandle TextureID, int x, int y, int Width, int Height, int Format, const void *pData) = 0;
+	virtual CTextureHandle LoadTextureRaw(size_t Width, size_t Height, int Format, const void *pData, int StoreFormat, int Flags, const char *pTexName = nullptr) = 0;
+	virtual int LoadTextureRawSub(CTextureHandle TextureID, int x, int y, size_t Width, size_t Height, int Format, const void *pData) = 0;
 	virtual CTextureHandle LoadTexture(const char *pFilename, int StorageType, int StoreFormat, int Flags) = 0;
+	virtual CTextureHandle InvalidTexture() const = 0;
 	virtual void TextureSet(CTextureHandle Texture) = 0;
 	void TextureClear() { TextureSet(CTextureHandle()); }
 
 	// pTextData & pTextOutlineData are automatically free'd
-	virtual bool LoadTextTextures(int Width, int Height, CTextureHandle &TextTexture, CTextureHandle &TextOutlineTexture, void *pTextData, void *pTextOutlineData) = 0;
+	virtual bool LoadTextTextures(size_t Width, size_t Height, CTextureHandle &TextTexture, CTextureHandle &TextOutlineTexture, void *pTextData, void *pTextOutlineData) = 0;
 	virtual bool UnloadTextTextures(CTextureHandle &TextTexture, CTextureHandle &TextOutlineTexture) = 0;
-	virtual bool UpdateTextTexture(CTextureHandle TextureID, int x, int y, int Width, int Height, const void *pData) = 0;
+	virtual bool UpdateTextTexture(CTextureHandle TextureID, int x, int y, size_t Width, size_t Height, const void *pData) = 0;
 
 	virtual CTextureHandle LoadSpriteTexture(CImageInfo &FromImageInfo, struct CDataSprite *pSprite) = 0;
 	virtual CTextureHandle LoadSpriteTexture(CImageInfo &FromImageInfo, struct client_data7::CDataSprite *pSprite) = 0;
@@ -337,7 +338,7 @@ public:
 	virtual void RenderTileLayer(int BufferContainerIndex, const ColorRGBA &Color, char **pOffsets, unsigned int *pIndicedVertexDrawNum, size_t NumIndicesOffset) = 0;
 	virtual void RenderBorderTiles(int BufferContainerIndex, const ColorRGBA &Color, char *pIndexBufferOffset, const vec2 &Offset, const vec2 &Dir, int JumpIndex, unsigned int DrawNum) = 0;
 	virtual void RenderBorderTileLines(int BufferContainerIndex, const ColorRGBA &Color, char *pIndexBufferOffset, const vec2 &Offset, const vec2 &Dir, unsigned int IndexDrawNum, unsigned int RedrawNum) = 0;
-	virtual void RenderQuadLayer(int BufferContainerIndex, SQuadRenderInfo *pQuadInfo, int QuadNum, int QuadOffset) = 0;
+	virtual void RenderQuadLayer(int BufferContainerIndex, SQuadRenderInfo *pQuadInfo, size_t QuadNum, int QuadOffset) = 0;
 	virtual void RenderText(int BufferContainerIndex, int TextQuadNum, int TextureSize, int TextureTextIndex, int TextureTextOutlineIndex, const ColorRGBA &TextColor, const ColorRGBA &TextOutlineColor) = 0;
 
 	// opengl 3.3 functions
@@ -460,23 +461,13 @@ public:
 		CORNER_TR = 2,
 		CORNER_BL = 4,
 		CORNER_BR = 8,
-		CORNER_ITL = 16,
-		CORNER_ITR = 32,
-		CORNER_IBL = 64,
-		CORNER_IBR = 128,
 
 		CORNER_T = CORNER_TL | CORNER_TR,
 		CORNER_B = CORNER_BL | CORNER_BR,
 		CORNER_R = CORNER_TR | CORNER_BR,
 		CORNER_L = CORNER_TL | CORNER_BL,
 
-		CORNER_IT = CORNER_ITL | CORNER_ITR,
-		CORNER_IB = CORNER_IBL | CORNER_IBR,
-		CORNER_IR = CORNER_ITR | CORNER_IBR,
-		CORNER_IL = CORNER_ITL | CORNER_IBL,
-
 		CORNER_ALL = CORNER_T | CORNER_B,
-		CORNER_INV_ALL = CORNER_IT | CORNER_IB
 	};
 	virtual void DrawRectExt(float x, float y, float w, float h, float r, int Corners) = 0;
 	virtual void DrawRectExt4(float x, float y, float w, float h, ColorRGBA ColorTopLeft, ColorRGBA ColorTopRight, ColorRGBA ColorBottomLeft, ColorRGBA ColorBottomRight, float r, int Corners) = 0;
@@ -506,6 +497,7 @@ public:
 
 	virtual void Swap() = 0;
 	virtual int GetNumScreens() const = 0;
+	virtual const char *GetScreenName(int Screen) const = 0;
 
 	// synchronization
 	virtual void InsertSignal(class CSemaphore *pSemaphore) = 0;
@@ -520,6 +512,10 @@ public:
 	virtual TGLBackendReadPresentedImageData &GetReadPresentedImageDataFuncUnsafe() = 0;
 
 	virtual SWarning *GetCurWarning() = 0;
+
+	// returns true if the error msg was shown
+	virtual bool ShowMessageBox(unsigned Type, const char *pTitle, const char *pMsg) = 0;
+	virtual bool IsBackendInitialized() = 0;
 
 protected:
 	inline CTextureHandle CreateTextureHandle(int Index)

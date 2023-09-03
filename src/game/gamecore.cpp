@@ -160,7 +160,7 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 		m_Direction = m_Input.m_Direction;
 
 		// setup angle
-		float TmpAngle = atan2f(m_Input.m_TargetY, m_Input.m_TargetX);
+		float TmpAngle = std::atan2(m_Input.m_TargetY, m_Input.m_TargetX);
 		if(TmpAngle < -(pi / 2.0f))
 		{
 			m_Angle = (int)((TmpAngle + (2.0f * pi)) * 256.0f);
@@ -491,7 +491,17 @@ void CCharacterCore::Move()
 	vec2 NewPos = m_Pos;
 
 	vec2 OldVel = m_Vel;
-	m_pCollision->MoveBox(&NewPos, &m_Vel, PhysicalSizeVec2(), 0);
+	bool Grounded = false;
+	m_pCollision->MoveBox(&NewPos, &m_Vel, PhysicalSizeVec2(),
+		vec2(m_Tuning.m_GroundElasticityX,
+			m_Tuning.m_GroundElasticityY),
+		&Grounded);
+
+	if(Grounded)
+	{
+		m_Jumped &= ~2;
+		m_JumpedTotal = 0;
+	}
 
 	m_Colliding = 0;
 	if(m_Vel.x < 0.001f && m_Vel.x > -0.001f)

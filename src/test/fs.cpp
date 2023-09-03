@@ -3,6 +3,51 @@
 
 #include <base/system.h>
 
+TEST(Filesystem, Filename)
+{
+	EXPECT_STREQ(fs_filename(""), "");
+	EXPECT_STREQ(fs_filename("a"), "a");
+	EXPECT_STREQ(fs_filename("abc"), "abc");
+	EXPECT_STREQ(fs_filename("a/b"), "b");
+	EXPECT_STREQ(fs_filename("a/b/c"), "c");
+	EXPECT_STREQ(fs_filename("aaaaa/bbbb/ccc"), "ccc");
+	EXPECT_STREQ(fs_filename("aaaaa\\bbbb\\ccc"), "ccc");
+	EXPECT_STREQ(fs_filename("aaaaa/bbbb\\ccc"), "ccc");
+	EXPECT_STREQ(fs_filename("aaaaa\\bbbb/ccc"), "ccc");
+}
+
+TEST(Filesystem, SplitFileExtension)
+{
+	char aName[IO_MAX_PATH_LENGTH];
+	char aExt[IO_MAX_PATH_LENGTH];
+
+	fs_split_file_extension("", aName, sizeof(aName), aExt, sizeof(aExt));
+	EXPECT_STREQ(aName, "");
+	EXPECT_STREQ(aExt, "");
+
+	fs_split_file_extension("name.ext", aName, sizeof(aName), aExt, sizeof(aExt));
+	EXPECT_STREQ(aName, "name");
+	EXPECT_STREQ(aExt, "ext");
+
+	fs_split_file_extension("name.ext", aName, sizeof(aName)); // extension parameter is optional
+	EXPECT_STREQ(aName, "name");
+
+	fs_split_file_extension("name.ext", nullptr, 0, aExt, sizeof(aExt)); // name parameter is optional
+	EXPECT_STREQ(aExt, "ext");
+
+	fs_split_file_extension("archive.tar.gz", aName, sizeof(aName), aExt, sizeof(aExt));
+	EXPECT_STREQ(aName, "archive.tar");
+	EXPECT_STREQ(aExt, "gz");
+
+	fs_split_file_extension("no_dot", aName, sizeof(aName), aExt, sizeof(aExt));
+	EXPECT_STREQ(aName, "no_dot");
+	EXPECT_STREQ(aExt, "");
+
+	fs_split_file_extension(".dot_first", aName, sizeof(aName), aExt, sizeof(aExt));
+	EXPECT_STREQ(aName, ".dot_first");
+	EXPECT_STREQ(aExt, "");
+}
+
 TEST(Filesystem, CreateCloseDelete)
 {
 	CTestInfo Info;

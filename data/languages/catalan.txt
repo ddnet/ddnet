@@ -72,12 +72,6 @@ Clan
 Client
 == Client
 
-Close
-== Tancar
-
-Connect
-== Connectar
-
 Connecting to
 == T'estàs unint a
 
@@ -344,9 +338,6 @@ Rename demo
 
 Reset filter
 == Reiniciar el filtre
-
-Sample rate
-== Freqüència de la imatge
 
 Score
 == Punts
@@ -642,9 +633,6 @@ Show votes window after voting
 HUD
 == HUD
 
-Select a name
-== Selecciona un nom
-
 Enable team chat sound
 == Activar el so del xat d'equip
 
@@ -671,9 +659,6 @@ Gameplay
 
 Restart
 == Reiniciar
-
-Old mouse mode
-== Mode antic del ratolí
 
 Browser
 == Navegador
@@ -707,9 +692,6 @@ Ghost
 
 Remove chat
 == Eliminar el xat
-
-Threaded sound loading
-== Càrrega de so en fils
 
 Check now
 == Comprova ara
@@ -1002,8 +984,8 @@ Show HUD
 Use high DPI
 == Fer servir alt DPI
 
-Default length: %d
-== Llargada predeterminada: %d
+Default length
+== Llargada predeterminada
 
 Enable replays
 == Activar les repeticions
@@ -1088,9 +1070,6 @@ Getting server list from master server
 
 %d player
 == %d jugador
-
-Refreshing...
-== Actualitzant...
 
 Leak IP
 == Fer la teva ip pública
@@ -1261,9 +1240,6 @@ default
 custom
 == personalitzat
 
-Graphics cards
-== Tarjetes gràfiques
-
 auto
 == auto
 
@@ -1278,8 +1254,6 @@ Tutorial
 
 Can't find a Tutorial server
 == No s'ha pogut trobar un servidor del tutorial
-
-[Graphics error]
 
 [Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
@@ -1344,7 +1318,10 @@ Initializing map logic
 Sending initial client info
 == 
 
-Search:
+Quitting. Please wait…
+== 
+
+Restarting. Please wait…
 == 
 
 Position:
@@ -1354,6 +1331,12 @@ Speed:
 == 
 
 Angle:
+== 
+
+Multi-View
+== 
+
+Team %d
 == 
 
 Uploading map data to GPU
@@ -1377,10 +1360,22 @@ Getting game info
 Requesting to join the game
 == 
 
-Cancel
+Rename folder
+== 
+
+A demo with this name already exists
+== 
+
+A folder with this name already exists
+== 
+
+Unable to rename the folder
 == 
 
 File '%s' already exists, do you want to overwrite it?
+== 
+
+(paused)
 == 
 
 Loading menu images
@@ -1389,10 +1384,38 @@ Loading menu images
 Copy info
 == 
 
+No server selected
+== 
+
+Online players (%d)
+== 
+
+Online clanmates (%d)
+== 
+
+[friends (server browser)]
+Offline (%d)
+== 
+
+Click to select server. Double click to join your friend.
+== 
+
+Click to remove this player from your friends list.
+== 
+
+Click to remove this clan from your friends list.
+== 
+
+None
+== 
+
 Are you sure that you want to remove the player '%s' from your friends list?
 == 
 
 Are you sure that you want to remove the clan '%s' from your friends list?
+== 
+
+Add Clan
 == 
 
 Play the current demo
@@ -1416,10 +1439,10 @@ Slow down the demo
 Speed up the demo
 == 
 
-Mark the beginning of a cut
+Mark the beginning of a cut (right click to reset)
 == 
 
-Mark the end of a cut
+Mark the end of a cut (right click to reset)
 == 
 
 Export cut as a separate demo
@@ -1431,19 +1454,46 @@ Go back one marker
 Go forward one marker
 == 
 
+Close the demo player
+== 
+
 Toggle keyboard shortcuts
+== 
+
+Export demo cut
+== 
+
+Cut interval
+== 
+
+Cut length
 == 
 
 Loading demo files
 == 
 
+All combined
+== 
+
+Folder Link
+== 
+
 Open the directory that contains the demo files
+== 
+
+Are you sure that you want to delete the folder '%s'?
 == 
 
 Are you sure that you want to delete the demo '%s'?
 == 
 
+Delete folder
+== 
+
 Unable to delete the demo '%s'
+== 
+
+Unable to delete the folder '%s'. Make sure it's empty first.
 == 
 
 Loading ghost files
@@ -1476,16 +1526,19 @@ Download community skins
 Choose default eyes when joining a server
 == 
 
+Create a random skin
+== 
+
 Open the directory to add custom skins
 == 
 
 Enable controller
 == 
 
-Controller %d: %s
+Controller
 == 
 
-Click to cycle through all available controllers.
+Ingame controller mode
 == 
 
 [Ingame controller mode]
@@ -1494,9 +1547,6 @@ Relative
 
 [Ingame controller mode]
 Absolute
-== 
-
-Ingame controller mode
 == 
 
 Ingame controller sens.
@@ -1511,16 +1561,13 @@ Controller jitter tolerance
 No controller found. Plug in a controller.
 == 
 
-Device
+Axis
 == 
 
 Status
 == 
 
 Aim bind
-== 
-
-Controller Axis #%d
 == 
 
 Mouse
@@ -1532,16 +1579,19 @@ Ingame mouse sens.
 UI mouse sens.
 == 
 
-Controller
-== 
-
 Reset controls
 == 
 
 Are you sure that you want to reset the controls to their defaults?
 == 
 
+Cancel
+== 
+
 Allows maps to render with more detail
+== 
+
+Graphics card
 == 
 
 Appearance
@@ -1682,8 +1732,8 @@ Loading race demo files
 Super
 == 
 
-Team %d
+Loading sound files
 == 
 
-Loading sound files
+Moved ingame
 == 

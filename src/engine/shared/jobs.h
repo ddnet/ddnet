@@ -22,8 +22,8 @@ private:
 
 public:
 	IJob();
-	IJob(const IJob &Other);
-	IJob &operator=(const IJob &Other);
+	IJob(const IJob &Other) = delete;
+	IJob &operator=(const IJob &Other) = delete;
 	virtual ~IJob();
 	int Status();
 

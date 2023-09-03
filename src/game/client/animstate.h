@@ -12,15 +12,17 @@ class CAnimState
 	CAnimKeyframe m_FrontFoot;
 	CAnimKeyframe m_Attach;
 
+	void AnimAdd(CAnimState *pState, const CAnimState *pAdded, float Amount);
+
 public:
-	CAnimKeyframe *GetBody() { return &m_Body; }
-	CAnimKeyframe *GetBackFoot() { return &m_BackFoot; }
-	CAnimKeyframe *GetFrontFoot() { return &m_FrontFoot; }
-	CAnimKeyframe *GetAttach() { return &m_Attach; }
+	const CAnimKeyframe *GetBody() const { return &m_Body; }
+	const CAnimKeyframe *GetBackFoot() const { return &m_BackFoot; }
+	const CAnimKeyframe *GetFrontFoot() const { return &m_FrontFoot; }
+	const CAnimKeyframe *GetAttach() const { return &m_Attach; }
 	void Set(CAnimation *pAnim, float Time);
 	void Add(CAnimation *pAnim, float Time, float Amount);
 
-	static CAnimState *GetIdle();
+	const static CAnimState *GetIdle();
 };
 
 #endif

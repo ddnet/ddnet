@@ -191,7 +191,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 			while(TextRender()->TextWidth(TitleFontsize, aBuf, -1, -1.0f) > TitleWidth)
 				aBuf[str_length(aBuf) - 1] = '\0';
 			if(str_comp(aBuf, Client()->GetCurrentMap()))
-				str_append(aBuf, "…", sizeof(aBuf));
+				str_append(aBuf, "…");
 			pTitle = aBuf;
 		}
 	}
@@ -202,7 +202,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		if(m_pClient->m_Snap.m_pGameDataObj)
 		{
 			int Score = Team == TEAM_RED ? m_pClient->m_Snap.m_pGameDataObj->m_TeamscoreRed : m_pClient->m_Snap.m_pGameDataObj->m_TeamscoreBlue;
-			str_format(aBuf, sizeof(aBuf), "%d", Score);
+			str_from_int(Score, aBuf);
 		}
 	}
 	else
@@ -211,12 +211,12 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 			m_pClient->m_Snap.m_apPlayerInfos[m_pClient->m_Snap.m_SpecInfo.m_SpectatorID])
 		{
 			int Score = m_pClient->m_Snap.m_apPlayerInfos[m_pClient->m_Snap.m_SpecInfo.m_SpectatorID]->m_Score;
-			str_format(aBuf, sizeof(aBuf), "%d", Score);
+			str_from_int(Score, aBuf);
 		}
 		else if(m_pClient->m_Snap.m_pLocalInfo)
 		{
 			int Score = m_pClient->m_Snap.m_pLocalInfo->m_Score;
-			str_format(aBuf, sizeof(aBuf), "%d", Score);
+			str_from_int(Score, aBuf);
 		}
 	}
 
@@ -370,7 +370,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 					if(DDTeam == TEAM_SUPER)
 						str_copy(aBuf, Localize("Super"));
 					else
-						str_format(aBuf, sizeof(aBuf), "%d", DDTeam);
+						str_from_int(DDTeam, aBuf);
 					TextRender()->SetCursor(&Cursor, x - 10.0f, y + Spacing + FontSize - (FontSize / 1.5f), FontSize / 1.5f, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
 					Cursor.m_LineWidth = NameLength + 3;
 				}
@@ -405,7 +405,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 				str_time((int64_t)absolute(pInfo->m_Score) * 100, TIME_HOURS, aBuf, sizeof(aBuf));
 		}
 		else
-			str_format(aBuf, sizeof(aBuf), "%d", clamp(pInfo->m_Score, -999, 99999));
+			str_from_int(clamp(pInfo->m_Score, -999, 99999), aBuf);
 		tw = TextRender()->TextWidth(FontSize, aBuf, -1, -1.0f);
 		TextRender()->SetCursor(&Cursor, ScoreOffset + ScoreLength - tw, y + (LineHeight - FontSize) / 2.f, FontSize, TEXTFLAG_RENDER);
 		TextRender()->TextEx(&Cursor, aBuf, -1);
@@ -432,7 +432,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		// avatar
 		CTeeRenderInfo TeeInfo = m_pClient->m_aClients[pInfo->m_ClientID].m_RenderInfo;
 		TeeInfo.m_Size *= TeeSizeMod;
-		CAnimState *pIdleState = CAnimState::GetIdle();
+		const CAnimState *pIdleState = CAnimState::GetIdle();
 		vec2 OffsetToMid;
 		RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &TeeInfo, OffsetToMid);
 		vec2 TeeRenderPos(TeeOffset + TeeLength / 2, y + LineHeight / 2.0f + OffsetToMid.y);
@@ -485,8 +485,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 
 		// country flag
-		ColorRGBA Color(1.0f, 1.0f, 1.0f, 0.5f);
-		m_pClient->m_CountryFlags.Render(m_pClient->m_aClients[pInfo->m_ClientID].m_Country, &Color,
+		m_pClient->m_CountryFlags.Render(m_pClient->m_aClients[pInfo->m_ClientID].m_Country, ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f),
 			CountryOffset, y + (Spacing + TeeSizeMod * 5.0f) / 2.0f, CountryLength, LineHeight - Spacing - TeeSizeMod * 5.0f);
 
 		// ping
@@ -495,7 +494,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 			ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA((300.0f - clamp(pInfo->m_Latency, 0, 300)) / 1000.0f, 1.0f, 0.5f));
 			TextRender()->TextColor(rgb);
 		}
-		str_format(aBuf, sizeof(aBuf), "%d", clamp(pInfo->m_Latency, 0, 999));
+		str_from_int(clamp(pInfo->m_Latency, 0, 999), aBuf);
 		tw = TextRender()->TextWidth(FontSize, aBuf, -1, -1.0f);
 		TextRender()->SetCursor(&Cursor, PingOffset + PingLength - tw, y + (LineHeight - FontSize) / 2.f, FontSize, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
 		Cursor.m_LineWidth = PingLength;
@@ -532,25 +531,25 @@ void CScoreboard::RenderRecordingNotification(float x)
 	{
 		str_time((int64_t)m_pClient->DemoRecorder(RECORDER_MANUAL)->Length() * 100, TIME_HOURS, aTime, sizeof(aTime));
 		str_format(aBuf2, sizeof(aBuf2), "%s %s  ", Localize("Manual"), aTime);
-		str_append(aBuf, aBuf2, sizeof(aBuf));
+		str_append(aBuf, aBuf2);
 	}
 	if(m_pClient->DemoRecorder(RECORDER_RACE)->IsRecording())
 	{
 		str_time((int64_t)m_pClient->DemoRecorder(RECORDER_RACE)->Length() * 100, TIME_HOURS, aTime, sizeof(aTime));
 		str_format(aBuf2, sizeof(aBuf2), "%s %s  ", Localize("Race"), aTime);
-		str_append(aBuf, aBuf2, sizeof(aBuf));
+		str_append(aBuf, aBuf2);
 	}
 	if(m_pClient->DemoRecorder(RECORDER_AUTO)->IsRecording())
 	{
 		str_time((int64_t)m_pClient->DemoRecorder(RECORDER_AUTO)->Length() * 100, TIME_HOURS, aTime, sizeof(aTime));
 		str_format(aBuf2, sizeof(aBuf2), "%s %s  ", Localize("Auto"), aTime);
-		str_append(aBuf, aBuf2, sizeof(aBuf));
+		str_append(aBuf, aBuf2);
 	}
 	if(m_pClient->DemoRecorder(RECORDER_REPLAYS)->IsRecording())
 	{
 		str_time((int64_t)m_pClient->DemoRecorder(RECORDER_REPLAYS)->Length() * 100, TIME_HOURS, aTime, sizeof(aTime));
 		str_format(aBuf2, sizeof(aBuf2), "%s %s  ", Localize("Replay"), aTime);
-		str_append(aBuf, aBuf2, sizeof(aBuf));
+		str_append(aBuf, aBuf2);
 	}
 
 	if(!aBuf[0])

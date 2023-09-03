@@ -267,6 +267,7 @@ bool IGameController::OnEntity(int Index, int x, int y, int Layer, int Flags, bo
 			true, //Freeze
 			true, //Explosive
 			(g_Config.m_SvShotgunBulletSound) ? SOUND_GRENADE_EXPLODE : -1, //SoundImpact
+			vec2(std::sin(Deg), std::cos(Deg)), // InitDir
 			Layer,
 			Number);
 		pBullet->SetBouncing(2 - (Dir % 2));
@@ -293,6 +294,7 @@ bool IGameController::OnEntity(int Index, int x, int y, int Layer, int Flags, bo
 			true, //Freeze
 			false, //Explosive
 			SOUND_GRENADE_EXPLODE,
+			vec2(std::sin(Deg), std::cos(Deg)), // InitDir
 			Layer,
 			Number);
 		pBullet->SetBouncing(2 - (Dir % 2));
@@ -532,13 +534,13 @@ int IGameController::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *
 	if(!pKiller || Weapon == WEAPON_GAME)
 		return 0;
 	if(pKiller == pVictim->GetPlayer())
-		pVictim->GetPlayer()->m_Score--; // suicide or world
+		pVictim->GetPlayer()->DecrementScore(); // suicide or world
 	else
 	{
 		if(IsTeamplay() && pVictim->GetPlayer()->GetTeam() == pKiller->GetTeam())
-			pKiller->m_Score--; // teamkill
+			pKiller->DecrementScore(); // teamkill
 		else
-			pKiller->m_Score++; // normal kill
+			pKiller->IncrementScore(); // normal kill
 	}
 	if(Weapon == WEAPON_SELF)
 		pVictim->GetPlayer()->m_RespawnTick = Server()->Tick() + Server()->TickSpeed() * 3.0f;
@@ -727,7 +729,11 @@ void IGameController::Snap(int SnappingClient)
 		if(Team == TEAM_SUPER)
 			return;
 
-		CNetObj_SwitchState *pSwitchState = Server()->SnapNewItem<CNetObj_SwitchState>(Team);
+		int SentTeam = Team;
+		if(g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO)
+			SentTeam = 0;
+
+		CNetObj_SwitchState *pSwitchState = Server()->SnapNewItem<CNetObj_SwitchState>(SentTeam);
 		if(!pSwitchState)
 			return;
 
@@ -904,12 +910,13 @@ bool IGameController::DoWincheckMatch()
 			{
 				if(!pPlayer)
 					continue;
-				if(pPlayer->m_Score > Topscore)
+				int Score = pPlayer->m_Score.value_or(0);
+				if(Score > Topscore)
 				{
-					Topscore = pPlayer->m_Score;
+					Topscore = Score;
 					TopscoreCount = 1;
 				}
-				else if(pPlayer->m_Score == Topscore)
+				else if(Score == Topscore)
 					TopscoreCount++;
 			}
 

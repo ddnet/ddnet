@@ -37,6 +37,7 @@ enum
 	CURVETYPE_SLOW,
 	CURVETYPE_FAST,
 	CURVETYPE_SMOOTH,
+	CURVETYPE_BEZIER,
 	NUM_CURVETYPES,
 
 	// game layer tiles
@@ -251,8 +252,13 @@ struct CMapItemInfoSettings : CMapItemInfo
 	int m_Settings;
 };
 
-struct CMapItemImage
+struct CMapItemImage_v1
 {
+	enum
+	{
+		CURRENT_VERSION = 1,
+	};
+
 	int m_Version;
 	int m_Width;
 	int m_Height;
@@ -260,6 +266,18 @@ struct CMapItemImage
 	int m_ImageName;
 	int m_ImageData;
 };
+
+struct CMapItemImage_v2 : public CMapItemImage_v1
+{
+	enum
+	{
+		CURRENT_VERSION = 2,
+	};
+
+	int m_Format; // Default before this version is CImageInfo::FORMAT_RGBA
+};
+
+typedef CMapItemImage_v1 CMapItemImage;
 
 struct CMapItemGroup_v1
 {
@@ -298,6 +316,12 @@ struct CMapItemLayer
 
 struct CMapItemLayerTilemap
 {
+	enum
+	{
+		CURRENT_VERSION = 3,
+		TILE_SKIP_MIN_VERSION = 4, // supported for loading but not saving
+	};
+
 	CMapItemLayer m_Layer;
 	int m_Version;
 
@@ -337,9 +361,16 @@ struct CMapItemLayerQuads
 
 struct CMapItemVersion
 {
+	enum
+	{
+		CURRENT_VERSION = 1
+	};
+
 	int m_Version;
 };
 
+// Represents basic information about envelope points.
+// In upstream Teeworlds, this is only used if all CMapItemEnvelope are version 1 or 2.
 struct CEnvPoint
 {
 	enum
@@ -348,14 +379,45 @@ struct CEnvPoint
 	};
 
 	int m_Time; // in ms
-	int m_Curvetype;
+	int m_Curvetype; // CURVETYPE_* constants, any unknown value behaves like CURVETYPE_LINEAR
 	int m_aValues[MAX_CHANNELS]; // 1-4 depending on envelope (22.10 fixed point)
 
 	bool operator<(const CEnvPoint &Other) const { return m_Time < Other.m_Time; }
 };
 
+// Represents additional envelope point information for CURVETYPE_BEZIER.
+// In DDNet, these are stored separately in an UUID-based map item.
+// In upstream Teeworlds, CEnvPointBezier_upstream is used instead.
+struct CEnvPointBezier
+{
+	// DeltaX in ms and DeltaY as 22.10 fxp
+	int m_aInTangentDeltaX[CEnvPoint::MAX_CHANNELS];
+	int m_aInTangentDeltaY[CEnvPoint::MAX_CHANNELS];
+	int m_aOutTangentDeltaX[CEnvPoint::MAX_CHANNELS];
+	int m_aOutTangentDeltaY[CEnvPoint::MAX_CHANNELS];
+};
+
+// Written to maps on upstream Teeworlds for envelope points including bezier information instead of the basic
+// CEnvPoint items, if at least one CMapItemEnvelope with version 3 or higher exists in the map.
+struct CEnvPointBezier_upstream : public CEnvPoint
+{
+	CEnvPointBezier m_Bezier;
+};
+
+// Used to represent all envelope point information at runtime in editor.
+// (Can eventually be different than CEnvPointBezier_upstream)
+struct CEnvPoint_runtime : public CEnvPoint
+{
+	CEnvPointBezier m_Bezier;
+};
+
 struct CMapItemEnvelope_v1
 {
+	enum
+	{
+		CURRENT_VERSION = 1,
+	};
+
 	int m_Version;
 	int m_Channels;
 	int m_StartPoint;
@@ -363,14 +425,28 @@ struct CMapItemEnvelope_v1
 	int m_aName[8];
 };
 
-struct CMapItemEnvelope : public CMapItemEnvelope_v1
+struct CMapItemEnvelope_v2 : public CMapItemEnvelope_v1
 {
 	enum
 	{
-		CURRENT_VERSION = 2
+		CURRENT_VERSION = 2,
 	};
+
 	int m_Synchronized;
 };
+
+// Only written to maps in upstream Teeworlds.
+// If at least one of these exists in a map, the envelope points
+// are represented by CEnvPointBezier_upstream instead of CEnvPoint.
+struct CMapItemEnvelope_v3 : public CMapItemEnvelope_v2
+{
+	enum
+	{
+		CURRENT_VERSION = 3,
+	};
+};
+
+typedef CMapItemEnvelope_v2 CMapItemEnvelope;
 
 struct CSoundShape
 {
@@ -489,8 +565,12 @@ public:
 bool IsValidGameTile(int Index);
 bool IsValidFrontTile(int Index);
 bool IsValidTeleTile(int Index);
+bool IsTeleTileNumberUsed(int Index); // Assumes that Index is a valid tele tile index
 bool IsValidSpeedupTile(int Index);
 bool IsValidSwitchTile(int Index);
+bool IsSwitchTileFlagsUsed(int Index); // Assumes that Index is a valid switch tile index
+bool IsSwitchTileNumberUsed(int Index); // Assumes that Index is a valid switch tile index
+bool IsSwitchTileDelayUsed(int Index); // Assumes that Index is a valid switch tile index
 bool IsValidTuneTile(int Index);
 bool IsValidEntity(int Index);
 bool IsRotatableTile(int Index);

@@ -29,6 +29,7 @@ public:
 	int m_NumClients; // Indirectly serialized.
 	int m_MaxPlayers;
 	int m_NumPlayers; // Not serialized.
+	int m_ClientScoreKind;
 	bool m_Passworded;
 	char m_aGameType[16];
 	char m_aName[64];

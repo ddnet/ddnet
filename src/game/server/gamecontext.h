@@ -140,6 +140,11 @@ class CGameContext : public IGameServer
 	void AddVote(const char *pDescription, const char *pCommand);
 	static int MapScan(const char *pName, int IsDir, int DirType, void *pUserData);
 
+	struct CPersistentData
+	{
+		CUuid m_PrevGameUuid;
+	};
+
 	struct CPersistentClientData
 	{
 		bool m_IsSpectator;
@@ -229,8 +234,8 @@ public:
 	void CreateSound(vec2 Pos, int Sound, CClientMask Mask = CClientMask().set());
 	void CreateSoundGlobal(int Sound, int Target = -1);
 
-	bool SnapLaserObject(const CSnapContext &Context, int SnapID, const vec2 &To, const vec2 &From, int StartTick, int Owner = -1, int LaserType = -1);
-	bool SnapPickup(const CSnapContext &Context, int SnapID, const vec2 &Pos, int Type, int SubType);
+	bool SnapLaserObject(const CSnapContext &Context, int SnapID, const vec2 &To, const vec2 &From, int StartTick, int Owner = -1, int LaserType = -1, int Subtype = -1, int SwitchNumber = -1);
+	bool SnapPickup(const CSnapContext &Context, int SnapID, const vec2 &Pos, int Type, int SubType, int SwitchNumber);
 
 	enum
 	{
@@ -251,7 +256,7 @@ public:
 	void SendChatTeam(int Team, const char *pText);
 	void SendChat(int ClientID, int Team, const char *pText, int SpamProtectionClientID = -1, int Flags = CHAT_SIX | CHAT_SIXUP);
 	void SendStartWarning(int ClientID, const char *pMessage);
-	void SendEmoticon(int ClientID, int Emoticon);
+	void SendEmoticon(int ClientID, int Emoticon, int TargetClientID);
 	void SendWeaponPickup(int ClientID, int Weapon);
 	void SendMotd(int ClientID);
 	void SendSettings(int ClientID);
@@ -274,10 +279,10 @@ public:
 	void LoadMapSettings();
 
 	// engine events
-	void OnInit() override;
+	void OnInit(const void *pPersistentData) override;
 	void OnConsoleInit() override;
 	void OnMapChange(char *pNewMapName, int MapNameSize) override;
-	void OnShutdown() override;
+	void OnShutdown(void *pPersistentData) override;
 
 	void OnTick() override;
 	void OnPreSnap() override;
@@ -297,11 +302,14 @@ public:
 	void OnClientPredictedInput(int ClientID, void *pInput) override;
 	void OnClientPredictedEarlyInput(int ClientID, void *pInput) override;
 
-	void OnClientEngineJoin(int ClientID, bool Sixup) override;
-	void OnClientEngineDrop(int ClientID, const char *pReason) override;
+	void TeehistorianRecordAntibot(const void *pData, int DataSize) override;
+	void TeehistorianRecordPlayerJoin(int ClientID, bool Sixup) override;
+	void TeehistorianRecordPlayerDrop(int ClientID, const char *pReason) override;
+	void TeehistorianRecordPlayerRejoin(int ClientID) override;
 
 	bool IsClientReady(int ClientID) const override;
 	bool IsClientPlayer(int ClientID) const override;
+	int PersistentDataSize() const override { return sizeof(CPersistentData); }
 	int PersistentClientDataSize() const override { return sizeof(CPersistentClientData); }
 
 	CUuid GameUuid() const override;
@@ -398,7 +406,6 @@ private:
 	static void ConTopPoints(IConsole::IResult *pResult, void *pUserData);
 	static void ConTimeCP(IConsole::IResult *pResult, void *pUserData);
 
-	static void ConUTF8(IConsole::IResult *pResult, void *pUserData);
 	static void ConDND(IConsole::IResult *pResult, void *pUserData);
 	static void ConMapInfo(IConsole::IResult *pResult, void *pUserData);
 	static void ConTimeout(IConsole::IResult *pResult, void *pUserData);
@@ -409,7 +416,6 @@ private:
 	static void ConMap(IConsole::IResult *pResult, void *pUserData);
 	static void ConTeamRank(IConsole::IResult *pResult, void *pUserData);
 	static void ConRank(IConsole::IResult *pResult, void *pUserData);
-	static void ConBroadTime(IConsole::IResult *pResult, void *pUserData);
 	static void ConJoinTeam(IConsole::IResult *pResult, void *pUserData);
 	static void ConLockTeam(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnlockTeam(IConsole::IResult *pResult, void *pUserData);
@@ -418,7 +424,6 @@ private:
 	static void ConWhisper(IConsole::IResult *pResult, void *pUserData);
 	static void ConConverse(IConsole::IResult *pResult, void *pUserData);
 	static void ConSetEyeEmote(IConsole::IResult *pResult, void *pUserData);
-	static void ConToggleBroadcast(IConsole::IResult *pResult, void *pUserData);
 	static void ConEyeEmote(IConsole::IResult *pResult, void *pUserData);
 	static void ConShowOthers(IConsole::IResult *pResult, void *pUserData);
 	static void ConShowAll(IConsole::IResult *pResult, void *pUserData);
@@ -430,6 +435,8 @@ private:
 	static void ConSetTimerType(IConsole::IResult *pResult, void *pUserData);
 	static void ConRescue(IConsole::IResult *pResult, void *pUserData);
 	static void ConTele(IConsole::IResult *pResult, void *pUserData);
+	static void ConPracticeUnSolo(IConsole::IResult *pResult, void *pUserData);
+	static void ConPracticeUnDeep(IConsole::IResult *pResult, void *pUserData);
 	static void ConProtectedKill(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConVoteMute(IConsole::IResult *pResult, void *pUserData);
@@ -479,8 +486,8 @@ private:
 
 	enum
 	{
-		MAX_LOG_SECONDS = 240,
-		MAX_LOGS = 256,
+		MAX_LOG_SECONDS = 600,
+		MAX_LOGS = 512,
 	};
 	struct CLog
 	{
@@ -492,8 +499,7 @@ private:
 		char m_aClientAddrStr[NETADDR_MAXSTRSIZE];
 	};
 	CLog m_aLogs[MAX_LOGS];
-	int m_FirstLog;
-	int m_LastLog;
+	int m_LatestLog;
 
 	void LogEvent(const char *Description, int ClientID);
 

@@ -253,7 +253,7 @@ CMapItemLayerQuads *GetQuadLayer(CDataFileReader &InputMap, const int aLayerID[2
 	int Start, Num;
 	InputMap.GetType(MAPITEMTYPE_GROUP, &Start, &Num);
 
-	CMapItemGroup *pGroupItem = aLayerID[0] >= Num ? 0x0 : (CMapItemGroup *)InputMap.GetItem(Start + aLayerID[0], 0, 0);
+	CMapItemGroup *pGroupItem = aLayerID[0] >= Num ? 0x0 : (CMapItemGroup *)InputMap.GetItem(Start + aLayerID[0]);
 
 	if(!pGroupItem)
 	{
@@ -264,7 +264,7 @@ CMapItemLayerQuads *GetQuadLayer(CDataFileReader &InputMap, const int aLayerID[2
 	InputMap.GetType(MAPITEMTYPE_LAYER, &Start, &Num);
 	*pItemNumber = Start + pGroupItem->m_StartLayer + aLayerID[1];
 
-	CMapItemLayer *pLayerItem = aLayerID[1] >= pGroupItem->m_NumLayers ? 0x0 : (CMapItemLayer *)InputMap.GetItem(*pItemNumber, 0, 0);
+	CMapItemLayer *pLayerItem = aLayerID[1] >= pGroupItem->m_NumLayers ? 0x0 : (CMapItemLayer *)InputMap.GetItem(*pItemNumber);
 	if(!pLayerItem)
 	{
 		dbg_msg("map_create_pixelart", "ERROR: unable to find layer '#%d' in group '#%d'", aLayerID[1], aLayerID[0]);

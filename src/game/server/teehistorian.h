@@ -33,6 +33,9 @@ public:
 		SHA256_DIGEST m_MapSha256;
 		int m_MapCrc;
 
+		bool m_HavePrevGameUuid;
+		CUuid m_PrevGameUuid;
+
 		CConfig *m_pConfig;
 		CTuningParams *m_pTuning;
 		CUuidManager *m_pUuids;
@@ -64,6 +67,7 @@ public:
 	void RecordPlayerInput(int ClientID, uint32_t UniqueClientID, const CNetObj_PlayerInput *pInput);
 	void RecordPlayerMessage(int ClientID, const void *pMsg, int MsgSize);
 	void RecordPlayerJoin(int ClientID, int Protocol);
+	void RecordPlayerRejoin(int ClientID);
 	void RecordPlayerReady(int ClientID);
 	void RecordPlayerDrop(int ClientID, const char *pReason);
 	void RecordConsoleCommand(int ClientID, int FlagMask, const char *pCmd, IConsole::IResult *pResult);
@@ -83,6 +87,8 @@ public:
 	void RecordAuthInitial(int ClientID, int Level, const char *pAuthName);
 	void RecordAuthLogin(int ClientID, int Level, const char *pAuthName);
 	void RecordAuthLogout(int ClientID);
+
+	void RecordAntibot(const void *pData, int DataSize);
 
 	int m_Debug; // Possible values: 0, 1, 2.
 

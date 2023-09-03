@@ -76,12 +76,6 @@ Clan
 Client
 == Клиент
 
-Close
-== Затвори
-
-Connect
-== Впиши
-
 Connecting to
 == Свързвам се с
 
@@ -347,9 +341,6 @@ Rename demo
 Reset filter
 == Рестартирай филтрите
 
-Sample rate
-== Честота
-
 Score
 == Точки
 
@@ -587,8 +578,6 @@ Type:
 == Тип:
 
 [Graphics error]
-
-[Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
 == 
 
@@ -672,7 +661,10 @@ Sending initial client info
 Warning
 == 
 
-Search:
+Quitting. Please wait…
+== 
+
+Restarting. Please wait…
 == 
 
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
@@ -690,10 +682,16 @@ Speed:
 Angle:
 == 
 
+Multi-View
+== 
+
 Server best:
 == 
 
 Personal best:
+== 
+
+Team %d
 == 
 
 Uploading map data to GPU
@@ -729,6 +727,9 @@ Requesting to join the game
 Reconnect in %d sec
 == 
 
+Rename folder
+== 
+
 Render demo
 == 
 
@@ -756,13 +757,22 @@ Your nickname '%s' is already used (%d points). Do you still want to use it?
 Checking for existing player with your name
 == 
 
-Cancel
+A demo with this name already exists
+== 
+
+A folder with this name already exists
+== 
+
+Unable to rename the folder
 == 
 
 File '%s' already exists, do you want to overwrite it?
 == 
 
 Replace video
+== 
+
+(paused)
 == 
 
 Speed
@@ -831,9 +841,6 @@ Exclude
 %d player
 == 
 
-Refreshing...
-== 
-
 Are you sure that you want to disconnect and switch to a different server?
 == 
 
@@ -858,22 +865,38 @@ Copy info
 Leak IP
 == 
 
+No server selected
+== 
+
+Online players (%d)
+== 
+
+Online clanmates (%d)
+== 
+
+[friends (server browser)]
+Offline (%d)
+== 
+
+Click to select server. Double click to join your friend.
+== 
+
+Click to remove this player from your friends list.
+== 
+
+Click to remove this clan from your friends list.
+== 
+
+None
+== 
+
 Are you sure that you want to remove the player '%s' from your friends list?
 == 
 
 Are you sure that you want to remove the clan '%s' from your friends list?
 == 
 
-Select a name
-== 
-
-Please use a different name
-== 
-
-File already exists, do you want to overwrite it?
-== 
-
-Remove chat
+Add Clan
 == 
 
 Play the current demo
@@ -897,10 +920,10 @@ Slow down the demo
 Speed up the demo
 == 
 
-Mark the beginning of a cut
+Mark the beginning of a cut (right click to reset)
 == 
 
-Mark the end of a cut
+Mark the end of a cut (right click to reset)
 == 
 
 Export cut as a separate demo
@@ -912,10 +935,37 @@ Go back one marker
 Go forward one marker
 == 
 
+Close the demo player
+== 
+
 Toggle keyboard shortcuts
 == 
 
+Export demo cut
+== 
+
+Cut interval
+== 
+
+Cut length
+== 
+
+Remove chat
+== 
+
+Please use a different name
+== 
+
+File already exists, do you want to overwrite it?
+== 
+
 Loading demo files
+== 
+
+All combined
+== 
+
+Folder Link
 == 
 
 Markers:
@@ -948,13 +998,22 @@ Demos directory
 Open the directory that contains the demo files
 == 
 
+Are you sure that you want to delete the folder '%s'?
+== 
+
 Are you sure that you want to delete the demo '%s'?
+== 
+
+Delete folder
 == 
 
 Render
 == 
 
 Unable to delete the demo '%s'
+== 
+
+Unable to delete the folder '%s'. Make sure it's empty first.
 == 
 
 Are you sure that you want to disconnect?
@@ -1068,6 +1127,9 @@ Skin prefix
 Choose default eyes when joining a server
 == 
 
+Create a random skin
+== 
+
 Skin Database
 == 
 
@@ -1134,10 +1196,10 @@ Chat command
 Enable controller
 == 
 
-Controller %d: %s
+Controller
 == 
 
-Click to cycle through all available controllers.
+Ingame controller mode
 == 
 
 [Ingame controller mode]
@@ -1146,9 +1208,6 @@ Relative
 
 [Ingame controller mode]
 Absolute
-== 
-
-Ingame controller mode
 == 
 
 Ingame controller sens.
@@ -1163,16 +1222,13 @@ Controller jitter tolerance
 No controller found. Plug in a controller.
 == 
 
-Device
+Axis
 == 
 
 Status
 == 
 
 Aim bind
-== 
-
-Controller Axis #%d
 == 
 
 Mouse
@@ -1184,13 +1240,13 @@ Ingame mouse sens.
 UI mouse sens.
 == 
 
-Controller
-== 
-
 Reset controls
 == 
 
 Are you sure that you want to reset the controls to their defaults?
+== 
+
+Cancel
 == 
 
 Dummy
@@ -1208,10 +1264,10 @@ Windowed fullscreen
 Desktop fullscreen
 == 
 
-may cause delay
+Screen
 == 
 
-Screen
+may cause delay
 == 
 
 Allows maps to render with more detail
@@ -1229,7 +1285,7 @@ default
 custom
 == 
 
-Graphics cards
+Graphics card
 == 
 
 auto
@@ -1254,9 +1310,6 @@ Enable team chat sound
 == 
 
 Enable highlighted chat sound
-== 
-
-Threaded sound loading
 == 
 
 Game sound volume
@@ -1460,7 +1513,7 @@ Save the best demo of each race
 Enable replays
 == 
 
-Default length: %d
+Default length
 == 
 
 When you cross the start line, show a ghost tee replicating the movements of your best time
@@ -1478,10 +1531,10 @@ Gameplay
 Overlay entities
 == 
 
-Size
+Show text entities
 == 
 
-Show text entities
+Size
 == 
 
 Opacity
@@ -1512,9 +1565,6 @@ AntiPing: predict weapons
 == 
 
 AntiPing: predict grenade paths
-== 
-
-Old mouse mode
 == 
 
 Background
@@ -1638,9 +1688,6 @@ Loading race demo files
 Super
 == 
 
-Team %d
-== 
-
 Manual
 == 
 
@@ -1693,4 +1740,7 @@ Grabs
 == 
 
 9+ new mentions
+== 
+
+Moved ingame
 == 

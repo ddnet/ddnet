@@ -124,12 +124,52 @@ TEST(Str, Utf8ToLower)
 	EXPECT_TRUE(str_utf8_comp_nocase_num("ÖlÜ", "ölüa", 6) != 0);
 	EXPECT_TRUE(str_utf8_comp_nocase_num("a", "z", 0) == 0);
 	EXPECT_TRUE(str_utf8_comp_nocase_num("a", "z", 1) != 0);
+}
 
-	const char str[] = "ÄÖÜ";
-	EXPECT_TRUE(str_utf8_find_nocase(str, "ä") == str);
-	EXPECT_TRUE(str_utf8_find_nocase(str, "ö") == str + 2);
-	EXPECT_TRUE(str_utf8_find_nocase(str, "ü") == str + 4);
-	EXPECT_TRUE(str_utf8_find_nocase(str, "z") == NULL);
+TEST(Str, Utf8FindNocase)
+{
+	const char *pStr = "abc";
+	const char *pEnd;
+	EXPECT_EQ(str_utf8_find_nocase(pStr, "a", &pEnd), pStr);
+	EXPECT_EQ(pEnd, pStr + str_length("a"));
+	EXPECT_EQ(str_utf8_find_nocase(pStr, "b", &pEnd), pStr + str_length("a"));
+	EXPECT_EQ(pEnd, pStr + str_length("ab"));
+	EXPECT_EQ(str_utf8_find_nocase(pStr, "c", &pEnd), pStr + str_length("ab"));
+	EXPECT_EQ(pEnd, pStr + str_length("abc"));
+	EXPECT_EQ(str_utf8_find_nocase(pStr, "d", &pEnd), nullptr);
+	EXPECT_EQ(pEnd, nullptr);
+
+	EXPECT_EQ(str_utf8_find_nocase(pStr, "A", &pEnd), pStr);
+	EXPECT_EQ(pEnd, pStr + str_length("a"));
+	EXPECT_EQ(str_utf8_find_nocase(pStr, "B", &pEnd), pStr + str_length("a"));
+	EXPECT_EQ(pEnd, pStr + str_length("ab"));
+	EXPECT_EQ(str_utf8_find_nocase(pStr, "C", &pEnd), pStr + str_length("ab"));
+	EXPECT_EQ(pEnd, pStr + str_length("abc"));
+	EXPECT_EQ(str_utf8_find_nocase(pStr, "D", &pEnd), nullptr);
+	EXPECT_EQ(pEnd, nullptr);
+
+	pStr = "ÄÖÜ";
+	EXPECT_EQ(str_utf8_find_nocase(pStr, "ä", &pEnd), pStr);
+	EXPECT_EQ(pEnd, pStr + str_length("Ä"));
+	EXPECT_EQ(str_utf8_find_nocase(pStr, "ö", &pEnd), pStr + str_length("Ä"));
+	EXPECT_EQ(pEnd, pStr + str_length("ÄÖ"));
+	EXPECT_EQ(str_utf8_find_nocase(pStr, "ü", &pEnd), pStr + str_length("ÄÖ"));
+	EXPECT_EQ(pEnd, pStr + str_length("ÄÖÜ"));
+	EXPECT_EQ(str_utf8_find_nocase(pStr, "z", &pEnd), nullptr);
+	EXPECT_EQ(pEnd, nullptr);
+
+	// Both 'I' and 'İ' map to 'i'
+	pStr = "antimatter";
+	EXPECT_EQ(str_utf8_find_nocase(pStr, "I", &pEnd), pStr + str_length("ant"));
+	EXPECT_EQ(pEnd, pStr + str_length("anti"));
+	EXPECT_EQ(str_utf8_find_nocase(pStr, "İ", &pEnd), pStr + str_length("ant"));
+	EXPECT_EQ(pEnd, pStr + str_length("anti"));
+	pStr = "ANTIMATTER";
+	EXPECT_EQ(str_utf8_find_nocase(pStr, "i", &pEnd), pStr + str_length("ANT"));
+	EXPECT_EQ(pEnd, pStr + str_length("ANTI"));
+	pStr = "ANTİMATTER";
+	EXPECT_EQ(str_utf8_find_nocase(pStr, "i", &pEnd), pStr + str_length("ANT"));
+	EXPECT_EQ(pEnd, pStr + str_length("ANTİ"));
 }
 
 TEST(Str, Utf8FixTruncation)
@@ -586,11 +626,42 @@ TEST(Str, Copy)
 	EXPECT_STREQ(aBuf, "DDNet最好了");
 	str_copy(aBuf, pStr, 16);
 	EXPECT_STREQ(aBuf, "DDNet最好了");
+	str_copy(aBuf, pStr);
+	EXPECT_STREQ(aBuf, "DDNet最好了");
+}
+
+TEST(Str, Append)
+{
+	char aBuf[64];
+	aBuf[0] = '\0';
+	str_append(aBuf, "DDNet最好了", 7);
+	EXPECT_STREQ(aBuf, "DDNet");
+	str_append(aBuf, "最", 8);
+	EXPECT_STREQ(aBuf, "DDNet");
+	str_append(aBuf, "最", 9);
+	EXPECT_STREQ(aBuf, "DDNet最");
+	str_append(aBuf, "好", 10);
+	EXPECT_STREQ(aBuf, "DDNet最");
+	str_append(aBuf, "好", 11);
+	EXPECT_STREQ(aBuf, "DDNet最");
+	str_append(aBuf, "好", 12);
+	EXPECT_STREQ(aBuf, "DDNet最好");
+	str_append(aBuf, "了", 13);
+	EXPECT_STREQ(aBuf, "DDNet最好");
+	str_append(aBuf, "了", 14);
+	EXPECT_STREQ(aBuf, "DDNet最好");
+	str_append(aBuf, "了", 15);
+	EXPECT_STREQ(aBuf, "DDNet最好了");
+	str_append(aBuf, "了", 16);
+	EXPECT_STREQ(aBuf, "DDNet最好了");
+	aBuf[0] = '\0';
+	str_append(aBuf, "DDNet最好了");
+	EXPECT_STREQ(aBuf, "DDNet最好了");
 }
 
 TEST(Str, Utf8Stats)
 {
-	int Size, Count;
+	size_t Size, Count;
 
 	str_utf8_stats("abc", 4, 3, &Size, &Count);
 	EXPECT_EQ(Size, 3);
@@ -623,6 +694,60 @@ TEST(Str, Utf8Stats)
 	str_utf8_stats("любовь", 13, 3, &Size, &Count);
 	EXPECT_EQ(Size, 6);
 	EXPECT_EQ(Count, 3);
+}
+
+TEST(Str, Utf8OffsetBytesToChars)
+{
+	EXPECT_EQ(str_utf8_offset_bytes_to_chars("", 0), 0);
+	EXPECT_EQ(str_utf8_offset_bytes_to_chars("", 100), 0);
+
+	EXPECT_EQ(str_utf8_offset_bytes_to_chars("abc", 0), 0);
+	EXPECT_EQ(str_utf8_offset_bytes_to_chars("abc", 1), 1);
+	EXPECT_EQ(str_utf8_offset_bytes_to_chars("abc", 2), 2);
+	EXPECT_EQ(str_utf8_offset_bytes_to_chars("abc", 3), 3);
+	EXPECT_EQ(str_utf8_offset_bytes_to_chars("abc", 100), 3);
+
+	EXPECT_EQ(str_utf8_offset_bytes_to_chars("любовь", 0), 0);
+	EXPECT_EQ(str_utf8_offset_bytes_to_chars("любовь", 2), 1);
+	EXPECT_EQ(str_utf8_offset_bytes_to_chars("любовь", 4), 2);
+	EXPECT_EQ(str_utf8_offset_bytes_to_chars("любовь", 6), 3);
+	EXPECT_EQ(str_utf8_offset_bytes_to_chars("любовь", 8), 4);
+	EXPECT_EQ(str_utf8_offset_bytes_to_chars("любовь", 10), 5);
+	EXPECT_EQ(str_utf8_offset_bytes_to_chars("любовь", 12), 6);
+	EXPECT_EQ(str_utf8_offset_bytes_to_chars("любовь", 100), 6);
+
+	EXPECT_EQ(str_utf8_offset_bytes_to_chars("DDNet最好了", 5), 5);
+	EXPECT_EQ(str_utf8_offset_bytes_to_chars("DDNet最好了", 8), 6);
+	EXPECT_EQ(str_utf8_offset_bytes_to_chars("DDNet最好了", 11), 7);
+	EXPECT_EQ(str_utf8_offset_bytes_to_chars("DDNet最好了", 14), 8);
+	EXPECT_EQ(str_utf8_offset_bytes_to_chars("DDNet最好了", 100), 8);
+}
+
+TEST(Str, Utf8OffsetCharsToBytes)
+{
+	EXPECT_EQ(str_utf8_offset_chars_to_bytes("", 0), 0);
+	EXPECT_EQ(str_utf8_offset_chars_to_bytes("", 100), 0);
+
+	EXPECT_EQ(str_utf8_offset_chars_to_bytes("abc", 0), 0);
+	EXPECT_EQ(str_utf8_offset_chars_to_bytes("abc", 1), 1);
+	EXPECT_EQ(str_utf8_offset_chars_to_bytes("abc", 2), 2);
+	EXPECT_EQ(str_utf8_offset_chars_to_bytes("abc", 3), 3);
+	EXPECT_EQ(str_utf8_offset_chars_to_bytes("abc", 100), 3);
+
+	EXPECT_EQ(str_utf8_offset_chars_to_bytes("любовь", 0), 0);
+	EXPECT_EQ(str_utf8_offset_chars_to_bytes("любовь", 1), 2);
+	EXPECT_EQ(str_utf8_offset_chars_to_bytes("любовь", 2), 4);
+	EXPECT_EQ(str_utf8_offset_chars_to_bytes("любовь", 3), 6);
+	EXPECT_EQ(str_utf8_offset_chars_to_bytes("любовь", 4), 8);
+	EXPECT_EQ(str_utf8_offset_chars_to_bytes("любовь", 5), 10);
+	EXPECT_EQ(str_utf8_offset_chars_to_bytes("любовь", 6), 12);
+	EXPECT_EQ(str_utf8_offset_chars_to_bytes("любовь", 100), 12);
+
+	EXPECT_EQ(str_utf8_offset_chars_to_bytes("DDNet最好了", 5), 5);
+	EXPECT_EQ(str_utf8_offset_chars_to_bytes("DDNet最好了", 6), 8);
+	EXPECT_EQ(str_utf8_offset_chars_to_bytes("DDNet最好了", 7), 11);
+	EXPECT_EQ(str_utf8_offset_chars_to_bytes("DDNet最好了", 8), 14);
+	EXPECT_EQ(str_utf8_offset_chars_to_bytes("DDNet最好了", 100), 14);
 }
 
 TEST(Str, Time)
@@ -950,3 +1075,35 @@ TEST(Str, CountChar)
 	EXPECT_EQ(str_countchr(pStr, '\0'), 0);
 	EXPECT_EQ(str_countchr(pStr, 'y'), 0);
 }
+
+#if defined(CONF_FAMILY_WINDOWS)
+TEST(Str, WindowsUtf8WideConversion)
+{
+	const char *apUtf8Strings[] = {
+		"",
+		"abc",
+		"a bb ccc dddd       eeeee",
+		"öüä",
+		"привет Наташа",
+		"ąçęįǫų",
+		"DDNet最好了",
+		"aβい🐘"};
+	const wchar_t *apWideStrings[] = {
+		L"",
+		L"abc",
+		L"a bb ccc dddd       eeeee",
+		L"öüä",
+		L"привет Наташа",
+		L"ąçęįǫų",
+		L"DDNet最好了",
+		L"aβい🐘"};
+	static_assert(std::size(apUtf8Strings) == std::size(apWideStrings));
+	for(size_t i = 0; i < std::size(apUtf8Strings); i++)
+	{
+		const std::string ConvertedUtf8 = windows_wide_to_utf8(apWideStrings[i]);
+		const std::wstring ConvertedWide = windows_utf8_to_wide(apUtf8Strings[i]);
+		EXPECT_STREQ(ConvertedUtf8.c_str(), apUtf8Strings[i]);
+		EXPECT_STREQ(ConvertedWide.c_str(), apWideStrings[i]);
+	}
+}
+#endif

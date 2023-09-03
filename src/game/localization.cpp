@@ -13,28 +13,6 @@ const char *Localize(const char *pStr, const char *pContext)
 	return pNewStr ? pNewStr : pStr;
 }
 
-CLocConstString::CLocConstString(const char *pStr, const char *pContext)
-{
-	m_pDefaultStr = pStr;
-	m_Hash = str_quickhash(m_pDefaultStr);
-	m_Version = -1;
-}
-
-void CLocConstString::Reload()
-{
-	m_Version = g_Localization.Version();
-	const char *pNewStr = g_Localization.FindString(m_Hash, m_ContextHash);
-	m_pCurrentStr = pNewStr;
-	if(!m_pCurrentStr)
-		m_pCurrentStr = m_pDefaultStr;
-}
-
-CLocalizationDatabase::CLocalizationDatabase()
-{
-	m_VersionCounter = 0;
-	m_CurrentVersion = 0;
-}
-
 void CLocalizationDatabase::LoadIndexfile(IStorage *pStorage, IConsole *pConsole)
 {
 	m_vLanguages.clear();
@@ -148,6 +126,14 @@ void CLocalizationDatabase::LoadIndexfile(IStorage *pStorage, IConsole *pConsole
 
 void CLocalizationDatabase::SelectDefaultLanguage(IConsole *pConsole, char *pFilename, size_t Length) const
 {
+	if(Languages().empty())
+		return;
+	if(Languages().size() == 1)
+	{
+		str_copy(pFilename, Languages()[0].m_FileName.c_str(), Length);
+		return;
+	}
+
 	char aLocaleStr[128];
 	os_locale_str(aLocaleStr, sizeof(aLocaleStr));
 
@@ -194,7 +180,7 @@ void CLocalizationDatabase::SelectDefaultLanguage(IConsole *pConsole, char *pFil
 		}
 
 		// Stop if no more locale segments are left
-		if(i == 0)
+		if(i <= 0)
 			break;
 	}
 }
@@ -206,7 +192,6 @@ bool CLocalizationDatabase::Load(const char *pFilename, IStorage *pStorage, ICon
 	{
 		m_vStrings.clear();
 		m_StringsHeap.Reset();
-		m_CurrentVersion = 0;
 		return true;
 	}
 
@@ -240,7 +225,7 @@ bool CLocalizationDatabase::Load(const char *pFilename, IStorage *pStorage, ICon
 			size_t Len = str_length(pLine);
 			if(Len < 1 || pLine[Len - 1] != ']')
 			{
-				str_format(aBuf, sizeof(aBuf), "malform context line (%d): %s", Line, pLine);
+				str_format(aBuf, sizeof(aBuf), "malformed context line (%d): %s", Line, pLine);
 				pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "localization", aBuf);
 				continue;
 			}
@@ -263,7 +248,7 @@ bool CLocalizationDatabase::Load(const char *pFilename, IStorage *pStorage, ICon
 
 		if(pReplacement[0] != '=' || pReplacement[1] != '=' || pReplacement[2] != ' ')
 		{
-			str_format(aBuf, sizeof(aBuf), "malform replacement line (%d) for '%s'", Line, aOrigin);
+			str_format(aBuf, sizeof(aBuf), "malformed replacement line (%d) for '%s'", Line, aOrigin);
 			pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "localization", aBuf);
 			continue;
 		}
@@ -273,8 +258,6 @@ bool CLocalizationDatabase::Load(const char *pFilename, IStorage *pStorage, ICon
 	}
 	io_close(IoHandle);
 	std::sort(m_vStrings.begin(), m_vStrings.end());
-
-	m_CurrentVersion = ++m_VersionCounter;
 	return true;
 }
 

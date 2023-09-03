@@ -59,7 +59,9 @@ void CGameContext::ConCredits(IConsole::IResult *pResult, void *pUserData)
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 		"sjrc6, Cellegen, srdante, Nouaa, Voxel, luk51,");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
-		"Vy0x2, Avolicious, louis & others.");
+		"Vy0x2, Avolicious, louis, Marmare314, hus3h,");
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
+		"ArijanJ & others");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 		"Based on DDRace by the DDRace developers,");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
@@ -278,18 +280,17 @@ void CGameContext::ConRules(IConsole::IResult *pResult, void *pUserData)
 			"Be nice.");
 		Printed = true;
 	}
-#define GET_SERVER_RULE_LINE(n) g_Config.m_SvRulesLine##n
 	char *apRuleLines[] = {
-		GET_SERVER_RULE_LINE(1),
-		GET_SERVER_RULE_LINE(2),
-		GET_SERVER_RULE_LINE(3),
-		GET_SERVER_RULE_LINE(4),
-		GET_SERVER_RULE_LINE(5),
-		GET_SERVER_RULE_LINE(6),
-		GET_SERVER_RULE_LINE(7),
-		GET_SERVER_RULE_LINE(8),
-		GET_SERVER_RULE_LINE(9),
-		GET_SERVER_RULE_LINE(10),
+		g_Config.m_SvRulesLine1,
+		g_Config.m_SvRulesLine2,
+		g_Config.m_SvRulesLine3,
+		g_Config.m_SvRulesLine4,
+		g_Config.m_SvRulesLine5,
+		g_Config.m_SvRulesLine6,
+		g_Config.m_SvRulesLine7,
+		g_Config.m_SvRulesLine8,
+		g_Config.m_SvRulesLine9,
+		g_Config.m_SvRulesLine10,
 	};
 	for(auto &pRuleLine : apRuleLines)
 	{
@@ -769,6 +770,11 @@ void CGameContext::ConSwap(IConsole::IResult *pResult, void *pUserData)
 	else if(!Teams.IsStarted(Team))
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "Need to have started the map to swap with a player.");
+		return;
+	}
+	if(pSelf->m_World.m_Core.m_apCharacters[pResult->m_ClientID] == nullptr || pSelf->m_World.m_Core.m_apCharacters[TargetClientId] == nullptr)
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "You and the other player must not be paused.");
 		return;
 	}
 
@@ -1541,6 +1547,59 @@ void CGameContext::ConTele(IConsole::IResult *pResult, void *pUserData)
 	pSelf->Teleport(pChr, Pos);
 	pChr->UnFreeze();
 	pChr->Core()->m_Vel = vec2(0, 0);
+}
+
+void CGameContext::ConPracticeUnSolo(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientID(pResult->m_ClientID))
+		return;
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if(!pPlayer)
+		return;
+	CCharacter *pChr = pPlayer->GetCharacter();
+	if(!pChr)
+		return;
+
+	if(g_Config.m_SvTeam == SV_TEAM_FORBIDDEN || g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO)
+	{
+		pSelf->SendChatTarget(pPlayer->GetCID(), "Command is not available on solo servers");
+		return;
+	}
+
+	CGameTeams &Teams = ((CGameControllerDDRace *)pSelf->m_pController)->m_Teams;
+	int Team = Teams.m_Core.Team(pResult->m_ClientID);
+	if(!Teams.IsPractice(Team))
+	{
+		pSelf->SendChatTarget(pPlayer->GetCID(), "You're not in a team with /practice turned on. Note that you can't earn a rank with practice enabled.");
+		return;
+	}
+
+	pChr->SetSolo(false);
+}
+
+void CGameContext::ConPracticeUnDeep(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientID(pResult->m_ClientID))
+		return;
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if(!pPlayer)
+		return;
+	CCharacter *pChr = pPlayer->GetCharacter();
+	if(!pChr)
+		return;
+
+	CGameTeams &Teams = ((CGameControllerDDRace *)pSelf->m_pController)->m_Teams;
+	int Team = Teams.m_Core.Team(pResult->m_ClientID);
+	if(!Teams.IsPractice(Team))
+	{
+		pSelf->SendChatTarget(pPlayer->GetCID(), "You're not in a team with /practice turned on. Note that you can't earn a rank with practice enabled.");
+		return;
+	}
+
+	pChr->SetDeepFrozen(false);
+	pChr->UnFreeze();
 }
 
 void CGameContext::ConProtectedKill(IConsole::IResult *pResult, void *pUserData)

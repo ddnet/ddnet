@@ -79,12 +79,6 @@ Clan
 Client
 == Klijent
 
-Close
-== Zatvori
-
-Connect
-== Konektuj
-
 Connecting to
 == Konektovanje na
 
@@ -349,9 +343,6 @@ Rename demo
 
 Reset filter
 == Poništi filter
-
-Sample rate
-== Frekvencija
 
 Score
 == Rezultat
@@ -703,9 +694,6 @@ Update now
 Restart
 == Restart
 
-Select a name
-== Izaberite ime
-
 Please use a different name
 == Molimo izaberite drugo ime
 
@@ -868,9 +856,6 @@ Enable team chat sound
 Enable highlighted chat sound
 == Omogući zvuk označavanja u čatu
 
-Threaded sound loading
-== Učitavanje tredovanog zvuka
-
 Map sound volume
 == Glasnoća zvuka mape
 
@@ -919,8 +904,8 @@ Client message
 Save the best demo of each race
 == Sačuvaj najbolji demo-snimak svake trke
 
-Default length: %d
-== Zadana dužina: %d
+Default length
+== Zadana dužina
 
 Enable replays
 == Omogući replay
@@ -960,9 +945,6 @@ Show other players' hook collision lines
 
 Show other players' key presses
 == Prikaži tipke koje ostali igrači pritiskaju
-
-Old mouse mode
-== Stari način miša
 
 Show tiles layers from BG map
 == Prikaži slojeve od pozadinske mape
@@ -1090,7 +1072,10 @@ Sending initial client info
 Warning
 == 
 
-Search:
+Quitting. Please wait…
+== 
+
+Restarting. Please wait…
 == 
 
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
@@ -1103,6 +1088,12 @@ Speed:
 == 
 
 Angle:
+== 
+
+Multi-View
+== 
+
+Team %d
 == 
 
 Uploading map data to GPU
@@ -1126,6 +1117,9 @@ Getting game info
 Requesting to join the game
 == 
 
+Rename folder
+== 
+
 Existing Player
 == 
 
@@ -1135,10 +1129,19 @@ Your nickname '%s' is already used (%d points). Do you still want to use it?
 Checking for existing player with your name
 == 
 
-Cancel
+A demo with this name already exists
+== 
+
+A folder with this name already exists
+== 
+
+Unable to rename the folder
 == 
 
 File '%s' already exists, do you want to overwrite it?
+== 
+
+(paused)
 == 
 
 Speed
@@ -1192,9 +1195,6 @@ Getting server list from master server
 %d player
 == 
 
-Refreshing...
-== 
-
 Are you sure that you want to disconnect and switch to a different server?
 == 
 
@@ -1204,10 +1204,38 @@ Copy info
 Leak IP
 == 
 
+No server selected
+== 
+
+Online players (%d)
+== 
+
+Online clanmates (%d)
+== 
+
+[friends (server browser)]
+Offline (%d)
+== 
+
+Click to select server. Double click to join your friend.
+== 
+
+Click to remove this player from your friends list.
+== 
+
+Click to remove this clan from your friends list.
+== 
+
+None
+== 
+
 Are you sure that you want to remove the player '%s' from your friends list?
 == 
 
 Are you sure that you want to remove the clan '%s' from your friends list?
+== 
+
+Add Clan
 == 
 
 Play the current demo
@@ -1231,10 +1259,10 @@ Slow down the demo
 Speed up the demo
 == 
 
-Mark the beginning of a cut
+Mark the beginning of a cut (right click to reset)
 == 
 
-Mark the end of a cut
+Mark the end of a cut (right click to reset)
 == 
 
 Export cut as a separate demo
@@ -1246,10 +1274,28 @@ Go back one marker
 Go forward one marker
 == 
 
+Close the demo player
+== 
+
 Toggle keyboard shortcuts
 == 
 
+Export demo cut
+== 
+
+Cut interval
+== 
+
+Cut length
+== 
+
 Loading demo files
+== 
+
+All combined
+== 
+
+Folder Link
 == 
 
 %.2f MiB
@@ -1264,10 +1310,19 @@ Demos directory
 Open the directory that contains the demo files
 == 
 
+Are you sure that you want to delete the folder '%s'?
+== 
+
 Are you sure that you want to delete the demo '%s'?
 == 
 
+Delete folder
+== 
+
 Unable to delete the demo '%s'
+== 
+
+Unable to delete the folder '%s'. Make sure it's empty first.
 == 
 
 Loading ghost files
@@ -1321,6 +1376,9 @@ Download community skins
 Choose default eyes when joining a server
 == 
 
+Create a random skin
+== 
+
 Skin Database
 == 
 
@@ -1336,10 +1394,10 @@ Chat command
 Enable controller
 == 
 
-Controller %d: %s
+Controller
 == 
 
-Click to cycle through all available controllers.
+Ingame controller mode
 == 
 
 [Ingame controller mode]
@@ -1348,9 +1406,6 @@ Relative
 
 [Ingame controller mode]
 Absolute
-== 
-
-Ingame controller mode
 == 
 
 Ingame controller sens.
@@ -1365,16 +1420,13 @@ Controller jitter tolerance
 No controller found. Plug in a controller.
 == 
 
-Device
+Axis
 == 
 
 Status
 == 
 
 Aim bind
-== 
-
-Controller Axis #%d
 == 
 
 Mouse
@@ -1386,13 +1438,13 @@ Ingame mouse sens.
 UI mouse sens.
 == 
 
-Controller
-== 
-
 Reset controls
 == 
 
 Are you sure that you want to reset the controls to their defaults?
+== 
+
+Cancel
 == 
 
 Dummy
@@ -1422,7 +1474,7 @@ default
 custom
 == 
 
-Graphics cards
+Graphics card
 == 
 
 auto
@@ -1669,9 +1721,6 @@ Loading race demo files
 Super
 == 
 
-Team %d
-== 
-
 Manual
 == 
 
@@ -1694,4 +1743,7 @@ Spree
 == 
 
 Grabs
+== 
+
+Moved ingame
 == 

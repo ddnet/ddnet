@@ -5,7 +5,7 @@
 
 #include <game/gamecore.h>
 
-#include <list>
+#include <vector>
 
 class CEntity;
 class CCharacter;
@@ -165,7 +165,7 @@ public:
 		Returns:
 			Returns list with all Characters on line.
 	*/
-	std::list<CCharacter *> IntersectedCharacters(vec2 Pos0, vec2 Pos1, float Radius, const CEntity *pNotThis = nullptr);
+	std::vector<CCharacter *> IntersectedCharacters(vec2 Pos0, vec2 Pos1, float Radius, const CEntity *pNotThis = nullptr);
 };
 
 #endif

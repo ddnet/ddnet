@@ -13,7 +13,7 @@ class CMotd : public CComponent
 	int64_t m_ServerMotdTime;
 	int64_t m_ServerMotdUpdateTime;
 	int m_RectQuadContainer = -1;
-	int m_TextContainerIndex = -1;
+	STextContainerIndex m_TextContainerIndex;
 
 public:
 	CMotd();
@@ -28,7 +28,7 @@ public:
 	virtual void OnStateChange(int NewState, int OldState) override;
 	virtual void OnWindowResize() override;
 	virtual void OnMessage(int MsgType, void *pRawMsg) override;
-	virtual bool OnInput(IInput::CEvent Event) override;
+	virtual bool OnInput(const IInput::CEvent &Event) override;
 };
 
 #endif

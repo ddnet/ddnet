@@ -25,6 +25,9 @@
 # Rafael Fontenelle   2022-09-17 23:23:00
 # Rafael Fontenelle   2022-10-25 11:22:00
 # Rafael Fontenelle   2023-01-09 10:33:00
+# Rafael Fontenelle   2023-03-26 19:11:00
+# Rafael Fontenelle   2023-07-07 12:11:00
+# Rafael Fontenelle   2023-08-14 14:17:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -97,12 +100,6 @@ Clan
 
 Client
 == Cliente
-
-Close
-== Fechar
-
-Connect
-== Conectar
 
 Connecting to
 == Conectando a
@@ -372,9 +369,6 @@ Rename demo
 Reset filter
 == Redefinir filtro
 
-Sample rate
-== Frequência do som
-
 Score
 == Pontos
 
@@ -603,9 +597,6 @@ HUD
 Show names in chat in team colors
 == Mostrar nomes no chat com cores do time
 
-Select a name
-== Selecione um nome
-
 Netversion:
 == Netversion:
 
@@ -651,9 +642,6 @@ Gameplay
 Restart
 == Reiniciar
 
-Old mouse mode
-== Modo antigo de mouse
-
 Round
 == Turno
 
@@ -689,9 +677,6 @@ Ghost
 
 Remove chat
 == Remover chat
-
-Threaded sound loading
-== Carregamento de som em fluxos
 
 Check now
 == Verificar agora
@@ -1005,8 +990,8 @@ Converse
 Successfully saved the replay!
 == A reprodução foi salva com sucesso
 
-Default length: %d
-== Duração padrão: %d
+Default length
+== Duração padrão
 
 Replay feature is disabled!
 == O Recurso de reprodução está desabilitado!
@@ -1252,9 +1237,6 @@ https://ddnet.org/discord
 Are you sure that you want to disconnect and switch to a different server?
 == Tem certeza que deseja desconectar e trocar para um servidor diferente?
 
-Refreshing...
-== Atualizando...
-
 Kill Messages
 == Mensagens de kill
 
@@ -1287,9 +1269,6 @@ default
 
 custom
 == personalizado
-
-Graphics cards
-== Placas de vídeo
 
 auto
 == auto
@@ -1363,12 +1342,6 @@ Download community skins
 Enable controller
 == Habilitar controle
 
-Controller %d: %s
-== Controle %d: %s
-
-Click to cycle through all available controllers.
-== Clique para trocar entre todos os controles disponíveis.
-
 [Ingame controller mode]
 Relative
 == Relativo
@@ -1389,17 +1362,11 @@ UI controller sens.
 Controller jitter tolerance
 == Tolerância jitter do controle
 
-Device
-== Dispositivo
-
 Status
 == Status
 
 Aim bind
 == Associação de mira
-
-Controller Axis #%d
-== Eixo #%d do controle
 
 Mouse
 == Mouse
@@ -1560,12 +1527,6 @@ Slow down the demo
 Speed up the demo
 == Acelerar a demo
 
-Mark the beginning of a cut
-== Marcar o início de um corte
-
-Mark the end of a cut
-== Marcar o fim de um corte
-
 Export cut as a separate demo
 == Exportar corte como uma demo separada
 
@@ -1642,8 +1603,6 @@ Are you sure that you want to reset the controls to their defaults?
 == Tem certeza que deseja redefinir os controles para seu padrão?
 
 [Graphics error]
-
-[Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
 == Falha durante a inicialização. Tente alterar gfx_backend para OpenGL ou Vulkan em settings_ddnet.cfg no diretório de configuração e tente novamente.
 
@@ -1704,13 +1663,107 @@ Open the directory to add custom assets
 
 [Graphics error]
 Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
-== Não foi possível inicializar o backend de vídeo fornecido, isso provavelmente porque você não instalou o driver da placa de vídeo 
+== Não foi possível inicializar o backend de vídeo fornecido, isso provavelmente porque você não instalou o driver da placa de vídeo.
 
 Could not save downloaded map. Try manually deleting this file: %s
 == Não foi possível salvar o mapa baixado. Tente excluir manualmente este arquivo: %s
 
-Search:
-== Pesquisa:
-
 Copy info
 == Copiar informação
+
+Create a random skin
+== Criar uma skin aleatória
+
+A demo with this name already exists
+== Uma demo com este nome já existe
+
+No server selected
+== Nenhum serviço selecionado
+
+Online players (%d)
+== Jogadores online (%d)
+
+Online clanmates (%d)
+== Colegas de clã online (%d)
+
+[friends (server browser)]
+Offline (%d)
+== Offline (%d)
+
+Click to select server. Double click to join your friend.
+== Clique para selecionar o servidor. Clique duplo para se juntar a seus amigos.
+
+Click to remove this player from your friends list.
+== Clique para remover este jogador de sua lista de amigos.
+
+Click to remove this clan from your friends list.
+== Clique para remover este clã a partir de sua lista de amigos.
+
+None
+== Ninguém
+
+Add Clan
+== Adicionar clã
+
+Mark the beginning of a cut (right click to reset)
+== Marcar o início de um corte (clique direito para redefinir)
+
+Mark the end of a cut (right click to reset)
+== Marcar o fim de um corte (clique direito para redefinir)
+
+Close the demo player
+== Fechar o reprodutor de demo
+
+Export demo cut
+== Exportar corte de demo
+
+Cut interval
+== Intervalo de corte
+
+Cut length
+== Comprimento do corte
+
+Axis
+== Eixo
+
+Graphics card
+== Placa de vídeo
+
+Quitting. Please wait…
+== Saindo. Por favor, aguarde…
+
+Restarting. Please wait…
+== Reiniciando. Por favor, aguarde…
+
+Multi-View
+== Multivisão
+
+Rename folder
+== Renomear pasta
+
+A folder with this name already exists
+== Uma pasta com este nome já existe
+
+Unable to rename the folder
+== Não foi possível renomear a pasta
+
+(paused)
+== (pausado)
+
+All combined
+== Tudo combinado
+
+Folder Link
+== Link da pasta
+
+Are you sure that you want to delete the folder '%s'?
+== Tem certeza que você deseja excluir a pasta "%s"?
+
+Delete folder
+== Excluir pasta
+
+Unable to delete the folder '%s'. Make sure it's empty first.
+== Não foi possível excluir a pasta "%s". Certifique-se que ela esteja vazia primeiro.
+
+Moved ingame
+== Movido no jogo

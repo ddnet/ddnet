@@ -2,7 +2,9 @@
 #originally created by:
 #	arionwt1997
 #modified by:
-#
+#	Chill & PoKeMoN		2023-03-31 16:00:00
+#	Chill & PoKeMoN		2023-07-02 00:54:00
+#	
 ##### /authors #####
 
 ##### translated strings #####
@@ -23,13 +25,13 @@
 == Засталося %i секунд!
 
 %s wins!
-== %s перамог!
+== %s перамагае!
 
 -Page %d-
 == -Старонка %d-
 
 Abort
-== Адмена
+== Перапыніць
 
 Add
 == Дадаць
@@ -41,7 +43,7 @@ Address
 == Адрас
 
 All
-== Усё
+== Усім
 
 Are you sure that you want to quit?
 == Вы сапраўды жадаеце выйсці?
@@ -50,13 +52,13 @@ Automatically record demos
 == Аўтаматычна запісваць дэма
 
 Automatically take game over screenshot
-== Рабіць здымак вынікаў гульні
+== Аўтаматычна рабіць здымак вынікаў гульні
 
 Blue team
-== Сінія
+== Сіняя каманда
 
 Blue team wins!
-== Сінія перамаглі!
+== Сіняя каманда перамагае!
 
 Body
 == Цела
@@ -76,17 +78,11 @@ Clan
 Client
 == Кліент
 
-Close
-== Выйсці
-
-Connect
-== Падлучыцца
-
 Connecting to
 == Падлучэнне да
 
 Connection Problems...
-== Праблемы з сувяззю...
+== Праблемы з падлучэннем...
 
 Console
 == Кансоль
@@ -98,10 +94,10 @@ Count players only
 == Лічыць толькі гульцоў
 
 Current
-== Бягучы
+== Бягучая разрознасць
 
 Custom colors
-== Свае колеры
+== Карыстацкія колеры
 
 Delete
 == Выдаліць
@@ -119,10 +115,10 @@ Demos
 == Дэма
 
 Disconnect
-== Адключыць
+== Адлучыцца
 
 Disconnected
-== Адключана
+== Адлучана
 
 Downloading map
 == Спампоўка карты
@@ -140,13 +136,13 @@ Error
 == Памылка
 
 Error loading demo
-== памылка пры загрузцы дэма
+== Памылка пры загрузцы дэма
 
 Favorite
-== Абраны
+== Любімы
 
 Favorites
-== Абраныя
+== Любімыя
 
 Feet
 == Ногі
@@ -179,16 +175,16 @@ Game info
 == Інфа пра гульню
 
 Game over
-== Гульня скончана
+== Канец гульні
 
 Game type
 == Тып гульні
 
 Game types:
-== Тып гульні:
+== Тыпы гульні:
 
 General
-== Асноўныя
+== Агульныя
 
 Graphics
 == Графіка
@@ -200,7 +196,7 @@ Hammer
 == Молат
 
 Has people playing
-== Не пусты сервер
+== Ёсць гульцы
 
 High Detail
 == Высокая дэталізацыя
@@ -209,7 +205,7 @@ Hook
 == Крук
 
 Invalid Demo
-== Недапушчальнае дэма
+== Несапраўднае дэма
 
 Join blue
 == За сініх
@@ -221,7 +217,7 @@ Jump
 == Скачок
 
 Kick player
-== Забаніць гульца
+== Выгнаць гульца
 
 Language
 == Мова
@@ -251,10 +247,10 @@ Name
 == Імя
 
 Next weapon
-== След. зброя
+== Наступная зброя
 
 Nickname
-== Нік
+== Нікнэйм
 
 No
 == Не
@@ -263,10 +259,10 @@ No password
 == Без пароля
 
 No servers found
-== Сервера не знойдзены
+== Серверы не знойдзены
 
 No servers match your filter criteria
-== Няма сервераў, падыходных пад ваш фільтр
+== Няма сервераў, адпаведных вашым крытэрыям
 
 Ok
 == ОК
@@ -275,13 +271,13 @@ Open
 == Адкрыць
 
 Parent Folder
-== Бацькоўскі каталог
+== Бацькоўская тэчка
 
 Password
 == Пароль
 
 Password incorrect
-== Пароль
+== Няправільны пароль
 
 Ping
 == Пінг
@@ -291,16 +287,16 @@ Pistol
 
 [Demo browser]
 Play
-== Прагляд
+== Прайграць
 
 Play background music
-== Гуляць фонавую музыку
+== Граць фонавую музыку
 
 Player
 == Гулец
 
 Player country:
-== Краіна:
+== Краіна гульца:
 
 Player options
 == Опцыі гульца
@@ -309,22 +305,22 @@ Players
 == Гульцы
 
 Please balance teams!
-== Збалансуйце каманды!
+== Калі ласка, збалансуйце каманды!
 
 Prev. weapon
-== Прад. зброя
+== Папярэдняя зброя
 
 Quit
-== Выйсце
+== Выйсці
 
 Reason:
-== Чыннік:
+== Прычына:
 
 Red team
-== Чырвоныя
+== Чырвоная каманда
 
 Red team wins!
-== Чырвоныя перамаглі!
+== Чырвоная каманда перамагае!
 
 Refresh
 == Абнавіць
@@ -345,10 +341,7 @@ Rename demo
 == Пераназваць дэма
 
 Reset filter
-== Скінуць фільтры
-
-Sample rate
-== Чашчыня
+== Скінуць фільтр
 
 Score
 == Ачкі
@@ -363,7 +356,7 @@ Screenshot
 == Здымак
 
 Server address:
-== Адрас сервера
+== Адрас сервера:
 
 Server details
 == Дэталі сервера
@@ -390,7 +383,7 @@ Show ingame HUD
 == Паказваць нутрагульнявы HUD
 
 Show name plates
-== Паказваць нікі гульцоў
+== Паказваць таблічкі з імёнамі
 
 Sound
 == Гук
@@ -408,22 +401,22 @@ Spectate previous
 == Назіраць папяр.
 
 Spectator mode
-== Назіральнік
+== Рэжым назірання
 
 Spectators
 == Назіральнікі
 
 Stop record
-== Стоп
+== Стоп запісу
 
 Strict gametype filter
 == Строгі фільтр рэжым.
 
 Sudden Death
-== Хуткая смерць
+== Раптоўная смерць
 
 Switch weapon on pickup
-== Перамыкаць зброю пры падборы
+== Пераключаць зброю пры падборы
 
 Team
 == Каманда
@@ -432,13 +425,13 @@ Team chat
 == Камандны чат
 
 The audio device couldn't be initialised.
-== Аўдыё прылада не можа быць ініцыялізавана
+== Аўдыё прылада не можа быць ініцыялізавана.
 
 The server is running a non-standard tuning on a pure game type.
 == Сервер запушчаны з нестандартнымі наладамі на стандартным тыпе гульні.
 
 There's an unsaved map in the editor, you might want to save it before you quit the game.
-== Ёсць незахаваная карта ў рэдактары, Вы можаце захаваць яе перад тым, як выйсці.
+== Ёсць незахаваная карта ў рэдактары, Вы можаце захацець захаваць яе перад тым, як выйсці.
 
 Time limit
 == Ліміт часу
@@ -447,7 +440,7 @@ Time limit: %d min
 == Ліміт часу: %d
 
 Try again
-== ОК
+== Паспрабаваць зноў
 
 Type
 == Тып
@@ -459,7 +452,7 @@ Use sounds
 == Выкарыстоўваць гукі
 
 Use team colors for name plates
-== Камандныя колеры для нікаў гульцоў
+== Выкарыстоўваць камандныя колеры для таблічак з імёнамі
 
 V-Sync
 == Вертыкальная сінхранізацыя
@@ -468,7 +461,7 @@ Version
 == Версія
 
 Vote command:
-== Камманда галасавання:
+== Камманда для галасавання:
 
 Vote description:
 == Апісанне галасавання:
@@ -492,18 +485,16 @@ Yes
 == Так
 
 You must restart the game for all settings to take effect.
-== Перазапусціце гульню для ўжывання змен.
-
-##### needs translation #####
+== Трэба перазапусціць гульню, каб усе налады набылі моц.
 
 New name:
-== Новае імя
+== Новае імя:
 
 Sat.
-== Кантраст
+== Насычанасць
 
 Miscellaneous
-== Дадаткова
+== Рознае
 
 Internet
 == Інтэрнэт
@@ -524,19 +515,19 @@ Sound volume
 == Гучнасць
 
 Created:
-== Створаны:
+== Створана:
 
 Max Screenshots
 == Максімальная колькасць здымкаў
 
 Length:
-== Даўжыня
+== Працягласць:
 
 Laser
-== Бласцер
+== Лазер
 
 Netversion:
-== Версія:
+== Сеткавая версія:
 
 Map:
 == Карта:
@@ -560,7 +551,7 @@ Reset to defaults
 == Скінуць налады
 
 Quit anyway?
-== Выйсці?
+== Усё адно выйсці?
 
 Version:
 == Версія:
@@ -569,7 +560,7 @@ Round
 == Раўнд
 
 Lht.
-== Яркасць
+== Светлата
 
 UI Color
 == Колер інтэрфейсу
@@ -578,1119 +569,1178 @@ Crc:
 == Crc:
 
 Alpha
-== Празрыст.
+== Непразрыст.
 
 LAN
 == LAN
 
 Name plates size
-== Памер
+== Памер таблічак з імёнамі
 
 Type:
 == Тып:
 
 [Graphics error]
-
-[Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== 
+== Памылка падчас ініцыялізацыі. Паспрабуйце змяніць gfx_backend на OpenGL або Vulkan у settings_ddnet.cfg ў тэчцы config і паспрабуйце зноў.
 
 [Graphics error]
 Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== 
+== Недахоп памяці VRAM. Паспрабуйце выдаліць карыстацкія рэсурсы (скіны, тэкстуры і г.д.), асабліва тыя, што маюць высокае разрознасць.
 
 [Graphics error]
 An error during command recording occurred. Try to update your GPU drivers.
-== 
+== Адбылася памылка падчас выканання каманды запісу. Паспрабуйце абнавіць драйверы відэакарты.
 
 [Graphics error]
 A render command failed. Try to update your GPU drivers.
-== 
+== Каманда рэндэрынгу не выканана. Паспрабуйце абнавіць драйверы відэакарты.
 
 [Graphics error]
 Submitting the render commands failed. Try to update your GPU drivers.
-== 
+== Адпраўка каманд рэндэрынгу не выканана. Паспрабуйце абнавіць драйверы відэакарты.
 
 [Graphics error]
 Failed to swap framebuffers. Try to update your GPU drivers.
-== 
+== Не атрымалася выканаць падпампоўку кадравых буфераў. Паспрабуйце абнавіць драйверы відэакарты.
 
 [Graphics error]
 Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== 
+== Невядомая памылка. Паспрабуйце змяніць gfx_backend на OpenGL або Vulkan ў settings_ddnet.cfg ў тэчцы config і паспрабуйце зноў.
 
 [Graphics error]
 Could not initialize the given graphics backend, reverting to the default backend now.
-== 
+== Не атрымалася ініцыялізаваць дадзены графічны бэкэнд, вяртанне да бэкэнда па змаўчанні.
 
 [Graphics error]
 Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
-== 
+== Не атрымалася ініцыялізаваць дадзены графічны бэкэнд, магчыма, гэта звязана з тым, што вы не ўсталявалі драйвер убудаванай відэакарты.
 
 Could not save downloaded map. Try manually deleting this file: %s
-== 
+== Не ўдалося захаваць спампаваную карту. Паспрабуйце ўручную выдаліць гэты файл: %s
 
 Successfully saved the replay!
-== 
+== Паўтор паспяхова захаваны!
 
 Saving ddnet-settings.cfg failed
-== 
+== Не атрымалася захаваць ddnet-settings.cfg
 
 Replay feature is disabled!
-== 
+== Функцыя паўтору адключаная!
 
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
-== 
+== Шырыня тэкстуры %s не дзеліцца на %d ці вышыня не дзеліцца на %d, што можа выклікаць візуальныя багі.
 
 The format of texture %s is not RGBA which will cause visual bugs.
-== 
+== Фармат тэкстуры %s не адпавядае RGBA, што можа выклікаць візуальныя багі.
 
 Preparing demo playback
-== 
+== Падрыхтоўка прайгравання дэма
 
 Connected
-== 
+== Падлучана
 
 Loading map file from storage
-== 
+== Загрузка файла карты са сховішча
 
 Loading DDNet Client
-== 
+== Загрузка кліента DDNet
 
 Why are you slowmo replaying to read this?
-== 
+== Навошта вы запавольваеце прайграванне каб прачытаць гэта?
 
 Initializing components
-== 
+== Ініцыялізацыя кампанентаў
 
 Initializing assets
-== 
+== Ініцыялізацыя рэсурсаў
 
 Initializing map logic
-== 
+== Ініцыялізацыя логікі карты
 
 Sending initial client info
-== 
+== Адпраўка пачатковых дадзеных кліента
 
 Warning
-== 
-
-Search:
-== 
+== Папярэджанне
 
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
-== 
+== Рэжым адладкі уключаны. Націсніце Ctrl+Shift+D, каб выключыць яго.
 
 Game paused
-== 
+== Гульня спыненая
 
 Position:
-== 
+== Пазіцыя:
 
 Speed:
-== 
+== Хуткасць:
 
 Angle:
-== 
+== Вугал:
 
 Server best:
-== 
+== Рэкорд сервера:
 
 Personal best:
-== 
+== Асабісты рэкорд:
 
 Uploading map data to GPU
-== 
+== Загрузка дадзеных карты ў GPU
 
 Reset
-== 
+== Скід
 
 Browser
-== 
+== Браўзэр
 
 Ghost
-== 
+== Прывід
 
 Trying to determine UDP connectivity...
-== 
+== Спроба вызначыць UDP падлучэнне...
 
 UDP seems to be filtered.
-== 
+== Здаецца, UDP фільтруецца.
 
 UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
-== 
+== Здаецца, UDP ды TCP IP адрозніваюцца. Паспрабуйце адключыць VPN, проксі і паскаральнікі сеткі.
 
 No answer from server yet.
-== 
+== Сервер яшчэ не адказаў.
 
 Getting game info
-== 
+== Атрыманне гульнявой інфармацыі
 
 Requesting to join the game
-== 
+== Запыт на далучэнне да гульні
 
 Reconnect in %d sec
-== 
+== Перападлучэнне праз %d сек.
 
 Render demo
-== 
+== Рэндэр дэма
 
 Welcome to DDNet
-== 
+== Запрашаем у DDNet
 
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
-== 
+== DDraceNetwork — гэта кааператыўная анлайн гульня, дзе мэта для вас і вашай групы Tee — дабрацца да фінішнай лініі карты. Як навічку, вам варта пачаць на Novice серверах, дзе размешчаны самыя простыя карты. Улічвайце пінг, каб выбраць блізкі да вас сервер.
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
-== 
+== Выкарыстоўвайце клавішу k, каб забіць свайго Tee (пачаць нанова), q для паўзы і назірання за іншымі гульцамі. Паглядзіце налады для іншых біндоў клавіш.
 
 It's recommended that you check the settings to adjust them to your liking before joining a server.
-== 
+== Рэкамендуецца праверыць налады, каб наладзіць іх паводле свайго меркавання перад далучэннем да сервера.
 
 Please enter your nickname below.
-== 
+== Калі ласка, увядзіце свой нікнэйм ніжэй.
 
 Existing Player
-== 
+== Існуючы гулец
 
 Your nickname '%s' is already used (%d points). Do you still want to use it?
-== 
+== Ваш нікнэйм '%s' ужо выкарыстоўваецца (%d поінтаў). Хочаце выкарыстоўваць яго?
 
 Checking for existing player with your name
-== 
+== Праверка на наяўнасць гульца з вашым імем
 
 Cancel
-== 
+== Скасаваць
 
 File '%s' already exists, do you want to overwrite it?
-== 
+== Файл '%s' ужо існуе, вы хочаце яго перазапісаць?
 
 Replace video
-== 
+== Замяніць відэа
 
 Speed
-== 
+== Хуткасць
 
 Video name:
-== 
+== Назва відэа:
 
 Join Tutorial Server
-== 
+== Далучыцца да навучальнага сервера
 
 Skip Tutorial
-== 
+== Прапусціць навучанне
 
 Show DDNet map finishes in server browser
-== 
+== Пазначаць пройдзеныя карты ў браўзэры
 
 transmits your player name to info.ddnet.org
-== 
+== перадае ваша імя гульца на info.ddnet.org
 
 Theme
-== 
+== Тэма
 
 Loading menu images
-== 
+== Загрузка відарысаў меню
 
 AFR
-== 
+== AFR
 
 ASI
-== 
+== ASI
 
 AUS
-== 
+== AUS
 
 EUR
-== 
+== EUR
 
 NA
-== 
+== NA
 
 SA
-== 
+== SA
 
 CHN
-== 
+== CHN
 
 Getting server list from master server
-== 
+== Атрыманне спіса сервераў ад майстар сервера
 
 Search
-== 
+== Пошук
 
 Exclude
-== 
+== Выключыць
 
 %d of %d servers
-== 
+== %d з %d сервераў
 
 %d of %d server
-== 
+== %d з %d сервера
 
 %d players
-== 
+== %d гульцоў
 
 %d player
-== 
-
-Refreshing...
-== 
+== %d гулец
 
 Are you sure that you want to disconnect and switch to a different server?
-== 
+== Вы ўпэўненыя, што хочаце адлучыцца і пераключыцца на іншы сервер?
 
 Filter connecting players
-== 
+== Убраць тых, што падлучаюцца
 
 Indicate map finish
-== 
+== Вылучыць пройдзеныя карты
 
 Unfinished map
-== 
+== Няпройдзеная карта
 
 Countries
-== 
+== Краіны
 
 Types
-== 
+== Тыпы
 
 Copy info
-== 
+== Капіяваць інфармацыю
 
 Leak IP
-== 
+== Перадаваць IP
 
 Are you sure that you want to remove the player '%s' from your friends list?
-== 
+== Вы ўпэўненыя што хочаце выдаліць гульца '%s' са спіса вашых сяброў?
 
 Are you sure that you want to remove the clan '%s' from your friends list?
-== 
-
-Select a name
-== 
+== Вы ўпэўненыя што хочаце выдаліць клан '%s' са спіса вашых сяброў?
 
 Please use a different name
-== 
+== Калі ласка, выкарыстайце іншае імя
 
 File already exists, do you want to overwrite it?
-== 
+== Файл ужо існуе, ці вы хочаце перазапісаць яго?
 
 Remove chat
-== 
+== Прыбраць чат
 
 Play the current demo
-== 
+== Прайграць бягучае дэма
 
 Pause the current demo
-== 
+== Прыпыніць бягучае дэма
 
 Stop the current demo
-== 
+== Спыніць бягучае дэма
 
 Go back one tick
-== 
+== Пераматаць назад на адзін цік
 
 Go forward one tick
-== 
+== Пераматаць наперад на адзін цік
 
 Slow down the demo
-== 
+== Запаволіць дэма
 
 Speed up the demo
-== 
-
-Mark the beginning of a cut
-== 
-
-Mark the end of a cut
-== 
+== Паскорыць дэма
 
 Export cut as a separate demo
-== 
+== Экспартаваць адрэзак як асобнае дэма
 
 Go back one marker
-== 
+== Пераматаць назад на адну пазнаку
 
 Go forward one marker
-== 
+== Пераматаць наперад на адну пазнаку
 
 Toggle keyboard shortcuts
-== 
+== Уключыць гарачыя клавішы
 
 Loading demo files
-== 
+== Загрузка дэма файлаў
 
 Markers:
-== 
+== Пазнакі
 
 %.2f MiB
-== 
+== %.2f МіБ
 
 %.2f KiB
-== 
+== %.2f КіБ
 
 Demo
-== 
+== Дэма
 
 Markers
-== 
+== Пазнакі
 
 Length
-== 
+== Працягласць
 
 Date
-== 
+== Дата
 
 Fetch Info
-== 
+== Атрымаць інфа.
 
 Demos directory
-== 
+== Тэчка дэма
 
 Open the directory that contains the demo files
-== 
+== Адкрыць тэчку, якая ўтрымвае файлы дэма
 
 Are you sure that you want to delete the demo '%s'?
-== 
+== Вы ўпэўненыя, што хочаце выдаліць дэма '%s'?
 
 Render
-== 
+== Рэндэр
 
 Unable to delete the demo '%s'
-== 
+== Немагчыма выдаліць дэма '%s'
 
 Are you sure that you want to disconnect?
-== 
+== Вы ўпэўненыя, што хочаце адлучыцца?
 
 Connect Dummy
-== 
+== Падлучыць даммі
 
 Connecting dummy
-== 
+== Падлучэнне даммі
 
 Disconnect Dummy
-== 
+== Адлучыць даммі
 
 Are you sure that you want to disconnect your dummy?
-== 
+== Вы ўпэўненыя, што хочаце адлучыць вашага даммі?
 
 Kill
-== 
+== Забіць
 
 Pause
-== 
+== Паўза
 
 Loading ghost files
-== 
+== Загрузка файлаў прывідаў
 
 Time
-== 
+== Час
 
 Reload
-== 
+== Перазагрузіць
 
 Deactivate
-== 
+== Выключыць
 
 Activate
-== 
+== Уключыць
 
 Save
-== 
+== Захаваць
 
 Menu opened. Press Esc key again to close menu.
-== 
+== Меню адкрыта. Зноў націсніце Esc для закрыцця меню.
 
 Smooth Dynamic Camera
-== 
+== Плыўная дынамічная камера
 
 Switch weapon when out of ammo
-== 
+== Пераключаць зброю, калі скончыліся патроны
 
 Skip the main menu
-== 
+== Прапускаць галоўнае меню пры запуску
 
 Refresh Rate
-== 
+== Чашчыня абнаўлення
 
 Save power by lowering refresh rate (higher input latency)
-== 
+== Эканомія энергіі за кошт зніжэння чашчыні абнаўленняў (больш высокая затрымка ўводу)
 
 Settings file
-== 
+== Файл налад
 
 Open the settings file
-== 
+== Адкрыць файл налад
 
 Config directory
-== 
+== Тэчка канфігурацыі
 
 Open the directory that contains the configuration and user files
-== 
+== Адкрыць тэчку, якая ўтрымвае файлы канфігурацыі і файлы карыстальніка
 
 Themes directory
-== 
+== Тэчка тэм
 
 Open the directory to add custom themes
-== 
+== Адкрыць тэчку для дадання карыстацкіх тэм
 
 Automatically take statboard screenshot
-== 
+== Аўтаматычна рабіць здымак статыстыкі
 
 Automatically create statboard csv
-== 
+== Аўтаматычна запісваць статыстыку ў CSV
 
 Max CSVs
-== 
+== Максімум CSV
 
 Dummy settings
-== 
+== Налады даммі
 
 Loading skin files
-== 
+== Загрузка файлаў скінаў
 
 Toggle to edit your dummy settings
-== 
+== Пераключыце, каб змяніць налады даммі
 
 Download skins
-== 
+== Спампаваць скіны
 
 Download community skins
-== 
+== Пампаваць скіны супольнасці
 
 Vanilla skins only
-== 
+== Толькі ванільныя скіны
 
 Fat skins (DDFat)
-== 
+== Тоўстыя скіны (DDFat)
 
 Skin prefix
-== 
+== Прэфікс скіна
 
 Choose default eyes when joining a server
-== 
+== Выбраць вочы па змаўчанні пры падлучэнні да сервера
+
+Create a random skin
+== Стварыць выпадковы скін
 
 Skin Database
-== 
+== База дадзеных скінаў
 
 Skins directory
-== 
+== Тэчка скіноў
 
 Open the directory to add custom skins
-== 
+== Адкрыць тэчку для дадання карыстацкіх скінаў
 
 Hook collisions
-== 
+== Сутыкненні крука
 
 Zoom in
-== 
+== Прыблізіць
 
 Zoom out
-== 
+== Аддаліць
 
 Default zoom
-== 
+== Маштаб па змаўч.
 
 Show others
-== 
+== Паказваць іншых
 
 Show all
-== 
+== Паказваць усіх
 
 Toggle dyncam
-== 
+== Змена дын. камеры
 
 Toggle dummy
-== 
+== Пераключыць даммі
 
 Toggle ghost
-== 
+== Пераключыць прывід
 
 Dummy copy
-== 
+== Даммі капіруе
 
 Hammerfly dummy
-== 
+== Даммі б'е
 
 Converse
-== 
+== Асабістае павед.
 
 Statboard
-== 
+== Статыстыка
 
 Lock team
-== 
+== Заблакаваць каманду
 
 Show entities
-== 
+== Паказваць энтыты
 
 Show HUD
-== 
+== Паказваць HUD
 
 Chat command
-== 
+== Камандны чат
 
 Enable controller
-== 
-
-Controller %d: %s
-== 
-
-Click to cycle through all available controllers.
-== 
+== Уключыць кантролер
 
 [Ingame controller mode]
 Relative
-== 
+== Адносны
 
 [Ingame controller mode]
 Absolute
-== 
+== Абсалютны
 
 Ingame controller mode
-== 
+== Рэжым кантролера ў гульні
 
 Ingame controller sens.
-== 
+== Адчувальнасць кантролера ў гульні
 
 UI controller sens.
-== 
+== Адчувальнасць кантролера ў меню
 
 Controller jitter tolerance
-== 
+== Устойлівасць кантролера да дрыгацення
 
 No controller found. Plug in a controller.
-== 
-
-Device
-== 
+== Кантролер не знойдзены. Падключыце кантролер.
 
 Status
-== 
+== Статус
 
 Aim bind
-== 
-
-Controller Axis #%d
-== 
+== Вось прыцэла
 
 Mouse
-== 
+== Мыш
 
 Ingame mouse sens.
-== 
+== Адчувальнасць мышы ў гульні
 
 UI mouse sens.
-== 
+== Адчувальнасць мышы ў меню
 
 Controller
-== 
+== Кантролер
 
 Reset controls
-== 
+== Скінуць налады
 
 Are you sure that you want to reset the controls to their defaults?
-== 
+== Вы ўпэўненыя, што хочаце скінуць кіраванне да значэнняў па змаўчанні
 
 Dummy
-== 
+== Даммі
 
 Windowed
-== 
+== Аконны
 
 Windowed borderless
-== 
+== Аконны без рамкі
 
 Windowed fullscreen
-== 
+== Аконны на ўвесь экран
 
 Desktop fullscreen
-== 
+== Поўнаэкранны
 
 may cause delay
-== 
+== можа выклікаць затрымку
 
 Screen
-== 
+== Экран
 
 Allows maps to render with more detail
-== 
+== Дазваляе картам рэндэрыцца з большай дэталізацыяй
 
 Use high DPI
-== 
+== Выкарыстоўваць высокі DPI
 
 Renderer
-== 
+== Рэндэрэр
 
 default
-== 
+== па змаўчанні
 
 custom
-== 
-
-Graphics cards
-== 
+== карыстацкі
 
 auto
-== 
+== аўта
 
 Enable game sounds
-== 
+== Уключыць гукі гульні
 
 Enable gun sound
-== 
+== Уключыць гук пісталета (толькі для DDRace)
 
 Enable long pain sound (used when shooting in freeze)
-== 
+== Уключыць доўгі гук болю (выкарыстоўваецца пры стральбе ў замарозцы)
 
 Enable server message sound
-== 
+== Уключыць гук паведамленняў сервера
 
 Enable regular chat sound
-== 
+== Уключыць гук звычайных паведамленняў
 
 Enable team chat sound
-== 
+== Уключыць гук камандных паведамленняў
 
 Enable highlighted chat sound
-== 
-
-Threaded sound loading
-== 
+== Уключыць гук падсвечаных паведамленняў
 
 Game sound volume
-== 
+== Гучнасць гульні
 
 Chat sound volume
-== 
+== Гучнасць чата
 
 Map sound volume
-== 
+== Гучнасць карты
 
 Background music volume
-== 
+== Гучнасць фонавай музыкі
 
 Appearance
-== 
+== Выгляд
 
 DDNet
-== 
+== DDNet
 
 Assets
-== 
+== Тэкстуры
 
 DDNet Client needs to be restarted to complete update!
-== 
+== Патрабуецца перазапусціць кліент DDnet для завяршэння абнаўлення!
 
 HUD
-== 
+== HUD
 
 Name Plate
-== 
+== Таблічка з імем
 
 Hook Collisions
-== 
+== Сутыкненні крука
 
 Kill Messages
-== 
+== Паведамленні пра смерць
 
 Show health, shields and ammo
-== 
+== Паказваць здароўе, шчыты і боепрыпасы
 
 Show kill messages
-== 
+== Паказваць паведамленні пра смерць
 
 Show score
-== 
+== Паказваць ачкі
 
 Show votes window after voting
-== 
+== Паказваць акно галасавання пасля выбару
 
 DDRace HUD
-== 
+== DDRace HUD
 
 Use DDRace Scoreboard
-== 
+== Выкарыстоўваць табло ачкоў DDRace
 
 Show client IDs in scoreboard
-== 
+== Паказваць ID кліента ў табло ачкоў
 
 Show DDRace HUD
-== 
+== Паказваць DDRace HUD
 
 Show jumps indicator
-== 
+== Паказваць індыкатар скачкоў
 
 Show dummy actions
-== 
+== Паказваць дзеянні даммі
 
 Show player position
-== 
+== Паказваць пазіцыю гульца
 
 Show player speed
-== 
+== Паказваць хуткасць гульца
 
 Show player target angle
-== 
+== Паказваць вугал прыцэла гульца
 
 Show freeze bars
-== 
+== Паказваць палоскі замарозкі
 
 Opacity of freeze bars inside freeze
-== 
+== Непразрыстасць палоскі замарозкі ўнутры замарозцы
 
 Show names in chat in team colors
-== 
+== Паказваць імёны ў чаце ў камандных колерах
 
 Show only chat messages from friends
-== 
+== Паказваць паведамленні чата толькі ад сяброў
 
 Use old chat style
-== 
+== Выкарыстоўваць стары стыль чата
 
 Messages
-== 
+== Паведамленні
 
 System message
-== 
+== Сістэмнае паведамленне
 
 Highlighted message
-== 
+== Падсвечанае паведамленне
 
 Team message
-== 
+== Каманднае паведамленне
 
 Friend message
-== 
+== Паведамленне ад сябра
 
 Normal message
-== 
+== Звычайнае паведамленне
 
 Client message
-== 
+== Паведамленне кліента
 
 Preview
-== 
+== Прадпрагляд
 
 Show clan above name plates
-== 
+== Паказваць клан над таблічкамі з імёнамі
 
 Clan plates size
-== 
+== Памер таблічак з кланамі
 
 Show hook strength indicator
-== 
+== Паказваць індыкатар сілы крука
 
 Show other players' key presses
-== 
+== Паказваць націснутыя клавішы іншых гульцоў
 
 Show local player's key presses
-== 
+== Паказваць вашы націснутыя клавішы
 
 Hook collision line
-== 
+== Лінія сутыкнення крука
 
 Show other players' hook collision lines
-== 
+== Паказваць сутыкненні крука іншых гульцоў
 
 Hook collision line width
-== 
+== Шырыня лініі сутыкнення крука
 
 Hook collision line opacity
-== 
+== Непразрыстасьць лініі сутыкнення крука
 
 Colors of the hook collision line, in case of a possible collision with:
-== 
+== Колер лініі сутыкнення крука ў выпадку калі:
 
 Your movements are not taken into account when calculating the line colors
-== 
+== Ваш рух не ўлічваецца, калі разлічваецца колер лініі
 
 Nothing hookable
-== 
+== Немагчыма зачапіцца
 
 Something hookable
-== 
+== Магчыма зачапіцца
 
 A Tee
-== 
+== Трапленне з Tee
 
 Normal Color
-== 
+== Звычайны колер
 
 Highlight Color
-== 
+== Колер падсвятлення
 
 Weapons
-== 
+== Зброя
 
 Rifle Laser Outline Color
-== 
+== Колер абводкі лазера вінтоўкі
 
 Rifle Laser Inner Color
-== 
+== Унутраны колер лазера вінтоўкі
 
 Shotgun Laser Outline Color
-== 
+== Колер абводкі лазера драбавіка
 
 Shotgun Laser Inner Color
-== 
+== Унутраны колер лазера драбавіка
 
 Entities
-== 
+== Энтыты
 
 Door Laser Outline Color
-== 
+== Колер абводкі лазера дзвярэй
 
 Door Laser Inner Color
-== 
+== Унутраны колер лазера дзвярэй
 
 Freeze Laser Outline Color
-== 
+== Колер абводкі лазера замарозкі
 
 Freeze Laser Inner Color
-== 
+== Унутраны колер лазера замарозкі
 
 Set all to Rifle
-== 
+== Зрабіць усё як у вінтоўкі
 
 Save the best demo of each race
-== 
+== Захоўваць лепшае дэма кожнага забегу
 
 Enable replays
-== 
+== Уключыць запісы
 
-Default length: %d
-== 
+Default length
+== Станд. працягласць
 
 When you cross the start line, show a ghost tee replicating the movements of your best time
-== 
+== Пры перасячэнні стартавай лініі, паказваць прывід Tee, які паўтарае ваш лепшы час
 
 Show ghost
-== 
+== Паказваць прывід
 
 Save ghost
-== 
+== Захоўваць прывід
 
 Gameplay
-== 
+== Гульнявы працэс
 
 Overlay entities
-== 
+== Накладаць энтыты
 
 Size
-== 
+== Памер
 
 Show text entities
-== 
+== Паказваць подпісы энтыты
 
 Opacity
-== 
+== Непразр.
 
 Adjust the opacity of entities belonging to other teams, such as tees and nameplates
-== 
+== Рэгуляванне непразрыстасці аб'ектаў іншых каманд, такіх як Tee і таблічкі з імёнамі.
 
 Show others (own team only)
-== 
+== Паказваць іншых (толькі сваю каманду)
 
 Show quads
-== 
+== Паказваць квады
 
 Quads are used for background decoration
-== 
+== Квады выкарыстоўваюцца для ўпрыгожвання фону
 
 AntiPing
-== 
+== АнтыПінг
 
 Tries to predict other entities to give a feel of low latency
-== 
+== Спрабуе прадказаць іншыя аб'екты, каб надаць адчуванне нізкай затрымкі
 
 AntiPing: predict other players
-== 
+== АнтыПінг: прадказваць становішча гульцоў
 
 AntiPing: predict weapons
-== 
+== АнтыПінг: прадказваць зброю
 
 AntiPing: predict grenade paths
-== 
-
-Old mouse mode
-== 
+== АнтыПінг: прадказывать траекторыі гранат
 
 Background
-== 
+== Фон
 
 Entities Background color
-== 
+== Колер фону энтыты
 
 Use current map as background
-== 
+== Выкарыстоўваць бягучую карту як фон
 
 Show tiles layers from BG map
-== 
+== Таксама выкарыстоўваць фонавыя тэкстуры карты
 
 Regular Background Color
-== 
+== Звычайны колер фону
 
 New random timeout code
-== 
+== Новы выпадковы таймаўт код
 
 Run on join
-== 
+== Запускаць пры ўваходзе
 
 Chat command (e.g. showall 1)
-== 
+== Каманда чата (напрыклад, showall 1)
 
 Unregister protocol and file extensions
-== 
+== Незарэгістраваны пратакол і пашырэнні файлаў
 
 DDNet %s is available:
-== 
+== Даступны DDNet %s:
 
 Update now
-== 
+== Абнавіць зараз
 
 Updating...
-== 
+== Абнаўленне...
 
 DDNet Client updated!
-== 
+== Кліент DDNet абнаўлён!
 
 No updates available
-== 
+== Няма даступных абнаўленняў
 
 Check now
-== 
+== Праверыць зараз
 
 Emoticons
-== 
+== Эмоцыi
 
 Particles
-== 
+== Часціцы
 
 Extras
-== 
+== Дадаткова
 
 Loading assets
-== 
+== Загрузка тэкстур
 
 Assets directory
-== 
+== Тэчка тэкстур
 
 Open the directory to add custom assets
-== 
+== Адкрыць тэчку для дадання карыстацкіх тэкстур
 
 Discord
-== 
+== Discord
 
 https://ddnet.org/discord
-== 
+== https://ddnet.org/discord
 
 Learn
-== 
+== Вікі
 
 https://wiki.ddnet.org/
-== 
+== https://wiki.ddnet.org/
 
 Tutorial
-== 
+== Навучанне
 
 Can't find a Tutorial server
-== 
+== Навучальны сервер не знойдзены
 
 Website
-== 
+== Сайт
 
 Settings
-== 
+== Налады
 
 Stop server
-== 
+== Спыніць сервер
 
 Run server
-== 
+== Запусціць сервер
 
 Server executable not found, can't run server
-== 
+== Выканальны файл сервера не знойдзены, немагчыма запусціць сервер
 
 Editor
-== 
+== Рэдактар
 
 [Start menu]
 Play
-== 
+== Гуляць
 
 DDNet %s is out!
-== 
+== Выйшаў DDNet %s!
 
 Downloading %s:
-== 
+== Спампоўка %s:
 
 Update failed! Check log...
-== 
+== Абнаўленне не атрымалася. Праверце логі...
 
 Restart
-== 
+== Перазапуск
 
 Loading race demo files
-== 
+== Загрузка дэма файлаў забегаў
 
 Super
-== 
+== Супер
 
 Team %d
-== 
+== Каманда %d
 
 Manual
-== 
+== Уручную
 
 Race
-== 
+== Забег
 
 Auto
-== 
+== Аўта
 
 Replay
-== 
+== Запіс
 
 Loading sound files
-== 
+== Загрузка гукавых файлаў
 
 Follow
-== 
+== Сачыць
 
 Frags
-== 
+== Забойства
 
 Deaths
-== 
+== Смерці
 
 Suicides
-== 
+== Суіц.
 
 Ratio
-== 
+== Суадн.
 
 Net
-== 
+== Варт.
 
 FPM
-== 
+== ЗУХ
 
 Spree
-== 
+== Серыя
 
 Best
-== 
+== Вынік
 
 Grabs
-== 
+== Зах.
 
 1 new mention
-== 
+== 1 згадка
 
 %d new mentions
-== 
+== %d згадак
 
 9+ new mentions
+== 9+ згадак
+
+A demo with this name already exists
+== Дэма з такой назвай ужо існуе 
+
+No server selected
+== Сервер не абраны
+
+Online players (%d)
+== Гульцоў анлайн (%d)
+
+Online clanmates (%d)
+== Членаў клана анлайн (%d)
+
+[friends (server browser)]
+Offline (%d)
+== Афлайн (%d)
+
+Click to select server. Double click to join your friend.
+== Націсніце, как абраць сервер. Націсніце двойчы, каб далучыцца да вашага сябра.
+
+Click to remove this player from your friends list.
+== Націсніце, как выдаліць гэтага гульца са свайго спіса сяброў.
+
+Click to remove this clan from your friends list.
+== Націсніце, как выдаліць гэты клан са свайго спіса сяброў.
+
+None
+== Пуста
+
+Add Clan
+== Дадаць клан
+
+Mark the beginning of a cut (right click to reset)
+== Пазначыць пачатак адрэзка (правая кнопка мышы для скіду)
+
+Mark the end of a cut (right click to reset)
+== Пазначыць канец адрэзка (правая кнопка мышы для скіду)
+
+Close the demo player
+== Закрыць прайгравальнік дэма
+
+Export demo cut
+== Экспартаваць адрэзак дэма
+
+Cut interval
+== Інтэрвал адрэзка
+
+Cut length
+== Працягласць адрэзка
+
+Axis
+== Вось
+
+Graphics card
+== Відэакарта
+
+Quitting. Please wait…
+== 
+
+Restarting. Please wait…
+== 
+
+Multi-View
+== 
+
+Rename folder
+== 
+
+A folder with this name already exists
+== 
+
+Unable to rename the folder
+== 
+
+(paused)
+== 
+
+All combined
+== 
+
+Folder Link
+== 
+
+Are you sure that you want to delete the folder '%s'?
+== 
+
+Delete folder
+== 
+
+Unable to delete the folder '%s'. Make sure it's empty first.
+== 
+
+Moved ingame
 == 

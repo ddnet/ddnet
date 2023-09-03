@@ -20,9 +20,6 @@ public:
 	IDbConnection &operator=(const IDbConnection &) = delete;
 	virtual void Print(IConsole *pConsole, const char *pMode) = 0;
 
-	// copies the credentials, not the active connection
-	virtual IDbConnection *Copy() = 0;
-
 	// returns the database prefix
 	const char *GetPrefix() const { return m_aPrefix; }
 	virtual const char *BinaryCollate() const = 0;

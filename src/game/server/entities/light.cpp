@@ -28,11 +28,10 @@ CLight::CLight(CGameWorld *pGameWorld, vec2 Pos, float Rotation, int Length,
 
 bool CLight::HitCharacter()
 {
-	std::list<CCharacter *> HitCharacters =
-		GameServer()->m_World.IntersectedCharacters(m_Pos, m_To, 0.0f, 0);
-	if(HitCharacters.empty())
+	std::vector<CCharacter *> vpHitCharacters = GameServer()->m_World.IntersectedCharacters(m_Pos, m_To, 0.0f, 0);
+	if(vpHitCharacters.empty())
 		return false;
-	for(auto *pChar : HitCharacters)
+	for(auto *pChar : vpHitCharacters)
 	{
 		if(m_Layer == LAYER_SWITCH && m_Number > 0 && !Switchers()[m_Number].m_aStatus[pChar->Team()])
 			continue;
@@ -107,27 +106,10 @@ void CLight::Snap(int SnappingClient)
 
 	int SnappingClientVersion = GameServer()->GetClientVersion(SnappingClient);
 
-	CNetObj_EntityEx *pEntData = 0;
-	if(SnappingClientVersion >= VERSION_DDNET_SWITCH && (m_Layer == LAYER_SWITCH || length(m_Core) > 0))
-		pEntData = static_cast<CNetObj_EntityEx *>(Server()->SnapNewItem(NETOBJTYPE_ENTITYEX, GetID(), sizeof(CNetObj_EntityEx)));
-
 	CCharacter *pChr = GameServer()->GetPlayerChar(SnappingClient);
 
 	if(SnappingClient != SERVER_DEMO_CLIENT && (GameServer()->m_apPlayers[SnappingClient]->GetTeam() == TEAM_SPECTATORS || GameServer()->m_apPlayers[SnappingClient]->IsPaused()) && GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID != SPEC_FREEVIEW)
 		pChr = GameServer()->GetPlayerChar(GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID);
-
-	if(pEntData)
-	{
-		pEntData->m_SwitchNumber = m_Number;
-		pEntData->m_Layer = m_Layer;
-		pEntData->m_EntityClass = ENTITYCLASS_LIGHT;
-	}
-	else
-	{
-		int Tick = (Server()->Tick() % Server()->TickSpeed()) % 6;
-		if(pChr && pChr->IsAlive() && m_Layer == LAYER_SWITCH && m_Number > 0 && !Switchers()[m_Number].m_aStatus[pChr->Team()] && Tick)
-			return;
-	}
 
 	vec2 From = m_Pos;
 	int StartTick = 0;
@@ -145,8 +127,12 @@ void CLight::Snap(int SnappingClient)
 		From = m_To;
 	}
 
-	if(!pEntData)
+	if(SnappingClientVersion < VERSION_DDNET_ENTITY_NETOBJS)
 	{
+		int Tick = (Server()->Tick() % Server()->TickSpeed()) % 6;
+		if(pChr && pChr->IsAlive() && m_Layer == LAYER_SWITCH && m_Number > 0 && !Switchers()[m_Number].m_aStatus[pChr->Team()] && Tick)
+			return;
+
 		StartTick = m_EvalTick;
 		if(StartTick < Server()->Tick() - 4)
 			StartTick = Server()->Tick() - 4;
@@ -155,5 +141,5 @@ void CLight::Snap(int SnappingClient)
 	}
 
 	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion), GetID(),
-		m_Pos, From, StartTick, -1, LASERTYPE_FREEZE);
+		m_Pos, From, StartTick, -1, LASERTYPE_FREEZE, 0, m_Number);
 }

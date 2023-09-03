@@ -6,7 +6,9 @@
 #include <base/vmath.h>
 
 struct CNetObj_Projectile;
+struct CNetObj_DDRaceProjectile;
 struct CNetObj_DDNetProjectile;
+struct CNetObj_EntityEx;
 
 class CProjectileData
 {
@@ -21,11 +23,13 @@ public:
 	bool m_Explosive;
 	int m_Bouncing;
 	bool m_Freeze;
+	int m_SwitchNumber;
 	// TuneZone is introduced locally
 	int m_TuneZone;
 };
 
-CProjectileData ExtractProjectileInfo(const CNetObj_Projectile *pProj, class CGameWorld *pGameWorld);
-CProjectileData ExtractProjectileInfoDDNet(const CNetObj_DDNetProjectile *pProj, class CGameWorld *pGameWorld);
+CProjectileData ExtractProjectileInfo(int NetObjType, const void *pData, class CGameWorld *pGameWorld, const CNetObj_EntityEx *pEntEx);
+CProjectileData ExtractProjectileInfoDDRace(const CNetObj_DDRaceProjectile *pProj, class CGameWorld *pGameWorld, const CNetObj_EntityEx *pEntEx);
+CProjectileData ExtractProjectileInfoDDNet(const CNetObj_DDNetProjectile *pProj);
 
 #endif // GAME_CLIENT_PROJECTILE_DATA_H

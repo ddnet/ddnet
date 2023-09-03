@@ -3,6 +3,7 @@
 #ifndef ENGINE_SERVER_H
 #define ENGINE_SERVER_H
 
+#include <optional>
 #include <type_traits>
 
 #include <base/hash.h>
@@ -207,7 +208,7 @@ public:
 	virtual void SetClientName(int ClientID, char const *pName) = 0;
 	virtual void SetClientClan(int ClientID, char const *pClan) = 0;
 	virtual void SetClientCountry(int ClientID, int Country) = 0;
-	virtual void SetClientScore(int ClientID, int Score) = 0;
+	virtual void SetClientScore(int ClientID, std::optional<int> Score) = 0;
 	virtual void SetClientFlags(int ClientID, int Flags) = 0;
 
 	virtual int SnapNewID() = 0;
@@ -233,6 +234,7 @@ public:
 	virtual const char *GetAuthName(int ClientID) const = 0;
 	virtual void Kick(int ClientID, const char *pReason) = 0;
 	virtual void Ban(int ClientID, int Seconds, const char *pReason) = 0;
+	virtual void RedirectClient(int ClientID, int Port, bool Verbose = false) = 0;
 	virtual void ChangeMap(const char *pMap) = 0;
 
 	virtual void DemoRecorder_HandleAutoStart() = 0;
@@ -275,10 +277,14 @@ class IGameServer : public IInterface
 	MACRO_INTERFACE("gameserver", 0)
 protected:
 public:
-	virtual void OnInit() = 0;
+	// `pPersistentData` may be null if this is the first time `IGameServer`
+	// is instantiated.
+	virtual void OnInit(const void *pPersistentData) = 0;
 	virtual void OnConsoleInit() = 0;
 	virtual void OnMapChange(char *pNewMapName, int MapNameSize) = 0;
-	virtual void OnShutdown() = 0;
+	// `pPersistentData` may be null if this is the last time `IGameServer`
+	// is destroyed.
+	virtual void OnShutdown(void *pPersistentData) = 0;
 
 	virtual void OnTick() = 0;
 	virtual void OnPreSnap() = 0;
@@ -313,6 +319,7 @@ public:
 	virtual bool IsClientReady(int ClientID) const = 0;
 	virtual bool IsClientPlayer(int ClientID) const = 0;
 
+	virtual int PersistentDataSize() const = 0;
 	virtual int PersistentClientDataSize() const = 0;
 
 	virtual CUuid GameUuid() const = 0;
@@ -327,14 +334,16 @@ public:
 	virtual void OnSetAuthed(int ClientID, int Level) = 0;
 	virtual bool PlayerExists(int ClientID) const = 0;
 
-	virtual void OnClientEngineJoin(int ClientID, bool Sixup) = 0;
-	virtual void OnClientEngineDrop(int ClientID, const char *pReason) = 0;
+	virtual void TeehistorianRecordAntibot(const void *pData, int DataSize) = 0;
+	virtual void TeehistorianRecordPlayerJoin(int ClientID, bool Sixup) = 0;
+	virtual void TeehistorianRecordPlayerDrop(int ClientID, const char *pReason) = 0;
+	virtual void TeehistorianRecordPlayerRejoin(int ClientID) = 0;
 
 	virtual void FillAntibot(CAntibotRoundData *pData) = 0;
 
 	/**
 	 * Used to report custom player info to master servers.
-	 * 
+	 *
 	 * @param aBuf Should be the json key values to add, starting with a ',' beforehand, like: ',"skin": "default", "team": 1'
 	 * @param i The client id.
 	 */

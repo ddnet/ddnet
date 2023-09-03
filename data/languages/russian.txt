@@ -16,6 +16,7 @@
 #	banan   	2022-06-12 11:36:50
 #	ban   	2023-01-5 10:22:50
 #	unban   	2023-03-10 21:50:50
+#	eblan   	2023-08-07 14:27:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -88,12 +89,6 @@ Clan
 
 Client
 == Клиент
-
-Close
-== Закрыть
-
-Connect
-== Подключиться
 
 Connecting to
 == Подключение к
@@ -360,9 +355,6 @@ Rename demo
 Reset filter
 == Сбросить фильтры
 
-Sample rate
-== Частота
-
 Score
 == Счёт
 
@@ -540,9 +532,6 @@ Enable team chat sound
 Enable highlighted chat sound
 == Звуки подсвечиваемых сообщений
 
-Threaded sound loading
-== Фоновая загрузка музыки
-
 Use DDRace Scoreboard
 == Использовать DDRace таблицу счета
 
@@ -672,9 +661,6 @@ Show ghost
 No updates available
 == Нет доступных обновлений
 
-Select a name
-== Выберите имя
-
 Show other players' hook collision lines
 == Показывать коллизии крюка других игроков
 
@@ -689,9 +675,6 @@ Show others
 
 Game paused
 == Пауза
-
-Old mouse mode
-== Режим старой мыши
 
 Team message
 == Сообщение от команды
@@ -787,7 +770,7 @@ Please enter your nickname below.
 == Пожалуйста, ниже укажите ваш псевдоним.
 
 Video name:
-== Название видео:
+== Название:
 
 Show DDNet map finishes in server browser
 == Показывать в браузере статус завершения карты
@@ -948,8 +931,8 @@ Friend message
 Save the best demo of each race
 == Сохранять лучшее демо каждой карты
 
-Default length: %d
-== Станд. длина: %d
+Default length
+== Станд. длина
 
 Enable replays
 == Включить записи
@@ -1030,13 +1013,13 @@ Grabs
 == Захватов
 
 1 new mention
-== 1 новое упоминание
+== 1 упоминание
 
 %d new mentions
-== %d новых упоминаний
+== %d упоминаний
 
 9+ new mentions
-== 9+ новых упоминаний
+== 9+ упоминаний
 
 Client message
 == Клиентское сообщение
@@ -1243,9 +1226,6 @@ Desktop fullscreen
 Are you sure that you want to disconnect and switch to a different server?
 == Вы уверены, что хотите отключиться и перейти на другой сервер?
 
-Refreshing...
-== Обновление...
-
 Kill Messages
 == Сообщения о смерти
 
@@ -1278,9 +1258,6 @@ default
 
 custom
 == перс.
-
-Graphics cards
-== Видеокарты
 
 auto
 == авто
@@ -1330,12 +1307,6 @@ Choose default eyes when joining a server
 Enable controller
 == Включить контроллер
 
-Controller %d: %s
-== Контроллер %d: %s
-
-Click to cycle through all available controllers.
-== Нажмите для переключения между всеми доступными контроллерами.
-
 [Ingame controller mode]
 Relative
 == Относительный
@@ -1356,17 +1327,11 @@ UI controller sens.
 Controller jitter tolerance
 == Устойчивость к движению контроллера
 
-Device
-== Устройство
-
 Status
 == Состояние
 
 Aim bind
 == Привязка оси
-
-Controller Axis #%d
-== Ось контроллера #%d
 
 Mouse
 == Мышь
@@ -1551,14 +1516,8 @@ Slow down the demo
 Speed up the demo
 == Ускорить демо
 
-Mark the beginning of a cut
-== Отметить начало участка
-
-Mark the end of a cut
-== Отметить конец участка
-
 Export cut as a separate demo
-== Экспортировать участок отдельно
+== Экспортировать отрезок отдельно
 
 Toggle keyboard shortcuts
 == Включить горячие клавиши
@@ -1698,8 +1657,102 @@ Could not initialize the given graphics backend, this is probably because you di
 Could not save downloaded map. Try manually deleting this file: %s
 == Не удалось сохранить загруженную карту. Попробуйте вручную удалить этот файл: %s
 
-Search:
-== Поиск:
-
 Copy info
 == Cкопировать данные
+
+Create a random skin
+== Создать случайный скин
+
+Online players (%d)
+== Друзей онлайн (%d)
+
+Online clanmates (%d)
+== Участников клана онлайн (%d)
+
+[friends (server browser)]
+Offline (%d)
+== Не в сети (%d)
+
+Click to select server. Double click to join your friend.
+== Нажмите, чтобы выбрать сервер. Двойное нажатие, чтобы присоединиться к другу
+
+Click to remove this player from your friends list.
+== Нажмите, чтобы убрать игрока из списка друзей.
+
+Click to remove this clan from your friends list.
+== Нажмите, чтобы Исключить клан из списка.
+
+None
+== Пусто
+
+Add Clan
+== Добавить клан
+
+A demo with this name already exists
+== Демо с таким именем уже существует
+
+No server selected
+== Не выбран сервер
+
+Mark the beginning of a cut (right click to reset)
+== Отметить начало отрезка (нажмите ПКМ, чтобы сбросить)
+
+Mark the end of a cut (right click to reset)
+== Отметить конец отрезка (нажмите ПКМ, чтобы сбросить)
+
+Close the demo player
+== Закрыть проигрыватель демок
+
+Export demo cut
+== Экспортировать отрезок демки
+
+Cut interval
+== Интервал отрезка
+
+Cut length
+== Длина отрезка
+
+Axis
+== Ось
+
+Graphics card
+== Видеокарта
+
+Quitting. Please wait…
+== Выход из игры. Пожалуйста, подождите...
+
+Restarting. Please wait…
+== Перезапуск игры. Пожалуйста, подождите...
+
+Multi-View
+== Мульти-Просмотр
+
+Rename folder
+== Переименовать папку
+
+A folder with this name already exists
+== Папка с таким именем уже существует
+
+Unable to rename the folder
+== Невозможно переименовать папку
+
+(paused)
+== (приостановленно)
+
+All combined
+== Все вместе
+
+Folder Link
+== Ссылка на папку
+
+Are you sure that you want to delete the folder '%s'?
+== Вы уверены, что хотите удалить папку '%s'?
+
+Delete folder
+== Удалить папку
+
+Unable to delete the folder '%s'. Make sure it's empty first.
+== Невозможно удалить папку '%s'. Сначала убедитесь, что она пуста.
+
+Moved ingame
+== Перемещены в игре

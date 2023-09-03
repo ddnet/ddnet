@@ -284,6 +284,10 @@ public:
 
 void CRconClientLogger::Log(const CLogMessage *pMessage)
 {
+	if(m_Filter.Filters(pMessage))
+	{
+		return;
+	}
 	m_pServer->SendRconLogLine(m_ClientID, pMessage);
 }
 
@@ -299,9 +303,10 @@ void CServer::CClient::Reset()
 	m_LastAckedSnapshot = -1;
 	m_LastInputTick = -1;
 	m_SnapRate = CClient::SNAPRATE_INIT;
-	m_Score = 0;
+	m_Score = -1;
 	m_NextMapChunk = 0;
 	m_Flags = 0;
+	m_RedirectDropTime = 0;
 }
 
 CServer::CServer()
@@ -363,6 +368,7 @@ CServer::~CServer()
 			free(Client.m_pPersistentData);
 		}
 	}
+	free(m_pPersistentData);
 
 	delete m_pRegister;
 	delete m_pConnectionPool;
@@ -473,7 +479,7 @@ void CServer::SetClientCountry(int ClientID, int Country)
 	m_aClients[ClientID].m_Country = Country;
 }
 
-void CServer::SetClientScore(int ClientID, int Score)
+void CServer::SetClientScore(int ClientID, std::optional<int> Score)
 {
 	if(ClientID < 0 || ClientID >= MAX_CLIENTS || m_aClients[ClientID].m_State < CClient::STATE_READY)
 		return;
@@ -520,6 +526,35 @@ void CServer::Ban(int ClientID, int Seconds, const char *pReason)
 	m_NetServer.NetBan()->BanAddr(&Addr, Seconds, pReason);
 }
 
+void CServer::RedirectClient(int ClientID, int Port, bool Verbose)
+{
+	if(ClientID < 0 || ClientID >= MAX_CLIENTS)
+		return;
+
+	char aBuf[512];
+	bool SupportsRedirect = GetClientVersion(ClientID) >= VERSION_DDNET_REDIRECT;
+	if(Verbose)
+	{
+		str_format(aBuf, sizeof(aBuf), "redirecting '%s' to port %d supported=%d", ClientName(ClientID), Port, SupportsRedirect);
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "redirect", aBuf);
+	}
+
+	if(!SupportsRedirect)
+	{
+		bool SamePort = Port == m_NetServer.Address().port;
+		str_format(aBuf, sizeof(aBuf), "Redirect unsupported: please connect to port %d", Port);
+		Kick(ClientID, SamePort ? "Redirect unsupported: please reconnect" : aBuf);
+		return;
+	}
+
+	CMsgPacker Msg(NETMSG_REDIRECT, true);
+	Msg.AddInt(Port);
+	SendMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_FLUSH, ClientID);
+
+	m_aClients[ClientID].m_RedirectDropTime = time_get() + time_freq() * 10;
+	m_aClients[ClientID].m_State = CClient::STATE_REDIRECTED;
+}
+
 int64_t CServer::TickStartTime(int Tick)
 {
 	return m_GameStartTime + (time_freq() * Tick) / SERVER_TICK_SPEED;
@@ -540,6 +575,7 @@ int CServer::Init()
 		Client.m_AuthKey = -1;
 		Client.m_Latency = 0;
 		Client.m_Sixup = false;
+		Client.m_RedirectDropTime = 0;
 	}
 
 	m_CurrentGameTick = MIN_TICK;
@@ -553,11 +589,11 @@ int CServer::Init()
 
 void CServer::SendLogLine(const CLogMessage *pMessage)
 {
-	if(pMessage->m_Level <= IConsole::ToLogLevel(g_Config.m_ConsoleOutputLevel))
+	if(pMessage->m_Level <= IConsole::ToLogLevelFilter(g_Config.m_ConsoleOutputLevel))
 	{
 		SendRconLogLine(-1, pMessage);
 	}
-	if(pMessage->m_Level <= IConsole::ToLogLevel(g_Config.m_EcOutputLevel))
+	if(pMessage->m_Level <= IConsole::ToLogLevelFilter(g_Config.m_EcOutputLevel))
 	{
 		m_Econ.Send(-1, pMessage->m_aLine);
 	}
@@ -751,9 +787,7 @@ static inline bool RepackMsg(const CMsgPacker *pMsg, CPacker &Packer, bool Sixup
 				MsgId += 1;
 			else if(MsgId == NETMSG_RCON_LINE)
 				MsgId = protocol7::NETMSG_RCON_LINE;
-			else if(MsgId >= NETMSG_AUTH_CHALLENGE && MsgId <= NETMSG_AUTH_RESULT)
-				MsgId += 4;
-			else if(MsgId >= NETMSG_PING && MsgId <= NETMSG_ERROR)
+			else if(MsgId >= NETMSG_PING && MsgId <= NETMSG_PING_REPLY)
 				MsgId += 4;
 			else if(MsgId >= NETMSG_RCON_CMD_ADD && MsgId <= NETMSG_RCON_CMD_REM)
 				MsgId -= 11;
@@ -1027,6 +1061,10 @@ int CServer::ClientRejoinCallback(int ClientID, void *pUser)
 
 	pThis->m_aClients[ClientID].Reset();
 
+	pThis->GameServer()->TeehistorianRecordPlayerRejoin(ClientID);
+	pThis->Antibot()->OnEngineClientDrop(ClientID, "rejoin");
+	pThis->Antibot()->OnEngineClientJoin(ClientID, false);
+
 	pThis->SendMap(ClientID);
 
 	return 0;
@@ -1051,6 +1089,9 @@ int CServer::NewClientNoAuthCallback(int ClientID, void *pUser)
 	pThis->m_aClients[ClientID].m_GotDDNetVersionPacket = false;
 	pThis->m_aClients[ClientID].m_DDNetVersionSettled = false;
 	pThis->m_aClients[ClientID].Reset();
+
+	pThis->GameServer()->TeehistorianRecordPlayerJoin(ClientID, false);
+	pThis->Antibot()->OnEngineClientJoin(ClientID, false);
 
 	pThis->SendCapabilities(ClientID);
 	pThis->SendMap(ClientID);
@@ -1081,7 +1122,7 @@ int CServer::NewClientCallback(int ClientID, void *pUser, bool Sixup)
 	mem_zero(&pThis->m_aClients[ClientID].m_Addr, sizeof(NETADDR));
 	pThis->m_aClients[ClientID].Reset();
 
-	pThis->GameServer()->OnClientEngineJoin(ClientID, Sixup);
+	pThis->GameServer()->TeehistorianRecordPlayerJoin(ClientID, Sixup);
 	pThis->Antibot()->OnEngineClientJoin(ClientID, Sixup);
 
 	pThis->m_aClients[ClientID].m_Sixup = Sixup;
@@ -1164,8 +1205,9 @@ int CServer::DelClientCallback(int ClientID, const char *pReason, void *pUser)
 	pThis->m_aPrevStates[ClientID] = CClient::STATE_EMPTY;
 	pThis->m_aClients[ClientID].m_Snapshots.PurgeAll();
 	pThis->m_aClients[ClientID].m_Sixup = false;
+	pThis->m_aClients[ClientID].m_RedirectDropTime = 0;
 
-	pThis->GameServer()->OnClientEngineDrop(ClientID, pReason);
+	pThis->GameServer()->TeehistorianRecordPlayerDrop(ClientID, pReason);
 	pThis->Antibot()->OnEngineClientDrop(ClientID, pReason);
 #if defined(CONF_FAMILY_UNIX)
 	pThis->SendConnLoggingCommand(CLOSE_SESSION, pThis->m_NetServer.ClientAddr(ClientID));
@@ -1293,11 +1335,11 @@ void CServer::SendRconLogLine(int ClientID, const CLogMessage *pMessage)
 	{
 		str_append(aLine, pLine, pStart - pLine + 1);
 		str_append(aLine, pStart + 2, pStart - pLine + pEnd - pStart - 1);
-		str_append(aLine, pEnd + 2, sizeof(aLine));
+		str_append(aLine, pEnd + 2);
 
 		str_append(aLineWithoutIps, pLine, pStart - pLine + 1);
-		str_append(aLineWithoutIps, "XXX", sizeof(aLineWithoutIps));
-		str_append(aLineWithoutIps, pEnd + 2, sizeof(aLineWithoutIps));
+		str_append(aLineWithoutIps, "XXX");
+		str_append(aLineWithoutIps, pEnd + 2);
 
 		pLine = aLine;
 		pLineWithoutIps = aLineWithoutIps;
@@ -1364,6 +1406,38 @@ static inline int MsgFromSixup(int Msg, bool System)
 	}
 
 	return Msg;
+}
+
+bool CServer::CheckReservedSlotAuth(int ClientID, const char *pPassword)
+{
+	char aBuf[256];
+
+	if(Config()->m_SvReservedSlotsPass[0] && !str_comp(Config()->m_SvReservedSlotsPass, pPassword))
+	{
+		str_format(aBuf, sizeof(aBuf), "cid=%d joining reserved slot with reserved pass", ClientID);
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+		return true;
+	}
+
+	// "^([^:]*):(.*)$"
+	if(Config()->m_SvReservedSlotsAuthLevel != 4)
+	{
+		char aName[sizeof(Config()->m_Password)];
+		const char *pInnerPassword = str_next_token(pPassword, ":", aName, sizeof(aName));
+		if(!pInnerPassword)
+		{
+			return false;
+		}
+		int Slot = m_AuthManager.FindKey(aName);
+		if(m_AuthManager.CheckKey(Slot, pInnerPassword + 1) && m_AuthManager.KeyLevel(Slot) >= Config()->m_SvReservedSlotsAuthLevel)
+		{
+			str_format(aBuf, sizeof(aBuf), "cid=%d joining reserved slot with key=%s", ClientID, m_AuthManager.KeyIdent(Slot));
+			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+			return true;
+		}
+	}
+
+	return false;
 }
 
 void CServer::ProcessClientPacket(CNetChunk *pPacket)
@@ -1466,7 +1540,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				}
 
 				// reserved slot
-				if(ClientID >= (Config()->m_SvMaxClients - Config()->m_SvReservedSlots) && Config()->m_SvReservedSlotsPass[0] != 0 && str_comp(Config()->m_SvReservedSlotsPass, pPassword) != 0)
+				if(ClientID >= Config()->m_SvMaxClients - Config()->m_SvReservedSlots && !CheckReservedSlotAuth(ClientID, pPassword))
 				{
 					m_NetServer.Drop(ClientID, "This server is full");
 					return;
@@ -1549,7 +1623,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				}
 				else
 				{
-					CMsgPacker Msgp(4, true, true); //NETMSG_SERVERINFO //TODO: Import the shared protocol from 7 as well
+					CMsgPacker Msgp(protocol7::NETMSG_SERVERINFO, true, true);
 					GetServerInfoSixup(&Msgp, -1, false);
 					SendMsg(&Msgp, MSGFLAG_VITAL | MSGFLAG_FLUSH, ClientID);
 				}
@@ -1826,7 +1900,7 @@ static inline int GetCacheIndex(int Type, bool SendClient)
 
 CServer::CCache::CCache()
 {
-	m_Cache.clear();
+	m_vCache.clear();
 }
 
 CServer::CCache::~CCache()
@@ -1841,12 +1915,12 @@ CServer::CCache::CCacheChunk::CCacheChunk(const void *pData, int Size)
 
 void CServer::CCache::AddChunk(const void *pData, int Size)
 {
-	m_Cache.emplace_back(pData, Size);
+	m_vCache.emplace_back(pData, Size);
 }
 
 void CServer::CCache::Clear()
 {
-	m_Cache.clear();
+	m_vCache.clear();
 }
 
 void CServer::CacheServerInfo(CCache *pCache, int Type, bool SendClients)
@@ -1876,7 +1950,7 @@ void CServer::CacheServerInfo(CCache *pCache, int Type, bool SendClients)
 #define ADD_INT(p, x) \
 	do \
 	{ \
-		str_format(aBuf, sizeof(aBuf), "%d", x); \
+		str_from_int(x, aBuf); \
 		(p).AddString(aBuf, 0); \
 	} while(0)
 
@@ -2017,7 +2091,24 @@ void CServer::CacheServerInfo(CCache *pCache, int Type, bool SendClients)
 			q.AddString(ClientClan(i), MAX_CLAN_LENGTH); // client clan
 
 			ADD_INT(q, m_aClients[i].m_Country); // client country
-			ADD_INT(q, m_aClients[i].m_Score); // client score
+
+			int Score;
+			if(m_aClients[i].m_Score.has_value())
+			{
+				Score = m_aClients[i].m_Score.value();
+				if(Score == 9999)
+					Score = -10000;
+				else if(Score == 0) // 0 time isn't displayed otherwise.
+					Score = -1;
+				else
+					Score = -Score;
+			}
+			else
+			{
+				Score = -9999;
+			}
+
+			ADD_INT(q, Score); // client score
 			ADD_INT(q, GameServer()->IsClientPlayer(i) ? 1 : 0); // is player?
 			if(Type == SERVERINFO_EXTENDED)
 				q.AddString("", 0); // extra info, reserved
@@ -2099,7 +2190,7 @@ void CServer::CacheServerInfoSixup(CCache *pCache, bool SendClients)
 				Packer.AddString(ClientName(i), MAX_NAME_LENGTH); // client name
 				Packer.AddString(ClientClan(i), MAX_CLAN_LENGTH); // client clan
 				Packer.AddInt(m_aClients[i].m_Country); // client country
-				Packer.AddInt(m_aClients[i].m_Score == -9999 ? -1 : -m_aClients[i].m_Score); // client score
+				Packer.AddInt(m_aClients[i].m_Score.value_or(-1)); // client score
 				Packer.AddInt(GameServer()->IsClientPlayer(i) ? 0 : 1); // flag spectator=1, bot=2 (player=0)
 			}
 		}
@@ -2120,7 +2211,7 @@ void CServer::SendServerInfo(const NETADDR *pAddr, int Token, int Type, bool Sen
 #define ADD_INT(p, x) \
 	do \
 	{ \
-		str_format(aBuf, sizeof(aBuf), "%d", x); \
+		str_from_int(x, aBuf); \
 		(p).AddString(aBuf, 0); \
 	} while(0)
 
@@ -2129,12 +2220,12 @@ void CServer::SendServerInfo(const NETADDR *pAddr, int Token, int Type, bool Sen
 	Packet.m_Address = *pAddr;
 	Packet.m_Flags = NETSENDFLAG_CONNLESS;
 
-	for(const auto &Chunk : pCache->m_Cache)
+	for(const auto &Chunk : pCache->m_vCache)
 	{
 		p.Reset();
 		if(Type == SERVERINFO_EXTENDED)
 		{
-			if(&Chunk == &pCache->m_Cache.front())
+			if(&Chunk == &pCache->m_vCache.front())
 				p.AddRaw(SERVERBROWSE_INFO_EXTENDED, sizeof(SERVERBROWSE_INFO_EXTENDED));
 			else
 				p.AddRaw(SERVERBROWSE_INFO_EXTENDED_MORE, sizeof(SERVERBROWSE_INFO_EXTENDED_MORE));
@@ -2173,7 +2264,7 @@ void CServer::GetServerInfoSixup(CPacker *pPacker, int Token, bool SendClients)
 
 	SendClients = SendClients && Token != -1;
 
-	CCache::CCacheChunk &FirstChunk = m_aSixupServerInfoCache[SendClients].m_Cache.front();
+	CCache::CCacheChunk &FirstChunk = m_aSixupServerInfoCache[SendClients].m_vCache.front();
 	pPacker->AddRaw(FirstChunk.m_vData.data(), FirstChunk.m_vData.size());
 }
 
@@ -2230,6 +2321,7 @@ void CServer::UpdateRegisterServerInfo()
 		"\"size\":%d"
 		"},"
 		"\"version\":\"%s\","
+		"\"client_score_kind\":\"time\","
 		"\"clients\":[",
 		MaxClients,
 		MaxPlayers,
@@ -2266,15 +2358,15 @@ void CServer::UpdateRegisterServerInfo()
 				EscapeJson(aCName, sizeof(aCName), ClientName(i)),
 				EscapeJson(aCClan, sizeof(aCClan), ClientClan(i)),
 				m_aClients[i].m_Country,
-				m_aClients[i].m_Score,
+				m_aClients[i].m_Score.value_or(-9999),
 				JsonBool(GameServer()->IsClientPlayer(i)),
 				aExtraPlayerInfo);
-			str_append(aInfo, aClientInfo, sizeof(aInfo));
+			str_append(aInfo, aClientInfo);
 			FirstPlayer = false;
 		}
 	}
 
-	str_append(aInfo, "]}", sizeof(aInfo));
+	str_append(aInfo, "]}");
 
 	m_pRegister->OnNewInfo(aInfo);
 }
@@ -2303,7 +2395,7 @@ void CServer::UpdateServerInfo(bool Resend)
 					SendServerInfo(m_NetServer.ClientAddr(i), -1, SERVERINFO_INGAME, false);
 				else
 				{
-					CMsgPacker Msg(4, true, true); //NETMSG_SERVERINFO //TODO: Import the shared protocol from 7 as well
+					CMsgPacker Msg(protocol7::NETMSG_SERVERINFO, true, true);
 					GetServerInfoSixup(&Msg, -1, false);
 					SendMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_FLUSH, i);
 				}
@@ -2380,6 +2472,9 @@ void CServer::PumpNetwork(bool PacketWaiting)
 			}
 			else
 			{
+				if(m_aClients[Packet.m_ClientID].m_State == CClient::STATE_REDIRECTED)
+					continue;
+
 				int GameFlags = 0;
 				if(Packet.m_Flags & NET_CHUNKFLAG_VITAL)
 				{
@@ -2542,6 +2637,7 @@ int CServer::Run()
 			Client.m_pPersistentData = malloc(Size);
 		}
 	}
+	m_pPersistentData = malloc(GameServer()->PersistentDataSize());
 
 	// load map
 	if(!LoadMap(Config()->m_SvMap))
@@ -2568,12 +2664,16 @@ int CServer::Run()
 
 	// start server
 	NETADDR BindAddr;
-	int NetType = Config()->m_SvIpv4Only ? NETTYPE_IPV4 : NETTYPE_ALL;
-
-	if(!Config()->m_Bindaddr[0] || net_host_lookup(Config()->m_Bindaddr, &BindAddr, NetType) != 0)
+	if(g_Config.m_Bindaddr[0] == '\0')
+	{
 		mem_zero(&BindAddr, sizeof(BindAddr));
-
-	BindAddr.type = NetType;
+	}
+	else if(net_host_lookup(g_Config.m_Bindaddr, &BindAddr, NETTYPE_ALL) != 0)
+	{
+		dbg_msg("server", "The configured bindaddr '%s' cannot be resolved", g_Config.m_Bindaddr);
+		return -1;
+	}
+	BindAddr.type = Config()->m_SvIpv4Only ? NETTYPE_IPV4 : NETTYPE_ALL;
 
 	int Port = Config()->m_SvPort;
 	for(BindAddr.port = Port != 0 ? Port : 8303; !m_NetServer.Open(BindAddr, &m_ServerBan, Config()->m_SvMaxClients, Config()->m_SvMaxClientsPerIP); BindAddr.port++)
@@ -2606,7 +2706,7 @@ int CServer::Run()
 	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
 
 	Antibot()->Init();
-	GameServer()->OnInit();
+	GameServer()->OnInit(nullptr);
 	if(ErrorShutdown())
 	{
 		m_RunServer = STOPPING;
@@ -2664,7 +2764,7 @@ int CServer::Run()
 						}
 					}
 
-					GameServer()->OnShutdown();
+					GameServer()->OnShutdown(m_pPersistentData);
 
 					for(int ClientID = 0; ClientID < MAX_CLIENTS; ClientID++)
 					{
@@ -2682,12 +2782,22 @@ int CServer::Run()
 					m_CurrentGameTick = MIN_TICK;
 					m_ServerInfoFirstRequest = 0;
 					Kernel()->ReregisterInterface(GameServer());
-					GameServer()->OnInit();
+					GameServer()->OnInit(m_pPersistentData);
 					if(ErrorShutdown())
 					{
 						break;
 					}
 					UpdateServerInfo(true);
+					for(int ClientID = 0; ClientID < MAX_CLIENTS; ClientID++)
+					{
+						if(m_aClients[ClientID].m_State != CClient::STATE_CONNECTING)
+							continue;
+
+						// When doing a map change, a new Teehistorian file is created. For players that are already
+						// on the server, no PlayerJoin event is produced in Teehistorian from the network engine.
+						// Record PlayerJoin events here to record the Sixup version and player join event.
+						GameServer()->TeehistorianRecordPlayerJoin(ClientID, m_aClients[ClientID].m_Sixup);
+					}
 				}
 				else
 				{
@@ -2813,9 +2923,12 @@ int CServer::Run()
 
 			NonActive = true;
 
-			for(const auto &Client : m_aClients)
+			for(int i = 0; i < MAX_CLIENTS; ++i)
 			{
-				if(Client.m_State != CClient::STATE_EMPTY)
+				if(m_aClients[i].m_State == CClient::STATE_REDIRECTED)
+					if(time_get() > m_aClients[i].m_RedirectDropTime)
+						m_NetServer.Drop(i, "redirected");
+				if(m_aClients[i].m_State != CClient::STATE_EMPTY)
 				{
 					NonActive = false;
 					break;
@@ -2878,7 +2991,7 @@ int CServer::Run()
 
 	m_Fifo.Shutdown();
 
-	GameServer()->OnShutdown();
+	GameServer()->OnShutdown(nullptr);
 	m_pMap->Unload();
 
 	DbPool()->OnShutdown();
@@ -3412,7 +3525,7 @@ void CServer::ConAddSqlServer(IConsole::IResult *pResult, void *pUserData)
 	str_copy(Config.m_aUser, pResult->GetString(3), sizeof(Config.m_aUser));
 	str_copy(Config.m_aPass, pResult->GetString(4), sizeof(Config.m_aPass));
 	str_copy(Config.m_aIp, pResult->GetString(5), sizeof(Config.m_aIp));
-	str_copy(Config.m_aBindaddr, Config.m_aBindaddr, sizeof(Config.m_aBindaddr));
+	Config.m_aBindaddr[0] = '\0';
 	Config.m_Port = pResult->GetInteger(6);
 	Config.m_Setup = pResult->NumArguments() == 8 ? pResult->GetInteger(7) : true;
 
@@ -3443,12 +3556,6 @@ void CServer::ConDumpSqlServers(IConsole::IResult *pResult, void *pUserData)
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", "choose either 'r' for SqlReadServer or 'w' for SqlWriteServer");
 		return;
 	}
-}
-
-void CServer::ConchainLoglevel(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
-{
-	pfnCallback(pResult, pCallbackUserData);
-	log_set_loglevel((LEVEL)g_Config.m_Loglevel);
 }
 
 void CServer::ConchainSpecialInfoupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
@@ -3615,6 +3722,26 @@ void CServer::ConchainSixupUpdate(IConsole::IResult *pResult, void *pUserData, I
 		pThis->m_MapReload |= (pThis->m_apCurrentMapData[MAP_TYPE_SIXUP] != 0) != (pResult->GetInteger(0) != 0);
 }
 
+void CServer::ConchainLoglevel(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	CServer *pSelf = (CServer *)pUserData;
+	pfnCallback(pResult, pCallbackUserData);
+	if(pResult->NumArguments())
+	{
+		pSelf->m_pFileLogger->SetFilter(CLogFilter{IConsole::ToLogLevelFilter(g_Config.m_Loglevel)});
+	}
+}
+
+void CServer::ConchainStdoutOutputLevel(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	CServer *pSelf = (CServer *)pUserData;
+	pfnCallback(pResult, pCallbackUserData);
+	if(pResult->NumArguments() && pSelf->m_pStdoutLogger)
+	{
+		pSelf->m_pStdoutLogger->SetFilter(CLogFilter{IConsole::ToLogLevelFilter(g_Config.m_StdoutOutputLevel)});
+	}
+}
+
 #if defined(CONF_FAMILY_UNIX)
 void CServer::ConchainConnLoggingServerChange(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
@@ -3682,7 +3809,6 @@ void CServer::RegisterCommands()
 	RustVersionRegister(*Console());
 
 	Console()->Chain("sv_name", ConchainSpecialInfoupdate, this);
-	Console()->Chain("loglevel", ConchainLoglevel, this);
 	Console()->Chain("password", ConchainSpecialInfoupdate, this);
 
 	Console()->Chain("sv_max_clients_per_ip", ConchainMaxclientsperipUpdate, this);
@@ -3693,6 +3819,9 @@ void CServer::RegisterCommands()
 	Console()->Chain("sv_rcon_helper_password", ConchainRconHelperPasswordChange, this);
 	Console()->Chain("sv_map", ConchainMapUpdate, this);
 	Console()->Chain("sv_sixup", ConchainSixupUpdate, this);
+
+	Console()->Chain("loglevel", ConchainLoglevel, this);
+	Console()->Chain("stdout_output_level", ConchainStdoutOutputLevel, this);
 
 #if defined(CONF_FAMILY_UNIX)
 	Console()->Chain("sv_conn_logging_server", ConchainConnLoggingServerChange, this);
@@ -3813,4 +3942,10 @@ bool CServer::SetTimedOut(int ClientID, int OrigID)
 void CServer::SetErrorShutdown(const char *pReason)
 {
 	str_copy(m_aErrorShutdownReason, pReason);
+}
+
+void CServer::SetLoggers(std::shared_ptr<ILogger> &&pFileLogger, std::shared_ptr<ILogger> &&pStdoutLogger)
+{
+	m_pFileLogger = pFileLogger;
+	m_pStdoutLogger = pStdoutLogger;
 }

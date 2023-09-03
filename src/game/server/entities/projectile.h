@@ -18,6 +18,7 @@ public:
 		bool Freeze,
 		bool Explosive,
 		int SoundImpact,
+		vec2 InitDir,
 		int Layer = 0,
 		int Number = 0);
 
@@ -46,13 +47,15 @@ private:
 	bool m_Freeze;
 	int m_TuneZone;
 	bool m_BelongsToPracticeTeam;
+	vec2 m_InitDir;
 
 	// gctf
 	CClientMask m_AffectedCharacters;
 
 public:
 	void SetBouncing(int Value);
-	bool FillExtraInfo(CNetObj_DDNetProjectile *pProj);
+	bool FillExtraInfoLegacy(CNetObj_DDRaceProjectile *pProj);
+	void FillExtraInfo(CNetObj_DDNetProjectile *pProj);
 
 	virtual int GetOwnerID() const override { return m_Owner; }
 };
