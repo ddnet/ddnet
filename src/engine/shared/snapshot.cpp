@@ -12,9 +12,9 @@
 
 // CSnapshot
 
-CSnapshotItem *CSnapshot::GetItem(int Index) const
+const CSnapshotItem *CSnapshot::GetItem(int Index) const
 {
-	return (CSnapshotItem *)(DataStart() + Offsets()[Index]);
+	return (const CSnapshotItem *)(DataStart() + Offsets()[Index]);
 }
 
 int CSnapshot::GetItemSize(int Index) const
@@ -37,12 +37,12 @@ int CSnapshot::GetExternalItemType(int InternalType) const
 		return InternalType;
 	}
 
-	int TypeItemIndex = GetItemIndex((0 << 16) | InternalType); // NETOBJTYPE_EX
+	int TypeItemIndex = GetItemIndex(InternalType); // NETOBJTYPE_EX
 	if(TypeItemIndex == -1 || GetItemSize(TypeItemIndex) < (int)sizeof(CUuid))
 	{
 		return InternalType;
 	}
-	CSnapshotItem *pTypeItem = GetItem(TypeItemIndex);
+	const CSnapshotItem *pTypeItem = GetItem(TypeItemIndex);
 	CUuid Uuid;
 	for(int i = 0; i < (int)sizeof(CUuid) / 4; i++)
 		int_to_bytes_be(&Uuid.m_aData[i * 4], pTypeItem->Data()[i]);
@@ -61,7 +61,7 @@ int CSnapshot::GetItemIndex(int Key) const
 	return -1;
 }
 
-void *CSnapshot::FindItem(int Type, int ID) const
+const void *CSnapshot::FindItem(int Type, int ID) const
 {
 	int InternalType = Type;
 	if(Type >= OFFSET_UUID)
@@ -74,7 +74,7 @@ void *CSnapshot::FindItem(int Type, int ID) const
 		bool Found = false;
 		for(int i = 0; i < m_NumItems; i++)
 		{
-			CSnapshotItem *pItem = GetItem(i);
+			const CSnapshotItem *pItem = GetItem(i);
 			if(pItem->Type() == 0 && pItem->ID() >= OFFSET_UUID_TYPE) // NETOBJTYPE_EX
 			{
 				if(mem_comp(pItem->Data(), aTypeUuidItem, sizeof(CUuid)) == 0)
@@ -100,7 +100,7 @@ unsigned CSnapshot::Crc()
 
 	for(int i = 0; i < m_NumItems; i++)
 	{
-		CSnapshotItem *pItem = GetItem(i);
+		const CSnapshotItem *pItem = GetItem(i);
 		int Size = GetItemSize(i);
 
 		for(int b = 0; b < Size / 4; b++)
@@ -114,7 +114,7 @@ void CSnapshot::DebugDump()
 	dbg_msg("snapshot", "data_size=%d num_items=%d", m_DataSize, m_NumItems);
 	for(int i = 0; i < m_NumItems; i++)
 	{
-		CSnapshotItem *pItem = GetItem(i);
+		const CSnapshotItem *pItem = GetItem(i);
 		int Size = GetItemSize(i);
 		dbg_msg("snapshot", "\ttype=%d id=%d", pItem->Type(), pItem->ID());
 		for(int b = 0; b < Size / 4; b++)
@@ -196,7 +196,7 @@ static int GetItemIndexHashed(int Key, const CItemList *pHashlist)
 	return -1;
 }
 
-int CSnapshotDelta::DiffItem(int *pPast, int *pCurrent, int *pOut, int Size)
+int CSnapshotDelta::DiffItem(const int *pPast, const int *pCurrent, int *pOut, int Size)
 {
 	int Needed = 0;
 	while(Size)
@@ -212,7 +212,7 @@ int CSnapshotDelta::DiffItem(int *pPast, int *pCurrent, int *pOut, int Size)
 	return Needed;
 }
 
-void CSnapshotDelta::UndiffItem(int *pPast, int *pDiff, int *pOut, int Size, int *pDataRate)
+void CSnapshotDelta::UndiffItem(const int *pPast, int *pDiff, int *pOut, int Size, int *pDataRate)
 {
 	while(Size)
 	{
@@ -304,7 +304,7 @@ int CSnapshotDelta::CreateDelta(CSnapshot *pFrom, CSnapshot *pTo, void *pDstData
 	{
 		// do delta
 		const int ItemSize = pTo->GetItemSize(i); // O(1) .. O(n)
-		CSnapshotItem *pCurItem = pTo->GetItem(i); // O(1) .. O(n)
+		const CSnapshotItem *pCurItem = pTo->GetItem(i); // O(1) .. O(n)
 		const int PastIndex = aPastIndices[i];
 		const bool IncludeSize = pCurItem->Type() >= MAX_NETOBJSIZES || !m_aItemSizes[pCurItem->Type()];
 
@@ -312,7 +312,7 @@ int CSnapshotDelta::CreateDelta(CSnapshot *pFrom, CSnapshot *pTo, void *pDstData
 		{
 			int *pItemDataDst = pData + 3;
 
-			CSnapshotItem *pPastItem = pFrom->GetItem(PastIndex);
+			const CSnapshotItem *pPastItem = pFrom->GetItem(PastIndex);
 
 			if(!IncludeSize)
 				pItemDataDst = pData + 2;
@@ -373,7 +373,7 @@ int CSnapshotDelta::UnpackDelta(CSnapshot *pFrom, CSnapshot *pTo, const void *pS
 	// copy all non deleted stuff
 	for(int i = 0; i < pFrom->NumItems(); i++)
 	{
-		CSnapshotItem *pFromItem = pFrom->GetItem(i);
+		const CSnapshotItem *pFromItem = pFrom->GetItem(i);
 		const int ItemSize = pFrom->GetItemSize(i);
 		bool Keep = true;
 		for(int d = 0; d < pDelta->m_NumDeletedItems; d++)

@@ -11,6 +11,8 @@
 # 2022-06-17 CHaBek
 # 2022-07-05 CHaBek
 # 2022-08-17 CHaBek
+# 2022-09-18 CHaBek
+# 2022-10-20 CHaBek
 ##### /authors #####
 
 ##### translated strings #####
@@ -51,14 +53,8 @@ Address
 All
 == 모두
 
-Are you sure that you want to delete the demo?
-== 데모를 삭제하시겠습니까?
-
 Are you sure that you want to quit?
 == 종료하시겠습니까?
-
-Are you sure that you want to remove the player from your friends list?
-== 이 플레이어를 친구 목록에서 삭제하시겠습니까?
 
 Automatically record demos
 == 자동으로 데모 녹화
@@ -383,7 +379,7 @@ Server not full
 == 빈 자리가 있는 서버
 
 Shotgun
-== 샷건
+== 산탄총
 
 Show chat
 == 채팅 표시
@@ -392,7 +388,7 @@ Show friends only
 == 친구가 있는 서버
 
 Show ingame HUD
-== 게임 인터페이스 표시
+== 게임 내 HUD 표시
 
 Show name plates
 == 이름 표시
@@ -453,9 +449,6 @@ Try again
 
 Type
 == 종류
-
-Unable to delete the demo
-== 데모를 삭제할 수 없음
 
 Unable to rename the demo
 == 데모의 이름을 변경할 수 없음
@@ -571,7 +564,7 @@ Info
 == 정보
 
 UI Color
-== 메뉴 색상
+== UI 색상
 
 Your skin
 == 당신의 스킨
@@ -702,9 +695,6 @@ Are you sure that you want to disconnect and switch to a different server?
 Country / Region
 == 국가 / 지역
 
-Destination file already exist
-== 대상 파일이 이미 존재함
-
 Speed
 == 속도
 
@@ -714,8 +704,8 @@ Video name:
 Show DDNet map finishes in server browser
 == DDNet 맵 완주를 서버 브라우저에 표시
 
-transmits your player name to info2.ddnet.tw
-== info2.ddnet.tw에 당신의 닉네임을 전송함
+transmits your player name to info.ddnet.org
+== info.ddnet.org에 당신의 닉네임을 전송함
 
 Theme
 == 테마
@@ -910,13 +900,13 @@ Toggle ghost
 == 고스트 표시
 
 Dummy copy
-== 더미와 동시동작
+== 더미 동시동작
 
 Hammerfly dummy
 == 해머플라이 더미
 
 Converse
-== 지속 대화
+== 비밀대화 지속
 
 Statboard
 == 통계표
@@ -1023,12 +1013,6 @@ Show kill messages
 Kill Messages
 == 킬 메시지
 
-Laser Outline Color
-== 레이저 테두리 색상
-
-Laser Inner Color
-== 레이저 색상
-
 Use old chat style
 == 구식 채팅 방식 사용
 
@@ -1128,9 +1112,6 @@ Show tiles layers from BG map
 Regular Background Color
 == 기본 배경 색상
 
-Try fast HTTP map download first
-== 빠른 HTTP 맵 다운로드 우선 시도
-
 New random timeout code
 == 새로운 무작위 타임아웃 코드 생성
 
@@ -1173,14 +1154,14 @@ Assets directory
 Discord
 == 디스코드
 
-https://ddnet.tw/discord
-== https://ddnet.tw/discord
+https://ddnet.org/discord
+== https://ddnet.org/discord
 
 Learn
 == 학습터
 
-https://wiki.ddnet.tw/
-== https://wiki.ddnet.tw/
+https://wiki.ddnet.org/
+== https://wiki.ddnet.org/wiki/Main_Page/ko
 
 Website
 == 웹사이트
@@ -1546,7 +1527,7 @@ Colors of the hook collision line, in case of a possible collision with:
 == 갈고리 보조선 색상:
 
 Your movements are not taken into account when calculating the line colors
-== 색상 계산에 이동은 고려하지 않습니다.
+== 움직임은 색상 추정에 고려되지 않습니다.
 
 Nothing hookable
 == 갈고리 불가
@@ -1565,3 +1546,99 @@ Loading race demo files
 
 Loading sound files
 == 소리 파일 로딩 중
+
+Play the current demo
+== 데모 재생
+
+Pause the current demo
+== 데모 일시정지
+
+Stop the current demo
+== 데모 정지
+
+Slow down the demo
+== 데모 속도 낮추기
+
+Speed up the demo
+== 데모 속도 높이기
+
+Mark the beginning of a cut
+== 영상 자르기의 시작 부분
+
+Mark the end of a cut
+== 영상 자르기의 끝 부분
+
+Export cut as a separate demo
+== 자른 부분을 다른 이름으로 저장
+
+Toggle keyboard shortcuts
+== 키보드 단축키 사용 선택
+
+Weapons
+== 무기
+
+Rifle Laser Outline Color
+== 소총 레이저 테두리 색상
+
+Rifle Laser Inner Color
+== 소총 레이저 광선 색상
+
+Shotgun Laser Outline Color
+== 산탄총 레이저 테두리 색상
+
+Shotgun Laser Inner Color
+== 산탄총 레이저 광선 색상
+
+Door Laser Outline Color
+== 문 레이저 테두리 색상
+
+Door Laser Inner Color
+== 문 레이저 광선 색상
+
+Freeze Laser Outline Color
+== 동결 레이저 테두리 색상
+
+Freeze Laser Inner Color
+== 동결 레이저 광선 색상
+
+Menu opened. Press Esc key again to close menu.
+== 메뉴가 열려 있습니다. Esc 키를 눌러 닫을 수 있습니다.
+
+Set all to Rifle
+== 소총 색상으로 통일
+
+Cancel
+== 
+
+File '%s' already exists, do you want to overwrite it?
+== 
+
+Are you sure that you want to remove the player '%s' from your friends list?
+== 
+
+Are you sure that you want to remove the clan '%s' from your friends list?
+== 
+
+Go back one tick
+== 
+
+Go forward one tick
+== 
+
+Go back one marker
+== 
+
+Go forward one marker
+== 
+
+Are you sure that you want to delete the demo '%s'?
+== 
+
+Unable to delete the demo '%s'
+== 
+
+Reset controls
+== 
+
+Are you sure that you want to reset the controls to their defaults?
+== 

@@ -1,7 +1,7 @@
 #include "test.h"
 #include <gtest/gtest.h>
 
-#include <game/bezier.h>
+#include <base/bezier.h>
 
 // Due to the implementation, derivatives must be divisible by 3 to be exactly
 // represented.

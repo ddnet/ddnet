@@ -26,13 +26,15 @@ GameInfoFlags = [
 ]
 GameInfoFlags2 = [
 	"ALLOW_X_SKINS", "GAMETYPE_CITY", "GAMETYPE_FDDRACE", "ENTITIES_FDDRACE", "HUD_HEALTH_ARMOR", "HUD_AMMO",
-	"HUD_DDRACE", "NO_WEAK_HOOK_AND_BOUNCE"
+	"HUD_DDRACE", "NO_WEAK_HOOK"
 ]
 ExPlayerFlags = ["AFK", "PAUSED", "SPEC"]
 ProjectileFlags = [f"CLIENTID_BIT{i}" for i in range(8)] + [
 	"NO_OWNER", "IS_DDNET", "BOUNCE_HORIZONTAL", "BOUNCE_VERTICAL",
 	"EXPLOSIVE", "FREEZE",
 ]
+
+LaserTypes = ["RIFLE", "SHOTGUN", "DOOR", "FREEZE"]
 
 Emoticons = ["OOP", "EXCLAMATION", "HEARTS", "DROP", "DOTDOT", "MUSIC", "SORRY", "GHOST", "SUSHI", "SPLATTEE", "DEVILTEE", "ZOMG", "ZZZ", "WTF", "EYES", "QUESTION"]
 
@@ -78,6 +80,7 @@ Enums = [
 	Enum("EMOTICON", Emoticons),
 	Enum("AUTHED", Authed),
 	Enum("ENTITYCLASS", EntityClasses),
+	Enum("LASERTYPE", LaserTypes),
 ]
 
 Flags = [
@@ -271,6 +274,16 @@ Objects = [
 		NetIntAny("m_Data"),
 		NetIntRange("m_Type", 0, 'NUM_WEAPONS-1'),
 		NetTick("m_StartTick"),
+	]),
+
+	NetObjectEx("DDNetLaser", "laser@netobj.ddnet.tw", [
+		NetIntAny("m_ToX"),
+		NetIntAny("m_ToY"),
+		NetIntAny("m_FromX"),
+		NetIntAny("m_FromY"),
+		NetTick("m_StartTick"),
+		NetIntRange("m_Owner", 0, 'MAX_CLIENTS-1'),
+		NetIntAny("m_Type"),
 	]),
 
 	## Events

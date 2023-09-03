@@ -19,28 +19,28 @@
 
 // todo: rework this
 
-const char *CConsole::CResult::GetString(unsigned Index)
+const char *CConsole::CResult::GetString(unsigned Index) const
 {
 	if(Index >= m_NumArgs)
 		return "";
 	return m_apArgs[Index];
 }
 
-int CConsole::CResult::GetInteger(unsigned Index)
+int CConsole::CResult::GetInteger(unsigned Index) const
 {
 	if(Index >= m_NumArgs)
 		return 0;
 	return str_toint(m_apArgs[Index]);
 }
 
-float CConsole::CResult::GetFloat(unsigned Index)
+float CConsole::CResult::GetFloat(unsigned Index) const
 {
 	if(Index >= m_NumArgs)
 		return 0.0f;
 	return str_tofloat(m_apArgs[Index]);
 }
 
-ColorHSLA CConsole::CResult::GetColor(unsigned Index, bool Light)
+ColorHSLA CConsole::CResult::GetColor(unsigned Index, bool Light) const
 {
 	ColorHSLA Hsla = ColorHSLA(0, 0, 0);
 	if(Index >= m_NumArgs)
@@ -322,7 +322,7 @@ LOG_COLOR ColorToLogColor(ColorRGBA Color)
 		(uint8_t)(Color.b * 255.0)};
 }
 
-void CConsole::Print(int Level, const char *pFrom, const char *pStr, ColorRGBA PrintColor)
+void CConsole::Print(int Level, const char *pFrom, const char *pStr, ColorRGBA PrintColor) const
 {
 	LEVEL LogLevel = IConsole::ToLogLevel(Level);
 	// if the color is pure white, use default terminal color
@@ -340,6 +340,12 @@ void CConsole::SetTeeHistorianCommandCallback(FTeeHistorianCommandCallback pfnCa
 {
 	m_pfnTeeHistorianCommandCallback = pfnCallback;
 	m_pTeeHistorianCommandUserdata = pUser;
+}
+
+void CConsole::SetUnknownCommandCallback(FUnknownCommandCallback pfnCallback, void *pUser)
+{
+	m_pfnUnknownCommandCallback = pfnCallback;
+	m_pUnknownCommandUserdata = pUser;
 }
 
 void CConsole::InitChecksum(CChecksumData *pData) const
@@ -498,8 +504,7 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientID, bo
 					else if(m_StoreCommands && pCommand->m_Flags & CFGFLAG_STORE)
 					{
 						m_ExecutionQueue.AddEntry();
-						m_ExecutionQueue.m_pLast->m_pfnCommandCallback = pCommand->m_pfnCallback;
-						m_ExecutionQueue.m_pLast->m_pCommandUserData = pCommand->m_pUserData;
+						m_ExecutionQueue.m_pLast->m_pCommand = pCommand;
 						m_ExecutionQueue.m_pLast->m_Result = Result;
 					}
 					else
@@ -542,9 +547,14 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientID, bo
 		}
 		else if(Stroke)
 		{
-			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "No such command: %s.", Result.m_pCommand);
-			Print(OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
+			// Pass the original string to the unknown command callback instead of the parsed command, as the latter
+			// ends at the first whitespace, which breaks for unknown commands (filenames) containing spaces.
+			if(!m_pfnUnknownCommandCallback(pStr, m_pUnknownCommandUserdata))
+			{
+				char aBuf[256];
+				str_format(aBuf, sizeof(aBuf), "No such command: %s.", Result.m_pCommand);
+				Print(OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
+			}
 		}
 
 		pStr = pNextPart;
@@ -1014,7 +1024,8 @@ void CConsole::Init()
 #define MACRO_CONFIG_INT(Name, ScriptName, Def, Min, Max, Flags, Desc) \
 	{ \
 		static CIntVariableData Data = {this, &g_Config.m_##Name, Min, Max, Def}; \
-		Register(#ScriptName, "?i", Flags, IntVariableCommand, &Data, Desc " (default: " #Def ", min: " #Min ", max: " #Max ")"); \
+		Register(#ScriptName, "?i", Flags, IntVariableCommand, &Data, \
+			Min == Max ? Desc " (default: " #Def ")" : Max == 0 ? Desc " (default: " #Def ", min: " #Min ")" : Desc " (default: " #Def ", min: " #Min ", max: " #Max ")"); \
 	}
 
 #define MACRO_CONFIG_COL(Name, ScriptName, Def, Flags, Desc) \
@@ -1237,7 +1248,7 @@ void CConsole::StoreCommands(bool Store)
 	if(!Store)
 	{
 		for(CExecutionQueue::CQueueEntry *pEntry = m_ExecutionQueue.m_pFirst; pEntry; pEntry = pEntry->m_pNext)
-			pEntry->m_pfnCommandCallback(&pEntry->m_Result, pEntry->m_pCommandUserData);
+			pEntry->m_pCommand->m_pfnCallback(&pEntry->m_Result, pEntry->m_pCommand->m_pUserData);
 		m_ExecutionQueue.Reset();
 	}
 	m_StoreCommands = Store;
@@ -1257,7 +1268,7 @@ const IConsole::CCommandInfo *CConsole::GetCommandInfo(const char *pName, int Fl
 	return 0;
 }
 
-extern IConsole *CreateConsole(int FlagMask) { return new CConsole(FlagMask); }
+std::unique_ptr<IConsole> CreateConsole(int FlagMask) { return std::make_unique<CConsole>(FlagMask); }
 
 void CConsole::ResetServerGameSettings()
 {
@@ -1296,7 +1307,7 @@ void CConsole::ResetServerGameSettings()
 #undef MACRO_CONFIG_STR
 }
 
-int CConsole::CResult::GetVictim()
+int CConsole::CResult::GetVictim() const
 {
 	return m_Victim;
 }

@@ -45,14 +45,8 @@ Address
 All
 == Alle
 
-Are you sure that you want to delete the demo?
-== Er du sikker på at du vil slette denne demoen?
-
 Are you sure that you want to quit?
 == Er du sikker på at du vil avslutte?
-
-Are you sure that you want to remove the player from your friends list?
-== Er du sikker på at du vil fjerne denne spilleren fra vennelisten?
 
 Automatically record demos
 == Spill inn demoer automatisk
@@ -463,9 +457,6 @@ Try again
 Type
 == Type
 
-Unable to delete the demo
-== Kunne ikke slette demoen
-
 Unable to rename the demo
 == Kunne ikke endre navn på demoen
 
@@ -666,17 +657,14 @@ It's recommended that you check the settings to adjust them to your liking befor
 Please enter your nickname below.
 == Skriv inn ditt ønskede kallenavn under.
 
-Destination file already exist
-== Destinasjonsfilen eksisterer allerede
-
 Video name:
 == Navn på video:
 
 Show DDNet map finishes in server browser
 == Vis fullførte DDNet-baner i serverlisten
 
-transmits your player name to info2.ddnet.tw
-== sender spillnavnet ditt til info2.ddnet.tw
+transmits your player name to info.ddnet.org
+== sender spillnavnet ditt til info.ddnet.org
 
 Search
 == Søk
@@ -999,9 +987,6 @@ Old mouse mode
 Show tiles layers from BG map
 == Vis tile-lag fra BG-bane
 
-Try fast HTTP map download first
-== Forsøk først rask HTTP-nedlasting av bane
-
 DDNet %s is available:
 == DDNet %s er tilgjengelig:
 
@@ -1167,8 +1152,8 @@ Particles
 Assets directory
 == Ressursmappe
 
-https://wiki.ddnet.tw/
-== https://wiki.ddnet.tw/
+https://wiki.ddnet.org/
+== https://wiki.ddnet.org/
 
 Website
 == Webside
@@ -1252,7 +1237,10 @@ Getting game info
 Requesting to join the game
 == 
 
-Are you sure that you want to disconnect and switch to a different server?
+Cancel
+== 
+
+File '%s' already exists, do you want to overwrite it?
 == 
 
 Join Tutorial Server
@@ -1291,19 +1279,79 @@ Getting server list from master server
 Refreshing...
 == 
 
+Are you sure that you want to disconnect and switch to a different server?
+== 
+
 Leak IP
+== 
+
+Are you sure that you want to remove the player '%s' from your friends list?
+== 
+
+Are you sure that you want to remove the clan '%s' from your friends list?
+== 
+
+Play the current demo
+== 
+
+Pause the current demo
+== 
+
+Stop the current demo
+== 
+
+Go back one tick
+== 
+
+Go forward one tick
+== 
+
+Slow down the demo
+== 
+
+Speed up the demo
+== 
+
+Mark the beginning of a cut
+== 
+
+Mark the end of a cut
+== 
+
+Export cut as a separate demo
+== 
+
+Go back one marker
+== 
+
+Go forward one marker
+== 
+
+Toggle keyboard shortcuts
 == 
 
 Loading demo files
 == 
 
+Are you sure that you want to delete the demo '%s'?
+== 
+
+Unable to delete the demo '%s'
+== 
+
 Loading ghost files
+== 
+
+Menu opened. Press Esc key again to close menu.
 == 
 
 Settings file
 == 
 
 Config directory
+== 
+
+Loading skin files
 == 
 
 Toggle to edit your dummy settings
@@ -1313,9 +1361,6 @@ Download community skins
 == 
 
 Choose default eyes when joining a server
-== 
-
-Loading skin files
 == 
 
 Chat command
@@ -1375,6 +1420,12 @@ UI mouse sens.
 == 
 
 Controller
+== 
+
+Reset controls
+== 
+
+Are you sure that you want to reset the controls to their defaults?
 == 
 
 Dummy
@@ -1494,10 +1545,34 @@ Normal Color
 Highlight Color
 == 
 
-Laser Outline Color
+Weapons
 == 
 
-Laser Inner Color
+Rifle Laser Outline Color
+== 
+
+Rifle Laser Inner Color
+== 
+
+Shotgun Laser Outline Color
+== 
+
+Shotgun Laser Inner Color
+== 
+
+Door Laser Outline Color
+== 
+
+Door Laser Inner Color
+== 
+
+Freeze Laser Outline Color
+== 
+
+Freeze Laser Inner Color
+== 
+
+Set all to Rifle
 == 
 
 When you cross the start line, show a ghost tee replicating the movements of your best time
@@ -1539,7 +1614,7 @@ Loading assets
 Discord
 == 
 
-https://ddnet.tw/discord
+https://ddnet.org/discord
 == 
 
 Tutorial

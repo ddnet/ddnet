@@ -18,6 +18,7 @@
 #include <game/client/components/sounds.h>
 #include <game/client/gameclient.h>
 #include <game/client/render.h>
+#include <game/client/skin.h>
 #include <game/client/ui.h>
 #include <game/client/ui_scrollregion.h>
 #include <game/localization.h>
@@ -190,8 +191,12 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		UI()->DoLabel(&Label, aBuf, 13.0f, TEXTALIGN_LEFT);
 		Left.HSplitTop(20.0f, &Button, &Left);
 		g_Config.m_ClRefreshRate = static_cast<int>(UI()->DoScrollbarH(&g_Config.m_ClRefreshRate, &Button, g_Config.m_ClRefreshRate / 10000.0f) * 10000.0f + 0.1f);
+		Left.HSplitTop(5.0f, 0, &Left);
+		Left.HSplitTop(20.0f, &Button, &Left);
+		int s_LowerRefreshRate;
+		if(DoButton_CheckBox(&s_LowerRefreshRate, Localize("Save power by lowering refresh rate (higher input latency)"), g_Config.m_ClRefreshRate <= 480 && g_Config.m_ClRefreshRate != 0, &Button))
+			g_Config.m_ClRefreshRate = g_Config.m_ClRefreshRate > 480 || g_Config.m_ClRefreshRate == 0 ? 480 : 0;
 
-		Left.HSplitTop(15.0f, 0, &Left);
 		CUIRect SettingsButton;
 		Left.HSplitBottom(25.0f, &Left, &SettingsButton);
 
@@ -404,10 +409,10 @@ struct CUISkin
 	CUISkin(const CSkin *pSkin) :
 		m_pSkin(pSkin) {}
 
-	bool operator<(const CUISkin &Other) const { return str_comp_nocase(m_pSkin->m_aName, Other.m_pSkin->m_aName) < 0; }
+	bool operator<(const CUISkin &Other) const { return str_comp_nocase(m_pSkin->GetName(), Other.m_pSkin->GetName()) < 0; }
 
-	bool operator<(const char *pOther) const { return str_comp_nocase(m_pSkin->m_aName, pOther) < 0; }
-	bool operator==(const char *pOther) const { return !str_comp_nocase(m_pSkin->m_aName, pOther); }
+	bool operator<(const char *pOther) const { return str_comp_nocase(m_pSkin->GetName(), pOther) < 0; }
+	bool operator==(const char *pOther) const { return !str_comp_nocase(m_pSkin->GetName(), pOther); }
 };
 
 void CMenus::RefreshSkins()
@@ -423,6 +428,49 @@ void CMenus::RefreshSkins()
 	if(Client()->State() >= IClient::STATE_ONLINE)
 	{
 		m_pClient->RefindSkins();
+	}
+}
+
+void CMenus::Con_AddFavoriteSkin(IConsole::IResult *pResult, void *pUserData)
+{
+	auto *pSelf = (CMenus *)pUserData;
+	if(pResult->NumArguments() >= 1)
+	{
+		pSelf->m_SkinFavorites.emplace(pResult->GetString(0));
+		pSelf->m_SkinFavoritesChanged = true;
+	}
+}
+
+void CMenus::Con_RemFavoriteSkin(IConsole::IResult *pResult, void *pUserData)
+{
+	auto *pSelf = (CMenus *)pUserData;
+	if(pResult->NumArguments() >= 1)
+	{
+		const auto it = pSelf->m_SkinFavorites.find(pResult->GetString(0));
+		if(it != pSelf->m_SkinFavorites.end())
+		{
+			pSelf->m_SkinFavorites.erase(it);
+			pSelf->m_SkinFavoritesChanged = true;
+		}
+	}
+}
+
+void CMenus::ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserData)
+{
+	auto *pSelf = (CMenus *)pUserData;
+	pSelf->OnConfigSave(pConfigManager);
+}
+
+void CMenus::OnConfigSave(IConfigManager *pConfigManager)
+{
+	for(const auto &Entry : m_SkinFavorites)
+	{
+		char aBuffer[256];
+		char aNameEscaped[256];
+		char *pDst = aNameEscaped;
+		str_escape(&pDst, Entry.c_str(), aNameEscaped + std::size(aNameEscaped));
+		str_format(aBuffer, std::size(aBuffer), "add_favorite_skin \"%s\"", Entry.c_str());
+		pConfigManager->WriteLine(aBuffer);
 	}
 }
 
@@ -445,25 +493,6 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		pColorBody = &g_Config.m_ClDummyColorBody;
 		pColorFeet = &g_Config.m_ClDummyColorFeet;
 	}
-
-	// skin info
-	CTeeRenderInfo OwnSkinInfo;
-	const CSkin *pSkin = m_pClient->m_Skins.Get(m_pClient->m_Skins.Find(pSkinName));
-	OwnSkinInfo.m_OriginalRenderSkin = pSkin->m_OriginalSkin;
-	OwnSkinInfo.m_ColorableRenderSkin = pSkin->m_ColorableSkin;
-	OwnSkinInfo.m_SkinMetrics = pSkin->m_Metrics;
-	OwnSkinInfo.m_CustomColoredSkin = *pUseCustomColor;
-	if(*pUseCustomColor)
-	{
-		OwnSkinInfo.m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(*pColorBody).UnclampLighting());
-		OwnSkinInfo.m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(*pColorFeet).UnclampLighting());
-	}
-	else
-	{
-		OwnSkinInfo.m_ColorBody = ColorRGBA(1.0f, 1.0f, 1.0f);
-		OwnSkinInfo.m_ColorFeet = ColorRGBA(1.0f, 1.0f, 1.0f);
-	}
-	OwnSkinInfo.m_Size = 50.0f;
 
 	MainView.HSplitTop(10.0f, &Label, &MainView);
 	Label.VSplitLeft(280.0f, &Label, &Dummy);
@@ -529,19 +558,40 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	SkinPrefix.HSplitTop(2.0f, 0, &SkinPrefix);
 	{
 		static const char *s_apSkinPrefixes[] = {"kitty", "santa"};
-		for(auto &pPrefix : s_apSkinPrefixes)
+		static CButtonContainer s_aPrefixButtons[std::size(s_apSkinPrefixes)];
+		for(size_t i = 0; i < std::size(s_apSkinPrefixes); i++)
 		{
 			SkinPrefix.HSplitTop(20.0f, &Button, &SkinPrefix);
 			Button.HMargin(2.0f, &Button);
-			static CButtonContainer s_PrefixButton;
-			if(DoButton_Menu(&s_PrefixButton, pPrefix, 0, &Button))
+			if(DoButton_Menu(&s_aPrefixButtons[i], s_apSkinPrefixes[i], 0, &Button))
 			{
-				str_copy(g_Config.m_ClSkinPrefix, pPrefix);
+				str_copy(g_Config.m_ClSkinPrefix, s_apSkinPrefixes[i]);
 			}
 		}
 	}
 
 	Dummy.HSplitTop(20.0f, &DummyLabel, &Dummy);
+
+	// note: get the skin info after the settings buttons, because they can trigger a refresh
+	// which invalidates the skin
+	// skin info
+	CTeeRenderInfo OwnSkinInfo;
+	const CSkin *pSkin = m_pClient->m_Skins.Find(pSkinName);
+	OwnSkinInfo.m_OriginalRenderSkin = pSkin->m_OriginalSkin;
+	OwnSkinInfo.m_ColorableRenderSkin = pSkin->m_ColorableSkin;
+	OwnSkinInfo.m_SkinMetrics = pSkin->m_Metrics;
+	OwnSkinInfo.m_CustomColoredSkin = *pUseCustomColor;
+	if(*pUseCustomColor)
+	{
+		OwnSkinInfo.m_ColorBody = color_cast<ColorRGBA>(ColorHSLA(*pColorBody).UnclampLighting());
+		OwnSkinInfo.m_ColorFeet = color_cast<ColorRGBA>(ColorHSLA(*pColorFeet).UnclampLighting());
+	}
+	else
+	{
+		OwnSkinInfo.m_ColorBody = ColorRGBA(1.0f, 1.0f, 1.0f);
+		OwnSkinInfo.m_ColorFeet = ColorRGBA(1.0f, 1.0f, 1.0f);
+	}
+	OwnSkinInfo.m_Size = 50.0f;
 
 	MainView.HSplitTop(50.0f, &Label, &MainView);
 	Label.VSplitLeft(230.0f, &Label, 0);
@@ -572,7 +622,6 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	EyesLabel.VSplitLeft(20.0f, 0, &EyesLabel);
 	EyesLabel.HSplitTop(50.0f, &EyesLabel, &Eyes);
 
-	float Highlight = 0.0f;
 	static CButtonContainer s_aEyeButtons[6];
 	static int s_aEyesToolTip[6];
 	for(int CurrentEyeEmote = 0; CurrentEyeEmote < 6; CurrentEyeEmote++)
@@ -585,7 +634,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 			Eyes.HSplitTop(60.0f, &EyesLabel, 0);
 			EyesLabel.HSplitTop(10.0f, 0, &EyesLabel);
 		}
-		Highlight = (m_Dummy) ? g_Config.m_ClDummyDefaultEyes == CurrentEyeEmote : g_Config.m_ClPlayerDefaultEyes == CurrentEyeEmote;
+		float Highlight = (m_Dummy ? g_Config.m_ClDummyDefaultEyes == CurrentEyeEmote : g_Config.m_ClPlayerDefaultEyes == CurrentEyeEmote) ? 1.0f : 0.0f;
 		if(DoButton_Menu(&s_aEyeButtons[CurrentEyeEmote], "", 0, &EyesTee, 0, IGraphics::CORNER_ALL, 10.0f, 0.0f, vec4(1, 1, 1, 0.5f + Highlight * 0.25f), vec4(1, 1, 1, 0.25f + Highlight * 0.25f)))
 		{
 			if(m_Dummy)
@@ -656,32 +705,76 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	MainView.HSplitTop(20.0f, 0, &MainView);
 	MainView.HSplitTop(230.0f - RenderEyesBelow * 25.0f, &SkinList, &MainView);
 	static std::vector<CUISkin> s_vSkinList;
+	static std::vector<CUISkin> s_vSkinListHelper;
+	static std::vector<CUISkin> s_vFavoriteSkinListHelper;
 	static int s_SkinCount = 0;
 	static float s_ScrollValue = 0.0f;
-	if(s_InitSkinlist || m_pClient->m_Skins.Num() != s_SkinCount)
+	// be nice to the CPU
+	static auto s_SkinLastRebuildTime = time_get_nanoseconds();
+	const auto CurTime = time_get_nanoseconds();
+	if(s_InitSkinlist || m_pClient->m_Skins.Num() != s_SkinCount || m_SkinFavoritesChanged || (m_pClient->m_Skins.IsDownloadingSkins() && (CurTime - s_SkinLastRebuildTime > 500ms)))
 	{
+		s_SkinLastRebuildTime = CurTime;
 		s_vSkinList.clear();
-		for(int i = 0; i < m_pClient->m_Skins.Num(); ++i)
-		{
-			const CSkin *pSkinToBeSelected = m_pClient->m_Skins.Get(i);
+		s_vSkinListHelper.clear();
+		s_vFavoriteSkinListHelper.clear();
+		// set skin count early, since Find of the skin class might load
+		// a downloading skin
+		s_SkinCount = m_pClient->m_Skins.Num();
+		m_SkinFavoritesChanged = false;
 
+		auto &&SkinNotFiltered = [&](const CSkin *pSkinToBeSelected) {
 			// filter quick search
-			if(g_Config.m_ClSkinFilterString[0] != '\0' && !str_utf8_find_nocase(pSkinToBeSelected->m_aName, g_Config.m_ClSkinFilterString))
-				continue;
+			if(g_Config.m_ClSkinFilterString[0] != '\0' && !str_utf8_find_nocase(pSkinToBeSelected->GetName(), g_Config.m_ClSkinFilterString))
+				return false;
 
 			// no special skins
-			if((pSkinToBeSelected->m_aName[0] == 'x' && pSkinToBeSelected->m_aName[1] == '_'))
+			if((pSkinToBeSelected->GetName()[0] == 'x' && pSkinToBeSelected->GetName()[1] == '_'))
+				return false;
+
+			return true;
+		};
+
+		for(const auto &it : m_SkinFavorites)
+		{
+			const CSkin *pSkinToBeSelected = m_pClient->m_Skins.FindOrNullptr(it.c_str());
+
+			if(pSkinToBeSelected == nullptr || !SkinNotFiltered(pSkinToBeSelected))
 				continue;
 
-			if(pSkinToBeSelected == 0)
-				continue;
-
-			s_vSkinList.emplace_back(pSkinToBeSelected);
+			s_vFavoriteSkinListHelper.emplace_back(pSkinToBeSelected);
 		}
-		std::sort(s_vSkinList.begin(), s_vSkinList.end());
+		for(const auto &SkinIt : m_pClient->m_Skins.GetSkinsUnsafe())
+		{
+			const auto &pSkinToBeSelected = SkinIt.second;
+			if(!SkinNotFiltered(pSkinToBeSelected.get()))
+				continue;
+
+			if(std::find(m_SkinFavorites.begin(), m_SkinFavorites.end(), pSkinToBeSelected->GetName()) == m_SkinFavorites.end())
+				s_vSkinListHelper.emplace_back(pSkinToBeSelected.get());
+		}
+		std::sort(s_vSkinListHelper.begin(), s_vSkinListHelper.end());
+		std::sort(s_vFavoriteSkinListHelper.begin(), s_vFavoriteSkinListHelper.end());
+		s_vSkinList = s_vFavoriteSkinListHelper;
+		s_vSkinList.insert(s_vSkinList.end(), s_vSkinListHelper.begin(), s_vSkinListHelper.end());
 		s_InitSkinlist = false;
-		s_SkinCount = m_pClient->m_Skins.Num();
 	}
+
+	auto &&RenderFavIcon = [&](const CUIRect &FavIcon, bool AsFav) {
+		TextRender()->SetCurFont(TextRender()->GetFont(TEXT_FONT_ICON_FONT));
+		TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
+		if(AsFav)
+			TextRender()->TextColor({1, 1, 0, 1});
+		else
+			TextRender()->TextColor({0.5f, 0.5f, 0.5f, 1});
+		TextRender()->TextOutlineColor(TextRender()->DefaultTextOutlineColor());
+		SLabelProperties Props;
+		Props.m_MaxWidth = FavIcon.w;
+		UI()->DoLabel(&FavIcon, "\xef\x80\x85", 12.0f, TEXTALIGN_RIGHT, Props);
+		TextRender()->TextColor(TextRender()->DefaultTextColor());
+		TextRender()->SetRenderFlags(0);
+		TextRender()->SetCurFont(nullptr);
+	};
 
 	int OldSelected = -1;
 	UiDoListboxStart(&s_InitSkinlist, &SkinList, 50.0f, Localize("Skins"), "", s_vSkinList.size(), 4, OldSelected, s_ScrollValue);
@@ -689,12 +782,14 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	{
 		const CSkin *pSkinToBeDraw = s_vSkinList[i].m_pSkin;
 
-		if(str_comp(pSkinToBeDraw->m_aName, pSkinName) == 0)
+		if(str_comp(pSkinToBeDraw->GetName(), pSkinName) == 0)
 			OldSelected = i;
 
 		CListboxItem Item = UiDoListboxNextItem(pSkinToBeDraw, OldSelected >= 0 && (size_t)OldSelected == i);
 		if(Item.m_Visible)
 		{
+			auto OriginalRect = Item.m_Rect;
+
 			CTeeRenderInfo Info = OwnSkinInfo;
 			Info.m_CustomColoredSkin = *pUseCustomColor;
 
@@ -707,9 +802,11 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 			RenderTools()->RenderTee(pIdleState, &Info, Emote, vec2(1.0f, 0.0f), TeeRenderPos);
 
 			Item.m_Rect.VSplitLeft(60.0f, 0, &Item.m_Rect);
-			SLabelProperties Props;
-			Props.m_MaxWidth = Item.m_Rect.w;
-			UI()->DoLabel(&Item.m_Rect, pSkinToBeDraw->m_aName, 12.0f, TEXTALIGN_LEFT, Props);
+			{
+				SLabelProperties Props;
+				Props.m_MaxWidth = Item.m_Rect.w;
+				UI()->DoLabel(&Item.m_Rect, pSkinToBeDraw->GetName(), 12.0f, TEXTALIGN_LEFT, Props);
+			}
 			if(g_Config.m_Debug)
 			{
 				ColorRGBA BloodColor = *pUseCustomColor ? color_cast<ColorRGBA>(ColorHSLA(*pColorBody)) : pSkinToBeDraw->m_BloodColor;
@@ -720,13 +817,45 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 				Graphics()->QuadsDrawTL(&QuadItem, 1);
 				Graphics()->QuadsEnd();
 			}
+
+			// render skin favorite icon
+			{
+				const auto SkinItFav = m_SkinFavorites.find(pSkinToBeDraw->GetName());
+				const auto IsFav = SkinItFav != m_SkinFavorites.end();
+				CUIRect FavIcon;
+				OriginalRect.HSplitTop(20.0f, &FavIcon, nullptr);
+				FavIcon.VSplitRight(20.0f, nullptr, &FavIcon);
+				if(IsFav)
+				{
+					RenderFavIcon(FavIcon, IsFav);
+				}
+				else
+				{
+					if(UI()->MouseInside(&FavIcon))
+					{
+						RenderFavIcon(FavIcon, IsFav);
+					}
+				}
+				if(UI()->DoButtonLogic(&pSkinToBeDraw->m_Metrics.m_Body, 0, &FavIcon))
+				{
+					if(IsFav)
+					{
+						m_SkinFavorites.erase(SkinItFav);
+					}
+					else
+					{
+						m_SkinFavorites.emplace(pSkinToBeDraw->GetName());
+					}
+					s_InitSkinlist = true;
+				}
+			}
 		}
 	}
 
 	const int NewSelected = UiDoListboxEnd(&s_ScrollValue, 0);
 	if(OldSelected != NewSelected)
 	{
-		mem_copy(pSkinName, s_vSkinList[NewSelected].m_pSkin->m_aName, sizeof(g_Config.m_ClPlayerSkin));
+		mem_copy(pSkinName, s_vSkinList[NewSelected].m_pSkin->GetName(), sizeof(g_Config.m_ClPlayerSkin));
 		SetNeedSendInfo();
 	}
 
@@ -767,7 +896,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	static CButtonContainer s_SkinDBDirID;
 	if(DoButton_Menu(&s_SkinDBDirID, Localize("Skin Database"), 0, &SkinDB))
 	{
-		const char *pLink = "https://ddnet.tw/skins/";
+		const char *pLink = "https://ddnet.org/skins/";
 		if(!open_link(pLink))
 		{
 			dbg_msg("menus", "couldn't open link '%s'", pLink);
@@ -1208,19 +1337,8 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 			static CButtonContainer s_DefaultButton;
 			if(DoButton_Menu(&s_DefaultButton, Localize("Reset to defaults"), 0, &ResetButton))
 			{
-				m_pClient->m_Binds.SetDefaults();
-
-				g_Config.m_InpMousesens = 200;
-				g_Config.m_UiMousesens = 200;
-
-				g_Config.m_InpControllerEnable = 0;
-				g_Config.m_InpControllerGUID[0] = '\0';
-				g_Config.m_InpControllerAbsolute = 0;
-				g_Config.m_InpControllerSens = 100;
-				g_Config.m_InpControllerX = 0;
-				g_Config.m_InpControllerY = 1;
-				g_Config.m_InpControllerTolerance = 5;
-				g_Config.m_UiControllerSens = 100;
+				PopupConfirm(Localize("Reset controls"), Localize("Are you sure that you want to reset the controls to their defaults?"),
+					Localize("Reset"), Localize("Cancel"), &CMenus::ResetSettingsControls);
 			}
 		}
 	}
@@ -1292,6 +1410,23 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 	s_ScrollRegion.End();
 }
 
+void CMenus::ResetSettingsControls()
+{
+	m_pClient->m_Binds.SetDefaults();
+
+	g_Config.m_InpMousesens = 200;
+	g_Config.m_UiMousesens = 200;
+
+	g_Config.m_InpControllerEnable = 0;
+	g_Config.m_InpControllerGUID[0] = '\0';
+	g_Config.m_InpControllerAbsolute = 0;
+	g_Config.m_InpControllerSens = 100;
+	g_Config.m_InpControllerX = 0;
+	g_Config.m_InpControllerY = 1;
+	g_Config.m_InpControllerTolerance = 5;
+	g_Config.m_UiControllerSens = 100;
+}
+
 int CMenus::RenderDropDown(int &CurDropDownState, CUIRect *pRect, int CurSelection, const void **pIDs, const char **pStr, int PickNum, CButtonContainer *pButtonContainer, float &ScrollVal)
 {
 	if(CurDropDownState != 0)
@@ -1305,7 +1440,7 @@ int CMenus::RenderDropDown(int &CurDropDownState, CUIRect *pRect, int CurSelecti
 			CListboxItem Item = UiDoListboxNextItem(pIDs[i], CurSelection == i);
 			if(Item.m_Visible)
 			{
-				str_format(aBuf, sizeof(aBuf), "%s", pStr[i]);
+				str_copy(aBuf, pStr[i]);
 				UI()->DoLabel(&Item.m_Rect, aBuf, 16.0f, TEXTALIGN_CENTER);
 			}
 		}
@@ -1386,7 +1521,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	int OldSelected = -1;
 	{
 		int G = std::gcd(g_Config.m_GfxScreenWidth, g_Config.m_GfxScreenHeight);
-		str_format(aBuf, sizeof(aBuf), "%s: %dx%d @%dhz %d bit (%d:%d)", Localize("Current"), int(g_Config.m_GfxScreenWidth * Graphics()->ScreenHiDPIScale()), int(g_Config.m_GfxScreenHeight * Graphics()->ScreenHiDPIScale()), g_Config.m_GfxScreenRefreshRate, g_Config.m_GfxColorDepth, g_Config.m_GfxScreenWidth / G, g_Config.m_GfxScreenHeight / G);
+		str_format(aBuf, sizeof(aBuf), "%s: %dx%d @%dhz %d bit (%d:%d)", Localize("Current"), (int)(g_Config.m_GfxScreenWidth * Graphics()->ScreenHiDPIScale()), (int)(g_Config.m_GfxScreenHeight * Graphics()->ScreenHiDPIScale()), g_Config.m_GfxScreenRefreshRate, g_Config.m_GfxColorDepth, g_Config.m_GfxScreenWidth / G, g_Config.m_GfxScreenHeight / G);
 	}
 
 	UI()->DoLabel(&ModeLabel, aBuf, sc_FontSizeResListHeader, TEXTALIGN_CENTER);
@@ -1606,7 +1741,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		char aTmpBackendName[256];
 
 		auto IsInfoDefault = [](const SMenuBackendInfo &CheckInfo) {
-			return str_comp_nocase(CheckInfo.m_pBackendName, "OpenGL") == 0 && CheckInfo.m_Major == 3 && CheckInfo.m_Minor == 0 && CheckInfo.m_Patch == 0;
+			return str_comp_nocase(CheckInfo.m_pBackendName, g_Config.ms_pGfxBackend) == 0 && CheckInfo.m_Major == g_Config.ms_GfxGLMajor && CheckInfo.m_Minor == g_Config.ms_GfxGLMinor && CheckInfo.m_Patch == g_Config.ms_GfxGLPatch;
 		};
 
 		int OldSelectedBackend = -1;
@@ -2760,7 +2895,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 
 			// Load skins
 
-			int DefaultInd = GameClient()->m_Skins.Find("default");
+			const auto *pDefaultSkin = GameClient()->m_Skins.Find("default");
 
 			for(auto &Info : aRenderInfo)
 			{
@@ -2768,13 +2903,13 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 				Info.m_CustomColoredSkin = false;
 			}
 
-			int ind = -1;
+			const CSkin *pSkin = nullptr;
 			int pos = 0;
 
-			aRenderInfo[pos++].m_OriginalRenderSkin = GameClient()->m_Skins.Get(DefaultInd)->m_OriginalSkin;
-			aRenderInfo[pos++].m_OriginalRenderSkin = (ind = GameClient()->m_Skins.Find("pinky")) != -1 ? GameClient()->m_Skins.Get(ind)->m_OriginalSkin : aRenderInfo[0].m_OriginalRenderSkin;
-			aRenderInfo[pos++].m_OriginalRenderSkin = (ind = GameClient()->m_Skins.Find("cammostripes")) != -1 ? GameClient()->m_Skins.Get(ind)->m_OriginalSkin : aRenderInfo[0].m_OriginalRenderSkin;
-			aRenderInfo[pos++].m_OriginalRenderSkin = (ind = GameClient()->m_Skins.Find("beast")) != -1 ? GameClient()->m_Skins.Get(ind)->m_OriginalSkin : aRenderInfo[0].m_OriginalRenderSkin;
+			aRenderInfo[pos++].m_OriginalRenderSkin = pDefaultSkin->m_OriginalSkin;
+			aRenderInfo[pos++].m_OriginalRenderSkin = (pSkin = GameClient()->m_Skins.FindOrNullptr("pinky")) != nullptr ? pSkin->m_OriginalSkin : aRenderInfo[0].m_OriginalRenderSkin;
+			aRenderInfo[pos++].m_OriginalRenderSkin = (pSkin = GameClient()->m_Skins.FindOrNullptr("cammostripes")) != nullptr ? pSkin->m_OriginalSkin : aRenderInfo[0].m_OriginalRenderSkin;
+			aRenderInfo[pos++].m_OriginalRenderSkin = (pSkin = GameClient()->m_Skins.FindOrNullptr("beast")) != nullptr ? pSkin->m_OriginalSkin : aRenderInfo[0].m_OriginalRenderSkin;
 		}
 
 		// System
@@ -2964,18 +3099,65 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 	{
 		MainView.VSplitMid(&LeftView, &RightView);
 
-		// ***** Laser ***** //
+		// ***** Weapons ***** //
 		LeftView.HSplitTop(HeadlineAndVMargin, &Label, &LeftView);
-		UI()->DoLabel(&Label, Localize("Laser"), HeadlineFontSize, TEXTALIGN_LEFT);
+		UI()->DoLabel(&Label, Localize("Weapons"), HeadlineFontSize, TEXTALIGN_LEFT);
 
-		// General laser settings
-		LeftView.HSplitTop(SectionTotalMargin + 2 * ColorPickerLineSize, &Section, &LeftView);
+		// General weapon laser settings
+		LeftView.HSplitTop(SectionTotalMargin + 4 * ColorPickerLineSize, &Section, &LeftView);
 		Section.Margin(SectionMargin, &Section);
 
-		static CButtonContainer s_LaserOutResetID, s_LaserInResetID;
+		static CButtonContainer s_LaserRifleOutResetID, s_LaserRifleInResetID, s_LaserShotgunOutResetID, s_LaserShotgunInResetID;
 
-		ColorHSLA LaserOutlineColor = DoLine_ColorPicker(&s_LaserOutResetID, ColorPickerLineSize, LeftViewColorPickerPosition, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Laser Outline Color"), &g_Config.m_ClLaserOutlineColor, ColorRGBA(0.074402f, 0.074402f, 0.247166f, 1.0f), false);
-		ColorHSLA LaserInnerColor = DoLine_ColorPicker(&s_LaserInResetID, ColorPickerLineSize, LeftViewColorPickerPosition, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Laser Inner Color"), &g_Config.m_ClLaserInnerColor, ColorRGBA(0.498039f, 0.498039f, 1.0f, 1.0f), false);
+		ColorHSLA LaserRifleOutlineColor = DoLine_ColorPicker(&s_LaserRifleOutResetID, ColorPickerLineSize, LeftViewColorPickerPosition, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Rifle Laser Outline Color"), &g_Config.m_ClLaserRifleOutlineColor, ColorRGBA(0.074402f, 0.074402f, 0.247166f, 1.0f), false);
+		ColorHSLA LaserRifleInnerColor = DoLine_ColorPicker(&s_LaserRifleInResetID, ColorPickerLineSize, LeftViewColorPickerPosition, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Rifle Laser Inner Color"), &g_Config.m_ClLaserRifleInnerColor, ColorRGBA(0.498039f, 0.498039f, 1.0f, 1.0f), false);
+		ColorHSLA LaserShotgunOutlineColor = DoLine_ColorPicker(&s_LaserShotgunOutResetID, ColorPickerLineSize, LeftViewColorPickerPosition, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Shotgun Laser Outline Color"), &g_Config.m_ClLaserShotgunOutlineColor, ColorRGBA(0.125490f, 0.098039f, 0.043137f, 1.0f), false);
+		ColorHSLA LaserShotgunInnerColor = DoLine_ColorPicker(&s_LaserShotgunInResetID, ColorPickerLineSize, LeftViewColorPickerPosition, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Shotgun Laser Inner Color"), &g_Config.m_ClLaserShotgunInnerColor, ColorRGBA(0.570588f, 0.417647f, 0.252941f, 1.0f), false);
+
+		// ***** Entities ***** //
+		LeftView.HSplitTop(MarginToNextSection * 2.0f, 0x0, &LeftView);
+		LeftView.HSplitTop(HeadlineAndVMargin, &Label, &LeftView);
+		UI()->DoLabel(&Label, Localize("Entities"), HeadlineFontSize, TEXTALIGN_LEFT);
+
+		// General entity laser settings
+		LeftView.HSplitTop(SectionTotalMargin + 4 * ColorPickerLineSize, &Section, &LeftView);
+		Section.Margin(SectionMargin, &Section);
+
+		static CButtonContainer s_LaserDoorOutResetID, s_LaserDoorInResetID, s_LaserFreezeOutResetID, s_LaserFreezeInResetID;
+
+		ColorHSLA LaserDoorOutlineColor = DoLine_ColorPicker(&s_LaserDoorOutResetID, ColorPickerLineSize, LeftViewColorPickerPosition, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Door Laser Outline Color"), &g_Config.m_ClLaserDoorOutlineColor, ColorRGBA(0.0f, 0.131372f, 0.096078f, 1.0f), false);
+		ColorHSLA LaserDoorInnerColor = DoLine_ColorPicker(&s_LaserDoorInResetID, ColorPickerLineSize, LeftViewColorPickerPosition, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Door Laser Inner Color"), &g_Config.m_ClLaserDoorInnerColor, ColorRGBA(0.262745f, 0.760784f, 0.639215f, 1.0f), false);
+		ColorHSLA LaserFreezeOutlineColor = DoLine_ColorPicker(&s_LaserFreezeOutResetID, ColorPickerLineSize, LeftViewColorPickerPosition, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Freeze Laser Outline Color"), &g_Config.m_ClLaserFreezeOutlineColor, ColorRGBA(0.131372f, 0.123529f, 0.182352f, 1.0f), false);
+		ColorHSLA LaserFreezeInnerColor = DoLine_ColorPicker(&s_LaserFreezeInResetID, ColorPickerLineSize, LeftViewColorPickerPosition, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Freeze Laser Inner Color"), &g_Config.m_ClLaserFreezeInnerColor, ColorRGBA(0.482352f, 0.443137f, 0.564705f, 1.0f), false);
+
+		static CButtonContainer s_AllToRifleResetID, s_AllToDefaultResetID;
+
+		LeftView.HSplitTop(20.0f, 0x0, &LeftView);
+		LeftView.HSplitTop(20.0f, &Button, &LeftView);
+		if(DoButton_Menu(&s_AllToRifleResetID, Localize("Set all to Rifle"), 0, &Button))
+		{
+			g_Config.m_ClLaserShotgunOutlineColor = g_Config.m_ClLaserRifleOutlineColor;
+			g_Config.m_ClLaserShotgunInnerColor = g_Config.m_ClLaserRifleInnerColor;
+			g_Config.m_ClLaserDoorOutlineColor = g_Config.m_ClLaserRifleOutlineColor;
+			g_Config.m_ClLaserDoorInnerColor = g_Config.m_ClLaserRifleInnerColor;
+			g_Config.m_ClLaserFreezeOutlineColor = g_Config.m_ClLaserRifleOutlineColor;
+			g_Config.m_ClLaserFreezeInnerColor = g_Config.m_ClLaserRifleInnerColor;
+		}
+
+		// values taken from the CL commands
+		LeftView.HSplitTop(10.0f, 0x0, &LeftView);
+		LeftView.HSplitTop(20.0f, &Button, &LeftView);
+		if(DoButton_Menu(&s_AllToDefaultResetID, Localize("Reset to defaults"), 0, &Button))
+		{
+			g_Config.m_ClLaserRifleOutlineColor = 11176233;
+			g_Config.m_ClLaserRifleInnerColor = 11206591;
+			g_Config.m_ClLaserShotgunOutlineColor = 1866773;
+			g_Config.m_ClLaserShotgunInnerColor = 1467241;
+			g_Config.m_ClLaserDoorOutlineColor = 7667473;
+			g_Config.m_ClLaserDoorInnerColor = 7701379;
+			g_Config.m_ClLaserFreezeOutlineColor = 11613223;
+			g_Config.m_ClLaserFreezeInnerColor = 12001153;
+		}
 
 		// ***** Laser Preview ***** //
 		RightView.HSplitTop(HeadlineAndVMargin, &Label, &RightView);
@@ -2983,8 +3165,19 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 
 		RightView.HSplitTop(SectionTotalMargin + 50.0f, &Section, &RightView);
 		Section.Margin(SectionMargin, &Section);
+		DoLaserPreview(&Section, LaserRifleOutlineColor, LaserRifleInnerColor, LASERTYPE_RIFLE);
 
-		DoLaserPreview(&Section, LaserOutlineColor, LaserInnerColor);
+		RightView.HSplitTop(SectionTotalMargin + 50.0f, &Section, &RightView);
+		Section.Margin(SectionMargin, &Section);
+		DoLaserPreview(&Section, LaserShotgunOutlineColor, LaserShotgunInnerColor, LASERTYPE_SHOTGUN);
+
+		RightView.HSplitTop(SectionTotalMargin + 50.0f, &Section, &RightView);
+		Section.Margin(SectionMargin, &Section);
+		DoLaserPreview(&Section, LaserDoorOutlineColor, LaserDoorInnerColor, LASERTYPE_DOOR);
+
+		RightView.HSplitTop(SectionTotalMargin + 50.0f, &Section, &RightView);
+		Section.Margin(SectionMargin, &Section);
+		DoLaserPreview(&Section, LaserFreezeOutlineColor, LaserFreezeInnerColor, LASERTYPE_DOOR);
 	}
 }
 
@@ -3217,10 +3410,6 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	static CButtonContainer s_ResetID1;
 	Miscellaneous.HSplitTop(25.0f, &Button, &Right);
 	DoLine_ColorPicker(&s_ResetID1, 25.0f, 194.0f, 13.0f, 5.0f, &Button, Localize("Regular Background Color"), &g_Config.m_ClBackgroundColor, GreyDefault, false);
-	Right.HSplitTop(5.0f, 0x0, &Right);
-	Right.HSplitTop(20.0f, &Button, &Right);
-	if(DoButton_CheckBox(&g_Config.m_ClHttpMapDownload, Localize("Try fast HTTP map download first"), g_Config.m_ClHttpMapDownload, &Button))
-		g_Config.m_ClHttpMapDownload ^= 1;
 
 	static CButtonContainer s_ButtonTimeout;
 	Right.HSplitTop(10.0f, 0x0, &Right);

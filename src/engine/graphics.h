@@ -524,7 +524,7 @@ class IEngineGraphics : public IGraphics
 	MACRO_INTERFACE("enginegraphics", 0)
 public:
 	virtual int Init() = 0;
-	virtual void Shutdown() = 0;
+	virtual void Shutdown() override = 0;
 
 	virtual void Minimize() = 0;
 	virtual void Maximize() = 0;

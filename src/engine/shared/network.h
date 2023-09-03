@@ -288,7 +288,7 @@ public:
 	void SetTimedOut(const NETADDR *pAddr, int Sequence, int Ack, SECURITY_TOKEN SecurityToken, CStaticRingBuffer<CNetChunkResend, NET_CONN_BUFFERSIZE> *pResendBuffer, bool Sixup);
 
 	// anti spoof
-	void DirectInit(NETADDR &Addr, SECURITY_TOKEN SecurityToken, SECURITY_TOKEN Token, bool Sixup);
+	void DirectInit(const NETADDR &Addr, SECURITY_TOKEN SecurityToken, SECURITY_TOKEN Token, bool Sixup);
 	void SetUnknownSeq() { m_UnknownSeq = true; }
 	void SetSequence(int Sequence) { m_Sequence = Sequence; }
 
@@ -523,7 +523,7 @@ public:
 	CONNECTIVITY GetConnectivity(int NetType, NETADDR *pGlobalAddr);
 };
 
-// TODO: both, fix these. This feels like a junk class for stuff that doesn't fit anywere
+// TODO: both, fix these. This feels like a junk class for stuff that doesn't fit anywhere
 class CNetBase
 {
 	static IOHANDLE ms_DataLogSent;

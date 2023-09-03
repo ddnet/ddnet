@@ -5,6 +5,7 @@
 #include <engine/shared/config.h>
 
 #include <cstddef>
+#include <string>
 #include <vector>
 
 constexpr int CMD_BUFFER_DATA_BUFFER_SIZE = 1024 * 1024 * 2;
@@ -73,7 +74,7 @@ public:
 
 	enum ECommandBufferCMD
 	{
-		// commadn groups
+		// command groups
 		CMDGROUP_CORE = 0, // commands that everyone has to implement
 		CMDGROUP_PLATFORM_GL = 10000, // commands specific to a platform
 		CMDGROUP_PLATFORM_SDL = 20000,
@@ -364,7 +365,7 @@ public:
 		SCommand_RenderTileLayer() :
 			SCommand(CMD_RENDER_TILE_LAYER) {}
 		SState m_State;
-		SColorf m_Color; // the color of the whole tilelayer -- already envelopped
+		SColorf m_Color; // the color of the whole tilelayer -- already enveloped
 
 		// the char offset of all indices that should be rendered, and the amount of renders
 		char **m_pIndicesOffsets;
@@ -379,7 +380,7 @@ public:
 		SCommand_RenderBorderTile() :
 			SCommand(CMD_RENDER_BORDER_TILE) {}
 		SState m_State;
-		SColorf m_Color; // the color of the whole tilelayer -- already envelopped
+		SColorf m_Color; // the color of the whole tilelayer -- already enveloped
 		char *m_pIndicesOffset; // you should use the command buffer data to allocate vertices for this command
 		unsigned int m_DrawNum;
 		int m_BufferContainerIndex;
@@ -394,7 +395,7 @@ public:
 		SCommand_RenderBorderTileLine() :
 			SCommand(CMD_RENDER_BORDER_TILE_LINE) {}
 		SState m_State;
-		SColorf m_Color; // the color of the whole tilelayer -- already envelopped
+		SColorf m_Color; // the color of the whole tilelayer -- already enveloped
 		char *m_pIndicesOffset; // you should use the command buffer data to allocate vertices for this command
 		unsigned int m_IndexDrawNum;
 		unsigned int m_DrawNum;
@@ -714,7 +715,7 @@ public:
 		INITFLAG_DESKTOP_FULLSCREEN = 1 << 5,
 	};
 
-	virtual ~IGraphicsBackend() {}
+	virtual ~IGraphicsBackend() = default;
 
 	virtual int Init(const char *pName, int *pScreen, int *pWidth, int *pHeight, int *pRefreshRate, int *pFsaaSamples, int Flags, int *pDesktopWidth, int *pDesktopHeight, int *pCurrentWidth, int *pCurrentHeight, class IStorage *pStorage) = 0;
 	virtual int Shutdown() = 0;
@@ -770,6 +771,8 @@ public:
 
 	// be aware that this function should only be called from the graphics thread, and even then you should really know what you are doing
 	virtual TGLBackendReadPresentedImageData &GetReadPresentedImageDataFuncUnsafe() = 0;
+
+	virtual bool GetWarning(std::vector<std::string> &WarningStrings) = 0;
 };
 
 class CGraphics_Threaded : public IEngineGraphics
@@ -1313,6 +1316,7 @@ public:
 	TGLBackendReadPresentedImageData &GetReadPresentedImageDataFuncUnsafe() override;
 };
 
-extern IGraphicsBackend *CreateGraphicsBackend();
+typedef std::function<const char *(const char *, const char *)> TTranslateFunc;
+extern IGraphicsBackend *CreateGraphicsBackend(TTranslateFunc &&TranslateFunc);
 
 #endif // ENGINE_CLIENT_GRAPHICS_THREADED_H

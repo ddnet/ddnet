@@ -55,13 +55,15 @@ class CHttpRequest : public IJob
 	size_t m_BodyLength = 0;
 
 	CTimeout m_Timeout = CTimeout{0, 0, 0, 0};
+	int64_t m_MaxResponseSize = -1;
 	REQUEST m_Type = REQUEST::GET;
 
 	bool m_WriteToFile = false;
 
+	uint64_t m_ResponseLength = 0;
+
 	// If `m_WriteToFile` is false.
 	size_t m_BufferSize = 0;
-	size_t m_BufferLength = 0;
 	unsigned char *m_pBuffer = nullptr;
 
 	// If `m_WriteToFile` is true.
@@ -99,6 +101,7 @@ public:
 	~CHttpRequest();
 
 	void Timeout(CTimeout Timeout) { m_Timeout = Timeout; }
+	void MaxResponseSize(int64_t MaxResponseSize) { m_MaxResponseSize = MaxResponseSize; }
 	void LogProgress(HTTPLOG LogProgress) { m_LogProgress = LogProgress; }
 	void IpResolve(IPRESOLVE IpResolve) { m_IpResolve = IpResolve; }
 	void WriteToFile(IStorage *pStorage, const char *pDest, int StorageType);
@@ -191,4 +194,5 @@ inline std::unique_ptr<CHttpRequest> HttpPostJson(const char *pUrl, const char *
 
 bool HttpInit(IStorage *pStorage);
 void EscapeUrl(char *pBuf, int Size, const char *pStr);
+bool HttpHasIpresolveBug();
 #endif // ENGINE_SHARED_HTTP_H

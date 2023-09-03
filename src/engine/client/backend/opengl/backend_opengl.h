@@ -128,7 +128,7 @@ public:
 	CCommandProcessorFragment_OpenGL();
 	virtual ~CCommandProcessorFragment_OpenGL() = default;
 
-	bool RunCommand(const CCommandBuffer::SCommand *pBaseCommand) override;
+	ERunCommandReturnTypes RunCommand(const CCommandBuffer::SCommand *pBaseCommand) override;
 };
 
 class CCommandProcessorFragment_OpenGL2 : public CCommandProcessorFragment_OpenGL

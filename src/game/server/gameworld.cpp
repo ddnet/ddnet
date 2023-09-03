@@ -267,25 +267,31 @@ void CGameWorld::Tick()
 	{
 		if(GameServer()->m_pController->IsForceBalanced())
 			GameServer()->SendChat(-1, CGameContext::CHAT_ALL, "Teams have been balanced");
+
 		// update all objects
-		if(g_Config.m_SvNoWeakHookAndBounce)
+		for(int i = 0; i < NUM_ENTTYPES; i++)
 		{
-			for(auto *pEnt : m_apFirstEntityTypes)
+			// It's important to call PreTick() and Tick() after each other.
+			// If we call PreTick() before, and Tick() after other entities have been processed, it causes physics changes such as a stronger shotgun or grenade.
+			if(g_Config.m_SvNoWeakHook && i == ENTTYPE_CHARACTER)
+			{
+				auto *pEnt = m_apFirstEntityTypes[i];
 				for(; pEnt;)
 				{
 					m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
-					pEnt->PreTick();
+					((CCharacter *)pEnt)->PreTick();
 					pEnt = m_pNextTraverseEntity;
 				}
-		}
+			}
 
-		for(auto *pEnt : m_apFirstEntityTypes)
+			auto *pEnt = m_apFirstEntityTypes[i];
 			for(; pEnt;)
 			{
 				m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
 				pEnt->Tick();
 				pEnt = m_pNextTraverseEntity;
 			}
+		}
 
 		for(auto *pEnt : m_apFirstEntityTypes)
 			for(; pEnt;)
@@ -333,8 +339,7 @@ void CGameWorld::SwapClients(int Client1, int Client2)
 }
 
 // TODO: should be more general
-//CCharacter *CGameWorld::IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, vec2& NewPos, CEntity *pNotThis)
-CCharacter *CGameWorld::IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, vec2 &NewPos, CCharacter *pNotThis, int CollideWith, class CCharacter *pThisOnly)
+CCharacter *CGameWorld::IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, vec2 &NewPos, const CCharacter *pNotThis, int CollideWith, const CCharacter *pThisOnly)
 {
 	// Find other players
 	float ClosestLen = distance(Pos0, Pos1) * 100.0f;
@@ -372,7 +377,7 @@ CCharacter *CGameWorld::IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, v
 	return pClosest;
 }
 
-CCharacter *CGameWorld::ClosestCharacter(vec2 Pos, float Radius, CEntity *pNotThis)
+CCharacter *CGameWorld::ClosestCharacter(vec2 Pos, float Radius, const CEntity *pNotThis)
 {
 	// Find other players
 	float ClosestRange = Radius * 2;
@@ -398,7 +403,7 @@ CCharacter *CGameWorld::ClosestCharacter(vec2 Pos, float Radius, CEntity *pNotTh
 	return pClosest;
 }
 
-std::list<class CCharacter *> CGameWorld::IntersectedCharacters(vec2 Pos0, vec2 Pos1, float Radius, class CEntity *pNotThis)
+std::list<class CCharacter *> CGameWorld::IntersectedCharacters(vec2 Pos0, vec2 Pos1, float Radius, const CEntity *pNotThis)
 {
 	std::list<CCharacter *> listOfChars;
 

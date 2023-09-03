@@ -22,6 +22,8 @@
 # Rafael Fontenelle   2021-02-13 07:00:00
 # Rafael Fontenelle   2021-06-10 12:00:00
 # pv                  2022-06-01 20:44:00
+# Rafael Fontenelle   2022-09-17 23:23:00
+# Rafael Fontenelle   2022-10-25 11:22:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -62,14 +64,8 @@ Address
 All
 == Todos
 
-Are you sure that you want to delete the demo?
-== Tem certeza que deseja deletar a demo?
-
 Are you sure that you want to quit?
 == Você tem certeza que deseja sair?
-
-Are you sure that you want to remove the player from your friends list?
-== Tem certeza que deseja remover o jogador de sua lista de amigos?
 
 Automatically record demos
 == Gravar demos automaticamente
@@ -486,9 +482,6 @@ Try again
 Type
 == Tipo
 
-Unable to delete the demo
-== Não foi possível deletar a demo
-
 Unable to rename the demo
 == Não foi possível renomear a demo
 
@@ -798,9 +791,6 @@ Show score
 UI Color
 == Cor da UI
 
-Try fast HTTP map download first
-== Tentar baixar mapa por HTTP (rápido) primeiro
-
 Best
 == Melhor
 
@@ -915,8 +905,8 @@ Date
 Show DDNet map finishes in server browser
 == Mostrar finalizações de mapas do DDNet no navegador do servidor
 
-transmits your player name to info2.ddnet.tw
-== transmite seu nome de jogador para info2.ddnet.tw
+transmits your player name to info.ddnet.org
+== transmite seu nome de jogador para info.ddnet.org
 
 Reload
 == Recarregar
@@ -1059,9 +1049,6 @@ It's recommended that you check the settings to adjust them to your liking befor
 Please enter your nickname below.
 == Por favor, insira seu apelido abaixo.
 
-Destination file already exist
-== O arquivo de destino já existe
-
 Video name:
 == Nome do vídeo
 
@@ -1107,8 +1094,8 @@ Skip the main menu
 Download skins
 == Baixar skins
 
-https://wiki.ddnet.tw/
-== https://wiki.ddnet.tw/wiki/Main_Page/pt-br
+https://wiki.ddnet.org/
+== https://wiki.ddnet.org/wiki/Main_Page/pt-br
 
 Website
 == Site
@@ -1213,12 +1200,6 @@ The width of texture %s is not divisible by %d, or the height is not divisible b
 Dummy
 == Dummy
 
-Laser Outline Color
-== Cor de contorno do laser
-
-Laser Inner Color
-== Cor interna do laser
-
 Preview
 == Visualizar
 
@@ -1273,8 +1254,8 @@ Desktop fullscreen
 Discord
 == Discord
 
-https://ddnet.tw/discord
-== https://ddnet.tw/discord
+https://ddnet.org/discord
+== https://ddnet.org/discord
 
 Are you sure that you want to disconnect and switch to a different server?
 == Tem certeza que deseja desconectar e trocar pata um servidor diferente?
@@ -1574,3 +1555,99 @@ Loading race demo files
 
 Loading sound files
 == Carregando arquivos de som
+
+Play the current demo
+== Assistir a demo atual
+
+Pause the current demo
+== Pausar a demo atual
+
+Stop the current demo
+== Parar a demo atual
+
+Slow down the demo
+== Desacelerar a demo
+
+Speed up the demo
+== Acelerar a demo
+
+Mark the beginning of a cut
+== Marcar o início de um corte
+
+Mark the end of a cut
+== Marcar o fim de um corte
+
+Export cut as a separate demo
+== Exportar corte como uma demo separada
+
+Toggle keyboard shortcuts
+== Ativar atalhos de teclado
+
+Weapons
+== Armas
+
+Rifle Laser Outline Color
+== Cor de contorno do laser do rifle
+
+Rifle Laser Inner Color
+== Cor de interna do laser do rifle
+
+Shotgun Laser Outline Color
+== Cor contorno do laser da espingarda
+
+Shotgun Laser Inner Color
+== Cor interna do laser do espingarda
+
+Door Laser Outline Color
+== Cor de contorno do laser da porta
+
+Door Laser Inner Color
+== Cor interna do laser do porta
+
+Freeze Laser Outline Color
+== Cor de contorno do laser do congelamento
+
+Freeze Laser Inner Color
+== Cor interna do laser do congelamento
+
+Menu opened. Press Esc key again to close menu.
+== Menu aberto. Pressione Esc novamente para fechar o menu.
+
+Set all to Rifle
+== Definir todos para rifle
+
+Cancel
+== Cancelar
+
+File '%s' already exists, do you want to overwrite it?
+== O arquivo "%s" já existe, tem certeza que deseja sobrescrevê-lo?
+
+Are you sure that you want to remove the player '%s' from your friends list?
+== Tem certeza que deseja remover o jogador "%s" de sua lista de amigos?
+
+Are you sure that you want to remove the clan '%s' from your friends list?
+== Tem certeza que deseja remover o clã "%s" da sua lista de amigos?
+
+Go back one tick
+== Voltar um passo
+
+Go forward one tick
+== Avançar um passo
+
+Go back one marker
+== Voltar um marcador
+
+Go forward one marker
+== Avançar um marcador
+
+Are you sure that you want to delete the demo '%s'?
+== Tem certeza que deseja excluir a demo "%s"?
+
+Unable to delete the demo '%s'
+== Não foi possível excluir a demo "%s"
+
+Reset controls
+== Redefinir controles
+
+Are you sure that you want to reset the controls to their defaults?
+== Tem certeza que deseja redefinir os controles para seu padrão?

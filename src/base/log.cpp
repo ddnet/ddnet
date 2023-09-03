@@ -106,7 +106,7 @@ void log_log_impl(LEVEL level, bool have_color, LOG_COLOR color, const char *sys
 	Msg.m_SystemLength = str_length(Msg.m_aSystem);
 
 	// TODO: Add level?
-	str_format(Msg.m_aLine, sizeof(Msg.m_aLine), "[%s][%s]: ", Msg.m_aTimestamp, Msg.m_aSystem);
+	str_format(Msg.m_aLine, sizeof(Msg.m_aLine), "%s %c %s: ", Msg.m_aTimestamp, "EWIDT"[level], Msg.m_aSystem);
 	Msg.m_LineMessageOffset = str_length(Msg.m_aLine);
 
 	char *pMessage = Msg.m_aLine + Msg.m_LineMessageOffset;
@@ -339,21 +339,9 @@ public:
 	void Log(const CLogMessage *pMessage) override
 	{
 		int WLen = MultiByteToWideChar(CP_UTF8, 0, pMessage->m_aLine, pMessage->m_LineLength, NULL, 0);
-		if(!WLen)
-		{
-			WCHAR aError[] = L"Failed to obtain length of log message\r\n";
-			WriteConsoleW(m_pConsole, aError, std::size(aError) - 1, NULL, NULL);
-			return;
-		}
+		dbg_assert(WLen > 0, "MultiByteToWideChar failure");
 		WCHAR *pWide = (WCHAR *)malloc((WLen + 2) * sizeof(*pWide));
-		WLen = MultiByteToWideChar(CP_UTF8, 0, pMessage->m_aLine, pMessage->m_LineLength, pWide, WLen);
-		if(!WLen)
-		{
-			WCHAR aError[] = L"Failed to convert log message encoding\r\n";
-			WriteConsoleW(m_pConsole, aError, std::size(aError) - 1, NULL, NULL);
-			free(pWide);
-			return;
-		}
+		dbg_assert(MultiByteToWideChar(CP_UTF8, 0, pMessage->m_aLine, pMessage->m_LineLength, pWide, WLen) == WLen, "MultiByteToWideChar failure");
 		pWide[WLen++] = '\r';
 		pWide[WLen++] = '\n';
 
@@ -435,9 +423,12 @@ class CLoggerWindowsDebugger : public ILogger
 public:
 	void Log(const CLogMessage *pMessage) override
 	{
-		WCHAR aWBuffer[4096];
-		MultiByteToWideChar(CP_UTF8, 0, pMessage->m_aLine, -1, aWBuffer, sizeof(aWBuffer) / sizeof(WCHAR));
-		OutputDebugStringW(aWBuffer);
+		int WLen = MultiByteToWideChar(CP_UTF8, 0, pMessage->m_aLine, -1, NULL, 0);
+		dbg_assert(WLen > 0, "MultiByteToWideChar failure");
+		WCHAR *pWide = (WCHAR *)malloc(WLen * sizeof(*pWide));
+		dbg_assert(MultiByteToWideChar(CP_UTF8, 0, pMessage->m_aLine, -1, pWide, WLen) == WLen, "MultiByteToWideChar failure");
+		OutputDebugStringW(pWide);
+		free(pWide);
 	}
 };
 std::unique_ptr<ILogger> log_logger_windows_debugger()

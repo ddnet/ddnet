@@ -36,7 +36,7 @@ public:
 	CEntity *FindFirst(int Type);
 	CEntity *FindLast(int Type);
 	int FindEntities(vec2 Pos, float Radius, CEntity **ppEnts, int Max, int Type);
-	CCharacter *IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, vec2 &NewPos, CCharacter *pNotThis = nullptr, int CollideWith = -1, CCharacter *pThisOnly = nullptr);
+	CCharacter *IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, vec2 &NewPos, const CCharacter *pNotThis = nullptr, int CollideWith = -1, const CCharacter *pThisOnly = nullptr);
 	void InsertEntity(CEntity *pEntity, bool Last = false);
 	void RemoveEntity(CEntity *pEntity);
 	void RemoveCharacter(CCharacter *pChar);
@@ -44,7 +44,7 @@ public:
 
 	// DDRace
 	void ReleaseHooked(int ClientID);
-	std::list<CCharacter *> IntersectedCharacters(vec2 Pos0, vec2 Pos1, float Radius, CEntity *pNotThis = nullptr);
+	std::list<CCharacter *> IntersectedCharacters(vec2 Pos0, vec2 Pos1, float Radius, const CEntity *pNotThis = nullptr);
 
 	int m_GameTick;
 	int m_GameTickSpeed;

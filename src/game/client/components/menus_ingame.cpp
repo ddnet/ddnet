@@ -10,6 +10,7 @@
 #include <engine/graphics.h>
 #include <engine/serverbrowser.h>
 #include <engine/shared/config.h>
+#include <engine/shared/localization.h>
 #include <engine/textrender.h>
 
 #include <game/generated/client_data.h>
@@ -56,11 +57,12 @@ void CMenus::RenderGame(CUIRect MainView)
 	{
 		if(Client()->GetCurrentRaceTime() / 60 >= g_Config.m_ClConfirmDisconnectTime && g_Config.m_ClConfirmDisconnectTime >= 0)
 		{
-			m_Popup = POPUP_DISCONNECT;
+			PopupConfirm(Localize("Disconnect"), Localize("Are you sure that you want to disconnect?"), Localize("Yes"), Localize("No"), &CMenus::PopupConfirmDisconnect);
 		}
 		else
 		{
 			Client()->Disconnect();
+			RefreshBrowserTab(g_Config.m_UiPage);
 		}
 	}
 
@@ -87,7 +89,7 @@ void CMenus::RenderGame(CUIRect MainView)
 		{
 			if(Client()->GetCurrentRaceTime() / 60 >= g_Config.m_ClConfirmDisconnectTime && g_Config.m_ClConfirmDisconnectTime >= 0)
 			{
-				m_Popup = POPUP_DISCONNECT_DUMMY;
+				PopupConfirm(Localize("Disconnect Dummy"), Localize("Are you sure that you want to disconnect your dummy?"), Localize("Yes"), Localize("No"), &CMenus::PopupConfirmDisconnectDummy);
 			}
 			else
 			{
@@ -207,6 +209,17 @@ void CMenus::RenderGame(CUIRect MainView)
 	}
 }
 
+void CMenus::PopupConfirmDisconnect()
+{
+	Client()->Disconnect();
+}
+
+void CMenus::PopupConfirmDisconnectDummy()
+{
+	Client()->DummyDisconnect(0);
+	SetActive(false);
+}
+
 void CMenus::RenderPlayers(CUIRect MainView)
 {
 	CUIRect Button, Button2, ButtonBar, Options, Player;
@@ -239,7 +252,7 @@ void CMenus::RenderPlayers(CUIRect MainView)
 
 	int TotalPlayers = 0;
 
-	for(auto &pInfoByName : m_pClient->m_Snap.m_apInfoByName)
+	for(const auto &pInfoByName : m_pClient->m_Snap.m_apInfoByName)
 	{
 		if(!pInfoByName)
 			continue;
@@ -526,7 +539,7 @@ bool CMenus::RenderServerControlKick(CUIRect MainView, bool FilterSpectators)
 	int NumOptions = 0;
 	int Selected = 0;
 	static int aPlayerIDs[MAX_CLIENTS];
-	for(auto &pInfoByName : m_pClient->m_Snap.m_apInfoByName)
+	for(const auto &pInfoByName : m_pClient->m_Snap.m_apInfoByName)
 	{
 		if(!pInfoByName)
 			continue;
@@ -973,8 +986,8 @@ void CMenus::RenderGhost(CUIRect MainView)
 	static CColumn s_aCols[] = {
 		{" ", -1, 2.0f, {0}, {0}},
 		{" ", COL_ACTIVE, 30.0f, {0}, {0}},
-		{"Name", COL_NAME, 300.0f, {0}, {0}}, // Localize("Name")
-		{"Time", COL_TIME, 200.0f, {0}, {0}}, // Localize("Time")
+		{Localizable("Name"), COL_NAME, 300.0f, {0}, {0}},
+		{Localizable("Time"), COL_TIME, 200.0f, {0}, {0}},
 	};
 
 	int NumCols = std::size(s_aCols);
@@ -1157,4 +1170,13 @@ void CMenus::RenderGhost(CUIRect MainView)
 		if(DoButton_Menu(&s_SaveButton, Localize("Save"), 0, &Button))
 			m_pClient->m_Ghost.SaveGhost(pGhost);
 	}
+}
+
+void CMenus::RenderIngameHint()
+{
+	float Width = 300 * Graphics()->ScreenAspect();
+	Graphics()->MapScreen(0, 0, Width, 300);
+	TextRender()->TextColor(1, 1, 1, 1);
+	TextRender()->Text(0x0, 5, 280, 5, Localize("Menu opened. Press Esc key again to close menu."), -1.0f);
+	UI()->MapScreen();
 }

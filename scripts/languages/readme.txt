@@ -7,9 +7,9 @@ about how to use the scripts.
 You can start by analyzing the current languages using analyze.py
 $ ./analyze.py
 
-analyze.py outputs serveral columns. The column 'total' is the number of
+analyze.py outputs several columns. The column 'total' is the number of
 translations in the file. 'empty' is the number of untranslated phrases in the
-file. The 2nd and 3rd columns are calculated by looking into the source. The scirpt
+file. The 2nd and 3rd columns are calculated by looking into the source. The script
 searches through the source for all phrases. 'missing' is the number of phrases in
 the source but not in the file. 'unused' is the number of phrases in the file but
 not in the source.

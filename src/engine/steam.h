@@ -18,7 +18,7 @@ public:
 	virtual void Update() = 0;
 
 	virtual void ClearGameInfo() = 0;
-	virtual void SetGameInfo(NETADDR ServerAddr, const char *pMapName) = 0;
+	virtual void SetGameInfo(const NETADDR &ServerAddr, const char *pMapName, bool AnnounceAddr) = 0;
 };
 
 ISteam *CreateSteam();

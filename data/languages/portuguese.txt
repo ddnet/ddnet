@@ -47,14 +47,8 @@ Address
 All
 == Todos
 
-Are you sure that you want to delete the demo?
-== Tens a certeza que queres apagar a demo?
-
 Are you sure that you want to quit?
 == Queres mesmo sair?
-
-Are you sure that you want to remove the player from your friends list?
-== Queres mesmo apagar o jogador da tua lista de amigos?
 
 Automatically record demos
 == Gravar demos automaticamente
@@ -483,9 +477,6 @@ Try again
 Type
 == Tipo
 
-Unable to delete the demo
-== Impossível eliminar a demo
-
 Unable to rename the demo
 == Impossivel renomear a demo
 
@@ -852,17 +843,14 @@ Are you sure that you want to disconnect and switch to a different server?
 Country / Region
 == País / Região
 
-Destination file already exist
-== Ficheiro de destino já existe
-
 Speed
 == Velocidade
 
 Video name:
 == Nome do vídeo:
 
-transmits your player name to info2.ddnet.tw
-== transmite o teu nome de jogador para info2.ddnet.tw
+transmits your player name to info.ddnet.org
+== transmite o teu nome de jogador para info.ddnet.org
 
 Theme
 == Tema
@@ -951,14 +939,14 @@ Particles
 Discord
 == Discord
 
-https://ddnet.tw/discord
-== https://ddnet.tw/discord
+https://ddnet.org/discord
+== https://ddnet.org/discord
 
 Learn
 == Aprender
 
-https://wiki.ddnet.tw/
-== https://wiki.ddnet.tw/
+https://wiki.ddnet.org/
+== https://wiki.ddnet.org/wiki/Main_Page/pt-br
 
 Website
 == Website
@@ -1052,13 +1040,19 @@ Requesting to join the game
 Render demo
 == 
 
-Replace video
-== 
-
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
 == 
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
+== 
+
+Cancel
+== 
+
+File '%s' already exists, do you want to overwrite it?
+== 
+
+Replace video
 == 
 
 Join Tutorial Server
@@ -1109,6 +1103,51 @@ Unfinished map
 Leak IP
 == 
 
+Are you sure that you want to remove the player '%s' from your friends list?
+== 
+
+Are you sure that you want to remove the clan '%s' from your friends list?
+== 
+
+Play the current demo
+== 
+
+Pause the current demo
+== 
+
+Stop the current demo
+== 
+
+Go back one tick
+== 
+
+Go forward one tick
+== 
+
+Slow down the demo
+== 
+
+Speed up the demo
+== 
+
+Mark the beginning of a cut
+== 
+
+Mark the end of a cut
+== 
+
+Export cut as a separate demo
+== 
+
+Go back one marker
+== 
+
+Go forward one marker
+== 
+
+Toggle keyboard shortcuts
+== 
+
 Loading demo files
 == 
 
@@ -1133,7 +1172,13 @@ Fetch Info
 Demos directory
 == 
 
+Are you sure that you want to delete the demo '%s'?
+== 
+
 Render
+== 
+
+Unable to delete the demo '%s'
 == 
 
 Kill
@@ -1145,6 +1190,9 @@ Pause
 Loading ghost files
 == 
 
+Menu opened. Press Esc key again to close menu.
+== 
+
 Smooth Dynamic Camera
 == 
 
@@ -1152,6 +1200,9 @@ Skip the main menu
 == 
 
 Config directory
+== 
+
+Loading skin files
 == 
 
 Toggle to edit your dummy settings
@@ -1176,9 +1227,6 @@ Choose default eyes when joining a server
 == 
 
 Skin Database
-== 
-
-Loading skin files
 == 
 
 Hook collisions
@@ -1280,6 +1328,12 @@ UI mouse sens.
 == 
 
 Controller
+== 
+
+Reset controls
+== 
+
+Are you sure that you want to reset the controls to their defaults?
 == 
 
 Windowed fullscreen
@@ -1411,10 +1465,37 @@ Normal Color
 Highlight Color
 == 
 
-Laser Outline Color
+Weapons
 == 
 
-Laser Inner Color
+Rifle Laser Outline Color
+== 
+
+Rifle Laser Inner Color
+== 
+
+Shotgun Laser Outline Color
+== 
+
+Shotgun Laser Inner Color
+== 
+
+Entities
+== 
+
+Door Laser Outline Color
+== 
+
+Door Laser Inner Color
+== 
+
+Freeze Laser Outline Color
+== 
+
+Freeze Laser Inner Color
+== 
+
+Set all to Rifle
 == 
 
 Enable replays
@@ -1462,16 +1543,10 @@ Show tiles layers from BG map
 Regular Background Color
 == 
 
-Try fast HTTP map download first
-== 
-
 Run on join
 == 
 
 Chat command (e.g. showall 1)
-== 
-
-Entities
 == 
 
 Emoticons

@@ -4,7 +4,7 @@
 
 #define TW_DILATE_ALPHA_THRESHOLD 10
 
-static void Dilate(int w, int h, int BPP, unsigned char *pSrc, unsigned char *pDest, unsigned char AlphaThreshold = TW_DILATE_ALPHA_THRESHOLD)
+static void Dilate(int w, int h, int BPP, const unsigned char *pSrc, unsigned char *pDest, unsigned char AlphaThreshold = TW_DILATE_ALPHA_THRESHOLD)
 {
 	int ix, iy;
 	const int aDirX[] = {0, -1, 1, 0};
@@ -33,7 +33,7 @@ static void Dilate(int w, int h, int BPP, unsigned char *pSrc, unsigned char *pD
 				{
 					for(int p = 0; p < BPP - 1; ++p)
 						// Seems safe for BPP = 3, 4 which we use. clang-analyzer seems to
-						// asssume being called with larger value. TODO: Can make this
+						// assume being called with larger value. TODO: Can make this
 						// safer anyway.
 						aSumOfOpaque[p] += pSrc[k + p]; // NOLINT(clang-analyzer-core.uninitialized.Assign)
 					++Counter;
@@ -55,7 +55,7 @@ static void Dilate(int w, int h, int BPP, unsigned char *pSrc, unsigned char *pD
 	}
 }
 
-static void CopyColorValues(int w, int h, int BPP, unsigned char *pSrc, unsigned char *pDest)
+static void CopyColorValues(int w, int h, int BPP, const unsigned char *pSrc, unsigned char *pDest)
 {
 	int m = 0;
 	for(int y = 0; y < h; y++)

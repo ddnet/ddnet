@@ -5,6 +5,9 @@
 
 #include "kernel.h"
 
+#include <set>
+#include <string>
+
 enum
 {
 	MAX_PATHS = 16
@@ -19,6 +22,20 @@ public:
 		TYPE_SAVE = 0,
 		TYPE_ALL = -1,
 		TYPE_ABSOLUTE = -2,
+		/**
+		 * Translates to TYPE_SAVE if a path is relative
+		 * and to TYPE_ABSOLUTE if a path is absolute.
+		 * Only usable with OpenFile, ReadFile, ReadFileStr
+		 * and GetCompletePath.
+		 */
+		TYPE_SAVE_OR_ABSOLUTE = -3,
+		/**
+		 * Translates to TYPE_ALL if a path is relative
+		 * and to TYPE_ABSOLUTE if a path is absolute.
+		 * Only usable with OpenFile, ReadFile, ReadFileStr
+		 * and GetCompletePath.
+		 */
+		TYPE_ALL_OR_ABSOLUTE = -4,
 
 		STORAGETYPE_BASIC = 0,
 		STORAGETYPE_SERVER,
@@ -31,6 +48,7 @@ public:
 	virtual bool ReadFile(const char *pFilename, int Type, void **ppResult, unsigned *pResultLen) = 0;
 	virtual char *ReadFileStr(const char *pFilename, int Type) = 0;
 	virtual bool FindFile(const char *pFilename, const char *pPath, int Type, char *pBuffer, int BufferSize) = 0;
+	virtual size_t FindFiles(const char *pFilename, const char *pPath, int Type, std::set<std::string> *pEntries) = 0;
 	virtual bool RemoveFile(const char *pFilename, int Type) = 0;
 	virtual bool RenameFile(const char *pOldFilename, const char *pNewFilename, int Type) = 0;
 	virtual bool CreateFolder(const char *pFoldername, int Type) = 0;

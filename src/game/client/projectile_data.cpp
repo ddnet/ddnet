@@ -67,7 +67,7 @@ void SnapshotRemoveExtraProjectileInfo(unsigned char *pData)
 	CSnapshot *pSnap = (CSnapshot *)pData;
 	for(int Index = 0; Index < pSnap->NumItems(); Index++)
 	{
-		CSnapshotItem *pItem = pSnap->GetItem(Index);
+		const CSnapshotItem *pItem = pSnap->GetItem(Index);
 		if(pItem->Type() == NETOBJTYPE_PROJECTILE)
 		{
 			CNetObj_Projectile *pProj = (CNetObj_Projectile *)((void *)pItem->Data());

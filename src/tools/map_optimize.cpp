@@ -60,7 +60,7 @@ void ClearPixelsTile(uint8_t *pImg, int Width, int Height, int TileIndex)
 	}
 }
 
-void GetImageSHA256(uint8_t *pImgBuff, int ImgSize, int Width, int Height, char *pSHA256Str)
+void GetImageSHA256(uint8_t *pImgBuff, int ImgSize, int Width, int Height, char *pSHA256Str, size_t SHA256StrSize)
 {
 	uint8_t *pNewImgBuff = (uint8_t *)malloc(ImgSize);
 
@@ -68,7 +68,7 @@ void GetImageSHA256(uint8_t *pImgBuff, int ImgSize, int Width, int Height, char 
 	CopyOpaquePixels(pNewImgBuff, pImgBuff, Width, Height);
 	SHA256_DIGEST SHAStr = sha256(pNewImgBuff, (size_t)ImgSize);
 
-	sha256_str(SHAStr, pSHA256Str, SHA256_MAXSTRSIZE * sizeof(char));
+	sha256_str(SHAStr, pSHA256Str, SHA256StrSize);
 
 	free(pNewImgBuff);
 }
@@ -292,7 +292,7 @@ int main(int argc, const char **argv)
 				char aSHA256Str[SHA256_MAXSTRSIZE];
 				// This is the important function, that calculates the SHA256 in a special way
 				// Please read the comments inside the functions to understand it
-				GetImageSHA256(pImgBuff, ImgSize, Width, Height, aSHA256Str);
+				GetImageSHA256(pImgBuff, ImgSize, Width, Height, aSHA256Str, sizeof(aSHA256Str));
 
 				char aNewName[IO_MAX_PATH_LENGTH];
 				int StrLen = str_format(aNewName, std::size(aNewName), "%s_cut_%s", pImgName, aSHA256Str);

@@ -164,6 +164,12 @@ void CGameControllerDDRace::OnPlayerDisconnect(CPlayer *pPlayer, const char *pRe
 		m_Teams.SetForceCharacterTeam(ClientID, TEAM_FLOCK);
 }
 
+void CGameControllerDDRace::OnReset()
+{
+	IGameController::OnReset();
+	m_Teams.Reset();
+}
+
 void CGameControllerDDRace::Tick()
 {
 	IGameController::Tick();

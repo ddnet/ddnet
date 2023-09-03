@@ -466,6 +466,18 @@ anim.back_foot.frames.Add(AnimKeyframe(0, -3, 0, -0.1))
 anim.front_foot.frames.Add(AnimKeyframe(0, 3, 0, -0.1))
 container.animations.Add(anim)
 
+anim = Animation("sit_left")
+anim.body.frames.Add(AnimKeyframe(0, 0, 3, 0))
+anim.back_foot.frames.Add(AnimKeyframe(0, -12, 0, 0.1))
+anim.front_foot.frames.Add(AnimKeyframe(0, -8, 0, 0.1))
+container.animations.Add(anim)
+
+anim = Animation("sit_right")
+anim.body.frames.Add(AnimKeyframe(0, 0, 3, 0))
+anim.back_foot.frames.Add(AnimKeyframe(0, 12, 0, -0.1))
+anim.front_foot.frames.Add(AnimKeyframe(0, 8, 0, -0.1))
+container.animations.Add(anim)
+
 anim = Animation("walk")
 anim.body.frames.Add(AnimKeyframe(0.0, 0, 0, 0))
 anim.body.frames.Add(AnimKeyframe(0.2, 0,-1, 0))
@@ -487,6 +499,54 @@ anim.front_foot.frames.Add(AnimKeyframe(0.4, 4,-4,-0.2))
 anim.front_foot.frames.Add(AnimKeyframe(0.6, 8, 0, 0))
 anim.front_foot.frames.Add(AnimKeyframe(0.8, 8, 0, 0))
 anim.front_foot.frames.Add(AnimKeyframe(1.0,-10,-4, 0.2))
+container.animations.Add(anim)
+
+# the run_left animation is taken directly from run_right, only the x and rotate values are flipped,
+# and each string is run backwards, to account for how it's played in game.
+anim = Animation("run_left")
+anim.body.frames.Add(AnimKeyframe(0.0, 0, -1, 0))
+anim.body.frames.Add(AnimKeyframe(0.2, 0, 0, 0))
+anim.body.frames.Add(AnimKeyframe(0.4, 0, -1, 0))
+anim.body.frames.Add(AnimKeyframe(0.6, 0, 0, 0))
+anim.body.frames.Add(AnimKeyframe(0.8, 0, 0, 0))
+anim.body.frames.Add(AnimKeyframe(1.0, 0, -1, 0))
+
+anim.back_foot.frames.Add(AnimKeyframe(0.0, 18, -8, -0.27))
+anim.back_foot.frames.Add(AnimKeyframe(0.2, 6, 0, 0))
+anim.back_foot.frames.Add(AnimKeyframe(0.4, -7, 0, 0))
+anim.back_foot.frames.Add(AnimKeyframe(0.6, -13, -4.5, 0.05))
+anim.back_foot.frames.Add(AnimKeyframe(0.8, 0, -8, -0.2))
+anim.back_foot.frames.Add(AnimKeyframe(1.0, 18, -8, -0.27))
+
+anim.front_foot.frames.Add(AnimKeyframe(0.0, -11, -2.5, 0.05))
+anim.front_foot.frames.Add(AnimKeyframe(0.2, -14, -5, 0.1))
+anim.front_foot.frames.Add(AnimKeyframe(0.4, 11, -8, -0.3))
+anim.front_foot.frames.Add(AnimKeyframe(0.6, 18, -8, -0.27))
+anim.front_foot.frames.Add(AnimKeyframe(0.8, 3, 0, 0))
+anim.front_foot.frames.Add(AnimKeyframe(1.0, -11, -2.5, 0.05))
+container.animations.Add(anim)
+
+anim = Animation("run_right")
+anim.body.frames.Add(AnimKeyframe(0.0, 0, -1, 0))
+anim.body.frames.Add(AnimKeyframe(0.2, 0, 0, 0))
+anim.body.frames.Add(AnimKeyframe(0.4, 0, 0, 0))
+anim.body.frames.Add(AnimKeyframe(0.6, 0, -1, 0))
+anim.body.frames.Add(AnimKeyframe(0.8, 0, 0, 0))
+anim.body.frames.Add(AnimKeyframe(1.0, 0, -1, 0))
+
+anim.back_foot.frames.Add(AnimKeyframe(0.0, -18, -8, 0.27))
+anim.back_foot.frames.Add(AnimKeyframe(0.2, 0, -8, 0.2))
+anim.back_foot.frames.Add(AnimKeyframe(0.4, 13, -4.5, -0.05))
+anim.back_foot.frames.Add(AnimKeyframe(0.6, 7, 0, 0))
+anim.back_foot.frames.Add(AnimKeyframe(0.8, -6, 0, 0))
+anim.back_foot.frames.Add(AnimKeyframe(1.0, -18, -8, 0.27))
+
+anim.front_foot.frames.Add(AnimKeyframe(0.0, 11, -2.5, -0.05))
+anim.front_foot.frames.Add(AnimKeyframe(0.2, -3, 0, 0))
+anim.front_foot.frames.Add(AnimKeyframe(0.4, -18, -8, 0.27))
+anim.front_foot.frames.Add(AnimKeyframe(0.6, -11, -8, 0.3))
+anim.front_foot.frames.Add(AnimKeyframe(0.8, 14, -5, -0.1))
+anim.front_foot.frames.Add(AnimKeyframe(1.0, 11, -2.5, -0.05))
 container.animations.Add(anim)
 
 anim = Animation("hammer_swing")
@@ -522,7 +582,7 @@ weapon.visual_size.Set(64)
 weapon.offsetx.Set(32)
 weapon.offsety.Set(4)
 # the number after the plus sign is the sprite scale, which is calculated for all sprites ( w / sqrt(w² * h²) ) of the additionally added x offset, which is added now,
-# since the muzzle image is 32 pixels bigger, devided by 2, because a sprite's position is always at the center of the sprite image itself
+# since the muzzle image is 32 pixels bigger, divided by 2, because a sprite's position is always at the center of the sprite image itself
 # => the offset added, bcs the sprite is bigger now, but should not be shifted to the left
 # => 96 / sqrt(64×64+96×96)  (the original sprite scale)
 # => 64 × original sprite scale (the actual size of the sprite ingame see weapon.visual_size above)

@@ -48,6 +48,7 @@ public:
 	float m_Size;
 	int m_GotAirJump;
 	int m_TeeRenderFlags;
+	bool m_FeetFlipped;
 };
 
 // Tee Render Flags

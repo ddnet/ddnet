@@ -195,11 +195,14 @@ void CProjectile::Tick()
 		}
 		else if(m_Freeze)
 		{
-			CCharacter *apEnts[MAX_CLIENTS];
-			int Num = GameWorld()->FindEntities(CurPos, 1.0f, (CEntity **)apEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
+			CEntity *apEnts[MAX_CLIENTS];
+			int Num = GameWorld()->FindEntities(CurPos, 1.0f, apEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
 			for(int i = 0; i < Num; ++i)
-				if(apEnts[i] && (m_Layer != LAYER_SWITCH || (m_Layer == LAYER_SWITCH && m_Number > 0 && Switchers()[m_Number].m_aStatus[apEnts[i]->Team()])))
-					apEnts[i]->Freeze();
+			{
+				auto *pChr = static_cast<CCharacter *>(apEnts[i]);
+				if(pChr && (m_Layer != LAYER_SWITCH || (m_Layer == LAYER_SWITCH && m_Number > 0 && Switchers()[m_Number].m_aStatus[pChr->Team()])))
+					pChr->Freeze();
+			}
 		}
 
 		if(pOwnerChar && !GameLayerClipped(ColPos) &&
@@ -405,7 +408,7 @@ bool CProjectile::FillExtraInfo(CNetObj_DDNetProjectile *pProj)
 		//If the modified data would be too large to fit in an integer, send normal data instead
 		return false;
 	}
-	//Send additional/modified info, by modifiying the fields of the netobj
+	//Send additional/modified info, by modifying the fields of the netobj
 	float Angle = -atan2f(m_Direction.x, m_Direction.y);
 
 	int Data = 0;

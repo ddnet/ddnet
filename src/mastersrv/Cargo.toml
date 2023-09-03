@@ -3,6 +3,10 @@ name = "mastersrv"
 version = "0.0.1"
 authors = ["heinrich5991 <heinrich5991@gmail.com>"]
 edition = "2018"
+publish = false
+license = "Zlib"
+
+[workspace]
 
 [dependencies]
 arrayvec = { version = "0.5.2", features = ["serde"] }

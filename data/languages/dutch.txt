@@ -56,14 +56,8 @@ Address
 All
 == Alle
 
-Are you sure that you want to delete the demo?
-== Weet je zeker dat je de demo wilt verwijderen?
-
 Are you sure that you want to quit?
 == Weet je zeker dat je wilt stoppen?
-
-Are you sure that you want to remove the player from your friends list?
-== Weet je zeker dat je deze speler uit je vriendenlijst wilt verwijderen?
 
 Automatically record demos
 == Automatisch demo's opnemen
@@ -474,9 +468,6 @@ Try again
 Type
 == Type
 
-Unable to delete the demo
-== Demo kon niet worden verwijderd
-
 Unable to rename the demo
 == Niet mogelijk om de demo te hernoemen
 
@@ -677,17 +668,14 @@ It's recommended that you check the settings to adjust them to your liking befor
 Please enter your nickname below.
 == Voer je bijnaam in a.u.b.
 
-Destination file already exist
-== Bestemmingsfolder bestaat al
-
 Video name:
 == Video naam:
 
 Show DDNet map finishes in server browser
 == Laat gefinishte maps zien in de verkenner
 
-transmits your player name to info2.ddnet.tw
-== verzendt je speler naam naar info2.ddnet.tw
+transmits your player name to info.ddnet.org
+== verzendt je speler naam naar info.ddnet.org
 
 Search
 == Zoek
@@ -1009,9 +997,6 @@ Old mouse mode
 Show tiles layers from BG map
 == Laat tegellagen van achtergrondmap zien
 
-Try fast HTTP map download first
-== Probeer eerst een snelle HTTP download voor deze map
-
 DDNet %s is available:
 == DDNet %s is beschikbaar
 
@@ -1246,12 +1231,6 @@ Assets
 Kill Messages
 == Kill Berichten
 
-Laser Outline Color
-== Laser Kleur Buitenzijde
-
-Laser Inner Color
-== Laser Kleur Binnenzijde
-
 Use old chat style
 == Oude chatstijl gebruiken
 
@@ -1312,11 +1291,11 @@ Assets directory
 Discord
 == Discord
 
-https://ddnet.tw/discord
-== https://ddnet.tw/discord
+https://ddnet.org/discord
+== https://ddnet.org/discord
 
-https://wiki.ddnet.tw/
-== https://wiki.ddnet.tw/
+https://wiki.ddnet.org/
+== https://wiki.ddnet.org/
 
 Tutorial
 == Tutorial
@@ -1412,19 +1391,79 @@ Getting game info
 Requesting to join the game
 == 
 
+Cancel
+== 
+
+File '%s' already exists, do you want to overwrite it?
+== 
+
 Loading menu images
+== 
+
+Are you sure that you want to remove the player '%s' from your friends list?
+== 
+
+Are you sure that you want to remove the clan '%s' from your friends list?
+== 
+
+Play the current demo
+== 
+
+Pause the current demo
+== 
+
+Stop the current demo
+== 
+
+Go back one tick
+== 
+
+Go forward one tick
+== 
+
+Slow down the demo
+== 
+
+Speed up the demo
+== 
+
+Mark the beginning of a cut
+== 
+
+Mark the end of a cut
+== 
+
+Export cut as a separate demo
+== 
+
+Go back one marker
+== 
+
+Go forward one marker
+== 
+
+Toggle keyboard shortcuts
 == 
 
 Loading demo files
 == 
 
+Are you sure that you want to delete the demo '%s'?
+== 
+
+Unable to delete the demo '%s'
+== 
+
 Loading ghost files
 == 
 
-Download community skins
+Menu opened. Press Esc key again to close menu.
 == 
 
 Loading skin files
+== 
+
+Download community skins
 == 
 
 Enable controller
@@ -1481,6 +1520,12 @@ UI mouse sens.
 == 
 
 Controller
+== 
+
+Reset controls
+== 
+
+Are you sure that you want to reset the controls to their defaults?
 == 
 
 Appearance
@@ -1556,6 +1601,36 @@ Normal Color
 == 
 
 Highlight Color
+== 
+
+Weapons
+== 
+
+Rifle Laser Outline Color
+== 
+
+Rifle Laser Inner Color
+== 
+
+Shotgun Laser Outline Color
+== 
+
+Shotgun Laser Inner Color
+== 
+
+Door Laser Outline Color
+== 
+
+Door Laser Inner Color
+== 
+
+Freeze Laser Outline Color
+== 
+
+Freeze Laser Inner Color
+== 
+
+Set all to Rifle
 == 
 
 Extras

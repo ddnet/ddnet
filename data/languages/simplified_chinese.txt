@@ -27,6 +27,9 @@
 # 2022-06-27 cheeser0613
 # 2022-07-04 cheeser0613
 # 2022-08-08 cheeser0613
+# 2022-09-17 cheeser0613
+# 2022-10-24 cheeser0613
+# 2022-12-11 cheeser0613
 ##### /authors #####
 
 ##### translated strings #####
@@ -67,14 +70,8 @@ Address
 All
 == 全体
 
-Are you sure that you want to delete the demo?
-== 你确定要删除这个回放吗？
-
 Are you sure that you want to quit?
 == 你确定要退出吗？
-
-Are you sure that you want to remove the player from your friends list?
-== 你确定要把这个玩家从好友列表中删除吗？
 
 Automatically record demos
 == 自动录制回放
@@ -527,9 +524,6 @@ Try again
 Type
 == 模式
 
-Unable to delete the demo
-== 无法删除这个回放
-
 Unable to rename the demo
 == 无法重命名这个回放
 
@@ -624,7 +618,7 @@ Length:
 == 时长：
 
 Laser
-== 激光枪
+== 激光
 
 Netversion:
 == 通信版本：
@@ -763,9 +757,6 @@ Show other players' key presses
 
 Show tiles layers from BG map
 == 显示实体层背景地图的图块层
-
-Try fast HTTP map download first
-== 优先尝试使用 HTTP 协议快速下载地图
 
 DDNet %s is available:
 == DDNet %s 现已可用：
@@ -926,8 +917,8 @@ Date
 Show DDNet map finishes in server browser
 == 在服务器浏览器中显示已完成的 DDNet 地图
 
-transmits your player name to info2.ddnet.tw
-== 将会发送你的玩家昵称到 info2.ddnet.tw
+transmits your player name to info.ddnet.org
+== 将会发送你的玩家昵称到 info.ddnet.org
 
 Reload
 == 刷新
@@ -1070,9 +1061,6 @@ Personal best:
 Render demo
 == 渲染回放
 
-Destination file already exist
-== 目标文件已经存在
-
 Replace video
 == 替换视频
 
@@ -1094,8 +1082,8 @@ Use k key to kill (restart), q to pause and watch other players. See settings fo
 Country / Region
 == 国家 / 地区
 
-https://wiki.ddnet.tw/
-== https://docs.qq.com/doc/DWGFrV0xPRmVWVkla
+https://wiki.ddnet.org/
+== https://wiki.ddnet.org/wiki/Main_Page/zh
 
 Warning
 == 警告
@@ -1218,7 +1206,7 @@ Particles
 Assets directory
 == 资源目录
 
-https://ddnet.tw/discord
+https://ddnet.org/discord
 == http://chat.teeworlds.cn/
 
 Discord
@@ -1232,12 +1220,6 @@ Chat command
 
 Dummy
 == 分身
-
-Laser Outline Color
-== 激光边框颜色
-
-Laser Inner Color
-== 激光颜色
 
 Preview
 == 预览
@@ -1585,3 +1567,99 @@ Loading race demo files
 
 Loading sound files
 == 正在加载声音文件
+
+Play the current demo
+== 播放回放
+
+Pause the current demo
+== 暂停回放
+
+Stop the current demo
+== 结束回放
+
+Slow down the demo
+== 减慢播放速度
+
+Speed up the demo
+== 加快播放速度
+
+Mark the beginning of a cut
+== 标记裁剪起点
+
+Mark the end of a cut
+== 标记裁剪终点
+
+Export cut as a separate demo
+== 另存为新回放文件
+
+Toggle keyboard shortcuts
+== 启用/禁用键盘快捷键
+
+Weapons
+== 武器
+
+Rifle Laser Outline Color
+== 激光枪弹道外框颜色
+
+Rifle Laser Inner Color
+== 激光枪弹道实心颜色
+
+Shotgun Laser Outline Color
+== 霰弹枪弹道外框颜色
+
+Shotgun Laser Inner Color
+== 霰弹枪弹道实心颜色
+
+Door Laser Outline Color
+== 激光门外框颜色
+
+Door Laser Inner Color
+== 激光门实心颜色
+
+Freeze Laser Outline Color
+== 冻结激光外框颜色
+
+Freeze Laser Inner Color
+== 冻结激光实心颜色
+
+Menu opened. Press Esc key again to close menu.
+== 菜单已打开，再次点击 Esc 以关闭
+
+Set all to Rifle
+== 统一为激光枪颜色
+
+Cancel
+== 取消
+
+File '%s' already exists, do you want to overwrite it?
+== 文件名 "%s" 已经存在，是否要覆盖该文件？
+
+Are you sure that you want to remove the player '%s' from your friends list?
+== 你确定要将好友 "%s" 从你的好友列表中删除？
+
+Are you sure that you want to remove the clan '%s' from your friends list?
+== 你确定要将战队 "%s" 从你的好友列表中删除？
+
+Go back one tick
+== 上一个 tick
+
+Go forward one tick
+== 下一个 tick
+
+Go back one marker
+== 返回上一个标记
+
+Go forward one marker
+== 跳至下一个标记
+
+Are you sure that you want to delete the demo '%s'?
+== 你确定要删除回放文件 "%s" ？
+
+Unable to delete the demo '%s'
+== 无法删除回放文件 "%s"
+
+Reset controls
+== 恢复默认设置
+
+Are you sure that you want to reset the controls to their defaults?
+== 你确定要将当前的控制恢复至默认设置？

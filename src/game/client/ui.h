@@ -197,6 +197,7 @@ class CUI
 
 	IInput::CEvent *m_pInputEventsArray;
 	int *m_pInputEventCount;
+	unsigned m_HotkeysPressed = 0;
 
 	bool m_MouseIsPress = false;
 	bool m_HasSelection = false;
@@ -239,6 +240,18 @@ public:
 
 	CUI();
 	~CUI();
+
+	enum EHotkey : unsigned
+	{
+		HOTKEY_ENTER = 1 << 0,
+		HOTKEY_ESCAPE = 1 << 1,
+		HOTKEY_UP = 1 << 2,
+		HOTKEY_DOWN = 1 << 3,
+		HOTKEY_DELETE = 1 << 4,
+		HOTKEY_TAB = 1 << 5,
+		HOTKEY_SCROLL_UP = 1 << 6,
+		HOTKEY_SCROLL_DOWN = 1 << 7,
+	};
 
 	void ResetUIElement(CUIElement &UIElement);
 
@@ -305,6 +318,10 @@ public:
 	void ConvertMouseMove(float *pX, float *pY, IInput::ECursorType CursorType) const;
 	void ResetMouseSlow() { m_MouseSlow = false; }
 
+	bool ConsumeHotkey(EHotkey Hotkey);
+	void ClearHotkeys() { m_HotkeysPressed = 0; }
+	bool OnInput(const IInput::CEvent &Event);
+
 	float ButtonColorMulActive() { return 0.5f; }
 	float ButtonColorMulHot() { return 1.5f; }
 	float ButtonColorMulDefault() { return 1.0f; }
@@ -326,9 +343,9 @@ public:
 	float DoTextLabel(float x, float y, float w, float h, const char *pText, float Size, int Align, const SLabelProperties &LabelProps = {});
 	void DoLabel(const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps = {});
 
-	void DoLabel(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps, int StrLen = -1, class CTextCursor *pReadCursor = nullptr);
-	void DoLabelStreamed(CUIElement::SUIElementRect &RectEl, float x, float y, float w, float h, const char *pText, float Size, int Align, float MaxWidth = -1, int AlignVertically = 1, bool StopAtEnd = false, int StrLen = -1, class CTextCursor *pReadCursor = nullptr);
-	void DoLabelStreamed(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth = -1, int AlignVertically = 1, bool StopAtEnd = false, int StrLen = -1, class CTextCursor *pReadCursor = nullptr);
+	void DoLabel(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps, int StrLen = -1, const CTextCursor *pReadCursor = nullptr);
+	void DoLabelStreamed(CUIElement::SUIElementRect &RectEl, float x, float y, float w, float h, const char *pText, float Size, int Align, float MaxWidth = -1, int AlignVertically = 1, bool StopAtEnd = false, int StrLen = -1, const CTextCursor *pReadCursor = nullptr);
+	void DoLabelStreamed(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, float MaxWidth = -1, int AlignVertically = 1, bool StopAtEnd = false, int StrLen = -1, const CTextCursor *pReadCursor = nullptr);
 
 	bool DoEditBox(const void *pID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden = false, int Corners = IGraphics::CORNER_ALL, const SUIExEditBoxProperties &Properties = {});
 	bool DoClearableEditBox(const void *pID, const void *pClearID, const CUIRect *pRect, char *pStr, unsigned StrSize, float FontSize, float *pOffset, bool Hidden = false, int Corners = IGraphics::CORNER_ALL, const SUIExEditBoxProperties &Properties = {});

@@ -580,7 +580,7 @@ void thread_detach(void *thread);
  * @param user Pointer to pass to the thread.
  * @param name Name describing the use of the thread
  *
- * @return The thread if no error occured, 0 on error.
+ * @return The thread if no error occurred, 0 on error.
  */
 void *thread_init_and_detach(void (*threadfunc)(void *), void *user, const char *name);
 
@@ -1201,7 +1201,7 @@ void str_utf8_truncate(char *dst, int dst_size, const char *src, int truncation_
  * counting the zero termination).
  *
  * @remark The strings are treated as zero-terminated strings.
- * @remark Garantees that dst string will contain zero-termination.
+ * @remark Guarantees that dst string will contain zero-termination.
  */
 void str_truncate(char *dst, int dst_size, const char *src, int truncation_len);
 
@@ -1246,8 +1246,22 @@ int str_format(char *buffer, int buffer_size, const char *format, ...)
  * @return Trimmed string
  *
  * @remark The strings are treated as zero-terminated strings.
+ * @remark Leading whitespace is always trimmed.
  */
-char *str_trim_words(char *str, int words);
+const char *str_trim_words(const char *str, int words);
+
+/**
+ * Check whether string has ASCII control characters.
+ *
+ * @ingroup Strings
+ *
+ * @param str String to check.
+ *
+ * @return Whether the string has ASCII control characters.
+ *
+ * @remark The strings are treated as zero-terminated strings.
+ */
+bool str_has_cc(const char *str);
 
 /**
  * Replaces all characters below 32 with whitespace.
@@ -1288,12 +1302,12 @@ void str_sanitize_filename(char *str);
  *
  * @param str String to clean up
  *
- * @remark The strings are treated as zero-termineted strings.
+ * @remark The strings are treated as zero-terminated strings.
  */
 void str_clean_whitespaces(char *str);
 
 /**
- * Skips leading non-whitespace characters(all but ' ', '\t', '\n', '\r').
+ * Skips leading non-whitespace characters.
  *
  * @ingroup Strings
  *
@@ -1303,6 +1317,7 @@ void str_clean_whitespaces(char *str);
  *		   within the string.
  *
  * @remark The strings are treated as zero-terminated strings.
+ * @remark Whitespace is defined according to str_isspace.
  */
 char *str_skip_to_whitespace(char *str);
 
@@ -1313,7 +1328,7 @@ char *str_skip_to_whitespace(char *str);
 const char *str_skip_to_whitespace_const(const char *str);
 
 /**
- * Skips leading whitespace characters(' ', '\t', '\n', '\r').
+ * Skips leading whitespace characters.
  *
  * @ingroup Strings
  *
@@ -1323,6 +1338,7 @@ const char *str_skip_to_whitespace_const(const char *str);
  * within the string.
  *
  * @remark The strings are treated as zero-terminated strings.
+ * @remark Whitespace is defined according to str_isspace.
  */
 char *str_skip_whitespaces(char *str);
 
@@ -1402,7 +1418,7 @@ int str_comp(const char *a, const char *b);
 int str_comp_num(const char *a, const char *b, int num);
 
 /**
- * Compares two strings case sensitive, digit chars will be compared as numbers.
+ * Compares two strings case insensitive, digit chars will be compared as numbers.
  *
  * @ingroup Strings
  *
@@ -1571,38 +1587,36 @@ const char *str_find_nocase(const char *haystack, const char *needle);
 */
 const char *str_find(const char *haystack, const char *needle);
 
-/*
-	Function: str_rchr
-		Finds the last occurance of a character
+/**
+ * Finds the last occurrence of a character
+ *
+ * @ingroup Strings
+ *
+ * @param haystack String to search in
+ * @param needle Character to search for
 
-	Parameters:
-		haystack - String to search in
-		needle - Character to search for
-
-	Returns:
-		A pointer into haystack where the needle was found.
-		Returns NULL if needle could not be found.
-
-	Remarks:
-		- The strings are treated as zero-terminated strings.
-*/
+ * @return A pointer into haystack where the needle was found.
+ * Returns NULL if needle could not be found.
+ *
+ * @remark The strings are treated as zero-terminated strings.
+ * @remark The zero-terminator character can also be found with this function.
+ */
 const char *str_rchr(const char *haystack, char needle);
 
-/*
-	Function: str_countchr
-		Counts the number of occurrences of a character in a string.
+/**
+ * Counts the number of occurrences of a character in a string.
+ *
+ * @ingroup Strings
+ *
+ * @param haystack String to count in
+ * @param needle Character to count
 
-	Parameters:
-		haystack - String to count in
-		needle - Character to count
-
-	Returns:
-		The number of characters in the haystack string matching
-		the needle character.
-
-	Remarks:
-		- The strings are treated as zero-terminated strings.
-*/
+ * @return The number of characters in the haystack string matching
+ * the needle character.
+ *
+ * @remark The strings are treated as zero-terminated strings.
+ * @remark The number of zero-terminator characters cannot be counted.
+ */
 int str_countchr(const char *haystack, char needle);
 
 /*
@@ -2016,14 +2030,24 @@ int str_toint(const char *str);
 int str_toint_base(const char *str, int base);
 unsigned long str_toulong_base(const char *str, int base);
 float str_tofloat(const char *str);
+
+/**
+ * Determines whether a character is whitespace.
+ *
+ * @ingroup Strings
+ *
+ * @param c the character to check
+ *
+ * @return 1 if the character is whitespace, 0 otherwise.
+ *
+ * @remark The following characters are considered whitespace: ' ', '\n', '\r', '\t'
+ */
 int str_isspace(char c);
+
 char str_uppercase(char c);
 int str_isallnum(const char *str);
 unsigned str_quickhash(const char *str);
 
-struct SKELETON;
-void str_utf8_skeleton_begin(struct SKELETON *skel, const char *str);
-int str_utf8_skeleton_next(struct SKELETON *skel);
 int str_utf8_to_skeleton(const char *str, int *buf, int buf_len);
 
 /*
@@ -2406,7 +2430,7 @@ int kill_process(PROCESS process);
 		random - Pointer to a randomly-initialized array of shorts.
 		random_length - Length of the short array.
 */
-void generate_password(char *buffer, unsigned length, unsigned short *random, unsigned random_length);
+void generate_password(char *buffer, unsigned length, const unsigned short *random, unsigned random_length);
 
 /*
 	Function: secure_random_init
@@ -2536,11 +2560,14 @@ public:
 /**
  * This is a RAII wrapper to initialize/uninitialize the Windows COM library,
  * which may be necessary for using the open_file and open_link functions.
+ * Must be used on every thread. It's automatically used on threads created
+ * with thread_init. Pass true to the constructor on threads that own a
+ * window (i.e. pump a message queue).
  */
 class CWindowsComLifecycle
 {
 public:
-	CWindowsComLifecycle();
+	CWindowsComLifecycle(bool HasWindow);
 	~CWindowsComLifecycle();
 };
 #endif

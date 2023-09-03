@@ -23,36 +23,36 @@ struct MapObject // quad pivot or tile layer
 	float m_aaExtendedArea[2][2]; // extended with parallax
 };
 
-bool ReplaceArea(IStorage *, const char[][64], const float[][2][2]);
-bool OpenMaps(IStorage *, const char[][64], CDataFileReader[], CDataFileWriter &);
+bool ReplaceArea(IStorage *, const char[3][64], const float[][2][2]);
+bool OpenMaps(IStorage *, const char[3][64], CDataFileReader[2], CDataFileWriter &);
 void SaveOutputMap(CDataFileReader &, CDataFileWriter &);
-bool CompareLayers(const char[][64], CDataFileReader[]);
-void CompareGroups(const char[][64], CDataFileReader[]);
+bool CompareLayers(const char[3][64], CDataFileReader[2]);
+void CompareGroups(const char[3][64], CDataFileReader[2]);
 const CMapItemGroup *GetLayerGroup(CDataFileReader &, int);
 
-void ReplaceAreaTiles(CDataFileReader[], const float[][2][2], const CMapItemGroup *[], CMapItemLayer *[]);
-void RemoveDestinationTiles(CMapItemLayerTilemap *, CTile *, float[][2]);
-void ReplaceDestinationTiles(CMapItemLayerTilemap *[], CTile *[], float[][2][2]);
-bool AdaptVisibleAreas(const float[][2][2], const MapObject[], float[][2][2]);
-bool AdaptReplaceableAreas(const float[][2][2], const float[][2][2], const MapObject[], float[][2][2]);
+void ReplaceAreaTiles(CDataFileReader[2], const float[][2][2], const CMapItemGroup *[2], CMapItemLayer *[2]);
+void RemoveDestinationTiles(CMapItemLayerTilemap *, CTile *, float[2][2]);
+void ReplaceDestinationTiles(CMapItemLayerTilemap *[2], CTile *[2], float[2][2][2]);
+bool AdaptVisibleAreas(const float[2][2][2], const MapObject[2], float[2][2][2]);
+bool AdaptReplaceableAreas(const float[2][2][2], const float[2][2][2], const MapObject[2], float[2][2][2]);
 
-void ReplaceAreaQuads(CDataFileReader[], const float[][2][2], const CMapItemGroup *[], CMapItemLayer *[], int);
-bool RemoveDestinationQuads(const float[][2], const CQuad *, int, const CMapItemGroup *, CQuad *, int &);
-bool InsertDestinationQuads(const float[][2][2], const CQuad *, int, const CMapItemGroup *[], CQuad *, int &);
-bool AdaptVisiblePoint(const float[][2][2], const float[][2], const MapObject[], float[]);
+void ReplaceAreaQuads(CDataFileReader[2], const float[][2][2], const CMapItemGroup *[2], CMapItemLayer *[2], int);
+bool RemoveDestinationQuads(const float[2][2], const CQuad *, int, const CMapItemGroup *, CQuad *, int &);
+bool InsertDestinationQuads(const float[2][2][2], const CQuad *, int, const CMapItemGroup *[2], CQuad *, int &);
+bool AdaptVisiblePoint(const float[2][2][2], const float[2][2], const MapObject[2], float[2]);
 
 MapObject CreateMapObject(const CMapItemGroup *, int, int, int, int);
 void SetExtendedArea(MapObject &);
-bool GetVisibleArea(const float[][2], MapObject, float[][2] = 0x0);
-bool GetReplaceableArea(const float[][2], MapObject, float[][2]);
+bool GetVisibleArea(const float[2][2], const MapObject &, float[2][2] = 0x0);
+bool GetReplaceableArea(const float[2][2], const MapObject &, float[2][2]);
 
-void GetGameAreaDistance(const float[][2][2], const MapObject[], const float[][2][2], float[]);
-void GetGameAreaDistance(const float[][2][2], const MapObject[], const float[][2], float[]);
-void GetSignificantScreenPos(MapObject, const float[][2], const float[][2], float[]);
-void ConvertToTiles(const float[][2], int[][2]);
+void GetGameAreaDistance(const float[2][2][2], const MapObject[2], const float[2][2][2], float[2]);
+void GetGameAreaDistance(const float[2][2][2], const MapObject[2], const float[2][2], float[2]);
+void GetSignificantScreenPos(const MapObject &, const float[2][2], const float[2][2], float[2]);
+void ConvertToTiles(const float[2][2], int[2][2]);
 
-bool GetLineIntersection(const float[], const float[], float[] = 0x0);
-bool GetLineIntersection(const float[], float);
+bool GetLineIntersection(const float[2], const float[2], float[2] = 0x0);
+bool GetLineIntersection(const float[2], float);
 void SetInexistent(float *, int);
 bool IsInexistent(const float *, int);
 bool IsInexistent(float);
@@ -72,18 +72,18 @@ int main(int argc, const char *argv[])
 	}
 
 	char aaMapNames[3][64];
-	snprintf(aaMapNames[0], 64, "%s", argv[1]); //from_map
-	snprintf(aaMapNames[1], 64, "%s", argv[4]); //to_map
-	snprintf(aaMapNames[2], 64, "%s", argv[9]); //output_map
+	str_copy(aaMapNames[0], argv[1]); //from_map
+	str_copy(aaMapNames[1], argv[4]); //to_map
+	str_copy(aaMapNames[2], argv[9]); //output_map
 
 	float aaaGameAreas[2][2][2];
 
 	for(int i = 0; i < 2; i++)
 	{
-		aaaGameAreas[i][0][0] = atof(argv[2 + i * 3]) * 32; //x
-		aaaGameAreas[i][1][0] = atof(argv[3 + i * 3]) * 32; //y
-		aaaGameAreas[i][0][1] = aaaGameAreas[i][0][0] + atof(argv[7]) * 32; //x + width
-		aaaGameAreas[i][1][1] = aaaGameAreas[i][1][0] + atof(argv[8]) * 32; //y + height
+		aaaGameAreas[i][0][0] = str_tofloat(argv[2 + i * 3]) * 32; //x
+		aaaGameAreas[i][1][0] = str_tofloat(argv[3 + i * 3]) * 32; //y
+		aaaGameAreas[i][0][1] = aaaGameAreas[i][0][0] + str_tofloat(argv[7]) * 32; //x + width
+		aaaGameAreas[i][1][1] = aaaGameAreas[i][1][0] + str_tofloat(argv[8]) * 32; //y + height
 	}
 
 	cmdline_free(argc, argv);
@@ -511,7 +511,7 @@ void SetExtendedArea(MapObject &Ob)
 	}
 }
 
-bool GetVisibleArea(const float aaGameArea[2][2], const MapObject Ob, float aaVisibleArea[2][2])
+bool GetVisibleArea(const float aaGameArea[2][2], const MapObject &Ob, float aaVisibleArea[2][2])
 {
 	if(IsInexistent((float *)Ob.m_aaExtendedArea, 4))
 		return false;
@@ -543,7 +543,7 @@ bool GetVisibleArea(const float aaGameArea[2][2], const MapObject Ob, float aaVi
 	return true;
 }
 
-bool GetReplaceableArea(const float aaVisibleArea[2][2], const MapObject Ob, float aaReplaceableArea[2][2])
+bool GetReplaceableArea(const float aaVisibleArea[2][2], const MapObject &Ob, float aaReplaceableArea[2][2])
 {
 	SetInexistent((float *)aaReplaceableArea, 4);
 	if(IsInexistent((float *)aaVisibleArea, 4))
@@ -599,7 +599,7 @@ void GetGameAreaDistance(const float aaaGameAreas[2][2][2], const MapObject aObs
 	GetGameAreaDistance(aaaGameAreas, aObs, aaaVisibleAreas, aDistance);
 }
 
-void GetSignificantScreenPos(const MapObject Ob, const float aaVisibleArea[2][2], const float aaReplaceableArea[2][2], float aScreen[2])
+void GetSignificantScreenPos(const MapObject &Ob, const float aaVisibleArea[2][2], const float aaReplaceableArea[2][2], float aScreen[2])
 {
 	for(int i = 0; i < 2; i++)
 	{

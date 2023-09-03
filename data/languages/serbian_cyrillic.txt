@@ -43,14 +43,8 @@ Address
 All
 == Сви
 
-Are you sure that you want to delete the demo?
-== Да ли сте сигурни да желите да избришете видео снимак?
-
 Are you sure that you want to quit?
 == Да ли сте сигурни да желите да изађете?
-
-Are you sure that you want to remove the player from your friends list?
-== Да ли си сигуран да хоћеш избрисати играча из листе пријатеља?
 
 Automatically record demos
 == Аутоматски сними видео
@@ -460,9 +454,6 @@ Try again
 Type
 == Тип
 
-Unable to delete the demo
-== Снимак није могуће обрисати
-
 Unable to rename the demo
 == Снимак није могуће преименовати
 
@@ -693,9 +684,6 @@ Please enter your nickname below.
 Country / Region
 == Земља / регион
 
-Destination file already exist
-== Датотека одредишта већ постоји
-
 Speed
 == Брзина
 
@@ -705,8 +693,8 @@ Video name:
 Show DDNet map finishes in server browser
 == Прикажи завршетка DDNet мапе у прегледачу сервера
 
-transmits your player name to info2.ddnet.tw
-== преноси име вашег играча на info2.ddnet.tw
+transmits your player name to info.ddnet.org
+== преноси име вашег играча на info.ddnet.org
 
 Theme
 == Тема
@@ -1033,9 +1021,6 @@ Old mouse mode
 Show tiles layers from BG map
 == Прикажи слојеве плочица са BG мапе
 
-Try fast HTTP map download first
-== Пробај брзи HTTP преузимач мапа прво
-
 DDNet %s is available:
 == DDNet %s је доступан:
 
@@ -1072,8 +1057,8 @@ Assets directory
 Learn
 == Упутство
 
-https://wiki.ddnet.tw/
-== https://wiki.ddnet.tw/
+https://wiki.ddnet.org/
+== https://wiki.ddnet.org/
 
 Website
 == Веб сајт
@@ -1177,9 +1162,6 @@ Loading map file from storage
 
 Why are you slowmo replaying to read this?
 == Зашто полако понављаш да би ово прочитао?
-
-Initializing components 
-== Учитавам компоненте
 
 Initializing assets
 == Учитавам слику
@@ -1489,12 +1471,6 @@ Normal Color
 Highlight Color
 == Истакнута Боја
 
-Laser Outline Color
-== Боја спољашњег ласера
-
-Laser Inner Color
-== Боја унутрашњег ласера
-
 When you cross the start line, show a ghost tee replicating the movements of your best time
 == Када кренеш да се тркаш, прикажи твог најбржег духа 
 
@@ -1537,8 +1513,8 @@ Loading assets
 Discord
 == Discord
 
-https://ddnet.tw/discord
-== https://ddnet.tw/discord
+https://ddnet.org/discord
+== https://ddnet.org/discord
 
 Tutorial
 == Увод
@@ -1557,3 +1533,102 @@ Team %d
 
 Loading sound files
 == Учитавам звучне фајлове
+
+Initializing components
+== 
+
+Cancel
+== 
+
+File '%s' already exists, do you want to overwrite it?
+== 
+
+Are you sure that you want to remove the player '%s' from your friends list?
+== 
+
+Are you sure that you want to remove the clan '%s' from your friends list?
+== 
+
+Play the current demo
+== 
+
+Pause the current demo
+== 
+
+Stop the current demo
+== 
+
+Go back one tick
+== 
+
+Go forward one tick
+== 
+
+Slow down the demo
+== 
+
+Speed up the demo
+== 
+
+Mark the beginning of a cut
+== 
+
+Mark the end of a cut
+== 
+
+Export cut as a separate demo
+== 
+
+Go back one marker
+== 
+
+Go forward one marker
+== 
+
+Toggle keyboard shortcuts
+== 
+
+Are you sure that you want to delete the demo '%s'?
+== 
+
+Unable to delete the demo '%s'
+== 
+
+Menu opened. Press Esc key again to close menu.
+== 
+
+Reset controls
+== 
+
+Are you sure that you want to reset the controls to their defaults?
+== 
+
+Weapons
+== 
+
+Rifle Laser Outline Color
+== 
+
+Rifle Laser Inner Color
+== 
+
+Shotgun Laser Outline Color
+== 
+
+Shotgun Laser Inner Color
+== 
+
+Door Laser Outline Color
+== 
+
+Door Laser Inner Color
+== 
+
+Freeze Laser Outline Color
+== 
+
+Freeze Laser Inner Color
+== 
+
+Set all to Rifle
+== 

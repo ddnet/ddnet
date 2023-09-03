@@ -81,7 +81,7 @@ void CParticles::Update(float TimePassed)
 	static float FrictionFraction = 0;
 	FrictionFraction += TimePassed;
 
-	if(FrictionFraction > 2.0f) // safety messure
+	if(FrictionFraction > 2.0f) // safety measure
 		FrictionFraction = 0;
 
 	int FrictionCount = 0;

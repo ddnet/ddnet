@@ -48,14 +48,8 @@ Address
 All
 == Hepsi
 
-Are you sure that you want to delete the demo?
-== Demo dosyasını silmek istediğinize emin misiniz?
-
 Are you sure that you want to quit?
 == Çıkmak istediğinize emin misiniz?
-
-Are you sure that you want to remove the player from your friends list?
-== Bu oyuncuyu arkadaş listenizden kaldırmak istediğinize emin misiniz?
 
 Automatically record demos
 == Demoları otomatik olarak kaydet
@@ -463,9 +457,6 @@ Try again
 Type
 == Tür
 
-Unable to delete the demo
-== Demo silinemiyor
-
 Unable to rename the demo
 == Demonun ismi değiştirilemiyor
 
@@ -669,17 +660,14 @@ It's recommended that you check the settings to adjust them to your liking befor
 Please enter your nickname below.
 == Lütfen takma adı girin.
 
-Destination file already exist
-== Dosya hali hazırda mevcut
-
 Video name:
 == Video ismi:
 
 Show DDNet map finishes in server browser
 == Tamamlanan DDNet haritalarını sunucu listesinde göster
 
-transmits your player name to info2.ddnet.tw
-== oyuncu adını info2.ddnet.tw ile paylaşır
+transmits your player name to info.ddnet.org
+== oyuncu adını info.ddnet.org ile paylaşır
 
 Search
 == Ara
@@ -1008,9 +996,6 @@ Old mouse mode
 Show tiles layers from BG map
 == Yapı katmanlarını göster
 
-Try fast HTTP map download first
-== Önce HTTP üzerinden haritayı hızlı indirmeyi dene
-
 DDNet %s is available:
 == DDNet %s yayınlandı:
 
@@ -1079,6 +1064,9 @@ Auto
 
 Replay
 == Yeniden oynatma
+
+https://wiki.ddnet.org/
+== https://wiki.ddnet.org/wiki/Main_Page/tr
 
 Saving ddnet-settings.cfg failed
 == 
@@ -1158,10 +1146,13 @@ Your nickname '%s' is already used (%d points). Do you still want to use it?
 Checking for existing player with your name
 == 
 
-Are you sure that you want to disconnect and switch to a different server?
+Country / Region
 == 
 
-Country / Region
+Cancel
+== 
+
+File '%s' already exists, do you want to overwrite it?
 == 
 
 Speed
@@ -1218,7 +1209,55 @@ Getting server list from master server
 Refreshing...
 == 
 
+Are you sure that you want to disconnect and switch to a different server?
+== 
+
 Leak IP
+== 
+
+Are you sure that you want to remove the player '%s' from your friends list?
+== 
+
+Are you sure that you want to remove the clan '%s' from your friends list?
+== 
+
+Play the current demo
+== 
+
+Pause the current demo
+== 
+
+Stop the current demo
+== 
+
+Go back one tick
+== 
+
+Go forward one tick
+== 
+
+Slow down the demo
+== 
+
+Speed up the demo
+== 
+
+Mark the beginning of a cut
+== 
+
+Mark the end of a cut
+== 
+
+Export cut as a separate demo
+== 
+
+Go back one marker
+== 
+
+Go forward one marker
+== 
+
+Toggle keyboard shortcuts
 == 
 
 Loading demo files
@@ -1227,7 +1266,16 @@ Loading demo files
 Demos directory
 == 
 
+Are you sure that you want to delete the demo '%s'?
+== 
+
+Unable to delete the demo '%s'
+== 
+
 Loading ghost files
+== 
+
+Menu opened. Press Esc key again to close menu.
 == 
 
 Smooth Dynamic Camera
@@ -1243,6 +1291,9 @@ Config directory
 == 
 
 Themes directory
+== 
+
+Loading skin files
 == 
 
 Toggle to edit your dummy settings
@@ -1261,9 +1312,6 @@ Skin Database
 == 
 
 Skins directory
-== 
-
-Loading skin files
 == 
 
 Chat command
@@ -1323,6 +1371,12 @@ UI mouse sens.
 == 
 
 Controller
+== 
+
+Reset controls
+== 
+
+Are you sure that you want to reset the controls to their defaults?
 == 
 
 Dummy
@@ -1457,10 +1511,37 @@ Normal Color
 Highlight Color
 == 
 
-Laser Outline Color
+Weapons
 == 
 
-Laser Inner Color
+Rifle Laser Outline Color
+== 
+
+Rifle Laser Inner Color
+== 
+
+Shotgun Laser Outline Color
+== 
+
+Shotgun Laser Inner Color
+== 
+
+Entities
+== 
+
+Door Laser Outline Color
+== 
+
+Door Laser Inner Color
+== 
+
+Freeze Laser Outline Color
+== 
+
+Freeze Laser Inner Color
+== 
+
+Set all to Rifle
 == 
 
 When you cross the start line, show a ghost tee replicating the movements of your best time
@@ -1496,9 +1577,6 @@ Run on join
 Chat command (e.g. showall 1)
 == 
 
-Entities
-== 
-
 Emoticons
 == 
 
@@ -1517,10 +1595,7 @@ Assets directory
 Discord
 == 
 
-https://ddnet.tw/discord
-== 
-
-https://wiki.ddnet.tw/
+https://ddnet.org/discord
 == 
 
 Tutorial

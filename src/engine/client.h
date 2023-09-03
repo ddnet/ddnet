@@ -219,10 +219,9 @@ public:
 
 	// TODO: Refactor: should redo this a bit i think, too many virtual calls
 	virtual int SnapNumItems(int SnapID) const = 0;
-	virtual void *SnapFindItem(int SnapID, int Type, int ID) const = 0;
+	virtual const void *SnapFindItem(int SnapID, int Type, int ID) const = 0;
 	virtual void *SnapGetItem(int SnapID, int Index, CSnapItem *pItem) const = 0;
 	virtual int SnapItemSize(int SnapID, int Index) const = 0;
-	virtual void SnapInvalidateItem(int SnapID, int Index) = 0;
 
 	virtual void SnapSetStaticsize(int ItemType, int Size) = 0;
 

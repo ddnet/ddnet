@@ -1,5 +1,5 @@
-#ifndef GAME_BEZIER_H
-#define GAME_BEZIER_H
+#ifndef BASE_BEZIER_H
+#define BASE_BEZIER_H
 
 // Evaluates the Bernstein polynomial of degree 3/a one-dimensional Bezier curve
 //
@@ -24,4 +24,4 @@ public:
 	static CCubicBezier With(float Start, float StartDerivative, float EndDerivative, float End);
 };
 
-#endif // GAME_BEZIER_H
+#endif // BASE_BEZIER_H

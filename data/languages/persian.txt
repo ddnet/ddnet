@@ -27,12 +27,8 @@ Address
 == ﺱﺭﺩﺁ
 All
 == ﻪﻤﻫ
-Are you sure that you want to delete the demo?
-== ؟ﺪﯿﻨﻛ ﻑﺬﺣ ﺍﺭ ﻮﻣﺩ ﻞﯾﺎﻓ ﺪﯿﻫﺍﻮﺧ ﯽﻣ ﺎﯾﺁ
 Are you sure that you want to quit?
 == ؟ﺪﯾﻮﺷ ﺝﺭﺎﺧ ﺪﯿﻫﺍﻮﺧ ﯽﻣ ﻪﻛ ﺪﯿﺘﺴﻫ ﻦﺌﻤﻄﻣ ﺎﯾﺁ
-Are you sure that you want to remove the player from your friends list?
-== ؟ﺪﯿﻨﻛ ﻑﺬﺣ ﺩﻮﺧ ﻥﺎﺘﺳﻭﺩ ﺖﺴﯿﻟ ﺯﺍ ﺍﺭ ﻦﻜﯾﺯﺎﺑ ﺪﯿﻫﺍﻮﺧ ﯽﻣ ﺎﯾﺁ
 Automatically record demos
 == ﺭﺎﻛﺩﻮﺧ ﺕﺭﻮﺻ ﻪﺑ ﻮﻣﺩ ﻂﺒﺿ
 Automatically take game over screenshot
@@ -329,17 +325,11 @@ Yes
 Country / Region
 == ﻪﻘﻄﻨﻣ / ﺭﻮﺸﮐ
 
-Unable to delete the demo
-== ﺩﺭﺍﺪﻧ ﺩﻮﺟﻭ ﻮﻣﺩ ﻑﺬﺣ ﻥﺎﮑﻣﺍ
-
 Unable to rename the demo
 == ﺩﺭﺍﺪﻧ ﺩﻮﺟﻭ ﻮﻣﺩ ﻡﺎﻧ ﺮﯿﯿﻐﺗ ﻥﺎﮑﻣﺍ
 
 New name:
 == ﺪﯾﺪﺟ ﻢﺳﺍ
-
-Destination file already exist
-== ﺖﺳﺍ ﺩﻮﺟﻮﻣ ﻞﺒﻗ ﺯﺍ ﺪﺼﻘﻣ ﻞﯾﺎﻓ
 
 Show chat
 == ﺖﭼ ﻥﺩﺍﺩ ﻥﺎﺸﻧ
@@ -846,6 +836,9 @@ Personal best:
 Uploading map data to GPU
 == 
 
+The audio device couldn't be initialised.
+== 
+
 Trying to determine UDP connectivity...
 == 
 
@@ -864,12 +857,6 @@ Getting game info
 Requesting to join the game
 == 
 
-The server is running a non-standard tuning on a pure game type.
-== 
-
-The audio device couldn't be initialised.
-== 
-
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
 == 
 
@@ -879,13 +866,22 @@ It's recommended that you check the settings to adjust them to your liking befor
 Please enter your nickname below.
 == 
 
+Cancel
+== 
+
+File '%s' already exists, do you want to overwrite it?
+== 
+
 Join Tutorial Server
 == 
 
 Skip Tutorial
 == 
 
-transmits your player name to info2.ddnet.tw
+transmits your player name to info.ddnet.org
+== 
+
+The server is running a non-standard tuning on a pure game type.
 == 
 
 Loading menu images
@@ -915,6 +911,51 @@ CHN
 Leak IP
 == 
 
+Are you sure that you want to remove the player '%s' from your friends list?
+== 
+
+Are you sure that you want to remove the clan '%s' from your friends list?
+== 
+
+Play the current demo
+== 
+
+Pause the current demo
+== 
+
+Stop the current demo
+== 
+
+Go back one tick
+== 
+
+Go forward one tick
+== 
+
+Slow down the demo
+== 
+
+Speed up the demo
+== 
+
+Mark the beginning of a cut
+== 
+
+Mark the end of a cut
+== 
+
+Export cut as a separate demo
+== 
+
+Go back one marker
+== 
+
+Go forward one marker
+== 
+
+Toggle keyboard shortcuts
+== 
+
 Loading demo files
 == 
 
@@ -933,10 +974,19 @@ Netversion:
 Fetch Info
 == 
 
+Are you sure that you want to delete the demo '%s'?
+== 
+
 Render
 == 
 
+Unable to delete the demo '%s'
+== 
+
 Loading ghost files
+== 
+
+Menu opened. Press Esc key again to close menu.
 == 
 
 Settings file
@@ -957,6 +1007,9 @@ Automatically create statboard csv
 Max CSVs
 == 
 
+Loading skin files
+== 
+
 Toggle to edit your dummy settings
 == 
 
@@ -973,9 +1026,6 @@ Skins
 == 
 
 Skins directory
-== 
-
-Loading skin files
 == 
 
 Hook collisions
@@ -1056,6 +1106,12 @@ UI mouse sens.
 == 
 
 Controller
+== 
+
+Reset controls
+== 
+
+Are you sure that you want to reset the controls to their defaults?
 == 
 
 Dummy
@@ -1268,10 +1324,37 @@ Normal Color
 Highlight Color
 == 
 
-Laser Outline Color
+Weapons
 == 
 
-Laser Inner Color
+Rifle Laser Outline Color
+== 
+
+Rifle Laser Inner Color
+== 
+
+Shotgun Laser Outline Color
+== 
+
+Shotgun Laser Inner Color
+== 
+
+Entities
+== 
+
+Door Laser Outline Color
+== 
+
+Door Laser Inner Color
+== 
+
+Freeze Laser Outline Color
+== 
+
+Freeze Laser Inner Color
+== 
+
+Set all to Rifle
 == 
 
 Save the best demo of each race
@@ -1337,9 +1420,6 @@ Show tiles layers from BG map
 Regular Background Color
 == 
 
-Try fast HTTP map download first
-== 
-
 New random timeout code
 == 
 
@@ -1353,9 +1433,6 @@ DDNet %s is available:
 == 
 
 DDNet Client updated!
-== 
-
-Entities
 == 
 
 Emoticons
@@ -1373,10 +1450,10 @@ Loading assets
 Assets directory
 == 
 
-https://ddnet.tw/discord
+https://ddnet.org/discord
 == 
 
-https://wiki.ddnet.tw/
+https://wiki.ddnet.org/
 == 
 
 Tutorial

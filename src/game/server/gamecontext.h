@@ -117,7 +117,8 @@ class CGameContext : public IGameServer
 	static void ConDrySave(IConsole::IResult *pResult, void *pUserData);
 	static void ConDumpAntibot(IConsole::IResult *pResult, void *pUserData);
 	static void ConchainSpecialMotdupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
-	static void ConchainGameinfoUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	static void ConchainGameinfoUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData); // gctf
+	static void ConDumpLog(IConsole::IResult *pResult, void *pUserData);
 
 	void Construct(int Resetting);
 	void Destruct(int Resetting);
@@ -307,6 +308,8 @@ public:
 	bool RateLimitPlayerVote(int ClientID);
 	bool RateLimitPlayerMapVote(int ClientID);
 
+	void OnUpdatePlayerServerInfo(char *aBuf, int BufSize, int ID) override;
+
 	std::shared_ptr<CScoreRandomMapResult> m_SqlRandomMapResult;
 
 private:
@@ -444,14 +447,34 @@ private:
 	int m_NumVoteMutes;
 	bool TryMute(const NETADDR *pAddr, int Secs, const char *pReason, bool InitialChatDelay);
 	void Mute(const NETADDR *pAddr, int Secs, const char *pDisplayName, const char *pReason = "", bool InitialChatDelay = false);
-	bool TryVoteMute(const NETADDR *pAddr, int Secs);
-	bool VoteMute(const NETADDR *pAddr, int Secs, const char *pDisplayName, int AuthedID);
+	bool TryVoteMute(const NETADDR *pAddr, int Secs, const char *pReason);
+	void VoteMute(const NETADDR *pAddr, int Secs, const char *pReason, const char *pDisplayName, int AuthedID);
 	bool VoteUnmute(const NETADDR *pAddr, const char *pDisplayName, int AuthedID);
 	void Whisper(int ClientID, char *pStr);
 	void WhisperID(int ClientID, int VictimID, const char *pMessage);
 	void Converse(int ClientID, char *pStr);
 	bool IsVersionBanned(int Version);
 	void UnlockTeam(int ClientID, int Team);
+
+	enum
+	{
+		MAX_LOG_SECONDS = 240,
+		MAX_LOGS = 256,
+	};
+	struct CLog
+	{
+		int64_t m_Timestamp;
+		bool m_FromServer;
+		char m_aDescription[128];
+		int m_ClientVersion;
+		char m_aClientName[MAX_NAME_LENGTH];
+		char m_aClientAddrStr[NETADDR_MAXSTRSIZE];
+	};
+	CLog m_aLogs[MAX_LOGS];
+	int m_FirstLog;
+	int m_LastLog;
+
+	void LogEvent(const char *Description, int ClientID);
 
 public:
 	CLayers *Layers() { return &m_Layers; }

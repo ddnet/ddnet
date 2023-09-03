@@ -1,4 +1,5 @@
 #include "scoreworker.h"
+#include "base/system.h"
 
 #include <engine/server/databases/connection.h>
 #include <engine/server/databases/connection_pool.h>
@@ -393,7 +394,7 @@ bool CScoreWorker::MapInfo(IDbConnection *pSqlServer, const ISqlData *pGameData,
 	return false;
 }
 
-bool CScoreWorker::SaveScore(IDbConnection *pSqlServer, const ISqlData *pGameData, bool Failure, char *pError, int ErrorSize)
+bool CScoreWorker::SaveScore(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize)
 {
 	const CSqlScoreData *pData = dynamic_cast<const CSqlScoreData *>(pGameData);
 	CScorePlayerResult *pResult = dynamic_cast<CScorePlayerResult *>(pGameData->m_pResult.get());
@@ -401,52 +402,105 @@ bool CScoreWorker::SaveScore(IDbConnection *pSqlServer, const ISqlData *pGameDat
 
 	char aBuf[1024];
 
-	str_format(aBuf, sizeof(aBuf),
-		"SELECT COUNT(*) AS NumFinished FROM %s_race WHERE Map=? AND Name=? ORDER BY time ASC LIMIT 1",
-		pSqlServer->GetPrefix());
-	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+	if(w == Write::NORMAL_SUCCEEDED)
 	{
-		return true;
+		str_format(aBuf, sizeof(aBuf),
+			"DELETE FROM %s_race_backup WHERE GameId=? AND Name=? AND Timestamp=%s",
+			pSqlServer->GetPrefix(), pSqlServer->InsertTimestampAsUtc());
+		if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+		{
+			return true;
+		}
+		pSqlServer->BindString(1, pData->m_aGameUuid);
+		pSqlServer->BindString(2, pData->m_aName);
+		pSqlServer->BindString(3, pData->m_aTimestamp);
+		pSqlServer->Print();
+		int NumInserted;
+		pSqlServer->ExecuteUpdate(&NumInserted, pError, ErrorSize);
+		return false;
 	}
-	pSqlServer->BindString(1, pData->m_aMap);
-	pSqlServer->BindString(2, pData->m_aName);
+	if(w == Write::NORMAL_FAILED)
+	{
+		int NumInserted;
+		// move to non-tmp table succeded. delete from backup again
+		str_format(aBuf, sizeof(aBuf),
+			"INSERT INTO %s_race SELECT * FROM %s_race_backup WHERE GameId=? AND Name=? AND Timestamp=%s",
+			pSqlServer->GetPrefix(), pSqlServer->GetPrefix(), pSqlServer->InsertTimestampAsUtc());
+		if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+		{
+			return true;
+		}
+		pSqlServer->BindString(1, pData->m_aGameUuid);
+		pSqlServer->BindString(2, pData->m_aName);
+		pSqlServer->BindString(3, pData->m_aTimestamp);
+		pSqlServer->Print();
+		pSqlServer->ExecuteUpdate(&NumInserted, pError, ErrorSize);
 
-	bool End;
-	if(pSqlServer->Step(&End, pError, ErrorSize))
-	{
-		return true;
+		// move to non-tmp table succeded. delete from backup again
+		str_format(aBuf, sizeof(aBuf),
+			"DELETE FROM %s_race_backup WHERE GameId=? AND Name=? AND Timestamp=%s",
+			pSqlServer->GetPrefix(), pSqlServer->InsertTimestampAsUtc());
+		if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+		{
+			return true;
+		}
+		pSqlServer->BindString(1, pData->m_aGameUuid);
+		pSqlServer->BindString(2, pData->m_aName);
+		pSqlServer->BindString(3, pData->m_aTimestamp);
+		pSqlServer->Print();
+		pSqlServer->ExecuteUpdate(&NumInserted, pError, ErrorSize);
+		return false;
 	}
-	int NumFinished = pSqlServer->GetInt(1);
-	if(NumFinished == 0)
+
+	if(w == Write::NORMAL)
 	{
-		str_format(aBuf, sizeof(aBuf), "SELECT Points FROM %s_maps WHERE Map=?", pSqlServer->GetPrefix());
+		str_format(aBuf, sizeof(aBuf),
+			"SELECT COUNT(*) AS NumFinished FROM %s_race WHERE Map=? AND Name=? ORDER BY time ASC LIMIT 1",
+			pSqlServer->GetPrefix());
 		if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 		{
 			return true;
 		}
 		pSqlServer->BindString(1, pData->m_aMap);
+		pSqlServer->BindString(2, pData->m_aName);
 
-		bool End2;
-		if(pSqlServer->Step(&End2, pError, ErrorSize))
+		bool End;
+		if(pSqlServer->Step(&End, pError, ErrorSize))
 		{
 			return true;
 		}
-		if(!End2)
+		int NumFinished = pSqlServer->GetInt(1);
+		if(NumFinished == 0)
 		{
-			int Points = pSqlServer->GetInt(1);
-			if(pSqlServer->AddPoints(pData->m_aName, Points, pError, ErrorSize))
+			str_format(aBuf, sizeof(aBuf), "SELECT Points FROM %s_maps WHERE Map=?", pSqlServer->GetPrefix());
+			if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 			{
 				return true;
 			}
-			str_format(paMessages[0], sizeof(paMessages[0]),
-				"You earned %d point%s for finishing this map!",
-				Points, Points == 1 ? "" : "s");
+			pSqlServer->BindString(1, pData->m_aMap);
+
+			bool End2;
+			if(pSqlServer->Step(&End2, pError, ErrorSize))
+			{
+				return true;
+			}
+			if(!End2)
+			{
+				int Points = pSqlServer->GetInt(1);
+				if(pSqlServer->AddPoints(pData->m_aName, Points, pError, ErrorSize))
+				{
+					return true;
+				}
+				str_format(paMessages[0], sizeof(paMessages[0]),
+					"You earned %d point%s for finishing this map!",
+					Points, Points == 1 ? "" : "s");
+			}
 		}
 	}
 
 	// save score. Can't fail, because no UNIQUE/PRIMARY KEY constrain is defined.
 	str_format(aBuf, sizeof(aBuf),
-		"%s INTO %s_race("
+		"%s INTO %s_race%s("
 		"	Map, Name, Timestamp, Time, Server, "
 		"	cp1, cp2, cp3, cp4, cp5, cp6, cp7, cp8, cp9, cp10, cp11, cp12, cp13, "
 		"	cp14, cp15, cp16, cp17, cp18, cp19, cp20, cp21, cp22, cp23, cp24, cp25, "
@@ -457,6 +511,7 @@ bool CScoreWorker::SaveScore(IDbConnection *pSqlServer, const ISqlData *pGameDat
 		"	%.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f, "
 		"	?, %s)",
 		pSqlServer->InsertIgnore(), pSqlServer->GetPrefix(),
+		w == Write::NORMAL ? "" : "_backup",
 		pSqlServer->InsertTimestampAsUtc(), pData->m_Time,
 		pData->m_aCurrentTimeCp[0], pData->m_aCurrentTimeCp[1], pData->m_aCurrentTimeCp[2],
 		pData->m_aCurrentTimeCp[3], pData->m_aCurrentTimeCp[4], pData->m_aCurrentTimeCp[5],
@@ -481,108 +536,159 @@ bool CScoreWorker::SaveScore(IDbConnection *pSqlServer, const ISqlData *pGameDat
 	return pSqlServer->ExecuteUpdate(&NumInserted, pError, ErrorSize);
 }
 
-bool CScoreWorker::SaveTeamScore(IDbConnection *pSqlServer, const ISqlData *pGameData, bool Failure, char *pError, int ErrorSize)
+bool CScoreWorker::SaveTeamScore(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize)
 {
 	const CSqlTeamScoreData *pData = dynamic_cast<const CSqlTeamScoreData *>(pGameData);
 
 	char aBuf[512];
 
-	// get the names sorted in a tab separated string
-	std::vector<std::string> vNames;
-	for(unsigned int i = 0; i < pData->m_Size; i++)
-		vNames.emplace_back(pData->m_aaNames[i]);
-
-	std::sort(vNames.begin(), vNames.end());
-	str_format(aBuf, sizeof(aBuf),
-		"SELECT l.ID, Name, Time "
-		"FROM (" // preselect teams with first name in team
-		"  SELECT ID "
-		"  FROM %s_teamrace "
-		"  WHERE Map = ? AND Name = ? AND DDNet7 = %s"
-		") as l INNER JOIN %s_teamrace AS r ON l.ID = r.ID "
-		"ORDER BY l.ID, Name COLLATE %s",
-		pSqlServer->GetPrefix(), pSqlServer->False(), pSqlServer->GetPrefix(), pSqlServer->BinaryCollate());
-	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+	if(w == Write::NORMAL_SUCCEEDED)
 	{
-		return true;
-	}
-	pSqlServer->BindString(1, pData->m_aMap);
-	pSqlServer->BindString(2, pData->m_aaNames[0]);
-
-	bool FoundTeam = false;
-	float Time;
-	CTeamrank Teamrank;
-	bool End;
-	if(pSqlServer->Step(&End, pError, ErrorSize))
-	{
-		return true;
-	}
-	if(!End)
-	{
-		bool SearchTeamEnd = false;
-		while(!SearchTeamEnd)
+		str_format(aBuf, sizeof(aBuf),
+			"DELETE FROM %s_teamrace_backup WHERE GameId=?",
+			pSqlServer->GetPrefix());
+		if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 		{
-			Time = pSqlServer->GetFloat(3);
-			if(Teamrank.NextSqlResult(pSqlServer, &SearchTeamEnd, pError, ErrorSize))
-			{
-				return true;
-			}
-			if(Teamrank.SamePlayers(&vNames))
-			{
-				FoundTeam = true;
-				break;
-			}
+			return true;
 		}
+
+		// copy uuid, because mysql BindBlob doesn't support const buffers
+		CUuid TeamrankId = pData->m_TeamrankUuid;
+		pSqlServer->BindBlob(1, TeamrankId.m_aData, sizeof(TeamrankId.m_aData));
+		int NumInserted;
+		return pSqlServer->ExecuteUpdate(&NumInserted, pError, ErrorSize);
 	}
-	if(FoundTeam)
+	if(w == Write::NORMAL_FAILED)
 	{
-		dbg_msg("sql", "found team rank from same team (old time: %f, new time: %f)", Time, pData->m_Time);
-		if(pData->m_Time < Time)
+		int NumInserted;
+		CUuid TeamrankId = pData->m_TeamrankUuid;
+
+		str_format(aBuf, sizeof(aBuf),
+			"INSERT INTO %s_teamrace SELECT * FROM %s_teamrace_backup WHERE GameId=?",
+			pSqlServer->GetPrefix(), pSqlServer->GetPrefix());
+		if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 		{
-			str_format(aBuf, sizeof(aBuf),
-				"UPDATE %s_teamrace SET Time=%.2f, Timestamp=?, DDNet7=%s, GameID=? WHERE ID = ?",
-				pSqlServer->GetPrefix(), pData->m_Time, pSqlServer->False());
-			if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
-			{
-				return true;
-			}
-			pSqlServer->BindString(1, pData->m_aTimestamp);
-			pSqlServer->BindString(2, pData->m_aGameUuid);
-			pSqlServer->BindBlob(3, Teamrank.m_TeamID.m_aData, sizeof(Teamrank.m_TeamID.m_aData));
-			pSqlServer->Print();
-			int NumUpdated;
-			if(pSqlServer->ExecuteUpdate(&NumUpdated, pError, ErrorSize))
-			{
-				return true;
-			}
+			return true;
 		}
+		pSqlServer->BindBlob(1, TeamrankId.m_aData, sizeof(TeamrankId.m_aData));
+		if(pSqlServer->ExecuteUpdate(&NumInserted, pError, ErrorSize))
+		{
+			return true;
+		}
+
+		str_format(aBuf, sizeof(aBuf),
+			"DELETE FROM %s_teamrace_backup WHERE GameId=?",
+			pSqlServer->GetPrefix());
+		if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+		{
+			return true;
+		}
+		pSqlServer->BindBlob(1, TeamrankId.m_aData, sizeof(TeamrankId.m_aData));
+		return pSqlServer->ExecuteUpdate(&NumInserted, pError, ErrorSize);
 	}
-	else
+
+	if(w == Write::NORMAL)
 	{
-		CUuid GameID = RandomUuid();
+		// get the names sorted in a tab separated string
+		std::vector<std::string> vNames;
 		for(unsigned int i = 0; i < pData->m_Size; i++)
+			vNames.emplace_back(pData->m_aaNames[i]);
+
+		std::sort(vNames.begin(), vNames.end());
+		str_format(aBuf, sizeof(aBuf),
+			"SELECT l.ID, Name, Time "
+			"FROM (" // preselect teams with first name in team
+			"  SELECT ID "
+			"  FROM %s_teamrace "
+			"  WHERE Map = ? AND Name = ? AND DDNet7 = %s"
+			") as l INNER JOIN %s_teamrace AS r ON l.ID = r.ID "
+			"ORDER BY l.ID, Name COLLATE %s",
+			pSqlServer->GetPrefix(), pSqlServer->False(), pSqlServer->GetPrefix(), pSqlServer->BinaryCollate());
+		if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 		{
-			// if no entry found... create a new one
-			str_format(aBuf, sizeof(aBuf),
-				"%s INTO %s_teamrace(Map, Name, Timestamp, Time, ID, GameID, DDNet7) "
-				"VALUES (?, ?, %s, %.2f, ?, ?, %s)",
-				pSqlServer->InsertIgnore(), pSqlServer->GetPrefix(),
-				pSqlServer->InsertTimestampAsUtc(), pData->m_Time, pSqlServer->False());
-			if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+			return true;
+		}
+		pSqlServer->BindString(1, pData->m_aMap);
+		pSqlServer->BindString(2, pData->m_aaNames[0]);
+
+		bool FoundTeam = false;
+		float Time;
+		CTeamrank Teamrank;
+		bool End;
+		if(pSqlServer->Step(&End, pError, ErrorSize))
+		{
+			return true;
+		}
+		if(!End)
+		{
+			bool SearchTeamEnd = false;
+			while(!SearchTeamEnd)
 			{
-				return true;
+				Time = pSqlServer->GetFloat(3);
+				if(Teamrank.NextSqlResult(pSqlServer, &SearchTeamEnd, pError, ErrorSize))
+				{
+					return true;
+				}
+				if(Teamrank.SamePlayers(&vNames))
+				{
+					FoundTeam = true;
+					break;
+				}
 			}
-			pSqlServer->BindString(1, pData->m_aMap);
-			pSqlServer->BindString(2, pData->m_aaNames[i]);
-			pSqlServer->BindString(3, pData->m_aTimestamp);
-			pSqlServer->BindBlob(4, GameID.m_aData, sizeof(GameID.m_aData));
-			pSqlServer->BindString(5, pData->m_aGameUuid);
-			pSqlServer->Print();
-			int NumInserted;
-			if(pSqlServer->ExecuteUpdate(&NumInserted, pError, ErrorSize))
+		}
+		if(FoundTeam)
+		{
+			dbg_msg("sql", "found team rank from same team (old time: %f, new time: %f)", Time, pData->m_Time);
+			if(pData->m_Time < Time)
 			{
-				return true;
+				str_format(aBuf, sizeof(aBuf),
+					"UPDATE %s_teamrace SET Time=%.2f, Timestamp=%s, DDNet7=%s, GameID=? WHERE ID = ?",
+					pSqlServer->GetPrefix(), pData->m_Time, pSqlServer->InsertTimestampAsUtc(), pSqlServer->False());
+				if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+				{
+					return true;
+				}
+				pSqlServer->BindString(1, pData->m_aTimestamp);
+				pSqlServer->BindString(2, pData->m_aGameUuid);
+				pSqlServer->BindBlob(3, Teamrank.m_TeamID.m_aData, sizeof(Teamrank.m_TeamID.m_aData));
+				pSqlServer->Print();
+				int NumUpdated;
+				if(pSqlServer->ExecuteUpdate(&NumUpdated, pError, ErrorSize))
+				{
+					return true;
+				}
+				// return error if we didn't update any rows
+				return NumUpdated == 0;
 			}
+			return false;
+		}
+	}
+
+	for(unsigned int i = 0; i < pData->m_Size; i++)
+	{
+		// if no entry found... create a new one
+		str_format(aBuf, sizeof(aBuf),
+			"%s INTO %s_teamrace%s(Map, Name, Timestamp, Time, ID, GameID, DDNet7) "
+			"VALUES (?, ?, %s, %.2f, ?, ?, %s)",
+			pSqlServer->InsertIgnore(), pSqlServer->GetPrefix(),
+			w == Write::NORMAL ? "" : "_backup",
+			pSqlServer->InsertTimestampAsUtc(), pData->m_Time, pSqlServer->False());
+		if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+		{
+			return true;
+		}
+		pSqlServer->BindString(1, pData->m_aMap);
+		pSqlServer->BindString(2, pData->m_aaNames[i]);
+		pSqlServer->BindString(3, pData->m_aTimestamp);
+		// copy uuid, because mysql BindBlob doesn't support const buffers
+		CUuid TeamrankId = pData->m_TeamrankUuid;
+		pSqlServer->BindBlob(4, TeamrankId.m_aData, sizeof(TeamrankId.m_aData));
+		pSqlServer->BindString(5, pData->m_aGameUuid);
+		pSqlServer->Print();
+		int NumInserted;
+		if(pSqlServer->ExecuteUpdate(&NumInserted, pError, ErrorSize))
+		{
+			return true;
 		}
 	}
 	return false;
@@ -1364,10 +1470,55 @@ bool CScoreWorker::RandomUnfinishedMap(IDbConnection *pSqlServer, const ISqlData
 	return false;
 }
 
-bool CScoreWorker::SaveTeam(IDbConnection *pSqlServer, const ISqlData *pGameData, bool Failure, char *pError, int ErrorSize)
+bool CScoreWorker::SaveTeam(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize)
 {
 	const CSqlTeamSave *pData = dynamic_cast<const CSqlTeamSave *>(pGameData);
 	CScoreSaveResult *pResult = dynamic_cast<CScoreSaveResult *>(pGameData->m_pResult.get());
+
+	if(w == Write::NORMAL_SUCCEEDED)
+	{
+		// write succeded on mysql server. delete from sqlite again
+		char aBuf[128] = {0};
+		str_format(aBuf, sizeof(aBuf),
+			"DELETE FROM %s_saves_backup WHERE Code = ?",
+			pSqlServer->GetPrefix());
+		if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+		{
+			return true;
+		}
+		pSqlServer->BindString(1, pData->m_aGeneratedCode);
+		bool End;
+		return pSqlServer->Step(&End, pError, ErrorSize);
+	}
+	if(w == Write::NORMAL_FAILED)
+	{
+		char aBuf[128] = {0};
+		bool End;
+		// move to non-tmp table succeded. delete from backup again
+		str_format(aBuf, sizeof(aBuf),
+			"INSERT INTO %s_saves SELECT * FROM %s_saves_backup WHERE Code = ?",
+			pSqlServer->GetPrefix(), pSqlServer->GetPrefix());
+		if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+		{
+			return true;
+		}
+		pSqlServer->BindString(1, pData->m_aGeneratedCode);
+		if(pSqlServer->Step(&End, pError, ErrorSize))
+		{
+			return true;
+		}
+
+		// move to non-tmp table succeded. delete from backup again
+		str_format(aBuf, sizeof(aBuf),
+			"DELETE FROM %s_saves_backup WHERE Code = ?",
+			pSqlServer->GetPrefix());
+		if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+		{
+			return true;
+		}
+		pSqlServer->BindString(1, pData->m_aGeneratedCode);
+		return pSqlServer->Step(&End, pError, ErrorSize);
+	}
 
 	char aSaveID[UUID_MAXSTRSIZE];
 	FormatUuid(pResult->m_SaveID, aSaveID, UUID_MAXSTRSIZE);
@@ -1375,8 +1526,8 @@ bool CScoreWorker::SaveTeam(IDbConnection *pSqlServer, const ISqlData *pGameData
 	char *pSaveState = pResult->m_SavedTeam.GetString();
 	char aBuf[65536];
 
-	dbg_msg("score/dbg", "code=%s failure=%d", pData->m_aCode, (int)Failure);
-	bool UseGeneratedCode = pData->m_aCode[0] == '\0' || Failure;
+	dbg_msg("score/dbg", "code=%s failure=%d", pData->m_aCode, (int)w);
+	bool UseGeneratedCode = pData->m_aCode[0] == '\0' || w != Write::NORMAL;
 
 	bool Retry = false;
 	// two tries, first use the user provided code, then the autogenerated
@@ -1390,9 +1541,10 @@ bool CScoreWorker::SaveTeam(IDbConnection *pSqlServer, const ISqlData *pGameData
 			str_copy(aCode, pData->m_aCode, sizeof(aCode));
 
 		str_format(aBuf, sizeof(aBuf),
-			"%s INTO %s_saves(Savegame, Map, Code, Timestamp, Server, SaveID, DDNet7) "
+			"%s INTO %s_saves%s(Savegame, Map, Code, Timestamp, Server, SaveID, DDNet7) "
 			"VALUES (?, ?, ?, CURRENT_TIMESTAMP, ?, ?, %s)",
-			pSqlServer->InsertIgnore(), pSqlServer->GetPrefix(), pSqlServer->False());
+			pSqlServer->InsertIgnore(), pSqlServer->GetPrefix(),
+			w == Write::NORMAL ? "" : "_backup", pSqlServer->False());
 		if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 		{
 			return true;
@@ -1410,8 +1562,9 @@ bool CScoreWorker::SaveTeam(IDbConnection *pSqlServer, const ISqlData *pGameData
 		}
 		if(NumInserted == 1)
 		{
-			if(!Failure)
+			if(w == Write::NORMAL)
 			{
+				pResult->m_aBroadcast[0] = '\0';
 				if(str_comp(pData->m_aServer, g_Config.m_SvSqlServerName) == 0)
 				{
 					str_format(pResult->m_aMessage, sizeof(pResult->m_aMessage),
@@ -1462,8 +1615,10 @@ bool CScoreWorker::SaveTeam(IDbConnection *pSqlServer, const ISqlData *pGameData
 	return false;
 }
 
-bool CScoreWorker::LoadTeam(IDbConnection *pSqlServer, const ISqlData *pGameData, bool Failure, char *pError, int ErrorSize)
+bool CScoreWorker::LoadTeam(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize)
 {
+	if(w == Write::NORMAL_SUCCEEDED || Write::BACKUP_FIRST)
+		return false;
 	const CSqlTeamLoad *pData = dynamic_cast<const CSqlTeamLoad *>(pGameData);
 	CScoreSaveResult *pResult = dynamic_cast<CScoreSaveResult *>(pGameData->m_pResult.get());
 	pResult->m_Status = CScoreSaveResult::LOAD_FAILED;
@@ -1531,7 +1686,11 @@ bool CScoreWorker::LoadTeam(IDbConnection *pSqlServer, const ISqlData *pGameData
 	}
 	if(!Found)
 	{
-		str_copy(pResult->m_aMessage, "You don't belong to this team", sizeof(pResult->m_aMessage));
+		str_copy(pResult->m_aMessage, "This save exists, but you are not part of it. "
+					      "Make sure you use the same name as you had when saving. "
+					      "If you saved with an already used code, you get a new random save code, "
+					      "check ddnet-saves.txt in config_directory.",
+			sizeof(pResult->m_aMessage));
 		return false;
 	}
 

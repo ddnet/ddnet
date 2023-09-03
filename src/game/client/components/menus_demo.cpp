@@ -154,19 +154,23 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		static int s_RemoveChat = 0;
 
 		static CButtonContainer s_ButtonAbort;
-		if(DoButton_Menu(&s_ButtonAbort, Localize("Abort"), 0, &Abort) || m_EscapePressed)
+		if(DoButton_Menu(&s_ButtonAbort, Localize("Abort"), 0, &Abort) || UI()->ConsumeHotkey(CUI::HOTKEY_ESCAPE))
 			m_DemoPlayerState = DEMOPLAYER_NONE;
 
 		static CButtonContainer s_ButtonOk;
-		if(DoButton_Menu(&s_ButtonOk, Localize("Ok"), 0, &Ok) || m_EnterPressed)
+		if(DoButton_Menu(&s_ButtonOk, Localize("Ok"), 0, &Ok) || UI()->ConsumeHotkey(CUI::HOTKEY_ENTER))
 		{
-			if(str_comp(m_vDemos[m_DemolistSelectedIndex].m_aFilename, m_aCurrentDemoFile) == 0)
+			char aDemoName[IO_MAX_PATH_LENGTH];
+			DemoPlayer()->GetDemoName(aDemoName, sizeof(aDemoName));
+			str_append(aDemoName, ".demo", sizeof(aDemoName));
+
+			if(!str_endswith(m_aCurrentDemoFile, ".demo"))
+				str_append(m_aCurrentDemoFile, ".demo", sizeof(m_aCurrentDemoFile));
+
+			if(str_comp(aDemoName, m_aCurrentDemoFile) == 0)
 				str_copy(m_aDemoPlayerPopupHint, Localize("Please use a different name"));
 			else
 			{
-				if(!str_endswith(m_aCurrentDemoFile, ".demo"))
-					str_append(m_aCurrentDemoFile, ".demo", sizeof(m_aCurrentDemoFile));
-
 				char aPath[IO_MAX_PATH_LENGTH];
 				str_format(aPath, sizeof(aPath), "%s/%s", m_aCurrentDemoFolder, m_aCurrentDemoFile);
 
@@ -179,6 +183,8 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 				}
 				else
 				{
+					if(DemoFile)
+						io_close(DemoFile);
 					m_DemoPlayerState = DEMOPLAYER_NONE;
 					Client()->DemoSlice(aPath, CMenus::DemoFilterChat, &s_RemoveChat);
 					DemolistPopulate();
@@ -215,7 +221,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	if(m_pClient->m_GameConsole.IsClosed() && m_DemoPlayerState == DEMOPLAYER_NONE && g_Config.m_ClDemoKeyboardShortcuts)
 	{
 		// increase/decrease speed
-		if(!Input()->KeyIsPressed(KEY_LSHIFT) && !Input()->KeyIsPressed(KEY_RSHIFT))
+		if(!Input()->ShiftIsPressed())
 		{
 			if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP) || Input()->KeyPress(KEY_UP))
 			{
@@ -319,13 +325,13 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 
 	MainView.HSplitBottom(TotalHeight, 0, &MainView);
 	MainView.VSplitLeft(50.0f, 0, &MainView);
-	MainView.VSplitLeft(450.0f, &MainView, 0);
+	MainView.VSplitLeft(600.0f, &MainView, 0);
 
 	MainView.Draw(ms_ColorTabbarActive, IGraphics::CORNER_T, 10.0f);
 
 	MainView.Margin(5.0f, &MainView);
 
-	CUIRect SeekBar, ButtonBar, NameBar;
+	CUIRect SeekBar, ButtonBar, NameBar, SpeedBar;
 
 	MainView.HSplitTop(SeekBarHeight, &SeekBar, &ButtonBar);
 	ButtonBar.HSplitTop(Margins, 0, &ButtonBar);
@@ -347,6 +353,20 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		FilledBar.w = 10.0f + (FilledBar.w - 10.0f) * Amount;
 		FilledBar.Draw(ColorRGBA(1, 1, 1, 0.5f), IGraphics::CORNER_ALL, 5.0f);
 
+		// draw highlighting
+		if(g_Config.m_ClDemoSliceBegin != -1 && g_Config.m_ClDemoSliceEnd != -1)
+		{
+			float RatioBegin = (g_Config.m_ClDemoSliceBegin - pInfo->m_FirstTick) / (float)TotalTicks;
+			float RatioEnd = (g_Config.m_ClDemoSliceEnd - pInfo->m_FirstTick) / (float)TotalTicks;
+			float Span = ((SeekBar.w - 10.0f) * RatioEnd) - ((SeekBar.w - 10.0f) * RatioBegin);
+			Graphics()->TextureClear();
+			Graphics()->QuadsBegin();
+			Graphics()->SetColor(1.0f, 0.0f, 0.0f, 0.25f);
+			IGraphics::CQuadItem QuadItem(10.0f + SeekBar.x + (SeekBar.w - 10.0f) * RatioBegin, SeekBar.y, Span, SeekBar.h);
+			Graphics()->QuadsDrawTL(&QuadItem, 1);
+			Graphics()->QuadsEnd();
+		}
+
 		// draw markers
 		for(int i = 0; i < pInfo->m_NumTimelineMarkers; i++)
 		{
@@ -354,7 +374,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 			Graphics()->TextureClear();
 			Graphics()->QuadsBegin();
 			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
-			IGraphics::CQuadItem QuadItem(SeekBar.x + (SeekBar.w - 10.0f) * Ratio, SeekBar.y, UI()->PixelSize(), SeekBar.h);
+			IGraphics::CQuadItem QuadItem(8.0f + SeekBar.x + (SeekBar.w - 10.0f) * Ratio, SeekBar.y, UI()->PixelSize(), SeekBar.h);
 			Graphics()->QuadsDrawTL(&QuadItem, 1);
 			Graphics()->QuadsEnd();
 		}
@@ -404,7 +424,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 				static float s_PrevAmount = 0.0f;
 				float AmountSeek = (UI()->MouseX() - SeekBar.x) / SeekBar.w;
 
-				if(Input()->KeyIsPressed(KEY_LSHIFT) || Input()->KeyIsPressed(KEY_RSHIFT))
+				if(Input()->ShiftIsPressed())
 				{
 					AmountSeek = s_PrevAmount + (AmountSeek - s_PrevAmount) * 0.05f;
 					if(AmountSeek > 0.0f && AmountSeek < 1.0f && absolute(s_PrevAmount - AmountSeek) >= 0.0001f)
@@ -454,19 +474,34 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	GameClient()->m_Tooltips.DoToolTip(&s_PlayPauseButton, &Button, pInfo->m_Paused ? Localize("Play the current demo") : Localize("Pause the current demo"));
 
 	// stop button
-
 	ButtonBar.VSplitLeft(Margins, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
 	static CButtonContainer s_ResetButton;
 	if(DoButton_FontIcon(&s_ResetButton, "\xEF\x81\x8D", false, &Button, IGraphics::CORNER_ALL))
 	{
 		DemoPlayer()->Pause();
-		DemoPlayer()->SeekPercent(0.0f);
+		PositionToSeek = 0.0f;
 	}
 	GameClient()->m_Tooltips.DoToolTip(&s_ResetButton, &Button, Localize("Stop the current demo"));
 
-	// slowdown
+	// one tick back
+	ButtonBar.VSplitLeft(Margins + 10.0f, 0, &ButtonBar);
+	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
+	static CButtonContainer s_OneTickBackButton;
+	if(DoButton_FontIcon(&s_OneTickBackButton, "\xEF\x81\x93", 0, &Button, IGraphics::CORNER_ALL))
+		DemoSeekTick(IDemoPlayer::TICK_PREVIOUS);
+	GameClient()->m_Tooltips.DoToolTip(&s_OneTickBackButton, &Button, Localize("Go back one tick"));
+
+	// one tick forward
 	ButtonBar.VSplitLeft(Margins, 0, &ButtonBar);
+	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
+	static CButtonContainer s_OneTickForwardButton;
+	if(DoButton_FontIcon(&s_OneTickForwardButton, "\xEF\x81\x94", 0, &Button, IGraphics::CORNER_ALL))
+		DemoSeekTick(IDemoPlayer::TICK_NEXT);
+	GameClient()->m_Tooltips.DoToolTip(&s_OneTickForwardButton, &Button, Localize("Go forward one tick"));
+
+	// slowdown
+	ButtonBar.VSplitLeft(Margins + 10.0f, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
 	static CButtonContainer s_SlowDownButton;
 	if(DoButton_FontIcon(&s_SlowDownButton, "\xEF\x81\x8A", 0, &Button, IGraphics::CORNER_ALL))
@@ -482,38 +517,81 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	GameClient()->m_Tooltips.DoToolTip(&s_FastForwardButton, &Button, Localize("Speed up the demo"));
 
 	// speed meter
-	ButtonBar.VSplitLeft(Margins * 3, 0, &ButtonBar);
+	ButtonBar.VSplitLeft(Margins * 12, &SpeedBar, &ButtonBar);
 	char aBuffer[64];
 	str_format(aBuffer, sizeof(aBuffer), "×%g", pInfo->m_Speed);
-	UI()->DoLabel(&ButtonBar, aBuffer, Button.h * 0.7f, TEXTALIGN_LEFT);
+	UI()->DoLabel(&SpeedBar, aBuffer, Button.h * 0.7f, TEXTALIGN_CENTER);
 
 	// slice begin button
-	ButtonBar.VSplitLeft(Margins * 10, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
 	static CButtonContainer s_SliceBeginButton;
 	if(DoButton_FontIcon(&s_SliceBeginButton, "\xEF\x8B\xB5", 0, &Button, IGraphics::CORNER_ALL))
+	{
 		Client()->DemoSliceBegin();
-	GameClient()->m_Tooltips.DoToolTip(&s_SliceBeginButton, &Button, Localize("Slice the beginning of a cut"));
+		if(CurrentTick > (g_Config.m_ClDemoSliceEnd - pInfo->m_FirstTick))
+			g_Config.m_ClDemoSliceEnd = -1;
+	}
+	GameClient()->m_Tooltips.DoToolTip(&s_SliceBeginButton, &Button, Localize("Mark the beginning of a cut"));
 
 	// slice end button
 	ButtonBar.VSplitLeft(Margins, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
 	static CButtonContainer s_SliceEndButton;
 	if(DoButton_FontIcon(&s_SliceEndButton, "\xEF\x8B\xB6", 0, &Button, IGraphics::CORNER_ALL))
+	{
 		Client()->DemoSliceEnd();
-	GameClient()->m_Tooltips.DoToolTip(&s_SliceEndButton, &Button, Localize("Slice the end of a cut"));
+		if(CurrentTick < (g_Config.m_ClDemoSliceBegin - pInfo->m_FirstTick))
+			g_Config.m_ClDemoSliceBegin = -1;
+	}
+	GameClient()->m_Tooltips.DoToolTip(&s_SliceEndButton, &Button, Localize("Mark the end of a cut"));
 
 	// slice save button
 	ButtonBar.VSplitLeft(Margins, 0, &ButtonBar);
 	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
 	static CButtonContainer s_SliceSaveButton;
-	if(DoButton_FontIcon(&s_SliceSaveButton, "\xEF\x80\xBD", 0, &Button, IGraphics::CORNER_ALL))
+	if(DoButton_FontIcon(&s_SliceSaveButton, "\xEF\x82\x8E", 0, &Button, IGraphics::CORNER_ALL))
 	{
-		str_copy(m_aCurrentDemoFile, m_vDemos[m_DemolistSelectedIndex].m_aFilename);
+		DemoPlayer()->GetDemoName(m_aCurrentDemoFile, sizeof(m_aCurrentDemoFile));
+		str_append(m_aCurrentDemoFile, ".demo", sizeof(m_aCurrentDemoFile));
 		m_aDemoPlayerPopupHint[0] = '\0';
 		m_DemoPlayerState = DEMOPLAYER_SLICE_SAVE;
 	}
-	GameClient()->m_Tooltips.DoToolTip(&s_SliceSaveButton, &Button, Localize("Export cut as a seperate demo"));
+	GameClient()->m_Tooltips.DoToolTip(&s_SliceSaveButton, &Button, Localize("Export cut as a separate demo"));
+
+	// threshold value, accounts for slight inaccuracy when setting demo position
+	const int Threshold = 10;
+
+	// one marker back
+	ButtonBar.VSplitLeft(Margins + 20.0f, 0, &ButtonBar);
+	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
+	static CButtonContainer s_OneMarkerBackButton;
+	if(DoButton_FontIcon(&s_OneMarkerBackButton, "\xEF\x81\x88", 0, &Button, IGraphics::CORNER_ALL))
+		for(int i = pInfo->m_NumTimelineMarkers - 1; i >= 0; i--)
+		{
+			if((pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) < CurrentTick && absolute(((pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) - CurrentTick)) > Threshold)
+			{
+				PositionToSeek = (float)(pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) / TotalTicks;
+				break;
+			}
+			PositionToSeek = 0.0f;
+		}
+	GameClient()->m_Tooltips.DoToolTip(&s_OneMarkerBackButton, &Button, Localize("Go back one marker"));
+
+	// one marker forward
+	ButtonBar.VSplitLeft(Margins, 0, &ButtonBar);
+	ButtonBar.VSplitLeft(ButtonbarHeight, &Button, &ButtonBar);
+	static CButtonContainer s_OneMarkerForwardButton;
+	if(DoButton_FontIcon(&s_OneMarkerForwardButton, "\xEF\x81\x91", 0, &Button, IGraphics::CORNER_ALL))
+		for(int i = 0; i < pInfo->m_NumTimelineMarkers; i++)
+		{
+			if((pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) > CurrentTick && absolute(((pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) - CurrentTick)) > Threshold)
+			{
+				PositionToSeek = (float)(pInfo->m_aTimelineMarkers[i] - pInfo->m_FirstTick) / TotalTicks;
+				break;
+			}
+			PositionToSeek = 1.0f;
+		}
+	GameClient()->m_Tooltips.DoToolTip(&s_OneMarkerForwardButton, &Button, Localize("Go forward one marker"));
 
 	// close button
 	ButtonBar.VSplitRight(ButtonbarHeight * 3, &ButtonBar, &Button);
@@ -535,9 +613,9 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 	GameClient()->m_Tooltips.DoToolTip(&s_KeyboardShortcutsButton, &Button, Localize("Toggle keyboard shortcuts"));
 
 	// demo name
-	char aDemoName[64] = {0};
+	char aDemoName[IO_MAX_PATH_LENGTH];
 	DemoPlayer()->GetDemoName(aDemoName, sizeof(aDemoName));
-	char aBuf[128];
+	char aBuf[IO_MAX_PATH_LENGTH + 128];
 	str_format(aBuf, sizeof(aBuf), Localize("Demofile: %s"), aDemoName);
 	CTextCursor Cursor;
 	TextRender()->SetCursor(&Cursor, NameBar.x, NameBar.y + (NameBar.h - (Button.h * 0.5f)) / 2.f, Button.h * 0.5f, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
@@ -705,7 +783,7 @@ CMenus::CListboxItem CMenus::UiDoListboxNextItem(const void *pId, bool Selected,
 		{
 			gs_ListBoxDoneEvents = 1;
 
-			if(m_EnterPressed || (DoubleClickable && Input()->MouseDoubleClick()))
+			if(UI()->ConsumeHotkey(CUI::HOTKEY_ENTER) || (DoubleClickable && Input()->MouseDoubleClick()))
 			{
 				gs_ListBoxItemActivated = true;
 				UI()->SetActiveItem(nullptr);
@@ -817,7 +895,7 @@ int CMenus::DemolistFetchCallback(const CFsFileInfo *pInfo, int IsDir, int Stora
 	}
 	else
 	{
-		str_truncate(Item.m_aName, sizeof(Item.m_aName), pInfo->m_pName, str_length(pInfo->m_pName) - 5);
+		str_truncate(Item.m_aName, sizeof(Item.m_aName), pInfo->m_pName, str_length(pInfo->m_pName) - str_length(".demo"));
 		Item.m_InfosLoaded = false;
 		Item.m_Date = pInfo->m_TimeModified;
 	}
@@ -880,7 +958,7 @@ bool CMenus::FetchHeader(CDemoItem &Item)
 {
 	if(!Item.m_InfosLoaded)
 	{
-		char aBuffer[512];
+		char aBuffer[IO_MAX_PATH_LENGTH];
 		str_format(aBuffer, sizeof(aBuffer), "%s/%s", m_aCurrentDemoFolder, Item.m_aFilename);
 		Item.m_Valid = DemoPlayer()->GetDemoInfo(Storage(), aBuffer, Item.m_StorageType, &Item.m_Info, &Item.m_TimelineMarkers, &Item.m_MapInfo);
 		Item.m_InfosLoaded = true;
@@ -1052,7 +1130,6 @@ void CMenus::RenderDemoList(CUIRect MainView)
 		CLocConstString m_Caption;
 		int m_Direction;
 		float m_Width;
-		int m_Flags;
 		CUIRect m_Rect;
 		CUIRect m_Spacer;
 	};
@@ -1066,10 +1143,10 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	};
 
 	static CColumn s_aCols[] = {
-		{COL_DEMONAME, SORT_DEMONAME, "Demo", 0, 0.0f, 0, {0}, {0}},
-		{COL_MARKERS, SORT_MARKERS, "Markers", 1, 75.0f, 0, {0}, {0}},
-		{COL_LENGTH, SORT_LENGTH, "Length", 1, 75.0f, 0, {0}, {0}},
-		{COL_DATE, SORT_DATE, "Date", 1, 160.0f, 1, {0}, {0}},
+		{COL_DEMONAME, SORT_DEMONAME, "Demo", 0, 0.0f, {0}, {0}},
+		{COL_MARKERS, SORT_MARKERS, "Markers", 1, 75.0f, {0}, {0}},
+		{COL_LENGTH, SORT_LENGTH, "Length", 1, 75.0f, {0}, {0}},
+		{COL_DATE, SORT_DATE, "Date", 1, 160.0f, {0}, {0}},
 	};
 	/* This is just for scripts/update_localization.py to work correctly. Don't remove!
 		Localize("Demo");Localize("Markers");Localize("Length");Localize("Date");
@@ -1264,7 +1341,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	UI()->ClipDisable();
 
 	bool Activated = false;
-	if(m_EnterPressed || (DoubleClicked && Input()->MouseDoubleClick()))
+	if(UI()->ConsumeHotkey(CUI::HOTKEY_ENTER) || (DoubleClicked && Input()->MouseDoubleClick()))
 	{
 		UI()->SetActiveItem(nullptr);
 		Activated = true;
@@ -1295,9 +1372,8 @@ void CMenus::RenderDemoList(CUIRect MainView)
 					fs_parent_dir(m_aCurrentDemoFolder);
 				else // sub folder
 				{
-					char aTemp[256];
-					str_copy(aTemp, m_aCurrentDemoFolder);
-					str_format(m_aCurrentDemoFolder, sizeof(m_aCurrentDemoFolder), "%s/%s", aTemp, m_vDemos[m_DemolistSelectedIndex].m_aFilename);
+					str_append(m_aCurrentDemoFolder, "/", sizeof(m_aCurrentDemoFolder));
+					str_append(m_aCurrentDemoFolder, m_vDemos[m_DemolistSelectedIndex].m_aFilename, sizeof(m_aCurrentDemoFolder));
 					m_DemolistStorageType = m_vDemos[m_DemolistSelectedIndex].m_StorageType;
 				}
 				DemolistPopulate();
@@ -1305,7 +1381,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 			}
 			else // file
 			{
-				char aBuf[512];
+				char aBuf[IO_MAX_PATH_LENGTH];
 				str_format(aBuf, sizeof(aBuf), "%s/%s", m_aCurrentDemoFolder, m_vDemos[m_DemolistSelectedIndex].m_aFilename);
 				const char *pError = Client()->DemoPlayer_Play(aBuf, m_vDemos[m_DemolistSelectedIndex].m_StorageType);
 				if(pError)
@@ -1334,12 +1410,13 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	if(!m_DemolistSelectedIsDir)
 	{
 		static CButtonContainer s_DeleteButton;
-		if(DoButton_Menu(&s_DeleteButton, Localize("Delete"), 0, &DeleteRect) || m_DeletePressed || (Input()->KeyPress(KEY_D) && m_pClient->m_GameConsole.IsClosed()))
+		if(DoButton_Menu(&s_DeleteButton, Localize("Delete"), 0, &DeleteRect) || UI()->ConsumeHotkey(CUI::HOTKEY_DELETE) || (Input()->KeyPress(KEY_D) && m_pClient->m_GameConsole.IsClosed()))
 		{
 			if(m_DemolistSelectedIndex >= 0)
 			{
-				UI()->SetActiveItem(nullptr);
-				m_Popup = POPUP_DELETE_DEMO;
+				char aBuf[128 + IO_MAX_PATH_LENGTH];
+				str_format(aBuf, sizeof(aBuf), Localize("Are you sure that you want to delete the demo '%s'?"), m_vDemos[m_DemolistSelectedIndex].m_aFilename);
+				PopupConfirm(Localize("Delete demo"), aBuf, Localize("Yes"), Localize("No"), &CMenus::PopupConfirmDeleteDemo);
 				return;
 			}
 		}
@@ -1372,4 +1449,21 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	}
 
 	UI()->DoLabel(&LabelRect, aFooterLabel, 14.0f, TEXTALIGN_LEFT);
+}
+
+void CMenus::PopupConfirmDeleteDemo()
+{
+	char aBuf[IO_MAX_PATH_LENGTH];
+	str_format(aBuf, sizeof(aBuf), "%s/%s", m_aCurrentDemoFolder, m_vDemos[m_DemolistSelectedIndex].m_aFilename);
+	if(Storage()->RemoveFile(aBuf, m_vDemos[m_DemolistSelectedIndex].m_StorageType))
+	{
+		DemolistPopulate();
+		DemolistOnUpdate(false);
+	}
+	else
+	{
+		char aError[128 + IO_MAX_PATH_LENGTH];
+		str_format(aError, sizeof(aError), Localize("Unable to delete the demo '%s'"), m_vDemos[m_DemolistSelectedIndex].m_aFilename);
+		PopupMessage(Localize("Error"), aError, Localize("Ok"));
+	}
 }

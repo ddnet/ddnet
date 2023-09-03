@@ -31,19 +31,16 @@ void CGameTeams::Reset()
 		m_aTeamState[i] = TEAMSTATE_EMPTY;
 		m_aTeamLocked[i] = false;
 		m_apSaveTeamResult[i] = nullptr;
-
-		m_aInvited[i] = 0;
-		m_aPractice[i] = false;
-		m_aLastSwap[i] = 0;
 		m_aTeamSentStartWarning[i] = false;
-		m_aTeamUnfinishableKillTick[i] = -1;
+		ResetRoundState(i);
 	}
 }
 
 void CGameTeams::ResetRoundState(int Team)
 {
 	ResetInvited(Team);
-	ResetSwitchers(Team);
+	if(Team != TEAM_SUPER)
+		ResetSwitchers(Team);
 	m_aLastSwap[Team] = 0;
 
 	m_aPractice[Team] = false;
@@ -226,8 +223,8 @@ void CGameTeams::Tick()
 				m_aTeamUnfinishableKillTick[i] = -1;
 				continue;
 			}
-			KillTeam(i, -1);
 			GameServer()->SendChatTeam(i, "Your team was killed because it couldn't finish anymore and hasn't entered /practice mode");
+			KillTeam(i, -1);
 		}
 	}
 
@@ -1072,7 +1069,7 @@ void CGameTeams::OnCharacterDeath(int ClientID, int Weapon)
 			char aBuf[128];
 			str_format(aBuf, sizeof(aBuf), "This team cannot finish anymore because '%s' left the team before hitting the start", Server()->ClientName(ClientID));
 			GameServer()->SendChatTeam(Team, aBuf);
-			GameServer()->SendChatTeam(Team, "Enter /practice mode to avoid being killed in 60 seconds");
+			GameServer()->SendChatTeam(Team, "Enter /practice mode or restart to avoid the entire team being killed in 60 seconds");
 
 			m_aTeamUnfinishableKillTick[Team] = Server()->Tick() + 60 * Server()->TickSpeed();
 			ChangeTeamState(Team, CGameTeams::TEAMSTATE_STARTED_UNFINISHABLE);

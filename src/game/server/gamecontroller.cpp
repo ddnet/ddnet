@@ -145,8 +145,8 @@ void IGameController::EvaluateSpawnType(CSpawnEval *pEval, int Type, int DDTeam)
 			if(j == 0)
 			{
 				// check if the position is occupado
-				CCharacter *apEnts[MAX_CLIENTS];
-				int Num = GameServer()->m_World.FindEntities(m_aaSpawnPoints[Type][i], 64, (CEntity **)apEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
+				CEntity *apEnts[MAX_CLIENTS];
+				int Num = GameServer()->m_World.FindEntities(m_aaSpawnPoints[Type][i], 64, apEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
 				vec2 aPositions[5] = {vec2(0.0f, 0.0f), vec2(-32.0f, 0.0f), vec2(0.0f, -32.0f), vec2(32.0f, 0.0f), vec2(0.0f, 32.0f)}; // start, left, up, right, down
 				int Result = -1;
 				for(int Index = 0; Index < 5 && Result == -1; ++Index)
@@ -155,12 +155,15 @@ void IGameController::EvaluateSpawnType(CSpawnEval *pEval, int Type, int DDTeam)
 					if(!GameServer()->m_World.m_Core.m_aTuning[0].m_PlayerCollision)
 						break;
 					for(int c = 0; c < Num; ++c)
+					{
+						CCharacter *pChr = static_cast<CCharacter *>(apEnts[c]);
 						if(GameServer()->Collision()->CheckPoint(m_aaSpawnPoints[Type][i] + aPositions[Index]) ||
-							distance(apEnts[c]->m_Pos, m_aaSpawnPoints[Type][i] + aPositions[Index]) <= apEnts[c]->GetProximityRadius())
+							distance(pChr->m_Pos, m_aaSpawnPoints[Type][i] + aPositions[Index]) <= pChr->GetProximityRadius())
 						{
 							Result = -1;
 							break;
 						}
+					}
 				}
 				if(Result == -1)
 					continue; // try next spawn point
@@ -286,7 +289,7 @@ bool IGameController::OnEntity(int Index, vec2 Pos, int Layer, int Flags, int Nu
 			Dir = 0;
 		else if(Flags == (TILEFLAG_ROTATE))
 			Dir = 1;
-		else if(Flags == (TILEFLAG_VFLIP | TILEFLAG_HFLIP))
+		else if(Flags == (TILEFLAG_FLIP_HORIZONTAL | TILEFLAG_FLIP_VERTICAL))
 			Dir = 2;
 		else
 			Dir = 3;
@@ -687,8 +690,8 @@ void IGameController::Snap(int SnappingClient)
 		GAMEINFOFLAG_ENTITIES_RACE |
 		GAMEINFOFLAG_RACE;
 	pGameInfoEx->m_Flags2 = GAMEINFOFLAG2_HUD_DDRACE;
-	if(g_Config.m_SvNoWeakHookAndBounce)
-		pGameInfoEx->m_Flags2 |= GAMEINFOFLAG2_NO_WEAK_HOOK_AND_BOUNCE;
+	if(g_Config.m_SvNoWeakHook)
+		pGameInfoEx->m_Flags2 |= GAMEINFOFLAG2_NO_WEAK_HOOK;
 	pGameInfoEx->m_Version = GAMEINFO_CURVERSION;
 
 	if(Server()->IsSixup(SnappingClient))

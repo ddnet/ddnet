@@ -794,6 +794,17 @@ void CGraphics_Threaded::KickCommandBuffer()
 {
 	m_pBackend->RunBuffer(m_pCommandBuffer);
 
+	std::vector<std::string> WarningStrings;
+	if(m_pBackend->GetWarning(WarningStrings))
+	{
+		SWarning NewWarning;
+		std::string WarningStr;
+		for(const auto &WarnStr : WarningStrings)
+			WarningStr.append((WarnStr + "\n"));
+		str_copy(NewWarning.m_aWarningMsg, WarningStr.c_str());
+		m_vWarnings.emplace_back(NewWarning);
+	}
+
 	// swap buffer
 	m_CurrentCommandBuffer ^= 1;
 	m_pCommandBuffer = m_apCommandBuffers[m_CurrentCommandBuffer];
@@ -849,6 +860,7 @@ bool CGraphics_Threaded::ScreenshotDirect()
 void CGraphics_Threaded::TextureSet(CTextureHandle TextureID)
 {
 	dbg_assert(m_Drawing == 0, "called Graphics()->TextureSet within begin");
+	dbg_assert(!TextureID.IsValid() || m_vTextureIndices[TextureID.Id()] == -1, "Texture handle was not invalid, but also did not correlate to an existing texture.");
 	m_State.m_Texture = TextureID.Id();
 }
 
@@ -2680,7 +2692,7 @@ void CGraphics_Threaded::AddBackEndWarningIfExists()
 	if(pErrStr != NULL)
 	{
 		SWarning NewWarning;
-		str_format(NewWarning.m_aWarningMsg, sizeof(NewWarning.m_aWarningMsg), "%s", Localize(pErrStr));
+		str_copy(NewWarning.m_aWarningMsg, Localize(pErrStr));
 		m_vWarnings.emplace_back(NewWarning);
 	}
 }
@@ -2829,7 +2841,7 @@ int CGraphics_Threaded::Init()
 	m_FirstFreeBufferObjectIndex = -1;
 	m_FirstFreeQuadContainer = -1;
 
-	m_pBackend = CreateGraphicsBackend();
+	m_pBackend = CreateGraphicsBackend(Localize);
 	if(InitWindow() != 0)
 		return -1;
 

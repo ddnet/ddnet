@@ -9,6 +9,7 @@
 #include <engine/keys.h>
 #include <engine/shared/config.h>
 #include <engine/storage.h>
+#include <limits>
 
 #include <game/client/ui_scrollregion.h>
 
@@ -31,10 +32,11 @@ void CEditor::UiInvokePopupMenu(void *pID, int Flags, float x, float y, float Wi
 	if(g_UiNumPopups > 7)
 		return;
 	Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "editor", "invoked");
-	if(x + Width > UI()->Screen()->w)
-		x -= Width;
-	if(y + Height > UI()->Screen()->h)
-		y -= Height;
+	const float Margin = 5.0f;
+	if(x + Width > UI()->Screen()->w - Margin)
+		x = maximum<float>(x - Width, Margin);
+	if(y + Height > UI()->Screen()->h - Margin)
+		y = maximum<float>(y - Height, Margin);
 	s_UiPopups[g_UiNumPopups].m_pId = pID;
 	s_UiPopups[g_UiNumPopups].m_IsMenu = Flags;
 	s_UiPopups[g_UiNumPopups].m_Rect.x = x;
@@ -473,7 +475,7 @@ int CEditor::PopupLayer(CEditor *pEditor, CUIRect View, void *pContext)
 
 	CProperty aProps[] = {
 		{"Group", pEditor->m_SelectedGroup, PROPTYPE_INT_STEP, 0, (int)pEditor->m_Map.m_vpGroups.size() - 1},
-		{"Order", pEditor->m_vSelectedLayers[0], PROPTYPE_INT_STEP, 0, (int)pCurrentGroup->m_vpLayers.size()},
+		{"Order", pEditor->m_vSelectedLayers[0], PROPTYPE_INT_STEP, 0, (int)pCurrentGroup->m_vpLayers.size() - 1},
 		{"Detail", pCurrentLayer && pCurrentLayer->m_Flags & LAYERFLAG_DETAIL, PROPTYPE_BOOL, 0, 1},
 		{nullptr},
 	};
@@ -648,7 +650,8 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View, void *pContext)
 
 	enum
 	{
-		PROP_POS_X = 0,
+		PROP_ORDER = 0,
+		PROP_POS_X,
 		PROP_POS_Y,
 		PROP_POS_ENV,
 		PROP_POS_ENV_OFFSET,
@@ -657,7 +660,9 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View, void *pContext)
 		NUM_PROPS,
 	};
 
+	int NumQuads = pLayer ? (int)pLayer->m_vQuads.size() : 0;
 	CProperty aProps[] = {
+		{"Order", pEditor->m_vSelectedQuads[pEditor->m_SelectedQuadIndex], PROPTYPE_INT_STEP, 0, NumQuads},
 		{"Pos X", fx2i(pCurrentQuad->m_aPoints[4].x), PROPTYPE_INT_SCROLL, -1000000, 1000000},
 		{"Pos Y", fx2i(pCurrentQuad->m_aPoints[4].y), PROPTYPE_INT_SCROLL, -1000000, 1000000},
 		{"Pos. Env", pCurrentQuad->m_PosEnv + 1, PROPTYPE_ENVELOPE, 0, 0},
@@ -676,6 +681,12 @@ int CEditor::PopupQuad(CEditor *pEditor, CUIRect View, void *pContext)
 
 	float OffsetX = i2fx(NewVal) - pCurrentQuad->m_aPoints[4].x;
 	float OffsetY = i2fx(NewVal) - pCurrentQuad->m_aPoints[4].y;
+
+	if(Prop == PROP_ORDER && pLayer)
+	{
+		int QuadIndex = pLayer->SwapQuads(pEditor->m_vSelectedQuads[pEditor->m_SelectedQuadIndex], NewVal);
+		pEditor->m_vSelectedQuads[pEditor->m_SelectedQuadIndex] = QuadIndex;
+	}
 
 	for(auto &pQuad : vpQuads)
 	{
@@ -955,7 +966,7 @@ int CEditor::PopupPoint(CEditor *pEditor, CUIRect View, void *pContext)
 	CProperty aProps[] = {
 		{"Pos X", x, PROPTYPE_INT_SCROLL, -1000000, 1000000},
 		{"Pos Y", y, PROPTYPE_INT_SCROLL, -1000000, 1000000},
-		{"Color", Color, PROPTYPE_COLOR, -1, (int)pEditor->m_Map.m_vpEnvelopes.size()},
+		{"Color", Color, PROPTYPE_COLOR, 0, 0},
 		{"Tex U", tu, PROPTYPE_INT_SCROLL, -1000000, 1000000},
 		{"Tex V", tv, PROPTYPE_INT_SCROLL, -1000000, 1000000},
 		{nullptr},
@@ -973,13 +984,13 @@ int CEditor::PopupPoint(CEditor *pEditor, CUIRect View, void *pContext)
 		{
 			for(int v = 0; v < 4; v++)
 				if(pEditor->m_SelectedPoints & (1 << v))
-					pQuad->m_aPoints[v].x = i2fx(NewVal);
+					pQuad->m_aPoints[v].x = i2fx(fx2i(pQuad->m_aPoints[v].x) + NewVal - x);
 		}
 		if(Prop == PROP_POS_Y)
 		{
 			for(int v = 0; v < 4; v++)
 				if(pEditor->m_SelectedPoints & (1 << v))
-					pQuad->m_aPoints[v].y = i2fx(NewVal);
+					pQuad->m_aPoints[v].y = i2fx(fx2i(pQuad->m_aPoints[v].y) + NewVal - y);
 		}
 		if(Prop == PROP_COLOR)
 		{
@@ -998,13 +1009,13 @@ int CEditor::PopupPoint(CEditor *pEditor, CUIRect View, void *pContext)
 		{
 			for(int v = 0; v < 4; v++)
 				if(pEditor->m_SelectedPoints & (1 << v))
-					pQuad->m_aTexcoords[v].x = f2fx(NewVal / 1024.0f);
+					pQuad->m_aTexcoords[v].x = f2fx(fx2f(pQuad->m_aTexcoords[v].x) + (NewVal - tu) / 1024.0f);
 		}
 		if(Prop == PROP_TEX_V)
 		{
 			for(int v = 0; v < 4; v++)
 				if(pEditor->m_SelectedPoints & (1 << v))
-					pQuad->m_aTexcoords[v].y = f2fx(NewVal / 1024.0f);
+					pQuad->m_aTexcoords[v].y = f2fx(fx2f(pQuad->m_aTexcoords[v].y) + (NewVal - tv) / 1024.0f);
 		}
 	}
 
@@ -1254,36 +1265,30 @@ int CEditor::PopupSelectImage(CEditor *pEditor, CUIRect View, void *pContext)
 
 	int ShowImage = g_SelectImageCurrent;
 
-	const float RowHeight = 14.0f;
+	const float ButtonHeight = 12.0f;
+	const float ButtonMargin = 2.0f;
+
 	static CScrollRegion s_ScrollRegion;
 	vec2 ScrollOffset(0.0f, 0.0f);
 	CScrollRegionParams ScrollParams;
 	ScrollParams.m_ScrollbarWidth = 10.0f;
 	ScrollParams.m_ScrollbarMargin = 3.0f;
-	ScrollParams.m_ScrollUnit = RowHeight * 5;
+	ScrollParams.m_ScrollUnit = (ButtonHeight + ButtonMargin) * 5;
 	s_ScrollRegion.Begin(&ButtonBar, &ScrollOffset, &ScrollParams);
 	ButtonBar.y += ScrollOffset.y;
 
 	for(int i = -1; i < (int)pEditor->m_Map.m_vpImages.size(); i++)
 	{
 		CUIRect Button;
-		ButtonBar.HSplitTop(RowHeight, &Button, &ButtonBar);
-		if(!s_ScrollRegion.AddRect(Button))
-			continue;
-
-		Button.HSplitTop(12.0f, &Button, 0);
-		if(pEditor->UI()->MouseInside(&Button))
-			ShowImage = i;
-
-		if(i == -1)
+		ButtonBar.HSplitTop(ButtonMargin, nullptr, &ButtonBar);
+		ButtonBar.HSplitTop(ButtonHeight, &Button, &ButtonBar);
+		if(s_ScrollRegion.AddRect(Button))
 		{
+			if(pEditor->UI()->MouseInside(&Button))
+				ShowImage = i;
+
 			static int s_NoneButton = 0;
-			if(pEditor->DoButton_MenuItem(&s_NoneButton, "None", i == g_SelectImageCurrent, &Button))
-				g_SelectImageSelected = -1;
-		}
-		else
-		{
-			if(pEditor->DoButton_MenuItem(&pEditor->m_Map.m_vpImages[i], pEditor->m_Map.m_vpImages[i]->m_aName, i == g_SelectImageCurrent, &Button))
+			if(pEditor->DoButton_MenuItem(i == -1 ? (void *)&s_NoneButton : &pEditor->m_Map.m_vpImages[i], i == -1 ? "None" : pEditor->m_Map.m_vpImages[i]->m_aName, i == g_SelectImageCurrent, &Button))
 				g_SelectImageSelected = i;
 		}
 	}
@@ -1335,65 +1340,32 @@ static int g_SelectSoundCurrent = -100;
 
 int CEditor::PopupSelectSound(CEditor *pEditor, CUIRect View, void *pContext)
 {
-	CUIRect ButtonBar, SoundView;
-	View.VSplitLeft(80.0f, &ButtonBar, &View);
-	View.Margin(10.0f, &SoundView);
+	const float ButtonHeight = 12.0f;
+	const float ButtonMargin = 2.0f;
 
-	static float s_ScrollValue = 0;
-	float SoundsHeight = pEditor->m_Map.m_vpSounds.size() * 14;
-	float ScrollDifference = SoundsHeight - ButtonBar.h;
+	static CScrollRegion s_ScrollRegion;
+	vec2 ScrollOffset(0.0f, 0.0f);
+	CScrollRegionParams ScrollParams;
+	ScrollParams.m_ScrollbarWidth = 10.0f;
+	ScrollParams.m_ScrollbarMargin = 3.0f;
+	ScrollParams.m_ScrollUnit = (ButtonHeight + ButtonMargin) * 5;
+	s_ScrollRegion.Begin(&View, &ScrollOffset, &ScrollParams);
+	View.y += ScrollOffset.y;
 
-	if(pEditor->m_Map.m_vpSounds.size() > 20) // Do we need a scrollbar?
-	{
-		CUIRect Scroll;
-		ButtonBar.VSplitRight(20.0f, &ButtonBar, &Scroll);
-		s_ScrollValue = pEditor->UI()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
-
-		if(pEditor->UI()->MouseInside(&Scroll) || pEditor->UI()->MouseInside(&ButtonBar))
-		{
-			int ScrollNum = (int)((SoundsHeight - ButtonBar.h) / 14.0f) + 1;
-			if(ScrollNum > 0)
-			{
-				if(pEditor->Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
-					s_ScrollValue = clamp(s_ScrollValue - 1.0f / ScrollNum, 0.0f, 1.0f);
-				if(pEditor->Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
-					s_ScrollValue = clamp(s_ScrollValue + 1.0f / ScrollNum, 0.0f, 1.0f);
-			}
-		}
-	}
-
-	float SoundStartAt = ScrollDifference * s_ScrollValue;
-	if(SoundStartAt < 0.0f)
-		SoundStartAt = 0.0f;
-
-	float SoundStopAt = SoundsHeight - ScrollDifference * (1 - s_ScrollValue);
-	float SoundCur = 0.0f;
 	for(int i = -1; i < (int)pEditor->m_Map.m_vpSounds.size(); i++)
 	{
-		if(SoundCur > SoundStopAt)
-			break;
-		if(SoundCur < SoundStartAt)
-		{
-			SoundCur += 14.0f;
-			continue;
-		}
-		SoundCur += 14.0f;
-
 		CUIRect Button;
-		ButtonBar.HSplitTop(14.0f, &Button, &ButtonBar);
-
-		if(i == -1)
+		View.HSplitTop(ButtonMargin, nullptr, &View);
+		View.HSplitTop(ButtonHeight, &Button, &View);
+		if(s_ScrollRegion.AddRect(Button))
 		{
 			static int s_NoneButton = 0;
-			if(pEditor->DoButton_MenuItem(&s_NoneButton, "None", i == g_SelectSoundCurrent, &Button))
-				g_SelectSoundSelected = -1;
-		}
-		else
-		{
-			if(pEditor->DoButton_MenuItem(&pEditor->m_Map.m_vpSounds[i], pEditor->m_Map.m_vpSounds[i]->m_aName, i == g_SelectSoundCurrent, &Button))
+			if(pEditor->DoButton_MenuItem(i == -1 ? (void *)&s_NoneButton : &pEditor->m_Map.m_vpSounds[i], i == -1 ? "None" : pEditor->m_Map.m_vpSounds[i]->m_aName, i == g_SelectSoundCurrent, &Button))
 				g_SelectSoundSelected = i;
 		}
 	}
+
+	s_ScrollRegion.End();
 
 	return 0;
 }
@@ -1403,7 +1375,7 @@ void CEditor::PopupSelectSoundInvoke(int Current, float x, float y)
 	static int s_SelectSoundPopupId = 0;
 	g_SelectSoundSelected = -100;
 	g_SelectSoundCurrent = Current;
-	UiInvokePopupMenu(&s_SelectSoundPopupId, 0, x, y, 400, 300, PopupSelectSound);
+	UiInvokePopupMenu(&s_SelectSoundPopupId, 0, x, y, 150, 300, PopupSelectSound);
 }
 
 int CEditor::PopupSelectSoundResult()
@@ -1472,70 +1444,34 @@ static int s_AutoMapConfigCurrent = -100;
 int CEditor::PopupSelectConfigAutoMap(CEditor *pEditor, CUIRect View, void *pContext)
 {
 	CLayerTiles *pLayer = static_cast<CLayerTiles *>(pEditor->GetSelectedLayer(0));
-	CUIRect Button;
-	static int s_aAutoMapperConfigButtons[256];
 	CAutoMapper *pAutoMapper = &pEditor->m_Map.m_vpImages[pLayer->m_Image]->m_AutoMapper;
 
 	const float ButtonHeight = 12.0f;
 	const float ButtonMargin = 2.0f;
 
-	static float s_ScrollValue = 0;
+	static CScrollRegion s_ScrollRegion;
+	vec2 ScrollOffset(0.0f, 0.0f);
+	CScrollRegionParams ScrollParams;
+	ScrollParams.m_ScrollbarWidth = 10.0f;
+	ScrollParams.m_ScrollbarMargin = 3.0f;
+	ScrollParams.m_ScrollUnit = (ButtonHeight + ButtonMargin) * 5;
+	s_ScrollRegion.Begin(&View, &ScrollOffset, &ScrollParams);
+	View.y += ScrollOffset.y;
 
-	// Add 1 more for the "None" option.
-	float ListHeight = (ButtonHeight + ButtonMargin) * (pAutoMapper->ConfigNamesNum() + 1);
-	float ScrollDifference = ListHeight - View.h;
-
-	// Disable scrollbar if not needed.
-	if(ListHeight > View.h)
+	for(int i = -1; i < pAutoMapper->ConfigNamesNum(); i++)
 	{
-		CUIRect Scroll;
-		View.VSplitRight(20.0f, &View, &Scroll);
-		s_ScrollValue = pEditor->UI()->DoScrollbarV(&s_ScrollValue, &Scroll, s_ScrollValue);
-
-		if(pEditor->UI()->MouseInside(&View) || pEditor->UI()->MouseInside(&Scroll))
+		CUIRect Button;
+		View.HSplitTop(ButtonMargin, nullptr, &View);
+		View.HSplitTop(ButtonHeight, &Button, &View);
+		if(s_ScrollRegion.AddRect(Button))
 		{
-			int ScrollNum = (int)((ListHeight / ButtonHeight) + 1);
-			if(ScrollNum > 0)
-			{
-				if(pEditor->Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
-					s_ScrollValue = clamp(s_ScrollValue - 1.0f / ScrollNum, 0.0f, 1.0f);
-				if(pEditor->Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
-					s_ScrollValue = clamp(s_ScrollValue + 1.0f / ScrollNum, 0.0f, 1.0f);
-			}
-		}
-
-		// Margin for scrollbar
-		View.VSplitRight(2.0f, &View, nullptr);
-	}
-
-	float ListStartAt = ScrollDifference * s_ScrollValue;
-
-	if(ListStartAt < 0.0f)
-		ListStartAt = 0.0f;
-
-	float ListStopAt = ListHeight - ScrollDifference * (1 - s_ScrollValue);
-	float ListCur = 0;
-
-	pEditor->UI()->ClipEnable(&View);
-
-	for(int i = 0; i < pAutoMapper->ConfigNamesNum() + 1; i++)
-	{
-		if(ListCur > ListStopAt)
-			break;
-
-		if(ListCur >= ListStartAt)
-		{
-			View.HSplitTop(ButtonMargin, nullptr, &View);
-			View.HSplitTop(ButtonHeight, &Button, &View);
-			if(pEditor->DoButton_MenuItem(&s_aAutoMapperConfigButtons[i], i == 0 ? "None" : pAutoMapper->GetConfigName(i - 1), i == s_AutoMapConfigCurrent, &Button, 0, nullptr))
-			{
+			static int s_NoneButton = 0;
+			if(pEditor->DoButton_MenuItem(i == -1 ? (void *)&s_NoneButton : pAutoMapper->GetConfigName(i), i == -1 ? "None" : pAutoMapper->GetConfigName(i), i == s_AutoMapConfigCurrent, &Button))
 				s_AutoMapConfigSelected = i;
-			}
 		}
-		ListCur += ButtonHeight + ButtonMargin;
 	}
 
-	pEditor->UI()->ClipDisable();
+	s_ScrollRegion.End();
 
 	return 0;
 }
@@ -1546,9 +1482,7 @@ void CEditor::PopupSelectConfigAutoMapInvoke(int Current, float x, float y)
 	s_AutoMapConfigSelected = -100;
 	s_AutoMapConfigCurrent = Current;
 	CLayerTiles *pLayer = static_cast<CLayerTiles *>(GetSelectedLayer(0));
-	int ItemCount = m_Map.m_vpImages[pLayer->m_Image]->m_AutoMapper.ConfigNamesNum();
-	if(ItemCount > 10)
-		ItemCount = 10;
+	const int ItemCount = minimum(m_Map.m_vpImages[pLayer->m_Image]->m_AutoMapper.ConfigNamesNum(), 10);
 	// Width for buttons is 120, 15 is the scrollbar width, 2 is the margin between both.
 	UiInvokePopupMenu(&s_AutoMapConfigSelectID, 0, x, y, 120.0f + 15.0f + 2.0f, 26.0f + 14.0f * ItemCount, PopupSelectConfigAutoMap);
 }
@@ -1560,7 +1494,7 @@ int CEditor::PopupSelectConfigAutoMapResult()
 
 	s_AutoMapConfigCurrent = s_AutoMapConfigSelected;
 	s_AutoMapConfigSelected = -100;
-	return s_AutoMapConfigCurrent - 1;
+	return s_AutoMapConfigCurrent;
 }
 
 // DDRace
@@ -1574,11 +1508,13 @@ int CEditor::PopupTele(CEditor *pEditor, CUIRect View, void *pContext)
 
 	View.VSplitRight(15.f, &NumberPicker, &FindEmptySlot);
 	NumberPicker.VSplitRight(2.f, &NumberPicker, nullptr);
+	FindEmptySlot.HSplitTop(13.0f, &FindEmptySlot, nullptr);
+	FindEmptySlot.HMargin(1.0f, &FindEmptySlot);
 
 	// find empty number button
 	{
 		static int s_EmptySlotPid = 0;
-		if(pEditor->DoButton_Editor(&s_EmptySlotPid, "F", 0, &FindEmptySlot, 0, "[ctrl+f] Find empty slot") || pEditor->Input()->KeyPress(KEY_F))
+		if(pEditor->DoButton_Editor(&s_EmptySlotPid, "F", 0, &FindEmptySlot, 0, "[ctrl+f] Find empty slot") || (pEditor->Input()->ModifierIsPressed() && pEditor->Input()->KeyPress(KEY_F)))
 		{
 			int number = -1;
 			for(int i = 1; i <= 255; i++)
@@ -1617,7 +1553,7 @@ int CEditor::PopupTele(CEditor *pEditor, CUIRect View, void *pContext)
 		int Prop = pEditor->DoProperties(&NumberPicker, aProps, s_aIds, &NewVal, s_Color);
 		if(Prop == PROP_TELE)
 		{
-			pEditor->m_TeleNumber = (NewVal + 256) % 256;
+			pEditor->m_TeleNumber = (NewVal - 1 + 255) % 255 + 1;
 		}
 
 		if(s_PreviousNumber == 1 || s_PreviousNumber != pEditor->m_TeleNumber)
@@ -1633,9 +1569,6 @@ int CEditor::PopupTele(CEditor *pEditor, CUIRect View, void *pContext)
 
 int CEditor::PopupSpeedup(CEditor *pEditor, CUIRect View, void *pContext)
 {
-	CUIRect Button;
-	View.HSplitBottom(12.0f, &View, &Button);
-
 	enum
 	{
 		PROP_FORCE = 0,
@@ -1645,7 +1578,7 @@ int CEditor::PopupSpeedup(CEditor *pEditor, CUIRect View, void *pContext)
 	};
 
 	CProperty aProps[] = {
-		{"Force", pEditor->m_SpeedupForce, PROPTYPE_INT_STEP, 0, 255},
+		{"Force", pEditor->m_SpeedupForce, PROPTYPE_INT_STEP, 1, 255},
 		{"Max Speed", pEditor->m_SpeedupMaxSpeed, PROPTYPE_INT_STEP, 0, 255},
 		{"Angle", pEditor->m_SpeedupAngle, PROPTYPE_ANGLE_SCROLL, 0, 359},
 		{nullptr},
@@ -1656,7 +1589,7 @@ int CEditor::PopupSpeedup(CEditor *pEditor, CUIRect View, void *pContext)
 	int Prop = pEditor->DoProperties(&View, aProps, s_aIds, &NewVal);
 
 	if(Prop == PROP_FORCE)
-		pEditor->m_SpeedupForce = clamp(NewVal, 0, 255);
+		pEditor->m_SpeedupForce = clamp(NewVal, 1, 255);
 	if(Prop == PROP_MAXSPEED)
 		pEditor->m_SpeedupMaxSpeed = clamp(NewVal, 0, 255);
 	if(Prop == PROP_ANGLE)
@@ -1672,16 +1605,15 @@ int CEditor::PopupSwitch(CEditor *pEditor, CUIRect View, void *pContext)
 	CUIRect NumberPicker;
 	CUIRect FindEmptySlot;
 
-	CUIRect DelayPicker;
-
-	View.HSplitMid(&NumberPicker, &DelayPicker);
-	NumberPicker.VSplitRight(15.f, &NumberPicker, &FindEmptySlot);
+	View.VSplitRight(15.f, &NumberPicker, &FindEmptySlot);
 	NumberPicker.VSplitRight(2.f, &NumberPicker, nullptr);
+	FindEmptySlot.HSplitTop(13.0f, &FindEmptySlot, nullptr);
+	FindEmptySlot.HMargin(1.0f, &FindEmptySlot);
 
 	// find empty number button
 	{
 		static int s_EmptySlotPid = 0;
-		if(pEditor->DoButton_Editor(&s_EmptySlotPid, "F", 0, &FindEmptySlot, 0, "[ctrl+f] Find empty slot") || pEditor->Input()->KeyPress(KEY_F))
+		if(pEditor->DoButton_Editor(&s_EmptySlotPid, "F", 0, &FindEmptySlot, 0, "[ctrl+f] Find empty slot") || (pEditor->Input()->ModifierIsPressed() && pEditor->Input()->KeyPress(KEY_F)))
 		{
 			int number = -1;
 			for(int i = 1; i <= 255; i++)
@@ -1712,7 +1644,7 @@ int CEditor::PopupSwitch(CEditor *pEditor, CUIRect View, void *pContext)
 		};
 
 		CProperty aProps[] = {
-			{"Number", pEditor->m_SwitchNum, PROPTYPE_INT_STEP, 1, 255},
+			{"Number", pEditor->m_SwitchNum, PROPTYPE_INT_STEP, 0, 255},
 			{"Delay", pEditor->m_SwitchDelay, PROPTYPE_INT_STEP, 0, 255},
 			{nullptr},
 		};
@@ -1742,9 +1674,6 @@ int CEditor::PopupSwitch(CEditor *pEditor, CUIRect View, void *pContext)
 
 int CEditor::PopupTune(CEditor *pEditor, CUIRect View, void *pContext)
 {
-	CUIRect Button;
-	View.HSplitBottom(12.0f, &View, &Button);
-
 	enum
 	{
 		PROP_TUNE = 0,
@@ -1762,6 +1691,48 @@ int CEditor::PopupTune(CEditor *pEditor, CUIRect View, void *pContext)
 
 	if(Prop == PROP_TUNE)
 		pEditor->m_TuningNum = (NewVal - 1 + 255) % 255 + 1;
+
+	return 0;
+}
+
+int CEditor::PopupGoto(CEditor *pEditor, CUIRect View, void *pContext)
+{
+	static ColorRGBA s_Color = ColorRGBA(1, 1, 1, 0.5f);
+
+	enum
+	{
+		PROP_CoordX = 0,
+		PROP_CoordY,
+		NUM_PROPS,
+	};
+
+	CProperty aProps[] = {
+		{"X", pEditor->m_GotoX, PROPTYPE_INT_STEP, std::numeric_limits<int>::min(), std::numeric_limits<int>::max()},
+		{"Y", pEditor->m_GotoY, PROPTYPE_INT_STEP, std::numeric_limits<int>::min(), std::numeric_limits<int>::max()},
+		{nullptr},
+	};
+
+	static int s_aIds[NUM_PROPS] = {0};
+	int NewVal = 0;
+	int Prop = pEditor->DoProperties(&View, aProps, s_aIds, &NewVal, s_Color);
+
+	if(Prop == PROP_CoordX)
+	{
+		pEditor->m_GotoX = NewVal;
+	}
+	else if(Prop == PROP_CoordY)
+	{
+		pEditor->m_GotoY = NewVal;
+	}
+
+	CUIRect Button;
+	View.HSplitBottom(12.0f, &View, &Button);
+
+	static int s_Button;
+	if(pEditor->DoButton_Editor(&s_Button, "Go", 0, &Button, 0, ""))
+	{
+		pEditor->Goto(pEditor->m_GotoX + 0.5f, pEditor->m_GotoY + 0.5f);
+	}
 
 	return 0;
 }
@@ -1898,4 +1869,127 @@ int CEditor::PopupEntities(CEditor *pEditor, CUIRect View, void *pContext)
 	}
 
 	return 0;
+}
+
+void CEditor::SMessagePopupContext::DefaultColor(ITextRender *pTextRender)
+{
+	m_TextColor = pTextRender->DefaultTextColor();
+}
+
+void CEditor::SMessagePopupContext::ErrorColor()
+{
+	m_TextColor = ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f);
+}
+
+int CEditor::PopupMessage(CEditor *pEditor, CUIRect View, void *pContext)
+{
+	SMessagePopupContext *pMessagePopup = static_cast<SMessagePopupContext *>(pContext);
+
+	CTextCursor Cursor;
+	pEditor->TextRender()->SetCursor(&Cursor, View.x, View.y, SMessagePopupContext::POPUP_FONT_SIZE, TEXTFLAG_RENDER);
+	Cursor.m_LineWidth = View.w;
+	pEditor->TextRender()->TextColor(pMessagePopup->m_TextColor);
+	pEditor->TextRender()->TextEx(&Cursor, pMessagePopup->m_aMessage, -1);
+	pEditor->TextRender()->TextColor(pEditor->TextRender()->DefaultTextColor());
+
+	return 0;
+}
+
+CEditor::SConfirmPopupContext::SConfirmPopupContext()
+{
+	Reset();
+}
+
+void CEditor::SConfirmPopupContext::Reset()
+{
+	m_Result = SConfirmPopupContext::UNSET;
+}
+
+void CEditor::ShowPopupConfirm(float X, float Y, SConfirmPopupContext *pContext)
+{
+	const float TextWidth = minimum(TextRender()->TextWidth(nullptr, SConfirmPopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, -1, -1.0f), SConfirmPopupContext::POPUP_MAX_WIDTH);
+	const int LineCount = TextRender()->TextLineCount(nullptr, SConfirmPopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, TextWidth);
+	const float PopupHeight = LineCount * SConfirmPopupContext::POPUP_FONT_SIZE + SConfirmPopupContext::POPUP_BUTTON_HEIGHT + SConfirmPopupContext::POPUP_BUTTON_SPACING + 10.0f;
+	pContext->m_Result = SConfirmPopupContext::UNSET;
+	UiInvokePopupMenu(pContext, 0, X, Y, TextWidth + 10.0f, PopupHeight, PopupConfirm, pContext);
+}
+
+int CEditor::PopupConfirm(CEditor *pEditor, CUIRect View, void *pContext)
+{
+	SConfirmPopupContext *pConfirmPopup = static_cast<SConfirmPopupContext *>(pContext);
+
+	CUIRect Label, ButtonBar, CancelButton, ConfirmButton;
+	View.HSplitBottom(SConfirmPopupContext::POPUP_BUTTON_HEIGHT, &Label, &ButtonBar);
+	ButtonBar.VSplitMid(&CancelButton, &ConfirmButton, SConfirmPopupContext::POPUP_BUTTON_SPACING);
+
+	CTextCursor Cursor;
+	pEditor->TextRender()->SetCursor(&Cursor, Label.x, Label.y, SConfirmPopupContext::POPUP_FONT_SIZE, TEXTFLAG_RENDER);
+	Cursor.m_LineWidth = Label.w;
+	pEditor->TextRender()->TextEx(&Cursor, pConfirmPopup->m_aMessage, -1);
+
+	static int s_CancelButton = 0;
+	if(pEditor->DoButton_Editor(&s_CancelButton, "Cancel", 0, &CancelButton, 0, nullptr))
+	{
+		pConfirmPopup->m_Result = SConfirmPopupContext::CANCELED;
+		return 1;
+	}
+
+	static int s_ConfirmButton = 0;
+	if(pEditor->DoButton_Editor(&s_ConfirmButton, "Confirm", 0, &ConfirmButton, 0, nullptr))
+	{
+		pConfirmPopup->m_Result = SConfirmPopupContext::CONFIRMED;
+		return 1;
+	}
+
+	return 0;
+}
+
+void CEditor::ShowPopupMessage(float X, float Y, SMessagePopupContext *pContext)
+{
+	const float TextWidth = minimum(TextRender()->TextWidth(nullptr, SMessagePopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, -1, -1.0f), SMessagePopupContext::POPUP_MAX_WIDTH);
+	const int LineCount = TextRender()->TextLineCount(nullptr, SMessagePopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, TextWidth);
+	UiInvokePopupMenu(pContext, 0, X, Y, TextWidth + 10.0f, LineCount * SMessagePopupContext::POPUP_FONT_SIZE + 10.0f, PopupMessage, pContext);
+}
+
+CEditor::SSelectionPopupContext::SSelectionPopupContext()
+{
+	Reset();
+}
+
+void CEditor::SSelectionPopupContext::Reset()
+{
+	m_pSelection = nullptr;
+	m_Entries.clear();
+}
+
+int CEditor::PopupSelection(CEditor *pEditor, CUIRect View, void *pContext)
+{
+	SSelectionPopupContext *pSelectionPopup = static_cast<SSelectionPopupContext *>(pContext);
+
+	CUIRect Slot;
+	const int LineCount = pEditor->TextRender()->TextLineCount(nullptr, SSelectionPopupContext::POPUP_FONT_SIZE, pSelectionPopup->m_aMessage, SSelectionPopupContext::POPUP_MAX_WIDTH);
+	View.HSplitTop(LineCount * SSelectionPopupContext::POPUP_FONT_SIZE, &Slot, &View);
+
+	CTextCursor Cursor;
+	pEditor->TextRender()->SetCursor(&Cursor, Slot.x, Slot.y, SSelectionPopupContext::POPUP_FONT_SIZE, TEXTFLAG_RENDER);
+	Cursor.m_LineWidth = Slot.w;
+	pEditor->TextRender()->TextEx(&Cursor, pSelectionPopup->m_aMessage, -1);
+
+	for(const auto &Entry : pSelectionPopup->m_Entries)
+	{
+		View.HSplitTop(SSelectionPopupContext::POPUP_ENTRY_SPACING, nullptr, &View);
+		View.HSplitTop(SSelectionPopupContext::POPUP_ENTRY_HEIGHT, &Slot, &View);
+		if(pEditor->DoButton_MenuItem(&Entry, Entry.c_str(), 0, &Slot, 0, nullptr))
+			pSelectionPopup->m_pSelection = &Entry;
+	}
+
+	return pSelectionPopup->m_pSelection == nullptr ? 0 : 1;
+}
+
+void CEditor::ShowPopupSelection(float X, float Y, SSelectionPopupContext *pContext)
+{
+	const int LineCount = TextRender()->TextLineCount(nullptr, SSelectionPopupContext::POPUP_FONT_SIZE, pContext->m_aMessage, SSelectionPopupContext::POPUP_MAX_WIDTH);
+	const float PopupHeight = LineCount * SSelectionPopupContext::POPUP_FONT_SIZE + pContext->m_Entries.size() * (SSelectionPopupContext::POPUP_ENTRY_HEIGHT + SSelectionPopupContext::POPUP_ENTRY_SPACING) + 10.0f;
+	pContext->m_pSelection = nullptr;
+	UiInvokePopupMenu(pContext, 0, X, Y, SSelectionPopupContext::POPUP_MAX_WIDTH + 10.0f, PopupHeight, PopupSelection, pContext);
 }

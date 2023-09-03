@@ -13,7 +13,7 @@
 
 //print >>f, "int inp_key_code(const char *key_name) { int i; if (!strcmp(key_name, \"-?-\")) return -1; else for (i = 0; i < 512; i++) if (!strcmp(key_strings[i], key_name)) return i; return -1; }"
 
-// this header is protected so you don't include it from anywere
+// this header is protected so you don't include it from anywhere
 #define KEYS_INCLUDE
 #include "keynames.h"
 #undef KEYS_INCLUDE
@@ -186,7 +186,7 @@ void CInput::SelectNextJoystick()
 
 float CInput::CJoystick::GetAxisValue(int Axis)
 {
-	return (SDL_JoystickGetAxis(m_pDelegate, Axis) - SDL_JOYSTICK_AXIS_MIN) / float(SDL_JOYSTICK_AXIS_MAX - SDL_JOYSTICK_AXIS_MIN) * 2.0f - 1.0f;
+	return (SDL_JoystickGetAxis(m_pDelegate, Axis) - SDL_JOYSTICK_AXIS_MIN) / (float)(SDL_JOYSTICK_AXIS_MAX - SDL_JOYSTICK_AXIS_MIN) * 2.0f - 1.0f;
 }
 
 int CInput::CJoystick::GetJoystickHatKey(int Hat, int HatValue)

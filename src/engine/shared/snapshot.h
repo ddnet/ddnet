@@ -10,10 +10,14 @@
 
 class CSnapshotItem
 {
+	friend class CSnapshotBuilder;
+
+	int *Data() { return (int *)(this + 1); }
+
 public:
 	int m_TypeAndID;
 
-	int *Data() { return (int *)(this + 1); }
+	const int *Data() const { return (int *)(this + 1); }
 	int Type() const { return m_TypeAndID >> 16; }
 	int ID() const { return m_TypeAndID & 0xffff; }
 	int Key() const { return m_TypeAndID; }
@@ -48,12 +52,12 @@ public:
 		m_NumItems = 0;
 	}
 	int NumItems() const { return m_NumItems; }
-	CSnapshotItem *GetItem(int Index) const;
+	const CSnapshotItem *GetItem(int Index) const;
 	int GetItemSize(int Index) const;
 	int GetItemIndex(int Key) const;
 	int GetItemType(int Index) const;
 	int GetExternalItemType(int InternalType) const;
-	void *FindItem(int Type, int ID) const;
+	const void *FindItem(int Type, int ID) const;
 
 	unsigned Crc();
 	void DebugDump();
@@ -84,10 +88,10 @@ private:
 	int m_aSnapshotDataUpdates[CSnapshot::MAX_TYPE + 1];
 	CData m_Empty;
 
-	static void UndiffItem(int *pPast, int *pDiff, int *pOut, int Size, int *pDataRate);
+	static void UndiffItem(const int *pPast, int *pDiff, int *pOut, int Size, int *pDataRate);
 
 public:
-	static int DiffItem(int *pPast, int *pCurrent, int *pOut, int Size);
+	static int DiffItem(const int *pPast, const int *pCurrent, int *pOut, int Size);
 	CSnapshotDelta();
 	CSnapshotDelta(const CSnapshotDelta &Old);
 	int GetDataRate(int Index) const { return m_aSnapshotDataRate[Index]; }

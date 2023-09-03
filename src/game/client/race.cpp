@@ -21,7 +21,7 @@ int CRaceHelper::TimeFromSecondsStr(const char *pStr)
 	{
 		pStr++;
 		static const int s_aMult[3] = {100, 10, 1};
-		for(int i = 0; isdigit(pStr[i]) && i < 3; i++)
+		for(size_t i = 0; i < std::size(s_aMult) && isdigit(pStr[i]); i++)
 			Time += (pStr[i] - '0') * s_aMult[i];
 	}
 	return Time;

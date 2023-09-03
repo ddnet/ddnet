@@ -20,6 +20,7 @@ protected:
 public:
 	IInterface() :
 		m_pKernel(nullptr) {}
+	virtual void Shutdown() {}
 	virtual ~IInterface() {}
 };
 
@@ -29,7 +30,7 @@ public: \
 \
 private:
 
-// This kernel thingie makes the structure very flat and basiclly singletons.
+// This kernel thingie makes the structure very flat and basically singletons.
 // I'm not sure if this is a good idea but it works for now.
 class IKernel
 {
@@ -40,6 +41,7 @@ class IKernel
 
 public:
 	static IKernel *Create();
+	virtual void Shutdown() = 0;
 	virtual ~IKernel() {}
 
 	// templated access to handle pointer conversions and interface names

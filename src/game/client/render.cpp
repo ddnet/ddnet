@@ -43,10 +43,18 @@ void CRenderTools::Init(IGraphics *pGraphics, ITextRender *pTextRender)
 	Graphics()->QuadsSetSubset(0, 0, 1, 1);
 	QuadContainerAddSprite(m_TeeQuadContainerIndex, 64.f * 0.4f);
 
+	// Feet
 	Graphics()->QuadsSetSubset(0, 0, 1, 1);
 	QuadContainerAddSprite(m_TeeQuadContainerIndex, -32.f, -16.f, 64.f, 32.f);
 	Graphics()->QuadsSetSubset(0, 0, 1, 1);
 	QuadContainerAddSprite(m_TeeQuadContainerIndex, -32.f, -16.f, 64.f, 32.f);
+
+	// Mirrored Feet
+	Graphics()->QuadsSetSubsetFree(1, 0, 0, 0, 0, 1, 1, 1);
+	QuadContainerAddSprite(m_TeeQuadContainerIndex, -32.f, -16.f, 64.f, 32.f);
+	Graphics()->QuadsSetSubsetFree(1, 0, 0, 0, 0, 1, 1, 1);
+	QuadContainerAddSprite(m_TeeQuadContainerIndex, -32.f, -16.f, 64.f, 32.f);
+
 	Graphics()->QuadContainerUpload(m_TeeQuadContainerIndex);
 }
 
@@ -237,7 +245,7 @@ void CRenderTools::GetRenderTeeOffsetToRenderedTee(CAnimState *pAnim, CTeeRender
 	float MinY = -32.0f * AssumedScale;
 	// the body pos shifts the body away from center
 	MinY += BodyPos.y;
-	// the actual body is smaller tho, bcs it doesnt use the full skin image in most cases
+	// the actual body is smaller though, because it doesn't use the full skin image in most cases
 	MinY += BodyOffset.y;
 
 	vec2 FeetOffset;
@@ -247,13 +255,13 @@ void CRenderTools::GetRenderTeeOffsetToRenderedTee(CAnimState *pAnim, CTeeRender
 	// MaxY builds up from the MinY
 	float MaxY = MinY + BodyHeight;
 	// if the body is smaller than the total feet offset, use feet
-	// since feets are smaller in height, respect the assumed relative position
+	// since feet are smaller in height, respect the assumed relative position
 	MaxY = maximum(MaxY, (-16.0f * AssumedScale + FeetPos.y) + FeetOffset.y + FeetHeight);
 
 	// now we got the full rendered size
 	float FullHeight = (MaxY - MinY);
 
-	// next step is to calculate the offset that was created compared to the assumed relative positon
+	// next step is to calculate the offset that was created compared to the assumed relative position
 	float MidOfRendered = MinY + FullHeight / 2.0f;
 
 	// TODO: x coordinate is ignored for now, bcs it's not really used yet anyway
@@ -297,6 +305,7 @@ void CRenderTools::RenderTee(CAnimState *pAnim, CTeeRenderInfo *pInfo, int Emote
 					int QuadOffset = 2;
 					int EyeQuadOffset = 0;
 					int TeeEye = 0;
+
 					switch(Emote)
 					{
 					case EMOTE_PAIN:
@@ -338,6 +347,10 @@ void CRenderTools::RenderTee(CAnimState *pAnim, CTeeRenderInfo *pInfo, int Emote
 			float h = BaseSize / 2;
 
 			int QuadOffset = 7;
+			if(Dir.x < 0 && pInfo->m_FeetFlipped)
+			{
+				QuadOffset += 2;
+			}
 
 			Graphics()->QuadsSetRotation(pFoot->m_Angle * pi * 2);
 

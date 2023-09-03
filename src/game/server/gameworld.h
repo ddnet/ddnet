@@ -88,8 +88,7 @@ public:
 		Returns:
 			Returns a pointer to the closest hit or NULL of there is no intersection.
 	*/
-	//CCharacter *IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, vec2 &NewPos, class CEntity *pNotThis = 0);
-	CCharacter *IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, vec2 &NewPos, CCharacter *pNotThis = 0, int CollideWith = -1, CCharacter *pThisOnly = 0);
+	CCharacter *IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, vec2 &NewPos, const CCharacter *pNotThis = nullptr, int CollideWith = -1, const CCharacter *pThisOnly = nullptr);
 	/*
 		Function: ClosestCharacter
 			Finds the closest CCharacter to a specific point.
@@ -97,12 +96,12 @@ public:
 		Arguments:
 			Pos - The center position.
 			Radius - How far off the CCharacter is allowed to be
-			ppNotThis - Entity to ignore
+			pNotThis - Entity to ignore
 
 		Returns:
 			Returns a pointer to the closest CCharacter or NULL if no CCharacter is close enough.
 	*/
-	CCharacter *ClosestCharacter(vec2 Pos, float Radius, CEntity *ppNotThis);
+	CCharacter *ClosestCharacter(vec2 Pos, float Radius, const CEntity *pNotThis);
 
 	/*
 		Function: InsertEntity
@@ -163,7 +162,7 @@ public:
 		Returns:
 			Returns list with all Characters on line.
 	*/
-	std::list<CCharacter *> IntersectedCharacters(vec2 Pos0, vec2 Pos1, float Radius, class CEntity *pNotThis = 0);
+	std::list<CCharacter *> IntersectedCharacters(vec2 Pos0, vec2 Pos1, float Radius, const CEntity *pNotThis = nullptr);
 };
 
 #endif

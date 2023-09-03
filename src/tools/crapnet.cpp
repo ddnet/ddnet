@@ -138,11 +138,10 @@ void Run(unsigned short Port, NETADDR Dest)
 			}
 		}
 
-		SPacket *p = 0;
 		SPacket *pNext = g_pFirst;
 		while(true)
 		{
-			p = pNext;
+			SPacket *p = pNext;
 			if(!p)
 				break;
 			pNext = p->m_pNext;

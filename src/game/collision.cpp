@@ -160,7 +160,7 @@ enum
 
 static int GetMoveRestrictionsRaw(int Direction, int Tile, int Flags)
 {
-	Flags = Flags & (TILEFLAG_VFLIP | TILEFLAG_HFLIP | TILEFLAG_ROTATE);
+	Flags = Flags & (TILEFLAG_FLIP_HORIZONTAL | TILEFLAG_FLIP_VERTICAL | TILEFLAG_ROTATE);
 	switch(Tile)
 	{
 	case TILE_STOP:
@@ -171,10 +171,10 @@ static int GetMoveRestrictionsRaw(int Direction, int Tile, int Flags)
 		case ROTATION_180: return CANTMOVE_UP;
 		case ROTATION_270: return CANTMOVE_RIGHT;
 
-		case TILEFLAG_HFLIP ^ ROTATION_0: return CANTMOVE_UP;
-		case TILEFLAG_HFLIP ^ ROTATION_90: return CANTMOVE_RIGHT;
-		case TILEFLAG_HFLIP ^ ROTATION_180: return CANTMOVE_DOWN;
-		case TILEFLAG_HFLIP ^ ROTATION_270: return CANTMOVE_LEFT;
+		case TILEFLAG_FLIP_VERTICAL ^ ROTATION_0: return CANTMOVE_UP;
+		case TILEFLAG_FLIP_VERTICAL ^ ROTATION_90: return CANTMOVE_RIGHT;
+		case TILEFLAG_FLIP_VERTICAL ^ ROTATION_180: return CANTMOVE_DOWN;
+		case TILEFLAG_FLIP_VERTICAL ^ ROTATION_270: return CANTMOVE_LEFT;
 		}
 		break;
 	case TILE_STOPS:
@@ -182,13 +182,13 @@ static int GetMoveRestrictionsRaw(int Direction, int Tile, int Flags)
 		{
 		case ROTATION_0:
 		case ROTATION_180:
-		case TILEFLAG_HFLIP ^ ROTATION_0:
-		case TILEFLAG_HFLIP ^ ROTATION_180:
+		case TILEFLAG_FLIP_VERTICAL ^ ROTATION_0:
+		case TILEFLAG_FLIP_VERTICAL ^ ROTATION_180:
 			return CANTMOVE_DOWN | CANTMOVE_UP;
 		case ROTATION_90:
 		case ROTATION_270:
-		case TILEFLAG_HFLIP ^ ROTATION_90:
-		case TILEFLAG_HFLIP ^ ROTATION_270:
+		case TILEFLAG_FLIP_VERTICAL ^ ROTATION_90:
+		case TILEFLAG_FLIP_VERTICAL ^ ROTATION_270:
 			return CANTMOVE_LEFT | CANTMOVE_RIGHT;
 		}
 		break;
@@ -294,13 +294,13 @@ int CCollision::IntersectLine(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *p
 	float Distance = distance(Pos0, Pos1);
 	int End(Distance + 1);
 	vec2 Last = Pos0;
-	int ix = 0, iy = 0; // Temporary position for checking collision
 	for(int i = 0; i <= End; i++)
 	{
 		float a = i / (float)End;
 		vec2 Pos = mix(Pos0, Pos1, a);
-		ix = round_to_int(Pos.x);
-		iy = round_to_int(Pos.y);
+		// Temporary position for checking collision
+		int ix = round_to_int(Pos.x);
+		int iy = round_to_int(Pos.y);
 
 		if(CheckPoint(ix, iy))
 		{
@@ -325,15 +325,15 @@ int CCollision::IntersectLineTeleHook(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision,
 	float Distance = distance(Pos0, Pos1);
 	int End(Distance + 1);
 	vec2 Last = Pos0;
-	int ix = 0, iy = 0; // Temporary position for checking collision
 	int dx = 0, dy = 0; // Offset for checking the "through" tile
 	ThroughOffset(Pos0, Pos1, &dx, &dy);
 	for(int i = 0; i <= End; i++)
 	{
 		float a = i / (float)End;
 		vec2 Pos = mix(Pos0, Pos1, a);
-		ix = round_to_int(Pos.x);
-		iy = round_to_int(Pos.y);
+		// Temporary position for checking collision
+		int ix = round_to_int(Pos.x);
+		int iy = round_to_int(Pos.y);
 
 		int Index = GetPureMapIndex(Pos);
 		if(g_Config.m_SvOldTeleportHook)
@@ -382,13 +382,13 @@ int CCollision::IntersectLineTeleWeapon(vec2 Pos0, vec2 Pos1, vec2 *pOutCollisio
 	float Distance = distance(Pos0, Pos1);
 	int End(Distance + 1);
 	vec2 Last = Pos0;
-	int ix = 0, iy = 0; // Temporary position for checking collision
 	for(int i = 0; i <= End; i++)
 	{
 		float a = i / (float)End;
 		vec2 Pos = mix(Pos0, Pos1, a);
-		ix = round_to_int(Pos.x);
-		iy = round_to_int(Pos.y);
+		// Temporary position for checking collision
+		int ix = round_to_int(Pos.x);
+		int iy = round_to_int(Pos.y);
 
 		int Index = GetPureMapIndex(Pos);
 		if(g_Config.m_SvOldTeleportWeapons)
@@ -913,18 +913,14 @@ std::list<int> CCollision::GetMapIndices(vec2 PrevPos, vec2 Pos, unsigned MaxInd
 	}
 	else
 	{
-		float a = 0.0f;
-		vec2 Tmp = vec2(0, 0);
-		int Nx = 0;
-		int Ny = 0;
-		int Index, LastIndex = 0;
+		int LastIndex = 0;
 		for(int i = 0; i < End; i++)
 		{
-			a = i / d;
-			Tmp = mix(PrevPos, Pos, a);
-			Nx = clamp((int)Tmp.x / 32, 0, m_Width - 1);
-			Ny = clamp((int)Tmp.y / 32, 0, m_Height - 1);
-			Index = Ny * m_Width + Nx;
+			float a = i / d;
+			vec2 Tmp = mix(PrevPos, Pos, a);
+			int Nx = clamp((int)Tmp.x / 32, 0, m_Width - 1);
+			int Ny = clamp((int)Tmp.y / 32, 0, m_Height - 1);
+			int Index = Ny * m_Width + Nx;
 			if(TileExists(Index) && LastIndex != Index)
 			{
 				if(MaxIndices && Indices.size() > MaxIndices)
@@ -997,17 +993,12 @@ int CCollision::GetIndex(vec2 PrevPos, vec2 Pos) const
 		}
 	}
 
-	float a = 0.0f;
-	vec2 Tmp = vec2(0, 0);
-	int Nx = 0;
-	int Ny = 0;
-
 	for(int i = 0, id = (int)ceilf(Distance); i < id; i++)
 	{
-		a = (float)i / Distance;
-		Tmp = mix(PrevPos, Pos, a);
-		Nx = clamp((int)Tmp.x / 32, 0, m_Width - 1);
-		Ny = clamp((int)Tmp.y / 32, 0, m_Height - 1);
+		float a = (float)i / Distance;
+		vec2 Tmp = mix(PrevPos, Pos, a);
+		int Nx = clamp((int)Tmp.x / 32, 0, m_Width - 1);
+		int Ny = clamp((int)Tmp.y / 32, 0, m_Height - 1);
 		if((m_pTele) ||
 			(m_pSpeedup && m_pSpeedup[Ny * m_Width + Nx].m_Force > 0))
 		{

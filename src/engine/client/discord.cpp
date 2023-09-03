@@ -64,7 +64,7 @@ public:
 	{
 		m_pActivityManager->clear_activity(m_pActivityManager, 0, 0);
 	}
-	void SetGameInfo(NETADDR ServerAddr, const char *pMapName) override
+	void SetGameInfo(const NETADDR &ServerAddr, const char *pMapName, bool AnnounceAddr) override
 	{
 		DiscordActivity Activity;
 		mem_zero(&Activity, sizeof(DiscordActivity));
@@ -102,7 +102,7 @@ class CDiscordStub : public IDiscord
 {
 	void Update() override {}
 	void ClearGameInfo() override {}
-	void SetGameInfo(NETADDR ServerAddr, const char *pMapName) override {}
+	void SetGameInfo(const NETADDR &ServerAddr, const char *pMapName, bool AnnounceAddr) override {}
 };
 
 IDiscord *CreateDiscord()

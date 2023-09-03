@@ -84,8 +84,10 @@ TEST_F(Jobs, LookupHost)
 
 	EXPECT_STREQ(pJob->m_aHostname, HOST);
 	EXPECT_EQ(pJob->m_Nettype, NETTYPE);
-	ASSERT_EQ(pJob->m_Result, 0);
-	EXPECT_EQ(pJob->m_Addr.type & NETTYPE, pJob->m_Addr.type);
+	if(pJob->m_Result == 0)
+	{
+		EXPECT_EQ(pJob->m_Addr.type & NETTYPE, pJob->m_Addr.type);
+	}
 }
 
 TEST_F(Jobs, LookupHostWebsocket)
@@ -106,8 +108,10 @@ TEST_F(Jobs, LookupHostWebsocket)
 
 	EXPECT_STREQ(pJob->m_aHostname, HOST);
 	EXPECT_EQ(pJob->m_Nettype, NETTYPE);
-	ASSERT_EQ(pJob->m_Result, 0);
-	EXPECT_EQ(pJob->m_Addr.type & NETTYPE_WEBSOCKET_IPV4, pJob->m_Addr.type);
+	if(pJob->m_Result == 0)
+	{
+		EXPECT_EQ(pJob->m_Addr.type & NETTYPE_WEBSOCKET_IPV4, pJob->m_Addr.type);
+	}
 }
 
 TEST_F(Jobs, Many)

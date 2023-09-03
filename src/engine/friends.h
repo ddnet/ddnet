@@ -25,7 +25,7 @@ public:
 		FRIEND_CLAN,
 		FRIEND_PLAYER,
 
-		MAX_FRIENDS = 1024,
+		MAX_FRIENDS = 4096,
 	};
 
 	virtual void Init(bool Foes = false) = 0;

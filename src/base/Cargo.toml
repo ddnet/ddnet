@@ -1,0 +1,15 @@
+[package]
+name = "ddnet-base"
+version = "0.0.1"
+edition = "2018"
+publish = false
+license = "Zlib"
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+cxx = "1.0"
+
+[dev-dependencies]
+ddnet-test = { path = "../rust-bridge/test", features = ["link-test-libraries"] }

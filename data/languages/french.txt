@@ -24,6 +24,7 @@
 #	Chairn			2022-06-16 19:00:00
 #	Sucre			2022-07-19 20:36:00
 #	archimede67		2022-08-15 13:02:00
+#	Nouaa			2022-10-25 18:00:00
 
 ##### /authors #####
 
@@ -65,14 +66,8 @@ Address
 All
 == Tout le monde
 
-Are you sure that you want to delete the demo?
-== Êtes-vous sûr de vouloir supprimer la démo ?
-
 Are you sure that you want to quit?
 == Êtes-vous sûr de vouloir quitter ?
-
-Are you sure that you want to remove the player from your friends list?
-== Êtes-vous sûr de vouloir supprimer ce joueur de votre liste d'amis ?
 
 Automatically record demos
 == Enregistrer les démos automatiquement
@@ -482,9 +477,6 @@ Try again
 
 Type
 == Type
-
-Unable to delete the demo
-== Impossible de supprimer la démo
 
 Unable to rename the demo
 == Impossible de renommer la démo
@@ -920,9 +912,6 @@ Hammerfly dummy
 Switch weapon when out of ammo
 == Changer d'arme lorsqu'il n'y a plus de munition
 
-Try fast HTTP map download first
-== Carte : essayer d'abord le téléchargement rapide HTTP
-
 Save the best demo of each race
 == Sauvegarder la meilleure démo de chaque course
 
@@ -991,9 +980,6 @@ Show tiles layers from BG map
 
 Show votes window after voting
 == Afficher la fenêtre de vote après avoir voté
-
-Destination file already exist
-== Le fichier de destination existe déjà
 
 %d new mentions
 == %d nouveaux messages
@@ -1073,8 +1059,8 @@ Please enter your nickname below.
 Show DDNet map finishes in server browser
 == Afficher les cartes de DDNet terminées dans le navigateur
 
-transmits your player name to info2.ddnet.tw
-== transmet votre pseudonyme à info2.ddnet.tw
+transmits your player name to info.ddnet.org
+== transmet votre pseudonyme à info.ddnet.org
 
 Saving ddnet-settings.cfg failed
 == L'enregistrement de ddnet-settings.cfg a échoué
@@ -1151,8 +1137,8 @@ Particles
 Assets directory
 == Répertoire des assets
 
-https://wiki.ddnet.tw/
-== https://wiki.ddnet.tw/
+https://wiki.ddnet.org/
+== https://wiki.ddnet.org/wiki/Main_Page/fr
 
 Website
 == Site web
@@ -1260,12 +1246,6 @@ Desktop fullscreen
 Kill Messages
 == Messages d'élimination
 
-Laser Outline Color
-== Couleur de la bordure du laser
-
-Laser Inner Color
-== Couleur du laser
-
 Preview
 == Prévisualisation
 
@@ -1281,8 +1261,8 @@ Regular Background Color
 Discord
 == Discord
 
-https://ddnet.tw/discord
-== https://ddnet.tw/discord
+https://ddnet.org/discord
+== https://ddnet.org/discord
 
 Are you sure that you want to disconnect and switch to a different server?
 == Êtes vous sur de vouloir vous déconnecter et changer de serveur?
@@ -1476,7 +1456,7 @@ Extras
 == Extras
 
 Connected
-==  Connecté
+== Connecté
 
 Initializing assets
 == Initialisation des assets
@@ -1579,3 +1559,99 @@ Something hookable
 
 Loading race demo files
 == Chargement des fichiers de demo de course
+
+Play the current demo
+== Jouer la démo en cours
+
+Pause the current demo
+== Mettre en pause la démo en cours
+
+Stop the current demo
+== Arrêter la démo en cours
+
+Slow down the demo
+== Ralentir la démo
+
+Speed up the demo
+== Accélérer la démo
+
+Mark the beginning of a cut
+== Marquer le début d'une coupe
+
+Mark the end of a cut
+== Marquer la fin d'une coupe
+
+Export cut as a separate demo
+== Exporter la coupe comme une démo séparée
+
+Toggle keyboard shortcuts
+== Basculer les raccourcis clavier
+
+Menu opened. Press Esc key again to close menu.
+== Menu ouvert. Appuyez à nouveau sur la touche Esc pour fermer le menu.
+
+Weapons
+== Armes
+
+Cancel
+== 
+
+File '%s' already exists, do you want to overwrite it?
+== 
+
+Are you sure that you want to remove the player '%s' from your friends list?
+== 
+
+Are you sure that you want to remove the clan '%s' from your friends list?
+== 
+
+Go back one tick
+== 
+
+Go forward one tick
+== 
+
+Go back one marker
+== 
+
+Go forward one marker
+== 
+
+Are you sure that you want to delete the demo '%s'?
+== 
+
+Unable to delete the demo '%s'
+== 
+
+Reset controls
+== 
+
+Are you sure that you want to reset the controls to their defaults?
+== 
+
+Rifle Laser Outline Color
+== 
+
+Rifle Laser Inner Color
+== 
+
+Shotgun Laser Outline Color
+== 
+
+Shotgun Laser Inner Color
+== 
+
+Door Laser Outline Color
+== 
+
+Door Laser Inner Color
+== 
+
+Freeze Laser Outline Color
+== 
+
+Freeze Laser Inner Color
+== 
+
+Set all to Rifle
+== 

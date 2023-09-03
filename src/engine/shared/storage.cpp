@@ -62,37 +62,36 @@ public:
 		// add save directories
 		if(StorageType != STORAGETYPE_BASIC && m_NumPaths && (!m_aaStoragePaths[TYPE_SAVE][0] || fs_makedir_rec_for(m_aaStoragePaths[TYPE_SAVE]) || !fs_makedir(m_aaStoragePaths[TYPE_SAVE])))
 		{
-			char aPath[IO_MAX_PATH_LENGTH];
 			if(StorageType == STORAGETYPE_CLIENT)
 			{
-				fs_makedir(GetPath(TYPE_SAVE, "screenshots", aPath, sizeof(aPath)));
-				fs_makedir(GetPath(TYPE_SAVE, "screenshots/auto", aPath, sizeof(aPath)));
-				fs_makedir(GetPath(TYPE_SAVE, "screenshots/auto/stats", aPath, sizeof(aPath)));
-				fs_makedir(GetPath(TYPE_SAVE, "maps", aPath, sizeof(aPath)));
-				fs_makedir(GetPath(TYPE_SAVE, "mapres", aPath, sizeof(aPath)));
-				fs_makedir(GetPath(TYPE_SAVE, "downloadedmaps", aPath, sizeof(aPath)));
-				fs_makedir(GetPath(TYPE_SAVE, "skins", aPath, sizeof(aPath)));
-				fs_makedir(GetPath(TYPE_SAVE, "downloadedskins", aPath, sizeof(aPath)));
-				fs_makedir(GetPath(TYPE_SAVE, "themes", aPath, sizeof(aPath)));
-				fs_makedir(GetPath(TYPE_SAVE, "assets", aPath, sizeof(aPath)));
-				fs_makedir(GetPath(TYPE_SAVE, "assets/emoticons", aPath, sizeof(aPath)));
-				fs_makedir(GetPath(TYPE_SAVE, "assets/entities", aPath, sizeof(aPath)));
-				fs_makedir(GetPath(TYPE_SAVE, "assets/game", aPath, sizeof(aPath)));
-				fs_makedir(GetPath(TYPE_SAVE, "assets/particles", aPath, sizeof(aPath)));
-				fs_makedir(GetPath(TYPE_SAVE, "assets/hud", aPath, sizeof(aPath)));
-				fs_makedir(GetPath(TYPE_SAVE, "assets/extras", aPath, sizeof(aPath)));
+				CreateFolder("screenshots", TYPE_SAVE);
+				CreateFolder("screenshots/auto", TYPE_SAVE);
+				CreateFolder("screenshots/auto/stats", TYPE_SAVE);
+				CreateFolder("maps", TYPE_SAVE);
+				CreateFolder("mapres", TYPE_SAVE);
+				CreateFolder("downloadedmaps", TYPE_SAVE);
+				CreateFolder("skins", TYPE_SAVE);
+				CreateFolder("downloadedskins", TYPE_SAVE);
+				CreateFolder("themes", TYPE_SAVE);
+				CreateFolder("assets", TYPE_SAVE);
+				CreateFolder("assets/emoticons", TYPE_SAVE);
+				CreateFolder("assets/entities", TYPE_SAVE);
+				CreateFolder("assets/game", TYPE_SAVE);
+				CreateFolder("assets/particles", TYPE_SAVE);
+				CreateFolder("assets/hud", TYPE_SAVE);
+				CreateFolder("assets/extras", TYPE_SAVE);
 #if defined(CONF_VIDEORECORDER)
-				fs_makedir(GetPath(TYPE_SAVE, "videos", aPath, sizeof(aPath)));
+				CreateFolder("videos", TYPE_SAVE);
 #endif
 			}
-			fs_makedir(GetPath(TYPE_SAVE, "dumps", aPath, sizeof(aPath)));
-			fs_makedir(GetPath(TYPE_SAVE, "demos", aPath, sizeof(aPath)));
-			fs_makedir(GetPath(TYPE_SAVE, "demos/auto", aPath, sizeof(aPath)));
-			fs_makedir(GetPath(TYPE_SAVE, "demos/auto/race", aPath, sizeof(aPath)));
-			fs_makedir(GetPath(TYPE_SAVE, "demos/replays", aPath, sizeof(aPath)));
-			fs_makedir(GetPath(TYPE_SAVE, "editor", aPath, sizeof(aPath)));
-			fs_makedir(GetPath(TYPE_SAVE, "ghosts", aPath, sizeof(aPath)));
-			fs_makedir(GetPath(TYPE_SAVE, "teehistorian", aPath, sizeof(aPath)));
+			CreateFolder("dumps", TYPE_SAVE);
+			CreateFolder("demos", TYPE_SAVE);
+			CreateFolder("demos/auto", TYPE_SAVE);
+			CreateFolder("demos/auto/race", TYPE_SAVE);
+			CreateFolder("demos/replays", TYPE_SAVE);
+			CreateFolder("editor", TYPE_SAVE);
+			CreateFolder("ghosts", TYPE_SAVE);
+			CreateFolder("teehistorian", TYPE_SAVE);
 		}
 
 		return m_NumPaths ? 0 : 1;
@@ -124,10 +123,10 @@ public:
 			}
 		}
 
-		char *pLine;
 		CLineReader LineReader;
 		LineReader.Init(File);
 
+		char *pLine;
 		while((pLine = LineReader.Get()))
 		{
 			const char *pLineWithoutPrefix = str_startswith(pLine, "add_path ");
@@ -152,8 +151,16 @@ public:
 
 	void AddPath(const char *pPath)
 	{
-		if(m_NumPaths >= MAX_PATHS || !pPath[0])
+		if(!pPath[0])
+		{
+			dbg_msg("storage", "cannot add empty path");
 			return;
+		}
+		if(m_NumPaths >= MAX_PATHS)
+		{
+			dbg_msg("storage", "cannot add path '%s', the maximum number of paths is %d", pPath, MAX_PATHS);
+			return;
+		}
 
 		if(!str_comp(pPath, "$USERDIR"))
 		{
@@ -182,6 +189,10 @@ public:
 			{
 				str_copy(m_aaStoragePaths[m_NumPaths++], pPath);
 				dbg_msg("storage", "added path '%s'", pPath);
+			}
+			else
+			{
+				dbg_msg("storage", "cannot add path '%s', which is not a directory", pPath);
 			}
 		}
 	}
@@ -242,16 +253,14 @@ public:
 				"/usr/pkg/share/ddnet",
 				"/usr/pkg/share/games/ddnet",
 				"/opt/ddnet"};
-			const int DirsCount = std::size(apDirs);
 
-			int i;
-			for(i = 0; i < DirsCount; i++)
+			for(const char *pDir : apDirs)
 			{
 				char aBuf[128];
-				str_format(aBuf, sizeof(aBuf), "%s/data/mapres", apDirs[i]);
+				str_format(aBuf, sizeof(aBuf), "%s/data/mapres", pDir);
 				if(fs_is_dir(aBuf))
 				{
-					str_format(m_aDatadir, sizeof(m_aDatadir), "%s/data", apDirs[i]);
+					str_format(m_aDatadir, sizeof(m_aDatadir), "%s/data", pDir);
 					return;
 				}
 			}
@@ -309,13 +318,17 @@ public:
 		if(Type == TYPE_ALL)
 		{
 			// list all available directories
-			for(int i = 0; i < m_NumPaths; ++i)
+			for(int i = TYPE_SAVE; i < m_NumPaths; ++i)
 				fs_listdir_fileinfo(GetPath(i, pPath, aBuffer, sizeof(aBuffer)), pfnCallback, i, pUser);
 		}
-		else if(Type >= 0 && Type < m_NumPaths)
+		else if(Type >= TYPE_SAVE && Type < m_NumPaths)
 		{
 			// list wanted directory
 			fs_listdir_fileinfo(GetPath(Type, pPath, aBuffer, sizeof(aBuffer)), pfnCallback, Type, pUser);
+		}
+		else
+		{
+			dbg_assert(false, "Type invalid");
 		}
 	}
 
@@ -325,17 +338,21 @@ public:
 		if(Type == TYPE_ALL)
 		{
 			// list all available directories
-			for(int i = 0; i < m_NumPaths; ++i)
+			for(int i = TYPE_SAVE; i < m_NumPaths; ++i)
 				fs_listdir(GetPath(i, pPath, aBuffer, sizeof(aBuffer)), pfnCallback, i, pUser);
 		}
-		else if(Type >= 0 && Type < m_NumPaths)
+		else if(Type >= TYPE_SAVE && Type < m_NumPaths)
 		{
 			// list wanted directory
 			fs_listdir(GetPath(Type, pPath, aBuffer, sizeof(aBuffer)), pfnCallback, Type, pUser);
 		}
+		else
+		{
+			dbg_assert(false, "Type invalid");
+		}
 	}
 
-	virtual const char *GetPath(int Type, const char *pDir, char *pBuffer, unsigned BufferSize)
+	const char *GetPath(int Type, const char *pDir, char *pBuffer, unsigned BufferSize)
 	{
 		if(Type == TYPE_ABSOLUTE)
 		{
@@ -348,8 +365,18 @@ public:
 		return pBuffer;
 	}
 
+	void TranslateType(int &Type, const char *pPath)
+	{
+		if(Type == TYPE_SAVE_OR_ABSOLUTE)
+			Type = fs_is_relative_path(pPath) ? TYPE_SAVE : TYPE_ABSOLUTE;
+		else if(Type == TYPE_ALL_OR_ABSOLUTE)
+			Type = fs_is_relative_path(pPath) ? TYPE_ALL : TYPE_ABSOLUTE;
+	}
+
 	IOHANDLE OpenFile(const char *pFilename, int Flags, int Type, char *pBuffer = 0, int BufferSize = 0) override
 	{
+		TranslateType(Type, pFilename);
+
 		char aBuffer[IO_MAX_PATH_LENGTH];
 		if(!pBuffer)
 		{
@@ -359,7 +386,7 @@ public:
 
 		if(Type == TYPE_ABSOLUTE)
 		{
-			return io_open(pFilename, Flags);
+			return io_open(GetPath(TYPE_ABSOLUTE, pFilename, pBuffer, BufferSize), Flags);
 		}
 		if(str_startswith(pFilename, "mapres/../skins/"))
 		{
@@ -379,24 +406,26 @@ public:
 		}
 		else
 		{
-			IOHANDLE Handle = 0;
-
-			if(Type <= TYPE_ALL)
+			if(Type == TYPE_ALL)
 			{
 				// check all available directories
-				for(int i = 0; i < m_NumPaths; ++i)
+				for(int i = TYPE_SAVE; i < m_NumPaths; ++i)
 				{
-					Handle = io_open(GetPath(i, pFilename, pBuffer, BufferSize), Flags);
+					IOHANDLE Handle = io_open(GetPath(i, pFilename, pBuffer, BufferSize), Flags);
 					if(Handle)
 						return Handle;
 				}
 			}
-			else if(Type >= 0 && Type < m_NumPaths)
+			else if(Type >= TYPE_SAVE && Type < m_NumPaths)
 			{
 				// check wanted directory
-				Handle = io_open(GetPath(Type, pFilename, pBuffer, BufferSize), Flags);
+				IOHANDLE Handle = io_open(GetPath(Type, pFilename, pBuffer, BufferSize), Flags);
 				if(Handle)
 					return Handle;
+			}
+			else
+			{
+				dbg_assert(false, "Type invalid");
 			}
 		}
 
@@ -466,11 +495,10 @@ public:
 
 	bool FindFile(const char *pFilename, const char *pPath, int Type, char *pBuffer, int BufferSize) override
 	{
-		if(BufferSize < 1)
-			return false;
+		dbg_assert(BufferSize >= 1, "BufferSize invalid");
 
 		pBuffer[0] = 0;
-		char aBuf[IO_MAX_PATH_LENGTH];
+
 		CFindCBData Data;
 		Data.m_pStorage = this;
 		Data.m_pFilename = pFilename;
@@ -478,29 +506,96 @@ public:
 		Data.m_pBuffer = pBuffer;
 		Data.m_BufferSize = BufferSize;
 
+		char aBuf[IO_MAX_PATH_LENGTH];
 		if(Type == TYPE_ALL)
 		{
 			// search within all available directories
-			for(int i = 0; i < m_NumPaths; ++i)
+			for(int i = TYPE_SAVE; i < m_NumPaths; ++i)
 			{
 				fs_listdir(GetPath(i, pPath, aBuf, sizeof(aBuf)), FindFileCallback, i, &Data);
 				if(pBuffer[0])
 					return true;
 			}
 		}
-		else if(Type >= 0 && Type < m_NumPaths)
+		else if(Type >= TYPE_SAVE && Type < m_NumPaths)
 		{
 			// search within wanted directory
 			fs_listdir(GetPath(Type, pPath, aBuf, sizeof(aBuf)), FindFileCallback, Type, &Data);
+		}
+		else
+		{
+			dbg_assert(false, "Type invalid");
 		}
 
 		return pBuffer[0] != 0;
 	}
 
+	struct SFindFilesCallbackData
+	{
+		CStorage *m_pStorage;
+		const char *m_pFilename;
+		const char *m_pPath;
+		std::set<std::string> *m_pEntries;
+	};
+
+	static int FindFilesCallback(const char *pName, int IsDir, int Type, void *pUser)
+	{
+		SFindFilesCallbackData Data = *static_cast<SFindFilesCallbackData *>(pUser);
+		if(IsDir)
+		{
+			if(pName[0] == '.')
+				return 0;
+
+			// search within the folder
+			char aBuf[IO_MAX_PATH_LENGTH];
+			char aPath[IO_MAX_PATH_LENGTH];
+			str_format(aPath, sizeof(aPath), "%s/%s", Data.m_pPath, pName);
+			Data.m_pPath = aPath;
+			fs_listdir(Data.m_pStorage->GetPath(Type, aPath, aBuf, sizeof(aBuf)), FindFilesCallback, Type, &Data);
+		}
+		else if(!str_comp(pName, Data.m_pFilename))
+		{
+			char aBuffer[IO_MAX_PATH_LENGTH];
+			str_format(aBuffer, sizeof(aBuffer), "%s/%s", Data.m_pPath, Data.m_pFilename);
+			Data.m_pEntries->emplace(aBuffer);
+		}
+
+		return 0;
+	}
+
+	size_t FindFiles(const char *pFilename, const char *pPath, int Type, std::set<std::string> *pEntries) override
+	{
+		SFindFilesCallbackData Data;
+		Data.m_pStorage = this;
+		Data.m_pFilename = pFilename;
+		Data.m_pPath = pPath;
+		Data.m_pEntries = pEntries;
+
+		char aBuf[IO_MAX_PATH_LENGTH];
+		if(Type == TYPE_ALL)
+		{
+			// search within all available directories
+			for(int i = TYPE_SAVE; i < m_NumPaths; ++i)
+			{
+				fs_listdir(GetPath(i, pPath, aBuf, sizeof(aBuf)), FindFilesCallback, i, &Data);
+			}
+		}
+		else if(Type >= TYPE_SAVE && Type < m_NumPaths)
+		{
+			// search within wanted directory
+			fs_listdir(GetPath(Type, pPath, aBuf, sizeof(aBuf)), FindFilesCallback, Type, &Data);
+		}
+		else
+		{
+			dbg_assert(false, "Type invalid");
+		}
+
+		return pEntries->size();
+	}
+
 	bool RemoveFile(const char *pFilename, int Type) override
 	{
-		if(Type < TYPE_ABSOLUTE || Type == TYPE_ALL || Type >= m_NumPaths)
-			return false;
+		dbg_assert(Type == TYPE_ABSOLUTE || (Type >= TYPE_SAVE && Type < m_NumPaths), "Type invalid");
 
 		char aBuffer[IO_MAX_PATH_LENGTH];
 		GetPath(Type, pFilename, aBuffer, sizeof(aBuffer));
@@ -524,8 +619,7 @@ public:
 
 	bool RenameFile(const char *pOldFilename, const char *pNewFilename, int Type) override
 	{
-		if(Type < 0 || Type >= m_NumPaths)
-			return false;
+		dbg_assert(Type >= TYPE_SAVE && Type < m_NumPaths, "Type invalid");
 
 		char aOldBuffer[IO_MAX_PATH_LENGTH];
 		char aNewBuffer[IO_MAX_PATH_LENGTH];
@@ -546,7 +640,10 @@ public:
 		GetBinaryPath(pNewFilename, aNewBuffer, sizeof(aNewBuffer));
 
 		if(fs_makedir_rec_for(aNewBuffer) < 0)
+		{
 			dbg_msg("storage", "cannot create folder for: %s", aNewBuffer);
+			return false;
+		}
 
 		bool Success = !fs_rename(aOldBuffer, aNewBuffer);
 		if(!Success)
@@ -556,8 +653,7 @@ public:
 
 	bool CreateFolder(const char *pFoldername, int Type) override
 	{
-		if(Type < 0 || Type >= m_NumPaths)
-			return false;
+		dbg_assert(Type >= TYPE_SAVE && Type < m_NumPaths, "Type invalid");
 
 		char aBuffer[IO_MAX_PATH_LENGTH];
 		GetPath(Type, pFoldername, aBuffer, sizeof(aBuffer));
@@ -570,13 +666,8 @@ public:
 
 	void GetCompletePath(int Type, const char *pDir, char *pBuffer, unsigned BufferSize) override
 	{
-		if(Type < 0 || Type >= m_NumPaths)
-		{
-			if(BufferSize > 0)
-				pBuffer[0] = 0;
-			return;
-		}
-
+		TranslateType(Type, pDir);
+		dbg_assert(Type >= TYPE_SAVE && Type < m_NumPaths, "Type invalid");
 		GetPath(Type, pDir, pBuffer, BufferSize);
 	}
 
@@ -588,14 +679,14 @@ public:
 
 	static IStorage *Create(int StorageType, int NumArgs, const char **ppArguments)
 	{
-		CStorage *p = new CStorage();
-		if(p && p->Init(StorageType, NumArgs, ppArguments))
+		CStorage *pStorage = new CStorage();
+		if(pStorage && pStorage->Init(StorageType, NumArgs, ppArguments))
 		{
 			dbg_msg("storage", "initialisation failed");
-			delete p;
-			p = 0;
+			delete pStorage;
+			pStorage = nullptr;
 		}
-		return p;
+		return pStorage;
 	}
 };
 
