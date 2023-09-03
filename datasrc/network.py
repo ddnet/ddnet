@@ -1,16 +1,17 @@
 # pylint: skip-file
 # See https://github.com/ddnet/ddnet/issues/3507
 
-from datatypes import Enum, Flags, NetBool, NetEvent, NetIntAny, NetIntRange, NetMessage, NetMessageEx, NetObject, NetObjectEx, NetString, NetStringHalfStrict, NetStringStrict, NetTick
+from datatypes import Enum, Flags, NetArray, NetBool, NetEvent, NetIntAny, NetIntRange, NetMessage, NetMessageEx, NetObject, NetObjectEx, NetString, NetStringHalfStrict, NetStringStrict, NetTick
 
 Emotes = ["NORMAL", "PAIN", "HAPPY", "SURPRISE", "ANGRY", "BLINK"]
 PlayerFlags = ["PLAYING", "IN_MENU", "CHATTING", "SCOREBOARD", "AIM"]
 GameFlags = ["TEAMS", "FLAGS"]
 GameStateFlags = ["GAMEOVER", "SUDDENDEATH", "PAUSED", "RACETIME"]
-CharacterFlags = ["SOLO", "JETPACK", "NO_COLLISION", "ENDLESS_HOOK", "ENDLESS_JUMP", "SUPER",
-                  "NO_HAMMER_HIT", "NO_SHOTGUN_HIT", "NO_GRENADE_HIT", "NO_LASER_HIT", "NO_HOOK",
+CharacterFlags = ["SOLO", "JETPACK", "COLLISION_DISABLED", "ENDLESS_HOOK", "ENDLESS_JUMP", "SUPER",
+                  "HAMMER_HIT_DISABLED", "SHOTGUN_HIT_DISABLED", "GRENADE_HIT_DISABLED", "LASER_HIT_DISABLED", "HOOK_HIT_DISABLED",
                   "TELEGUN_GUN", "TELEGUN_GRENADE", "TELEGUN_LASER",
-                  "WEAPON_HAMMER", "WEAPON_GUN", "WEAPON_SHOTGUN", "WEAPON_GRENADE", "WEAPON_LASER", "WEAPON_NINJA", "NO_MOVEMENTS"]
+                  "WEAPON_HAMMER", "WEAPON_GUN", "WEAPON_SHOTGUN", "WEAPON_GRENADE", "WEAPON_LASER", "WEAPON_NINJA",
+				  "MOVEMENTS_DISABLED", "IN_FREEZE", "PRACTICE_MODE"]
 GameInfoFlags = [
 	"TIMESCORE", "GAMETYPE_RACE", "GAMETYPE_FASTCAP", "GAMETYPE_FNG",
 	"GAMETYPE_DDRACE", "GAMETYPE_DDNET", "GAMETYPE_BLOCK_WORLDS",
@@ -24,23 +25,22 @@ GameInfoFlags = [
 	# Full, use GameInfoFlags2 for more flags
 ]
 GameInfoFlags2 = [
-	"ALLOW_X_SKINS", "GAMETYPE_CITY", "GAMETYPE_FDDRACE", "ENTITIES_FDDRACE",
+	"ALLOW_X_SKINS", "GAMETYPE_CITY", "GAMETYPE_FDDRACE", "ENTITIES_FDDRACE", "HUD_HEALTH_ARMOR", "HUD_AMMO",
+	"HUD_DDRACE", "NO_WEAK_HOOK_AND_BOUNCE"
 ]
 ExPlayerFlags = ["AFK", "PAUSED", "SPEC"]
-ProjectileFlags = ["CLIENTID_BIT{}".format(i) for i in range(8)] + [
+ProjectileFlags = [f"CLIENTID_BIT{i}" for i in range(8)] + [
 	"NO_OWNER", "IS_DDNET", "BOUNCE_HORIZONTAL", "BOUNCE_VERTICAL",
 	"EXPLOSIVE", "FREEZE",
 ]
 
 Emoticons = ["OOP", "EXCLAMATION", "HEARTS", "DROP", "DOTDOT", "MUSIC", "SORRY", "GHOST", "SUSHI", "SPLATTEE", "DEVILTEE", "ZOMG", "ZZZ", "WTF", "EYES", "QUESTION"]
 
-Powerups = ["HEALTH", "ARMOR", "WEAPON", "NINJA"]
+Powerups = ["HEALTH", "ARMOR", "WEAPON", "NINJA", "ARMOR_SHOTGUN", "ARMOR_GRENADE", "ARMOR_NINJA", "ARMOR_LASER"]
 Authed = ["NO", "HELPER", "MOD", "ADMIN"]
 EntityClasses = ["PROJECTILE", "DOOR", "DRAGGER_WEAK", "DRAGGER_NORMAL", "DRAGGER_STRONG", "GUN_NORMAL", "GUN_EXPLOSIVE", "GUN_FREEZE", "GUN_UNFREEZE", "LIGHT", "PICKUP"]
 
 RawHeader = '''
-
-#include <engine/message.h>
 #include <engine/shared/teehistorian_ex.h>
 
 enum
@@ -64,12 +64,11 @@ enum
 
 enum
 {
-	GAMEINFO_CURVERSION=6,
+	GAMEINFO_CURVERSION=8,
 };
 '''
 
 RawSource = '''
-#include <engine/message.h>
 #include "protocol.h"
 '''
 
@@ -176,7 +175,7 @@ Objects = [
 		NetIntRange("m_Direction", -1, 1),
 
 		NetIntRange("m_Jumped", 0, 3),
-		NetIntRange("m_HookedPlayer", 0, 'MAX_CLIENTS-1'),
+		NetIntRange("m_HookedPlayer", -1, 'MAX_CLIENTS-1'),
 		NetIntRange("m_HookState", -1, 5),
 		NetTick("m_HookTick"),
 
@@ -236,12 +235,21 @@ Objects = [
 	]),
 
 	NetObjectEx("DDNetCharacter", "character@netobj.ddnet.tw", [
-		NetIntAny("m_Flags"),
-		NetTick("m_FreezeEnd"),
-		NetIntRange("m_Jumps", -1, 255),
-		NetIntAny("m_TeleCheckpoint"),
-		NetIntRange("m_StrongWeakID", 0, 'MAX_CLIENTS-1'),
-	]),
+		NetIntAny("m_Flags", 0),
+		NetTick("m_FreezeEnd", 0),
+		NetIntRange("m_Jumps", -1, 255, 2),
+		NetIntAny("m_TeleCheckpoint", -1),
+		NetIntRange("m_StrongWeakID", 0, 'MAX_CLIENTS-1', 0),
+
+		# New data fields for jump display, freeze bar and ninja bar
+		# Default values indicate that these values should not be used
+		NetIntRange("m_JumpedTotal", -1, 255, -1),
+		NetTick("m_NinjaActivationTick", -1),
+		NetTick("m_FreezeStart", -1),
+		# New data fields for improved target accuracy
+		NetIntAny("m_TargetX", 0),
+		NetIntAny("m_TargetY", 0),
+	], validate_size=False),
 
 	NetObjectEx("DDNetPlayer", "player@netobj.ddnet.tw", [
 		NetIntAny("m_Flags"),
@@ -249,9 +257,9 @@ Objects = [
 	]),
 
 	NetObjectEx("GameInfoEx", "gameinfo@netobj.ddnet.tw", [
-		NetIntAny("m_Flags"),
-		NetIntAny("m_Version"),
-		NetIntAny("m_Flags2"),
+		NetIntAny("m_Flags", 0),
+		NetIntAny("m_Version", 0),
+		NetIntAny("m_Flags2", 0),
 	], validate_size=False),
 
 	# The code assumes that this has the same in-memory representation as
@@ -304,17 +312,13 @@ Objects = [
 
 	# Switch state for a player team.
 	NetObjectEx("SwitchState", "switch-state@netobj.ddnet.tw", [
-		NetIntRange("m_NumSwitchers", 0, 256),
+		NetIntAny("m_HighestSwitchNumber", 0),
 		# 256 switches / 32 bits = 8 int32
-		NetIntAny("m_Status1"),
-		NetIntAny("m_Status2"),
-		NetIntAny("m_Status3"),
-		NetIntAny("m_Status4"),
-		NetIntAny("m_Status5"),
-		NetIntAny("m_Status6"),
-		NetIntAny("m_Status7"),
-		NetIntAny("m_Status8"),
-	]),
+		NetArray(NetIntAny("m_aStatus", 0), 8),
+		# send the endtick of up to 4 timed switchers
+		NetArray(NetIntAny("m_aSwitchNumbers", 0), 4),
+		NetArray(NetIntAny("m_aEndTicks", 0), 4),
+	], validate_size=False),
 
 	# Switch info for map items
 	NetObjectEx("EntityEx", "entity-ex@netobj.ddnet.tw", [
@@ -443,9 +447,9 @@ Messages = [
 	], teehistorian=False),
 
 	NetMessage("Cl_CallVote", [
-		NetStringStrict("m_Type"),
-		NetStringStrict("m_Value"),
-		NetStringStrict("m_Reason"),
+		NetStringStrict("m_pType"),
+		NetStringStrict("m_pValue"),
+		NetStringStrict("m_pReason"),
 	], teehistorian=False),
 
 	NetMessage("Cl_IsDDNetLegacy", []),

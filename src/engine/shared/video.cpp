@@ -1,7 +1,5 @@
 #if defined(CONF_VIDEORECORDER)
 
-#include <engine/shared/config.h>
-
 #include "video.h"
 
 IVideo *IVideo::ms_pCurrentVideo = 0;

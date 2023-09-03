@@ -5,6 +5,8 @@
 
 #include "kernel.h"
 
+#include <engine/shared/video.h>
+
 class ISound : public IInterface
 {
 	MACRO_INTERFACE("sound", 0)
@@ -85,6 +87,12 @@ public:
 	virtual void Stop(int SampleID) = 0;
 	virtual void StopAll() = 0;
 	virtual void StopVoice(CVoiceHandle Voice) = 0;
+	virtual bool IsPlaying(int SampleID) = 0;
+
+	virtual ISoundMixFunc GetSoundMixFunc() = 0;
+	// useful for thread synchronization
+	virtual void PauseAudioDevice() = 0;
+	virtual void UnpauseAudioDevice() = 0;
 
 protected:
 	inline CVoiceHandle CreateVoiceHandle(int Index, int Age)

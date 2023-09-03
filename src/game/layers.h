@@ -3,31 +3,41 @@
 #ifndef GAME_LAYERS_H
 #define GAME_LAYERS_H
 
-#include <engine/map.h>
-#include <game/mapitems.h>
+class IKernel;
+class IMap;
+
+struct CMapItemGroup;
+struct CMapItemGroupEx;
+struct CMapItemLayer;
+struct CMapItemLayerTilemap;
 
 class CLayers
 {
 	int m_GroupsNum;
 	int m_GroupsStart;
+	int m_GroupsExNum;
+	int m_GroupsExStart;
 	int m_LayersNum;
 	int m_LayersStart;
 	CMapItemGroup *m_pGameGroup;
+	CMapItemGroupEx *m_pGameGroupEx;
 	CMapItemLayerTilemap *m_pGameLayer;
-	class IMap *m_pMap;
+	IMap *m_pMap;
 
 	void InitTilemapSkip();
 
 public:
 	CLayers();
-	void Init(class IKernel *pKernel);
-	void InitBackground(class IMap *pMap);
+	void Init(IKernel *pKernel);
+	void InitBackground(IMap *pMap);
 	int NumGroups() const { return m_GroupsNum; }
 	int NumLayers() const { return m_LayersNum; }
-	class IMap *Map() const { return m_pMap; }
+	IMap *Map() const { return m_pMap; }
 	CMapItemGroup *GameGroup() const { return m_pGameGroup; }
+	CMapItemGroupEx *GameGroupEx() const { return m_pGameGroupEx; }
 	CMapItemLayerTilemap *GameLayer() const { return m_pGameLayer; }
 	CMapItemGroup *GetGroup(int Index) const;
+	CMapItemGroupEx *GetGroupEx(int Index) const;
 	CMapItemLayer *GetLayer(int Index) const;
 
 	// DDRace

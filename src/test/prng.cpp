@@ -56,9 +56,9 @@ TEST(Prng, EqualsPcg32GlobalDemo)
 
 	CPrng Prng;
 	Prng.Seed(aSeed);
-	for(unsigned i = 0; i < sizeof(PCG32_GLOBAL_DEMO) / sizeof(PCG32_GLOBAL_DEMO[0]); i++)
+	for(auto Expected : PCG32_GLOBAL_DEMO)
 	{
-		EXPECT_EQ(Prng.RandomBits(), PCG32_GLOBAL_DEMO[i]);
+		EXPECT_EQ(Prng.RandomBits(), Expected);
 	}
 }
 

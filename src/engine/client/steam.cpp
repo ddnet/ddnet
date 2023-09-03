@@ -22,7 +22,7 @@ public:
 		m_pSteamFriends = SteamAPI_SteamFriends_v017();
 
 		ReadLaunchCommandLine();
-		str_copy(m_aPlayerName, SteamAPI_ISteamFriends_GetPersonaName(m_pSteamFriends), sizeof(m_aPlayerName));
+		str_copy(m_aPlayerName, SteamAPI_ISteamFriends_GetPersonaName(m_pSteamFriends));
 	}
 	~CSteam()
 	{
@@ -61,15 +61,15 @@ public:
 
 	void OnGameRichPresenceJoinRequested(GameRichPresenceJoinRequested_t *pEvent)
 	{
-		ParseConnectString(pEvent->m_rgchConnect);
+		ParseConnectString(pEvent->m_aRGCHConnect);
 	}
 
-	const char *GetPlayerName()
+	const char *GetPlayerName() override
 	{
 		return m_aPlayerName;
 	}
 
-	const NETADDR *GetConnectAddress()
+	const NETADDR *GetConnectAddress() override
 	{
 		if(m_GotConnectAddr)
 		{
@@ -80,12 +80,12 @@ public:
 			return 0;
 		}
 	}
-	void ClearConnectAddress()
+	void ClearConnectAddress() override
 	{
 		m_GotConnectAddr = false;
 	}
 
-	void Update()
+	void Update() override
 	{
 		SteamAPI_ManualDispatch_RunFrame(m_SteamPipe);
 		CallbackMsg_t Callback;
@@ -108,11 +108,11 @@ public:
 			SteamAPI_ManualDispatch_FreeLastCallback(m_SteamPipe);
 		}
 	}
-	void ClearGameInfo()
+	void ClearGameInfo() override
 	{
 		SteamAPI_ISteamFriends_ClearRichPresence(m_pSteamFriends);
 	}
-	void SetGameInfo(NETADDR ServerAddr, const char *pMapName)
+	void SetGameInfo(NETADDR ServerAddr, const char *pMapName) override
 	{
 		char aServerAddr[NETADDR_MAXSTRSIZE];
 		net_addr_str(&ServerAddr, aServerAddr, sizeof(aServerAddr), true);
@@ -127,12 +127,12 @@ public:
 
 class CSteamStub : public ISteam
 {
-	const char *GetPlayerName() { return 0; }
-	const NETADDR *GetConnectAddress() { return 0; }
-	void ClearConnectAddress() {}
-	void Update() {}
-	void ClearGameInfo() {}
-	void SetGameInfo(NETADDR ServerAddr, const char *pMapName) {}
+	const char *GetPlayerName() override { return 0; }
+	const NETADDR *GetConnectAddress() override { return 0; }
+	void ClearConnectAddress() override {}
+	void Update() override {}
+	void ClearGameInfo() override {}
+	void SetGameInfo(NETADDR ServerAddr, const char *pMapName) override {}
 };
 
 ISteam *CreateSteam()

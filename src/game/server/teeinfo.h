@@ -4,9 +4,9 @@
 class CTeeInfo
 {
 public:
-	constexpr static const float DARKEST_LGT_7 = 61 / 255.0f;
+	constexpr static const float ms_DarkestLGT7 = 61 / 255.0f;
 
-	char m_SkinName[64] = {'\0'};
+	char m_aSkinName[64] = {'\0'};
 	int m_UseCustomColor = 0;
 	int m_ColorBody = 0;
 	int m_ColorFeet = 0;
@@ -21,7 +21,7 @@ public:
 	CTeeInfo(const char *pSkinName, int UseCustomColor, int ColorBody, int ColorFeet);
 
 	// This constructor will assume all arrays are of length 6
-	CTeeInfo(const char *pSkinPartNames[6], int *pUseCustomColors, int *pSkinPartColors);
+	CTeeInfo(const char *apSkinPartNames[6], int *pUseCustomColors, int *pSkinPartColors);
 
 	void FromSixup();
 	void ToSixup();

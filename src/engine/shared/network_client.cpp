@@ -3,12 +3,12 @@
 #include "network.h"
 #include <base/system.h>
 
-bool CNetClient::Open(NETADDR BindAddr, int Flags)
+bool CNetClient::Open(NETADDR BindAddr)
 {
 	// open socket
 	NETSOCKET Socket;
 	Socket = net_udp_create(BindAddr);
-	if(!Socket.type)
+	if(!Socket)
 		return false;
 
 	// clean it
@@ -16,16 +16,22 @@ bool CNetClient::Open(NETADDR BindAddr, int Flags)
 
 	// init
 	m_Socket = Socket;
+	m_pStun = new CStun(m_Socket);
 	m_Connection.Init(m_Socket, false);
-	net_init_mmsgs(&m_MMSGS);
 
 	return true;
 }
 
 int CNetClient::Close()
 {
-	// TODO: implement me
-	return 0;
+	if(!m_Socket)
+		return 0;
+	if(m_pStun)
+	{
+		delete m_pStun;
+		m_pStun = nullptr;
+	}
+	return net_udp_close(m_Socket);
 }
 
 int CNetClient::Disconnect(const char *pReason)
@@ -40,12 +46,13 @@ int CNetClient::Update()
 	m_Connection.Update();
 	if(m_Connection.State() == NET_CONNSTATE_ERROR)
 		Disconnect(m_Connection.ErrorString());
+	m_pStun->Update();
 	return 0;
 }
 
-int CNetClient::Connect(NETADDR *pAddr)
+int CNetClient::Connect(const NETADDR *pAddr, int NumAddrs)
 {
-	m_Connection.Connect(pAddr);
+	m_Connection.Connect(pAddr, NumAddrs);
 	return 0;
 }
 
@@ -66,11 +73,16 @@ int CNetClient::Recv(CNetChunk *pChunk)
 		// TODO: empty the recvinfo
 		NETADDR Addr;
 		unsigned char *pData;
-		int Bytes = net_udp_recv(m_Socket, &Addr, m_RecvUnpacker.m_aBuffer, NET_MAX_PACKETSIZE, &m_MMSGS, &pData);
+		int Bytes = net_udp_recv(m_Socket, &Addr, &pData);
 
 		// no more packets for now
 		if(Bytes <= 0)
 			break;
+
+		if(m_pStun->OnPacket(Addr, pData, Bytes))
+		{
+			continue;
+		}
 
 		bool Sixup = false;
 		if(CNetBase::UnpackPacket(pData, Bytes, &m_RecvUnpacker.m_Data, Sixup) == 0)
@@ -91,7 +103,7 @@ int CNetClient::Recv(CNetChunk *pChunk)
 			}
 			else
 			{
-				if(m_Connection.State() != NET_CONNSTATE_OFFLINE && m_Connection.State() != NET_CONNSTATE_ERROR && net_addr_comp(m_Connection.PeerAddress(), &Addr) == 0 && m_Connection.Feed(&m_RecvUnpacker.m_Data, &Addr))
+				if(m_Connection.State() != NET_CONNSTATE_OFFLINE && m_Connection.State() != NET_CONNSTATE_ERROR && m_Connection.Feed(&m_RecvUnpacker.m_Data, &Addr))
 					m_RecvUnpacker.Start(&Addr, &m_Connection, 0);
 			}
 		}
@@ -116,7 +128,7 @@ int CNetClient::Send(CNetChunk *pChunk)
 	else
 	{
 		int Flags = 0;
-		dbg_assert(pChunk->m_ClientID == 0, "errornous client id");
+		dbg_assert(pChunk->m_ClientID == 0, "erroneous client id");
 
 		if(pChunk->m_Flags & NETSENDFLAG_VITAL)
 			Flags = NET_CHUNKFLAG_VITAL;
@@ -153,4 +165,19 @@ int CNetClient::GotProblems(int64_t MaxLatency) const
 const char *CNetClient::ErrorString() const
 {
 	return m_Connection.ErrorString();
+}
+
+void CNetClient::FeedStunServer(NETADDR StunServer)
+{
+	m_pStun->FeedStunServer(StunServer);
+}
+
+void CNetClient::RefreshStun()
+{
+	m_pStun->Refresh();
+}
+
+CONNECTIVITY CNetClient::GetConnectivity(int NetType, NETADDR *pGlobalAddr)
+{
+	return m_pStun->GetConnectivity(NetType, pGlobalAddr);
 }

@@ -1,10 +1,11 @@
+#include <base/logger.h>
 #include <base/system.h>
 #include <engine/storage.h>
 
-struct ListDirectoryContext
+struct SListDirectoryContext
 {
-	const char *pPath;
-	IStorage *pStorage;
+	const char *m_pPath;
+	IStorage *m_pStorage;
 };
 
 inline void ProcessItem(const char *pItemName, IStorage *pStorage)
@@ -35,10 +36,10 @@ static int ListdirCallback(const char *pItemName, int IsDir, int StorageType, vo
 {
 	if(!IsDir)
 	{
-		ListDirectoryContext Context = *((ListDirectoryContext *)pUser);
+		SListDirectoryContext Context = *((SListDirectoryContext *)pUser);
 		char aName[2048];
-		str_format(aName, sizeof(aName), "%s/%s", Context.pPath, pItemName);
-		ProcessItem(aName, Context.pStorage);
+		str_format(aName, sizeof(aName), "%s/%s", Context.m_pPath, pItemName);
+		ProcessItem(aName, Context.m_pStorage);
 	}
 
 	return 0;
@@ -46,9 +47,13 @@ static int ListdirCallback(const char *pItemName, int IsDir, int StorageType, vo
 
 int main(int argc, const char **argv) // NOLINT(misc-definitions-in-headers)
 {
-	cmdline_fix(&argc, &argv);
-	dbg_logger_stdout();
+	CCmdlineFix CmdlineFix(&argc, &argv);
+	log_set_global_logger_default();
+
 	IStorage *pStorage = CreateLocalStorage();
+	if(!pStorage)
+		return -1;
+
 	if(argc == 1)
 	{
 		dbg_msg("usage", "%s FILE1 [ FILE2... ]", argv[0]);
@@ -57,7 +62,7 @@ int main(int argc, const char **argv) // NOLINT(misc-definitions-in-headers)
 	}
 	else if(argc == 2 && fs_is_dir(argv[1]))
 	{
-		ListDirectoryContext Context = {argv[1], pStorage};
+		SListDirectoryContext Context = {argv[1], pStorage};
 		pStorage->ListDirectory(IStorage::TYPE_ALL, argv[1], ListdirCallback, &Context);
 	}
 
@@ -65,6 +70,5 @@ int main(int argc, const char **argv) // NOLINT(misc-definitions-in-headers)
 	{
 		ProcessItem(argv[i], pStorage);
 	}
-	cmdline_free(argc, argv);
 	return 0;
 }

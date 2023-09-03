@@ -21,6 +21,7 @@
 struct SBufferContainerInfo
 {
 	int m_Stride;
+	int m_VertBufferBindingIndex;
 
 	// the attributes of the container
 	struct SAttribute
@@ -32,17 +33,17 @@ struct SBufferContainerInfo
 
 		//0: float, 1:integer
 		unsigned int m_FuncType;
-
-		int m_VertBufferBindingIndex;
 	};
-	std::vector<SAttribute> m_Attributes;
+	std::vector<SAttribute> m_vAttributes;
 };
 
 struct SQuadRenderInfo
 {
-	float m_aColor[4];
-	float m_aOffsets[2];
+	ColorRGBA m_Color;
+	vec2 m_Offsets;
 	float m_Rotation;
+	// allows easier upload for uniform buffers because of the alignment requirements
+	float m_Padding;
 };
 
 struct SGraphicTile
@@ -69,7 +70,7 @@ public:
 		FORMAT_AUTO = -1,
 		FORMAT_RGB = 0,
 		FORMAT_RGBA = 1,
-		FORMAT_ALPHA = 2,
+		FORMAT_SINGLE_COMPONENT = 2,
 	};
 
 	/* Variable: width
@@ -102,14 +103,9 @@ public:
 	uint32_t m_Format;
 };
 
-struct GL_SPoint
-{
-	float x, y;
-};
-struct GL_STexCoord
-{
-	float u, v;
-};
+typedef vec2 GL_SPoint;
+typedef vec2 GL_STexCoord;
+
 struct GL_STexCoord3D
 {
 	GL_STexCoord3D &operator=(const GL_STexCoord &TexCoord)
@@ -118,18 +114,21 @@ struct GL_STexCoord3D
 		v = TexCoord.v;
 		return *this;
 	}
+
+	GL_STexCoord3D &operator=(const vec3 &TexCoord)
+	{
+		u = TexCoord.u;
+		v = TexCoord.v;
+		w = TexCoord.w;
+		return *this;
+	}
+
 	float u, v, w;
 };
-struct GL_SColorf
-{
-	float r, g, b, a;
-};
 
+typedef ColorRGBA GL_SColorf;
 //use normalized color values
-struct GL_SColor
-{
-	unsigned char r, g, b, a;
-};
+typedef vector4_base<unsigned char> GL_SColor;
 
 struct GL_SVertex
 {
@@ -152,18 +151,61 @@ struct GL_SVertexTex3DStream
 	GL_STexCoord3D m_Tex;
 };
 
+static constexpr size_t gs_GraphicsMaxQuadsRenderCount = 256;
+static constexpr size_t gs_GraphicsMaxParticlesRenderCount = 512;
+
 enum EGraphicsDriverAgeType
 {
 	GRAPHICS_DRIVER_AGE_TYPE_LEGACY = 0,
 	GRAPHICS_DRIVER_AGE_TYPE_DEFAULT,
 	GRAPHICS_DRIVER_AGE_TYPE_MODERN,
+
+	GRAPHICS_DRIVER_AGE_TYPE_COUNT,
 };
+
+enum EBackendType
+{
+	BACKEND_TYPE_OPENGL = 0,
+	BACKEND_TYPE_OPENGL_ES,
+	BACKEND_TYPE_VULKAN,
+
+	// special value to tell the backend to identify the current backend
+	BACKEND_TYPE_AUTO,
+
+	BACKEND_TYPE_COUNT,
+};
+
+struct STWGraphicGPU
+{
+	enum ETWGraphicsGPUType
+	{
+		GRAPHICS_GPU_TYPE_DISCRETE = 0,
+		GRAPHICS_GPU_TYPE_INTEGRATED,
+		GRAPHICS_GPU_TYPE_VIRTUAL,
+		GRAPHICS_GPU_TYPE_CPU,
+
+		// should stay at last position in this enum
+		GRAPHICS_GPU_TYPE_INVALID,
+	};
+
+	struct STWGraphicGPUItem
+	{
+		char m_aName[256];
+		ETWGraphicsGPUType m_GPUType;
+	};
+	std::vector<STWGraphicGPUItem> m_vGPUs;
+	STWGraphicGPUItem m_AutoGPU;
+};
+
+typedef STWGraphicGPU TTWGraphicsGPUList;
 
 typedef std::function<void(void *)> WINDOW_RESIZE_FUNC;
 
 namespace client_data7 {
 struct CDataSprite; // NOLINT(bugprone-forward-declaration-namespace)
 }
+
+typedef std::function<bool(uint32_t &Width, uint32_t &Height, uint32_t &Format, std::vector<uint8_t> &vDstData)> TGLBackendReadPresentedImageData;
 
 class IGraphics : public IInterface
 {
@@ -209,19 +251,23 @@ public:
 	int WindowWidth() const { return m_ScreenWidth / m_ScreenHiDPIScale; }
 	int WindowHeight() const { return m_ScreenHeight / m_ScreenHiDPIScale; }
 
+	virtual void WarnPngliteIncompatibleImages(bool Warn) = 0;
 	virtual void SetWindowParams(int FullscreenMode, bool IsBorderless, bool AllowResizing) = 0;
 	virtual bool SetWindowScreen(int Index) = 0;
 	virtual bool SetVSync(bool State) = 0;
+	virtual bool SetMultiSampling(uint32_t ReqMultiSamplingCount, uint32_t &MultiSamplingCountBackend) = 0;
 	virtual int GetWindowScreen() = 0;
 	virtual void Move(int x, int y) = 0;
 	virtual void Resize(int w, int h, int RefreshRate) = 0;
 	virtual void GotResized(int w, int h, int RefreshRate) = 0;
+	virtual void UpdateViewport(int X, int Y, int W, int H, bool ByResize) = 0;
 	virtual void AddWindowResizeListener(WINDOW_RESIZE_FUNC pFunc, void *pUser) = 0;
 
 	virtual void WindowDestroyNtf(uint32_t WindowID) = 0;
 	virtual void WindowCreateNtf(uint32_t WindowID) = 0;
 
-	virtual void Clear(float r, float g, float b) = 0;
+	// ForceClearNow forces the backend to trigger a clear, even at performance cost, else it might be delayed by one frame
+	virtual void Clear(float r, float g, float b, bool ForceClearNow = false) = 0;
 
 	virtual void ClipEnable(int x, int y, int w, int h) = 0;
 	virtual void ClipDisable() = 0;
@@ -235,12 +281,19 @@ public:
 	virtual void BlendAdditive() = 0;
 	virtual void WrapNormal() = 0;
 	virtual void WrapClamp() = 0;
-	virtual int MemoryUsage() const = 0;
+
+	virtual uint64_t TextureMemoryUsage() const = 0;
+	virtual uint64_t BufferMemoryUsage() const = 0;
+	virtual uint64_t StreamedMemoryUsage() const = 0;
+	virtual uint64_t StagingMemoryUsage() const = 0;
+
+	virtual const TTWGraphicsGPUList &GetGPUs() const = 0;
 
 	virtual int LoadPNG(CImageInfo *pImg, const char *pFilename, int StorageType) = 0;
 	virtual void FreePNG(CImageInfo *pImg) = 0;
 
 	virtual bool CheckImageDivisibility(const char *pFileName, CImageInfo &Img, int DivX, int DivY, bool AllowResize) = 0;
+	virtual bool IsImageFormatRGBA(const char *pFileName, CImageInfo &Img) = 0;
 
 	// destination and source buffer require to have the same width and height
 	virtual void CopyTextureBufferSub(uint8_t *pDestBuffer, uint8_t *pSourceBuffer, int FullWidth, int FullHeight, int ColorChannelCount, int SubOffsetX, int SubOffsetY, int SubCopyWidth, int SubCopyHeight) = 0;
@@ -249,11 +302,16 @@ public:
 	virtual void CopyTextureFromTextureBufferSub(uint8_t *pDestBuffer, int DestWidth, int DestHeight, uint8_t *pSourceBuffer, int SrcWidth, int SrcHeight, int ColorChannelCount, int SrcSubOffsetX, int SrcSubOffsetY, int SrcSubCopyWidth, int SrcSubCopyHeight) = 0;
 
 	virtual int UnloadTexture(CTextureHandle *pIndex) = 0;
-	virtual CTextureHandle LoadTextureRaw(int Width, int Height, int Format, const void *pData, int StoreFormat, int Flags, const char *pTexName = NULL) = 0;
+	virtual CTextureHandle LoadTextureRaw(int Width, int Height, int Format, const void *pData, int StoreFormat, int Flags, const char *pTexName = nullptr) = 0;
 	virtual int LoadTextureRawSub(CTextureHandle TextureID, int x, int y, int Width, int Height, int Format, const void *pData) = 0;
 	virtual CTextureHandle LoadTexture(const char *pFilename, int StorageType, int StoreFormat, int Flags) = 0;
 	virtual void TextureSet(CTextureHandle Texture) = 0;
 	void TextureClear() { TextureSet(CTextureHandle()); }
+
+	// pTextData & pTextOutlineData are automatically free'd
+	virtual bool LoadTextTextures(int Width, int Height, CTextureHandle &TextTexture, CTextureHandle &TextOutlineTexture, void *pTextData, void *pTextOutlineData) = 0;
+	virtual bool UnloadTextTextures(CTextureHandle &TextTexture, CTextureHandle &TextOutlineTexture) = 0;
+	virtual bool UpdateTextTexture(CTextureHandle TextureID, int x, int y, int Width, int Height, const void *pData) = 0;
 
 	virtual CTextureHandle LoadSpriteTexture(CImageInfo &FromImageInfo, struct CDataSprite *pSprite) = 0;
 	virtual CTextureHandle LoadSpriteTexture(CImageInfo &FromImageInfo, struct client_data7::CDataSprite *pSprite) = 0;
@@ -262,31 +320,35 @@ public:
 	virtual bool IsSpriteTextureFullyTransparent(CImageInfo &FromImageInfo, struct client_data7::CDataSprite *pSprite) = 0;
 
 	virtual void FlushVertices(bool KeepVertices = false) = 0;
-	virtual void FlushTextVertices(int TextureSize, int TextTextureIndex, int TextOutlineTextureIndex, float *pOutlineTextColor) = 0;
 	virtual void FlushVerticesTex3D() = 0;
 
 	// specific render functions
-	virtual void RenderTileLayer(int BufferContainerIndex, float *pColor, char **pOffsets, unsigned int *IndicedVertexDrawNum, size_t NumIndicesOffet) = 0;
-	virtual void RenderBorderTiles(int BufferContainerIndex, float *pColor, char *pIndexBufferOffset, float *pOffset, float *pDir, int JumpIndex, unsigned int DrawNum) = 0;
-	virtual void RenderBorderTileLines(int BufferContainerIndex, float *pColor, char *pIndexBufferOffset, float *pOffset, float *pDir, unsigned int IndexDrawNum, unsigned int RedrawNum) = 0;
+	virtual void RenderTileLayer(int BufferContainerIndex, const ColorRGBA &Color, char **pOffsets, unsigned int *pIndicedVertexDrawNum, size_t NumIndicesOffset) = 0;
+	virtual void RenderBorderTiles(int BufferContainerIndex, const ColorRGBA &Color, char *pIndexBufferOffset, const vec2 &Offset, const vec2 &Dir, int JumpIndex, unsigned int DrawNum) = 0;
+	virtual void RenderBorderTileLines(int BufferContainerIndex, const ColorRGBA &Color, char *pIndexBufferOffset, const vec2 &Offset, const vec2 &Dir, unsigned int IndexDrawNum, unsigned int RedrawNum) = 0;
 	virtual void RenderQuadLayer(int BufferContainerIndex, SQuadRenderInfo *pQuadInfo, int QuadNum, int QuadOffset) = 0;
-	virtual void RenderText(int BufferContainerIndex, int TextQuadNum, int TextureSize, int TextureTextIndex, int TextureTextOutlineIndex, float *pTextColor, float *pTextoutlineColor) = 0;
+	virtual void RenderText(int BufferContainerIndex, int TextQuadNum, int TextureSize, int TextureTextIndex, int TextureTextOutlineIndex, const ColorRGBA &TextColor, const ColorRGBA &TextOutlineColor) = 0;
 
 	// opengl 3.3 functions
+
+	enum EBufferObjectCreateFlags
+	{
+		// tell the backend that the buffer only needs to be valid for the span of one frame. Buffer size is not allowed to be bigger than GL_SVertex * MAX_VERTICES
+		BUFFER_OBJECT_CREATE_FLAGS_ONE_TIME_USE_BIT = 1 << 0,
+	};
+
 	// if a pointer is passed as moved pointer, it requires to be allocated with malloc()
-	virtual int CreateBufferObject(size_t UploadDataSize, void *pUploadData, bool IsMovedPointer = false) = 0;
-	virtual void RecreateBufferObject(int BufferIndex, size_t UploadDataSize, void *pUploadData, bool IsMovedPointer = false) = 0;
-	virtual void UpdateBufferObject(int BufferIndex, size_t UploadDataSize, void *pUploadData, void *pOffset, bool IsMovedPointer = false) = 0;
-	virtual void CopyBufferObject(int WriteBufferIndex, int ReadBufferIndex, size_t WriteOffset, size_t ReadOffset, size_t CopyDataSize) = 0;
+	virtual int CreateBufferObject(size_t UploadDataSize, void *pUploadData, int CreateFlags, bool IsMovedPointer = false) = 0;
+	virtual void RecreateBufferObject(int BufferIndex, size_t UploadDataSize, void *pUploadData, int CreateFlags, bool IsMovedPointer = false) = 0;
 	virtual void DeleteBufferObject(int BufferIndex) = 0;
 
 	virtual int CreateBufferContainer(struct SBufferContainerInfo *pContainerInfo) = 0;
 	// destroying all buffer objects means, that all referenced VBOs are destroyed automatically, so the user does not need to save references to them
 	virtual void DeleteBufferContainer(int ContainerIndex, bool DestroyAllBO = true) = 0;
-	virtual void UpdateBufferContainer(int ContainerIndex, struct SBufferContainerInfo *pContainerInfo) = 0;
 	virtual void IndicesNumRequiredNotify(unsigned int RequiredIndicesCount) = 0;
 
-	virtual void GetDriverVersion(EGraphicsDriverAgeType DriverAgeType, int &Major, int &Minor, int &Patch) = 0;
+	// returns true if the driver age type is supported, passing BACKEND_TYPE_AUTO for BackendType will query the values for the currently used backend
+	virtual bool GetDriverVersion(EGraphicsDriverAgeType DriverAgeType, int &Major, int &Minor, int &Patch, const char *&pName, EBackendType BackendType) = 0;
 	virtual bool IsConfigModernAPI() = 0;
 	virtual bool IsTileBufferingEnabled() = 0;
 	virtual bool IsQuadBufferingEnabled() = 0;
@@ -311,8 +373,6 @@ public:
 
 	virtual void QuadsBegin() = 0;
 	virtual void QuadsEnd() = 0;
-	virtual void TextQuadsBegin() = 0;
-	virtual void TextQuadsEnd(int TextureSize, int TextTextureIndex, int TextOutlineTextureIndex, float *pOutlineTextColor) = 0;
 	virtual void QuadsTex3DBegin() = 0;
 	virtual void QuadsTex3DEnd() = 0;
 	virtual void TrianglesBegin() = 0;
@@ -361,8 +421,8 @@ public:
 	virtual int CreateQuadContainer(bool AutomaticUpload = true) = 0;
 	virtual void QuadContainerChangeAutomaticUpload(int ContainerIndex, bool AutomaticUpload) = 0;
 	virtual void QuadContainerUpload(int ContainerIndex) = 0;
-	virtual void QuadContainerAddQuads(int ContainerIndex, CQuadItem *pArray, int Num) = 0;
-	virtual void QuadContainerAddQuads(int ContainerIndex, CFreeformItem *pArray, int Num) = 0;
+	virtual int QuadContainerAddQuads(int ContainerIndex, CQuadItem *pArray, int Num) = 0;
+	virtual int QuadContainerAddQuads(int ContainerIndex, CFreeformItem *pArray, int Num) = 0;
 	virtual void QuadContainerReset(int ContainerIndex) = 0;
 	virtual void DeleteQuadContainer(int ContainerIndex) = 0;
 	virtual void RenderQuadContainer(int ContainerIndex, int QuadDrawNum) = 0;
@@ -372,7 +432,7 @@ public:
 
 	struct SRenderSpriteInfo
 	{
-		float m_Pos[2];
+		vec2 m_Pos;
 		float m_Scale;
 		float m_Rotation;
 	};
@@ -381,6 +441,38 @@ public:
 
 	virtual void QuadsDrawFreeform(const CFreeformItem *pArray, int Num) = 0;
 	virtual void QuadsText(float x, float y, float Size, const char *pText) = 0;
+
+	enum
+	{
+		CORNER_NONE = 0,
+		CORNER_TL = 1,
+		CORNER_TR = 2,
+		CORNER_BL = 4,
+		CORNER_BR = 8,
+		CORNER_ITL = 16,
+		CORNER_ITR = 32,
+		CORNER_IBL = 64,
+		CORNER_IBR = 128,
+
+		CORNER_T = CORNER_TL | CORNER_TR,
+		CORNER_B = CORNER_BL | CORNER_BR,
+		CORNER_R = CORNER_TR | CORNER_BR,
+		CORNER_L = CORNER_TL | CORNER_BL,
+
+		CORNER_IT = CORNER_ITL | CORNER_ITR,
+		CORNER_IB = CORNER_IBL | CORNER_IBR,
+		CORNER_IR = CORNER_ITR | CORNER_IBR,
+		CORNER_IL = CORNER_ITL | CORNER_IBL,
+
+		CORNER_ALL = CORNER_T | CORNER_B,
+		CORNER_INV_ALL = CORNER_IT | CORNER_IB
+	};
+	virtual void DrawRectExt(float x, float y, float w, float h, float r, int Corners) = 0;
+	virtual void DrawRectExt4(float x, float y, float w, float h, ColorRGBA ColorTopLeft, ColorRGBA ColorTopRight, ColorRGBA ColorBottomLeft, ColorRGBA ColorBottomRight, float r, int Corners) = 0;
+	virtual int CreateRectQuadContainer(float x, float y, float w, float h, float r, int Corners) = 0;
+	virtual void DrawRect(float x, float y, float w, float h, ColorRGBA Color, int Corners, float Rounding) = 0;
+	virtual void DrawRect4(float x, float y, float w, float h, ColorRGBA ColorTopLeft, ColorRGBA ColorTopRight, ColorRGBA ColorBottomLeft, ColorRGBA ColorBottomRight, int Corners, float Rounding) = 0;
+	virtual void DrawCircle(float CenterX, float CenterY, float Radius, int Segments) = 0;
 
 	struct CColorVertex
 	{
@@ -392,8 +484,8 @@ public:
 	};
 	virtual void SetColorVertex(const CColorVertex *pArray, int Num) = 0;
 	virtual void SetColor(float r, float g, float b, float a) = 0;
-	virtual void SetColor(ColorRGBA rgb) = 0;
-	virtual void SetColor4(vec4 TopLeft, vec4 TopRight, vec4 BottomLeft, vec4 BottomRight) = 0;
+	virtual void SetColor(ColorRGBA Color) = 0;
+	virtual void SetColor4(ColorRGBA TopLeft, ColorRGBA TopRight, ColorRGBA BottomLeft, ColorRGBA BottomRight) = 0;
 	virtual void ChangeColorOfCurrentQuadVertices(float r, float g, float b, float a) = 0;
 	virtual void ChangeColorOfQuadVertices(int QuadOffset, unsigned char r, unsigned char g, unsigned char b, unsigned char a) = 0;
 
@@ -411,6 +503,10 @@ public:
 
 	virtual void SetWindowGrab(bool Grab) = 0;
 	virtual void NotifyWindow() = 0;
+
+	// be aware that this function should only be called from the graphics thread, and even then you should really know what you are doing
+	// this function always returns the pixels in RGB
+	virtual TGLBackendReadPresentedImageData &GetReadPresentedImageDataFuncUnsafe() = 0;
 
 	virtual SWarning *GetCurWarning() = 0;
 

@@ -12,18 +12,19 @@ enum
 	VANILLA_TEAM_SUPER = VANILLA_MAX_CLIENTS
 };
 
+// do not change the values of the following enum
 enum
 {
-	SV_TEAM_FORBIDDEN,
-	SV_TEAM_ALLOWED,
-	SV_TEAM_MANDATORY,
-	SV_TEAM_FORCED_SOLO
+	SV_TEAM_FORBIDDEN = 0, // teams are disabled on the map
+	SV_TEAM_ALLOWED = 1, // teams are enabled on the map, but optional
+	SV_TEAM_MANDATORY = 2, // map must be played with a team
+	SV_TEAM_FORCED_SOLO = 3 // map forces a random team for each individual player
 };
 
 class CTeamsCore
 {
-	int m_Team[MAX_CLIENTS];
-	bool m_IsSolo[MAX_CLIENTS];
+	int m_aTeam[MAX_CLIENTS];
+	bool m_aIsSolo[MAX_CLIENTS];
 
 public:
 	bool m_IsDDRace16;
@@ -41,14 +42,15 @@ public:
 	void Reset();
 	void SetSolo(int ClientID, bool Value)
 	{
-		m_IsSolo[ClientID] = Value;
+		dbg_assert(ClientID >= 0 && ClientID < MAX_CLIENTS, "Invalid client id");
+		m_aIsSolo[ClientID] = Value;
 	}
 
 	bool GetSolo(int ClientID) const
 	{
 		if(ClientID < 0 || ClientID >= MAX_CLIENTS)
 			return false;
-		return m_IsSolo[ClientID];
+		return m_aIsSolo[ClientID];
 	}
 };
 

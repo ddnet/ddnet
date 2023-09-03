@@ -1,27 +1,28 @@
 #include "updater.h"
+#include <base/lock_scope.h>
 #include <base/system.h>
 #include <engine/client.h>
 #include <engine/engine.h>
 #include <engine/external/json-parser/json.h>
+#include <engine/shared/http.h>
 #include <engine/shared/json.h>
 #include <engine/storage.h>
-#include <game/version.h>
 
 #include <cstdlib> // system
 
 using std::map;
 using std::string;
 
-class CUpdaterFetchTask : public CGetFile
+class CUpdaterFetchTask : public CHttpRequest
 {
 	char m_aBuf[256];
 	char m_aBuf2[256];
 	CUpdater *m_pUpdater;
 
-	virtual void OnProgress();
+	void OnProgress() override;
 
 protected:
-	virtual int OnCompletion(int State);
+	int OnCompletion(int State) override;
 
 public:
 	CUpdaterFetchTask(CUpdater *pUpdater, const char *pFile, const char *pDestPath);
@@ -44,36 +45,36 @@ static const char *GetUpdaterDestPath(char *pBuf, int BufSize, const char *pFile
 }
 
 CUpdaterFetchTask::CUpdaterFetchTask(CUpdater *pUpdater, const char *pFile, const char *pDestPath) :
-	CGetFile(pUpdater->m_pStorage, GetUpdaterUrl(m_aBuf, sizeof(m_aBuf), pFile), GetUpdaterDestPath(m_aBuf2, sizeof(m_aBuf), pFile, pDestPath), -2, CTimeout{0, 0, 0}),
+	CHttpRequest(GetUpdaterUrl(m_aBuf, sizeof(m_aBuf), pFile)),
 	m_pUpdater(pUpdater)
 {
+	WriteToFile(pUpdater->m_pStorage, GetUpdaterDestPath(m_aBuf2, sizeof(m_aBuf2), pFile, pDestPath), -2);
 }
 
 void CUpdaterFetchTask::OnProgress()
 {
-	lock_wait(m_pUpdater->m_Lock);
-	str_copy(m_pUpdater->m_aStatus, Dest(), sizeof(m_pUpdater->m_aStatus));
+	CLockScope ls(m_pUpdater->m_Lock);
+	str_copy(m_pUpdater->m_aStatus, Dest());
 	m_pUpdater->m_Percent = Progress();
-	lock_unlock(m_pUpdater->m_Lock);
 }
 
 int CUpdaterFetchTask::OnCompletion(int State)
 {
-	State = CGetFile::OnCompletion(State);
+	State = CHttpRequest::OnCompletion(State);
 
-	const char *b = 0;
-	for(const char *a = Dest(); *a; a++)
-		if(*a == '/')
-			b = a + 1;
-	b = b ? b : Dest();
-	if(!str_comp(b, "update.json"))
+	const char *pFileName = 0;
+	for(const char *pPath = Dest(); *pPath; pPath++)
+		if(*pPath == '/')
+			pFileName = pPath + 1;
+	pFileName = pFileName ? pFileName : Dest();
+	if(!str_comp(pFileName, "update.json"))
 	{
 		if(State == HTTP_DONE)
 			m_pUpdater->SetCurrentState(IUpdater::GOT_MANIFEST);
 		else if(State == HTTP_ERROR)
 			m_pUpdater->SetCurrentState(IUpdater::FAIL);
 	}
-	else if(!str_comp(b, m_pUpdater->m_aLastFile))
+	else if(!str_comp(pFileName, m_pUpdater->m_aLastFile))
 	{
 		if(State == HTTP_DONE)
 			m_pUpdater->SetCurrentState(IUpdater::MOVE_FILES);
@@ -111,32 +112,26 @@ CUpdater::~CUpdater()
 
 void CUpdater::SetCurrentState(int NewState)
 {
-	lock_wait(m_Lock);
+	CLockScope ls(m_Lock);
 	m_State = NewState;
-	lock_unlock(m_Lock);
 }
 
 int CUpdater::GetCurrentState()
 {
-	lock_wait(m_Lock);
-	int Result = m_State;
-	lock_unlock(m_Lock);
-	return Result;
+	CLockScope ls(m_Lock);
+	return m_State;
 }
 
 void CUpdater::GetCurrentFile(char *pBuf, int BufSize)
 {
-	lock_wait(m_Lock);
+	CLockScope ls(m_Lock);
 	str_copy(pBuf, m_aStatus, BufSize);
-	lock_unlock(m_Lock);
 }
 
 int CUpdater::GetCurrentPercent()
 {
-	lock_wait(m_Lock);
-	int Result = m_Percent;
-	lock_unlock(m_Lock);
-	return Result;
+	CLockScope ls(m_Lock);
+	return m_Percent;
 }
 
 void CUpdater::FetchFile(const char *pFile, const char *pDestPath)
@@ -247,17 +242,12 @@ bool CUpdater::ReplaceServer()
 void CUpdater::ParseUpdate()
 {
 	char aPath[IO_MAX_PATH_LENGTH];
-	IOHANDLE File = m_pStorage->OpenFile(m_pStorage->GetBinaryPath("update/update.json", aPath, sizeof aPath), IOFLAG_READ | IOFLAG_SKIP_BOM, IStorage::TYPE_ABSOLUTE);
-	if(!File)
+	void *pBuf;
+	unsigned Length;
+	if(!m_pStorage->ReadFile(m_pStorage->GetBinaryPath("update/update.json", aPath, sizeof aPath), IStorage::TYPE_ABSOLUTE, &pBuf, &Length))
 		return;
 
-	long int Length = io_length(File);
-	char *pBuf = (char *)malloc(Length);
-	mem_zero(pBuf, Length);
-	io_read(File, pBuf, Length);
-	io_close(File);
-
-	json_value *pVersions = json_parse(pBuf, Length);
+	json_value *pVersions = json_parse((json_char *)pBuf, Length);
 	free(pBuf);
 
 	if(pVersions && pVersions->type == json_array)
@@ -362,7 +352,7 @@ void CUpdater::PerformUpdate()
 		pLastFile = m_aClientExecTmp;
 	}
 
-	str_copy(m_aLastFile, pLastFile, sizeof(m_aLastFile));
+	str_copy(m_aLastFile, pLastFile);
 }
 
 void CUpdater::CommitUpdate()

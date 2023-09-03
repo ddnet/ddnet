@@ -3,9 +3,10 @@
 #ifndef ENGINE_CLIENT_FRIENDS_H
 #define ENGINE_CLIENT_FRIENDS_H
 
-#include <engine/config.h>
 #include <engine/console.h>
 #include <engine/friends.h>
+
+class IConfigManager;
 
 class CFriends : public IFriends
 {
@@ -22,15 +23,15 @@ class CFriends : public IFriends
 public:
 	CFriends();
 
-	void Init(bool Foes = false);
+	void Init(bool Foes = false) override;
 
-	int NumFriends() const { return m_NumFriends; }
-	const CFriendInfo *GetFriend(int Index) const;
-	int GetFriendState(const char *pName, const char *pClan) const;
-	bool IsFriend(const char *pName, const char *pClan, bool PlayersOnly) const;
+	int NumFriends() const override { return m_NumFriends; }
+	const CFriendInfo *GetFriend(int Index) const override;
+	int GetFriendState(const char *pName, const char *pClan) const override;
+	bool IsFriend(const char *pName, const char *pClan, bool PlayersOnly) const override;
 
-	void AddFriend(const char *pName, const char *pClan);
-	void RemoveFriend(const char *pName, const char *pClan);
+	void AddFriend(const char *pName, const char *pClan) override;
+	void RemoveFriend(const char *pName, const char *pClan) override;
 	void RemoveFriend(int Index);
 	void Friends();
 };

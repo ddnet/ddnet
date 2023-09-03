@@ -32,7 +32,7 @@ protected:
 class CJob : public IJob
 {
 	std::function<void()> m_JobFunction;
-	void Run() { m_JobFunction(); }
+	void Run() override { m_JobFunction(); }
 
 public:
 	CJob(std::function<void()> &&JobFunction) :
@@ -88,10 +88,32 @@ TEST_F(Jobs, LookupHost)
 	EXPECT_EQ(pJob->m_Addr.type & NETTYPE, pJob->m_Addr.type);
 }
 
+TEST_F(Jobs, LookupHostWebsocket)
+{
+	static const char *HOST = "ws://example.com";
+	static const int NETTYPE = NETTYPE_ALL;
+	auto pJob = std::make_shared<CHostLookup>(HOST, NETTYPE);
+
+	EXPECT_STREQ(pJob->m_aHostname, HOST);
+	EXPECT_EQ(pJob->m_Nettype, NETTYPE);
+
+	Add(pJob);
+	while(pJob->Status() != IJob::STATE_DONE)
+	{
+		// yay, busy loop...
+		thread_yield();
+	}
+
+	EXPECT_STREQ(pJob->m_aHostname, HOST);
+	EXPECT_EQ(pJob->m_Nettype, NETTYPE);
+	ASSERT_EQ(pJob->m_Result, 0);
+	EXPECT_EQ(pJob->m_Addr.type & NETTYPE_WEBSOCKET_IPV4, pJob->m_Addr.type);
+}
+
 TEST_F(Jobs, Many)
 {
 	std::atomic<int> ThreadsRunning(0);
-	std::vector<std::shared_ptr<IJob>> apJobs;
+	std::vector<std::shared_ptr<IJob>> vpJobs;
 	SEMAPHORE sphore;
 	sphore_init(&sphore);
 	for(int i = 0; i < TEST_NUM_THREADS; i++)
@@ -104,16 +126,16 @@ TEST_F(Jobs, Many)
 			}
 		});
 		EXPECT_EQ(pJob->Status(), IJob::STATE_PENDING);
-		apJobs.push_back(pJob);
+		vpJobs.push_back(pJob);
 	}
-	for(auto &pJob : apJobs)
+	for(auto &pJob : vpJobs)
 	{
 		Add(pJob);
 	}
 	sphore_wait(&sphore);
 	sphore_destroy(&sphore);
 	m_Pool.~CJobPool();
-	for(auto &pJob : apJobs)
+	for(auto &pJob : vpJobs)
 	{
 		EXPECT_EQ(pJob->Status(), IJob::STATE_DONE);
 	}

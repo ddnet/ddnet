@@ -3,9 +3,9 @@ import csv
 import os
 import sys
 
-import clang.cindex
+import clang.cindex # pylint: disable=import-error
 
-from clang.cindex import CursorKind, LinkageKind, StorageClass, TypeKind
+from clang.cindex import CursorKind, LinkageKind, StorageClass, TypeKind # pylint: disable=import-error
 
 try:
 	from tqdm import tqdm
@@ -92,20 +92,20 @@ class ParseError(RuntimeError):
 def process_source_file(out, file, extra_args, break_on):
 	args = extra_args + ["-Isrc"]
 	if file.endswith(".c"):
-		header = "{}.h".format(file[:-2])
+		header = f"{file[:-2]}.h"
 	elif file.endswith(".cpp"):
-		header = "{}.h".format(file[:-4])
+		header = f"{file[:-4]}.h"
 	else:
-		raise ValueError("unrecognized source file: {}".format(file))
+		raise ValueError(f"unrecognized source file: {file}")
 
 	index = clang.cindex.Index.create()
 	unit = index.parse(file, args=args)
 	errors = list(unit.diagnostics)
 	if errors:
 		for error in errors:
-			print("{}: {}".format(file, error.format()), file=sys.stderr)
+			print(f"{file}: {error.format()}", file=sys.stderr)
 		print(args, file=sys.stderr)
-		raise ParseError("failed parsing {}".format(file))
+		raise ParseError(f"failed parsing {file}")
 
 	filter_files = frozenset([file, header])
 
@@ -140,7 +140,7 @@ def process_source_file(out, file, extra_args, break_on):
 				"name": node.spelling,
 			})
 			if node.spelling == break_on:
-				breakpoint()
+				breakpoint() # pylint: disable=forgotten-debug-statement
 
 def main():
 	p = argparse.ArgumentParser(description="Extracts identifier data from a Teeworlds source file and its header, outputting the data as CSV to stdout")

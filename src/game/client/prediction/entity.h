@@ -5,20 +5,17 @@
 
 #include "gameworld.h"
 #include <base/vmath.h>
-#include <new>
 
 #define MACRO_ALLOC_HEAP() \
 public: \
 	void *operator new(size_t Size) \
 	{ \
 		void *p = malloc(Size); \
-		/*dbg_msg("", "++ %p %d", p, size);*/ \
 		mem_zero(p, Size); \
 		return p; \
 	} \
 	void operator delete(void *pPtr) \
 	{ \
-		/*dbg_msg("", "-- %p", p);*/ \
 		free(pPtr); \
 	} \
 \
@@ -38,9 +35,12 @@ protected:
 	int m_ObjType;
 
 public:
-	CEntity(CGameWorld *pGameWorld, int Objtype);
+	int GetID() const { return m_ID; }
+
+	CEntity(CGameWorld *pGameWorld, int Objtype, vec2 Pos = vec2(0, 0), int ProximityRadius = 0);
 	virtual ~CEntity();
 
+	std::vector<SSwitchers> &Switchers() { return m_pGameWorld->Switchers(); }
 	class CGameWorld *GameWorld() { return m_pGameWorld; }
 	CTuningParams *Tuning() { return GameWorld()->Tuning(); }
 	CTuningParams *TuningList() { return GameWorld()->TuningList(); }
@@ -48,10 +48,13 @@ public:
 	class CCollision *Collision() { return GameWorld()->Collision(); }
 	CEntity *TypeNext() { return m_pNextTypeEntity; }
 	CEntity *TypePrev() { return m_pPrevTypeEntity; }
+	const vec2 &GetPos() const { return m_Pos; }
+	float GetProximityRadius() const { return m_ProximityRadius; }
 
-	virtual void Destroy() { delete this; }
+	void Destroy() { delete this; }
+	virtual void PreTick() {}
 	virtual void Tick() {}
-	virtual void TickDefered() {}
+	virtual void TickDeferred() {}
 
 	bool GameLayerClipped(vec2 CheckPos);
 	float m_ProximityRadius;
@@ -63,14 +66,13 @@ public:
 	int m_DestroyTick;
 	int m_LastRenderTick;
 	CEntity *m_pParent;
+	CEntity *m_pChild;
 	CEntity *NextEntity() { return m_pNextTypeEntity; }
-	int ID() { return m_ID; }
 	void Keep()
 	{
 		m_SnapTicks = 0;
 		m_MarkedForDestroy = false;
 	}
-	void DetachFromGameWorld() { m_pGameWorld = 0; }
 
 	CEntity()
 	{

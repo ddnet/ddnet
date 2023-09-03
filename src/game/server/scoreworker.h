@@ -1,7 +1,6 @@
 #ifndef GAME_SERVER_SCOREWORKER_H
 #define GAME_SERVER_SCOREWORKER_H
 
-#include <atomic>
 #include <memory>
 #include <string>
 #include <utility>
@@ -15,11 +14,11 @@
 #include <game/voting.h>
 
 class IDbConnection;
-class IServer;
+class IGameController;
 
 enum
 {
-	NUM_CHECKPOINTS = 25,
+	NUM_CHECKPOINTS = MAX_CHECKPOINTS,
 	TIMESTAMP_STR_LENGTH = 20, // 2019-04-02 19:38:36
 };
 
@@ -47,7 +46,7 @@ struct CScorePlayerResult : ISqlResult
 		struct
 		{
 			float m_Time;
-			float m_CpTime[NUM_CHECKPOINTS];
+			float m_aTimeCp[NUM_CHECKPOINTS];
 			int m_Score;
 			int m_HasFinishScore;
 			int m_Birthday; // 0 indicates no birthday
@@ -142,7 +141,7 @@ struct CSqlScoreData : ISqlData
 	int m_ClientID;
 	float m_Time;
 	char m_aTimestamp[TIMESTAMP_STR_LENGTH];
-	float m_aCpCurrent[NUM_CHECKPOINTS];
+	float m_aCurrentTimeCp[NUM_CHECKPOINTS];
 	int m_Num;
 	bool m_Search;
 	char m_aRequestingPlayer[MAX_NAME_LENGTH];
@@ -150,9 +149,9 @@ struct CSqlScoreData : ISqlData
 
 struct CScoreSaveResult : ISqlResult
 {
-	CScoreSaveResult(int PlayerID, IGameController *Controller) :
+	CScoreSaveResult(int PlayerID, IGameController *pController) :
 		m_Status(SAVE_FAILED),
-		m_SavedTeam(CSaveTeam(Controller)),
+		m_SavedTeam(CSaveTeam(pController)),
 		m_RequestingPlayer(PlayerID)
 	{
 		m_aMessage[0] = '\0';
@@ -233,22 +232,19 @@ public:
 	void Reset()
 	{
 		m_BestTime = 0;
-		m_CurrentTime = 0;
-		for(float &BestCpTime : m_aBestCpTime)
-			BestCpTime = 0;
+		for(float &BestTimeCp : m_aBestTimeCp)
+			BestTimeCp = 0;
 	}
 
-	void Set(float Time, float CpTime[NUM_CHECKPOINTS])
+	void Set(float Time, float aTimeCp[NUM_CHECKPOINTS])
 	{
 		m_BestTime = Time;
-		m_CurrentTime = Time;
 		for(int i = 0; i < NUM_CHECKPOINTS; i++)
-			m_aBestCpTime[i] = CpTime[i];
+			m_aBestTimeCp[i] = aTimeCp[i];
 	}
 
 	float m_BestTime;
-	float m_CurrentTime;
-	float m_aBestCpTime[NUM_CHECKPOINTS];
+	float m_aBestTimeCp[NUM_CHECKPOINTS];
 };
 
 struct CTeamrank
@@ -272,7 +268,7 @@ struct CTeamrank
 	// if another team can be extracted
 	bool NextSqlResult(IDbConnection *pSqlServer, bool *pEnd, char *pError, int ErrorSize);
 
-	bool SamePlayers(const std::vector<std::string> *aSortedNames);
+	bool SamePlayers(const std::vector<std::string> *pvSortedNames);
 };
 
 struct CScoreWorker

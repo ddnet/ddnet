@@ -2,6 +2,8 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "character.h"
 #include <game/server/gamecontext.h>
+#include <game/mapitems.h>
+#include <game/server/gamecontroller.h>
 
 #include "flag.h"
 CFlag::CFlag(CGameWorld *pGameWorld, int Team) :
@@ -68,7 +70,7 @@ void CFlag::TickDefered()
 			}
 			else
 			{
-				m_Vel.y += GameWorld()->m_Core.m_Tuning[0].m_Gravity;
+				m_Vel.y += GameWorld()->m_Core.m_aTuning[0].m_Gravity;
 				GameServer()->Collision()->MoveBox(&m_Pos, &m_Vel, vec2(ms_PhysSize, ms_PhysSize), 0.5f);
 			}
 		}

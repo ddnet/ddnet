@@ -2,11 +2,14 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #ifndef GAME_CLIENT_COMPONENTS_NAMEPLATES_H
 #define GAME_CLIENT_COMPONENTS_NAMEPLATES_H
+#include <base/vmath.h>
+
+#include <engine/shared/protocol.h>
+
 #include <game/client/component.h>
 
 struct CNetObj_Character;
 struct CNetObj_PlayerInfo;
-struct CMapItemGroup;
 
 struct SPlayerNamePlate
 {
@@ -37,8 +40,6 @@ struct SPlayerNamePlate
 
 class CNamePlates : public CComponent
 {
-	void MapscreenToGroup(float CenterX, float CenterY, CMapItemGroup *pGroup);
-
 	void RenderNameplate(
 		const CNetObj_Character *pPrevChar,
 		const CNetObj_Character *pPlayerChar,

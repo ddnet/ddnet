@@ -226,7 +226,7 @@ def get_list2(address):
 master_servers = []
 
 for i in range(1, NUM_MASTERSERVERS+1):
-	m = Master_Server_Info(("master%d.teeworlds.com"%i, MASTERSERVER_PORT))
+	m = Master_Server_Info((f"master{int(i)}.teeworlds.com", MASTERSERVER_PORT))
 	master_servers.append(m)
 	m.start()
 	time.sleep(0.001) # avoid issues

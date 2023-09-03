@@ -1,7 +1,6 @@
 #ifndef ENGINE_CLIENT_UPDATER_H
 #define ENGINE_CLIENT_UPDATER_H
 
-#include <engine/client/http.h>
 #include <engine/updater.h>
 #include <map>
 #include <string>
@@ -55,7 +54,7 @@ class CUpdater : public IUpdater
 	std::map<std::string, bool> m_FileJobs;
 
 	void AddFileJob(const char *pFile, bool Job);
-	void FetchFile(const char *pFile, const char *pDestPath = 0);
+	void FetchFile(const char *pFile, const char *pDestPath = nullptr);
 	bool MoveFile(const char *pFile);
 
 	void ParseUpdate();
@@ -65,19 +64,19 @@ class CUpdater : public IUpdater
 	bool ReplaceClient();
 	bool ReplaceServer();
 
-	void SetCurrentState(int NewState);
+	void SetCurrentState(int NewState) REQUIRES(!m_Lock);
 
 public:
 	CUpdater();
 	~CUpdater();
 
-	int GetCurrentState();
-	void GetCurrentFile(char *pBuf, int BufSize);
-	int GetCurrentPercent();
+	int GetCurrentState() override REQUIRES(!m_Lock);
+	void GetCurrentFile(char *pBuf, int BufSize) override REQUIRES(!m_Lock);
+	int GetCurrentPercent() override REQUIRES(!m_Lock);
 
-	virtual void InitiateUpdate();
+	void InitiateUpdate() override;
 	void Init();
-	virtual void Update();
+	void Update() override;
 };
 
 #endif

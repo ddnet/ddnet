@@ -7,7 +7,6 @@
 #include <antibot/antibot_data.h>
 
 #include <cmath>
-#include <engine/kernel.h>
 #include <engine/map.h>
 
 #include <game/collision.h>
@@ -49,7 +48,6 @@ CCollision::CCollision()
 	m_pFront = 0;
 	m_pSwitch = 0;
 	m_pDoor = 0;
-	m_pSwitchers = 0;
 	m_pTune = 0;
 }
 
@@ -61,7 +59,7 @@ CCollision::~CCollision()
 void CCollision::Init(class CLayers *pLayers)
 {
 	Dest();
-	m_NumSwitchers = 0;
+	m_HighestSwitchNumber = 0;
 	m_pLayers = pLayers;
 	m_Width = m_pLayers->GameLayer()->m_Width;
 	m_Height = m_pLayers->GameLayer()->m_Height;
@@ -93,7 +91,6 @@ void CCollision::Init(class CLayers *pLayers)
 	else
 	{
 		m_pDoor = 0;
-		m_pSwitchers = 0;
 	}
 
 	if(m_pLayers->TuneLayer())
@@ -115,8 +112,8 @@ void CCollision::Init(class CLayers *pLayers)
 		int Index;
 		if(m_pSwitch)
 		{
-			if(m_pSwitch[i].m_Number > m_NumSwitchers)
-				m_NumSwitchers = m_pSwitch[i].m_Number;
+			if(m_pSwitch[i].m_Number > m_HighestSwitchNumber)
+				m_HighestSwitchNumber = m_pSwitch[i].m_Number;
 
 			if(m_pSwitch[i].m_Number)
 				m_pDoor[i].m_Number = m_pSwitch[i].m_Number;
@@ -131,22 +128,6 @@ void CCollision::Init(class CLayers *pLayers)
 					m_pSwitch[i].m_Type = Index;
 				else
 					m_pSwitch[i].m_Type = 0;
-			}
-		}
-	}
-
-	if(m_NumSwitchers)
-	{
-		m_pSwitchers = new SSwitchers[m_NumSwitchers + 1];
-
-		for(int i = 0; i < m_NumSwitchers + 1; ++i)
-		{
-			m_pSwitchers[i].m_Initial = true;
-			for(int j = 0; j < MAX_CLIENTS; ++j)
-			{
-				m_pSwitchers[i].m_Status[j] = true;
-				m_pSwitchers[i].m_EndTick[j] = 0;
-				m_pSwitchers[i].m_Type[j] = 0;
 			}
 		}
 	}
@@ -567,7 +548,6 @@ void CCollision::MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, float Elas
 void CCollision::Dest()
 {
 	delete[] m_pDoor;
-	delete[] m_pSwitchers;
 	m_pTiles = 0;
 	m_Width = 0;
 	m_Height = 0;
@@ -578,7 +558,6 @@ void CCollision::Dest()
 	m_pSwitch = 0;
 	m_pTune = 0;
 	m_pDoor = 0;
-	m_pSwitchers = 0;
 }
 
 int CCollision::IsSolid(int x, int y) const
@@ -681,7 +660,7 @@ int CCollision::IsCheckEvilTeleport(int Index) const
 	return 0;
 }
 
-int CCollision::IsTCheckpoint(int Index) const
+int CCollision::IsTeleCheckpoint(int Index) const
 {
 	if(Index < 0)
 		return 0;
@@ -739,15 +718,15 @@ int CCollision::IsTune(int Index) const
 	return 0;
 }
 
-void CCollision::GetSpeedup(int Index, vec2 *Dir, int *Force, int *MaxSpeed) const
+void CCollision::GetSpeedup(int Index, vec2 *pDir, int *pForce, int *pMaxSpeed) const
 {
 	if(Index < 0 || !m_pSpeedup)
 		return;
 	float Angle = m_pSpeedup[Index].m_Angle * (pi / 180.0f);
-	*Force = m_pSpeedup[Index].m_Force;
-	*Dir = vec2(cos(Angle), sin(Angle));
-	if(MaxSpeed)
-		*MaxSpeed = m_pSpeedup[Index].m_MaxSpeed;
+	*pForce = m_pSpeedup[Index].m_Force;
+	*pDir = vec2(cos(Angle), sin(Angle));
+	if(pMaxSpeed)
+		*pMaxSpeed = m_pSpeedup[Index].m_MaxSpeed;
 }
 
 int CCollision::GetSwitchType(int Index) const
@@ -1152,7 +1131,7 @@ int CCollision::GetDTileFlags(int Index) const
 	return m_pDoor[Index].m_Flags;
 }
 
-void ThroughOffset(vec2 Pos0, vec2 Pos1, int *Ox, int *Oy)
+void ThroughOffset(vec2 Pos0, vec2 Pos1, int *pOffsetX, int *pOffsetY)
 {
 	float x = Pos0.x - Pos1.x;
 	float y = Pos0.y - Pos1.y;
@@ -1160,26 +1139,26 @@ void ThroughOffset(vec2 Pos0, vec2 Pos1, int *Ox, int *Oy)
 	{
 		if(x < 0)
 		{
-			*Ox = -32;
-			*Oy = 0;
+			*pOffsetX = -32;
+			*pOffsetY = 0;
 		}
 		else
 		{
-			*Ox = 32;
-			*Oy = 0;
+			*pOffsetX = 32;
+			*pOffsetY = 0;
 		}
 	}
 	else
 	{
 		if(y < 0)
 		{
-			*Ox = 0;
-			*Oy = -32;
+			*pOffsetX = 0;
+			*pOffsetY = -32;
 		}
 		else
 		{
-			*Ox = 0;
-			*Oy = 32;
+			*pOffsetX = 0;
+			*pOffsetY = 32;
 		}
 	}
 }
@@ -1275,24 +1254,24 @@ int CCollision::IntersectAir(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pO
 	return 0;
 }
 
-int CCollision::IsCheckpoint(int Index) const
+int CCollision::IsTimeCheckpoint(int Index) const
 {
 	if(Index < 0)
 		return -1;
 
 	int z = m_pTiles[Index].m_Index;
-	if(z >= TILE_CHECKPOINT_FIRST && z <= TILE_CHECKPOINT_LAST)
-		return z - TILE_CHECKPOINT_FIRST;
+	if(z >= TILE_TIME_CHECKPOINT_FIRST && z <= TILE_TIME_CHECKPOINT_LAST)
+		return z - TILE_TIME_CHECKPOINT_FIRST;
 	return -1;
 }
 
-int CCollision::IsFCheckpoint(int Index) const
+int CCollision::IsFTimeCheckpoint(int Index) const
 {
 	if(Index < 0 || !m_pFront)
 		return -1;
 
 	int z = m_pFront[Index].m_Index;
-	if(z >= 35 && z <= 59)
-		return z - 35;
+	if(z >= TILE_TIME_CHECKPOINT_FIRST && z <= TILE_TIME_CHECKPOINT_LAST)
+		return z - TILE_TIME_CHECKPOINT_FIRST;
 	return -1;
 }

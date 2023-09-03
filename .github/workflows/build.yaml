@@ -14,19 +14,19 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macOS-latest, windows-latest, ubuntu-18.04]
+        os: [ubuntu-latest, macOS-latest, windows-latest, ubuntu-20.04]
         include:
         - os: ubuntu-latest
           cmake-args: -G Ninja
-          package-file: DDNet-*-linux_x86_64.tar.xz
+          package-file: "*-linux_x86_64.tar.xz"
           fancy: true
           env:
             CFLAGS: -Wdeclaration-after-statement -Werror
             CXXFLAGS: -Werror
-        - os: ubuntu-18.04
+        - os: ubuntu-20.04
           cmake-path: /usr/bin/
-          cmake-args: -G Ninja
-          package-file: DDNet-*-linux_x86_64.tar.xz
+          cmake-args: -G Ninja -DTEST_MYSQL=ON
+          package-file: "*-linux_x86_64.tar.xz"
           fancy: false
           env:
             CFLAGS: -Wdeclaration-after-statement -Werror
@@ -34,14 +34,14 @@ jobs:
             GTEST_FILTER: -*SQLite*
         - os: macOS-latest
           cmake-args: -G Ninja
-          package-file: DDNet-*-macos.dmg
+          package-file: "*-macos.dmg"
           fancy: false
           env:
             CFLAGS: -Wdeclaration-after-statement -Werror
             CXXFLAGS: -Werror
         - os: windows-latest
           cmake-args: -A x64
-          package-file: DDNet-*-win64.zip
+          package-file: "*-win64.zip"
           fancy: false
           env:
             CFLAGS: /WX
@@ -57,17 +57,34 @@ jobs:
       if: contains(matrix.os, 'ubuntu')
       run: |
         sudo apt-get update -y
-        sudo apt-get install pkg-config cmake ninja-build libfreetype6-dev libnotify-dev libsdl2-dev libsqlite3-dev -y
+        sudo apt-get upgrade -y
+        sudo apt-get install pkg-config cmake ninja-build libfreetype6-dev libnotify-dev libsdl2-dev libsqlite3-dev libvulkan-dev glslang-tools spirv-tools libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libswscale-dev libx264-dev libpng-dev valgrind -y
+
+    - name: Prepare Linux (non-fancy)
+      if: ${{ contains(matrix.os, 'ubuntu') && !matrix.fancy }}
+      run: |
+        sudo rm -rf /var/lib/mysql/ /var/run/mysqld
+        sudo mkdir /var/lib/mysql/ /var/run/mysqld/
+        sudo chown mysql:mysql /var/lib/mysql/ /var/run/mysqld/
+        sudo mysqld --initialize-insecure --user=mysql --basedir=/usr --datadir=/var/lib/mysql/
+        sudo /usr/bin/mysqld_safe --basedir=/usr --datadir='/var/lib/mysql/' &
+        sleep 10
+        sudo mysql <<EOF
+        CREATE DATABASE ddnet;
+        CREATE USER 'ddnet'@'localhost' IDENTIFIED BY 'thebestpassword';
+        GRANT ALL PRIVILEGES ON ddnet.* TO 'ddnet'@'localhost';
+        FLUSH PRIVILEGES;
+        EOF
 
     - name: Prepare Linux (fancy)
       if: contains(matrix.os, 'ubuntu') && matrix.fancy
       run: |
-        sudo apt-get install libmariadbclient-dev libwebsockets-dev mariadb-server -y
+        sudo apt-get install libmariadbclient-dev libwebsockets-dev mariadb-server-10.3 -y
         sudo rm -rf /var/lib/mysql/
         sudo mysql_install_db --user=mysql --datadir=/var/lib/mysql/
-        cd /usr; sudo /usr/bin/mysqld_safe --datadir='/var/lib/mysql/' --no-watch
+        cd /usr; sudo mysqld_safe --datadir='/var/lib/mysql/' --no-watch
         sleep 10
-        sudo mariadb <<EOF
+        sudo mysql <<EOF
         CREATE DATABASE ddnet;
         CREATE USER 'ddnet'@'localhost' IDENTIFIED BY 'thebestpassword';
         GRANT ALL PRIVILEGES ON ddnet.* TO 'ddnet'@'localhost';
@@ -78,7 +95,7 @@ jobs:
       if: contains(matrix.os, 'macOS')
       run: |
         brew update || true
-        brew install pkg-config sdl2 python3 ninja
+        brew install pkg-config sdl2 ffmpeg python3 ninja molten-vk vulkan-headers glslang spirv-tools
         brew upgrade freetype
         pip3 install dmgbuild
         sudo rm -rf /Library/Developer/CommandLineTools
@@ -140,7 +157,7 @@ jobs:
       run: |
         mkdir fancy
         cd fancy
-        ${{ matrix.cmake-path }}cmake ${{ matrix.cmake-args }} -DCMAKE_BUILD_TYPE=RelWithDebInfo -DDOWNLOAD_GTEST=ON -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=. -DANTIBOT=ON -DTEST_MYSQL=ON -DWEBSOCKETS=ON ..
+        ${{ matrix.cmake-path }}cmake ${{ matrix.cmake-args }} -DCMAKE_BUILD_TYPE=RelWithDebInfo -DDOWNLOAD_GTEST=ON -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=. -DANTIBOT=ON -DWEBSOCKETS=ON ..
         ${{ matrix.cmake-path }}cmake --build . --config RelWithDebInfo --target everything ${{ matrix.build-args }}
     - name: Test fancy
       if: matrix.fancy
@@ -148,12 +165,19 @@ jobs:
       run: |
         cd fancy
         ${{ matrix.cmake-path }}cmake --build . --config RelWithDebInfo --target run_tests ${{ matrix.build-args }}
+
     - name: Run fancy server
       if: matrix.fancy
       env: ${{ matrix.env }}
       run: |
         cd fancy
         ./DDNet-Server shutdown
+
+    - name: Run integration tests with Valgrind's Memcheck
+      if: contains(matrix.os, 'ubuntu')
+      run: |
+        cd headless
+        ./integration_test.sh --valgrind-memcheck
 
     - name: Package
       run: |

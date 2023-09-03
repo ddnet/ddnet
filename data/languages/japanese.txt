@@ -142,9 +142,6 @@ Dynamic Camera
 Emoticon
 == 絵文字
 
-Enter
-== Enter
-
 Error
 == エラー
 
@@ -237,9 +234,6 @@ MOTD
 
 Map
 == マップ
-
-Mouse sens.
-== マウス感度
 
 Move left
 == 左移動
@@ -673,18 +667,6 @@ Welcome to DDNet
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
 == DDraceNetwork は、協力型のオンラインゲームです。チーム中の Tee と協力して、マップ上のゴールを目指しましょう！初心者の方は、最も簡単なマップを使っている Novice サーバーから始めることをおすすめします。サーバー選ぶ時は ping を考慮して、近くのサーバーを選んでください。
 
-The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
-== マップには、一時的に Tee が動けなくなる「フリーズ」が存在します。みんなで協力して、フリーズを乗り切る必要があります。
-
-The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== マウスのスクロールで武器を変えます。ハンマー（左ボタン）で他の Tee を叩き、凍結していた Tee を起こすことができます。
-
-Hook (right mouse) can be used to swing through the map and to hook other tees to you.
-== フック（右ボタン）で地図上でスイングしたり、他の Tee を自分にフックすることができます。
-
-Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
-== 最も重要なのはコミュニケーションです。チュートリアルはありませんので、ゲームの基本やコツを学ぶためには、他のプレイヤーとチャットする必要があります。T ボタンを押すと、チャット画面が開きます。
-
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
 == K ボタンでキル（やり直す）、Q ボタンで一時停止して観戦することができます。他のキーバインドは設定画面を参照してください。
 
@@ -832,9 +814,6 @@ Smooth Dynamic Camera
 Switch weapon when out of ammo
 == 弾薬切れの時に武器を切り替え
 
-Reset wanted weapon on death
-== 死亡時に武器をデフォルトにリセット
-
 Show only chat messages from friends
 == 友たちからのメッセージのみを表示
 
@@ -849,9 +828,6 @@ Skip the main menu
 
 Refresh Rate
 == リフレッシュ・レート
-
-Show console window
-== コンソールを表示
 
 Themes directory
 == テーマ・ディレクトリー
@@ -937,9 +913,6 @@ Show HUD
 Chat command
 == チャットコマンド
 
-UI mouse s.
-== メイン画面マウス感度
-
 Dummy
 == ダミー
 
@@ -960,15 +933,6 @@ may cause delay
 
 Screen
 == 画面
-
-Use modern OpenGL
-== 最新の OpenGL を使用
-
-Preinit VBO (iGPUs only)
-== VBO を事前初期化（統合型グラフィックのみ）
-
-Multiple texture units (disable for macOS)
-== 多重テクスチャユニット（macOS 以外）
 
 Use high DPI
 == 高 DPI 対応モード
@@ -1024,14 +988,8 @@ DDNet Client needs to be restarted to complete update!
 Use DDRace Scoreboard
 == DDRace スゴアボードを使用
 
-Show client IDs
-== クライアント ID を表示
-
 Show score
 == スコアを表示
-
-Show health + ammo
-== HP と弾薬を表示
 
 Show names in chat in team colors
 == チームの色でハンドルネームを表示
@@ -1047,18 +1005,6 @@ Laser Outline Color
 
 Laser Inner Color
 == レーザーの色
-
-Hookline
-== フックライン
-
-No hit
-== ヒットなし
-
-Hookable
-== フック可能
-
-Tee
-== Tee
 
 Use old chat style
 == 古いチャットボックスを使用
@@ -1292,7 +1238,73 @@ Grabs
 9+ new mentions
 == 9+ 件の新しいメンション
 
+The format of texture %s is not RGBA which will cause visual bugs.
+== 
+
+Preparing demo playback
+== 
+
+Connected
+== 
+
+Loading map file from storage
+== 
+
+Why are you slowmo replaying to read this?
+== 
+
+Initializing components
+== 
+
+Initializing assets
+== 
+
+Initializing map logic
+== 
+
+Sending initial client info
+== 
+
+Position:
+== 
+
+Speed:
+== 
+
+Angle:
+== 
+
+Uploading map data to GPU
+== 
+
+Trying to determine UDP connectivity...
+== 
+
+UDP seems to be filtered.
+== 
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== 
+
+No answer from server yet.
+== 
+
+Getting game info
+== 
+
+Requesting to join the game
+== 
+
 Are you sure that you want to disconnect and switch to a different server?
+== 
+
+Join Tutorial Server
+== 
+
+Skip Tutorial
+== 
+
+Loading menu images
 == 
 
 AFR
@@ -1319,29 +1331,229 @@ CHN
 Refreshing...
 == 
 
+Loading demo files
+== 
+
+Loading ghost files
+== 
+
 Settings file
 == 
 
 Config directory
 == 
 
+Toggle to edit your dummy settings
+== 
+
+Download community skins
+== 
+
+Choose default eyes when joining a server
+== 
+
+Loading skin files
+== 
+
+Enable controller
+== 
+
+Controller %d: %s
+== 
+
+Click to cycle through all available controllers.
+== 
+
+[Ingame controller mode]
+Relative
+== 
+
+[Ingame controller mode]
+Absolute
+== 
+
+Ingame controller mode
+== 
+
+Ingame controller sens.
+== 
+
+UI controller sens.
+== 
+
+Controller jitter tolerance
+== 
+
+No controller found. Plug in a controller and restart the game.
+== 
+
+Device
+== 
+
+Status
+== 
+
+Aim bind
+== 
+
+Controller Axis #%d
+== 
+
+Mouse
+== 
+
+Ingame mouse sens.
+== 
+
+UI mouse sens.
+== 
+
+Controller
+== 
+
 Windowed fullscreen
+== 
+
+Allows maps to render with more detail
+== 
+
+Renderer
+== 
+
+default
+== 
+
+custom
+== 
+
+Graphics cards
+== 
+
+auto
+== 
+
+Appearance
+== 
+
+Name Plate
+== 
+
+Hook Collisions
 == 
 
 Kill Messages
 == 
 
-Kill Message Normal Color
+Show health, shields and ammo
 == 
 
-Kill Message Highlight Color
+DDRace HUD
+== 
+
+Show client IDs in scoreboard
+== 
+
+Show DDRace HUD
+== 
+
+Show jumps indicator
+== 
+
+Show dummy actions
+== 
+
+Show player position
+== 
+
+Show player speed
+== 
+
+Show player target angle
+== 
+
+Show freeze bars
+== 
+
+Opacity of freeze bars inside freeze
+== 
+
+Show hook strength indicator
 == 
 
 Show local player's key presses
+== 
+
+Hook collision line
+== 
+
+Hook collision line width
+== 
+
+Hook collision line opacity
+== 
+
+Colors of the hook collision line, in case of a possible collision with:
+== 
+
+Your movements are not taken into account when calculating the line colors
+== 
+
+Nothing hookable
+== 
+
+Something hookable
+== 
+
+A Tee
+== 
+
+Normal Color
+== 
+
+Highlight Color
+== 
+
+When you cross the start line, show a ghost tee replicating the movements of your best time
+== 
+
+Opacity
+== 
+
+Adjust the opacity of entities belonging to other teams, such as tees and nameplates
+== 
+
+Quads are used for background decoration
+== 
+
+Tries to predict other entities to give a feel of low latency
 == 
 
 Run on join
 == 
 
 Chat command (e.g. showall 1)
+== 
+
+Extras
+== 
+
+Loading assets
+== 
+
+Tutorial
+== 
+
+Can't find a Tutorial server
+== 
+
+Loading race demo files
+== 
+
+Super
+== 
+
+Team %d
+== 
+
+Loading sound files
 == 

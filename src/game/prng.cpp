@@ -1,5 +1,7 @@
 #include "prng.h"
 
+#include <base/system.h>
+
 // From https://en.wikipedia.org/w/index.php?title=Permuted_congruential_generator&oldid=901497400#Example_code.
 //
 // > The generator recommended for most users is PCG-XSH-RR with 64-bit state
@@ -45,8 +47,8 @@ unsigned int CPrng::RandomBits()
 	uint64_t x = m_State;
 	unsigned int Count = x >> 59;
 
-	static const uint64_t MULTIPLIER = 6364136223846793005u;
-	m_State = x * MULTIPLIER + m_Increment;
+	static const uint64_t s_Multiplier = 6364136223846793005u;
+	m_State = x * s_Multiplier + m_Increment;
 	x ^= x >> 18;
 	return RotateRight32(x >> 27, Count);
 }

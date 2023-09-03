@@ -1,8 +1,9 @@
 #include "protocol_ex.h"
 
 #include "config.h"
-#include "protocol.h"
 #include "uuid_manager.h"
+
+#include <engine/message.h>
 
 #include <new>
 
@@ -13,7 +14,7 @@ void RegisterUuids(CUuidManager *pManager)
 #undef UUID
 }
 
-int UnpackMessageID(int *pID, bool *pSys, struct CUuid *pUuid, CUnpacker *pUnpacker, CMsgPacker *pPacker)
+int UnpackMessageID(int *pID, bool *pSys, CUuid *pUuid, CUnpacker *pUnpacker, CMsgPacker *pPacker)
 {
 	*pID = 0;
 	*pSys = false;

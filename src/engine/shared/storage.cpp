@@ -28,10 +28,17 @@ public:
 		m_aUserdir[0] = 0;
 	}
 
-	int Init(const char *pApplicationName, int StorageType, int NumArgs, const char **ppArguments)
+	int Init(int StorageType, int NumArgs, const char **ppArguments)
 	{
 		// get userdir
-		fs_storage_path(pApplicationName, m_aUserdir, sizeof(m_aUserdir));
+		char aFallbackUserdir[IO_MAX_PATH_LENGTH];
+		fs_storage_path("DDNet", m_aUserdir, sizeof(m_aUserdir));
+		fs_storage_path("Teeworlds", aFallbackUserdir, sizeof(aFallbackUserdir));
+
+		if(!fs_is_dir(m_aUserdir) && fs_is_dir(aFallbackUserdir))
+		{
+			str_copy(m_aUserdir, aFallbackUserdir);
+		}
 
 		// get datadir
 		FindDatadir(ppArguments[0]);
@@ -53,7 +60,7 @@ public:
 		}
 
 		// add save directories
-		if(StorageType != STORAGETYPE_BASIC && m_NumPaths && (!m_aaStoragePaths[TYPE_SAVE][0] || !fs_makedir(m_aaStoragePaths[TYPE_SAVE])))
+		if(StorageType != STORAGETYPE_BASIC && m_NumPaths && (!m_aaStoragePaths[TYPE_SAVE][0] || fs_makedir_rec_for(m_aaStoragePaths[TYPE_SAVE]) || !fs_makedir(m_aaStoragePaths[TYPE_SAVE])))
 		{
 			char aPath[IO_MAX_PATH_LENGTH];
 			if(StorageType == STORAGETYPE_CLIENT)
@@ -72,6 +79,8 @@ public:
 				fs_makedir(GetPath(TYPE_SAVE, "assets/entities", aPath, sizeof(aPath)));
 				fs_makedir(GetPath(TYPE_SAVE, "assets/game", aPath, sizeof(aPath)));
 				fs_makedir(GetPath(TYPE_SAVE, "assets/particles", aPath, sizeof(aPath)));
+				fs_makedir(GetPath(TYPE_SAVE, "assets/hud", aPath, sizeof(aPath)));
+				fs_makedir(GetPath(TYPE_SAVE, "assets/extras", aPath, sizeof(aPath)));
 #if defined(CONF_VIDEORECORDER)
 				fs_makedir(GetPath(TYPE_SAVE, "videos", aPath, sizeof(aPath)));
 #endif
@@ -150,7 +159,7 @@ public:
 		{
 			if(m_aUserdir[0])
 			{
-				str_copy(m_aaStoragePaths[m_NumPaths++], m_aUserdir, IO_MAX_PATH_LENGTH);
+				str_copy(m_aaStoragePaths[m_NumPaths++], m_aUserdir);
 				dbg_msg("storage", "added path '$USERDIR' ('%s')", m_aUserdir);
 			}
 		}
@@ -158,7 +167,7 @@ public:
 		{
 			if(m_aDatadir[0])
 			{
-				str_copy(m_aaStoragePaths[m_NumPaths++], m_aDatadir, IO_MAX_PATH_LENGTH);
+				str_copy(m_aaStoragePaths[m_NumPaths++], m_aDatadir);
 				dbg_msg("storage", "added path '$DATADIR' ('%s')", m_aDatadir);
 			}
 		}
@@ -171,7 +180,7 @@ public:
 		{
 			if(fs_is_dir(pPath))
 			{
-				str_copy(m_aaStoragePaths[m_NumPaths++], pPath, IO_MAX_PATH_LENGTH);
+				str_copy(m_aaStoragePaths[m_NumPaths++], pPath);
 				dbg_msg("storage", "added path '%s'", pPath);
 			}
 		}
@@ -182,7 +191,7 @@ public:
 		// 1) use data-dir in PWD if present
 		if(fs_is_dir("data/mapres"))
 		{
-			str_copy(m_aDatadir, "data", sizeof(m_aDatadir));
+			str_copy(m_aDatadir, "data");
 			return;
 		}
 
@@ -233,7 +242,7 @@ public:
 				"/usr/pkg/share/ddnet",
 				"/usr/pkg/share/games/ddnet",
 				"/opt/ddnet"};
-			const int DirsCount = sizeof(apDirs) / sizeof(apDirs[0]);
+			const int DirsCount = std::size(apDirs);
 
 			int i;
 			for(i = 0; i < DirsCount; i++)
@@ -277,30 +286,24 @@ public:
 					io_close(File);
 					return;
 				}
-				else
-				{
 #if defined(CONF_PLATFORM_MACOS)
-					str_append(m_aBinarydir, "/../../../DDNet-Server.app/Contents/MacOS", sizeof(m_aBinarydir));
-					str_format(aBuf, sizeof(aBuf), "%s/" PLAT_SERVER_EXEC, m_aBinarydir);
-					IOHANDLE File = io_open(aBuf, IOFLAG_READ);
-					if(File)
-					{
-						io_close(File);
-						return;
-					}
-					else
-						m_aBinarydir[0] = 0;
-#else
-					m_aBinarydir[0] = 0;
-#endif
+				str_append(m_aBinarydir, "/../../../DDNet-Server.app/Contents/MacOS", sizeof(m_aBinarydir));
+				str_format(aBuf, sizeof(aBuf), "%s/" PLAT_SERVER_EXEC, m_aBinarydir);
+				IOHANDLE FileBis = io_open(aBuf, IOFLAG_READ);
+				if(FileBis)
+				{
+					io_close(FileBis);
+					return;
 				}
+#endif
 			}
 		}
 
 		// no binary directory found, use $PATH on Posix, $PWD on Windows
+		m_aBinarydir[0] = '\0';
 	}
 
-	virtual void ListDirectoryInfo(int Type, const char *pPath, FS_LISTDIR_CALLBACK_FILEINFO pfnCallback, void *pUser)
+	void ListDirectoryInfo(int Type, const char *pPath, FS_LISTDIR_CALLBACK_FILEINFO pfnCallback, void *pUser) override
 	{
 		char aBuffer[IO_MAX_PATH_LENGTH];
 		if(Type == TYPE_ALL)
@@ -316,7 +319,7 @@ public:
 		}
 	}
 
-	virtual void ListDirectory(int Type, const char *pPath, FS_LISTDIR_CALLBACK pfnCallback, void *pUser)
+	void ListDirectory(int Type, const char *pPath, FS_LISTDIR_CALLBACK pfnCallback, void *pUser) override
 	{
 		char aBuffer[IO_MAX_PATH_LENGTH];
 		if(Type == TYPE_ALL)
@@ -345,7 +348,7 @@ public:
 		return pBuffer;
 	}
 
-	virtual IOHANDLE OpenFile(const char *pFilename, int Flags, int Type, char *pBuffer = 0, int BufferSize = 0)
+	IOHANDLE OpenFile(const char *pFilename, int Flags, int Type, char *pBuffer = 0, int BufferSize = 0) override
 	{
 		char aBuffer[IO_MAX_PATH_LENGTH];
 		if(!pBuffer)
@@ -401,6 +404,30 @@ public:
 		return 0;
 	}
 
+	bool ReadFile(const char *pFilename, int Type, void **ppResult, unsigned *pResultLen) override
+	{
+		IOHANDLE File = OpenFile(pFilename, IOFLAG_READ, Type);
+		if(!File)
+		{
+			*ppResult = nullptr;
+			*pResultLen = 0;
+			return false;
+		}
+		io_read_all(File, ppResult, pResultLen);
+		io_close(File);
+		return true;
+	}
+
+	char *ReadFileStr(const char *pFilename, int Type) override
+	{
+		IOHANDLE File = OpenFile(pFilename, IOFLAG_READ | IOFLAG_SKIP_BOM, Type);
+		if(!File)
+			return nullptr;
+		char *pResult = io_read_all_str(File);
+		io_close(File);
+		return pResult;
+	}
+
 	struct CFindCBData
 	{
 		CStorage *m_pStorage;
@@ -437,7 +464,7 @@ public:
 		return 0;
 	}
 
-	virtual bool FindFile(const char *pFilename, const char *pPath, int Type, char *pBuffer, int BufferSize)
+	bool FindFile(const char *pFilename, const char *pPath, int Type, char *pBuffer, int BufferSize) override
 	{
 		if(BufferSize < 1)
 			return false;
@@ -470,7 +497,7 @@ public:
 		return pBuffer[0] != 0;
 	}
 
-	virtual bool RemoveFile(const char *pFilename, int Type)
+	bool RemoveFile(const char *pFilename, int Type) override
 	{
 		if(Type < TYPE_ABSOLUTE || Type == TYPE_ALL || Type >= m_NumPaths)
 			return false;
@@ -484,7 +511,7 @@ public:
 		return Success;
 	}
 
-	virtual bool RemoveBinaryFile(const char *pFilename)
+	bool RemoveBinaryFile(const char *pFilename) override
 	{
 		char aBuffer[IO_MAX_PATH_LENGTH];
 		GetBinaryPath(pFilename, aBuffer, sizeof(aBuffer));
@@ -495,7 +522,7 @@ public:
 		return Success;
 	}
 
-	virtual bool RenameFile(const char *pOldFilename, const char *pNewFilename, int Type)
+	bool RenameFile(const char *pOldFilename, const char *pNewFilename, int Type) override
 	{
 		if(Type < 0 || Type >= m_NumPaths)
 			return false;
@@ -511,7 +538,7 @@ public:
 		return Success;
 	}
 
-	virtual bool RenameBinaryFile(const char *pOldFilename, const char *pNewFilename)
+	bool RenameBinaryFile(const char *pOldFilename, const char *pNewFilename) override
 	{
 		char aOldBuffer[IO_MAX_PATH_LENGTH];
 		char aNewBuffer[IO_MAX_PATH_LENGTH];
@@ -527,7 +554,7 @@ public:
 		return Success;
 	}
 
-	virtual bool CreateFolder(const char *pFoldername, int Type)
+	bool CreateFolder(const char *pFoldername, int Type) override
 	{
 		if(Type < 0 || Type >= m_NumPaths)
 			return false;
@@ -541,7 +568,7 @@ public:
 		return Success;
 	}
 
-	virtual void GetCompletePath(int Type, const char *pDir, char *pBuffer, unsigned BufferSize)
+	void GetCompletePath(int Type, const char *pDir, char *pBuffer, unsigned BufferSize) override
 	{
 		if(Type < 0 || Type >= m_NumPaths)
 		{
@@ -553,16 +580,16 @@ public:
 		GetPath(Type, pDir, pBuffer, BufferSize);
 	}
 
-	virtual const char *GetBinaryPath(const char *pFilename, char *pBuffer, unsigned BufferSize)
+	const char *GetBinaryPath(const char *pFilename, char *pBuffer, unsigned BufferSize) override
 	{
 		str_format(pBuffer, BufferSize, "%s%s%s", m_aBinarydir, !m_aBinarydir[0] ? "" : "/", pFilename);
 		return pBuffer;
 	}
 
-	static IStorage *Create(const char *pApplicationName, int StorageType, int NumArgs, const char **ppArguments)
+	static IStorage *Create(int StorageType, int NumArgs, const char **ppArguments)
 	{
 		CStorage *p = new CStorage();
-		if(p && p->Init(pApplicationName, StorageType, NumArgs, ppArguments))
+		if(p && p->Init(StorageType, NumArgs, ppArguments))
 		{
 			dbg_msg("storage", "initialisation failed");
 			delete p;
@@ -600,9 +627,9 @@ const char *IStorage::FormatTmpPath(char *aBuf, unsigned BufSize, const char *pP
 	return aBuf;
 }
 
-IStorage *CreateStorage(const char *pApplicationName, int StorageType, int NumArgs, const char **ppArguments)
+IStorage *CreateStorage(int StorageType, int NumArgs, const char **ppArguments)
 {
-	return CStorage::Create(pApplicationName, StorageType, NumArgs, ppArguments);
+	return CStorage::Create(StorageType, NumArgs, ppArguments);
 }
 
 IStorage *CreateLocalStorage()

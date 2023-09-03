@@ -2,13 +2,10 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <base/math.h>
 
-#include <engine/console.h>
 #include <engine/graphics.h>
 
 #include "editor.h"
 #include <game/client/render.h>
-#include <game/generated/client_data.h>
-#include <game/localization.h>
 
 CLayerQuads::CLayerQuads()
 {
@@ -17,75 +14,83 @@ CLayerQuads::CLayerQuads()
 	m_Image = -1;
 }
 
+CLayerQuads::CLayerQuads(const CLayerQuads &Other) :
+	CLayer(Other)
+{
+	m_Image = Other.m_Image;
+	m_vQuads = Other.m_vQuads;
+}
+
 CLayerQuads::~CLayerQuads() = default;
 
 void CLayerQuads::Render(bool QuadPicker)
 {
 	Graphics()->TextureClear();
-	if(m_Image >= 0 && m_Image < m_pEditor->m_Map.m_lImages.size())
-		Graphics()->TextureSet(m_pEditor->m_Map.m_lImages[m_Image]->m_Texture);
+	if(m_Image >= 0 && (size_t)m_Image < m_pEditor->m_Map.m_vpImages.size())
+		Graphics()->TextureSet(m_pEditor->m_Map.m_vpImages[m_Image]->m_Texture);
 
 	Graphics()->BlendNone();
-	m_pEditor->RenderTools()->ForceRenderQuads(m_lQuads.base_ptr(), m_lQuads.size(), LAYERRENDERFLAG_OPAQUE, m_pEditor->EnvelopeEval, m_pEditor);
+	m_pEditor->RenderTools()->ForceRenderQuads(m_vQuads.data(), m_vQuads.size(), LAYERRENDERFLAG_OPAQUE, m_pEditor->EnvelopeEval, m_pEditor);
 	Graphics()->BlendNormal();
-	m_pEditor->RenderTools()->ForceRenderQuads(m_lQuads.base_ptr(), m_lQuads.size(), LAYERRENDERFLAG_TRANSPARENT, m_pEditor->EnvelopeEval, m_pEditor);
+	m_pEditor->RenderTools()->ForceRenderQuads(m_vQuads.data(), m_vQuads.size(), LAYERRENDERFLAG_TRANSPARENT, m_pEditor->EnvelopeEval, m_pEditor);
 }
 
 CQuad *CLayerQuads::NewQuad(int x, int y, int Width, int Height)
 {
 	m_pEditor->m_Map.m_Modified = true;
 
-	CQuad *q = &m_lQuads[m_lQuads.add(CQuad())];
+	m_vQuads.emplace_back();
+	CQuad *pQuad = &m_vQuads[m_vQuads.size() - 1];
 
-	q->m_PosEnv = -1;
-	q->m_ColorEnv = -1;
-	q->m_PosEnvOffset = 0;
-	q->m_ColorEnvOffset = 0;
+	pQuad->m_PosEnv = -1;
+	pQuad->m_ColorEnv = -1;
+	pQuad->m_PosEnvOffset = 0;
+	pQuad->m_ColorEnvOffset = 0;
 
 	Width /= 2;
 	Height /= 2;
-	q->m_aPoints[0].x = i2fx(x - Width);
-	q->m_aPoints[0].y = i2fx(y - Height);
-	q->m_aPoints[1].x = i2fx(x + Width);
-	q->m_aPoints[1].y = i2fx(y - Height);
-	q->m_aPoints[2].x = i2fx(x - Width);
-	q->m_aPoints[2].y = i2fx(y + Height);
-	q->m_aPoints[3].x = i2fx(x + Width);
-	q->m_aPoints[3].y = i2fx(y + Height);
+	pQuad->m_aPoints[0].x = i2fx(x - Width);
+	pQuad->m_aPoints[0].y = i2fx(y - Height);
+	pQuad->m_aPoints[1].x = i2fx(x + Width);
+	pQuad->m_aPoints[1].y = i2fx(y - Height);
+	pQuad->m_aPoints[2].x = i2fx(x - Width);
+	pQuad->m_aPoints[2].y = i2fx(y + Height);
+	pQuad->m_aPoints[3].x = i2fx(x + Width);
+	pQuad->m_aPoints[3].y = i2fx(y + Height);
 
-	q->m_aPoints[4].x = i2fx(x); // pivot
-	q->m_aPoints[4].y = i2fx(y);
+	pQuad->m_aPoints[4].x = i2fx(x); // pivot
+	pQuad->m_aPoints[4].y = i2fx(y);
 
-	q->m_aTexcoords[0].x = i2fx(0);
-	q->m_aTexcoords[0].y = i2fx(0);
+	pQuad->m_aTexcoords[0].x = i2fx(0);
+	pQuad->m_aTexcoords[0].y = i2fx(0);
 
-	q->m_aTexcoords[1].x = i2fx(1);
-	q->m_aTexcoords[1].y = i2fx(0);
+	pQuad->m_aTexcoords[1].x = i2fx(1);
+	pQuad->m_aTexcoords[1].y = i2fx(0);
 
-	q->m_aTexcoords[2].x = i2fx(0);
-	q->m_aTexcoords[2].y = i2fx(1);
+	pQuad->m_aTexcoords[2].x = i2fx(0);
+	pQuad->m_aTexcoords[2].y = i2fx(1);
 
-	q->m_aTexcoords[3].x = i2fx(1);
-	q->m_aTexcoords[3].y = i2fx(1);
+	pQuad->m_aTexcoords[3].x = i2fx(1);
+	pQuad->m_aTexcoords[3].y = i2fx(1);
 
-	q->m_aColors[0].r = 255;
-	q->m_aColors[0].g = 255;
-	q->m_aColors[0].b = 255;
-	q->m_aColors[0].a = 255;
-	q->m_aColors[1].r = 255;
-	q->m_aColors[1].g = 255;
-	q->m_aColors[1].b = 255;
-	q->m_aColors[1].a = 255;
-	q->m_aColors[2].r = 255;
-	q->m_aColors[2].g = 255;
-	q->m_aColors[2].b = 255;
-	q->m_aColors[2].a = 255;
-	q->m_aColors[3].r = 255;
-	q->m_aColors[3].g = 255;
-	q->m_aColors[3].b = 255;
-	q->m_aColors[3].a = 255;
+	pQuad->m_aColors[0].r = 255;
+	pQuad->m_aColors[0].g = 255;
+	pQuad->m_aColors[0].b = 255;
+	pQuad->m_aColors[0].a = 255;
+	pQuad->m_aColors[1].r = 255;
+	pQuad->m_aColors[1].g = 255;
+	pQuad->m_aColors[1].b = 255;
+	pQuad->m_aColors[1].a = 255;
+	pQuad->m_aColors[2].r = 255;
+	pQuad->m_aColors[2].g = 255;
+	pQuad->m_aColors[2].b = 255;
+	pQuad->m_aColors[2].a = 255;
+	pQuad->m_aColors[3].r = 255;
+	pQuad->m_aColors[3].g = 255;
+	pQuad->m_aColors[3].b = 255;
+	pQuad->m_aColors[3].a = 255;
 
-	return q;
+	return pQuad;
 }
 
 void CLayerQuads::BrushSelecting(CUIRect Rect)
@@ -111,16 +116,14 @@ int CLayerQuads::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 	pBrush->AddLayer(pGrabbed);
 
 	//dbg_msg("", "%f %f %f %f", rect.x, rect.y, rect.w, rect.h);
-	for(int i = 0; i < m_lQuads.size(); i++)
+	for(const auto &Quad : m_vQuads)
 	{
-		CQuad *q = &m_lQuads[i];
-		float px = fx2f(q->m_aPoints[4].x);
-		float py = fx2f(q->m_aPoints[4].y);
+		float px = fx2f(Quad.m_aPoints[4].x);
+		float py = fx2f(Quad.m_aPoints[4].y);
 
 		if(px > Rect.x && px < Rect.x + Rect.w && py > Rect.y && py < Rect.y + Rect.h)
 		{
-			CQuad n;
-			n = *q;
+			CQuad n = Quad;
 
 			for(auto &Point : n.m_aPoints)
 			{
@@ -128,19 +131,19 @@ int CLayerQuads::BrushGrab(CLayerGroup *pBrush, CUIRect Rect)
 				Point.y -= f2fx(Rect.y);
 			}
 
-			pGrabbed->m_lQuads.add(n);
+			pGrabbed->m_vQuads.push_back(n);
 		}
 	}
 
-	return pGrabbed->m_lQuads.size() ? 1 : 0;
+	return pGrabbed->m_vQuads.empty() ? 0 : 1;
 }
 
 void CLayerQuads::BrushPlace(CLayer *pBrush, float wx, float wy)
 {
-	CLayerQuads *l = (CLayerQuads *)pBrush;
-	for(int i = 0; i < l->m_lQuads.size(); i++)
+	CLayerQuads *pQuadLayer = (CLayerQuads *)pBrush;
+	for(const auto &Quad : pQuadLayer->m_vQuads)
 	{
-		CQuad n = l->m_lQuads[i];
+		CQuad n = Quad;
 
 		for(auto &Point : n.m_aPoints)
 		{
@@ -148,44 +151,27 @@ void CLayerQuads::BrushPlace(CLayer *pBrush, float wx, float wy)
 			Point.y += f2fx(wy);
 		}
 
-		m_lQuads.add(n);
+		m_vQuads.push_back(n);
 	}
 	m_pEditor->m_Map.m_Modified = true;
 }
 
-void Swap(CPoint &a, CPoint &b)
-{
-	CPoint Tmp;
-	Tmp.x = a.x;
-	Tmp.y = a.y;
-
-	a.x = b.x;
-	a.y = b.y;
-
-	b.x = Tmp.x;
-	b.y = Tmp.y;
-}
-
 void CLayerQuads::BrushFlipX()
 {
-	for(int i = 0; i < m_lQuads.size(); i++)
+	for(auto &Quad : m_vQuads)
 	{
-		CQuad *q = &m_lQuads[i];
-
-		Swap(q->m_aPoints[0], q->m_aPoints[1]);
-		Swap(q->m_aPoints[2], q->m_aPoints[3]);
+		std::swap(Quad.m_aPoints[0], Quad.m_aPoints[1]);
+		std::swap(Quad.m_aPoints[2], Quad.m_aPoints[3]);
 	}
 	m_pEditor->m_Map.m_Modified = true;
 }
 
 void CLayerQuads::BrushFlipY()
 {
-	for(int i = 0; i < m_lQuads.size(); i++)
+	for(auto &Quad : m_vQuads)
 	{
-		CQuad *q = &m_lQuads[i];
-
-		Swap(q->m_aPoints[0], q->m_aPoints[2]);
-		Swap(q->m_aPoints[1], q->m_aPoints[3]);
+		std::swap(Quad.m_aPoints[0], Quad.m_aPoints[2]);
+		std::swap(Quad.m_aPoints[1], Quad.m_aPoints[3]);
 	}
 	m_pEditor->m_Map.m_Modified = true;
 }
@@ -205,11 +191,9 @@ void CLayerQuads::BrushRotate(float Amount)
 	Center.x /= 2;
 	Center.y /= 2;
 
-	for(int i = 0; i < m_lQuads.size(); i++)
+	for(auto &Quad : m_vQuads)
 	{
-		CQuad *q = &m_lQuads[i];
-
-		for(auto &Point : q->m_aPoints)
+		for(auto &Point : Quad.m_aPoints)
 		{
 			vec2 Pos(fx2f(Point.x), fx2f(Point.y));
 			Rotate(&Center, &Pos, Amount);
@@ -219,17 +203,17 @@ void CLayerQuads::BrushRotate(float Amount)
 	}
 }
 
-void CLayerQuads::GetSize(float *w, float *h)
+void CLayerQuads::GetSize(float *pWidth, float *pHeight)
 {
-	*w = 0;
-	*h = 0;
+	*pWidth = 0;
+	*pHeight = 0;
 
-	for(int i = 0; i < m_lQuads.size(); i++)
+	for(const auto &Quad : m_vQuads)
 	{
-		for(auto &Point : m_lQuads[i].m_aPoints)
+		for(const auto &Point : Quad.m_aPoints)
 		{
-			*w = maximum(*w, fx2f(Point.x));
-			*h = maximum(*h, fx2f(Point.y));
+			*pWidth = maximum(*pWidth, fx2f(Point.x));
+			*pHeight = maximum(*pHeight, fx2f(Point.y));
 		}
 	}
 }
@@ -245,7 +229,7 @@ int CLayerQuads::RenderProperties(CUIRect *pToolBox)
 
 	CProperty aProps[] = {
 		{"Image", m_Image, PROPTYPE_IMAGE, -1, 0},
-		{0},
+		{nullptr},
 	};
 
 	static int s_aIds[NUM_PROPS] = {0};
@@ -257,7 +241,7 @@ int CLayerQuads::RenderProperties(CUIRect *pToolBox)
 	if(Prop == PROP_IMAGE)
 	{
 		if(NewVal >= 0)
-			m_Image = NewVal % m_pEditor->m_Map.m_lImages.size();
+			m_Image = NewVal % m_pEditor->m_Map.m_vpImages.size();
 		else
 			m_Image = -1;
 	}
@@ -272,9 +256,14 @@ void CLayerQuads::ModifyImageIndex(INDEX_MODIFY_FUNC Func)
 
 void CLayerQuads::ModifyEnvelopeIndex(INDEX_MODIFY_FUNC Func)
 {
-	for(int i = 0; i < m_lQuads.size(); i++)
+	for(auto &Quad : m_vQuads)
 	{
-		Func(&m_lQuads[i].m_PosEnv);
-		Func(&m_lQuads[i].m_ColorEnv);
+		Func(&Quad.m_PosEnv);
+		Func(&Quad.m_ColorEnv);
 	}
+}
+
+CLayer *CLayerQuads::Duplicate() const
+{
+	return new CLayerQuads(*this);
 }

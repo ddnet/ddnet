@@ -19,7 +19,7 @@ void CFifo::Init(IConsole *pConsole, char *pFifoFile, int Flag)
 	if(pFifoFile[0] == '\0')
 		return;
 
-	str_copy(m_aFilename, pFifoFile, sizeof(m_aFilename));
+	str_copy(m_aFilename, pFifoFile);
 	m_Flag = Flag;
 
 	mkfifo(m_aFilename, 0600);
@@ -61,9 +61,10 @@ void CFifo::Update()
 		return;
 
 	char aBuf[8192];
-	int Length = read(m_File, aBuf, sizeof(aBuf));
+	int Length = read(m_File, aBuf, sizeof(aBuf) - 1);
 	if(Length <= 0)
 		return;
+	aBuf[Length] = '\0';
 
 	char *pCur = aBuf;
 	for(int i = 0; i < Length; ++i)

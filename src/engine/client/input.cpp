@@ -1,8 +1,9 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#include "SDL.h"
+#include <SDL.h>
 
 #include <base/system.h>
+#include <engine/console.h>
 #include <engine/graphics.h>
 #include <engine/input.h>
 #include <engine/keys.h>
@@ -17,6 +18,14 @@
 #include "keynames.h"
 #undef KEYS_INCLUDE
 
+// support older SDL version (pre 2.0.6)
+#ifndef SDL_JOYSTICK_AXIS_MIN
+#define SDL_JOYSTICK_AXIS_MIN (-32768)
+#endif
+#ifndef SDL_JOYSTICK_AXIS_MAX
+#define SDL_JOYSTICK_AXIS_MAX 32767
+#endif
+
 void CInput::AddEvent(char *pText, int Key, int Flags)
 {
 	if(m_NumEvents != INPUT_BUFFER_SIZE)
@@ -26,7 +35,7 @@ void CInput::AddEvent(char *pText, int Key, int Flags)
 		if(!pText)
 			m_aInputEvents[m_NumEvents].m_aText[0] = 0;
 		else
-			str_copy(m_aInputEvents[m_NumEvents].m_aText, pText, sizeof(m_aInputEvents[m_NumEvents].m_aText));
+			str_copy(m_aInputEvents[m_NumEvents].m_aText, pText);
 		m_aInputEvents[m_NumEvents].m_InputCount = m_InputCounter;
 		m_NumEvents++;
 	}
@@ -51,43 +60,213 @@ CInput::CInput()
 	m_NumTextInputInstances = 0;
 	m_EditingTextLen = -1;
 	m_aEditingText[0] = 0;
-
-	m_LastX = 0;
-	m_LastY = 0;
 }
 
 void CInput::Init()
 {
 	m_pGraphics = Kernel()->RequestInterface<IEngineGraphics>();
+	m_pConsole = Kernel()->RequestInterface<IConsole>();
 
 	// increase ime instance counter for menu
 	SetIMEState(true);
 	MouseModeRelative();
+
+	InitJoysticks();
 }
 
-void CInput::MouseRelative(float *x, float *y)
+void CInput::Shutdown()
+{
+	SDL_free(m_pClipboardText);
+	CloseJoysticks();
+}
+
+void CInput::InitJoysticks()
+{
+	if(!SDL_WasInit(SDL_INIT_JOYSTICK))
+	{
+		if(SDL_InitSubSystem(SDL_INIT_JOYSTICK) < 0)
+		{
+			dbg_msg("joystick", "Unable to init SDL joystick system: %s", SDL_GetError());
+			return;
+		}
+	}
+
+	int NumJoysticks = SDL_NumJoysticks();
+	if(NumJoysticks > 0)
+	{
+		dbg_msg("joystick", "%d joystick(s) found", NumJoysticks);
+		int ActualIndex = 0;
+		for(int i = 0; i < NumJoysticks; i++)
+		{
+			SDL_Joystick *pJoystick = SDL_JoystickOpen(i);
+			if(!pJoystick)
+			{
+				dbg_msg("joystick", "Could not open joystick %d: '%s'", i, SDL_GetError());
+				continue;
+			}
+			m_vJoysticks.emplace_back(this, ActualIndex, pJoystick);
+			const CJoystick &Joystick = m_vJoysticks[m_vJoysticks.size() - 1];
+			dbg_msg("joystick", "Opened Joystick %d '%s' (%d axes, %d buttons, %d balls, %d hats)", i, Joystick.GetName(),
+				Joystick.GetNumAxes(), Joystick.GetNumButtons(), Joystick.GetNumBalls(), Joystick.GetNumHats());
+			ActualIndex++;
+		}
+		if(ActualIndex > 0)
+		{
+			UpdateActiveJoystick();
+			Console()->Chain("joystick_guid", ConchainJoystickGuidChanged, this);
+		}
+	}
+	else
+	{
+		dbg_msg("joystick", "No joysticks found");
+	}
+}
+
+void CInput::UpdateActiveJoystick()
+{
+	if(m_vJoysticks.empty())
+		return;
+	m_pActiveJoystick = nullptr;
+	for(auto &Joystick : m_vJoysticks)
+	{
+		if(str_comp(Joystick.GetGUID(), g_Config.m_InpControllerGUID) == 0)
+		{
+			m_pActiveJoystick = &Joystick;
+			return;
+		}
+	}
+	// Fall back to first joystick if no match was found
+	if(!m_pActiveJoystick)
+		m_pActiveJoystick = &m_vJoysticks[0]; // NOLINT(readability-container-data-pointer)
+}
+
+void CInput::ConchainJoystickGuidChanged(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	pfnCallback(pResult, pCallbackUserData);
+	static_cast<CInput *>(pUserData)->UpdateActiveJoystick();
+}
+
+float CInput::GetJoystickDeadzone()
+{
+	return g_Config.m_InpControllerTolerance / 50.0f;
+}
+
+CInput::CJoystick::CJoystick(CInput *pInput, int Index, SDL_Joystick *pDelegate)
+{
+	m_pInput = pInput;
+	m_Index = Index;
+	m_pDelegate = pDelegate;
+	m_NumAxes = SDL_JoystickNumAxes(pDelegate);
+	m_NumButtons = SDL_JoystickNumButtons(pDelegate);
+	m_NumBalls = SDL_JoystickNumBalls(pDelegate);
+	m_NumHats = SDL_JoystickNumHats(pDelegate);
+	str_copy(m_aName, SDL_JoystickName(pDelegate));
+	SDL_JoystickGetGUIDString(SDL_JoystickGetGUID(pDelegate), m_aGUID, sizeof(m_aGUID));
+	m_InstanceID = SDL_JoystickInstanceID(pDelegate);
+}
+
+void CInput::CloseJoysticks()
+{
+	if(SDL_WasInit(SDL_INIT_JOYSTICK))
+		SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
+
+	m_vJoysticks.clear();
+	m_pActiveJoystick = nullptr;
+}
+
+void CInput::SelectNextJoystick()
+{
+	const int Num = m_vJoysticks.size();
+	if(Num > 1)
+	{
+		m_pActiveJoystick = &m_vJoysticks[(m_pActiveJoystick->GetIndex() + 1) % Num];
+		str_copy(g_Config.m_InpControllerGUID, m_pActiveJoystick->GetGUID());
+	}
+}
+
+float CInput::CJoystick::GetAxisValue(int Axis)
+{
+	return (SDL_JoystickGetAxis(m_pDelegate, Axis) - SDL_JOYSTICK_AXIS_MIN) / float(SDL_JOYSTICK_AXIS_MAX - SDL_JOYSTICK_AXIS_MIN) * 2.0f - 1.0f;
+}
+
+int CInput::CJoystick::GetJoystickHatKey(int Hat, int HatValue)
+{
+	switch(HatValue)
+	{
+	case SDL_HAT_LEFTUP: return KEY_JOY_HAT0_LEFTUP + Hat * NUM_JOYSTICK_BUTTONS_PER_HAT;
+	case SDL_HAT_UP: return KEY_JOY_HAT0_UP + Hat * NUM_JOYSTICK_BUTTONS_PER_HAT;
+	case SDL_HAT_RIGHTUP: return KEY_JOY_HAT0_RIGHTUP + Hat * NUM_JOYSTICK_BUTTONS_PER_HAT;
+	case SDL_HAT_LEFT: return KEY_JOY_HAT0_LEFT + Hat * NUM_JOYSTICK_BUTTONS_PER_HAT;
+	case SDL_HAT_RIGHT: return KEY_JOY_HAT0_RIGHT + Hat * NUM_JOYSTICK_BUTTONS_PER_HAT;
+	case SDL_HAT_LEFTDOWN: return KEY_JOY_HAT0_LEFTDOWN + Hat * NUM_JOYSTICK_BUTTONS_PER_HAT;
+	case SDL_HAT_DOWN: return KEY_JOY_HAT0_DOWN + Hat * NUM_JOYSTICK_BUTTONS_PER_HAT;
+	case SDL_HAT_RIGHTDOWN: return KEY_JOY_HAT0_RIGHTDOWN + Hat * NUM_JOYSTICK_BUTTONS_PER_HAT;
+	}
+	return -1;
+}
+
+int CInput::CJoystick::GetHatValue(int Hat)
+{
+	return GetJoystickHatKey(Hat, SDL_JoystickGetHat(m_pDelegate, Hat));
+}
+
+bool CInput::CJoystick::Relative(float *pX, float *pY)
+{
+	if(!g_Config.m_InpControllerEnable)
+		return false;
+
+	const vec2 RawJoystickPos = vec2(GetAxisValue(g_Config.m_InpControllerX), GetAxisValue(g_Config.m_InpControllerY));
+	const float Len = length(RawJoystickPos);
+	const float DeadZone = Input()->GetJoystickDeadzone();
+	if(Len > DeadZone)
+	{
+		const float Factor = 0.1f * maximum((Len - DeadZone) / (1 - DeadZone), 0.001f) / Len;
+		*pX = RawJoystickPos.x * Factor;
+		*pY = RawJoystickPos.y * Factor;
+		return true;
+	}
+	return false;
+}
+
+bool CInput::CJoystick::Absolute(float *pX, float *pY)
+{
+	if(!Input()->m_MouseFocus || !Input()->m_InputGrabbed || !g_Config.m_InpControllerEnable)
+		return false;
+
+	const vec2 RawJoystickPos = vec2(GetAxisValue(g_Config.m_InpControllerX), GetAxisValue(g_Config.m_InpControllerY));
+	const float DeadZone = Input()->GetJoystickDeadzone();
+	if(dot(RawJoystickPos, RawJoystickPos) > DeadZone * DeadZone)
+	{
+		*pX = RawJoystickPos.x;
+		*pY = RawJoystickPos.y;
+		return true;
+	}
+	return false;
+}
+
+bool CInput::MouseRelative(float *pX, float *pY)
 {
 	if(!m_MouseFocus || !m_InputGrabbed)
-		return;
+		return false;
 
 	int nx = 0, ny = 0;
-	float Sens = g_Config.m_InpMousesens / 100.0f;
-
 #if defined(CONF_PLATFORM_ANDROID) // No relative mouse on Android
+	static int s_LastX = 0;
+	static int s_LastY = 0;
 	SDL_GetMouseState(&nx, &ny);
-	int XTmp = nx - m_LastX;
-	int YTmp = ny - m_LastY;
-	m_LastX = nx;
-	m_LastY = ny;
+	int XTmp = nx - s_LastX;
+	int YTmp = ny - s_LastY;
+	s_LastX = nx;
+	s_LastY = ny;
 	nx = XTmp;
 	ny = YTmp;
-	Sens = 1;
 #else
 	SDL_GetRelativeMouseState(&nx, &ny);
 #endif
 
-	*x = nx * Sens;
-	*y = ny * Sens;
+	*pX = nx;
+	*pY = ny;
+	return *pX != 0.0f || *pY != 0.0f;
 }
 
 void CInput::MouseModeAbsolute()
@@ -108,19 +287,15 @@ void CInput::MouseModeRelative()
 	SDL_GetRelativeMouseState(0x0, 0x0);
 }
 
-void CInput::NativeMousePos(int *x, int *y) const
+void CInput::NativeMousePos(int *pX, int *pY) const
 {
-	int nx = 0, ny = 0;
-	SDL_GetMouseState(&nx, &ny);
-
-	*x = nx;
-	*y = ny;
+	SDL_GetMouseState(pX, pY);
 }
 
-bool CInput::NativeMousePressed(int index)
+bool CInput::NativeMousePressed(int Index)
 {
 	int i = SDL_GetMouseState(NULL, NULL);
-	return (i & SDL_BUTTON(index)) != 0;
+	return (i & SDL_BUTTON(Index)) != 0;
 }
 
 bool CInput::MouseDoubleClick()
@@ -135,17 +310,14 @@ bool CInput::MouseDoubleClick()
 
 const char *CInput::GetClipboardText()
 {
-	if(m_pClipboardText)
-	{
-		SDL_free(m_pClipboardText);
-	}
+	SDL_free(m_pClipboardText);
 	m_pClipboardText = SDL_GetClipboardText();
 	return m_pClipboardText;
 }
 
-void CInput::SetClipboardText(const char *Text)
+void CInput::SetClipboardText(const char *pText)
 {
-	SDL_SetClipboardText(Text);
+	SDL_SetClipboardText(pText);
 }
 
 void CInput::Clear()
@@ -160,6 +332,148 @@ bool CInput::KeyState(int Key) const
 	if(Key < 0 || Key >= KEY_LAST)
 		return false;
 	return m_aInputState[Key];
+}
+
+void CInput::UpdateMouseState()
+{
+	const int MouseState = SDL_GetMouseState(NULL, NULL);
+	if(MouseState & SDL_BUTTON(SDL_BUTTON_LEFT))
+		m_aInputState[KEY_MOUSE_1] = 1;
+	if(MouseState & SDL_BUTTON(SDL_BUTTON_RIGHT))
+		m_aInputState[KEY_MOUSE_2] = 1;
+	if(MouseState & SDL_BUTTON(SDL_BUTTON_MIDDLE))
+		m_aInputState[KEY_MOUSE_3] = 1;
+	if(MouseState & SDL_BUTTON(SDL_BUTTON_X1))
+		m_aInputState[KEY_MOUSE_4] = 1;
+	if(MouseState & SDL_BUTTON(SDL_BUTTON_X2))
+		m_aInputState[KEY_MOUSE_5] = 1;
+	if(MouseState & SDL_BUTTON(6))
+		m_aInputState[KEY_MOUSE_6] = 1;
+	if(MouseState & SDL_BUTTON(7))
+		m_aInputState[KEY_MOUSE_7] = 1;
+	if(MouseState & SDL_BUTTON(8))
+		m_aInputState[KEY_MOUSE_8] = 1;
+	if(MouseState & SDL_BUTTON(9))
+		m_aInputState[KEY_MOUSE_9] = 1;
+}
+
+void CInput::UpdateJoystickState()
+{
+	if(!g_Config.m_InpControllerEnable)
+		return;
+	IJoystick *pJoystick = GetActiveJoystick();
+	if(!pJoystick)
+		return;
+
+	const float DeadZone = GetJoystickDeadzone();
+	for(int Axis = 0; Axis < pJoystick->GetNumAxes(); Axis++)
+	{
+		const float Value = pJoystick->GetAxisValue(Axis);
+		const int LeftKey = KEY_JOY_AXIS_0_LEFT + 2 * Axis;
+		const int RightKey = LeftKey + 1;
+		m_aInputState[LeftKey] = Value <= -DeadZone;
+		m_aInputState[RightKey] = Value >= DeadZone;
+	}
+
+	for(int Hat = 0; Hat < pJoystick->GetNumHats(); Hat++)
+	{
+		const int HatState = pJoystick->GetHatValue(Hat);
+		for(int Key = KEY_JOY_HAT0_LEFTUP + Hat * NUM_JOYSTICK_BUTTONS_PER_HAT; Key <= KEY_JOY_HAT0_RIGHTDOWN + Hat * NUM_JOYSTICK_BUTTONS_PER_HAT; Key++)
+			m_aInputState[Key] = Key == HatState;
+	}
+}
+
+void CInput::HandleJoystickAxisMotionEvent(const SDL_Event &Event)
+{
+	if(!g_Config.m_InpControllerEnable)
+		return;
+	CJoystick *pJoystick = GetActiveJoystick();
+	if(!pJoystick || pJoystick->GetInstanceID() != Event.jaxis.which)
+		return;
+	if(Event.jaxis.axis >= NUM_JOYSTICK_AXES)
+		return;
+
+	const int LeftKey = KEY_JOY_AXIS_0_LEFT + 2 * Event.jaxis.axis;
+	const int RightKey = LeftKey + 1;
+	const float DeadZone = GetJoystickDeadzone();
+
+	if(Event.jaxis.value <= SDL_JOYSTICK_AXIS_MIN * DeadZone && !m_aInputState[LeftKey])
+	{
+		m_aInputState[LeftKey] = true;
+		m_aInputCount[LeftKey] = m_InputCounter;
+		AddEvent(0, LeftKey, IInput::FLAG_PRESS);
+	}
+	else if(Event.jaxis.value > SDL_JOYSTICK_AXIS_MIN * DeadZone && m_aInputState[LeftKey])
+	{
+		m_aInputState[LeftKey] = false;
+		AddEvent(0, LeftKey, IInput::FLAG_RELEASE);
+	}
+
+	if(Event.jaxis.value >= SDL_JOYSTICK_AXIS_MAX * DeadZone && !m_aInputState[RightKey])
+	{
+		m_aInputState[RightKey] = true;
+		m_aInputCount[RightKey] = m_InputCounter;
+		AddEvent(0, RightKey, IInput::FLAG_PRESS);
+	}
+	else if(Event.jaxis.value < SDL_JOYSTICK_AXIS_MAX * DeadZone && m_aInputState[RightKey])
+	{
+		m_aInputState[RightKey] = false;
+		AddEvent(0, RightKey, IInput::FLAG_RELEASE);
+	}
+}
+
+void CInput::HandleJoystickButtonEvent(const SDL_Event &Event)
+{
+	if(!g_Config.m_InpControllerEnable)
+		return;
+	CJoystick *pJoystick = GetActiveJoystick();
+	if(!pJoystick || pJoystick->GetInstanceID() != Event.jbutton.which)
+		return;
+	if(Event.jbutton.button >= NUM_JOYSTICK_BUTTONS)
+		return;
+
+	const int Key = Event.jbutton.button + KEY_JOYSTICK_BUTTON_0;
+
+	if(Event.type == SDL_JOYBUTTONDOWN)
+	{
+		m_aInputState[Key] = true;
+		m_aInputCount[Key] = m_InputCounter;
+		AddEvent(0, Key, IInput::FLAG_PRESS);
+	}
+	else if(Event.type == SDL_JOYBUTTONUP)
+	{
+		m_aInputState[Key] = false;
+		AddEvent(0, Key, IInput::FLAG_RELEASE);
+	}
+}
+
+void CInput::HandleJoystickHatMotionEvent(const SDL_Event &Event)
+{
+	if(!g_Config.m_InpControllerEnable)
+		return;
+	CJoystick *pJoystick = GetActiveJoystick();
+	if(!pJoystick || pJoystick->GetInstanceID() != Event.jhat.which)
+		return;
+	if(Event.jhat.hat >= NUM_JOYSTICK_HATS)
+		return;
+
+	const int CurrentKey = CJoystick::GetJoystickHatKey(Event.jhat.hat, Event.jhat.value);
+
+	for(int Key = KEY_JOY_HAT0_LEFTUP + Event.jhat.hat * NUM_JOYSTICK_BUTTONS_PER_HAT; Key <= KEY_JOY_HAT0_RIGHTDOWN + Event.jhat.hat * NUM_JOYSTICK_BUTTONS_PER_HAT; Key++)
+	{
+		if(Key != CurrentKey && m_aInputState[Key])
+		{
+			m_aInputState[Key] = false;
+			AddEvent(0, Key, IInput::FLAG_RELEASE);
+		}
+	}
+
+	if(CurrentKey >= 0)
+	{
+		m_aInputState[CurrentKey] = true;
+		m_aInputCount[CurrentKey] = m_InputCounter;
+		AddEvent(0, CurrentKey, IInput::FLAG_PRESS);
+	}
 }
 
 bool CInput::GetIMEState()
@@ -230,26 +544,9 @@ int CInput::Update()
 	if(m_EditingTextLen == 0)
 		m_EditingTextLen = -1;
 
-	// these states must always be updated manually because they are not in the GetKeyState from SDL
-	const int MouseState = SDL_GetMouseState(NULL, NULL);
-	if(MouseState & SDL_BUTTON(SDL_BUTTON_LEFT))
-		m_aInputState[KEY_MOUSE_1] = 1;
-	if(MouseState & SDL_BUTTON(SDL_BUTTON_RIGHT))
-		m_aInputState[KEY_MOUSE_2] = 1;
-	if(MouseState & SDL_BUTTON(SDL_BUTTON_MIDDLE))
-		m_aInputState[KEY_MOUSE_3] = 1;
-	if(MouseState & SDL_BUTTON(SDL_BUTTON_X1))
-		m_aInputState[KEY_MOUSE_4] = 1;
-	if(MouseState & SDL_BUTTON(SDL_BUTTON_X2))
-		m_aInputState[KEY_MOUSE_5] = 1;
-	if(MouseState & SDL_BUTTON(6))
-		m_aInputState[KEY_MOUSE_6] = 1;
-	if(MouseState & SDL_BUTTON(7))
-		m_aInputState[KEY_MOUSE_7] = 1;
-	if(MouseState & SDL_BUTTON(8))
-		m_aInputState[KEY_MOUSE_8] = 1;
-	if(MouseState & SDL_BUTTON(9))
-		m_aInputState[KEY_MOUSE_9] = 1;
+	// these states must always be updated manually because they are not in the SDL_GetKeyboardState from SDL
+	UpdateMouseState();
+	UpdateJoystickState();
 
 	SDL_Event Event;
 	bool IgnoreKeys = false;
@@ -264,7 +561,7 @@ int CInput::Update()
 			m_EditingTextLen = str_length(Event.edit.text);
 			if(m_EditingTextLen)
 			{
-				str_copy(m_aEditingText, Event.edit.text, sizeof(m_aEditingText));
+				str_copy(m_aEditingText, Event.edit.text);
 				m_EditingCursor = 0;
 				for(int i = 0; i < Event.edit.start; i++)
 					m_EditingCursor = str_utf8_forward(m_aEditingText, m_EditingCursor);
@@ -305,11 +602,25 @@ int CInput::Update()
 			Scancode = g_Config.m_InpTranslatedKeys ? SDL_GetScancodeFromKey(Event.key.keysym.sym) : Event.key.keysym.scancode;
 			break;
 
+		// handle the joystick events
+		case SDL_JOYAXISMOTION:
+			HandleJoystickAxisMotionEvent(Event);
+			break;
+
+		case SDL_JOYBUTTONUP:
+		case SDL_JOYBUTTONDOWN:
+			HandleJoystickButtonEvent(Event);
+			break;
+
+		case SDL_JOYHATMOTION:
+			HandleJoystickHatMotionEvent(Event);
+			break;
+
 		// handle mouse buttons
 		case SDL_MOUSEBUTTONUP:
 			Action = IInput::FLAG_RELEASE;
 
-			// fall through
+			[[fallthrough]];
 		case SDL_MOUSEBUTTONDOWN:
 			if(Event.button.button == SDL_BUTTON_LEFT)
 				Scancode = KEY_MOUSE_1;
@@ -393,7 +704,7 @@ int CInput::Update()
 				MouseModeAbsolute();
 				MouseModeRelative();
 #endif
-				// fallthrough
+				[[fallthrough]];
 			case SDL_WINDOWEVENT_RESTORED:
 				Graphics()->WindowCreateNtf(Event.window.windowID);
 				break;

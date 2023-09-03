@@ -152,9 +152,6 @@ Dynamic Camera
 Emoticon
 == Эмоции
 
-Enter
-== Вход
-
 Error
 == Ошибка
 
@@ -189,7 +186,7 @@ Friends
 == Друзья
 
 Fullscreen
-== Полноэкранный режим
+== Полноэкранный（настр.)
 
 Game
 == Игра
@@ -250,9 +247,6 @@ MOTD
 
 Map
 == Карта
-
-Mouse sens.
-== Чувств. мыши
 
 Move left
 == Шаг влево
@@ -403,7 +397,7 @@ Shotgun
 == Дробовик
 
 Show chat
-== Показать чат
+== Показывать чат
 
 Show friends only
 == Только с друзьями
@@ -453,9 +447,6 @@ Switch weapon on pickup
 Switch weapon when out of ammo
 == Переключать оружие без патронов
 
-Reset wanted weapon on death
-== Сбрасывать выбор оружия при смерти
-
 Show only chat messages from friends
 == Показывать сообщения только от друзей
 
@@ -464,9 +455,6 @@ Show clan above name plates
 
 Automatically take statboard screenshot
 == Делать снимок результатов
-
-Show console window
-== Показывать консоль
 
 Team
 == Команда
@@ -565,16 +553,13 @@ Threaded sound loading
 == Фоновая загрузка музыки
 
 Use DDRace Scoreboard
-== Использовать DDRace табло
+== Использовать DDRace таблицу счета
 
 Show kill messages
 == Показывать сообщения о смерти
 
 Show score
 == Показывать табло счета
-
-Show health + ammo
-== Показывать здоровье и патроны
 
 Show names in chat in team colors
 == Выделять сообщения в командном чате
@@ -619,7 +604,7 @@ Join game
 == Играть
 
 FSAA samples
-== FSAA сэмплов 
+== FSAA сэмплов
 
 Sound volume
 == Громкость звука
@@ -807,18 +792,6 @@ Welcome to DDNet
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
 == DDraceNetwork - кооперативная онлайн-игра, где Вашей главной целью и целью вашей команды является достижение конца карты. Как новенький, Вы должны начать свой путь на Novice, на которых есть лёгкие карты. Также учитывайте пинг и выбирайте ближайший к вам сервер.
 
-The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
-== Карта содержит фриз, который временно лишает вас возможности двигаться. Вы должны работать сообща, чтобы пройти такие места.
-
-The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== Колесо мыши меняет оружие. Молотком (ЛКМ) можно ударить по другим и расфризить их.
-
-Hook (right mouse) can be used to swing through the map and to hook other tees to you.
-== Крюк (ПКМ) используется для перемещения по карте, а также для притягивания игроков к себе.
-
-Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
-== Самое главное, общение - ключ к успеху: здесь нет туториалов, поэтому тебе придется общаться (кнопка Т) с остальными игроками, чтобы обучиться базовым вещам и трюкам в игре.
-
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == Перед посещением сервера рекомендуем изменить настройки на Ваш вкус.
 
@@ -961,25 +934,16 @@ Lock team
 == Закрыть команду
 
 Show entities
-== Показать тайлы
+== Показывать тайлы
 
 Show HUD
 == Показывать HUD
-
-UI mouse s.
-== Чувств. мыши в меню
 
 may cause delay
 == создает задержку
 
 Screen
 == Экран
-
-Preinit VBO (iGPUs only)
-== Преинициал-ть VBO (только iGPU)
-
-Multiple texture units (disable for macOS)
-== Улучш. блоки текстур (откл. для macOS)
 
 Use high DPI
 == Использовать высокую чувств.
@@ -1240,9 +1204,6 @@ The width of texture %s is not divisible by %d, or the height is not divisible b
 Dummy
 == Дамми
 
-Show client IDs
-== Показывать ID
-
 Laser Outline Color
 == Цвет обводки лазера
 
@@ -1306,12 +1267,6 @@ Windowed borderless
 Desktop fullscreen
 == Полноэкранный
 
-Use modern OpenGL
-== Использовать новый OpenGL
-
-Tee
-== Tee
-
 Are you sure that you want to disconnect and switch to a different server?
 == Вы уверены, что хотите отключиться и перейти на другой сервер?
 
@@ -1319,37 +1274,294 @@ Refreshing...
 == Обновление...
 
 Kill Messages
-== Сообщения об убийстве
-
-Kill Message Normal Color
-== Цвет сообщения об убийстве
-
-Kill Message Highlight Color
-== Цвет подсветки сообщения об убийстве
-
-Hookline
-== Линия крюка
-
-No hit
-== Нельзя зацепиться
-
-Hookable
-== Можно зацепиться
+== Сообщения о смерти
 
 Show local player's key presses
 == Показывать нажатия клавиш игрока
 
+The format of texture %s is not RGBA which will cause visual bugs.
+== Формат текстуры %s не соотвествует RGBA, что может повлечь артефакты.
+
+Join Tutorial Server
+== Начать туториал
+
+Skip Tutorial
+== Пропустить туториал
+
 Settings file
-== 
+== Файл настроек
 
 Config directory
-== 
+== Путь к настройкам
 
 Windowed fullscreen
-== 
+== Оконный на весь экран
+
+Renderer
+== Рендерер
+
+default
+== станд.
+
+custom
+== перс.
+
+Graphics cards
+== Видеокарты
+
+auto
+== авто
 
 Run on join
-== 
+== Запускать при входе
 
 Chat command (e.g. showall 1)
+== Чат-команда (напр. showall 1)
+
+Tutorial
+== Туториал
+
+Can't find a Tutorial server
+== Обучающий сервер не найден
+
+Position:
+== Позиция
+
+Speed:
+== Скорость
+
+Angle:
+== Угол
+
+Trying to determine UDP connectivity...
+== Попытка определить UDP соединение...
+
+UDP seems to be filtered.
+== Похоже, что UDP фильтруется.
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== Похоже, что UDP и TCP IP отличаются. Попробуйте отключить VPN, прокси и ускорители сети.
+
+No answer from server yet.
+== Сервер еще не ответил.
+
+Toggle to edit your dummy settings
+== Переключите, чтобы изменить настройки дамми
+
+Download community skins
+== Скачивать скины сообщества
+
+Choose default eyes when joining a server
+== Выберите стандартные глаза при подключении к серверу
+
+Enable controller
+== Включить контроллер
+
+Controller %d: %s
+== Контроллер %d: %s
+
+Click to cycle through all available controllers.
+== Нажмите для переключения между всеми доступными контроллерами.
+
+[Ingame controller mode]
+Relative
+== Относительный
+
+[Ingame controller mode]
+Absolute
+== Абсолютный
+
+Ingame controller mode
+== Режим контроллера в игре
+
+Ingame controller sens.
+== Чувств. контроллера в игре
+
+UI controller sens.
+== Чувств. контроллера в меню
+
+Controller jitter tolerance
+== Устойчивость к движению контроллера
+
+No controller found. Plug in a controller and restart the game.
+== Контроллер не найден. Подключите контроллер и перезапустите игру.
+
+Device
+== Устройство
+
+Status
+== Состояние
+
+Aim bind
+== Привязка оси
+
+Controller Axis #%d
+== Ось контроллера #%d
+
+Mouse
+== Мышь
+
+Ingame mouse sens.
+== Чувств. мыши в игре
+
+UI mouse sens.
+== Чувств. мыши в меню
+
+Controller
+== Контроллер
+
+Allows maps to render with more detail
+== Позволяет более детализированную прорисовку карты
+
+Show dummy actions
+== Показывать действия дамми
+
+Show player position
+== Показывать позицию игрока
+
+Show player speed
+== Показывать скорость игрока
+
+Show player target angle
+== Показывать угол прицела игрока
+
+Show freeze bars
+== Показывать полоску фриза
+
+Opacity of freeze bars inside freeze
+== Прозрачность полоски фриза внутри фриза
+
+Normal Color
+== Обычный цвет
+
+Highlight Color
+== Цвет выделения
+
+When you cross the start line, show a ghost tee replicating the movements of your best time
+== При пересечении стартовой линии, показать тень Tee, повторяющую прохождение лучшего времени
+
+Opacity
+== Прозрачность
+
+Adjust the opacity of entities belonging to other teams, such as tees and nameplates
+== Регулирует прозрачность объектов другой команды, такие как Tee и имена.
+
+Quads are used for background decoration
+== Квады используются для фонового украшения
+
+Tries to predict other entities to give a feel of low latency
+== Пытыается предсказать другие объекты, чтобы придать ощущение низкой задержки
+
+Extras
+== Дополнительно
+
+Super
+== Супер
+
+Team %d
+== Команда %d
+
+Preparing demo playback
+== Подготовка воспроизведения демо
+
+Connected
+== Подключено
+
+Loading map file from storage
+== Загрузка файлов карты из памяти
+
+Initializing components
+== Подготовка компонентов
+
+Initializing assets
+== Подготовка ресурсов
+
+Initializing map logic
+== Подготовка алгоритмов карты
+
+Sending initial client info
+== Отправка начальных данных о клиенте
+
+Uploading map data to GPU
+== Загрузка данных о карте в GPU
+
+Getting game info
+== Получение игровых данных
+
+Requesting to join the game
+== Запрашивается подключение к игре
+
+Loading menu images
+== Загрузка изображений меню
+
+Loading demo files
+== Загрузка файлов демо
+
+Loading ghost files
+== Загрузка файлов тени
+
+Loading skin files
+== Загрузка файлов скинов
+
+Appearance
+== Внешний вид
+
+Name Plate
+== Табличка имени
+
+Hook Collisions
+== Коллизии крюка
+
+Show health, shields and ammo
+== Показывать здоровье, щиты и патроны
+
+DDRace HUD
+== DDRace HUD
+
+Show client IDs in scoreboard
+== Показывать ID клиентов в таблице счета
+
+Show DDRace HUD
+== Показывать DDRace HUD
+
+Show jumps indicator
+== Показывать индикатор прыжка
+
+Show hook strength indicator
+== Показывать индикатор силы крюка
+
+Hook collision line
+== Линия коллизии крюка
+
+Hook collision line width
+== Ширина линии
+
+Hook collision line opacity
+== Прозрачность линии
+
+Colors of the hook collision line, in case of a possible collision with:
+== Цвет линии, в случае если:
+
+Your movements are not taken into account when calculating the line colors
+== Ваши движения не учитываются, когда рассчитывается цвет линии
+
+Nothing hookable
+== Невозможно зацепиться
+
+Something hookable
+== Возможно зацепиться
+
+A Tee
+== Столкновение с Tee
+
+Loading assets
+== Загрузка ресурсов
+
+Loading race demo files
+== Загрузка файлов демо
+
+Loading sound files
+== Загрузка звуковых файлов
+
+Why are you slowmo replaying to read this?
 == 

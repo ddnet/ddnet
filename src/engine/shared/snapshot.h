@@ -3,7 +3,8 @@
 #ifndef ENGINE_SHARED_SNAPSHOT_H
 #define ENGINE_SHARED_SNAPSHOT_H
 
-#include <base/system.h>
+#include <cstddef>
+#include <stdint.h>
 
 // CSnapshot
 
@@ -27,6 +28,9 @@ class CSnapshot
 	int *Offsets() const { return (int *)(this + 1); }
 	char *DataStart() const { return (char *)(Offsets() + m_NumItems); }
 
+	size_t OffsetSize() const { return sizeof(int) * m_NumItems; }
+	size_t TotalSize() const { return sizeof(CSnapshot) + OffsetSize() + m_DataSize; }
+
 public:
 	enum
 	{
@@ -48,10 +52,12 @@ public:
 	int GetItemSize(int Index) const;
 	int GetItemIndex(int Key) const;
 	int GetItemType(int Index) const;
+	int GetExternalItemType(int InternalType) const;
 	void *FindItem(int Type, int ID) const;
 
 	unsigned Crc();
 	void DebugDump();
+	bool IsValid(size_t ActualSize) const;
 };
 
 // CSnapshotDelta
@@ -107,6 +113,8 @@ public:
 		int m_Tick;
 
 		int m_SnapSize;
+		int m_AltSnapSize;
+
 		CSnapshot *m_pSnap;
 		CSnapshot *m_pAltSnap;
 	};
@@ -114,12 +122,12 @@ public:
 	CHolder *m_pFirst;
 	CHolder *m_pLast;
 
-	CSnapshotStorage() { Init(); };
-	~CSnapshotStorage() { PurgeAll(); };
+	CSnapshotStorage() { Init(); }
+	~CSnapshotStorage() { PurgeAll(); }
 	void Init();
 	void PurgeAll();
 	void PurgeUntil(int Tick);
-	void Add(int Tick, int64_t Tagtime, int DataSize, void *pData, int CreateAlt);
+	void Add(int Tick, int64_t Tagtime, int DataSize, void *pData, int AltDataSize, void *pAltData);
 	int Get(int Tick, int64_t *pTagtime, CSnapshot **ppData, CSnapshot **ppAltData);
 };
 
@@ -141,6 +149,7 @@ class CSnapshotBuilder
 
 	void AddExtendedItemType(int Index);
 	int GetExtendedItemTypeIndex(int TypeID);
+	int GetTypeFromIndex(int Index);
 
 	bool m_Sixup;
 

@@ -1,12 +1,14 @@
 /* (c) Shereef Marzouk. See "licence DDRace.txt" and the readme.txt in the root of the distribution for more information. */
 #include "gamecontext.h"
+
+#include <engine/antibot.h>
+
 #include <engine/shared/config.h>
 #include <game/server/entities/character.h>
 #include <game/server/gamemodes/DDRace.h>
 #include <game/server/player.h>
 #include <game/server/save.h>
 #include <game/server/teams.h>
-#include <game/version.h>
 
 bool CheckClientID(int ClientID);
 
@@ -126,14 +128,10 @@ void CGameContext::ConSuper(IConsole::IResult *pResult, void *pUserData)
 	if(!CheckClientID(pResult->m_ClientID))
 		return;
 	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
-	if(pChr && !pChr->m_Super)
+	if(pChr && !pChr->IsSuper())
 	{
-		pChr->m_Super = true;
-		pChr->Core()->m_Super = true;
+		pChr->SetSuper(true);
 		pChr->UnFreeze();
-		pChr->m_TeamBeforeSuper = pChr->Team();
-		pChr->Teams()->SetCharacterTeam(pResult->m_ClientID, TEAM_SUPER);
-		pChr->m_DDRaceState = DDRACE_CHEAT;
 	}
 }
 
@@ -143,12 +141,9 @@ void CGameContext::ConUnSuper(IConsole::IResult *pResult, void *pUserData)
 	if(!CheckClientID(pResult->m_ClientID))
 		return;
 	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
-	if(pChr && pChr->m_Super)
+	if(pChr && pChr->IsSuper())
 	{
-		pChr->m_Super = false;
-		pChr->Core()->m_Super = false;
-		pChr->Teams()->SetForceCharacterTeam(pResult->m_ClientID,
-			pChr->m_TeamBeforeSuper);
+		pChr->SetSuper(false);
 	}
 }
 
@@ -169,7 +164,27 @@ void CGameContext::ConUnDeep(IConsole::IResult *pResult, void *pUserData)
 		return;
 	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
 	if(pChr)
-		pChr->m_DeepFreeze = false;
+		pChr->SetDeepFrozen(false);
+}
+
+void CGameContext::ConLiveFreeze(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientID(pResult->m_ClientID))
+		return;
+	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
+	if(pChr)
+		pChr->SetLiveFrozen(true);
+}
+
+void CGameContext::ConUnLiveFreeze(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientID(pResult->m_ClientID))
+		return;
+	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
+	if(pChr)
+		pChr->SetLiveFrozen(false);
 }
 
 void CGameContext::ConShotgun(IConsole::IResult *pResult, void *pUserData)
@@ -195,7 +210,7 @@ void CGameContext::ConJetpack(IConsole::IResult *pResult, void *pUserData)
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
 	if(pChr)
-		pChr->m_Jetpack = true;
+		pChr->SetJetpack(true);
 }
 
 void CGameContext::ConWeapons(IConsole::IResult *pResult, void *pUserData)
@@ -227,7 +242,7 @@ void CGameContext::ConUnJetpack(IConsole::IResult *pResult, void *pUserData)
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
 	if(pChr)
-		pChr->m_Jetpack = false;
+		pChr->SetJetpack(false);
 }
 
 void CGameContext::ConUnWeapons(IConsole::IResult *pResult, void *pUserData)
@@ -466,6 +481,8 @@ bool CGameContext::TryMute(const NETADDR *pAddr, int Secs, const char *pReason, 
 
 void CGameContext::Mute(const NETADDR *pAddr, int Secs, const char *pDisplayName, const char *pReason, bool InitialChatDelay)
 {
+	if(Secs <= 0)
+		return;
 	if(!TryMute(pAddr, Secs, pReason, InitialChatDelay))
 		return;
 	if(InitialChatDelay)

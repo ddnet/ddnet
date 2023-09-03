@@ -23,8 +23,6 @@ GameMsgIDs = Enum("GAMEMSG", ["TEAM_SWAP", "SPEC_INVALIDID", "TEAM_SHUFFLE", "TE
 
 RawHeader = '''
 
-#include <engine/message.h>
-
 enum
 {
 	INPUT_STATE_MASK=0x3f
@@ -58,7 +56,6 @@ enum
 '''
 
 RawSource = '''
-#include <engine/message.h>
 #include "protocol.h"
 '''
 
@@ -427,9 +424,9 @@ Messages = [
 	]),
 
 	NetMessage("Cl_CallVote", [
-		NetStringStrict("m_Type"),
-		NetStringStrict("m_Value"),
-		NetStringStrict("m_Reason"),
+		NetStringStrict("m_pType"),
+		NetStringStrict("m_pValue"),
+		NetStringStrict("m_pReason"),
 		NetBool("m_Force"),
 	]),
 
@@ -461,18 +458,18 @@ Messages = [
 	]),
 
 	NetMessage("Sv_CommandInfo", [
-			NetStringStrict("m_Name"),
-			NetStringStrict("m_ArgsFormat"),
-			NetStringStrict("m_HelpText")
+			NetStringStrict("m_pName"),
+			NetStringStrict("m_pArgsFormat"),
+			NetStringStrict("m_pHelpText")
 	]),
 
 	NetMessage("Sv_CommandInfoRemove", [
-			NetStringStrict("m_Name")
+			NetStringStrict("m_pName")
 	]),
 
 	NetMessage("Cl_Command", [
-			NetStringStrict("m_Name"),
-			NetStringStrict("m_Arguments")
+			NetStringStrict("m_pName"),
+			NetStringStrict("m_pArguments")
 	]),
 
 ]

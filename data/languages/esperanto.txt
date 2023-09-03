@@ -1,0 +1,1550 @@
+##### translated strings #####
+
+Connected
+== Konektita
+
+Loading map file from storage
+== Ŝargas mapdosieron el la diskaparato
+
+Loading DDNet Client
+== Ŝargas DDNet
+
+Warning
+== Averto
+
+All
+== Ĉio
+
+Team
+== Teamo
+
+Chat
+== Diskutejo
+
+-Page %d-
+== -Paĝo %d-
+
+Game paused
+== Paŭzata ludo
+
+Warmup
+== Trejnado
+
+Connection Problems...
+== Konekta problemoj...
+
+Please balance teams!
+== Bonvolu ekvilibrigi teamojn!
+
+%ds left
+== Restas %ds
+
+Reason:
+== Kialo:
+
+Vote yes
+== Voĉdoni jes
+
+Vote no
+== Voĉdoni ne
+
+Speed:
+== Rapideco:
+
+Spectate
+== Spekti
+
+Free-View
+== Libera vidado
+
+News
+== Novaĵoj
+
+Internet
+== Internet
+
+LAN
+== LAN
+
+Favorites
+== Favoratoj
+
+Game
+== Ludo
+
+Players
+== Ludantoj
+
+Server info
+== Servila informoj
+
+Browser
+== Retumilo
+
+Ghost
+== Fantomo
+
+Call vote
+== Voĉdoni
+
+Connecting to
+== Konektas al
+
+Abort
+== Nuligi
+
+Downloading map
+== Elŝutas mapon
+
+Disconnected
+== Malkonektita
+
+Ok
+== Okej
+
+Reconnect in %d sec
+== Rekonektiĝos post %d sek
+
+Try again
+== Reprovi
+
+Quit
+== Eliri
+
+Are you sure that you want to quit?
+== Ĉu vi certas eliri?
+
+Disconnect
+== Malkonektiĝi
+
+Are you sure that you want to disconnect?
+== Ĉu vi certas malkonektiĝi?
+
+Disconnect Dummy
+== Malkonektigi pupon
+
+Are you sure that you want to disconnect your dummy?
+== Ĉu vi certas malkonektiĝi vian pupon?
+
+Welcome to DDNet
+== Bonvenon en DDNet
+
+Please enter your nickname below.
+== Bonvolu tajpi vian kromnomon.
+
+Existing Player
+== Ekzista ludanto
+
+Your nickname '%s' is already used (%d points). Do you still want to use it?
+== Vian kromnomon '%s' estas jam uzata (%d poentoj). Ĉu vi tamen volas uzi ĝin?
+
+Checking for existing player with your name
+== Kontrolas ekzistan ludanton kun via nomo
+
+Are you sure that you want to disconnect and switch to a different server?
+== Ĉu vi certas malkonektiĝi kaj movi al alia servilo?
+
+There's an unsaved map in the editor, you might want to save it before you quit the game.
+== Estas nesavata mapo en la redaktilo, vi eble volas savi ĝin antaŭ eliri la ludon.
+
+Quit anyway?
+== Eliri tamen
+
+No
+== Ne
+
+Yes
+== Jes
+
+Password
+== Pasvorto
+
+%i minute left
+== Restas %i minuto
+
+%i minutes left
+== Restas %i minutoj
+
+%i second left
+== Restas %i sekundo
+
+%i seconds left
+== Restas %i sekundoj
+
+Country / Region
+== Lando / Regiono
+
+Error
+== Eraro
+
+New name:
+== Nova nomo:
+
+Show chat
+== Montri la diskutejon
+
+Use sounds
+== Uzi sonojn
+
+Speed
+== Rapideco
+
+Join Tutorial Server
+== Aliĝi al la lernila servilo
+
+Skip Tutorial
+== Pasi la lernilo
+
+transmits your player name to info2.ddnet.tw
+== sendas vian ludantnomon al info2.ddnet.tw
+
+Nickname
+== Kromnomo
+
+Theme
+== Temo
+
+AFR
+== AFR
+
+ASI
+== AZI
+
+AUS
+== AŬS
+
+EUR
+== EŬR
+
+NA
+== NA
+
+SA
+== SA
+
+CHN
+== ĈIN
+
+Type
+== Tipo
+
+Getting server list from master server
+== Elŝutas servilaro de ĉefa servilo
+
+No servers found
+== Neniuj serviloj trovitaj
+
+No servers match your filter criteria
+== Neniuj serviloj kun via filtro
+
+Search
+== Serĉi
+
+Exclude
+== Ekskludi
+
+%d of %d servers
+== %d de %d serviloj
+
+%d of %d server
+== %d de %d servilo
+
+%d players
+== %d ludantoj
+
+%d player
+== %d ludanto
+
+Server address:
+== Retadreso de servilo:
+
+Refresh
+== Aktualigi
+
+Refreshing...
+== Aktualas...
+
+Connect
+== Konektiĝi
+
+Count players only
+== Nur nombri ludantojn
+
+Show friends only
+== Nur montri amikojn
+
+No password
+== Neniu pasvorto
+
+Game types:
+== Ludtipoj:
+
+Countries
+== Landoj
+
+Favorite
+== Favorati
+
+Friends
+== Amikoj
+
+Name
+== Nomo
+
+Clan
+== Klano
+
+Add Friend
+== Aldoni amikon
+
+Filter
+== Filtri
+
+Select a name
+== Elekti nomon
+
+Please use a different name
+== Bonvolu uzi malsaman nomon
+
+Remove chat
+== Malmontri la diskutejon
+
+Close
+== Fermi
+
+Folder
+== Dosierujo
+
+Version:
+== Versio:
+
+Map:
+== Mapo:
+
+Open
+== Malfermi
+
+[Demo browser]
+Play
+== Legi
+
+Delete
+== Forigi
+
+Rename
+== Renomigi
+
+Connect Dummy
+== Konektigi pupon
+
+Connecting dummy
+== Pupo konektas
+
+Join red
+== Aliĝi al ruĝa taemo
+
+Join blue
+== Aliĝi al blua teamo
+
+Join game
+== Aliĝi al la ludo
+
+Kill
+== Mortiĝi
+
+Pause
+== Paŭzi
+
+Player options
+== Ludantaj agordoj
+
+Player
+== Ludanto
+
+Address
+== Retadreso
+
+Ping
+== Latenco
+
+Version
+== Versio
+
+Game info
+== Ludaj informoj
+
+Game type
+== Ludtipo
+
+Map
+== Mapo
+
+MOTD
+== MDLT
+
+Change settings
+== Ŝanĝi agordojn
+
+Kick player
+== Elirigi ludanton
+
+Move player to spectators
+== Movi ludanton al spektantoj
+
+Force vote
+== Forci voĉdonon
+
+Vote description:
+== Voĉdona priskribo:
+
+Vote command:
+== Voĉdona komando:
+
+Add
+== Aldoni
+
+Time
+== Tempo
+
+Dummy settings
+== Agordoj de la pupo
+
+Skins
+== Haŭtoj
+
+Skin Database
+== Datumbazo de haŭtoj
+
+Skins directory
+== Dosierujo de haŭtoj
+
+Move left
+== Movi maldekstren
+
+Move right
+== Movi dekstren
+
+Jump
+== Salti
+
+Fire
+== Pafi
+
+Hook
+== Hoki
+
+Show others
+== Montri aliaj
+
+Show all
+== Montri ĉiuj
+
+Hammer
+== Martelo
+
+Pistol
+== Pistolo
+
+Laser
+== Lasero
+
+Mouse
+== Muso
+
+Weapon
+== Batalilo
+
+Dummy
+== Pupo
+
+Screen
+== Ekrano
+
+default
+== defaŭlta
+
+auto
+== aŭtomata
+
+Language
+== Lingvo
+
+General
+== Ĝenerala
+
+Appearance
+== Aspekto
+
+Graphics
+== Grafikoj
+
+Sound
+== Sono
+
+DDNet
+== DDNet
+
+Assets
+== Bildoj
+
+DDNet Client needs to be restarted to complete update!
+== Vi devas relanci DDNet por kompletigi la ĝisdatigon.
+
+You must restart the game for all settings to take effect.
+== Vi devas relanci la ludon por aktivigi ĉiujn agordojn.
+
+Show dummy actions
+== Montri la agojn de la pupo
+
+Team message
+== Mesaĝo de teamo
+
+Friend message
+== Mesaĝo de amiko
+
+Normal message
+== Normala mesaĝo
+
+Preview
+== Antaŭrigardilo
+
+A Tee
+== Tejo
+
+DDNet %s is available:
+== DDNet %s estas disponebla:
+
+Update now
+== Ĝisdatigi nun
+
+Updating...
+== Ĝisdatiĝas...
+
+Check now
+== Kontroli nun
+
+Discord
+== Diskordo
+
+https://ddnet.tw/discord
+== https://ddnet.tw/discord
+
+Learn
+== Lerni
+
+https://wiki.ddnet.tw/
+== https://wiki.ddnet.tw/
+
+Tutorial
+== Lernilo
+
+Website
+== Retejo
+
+Settings
+== Agordoj
+
+Stop server
+== Halti servilon
+
+Run server
+== Lanci servilon
+
+Editor
+== Redaktilo
+
+[Start menu]
+Play
+== Ludi
+
+DDNet %s is out!
+== DDNet %s estas disponebla!
+
+Downloading %s:
+== Elŝutas %s:
+
+Restart
+== Relanci
+
+Spectators
+== Spektantoj
+
+Red team
+== Ruĝa teamo
+
+Blue team
+== Blua teamo
+
+Follow
+== Sekvi
+
+Deaths
+== Mortoj
+
+1 new mention
+== 1 nova mencio
+
+%d new mentions
+== %d novaj mencioj
+
+9+ new mentions
+== 9+ novaj mencioj
+
+Successfully saved the replay!
+== 
+
+Saving ddnet-settings.cfg failed
+== 
+
+Replay feature is disabled!
+== 
+
+The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
+== 
+
+The format of texture %s is not RGBA which will cause visual bugs.
+== 
+
+Preparing demo playback
+== 
+
+Why are you slowmo replaying to read this?
+== 
+
+Initializing components
+== 
+
+Initializing assets
+== 
+
+Initializing map logic
+== 
+
+Sending initial client info
+== 
+
+Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
+== 
+
+Sudden Death
+== 
+
+Position:
+== 
+
+Angle:
+== 
+
+Server best:
+== 
+
+Personal best:
+== 
+
+Uploading map data to GPU
+== 
+
+Reset
+== 
+
+Demos
+== 
+
+Trying to determine UDP connectivity...
+== 
+
+UDP seems to be filtered.
+== 
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== 
+
+No answer from server yet.
+== 
+
+Getting game info
+== 
+
+Requesting to join the game
+== 
+
+The server is running a non-standard tuning on a pure game type.
+== 
+
+Delete demo
+== 
+
+Are you sure that you want to delete the demo?
+== 
+
+Rename demo
+== 
+
+Render demo
+== 
+
+Replace video
+== 
+
+File already exists, do you want to overwrite it?
+== 
+
+Remove friend
+== 
+
+Are you sure that you want to remove the player from your friends list?
+== 
+
+Sound error
+== 
+
+The audio device couldn't be initialised.
+== 
+
+Password incorrect
+== 
+
+DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
+== 
+
+Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
+== 
+
+It's recommended that you check the settings to adjust them to your liking before joining a server.
+== 
+
+Unable to delete the demo
+== 
+
+Unable to rename the demo
+== 
+
+Destination file already exist
+== 
+
+Error loading demo
+== 
+
+Show ingame HUD
+== 
+
+Video name:
+== 
+
+Show DDNet map finishes in server browser
+== 
+
+Loading menu images
+== 
+
+Server filter
+== 
+
+Has people playing
+== 
+
+Server not full
+== 
+
+Strict gametype filter
+== 
+
+Player country:
+== 
+
+Filter connecting players
+== 
+
+Indicate map finish
+== 
+
+Unfinished map
+== 
+
+Types
+== 
+
+Reset filter
+== 
+
+Server details
+== 
+
+Leak IP
+== 
+
+Scoreboard
+== 
+
+Remove
+== 
+
+Info
+== 
+
+Demofile: %s
+== 
+
+Loading demo files
+== 
+
+Parent Folder
+== 
+
+Invalid Demo
+== 
+
+Demo details
+== 
+
+Created:
+== 
+
+Type:
+== 
+
+Length:
+== 
+
+Markers:
+== 
+
+Size:
+== 
+
+%.2f MiB
+== 
+
+%.2f KiB
+== 
+
+Crc:
+== 
+
+Netversion:
+== 
+
+Demo
+== 
+
+Markers
+== 
+
+Length
+== 
+
+Date
+== 
+
+Fetch Info
+== 
+
+Demos directory
+== 
+
+Render
+== 
+
+Stop record
+== 
+
+Record demo
+== 
+
+Score limit
+== 
+
+Time limit
+== 
+
+Loading ghost files
+== 
+
+Reload
+== 
+
+Deactivate
+== 
+
+Activate
+== 
+
+Save
+== 
+
+Dynamic Camera
+== 
+
+Smooth Dynamic Camera
+== 
+
+Switch weapon on pickup
+== 
+
+Switch weapon when out of ammo
+== 
+
+Client
+== 
+
+Skip the main menu
+== 
+
+Automatically record demos
+== 
+
+Max demos
+== 
+
+Automatically take game over screenshot
+== 
+
+Max Screenshots
+== 
+
+Refresh Rate
+== 
+
+Settings file
+== 
+
+Config directory
+== 
+
+Themes directory
+== 
+
+Automatically take statboard screenshot
+== 
+
+Automatically create statboard csv
+== 
+
+Max CSVs
+== 
+
+Your skin
+== 
+
+Toggle to edit your dummy settings
+== 
+
+Download skins
+== 
+
+Download community skins
+== 
+
+Vanilla skins only
+== 
+
+Fat skins (DDFat)
+== 
+
+Skin prefix
+== 
+
+Choose default eyes when joining a server
+== 
+
+Custom colors
+== 
+
+Body
+== 
+
+Feet
+== 
+
+Loading skin files
+== 
+
+Hook collisions
+== 
+
+Zoom in
+== 
+
+Zoom out
+== 
+
+Default zoom
+== 
+
+Toggle dyncam
+== 
+
+Toggle dummy
+== 
+
+Toggle ghost
+== 
+
+Dummy copy
+== 
+
+Hammerfly dummy
+== 
+
+Shotgun
+== 
+
+Grenade
+== 
+
+Next weapon
+== 
+
+Prev. weapon
+== 
+
+Team chat
+== 
+
+Converse
+== 
+
+Emoticon
+== 
+
+Spectator mode
+== 
+
+Spectate next
+== 
+
+Spectate previous
+== 
+
+Console
+== 
+
+Remote console
+== 
+
+Screenshot
+== 
+
+Statboard
+== 
+
+Lock team
+== 
+
+Show entities
+== 
+
+Show HUD
+== 
+
+Chat command
+== 
+
+Enable controller
+== 
+
+Controller %d: %s
+== 
+
+Click to cycle through all available controllers.
+== 
+
+[Ingame controller mode]
+Relative
+== 
+
+[Ingame controller mode]
+Absolute
+== 
+
+Ingame controller mode
+== 
+
+Ingame controller sens.
+== 
+
+UI controller sens.
+== 
+
+Controller jitter tolerance
+== 
+
+No controller found. Plug in a controller and restart the game.
+== 
+
+Device
+== 
+
+Status
+== 
+
+Aim bind
+== 
+
+Controller Axis #%d
+== 
+
+Controls
+== 
+
+Ingame mouse sens.
+== 
+
+UI mouse sens.
+== 
+
+Controller
+== 
+
+Movement
+== 
+
+Reset to defaults
+== 
+
+Voting
+== 
+
+Miscellaneous
+== 
+
+Current
+== 
+
+Display Modes
+== 
+
+Windowed
+== 
+
+Windowed borderless
+== 
+
+Windowed fullscreen
+== 
+
+Desktop fullscreen
+== 
+
+Fullscreen
+== 
+
+V-Sync
+== 
+
+may cause delay
+== 
+
+FSAA samples
+== 
+
+High Detail
+== 
+
+Allows maps to render with more detail
+== 
+
+Use high DPI
+== 
+
+UI Color
+== 
+
+Renderer
+== 
+
+custom
+== 
+
+Graphics cards
+== 
+
+Play background music
+== 
+
+Mute when not active
+== 
+
+Enable game sounds
+== 
+
+Enable gun sound
+== 
+
+Enable long pain sound (used when shooting in freeze)
+== 
+
+Enable server message sound
+== 
+
+Enable regular chat sound
+== 
+
+Enable team chat sound
+== 
+
+Enable highlighted chat sound
+== 
+
+Threaded sound loading
+== 
+
+Sample rate
+== 
+
+Sound volume
+== 
+
+Game sound volume
+== 
+
+Chat sound volume
+== 
+
+Map sound volume
+== 
+
+Background music volume
+== 
+
+Hue
+== 
+
+Sat.
+== 
+
+Lht.
+== 
+
+Alpha
+== 
+
+HUD
+== 
+
+Name Plate
+== 
+
+Hook Collisions
+== 
+
+Kill Messages
+== 
+
+Show health, shields and ammo
+== 
+
+Show name plates
+== 
+
+Show kill messages
+== 
+
+Show score
+== 
+
+Show votes window after voting
+== 
+
+DDRace HUD
+== 
+
+Use DDRace Scoreboard
+== 
+
+Show client IDs in scoreboard
+== 
+
+Show DDRace HUD
+== 
+
+Show jumps indicator
+== 
+
+Show player position
+== 
+
+Show player speed
+== 
+
+Show player target angle
+== 
+
+Show freeze bars
+== 
+
+Opacity of freeze bars inside freeze
+== 
+
+Show names in chat in team colors
+== 
+
+Show only chat messages from friends
+== 
+
+Use old chat style
+== 
+
+Messages
+== 
+
+System message
+== 
+
+Highlighted message
+== 
+
+Client message
+== 
+
+Name plates size
+== 
+
+Show clan above name plates
+== 
+
+Clan plates size
+== 
+
+Use team colors for name plates
+== 
+
+Show hook strength indicator
+== 
+
+Show other players' key presses
+== 
+
+Show local player's key presses
+== 
+
+Hook collision line
+== 
+
+Show other players' hook collision lines
+== 
+
+Hook collision line width
+== 
+
+Hook collision line opacity
+== 
+
+Colors of the hook collision line, in case of a possible collision with:
+== 
+
+Your movements are not taken into account when calculating the line colors
+== 
+
+Nothing hookable
+== 
+
+Something hookable
+== 
+
+Normal Color
+== 
+
+Highlight Color
+== 
+
+Laser Outline Color
+== 
+
+Laser Inner Color
+== 
+
+Save the best demo of each race
+== 
+
+Enable replays
+== 
+
+Default length: %d
+== 
+
+When you cross the start line, show a ghost tee replicating the movements of your best time
+== 
+
+Show ghost
+== 
+
+Save ghost
+== 
+
+Gameplay
+== 
+
+Overlay entities
+== 
+
+Size
+== 
+
+Show text entities
+== 
+
+Opacity
+== 
+
+Adjust the opacity of entities belonging to other teams, such as tees and nameplates
+== 
+
+Show others (own team only)
+== 
+
+Show quads
+== 
+
+Quads are used for background decoration
+== 
+
+AntiPing
+== 
+
+Tries to predict other entities to give a feel of low latency
+== 
+
+AntiPing: predict other players
+== 
+
+AntiPing: predict weapons
+== 
+
+AntiPing: predict grenade paths
+== 
+
+Old mouse mode
+== 
+
+Background
+== 
+
+Entities Background color
+== 
+
+Use current map as background
+== 
+
+Show tiles layers from BG map
+== 
+
+Regular Background Color
+== 
+
+Try fast HTTP map download first
+== 
+
+New random timeout code
+== 
+
+Run on join
+== 
+
+Chat command (e.g. showall 1)
+== 
+
+DDNet Client updated!
+== 
+
+No updates available
+== 
+
+Entities
+== 
+
+Emoticons
+== 
+
+Particles
+== 
+
+Extras
+== 
+
+Loading assets
+== 
+
+Assets directory
+== 
+
+Can't find a Tutorial server
+== 
+
+Server executable not found, can't run server
+== 
+
+Update failed! Check log...
+== 
+
+Loading race demo files
+== 
+
+Time limit: %d min
+== 
+
+Round
+== 
+
+Game over
+== 
+
+Score
+== 
+
+Super
+== 
+
+Team %d
+== 
+
+Manual
+== 
+
+Race
+== 
+
+Auto
+== 
+
+Replay
+== 
+
+Draw!
+== 
+
+%s wins!
+== 
+
+Red team wins!
+== 
+
+Blue team wins!
+== 
+
+Loading sound files
+== 
+
+Frags
+== 
+
+Suicides
+== 
+
+Ratio
+== 
+
+Net
+== 
+
+FPM
+== 
+
+Spree
+== 
+
+Best
+== 
+
+Grabs
+== 

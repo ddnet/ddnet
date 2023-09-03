@@ -2,6 +2,8 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "jobs.h"
 
+#include <base/lock_scope.h>
+
 IJob::IJob() :
 	m_Status(STATE_PENDING)
 {
@@ -38,16 +40,10 @@ CJobPool::CJobPool()
 
 CJobPool::~CJobPool()
 {
-	m_Shutdown = true;
-	for(int i = 0; i < m_NumThreads; i++)
-		sphore_signal(&m_Semaphore);
-	for(int i = 0; i < m_NumThreads; i++)
+	if(!m_Shutdown)
 	{
-		if(m_apThreads[i])
-			thread_wait(m_apThreads[i]);
+		Destroy();
 	}
-	lock_destroy(m_Lock);
-	sphore_destroy(&m_Semaphore);
 }
 
 void CJobPool::WorkerThread(void *pUser)
@@ -60,15 +56,16 @@ void CJobPool::WorkerThread(void *pUser)
 
 		// fetch job from queue
 		sphore_wait(&pPool->m_Semaphore);
-		lock_wait(pPool->m_Lock);
-		if(pPool->m_pFirstJob)
 		{
-			pJob = pPool->m_pFirstJob;
-			pPool->m_pFirstJob = pPool->m_pFirstJob->m_pNext;
-			if(!pPool->m_pFirstJob)
-				pPool->m_pLastJob = 0;
+			CLockScope ls(pPool->m_Lock);
+			if(pPool->m_pFirstJob)
+			{
+				pJob = pPool->m_pFirstJob;
+				pPool->m_pFirstJob = pPool->m_pFirstJob->m_pNext;
+				if(!pPool->m_pFirstJob)
+					pPool->m_pLastJob = 0;
+			}
 		}
-		lock_unlock(pPool->m_Lock);
 
 		// do the job if we have one
 		if(pJob)
@@ -86,18 +83,32 @@ void CJobPool::Init(int NumThreads)
 		m_apThreads[i] = thread_init(WorkerThread, this, "CJobPool worker");
 }
 
+void CJobPool::Destroy()
+{
+	m_Shutdown = true;
+	for(int i = 0; i < m_NumThreads; i++)
+		sphore_signal(&m_Semaphore);
+	for(int i = 0; i < m_NumThreads; i++)
+	{
+		if(m_apThreads[i])
+			thread_wait(m_apThreads[i]);
+	}
+	lock_destroy(m_Lock);
+	sphore_destroy(&m_Semaphore);
+}
+
 void CJobPool::Add(std::shared_ptr<IJob> pJob)
 {
-	lock_wait(m_Lock);
+	{
+		CLockScope ls(m_Lock);
+		// add job to queue
+		if(m_pLastJob)
+			m_pLastJob->m_pNext = pJob;
+		m_pLastJob = std::move(pJob);
+		if(!m_pFirstJob)
+			m_pFirstJob = m_pLastJob;
+	}
 
-	// add job to queue
-	if(m_pLastJob)
-		m_pLastJob->m_pNext = pJob;
-	m_pLastJob = std::move(pJob);
-	if(!m_pFirstJob)
-		m_pFirstJob = m_pLastJob;
-
-	lock_unlock(m_Lock);
 	sphore_signal(&m_Semaphore);
 }
 

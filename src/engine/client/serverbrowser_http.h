@@ -20,8 +20,7 @@ public:
 	virtual bool GetBestUrl(const char **pBestUrl) const = 0;
 
 	virtual int NumServers() const = 0;
-	virtual const NETADDR &ServerAddress(int Index) const = 0;
-	virtual void Server(int Index, NETADDR *pAddr, CServerInfo *pInfo) const = 0;
+	virtual const CServerInfo &Server(int Index) const = 0;
 	virtual int NumLegacyServers() const = 0;
 	virtual const NETADDR &LegacyServer(int Index) const = 0;
 };

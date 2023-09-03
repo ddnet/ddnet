@@ -6,8 +6,10 @@
 #include <base/vmath.h>
 
 #include "alloc.h"
-#include "gamecontext.h"
 #include "gameworld.h"
+
+class CCollision;
+class CGameContext;
 
 /*
 	Class: Entity
@@ -18,12 +20,13 @@ class CEntity
 	MACRO_ALLOC_HEAP()
 
 private:
-	friend class CGameWorld; // entity list handling
+	friend CGameWorld; // entity list handling
 	CEntity *m_pPrevTypeEntity;
 	CEntity *m_pNextTypeEntity;
 
 	/* Identity */
-	class CGameWorld *m_pGameWorld;
+	CGameWorld *m_pGameWorld;
+	CCollision *m_pCCollision;
 
 	int m_ID;
 	int m_ObjType;
@@ -55,10 +58,12 @@ public: // TODO: Maybe make protected
 	virtual ~CEntity();
 
 	/* Objects */
-	class CGameWorld *GameWorld() { return m_pGameWorld; }
+	std::vector<SSwitchers> &Switchers() { return m_pGameWorld->m_Core.m_vSwitchers; }
+	CGameWorld *GameWorld() { return m_pGameWorld; }
 	class CConfig *Config() { return m_pGameWorld->Config(); }
 	class CGameContext *GameServer() { return m_pGameWorld->GameServer(); }
 	class IServer *Server() { return m_pGameWorld->Server(); }
+	CCollision *Collision() { return m_pCCollision; }
 
 	/* Getters */
 	CEntity *TypeNext() { return m_pNextTypeEntity; }
@@ -82,6 +87,13 @@ public: // TODO: Maybe make protected
 	virtual void Reset() {}
 
 	/*
+		Function: PreTick
+			Called to progress the entity before the next tick.
+			Can be used to prepare variables for all clients before the next tick is executed.
+	*/
+	virtual void PreTick() {}
+
+	/*
 		Function: Tick
 			Called to progress the entity to the next tick. Updates
 			and moves the entity to its new state and position.
@@ -89,10 +101,10 @@ public: // TODO: Maybe make protected
 	virtual void Tick() {}
 
 	/*
-		Function: TickDefered
+		Function: TickDeferred
 			Called after all entities Tick() function has been called.
 	*/
-	virtual void TickDefered() {}
+	virtual void TickDeferred() {}
 
 	/*
 		Function: TickPaused
@@ -139,18 +151,20 @@ public: // TODO: Maybe make protected
 	*/
 	bool NetworkClipped(int SnappingClient) const;
 	bool NetworkClipped(int SnappingClient, vec2 CheckPos) const;
+	bool NetworkClippedLine(int SnappingClient, vec2 StartPos, vec2 EndPos) const;
 
 	bool GameLayerClipped(vec2 CheckPos);
 
 	// DDRace
 
 	bool GetNearestAirPos(vec2 Pos, vec2 PrevPos, vec2 *pOutPos);
-	bool GetNearestAirPosPlayer(vec2 PlayerPos, vec2 *OutPos);
+	bool GetNearestAirPosPlayer(vec2 PlayerPos, vec2 *pOutPos);
 
 	int m_Number;
 	int m_Layer;
 };
 
 bool NetworkClipped(const CGameContext *pGameServer, int SnappingClient, vec2 CheckPos);
+bool NetworkClippedLine(const CGameContext *pGameServer, int SnappingClient, vec2 StartPos, vec2 EndPos);
 
 #endif

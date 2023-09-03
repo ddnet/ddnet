@@ -4,7 +4,7 @@
 
 #include <game/server/entity.h>
 
-class CTrigger;
+class CGameWorld;
 
 class CDoor : public CEntity
 {
@@ -17,7 +17,7 @@ public:
 	CDoor(CGameWorld *pGameWorld, vec2 Pos, float Rotation, int Length,
 		int Number);
 
-	virtual void Snap(int SnappingClient);
+	void Snap(int SnappingClient) override;
 };
 
 #endif // GAME_SERVER_ENTITIES_DOOR_H

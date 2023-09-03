@@ -1,0 +1,8 @@
+{
+   DemoRecorderWrite
+   Memcheck:Param
+   write(buf)
+   ...
+   fun:_ZN13CDemoRecorder5WriteEiPKvi
+   ...
+}

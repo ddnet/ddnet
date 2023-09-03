@@ -65,7 +65,7 @@ public:
 	int GetMoveRestrictions(CALLBACK_SWITCHACTIVE pfnSwitchActive, void *pUser, vec2 Pos, float Distance = 18.0f, int OverrideCenterTileIndex = -1);
 	int GetMoveRestrictions(vec2 Pos, float Distance = 18.0f)
 	{
-		return GetMoveRestrictions(0, 0, Pos, Distance);
+		return GetMoveRestrictions(nullptr, nullptr, Pos, Distance);
 	}
 
 	int GetTile(int x, int y) const;
@@ -88,10 +88,10 @@ public:
 	int IsCheckEvilTeleport(int Index) const;
 	int IsTeleportWeapon(int Index) const;
 	int IsTeleportHook(int Index) const;
-	int IsTCheckpoint(int Index) const;
+	int IsTeleCheckpoint(int Index) const;
 	int IsSpeedup(int Index) const;
 	int IsTune(int Index) const;
-	void GetSpeedup(int Index, vec2 *Dir, int *Force, int *MaxSpeed) const;
+	void GetSpeedup(int Index, vec2 *pDir, int *pForce, int *pMaxSpeed) const;
 	int GetSwitchType(int Index) const;
 	int GetSwitchNumber(int Index) const;
 	int GetSwitchDelay(int Index) const;
@@ -103,8 +103,8 @@ public:
 	int IsNoLaser(int x, int y) const;
 	int IsFNoLaser(int x, int y) const;
 
-	int IsCheckpoint(int Index) const;
-	int IsFCheckpoint(int Index) const;
+	int IsTimeCheckpoint(int Index) const;
+	int IsFTimeCheckpoint(int Index) const;
 
 	int IsMover(int x, int y, int *pFlags) const;
 
@@ -114,16 +114,7 @@ public:
 	class CSwitchTile *SwitchLayer() { return m_pSwitch; }
 	class CTuneTile *TuneLayer() { return m_pTune; }
 	class CLayers *Layers() { return m_pLayers; }
-	int m_NumSwitchers;
-
-	struct SSwitchers
-	{
-		bool m_Status[MAX_CLIENTS];
-		bool m_Initial;
-		int m_EndTick[MAX_CLIENTS];
-		int m_Type[MAX_CLIENTS];
-	};
-	SSwitchers *m_pSwitchers;
+	int m_HighestSwitchNumber;
 
 private:
 	class CTeleTile *m_pTele;
@@ -134,5 +125,5 @@ private:
 	class CDoorTile *m_pDoor;
 };
 
-void ThroughOffset(vec2 Pos0, vec2 Pos1, int *Ox, int *Oy);
+void ThroughOffset(vec2 Pos0, vec2 Pos1, int *pOffsetX, int *pOffsetY);
 #endif

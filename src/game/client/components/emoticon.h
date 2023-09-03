@@ -7,8 +7,6 @@
 
 class CEmoticon : public CComponent
 {
-	void DrawCircle(float x, float y, float r, int Segments);
-
 	bool m_WasActive;
 	bool m_Active;
 
@@ -27,7 +25,7 @@ public:
 	virtual void OnConsoleInit() override;
 	virtual void OnRender() override;
 	virtual void OnRelease() override;
-	virtual bool OnMouseMove(float x, float y) override;
+	virtual bool OnCursorMove(float x, float y, IInput::ECursorType CursorType) override;
 
 	void Emote(int Emoticon);
 	void EyeEmote(int EyeEmote);

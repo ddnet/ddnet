@@ -6,6 +6,7 @@
 #	Tsin			2011-04-06 23:15:58
 #	Shymwo			2011-07-15 01:27:45
 #	Shymwo			2011-07-21 18:54:53
+#	CROACH			2022-05-15 21:41:32
 ##### /authors #####
 
 ##### translated strings #####
@@ -145,9 +146,6 @@ Dynamic Camera
 Emoticon
 == Emotikona
 
-Enter
-== Wejdź
-
 Error
 == Błąd
 
@@ -244,9 +242,6 @@ MOTD
 Map
 == Mapa
 
-Mouse sens.
-== Czułość myszy
-
 Move left
 == W lewo
 
@@ -260,7 +255,7 @@ Movement
 == Ruch
 
 Mute when not active
-== Wycisz, kiedy gra nieaktywna
+== Wycisz, kiedy gra jest nieaktywna
 
 Name
 == Nazwa
@@ -682,17 +677,11 @@ Select a name
 Switch weapon when out of ammo
 == Zmień broń, gdy skończy się amunicja
 
-Reset wanted weapon on death
-== Zresetuj broń, którą chcesz podnieść po śmierci
-
 Dummy settings
 == Ustawienia dummy
 
 Show score
 == Pokazuj wyniki
-
-Show health + ammo
-== Pokazuj życie i amunicję
 
 Show names in chat in team colors
 == Pokazuj nicki na czacie w kolorach teamu
@@ -805,9 +794,6 @@ Destination file already exist
 Reload
 == Przeładuj
 
-Multiple texture units (disable for macOS)
-== Jednostki z wieloma teksturami (wyłącz dla macOS)
-
 Replay feature is disabled!
 == Funkcja odtwarzania jest wyłączona!
 
@@ -910,9 +896,6 @@ Show entities
 Size
 == Rozmiar
 
-UI mouse s.
-== Czułość myszy w UI
-
 Fetch Info
 == Pobierz szczegóły
 
@@ -979,9 +962,6 @@ Downloading %s:
 Show tiles layers from BG map
 == Pokazuj warstwy płytek razem z tłem mapy
 
-Show console window
-== Pokazuj okno konsoli
-
 Max CSVs
 == Maksymalne CSV
 
@@ -1039,9 +1019,6 @@ Dummy copy
 9+ new mentions
 == 9+ razy wspomniano o tobie
 
-Preinit VBO (iGPUs only)
-== Zainicjuj VBO (tylko iGPU)
-
 Statboard
 == Tabela wyników
 
@@ -1065,18 +1042,6 @@ Reconnect in %d sec
 
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
 == DDraceNetwork jest grą online polegającą na współpracy z innymi graczami, gdzie twoim i ich zadaniem jest dotrzeć do mety na końcu mapy. Jako nowy gracz powinieneś zacząć od serwerów Novice, które hostują najłatwiejsze mapy. Weź pod uwagę ping, aby wybrać serwer najbliżej siebie.
-
-The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
-== Mapy zawierają freeze, który tymczasowo uniemożliwia poruszanie się tee. Powienieneś współpracować z innymi, aby ukończyć wszystkie części mapy.
-
-The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== Rolka myszki zmienia narzędzie (broń). Młotek (lewy przycisk myszki) może być użyty do uderzania innych tee i odmrażania ich, gdy są unieruchomieni po kontakcie z freezem.
-
-Hook (right mouse) can be used to swing through the map and to hook other tees to you.
-== Hak (prawy przycisk myszki) może być użyty do wspinania się po mapie i łapania innych tee (przyciągania ich do siebie).
-
-Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
-== Najważniejszym przyciskiem jest T. Dzięki niemu możesz rozmawiać z innymi, aby nauczyć się podstaw i trików związanych z grą.
 
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == Przed wejściem na dowolny serwer zalecane jest sprawdzenie ustawień w celu dostosowania ich do własnych upodobań.
@@ -1230,121 +1195,369 @@ Play
 == Graj
 
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
-== 
+== Szerokość tekstury %s nie jest podzielna przez %d, lub wysokość nie jest podzielna przez %d, co może spowodować błędy wizualne.
+
+The format of texture %s is not RGBA which will cause visual bugs.
+== Formatem tekstury %s nie jest RGBA, co może spowodować błędy wizualne.
 
 Are you sure that you want to disconnect and switch to a different server?
-== 
+== Czy na pewno chcesz się rozłączyć i przełączyć na inny serwer?
+
+Join Tutorial Server
+== Dołącz do serwera samouczkowego
+
+Skip Tutorial
+== Pomiń samouczek
 
 AFR
-== 
+== AFR
 
 ASI
-== 
+== ASI
 
 AUS
-== 
+== AUS
 
 EUR
-== 
+== EUR
 
 NA
-== 
+== NA
 
 SA
-== 
+== SA
 
 CHN
-== 
+== CHN
 
 Getting server list from master server
-== 
+== Pobieranie listy serwerów z serwera głównego
 
 Refreshing...
-== 
+== Odświeżanie
 
 Leak IP
-== 
+== Ujawnij IP
 
 Settings file
-== 
+== Plik ustawień
 
 Config directory
-== 
+== Lokalizacja konfiguracji
+
+Toggle to edit your dummy settings
+== Przełącz aby edytować ustawienia kukły
+
+Choose default eyes when joining a server
+== Wybierz domyślne oczy, podczas dołączenia do serwera
 
 Chat command
-== 
+== Komenda czatu
 
 Dummy
-== 
+== Kukła
 
 Windowed
-== 
+== W oknie
 
 Windowed borderless
-== 
+== W oknie bez ramki
 
 Windowed fullscreen
-== 
+== W oknie pełnoekranowym
 
 Desktop fullscreen
-== 
+== Pełnoekranowy z przełączaniem innych okien
 
-Use modern OpenGL
-== 
+Allows maps to render with more detail
+== Pozwala na renderowanie map z większą ilością detali
 
-Show client IDs
-== 
+Renderer
+== Technologia renderowania
+
+default
+== domyślny
+
+custom
+== niestandardowy
+
+Graphics cards
+== Karty graficzne
+
+auto
+== automatyczny
 
 Kill Messages
-== 
-
-Kill Message Normal Color
-== 
-
-Kill Message Highlight Color
-== 
+== Wiadomości o zabiciu
 
 Laser Outline Color
-== 
+== Zewnętrzny kolor lasera
 
 Laser Inner Color
-== 
-
-Hookline
-== 
-
-No hit
-== 
-
-Hookable
-== 
-
-Tee
-== 
+== Wewnętrzny kolor lasera
 
 Preview
-== 
+== Podgląd
+
+When you cross the start line, show a ghost tee replicating the movements of your best time
+== Podczas przekroczenia linii startu, pokaż duszka z Twoim najlepszym czasem
+
+Opacity
+== Przezroczystość
+
+Adjust the opacity of entities belonging to other teams, such as tees and nameplates
+== Dopasuj przezroczystość obiektów należących do innych drużyn, takich jak duszki i nicki
+
+Quads are used for background decoration
+== Kwadry są używane do dekoracji tła
+
+Tries to predict other entities to give a feel of low latency
+== Próbuje przewidzieć ruchy innych stworzeń, aby dostarczyć wrażenie niskiego opóźnienia
 
 Show local player's key presses
-== 
+== Pokazuj klawisze, które są wciśnięte
 
 Background
-== 
+== Tło
 
 Entities Background color
-== 
+== Kolor tła stworzeń
 
 Regular Background Color
-== 
+== Kolor tła normalnego
 
 Run on join
-== 
+== Uruchom po dołączeniu
 
 Chat command (e.g. showall 1)
-== 
+== Komenda czatu (np. showall 1)
 
 Discord
-== 
+== Discord
 
 https://ddnet.tw/discord
+== https://ddnet.tw/discord
+
+Tutorial
+== Samouczek
+
+Can't find a Tutorial server
+== Nie można znaleźć serwera samouczkowego
+
+Super
+== Super
+
+Team %d
+== Drużyna %d
+
+Preparing demo playback
+== 
+
+Connected
+== 
+
+Loading map file from storage
+== 
+
+Why are you slowmo replaying to read this?
+== 
+
+Initializing components
+== 
+
+Initializing assets
+== 
+
+Initializing map logic
+== 
+
+Sending initial client info
+== 
+
+Position:
+== 
+
+Speed:
+== 
+
+Angle:
+== 
+
+Uploading map data to GPU
+== 
+
+Trying to determine UDP connectivity...
+== 
+
+UDP seems to be filtered.
+== 
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== 
+
+No answer from server yet.
+== 
+
+Getting game info
+== 
+
+Requesting to join the game
+== 
+
+Loading menu images
+== 
+
+Loading demo files
+== 
+
+Loading ghost files
+== 
+
+Download community skins
+== 
+
+Loading skin files
+== 
+
+Enable controller
+== 
+
+Controller %d: %s
+== 
+
+Click to cycle through all available controllers.
+== 
+
+[Ingame controller mode]
+Relative
+== 
+
+[Ingame controller mode]
+Absolute
+== 
+
+Ingame controller mode
+== 
+
+Ingame controller sens.
+== 
+
+UI controller sens.
+== 
+
+Controller jitter tolerance
+== 
+
+No controller found. Plug in a controller and restart the game.
+== 
+
+Device
+== 
+
+Status
+== 
+
+Aim bind
+== 
+
+Controller Axis #%d
+== 
+
+Mouse
+== 
+
+Ingame mouse sens.
+== 
+
+UI mouse sens.
+== 
+
+Controller
+== 
+
+Appearance
+== 
+
+Name Plate
+== 
+
+Hook Collisions
+== 
+
+Show health, shields and ammo
+== 
+
+DDRace HUD
+== 
+
+Show client IDs in scoreboard
+== 
+
+Show DDRace HUD
+== 
+
+Show jumps indicator
+== 
+
+Show dummy actions
+== 
+
+Show player position
+== 
+
+Show player speed
+== 
+
+Show player target angle
+== 
+
+Show freeze bars
+== 
+
+Opacity of freeze bars inside freeze
+== 
+
+Show hook strength indicator
+== 
+
+Hook collision line
+== 
+
+Hook collision line width
+== 
+
+Hook collision line opacity
+== 
+
+Colors of the hook collision line, in case of a possible collision with:
+== 
+
+Your movements are not taken into account when calculating the line colors
+== 
+
+Nothing hookable
+== 
+
+Something hookable
+== 
+
+A Tee
+== 
+
+Normal Color
+== 
+
+Highlight Color
+== 
+
+Extras
+== 
+
+Loading assets
+== 
+
+Loading race demo files
+== 
+
+Loading sound files
 == 

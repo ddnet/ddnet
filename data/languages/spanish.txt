@@ -13,6 +13,10 @@
 # Headshot        2021-05-30 17:00:00
 # Deëivid!        2021-10-27 00:49:00
 # Deëivid!        2022-02-05 21:53:00
+# Deëivid!        2022-03-27 18:40:00
+# Deëivid!        2022-05-13 18:44:00
+# Deëivid!        2022-06-22 19:26:00
+# Deëivid!        2022-07-05 22:30:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -152,9 +156,6 @@ Dynamic Camera
 Emoticon
 == Emoticon
 
-Enter
-== Entrar
-
 Error
 == Error
 
@@ -253,9 +254,6 @@ MOTD
 
 Map
 == Mapa
-
-Mouse sens.
-== Sensib. del ratón
 
 Move left
 == Mover a la izquierda
@@ -677,18 +675,6 @@ Welcome to DDNet
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
 == DDraceNetwork es un juego cooperativo en línea donde el objetivo es que tú y vuestro grupo de tees lleguen a la meta del mapa. Como recién llegado, deberías comenzar en los servidores Novice, que alojan los mapas más fáciles. Considera el ping para elegir un servidor cercano.
 
-The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
-== Los mapas contienen freeze, lo que hace que un tee no pueda moverse temporalmente. Tendrán que trabajar juntos para superar estas partes.
-
-The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== La rueda del ratón cambia las armas. El martillo (ratón izquierdo) se puede usar para golpear otros tees y despertarlos del freeze.
-
-Hook (right mouse) can be used to swing through the map and to hook other tees to you.
-== El gancho (mouse derecho) se puede usar para desplazarse por el mapa y enganchar a otros tees hacia ti.
-
-Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
-== Lo más importante es que la comunicación es clave: no hay un tutorial, por lo que tendrás que chatear (tecla t) con otros jugadores para aprender los conceptos básicos y las técnicas del juego.
-
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == Se recomienda que verifiques la configuración para ajustarla a tu gusto antes de unirte a un servidor.
 
@@ -803,9 +789,6 @@ Save
 Switch weapon when out of ammo
 == Cambiar de arma cuando se acabe la munición
 
-Reset wanted weapon on death
-== Restablecer el arma deseada al morir
-
 Show clan above name plates
 == Mostrar el clan por encima de los nombres
 
@@ -814,9 +797,6 @@ Clan plates size
 
 Refresh Rate
 == Frecuencia de actualización
-
-Show console window
-== Mostrar ventana de consola
 
 Automatically take statboard screenshot
 == Tomar automáticamente la captura de pantalla del Statboard
@@ -893,20 +873,11 @@ Show entities
 Show HUD
 == Mostrar HUD
 
-UI mouse s.
-== Sens. del ratón en menú
-
 may cause delay
 == puede causar retraso
 
 Screen
 == Pantalla
-
-Preinit VBO (iGPUs only)
-== Preinit VBO (solo iGPU)
-
-Multiple texture units (disable for macOS)
-== Múltiples unidades de textura (deshabilitar para macOS)
 
 Use high DPI
 == Usar DPI alto
@@ -952,9 +923,6 @@ Use DDRace Scoreboard
 
 Show score
 == Mostrar puntaje
-
-Show health + ammo
-== Mostrar salud + munición
 
 Show names in chat in team colors
 == Mostrar nombres con colores de equipo en el chat
@@ -1179,7 +1147,7 @@ Assets
 == Recursos
 
 Use old chat style
-== Usar estilo viejo de chat
+== Usar estilo antiguo del chat
 
 Client message
 == Mensaje de cliente
@@ -1281,29 +1249,11 @@ Windowed borderless
 Desktop fullscreen
 == Pantalla completa de escritorio
 
-Use modern OpenGL
-== Usar OpenGL moderno
-
-Show client IDs
-== Mostrar IDs de clientes
-
 Laser Outline Color
 == Color de contorno del láser
 
 Laser Inner Color
 == Color interior del láser
-
-Hookline
-== Línea del gancho
-
-No hit
-== Sin golpes
-
-Hookable
-== Enganchable
-
-Tee
-== Tee
 
 Preview
 == Vista previa
@@ -1332,12 +1282,6 @@ Refreshing...
 Kill Messages
 == Mensajes de Muerte
 
-Kill Message Normal Color
-== Color Normal de Mensajes de Muerte
-
-Kill Message Highlight Color
-== Color Destac. de Mensajes de Muerte
-
 Show local player's key presses
 == Mostrar las teclas presionadas por el jugador local
 
@@ -1347,11 +1291,283 @@ Settings file
 Config directory
 == Directorio de configuración
 
-Windowed fullscreen
-== 
-
 Run on join
 == Ejec. al entrar
 
 Chat command (e.g. showall 1)
 == Comando de chat (Ej. showall 1)
+
+The format of texture %s is not RGBA which will cause visual bugs.
+== El formato de la textura %s no es RGBA, lo que puede causar errores visuales.
+
+Join Tutorial Server
+== Ir a un servidor Tutorial
+
+Skip Tutorial
+== Saltar Tutorial
+
+Windowed fullscreen
+== Ventana a pantalla completa
+
+Renderer
+== Renderizador
+
+default
+== por defecto
+
+custom
+== personalizado
+
+Graphics cards
+== Tarjetas de video
+
+auto
+== auto.
+
+Tutorial
+== Tutorial
+
+Can't find a Tutorial server
+== No se pudo encontrar un servidor Tutorial
+
+Toggle to edit your dummy settings
+== Actívalo para editar la configuración de tu dummy
+
+Choose default eyes when joining a server
+== Escoge los ojos predeterminados al unirte a un servidor
+
+Allows maps to render with more detail
+== Permite que los mapas tengan más detalles
+
+When you cross the start line, show a ghost tee replicating the movements of your best time
+== Cuando cruzas la línea de inicio, se muestra un tee fantasma replicando los movimientos de tu mejor tiempo
+
+Opacity
+== Opacidad
+
+Quads are used for background decoration
+== Las quads se usan para la decoración del fondo
+
+Tries to predict other entities to give a feel of low latency
+== Intenta predecir a otras entidades para dar una sensación de baja latencia
+
+Super
+== Súper
+
+Team %d
+== Equipo %d
+
+Position:
+== Posición:
+
+Speed:
+== Velocidad:
+
+Angle:
+== Ángulo:
+
+Trying to determine UDP connectivity...
+== Tratando de determinar la conexión UDP...
+
+UDP seems to be filtered.
+== UDP parece estar filtrado.
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== Las direcciones IP TCP y UDP parecen ser diferentes. Intenta desactivar cualquier VPN, proxy o acelerador de red.
+
+No answer from server yet.
+== Aún no hay respuesta del servidor.
+
+Download community skins
+== Descargar skins de la comunidad
+
+Enable controller
+== Habilitar mando
+
+Controller %d: %s
+== Mando %d: %s
+
+Click to cycle through all available controllers.
+== Click acá para recorrer todos los mandos disponibles.
+
+[Ingame controller mode]
+Relative
+== Relativo
+
+[Ingame controller mode]
+Absolute
+== Absoluto
+
+Ingame controller mode
+== Modo del mando
+
+Ingame controller sens.
+== Sens. del mando en el juego
+
+UI controller sens.
+== Sens. del mando en el menú
+
+Controller jitter tolerance
+== Tolerancia a la fluctuación del mando
+
+No controller found. Plug in a controller and restart the game.
+== No se encontró un mando. Conecta uno y reinicia el juego.
+
+Device
+== Dispositivo
+
+Status
+== Estado
+
+Aim bind
+== Apuntar
+
+Controller Axis #%d
+== Eje #%d del mando
+
+Mouse
+== Ratón
+
+Ingame mouse sens.
+== Sens. del ratón en el juego
+
+UI mouse sens.
+== Sens. del ratón en el menú
+
+Controller
+== Mando
+
+Show dummy actions
+== Mostrar acciones del dummy
+
+Show freeze bars
+== Mostrar barras de freeze
+
+Show player position
+== Mostrar la posición del jugador
+
+Show player speed
+== Mostrar la velocidad del jugador
+
+Show player target angle
+== Mostrar el ángulo del objetivo del jugador
+
+Adjust the opacity of entities belonging to other teams, such as tees and nameplates
+== Ajusta la opacidad de entidades pertenecientes a otros equipos, como los tees y los nombres.
+
+Opacity of freeze bars inside freeze
+== Opacidad de las barras de freeze dentro del freeze
+
+Normal Color
+== Color normal
+
+Highlight Color
+== Color resaltado
+
+Extras
+== Extras
+
+Preparing demo playback
+== 
+
+Connected
+== 
+
+Loading map file from storage
+== 
+
+Why are you slowmo replaying to read this?
+== 
+
+Initializing components
+== 
+
+Initializing assets
+== 
+
+Initializing map logic
+== 
+
+Sending initial client info
+== 
+
+Uploading map data to GPU
+== 
+
+Getting game info
+== 
+
+Requesting to join the game
+== 
+
+Loading menu images
+== 
+
+Loading demo files
+== 
+
+Loading ghost files
+== 
+
+Loading skin files
+== 
+
+Appearance
+== 
+
+Name Plate
+== 
+
+Hook Collisions
+== 
+
+Show health, shields and ammo
+== 
+
+DDRace HUD
+== 
+
+Show client IDs in scoreboard
+== 
+
+Show DDRace HUD
+== 
+
+Show jumps indicator
+== 
+
+Show hook strength indicator
+== 
+
+Hook collision line
+== 
+
+Hook collision line width
+== 
+
+Hook collision line opacity
+== 
+
+Colors of the hook collision line, in case of a possible collision with:
+== 
+
+Your movements are not taken into account when calculating the line colors
+== 
+
+Nothing hookable
+== 
+
+Something hookable
+== 
+
+A Tee
+== 
+
+Loading assets
+== 
+
+Loading race demo files
+== 
+
+Loading sound files
+== 

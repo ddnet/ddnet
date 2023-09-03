@@ -145,9 +145,6 @@ Dynamic Camera
 Emoticon
 == Emotikony
 
-Enter
-== Vstoupit
-
 Error
 == Chyba
 
@@ -243,9 +240,6 @@ MOTD
 
 Map
 == Mapa
-
-Mouse sens.
-== Citlivost myši
 
 Move left
 == Pohyb doleva
@@ -663,18 +657,6 @@ Welcome to DDNet
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
 == DDraceNetwork je kooperativní online hra, kde je cílem pro vás a vaši skupinu dosáhnout cílové čáry mapy. Jako nováček byste měli začít na začínajících serverech, které hostují nejjednodušší mapy. Zvažte ping a vyberte si server, který je vám nejblíž.
 
-The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
-== Mapy obsahují zmrazení, které dočasně znemožňuje vašemu tee pohyb. Abyste se dostali přes tyto části, musíte spolupracovat.
-
-The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== Kolečko myši mění zbraně. Kladivo (levé tlačítko myši) lze použít k zasažení ostatních tee a jejich rozmražení.
-
-Hook (right mouse) can be used to swing through the map and to hook other tees to you.
-== Hák (pravé tlačítko myši) lze použít k zhoupnutí se skrz mapu a k přitáhnutí ostatních tee k vám.
-
-Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
-== A co je nejdůležitější, klíčem je komunikace. Neexistuje žádný návod, takže budete muset chatovat (klávesou t) s ostatními hráči, abyste se naučili základy a triky hry.
-
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == Před připojením k serveru se doporučuje zkontrolovat nastavení a upravit je podle vašich představ.
 
@@ -706,7 +688,7 @@ Countries
 == Země
 
 Types
-== Typy 
+== Typy
 
 DDNet %s is out!
 == DDNet %s je venku!
@@ -780,9 +762,6 @@ Save
 Switch weapon when out of ammo
 == Změnit zbraň když vám dojdou náboje
 
-Reset wanted weapon on death
-== Resetujte hledanou zbraň po smrti
-
 Show only chat messages from friends
 == Zobrazit pouze zprávy od přátel
 
@@ -794,9 +773,6 @@ Clan plates size
 
 Refresh Rate
 == Obnovovací frekvence
-
-Show console window
-== Zobrazit konzolové okno
 
 Automatically take statboard screenshot
 == Automaticky pořídit snímek obrazovky statboardu
@@ -873,20 +849,11 @@ Show entities
 Show HUD
 == Zobrazit HUD
 
-UI mouse s.
-== UI mouse s.
-
 may cause delay
 == může způsobit zpoždění
 
 Screen
 == Obrazovka
-
-Preinit VBO (iGPUs only)
-== Preinit VBO (pouze iGPU)
-
-Multiple texture units (disable for macOS)
-== Více texturových jednotek (deaktivovat pro macOS)
 
 Use high DPI
 == Použít vysoké DPI
@@ -932,9 +899,6 @@ Use DDRace Scoreboard
 
 Show score
 == Zobrazit skóre
-
-Show health + ammo
-== Ukázat zdraví + munici
 
 Show names in chat in team colors
 == Zobrazit jména v chatu v týmových barvách
@@ -1232,7 +1196,73 @@ Update failed! Check log...
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
 == 
 
+The format of texture %s is not RGBA which will cause visual bugs.
+== 
+
+Preparing demo playback
+== 
+
+Connected
+== 
+
+Loading map file from storage
+== 
+
+Why are you slowmo replaying to read this?
+== 
+
+Initializing components
+== 
+
+Initializing assets
+== 
+
+Initializing map logic
+== 
+
+Sending initial client info
+== 
+
+Position:
+== 
+
+Speed:
+== 
+
+Angle:
+== 
+
+Uploading map data to GPU
+== 
+
+Trying to determine UDP connectivity...
+== 
+
+UDP seems to be filtered.
+== 
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== 
+
+No answer from server yet.
+== 
+
+Getting game info
+== 
+
+Requesting to join the game
+== 
+
 Are you sure that you want to disconnect and switch to a different server?
+== 
+
+Join Tutorial Server
+== 
+
+Skip Tutorial
+== 
+
+Loading menu images
 == 
 
 AFR
@@ -1265,13 +1295,87 @@ Refreshing...
 Leak IP
 == 
 
+Loading demo files
+== 
+
+Loading ghost files
+== 
+
 Settings file
 == 
 
 Config directory
 == 
 
+Toggle to edit your dummy settings
+== 
+
+Download community skins
+== 
+
+Choose default eyes when joining a server
+== 
+
+Loading skin files
+== 
+
 Chat command
+== 
+
+Enable controller
+== 
+
+Controller %d: %s
+== 
+
+Click to cycle through all available controllers.
+== 
+
+[Ingame controller mode]
+Relative
+== 
+
+[Ingame controller mode]
+Absolute
+== 
+
+Ingame controller mode
+== 
+
+Ingame controller sens.
+== 
+
+UI controller sens.
+== 
+
+Controller jitter tolerance
+== 
+
+No controller found. Plug in a controller and restart the game.
+== 
+
+Device
+== 
+
+Status
+== 
+
+Aim bind
+== 
+
+Controller Axis #%d
+== 
+
+Mouse
+== 
+
+Ingame mouse sens.
+== 
+
+UI mouse sens.
+== 
+
+Controller
 == 
 
 Dummy
@@ -1289,19 +1393,106 @@ Windowed fullscreen
 Desktop fullscreen
 == 
 
-Use modern OpenGL
+Allows maps to render with more detail
 == 
 
-Show client IDs
+Renderer
+== 
+
+default
+== 
+
+custom
+== 
+
+Graphics cards
+== 
+
+auto
+== 
+
+Appearance
+== 
+
+Name Plate
+== 
+
+Hook Collisions
 == 
 
 Kill Messages
 == 
 
-Kill Message Normal Color
+Show health, shields and ammo
 == 
 
-Kill Message Highlight Color
+DDRace HUD
+== 
+
+Show client IDs in scoreboard
+== 
+
+Show DDRace HUD
+== 
+
+Show jumps indicator
+== 
+
+Show dummy actions
+== 
+
+Show player position
+== 
+
+Show player speed
+== 
+
+Show player target angle
+== 
+
+Show freeze bars
+== 
+
+Opacity of freeze bars inside freeze
+== 
+
+Preview
+== 
+
+Show hook strength indicator
+== 
+
+Show local player's key presses
+== 
+
+Hook collision line
+== 
+
+Hook collision line width
+== 
+
+Hook collision line opacity
+== 
+
+Colors of the hook collision line, in case of a possible collision with:
+== 
+
+Your movements are not taken into account when calculating the line colors
+== 
+
+Nothing hookable
+== 
+
+Something hookable
+== 
+
+A Tee
+== 
+
+Normal Color
+== 
+
+Highlight Color
 == 
 
 Laser Outline Color
@@ -1310,22 +1501,19 @@ Laser Outline Color
 Laser Inner Color
 == 
 
-Hookline
+When you cross the start line, show a ghost tee replicating the movements of your best time
 == 
 
-No hit
+Opacity
 == 
 
-Hookable
+Adjust the opacity of entities belonging to other teams, such as tees and nameplates
 == 
 
-Tee
+Quads are used for background decoration
 == 
 
-Preview
-== 
-
-Show local player's key presses
+Tries to predict other entities to give a feel of low latency
 == 
 
 Background
@@ -1343,8 +1531,32 @@ Run on join
 Chat command (e.g. showall 1)
 == 
 
+Extras
+== 
+
+Loading assets
+== 
+
 Discord
 == 
 
 https://ddnet.tw/discord
+== 
+
+Tutorial
+== 
+
+Can't find a Tutorial server
+== 
+
+Loading race demo files
+== 
+
+Super
+== 
+
+Team %d
+== 
+
+Loading sound files
 == 

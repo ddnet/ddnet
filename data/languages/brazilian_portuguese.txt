@@ -21,6 +21,7 @@
 # Rafael Fontenelle   2020-09-20 11:00:38
 # Rafael Fontenelle   2021-02-13 07:00:00
 # Rafael Fontenelle   2021-06-10 12:00:00
+# pv                  2022-06-01 20:44:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -62,7 +63,7 @@ All
 == Todos
 
 Are you sure that you want to delete the demo?
-== Tem certeza que deseja deletar o demo?
+== Tem certeza que deseja deletar a demo?
 
 Are you sure that you want to quit?
 == Você tem certeza que deseja sair?
@@ -134,7 +135,7 @@ Delete demo
 == Deletar demo
 
 Demo details
-== Detalhes do demo
+== Detalhes da demo
 
 Demofile: %s
 == Demo: %s
@@ -159,9 +160,6 @@ Dynamic Camera
 
 Emoticon
 == Emoticon
-
-Enter
-== Entrar
 
 Error
 == Erro
@@ -261,9 +259,6 @@ MOTD
 
 Map
 == Mapa
-
-Mouse sens.
-== Sens. do mouse
 
 Move left
 == Esquerda
@@ -492,10 +487,10 @@ Type
 == Tipo
 
 Unable to delete the demo
-== Não foi possível deletar o demo
+== Não foi possível deletar a demo
 
 Unable to rename the demo
-== Não foi possível renomear o demo
+== Não foi possível renomear a demo
 
 Use sounds
 == Usar sons
@@ -752,9 +747,6 @@ News
 Updating...
 == Atualizando...
 
-Show health + ammo
-== Mostrar vida + munição
-
 Overlay entities
 == Sobrepor entidades
 
@@ -805,9 +797,6 @@ Show score
 
 UI Color
 == Cor da UI
-
-Show console window
-== Mostra janela de console
 
 Try fast HTTP map download first
 == Tentar baixar mapa por HTTP (rápido) primeiro
@@ -863,9 +852,6 @@ Highlighted message
 Alpha
 == Alfa
 
-Reset wanted weapon on death
-== Redefinir arma desejada ao morrer
-
 Length:
 == Duração:
 
@@ -908,17 +894,8 @@ Deactivate
 Welcome to DDNet
 == Bem-vindo ao DDNet
 
-Preinit VBO (iGPUs only)
-== Pré-iniciar VNO (iGPU somente) 
-
 Activate
 == Ativar
-
-Multiple texture units (disable for macOS)
-== Várias unidades de textura (desabilite para macOS)
-
-UI mouse s.
-== Sens. mouse de UI
 
 File already exists, do you want to overwrite it?
 == O arquivo já existe, você deseja sobrescrevê-lo?
@@ -1072,18 +1049,6 @@ Replace video
 
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
 == DDraceNetwork é um jogo online cooperativo cujo objetivo é você e seu grupo de tees chegarem à linha de chegada do mapa. Como um novato, você deve começar nos servidores Novice, que hospedam os mapas mais fáceis. Considere o ping para escolher um servidor próximo a você.
-
-The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
-== Os mapas contêm congelamento, o que temporariamente torna um tee incapaz de se mover. Você tem que trabalhar junto para passar por essas partes.
-
-The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== A roda do mouse muda de arma. O martelo (botão esquerdo do mouse) pode ser usado para acertar outros tees e acordá-los do congelamento.
-
-Hook (right mouse) can be used to swing through the map and to hook other tees to you.
-== O gancho (botão direito do mouse) pode ser usado para balançar pelo mapa e agarrar outros tees em você.
-
-Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
-== Mais importante ainda, a comunicação é a chave: não há um tutorial, então você terá que conversar (tecla t) com outros jogadores para aprender o básico e os truques do jogo.
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
 == Use a tecla k para se matar (reiniciar), q para pausar e assistir outros jogadores. Veja as configurações para outras combinações de teclas.
@@ -1248,9 +1213,6 @@ The width of texture %s is not divisible by %d, or the height is not divisible b
 Dummy
 == Dummy
 
-Show client IDs
-== Mostrar IDs de cliente
-
 Laser Outline Color
 == Cor de contorno do laser
 
@@ -1308,21 +1270,6 @@ Windowed borderless
 Desktop fullscreen
 == Tela cheia de desktop
 
-Use modern OpenGL
-== Usar OpenGL moderno
-
-Hookline
-== Linha do gancho
-
-No hit
-== Sem acerto
-
-Hookable
-== Enganchável
-
-Tee
-== Tee
-
 Discord
 == Discord
 
@@ -1338,26 +1285,292 @@ Refreshing...
 Kill Messages
 == Mensagens de kill
 
-Kill Message Normal Color
-== Cor normal de mensagem de kill
-
-Kill Message Highlight Color
-== Cor de realce de mensagem de kill
-
 Show local player's key presses
 == Mostrar pressionamento de teclas de jogadores locais
 
+The format of texture %s is not RGBA which will cause visual bugs.
+== O formato da textura %s não é RGBA, o que vai causar falhas visuais.
+
+Join Tutorial Server
+== Entrar no servidor de tutorial
+
+Skip Tutorial
+== Pular tutorial
+
 Settings file
-== 
+== Arquivo de configurações
 
 Config directory
-== 
+== Diretório de configurações
 
 Windowed fullscreen
-== 
+== Tela cheia em janela
+
+Renderer
+== Renderizador
+
+default
+== padrão
+
+custom
+== personalizado
+
+Graphics cards
+== Placas de vídeo
+
+auto
+== auto
 
 Run on join
-== 
+== Executar ao entrar
 
 Chat command (e.g. showall 1)
-== 
+== Comando de chat (p. ex., showall 1)
+
+Tutorial
+== Tutorial
+
+Can't find a Tutorial server
+== Não foi possível encontrar o servidor de tutorial
+
+Toggle to edit your dummy settings
+== Alterne para editar as configurações do seu dummy
+
+Choose default eyes when joining a server
+== Escolha os olhos padrões ao entrar em um servidor
+
+Allows maps to render with more detail
+== Permite que os mapas renderizem com mais detalhes
+
+When you cross the start line, show a ghost tee replicating the movements of your best time
+== Ao cruzar a linha de partida, mostra um tee fantasma replicando os movimentos do seu melhor tempo
+
+Opacity
+== Opacidade
+
+Adjust the opacity of entities belonging to other teams, such as tees and nameplates
+== Ajustar a opacidade das entidades pertencentes a outros times, tais como tees e placas de identificação
+
+Quads are used for background decoration
+== Quads são utilizados para decoração de fundo
+
+Tries to predict other entities to give a feel of low latency
+== Tenta prever outras entidades para dar uma sensação de baixa latência
+
+Super
+== Super
+
+Team %d
+== Time %d
+
+Position:
+== Posição:
+
+Speed:
+== Velocidade:
+
+Angle:
+== Ângulo:
+
+Trying to determine UDP connectivity...
+== Tentando determinar conectividade UDP...
+
+UDP seems to be filtered.
+== UDP parece estar filtrado.
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== Os endereços IP em UDP e TCP parecem estar diferentes. Tente desabilitar VPN, proxy e aceleradores de rede.
+
+No answer from server yet.
+== Nenhuma resposta dos servidores ainda.
+
+Download community skins
+== Baixar skins da comunidade
+
+Enable controller
+== Habilitar controle
+
+Controller %d: %s
+== Controle %d: %s
+
+Click to cycle through all available controllers.
+== Clique para trocar entre todos os controles disponíveis.
+
+[Ingame controller mode]
+Relative
+== Relativo
+
+[Ingame controller mode]
+Absolute
+== Absoluto
+
+Ingame controller mode
+== Modo do controle no jogo
+
+Ingame controller sens.
+== Sens. do controle no jogo
+
+UI controller sens.
+== Sens do controle na UI
+
+Controller jitter tolerance
+== Tolerância jitter do controle
+
+No controller found. Plug in a controller and restart the game.
+== Nenhum controle encontrado. Conecte um controle e reinicie o jogo.
+
+Device
+== Dispositivo
+
+Status
+== Status
+
+Aim bind
+== Associação de mira
+
+Controller Axis #%d
+== Eixo #%d do controle
+
+Mouse
+== Mouse
+
+Ingame mouse sens.
+== Sens. do mouse no jogo
+
+UI mouse sens.
+== Sens. do mouse na UI
+
+Controller
+== Controle
+
+Show dummy actions
+== Mostrar ações do dummy
+
+Show player position
+== Mostrar posição do jogador
+
+Show player speed
+== Mostrar velocidade do jogador
+
+Show player target angle
+== Mostrar ângulo de alvo do jogador
+
+Show freeze bars
+== Mostrar barra de congelamento
+
+Opacity of freeze bars inside freeze
+== Opacidade das barras de congelamento durante o congelamento
+
+Normal Color
+== Cor normal
+
+Highlight Color
+== Cor realçada
+
+Extras
+== Extras
+
+Preparing demo playback
+== Preparando reprodução da demo
+
+Connected
+== Conectado
+
+Loading map file from storage
+== Carregando arquivo de mapa do armazenamento
+
+Why are you slowmo replaying to read this?
+== Por que você está respondendo em câmera lenta para ler isso?
+
+Initializing components
+== Inicializando componentes
+
+Initializing assets
+== Inicializando ativos
+
+Initializing map logic
+== Inicializando lógica de mapa
+
+Sending initial client info
+== Enviando info iniciais do cliente
+
+Uploading map data to GPU
+== Carregando dados de mapa para GPU
+
+Getting game info
+== Obtendo info do jogo
+
+Requesting to join the game
+== Solicitando entrada no jogo
+
+Loading menu images
+== Carregando imagens de menu
+
+Loading demo files
+== Carregando arquivos de demo
+
+Loading ghost files
+== Carregando arquivos de fantasma
+
+Loading skin files
+== Carregando arquivos de skins
+
+Appearance
+== Aparência
+
+Name Plate
+== Placa de nome
+
+Hook Collisions
+== Colisões de gancho
+
+Show health, shields and ammo
+== Mostrar saúde, escudos e munição
+
+DDRace HUD
+== HUD do DDRace
+
+Show client IDs in scoreboard
+== Mostrar IDs de cliente no placar
+
+Show DDRace HUD
+== Mostrar HUD do DDRace
+
+Show jumps indicator
+== Mostrar indicador de pulos
+
+Show hook strength indicator
+== Mostrar indicador de força do gancho
+
+Hook collision line
+== Linha de colisão do gancho
+
+Hook collision line width
+== Largura da linha de colisão do gancho
+
+Hook collision line opacity
+== Opacidade da linha de colisão do gancho
+
+Colors of the hook collision line, in case of a possible collision with:
+== Cores da linha de colisão do gancho, no caso de uma possível colisão com:
+
+Your movements are not taken into account when calculating the line colors
+== Seus movimentos não são levados em conta ao calcular as cores de linha
+
+Nothing hookable
+== Nada enganchável
+
+Something hookable
+== Alguma coisa enganchável
+
+A Tee
+== Um tee
+
+Loading assets
+== Carregando ativos
+
+Loading race demo files
+== Carregando arquivos de demo de corrida
+
+Loading sound files
+== Carregando arquivos de som

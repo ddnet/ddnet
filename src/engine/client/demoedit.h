@@ -1,11 +1,11 @@
 #ifndef ENGINE_CLIENT_DEMOEDIT_H
 #define ENGINE_CLIENT_DEMOEDIT_H
 
-#include <engine/client/http.h>
 #include <engine/shared/demo.h>
+#include <engine/shared/jobs.h>
 #include <engine/shared/snapshot.h>
 
-#define CONNECTLINK "ddnet:"
+class IStorage;
 
 class CDemoEdit : public IJob
 {
@@ -20,8 +20,8 @@ class CDemoEdit : public IJob
 	int m_EndTick;
 
 public:
-	CDemoEdit(const char *pNetVersion, class CSnapshotDelta *pSnapshotDelta, IStorage *pStorage, const char *pDemo, const char *pDst, int StartTick, int EndTick);
-	void Run();
+	CDemoEdit(const char *pNetVersion, CSnapshotDelta *pSnapshotDelta, IStorage *pStorage, const char *pDemo, const char *pDst, int StartTick, int EndTick);
+	void Run() override;
 	char *Destination() { return m_aDst; }
 };
 #endif

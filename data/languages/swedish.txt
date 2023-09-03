@@ -146,9 +146,6 @@ Dynamic Camera
 Emoticon
 == Känsloikon
 
-Enter
-== Fortsätt
-
 Error
 == Fel
 
@@ -244,9 +241,6 @@ MOTD
 
 Map
 == Bana
-
-Mouse sens.
-== Muskänslighet
 
 Move left
 == Gå vänster
@@ -612,17 +606,11 @@ Name plates size
 Type:
 == Typ:
 
-Show console window
-== Visa konsol fönster
-
 Vanilla skins only
 == Bara vanilla skins
 
 New random timeout code
 == Ny slumpad timeout kod
-
-UI mouse s.
-== UI mus s.
 
 Select a name
 == Välj ett namn
@@ -634,7 +622,7 @@ Default zoom
 == Standard zoom
 
 Dummy copy
-== Dummy kopiering 
+== Dummy kopiering
 
 Show tiles layers from BG map
 == Visa tiles lager från BG bana
@@ -735,18 +723,6 @@ transmits your player name to info2.ddnet.tw
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
 == DDraceNetwork är ett kooperativ online spel där målet är för dig och en grupp av tees att nå banas mål. Som en nykomling, så borde du starta på Novice serverna, vilket har bara de enklaste banorna. Kom ihåg att använda ping till att välja en server som är nära dig.
 
-The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
-== Banorna innehåller freeze, vilket temporärt gör att en tee inte kan röra på sig. Du behöver att arbeta tillsammans för att komma igenom dessa hinder.
-
-The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== Med Skrollhjulet så kan du ändra vapen. Hammaren (vänster klick) kan användas till att slå andra tees och vakna upp dem från att bli frysta.
-
-Hook (right mouse) can be used to swing through the map and to hook other tees to you.
-== Hook (höger klick) kan användas till att svinga sig igenom banan och att dra andra tees emot dig.
-
-Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
-== Mest viktiga är kommunikation: Det finns ingen tutorial, så du kommer att behöva chatta (t knappen) med andra spelare för att lära dig grunderna och tricks till spelet.
-
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == Det är rekommenderad att du kollar igenom inställningarna och ändra dem, så de passar dig innan du ansluter till en server.
 
@@ -819,9 +795,6 @@ Update failed! Check log...
 Check now
 == Kolla nu
 
-Reset wanted weapon on death
-== Återställ önskade vapen vid död
-
 Search
 == Sök
 
@@ -878,9 +851,6 @@ Normal message
 
 Show score
 == Visa poäng
-
-Multiple texture units (disable for macOS)
-== Multiple texture units (avaktivera för macOS)
 
 Refresh Rate
 == Uppdateringsfrekvens
@@ -981,9 +951,6 @@ Best
 Updating...
 == Updaterar...
 
-Preinit VBO (iGPUs only)
-== Preinit VBO (bara iGPUs)
-
 Clan plates size
 == Klanskylt storlek
 
@@ -1061,9 +1028,6 @@ Show others
 
 Unfinished map
 == Oavklarad bana
-
-Show health + ammo
-== Visa hälsa + ammunition
 
 Show quads
 == Visa quads
@@ -1258,9 +1222,6 @@ Windowed fullscreen
 Desktop fullscreen
 == Desktop fullscreen
 
-Use modern OpenGL
-== Använd modern OpenGL
-
 Game sound volume
 == Spel ljudvolym
 
@@ -1273,35 +1234,14 @@ Background music volume
 Assets
 == Assets
 
-Show client IDs
-== Visa klient ID:n
-
 Kill Messages
 == Döds meddelanden
-
-Kill Message Normal Color
-== Döds Meddelanden Normal Färg
-
-Kill Message Highlight Color
-== Döds Meddelanden Betonad Färg
 
 Laser Outline Color
 == Laser Yttre Färg
 
 Laser Inner Color
 == Laser Inre Färg
-
-Hookline
-== Hooklina
-
-No hit
-== Ingen träff
-
-Hookable
-== Hookable
-
-Tee
-== Tee
 
 Use old chat style
 == Använd gammal chatt stil
@@ -1347,3 +1287,275 @@ Discord
 
 https://ddnet.tw/discord
 == https://ddnet.tw/discord
+
+The format of texture %s is not RGBA which will cause visual bugs.
+== 
+
+Preparing demo playback
+== 
+
+Connected
+== 
+
+Loading map file from storage
+== 
+
+Why are you slowmo replaying to read this?
+== 
+
+Initializing components
+== 
+
+Initializing assets
+== 
+
+Initializing map logic
+== 
+
+Sending initial client info
+== 
+
+Position:
+== 
+
+Speed:
+== 
+
+Angle:
+== 
+
+Uploading map data to GPU
+== 
+
+Trying to determine UDP connectivity...
+== 
+
+UDP seems to be filtered.
+== 
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== 
+
+No answer from server yet.
+== 
+
+Getting game info
+== 
+
+Requesting to join the game
+== 
+
+Join Tutorial Server
+== 
+
+Skip Tutorial
+== 
+
+Loading menu images
+== 
+
+Loading demo files
+== 
+
+Loading ghost files
+== 
+
+Toggle to edit your dummy settings
+== 
+
+Download community skins
+== 
+
+Choose default eyes when joining a server
+== 
+
+Loading skin files
+== 
+
+Enable controller
+== 
+
+Controller %d: %s
+== 
+
+Click to cycle through all available controllers.
+== 
+
+[Ingame controller mode]
+Relative
+== 
+
+[Ingame controller mode]
+Absolute
+== 
+
+Ingame controller mode
+== 
+
+Ingame controller sens.
+== 
+
+UI controller sens.
+== 
+
+Controller jitter tolerance
+== 
+
+No controller found. Plug in a controller and restart the game.
+== 
+
+Device
+== 
+
+Status
+== 
+
+Aim bind
+== 
+
+Controller Axis #%d
+== 
+
+Mouse
+== 
+
+Ingame mouse sens.
+== 
+
+UI mouse sens.
+== 
+
+Controller
+== 
+
+Allows maps to render with more detail
+== 
+
+Renderer
+== 
+
+default
+== 
+
+custom
+== 
+
+Graphics cards
+== 
+
+auto
+== 
+
+Appearance
+== 
+
+Name Plate
+== 
+
+Hook Collisions
+== 
+
+Show health, shields and ammo
+== 
+
+DDRace HUD
+== 
+
+Show client IDs in scoreboard
+== 
+
+Show DDRace HUD
+== 
+
+Show jumps indicator
+== 
+
+Show dummy actions
+== 
+
+Show player position
+== 
+
+Show player speed
+== 
+
+Show player target angle
+== 
+
+Show freeze bars
+== 
+
+Opacity of freeze bars inside freeze
+== 
+
+Show hook strength indicator
+== 
+
+Hook collision line
+== 
+
+Hook collision line width
+== 
+
+Hook collision line opacity
+== 
+
+Colors of the hook collision line, in case of a possible collision with:
+== 
+
+Your movements are not taken into account when calculating the line colors
+== 
+
+Nothing hookable
+== 
+
+Something hookable
+== 
+
+A Tee
+== 
+
+Normal Color
+== 
+
+Highlight Color
+== 
+
+When you cross the start line, show a ghost tee replicating the movements of your best time
+== 
+
+Opacity
+== 
+
+Adjust the opacity of entities belonging to other teams, such as tees and nameplates
+== 
+
+Quads are used for background decoration
+== 
+
+Tries to predict other entities to give a feel of low latency
+== 
+
+Extras
+== 
+
+Loading assets
+== 
+
+Tutorial
+== 
+
+Can't find a Tutorial server
+== 
+
+Loading race demo files
+== 
+
+Super
+== 
+
+Team %d
+== 
+
+Loading sound files
+== 

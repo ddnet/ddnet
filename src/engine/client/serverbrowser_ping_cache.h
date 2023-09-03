@@ -8,21 +8,14 @@ class IStorage;
 class IServerBrowserPingCache
 {
 public:
-	class CEntry
-	{
-	public:
-		NETADDR m_Addr;
-		int m_Ping;
-	};
-
 	virtual ~IServerBrowserPingCache() {}
 
 	virtual void Load() = 0;
 
-	virtual void CachePing(NETADDR Addr, int Ping) = 0;
-	// The returned list is sorted by address, the addresses don't have a
-	// port.
-	virtual void GetPingCache(const CEntry **ppEntries, int *pNumEntries) = 0;
+	virtual int NumEntries() const = 0;
+	virtual void CachePing(const NETADDR &Addr, int Ping) = 0;
+	// Returns -1 if the ping isn't cached.
+	virtual int GetPing(const NETADDR *pAddrs, int NumAddrs) const = 0;
 };
 
 IServerBrowserPingCache *CreateServerBrowserPingCache(IConsole *pConsole, IStorage *pStorage);

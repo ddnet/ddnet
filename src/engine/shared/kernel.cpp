@@ -57,7 +57,7 @@ public:
 		}
 	}
 
-	virtual bool RegisterInterfaceImpl(const char *pName, IInterface *pInterface, bool Destroy)
+	bool RegisterInterfaceImpl(const char *pName, IInterface *pInterface, bool Destroy) override
 	{
 		// TODO: More error checks here
 		if(!pInterface)
@@ -80,14 +80,14 @@ public:
 
 		pInterface->m_pKernel = this;
 		m_aInterfaces[m_NumInterfaces].m_pInterface = pInterface;
-		str_copy(m_aInterfaces[m_NumInterfaces].m_aName, pName, sizeof(m_aInterfaces[m_NumInterfaces].m_aName));
+		str_copy(m_aInterfaces[m_NumInterfaces].m_aName, pName);
 		m_aInterfaces[m_NumInterfaces].m_AutoDestroy = Destroy;
 		m_NumInterfaces++;
 
 		return true;
 	}
 
-	virtual bool ReregisterInterfaceImpl(const char *pName, IInterface *pInterface)
+	bool ReregisterInterfaceImpl(const char *pName, IInterface *pInterface) override
 	{
 		if(FindInterfaceInfo(pName) == 0)
 		{
@@ -100,7 +100,7 @@ public:
 		return true;
 	}
 
-	virtual IInterface *RequestInterfaceImpl(const char *pName)
+	IInterface *RequestInterfaceImpl(const char *pName) override
 	{
 		CInterfaceInfo *pInfo = FindInterfaceInfo(pName);
 		if(!pInfo)

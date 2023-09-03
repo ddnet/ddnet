@@ -6,6 +6,8 @@
 #include "huffman.h"
 #include "network.h"
 
+const unsigned char SECURITY_TOKEN_MAGIC[4] = {'T', 'K', 'E', 'N'};
+
 void CNetRecvUnpacker::Clear()
 {
 	m_Valid = false;
@@ -128,8 +130,8 @@ void CNetBase::SendPacket(NETSOCKET Socket, NETADDR *pAddr, CNetPacketConstruct 
 	int HeaderSize = NET_PACKETHEADERSIZE;
 	if(Sixup)
 	{
-		HeaderSize += 4;
-		mem_copy(&aBuffer[3], &SecurityToken, 4);
+		HeaderSize += sizeof(SecurityToken);
+		mem_copy(&aBuffer[3], &SecurityToken, sizeof(SecurityToken));
 	}
 	else if(SecurityToken != NET_SECURITY_TOKEN_UNSUPPORTED)
 	{
@@ -195,10 +197,7 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 {
 	// check the size
 	if(Size < NET_PACKETHEADERSIZE || Size > NET_MAX_PACKETSIZE)
-	{
-		//dbg_msg("", "packet too small, %d", Size);
 		return -1;
-	}
 
 	// log the data
 	if(ms_DataLogRecv)
@@ -215,9 +214,6 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 
 	if(pPacket->m_Flags & NET_PACKETFLAG_CONNLESS)
 	{
-		if(Size < 1)
-			return -1;
-
 		Sixup = (pBuffer[0] & 0x3) == 1;
 		int Offset = Sixup ? 9 : 6;
 		if(Size < Offset)
@@ -225,8 +221,8 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 
 		if(Sixup)
 		{
-			mem_copy(pSecurityToken, &pBuffer[1], 4);
-			mem_copy(pResponseToken, &pBuffer[5], 4);
+			mem_copy(pSecurityToken, &pBuffer[1], sizeof(*pSecurityToken));
+			mem_copy(pResponseToken, &pBuffer[5], sizeof(*pResponseToken));
 		}
 
 		pPacket->m_Flags = NET_PACKETFLAG_CONNLESS;
@@ -264,7 +260,7 @@ int CNetBase::UnpackPacket(unsigned char *pBuffer, int Size, CNetPacketConstruct
 				Flags |= NET_PACKETFLAG_COMPRESSION;
 			pPacket->m_Flags = Flags;
 
-			mem_copy(pSecurityToken, &pBuffer[3], 4);
+			mem_copy(pSecurityToken, &pBuffer[3], sizeof(*pSecurityToken));
 		}
 
 		if(pPacket->m_Flags & NET_PACKETFLAG_COMPRESSION)
@@ -343,23 +339,23 @@ unsigned char *CNetChunkHeader::Unpack(unsigned char *pData, int Split)
 	return pData + 2;
 }
 
-int CNetBase::IsSeqInBackroom(int Seq, int Ack)
+bool CNetBase::IsSeqInBackroom(int Seq, int Ack)
 {
 	int Bottom = (Ack - NET_MAX_SEQUENCE / 2);
 	if(Bottom < 0)
 	{
 		if(Seq <= Ack)
-			return 1;
+			return true;
 		if(Seq >= (Bottom + NET_MAX_SEQUENCE))
-			return 1;
+			return true;
 	}
 	else
 	{
 		if(Seq <= Ack && Seq >= Bottom)
-			return 1;
+			return true;
 	}
 
-	return 0;
+	return false;
 }
 
 IOHANDLE CNetBase::ms_DataLogSent = 0;
@@ -412,22 +408,7 @@ int CNetBase::Decompress(const void *pData, int DataSize, void *pOutput, int Out
 	return ms_Huffman.Decompress(pData, DataSize, pOutput, OutputSize);
 }
 
-static const unsigned s_aFreqTable[256 + 1] = {
-	1 << 30, 4545, 2657, 431, 1950, 919, 444, 482, 2244, 617, 838, 542, 715, 1814, 304, 240, 754, 212, 647, 186,
-	283, 131, 146, 166, 543, 164, 167, 136, 179, 859, 363, 113, 157, 154, 204, 108, 137, 180, 202, 176,
-	872, 404, 168, 134, 151, 111, 113, 109, 120, 126, 129, 100, 41, 20, 16, 22, 18, 18, 17, 19,
-	16, 37, 13, 21, 362, 166, 99, 78, 95, 88, 81, 70, 83, 284, 91, 187, 77, 68, 52, 68,
-	59, 66, 61, 638, 71, 157, 50, 46, 69, 43, 11, 24, 13, 19, 10, 12, 12, 20, 14, 9,
-	20, 20, 10, 10, 15, 15, 12, 12, 7, 19, 15, 14, 13, 18, 35, 19, 17, 14, 8, 5,
-	15, 17, 9, 15, 14, 18, 8, 10, 2173, 134, 157, 68, 188, 60, 170, 60, 194, 62, 175, 71,
-	148, 67, 167, 78, 211, 67, 156, 69, 1674, 90, 174, 53, 147, 89, 181, 51, 174, 63, 163, 80,
-	167, 94, 128, 122, 223, 153, 218, 77, 200, 110, 190, 73, 174, 69, 145, 66, 277, 143, 141, 60,
-	136, 53, 180, 57, 142, 57, 158, 61, 166, 112, 152, 92, 26, 22, 21, 28, 20, 26, 30, 21,
-	32, 27, 20, 17, 23, 21, 30, 22, 22, 21, 27, 25, 17, 27, 23, 18, 39, 26, 15, 21,
-	12, 18, 18, 27, 20, 18, 15, 19, 11, 17, 33, 12, 18, 15, 19, 18, 16, 26, 17, 18,
-	9, 10, 25, 22, 22, 17, 20, 16, 6, 16, 15, 20, 14, 18, 24, 335, 1517};
-
 void CNetBase::Init()
 {
-	ms_Huffman.Init(s_aFreqTable);
+	ms_Huffman.Init();
 }

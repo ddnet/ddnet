@@ -3,17 +3,25 @@
 #ifndef ENGINE_CLIENT_SERVERBROWSER_H
 #define ENGINE_CLIENT_SERVERBROWSER_H
 
-#include <engine/client/http.h>
-#include <engine/config.h>
+#include <base/system.h>
+
 #include <engine/console.h>
-#include <engine/external/json-parser/json.h>
-#include <engine/masterserver.h>
 #include <engine/serverbrowser.h>
 #include <engine/shared/config.h>
+#include <engine/shared/http.h>
 #include <engine/shared/memheap.h>
 
+#include <unordered_map>
+
+class CNetClient;
+class IConfigManager;
+class IConsole;
+class IEngine;
+class IFavorites;
+class IFriends;
 class IServerBrowserHttp;
 class IServerBrowserPingCache;
+class IStorage;
 
 class CServerBrowser : public IServerBrowser
 {
@@ -21,14 +29,11 @@ public:
 	class CServerEntry
 	{
 	public:
-		NETADDR m_Addr;
 		int64_t m_RequestTime;
 		bool m_RequestIgnoreInfo;
 		int m_GotInfo;
 		bool m_Request64Legacy;
 		CServerInfo m_Info;
-
-		CServerEntry *m_pNextIp; // ip hashed list
 
 		CServerEntry *m_pPrevReq; // request list
 		CServerEntry *m_pNextReq;
@@ -53,14 +58,6 @@ public:
 			m_FlagID = -1;
 			m_aName[0] = '\0';
 		};
-		/*void Add(NETADDR Addr, char* pType) {
-			if (m_NumServers < MAX_SERVERS)
-			{
-				m_aServers[m_NumServers] = Addr;
-				str_copy(m_aTypes[m_NumServers], pType, sizeof(m_aTypes[0]));
-				m_NumServers++;
-			}
-		};*/
 	};
 
 	enum
@@ -83,55 +80,50 @@ public:
 	virtual ~CServerBrowser();
 
 	// interface functions
-	void Refresh(int Type);
-	bool IsRefreshing() const;
-	bool IsGettingServerlist() const;
-	int LoadingProgression() const;
+	void Refresh(int Type) override;
+	bool IsRefreshing() const override;
+	bool IsGettingServerlist() const override;
+	int LoadingProgression() const override;
 
-	int NumServers() const { return m_NumServers; }
+	int NumServers() const override { return m_NumServers; }
 
-	int Players(const CServerInfo &Item) const
+	int Players(const CServerInfo &Item) const override
 	{
 		return g_Config.m_BrFilterSpectators ? Item.m_NumPlayers : Item.m_NumClients;
 	}
 
-	int Max(const CServerInfo &Item) const
+	int Max(const CServerInfo &Item) const override
 	{
 		return g_Config.m_BrFilterSpectators ? Item.m_MaxPlayers : Item.m_MaxClients;
 	}
 
-	int NumSortedServers() const { return m_NumSortedServers; }
-	const CServerInfo *SortedGet(int Index) const;
+	int NumSortedServers() const override { return m_NumSortedServers; }
+	const CServerInfo *SortedGet(int Index) const override;
 
-	bool GotInfo(const NETADDR &Addr) const;
-	bool IsFavorite(const NETADDR &Addr) const;
-	bool IsFavoritePingAllowed(const NETADDR &Addr) const;
-	void AddFavorite(const NETADDR &Addr);
-	void FavoriteAllowPing(const NETADDR &Addr, bool AllowPing);
-	void RemoveFavorite(const NETADDR &Addr);
-
+	const char *GetTutorialServer() override;
 	void LoadDDNetRanks();
 	void RecheckOfficial();
 	void LoadDDNetServers();
 	void LoadDDNetInfoJson();
 	const json_value *LoadDDNetInfo();
 	int HasRank(const char *pMap);
-	int NumCountries(int Network) { return m_aNetworks[Network].m_NumCountries; };
-	int GetCountryFlag(int Network, int Index) { return m_aNetworks[Network].m_aCountries[Index].m_FlagID; };
-	const char *GetCountryName(int Network, int Index) { return m_aNetworks[Network].m_aCountries[Index].m_aName; };
+	int NumCountries(int Network) override { return m_aNetworks[Network].m_NumCountries; }
+	int GetCountryFlag(int Network, int Index) override { return m_aNetworks[Network].m_aCountries[Index].m_FlagID; }
+	const char *GetCountryName(int Network, int Index) override { return m_aNetworks[Network].m_aCountries[Index].m_aName; }
 
-	int NumTypes(int Network) { return m_aNetworks[Network].m_NumTypes; };
-	const char *GetType(int Network, int Index) { return m_aNetworks[Network].m_aTypes[Index]; };
+	int NumTypes(int Network) override { return m_aNetworks[Network].m_NumTypes; }
+	const char *GetType(int Network, int Index) override { return m_aNetworks[Network].m_aTypes[Index]; }
 
-	void DDNetFilterAdd(char *pFilter, const char *pName);
-	void DDNetFilterRem(char *pFilter, const char *pName);
-	bool DDNetFiltered(char *pFilter, const char *pName);
-	void CountryFilterClean(int Network);
-	void TypeFilterClean(int Network);
+	void DDNetFilterAdd(char *pFilter, const char *pName) override;
+	void DDNetFilterRem(char *pFilter, const char *pName) override;
+	bool DDNetFiltered(char *pFilter, const char *pName) override;
+	void CountryFilterClean(int Network) override;
+	void TypeFilterClean(int Network) override;
 
 	//
 	void Update(bool ForceResort);
-	void Set(const NETADDR &Addr, int Type, int Token, const CServerInfo *pInfo);
+	void OnServerInfoUpdate(const NETADDR &Addr, int Token, const CServerInfo *pInfo);
+	void SetHttpInfo(const CServerInfo *pInfo);
 	void RequestCurrentServer(const NETADDR &Addr) const;
 	void RequestCurrentServerWithRandomToken(const NETADDR &Addr, int *pBasicToken, int *pToken) const;
 	void SetCurrentServerPing(const NETADDR &Addr, int Ping);
@@ -142,14 +134,15 @@ public:
 	void RequestImpl64(const NETADDR &Addr, CServerEntry *pEntry) const;
 	void QueueRequest(CServerEntry *pEntry);
 	CServerEntry *Find(const NETADDR &Addr);
-	int GetCurrentType() { return m_ServerlistType; };
+	int GetCurrentType() override { return m_ServerlistType; }
 
 private:
-	CNetClient *m_pNetClient;
-	class IConsole *m_pConsole;
-	class IEngine *m_pEngine;
-	class IFriends *m_pFriends;
-	class IStorage *m_pStorage;
+	CNetClient *m_pNetClient = nullptr;
+	IConsole *m_pConsole = nullptr;
+	IEngine *m_pEngine = nullptr;
+	IFriends *m_pFriends = nullptr;
+	IFavorites *m_pFavorites = nullptr;
+	IStorage *m_pStorage = nullptr;
 	char m_aNetVersion[128];
 
 	bool m_RefreshingHttp = false;
@@ -160,17 +153,12 @@ private:
 	CHeap m_ServerlistHeap;
 	CServerEntry **m_ppServerlist;
 	int *m_pSortedServerlist;
-
-	NETADDR m_aFavoriteServers[MAX_FAVORITES];
-	bool m_aFavoriteServersAllowPing[MAX_FAVORITES];
-	int m_NumFavoriteServers;
+	std::unordered_map<NETADDR, int> m_ByAddr;
 
 	CNetwork m_aNetworks[NUM_NETWORKS];
 	int m_OwnLocation = CServerInfo::LOC_UNKNOWN;
 
 	json_value *m_pDDNetInfo;
-
-	CServerEntry *m_aServerlistIp[256]; // ip hash list
 
 	CServerEntry *m_pFirstReqServer; // request list
 	CServerEntry *m_pLastReqServer;
@@ -196,8 +184,6 @@ private:
 
 	bool m_SortOnNextUpdate;
 
-	int FindFavorite(const NETADDR &Addr) const;
-
 	int GenerateToken(const NETADDR &Addr) const;
 	static int GetBasicToken(int Token);
 	static int GetExtraToken(int Token);
@@ -219,7 +205,7 @@ private:
 	void CleanUp();
 
 	void UpdateFromHttp();
-	CServerEntry *Add(const NETADDR &Addr);
+	CServerEntry *Add(const NETADDR *pAddrs, int NumAddrs);
 
 	void RemoveRequest(CServerEntry *pEntry);
 
@@ -230,8 +216,6 @@ private:
 
 	void SetInfo(CServerEntry *pEntry, const CServerInfo &Info);
 	void SetLatency(NETADDR Addr, int Latency);
-
-	static void ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserData);
 };
 
 #endif

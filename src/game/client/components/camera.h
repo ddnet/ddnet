@@ -3,6 +3,10 @@
 #ifndef GAME_CLIENT_COMPONENTS_CAMERA_H
 #define GAME_CLIENT_COMPONENTS_CAMERA_H
 #include <base/vmath.h>
+
+#include <engine/client.h>
+#include <engine/console.h>
+
 #include <game/bezier.h>
 #include <game/client/component.h>
 
@@ -18,7 +22,7 @@ class CCamera : public CComponent
 	};
 
 	int m_CamType;
-	vec2 m_LastPos[NUM_DUMMIES];
+	vec2 m_aLastPos[NUM_DUMMIES];
 	vec2 m_PrevCenter;
 
 	CCubicBezier m_ZoomSmoothing;

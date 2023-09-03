@@ -2,7 +2,9 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #ifndef GAME_CLIENT_COMPONENTS_SOUNDS_H
 #define GAME_CLIENT_COMPONENTS_SOUNDS_H
-#include <engine/engine.h>
+
+#include <base/vmath.h>
+#include <engine/shared/jobs.h>
 #include <engine/sound.h>
 #include <game/client/component.h>
 
@@ -13,7 +15,7 @@ class CSoundLoading : public IJob
 
 public:
 	CSoundLoading(CGameClient *pGameClient, bool Render);
-	void Run();
+	void Run() override;
 };
 
 class CSounds : public CComponent
@@ -62,6 +64,7 @@ public:
 	void PlayAt(int Channel, int SetId, float Vol, vec2 Pos);
 	void PlayAndRecord(int Channel, int SetId, float Vol, vec2 Pos);
 	void Stop(int SetId);
+	bool IsPlaying(int SetId);
 
 	ISound::CVoiceHandle PlaySample(int Channel, int SampleId, float Vol, int Flags = 0);
 	ISound::CVoiceHandle PlaySampleAt(int Channel, int SampleId, float Vol, vec2 Pos, int Flags = 0);

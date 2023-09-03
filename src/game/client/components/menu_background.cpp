@@ -11,20 +11,17 @@
 #include <game/client/components/maplayers.h>
 
 #include <game/layers.h>
-
-#include <game/client/render.h>
+#include <game/mapitems.h>
 
 #include "menu_background.h"
+
+#include <chrono>
+
+using namespace std::chrono_literals;
 
 CMenuBackground::CMenuBackground() :
 	CBackground(CMapLayers::TYPE_FULL_DESIGN, false)
 {
-	m_RotationCenter = vec2(0.0f, 0.0f);
-	m_AnimationStartPos = vec2(0.0f, 0.0f);
-	m_Camera.m_Center = vec2(0.0f, 0.0f);
-	m_Camera.m_PrevCenter = vec2(0.0f, 0.0f);
-	m_MenuCenter = vec2(0.0f, 0.0f);
-
 	m_ChangedPosition = false;
 
 	ResetPositions();
@@ -59,28 +56,28 @@ void CMenuBackground::OnInit()
 
 void CMenuBackground::ResetPositions()
 {
-	m_Positions[POS_START] = vec2(500.0f, 500.0f);
-	m_Positions[POS_BROWSER_INTERNET] = vec2(1000.0f, 1000.0f);
-	m_Positions[POS_BROWSER_LAN] = vec2(1100.0f, 1000.0f);
-	m_Positions[POS_DEMOS] = vec2(900.0f, 100.0f);
-	m_Positions[POS_NEWS] = vec2(500.0f, 750.0f);
-	m_Positions[POS_BROWSER_FAVORITES] = vec2(1250.0f, 500.0f);
-	m_Positions[POS_SETTINGS_LANGUAGE] = vec2(500.0f, 1200.0f);
-	m_Positions[POS_SETTINGS_GENERAL] = vec2(500.0f, 1000.0f);
-	m_Positions[POS_SETTINGS_PLAYER] = vec2(600.0f, 1000.0f);
-	m_Positions[POS_SETTINGS_TEE] = vec2(700.0f, 1000.0f);
-	m_Positions[POS_SETTINGS_HUD] = vec2(200.0f, 1000.0f);
-	m_Positions[POS_SETTINGS_CONTROLS] = vec2(800.0f, 1000.0f);
-	m_Positions[POS_SETTINGS_GRAPHICS] = vec2(900.0f, 1000.0f);
-	m_Positions[POS_SETTINGS_SOUND] = vec2(1000.0f, 1000.0f);
-	m_Positions[POS_SETTINGS_DDNET] = vec2(1200.0f, 200.0f);
-	m_Positions[POS_SETTINGS_ASSETS] = vec2(500.0f, 500.0f);
+	m_aPositions[POS_START] = vec2(500.0f, 500.0f);
+	m_aPositions[POS_BROWSER_INTERNET] = vec2(1000.0f, 1000.0f);
+	m_aPositions[POS_BROWSER_LAN] = vec2(1100.0f, 1000.0f);
+	m_aPositions[POS_DEMOS] = vec2(900.0f, 100.0f);
+	m_aPositions[POS_NEWS] = vec2(500.0f, 750.0f);
+	m_aPositions[POS_BROWSER_FAVORITES] = vec2(1250.0f, 500.0f);
+	m_aPositions[POS_SETTINGS_LANGUAGE] = vec2(500.0f, 1200.0f);
+	m_aPositions[POS_SETTINGS_GENERAL] = vec2(500.0f, 1000.0f);
+	m_aPositions[POS_SETTINGS_PLAYER] = vec2(600.0f, 1000.0f);
+	m_aPositions[POS_SETTINGS_TEE] = vec2(700.0f, 1000.0f);
+	m_aPositions[POS_SETTINGS_APPEARANCE] = vec2(200.0f, 1000.0f);
+	m_aPositions[POS_SETTINGS_CONTROLS] = vec2(800.0f, 1000.0f);
+	m_aPositions[POS_SETTINGS_GRAPHICS] = vec2(900.0f, 1000.0f);
+	m_aPositions[POS_SETTINGS_SOUND] = vec2(1000.0f, 1000.0f);
+	m_aPositions[POS_SETTINGS_DDNET] = vec2(1200.0f, 200.0f);
+	m_aPositions[POS_SETTINGS_ASSETS] = vec2(500.0f, 500.0f);
 	for(int i = 0; i < POS_BROWSER_CUSTOM_NUM; ++i)
-		m_Positions[POS_BROWSER_CUSTOM0 + i] = vec2(500.0f + (75.0f * (float)i), 650.0f - (75.0f * (float)i));
+		m_aPositions[POS_BROWSER_CUSTOM0 + i] = vec2(500.0f + (75.0f * (float)i), 650.0f - (75.0f * (float)i));
 	for(int i = 0; i < POS_SETTINGS_RESERVED_NUM; ++i)
-		m_Positions[POS_SETTINGS_RESERVED0 + i] = vec2(0, 0);
+		m_aPositions[POS_SETTINGS_RESERVED0 + i] = vec2(0, 0);
 	for(int i = 0; i < POS_RESERVED_NUM; ++i)
-		m_Positions[POS_RESERVED0 + i] = vec2(0, 0);
+		m_aPositions[POS_RESERVED0 + i] = vec2(0, 0);
 }
 
 int CMenuBackground::ThemeScan(const char *pName, int IsDir, int DirType, void *pUser)
@@ -106,15 +103,15 @@ int CMenuBackground::ThemeScan(const char *pName, int IsDir, int DirType, void *
 		IsNight = true;
 	}
 	else
-		str_copy(aThemeName, aFullName, sizeof(aThemeName));
+		str_copy(aThemeName, aFullName);
 
 	if(str_comp(aThemeName, "none") == 0 || str_comp(aThemeName, "auto") == 0 || str_comp(aThemeName, "rand") == 0) // "none", "auto" and "rand" reserved, disallowed for maps
 		return 0;
 
 	// try to edit an existing theme
-	for(auto &Theme : pSelf->m_lThemes)
+	for(auto &Theme : pSelf->m_vThemes)
 	{
-		if(str_comp(Theme.m_Name, aThemeName) == 0)
+		if(str_comp(Theme.m_Name.c_str(), aThemeName) == 0)
 		{
 			if(IsDay)
 				Theme.m_HasDay = true;
@@ -129,7 +126,13 @@ int CMenuBackground::ThemeScan(const char *pName, int IsDir, int DirType, void *
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf), "added theme %s from themes/%s", aThemeName, pName);
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "game", aBuf);
-	pSelf->m_lThemes.push_back(Theme);
+	pSelf->m_vThemes.push_back(Theme);
+	auto TimeNow = time_get_nanoseconds();
+	if(TimeNow - pSelf->m_ThemeScanStartTime >= std::chrono::nanoseconds(1s) / 60)
+	{
+		pSelf->Client()->UpdateAndSwap();
+		pSelf->m_ThemeScanStartTime = TimeNow;
+	}
 	return 0;
 }
 
@@ -140,13 +143,20 @@ int CMenuBackground::ThemeIconScan(const char *pName, int IsDir, int DirType, vo
 	if(IsDir || !pSuffix)
 		return 0;
 
+	auto TimeNow = time_get_nanoseconds();
+	if(TimeNow - pSelf->m_ThemeScanStartTime >= std::chrono::nanoseconds(1s) / 60)
+	{
+		pSelf->Client()->UpdateAndSwap();
+		pSelf->m_ThemeScanStartTime = TimeNow;
+	}
+
 	char aThemeName[128];
 	str_truncate(aThemeName, sizeof(aThemeName), pName, pSuffix - pName);
 
 	// save icon for an existing theme
-	for(CTheme &Theme : pSelf->m_lThemes) // bit slow but whatever
+	for(CTheme &Theme : pSelf->m_vThemes) // bit slow but whatever
 	{
-		if(str_comp(Theme.m_Name, aThemeName) == 0 || (!Theme.m_Name[0] && str_comp(aThemeName, "none") == 0))
+		if(str_comp(Theme.m_Name.c_str(), aThemeName) == 0 || (Theme.m_Name.empty() && str_comp(aThemeName, "none") == 0))
 		{
 			char aBuf[IO_MAX_PATH_LENGTH];
 			str_format(aBuf, sizeof(aBuf), "themes/%s", pName);
@@ -185,7 +195,7 @@ void CMenuBackground::LoadMenuBackground(bool HasDayHint, bool HasNightHint)
 
 	bool NeedImageLoading = false;
 
-	str_copy(m_aMapName, g_Config.m_ClMenuMap, sizeof(m_aMapName));
+	str_copy(m_aMapName, g_Config.m_ClMenuMap);
 
 	if(g_Config.m_ClMenuMap[0] != '\0')
 	{
@@ -214,10 +224,10 @@ void CMenuBackground::LoadMenuBackground(bool HasDayHint, bool HasNightHint)
 		else if(str_comp(pMenuMap, "rand") == 0)
 		{
 			//make sure to load themes
-			std::vector<CTheme> &ThemesRef = GetThemes();
-			int RandomThemeIndex = rand() % (ThemesRef.size() - PREDEFINED_THEMES_COUNT);
-			if(RandomThemeIndex + PREDEFINED_THEMES_COUNT < (int)ThemesRef.size())
-				pMenuMap = ThemesRef[RandomThemeIndex + PREDEFINED_THEMES_COUNT].m_Name.cstr();
+			std::vector<CTheme> &vThemesRef = GetThemes();
+			int RandomThemeIndex = rand() % (vThemesRef.size() - PREDEFINED_THEMES_COUNT);
+			if(RandomThemeIndex + PREDEFINED_THEMES_COUNT < (int)vThemesRef.size())
+				pMenuMap = vThemesRef[RandomThemeIndex + PREDEFINED_THEMES_COUNT].m_Name.c_str();
 		}
 
 		char aBuf[128];
@@ -279,10 +289,10 @@ void CMenuBackground::LoadMenuBackground(bool HasDayHint, bool HasNightHint)
 						for(x = 0; x < pTLayer->m_Width; ++x)
 						{
 							unsigned char Index = ((CTile *)pTiles)[y * pTLayer->m_Width + x].m_Index;
-							if(Index >= TILE_CHECKPOINT_FIRST && Index <= TILE_CHECKPOINT_LAST)
+							if(Index >= TILE_TIME_CHECKPOINT_FIRST && Index <= TILE_TIME_CHECKPOINT_LAST)
 							{
-								int ArrayIndex = clamp<int>((Index - TILE_CHECKPOINT_FIRST), 0, NUM_POS);
-								m_Positions[ArrayIndex] = vec2(x * 32.0f + 16.0f, y * 32.0f + 16.0f);
+								int ArrayIndex = clamp<int>((Index - TILE_TIME_CHECKPOINT_FIRST), 0, NUM_POS);
+								m_aPositions[ArrayIndex] = vec2(x * 32.0f + 16.0f, y * 32.0f + 16.0f);
 							}
 
 							x += ((CTile *)pTiles)[y * pTLayer->m_Width + x].m_Skip;
@@ -381,23 +391,24 @@ void CMenuBackground::ChangePosition(int PositionNumber)
 		m_ChangedPosition = true;
 	}
 	m_AnimationStartPos = m_Camera.m_Center;
-	m_RotationCenter = m_Positions[m_CurrentPosition];
+	m_RotationCenter = m_aPositions[m_CurrentPosition];
 	m_MoveTime = 0.0f;
 }
 
 std::vector<CTheme> &CMenuBackground::GetThemes()
 {
-	if(m_lThemes.empty()) // not loaded yet
+	if(m_vThemes.empty()) // not loaded yet
 	{
 		// when adding more here, make sure to change the value of PREDEFINED_THEMES_COUNT too
-		m_lThemes.emplace_back("", true, true); // no theme
-		m_lThemes.emplace_back("auto", true, true); // auto theme
-		m_lThemes.emplace_back("rand", true, true); // random theme
+		m_vThemes.emplace_back("", true, true); // no theme
+		m_vThemes.emplace_back("auto", true, true); // auto theme
+		m_vThemes.emplace_back("rand", true, true); // random theme
 
+		m_ThemeScanStartTime = time_get_nanoseconds();
 		Storage()->ListDirectory(IStorage::TYPE_ALL, "themes", ThemeScan, (CMenuBackground *)this);
 		Storage()->ListDirectory(IStorage::TYPE_ALL, "themes", ThemeIconScan, (CMenuBackground *)this);
 
-		std::sort(m_lThemes.begin() + PREDEFINED_THEMES_COUNT, m_lThemes.end());
+		std::sort(m_vThemes.begin() + PREDEFINED_THEMES_COUNT, m_vThemes.end());
 	}
-	return m_lThemes;
+	return m_vThemes;
 }

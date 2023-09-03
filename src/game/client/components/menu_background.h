@@ -4,6 +4,8 @@
 #include <game/client/components/background.h>
 #include <game/client/components/camera.h>
 
+#include <chrono>
+#include <string>
 #include <vector>
 
 class CMenuMap : public CBackgroundEngineMap
@@ -16,10 +18,10 @@ class CTheme
 {
 public:
 	CTheme() {}
-	CTheme(const char *n, bool HasDay, bool HasNight) :
-		m_Name(n), m_HasDay(HasDay), m_HasNight(HasNight) {}
+	CTheme(const char *pName, bool HasDay, bool HasNight) :
+		m_Name(pName), m_HasDay(HasDay), m_HasNight(HasNight) {}
 
-	string m_Name;
+	std::string m_Name;
 	bool m_HasDay;
 	bool m_HasNight;
 	IGraphics::CTextureHandle m_IconTexture;
@@ -28,6 +30,11 @@ public:
 
 class CMenuBackground : public CBackground
 {
+	std::chrono::nanoseconds m_ThemeScanStartTime{0};
+
+protected:
+	bool CanRenderMenuBackground() override { return false; }
+
 public:
 	enum
 	{
@@ -38,7 +45,7 @@ public:
 		POS_SETTINGS_GENERAL,
 		POS_SETTINGS_PLAYER,
 		POS_SETTINGS_TEE,
-		POS_SETTINGS_HUD,
+		POS_SETTINGS_APPEARANCE,
 		POS_SETTINGS_CONTROLS,
 		POS_SETTINGS_GRAPHICS,
 		POS_SETTINGS_SOUND,
@@ -76,7 +83,7 @@ public:
 
 	vec2 m_MenuCenter;
 	vec2 m_RotationCenter;
-	vec2 m_Positions[NUM_POS];
+	vec2 m_aPositions[NUM_POS];
 	int m_CurrentPosition;
 	vec2 m_AnimationStartPos;
 	bool m_ChangedPosition;
@@ -89,7 +96,7 @@ public:
 	static int ThemeScan(const char *pName, int IsDir, int DirType, void *pUser);
 	static int ThemeIconScan(const char *pName, int IsDir, int DirType, void *pUser);
 
-	std::vector<CTheme> m_lThemes;
+	std::vector<CTheme> m_vThemes;
 
 	CMenuBackground();
 	~CMenuBackground() override {}

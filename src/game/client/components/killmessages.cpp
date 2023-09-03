@@ -15,11 +15,8 @@ void CKillMessages::OnWindowResize()
 {
 	for(auto &Killmsg : m_aKillmsgs)
 	{
-		if(Killmsg.m_VictimTextContainerIndex != -1)
-			TextRender()->DeleteTextContainer(Killmsg.m_VictimTextContainerIndex);
-		if(Killmsg.m_KillerTextContainerIndex != -1)
-			TextRender()->DeleteTextContainer(Killmsg.m_KillerTextContainerIndex);
-		Killmsg.m_VictimTextContainerIndex = Killmsg.m_KillerTextContainerIndex = -1;
+		TextRender()->DeleteTextContainer(Killmsg.m_VictimTextContainerIndex);
+		TextRender()->DeleteTextContainer(Killmsg.m_KillerTextContainerIndex);
 	}
 }
 
@@ -30,13 +27,8 @@ void CKillMessages::OnReset()
 	{
 		Killmsg.m_Tick = -100000;
 
-		if(Killmsg.m_VictimTextContainerIndex != -1)
-			TextRender()->DeleteTextContainer(Killmsg.m_VictimTextContainerIndex);
-
-		if(Killmsg.m_KillerTextContainerIndex != -1)
-			TextRender()->DeleteTextContainer(Killmsg.m_KillerTextContainerIndex);
-
-		Killmsg.m_VictimTextContainerIndex = Killmsg.m_KillerTextContainerIndex = -1;
+		TextRender()->DeleteTextContainer(Killmsg.m_VictimTextContainerIndex);
+		TextRender()->DeleteTextContainer(Killmsg.m_KillerTextContainerIndex);
 	}
 }
 
@@ -83,7 +75,7 @@ void CKillMessages::CreateKillmessageNamesIfNotCreated(CKillMsg &Kill)
 		}
 		TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(Color)));
 
-		Kill.m_VictimTextContainerIndex = TextRender()->CreateTextContainer(&Cursor, Kill.m_aVictimName);
+		TextRender()->CreateTextContainer(Kill.m_VictimTextContainerIndex, &Cursor, Kill.m_aVictimName);
 	}
 
 	if(Kill.m_KillerTextContainerIndex == -1 && Kill.m_aKillerName[0] != 0)
@@ -101,13 +93,16 @@ void CKillMessages::CreateKillmessageNamesIfNotCreated(CKillMsg &Kill)
 		}
 		TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(Color)));
 
-		Kill.m_KillerTextContainerIndex = TextRender()->CreateTextContainer(&Cursor, Kill.m_aKillerName);
+		TextRender()->CreateTextContainer(Kill.m_KillerTextContainerIndex, &Cursor, Kill.m_aKillerName);
 	}
 	TextRender()->TextColor(TextRender()->DefaultTextColor());
 }
 
 void CKillMessages::OnMessage(int MsgType, void *pRawMsg)
 {
+	if(m_pClient->m_SuppressEvents)
+		return;
+
 	if(MsgType == NETMSGTYPE_SV_KILLMSG)
 	{
 		CNetMsg_Sv_KillMsg *pMsg = (CNetMsg_Sv_KillMsg *)pRawMsg;
@@ -122,7 +117,7 @@ void CKillMessages::OnMessage(int MsgType, void *pRawMsg)
 		{
 			Kill.m_VictimTeam = m_pClient->m_aClients[Kill.m_VictimID].m_Team;
 			Kill.m_VictimDDTeam = m_pClient->m_Teams.Team(Kill.m_VictimID);
-			str_copy(Kill.m_aVictimName, m_pClient->m_aClients[Kill.m_VictimID].m_aName, sizeof(Kill.m_aVictimName));
+			str_copy(Kill.m_aVictimName, m_pClient->m_aClients[Kill.m_VictimID].m_aName);
 			Kill.m_VictimRenderInfo = m_pClient->m_aClients[Kill.m_VictimID].m_RenderInfo;
 		}
 
@@ -130,7 +125,7 @@ void CKillMessages::OnMessage(int MsgType, void *pRawMsg)
 		if(Kill.m_KillerID >= 0 && Kill.m_KillerID < MAX_CLIENTS)
 		{
 			Kill.m_KillerTeam = m_pClient->m_aClients[Kill.m_KillerID].m_Team;
-			str_copy(Kill.m_aKillerName, m_pClient->m_aClients[Kill.m_KillerID].m_aName, sizeof(Kill.m_aKillerName));
+			str_copy(Kill.m_aKillerName, m_pClient->m_aClients[Kill.m_KillerID].m_aName);
 			Kill.m_KillerRenderInfo = m_pClient->m_aClients[Kill.m_KillerID].m_RenderInfo;
 		}
 
@@ -159,17 +154,8 @@ void CKillMessages::OnMessage(int MsgType, void *pRawMsg)
 			// add the message
 			m_KillmsgCurrent = (m_KillmsgCurrent + 1) % MAX_KILLMSGS;
 
-			if(m_aKillmsgs[m_KillmsgCurrent].m_VictimTextContainerIndex != -1)
-			{
-				TextRender()->DeleteTextContainer(m_aKillmsgs[m_KillmsgCurrent].m_VictimTextContainerIndex);
-				m_aKillmsgs[m_KillmsgCurrent].m_VictimTextContainerIndex = -1;
-			}
-
-			if(m_aKillmsgs[m_KillmsgCurrent].m_KillerTextContainerIndex != -1)
-			{
-				TextRender()->DeleteTextContainer(m_aKillmsgs[m_KillmsgCurrent].m_KillerTextContainerIndex);
-				m_aKillmsgs[m_KillmsgCurrent].m_KillerTextContainerIndex = -1;
-			}
+			TextRender()->DeleteTextContainer(m_aKillmsgs[m_KillmsgCurrent].m_VictimTextContainerIndex);
+			TextRender()->DeleteTextContainer(m_aKillmsgs[m_KillmsgCurrent].m_KillerTextContainerIndex);
 
 			m_aKillmsgs[m_KillmsgCurrent] = Kill;
 		}
@@ -200,21 +186,21 @@ void CKillMessages::OnRender()
 
 		float x = StartX;
 
-		STextRenderColor TColor(1.f, 1.f, 1.f, 1.f);
-		STextRenderColor TOutlineColor(0.f, 0.f, 0.f, 0.3f);
+		ColorRGBA TColor(1.f, 1.f, 1.f, 1.f);
+		ColorRGBA TOutlineColor(0.f, 0.f, 0.f, 0.3f);
 
 		// render victim name
 		x -= m_aKillmsgs[r].m_VitctimTextWidth;
 		if(m_aKillmsgs[r].m_VictimID >= 0 && g_Config.m_ClChatTeamColors && m_aKillmsgs[r].m_VictimDDTeam)
 		{
-			ColorRGBA rgb = color_cast<ColorRGBA>(ColorHSLA(m_aKillmsgs[r].m_VictimDDTeam / 64.0f, 1.0f, 0.75f));
-			TColor.Set(rgb.r, rgb.g, rgb.b, 1.0f);
+			TColor = color_cast<ColorRGBA>(ColorHSLA(m_aKillmsgs[r].m_VictimDDTeam / 64.0f, 1.0f, 0.75f));
+			TColor.a = 1.f;
 		}
 
 		CreateKillmessageNamesIfNotCreated(m_aKillmsgs[r]);
 
 		if(m_aKillmsgs[r].m_VictimTextContainerIndex != -1)
-			TextRender()->RenderTextContainer(m_aKillmsgs[r].m_VictimTextContainerIndex, &TColor, &TOutlineColor, x, y + (46.f - 36.f) / 2.f);
+			TextRender()->RenderTextContainer(m_aKillmsgs[r].m_VictimTextContainerIndex, TColor, TOutlineColor, x, y + (46.f - 36.f) / 2.f);
 
 		// render victim tee
 		x -= 24.0f;
@@ -254,7 +240,7 @@ void CKillMessages::OnRender()
 		x -= 44.0f;
 		if(m_aKillmsgs[r].m_Weapon >= 0)
 		{
-			Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteWeapons[m_aKillmsgs[r].m_Weapon]);
+			Graphics()->TextureSet(GameClient()->m_GameSkin.m_aSpriteWeapons[m_aKillmsgs[r].m_Weapon]);
 			Graphics()->RenderQuadContainerAsSprite(m_SpriteQuadContainerIndex, 4 + m_aKillmsgs[r].m_Weapon, x, y + 28);
 		}
 		x -= 52.0f;
@@ -299,7 +285,7 @@ void CKillMessages::OnRender()
 			x -= m_aKillmsgs[r].m_KillerTextWidth;
 
 			if(m_aKillmsgs[r].m_KillerTextContainerIndex != -1)
-				TextRender()->RenderTextContainer(m_aKillmsgs[r].m_KillerTextContainerIndex, &TColor, &TOutlineColor, x, y + (46.f - 36.f) / 2.f);
+				TextRender()->RenderTextContainer(m_aKillmsgs[r].m_KillerTextContainerIndex, TColor, TOutlineColor, x, y + (46.f - 36.f) / 2.f);
 		}
 
 		y += 46.0f;

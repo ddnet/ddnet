@@ -21,7 +21,7 @@ class Record(namedtuple('Record', 'name time checkpoints')):
 		time = Decimal(lines[1])
 		checkpoints_str = lines[2].split(' ')
 		if len(checkpoints_str) != 26 or checkpoints_str[25] != "":
-			raise ValueError("wrong amount of checkpoint times: {}".format(len(checkpoints_str)))
+			raise ValueError(f"wrong amount of checkpoint times: {len(checkpoints_str)}")
 		checkpoints_str = checkpoints_str[:25]
 		checkpoints = tuple(Decimal(c) for c in checkpoints_str)
 		return Record(name=name, time=time, checkpoints=checkpoints)
@@ -46,11 +46,11 @@ def main():
 	for in_ in args.in_:
 		match = MAP_RE.match(os.path.basename(in_))
 		if not match:
-			raise ValueError("Invalid text score database name, does not end in '_record.dtb': {}".format(in_))
+			raise ValueError(f"Invalid text score database name, does not end in '_record.dtb': {in_}")
 		m = match.group("map")
 		if m in records:
-			raise ValueError("Two text score databases refer to the same map: {}".format(in_))
-		with open(in_) as f:
+			raise ValueError(f"Two text score databases refer to the same map: {in_}")
+		with open(in_, encoding="utf-8") as f:
 			records[m] = read_records(f)
 
 	if not args.dry_run:
@@ -62,23 +62,23 @@ def main():
 			"Timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, "
 			"Time FLOAT DEFAULT 0, "
 			"Server CHAR(4), " +
-			"".join("cp{} FLOAT DEFAULT 0, ".format(i + 1) for i in range(25)) +
+			"".join(f"cp{i + 1} FLOAT DEFAULT 0, " for i in range(25)) +
 			"GameID VARCHAR(64), "
 			"DDNet7 BOOL DEFAULT FALSE"
 		");")
 		c.executemany(
 			"INSERT INTO record_race (Map, Name, Time, Server, " +
-			"".join("cp{}, ".format(i + 1) for i in range(25)) +
+			"".join(f"cp{i + 1}, " for i in range(25)) +
 			"GameID, DDNet7) " +
-			"VALUES ({})".format(",".join("?" * 31)),
-			[(map, r.name, float(r.time), "TEXT", *[float(c) for c in r.checkpoints], None, False) for map in records for r in records[map]]
+			f"VALUES ({','.join('?' * 31)})",
+			[(map, r.name, float(r.time), "TEXT", *[float(c) for c in r.checkpoints], None, False) for map, record in records.items() for r in record]
 		)
 		conn.commit()
 		conn.close()
 
 	if args.stats:
-		print("Number of imported text databases: {}".format(len(records)), file=sys.stderr)
-		print("Number of imported ranks: {}".format(sum(len(r) for r in records.values()), file=sys.stderr))
+		print(f"Number of imported text databases: {len(records)}", file=sys.stderr)
+		print(f"Number of imported ranks: {sum(len(r) for r in records.values())}", file=sys.stderr)
 
 if __name__ == '__main__':
 	sys.exit(main())

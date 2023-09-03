@@ -1,8 +1,11 @@
 #include "serverinfo.h"
 
 #include "json.h"
+#include <base/math.h>
 #include <engine/external/json-parser/json.h>
 #include <engine/serverbrowser.h>
+
+#include <cstdio>
 
 static bool IsAllowedHex(char c)
 {
@@ -83,23 +86,23 @@ bool CServerInfo2::FromJsonRaw(CServerInfo2 *pOut, const json_value *pJson)
 	pOut->m_MaxClients = json_int_get(&MaxClients);
 	pOut->m_MaxPlayers = json_int_get(&MaxPlayers);
 	pOut->m_Passworded = Passworded;
-	str_copy(pOut->m_aGameType, GameType, sizeof(pOut->m_aGameType));
-	str_copy(pOut->m_aName, Name, sizeof(pOut->m_aName));
-	str_copy(pOut->m_aMapName, MapName, sizeof(pOut->m_aMapName));
-	str_copy(pOut->m_aVersion, Version, sizeof(pOut->m_aVersion));
+	str_copy(pOut->m_aGameType, GameType);
+	str_copy(pOut->m_aName, Name);
+	str_copy(pOut->m_aMapName, MapName);
+	str_copy(pOut->m_aVersion, Version);
 
 	pOut->m_NumClients = 0;
 	pOut->m_NumPlayers = 0;
 	for(unsigned i = 0; i < Clients.u.array.length; i++)
 	{
 		const json_value &Client = Clients[i];
-		const json_value &Name = Client["name"];
+		const json_value &ClientName = Client["name"];
 		const json_value &Clan = Client["clan"];
 		const json_value &Country = Client["country"];
 		const json_value &Score = Client["score"];
 		const json_value &IsPlayer = Client["is_player"];
 		Error = false;
-		Error = Error || Name.type != json_string;
+		Error = Error || ClientName.type != json_string;
 		Error = Error || Clan.type != json_string;
 		Error = Error || Country.type != json_integer;
 		Error = Error || Score.type != json_integer;
@@ -111,8 +114,8 @@ bool CServerInfo2::FromJsonRaw(CServerInfo2 *pOut, const json_value *pJson)
 		if(i < SERVERINFO_MAX_CLIENTS)
 		{
 			CClient *pClient = &pOut->m_aClients[i];
-			str_copy(pClient->m_aName, Name, sizeof(pClient->m_aName));
-			str_copy(pClient->m_aClan, Clan, sizeof(pClient->m_aClan));
+			str_copy(pClient->m_aName, ClientName);
+			str_copy(pClient->m_aClan, Clan);
 			pClient->m_Country = json_int_get(&Country);
 			pClient->m_Score = json_int_get(&Score);
 			pClient->m_IsPlayer = IsPlayer;
@@ -168,15 +171,15 @@ CServerInfo2::operator CServerInfo() const
 	Result.m_MaxPlayers = m_MaxPlayers;
 	Result.m_NumPlayers = m_NumPlayers;
 	Result.m_Flags = m_Passworded ? SERVER_FLAG_PASSWORD : 0;
-	str_copy(Result.m_aGameType, m_aGameType, sizeof(Result.m_aGameType));
-	str_copy(Result.m_aName, m_aName, sizeof(Result.m_aName));
-	str_copy(Result.m_aMap, m_aMapName, sizeof(Result.m_aMap));
-	str_copy(Result.m_aVersion, m_aVersion, sizeof(Result.m_aVersion));
+	str_copy(Result.m_aGameType, m_aGameType);
+	str_copy(Result.m_aName, m_aName);
+	str_copy(Result.m_aMap, m_aMapName);
+	str_copy(Result.m_aVersion, m_aVersion);
 
 	for(int i = 0; i < minimum(m_NumClients, (int)SERVERINFO_MAX_CLIENTS); i++)
 	{
-		str_copy(Result.m_aClients[i].m_aName, m_aClients[i].m_aName, sizeof(Result.m_aClients[i].m_aName));
-		str_copy(Result.m_aClients[i].m_aClan, m_aClients[i].m_aClan, sizeof(Result.m_aClients[i].m_aClan));
+		str_copy(Result.m_aClients[i].m_aName, m_aClients[i].m_aName);
+		str_copy(Result.m_aClients[i].m_aClan, m_aClients[i].m_aClan);
 		Result.m_aClients[i].m_Country = m_aClients[i].m_Country;
 		Result.m_aClients[i].m_Score = m_aClients[i].m_Score;
 		Result.m_aClients[i].m_Player = m_aClients[i].m_IsPlayer;

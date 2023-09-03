@@ -2,23 +2,18 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <base/system.h>
 
-#include <engine/console.h>
-
 #include "netban.h"
 #include "network.h"
 
-bool CNetConsole::Open(NETADDR BindAddr, CNetBan *pNetBan, int Flags)
+bool CNetConsole::Open(NETADDR BindAddr, CNetBan *pNetBan)
 {
 	// zero out the whole structure
 	mem_zero(this, sizeof(*this));
-	m_Socket.type = NETTYPE_INVALID;
-	m_Socket.ipv4sock = -1;
-	m_Socket.ipv6sock = -1;
 	m_pNetBan = pNetBan;
 
 	// open socket
 	m_Socket = net_tcp_create(BindAddr);
-	if(!m_Socket.type)
+	if(!m_Socket)
 		return false;
 	if(net_tcp_listen(m_Socket, NET_MAX_CONSOLE_CLIENTS))
 		return false;
@@ -71,7 +66,7 @@ int CNetConsole::AcceptClient(NETSOCKET Socket, const NETADDR *pAddr)
 		{
 			if(net_addr_comp(pAddr, m_aSlots[i].m_Connection.PeerAddress()) == 0)
 			{
-				str_copy(aError, "only one client per IP allowed", sizeof(aError));
+				str_copy(aError, "only one client per IP allowed");
 				break;
 			}
 		}
@@ -88,7 +83,7 @@ int CNetConsole::AcceptClient(NETSOCKET Socket, const NETADDR *pAddr)
 
 	// reject client
 	if(!aError[0])
-		str_copy(aError, "no free slot available", sizeof(aError));
+		str_copy(aError, "no free slot available");
 
 	net_tcp_send(Socket, aError, str_length(aError));
 	net_tcp_close(Socket);

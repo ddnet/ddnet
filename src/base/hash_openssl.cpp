@@ -1,6 +1,11 @@
 #if defined(CONF_OPENSSL)
 #include "hash_ctxt.h"
 
+#ifdef __GNUC__
+// EVP requires heap allocations, let's postpone the replacement for now
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
+
 void sha256_init(SHA256_CTX *ctxt)
 {
 	SHA256_Init(ctxt);

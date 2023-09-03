@@ -3,11 +3,20 @@
 #ifndef GAME_SERVER_PLAYER_H
 #define GAME_SERVER_PLAYER_H
 
-#include "alloc.h"
+#include <base/vmath.h>
 
-// this include should perhaps be removed
-#include "score.h"
+#include <engine/shared/protocol.h>
+
+#include "alloc.h"
 #include "teeinfo.h"
+
+#include <memory>
+
+class CCharacter;
+class CGameContext;
+class IServer;
+struct CNetObj_PlayerInput;
+struct CScorePlayerResult;
 
 enum
 {
@@ -22,7 +31,7 @@ class CPlayer
 	MACRO_ALLOC_POOL_ID()
 
 public:
-	CPlayer(CGameContext *pGameServer, int ClientID, int Team);
+	CPlayer(CGameContext *pGameServer, uint32_t UniqueClientID, int ClientID, int Team);
 	~CPlayer();
 
 	void Reset();
@@ -31,8 +40,9 @@ public:
 	void Respawn(bool WeakHook = false); // with WeakHook == true the character will be spawned after all calls of Tick from other Players
 	CCharacter *ForceSpawn(vec2 Pos); // required for loading savegames
 	void SetTeam(int Team, bool DoChatMsg = true);
-	int GetTeam() const { return m_Team; };
-	int GetCID() const { return m_ClientID; };
+	int GetTeam() const { return m_Team; }
+	int GetCID() const { return m_ClientID; }
+	uint32_t GetUniqueCID() const { return m_UniqueClientID; }
 	int GetClientVersion() const;
 	bool SetTimerType(int TimerType);
 
@@ -44,9 +54,9 @@ public:
 	void Snap(int SnappingClient);
 	void FakeSnap();
 
-	void OnDirectInput(CNetObj_PlayerInput *NewInput);
-	void OnPredictedInput(CNetObj_PlayerInput *NewInput);
-	void OnPredictedEarlyInput(CNetObj_PlayerInput *NewInput);
+	void OnDirectInput(CNetObj_PlayerInput *pNewInput);
+	void OnPredictedInput(CNetObj_PlayerInput *pNewInput);
+	void OnPredictedEarlyInput(CNetObj_PlayerInput *pNewInput);
 	void OnDisconnect();
 
 	void KillCharacter(int Weapon = WEAPON_GAME);
@@ -64,7 +74,7 @@ public:
 	int m_PlayerFlags;
 
 	// used for snapping to just update latency if the scoreboard is active
-	int m_aActLatency[MAX_CLIENTS];
+	int m_aCurLatency[MAX_CLIENTS];
 
 	// used for spectator mode
 	int m_SpectatorID;
@@ -83,7 +93,7 @@ public:
 	int m_LastChangeInfo;
 	int m_LastEmote;
 	int m_LastKill;
-	int m_LastCommands[4];
+	int m_aLastCommands[4];
 	int m_LastCommandPos;
 	int m_LastWhisperTo;
 	int m_LastInvited;
@@ -113,6 +123,7 @@ public:
 	} m_Latency;
 
 private:
+	const uint32_t m_UniqueClientID;
 	CCharacter *m_pCharacter;
 	int m_NumInputs;
 	CGameContext *m_pGameServer;
@@ -177,9 +188,8 @@ public:
 
 	bool m_Moderating;
 
-	bool AfkTimer(CNetObj_PlayerInput *pNewTarget); // returns true if kicked
 	void UpdatePlaytime();
-	void AfkVoteTimer(CNetObj_PlayerInput *pNewTarget);
+	void AfkTimer();
 	int64_t m_LastPlaytime;
 	int64_t m_LastEyeEmote;
 	int64_t m_LastBroadcast;
@@ -187,12 +197,6 @@ public:
 
 	CNetObj_PlayerInput *m_pLastTarget;
 	bool m_LastTargetInit;
-	/* 
-		afk timer's 1st warning after 50% of sv_max_afk_time
-		2nd warning after 90%
-		kick after reaching 100% of sv_max_afk_time
-	*/
-	bool m_SentAfkWarning[2];
 
 	bool m_EyeEmoteEnabled;
 	int m_TimerType;
@@ -210,6 +214,8 @@ public:
 	int64_t m_EligibleForFinishCheck;
 	bool m_VotedForPractice;
 	int m_SwapTargetsClientID; //Client ID of the swap target for the given player
+
+	bool m_BirthdayAnnounced;
 
 	// gctf
 	int m_RespawnTick;

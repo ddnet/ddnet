@@ -12,7 +12,7 @@ protected:
 	CTestInfo m_Info;
 	bool Delete;
 
-	void SetUp()
+	void SetUp() override
 	{
 		IOHANDLE File = io_open(m_Info.m_aFilename, IOFLAG_WRITE);
 		ASSERT_TRUE(File);

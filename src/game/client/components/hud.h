@@ -49,8 +49,13 @@ class CHud : public CComponent
 	void RenderTeambalanceWarning();
 	void RenderVoting();
 
-	void PrepareHealthAmoQuads();
-	void RenderHealthAndAmmo(const CNetObj_Character *pCharacter);
+	void PrepareAmmoHealthAndArmorQuads();
+	void RenderAmmoHealthAndArmor(const CNetObj_Character *pCharacter);
+
+	void PreparePlayerStateQuads();
+	void RenderPlayerState(const int ClientID);
+	void RenderDummyActions();
+	void RenderMovementInformation(const int ClientID);
 
 	void RenderGameTimer();
 	void RenderPauseNotification();
@@ -60,7 +65,7 @@ class CHud : public CComponent
 	void RenderWarmupTimer();
 	void RenderLocalTime(float x);
 
-	void MapscreenToGroup(float CenterX, float CenterY, struct CMapItemGroup *PGroup);
+	static constexpr float MOVEMENT_INFORMATION_LINE_HEIGHT = 8.0f;
 
 public:
 	CHud();
@@ -75,18 +80,58 @@ public:
 	// DDRace
 
 	virtual void OnMessage(int MsgType, void *pRawMsg) override;
+	void RenderNinjaBarPos(float x, const float y, const float width, const float height, float Progress, float Alpha = 1.0f);
 
 private:
 	void RenderRecord();
 	void RenderDDRaceEffects();
-	float m_CheckpointDiff;
+	float m_TimeCpDiff;
 	float m_ServerRecord;
-	float m_PlayerRecord[NUM_DUMMIES];
+	float m_aPlayerRecord[NUM_DUMMIES];
+	float m_FinishTimeDiff;
 	int m_DDRaceTime;
-	int m_LastReceivedTimeTick;
-	int m_CheckpointTick;
-	bool m_FinishTime;
-	bool m_DDRaceTimeReceived;
+	int m_FinishTimeLastReceivedTick;
+	int m_TimeCpLastReceivedTick;
+	bool m_ShowFinishTime;
+
+	inline float GetMovementInformationBoxHeight();
+	inline int GetDigitsIndex(int Value, int Max);
+
+	// Quad Offsets
+	int m_aAmmoOffset[NUM_WEAPONS];
+	int m_HealthOffset;
+	int m_EmptyHealthOffset;
+	int m_ArmorOffset;
+	int m_EmptyArmorOffset;
+	int m_aCursorOffset[NUM_WEAPONS];
+	int m_FlagOffset;
+	int m_AirjumpOffset;
+	int m_AirjumpEmptyOffset;
+	int m_WeaponHammerOffset;
+	int m_WeaponGunOffset;
+	int m_WeaponShotgunOffset;
+	int m_WeaponGrenadeOffset;
+	int m_WeaponLaserOffset;
+	int m_WeaponNinjaOffset;
+	int m_EndlessJumpOffset;
+	int m_EndlessHookOffset;
+	int m_JetpackOffset;
+	int m_TeleportGrenadeOffset;
+	int m_TeleportGunOffset;
+	int m_TeleportLaserOffset;
+	int m_SoloOffset;
+	int m_CollisionDisabledOffset;
+	int m_HookHitDisabledOffset;
+	int m_HammerHitDisabledOffset;
+	int m_GunHitDisabledOffset;
+	int m_ShotgunHitDisabledOffset;
+	int m_GrenadeHitDisabledOffset;
+	int m_LaserHitDisabledOffset;
+	int m_DeepFrozenOffset;
+	int m_LiveFrozenOffset;
+	int m_DummyHammerOffset;
+	int m_DummyCopyOffset;
+	int m_PracticeModeOffset;
 };
 
 #endif

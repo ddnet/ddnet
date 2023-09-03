@@ -3,6 +3,7 @@
 #ifndef GAME_CLIENT_COMPONENTS_ITEMS_H
 #define GAME_CLIENT_COMPONENTS_ITEMS_H
 #include <game/client/component.h>
+#include <game/generated/protocol.h>
 
 class CProjectileData;
 
@@ -21,6 +22,17 @@ public:
 	virtual void OnInit() override;
 
 	void ReconstructSmokeTrail(const CProjectileData *pCurrent, int DestroyTick);
+
+private:
+	int m_BlueFlagOffset;
+	int m_RedFlagOffset;
+	int m_PickupHealthOffset;
+	int m_PickupArmorOffset;
+	int m_aPickupWeaponOffset[NUM_WEAPONS];
+	int m_PickupNinjaOffset;
+	int m_aPickupWeaponArmorOffset[4];
+	int m_aProjectileOffset[NUM_WEAPONS];
+	int m_aParticleSplatOffset[3];
 };
 
 #endif

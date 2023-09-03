@@ -38,17 +38,17 @@ public:
 	CDemoRecorder(class CSnapshotDelta *pSnapshotDelta, bool NoMapData = false);
 	CDemoRecorder() {}
 
-	int Start(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, const char *pNetversion, const char *pMap, SHA256_DIGEST *pSha256, unsigned MapCrc, const char *pType, unsigned MapSize, unsigned char *pMapData, IOHANDLE MapFile = 0, DEMOFUNC_FILTER pfnFilter = 0, void *pUser = 0);
-	int Stop();
+	int Start(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, const char *pNetversion, const char *pMap, SHA256_DIGEST *pSha256, unsigned MapCrc, const char *pType, unsigned MapSize, unsigned char *pMapData, IOHANDLE MapFile = nullptr, DEMOFUNC_FILTER pfnFilter = nullptr, void *pUser = nullptr);
+	int Stop() override;
 	void AddDemoMarker();
 
 	void RecordSnapshot(int Tick, const void *pData, int Size);
 	void RecordMessage(const void *pData, int Size);
 
-	bool IsRecording() const { return m_File != 0; }
-	char *GetCurrentFilename() { return m_aCurrentFilename; }
+	bool IsRecording() const override { return m_File != nullptr; }
+	char *GetCurrentFilename() override { return m_aCurrentFilename; }
 
-	int Length() const { return (m_LastTickMarker - m_FirstTick) / SERVER_TICK_SPEED; }
+	int Length() const override { return (m_LastTickMarker - m_FirstTick) / SERVER_TICK_SPEED; }
 };
 
 class CDemoPlayer : public IDemoPlayer
@@ -117,12 +117,8 @@ private:
 	int ReadChunkHeader(int *pType, int *pSize, int *pTick);
 	void DoTick();
 	void ScanFile();
-	int NextFrame();
 
-	int64_t time();
-
-	int64_t m_TickTime;
-	int64_t m_Time;
+	int64_t Time();
 
 public:
 	CDemoPlayer(class CSnapshotDelta *pSnapshotDelta);
@@ -136,25 +132,26 @@ public:
 	unsigned char *GetMapData(class IStorage *pStorage);
 	bool ExtractMap(class IStorage *pStorage);
 	int Play();
-	void Pause();
-	void Unpause();
+	void Pause() override;
+	void Unpause() override;
 	int Stop();
-	void SetSpeed(float Speed);
-	void SetSpeedIndex(int Offset);
-	int SeekPercent(float Percent);
-	int SeekTime(float Seconds);
-	int SetPos(int WantedTick);
-	const CInfo *BaseInfo() const { return &m_Info.m_Info; }
-	void GetDemoName(char *pBuffer, int BufferSize) const;
-	bool GetDemoInfo(class IStorage *pStorage, const char *pFilename, int StorageType, CDemoHeader *pDemoHeader, CTimelineMarkers *pTimelineMarkers, CMapInfo *pMapInfo) const;
-	const char *GetDemoFileName() { return m_aFilename; };
-	int GetDemoType() const;
+	void SetSpeed(float Speed) override;
+	void SetSpeedIndex(int Offset) override;
+	int SeekPercent(float Percent) override;
+	int SeekTime(float Seconds) override;
+	int SeekTick(ETickOffset TickOffset) override;
+	int SetPos(int WantedTick) override;
+	const CInfo *BaseInfo() const override { return &m_Info.m_Info; }
+	void GetDemoName(char *pBuffer, int BufferSize) const override;
+	bool GetDemoInfo(class IStorage *pStorage, const char *pFilename, int StorageType, CDemoHeader *pDemoHeader, CTimelineMarkers *pTimelineMarkers, CMapInfo *pMapInfo) const override;
+	const char *GetDemoFileName() { return m_aFilename; }
+	int GetDemoType() const override;
 
 	int Update(bool RealTime = true);
 
 	const CPlaybackInfo *Info() const { return &m_Info; }
-	virtual bool IsPlaying() const { return m_File != 0; }
-	const CMapInfo *GetMapInfo() { return &m_MapInfo; };
+	bool IsPlaying() const override { return m_File != nullptr; }
+	const CMapInfo *GetMapInfo() const { return &m_MapInfo; }
 };
 
 class CDemoEditor : public IDemoEditor, public CDemoPlayer::IListener
@@ -172,10 +169,10 @@ class CDemoEditor : public IDemoEditor, public CDemoPlayer::IListener
 
 public:
 	virtual void Init(const char *pNetVersion, class CSnapshotDelta *pSnapshotDelta, class IConsole *pConsole, class IStorage *pStorage);
-	virtual void Slice(const char *pDemo, const char *pDst, int StartTick, int EndTick, DEMOFUNC_FILTER pfnFilter, void *pUser);
+	void Slice(const char *pDemo, const char *pDst, int StartTick, int EndTick, DEMOFUNC_FILTER pfnFilter, void *pUser) override;
 
-	virtual void OnDemoPlayerSnapshot(void *pData, int Size);
-	virtual void OnDemoPlayerMessage(void *pData, int Size);
+	void OnDemoPlayerSnapshot(void *pData, int Size) override;
+	void OnDemoPlayerMessage(void *pData, int Size) override;
 };
 
 #endif

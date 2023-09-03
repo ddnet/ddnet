@@ -3,6 +3,7 @@
 #include "memheap.h"
 #include <base/system.h>
 #include <cstdint>
+#include <cstdlib>
 
 // allocates a new chunk to be used
 void CHeap::NewChunk()
@@ -95,5 +96,13 @@ void *CHeap::Allocate(unsigned Size, unsigned Alignment)
 		pMem = (char *)AllocateFromChunk(Size, Alignment);
 	}
 
+	return pMem;
+}
+
+const char *CHeap::StoreString(const char *pSrc)
+{
+	const int Size = str_length(pSrc) + 1;
+	char *pMem = static_cast<char *>(Allocate(Size));
+	str_copy(pMem, pSrc, Size);
 	return pMem;
 }

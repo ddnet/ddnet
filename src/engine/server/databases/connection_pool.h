@@ -69,7 +69,7 @@ public:
 	void OnShutdown();
 
 private:
-	std::vector<std::unique_ptr<IDbConnection>> m_aapDbConnections[NUM_MODES];
+	std::vector<std::unique_ptr<IDbConnection>> m_vvpDbConnections[NUM_MODES];
 
 	static void Worker(void *pUser);
 	void Worker();
@@ -77,8 +77,8 @@ private:
 
 	std::atomic_bool m_Shutdown{false};
 	CSemaphore m_NumElem;
-	int FirstElem;
-	int LastElem;
+	int m_FirstElem;
+	int m_LastElem;
 	std::unique_ptr<struct CSqlExecData> m_aTasks[512];
 };
 

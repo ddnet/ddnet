@@ -5,16 +5,17 @@
 #	vierkant		2010-06-03 19:06:34
 #	vierkant		2010-06-04 13:20:25
 #	vierkant		2010-06-09 14:40:12
-#	Sijmen Schoon	2010-11-21 16:08:46
+#	Sijmen Schoon	        2010-11-21 16:08:46
 #	vierkant		2010-11-21 18:19:48
 #	vierkant		2010-12-16 19:44:49
 #	vierkant		2011-01-03 12:22:05
 #	vierkant		2011-01-29 18:40:28
 #	vierkant		2011-04-02 22:19:30
 #	Vijfhoek		2011-05-02 18:09:31
-#	Syntax Error	2011-07-02 20:09:24
-#	Yared Hufkens	2012-02-03 19:57:59
-#	Yared Hufkens	2012-12-08 10:51:30
+#	Syntax Error	        2011-07-02 20:09:24
+#	Yared Hufkens	        2012-02-03 19:57:59
+#	Yared Hufkens	        2012-12-08 10:51:30
+#       Ronan                   2022-05-17 22:22:22
 ##### /authors #####
 
 ##### translated strings #####
@@ -65,10 +66,10 @@ Are you sure that you want to remove the player from your friends list?
 == Weet je zeker dat je deze speler uit je vriendenlijst wilt verwijderen?
 
 Automatically record demos
-== Automatisch demos opnemen
+== Automatisch demo's opnemen
 
 Automatically take game over screenshot
-== Automatisch schermafbeeldingen nemen
+== Automatisch schermafbeeldingen nemen bij einde spel
 
 Blue team
 == Blauwe team
@@ -113,7 +114,7 @@ Controls
 == Besturing
 
 Count players only
-== Tel alleen spelers
+== Alleen spelers tellen
 
 Current
 == Huidig
@@ -143,19 +144,16 @@ Disconnected
 == Verbinding verbroken
 
 Downloading map
-== Kaart downloaden
+== Kaart aan het downloaden
 
 Draw!
 == Gelijkspel!
 
 Dynamic Camera
-== Dynamische camera
+== Dynamische Camera
 
 Emoticon
 == Emoticon
-
-Enter
-== Starten
 
 Error
 == Fout
@@ -182,7 +180,7 @@ Folder
 == Map
 
 Force vote
-== Forceer stem
+== Stem forceren
 
 Free-View
 == Vrij bewegen
@@ -224,7 +222,7 @@ Has people playing
 == Mensen in server
 
 High Detail
-== Veel details
+== Hoge Details
 
 Hook
 == Haak
@@ -252,9 +250,6 @@ MOTD
 
 Map
 == Kaart
-
-Mouse sens.
-== Muis resolutie
 
 Move left
 == Naar links
@@ -290,7 +285,7 @@ No servers found
 == Geen servers gevonden
 
 No servers match your filter criteria
-== Geen servers gevonden bij zoekopdracht
+== Geen servers komen overeen met je filtercriteria
 
 Ok
 == Oké
@@ -435,7 +430,7 @@ Spectate previous
 == Volg vorige speler
 
 Spectator mode
-== Toeschouwer modus
+== Toeschouwermode
 
 Spectators
 == Toeschouwers
@@ -459,7 +454,7 @@ Team chat
 == Team chat
 
 The audio device couldn't be initialised.
-== Het geluid kon niet worden geladen.
+== Het audioapparaat kon niet worden geïnitialiseerd.
 
 The server is running a non-standard tuning on a pure game type.
 == The server draait geen standaard spel type.
@@ -486,7 +481,7 @@ Unable to rename the demo
 == Niet mogelijk om de demo te hernoemen
 
 Use sounds
-== Gebruik geluid
+== Gebruik geluiden
 
 Use team colors for name plates
 == Gebruik teamkleuren voor naamplaten
@@ -498,10 +493,10 @@ Version
 == Versie
 
 Vote command:
-== Stem commando:
+== Stemcommando:
 
 Vote description:
-== Stem omschrijving:
+== Stemomschrijving:
 
 Vote no
 == Stem nee
@@ -587,13 +582,13 @@ Size:
 == Grootte:
 
 Reset to defaults
-== Standaardinstellingen
+== Terugzetten naar standaardinstellingen
 
 Quit anyway?
 == Toch afsluiten?
 
 Display Modes
-== Laat modes zien
+== Resoluties
 
 Version:
 == Versie:
@@ -605,7 +600,7 @@ Lht.
 == Licht
 
 UI Color
-== UI kleur
+== UI Kleur
 
 Crc:
 == Crc:
@@ -626,7 +621,7 @@ Successfully saved the replay!
 == De replay is succesvol opgeslagen!
 
 Replay feature is disabled!
-== Herhaling functie is uitgeschakeld!
+== Replay functie is uitgeschakeld!
 
 Game paused
 == Spel gepauzeerd
@@ -638,7 +633,7 @@ Personal best:
 == Persoonlijk record:
 
 Learn
-== Leren:
+== Leren
 
 Browser
 == Verkenner
@@ -653,7 +648,7 @@ Reconnect in %d sec
 == Opnieuw verbinden in %d sec
 
 Render demo
-== Demo verwerken
+== Demo renderen
 
 Replace video
 == Video vervangen
@@ -676,18 +671,6 @@ Welcome to DDNet
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
 == DDraceNetwork is een coöperatief online spel waar het doel is om met jezelf en je medespelers de finish van de map te behalen. Als een nieuwkomer kun je het best starten op een Novice server, waar je de makkelijkste maps zult vinden. Neem je ping in overweging bij het kiezen van een server.
 
-The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
-== De map bevat freeze. Als je hier in komt kan je een tijdje niet bewegen. Je moet samen werken om door deze delen heen te komen.
-
-The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== Het muiswiel veranderd wapens. Hamer (linker muisknop) kan gebruikt worden om andere tees te slaan en deze uit de freeze te halen.
-
-Hook (right mouse) can be used to swing through the map and to hook other tees to you.
-== Hook (rechter muis knop) kan gebruikt worden om door de map heen te zwaaien en om andere tees om je heen te hooken.
-
-Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
-== Communicatie is de sleutel tot succes: Er is geen tutorial beschikbaar dus je zult via de chat functie (t toets) met andere spelers de basis van het spel leren.
-
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == Het wordt aangeraden dat je de instellingen bekijkt en ze aanpast naar jouw wensen voordat je met een server verbindt.
 
@@ -704,7 +687,7 @@ Show DDNet map finishes in server browser
 == Laat gefinishte maps zien in de verkenner
 
 transmits your player name to info2.ddnet.tw
-== Verzend je speler naam naar info2.ddnet.tw
+== verzendt je speler naam naar info2.ddnet.tw
 
 Search
 == Zoek
@@ -719,7 +702,7 @@ Indicate map finish
 == Laat map finish zien
 
 Unfinished map
-== niet gefinishte map
+== Niet gefinishte map
 
 Countries
 == Landen
@@ -801,23 +784,17 @@ Save
 Switch weapon when out of ammo
 == Verander wapen wanneer de munitie op is
 
-Reset wanted weapon on death
-== Reset gewild wapen bij het doodgaan
-
 Show only chat messages from friends
 == Laat alleen berichten van vrienden zien
 
 Show clan above name plates
-== Laat clan boven naam platen zien
+== Laat clan boven naamplaten zien
 
 Clan plates size
 == Clan plaat grootte
 
 Refresh Rate
 == Vernieuwingsfrequentie
-
-Show console window
-== Laat console scherm zien
 
 Automatically take statboard screenshot
 == Automatisch statistiekbord screenshot nemen
@@ -835,7 +812,7 @@ Vanilla skins only
 == Alleen vanilla skins
 
 Fat skins (DDFat)
-== Dikke skins (DDdik)
+== Fat skins (DDFat)
 
 Skin prefix
 == Skin prefix
@@ -894,26 +871,17 @@ Show entities
 Show HUD
 == Laat HUD zien
 
-UI mouse s.
-== UI mouse s.
-
 may cause delay
 == kan voor vertraging zorgen
 
 Screen
 == Scherm
 
-Preinit VBO (iGPUs only)
-== Preinit VBO (alleen iGPUs)
-
-Multiple texture units (disable for macOS)
-== Meerdere texture eenheden (uitgeschakeld voor macOS)
-
 Use high DPI
 == Gebruik hoge DPI
 
 Enable game sounds
-== Schakel spel geluid in
+== Schakel spelgeluid in
 
 Enable gun sound
 == Schakel pistool geluid in
@@ -954,14 +922,11 @@ Use DDRace Scoreboard
 Show score
 == Laat score zien
 
-Show health + ammo
-== Laat levens + ammo zien
-
 Show names in chat in team colors
 == Laat namen in chat in de kleuren van het team zien
 
 Show kill messages
-== Laat Sterfberichten zien
+== Laat sterfberichten zien
 
 Show votes window after voting
 == Laat stemscherm zien na het stemmen
@@ -970,7 +935,7 @@ Messages
 == Berichten
 
 System message
-== Systeem bericht
+== Systeembericht
 
 Reset
 == Reset
@@ -979,7 +944,7 @@ Highlighted message
 == Gemarkeerd bericht
 
 Team message
-== Team bericht
+== Teambericht
 
 Friend message
 == Bericht van een vriend
@@ -991,10 +956,10 @@ Save the best demo of each race
 == Sla de beste demo op van elke race
 
 Default length: %d
-== Standaart lengte: %d
+== Standaard lengte: %d
 
 Enable replays
-== Replays aan zetten
+== Replays aanzetten
 
 Show ghost
 == Laat spook zien
@@ -1006,7 +971,7 @@ Gameplay
 == Gameplay
 
 Overlay entities
-== Laat entities zien over de normale map
+== Overlay entities
 
 Size
 == Grootte
@@ -1015,7 +980,7 @@ Show text entities
 == Laat text entities zien
 
 Show others (own team only)
-== Laat anderen zien (Alleen in team)
+== Laat anderen zien (alleen eigen team)
 
 Show quads
 == Laat quads zien
@@ -1024,7 +989,7 @@ AntiPing
 == AntiPing
 
 AntiPing: predict other players
-== AntiPing: voorspel andere spelers
+== AntiPing: Voorspel andere spelers
 
 AntiPing: predict weapons
 == AntiPing: Voorspel wapens
@@ -1036,13 +1001,13 @@ Show other players' hook collision lines
 == Laat de hookraaklijn van andere spelers zien
 
 Show other players' key presses
-== Laat toetsinput van andere spelers zien
+== Laat toetsaanslagen van andere spelers zien
 
 Old mouse mode
 == Oude muis modus
 
 Show tiles layers from BG map
-== Laat tegel lagen van achtergrondmap zien
+== Laat tegellagen van achtergrondmap zien
 
 Try fast HTTP map download first
 == Probeer eerst een snelle HTTP download voor deze map
@@ -1111,248 +1076,496 @@ Replay
 == Herhaling
 
 Saving ddnet-settings.cfg failed
-== 
+== Het opslaan van ddnet-settings.cfg is mislukt
 
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
-== 
+== De wijdte van de texture %s is niet te delen door %d, of de hoogte is niet te delen door %d wat visuele bugs kan veroorzaken.
+
+The format of texture %s is not RGBA which will cause visual bugs.
+== Het format van de texture %s is niet RGBA, hetgeen zal visuele bugs veroorzaken.
 
 Warning
-== 
+== Waarschuwing
 
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
-== 
+== Debug mode is geactiveerd. Gebruik Ctrl+Shift+D om debug mode te deactiveren.
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
-== 
+== Gebruik de k toets om jezelf te doden (herstarten), q om te pauzeren en andere spelers te bekijken. Zie instellingen voor andere toetsenbindingen.
 
 Existing Player
-== 
+== Bestaande speler
 
 Your nickname '%s' is already used (%d points). Do you still want to use it?
-== 
+== Jouw gebruikersnaam '%s' is al in gebruik (%d points). Wil je deze naam alsnog gebruiken?
 
 Checking for existing player with your name
-== 
+== Aan het zoeken naar bestaande spelers met jouw naam
 
 Are you sure that you want to disconnect and switch to a different server?
-== 
+== Weet je zeker dat je de verbinding wilt verbreken en wilt verbinden met een andere server?
 
 Country / Region
-== 
+== Land / Regio
 
 Speed
-== 
+== Snelheid
+
+Join Tutorial Server
+== Tutorial server betreden
+
+Skip Tutorial
+== Tutorial overslaan
 
 Theme
-== 
+== Thema
 
 AFR
-== 
+== AFR
 
 ASI
-== 
+== AZI
 
 AUS
-== 
+== AUS
 
 EUR
-== 
+== EUR
 
 NA
-== 
+== NA
 
 SA
-== 
+== ZA
 
 CHN
-== 
+== CHN
 
 Getting server list from master server
-== 
+== Serverlijst ophalen bij masterserver
 
 %d of %d servers
-== 
+== %d van de %d servers
 
 %d of %d server
-== 
+== %d van %d server
 
 %d players
-== 
+== %d spelers
 
 %d player
-== 
+== %d speler
 
 Refreshing...
-== 
+== Aan het verversen...
 
 Leak IP
-== 
+== Lek IP
 
 Demos directory
-== 
+== Demo's map
 
 Smooth Dynamic Camera
-== 
+== Vloeiende Dynamische Camera
 
 Skip the main menu
-== 
+== Sla het hoofdmenu over
 
 Settings file
-== 
+== Instellingenbestand
 
 Config directory
-== 
+== Configuratie map
 
 Themes directory
-== 
+== Thema map
+
+Toggle to edit your dummy settings
+== Schakel in om je dummyinstellingen te bewerken
 
 Download skins
-== 
+== Skins downloaden
+
+Choose default eyes when joining a server
+== Kies standaard ogen wanneer je een server betreedt
 
 Skin Database
-== 
+== Skin database
 
 Skins directory
-== 
+== Skins map
 
 Chat command
-== 
+== Chat command
 
 Dummy
-== 
+== Dummy
 
 Windowed
-== 
+== Venster
 
 Windowed borderless
-== 
+== Randloos venster
 
 Windowed fullscreen
-== 
+== Volledigscherm (in venster)
 
 Desktop fullscreen
-== 
+== Bureaublad volledigscherm
 
-Use modern OpenGL
-== 
+Allows maps to render with more detail
+== Maakt het mogelijk om kaarten met meer detail te renderen
+
+Renderer
+== Renderer
+
+default
+== standaard
+
+custom
+== custom
+
+Graphics cards
+== Grafische kaart
+
+auto
+== Automatisch
 
 Game sound volume
-== 
+== Game geluid volume
 
 Chat sound volume
-== 
+== Chat geluid volume
 
 Background music volume
-== 
+== Achtergrond geluid volume
 
 Assets
-== 
-
-Show client IDs
-== 
+== Assets
 
 Kill Messages
-== 
-
-Kill Message Normal Color
-== 
-
-Kill Message Highlight Color
-== 
+== Kill Berichten
 
 Laser Outline Color
-== 
+== Laser Kleur Buitenzijde
 
 Laser Inner Color
-== 
-
-Hookline
-== 
-
-No hit
-== 
-
-Hookable
-== 
-
-Tee
-== 
+== Laser Kleur Binnenzijde
 
 Use old chat style
-== 
+== Oude chatstijl gebruiken
 
 Client message
-== 
+== Clientbericht
 
 Preview
-== 
+== Voorbeeld
+
+When you cross the start line, show a ghost tee replicating the movements of your best time
+== Wanneer je over de startlijn gaat, laat een spook tee zien die jouw beste tijd repliceert
+
+Opacity
+== Ondoorzichtigheid
+
+Adjust the opacity of entities belonging to other teams, such as tees and nameplates
+== Pas de ondoorzichtigheid van entities die tot andere teams behoren aan, zoals de tee's en de naamplaten
+
+Quads are used for background decoration
+== Quads worden gebruikt voor achtergronddecoratie
+
+Tries to predict other entities to give a feel of low latency
+== Probeert andere entities te voorspellen om een gevoel van "low latency" te geven
 
 Show local player's key presses
-== 
+== Laat lokale spelers hun toetsaanslagen zien
 
 Background
-== 
+== Achtergrond
 
 Entities Background color
-== 
+== Entities Achtergrondkleur
 
 Use current map as background
-== 
+== Gebruik de huidige map als achtergrond
 
 Regular Background Color
-== 
+== Reguliere Achtergrondkleur
 
 Run on join
-== 
+== Run bij deelnemen
 
 Chat command (e.g. showall 1)
-== 
+== Chat command (bijv. showall 1)
 
 Entities
-== 
+== Entities
 
 Emoticons
-== 
+== Emoticons
 
 Particles
-== 
+== Particles
 
 Assets directory
-== 
+== Assets map
 
 Discord
-== 
+== Discord
 
 https://ddnet.tw/discord
-== 
+== https://ddnet.tw/discord
 
 https://wiki.ddnet.tw/
-== 
+== https://wiki.ddnet.tw/
+
+Tutorial
+== Tutorial
+
+Can't find a Tutorial server
+== De Tutorial server is niet gevonden
 
 Website
-== 
+== Website
 
 Settings
-== 
+== Instellingen
 
 Stop server
-== 
+== Stop server
 
 Run server
-== 
+== Laad server
 
 Server executable not found, can't run server
-== 
+== Server executable niet gevonden, de server kon niet worden gestart
 
 Editor
-== 
+== Editor
 
 [Start menu]
 Play
-== 
+== Speel
+
+Super
+== Super
+
+Team %d
+== Team %d
 
 Net
-== 
+== Net
 
 FPM
+== FPM
+
+Preparing demo playback
+== 
+
+Connected
+== 
+
+Loading map file from storage
+== 
+
+Why are you slowmo replaying to read this?
+== 
+
+Initializing components
+== 
+
+Initializing assets
+== 
+
+Initializing map logic
+== 
+
+Sending initial client info
+== 
+
+Position:
+== 
+
+Speed:
+== 
+
+Angle:
+== 
+
+Uploading map data to GPU
+== 
+
+Trying to determine UDP connectivity...
+== 
+
+UDP seems to be filtered.
+== 
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== 
+
+No answer from server yet.
+== 
+
+Getting game info
+== 
+
+Requesting to join the game
+== 
+
+Loading menu images
+== 
+
+Loading demo files
+== 
+
+Loading ghost files
+== 
+
+Download community skins
+== 
+
+Loading skin files
+== 
+
+Enable controller
+== 
+
+Controller %d: %s
+== 
+
+Click to cycle through all available controllers.
+== 
+
+[Ingame controller mode]
+Relative
+== 
+
+[Ingame controller mode]
+Absolute
+== 
+
+Ingame controller mode
+== 
+
+Ingame controller sens.
+== 
+
+UI controller sens.
+== 
+
+Controller jitter tolerance
+== 
+
+No controller found. Plug in a controller and restart the game.
+== 
+
+Device
+== 
+
+Status
+== 
+
+Aim bind
+== 
+
+Controller Axis #%d
+== 
+
+Mouse
+== 
+
+Ingame mouse sens.
+== 
+
+UI mouse sens.
+== 
+
+Controller
+== 
+
+Appearance
+== 
+
+Name Plate
+== 
+
+Hook Collisions
+== 
+
+Show health, shields and ammo
+== 
+
+DDRace HUD
+== 
+
+Show client IDs in scoreboard
+== 
+
+Show DDRace HUD
+== 
+
+Show jumps indicator
+== 
+
+Show dummy actions
+== 
+
+Show player position
+== 
+
+Show player speed
+== 
+
+Show player target angle
+== 
+
+Show freeze bars
+== 
+
+Opacity of freeze bars inside freeze
+== 
+
+Show hook strength indicator
+== 
+
+Hook collision line
+== 
+
+Hook collision line width
+== 
+
+Hook collision line opacity
+== 
+
+Colors of the hook collision line, in case of a possible collision with:
+== 
+
+Your movements are not taken into account when calculating the line colors
+== 
+
+Nothing hookable
+== 
+
+Something hookable
+== 
+
+A Tee
+== 
+
+Normal Color
+== 
+
+Highlight Color
+== 
+
+Extras
+== 
+
+Loading assets
+== 
+
+Loading race demo files
+== 
+
+Loading sound files
 == 

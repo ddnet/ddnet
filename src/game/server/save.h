@@ -1,9 +1,10 @@
 #ifndef GAME_SERVER_SAVE_H
 #define GAME_SERVER_SAVE_H
 
+#include <base/vmath.h>
+
 #include <engine/shared/protocol.h>
 #include <game/generated/protocol.h>
-#include <game/server/gamecontroller.h>
 
 class IGameController;
 class CGameContext;
@@ -18,13 +19,22 @@ public:
 	void Save(CCharacter *pchr);
 	void Load(CCharacter *pchr, int Team, bool IsSwap = false);
 	char *GetString(const CSaveTeam *pTeam);
-	int FromString(const char *String);
+	int FromString(const char *pString);
 	void LoadHookedPlayer(const CSaveTeam *pTeam);
 	bool IsHooking() const;
 	vec2 GetPos() const { return m_Pos; }
 	const char *GetName() const { return m_aName; }
 	int GetClientID() const { return m_ClientID; }
-	void SetClientID(int ClientID) { m_ClientID = ClientID; };
+	void SetClientID(int ClientID) { m_ClientID = ClientID; }
+
+	enum
+	{
+		HIT_ALL = 0,
+		HAMMER_HIT_DISABLED = 1,
+		SHOTGUN_HIT_DISABLED = 2,
+		GRENADE_HIT_DISABLED = 4,
+		LASER_HIT_DISABLED = 8
+	};
 
 private:
 	int m_ClientID;
@@ -52,31 +62,31 @@ private:
 	int m_LastWeapon;
 	int m_QueuedWeapon;
 
-	int m_SuperJump;
+	int m_EndlessJump;
 	int m_Jetpack;
 	int m_NinjaJetpack;
 	int m_FreezeTime;
-	int m_FreezeTick;
-	int m_DeepFreeze;
-	int m_LiveFreeze;
+	int m_FreezeStart;
+	int m_DeepFrozen;
+	int m_LiveFrozen;
 	int m_EndlessHook;
 	int m_DDRaceState;
 
-	int m_Hit;
-	int m_Collision;
+	int m_HitDisabledFlags;
+	int m_CollisionEnabled;
 	int m_TuneZone;
 	int m_TuneZoneOld;
-	int m_Hook;
+	int m_HookHitEnabled;
 	int m_Time;
 	vec2 m_Pos;
 	vec2 m_PrevPos;
 	int m_TeleCheckpoint;
 	int m_LastPenalty;
 
-	int m_CpTime;
-	int m_CpActive;
-	int m_CpLastBroadcast;
-	float m_aCpCurrent[25];
+	int m_TimeCpBroadcastEndTime;
+	int m_LastTimeCp;
+	int m_LastTimeCpBroadcasted;
+	float m_aCurrentTimeCp[MAX_CHECKPOINTS];
 
 	int m_NotEligibleForFinish;
 
@@ -113,12 +123,12 @@ private:
 class CSaveTeam
 {
 public:
-	CSaveTeam(IGameController *Controller);
+	CSaveTeam(IGameController *pController);
 	~CSaveTeam();
 	char *GetString();
 	int GetMembersCount() const { return m_MembersCount; }
 	// MatchPlayers has to be called afterwards
-	int FromString(const char *String);
+	int FromString(const char *pString);
 	// returns true if a team can load, otherwise writes a nice error Message in pMessage
 	bool MatchPlayers(const char (*paNames)[MAX_NAME_LENGTH], const int *pClientID, int NumPlayer, char *pMessage, int MessageLen);
 	int Save(int Team);
@@ -145,7 +155,7 @@ private:
 
 	int m_TeamState;
 	int m_MembersCount;
-	int m_NumSwitchers;
+	int m_HighestSwitchNumber;
 	int m_TeamLocked;
 	int m_Practice;
 };

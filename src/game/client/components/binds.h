@@ -2,10 +2,11 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #ifndef GAME_CLIENT_COMPONENTS_BINDS_H
 #define GAME_CLIENT_COMPONENTS_BINDS_H
-#include <engine/keys.h>
-#include <game/client/component.h>
 
-#include "console.h"
+#include <engine/console.h>
+#include <engine/keys.h>
+
+#include <game/client/component.h>
 
 class IConfigManager;
 
@@ -14,7 +15,7 @@ class CBinds : public CComponent
 	int GetKeyID(const char *pKeyName);
 
 	static void ConBind(IConsole::IResult *pResult, void *pUserData);
-	static void ConDumpBinds(IConsole::IResult *pResult, void *pUserData);
+	static void ConBinds(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnbind(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnbindAll(IConsole::IResult *pResult, void *pUserData);
 	class IConsole *GetConsole() const { return Console(); }
@@ -53,7 +54,7 @@ public:
 	const char *Get(int KeyID, int ModifierCombination);
 	void GetKey(const char *pBindStr, char *aBuf, unsigned BufSize);
 	int GetBindSlot(const char *pBindString, int *pModifierCombination);
-	static int GetModifierMask(IInput *i);
+	static int GetModifierMask(IInput *pInput);
 	static int GetModifierMaskOfKey(int Key);
 	static const char *GetModifierName(int Modifier);
 	static const char *GetKeyBindModifiersName(int ModifierCombination);

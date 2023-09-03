@@ -2,11 +2,15 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #ifndef GAME_CLIENT_COMPONENTS_CHAT_H
 #define GAME_CLIENT_COMPONENTS_CHAT_H
+#include <vector>
+
+#include <engine/console.h>
 #include <engine/shared/config.h>
+#include <engine/shared/protocol.h>
 #include <engine/shared/ringbuffer.h>
+
 #include <game/client/component.h>
 #include <game/client/lineinput.h>
-
 #include <game/client/skin.h>
 
 class CChat : public CComponent
@@ -25,8 +29,9 @@ class CChat : public CComponent
 	struct CLine
 	{
 		int64_t m_Time;
-		float m_YOffset[2];
+		float m_aYOffset[2];
 		int m_ClientID;
+		int m_TeamNumber;
 		bool m_Team;
 		bool m_Whisper;
 		int m_NameColor;
@@ -38,7 +43,7 @@ class CChat : public CComponent
 		int m_TextContainerIndex;
 		int m_QuadContainerIndex;
 
-		char m_aSkinName[sizeof(g_Config.m_ClPlayerSkin) / sizeof(g_Config.m_ClPlayerSkin[0])];
+		char m_aSkinName[std::size(g_Config.m_ClPlayerSkin)];
 		CSkin::SSkinTextures m_RenderSkin;
 		CSkin::SSkinMetrics m_RenderSkinMetrics;
 		bool m_CustomColoredSkin;
@@ -80,18 +85,31 @@ class CChat : public CComponent
 	char m_aCompletionBuffer[256];
 	int m_PlaceholderOffset;
 	int m_PlaceholderLength;
+	struct CRateablePlayer
+	{
+		int ClientID;
+		int Score;
+	};
+	CRateablePlayer m_aPlayerCompletionList[MAX_CLIENTS];
+	int m_PlayerCompletionListLength;
 
 	struct CCommand
 	{
-		const char *pName;
-		const char *pParams;
+		const char *m_pName;
+		const char *m_pParams;
 
-		bool operator<(const CCommand &Other) const { return str_comp(pName, Other.pName) < 0; }
-		bool operator<=(const CCommand &Other) const { return str_comp(pName, Other.pName) <= 0; }
-		bool operator==(const CCommand &Other) const { return str_comp(pName, Other.pName) == 0; }
+		CCommand() = default;
+		CCommand(const char *pName, const char *pParams) :
+			m_pName(pName), m_pParams(pParams)
+		{
+		}
+
+		bool operator<(const CCommand &Other) const { return str_comp(m_pName, Other.m_pName) < 0; }
+		bool operator<=(const CCommand &Other) const { return str_comp(m_pName, Other.m_pName) <= 0; }
+		bool operator==(const CCommand &Other) const { return str_comp(m_pName, Other.m_pName) == 0; }
 	};
 
-	sorted_array<CCommand> m_Commands;
+	std::vector<CCommand> m_vCommands;
 	bool m_ReverseTAB;
 
 	struct CHistoryEntry
@@ -115,11 +133,10 @@ class CChat : public CComponent
 
 	bool LineShouldHighlight(const char *pLine, const char *pName);
 	void StoreSave(const char *pText);
-	void Reset();
 
 public:
 	CChat();
-	virtual int Sizeof() const override { return sizeof(*this); }
+	int Sizeof() const override { return sizeof(*this); }
 
 	static constexpr float MESSAGE_PADDING_X = 5.0f;
 	static constexpr float MESSAGE_TEE_SIZE = 7.0f;
@@ -138,15 +155,17 @@ public:
 	void RegisterCommand(const char *pName, const char *pParams, int flags, const char *pHelp);
 	void Echo(const char *pString);
 
-	virtual void OnWindowResize() override;
-	virtual void OnConsoleInit() override;
-	virtual void OnStateChange(int NewState, int OldState) override;
-	virtual void OnRender() override;
-	virtual void RefindSkins();
-	virtual void OnPrepareLines();
-	virtual void OnRelease() override;
-	virtual void OnMessage(int MsgType, void *pRawMsg) override;
-	virtual bool OnInput(IInput::CEvent Event) override;
+	void OnWindowResize() override;
+	void OnConsoleInit() override;
+	void OnStateChange(int NewState, int OldState) override;
+	void OnRender() override;
+	void RefindSkins();
+	void OnPrepareLines();
+	void Reset();
+	void OnRelease() override;
+	void OnMessage(int MsgType, void *pRawMsg) override;
+	bool OnInput(IInput::CEvent Event) override;
+	void OnInit() override;
 
 	void RebuildChat();
 };

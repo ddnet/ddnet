@@ -1,8 +1,6 @@
-
 #ifndef GAME_CLIENT_SKIN_H
 #define GAME_CLIENT_SKIN_H
 #include <base/color.h>
-#include <base/tl/sorted_array.h>
 #include <base/vmath.h>
 #include <engine/graphics.h>
 #include <limits>
@@ -10,8 +8,6 @@
 // do this better and nicer
 struct CSkin
 {
-	bool m_IsVanilla;
-
 	struct SSkinTextures
 	{
 		IGraphics::CTextureHandle m_Body;
@@ -23,7 +19,7 @@ struct CSkin
 		IGraphics::CTextureHandle m_Hands;
 		IGraphics::CTextureHandle m_HandsOutline;
 
-		IGraphics::CTextureHandle m_Eyes[6];
+		IGraphics::CTextureHandle m_aEyes[6];
 
 		void Reset()
 		{
@@ -33,7 +29,7 @@ struct CSkin
 			m_FeetOutline = IGraphics::CTextureHandle();
 			m_Hands = IGraphics::CTextureHandle();
 			m_HandsOutline = IGraphics::CTextureHandle();
-			for(auto &Eye : m_Eyes)
+			for(auto &Eye : m_aEyes)
 				Eye = IGraphics::CTextureHandle();
 		}
 	};
@@ -132,9 +128,7 @@ struct CSkin
 	SSkinMetrics m_Metrics;
 
 	bool operator<(const CSkin &Other) const { return str_comp(m_aName, Other.m_aName) < 0; }
-
-	bool operator<(const char *pOther) const { return str_comp(m_aName, pOther) < 0; }
-	bool operator==(const char *pOther) const { return !str_comp(m_aName, pOther); }
+	bool operator==(const CSkin &Other) const { return !str_comp(m_aName, Other.m_aName); }
 };
 
 #endif

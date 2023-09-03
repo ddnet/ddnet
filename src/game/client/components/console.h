@@ -8,6 +8,8 @@
 
 #include <engine/console.h>
 
+#include <mutex>
+
 enum
 {
 	CONSOLE_CLOSED,
@@ -16,8 +18,11 @@ enum
 	CONSOLE_CLOSING,
 };
 
+class CConsoleLogger;
+
 class CGameConsole : public CComponent
 {
+	friend class CConsoleLogger;
 	class CInstance
 	{
 	public:
@@ -27,23 +32,25 @@ class CGameConsole : public CComponent
 			ColorRGBA m_PrintColor;
 			char m_aText[1];
 		};
+		std::mutex m_BacklogLock;
 		CStaticRingBuffer<CBacklogEntry, 1024 * 1024, CRingBufferBase::FLAG_RECYCLE> m_Backlog;
 		CStaticRingBuffer<char, 64 * 1024, CRingBufferBase::FLAG_RECYCLE> m_History;
 		char *m_pHistoryEntry;
 
 		CLineInput m_Input;
+		const char *m_pName;
 		int m_Type;
-		int m_CompletionEnumerationCount;
-		int m_BacklogActPage;
+		int m_BacklogCurPage;
 
 		CGameConsole *m_pGameConsole;
 
 		char m_aCompletionBuffer[128];
-		bool m_CompletionUsed;
 		int m_CompletionChosen;
+		char m_aCompletionBufferArgument[128];
+		int m_CompletionChosenArgument;
 		int m_CompletionFlagmask;
 		float m_CompletionRenderOffset;
-		bool m_ReverseTAB;
+		float m_CompletionRenderOffsetChange;
 
 		char m_aUser[32];
 		bool m_UserGot;
@@ -60,24 +67,26 @@ class CGameConsole : public CComponent
 		void ClearBacklog();
 		void ClearBacklogYOffsets();
 		void ClearHistory();
+		void Reset();
 
 		void ExecuteLine(const char *pLine);
 
 		void OnInput(IInput::CEvent Event);
-		void PrintLine(const char *pLine, ColorRGBA PrintColor = {1, 1, 1, 1});
+		void PrintLine(const char *pLine, int Len, ColorRGBA PrintColor);
 
 		const char *GetString() const { return m_Input.GetString(); }
-		static void PossibleCommandsCompleteCallback(const char *pStr, void *pUser);
+		static void PossibleCommandsCompleteCallback(int Index, const char *pStr, void *pUser);
+		static void PossibleArgumentsCompleteCallback(int Index, const char *pStr, void *pUser);
 	};
 
 	class IConsole *m_pConsole;
+	CConsoleLogger *m_pConsoleLogger = nullptr;
 
 	CInstance m_LocalConsole;
 	CInstance m_RemoteConsole;
 
 	CInstance *CurrentConsole();
 	float TimeNow();
-	int m_PrintCBIndex;
 
 	int m_ConsoleType;
 	int m_ConsoleState;
@@ -99,8 +108,7 @@ class CGameConsole : public CComponent
 	void Toggle(int Type);
 	void Dump(int Type);
 
-	static void PossibleCommandsRenderCallback(const char *pStr, void *pUser);
-	static void ClientConsolePrintCallback(const char *pStr, void *pUserData, ColorRGBA PrintColor = {1, 1, 1, 1});
+	static void PossibleCommandsRenderCallback(int Index, const char *pStr, void *pUser);
 	static void ConToggleLocalConsole(IConsole::IResult *pResult, void *pUserData);
 	static void ConToggleRemoteConsole(IConsole::IResult *pResult, void *pUserData);
 	static void ConClearLocalConsole(IConsole::IResult *pResult, void *pUserData);
@@ -109,7 +117,6 @@ class CGameConsole : public CComponent
 	static void ConDumpRemoteConsole(IConsole::IResult *pResult, void *pUserData);
 	static void ConConsolePageUp(IConsole::IResult *pResult, void *pUserData);
 	static void ConConsolePageDown(IConsole::IResult *pResult, void *pUserData);
-	static void ConchainConsoleOutputLevelUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
 public:
 	enum
@@ -119,6 +126,7 @@ public:
 	};
 
 	CGameConsole();
+	~CGameConsole();
 	virtual int Sizeof() const override { return sizeof(*this); }
 
 	void PrintLine(int Type, const char *pLine);

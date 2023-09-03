@@ -1,10 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
-#include <base/tl/sorted_array.h>
-
 #include <engine/demo.h>
-#include <engine/engine.h>
 
 #include <engine/shared/config.h>
 
@@ -13,7 +10,6 @@
 #include <game/client/components/damageind.h>
 #include <game/client/components/flow.h>
 #include <game/client/components/particles.h>
-#include <game/client/components/skins.h>
 #include <game/client/components/sounds.h>
 #include <game/client/gameclient.h>
 
@@ -23,6 +19,7 @@ inline vec2 RandomDir() { return normalize(vec2(random_float() - 0.5f, random_fl
 
 CEffects::CEffects()
 {
+	m_Add5hz = false;
 	m_Add50hz = false;
 	m_Add100hz = false;
 }
@@ -61,7 +58,7 @@ void CEffects::ResetDamageIndicator()
 	m_pClient->m_DamageInd.Reset();
 }
 
-void CEffects::PowerupShine(vec2 Pos, vec2 size)
+void CEffects::PowerupShine(vec2 Pos, vec2 Size)
 {
 	if(!m_Add50hz)
 		return;
@@ -69,7 +66,7 @@ void CEffects::PowerupShine(vec2 Pos, vec2 size)
 	CParticle p;
 	p.SetDefault();
 	p.m_Spr = SPRITE_PART_SLICE;
-	p.m_Pos = Pos + vec2((random_float() - 0.5f) * size.x, (random_float() - 0.5f) * size.y);
+	p.m_Pos = Pos + vec2((random_float() - 0.5f) * Size.x, (random_float() - 0.5f) * Size.y);
 	p.m_Vel = vec2(0, 0);
 	p.m_LifeSpan = 0.5f;
 	p.m_StartSize = 16.0f;
@@ -80,6 +77,31 @@ void CEffects::PowerupShine(vec2 Pos, vec2 size)
 	p.m_Friction = 0.9f;
 	p.m_FlowAffected = 0.0f;
 	m_pClient->m_Particles.Add(CParticles::GROUP_GENERAL, &p);
+}
+
+void CEffects::FreezingFlakes(vec2 Pos, vec2 Size)
+{
+	if(!m_Add5hz)
+		return;
+
+	CParticle p;
+	p.SetDefault();
+	p.m_Spr = SPRITE_PART_SNOWFLAKE;
+	p.m_Pos = Pos + vec2((random_float() - 0.5f) * Size.x, (random_float() - 0.5f) * Size.y);
+	p.m_Vel = vec2(0, 0);
+	p.m_LifeSpan = 1.5f;
+	p.m_StartSize = (random_float() + 0.5f) * 16.0f;
+	p.m_EndSize = p.m_StartSize * 0.5f;
+	p.m_UseAlphaFading = true;
+	p.m_StartAlpha = 1.0f;
+	p.m_EndAlpha = 0.0f;
+	p.m_Rot = random_float() * pi * 2;
+	p.m_Rotspeed = pi;
+	p.m_Gravity = random_float() * 250.0f;
+	p.m_Friction = 0.9f;
+	p.m_FlowAffected = 0.0f;
+	p.m_Collides = false;
+	m_pClient->m_Particles.Add(CParticles::GROUP_EXTRA, &p);
 }
 
 void CEffects::SmokeTrail(vec2 Pos, vec2 Vel, float Alpha, float TimePassed)
@@ -166,7 +188,13 @@ void CEffects::PlayerDeath(vec2 Pos, int ClientID)
 
 	if(ClientID >= 0)
 	{
-		if(m_pClient->m_aClients[ClientID].m_UseCustomColor)
+		// Use m_RenderInfo.m_CustomColoredSkin instead of m_UseCustomColor
+		// m_UseCustomColor says if the player's skin has a custom color (value sent from the client side)
+
+		// m_RenderInfo.m_CustomColoredSkin Defines if in the context of the game the color is being customized,
+		// Using this value if the game is teams (red and blue), this value will be true even if the skin is with the normal color.
+		// And will use the team body color to create player death effect instead of tee color
+		if(m_pClient->m_aClients[ClientID].m_RenderInfo.m_CustomColoredSkin)
 			BloodColor = m_pClient->m_aClients[ClientID].m_RenderInfo.m_ColorBody;
 		else
 		{
@@ -221,7 +249,6 @@ void CEffects::Explosion(vec2 Pos)
 	// add the smoke
 	for(int i = 0; i < 24; i++)
 	{
-		CParticle p;
 		p.SetDefault();
 		p.m_Spr = SPRITE_PART_SMOKE;
 		p.m_Pos = Pos;
@@ -254,50 +281,37 @@ void CEffects::HammerHit(vec2 Pos)
 
 void CEffects::OnRender()
 {
-	static int64_t LastUpdate100hz = 0;
-	static int64_t LastUpdate50hz = 0;
+	static int64_t s_LastUpdate100hz = 0;
+	static int64_t s_LastUpdate50hz = 0;
+	static int64_t s_LastUpdate5hz = 0;
 
+	float Speed = 1.0f;
 	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
-	{
-		const IDemoPlayer::CInfo *pInfo = DemoPlayer()->BaseInfo();
+		Speed = DemoPlayer()->BaseInfo()->m_Speed;
 
-		if(time() - LastUpdate100hz > time_freq() / (100 * pInfo->m_Speed))
-		{
-			m_Add100hz = true;
-			LastUpdate100hz = time();
-		}
-		else
-			m_Add100hz = false;
-
-		if(time() - LastUpdate50hz > time_freq() / (100 * pInfo->m_Speed))
-		{
-			m_Add50hz = true;
-			LastUpdate50hz = time();
-		}
-		else
-			m_Add50hz = false;
-
-		if(m_Add50hz)
-			m_pClient->m_Flow.Update();
-
-		return;
-	}
-
-	if(time() - LastUpdate100hz > time_freq() / 100)
+	if(time() - s_LastUpdate100hz > time_freq() / (100 * Speed))
 	{
 		m_Add100hz = true;
-		LastUpdate100hz = time();
+		s_LastUpdate100hz = time();
 	}
 	else
 		m_Add100hz = false;
 
-	if(time() - LastUpdate50hz > time_freq() / 100)
+	if(time() - s_LastUpdate50hz > time_freq() / (50 * Speed))
 	{
 		m_Add50hz = true;
-		LastUpdate50hz = time();
+		s_LastUpdate50hz = time();
 	}
 	else
 		m_Add50hz = false;
+
+	if(time() - s_LastUpdate5hz > time_freq() / (5 * Speed))
+	{
+		m_Add5hz = true;
+		s_LastUpdate5hz = time();
+	}
+	else
+		m_Add5hz = false;
 
 	if(m_Add50hz)
 		m_pClient->m_Flow.Update();

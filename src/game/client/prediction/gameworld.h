@@ -4,15 +4,17 @@
 #define GAME_CLIENT_PREDICTION_GAMEWORLD_H
 
 #include <game/gamecore.h>
+#include <game/teamscore.h>
 
 #include <list>
 
-class CEntity;
+class CCollision;
 class CCharacter;
+class CEntity;
 
 class CGameWorld
 {
-	friend class CCharacter;
+	friend CCharacter;
 
 public:
 	enum
@@ -34,14 +36,15 @@ public:
 	CEntity *FindFirst(int Type);
 	CEntity *FindLast(int Type);
 	int FindEntities(vec2 Pos, float Radius, CEntity **ppEnts, int Max, int Type);
-	class CCharacter *IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, vec2 &NewPos, class CCharacter *pNotThis = 0, int CollideWith = -1, class CCharacter *pThisOnly = 0);
+	CCharacter *IntersectCharacter(vec2 Pos0, vec2 Pos1, float Radius, vec2 &NewPos, CCharacter *pNotThis = nullptr, int CollideWith = -1, CCharacter *pThisOnly = nullptr);
 	void InsertEntity(CEntity *pEntity, bool Last = false);
 	void RemoveEntity(CEntity *pEntity);
+	void RemoveCharacter(CCharacter *pChar);
 	void Tick();
 
 	// DDRace
 	void ReleaseHooked(int ClientID);
-	std::list<class CCharacter *> IntersectedCharacters(vec2 Pos0, vec2 Pos1, float Radius, class CEntity *pNotThis = 0);
+	std::list<CCharacter *> IntersectedCharacters(vec2 Pos0, vec2 Pos1, float Radius, CEntity *pNotThis = nullptr);
 
 	int m_GameTick;
 	int m_GameTickSpeed;
@@ -50,11 +53,12 @@ public:
 	// getter for server variables
 	int GameTick() { return m_GameTick; }
 	int GameTickSpeed() { return m_GameTickSpeed; }
-	class CCollision *Collision() { return m_pCollision; }
+	CCollision *Collision() { return m_pCollision; }
 	CTeamsCore *Teams() { return &m_Teams; }
+	std::vector<SSwitchers> &Switchers() { return m_Core.m_vSwitchers; }
 	CTuningParams *Tuning();
 	CEntity *GetEntity(int ID, int EntityType);
-	class CCharacter *GetCharacterByID(int ID) { return (ID >= 0 && ID < MAX_CLIENTS) ? m_apCharacters[ID] : 0; }
+	CCharacter *GetCharacterByID(int ID) { return (ID >= 0 && ID < MAX_CLIENTS) ? m_apCharacters[ID] : nullptr; }
 
 	// from gamecontext
 	void CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage, int ActivatedTeam, int64_t Mask);
@@ -72,6 +76,8 @@ public:
 		bool m_PredictDDRace;
 		bool m_IsSolo;
 		bool m_UseTuneZones;
+		bool m_BugDDRaceInput;
+		bool m_NoWeakHookAndBounce;
 	} m_WorldConfig;
 
 	bool m_IsValidCopy;
@@ -97,7 +103,7 @@ private:
 	CEntity *m_pNextTraverseEntity = nullptr;
 	CEntity *m_apFirstEntityTypes[NUM_ENTTYPES];
 
-	class CCharacter *m_apCharacters[MAX_CLIENTS];
+	CCharacter *m_apCharacters[MAX_CLIENTS];
 };
 
 class CCharOrder

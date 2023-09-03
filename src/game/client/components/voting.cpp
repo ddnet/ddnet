@@ -3,7 +3,6 @@
 #include <engine/shared/config.h>
 
 #include "voting.h"
-#include <base/vmath.h>
 #include <game/client/components/sounds.h>
 #include <game/client/render.h>
 #include <game/generated/protocol.h>
@@ -28,9 +27,9 @@ void CVoting::ConVote(IConsole::IResult *pResult, void *pUserData)
 void CVoting::Callvote(const char *pType, const char *pValue, const char *pReason)
 {
 	CNetMsg_Cl_CallVote Msg = {0};
-	Msg.m_Type = pType;
-	Msg.m_Value = pValue;
-	Msg.m_Reason = pReason;
+	Msg.m_pType = pType;
+	Msg.m_pValue = pValue;
+	Msg.m_pReason = pReason;
 	Client()->SendPackMsgActive(&Msg, MSGFLAG_VITAL);
 }
 
@@ -76,7 +75,7 @@ void CVoting::CallvoteOption(int OptionID, const char *pReason, bool ForceVote)
 			if(ForceVote)
 			{
 				char aBuf[128];
-				str_copy(aBuf, "force_vote option \"", sizeof(aBuf));
+				str_copy(aBuf, "force_vote option \"");
 				char *pDst = aBuf + str_length(aBuf);
 				str_escape(&pDst, pOption->m_aDescription, aBuf + sizeof(aBuf));
 				str_append(aBuf, "\" \"", sizeof(aBuf));
@@ -103,7 +102,7 @@ void CVoting::RemovevoteOption(int OptionID)
 		if(OptionID == 0)
 		{
 			char aBuf[128];
-			str_copy(aBuf, "remove_vote \"", sizeof(aBuf));
+			str_copy(aBuf, "remove_vote \"");
 			char *pDst = aBuf + str_length(aBuf);
 			str_escape(&pDst, pOption->m_aDescription, aBuf + sizeof(aBuf));
 			str_append(aBuf, "\"", sizeof(aBuf));
@@ -119,7 +118,7 @@ void CVoting::RemovevoteOption(int OptionID)
 void CVoting::AddvoteOption(const char *pDescription, const char *pCommand)
 {
 	char aBuf[128];
-	str_copy(aBuf, "add_vote \"", sizeof(aBuf));
+	str_copy(aBuf, "add_vote \"");
 	char *pDst = aBuf + str_length(aBuf);
 	str_escape(&pDst, pDescription, aBuf + sizeof(aBuf));
 	str_append(aBuf, "\" \"", sizeof(aBuf));
@@ -170,7 +169,7 @@ void CVoting::AddOption(const char *pDescription)
 	if(!m_pFirst)
 		m_pFirst = pOption;
 
-	str_copy(pOption->m_aDescription, pDescription, sizeof(pOption->m_aDescription));
+	str_copy(pOption->m_aDescription, pDescription);
 	++m_NumVoteOptions;
 }
 
@@ -197,7 +196,7 @@ void CVoting::OnReset()
 
 void CVoting::OnConsoleInit()
 {
-	Console()->Register("callvote", "s[name] s[command] ?r[reason]", CFGFLAG_CLIENT, ConCallvote, this, "Call vote");
+	Console()->Register("callvote", "s[command] s[id] ?r[reason]", CFGFLAG_CLIENT, ConCallvote, this, "Call vote");
 	Console()->Register("vote", "r['yes'|'no']", CFGFLAG_CLIENT, ConVote, this, "Vote yes/no");
 }
 
@@ -209,8 +208,8 @@ void CVoting::OnMessage(int MsgType, void *pRawMsg)
 		OnReset();
 		if(pMsg->m_Timeout)
 		{
-			str_copy(m_aDescription, pMsg->m_pDescription, sizeof(m_aDescription));
-			str_copy(m_aReason, pMsg->m_pReason, sizeof(m_aReason));
+			str_copy(m_aDescription, pMsg->m_pDescription);
+			str_copy(m_aReason, pMsg->m_pReason);
 			m_Closetime = time() + time_freq() * pMsg->m_Timeout;
 
 			if(Client()->RconAuthed())
@@ -305,13 +304,13 @@ void CVoting::OnRender()
 
 void CVoting::RenderBars(CUIRect Bars, bool Text)
 {
-	RenderTools()->DrawUIRect(&Bars, ColorRGBA(0.8f, 0.8f, 0.8f, 0.5f), CUI::CORNER_ALL, Bars.h / 3);
+	Bars.Draw(ColorRGBA(0.8f, 0.8f, 0.8f, 0.5f), IGraphics::CORNER_ALL, Bars.h / 3);
 
 	CUIRect Splitter = Bars;
 	Splitter.x = Splitter.x + Splitter.w / 2;
 	Splitter.w = Splitter.h / 2.0f;
 	Splitter.x -= Splitter.w / 2;
-	RenderTools()->DrawUIRect(&Splitter, ColorRGBA(0.4f, 0.4f, 0.4f, 0.5f), CUI::CORNER_ALL, Splitter.h / 4);
+	Splitter.Draw(ColorRGBA(0.4f, 0.4f, 0.4f, 0.5f), IGraphics::CORNER_ALL, Splitter.h / 4);
 
 	if(m_Total)
 	{
@@ -320,7 +319,7 @@ void CVoting::RenderBars(CUIRect Bars, bool Text)
 		{
 			CUIRect YesArea = Bars;
 			YesArea.w *= m_Yes / (float)m_Total;
-			RenderTools()->DrawUIRect(&YesArea, ColorRGBA(0.2f, 0.9f, 0.2f, 0.85f), CUI::CORNER_ALL, Bars.h / 3);
+			YesArea.Draw(ColorRGBA(0.2f, 0.9f, 0.2f, 0.85f), IGraphics::CORNER_ALL, Bars.h / 3);
 
 			if(Text)
 			{
@@ -338,7 +337,7 @@ void CVoting::RenderBars(CUIRect Bars, bool Text)
 			CUIRect NoArea = Bars;
 			NoArea.w *= m_No / (float)m_Total;
 			NoArea.x = (Bars.x + Bars.w) - NoArea.w;
-			RenderTools()->DrawUIRect(&NoArea, ColorRGBA(0.9f, 0.2f, 0.2f, 0.85f), CUI::CORNER_ALL, Bars.h / 3);
+			NoArea.Draw(ColorRGBA(0.9f, 0.2f, 0.2f, 0.85f), IGraphics::CORNER_ALL, Bars.h / 3);
 
 			if(Text)
 			{

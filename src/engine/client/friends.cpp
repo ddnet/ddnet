@@ -113,8 +113,8 @@ void CFriends::AddFriend(const char *pName, const char *pClan)
 			return;
 	}
 
-	str_copy(m_aFriends[m_NumFriends].m_aName, pName, sizeof(m_aFriends[m_NumFriends].m_aName));
-	str_copy(m_aFriends[m_NumFriends].m_aClan, pClan, sizeof(m_aFriends[m_NumFriends].m_aClan));
+	str_copy(m_aFriends[m_NumFriends].m_aName, pName);
+	str_copy(m_aFriends[m_NumFriends].m_aClan, pClan);
 	m_aFriends[m_NumFriends].m_NameHash = NameHash;
 	m_aFriends[m_NumFriends].m_ClanHash = ClanHash;
 	++m_NumFriends;
@@ -166,7 +166,7 @@ void CFriends::ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserDat
 	const char *pEnd = aBuf + sizeof(aBuf) - 4;
 	for(int i = 0; i < pSelf->m_NumFriends; ++i)
 	{
-		str_copy(aBuf, pSelf->m_Foes ? "add_foe " : "add_friend ", sizeof(aBuf));
+		str_copy(aBuf, pSelf->m_Foes ? "add_foe " : "add_friend ");
 
 		str_append(aBuf, "\"", sizeof(aBuf));
 		char *pDst = aBuf + str_length(aBuf);

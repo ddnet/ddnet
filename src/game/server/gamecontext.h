@@ -3,23 +3,21 @@
 #ifndef GAME_SERVER_GAMECONTEXT_H
 #define GAME_SERVER_GAMECONTEXT_H
 
-#include <engine/antibot.h>
 #include <engine/console.h>
 #include <engine/server.h>
 
+#include <game/collision.h>
 #include <game/layers.h>
 #include <game/mapbugs.h>
 #include <game/voting.h>
 
-#include <base/tl/array.h>
-#include <base/tl/string.h>
-
 #include "eventhandler.h"
-//#include "gamecontroller.h"
+#include "game/generated/protocol.h"
 #include "gameworld.h"
 #include "teehistorian.h"
 
 #include <memory>
+#include <string>
 
 /*
 	Tick
@@ -48,15 +46,17 @@ enum
 	NUM_TUNEZONES = 256
 };
 
+class CCharacter;
 class CConfig;
 class CHeap;
 class CPlayer;
 class CScore;
-class IConsole;
+class CUnpacker;
+class IAntibot;
 class IGameController;
 class IEngine;
 class IStorage;
-struct CAntibotData;
+struct CAntibotRoundData;
 struct CScoreRandomMapResult;
 
 class CGameContext : public IGameServer
@@ -73,7 +73,7 @@ class CGameContext : public IGameServer
 	CNetObjHandler m_NetObjHandler;
 	CTuningParams m_Tuning;
 	CTuningParams m_aTuningList[NUM_TUNEZONES];
-	array<string> m_aCensorlist;
+	std::vector<std::string> m_vCensorlist;
 
 	bool m_TeeHistorianActive;
 	CTeeHistorian m_TeeHistorian;
@@ -90,7 +90,7 @@ class CGameContext : public IGameServer
 	static void ConTuneParam(IConsole::IResult *pResult, void *pUserData);
 	static void ConToggleTuneParam(IConsole::IResult *pResult, void *pUserData);
 	static void ConTuneReset(IConsole::IResult *pResult, void *pUserData);
-	static void ConTuneDump(IConsole::IResult *pResult, void *pUserData);
+	static void ConTunes(IConsole::IResult *pResult, void *pUserData);
 	static void ConTuneZone(IConsole::IResult *pResult, void *pUserData);
 	static void ConTuneDumpZone(IConsole::IResult *pResult, void *pUserData);
 	static void ConTuneResetZone(IConsole::IResult *pResult, void *pUserData);
@@ -150,6 +150,13 @@ public:
 
 	CEventHandler m_Events;
 	CPlayer *m_apPlayers[MAX_CLIENTS];
+	// keep last input to always apply when none is sent
+	CNetObj_PlayerInput m_aLastPlayerInput[MAX_CLIENTS];
+	bool m_aPlayerHasInput[MAX_CLIENTS];
+
+	// returns last input if available otherwise nulled PlayerInput object
+	// ClientID has to be valid
+	CNetObj_PlayerInput GetLastPlayerInput(int ClientID) const;
 
 	IGameController *m_pController;
 	CGameWorld m_World;
@@ -157,6 +164,7 @@ public:
 	// helper functions
 	class CCharacter *GetPlayerChar(int ClientID);
 	bool EmulateBug(int Bug);
+	std::vector<SSwitchers> &Switchers() { return m_World.m_Core.m_vSwitchers; }
 
 	// voting
 	void StartVote(const char *pDesc, const char *pCommand, const char *pReason, const char *pSixupDesc);
@@ -227,7 +235,7 @@ public:
 	void SendSettings(int ClientID);
 	void SendBroadcast(const char *pText, int ClientID, bool IsImportant = true);
 
-	void List(int ClientID, const char *filter);
+	void List(int ClientID, const char *pFilter);
 
 	void SendGameMsg(int GameMsgID, int ClientID);
 	void SendGameMsg(int GameMsgID, int ParaI1, int ClientID);
@@ -244,51 +252,53 @@ public:
 	void LoadMapSettings();
 
 	// engine events
-	virtual void OnInit();
-	virtual void OnConsoleInit();
-	virtual void OnMapChange(char *pNewMapName, int MapNameSize);
-	virtual void OnShutdown();
+	void OnInit() override;
+	void OnConsoleInit() override;
+	void OnMapChange(char *pNewMapName, int MapNameSize) override;
+	void OnShutdown() override;
 
-	virtual void OnTick();
-	virtual void OnPreSnap();
-	virtual void OnSnap(int ClientID);
-	virtual void OnPostSnap();
+	void OnTick() override;
+	void OnPreSnap() override;
+	void OnSnap(int ClientID) override;
+	void OnPostSnap() override;
 
-	void *PreProcessMsg(int *MsgID, CUnpacker *pUnpacker, int ClientID);
+	void *PreProcessMsg(int *pMsgID, CUnpacker *pUnpacker, int ClientID);
 	void CensorMessage(char *pCensoredMessage, const char *pMessage, int Size);
-	virtual void OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID);
+	void OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID) override;
 
-	virtual bool OnClientDataPersist(int ClientID, void *pData);
-	virtual void OnClientConnected(int ClientID, void *pData);
-	virtual void OnClientEnter(int ClientID);
-	virtual void OnClientDrop(int ClientID, const char *pReason);
-	virtual void OnClientDirectInput(int ClientID, void *pInput);
-	virtual void OnClientPredictedInput(int ClientID, void *pInput);
-	virtual void OnClientPredictedEarlyInput(int ClientID, void *pInput);
+	bool OnClientDataPersist(int ClientID, void *pData) override;
+	void OnClientConnected(int ClientID, void *pData) override;
+	void OnClientEnter(int ClientID) override;
+	void OnClientDrop(int ClientID, const char *pReason) override;
+	void OnClientPrepareInput(int ClientID, void *pInput) override;
+	void OnClientDirectInput(int ClientID, void *pInput) override;
+	void OnClientPredictedInput(int ClientID, void *pInput) override;
+	void OnClientPredictedEarlyInput(int ClientID, void *pInput) override;
 
-	virtual void OnClientEngineJoin(int ClientID, bool Sixup);
-	virtual void OnClientEngineDrop(int ClientID, const char *pReason);
+	void OnClientEngineJoin(int ClientID, bool Sixup) override;
+	void OnClientEngineDrop(int ClientID, const char *pReason) override;
 
-	virtual bool IsClientReady(int ClientID) const;
-	virtual bool IsClientPlayer(int ClientID) const;
-	virtual int PersistentClientDataSize() const { return sizeof(CPersistentClientData); }
+	bool IsClientReady(int ClientID) const override;
+	bool IsClientPlayer(int ClientID) const override;
+	int PersistentClientDataSize() const override { return sizeof(CPersistentClientData); }
 
-	virtual CUuid GameUuid() const;
-	virtual const char *GameType() const;
-	virtual const char *Version() const;
-	virtual const char *NetVersion() const;
+	CUuid GameUuid() const override;
+	const char *GameType() const override;
+	const char *Version() const override;
+	const char *NetVersion() const override;
 
 	// DDRace
-	void OnPreTickTeehistorian();
+	void OnPreTickTeehistorian() override;
 	bool OnClientDDNetVersionKnown(int ClientID);
-	virtual void FillAntibot(CAntibotRoundData *pData);
+	void FillAntibot(CAntibotRoundData *pData) override;
 	int ProcessSpamProtection(int ClientID, bool RespectChatInitialDelay = true);
 	int GetDDRaceTeam(int ClientID);
 	// Describes the time when the first player joined the server.
 	int64_t m_NonEmptySince;
 	int64_t m_LastMapVote;
 	int GetClientVersion(int ClientID) const;
-	bool PlayerExists(int ClientID) const { return m_apPlayers[ClientID]; }
+	int64_t ClientsMaskExcludeClientVersionAndHigher(int Version);
+	bool PlayerExists(int ClientID) const override { return m_apPlayers[ClientID]; }
 	// Returns true if someone is actively moderating.
 	bool PlayerModerating() const;
 	void ForceVote(int EnforcerID, bool Success);
@@ -300,8 +310,10 @@ public:
 	std::shared_ptr<CScoreRandomMapResult> m_SqlRandomMapResult;
 
 private:
+	// starting 1 to make 0 the special value "no client id"
+	uint32_t NextUniqueClientID = 1;
 	bool m_VoteWillPass;
-	class CScore *m_pScore;
+	CScore *m_pScore;
 
 	//DDRace Console Commands
 
@@ -312,6 +324,8 @@ private:
 	static void ConUnEndlessHook(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnSolo(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnDeep(IConsole::IResult *pResult, void *pUserData);
+	static void ConLiveFreeze(IConsole::IResult *pResult, void *pUserData);
+	static void ConUnLiveFreeze(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnSuper(IConsole::IResult *pResult, void *pUserData);
 	static void ConSuper(IConsole::IResult *pResult, void *pUserData);
 	static void ConShotgun(IConsole::IResult *pResult, void *pUserData);
@@ -358,6 +372,7 @@ private:
 	static void ConTimes(IConsole::IResult *pResult, void *pUserData);
 	static void ConPoints(IConsole::IResult *pResult, void *pUserData);
 	static void ConTopPoints(IConsole::IResult *pResult, void *pUserData);
+	static void ConTimeCP(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConUTF8(IConsole::IResult *pResult, void *pUserData);
 	static void ConDND(IConsole::IResult *pResult, void *pUserData);
@@ -440,7 +455,7 @@ private:
 
 public:
 	CLayers *Layers() { return &m_Layers; }
-	class CScore *Score() { return m_pScore; }
+	CScore *Score() { return m_pScore; }
 
 	enum
 	{
@@ -455,22 +470,17 @@ public:
 	int m_VoteVictim;
 	int m_VoteEnforcer;
 
-	inline bool IsOptionVote() const { return m_VoteType == VOTE_TYPE_OPTION; };
-	inline bool IsKickVote() const { return m_VoteType == VOTE_TYPE_KICK; };
-	inline bool IsSpecVote() const { return m_VoteType == VOTE_TYPE_SPECTATE; };
+	inline bool IsOptionVote() const { return m_VoteType == VOTE_TYPE_OPTION; }
+	inline bool IsKickVote() const { return m_VoteType == VOTE_TYPE_KICK; }
+	inline bool IsSpecVote() const { return m_VoteType == VOTE_TYPE_SPECTATE; }
 
 	void SendRecord(int ClientID);
-	static void SendChatResponse(const char *pLine, void *pUser, ColorRGBA PrintColor = {1, 1, 1, 1});
-	static void SendChatResponseAll(const char *pLine, void *pUser);
-	virtual void OnSetAuthed(int ClientID, int Level);
+	void OnSetAuthed(int ClientID, int Level) override;
 	virtual bool PlayerCollision();
 	virtual bool PlayerHooking();
 	virtual float PlayerJetpack();
 
 	void ResetTuning();
-
-	int m_ChatResponseTargetID;
-	int m_ChatPrintCBIndex;
 };
 
 inline int64_t CmaskAll() { return -1LL; }

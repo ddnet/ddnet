@@ -6,7 +6,7 @@
 #if defined(CONF_DISCORD) && !(defined(CONF_ARCH_ARM64) && defined(CONF_PLATFORM_MACOS))
 #include <discord_game_sdk.h>
 
-typedef enum EDiscordResult (*FDiscordCreate)(DiscordVersion, struct DiscordCreateParams *, struct IDiscordCore **);
+typedef enum EDiscordResult DISCORD_API (*FDiscordCreate)(DiscordVersion, struct DiscordCreateParams *, struct IDiscordCore **);
 
 #if defined(CONF_DISCORD_DYNAMIC)
 #include <dlfcn.h>
@@ -56,15 +56,15 @@ public:
 		m_pActivityManager = m_pCore->get_activity_manager(m_pCore);
 		return false;
 	}
-	void Update()
+	void Update() override
 	{
 		m_pCore->run_callbacks(m_pCore);
 	}
-	void ClearGameInfo()
+	void ClearGameInfo() override
 	{
 		m_pActivityManager->clear_activity(m_pActivityManager, 0, 0);
 	}
-	void SetGameInfo(NETADDR ServerAddr, const char *pMapName)
+	void SetGameInfo(NETADDR ServerAddr, const char *pMapName) override
 	{
 		DiscordActivity Activity;
 		mem_zero(&Activity, sizeof(DiscordActivity));
@@ -100,9 +100,9 @@ IDiscord *CreateDiscordImpl()
 
 class CDiscordStub : public IDiscord
 {
-	void Update() {}
-	void ClearGameInfo() {}
-	void SetGameInfo(NETADDR ServerAddr, const char *pMapName) {}
+	void Update() override {}
+	void ClearGameInfo() override {}
+	void SetGameInfo(NETADDR ServerAddr, const char *pMapName) override {}
 };
 
 IDiscord *CreateDiscord()

@@ -3,15 +3,19 @@
 #include <cctype>
 
 #include <base/system.h>
-#include <engine/serverbrowser.h>
 #include <engine/shared/config.h>
 #include <engine/storage.h>
 
 #include <game/client/race.h>
+#include <game/localization.h>
 
 #include "race_demo.h"
 
 #include <game/client/gameclient.h>
+
+#include <chrono>
+
+using namespace std::chrono_literals;
 
 const char *CRaceDemo::ms_pRaceDemoDir = "demos/auto/race";
 
@@ -24,7 +28,7 @@ struct CDemoItem
 struct CDemoListParam
 {
 	const CRaceDemo *m_pThis;
-	std::vector<CDemoItem> *m_plDemos;
+	std::vector<CDemoItem> *m_pvDemos;
 	const char *pMap;
 };
 
@@ -36,7 +40,7 @@ void CRaceDemo::GetPath(char *pBuf, int Size, int Time) const
 	const char *pMap = Client()->GetCurrentMap();
 
 	char aPlayerName[MAX_NAME_LENGTH];
-	str_copy(aPlayerName, Client()->PlayerName(), sizeof(aPlayerName));
+	str_copy(aPlayerName, Client()->PlayerName());
 	str_sanitize_filename(aPlayerName);
 
 	if(Time < 0)
@@ -180,9 +184,16 @@ void CRaceDemo::StopRecord(int Time)
 	m_RecordStopTick = -1;
 }
 
+struct SRaceDemoFetchUser
+{
+	CRaceDemo *m_pThis;
+	CDemoListParam *m_pParam;
+};
+
 int CRaceDemo::RaceDemolistFetchCallback(const CFsFileInfo *pInfo, int IsDir, int StorageType, void *pUser)
 {
-	CDemoListParam *pParam = (CDemoListParam *)pUser;
+	auto *pRealUser = (SRaceDemoFetchUser *)pUser;
+	auto *pParam = pRealUser->m_pParam;
 	int MapLen = str_length(pParam->pMap);
 	if(IsDir || !str_endswith(pInfo->m_pName, ".demo") || !str_startswith(pInfo->m_pName, pParam->pMap) || pInfo->m_pName[MapLen] != '_')
 		return 0;
@@ -198,7 +209,7 @@ int CRaceDemo::RaceDemolistFetchCallback(const CFsFileInfo *pInfo, int IsDir, in
 	if(g_Config.m_ClDemoName)
 	{
 		char aPlayerName[MAX_NAME_LENGTH];
-		str_copy(aPlayerName, pParam->m_pThis->Client()->PlayerName(), sizeof(aPlayerName));
+		str_copy(aPlayerName, pParam->m_pThis->Client()->PlayerName());
 		str_sanitize_filename(aPlayerName);
 
 		if(pTEnd[0] != '_' || str_comp(pTEnd + 1, aPlayerName) != 0)
@@ -209,19 +220,28 @@ int CRaceDemo::RaceDemolistFetchCallback(const CFsFileInfo *pInfo, int IsDir, in
 
 	Item.m_Time = CRaceHelper::TimeFromSecondsStr(pTime);
 	if(Item.m_Time > 0)
-		pParam->m_plDemos->push_back(Item);
+		pParam->m_pvDemos->push_back(Item);
+
+	if(time_get_nanoseconds() - pRealUser->m_pThis->m_RaceDemosLoadStartTime > 500ms)
+	{
+		pRealUser->m_pThis->GameClient()->m_Menus.RenderLoading(Localize("Loading race demo files"), "", 0, false);
+	}
 
 	return 0;
 }
 
-bool CRaceDemo::CheckDemo(int Time) const
+bool CRaceDemo::CheckDemo(int Time)
 {
-	std::vector<CDemoItem> lDemos;
-	CDemoListParam Param = {this, &lDemos, Client()->GetCurrentMap()};
-	Storage()->ListDirectoryInfo(IStorage::TYPE_SAVE, ms_pRaceDemoDir, RaceDemolistFetchCallback, &Param);
+	std::vector<CDemoItem> vDemos;
+	CDemoListParam Param = {this, &vDemos, Client()->GetCurrentMap()};
+	m_RaceDemosLoadStartTime = time_get_nanoseconds();
+	SRaceDemoFetchUser User;
+	User.m_pParam = &Param;
+	User.m_pThis = this;
+	Storage()->ListDirectoryInfo(IStorage::TYPE_SAVE, ms_pRaceDemoDir, RaceDemolistFetchCallback, &User);
 
 	// loop through demo files
-	for(auto &Demo : lDemos)
+	for(auto &Demo : vDemos)
 	{
 		if(Time >= Demo.m_Time) // found a better demo
 			return false;

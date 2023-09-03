@@ -6,6 +6,8 @@
 #include <engine/console.h>
 
 class CConfig;
+class CNetBan;
+class ColorRGBA;
 
 class CEcon
 {
@@ -39,16 +41,16 @@ class CEcon
 	int m_UserClientID;
 
 	static void SendLineCB(const char *pLine, void *pUserData, ColorRGBA PrintColor = {1, 1, 1, 1});
-	static void ConchainEconOutputLevelUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConLogout(IConsole::IResult *pResult, void *pUserData);
 
 	static int NewClientCallback(int ClientID, void *pUser);
 	static int DelClientCallback(int ClientID, const char *pReason, void *pUser);
 
 public:
+	CEcon();
 	IConsole *Console() { return m_pConsole; }
 
-	void Init(CConfig *pConfig, IConsole *pConsole, class CNetBan *pNetBan);
+	void Init(CConfig *pConfig, IConsole *pConsole, CNetBan *pNetBan);
 	void Update();
 	void Send(int ClientID, const char *pLine);
 	void Shutdown();

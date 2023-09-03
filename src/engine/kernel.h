@@ -19,7 +19,7 @@ protected:
 
 public:
 	IInterface() :
-		m_pKernel(0) {}
+		m_pKernel(nullptr) {}
 	virtual ~IInterface() {}
 };
 
@@ -34,9 +34,9 @@ private:
 class IKernel
 {
 	// hide the implementation
-	virtual bool RegisterInterfaceImpl(const char *InterfaceName, IInterface *pInterface, bool Destroy) = 0;
-	virtual bool ReregisterInterfaceImpl(const char *InterfaceName, IInterface *pInterface) = 0;
-	virtual IInterface *RequestInterfaceImpl(const char *InterfaceName) = 0;
+	virtual bool RegisterInterfaceImpl(const char *pInterfaceName, IInterface *pInterface, bool Destroy) = 0;
+	virtual bool ReregisterInterfaceImpl(const char *pInterfaceName, IInterface *pInterface) = 0;
+	virtual IInterface *RequestInterfaceImpl(const char *pInterfaceName) = 0;
 
 public:
 	static IKernel *Create();

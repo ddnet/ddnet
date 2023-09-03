@@ -47,7 +47,7 @@ How to build:
 How to build the ddnet-libs for Android:
 ========================================
 -	There is a script to automatically download and build all repositories, this requires an active internet connection:
-	`scripts/android/gen_android_libs.sh <directory to build in>`
+	`scripts/compile_libs/gen_libs.sh <directory to build in> android`
 	Warning!: DO NOT CHOOSE A DIRECTORY INSIDE THE SOURCE TREE
 	
 	After the script finished executing it should have created a ddnet-libs directory which created all libs in the right directory format and can be merged with ddnet-libs in the source directory

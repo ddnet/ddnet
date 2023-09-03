@@ -7,6 +7,7 @@
 #include <engine/map.h>
 
 #include <game/generated/protocol7.h>
+#include <game/generated/protocol.h>
 
 /*
 	Class: Game Controller

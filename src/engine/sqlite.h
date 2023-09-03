@@ -2,8 +2,8 @@
 #define ENGINE_SQLITE_H
 #include <memory>
 
-typedef struct sqlite3 sqlite3;
-typedef struct sqlite3_stmt sqlite3_stmt;
+struct sqlite3;
+struct sqlite3_stmt;
 class IConsole;
 class IStorage;
 

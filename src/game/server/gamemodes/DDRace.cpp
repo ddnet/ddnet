@@ -9,6 +9,7 @@
 #include <game/server/entities/flag.h>
 #include <game/server/gamecontext.h>
 #include <game/server/player.h>
+#include <game/server/score.h>
 #include <game/version.h>
 
 #define GAME_TYPE_NAME "gCTF"
@@ -44,7 +45,7 @@ void CGameControllerDDRace::OnCharacterSpawn(CCharacter *pChr)
 void CGameControllerDDRace::HandleCharacterTiles(CCharacter *pChr, int MapIndex)
 {
 	CPlayer *pPlayer = pChr->GetPlayer();
-	int ClientID = pPlayer->GetCID();
+	const int ClientID = pPlayer->GetCID();
 
 	int m_TileIndex = GameServer()->Collision()->GetTileIndex(MapIndex);
 	int m_TileFIndex = GameServer()->Collision()->GetFTileIndex(MapIndex);
@@ -93,7 +94,12 @@ void CGameControllerDDRace::HandleCharacterTiles(CCharacter *pChr, int MapIndex)
 		}
 
 		m_Teams.OnCharacterStart(ClientID);
-		pChr->m_CpActive = -2;
+		pChr->m_LastTimeCp = -1;
+		pChr->m_LastTimeCpBroadcasted = -1;
+		for(float &CurrentTimeCp : pChr->m_aCurrentTimeCp)
+		{
+			CurrentTimeCp = 0.0f;
+		}
 	}
 
 	// finish
@@ -318,7 +324,7 @@ void CGameControllerDDRace::FlagTick()
 		{
 			if(m_apFlags[fi ^ 1] && m_apFlags[fi ^ 1]->IsAtStand())
 			{
-				if(distance(F->GetPos(), m_apFlags[fi ^ 1]->GetPos()) < CFlag::ms_PhysSize + CCharacter::ms_PhysSize)
+				if(distance(F->GetPos(), m_apFlags[fi ^ 1]->GetPos()) < CFlag::ms_PhysSize + CCharacterCore::PhysicalSize())
 				{
 					// CAPTURE! \o/
 					m_aTeamscore[fi ^ 1] += 100;

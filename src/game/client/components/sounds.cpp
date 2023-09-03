@@ -1,9 +1,8 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
-#include <base/tl/array.h>
-
 #include "sounds.h"
+
 #include <engine/engine.h>
 #include <engine/shared/config.h>
 #include <engine/sound.h>
@@ -11,6 +10,7 @@
 #include <game/client/components/menus.h>
 #include <game/client/gameclient.h>
 #include <game/generated/client_data.h>
+#include <game/localization.h>
 
 CSoundLoading::CSoundLoading(CGameClient *pGameClient, bool Render) :
 	m_pGameClient(pGameClient),
@@ -22,14 +22,20 @@ void CSoundLoading::Run()
 {
 	for(int s = 0; s < g_pData->m_NumSounds; s++)
 	{
+		const char *pLoadingCaption = Localize("Loading DDNet Client");
+		const char *pLoadingContent = Localize("Loading sound files");
+
 		for(int i = 0; i < g_pData->m_aSounds[s].m_NumSounds; i++)
 		{
 			int Id = m_pGameClient->Sound()->LoadWV(g_pData->m_aSounds[s].m_aSounds[i].m_pFilename);
 			g_pData->m_aSounds[s].m_aSounds[i].m_Id = Id;
+			// try to render a frame
+			if(m_Render)
+				m_pGameClient->m_Menus.RenderLoading(pLoadingCaption, pLoadingContent, 0);
 		}
 
 		if(m_Render)
-			m_pGameClient->m_Menus.RenderLoading();
+			m_pGameClient->m_Menus.RenderLoading(pLoadingCaption, pLoadingContent, 1);
 	}
 }
 
@@ -79,6 +85,7 @@ void CSounds::OnInit()
 		m_pSoundJob = std::make_shared<CSoundLoading>(m_pClient, false);
 		m_pClient->Engine()->AddJob(m_pSoundJob);
 		m_WaitForSoundJob = true;
+		m_pClient->m_Menus.RenderLoading(Localize("Loading DDNet Client"), Localize("Loading sound files"), 0);
 	}
 	else
 	{
@@ -169,15 +176,15 @@ void CSounds::ClearQueue()
 
 void CSounds::Enqueue(int Channel, int SetId)
 {
-	// add sound to the queue
-	if(m_QueuePos < QUEUE_SIZE)
-	{
-		if(Channel == CHN_MUSIC || !g_Config.m_ClEditor)
-		{
-			m_aQueue[m_QueuePos].m_Channel = Channel;
-			m_aQueue[m_QueuePos++].m_SetId = SetId;
-		}
-	}
+	if(m_pClient->m_SuppressEvents)
+		return;
+	if(m_QueuePos >= QUEUE_SIZE)
+		return;
+	if(Channel != CHN_MUSIC && g_Config.m_ClEditor)
+		return;
+
+	m_aQueue[m_QueuePos].m_Channel = Channel;
+	m_aQueue[m_QueuePos++].m_SetId = SetId;
 }
 
 void CSounds::PlayAndRecord(int Channel, int SetId, float Vol, vec2 Pos)
@@ -191,6 +198,8 @@ void CSounds::PlayAndRecord(int Channel, int SetId, float Vol, vec2 Pos)
 
 void CSounds::Play(int Channel, int SetId, float Vol)
 {
+	if(m_pClient->m_SuppressEvents)
+		return;
 	if(Channel == CHN_MUSIC && !g_Config.m_SndMusic)
 		return;
 
@@ -207,6 +216,8 @@ void CSounds::Play(int Channel, int SetId, float Vol)
 
 void CSounds::PlayAt(int Channel, int SetId, float Vol, vec2 Pos)
 {
+	if(m_pClient->m_SuppressEvents)
+		return;
 	if(Channel == CHN_MUSIC && !g_Config.m_SndMusic)
 		return;
 
@@ -226,10 +237,22 @@ void CSounds::Stop(int SetId)
 	if(m_WaitForSoundJob || SetId < 0 || SetId >= g_pData->m_NumSounds)
 		return;
 
-	CDataSoundset *pSet = &g_pData->m_aSounds[SetId];
-
+	const CDataSoundset *pSet = &g_pData->m_aSounds[SetId];
 	for(int i = 0; i < pSet->m_NumSounds; i++)
-		Sound()->Stop(pSet->m_aSounds[i].m_Id);
+		if(pSet->m_aSounds[i].m_Id != -1)
+			Sound()->Stop(pSet->m_aSounds[i].m_Id);
+}
+
+bool CSounds::IsPlaying(int SetId)
+{
+	if(m_WaitForSoundJob || SetId < 0 || SetId >= g_pData->m_NumSounds)
+		return false;
+
+	const CDataSoundset *pSet = &g_pData->m_aSounds[SetId];
+	for(int i = 0; i < pSet->m_NumSounds; i++)
+		if(pSet->m_aSounds[i].m_Id != -1 && Sound()->IsPlaying(pSet->m_aSounds[i].m_Id))
+			return true;
+	return false;
 }
 
 ISound::CVoiceHandle CSounds::PlaySample(int Channel, int SampleId, float Vol, int Flags)

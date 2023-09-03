@@ -3,7 +3,7 @@
 #ifndef GAME_MAPITEMS_H
 #define GAME_MAPITEMS_H
 
-#include <engine/shared/protocol.h>
+#include <base/vmath.h>
 
 // layer types
 enum
@@ -80,6 +80,11 @@ enum
 	//DDRace - Shotgun
 	ENTITY_CRAZY_SHOTGUN_EX,
 	ENTITY_CRAZY_SHOTGUN,
+	//DDNet - Removing specific weapon
+	ENTITY_ARMOR_SHOTGUN,
+	ENTITY_ARMOR_GRENADE,
+	ENTITY_ARMOR_NINJA,
+	ENTITY_ARMOR_LASER,
 	//DDRace - Draggers
 	ENTITY_DRAGGER_WEAK = 42,
 	ENTITY_DRAGGER_NORMAL,
@@ -130,8 +135,8 @@ enum
 	TILE_REFILL_JUMPS = 32,
 	TILE_START,
 	TILE_FINISH,
-	TILE_CHECKPOINT_FIRST = 35,
-	TILE_CHECKPOINT_LAST = 59,
+	TILE_TIME_CHECKPOINT_FIRST = 35,
+	TILE_TIME_CHECKPOINT_LAST = 59,
 	TILE_STOP = 60,
 	TILE_STOPS,
 	TILE_STOPA,
@@ -208,15 +213,8 @@ enum
 	ENTITY_OFFSET = 255 - 16 * 4,
 };
 
-struct CPoint
-{
-	int x, y; // 22.10 fixed point
-};
-
-struct CColor
-{
-	int r, g, b, a;
-};
+typedef ivec2 CPoint; // 22.10 fixed point
+typedef ivec4 CColor;
 
 struct CQuad
 {

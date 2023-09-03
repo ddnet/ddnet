@@ -3,10 +3,11 @@
 
 #include "projectile_data.h"
 
-#include <base/math.h>
 #include <engine/shared/snapshot.h>
 #include <game/client/prediction/gameworld.h>
 #include <game/generated/protocol.h>
+
+#include <game/collision.h>
 
 bool UseProjectileExtraInfo(const CNetObj_Projectile *pProj)
 {

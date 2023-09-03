@@ -3,7 +3,6 @@
 #include <base/system.h>
 
 #include "compression.h"
-#include "config.h"
 #include "packer.h"
 
 void CPacker::Reset()
@@ -18,14 +17,13 @@ void CPacker::AddInt(int i)
 	if(m_Error)
 		return;
 
-	// make sure that we have space enough
-	if(m_pEnd - m_pCurrent <= CVariableInt::MAX_BYTES_PACKED)
+	unsigned char *pNext = CVariableInt::Pack(m_pCurrent, i, m_pEnd - m_pCurrent);
+	if(!pNext)
 	{
-		dbg_break();
 		m_Error = 1;
+		return;
 	}
-	else
-		m_pCurrent = CVariableInt::Pack(m_pCurrent, i);
+	m_pCurrent = pNext;
 }
 
 void CPacker::AddString(const char *pStr, int Limit)
@@ -102,12 +100,13 @@ int CUnpacker::GetInt()
 	}
 
 	int i;
-	m_pCurrent = CVariableInt::Unpack(m_pCurrent, &i);
-	if(m_pCurrent > m_pEnd)
+	const unsigned char *pNext = CVariableInt::Unpack(m_pCurrent, &i, m_pEnd - m_pCurrent);
+	if(!pNext)
 	{
 		m_Error = 1;
 		return 0;
 	}
+	m_pCurrent = pNext;
 	return i;
 }
 
@@ -122,6 +121,35 @@ int CUnpacker::GetIntOrDefault(int Default)
 		return Default;
 	}
 	return GetInt();
+}
+
+int CUnpacker::GetUncompressedInt()
+{
+	if(m_Error)
+		return 0;
+
+	if(m_pCurrent + 4 > m_pEnd)
+	{
+		m_Error = 1;
+		return 0;
+	}
+
+	int i = *(int *)m_pCurrent;
+	m_pCurrent += 4;
+	return i;
+}
+
+int CUnpacker::GetUncompressedIntOrDefault(int Default)
+{
+	if(m_Error)
+	{
+		return 0;
+	}
+	if(m_pCurrent == m_pEnd)
+	{
+		return Default;
+	}
+	return GetUncompressedInt();
 }
 
 const char *CUnpacker::GetString(int SanitizeType)

@@ -21,7 +21,7 @@
 == ﺖﻀﻣ ﻦﻧﺍﻮﺛ %i
 
 %s wins!
-== !ﺯﺎﻓ %s 
+== !ﺯﺎﻓ %s
 
 -Page %d-
 == -ﺔﺤﻔﺻ &d-
@@ -137,9 +137,6 @@ Dynamic Camera
 Emoticon
 == ﺕﻮﻤﻳﺍ
 
-Enter
-== ﺀﺍﺪﺑﺍ
-
 Error
 == ﺀﺎﻄﺧ
 
@@ -238,9 +235,6 @@ MOTD
 
 Map
 == ﺏﺎﻤﻟﺍ
-
-Mouse sens.
-== ﺱﻭﺎﻤﻟﺍ ﺔﻴﺳﺎﺴﺣ
 
 Move left
 == ﺭﺎﺴﻳ ﻙﺮﺤﺘﻟﺍ
@@ -675,9 +669,6 @@ Browser
 Enable gun sound
 == ﺔﺤﻠﺳﻻﺍ ﺕﻮﺻ ﻞﻴﻌﻔﺗ
 
-Show health + ammo
-== ﺓﺮﻴﺧﺬﻟﺍ + ﺔﺤﺼﻟﺍ ﺭﺎﻬﻇﺇ
-
 Team message
 == ﻖﻳﺮﻔﻟﺍ ﺔﻟﺎﺳﺭ
 
@@ -768,9 +759,6 @@ AntiPing: predict weapons
 Highlighted message
 == ﻪﻴﺒﻨﺘﻟﺍ ﻞﺋﺎﺳﺭ
 
-Reset wanted weapon on death
-== ﺕﻮﻤﻟﺍ ﺪﻨﻋ ﺏﻮﻠﻄﻣ ﺡﻼﺳ ﻦﻴﻴﻌﺗ ﺓﺩﺎﻋﺇ
-
 Switch weapon when out of ammo
 == ﺓﺮﻴﺧﺬﻟﺍ ﺫﺎﻔﻧ ﺪﻨﻋ ﺡﻼﺴﻟﺍ ﺮﻴﻴﻐﺗ
 
@@ -785,9 +773,6 @@ Automatically take game over screenshot
 
 Please use a different name
 == ﺮﺧﺃ ﻢﺳﺍ ﺭﺎﻴﺘﺧﺎﺑ ﻢﻗ ﺀﺎﺟﺭ
-
-Show console window
-== ﻢﻜﺤﺘﻟﺍ ﺓﺪﺣﻭ ﺓﺬﻓﺎﻧ ﺽﺮﻋ
 
 Gameplay
 == ﺐﻌﻠﻟﺍ
@@ -805,7 +790,7 @@ Reset
 == ﻦﻴﻴﻌﺗ ﺓﺩﺎﻋﺇ
 
 Automatically create statboard csv
-== statboard ﻞﻤﻋ ﻲﺋﺎﻘﻠﺗ 
+== statboard ﻞﻤﻋ ﻲﺋﺎﻘﻠﺗ
 
 Show tiles layers from BG map
 == ﺔﻴﻔﻠﺨﻟﺍ ﺏﺎﻤﻠﻟ ﺐﻧﺎﺠﺘﻟﺍ ﺕﺎﻘﺒﻃ ﺭﺎﻬﻇﺇ
@@ -875,15 +860,6 @@ Welcome to DDNet
 
 may cause delay
 == ﺮﻴﺧﺄﺗ ﺐﺒﺴﻳ
-
-Preinit VBO (iGPUs only)
-== Preinit-VBO (iGPUs ﻂﻘﻓ)
-
-Multiple texture units (disable for macOS)
-== ﺮﺘﺴﻜﺗ ﻦﻣ ﺮﺜﻛﺍ ( ﺖﻨﻛ ﺍﺫﺍ ﺔﺋﺎﻔﻃﺍ macOS )
-
-UI mouse s.
-== ﻮﻴﻨﻣ ﺱﻭﺎﻤﻟﺍ ﺔﻴﺳﺎﺴﺣ
 
 Indicate map finish
 == ﺔﻗﺎﻄﺒﻟﺍ ﺭﺎﺼﺘﻧﺍ ﺭﺎﻬﻇﺇ
@@ -1017,9 +993,6 @@ Pause
 transmits your player name to info2.ddnet.tw
 == ﻰﻟﺇ ﻚﺑ ﺹﺎﺨﻟﺍ ﺐﻋﻼﻟﺍ ﻢﺳﺍ ﻞﻘﻨﻳ info2.ddnet.tw
 
-The mouse wheel changes weapons. Hammer (left mouse) can be used to hit other tees and wake them up from being frozen.
-== .ﺰﻳﺮﻔﻟﺍ ﻦﻣ ﺎﻬﻇﺎﻘﻳﺇﻭ ﻯﺮﺧﻷﺍ ﺕﻼﻤﺤﻤﻟﺍ ﺏﺮﻀﻟ (ﺮﺴﻳﻷﺍ ﺱﻭﺎﻤﻟﺍ) ﺔﻗﺮﻄﻤﻟﺍ ﻡﺍﺪﺨﺘﺳﺍ ﻦﻜﻤﻳ .ﺔﺤﻠﺳﻷﺍ ﺮﻴﻐﺗ ﺱﻭﺎﻤﻟﺍ ﺔﻠﺠﻋ
-
 Server best:
 == :ﺮﻓﺮﻴﺳ ﻞﻀﻓﺍ
 
@@ -1053,23 +1026,14 @@ Kill
 Please enter your nickname below.
 == ﻚﺑ ﺹﺎﺨﻟﺍ ﻢﺳﺍ ﻝﺎﺧﺩﺇ ﺀﺎﺟﺮﻟﺍ
 
-The maps contain freeze, which temporarily make a tee unable to move. You have to work together to get through these parts.
-== .ﺀﺍﺰﺟﻷﺍ ﻩﺬﻫ ﺯﻭﺎﺠﺘﻟ ﺍًﻌﻣ ﻞﻤﻌﻟﺍ ﻚﻴﻠﻋ .ﺍًﺘﻗﺆﻣ ﻙﺮﺤﺘﻟﺍ ﻰﻠﻋ ﺓﺭﺩﺎﻗ ﺮﻴﻏ ﻕﻼﻄﻧﻹﺍ ﺔﻄﻘﻧ ﻞﻌﺠﻳ ﺎﻤﻣ ، ﻩﺰﻳﺮﻓ ﻰﻠﻋ ﺕﺎﺑﺎﻣ ﻱﻮﺘﺤﺗ
-
 Render
 == ﻞﻌﺟ
-
-Hook (right mouse) can be used to swing through the map and to hook other tees to you.
-== ﻚﻴﻟﺍ ﺹﺎﺨﺷﻻﺍ ﺐﺤﺳﻭ ﺏﺎﻤﻟﺎﺑ ﻙﺮﺤﺘﻠﻟ ﻡﺪﺨﺘﺴﻳ )ﻦﻴﻤﻳ ﻚﻠﻛ( ﺐﺤﺴﻠﻟ
 
 It's recommended that you check the settings to adjust them to your liking before joining a server.
 == .ﺮﻓﺮﻴﺴﻟﺍ ﻰﻟﺇ ﻡﺎﻤﻀﻧﻻﺍ ﻞﺒﻗ ﻚﺘﺒﻏﺭ ﺐﺴﺣ ﺎﻬﻄﺒﻀﻟ ﺕﺍﺩﺍﺪﻋﻹﺍ ﻦﻣ ﻖﻘﺤﺘﻟﺎﺑ ﻰﺻﻮﻳ
 
 Use high DPI
 == ﻲﻟﺎﻋ IPD ﻡﺍﺪﺨﺘﺳﺍ
-
-Most importantly communication is key: There is no tutorial so you'll have to chat (t key) with other players to learn the basics and tricks of the game.
-== .ﺔﺒﻌﻠﻟﺍ ﻞﻴﺣﻭ ﺕﺎﻴﺳﺎﺳﺃ ﻢﻠﻌﺘﻟ ﻦﻳﺮﺧﺁ ﻦﻴﺒﻋﻻ ﻊﻣ  (ﺭﺯ t) ﺔﺷﺩﺭﺪﻟﺍ ﻚﻴﻠﻋ ﻦﻴﻌﺘﻴﺳ ﺍﺬﻟ ، ﻲﻤﻴﻠﻌﺗ ﺞﻣﺎﻧﺮﺑ ﺪﺟﻮﻳ ﻻ :ﺭﺯ ﻮﻫ ﻞﺻﺍﻮﺘﻟﺍ ، ﻚﻟﺫ ﻦﻣ ﻢﻫﻷﺍ
 
 Learn
 == ﻢﻠﻌﺗ
@@ -1219,7 +1183,73 @@ Smooth Dynamic Camera
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
 == 
 
+The format of texture %s is not RGBA which will cause visual bugs.
+== 
+
+Preparing demo playback
+== 
+
+Connected
+== 
+
+Loading map file from storage
+== 
+
+Why are you slowmo replaying to read this?
+== 
+
+Initializing components
+== 
+
+Initializing assets
+== 
+
+Initializing map logic
+== 
+
+Sending initial client info
+== 
+
+Position:
+== 
+
+Speed:
+== 
+
+Angle:
+== 
+
+Uploading map data to GPU
+== 
+
+Trying to determine UDP connectivity...
+== 
+
+UDP seems to be filtered.
+== 
+
+UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
+== 
+
+No answer from server yet.
+== 
+
+Getting game info
+== 
+
+Requesting to join the game
+== 
+
 Are you sure that you want to disconnect and switch to a different server?
+== 
+
+Join Tutorial Server
+== 
+
+Skip Tutorial
+== 
+
+Loading menu images
 == 
 
 AFR
@@ -1252,13 +1282,87 @@ Refreshing...
 Leak IP
 == 
 
+Loading demo files
+== 
+
+Loading ghost files
+== 
+
 Settings file
 == 
 
 Config directory
 == 
 
+Toggle to edit your dummy settings
+== 
+
+Download community skins
+== 
+
+Choose default eyes when joining a server
+== 
+
+Loading skin files
+== 
+
 Chat command
+== 
+
+Enable controller
+== 
+
+Controller %d: %s
+== 
+
+Click to cycle through all available controllers.
+== 
+
+[Ingame controller mode]
+Relative
+== 
+
+[Ingame controller mode]
+Absolute
+== 
+
+Ingame controller mode
+== 
+
+Ingame controller sens.
+== 
+
+UI controller sens.
+== 
+
+Controller jitter tolerance
+== 
+
+No controller found. Plug in a controller and restart the game.
+== 
+
+Device
+== 
+
+Status
+== 
+
+Aim bind
+== 
+
+Controller Axis #%d
+== 
+
+Mouse
+== 
+
+Ingame mouse sens.
+== 
+
+UI mouse sens.
+== 
+
+Controller
 == 
 
 Dummy
@@ -1276,22 +1380,109 @@ Windowed fullscreen
 Desktop fullscreen
 == 
 
-Use modern OpenGL
+Allows maps to render with more detail
+== 
+
+Renderer
+== 
+
+default
+== 
+
+custom
+== 
+
+Graphics cards
+== 
+
+auto
 == 
 
 Sample rate
 == 
 
-Show client IDs
+Appearance
+== 
+
+Name Plate
+== 
+
+Hook Collisions
 == 
 
 Kill Messages
 == 
 
-Kill Message Normal Color
+Show health, shields and ammo
 == 
 
-Kill Message Highlight Color
+DDRace HUD
+== 
+
+Show client IDs in scoreboard
+== 
+
+Show DDRace HUD
+== 
+
+Show jumps indicator
+== 
+
+Show dummy actions
+== 
+
+Show player position
+== 
+
+Show player speed
+== 
+
+Show player target angle
+== 
+
+Show freeze bars
+== 
+
+Opacity of freeze bars inside freeze
+== 
+
+Preview
+== 
+
+Show hook strength indicator
+== 
+
+Show local player's key presses
+== 
+
+Hook collision line
+== 
+
+Hook collision line width
+== 
+
+Hook collision line opacity
+== 
+
+Colors of the hook collision line, in case of a possible collision with:
+== 
+
+Your movements are not taken into account when calculating the line colors
+== 
+
+Nothing hookable
+== 
+
+Something hookable
+== 
+
+A Tee
+== 
+
+Normal Color
+== 
+
+Highlight Color
 == 
 
 Laser Outline Color
@@ -1300,22 +1491,19 @@ Laser Outline Color
 Laser Inner Color
 == 
 
-Hookline
+When you cross the start line, show a ghost tee replicating the movements of your best time
 == 
 
-No hit
+Opacity
 == 
 
-Hookable
+Adjust the opacity of entities belonging to other teams, such as tees and nameplates
 == 
 
-Tee
+Quads are used for background decoration
 == 
 
-Preview
-== 
-
-Show local player's key presses
+Tries to predict other entities to give a feel of low latency
 == 
 
 Background
@@ -1336,8 +1524,32 @@ Chat command (e.g. showall 1)
 DDNet %s is available:
 == 
 
+Extras
+== 
+
+Loading assets
+== 
+
 Discord
 == 
 
 https://ddnet.tw/discord
+== 
+
+Tutorial
+== 
+
+Can't find a Tutorial server
+== 
+
+Loading race demo files
+== 
+
+Super
+== 
+
+Team %d
+== 
+
+Loading sound files
 == 
