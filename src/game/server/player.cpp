@@ -343,25 +343,25 @@ void CPlayer::Snap(int SnappingClient)
 	// Due to clients expecting this as a negative value, we have to make sure it's negative.
 	// Special numbers:
 	// -9999: means no time and isn't displayed in the scoreboard.
-	if(m_Score.has_value())
-	{
-		// shift the time by a second if the player actually took 9999
-		// seconds to finish the map.
-		if(m_Score.value() == 9999)
-			Score = -10000;
-		else
-			Score = -m_Score.value();
-	}
-	else
-	{
-		Score = -9999;
-	}
+	// if(m_Score.has_value())
+	// {
+	// 	// shift the time by a second if the player actually took 9999
+	// 	// seconds to finish the map.
+	// 	if(m_Score.value() == 9999)
+	// 		Score = -10000;
+	// 	else
+	// 		Score = -m_Score.value();
+	// }
+	// else
+	// {
+	// 	Score = -9999;
+	// }
 
-	// send 0 if times of others are not shown
-	if(SnappingClient != m_ClientID && g_Config.m_SvHideScore)
-		Score = -9999;
+	// // send 0 if times of others are not shown
+	// if(SnappingClient != m_ClientID && g_Config.m_SvHideScore)
+	// 	Score = -9999;
 
-	Score = m_Score.has_value() ? m_Score.value() : 0; // gctf
+	Score = m_Score.value_or(0); // gctf
 
 	if(!Server()->IsSixup(SnappingClient))
 	{
