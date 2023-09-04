@@ -149,6 +149,10 @@ void CPlayer::Reset()
 	m_VotedForPractice = false;
 	m_SwapTargetsClientID = -1;
 	m_BirthdayAnnounced = false;
+
+	// gctf
+	m_IsReadyToPlay = !GameServer()->m_pController->IsPlayerReadyMode();
+	m_DeadSpecMode = false;
 }
 
 static int PlayerFlags_SixToSeven(int Flags)
@@ -379,6 +383,21 @@ void CPlayer::Snap(int SnappingClient)
 			// In older versions the SPECTATORS TEAM was also used if the own player is in PAUSE_PAUSED or if any player is in PAUSE_SPEC.
 			pPlayerInfo->m_Team = (m_Paused != PAUSE_PAUSED || m_ClientID != SnappingClient) && m_Paused < PAUSE_SPEC ? m_Team : TEAM_SPECTATORS;
 		}
+
+		// gctf
+		if(!GameServer()->m_pController->IsGameRunning() &&
+			(!GameServer()->m_pController->IsPlayerReadyMode() || m_IsReadyToPlay))
+		{
+			char aReady[512];
+			char aName[64];
+			static const int MaxNameLen = MAX_NAME_LENGTH - (str_length("\xE2\x9C\x93") + 2);
+			str_truncate(aName, sizeof(aName), Server()->ClientName(m_ClientID), MaxNameLen);
+			str_format(aReady, sizeof(aReady), "\xE2\x9C\x93 %s", aName);
+			// 0.7 puts the checkmark at the end
+			// we put it in the beginning because ddnet scoreboard cuts off long names
+			// such as WWWWWWWWWW... which would also hide the checkmark in the end
+			StrToInts(&pClientInfo->m_Name0, 4, aReady);
+		}
 	}
 	else
 	{
@@ -391,6 +410,8 @@ void CPlayer::Snap(int SnappingClient)
 			pPlayerInfo->m_PlayerFlags |= protocol7::PLAYERFLAG_AIM;
 		if(Server()->ClientAuthed(m_ClientID))
 			pPlayerInfo->m_PlayerFlags |= protocol7::PLAYERFLAG_ADMIN;
+		if(!GameServer()->m_pController->IsPlayerReadyMode() || m_IsReadyToPlay)
+			pPlayerInfo->m_PlayerFlags |= protocol7::PLAYERFLAG_READY;
 
 		// Times are in milliseconds for 0.7
 		// pPlayerInfo->m_Score = Score == -9999 ? -1 : -Score * 1000;
@@ -597,7 +618,14 @@ void CPlayer::Respawn(bool WeakHook)
 	{
 		m_WeakHookSpawn = WeakHook;
 		m_Spawning = true;
+
+		// gctf
+		m_IsReadyToPlay = true;
+		// m_DeadSpecMode = true;
+		return;
 	}
+
+	m_DeadSpecMode = false;
 }
 
 CCharacter *CPlayer::ForceSpawn(vec2 Pos)
@@ -637,6 +665,8 @@ void CPlayer::SetTeam(int Team, bool DoChatMsg)
 				pPlayer->m_SpectatorID = SPEC_FREEVIEW;
 		}
 	}
+
+	// m_DeadSpecMode = false; // gctf
 }
 
 bool CPlayer::SetTimerType(int TimerType)

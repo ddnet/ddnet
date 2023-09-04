@@ -223,6 +223,10 @@ public:
 
 	// gctf
 	int m_RespawnTick;
+	bool m_IsReadyToEnter; // 0.7 ready change
+	bool m_IsReadyToPlay; // 0.7 ready change
+	bool m_DeadSpecMode; // 0.7 dead players
+	int64_t m_LastReadyChangeTick;
 	void IncrementScore() { AddScore(1); }
 	void DecrementScore() { AddScore(-1); }
 	void AddScore(int Score) { m_Score = m_Score.value_or(0) + Score; }

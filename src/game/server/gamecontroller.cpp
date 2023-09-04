@@ -524,6 +524,7 @@ void IGameController::OnReset()
 		pPlayer->Respawn();
 		pPlayer->m_RespawnTick = Server()->Tick() + Server()->TickSpeed() / 2;
 		pPlayer->m_Score = 0;
+		pPlayer->m_IsReadyToPlay = true; // gctf
 	}
 }
 
@@ -873,6 +874,83 @@ void IGameController::DoTeamChange(CPlayer *pPlayer, int Team, bool DoChatMsg)
 
 // gctf
 
+bool IGameController::IsPlayerReadyMode()
+{
+	return Config()->m_SvPlayerReadyMode != 0 && (m_GameStateTimer == TIMER_INFINITE && (m_GameState == IGS_WARMUP_USER || m_GameState == IGS_GAME_PAUSED));
+}
+
+void IGameController::OnPlayerReadyChange(CPlayer *pPlayer)
+{
+	if(pPlayer->m_LastReadyChangeTick && pPlayer->m_LastReadyChangeTick+Server()->TickSpeed()*1 > Server()->Tick())
+		return;
+
+	pPlayer->m_LastReadyChangeTick = Server()->Tick();
+
+	if(Config()->m_SvPlayerReadyMode && pPlayer->GetTeam() != TEAM_SPECTATORS && !pPlayer->m_DeadSpecMode)
+	{
+		// change players ready state
+		pPlayer->m_IsReadyToPlay ^= 1;
+
+		if(m_GameState == IGS_GAME_RUNNING && !pPlayer->m_IsReadyToPlay)
+		{
+			SetGameState(IGS_GAME_PAUSED, TIMER_INFINITE); // one player isn't ready -> pause the game
+			GameServer()->SendGameMsg(protocol7::GAMEMSG_GAME_PAUSED, pPlayer->GetCID(), -1);
+		}
+
+		CheckReadyStates();
+	}
+}
+
+// to be called when a player changes state, spectates or disconnects
+void IGameController::CheckReadyStates(int WithoutID)
+{
+	if(Config()->m_SvPlayerReadyMode)
+	{
+		switch(m_GameState)
+		{
+		case IGS_WARMUP_USER:
+			// all players are ready -> end warmup
+			if(GetPlayersReadyState(WithoutID))
+				SetGameState(IGS_WARMUP_USER, 0);
+			break;
+		case IGS_GAME_PAUSED:
+			// all players are ready -> unpause the game
+			if(GetPlayersReadyState(WithoutID))
+				SetGameState(IGS_GAME_PAUSED, 0);
+			break;
+		case IGS_GAME_RUNNING:
+		case IGS_WARMUP_GAME:
+		case IGS_START_COUNTDOWN:
+		case IGS_END_MATCH:
+		case IGS_END_ROUND:
+			// not affected
+			break;
+		}
+	}
+}
+
+bool IGameController::GetPlayersReadyState(int WithoutID)
+{
+	for(int i = 0; i < MAX_CLIENTS; ++i)
+	{
+		if(i == WithoutID)
+			continue; // skip
+		if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS && !GameServer()->m_apPlayers[i]->m_IsReadyToPlay)
+			return false;
+	}
+
+	return true;
+}
+
+void IGameController::SetPlayersReadyState(bool ReadyState)
+{
+	for(int i = 0; i < MAX_CLIENTS; ++i)
+	{
+		if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS && (ReadyState || !GameServer()->m_apPlayers[i]->m_DeadSpecMode))
+			GameServer()->m_apPlayers[i]->m_IsReadyToPlay = ReadyState;
+	}
+}
+
 void IGameController::EndMatch()
 {
 	if(m_Warmup) // game can't end when we are running warmup
@@ -1076,11 +1154,11 @@ void IGameController::SetGameState(EGameState GameState, int Timer)
 				{
 					m_GameState = GameState;
 					m_GameStateTimer = TIMER_INFINITE;
-					// if(Config()->m_SvPlayerReadyMode)
-					// {
-					// 	// run warmup till all players are ready
-					// 	SetPlayersReadyState(false);
-					// }
+					if(Config()->m_SvPlayerReadyMode)
+					{
+						// run warmup till all players are ready
+						SetPlayersReadyState(false);
+					}
 				}
 				else if(Timer > 0)
 				{
@@ -1134,7 +1212,7 @@ void IGameController::SetGameState(EGameState GameState, int Timer)
 		{
 			m_GameState = GameState;
 			m_GameStateTimer = TIMER_INFINITE;
-			// SetPlayersReadyState(true);
+			SetPlayersReadyState(true);
 			GameServer()->m_World.m_Paused = false;
 		}
 		break;
@@ -1149,7 +1227,7 @@ void IGameController::SetGameState(EGameState GameState, int Timer)
 				{
 					// pauses infinitely till all players are ready or disabled via rcon command
 					m_GameStateTimer = TIMER_INFINITE;
-					// SetPlayersReadyState(false);
+					SetPlayersReadyState(false);
 				}
 				else
 				{

@@ -1795,6 +1795,12 @@ void *CGameContext::PreProcessMsg(int *pMsgID, CUnpacker *pUnpacker, int ClientI
 			pMsg->m_ColorBody = pPlayer->m_TeeInfos.m_ColorBody;
 			pMsg->m_ColorFeet = pPlayer->m_TeeInfos.m_ColorFeet;
 		}
+		// gctf ready start
+		else if(*pMsgID == protocol7::NETMSGTYPE_CL_READYCHANGE)
+		{
+			m_pController->OnPlayerReadyChange(pPlayer);
+		}
+		// gctf ready end
 		else if(*pMsgID == protocol7::NETMSGTYPE_CL_SKINCHANGE)
 		{
 			protocol7::CNetMsg_Cl_SkinChange *pMsg = (protocol7::CNetMsg_Cl_SkinChange *)pRawMsg;
@@ -2019,6 +2025,11 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 					char aWhisperMsg[256];
 					str_copy(aWhisperMsg, pMsg->m_pMessage + 10, 256);
 					Converse(pPlayer->GetCID(), aWhisperMsg);
+				}
+				else if(!str_comp_nocase(pMsg->m_pMessage + 1, "ready")) // gctf
+				{
+					dbg_msg("chat", "got ready");
+					m_pController->OnPlayerReadyChange(pPlayer);
 				}
 				else
 				{
@@ -4520,11 +4531,20 @@ void CGameContext::SendGameMsg(int GameMsgID, int ClientID)
 {
 	CMsgPacker Msg(protocol7::NETMSGTYPE_SV_GAMEMSG, false, true);
 	Msg.AddInt(GameMsgID);
-	if(ClientID != -1)
+	if(ClientID != -1 && Server()->IsSixup(ClientID))
+	{
 		Server()->SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
+		return;
+	}
 	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
 		if(Server()->IsSixup(i))
+		{
 			Server()->SendMsg(&Msg, MSGFLAG_VITAL, i);
+			continue;
+		}
+		// TODO: 0.6
+	}
 }
 
 void CGameContext::SendGameMsg(int GameMsgID, int ParaI1, int ClientID)
@@ -4532,11 +4552,26 @@ void CGameContext::SendGameMsg(int GameMsgID, int ParaI1, int ClientID)
 	CMsgPacker Msg(protocol7::NETMSGTYPE_SV_GAMEMSG, false, true);
 	Msg.AddInt(GameMsgID);
 	Msg.AddInt(ParaI1);
-	if(ClientID != -1)
+	if(ClientID != -1 && Server()->IsSixup(ClientID))
+	{
 		Server()->SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
+		return;
+	}
 	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
 		if(Server()->IsSixup(i))
+		{
 			Server()->SendMsg(&Msg, MSGFLAG_VITAL, i);
+			continue;
+		}
+		if (GameMsgID == protocol7::GAMEMSG_GAME_PAUSED)
+		{
+			char aBuf[512];
+			int PauseID = clamp(ParaI1, 0, MAX_CLIENTS - 1);
+			str_format(aBuf, sizeof(aBuf), "'%s' initiated a pause. If you are ready do /ready", Server()->ClientName(PauseID));
+			SendChatTarget(i, aBuf);
+		}
+	}
 }
 
 void CGameContext::SendGameMsg(int GameMsgID, int ParaI1, int ParaI2, int ParaI3, int ClientID)
@@ -4549,8 +4584,14 @@ void CGameContext::SendGameMsg(int GameMsgID, int ParaI1, int ParaI2, int ParaI3
 	if(ClientID != -1)
 		Server()->SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
 	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
 		if(Server()->IsSixup(i))
+		{
 			Server()->SendMsg(&Msg, MSGFLAG_VITAL, i);
+			continue;
+		}
+		// TODO: 0.6
+	}
 }
 
 int CGameContext::GetDDNetInstaWeapon()

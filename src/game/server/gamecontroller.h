@@ -156,6 +156,12 @@ public:
 	float m_CurrentRecord;
 
 	// gctf
+	virtual void OnPlayerReadyChange(class CPlayer *pPlayer); // 0.7 ready change
+	void CheckReadyStates(int WithoutID = -1);
+	bool GetPlayersReadyState(int WithoutID = -1);
+	void SetPlayersReadyState(bool ReadyState);
+	bool IsPlayerReadyMode();
+	int IsGameRunning() { return m_GameState == IGS_GAME_RUNNING; }
 
 private:
 	int m_aTeamSize[protocol7::NUM_TEAMS];
