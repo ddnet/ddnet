@@ -4564,7 +4564,7 @@ void CGameContext::SendGameMsg(int GameMsgID, int ParaI1, int ClientID)
 			Server()->SendMsg(&Msg, MSGFLAG_VITAL, i);
 			continue;
 		}
-		if (GameMsgID == protocol7::GAMEMSG_GAME_PAUSED)
+		if(GameMsgID == protocol7::GAMEMSG_GAME_PAUSED)
 		{
 			char aBuf[512];
 			int PauseID = clamp(ParaI1, 0, MAX_CLIENTS - 1);

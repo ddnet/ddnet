@@ -881,7 +881,7 @@ bool IGameController::IsPlayerReadyMode()
 
 void IGameController::OnPlayerReadyChange(CPlayer *pPlayer)
 {
-	if(pPlayer->m_LastReadyChangeTick && pPlayer->m_LastReadyChangeTick+Server()->TickSpeed()*1 > Server()->Tick())
+	if(pPlayer->m_LastReadyChangeTick && pPlayer->m_LastReadyChangeTick + Server()->TickSpeed() * 1 > Server()->Tick())
 		return;
 
 	pPlayer->m_LastReadyChangeTick = Server()->Tick();
