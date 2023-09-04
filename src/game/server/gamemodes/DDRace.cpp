@@ -293,7 +293,7 @@ bool CGameControllerDDRace::OnEntity(int Index, int x, int y, int Layer, int Fla
 {
 	IGameController::OnEntity(Index, x, y, Layer, Flags, Initial, Number);
 
-	vec2 Pos = vec2(x, y);
+	const vec2 Pos(x * 32.0f + 16.0f, y * 32.0f + 16.0f);
 	int Team = -1;
 	if(Index == ENTITY_FLAGSTAND_RED)
 		Team = TEAM_RED;
@@ -466,7 +466,7 @@ void CGameControllerDDRace::Snap(int SnappingClient)
 
 	if(Server()->IsSixup(SnappingClient))
 	{
-		protocol7::CNetObj_GameDataFlag *pGameDataObj = static_cast<protocol7::CNetObj_GameDataFlag *>(Server()->SnapNewItem(-protocol7::NETOBJTYPE_GAMEDATAFLAG, 0, sizeof(protocol7::CNetObj_GameDataFlag)));
+		protocol7::CNetObj_GameDataFlag *pGameDataObj = Server()->SnapNewItem<protocol7::CNetObj_GameDataFlag>(0);
 		if(!pGameDataObj)
 			return;
 
@@ -475,7 +475,7 @@ void CGameControllerDDRace::Snap(int SnappingClient)
 	}
 	else
 	{
-		CNetObj_GameData *pGameDataObj = (CNetObj_GameData *)Server()->SnapNewItem(NETOBJTYPE_GAMEDATA, 0, sizeof(CNetObj_GameData));
+		CNetObj_GameData *pGameDataObj = Server()->SnapNewItem<CNetObj_GameData>(0);
 		if(!pGameDataObj)
 			return;
 
