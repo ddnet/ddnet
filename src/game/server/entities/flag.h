@@ -35,7 +35,7 @@ public:
 	virtual void Reset() override;
 	virtual void TickPaused() override;
 	virtual void Snap(int SnappingClient) override;
-	virtual void TickDefered();
+	virtual void TickDeferred() override;
 
 	/* Functions */
 	void Grab(class CCharacter *pChar);

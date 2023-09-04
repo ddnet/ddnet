@@ -43,7 +43,7 @@ void CFlag::Drop()
 	m_DropTick = Server()->Tick();
 }
 
-void CFlag::TickDefered()
+void CFlag::TickDeferred()
 {
 	if(m_pCarrier)
 	{
