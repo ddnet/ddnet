@@ -2028,7 +2028,6 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 				}
 				else if(!str_comp_nocase(pMsg->m_pMessage + 1, "ready")) // gctf
 				{
-					dbg_msg("chat", "got ready");
 					m_pController->OnPlayerReadyChange(pPlayer);
 				}
 				else
