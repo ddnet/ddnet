@@ -1299,7 +1299,10 @@ int CMenus::Render()
 
 		if(UseIpLabel)
 		{
-			UI()->DoLabel(&Part, Client()->ConnectAddressString(), FontSize, TEXTALIGN_MC);
+			SLabelProperties IpLabelProps;
+			IpLabelProps.m_MaxWidth = Part.w;
+			IpLabelProps.m_EllipsisAtEnd = true;
+			UI()->DoLabel(&Part, Client()->ConnectAddressString(), FontSize, TEXTALIGN_MC, IpLabelProps);
 			Box.HSplitTop(20.f, &Part, &Box);
 			Box.HSplitTop(24.f, &Part, &Box);
 		}
