@@ -55,7 +55,7 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	m_EmoteStop = -1;
 	m_LastAction = -1;
 	m_LastNoAmmoSound = -1;
-	m_LastWeapon = WEAPON_GRENADE;
+	m_LastWeapon = GameServer()->GetDDNetInstaWeapon();
 	m_QueuedWeapon = -1;
 	m_LastRefillJumps = false;
 	m_LastPenalty = false;
@@ -76,7 +76,7 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 
 	m_Core.Reset();
 	m_Core.Init(&GameServer()->m_World.m_Core, Collision());
-	m_Core.m_ActiveWeapon = WEAPON_GRENADE;
+	m_Core.m_ActiveWeapon = GameServer()->GetDDNetInstaWeapon();
 	m_Core.m_Pos = m_Pos;
 	m_Core.m_Id = m_pPlayer->GetCID();
 	GameServer()->m_World.m_Core.m_apCharacters[m_pPlayer->GetCID()] = &m_Core;

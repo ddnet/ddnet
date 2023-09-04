@@ -4552,3 +4552,12 @@ void CGameContext::SendGameMsg(int GameMsgID, int ParaI1, int ParaI2, int ParaI3
 		if(Server()->IsSixup(i))
 			Server()->SendMsg(&Msg, MSGFLAG_VITAL, i);
 }
+
+int CGameContext::GetDDNetInstaWeapon()
+{
+	if(str_comp_nocase(g_Config.m_SvGametype, "gctf") == 0)
+		return WEAPON_GRENADE;
+	if(str_comp_nocase(g_Config.m_SvGametype, "ictf") == 0)
+		return WEAPON_LASER;
+	return WEAPON_GRENADE;
+}
