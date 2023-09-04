@@ -4,3 +4,11 @@ DDNet-insta based on DDRaceNetwork, a Teeworlds mod. See the [website](https://d
 
 For build instructions visit the [ddnet repo](https://github.com/ddnet/ddnet).
 
++ `sv_scorelimit` Score limit (0 disables)
++ `sv_timelimit` Time limit in minutes (0 disables)
++ `sv_gametype` Game type (gctf, ictf)
++ `sv_grenade_ammo_regen` Activate or deactivate grenade ammo regeneration in general
++ `sv_grenade_ammo_regen_time` Grenade ammo regeneration time in miliseconds
++ `sv_grenade_ammo_regen_num` Maximum number of grenades if ammo regeneration on
++ `sv_grenade_ammo_regen_speed` Give grenades back that push own player
++ `sv_sprayprotection` Spray protection
