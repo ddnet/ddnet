@@ -7,6 +7,7 @@ For build instructions visit the [ddnet repo](https://github.com/ddnet/ddnet).
 + `sv_scorelimit` Score limit (0 disables)
 + `sv_timelimit` Time limit in minutes (0 disables)
 + `sv_gametype` Game type (gctf, ictf)
++ `sv_player_ready_mode` When enabled, players can pause/unpause the game and start the game on warmup via their ready state
 + `sv_grenade_ammo_regen` Activate or deactivate grenade ammo regeneration in general
 + `sv_grenade_ammo_regen_time` Grenade ammo regeneration time in miliseconds
 + `sv_grenade_ammo_regen_num` Maximum number of grenades if ammo regeneration on
