@@ -103,7 +103,7 @@ public:
 	void SetInput(const CNetObj_PlayerInput *pNewInput)
 	{
 		m_LatestInput = m_Input = *pNewInput;
-		// it is not allowed to aim in the center
+		// it is not allowed to laim in the center
 		if(m_Input.m_TargetX == 0 && m_Input.m_TargetY == 0)
 		{
 			m_Input.m_TargetY = m_LatestInput.m_TargetY = -1;

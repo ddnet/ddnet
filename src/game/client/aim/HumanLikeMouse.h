@@ -1,0 +1,36 @@
+//
+// Created by danii on 03.09.2023.
+//
+
+#ifndef DDNET_HUMANLIKEMOUSE_H
+#define DDNET_HUMANLIKEMOUSE_H
+
+#include <cmath>
+#include <vector>
+#include <queue>
+#include <cstdlib>
+#include <ctime>
+#include "engine/client.h"
+#include "engine/input.h"
+#include "game/client/component.h"
+
+struct Point {
+	int x;
+	int y;
+};
+
+class HumanLikeMouse : public CComponent
+{
+public:
+	std::vector<Point> getPoints(int start_x, int start_y, int dest_x, int dest_y, double G_0 = 9, double W_0 = 3, double M_0 = 15, double D_0 = 12);
+	void moveToPoint(Point* targetPoint);
+	void moveToPlayer(int id);
+	virtual int Sizeof() const override { return sizeof(*this); }
+	void OnUpdate();
+protected:
+	Point HumanLikeMouse::getCurrentMousePosition();
+	std::queue<Point> targetWay;
+	int countPointsInWay;
+};
+
+#endif // DDNET_HUMANLIKEMOUSE_H

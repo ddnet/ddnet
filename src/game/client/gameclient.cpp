@@ -108,9 +108,10 @@ void CGameClient::OnConsoleInit()
 	m_Menus.SetMenuBackground(&m_MenuBackground);
 
 	m_NamePlates.SetPlayers(&m_Players);
-
 	// make a list of all the systems, make sure to add them in the correct render order
 	m_vpAll.insert(m_vpAll.end(), {&pythonController,
+					      &aimHelper,
+					      &humanLikeMouse,
 					      &m_Skins,
 					      &m_CountryFlags,
 					      &m_MapImages,
@@ -395,6 +396,8 @@ void CGameClient::OnUpdate()
 	HandleLanguageChanged();
 
 	CUIElementBase::Init(UI()); // update static pointer because game and editor use separate UI
+
+	this->humanLikeMouse.OnUpdate();
 
 	// handle mouse movement
 	float x = 0.0f, y = 0.0f;
