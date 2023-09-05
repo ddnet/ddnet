@@ -947,6 +947,8 @@ void CGameContext::OnTick()
 	m_World.m_Core.m_aTuning[0] = m_Tuning;
 	m_World.Tick();
 
+	UpdatePlayerMaps();
+
 	//if(world.paused) // make sure that the game object always updates
 	m_pController->Tick();
 
@@ -4008,6 +4010,67 @@ void CGameContext::OnPreSnap() {}
 void CGameContext::OnPostSnap()
 {
 	m_Events.Clear();
+}
+
+void CGameContext::UpdatePlayerMaps()
+{
+	const auto DistCompare = [](std::pair<float, int> a, std::pair<float, int> b) -> bool {
+		return (a.first < b.first);
+	};
+
+	if(Server()->Tick() % g_Config.m_SvMapUpdateRate != 0)
+		return;
+
+	std::pair<float, int> Dist[MAX_CLIENTS];
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(!Server()->ClientIngame(i))
+			continue;
+		if(Server()->GetClientVersion(i) >= VERSION_DDNET_OLD)
+			continue;
+		int *pMap = Server()->GetIdMap(i);
+
+		// compute distances
+		for(int j = 0; j < MAX_CLIENTS; j++)
+		{
+			Dist[j].second = j;
+			if(j == i)
+				continue;
+			if(!Server()->ClientIngame(j) || !m_apPlayers[j])
+			{
+				Dist[j].first = 1e10;
+				continue;
+			}
+			CCharacter *pChr = m_apPlayers[j]->GetCharacter();
+			if(!pChr)
+			{
+				Dist[j].first = 1e9;
+				continue;
+			}
+			if(!pChr->CanSnapCharacter(i))
+				Dist[j].first = 1e8;
+			else
+				Dist[j].first = length_squared(m_apPlayers[i]->m_ViewPos - pChr->GetPos());
+		}
+
+		// always send the player themselves, even if all in same position
+		Dist[i].first = -1;
+
+		std::nth_element(&Dist[0], &Dist[VANILLA_MAX_CLIENTS - 1], &Dist[MAX_CLIENTS], DistCompare);
+
+		int Index = 1; // exclude self client id
+		for(int j = 0; j < VANILLA_MAX_CLIENTS - 1; j++)
+		{
+			pMap[j + 1] = -1; // also fill player with empty name to say chat msgs
+			if(Dist[j].second == i || Dist[j].first > 5e9f)
+				continue;
+			pMap[Index++] = Dist[j].second;
+		}
+
+		// sort by real client ids, guarantee order on distance changes, O(Nlog(N)) worst case
+		// sort just clients in game always except first (self client id) and last (fake client id) indexes
+		std::sort(&pMap[1], &pMap[minimum(Index, VANILLA_MAX_CLIENTS - 1)]);
+	}
 }
 
 bool CGameContext::IsClientReady(int ClientID) const
