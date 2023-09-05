@@ -1,3 +1,5 @@
+#include "layer_tele.h"
+
 #include <game/editor/editor.h>
 
 CLayerTele::CLayerTele(int w, int h) :

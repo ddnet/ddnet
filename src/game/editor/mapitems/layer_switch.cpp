@@ -1,3 +1,5 @@
+#include "layer_switch.h"
+
 #include <game/editor/editor.h>
 
 CLayerSwitch::CLayerSwitch(int w, int h) :

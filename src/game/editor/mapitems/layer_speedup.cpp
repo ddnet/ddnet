@@ -1,3 +1,5 @@
+#include "layer_speedup.h"
+
 #include <game/editor/editor.h>
 
 CLayerSpeedup::CLayerSpeedup(int w, int h) :

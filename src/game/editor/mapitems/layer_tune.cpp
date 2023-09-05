@@ -1,3 +1,5 @@
+#include "layer_tune.h"
+
 #include <game/editor/editor.h>
 
 CLayerTune::CLayerTune(int w, int h) :

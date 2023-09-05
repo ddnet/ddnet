@@ -1,3 +1,5 @@
+#include "layer_sounds.h"
+
 #include <game/editor/editor.h>
 
 #include <game/generated/client_data.h>
