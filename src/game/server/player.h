@@ -7,7 +7,8 @@
 
 #include <engine/shared/protocol.h>
 
-#include "alloc.h"
+#include <game/alloc.h>
+
 #include "teeinfo.h"
 
 #include <memory>

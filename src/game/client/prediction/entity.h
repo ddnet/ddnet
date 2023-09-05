@@ -3,23 +3,11 @@
 #ifndef GAME_CLIENT_PREDICTION_ENTITY_H
 #define GAME_CLIENT_PREDICTION_ENTITY_H
 
-#include "gameworld.h"
 #include <base/vmath.h>
 
-#define MACRO_ALLOC_HEAP() \
-public: \
-	void *operator new(size_t Size) \
-	{ \
-		void *p = malloc(Size); \
-		mem_zero(p, Size); \
-		return p; \
-	} \
-	void operator delete(void *pPtr) \
-	{ \
-		free(pPtr); \
-	} \
-\
-private:
+#include <game/alloc.h>
+
+#include "gameworld.h"
 
 class CEntity
 {

@@ -5,7 +5,8 @@
 
 #include <base/vmath.h>
 
-#include "alloc.h"
+#include <game/alloc.h>
+
 #include "gameworld.h"
 
 class CCollision;
