@@ -768,7 +768,8 @@ void CCharacter::Tick()
 
 	if(m_Core.m_TriggeredEvents & COREEVENT_HOOK_ATTACH_PLAYER)
 	{
-		if(m_Core.m_HookedPlayer != -1 && GameServer()->m_apPlayers[m_Core.m_HookedPlayer]->GetTeam() != TEAM_SPECTATORS)
+		const int HookedPlayer = m_Core.HookedPlayer();
+		if(HookedPlayer != -1 && GameServer()->m_apPlayers[HookedPlayer]->GetTeam() != TEAM_SPECTATORS)
 		{
 			Antibot()->OnHookAttach(m_pPlayer->GetCID(), true);
 		}
@@ -1138,7 +1139,7 @@ bool CCharacter::IsSnappingCharacterInView(int SnappingClientID)
 		for(const auto &AttachedPlayerID : m_Core.m_AttachedPlayers)
 		{
 			CCharacter *pOtherPlayer = GameServer()->GetPlayerChar(AttachedPlayerID);
-			if(pOtherPlayer && pOtherPlayer->m_Core.m_HookedPlayer == ID)
+			if(pOtherPlayer && pOtherPlayer->m_Core.HookedPlayer() == ID)
 			{
 				if(!NetworkClippedLine(SnappingClientID, m_Pos, pOtherPlayer->m_Pos))
 				{
@@ -1269,7 +1270,7 @@ void CCharacter::FillAntibot(CAntibotCharacterData *pData)
 	pData->m_Pos = m_Pos;
 	pData->m_Vel = m_Core.m_Vel;
 	pData->m_Angle = m_Core.m_Angle;
-	pData->m_HookedPlayer = m_Core.m_HookedPlayer;
+	pData->m_HookedPlayer = m_Core.HookedPlayer();
 	pData->m_SpawnTick = m_SpawnTick;
 	pData->m_WeaponChangeTick = m_WeaponChangeTick;
 	pData->m_aLatestInputs[0].m_TargetX = m_LatestInput.m_TargetX;
@@ -2229,7 +2230,7 @@ void CCharacter::Pause(bool Pause)
 		GameServer()->m_World.m_Core.m_apCharacters[m_pPlayer->GetCID()] = 0;
 		GameServer()->m_World.RemoveEntity(this);
 
-		if(m_Core.m_HookedPlayer != -1) // Keeping hook would allow cheats
+		if(m_Core.HookedPlayer() != -1) // Keeping hook would allow cheats
 		{
 			ResetHook();
 			GameWorld()->ReleaseHooked(GetPlayer()->GetCID());
@@ -2332,5 +2333,6 @@ CClientMask CCharacter::TeamMask()
 
 void CCharacter::SwapClients(int Client1, int Client2)
 {
-	m_Core.SetHookedPlayer(m_Core.m_HookedPlayer == Client1 ? Client2 : m_Core.m_HookedPlayer == Client2 ? Client1 : m_Core.m_HookedPlayer);
+	const int HookedPlayer = m_Core.HookedPlayer();
+	m_Core.SetHookedPlayer(HookedPlayer == Client1 ? Client2 : HookedPlayer == Client2 ? Client1 : HookedPlayer);
 }

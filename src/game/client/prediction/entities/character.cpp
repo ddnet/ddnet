@@ -1171,7 +1171,7 @@ void CCharacter::ResetPrediction()
 		SetWeaponGot(w, false);
 		SetWeaponAmmo(w, -1);
 	}
-	if(m_Core.m_HookedPlayer >= 0)
+	if(m_Core.HookedPlayer() >= 0)
 	{
 		m_Core.SetHookedPlayer(-1);
 		m_Core.m_HookState = HOOK_IDLE;

@@ -428,7 +428,7 @@ void CGameWorld::ReleaseHooked(int ClientID)
 	for(; pChr; pChr = (CCharacter *)pChr->TypeNext())
 	{
 		CCharacterCore *pCore = pChr->Core();
-		if(pCore->m_HookedPlayer == ClientID && !pChr->IsSuper())
+		if(pCore->HookedPlayer() == ClientID && !pChr->IsSuper())
 		{
 			pCore->SetHookedPlayer(-1);
 			pCore->m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;

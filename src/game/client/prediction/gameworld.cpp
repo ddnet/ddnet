@@ -315,7 +315,7 @@ void CGameWorld::ReleaseHooked(int ClientID)
 	for(; pChr; pChr = (CCharacter *)pChr->TypeNext())
 	{
 		CCharacterCore *pCore = pChr->Core();
-		if(pCore->m_HookedPlayer == ClientID)
+		if(pCore->HookedPlayer() == ClientID)
 		{
 			pCore->SetHookedPlayer(-1);
 			pCore->m_HookState = HOOK_RETRACTED;
@@ -556,7 +556,7 @@ void CGameWorld::NetObjEnd()
 	for(int i = 0; i < MAX_CLIENTS; i++)
 		if(CCharacter *pChar = GetCharacterByID(i))
 			if(!pChar->m_MarkedForDestroy)
-				if(CCharacter *pHookedChar = GetCharacterByID(pChar->m_Core.m_HookedPlayer))
+				if(CCharacter *pHookedChar = GetCharacterByID(pChar->m_Core.HookedPlayer()))
 					if(pHookedChar->m_MarkedForDestroy)
 					{
 						pHookedChar->m_Pos = pHookedChar->m_Core.m_Pos = pChar->m_Core.m_HookPos;
