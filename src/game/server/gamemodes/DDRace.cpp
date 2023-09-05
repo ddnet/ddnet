@@ -18,9 +18,9 @@
 static const char *GetGameTypeName()
 {
 	if(str_comp_nocase(g_Config.m_SvGametype, "gctf") == 0)
-		return  g_Config.m_SvTestingCommands ? "gCTF-test" : "gCTF";
+		return g_Config.m_SvTestingCommands ? "gCTF-test" : "gCTF";
 	if(str_comp_nocase(g_Config.m_SvGametype, "ictf") == 0)
-		return  g_Config.m_SvTestingCommands ? "iCTF-test" : "iCTF";
+		return g_Config.m_SvTestingCommands ? "iCTF-test" : "iCTF";
 	return "gCTF";
 }
 
