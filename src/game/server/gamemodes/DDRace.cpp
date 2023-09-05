@@ -12,8 +12,17 @@
 #include <game/server/score.h>
 #include <game/version.h>
 
-#define GAME_TYPE_NAME "gCTF"
-#define TEST_TYPE_NAME "gCTF-test"
+// #define GAME_TYPE_NAME "gCTF"
+// #define TEST_TYPE_NAME "gCTF-test"
+
+static const char *GetGameTypeName()
+{
+	if(str_comp_nocase(g_Config.m_SvGametype, "gctf") == 0)
+		return  g_Config.m_SvTestingCommands ? "gCTF-test" : "gCTF";
+	if(str_comp_nocase(g_Config.m_SvGametype, "ictf") == 0)
+		return  g_Config.m_SvTestingCommands ? "iCTF-test" : "iCTF";
+	return "gCTF";
+}
 
 CGameControllerDDRace::CGameControllerDDRace(class CGameContext *pGameServer) :
 	IGameController(pGameServer), m_Teams(pGameServer), m_pLoadBestTimeResult(nullptr)
@@ -21,7 +30,7 @@ CGameControllerDDRace::CGameControllerDDRace(class CGameContext *pGameServer) :
 	// game
 	m_apFlags[0] = 0;
 	m_apFlags[1] = 0;
-	m_pGameType = g_Config.m_SvTestingCommands ? TEST_TYPE_NAME : GAME_TYPE_NAME;
+	m_pGameType = GetGameTypeName();
 	m_GameFlags = GAMEFLAG_TEAMS | GAMEFLAG_FLAGS;
 
 	InitTeleporter();
