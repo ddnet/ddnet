@@ -113,7 +113,7 @@ class CAtlas
 	/**
 	 * Sections with a smaller width or height will not be created
 	 * when cutting larger sections, to prevent collecting many
-	 * small, mostly unuseable sections.
+	 * small, mostly unusable sections.
 	 */
 	static constexpr size_t MIN_SECTION_DIMENSION = 6;
 
@@ -227,7 +227,7 @@ public:
 			}
 
 			// We don't iterate sections in the map with increasing width and height at the same time,
-			// because it's slower and doesn't noticable increase the atlas utilization.
+			// because it's slower and doesn't noticeable increase the atlas utilization.
 		}
 
 		// Check vector for larger section
@@ -261,7 +261,7 @@ public:
 			}
 		} while(SectionIndex > 0);
 		if(SmallestLossIndex == m_vSections.size())
-			return false; // No useable section found in vector
+			return false; // No usable section found in vector
 
 		// Use the section with the smallest loss
 		const SSection Section = m_vSections[SmallestLossIndex];

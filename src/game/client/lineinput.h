@@ -53,7 +53,7 @@ private:
 
 	static char ms_aStars[128];
 
-	char *m_pStr = nullptr; // explicitly set to nullptr outside of contructor, so SetBuffer works in this case
+	char *m_pStr = nullptr; // explicitly set to nullptr outside of constructor, so SetBuffer works in this case
 	size_t m_MaxSize;
 	size_t m_MaxChars;
 	size_t m_Len;

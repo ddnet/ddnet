@@ -3585,7 +3585,7 @@ void CGameClient::HandleMultiView()
 	else if(m_MultiView.m_SecondChance != 0.0f)
 		m_MultiView.m_SecondChance = 0.0f;
 
-	// if we only have one tee thats in the list, we activate solo-mode
+	// if we only have one tee that's in the list, we activate solo-mode
 	m_MultiView.m_Solo = std::count(std::begin(m_aMultiViewId), std::end(m_aMultiViewId), true) == 1;
 
 	vec2 TargetPos = vec2((Minpos.x + Maxpos.x) / 2.0f, (Minpos.y + Maxpos.y) / 2.0f);
@@ -3751,7 +3751,7 @@ float CGameClient::CalculateMultiViewZoom(vec2 MinPos, vec2 MaxPos, float Vel)
 	float Zoom = std::max(ZoomX, ZoomY);
 	// zoom out to maximum 10 percent of the current zoom for 70 velocity
 	float Diff = clamp(MapValue(70.0f, 15.0f, Zoom * 0.10f, 0.0f, Vel), 0.0f, Zoom * 0.10f);
-	// zoom should stay inbetween 1.1 and 20.0
+	// zoom should stay between 1.1 and 20.0
 	Zoom = clamp(Zoom + Diff, 1.1f, 20.0f);
 	// add the user preference
 	Zoom -= (Zoom * 0.1f) * m_MultiViewPersonalZoom;

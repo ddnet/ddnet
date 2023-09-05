@@ -1102,7 +1102,7 @@ protected:
 	bool m_CanAssert = false;
 
 	/**
-	 * After an error occured, the rendering stop as soon as possible
+	 * After an error occurred, the rendering stop as soon as possible
 	 * Always stop the current code execution after a call to this function (e.g. return false)
 	 */
 	void SetError(EGFXErrorType ErrType, const char *pErr, const char *pErrStrExtra = nullptr)
@@ -6492,7 +6492,7 @@ public:
 				Ret = CallbackObj.m_CMDIsHandled;
 				if(!CallbackObj.m_CommandCB(pBaseCommand, Buffer))
 				{
-					// an error occured, stop this command and ignore all further commands
+					// an error occurred, stop this command and ignore all further commands
 					return ERunCommandReturnTypes::RUN_COMMAND_COMMAND_ERROR;
 				}
 			}
@@ -7652,7 +7652,7 @@ public:
 				{
 					if(!m_aCommandCallbacks[CommandBufferCMDOff(NextCmd.m_Command)].m_CommandCB(NextCmd.m_pRawCommand, NextCmd))
 					{
-						// an error occured, the thread will not continue execution
+						// an error occurred, the thread will not continue execution
 						HasErrorFromCmd = true;
 						break;
 					}
