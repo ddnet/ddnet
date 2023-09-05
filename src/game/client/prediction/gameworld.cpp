@@ -182,11 +182,6 @@ void CGameWorld::RemoveEntities()
 		}
 }
 
-bool distCompare(std::pair<float, int> a, std::pair<float, int> b)
-{
-	return (a.first < b.first);
-}
-
 void CGameWorld::Tick()
 {
 	// update all objects

@@ -3480,6 +3480,7 @@ void CGameContext::OnInit(const void *pPersistentData)
 
 	m_Layers.Init(Kernel());
 	m_Collision.Init(&m_Layers);
+	m_World.m_pTuningList = m_aTuningList;
 	m_World.m_Core.InitSwitchers(m_Collision.m_HighestSwitchNumber);
 
 	char aMapName[IO_MAX_PATH_LENGTH];

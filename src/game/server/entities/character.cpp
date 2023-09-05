@@ -206,9 +206,9 @@ void CCharacter::HandleJetpack()
 		{
 			float Strength;
 			if(!m_TuneZone)
-				Strength = GameServer()->Tuning()->m_JetpackStrength;
+				Strength = Tuning()->m_JetpackStrength;
 			else
-				Strength = GameServer()->TuningList()[m_TuneZone].m_JetpackStrength;
+				Strength = TuningList()[m_TuneZone].m_JetpackStrength;
 			TakeDamage(Direction * -1.0f * (Strength / 100.0f / 6.11f), 0, m_pPlayer->GetCID(), m_Core.m_ActiveWeapon);
 		}
 	}
@@ -255,9 +255,9 @@ void CCharacter::HandleNinja()
 		vec2 GroundElasticity;
 
 		if(!m_TuneZone)
-			GroundElasticity = vec2(GameServer()->Tuning()->m_GroundElasticityX, GameServer()->Tuning()->m_GroundElasticityY);
+			GroundElasticity = vec2(Tuning()->m_GroundElasticityX, Tuning()->m_GroundElasticityY);
 		else
-			GroundElasticity = vec2(GameServer()->TuningList()[m_TuneZone].m_GroundElasticityX, GameServer()->TuningList()[m_TuneZone].m_GroundElasticityY);
+			GroundElasticity = vec2(TuningList()[m_TuneZone].m_GroundElasticityX, TuningList()[m_TuneZone].m_GroundElasticityY);
 
 		Collision()->MoveBox(&m_Core.m_Pos, &m_Core.m_Vel, vec2(GetProximityRadius(), GetProximityRadius()), GroundElasticity);
 
@@ -470,9 +470,9 @@ void CCharacter::FireWeapon()
 
 			float Strength;
 			if(!m_TuneZone)
-				Strength = GameServer()->Tuning()->m_HammerStrength;
+				Strength = Tuning()->m_HammerStrength;
 			else
-				Strength = GameServer()->TuningList()[m_TuneZone].m_HammerStrength;
+				Strength = TuningList()[m_TuneZone].m_HammerStrength;
 
 			vec2 Temp = pTarget->m_Core.m_Vel + normalize(Dir + vec2(0.f, -1.1f)) * 10.0f;
 			Temp = ClampVel(pTarget->m_MoveRestrictions, Temp);
@@ -494,9 +494,9 @@ void CCharacter::FireWeapon()
 		{
 			float FireDelay;
 			if(!m_TuneZone)
-				FireDelay = GameServer()->Tuning()->m_HammerHitFireDelay;
+				FireDelay = Tuning()->m_HammerHitFireDelay;
 			else
-				FireDelay = GameServer()->TuningList()[m_TuneZone].m_HammerHitFireDelay;
+				FireDelay = TuningList()[m_TuneZone].m_HammerHitFireDelay;
 			m_ReloadTimer = FireDelay * Server()->TickSpeed() / 1000;
 		}
 	}
@@ -508,9 +508,9 @@ void CCharacter::FireWeapon()
 		{
 			int Lifetime;
 			if(!m_TuneZone)
-				Lifetime = (int)(Server()->TickSpeed() * GameServer()->Tuning()->m_GunLifetime);
+				Lifetime = (int)(Server()->TickSpeed() * Tuning()->m_GunLifetime);
 			else
-				Lifetime = (int)(Server()->TickSpeed() * GameServer()->TuningList()[m_TuneZone].m_GunLifetime);
+				Lifetime = (int)(Server()->TickSpeed() * TuningList()[m_TuneZone].m_GunLifetime);
 
 			new CProjectile(
 				GameWorld(),
@@ -534,9 +534,9 @@ void CCharacter::FireWeapon()
 	{
 		float LaserReach;
 		if(!m_TuneZone)
-			LaserReach = GameServer()->Tuning()->m_LaserReach;
+			LaserReach = Tuning()->m_LaserReach;
 		else
-			LaserReach = GameServer()->TuningList()[m_TuneZone].m_LaserReach;
+			LaserReach = TuningList()[m_TuneZone].m_LaserReach;
 
 		new CLaser(&GameServer()->m_World, m_Pos, Direction, LaserReach, m_pPlayer->GetCID(), WEAPON_SHOTGUN);
 		GameServer()->CreateSound(m_Pos, SOUND_SHOTGUN_FIRE, TeamMask());
@@ -547,9 +547,9 @@ void CCharacter::FireWeapon()
 	{
 		int Lifetime;
 		if(!m_TuneZone)
-			Lifetime = (int)(Server()->TickSpeed() * GameServer()->Tuning()->m_GrenadeLifetime);
+			Lifetime = (int)(Server()->TickSpeed() * Tuning()->m_GrenadeLifetime);
 		else
-			Lifetime = (int)(Server()->TickSpeed() * GameServer()->TuningList()[m_TuneZone].m_GrenadeLifetime);
+			Lifetime = (int)(Server()->TickSpeed() * TuningList()[m_TuneZone].m_GrenadeLifetime);
 
 		new CProjectile(
 			GameWorld(),
@@ -572,9 +572,9 @@ void CCharacter::FireWeapon()
 	{
 		float LaserReach;
 		if(!m_TuneZone)
-			LaserReach = GameServer()->Tuning()->m_LaserReach;
+			LaserReach = Tuning()->m_LaserReach;
 		else
-			LaserReach = GameServer()->TuningList()[m_TuneZone].m_LaserReach;
+			LaserReach = TuningList()[m_TuneZone].m_LaserReach;
 
 		new CLaser(GameWorld(), m_Pos, Direction, LaserReach, m_pPlayer->GetCID(), WEAPON_LASER);
 		GameServer()->CreateSound(m_Pos, SOUND_LASER_FIRE, TeamMask());
@@ -601,9 +601,9 @@ void CCharacter::FireWeapon()
 	{
 		float FireDelay;
 		if(!m_TuneZone)
-			GameServer()->Tuning()->Get(38 + m_Core.m_ActiveWeapon, &FireDelay);
+			Tuning()->Get(38 + m_Core.m_ActiveWeapon, &FireDelay);
 		else
-			GameServer()->TuningList()[m_TuneZone].Get(38 + m_Core.m_ActiveWeapon, &FireDelay);
+			TuningList()[m_TuneZone].Get(38 + m_Core.m_ActiveWeapon, &FireDelay);
 		m_ReloadTimer = FireDelay * Server()->TickSpeed() / 1000;
 	}
 }
@@ -1184,9 +1184,9 @@ void CCharacter::Snap(int SnappingClient)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_SUPER;
 	if(m_Core.m_EndlessHook)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_ENDLESS_HOOK;
-	if(m_Core.m_CollisionDisabled || !GameServer()->Tuning()->m_PlayerCollision)
+	if(m_Core.m_CollisionDisabled || !Tuning()->m_PlayerCollision)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_COLLISION_DISABLED;
-	if(m_Core.m_HookHitDisabled || !GameServer()->Tuning()->m_PlayerHooking)
+	if(m_Core.m_HookHitDisabled || !Tuning()->m_PlayerHooking)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_HOOK_HIT_DISABLED;
 	if(m_Core.m_EndlessJump)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_ENDLESS_JUMP;
@@ -1915,9 +1915,9 @@ void CCharacter::HandleTuneLayer()
 	m_TuneZone = Collision()->IsTune(CurrentIndex);
 
 	if(m_TuneZone)
-		m_Core.m_Tuning = GameServer()->TuningList()[m_TuneZone]; // throw tunings from specific zone into gamecore
+		m_Core.m_Tuning = TuningList()[m_TuneZone]; // throw tunings from specific zone into gamecore
 	else
-		m_Core.m_Tuning = *GameServer()->Tuning();
+		m_Core.m_Tuning = *Tuning();
 
 	if(m_TuneZone != m_TuneZoneOld) // don't send tunigs all the time
 	{
