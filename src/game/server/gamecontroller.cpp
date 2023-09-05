@@ -947,11 +947,9 @@ bool IGameController::GetPlayersReadyState(int WithoutID)
 
 void IGameController::SetPlayersReadyState(bool ReadyState)
 {
-	for(int i = 0; i < MAX_CLIENTS; ++i)
-	{
-		if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS && (ReadyState || !GameServer()->m_apPlayers[i]->m_DeadSpecMode))
-			GameServer()->m_apPlayers[i]->m_IsReadyToPlay = ReadyState;
-	}
+	for(auto &pPlayer : GameServer()->m_apPlayers)
+		if(pPlayer && pPlayer->GetTeam() != TEAM_SPECTATORS && (ReadyState || !pPlayer->m_DeadSpecMode))
+			pPlayer->m_IsReadyToPlay = ReadyState;
 }
 
 void IGameController::EndMatch()
