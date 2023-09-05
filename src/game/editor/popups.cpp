@@ -394,7 +394,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupGroup(void *pContext, CUIRect View, 
 		static int s_NewTeleLayerButton = 0;
 		if(pEditor->DoButton_Editor(&s_NewTeleLayerButton, "Add tele layer", 0, &Button, 0, "Creates a new tele layer"))
 		{
-			std::shared_ptr<CLayer> pTeleLayer = std::make_shared<CLayerTele>(pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
+			std::shared_ptr<CLayer> pTeleLayer = std::make_shared<CLayerTele>(pEditor, pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
 			pEditor->m_Map.MakeTeleLayer(pTeleLayer);
 			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->AddLayer(pTeleLayer);
 			pEditor->SelectLayer(pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_vpLayers.size() - 1);
@@ -411,7 +411,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupGroup(void *pContext, CUIRect View, 
 		static int s_NewSpeedupLayerButton = 0;
 		if(pEditor->DoButton_Editor(&s_NewSpeedupLayerButton, "Add speedup layer", 0, &Button, 0, "Creates a new speedup layer"))
 		{
-			std::shared_ptr<CLayer> pSpeedupLayer = std::make_shared<CLayerSpeedup>(pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
+			std::shared_ptr<CLayer> pSpeedupLayer = std::make_shared<CLayerSpeedup>(pEditor, pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
 			pEditor->m_Map.MakeSpeedupLayer(pSpeedupLayer);
 			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->AddLayer(pSpeedupLayer);
 			pEditor->SelectLayer(pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_vpLayers.size() - 1);
@@ -428,7 +428,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupGroup(void *pContext, CUIRect View, 
 		static int s_NewTuneLayerButton = 0;
 		if(pEditor->DoButton_Editor(&s_NewTuneLayerButton, "Add tune layer", 0, &Button, 0, "Creates a new tuning layer"))
 		{
-			std::shared_ptr<CLayer> pTuneLayer = std::make_shared<CLayerTune>(pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
+			std::shared_ptr<CLayer> pTuneLayer = std::make_shared<CLayerTune>(pEditor, pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
 			pEditor->m_Map.MakeTuneLayer(pTuneLayer);
 			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->AddLayer(pTuneLayer);
 			pEditor->SelectLayer(pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_vpLayers.size() - 1);
@@ -445,7 +445,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupGroup(void *pContext, CUIRect View, 
 		static int s_NewFrontLayerButton = 0;
 		if(pEditor->DoButton_Editor(&s_NewFrontLayerButton, "Add front layer", 0, &Button, 0, "Creates a new item layer"))
 		{
-			std::shared_ptr<CLayer> pFrontLayer = std::make_shared<CLayerFront>(pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
+			std::shared_ptr<CLayer> pFrontLayer = std::make_shared<CLayerFront>(pEditor, pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
 			pEditor->m_Map.MakeFrontLayer(pFrontLayer);
 			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->AddLayer(pFrontLayer);
 			pEditor->SelectLayer(pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_vpLayers.size() - 1);
@@ -462,7 +462,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupGroup(void *pContext, CUIRect View, 
 		static int s_NewSwitchLayerButton = 0;
 		if(pEditor->DoButton_Editor(&s_NewSwitchLayerButton, "Add switch layer", 0, &Button, 0, "Creates a new switch layer"))
 		{
-			std::shared_ptr<CLayer> pSwitchLayer = std::make_shared<CLayerSwitch>(pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
+			std::shared_ptr<CLayer> pSwitchLayer = std::make_shared<CLayerSwitch>(pEditor, pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
 			pEditor->m_Map.MakeSwitchLayer(pSwitchLayer);
 			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->AddLayer(pSwitchLayer);
 			pEditor->SelectLayer(pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_vpLayers.size() - 1);
@@ -477,8 +477,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupGroup(void *pContext, CUIRect View, 
 	static int s_NewQuadLayerButton = 0;
 	if(pEditor->DoButton_Editor(&s_NewQuadLayerButton, "Add quads layer", 0, &Button, 0, "Creates a new quad layer"))
 	{
-		std::shared_ptr<CLayer> pQuadLayer = std::make_shared<CLayerQuads>();
-		pQuadLayer->m_pEditor = pEditor;
+		std::shared_ptr<CLayer> pQuadLayer = std::make_shared<CLayerQuads>(pEditor);
 		pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->AddLayer(pQuadLayer);
 		pEditor->SelectLayer(pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_vpLayers.size() - 1);
 		pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_Collapse = false;
@@ -491,7 +490,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupGroup(void *pContext, CUIRect View, 
 	static int s_NewTileLayerButton = 0;
 	if(pEditor->DoButton_Editor(&s_NewTileLayerButton, "Add tile layer", 0, &Button, 0, "Creates a new tile layer"))
 	{
-		std::shared_ptr<CLayer> pTileLayer = std::make_shared<CLayerTiles>(pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
+		std::shared_ptr<CLayer> pTileLayer = std::make_shared<CLayerTiles>(pEditor, pEditor->m_Map.m_pGameLayer->m_Width, pEditor->m_Map.m_pGameLayer->m_Height);
 		pTileLayer->m_pEditor = pEditor;
 		pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->AddLayer(pTileLayer);
 		pEditor->SelectLayer(pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_vpLayers.size() - 1);
@@ -505,8 +504,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupGroup(void *pContext, CUIRect View, 
 	static int s_NewSoundLayerButton = 0;
 	if(pEditor->DoButton_Editor(&s_NewSoundLayerButton, "Add sound layer", 0, &Button, 0, "Creates a new sound layer"))
 	{
-		std::shared_ptr<CLayer> pSoundLayer = std::make_shared<CLayerSounds>();
-		pSoundLayer->m_pEditor = pEditor;
+		std::shared_ptr<CLayer> pSoundLayer = std::make_shared<CLayerSounds>(pEditor);
 		pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->AddLayer(pSoundLayer);
 		pEditor->SelectLayer(pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_vpLayers.size() - 1);
 		pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_Collapse = false;

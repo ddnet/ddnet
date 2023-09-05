@@ -404,7 +404,7 @@ void CAutoMapper::ProceedLocalized(CLayerTiles *pLayer, int ConfigID, int Seed, 
 	int UpdateToX = clamp(X + Width + 3 * pConf->m_EndX, 0, pLayer->m_Width);
 	int UpdateToY = clamp(Y + Height + 3 * pConf->m_EndY, 0, pLayer->m_Height);
 
-	CLayerTiles *pUpdateLayer = new CLayerTiles(UpdateToX - UpdateFromX, UpdateToY - UpdateFromY);
+	CLayerTiles *pUpdateLayer = new CLayerTiles(Editor(), UpdateToX - UpdateFromX, UpdateToY - UpdateFromY);
 
 	for(int y = UpdateFromY; y < UpdateToY; y++)
 	{
@@ -452,7 +452,7 @@ void CAutoMapper::Proceed(CLayerTiles *pLayer, int ConfigID, int Seed, int SeedO
 		CLayerTiles *pReadLayer;
 		if(pRun->m_AutomapCopy)
 		{
-			pReadLayer = new CLayerTiles(pLayer->m_Width, pLayer->m_Height);
+			pReadLayer = new CLayerTiles(Editor(), pLayer->m_Width, pLayer->m_Height);
 
 			for(int y = 0; y < pLayer->m_Height; y++)
 			{

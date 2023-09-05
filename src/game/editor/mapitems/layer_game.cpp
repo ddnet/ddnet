@@ -4,8 +4,8 @@
 
 #include <game/editor/editor.h>
 
-CLayerGame::CLayerGame(int w, int h) :
-	CLayerTiles(w, h)
+CLayerGame::CLayerGame(CEditor *pEditor, int w, int h) :
+	CLayerTiles(pEditor, w, h)
 {
 	str_copy(m_aName, "Game");
 	m_Game = 1;
@@ -32,7 +32,7 @@ void CLayerGame::SetTile(int x, int y, CTile Tile)
 	{
 		if(!m_pEditor->m_Map.m_pFrontLayer)
 		{
-			std::shared_ptr<CLayer> pLayerFront = std::make_shared<CLayerFront>(m_Width, m_Height);
+			std::shared_ptr<CLayer> pLayerFront = std::make_shared<CLayerFront>(m_pEditor, m_Width, m_Height);
 			m_pEditor->m_Map.MakeFrontLayer(pLayerFront);
 			m_pEditor->m_Map.m_pGameGroup->AddLayer(pLayerFront);
 		}

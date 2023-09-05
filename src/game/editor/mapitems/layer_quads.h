@@ -6,7 +6,7 @@
 class CLayerQuads : public CLayer
 {
 public:
-	CLayerQuads();
+	explicit CLayerQuads(CEditor *pEditor);
 	CLayerQuads(const CLayerQuads &Other);
 	~CLayerQuads();
 

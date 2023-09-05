@@ -2,8 +2,8 @@
 
 #include <game/editor/editor.h>
 
-CLayerSpeedup::CLayerSpeedup(int w, int h) :
-	CLayerTiles(w, h)
+CLayerSpeedup::CLayerSpeedup(CEditor *pEditor, int w, int h) :
+	CLayerTiles(pEditor, w, h)
 {
 	str_copy(m_aName, "Speedup");
 	m_Speedup = 1;

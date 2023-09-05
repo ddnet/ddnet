@@ -6,7 +6,7 @@
 class CLayerTele : public CLayerTiles
 {
 public:
-	CLayerTele(int w, int h);
+	CLayerTele(CEditor *pEditor, int w, int h);
 	~CLayerTele();
 
 	CTeleTile *m_pTeleTile;

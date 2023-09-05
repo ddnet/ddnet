@@ -6,7 +6,7 @@
 class CLayerTune : public CLayerTiles
 {
 public:
-	CLayerTune(int w, int h);
+	CLayerTune(CEditor *pEditor, int w, int h);
 	~CLayerTune();
 
 	CTuneTile *m_pTuneTile;

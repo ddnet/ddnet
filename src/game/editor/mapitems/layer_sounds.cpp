@@ -6,7 +6,8 @@
 
 static const float s_SourceVisualSize = 32.0f;
 
-CLayerSounds::CLayerSounds()
+CLayerSounds::CLayerSounds(CEditor *pEditor) :
+	CLayer(pEditor)
 {
 	m_Type = LAYERTYPE_SOUNDS;
 	m_aName[0] = '\0';
@@ -144,8 +145,7 @@ void CLayerSounds::BrushSelecting(CUIRect Rect)
 int CLayerSounds::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
 {
 	// create new layer
-	std::shared_ptr<CLayerSounds> pGrabbed = std::make_shared<CLayerSounds>();
-	pGrabbed->m_pEditor = m_pEditor;
+	std::shared_ptr<CLayerSounds> pGrabbed = std::make_shared<CLayerSounds>(m_pEditor);
 	pGrabbed->m_Sound = m_Sound;
 	pBrush->AddLayer(pGrabbed);
 

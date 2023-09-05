@@ -7542,13 +7542,11 @@ void CEditor::Init()
 	m_BackgroundTexture = Graphics()->LoadTexture("editor/background.png", IStorage::TYPE_ALL);
 	m_CursorTexture = Graphics()->LoadTexture("editor/cursor.png", IStorage::TYPE_ALL);
 
-	m_pTilesetPicker = std::make_shared<CLayerTiles>(16, 16);
-	m_pTilesetPicker->m_pEditor = this;
+	m_pTilesetPicker = std::make_shared<CLayerTiles>(this, 16, 16);
 	m_pTilesetPicker->MakePalette();
 	m_pTilesetPicker->m_Readonly = true;
 
-	m_pQuadsetPicker = std::make_shared<CLayerQuads>();
-	m_pQuadsetPicker->m_pEditor = this;
+	m_pQuadsetPicker = std::make_shared<CLayerQuads>(this);
 	m_pQuadsetPicker->NewQuad(0, 0, 64, 64);
 	m_pQuadsetPicker->m_Readonly = true;
 

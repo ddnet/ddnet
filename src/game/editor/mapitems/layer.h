@@ -19,14 +19,14 @@ public:
 	class IGraphics *Graphics();
 	class ITextRender *TextRender();
 
-	CLayer()
+	explicit CLayer(CEditor *pEditor)
 	{
 		m_Type = LAYERTYPE_INVALID;
 		str_copy(m_aName, "(invalid)");
 		m_Visible = true;
 		m_Readonly = false;
 		m_Flags = 0;
-		m_pEditor = nullptr;
+		m_pEditor = pEditor;
 	}
 
 	CLayer(const CLayer &Other)

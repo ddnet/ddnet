@@ -6,7 +6,7 @@
 class CLayerSpeedup : public CLayerTiles
 {
 public:
-	CLayerSpeedup(int w, int h);
+	CLayerSpeedup(CEditor *pEditor, int w, int h);
 	~CLayerSpeedup();
 
 	CSpeedupTile *m_pSpeedupTile;

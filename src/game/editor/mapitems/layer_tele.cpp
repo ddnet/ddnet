@@ -2,8 +2,8 @@
 
 #include <game/editor/editor.h>
 
-CLayerTele::CLayerTele(int w, int h) :
-	CLayerTiles(w, h)
+CLayerTele::CLayerTele(CEditor *pEditor, int w, int h) :
+	CLayerTiles(pEditor, w, h)
 {
 	str_copy(m_aName, "Tele");
 	m_Tele = 1;

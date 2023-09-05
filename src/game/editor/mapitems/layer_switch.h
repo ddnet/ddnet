@@ -6,7 +6,7 @@
 class CLayerSwitch : public CLayerTiles
 {
 public:
-	CLayerSwitch(int w, int h);
+	CLayerSwitch(CEditor *pEditor, int w, int h);
 	~CLayerSwitch();
 
 	CSwitchTile *m_pSwitchTile;

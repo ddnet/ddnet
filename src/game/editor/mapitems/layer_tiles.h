@@ -83,7 +83,7 @@ protected:
 	}
 
 public:
-	CLayerTiles(int w, int h);
+	CLayerTiles(CEditor *pEditor, int w, int h);
 	CLayerTiles(const CLayerTiles &Other);
 	~CLayerTiles();
 
