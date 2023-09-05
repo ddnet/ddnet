@@ -1803,7 +1803,7 @@ void CCharacter::HandleTiles(int Index)
 	{
 		if(m_Core.m_Super)
 			return;
-		int TeleOut = m_Core.m_pWorld->RandomOr0((*m_pTeleOuts)[z - 1].size());
+		int TeleOut = GameWorld()->m_Core.RandomOr0((*m_pTeleOuts)[z - 1].size());
 		m_Core.m_Pos = (*m_pTeleOuts)[z - 1][TeleOut];
 		if(!g_Config.m_SvTeleportHoldHook)
 		{
@@ -1818,7 +1818,7 @@ void CCharacter::HandleTiles(int Index)
 	{
 		if(m_Core.m_Super)
 			return;
-		int TeleOut = m_Core.m_pWorld->RandomOr0((*m_pTeleOuts)[evilz - 1].size());
+		int TeleOut = GameWorld()->m_Core.RandomOr0((*m_pTeleOuts)[evilz - 1].size());
 		m_Core.m_Pos = (*m_pTeleOuts)[evilz - 1][TeleOut];
 		if(!g_Config.m_SvOldTeleportHook && !g_Config.m_SvOldTeleportWeapons)
 		{
@@ -1845,7 +1845,7 @@ void CCharacter::HandleTiles(int Index)
 		{
 			if(!(*m_pTeleCheckOuts)[k].empty())
 			{
-				int TeleOut = m_Core.m_pWorld->RandomOr0((*m_pTeleCheckOuts)[k].size());
+				int TeleOut = GameWorld()->m_Core.RandomOr0((*m_pTeleCheckOuts)[k].size());
 				m_Core.m_Pos = (*m_pTeleCheckOuts)[k][TeleOut];
 				m_Core.m_Vel = vec2(0, 0);
 
@@ -1882,7 +1882,7 @@ void CCharacter::HandleTiles(int Index)
 		{
 			if(!(*m_pTeleCheckOuts)[k].empty())
 			{
-				int TeleOut = m_Core.m_pWorld->RandomOr0((*m_pTeleCheckOuts)[k].size());
+				int TeleOut = GameWorld()->m_Core.RandomOr0((*m_pTeleCheckOuts)[k].size());
 				m_Core.m_Pos = (*m_pTeleCheckOuts)[k][TeleOut];
 
 				if(!g_Config.m_SvTeleportHoldHook)
