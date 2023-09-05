@@ -1107,7 +1107,7 @@ void CCharacter::GiveAllWeapons()
 
 CTeamsCore *CCharacter::TeamsCore()
 {
-	return m_Core.m_pTeams;
+	return GameWorld()->Teams();
 }
 
 CCharacter::CCharacter(CGameWorld *pGameWorld, int ID, CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended) :
@@ -1355,9 +1355,7 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 
 void CCharacter::SetCoreWorld(CGameWorld *pGameWorld)
 {
-	m_Core.m_pWorld = &pGameWorld->m_Core;
-	m_Core.m_pCollision = pGameWorld->Collision();
-	m_Core.m_pTeams = pGameWorld->Teams();
+	m_Core.SetCoreWorld(&pGameWorld->m_Core, pGameWorld->Collision(), pGameWorld->Teams());
 }
 
 bool CCharacter::Match(CCharacter *pChar)

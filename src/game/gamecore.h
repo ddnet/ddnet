@@ -220,7 +220,6 @@ public:
 
 class CCharacterCore
 {
-	friend class CCharacter;
 	CWorldCore *m_pWorld = nullptr;
 	CCollision *m_pCollision;
 	std::map<int, std::vector<vec2>> *m_pTeleOuts;
@@ -272,6 +271,7 @@ public:
 	int m_TriggeredEvents;
 
 	void Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore *pTeams = nullptr, std::map<int, std::vector<vec2>> *pTeleOuts = nullptr);
+	void SetCoreWorld(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore *pTeams);
 	void Reset();
 	void TickDeferred();
 	void Tick(bool UseInput, bool DoDeferredTick = true);

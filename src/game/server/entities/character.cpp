@@ -1262,7 +1262,7 @@ void CCharacter::SetTeleports(std::map<int, std::vector<vec2>> *pTeleOuts, std::
 {
 	m_pTeleOuts = pTeleOuts;
 	m_pTeleCheckOuts = pTeleCheckOuts;
-	m_Core.m_pTeleOuts = pTeleOuts;
+	m_Core.SetTeleOuts(pTeleOuts);
 }
 
 void CCharacter::FillAntibot(CAntibotCharacterData *pData)
