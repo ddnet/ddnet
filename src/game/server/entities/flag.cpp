@@ -94,13 +94,23 @@ void CFlag::Snap(int SnappingClient)
 	if(NetworkClipped(SnappingClient))
 		return;
 
+	// this should not be here ._.
+	// it is also done in TickDeferred and vanilla does not
+	// keep this in here
+	// but thats the only fix i found for
+	// https://github.com/ZillyInsta/ddnet-insta/issues/6
+	// in 0.7 the flag laggs behind otherwise unless cl_predict_players is set to 1
+	// which is not needed on vanilla servers
+	if(m_pCarrier)
+		m_Pos = m_pCarrier->GetPos();
+
 	if(Server()->IsSixup(SnappingClient))
 	{
 		protocol7::CNetObj_Flag *pFlag = Server()->SnapNewItem<protocol7::CNetObj_Flag>(m_Team);
 		if(!pFlag)
 			return;
-		pFlag->m_X = (int)m_Pos.x;
-		pFlag->m_Y = (int)m_Pos.y;
+		pFlag->m_X = round_to_int(m_Pos.x);
+		pFlag->m_Y = round_to_int(m_Pos.y);
 		pFlag->m_Team = m_Team;
 	}
 	else
@@ -108,8 +118,8 @@ void CFlag::Snap(int SnappingClient)
 		CNetObj_Flag *pFlag = Server()->SnapNewItem<CNetObj_Flag>(m_Team);
 		if(!pFlag)
 			return;
-		pFlag->m_X = (int)m_Pos.x;
-		pFlag->m_Y = (int)m_Pos.y;
+		pFlag->m_X = round_to_int(m_Pos.x);
+		pFlag->m_Y = round_to_int(m_Pos.y);
 		pFlag->m_Team = m_Team;
 	}
 }
