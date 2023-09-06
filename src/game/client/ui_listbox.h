@@ -29,7 +29,7 @@ private:
 	int m_ListBoxItemsPerRow;
 	bool m_ListBoxItemSelected;
 	bool m_ListBoxItemActivated;
-	bool m_ScrollbarIsShown;
+	bool m_ScrollbarShown;
 	const char *m_pBottomText;
 	float m_FooterHeight;
 	float m_AutoSpacing;
@@ -64,8 +64,8 @@ public:
 	bool WasItemSelected() const { return m_ListBoxItemSelected; }
 	bool WasItemActivated() const { return m_ListBoxItemActivated; }
 
-	bool ScrollbarIsShown() const { return m_ScrollbarIsShown; }
-	float ScrollbarWidth() const { return ScrollbarIsShown() ? ScrollbarWidthMax() : 0.0f; }
+	bool ScrollbarShown() const { return m_ScrollbarShown; }
+	float ScrollbarWidth() const { return ScrollbarShown() ? ScrollbarWidthMax() : 0.0f; }
 	float ScrollbarWidthMax() const { return 20.0f; }
 };
 

@@ -193,7 +193,7 @@ bool CScrollRegion::AddRect(const CUIRect &Rect, bool ShouldScrollHere)
 	m_ContentH = maximum(std::ceil(Rect.y + Rect.h - (m_ClipRect.y + m_ContentScrollOff.y)) + HEIGHT_MAGIC_FIX, m_ContentH);
 	if(ShouldScrollHere)
 		ScrollHere();
-	return !IsRectClipped(Rect);
+	return !RectClipped(Rect);
 }
 
 void CScrollRegion::ScrollHere(EScrollOption Option)
@@ -230,7 +230,7 @@ void CScrollRegion::ScrollRelative(EScrollRelative Direction, float SpeedMultipl
 
 void CScrollRegion::DoEdgeScrolling()
 {
-	if(!IsScrollbarShown())
+	if(!ScrollbarShown())
 		return;
 
 	const float ScrollBorderSize = 20.0f;
@@ -244,17 +244,17 @@ void CScrollRegion::DoEdgeScrolling()
 		ScrollRelative(SCROLLRELATIVE_DOWN, minimum(MaxScrollMultiplier, (UI()->MouseY() - BottomScrollPosition) * ScrollSpeedFactor));
 }
 
-bool CScrollRegion::IsRectClipped(const CUIRect &Rect) const
+bool CScrollRegion::RectClipped(const CUIRect &Rect) const
 {
 	return (m_ClipRect.x > (Rect.x + Rect.w) || (m_ClipRect.x + m_ClipRect.w) < Rect.x || m_ClipRect.y > (Rect.y + Rect.h) || (m_ClipRect.y + m_ClipRect.h) < Rect.y);
 }
 
-bool CScrollRegion::IsScrollbarShown() const
+bool CScrollRegion::ScrollbarShown() const
 {
 	return m_ContentH > m_ClipRect.h;
 }
 
-bool CScrollRegion::IsAnimating() const
+bool CScrollRegion::Animating() const
 {
 	return m_AnimTime > 0.0f;
 }

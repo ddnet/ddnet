@@ -17,7 +17,7 @@ CListBox::CListBox()
 	m_FilterOffset = 0.0f;
 	m_HasHeader = false;
 	m_AutoSpacing = 0.0f;
-	m_ScrollbarIsShown = false;
+	m_ScrollbarShown = false;
 	m_Active = true;
 }
 
@@ -140,7 +140,7 @@ CListboxItem CListBox::DoNextRow()
 	m_RowView.VSplitLeft(m_RowView.w / (m_ListBoxItemsPerRow - m_ListBoxItemIndex % m_ListBoxItemsPerRow), &Item.m_Rect, &m_RowView);
 
 	Item.m_Selected = m_ListBoxSelectedIndex == m_ListBoxItemIndex;
-	Item.m_Visible = !m_ScrollRegion.IsRectClipped(Item.m_Rect);
+	Item.m_Visible = !m_ScrollRegion.RectClipped(Item.m_Rect);
 
 	m_ListBoxItemIndex++;
 	return Item;
@@ -188,7 +188,7 @@ CListboxItem CListBox::DoNextItem(const void *pId, bool Selected)
 
 		Item.m_Rect.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, m_Active ? 0.5f : 0.33f), IGraphics::CORNER_ALL, 5.0f);
 	}
-	if(UI()->HotItem() == pId && !m_ScrollRegion.IsAnimating())
+	if(UI()->HotItem() == pId && !m_ScrollRegion.Animating())
 	{
 		Item.m_Rect.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.33f), IGraphics::CORNER_ALL, 5.0f);
 	}
@@ -208,7 +208,7 @@ int CListBox::DoEnd()
 	m_ScrollRegion.End();
 	m_Active |= m_ScrollRegion.Params().m_Active;
 
-	m_ScrollbarIsShown = m_ScrollRegion.IsScrollbarShown();
+	m_ScrollbarShown = m_ScrollRegion.ScrollbarShown();
 	if(m_ListBoxNewSelOffset != 0 && m_ListBoxNumItems > 0 && m_ListBoxSelectedIndex == m_ListBoxNewSelected)
 	{
 		m_ListBoxNewSelected = clamp((m_ListBoxNewSelected == -1 ? 0 : m_ListBoxNewSelected) + m_ListBoxNewSelOffset, 0, m_ListBoxNumItems - 1);
