@@ -1000,7 +1000,7 @@ void CServerBrowser::UpdateFromHttp()
 			Want = [&](const NETADDR *pAddrs, int NumAddrs) -> bool {
 				for(int i = 0; i < NumAddrs; i++)
 				{
-					if(WantedAddrs.count(pAddrs[i]))
+					if(WantedAddrs.contains(pAddrs[i]))
 					{
 						return true;
 					}

@@ -1,0 +1,11 @@
+set(CMAKE_SYSTEM_NAME Linux)
+
+set(CMAKE_C_COMPILER /opt/x-tools/x86_64-unknown-linux-gnu/bin/x86_64-unknown-linux-gnu-gcc)
+set(CMAKE_CXX_COMPILER /opt/x-tools/x86_64-unknown-linux-gnu/bin/x86_64-unknown-linux-gnu-g++)
+set(CMAKE_RUST_COMPILER_TARGET /opt/x-tools/x86_64-unknown-linux-gnu/bin/x86_64-unknown-linux-gnu)
+
+set(CMAKE_FIND_ROOT_PATH /)
+set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY BOTH)
+set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE BOTH)
+set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE BOTH)

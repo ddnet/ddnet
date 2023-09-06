@@ -294,7 +294,8 @@ void CUpdater::PerformUpdate()
 
 	const char *pLastFile;
 	pLastFile = "";
-	for(map<string, bool>::reverse_iterator it = m_FileJobs.rbegin(); it != m_FileJobs.rend(); ++it)
+	// for(auto &m_FileJob : std::ranges::reverse_view(m_FileJobs)) // Not supported by Clang yet
+	for(map<string, bool>::reverse_iterator it = m_FileJobs.rbegin(); it != m_FileJobs.rend(); ++it) // NOLINT(modernize-loop-convert)
 	{
 		if(it->second)
 		{
