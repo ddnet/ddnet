@@ -1769,3 +1769,6 @@ Unable to delete the folder '%s'. Make sure it's empty first.
 
 Moved ingame
 == 遊戲內移動
+
+Render cut to video
+== 

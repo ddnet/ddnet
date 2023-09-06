@@ -1362,6 +1362,9 @@ Cut interval
 Cut length
 == 
 
+Render cut to video
+== 
+
 Loading demo files
 == 
 
@@ -1422,10 +1425,10 @@ Automatically create statboard csv
 Max CSVs
 == 
 
-Loading skin files
+Toggle to edit your dummy settings
 == 
 
-Toggle to edit your dummy settings
+Loading skin files
 == 
 
 Download community skins
@@ -1443,13 +1446,13 @@ Create a random skin
 Open the directory to add custom skins
 == 
 
+Converse
+== 
+
 Dummy copy
 == 
 
 Hammerfly dummy
-== 
-
-Converse
 == 
 
 Statboard

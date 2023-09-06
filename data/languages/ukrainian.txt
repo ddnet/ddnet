@@ -1744,3 +1744,6 @@ Graphics card
 
 Moved ingame
 == Перемістився в грі
+
+Render cut to video
+== 
