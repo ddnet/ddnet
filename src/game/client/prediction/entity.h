@@ -12,12 +12,14 @@
 class CEntity
 {
 	MACRO_ALLOC_HEAP()
-	friend class CGameWorld; // entity list handling
+
+private:
+	friend CGameWorld; // entity list handling
 	CEntity *m_pPrevTypeEntity;
 	CEntity *m_pNextTypeEntity;
 
 protected:
-	class CGameWorld *m_pGameWorld;
+	CGameWorld *m_pGameWorld;
 	bool m_MarkedForDestroy;
 	int m_ID;
 	int m_ObjType;
@@ -29,7 +31,7 @@ public:
 	virtual ~CEntity();
 
 	std::vector<SSwitchers> &Switchers() { return m_pGameWorld->Switchers(); }
-	class CGameWorld *GameWorld() { return m_pGameWorld; }
+	CGameWorld *GameWorld() { return m_pGameWorld; }
 	CTuningParams *Tuning() { return GameWorld()->Tuning(); }
 	CTuningParams *TuningList() { return GameWorld()->TuningList(); }
 	CTuningParams *GetTuning(int i) { return GameWorld()->GetTuning(i); }
