@@ -543,7 +543,7 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientID, bo
 			// ends at the first whitespace, which breaks for unknown commands (filenames) containing spaces.
 			if(!m_pfnUnknownCommandCallback(pStr, m_pUnknownCommandUserdata))
 			{
-				char aBuf[256];
+				char aBuf[512 + 32];
 				str_format(aBuf, sizeof(aBuf), "No such command: %s.", Result.m_pCommand);
 				Print(OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
 			}
@@ -881,7 +881,7 @@ void CConsole::TraverseChain(FCommandCallback *ppfnCallback, void **ppUserData)
 void CConsole::ConToggle(IConsole::IResult *pResult, void *pUser)
 {
 	CConsole *pConsole = static_cast<CConsole *>(pUser);
-	char aBuf[128] = {0};
+	char aBuf[512 + 32] = {0};
 	CCommand *pCommand = pConsole->FindCommand(pResult->GetString(0), pConsole->m_FlagMask);
 	if(pCommand)
 	{
@@ -933,7 +933,7 @@ void CConsole::ConToggle(IConsole::IResult *pResult, void *pUser)
 void CConsole::ConToggleStroke(IConsole::IResult *pResult, void *pUser)
 {
 	CConsole *pConsole = static_cast<CConsole *>(pUser);
-	char aBuf[128] = {0};
+	char aBuf[512 + 32] = {0};
 	CCommand *pCommand = pConsole->FindCommand(pResult->GetString(1), pConsole->m_FlagMask);
 	if(pCommand)
 	{
