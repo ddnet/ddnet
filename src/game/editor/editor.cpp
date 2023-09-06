@@ -4560,8 +4560,11 @@ void CEditor::RenderFileDialog()
 	{
 		// render search bar
 		UI()->DoLabel(&FileBoxLabel, "Search:", 10.0f, TEXTALIGN_ML);
-		if(m_FileDialogOpening)
+		if(m_FileDialogOpening || (Input()->KeyPress(KEY_F) && Input()->ModifierIsPressed()))
+		{
 			UI()->SetActiveItem(&m_FileDialogFilterInput);
+			m_FileDialogFilterInput.SelectAll();
+		}
 		if(UI()->DoClearableEditBox(&m_FileDialogFilterInput, &FileBox, 10.0f))
 		{
 			RefreshFilteredFileList();
@@ -4784,6 +4787,7 @@ void CEditor::RenderFileDialog()
 		if(IsDir) // folder
 		{
 			m_FileDialogFilterInput.Clear();
+			UI()->SetActiveItem(&m_FileDialogFilterInput);
 			const bool ParentFolder = str_comp(m_vpFilteredFileList[m_FilesSelectedIndex]->m_aFilename, "..") == 0;
 			if(ParentFolder) // parent folder
 			{
