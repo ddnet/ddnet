@@ -2006,7 +2006,10 @@ void CMenus::RenderSettingsPython(CUIRect MainView)
 	}
 
 	if(!g_Config.m_DTHPython)
+	{
+		NeedToggle = true;
 		return;
+	}
 
 	ListView.HSplitTop(13.0f, &MainView, &ListView); //Отступ
 	//Кнопка обновления
@@ -2018,16 +2021,14 @@ void CMenus::RenderSettingsPython(CUIRect MainView)
 
 		Button.VSplitRight(100.0f, &Button, &RefreshButton);
 		if(DoButton_Menu(&s_RefreshButton, Localize("Refresh"), 0, &RefreshButton))
+		{
 			RefreshPythonScripts();
+			NeedToggle = true;
+		}
 	}
 
 	static CButtonContainer s_ListBox;
 	static int ShowOnlyActive = 0;
-
-
-
-
-	static float ScrollValue = 0;
 
 	static CListBox listBox;
 	static int ActiveScripts = 0, NumListedFiles = 0;
@@ -2036,13 +2037,11 @@ void CMenus::RenderSettingsPython(CUIRect MainView)
 
 
 	{
-		//receive scripts
-
-
 		const int ScriptMaxCount = 512;
 
 		static CButtonContainer pItemID[ScriptMaxCount];
 		static CButtonContainer pIDButtonToggleScript[ScriptMaxCount];
+		static CButtonContainer pIDButtonAutoLoad[ScriptMaxCount];
 
 		int i = 0;
 
@@ -2079,7 +2078,31 @@ void CMenus::RenderSettingsPython(CUIRect MainView)
 					else if(toggle)
 						GameClient()->pythonController.StopExecuteScript(PythonScript);
 				}
+
+				Row.VSplitRight(Row.h/2.0f, &Row, &Buttons);
+				Buttons.HSplitMid(&Buttons, &Button);
+
+				if(DoButton_CheckBox(&pIDButtonAutoLoad[i], "", GameClient()->pythonController.isScriptAutoloading(PythonScript), &Button))
+				{
+					bool toggle = m_pClient->pythonController.isScriptAutoloading(PythonScript);
+
+					if(!toggle)
+						this->m_pClient->pythonController.AutoloadAdd(PythonScript);
+					else if(toggle)
+						this->m_pClient->pythonController.AutoloadRemove(PythonScript);
+				}
 			}
+
+			if(!this->m_pClient->pythonController.isExecutedScript(PythonScript) && this->m_pClient->pythonController.isScriptAutoloading(PythonScript))
+			{
+				if(NeedToggle && !this->m_pClient->pythonController.isExecutedScript(PythonScript))
+				{
+					RefreshPythonScripts();
+					this->m_pClient->pythonController.StartExecuteScript(PythonScript);
+					NeedToggle = false;
+				}
+			}
+
 			i++;
 		}
 
@@ -2098,8 +2121,8 @@ void CMenus::RenderSettingsPython(CUIRect MainView)
 	{
 		if(s_PythonSelectedScript > -1 && s_PythonSelectedScript < GameClient()->pythonScripts.size())
 		{
-			static CButtonContainer s_ToggleButton;
-			CUIRect ToggleButton;
+			static CButtonContainer s_ToggleButton, s_RefreshButton;
+			CUIRect ToggleButton, RefreshButton;
 
 			ScriptBox.VSplitLeft(15.0f, 0, &ScriptBox);
 			ScriptBox.HSplitBottom(15.0f, &ScriptBox, 0);
@@ -2111,13 +2134,45 @@ void CMenus::RenderSettingsPython(CUIRect MainView)
 
 
 			ToggleButton.HSplitBottom(30.0f+7.0f, &ScriptBox, &Button);
-			//DoButton_Menu(&s_ToggleButton, GameClient()->pythonController.isExecutedScript() ? "Toggle", 0, &Button, nullptr, IGraphics::CORNER_ALL, 10.0f, 0.0f, vec4(1.f, 1.f, 1.f, 0.75f), vec4(1.f, 1.f, 1.f, 0.5f));
+			PythonScript *PS = GameClient()->pythonScripts[s_PythonSelectedScript];
+
+			if(DoButton_Menu(&s_ToggleButton, GameClient()->pythonController.isExecutedScript(PS) ? "Deactivate" : "Activate" , 0, &Button, nullptr, IGraphics::CORNER_ALL, 10.0f, 0.0f, vec4(1.f, 1.f, 1.f, 0.75f), vec4(1.f, 1.f, 1.f, 0.5f)))
+			{
+				bool toggle = GameClient()->pythonController.isExecutedScript(PS);
+
+				if(!toggle)
+					GameClient()->pythonController.StartExecuteScript(PS);
+				else
+					GameClient()->pythonController.StopExecuteScript(PS);
+			}
+
+			ScriptBox.HSplitBottom(13.0f, &ScriptBox, &Button);
+			ScriptBox.VSplitLeft(100.0f+10.0f, &RefreshButton, &ScriptBox);
+
+			RefreshButton.HSplitBottom(30.0f+7.0f, &ScriptBox, &Button);
+
+			if(DoButton_Menu(&s_RefreshButton, "Refresh" , 0, &Button, nullptr, IGraphics::CORNER_ALL, 10.0f, 0.13f, vec4(1.f, 1.f, 1.f, 0.75f), vec4(1.f, 1.f, 1.f, 0.5f)))
+			{
+				bool toggle = GameClient()->pythonController.isExecutedScript(PS);
+
+				if(toggle)
+				{
+					//TODO: RefreshPythonScripts();
+					GameClient()->pythonController.StartExecuteScript(PS);
+				}
+				//else
+					//RefreshPythonScripts();
+			}
 		}
 	}
 }
 
 void CMenus::RefreshPythonScripts()
 {
+//	for(auto PythonScript : GameClient()->pythonScripts)
+//	{
+//		GameClient()->pythonController.StopExecuteScript(PythonScript);
+//	}
 	GameClient()->pythonScripts = this->scriptsScanner.scan();
 }
 

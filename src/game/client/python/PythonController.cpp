@@ -8,6 +8,37 @@ PythonController::PythonController()
 	Py_Initialize();
 }
 
+void PythonController::AutoloadAdd(PythonScript *pythonScript)
+{
+	if(this->isScriptAutoloading(pythonScript))
+		return;
+
+	this->autoLoadPythonScripts.push_back(pythonScript);
+}
+
+void PythonController::AutoloadRemove(PythonScript *pythonScript)
+{
+	for(auto i = this->autoLoadPythonScripts.begin(); i != this->autoLoadPythonScripts.end(); i++)
+	{
+		auto autoLoadScript = *i;
+		if(autoLoadScript->filepath == pythonScript->filepath)
+		{
+			this->autoLoadPythonScripts.erase(i);
+			return;
+		}
+	}
+}
+
+bool PythonController::isScriptAutoloading(PythonScript *pythonScript)
+{
+	for(auto PythonScript : this->autoLoadPythonScripts)
+	{
+		if(PythonScript->filepath == pythonScript->filepath)
+			return true;
+	}
+	return false;
+}
+
 void PythonController::StartExecuteScript(PythonScript* pythonScript)
 {
 	if (this->isExecutedScript(pythonScript)) {

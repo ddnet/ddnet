@@ -13,12 +13,16 @@ public:
 	void StartExecuteScript(PythonScript* pythonScript);
 	void StopExecuteScript(PythonScript* pythonScript);
 	bool isExecutedScript(PythonScript* pythonScript);
+	void AutoloadAdd(PythonScript* pythonScript);
+	void AutoloadRemove(PythonScript* pythonScript);
+	bool isScriptAutoloading(PythonScript* pythonScript);
 	virtual int Sizeof() const override { return sizeof(*this); }
 	int SnapInput(int* pData, int inputId);
 	bool needForceInput(int inputId);
 	CNetObj_PlayerInput inputs[NUM_DUMMIES];
 	bool blockUserInput = false;
 protected:
+	std::vector<PythonScript*> autoLoadPythonScripts;
 	std::vector<PythonScript*> executedPythonScripts;
 	bool OnInput(const IInput::CEvent &Event);
 };

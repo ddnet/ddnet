@@ -182,7 +182,7 @@ static PyObject* API_Input_move(PyObject* self, PyObject* args) {
 }
 
 static PyObject* API_Input_jump(PyObject* self, PyObject* args) {
-	PythonAPI_GameClient->pythonController.inputs[g_Config.m_ClDummy].m_Jump = 4;
+	PythonAPI_GameClient->pythonController.inputs[g_Config.m_ClDummy].m_Jump = 1;
 	Py_RETURN_NONE;
 }
 

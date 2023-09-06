@@ -502,6 +502,8 @@ protected:
 	void RenderSettingsCustom(CUIRect MainView);
 	void RenderSettingsPython(CUIRect MainView);
 
+	bool NeedToggle = true;
+
 	void SetNeedSendInfo();
 	void SetActive(bool Active);
 	void UpdateColors();
