@@ -729,7 +729,7 @@ public:
 		return vec2(0.0f, 0.0f);
 	}
 
-	void UploadEntityLayerText(void *pTexBuff, size_t ImageColorChannelCount, int TexWidth, int TexHeight, int TexSubWidth, int TexSubHeight, const char *pText, int Length, float x, float y, int FontSize)
+	void UploadEntityLayerText(void *pTexBuff, size_t PixelSize, size_t TexWidth, size_t TexHeight, int TexSubWidth, int TexSubHeight, const char *pText, int Length, float x, float y, int FontSize)
 	{
 		if(FontSize < 1)
 			return;
@@ -777,11 +777,11 @@ public:
 					{
 						const int ImgOffX = clamp(x + OffX + WidthLastChars, x, (x + TexSubWidth) - 1);
 						const int ImgOffY = clamp(y + OffY, y, (y + TexSubHeight) - 1);
-						const size_t ImageOffset = ImgOffY * (TexWidth * ImageColorChannelCount) + ImgOffX * ImageColorChannelCount;
+						const size_t ImageOffset = ImgOffY * (TexWidth * PixelSize) + ImgOffX * PixelSize;
 						const size_t GlyphOffset = OffY * pBitmap->width + OffX;
-						for(size_t i = 0; i < ImageColorChannelCount; ++i)
+						for(size_t i = 0; i < PixelSize; ++i)
 						{
-							if(i != ImageColorChannelCount - 1)
+							if(i != PixelSize - 1)
 							{
 								*(pImageBuff + ImageOffset + i) = 255;
 							}
@@ -2139,9 +2139,9 @@ public:
 		return TextContainer.m_BoundingBox;
 	}
 
-	void UploadEntityLayerText(void *pTexBuff, size_t ImageColorChannelCount, int TexWidth, int TexHeight, int TexSubWidth, int TexSubHeight, const char *pText, int Length, float x, float y, int FontSize) override
+	void UploadEntityLayerText(void *pTexBuff, size_t PixelSize, size_t TexWidth, size_t TexHeight, int TexSubWidth, int TexSubHeight, const char *pText, int Length, float x, float y, int FontSize) override
 	{
-		m_pGlyphMap->UploadEntityLayerText(pTexBuff, ImageColorChannelCount, TexWidth, TexHeight, TexSubWidth, TexSubHeight, pText, Length, x, y, FontSize);
+		m_pGlyphMap->UploadEntityLayerText(pTexBuff, PixelSize, TexWidth, TexHeight, TexSubWidth, TexSubHeight, pText, Length, x, y, FontSize);
 	}
 
 	int AdjustFontSize(const char *pText, int TextLength, int MaxSize, int MaxWidth) const override
