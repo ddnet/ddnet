@@ -1574,7 +1574,11 @@ public:
 		float LastCharX = DrawX;
 		float LastCharWidth = 0;
 
+		// Returns true if line was started
 		const auto &&StartNewLine = [&]() {
+			if(pCursor->m_MaxLines > 0 && LineCount >= pCursor->m_MaxLines)
+				return false;
+
 			DrawX = pCursor->m_StartX;
 			DrawY += pCursor->m_AlignedFontSize;
 			if((RenderFlags & TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT) == 0)
@@ -1587,6 +1591,7 @@ public:
 			LastCharX = DrawX;
 			LastCharWidth = 0;
 			++LineCount;
+			return true;
 		};
 
 		if(pCursor->m_CalculateSelectionMode != TEXT_CURSOR_SELECTION_MODE_NONE || pCursor->m_CursorMode != TEXT_CURSOR_CURSOR_MODE_NONE)
@@ -1606,7 +1611,7 @@ public:
 		bool GotNewLine = false;
 		bool GotNewLineLast = false;
 
-		while(pCurrent < pEnd && (pCursor->m_MaxLines < 1 || LineCount <= pCursor->m_MaxLines) && pCurrent != pEllipsis)
+		while(pCurrent < pEnd && pCurrent != pEllipsis)
 		{
 			bool NewLine = false;
 			const char *pBatchEnd = pEnd;
@@ -1667,8 +1672,7 @@ public:
 					if((pCursor->m_Flags & TEXTFLAG_DISALLOW_NEWLINE) == 0)
 					{
 						pLastGlyph = nullptr;
-						StartNewLine();
-						if(pCursor->m_MaxLines > 0 && LineCount > pCursor->m_MaxLines)
+						if(!StartNewLine())
 							break;
 						continue;
 					}
@@ -1859,7 +1863,8 @@ public:
 
 			if(NewLine)
 			{
-				StartNewLine();
+				if(!StartNewLine())
+					break;
 				GotNewLine = true;
 				GotNewLineLast = true;
 			}
