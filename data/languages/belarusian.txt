@@ -1727,6 +1727,9 @@ Unable to rename the folder
 (paused)
 == 
 
+Render cut to video
+== 
+
 All combined
 == 
 

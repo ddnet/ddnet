@@ -1507,11 +1507,6 @@ A render command failed. Try to update your GPU drivers.
 Submitting the render commands failed. Try to update your GPU drivers.
 == Неуспешно слање рендерних команди. Покушајте ажурирати драјвере за вашу графичку картицу.
 
-[Graphics error]
-Failed to swap framebuffers. Try to update your GPU drivers.
-== 
-
-[Graphics error]
 Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
 == Неуспешно замена бафера фреймова. Покушајте ажурирати драјвере за вашу графичку картицу.
 
@@ -1748,3 +1743,10 @@ Open the directory to add custom assets
 
 Moved ingame
 == Померено у игри
+
+[Graphics error]
+Failed to swap framebuffers. Try to update your GPU drivers.
+== 
+
+Render cut to video
+== 

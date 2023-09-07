@@ -1756,3 +1756,6 @@ Unable to delete the folder '%s'. Make sure it's empty first.
 
 Moved ingame
 == Перемещены в игре
+
+Render cut to video
+== 

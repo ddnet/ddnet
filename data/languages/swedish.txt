@@ -1747,3 +1747,6 @@ Loading sound files
 
 Moved ingame
 == Förflyttades i spelet
+
+Render cut to video
+== Rendera snitt till video
