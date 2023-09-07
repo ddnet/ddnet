@@ -5,39 +5,14 @@ if(CMAKE_OSX_DEPLOYMENT_TARGET VERSION_LESS 10.15)
   message(WARNING "Building for macOS < 10.15 is not supported")
 endif()
 
-file(STRINGS src/game/version.h VERSION_LINE
-  LIMIT_COUNT 1
-  REGEX "^#define GAME_RELEASE_VERSION "
+# Set version if not explicitly set
+if(NOT VERSION)
+  set(VERSION 17.2.1)
+endif()
+
+project(DDNet
+  VERSION ${VERSION}
 )
-
-if(VERSION_LINE MATCHES "\"([0-9]+)\\.([0-9]+)\\.([0-9]+)\"")
-  set(VERSION_MAJOR ${CMAKE_MATCH_1})
-  set(VERSION_MINOR ${CMAKE_MATCH_2})
-  set(VERSION_PATCH ${CMAKE_MATCH_3})
-elseif(VERSION_LINE MATCHES "\"([0-9]+)\\.([0-9]+)\"")
-  set(VERSION_MAJOR ${CMAKE_MATCH_1})
-  set(VERSION_MINOR ${CMAKE_MATCH_2})
-  set(VERSION_PATCH "0")
-else()
-  message(FATAL_ERROR "Couldn't parse version from src/game/version.h")
-endif()
-
-# Extra support for CMake pre-3.0
-if(NOT POLICY CMP0048)
-  set(PROJECT_VERSION_MAJOR ${VERSION_MAJOR})
-  set(PROJECT_VERSION_MINOR ${VERSION_MINOR})
-  set(PROJECT_VERSION_PATCH ${VERSION_PATCH})
-  if(VERSION_PATCH STREQUAL "0")
-    set(PROJECT_VERSION ${VERSION_MAJOR}.${VERSION_MINOR})
-  else()
-    set(PROJECT_VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH})
-  endif()
-endif()
-if(VERSION_PATCH STREQUAL "0")
-  project(DDNet VERSION ${VERSION_MAJOR}.${VERSION_MINOR})
-else()
-  project(DDNet VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH})
-endif()
 
 set(ORIGINAL_CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH})
 set(ORIGINAL_CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES})
@@ -139,11 +114,6 @@ if(TEST_MYSQL)
   set(MYSQL ON)
 endif()
 
-# Set version if not explicitly set
-if(NOT VERSION)
-  set(VERSION ${PROJECT_VERSION})
-endif()
-
 set(OpenGL_GL_PREFERENCE LEGACY)
 
 # Set the default build type to Release
@@ -176,13 +146,13 @@ if(IPO)
   endif()
 endif()
 
-if(CMAKE_VERSION VERSION_LESS 3.0)
-  configure_file(src/game/version.h vd.h)
+if(${PROJECT_VERSION_MINOR} GREATER 9)
+  set(CLIENT_VERSIONNR ${PROJECT_VERSION_MAJOR}${PROJECT_VERSION_MINOR}${PROJECT_VERSION_PATCH})
 else()
-  set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
-    src/game/version.h
-  )
+  set(CLIENT_VERSIONNR ${PROJECT_VERSION_MAJOR}0${PROJECT_VERSION_MINOR}${PROJECT_VERSION_PATCH})
 endif()
+
+configure_file(src/game/version.h.in ${PROJECT_BINARY_DIR}/src/game/version.h)
 
 set(SERVER_EXECUTABLE DDNet-Server CACHE STRING "Name of the built server executable")
 set(CLIENT_EXECUTABLE DDNet CACHE STRING "Name of the build client executable")
@@ -413,7 +383,7 @@ function(set_glob VAR GLOBBING EXTS DIRECTORY) # ...
 endfunction()
 
 function(set_src VAR GLOBBING DIRECTORY) # ...
-  set_glob(${VAR} ${GLOBBING} "c;cpp;h" ${DIRECTORY} ${ARGN})
+  set_glob(${VAR} ${GLOBBING} "c;cpp;h;h.in" ${DIRECTORY} ${ARGN})
   set(${VAR} ${${VAR}} PARENT_SCOPE)
   set(CHECKSUM_SRC ${CHECKSUM_SRC} ${${VAR}} PARENT_SCOPE)
 endfunction()
@@ -2040,7 +2010,7 @@ set_src(GAME_SHARED GLOB src/game
   teamscore.h
   tuning.h
   variables.h
-  version.h
+  version.h.in
   voting.h
 )
 # A bit hacky, but these are needed to register all the UUIDs, even for stuff
@@ -2067,6 +2037,7 @@ set(GAME_GENERATED_SHARED
   src/game/generated/protocol.h
   src/game/generated/protocol7.h
   src/game/generated/protocolglue.h
+  src/game/version.h
 )
 set(DEPS ${DEP_JSON} ${DEP_MD5} ${ZLIB_DEP})
 
@@ -3385,9 +3356,6 @@ foreach(target ${TARGETS_OWN})
     if(DISCORD_DYNAMIC)
       target_compile_definitions(${target} PRIVATE CONF_DISCORD_DYNAMIC)
     endif()
-  endif()
-  if(VERSION)
-    target_compile_definitions(${target} PRIVATE GAME_RELEASE_VERSION="${VERSION}")
   endif()
   if(CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
    target_compile_definitions(${target} PRIVATE CONF_WEBASM)
