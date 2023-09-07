@@ -216,7 +216,7 @@ void CSounds::Play(int Channel, int SetId, float Vol)
 
 void CSounds::PlayAt(int Channel, int SetId, float Vol, vec2 Pos)
 {
-	if(m_pClient->m_SuppressEvents)
+	if(!g_Config.m_SndGame || m_pClient->m_SuppressEvents)
 		return;
 	if(Channel == CHN_MUSIC && !g_Config.m_SndMusic)
 		return;
