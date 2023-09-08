@@ -76,7 +76,7 @@ using namespace std::chrono_literals;
 
 const char *CGameClient::Version() const { return GAME_VERSION; }
 const char *CGameClient::NetVersion() const { return GAME_NETVERSION; }
-int CGameClient::DDNetVersion() const { return CLIENT_VERSIONNR; }
+int CGameClient::DDNetVersion() const { return DDNET_VERSION_NUMBER; }
 const char *CGameClient::DDNetVersionStr() const { return m_aDDNetVersionStr; }
 const char *CGameClient::GetItemName(int Type) const { return m_NetObjHandler.GetObjName(Type); }
 
@@ -1770,7 +1770,7 @@ void CGameClient::OnNewSnapshot()
 			continue;
 		}
 		CMsgPacker Msg(NETMSGTYPE_CL_ISDDNETLEGACY, false);
-		Msg.AddInt(CLIENT_VERSIONNR);
+		Msg.AddInt(DDNetVersion());
 		Client()->SendMsg(i, &Msg, MSGFLAG_VITAL);
 		m_aDDRaceMsgSent[i] = true;
 	}
