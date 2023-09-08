@@ -329,8 +329,6 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 	MainView.HSplitTop(20.0f, 0, &MainView);
 	int OldSelected = -1;
 	static CListBox s_ListBox;
-	if(UI()->CheckActiveItem(&s_ClanInput) || UI()->CheckActiveItem(&s_NameInput))
-		s_ListBox.SetActive(false);
 	s_ListBox.DoStart(50.0f, m_pClient->m_CountryFlags.Num(), 10, 3, OldSelected, &MainView);
 
 	for(size_t i = 0; i < m_pClient->m_CountryFlags.Num(); ++i)
