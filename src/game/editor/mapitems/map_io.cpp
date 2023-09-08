@@ -123,24 +123,26 @@ bool CEditorMap::Save(const char *pFileName)
 		}
 		else
 		{
+			const size_t PixelSize = CImageInfo::PixelSize(CImageInfo::FORMAT_RGBA);
+			const size_t DataSize = (size_t)Item.m_Width * Item.m_Height * PixelSize;
 			if(pImg->m_Format == CImageInfo::FORMAT_RGB)
 			{
 				// Convert to RGBA
-				unsigned char *pDataRGBA = (unsigned char *)malloc((size_t)Item.m_Width * Item.m_Height * 4);
+				unsigned char *pDataRGBA = (unsigned char *)malloc(DataSize);
 				unsigned char *pDataRGB = (unsigned char *)pImg->m_pData;
 				for(int j = 0; j < Item.m_Width * Item.m_Height; j++)
 				{
-					pDataRGBA[j * 4] = pDataRGB[j * 3];
-					pDataRGBA[j * 4 + 1] = pDataRGB[j * 3 + 1];
-					pDataRGBA[j * 4 + 2] = pDataRGB[j * 3 + 2];
-					pDataRGBA[j * 4 + 3] = 255;
+					pDataRGBA[j * PixelSize] = pDataRGB[j * 3];
+					pDataRGBA[j * PixelSize + 1] = pDataRGB[j * 3 + 1];
+					pDataRGBA[j * PixelSize + 2] = pDataRGB[j * 3 + 2];
+					pDataRGBA[j * PixelSize + 3] = 255;
 				}
-				Item.m_ImageData = Writer.AddData(Item.m_Width * Item.m_Height * 4, pDataRGBA);
+				Item.m_ImageData = Writer.AddData(DataSize, pDataRGBA);
 				free(pDataRGBA);
 			}
 			else
 			{
-				Item.m_ImageData = Writer.AddData(Item.m_Width * Item.m_Height * 4, pImg->m_pData);
+				Item.m_ImageData = Writer.AddData(DataSize, pImg->m_pData);
 			}
 		}
 		Writer.AddItem(MAPITEMTYPE_IMAGE, i, sizeof(Item), &Item);
@@ -487,7 +489,7 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 				std::shared_ptr<CEditorImage> pImg = std::make_shared<CEditorImage>(m_pEditor);
 				pImg->m_External = pItem->m_External;
 
-				const int Format = pItem->m_Version < CMapItemImage_v2::CURRENT_VERSION ? CImageInfo::FORMAT_RGBA : pItem->m_Format;
+				const CImageInfo::EImageFormat Format = pItem->m_Version < CMapItemImage_v2::CURRENT_VERSION ? CImageInfo::FORMAT_RGBA : CImageInfo::ImageFormatFromInt(pItem->m_Format);
 				if(pImg->m_External || (Format != CImageInfo::FORMAT_RGB && Format != CImageInfo::FORMAT_RGBA))
 				{
 					char aBuf[IO_MAX_PATH_LENGTH];
@@ -501,7 +503,7 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 						int TextureLoadFlag = m_pEditor->Graphics()->HasTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
 						if(ImgInfo.m_Width % 16 != 0 || ImgInfo.m_Height % 16 != 0)
 							TextureLoadFlag = 0;
-						pImg->m_Texture = m_pEditor->Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, CImageInfo::FORMAT_AUTO, TextureLoadFlag, aBuf);
+						pImg->m_Texture = m_pEditor->Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, TextureLoadFlag, aBuf);
 						ImgInfo.m_pData = nullptr;
 						pImg->m_External = 1;
 					}
@@ -514,13 +516,13 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 
 					// copy image data
 					void *pData = DataFile.GetData(pItem->m_ImageData);
-					const size_t DataSize = (size_t)pImg->m_Width * pImg->m_Height * 4;
+					const size_t DataSize = (size_t)pImg->m_Width * pImg->m_Height * CImageInfo::PixelSize(Format);
 					pImg->m_pData = malloc(DataSize);
 					mem_copy(pImg->m_pData, pData, DataSize);
 					int TextureLoadFlag = m_pEditor->Graphics()->HasTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
 					if(pImg->m_Width % 16 != 0 || pImg->m_Height % 16 != 0)
 						TextureLoadFlag = 0;
-					pImg->m_Texture = m_pEditor->Graphics()->LoadTextureRaw(pImg->m_Width, pImg->m_Height, pImg->m_Format, pImg->m_pData, CImageInfo::FORMAT_AUTO, TextureLoadFlag);
+					pImg->m_Texture = m_pEditor->Graphics()->LoadTextureRaw(pImg->m_Width, pImg->m_Height, pImg->m_Format, pImg->m_pData, TextureLoadFlag);
 				}
 
 				// copy image name

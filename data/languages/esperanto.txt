@@ -900,6 +900,9 @@ Cut interval
 Cut length
 == 
 
+Render cut to video
+== 
+
 File already exists, do you want to overwrite it?
 == 
 
@@ -1086,13 +1089,13 @@ Automatically create statboard csv
 Max CSVs
 == 
 
+Toggle to edit your dummy settings
+== 
+
 Loading skin files
 == 
 
 Your skin
-== 
-
-Toggle to edit your dummy settings
 == 
 
 Download skins
@@ -1143,16 +1146,7 @@ Default zoom
 Toggle dyncam
 == 
 
-Toggle dummy
-== 
-
 Toggle ghost
-== 
-
-Dummy copy
-== 
-
-Hammerfly dummy
 == 
 
 Shotgun
@@ -1171,6 +1165,18 @@ Team chat
 == 
 
 Converse
+== 
+
+Chat command
+== 
+
+Toggle dummy
+== 
+
+Dummy copy
+== 
+
+Hammerfly dummy
 == 
 
 Emoticon
@@ -1207,9 +1213,6 @@ Show entities
 == 
 
 Show HUD
-== 
-
-Chat command
 == 
 
 Enable controller

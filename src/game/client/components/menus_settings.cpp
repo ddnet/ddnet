@@ -323,6 +323,7 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 	{
 		m_Dummy ^= 1;
 	}
+	GameClient()->m_Tooltips.DoToolTip(&m_Dummy, &Dummy, Localize("Toggle to edit your dummy settings"));
 
 	// country flag selector
 	MainView.HSplitTop(20.0f, 0, &MainView);
@@ -615,7 +616,6 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	EyesLabel.HSplitTop(50.0f, &EyesLabel, &Eyes);
 
 	static CButtonContainer s_aEyeButtons[6];
-	static int s_aEyesToolTip[6];
 	for(int CurrentEyeEmote = 0; CurrentEyeEmote < 6; CurrentEyeEmote++)
 	{
 		EyesLabel.VSplitLeft(10.0f, 0, &EyesLabel);
@@ -642,7 +642,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 					GameClient()->m_Emoticon.EyeEmote(CurrentEyeEmote);
 			}
 		}
-		GameClient()->m_Tooltips.DoToolTip(&s_aEyesToolTip[CurrentEyeEmote], &EyesTee, Localize("Choose default eyes when joining a server"));
+		GameClient()->m_Tooltips.DoToolTip(&s_aEyeButtons[CurrentEyeEmote], &EyesTee, Localize("Choose default eyes when joining a server"));
 		RenderTools()->RenderTee(pIdleState, &OwnSkinInfo, CurrentEyeEmote, vec2(1, 0), vec2(EyesTee.x + 25.0f, EyesTee.y + EyesTee.h / 2.0f + OffsetToMid.y));
 	}
 
@@ -2841,6 +2841,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 
 		Section.HSplitTop(LineSize, &Label, &Section);
 		UI()->DoLabel(&Label, Localize("Colors of the hook collision line, in case of a possible collision with:"), 13.0f, TEXTALIGN_ML);
+		UI()->DoButtonLogic(&s_HookCollToolTip, 0, &Label); // Just for the tooltip, result ignored
 		GameClient()->m_Tooltips.DoToolTip(&s_HookCollToolTip, &Label, Localize("Your movements are not taken into account when calculating the line colors"));
 		DoLine_ColorPicker(&s_HookCollNoCollResetID, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Nothing hookable"), &g_Config.m_ClHookCollColorNoColl, ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f), false);
 		DoLine_ColorPicker(&s_HookCollHookableCollResetID, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Something hookable"), &g_Config.m_ClHookCollColorHookableColl, ColorRGBA(130.0f / 255.0f, 232.0f / 255.0f, 160.0f / 255.0f, 1.0f), false);

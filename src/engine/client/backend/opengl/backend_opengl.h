@@ -80,13 +80,13 @@ protected:
 	virtual bool IsNewApi() { return false; }
 	void DestroyTexture(int Slot);
 
-	bool GetPresentedImageData(uint32_t &Width, uint32_t &Height, uint32_t &Format, std::vector<uint8_t> &vDstData) override;
+	bool GetPresentedImageData(uint32_t &Width, uint32_t &Height, CImageInfo::EImageFormat &Format, std::vector<uint8_t> &vDstData) override;
 
 	static int TexFormatToOpenGLFormat(int TexFormat);
-	static size_t GLFormatToImageColorChannelCount(int GLFormat);
+	static size_t GLFormatToPixelSize(int GLFormat);
 
 	void TextureUpdate(int Slot, int X, int Y, int Width, int Height, int GLFormat, void *pTexData);
-	void TextureCreate(int Slot, int Width, int Height, int PixelSize, int GLFormat, int GLStoreFormat, int Flags, void *pTexData);
+	void TextureCreate(int Slot, int Width, int Height, int GLFormat, int GLStoreFormat, int Flags, void *pTexData);
 
 	virtual bool Cmd_Init(const SCommand_Init *pCommand);
 	virtual void Cmd_Shutdown(const SCommand_Shutdown *pCommand) {}

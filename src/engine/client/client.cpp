@@ -974,7 +974,7 @@ void CClient::ServerInfoRequest()
 
 void CClient::LoadDebugFont()
 {
-	m_DebugFont = Graphics()->LoadTexture("debug_font.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
+	m_DebugFont = Graphics()->LoadTexture("debug_font.png", IStorage::TYPE_ALL);
 }
 
 // ---
@@ -4626,7 +4626,7 @@ int main(int argc, const char **argv)
 		pClient->GetGPUInfoString(aGPUInfo);
 		char aMessage[768];
 		str_format(aMessage, sizeof(aMessage),
-			"An assertion error occured. Please write down or take a screenshot of the following information and report this error.\n"
+			"An assertion error occurred. Please write down or take a screenshot of the following information and report this error.\n"
 			"Please also share the assert log which you should find in the 'dumps' folder in your config directory.\n\n"
 			"%s\n\n"
 			"Platform: %s\n"

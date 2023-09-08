@@ -3860,18 +3860,14 @@ bool CEditor::ReplaceImage(const char *pFileName, int StorageType, bool CheckDup
 
 	if(!pImg->m_External && g_Config.m_ClEditorDilate == 1 && pImg->m_Format == CImageInfo::FORMAT_RGBA)
 	{
-		int ColorChannelCount = 0;
-		if(ImgInfo.m_Format == CImageInfo::FORMAT_RGBA)
-			ColorChannelCount = 4;
-
-		DilateImage((unsigned char *)ImgInfo.m_pData, ImgInfo.m_Width, ImgInfo.m_Height, ColorChannelCount);
+		DilateImage((unsigned char *)ImgInfo.m_pData, ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.PixelSize());
 	}
 
 	pImg->m_AutoMapper.Load(pImg->m_aName);
 	int TextureLoadFlag = Graphics()->HasTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
 	if(ImgInfo.m_Width % 16 != 0 || ImgInfo.m_Height % 16 != 0)
 		TextureLoadFlag = 0;
-	pImg->m_Texture = Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, CImageInfo::FORMAT_AUTO, TextureLoadFlag, pFileName);
+	pImg->m_Texture = Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, TextureLoadFlag, pFileName);
 	ImgInfo.m_pData = nullptr;
 	SortImages();
 	for(size_t i = 0; i < m_Map.m_vpImages.size(); ++i)
@@ -3924,17 +3920,13 @@ bool CEditor::AddImage(const char *pFileName, int StorageType, void *pUser)
 
 	if(!pImg->m_External && g_Config.m_ClEditorDilate == 1 && pImg->m_Format == CImageInfo::FORMAT_RGBA)
 	{
-		int ColorChannelCount = 0;
-		if(ImgInfo.m_Format == CImageInfo::FORMAT_RGBA)
-			ColorChannelCount = 4;
-
-		DilateImage((unsigned char *)ImgInfo.m_pData, ImgInfo.m_Width, ImgInfo.m_Height, ColorChannelCount);
+		DilateImage((unsigned char *)ImgInfo.m_pData, ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.PixelSize());
 	}
 
 	int TextureLoadFlag = pEditor->Graphics()->HasTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
 	if(ImgInfo.m_Width % 16 != 0 || ImgInfo.m_Height % 16 != 0)
 		TextureLoadFlag = 0;
-	pImg->m_Texture = pEditor->Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, CImageInfo::FORMAT_AUTO, TextureLoadFlag, pFileName);
+	pImg->m_Texture = pEditor->Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, TextureLoadFlag, pFileName);
 	ImgInfo.m_pData = nullptr;
 	str_copy(pImg->m_aName, aBuf);
 	pImg->m_AutoMapper.Load(pImg->m_aName);
@@ -4568,8 +4560,11 @@ void CEditor::RenderFileDialog()
 	{
 		// render search bar
 		UI()->DoLabel(&FileBoxLabel, "Search:", 10.0f, TEXTALIGN_ML);
-		if(m_FileDialogOpening)
+		if(m_FileDialogOpening || (Input()->KeyPress(KEY_F) && Input()->ModifierIsPressed()))
+		{
 			UI()->SetActiveItem(&m_FileDialogFilterInput);
+			m_FileDialogFilterInput.SelectAll();
+		}
 		if(UI()->DoClearableEditBox(&m_FileDialogFilterInput, &FileBox, 10.0f))
 		{
 			RefreshFilteredFileList();
@@ -4618,7 +4613,7 @@ void CEditor::RenderFileDialog()
 				if(Graphics()->LoadPNG(&m_FilePreviewImageInfo, aBuffer, m_vpFilteredFileList[m_FilesSelectedIndex]->m_StorageType))
 				{
 					Graphics()->UnloadTexture(&m_FilePreviewImage);
-					m_FilePreviewImage = Graphics()->LoadTextureRaw(m_FilePreviewImageInfo.m_Width, m_FilePreviewImageInfo.m_Height, m_FilePreviewImageInfo.m_Format, m_FilePreviewImageInfo.m_pData, m_FilePreviewImageInfo.m_Format, 0);
+					m_FilePreviewImage = Graphics()->LoadTextureRaw(m_FilePreviewImageInfo.m_Width, m_FilePreviewImageInfo.m_Height, m_FilePreviewImageInfo.m_Format, m_FilePreviewImageInfo.m_pData, 0);
 					Graphics()->FreePNG(&m_FilePreviewImageInfo);
 					m_FilePreviewState = PREVIEW_LOADED;
 				}
@@ -4792,6 +4787,7 @@ void CEditor::RenderFileDialog()
 		if(IsDir) // folder
 		{
 			m_FileDialogFilterInput.Clear();
+			UI()->SetActiveItem(&m_FileDialogFilterInput);
 			const bool ParentFolder = str_comp(m_vpFilteredFileList[m_FilesSelectedIndex]->m_aFilename, "..") == 0;
 			if(ParentFolder) // parent folder
 			{
@@ -7443,42 +7439,42 @@ int CEditor::GetTextureUsageFlag()
 IGraphics::CTextureHandle CEditor::GetFrontTexture()
 {
 	if(!m_FrontTexture.IsValid())
-		m_FrontTexture = Graphics()->LoadTexture("editor/front.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, GetTextureUsageFlag());
+		m_FrontTexture = Graphics()->LoadTexture("editor/front.png", IStorage::TYPE_ALL, GetTextureUsageFlag());
 	return m_FrontTexture;
 }
 
 IGraphics::CTextureHandle CEditor::GetTeleTexture()
 {
 	if(!m_TeleTexture.IsValid())
-		m_TeleTexture = Graphics()->LoadTexture("editor/tele.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, GetTextureUsageFlag());
+		m_TeleTexture = Graphics()->LoadTexture("editor/tele.png", IStorage::TYPE_ALL, GetTextureUsageFlag());
 	return m_TeleTexture;
 }
 
 IGraphics::CTextureHandle CEditor::GetSpeedupTexture()
 {
 	if(!m_SpeedupTexture.IsValid())
-		m_SpeedupTexture = Graphics()->LoadTexture("editor/speedup.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, GetTextureUsageFlag());
+		m_SpeedupTexture = Graphics()->LoadTexture("editor/speedup.png", IStorage::TYPE_ALL, GetTextureUsageFlag());
 	return m_SpeedupTexture;
 }
 
 IGraphics::CTextureHandle CEditor::GetSwitchTexture()
 {
 	if(!m_SwitchTexture.IsValid())
-		m_SwitchTexture = Graphics()->LoadTexture("editor/switch.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, GetTextureUsageFlag());
+		m_SwitchTexture = Graphics()->LoadTexture("editor/switch.png", IStorage::TYPE_ALL, GetTextureUsageFlag());
 	return m_SwitchTexture;
 }
 
 IGraphics::CTextureHandle CEditor::GetTuneTexture()
 {
 	if(!m_TuneTexture.IsValid())
-		m_TuneTexture = Graphics()->LoadTexture("editor/tune.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, GetTextureUsageFlag());
+		m_TuneTexture = Graphics()->LoadTexture("editor/tune.png", IStorage::TYPE_ALL, GetTextureUsageFlag());
 	return m_TuneTexture;
 }
 
 IGraphics::CTextureHandle CEditor::GetEntitiesTexture()
 {
 	if(!m_EntitiesTexture.IsValid())
-		m_EntitiesTexture = Graphics()->LoadTexture("editor/entities/DDNet.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, GetTextureUsageFlag());
+		m_EntitiesTexture = Graphics()->LoadTexture("editor/entities/DDNet.png", IStorage::TYPE_ALL, GetTextureUsageFlag());
 	return m_EntitiesTexture;
 }
 
@@ -7506,9 +7502,9 @@ void CEditor::Init()
 	for(CEditorComponent &Component : m_vComponents)
 		Component.Init(this);
 
-	m_CheckerTexture = Graphics()->LoadTexture("editor/checker.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
-	m_BackgroundTexture = Graphics()->LoadTexture("editor/background.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
-	m_CursorTexture = Graphics()->LoadTexture("editor/cursor.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
+	m_CheckerTexture = Graphics()->LoadTexture("editor/checker.png", IStorage::TYPE_ALL);
+	m_BackgroundTexture = Graphics()->LoadTexture("editor/background.png", IStorage::TYPE_ALL);
+	m_CursorTexture = Graphics()->LoadTexture("editor/cursor.png", IStorage::TYPE_ALL);
 
 	m_pTilesetPicker = std::make_shared<CLayerTiles>(16, 16);
 	m_pTilesetPicker->m_pEditor = this;

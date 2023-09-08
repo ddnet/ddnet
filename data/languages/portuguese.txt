@@ -1225,6 +1225,9 @@ Cut interval
 Cut length
 == 
 
+Render cut to video
+== 
+
 Loading demo files
 == 
 
@@ -1309,10 +1312,10 @@ Open the directory that contains the configuration and user files
 Open the directory to add custom themes
 == 
 
-Loading skin files
+Toggle to edit your dummy settings
 == 
 
-Toggle to edit your dummy settings
+Loading skin files
 == 
 
 Download skins
@@ -1357,19 +1360,22 @@ Show all
 Toggle dyncam
 == 
 
-Toggle dummy
+Toggle ghost
 == 
 
-Toggle ghost
+Converse
+== 
+
+Chat command
+== 
+
+Toggle dummy
 == 
 
 Dummy copy
 == 
 
 Hammerfly dummy
-== 
-
-Converse
 == 
 
 Statboard
@@ -1382,9 +1388,6 @@ Show entities
 == 
 
 Show HUD
-== 
-
-Chat command
 == 
 
 Enable controller

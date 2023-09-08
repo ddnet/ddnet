@@ -1716,6 +1716,9 @@ Cut interval
 Cut length
 == 
 
+Render cut to video
+== 
+
 All combined
 == 
 

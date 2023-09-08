@@ -134,7 +134,7 @@ public: // TODO: Maybe make protected
 			ClientID of the initiator from this entity. -1 created by map.
 			This is used by save/load to remove related entities to the tee.
 			CCharacter should not return the PlayerId, because they get
-			handled separatly in save/load code.
+			handled separately in save/load code.
 	*/
 	virtual int GetOwnerID() const { return -1; }
 

@@ -11,7 +11,7 @@ use std::str;
 ///
 /// Callbacks in C are usually represented by a function pointer and some
 /// "userdata" pointer that is also passed to the function pointer. This allows
-/// to hand data to the callback. This type represents such a userdata poiner.
+/// to hand data to the callback. This type represents such a userdata pointer.
 ///
 /// It is `unsafe` to convert the `UserPtr` back to its original pointer using
 /// [`UserPtr::cast`] because its lifetime and type information was lost.

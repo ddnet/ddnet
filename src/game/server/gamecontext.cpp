@@ -643,17 +643,14 @@ void CGameContext::SendMotd(int ClientID)
 
 void CGameContext::SendSettings(int ClientID)
 {
-	if(Server()->IsSixup(ClientID))
-	{
-		protocol7::CNetMsg_Sv_ServerSettings Msg;
-		Msg.m_KickVote = g_Config.m_SvVoteKick;
-		Msg.m_KickMin = g_Config.m_SvVoteKickMin;
-		Msg.m_SpecVote = g_Config.m_SvVoteSpectate;
-		Msg.m_TeamLock = 0;
-		Msg.m_TeamBalance = 0;
-		Msg.m_PlayerSlots = g_Config.m_SvMaxClients - g_Config.m_SvSpectatorSlots;
-		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientID);
-	}
+	protocol7::CNetMsg_Sv_ServerSettings Msg;
+	Msg.m_KickVote = g_Config.m_SvVoteKick;
+	Msg.m_KickMin = g_Config.m_SvVoteKickMin;
+	Msg.m_SpecVote = g_Config.m_SvVoteSpectate;
+	Msg.m_TeamLock = 0;
+	Msg.m_TeamBalance = 0;
+	Msg.m_PlayerSlots = g_Config.m_SvMaxClients - g_Config.m_SvSpectatorSlots;
+	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientID);
 }
 
 void CGameContext::SendBroadcast(const char *pText, int ClientID, bool IsImportant)
@@ -3338,6 +3335,16 @@ void CGameContext::ConchainSpecialMotdupdate(IConsole::IResult *pResult, void *p
 	}
 }
 
+void CGameContext::ConchainSettingUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	pfnCallback(pResult, pCallbackUserData);
+	if(pResult->NumArguments())
+	{
+		CGameContext *pSelf = (CGameContext *)pUserData;
+		pSelf->SendSettings(-1);
+	}
+}
+
 void CGameContext::ConchainGameinfoUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	pfnCallback(pResult, pCallbackUserData);
@@ -3388,8 +3395,14 @@ void CGameContext::OnConsoleInit()
 
 	Console()->Chain("sv_motd", ConchainSpecialMotdupdate, this);
 
-	Console()->Chain("sv_scorelimit", ConchainGameinfoUpdate, this);
-	Console()->Chain("sv_timelimit", ConchainGameinfoUpdate, this);
+	Console()->Chain("sv_scorelimit", ConchainGameinfoUpdate, this); // gctf
+	Console()->Chain("sv_timelimit", ConchainGameinfoUpdate, this); // gctf
+
+	Console()->Chain("sv_vote_kick", ConchainSettingUpdate, this);
+	Console()->Chain("sv_vote_kick_min", ConchainSettingUpdate, this);
+	Console()->Chain("sv_vote_spectate", ConchainSettingUpdate, this);
+	Console()->Chain("sv_spectator_slots", ConchainSettingUpdate, this);
+	Console()->Chain("sv_max_clients", ConchainSettingUpdate, this);
 
 #define CONSOLE_COMMAND(name, params, flags, callback, userdata, help) m_pConsole->Register(name, params, flags, callback, userdata, help);
 #include <game/ddracecommands.h>

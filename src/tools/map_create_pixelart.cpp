@@ -220,9 +220,9 @@ bool GetPixelClamped(const CImageInfo &Img, int x, int y, uint8_t aPixel[4])
 	aPixel[2] = 255;
 	aPixel[3] = 255;
 
-	int BPP = Img.m_Format == CImageInfo::FORMAT_RGB ? 3 : 4;
-	for(int i = 0; i < BPP; i++)
-		aPixel[i] = ((uint8_t *)Img.m_pData)[x * BPP + (Img.m_Width * BPP * y) + i];
+	const size_t PixelSize = Img.PixelSize();
+	for(size_t i = 0; i < PixelSize; i++)
+		aPixel[i] = ((uint8_t *)Img.m_pData)[x * PixelSize + (Img.m_Width * PixelSize * y) + i];
 
 	return aPixel[3] > 0;
 }

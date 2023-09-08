@@ -281,7 +281,7 @@ public:
 
 	virtual STextBoundingBox GetBoundingBoxTextContainer(STextContainerIndex TextContainerIndex) = 0;
 
-	virtual void UploadEntityLayerText(void *pTexBuff, size_t ImageColorChannelCount, int TexWidth, int TexHeight, int TexSubWidth, int TexSubHeight, const char *pText, int Length, float x, float y, int FontSize) = 0;
+	virtual void UploadEntityLayerText(void *pTexBuff, size_t PixelSize, size_t TexWidth, size_t TexHeight, int TexSubWidth, int TexSubHeight, const char *pText, int Length, float x, float y, int FontSize) = 0;
 	virtual int AdjustFontSize(const char *pText, int TextLength, int MaxSize, int MaxWidth) const = 0;
 	virtual float GetGlyphOffsetX(int FontSize, char TextCharacter) const = 0;
 	virtual int CalculateTextWidth(const char *pText, int TextLength, int FontWidth, int FontSize) const = 0;

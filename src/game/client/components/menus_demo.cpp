@@ -726,13 +726,22 @@ void CMenus::RenderDemoPlayerSliceSavePopup(CUIRect MainView)
 
 	// remove chat checkbox
 	static int s_RemoveChat = 0;
-	CUIRect RemoveChatCheckBox;
-	Box.HSplitTop(24.0f, &RemoveChatCheckBox, &Box);
+
+	CUIRect CheckBoxBar, RemoveChatCheckBox, RenderCutCheckBox;
+	Box.HSplitTop(24.0f, &CheckBoxBar, &Box);
 	Box.HSplitTop(20.0f, nullptr, &Box);
+	CheckBoxBar.VSplitMid(&RemoveChatCheckBox, &RenderCutCheckBox, 40.0f);
 	if(DoButton_CheckBox(&s_RemoveChat, Localize("Remove chat"), s_RemoveChat, &RemoveChatCheckBox))
 	{
 		s_RemoveChat ^= 1;
 	}
+#if defined(CONF_VIDEORECORDER)
+	static int s_RenderCut = 0;
+	if(DoButton_CheckBox(&s_RenderCut, Localize("Render cut to video"), s_RenderCut, &RenderCutCheckBox))
+	{
+		s_RenderCut ^= 1;
+	}
+#endif
 
 	// buttons
 	CUIRect ButtonBar, AbortButton, OkButton;
@@ -784,10 +793,20 @@ void CMenus::RenderDemoPlayerSliceSavePopup(CUIRect MainView)
 		str_copy(m_aCurrentDemoSelectionName, m_DemoSliceInput.GetString());
 		if(str_endswith(m_aCurrentDemoSelectionName, ".demo"))
 			m_aCurrentDemoSelectionName[str_length(m_aCurrentDemoSelectionName) - str_length(".demo")] = '\0';
-		m_DemoPlayerState = DEMOPLAYER_NONE;
+
 		Client()->DemoSlice(aPath, CMenus::DemoFilterChat, &s_RemoveChat);
 		DemolistPopulate();
 		DemolistOnUpdate(false);
+		m_DemoPlayerState = DEMOPLAYER_NONE;
+#if defined(CONF_VIDEORECORDER)
+		if(s_RenderCut)
+		{
+			m_Popup = POPUP_RENDER_DEMO;
+			m_StartPaused = false;
+			m_DemoRenderInput.Set(m_aCurrentDemoSelectionName);
+			UI()->SetActiveItem(&m_DemoRenderInput);
+		}
+#endif
 	}
 	if(s_ConfirmPopupContext.m_Result != CUI::SConfirmPopupContext::UNSET)
 	{
