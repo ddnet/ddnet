@@ -380,7 +380,7 @@ function(set_glob VAR GLOBBING EXTS DIRECTORY) # ...
 endfunction()
 
 function(set_src VAR GLOBBING DIRECTORY) # ...
-  set_glob(${VAR} ${GLOBBING} "c;cpp;h;h.in" ${DIRECTORY} ${ARGN})
+  set_glob(${VAR} ${GLOBBING} "c;cpp;h" ${DIRECTORY} ${ARGN})
   set(${VAR} ${${VAR}} PARENT_SCOPE)
   set(CHECKSUM_SRC ${CHECKSUM_SRC} ${${VAR}} PARENT_SCOPE)
 endfunction()
@@ -1996,7 +1996,6 @@ set_src(GAME_SHARED GLOB src/game
   teamscore.h
   tuning.h
   variables.h
-  version.h.in
   voting.h
 )
 # A bit hacky, but these are needed to register all the UUIDs, even for stuff
