@@ -8,6 +8,8 @@
 #include <engine/shared/json.h>
 #include <engine/storage.h>
 
+#include <game/version.h>
+
 #include <cstdlib> // system
 
 using std::map;

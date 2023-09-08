@@ -1,46 +1,18 @@
-cmake_minimum_required(VERSION 2.8.12...3.19.1)
-if(CMAKE_VERSION VERSION_LESS 3.12)
-  cmake_policy(VERSION ${CMAKE_VERSION})
-endif()
+cmake_minimum_required(VERSION 3.12...3.27.4)
 
 set(CMAKE_OSX_DEPLOYMENT_TARGET 10.15 CACHE INTERNAL "Minimum macOS deployment version")
 if(CMAKE_OSX_DEPLOYMENT_TARGET VERSION_LESS 10.15)
   message(WARNING "Building for macOS < 10.15 is not supported")
 endif()
 
-file(STRINGS src/game/version.h VERSION_LINE
-  LIMIT_COUNT 1
-  REGEX "^#define GAME_RELEASE_VERSION "
+# Set version if not explicitly set
+if(NOT VERSION)
+  set(VERSION 17.2.1)
+endif()
+
+project(DDNet
+  VERSION ${VERSION}
 )
-
-if(VERSION_LINE MATCHES "\"([0-9]+)\\.([0-9]+)\\.([0-9]+)\"")
-  set(VERSION_MAJOR ${CMAKE_MATCH_1})
-  set(VERSION_MINOR ${CMAKE_MATCH_2})
-  set(VERSION_PATCH ${CMAKE_MATCH_3})
-elseif(VERSION_LINE MATCHES "\"([0-9]+)\\.([0-9]+)\"")
-  set(VERSION_MAJOR ${CMAKE_MATCH_1})
-  set(VERSION_MINOR ${CMAKE_MATCH_2})
-  set(VERSION_PATCH "0")
-else()
-  message(FATAL_ERROR "Couldn't parse version from src/game/version.h")
-endif()
-
-# Extra support for CMake pre-3.0
-if(NOT POLICY CMP0048)
-  set(PROJECT_VERSION_MAJOR ${VERSION_MAJOR})
-  set(PROJECT_VERSION_MINOR ${VERSION_MINOR})
-  set(PROJECT_VERSION_PATCH ${VERSION_PATCH})
-  if(VERSION_PATCH STREQUAL "0")
-    set(PROJECT_VERSION ${VERSION_MAJOR}.${VERSION_MINOR})
-  else()
-    set(PROJECT_VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH})
-  endif()
-endif()
-if(VERSION_PATCH STREQUAL "0")
-  project(DDNet VERSION ${VERSION_MAJOR}.${VERSION_MINOR})
-else()
-  project(DDNet VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH})
-endif()
 
 set(ORIGINAL_CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH})
 set(ORIGINAL_CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES})
@@ -142,11 +114,6 @@ if(TEST_MYSQL)
   set(MYSQL ON)
 endif()
 
-# Set version if not explicitly set
-if(NOT VERSION)
-  set(VERSION ${PROJECT_VERSION})
-endif()
-
 set(OpenGL_GL_PREFERENCE LEGACY)
 
 # Set the default build type to Release
@@ -165,27 +132,29 @@ endif()
 set(DBG $<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>)
 
 if(IPO)
-  if(CMAKE_VERSION VERSION_GREATER 3.9)
-    include(CheckIPOSupported)
-    check_ipo_supported(RESULT ipo_supported OUTPUT ipo_output)
-    if(ipo_supported)
-      message(STATUS "IPO is enabled")
-      set(ENABLE_IPO TRUE)
-    else()
-      message(WARNING "IPO is not supported: ${ipo_output}")
-    endif()
+  include(CheckIPOSupported)
+  check_ipo_supported(RESULT ipo_supported OUTPUT ipo_output)
+  if(ipo_supported)
+    message(STATUS "IPO is enabled")
+    set(ENABLE_IPO TRUE)
   else()
-      message(WARNING "IPO enablement requires CMake 3.9+")
+    message(WARNING "IPO is not supported: ${ipo_output}")
   endif()
 endif()
 
-if(CMAKE_VERSION VERSION_LESS 3.0)
-  configure_file(src/game/version.h vd.h)
-else()
-  set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
-    src/game/version.h
-  )
+if("0${PROJECT_VERSION_PATCH}" GREATER 9)
+  message(SEND_ERROR "Invalid project patch version (the version is \"${PROJECT_VERSION}\", the patch part must be in range 0-9 if set)")
 endif()
+if(${PROJECT_VERSION_MINOR} GREATER 99)
+  message(SEND_ERROR "Invalid project minor version (the version is \"${PROJECT_VERSION}\", the minor part must be in range 0-99)")
+endif()
+if(${PROJECT_VERSION_MINOR} GREATER 9)
+  set(CLIENT_VERSIONNR ${PROJECT_VERSION_MAJOR}${PROJECT_VERSION_MINOR}${PROJECT_VERSION_PATCH})
+else()
+  set(CLIENT_VERSIONNR ${PROJECT_VERSION_MAJOR}0${PROJECT_VERSION_MINOR}${PROJECT_VERSION_PATCH})
+endif()
+
+configure_file(src/game/version.h.in ${PROJECT_BINARY_DIR}/src/game/version.h)
 
 set(SERVER_EXECUTABLE DDNet-Server CACHE STRING "Name of the built server executable")
 set(CLIENT_EXECUTABLE DDNet CACHE STRING "Name of the build client executable")
@@ -290,7 +259,7 @@ if(NOT MSVC AND NOT HAIKU)
     endif()
   endif()
 
-  if(CMAKE_VERSION VERSION_LESS 3.1 OR TARGET_OS STREQUAL "mac")
+  if(TARGET_OS STREQUAL "mac")
     add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -std=gnu++17)
   endif()
 
@@ -330,12 +299,10 @@ if(NOT MSVC AND NOT HAIKU)
   endif()
 
   add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wall)
-  if(CMAKE_VERSION VERSION_GREATER 3.3 OR CMAKE_VERSION VERSION_EQUAL 3.3)
-    add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN
-      $<$<COMPILE_LANGUAGE:C>:-Wdeclaration-after-statement>
-      -Wdeclaration-after-statement
-    )
-  endif()
+  add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN
+    $<$<COMPILE_LANGUAGE:C>:-Wdeclaration-after-statement>
+    -Wdeclaration-after-statement
+  )
   add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wextra)
   add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wno-psabi) # parameter passing for argument of type ‘__gnu_cxx::__normal_iterator<CCommandProcessorFragment_Vulkan::SMemoryBlock<1>*, std::vector<CCommandProcessorFragment_Vulkan::SMemoryBlock<1>, std::allocator<CCommandProcessorFragment_Vulkan::SMemoryBlock<1> > > >’ changed in GCC 7.1
   add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wno-unused-parameter)
@@ -387,28 +354,25 @@ function(set_glob VAR GLOBBING EXTS DIRECTORY) # ...
   if(NOT FILES STREQUAL GLOB_RESULT)
     message(AUTHOR_WARNING "${VAR} does not contain every file from directory ${DIRECTORY}")
     set(LIST_BUT_NOT_GLOB)
-    if(POLICY CMP0057)
-      cmake_policy(SET CMP0057 NEW)
-      foreach(file ${FILES})
-        if(NOT file IN_LIST GLOB_RESULT)
-          list(APPEND LIST_BUT_NOT_GLOB ${file})
-        endif()
-      endforeach()
-      if(LIST_BUT_NOT_GLOB)
-        message(AUTHOR_WARNING "Entries only present in ${VAR}: ${LIST_BUT_NOT_GLOB}")
+    foreach(file ${FILES})
+      if(NOT file IN_LIST GLOB_RESULT)
+        list(APPEND LIST_BUT_NOT_GLOB ${file})
       endif()
-      set(GLOB_BUT_NOT_LIST)
-      foreach(file ${GLOB_RESULT})
-        if(NOT file IN_LIST FILES)
-          list(APPEND GLOB_BUT_NOT_LIST ${file})
-        endif()
-      endforeach()
-      if(GLOB_BUT_NOT_LIST)
-        message(AUTHOR_WARNING "Entries only present in ${DIRECTORY}: ${GLOB_BUT_NOT_LIST}")
+    endforeach()
+    if(LIST_BUT_NOT_GLOB)
+      message(AUTHOR_WARNING "Entries only present in ${VAR}: ${LIST_BUT_NOT_GLOB}")
+    endif()
+    set(GLOB_BUT_NOT_LIST)
+    foreach(file ${GLOB_RESULT})
+      if(NOT file IN_LIST FILES)
+        list(APPEND GLOB_BUT_NOT_LIST ${file})
       endif()
-      if(NOT LIST_BUT_NOT_GLOB AND NOT GLOB_BUT_NOT_LIST)
-        message(AUTHOR_WARNING "${VAR} is not alphabetically sorted")
-      endif()
+    endforeach()
+    if(GLOB_BUT_NOT_LIST)
+      message(AUTHOR_WARNING "Entries only present in ${DIRECTORY}: ${GLOB_BUT_NOT_LIST}")
+    endif()
+    if(NOT LIST_BUT_NOT_GLOB AND NOT GLOB_BUT_NOT_LIST)
+      message(AUTHOR_WARNING "${VAR} is not alphabetically sorted")
     endif()
   endif()
 
@@ -416,7 +380,7 @@ function(set_glob VAR GLOBBING EXTS DIRECTORY) # ...
 endfunction()
 
 function(set_src VAR GLOBBING DIRECTORY) # ...
-  set_glob(${VAR} ${GLOBBING} "c;cpp;h" ${DIRECTORY} ${ARGN})
+  set_glob(${VAR} ${GLOBBING} "c;cpp;h;h.in" ${DIRECTORY} ${ARGN})
   set(${VAR} ${${VAR}} PARENT_SCOPE)
   set(CHECKSUM_SRC ${CHECKSUM_SRC} ${${VAR}} PARENT_SCOPE)
 endfunction()
@@ -424,18 +388,10 @@ set(CHECKSUM_SRC)
 
 function(set_own_rpath TARGET)
   if(NOT TARGET_OS STREQUAL "windows" AND NOT TARGET_OS STREQUAL "mac")
-    if(CMAKE_VERSION VERSION_GREATER 3.8 OR CMAKE_VERSION VERSION_EQUAL 3.8)
-      set_property(TARGET ${TARGET} PROPERTY BUILD_RPATH "$ORIGIN")
-    endif()
+    set_property(TARGET ${TARGET} PROPERTY BUILD_RPATH "$ORIGIN")
     set_property(TARGET ${TARGET} PROPERTY INSTALL_RPATH "$ORIGIN/../lib/ddnet")
   endif()
 endfunction()
-
-if(NOT TARGET_OS STREQUAL "windows" AND NOT TARGET_OS STREQUAL "mac" AND CMAKE_VERSION VERSION_LESS 3.8)
-  if((CLIENT AND (STEAM OR DISCORD_DYNAMIC)) OR ANTIBOT)
-    message(STATUS "Can't set BUILD_RPATH in CMake before 3.8, pass -Wl,-rpath,'$ORIGIN' manually if you wish to emulate this. Or just install a newer version of CMake...")
-  endif()
-endif()
 
 ########################################################################
 # INITIALIZE TARGET LISTS
@@ -834,9 +790,6 @@ if(NOT(GTEST_FOUND) AND DOWNLOAD_GTEST)
 
       set(GTEST_LIBRARIES gtest gmock)
       set(GTEST_INCLUDE_DIRS)
-      if(CMAKE_VERSION VERSION_LESS 2.8.11)
-        set(GTEST_INCLUDE_DIRS "${gtest_SOURCE_DIR}/include" "${gmock_SOURCE_DIR}/include")
-      endif()
     endif()
   endif()
 endif()
@@ -2043,7 +1996,7 @@ set_src(GAME_SHARED GLOB src/game
   teamscore.h
   tuning.h
   variables.h
-  version.h
+  version.h.in
   voting.h
 )
 # A bit hacky, but these are needed to register all the UUIDs, even for stuff
@@ -2070,6 +2023,7 @@ set(GAME_GENERATED_SHARED
   src/game/generated/protocol.h
   src/game/generated/protocol7.h
   src/game/generated/protocolglue.h
+  src/game/version.h
 )
 set(DEPS ${DEP_JSON} ${DEP_MD5} ${ZLIB_DEP})
 
@@ -3090,8 +3044,6 @@ endif()
 
 if(DEV)
   # Don't generate CPack targets.
-elseif(CMAKE_VERSION VERSION_LESS 3.6 OR CMAKE_VERSION VERSION_EQUAL 3.6)
-  message(WARNING "Cannot create CPack targets, CMake version too old. Use CMake 3.6 or newer.")
 else()
   set(EXTRA_ARGS DESTINATION ${CPACK_PACKAGE_FILE_NAME} COMPONENT portable EXCLUDE_FROM_ALL)
   install(TARGETS ${CPACK_TARGETS} ${EXTRA_ARGS})
@@ -3321,11 +3273,9 @@ foreach(target ${TARGETS_LINK})
 endforeach()
 
 foreach(target ${TARGETS_OWN})
-  if((CMAKE_VERSION VERSION_GREATER 3.1 OR CMAKE_VERSION VERSION_EQUAL 3.1))
-    set_property(TARGET ${target} PROPERTY CXX_STANDARD 17)
-    set_property(TARGET ${target} PROPERTY CXX_STANDARD_REQUIRED ON)
-    set_property(TARGET ${target} PROPERTY CXX_EXTENSIONS OFF)
-  endif()
+  set_property(TARGET ${target} PROPERTY CXX_STANDARD 17)
+  set_property(TARGET ${target} PROPERTY CXX_STANDARD_REQUIRED ON)
+  set_property(TARGET ${target} PROPERTY CXX_EXTENSIONS OFF)
 
   if(MSVC)
     target_compile_options(${target} PRIVATE /wd4244) # Possible loss of data (float -> int, int -> float, etc.).
@@ -3388,9 +3338,6 @@ foreach(target ${TARGETS_OWN})
     if(DISCORD_DYNAMIC)
       target_compile_definitions(${target} PRIVATE CONF_DISCORD_DYNAMIC)
     endif()
-  endif()
-  if(VERSION)
-    target_compile_definitions(${target} PRIVATE GAME_RELEASE_VERSION="${VERSION}")
   endif()
   if(CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
    target_compile_definitions(${target} PRIVATE CONF_WEBASM)
