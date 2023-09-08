@@ -940,7 +940,6 @@ public:
 	void RenderMousePointer();
 
 	std::vector<CQuad *> GetSelectedQuads();
-	std::vector<std::pair<CQuad *, int>> GetSelectedQuadPoints();
 	std::shared_ptr<CLayer> GetSelectedLayerType(int Index, int Type) const;
 	std::shared_ptr<CLayer> GetSelectedLayer(int Index) const;
 	std::shared_ptr<CLayerGroup> GetSelectedGroup() const;
@@ -951,13 +950,12 @@ public:
 	void ToggleSelectQuad(int Index);
 	void DeselectQuads();
 	void DeselectQuadPoints();
-	void SelectQuadPoint(int QuadIndex, int Index);
-	void ToggleSelectQuadPoint(int QuadIndex, int Index);
+	void SelectQuadPoint(int Index);
+	void ToggleSelectQuadPoint(int Index);
 	void DeleteSelectedQuads();
 	bool IsQuadSelected(int Index) const;
-	bool IsQuadPointSelected(int QuadIndex, int Index) const;
+	bool IsQuadPointSelected(int Index) const;
 	int FindSelectedQuadIndex(int Index) const;
-	int FindSelectedQuadPointIndex(int QuadIndex) const;
 
 	int FindEnvPointIndex(int Index, int Channel) const;
 	void SelectEnvPoint(int Index);
@@ -1183,7 +1181,7 @@ public:
 	int m_SelectedQuadPoint;
 	int m_SelectedQuadIndex;
 	int m_SelectedGroup;
-	std::vector<std::pair<int, int>> m_vSelectedQuadPoints;
+	int m_SelectedQuadPoints;
 	int m_SelectedEnvelope;
 	std::vector<std::pair<int, int>> m_vSelectedEnvelopePoints;
 	int m_SelectedQuadEnvelope;
@@ -1194,8 +1192,6 @@ public:
 	std::pair<int, int> m_SelectedTangentInPoint;
 	std::pair<int, int> m_SelectedTangentOutPoint;
 	bool m_UpdateEnvPointInfo;
-
-	std::vector<CQuad> m_vCopyBuffer;
 
 	bool m_QuadKnifeActive;
 	int m_QuadKnifeCount;
