@@ -4535,6 +4535,23 @@ void os_locale_str(char *locale, size_t length)
 		str_copy(locale, "en-US", length);
 }
 
+bool os_has_elevated_privileges()
+{
+#if defined(CONF_FAMILY_WINDOWS)
+	HANDLE token_handle;
+	dbg_assert(OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &token_handle), "OpenProcessToken failure");
+	TOKEN_ELEVATION token_elevation;
+	DWORD token_elevation_size = sizeof(TOKEN_ELEVATION);
+	dbg_assert(GetTokenInformation(token_handle, TokenElevation, &token_elevation, token_elevation_size, &token_elevation_size), "GetTokenInformation failure");
+	const bool elevated = token_elevation.TokenIsElevated != 0;
+	CloseHandle(token_handle);
+	return elevated;
+#else
+	// Check if the effective user ID or real user ID is 0 (root)
+	return geteuid() == 0 || getuid() == 0;
+#endif
+}
+
 #if defined(CONF_EXCEPTION_HANDLING)
 #if defined(CONF_FAMILY_WINDOWS)
 static HMODULE exception_handling_module = nullptr;

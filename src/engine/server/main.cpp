@@ -49,20 +49,26 @@ int main(int argc, const char **argv)
 {
 	CCmdlineFix CmdlineFix(&argc, &argv);
 	bool Silent = false;
+	bool AllowElevated = false;
 
 	for(int i = 1; i < argc; i++)
 	{
 		if(str_comp("-s", argv[i]) == 0 || str_comp("--silent", argv[i]) == 0)
 		{
 			Silent = true;
-#if defined(CONF_FAMILY_WINDOWS)
-			ShowWindow(GetConsoleWindow(), SW_HIDE);
-#endif
-			break;
+		}
+		else if(str_comp("--allow-elevated", argv[i]) == 0)
+		{
+			AllowElevated = true;
 		}
 	}
 
 #if defined(CONF_FAMILY_WINDOWS)
+	if(Silent)
+	{
+		ShowWindow(GetConsoleWindow(), SW_HIDE);
+	}
+
 	CWindowsComLifecycle WindowsComLifecycle(false);
 #endif
 
@@ -87,6 +93,12 @@ int main(int argc, const char **argv)
 	std::shared_ptr<CFutureLogger> pFutureAssertionLogger = std::make_shared<CFutureLogger>();
 	vpLoggers.push_back(pFutureAssertionLogger);
 	log_set_global_logger(log_logger_collection(std::move(vpLoggers)).release());
+
+	if(!AllowElevated && os_has_elevated_privileges())
+	{
+		log_error("server", "Elevated privileges detected. Launch the server without elevated privileges. To launch the server anyway, specify \"--allow-elevated\" as a command line argument.");
+		return -1;
+	}
 
 	if(secure_random_init() != 0)
 	{

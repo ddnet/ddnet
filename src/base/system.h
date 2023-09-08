@@ -2749,6 +2749,19 @@ bool os_version_str(char *version, size_t length);
  */
 void os_locale_str(char *locale, size_t length);
 
+/**
+ * Returns whether the current process was launched with elevated privileges.
+ * On Unix, this mean the process was launched either by the "root" user itself
+ * or by using the "sudo" command on a regular user.
+ * On Windows, this means the process was launched by giving it administrative
+ * access using User Account Control (UAC). This does not include the user itself
+ * having the administrator role, as this is very common on Windows and in itself
+ * does not cause issues with permissions, as long as the user stays administrator.
+ *
+ * @return true if process was launched with elevated privileges, false otherwise
+ */
+bool os_has_elevated_privileges();
+
 #if defined(CONF_EXCEPTION_HANDLING)
 void init_exception_handler();
 void set_exception_handler_log_file(const char *log_file_path);

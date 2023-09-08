@@ -1062,9 +1062,9 @@ void CConsole::ParseArguments(int NumArgs, const char **ppArguments)
 				ExecuteFile(ppArguments[i + 1], -1, true, IStorage::TYPE_ABSOLUTE);
 			i++;
 		}
-		else if(!str_comp("-s", ppArguments[i]) || !str_comp("--silent", ppArguments[i]))
+		else if(!str_comp("-s", ppArguments[i]) || !str_comp("--silent", ppArguments[i]) || !str_comp("--allow-elevated", ppArguments[i]))
 		{
-			// skip silent param
+			// ignore command line flags that are handled separately
 			continue;
 		}
 		else

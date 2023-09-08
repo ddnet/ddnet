@@ -4532,12 +4532,17 @@ int main(int argc, const char **argv)
 	CCmdlineFix CmdlineFix(&argc, &argv);
 
 	bool Silent = false;
+	bool AllowElevated = false;
 
 	for(int i = 1; i < argc; i++)
 	{
 		if(str_comp("-s", argv[i]) == 0 || str_comp("--silent", argv[i]) == 0)
 		{
 			Silent = true;
+		}
+		else if(str_comp("--allow-elevated", argv[i]) == 0)
+		{
+			AllowElevated = true;
 		}
 	}
 
@@ -4570,6 +4575,13 @@ int main(int argc, const char **argv)
 	std::shared_ptr<CFutureLogger> pFutureAssertionLogger = std::make_shared<CFutureLogger>();
 	vpLoggers.push_back(pFutureAssertionLogger);
 	log_set_global_logger(log_logger_collection(std::move(vpLoggers)).release());
+
+	if(!AllowElevated && os_has_elevated_privileges())
+	{
+		const char *pMessage = "You are trying to launch the game with elevated privileges (admin/root).\nThis can cause issues and is not necessary. Please launch the game without elevated privileges.\nTo launch the game anyway, specify \"--allow-elevated\" as a command line argument.";
+		SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Elevated privileges (admin/root) detected", pMessage, nullptr);
+		return -1;
+	}
 
 	std::stack<std::function<void()>> CleanerFunctions;
 	std::function<void()> PerformCleanup = [&CleanerFunctions]() mutable {

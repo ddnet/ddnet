@@ -114,7 +114,7 @@ jobs:
     - name: Run debug server
       run: |
         cd debug
-        ./DDNet-Server shutdown
+        ./DDNet-Server --allow-elevated shutdown
 
     - name: Build in release mode
       run: |
@@ -131,7 +131,7 @@ jobs:
     - name: Run release server
       run: |
         cd release
-        ./DDNet-Server shutdown
+        ./DDNet-Server --allow-elevated shutdown
 
     - name: Build headless client
       if: contains(matrix.os, 'ubuntu-latest')
@@ -165,8 +165,8 @@ jobs:
         cd headless
         # Remove old coverage data:
         find . -name '*.gcno' -o -name '*.gcda' -delete
-        ./DDNet-Server &
-        ./DDNet "cl_download_skins 0;connect localhost:8303;quit"
+        ./DDNet-Server --allow-elevated &
+        ./DDNet --allow-elevated "cl_download_skins 0;connect localhost:8303;quit"
 
     - name: Upload Codecov report (start & connect)
       if: contains(matrix.os, 'ubuntu-latest')
@@ -194,7 +194,7 @@ jobs:
       if: matrix.fancy
       run: |
         cd fancy
-        ./DDNet-Server shutdown
+        ./DDNet-Server --allow-elevated shutdown
 
     - name: Run integration tests with Valgrind's Memcheck
       if: contains(matrix.os, 'ubuntu-latest')
