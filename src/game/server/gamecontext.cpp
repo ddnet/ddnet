@@ -1928,30 +1928,47 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 	if(Server()->ClientIngame(ClientID))
 	{
-		if(MsgID == NETMSGTYPE_CL_SAY)
+		switch(MsgID)
+		{
+		case NETMSGTYPE_CL_SAY:
 			OnSayNetMessage(static_cast<CNetMsg_Cl_Say *>(pRawMsg), ClientID, pUnpacker);
-		else if(MsgID == NETMSGTYPE_CL_CALLVOTE)
+			break;
+		case NETMSGTYPE_CL_CALLVOTE:
 			OnCallVoteNetMessage(static_cast<CNetMsg_Cl_CallVote *>(pRawMsg), ClientID);
-		else if(MsgID == NETMSGTYPE_CL_VOTE)
+			break;
+		case NETMSGTYPE_CL_VOTE:
 			OnVoteNetMessage(static_cast<CNetMsg_Cl_Vote *>(pRawMsg), ClientID);
-		else if(MsgID == NETMSGTYPE_CL_SETTEAM)
+			break;
+		case NETMSGTYPE_CL_SETTEAM:
 			OnSetTeamNetMessage(static_cast<CNetMsg_Cl_SetTeam *>(pRawMsg), ClientID);
-		else if(MsgID == NETMSGTYPE_CL_ISDDNETLEGACY)
+			break;
+		case NETMSGTYPE_CL_ISDDNETLEGACY:
 			OnIsDDNetLegacyNetMessage(static_cast<CNetMsg_Cl_IsDDNetLegacy *>(pRawMsg), ClientID, pUnpacker);
-		else if(MsgID == NETMSGTYPE_CL_SHOWOTHERSLEGACY)
+			break;
+		case NETMSGTYPE_CL_SHOWOTHERSLEGACY:
 			OnShowOthersLegacyNetMessage(static_cast<CNetMsg_Cl_ShowOthersLegacy *>(pRawMsg), ClientID);
-		else if(MsgID == NETMSGTYPE_CL_SHOWOTHERS)
+			break;
+		case NETMSGTYPE_CL_SHOWOTHERS:
 			OnShowOthersNetMessage(static_cast<CNetMsg_Cl_ShowOthers *>(pRawMsg), ClientID);
-		else if(MsgID == NETMSGTYPE_CL_SHOWDISTANCE)
+			break;
+		case NETMSGTYPE_CL_SHOWDISTANCE:
 			OnShowDistanceNetMessage(static_cast<CNetMsg_Cl_ShowDistance *>(pRawMsg), ClientID);
-		else if(MsgID == NETMSGTYPE_CL_SETSPECTATORMODE)
+			break;
+		case NETMSGTYPE_CL_SETSPECTATORMODE:
 			OnSetSpectatorModeNetMessage(static_cast<CNetMsg_Cl_SetSpectatorMode *>(pRawMsg), ClientID);
-		else if(MsgID == NETMSGTYPE_CL_CHANGEINFO)
+			break;
+		case NETMSGTYPE_CL_CHANGEINFO:
 			OnChangeInfoNetMessage(static_cast<CNetMsg_Cl_ChangeInfo *>(pRawMsg), ClientID);
-		else if(MsgID == NETMSGTYPE_CL_EMOTICON)
+			break;
+		case NETMSGTYPE_CL_EMOTICON:
 			OnEmoticonNetMessage(static_cast<CNetMsg_Cl_Emoticon *>(pRawMsg), ClientID);
-		else if(MsgID == NETMSGTYPE_CL_KILL)
+			break;
+		case NETMSGTYPE_CL_KILL:
 			OnKillNetMessage(static_cast<CNetMsg_Cl_Kill *>(pRawMsg), ClientID);
+			break;
+		default:
+			break;
+		}
 	}
 	if(MsgID == NETMSGTYPE_CL_STARTINFO)
 	{
