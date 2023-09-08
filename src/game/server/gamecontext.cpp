@@ -1926,8 +1926,6 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 	if(!pRawMsg)
 		return;
 
-	CPlayer *pPlayer = m_apPlayers[ClientID];
-
 	if(Server()->ClientIngame(ClientID))
 	{
 		if(MsgID == NETMSGTYPE_CL_SAY)
@@ -1939,93 +1937,21 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 		else if(MsgID == NETMSGTYPE_CL_SETTEAM)
 			OnSetTeamNetMessage(static_cast<CNetMsg_Cl_SetTeam *>(pRawMsg), ClientID);
 		else if(MsgID == NETMSGTYPE_CL_ISDDNETLEGACY)
-		{
-			IServer::CClientInfo Info;
-			if(Server()->GetClientInfo(ClientID, &Info) && Info.m_GotDDNetVersion)
-			{
-				return;
-			}
-			int DDNetVersion = pUnpacker->GetInt();
-			if(pUnpacker->Error() || DDNetVersion < 0)
-			{
-				DDNetVersion = VERSION_DDRACE;
-			}
-			Server()->SetClientDDNetVersion(ClientID, DDNetVersion);
-			OnClientDDNetVersionKnown(ClientID);
-		}
+			OnIsDDNetLegacyNetMessage(static_cast<CNetMsg_Cl_IsDDNetLegacy *>(pRawMsg), ClientID, pUnpacker);
 		else if(MsgID == NETMSGTYPE_CL_SHOWOTHERSLEGACY)
-		{
-			if(g_Config.m_SvShowOthers && !g_Config.m_SvShowOthersDefault)
-			{
-				CNetMsg_Cl_ShowOthersLegacy *pMsg = (CNetMsg_Cl_ShowOthersLegacy *)pRawMsg;
-				pPlayer->m_ShowOthers = pMsg->m_Show;
-			}
-		}
+			OnShowOthersLegacyNetMessage(static_cast<CNetMsg_Cl_ShowOthersLegacy *>(pRawMsg), ClientID);
 		else if(MsgID == NETMSGTYPE_CL_SHOWOTHERS)
-		{
-			if(g_Config.m_SvShowOthers && !g_Config.m_SvShowOthersDefault)
-			{
-				CNetMsg_Cl_ShowOthers *pMsg = (CNetMsg_Cl_ShowOthers *)pRawMsg;
-				pPlayer->m_ShowOthers = pMsg->m_Show;
-			}
-		}
+			OnShowOthersNetMessage(static_cast<CNetMsg_Cl_ShowOthers *>(pRawMsg), ClientID);
 		else if(MsgID == NETMSGTYPE_CL_SHOWDISTANCE)
-		{
-			CNetMsg_Cl_ShowDistance *pMsg = (CNetMsg_Cl_ShowDistance *)pRawMsg;
-			pPlayer->m_ShowDistance = vec2(pMsg->m_X, pMsg->m_Y);
-		}
-		else if(MsgID == NETMSGTYPE_CL_SETSPECTATORMODE && !m_World.m_Paused)
-		{
-			CNetMsg_Cl_SetSpectatorMode *pMsg = (CNetMsg_Cl_SetSpectatorMode *)pRawMsg;
-
-			pMsg->m_SpectatorID = clamp(pMsg->m_SpectatorID, (int)SPEC_FOLLOW, MAX_CLIENTS - 1);
-
-			if(pMsg->m_SpectatorID >= 0)
-				if(!Server()->ReverseTranslate(pMsg->m_SpectatorID, ClientID))
-					return;
-
-			if((g_Config.m_SvSpamprotection && pPlayer->m_LastSetSpectatorMode && pPlayer->m_LastSetSpectatorMode + Server()->TickSpeed() / 4 > Server()->Tick()))
-				return;
-
-			pPlayer->m_LastSetSpectatorMode = Server()->Tick();
-			pPlayer->UpdatePlaytime();
-			if(pMsg->m_SpectatorID >= 0 && (!m_apPlayers[pMsg->m_SpectatorID] || m_apPlayers[pMsg->m_SpectatorID]->GetTeam() == TEAM_SPECTATORS))
-				SendChatTarget(ClientID, "Invalid spectator id used");
-			else
-				pPlayer->m_SpectatorID = pMsg->m_SpectatorID;
-		}
+			OnShowDistanceNetMessage(static_cast<CNetMsg_Cl_ShowDistance *>(pRawMsg), ClientID);
+		else if(MsgID == NETMSGTYPE_CL_SETSPECTATORMODE)
+			OnSetSpectatorModeNetMessage(static_cast<CNetMsg_Cl_SetSpectatorMode *>(pRawMsg), ClientID);
 		else if(MsgID == NETMSGTYPE_CL_CHANGEINFO)
 			OnChangeInfoNetMessage(static_cast<CNetMsg_Cl_ChangeInfo *>(pRawMsg), ClientID);
-		else if(MsgID == NETMSGTYPE_CL_EMOTICON && !m_World.m_Paused)
+		else if(MsgID == NETMSGTYPE_CL_EMOTICON)
 			OnEmoticonNetMessage(static_cast<CNetMsg_Cl_Emoticon *>(pRawMsg), ClientID);
-		else if(MsgID == NETMSGTYPE_CL_KILL && !m_World.m_Paused)
-		{
-			if(m_VoteCloseTime && m_VoteCreator == ClientID && GetDDRaceTeam(ClientID) && (IsKickVote() || IsSpecVote()))
-			{
-				SendChatTarget(ClientID, "You are running a vote please try again after the vote is done!");
-				return;
-			}
-			if(pPlayer->m_LastKill && pPlayer->m_LastKill + Server()->TickSpeed() * g_Config.m_SvKillDelay > Server()->Tick())
-				return;
-			if(pPlayer->IsPaused())
-				return;
-
-			CCharacter *pChr = pPlayer->GetCharacter();
-			if(!pChr)
-				return;
-
-			//Kill Protection
-			int CurrTime = (Server()->Tick() - pChr->m_StartTime) / Server()->TickSpeed();
-			if(g_Config.m_SvKillProtection != 0 && CurrTime >= (60 * g_Config.m_SvKillProtection) && pChr->m_DDRaceState == DDRACE_STARTED)
-			{
-				SendChatTarget(ClientID, "Kill Protection enabled. If you really want to kill, type /kill");
-				return;
-			}
-
-			pPlayer->m_LastKill = Server()->Tick();
-			pPlayer->KillCharacter(WEAPON_SELF);
-			pPlayer->Respawn();
-		}
+		else if(MsgID == NETMSGTYPE_CL_KILL)
+			OnKillNetMessage(static_cast<CNetMsg_Cl_Kill *>(pRawMsg), ClientID);
 	}
 	if(MsgID == NETMSGTYPE_CL_STARTINFO)
 	{
@@ -2485,6 +2411,68 @@ void CGameContext::OnSetTeamNetMessage(const CNetMsg_Cl_SetTeam *pMsg, int Clien
 	}
 }
 
+void CGameContext::OnIsDDNetLegacyNetMessage(const CNetMsg_Cl_IsDDNetLegacy *pMsg, int ClientID, CUnpacker *pUnpacker)
+{
+	IServer::CClientInfo Info;
+	if(Server()->GetClientInfo(ClientID, &Info) && Info.m_GotDDNetVersion)
+	{
+		return;
+	}
+	int DDNetVersion = pUnpacker->GetInt();
+	if(pUnpacker->Error() || DDNetVersion < 0)
+	{
+		DDNetVersion = VERSION_DDRACE;
+	}
+	Server()->SetClientDDNetVersion(ClientID, DDNetVersion);
+	OnClientDDNetVersionKnown(ClientID);
+}
+
+void CGameContext::OnShowOthersLegacyNetMessage(const CNetMsg_Cl_ShowOthersLegacy *pMsg, int ClientID)
+{
+	if(g_Config.m_SvShowOthers && !g_Config.m_SvShowOthersDefault)
+	{
+		CPlayer *pPlayer = m_apPlayers[ClientID];
+		pPlayer->m_ShowOthers = pMsg->m_Show;
+	}
+}
+
+void CGameContext::OnShowOthersNetMessage(const CNetMsg_Cl_ShowOthers *pMsg, int ClientID)
+{
+	if(g_Config.m_SvShowOthers && !g_Config.m_SvShowOthersDefault)
+	{
+		CPlayer *pPlayer = m_apPlayers[ClientID];
+		pPlayer->m_ShowOthers = pMsg->m_Show;
+	}
+}
+
+void CGameContext::OnShowDistanceNetMessage(const CNetMsg_Cl_ShowDistance *pMsg, int ClientID)
+{
+	CPlayer *pPlayer = m_apPlayers[ClientID];
+	pPlayer->m_ShowDistance = vec2(pMsg->m_X, pMsg->m_Y);
+}
+
+void CGameContext::OnSetSpectatorModeNetMessage(const CNetMsg_Cl_SetSpectatorMode *pMsg, int ClientID)
+{
+	if(m_World.m_Paused)
+		return;
+
+	int SpectatorID = clamp(pMsg->m_SpectatorID, (int)SPEC_FOLLOW, MAX_CLIENTS - 1);
+	if(SpectatorID >= 0)
+		if(!Server()->ReverseTranslate(SpectatorID, ClientID))
+			return;
+
+	CPlayer *pPlayer = m_apPlayers[ClientID];
+	if((g_Config.m_SvSpamprotection && pPlayer->m_LastSetSpectatorMode && pPlayer->m_LastSetSpectatorMode + Server()->TickSpeed() / 4 > Server()->Tick()))
+		return;
+
+	pPlayer->m_LastSetSpectatorMode = Server()->Tick();
+	pPlayer->UpdatePlaytime();
+	if(SpectatorID >= 0 && (!m_apPlayers[SpectatorID] || m_apPlayers[SpectatorID]->GetTeam() == TEAM_SPECTATORS))
+		SendChatTarget(ClientID, "Invalid spectator id used");
+	else
+		pPlayer->m_SpectatorID = SpectatorID;
+}
+
 void CGameContext::OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int ClientID)
 {
 	CPlayer *pPlayer = m_apPlayers[ClientID];
@@ -2588,6 +2576,9 @@ void CGameContext::OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int
 
 void CGameContext::OnEmoticonNetMessage(const CNetMsg_Cl_Emoticon *pMsg, int ClientID)
 {
+	if(m_World.m_Paused)
+		return;
+
 	CPlayer *pPlayer = m_apPlayers[ClientID];
 
 	auto &&CheckPreventEmote = [&](int64_t LastEmote, int64_t DelayInMs) {
@@ -2660,6 +2651,39 @@ void CGameContext::OnEmoticonNetMessage(const CNetMsg_Cl_Emoticon *pMsg, int Cli
 		}
 		pChr->SetEmote(EmoteType, Server()->Tick() + 2 * Server()->TickSpeed());
 	}
+}
+
+void CGameContext::OnKillNetMessage(const CNetMsg_Cl_Kill *pMsg, int ClientID)
+{
+	if(m_World.m_Paused)
+		return;
+
+	if(m_VoteCloseTime && m_VoteCreator == ClientID && GetDDRaceTeam(ClientID) && (IsKickVote() || IsSpecVote()))
+	{
+		SendChatTarget(ClientID, "You are running a vote please try again after the vote is done!");
+		return;
+	}
+	CPlayer *pPlayer = m_apPlayers[ClientID];
+	if(pPlayer->m_LastKill && pPlayer->m_LastKill + Server()->TickSpeed() * g_Config.m_SvKillDelay > Server()->Tick())
+		return;
+	if(pPlayer->IsPaused())
+		return;
+
+	CCharacter *pChr = pPlayer->GetCharacter();
+	if(!pChr)
+		return;
+
+	// Kill Protection
+	int CurrTime = (Server()->Tick() - pChr->m_StartTime) / Server()->TickSpeed();
+	if(g_Config.m_SvKillProtection != 0 && CurrTime >= (60 * g_Config.m_SvKillProtection) && pChr->m_DDRaceState == DDRACE_STARTED)
+	{
+		SendChatTarget(ClientID, "Kill Protection enabled. If you really want to kill, type /kill");
+		return;
+	}
+
+	pPlayer->m_LastKill = Server()->Tick();
+	pPlayer->KillCharacter(WEAPON_SELF);
+	pPlayer->Respawn();
 }
 
 void CGameContext::OnStartInfoNetMessage(const CNetMsg_Cl_StartInfo *pMsg, int ClientID)
