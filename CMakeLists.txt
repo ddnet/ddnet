@@ -299,10 +299,6 @@ if(NOT MSVC AND NOT HAIKU)
   endif()
 
   add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wall)
-  add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN
-    $<$<COMPILE_LANGUAGE:C>:-Wdeclaration-after-statement>
-    -Wdeclaration-after-statement
-  )
   add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wextra)
   add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wno-psabi) # parameter passing for argument of type ‘__gnu_cxx::__normal_iterator<CCommandProcessorFragment_Vulkan::SMemoryBlock<1>*, std::vector<CCommandProcessorFragment_Vulkan::SMemoryBlock<1>, std::allocator<CCommandProcessorFragment_Vulkan::SMemoryBlock<1> > > >’ changed in GCC 7.1
   add_cxx_compiler_flag_if_supported(OUR_FLAGS_OWN -Wno-unused-parameter)
