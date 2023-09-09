@@ -1728,7 +1728,7 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 void CMenus::ConchainFriendlistUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	pfnCallback(pResult, pCallbackUserData);
-	if(pResult->NumArguments() == 2 && ((CMenus *)pUserData)->Client()->State() == IClient::STATE_OFFLINE)
+	if(pResult->NumArguments() >= 1 && ((CMenus *)pUserData)->Client()->State() == IClient::STATE_OFFLINE)
 	{
 		((CMenus *)pUserData)->FriendlistOnUpdate();
 		((CMenus *)pUserData)->Client()->ServerBrowserUpdate();
@@ -1738,6 +1738,6 @@ void CMenus::ConchainFriendlistUpdate(IConsole::IResult *pResult, void *pUserDat
 void CMenus::ConchainServerbrowserUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	pfnCallback(pResult, pCallbackUserData);
-	if(pResult->NumArguments() && g_Config.m_UiPage == PAGE_FAVORITES)
+	if(pResult->NumArguments() >= 1 && g_Config.m_UiPage == PAGE_FAVORITES)
 		((CMenus *)pUserData)->ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
 }
