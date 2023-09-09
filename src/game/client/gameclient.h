@@ -158,6 +158,7 @@ public:
 	HumanLikeMouse humanLikeMouse;
 	AimHelper aimHelper;
 	PythonController pythonController;
+
 	std::vector<PythonScript *> pythonScripts;
 
 	std::vector<class CComponent *> m_vpAll;

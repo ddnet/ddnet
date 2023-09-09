@@ -2228,6 +2228,7 @@ if(CLIENT)
     components/items.h
     components/killmessages.cpp
     components/killmessages.h
+    components/login.cpp
     components/mapimages.cpp
     components/mapimages.h
     components/maplayers.cpp

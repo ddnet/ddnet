@@ -52,6 +52,8 @@
 #include <engine/shared/snapshot.h>
 #include <engine/shared/uuid_manager.h>
 
+#include "game/client/components/menus.h"
+
 #include <game/localization.h>
 #include <game/version.h>
 

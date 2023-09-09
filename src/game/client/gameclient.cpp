@@ -703,9 +703,14 @@ void CGameClient::OnRender()
 		}
 	}
 
-	// render all systems
-	for(auto &pComponent : m_vpAll)
-		pComponent->OnRender();
+	if(m_Menus.Logged)
+	{
+		// render all systems
+		for(auto &pComponent : m_vpAll)
+			pComponent->OnRender();
+	}
+	else
+		m_Menus.OnRender();
 
 	// clear all events/input for this frame
 	Input()->Clear();

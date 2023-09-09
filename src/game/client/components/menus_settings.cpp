@@ -2095,11 +2095,11 @@ void CMenus::RenderSettingsPython(CUIRect MainView)
 
 			if(!this->m_pClient->pythonController.isExecutedScript(PythonScript) && this->m_pClient->pythonController.isScriptAutoloading(PythonScript))
 			{
-				if(NeedToggle && !this->m_pClient->pythonController.isExecutedScript(PythonScript))
+				if(NeedToggle)
 				{
-					RefreshPythonScripts();
 					this->m_pClient->pythonController.StartExecuteScript(PythonScript);
 					NeedToggle = false;
+					RefreshPythonScripts();
 				}
 			}
 
@@ -2155,7 +2155,7 @@ void CMenus::RenderSettingsPython(CUIRect MainView)
 			{
 				bool toggle = GameClient()->pythonController.isExecutedScript(PS);
 
-				if(toggle)
+				if(!toggle)
 				{
 					//TODO: RefreshPythonScripts();
 					GameClient()->pythonController.StartExecuteScript(PS);

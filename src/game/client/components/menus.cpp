@@ -971,6 +971,23 @@ int CMenus::Render()
 	UI()->MapScreen();
 	UI()->ResetMouseSlow();
 
+	CUIRect MainView;
+	CUIRect TabBar;
+
+	if(!Logged)
+	{
+		if(!m_pBackground->Render())
+			RenderBackground();
+		ms_ColorTabbarInactive = ms_ColorTabbarInactiveOutgame;
+		ms_ColorTabbarActive = ms_ColorTabbarActiveOutgame;
+		ms_ColorTabbarHover = ms_ColorTabbarHoverOutgame;
+
+		Screen.Margin(10.0f, &Screen);
+		Screen.HSplitTop(24.0f, &TabBar, &MainView);
+		RenderLoginMenu(MainView);
+		return 0;
+	}
+
 	static int s_Frame = 0;
 	if(s_Frame == 0)
 	{
@@ -1011,9 +1028,6 @@ int CMenus::Render()
 		ms_ColorTabbarActive = ms_ColorTabbarActiveOutgame;
 		ms_ColorTabbarHover = ms_ColorTabbarHoverOutgame;
 	}
-
-	CUIRect TabBar;
-	CUIRect MainView;
 
 	// some margin around the screen
 	Screen.Margin(10.0f, &Screen);
