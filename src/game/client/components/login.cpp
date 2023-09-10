@@ -62,24 +62,36 @@ void CMenus::RenderLoginMenu(CUIRect MainView)
 
 	MainView.VMargin(VMargin, &LoginBox);
 
-	LoginBox.HSplitTop(LoginBox.w/2.25f, 0, &LoginBox);
-	LoginBox.HSplitTop(50.0f, &LoginLine, &PassLine);
+	LoginBox.HSplitTop(LoginBox.w/3.0f, 0, &LoginBox);
+
+	LoginBox.HSplitTop(17.0f, &Label, &LoginBox);
+	UI()->DoLabel(&Label, "Login", 24.0f, TEXTALIGN_CENTER);
+	LoginBox.HSplitTop(24.0f, &LoginLine, &LoginBox);
+	LoginBox.HSplitTop(24.0f, &LoginLine, &LoginBox);
+
+	LoginLine.HSplitTop(50.0f, &LoginLine, 0);
+	LoginLine.HSplitBottom(50.0f, 0, &LoginLine);
+
 	LoginLine.VSplitLeft(50.0f, 0, &LoginLine);
 	LoginLine.VSplitRight(50.0f, &LoginLine, 0);
-	LoginLine.HSplitBottom(100.0f, &Label, 0);
-	Label.HSplitBottom(100.0f, &Label, 0);
-	UI()->DoLabel(&Label, "Login", 30.0f, TEXTALIGN_CENTER);
 
-	m_LogInLogin.SetBuffer(m_Login, sizeof(m_Login));
-	UI()->DoClearableEditBox(&m_LogInLogin, &LoginLine, 12.0f);
 
-	PassLine.HSplitTop(50.0f, 0, &PassLine);
+	LoginBox.HSplitTop(50.0f, &PassLine, &LoginBox);
+	LoginBox.HSplitTop(17.0f, &Label, &LoginBox);
+	UI()->DoLabel(&Label, "Password", 24.0f, TEXTALIGN_CENTER);
+	LoginBox.HSplitTop(24.0f, &PassLine, &LoginBox);
+	LoginBox.HSplitTop(7.0f, &PassLine, &LoginBox);
+
 	PassLine.HSplitTop(50.0f, &PassLine, 0);
+	PassLine.HSplitBottom(50.0f, 0, &PassLine);
+
 	PassLine.VSplitLeft(50.0f, 0, &PassLine);
 	PassLine.VSplitRight(50.0f, &PassLine, 0);
-	PassLine.HSplitBottom(58.0f, &Label, 0);
-	Label.HSplitTop(58.0f, 0, &Label);
-	UI()->DoLabel(&Label, "Password", 30.0f, TEXTALIGN_CENTER);
+
+
+
+	m_LogInLogin.SetBuffer(m_Login, sizeof(m_Login));
+	UI()->DoClearableEditBox(&m_LogInLogin, &LoginLine, 18.0f);
 
 	m_LogInPassword.SetBuffer(m_Pass, sizeof(m_Pass));
 	m_LogInPassword.SetHidden(true);
