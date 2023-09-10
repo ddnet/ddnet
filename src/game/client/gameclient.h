@@ -96,6 +96,7 @@ public:
 	bool m_HudDDRace;
 
 	bool m_NoWeakHookAndBounce;
+	bool m_NoSkinChangeForFrozen;
 };
 
 class CSnapEntities
