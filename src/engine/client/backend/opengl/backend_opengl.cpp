@@ -966,8 +966,18 @@ void CCommandProcessorFragment_OpenGL::Cmd_TextTextures_Create(const CCommandBuf
 
 void CCommandProcessorFragment_OpenGL::Cmd_Clear(const CCommandBuffer::SCommand_Clear *pCommand)
 {
+	// if clip is still active, force disable it for clearing, enable it again afterwards
+	bool ClipWasEnabled = m_LastClipEnable;
+	if(ClipWasEnabled)
+	{
+		glDisable(GL_SCISSOR_TEST);
+	}
 	glClearColor(pCommand->m_Color.r, pCommand->m_Color.g, pCommand->m_Color.b, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	if(ClipWasEnabled)
+	{
+		glEnable(GL_SCISSOR_TEST);
+	}
 }
 
 void CCommandProcessorFragment_OpenGL::Cmd_Render(const CCommandBuffer::SCommand_Render *pCommand)
