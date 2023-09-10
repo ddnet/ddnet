@@ -817,6 +817,10 @@ void CChat::RefindSkins()
 
 			Line.m_RenderSkinMetrics = pSkin->m_Metrics;
 		}
+		else
+		{
+			Line.m_RenderSkin.Reset();
+		}
 	}
 }
 
