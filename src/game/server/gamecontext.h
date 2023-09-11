@@ -288,6 +288,19 @@ public:
 	void *PreProcessMsg(int *pMsgID, CUnpacker *pUnpacker, int ClientID);
 	void CensorMessage(char *pCensoredMessage, const char *pMessage, int Size);
 	void OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID) override;
+	void OnSayNetMessage(const CNetMsg_Cl_Say *pMsg, int ClientID, const CUnpacker *pUnpacker);
+	void OnCallVoteNetMessage(const CNetMsg_Cl_CallVote *pMsg, int ClientID);
+	void OnVoteNetMessage(const CNetMsg_Cl_Vote *pMsg, int ClientID);
+	void OnSetTeamNetMessage(const CNetMsg_Cl_SetTeam *pMsg, int ClientID);
+	void OnIsDDNetLegacyNetMessage(const CNetMsg_Cl_IsDDNetLegacy *pMsg, int ClientID, CUnpacker *pUnpacker);
+	void OnShowOthersLegacyNetMessage(const CNetMsg_Cl_ShowOthersLegacy *pMsg, int ClientID);
+	void OnShowOthersNetMessage(const CNetMsg_Cl_ShowOthers *pMsg, int ClientID);
+	void OnShowDistanceNetMessage(const CNetMsg_Cl_ShowDistance *pMsg, int ClientID);
+	void OnSetSpectatorModeNetMessage(const CNetMsg_Cl_SetSpectatorMode *pMsg, int ClientID);
+	void OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int ClientID);
+	void OnEmoticonNetMessage(const CNetMsg_Cl_Emoticon *pMsg, int ClientID);
+	void OnKillNetMessage(const CNetMsg_Cl_Kill *pMsg, int ClientID);
+	void OnStartInfoNetMessage(const CNetMsg_Cl_StartInfo *pMsg, int ClientID);
 
 	bool OnClientDataPersist(int ClientID, void *pData) override;
 	void OnClientConnected(int ClientID, void *pData) override;
