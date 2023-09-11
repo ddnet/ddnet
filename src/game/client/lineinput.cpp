@@ -386,6 +386,9 @@ bool CLineInput::ProcessInput(const IInput::CEvent &Event)
 
 STextBoundingBox CLineInput::Render(const CUIRect *pRect, float FontSize, int Align, bool Changed, float LineWidth)
 {
+	// update derived attributes to handle external changes to the buffer
+	UpdateStrData();
+
 	m_WasRendered = true;
 
 	const char *pDisplayStr = GetDisplayedString();
