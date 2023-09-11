@@ -22,6 +22,12 @@ static void Dilate(int w, int h, int BPP, const unsigned char *pSrc, unsigned ch
 			if(pSrc[m + AlphaCompIndex] > AlphaThreshold)
 				continue;
 
+			// clear pixels that are considered transparent
+			// this allows the image to always be black where no dilate is needed
+			pDest[m + 0] = 0;
+			pDest[m + 1] = 0;
+			pDest[m + 2] = 0;
+
 			int aSumOfOpaque[] = {0, 0, 0};
 			int Counter = 0;
 			for(int c = 0; c < 4; c++)
