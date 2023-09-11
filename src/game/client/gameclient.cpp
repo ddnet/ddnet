@@ -3343,6 +3343,11 @@ void CGameClient::RefindSkins()
 			Client.m_SkinInfo.m_ColorableRenderSkin = pSkin->m_ColorableSkin;
 			Client.UpdateRenderInfo(IsTeamPlay());
 		}
+		else
+		{
+			Client.m_SkinInfo.m_OriginalRenderSkin.Reset();
+			Client.m_SkinInfo.m_ColorableRenderSkin.Reset();
+		}
 	}
 	m_Ghost.RefindSkin();
 	m_Chat.RefindSkins();

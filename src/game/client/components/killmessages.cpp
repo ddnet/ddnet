@@ -397,6 +397,7 @@ void CKillMessages::RefindSkins()
 
 		if(m_aKillmsgs[r].m_KillerID >= 0)
 		{
+			m_aKillmsgs[r].m_KillerRenderInfo = {};
 			const CGameClient::CClientData &Client = GameClient()->m_aClients[m_aKillmsgs[r].m_KillerID];
 			if(Client.m_aSkinName[0] != '\0')
 				m_aKillmsgs[r].m_KillerRenderInfo = Client.m_RenderInfo;
