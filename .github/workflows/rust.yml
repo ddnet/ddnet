@@ -10,6 +10,8 @@ on:
 jobs:
   rustdoc:
     runs-on: ubuntu-latest
+    env:
+      CARGO_HTTP_MULTIPLEXING: false
     steps:
     - uses: actions/checkout@v2
     - name: Cache Rust dependencies
@@ -28,6 +30,8 @@ jobs:
 
   cargo-deny:
     runs-on: ubuntu-latest
+    env:
+      CARGO_HTTP_MULTIPLEXING: false
     strategy:
       matrix:
         checks:
