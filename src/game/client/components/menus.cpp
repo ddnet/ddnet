@@ -1717,13 +1717,13 @@ int CMenus::Render()
 
 			Box.HSplitBottom(160.f, &Box, &Part);
 
-			Part.VSplitLeft(60.0f, 0, &TextBox);
-			TextBox.VSplitLeft(20.0f, 0, &TextBox);
-			TextBox.VSplitRight(60.0f, &TextBox, 0);
+			Part.VSplitLeft(60.0f, nullptr, &TextBox);
+			TextBox.VSplitLeft(20.0f, nullptr, &TextBox);
+			TextBox.VSplitRight(60.0f, &TextBox, nullptr);
 
 			str_format(aBuf, sizeof(aBuf), Localize("Video was saved to '%s'"), aFilePath);
 
-			UI()->DoLabel(&TextBox, aBuf, 18.0f, TEXTALIGN_LEFT);
+			UI()->DoLabel(&TextBox, aBuf, 18.0f, TEXTALIGN_TL);
 		}
 #endif
 		else if(m_Popup == POPUP_FIRST_LAUNCH)

@@ -987,7 +987,7 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	}
 
 #if defined(CONF_VIDEORECORDER)
-	if(m_DemoRenderInput.GetLength() > 0)
+	if(!m_DemoRenderInput.IsEmpty())
 	{
 		m_Popup = POPUP_RENDER_DONE;
 	}
