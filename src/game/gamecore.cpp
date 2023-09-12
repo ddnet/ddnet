@@ -94,7 +94,6 @@ void CCharacterCore::Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore
 
 	// fail safe, if core's tuning didn't get updated at all, just fallback to world tuning.
 	m_Tuning = m_pWorld->m_aTuning[g_Config.m_ClDummy];
-	Reset();
 }
 
 void CCharacterCore::Reset()
