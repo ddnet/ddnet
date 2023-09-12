@@ -986,6 +986,13 @@ void CMenus::RenderDemoList(CUIRect MainView)
 		s_Inited = 1;
 	}
 
+#if defined(CONF_VIDEORECORDER)
+	if(m_DemoRenderInput.GetLength() > 0)
+	{
+		m_Popup = POPUP_RENDER_DONE;
+	}
+#endif
+
 	char aFooterLabel[128] = {0};
 	if(m_DemolistSelectedIndex >= 0)
 	{
