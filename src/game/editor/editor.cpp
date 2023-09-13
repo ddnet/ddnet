@@ -842,7 +842,7 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 
 		float EnvelopeSectionStart = 0.0f;
 		float EnvelopeTime = 0.0f;
-		if(m_SelectedEnvelope >= 0)
+		if(m_SelectedEnvelope >= 0 && m_ActiveExtraEditor == EXTRAEDITOR_ENVELOPES)
 		{
 			std::shared_ptr<CEnvelope> pSelectedEnvelope = m_Map.m_vpEnvelopes[m_SelectedEnvelope];
 			EnvelopeTime = std::fmod(m_AnimateTime, pSelectedEnvelope->EndTime());
@@ -888,7 +888,7 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 
 		// TODO: animation speed
 
-		if(m_SelectedEnvelope >= 0)
+		if(m_SelectedEnvelope >= 0 && m_ActiveExtraEditor == EXTRAEDITOR_ENVELOPES)
 		{
 			std::shared_ptr<CEnvelope> pSelectedEnvelope = m_Map.m_vpEnvelopes[m_SelectedEnvelope];
 
@@ -5518,11 +5518,9 @@ void CEditor::SetHotEnvelopePoint(const CUIRect &View, const std::shared_ptr<CEn
 
 	if(pMinPoint != nullptr)
 		UI()->SetHotItem(pMinPoint);
-	else if(!m_Animate)
+	else if(!m_Animate && absolute(EnvelopeToScreenX(View, m_AnimateTime) - mx) < 20.0f)
 	{
-		float Time = std::fmod(m_AnimateTime, pEnvelope->EndTime());
-		if(absolute(EnvelopeToScreenX(View, m_AnimateTime) - mx) < 20.0f || absolute(EnvelopeToScreenX(View, Time) - mx) < 20.0f)
-			UI()->SetHotItem(&m_AnimateTime);
+		UI()->SetHotItem(&m_AnimateTime);
 	}
 }
 
@@ -6001,7 +5999,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 				}
 
 				BarColor = {1, 1, 0, 0.8f};
-				// m_pTooltip = "Timebar. Press left-click to drag.";
+				m_pTooltip = "Timebar. Press left-click to drag.";
 			}
 			else if(UI()->HotItem() == &m_AnimateTime)
 			{
@@ -6015,29 +6013,15 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 				}
 
 				BarColor = {1, 1, 0, 0.8f};
-				// m_pTooltip = "Timebar. Press left-click to drag.";
+				m_pTooltip = "Timebar. Press left-click to drag.";
 			}
 			else
 				BarColor = {1, 1, 0, 0.5f};
 
 			const float BarWidth = 1.5f;
-			{
-				Graphics()->SetColor(BarColor);
-				IGraphics::CQuadItem QuadItem(EnvelopeToScreenX(View, m_AnimateTime) - BarWidth / 2.0f, View.y, BarWidth, View.h);
-				Graphics()->QuadsDrawTL(&QuadItem, 1);
-			}
-
-			if(m_AnimateTime > pEnvelope->EndTime())
-			{
-				BarColor.r *= 0.5f;
-				BarColor.g *= 0.5f;
-				BarColor.b *= 0.5f;
-				Graphics()->SetColor(BarColor);
-
-				float Time = std::fmod(m_AnimateTime, pEnvelope->EndTime());
-				IGraphics::CQuadItem QuadItem(EnvelopeToScreenX(View, Time) - BarWidth / 2.0f, View.y, BarWidth, View.h);
-				Graphics()->QuadsDrawTL(&QuadItem, 1);
-			}
+			Graphics()->SetColor(BarColor);
+			IGraphics::CQuadItem QuadItem(EnvelopeToScreenX(View, m_AnimateTime) - BarWidth / 2.0f, View.y, BarWidth, View.h);
+			Graphics()->QuadsDrawTL(&QuadItem, 1);
 
 			Graphics()->QuadsEnd();
 			UI()->ClipDisable();
