@@ -43,7 +43,9 @@ void PythonController::StartExecuteScript(PythonScript* pythonScript)
 {
 	ResetInput();
 
-	if (this->isExecutedScript(pythonScript)) {
+	pythonScript->init();
+
+	if (!pythonScript->isInitialized() || this->isExecutedScript(pythonScript)) {
 		return;
 	}
 
@@ -70,12 +72,6 @@ bool PythonController::OnInput(const IInput::CEvent &Event)
 {
 	std::string keyName = this->m_pClient->Input()->KeyName(Event.m_Key);
 
-	//	if (keyName == "l") {
-	//		vec2 playerPos = this->m_pClient->m_aClients[this->m_pClient->m_aLocalIDs[g_Config.m_ClDummy]].m_Predicted.m_Pos;
-	//		vec2 pos = this->m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy] * GameClient()->m_Camera.m_Zoom + playerPos;
-	//		this->m_pClient->movementAgent.moveTo(pos);
-	//	}
-
 	for (auto executedPythonScript : this->executedPythonScripts) {
 		PyObject* function = PyObject_GetAttrString(executedPythonScript->module, "onInput");
 
@@ -91,7 +87,11 @@ bool PythonController::OnInput(const IInput::CEvent &Event)
 			Py_XDECREF(keyCodeObject);
 			Py_XDECREF(keyFlagsObject);
 			Py_XDECREF(keyNameObject);
+		} else {
+			PyErr_Clear();
 		}
+
+		executedPythonScript->updateExceptions();
 	}
 
 	return false;
@@ -183,7 +183,11 @@ void PythonController::OnUpdate()
 			PyObject_CallObject(function, args);
 			PyOS_InterruptOccurred();
 			Py_XDECREF(args);
+		} else {
+			PyErr_Clear();
 		}
+
+		executedPythonScript->updateExceptions();
 	}
 }
 

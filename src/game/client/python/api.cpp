@@ -3,16 +3,35 @@
 #include "game/client/gameclient.h"
 
 // ============ API.Collision Module ============ //
-static PyObject* API_Collision_debug(PyObject* self, PyObject* args) {
-	char* message;
-//	PyArg_ParseTuple(args, "s", &message);
+static PyObject* API_Collision_IntersectLine(PyObject* self, PyObject* args) {
+	PyObject* position_dict0;
+	PyObject* position_dict1;
 
-//	PythonAPI_GameClient->Collision().
-	Py_RETURN_NONE;
+	if (!PyArg_ParseTuple(args, "OO", &position_dict0, &position_dict1)) {
+		return NULL;
+	}
+
+	vec2 position0, position1;
+
+	position0.x = PyFloat_AsDouble(PyDict_GetItemString(position_dict0, "x"));
+	position0.y = PyFloat_AsDouble(PyDict_GetItemString(position_dict0, "y"));
+
+	position1.x = PyFloat_AsDouble(PyDict_GetItemString(position_dict1, "x"));
+	position1.y = PyFloat_AsDouble(PyDict_GetItemString(position_dict1, "y"));
+
+	vec2 outCollision;
+	vec2 outBeforeCollision;
+
+	int tileId = PythonAPI_GameClient->Collision()->IntersectLine(position0, position1, &outCollision, &outBeforeCollision);
+
+	PyObject *outCollisionTuple = Py_BuildValue("{s:d,s:d}", "x", outCollision.x, "y", outCollision.y);
+	PyObject *outBeforeCollisionTuple = Py_BuildValue("{s:d,s:d}", "x", outBeforeCollision.x, "y", outBeforeCollision.y);
+
+	return Py_BuildValue("iOO", tileId, outCollisionTuple, outBeforeCollisionTuple);
 }
 
 static PyMethodDef API_CollisionMethods[] = {
-	{"debug", API_Collision_debug, METH_VARARGS, "Prints a debug message"},
+	{"intersectLine", API_Collision_IntersectLine, METH_VARARGS, "Intersect Line"},
 	{NULL, NULL, 0, NULL}
 };
 

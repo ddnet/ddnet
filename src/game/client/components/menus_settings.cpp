@@ -2055,7 +2055,7 @@ void CMenus::RenderSettingsPython(CUIRect MainView)
 
 		int i = 0;
 
-		for(auto PythonScript : GameClient()->pythonScripts)
+		for(auto &PythonScript : GameClient()->pythonScripts)
 		{
 
 			const CListboxItem Item = listBox.DoNextItem(&pItemID[i]);
@@ -2070,7 +2070,7 @@ void CMenus::RenderSettingsPython(CUIRect MainView)
 
 				Row.HMargin(7.0f, &Row);
 				Row.HSplitTop(5.0f, 0, &Label);
-				UI()->DoLabel(&Label, PythonScript->name, 24.0f, TEXTALIGN_LEFT);
+				UI()->DoLabel(&Label, PythonScript->name.c_str(), 24.0f, TEXTALIGN_LEFT);
 
 				Row.VSplitRight(Row.h, &Row, &Button);
 				if(UI()->MouseInside(&Row) && Input()->KeyPress(KEY_MOUSE_1))
@@ -2173,18 +2173,15 @@ void CMenus::RenderSettingsPython(CUIRect MainView)
 
 void CMenus::RefreshPythonScripts()
 {
-//	for(auto PythonScript : GameClient()->pythonScripts)
-//	{
-//		GameClient()->pythonController.StopExecuteScript(PythonScript);
-//	}
-	GameClient()->pythonScripts = this->scriptsScanner.scan();
-
-	for(auto pythonScript : m_pClient->pythonScripts)
+	for(auto &pythonScript : GameClient()->pythonScripts)
 	{
 		m_pClient->pythonController.StopExecuteScript(pythonScript);
+	}
 
-		GameClient()->pythonScripts = this->scriptsScanner.scan();
+	GameClient()->pythonScripts = this->scriptsScanner.scan();
 
+	for(auto &pythonScript : GameClient()->pythonScripts)
+	{
 		if(m_pClient->pythonController.isScriptAutoloading(pythonScript))
 			m_pClient->pythonController.StartExecuteScript(pythonScript);
 	}

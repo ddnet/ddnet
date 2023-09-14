@@ -162,7 +162,7 @@ public:
 	AimHelper aimHelper;
 	PythonController pythonController;
 
-	std::vector<PythonScript *> pythonScripts;
+	std::vector<PythonScript*> pythonScripts;
 	MovementAgent movementAgent;
 	Map map;
 	User user;
