@@ -16,6 +16,9 @@ public:
 	void AutoloadAdd(PythonScript* pythonScript);
 	void AutoloadRemove(PythonScript* pythonScript);
 	bool isScriptAutoloading(PythonScript* pythonScript);
+
+	void InputFire();
+
 	virtual int Sizeof() const override { return sizeof(*this); }
 	int SnapInput(int* pData, int inputId);
 	bool needForceInput(int inputId);

@@ -98,6 +98,11 @@ inline T distance(const vector2_base<T> a, const vector2_base<T> &b)
 	return length(a - b);
 }
 
+vector2_base<int> inline floor(const vector2_base<float> a)
+{
+	return vector2_base<int>(floor(a.x), floor(a.y));
+}
+
 template<typename T>
 constexpr inline T dot(const vector2_base<T> a, const vector2_base<T> &b)
 {
@@ -156,6 +161,46 @@ inline vector2_base<float> direction(float angle)
 inline vector2_base<float> random_direction()
 {
 	return direction(random_angle());
+}
+
+template<typename T>
+inline vector2_base<T> left(vector2_base<T> a, vector2_base<T> b)
+{
+	if (a.x > b.x) {
+		return b;
+	}
+
+	return a;
+}
+
+template<typename T>
+inline vector2_base<T> right(vector2_base<T> a, vector2_base<T> b)
+{
+	if (a.x <= b.x) {
+		return b;
+	}
+
+	return a;
+}
+
+template<typename T>
+inline vector2_base<T> top(vector2_base<T> a, vector2_base<T> b)
+{
+	if (a.y > b.y) {
+		return b;
+	}
+
+	return a;
+}
+
+template<typename T>
+inline vector2_base<T> bottom(vector2_base<T> a, vector2_base<T> b)
+{
+	if (a.y <= b.y) {
+		return b;
+	}
+
+	return a;
 }
 
 typedef vector2_base<float> vec2;

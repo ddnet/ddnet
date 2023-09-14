@@ -27,10 +27,13 @@ public:
 	void moveToPlayer(int id);
 	virtual int Sizeof() const override { return sizeof(*this); }
 	void OnUpdate();
+	bool isMoveEnded();
 protected:
 	Point HumanLikeMouse::getCurrentMousePosition();
 	std::queue<Point> targetWay;
 	int countPointsInWay;
+
+	void processMouseMoving();
 };
 
 #endif // DDNET_HUMANLIKEMOUSE_H

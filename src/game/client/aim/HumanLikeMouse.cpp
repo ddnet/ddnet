@@ -13,6 +13,14 @@ double random_double() {
 	return static_cast<double>(rand()) / RAND_MAX;
 }
 
+int randomNumber(int from, int to)
+{
+	std::mt19937 rng(std::random_device{}());
+	std::uniform_int_distribution<int> dist(from, to);
+
+	return dist(rng);
+}
+
 std::vector<Point> HumanLikeMouse::getPoints(int start_x, int start_y, int dest_x, int dest_y, double G_0, double W_0, double M_0, double D_0) {
 	std::vector<Point> points_visited;
 	points_visited.push_back({start_x, start_y});
@@ -78,15 +86,43 @@ Point HumanLikeMouse::getCurrentMousePosition()
 	return point;
 }
 
-void HumanLikeMouse::OnUpdate()
+void HumanLikeMouse::moveToPoint(Point* targetPoint)
+{
+	Point startPoint = HumanLikeMouse::getCurrentMousePosition();
+	std::vector<Point> points = this->getPoints(startPoint.x, startPoint.y, targetPoint->x, targetPoint->y);
+	this->countPointsInWay = points.size();
+
+	while (!this->targetWay.empty()) {
+		this->targetWay.pop();
+	}
+
+	for(auto point : points) {
+		this->targetWay.push(point);
+	}
+}
+
+void HumanLikeMouse::moveToPlayer(int id)
+{
+	if (id == this->m_pClient->m_aLocalIDs[g_Config.m_ClDummy]) {
+		return;
+	}
+
+	Point point;
+	vec2 playerPos = this->m_pClient->m_aClients[id].m_Predicted.m_Pos + vec2(randomNumber(-8, 8), randomNumber(-8, 8)); // TODO : CHANGE TO PROXIMITY RADIUS
+	vec2 diff = (playerPos - this->m_pClient->m_aClients[this->m_pClient->m_aLocalIDs[g_Config.m_ClDummy]].m_Predicted.m_Pos) * ((float)(randomNumber(50, 200)) / 100);
+	point.x = diff.x;
+	point.y = diff.y;
+
+	this->moveToPoint(&point);
+}
+
+void HumanLikeMouse::processMouseMoving()
 {
 	static float timer = Client()->LocalTime();
 	static int moveIteration = 1;
 	static Point prevPoint = this->getCurrentMousePosition();
-	float timeToAim = 0.03 / this->countPointsInWay;
+	float timeToAim = 0.02 / this->countPointsInWay;
 	float speed = 10;
-
-//	this->m_pClient->aimHelper.getPlayerIdForLaserShootFng();
 
 	if (this->targetWay.empty() || timer + (timeToAim / speed) * moveIteration >= Client()->LocalTime()) {
 		return;
@@ -112,40 +148,19 @@ void HumanLikeMouse::OnUpdate()
 	}
 }
 
-void HumanLikeMouse::moveToPoint(Point* targetPoint)
+void HumanLikeMouse::OnUpdate()
 {
-	Point startPoint = HumanLikeMouse::getCurrentMousePosition();
-	std::vector<Point> points = this->getPoints(startPoint.x, startPoint.y, targetPoint->x, targetPoint->y);
-	this->countPointsInWay = points.size();
+	this->processMouseMoving();
 
-	while (!this->targetWay.empty()) {
-		this->targetWay.pop();
-	}
-
-	for(auto point : points) {
-		this->targetWay.push(point);
-	}
-}
-
-int randomNumber(int from, int to)
-{
-	std::mt19937 rng(std::random_device{}());
-	std::uniform_int_distribution<int> dist(from, to);
-
-	return dist(rng);
-}
-
-void HumanLikeMouse::moveToPlayer(int id)
-{
-	if (id == this->m_pClient->m_aLocalIDs[g_Config.m_ClDummy]) {
+	if (this->m_pClient->m_GameWorld.GameTick() <= 0) {
 		return;
 	}
 
-	Point point;
-	vec2 playerPos = this->m_pClient->m_aClients[id].m_Predicted.m_Pos + vec2(randomNumber(-8, 8), randomNumber(-8, 8)); // TODO : CHANGE TO PROXIMITY RADIUS
-	vec2 diff = (playerPos - this->m_pClient->m_aClients[this->m_pClient->m_aLocalIDs[g_Config.m_ClDummy]].m_Predicted.m_Pos) * ((float)(randomNumber(50, 200)) / 100);
-	point.x = diff.x;
-	point.y = diff.y;
+	auto localClientData = this->m_pClient->m_aClients[this->m_pClient->m_aLocalIDs[g_Config.m_ClDummy]];
+//	this->m_pClient->aimHelper.predictLaserShoot(localClientData.m_Predicted.m_Id, localClientData.m_Predicted.m_Pos + this->m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy]);
+}
 
-	this->moveToPoint(&point);
+bool HumanLikeMouse::isMoveEnded()
+{
+	return this->targetWay.empty();
 }
