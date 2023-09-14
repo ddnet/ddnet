@@ -2,6 +2,35 @@
 #include "base/system.h"
 #include "game/client/gameclient.h"
 
+// ============ API.Collision Module ============ //
+static PyObject* API_Collision_debug(PyObject* self, PyObject* args) {
+	char* message;
+//	PyArg_ParseTuple(args, "s", &message);
+
+//	PythonAPI_GameClient->Collision().
+	Py_RETURN_NONE;
+}
+
+static PyMethodDef API_CollisionMethods[] = {
+	{"debug", API_Collision_debug, METH_VARARGS, "Prints a debug message"},
+	{NULL, NULL, 0, NULL}
+};
+
+static struct PyModuleDef API_CollisionModule = {
+	PyModuleDef_HEAD_INIT,
+	"API.Collision",
+	NULL,
+	-1,
+	API_CollisionMethods
+};
+
+PyMODINIT_FUNC PyInit_API_Collision(void) {
+	PyObject* module = PyModule_Create(&API_CollisionModule);
+
+	return module;
+}
+
+// ============ API.Player(id) Module ============ //
 PyObject* CreatePlayerObject(CGameClient::CClientData playerClient)
 {
 	return Py_BuildValue(
@@ -154,7 +183,6 @@ PyObject* CreatePlayerObject(CGameClient::CClientData playerClient)
 	);
 }
 
-// ============ API.Player Module ============ //
 static PyObject* API_Player(PyObject* self, PyObject* args) {
 	int playerId;
 	PyArg_ParseTuple(args, "i", &playerId);
@@ -353,5 +381,6 @@ PyMODINIT_FUNC PyInit_API(void) {
 	PyObject* APIModule = PyModule_Create(&API);
 	PyModule_AddObject(APIModule, "Console", PyInit_API_Console());
 	PyModule_AddObject(APIModule, "Input", PyInit_API_Input());
+	PyModule_AddObject(APIModule, "Collision", PyInit_API_Collision());
 	return APIModule;
 }
