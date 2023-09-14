@@ -18,8 +18,12 @@ public:
 	bool isScriptAutoloading(PythonScript* pythonScript);
 
 	void InputFire();
+	void ResetInput();
+
+	void OnUpdate();
 
 	virtual int Sizeof() const override { return sizeof(*this); }
+
 	int SnapInput(int* pData, int inputId);
 	bool needForceInput(int inputId);
 	CNetObj_PlayerInput inputs[NUM_DUMMIES];

@@ -403,6 +403,7 @@ void CGameClient::OnUpdate()
 
 	this->humanLikeMouse.OnUpdate();
 	this->movementAgent.OnUpdate();
+	this->pythonController.OnUpdate();
 
 	// handle mouse movement
 	float x = 0.0f, y = 0.0f;

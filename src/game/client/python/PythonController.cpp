@@ -41,6 +41,8 @@ bool PythonController::isScriptAutoloading(PythonScript *pythonScript)
 
 void PythonController::StartExecuteScript(PythonScript* pythonScript)
 {
+	ResetInput();
+
 	if (this->isExecutedScript(pythonScript)) {
 		return;
 	}
@@ -50,6 +52,9 @@ void PythonController::StartExecuteScript(PythonScript* pythonScript)
 
 void PythonController::StopExecuteScript(PythonScript* pythonScript)
 {
+	ResetInput();
+	pythonScript->fileExceptions = vector<string>(0);
+
 	for (auto iterator = this->executedPythonScripts.begin(); iterator != this->executedPythonScripts.end(); iterator++) {
 		auto executedPythonScript = *iterator;
 
@@ -166,4 +171,30 @@ void PythonController::InputFire()
 {
 	GameClient()->m_Controls.m_aInputData[g_Config.m_ClDummy].m_Fire = (GameClient()->m_Controls.m_aInputData[g_Config.m_ClDummy].m_Fire + 1) % 64;
 	GameClient()->pythonController.inputs[g_Config.m_ClDummy].m_Fire = GameClient()->m_Controls.m_aInputData[g_Config.m_ClDummy].m_Fire;
+}
+
+void PythonController::OnUpdate()
+{
+	for (auto executedPythonScript : this->executedPythonScripts) {
+		PyObject* function = PyObject_GetAttrString(executedPythonScript->module, "onUpdate");
+
+		if (function != nullptr && PyCallable_Check(function)) {
+			PyObject* args = PyTuple_Pack(0);
+			PyObject_CallObject(function, args);
+			PyOS_InterruptOccurred();
+			Py_XDECREF(args);
+		}
+	}
+}
+
+void PythonController::ResetInput()
+{
+	for (int i = 0; i < 2; i++) {
+		this->inputs[i].m_Fire = 0;
+		this->inputs[i].m_Direction = 0;
+		this->inputs[i].m_Jump = 0;
+		this->inputs[i].m_Hook = 0;
+		this->inputs[i].m_TargetX = 0;
+		this->inputs[i].m_TargetY = 0;
+	}
 }
