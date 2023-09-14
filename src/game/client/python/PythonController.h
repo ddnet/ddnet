@@ -24,9 +24,10 @@ public:
 	bool needForceInput(int inputId);
 	CNetObj_PlayerInput inputs[NUM_DUMMIES];
 	bool blockUserInput = false;
-protected:
+
 	std::vector<PythonScript*> autoLoadPythonScripts;
 	std::vector<PythonScript*> executedPythonScripts;
+protected:
 	bool OnInput(const IInput::CEvent &Event);
 };
 

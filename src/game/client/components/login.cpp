@@ -29,6 +29,10 @@ void CMenus::RenderLoginMenu(CUIRect MainView)
 
 	static int init = 0;
 	static int rememberMe = 0;
+	static bool ShowInvalidCredentials = false;
+
+	static std::string errlogin = "";
+	static std::string errpass = "";
 
 	if (init == 0) {
 		init = 1;
@@ -51,7 +55,7 @@ void CMenus::RenderLoginMenu(CUIRect MainView)
 
 	Box.HSplitTop(30.0f, &Button, &Box);
 	Box.Draw(ms_ColorTabbarActiveOutgame, IGraphics::CORNER_ALL, 10.0f);
-	UI()->DoLabel(&Button, "You need login to use this client.", 23.0f, TEXTALIGN_CENTER);
+	UI()->DoLabel(&Button, Localize("You need login to use this client."), 23.0f, TEXTALIGN_CENTER);
 	Box.HSplitBottom(35.0f, &Box, &Button);
 	Box.HSplitBottom(35.0f, &Button, &Box);
 
@@ -60,7 +64,7 @@ void CMenus::RenderLoginMenu(CUIRect MainView)
 	LoginButton.VSplitLeft(50.0f, &Button, &LoginButton);
 	AbortButton.VSplitRight(50.0f, &AbortButton, &Button);
 
-	if(DoButton_Menu(&s_Login, "Log in", 0, &LoginButton, nullptr, IGraphics::CORNER_ALL, 5.0f, 0.f))
+	if(DoButton_Menu(&s_Login, Localize("Log in"), 0, &LoginButton, nullptr, IGraphics::CORNER_ALL, 5.0f, 0.f))
 	{
 		GameClient()->user.login(string(m_Login), string(m_Pass));
 		bool loggedIn = GameClient()->user.login(string(m_Login), string(m_Pass));
@@ -75,20 +79,35 @@ void CMenus::RenderLoginMenu(CUIRect MainView)
 
 		if (!loggedIn) {
 			// show "Invalid Credentials"
+			ShowInvalidCredentials = true;
+			errlogin = m_Login;
+			errpass = m_Pass;
 		}
 	}
 
-	if(DoButton_Menu(&s_Abort, "Quit", 0, &AbortButton, nullptr, IGraphics::CORNER_ALL, 5.0f, 0.f))
+	if(DoButton_Menu(&s_Abort, Localize("Quit"), 0, &AbortButton, nullptr, IGraphics::CORNER_ALL, 5.0f, 0.f))
 		Client()->Quit();
 
 	CUIRect LoginBox;
 
 	MainView.VMargin(VMargin, &LoginBox);
 
+	if(ShowInvalidCredentials)
+	{
+		CUIRect InvalidCredsLabel;
+		LoginBox.HSplitTop(100.0f, &LoginBox, &InvalidCredsLabel);
+		UI()->DoLabel(&InvalidCredsLabel, Localize("Invalid credentials"), 24.0f, TEXTALIGN_CENTER);
+
+		if(errlogin != m_Login || errpass != m_Pass)
+		{
+			ShowInvalidCredentials = false;
+		}
+	}
+
 	LoginBox.HSplitTop(LoginBox.w/3.0f, 0, &LoginBox);
 
 	LoginBox.HSplitTop(17.0f, &Label, &LoginBox);
-	UI()->DoLabel(&Label, "Login", 24.0f, TEXTALIGN_CENTER);
+	UI()->DoLabel(&Label, Localize("Login"), 24.0f, TEXTALIGN_CENTER);
 	LoginBox.HSplitTop(24.0f, &LoginLine, &LoginBox);
 	LoginBox.HSplitTop(24.0f, &LoginLine, &LoginBox);
 
@@ -101,7 +120,7 @@ void CMenus::RenderLoginMenu(CUIRect MainView)
 
 	LoginBox.HSplitTop(50.0f, &PassLine, &LoginBox);
 	LoginBox.HSplitTop(17.0f, &Label, &LoginBox);
-	UI()->DoLabel(&Label, "Password", 24.0f, TEXTALIGN_CENTER);
+	UI()->DoLabel(&Label, Localize("Password"), 24.0f, TEXTALIGN_CENTER);
 	LoginBox.HSplitTop(24.0f, &PassLine, &LoginBox);
 	LoginBox.HSplitTop(7.0f, &PassLine, &LoginBox);
 
@@ -119,7 +138,7 @@ void CMenus::RenderLoginMenu(CUIRect MainView)
 	Button.VSplitLeft(50.0f, 0, &Button);
 	Button.VSplitRight(50.0f, &Button, 0);
 
-	if(DoButton_CheckBox(&rememberMe, "Remember me", rememberMe, &Button))
+	if(DoButton_CheckBox(&rememberMe, Localize("Remember me"), rememberMe, &Button))
 		rememberMe ^= 1;
 
 

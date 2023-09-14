@@ -1993,7 +1993,7 @@ void CMenus::RenderSettingsPython(CUIRect MainView)
 	CUIRect ListView, Button, BottomBar, ScriptBox;
 
 	static int s_PythonSelectedScript = -1;
-	static int s_ActivePythonExceptions = -1;
+	static bool s_ShowPythonExceptions = false;
 
 	MainView.VSplitLeft(MainView.w/2.0f, &ListView, &ScriptBox);
 	ListView.HSplitBottom(60.0f + 5.0f, &ListView, &BottomBar);
@@ -2008,12 +2008,16 @@ void CMenus::RenderSettingsPython(CUIRect MainView)
 
 	if(g_Config.m_DTHPython)
 	{
-
+		if(NeedToggle)
+		{
+			RefreshPythonScripts();
+			NeedToggle = false;
+		}
 	}
 	else
 	{
 		s_PythonSelectedScript = -1;
-		s_ActivePythonExceptions = -1;
+		s_ShowPythonExceptions = false;
 		NeedToggle = true;
 		return;
 	}
@@ -2030,7 +2034,6 @@ void CMenus::RenderSettingsPython(CUIRect MainView)
 		if(DoButton_Menu(&s_RefreshButton, Localize("Refresh"), 0, &RefreshButton))
 		{
 			RefreshPythonScripts();
-			NeedToggle = true;
 		}
 	}
 
@@ -2145,25 +2148,24 @@ void CMenus::RenderSettingsPython(CUIRect MainView)
 			Buttons.VSplitLeft(ScriptBox.w/NUMOF_BUTTONS, &RefreshButton, &Buttons);
 			Buttons.VSplitLeft(ScriptBox.w/NUMOF_BUTTONS, &ExceptionsButton, &Buttons);
 
-			DoButton_Menu(&s_ToggleButton, isexecuted ? "Deactivate" : "Activate", 0, &ToggleButton, nullptr, IGraphics::CORNER_L);
-			DoButton_Menu(&s_RefreshButton, "Refresh", 0, &RefreshButton, nullptr, IGraphics::CORNER_NONE);
-			DoButton_Menu(&s_ExceptionButton, "Show Exceptions", 0, &ExceptionsButton, nullptr, IGraphics::CORNER_R);
-
-//			ToggleButton.HSplitTop(25.0f, &ToggleButton, nullptr);
-//			ToggleButton.HSplitBottom(25.0f, nullptr, &ToggleButton);
-//			ToggleButton.VSplitLeft(50.0f, nullptr, &ToggleButton);
-//			ToggleButton.VSplitRight(200.0f, &ToggleButton, nullptr);
-
-
-			if(!PS->fileExceptions.empty())
+			if(DoButton_Menu(&s_ToggleButton, isexecuted ? "Deactivate" : "Activate", 0, &ToggleButton, nullptr, IGraphics::CORNER_L))
 			{
-				ScriptBox.HSplitBottom(13.0f, &ScriptBox, &Button);
-				ScriptBox.VSplitLeft(100 + 10.0f, &ExceptionsButton, &ScriptBox);
+				if(isexecuted)
+					m_pClient->pythonController.StopExecuteScript(PS);
+				else if(!isexecuted)
+					m_pClient->pythonController.StartExecuteScript(PS);
+			}
+			if(DoButton_Menu(&s_RefreshButton, "Refresh", 0, &RefreshButton, nullptr, IGraphics::CORNER_NONE))
+			{
+				RefreshPythonScripts();
+			}
 
-				ExceptionsButton.HSplitBottom(30.0f + 7.0f, 0, &Button);
+			char aBuf[64];
+			str_format(aBuf, sizeof(aBuf), Localize("Exceptions (%i)"), PS->fileExceptions.size());
 
-				DoButton_Menu(&s_ExceptionButton, "Show Exceptions", 0, &Button, nullptr, IGraphics::CORNER_ALL, 10.0f, 0.13f, vec4(1.f, 1.f, 1.f, 0.75f), vec4(1.f, 1.f, 1.f, 0.5f));
-				ScriptBox.Draw(vec4(0,1,0,0.25f), IGraphics::CORNER_ALL, 5.5f);
+			if(DoButton_Menu(&s_ExceptionButton, aBuf, 0, &ExceptionsButton, nullptr, IGraphics::CORNER_R))
+			{
+
 			}
 		}
 	}
@@ -2175,7 +2177,15 @@ void CMenus::RefreshPythonScripts()
 //	{
 //		GameClient()->pythonController.StopExecuteScript(PythonScript);
 //	}
-	GameClient()->pythonScripts = this->scriptsScanner.scan();
+	for(auto pythonScript : m_pClient->pythonScripts)
+	{
+		m_pClient->pythonController.StopExecuteScript(pythonScript);
+
+		GameClient()->pythonScripts = this->scriptsScanner.scan();
+
+		if(m_pClient->pythonController.isScriptAutoloading(pythonScript))
+			m_pClient->pythonController.StartExecuteScript(pythonScript);
+	}
 }
 
 void CMenus::RenderSettings(CUIRect MainView)
