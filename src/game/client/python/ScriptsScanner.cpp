@@ -1,27 +1,41 @@
 #include "ScriptsScanner.h"
 #include "base/system.h"
 #include <filesystem>
-namespace fs = std::filesystem;
+#include <queue>
 
-std::vector<PythonScript*> ScriptsScanner::scan()
+namespace fs = filesystem;
+
+vector<PythonScript*> ScriptsScanner::scan()
 {
-	std::vector<PythonScript*> scripts(0);
+	vector<PythonScript*> scripts(0);
+	queue<string> directories;
+	directories.push(this->directoryForScanning);
 
-	for (const auto & entry : fs::directory_iterator(this->directoryForScanning))
-	{
-		if (entry.is_directory()) {
-			// Add recursive scan
-			continue;
+	while (!directories.empty()) {
+		string directory = directories.front();
+		directories.pop();
+
+		for (const auto & entry : fs::directory_iterator(directory))
+		{
+			string path = entry.path().string().substr(strlen(this->directoryForScanning) + 1);
+
+			if (path.length() >= 11 && path.substr(path.length() - 11) == "__pycache__") {
+				continue;
+			}
+
+			if (entry.is_directory()) {
+				directories.push(directory + "\\" + path);
+				continue;
+			}
+
+			if (path.substr(path.length() - 3) != ".py") {
+				continue;
+			}
+
+			string scriptPath = string(this->directoryForScanning) + "." + path.substr(0, path.length() - 3);
+			replace(scriptPath.begin(), scriptPath.end(), '\\', '.');
+			scripts.emplace_back(new PythonScript(scriptPath));
 		}
-
-		std::string path = entry.path().string().substr(strlen(this->directoryForScanning) + 1);
-
-		if (path.substr(path.length() - 3) != ".py") {
-			continue;
-		}
-
-		std::string scriptPath = std::string(this->directoryForScanning) + "." + path.substr(0, path.length() - 3);
-		scripts.emplace_back(new PythonScript(scriptPath));
 	}
 
 	return scripts;
