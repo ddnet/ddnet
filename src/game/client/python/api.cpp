@@ -194,8 +194,7 @@ static PyObject* API_Input_hook(PyObject* self, PyObject* args) {
 }
 
 static PyObject* API_Input_fire(PyObject* self, PyObject* args) {
-	PythonAPI_GameClient->m_Controls.m_aInputData[g_Config.m_ClDummy].m_Fire = (PythonAPI_GameClient->m_Controls.m_aInputData[g_Config.m_ClDummy].m_Fire + 1) % 64;
-	PythonAPI_GameClient->pythonController.inputs[g_Config.m_ClDummy].m_Fire = PythonAPI_GameClient->m_Controls.m_aInputData[g_Config.m_ClDummy].m_Fire;
+	PythonAPI_GameClient->pythonController.InputFire();
 	Py_RETURN_NONE;
 }
 

@@ -2184,12 +2184,16 @@ if(CLIENT)
     video.h
   )
   set_src(GAME_CLIENT GLOB_RECURSE src/game/client
+    MovementAgent.cpp
+    MovementAgent.h
     aim/AimHelper.cpp
     aim/AimHelper.h
     aim/HumanLikeMouse.cpp
     aim/HumanLikeMouse.h
     animstate.cpp
     animstate.h
+    auth/User.cpp
+    auth/User.h
     component.cpp
     component.h
     components/background.cpp
@@ -2269,6 +2273,8 @@ if(CLIENT)
     components/tooltips.h
     components/voting.cpp
     components/voting.h
+    environment/Map.cpp
+    environment/Map.h
     gameclient.cpp
     gameclient.h
     laser_data.cpp

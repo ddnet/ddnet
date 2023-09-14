@@ -18,6 +18,7 @@
 #include <game/client/prediction/gameworld.h>
 
 // components
+#include "MovementAgent.h"
 #include "components/background.h"
 #include "components/binds.h"
 #include "components/broadcast.h"
@@ -55,6 +56,8 @@
 #include "components/voting.h"
 #include "game/client/aim/AimHelper.h"
 #include "game/client/aim/HumanLikeMouse.h"
+#include "game/client/auth/User.h"
+#include "game/client/environment/Map.h"
 #include "game/client/python/PythonController.h"
 
 class CGameInfo
@@ -160,6 +163,9 @@ public:
 	PythonController pythonController;
 
 	std::vector<PythonScript *> pythonScripts;
+	MovementAgent movementAgent;
+	Map map;
+	User user;
 
 	std::vector<class CComponent *> m_vpAll;
 

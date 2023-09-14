@@ -63,6 +63,14 @@ void PythonController::StopExecuteScript(PythonScript* pythonScript)
 
 bool PythonController::OnInput(const IInput::CEvent &Event)
 {
+	std::string keyName = this->m_pClient->Input()->KeyName(Event.m_Key);
+
+	//	if (keyName == "l") {
+	//		vec2 playerPos = this->m_pClient->m_aClients[this->m_pClient->m_aLocalIDs[g_Config.m_ClDummy]].m_Predicted.m_Pos;
+	//		vec2 pos = this->m_pClient->m_Controls.m_aMousePos[g_Config.m_ClDummy] * GameClient()->m_Camera.m_Zoom + playerPos;
+	//		this->m_pClient->movementAgent.moveTo(pos);
+	//	}
+
 	for (auto executedPythonScript : this->executedPythonScripts) {
 		PyObject* function = PyObject_GetAttrString(executedPythonScript->module, "onInput");
 
@@ -138,7 +146,7 @@ int PythonController::SnapInput(int *pData, int inputId)
 			this->m_pClient->m_Controls.m_aInputData[inputId].m_Fire = (this->m_pClient->m_Controls.m_aInputData[inputId].m_Fire + 1) % 64;
 		}
 		this->inputs[inputId].m_Fire = 0;
-		this->m_pClient->m_Chat.AddLine(g_Config.m_ClDummy, 0, ("On snap input" + std::to_string(input.m_Fire)).c_str());
+//		this->m_pClient->m_Chat.AddLine(g_Config.m_ClDummy, 0, ("On snap input" + std::to_string(input.m_Fire)).c_str());
 	}
 
 	if (this->inputs[inputId].m_TargetX != 0 || this->inputs[inputId].m_TargetY != 0) {
@@ -152,4 +160,10 @@ int PythonController::SnapInput(int *pData, int inputId)
 	}
 
 	return sizeData;
+}
+
+void PythonController::InputFire()
+{
+	GameClient()->m_Controls.m_aInputData[g_Config.m_ClDummy].m_Fire = (GameClient()->m_Controls.m_aInputData[g_Config.m_ClDummy].m_Fire + 1) % 64;
+	GameClient()->pythonController.inputs[g_Config.m_ClDummy].m_Fire = GameClient()->m_Controls.m_aInputData[g_Config.m_ClDummy].m_Fire;
 }

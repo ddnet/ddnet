@@ -24,7 +24,7 @@ using namespace std::chrono_literals;
 
 void CMenus::RenderLoginMenu(CUIRect MainView)
 {
-	if(Logged)
+	if(GameClient()->user.isAuthorized())
 		return;
 
 	CUIRect Button, LoginButton, AbortButton, PassLine, LoginLine, Label;
@@ -51,8 +51,7 @@ void CMenus::RenderLoginMenu(CUIRect MainView)
 
 	if(DoButton_Menu(&s_Login, "Log in", 0, &LoginButton, nullptr, IGraphics::CORNER_ALL, 5.0f, 0.f))
 	{
-		if(m_Login == Login && m_Pass == Pass)
-			Logged = true;
+		GameClient()->user.login(string(m_Login), string(m_Pass));
 	}
 
 	if(DoButton_Menu(&s_Abort, "Quit", 0, &AbortButton, nullptr, IGraphics::CORNER_ALL, 5.0f, 0.f))
