@@ -123,7 +123,7 @@ public:
 	void Header(const char *pNameColonValue);
 	void HeaderString(const char *pName, const char *pValue)
 	{
-		char aHeader[256];
+		char aHeader[2048];
 		str_format(aHeader, sizeof(aHeader), "%s: %s", pName, pValue);
 		Header(aHeader);
 	}

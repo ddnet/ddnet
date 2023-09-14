@@ -13,7 +13,8 @@ bool User::login(string login, string password)
 {
 	string body = "{\"email\": \"" + login + "\", \"password\": \"" + password + "\"}";
 
-	CHttpRequest* request = new CHttpRequest(BACKEND_URL);
+	string url = string(BACKEND_URL) + BACKEND_LOGIN_ACTION;
+	CHttpRequest* request = new CHttpRequest(url.c_str());
 	request->PostJson(body.c_str());
 	request->LogProgress(HTTPLOG::FAILURE);
 
@@ -29,6 +30,7 @@ bool User::login(string login, string password)
 	const json_value &TokenString = Json["token"];
 
 	this->token = json_string_get(&TokenString);
+	this->requestUserData();
 
 	return true;
 }
@@ -92,4 +94,25 @@ void User::logout()
 {
 	this->eraseCredentials();
 	this->token = "";
+}
+
+void User::requestUserData()
+{
+	string url = string(BACKEND_URL) + BACKEND_ME_ACTION;
+	CHttpRequest* request = new CHttpRequest(url.c_str());
+	string authHeader = "Bearer " + this->token;
+	request->HeaderString("Authorization", authHeader.c_str());
+	request->LogProgress(HTTPLOG::FAILURE);
+
+	Engine()->RunJobBlocking(request);
+
+	json_value* resultJson = request->ResultJson();
+
+	if (!resultJson) {
+		return;
+	}
+
+	const json_value &Json = *resultJson;
+
+	this->userData.clanName = json_string_get(&Json["clanName"]);
 }
