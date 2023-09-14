@@ -48,6 +48,21 @@ Abort
 Add
 == Добавить
 
+You need login to use this client.
+== Необходимо авторизоваться, чтобы использовать клиент
+
+Log in
+== Войти
+
+Login
+== Логин
+
+Remember me
+== Запомнить меня
+
+Invalid credentials
+== Недействительные учётные данные
+
 Add Friend
 == Добавить друга
 
