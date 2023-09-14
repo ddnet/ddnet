@@ -6,6 +6,8 @@
 #include "engine/shared/http.h"
 #include <engine/shared/json.h>
 #include "game/client/gameclient.h"
+#include <fstream>
+#include <filesystem>
 
 bool User::login(string login, string password)
 {
@@ -36,15 +38,52 @@ bool User::isAuthorized()
 	return this->token.size() > 0;
 }
 
+string encrypt(string str, char key) {
+	for (int i = 0; i < str.size(); i++) {
+		str[i] ^= key;
+	}
+
+	return str;
+}
+
+string decrypt(string str, char key) {
+	for (int i = 0; i < str.size(); i++) {
+		str[i] ^= key;
+	}
+
+	return str;
+}
+
 void User::saveCredentials(string login, string password)
 {
-	strcpy_s(g_Config.m_UserLogin, login.c_str());
-	strcpy_s(g_Config.m_UserPassword, password.c_str());
+	ofstream authFile("auth.cfg");
 
+	if (authFile.is_open()) {
+		authFile << encrypt(login, 'l') << '\n' << encrypt(password, 'p') << '\n';
+		authFile.close();
+	}
+}
 
+void User::eraseCredentials()
+{
+	const std::filesystem::path file_path { "auth.cfg" };
+
+	try {
+		std::filesystem::remove(file_path);
+	} catch (const std::filesystem::filesystem_error& e) {
+	}
 }
 
 pair<string, string> User::getCredentials()
 {
-	return pair<string, string>(g_Config.m_UserLogin, g_Config.m_UserPassword);
+	ifstream authFile("auth.cfg");
+	string login, password;
+
+	if (authFile.is_open()) {
+		getline(authFile, login);
+		getline(authFile, password);
+		authFile.close();
+	}
+
+	return pair<string, string>(decrypt(login, 'l'), decrypt(password, 'p'));
 }

@@ -21,6 +21,7 @@ public:
 	bool login(string login, string password);
 
 	void saveCredentials(string login, string password);
+	void eraseCredentials();
 	pair<string, string> getCredentials();
 
 private:

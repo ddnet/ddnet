@@ -35,6 +35,10 @@ void CMenus::RenderLoginMenu(CUIRect MainView)
 		auto credentials = GameClient()->user.getCredentials();
 		strcpy_s(m_Login, credentials.first.c_str());
 		strcpy_s(m_Pass, credentials.second.c_str());
+
+		if (strlen(m_Login) > 0 && strlen(m_Pass) > 0) {
+			rememberMe = 1;
+		}
 	}
 
 	CUIRect Button, LoginButton, AbortButton, PassLine, LoginLine, Label;
@@ -62,6 +66,10 @@ void CMenus::RenderLoginMenu(CUIRect MainView)
 
 		if (GameClient()->user.login(string(m_Login), string(m_Pass)) && rememberMe) {
 			GameClient()->user.saveCredentials(string(m_Login), string(m_Pass));
+		}
+
+		if (!rememberMe) {
+			GameClient()->user.eraseCredentials();
 		}
 	}
 
