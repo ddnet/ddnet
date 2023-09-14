@@ -27,6 +27,16 @@ void CMenus::RenderLoginMenu(CUIRect MainView)
 	if(GameClient()->user.isAuthorized())
 		return;
 
+	static int init = 0;
+	static int rememberMe = 0;
+
+	if (init == 0) {
+		init = 1;
+		auto credentials = GameClient()->user.getCredentials();
+		strcpy_s(m_Login, credentials.first.c_str());
+		strcpy_s(m_Pass, credentials.second.c_str());
+	}
+
 	CUIRect Button, LoginButton, AbortButton, PassLine, LoginLine, Label;
 	CUIRect Box;
 	static CButtonContainer s_Login, s_Abort;
@@ -46,12 +56,13 @@ void CMenus::RenderLoginMenu(CUIRect MainView)
 	LoginButton.VSplitLeft(50.0f, &Button, &LoginButton);
 	AbortButton.VSplitRight(50.0f, &AbortButton, &Button);
 
-	 std::string Login = "123";
-	 std::string Pass = "qwerty";
-
 	if(DoButton_Menu(&s_Login, "Log in", 0, &LoginButton, nullptr, IGraphics::CORNER_ALL, 5.0f, 0.f))
 	{
 		GameClient()->user.login(string(m_Login), string(m_Pass));
+
+		if (GameClient()->user.login(string(m_Login), string(m_Pass)) && rememberMe) {
+			GameClient()->user.saveCredentials(string(m_Login), string(m_Pass));
+		}
 	}
 
 	if(DoButton_Menu(&s_Abort, "Quit", 0, &AbortButton, nullptr, IGraphics::CORNER_ALL, 5.0f, 0.f))
@@ -95,8 +106,8 @@ void CMenus::RenderLoginMenu(CUIRect MainView)
 	Button.VSplitLeft(50.0f, 0, &Button);
 	Button.VSplitRight(50.0f, &Button, 0);
 
-	if(DoButton_CheckBox(&g_Config.m_ClAntiPing, "Remember me", g_Config.m_ClAntiPing, &Button))
-		g_Config.m_ClAntiPing ^= 1;
+	if(DoButton_CheckBox(&rememberMe, "Remember me", rememberMe, &Button))
+		rememberMe ^= 1;
 
 
 	m_LogInLogin.SetBuffer(m_Login, sizeof(m_Login));

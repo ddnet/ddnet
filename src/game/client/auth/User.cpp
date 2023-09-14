@@ -10,7 +10,6 @@
 bool User::login(string login, string password)
 {
 	string body = "{\"email\": \"" + login + "\", \"password\": \"" + password + "\"}";
-//	auto request = HttpPostJson(BACKEND_URL, body.c_str());
 
 	CHttpRequest* request = new CHttpRequest(BACKEND_URL);
 	request->PostJson(body.c_str());
@@ -35,4 +34,17 @@ bool User::login(string login, string password)
 bool User::isAuthorized()
 {
 	return this->token.size() > 0;
+}
+
+void User::saveCredentials(string login, string password)
+{
+	strcpy_s(g_Config.m_UserLogin, login.c_str());
+	strcpy_s(g_Config.m_UserPassword, password.c_str());
+
+
+}
+
+pair<string, string> User::getCredentials()
+{
+	return pair<string, string>(g_Config.m_UserLogin, g_Config.m_UserPassword);
 }

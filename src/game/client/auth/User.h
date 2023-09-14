@@ -8,7 +8,7 @@
 #include "engine/client.h"
 #include "game/client/component.h"
 
-#define BACKEND_URL "https://vko-abiturient.kz/authentication_token"
+#define BACKEND_URL "https://backend.dth.dexodus.ru/authentication_token"
 
 using namespace std;
 
@@ -19,6 +19,9 @@ public:
 
 	bool isAuthorized();
 	bool login(string login, string password);
+
+	void saveCredentials(string login, string password);
+	pair<string, string> getCredentials();
 
 private:
 	string token = "";
