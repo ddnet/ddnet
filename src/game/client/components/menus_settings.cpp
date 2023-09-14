@@ -2177,6 +2177,8 @@ void CMenus::RefreshPythonScripts()
 //	{
 //		GameClient()->pythonController.StopExecuteScript(PythonScript);
 //	}
+	GameClient()->pythonScripts = this->scriptsScanner.scan();
+
 	for(auto pythonScript : m_pClient->pythonScripts)
 	{
 		m_pClient->pythonController.StopExecuteScript(pythonScript);

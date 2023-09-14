@@ -32,11 +32,9 @@ public:
 	void saveCredentials(string login, string password);
 	void eraseCredentials();
 	pair<string, string> getCredentials();
-
+	UserData userData;
 private:
 	string token = "";
-	UserData userData;
-
 	void requestUserData();
 };
 
