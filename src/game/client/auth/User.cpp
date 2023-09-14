@@ -87,3 +87,9 @@ pair<string, string> User::getCredentials()
 
 	return pair<string, string>(decrypt(login, 'l'), decrypt(password, 'p'));
 }
+
+void User::logout()
+{
+	this->eraseCredentials();
+	this->token = "";
+}

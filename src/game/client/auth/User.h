@@ -19,6 +19,7 @@ public:
 
 	bool isAuthorized();
 	bool login(string login, string password);
+	void logout();
 
 	void saveCredentials(string login, string password);
 	void eraseCredentials();
