@@ -765,6 +765,14 @@ bool CGameClient::Predict() const
 	return !m_Snap.m_SpecInfo.m_Active && m_Snap.m_pLocalCharacter;
 }
 
+ColorRGBA CGameClient::GetDDTeamColor(int DDTeam, float Lightness) const
+{
+	// Use golden angle to generate unique colors with distinct adjacent colors.
+	// The first DDTeam (team 1) gets angle 0°, i.e. red hue.
+	const float Hue = std::fmod((DDTeam - 1) * (137.50776f / 360.0f), 1.0f);
+	return color_cast<ColorRGBA>(ColorHSLA(Hue, 1.0f, Lightness));
+}
+
 void CGameClient::OnRelease()
 {
 	// release all systems
