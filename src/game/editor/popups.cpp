@@ -1459,6 +1459,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupImage(void *pContext, CUIRect View, 
 	static int s_ReaddButton = 0;
 	static int s_ReplaceButton = 0;
 	static int s_RemoveButton = 0;
+	static int s_ExportButton = 0;
 
 	CUIRect Slot;
 	View.HSplitTop(12.0f, &Slot, &View);
@@ -1536,6 +1537,17 @@ CUI::EPopupMenuFunctionResult CEditor::PopupImage(void *pContext, CUIRect View, 
 		pEditor->m_Map.m_vpImages.erase(pEditor->m_Map.m_vpImages.begin() + pEditor->m_SelectedImage);
 		pEditor->m_Map.ModifyImageIndex(gs_ModifyIndexDeleted(pEditor->m_SelectedImage));
 		return CUI::POPUP_CLOSE_CURRENT;
+	}
+
+	if(!pImg->m_External)
+	{
+		View.HSplitTop(5.0f, nullptr, &View);
+		View.HSplitTop(12.0f, &Slot, &View);
+		if(pEditor->DoButton_MenuItem(&s_ExportButton, "Export", 0, &Slot, 0, "Export the image"))
+		{
+			pEditor->InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_IMG, "Save image", "Save", "mapres", false, CallbackSaveImage, pEditor);
+			return CUI::POPUP_CLOSE_CURRENT;
+		}
 	}
 
 	return CUI::POPUP_KEEP_OPEN;
@@ -1750,6 +1762,11 @@ CUI::EPopupMenuFunctionResult CEditor::PopupEvent(void *pContext, CUIRect View, 
 		pTitle = "Save map";
 		pMessage = "The file already exists.\n\nDo you want to overwrite the map?";
 	}
+	else if(pEditor->m_PopupEventType == POPEVENT_SAVE_IMG)
+	{
+		pTitle = "Save image";
+		pMessage = "The file already exists.\n\nDo you want to overwrite the image?";
+	}
 	else if(pEditor->m_PopupEventType == POPEVENT_LARGELAYER)
 	{
 		pTitle = "Large layer";
@@ -1867,6 +1884,11 @@ CUI::EPopupMenuFunctionResult CEditor::PopupEvent(void *pContext, CUIRect View, 
 		else if(pEditor->m_PopupEventType == POPEVENT_SAVE_COPY)
 		{
 			CallbackSaveCopyMap(pEditor->m_aFileSaveName, IStorage::TYPE_SAVE, pEditor);
+			return CUI::POPUP_CLOSE_CURRENT;
+		}
+		else if(pEditor->m_PopupEventType == POPEVENT_SAVE_IMG)
+		{
+			CallbackSaveImage(pEditor->m_aFileSaveName, IStorage::TYPE_SAVE, pEditor);
 			return CUI::POPUP_CLOSE_CURRENT;
 		}
 		else if(pEditor->m_PopupEventType == POPEVENT_PLACE_BORDER_TILES)
