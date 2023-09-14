@@ -25,6 +25,13 @@
 #include <game/client/ui.h>
 #include <game/voting.h>
 
+enum ACTIVESCRIPT_BUTTONS {
+	BUTTON_TOGGLE,
+	BUTTON_AUTOLOAD,
+	BUTTON_EXCEPTIONS,
+	NUMOF_BUTTONS
+};
+
 struct CServerProcess
 {
 	PROCESS m_Process;
@@ -505,6 +512,7 @@ protected:
 	void RenderSettings(CUIRect MainView);
 	void RenderSettingsCustom(CUIRect MainView);
 	void RenderSettingsPython(CUIRect MainView);
+//	void RenderSettingsPythonExceptions(CUIRect MainView);
 
 	//login
 	void RenderLoginMenu(CUIRect MainView);
@@ -522,7 +530,7 @@ protected:
 	class CMenuBackground *m_pBackground;
 
 public:
-	bool Logged = false;
+	bool Logged = true;
 
 	void RenderBackground();
 

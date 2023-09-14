@@ -1993,6 +1993,7 @@ void CMenus::RenderSettingsPython(CUIRect MainView)
 	CUIRect ListView, Button, BottomBar, ScriptBox;
 
 	static int s_PythonSelectedScript = -1;
+	static int s_ActivePythonExceptions = -1;
 
 	MainView.VSplitLeft(MainView.w/2.0f, &ListView, &ScriptBox);
 	ListView.HSplitBottom(60.0f + 5.0f, &ListView, &BottomBar);
@@ -2005,8 +2006,14 @@ void CMenus::RenderSettingsPython(CUIRect MainView)
 			s_PythonSelectedScript = -1;
 	}
 
-	if(!g_Config.m_DTHPython)
+	if(g_Config.m_DTHPython)
 	{
+
+	}
+	else
+	{
+		s_PythonSelectedScript = -1;
+		s_ActivePythonExceptions = -1;
 		NeedToggle = true;
 		return;
 	}
@@ -2033,7 +2040,7 @@ void CMenus::RenderSettingsPython(CUIRect MainView)
 	static CListBox listBox;
 	static int ActiveScripts = 0, NumListedFiles = 0;
 	CUIRect ListBox = ListView;
-	listBox.DoStart(50.0f, NumListedFiles, 1, 1, -1, &ListBox, true,0, true);
+	listBox.DoStart(50.0f, NumListedFiles, 1, 1, -1, &ListBox, true, 0, true);
 
 
 	{
@@ -2121,47 +2128,42 @@ void CMenus::RenderSettingsPython(CUIRect MainView)
 	{
 		if(s_PythonSelectedScript > -1 && s_PythonSelectedScript < GameClient()->pythonScripts.size())
 		{
-			static CButtonContainer s_ToggleButton, s_RefreshButton;
-			CUIRect ToggleButton, RefreshButton;
+			static CButtonContainer s_ToggleButton, s_RefreshButton, s_ExceptionButton;
+			CUIRect ToggleButton, RefreshButton, ExceptionsButton, Buttons;
 
 			ScriptBox.VSplitLeft(15.0f, 0, &ScriptBox);
 			ScriptBox.HSplitBottom(15.0f, &ScriptBox, 0);
 			ScriptBox.Draw(vec4(1,1,1,0.25f), IGraphics::CORNER_ALL, 5.5f);
 
-			ScriptBox.VSplitLeft(10.0f, &Button, &ScriptBox);
-			ScriptBox.HSplitBottom(13.0f, &ScriptBox, &Button);
-			ScriptBox.VSplitLeft(100.0f+10.0f, &ToggleButton, &ScriptBox);
-
-
-			ToggleButton.HSplitBottom(30.0f+7.0f, &ScriptBox, &Button);
 			PythonScript *PS = GameClient()->pythonScripts[s_PythonSelectedScript];
+			bool isexecuted = m_pClient->pythonController.isExecutedScript(PS);
 
-			if(DoButton_Menu(&s_ToggleButton, GameClient()->pythonController.isExecutedScript(PS) ? "Deactivate" : "Activate" , 0, &Button, nullptr, IGraphics::CORNER_ALL, 10.0f, 0.0f, vec4(1.f, 1.f, 1.f, 0.75f), vec4(1.f, 1.f, 1.f, 0.5f)))
+			ScriptBox.HSplitBottom(50.0f, &ScriptBox, &Buttons);
+
+			Buttons.HSplitBottom(25.0f, &ScriptBox, &Buttons);
+			Buttons.VSplitLeft(ScriptBox.w/NUMOF_BUTTONS, &ToggleButton, &Buttons);
+			Buttons.VSplitLeft(ScriptBox.w/NUMOF_BUTTONS, &RefreshButton, &Buttons);
+			Buttons.VSplitLeft(ScriptBox.w/NUMOF_BUTTONS, &ExceptionsButton, &Buttons);
+
+			DoButton_Menu(&s_ToggleButton, isexecuted ? "Deactivate" : "Activate", 0, &ToggleButton, nullptr, IGraphics::CORNER_L);
+			DoButton_Menu(&s_RefreshButton, "Refresh", 0, &RefreshButton, nullptr, IGraphics::CORNER_NONE);
+			DoButton_Menu(&s_ExceptionButton, "Show Exceptions", 0, &ExceptionsButton, nullptr, IGraphics::CORNER_R);
+
+//			ToggleButton.HSplitTop(25.0f, &ToggleButton, nullptr);
+//			ToggleButton.HSplitBottom(25.0f, nullptr, &ToggleButton);
+//			ToggleButton.VSplitLeft(50.0f, nullptr, &ToggleButton);
+//			ToggleButton.VSplitRight(200.0f, &ToggleButton, nullptr);
+
+
+			if(!PS->fileExceptions.empty())
 			{
-				bool toggle = GameClient()->pythonController.isExecutedScript(PS);
+				ScriptBox.HSplitBottom(13.0f, &ScriptBox, &Button);
+				ScriptBox.VSplitLeft(100 + 10.0f, &ExceptionsButton, &ScriptBox);
 
-				if(!toggle)
-					GameClient()->pythonController.StartExecuteScript(PS);
-				else
-					GameClient()->pythonController.StopExecuteScript(PS);
-			}
+				ExceptionsButton.HSplitBottom(30.0f + 7.0f, 0, &Button);
 
-			ScriptBox.HSplitBottom(13.0f, &ScriptBox, &Button);
-			ScriptBox.VSplitLeft(100.0f+10.0f, &RefreshButton, &ScriptBox);
-
-			RefreshButton.HSplitBottom(30.0f+7.0f, &ScriptBox, &Button);
-
-			if(DoButton_Menu(&s_RefreshButton, "Refresh" , 0, &Button, nullptr, IGraphics::CORNER_ALL, 10.0f, 0.13f, vec4(1.f, 1.f, 1.f, 0.75f), vec4(1.f, 1.f, 1.f, 0.5f)))
-			{
-				bool toggle = GameClient()->pythonController.isExecutedScript(PS);
-
-				if(!toggle)
-				{
-					//TODO: RefreshPythonScripts();
-					GameClient()->pythonController.StartExecuteScript(PS);
-				}
-				//else
-					//RefreshPythonScripts();
+				DoButton_Menu(&s_ExceptionButton, "Show Exceptions", 0, &Button, nullptr, IGraphics::CORNER_ALL, 10.0f, 0.13f, vec4(1.f, 1.f, 1.f, 0.75f), vec4(1.f, 1.f, 1.f, 0.5f));
+				ScriptBox.Draw(vec4(0,1,0,0.25f), IGraphics::CORNER_ALL, 5.5f);
 			}
 		}
 	}

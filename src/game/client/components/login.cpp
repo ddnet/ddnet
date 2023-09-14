@@ -88,6 +88,16 @@ void CMenus::RenderLoginMenu(CUIRect MainView)
 	PassLine.VSplitLeft(50.0f, 0, &PassLine);
 	PassLine.VSplitRight(50.0f, &PassLine, 0);
 
+	LoginBox.HSplitTop(80.0f, &LoginBox, &Button);
+
+	Button.HSplitTop(20.0f, &Button, 0);
+	Button.HSplitBottom(20.0f, 0, &Button);
+
+	Button.VSplitLeft(50.0f, 0, &Button);
+	Button.VSplitRight(50.0f, &Button, 0);
+
+	if(DoButton_CheckBox(&g_Config.m_ClAntiPing, "Remember me", g_Config.m_ClAntiPing, &Button))
+		g_Config.m_ClAntiPing ^= 1;
 
 
 	m_LogInLogin.SetBuffer(m_Login, sizeof(m_Login));
