@@ -63,13 +63,18 @@ void CMenus::RenderLoginMenu(CUIRect MainView)
 	if(DoButton_Menu(&s_Login, "Log in", 0, &LoginButton, nullptr, IGraphics::CORNER_ALL, 5.0f, 0.f))
 	{
 		GameClient()->user.login(string(m_Login), string(m_Pass));
+		bool loggedIn = GameClient()->user.login(string(m_Login), string(m_Pass));
 
-		if (GameClient()->user.login(string(m_Login), string(m_Pass)) && rememberMe) {
+		if (loggedIn && rememberMe) {
 			GameClient()->user.saveCredentials(string(m_Login), string(m_Pass));
 		}
 
 		if (!rememberMe) {
 			GameClient()->user.eraseCredentials();
+		}
+
+		if (!loggedIn) {
+			// show "Invalid Credentials"
 		}
 	}
 
