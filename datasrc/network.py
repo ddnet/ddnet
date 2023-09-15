@@ -549,4 +549,8 @@ Messages = [
 		NetIntRange("m_Team", 0, 'MAX_CLIENTS-1'),
 		NetIntRange("m_First", -1, 'MAX_CLIENTS-1'),
 	]),
+
+	NetMessageEx("Sv_YourVote", "yourvote@netmsg.ddnet.org", [
+		NetIntRange("m_Voted", -1, 1),
+	]),
 ]
