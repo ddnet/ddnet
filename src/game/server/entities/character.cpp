@@ -206,9 +206,9 @@ void CCharacter::HandleJetpack()
 		{
 			float Strength;
 			if(!m_TuneZone)
-				Strength = GameServer()->Tuning()->m_JetpackStrength;
+				Strength = Tuning()->m_JetpackStrength;
 			else
-				Strength = GameServer()->TuningList()[m_TuneZone].m_JetpackStrength;
+				Strength = TuningList()[m_TuneZone].m_JetpackStrength;
 			TakeDamage(Direction * -1.0f * (Strength / 100.0f / 6.11f), 0, m_pPlayer->GetCID(), m_Core.m_ActiveWeapon);
 		}
 	}
@@ -255,9 +255,9 @@ void CCharacter::HandleNinja()
 		vec2 GroundElasticity;
 
 		if(!m_TuneZone)
-			GroundElasticity = vec2(GameServer()->Tuning()->m_GroundElasticityX, GameServer()->Tuning()->m_GroundElasticityY);
+			GroundElasticity = vec2(Tuning()->m_GroundElasticityX, Tuning()->m_GroundElasticityY);
 		else
-			GroundElasticity = vec2(GameServer()->TuningList()[m_TuneZone].m_GroundElasticityX, GameServer()->TuningList()[m_TuneZone].m_GroundElasticityY);
+			GroundElasticity = vec2(TuningList()[m_TuneZone].m_GroundElasticityX, TuningList()[m_TuneZone].m_GroundElasticityY);
 
 		Collision()->MoveBox(&m_Core.m_Pos, &m_Core.m_Vel, vec2(GetProximityRadius(), GetProximityRadius()), GroundElasticity);
 
@@ -470,9 +470,9 @@ void CCharacter::FireWeapon()
 
 			float Strength;
 			if(!m_TuneZone)
-				Strength = GameServer()->Tuning()->m_HammerStrength;
+				Strength = Tuning()->m_HammerStrength;
 			else
-				Strength = GameServer()->TuningList()[m_TuneZone].m_HammerStrength;
+				Strength = TuningList()[m_TuneZone].m_HammerStrength;
 
 			vec2 Temp = pTarget->m_Core.m_Vel + normalize(Dir + vec2(0.f, -1.1f)) * 10.0f;
 			Temp = ClampVel(pTarget->m_MoveRestrictions, Temp);
@@ -494,9 +494,9 @@ void CCharacter::FireWeapon()
 		{
 			float FireDelay;
 			if(!m_TuneZone)
-				FireDelay = GameServer()->Tuning()->m_HammerHitFireDelay;
+				FireDelay = Tuning()->m_HammerHitFireDelay;
 			else
-				FireDelay = GameServer()->TuningList()[m_TuneZone].m_HammerHitFireDelay;
+				FireDelay = TuningList()[m_TuneZone].m_HammerHitFireDelay;
 			m_ReloadTimer = FireDelay * Server()->TickSpeed() / 1000;
 		}
 	}
@@ -508,9 +508,9 @@ void CCharacter::FireWeapon()
 		{
 			int Lifetime;
 			if(!m_TuneZone)
-				Lifetime = (int)(Server()->TickSpeed() * GameServer()->Tuning()->m_GunLifetime);
+				Lifetime = (int)(Server()->TickSpeed() * Tuning()->m_GunLifetime);
 			else
-				Lifetime = (int)(Server()->TickSpeed() * GameServer()->TuningList()[m_TuneZone].m_GunLifetime);
+				Lifetime = (int)(Server()->TickSpeed() * TuningList()[m_TuneZone].m_GunLifetime);
 
 			new CProjectile(
 				GameWorld(),
@@ -534,9 +534,9 @@ void CCharacter::FireWeapon()
 	{
 		float LaserReach;
 		if(!m_TuneZone)
-			LaserReach = GameServer()->Tuning()->m_LaserReach;
+			LaserReach = Tuning()->m_LaserReach;
 		else
-			LaserReach = GameServer()->TuningList()[m_TuneZone].m_LaserReach;
+			LaserReach = TuningList()[m_TuneZone].m_LaserReach;
 
 		new CLaser(&GameServer()->m_World, m_Pos, Direction, LaserReach, m_pPlayer->GetCID(), WEAPON_SHOTGUN);
 		GameServer()->CreateSound(m_Pos, SOUND_SHOTGUN_FIRE, TeamMask());
@@ -547,9 +547,9 @@ void CCharacter::FireWeapon()
 	{
 		int Lifetime;
 		if(!m_TuneZone)
-			Lifetime = (int)(Server()->TickSpeed() * GameServer()->Tuning()->m_GrenadeLifetime);
+			Lifetime = (int)(Server()->TickSpeed() * Tuning()->m_GrenadeLifetime);
 		else
-			Lifetime = (int)(Server()->TickSpeed() * GameServer()->TuningList()[m_TuneZone].m_GrenadeLifetime);
+			Lifetime = (int)(Server()->TickSpeed() * TuningList()[m_TuneZone].m_GrenadeLifetime);
 
 		new CProjectile(
 			GameWorld(),
@@ -572,9 +572,9 @@ void CCharacter::FireWeapon()
 	{
 		float LaserReach;
 		if(!m_TuneZone)
-			LaserReach = GameServer()->Tuning()->m_LaserReach;
+			LaserReach = Tuning()->m_LaserReach;
 		else
-			LaserReach = GameServer()->TuningList()[m_TuneZone].m_LaserReach;
+			LaserReach = TuningList()[m_TuneZone].m_LaserReach;
 
 		new CLaser(GameWorld(), m_Pos, Direction, LaserReach, m_pPlayer->GetCID(), WEAPON_LASER);
 		GameServer()->CreateSound(m_Pos, SOUND_LASER_FIRE, TeamMask());
@@ -601,9 +601,9 @@ void CCharacter::FireWeapon()
 	{
 		float FireDelay;
 		if(!m_TuneZone)
-			GameServer()->Tuning()->Get(38 + m_Core.m_ActiveWeapon, &FireDelay);
+			Tuning()->Get(38 + m_Core.m_ActiveWeapon, &FireDelay);
 		else
-			GameServer()->TuningList()[m_TuneZone].Get(38 + m_Core.m_ActiveWeapon, &FireDelay);
+			TuningList()[m_TuneZone].Get(38 + m_Core.m_ActiveWeapon, &FireDelay);
 		m_ReloadTimer = FireDelay * Server()->TickSpeed() / 1000;
 	}
 }
@@ -768,7 +768,8 @@ void CCharacter::Tick()
 
 	if(m_Core.m_TriggeredEvents & COREEVENT_HOOK_ATTACH_PLAYER)
 	{
-		if(m_Core.m_HookedPlayer != -1 && GameServer()->m_apPlayers[m_Core.m_HookedPlayer]->GetTeam() != TEAM_SPECTATORS)
+		const int HookedPlayer = m_Core.HookedPlayer();
+		if(HookedPlayer != -1 && GameServer()->m_apPlayers[HookedPlayer]->GetTeam() != TEAM_SPECTATORS)
 		{
 			Antibot()->OnHookAttach(m_pPlayer->GetCID(), true);
 		}
@@ -1138,7 +1139,7 @@ bool CCharacter::IsSnappingCharacterInView(int SnappingClientID)
 		for(const auto &AttachedPlayerID : m_Core.m_AttachedPlayers)
 		{
 			CCharacter *pOtherPlayer = GameServer()->GetPlayerChar(AttachedPlayerID);
-			if(pOtherPlayer && pOtherPlayer->m_Core.m_HookedPlayer == ID)
+			if(pOtherPlayer && pOtherPlayer->m_Core.HookedPlayer() == ID)
 			{
 				if(!NetworkClippedLine(SnappingClientID, m_Pos, pOtherPlayer->m_Pos))
 				{
@@ -1183,9 +1184,9 @@ void CCharacter::Snap(int SnappingClient)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_SUPER;
 	if(m_Core.m_EndlessHook)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_ENDLESS_HOOK;
-	if(m_Core.m_CollisionDisabled || !GameServer()->Tuning()->m_PlayerCollision)
+	if(m_Core.m_CollisionDisabled || !Tuning()->m_PlayerCollision)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_COLLISION_DISABLED;
-	if(m_Core.m_HookHitDisabled || !GameServer()->Tuning()->m_PlayerHooking)
+	if(m_Core.m_HookHitDisabled || !Tuning()->m_PlayerHooking)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_HOOK_HIT_DISABLED;
 	if(m_Core.m_EndlessJump)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_ENDLESS_JUMP;
@@ -1261,7 +1262,7 @@ void CCharacter::SetTeleports(std::map<int, std::vector<vec2>> *pTeleOuts, std::
 {
 	m_pTeleOuts = pTeleOuts;
 	m_pTeleCheckOuts = pTeleCheckOuts;
-	m_Core.m_pTeleOuts = pTeleOuts;
+	m_Core.SetTeleOuts(pTeleOuts);
 }
 
 void CCharacter::FillAntibot(CAntibotCharacterData *pData)
@@ -1269,7 +1270,7 @@ void CCharacter::FillAntibot(CAntibotCharacterData *pData)
 	pData->m_Pos = m_Pos;
 	pData->m_Vel = m_Core.m_Vel;
 	pData->m_Angle = m_Core.m_Angle;
-	pData->m_HookedPlayer = m_Core.m_HookedPlayer;
+	pData->m_HookedPlayer = m_Core.HookedPlayer();
 	pData->m_SpawnTick = m_SpawnTick;
 	pData->m_WeaponChangeTick = m_WeaponChangeTick;
 	pData->m_aLatestInputs[0].m_TargetX = m_LatestInput.m_TargetX;
@@ -1802,7 +1803,7 @@ void CCharacter::HandleTiles(int Index)
 	{
 		if(m_Core.m_Super)
 			return;
-		int TeleOut = m_Core.m_pWorld->RandomOr0((*m_pTeleOuts)[z - 1].size());
+		int TeleOut = GameWorld()->m_Core.RandomOr0((*m_pTeleOuts)[z - 1].size());
 		m_Core.m_Pos = (*m_pTeleOuts)[z - 1][TeleOut];
 		if(!g_Config.m_SvTeleportHoldHook)
 		{
@@ -1817,7 +1818,7 @@ void CCharacter::HandleTiles(int Index)
 	{
 		if(m_Core.m_Super)
 			return;
-		int TeleOut = m_Core.m_pWorld->RandomOr0((*m_pTeleOuts)[evilz - 1].size());
+		int TeleOut = GameWorld()->m_Core.RandomOr0((*m_pTeleOuts)[evilz - 1].size());
 		m_Core.m_Pos = (*m_pTeleOuts)[evilz - 1][TeleOut];
 		if(!g_Config.m_SvOldTeleportHook && !g_Config.m_SvOldTeleportWeapons)
 		{
@@ -1844,7 +1845,7 @@ void CCharacter::HandleTiles(int Index)
 		{
 			if(!(*m_pTeleCheckOuts)[k].empty())
 			{
-				int TeleOut = m_Core.m_pWorld->RandomOr0((*m_pTeleCheckOuts)[k].size());
+				int TeleOut = GameWorld()->m_Core.RandomOr0((*m_pTeleCheckOuts)[k].size());
 				m_Core.m_Pos = (*m_pTeleCheckOuts)[k][TeleOut];
 				m_Core.m_Vel = vec2(0, 0);
 
@@ -1881,7 +1882,7 @@ void CCharacter::HandleTiles(int Index)
 		{
 			if(!(*m_pTeleCheckOuts)[k].empty())
 			{
-				int TeleOut = m_Core.m_pWorld->RandomOr0((*m_pTeleCheckOuts)[k].size());
+				int TeleOut = GameWorld()->m_Core.RandomOr0((*m_pTeleCheckOuts)[k].size());
 				m_Core.m_Pos = (*m_pTeleCheckOuts)[k][TeleOut];
 
 				if(!g_Config.m_SvTeleportHoldHook)
@@ -1914,9 +1915,9 @@ void CCharacter::HandleTuneLayer()
 	m_TuneZone = Collision()->IsTune(CurrentIndex);
 
 	if(m_TuneZone)
-		m_Core.m_Tuning = GameServer()->TuningList()[m_TuneZone]; // throw tunings from specific zone into gamecore
+		m_Core.m_Tuning = TuningList()[m_TuneZone]; // throw tunings from specific zone into gamecore
 	else
-		m_Core.m_Tuning = *GameServer()->Tuning();
+		m_Core.m_Tuning = *Tuning();
 
 	if(m_TuneZone != m_TuneZoneOld) // don't send tunigs all the time
 	{
@@ -2229,7 +2230,7 @@ void CCharacter::Pause(bool Pause)
 		GameServer()->m_World.m_Core.m_apCharacters[m_pPlayer->GetCID()] = 0;
 		GameServer()->m_World.RemoveEntity(this);
 
-		if(m_Core.m_HookedPlayer != -1) // Keeping hook would allow cheats
+		if(m_Core.HookedPlayer() != -1) // Keeping hook would allow cheats
 		{
 			ResetHook();
 			GameWorld()->ReleaseHooked(GetPlayer()->GetCID());
@@ -2332,5 +2333,6 @@ CClientMask CCharacter::TeamMask()
 
 void CCharacter::SwapClients(int Client1, int Client2)
 {
-	m_Core.SetHookedPlayer(m_Core.m_HookedPlayer == Client1 ? Client2 : m_Core.m_HookedPlayer == Client2 ? Client1 : m_Core.m_HookedPlayer);
+	const int HookedPlayer = m_Core.HookedPlayer();
+	m_Core.SetHookedPlayer(HookedPlayer == Client1 ? Client2 : HookedPlayer == Client2 ? Client1 : HookedPlayer);
 }

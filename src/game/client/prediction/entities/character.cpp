@@ -939,7 +939,7 @@ void CCharacter::HandleTuneLayer()
 	SetTuneZone(GameWorld()->m_WorldConfig.m_UseTuneZones ? Collision()->IsTune(CurrentIndex) : 0);
 
 	if(m_IsLocal)
-		m_Core.m_pWorld->m_aTuning[g_Config.m_ClDummy] = *GetTuning(m_TuneZone); // throw tunings (from specific zone if in a tunezone) into gamecore if the character is local
+		GameWorld()->m_Core.m_aTuning[g_Config.m_ClDummy] = *GetTuning(m_TuneZone); // throw tunings (from specific zone if in a tunezone) into gamecore if the character is local
 	m_Core.m_Tuning = *GetTuning(m_TuneZone);
 }
 
@@ -1107,7 +1107,7 @@ void CCharacter::GiveAllWeapons()
 
 CTeamsCore *CCharacter::TeamsCore()
 {
-	return m_Core.m_pTeams;
+	return GameWorld()->Teams();
 }
 
 CCharacter::CCharacter(CGameWorld *pGameWorld, int ID, CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended) :
@@ -1171,7 +1171,7 @@ void CCharacter::ResetPrediction()
 		SetWeaponGot(w, false);
 		SetWeaponAmmo(w, -1);
 	}
-	if(m_Core.m_HookedPlayer >= 0)
+	if(m_Core.HookedPlayer() >= 0)
 	{
 		m_Core.SetHookedPlayer(-1);
 		m_Core.m_HookState = HOOK_IDLE;
@@ -1355,9 +1355,7 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 
 void CCharacter::SetCoreWorld(CGameWorld *pGameWorld)
 {
-	m_Core.m_pWorld = &pGameWorld->m_Core;
-	m_Core.m_pCollision = pGameWorld->Collision();
-	m_Core.m_pTeams = pGameWorld->Teams();
+	m_Core.SetCoreWorld(&pGameWorld->m_Core, pGameWorld->Collision(), pGameWorld->Teams());
 }
 
 bool CCharacter::Match(CCharacter *pChar)

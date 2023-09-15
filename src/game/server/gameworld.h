@@ -39,8 +39,6 @@ private:
 	class CConfig *m_pConfig;
 	class IServer *m_pServer;
 
-	void UpdatePlayerMaps();
-
 public:
 	class CGameContext *GameServer() { return m_pGameServer; }
 	class CConfig *Config() { return m_pConfig; }
@@ -166,6 +164,12 @@ public:
 			Returns list with all Characters on line.
 	*/
 	std::vector<CCharacter *> IntersectedCharacters(vec2 Pos0, vec2 Pos1, float Radius, const CEntity *pNotThis = nullptr);
+
+	CTuningParams *Tuning();
+
+	CTuningParams *m_pTuningList;
+	CTuningParams *TuningList() { return m_pTuningList; }
+	CTuningParams *GetTuning(int i) { return &TuningList()[i]; }
 };
 
 #endif

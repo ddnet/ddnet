@@ -1995,6 +1995,7 @@ set_src(ENGINE_GFX GLOB src/engine/gfx
   image_manipulation.h
 )
 set_src(GAME_SHARED GLOB src/game
+  alloc.h
   collision.cpp
   collision.h
   ddracechat.h
@@ -2497,7 +2498,6 @@ if(SERVER)
     upnp.h
   )
   set_src(GAME_SERVER GLOB_RECURSE src/game/server
-    alloc.h
     ddracechat.cpp
     ddracecommands.cpp
     entities/character.cpp
