@@ -175,6 +175,15 @@ void PythonController::InputFire()
 
 void PythonController::OnUpdate()
 {
+	static int skips = 0;
+
+	if (skips < 32) {
+		skips++;
+		return;
+	}
+
+	skips = 0;
+
 	for (auto executedPythonScript : this->executedPythonScripts) {
 		PyObject* function = PyObject_GetAttrString(executedPythonScript->module, "onUpdate");
 

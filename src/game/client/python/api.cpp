@@ -322,11 +322,11 @@ static PyObject* API_Input_moveMouseToPlayer(PyObject* self, PyObject* args) {
 }
 
 static PyMethodDef API_InputMethods[] = {
-	{"move", API_Input_move, METH_VARARGS, "Move tee"},
-	{"jump", API_Input_jump, METH_VARARGS, "Jump tee"},
+	{"move", API_Input_move, METH_VARARGS, "Move tee. Takes a value from (API.Direction['Left'], API.Direction['None'], API.Direction['Right'])."},
+	{"jump", API_Input_jump, METH_NOARGS, "Jump tee"},
 	{"hook", API_Input_hook, METH_VARARGS, "Hook tee"},
-	{"fire", API_Input_fire, METH_VARARGS, "Fire tee"},
-	{"setTarget", API_Input_setTarget, METH_VARARGS, "Set Target position(arg: {'x': int, 'y': int}"},
+	{"fire", API_Input_fire, METH_NOARGS, "Fire tee"},
+	{"setTarget", API_Input_setTarget, METH_VARARGS, "Set Target position(arg: {'x': int, 'y': int})"},
 	{"setTargetHumanLike", API_Input_setTargetHumanLike, METH_VARARGS, "Set Target Human Like position(arg: {'x': int, 'y': int}"},
 	{"moveMouseToPlayer", API_Input_moveMouseToPlayer, METH_VARARGS, "Move mouse to player human Like(arg: playerId"},
 	{"setBlockUserInput", API_Input_setBlockUserInput, METH_VARARGS, "Block user input"},
