@@ -2916,11 +2916,7 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 		}
 		else if(pProps[i].m_Type == PROPTYPE_COLOR)
 		{
-			const ColorRGBA ColorPick = ColorRGBA(
-				((pProps[i].m_Value >> 24) & 0xff) / 255.0f,
-				((pProps[i].m_Value >> 16) & 0xff) / 255.0f,
-				((pProps[i].m_Value >> 8) & 0xff) / 255.0f,
-				(pProps[i].m_Value & 0xff) / 255.0f);
+			const ColorRGBA ColorPick = ColorRGBA::UnpackAlphaLast<ColorRGBA>(pProps[i].m_Value);
 
 			CUIRect ColorRect;
 			Shifter.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f * UI()->ButtonColorMul(&pIDs[i])), IGraphics::CORNER_ALL, 5.0f);
@@ -2962,7 +2958,7 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 			else if(UI()->IsPopupOpen(&s_ColorPickerPopupContext))
 			{
 				ColorRGBA c = color_cast<ColorRGBA>(s_ColorPickerPopupContext.m_HsvaColor);
-				const int NewColor = ((int)(c.r * 255.0f) & 0xff) << 24 | ((int)(c.g * 255.0f) & 0xff) << 16 | ((int)(c.b * 255.0f) & 0xff) << 8 | ((int)(c.a * 255.0f) & 0xff);
+				const int NewColor = c.PackAlphaLast(s_ColorPickerPopupContext.m_Alpha);
 				if(NewColor != pProps[i].m_Value)
 				{
 					*pNewVal = NewColor;
