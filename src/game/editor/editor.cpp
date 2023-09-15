@@ -1483,7 +1483,7 @@ void CEditor::DoQuad(CQuad *pQuad, int Index)
 
 		Graphics()->SetColor(1, 1, 1, 1);
 	}
-	else if(Input()->KeyPress(KEY_R) && !m_vSelectedQuads.empty())
+	else if(Input()->KeyPress(KEY_R) && !m_vSelectedQuads.empty() && m_Dialog == DIALOG_NONE)
 	{
 		UI()->EnableMouseLock(pID);
 		UI()->SetActiveItem(pID);
@@ -5699,7 +5699,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		ToolBar.VSplitLeft(40.0f, &Button, &ToolBar);
 		UI()->DoLabel(&Button, "Sync.", 10.0f, TEXTALIGN_ML);
 
-		if(UI()->MouseInside(&View))
+		if(UI()->MouseInside(&View) && m_Dialog == DIALOG_NONE)
 		{
 			UI()->SetHotItem(&s_EnvelopeEditorID);
 
