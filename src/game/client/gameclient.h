@@ -517,6 +517,11 @@ public:
 
 	class CTeamsCore m_Teams;
 
+	CPrng m_Prng;
+	std::map<int, std::vector<vec2>> m_TeleOuts;
+	std::map<int, std::vector<vec2>> m_TeleCheckOuts;
+	void InitTeleporter();
+
 	int IntersectCharacter(vec2 HookPos, vec2 NewPos, vec2 &NewPos2, int ownID);
 
 	int GetLastRaceTick() override;

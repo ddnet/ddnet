@@ -169,7 +169,8 @@ void CLaser::DoBounce()
 			CGameControllerDDRace *pControllerDDRace = (CGameControllerDDRace *)GameServer()->m_pController;
 			if(Res == TILE_TELEINWEAPON && !pControllerDDRace->m_TeleOuts[z - 1].empty())
 			{
-				int TeleOut = GameServer()->m_World.m_Core.RandomOr0(pControllerDDRace->m_TeleOuts[z - 1].size());
+				uint64_t aSeed[2] = {static_cast<uint64_t>(Server()->Tick()), static_cast<uint64_t>(GetOwnerID())};
+				int TeleOut = g_Config.m_SvTeleportSeeded ? GameServer()->m_World.m_Core.SeededRandomOr0(pControllerDDRace->m_TeleOuts[z - 1].size(), aSeed) : GameServer()->m_World.m_Core.RandomOr0(pControllerDDRace->m_TeleOuts[z - 1].size());
 				m_TelePos = pControllerDDRace->m_TeleOuts[z - 1][TeleOut];
 				m_WasTele = true;
 			}

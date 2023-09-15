@@ -546,6 +546,14 @@ void CCharacter::OnDirectInput(CNetObj_PlayerInput *pNewInput)
 	mem_copy(&m_LatestPrevInput, &m_LatestInput, sizeof(m_LatestInput));
 }
 
+void CCharacter::ResetHook()
+{
+	m_Core.SetHookedPlayer(-1);
+	m_Core.m_HookState = HOOK_RETRACTED;
+	m_Core.m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
+	m_Core.m_HookPos = m_Core.m_Pos;
+}
+
 void CCharacter::ResetInput()
 {
 	m_Input.m_Direction = 0;
@@ -563,6 +571,7 @@ void CCharacter::PreTick()
 	DDRaceTick();
 
 	m_Core.m_Input = m_Input;
+	m_Core.m_Tick = GameWorld()->GameTick();
 	m_Core.Tick(true, !m_pGameWorld->m_WorldConfig.m_NoWeakHookAndBounce);
 }
 
@@ -618,6 +627,13 @@ bool CCharacter::SameTeam(int ClientID)
 int CCharacter::Team()
 {
 	return TeamsCore()->Team(GetCID());
+}
+
+void CCharacter::SetTeleports(std::map<int, std::vector<vec2>> *pTeleOuts, std::map<int, std::vector<vec2>> *pTeleCheckOuts)
+{
+	m_pTeleOuts = pTeleOuts;
+	m_pTeleCheckOuts = pTeleCheckOuts;
+	m_Core.m_pTeleOuts = pTeleOuts;
 }
 
 void CCharacter::HandleSkippableTiles(int Index)
@@ -931,6 +947,94 @@ void CCharacter::HandleTiles(int Index)
 	{
 		m_LastRefillJumps = false;
 	}
+
+	uint64_t aSeed[2] = {static_cast<uint64_t>(GameWorld()->GameTick()), static_cast<uint64_t>(GetCID())};
+	int z = Collision()->IsTeleport(MapIndex);
+	if(!g_Config.m_SvOldTeleportHook && !g_Config.m_SvOldTeleportWeapons && z && !(*m_pTeleOuts)[z - 1].empty())
+	{
+		if(m_Core.m_Super)
+			return;
+		int TeleOut = g_Config.m_SvTeleportSeeded ? m_Core.m_pWorld->SeededRandomOr0((*m_pTeleOuts)[z - 1].size(), aSeed) : m_Core.m_pWorld->RandomOr0((*m_pTeleOuts)[z - 1].size());
+		m_Core.m_Pos = (*m_pTeleOuts)[z - 1][TeleOut];
+		if(!g_Config.m_SvTeleportHoldHook)
+		{
+			ResetHook();
+		}
+		if(g_Config.m_SvTeleportLoseWeapons)
+			ResetPickups();
+		return;
+	}
+	int evilz = Collision()->IsEvilTeleport(MapIndex);
+	if(evilz && !(*m_pTeleOuts)[evilz - 1].empty())
+	{
+		if(m_Core.m_Super)
+			return;
+		int TeleOut = g_Config.m_SvTeleportSeeded ? m_Core.m_pWorld->SeededRandomOr0((*m_pTeleOuts)[evilz - 1].size(), aSeed) : m_Core.m_pWorld->RandomOr0((*m_pTeleOuts)[evilz - 1].size());
+		m_Core.m_Pos = (*m_pTeleOuts)[evilz - 1][TeleOut];
+		if(!g_Config.m_SvOldTeleportHook && !g_Config.m_SvOldTeleportWeapons)
+		{
+			m_Core.m_Vel = vec2(0, 0);
+
+			if(!g_Config.m_SvTeleportHoldHook)
+			{
+				ResetHook();
+				GameWorld()->ReleaseHooked(GetCID());
+			}
+			if(g_Config.m_SvTeleportLoseWeapons)
+			{
+				ResetPickups();
+			}
+		}
+		return;
+	}
+	if(Collision()->IsCheckEvilTeleport(MapIndex))
+	{
+		if(m_Core.m_Super)
+			return;
+		// first check if there is a TeleCheckOut for the current recorded checkpoint, if not check previous checkpoints
+		for(int k = m_TeleCheckpoint - 1; k >= 0; k--)
+		{
+			if(!(*m_pTeleCheckOuts)[k].empty())
+			{
+				int TeleOut = g_Config.m_SvTeleportSeeded ? m_Core.m_pWorld->SeededRandomOr0((*m_pTeleCheckOuts)[k].size(), aSeed) : m_Core.m_pWorld->RandomOr0((*m_pTeleCheckOuts)[k].size());
+				m_Core.m_Pos = (*m_pTeleCheckOuts)[k][TeleOut];
+				m_Core.m_Vel = vec2(0, 0);
+
+				if(!g_Config.m_SvTeleportHoldHook)
+				{
+					ResetHook();
+					GameWorld()->ReleaseHooked(GetCID());
+				}
+
+				return;
+			}
+		}
+		// TODO: If no checkpointout have been found (or if there no recorded checkpoint), teleport to start
+		return;
+	}
+	if(Collision()->IsCheckTeleport(MapIndex))
+	{
+		if(m_Core.m_Super)
+			return;
+		// first check if there is a TeleCheckOut for the current recorded checkpoint, if not check previous checkpoints
+		for(int k = m_TeleCheckpoint - 1; k >= 0; k--)
+		{
+			if(!(*m_pTeleCheckOuts)[k].empty())
+			{
+				int TeleOut = g_Config.m_SvTeleportSeeded ? m_Core.m_pWorld->SeededRandomOr0((*m_pTeleCheckOuts)[k].size(), aSeed) : m_Core.m_pWorld->RandomOr0((*m_pTeleCheckOuts)[k].size());
+				m_Core.m_Pos = (*m_pTeleCheckOuts)[k][TeleOut];
+
+				if(!g_Config.m_SvTeleportHoldHook)
+				{
+					ResetHook();
+				}
+
+				return;
+			}
+		}
+		// TODO: If no checkpointout have been found (or if there no recorded checkpoint), teleport to start
+		return;
+	}
 }
 
 void CCharacter::HandleTuneLayer()
@@ -1105,6 +1209,16 @@ void CCharacter::GiveAllWeapons()
 	}
 }
 
+void CCharacter::ResetPickups()
+{
+	for(int i = WEAPON_SHOTGUN; i < NUM_WEAPONS - 1; i++)
+	{
+		m_Core.m_aWeapons[i].m_Got = false;
+		if(m_Core.m_ActiveWeapon == i)
+			m_Core.m_ActiveWeapon = WEAPON_GUN;
+	}
+}
+
 CTeamsCore *CCharacter::TeamsCore()
 {
 	return m_Core.m_pTeams;
@@ -1123,6 +1237,7 @@ CCharacter::CCharacter(CGameWorld *pGameWorld, int ID, CNetObj_Character *pChar,
 	m_Core.Reset();
 	m_Core.Init(&GameWorld()->m_Core, GameWorld()->Collision(), GameWorld()->Teams());
 	m_Core.m_Id = ID;
+	m_Core.m_Tick = GameWorld()->GameTick();
 	mem_zero(&m_Core.m_Ninja, sizeof(m_Core.m_Ninja));
 	m_Core.m_LeftWall = true;
 	m_ReloadTimer = 0;
@@ -1139,6 +1254,8 @@ CCharacter::CCharacter(CGameWorld *pGameWorld, int ID, CNetObj_Character *pChar,
 	m_Input.m_TargetY = -1;
 
 	m_LatestPrevInput = m_LatestInput = m_PrevInput = m_SavedInput = m_Input;
+
+	SetTeleports(GameWorld()->m_pTeleOuts, GameWorld()->m_pTeleCheckOuts);
 
 	ResetPrediction();
 	Read(pChar, pExtended, false);
@@ -1184,6 +1301,10 @@ void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtende
 {
 	m_Core.Read((const CNetObj_CharacterCore *)pChar);
 	m_IsLocal = IsLocal;
+
+	m_Core.SetTeleOuts(m_pGameWorld->m_pTeleOuts);
+	m_pTeleCheckOuts = m_pGameWorld->m_pTeleCheckOuts;
+	m_pTeleOuts = m_pGameWorld->m_pTeleOuts;
 
 	if(pExtended)
 	{

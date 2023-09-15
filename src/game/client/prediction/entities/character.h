@@ -51,6 +51,7 @@ public:
 
 	void OnPredictedInput(CNetObj_PlayerInput *pNewInput);
 	void OnDirectInput(CNetObj_PlayerInput *pNewInput);
+	void ResetHook();
 	void ResetInput();
 	void FireWeapon();
 
@@ -63,10 +64,12 @@ public:
 	bool m_IsLocal;
 
 	CTeamsCore *TeamsCore();
+	void SetTeleports(std::map<int, std::vector<vec2>> *pTeleOuts, std::map<int, std::vector<vec2>> *pTeleCheckOuts);
 	bool Freeze(int Seconds);
 	bool Freeze();
 	bool UnFreeze();
 	void GiveAllWeapons();
+	void ResetPickups();
 	int Team();
 	bool CanCollide(int ClientID);
 	bool SameTeam(int ClientID);
@@ -158,6 +161,9 @@ private:
 
 	// the player core for the physics
 	CCharacterCore m_Core;
+
+	std::map<int, std::vector<vec2>> *m_pTeleOuts = nullptr;
+	std::map<int, std::vector<vec2>> *m_pTeleCheckOuts = nullptr;
 
 	// DDRace
 

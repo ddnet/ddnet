@@ -209,6 +209,16 @@ public:
 		// significant for DDNet and favored the simple implementation.
 		return m_pPrng->RandomBits() % BelowThis;
 	}
+	int SeededRandomOr0(int BelowThis, uint64_t aSeed[2])
+	{
+		if(BelowThis <= 1)
+			return 0;
+		aSeed[0] = 0xf989fe135994390f ^ aSeed[0];
+		aSeed[1] = 0x8ca60f712e344ee0 ^ aSeed[1];
+		CPrng Prng;
+		Prng.Seed(aSeed);
+		return Prng.RandomBits() % BelowThis;
+	}
 
 	CTuningParams m_aTuning[2];
 	class CCharacterCore *m_apCharacters[MAX_CLIENTS];
@@ -283,6 +293,7 @@ public:
 
 	// DDRace
 	int m_Id;
+	int m_Tick;
 	bool m_Reset;
 	CCollision *Collision() { return m_pCollision; }
 

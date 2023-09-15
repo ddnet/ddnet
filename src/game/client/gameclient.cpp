@@ -485,6 +485,14 @@ void CGameClient::OnConnected()
 	m_Collision.Init(Layers());
 	m_GameWorld.m_Core.InitSwitchers(m_Collision.m_HighestSwitchNumber);
 
+	InitTeleporter();
+	m_GameWorld.SetTeleports(&m_TeleOuts, &m_TeleCheckOuts);
+
+	uint64_t aSeed[2];
+	secure_random_fill(aSeed, sizeof(aSeed));
+	m_Prng.Seed(aSeed);
+	m_GameWorld.m_Core.m_pPrng = &m_Prng;
+
 	CRaceHelper::ms_aFlagIndex[0] = -1;
 	CRaceHelper::ms_aFlagIndex[1] = -1;
 
@@ -3507,6 +3515,35 @@ void CGameClient::SnapCollectEntities()
 			pDataEx = (const CNetObj_EntityEx *)vItemEx[IndexEx].m_pData;
 
 		m_vSnapEntities.push_back({Ent.m_Item, Ent.m_pData, pDataEx});
+	}
+}
+
+void CGameClient::InitTeleporter()
+{
+	m_TeleCheckOuts.clear();
+	m_TeleOuts.clear();
+	if(!Collision()->Layers()->TeleLayer())
+		return;
+	int Width = Collision()->Layers()->TeleLayer()->m_Width;
+	int Height = Collision()->Layers()->TeleLayer()->m_Height;
+
+	for(int i = 0; i < Width * Height; i++)
+	{
+		int Number = Collision()->TeleLayer()[i].m_Number;
+		int Type = Collision()->TeleLayer()[i].m_Type;
+		if(Number > 0)
+		{
+			if(Type == TILE_TELEOUT)
+			{
+				m_TeleOuts[Number - 1].push_back(
+					vec2(i % Width * 32 + 16, i / Width * 32 + 16));
+			}
+			else if(Type == TILE_TELECHECKOUT)
+			{
+				m_TeleCheckOuts[Number - 1].push_back(
+					vec2(i % Width * 32 + 16, i / Width * 32 + 16));
+			}
+		}
 	}
 }
 
