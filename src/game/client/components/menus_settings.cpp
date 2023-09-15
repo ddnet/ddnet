@@ -1993,18 +1993,7 @@ void CMenus::RenderSettingsPython(CUIRect MainView)
 	CUIRect ListView, Button, BottomBar, ScriptBox;
 
 	static int s_PythonSelectedScript = -1;
-	static bool s_ShowPythonExceptions = false;
-
-	MainView.VSplitLeft(MainView.w/2.0f, &ListView, &ScriptBox);
-	ListView.HSplitBottom(60.0f + 5.0f, &ListView, &BottomBar);
-	ListView.HSplitTop(20.0f, &Button, &ListView);
-
-	if(DoButton_CheckBox(&g_Config.m_DTHPython, "Enable Python Scripts", g_Config.m_DTHPython, &Button))
-	{
-		g_Config.m_DTHPython ^= 1;
-		if(!g_Config.m_DTHPython)
-			s_PythonSelectedScript = -1;
-	}
+	static int s_ActiveScriptException = -1;
 
 	if(g_Config.m_DTHPython)
 	{
@@ -2013,14 +2002,42 @@ void CMenus::RenderSettingsPython(CUIRect MainView)
 			RefreshPythonScripts();
 			NeedToggle = false;
 		}
+
+		if(s_ActiveScriptException >= 0)
+		{
+			static CButtonContainer sCloseButton;
+			CUIRect CloseButton;
+			MainView.HSplitBottom(20.0f, &MainView, &CloseButton);
+			if(DoButton_Menu(&sCloseButton, Localize("Close"), 0, &CloseButton, 0, IGraphics::CORNER_ALL) || !g_Config.m_DTHPython)
+			{
+				s_ActiveScriptException = -1;
+			}
+			else
+			{
+				MainView.HSplitTop(10.0f, 0, &MainView);
+				RenderSettingsPythonExceptions(MainView, GameClient()->pythonScripts[s_ActiveScriptException]);
+				return;
+			}
+		}
 	}
 	else
 	{
 		s_PythonSelectedScript = -1;
-		s_ShowPythonExceptions = false;
+		s_ActiveScriptException = -1;
 		NeedToggle = true;
-		return;
 	}
+
+	MainView.VSplitLeft(MainView.w/2.0f, &ListView, &ScriptBox);
+	ListView.HSplitBottom(60.0f + 5.0f, &ListView, &BottomBar);
+	ListView.HSplitTop(20.0f, &Button, &ListView);
+
+	if(DoButton_CheckBox(&g_Config.m_DTHPython, "Enable Python Scripts", g_Config.m_DTHPython, &Button))
+	{
+		g_Config.m_DTHPython ^= 1;
+	}
+
+	if(!g_Config.m_DTHPython)
+		return;
 
 	ListView.HSplitTop(13.0f, &MainView, &ListView); //Отступ
 	//Кнопка обновления
@@ -2036,8 +2053,6 @@ void CMenus::RenderSettingsPython(CUIRect MainView)
 			RefreshPythonScripts();
 		}
 	}
-
-	static CButtonContainer s_ListBox;
 	static int ShowOnlyActive = 0;
 
 	static CListBox listBox;
@@ -2064,7 +2079,7 @@ void CMenus::RenderSettingsPython(CUIRect MainView)
 
 			if(Item.m_Visible)
 			{
-				CUIRect Label, Buttons, Button;
+				CUIRect Label, Buttons;
 
 				CUIRect Row = Item.m_Rect;
 
@@ -2132,7 +2147,7 @@ void CMenus::RenderSettingsPython(CUIRect MainView)
 		if(s_PythonSelectedScript > -1 && s_PythonSelectedScript < GameClient()->pythonScripts.size())
 		{
 			static CButtonContainer s_ToggleButton, s_RefreshButton, s_ExceptionButton;
-			CUIRect ToggleButton, RefreshButton, ExceptionsButton, Buttons;
+			CUIRect ToggleButton, RefreshButton, ExceptionsButton, Buttons, ExceptionBox;
 
 			ScriptBox.VSplitLeft(15.0f, 0, &ScriptBox);
 			ScriptBox.HSplitBottom(15.0f, &ScriptBox, 0);
@@ -2165,10 +2180,75 @@ void CMenus::RenderSettingsPython(CUIRect MainView)
 
 			if(DoButton_Menu(&s_ExceptionButton, aBuf, 0, &ExceptionsButton, nullptr, IGraphics::CORNER_R))
 			{
-
+				static float aScrollValue= 1.0f;
+				s_ActiveScriptException = s_PythonSelectedScript;
 			}
+
 		}
 	}
+}
+
+void CMenus::RenderSettingsPythonExceptions(CUIRect MainView, PythonScript *PS)
+{
+	static CListBox listBox;
+
+	char Buf[256];
+	char Bottom[32];
+	char Title[256];
+
+	str_format(Title, sizeof(Title), Localize("Script exceptions thrown by '%s'"), PS->name.c_str()); //TODO: Localize all this stuffs
+
+	listBox.DoStart(15.0f, PS->fileExceptions.size(), 1, 1, -1, &MainView, true, IGraphics::CORNER_ALL, true);
+
+	CButtonContainer s_ExcButtonIDs[101];
+
+
+	for(int i = 0; i < PS->fileExceptions.size(); i++)
+	{
+		CListboxItem Item = listBox.DoNextItem(s_ExcButtonIDs);
+		if(!Item.m_Visible)
+			continue;
+
+		CUIRect Button;
+		str_format(Buf, sizeof(Buf), "#%i", i+1);
+
+		Item.m_Rect.VSplitLeft(35.0f, &Button, &Item.m_Rect);
+		UI()->DoLabel(&Button, Buf, 15.f, TEXTALIGN_LEFT);
+
+		Item.m_Rect.VSplitLeft(10.0f, 0, &Item.m_Rect);
+		str_format(Buf, sizeof(Buf), "@@ %s", PS->fileExceptions[i].c_str());
+		UI()->DoLabel(&Item.m_Rect, Buf, 15.f, TEXTALIGN_CENTER);
+	}
+	listBox.DoEnd();
+	//				static int ActiveExceptions = -1;
+	//				char Title[256];
+	//				char BottomText[32];
+	//				char Buf[256];
+	//
+	//				CUIRect ExceptionList = ScriptBox;
+	//				CButtonContainer s_ButtonIDs[101];
+	//				static CListBox ExcListBox;
+	//				ExcListBox.DoStart(11.0f, ActiveExceptions, 1, 1, -1, &ExceptionList, true, 0, true);
+	//				for(int i = 0; i < PS->fileExceptions.size(); i++)
+	//				{
+	//					ActiveExceptions++;
+	//					const CListboxItem Item = ExcListBox.DoNextItem(&s_ButtonIDs[i]);
+	//					CUIRect button;
+	//					if(!Item.m_Visible)
+	//						continue;
+	//
+	//					CUIRect CRow = Item.m_Rect;
+	//					str_format(aBuf, sizeof(aBuf), "#%i", i+1);
+	//					CRow.HMargin(10.0f, &CRow);
+	//					ExceptionList.VSplitLeft(10.0f, &CRow, &ExceptionList);
+	//					CRow.VSplitLeft(35.0f, &button, &CRow);
+	//					UI()->DoLabel(&button, aBuf, 16.0f, TEXTALIGN_CENTER);
+	//
+	//					CRow.VSplitLeft(10.0f, nullptr, &button);
+	//					str_format(aBuf, sizeof(aBuf), "@@ %s", PS->fileExceptions[i].c_str());
+	//					UI()->DoLabel(&button, aBuf, 16.0f, TEXTALIGN_CENTER);
+	//				}
+	//				ExcListBox.DoEnd();
 }
 
 void CMenus::RefreshPythonScripts()
