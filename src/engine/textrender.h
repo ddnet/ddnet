@@ -91,6 +91,8 @@ MAYBE_UNUSED static const char *FONT_ICON_GEAR = "\xEF\x80\x93";
 MAYBE_UNUSED static const char *FONT_ICON_PEN_TO_SQUARE = "\xEF\x81\x84";
 MAYBE_UNUSED static const char *FONT_ICON_CLAPPERBOARD = "\xEE\x84\xB1";
 MAYBE_UNUSED static const char *FONT_ICON_EARTH_AMERICAS = "\xEF\x95\xBD";
+MAYBE_UNUSED static const char *FONT_ICON_LIST_UL = "\xEF\x83\x8A";
+MAYBE_UNUSED static const char *FONT_ICON_INFO = "\xEF\x84\xA9";
 
 MAYBE_UNUSED static const char *FONT_ICON_SLASH = "\xEF\x9C\x95";
 MAYBE_UNUSED static const char *FONT_ICON_PLAY = "\xEF\x81\x8B";
