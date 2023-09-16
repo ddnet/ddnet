@@ -98,6 +98,12 @@ void CGameContext::ConNinja(IConsole::IResult *pResult, void *pUserData)
 	pSelf->ModifyWeapons(pResult, pUserData, WEAPON_NINJA, false);
 }
 
+void CGameContext::ConUnNinja(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	pSelf->ModifyWeapons(pResult, pUserData, WEAPON_NINJA, true);
+}
+
 void CGameContext::ConEndlessHook(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
@@ -147,6 +153,16 @@ void CGameContext::ConUnSuper(IConsole::IResult *pResult, void *pUserData)
 	}
 }
 
+void CGameContext::ConSolo(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientID(pResult->m_ClientID))
+		return;
+	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
+	if(pChr)
+		pChr->SetSolo(true);
+}
+
 void CGameContext::ConUnSolo(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
@@ -155,6 +171,16 @@ void CGameContext::ConUnSolo(IConsole::IResult *pResult, void *pUserData)
 	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
 	if(pChr)
 		pChr->SetSolo(false);
+}
+
+void CGameContext::ConDeep(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientID(pResult->m_ClientID))
+		return;
+	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
+	if(pChr)
+		pChr->SetDeepFrozen(true);
 }
 
 void CGameContext::ConUnDeep(IConsole::IResult *pResult, void *pUserData)
