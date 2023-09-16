@@ -2209,16 +2209,12 @@ int net_would_block()
 #endif
 }
 
-int net_init()
+void net_init()
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	WSADATA wsaData;
-	int err = WSAStartup(MAKEWORD(1, 1), &wsaData);
-	dbg_assert(err == 0, "network initialization failed.");
-	return err == 0 ? 0 : 1;
+	WSADATA wsa_data;
+	dbg_assert(WSAStartup(MAKEWORD(1, 1), &wsa_data) == 0, "network initialization failed.");
 #endif
-
-	return 0;
 }
 
 #if defined(CONF_FAMILY_UNIX)
