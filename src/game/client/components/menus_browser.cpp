@@ -1394,7 +1394,7 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 
 	// friends list
 	static CScrollRegion s_ScrollRegion;
-	if(!s_ScrollRegion.IsScrollbarShown())
+	if(!s_ScrollRegion.ScrollbarShown())
 		List.VSplitRight(3.0f, &List, nullptr);
 	vec2 ScrollOffset(0.0f, 0.0f);
 	CScrollRegionParams ScrollParams;
@@ -1455,7 +1455,7 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 				const auto &Friend = m_avFriends[FriendType][FriendIndex];
 				List.HSplitTop(11.0f + 10.0f + 2 * 2.0f + 1.0f + (Friend.ServerInfo() == nullptr ? 0.0f : 10.0f), &Rect, &List);
 				s_ScrollRegion.AddRect(Rect);
-				if(s_ScrollRegion.IsRectClipped(Rect))
+				if(s_ScrollRegion.RectClipped(Rect))
 					continue;
 
 				const bool Inside = UI()->MouseHovered(&Rect);
