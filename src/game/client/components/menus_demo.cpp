@@ -686,7 +686,6 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 		char aDemoName[IO_MAX_PATH_LENGTH];
 		DemoPlayer()->GetDemoName(aDemoName, sizeof(aDemoName));
 		m_DemoSliceInput.Set(aDemoName);
-		m_DemoSliceInput.Append(".demo");
 		UI()->SetActiveItem(&m_DemoSliceInput);
 		m_DemoPlayerState = DEMOPLAYER_SLICE_SAVE;
 	}
@@ -828,11 +827,11 @@ void CMenus::RenderDemoPlayerSliceSavePopup(CUIRect MainView)
 	if(DoButton_Menu(&s_ButtonOk, Localize("Ok"), 0, &OkButton) || (!UI()->IsPopupOpen() && UI()->ConsumeHotkey(CUI::HOTKEY_ENTER)))
 	{
 		char aDemoName[IO_MAX_PATH_LENGTH];
+		char aNameWithoutExt[IO_MAX_PATH_LENGTH];
 		DemoPlayer()->GetDemoName(aDemoName, sizeof(aDemoName));
-		str_append(aDemoName, ".demo");
 
-		if(!str_endswith(m_DemoSliceInput.GetString(), ".demo"))
-			m_DemoSliceInput.Append(".demo");
+		fs_split_file_extension(m_DemoSliceInput.GetString(), aNameWithoutExt, sizeof(aNameWithoutExt));
+		m_DemoSliceInput.Set(aNameWithoutExt);
 
 		if(str_comp(aDemoName, m_DemoSliceInput.GetString()) == 0)
 		{
@@ -860,7 +859,7 @@ void CMenus::RenderDemoPlayerSliceSavePopup(CUIRect MainView)
 	if(s_ConfirmPopupContext.m_Result == CUI::SConfirmPopupContext::CONFIRMED)
 	{
 		char aPath[IO_MAX_PATH_LENGTH];
-		str_format(aPath, sizeof(aPath), "%s/%s", m_aCurrentDemoFolder, m_DemoSliceInput.GetString());
+		str_format(aPath, sizeof(aPath), "%s/%s.demo", m_aCurrentDemoFolder, m_DemoSliceInput.GetString());
 		str_copy(m_aCurrentDemoSelectionName, m_DemoSliceInput.GetString());
 		if(str_endswith(m_aCurrentDemoSelectionName, ".demo"))
 			m_aCurrentDemoSelectionName[str_length(m_aCurrentDemoSelectionName) - str_length(".demo")] = '\0';
