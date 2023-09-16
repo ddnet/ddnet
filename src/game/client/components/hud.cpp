@@ -598,11 +598,19 @@ void CHud::RenderVoting()
 	str_format(aBuf, sizeof(aBuf), "%s - %s", aKey, Localize("Vote yes"));
 	Base.y += Base.h;
 	Base.h = 12.0f;
+	if(m_pClient->m_Voting.TakenChoice() == 1)
+		TextRender()->TextColor(ColorRGBA(0.2f, 0.9f, 0.2f, 0.85f));
 	UI()->DoLabel(&Base, aBuf, 6.0f, TEXTALIGN_ML);
+
+	TextRender()->TextColor(TextRender()->DefaultTextColor());
 
 	m_pClient->m_Binds.GetKey("vote no", aKey, sizeof(aKey));
 	str_format(aBuf, sizeof(aBuf), "%s - %s", Localize("Vote no"), aKey);
+	if(m_pClient->m_Voting.TakenChoice() == -1)
+		TextRender()->TextColor(ColorRGBA(0.9f, 0.2f, 0.2f, 0.85f));
 	UI()->DoLabel(&Base, aBuf, 6.0f, TEXTALIGN_MR);
+
+	TextRender()->TextColor(TextRender()->DefaultTextColor());
 }
 
 void CHud::RenderCursor()
