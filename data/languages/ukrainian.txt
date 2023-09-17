@@ -1738,8 +1738,8 @@ Go back the specified duration
 == %d хв.
 
 [Demo player duration]
-%d сек.
-== 
+%d sec.
+== %d сек.
 
 Change the skip duration
 == Змінити тривалість пропуску
@@ -1749,20 +1749,3 @@ Go forward the specified duration
 
 Render cut to video
 == Відтворити вирізку відео
-
-[Demo player duration]
-%d min.
-== 
-
-[Demo player duration]
-%d sec.
-== 
-
-Change the skip duration
-== 
-
-Go forward the specified duration
-== 
-
-Render cut to video
-== 
