@@ -452,6 +452,7 @@ protected:
 	// found in menus_browser.cpp
 	int m_SelectedIndex;
 	bool m_ServerBrowserShouldRevealSelection;
+	std::vector<CUIElement *> m_vpServerBrowserUiElements;
 	void RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemActivated);
 	void RenderServerbrowserStatusBox(CUIRect StatusBox, bool WasListboxItemActivated);
 	void Connect(const char *pAddress);

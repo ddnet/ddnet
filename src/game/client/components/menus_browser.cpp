@@ -230,14 +230,18 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 		TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
 	};
 
+	if(m_vpServerBrowserUiElements.size() < (size_t)NumServers)
+		m_vpServerBrowserUiElements.resize(NumServers, nullptr);
+
 	for(int i = 0; i < NumServers; i++)
 	{
 		const CServerInfo *pItem = ServerBrowser()->SortedGet(i);
 
-		if(pItem->m_pUIElement == nullptr)
+		if(m_vpServerBrowserUiElements[i] == nullptr)
 		{
-			pItem->m_pUIElement = UI()->GetNewUIElement(NUM_UI_ELEMS);
+			m_vpServerBrowserUiElements[i] = UI()->GetNewUIElement(NUM_UI_ELEMS);
 		}
+		CUIElement *pUiElement = m_vpServerBrowserUiElements[i];
 
 		const CListboxItem ListItem = s_ListBox.DoNextItem(pItem, str_comp(pItem->m_aAddress, g_Config.m_UiServerAddress) == 0);
 		if(ListItem.m_Selected)
@@ -281,22 +285,22 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 			{
 				if(pItem->m_Flags & SERVER_FLAG_PASSWORD)
 				{
-					RenderBrowserIcons(*pItem->m_pUIElement->Rect(UI_ELEM_LOCK_ICON), &Button, ColorRGBA(0.75f, 0.75f, 0.75f, 1.0f), TextRender()->DefaultTextOutlineColor(), FONT_ICON_LOCK, TEXTALIGN_MC);
+					RenderBrowserIcons(*pUiElement->Rect(UI_ELEM_LOCK_ICON), &Button, ColorRGBA(0.75f, 0.75f, 0.75f, 1.0f), TextRender()->DefaultTextOutlineColor(), FONT_ICON_LOCK, TEXTALIGN_MC);
 				}
 			}
 			else if(ID == COL_FLAG_FAV)
 			{
 				if(pItem->m_Favorite != TRISTATE::NONE)
 				{
-					RenderBrowserIcons(*pItem->m_pUIElement->Rect(UI_ELEM_FAVORITE_ICON), &Button, ColorRGBA(0.94f, 0.4f, 0.4f, 1.0f), TextRender()->DefaultTextOutlineColor(), FONT_ICON_HEART, TEXTALIGN_MC);
+					RenderBrowserIcons(*pUiElement->Rect(UI_ELEM_FAVORITE_ICON), &Button, ColorRGBA(0.94f, 0.4f, 0.4f, 1.0f), TextRender()->DefaultTextOutlineColor(), FONT_ICON_HEART, TEXTALIGN_MC);
 				}
 			}
 			else if(ID == COL_FLAG_OFFICIAL)
 			{
 				if(pItem->m_Official && g_Config.m_UiPage != PAGE_DDNET && g_Config.m_UiPage != PAGE_KOG)
 				{
-					RenderBrowserIcons(*pItem->m_pUIElement->Rect(UI_ELEM_OFFICIAL_ICON_1), &Button, ColorRGBA(0.4f, 0.7f, 0.94f, 1.0f), ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), FONT_ICON_CERTIFICATE, TEXTALIGN_MC);
-					RenderBrowserIcons(*pItem->m_pUIElement->Rect(UI_ELEM_OFFICIAL_ICON_2), &Button, ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f), FONT_ICON_CHECK, TEXTALIGN_MC, true);
+					RenderBrowserIcons(*pUiElement->Rect(UI_ELEM_OFFICIAL_ICON_1), &Button, ColorRGBA(0.4f, 0.7f, 0.94f, 1.0f), ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), FONT_ICON_CERTIFICATE, TEXTALIGN_MC);
+					RenderBrowserIcons(*pUiElement->Rect(UI_ELEM_OFFICIAL_ICON_2), &Button, ColorRGBA(0.0f, 0.0f, 0.0f, 1.0f), ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f), FONT_ICON_CHECK, TEXTALIGN_MC, true);
 				}
 			}
 			else if(ID == COL_NAME)
@@ -308,14 +312,14 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 				bool Printed = false;
 				if(g_Config.m_BrFilterString[0] && (pItem->m_QuickSearchHit & IServerBrowser::QUICK_SERVERNAME))
 					Printed = PrintHighlighted(pItem->m_aName, [&](const char *pFilteredStr, const int FilterLen) {
-						UI()->DoLabelStreamed(*pItem->m_pUIElement->Rect(UI_ELEM_NAME_1), &Button, pItem->m_aName, FontSize, TEXTALIGN_ML, Props, (int)(pFilteredStr - pItem->m_aName));
+						UI()->DoLabelStreamed(*pUiElement->Rect(UI_ELEM_NAME_1), &Button, pItem->m_aName, FontSize, TEXTALIGN_ML, Props, (int)(pFilteredStr - pItem->m_aName));
 						TextRender()->TextColor(gs_HighlightedTextColor);
-						UI()->DoLabelStreamed(*pItem->m_pUIElement->Rect(UI_ELEM_NAME_2), &Button, pFilteredStr, FontSize, TEXTALIGN_ML, Props, FilterLen, &pItem->m_pUIElement->Rect(UI_ELEM_NAME_1)->m_Cursor);
+						UI()->DoLabelStreamed(*pUiElement->Rect(UI_ELEM_NAME_2), &Button, pFilteredStr, FontSize, TEXTALIGN_ML, Props, FilterLen, &pUiElement->Rect(UI_ELEM_NAME_1)->m_Cursor);
 						TextRender()->TextColor(TextRender()->DefaultTextColor());
-						UI()->DoLabelStreamed(*pItem->m_pUIElement->Rect(UI_ELEM_NAME_3), &Button, pFilteredStr + FilterLen, FontSize, TEXTALIGN_ML, Props, -1, &pItem->m_pUIElement->Rect(UI_ELEM_NAME_2)->m_Cursor);
+						UI()->DoLabelStreamed(*pUiElement->Rect(UI_ELEM_NAME_3), &Button, pFilteredStr + FilterLen, FontSize, TEXTALIGN_ML, Props, -1, &pUiElement->Rect(UI_ELEM_NAME_2)->m_Cursor);
 					});
 				if(!Printed)
-					UI()->DoLabelStreamed(*pItem->m_pUIElement->Rect(UI_ELEM_NAME_1), &Button, pItem->m_aName, FontSize, TEXTALIGN_ML, Props);
+					UI()->DoLabelStreamed(*pUiElement->Rect(UI_ELEM_NAME_1), &Button, pItem->m_aName, FontSize, TEXTALIGN_ML, Props);
 			}
 			else if(ID == COL_GAMETYPE)
 			{
@@ -327,7 +331,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 				{
 					TextRender()->TextColor(GetGametypeTextColor(pItem->m_aGameType));
 				}
-				UI()->DoLabelStreamed(*pItem->m_pUIElement->Rect(UI_ELEM_GAMETYPE), &Button, pItem->m_aGameType, FontSize, TEXTALIGN_ML, Props);
+				UI()->DoLabelStreamed(*pUiElement->Rect(UI_ELEM_GAMETYPE), &Button, pItem->m_aGameType, FontSize, TEXTALIGN_ML, Props);
 				TextRender()->TextColor(TextRender()->DefaultTextColor());
 			}
 			else if(ID == COL_MAP)
@@ -340,7 +344,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 					if(g_Config.m_BrIndicateFinished && pItem->m_HasRank == 1)
 					{
 						Icon.Margin(2.0f, &Icon);
-						RenderBrowserIcons(*pItem->m_pUIElement->Rect(UI_ELEM_FINISH_ICON), &Icon, TextRender()->DefaultTextColor(), TextRender()->DefaultTextOutlineColor(), FONT_ICON_FLAG_CHECKERED, TEXTALIGN_MC);
+						RenderBrowserIcons(*pUiElement->Rect(UI_ELEM_FINISH_ICON), &Icon, TextRender()->DefaultTextColor(), TextRender()->DefaultTextOutlineColor(), FONT_ICON_FLAG_CHECKERED, TEXTALIGN_MC);
 					}
 				}
 
@@ -351,14 +355,14 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 				bool Printed = false;
 				if(g_Config.m_BrFilterString[0] && (pItem->m_QuickSearchHit & IServerBrowser::QUICK_MAPNAME))
 					Printed = PrintHighlighted(pItem->m_aMap, [&](const char *pFilteredStr, const int FilterLen) {
-						UI()->DoLabelStreamed(*pItem->m_pUIElement->Rect(UI_ELEM_MAP_1), &Button, pItem->m_aMap, FontSize, TEXTALIGN_ML, Props, (int)(pFilteredStr - pItem->m_aMap));
+						UI()->DoLabelStreamed(*pUiElement->Rect(UI_ELEM_MAP_1), &Button, pItem->m_aMap, FontSize, TEXTALIGN_ML, Props, (int)(pFilteredStr - pItem->m_aMap));
 						TextRender()->TextColor(gs_HighlightedTextColor);
-						UI()->DoLabelStreamed(*pItem->m_pUIElement->Rect(UI_ELEM_MAP_2), &Button, pFilteredStr, FontSize, TEXTALIGN_ML, Props, FilterLen, &pItem->m_pUIElement->Rect(UI_ELEM_MAP_1)->m_Cursor);
+						UI()->DoLabelStreamed(*pUiElement->Rect(UI_ELEM_MAP_2), &Button, pFilteredStr, FontSize, TEXTALIGN_ML, Props, FilterLen, &pUiElement->Rect(UI_ELEM_MAP_1)->m_Cursor);
 						TextRender()->TextColor(TextRender()->DefaultTextColor());
-						UI()->DoLabelStreamed(*pItem->m_pUIElement->Rect(UI_ELEM_MAP_3), &Button, pFilteredStr + FilterLen, FontSize, TEXTALIGN_ML, Props, -1, &pItem->m_pUIElement->Rect(UI_ELEM_MAP_2)->m_Cursor);
+						UI()->DoLabelStreamed(*pUiElement->Rect(UI_ELEM_MAP_3), &Button, pFilteredStr + FilterLen, FontSize, TEXTALIGN_ML, Props, -1, &pUiElement->Rect(UI_ELEM_MAP_2)->m_Cursor);
 					});
 				if(!Printed)
-					UI()->DoLabelStreamed(*pItem->m_pUIElement->Rect(UI_ELEM_MAP_1), &Button, pItem->m_aMap, FontSize, TEXTALIGN_ML, Props);
+					UI()->DoLabelStreamed(*pUiElement->Rect(UI_ELEM_MAP_1), &Button, pItem->m_aMap, FontSize, TEXTALIGN_ML, Props);
 			}
 			else if(ID == COL_PLAYERS)
 			{
@@ -368,7 +372,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 					CUIRect Icon;
 					Button.VSplitRight(50.0f, &Icon, &Button);
 					Icon.Margin(2.0f, &Icon);
-					RenderBrowserIcons(*pItem->m_pUIElement->Rect(UI_ELEM_FRIEND_ICON), &Icon, ColorRGBA(0.94f, 0.4f, 0.4f, 1.0f), TextRender()->DefaultTextOutlineColor(), FONT_ICON_HEART, TEXTALIGN_MC);
+					RenderBrowserIcons(*pUiElement->Rect(UI_ELEM_FRIEND_ICON), &Icon, ColorRGBA(0.94f, 0.4f, 0.4f, 1.0f), TextRender()->DefaultTextOutlineColor(), FONT_ICON_HEART, TEXTALIGN_MC);
 					if(FriendsOnServer > 1)
 					{
 						str_from_int(FriendsOnServer, aTemp);
@@ -383,7 +387,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 				{
 					TextRender()->TextColor(gs_HighlightedTextColor);
 				}
-				UI()->DoLabelStreamed(*pItem->m_pUIElement->Rect(UI_ELEM_PLAYERS), &Button, aTemp, FontSize, TEXTALIGN_MR);
+				UI()->DoLabelStreamed(*pUiElement->Rect(UI_ELEM_PLAYERS), &Button, aTemp, FontSize, TEXTALIGN_MR);
 				TextRender()->TextColor(TextRender()->DefaultTextColor());
 			}
 			else if(ID == COL_PING)
@@ -394,7 +398,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 				{
 					TextRender()->TextColor(GetPingTextColor(pItem->m_Latency));
 				}
-				UI()->DoLabelStreamed(*pItem->m_pUIElement->Rect(UI_ELEM_PING), &Button, aTemp, FontSize, TEXTALIGN_MR);
+				UI()->DoLabelStreamed(*pUiElement->Rect(UI_ELEM_PING), &Button, aTemp, FontSize, TEXTALIGN_MR);
 				TextRender()->TextColor(TextRender()->DefaultTextColor());
 			}
 		}
