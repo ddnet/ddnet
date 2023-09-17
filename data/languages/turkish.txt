@@ -152,9 +152,6 @@ Favorites
 Feet
 == Ayak
 
-Filter
-== Filtre
-
 Fire
 == Ateş
 
@@ -166,9 +163,6 @@ Force vote
 
 Free-View
 == Serbest Bakış
-
-Friends
-== Arkadaşlar
 
 Fullscreen
 == Tam ekran
@@ -360,12 +354,6 @@ Screenshot
 Server address:
 == Sunucu adresi:
 
-Server details
-== Sunucucu detayları
-
-Server filter
-== Filtreler
-
 Server info
 == Hakkında
 
@@ -533,9 +521,6 @@ Netversion:
 
 Map:
 == Harita:
-
-Info
-== Bilgi
 
 Hue
 == Renk
@@ -1751,6 +1736,23 @@ Loading sound files
 
 Moved ingame
 == Hareket edildi
+
+Go back the specified duration
+== 
+
+[Demo player duration]
+%d min.
+== 
+
+[Demo player duration]
+%d sec.
+== 
+
+Change the skip duration
+== 
+
+Go forward the specified duration
+== 
 
 Render cut to video
 == 

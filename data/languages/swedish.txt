@@ -150,9 +150,6 @@ Favorites
 Feet
 == Fötter
 
-Filter
-== Filter
-
 Fire
 == Skjuta
 
@@ -164,9 +161,6 @@ Force vote
 
 Free-View
 == Friläge
-
-Friends
-== Kompisar
 
 Fullscreen
 == Fullskärm
@@ -361,12 +355,6 @@ Screenshot
 Server address:
 == Serveradress
 
-Server details
-== Serverdetaljer
-
-Server filter
-== Serverfilter
-
 Server info
 == Serverinfo
 
@@ -534,9 +522,6 @@ Netversion:
 
 Map:
 == Bana
-
-Info
-== Info
 
 Hue
 == Nyans
@@ -1750,3 +1735,20 @@ Moved ingame
 
 Render cut to video
 == Rendera snitt till video
+
+Go back the specified duration
+== 
+
+[Demo player duration]
+%d min.
+== 
+
+[Demo player duration]
+%d sec.
+== 
+
+Change the skip duration
+== 
+
+Go forward the specified duration
+== 
