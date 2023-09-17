@@ -391,7 +391,7 @@ bool CGameContext::SnapLaserObject(const CSnapContext &Context, int SnapID, cons
 		pObj->m_ToY = (int)To.y;
 		pObj->m_FromX = (int)From.x;
 		pObj->m_FromY = (int)From.y;
-		pObj->m_StartTick = StartTick;
+		pObj->m_StartTick = LaserType == LASERTYPE_RIFLE || LaserType == LASERTYPE_SHOTGUN ? StartTick : -1;
 		pObj->m_Owner = Owner;
 		pObj->m_Type = LaserType;
 		pObj->m_Subtype = Subtype;
