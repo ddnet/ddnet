@@ -92,7 +92,7 @@ public:
 	char m_aVersion[32];
 	char m_aAddress[MAX_SERVER_ADDRESSES * NETADDR_MAXSTRSIZE];
 	CClient m_aClients[SERVERINFO_MAX_CLIENTS];
-	mutable int m_NumFilteredPlayers;
+	int m_NumFilteredPlayers;
 
 	mutable CUIElement *m_pUIElement;
 

@@ -438,7 +438,7 @@ int CServerBrowser::SortHash() const
 	return i;
 }
 
-void SetFilteredPlayers(const CServerInfo &Item)
+void UpdateFilteredPlayers(CServerInfo &Item)
 {
 	Item.m_NumFilteredPlayers = g_Config.m_BrFilterSpectators ? Item.m_NumPlayers : Item.m_NumClients;
 	if(g_Config.m_BrFilterConnectingPlayers)
@@ -456,7 +456,7 @@ void CServerBrowser::Sort()
 	// fill m_NumFilteredPlayers
 	for(int i = 0; i < m_NumServers; i++)
 	{
-		SetFilteredPlayers(m_ppServerlist[i]->m_Info);
+		UpdateFilteredPlayers(m_ppServerlist[i]->m_Info);
 	}
 
 	// create filtered list
