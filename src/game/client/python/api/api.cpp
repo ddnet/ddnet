@@ -216,6 +216,21 @@ static PyObject* API_Player(PyObject* self, PyObject* args) {
 	return player;
 }
 
+// ============ API.LocalID(ClientID) Module ============ //
+static PyObject* API_LocalID(PyObject* self, PyObject* args) {
+	int clientId;
+	PyArg_ParseTuple(args, "i", &clientId);
+
+	if(clientId == -1)
+		clientId = g_Config.m_ClDummy;
+
+	auto localId = PythonAPI_GameClient->m_aLocalIDs[clientId];
+
+	PyObject* localIdObject = PyLong_FromLong(localId);
+
+	return localIdObject;
+}
+
 // ============ API.Input Module ============ //
 enum API_Input_Direction {
 	DIRECTION_LEFT = -1,
@@ -388,6 +403,7 @@ PyMODINIT_FUNC PyInit_API_Console(void) {
 
 static PyMethodDef APIMethods[] = {
 	{"Player", API_Player, METH_VARARGS, "Get Player Data"},
+	{"LocalID", API_LocalID, METH_VARARGS, "Get Local ID"},
 	{NULL, NULL, 0, NULL}
 };
 

@@ -512,7 +512,7 @@ protected:
 	void RenderSettings(CUIRect MainView);
 	void RenderSettingsCustom(CUIRect MainView);
 	void RenderSettingsPython(CUIRect MainView);
-//	void RenderSettingsPythonExceptions(CUIRect MainView);
+	void RenderSettingsPythonExceptions(CUIRect MainView, PythonScript *PS);
 
 	//login
 	void RenderLoginMenu(CUIRect MainView);
