@@ -92,9 +92,7 @@ public:
 	char m_aVersion[32];
 	char m_aAddress[MAX_SERVER_ADDRESSES * NETADDR_MAXSTRSIZE];
 	CClient m_aClients[SERVERINFO_MAX_CLIENTS];
-	mutable int m_NumFilteredPlayers;
-
-	mutable CUIElement *m_pUIElement;
+	int m_NumFilteredPlayers;
 
 	static int EstimateLatency(int Loc1, int Loc2);
 	static bool ParseLocation(int *pResult, const char *pString);
