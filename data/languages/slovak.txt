@@ -145,9 +145,6 @@ Favorites
 Feet
 == Nohy
 
-Filter
-== Filter
-
 Fire
 == Streľba
 
@@ -159,9 +156,6 @@ Force vote
 
 Free-View
 == Voľná Kamera
-
-Friends
-== Priatelia
 
 Fullscreen
 == Celá obrazovka
@@ -356,12 +350,6 @@ Screenshot
 Server address:
 == Adresa servera:
 
-Server details
-== Detaily servera
-
-Server filter
-== Filter serverov
-
 Server info
 == Informácie
 
@@ -531,9 +519,6 @@ Netversion:
 
 Map:
 == Mapa:
-
-Info
-== Info
 
 Hue
 == Hue
@@ -911,10 +896,33 @@ Pause the current demo
 Stop the current demo
 == 
 
+Go back the specified duration
+== 
+
+[Demo player duration]
+%d min.
+== 
+
+[Demo player duration]
+%d sec.
+== 
+
+Change the skip duration
+== 
+
+Go forward the specified duration
+== 
+
 Go back one tick
 == 
 
 Go forward one tick
+== 
+
+Go back one marker
+== 
+
+Go forward one marker
 == 
 
 Slow down the demo
@@ -930,12 +938,6 @@ Mark the end of a cut (right click to reset)
 == 
 
 Export cut as a separate demo
-== 
-
-Go back one marker
-== 
-
-Go forward one marker
 == 
 
 Close the demo player
