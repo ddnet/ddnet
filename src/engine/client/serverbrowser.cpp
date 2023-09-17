@@ -1545,7 +1545,7 @@ bool CServerInfo::ParseLocation(int *pResult, const char *pString)
 		return true;
 	}
 	// ISO continent code. Allow antarctica, but treat it as unknown.
-	static const char s_apLocations[][6] = {
+	static const char s_apLocations[NUM_LOCS][6] = {
 		"an", // LOC_UNKNOWN
 		"af", // LOC_AFRICA
 		"as", // LOC_ASIA
