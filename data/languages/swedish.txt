@@ -1737,18 +1737,18 @@ Render cut to video
 == Rendera snitt till video
 
 Go back the specified duration
-== 
+== Gå tillbaka den angivna tiden
 
 [Demo player duration]
 %d min.
-== 
+== %d min.
 
 [Demo player duration]
 %d sec.
-== 
+== %d sek.
 
 Change the skip duration
-== 
+== Ändra tiden för framspolning
 
 Go forward the specified duration
-== 
+== Gå framåt den angivna tiden
