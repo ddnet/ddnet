@@ -1300,20 +1300,17 @@ int CServerBrowser::HasRank(const char *pMap)
 	if(m_ServerlistType != IServerBrowser::TYPE_DDNET || !m_pDDNetInfo)
 		return -1;
 
-	const json_value *pDDNetRanks = json_object_get(m_pDDNetInfo, "maps");
-
-	if(!pDDNetRanks || pDDNetRanks->type != json_array)
+	const json_value &Ranks = (*m_pDDNetInfo)["maps"];
+	if(Ranks.type != json_array)
 		return -1;
 
-	for(int i = 0; i < json_array_length(pDDNetRanks); i++)
+	for(unsigned i = 0; i < Ranks.u.array.length; ++i)
 	{
-		const json_value *pJson = json_array_get(pDDNetRanks, i);
-		if(!pJson || pJson->type != json_string)
+		const json_value &Entry = *Ranks.u.array.values[i];
+		if(Entry.type != json_string)
 			continue;
 
-		const char *pStr = json_string_get(pJson);
-
-		if(str_comp(pMap, pStr) == 0)
+		if(str_comp(pMap, Entry.u.string.ptr) == 0)
 			return 1;
 	}
 
