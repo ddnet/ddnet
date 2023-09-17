@@ -145,9 +145,6 @@ Favorites
 Feet
 == Урасем
 
-Filter
-== Фильтр
-
 Fire
 == Пĕрӳ
 
@@ -159,9 +156,6 @@ Force vote
 
 Free-View
 == Ирĕклĕ обзор
-
-Friends
-== Юлташсем
 
 Fullscreen
 == Тулли экран
@@ -356,12 +350,6 @@ Screenshot
 Server address:
 == Сервер адресĕ
 
-Server details
-== Сервер тĕплĕсем
-
-Server filter
-== Серверсен фильтр
-
 Server info
 == Пĕлтерӳ
 
@@ -534,9 +522,6 @@ Miscellaneous
 
 Netversion:
 == Версия:
-
-Info
-== Пĕлтерӳ
 
 UI Color
 == Интерфейс тĕсĕ
@@ -911,10 +896,33 @@ Pause the current demo
 Stop the current demo
 == 
 
+Go back the specified duration
+== 
+
+[Demo player duration]
+%d min.
+== 
+
+[Demo player duration]
+%d sec.
+== 
+
+Change the skip duration
+== 
+
+Go forward the specified duration
+== 
+
 Go back one tick
 == 
 
 Go forward one tick
+== 
+
+Go back one marker
+== 
+
+Go forward one marker
 == 
 
 Slow down the demo
@@ -930,12 +938,6 @@ Mark the end of a cut (right click to reset)
 == 
 
 Export cut as a separate demo
-== 
-
-Go back one marker
-== 
-
-Go forward one marker
 == 
 
 Close the demo player
