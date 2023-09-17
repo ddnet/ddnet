@@ -722,7 +722,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 		const ColorRGBA ColorActive = ColorRGBA(0.0f, 0.0f, 0.0f, 0.3f);
 		const ColorRGBA ColorInactive = ColorRGBA(0.0f, 0.0f, 0.0f, 0.15f);
 
-		const int Network = g_Config.m_UiPage == PAGE_DDNET ? IServerBrowser::NETWORK_DDNET : IServerBrowser::NETWORK_KOG;
+		const CCommunity &Community = ServerBrowser()->Communities()[g_Config.m_UiPage == PAGE_DDNET ? IServerBrowser::NETWORK_DDNET : IServerBrowser::NETWORK_KOG];
 
 		CUIRect TabContents, CountriesTab, TypesTab;
 		View.HSplitTop(6.0f, nullptr, &View);
@@ -752,11 +752,11 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 
 		if(s_ActiveTab == FILTERTAB_COUNTRIES)
 		{
-			RenderServerbrowserCountriesFilter(TabContents, Network);
+			RenderServerbrowserCountriesFilter(TabContents, Community);
 		}
 		else if(s_ActiveTab == FILTERTAB_TYPES)
 		{
-			RenderServerbrowserTypesFilter(TabContents, Network);
+			RenderServerbrowserTypesFilter(TabContents, Community);
 		}
 	}
 
@@ -883,11 +883,11 @@ void CMenus::RenderServerbrowserDDNetFilter(CUIRect View,
 	ScrollRegion.End();
 }
 
-void CMenus::RenderServerbrowserCountriesFilter(CUIRect View, int Network)
+void CMenus::RenderServerbrowserCountriesFilter(CUIRect View, const CCommunity &Community)
 {
-	char *pFilterExcludeCountries = Network == IServerBrowser::NETWORK_DDNET ? g_Config.m_BrFilterExcludeCountries : g_Config.m_BrFilterExcludeCountriesKoG;
-	const int FilterExcludeCountriesSize = Network == IServerBrowser::NETWORK_DDNET ? sizeof(g_Config.m_BrFilterExcludeCountries) : sizeof(g_Config.m_BrFilterExcludeCountriesKoG);
-	const int MaxEntries = ServerBrowser()->NumCountries(Network);
+	char *pFilterExcludeCountries = str_comp(Community.Id(), IServerBrowser::COMMUNITY_DDNET) == 0 ? g_Config.m_BrFilterExcludeCountries : g_Config.m_BrFilterExcludeCountriesKoG;
+	const int FilterExcludeCountriesSize = str_comp(Community.Id(), IServerBrowser::COMMUNITY_DDNET) == 0 ? sizeof(g_Config.m_BrFilterExcludeCountries) : sizeof(g_Config.m_BrFilterExcludeCountriesKoG);
+	const int MaxEntries = Community.Countries().size();
 	const int EntriesPerRow = MaxEntries > 8 ? 5 : 4;
 
 	static CScrollRegion s_ScrollRegion;
@@ -897,25 +897,24 @@ void CMenus::RenderServerbrowserCountriesFilter(CUIRect View, int Network)
 	const float Spacing = 2.0f;
 
 	const auto &&GetItemName = [&](int ItemIndex) {
-		return ServerBrowser()->GetCountryName(Network, ItemIndex);
+		return Community.Countries()[ItemIndex].Name();
 	};
 	const auto &&RenderItem = [&](int ItemIndex, CUIRect Item, const void *pItemId, bool Active) {
 		Item.Margin(Spacing, &Item);
 		const float OldWidth = Item.w;
 		Item.w = Item.h * 2.0f;
 		Item.x += (OldWidth - Item.w) / 2.0f;
-		const int FlagID = ServerBrowser()->GetCountryFlag(Network, ItemIndex);
-		m_pClient->m_CountryFlags.Render(FlagID, ColorRGBA(1.0f, 1.0f, 1.0f, (Active ? 0.9f : 0.2f) + (UI()->HotItem() == pItemId ? 0.1f : 0.0f)), Item.x, Item.y, Item.w, Item.h);
+		m_pClient->m_CountryFlags.Render(Community.Countries()[ItemIndex].FlagId(), ColorRGBA(1.0f, 1.0f, 1.0f, (Active ? 0.9f : 0.2f) + (UI()->HotItem() == pItemId ? 0.1f : 0.0f)), Item.x, Item.y, Item.w, Item.h);
 	};
 
 	RenderServerbrowserDDNetFilter(View, pFilterExcludeCountries, FilterExcludeCountriesSize, ItemHeight + 2.0f * Spacing, MaxEntries, EntriesPerRow, s_ScrollRegion, s_vItemIds, GetItemName, RenderItem);
 }
 
-void CMenus::RenderServerbrowserTypesFilter(CUIRect View, int Network)
+void CMenus::RenderServerbrowserTypesFilter(CUIRect View, const CCommunity &Community)
 {
-	char *pFilterExcludeTypes = Network == IServerBrowser::NETWORK_DDNET ? g_Config.m_BrFilterExcludeTypes : g_Config.m_BrFilterExcludeTypesKoG;
-	const int FilterExcludeTypesSize = Network == IServerBrowser::NETWORK_DDNET ? sizeof(g_Config.m_BrFilterExcludeTypes) : sizeof(g_Config.m_BrFilterExcludeTypesKoG);
-	const int MaxEntries = ServerBrowser()->NumTypes(Network);
+	char *pFilterExcludeTypes = str_comp(Community.Id(), IServerBrowser::COMMUNITY_DDNET) == 0 ? g_Config.m_BrFilterExcludeTypes : g_Config.m_BrFilterExcludeTypesKoG;
+	const int FilterExcludeTypesSize = str_comp(Community.Id(), IServerBrowser::COMMUNITY_DDNET) == 0 ? sizeof(g_Config.m_BrFilterExcludeTypes) : sizeof(g_Config.m_BrFilterExcludeTypesKoG);
+	const int MaxEntries = Community.Types().size();
 	const int EntriesPerRow = 3;
 
 	static CScrollRegion s_ScrollRegion;
@@ -925,7 +924,7 @@ void CMenus::RenderServerbrowserTypesFilter(CUIRect View, int Network)
 	const float Spacing = 2.0f;
 
 	const auto &&GetItemName = [&](int ItemIndex) {
-		return ServerBrowser()->GetType(Network, ItemIndex);
+		return Community.Types()[ItemIndex].Name();
 	};
 	const auto &&RenderItem = [&](int ItemIndex, CUIRect Item, const void *pItemId, bool Active) {
 		Item.Margin(Spacing, &Item);

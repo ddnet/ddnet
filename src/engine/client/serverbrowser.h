@@ -38,43 +38,6 @@ public:
 		CServerEntry *m_pNextReq;
 	};
 
-	struct CNetworkCountry
-	{
-		enum
-		{
-			MAX_SERVERS = 1024
-		};
-
-		char m_aName[256];
-		int m_FlagID;
-		NETADDR m_aServers[MAX_SERVERS];
-		char m_aTypes[MAX_SERVERS][32];
-		int m_NumServers;
-
-		void Reset()
-		{
-			m_NumServers = 0;
-			m_FlagID = -1;
-			m_aName[0] = '\0';
-		};
-	};
-
-	enum
-	{
-		MAX_FAVORITES = 2048,
-		MAX_COUNTRIES = 32,
-		MAX_TYPES = 32,
-	};
-
-	struct CNetwork
-	{
-		CNetworkCountry m_aCountries[MAX_COUNTRIES];
-		int m_NumCountries;
-
-		char m_aTypes[MAX_TYPES][32];
-		int m_NumTypes;
-	};
-
 	CServerBrowser();
 	virtual ~CServerBrowser();
 
@@ -107,18 +70,15 @@ public:
 	void LoadDDNetInfoJson();
 	const json_value *LoadDDNetInfo();
 	int HasRank(const char *pMap);
-	int NumCountries(int Network) override { return m_aNetworks[Network].m_NumCountries; }
-	int GetCountryFlag(int Network, int Index) override { return m_aNetworks[Network].m_aCountries[Index].m_FlagID; }
-	const char *GetCountryName(int Network, int Index) override { return m_aNetworks[Network].m_aCountries[Index].m_aName; }
 
-	int NumTypes(int Network) override { return m_aNetworks[Network].m_NumTypes; }
-	const char *GetType(int Network, int Index) override { return m_aNetworks[Network].m_aTypes[Index]; }
+	const std::vector<CCommunity> &Communities() const override;
+	const CCommunity *Community(const char *pCommunityId) const override;
 
 	void DDNetFilterAdd(char *pFilter, int FilterSize, const char *pName) const override;
 	void DDNetFilterRem(char *pFilter, int FilterSize, const char *pName) const override;
 	bool DDNetFiltered(const char *pFilter, const char *pName) const override;
-	void CountryFilterClean(int Network) override;
-	void TypeFilterClean(int Network) override;
+	void CountryFilterClean(int CommunityIndex) override;
+	void TypeFilterClean(int CommunityIndex) override;
 
 	//
 	void Update();
@@ -155,7 +115,7 @@ private:
 	int *m_pSortedServerlist;
 	std::unordered_map<NETADDR, int> m_ByAddr;
 
-	CNetwork m_aNetworks[NUM_NETWORKS];
+	std::vector<CCommunity> m_vCommunities;
 	int m_OwnLocation = CServerInfo::LOC_UNKNOWN;
 
 	json_value *m_pDDNetInfo;
