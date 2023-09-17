@@ -891,13 +891,8 @@ void CGameTeams::SwapTeamCharacters(CPlayer *pPrimaryPlayer, CPlayer *pTargetPla
 		return;
 	}
 
-	for(int i = 0; i < MAX_CLIENTS; i++)
-	{
-		if(m_Core.Team(i) == Team && GameServer()->m_apPlayers[i])
-		{
-			GameServer()->m_apPlayers[i]->m_SwapTargetsClientID = -1;
-		}
-	}
+	pPrimaryPlayer->m_SwapTargetsClientID = -1;
+	pTargetPlayer->m_SwapTargetsClientID = -1;
 
 	int TimeoutAfterDelay = g_Config.m_SvSaveSwapGamesDelay + g_Config.m_SvSwapTimeout;
 	if(Since >= TimeoutAfterDelay)
