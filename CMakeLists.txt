@@ -2305,8 +2305,10 @@ if(CLIENT)
     python/PythonScript.h
     python/ScriptsScanner.cpp
     python/ScriptsScanner.h
-    python/api.cpp
-    python/api.h
+    python/api/api.cpp
+    python/api/api.h
+    python/api/api_vector2.cpp
+    python/api/api_vector2.h
     race.cpp
     race.h
     render.cpp

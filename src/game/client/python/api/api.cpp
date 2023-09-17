@@ -1,6 +1,8 @@
 #include "api.h"
 #include "base/system.h"
 #include "game/client/gameclient.h"
+#include "structmember.h"
+#include "api_vector2.h"
 
 // ============ API.Collision Module ============ //
 static PyObject* API_Collision_IntersectLine(PyObject* self, PyObject* args) {
@@ -50,6 +52,7 @@ PyMODINIT_FUNC PyInit_API_Collision(void) {
 }
 
 // ============ API.Player(id) Module ============ //
+
 PyObject* CreatePlayerObject(CGameClient::CClientData playerClient)
 {
 	return Py_BuildValue(
@@ -401,5 +404,11 @@ PyMODINIT_FUNC PyInit_API(void) {
 	PyModule_AddObject(APIModule, "Console", PyInit_API_Console());
 	PyModule_AddObject(APIModule, "Input", PyInit_API_Input());
 	PyModule_AddObject(APIModule, "Collision", PyInit_API_Collision());
+
+	while (PyType_Ready(&Vector2Type) < 0)
+	{
+	}
+
+	PyModule_AddObject(APIModule, "Vector2", (PyObject *)&Vector2Type);
 	return APIModule;
 }

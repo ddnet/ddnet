@@ -45,7 +45,10 @@ void PythonScript::init()
 	PyObject_SetAttrString(sysModule, "stderr", errStream);
 
 	this->module = PyImport_ImportModule(this->filepath.c_str());
+	this->updateExceptions();
+
 	this->module = PyImport_ReloadModule(this->module);
+	this->updateExceptions();
 
 	if (this->module == nullptr) {
 		this->fileExceptions.push_back(getError());

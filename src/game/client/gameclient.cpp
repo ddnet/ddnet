@@ -73,7 +73,7 @@
 #include "prediction/entities/projectile.h"
 
 #include "game/client/python/ScriptsScanner.h"
-#include "game/client/python/api.h"
+#include "game/client/python/api/api.h"
 
 using namespace std::chrono_literals;
 

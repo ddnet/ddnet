@@ -1,6 +1,6 @@
 #include "PythonController.h"
 #include "Python.h"
-#include "api.h"
+#include "game/client/python/api/api.h"
 
 PythonController::PythonController()
 {
