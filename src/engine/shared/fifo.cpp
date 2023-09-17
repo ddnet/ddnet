@@ -154,7 +154,13 @@ void CFifo::Update()
 		if(!PeekNamedPipe(m_pPipe, NULL, 0, NULL, &BytesAvailable, NULL))
 		{
 			const DWORD LastError = GetLastError();
-			if(LastError != ERROR_BAD_PIPE) // pipe not connected, not an error
+			if(LastError == ERROR_BROKEN_PIPE)
+			{
+				// Pipe was disconnected from the other side, either immediately
+				// after connecting or after reading the previous message.
+				DisconnectNamedPipe(m_pPipe);
+			}
+			else
 			{
 				const std::string ErrorMsg = windows_format_system_message(LastError);
 				dbg_msg("fifo", "failed to peek at pipe '%s' (%ld %s)", m_aFilename, LastError, ErrorMsg.c_str());

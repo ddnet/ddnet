@@ -278,21 +278,18 @@ void CKillMessages::OnRender()
 
 		float x = StartX;
 
-		ColorRGBA TColor(1.f, 1.f, 1.f, 1.f);
-		ColorRGBA TOutlineColor(0.f, 0.f, 0.f, 0.3f);
-
 		// render victim name
 		x -= m_aKillmsgs[r].m_VictimTextWidth;
+		ColorRGBA TextColor;
 		if(m_aKillmsgs[r].m_VictimID >= 0 && g_Config.m_ClChatTeamColors && m_aKillmsgs[r].m_VictimDDTeam)
-		{
-			TColor = color_cast<ColorRGBA>(ColorHSLA(m_aKillmsgs[r].m_VictimDDTeam / 64.0f, 1.0f, 0.75f));
-			TColor.a = 1.f;
-		}
+			TextColor = m_pClient->GetDDTeamColor(m_aKillmsgs[r].m_VictimDDTeam, 0.75f);
+		else
+			TextColor = TextRender()->DefaultTextColor();
 
 		CreateKillmessageNamesIfNotCreated(m_aKillmsgs[r]);
 
 		if(m_aKillmsgs[r].m_VictimTextContainerIndex.Valid())
-			TextRender()->RenderTextContainer(m_aKillmsgs[r].m_VictimTextContainerIndex, TColor, TOutlineColor, x, y + (46.f - 36.f) / 2.f);
+			TextRender()->RenderTextContainer(m_aKillmsgs[r].m_VictimTextContainerIndex, TextColor, TextRender()->DefaultTextOutlineColor(), x, y + (46.f - 36.f) / 2.f);
 
 		// render victim tee
 		x -= 24.0f;
@@ -380,7 +377,7 @@ void CKillMessages::OnRender()
 			x -= m_aKillmsgs[r].m_KillerTextWidth;
 
 			if(m_aKillmsgs[r].m_KillerTextContainerIndex.Valid())
-				TextRender()->RenderTextContainer(m_aKillmsgs[r].m_KillerTextContainerIndex, TColor, TOutlineColor, x, y + (46.f - 36.f) / 2.f);
+				TextRender()->RenderTextContainer(m_aKillmsgs[r].m_KillerTextContainerIndex, TextColor, TextRender()->DefaultTextOutlineColor(), x, y + (46.f - 36.f) / 2.f);
 		}
 
 		y += 46.0f;
@@ -397,6 +394,7 @@ void CKillMessages::RefindSkins()
 
 		if(m_aKillmsgs[r].m_KillerID >= 0)
 		{
+			m_aKillmsgs[r].m_KillerRenderInfo = {};
 			const CGameClient::CClientData &Client = GameClient()->m_aClients[m_aKillmsgs[r].m_KillerID];
 			if(Client.m_aSkinName[0] != '\0')
 				m_aKillmsgs[r].m_KillerRenderInfo = Client.m_RenderInfo;

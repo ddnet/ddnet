@@ -130,7 +130,8 @@ void CVoting::AddvoteOption(const char *pDescription, const char *pCommand)
 
 void CVoting::Vote(int v)
 {
-	m_Voted = v;
+	if(m_Voted == 0)
+		m_Voted = v;
 	CNetMsg_Cl_Vote Msg = {v};
 	Client()->SendPackMsgActive(&Msg, MSGFLAG_VITAL);
 }
@@ -298,6 +299,11 @@ void CVoting::OnMessage(int MsgType, void *pRawMsg)
 				break;
 			}
 		}
+	}
+	else if(MsgType == NETMSGTYPE_SV_YOURVOTE)
+	{
+		CNetMsg_Sv_YourVote *pMsg = (CNetMsg_Sv_YourVote *)pRawMsg;
+		m_Voted = pMsg->m_Voted;
 	}
 }
 

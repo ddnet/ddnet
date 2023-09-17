@@ -346,7 +346,7 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 
 		// find the current command
 		{
-			char aBuf[128];
+			char aBuf[512];
 			StrCopyUntilSpace(aBuf, sizeof(aBuf), GetString());
 			const IConsole::CCommandInfo *pCommand = m_pGameConsole->m_pConsole->GetCommandInfo(aBuf, m_CompletionFlagmask,
 				m_Type != CGameConsole::CONSOLETYPE_LOCAL && m_pGameConsole->Client()->RconAuthed() && m_pGameConsole->Client()->UseTempRconCommands());
@@ -367,9 +367,6 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 
 void CGameConsole::CInstance::PrintLine(const char *pLine, int Len, ColorRGBA PrintColor)
 {
-	if(Len > 255)
-		Len = 255;
-
 	m_BacklogLock.lock();
 	CBacklogEntry *pEntry = m_Backlog.Allocate(sizeof(CBacklogEntry) + Len);
 	pEntry->m_YOffset = -1.0f;
@@ -694,7 +691,7 @@ void CGameConsole::OnRender()
 
 				if(NumArguments <= 0 && pConsole->m_IsCommand)
 				{
-					char aBuf[512];
+					char aBuf[1024];
 					str_format(aBuf, sizeof(aBuf), "Help: %s ", pConsole->m_pCommandHelp);
 					TextRender()->TextEx(&Info.m_Cursor, aBuf, -1);
 					TextRender()->TextColor(0.75f, 0.75f, 0.75f, 1);
@@ -729,8 +726,9 @@ void CGameConsole::OnRender()
 				{
 					TextRender()->SetCursor(&Cursor, 0.0f, 0.0f, FontSize, 0);
 					Cursor.m_LineWidth = Screen.w - 10;
+					Cursor.m_MaxLines = 10;
 					TextRender()->TextEx(&Cursor, pEntry->m_aText, -1);
-					pEntry->m_YOffset = Cursor.m_Y + Cursor.m_AlignedFontSize + LineOffset;
+					pEntry->m_YOffset = Cursor.Height() + LineOffset;
 				}
 				OffsetY += pEntry->m_YOffset;
 
@@ -751,6 +749,7 @@ void CGameConsole::OnRender()
 				{
 					TextRender()->SetCursor(&Cursor, 0.0f, y - OffsetY, FontSize, TEXTFLAG_RENDER);
 					Cursor.m_LineWidth = Screen.w - 10.0f;
+					Cursor.m_MaxLines = 10;
 					Cursor.m_CalculateSelectionMode = (m_ConsoleState == CONSOLE_OPEN && pConsole->m_MousePress.y < pConsole->m_BoundingBox.m_Y && (pConsole->m_MouseIsPress || (pConsole->m_CurSelStart != pConsole->m_CurSelEnd) || pConsole->m_HasSelection)) ? TEXT_CURSOR_SELECTION_MODE_CALCULATE : TEXT_CURSOR_SELECTION_MODE_NONE;
 					Cursor.m_PressMouse = pConsole->m_MousePress;
 					Cursor.m_ReleaseMouse = pConsole->m_MouseRelease;

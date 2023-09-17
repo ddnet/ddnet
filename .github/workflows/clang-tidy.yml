@@ -11,6 +11,8 @@ on:
 jobs:
   check-clang-tidy:
     runs-on: ubuntu-latest
+    env:
+      CARGO_HTTP_MULTIPLEXING: false
     steps:
     - uses: actions/checkout@v3
       with:

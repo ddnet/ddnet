@@ -91,6 +91,8 @@ MAYBE_UNUSED static const char *FONT_ICON_GEAR = "\xEF\x80\x93";
 MAYBE_UNUSED static const char *FONT_ICON_PEN_TO_SQUARE = "\xEF\x81\x84";
 MAYBE_UNUSED static const char *FONT_ICON_CLAPPERBOARD = "\xEE\x84\xB1";
 MAYBE_UNUSED static const char *FONT_ICON_EARTH_AMERICAS = "\xEF\x95\xBD";
+MAYBE_UNUSED static const char *FONT_ICON_LIST_UL = "\xEF\x83\x8A";
+MAYBE_UNUSED static const char *FONT_ICON_INFO = "\xEF\x84\xA9";
 
 MAYBE_UNUSED static const char *FONT_ICON_SLASH = "\xEF\x9C\x95";
 MAYBE_UNUSED static const char *FONT_ICON_PLAY = "\xEF\x81\x8B";
@@ -98,6 +100,8 @@ MAYBE_UNUSED static const char *FONT_ICON_PAUSE = "\xEF\x81\x8C";
 MAYBE_UNUSED static const char *FONT_ICON_STOP = "\xEF\x81\x8D";
 MAYBE_UNUSED static const char *FONT_ICON_CHEVRON_LEFT = "\xEF\x81\x93";
 MAYBE_UNUSED static const char *FONT_ICON_CHEVRON_RIGHT = "\xEF\x81\x94";
+MAYBE_UNUSED static const char *FONT_ICON_CHEVRON_UP = "\xEF\x81\xB7";
+MAYBE_UNUSED static const char *FONT_ICON_CHEVRON_DOWN = "\xEF\x81\xB8";
 MAYBE_UNUSED static const char *FONT_ICON_BACKWARD = "\xEF\x81\x8A";
 MAYBE_UNUSED static const char *FONT_ICON_FORWARD = "\xEF\x81\x8E";
 MAYBE_UNUSED static const char *FONT_ICON_RIGHT_FROM_BRACKET = "\xEF\x8B\xB5";
@@ -105,6 +109,8 @@ MAYBE_UNUSED static const char *FONT_ICON_RIGHT_TO_BRACKET = "\xEF\x8B\xB6";
 MAYBE_UNUSED static const char *FONT_ICON_ARROW_UP_RIGHT_FROM_SQUARE = "\xEF\x82\x8E";
 MAYBE_UNUSED static const char *FONT_ICON_BACKWARD_STEP = "\xEF\x81\x88";
 MAYBE_UNUSED static const char *FONT_ICON_FORWARD_STEP = "\xEF\x81\x91";
+MAYBE_UNUSED static const char *FONT_ICON_BACKWARD_FAST = "\xEF\x81\x89";
+MAYBE_UNUSED static const char *FONT_ICON_FORWARD_FAST = "\xEF\x81\x90";
 MAYBE_UNUSED static const char *FONT_ICON_KEYBOARD = "\xE2\x8C\xA8";
 MAYBE_UNUSED static const char *FONT_ICON_ELLIPSIS = "\xEF\x85\x81";
 
@@ -281,7 +287,7 @@ public:
 
 	virtual STextBoundingBox GetBoundingBoxTextContainer(STextContainerIndex TextContainerIndex) = 0;
 
-	virtual void UploadEntityLayerText(void *pTexBuff, size_t ImageColorChannelCount, int TexWidth, int TexHeight, int TexSubWidth, int TexSubHeight, const char *pText, int Length, float x, float y, int FontSize) = 0;
+	virtual void UploadEntityLayerText(void *pTexBuff, size_t PixelSize, size_t TexWidth, size_t TexHeight, int TexSubWidth, int TexSubHeight, const char *pText, int Length, float x, float y, int FontSize) = 0;
 	virtual int AdjustFontSize(const char *pText, int TextLength, int MaxSize, int MaxWidth) const = 0;
 	virtual float GetGlyphOffsetX(int FontSize, char TextCharacter) const = 0;
 	virtual int CalculateTextWidth(const char *pText, int TextLength, int FontWidth, int FontSize) const = 0;

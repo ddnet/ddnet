@@ -147,9 +147,6 @@ Favorites
 Feet
 == Ногі
 
-Filter
-== Фільтр
-
 Fire
 == Стрэл
 
@@ -161,9 +158,6 @@ Force vote
 
 Free-View
 == Вольны агляд
-
-Friends
-== Сябры
 
 Fullscreen
 == Поўнаэкранны рэжым
@@ -358,12 +352,6 @@ Screenshot
 Server address:
 == Адрас сервера:
 
-Server details
-== Дэталі сервера
-
-Server filter
-== Фільтр сервераў
-
 Server info
 == Інфармацыя
 
@@ -531,9 +519,6 @@ Netversion:
 
 Map:
 == Карта:
-
-Info
-== Інфа
 
 Hue
 == Адценне
@@ -1725,6 +1710,26 @@ Unable to rename the folder
 == 
 
 (paused)
+== 
+
+Go back the specified duration
+== 
+
+[Demo player duration]
+%d min.
+== 
+
+[Demo player duration]
+%d sec.
+== 
+
+Change the skip duration
+== 
+
+Go forward the specified duration
+== 
+
+Render cut to video
 == 
 
 All combined

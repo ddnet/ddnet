@@ -170,9 +170,6 @@ Favorites
 Feet
 == Pés
 
-Filter
-== Filtro
-
 Fire
 == Atirar
 
@@ -184,9 +181,6 @@ Force vote
 
 Free-View
 == Visualização livre
-
-Friends
-== Amigos
 
 Fullscreen
 == Tela cheia
@@ -384,12 +378,6 @@ Screenshot
 Server address:
 == Endereço:
 
-Server details
-== Detalhes do servidor
-
-Server filter
-== Filtro de servidores
-
 Server info
 == Servidor
 
@@ -575,9 +563,6 @@ Show ghost
 
 Clan plates size
 == Tamanho da placa do clã
-
-Info
-== Info
 
 No updates available
 == Nenhuma atualização disponível
@@ -1767,3 +1752,23 @@ Unable to delete the folder '%s'. Make sure it's empty first.
 
 Moved ingame
 == Movido no jogo
+
+Go back the specified duration
+== 
+
+[Demo player duration]
+%d min.
+== 
+
+[Demo player duration]
+%d sec.
+== 
+
+Change the skip duration
+== 
+
+Go forward the specified duration
+== 
+
+Render cut to video
+== 

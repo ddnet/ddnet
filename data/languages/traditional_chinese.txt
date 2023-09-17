@@ -166,9 +166,6 @@ Favorites
 Feet
 == 腳
 
-Filter
-== 過濾器
-
 Fire
 == 開火
 
@@ -180,9 +177,6 @@ Force vote
 
 Free-View
 == 自由視角
-
-Friends
-== 好友
 
 Fullscreen
 == 獨占全螢幕
@@ -404,12 +398,6 @@ Screenshot
 Server address:
 == 伺服器地址：
 
-Server details
-== 伺服器詳細資訊
-
-Server filter
-== 伺服器過濾器
-
 Server info
 == 伺服器資訊
 
@@ -604,9 +592,6 @@ Netversion:
 
 Map:
 == 地圖：
-
-Info
-== 資訊
 
 Hue
 == 色調
@@ -1769,3 +1754,23 @@ Unable to delete the folder '%s'. Make sure it's empty first.
 
 Moved ingame
 == 遊戲內移動
+
+Go back the specified duration
+== 
+
+[Demo player duration]
+%d min.
+== 
+
+[Demo player duration]
+%d sec.
+== 
+
+Change the skip duration
+== 
+
+Go forward the specified duration
+== 
+
+Render cut to video
+== 

@@ -12,6 +12,8 @@
 #include <limits>
 
 #include <game/client/ui_scrollregion.h>
+#include <game/editor/mapitems/image.h>
+#include <game/editor/mapitems/sound.h>
 
 #include "editor.h"
 
@@ -196,6 +198,15 @@ CUI::EPopupMenuFunctionResult CEditor::PopupMenuTools(void *pContext, CUIRect Vi
 	{
 		static SPopupMenuId s_PopupGotoId;
 		pEditor->UI()->DoPopupMenu(&s_PopupGotoId, Slot.x, Slot.y + Slot.h, 120, 52, pEditor, PopupGoto);
+	}
+
+	static int s_TileartButton = 0;
+	View.HSplitTop(2.0f, nullptr, &View);
+	View.HSplitTop(12.0f, &Slot, &View);
+	if(pEditor->DoButton_MenuItem(&s_TileartButton, "Add tileart", 0, &Slot, 0, "Generate tileart from image"))
+	{
+		pEditor->InvokeFileDialog(IStorage::TYPE_ALL, FILETYPE_IMG, "Add tileart", "Open", "mapres", false, CallbackAddTileart, pEditor);
+		return CUI::POPUP_CLOSE_CURRENT;
 	}
 
 	return CUI::POPUP_KEEP_OPEN;
@@ -1198,10 +1209,10 @@ CUI::EPopupMenuFunctionResult CEditor::PopupSource(void *pContext, CUIRect View,
 CUI::EPopupMenuFunctionResult CEditor::PopupPoint(void *pContext, CUIRect View, bool Active)
 {
 	CEditor *pEditor = static_cast<CEditor *>(pContext);
-	std::vector<std::pair<CQuad *, int>> vpQuads = pEditor->GetSelectedQuadPoints();
+	std::vector<CQuad *> vpQuads = pEditor->GetSelectedQuads();
 	if(!in_range<int>(pEditor->m_SelectedQuadIndex, 0, vpQuads.size() - 1))
 		return CUI::POPUP_CLOSE_CURRENT;
-	CQuad *pCurrentQuad = vpQuads[pEditor->m_SelectedQuadIndex].first;
+	CQuad *pCurrentQuad = vpQuads[pEditor->m_SelectedQuadIndex];
 
 	enum
 	{
@@ -1241,25 +1252,25 @@ CUI::EPopupMenuFunctionResult CEditor::PopupPoint(void *pContext, CUIRect View, 
 		pEditor->m_Map.OnModify();
 	}
 
-	for(auto [pQuad, SelectedPoints] : vpQuads)
+	for(CQuad *pQuad : vpQuads)
 	{
 		if(Prop == PROP_POS_X)
 		{
 			for(int v = 0; v < 4; v++)
-				if(SelectedPoints & (1 << v))
+				if(pEditor->IsQuadSelected(v))
 					pQuad->m_aPoints[v].x = i2fx(fx2i(pQuad->m_aPoints[v].x) + NewVal - X);
 		}
 		else if(Prop == PROP_POS_Y)
 		{
 			for(int v = 0; v < 4; v++)
-				if(SelectedPoints & (1 << v))
+				if(pEditor->IsQuadSelected(v))
 					pQuad->m_aPoints[v].y = i2fx(fx2i(pQuad->m_aPoints[v].y) + NewVal - Y);
 		}
 		else if(Prop == PROP_COLOR)
 		{
 			for(int v = 0; v < 4; v++)
 			{
-				if(SelectedPoints & (1 << v))
+				if(pEditor->IsQuadSelected(v))
 				{
 					pQuad->m_aColors[v].r = (NewVal >> 24) & 0xff;
 					pQuad->m_aColors[v].g = (NewVal >> 16) & 0xff;
@@ -1271,13 +1282,13 @@ CUI::EPopupMenuFunctionResult CEditor::PopupPoint(void *pContext, CUIRect View, 
 		else if(Prop == PROP_TEX_U)
 		{
 			for(int v = 0; v < 4; v++)
-				if(SelectedPoints & (1 << v))
+				if(pEditor->IsQuadSelected(v))
 					pQuad->m_aTexcoords[v].x = f2fx(fx2f(pQuad->m_aTexcoords[v].x) + (NewVal - TextureU) / 1024.0f);
 		}
 		else if(Prop == PROP_TEX_V)
 		{
 			for(int v = 0; v < 4; v++)
-				if(SelectedPoints & (1 << v))
+				if(pEditor->IsQuadSelected(v))
 					pQuad->m_aTexcoords[v].y = f2fx(fx2f(pQuad->m_aTexcoords[v].y) + (NewVal - TextureV) / 1024.0f);
 		}
 	}
@@ -1724,7 +1735,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupEvent(void *pContext, CUIRect View, 
 		pTitle = "Exit the editor";
 		pMessage = "The map contains unsaved data, you might want to save it before you exit the editor.\n\nContinue anyway?";
 	}
-	else if(pEditor->m_PopupEventType == POPEVENT_LOAD || pEditor->m_PopupEventType == POPEVENT_LOADCURRENT)
+	else if(pEditor->m_PopupEventType == POPEVENT_LOAD || pEditor->m_PopupEventType == POPEVENT_LOADCURRENT || pEditor->m_PopupEventType == POPEVENT_LOADDROP)
 	{
 		pTitle = "Load map";
 		pMessage = "The map contains unsaved data, you might want to save it before you load a new map.\n\nContinue anyway?";
@@ -1764,6 +1775,21 @@ CUI::EPopupMenuFunctionResult CEditor::PopupEvent(void *pContext, CUIRect View, 
 		pTitle = "Place border tiles";
 		pMessage = "This is going to overwrite any existing tiles around the edges of the layer.\n\nContinue?";
 	}
+	else if(pEditor->m_PopupEventType == POPEVENT_PIXELART_BIG_IMAGE)
+	{
+		pTitle = "Big image";
+		pMessage = "The selected image is big. Converting it to tileart may take some time.\n\nContinue anyway?";
+	}
+	else if(pEditor->m_PopupEventType == POPEVENT_PIXELART_MANY_COLORS)
+	{
+		pTitle = "Many colors";
+		pMessage = "The selected image contains many colors, which will lead to a big mapfile. You may want to consider reducing the number of colors.\n\nContinue anyway?";
+	}
+	else if(pEditor->m_PopupEventType == POPEVENT_PIXELART_TOO_MANY_COLORS)
+	{
+		pTitle = "Too many colors";
+		pMessage = "The client only supports 64 images but more would be needed to add the selected image as tileart.";
+	}
 	else
 	{
 		dbg_assert(false, "m_PopupEventType invalid");
@@ -1786,12 +1812,21 @@ CUI::EPopupMenuFunctionResult CEditor::PopupEvent(void *pContext, CUIRect View, 
 
 	// button bar
 	ButtonBar.VSplitLeft(110.0f, &Button, &ButtonBar);
-	if(pEditor->m_PopupEventType != POPEVENT_LARGELAYER && pEditor->m_PopupEventType != POPEVENT_PREVENTUNUSEDTILES && pEditor->m_PopupEventType != POPEVENT_IMAGEDIV16 && pEditor->m_PopupEventType != POPEVENT_IMAGE_MAX)
+	if(pEditor->m_PopupEventType != POPEVENT_LARGELAYER && pEditor->m_PopupEventType != POPEVENT_PREVENTUNUSEDTILES && pEditor->m_PopupEventType != POPEVENT_IMAGEDIV16 && pEditor->m_PopupEventType != POPEVENT_IMAGE_MAX && pEditor->m_PopupEventType != POPEVENT_PIXELART_TOO_MANY_COLORS)
 	{
 		static int s_CancelButton = 0;
 		if(pEditor->DoButton_Editor(&s_CancelButton, "Cancel", 0, &Button, 0, nullptr))
 		{
+			if(pEditor->m_PopupEventType == POPEVENT_LOADDROP)
+				pEditor->m_aFileNamePending[0] = 0;
 			pEditor->m_PopupEventWasActivated = false;
+
+			if(pEditor->m_PopupEventType == POPEVENT_PIXELART_BIG_IMAGE || pEditor->m_PopupEventType == POPEVENT_PIXELART_MANY_COLORS)
+			{
+				free(pEditor->m_TileartImageInfo.m_pData);
+				pEditor->m_TileartImageInfo.m_pData = nullptr;
+			}
+
 			return CUI::POPUP_CLOSE_CURRENT;
 		}
 	}
@@ -1812,6 +1847,13 @@ CUI::EPopupMenuFunctionResult CEditor::PopupEvent(void *pContext, CUIRect View, 
 		{
 			pEditor->LoadCurrentMap();
 		}
+		else if(pEditor->m_PopupEventType == POPEVENT_LOADDROP)
+		{
+			int Result = pEditor->Load(pEditor->m_aFileNamePending, IStorage::TYPE_ALL_OR_ABSOLUTE);
+			if(!Result)
+				dbg_msg("editor", "editing passed map file '%s' failed", pEditor->m_aFileNamePending);
+			pEditor->m_aFileNamePending[0] = 0;
+		}
 		else if(pEditor->m_PopupEventType == POPEVENT_NEW)
 		{
 			pEditor->Reset();
@@ -1830,6 +1872,14 @@ CUI::EPopupMenuFunctionResult CEditor::PopupEvent(void *pContext, CUIRect View, 
 		else if(pEditor->m_PopupEventType == POPEVENT_PLACE_BORDER_TILES)
 		{
 			pEditor->PlaceBorderTiles();
+		}
+		else if(pEditor->m_PopupEventType == POPEVENT_PIXELART_BIG_IMAGE)
+		{
+			pEditor->TileartCheckColors();
+		}
+		else if(pEditor->m_PopupEventType == POPEVENT_PIXELART_MANY_COLORS)
+		{
+			pEditor->AddTileart();
 		}
 		pEditor->m_PopupEventWasActivated = false;
 		return CUI::POPUP_CLOSE_CURRENT;
@@ -2368,7 +2418,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupEntities(void *pContext, CUIRect Vie
 
 				char aBuf[IO_MAX_PATH_LENGTH];
 				str_format(aBuf, sizeof(aBuf), "editor/entities/%s.png", pName);
-				pEditor->m_EntitiesTexture = pEditor->Graphics()->LoadTexture(aBuf, IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, pEditor->GetTextureUsageFlag());
+				pEditor->m_EntitiesTexture = pEditor->Graphics()->LoadTexture(aBuf, IStorage::TYPE_ALL, pEditor->GetTextureUsageFlag());
 				return CUI::POPUP_CLOSE_CURRENT;
 			}
 		}

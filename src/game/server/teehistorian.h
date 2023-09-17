@@ -33,6 +33,9 @@ public:
 		SHA256_DIGEST m_MapSha256;
 		int m_MapCrc;
 
+		bool m_HavePrevGameUuid;
+		CUuid m_PrevGameUuid;
+
 		CConfig *m_pConfig;
 		CTuningParams *m_pTuning;
 		CUuidManager *m_pUuids;

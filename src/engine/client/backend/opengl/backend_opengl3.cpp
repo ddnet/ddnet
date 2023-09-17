@@ -555,7 +555,7 @@ void CCommandProcessorFragment_OpenGL3_3::TextureUpdate(int Slot, int X, int Y, 
 			Y /= 2;
 		}
 
-		void *pTmpData = Resize(static_cast<const unsigned char *>(pTexData), Width, Height, Width, Height, GLFormatToImageColorChannelCount(GLFormat));
+		void *pTmpData = Resize(static_cast<const unsigned char *>(pTexData), Width, Height, Width, Height, GLFormatToPixelSize(GLFormat));
 		free(pTexData);
 		pTexData = pTmpData;
 	}
@@ -577,7 +577,7 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_Texture_Destroy(const CCommandBuff
 	DestroyTexture(pCommand->m_Slot);
 }
 
-void CCommandProcessorFragment_OpenGL3_3::TextureCreate(int Slot, int Width, int Height, int PixelSize, int GLFormat, int GLStoreFormat, int Flags, void *pTexData)
+void CCommandProcessorFragment_OpenGL3_3::TextureCreate(int Slot, int Width, int Height, int GLFormat, int GLStoreFormat, int Flags, void *pTexData)
 {
 	if(Slot >= (int)m_vTextures.size())
 		m_vTextures.resize(m_vTextures.size() * 2);
@@ -595,7 +595,7 @@ void CCommandProcessorFragment_OpenGL3_3::TextureCreate(int Slot, int Width, int
 				++RescaleCount;
 			} while(Width > m_MaxTexSize || Height > m_MaxTexSize);
 
-			void *pTmpData = Resize(static_cast<const unsigned char *>(pTexData), Width, Height, Width, Height, GLFormatToImageColorChannelCount(GLFormat));
+			void *pTmpData = Resize(static_cast<const unsigned char *>(pTexData), Width, Height, Width, Height, GLFormatToPixelSize(GLFormat));
 			free(pTexData);
 			pTexData = pTmpData;
 		}
@@ -604,10 +604,9 @@ void CCommandProcessorFragment_OpenGL3_3::TextureCreate(int Slot, int Width, int
 	m_vTextures[Slot].m_Height = Height;
 	m_vTextures[Slot].m_RescaleCount = RescaleCount;
 
-	int Oglformat = GLFormat;
-	int StoreOglformat = GLStoreFormat;
-	if(StoreOglformat == GL_RED)
-		StoreOglformat = GL_R8;
+	if(GLStoreFormat == GL_RED)
+		GLStoreFormat = GL_R8;
+	const size_t PixelSize = GLFormatToPixelSize(GLFormat);
 
 	int SamplerSlot = 0;
 
@@ -628,7 +627,7 @@ void CCommandProcessorFragment_OpenGL3_3::TextureCreate(int Slot, int Width, int
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			glSamplerParameteri(m_vTextures[Slot].m_Sampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			glSamplerParameteri(m_vTextures[Slot].m_Sampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glTexImage2D(GL_TEXTURE_2D, 0, StoreOglformat, Width, Height, 0, Oglformat, GL_UNSIGNED_BYTE, pTexData);
+			glTexImage2D(GL_TEXTURE_2D, 0, GLStoreFormat, Width, Height, 0, GLFormat, GL_UNSIGNED_BYTE, pTexData);
 		}
 	}
 	else
@@ -649,7 +648,7 @@ void CCommandProcessorFragment_OpenGL3_3::TextureCreate(int Slot, int Width, int
 				glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 5.f);
 				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LOD, 5);
 			}
-			glTexImage2D(GL_TEXTURE_2D, 0, StoreOglformat, Width, Height, 0, Oglformat, GL_UNSIGNED_BYTE, pTexData);
+			glTexImage2D(GL_TEXTURE_2D, 0, GLStoreFormat, Width, Height, 0, GLFormat, GL_UNSIGNED_BYTE, pTexData);
 			glGenerateMipmap(GL_TEXTURE_2D);
 		}
 
@@ -671,14 +670,12 @@ void CCommandProcessorFragment_OpenGL3_3::TextureCreate(int Slot, int Width, int
 				glSamplerParameterf(m_vTextures[Slot].m_Sampler2DArray, GL_TEXTURE_LOD_BIAS, ((GLfloat)m_OpenGLTextureLodBIAS / 1000.0f));
 #endif
 
-			int ImageColorChannels = GLFormatToImageColorChannelCount(GLFormat);
-
 			uint8_t *p3DImageData = NULL;
 
 			bool IsSingleLayer = (Flags & CCommandBuffer::TEXFLAG_TO_2D_ARRAY_TEXTURE_SINGLE_LAYER) != 0;
 
 			if(!IsSingleLayer)
-				p3DImageData = (uint8_t *)malloc((size_t)ImageColorChannels * Width * Height);
+				p3DImageData = (uint8_t *)malloc((size_t)Width * Height * PixelSize);
 			int Image3DWidth, Image3DHeight;
 
 			int ConvertWidth = Width;
@@ -691,7 +688,7 @@ void CCommandProcessorFragment_OpenGL3_3::TextureCreate(int Slot, int Width, int
 					dbg_msg("gfx", "3D/2D array texture was resized");
 					int NewWidth = maximum<int>(HighestBit(ConvertWidth), 16);
 					int NewHeight = maximum<int>(HighestBit(ConvertHeight), 16);
-					uint8_t *pNewTexData = (uint8_t *)Resize((const uint8_t *)pTexData, ConvertWidth, ConvertHeight, NewWidth, NewHeight, GLFormatToImageColorChannelCount(GLFormat));
+					uint8_t *pNewTexData = (uint8_t *)Resize((const uint8_t *)pTexData, ConvertWidth, ConvertHeight, NewWidth, NewHeight, GLFormatToPixelSize(GLFormat));
 
 					ConvertWidth = NewWidth;
 					ConvertHeight = NewHeight;
@@ -701,15 +698,15 @@ void CCommandProcessorFragment_OpenGL3_3::TextureCreate(int Slot, int Width, int
 				}
 			}
 
-			if(IsSingleLayer || (Texture2DTo3D(pTexData, ConvertWidth, ConvertHeight, ImageColorChannels, 16, 16, p3DImageData, Image3DWidth, Image3DHeight)))
+			if(IsSingleLayer || (Texture2DTo3D(pTexData, ConvertWidth, ConvertHeight, PixelSize, 16, 16, p3DImageData, Image3DWidth, Image3DHeight)))
 			{
 				if(IsSingleLayer)
 				{
-					glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, StoreOglformat, ConvertWidth, ConvertHeight, 1, 0, Oglformat, GL_UNSIGNED_BYTE, pTexData);
+					glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GLStoreFormat, ConvertWidth, ConvertHeight, 1, 0, GLFormat, GL_UNSIGNED_BYTE, pTexData);
 				}
 				else
 				{
-					glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, StoreOglformat, Image3DWidth, Image3DHeight, 256, 0, Oglformat, GL_UNSIGNED_BYTE, p3DImageData);
+					glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GLStoreFormat, Image3DWidth, Image3DHeight, 256, 0, GLFormat, GL_UNSIGNED_BYTE, p3DImageData);
 				}
 				glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
 			}
@@ -723,12 +720,12 @@ void CCommandProcessorFragment_OpenGL3_3::TextureCreate(int Slot, int Width, int
 	m_vTextures[Slot].m_LastWrapMode = CCommandBuffer::WRAP_REPEAT;
 
 	// calculate memory usage
-	m_vTextures[Slot].m_MemSize = Width * Height * PixelSize;
+	m_vTextures[Slot].m_MemSize = (size_t)Width * Height * PixelSize;
 	while(Width > 2 && Height > 2)
 	{
 		Width >>= 1;
 		Height >>= 1;
-		m_vTextures[Slot].m_MemSize += Width * Height * PixelSize;
+		m_vTextures[Slot].m_MemSize += (size_t)Width * Height * PixelSize;
 	}
 	m_pTextureMemoryUsage->store(m_pTextureMemoryUsage->load(std::memory_order_relaxed) + m_vTextures[Slot].m_MemSize, std::memory_order_relaxed);
 
@@ -737,7 +734,7 @@ void CCommandProcessorFragment_OpenGL3_3::TextureCreate(int Slot, int Width, int
 
 void CCommandProcessorFragment_OpenGL3_3::Cmd_Texture_Create(const CCommandBuffer::SCommand_Texture_Create *pCommand)
 {
-	TextureCreate(pCommand->m_Slot, pCommand->m_Width, pCommand->m_Height, pCommand->m_PixelSize, TexFormatToOpenGLFormat(pCommand->m_Format), TexFormatToOpenGLFormat(pCommand->m_StoreFormat), pCommand->m_Flags, pCommand->m_pData);
+	TextureCreate(pCommand->m_Slot, pCommand->m_Width, pCommand->m_Height, TexFormatToOpenGLFormat(pCommand->m_Format), TexFormatToOpenGLFormat(pCommand->m_StoreFormat), pCommand->m_Flags, pCommand->m_pData);
 }
 
 void CCommandProcessorFragment_OpenGL3_3::Cmd_TextTexture_Update(const CCommandBuffer::SCommand_TextTexture_Update *pCommand)
@@ -753,20 +750,28 @@ void CCommandProcessorFragment_OpenGL3_3::Cmd_TextTextures_Destroy(const CComman
 
 void CCommandProcessorFragment_OpenGL3_3::Cmd_TextTextures_Create(const CCommandBuffer::SCommand_TextTextures_Create *pCommand)
 {
-	void *pTextData = pCommand->m_pTextData;
-	void *pTextOutlineData = pCommand->m_pTextOutlineData;
-	TextureCreate(pCommand->m_Slot, pCommand->m_Width, pCommand->m_Height, 1, GL_RED, GL_RED, CCommandBuffer::TEXFLAG_NOMIPMAPS, pTextData);
-	TextureCreate(pCommand->m_SlotOutline, pCommand->m_Width, pCommand->m_Height, 1, GL_RED, GL_RED, CCommandBuffer::TEXFLAG_NOMIPMAPS, pTextOutlineData);
+	TextureCreate(pCommand->m_Slot, pCommand->m_Width, pCommand->m_Height, GL_RED, GL_RED, CCommandBuffer::TEXFLAG_NOMIPMAPS, pCommand->m_pTextData);
+	TextureCreate(pCommand->m_SlotOutline, pCommand->m_Width, pCommand->m_Height, GL_RED, GL_RED, CCommandBuffer::TEXFLAG_NOMIPMAPS, pCommand->m_pTextOutlineData);
 }
 
 void CCommandProcessorFragment_OpenGL3_3::Cmd_Clear(const CCommandBuffer::SCommand_Clear *pCommand)
 {
+	// if clip is still active, force disable it for clearing, enable it again afterwards
+	bool ClipWasEnabled = m_LastClipEnable;
+	if(ClipWasEnabled)
+	{
+		glDisable(GL_SCISSOR_TEST);
+	}
 	if(pCommand->m_Color.r != m_ClearColor.r || pCommand->m_Color.g != m_ClearColor.g || pCommand->m_Color.b != m_ClearColor.b)
 	{
 		glClearColor(pCommand->m_Color.r, pCommand->m_Color.g, pCommand->m_Color.b, 0.0f);
 		m_ClearColor = pCommand->m_Color;
 	}
 	glClear(GL_COLOR_BUFFER_BIT);
+	if(ClipWasEnabled)
+	{
+		glEnable(GL_SCISSOR_TEST);
+	}
 }
 
 void CCommandProcessorFragment_OpenGL3_3::UploadStreamBufferData(unsigned int PrimitiveType, const void *pVertices, size_t VertSize, unsigned int PrimitiveCount, bool AsTex3D)

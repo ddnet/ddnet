@@ -97,6 +97,13 @@ void CCharacterCore::Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore
 	Reset();
 }
 
+void CCharacterCore::SetCoreWorld(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore *pTeams)
+{
+	m_pWorld = pWorld;
+	m_pCollision = pCollision;
+	m_pTeams = pTeams;
+}
+
 void CCharacterCore::Reset()
 {
 	m_Pos = vec2(0, 0);

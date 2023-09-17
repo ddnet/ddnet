@@ -1749,3 +1749,20 @@ Go forward the specified duration
 
 Render cut to video
 == Відтворити вирізку відео
+
+[Demo player duration]
+%d min.
+== 
+
+[Demo player duration]
+%d sec.
+== 
+
+Change the skip duration
+== 
+
+Go forward the specified duration
+== 
+
+Render cut to video
+== 

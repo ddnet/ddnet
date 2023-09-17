@@ -448,10 +448,10 @@ int CMenus::DoButton_CheckBox_Number(const void *pID, const char *pText, int Che
 	return DoButton_CheckBox_Common(pID, pText, aBuf, pRect);
 }
 
-int CMenus::DoKeyReader(void *pID, const CUIRect *pRect, int Key, int ModifierCombination, int *pNewModifierCombination)
+int CMenus::DoKeyReader(const void *pID, const CUIRect *pRect, int Key, int ModifierCombination, int *pNewModifierCombination)
 {
 	// process
-	static void *pGrabbedID = 0;
+	static const void *pGrabbedID = 0;
 	static bool MouseReleased = true;
 	static int s_ButtonUsed = 0;
 	const bool Inside = UI()->MouseHovered(pRect);
@@ -864,7 +864,7 @@ void CMenus::OnInit()
 	Console()->Chain("cl_asset_hud", ConchainAssetHud, this);
 	Console()->Chain("cl_asset_extras", ConchainAssetExtras, this);
 
-	m_TextureBlob = Graphics()->LoadTexture("blob.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
+	m_TextureBlob = Graphics()->LoadTexture("blob.png", IStorage::TYPE_ALL);
 
 	// setup load amount
 	const int NumMenuImages = 5;
@@ -1299,7 +1299,10 @@ int CMenus::Render()
 
 		if(UseIpLabel)
 		{
-			UI()->DoLabel(&Part, Client()->ConnectAddressString(), FontSize, TEXTALIGN_MC);
+			SLabelProperties IpLabelProps;
+			IpLabelProps.m_MaxWidth = Part.w;
+			IpLabelProps.m_EllipsisAtEnd = true;
+			UI()->DoLabel(&Part, Client()->ConnectAddressString(), FontSize, TEXTALIGN_MC, IpLabelProps);
 			Box.HSplitTop(20.f, &Part, &Box);
 			Box.HSplitTop(24.f, &Part, &Box);
 		}
@@ -2173,10 +2176,9 @@ int CMenus::MenuImageScan(const char *pName, int IsDir, int DirType, void *pUser
 		MenuImage.m_OrgTexture = pSelf->Graphics()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, Info.m_Format, 0);
 
 		unsigned char *pData = (unsigned char *)Info.m_pData;
-		//int Pitch = Info.m_Width*4;
 
 		// create colorless version
-		int Step = Info.m_Format == CImageInfo::FORMAT_RGBA ? 4 : 3;
+		const size_t Step = Info.PixelSize();
 
 		// make the texture gray scale
 		for(int i = 0; i < Info.m_Width * Info.m_Height; i++)

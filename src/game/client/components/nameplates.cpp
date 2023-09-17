@@ -144,7 +144,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 
 		float tw = m_aNamePlates[ClientID].m_NameTextWidth;
 		if(g_Config.m_ClNameplatesTeamcolors && m_pClient->m_Teams.Team(ClientID))
-			rgb = color_cast<ColorRGBA>(ColorHSLA(m_pClient->m_Teams.Team(ClientID) / 64.0f, 1.0f, 0.75f));
+			rgb = m_pClient->GetDDTeamColor(m_pClient->m_Teams.Team(ClientID), 0.75f);
 
 		ColorRGBA TColor;
 		ColorRGBA TOutlineColor;

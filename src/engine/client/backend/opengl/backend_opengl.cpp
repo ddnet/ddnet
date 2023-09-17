@@ -42,11 +42,6 @@ void CCommandProcessorFragment_OpenGL::Cmd_Update_Viewport(const CCommandBuffer:
 	glViewport(pCommand->m_X, pCommand->m_Y, pCommand->m_Width, pCommand->m_Height);
 }
 
-void CCommandProcessorFragment_OpenGL::Cmd_Finish(const CCommandBuffer::SCommand_Finish *pCommand)
-{
-	glFinish();
-}
-
 int CCommandProcessorFragment_OpenGL::TexFormatToOpenGLFormat(int TexFormat)
 {
 	if(TexFormat == CCommandBuffer::TEXFORMAT_RGBA)
@@ -54,7 +49,7 @@ int CCommandProcessorFragment_OpenGL::TexFormatToOpenGLFormat(int TexFormat)
 	return GL_RGBA;
 }
 
-size_t CCommandProcessorFragment_OpenGL::GLFormatToImageColorChannelCount(int GLFormat)
+size_t CCommandProcessorFragment_OpenGL::GLFormatToPixelSize(int GLFormat)
 {
 	switch(GLFormat)
 	{
@@ -283,7 +278,7 @@ GfxOpenGLMessageCallback(GLenum Source,
 }
 #endif
 
-bool CCommandProcessorFragment_OpenGL::GetPresentedImageData(uint32_t &Width, uint32_t &Height, uint32_t &Format, std::vector<uint8_t> &vDstData)
+bool CCommandProcessorFragment_OpenGL::GetPresentedImageData(uint32_t &Width, uint32_t &Height, CImageInfo::EImageFormat &Format, std::vector<uint8_t> &vDstData)
 {
 	if(m_CanvasWidth == 0 || m_CanvasHeight == 0)
 	{
@@ -319,7 +314,7 @@ bool CCommandProcessorFragment_OpenGL::InitOpenGL(const SCommand_Init *pCommand)
 	m_IsOpenGLES = pCommand->m_RequestedBackend == BACKEND_TYPE_OPENGL_ES;
 
 	TGLBackendReadPresentedImageData &ReadPresentedImgDataFunc = *pCommand->m_pReadPresentedImageDataFunc;
-	ReadPresentedImgDataFunc = [this](uint32_t &Width, uint32_t &Height, uint32_t &Format, std::vector<uint8_t> &vDstData) { return GetPresentedImageData(Width, Height, Format, vDstData); };
+	ReadPresentedImgDataFunc = [this](uint32_t &Width, uint32_t &Height, CImageInfo::EImageFormat &Format, std::vector<uint8_t> &vDstData) { return GetPresentedImageData(Width, Height, Format, vDstData); };
 
 	const char *pVendorString = (const char *)glGetString(GL_VENDOR);
 	dbg_msg("opengl", "Vendor string: %s", pVendorString);
@@ -649,7 +644,7 @@ void CCommandProcessorFragment_OpenGL::TextureUpdate(int Slot, int X, int Y, int
 			int ResizedW = (int)(Width * ResizeW);
 			int ResizedH = (int)(Height * ResizeH);
 
-			void *pTmpData = Resize(static_cast<const unsigned char *>(pTexData), Width, Height, ResizedW, ResizedH, GLFormatToImageColorChannelCount(GLFormat));
+			void *pTmpData = Resize(static_cast<const unsigned char *>(pTexData), Width, Height, ResizedW, ResizedH, GLFormatToPixelSize(GLFormat));
 			free(pTexData);
 			pTexData = pTmpData;
 
@@ -671,7 +666,7 @@ void CCommandProcessorFragment_OpenGL::TextureUpdate(int Slot, int X, int Y, int
 			Y /= 2;
 		}
 
-		void *pTmpData = Resize(static_cast<const unsigned char *>(pTexData), OldWidth, OldHeight, Width, Height, GLFormatToImageColorChannelCount(GLFormat));
+		void *pTmpData = Resize(static_cast<const unsigned char *>(pTexData), OldWidth, OldHeight, Width, Height, GLFormatToPixelSize(GLFormat));
 		free(pTexData);
 		pTexData = pTmpData;
 	}
@@ -723,7 +718,7 @@ void CCommandProcessorFragment_OpenGL::Cmd_Texture_Destroy(const CCommandBuffer:
 	DestroyTexture(pCommand->m_Slot);
 }
 
-void CCommandProcessorFragment_OpenGL::TextureCreate(int Slot, int Width, int Height, int PixelSize, int GLFormat, int GLStoreFormat, int Flags, void *pTexData)
+void CCommandProcessorFragment_OpenGL::TextureCreate(int Slot, int Width, int Height, int GLFormat, int GLStoreFormat, int Flags, void *pTexData)
 {
 #ifndef BACKEND_GL_MODERN_API
 
@@ -746,7 +741,7 @@ void CCommandProcessorFragment_OpenGL::TextureCreate(int Slot, int Width, int He
 		int PowerOfTwoHeight = HighestBit(Height);
 		if(Width != PowerOfTwoWidth || Height != PowerOfTwoHeight)
 		{
-			void *pTmpData = Resize(static_cast<const unsigned char *>(pTexData), Width, Height, PowerOfTwoWidth, PowerOfTwoHeight, GLFormatToImageColorChannelCount(GLFormat));
+			void *pTmpData = Resize(static_cast<const unsigned char *>(pTexData), Width, Height, PowerOfTwoWidth, PowerOfTwoHeight, GLFormatToPixelSize(GLFormat));
 			free(pTexData);
 			pTexData = pTmpData;
 
@@ -778,7 +773,7 @@ void CCommandProcessorFragment_OpenGL::TextureCreate(int Slot, int Width, int He
 
 		if(NeedsResize)
 		{
-			void *pTmpData = Resize(static_cast<const unsigned char *>(pTexData), OldWidth, OldHeight, Width, Height, GLFormatToImageColorChannelCount(GLFormat));
+			void *pTmpData = Resize(static_cast<const unsigned char *>(pTexData), OldWidth, OldHeight, Width, Height, GLFormatToPixelSize(GLFormat));
 			free(pTexData);
 			pTexData = pTmpData;
 		}
@@ -787,8 +782,7 @@ void CCommandProcessorFragment_OpenGL::TextureCreate(int Slot, int Width, int He
 	m_vTextures[Slot].m_Height = Height;
 	m_vTextures[Slot].m_RescaleCount = RescaleCount;
 
-	int Oglformat = GLFormat;
-	int StoreOglformat = GLStoreFormat;
+	const size_t PixelSize = GLFormatToPixelSize(GLFormat);
 
 	if((Flags & CCommandBuffer::TEXFLAG_NO_2D_TEXTURE) == 0)
 	{
@@ -802,7 +796,7 @@ void CCommandProcessorFragment_OpenGL::TextureCreate(int Slot, int Width, int He
 		{
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glTexImage2D(GL_TEXTURE_2D, 0, StoreOglformat, Width, Height, 0, Oglformat, GL_UNSIGNED_BYTE, pTexData);
+			glTexImage2D(GL_TEXTURE_2D, 0, GLStoreFormat, Width, Height, 0, GLFormat, GL_UNSIGNED_BYTE, pTexData);
 		}
 	}
 	else
@@ -818,7 +812,7 @@ void CCommandProcessorFragment_OpenGL::TextureCreate(int Slot, int Width, int He
 				glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, ((GLfloat)m_OpenGLTextureLodBIAS / 1000.0f));
 #endif
 
-			glTexImage2D(GL_TEXTURE_2D, 0, StoreOglformat, Width, Height, 0, Oglformat, GL_UNSIGNED_BYTE, pTexData);
+			glTexImage2D(GL_TEXTURE_2D, 0, GLStoreFormat, Width, Height, 0, GLFormat, GL_UNSIGNED_BYTE, pTexData);
 		}
 
 		int Flag2DArrayTexture = (CCommandBuffer::TEXFLAG_TO_2D_ARRAY_TEXTURE | CCommandBuffer::TEXFLAG_TO_2D_ARRAY_TEXTURE_SINGLE_LAYER);
@@ -886,14 +880,12 @@ void CCommandProcessorFragment_OpenGL::TextureCreate(int Slot, int Width, int He
 				glBindSampler(0, 0);
 			}
 
-			int ImageColorChannels = GLFormatToImageColorChannelCount(GLFormat);
-
 			uint8_t *p3DImageData = NULL;
 
 			bool IsSingleLayer = (Flags & (CCommandBuffer::TEXFLAG_TO_2D_ARRAY_TEXTURE_SINGLE_LAYER | CCommandBuffer::TEXFLAG_TO_3D_TEXTURE_SINGLE_LAYER)) != 0;
 
 			if(!IsSingleLayer)
-				p3DImageData = (uint8_t *)malloc((size_t)ImageColorChannels * Width * Height);
+				p3DImageData = (uint8_t *)malloc((size_t)Width * Height * PixelSize);
 			int Image3DWidth, Image3DHeight;
 
 			int ConvertWidth = Width;
@@ -906,7 +898,7 @@ void CCommandProcessorFragment_OpenGL::TextureCreate(int Slot, int Width, int He
 					dbg_msg("gfx", "3D/2D array texture was resized");
 					int NewWidth = maximum<int>(HighestBit(ConvertWidth), 16);
 					int NewHeight = maximum<int>(HighestBit(ConvertHeight), 16);
-					uint8_t *pNewTexData = (uint8_t *)Resize((const uint8_t *)pTexData, ConvertWidth, ConvertHeight, NewWidth, NewHeight, GLFormatToImageColorChannelCount(GLFormat));
+					uint8_t *pNewTexData = (uint8_t *)Resize((const uint8_t *)pTexData, ConvertWidth, ConvertHeight, NewWidth, NewHeight, GLFormatToPixelSize(GLFormat));
 
 					ConvertWidth = NewWidth;
 					ConvertHeight = NewHeight;
@@ -916,15 +908,15 @@ void CCommandProcessorFragment_OpenGL::TextureCreate(int Slot, int Width, int He
 				}
 			}
 
-			if(IsSingleLayer || (Texture2DTo3D(pTexData, ConvertWidth, ConvertHeight, ImageColorChannels, 16, 16, p3DImageData, Image3DWidth, Image3DHeight)))
+			if(IsSingleLayer || (Texture2DTo3D(pTexData, ConvertWidth, ConvertHeight, PixelSize, 16, 16, p3DImageData, Image3DWidth, Image3DHeight)))
 			{
 				if(IsSingleLayer)
 				{
-					glTexImage3D(Target, 0, StoreOglformat, ConvertWidth, ConvertHeight, 1, 0, Oglformat, GL_UNSIGNED_BYTE, pTexData);
+					glTexImage3D(Target, 0, GLStoreFormat, ConvertWidth, ConvertHeight, 1, 0, GLFormat, GL_UNSIGNED_BYTE, pTexData);
 				}
 				else
 				{
-					glTexImage3D(Target, 0, StoreOglformat, Image3DWidth, Image3DHeight, 256, 0, Oglformat, GL_UNSIGNED_BYTE, p3DImageData);
+					glTexImage3D(Target, 0, GLStoreFormat, Image3DWidth, Image3DHeight, 256, 0, GLFormat, GL_UNSIGNED_BYTE, p3DImageData);
 				}
 			}
 
@@ -937,12 +929,12 @@ void CCommandProcessorFragment_OpenGL::TextureCreate(int Slot, int Width, int He
 	m_vTextures[Slot].m_LastWrapMode = CCommandBuffer::WRAP_REPEAT;
 
 	// calculate memory usage
-	m_vTextures[Slot].m_MemSize = Width * Height * PixelSize;
+	m_vTextures[Slot].m_MemSize = (size_t)Width * Height * PixelSize;
 	while(Width > 2 && Height > 2)
 	{
 		Width >>= 1;
 		Height >>= 1;
-		m_vTextures[Slot].m_MemSize += Width * Height * PixelSize;
+		m_vTextures[Slot].m_MemSize += (size_t)Width * Height * PixelSize;
 	}
 	m_pTextureMemoryUsage->store(m_pTextureMemoryUsage->load(std::memory_order_relaxed) + m_vTextures[Slot].m_MemSize, std::memory_order_relaxed);
 
@@ -952,7 +944,7 @@ void CCommandProcessorFragment_OpenGL::TextureCreate(int Slot, int Width, int He
 
 void CCommandProcessorFragment_OpenGL::Cmd_Texture_Create(const CCommandBuffer::SCommand_Texture_Create *pCommand)
 {
-	TextureCreate(pCommand->m_Slot, pCommand->m_Width, pCommand->m_Height, pCommand->m_PixelSize, TexFormatToOpenGLFormat(pCommand->m_Format), TexFormatToOpenGLFormat(pCommand->m_StoreFormat), pCommand->m_Flags, pCommand->m_pData);
+	TextureCreate(pCommand->m_Slot, pCommand->m_Width, pCommand->m_Height, TexFormatToOpenGLFormat(pCommand->m_Format), TexFormatToOpenGLFormat(pCommand->m_StoreFormat), pCommand->m_Flags, pCommand->m_pData);
 }
 
 void CCommandProcessorFragment_OpenGL::Cmd_TextTexture_Update(const CCommandBuffer::SCommand_TextTexture_Update *pCommand)
@@ -968,16 +960,24 @@ void CCommandProcessorFragment_OpenGL::Cmd_TextTextures_Destroy(const CCommandBu
 
 void CCommandProcessorFragment_OpenGL::Cmd_TextTextures_Create(const CCommandBuffer::SCommand_TextTextures_Create *pCommand)
 {
-	void *pTextData = pCommand->m_pTextData;
-	void *pTextOutlineData = pCommand->m_pTextOutlineData;
-	TextureCreate(pCommand->m_Slot, pCommand->m_Width, pCommand->m_Height, 1, GL_ALPHA, GL_ALPHA, CCommandBuffer::TEXFLAG_NOMIPMAPS, pTextData);
-	TextureCreate(pCommand->m_SlotOutline, pCommand->m_Width, pCommand->m_Height, 1, GL_ALPHA, GL_ALPHA, CCommandBuffer::TEXFLAG_NOMIPMAPS, pTextOutlineData);
+	TextureCreate(pCommand->m_Slot, pCommand->m_Width, pCommand->m_Height, GL_ALPHA, GL_ALPHA, CCommandBuffer::TEXFLAG_NOMIPMAPS, pCommand->m_pTextData);
+	TextureCreate(pCommand->m_SlotOutline, pCommand->m_Width, pCommand->m_Height, GL_ALPHA, GL_ALPHA, CCommandBuffer::TEXFLAG_NOMIPMAPS, pCommand->m_pTextOutlineData);
 }
 
 void CCommandProcessorFragment_OpenGL::Cmd_Clear(const CCommandBuffer::SCommand_Clear *pCommand)
 {
+	// if clip is still active, force disable it for clearing, enable it again afterwards
+	bool ClipWasEnabled = m_LastClipEnable;
+	if(ClipWasEnabled)
+	{
+		glDisable(GL_SCISSOR_TEST);
+	}
 	glClearColor(pCommand->m_Color.r, pCommand->m_Color.g, pCommand->m_Color.b, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	if(ClipWasEnabled)
+	{
+		glEnable(GL_SCISSOR_TEST);
+	}
 }
 
 void CCommandProcessorFragment_OpenGL::Cmd_Render(const CCommandBuffer::SCommand_Render *pCommand)
@@ -1101,9 +1101,6 @@ ERunCommandReturnTypes CCommandProcessorFragment_OpenGL::RunCommand(const CComma
 		break;
 	case CCommandBuffer::CMD_UPDATE_VIEWPORT:
 		Cmd_Update_Viewport(static_cast<const CCommandBuffer::SCommand_Update_Viewport *>(pBaseCommand));
-		break;
-	case CCommandBuffer::CMD_FINISH:
-		Cmd_Finish(static_cast<const CCommandBuffer::SCommand_Finish *>(pBaseCommand));
 		break;
 
 	case CCommandBuffer::CMD_CREATE_BUFFER_OBJECT: Cmd_CreateBufferObject(static_cast<const CCommandBuffer::SCommand_CreateBufferObject *>(pBaseCommand)); break;

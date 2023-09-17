@@ -177,9 +177,6 @@ Favorites
 Feet
 == 脚
 
-Filter
-== 筛选
-
 Fire
 == 开火
 
@@ -191,9 +188,6 @@ Force vote
 
 Free-View
 == 自由视角
-
-Friends
-== 好友
 
 Fullscreen
 == 独占全屏
@@ -415,12 +409,6 @@ Screenshot
 Server address:
 == 服务器地址：
 
-Server details
-== 服务器详情
-
-Server filter
-== 服务器筛选
-
 Server info
 == 服务器信息
 
@@ -615,9 +603,6 @@ Netversion:
 
 Map:
 == 地图：
-
-Info
-== 信息
 
 Hue
 == 色调
@@ -1780,3 +1765,23 @@ Unable to delete the folder '%s'. Make sure it's empty first.
 
 Moved ingame
 == 游戏内移动
+
+Go back the specified duration
+== 
+
+[Demo player duration]
+%d min.
+== 
+
+[Demo player duration]
+%d sec.
+== 
+
+Change the skip duration
+== 
+
+Go forward the specified duration
+== 
+
+Render cut to video
+== 

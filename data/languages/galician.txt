@@ -145,9 +145,6 @@ Favorites
 Feet
 == Pés
 
-Filter
-== Filtro
-
 Fire
 == Disparar
 
@@ -159,9 +156,6 @@ Force vote
 
 Free-View
 == Vista libre
-
-Friends
-== Amigos
 
 Fullscreen
 == Pantalla completa
@@ -359,12 +353,6 @@ Screenshot
 Server address:
 == IP do servidor:
 
-Server details
-== Detalles do servidor
-
-Server filter
-== Filtro do servidor
-
 Server info
 == Servidor
 
@@ -535,9 +523,6 @@ Netversion:
 
 Map:
 == Mapa:
-
-Info
-== Información
 
 Hue
 == Matiz
@@ -1698,6 +1683,23 @@ Unable to rename the folder
 No server selected
 == 
 
+Go back the specified duration
+== 
+
+[Demo player duration]
+%d min.
+== 
+
+[Demo player duration]
+%d sec.
+== 
+
+Change the skip duration
+== 
+
+Go forward the specified duration
+== 
+
 Mark the beginning of a cut (right click to reset)
 == 
 
@@ -1714,6 +1716,9 @@ Cut interval
 == 
 
 Cut length
+== 
+
+Render cut to video
 == 
 
 All combined

@@ -149,9 +149,6 @@ Favorites
 Feet
 == Stopala
 
-Filter
-== Filter
-
 Fire
 == Pucaj
 
@@ -163,9 +160,6 @@ Force vote
 
 Free-View
 == Slobodan pregled
-
-Friends
-== Prijatelji
 
 Fullscreen
 == Preko celog ekrana
@@ -355,12 +349,6 @@ Screenshot
 
 Server address:
 == Adresa servera:
-
-Server details
-== Detalji o serveru
-
-Server filter
-== Filter servera
 
 Server info
 == O serveru
@@ -561,9 +549,6 @@ Netversion:
 
 Map:
 == Mapa
-
-Info
-== Info
 
 Hue
 == Nijansa
@@ -1507,178 +1492,169 @@ A render command failed. Try to update your GPU drivers.
 Submitting the render commands failed. Try to update your GPU drivers.
 == Неуспешно слање рендерних команди. Покушајте ажурирати драјвере за вашу графичку картицу.
 
-[Graphics error]
-Failed to swap framebuffers. Try to update your GPU drivers.
-== 
-
-[Graphics error]
-Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== Неуспешно замена бафера фреймова. Покушајте ажурирати драјвере за вашу графичку картицу.
-
-[Graphics error]
 Could not initialize the given graphics backend, reverting to the default backend now.
-== 
+== Није било могуће иницијализовати дати графички позадину, сада се враћамо на подразумевану позадину.
 
 [Graphics error]
 Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
-== 
+== Није било могуће иницијализовати дати графички позадину, највероватније зато што нисте инсталирали драјвер за интегрисану графичку картицу.
 
 Could not save downloaded map. Try manually deleting this file: %s
-== 
+== Није могуће сачувати преузету мапу. Покушајте ручно обрисати овај фајл: %s.
 
 Initializing components
 == Иницијализација компоненти
 
 Quitting. Please wait…
-== Излазим. Молим вас да почекате…
+== Излазим. Молим вас да почекате...
 
 Restarting. Please wait…
-== Поновно покрећем се. Молим вас да почекате…
+== Поновно покрећем се. Молим вас да почекате...
 
 Multi-View
-== 
+== Мулти-поглед
 
 Rename folder
-== 
+== Преименујте фасциклу
 
 A demo with this name already exists
-== 
+== Демо са овим именом већ постоји.
 
 A folder with this name already exists
-== 
+== Фасцикла са овим именом већ постоји.
 
 Unable to rename the folder
-== 
+== Није могуће преименовати фасциклу.
 
 File '%s' already exists, do you want to overwrite it?
-== 
+== Датотека '%s' већ постоји, желите ли да је препишете?
 
 (paused)
-== 
+== (паузирано)
 
 transmits your player name to info.ddnet.org
-== 
+== преноси ваше играчко име на info.ddnet.org
 
 Copy info
-== 
+== Копирај информације
 
 No server selected
-== 
+== Није изабран сервер
 
 Online players (%d)
-== 
+== Играчи на мрежи (%d)
 
 Online clanmates (%d)
-== 
+== Чланови клана на мрежи (%d)
 
 [friends (server browser)]
 Offline (%d)
-== 
+== Изван мреже (%d)
 
 Click to select server. Double click to join your friend.
-== 
+== Кликните да бисте изабрали сервер. Дупли клик за придруживање пријатељу.
 
 Click to remove this player from your friends list.
-== 
+== Кликните да бисте уклонили овог играча са листе пријатеља.
 
 Click to remove this clan from your friends list.
-== 
+== Кликните да бисте уклонили овај клан са листе пријатеља.
 
 None
-== 
+== Ништа
 
 Are you sure that you want to remove the player '%s' from your friends list?
-== 
+== Да ли сте сигурни да желите да уклоните играча '%s' са листе пријатеља?
 
 Are you sure that you want to remove the clan '%s' from your friends list?
-== 
+== Да ли сте сигурни да желите да уклоните клан '%s' са листе пријатеља?
 
 Add Clan
-== 
+== Додај клан
 
 Play the current demo
-== 
+== Пусти тренутни демо запис
 
 Pause the current demo
-== 
+== Паузирај тренутни демо запис
 
 Stop the current demo
-== 
+== Заустави тренутни демо запис
 
 Go back one tick
-== 
+== Иди назад један корак
 
 Go forward one tick
-== 
+== Иди напред један корак
 
 Slow down the demo
-== 
+== Успори демо запис
 
 Speed up the demo
-== 
+== Убрзај демо запис
 
 Mark the beginning of a cut (right click to reset)
-== 
+== Обележи почетак сечења (десни клик за ресетовање)
 
 Mark the end of a cut (right click to reset)
-== 
+== Обележи крај сечења (десни клик за ресетовање)
 
 Export cut as a separate demo
-== 
+== Извоз сечења као засебног демо записа
 
 Go back one marker
-== 
+== Иди назад један маркер
 
 Go forward one marker
-== 
+== Иди напред један маркер
 
 Close the demo player
-== 
+== Затвори репродуктор демо записа
 
 Toggle keyboard shortcuts
-== 
+== Пребациванје тастатурних пречица
 
 Export demo cut
-== 
+== Извоз демо сечења
 
 Cut interval
-== 
+== Интервал сечења
 
 Cut length
-== 
+== Дужина сечења
 
 All combined
-== 
+== Све комбиновано
 
 Folder Link
-== 
+== Веза до фасцикле
 
 Open the directory that contains the demo files
-== 
+== Отвори директоријум који садржи демо фајлове
 
 Are you sure that you want to delete the folder '%s'?
-== 
+== Да ли сте сигурни да желите да обришете фасциклу '%s'?
 
 Are you sure that you want to delete the demo '%s'?
-== 
+== Да ли сте сигурни да желите да обришете демо запис '%s'?
 
 Delete folder
-== 
+== Обриши фасциклу
 
 Unable to delete the demo '%s'
-== 
+== Није могуће обрисати демо запис '%s'
 
 Unable to delete the folder '%s'. Make sure it's empty first.
-== 
+== Није могуће обрисати фасциклу '%s'. Проверите прво да ли је празна.
 
 Menu opened. Press Esc key again to close menu.
-== 
+== Мени је отворен. Поново притисните тастер Esc да бисте затворили мени.
 
 Save power by lowering refresh rate (higher input latency)
-== 
+== Уштедите струју смањивањем стопе освежавања (већа улазна латенција)
 
 Open the settings file
-== 
+== Отворите датотеку са подешавањима
 
 Open the directory that contains the configuration and user files
 == Отворите директоријум који садржи конфигурационе и корисничке датотеке.
@@ -1747,4 +1723,32 @@ Open the directory to add custom assets
 == Отворите директоријум за додавање прилагођених ресурса
 
 Moved ingame
+== Померено у игри
+
+[Graphics error]
+Failed to swap framebuffers. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== 
+
+Go back the specified duration
+== 
+
+[Demo player duration]
+%d min.
+== 
+
+[Demo player duration]
+%d sec.
+== 
+
+Change the skip duration
+== 
+
+Go forward the specified duration
+== 
+
+Render cut to video
 == 

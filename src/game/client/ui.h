@@ -203,6 +203,7 @@ struct SMenuButtonProperties
 	bool m_HintRequiresStringCheck = false;
 	bool m_HintCanChangePositionOrSize = false;
 	bool m_UseIconFont = false;
+	bool m_ShowDropDownIcon = false;
 	int m_Corners = IGraphics::CORNER_ALL;
 	float m_Rounding = 5.0f;
 	float m_FontFactor = 0.0f;
@@ -236,6 +237,13 @@ struct SValueSelectorProperties
 	bool m_IsHex = false;
 	int m_HexPrefix = 6;
 	ColorRGBA m_Color = ColorRGBA(0.0f, 0.0f, 0.0f, 0.4f);
+};
+
+struct SProgressSpinnerProperties
+{
+	float m_Progress = -1.0f; // between 0.0f and 1.0f, or negative for indeterminate progress
+	ColorRGBA m_Color = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
+	int m_Segments = 64;
 };
 
 /**
@@ -510,6 +518,9 @@ public:
 	float DoScrollbarV(const void *pID, const CUIRect *pRect, float Current);
 	float DoScrollbarH(const void *pID, const CUIRect *pRect, float Current, const ColorRGBA *pColorInner = nullptr);
 	void DoScrollbarOption(const void *pID, int *pOption, const CUIRect *pRect, const char *pStr, int Min, int Max, const IScrollbarScale *pScale = &ms_LinearScrollbarScale, unsigned Flags = 0u, const char *pSuffix = "");
+
+	// progress spinner
+	void RenderProgressSpinner(vec2 Center, float OuterRadius, const SProgressSpinnerProperties &Props = {});
 
 	// popup menu
 	void DoPopupMenu(const SPopupMenuId *pID, int X, int Y, int Width, int Height, void *pContext, FPopupMenuFunction pfnFunc, const SPopupMenuProperties &Props = {});

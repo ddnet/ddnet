@@ -145,9 +145,6 @@ Favorites
 Feet
 == ﺎﭘ
 
-Filter
-== ﺮﺘﻠﯿﻓ
-
 Fire
 == ﻚﯿﻠﺷ
 
@@ -159,9 +156,6 @@ Force vote
 
 Free-View
 == ﺩﺍﺯﺁ-ﺪﯾﺩ
-
-Friends
-== ﻥﺎﺘﺳﻭﺩ
 
 Fullscreen
 == ﻞﻣﺎﻛ ى ﻪﺤﻔﺻ
@@ -472,9 +466,6 @@ Server address:
 Refresh
 == ﯼﺯﺎﺳ ﻩﺯﺎﺗ
 
-Server filter
-== ﺭﻭﺮﺳ ﺮﺘﻠﯿﻓ
-
 Server not full
 == ﺪﺷﺎﺒﻧ ﺮﭘ ﺭﻭﺮﺳ
 
@@ -505,17 +496,11 @@ Types
 Reset filter
 == ﺮﺘﻠﯿﻓ ﻥﺩﺮﮐ ﺖﺴﯾﺭ
 
-Server details
-== ﺭﻭﺮﺳ ﺕﺎﻋﻼﻃﺍ
-
 Scoreboard
 == ﺕﺍﺯﺎﯿﺘﻣﺍ ﯼﻮﻠﺑﺎﺗ
 
 Remove
 == ﻥﺩﺮﮐ کﺎﭘ
-
-Info
-== ﺕﺎﻋﻼﻃﺍ
 
 Please use a different name
 == ﻦﮐ ﻩﺩﺎﻔﺘﺳﺍ ﺕﻭﺎﻔﺘﻣ ﻡﺎﻧ ﮏﯾ ﺯﺍ ﺎﻔﻄﻟ
@@ -1685,6 +1670,23 @@ None
 Add Clan
 == 
 
+Go back the specified duration
+== 
+
+[Demo player duration]
+%d min.
+== 
+
+[Demo player duration]
+%d sec.
+== 
+
+Change the skip duration
+== 
+
+Go forward the specified duration
+== 
+
 Mark the beginning of a cut (right click to reset)
 == 
 
@@ -1701,6 +1703,9 @@ Cut interval
 == 
 
 Cut length
+== 
+
+Render cut to video
 == 
 
 All combined

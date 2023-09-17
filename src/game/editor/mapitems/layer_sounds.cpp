@@ -1,7 +1,6 @@
+#include <game/editor/editor.h>
 
 #include <game/generated/client_data.h>
-
-#include "editor.h"
 
 static const float s_SourceVisualSize = 32.0f;
 

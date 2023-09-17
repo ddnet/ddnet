@@ -96,6 +96,7 @@ public:
 	bool m_HudDDRace;
 
 	bool m_NoWeakHookAndBounce;
+	bool m_NoSkinChangeForFrozen;
 };
 
 class CSnapEntities
@@ -529,6 +530,7 @@ public:
 	bool Predict() const;
 	bool PredictDummy() { return g_Config.m_ClPredictDummy && Client()->DummyConnected() && m_Snap.m_LocalClientID >= 0 && m_PredictedDummyID >= 0 && !m_aClients[m_PredictedDummyID].m_Paused; }
 	const CTuningParams *GetTuning(int i) { return &m_aTuningList[i]; }
+	ColorRGBA GetDDTeamColor(int DDTeam, float Lightness = 0.5f) const;
 
 	CGameWorld m_GameWorld;
 	CGameWorld m_PredictedWorld;

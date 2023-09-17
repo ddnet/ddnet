@@ -23,8 +23,7 @@ void CMapGrid::OnRender(CUIRect View)
 		float aGroupPoints[4];
 		pGroup->Mapping(aGroupPoints);
 
-		float w = UI()->Screen()->w;
-		float h = UI()->Screen()->h;
+		const CUIRect *pScreen = UI()->Screen();
 
 		int LineDistance = GridLineDistance();
 
@@ -36,14 +35,14 @@ void CMapGrid::OnRender(CUIRect View)
 		Graphics()->TextureClear();
 		Graphics()->LinesBegin();
 
-		for(int i = 0; i < (int)w; i++)
+		for(int i = 0; i < (int)pScreen->w; i++)
 		{
 			if((i + YGridOffset) % m_GridFactor == 0)
 				Graphics()->SetColor(1.0f, 0.3f, 0.3f, 0.3f);
 			else
 				Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.15f);
 
-			IGraphics::CLineItem Line = IGraphics::CLineItem(LineDistance * XOffset, LineDistance * i + LineDistance * YOffset, w + aGroupPoints[2], LineDistance * i + LineDistance * YOffset);
+			IGraphics::CLineItem Line = IGraphics::CLineItem(LineDistance * XOffset, LineDistance * i + LineDistance * YOffset, pScreen->w + aGroupPoints[2], LineDistance * i + LineDistance * YOffset);
 			Graphics()->LinesDraw(&Line, 1);
 
 			if((i + XGridOffset) % m_GridFactor == 0)
@@ -51,7 +50,7 @@ void CMapGrid::OnRender(CUIRect View)
 			else
 				Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.15f);
 
-			Line = IGraphics::CLineItem(LineDistance * i + LineDistance * XOffset, LineDistance * YOffset, LineDistance * i + LineDistance * XOffset, h + aGroupPoints[3]);
+			Line = IGraphics::CLineItem(LineDistance * i + LineDistance * XOffset, LineDistance * YOffset, LineDistance * i + LineDistance * XOffset, pScreen->h + aGroupPoints[3]);
 			Graphics()->LinesDraw(&Line, 1);
 		}
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);

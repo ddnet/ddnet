@@ -154,9 +154,6 @@ Favorites
 Feet
 == 발
 
-Filter
-== 필터
-
 Fire
 == 발사
 
@@ -168,9 +165,6 @@ Force vote
 
 Free-View
 == 자유 시점
-
-Friends
-== 친구
 
 Fullscreen
 == 전체화면
@@ -359,12 +353,6 @@ Screenshot
 Server address:
 == 서버 주소:
 
-Server details
-== 서버 세부정보
-
-Server filter
-== 서버 필터
-
 Server info
 == 서버 정보
 
@@ -549,9 +537,6 @@ Miscellaneous
 
 Netversion:
 == 통신 버전:
-
-Info
-== 정보
 
 UI Color
 == UI 색상
@@ -1715,6 +1700,23 @@ None
 Add Clan
 == 
 
+Go back the specified duration
+== 
+
+[Demo player duration]
+%d min.
+== 
+
+[Demo player duration]
+%d sec.
+== 
+
+Change the skip duration
+== 
+
+Go forward the specified duration
+== 
+
 Mark the beginning of a cut (right click to reset)
 == 
 
@@ -1731,6 +1733,9 @@ Cut interval
 == 
 
 Cut length
+== 
+
+Render cut to video
 == 
 
 All combined

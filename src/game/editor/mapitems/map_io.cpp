@@ -1,6 +1,5 @@
-/* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
-/* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#include "editor.h"
+#include <game/editor/editor.h>
+
 #include <engine/client.h>
 #include <engine/console.h>
 #include <engine/graphics.h>
@@ -11,6 +10,9 @@
 
 #include <game/gamecore.h>
 #include <game/mapitems_ex.h>
+
+#include "image.h"
+#include "sound.h"
 
 template<typename T>
 static int MakeVersion(int i, const T &v)
@@ -30,15 +32,6 @@ struct CSoundSource_DEPRECATED
 	int m_SoundEnv;
 	int m_SoundEnvOffset;
 };
-
-bool CEditor::Save(const char *pFilename)
-{
-	// Check if file with this name is already being saved at the moment
-	if(std::any_of(std::begin(m_WriterFinishJobs), std::end(m_WriterFinishJobs), [pFilename](const std::shared_ptr<CDataFileWriterFinishJob> &Job) { return str_comp(pFilename, Job->GetRealFileName()) == 0; }))
-		return false;
-
-	return m_Map.Save(pFilename);
-}
 
 bool CEditorMap::Save(const char *pFileName)
 {
@@ -130,24 +123,26 @@ bool CEditorMap::Save(const char *pFileName)
 		}
 		else
 		{
+			const size_t PixelSize = CImageInfo::PixelSize(CImageInfo::FORMAT_RGBA);
+			const size_t DataSize = (size_t)Item.m_Width * Item.m_Height * PixelSize;
 			if(pImg->m_Format == CImageInfo::FORMAT_RGB)
 			{
 				// Convert to RGBA
-				unsigned char *pDataRGBA = (unsigned char *)malloc((size_t)Item.m_Width * Item.m_Height * 4);
+				unsigned char *pDataRGBA = (unsigned char *)malloc(DataSize);
 				unsigned char *pDataRGB = (unsigned char *)pImg->m_pData;
 				for(int j = 0; j < Item.m_Width * Item.m_Height; j++)
 				{
-					pDataRGBA[j * 4] = pDataRGB[j * 3];
-					pDataRGBA[j * 4 + 1] = pDataRGB[j * 3 + 1];
-					pDataRGBA[j * 4 + 2] = pDataRGB[j * 3 + 2];
-					pDataRGBA[j * 4 + 3] = 255;
+					pDataRGBA[j * PixelSize] = pDataRGB[j * 3];
+					pDataRGBA[j * PixelSize + 1] = pDataRGB[j * 3 + 1];
+					pDataRGBA[j * PixelSize + 2] = pDataRGB[j * 3 + 2];
+					pDataRGBA[j * PixelSize + 3] = 255;
 				}
-				Item.m_ImageData = Writer.AddData(Item.m_Width * Item.m_Height * 4, pDataRGBA);
+				Item.m_ImageData = Writer.AddData(DataSize, pDataRGBA);
 				free(pDataRGBA);
 			}
 			else
 			{
-				Item.m_ImageData = Writer.AddData(Item.m_Width * Item.m_Height * 4, pImg->m_pData);
+				Item.m_ImageData = Writer.AddData(DataSize, pImg->m_pData);
 			}
 		}
 		Writer.AddItem(MAPITEMTYPE_IMAGE, i, sizeof(Item), &Item);
@@ -364,7 +359,7 @@ bool CEditorMap::Save(const char *pFileName)
 
 	// save points
 	m_pEditor->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "editor", "saving envelope points");
-	bool BezierUsed = true;
+	bool BezierUsed = false;
 	for(const auto &pEnvelope : m_vpEnvelopes)
 	{
 		for(const auto &Point : pEnvelope->m_vPoints)
@@ -424,30 +419,6 @@ bool CEditorMap::Save(const char *pFileName)
 	m_pEditor->m_WriterFinishJobs.push_back(pWriterFinishJob);
 
 	return true;
-}
-
-bool CEditor::Load(const char *pFileName, int StorageType)
-{
-	const auto &&ErrorHandler = [this](const char *pErrorMessage) {
-		ShowFileDialogError("%s", pErrorMessage);
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "editor/load", pErrorMessage);
-	};
-
-	Reset();
-	bool Result = m_Map.Load(pFileName, StorageType, std::move(ErrorHandler));
-	if(Result)
-	{
-		str_copy(m_aFileName, pFileName);
-		SortImages();
-		SelectGameLayer();
-		MapView()->OnMapLoad();
-	}
-	else
-	{
-		m_aFileName[0] = 0;
-		Reset();
-	}
-	return Result;
 }
 
 bool CEditorMap::Load(const char *pFileName, int StorageType, const std::function<void(const char *pErrorMessage)> &ErrorHandler)
@@ -518,7 +489,7 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 				std::shared_ptr<CEditorImage> pImg = std::make_shared<CEditorImage>(m_pEditor);
 				pImg->m_External = pItem->m_External;
 
-				const int Format = pItem->m_Version < CMapItemImage_v2::CURRENT_VERSION ? CImageInfo::FORMAT_RGBA : pItem->m_Format;
+				const CImageInfo::EImageFormat Format = pItem->m_Version < CMapItemImage_v2::CURRENT_VERSION ? CImageInfo::FORMAT_RGBA : CImageInfo::ImageFormatFromInt(pItem->m_Format);
 				if(pImg->m_External || (Format != CImageInfo::FORMAT_RGB && Format != CImageInfo::FORMAT_RGBA))
 				{
 					char aBuf[IO_MAX_PATH_LENGTH];
@@ -532,7 +503,7 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 						int TextureLoadFlag = m_pEditor->Graphics()->HasTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
 						if(ImgInfo.m_Width % 16 != 0 || ImgInfo.m_Height % 16 != 0)
 							TextureLoadFlag = 0;
-						pImg->m_Texture = m_pEditor->Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, CImageInfo::FORMAT_AUTO, TextureLoadFlag, aBuf);
+						pImg->m_Texture = m_pEditor->Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, TextureLoadFlag, aBuf);
 						ImgInfo.m_pData = nullptr;
 						pImg->m_External = 1;
 					}
@@ -545,13 +516,13 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 
 					// copy image data
 					void *pData = DataFile.GetData(pItem->m_ImageData);
-					const size_t DataSize = (size_t)pImg->m_Width * pImg->m_Height * 4;
+					const size_t DataSize = (size_t)pImg->m_Width * pImg->m_Height * CImageInfo::PixelSize(Format);
 					pImg->m_pData = malloc(DataSize);
 					mem_copy(pImg->m_pData, pData, DataSize);
 					int TextureLoadFlag = m_pEditor->Graphics()->HasTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
 					if(pImg->m_Width % 16 != 0 || pImg->m_Height % 16 != 0)
 						TextureLoadFlag = 0;
-					pImg->m_Texture = m_pEditor->Graphics()->LoadTextureRaw(pImg->m_Width, pImg->m_Height, pImg->m_Format, pImg->m_pData, CImageInfo::FORMAT_AUTO, TextureLoadFlag);
+					pImg->m_Texture = m_pEditor->Graphics()->LoadTextureRaw(pImg->m_Width, pImg->m_Height, pImg->m_Format, pImg->m_pData, TextureLoadFlag);
 				}
 
 				// copy image name
@@ -580,7 +551,6 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 
 				// copy base info
 				std::shared_ptr<CEditorSound> pSound = std::make_shared<CEditorSound>(m_pEditor);
-
 				if(pItem->m_External)
 				{
 					char aBuf[IO_MAX_PATH_LENGTH];
@@ -1043,59 +1013,4 @@ void CEditorMap::PerformSanityChecks(const std::function<void(const char *pError
 		}
 		++ImageIndex;
 	}
-}
-
-bool CEditor::Append(const char *pFileName, int StorageType)
-{
-	CEditorMap NewMap;
-	NewMap.m_pEditor = this;
-
-	const auto &&ErrorHandler = [this](const char *pErrorMessage) {
-		ShowFileDialogError("%s", pErrorMessage);
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "editor/append", pErrorMessage);
-	};
-	if(!NewMap.Load(pFileName, StorageType, std::move(ErrorHandler)))
-		return false;
-
-	// modify indices
-	static const auto &&s_ModifyAddIndex = [](int AddAmount) {
-		return [AddAmount](int *pIndex) {
-			if(*pIndex >= 0)
-				*pIndex += AddAmount;
-		};
-	};
-	NewMap.ModifyImageIndex(s_ModifyAddIndex(m_Map.m_vpImages.size()));
-	NewMap.ModifySoundIndex(s_ModifyAddIndex(m_Map.m_vpSounds.size()));
-	NewMap.ModifyEnvelopeIndex(s_ModifyAddIndex(m_Map.m_vpEnvelopes.size()));
-
-	// transfer images
-	for(const auto &pImage : NewMap.m_vpImages)
-		m_Map.m_vpImages.push_back(pImage);
-	NewMap.m_vpImages.clear();
-
-	// transfer sounds
-	for(const auto &pSound : NewMap.m_vpSounds)
-		m_Map.m_vpSounds.push_back(pSound);
-	NewMap.m_vpSounds.clear();
-
-	// transfer envelopes
-	for(const auto &pEnvelope : NewMap.m_vpEnvelopes)
-		m_Map.m_vpEnvelopes.push_back(pEnvelope);
-	NewMap.m_vpEnvelopes.clear();
-
-	// transfer groups
-	for(const auto &pGroup : NewMap.m_vpGroups)
-	{
-		if(pGroup != NewMap.m_pGameGroup)
-		{
-			pGroup->m_pMap = &m_Map;
-			m_Map.m_vpGroups.push_back(pGroup);
-		}
-	}
-	NewMap.m_vpGroups.clear();
-
-	SortImages();
-
-	// all done \o/
-	return true;
 }

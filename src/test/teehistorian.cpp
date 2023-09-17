@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include <base/detect.h>
+#include <engine/external/json-parser/json.h>
 #include <engine/server.h>
 #include <engine/shared/config.h>
 #include <game/gamecore.h>
@@ -68,6 +69,9 @@ protected:
 		m_GameInfo.m_MapSha256 = Sha256;
 		m_GameInfo.m_MapCrc = 0xeceaf25c;
 
+		m_GameInfo.m_HavePrevGameUuid = false;
+		mem_zero(&m_GameInfo.m_PrevGameUuid, sizeof(m_GameInfo.m_PrevGameUuid));
+
 		m_GameInfo.m_pConfig = &m_Config;
 		m_GameInfo.m_pTuning = &m_Tuning;
 		m_GameInfo.m_pUuids = &m_UuidManager;
@@ -101,7 +105,7 @@ protected:
 	void Expect(const unsigned char *pOutput, size_t OutputSize)
 	{
 		static CUuid TEEHISTORIAN_UUID = CalculateUuid("teehistorian@ddnet.tw");
-		static const char PREFIX1[] = "{\"comment\":\"teehistorian@ddnet.tw\",\"version\":\"2\",\"version_minor\":\"5\",\"game_uuid\":\"a1eb7182-796e-3b3e-941d-38ca71b2a4a8\",\"server_version\":\"DDNet test\",\"start_time\":\"";
+		static const char PREFIX1[] = "{\"comment\":\"teehistorian@ddnet.tw\",\"version\":\"2\",\"version_minor\":\"6\",\"game_uuid\":\"a1eb7182-796e-3b3e-941d-38ca71b2a4a8\",\"server_version\":\"DDNet test\",\"start_time\":\"";
 		static const char PREFIX2[] = "\",\"server_name\":\"server name\",\"server_port\":\"8303\",\"game_type\":\"game type\",\"map_name\":\"Kobra 3 Solo\",\"map_size\":\"903514\",\"map_sha256\":\"0123456789012345678901234567890123456789012345678901234567890123\",\"map_crc\":\"eceaf25c\",\"prng_description\":\"test-prng:02468ace\",\"config\":{},\"tuning\":{},\"uuids\":[";
 		static const char PREFIX3[] = "]}";
 
@@ -832,4 +836,24 @@ TEST_F(TeeHistorian, AntibotEmptyMessage)
 
 	m_TH.RecordAntibot("🤖", 4);
 	Expect(EXPECTED, sizeof(EXPECTED));
+}
+
+TEST_F(TeeHistorian, PrevGameUuid)
+{
+	m_GameInfo.m_HavePrevGameUuid = true;
+	CUuid PrevGameUuid = {{
+		// fe19c218-f555-4002-a273-126c59ccc17a
+		0xfe, 0x19, 0xc2, 0x18, 0xf5, 0x55, 0x40, 0x02,
+		0xa2, 0x73, 0x12, 0x6c, 0x59, 0xcc, 0xc1, 0x7a,
+		//
+	}};
+	m_GameInfo.m_PrevGameUuid = PrevGameUuid;
+	Reset(&m_GameInfo);
+	Finish();
+	json_value *pJson = json_parse((const char *)m_vBuffer.data() + 16, -1);
+	ASSERT_TRUE(pJson);
+	const json_value &JsonPrevGameUuid = (*pJson)["prev_game_uuid"];
+	ASSERT_EQ(JsonPrevGameUuid.type, json_string);
+	EXPECT_STREQ(JsonPrevGameUuid, "fe19c218-f555-4002-a273-126c59ccc17a");
+	json_value_free(pJson);
 }

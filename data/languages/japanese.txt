@@ -145,9 +145,6 @@ Favorites
 Feet
 == 足
 
-Filter
-== フィルタ
-
 Fire
 == 射撃
 
@@ -159,9 +156,6 @@ Force vote
 
 Free-View
 == 自由視点
-
-Friends
-== 友達
 
 Game
 == ゲーム
@@ -353,12 +347,6 @@ Screenshot
 Server address:
 == IP アドレス:
 
-Server details
-== サーバー情報
-
-Server filter
-== サーバーフィルタ
-
 Server info
 == サーバー情報
 
@@ -531,9 +519,6 @@ Miscellaneous
 
 Netversion:
 == 通信バージョン:
-
-Info
-== 情報
 
 UI Color
 == UI カラー
@@ -1395,10 +1380,33 @@ Pause the current demo
 Stop the current demo
 == 
 
+Go back the specified duration
+== 
+
+[Demo player duration]
+%d min.
+== 
+
+[Demo player duration]
+%d sec.
+== 
+
+Change the skip duration
+== 
+
+Go forward the specified duration
+== 
+
 Go back one tick
 == 
 
 Go forward one tick
+== 
+
+Go back one marker
+== 
+
+Go forward one marker
 == 
 
 Slow down the demo
@@ -1416,12 +1424,6 @@ Mark the end of a cut (right click to reset)
 Export cut as a separate demo
 == 
 
-Go back one marker
-== 
-
-Go forward one marker
-== 
-
 Close the demo player
 == 
 
@@ -1435,6 +1437,9 @@ Cut interval
 == 
 
 Cut length
+== 
+
+Render cut to video
 == 
 
 Loading demo files
@@ -1488,10 +1493,10 @@ Open the directory that contains the configuration and user files
 Open the directory to add custom themes
 == 
 
-Loading skin files
+Toggle to edit your dummy settings
 == 
 
-Toggle to edit your dummy settings
+Loading skin files
 == 
 
 Download community skins

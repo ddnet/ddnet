@@ -145,9 +145,6 @@ Favorites
 Feet
 == Стопала
 
-Filter
-== Филтер
-
 Fire
 == Пуцај
 
@@ -159,9 +156,6 @@ Force vote
 
 Free-View
 == Слободан преглед
-
-Friends
-== Пријатељи
 
 Fullscreen
 == Преко целог екрана
@@ -351,12 +345,6 @@ Screenshot
 
 Server address:
 == Адреса сервера:
-
-Server details
-== Детаљи о серверу
-
-Server filter
-== Филтер сервера
 
 Server info
 == О серверу
@@ -557,9 +545,6 @@ Netversion:
 
 Map:
 == Мапа
-
-Info
-== Инфо
 
 Hue
 == Нијанса
@@ -1601,10 +1586,33 @@ Pause the current demo
 Stop the current demo
 == 
 
+Go back the specified duration
+== 
+
+[Demo player duration]
+%d min.
+== 
+
+[Demo player duration]
+%d sec.
+== 
+
+Change the skip duration
+== 
+
+Go forward the specified duration
+== 
+
 Go back one tick
 == 
 
 Go forward one tick
+== 
+
+Go back one marker
+== 
+
+Go forward one marker
 == 
 
 Slow down the demo
@@ -1622,12 +1630,6 @@ Mark the end of a cut (right click to reset)
 Export cut as a separate demo
 == 
 
-Go back one marker
-== 
-
-Go forward one marker
-== 
-
 Close the demo player
 == 
 
@@ -1641,6 +1643,9 @@ Cut interval
 == 
 
 Cut length
+== 
+
+Render cut to video
 == 
 
 All combined

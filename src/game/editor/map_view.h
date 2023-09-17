@@ -38,7 +38,7 @@ public:
 
 	bool m_ShowPicker; // TODO: make private
 
-	float WorldZoom() const;
+	float GetWorldZoom() const;
 
 	void OffsetWorld(vec2 Offset);
 	void OffsetEditor(vec2 Offset);

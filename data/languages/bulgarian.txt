@@ -145,9 +145,6 @@ Favorites
 Feet
 == Крака
 
-Filter
-== Филтър
-
 Fire
 == Стрелба
 
@@ -159,9 +156,6 @@ Force vote
 
 Free-View
 == Свободен Изглед
-
-Friends
-== Приятели
 
 Fullscreen
 == Цял Екран
@@ -356,12 +350,6 @@ Screenshot
 Server address:
 == Адрес на сървъра:
 
-Server details
-== Детайли за Сървъра
-
-Server filter
-== Филтър на сървъра
-
 Server info
 == Инфо
 
@@ -528,9 +516,6 @@ Netversion:
 
 Map:
 == Карта:
-
-Info
-== Инфо
 
 Hue
 == Оттенък
@@ -908,10 +893,33 @@ Pause the current demo
 Stop the current demo
 == 
 
+Go back the specified duration
+== 
+
+[Demo player duration]
+%d min.
+== 
+
+[Demo player duration]
+%d sec.
+== 
+
+Change the skip duration
+== 
+
+Go forward the specified duration
+== 
+
 Go back one tick
 == 
 
 Go forward one tick
+== 
+
+Go back one marker
+== 
+
+Go forward one marker
 == 
 
 Slow down the demo
@@ -927,12 +935,6 @@ Mark the end of a cut (right click to reset)
 == 
 
 Export cut as a separate demo
-== 
-
-Go back one marker
-== 
-
-Go forward one marker
 == 
 
 Close the demo player
@@ -951,6 +953,9 @@ Cut length
 == 
 
 Remove chat
+== 
+
+Render cut to video
 == 
 
 Please use a different name
@@ -1103,10 +1108,10 @@ Max CSVs
 Dummy settings
 == 
 
-Loading skin files
+Toggle to edit your dummy settings
 == 
 
-Toggle to edit your dummy settings
+Loading skin files
 == 
 
 Download skins
@@ -1160,19 +1165,22 @@ Show all
 Toggle dyncam
 == 
 
-Toggle dummy
+Toggle ghost
 == 
 
-Toggle ghost
+Converse
+== 
+
+Chat command
+== 
+
+Toggle dummy
 == 
 
 Dummy copy
 == 
 
 Hammerfly dummy
-== 
-
-Converse
 == 
 
 Spectate previous
@@ -1188,9 +1196,6 @@ Show entities
 == 
 
 Show HUD
-== 
-
-Chat command
 == 
 
 Enable controller

@@ -100,7 +100,7 @@ void CSaveTee::Save(CCharacter *pChr)
 	m_HookTick = pChr->m_Core.m_HookTick;
 
 	m_HookState = pChr->m_Core.m_HookState;
-	m_HookedPlayer = pChr->m_Core.m_HookedPlayer;
+	m_HookedPlayer = pChr->m_Core.HookedPlayer();
 	m_NewHook = pChr->m_Core.m_NewHook != 0;
 
 	m_InputDirection = pChr->m_SavedInput.m_Direction;

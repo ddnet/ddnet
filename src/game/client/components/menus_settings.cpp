@@ -323,13 +323,12 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 	{
 		m_Dummy ^= 1;
 	}
+	GameClient()->m_Tooltips.DoToolTip(&m_Dummy, &Dummy, Localize("Toggle to edit your dummy settings"));
 
 	// country flag selector
 	MainView.HSplitTop(20.0f, 0, &MainView);
 	int OldSelected = -1;
 	static CListBox s_ListBox;
-	if(UI()->CheckActiveItem(&s_ClanInput) || UI()->CheckActiveItem(&s_NameInput))
-		s_ListBox.SetActive(false);
 	s_ListBox.DoStart(50.0f, m_pClient->m_CountryFlags.Num(), 10, 3, OldSelected, &MainView);
 
 	for(size_t i = 0; i < m_pClient->m_CountryFlags.Num(); ++i)
@@ -615,7 +614,6 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	EyesLabel.HSplitTop(50.0f, &EyesLabel, &Eyes);
 
 	static CButtonContainer s_aEyeButtons[6];
-	static int s_aEyesToolTip[6];
 	for(int CurrentEyeEmote = 0; CurrentEyeEmote < 6; CurrentEyeEmote++)
 	{
 		EyesLabel.VSplitLeft(10.0f, 0, &EyesLabel);
@@ -642,7 +640,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 					GameClient()->m_Emoticon.EyeEmote(CurrentEyeEmote);
 			}
 		}
-		GameClient()->m_Tooltips.DoToolTip(&s_aEyesToolTip[CurrentEyeEmote], &EyesTee, Localize("Choose default eyes when joining a server"));
+		GameClient()->m_Tooltips.DoToolTip(&s_aEyeButtons[CurrentEyeEmote], &EyesTee, Localize("Choose default eyes when joining a server"));
 		RenderTools()->RenderTee(pIdleState, &OwnSkinInfo, CurrentEyeEmote, vec2(1, 0), vec2(EyesTee.x + 25.0f, EyesTee.y + EyesTee.h / 2.0f + OffsetToMid.y));
 	}
 
@@ -940,7 +938,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 typedef struct
 {
-	CLocConstString m_Name;
+	const char *m_pName;
 	const char *m_pCommand;
 	int m_KeyId;
 	int m_ModifierCombination;
@@ -948,7 +946,7 @@ typedef struct
 
 static CKeyInfo gs_aKeys[] =
 	{
-		{Localizable("Move left"), "+left", 0, 0}, // Localize - these strings are localized within CLocConstString
+		{Localizable("Move left"), "+left", 0, 0},
 		{Localizable("Move right"), "+right", 0, 0},
 		{Localizable("Jump"), "+jump", 0, 0},
 		{Localizable("Fire"), "+fire", 0, 0},
@@ -1003,23 +1001,24 @@ void CMenus::DoSettingsControlsButtons(int Start, int Stop, CUIRect View)
 {
 	for(int i = Start; i < Stop; i++)
 	{
-		CKeyInfo &Key = gs_aKeys[i];
+		const CKeyInfo &Key = gs_aKeys[i];
+
 		CUIRect Button, Label;
 		View.HSplitTop(20.0f, &Button, &View);
 		Button.VSplitLeft(135.0f, &Label, &Button);
 
 		char aBuf[64];
-		str_format(aBuf, sizeof(aBuf), "%s:", Localize((const char *)Key.m_Name));
+		str_format(aBuf, sizeof(aBuf), "%s:", Localize(Key.m_pName));
 
 		UI()->DoLabel(&Label, aBuf, 13.0f, TEXTALIGN_ML);
 		int OldId = Key.m_KeyId, OldModifierCombination = Key.m_ModifierCombination, NewModifierCombination;
-		int NewId = DoKeyReader((void *)&Key.m_Name, &Button, OldId, OldModifierCombination, &NewModifierCombination);
+		int NewId = DoKeyReader(&Key.m_KeyId, &Button, OldId, OldModifierCombination, &NewModifierCombination);
 		if(NewId != OldId || NewModifierCombination != OldModifierCombination)
 		{
 			if(OldId != 0 || NewId == 0)
 				m_pClient->m_Binds.Bind(OldId, "", false, OldModifierCombination);
 			if(NewId != 0)
-				m_pClient->m_Binds.Bind(NewId, gs_aKeys[i].m_pCommand, false, NewModifierCombination);
+				m_pClient->m_Binds.Bind(NewId, Key.m_pCommand, false, NewModifierCombination);
 		}
 
 		View.HSplitTop(2.0f, 0, &View);
@@ -2840,6 +2839,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 
 		Section.HSplitTop(LineSize, &Label, &Section);
 		UI()->DoLabel(&Label, Localize("Colors of the hook collision line, in case of a possible collision with:"), 13.0f, TEXTALIGN_ML);
+		UI()->DoButtonLogic(&s_HookCollToolTip, 0, &Label); // Just for the tooltip, result ignored
 		GameClient()->m_Tooltips.DoToolTip(&s_HookCollToolTip, &Label, Localize("Your movements are not taken into account when calculating the line colors"));
 		DoLine_ColorPicker(&s_HookCollNoCollResetID, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Nothing hookable"), &g_Config.m_ClHookCollColorNoColl, ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f), false);
 		DoLine_ColorPicker(&s_HookCollHookableCollResetID, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Something hookable"), &g_Config.m_ClHookCollColorHookableColl, ColorRGBA(130.0f / 255.0f, 232.0f / 255.0f, 160.0f / 255.0f, 1.0f), false);

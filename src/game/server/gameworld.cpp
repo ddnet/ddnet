@@ -6,7 +6,6 @@
 #include "entity.h"
 #include "gamecontext.h"
 #include "gamecontroller.h"
-#include "player.h"
 
 #include <engine/shared/config.h>
 
@@ -192,68 +191,6 @@ void CGameWorld::RemoveEntities()
 		}
 }
 
-bool distCompare(std::pair<float, int> a, std::pair<float, int> b)
-{
-	return (a.first < b.first);
-}
-
-void CGameWorld::UpdatePlayerMaps()
-{
-	if(Server()->Tick() % g_Config.m_SvMapUpdateRate != 0)
-		return;
-
-	std::pair<float, int> Dist[MAX_CLIENTS];
-	for(int i = 0; i < MAX_CLIENTS; i++)
-	{
-		if(!Server()->ClientIngame(i))
-			continue;
-		if(Server()->GetClientVersion(i) >= VERSION_DDNET_OLD)
-			continue;
-		int *pMap = Server()->GetIdMap(i);
-
-		// compute distances
-		for(int j = 0; j < MAX_CLIENTS; j++)
-		{
-			Dist[j].second = j;
-			if(j == i)
-				continue;
-			if(!Server()->ClientIngame(j) || !GameServer()->m_apPlayers[j])
-			{
-				Dist[j].first = 1e10;
-				continue;
-			}
-			CCharacter *pChr = GameServer()->m_apPlayers[j]->GetCharacter();
-			if(!pChr)
-			{
-				Dist[j].first = 1e9;
-				continue;
-			}
-			if(!pChr->CanSnapCharacter(i))
-				Dist[j].first = 1e8;
-			else
-				Dist[j].first = length_squared(GameServer()->m_apPlayers[i]->m_ViewPos - pChr->m_Pos);
-		}
-
-		// always send the player themselves, even if all in same position
-		Dist[i].first = -1;
-
-		std::nth_element(&Dist[0], &Dist[VANILLA_MAX_CLIENTS - 1], &Dist[MAX_CLIENTS], distCompare);
-
-		int Index = 1; // exclude self client id
-		for(int j = 0; j < VANILLA_MAX_CLIENTS - 1; j++)
-		{
-			pMap[j + 1] = -1; // also fill player with empty name to say chat msgs
-			if(Dist[j].second == i || Dist[j].first > 5e9f)
-				continue;
-			pMap[Index++] = Dist[j].second;
-		}
-
-		// sort by real client ids, guarantee order on distance changes, O(Nlog(N)) worst case
-		// sort just clients in game always except first (self client id) and last (fake client id) indexes
-		std::sort(&pMap[1], &pMap[minimum(Index, VANILLA_MAX_CLIENTS - 1)]);
-	}
-}
-
 void CGameWorld::Tick()
 {
 	if(m_ResetRequested)
@@ -310,8 +247,6 @@ void CGameWorld::Tick()
 	}
 
 	RemoveEntities();
-
-	UpdatePlayerMaps();
 
 	// find the characters' strong/weak id
 	int StrongWeakID = 0;
@@ -428,11 +363,16 @@ void CGameWorld::ReleaseHooked(int ClientID)
 	for(; pChr; pChr = (CCharacter *)pChr->TypeNext())
 	{
 		CCharacterCore *pCore = pChr->Core();
-		if(pCore->m_HookedPlayer == ClientID && !pChr->IsSuper())
+		if(pCore->HookedPlayer() == ClientID && !pChr->IsSuper())
 		{
 			pCore->SetHookedPlayer(-1);
 			pCore->m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
 			pCore->m_HookState = HOOK_RETRACTED;
 		}
 	}
+}
+
+CTuningParams *CGameWorld::Tuning()
+{
+	return &m_Core.m_aTuning[0];
 }

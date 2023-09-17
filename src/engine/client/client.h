@@ -164,9 +164,9 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	int m_aCurrentRecvTick[NUM_DUMMIES];
 	int m_aRconAuthed[NUM_DUMMIES];
 	char m_aRconUsername[32];
-	char m_aRconPassword[32];
+	char m_aRconPassword[128];
 	int m_UseTempRconCommands;
-	char m_aPassword[32];
+	char m_aPassword[128];
 	bool m_SendPassword;
 	bool m_ButtonRender = false;
 
@@ -482,7 +482,7 @@ public:
 	void RegisterCommands();
 
 	const char *DemoPlayer_Play(const char *pFilename, int StorageType) override;
-	void DemoRecorder_Start(const char *pFilename, bool WithTimestamp, int Recorder) override;
+	void DemoRecorder_Start(const char *pFilename, bool WithTimestamp, int Recorder, bool Verbose = false) override;
 	void DemoRecorder_HandleAutoStart() override;
 	void DemoRecorder_StartReplayRecorder();
 	void DemoRecorder_Stop(int Recorder, bool RemoveFile = false) override;

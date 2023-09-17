@@ -169,9 +169,6 @@ Favorites
 Feet
 == Pieds
 
-Filter
-== Filtre
-
 Fire
 == Tirer
 
@@ -183,9 +180,6 @@ Force vote
 
 Free-View
 == Vue libre
-
-Friends
-== Amis
 
 Fullscreen
 == Plein écran
@@ -380,12 +374,6 @@ Screenshot
 Server address:
 == Adresse du serveur :
 
-Server details
-== Détails du serveur
-
-Server filter
-== Filtres du serveur
-
 Server info
 == Info. serveur
 
@@ -555,9 +543,6 @@ Netversion:
 
 Map:
 == Carte :
-
-Info
-== Info.
 
 Hue
 == Teinte
@@ -1727,6 +1712,23 @@ Unable to rename the folder
 No server selected
 == 
 
+Go back the specified duration
+== 
+
+[Demo player duration]
+%d min.
+== 
+
+[Demo player duration]
+%d sec.
+== 
+
+Change the skip duration
+== 
+
+Go forward the specified duration
+== 
+
 Mark the beginning of a cut (right click to reset)
 == 
 
@@ -1743,6 +1745,9 @@ Cut interval
 == 
 
 Cut length
+== 
+
+Render cut to video
 == 
 
 All combined

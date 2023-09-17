@@ -1,0 +1,448 @@
+[Random Blocks]
+
+Index 1
+
+Index 1 XFLIP
+Random 40
+
+Index 1 YFLIP
+Random 40
+
+Index 1 YFLIP XFLIP
+Random 40
+
+Index 2
+Random 40
+
+Index 2 XFLIP
+Random 40
+
+Index 2 YFLIP
+Random 40
+
+Index 2 YFLIP XFLIP
+Random 40
+
+Index 3 XFLIP
+Random 40
+
+Index 3 YFLIP
+Random 40
+
+Index 3 YFLIP XFLIP
+Random 40
+
+Index 4
+Random 40
+
+Index 4 XFLIP
+Random 40
+
+Index 4 YFLIP
+Random 40
+
+Index 4 YFLIP XFLIP
+Random 40
+
+Index 5
+Random 40
+
+Index 5 XFLIP
+Random 40
+
+Index 5 YFLIP
+Random 40
+
+Index 5 YFLIP XFLIP
+Random 40
+
+Index 6
+Random 40
+
+Index 6 XFLIP
+Random 40
+
+Index 6 YFLIP
+Random 40
+
+Index 6 YFLIP XFLIP
+Random 40
+
+Index 64
+Random 40
+
+Index 64 XFLIP
+Random 40
+
+Index 64 YFLIP
+Random 40
+
+Index 64 YFLIP XFLIP
+Random 40
+
+Index 65
+Random 40
+
+Index 65 XFLIP
+Random 40
+
+Index 65 YFLIP
+Random 40
+
+Index 65 YFLIP XFLIP
+Random 40
+
+Index 66
+Random 40
+
+Index 66 XFLIP
+Random 40
+
+Index 66 YFLIP
+Random 40
+
+Index 66 YFLIP XFLIP
+Random 40
+
+Index 67
+Random 40
+
+Index 67 XFLIP
+Random 40
+
+Index 67 YFLIP
+Random 40
+
+Index 67 YFLIP XFLIP
+Random 40
+
+#random 2x2
+Index 19
+Pos 0 0 FULL
+Pos 1 0 FULL
+Pos 0 1 FULL
+Pos 1 1 FULL
+Pos -1 0 NOTINDEX -1
+Pos 0 -1 NOTINDEX -1
+Pos 0 2 NOTINDEX -1
+Pos 2 0 NOTINDEX -1
+Random 100
+
+
+#random 3x3
+Index 16
+Pos 0 0 FULL
+Pos 1 0 FULL
+Pos 2 0 FULL
+Pos 0 1 FULL
+Pos 1 1 FULL
+Pos 2 1 FULL
+Pos 0 2 FULL
+Pos 1 2 FULL
+Pos 2 2 FULL
+Pos -1 0 NOTINDEX -1
+Pos 0 -1 NOTINDEX -1
+Pos 0 3 NOTINDEX -1
+Pos 3 0 NOTINDEX -1
+Random 100
+
+
+NewRun
+
+#Remove overlaps
+Index 1
+Pos 0 0 INDEX 16 OR 19 
+Pos -2 -2 INDEX 16 OR 19
+
+Index 1
+Pos 0 0 INDEX 16 OR 19
+Pos -1 -2 INDEX 16 OR 19
+
+Index 1
+Pos 0 0 INDEX 16 OR 19
+Pos 0 -2 INDEX 16 OR 19
+
+Index 1
+Pos 0 0 INDEX 16 OR 19
+Pos 1 -2 INDEX 16 OR 19
+
+Index 1
+Pos 0 0 INDEX 16 OR 19
+Pos 2 -2 INDEX 16 OR 19
+
+Index 1
+Pos 0 0 INDEX 16 OR 19
+Pos -2 -1 INDEX 16 OR 19
+
+Index 1
+Pos 0 0 INDEX 16 OR 19
+Pos -1 -1 INDEX 16 OR 19
+
+Index 1
+Pos 0 0 INDEX 16 OR 19
+Pos 0 -1 INDEX 16 OR 19
+
+Index 1
+Pos 0 0 INDEX 16 OR 19
+Pos 1 -1 INDEX 16 OR 19
+
+Index 1
+Pos 0 0 INDEX 16 OR 19
+Pos 2 -1 INDEX 16 OR 19
+
+Index 1
+Pos 0 0 INDEX 16 OR 19
+Pos -2 0 INDEX 16 OR 19
+
+Index 1
+Pos 0 0 INDEX 16 OR 19
+Pos -1 0 INDEX 16 OR 19
+
+Index 1
+Pos 0 0 INDEX 16 OR 19
+Pos 1 0 INDEX 16 OR 19
+
+Index 1
+Pos 0 0 INDEX 16 OR 19
+Pos 2 0 INDEX 16 OR 19
+
+Index 1
+Pos 0 0 INDEX 16 OR 19
+Pos -2 1 INDEX 16 OR 19
+
+Index 1
+Pos 0 0 INDEX 16 OR 19
+Pos -1 1 INDEX 16 OR 19
+
+Index 1
+Pos 0 0 INDEX 16 OR 19
+Pos 0 1 INDEX 16 OR 19
+
+Index 1
+Pos 0 0 INDEX 16 OR 19
+Pos 1 1 INDEX 16 OR 19
+
+Index 1
+Pos 0 0 INDEX 16 OR 19
+Pos 2 1 INDEX 16 OR 19
+
+Index 1
+Pos 0 0 INDEX 16 OR 19
+Pos -2 2 INDEX 16 OR 19
+
+Index 1
+Pos 0 0 INDEX 16 OR 19
+Pos -1 2 INDEX 16 OR 19
+
+Index 1
+Pos 0 0 INDEX 16 OR 19
+Pos 0 2 INDEX 16 OR 19
+
+Index 1
+Pos 0 0 INDEX 16 OR 19
+Pos 1 2 INDEX 16 OR 19
+
+Index 1
+Pos 0 0 INDEX 16 OR 19
+Pos 2 2 INDEX 16 OR 19
+
+NewRun
+
+#Fill tiles
+Index 20
+Pos -1 0 INDEX 19
+Index 35
+Pos 0 -1 INDEX 19
+Index 36
+Pos -1 -1 INDEX 19
+
+Index 17
+Pos -1 0 INDEX 16
+Index 18
+Pos -2 0 INDEX 16
+Index 32
+Pos 0 -1 INDEX 16
+Index 33
+Pos -1 -1 INDEX 16
+Index 34
+Pos -2 -1 INDEX 16
+Index 48
+Pos 0 -2 INDEX 16
+Index 49
+Pos -1 -2 INDEX 16
+Index 50
+Pos -2 -2 INDEX 16
+
+
+
+[Random small Blocks]
+
+Index 1
+
+Index 1 XFLIP
+Random 40
+
+Index 1 YFLIP
+Random 40
+
+Index 1 YFLIP XFLIP
+Random 40
+
+Index 2
+Random 40
+
+Index 2 XFLIP
+Random 40
+
+Index 2 YFLIP
+Random 40
+
+Index 2 YFLIP XFLIP
+Random 40
+
+Index 3 XFLIP
+Random 40
+
+Index 3 YFLIP
+Random 40
+
+Index 3 YFLIP XFLIP
+Random 40
+
+Index 4
+Random 40
+
+Index 4 XFLIP
+Random 40
+
+Index 4 YFLIP
+Random 40
+
+Index 4 YFLIP XFLIP
+Random 40
+
+Index 5
+Random 40
+
+Index 5 XFLIP
+Random 40
+
+Index 5 YFLIP
+Random 40
+
+Index 5 YFLIP XFLIP
+Random 40
+
+Index 6
+Random 40
+
+Index 6 XFLIP
+Random 40
+
+Index 6 YFLIP
+Random 40
+
+Index 6 YFLIP XFLIP
+Random 40
+
+Index 64
+Random 40
+
+Index 64 XFLIP
+Random 40
+
+Index 64 YFLIP
+Random 40
+
+Index 64 YFLIP XFLIP
+Random 40
+
+Index 65
+Random 40
+
+Index 65 XFLIP
+Random 40
+
+Index 65 YFLIP
+Random 40
+
+Index 65 YFLIP XFLIP
+Random 40
+
+Index 66
+Random 40
+
+Index 66 XFLIP
+Random 40
+
+Index 66 YFLIP
+Random 40
+
+Index 66 YFLIP XFLIP
+Random 40
+
+Index 67
+Random 40
+
+Index 67 XFLIP
+Random 40
+
+Index 67 YFLIP
+Random 40
+
+Index 67 YFLIP XFLIP
+Random 40
+
+
+
+[Random Decoration]
+
+Index 7
+
+Index 7 XFLIP
+Random 18
+  
+Index 7 YFLIP
+Random 18
+
+Index 7 YFLIP XFLIP
+Random 18
+
+Index 21
+Random 18
+
+Index 21 XFLIP
+Random 18
+
+Index 21 YFLIP
+Random 18
+
+Index 21 YFLIP XFLIP
+Random 18
+
+Index 23
+Random 18
+
+Index 23 XFLIP
+Random 18
+
+Index 23 YFLIP
+Random 18
+
+Index 23 YFLIP XFLIP
+Random 18
+
+Index 51
+Random 18
+
+Index 51 XFLIP
+Random 18
+
+Index 51 YFLIP
+Random 18
+
+Index 51 YFLIP XFLIP
+Random 18
+
+Index 68
+Random 18

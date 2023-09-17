@@ -71,7 +71,7 @@ class CMenus : public CComponent
 	int DoButton_GridHeader(const void *pID, const char *pText, int Checked, const CUIRect *pRect);
 
 	void DoButton_KeySelect(const void *pID, const char *pText, const CUIRect *pRect);
-	int DoKeyReader(void *pID, const CUIRect *pRect, int Key, int ModifierCombination, int *pNewModifierCombination);
+	int DoKeyReader(const void *pID, const CUIRect *pRect, int Key, int ModifierCombination, int *pNewModifierCombination);
 
 	void DoSettingsControlsButtons(int Start, int Stop, CUIRect View);
 
@@ -409,8 +409,6 @@ protected:
 	std::vector<CFriendItem> m_avFriends[NUM_FRIEND_TYPES];
 	const CFriendItem *m_pRemoveFriend = nullptr;
 
-	void FriendlistOnUpdate();
-
 	// found in menus.cpp
 	int Render();
 #if defined(CONF_VIDEORECORDER)
@@ -454,11 +452,19 @@ protected:
 	// found in menus_browser.cpp
 	int m_SelectedIndex;
 	bool m_ServerBrowserShouldRevealSelection;
-	void RenderServerbrowserServerList(CUIRect View);
+	void RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemActivated);
+	void RenderServerbrowserStatusBox(CUIRect StatusBox, bool WasListboxItemActivated);
 	void Connect(const char *pAddress);
 	void PopupConfirmSwitchServer();
-	void RenderServerbrowserServerDetail(CUIRect View);
 	void RenderServerbrowserFilters(CUIRect View);
+	void RenderServerbrowserDDNetFilter(CUIRect View,
+		char *pFilterExclude, int FilterExcludeSize,
+		float ItemHeight, int MaxItems, int ItemsPerRow,
+		CScrollRegion &ScrollRegion, std::vector<unsigned char> &vItemIds,
+		const std::function<const char *(int ItemIndex)> &GetItemName,
+		const std::function<void(int ItemIndex, CUIRect Item, const void *pItemId, bool Active)> &RenderItem);
+	void RenderServerbrowserCountriesFilter(CUIRect View, int Network);
+	void RenderServerbrowserTypesFilter(CUIRect View, int Network);
 	struct SPopupCountrySelectionContext
 	{
 		CMenus *m_pMenus;
@@ -466,11 +472,17 @@ protected:
 		bool m_New;
 	};
 	static CUI::EPopupMenuFunctionResult PopupCountrySelection(void *pContext, CUIRect View, bool Active);
+	void RenderServerbrowserInfo(CUIRect View);
+	void RenderServerbrowserInfoScoreboard(CUIRect View, const CServerInfo *pSelectedServer);
 	void RenderServerbrowserFriends(CUIRect View);
+	void FriendlistOnUpdate();
 	void PopupConfirmRemoveFriend();
+	void RenderServerbrowserTabBar(CUIRect TabBar);
+	void RenderServerbrowserToolBox(CUIRect ToolBox);
 	void RenderServerbrowser(CUIRect MainView);
 	template<typename F>
 	bool PrintHighlighted(const char *pName, F &&PrintFn);
+	CTeeRenderInfo GetTeeRenderInfo(vec2 Size, const char *pSkinName, bool CustomSkinColors, int CustomSkinColorBody, int CustomSkinColorFeet) const;
 	static void ConchainFriendlistUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainServerbrowserUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
@@ -583,6 +595,9 @@ public:
 		SMALL_TAB_EDITOR,
 		SMALL_TAB_DEMOBUTTON,
 		SMALL_TAB_SERVER,
+		SMALL_TAB_BROWSER_FILTER,
+		SMALL_TAB_BROWSER_INFO,
+		SMALL_TAB_BROWSER_FRIENDS,
 
 		SMALL_TAB_LENGTH,
 	};

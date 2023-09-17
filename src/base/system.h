@@ -879,11 +879,9 @@ typedef struct sockaddr_un UNIXSOCKETADDR;
  *
  * @ingroup Network-General
  *
- * @return 0 on success.
- *
  * @remark You must call this function before using any other network functions.
  */
-int net_init();
+void net_init();
 
 /*
 	Function: net_host_lookup

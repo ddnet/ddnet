@@ -146,9 +146,6 @@ Favorites
 Feet
 == Fødder
 
-Filter
-== Filter
-
 Fire
 == Skyd
 
@@ -160,9 +157,6 @@ Force vote
 
 Free-View
 == Free-View
-
-Friends
-== Venner
 
 Fullscreen
 == Fuldskærm
@@ -357,12 +351,6 @@ Screenshot
 Server address:
 == Serveradresse
 
-Server details
-== Serverdetaljer
-
-Server filter
-== Serverfilter
-
 Server info
 == Serverinfo
 
@@ -532,9 +520,6 @@ Netversion:
 
 Map:
 == Bane
-
-Info
-== Info
 
 Hue
 == Farve
@@ -1363,10 +1348,33 @@ Pause the current demo
 Stop the current demo
 == 
 
+Go back the specified duration
+== 
+
+[Demo player duration]
+%d min.
+== 
+
+[Demo player duration]
+%d sec.
+== 
+
+Change the skip duration
+== 
+
+Go forward the specified duration
+== 
+
 Go back one tick
 == 
 
 Go forward one tick
+== 
+
+Go back one marker
+== 
+
+Go forward one marker
 == 
 
 Slow down the demo
@@ -1384,12 +1392,6 @@ Mark the end of a cut (right click to reset)
 Export cut as a separate demo
 == 
 
-Go back one marker
-== 
-
-Go forward one marker
-== 
-
 Close the demo player
 == 
 
@@ -1403,6 +1405,9 @@ Cut interval
 == 
 
 Cut length
+== 
+
+Render cut to video
 == 
 
 Loading demo files
@@ -1456,10 +1461,10 @@ Open the directory that contains the configuration and user files
 Open the directory to add custom themes
 == 
 
-Loading skin files
+Toggle to edit your dummy settings
 == 
 
-Toggle to edit your dummy settings
+Loading skin files
 == 
 
 Download community skins

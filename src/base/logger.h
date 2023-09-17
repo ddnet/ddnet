@@ -103,7 +103,7 @@ public:
 	 */
 	virtual void GlobalFinish() {}
 	/**
-	 * Notifies thte logger of a changed `m_Filter`.
+	 * Notifies the logger of a changed `m_Filter`.
 	 */
 	virtual void OnFilterChange() {}
 };

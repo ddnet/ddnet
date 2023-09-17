@@ -95,7 +95,7 @@ void *ReplaceImageItem(CMapItemImage *pImgItem, const char *pImgName, const char
 	IStorage::StripPathAndExtension(pImgFile, g_aNewName, sizeof(g_aNewName));
 	g_NewDataID = pImgItem->m_ImageData;
 	g_pNewData = ImgInfo.m_pData;
-	g_NewDataSize = ImgInfo.m_Width * ImgInfo.m_Height * 4;
+	g_NewDataSize = (size_t)ImgInfo.m_Width * ImgInfo.m_Height * ImgInfo.PixelSize();
 
 	return (void *)pNewImgItem;
 }

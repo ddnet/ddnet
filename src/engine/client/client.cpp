@@ -505,7 +505,7 @@ void CClient::RconAuth(const char *pName, const char *pPassword)
 
 	CMsgPacker Msg(NETMSG_RCON_AUTH, true);
 	Msg.AddString(pName, 32);
-	Msg.AddString(pPassword, 32);
+	Msg.AddString(pPassword, 128);
 	Msg.AddInt(1);
 	SendMsgActive(&Msg, MSGFLAG_VITAL);
 }
@@ -974,7 +974,7 @@ void CClient::ServerInfoRequest()
 
 void CClient::LoadDebugFont()
 {
-	m_DebugFont = Graphics()->LoadTexture("debug_font.png", IStorage::TYPE_ALL, CImageInfo::FORMAT_AUTO, 0);
+	m_DebugFont = Graphics()->LoadTexture("debug_font.png", IStorage::TYPE_ALL);
 }
 
 // ---
@@ -3120,7 +3120,7 @@ void CClient::Run()
 		// handle pending map edits
 		if(m_aCmdEditMap[0])
 		{
-			int Result = m_pEditor->Load(m_aCmdEditMap, IStorage::TYPE_ALL_OR_ABSOLUTE);
+			int Result = m_pEditor->HandleMapDrop(m_aCmdEditMap, IStorage::TYPE_ALL_OR_ABSOLUTE);
 			if(Result)
 				g_Config.m_ClEditor = true;
 			else
@@ -3375,12 +3375,6 @@ void CClient::Run()
 		}
 		else
 			LastTime = Now;
-
-		if(g_Config.m_DbgHitch)
-		{
-			std::this_thread::sleep_for(g_Config.m_DbgHitch * 1ms);
-			g_Config.m_DbgHitch = 0;
-		}
 
 		// update local and global time
 		m_LocalTime = (time_get() - m_LocalStartTime) / (float)time_freq();
@@ -3957,10 +3951,13 @@ void CClient::Con_DemoSpeed(IConsole::IResult *pResult, void *pUserData)
 	pSelf->m_DemoPlayer.SetSpeed(pResult->GetFloat(0));
 }
 
-void CClient::DemoRecorder_Start(const char *pFilename, bool WithTimestamp, int Recorder)
+void CClient::DemoRecorder_Start(const char *pFilename, bool WithTimestamp, int Recorder, bool Verbose)
 {
 	if(State() != IClient::STATE_ONLINE)
-		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demorec/record", "client is not online");
+	{
+		if(Verbose)
+			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demorec/record", "client is not online");
+	}
 	else
 	{
 		char aFilename[IO_MAX_PATH_LENGTH];
@@ -4038,9 +4035,9 @@ void CClient::Con_Record(IConsole::IResult *pResult, void *pUserData)
 {
 	CClient *pSelf = (CClient *)pUserData;
 	if(pResult->NumArguments())
-		pSelf->DemoRecorder_Start(pResult->GetString(0), false, RECORDER_MANUAL);
+		pSelf->DemoRecorder_Start(pResult->GetString(0), false, RECORDER_MANUAL, true);
 	else
-		pSelf->DemoRecorder_Start(pSelf->m_aCurrentMap, true, RECORDER_MANUAL);
+		pSelf->DemoRecorder_Start(pSelf->m_aCurrentMap, true, RECORDER_MANUAL, true);
 }
 
 void CClient::Con_StopRecord(IConsole::IResult *pResult, void *pUserData)
@@ -4629,7 +4626,7 @@ int main(int argc, const char **argv)
 		pClient->GetGPUInfoString(aGPUInfo);
 		char aMessage[768];
 		str_format(aMessage, sizeof(aMessage),
-			"An assertion error occured. Please write down or take a screenshot of the following information and report this error.\n"
+			"An assertion error occurred. Please write down or take a screenshot of the following information and report this error.\n"
 			"Please also share the assert log which you should find in the 'dumps' folder in your config directory.\n\n"
 			"%s\n\n"
 			"Platform: %s\n"
