@@ -505,7 +505,7 @@ void CClient::RconAuth(const char *pName, const char *pPassword)
 
 	CMsgPacker Msg(NETMSG_RCON_AUTH, true);
 	Msg.AddString(pName, 32);
-	Msg.AddString(pPassword, 32);
+	Msg.AddString(pPassword, 128);
 	Msg.AddInt(1);
 	SendMsgActive(&Msg, MSGFLAG_VITAL);
 }
