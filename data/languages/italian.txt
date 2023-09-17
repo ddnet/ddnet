@@ -152,9 +152,6 @@ Favorites
 Feet
 == Piedi
 
-Filter
-== Filtro
-
 Fire
 == Fuoco
 
@@ -166,9 +163,6 @@ Force vote
 
 Free-View
 == Visione libera
-
-Friends
-== Amici
 
 Fullscreen
 == Schermo intero
@@ -363,12 +357,6 @@ Screenshot
 Server address:
 == Indirizzo server:
 
-Server details
-== Dettagli server
-
-Server filter
-== Filtro server
-
 Server info
 == Info server
 
@@ -535,9 +523,6 @@ Netversion:
 
 Map:
 == Mappa:
-
-Info
-== Info
 
 Hue
 == Tinta
@@ -1562,10 +1547,33 @@ Pause the current demo
 Stop the current demo
 == 
 
+Go back the specified duration
+== 
+
+[Demo player duration]
+%d min.
+== 
+
+[Demo player duration]
+%d sec.
+== 
+
+Change the skip duration
+== 
+
+Go forward the specified duration
+== 
+
 Go back one tick
 == 
 
 Go forward one tick
+== 
+
+Go back one marker
+== 
+
+Go forward one marker
 == 
 
 Slow down the demo
@@ -1581,12 +1589,6 @@ Mark the end of a cut (right click to reset)
 == 
 
 Export cut as a separate demo
-== 
-
-Go back one marker
-== 
-
-Go forward one marker
 == 
 
 Close the demo player

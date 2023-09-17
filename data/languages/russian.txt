@@ -159,9 +159,6 @@ Favorites
 Feet
 == Ноги
 
-Filter
-== Фильтр
-
 Fire
 == Стрелять
 
@@ -173,9 +170,6 @@ Force vote
 
 Free-View
 == Свободный обзор
-
-Friends
-== Друзья
 
 Fullscreen
 == Полноэкранный（настр.)
@@ -369,12 +363,6 @@ Screenshot
 
 Server address:
 == Адрес сервера:
-
-Server details
-== Сведения сервера
-
-Server filter
-== Фильтр серверов
 
 Server info
 == Информация
@@ -606,9 +594,6 @@ Netversion:
 
 Map:
 == Карта:
-
-Info
-== Инфо
 
 Hue
 == Оттен.
@@ -1756,6 +1741,23 @@ Unable to delete the folder '%s'. Make sure it's empty first.
 
 Moved ingame
 == Перемещены в игре
+
+Go back the specified duration
+== 
+
+[Demo player duration]
+%d min.
+== 
+
+[Demo player duration]
+%d sec.
+== 
+
+Change the skip duration
+== 
+
+Go forward the specified duration
+== 
 
 Render cut to video
 == 
