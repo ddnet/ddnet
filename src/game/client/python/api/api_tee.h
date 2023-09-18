@@ -354,6 +354,106 @@ static PyGetSetDef Tee_getseters[] = {
 	{NULL}  /* Sentinel */
 };
 
+static PyObject* Tee_str(Tee* self)
+{
+	// Буфер для строковых представлений полей struct.
+	char buf[2048];
+
+	// Создание строковых представлений для обьектов типа Vector2.
+	PyObject* pos_str_obj = Vector2_str(&(self->pos));
+	PyObject* vel_str_obj = Vector2_str(&(self->vel));
+	PyObject* hookPos_str_obj = Vector2_str(&(self->hookPos));
+	PyObject* hookDir_str_obj = Vector2_str(&(self->hookDir));
+	PyObject* hookTeleBase_str_obj = Vector2_str(&(self->hookTeleBase));
+	PyObject* lastVel_str_obj = Vector2_str(&(self->lastVel));
+
+	// Получение указателей на C-строки.
+	const char *pos_str = PyUnicode_AsUTF8(pos_str_obj);
+	const char *vel_str = PyUnicode_AsUTF8(vel_str_obj);
+	const char *hookPos_str = PyUnicode_AsUTF8(hookPos_str_obj);
+	const char *hookDir_str = PyUnicode_AsUTF8(hookDir_str_obj);
+	const char *hookTeleBase_str = PyUnicode_AsUTF8(hookTeleBase_str_obj);
+	const char *lastVel_str = PyUnicode_AsUTF8(lastVel_str_obj);
+
+	// Проверка получения всех указателей на строки.
+	if (!pos_str || !vel_str || !hookPos_str || !hookDir_str || !hookTeleBase_str || !lastVel_str) {
+		// Освобождение всех PyObject, если не удалось получить строки.
+		Py_XDECREF(pos_str_obj);
+		Py_XDECREF(vel_str_obj);
+		Py_XDECREF(hookPos_str_obj);
+		Py_XDECREF(hookDir_str_obj);
+		Py_XDECREF(hookTeleBase_str_obj);
+		Py_XDECREF(lastVel_str_obj);
+		return NULL;
+	}
+
+	sprintf(
+		buf,
+		"Tee(\n"
+			"	pos: %s,\n"
+			"	vel: %s,\n"
+			"	hookPos: %s,\n"
+			"	hookDir: %s,\n"
+			"	hookTeleBase: %s,\n"
+			"	hookTick: %d,\n"
+			"	hookState: %d,\n"
+			"	hookedPlayer: %d,\n"
+			"	activeWeapon: %d,\n"
+			"	isNewHook: %s,\n"
+			"	jumped: %d,\n"
+			"	jumpedTotal: %d,\n"
+			"	jumps: %d,\n"
+			"	direction: %d,\n"
+			"	angle: %d,\n"
+			"	triggeredEvents: %d,\n"
+			"	id: %d,\n"
+			"	isReset: %s,\n"
+			"	lastVel: %s,\n"
+			"	colliding: %d,\n"
+			"	isLeftWall: %s,\n"
+			"	isSolo: %s,\n"
+			"	isJetpack: %s,\n"
+			"	isCollisionDisabled: %s,\n"
+			"	isEndlessHook: %s,\n"
+			"	isEndlessJump: %s,\n"
+			"	isHammerHitDisabled: %s,\n"
+			"	isGrenadeHitDisabled: %s,\n"
+			"	isLaserHitDisabled: %s,\n"
+			"	isShotgunHitDisabled: %s,\n"
+			"	isHookHitDisabled: %s,\n"
+			"	isSuper: %s,\n"
+			"	hasTelegunGun: %s,\n"
+			"	hasTelegunGrenade: %s,\n"
+			"	hasTelegunLaser: %s,\n"
+			"	freezeStart: %d,\n"
+			"	freezeEnd: %d,\n"
+			"	isInFreeze: %s,\n"
+			"	isDeepFrozen: %s,\n"
+			"	isLiveFrozen: %s\n"
+		")",
+		pos_str, vel_str, hookPos_str, hookDir_str, hookTeleBase_str, self->hookTick, self->hookState,
+		self->hookedPlayer, self->activeWeapon, self->isNewHook ? "true" : "false", self->jumped, self->jumpedTotal, self->jumps,
+		self->direction, self->angle, self->triggeredEvents, self->id, self->isReset ? "true" : "false", lastVel_str,
+		self->colliding, self->isLeftWall ? "true" : "false", self->isSolo ? "true" : "false", self->isJetpack ? "true" : "false",
+		self->isCollisionDisabled ? "true" : "false", self->isEndlessHook ? "true" : "false", self->isEndlessJump ? "true" : "false",
+		self->isHammerHitDisabled ? "true" : "false", self->isGrenadeHitDisabled ? "true" : "false",
+		self->isLaserHitDisabled ? "true" : "false", self->isShotgunHitDisabled ? "true" : "false",
+		self->isHookHitDisabled ? "true" : "false", self->isSuper ? "true" : "false", self->hasTelegunGun ? "true" : "false",
+		self->hasTelegunGrenade ? "true" : "false", self->hasTelegunLaser ? "true" : "false", self->freezeStart,
+		self->freezeEnd, self->isInFreeze ? "true" : "false", self->isDeepFrozen ? "true" : "false", self->isLiveFrozen ? "true" : "false"
+	);
+
+	// Уменьшение счетчика ссылок на все PyObject.
+	Py_DECREF(pos_str_obj);
+	Py_DECREF(vel_str_obj);
+	Py_DECREF(hookPos_str_obj);
+	Py_DECREF(hookDir_str_obj);
+	Py_DECREF(hookTeleBase_str_obj);
+	Py_DECREF(lastVel_str_obj);
+
+	return PyUnicode_FromString(buf);
+}
+
 static PyTypeObject TeeType = {
 	{ PyObject_HEAD_INIT(NULL) 0, },
 	"API.Tee",                /* tp_name */
@@ -370,7 +470,7 @@ static PyTypeObject TeeType = {
 	0,                            /* tp_as_mapping */
 	0,                            /* tp_hash */
 	0,                            /* tp_call */
-	0,                            /* tp_str */
+	(reprfunc)Tee_str,                            /* tp_str */
 	0,                            /* tp_getattro */
 	0,                            /* tp_setattro */
 	0,                            /* tp_as_buffer */

@@ -529,6 +529,105 @@ static PyGetSetDef Player_getseters[] = {
 	{NULL}  /* Sentinel */
 };
 
+static PyObject* Player_str(Player* self)
+{
+	char buf[4096];
+
+	PyObject* name_str = PyUnicode_FromString(self->name.c_str());
+	PyObject* clan_str = PyUnicode_FromString(self->clan.c_str());
+	PyObject* skinName_str = PyUnicode_FromString(self->skinName.c_str());
+	PyObject* renderPos_str_obj = Vector2_str(&self->renderPos);
+	PyObject* specChar_str_obj = Vector2_str(&self->specChar);
+	PyObject* tee_str_obj = Tee_str(&self->tee);
+
+	const char *renderPos_str = PyUnicode_AsUTF8(renderPos_str_obj);
+	const char *tee_str = PyUnicode_AsUTF8(tee_str_obj);
+	const char *specChar_str = PyUnicode_AsUTF8(specChar_str_obj);
+
+	if (!renderPos_str || !tee_str || !specChar_str) {
+		Py_XDECREF(renderPos_str_obj);
+		Py_XDECREF(tee_str_obj);
+		Py_XDECREF(specChar_str_obj);
+		return NULL;
+	}
+
+	sprintf(
+		buf,
+		"Player(\n"
+		"useCustomColor: %d,\n"
+		"colorBody: %d,\n"
+		"colorFeet: %d,\n"
+		"name: %s,\n"
+		"clan: %s,\n"
+		"country: %d,\n"
+		"skinName: %s,\n"
+		"skinColor: %d,\n"
+		"team: %d,\n"
+		"emoticon: %d,\n"
+		"emoticonStartFraction: %.2f,\n"
+		"emoticonStartTick: %d,\n"
+		"isSolo: %s,\n"
+		"isJetpack: %s,\n"
+		"isCollisionDisabled: %s,\n"
+		"isEndlessHook: %s,\n"
+		"isEndlessJump: %s,\n"
+		"isHammerHitDisabled: %s,\n"
+		"isGrenadeHitDisabled: %s,\n"
+		"isLaserHitDisabled: %s,\n"
+		"isShotgunHitDisabled: %s,\n"
+		"isHookHitDisabled: %s,\n"
+		"isSuper: %s,\n"
+		"isHasTelegunGun: %s,\n"
+		"isHasTelegunGrenade: %s,\n"
+		"isHasTelegunLaser: %s,\n"
+		"freezeEnd: %d,\n"
+		"isDeepFrozen: %s,\n"
+		"isLiveFrozen: %s,\n"
+		"angle: %.2f,\n"
+		"isActive: %s,\n"
+		"isChatIgnore: %s,\n"
+		"isEmoticonIgnore: %s,\n"
+		"isFriend: %s,\n"
+		"isFoe: %s,\n"
+		"authLevel: %d,\n"
+		"isAfk: %s,\n"
+		"isPaused: %s,\n"
+		"isSpec: %s,\n"
+		"renderPos: %s,\n"
+		"isPredicted: %s,\n"
+		"isPredictedLocal: %s,\n"
+		"isSpecCharPresent: %s,\n"
+		"specChar: %s,\n"
+		"tee: %s\n"
+		")",
+		self->useCustomColor, self->colorBody, self->colorFeet, PyUnicode_AsUTF8(name_str), PyUnicode_AsUTF8(clan_str),
+		self->country, PyUnicode_AsUTF8(skinName_str), self->skinColor, self->team, self->emoticon,
+		self->emoticonStartFraction, self->emoticonStartTick, self->isSolo ? "true" : "false",
+		self->isJetpack ? "true" : "false", self->isCollisionDisabled ? "true" : "false",
+		self->isEndlessHook ? "true" : "false", self->isEndlessJump ? "true" : "false",
+		self->isHammerHitDisabled ? "true" : "false", self->isGrenadeHitDisabled ? "true" : "false",
+		self->isLaserHitDisabled ? "true" : "false", self->isShotgunHitDisabled ? "true" : "false",
+		self->isHookHitDisabled ? "true" : "false", self->isSuper ? "true" : "false",
+		self->isHasTelegunGun ? "true" : "false", self->isHasTelegunGrenade ? "true" : "false",
+		self->isHasTelegunLaser ? "true" : "false", self->freezeEnd, self->isDeepFrozen ? "true" : "false",
+		self->isLiveFrozen ? "true" : "false", self->angle, self->isActive ? "true" : "false",
+		self->isChatIgnore ? "true" : "false", self->isEmoticonIgnore ? "true" : "false",
+		self->isFriend ? "true" : "false", self->isFoe ? "true" : "false", self->authLevel,
+		self->isAfk ? "true" : "false", self->isPaused ? "true" : "false", self->isSpec ? "true" : "false",
+		renderPos_str, self->isSpecCharPresent ? "true" : "false", self->isPredicted ? "true" : "false",
+		self->isPredictedLocal ? "true" : "false", specChar_str, tee_str
+	);
+
+	Py_DECREF(renderPos_str_obj);
+	Py_DECREF(tee_str_obj);
+	Py_DECREF(name_str);
+	Py_DECREF(clan_str);
+	Py_DECREF(skinName_str);
+	Py_DECREF(specChar_str);
+
+	return PyUnicode_FromString(buf);
+}
+
 static PyTypeObject PlayerType = {
 	{ PyObject_HEAD_INIT(NULL) 0, },
 	"API.Player",                /* tp_name */
@@ -545,7 +644,7 @@ static PyTypeObject PlayerType = {
 	0,                            /* tp_as_mapping */
 	0,                            /* tp_hash */
 	0,                            /* tp_call */
-	0,                            /* tp_str */
+	(reprfunc)Player_str,                            /* tp_str */
 	0,                            /* tp_getattro */
 	0,                            /* tp_setattro */
 	0,                            /* tp_as_buffer */
