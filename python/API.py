@@ -6,7 +6,7 @@ class Vector2:
 
     def __init__(self, x: float, y: float):
         pass
-    def distance(vector: 'Vector2') -> float:
+    def distance(self, vector: 'Vector2') -> float:
         pass
     def __add__(other: 'Vector2') -> 'Vector2':
         pass
