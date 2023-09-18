@@ -254,72 +254,72 @@ static PyObject* Player_getemoticonStartTick(Player* self, void* closure)
 
 static PyObject* Player_getisSolo(Player* self, void* closure)
 {
-	return Py_BuildValue("p", self->isSolo);
+	return Py_BuildValue("b", self->isSolo);
 }
 
 static PyObject* Player_getisJetpack(Player* self, void* closure)
 {
-	return Py_BuildValue("p", self->isJetpack);
+	return Py_BuildValue("b", self->isJetpack);
 }
 
 static PyObject* Player_getisCollisionDisabled(Player* self, void* closure)
 {
-	return Py_BuildValue("p", self->isCollisionDisabled);
+	return Py_BuildValue("b", self->isCollisionDisabled);
 }
 
 static PyObject* Player_getisEndlessHook(Player* self, void* closure)
 {
-	return Py_BuildValue("p", self->isEndlessHook);
+	return Py_BuildValue("b", self->isEndlessHook);
 }
 
 static PyObject* Player_getisEndlessJump(Player* self, void* closure)
 {
-	return Py_BuildValue("p", self->isEndlessJump);
+	return Py_BuildValue("b", self->isEndlessJump);
 }
 
 static PyObject* Player_getisHammerHitDisabled(Player* self, void* closure)
 {
-	return Py_BuildValue("p", self->isHammerHitDisabled);
+	return Py_BuildValue("b", self->isHammerHitDisabled);
 }
 
 static PyObject* Player_getisGrenadeHitDisabled(Player* self, void* closure)
 {
-	return Py_BuildValue("p", self->isGrenadeHitDisabled);
+	return Py_BuildValue("b", self->isGrenadeHitDisabled);
 }
 
 static PyObject* Player_getisLaserHitDisabled(Player* self, void* closure)
 {
-	return Py_BuildValue("p", self->isLaserHitDisabled);
+	return Py_BuildValue("b", self->isLaserHitDisabled);
 }
 
 static PyObject* Player_getisShotgunHitDisabled(Player* self, void* closure)
 {
-	return Py_BuildValue("p", self->isShotgunHitDisabled);
+	return Py_BuildValue("b", self->isShotgunHitDisabled);
 }
 
 static PyObject* Player_getisHookHitDisabled(Player* self, void* closure)
 {
-	return Py_BuildValue("p", self->isHookHitDisabled);
+	return Py_BuildValue("b", self->isHookHitDisabled);
 }
 
 static PyObject* Player_getisSuper(Player* self, void* closure)
 {
-	return Py_BuildValue("p", self->isSuper);
+	return Py_BuildValue("b", self->isSuper);
 }
 
 static PyObject* Player_getisHasTelegunGun(Player* self, void* closure)
 {
-	return Py_BuildValue("p", self->isHasTelegunGun);
+	return Py_BuildValue("b", self->isHasTelegunGun);
 }
 
 static PyObject* Player_getisHasTelegunGrenade(Player* self, void* closure)
 {
-	return Py_BuildValue("p", self->isHasTelegunGrenade);
+	return Py_BuildValue("b", self->isHasTelegunGrenade);
 }
 
 static PyObject* Player_getisHasTelegunLaser(Player* self, void* closure)
 {
-	return Py_BuildValue("p", self->isHasTelegunLaser);
+	return Py_BuildValue("b", self->isHasTelegunLaser);
 }
 
 static PyObject* Player_getfreezeEnd(Player* self, void* closure)
@@ -329,12 +329,12 @@ static PyObject* Player_getfreezeEnd(Player* self, void* closure)
 
 static PyObject* Player_getisDeepFrozen(Player* self, void* closure)
 {
-	return Py_BuildValue("p", self->isDeepFrozen);
+	return Py_BuildValue("b", self->isDeepFrozen);
 }
 
 static PyObject* Player_getisLiveFrozen(Player* self, void* closure)
 {
-	return Py_BuildValue("p", self->isLiveFrozen);
+	return Py_BuildValue("b", self->isLiveFrozen);
 }
 
 static PyObject* Player_getangle(Player* self, void* closure)
@@ -344,27 +344,27 @@ static PyObject* Player_getangle(Player* self, void* closure)
 
 static PyObject* Player_getisActive(Player* self, void* closure)
 {
-	return Py_BuildValue("p", self->isActive);
+	return Py_BuildValue("b", self->isActive);
 }
 
 static PyObject* Player_getisChatIgnore(Player* self, void* closure)
 {
-	return Py_BuildValue("p", self->isChatIgnore);
+	return Py_BuildValue("b", self->isChatIgnore);
 }
 
 static PyObject* Player_getisEmoticonIgnore(Player* self, void* closure)
 {
-	return Py_BuildValue("p", self->isEmoticonIgnore);
+	return Py_BuildValue("b", self->isEmoticonIgnore);
 }
 
 static PyObject* Player_getisFriend(Player* self, void* closure)
 {
-	return Py_BuildValue("p", self->isFriend);
+	return Py_BuildValue("b", self->isFriend);
 }
 
 static PyObject* Player_getisFoe(Player* self, void* closure)
 {
-	return Py_BuildValue("p", self->isFoe);
+	return Py_BuildValue("b", self->isFoe);
 }
 
 static PyObject* Player_getauthLevel(Player* self, void* closure)
@@ -374,17 +374,17 @@ static PyObject* Player_getauthLevel(Player* self, void* closure)
 
 static PyObject* Player_getisAfk(Player* self, void* closure)
 {
-	return Py_BuildValue("p", self->isAfk);
+	return Py_BuildValue("b", self->isAfk);
 }
 
 static PyObject* Player_getisPaused(Player* self, void* closure)
 {
-	return Py_BuildValue("p", self->isPaused);
+	return Py_BuildValue("b", self->isPaused);
 }
 
 static PyObject* Player_getisSpec(Player* self, void* closure)
 {
-	return Py_BuildValue("p", self->isSpec);
+	return Py_BuildValue("b", self->isSpec);
 }
 
 static PyObject* Player_getrenderPos(Player* self, void* closure)
@@ -398,12 +398,12 @@ static PyObject* Player_getrenderPos(Player* self, void* closure)
 
 static PyObject* Player_getisPredicted(Player* self, void* closure)
 {
-	return Py_BuildValue("p", self->isPredicted);
+	return Py_BuildValue("b", self->isPredicted);
 }
 
 static PyObject* Player_getisPredictedLocal(Player* self, void* closure)
 {
-	return Py_BuildValue("p", self->isPredictedLocal);
+	return Py_BuildValue("b", self->isPredictedLocal);
 }
 
 static PyObject* Player_getsmoothStart(Player* self, void* closure)
@@ -418,7 +418,7 @@ static PyObject* Player_getsmoothLen(Player* self, void* closure)
 
 static PyObject* Player_getisSpecCharPresent(Player* self, void* closure)
 {
-	return Py_BuildValue("p", self->isSpecCharPresent);
+	return Py_BuildValue("b", self->isSpecCharPresent);
 }
 
 static PyObject* Player_getspecChar(Player* self, void* closure)

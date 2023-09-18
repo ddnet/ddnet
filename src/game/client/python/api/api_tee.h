@@ -148,7 +148,7 @@ static PyObject* Tee_getactiveWeapon(Tee* self, void* closure)
 
 static PyObject* Tee_getisNewHook(Tee* self, void* closure)
 {
-	return Py_BuildValue("p", self->isNewHook);
+	return Py_BuildValue("b", self->isNewHook);
 }
 
 static PyObject* Tee_getjumped(Tee* self, void* closure)
@@ -188,7 +188,7 @@ static PyObject* Tee_getid(Tee* self, void* closure)
 
 static PyObject* Tee_getisReset(Tee* self, void* closure)
 {
-	return Py_BuildValue("p", self->isReset);
+	return Py_BuildValue("b", self->isReset);
 }
 
 static PyObject* Tee_getlastVel(Tee* self, void* closure)
@@ -207,77 +207,77 @@ static PyObject* Tee_getcolliding(Tee* self, void* closure)
 
 static PyObject* Tee_getisLeftWall(Tee* self, void* closure)
 {
-	return Py_BuildValue("p", self->isLeftWall);
+	return Py_BuildValue("b", self->isLeftWall);
 }
 
 static PyObject* Tee_getisSolo(Tee* self, void* closure)
 {
-	return Py_BuildValue("p", self->isSolo);
+	return Py_BuildValue("b", self->isSolo);
 }
 
 static PyObject* Tee_getisJetpack(Tee* self, void* closure)
 {
-	return Py_BuildValue("p", self->isJetpack);
+	return Py_BuildValue("b", self->isJetpack);
 }
 
 static PyObject* Tee_getisCollisionDisabled(Tee* self, void* closure)
 {
-	return Py_BuildValue("p", self->isCollisionDisabled);
+	return Py_BuildValue("b", self->isCollisionDisabled);
 }
 
 static PyObject* Tee_getisEndlessHook(Tee* self, void* closure)
 {
-	return Py_BuildValue("p", self->isEndlessHook);
+	return Py_BuildValue("b", self->isEndlessHook);
 }
 
 static PyObject* Tee_getisEndlessJump(Tee* self, void* closure)
 {
-	return Py_BuildValue("p", self->isEndlessJump);
+	return Py_BuildValue("b", self->isEndlessJump);
 }
 
 static PyObject* Tee_getisHammerHitDisabled(Tee* self, void* closure)
 {
-	return Py_BuildValue("p", self->isHammerHitDisabled);
+	return Py_BuildValue("b", self->isHammerHitDisabled);
 }
 
 static PyObject* Tee_getisGrenadeHitDisabled(Tee* self, void* closure)
 {
-	return Py_BuildValue("p", self->isGrenadeHitDisabled);
+	return Py_BuildValue("b", self->isGrenadeHitDisabled);
 }
 
 static PyObject* Tee_getisLaserHitDisabled(Tee* self, void* closure)
 {
-	return Py_BuildValue("p", self->isLaserHitDisabled);
+	return Py_BuildValue("b", self->isLaserHitDisabled);
 }
 
 static PyObject* Tee_getisShotgunHitDisabled(Tee* self, void* closure)
 {
-	return Py_BuildValue("p", self->isShotgunHitDisabled);
+	return Py_BuildValue("b", self->isShotgunHitDisabled);
 }
 
 static PyObject* Tee_getisHookHitDisabled(Tee* self, void* closure)
 {
-	return Py_BuildValue("p", self->isHookHitDisabled);
+	return Py_BuildValue("b", self->isHookHitDisabled);
 }
 
 static PyObject* Tee_getisSuper(Tee* self, void* closure)
 {
-	return Py_BuildValue("p", self->isSuper);
+	return Py_BuildValue("b", self->isSuper);
 }
 
 static PyObject* Tee_gethasTelegunGun(Tee* self, void* closure)
 {
-	return Py_BuildValue("p", self->hasTelegunGun);
+	return Py_BuildValue("b", self->hasTelegunGun);
 }
 
 static PyObject* Tee_gethasTelegunGrenade(Tee* self, void* closure)
 {
-	return Py_BuildValue("p", self->hasTelegunGrenade);
+	return Py_BuildValue("b", self->hasTelegunGrenade);
 }
 
 static PyObject* Tee_gethasTelegunLaser(Tee* self, void* closure)
 {
-	return Py_BuildValue("p", self->hasTelegunLaser);
+	return Py_BuildValue("b", self->hasTelegunLaser);
 }
 
 static PyObject* Tee_getfreezeStart(Tee* self, void* closure)
@@ -292,17 +292,17 @@ static PyObject* Tee_getfreezeEnd(Tee* self, void* closure)
 
 static PyObject* Tee_getisInFreeze(Tee* self, void* closure)
 {
-	return Py_BuildValue("p", self->isInFreeze);
+	return Py_BuildValue("b", self->isInFreeze);
 }
 
 static PyObject* Tee_getisDeepFrozen(Tee* self, void* closure)
 {
-	return Py_BuildValue("p", self->isDeepFrozen);
+	return Py_BuildValue("b", self->isDeepFrozen);
 }
 
 static PyObject* Tee_getisLiveFrozen(Tee* self, void* closure)
 {
-	return Py_BuildValue("p", self->isLiveFrozen);
+	return Py_BuildValue("b", self->isLiveFrozen);
 }
 
 static void Tee_dealloc(Tee* self)
