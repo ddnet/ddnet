@@ -1750,21 +1750,21 @@ Moved ingame
 == Movido dentro del juego
 
 Go back the specified duration
-== 
+== Retroceder el tiempo especificado
 
 [Demo player duration]
 %d min.
-== 
+== %d min.
 
 [Demo player duration]
 %d sec.
-== 
+== %d seg.
 
 Change the skip duration
-== 
+== Cambiar duración del salto
 
 Go forward the specified duration
-== 
+== Adelantar el tiempo especificado
 
 Render cut to video
-== 
+== Renderizar corte a vídeo
