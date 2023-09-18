@@ -471,8 +471,8 @@ private:
 
 	enum
 	{
-		MAX_MUTES = 32,
-		MAX_VOTE_MUTES = 32,
+		MAX_MUTES = 128,
+		MAX_VOTE_MUTES = 128,
 	};
 	struct CMute
 	{
