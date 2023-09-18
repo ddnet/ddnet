@@ -11,6 +11,8 @@ on:
 jobs:
   check-style:
     runs-on: ubuntu-20.04
+    env:
+      CARGO_HTTP_MULTIPLEXING: false
     steps:
     - uses: actions/checkout@v3
       with:
