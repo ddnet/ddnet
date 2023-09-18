@@ -1257,35 +1257,106 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 
 void CEditor::DoToolbarSounds(CUIRect ToolBar)
 {
-	CUIRect ToolBarTop, ToolBarBottom, Button;
+	CUIRect ToolBarTop, ToolBarBottom, Button, SeekBar;
 	ToolBar.HSplitMid(&ToolBarTop, &ToolBarBottom, 5.0f);
 
 	if(m_SelectedSound >= 0 && (size_t)m_SelectedSound < m_Map.m_vpSounds.size())
 	{
 		const std::shared_ptr<CEditorSound> pSelectedSound = m_Map.m_vpSounds[m_SelectedSound];
 
-		// play/stop button
+		// play/pause button
 		{
 			ToolBarBottom.VSplitLeft(ToolBarBottom.h, &Button, &ToolBarBottom);
-			static int s_PlayStopButton;
-			if(DoButton_FontIcon(&s_PlayStopButton, Sound()->IsPlaying(pSelectedSound->m_SoundID) ? FONT_ICON_STOP : FONT_ICON_PLAY, 0, &Button, 0, "Play/stop audio preview", IGraphics::CORNER_ALL) ||
+			static int s_PlayPauseButton;
+			if(DoButton_FontIcon(&s_PlayPauseButton, Sound()->IsPlaying(pSelectedSound->m_SoundID) ? FONT_ICON_PAUSE : FONT_ICON_PLAY, 0, &Button, 0, "Play/pause audio preview", IGraphics::CORNER_ALL) ||
 				(m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_SPACE)))
 			{
 				if(Sound()->IsPlaying(pSelectedSound->m_SoundID))
-					Sound()->Stop(pSelectedSound->m_SoundID);
+					Sound()->Pause(pSelectedSound->m_SoundID);
 				else
-					Sound()->Play(CSounds::CHN_GUI, pSelectedSound->m_SoundID, 0);
+					Sound()->Play(CSounds::CHN_GUI, pSelectedSound->m_SoundID, ISound::FLAG_PREVIEW);
 			}
 		}
-
-		// duration
+		// stop button
+		{
+			ToolBarBottom.VSplitLeft(2.0f, nullptr, &ToolBarBottom);
+			ToolBarBottom.VSplitLeft(ToolBarBottom.h, &Button, &ToolBarBottom);
+			static int s_StopButton;
+			if(DoButton_FontIcon(&s_StopButton, FONT_ICON_STOP, 0, &Button, 0, "Stop audio preview", IGraphics::CORNER_ALL))
+			{
+				Sound()->Stop(pSelectedSound->m_SoundID);
+			}
+		}
+		// do seekbar
 		{
 			ToolBarBottom.VSplitLeft(5.0f, nullptr, &ToolBarBottom);
-			char aDuration[32];
-			char aDurationLabel[64];
-			str_time_float(Sound()->GetSampleDuration(pSelectedSound->m_SoundID), TIME_HOURS, aDuration, sizeof(aDuration));
-			str_format(aDurationLabel, sizeof(aDurationLabel), "Duration: %s", aDuration);
-			UI()->DoLabel(&ToolBarBottom, aDurationLabel, 12.0f, TEXTALIGN_ML);
+			ToolBarBottom.VSplitLeft(200.0f, &SeekBar, &ToolBarBottom);
+			const float Rounding = 5.0f;
+
+			static int s_SeekBarID = 0;
+			void *pId = &s_SeekBarID;
+
+			char aBuffer[64];
+			float CurrentTime = Sound()->GetSampleCurrentTime(pSelectedSound->m_SoundID);
+			float TotalTime = Sound()->GetSampleTotalTime(pSelectedSound->m_SoundID);
+
+			// draw seek bar
+			SeekBar.Draw(ColorRGBA(0, 0, 0, 0.5f), IGraphics::CORNER_ALL, Rounding);
+
+			// draw filled bar
+			float Amount = CurrentTime / TotalTime;
+			CUIRect FilledBar = SeekBar;
+			FilledBar.w = 2 * Rounding + (FilledBar.w - 2 * Rounding) * Amount;
+			FilledBar.Draw(ColorRGBA(1, 1, 1, 0.5f), IGraphics::CORNER_ALL, Rounding);
+
+			// draw time
+			char aCurrentTime[32];
+			str_time_float(CurrentTime, TIME_HOURS, aCurrentTime, sizeof(aCurrentTime));
+			char aTotalTime[32];
+			str_time_float(TotalTime, TIME_HOURS, aTotalTime, sizeof(aTotalTime));
+			str_format(aBuffer, sizeof(aBuffer), "%s / %s", aCurrentTime, aTotalTime);
+			UI()->DoLabel(&SeekBar, aBuffer, SeekBar.h * 0.70f, TEXTALIGN_MC);
+
+			// do the logic
+			const bool Inside = UI()->MouseInside(&SeekBar);
+
+			if(UI()->CheckActiveItem(pId))
+			{
+				if(!UI()->MouseButton(0))
+					UI()->SetActiveItem(nullptr);
+				else
+				{
+					static float s_PrevAmount = 0.0f;
+					float AmountSeek = clamp((UI()->MouseX() - SeekBar.x - Rounding) / (float)(SeekBar.w - 2 * Rounding), 0.0f, 1.0f);
+
+					if(Input()->ShiftIsPressed())
+					{
+						AmountSeek = s_PrevAmount + (AmountSeek - s_PrevAmount) * 0.05f;
+						if(AmountSeek >= 0.0f && AmountSeek <= 1.0f && absolute(s_PrevAmount - AmountSeek) >= 0.0001f)
+						{
+							Sound()->SetSampleCurrentTime(pSelectedSound->m_SoundID, AmountSeek);
+						}
+					}
+					else
+					{
+						if(AmountSeek >= 0.0f && AmountSeek <= 1.0f && absolute(s_PrevAmount - AmountSeek) >= 0.001f)
+						{
+							s_PrevAmount = AmountSeek;
+							Sound()->SetSampleCurrentTime(pSelectedSound->m_SoundID, AmountSeek);
+						}
+					}
+				}
+			}
+			else if(UI()->HotItem() == pId)
+			{
+				if(UI()->MouseButton(0))
+				{
+					UI()->SetActiveItem(pId);
+				}
+			}
+
+			if(Inside)
+				UI()->SetHotItem(pId);
 		}
 	}
 }
@@ -4689,11 +4760,11 @@ void CEditor::RenderFileDialog()
 						Sound()->Play(CSounds::CHN_GUI, m_FilePreviewSound, 0);
 				}
 
-				char aDuration[32];
-				char aDurationLabel[64];
-				str_time_float(Sound()->GetSampleDuration(m_FilePreviewSound), TIME_HOURS, aDuration, sizeof(aDuration));
-				str_format(aDurationLabel, sizeof(aDurationLabel), "Duration: %s", aDuration);
-				UI()->DoLabel(&Preview, aDurationLabel, 12.0f, TEXTALIGN_ML);
+				char aTotalTime[32];
+				char aTotalTimeLabel[64];
+				str_time_float(Sound()->GetSampleTotalTime(m_FilePreviewSound), TIME_HOURS, aTotalTime, sizeof(aTotalTime));
+				str_format(aTotalTimeLabel, sizeof(aTotalTimeLabel), "Duration: %s", aTotalTime);
+				UI()->DoLabel(&Preview, aTotalTimeLabel, 12.0f, TEXTALIGN_ML);
 			}
 			else if(m_FilePreviewState == PREVIEW_ERROR)
 			{

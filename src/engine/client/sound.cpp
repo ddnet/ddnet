@@ -618,12 +618,56 @@ void CSound::UnloadSample(int SampleID)
 	m_aSamples[SampleID].m_pData = nullptr;
 }
 
-float CSound::GetSampleDuration(int SampleID)
+float CSound::GetSampleTotalTime(int SampleID)
 {
 	if(SampleID == -1 || SampleID >= NUM_SAMPLES)
 		return 0.0f;
 
 	return (m_aSamples[SampleID].m_NumFrames / m_aSamples[SampleID].m_Rate);
+}
+
+float CSound::GetSampleCurrentTime(int SampleID)
+{
+	if(SampleID == -1 || SampleID >= NUM_SAMPLES)
+		return 0.0f;
+
+	CSample *pSample = &m_aSamples[SampleID];
+	if(IsPlaying(SampleID))
+	{
+		for(auto &Voice : m_aVoices)
+		{
+			if(Voice.m_pSample == pSample)
+			{
+				return (Voice.m_Tick / pSample->m_Rate);
+			}
+		}
+	}
+	else
+	{
+		return (pSample->m_PausedAt / pSample->m_Rate);
+	}
+}
+
+void CSound::SetSampleCurrentTime(int SampleID, float Time)
+{
+	if(SampleID == -1 || SampleID >= NUM_SAMPLES)
+		return;
+
+	CSample *pSample = &m_aSamples[SampleID];
+	if(IsPlaying(SampleID))
+	{
+		for(auto &Voice : m_aVoices)
+		{
+			if(Voice.m_pSample == pSample)
+			{
+				Voice.m_Tick = pSample->m_NumFrames * Time;
+			}
+		}
+	}
+	else
+	{
+		pSample->m_PausedAt = pSample->m_NumFrames * Time;
+	}
 }
 
 void CSound::SetChannel(int ChannelID, float Vol, float Pan)
@@ -772,9 +816,18 @@ ISound::CVoiceHandle CSound::Play(int ChannelID, int SampleID, int Flags, float 
 		m_aVoices[VoiceID].m_pSample = &m_aSamples[SampleID];
 		m_aVoices[VoiceID].m_pChannel = &m_aChannels[ChannelID];
 		if(Flags & FLAG_LOOP)
+		{
 			m_aVoices[VoiceID].m_Tick = m_aSamples[SampleID].m_PausedAt;
+		}
+		else if(Flags & FLAG_PREVIEW)
+		{
+			m_aVoices[VoiceID].m_Tick = m_aSamples[SampleID].m_PausedAt;
+			m_aSamples[SampleID].m_PausedAt = 0;
+		}
 		else
+		{
 			m_aVoices[VoiceID].m_Tick = 0;
+		}
 		m_aVoices[VoiceID].m_Vol = 255;
 		m_aVoices[VoiceID].m_Flags = Flags;
 		m_aVoices[VoiceID].m_X = (int)x;
@@ -797,6 +850,21 @@ ISound::CVoiceHandle CSound::PlayAt(int ChannelID, int SampleID, int Flags, floa
 ISound::CVoiceHandle CSound::Play(int ChannelID, int SampleID, int Flags)
 {
 	return Play(ChannelID, SampleID, Flags, 0, 0);
+}
+
+void CSound::Pause(int SampleID)
+{
+	// TODO: a nice fade out
+	std::unique_lock<std::mutex> Lock(m_SoundLock);
+	CSample *pSample = &m_aSamples[SampleID];
+	for(auto &Voice : m_aVoices)
+	{
+		if(Voice.m_pSample == pSample)
+		{
+			Voice.m_pSample->m_PausedAt = Voice.m_Tick;
+			Voice.m_pSample = 0;
+		}
+	}
 }
 
 void CSound::Stop(int SampleID)

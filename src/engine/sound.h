@@ -15,7 +15,8 @@ public:
 		FLAG_LOOP = 1 << 0,
 		FLAG_POS = 1 << 1,
 		FLAG_NO_PANNING = 1 << 2,
-		FLAG_ALL = FLAG_LOOP | FLAG_POS | FLAG_NO_PANNING,
+		FLAG_PREVIEW = 1 << 3,
+		FLAG_ALL = FLAG_LOOP | FLAG_POS | FLAG_NO_PANNING | FLAG_PREVIEW,
 	};
 
 	enum
@@ -68,7 +69,9 @@ public:
 	virtual int LoadWVFromMem(const void *pData, unsigned DataSize, bool FromEditor = false) = 0;
 	virtual void UnloadSample(int SampleID) = 0;
 
-	virtual float GetSampleDuration(int SampleID) = 0; // in s
+	virtual float GetSampleTotalTime(int SampleID) = 0; // in s
+	virtual float GetSampleCurrentTime(int SampleID) = 0; // in s
+	virtual void SetSampleCurrentTime(int SampleID, float Time) = 0;
 
 	virtual void SetChannel(int ChannelID, float Volume, float Panning) = 0;
 	virtual void SetListenerPos(float x, float y) = 0;
@@ -83,6 +86,7 @@ public:
 
 	virtual CVoiceHandle PlayAt(int ChannelID, int SampleID, int Flags, float x, float y) = 0;
 	virtual CVoiceHandle Play(int ChannelID, int SampleID, int Flags) = 0;
+	virtual void Pause(int SampleID) = 0;
 	virtual void Stop(int SampleID) = 0;
 	virtual void StopAll() = 0;
 	virtual void StopVoice(CVoiceHandle Voice) = 0;
