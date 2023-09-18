@@ -171,8 +171,8 @@ static PyObject* Vector2_mul(PyObject* v, PyObject* w)
 	return (PyObject *)result;
 }
 
-static PyObject* Vector2_div(PyObject* v, PyObject* w) {
-
+static PyObject* Vector2_div(PyObject* v, PyObject* w)
+{
 	double xDiv, yDiv;
 
 	if (PyFloat_Check(w)) {
