@@ -4,11 +4,31 @@
 #include "Python.h"
 #include "game/client/gameclient.h"
 
-typedef struct {
+struct Vector2 {
 	PyObject_HEAD;
 	double x;
 	double y;
-} Vector2;
+
+	Vector2(vec2 vec)
+	{
+		this->x = vec.x;
+		this->y = vec.y;
+	}
+
+	Vector2(double x, double y)
+	{
+		this->x = x;
+		this->y = y;
+	}
+
+	Vector2(float x, float y)
+	{
+		this->x = x;
+		this->y = y;
+	}
+
+	Vector2() {}
+};
 
 extern PyTypeObject Vector2Type;
 
@@ -221,7 +241,7 @@ static PyNumberMethods Vector2_as_number = {
 
 static PyObject* Vector2_str(Vector2* self)
 {
-	char buf[19];
+	char buf[128];
 	sprintf(buf, "{x: %.2f, y: %.2f}", self->x, self->y);
 	return PyUnicode_FromString(buf);
 }

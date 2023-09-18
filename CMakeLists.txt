@@ -2307,7 +2307,8 @@ if(CLIENT)
     python/ScriptsScanner.h
     python/api/api.cpp
     python/api/api.h
-    python/api/api_vector2.cpp
+    python/api/api_player.h
+    python/api/api_tee.h
     python/api/api_vector2.h
     race.cpp
     race.h
