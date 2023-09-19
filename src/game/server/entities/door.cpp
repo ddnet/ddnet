@@ -58,7 +58,7 @@ void CDoor::Snap(int SnappingClient)
 	if(SnappingClientVersion >= VERSION_DDNET_ENTITY_NETOBJS)
 	{
 		From = m_To;
-		StartTick = 0;
+		StartTick = -1;
 	}
 	else
 	{

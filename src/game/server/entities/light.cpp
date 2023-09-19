@@ -112,7 +112,7 @@ void CLight::Snap(int SnappingClient)
 		pChr = GameServer()->GetPlayerChar(GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID);
 
 	vec2 From = m_Pos;
-	int StartTick = 0;
+	int StartTick = -1;
 
 	if(pChr && pChr->Team() == TEAM_SUPER)
 	{

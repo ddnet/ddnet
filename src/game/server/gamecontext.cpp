@@ -396,6 +396,7 @@ bool CGameContext::SnapLaserObject(const CSnapContext &Context, int SnapID, cons
 		pObj->m_Type = LaserType;
 		pObj->m_Subtype = Subtype;
 		pObj->m_SwitchNumber = SwitchNumber;
+		pObj->m_Flags = 0;
 	}
 	else
 	{

@@ -21,6 +21,7 @@ public:
 	int m_Type;
 	int m_SwitchNumber;
 	int m_Subtype;
+	bool m_Predict;
 	// TuneZone is introduced locally
 	int m_TuneZone;
 };

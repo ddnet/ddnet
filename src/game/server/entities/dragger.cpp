@@ -212,7 +212,7 @@ void CDragger::Snap(int SnappingClient)
 	int StartTick;
 	if(SnappingClientVersion >= VERSION_DDNET_ENTITY_NETOBJS)
 	{
-		StartTick = 0;
+		StartTick = -1;
 	}
 	else
 	{

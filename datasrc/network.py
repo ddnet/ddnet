@@ -36,6 +36,9 @@ LegacyProjectileFlags = [f"CLIENTID_BIT{i}" for i in range(8)] + [
 ProjectileFlags = [
 	"BOUNCE_HORIZONTAL", "BOUNCE_VERTICAL", "EXPLOSIVE", "FREEZE", "NORMALIZE_VEL",
 ]
+LaserFlags = [
+	"NO_PREDICT",
+]
 
 LaserTypes = ["RIFLE", "SHOTGUN", "DOOR", "FREEZE", "DRAGGER", "GUN", "PLASMA"]
 DraggerTypes = ["WEAK", "WEAK_NW", "NORMAL", "NORMAL_NW", "STRONG", "STRONG_NW"]
@@ -100,6 +103,7 @@ Flags = [
 	Flags("EXPLAYERFLAG", ExPlayerFlags),
 	Flags("LEGACYPROJECTILEFLAG", LegacyProjectileFlags),
 	Flags("PROJECTILEFLAG", ProjectileFlags),
+	Flags("LASERFLAG", LaserFlags),
 ]
 
 Objects = [
@@ -294,6 +298,7 @@ Objects = [
 		NetIntAny("m_Type"),
 		NetIntAny("m_SwitchNumber", -1),
 		NetIntAny("m_Subtype", -1),
+		NetIntAny("m_Flags", 0),
 	]),
 
 	NetObjectEx("DDNetProjectile", "ddnet-projectile@netobj.ddnet.tw", [
