@@ -5,6 +5,7 @@
 #include "HumanLikeMouse.h"
 #include "game/client/gameclient.h"
 #include <random>
+#include <utility>
 
 const double sqrt3 = std::sqrt(3);
 const double sqrt5 = std::sqrt(5);
@@ -86,7 +87,7 @@ Point HumanLikeMouse::getCurrentMousePosition()
 	return point;
 }
 
-void HumanLikeMouse::moveToPoint(Point* targetPoint)
+void HumanLikeMouse::moveToPoint(Point* targetPoint, float moveTime, function<void()> onArrival)
 {
 	Point startPoint = HumanLikeMouse::getCurrentMousePosition();
 	std::vector<Point> points = this->getPoints(startPoint.x, startPoint.y, targetPoint->x, targetPoint->y);
@@ -99,9 +100,12 @@ void HumanLikeMouse::moveToPoint(Point* targetPoint)
 	for(auto point : points) {
 		this->targetWay.push(point);
 	}
+
+	this->onArrival = std::move(onArrival);
+	this->moveTime = moveTime;
 }
 
-void HumanLikeMouse::moveToPlayer(int id)
+void HumanLikeMouse::moveToPlayer(int id, float moveTime, function<void()> onArrival)
 {
 	if (id == this->m_pClient->m_aLocalIDs[g_Config.m_ClDummy]) {
 		return;
@@ -113,7 +117,7 @@ void HumanLikeMouse::moveToPlayer(int id)
 	point.x = diff.x;
 	point.y = diff.y;
 
-	this->moveToPoint(&point);
+	this->moveToPoint(&point, moveTime, std::move(onArrival));
 }
 
 void HumanLikeMouse::processMouseMoving()
@@ -121,7 +125,7 @@ void HumanLikeMouse::processMouseMoving()
 	static float timer = Client()->LocalTime();
 	static int moveIteration = 1;
 	static Point prevPoint = this->getCurrentMousePosition();
-	float timeToAim = 0.02 / this->countPointsInWay;
+	float timeToAim = this->moveTime / this->countPointsInWay;
 	float speed = 10;
 
 	if (this->targetWay.empty() || timer + (timeToAim / speed) * moveIteration >= Client()->LocalTime()) {
@@ -143,6 +147,10 @@ void HumanLikeMouse::processMouseMoving()
 		this->targetWay.pop();
 		prevPoint = point;
 		moveIteration = 1;
+
+		if (this->targetWay.empty()) {
+			this->onArrival();
+		}
 	} else {
 		moveIteration++;
 	}

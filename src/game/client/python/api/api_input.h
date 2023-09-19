@@ -5,6 +5,7 @@
 #ifndef DDNET_API_INPUT_H
 #define DDNET_API_INPUT_H
 
+#include <functional>
 #include "api.h"
 #include "api_vector2.h"
 
@@ -15,7 +16,8 @@ enum API_Input_Direction {
 	DIRECTION_NONE = 0,
 };
 
-static PyObject* API_Input_move(PyObject* self, PyObject* args) {
+static PyObject* API_Input_move(PyObject* self, PyObject* args)
+{
 	API_Input_Direction direction;
 	PyArg_ParseTuple(args, "i", &direction);
 
@@ -23,24 +25,28 @@ static PyObject* API_Input_move(PyObject* self, PyObject* args) {
 	Py_RETURN_NONE;
 }
 
-static PyObject* API_Input_jump(PyObject* self, PyObject* args) {
+static PyObject* API_Input_jump(PyObject* self, PyObject* args)
+{
 	PythonAPI_GameClient->pythonController.inputs[g_Config.m_ClDummy].m_Jump = 1;
 	Py_RETURN_NONE;
 }
 
-static PyObject* API_Input_hook(PyObject* self, PyObject* args) {
+static PyObject* API_Input_hook(PyObject* self, PyObject* args)
+{
 	bool hook;
 	PyArg_ParseTuple(args, "b", &hook);
 	PythonAPI_GameClient->pythonController.inputs[g_Config.m_ClDummy].m_Hook = hook;
 	Py_RETURN_NONE;
 }
 
-static PyObject* API_Input_fire(PyObject* self, PyObject* args) {
+static PyObject* API_Input_fire(PyObject* self, PyObject* args)
+{
 	PythonAPI_GameClient->pythonController.InputFire();
 	Py_RETURN_NONE;
 }
 
-static PyObject* API_Input_setBlockUserInput(PyObject* self, PyObject* args) {
+static PyObject* API_Input_setBlockUserInput(PyObject* self, PyObject* args)
+{
 	bool block;
 	PyArg_ParseTuple(args, "b", &block);
 
@@ -48,7 +54,8 @@ static PyObject* API_Input_setBlockUserInput(PyObject* self, PyObject* args) {
 	Py_RETURN_NONE;
 }
 
-static PyObject* API_Input_setTarget(PyObject* self, PyObject* args) {
+static PyObject* API_Input_setTarget(PyObject* self, PyObject* args)
+{
 	Vector2 *position;
 
 	if (!PyArg_ParseTuple(args, "O!", &Vector2Type, &position))
@@ -60,32 +67,119 @@ static PyObject* API_Input_setTarget(PyObject* self, PyObject* args) {
 	Py_RETURN_NONE;
 }
 
-static PyObject* API_Input_setTargetHumanLike(PyObject* self, PyObject* args) {
-	Vector2 *position;
+PyObject* global_onArrivalPythonFunction = nullptr;
 
-	if (!PyArg_ParseTuple(args, "O!", &Vector2Type, &position))
+static PyObject* wrap_onArrival() {
+	if (global_onArrivalPythonFunction) {
+		PyObject_CallObject(global_onArrivalPythonFunction, NULL);
+		Py_DECREF(global_onArrivalPythonFunction);
+		global_onArrivalPythonFunction = nullptr;
+	}
+	Py_RETURN_NONE;
+}
+
+static PyObject* API_Input_setTargetHumanLike(PyObject* self, PyObject* args)
+{
+	Vector2 *position;
+	PyObject *pyMoveTime = nullptr;
+	PyObject *pyFunction = nullptr;
+
+	if (!PyArg_ParseTuple(args, "O!OO:Input_setTargetHumanLike", &Vector2Type, &position, &pyMoveTime, &pyFunction))
 		return NULL;
 
-	Point point;
+	if (pyMoveTime != nullptr && !PyFloat_Check(pyMoveTime)) {
+		PyErr_SetString(PyExc_TypeError, "`moveTime` must be a float or None");
+		return NULL;
+	}
 
+	if (pyFunction != nullptr && !PyCallable_Check(pyFunction)) {
+		PyErr_SetString(PyExc_TypeError, "`onArrived` must be a callable function or None");
+		return NULL;
+	}
+
+	float moveTime = 0.02;
+	if (pyMoveTime != nullptr) {
+		moveTime = PyFloat_AsDouble(pyMoveTime);
+	}
+
+	Point point;
 	point.x = (int) position->x;
 	point.y = (int) position->y;
 
-	PythonAPI_GameClient->humanLikeMouse.moveToPoint(&point);
+	std::function<void()> onArrival;
+
+	if (global_onArrivalPythonFunction) {
+		Py_DECREF(global_onArrivalPythonFunction);
+	}
+
+	global_onArrivalPythonFunction = pyFunction;
+
+	if (global_onArrivalPythonFunction) {
+		Py_INCREF(global_onArrivalPythonFunction);
+		onArrival = [] {
+			wrap_onArrival();
+		};
+	} else {
+		onArrival = []() {};
+	}
+
+	PythonAPI_GameClient->humanLikeMouse.moveToPoint(&point, moveTime, onArrival);
 
 	Py_RETURN_NONE;
 }
 
-static PyObject* API_Input_moveMouseToPlayer(PyObject* self, PyObject* args) {
+static PyObject* API_Input_moveMouseToPlayer(PyObject* self, PyObject* args)
+{
 	int playerId;
+	PyObject *pyMoveTime = nullptr;
+	PyObject *pyFunction = nullptr;
 
-	if (!PyArg_ParseTuple(args, "i", &playerId)) {
+	if (!PyArg_ParseTuple(args, "iOO:Input_setTargetHumanLike", &playerId, &pyMoveTime, &pyFunction))
+		return NULL;
+
+
+	if (pyMoveTime != nullptr && !PyFloat_Check(pyMoveTime)) {
+		PyErr_SetString(PyExc_TypeError, "`moveTime` must be a float or None");
 		return NULL;
 	}
 
-	PythonAPI_GameClient->humanLikeMouse.moveToPlayer(playerId);
+	if (pyFunction != nullptr && !PyCallable_Check(pyFunction)) {
+		PyErr_SetString(PyExc_TypeError, "`onArrived` must be a callable function");
+		return NULL;
+	}
+
+	float moveTime = 0.02;
+	if (pyMoveTime != nullptr) {
+		moveTime = PyFloat_AsDouble(pyMoveTime);
+	}
+
+	std::function<void()> onArrival;
+
+	if (global_onArrivalPythonFunction) {
+		Py_DECREF(global_onArrivalPythonFunction);
+	}
+
+	global_onArrivalPythonFunction = pyFunction;
+
+	if (global_onArrivalPythonFunction) {
+		Py_INCREF(global_onArrivalPythonFunction);
+		onArrival = [] {
+			wrap_onArrival();
+		};
+	} else {
+		onArrival = []() {};
+	}
+
+	PythonAPI_GameClient->humanLikeMouse.moveToPlayer(playerId, moveTime, onArrival);
 
 	Py_RETURN_NONE;
+}
+
+static PyObject* API_Input_isHumanLikeMoveEnded(PyObject* self, PyObject* args)
+{
+	bool moveEnded = PythonAPI_GameClient->humanLikeMouse.isMoveEnded();
+
+	return PyBool_FromLong(moveEnded ? 1 : 0);
 }
 
 static PyMethodDef API_InputMethods[] = {
@@ -97,6 +191,7 @@ static PyMethodDef API_InputMethods[] = {
 	{"setTargetHumanLike", API_Input_setTargetHumanLike, METH_VARARGS, "Set Target Human Like position(arg: {'x': int, 'y': int}"},
 	{"moveMouseToPlayer", API_Input_moveMouseToPlayer, METH_VARARGS, "Move mouse to player human Like(arg: playerId"},
 	{"setBlockUserInput", API_Input_setBlockUserInput, METH_VARARGS, "Block user input"},
+	{"isHumanLikeMoveEnded", API_Input_isHumanLikeMoveEnded, METH_NOARGS, "Return true, if human like moving is ended, else false"},
 	{NULL, NULL, 0, NULL}
 };
 
@@ -108,7 +203,8 @@ static struct PyModuleDef API_InputModule = {
 	API_InputMethods
 };
 
-PyMODINIT_FUNC PyInit_API_Input(void) {
+PyMODINIT_FUNC PyInit_API_Input(void)
+{
 	PyObject* module = PyModule_Create(&API_InputModule);
 
 	PyObject* direction_enum = Py_BuildValue(

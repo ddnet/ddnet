@@ -1,4 +1,4 @@
-from typing import Any, Tuple
+from typing import Any, Tuple, Callable
 
 class Vector2:
     x: float
@@ -116,7 +116,7 @@ def LocalID(clientId: int) -> int:
 
 class Collision:
     @staticmethod
-    def intersectLine(position0: Vector2, position1: Vector2) -> Any:
+    def intersectLine(position0: Vector2, position1: Vector2) -> Tuple[int, Vector2, Vector2]:
         pass
 
 class Console:
@@ -152,9 +152,13 @@ class Input:
         pass
 
     @staticmethod
-    def setTargetHumanLike(position: Vector2) -> None:
+    def setTargetHumanLike(position: Vector2, moveTime: float, onArrived: Callable[[], None] = None) -> None:
         pass
 
     @staticmethod
-    def moveMouseToPlayer(playerId: int) -> None:
+    def moveMouseToPlayer(playerId: int, moveTime: float, onArrived: Callable[[], None] = None) -> None:
+        pass
+
+    @staticmethod
+    def isHumanLikeMoveEnded() -> bool:
         pass
