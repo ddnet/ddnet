@@ -464,8 +464,8 @@ protected:
 		CScrollRegion &ScrollRegion, std::vector<unsigned char> &vItemIds,
 		const std::function<const char *(int ItemIndex)> &GetItemName,
 		const std::function<void(int ItemIndex, CUIRect Item, const void *pItemId, bool Active)> &RenderItem);
-	void RenderServerbrowserCountriesFilter(CUIRect View, int Network);
-	void RenderServerbrowserTypesFilter(CUIRect View, int Network);
+	void RenderServerbrowserCountriesFilter(CUIRect View, const CCommunity &Community);
+	void RenderServerbrowserTypesFilter(CUIRect View, const CCommunity &Community);
 	struct SPopupCountrySelectionContext
 	{
 		CMenus *m_pMenus;

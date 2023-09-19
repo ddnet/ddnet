@@ -142,7 +142,7 @@ bool CServerInfo2::FromJsonRaw(CServerInfo2 *pOut, const json_value *pJson)
 				if(SkinName.type == json_string)
 				{
 					HasSkin = true;
-					str_copy(pClient->m_aSkin, json_string_get(&SkinName));
+					str_copy(pClient->m_aSkin, SkinName.u.string.ptr);
 					// if skin json value existed, then always at least default to "default"
 					if(pClient->m_aSkin[0] == '\0')
 						str_copy(pClient->m_aSkin, "default");
@@ -150,8 +150,8 @@ bool CServerInfo2::FromJsonRaw(CServerInfo2 *pOut, const json_value *pJson)
 					if(SkinBodyColor.type == json_integer && SkinFeetColor.type == json_integer)
 					{
 						pClient->m_CustomSkinColors = true;
-						pClient->m_CustomSkinColorBody = json_int_get(&SkinBodyColor);
-						pClient->m_CustomSkinColorFeet = json_int_get(&SkinFeetColor);
+						pClient->m_CustomSkinColorBody = SkinBodyColor.u.integer;
+						pClient->m_CustomSkinColorFeet = SkinFeetColor.u.integer;
 					}
 					// else set custom colors off
 					else

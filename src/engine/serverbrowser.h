@@ -9,6 +9,8 @@
 
 #include "kernel.h"
 
+#include <vector>
+
 #define DDNET_INFO "ddnet-info.json"
 
 class CUIElement;
@@ -99,6 +101,80 @@ public:
 	void InfoToString(char *pBuffer, int BufferSize) const;
 };
 
+class CCommunityCountryServer
+{
+	NETADDR m_Address;
+	char m_aTypeName[32];
+
+public:
+	CCommunityCountryServer(NETADDR Address, const char *pTypeName) :
+		m_Address(Address)
+	{
+		str_copy(m_aTypeName, pTypeName);
+	}
+
+	NETADDR Address() const { return m_Address; }
+	const char *TypeName() const { return m_aTypeName; }
+};
+
+class CCommunityCountry
+{
+	friend class CServerBrowser;
+
+	char m_aName[256];
+	int m_FlagId;
+	std::vector<CCommunityCountryServer> m_vServers;
+
+public:
+	CCommunityCountry(const char *pName, int FlagId) :
+		m_FlagId(FlagId)
+	{
+		str_copy(m_aName, pName);
+	}
+
+	const char *Name() const { return m_aName; }
+	int FlagId() const { return m_FlagId; }
+	const std::vector<CCommunityCountryServer> &Servers() const { return m_vServers; }
+};
+
+class CCommunityType
+{
+	char m_aName[32];
+
+public:
+	CCommunityType(const char *pName)
+	{
+		str_copy(m_aName, pName);
+	}
+
+	const char *Name() const { return m_aName; }
+};
+
+class CCommunity
+{
+	friend class CServerBrowser;
+
+	char m_aId[32];
+	char m_aName[64];
+	char m_aJsonServersKey[32];
+	std::vector<CCommunityCountry> m_vCountries;
+	std::vector<CCommunityType> m_vTypes;
+
+public:
+	CCommunity(const char *pId, const char *pName, const char *pJsonServersKey)
+	{
+		str_copy(m_aId, pId);
+		str_copy(m_aName, pName);
+		str_copy(m_aJsonServersKey, pJsonServersKey);
+	}
+
+	const char *Id() const { return m_aId; }
+	const char *Name() const { return m_aName; }
+	const char *JsonServersKey() const { return m_aJsonServersKey; }
+	const std::vector<CCommunityCountry> &Countries() const { return m_vCountries; }
+	const std::vector<CCommunityType> &Types() const { return m_vTypes; }
+};
+
 class IServerBrowser : public IInterface
 {
 	MACRO_INTERFACE("serverbrowser", 0)
@@ -129,10 +205,13 @@ public:
 		TYPE_DDNET = 4,
 		TYPE_KOG = 5,
 
+		// TODO: remove integer community index and used string IDs instead
 		NETWORK_DDNET = 0,
 		NETWORK_KOG = 1,
 		NUM_NETWORKS,
 	};
+
+	static constexpr const char *COMMUNITY_DDNET = "ddnet";
 
 	static constexpr const char *SEARCH_EXCLUDE_TOKEN = ";";
 
@@ -149,18 +228,14 @@ public:
 	virtual int NumSortedServers() const = 0;
 	virtual const CServerInfo *SortedGet(int Index) const = 0;
 
-	virtual int NumCountries(int Network) = 0;
-	virtual int GetCountryFlag(int Network, int Index) = 0;
-	virtual const char *GetCountryName(int Network, int Index) = 0;
-
-	virtual int NumTypes(int Network) = 0;
-	virtual const char *GetType(int Network, int Index) = 0;
+	virtual const std::vector<CCommunity> &Communities() const = 0;
+	virtual const CCommunity *Community(const char *pCommunityId) const = 0;
 
 	virtual void DDNetFilterAdd(char *pFilter, int FilterSize, const char *pName) const = 0;
 	virtual void DDNetFilterRem(char *pFilter, int FilterSize, const char *pName) const = 0;
 	virtual bool DDNetFiltered(const char *pFilter, const char *pName) const = 0;
-	virtual void CountryFilterClean(int Network) = 0;
-	virtual void TypeFilterClean(int Network) = 0;
+	virtual void CountryFilterClean(int CommunityIndex) = 0;
+	virtual void TypeFilterClean(int CommunityIndex) = 0;
 	virtual int GetCurrentType() = 0;
 	virtual const char *GetTutorialServer() = 0;
 };
