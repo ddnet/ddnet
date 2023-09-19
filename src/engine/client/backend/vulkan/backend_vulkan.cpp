@@ -5853,6 +5853,15 @@ public:
 		return true;
 	}
 
+	void FreeDescriptorSetFromPool(SDeviceDescriptorSet &DescrSet)
+	{
+		if(DescrSet.m_PoolIndex != std::numeric_limits<size_t>::max())
+		{
+			vkFreeDescriptorSets(m_VKDevice, DescrSet.m_pPools->m_vPools[DescrSet.m_PoolIndex].m_Pool, 1, &DescrSet.m_Descriptor);
+			DescrSet.m_pPools->m_vPools[DescrSet.m_PoolIndex].m_CurSize -= 1;
+		}
+	}
+
 	[[nodiscard]] bool CreateNewTexturedStandardDescriptorSets(size_t TextureSlot, size_t DescrIndex)
 	{
 		auto &Texture = m_vTextures[TextureSlot];
@@ -5894,8 +5903,7 @@ public:
 	void DestroyTexturedStandardDescriptorSets(CTexture &Texture, size_t DescrIndex)
 	{
 		auto &DescrSet = Texture.m_aVKStandardTexturedDescrSets[DescrIndex];
-		if(DescrSet.m_PoolIndex != std::numeric_limits<size_t>::max())
-			vkFreeDescriptorSets(m_VKDevice, DescrSet.m_pPools->m_vPools[DescrSet.m_PoolIndex].m_Pool, 1, &DescrSet.m_Descriptor);
+		FreeDescriptorSetFromPool(DescrSet);
 		DescrSet = {};
 	}
 
@@ -5940,8 +5948,7 @@ public:
 	void DestroyTextured3DStandardDescriptorSets(CTexture &Texture)
 	{
 		auto &DescrSet = Texture.m_VKStandard3DTexturedDescrSet;
-		if(DescrSet.m_PoolIndex != std::numeric_limits<size_t>::max())
-			vkFreeDescriptorSets(m_VKDevice, DescrSet.m_pPools->m_vPools[DescrSet.m_PoolIndex].m_Pool, 1, &DescrSet.m_Descriptor);
+		FreeDescriptorSetFromPool(DescrSet);
 	}
 
 	[[nodiscard]] bool CreateNewTextDescriptorSets(size_t Texture, size_t TextureOutline)
@@ -5991,8 +5998,7 @@ public:
 	void DestroyTextDescriptorSets(CTexture &Texture, CTexture &TextureOutline)
 	{
 		auto &DescrSet = Texture.m_VKTextDescrSet;
-		if(DescrSet.m_PoolIndex != std::numeric_limits<size_t>::max())
-			vkFreeDescriptorSets(m_VKDevice, DescrSet.m_pPools->m_vPools[DescrSet.m_PoolIndex].m_Pool, 1, &DescrSet.m_Descriptor);
+		FreeDescriptorSetFromPool(DescrSet);
 	}
 
 	[[nodiscard]] bool HasMultiSampling()
