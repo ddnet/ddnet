@@ -480,9 +480,9 @@ void CHud::RenderWarmupTimer()
 		float w = TextRender()->TextWidth(FontSize, Localize("Warmup"), -1, -1.0f);
 		TextRender()->Text(150 * Graphics()->ScreenAspect() + -w / 2, 50, FontSize, Localize("Warmup"), -1.0f);
 
-		int Seconds = m_pClient->m_Snap.m_pGameInfoObj->m_WarmupTimer / SERVER_TICK_SPEED;
+		int Seconds = m_pClient->m_Snap.m_pGameInfoObj->m_WarmupTimer / Client()->GameTickSpeed();
 		if(Seconds < 5)
-			str_format(aBuf, sizeof(aBuf), "%d.%d", Seconds, (m_pClient->m_Snap.m_pGameInfoObj->m_WarmupTimer * 10 / SERVER_TICK_SPEED) % 10);
+			str_format(aBuf, sizeof(aBuf), "%d.%d", Seconds, (m_pClient->m_Snap.m_pGameInfoObj->m_WarmupTimer * 10 / Client()->GameTickSpeed()) % 10);
 		else
 			str_from_int(Seconds, aBuf);
 		w = TextRender()->TextWidth(FontSize, aBuf, -1, -1.0f);
@@ -1300,43 +1300,35 @@ void CHud::RenderMovementInformation(const int ClientID)
 
 	Graphics()->DrawRect(StartX, StartY, BoxWidth, BoxHeight, ColorRGBA(0.0f, 0.0f, 0.0f, 0.4f), IGraphics::CORNER_L, 5.0f);
 
-	CNetObj_Character *pCharacter = &m_pClient->m_Snap.m_aCharacters[ClientID].m_Cur;
-	const float TicksPerSecond = 50.0f;
+	const CNetObj_Character *pPrevChar = &m_pClient->m_Snap.m_aCharacters[ClientID].m_Prev;
+	const CNetObj_Character *pCurChar = &m_pClient->m_Snap.m_aCharacters[ClientID].m_Cur;
+	const float IntraTick = Client()->IntraGameTick(g_Config.m_ClDummy);
 
 	// To make the player position relative to blocks we need to divide by the block size
-	float PosX = pCharacter->m_X / 32.0f;
-	float PosY = pCharacter->m_Y / 32.0f;
+	const vec2 Pos = mix(vec2(pPrevChar->m_X, pPrevChar->m_Y), vec2(pCurChar->m_X, pCurChar->m_Y), IntraTick) / 32.0f;
 
-	float VelspeedX = pCharacter->m_VelX / 256.0f * TicksPerSecond;
-	if(pCharacter->m_VelX >= -1 && pCharacter->m_VelX <= 1)
+	const vec2 Vel = mix(vec2(pPrevChar->m_VelX, pPrevChar->m_VelY), vec2(pCurChar->m_VelX, pCurChar->m_VelY), IntraTick);
+
+	float VelspeedX = Vel.x / 256.0f * Client()->GameTickSpeed();
+	if(Vel.x >= -1 && Vel.x <= 1)
 	{
 		VelspeedX = 0;
 	}
-	float VelspeedY = pCharacter->m_VelY / 256.0f * TicksPerSecond;
-	if(pCharacter->m_VelY >= -128 && pCharacter->m_VelY <= 128)
+	float VelspeedY = Vel.y / 256.0f * Client()->GameTickSpeed();
+	if(Vel.y >= -128 && Vel.y <= 128)
 	{
 		VelspeedY = 0;
 	}
 	// We show the speed in Blocks per Second (Bps) and therefore have to divide by the block size
 	float DisplaySpeedX = VelspeedX / 32;
-	float VelspeedLength = length(vec2(pCharacter->m_VelX / 256.0f, pCharacter->m_VelY / 256.0f)) * TicksPerSecond;
+	float VelspeedLength = length(vec2(Vel.x, Vel.y) / 256.0f) * Client()->GameTickSpeed();
 	// Todo: Use Velramp tuning of each individual player
 	// Since these tuning parameters are almost never changed, the default values are sufficient in most cases
 	float Ramp = VelocityRamp(VelspeedLength, m_pClient->m_aTuning[g_Config.m_ClDummy].m_VelrampStart, m_pClient->m_aTuning[g_Config.m_ClDummy].m_VelrampRange, m_pClient->m_aTuning[g_Config.m_ClDummy].m_VelrampCurvature);
 	DisplaySpeedX *= Ramp;
 	float DisplaySpeedY = VelspeedY / 32;
 
-	float Angle = 0.0f;
-	if(m_pClient->m_Snap.m_aCharacters[ClientID].m_HasExtendedDisplayInfo)
-	{
-		// On DDNet servers the more accurate angle is displayed, calculated from the target coordinates
-		CNetObj_DDNetCharacter *pExtendedData = &m_pClient->m_Snap.m_aCharacters[ClientID].m_ExtendedData;
-		Angle = std::atan2(pExtendedData->m_TargetY, pExtendedData->m_TargetX);
-	}
-	else
-	{
-		Angle = pCharacter->m_Angle / 256.0f;
-	}
+	float Angle = m_pClient->m_Players.GetPlayerTargetAngle(pPrevChar, pCurChar, ClientID, IntraTick);
 	if(Angle < 0)
 	{
 		Angle += 2.0f * pi;
@@ -1372,16 +1364,16 @@ void CHud::RenderMovementInformation(const int ClientID)
 		y += MOVEMENT_INFORMATION_LINE_HEIGHT;
 
 		TextRender()->Text(xl, y, Fontsize, "X:", -1.0f);
-		str_format(aBuf, sizeof(aBuf), "%.2f", PosX);
-		DigitsIndex = GetDigitsIndex(PosX, 5);
-		w = (PosX < 0) ? s_aTextWidthMinus[DigitsIndex] : s_aTextWidth[DigitsIndex];
+		str_format(aBuf, sizeof(aBuf), "%.2f", Pos.x);
+		DigitsIndex = GetDigitsIndex(Pos.x, 5);
+		w = (Pos.x < 0) ? s_aTextWidthMinus[DigitsIndex] : s_aTextWidth[DigitsIndex];
 		TextRender()->Text(xr - w, y, Fontsize, aBuf, -1.0f);
 		y += MOVEMENT_INFORMATION_LINE_HEIGHT;
 
 		TextRender()->Text(xl, y, Fontsize, "Y:", -1.0f);
-		str_format(aBuf, sizeof(aBuf), "%.2f", PosY);
-		DigitsIndex = GetDigitsIndex(PosY, 5);
-		w = (PosY < 0) ? s_aTextWidthMinus[DigitsIndex] : s_aTextWidth[DigitsIndex];
+		str_format(aBuf, sizeof(aBuf), "%.2f", Pos.y);
+		DigitsIndex = GetDigitsIndex(Pos.y, 5);
+		w = (Pos.y < 0) ? s_aTextWidthMinus[DigitsIndex] : s_aTextWidth[DigitsIndex];
 		TextRender()->Text(xr - w, y, Fontsize, aBuf, -1.0f);
 		y += MOVEMENT_INFORMATION_LINE_HEIGHT;
 	}
