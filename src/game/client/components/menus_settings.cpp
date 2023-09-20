@@ -2798,8 +2798,47 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClNameplatesTeamcolors, Localize("Use team colors for name plates"), &g_Config.m_ClNameplatesTeamcolors, &Section, LineSize);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClNameplatesStrong, Localize("Show hook strength indicator"), &g_Config.m_ClNameplatesStrong, &Section, LineSize);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowDirectionOther, Localize("Show other players' key presses"), &g_Config.m_ClShowDirectionOther, &Section, LineSize);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowDirectionOwn, Localize("Show local player's key presses"), &g_Config.m_ClShowDirectionOwn, &Section, LineSize);
+
+		Section.HSplitTop(LineSize, &Button, &Section);
+		if(DoButton_CheckBox(&g_Config.m_ClShowDirection, Localize("Show other players' key presses"), g_Config.m_ClShowDirection >= 1 && g_Config.m_ClShowDirection != 3, &Button))
+		{
+			switch(g_Config.m_ClShowDirection)
+			{
+			case 0:
+				g_Config.m_ClShowDirection = 1;
+				break;
+			case 1:
+				g_Config.m_ClShowDirection = 0;
+				break;
+			case 2:
+				g_Config.m_ClShowDirection = 3;
+				break;
+			case 3:
+				g_Config.m_ClShowDirection = 2;
+				break;
+			}
+		}
+
+		Section.HSplitTop(LineSize, &Button, &Section);
+		static int s_ShowLocalPlayer = 0;
+		if(DoButton_CheckBox(&s_ShowLocalPlayer, Localize("Show local player's key presses"), g_Config.m_ClShowDirection >= 2, &Button))
+		{
+			switch(g_Config.m_ClShowDirection)
+			{
+			case 0:
+				g_Config.m_ClShowDirection = 3;
+				break;
+			case 1:
+				g_Config.m_ClShowDirection = 2;
+				break;
+			case 2:
+				g_Config.m_ClShowDirection = 1;
+				break;
+			case 3:
+				g_Config.m_ClShowDirection = 0;
+				break;
+			}
+		}
 	}
 	else if(s_CurTab == APPEARANCE_TAB_HOOK_COLLISION)
 	{

@@ -44,16 +44,12 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 	ColorRGBA rgb = ColorRGBA(1.0f, 1.0f, 1.0f);
 
 	// render players' key presses
-	int ShowDirectionOther = g_Config.m_ClShowDirectionOther;
-	int ShowDirectionOwn = g_Config.m_ClShowDirectionOwn;
+	int ShowDirection = g_Config.m_ClShowDirection;
 #if defined(CONF_VIDEORECORDER)
 	if(IVideo::Current())
-	{
-		ShowDirectionOther = g_Config.m_ClVideoShowDirectionOther;
-		ShowDirectionOwn = g_Config.m_ClVideoShowDirectionOwn;
-	}
+		ShowDirection = g_Config.m_ClVideoShowDirection;
 #endif
-	if((ShowDirectionOther && !pPlayerInfo->m_Local) || (ShowDirectionOwn && pPlayerInfo->m_Local) || (ShowDirectionOwn && Client()->DummyConnected() && Client()->State() != IClient::STATE_DEMOPLAYBACK && ClientID == m_pClient->m_aLocalIDs[!g_Config.m_ClDummy]))
+	if((ShowDirection && ShowDirection != 3 && !pPlayerInfo->m_Local) || (ShowDirection >= 2 && pPlayerInfo->m_Local) || (ShowDirection == 3 && Client()->DummyConnected() && Client()->State() != IClient::STATE_DEMOPLAYBACK && ClientID == m_pClient->m_aLocalIDs[!g_Config.m_ClDummy]))
 	{
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 		Graphics()->QuadsSetRotation(0);
@@ -286,10 +282,10 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 
 void CNamePlates::OnRender()
 {
-	int ShowDirection = (g_Config.m_ClShowDirectionOther || g_Config.m_ClShowDirectionOwn);
+	int ShowDirection = g_Config.m_ClShowDirection;
 #if defined(CONF_VIDEORECORDER)
 	if(IVideo::Current())
-		ShowDirection = (g_Config.m_ClVideoShowDirectionOther || g_Config.m_ClVideoShowDirectionOwn);
+		ShowDirection = g_Config.m_ClVideoShowDirection;
 #endif
 	if(!g_Config.m_ClNameplates && ShowDirection == 0)
 		return;
