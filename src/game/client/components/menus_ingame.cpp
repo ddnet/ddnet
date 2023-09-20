@@ -349,6 +349,8 @@ void CMenus::RenderPlayers(CUIRect MainView)
 				m_pClient->Friends()->RemoveFriend(CurrentClient.m_aName, CurrentClient.m_aClan);
 			else
 				m_pClient->Friends()->AddFriend(CurrentClient.m_aName, CurrentClient.m_aClan);
+
+			m_pClient->Client()->ServerBrowserUpdate();
 		}
 	}
 
