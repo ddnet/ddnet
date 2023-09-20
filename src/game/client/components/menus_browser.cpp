@@ -1661,10 +1661,11 @@ CTeeRenderInfo CMenus::GetTeeRenderInfo(vec2 Size, const char *pSkinName, bool C
 void CMenus::ConchainFriendlistUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	pfnCallback(pResult, pCallbackUserData);
-	if(pResult->NumArguments() >= 1 && ((CMenus *)pUserData)->Client()->State() == IClient::STATE_OFFLINE)
+	CMenus *pThis = ((CMenus *)pUserData);
+	if(pResult->NumArguments() >= 1 && (pThis->Client()->State() == IClient::STATE_OFFLINE || pThis->Client()->State() == IClient::STATE_ONLINE))
 	{
-		((CMenus *)pUserData)->FriendlistOnUpdate();
-		((CMenus *)pUserData)->Client()->ServerBrowserUpdate();
+		pThis->FriendlistOnUpdate();
+		pThis->Client()->ServerBrowserUpdate();
 	}
 }
 
