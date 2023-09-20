@@ -198,12 +198,12 @@ public:
 		QUICK_PLAYER = 2,
 		QUICK_MAPNAME = 4,
 
-		TYPE_NONE = 0,
-		TYPE_INTERNET = 1,
-		TYPE_LAN = 2,
-		TYPE_FAVORITES = 3,
-		TYPE_DDNET = 4,
-		TYPE_KOG = 5,
+		TYPE_INTERNET = 0,
+		TYPE_LAN,
+		TYPE_FAVORITES,
+		TYPE_DDNET,
+		TYPE_KOG,
+		NUM_TYPES,
 
 		// TODO: remove integer community index and used string IDs instead
 		NETWORK_DDNET = 0,

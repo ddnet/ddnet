@@ -690,7 +690,7 @@ void CUI::DoLabelStreamed(CUIElement::SUIElementRect &RectEl, const CUIRect *pRe
 {
 	bool NeedsRecreate = false;
 	bool ColorChanged = RectEl.m_TextColor != TextRender()->GetTextColor() || RectEl.m_TextOutlineColor != TextRender()->GetTextOutlineColor();
-	if(!RectEl.m_UITextContainer.Valid() || RectEl.m_Width != pRect->w || RectEl.m_Height != pRect->h || ColorChanged)
+	if((!RectEl.m_UITextContainer.Valid() && pText[0] != '\0' && StrLen != 0) || RectEl.m_Width != pRect->w || RectEl.m_Height != pRect->h || ColorChanged)
 	{
 		NeedsRecreate = true;
 	}
@@ -732,12 +732,10 @@ void CUI::DoLabelStreamed(CUIElement::SUIElementRect &RectEl, const CUIRect *pRe
 		DoLabel(RectEl, &TmpRect, pText, Size, TEXTALIGN_TL, LabelProps, StrLen, pReadCursor);
 	}
 
-	ColorRGBA ColorText(RectEl.m_TextColor);
-	ColorRGBA ColorTextOutline(RectEl.m_TextOutlineColor);
 	if(RectEl.m_UITextContainer.Valid())
 	{
 		const vec2 CursorPos = CalcAlignedCursorPos(pRect, vec2(RectEl.m_Cursor.m_LongestLineWidth, RectEl.m_Cursor.Height()), Align);
-		TextRender()->RenderTextContainer(RectEl.m_UITextContainer, ColorText, ColorTextOutline, CursorPos.x, CursorPos.y);
+		TextRender()->RenderTextContainer(RectEl.m_UITextContainer, RectEl.m_TextColor, RectEl.m_TextOutlineColor, CursorPos.x, CursorPos.y);
 	}
 }
 
