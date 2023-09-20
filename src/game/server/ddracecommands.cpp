@@ -15,33 +15,41 @@ bool CheckClientID(int ClientID);
 void CGameContext::ConGoLeft(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
+	int Tiles = pResult->NumArguments() == 1 ? pResult->GetInteger(0) : 1;
+
 	if(!CheckClientID(pResult->m_ClientID))
 		return;
-	pSelf->MoveCharacter(pResult->m_ClientID, -1, 0);
+	pSelf->MoveCharacter(pResult->m_ClientID, -1 * Tiles, 0);
 }
 
 void CGameContext::ConGoRight(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
+	int Tiles = pResult->NumArguments() == 1 ? pResult->GetInteger(0) : 1;
+
 	if(!CheckClientID(pResult->m_ClientID))
 		return;
-	pSelf->MoveCharacter(pResult->m_ClientID, 1, 0);
+	pSelf->MoveCharacter(pResult->m_ClientID, Tiles, 0);
 }
 
 void CGameContext::ConGoDown(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
+	int Tiles = pResult->NumArguments() == 1 ? pResult->GetInteger(0) : 1;
+
 	if(!CheckClientID(pResult->m_ClientID))
 		return;
-	pSelf->MoveCharacter(pResult->m_ClientID, 0, 1);
+	pSelf->MoveCharacter(pResult->m_ClientID, 0, Tiles);
 }
 
 void CGameContext::ConGoUp(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
+	int Tiles = pResult->NumArguments() == 1 ? pResult->GetInteger(0) : 1;
+
 	if(!CheckClientID(pResult->m_ClientID))
 		return;
-	pSelf->MoveCharacter(pResult->m_ClientID, 0, -1);
+	pSelf->MoveCharacter(pResult->m_ClientID, 0, -1 * Tiles);
 }
 
 void CGameContext::ConMove(IConsole::IResult *pResult, void *pUserData)
