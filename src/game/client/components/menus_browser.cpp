@@ -730,7 +730,7 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 		View.HSplitTop(19.0f, &Button, &View);
 		View.HSplitTop(minimum(120.0f + CScrollRegion::HEIGHT_MAGIC_FIX, View.h), &TabContents, &View);
 		Button.VSplitMid(&CountriesTab, &TypesTab);
-		TabContents.Draw(ms_ColorTabbarInactive, IGraphics::CORNER_B, 4.0f);
+		TabContents.Draw(ColorActive, IGraphics::CORNER_B, 4.0f);
 
 		enum EFilterTab
 		{
