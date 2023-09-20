@@ -480,9 +480,9 @@ void CHud::RenderWarmupTimer()
 		float w = TextRender()->TextWidth(FontSize, Localize("Warmup"), -1, -1.0f);
 		TextRender()->Text(150 * Graphics()->ScreenAspect() + -w / 2, 50, FontSize, Localize("Warmup"), -1.0f);
 
-		int Seconds = m_pClient->m_Snap.m_pGameInfoObj->m_WarmupTimer / SERVER_TICK_SPEED;
+		int Seconds = m_pClient->m_Snap.m_pGameInfoObj->m_WarmupTimer / Client()->GameTickSpeed();
 		if(Seconds < 5)
-			str_format(aBuf, sizeof(aBuf), "%d.%d", Seconds, (m_pClient->m_Snap.m_pGameInfoObj->m_WarmupTimer * 10 / SERVER_TICK_SPEED) % 10);
+			str_format(aBuf, sizeof(aBuf), "%d.%d", Seconds, (m_pClient->m_Snap.m_pGameInfoObj->m_WarmupTimer * 10 / Client()->GameTickSpeed()) % 10);
 		else
 			str_from_int(Seconds, aBuf);
 		w = TextRender()->TextWidth(FontSize, aBuf, -1, -1.0f);
@@ -1301,25 +1301,24 @@ void CHud::RenderMovementInformation(const int ClientID)
 	Graphics()->DrawRect(StartX, StartY, BoxWidth, BoxHeight, ColorRGBA(0.0f, 0.0f, 0.0f, 0.4f), IGraphics::CORNER_L, 5.0f);
 
 	CNetObj_Character *pCharacter = &m_pClient->m_Snap.m_aCharacters[ClientID].m_Cur;
-	const float TicksPerSecond = 50.0f;
 
 	// To make the player position relative to blocks we need to divide by the block size
 	float PosX = pCharacter->m_X / 32.0f;
 	float PosY = pCharacter->m_Y / 32.0f;
 
-	float VelspeedX = pCharacter->m_VelX / 256.0f * TicksPerSecond;
+	float VelspeedX = pCharacter->m_VelX / 256.0f * Client()->GameTickSpeed();
 	if(pCharacter->m_VelX >= -1 && pCharacter->m_VelX <= 1)
 	{
 		VelspeedX = 0;
 	}
-	float VelspeedY = pCharacter->m_VelY / 256.0f * TicksPerSecond;
+	float VelspeedY = pCharacter->m_VelY / 256.0f * Client()->GameTickSpeed();
 	if(pCharacter->m_VelY >= -128 && pCharacter->m_VelY <= 128)
 	{
 		VelspeedY = 0;
 	}
 	// We show the speed in Blocks per Second (Bps) and therefore have to divide by the block size
 	float DisplaySpeedX = VelspeedX / 32;
-	float VelspeedLength = length(vec2(pCharacter->m_VelX / 256.0f, pCharacter->m_VelY / 256.0f)) * TicksPerSecond;
+	float VelspeedLength = length(vec2(pCharacter->m_VelX / 256.0f, pCharacter->m_VelY / 256.0f)) * Client()->GameTickSpeed();
 	// Todo: Use Velramp tuning of each individual player
 	// Since these tuning parameters are almost never changed, the default values are sufficient in most cases
 	float Ramp = VelocityRamp(VelspeedLength, m_pClient->m_aTuning[g_Config.m_ClDummy].m_VelrampStart, m_pClient->m_aTuning[g_Config.m_ClDummy].m_VelrampRange, m_pClient->m_aTuning[g_Config.m_ClDummy].m_VelrampCurvature);
