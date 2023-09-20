@@ -2657,25 +2657,31 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 				TempY += RealOffsetY;
 			}
 
-			str_format(aLineBuilder, sizeof(aLineBuilder), "%sRandom Tee: Hey, how are you %s?", g_Config.m_ClShowIDs ? " 7: " : "", aBuf);
-			Width = TextRender()->TextWidth(RealFontSize, aLineBuilder, -1, -1);
-			Graphics()->DrawRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Width + RealMsgPaddingX + RealMsgPaddingTee, RealFontSize + RealMsgPaddingY, RealBackgroundRounding, IGraphics::CORNER_ALL);
-			TempY += RealOffsetY;
+			if(!g_Config.m_ClShowChatFriends)
+			{
+				str_format(aLineBuilder, sizeof(aLineBuilder), "%sRandom Tee: Hey, how are you %s?", g_Config.m_ClShowIDs ? " 7: " : "", aBuf);
+				Width = TextRender()->TextWidth(RealFontSize, aLineBuilder, -1, -1);
+				Graphics()->DrawRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Width + RealMsgPaddingX + RealMsgPaddingTee, RealFontSize + RealMsgPaddingY, RealBackgroundRounding, IGraphics::CORNER_ALL);
+				TempY += RealOffsetY;
 
-			str_format(aLineBuilder, sizeof(aLineBuilder), "%sYour Teammate: Let's speedrun this!", g_Config.m_ClShowIDs ? "11: " : "");
-			Width = TextRender()->TextWidth(RealFontSize, aLineBuilder, -1, -1);
-			Graphics()->DrawRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Width + RealMsgPaddingX + RealMsgPaddingTee, RealFontSize + RealMsgPaddingY, RealBackgroundRounding, IGraphics::CORNER_ALL);
-			TempY += RealOffsetY;
+				str_format(aLineBuilder, sizeof(aLineBuilder), "%sYour Teammate: Let's speedrun this!", g_Config.m_ClShowIDs ? "11: " : "");
+				Width = TextRender()->TextWidth(RealFontSize, aLineBuilder, -1, -1);
+				Graphics()->DrawRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Width + RealMsgPaddingX + RealMsgPaddingTee, RealFontSize + RealMsgPaddingY, RealBackgroundRounding, IGraphics::CORNER_ALL);
+				TempY += RealOffsetY;
+			}
 
 			str_format(aLineBuilder, sizeof(aLineBuilder), "%s%sFriend: Hello there", g_Config.m_ClMessageFriend ? "♥ " : "", g_Config.m_ClShowIDs ? " 8: " : "");
 			Width = TextRender()->TextWidth(RealFontSize, aLineBuilder, -1, -1);
 			Graphics()->DrawRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Width + RealMsgPaddingX + RealMsgPaddingTee, RealFontSize + RealMsgPaddingY, RealBackgroundRounding, IGraphics::CORNER_ALL);
 			TempY += RealOffsetY;
 
-			str_format(aLineBuilder, sizeof(aLineBuilder), "%sSpammer [6]: Hey fools, I'm spamming here!", g_Config.m_ClShowIDs ? " 9: " : "");
-			Width = TextRender()->TextWidth(RealFontSize, aLineBuilder, -1, -1);
-			Graphics()->DrawRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Width + RealMsgPaddingX + RealMsgPaddingTee, RealFontSize + RealMsgPaddingY, RealBackgroundRounding, IGraphics::CORNER_ALL);
-			TempY += RealOffsetY;
+			if(!g_Config.m_ClShowChatFriends)
+			{
+				str_format(aLineBuilder, sizeof(aLineBuilder), "%sSpammer [6]: Hey fools, I'm spamming here!", g_Config.m_ClShowIDs ? " 9: " : "");
+				Width = TextRender()->TextWidth(RealFontSize, aLineBuilder, -1, -1);
+				Graphics()->DrawRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Width + RealMsgPaddingX + RealMsgPaddingTee, RealFontSize + RealMsgPaddingY, RealBackgroundRounding, IGraphics::CORNER_ALL);
+				TempY += RealOffsetY;
+			}
 
 			Width = TextRender()->TextWidth(RealFontSize, "— Echo command executed", -1, -1);
 			Graphics()->DrawRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Width + RealMsgPaddingX, RealFontSize + RealMsgPaddingY, RealBackgroundRounding, IGraphics::CORNER_ALL);
@@ -2711,29 +2717,32 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 			TextRender()->SetCursorPosition(&Cursor, X, Y += RealOffsetY);
 		}
 
-		// Highlighted
-		TextRender()->MoveCursor(&Cursor, RealMsgPaddingTee, 0);
-		TextRender()->TextColor(DefaultNameColor);
-		if(g_Config.m_ClShowIDs)
-			TextRender()->TextEx(&Cursor, " 7: ", -1);
-		TextRender()->TextEx(&Cursor, "Random Tee: ", -1);
-		TextRender()->TextColor(HighlightedColor);
-		TextRender()->TextEx(&Cursor, "Hey, how are you ", -1);
-		TextRender()->TextEx(&Cursor, aBuf, -1);
-		TextRender()->TextEx(&Cursor, "?", -1);
-		if(!g_Config.m_ClChatOld)
-			RenderTools()->RenderTee(pIdleState, &aRenderInfo[1], EMOTE_NORMAL, vec2(1, 0.1f), vec2(X + RealTeeSizeHalved, Y + OffsetTeeY + FullHeightMinusTee / 2.0f + TWSkinUnreliableOffset));
-		TextRender()->SetCursorPosition(&Cursor, X, Y += RealOffsetY);
+		if(!g_Config.m_ClShowChatFriends)
+		{
+			// Highlighted
+			TextRender()->MoveCursor(&Cursor, RealMsgPaddingTee, 0);
+			TextRender()->TextColor(DefaultNameColor);
+			if(g_Config.m_ClShowIDs)
+				TextRender()->TextEx(&Cursor, " 7: ", -1);
+			TextRender()->TextEx(&Cursor, "Random Tee: ", -1);
+			TextRender()->TextColor(HighlightedColor);
+			TextRender()->TextEx(&Cursor, "Hey, how are you ", -1);
+			TextRender()->TextEx(&Cursor, aBuf, -1);
+			TextRender()->TextEx(&Cursor, "?", -1);
+			if(!g_Config.m_ClChatOld)
+				RenderTools()->RenderTee(pIdleState, &aRenderInfo[1], EMOTE_NORMAL, vec2(1, 0.1f), vec2(X + RealTeeSizeHalved, Y + OffsetTeeY + FullHeightMinusTee / 2.0f + TWSkinUnreliableOffset));
+			TextRender()->SetCursorPosition(&Cursor, X, Y += RealOffsetY);
 
-		// Team
-		TextRender()->MoveCursor(&Cursor, RealMsgPaddingTee, 0);
-		TextRender()->TextColor(TeamColor);
-		if(g_Config.m_ClShowIDs)
-			TextRender()->TextEx(&Cursor, "11: ", -1);
-		TextRender()->TextEx(&Cursor, "Your Teammate: Let's speedrun this!", -1);
-		if(!g_Config.m_ClChatOld)
-			RenderTools()->RenderTee(pIdleState, &aRenderInfo[0], EMOTE_NORMAL, vec2(1, 0.1f), vec2(X + RealTeeSizeHalved, Y + OffsetTeeY + FullHeightMinusTee / 2.0f + TWSkinUnreliableOffset));
-		TextRender()->SetCursorPosition(&Cursor, X, Y += RealOffsetY);
+			// Team
+			TextRender()->MoveCursor(&Cursor, RealMsgPaddingTee, 0);
+			TextRender()->TextColor(TeamColor);
+			if(g_Config.m_ClShowIDs)
+				TextRender()->TextEx(&Cursor, "11: ", -1);
+			TextRender()->TextEx(&Cursor, "Your Teammate: Let's speedrun this!", -1);
+			if(!g_Config.m_ClChatOld)
+				RenderTools()->RenderTee(pIdleState, &aRenderInfo[0], EMOTE_NORMAL, vec2(1, 0.1f), vec2(X + RealTeeSizeHalved, Y + OffsetTeeY + FullHeightMinusTee / 2.0f + TWSkinUnreliableOffset));
+			TextRender()->SetCursorPosition(&Cursor, X, Y += RealOffsetY);
+		}
 
 		// Friend
 		TextRender()->MoveCursor(&Cursor, RealMsgPaddingTee, 0);
@@ -2753,19 +2762,21 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		TextRender()->SetCursorPosition(&Cursor, X, Y += RealOffsetY);
 
 		// Normal
-		TextRender()->MoveCursor(&Cursor, RealMsgPaddingTee, 0);
-		TextRender()->TextColor(DefaultNameColor);
-		if(g_Config.m_ClShowIDs)
-			TextRender()->TextEx(&Cursor, " 9: ", -1);
-		TextRender()->TextEx(&Cursor, "Spammer ", -1);
-		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 0.3f);
-		TextRender()->TextEx(&Cursor, "[6]", -1);
-		TextRender()->TextColor(NormalColor);
-		TextRender()->TextEx(&Cursor, ": Hey fools, I'm spamming here!", -1);
-		if(!g_Config.m_ClChatOld)
-			RenderTools()->RenderTee(pIdleState, &aRenderInfo[3], EMOTE_NORMAL, vec2(1, 0.1f), vec2(X + RealTeeSizeHalved, Y + OffsetTeeY + FullHeightMinusTee / 2.0f + TWSkinUnreliableOffset));
-		TextRender()->SetCursorPosition(&Cursor, X, Y += RealOffsetY);
-
+		if(!g_Config.m_ClShowChatFriends)
+		{
+			TextRender()->MoveCursor(&Cursor, RealMsgPaddingTee, 0);
+			TextRender()->TextColor(DefaultNameColor);
+			if(g_Config.m_ClShowIDs)
+				TextRender()->TextEx(&Cursor, " 9: ", -1);
+			TextRender()->TextEx(&Cursor, "Spammer ", -1);
+			TextRender()->TextColor(1.0f, 1.0f, 1.0f, 0.3f);
+			TextRender()->TextEx(&Cursor, "[6]", -1);
+			TextRender()->TextColor(NormalColor);
+			TextRender()->TextEx(&Cursor, ": Hey fools, I'm spamming here!", -1);
+			if(!g_Config.m_ClChatOld)
+				RenderTools()->RenderTee(pIdleState, &aRenderInfo[3], EMOTE_NORMAL, vec2(1, 0.1f), vec2(X + RealTeeSizeHalved, Y + OffsetTeeY + FullHeightMinusTee / 2.0f + TWSkinUnreliableOffset));
+			TextRender()->SetCursorPosition(&Cursor, X, Y += RealOffsetY);
+		}
 		// Client
 		TextRender()->TextColor(ClientColor);
 		TextRender()->TextEx(&Cursor, "— Echo command executed", -1);
