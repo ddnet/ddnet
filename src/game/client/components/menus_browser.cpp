@@ -230,18 +230,19 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 		TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
 	};
 
-	if(m_vpServerBrowserUiElements.size() < (size_t)NumServers)
-		m_vpServerBrowserUiElements.resize(NumServers, nullptr);
+	std::vector<CUIElement *> &vpServerBrowserUiElements = m_avpServerBrowserUiElements[ServerBrowser()->GetCurrentType()];
+	if(vpServerBrowserUiElements.size() < (size_t)NumServers)
+		vpServerBrowserUiElements.resize(NumServers, nullptr);
 
 	for(int i = 0; i < NumServers; i++)
 	{
 		const CServerInfo *pItem = ServerBrowser()->SortedGet(i);
 
-		if(m_vpServerBrowserUiElements[i] == nullptr)
+		if(vpServerBrowserUiElements[i] == nullptr)
 		{
-			m_vpServerBrowserUiElements[i] = UI()->GetNewUIElement(NUM_UI_ELEMS);
+			vpServerBrowserUiElements[i] = UI()->GetNewUIElement(NUM_UI_ELEMS);
 		}
-		CUIElement *pUiElement = m_vpServerBrowserUiElements[i];
+		CUIElement *pUiElement = vpServerBrowserUiElements[i];
 
 		const CListboxItem ListItem = s_ListBox.DoNextItem(pItem, str_comp(pItem->m_aAddress, g_Config.m_UiServerAddress) == 0);
 		if(ListItem.m_Selected)
