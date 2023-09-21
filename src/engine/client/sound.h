@@ -3,25 +3,80 @@
 #ifndef ENGINE_CLIENT_SOUND_H
 #define ENGINE_CLIENT_SOUND_H
 
-#include <engine/shared/video.h>
 #include <engine/sound.h>
 
 #include <SDL_audio.h>
 
-class IEngineGraphics;
-class IStorage;
+#include <atomic>
+#include <mutex>
+
+struct CSample
+{
+	short *m_pData;
+	int m_NumFrames;
+	int m_Rate;
+	int m_Channels;
+	int m_LoopStart;
+	int m_LoopEnd;
+	int m_PausedAt;
+};
+
+struct CChannel
+{
+	int m_Vol;
+	int m_Pan;
+};
+
+struct CVoice
+{
+	CSample *m_pSample;
+	CChannel *m_pChannel;
+	int m_Age; // increases when reused
+	int m_Tick;
+	int m_Vol; // 0 - 255
+	int m_Flags;
+	int m_X, m_Y;
+	float m_Falloff; // [0.0, 1.0]
+
+	int m_Shape;
+	union
+	{
+		ISound::CVoiceShapeCircle m_Circle;
+		ISound::CVoiceShapeRectangle m_Rectangle;
+	};
+};
 
 class CSound : public IEngineSound
 {
-	bool m_SoundEnabled;
-	SDL_AudioDeviceID m_Device;
+	enum
+	{
+		NUM_SAMPLES = 512,
+		NUM_VOICES = 256,
+		NUM_CHANNELS = 16,
+	};
 
-	IEngineGraphics *m_pGraphics;
-	IStorage *m_pStorage;
+	bool m_SoundEnabled = false;
+	SDL_AudioDeviceID m_Device = 0;
+	std::mutex m_SoundLock;
 
-	int AllocID();
+	CSample m_aSamples[NUM_SAMPLES] = {{0}};
+	CVoice m_aVoices[NUM_VOICES] = {{0}};
+	CChannel m_aChannels[NUM_CHANNELS] = {{255, 0}};
+	int m_NextVoice = 0;
+	uint32_t m_MaxFrames = 0;
+
+	std::atomic<int> m_CenterX = 0;
+	std::atomic<int> m_CenterY = 0;
+	std::atomic<int> m_SoundVolume = 100;
+	int m_MixingRate = 48000;
 
 	static void RateConvert(int SampleID);
+	class IEngineGraphics *m_pGraphics = nullptr;
+	IStorage *m_pStorage = nullptr;
+
+	int *m_pMixBuffer = nullptr;
+
+	int AllocID();
 
 	// TODO: Refactor: clean this mess up
 	static int DecodeWV(int SampleID, const void *pData, unsigned DataSize);
@@ -30,7 +85,6 @@ class CSound : public IEngineSound
 	void UpdateVolume();
 
 public:
-	CSound();
 	int Init() override;
 	int Update() override;
 	void Shutdown() override;
@@ -64,7 +118,7 @@ public:
 	void StopVoice(CVoiceHandle Voice) override;
 	bool IsPlaying(int SampleID) override;
 
-	ISoundMixFunc GetSoundMixFunc() override;
+	void Mix(short *pFinalOut, unsigned Frames) override;
 	void PauseAudioDevice() override;
 	void UnpauseAudioDevice() override;
 };

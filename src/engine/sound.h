@@ -3,9 +3,7 @@
 #ifndef ENGINE_SOUND_H
 #define ENGINE_SOUND_H
 
-#include "kernel.h"
-
-#include <engine/shared/video.h>
+#include <engine/kernel.h>
 #include <engine/storage.h>
 
 class ISound : public IInterface
@@ -90,7 +88,7 @@ public:
 	virtual void StopVoice(CVoiceHandle Voice) = 0;
 	virtual bool IsPlaying(int SampleID) = 0;
 
-	virtual ISoundMixFunc GetSoundMixFunc() = 0;
+	virtual void Mix(short *pFinalOut, unsigned Frames) = 0;
 	// useful for thread synchronization
 	virtual void PauseAudioDevice() = 0;
 	virtual void UnpauseAudioDevice() = 0;

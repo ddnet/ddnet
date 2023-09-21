@@ -1,102 +1,27 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#include <atomic>
+#include <SDL.h>
+
 #include <base/math.h>
 #include <base/system.h>
 
 #include <engine/graphics.h>
-#include <engine/storage.h>
-
 #include <engine/shared/config.h>
-#include <mutex>
-
-#include "SDL.h"
+#include <engine/storage.h>
 
 #include "sound.h"
 
-extern "C" {
 #if defined(CONF_VIDEORECORDER)
 #include <engine/shared/video.h>
 #endif
+extern "C" {
 #include <opusfile.h>
 #include <wavpack.h>
 }
+
 #include <cmath>
 
-enum
-{
-	NUM_SAMPLES = 512,
-	NUM_VOICES = 256,
-	NUM_CHANNELS = 16,
-};
-
-struct CSample
-{
-	short *m_pData;
-	int m_NumFrames;
-	int m_Rate;
-	int m_Channels;
-	int m_LoopStart;
-	int m_LoopEnd;
-	int m_PausedAt;
-};
-
-struct CChannel
-{
-	int m_Vol;
-	int m_Pan;
-};
-
-struct CVoice
-{
-	CSample *m_pSample;
-	CChannel *m_pChannel;
-	int m_Age; // increases when reused
-	int m_Tick;
-	int m_Vol; // 0 - 255
-	int m_Flags;
-	int m_X, m_Y;
-	float m_Falloff; // [0.0, 1.0]
-
-	int m_Shape;
-	union
-	{
-		ISound::CVoiceShapeCircle m_Circle;
-		ISound::CVoiceShapeRectangle m_Rectangle;
-	};
-};
-
-static CSample m_aSamples[NUM_SAMPLES] = {{0}};
-static CVoice m_aVoices[NUM_VOICES] = {{0}};
-static CChannel m_aChannels[NUM_CHANNELS] = {{255, 0}};
-
-static std::mutex m_SoundLock;
-
-static std::atomic<int> m_CenterX{0};
-static std::atomic<int> m_CenterY{0};
-
-static int m_MixingRate = 48000;
-static std::atomic<int> m_SoundVolume{100};
-
-static int m_NextVoice = 0;
-static int *m_pMixBuffer = 0; // buffer only used by the thread callback function
-static uint32_t m_MaxFrames = 0;
-
-static const void *s_pWVBuffer = 0x0;
-static int s_WVBufferPosition = 0;
-static int s_WVBufferSize = 0;
-
-const int DefaultDistance = 1500;
-int m_LastBreak = 0;
-
-static int IntAbs(int i)
-{
-	if(i < 0)
-		return -i;
-	return i;
-}
-
-static void Mix(short *pFinalOut, unsigned Frames)
+void CSound::Mix(short *pFinalOut, unsigned Frames)
 {
 	Frames = minimum(Frames, m_MaxFrames);
 	mem_zero(m_pMixBuffer, Frames * 2 * sizeof(int));
@@ -258,26 +183,22 @@ static void Mix(short *pFinalOut, unsigned Frames)
 #endif
 }
 
-static void SdlCallback(void *pUnused, Uint8 *pStream, int Len)
+static void SdlCallback(void *pUser, Uint8 *pStream, int Len)
 {
-	(void)pUnused;
+	CSound *pSound = static_cast<CSound *>(pUser);
+
 #if defined(CONF_VIDEORECORDER)
 	if(!(IVideo::Current() && g_Config.m_ClVideoSndEnable))
 	{
-		Mix((short *)pStream, Len / sizeof(short) / 2);
+		pSound->Mix((short *)pStream, Len / sizeof(short) / 2);
 	}
 	else
 	{
 		mem_zero(pStream, Len);
 	}
 #else
-	Mix((short *)pStream, Len / sizeof(short) / 2);
+	pSound->Mix((short *)pStream, Len / sizeof(short) / 2);
 #endif
-}
-
-CSound::CSound() :
-	m_SoundEnabled(false), m_Device(0), m_pGraphics(nullptr), m_pStorage(nullptr)
-{
 }
 
 int CSound::Init()
@@ -286,37 +207,35 @@ int CSound::Init()
 	m_pGraphics = Kernel()->RequestInterface<IEngineGraphics>();
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 
-	SDL_AudioSpec Format, FormatOut;
-
 	if(!g_Config.m_SndEnable)
 		return 0;
 
 	if(SDL_InitSubSystem(SDL_INIT_AUDIO) < 0)
 	{
-		dbg_msg("client/sound", "unable to init SDL audio: %s", SDL_GetError());
+		dbg_msg("sound", "unable to init SDL audio: %s", SDL_GetError());
 		return -1;
 	}
 
 	m_MixingRate = g_Config.m_SndRate;
 
-	// Set 16-bit stereo audio at 22Khz
-	Format.freq = g_Config.m_SndRate;
+	SDL_AudioSpec Format, FormatOut;
+	Format.freq = m_MixingRate;
 	Format.format = AUDIO_S16;
 	Format.channels = 2;
 	Format.samples = g_Config.m_SndBufferSize;
 	Format.callback = SdlCallback;
-	Format.userdata = NULL;
+	Format.userdata = this;
 
 	// Open the audio device and start playing sound!
 	m_Device = SDL_OpenAudioDevice(nullptr, 0, &Format, &FormatOut, 0);
 
 	if(m_Device == 0)
 	{
-		dbg_msg("client/sound", "unable to open audio: %s", SDL_GetError());
+		dbg_msg("sound", "unable to open audio: %s", SDL_GetError());
 		return -1;
 	}
 	else
-		dbg_msg("client/sound", "sound init successful using audio driver '%s'", SDL_GetCurrentAudioDriver());
+		dbg_msg("sound", "sound init successful using audio driver '%s'", SDL_GetCurrentAudioDriver());
 
 	m_MaxFrames = FormatOut.samples * 2;
 #if defined(CONF_VIDEORECORDER)
@@ -460,6 +379,11 @@ int CSound::DecodeOpus(int SampleID, const void *pData, unsigned DataSize)
 	return SampleID;
 }
 
+// TODO: Update WavPack to get rid of these global variables
+static const void *s_pWVBuffer = nullptr;
+static int s_WVBufferPosition = 0;
+static int s_WVBufferSize = 0;
+
 static int ReadDataOld(void *pBuffer, int Size)
 {
 	int ChunkSize = minimum(Size, s_WVBufferSize - s_WVBufferPosition);
@@ -508,6 +432,7 @@ int CSound::DecodeWV(int SampleID, const void *pData, unsigned DataSize)
 	CSample *pSample = &m_aSamples[SampleID];
 	char aError[100];
 
+	dbg_assert(s_pWVBuffer == nullptr, "DecodeWV already in use");
 	s_pWVBuffer = pData;
 	s_WVBufferSize = DataSize;
 	s_WVBufferPosition = 0;
@@ -890,7 +815,7 @@ ISound::CVoiceHandle CSound::Play(int ChannelID, int SampleID, int Flags, float 
 		m_aVoices[VoiceID].m_Y = (int)y;
 		m_aVoices[VoiceID].m_Falloff = 0.0f;
 		m_aVoices[VoiceID].m_Shape = ISound::SHAPE_CIRCLE;
-		m_aVoices[VoiceID].m_Circle.m_Radius = DefaultDistance;
+		m_aVoices[VoiceID].m_Circle.m_Radius = 1500;
 		Age = m_aVoices[VoiceID].m_Age;
 	}
 
@@ -963,11 +888,6 @@ bool CSound::IsPlaying(int SampleID)
 	std::unique_lock<std::mutex> Lock(m_SoundLock);
 	const CSample *pSample = &m_aSamples[SampleID];
 	return std::any_of(std::begin(m_aVoices), std::end(m_aVoices), [pSample](const auto &Voice) { return Voice.m_pSample == pSample; });
-}
-
-ISoundMixFunc CSound::GetSoundMixFunc()
-{
-	return Mix;
 }
 
 void CSound::PauseAudioDevice()
