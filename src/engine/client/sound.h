@@ -43,8 +43,8 @@ public:
 
 	float GetSampleDuration(int SampleID) override; // in s
 
-	void SetListenerPos(float x, float y) override;
 	void SetChannel(int ChannelID, float Vol, float Pan) override;
+	void SetListenerPos(float x, float y) override;
 
 	void SetVoiceVolume(CVoiceHandle Voice, float Volume) override;
 	void SetVoiceFalloff(CVoiceHandle Voice, float Falloff) override;

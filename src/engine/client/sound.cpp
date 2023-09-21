@@ -737,6 +737,12 @@ float CSound::GetSampleDuration(int SampleID)
 	return (m_aSamples[SampleID].m_NumFrames / m_aSamples[SampleID].m_Rate);
 }
 
+void CSound::SetChannel(int ChannelID, float Vol, float Pan)
+{
+	m_aChannels[ChannelID].m_Vol = (int)(Vol * 255.0f);
+	m_aChannels[ChannelID].m_Pan = (int)(Pan * 255.0f); // TODO: this is only on and off right now
+}
+
 void CSound::SetListenerPos(float x, float y)
 {
 	m_CenterX.store((int)x, std::memory_order_relaxed);
@@ -851,12 +857,6 @@ void CSound::SetVoiceRectangle(CVoiceHandle Voice, float Width, float Height)
 	m_aVoices[VoiceID].m_Shape = ISound::SHAPE_RECTANGLE;
 	m_aVoices[VoiceID].m_Rectangle.m_Width = maximum(0.0f, Width);
 	m_aVoices[VoiceID].m_Rectangle.m_Height = maximum(0.0f, Height);
-}
-
-void CSound::SetChannel(int ChannelID, float Vol, float Pan)
-{
-	m_aChannels[ChannelID].m_Vol = (int)(Vol * 255.0f);
-	m_aChannels[ChannelID].m_Pan = (int)(Pan * 255.0f); // TODO: this is only on and off right now
 }
 
 ISound::CVoiceHandle CSound::Play(int ChannelID, int SampleID, int Flags, float x, float y)
