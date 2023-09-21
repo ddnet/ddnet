@@ -1523,8 +1523,37 @@ void CGameContext::ConTele(IConsole::IResult *pResult, void *pUserData)
 			return;
 		Pos = pChrTo->m_Pos;
 	}
-
+	pChr->LastTelePos = Pos;
 	pSelf->Teleport(pChr, Pos);
+	pChr->UnFreeze();
+	pChr->Core()->m_Vel = vec2(0, 0);
+}
+
+void CGameContext::ConLastTele(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientID(pResult->m_ClientID))
+		return;
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if(!pPlayer)
+		return;
+	CCharacter *pChr = pPlayer->GetCharacter();
+	if(!pChr)
+		return;
+
+	CGameTeams &Teams = ((CGameControllerDDRace *)pSelf->m_pController)->m_Teams;
+	int Team = Teams.m_Core.Team(pResult->m_ClientID);
+	if(!Teams.IsPractice(Team))
+	{
+		pSelf->SendChatTarget(pPlayer->GetCID(), "You're not in a team with /practice turned on. Note that you can't earn a rank with practice enabled.");
+		return;
+	}
+	if(!pChr->LastTelePos.x)
+	{
+		pSelf->SendChatTarget(pPlayer->GetCID(), "You haven't previously teleported. Use /tp before using this command.");
+		return;
+	}
+	pSelf->Teleport(pChr, pChr->LastTelePos);
 	pChr->UnFreeze();
 	pChr->Core()->m_Vel = vec2(0, 0);
 }
