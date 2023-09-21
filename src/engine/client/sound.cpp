@@ -308,7 +308,7 @@ int CSound::Init()
 	Format.userdata = NULL;
 
 	// Open the audio device and start playing sound!
-	m_Device = SDL_OpenAudioDevice(NULL, 0, &Format, &FormatOut, 0);
+	m_Device = SDL_OpenAudioDevice(nullptr, 0, &Format, &FormatOut, 0);
 
 	if(m_Device == 0)
 	{
@@ -357,7 +357,7 @@ void CSound::Shutdown()
 	SDL_CloseAudioDevice(m_Device);
 	SDL_QuitSubSystem(SDL_INIT_AUDIO);
 	free(m_pMixBuffer);
-	m_pMixBuffer = 0;
+	m_pMixBuffer = nullptr;
 }
 
 int CSound::AllocID()
@@ -365,7 +365,7 @@ int CSound::AllocID()
 	// TODO: linear search, get rid of it
 	for(unsigned SampleID = 0; SampleID < NUM_SAMPLES; SampleID++)
 	{
-		if(m_aSamples[SampleID].m_pData == 0x0)
+		if(m_aSamples[SampleID].m_pData == nullptr)
 			return SampleID;
 	}
 
@@ -726,8 +726,7 @@ void CSound::UnloadSample(int SampleID)
 
 	Stop(SampleID);
 	free(m_aSamples[SampleID].m_pData);
-
-	m_aSamples[SampleID].m_pData = 0x0;
+	m_aSamples[SampleID].m_pData = nullptr;
 }
 
 float CSound::GetSampleDuration(int SampleID)
@@ -926,7 +925,7 @@ void CSound::Stop(int SampleID)
 				Voice.m_pSample->m_PausedAt = Voice.m_Tick;
 			else
 				Voice.m_pSample->m_PausedAt = 0;
-			Voice.m_pSample = 0;
+			Voice.m_pSample = nullptr;
 		}
 	}
 }
@@ -944,7 +943,7 @@ void CSound::StopAll()
 			else
 				Voice.m_pSample->m_PausedAt = 0;
 		}
-		Voice.m_pSample = 0;
+		Voice.m_pSample = nullptr;
 	}
 }
 
@@ -959,7 +958,7 @@ void CSound::StopVoice(CVoiceHandle Voice)
 	if(m_aVoices[VoiceID].m_Age != Voice.Age())
 		return;
 
-	m_aVoices[VoiceID].m_pSample = 0;
+	m_aVoices[VoiceID].m_pSample = nullptr;
 	m_aVoices[VoiceID].m_Age++;
 }
 
