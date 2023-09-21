@@ -27,6 +27,8 @@ class CSound : public IEngineSound
 	static int DecodeWV(int SampleID, const void *pData, unsigned DataSize);
 	static int DecodeOpus(int SampleID, const void *pData, unsigned DataSize);
 
+	void UpdateVolume();
+
 public:
 	CSound();
 	int Init() override;

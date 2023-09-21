@@ -327,24 +327,22 @@ int CSound::Init()
 	SDL_PauseAudioDevice(m_Device, 0);
 
 	m_SoundEnabled = true;
-	Update(); // update the volume
+	Update();
 	return 0;
 }
 
 int CSound::Update()
 {
-	// update volume
-	int WantedVolume = g_Config.m_SndVolume;
+	UpdateVolume();
+	return 0;
+}
 
+void CSound::UpdateVolume()
+{
+	int WantedVolume = g_Config.m_SndVolume;
 	if(!m_pGraphics->WindowActive() && g_Config.m_SndNonactiveMute)
 		WantedVolume = 0;
-
-	if(WantedVolume != m_SoundVolume)
-	{
-		std::unique_lock<std::mutex> Lock(m_SoundLock);
-		m_SoundVolume = WantedVolume;
-	}
-	return 0;
+	m_SoundVolume.store(WantedVolume, std::memory_order_relaxed);
 }
 
 void CSound::Shutdown()
