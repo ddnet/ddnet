@@ -721,7 +721,7 @@ void CGameContext::ConSwap(IConsole::IResult *pResult, void *pUserData)
 	}
 	else
 	{
-		int TeamSize = 0;
+		int TeamSize = 1;
 		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
 			if(pSelf->m_apPlayers[i] && Teams.m_Core.Team(i) == Team && i != pResult->m_ClientID)
@@ -730,7 +730,7 @@ void CGameContext::ConSwap(IConsole::IResult *pResult, void *pUserData)
 				TeamSize++;
 			}
 		}
-		if(TeamSize > 1)
+		if(TeamSize != 2)
 			TargetClientId = -1;
 	}
 
