@@ -29,149 +29,146 @@ void CSound::Mix(short *pFinalOut, unsigned Frames)
 	// acquire lock while we are mixing
 	m_SoundLock.lock();
 
-	int MasterVol = m_SoundVolume;
+	const int MasterVol = m_SoundVolume.load(std::memory_order_relaxed);
 
 	for(auto &Voice : m_aVoices)
 	{
-		if(Voice.m_pSample)
+		if(!Voice.m_pSample)
+			continue;
+
+		// mix voice
+		int *pOut = m_pMixBuffer;
+
+		const int Step = Voice.m_pSample->m_Channels; // setup input sources
+		short *pInL = &Voice.m_pSample->m_pData[Voice.m_Tick * Step];
+		short *pInR = &Voice.m_pSample->m_pData[Voice.m_Tick * Step + 1];
+
+		unsigned End = Voice.m_pSample->m_NumFrames - Voice.m_Tick;
+
+		int VolumeR = round_truncate(Voice.m_pChannel->m_Vol * (Voice.m_Vol / 255.0f));
+		int VolumeL = VolumeR;
+
+		// make sure that we don't go outside the sound data
+		if(Frames < End)
+			End = Frames;
+
+		// check if we have a mono sound
+		if(Voice.m_pSample->m_Channels == 1)
+			pInR = pInL;
+
+		// volume calculation
+		if(Voice.m_Flags & ISound::FLAG_POS && Voice.m_pChannel->m_Pan)
 		{
-			// mix voice
-			int *pOut = m_pMixBuffer;
+			// TODO: we should respect the channel panning value
+			const int dx = Voice.m_X - m_CenterX.load(std::memory_order_relaxed);
+			const int dy = Voice.m_Y - m_CenterY.load(std::memory_order_relaxed);
+			float FalloffX = 0.0f;
+			float FalloffY = 0.0f;
 
-			int Step = Voice.m_pSample->m_Channels; // setup input sources
-			short *pInL = &Voice.m_pSample->m_pData[Voice.m_Tick * Step];
-			short *pInR = &Voice.m_pSample->m_pData[Voice.m_Tick * Step + 1];
+			int RangeX = 0; // for panning
+			bool InVoiceField = false;
 
-			unsigned End = Voice.m_pSample->m_NumFrames - Voice.m_Tick;
-
-			int Rvol = (int)(Voice.m_pChannel->m_Vol * (Voice.m_Vol / 255.0f));
-			int Lvol = (int)(Voice.m_pChannel->m_Vol * (Voice.m_Vol / 255.0f));
-
-			// make sure that we don't go outside the sound data
-			if(Frames < End)
-				End = Frames;
-
-			// check if we have a mono sound
-			if(Voice.m_pSample->m_Channels == 1)
-				pInR = pInL;
-
-			// volume calculation
-			if(Voice.m_Flags & ISound::FLAG_POS && Voice.m_pChannel->m_Pan)
+			switch(Voice.m_Shape)
 			{
-				// TODO: we should respect the channel panning value
-				int dx = Voice.m_X - m_CenterX.load(std::memory_order_relaxed);
-				int dy = Voice.m_Y - m_CenterY.load(std::memory_order_relaxed);
-				//
-				int p = IntAbs(dx);
-				float FalloffX = 0.0f;
-				float FalloffY = 0.0f;
+			case ISound::SHAPE_CIRCLE:
+			{
+				const float Radius = Voice.m_Circle.m_Radius;
+				RangeX = Radius;
 
-				int RangeX = 0; // for panning
-				bool InVoiceField = false;
-
-				switch(Voice.m_Shape)
+				// dx and dy can be larger than 46341 and thus the calculation would go beyond the limits of a integer,
+				// therefore we cast them into float
+				const int Dist = (int)length(vec2(dx, dy));
+				if(Dist < Radius)
 				{
-				case ISound::SHAPE_CIRCLE:
-				{
-					float r = Voice.m_Circle.m_Radius;
-					RangeX = r;
+					InVoiceField = true;
 
-					// dx and dy can be larger than 46341 and thus the calculation would go beyond the limits of a integer,
-					// therefore we cast them into float
-					int Dist = (int)length(vec2(dx, dy));
-					if(Dist < r)
-					{
-						InVoiceField = true;
-
-						// falloff
-						int FalloffDistance = r * Voice.m_Falloff;
-						if(Dist > FalloffDistance)
-							FalloffX = FalloffY = (r - Dist) / (r - FalloffDistance);
-						else
-							FalloffX = FalloffY = 1.0f;
-					}
+					// falloff
+					int FalloffDistance = Radius * Voice.m_Falloff;
+					if(Dist > FalloffDistance)
+						FalloffX = FalloffY = (Radius - Dist) / (Radius - FalloffDistance);
 					else
-						InVoiceField = false;
-
-					break;
-				}
-
-				case ISound::SHAPE_RECTANGLE:
-				{
-					RangeX = Voice.m_Rectangle.m_Width / 2.0f;
-
-					int abs_dx = absolute(dx);
-					int abs_dy = absolute(dy);
-
-					int w = Voice.m_Rectangle.m_Width / 2.0f;
-					int h = Voice.m_Rectangle.m_Height / 2.0f;
-
-					if(abs_dx < w && abs_dy < h)
-					{
-						InVoiceField = true;
-
-						// falloff
-						int fx = Voice.m_Falloff * w;
-						int fy = Voice.m_Falloff * h;
-
-						FalloffX = abs_dx > fx ? (float)(w - abs_dx) / (w - fx) : 1.0f;
-						FalloffY = abs_dy > fy ? (float)(h - abs_dy) / (h - fy) : 1.0f;
-					}
-					else
-						InVoiceField = false;
-
-					break;
-				}
-				};
-
-				if(InVoiceField)
-				{
-					// panning
-					if(!(Voice.m_Flags & ISound::FLAG_NO_PANNING))
-					{
-						if(dx > 0)
-							Lvol = ((RangeX - p) * Lvol) / RangeX;
-						else
-							Rvol = ((RangeX - p) * Rvol) / RangeX;
-					}
-
-					{
-						Lvol *= FalloffX * FalloffY;
-						Rvol *= FalloffX * FalloffY;
-					}
+						FalloffX = FalloffY = 1.0f;
 				}
 				else
+					InVoiceField = false;
+
+				break;
+			}
+
+			case ISound::SHAPE_RECTANGLE:
+			{
+				RangeX = Voice.m_Rectangle.m_Width / 2.0f;
+
+				const int abs_dx = absolute(dx);
+				const int abs_dy = absolute(dy);
+
+				const int w = Voice.m_Rectangle.m_Width / 2.0f;
+				const int h = Voice.m_Rectangle.m_Height / 2.0f;
+
+				if(abs_dx < w && abs_dy < h)
 				{
-					Lvol = 0;
-					Rvol = 0;
+					InVoiceField = true;
+
+					// falloff
+					int fx = Voice.m_Falloff * w;
+					int fy = Voice.m_Falloff * h;
+
+					FalloffX = abs_dx > fx ? (float)(w - abs_dx) / (w - fx) : 1.0f;
+					FalloffY = abs_dy > fy ? (float)(h - abs_dy) / (h - fy) : 1.0f;
 				}
-			}
-
-			// process all frames
-			for(unsigned s = 0; s < End; s++)
-			{
-				*pOut++ += (*pInL) * Lvol;
-				*pOut++ += (*pInR) * Rvol;
-				pInL += Step;
-				pInR += Step;
-				Voice.m_Tick++;
-			}
-
-			// free voice if not used any more
-			if(Voice.m_Tick == Voice.m_pSample->m_NumFrames)
-			{
-				if(Voice.m_Flags & ISound::FLAG_LOOP)
-					Voice.m_Tick = 0;
 				else
+					InVoiceField = false;
+
+				break;
+			}
+			};
+
+			if(InVoiceField)
+			{
+				// panning
+				if(!(Voice.m_Flags & ISound::FLAG_NO_PANNING))
 				{
-					Voice.m_pSample = 0;
-					Voice.m_Age++;
+					if(dx > 0)
+						VolumeL = ((RangeX - absolute(dx)) * VolumeL) / RangeX;
+					else
+						VolumeR = ((RangeX - absolute(dx)) * VolumeR) / RangeX;
 				}
+
+				{
+					VolumeL *= FalloffX * FalloffY;
+					VolumeR *= FalloffX * FalloffY;
+				}
+			}
+			else
+			{
+				VolumeL = 0;
+				VolumeR = 0;
+			}
+		}
+
+		// process all frames
+		for(unsigned s = 0; s < End; s++)
+		{
+			*pOut++ += (*pInL) * VolumeL;
+			*pOut++ += (*pInR) * VolumeR;
+			pInL += Step;
+			pInR += Step;
+			Voice.m_Tick++;
+		}
+
+		// free voice if not used any more
+		if(Voice.m_Tick == Voice.m_pSample->m_NumFrames)
+		{
+			if(Voice.m_Flags & ISound::FLAG_LOOP)
+				Voice.m_Tick = 0;
+			else
+			{
+				Voice.m_pSample = nullptr;
+				Voice.m_Age++;
 			}
 		}
 	}
 
-	// release the lock
 	m_SoundLock.unlock();
 
 	// clamp accumulated values
