@@ -2637,7 +2637,9 @@ void CClient::Update()
 		if(m_DemoPlayer.IsPlaying() && IVideo::Current())
 		{
 			IVideo::Current()->NextVideoFrame();
-			IVideo::Current()->NextAudioFrameTimeline(Sound()->GetSoundMixFunc());
+			IVideo::Current()->NextAudioFrameTimeline([this](short *pFinalOut, unsigned Frames) {
+				Sound()->Mix(pFinalOut, Frames);
+			});
 		}
 		else if(m_ButtonRender)
 			Disconnect();

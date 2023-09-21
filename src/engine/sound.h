@@ -3,9 +3,7 @@
 #ifndef ENGINE_SOUND_H
 #define ENGINE_SOUND_H
 
-#include "kernel.h"
-
-#include <engine/shared/video.h>
+#include <engine/kernel.h>
 #include <engine/storage.h>
 
 class ISound : public IInterface
@@ -64,10 +62,10 @@ public:
 
 	virtual bool IsSoundEnabled() = 0;
 
-	virtual int LoadWV(const char *pFilename, int StorageType = IStorage::TYPE_ALL) = 0;
 	virtual int LoadOpus(const char *pFilename, int StorageType = IStorage::TYPE_ALL) = 0;
-	virtual int LoadWVFromMem(const void *pData, unsigned DataSize, bool FromEditor = false) = 0;
+	virtual int LoadWV(const char *pFilename, int StorageType = IStorage::TYPE_ALL) = 0;
 	virtual int LoadOpusFromMem(const void *pData, unsigned DataSize, bool FromEditor = false) = 0;
+	virtual int LoadWVFromMem(const void *pData, unsigned DataSize, bool FromEditor = false) = 0;
 	virtual void UnloadSample(int SampleID) = 0;
 
 	virtual float GetSampleDuration(int SampleID) = 0; // in s
@@ -78,7 +76,7 @@ public:
 	virtual void SetVoiceVolume(CVoiceHandle Voice, float Volume) = 0;
 	virtual void SetVoiceFalloff(CVoiceHandle Voice, float Falloff) = 0;
 	virtual void SetVoiceLocation(CVoiceHandle Voice, float x, float y) = 0;
-	virtual void SetVoiceTimeOffset(CVoiceHandle Voice, float offset) = 0; // in s
+	virtual void SetVoiceTimeOffset(CVoiceHandle Voice, float TimeOffset) = 0; // in s
 
 	virtual void SetVoiceCircle(CVoiceHandle Voice, float Radius) = 0;
 	virtual void SetVoiceRectangle(CVoiceHandle Voice, float Width, float Height) = 0;
@@ -90,7 +88,7 @@ public:
 	virtual void StopVoice(CVoiceHandle Voice) = 0;
 	virtual bool IsPlaying(int SampleID) = 0;
 
-	virtual ISoundMixFunc GetSoundMixFunc() = 0;
+	virtual void Mix(short *pFinalOut, unsigned Frames) = 0;
 	// useful for thread synchronization
 	virtual void PauseAudioDevice() = 0;
 	virtual void UnpauseAudioDevice() = 0;
