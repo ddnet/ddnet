@@ -286,94 +286,87 @@ int CSound::AllocID()
 	return -1;
 }
 
-void CSound::RateConvert(int SampleID)
+void CSound::RateConvert(CSample &Sample)
 {
-	CSample *pSample = &m_aSamples[SampleID];
-
 	// make sure that we need to convert this sound
-	if(!pSample->m_pData || pSample->m_Rate == m_MixingRate)
+	if(!Sample.m_pData || Sample.m_Rate == m_MixingRate)
 		return;
 
 	// allocate new data
-	int NumFrames = (int)((pSample->m_NumFrames / (float)pSample->m_Rate) * m_MixingRate);
-	short *pNewData = (short *)calloc((size_t)NumFrames * pSample->m_Channels, sizeof(short));
+	const int NumFrames = (int)((Sample.m_NumFrames / (float)Sample.m_Rate) * m_MixingRate);
+	short *pNewData = (short *)calloc((size_t)NumFrames * Sample.m_Channels, sizeof(short));
 
 	for(int i = 0; i < NumFrames; i++)
 	{
 		// resample TODO: this should be done better, like linear at least
 		float a = i / (float)NumFrames;
-		int f = (int)(a * pSample->m_NumFrames);
-		if(f >= pSample->m_NumFrames)
-			f = pSample->m_NumFrames - 1;
+		int f = (int)(a * Sample.m_NumFrames);
+		if(f >= Sample.m_NumFrames)
+			f = Sample.m_NumFrames - 1;
 
 		// set new data
-		if(pSample->m_Channels == 1)
-			pNewData[i] = pSample->m_pData[f];
-		else if(pSample->m_Channels == 2)
+		if(Sample.m_Channels == 1)
+			pNewData[i] = Sample.m_pData[f];
+		else if(Sample.m_Channels == 2)
 		{
-			pNewData[i * 2] = pSample->m_pData[f * 2];
-			pNewData[i * 2 + 1] = pSample->m_pData[f * 2 + 1];
+			pNewData[i * 2] = Sample.m_pData[f * 2];
+			pNewData[i * 2 + 1] = Sample.m_pData[f * 2 + 1];
 		}
 	}
 
 	// free old data and apply new
-	free(pSample->m_pData);
-	pSample->m_pData = pNewData;
-	pSample->m_NumFrames = NumFrames;
-	pSample->m_Rate = m_MixingRate;
+	free(Sample.m_pData);
+	Sample.m_pData = pNewData;
+	Sample.m_NumFrames = NumFrames;
+	Sample.m_Rate = m_MixingRate;
 }
 
-int CSound::DecodeOpus(int SampleID, const void *pData, unsigned DataSize)
+bool CSound::DecodeOpus(CSample &Sample, const void *pData, unsigned DataSize)
 {
-	if(SampleID == -1 || SampleID >= NUM_SAMPLES)
-		return -1;
-
-	CSample *pSample = &m_aSamples[SampleID];
-
-	OggOpusFile *pOpusFile = op_open_memory((const unsigned char *)pData, DataSize, NULL);
+	OggOpusFile *pOpusFile = op_open_memory((const unsigned char *)pData, DataSize, nullptr);
 	if(pOpusFile)
 	{
-		int NumChannels = op_channel_count(pOpusFile, -1);
-		int NumSamples = op_pcm_total(pOpusFile, -1); // per channel!
+		const int NumChannels = op_channel_count(pOpusFile, -1);
+		const int NumSamples = op_pcm_total(pOpusFile, -1); // per channel!
 
-		pSample->m_Channels = NumChannels;
+		Sample.m_Channels = NumChannels;
 
-		if(pSample->m_Channels > 2)
+		if(Sample.m_Channels > 2)
 		{
 			dbg_msg("sound/opus", "file is not mono or stereo.");
-			return -1;
+			return false;
 		}
 
-		pSample->m_pData = (short *)calloc((size_t)NumSamples * NumChannels, sizeof(short));
+		Sample.m_pData = (short *)calloc((size_t)NumSamples * NumChannels, sizeof(short));
 
 		int Pos = 0;
 		while(Pos < NumSamples)
 		{
-			const int Read = op_read(pOpusFile, pSample->m_pData + Pos * NumChannels, NumSamples * NumChannels, NULL);
+			const int Read = op_read(pOpusFile, Sample.m_pData + Pos * NumChannels, NumSamples * NumChannels, nullptr);
 			if(Read < 0)
 			{
-				free(pSample->m_pData);
+				free(Sample.m_pData);
 				dbg_msg("sound/opus", "op_read error %d at %d", Read, Pos);
-				return -1;
+				return false;
 			}
 			else if(Read == 0) // EOF
 				break;
 			Pos += Read;
 		}
 
-		pSample->m_NumFrames = Pos;
-		pSample->m_Rate = 48000;
-		pSample->m_LoopStart = -1;
-		pSample->m_LoopEnd = -1;
-		pSample->m_PausedAt = 0;
+		Sample.m_NumFrames = Pos;
+		Sample.m_Rate = 48000;
+		Sample.m_LoopStart = -1;
+		Sample.m_LoopEnd = -1;
+		Sample.m_PausedAt = 0;
 	}
 	else
 	{
 		dbg_msg("sound/opus", "failed to decode sample");
-		return -1;
+		return false;
 	}
 
-	return SampleID;
+	return true;
 }
 
 // TODO: Update WavPack to get rid of these global variables
@@ -421,12 +414,8 @@ static int PushBackByte(void *pId, int Char)
 }
 #endif
 
-int CSound::DecodeWV(int SampleID, const void *pData, unsigned DataSize)
+bool CSound::DecodeWV(CSample &Sample, const void *pData, unsigned DataSize)
 {
-	if(SampleID == -1 || SampleID >= NUM_SAMPLES)
-		return -1;
-
-	CSample *pSample = &m_aSamples[SampleID];
 	char aError[100];
 
 	dbg_assert(s_pWVBuffer == nullptr, "DecodeWV already in use");
@@ -447,24 +436,26 @@ int CSound::DecodeWV(int SampleID, const void *pData, unsigned DataSize)
 #endif
 	if(pContext)
 	{
-		int NumSamples = WavpackGetNumSamples(pContext);
-		int BitsPerSample = WavpackGetBitsPerSample(pContext);
-		unsigned int SampleRate = WavpackGetSampleRate(pContext);
-		int NumChannels = WavpackGetNumChannels(pContext);
+		const int NumSamples = WavpackGetNumSamples(pContext);
+		const int BitsPerSample = WavpackGetBitsPerSample(pContext);
+		const unsigned int SampleRate = WavpackGetSampleRate(pContext);
+		const int NumChannels = WavpackGetNumChannels(pContext);
 
-		pSample->m_Channels = NumChannels;
-		pSample->m_Rate = SampleRate;
+		Sample.m_Channels = NumChannels;
+		Sample.m_Rate = SampleRate;
 
-		if(pSample->m_Channels > 2)
+		if(Sample.m_Channels > 2)
 		{
 			dbg_msg("sound/wv", "file is not mono or stereo.");
-			return -1;
+			s_pWVBuffer = nullptr;
+			return false;
 		}
 
 		if(BitsPerSample != 16)
 		{
 			dbg_msg("sound/wv", "bps is %d, not 16", BitsPerSample);
-			return -1;
+			s_pWVBuffer = nullptr;
+			return false;
 		}
 
 		int *pBuffer = (int *)calloc((size_t)NumSamples * NumChannels, sizeof(int));
@@ -472,13 +463,14 @@ int CSound::DecodeWV(int SampleID, const void *pData, unsigned DataSize)
 		{
 			free(pBuffer);
 			dbg_msg("sound/wv", "WavpackUnpackSamples failed. NumSamples=%d, NumChannels=%d", NumSamples, NumChannels);
-			return -1;
+			s_pWVBuffer = nullptr;
+			return false;
 		}
+
+		Sample.m_pData = (short *)calloc((size_t)NumSamples * NumChannels, sizeof(short));
+
 		int *pSrc = pBuffer;
-
-		pSample->m_pData = (short *)calloc((size_t)NumSamples * NumChannels, sizeof(short));
-		short *pDst = pSample->m_pData;
-
+		short *pDst = Sample.m_pData;
 		for(int i = 0; i < NumSamples * NumChannels; i++)
 			*pDst++ = (short)*pSrc++;
 
@@ -487,18 +479,21 @@ int CSound::DecodeWV(int SampleID, const void *pData, unsigned DataSize)
 		WavpackCloseFile(pContext);
 #endif
 
-		pSample->m_NumFrames = NumSamples;
-		pSample->m_LoopStart = -1;
-		pSample->m_LoopEnd = -1;
-		pSample->m_PausedAt = 0;
+		Sample.m_NumFrames = NumSamples;
+		Sample.m_LoopStart = -1;
+		Sample.m_LoopEnd = -1;
+		Sample.m_PausedAt = 0;
+
+		s_pWVBuffer = nullptr;
 	}
 	else
 	{
 		dbg_msg("sound/wv", "failed to decode sample (%s)", aError);
-		return -1;
+		s_pWVBuffer = nullptr;
+		return false;
 	}
 
-	return SampleID;
+	return true;
 }
 
 int CSound::LoadOpus(const char *pFilename, int StorageType)
@@ -516,7 +511,7 @@ int CSound::LoadOpus(const char *pFilename, int StorageType)
 	if(!m_pStorage)
 		return -1;
 
-	int SampleID = AllocID();
+	const int SampleID = AllocID();
 	if(SampleID < 0)
 	{
 		dbg_msg("sound/opus", "failed to allocate sample ID. filename='%s'", pFilename);
@@ -531,15 +526,15 @@ int CSound::LoadOpus(const char *pFilename, int StorageType)
 		return -1;
 	}
 
-	SampleID = DecodeOpus(SampleID, pData, DataSize);
+	const bool DecodeSuccess = DecodeOpus(m_aSamples[SampleID], pData, DataSize);
 	free(pData);
-	if(SampleID < 0)
+	if(!DecodeSuccess)
 		return -1;
 
 	if(g_Config.m_Debug)
 		dbg_msg("sound/opus", "loaded %s", pFilename);
 
-	RateConvert(SampleID);
+	RateConvert(m_aSamples[SampleID]);
 	return SampleID;
 }
 
@@ -558,7 +553,7 @@ int CSound::LoadWV(const char *pFilename, int StorageType)
 	if(!m_pStorage)
 		return -1;
 
-	int SampleID = AllocID();
+	const int SampleID = AllocID();
 	if(SampleID < 0)
 	{
 		dbg_msg("sound/wv", "failed to allocate sample ID. filename='%s'", pFilename);
@@ -573,15 +568,15 @@ int CSound::LoadWV(const char *pFilename, int StorageType)
 		return -1;
 	}
 
-	SampleID = DecodeWV(SampleID, pData, DataSize);
+	const bool DecodeSuccess = DecodeWV(m_aSamples[SampleID], pData, DataSize);
 	free(pData);
-	if(SampleID < 0)
+	if(!DecodeSuccess)
 		return -1;
 
 	if(g_Config.m_Debug)
 		dbg_msg("sound/wv", "loaded %s", pFilename);
 
-	RateConvert(SampleID);
+	RateConvert(m_aSamples[SampleID]);
 	return SampleID;
 }
 
@@ -600,15 +595,14 @@ int CSound::LoadOpusFromMem(const void *pData, unsigned DataSize, bool FromEdito
 	if(!pData)
 		return -1;
 
-	int SampleID = AllocID();
+	const int SampleID = AllocID();
 	if(SampleID < 0)
 		return -1;
 
-	SampleID = DecodeOpus(SampleID, pData, DataSize);
-	if(SampleID < 0)
+	if(!DecodeOpus(m_aSamples[SampleID], pData, DataSize))
 		return -1;
 
-	RateConvert(SampleID);
+	RateConvert(m_aSamples[SampleID]);
 	return SampleID;
 }
 
@@ -627,15 +621,14 @@ int CSound::LoadWVFromMem(const void *pData, unsigned DataSize, bool FromEditor 
 	if(!pData)
 		return -1;
 
-	int SampleID = AllocID();
+	const int SampleID = AllocID();
 	if(SampleID < 0)
 		return -1;
 
-	SampleID = DecodeWV(SampleID, pData, DataSize);
-	if(SampleID < 0)
+	if(!DecodeWV(m_aSamples[SampleID], pData, DataSize))
 		return -1;
 
-	RateConvert(SampleID);
+	RateConvert(m_aSamples[SampleID]);
 	return SampleID;
 }
 

@@ -70,17 +70,16 @@ class CSound : public IEngineSound
 	std::atomic<int> m_SoundVolume = 100;
 	int m_MixingRate = 48000;
 
-	static void RateConvert(int SampleID);
 	class IEngineGraphics *m_pGraphics = nullptr;
 	IStorage *m_pStorage = nullptr;
 
 	int *m_pMixBuffer = nullptr;
 
 	int AllocID();
+	void RateConvert(CSample &Sample);
 
-	// TODO: Refactor: clean this mess up
-	static int DecodeWV(int SampleID, const void *pData, unsigned DataSize);
-	static int DecodeOpus(int SampleID, const void *pData, unsigned DataSize);
+	bool DecodeOpus(CSample &Sample, const void *pData, unsigned DataSize);
+	bool DecodeWV(CSample &Sample, const void *pData, unsigned DataSize);
 
 	void UpdateVolume();
 
@@ -91,10 +90,10 @@ public:
 
 	bool IsSoundEnabled() override { return m_SoundEnabled; }
 
-	int LoadWV(const char *pFilename, int StorageType = IStorage::TYPE_ALL) override;
-	int LoadWVFromMem(const void *pData, unsigned DataSize, bool FromEditor) override;
 	int LoadOpus(const char *pFilename, int StorageType = IStorage::TYPE_ALL) override;
+	int LoadWV(const char *pFilename, int StorageType = IStorage::TYPE_ALL) override;
 	int LoadOpusFromMem(const void *pData, unsigned DataSize, bool FromEditor) override;
+	int LoadWVFromMem(const void *pData, unsigned DataSize, bool FromEditor) override;
 	void UnloadSample(int SampleID) override;
 
 	float GetSampleDuration(int SampleID) override; // in s
