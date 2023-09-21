@@ -788,7 +788,7 @@ void CSound::SetVoiceLocation(CVoiceHandle Voice, float x, float y)
 	m_aVoices[VoiceID].m_Y = y;
 }
 
-void CSound::SetVoiceTimeOffset(CVoiceHandle Voice, float offset)
+void CSound::SetVoiceTimeOffset(CVoiceHandle Voice, float TimeOffset)
 {
 	if(!Voice.IsValid())
 		return;
@@ -799,27 +799,25 @@ void CSound::SetVoiceTimeOffset(CVoiceHandle Voice, float offset)
 	if(m_aVoices[VoiceID].m_Age != Voice.Age())
 		return;
 
-	{
-		if(m_aVoices[VoiceID].m_pSample)
-		{
-			int Tick = 0;
-			bool IsLooping = m_aVoices[VoiceID].m_Flags & ISound::FLAG_LOOP;
-			uint64_t TickOffset = m_aVoices[VoiceID].m_pSample->m_Rate * offset;
-			if(m_aVoices[VoiceID].m_pSample->m_NumFrames > 0 && IsLooping)
-				Tick = TickOffset % m_aVoices[VoiceID].m_pSample->m_NumFrames;
-			else
-				Tick = clamp(TickOffset, (uint64_t)0, (uint64_t)m_aVoices[VoiceID].m_pSample->m_NumFrames);
+	if(!m_aVoices[VoiceID].m_pSample)
+		return;
 
-			// at least 200msec off, else depend on buffer size
-			float Threshold = maximum(0.2f * m_aVoices[VoiceID].m_pSample->m_Rate, (float)m_MaxFrames);
-			if(absolute(m_aVoices[VoiceID].m_Tick - Tick) > Threshold)
-			{
-				// take care of looping (modulo!)
-				if(!(IsLooping && (minimum(m_aVoices[VoiceID].m_Tick, Tick) + m_aVoices[VoiceID].m_pSample->m_NumFrames - maximum(m_aVoices[VoiceID].m_Tick, Tick)) <= Threshold))
-				{
-					m_aVoices[VoiceID].m_Tick = Tick;
-				}
-			}
+	int Tick = 0;
+	bool IsLooping = m_aVoices[VoiceID].m_Flags & ISound::FLAG_LOOP;
+	uint64_t TickOffset = m_aVoices[VoiceID].m_pSample->m_Rate * TimeOffset;
+	if(m_aVoices[VoiceID].m_pSample->m_NumFrames > 0 && IsLooping)
+		Tick = TickOffset % m_aVoices[VoiceID].m_pSample->m_NumFrames;
+	else
+		Tick = clamp(TickOffset, (uint64_t)0, (uint64_t)m_aVoices[VoiceID].m_pSample->m_NumFrames);
+
+	// at least 200msec off, else depend on buffer size
+	float Threshold = maximum(0.2f * m_aVoices[VoiceID].m_pSample->m_Rate, (float)m_MaxFrames);
+	if(absolute(m_aVoices[VoiceID].m_Tick - Tick) > Threshold)
+	{
+		// take care of looping (modulo!)
+		if(!(IsLooping && (minimum(m_aVoices[VoiceID].m_Tick, Tick) + m_aVoices[VoiceID].m_pSample->m_NumFrames - maximum(m_aVoices[VoiceID].m_Tick, Tick)) <= Threshold))
+		{
+			m_aVoices[VoiceID].m_Tick = Tick;
 		}
 	}
 }

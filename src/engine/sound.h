@@ -78,7 +78,7 @@ public:
 	virtual void SetVoiceVolume(CVoiceHandle Voice, float Volume) = 0;
 	virtual void SetVoiceFalloff(CVoiceHandle Voice, float Falloff) = 0;
 	virtual void SetVoiceLocation(CVoiceHandle Voice, float x, float y) = 0;
-	virtual void SetVoiceTimeOffset(CVoiceHandle Voice, float offset) = 0; // in s
+	virtual void SetVoiceTimeOffset(CVoiceHandle Voice, float TimeOffset) = 0; // in s
 
 	virtual void SetVoiceCircle(CVoiceHandle Voice, float Radius) = 0;
 	virtual void SetVoiceRectangle(CVoiceHandle Voice, float Width, float Height) = 0;

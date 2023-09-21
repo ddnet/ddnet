@@ -49,7 +49,7 @@ public:
 	void SetVoiceVolume(CVoiceHandle Voice, float Volume) override;
 	void SetVoiceFalloff(CVoiceHandle Voice, float Falloff) override;
 	void SetVoiceLocation(CVoiceHandle Voice, float x, float y) override;
-	void SetVoiceTimeOffset(CVoiceHandle Voice, float offset) override; // in s
+	void SetVoiceTimeOffset(CVoiceHandle Voice, float TimeOffset) override; // in s
 
 	void SetVoiceCircle(CVoiceHandle Voice, float Radius) override;
 	void SetVoiceRectangle(CVoiceHandle Voice, float Width, float Height) override;
