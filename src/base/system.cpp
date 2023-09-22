@@ -4149,12 +4149,11 @@ int kill_process(PROCESS process)
 {
 #if defined(CONF_FAMILY_WINDOWS)
 	BOOL success = TerminateProcess(process, 0);
-	if(success)
-	{
-		CloseHandle(process);
-	}
-	return success;
+	CloseHandle(process);
+	return success || GetLastError() == ERROR_INVALID_HANDLE;
 #elif defined(CONF_FAMILY_UNIX)
+	if(!is_process_alive(process))
+		return true;
 	int status;
 	kill(process, SIGTERM);
 	return waitpid(process, &status, 0) != -1;

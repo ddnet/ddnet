@@ -137,10 +137,7 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 	static CButtonContainer s_LocalServerButton;
 
 	if(!is_process_alive(m_ServerProcess.m_Process))
-	{
 		KillServer();
-		m_ServerProcess.m_Process = INVALID_PROCESS;
-	}
 
 	if(DoButton_Menu(&s_LocalServerButton, m_ServerProcess.m_Process ? Localize("Stop server") : Localize("Run server"), 0, &Button, g_Config.m_ClShowStartMenuImages ? "local_server" : 0, IGraphics::CORNER_ALL, Rounding, 0.5f, vec4(0.0f, 0.0f, 0.0f, 0.5f), m_ServerProcess.m_Process ? vec4(0.0f, 1.0f, 0.0f, 0.25f) : vec4(0.0f, 0.0f, 0.0f, 0.25f)) || (CheckHotKey(KEY_R) && Input()->KeyPress(KEY_R)))
 	{
