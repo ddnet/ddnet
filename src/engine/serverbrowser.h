@@ -51,6 +51,7 @@ public:
 		int m_Country;
 		int m_Score;
 		bool m_Player;
+		bool m_Afk;
 
 		// skin info
 		char m_aSkin[24 + 1];

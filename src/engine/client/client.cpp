@@ -1479,6 +1479,7 @@ void CClient::ProcessServerInfo(int RawType, NETADDR *pFrom, const void *pData, 
 		GET_INT(pClient->m_Country);
 		GET_INT(pClient->m_Score);
 		GET_INT(pClient->m_Player);
+		GET_INT(pClient->m_Afk);
 		if(SavedType == SERVERINFO_EXTENDED)
 		{
 			Up.GetString(); // extra info, reserved

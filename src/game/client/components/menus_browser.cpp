@@ -1218,7 +1218,8 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 	const float FontSize = 10.0f;
 	static bool s_aListExtended[NUM_FRIEND_TYPES] = {true, true, false};
 	static const ColorRGBA s_aListColors[NUM_FRIEND_TYPES] = {ColorRGBA(0.5f, 1.0f, 0.5f, 1.0f), ColorRGBA(0.4f, 0.4f, 1.0f, 1.0f), ColorRGBA(1.0f, 0.5f, 0.5f, 1.0f)};
-	const ColorRGBA OfflineClanColor = ColorRGBA(0.7f, 0.45f, 0.75f, 1.0f);
+	// Alternates of s_aListColors include: AFK friend color, AFK clanmate color, Offline clan color.
+	static const ColorRGBA s_aListColorAlternates[NUM_FRIEND_TYPES] = {ColorRGBA(1.0f, 1.0f, 0.5f, 1.0f), ColorRGBA(0.4f, 0.75f, 1.0f, 1.0f), ColorRGBA(0.7f, 0.45f, 0.75f, 1.0f)};
 	const float SpacingH = 2.0f;
 
 	CUIRect List, ServerFriends;
@@ -1334,8 +1335,8 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 				{
 					GameClient()->m_Tooltips.DoToolTip(Friend.ListItemId(), &Rect, Localize("Click to select server. Double click to join your friend."));
 				}
-				const bool OfflineClan = Friend.FriendState() == IFriends::FRIEND_CLAN && FriendType == FRIEND_OFF;
-				Rect.Draw((OfflineClan ? OfflineClanColor : s_aListColors[FriendType]).WithAlpha(Inside ? 0.5f : 0.3f), IGraphics::CORNER_ALL, 5.0f);
+				const bool AlternateColor = (FriendType != FRIEND_OFF && Friend.IsAfk()) || (Friend.FriendState() == IFriends::FRIEND_CLAN && FriendType == FRIEND_OFF);
+				Rect.Draw((AlternateColor ? s_aListColorAlternates[FriendType] : s_aListColors[FriendType]).WithAlpha(Inside ? 0.5f : 0.3f), IGraphics::CORNER_ALL, 5.0f);
 				Rect.Margin(2.0f, &Rect);
 
 				CUIRect RemoveButton, NameLabel, ClanLabel, InfoLabel;
@@ -1360,7 +1361,7 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 					vec2 OffsetToMid;
 					RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &TeeInfo, OffsetToMid);
 					const vec2 TeeRenderPos = vec2(Skin.x + Skin.w / 2.0f, Skin.y + Skin.h * 0.55f + OffsetToMid.y);
-					RenderTools()->RenderTee(pIdleState, &TeeInfo, EMOTE_NORMAL, vec2(1.0f, 0.0f), TeeRenderPos);
+					RenderTools()->RenderTee(pIdleState, &TeeInfo, Friend.IsAfk() ? EMOTE_BLINK : EMOTE_NORMAL, vec2(1.0f, 0.0f), TeeRenderPos);
 				}
 				Rect.HSplitTop(11.0f, &NameLabel, &ClanLabel);
 
