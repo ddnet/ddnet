@@ -708,13 +708,30 @@ void CGameContext::ConSwap(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	int TargetClientId = -1;
-	for(int i = 0; i < MAX_CLIENTS; i++)
+	if(pResult->NumArguments() == 1)
 	{
-		if(pSelf->m_apPlayers[i] && !str_comp(pName, pSelf->Server()->ClientName(i)))
+		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
-			TargetClientId = i;
-			break;
+			if(pSelf->m_apPlayers[i] && !str_comp(pName, pSelf->Server()->ClientName(i)))
+			{
+				TargetClientId = i;
+				break;
+			}
 		}
+	}
+	else
+	{
+		int TeamSize = 1;
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if(pSelf->m_apPlayers[i] && Teams.m_Core.Team(i) == Team && i != pResult->m_ClientID)
+			{
+				TargetClientId = i;
+				TeamSize++;
+			}
+		}
+		if(TeamSize != 2)
+			TargetClientId = -1;
 	}
 
 	if(TargetClientId < 0)
