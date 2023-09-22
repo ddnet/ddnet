@@ -4149,8 +4149,13 @@ int kill_process(PROCESS process)
 {
 #if defined(CONF_FAMILY_WINDOWS)
 	BOOL success = TerminateProcess(process, 0);
-	CloseHandle(process);
-	return success || GetLastError() == ERROR_INVALID_HANDLE;
+	BOOL is_alive = is_process_alive(process);
+	if(success || !is_alive)
+	{
+		CloseHandle(process);
+		return true;
+	}
+	return false;
 #elif defined(CONF_FAMILY_UNIX)
 	if(!is_process_alive(process))
 		return true;
