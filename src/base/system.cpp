@@ -4161,6 +4161,19 @@ int kill_process(PROCESS process)
 #endif
 }
 
+bool is_process_alive(PROCESS process)
+{
+	if(process == INVALID_PROCESS)
+		return false;
+#if defined(CONF_FAMILY_WINDOWS)
+	DWORD exit_code;
+	GetExitCodeProcess(process, &exit_code);
+	return exit_code == STILL_ACTIVE;
+#else
+	return waitpid(process, nullptr, WNOHANG) == 0;
+#endif
+}
+
 int open_link(const char *link)
 {
 #if defined(CONF_FAMILY_WINDOWS)
