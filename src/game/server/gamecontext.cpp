@@ -1555,8 +1555,11 @@ void CGameContext::OnClientEnter(int ClientID)
 	// initial chat delay
 	if(g_Config.m_SvChatInitialDelay != 0 && m_apPlayers[ClientID]->m_JoinTick > m_NonEmptySince + 10 * Server()->TickSpeed())
 	{
+		char aBuf[128];
 		NETADDR Addr;
 		Server()->GetClientAddr(ClientID, &Addr);
+		str_format(aBuf, sizeof aBuf, "This server has an initial chat delay, you will need to wait %d seconds before talking.", g_Config.m_SvChatInitialDelay);
+		SendChatTarget(ClientID, aBuf);
 		Mute(&Addr, g_Config.m_SvChatInitialDelay, Server()->ClientName(ClientID), "Initial chat delay", true);
 	}
 
@@ -4151,20 +4154,27 @@ bool CGameContext::ProcessSpamProtection(int ClientID, bool RespectChatInitialDe
 	NETADDR Addr;
 	Server()->GetClientAddr(ClientID, &Addr);
 
-	int Muted = 0;
-	for(int i = 0; i < m_NumMutes && Muted <= 0; i++)
+	CMute Muted;
+	int Expires = 0;
+	for(int i = 0; i < m_NumMutes && Expires <= 0; i++)
 	{
 		if(!net_addr_comp_noport(&Addr, &m_aMutes[i].m_Addr))
 		{
 			if(RespectChatInitialDelay || m_aMutes[i].m_InitialChatDelay)
-				Muted = (m_aMutes[i].m_Expire - Server()->Tick()) / Server()->TickSpeed();
+			{
+				Muted = m_aMutes[i];
+				Expires = (m_aMutes[i].m_Expire - Server()->Tick()) / Server()->TickSpeed();
+			}
 		}
 	}
 
-	if(Muted > 0)
+	if(Expires > 0)
 	{
 		char aBuf[128];
-		str_format(aBuf, sizeof aBuf, "You are not permitted to talk for the next %d seconds.", Muted);
+		if(Muted.m_InitialChatDelay)
+			str_format(aBuf, sizeof aBuf, "This server has an initial chat delay, you will be able to talk in %d seconds.", Expires);
+		else
+			str_format(aBuf, sizeof aBuf, "You are not permitted to talk for the next %d seconds.", Expires);
 		SendChatTarget(ClientID, aBuf);
 		return true;
 	}
