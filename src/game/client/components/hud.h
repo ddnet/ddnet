@@ -66,6 +66,7 @@ class CHud : public CComponent
 	void RenderSuddenDeath();
 	void RenderScoreHud();
 	void RenderSpectatorHud();
+	void RenderSpectateHint();
 	void RenderWarmupTimer();
 	void RenderLocalTime(float x);
 

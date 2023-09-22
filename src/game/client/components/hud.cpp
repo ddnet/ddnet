@@ -1428,6 +1428,22 @@ void CHud::RenderSpectatorHud()
 	TextRender()->Text(m_Width - 174.0f, m_Height - 15.0f + (15.f - 8.f) / 2.f, 8.0f, aBuf, -1.0f);
 }
 
+void CHud::RenderSpectateHint()
+{
+	if(m_pClient->m_Menus.IsActive() || g_Config.m_Debug)
+		return;
+
+	const float Height = 300.0f;
+	const float Width = Height * Graphics()->ScreenAspect();
+	Graphics()->MapScreen(0.0f, 0.0f, Width, Height);
+
+	const float FontSize = 5.0f;
+	const float Spacing = 5.0f;
+
+	TextRender()->TextColor(TextRender()->DefaultTextColor());
+	TextRender()->Text(Spacing, Height - FontSize - Spacing, FontSize, Localize("Spectating. Press Q or P again to stop spectating."));
+}
+
 void CHud::RenderLocalTime(float x)
 {
 	if(!g_Config.m_ClShowLocalTimeAlways && !m_pClient->m_Scoreboard.Active())
@@ -1488,6 +1504,10 @@ void CHud::OnRender()
 			if(SpectatorID != SPEC_FREEVIEW)
 			{
 				RenderMovementInformation(SpectatorID);
+			}
+			if(m_pClient->m_Snap.m_apInfoByName[m_pClient->m_Snap.m_LocalClientID] && m_pClient->m_Snap.m_apInfoByName[m_pClient->m_Snap.m_LocalClientID]->m_Team != TEAM_SPECTATORS)
+			{
+				RenderSpectateHint();
 			}
 			RenderSpectatorHud();
 		}
