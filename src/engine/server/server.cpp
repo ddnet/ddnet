@@ -3107,16 +3107,20 @@ static int GetAuthLevel(const char *pLevel)
 
 void CServer::AuthRemoveKey(int KeySlot)
 {
-	int NewKeySlot = KeySlot;
-	int OldKeySlot = m_AuthManager.RemoveKey(KeySlot);
+	m_AuthManager.RemoveKey(KeySlot);
 	LogoutKey(KeySlot, "key removal");
 
 	// Update indices.
-	if(OldKeySlot != NewKeySlot)
+	for(auto &Client : m_aClients)
 	{
-		for(auto &Client : m_aClients)
-			if(Client.m_AuthKey == OldKeySlot)
-				Client.m_AuthKey = NewKeySlot;
+		if(Client.m_AuthKey == KeySlot)
+		{
+			Client.m_AuthKey = -1;
+		}
+		else if(Client.m_AuthKey > KeySlot)
+		{
+			--Client.m_AuthKey;
+		}
 	}
 }
 
