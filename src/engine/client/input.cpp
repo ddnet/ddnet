@@ -557,6 +557,9 @@ int CInput::Update()
 	// keep the counter between 1..0xFFFF, 0 means not pressed
 	m_InputCounter = (m_InputCounter % 0xFFFF) + 1;
 
+	// Ensure that we have the latest keyboard, mouse and joystick state
+	SDL_PumpEvents();
+
 	int NumKeyStates;
 	const Uint8 *pState = SDL_GetKeyboardState(&NumKeyStates);
 	if(NumKeyStates >= KEY_MOUSE_1)
