@@ -981,6 +981,12 @@ set(EXPECTED_DATA
   arrow.png
   assets/entities/comfort/ddnet.png
   assets/entities/license.txt
+  assets/entities/none/entities.png
+  assets/game/none/game.png
+  assets/emoticons/none/emoticons.png
+  assets/extras/none/extras.png
+  assets/hud/none/hud.png
+  assets/particles/none/particles.png
   assets/game/game_06.png
   audio/foley_body_impact-01.wv
   audio/foley_body_impact-02.wv
