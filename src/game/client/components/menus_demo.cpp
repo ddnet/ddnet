@@ -1051,14 +1051,28 @@ void CMenus::FetchAllHeaders()
 	std::stable_sort(m_vDemos.begin(), m_vDemos.end());
 }
 
-void CMenus::RenderDemoList(CUIRect MainView)
+void CMenus::RenderDemoBrowser(CUIRect MainView)
 {
-	static int s_Inited = 0;
-	if(!s_Inited)
+	CUIRect ListView, DetailsView, ButtonsView;
+	MainView.Draw(ms_ColorTabbarActive, IGraphics::CORNER_B, 10.0f);
+	MainView.Margin(10.0f, &MainView);
+	MainView.HSplitBottom(22.0f * 2.0f + 5.0f, &ListView, &ButtonsView);
+	ListView.VSplitRight(205.0f, &ListView, &DetailsView);
+	ListView.VSplitRight(5.0f, &ListView, nullptr);
+
+	bool WasListboxItemActivated;
+	RenderDemoBrowserList(ListView, WasListboxItemActivated);
+	RenderDemoBrowserDetails(DetailsView);
+	RenderDemoBrowserButtons(ButtonsView, WasListboxItemActivated);
+}
+
+void CMenus::RenderDemoBrowserList(CUIRect ListView, bool &WasListboxItemActivated)
+{
+	if(!m_DemoBrowserListInitialized)
 	{
 		DemolistPopulate();
 		DemolistOnUpdate(true);
-		s_Inited = 1;
+		m_DemoBrowserListInitialized = true;
 	}
 
 #if defined(CONF_VIDEORECORDER)
@@ -1068,151 +1082,9 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	}
 #endif
 
-	char aFooterLabel[128] = {0};
-	if(m_DemolistSelectedIndex >= 0)
+	struct SColumn
 	{
-		CDemoItem *pItem = m_vpFilteredDemos[m_DemolistSelectedIndex];
-		if(str_comp(pItem->m_aFilename, "..") == 0)
-			str_copy(aFooterLabel, Localize("Parent Folder"));
-		else if(m_vpFilteredDemos[m_DemolistSelectedIndex]->m_IsLink)
-			str_copy(aFooterLabel, Localize("Folder Link"));
-		else if(m_vpFilteredDemos[m_DemolistSelectedIndex]->m_IsDir)
-			str_copy(aFooterLabel, Localize("Folder"));
-		else if(!FetchHeader(*pItem))
-			str_copy(aFooterLabel, Localize("Invalid Demo"));
-		else
-			str_copy(aFooterLabel, Localize("Demo details"));
-	}
-
-	// render background
-	MainView.Draw(ms_ColorTabbarActive, IGraphics::CORNER_B, 10.0f);
-	MainView.Margin(10.0f, &MainView);
-
-#if defined(CONF_VIDEORECORDER)
-	CUIRect RenderRect;
-#endif
-	CUIRect ButtonBar, RefreshRect, FetchRect, PlayRect, DeleteRect, RenameRect, LabelRect, ListBox;
-	CUIRect ButtonBar2, DirectoryButton, DemoSearch;
-
-	MainView.HSplitBottom((ms_ButtonHeight + 5.0f) * 2.0f, &MainView, &ButtonBar2);
-	ButtonBar2.HSplitTop(5.0f, 0, &ButtonBar2);
-	ButtonBar2.HSplitTop(ms_ButtonHeight, &ButtonBar2, &ButtonBar);
-	ButtonBar.HSplitTop(5.0f, 0, &ButtonBar);
-	ButtonBar2.VSplitLeft(110.0f, &FetchRect, &ButtonBar2);
-	ButtonBar2.VSplitLeft(10.0f, 0, &ButtonBar2);
-	ButtonBar2.VSplitLeft(230.0f, &DirectoryButton, &ButtonBar2);
-	ButtonBar2.VSplitLeft(10.0f, 0, &ButtonBar2);
-	ButtonBar2.VSplitLeft(230.0f, &DemoSearch, &ButtonBar2);
-	ButtonBar2.VSplitLeft(10.0f, 0, &ButtonBar2);
-	ButtonBar.VSplitRight(110.0f, &ButtonBar, &PlayRect);
-	ButtonBar.VSplitLeft(110.0f, &RefreshRect, &ButtonBar);
-	ButtonBar.VSplitLeft(10.0f, 0, &ButtonBar);
-	ButtonBar.VSplitLeft(110.0f, &DeleteRect, &ButtonBar);
-	ButtonBar.VSplitLeft(10.0f, 0, &ButtonBar);
-	ButtonBar.VSplitLeft(110.0f, &RenameRect, &ButtonBar);
-	ButtonBar.VSplitLeft(10.0f, 0, &ButtonBar);
-#if defined(CONF_VIDEORECORDER)
-	ButtonBar2.VSplitRight(110.0f, &ButtonBar2, &RenderRect);
-	ButtonBar2.VSplitRight(10.0f, &ButtonBar2, 0);
-#endif
-	ButtonBar.VSplitLeft(110.0f, &LabelRect, &ButtonBar);
-	MainView.HSplitBottom(140.0f, &ListBox, &MainView);
-
-	// render demo info
-	MainView.VMargin(5.0f, &MainView);
-	MainView.HSplitBottom(5.0f, &MainView, 0);
-	MainView.Draw(ColorRGBA(0, 0, 0, 0.15f), IGraphics::CORNER_B, 4.0f);
-	if(m_DemolistSelectedIndex >= 0 && !m_vpFilteredDemos[m_DemolistSelectedIndex]->m_IsDir && m_vpFilteredDemos[m_DemolistSelectedIndex]->m_Valid)
-	{
-		CUIRect Left, Right, Labels;
-		MainView.VMargin(20.0f, &MainView);
-		MainView.HMargin(10.0f, &MainView);
-		MainView.VSplitMid(&Labels, &MainView);
-
-		// left side
-		Labels.HSplitTop(20.0f, &Left, &Labels);
-		Left.VSplitLeft(150.0f, &Left, &Right);
-		UI()->DoLabel(&Left, Localize("Created:"), 14.0f, TEXTALIGN_ML);
-
-		char aTimestamp[256];
-		str_timestamp_ex(m_vpFilteredDemos[m_DemolistSelectedIndex]->m_Date, aTimestamp, sizeof(aTimestamp), FORMAT_SPACE);
-
-		UI()->DoLabel(&Right, aTimestamp, 14.0f, TEXTALIGN_ML);
-		Labels.HSplitTop(5.0f, 0, &Labels);
-		Labels.HSplitTop(20.0f, &Left, &Labels);
-		Left.VSplitLeft(150.0f, &Left, &Right);
-		UI()->DoLabel(&Left, Localize("Type:"), 14.0f, TEXTALIGN_ML);
-		UI()->DoLabel(&Right, m_vpFilteredDemos[m_DemolistSelectedIndex]->m_Info.m_aType, 14.0f, TEXTALIGN_ML);
-		Labels.HSplitTop(5.0f, 0, &Labels);
-		Labels.HSplitTop(20.0f, &Left, &Labels);
-		Left.VSplitLeft(150.0f, &Left, &Right);
-		UI()->DoLabel(&Left, Localize("Length:"), 14.0f, TEXTALIGN_ML);
-		int Length = m_vpFilteredDemos[m_DemolistSelectedIndex]->Length();
-		char aBuf[64];
-		str_time((int64_t)Length * 100, TIME_HOURS, aBuf, sizeof(aBuf));
-		UI()->DoLabel(&Right, aBuf, 14.0f, TEXTALIGN_ML);
-		Labels.HSplitTop(5.0f, 0, &Labels);
-		Labels.HSplitTop(20.0f, &Left, &Labels);
-		Left.VSplitLeft(150.0f, &Left, &Right);
-		UI()->DoLabel(&Left, Localize("Version:"), 14.0f, TEXTALIGN_ML);
-		str_from_int(m_vpFilteredDemos[m_DemolistSelectedIndex]->m_Info.m_Version, aBuf);
-		UI()->DoLabel(&Right, aBuf, 14.0f, TEXTALIGN_ML);
-		Labels.HSplitTop(5.0f, 0, &Labels);
-		Labels.HSplitTop(20.0f, &Left, &Labels);
-		Left.VSplitLeft(150.0f, &Left, &Right);
-		UI()->DoLabel(&Left, Localize("Markers:"), 14.0f, TEXTALIGN_ML);
-		str_from_int(m_vpFilteredDemos[m_DemolistSelectedIndex]->NumMarkers(), aBuf);
-		UI()->DoLabel(&Right, aBuf, 14.0f, TEXTALIGN_ML);
-
-		// right side
-		Labels = MainView;
-		Labels.HSplitTop(20.0f, &Left, &Labels);
-		Left.VSplitLeft(150.0f, &Left, &Right);
-		UI()->DoLabel(&Left, Localize("Map:"), 14.0f, TEXTALIGN_ML);
-		UI()->DoLabel(&Right, m_vpFilteredDemos[m_DemolistSelectedIndex]->m_Info.m_aMapName, 14.0f, TEXTALIGN_ML);
-		Labels.HSplitTop(5.0f, 0, &Labels);
-		Labels.HSplitTop(20.0f, &Left, &Labels);
-		Left.VSplitLeft(150.0f, &Left, &Right);
-		UI()->DoLabel(&Left, Localize("Size:"), 14.0f, TEXTALIGN_ML);
-		const float Size = m_vpFilteredDemos[m_DemolistSelectedIndex]->Size() / 1024.0f;
-		if(Size > 1024)
-			str_format(aBuf, sizeof(aBuf), Localize("%.2f MiB"), Size / 1024.0f);
-		else
-			str_format(aBuf, sizeof(aBuf), Localize("%.2f KiB"), Size);
-		UI()->DoLabel(&Right, aBuf, 14.0f, TEXTALIGN_ML);
-		Labels.HSplitTop(5.0f, 0, &Labels);
-		Labels.HSplitTop(20.0f, &Left, &Labels);
-		Left.VSplitLeft(150.0f, &Left, &Right);
-		if(m_vpFilteredDemos[m_DemolistSelectedIndex]->m_MapInfo.m_Sha256 != SHA256_ZEROED)
-		{
-			UI()->DoLabel(&Left, "SHA256:", 14.0f, TEXTALIGN_ML);
-			char aSha[SHA256_MAXSTRSIZE];
-			sha256_str(m_vpFilteredDemos[m_DemolistSelectedIndex]->m_MapInfo.m_Sha256, aSha, sizeof(aSha) / 2);
-			UI()->DoLabel(&Right, aSha, Right.w > 235 ? 14.0f : 11.0f, TEXTALIGN_ML);
-		}
-		else
-		{
-			UI()->DoLabel(&Left, Localize("Crc:"), 14.0f, TEXTALIGN_ML);
-			str_format(aBuf, sizeof(aBuf), "%08x", m_vpFilteredDemos[m_DemolistSelectedIndex]->m_MapInfo.m_Crc);
-			UI()->DoLabel(&Right, aBuf, 14.0f, TEXTALIGN_ML);
-		}
-		Labels.HSplitTop(5.0f, 0, &Labels);
-		Labels.HSplitTop(20.0f, &Left, &Labels);
-
-		Left.VSplitLeft(150.0f, &Left, &Right);
-		UI()->DoLabel(&Left, Localize("Netversion:"), 14.0f, TEXTALIGN_ML);
-		UI()->DoLabel(&Right, m_vpFilteredDemos[m_DemolistSelectedIndex]->m_Info.m_aNetversion, 14.0f, TEXTALIGN_ML);
-	}
-
-	// demo list
-
-	CUIRect Headers;
-
-	ListBox.HSplitTop(ms_ListheaderHeight, &Headers, &ListBox);
-
-	struct CColumn
-	{
-		int m_ID;
+		int m_Id;
 		int m_Sort;
 		const char *m_pCaption;
 		int m_Direction;
@@ -1224,29 +1096,28 @@ void CMenus::RenderDemoList(CUIRect MainView)
 	{
 		COL_ICON = 0,
 		COL_DEMONAME,
-		COL_MARKERS,
 		COL_LENGTH,
 		COL_DATE,
 	};
 
 	static CListBox s_ListBox;
-	static CColumn s_aCols[] = {
+	static SColumn s_aCols[] = {
 		{-1, -1, "", -1, 2.0f, {0}},
 		{COL_ICON, -1, "", -1, ms_ListheaderHeight, {0}},
 		{-1, -1, "", -1, 2.0f, {0}},
 		{COL_DEMONAME, SORT_DEMONAME, Localizable("Demo"), 0, 0.0f, {0}},
 		{-1, -1, "", 1, 2.0f, {0}},
-		{COL_MARKERS, SORT_MARKERS, Localizable("Markers"), 1, 75.0f, {0}},
-		{-1, -1, "", 1, 2.0f, {0}},
 		{COL_LENGTH, SORT_LENGTH, Localizable("Length"), 1, 75.0f, {0}},
 		{-1, -1, "", 1, 2.0f, {0}},
-		{COL_DATE, SORT_DATE, Localizable("Date"), 1, 160.0f, {0}},
+		{COL_DATE, SORT_DATE, Localizable("Date"), 1, 150.0f, {0}},
 		{-1, -1, "", 1, s_ListBox.ScrollbarWidthMax(), {0}},
 	};
 
-	Headers.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.15f), IGraphics::CORNER_NONE, 0.0f);
+	CUIRect Headers, ListBox;
+	ListView.HSplitTop(ms_ListheaderHeight, &Headers, &ListBox);
+	Headers.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_T, 5.0f);
+	ListBox.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.15f), IGraphics::CORNER_B, 5.0f);
 
-	// do layout
 	for(auto &Col : s_aCols)
 	{
 		if(Col.m_Direction == -1)
@@ -1269,23 +1140,21 @@ void CMenus::RenderDemoList(CUIRect MainView)
 			Col.m_Rect = Headers;
 	}
 
-	// do headers
 	for(auto &Col : s_aCols)
 	{
-		if(DoButton_GridHeader(&Col.m_ID, Localize(Col.m_pCaption), g_Config.m_BrDemoSort == Col.m_Sort, &Col.m_Rect))
+		if(Col.m_pCaption[0] != '\0' && Col.m_Sort != -1)
 		{
-			if(Col.m_Sort != -1)
+			if(DoButton_GridHeader(&Col.m_Id, Localize(Col.m_pCaption), g_Config.m_BrDemoSort == Col.m_Sort, &Col.m_Rect))
 			{
 				if(g_Config.m_BrDemoSort == Col.m_Sort)
 					g_Config.m_BrDemoSortOrder ^= 1;
 				else
 					g_Config.m_BrDemoSortOrder = 0;
 				g_Config.m_BrDemoSort = Col.m_Sort;
+				// Don't rescan in order to keep fetched headers, just resort
+				std::stable_sort(m_vDemos.begin(), m_vDemos.end());
+				DemolistOnUpdate(false);
 			}
-
-			// Don't rescan in order to keep fetched headers, just resort
-			std::stable_sort(m_vDemos.begin(), m_vDemos.end());
-			DemolistOnUpdate(false);
 		}
 	}
 
@@ -1297,12 +1166,13 @@ void CMenus::RenderDemoList(CUIRect MainView)
 
 	s_ListBox.DoStart(ms_ListheaderHeight, m_vpFilteredDemos.size(), 1, 3, m_DemolistSelectedIndex, &ListBox, false, IGraphics::CORNER_ALL, true);
 
+	char aBuf[64];
 	int ItemIndex = -1;
-	for(auto &Item : m_vpFilteredDemos)
+	for(auto &pItem : m_vpFilteredDemos)
 	{
 		ItemIndex++;
 
-		const CListboxItem ListItem = s_ListBox.DoNextItem(&Item, ItemIndex == m_DemolistSelectedIndex);
+		const CListboxItem ListItem = s_ListBox.DoNextItem(pItem, ItemIndex == m_DemolistSelectedIndex);
 		if(!ListItem.m_Visible)
 			continue;
 
@@ -1314,22 +1184,20 @@ void CMenus::RenderDemoList(CUIRect MainView)
 			Button.h = ListItem.m_Rect.h;
 			Button.w = Col.m_Rect.w;
 
-			int ID = Col.m_ID;
-
-			if(ID == COL_ICON)
+			if(Col.m_Id == COL_ICON)
 			{
 				Button.Margin(1.0f, &Button);
 
 				const char *pIconType;
-				if(Item->m_IsLink || str_comp(Item->m_aFilename, "..") == 0)
+				if(pItem->m_IsLink || str_comp(pItem->m_aFilename, "..") == 0)
 					pIconType = FONT_ICON_FOLDER_TREE;
-				else if(Item->m_IsDir)
+				else if(pItem->m_IsDir)
 					pIconType = FONT_ICON_FOLDER;
 				else
 					pIconType = FONT_ICON_FILM;
 
 				ColorRGBA IconColor;
-				if(!Item->m_IsDir && (!Item->m_InfosLoaded || !Item->m_Valid))
+				if(!pItem->m_IsDir && (!pItem->m_InfosLoaded || !pItem->m_Valid))
 					IconColor = ColorRGBA(0.6f, 0.6f, 0.6f, 1.0f); // not loaded
 				else
 					IconColor = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
@@ -1342,32 +1210,23 @@ void CMenus::RenderDemoList(CUIRect MainView)
 				TextRender()->TextColor(TextRender()->DefaultTextColor());
 				TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
 			}
-			else if(ID == COL_DEMONAME)
+			else if(Col.m_Id == COL_DEMONAME)
 			{
 				SLabelProperties Props;
 				Props.m_MaxWidth = Button.w;
 				Props.m_EllipsisAtEnd = true;
 				Props.m_EnableWidthCheck = false;
-				UI()->DoLabel(&Button, Item->m_aName, 12.0f, TEXTALIGN_ML, Props);
+				UI()->DoLabel(&Button, pItem->m_aName, 12.0f, TEXTALIGN_ML, Props);
 			}
-			else if(ID == COL_MARKERS && !Item->m_IsDir && Item->m_InfosLoaded && Item->m_Valid)
+			else if(Col.m_Id == COL_LENGTH && !pItem->m_IsDir && pItem->m_Valid)
 			{
-				char aBuf[3];
-				str_from_int(Item->NumMarkers(), aBuf);
+				str_time((int64_t)pItem->Length() * 100, TIME_HOURS, aBuf, sizeof(aBuf));
 				Button.VMargin(4.0f, &Button);
 				UI()->DoLabel(&Button, aBuf, 12.0f, TEXTALIGN_MR);
 			}
-			else if(ID == COL_LENGTH && !Item->m_IsDir && Item->m_InfosLoaded && Item->m_Valid)
+			else if(Col.m_Id == COL_DATE && !pItem->m_IsDir)
 			{
-				char aBuf[32];
-				str_time((int64_t)Item->Length() * 100, TIME_HOURS, aBuf, sizeof(aBuf));
-				Button.VMargin(4.0f, &Button);
-				UI()->DoLabel(&Button, aBuf, 12.0f, TEXTALIGN_MR);
-			}
-			else if(ID == COL_DATE && !Item->m_IsDir)
-			{
-				char aBuf[64];
-				str_timestamp_ex(Item->m_Date, aBuf, sizeof(aBuf), FORMAT_SPACE);
+				str_timestamp_ex(pItem->m_Date, aBuf, sizeof(aBuf), FORMAT_SPACE);
 				Button.VMargin(4.0f, &Button);
 				UI()->DoLabel(&Button, aBuf, 12.0f, TEXTALIGN_MR);
 			}
@@ -1383,25 +1242,223 @@ void CMenus::RenderDemoList(CUIRect MainView)
 		DemolistOnUpdate(false);
 	}
 
-	static CButtonContainer s_RefreshButton;
-	if(DoButton_Menu(&s_RefreshButton, Localize("Refresh"), 0, &RefreshRect) || Input()->KeyPress(KEY_F5) || (Input()->KeyPress(KEY_R) && Input()->ModifierIsPressed()))
-	{
-		DemolistPopulate();
-		DemolistOnUpdate(false);
-	}
+	WasListboxItemActivated = s_ListBox.WasItemActivated();
+}
 
-	if(DoButton_CheckBox(&g_Config.m_BrDemoFetchInfo, Localize("Fetch Info"), g_Config.m_BrDemoFetchInfo, &FetchRect))
-	{
-		g_Config.m_BrDemoFetchInfo ^= 1;
-		if(g_Config.m_BrDemoFetchInfo)
-			FetchAllHeaders();
-	}
+void CMenus::RenderDemoBrowserDetails(CUIRect DetailsView)
+{
+	CUIRect Contents, Header;
+	DetailsView.HSplitTop(ms_ListheaderHeight, &Header, &Contents);
+	Contents.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.15f), IGraphics::CORNER_B, 5.0f);
+	Contents.Margin(5.0f, &Contents);
 
-	static CButtonContainer s_PlayButton;
-	if(DoButton_Menu(&s_PlayButton, (m_DemolistSelectedIndex >= 0 && m_vpFilteredDemos[m_DemolistSelectedIndex]->m_IsDir) ? Localize("Open") : Localize("Play", "Demo browser"), 0, &PlayRect) || s_ListBox.WasItemActivated() || UI()->ConsumeHotkey(CUI::HOTKEY_ENTER) || (Input()->KeyPress(KEY_P) && m_pClient->m_GameConsole.IsClosed() && !m_DemoSearchInput.IsActive()))
+	const float FontSize = 12.0f;
+	CDemoItem *pItem = m_DemolistSelectedIndex >= 0 ? m_vpFilteredDemos[m_DemolistSelectedIndex] : nullptr;
+
+	Header.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_T, 5.0f);
+	const char *pHeaderLabel;
+	if(pItem == nullptr)
+		pHeaderLabel = Localize("No demo selected");
+	else if(str_comp(pItem->m_aFilename, "..") == 0)
+		pHeaderLabel = Localize("Parent Folder");
+	else if(pItem->m_IsLink)
+		pHeaderLabel = Localize("Folder Link");
+	else if(pItem->m_IsDir)
+		pHeaderLabel = Localize("Folder");
+	else if(!FetchHeader(*pItem))
+		pHeaderLabel = Localize("Invalid Demo");
+	else
+		pHeaderLabel = Localize("Demo");
+	UI()->DoLabel(&Header, pHeaderLabel, FontSize + 2.0f, TEXTALIGN_MC);
+
+	if(pItem == nullptr || pItem->m_IsDir)
+		return;
+
+	char aBuf[256];
+	CUIRect Left, Right;
+
+	Contents.HSplitTop(18.0f, &Left, &Contents);
+	UI()->DoLabel(&Left, Localize("Created"), FontSize, TEXTALIGN_ML);
+	str_timestamp_ex(pItem->m_Date, aBuf, sizeof(aBuf), FORMAT_SPACE);
+	Contents.HSplitTop(18.0f, &Left, &Contents);
+	UI()->DoLabel(&Left, aBuf, FontSize - 1.0f, TEXTALIGN_ML);
+	Contents.HSplitTop(4.0f, nullptr, &Contents);
+
+	if(!pItem->m_Valid)
+		return;
+
+	Contents.HSplitTop(18.0f, &Left, &Contents);
+	Left.VSplitMid(&Left, &Right, 4.0f);
+	UI()->DoLabel(&Left, Localize("Type"), FontSize, TEXTALIGN_ML);
+	UI()->DoLabel(&Right, Localize("Version"), FontSize, TEXTALIGN_ML);
+	Contents.HSplitTop(18.0f, &Left, &Contents);
+	Left.VSplitMid(&Left, &Right, 4.0f);
+	UI()->DoLabel(&Left, pItem->m_Info.m_aType, FontSize - 1.0f, TEXTALIGN_ML);
+	str_from_int(pItem->m_Info.m_Version, aBuf);
+	UI()->DoLabel(&Right, aBuf, FontSize - 1.0f, TEXTALIGN_ML);
+	Contents.HSplitTop(4.0f, nullptr, &Contents);
+
+	Contents.HSplitTop(18.0f, &Left, &Contents);
+	Left.VSplitMid(&Left, &Right, 4.0f);
+	UI()->DoLabel(&Left, Localize("Length"), FontSize, TEXTALIGN_ML);
+	UI()->DoLabel(&Right, Localize("Markers"), FontSize, TEXTALIGN_ML);
+	Contents.HSplitTop(18.0f, &Left, &Contents);
+	Left.VSplitMid(&Left, &Right, 4.0f);
+	str_time((int64_t)pItem->Length() * 100, TIME_HOURS, aBuf, sizeof(aBuf));
+	UI()->DoLabel(&Left, aBuf, FontSize - 1.0f, TEXTALIGN_ML);
+	str_from_int(pItem->NumMarkers(), aBuf);
+	UI()->DoLabel(&Right, aBuf, FontSize - 1.0f, TEXTALIGN_ML);
+	Contents.HSplitTop(4.0f, nullptr, &Contents);
+
+	Contents.HSplitTop(18.0f, &Left, &Contents);
+	UI()->DoLabel(&Left, Localize("Netversion"), FontSize, TEXTALIGN_ML);
+	Contents.HSplitTop(18.0f, &Left, &Contents);
+	UI()->DoLabel(&Left, pItem->m_Info.m_aNetversion, FontSize - 1.0f, TEXTALIGN_ML);
+	Contents.HSplitTop(16.0f, nullptr, &Contents);
+
+	Contents.HSplitTop(18.0f, &Left, &Contents);
+	UI()->DoLabel(&Left, Localize("Map"), FontSize, TEXTALIGN_ML);
+	Contents.HSplitTop(18.0f, &Left, &Contents);
+	UI()->DoLabel(&Left, pItem->m_Info.m_aMapName, FontSize - 1.0f, TEXTALIGN_ML);
+	Contents.HSplitTop(4.0f, nullptr, &Contents);
+
+	Contents.HSplitTop(18.0f, &Left, &Contents);
+	UI()->DoLabel(&Left, Localize("Size"), FontSize, TEXTALIGN_ML);
+	Contents.HSplitTop(18.0f, &Left, &Contents);
+	const float Size = pItem->Size() / 1024.0f;
+	if(Size == 0.0f)
+		str_copy(aBuf, Localize("map not included", "Demo details"));
+	else if(Size > 1024)
+		str_format(aBuf, sizeof(aBuf), Localize("%.2f MiB"), Size / 1024.0f);
+	else
+		str_format(aBuf, sizeof(aBuf), Localize("%.2f KiB"), Size);
+	UI()->DoLabel(&Left, aBuf, FontSize - 1.0f, TEXTALIGN_ML);
+	Contents.HSplitTop(4.0f, nullptr, &Contents);
+
+	Contents.HSplitTop(18.0f, &Left, &Contents);
+	if(pItem->m_MapInfo.m_Sha256 != SHA256_ZEROED)
 	{
-		if(m_DemolistSelectedIndex >= 0)
+		UI()->DoLabel(&Left, "SHA256", FontSize, TEXTALIGN_ML);
+		Contents.HSplitTop(18.0f, &Left, &Contents);
+		char aSha[SHA256_MAXSTRSIZE];
+		sha256_str(pItem->m_MapInfo.m_Sha256, aSha, sizeof(aSha));
+		SLabelProperties Props;
+		Props.m_MaxWidth = Left.w;
+		Props.m_EllipsisAtEnd = true;
+		Props.m_EnableWidthCheck = false;
+		UI()->DoLabel(&Left, aSha, FontSize - 1.0f, TEXTALIGN_ML, Props);
+	}
+	else
+	{
+		UI()->DoLabel(&Left, "CRC32", FontSize, TEXTALIGN_ML);
+		Contents.HSplitTop(18.0f, &Left, &Contents);
+		str_format(aBuf, sizeof(aBuf), "%08x", pItem->m_MapInfo.m_Crc);
+		UI()->DoLabel(&Left, aBuf, FontSize - 1.0f, TEXTALIGN_ML);
+	}
+	Contents.HSplitTop(4.0f, nullptr, &Contents);
+}
+
+void CMenus::RenderDemoBrowserButtons(CUIRect ButtonsView, bool WasListboxItemActivated)
+{
+	const auto &&SetIconMode = [&](bool Enable) {
+		if(Enable)
 		{
+			TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
+			TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
+		}
+		else
+		{
+			TextRender()->SetRenderFlags(0);
+			TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
+		}
+	};
+
+	CUIRect ButtonBarTop, ButtonBarBottom;
+	ButtonsView.HSplitTop(5.0f, nullptr, &ButtonsView);
+	ButtonsView.HSplitMid(&ButtonBarTop, &ButtonBarBottom, 5.0f);
+
+	// quick search
+	{
+		SetIconMode(true);
+		CUIRect DemoSearch, SearchIcon;
+		ButtonBarTop.VSplitLeft(ButtonBarBottom.h * 21.0f, &DemoSearch, &ButtonBarTop);
+		ButtonBarTop.VSplitLeft(ButtonBarTop.h / 2.0f, nullptr, &ButtonBarTop);
+		DemoSearch.VSplitLeft(TextRender()->TextWidth(14.0f, FONT_ICON_MAGNIFYING_GLASS), &SearchIcon, &DemoSearch);
+		DemoSearch.VSplitLeft(5.0f, nullptr, &DemoSearch);
+		UI()->DoLabel(&SearchIcon, FONT_ICON_MAGNIFYING_GLASS, 14.0f, TEXTALIGN_ML);
+		SetIconMode(false);
+		m_DemoSearchInput.SetEmptyText(Localize("Search"));
+
+		if(Input()->KeyPress(KEY_F) && Input()->ModifierIsPressed())
+		{
+			UI()->SetActiveItem(&m_DemoSearchInput);
+			m_DemoSearchInput.SelectAll();
+		}
+		if(UI()->DoClearableEditBox(&m_DemoSearchInput, &DemoSearch, 12.0f))
+		{
+			RefreshFilteredDemos();
+			DemolistOnUpdate(false);
+		}
+	}
+
+	// refresh button
+	{
+		CUIRect RefreshButton;
+		ButtonBarBottom.VSplitLeft(ButtonBarBottom.h * 3.0f, &RefreshButton, &ButtonBarBottom);
+		ButtonBarBottom.VSplitLeft(ButtonBarBottom.h / 2.0f, nullptr, &ButtonBarBottom);
+		SetIconMode(true);
+		static CButtonContainer s_RefreshButton;
+		if(DoButton_Menu(&s_RefreshButton, FONT_ICON_ARROW_ROTATE_RIGHT, 0, &RefreshButton) || Input()->KeyPress(KEY_F5) || (Input()->KeyPress(KEY_R) && Input()->ModifierIsPressed()))
+		{
+			SetIconMode(false);
+			DemolistPopulate();
+			DemolistOnUpdate(false);
+		}
+		SetIconMode(false);
+	}
+
+	// fetch info checkbox
+	{
+		CUIRect FetchInfo;
+		ButtonBarBottom.VSplitLeft(ButtonBarBottom.h * 7.0f, &FetchInfo, &ButtonBarBottom);
+		ButtonBarBottom.VSplitLeft(ButtonBarBottom.h / 2.0f, nullptr, &ButtonBarBottom);
+		if(DoButton_CheckBox(&g_Config.m_BrDemoFetchInfo, Localize("Fetch Info"), g_Config.m_BrDemoFetchInfo, &FetchInfo))
+		{
+			g_Config.m_BrDemoFetchInfo ^= 1;
+			if(g_Config.m_BrDemoFetchInfo)
+				FetchAllHeaders();
+		}
+	}
+
+	// demos directory button
+	{
+		CUIRect DemosDirectoryButton;
+		ButtonBarBottom.VSplitLeft(ButtonBarBottom.h * 10.0f, &DemosDirectoryButton, &ButtonBarBottom);
+		ButtonBarBottom.VSplitLeft(ButtonBarBottom.h / 2.0f, nullptr, &ButtonBarBottom);
+		static CButtonContainer s_DemosDirectoryButton;
+		if(DoButton_Menu(&s_DemosDirectoryButton, Localize("Demos directory"), 0, &DemosDirectoryButton))
+		{
+			char aBuf[IO_MAX_PATH_LENGTH];
+			Storage()->GetCompletePath(m_DemolistSelectedIndex >= 0 ? m_vpFilteredDemos[m_DemolistSelectedIndex]->m_StorageType : IStorage::TYPE_SAVE, m_aCurrentDemoFolder[0] == '\0' ? "demos" : m_aCurrentDemoFolder, aBuf, sizeof(aBuf));
+			if(!open_file(aBuf))
+			{
+				dbg_msg("menus", "couldn't open file '%s'", aBuf);
+			}
+		}
+		GameClient()->m_Tooltips.DoToolTip(&s_DemosDirectoryButton, &DemosDirectoryButton, Localize("Open the directory that contains the demo files"));
+	}
+
+	// play/open button
+	if(m_DemolistSelectedIndex >= 0)
+	{
+		CUIRect PlayButton;
+		ButtonBarBottom.VSplitRight(ButtonBarBottom.h * 3.0f, &ButtonBarBottom, &PlayButton);
+		ButtonBarBottom.VSplitRight(ButtonBarBottom.h, &ButtonBarBottom, nullptr);
+		SetIconMode(true);
+		static CButtonContainer s_PlayButton;
+		if(DoButton_Menu(&s_PlayButton, (m_DemolistSelectedIndex >= 0 && m_vpFilteredDemos[m_DemolistSelectedIndex]->m_IsDir) ? FONT_ICON_FOLDER_OPEN : FONT_ICON_PLAY, 0, &PlayButton) || WasListboxItemActivated || UI()->ConsumeHotkey(CUI::HOTKEY_ENTER) || (Input()->KeyPress(KEY_P) && m_pClient->m_GameConsole.IsClosed() && !m_DemoSearchInput.IsActive()))
+		{
+			SetIconMode(false);
 			if(m_vpFilteredDemos[m_DemolistSelectedIndex]->m_IsDir) // folder
 			{
 				m_DemoSearchInput.Clear();
@@ -1451,93 +1508,75 @@ void CMenus::RenderDemoList(CUIRect MainView)
 				}
 			}
 		}
-	}
+		SetIconMode(false);
 
-	static CButtonContainer s_DirectoryButtonID;
-	if(DoButton_Menu(&s_DirectoryButtonID, Localize("Demos directory"), 0, &DirectoryButton))
-	{
-		char aBuf[IO_MAX_PATH_LENGTH];
-		Storage()->GetCompletePath(m_DemolistSelectedIndex >= 0 ? m_vpFilteredDemos[m_DemolistSelectedIndex]->m_StorageType : IStorage::TYPE_SAVE, m_aCurrentDemoFolder[0] == '\0' ? "demos" : m_aCurrentDemoFolder, aBuf, sizeof(aBuf));
-		if(!open_file(aBuf))
+		if(m_aCurrentDemoFolder[0] != '\0')
 		{
-			dbg_msg("menus", "couldn't open file '%s'", aBuf);
-		}
-	}
-	GameClient()->m_Tooltips.DoToolTip(&s_DirectoryButtonID, &DirectoryButton, Localize("Open the directory that contains the demo files"));
-
-	if(m_DemolistSelectedIndex >= 0 && m_aCurrentDemoFolder[0] != '\0')
-	{
-		if(str_comp(m_vpFilteredDemos[m_DemolistSelectedIndex]->m_aFilename, "..") != 0 && m_vpFilteredDemos[m_DemolistSelectedIndex]->m_StorageType == IStorage::TYPE_SAVE)
-		{
-			static CButtonContainer s_DeleteButton;
-			if(DoButton_Menu(&s_DeleteButton, Localize("Delete"), 0, &DeleteRect) || UI()->ConsumeHotkey(CUI::HOTKEY_DELETE) || (Input()->KeyPress(KEY_D) && m_pClient->m_GameConsole.IsClosed() && !m_DemoSearchInput.IsActive()))
+			if(str_comp(m_vpFilteredDemos[m_DemolistSelectedIndex]->m_aFilename, "..") != 0 && m_vpFilteredDemos[m_DemolistSelectedIndex]->m_StorageType == IStorage::TYPE_SAVE)
 			{
-				char aBuf[128 + IO_MAX_PATH_LENGTH];
-				str_format(aBuf, sizeof(aBuf), m_vpFilteredDemos[m_DemolistSelectedIndex]->m_IsDir ? Localize("Are you sure that you want to delete the folder '%s'?") : Localize("Are you sure that you want to delete the demo '%s'?"), m_vpFilteredDemos[m_DemolistSelectedIndex]->m_aFilename);
-				PopupConfirm(m_vpFilteredDemos[m_DemolistSelectedIndex]->m_IsDir ? Localize("Delete folder") : Localize("Delete demo"), aBuf, Localize("Yes"), Localize("No"), m_vpFilteredDemos[m_DemolistSelectedIndex]->m_IsDir ? &CMenus::PopupConfirmDeleteFolder : &CMenus::PopupConfirmDeleteDemo);
-				return;
-			}
+				// rename button
+				CUIRect RenameButton;
+				ButtonBarBottom.VSplitRight(ButtonBarBottom.h * 3.0f, &ButtonBarBottom, &RenameButton);
+				ButtonBarBottom.VSplitRight(ButtonBarBottom.h / 2.0f, &ButtonBarBottom, nullptr);
+				SetIconMode(true);
+				static CButtonContainer s_RenameButton;
+				if(DoButton_Menu(&s_RenameButton, FONT_ICON_PENCIL, 0, &RenameButton))
+				{
+					SetIconMode(false);
+					m_Popup = POPUP_RENAME_DEMO;
+					if(m_vpFilteredDemos[m_DemolistSelectedIndex]->m_IsDir)
+					{
+						m_DemoRenameInput.Set(m_vpFilteredDemos[m_DemolistSelectedIndex]->m_aFilename);
+					}
+					else
+					{
+						char aNameWithoutExt[IO_MAX_PATH_LENGTH];
+						fs_split_file_extension(m_vpFilteredDemos[m_DemolistSelectedIndex]->m_aFilename, aNameWithoutExt, sizeof(aNameWithoutExt));
+						m_DemoRenameInput.Set(aNameWithoutExt);
+					}
+					UI()->SetActiveItem(&m_DemoRenameInput);
+					return;
+				}
 
-			static CButtonContainer s_RenameButton;
-			if(DoButton_Menu(&s_RenameButton, Localize("Rename"), 0, &RenameRect))
-			{
-				m_Popup = POPUP_RENAME_DEMO;
-				if(m_vpFilteredDemos[m_DemolistSelectedIndex]->m_IsDir)
+				// delete button
+				static CButtonContainer s_DeleteButton;
+				CUIRect DeleteButton;
+				ButtonBarBottom.VSplitRight(ButtonBarBottom.h * 3.0f, &ButtonBarBottom, &DeleteButton);
+				ButtonBarBottom.VSplitRight(ButtonBarBottom.h / 2.0f, &ButtonBarBottom, nullptr);
+				if(DoButton_Menu(&s_DeleteButton, FONT_ICON_TRASH, 0, &DeleteButton) || UI()->ConsumeHotkey(CUI::HOTKEY_DELETE) || (Input()->KeyPress(KEY_D) && m_pClient->m_GameConsole.IsClosed() && !m_DemoSearchInput.IsActive()))
 				{
-					m_DemoRenameInput.Set(m_vpFilteredDemos[m_DemolistSelectedIndex]->m_aFilename);
+					SetIconMode(false);
+					char aBuf[128 + IO_MAX_PATH_LENGTH];
+					str_format(aBuf, sizeof(aBuf), m_vpFilteredDemos[m_DemolistSelectedIndex]->m_IsDir ? Localize("Are you sure that you want to delete the folder '%s'?") : Localize("Are you sure that you want to delete the demo '%s'?"), m_vpFilteredDemos[m_DemolistSelectedIndex]->m_aFilename);
+					PopupConfirm(m_vpFilteredDemos[m_DemolistSelectedIndex]->m_IsDir ? Localize("Delete folder") : Localize("Delete demo"), aBuf, Localize("Yes"), Localize("No"), m_vpFilteredDemos[m_DemolistSelectedIndex]->m_IsDir ? &CMenus::PopupConfirmDeleteFolder : &CMenus::PopupConfirmDeleteDemo);
+					return;
 				}
-				else
-				{
-					char aNameWithoutExt[IO_MAX_PATH_LENGTH];
-					fs_split_file_extension(m_vpFilteredDemos[m_DemolistSelectedIndex]->m_aFilename, aNameWithoutExt, sizeof(aNameWithoutExt));
-					m_DemoRenameInput.Set(aNameWithoutExt);
-				}
-				UI()->SetActiveItem(&m_DemoRenameInput);
-				return;
+				SetIconMode(false);
 			}
-		}
 
 #if defined(CONF_VIDEORECORDER)
-		if(!m_vpFilteredDemos[m_DemolistSelectedIndex]->m_IsDir)
-		{
-			static CButtonContainer s_RenderButton;
-			if(DoButton_Menu(&s_RenderButton, Localize("Render"), 0, &RenderRect) || (Input()->KeyPress(KEY_R) && m_pClient->m_GameConsole.IsClosed() && !m_DemoSearchInput.IsActive()))
+			// render demo button
+			if(!m_vpFilteredDemos[m_DemolistSelectedIndex]->m_IsDir)
 			{
-				m_Popup = POPUP_RENDER_DEMO;
-				m_StartPaused = false;
-				char aNameWithoutExt[IO_MAX_PATH_LENGTH];
-				fs_split_file_extension(m_vpFilteredDemos[m_DemolistSelectedIndex]->m_aFilename, aNameWithoutExt, sizeof(aNameWithoutExt));
-				m_DemoRenderInput.Set(aNameWithoutExt);
-				UI()->SetActiveItem(&m_DemoRenderInput);
-				return;
+				CUIRect RenderButton;
+				ButtonBarTop.VSplitRight(ButtonBarBottom.h * 3.0f, &ButtonBarTop, &RenderButton);
+				ButtonBarTop.VSplitRight(ButtonBarBottom.h, &ButtonBarTop, nullptr);
+				SetIconMode(true);
+				static CButtonContainer s_RenderButton;
+				if(DoButton_Menu(&s_RenderButton, FONT_ICON_VIDEO, 0, &RenderButton) || (Input()->KeyPress(KEY_R) && m_pClient->m_GameConsole.IsClosed() && !m_DemoSearchInput.IsActive()))
+				{
+					SetIconMode(false);
+					m_Popup = POPUP_RENDER_DEMO;
+					m_StartPaused = false;
+					char aNameWithoutExt[IO_MAX_PATH_LENGTH];
+					fs_split_file_extension(m_vpFilteredDemos[m_DemolistSelectedIndex]->m_aFilename, aNameWithoutExt, sizeof(aNameWithoutExt));
+					m_DemoRenderInput.Set(aNameWithoutExt);
+					UI()->SetActiveItem(&m_DemoRenderInput);
+					return;
+				}
+				SetIconMode(false);
 			}
-		}
 #endif
-	}
-
-	UI()->DoLabel(&LabelRect, aFooterLabel, 14.0f, TEXTALIGN_ML);
-
-	// render quick search
-	{
-		TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
-		TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
-
-		UI()->DoLabel(&DemoSearch, FONT_ICON_MAGNIFYING_GLASS, 16.0f, TEXTALIGN_ML);
-		TextRender()->SetRenderFlags(0);
-		TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
-		DemoSearch.VSplitLeft(TextRender()->TextWidth(16.0f, FONT_ICON_MAGNIFYING_GLASS), nullptr, &DemoSearch);
-		DemoSearch.VSplitLeft(5.0f, 0, &DemoSearch);
-		m_DemoSearchInput.SetEmptyText(Localize("Search"));
-
-		if(Input()->KeyPress(KEY_F) && Input()->ModifierIsPressed())
-		{
-			UI()->SetActiveItem(&m_DemoSearchInput);
-			m_DemoSearchInput.SelectAll();
-		}
-		if(UI()->DoClearableEditBox(&m_DemoSearchInput, &DemoSearch, 12.0f))
-		{
-			RefreshFilteredDemos();
-			DemolistOnUpdate(false);
 		}
 	}
 }

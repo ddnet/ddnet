@@ -115,8 +115,10 @@ MAYBE_UNUSED static const char *FONT_ICON_KEYBOARD = "\xE2\x8C\xA8";
 MAYBE_UNUSED static const char *FONT_ICON_ELLIPSIS = "\xEF\x85\x81";
 
 MAYBE_UNUSED static const char *FONT_ICON_FOLDER = "\xEF\x81\xBB";
+MAYBE_UNUSED static const char *FONT_ICON_FOLDER_OPEN = "\xEF\x81\xBC";
 MAYBE_UNUSED static const char *FONT_ICON_FOLDER_TREE = "\xEF\xA0\x82";
 MAYBE_UNUSED static const char *FONT_ICON_FILM = "\xEF\x80\x88";
+MAYBE_UNUSED static const char *FONT_ICON_VIDEO = "\xEF\x80\xBD";
 MAYBE_UNUSED static const char *FONT_ICON_MAP = "\xEF\x89\xB9";
 MAYBE_UNUSED static const char *FONT_ICON_IMAGE = "\xEF\x80\xBE";
 MAYBE_UNUSED static const char *FONT_ICON_MUSIC = "\xEF\x80\x81";
