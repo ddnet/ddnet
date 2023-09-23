@@ -13,6 +13,8 @@ enum
 	MAX_TIMELINE_MARKERS = 64
 };
 
+static const unsigned char gs_aHeaderMarker[7] = {'T', 'W', 'D', 'E', 'M', 'O', 0};
+
 constexpr int g_DemoSpeeds = 22;
 extern const double g_aSpeeds[g_DemoSpeeds];
 
@@ -34,6 +36,16 @@ struct CDemoHeader
 	char m_aType[8];
 	unsigned char m_aLength[sizeof(int32_t)];
 	char m_aTimestamp[20];
+
+	bool Valid() const
+	{
+		// Check marker and ensure that strings are zero-terminated and valid UTF-8.
+		return mem_comp(m_aMarker, gs_aHeaderMarker, sizeof(gs_aHeaderMarker)) == 0 &&
+		       mem_has_null(m_aNetversion, sizeof(m_aNetversion)) && str_utf8_check(m_aNetversion) &&
+		       mem_has_null(m_aMapName, sizeof(m_aMapName)) && str_utf8_check(m_aMapName) &&
+		       mem_has_null(m_aType, sizeof(m_aType)) && str_utf8_check(m_aType) &&
+		       mem_has_null(m_aTimestamp, sizeof(m_aTimestamp)) && str_utf8_check(m_aTimestamp);
+	}
 };
 
 struct CTimelineMarkers

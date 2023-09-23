@@ -23,7 +23,6 @@ const CUuid SHA256_EXTENSION =
 	{{0x6b, 0xe6, 0xda, 0x4a, 0xce, 0xbd, 0x38, 0x0c,
 		0x9b, 0x5b, 0x12, 0x89, 0xc8, 0x42, 0xd7, 0x80}};
 
-static const unsigned char gs_aHeaderMarker[7] = {'T', 'W', 'D', 'E', 'M', 'O', 0};
 static const unsigned char gs_CurVersion = 6;
 static const unsigned char gs_OldVersion = 3;
 static const unsigned char gs_Sha256Version = 6;
@@ -749,13 +748,12 @@ int CDemoPlayer::Load(class IStorage *pStorage, class IConsole *pConsole, const 
 	m_LastSnapshotDataSize = -1;
 
 	// read the header
-	io_read(m_File, &m_Info.m_Header, sizeof(m_Info.m_Header));
-	if(mem_comp(m_Info.m_Header.m_aMarker, gs_aHeaderMarker, sizeof(gs_aHeaderMarker)) != 0)
+	if(io_read(m_File, &m_Info.m_Header, sizeof(m_Info.m_Header)) != sizeof(m_Info.m_Header) || !m_Info.m_Header.Valid())
 	{
 		if(m_pConsole)
 		{
 			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "'%s' is not a demo file", pFilename);
+			str_format(aBuf, sizeof(aBuf), "'%s' is not a valid demo file", pFilename);
 			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_player", aBuf);
 		}
 		io_close(m_File);
@@ -1112,18 +1110,25 @@ void CDemoPlayer::GetDemoName(char *pBuffer, int BufferSize) const
 
 bool CDemoPlayer::GetDemoInfo(class IStorage *pStorage, const char *pFilename, int StorageType, CDemoHeader *pDemoHeader, CTimelineMarkers *pTimelineMarkers, CMapInfo *pMapInfo) const
 {
-	if(!pDemoHeader || !pTimelineMarkers || !pMapInfo)
-		return false;
-
 	mem_zero(pDemoHeader, sizeof(CDemoHeader));
 	mem_zero(pTimelineMarkers, sizeof(CTimelineMarkers));
+	mem_zero(pMapInfo, sizeof(CMapInfo));
 
 	IOHANDLE File = pStorage->OpenFile(pFilename, IOFLAG_READ, StorageType);
 	if(!File)
 		return false;
 
-	io_read(File, pDemoHeader, sizeof(CDemoHeader));
-	io_read(File, pTimelineMarkers, sizeof(CTimelineMarkers));
+	if(io_read(File, pDemoHeader, sizeof(CDemoHeader)) != sizeof(CDemoHeader) || !pDemoHeader->Valid() || pDemoHeader->m_Version < gs_OldVersion)
+	{
+		mem_zero(pDemoHeader, sizeof(CDemoHeader));
+		io_close(File);
+		return false;
+	}
+
+	if(pDemoHeader->m_Version > gs_OldVersion)
+	{
+		io_read(File, pTimelineMarkers, sizeof(CTimelineMarkers));
+	}
 
 	str_copy(pMapInfo->m_aName, pDemoHeader->m_aMapName);
 	pMapInfo->m_Crc = bytes_be_to_uint(pDemoHeader->m_aMapCrc);
@@ -1150,7 +1155,7 @@ bool CDemoPlayer::GetDemoInfo(class IStorage *pStorage, const char *pFilename, i
 	pMapInfo->m_Size = bytes_be_to_uint(pDemoHeader->m_aMapSize);
 
 	io_close(File);
-	return !(mem_comp(pDemoHeader->m_aMarker, gs_aHeaderMarker, sizeof(gs_aHeaderMarker)) || pDemoHeader->m_Version < gs_OldVersion);
+	return true;
 }
 
 int CDemoPlayer::GetDemoType() const
