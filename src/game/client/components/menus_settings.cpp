@@ -3127,8 +3127,8 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	static CButtonContainer s_BackgroundEntitiesReloadButton;
 	if(DoButton_Menu(&s_BackgroundEntitiesReloadButton, Localize("Reload"), 0, &Button))
 	{
-		if(str_comp(g_Config.m_ClBackgroundEntities, m_pClient->m_BackGround.MapName()) != 0)
-			m_pClient->m_BackGround.LoadBackground();
+		if(str_comp(g_Config.m_ClBackgroundEntities, m_pClient->m_Background.MapName()) != 0)
+			m_pClient->m_Background.LoadBackground();
 	}
 
 	Background.HSplitTop(20.0f, &Button, &Background);
@@ -3140,7 +3140,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 			g_Config.m_ClBackgroundEntities[0] = '\0';
 		else
 			str_copy(g_Config.m_ClBackgroundEntities, CURRENT_MAP);
-		m_pClient->m_BackGround.LoadBackground();
+		m_pClient->m_Background.LoadBackground();
 	}
 
 	Background.HSplitTop(20.0f, &Button, &Background);
