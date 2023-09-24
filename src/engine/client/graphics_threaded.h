@@ -819,7 +819,7 @@ class CGraphics_Threaded : public IEngineGraphics
 	CTextureHandle m_InvalidTexture;
 
 	std::vector<int> m_vTextureIndices;
-	int m_FirstFreeTexture;
+	size_t m_FirstFreeTexture;
 	int m_TextureMemoryUsage;
 
 	std::vector<uint8_t> m_vSpriteHelper;
