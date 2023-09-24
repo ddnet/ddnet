@@ -85,6 +85,9 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	m_SendCore = CCharacterCore();
 	m_ReckoningCore = CCharacterCore();
 
+	m_ReckoningCore.Init(nullptr, Collision());
+	m_ReckoningCore.m_Tuning = *Tuning();
+
 	GameServer()->m_World.InsertEntity(this);
 	m_Alive = true;
 
@@ -785,9 +788,6 @@ void CCharacter::TickDeferred()
 {
 	// advance the dummy
 	{
-		CWorldCore TempWorld;
-		m_ReckoningCore.Init(&TempWorld, Collision(), &Teams()->m_Core, m_pTeleOuts);
-		m_ReckoningCore.m_Id = m_pPlayer->GetCID();
 		m_ReckoningCore.Tick(false);
 		m_ReckoningCore.Move();
 		m_ReckoningCore.Quantize();
@@ -1915,9 +1915,9 @@ void CCharacter::HandleTuneLayer()
 	m_TuneZone = Collision()->IsTune(CurrentIndex);
 
 	if(m_TuneZone)
-		m_Core.m_Tuning = TuningList()[m_TuneZone]; // throw tunings from specific zone into gamecore
+		m_Core.m_Tuning = m_ReckoningCore.m_Tuning = TuningList()[m_TuneZone]; // throw tunings from specific zone into gamecore
 	else
-		m_Core.m_Tuning = *Tuning();
+		m_Core.m_Tuning = m_ReckoningCore.m_Tuning = *Tuning();
 
 	if(m_TuneZone != m_TuneZoneOld) // don't send tunigs all the time
 	{
