@@ -141,9 +141,9 @@ public:
 	CItems m_Items;
 	CMapImages m_MapImages;
 
-	CMapLayers m_MapLayersBackGround = CMapLayers{CMapLayers::TYPE_BACKGROUND};
-	CMapLayers m_MapLayersForeGround = CMapLayers{CMapLayers::TYPE_FOREGROUND};
-	CBackground m_BackGround;
+	CMapLayers m_MapLayersBackground = CMapLayers{CMapLayers::TYPE_BACKGROUND};
+	CMapLayers m_MapLayersForeground = CMapLayers{CMapLayers::TYPE_FOREGROUND};
+	CBackground m_Background;
 	CMenuBackground m_MenuBackground;
 
 	CMapSounds m_MapSounds;
