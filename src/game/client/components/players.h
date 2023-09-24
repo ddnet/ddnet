@@ -11,8 +11,6 @@ class CPlayers : public CComponent
 {
 	friend class CGhost;
 
-	CTeeRenderInfo m_RenderInfoSpec;
-	CTeeRenderInfo m_aRenderInfo[MAX_CLIENTS];
 	void RenderHand(const CTeeRenderInfo *pInfo, vec2 CenterPos, vec2 Dir, float AngleOffset, vec2 PostRotOffset, float Alpha = 1.0f);
 	void RenderPlayer(
 		const CNetObj_Character *pPrevChar,
