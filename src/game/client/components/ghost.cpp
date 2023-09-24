@@ -608,7 +608,7 @@ void CGhost::OnConsoleInit()
 	m_pGhostLoader = Kernel()->RequestInterface<IGhostLoader>();
 	m_pGhostRecorder = Kernel()->RequestInterface<IGhostRecorder>();
 
-	Console()->Register("gplay", "", CFGFLAG_CLIENT, ConGPlay, this, "");
+	Console()->Register("gplay", "", CFGFLAG_CLIENT, ConGPlay, this, "Start playback of ghosts");
 }
 
 void CGhost::OnMessage(int MsgType, void *pRawMsg)
