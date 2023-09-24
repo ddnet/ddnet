@@ -176,7 +176,7 @@ public:
 
 	int GetLastRaceTick();
 
-	void RefindSkin();
+	void RefindSkins();
 };
 
 #endif

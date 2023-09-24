@@ -3358,7 +3358,7 @@ void CGameClient::RefindSkins()
 			Client.m_SkinInfo.m_ColorableRenderSkin.Reset();
 		}
 	}
-	m_Ghost.RefindSkin();
+	m_Ghost.RefindSkins();
 	m_Chat.RefindSkins();
 	m_KillMessages.RefindSkins();
 }
