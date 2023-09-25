@@ -264,18 +264,14 @@ void CGraphics_Threaded::LinesDraw(const CLineItem *pArray, int Num)
 
 IGraphics::CTextureHandle CGraphics_Threaded::FindFreeTextureIndex()
 {
-	int Tex = m_FirstFreeTexture;
-	if(Tex == -1)
+	const size_t CurSize = m_vTextureIndices.size();
+	if(m_FirstFreeTexture == CurSize)
 	{
-		const size_t CurSize = m_vTextureIndices.size();
 		m_vTextureIndices.resize(CurSize * 2);
-		for(size_t i = 0; i < CurSize - 1; ++i)
-		{
+		for(size_t i = 0; i < CurSize; ++i)
 			m_vTextureIndices[CurSize + i] = CurSize + i + 1;
-		}
-		m_vTextureIndices.back() = -1;
-		Tex = CurSize;
 	}
+	const size_t Tex = m_FirstFreeTexture;
 	m_FirstFreeTexture = m_vTextureIndices[Tex];
 	m_vTextureIndices[Tex] = -1;
 	return CreateTextureHandle(Tex);
@@ -284,6 +280,8 @@ IGraphics::CTextureHandle CGraphics_Threaded::FindFreeTextureIndex()
 void CGraphics_Threaded::FreeTextureIndex(CTextureHandle *pIndex)
 {
 	dbg_assert(pIndex->IsValid(), "Cannot free invalid texture index");
+	dbg_assert(m_vTextureIndices[pIndex->Id()] == -1, "Cannot free already freed texture index");
+
 	m_vTextureIndices[pIndex->Id()] = m_FirstFreeTexture;
 	m_FirstFreeTexture = pIndex->Id();
 	pIndex->Invalidate();
@@ -2598,9 +2596,8 @@ int CGraphics_Threaded::Init()
 	// init textures
 	m_FirstFreeTexture = 0;
 	m_vTextureIndices.resize(CCommandBuffer::MAX_TEXTURES);
-	for(size_t i = 0; i < m_vTextureIndices.size() - 1; ++i)
+	for(size_t i = 0; i < m_vTextureIndices.size(); ++i)
 		m_vTextureIndices[i] = i + 1;
-	m_vTextureIndices.back() = -1;
 
 	m_FirstFreeVertexArrayInfo = -1;
 	m_FirstFreeBufferObjectIndex = -1;

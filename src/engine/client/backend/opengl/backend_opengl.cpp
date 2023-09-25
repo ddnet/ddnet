@@ -729,7 +729,7 @@ void CCommandProcessorFragment_OpenGL::TextureCreate(int Slot, int Width, int He
 		glGetIntegerv(GL_MAX_TEXTURE_SIZE, &m_MaxTexSize);
 	}
 
-	if(Slot >= (int)m_vTextures.size())
+	while(Slot >= (int)m_vTextures.size())
 		m_vTextures.resize(m_vTextures.size() * 2);
 
 	m_vTextures[Slot].m_ResizeWidth = -1.f;
