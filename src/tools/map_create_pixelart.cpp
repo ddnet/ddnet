@@ -330,9 +330,7 @@ bool LoadPNG(CImageInfo *pImg, const char *pFilename)
 
 	uint8_t *pImgBuffer = NULL;
 	EImageFormat ImageFormat;
-	int PngliteIncompatible;
-
-	if(!LoadPNG(ImageByteBuffer, pFilename, PngliteIncompatible, pImg->m_Width, pImg->m_Height, pImgBuffer, ImageFormat))
+	if(!LoadPNG(ImageByteBuffer, pFilename, pImg->m_Width, pImg->m_Height, pImgBuffer, ImageFormat))
 	{
 		dbg_msg("map_create_pixelart", "ERROR: Unable to load a valid PNG from file %s", pFilename);
 		return false;

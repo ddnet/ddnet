@@ -83,53 +83,7 @@ static void LibPNGDeleteReadStruct(png_structp pPNGStruct, png_infop pPNGInfo)
 	png_destroy_read_struct(&pPNGStruct, nullptr, nullptr);
 }
 
-static int PngliteIncompatibility(png_structp pPNGStruct, png_infop pPNGInfo)
-{
-	int ColorType = png_get_color_type(pPNGStruct, pPNGInfo);
-	int BitDepth = png_get_bit_depth(pPNGStruct, pPNGInfo);
-	int InterlaceType = png_get_interlace_type(pPNGStruct, pPNGInfo);
-	int Result = 0;
-	switch(ColorType)
-	{
-	case PNG_COLOR_TYPE_GRAY:
-	case PNG_COLOR_TYPE_RGB:
-	case PNG_COLOR_TYPE_RGB_ALPHA:
-	case PNG_COLOR_TYPE_GRAY_ALPHA:
-		break;
-	default:
-		log_debug("png", "color type %d unsupported by pnglite", ColorType);
-		Result |= PNGLITE_COLOR_TYPE;
-	}
-
-	switch(BitDepth)
-	{
-	case 8:
-	case 16:
-		break;
-	default:
-		log_debug("png", "bit depth %d unsupported by pnglite", BitDepth);
-		Result |= PNGLITE_BIT_DEPTH;
-	}
-
-	if(InterlaceType != PNG_INTERLACE_NONE)
-	{
-		log_debug("png", "interlace type %d unsupported by pnglite", InterlaceType);
-		Result |= PNGLITE_INTERLACE_TYPE;
-	}
-	if(png_get_compression_type(pPNGStruct, pPNGInfo) != PNG_COMPRESSION_TYPE_BASE)
-	{
-		log_debug("png", "non-default compression type unsupported by pnglite");
-		Result |= PNGLITE_COMPRESSION_TYPE;
-	}
-	if(png_get_filter_type(pPNGStruct, pPNGInfo) != PNG_FILTER_TYPE_BASE)
-	{
-		log_debug("png", "non-default filter type unsupported by pnglite");
-		Result |= PNGLITE_FILTER_TYPE;
-	}
-	return Result;
-}
-
-bool LoadPNG(SImageByteBuffer &ByteLoader, const char *pFileName, int &PngliteIncompatible, int &Width, int &Height, uint8_t *&pImageBuff, EImageFormat &ImageFormat)
+bool LoadPNG(SImageByteBuffer &ByteLoader, const char *pFileName, int &Width, int &Height, uint8_t *&pImageBuff, EImageFormat &ImageFormat)
 {
 	SLibPNGWarningItem UserErrorStruct = {&ByteLoader, pFileName, {}};
 
@@ -194,7 +148,6 @@ bool LoadPNG(SImageByteBuffer &ByteLoader, const char *pFileName, int &PngliteIn
 	Height = png_get_image_height(pPNGStruct, pPNGInfo);
 	const int ColorType = png_get_color_type(pPNGStruct, pPNGInfo);
 	const png_byte BitDepth = png_get_bit_depth(pPNGStruct, pPNGInfo);
-	PngliteIncompatible = PngliteIncompatibility(pPNGStruct, pPNGInfo);
 
 	if(BitDepth == 16)
 	{
