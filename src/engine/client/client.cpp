@@ -1985,8 +1985,6 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 				if((NumParts < CSnapshot::MAX_PARTS && m_aSnapshotParts[Conn] == (((uint64_t)(1) << NumParts) - 1)) ||
 					(NumParts == CSnapshot::MAX_PARTS && m_aSnapshotParts[Conn] == std::numeric_limits<uint64_t>::max()))
 				{
-					static CSnapshot Emptysnap;
-					CSnapshot *pDeltaShot = &Emptysnap;
 					unsigned char aTmpBuffer2[CSnapshot::MAX_SIZE];
 					unsigned char aTmpBuffer3[CSnapshot::MAX_SIZE];
 					CSnapshot *pTmpBuffer3 = (CSnapshot *)aTmpBuffer3; // Fix compiler warning for strict-aliasing
@@ -1995,9 +1993,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 					m_aSnapshotParts[Conn] = 0;
 
 					// find snapshot that we should use as delta
-					Emptysnap.Clear();
-
-					// find delta
+					const CSnapshot *pDeltaShot = CSnapshot::EmptySnapshot();
 					if(DeltaTick >= 0)
 					{
 						int DeltashotSize = m_aSnapshotStorage[Conn].Get(DeltaTick, 0, &pDeltaShot, 0);

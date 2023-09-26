@@ -974,11 +974,8 @@ void CServer::DoSnapshot()
 			m_aClients[i].m_Snapshots.Add(m_CurrentGameTick, time_get(), SnapshotSize, pData, 0, nullptr);
 
 			// find snapshot that we can perform delta against
-			static CSnapshot s_EmptySnap;
-			s_EmptySnap.Clear();
-
 			int DeltaTick = -1;
-			CSnapshot *pDeltashot = &s_EmptySnap;
+			const CSnapshot *pDeltashot = CSnapshot::EmptySnapshot();
 			{
 				int DeltashotSize = m_aClients[i].m_Snapshots.Get(m_aClients[i].m_LastAckedSnapshot, 0, &pDeltashot, 0);
 				if(DeltashotSize >= 0)
