@@ -3405,7 +3405,15 @@ void CGameContext::ConVotes(IConsole::IResult *pResult, void *pUserData)
 		{
 			continue;
 		}
-		str_format(aBuf, sizeof(aBuf), "\"%s\" -> \"%s\"", pOption->m_aDescription, pOption->m_aCommand);
+
+		str_copy(aBuf, "add_vote \"");
+		char *pDst = aBuf + str_length(aBuf);
+		str_escape(&pDst, pOption->m_aDescription, aBuf + sizeof(aBuf));
+		str_append(aBuf, "\" \"");
+		pDst = aBuf + str_length(aBuf);
+		str_escape(&pDst, pOption->m_aCommand, aBuf + sizeof(aBuf));
+		str_append(aBuf, "\"");
+
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "votes", aBuf);
 	}
 	str_format(aBuf, sizeof(aBuf), "%d %s, showing entries %d - %d", Count, Count == 1 ? "vote" : "votes", Start, End - 1);
