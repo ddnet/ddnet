@@ -3388,6 +3388,38 @@ void CGameContext::ConVote(IConsole::IResult *pResult, void *pUserData)
 		pSelf->ForceVote(pResult->m_ClientID, false);
 }
 
+void CGameContext::ConVotes(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	int Page = pResult->NumArguments() > 0 ? pResult->GetInteger(0) : 0;
+	static const int s_EntriesPerPage = 20;
+	const int Start = Page * s_EntriesPerPage;
+	const int End = (Page + 1) * s_EntriesPerPage;
+
+	char aBuf[512];
+	int Count = 0;
+	for(CVoteOptionServer *pOption = pSelf->m_pVoteOptionFirst; pOption; pOption = pOption->m_pNext, Count++)
+	{
+		if(Count < Start || Count >= End)
+		{
+			continue;
+		}
+
+		str_copy(aBuf, "add_vote \"");
+		char *pDst = aBuf + str_length(aBuf);
+		str_escape(&pDst, pOption->m_aDescription, aBuf + sizeof(aBuf));
+		str_append(aBuf, "\" \"");
+		pDst = aBuf + str_length(aBuf);
+		str_escape(&pDst, pOption->m_aCommand, aBuf + sizeof(aBuf));
+		str_append(aBuf, "\"");
+
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "votes", aBuf);
+	}
+	str_format(aBuf, sizeof(aBuf), "%d %s, showing entries %d - %d", Count, Count == 1 ? "vote" : "votes", Start, End - 1);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "votes", aBuf);
+}
+
 void CGameContext::ConchainSpecialMotdupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	pfnCallback(pResult, pCallbackUserData);
@@ -3443,6 +3475,7 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("clear_votes", "", CFGFLAG_SERVER, ConClearVotes, this, "Clears the voting options");
 	Console()->Register("add_map_votes", "", CFGFLAG_SERVER, ConAddMapVotes, this, "Automatically adds voting options for all maps");
 	Console()->Register("vote", "r['yes'|'no']", CFGFLAG_SERVER, ConVote, this, "Force a vote to yes/no");
+	Console()->Register("votes", "?i[page]", CFGFLAG_SERVER, ConVotes, this, "Show all votes (page 0 by default, 20 entries per page)");
 	Console()->Register("dump_antibot", "", CFGFLAG_SERVER, ConDumpAntibot, this, "Dumps the antibot status");
 
 	Console()->Chain("sv_motd", ConchainSpecialMotdupdate, this);
