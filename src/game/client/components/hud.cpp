@@ -524,7 +524,7 @@ void CHud::RenderTextInfo()
 			TextRender()->RenderTextContainer(m_FPSTextContainerIndex, TextRender()->DefaultTextColor(), TextRender()->DefaultTextOutlineColor());
 		}
 	}
-	if(g_Config.m_ClShowpred)
+	if(g_Config.m_ClShowpred && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 	{
 		char aBuf[64];
 		str_from_int(Client()->GetPredictionTime(), aBuf);
