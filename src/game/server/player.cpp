@@ -219,7 +219,7 @@ void CPlayer::Tick()
 
 	if(Server()->GetNetErrorString(m_ClientID)[0])
 	{
-		m_Afk = true;
+		SetAfk(true);
 
 		char aBuf[512];
 		str_format(aBuf, sizeof(aBuf), "'%s' would have timed out, but can use timeout protection now", Server()->ClientName(m_ClientID));
@@ -705,11 +705,14 @@ void CPlayer::UpdatePlaytime()
 
 void CPlayer::AfkTimer()
 {
-	m_Afk = g_Config.m_SvMaxAfkTime != 0 && m_LastPlaytime < time_get() - time_freq() * g_Config.m_SvMaxAfkTime;
+	SetAfk(g_Config.m_SvMaxAfkTime != 0 && m_LastPlaytime < time_get() - time_freq() * g_Config.m_SvMaxAfkTime);
 }
 
 void CPlayer::SetAfk(bool Afk)
 {
+	if(m_Afk != Afk)
+		Server()->ExpireServerInfo();
+
 	if(g_Config.m_SvMaxAfkTime == 0)
 	{
 		m_Afk = false;
