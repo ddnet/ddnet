@@ -293,9 +293,6 @@ CClient::CClient() :
 		DemoRecorder = CDemoRecorder(&m_SnapshotDelta);
 
 	m_RenderFrameTime = 0.0001f;
-	m_RenderFrameTimeLow = 1.0f;
-	m_RenderFrameTimeHigh = 0.0f;
-	m_RenderFrames = 0;
 	m_LastRenderTime = time_get();
 
 	m_GameTickSpeed = SERVER_TICK_SPEED;
@@ -3234,14 +3231,8 @@ void CClient::Run()
 				(!AsyncRenderOld || m_pGraphics->IsIdle()) &&
 				(!GfxRefreshRate || (time_freq() / (int64_t)g_Config.m_GfxRefreshRate) <= Now - LastRenderTime))
 			{
-				m_RenderFrames++;
-
 				// update frametime
 				m_RenderFrameTime = (Now - m_LastRenderTime) / (float)time_freq();
-				if(m_RenderFrameTime < m_RenderFrameTimeLow)
-					m_RenderFrameTimeLow = m_RenderFrameTime;
-				if(m_RenderFrameTime > m_RenderFrameTimeHigh)
-					m_RenderFrameTimeHigh = m_RenderFrameTime;
 				m_FpsGraph.Add(1.0f / m_RenderFrameTime, 1, 1, 1);
 
 				if(m_BenchmarkFile)
@@ -3267,33 +3258,14 @@ void CClient::Run()
 				LastRenderTime = Now - AdditionalTime;
 				m_LastRenderTime = Now;
 
-#ifdef CONF_DEBUG
-				if(g_Config.m_DbgStress)
-				{
-					if((m_RenderFrames % 10) == 0)
-					{
-						if(!m_EditorActive)
-							Render();
-						else
-						{
-							m_pEditor->OnRender();
-							DebugRender();
-						}
-						m_pGraphics->Swap();
-					}
-				}
+				if(!m_EditorActive)
+					Render();
 				else
-#endif
 				{
-					if(!m_EditorActive)
-						Render();
-					else
-					{
-						m_pEditor->OnRender();
-						DebugRender();
-					}
-					m_pGraphics->Swap();
+					m_pEditor->OnRender();
+					DebugRender();
 				}
+				m_pGraphics->Swap();
 			}
 			else if(!IsRenderActive)
 			{
@@ -3333,11 +3305,7 @@ void CClient::Run()
 		auto Now = time_get_nanoseconds();
 		decltype(Now) SleepTimeInNanoSeconds{0};
 		bool Slept = false;
-		if(
-#ifdef CONF_DEBUG
-			g_Config.m_DbgStress ||
-#endif
-			(g_Config.m_ClRefreshRateInactive && !m_pGraphics->WindowActive()))
+		if(g_Config.m_ClRefreshRateInactive && !m_pGraphics->WindowActive())
 		{
 			SleepTimeInNanoSeconds = (std::chrono::nanoseconds(1s) / (int64_t)g_Config.m_ClRefreshRateInactive) - (Now - LastTime);
 			std::this_thread::sleep_for(SleepTimeInNanoSeconds);

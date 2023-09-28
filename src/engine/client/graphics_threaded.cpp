@@ -428,12 +428,6 @@ bool CGraphics_Threaded::IsSpriteTextureFullyTransparent(CImageInfo &FromImageIn
 
 IGraphics::CTextureHandle CGraphics_Threaded::LoadTextureRaw(size_t Width, size_t Height, CImageInfo::EImageFormat Format, const void *pData, int Flags, const char *pTexName)
 {
-	// don't waste memory on texture if we are stress testing
-#ifdef CONF_DEBUG
-	if(g_Config.m_DbgStress && m_InvalidTexture.IsValid())
-		return m_InvalidTexture;
-#endif
-
 	if((Flags & IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE) != 0 || (Flags & IGraphics::TEXLOAD_TO_3D_TEXTURE) != 0)
 	{
 		if(Width == 0 || (Width % 16) != 0 || Height == 0 || (Height % 16) != 0)

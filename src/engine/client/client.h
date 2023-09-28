@@ -149,9 +149,6 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	IGraphics::CTextureHandle m_DebugFont;
 
 	int64_t m_LastRenderTime;
-	float m_RenderFrameTimeLow;
-	float m_RenderFrameTimeHigh;
-	int m_RenderFrames;
 
 	int m_SnapCrcErrors;
 	bool m_AutoScreenshotRecycle;
