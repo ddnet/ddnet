@@ -293,8 +293,6 @@ CClient::CClient() :
 		DemoRecorder = CDemoRecorder(&m_SnapshotDelta);
 
 	m_RenderFrameTime = 0.0001f;
-	m_RenderFrameTimeLow = 1.0f;
-	m_RenderFrameTimeHigh = 0.0f;
 	m_RenderFrames = 0;
 	m_LastRenderTime = time_get();
 
@@ -3238,10 +3236,6 @@ void CClient::Run()
 
 				// update frametime
 				m_RenderFrameTime = (Now - m_LastRenderTime) / (float)time_freq();
-				if(m_RenderFrameTime < m_RenderFrameTimeLow)
-					m_RenderFrameTimeLow = m_RenderFrameTime;
-				if(m_RenderFrameTime > m_RenderFrameTimeHigh)
-					m_RenderFrameTimeHigh = m_RenderFrameTime;
 				m_FpsGraph.Add(1.0f / m_RenderFrameTime, 1, 1, 1);
 
 				if(m_BenchmarkFile)
