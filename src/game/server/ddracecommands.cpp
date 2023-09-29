@@ -386,6 +386,8 @@ void CGameContext::ConTeleport(IConsole::IResult *pResult, void *pUserData)
 	if(pChr && pSelf->GetPlayerChar(TeleTo))
 	{
 		pSelf->Teleport(pChr, pSelf->m_apPlayers[TeleTo]->m_ViewPos);
+		pChr->UnFreeze();
+		pChr->Core()->m_Vel = vec2(0, 0);
 	}
 }
 
