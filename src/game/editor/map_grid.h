@@ -13,7 +13,7 @@ public:
 	int GridLineDistance() const;
 
 	/**
-	 * Returns wether the grid is rendered.
+	 * Returns whether the grid is rendered.
 	 */
 	bool IsEnabled() const;
 

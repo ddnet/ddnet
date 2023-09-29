@@ -349,6 +349,8 @@ void CMenus::RenderPlayers(CUIRect MainView)
 				m_pClient->Friends()->RemoveFriend(CurrentClient.m_aName, CurrentClient.m_aClan);
 			else
 				m_pClient->Friends()->AddFriend(CurrentClient.m_aName, CurrentClient.m_aClan);
+
+			m_pClient->Client()->ServerBrowserUpdate();
 		}
 	}
 
@@ -812,49 +814,45 @@ void CMenus::RenderServerControl(CUIRect MainView)
 
 void CMenus::RenderInGameNetwork(CUIRect MainView)
 {
-	CUIRect Box = MainView;
-	CUIRect Button;
-
-	int Page = g_Config.m_UiPage;
-	int NewPage = -1;
-
 	MainView.Draw(ms_ColorTabbarActive, IGraphics::CORNER_B, 10.0f);
 
-	Box.HSplitTop(5.0f, &MainView, &MainView);
-	Box.HSplitTop(24.0f, &Box, &MainView);
+	CUIRect TabBar, Button;
+	MainView.HSplitTop(24.0f, &TabBar, &MainView);
 
-	Box.VSplitLeft(100.0f, &Button, &Box);
+	int NewPage = g_Config.m_UiPage;
+
+	TabBar.VSplitLeft(100.0f, &Button, &TabBar);
 	static CButtonContainer s_InternetButton;
-	if(DoButton_MenuTab(&s_InternetButton, Localize("Internet"), Page == PAGE_INTERNET, &Button, 0))
+	if(DoButton_MenuTab(&s_InternetButton, Localize("Internet"), g_Config.m_UiPage == PAGE_INTERNET, &Button, IGraphics::CORNER_NONE))
 	{
-		if(Page != PAGE_INTERNET)
+		if(g_Config.m_UiPage != PAGE_INTERNET)
 			ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
 		NewPage = PAGE_INTERNET;
 	}
 
-	Box.VSplitLeft(80.0f, &Button, &Box);
+	TabBar.VSplitLeft(80.0f, &Button, &TabBar);
 	static CButtonContainer s_LanButton;
-	if(DoButton_MenuTab(&s_LanButton, Localize("LAN"), Page == PAGE_LAN, &Button, 0))
+	if(DoButton_MenuTab(&s_LanButton, Localize("LAN"), g_Config.m_UiPage == PAGE_LAN, &Button, IGraphics::CORNER_NONE))
 	{
-		if(Page != PAGE_LAN)
+		if(g_Config.m_UiPage != PAGE_LAN)
 			ServerBrowser()->Refresh(IServerBrowser::TYPE_LAN);
 		NewPage = PAGE_LAN;
 	}
 
-	Box.VSplitLeft(110.0f, &Button, &Box);
+	TabBar.VSplitLeft(110.0f, &Button, &TabBar);
 	static CButtonContainer s_FavoritesButton;
-	if(DoButton_MenuTab(&s_FavoritesButton, Localize("Favorites"), Page == PAGE_FAVORITES, &Button, 0))
+	if(DoButton_MenuTab(&s_FavoritesButton, Localize("Favorites"), g_Config.m_UiPage == PAGE_FAVORITES, &Button, IGraphics::CORNER_NONE))
 	{
-		if(Page != PAGE_FAVORITES)
+		if(g_Config.m_UiPage != PAGE_FAVORITES)
 			ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
 		NewPage = PAGE_FAVORITES;
 	}
 
-	Box.VSplitLeft(110.0f, &Button, &Box);
+	TabBar.VSplitLeft(110.0f, &Button, &TabBar);
 	static CButtonContainer s_DDNetButton;
-	if(DoButton_MenuTab(&s_DDNetButton, "DDNet", Page == PAGE_DDNET, &Button, 0) || Page < PAGE_INTERNET || Page > PAGE_KOG)
+	if(DoButton_MenuTab(&s_DDNetButton, "DDNet", g_Config.m_UiPage == PAGE_DDNET, &Button, IGraphics::CORNER_NONE) || g_Config.m_UiPage < PAGE_INTERNET || g_Config.m_UiPage > PAGE_KOG)
 	{
-		if(Page != PAGE_DDNET)
+		if(g_Config.m_UiPage != PAGE_DDNET)
 		{
 			Client()->RequestDDNetInfo();
 			ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
@@ -862,11 +860,11 @@ void CMenus::RenderInGameNetwork(CUIRect MainView)
 		NewPage = PAGE_DDNET;
 	}
 
-	Box.VSplitLeft(110.0f, &Button, &Box);
+	TabBar.VSplitLeft(110.0f, &Button, &TabBar);
 	static CButtonContainer s_KoGButton;
-	if(DoButton_MenuTab(&s_KoGButton, "KoG", Page == PAGE_KOG, &Button, IGraphics::CORNER_BR))
+	if(DoButton_MenuTab(&s_KoGButton, "KoG", g_Config.m_UiPage == PAGE_KOG, &Button, IGraphics::CORNER_NONE))
 	{
-		if(Page != PAGE_KOG)
+		if(g_Config.m_UiPage != PAGE_KOG)
 		{
 			Client()->RequestDDNetInfo();
 			ServerBrowser()->Refresh(IServerBrowser::TYPE_KOG);
@@ -874,7 +872,7 @@ void CMenus::RenderInGameNetwork(CUIRect MainView)
 		NewPage = PAGE_KOG;
 	}
 
-	if(NewPage != -1)
+	if(NewPage != g_Config.m_UiPage)
 	{
 		if(Client()->State() != IClient::STATE_OFFLINE)
 			SetMenuPage(NewPage);
@@ -988,7 +986,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 
 	struct CColumn
 	{
-		CLocConstString m_Caption;
+		const char *m_pCaption;
 		int m_Id;
 		float m_Width;
 		CUIRect m_Rect;
@@ -1003,8 +1001,8 @@ void CMenus::RenderGhost(CUIRect MainView)
 	};
 
 	static CColumn s_aCols[] = {
-		{" ", -1, 2.0f, {0}, {0}},
-		{" ", COL_ACTIVE, 30.0f, {0}, {0}},
+		{"", -1, 2.0f, {0}, {0}},
+		{"", COL_ACTIVE, 30.0f, {0}, {0}},
 		{Localizable("Name"), COL_NAME, 300.0f, {0}, {0}},
 		{Localizable("Time"), COL_TIME, 200.0f, {0}, {0}},
 	};
@@ -1022,7 +1020,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 
 	// do headers
 	for(int i = 0; i < NumCols; i++)
-		DoButton_GridHeader(s_aCols[i].m_Caption, Localize(s_aCols[i].m_Caption), 0, &s_aCols[i].m_Rect);
+		DoButton_GridHeader(&s_aCols[i].m_Id, Localize(s_aCols[i].m_pCaption), 0, &s_aCols[i].m_Rect);
 
 	View.Draw(ColorRGBA(0, 0, 0, 0.15f), 0, 0);
 

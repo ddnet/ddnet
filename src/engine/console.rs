@@ -512,7 +512,7 @@ mod ffi {
 /// Used as a last parameter in [`IConsole::Print`].
 ///
 /// It is treated as "no color" in the console code, meaning that the default
-/// color of the output medium isn't overriden.
+/// color of the output medium isn't overridden.
 #[allow(non_upper_case_globals)]
 pub const gs_ConsoleDefaultColor: ColorRGBA = ColorRGBA {
     r: 1.0,

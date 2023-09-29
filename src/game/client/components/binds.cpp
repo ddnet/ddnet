@@ -251,10 +251,7 @@ void CBinds::SetDefaults()
 
 void CBinds::OnConsoleInit()
 {
-	// bindings
-	IConfigManager *pConfigManager = Kernel()->RequestInterface<IConfigManager>();
-	if(pConfigManager)
-		pConfigManager->RegisterCallback(ConfigSaveCallback, this);
+	ConfigManager()->RegisterCallback(ConfigSaveCallback, this);
 
 	Console()->Register("bind", "s[key] ?r[command]", CFGFLAG_CLIENT, ConBind, this, "Bind key to execute a command or view keybindings");
 	Console()->Register("binds", "?s[key]", CFGFLAG_CLIENT, ConBinds, this, "Print command executed by this keybinding or all binds");

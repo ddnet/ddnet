@@ -15,8 +15,6 @@ class CEntity;
 
 class CGameWorld
 {
-	friend CCharacter;
-
 public:
 	enum
 	{

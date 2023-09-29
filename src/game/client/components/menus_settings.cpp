@@ -323,13 +323,12 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 	{
 		m_Dummy ^= 1;
 	}
+	GameClient()->m_Tooltips.DoToolTip(&m_Dummy, &Dummy, Localize("Toggle to edit your dummy settings"));
 
 	// country flag selector
 	MainView.HSplitTop(20.0f, 0, &MainView);
 	int OldSelected = -1;
 	static CListBox s_ListBox;
-	if(UI()->CheckActiveItem(&s_ClanInput) || UI()->CheckActiveItem(&s_NameInput))
-		s_ListBox.SetActive(false);
 	s_ListBox.DoStart(50.0f, m_pClient->m_CountryFlags.Num(), 10, 3, OldSelected, &MainView);
 
 	for(size_t i = 0; i < m_pClient->m_CountryFlags.Num(); ++i)
@@ -615,7 +614,6 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	EyesLabel.HSplitTop(50.0f, &EyesLabel, &Eyes);
 
 	static CButtonContainer s_aEyeButtons[6];
-	static int s_aEyesToolTip[6];
 	for(int CurrentEyeEmote = 0; CurrentEyeEmote < 6; CurrentEyeEmote++)
 	{
 		EyesLabel.VSplitLeft(10.0f, 0, &EyesLabel);
@@ -642,7 +640,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 					GameClient()->m_Emoticon.EyeEmote(CurrentEyeEmote);
 			}
 		}
-		GameClient()->m_Tooltips.DoToolTip(&s_aEyesToolTip[CurrentEyeEmote], &EyesTee, Localize("Choose default eyes when joining a server"));
+		GameClient()->m_Tooltips.DoToolTip(&s_aEyeButtons[CurrentEyeEmote], &EyesTee, Localize("Choose default eyes when joining a server"));
 		RenderTools()->RenderTee(pIdleState, &OwnSkinInfo, CurrentEyeEmote, vec2(1, 0), vec2(EyesTee.x + 25.0f, EyesTee.y + EyesTee.h / 2.0f + OffsetToMid.y));
 	}
 
@@ -959,7 +957,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 typedef struct
 {
-	CLocConstString m_Name;
+	const char *m_pName;
 	const char *m_pCommand;
 	int m_KeyId;
 	int m_ModifierCombination;
@@ -967,7 +965,7 @@ typedef struct
 
 static CKeyInfo gs_aKeys[] =
 	{
-		{Localizable("Move left"), "+left", 0, 0}, // Localize - these strings are localized within CLocConstString
+		{Localizable("Move left"), "+left", 0, 0},
 		{Localizable("Move right"), "+right", 0, 0},
 		{Localizable("Jump"), "+jump", 0, 0},
 		{Localizable("Fire"), "+fire", 0, 0},
@@ -1022,23 +1020,24 @@ void CMenus::DoSettingsControlsButtons(int Start, int Stop, CUIRect View)
 {
 	for(int i = Start; i < Stop; i++)
 	{
-		CKeyInfo &Key = gs_aKeys[i];
+		const CKeyInfo &Key = gs_aKeys[i];
+
 		CUIRect Button, Label;
 		View.HSplitTop(20.0f, &Button, &View);
 		Button.VSplitLeft(135.0f, &Label, &Button);
 
 		char aBuf[64];
-		str_format(aBuf, sizeof(aBuf), "%s:", Localize((const char *)Key.m_Name));
+		str_format(aBuf, sizeof(aBuf), "%s:", Localize(Key.m_pName));
 
 		UI()->DoLabel(&Label, aBuf, 13.0f, TEXTALIGN_ML);
 		int OldId = Key.m_KeyId, OldModifierCombination = Key.m_ModifierCombination, NewModifierCombination;
-		int NewId = DoKeyReader((void *)&Key.m_Name, &Button, OldId, OldModifierCombination, &NewModifierCombination);
+		int NewId = DoKeyReader(&Key.m_KeyId, &Button, OldId, OldModifierCombination, &NewModifierCombination);
 		if(NewId != OldId || NewModifierCombination != OldModifierCombination)
 		{
 			if(OldId != 0 || NewId == 0)
 				m_pClient->m_Binds.Bind(OldId, "", false, OldModifierCombination);
 			if(NewId != 0)
-				m_pClient->m_Binds.Bind(NewId, gs_aKeys[i].m_pCommand, false, NewModifierCombination);
+				m_pClient->m_Binds.Bind(NewId, Key.m_pCommand, false, NewModifierCombination);
 		}
 
 		View.HSplitTop(2.0f, 0, &View);
@@ -2690,25 +2689,31 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 				TempY += RealOffsetY;
 			}
 
-			str_format(aLineBuilder, sizeof(aLineBuilder), "%sRandom Tee: Hey, how are you %s?", g_Config.m_ClShowIDs ? " 7: " : "", aBuf);
-			Width = TextRender()->TextWidth(RealFontSize, aLineBuilder, -1, -1);
-			Graphics()->DrawRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Width + RealMsgPaddingX + RealMsgPaddingTee, RealFontSize + RealMsgPaddingY, RealBackgroundRounding, IGraphics::CORNER_ALL);
-			TempY += RealOffsetY;
+			if(!g_Config.m_ClShowChatFriends)
+			{
+				str_format(aLineBuilder, sizeof(aLineBuilder), "%sRandom Tee: Hey, how are you %s?", g_Config.m_ClShowIDs ? " 7: " : "", aBuf);
+				Width = TextRender()->TextWidth(RealFontSize, aLineBuilder, -1, -1);
+				Graphics()->DrawRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Width + RealMsgPaddingX + RealMsgPaddingTee, RealFontSize + RealMsgPaddingY, RealBackgroundRounding, IGraphics::CORNER_ALL);
+				TempY += RealOffsetY;
 
-			str_format(aLineBuilder, sizeof(aLineBuilder), "%sYour Teammate: Let's speedrun this!", g_Config.m_ClShowIDs ? "11: " : "");
-			Width = TextRender()->TextWidth(RealFontSize, aLineBuilder, -1, -1);
-			Graphics()->DrawRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Width + RealMsgPaddingX + RealMsgPaddingTee, RealFontSize + RealMsgPaddingY, RealBackgroundRounding, IGraphics::CORNER_ALL);
-			TempY += RealOffsetY;
+				str_format(aLineBuilder, sizeof(aLineBuilder), "%sYour Teammate: Let's speedrun this!", g_Config.m_ClShowIDs ? "11: " : "");
+				Width = TextRender()->TextWidth(RealFontSize, aLineBuilder, -1, -1);
+				Graphics()->DrawRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Width + RealMsgPaddingX + RealMsgPaddingTee, RealFontSize + RealMsgPaddingY, RealBackgroundRounding, IGraphics::CORNER_ALL);
+				TempY += RealOffsetY;
+			}
 
 			str_format(aLineBuilder, sizeof(aLineBuilder), "%s%sFriend: Hello there", g_Config.m_ClMessageFriend ? "♥ " : "", g_Config.m_ClShowIDs ? " 8: " : "");
 			Width = TextRender()->TextWidth(RealFontSize, aLineBuilder, -1, -1);
 			Graphics()->DrawRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Width + RealMsgPaddingX + RealMsgPaddingTee, RealFontSize + RealMsgPaddingY, RealBackgroundRounding, IGraphics::CORNER_ALL);
 			TempY += RealOffsetY;
 
-			str_format(aLineBuilder, sizeof(aLineBuilder), "%sSpammer [6]: Hey fools, I'm spamming here!", g_Config.m_ClShowIDs ? " 9: " : "");
-			Width = TextRender()->TextWidth(RealFontSize, aLineBuilder, -1, -1);
-			Graphics()->DrawRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Width + RealMsgPaddingX + RealMsgPaddingTee, RealFontSize + RealMsgPaddingY, RealBackgroundRounding, IGraphics::CORNER_ALL);
-			TempY += RealOffsetY;
+			if(!g_Config.m_ClShowChatFriends)
+			{
+				str_format(aLineBuilder, sizeof(aLineBuilder), "%sSpammer [6]: Hey fools, I'm spamming here!", g_Config.m_ClShowIDs ? " 9: " : "");
+				Width = TextRender()->TextWidth(RealFontSize, aLineBuilder, -1, -1);
+				Graphics()->DrawRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Width + RealMsgPaddingX + RealMsgPaddingTee, RealFontSize + RealMsgPaddingY, RealBackgroundRounding, IGraphics::CORNER_ALL);
+				TempY += RealOffsetY;
+			}
 
 			Width = TextRender()->TextWidth(RealFontSize, "— Echo command executed", -1, -1);
 			Graphics()->DrawRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Width + RealMsgPaddingX, RealFontSize + RealMsgPaddingY, RealBackgroundRounding, IGraphics::CORNER_ALL);
@@ -2744,29 +2749,32 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 			TextRender()->SetCursorPosition(&Cursor, X, Y += RealOffsetY);
 		}
 
-		// Highlighted
-		TextRender()->MoveCursor(&Cursor, RealMsgPaddingTee, 0);
-		TextRender()->TextColor(DefaultNameColor);
-		if(g_Config.m_ClShowIDs)
-			TextRender()->TextEx(&Cursor, " 7: ", -1);
-		TextRender()->TextEx(&Cursor, "Random Tee: ", -1);
-		TextRender()->TextColor(HighlightedColor);
-		TextRender()->TextEx(&Cursor, "Hey, how are you ", -1);
-		TextRender()->TextEx(&Cursor, aBuf, -1);
-		TextRender()->TextEx(&Cursor, "?", -1);
-		if(!g_Config.m_ClChatOld)
-			RenderTools()->RenderTee(pIdleState, &aRenderInfo[1], EMOTE_NORMAL, vec2(1, 0.1f), vec2(X + RealTeeSizeHalved, Y + OffsetTeeY + FullHeightMinusTee / 2.0f + TWSkinUnreliableOffset));
-		TextRender()->SetCursorPosition(&Cursor, X, Y += RealOffsetY);
+		if(!g_Config.m_ClShowChatFriends)
+		{
+			// Highlighted
+			TextRender()->MoveCursor(&Cursor, RealMsgPaddingTee, 0);
+			TextRender()->TextColor(DefaultNameColor);
+			if(g_Config.m_ClShowIDs)
+				TextRender()->TextEx(&Cursor, " 7: ", -1);
+			TextRender()->TextEx(&Cursor, "Random Tee: ", -1);
+			TextRender()->TextColor(HighlightedColor);
+			TextRender()->TextEx(&Cursor, "Hey, how are you ", -1);
+			TextRender()->TextEx(&Cursor, aBuf, -1);
+			TextRender()->TextEx(&Cursor, "?", -1);
+			if(!g_Config.m_ClChatOld)
+				RenderTools()->RenderTee(pIdleState, &aRenderInfo[1], EMOTE_NORMAL, vec2(1, 0.1f), vec2(X + RealTeeSizeHalved, Y + OffsetTeeY + FullHeightMinusTee / 2.0f + TWSkinUnreliableOffset));
+			TextRender()->SetCursorPosition(&Cursor, X, Y += RealOffsetY);
 
-		// Team
-		TextRender()->MoveCursor(&Cursor, RealMsgPaddingTee, 0);
-		TextRender()->TextColor(TeamColor);
-		if(g_Config.m_ClShowIDs)
-			TextRender()->TextEx(&Cursor, "11: ", -1);
-		TextRender()->TextEx(&Cursor, "Your Teammate: Let's speedrun this!", -1);
-		if(!g_Config.m_ClChatOld)
-			RenderTools()->RenderTee(pIdleState, &aRenderInfo[0], EMOTE_NORMAL, vec2(1, 0.1f), vec2(X + RealTeeSizeHalved, Y + OffsetTeeY + FullHeightMinusTee / 2.0f + TWSkinUnreliableOffset));
-		TextRender()->SetCursorPosition(&Cursor, X, Y += RealOffsetY);
+			// Team
+			TextRender()->MoveCursor(&Cursor, RealMsgPaddingTee, 0);
+			TextRender()->TextColor(TeamColor);
+			if(g_Config.m_ClShowIDs)
+				TextRender()->TextEx(&Cursor, "11: ", -1);
+			TextRender()->TextEx(&Cursor, "Your Teammate: Let's speedrun this!", -1);
+			if(!g_Config.m_ClChatOld)
+				RenderTools()->RenderTee(pIdleState, &aRenderInfo[0], EMOTE_NORMAL, vec2(1, 0.1f), vec2(X + RealTeeSizeHalved, Y + OffsetTeeY + FullHeightMinusTee / 2.0f + TWSkinUnreliableOffset));
+			TextRender()->SetCursorPosition(&Cursor, X, Y += RealOffsetY);
+		}
 
 		// Friend
 		TextRender()->MoveCursor(&Cursor, RealMsgPaddingTee, 0);
@@ -2786,19 +2794,21 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		TextRender()->SetCursorPosition(&Cursor, X, Y += RealOffsetY);
 
 		// Normal
-		TextRender()->MoveCursor(&Cursor, RealMsgPaddingTee, 0);
-		TextRender()->TextColor(DefaultNameColor);
-		if(g_Config.m_ClShowIDs)
-			TextRender()->TextEx(&Cursor, " 9: ", -1);
-		TextRender()->TextEx(&Cursor, "Spammer ", -1);
-		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 0.3f);
-		TextRender()->TextEx(&Cursor, "[6]", -1);
-		TextRender()->TextColor(NormalColor);
-		TextRender()->TextEx(&Cursor, ": Hey fools, I'm spamming here!", -1);
-		if(!g_Config.m_ClChatOld)
-			RenderTools()->RenderTee(pIdleState, &aRenderInfo[3], EMOTE_NORMAL, vec2(1, 0.1f), vec2(X + RealTeeSizeHalved, Y + OffsetTeeY + FullHeightMinusTee / 2.0f + TWSkinUnreliableOffset));
-		TextRender()->SetCursorPosition(&Cursor, X, Y += RealOffsetY);
-
+		if(!g_Config.m_ClShowChatFriends)
+		{
+			TextRender()->MoveCursor(&Cursor, RealMsgPaddingTee, 0);
+			TextRender()->TextColor(DefaultNameColor);
+			if(g_Config.m_ClShowIDs)
+				TextRender()->TextEx(&Cursor, " 9: ", -1);
+			TextRender()->TextEx(&Cursor, "Spammer ", -1);
+			TextRender()->TextColor(1.0f, 1.0f, 1.0f, 0.3f);
+			TextRender()->TextEx(&Cursor, "[6]", -1);
+			TextRender()->TextColor(NormalColor);
+			TextRender()->TextEx(&Cursor, ": Hey fools, I'm spamming here!", -1);
+			if(!g_Config.m_ClChatOld)
+				RenderTools()->RenderTee(pIdleState, &aRenderInfo[3], EMOTE_NORMAL, vec2(1, 0.1f), vec2(X + RealTeeSizeHalved, Y + OffsetTeeY + FullHeightMinusTee / 2.0f + TWSkinUnreliableOffset));
+			TextRender()->SetCursorPosition(&Cursor, X, Y += RealOffsetY);
+		}
 		// Client
 		TextRender()->TextColor(ClientColor);
 		TextRender()->TextEx(&Cursor, "— Echo command executed", -1);
@@ -2872,6 +2882,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 
 		Section.HSplitTop(LineSize, &Label, &Section);
 		UI()->DoLabel(&Label, Localize("Colors of the hook collision line, in case of a possible collision with:"), 13.0f, TEXTALIGN_ML);
+		UI()->DoButtonLogic(&s_HookCollToolTip, 0, &Label); // Just for the tooltip, result ignored
 		GameClient()->m_Tooltips.DoToolTip(&s_HookCollToolTip, &Label, Localize("Your movements are not taken into account when calculating the line colors"));
 		DoLine_ColorPicker(&s_HookCollNoCollResetID, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Nothing hookable"), &g_Config.m_ClHookCollColorNoColl, ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f), false);
 		DoLine_ColorPicker(&s_HookCollHookableCollResetID, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Something hookable"), &g_Config.m_ClHookCollColorHookableColl, ColorRGBA(130.0f / 255.0f, 232.0f / 255.0f, 160.0f / 255.0f, 1.0f), false);
@@ -4202,8 +4213,8 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	static CButtonContainer s_BackgroundEntitiesReloadButton;
 	if(DoButton_Menu(&s_BackgroundEntitiesReloadButton, Localize("Reload"), 0, &Button))
 	{
-		if(str_comp(g_Config.m_ClBackgroundEntities, m_pClient->m_BackGround.MapName()) != 0)
-			m_pClient->m_BackGround.LoadBackground();
+		if(str_comp(g_Config.m_ClBackgroundEntities, m_pClient->m_Background.MapName()) != 0)
+			m_pClient->m_Background.LoadBackground();
 	}
 
 	Background.HSplitTop(20.0f, &Button, &Background);
@@ -4215,7 +4226,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 			g_Config.m_ClBackgroundEntities[0] = '\0';
 		else
 			str_copy(g_Config.m_ClBackgroundEntities, CURRENT_MAP);
-		m_pClient->m_BackGround.LoadBackground();
+		m_pClient->m_Background.LoadBackground();
 	}
 
 	Background.HSplitTop(20.0f, &Button, &Background);

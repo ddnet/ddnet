@@ -144,9 +144,6 @@ Favorites
 Feet
 == Láb
 
-Filter
-== Szűrő
-
 Fire
 == Tűz
 
@@ -158,9 +155,6 @@ Force vote
 
 Free-View
 == Szabad nézet
-
-Friends
-== Barátok
 
 Fullscreen
 == Teljesképernyő
@@ -349,12 +343,6 @@ Screenshot
 Server address:
 == Szerver címe:
 
-Server details
-== Szerver részletei
-
-Server filter
-== Szerver szűrő
-
 Server info
 == Szerver infó
 
@@ -510,9 +498,6 @@ Netversion:
 
 Map:
 == Pálya:
-
-Info
-== Infó
 
 Miscellaneous
 == Egyéb
@@ -1703,6 +1688,23 @@ None
 Add Clan
 == 
 
+Go back the specified duration
+== 
+
+[Demo player duration]
+%d min.
+== 
+
+[Demo player duration]
+%d sec.
+== 
+
+Change the skip duration
+== 
+
+Go forward the specified duration
+== 
+
 Mark the beginning of a cut (right click to reset)
 == 
 
@@ -1719,6 +1721,9 @@ Cut interval
 == 
 
 Cut length
+== 
+
+Render cut to video
 == 
 
 All combined

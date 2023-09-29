@@ -762,7 +762,7 @@ int CServer::GetClientVersion(int ClientID) const
 {
 	// Assume latest client version for server demos
 	if(ClientID == SERVER_DEMO_CLIENT)
-		return CLIENT_VERSIONNR;
+		return DDNET_VERSION_NUMBER;
 
 	CClientInfo Info;
 	if(GetClientInfo(ClientID, &Info))
@@ -974,11 +974,8 @@ void CServer::DoSnapshot()
 			m_aClients[i].m_Snapshots.Add(m_CurrentGameTick, time_get(), SnapshotSize, pData, 0, nullptr);
 
 			// find snapshot that we can perform delta against
-			static CSnapshot s_EmptySnap;
-			s_EmptySnap.Clear();
-
 			int DeltaTick = -1;
-			CSnapshot *pDeltashot = &s_EmptySnap;
+			const CSnapshot *pDeltashot = CSnapshot::EmptySnapshot();
 			{
 				int DeltashotSize = m_aClients[i].m_Snapshots.Get(m_aClients[i].m_LastAckedSnapshot, 0, &pDeltashot, 0);
 				if(DeltashotSize >= 0)
@@ -3107,16 +3104,20 @@ static int GetAuthLevel(const char *pLevel)
 
 void CServer::AuthRemoveKey(int KeySlot)
 {
-	int NewKeySlot = KeySlot;
-	int OldKeySlot = m_AuthManager.RemoveKey(KeySlot);
+	m_AuthManager.RemoveKey(KeySlot);
 	LogoutKey(KeySlot, "key removal");
 
 	// Update indices.
-	if(OldKeySlot != NewKeySlot)
+	for(auto &Client : m_aClients)
 	{
-		for(auto &Client : m_aClients)
-			if(Client.m_AuthKey == OldKeySlot)
-				Client.m_AuthKey = NewKeySlot;
+		if(Client.m_AuthKey == KeySlot)
+		{
+			Client.m_AuthKey = -1;
+		}
+		else if(Client.m_AuthKey > KeySlot)
+		{
+			--Client.m_AuthKey;
+		}
 	}
 }
 
@@ -3810,6 +3811,7 @@ void CServer::RegisterCommands()
 
 	Console()->Chain("sv_name", ConchainSpecialInfoupdate, this);
 	Console()->Chain("password", ConchainSpecialInfoupdate, this);
+	Console()->Chain("sv_spectator_slots", ConchainSpecialInfoupdate, this);
 
 	Console()->Chain("sv_max_clients_per_ip", ConchainMaxclientsperipUpdate, this);
 	Console()->Chain("access_level", ConchainCommandAccessUpdate, this);

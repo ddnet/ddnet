@@ -149,9 +149,6 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	IGraphics::CTextureHandle m_DebugFont;
 
 	int64_t m_LastRenderTime;
-	float m_RenderFrameTimeLow;
-	float m_RenderFrameTimeHigh;
-	int m_RenderFrames;
 
 	int m_SnapCrcErrors;
 	bool m_AutoScreenshotRecycle;
@@ -164,9 +161,9 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	int m_aCurrentRecvTick[NUM_DUMMIES];
 	int m_aRconAuthed[NUM_DUMMIES];
 	char m_aRconUsername[32];
-	char m_aRconPassword[32];
+	char m_aRconPassword[128];
 	int m_UseTempRconCommands;
-	char m_aPassword[32];
+	char m_aPassword[128];
 	bool m_SendPassword;
 	bool m_ButtonRender = false;
 
@@ -470,6 +467,7 @@ public:
 	static void ConchainWindowBordered(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainWindowScreen(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainWindowVSync(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	static void ConchainWindowResize(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainTimeoutSeed(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainPassword(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainReplays(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
@@ -484,7 +482,7 @@ public:
 	void RegisterCommands();
 
 	const char *DemoPlayer_Play(const char *pFilename, int StorageType) override;
-	void DemoRecorder_Start(const char *pFilename, bool WithTimestamp, int Recorder) override;
+	void DemoRecorder_Start(const char *pFilename, bool WithTimestamp, int Recorder, bool Verbose = false) override;
 	void DemoRecorder_HandleAutoStart() override;
 	void DemoRecorder_StartReplayRecorder();
 	void DemoRecorder_Stop(int Recorder, bool RemoveFile = false) override;

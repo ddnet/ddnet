@@ -355,7 +355,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 
 		if(DDTeam != TEAM_FLOCK)
 		{
-			ColorRGBA Color = color_cast<ColorRGBA>(ColorHSLA(DDTeam / 64.0f, 1.0f, 0.5f, 0.5f));
+			const ColorRGBA Color = m_pClient->GetDDTeamColor(DDTeam).WithAlpha(0.5f);
 			int Corners = 0;
 			if(OldDDTeam != DDTeam)
 				Corners |= IGraphics::CORNER_TL | IGraphics::CORNER_TR;

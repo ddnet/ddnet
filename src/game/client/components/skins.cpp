@@ -234,7 +234,7 @@ const CSkin *CSkins::LoadSkin(const char *pName, CImageInfo &Info)
 	int OrgWeight = 0;
 	int NewWeight = 192;
 
-	// find most common frequence
+	// find most common frequency
 	for(int y = 0; y < BodyHeight; y++)
 		for(int x = 0; x < BodyWidth; x++)
 		{

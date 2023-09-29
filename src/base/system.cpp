@@ -92,29 +92,17 @@
 
 IOHANDLE io_stdin()
 {
-#if defined(CONF_FAMILY_WINDOWS)
-	return GetStdHandle(STD_INPUT_HANDLE);
-#else
 	return stdin;
-#endif
 }
 
 IOHANDLE io_stdout()
 {
-#if defined(CONF_FAMILY_WINDOWS)
-	return GetStdHandle(STD_OUTPUT_HANDLE);
-#else
 	return stdout;
-#endif
 }
 
 IOHANDLE io_stderr()
 {
-#if defined(CONF_FAMILY_WINDOWS)
-	return GetStdHandle(STD_ERROR_HANDLE);
-#else
 	return stderr;
-#endif
 }
 
 IOHANDLE io_current_exe()
@@ -281,20 +269,24 @@ IOHANDLE io_open_impl(const char *filename, int flags)
 	const std::wstring wide_filename = windows_utf8_to_wide(filename);
 	DWORD desired_access;
 	DWORD creation_disposition;
+	const char *open_mode;
 	if((flags & IOFLAG_READ) != 0)
 	{
 		desired_access = FILE_READ_DATA;
 		creation_disposition = OPEN_EXISTING;
+		open_mode = "rb";
 	}
 	else if(flags == IOFLAG_WRITE)
 	{
 		desired_access = FILE_WRITE_DATA;
 		creation_disposition = OPEN_ALWAYS;
+		open_mode = "wb";
 	}
 	else if(flags == IOFLAG_APPEND)
 	{
 		desired_access = FILE_APPEND_DATA;
 		creation_disposition = OPEN_ALWAYS;
+		open_mode = "ab";
 	}
 	else
 	{
@@ -303,8 +295,12 @@ IOHANDLE io_open_impl(const char *filename, int flags)
 	}
 	HANDLE handle = CreateFileW(wide_filename.c_str(), desired_access, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, nullptr, creation_disposition, FILE_ATTRIBUTE_NORMAL, nullptr);
 	if(handle == INVALID_HANDLE_VALUE)
-		return nullptr; // otherwise all existing checks don't work for the invalid handle
-	return handle;
+		return nullptr;
+	const int file_descriptor = _open_osfhandle((intptr_t)handle, 0);
+	dbg_assert(file_descriptor != -1, "_open_osfhandle failure");
+	FILE *file_stream = _fdopen(file_descriptor, open_mode);
+	dbg_assert(file_stream != nullptr, "_fdopen failure");
+	return file_stream;
 #else
 	const char *open_mode;
 	if((flags & IOFLAG_READ) != 0)
@@ -345,13 +341,7 @@ IOHANDLE io_open(const char *filename, int flags)
 
 unsigned io_read(IOHANDLE io, void *buffer, unsigned size)
 {
-#if defined(CONF_FAMILY_WINDOWS)
-	DWORD actual_size;
-	ReadFile((HANDLE)io, buffer, size, &actual_size, nullptr);
-	return actual_size;
-#else
 	return fread(buffer, 1, size, (FILE *)io);
-#endif
 }
 
 void io_read_all(IOHANDLE io, void **result, unsigned *result_len)
@@ -406,25 +396,6 @@ unsigned io_skip(IOHANDLE io, int size)
 
 int io_seek(IOHANDLE io, int offset, int origin)
 {
-#if defined(CONF_FAMILY_WINDOWS)
-	DWORD move_method;
-	switch(origin)
-	{
-	case IOSEEK_START:
-		move_method = FILE_BEGIN;
-		break;
-	case IOSEEK_CUR:
-		move_method = FILE_CURRENT;
-		break;
-	case IOSEEK_END:
-		move_method = FILE_END;
-		break;
-	default:
-		dbg_assert(false, "origin invalid");
-		return -1;
-	}
-	return SetFilePointer((HANDLE)io, offset, nullptr, move_method) == INVALID_SET_FILE_POINTER ? -1 : 0;
-#else
 	int real_origin;
 	switch(origin)
 	{
@@ -442,17 +413,11 @@ int io_seek(IOHANDLE io, int offset, int origin)
 		return -1;
 	}
 	return fseek((FILE *)io, offset, real_origin);
-#endif
 }
 
 long int io_tell(IOHANDLE io)
 {
-#if defined(CONF_FAMILY_WINDOWS)
-	const DWORD position = SetFilePointer((HANDLE)io, 0, nullptr, FILE_CURRENT);
-	return position == INVALID_SET_FILE_POINTER ? -1 : position;
-#else
 	return ftell((FILE *)io);
-#endif
 }
 
 long int io_length(IOHANDLE io)
@@ -466,23 +431,12 @@ long int io_length(IOHANDLE io)
 
 int io_error(IOHANDLE io)
 {
-#if defined(CONF_FAMILY_WINDOWS)
-	// Only works when called directly after the operation that failed
-	return GetLastError();
-#else
 	return ferror((FILE *)io);
-#endif
 }
 
 unsigned io_write(IOHANDLE io, const void *buffer, unsigned size)
 {
-#if defined(CONF_FAMILY_WINDOWS)
-	DWORD actual_size;
-	WriteFile((HANDLE)io, buffer, size, &actual_size, nullptr);
-	return actual_size;
-#else
 	return fwrite(buffer, 1, size, (FILE *)io);
-#endif
 }
 
 bool io_write_newline(IOHANDLE io)
@@ -496,20 +450,12 @@ bool io_write_newline(IOHANDLE io)
 
 int io_close(IOHANDLE io)
 {
-#if defined(CONF_FAMILY_WINDOWS)
-	return CloseHandle((HANDLE)io) == 0;
-#else
 	return fclose((FILE *)io) != 0;
-#endif
 }
 
 int io_flush(IOHANDLE io)
 {
-#if defined(CONF_FAMILY_WINDOWS)
-	return FlushFileBuffers((HANDLE)io) == FALSE;
-#else
 	return fflush((FILE *)io);
-#endif
 }
 
 int io_sync(IOHANDLE io)
@@ -519,7 +465,7 @@ int io_sync(IOHANDLE io)
 		return 1;
 	}
 #if defined(CONF_FAMILY_WINDOWS)
-	return FlushFileBuffers((HANDLE)io) == 0;
+	return FlushFileBuffers((HANDLE)_get_osfhandle(_fileno((FILE *)io))) == FALSE;
 #else
 	return fsync(fileno((FILE *)io)) != 0;
 #endif
@@ -2209,16 +2155,12 @@ int net_would_block()
 #endif
 }
 
-int net_init()
+void net_init()
 {
 #if defined(CONF_FAMILY_WINDOWS)
-	WSADATA wsaData;
-	int err = WSAStartup(MAKEWORD(1, 1), &wsaData);
-	dbg_assert(err == 0, "network initialization failed.");
-	return err == 0 ? 0 : 1;
+	WSADATA wsa_data;
+	dbg_assert(WSAStartup(MAKEWORD(1, 1), &wsa_data) == 0, "network initialization failed.");
 #endif
-
-	return 0;
 }
 
 #if defined(CONF_FAMILY_UNIX)
@@ -4153,15 +4095,32 @@ int kill_process(PROCESS process)
 {
 #if defined(CONF_FAMILY_WINDOWS)
 	BOOL success = TerminateProcess(process, 0);
-	if(success)
+	BOOL is_alive = is_process_alive(process);
+	if(success || !is_alive)
 	{
 		CloseHandle(process);
+		return true;
 	}
-	return success;
+	return false;
 #elif defined(CONF_FAMILY_UNIX)
+	if(!is_process_alive(process))
+		return true;
 	int status;
 	kill(process, SIGTERM);
 	return waitpid(process, &status, 0) != -1;
+#endif
+}
+
+bool is_process_alive(PROCESS process)
+{
+	if(process == INVALID_PROCESS)
+		return false;
+#if defined(CONF_FAMILY_WINDOWS)
+	DWORD exit_code;
+	GetExitCodeProcess(process, &exit_code);
+	return exit_code == STILL_ACTIVE;
+#else
+	return waitpid(process, nullptr, WNOHANG) == 0;
 #endif
 }
 

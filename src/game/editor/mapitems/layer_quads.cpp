@@ -2,6 +2,8 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <game/editor/editor.h>
 
+#include "image.h"
+
 CLayerQuads::CLayerQuads()
 {
 	m_Type = LAYERTYPE_QUADS;

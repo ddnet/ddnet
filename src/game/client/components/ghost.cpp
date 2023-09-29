@@ -608,7 +608,7 @@ void CGhost::OnConsoleInit()
 	m_pGhostLoader = Kernel()->RequestInterface<IGhostLoader>();
 	m_pGhostRecorder = Kernel()->RequestInterface<IGhostRecorder>();
 
-	Console()->Register("gplay", "", CFGFLAG_CLIENT, ConGPlay, this, "");
+	Console()->Register("gplay", "", CFGFLAG_CLIENT, ConGPlay, this, "Start playback of ghosts");
 }
 
 void CGhost::OnMessage(int MsgType, void *pRawMsg)
@@ -675,14 +675,18 @@ void CGhost::RefindSkin()
 		if(!Ghost.Empty())
 		{
 			IntsToStr(&Ghost.m_Skin.m_Skin0, 6, aSkinName);
+			CTeeRenderInfo *pRenderInfo = &Ghost.m_RenderInfo;
 			if(aSkinName[0] != '\0')
 			{
-				CTeeRenderInfo *pRenderInfo = &Ghost.m_RenderInfo;
-
 				const CSkin *pSkin = m_pClient->m_Skins.Find(aSkinName);
 				pRenderInfo->m_OriginalRenderSkin = pSkin->m_OriginalSkin;
 				pRenderInfo->m_ColorableRenderSkin = pSkin->m_ColorableSkin;
 				pRenderInfo->m_SkinMetrics = pSkin->m_Metrics;
+			}
+			else
+			{
+				pRenderInfo->m_OriginalRenderSkin.Reset();
+				pRenderInfo->m_ColorableRenderSkin.Reset();
 			}
 		}
 	}

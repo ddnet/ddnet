@@ -4,6 +4,7 @@
 #modified by:
 #	Chill & PoKeMoN		2023-03-31 16:00:00
 #	Chill & PoKeMoN		2023-07-02 00:54:00
+#	Chill [TD] & PoKeMoN [TD]		2023-09-22 17:49:00
 #	
 ##### /authors #####
 
@@ -147,9 +148,6 @@ Favorites
 Feet
 == Ногі
 
-Filter
-== Фільтр
-
 Fire
 == Стрэл
 
@@ -161,9 +159,6 @@ Force vote
 
 Free-View
 == Вольны агляд
-
-Friends
-== Сябры
 
 Fullscreen
 == Поўнаэкранны рэжым
@@ -358,12 +353,6 @@ Screenshot
 Server address:
 == Адрас сервера:
 
-Server details
-== Дэталі сервера
-
-Server filter
-== Фільтр сервераў
-
 Server info
 == Інфармацыя
 
@@ -531,9 +520,6 @@ Netversion:
 
 Map:
 == Карта:
-
-Info
-== Інфа
 
 Hue
 == Адценне
@@ -1106,7 +1092,7 @@ Show HUD
 == Паказваць HUD
 
 Chat command
-== Камандны чат
+== Каманда чата
 
 Enable controller
 == Уключыць кантролер
@@ -1643,13 +1629,13 @@ Grabs
 == Зах.
 
 1 new mention
-== 1 згадка
+== 1 новая згадка
 
 %d new mentions
-== %d згадак
+== %d новых згадак
 
 9+ new mentions
-== 9+ згадак
+== 9+ новых згадак
 
 A demo with this name already exists
 == Дэма з такой назвай ужо існуе 
@@ -1707,40 +1693,60 @@ Graphics card
 == Відэакарта
 
 Quitting. Please wait…
-== 
+== Выхад. Пачакайце, калі ласка…
 
 Restarting. Please wait…
-== 
+== Перазапуск. Пачакайце, калі ласка…
 
 Multi-View
-== 
+== Мульты-агляд
 
 Rename folder
-== 
+== Пераназваць тэчку
 
 A folder with this name already exists
-== 
+== Тэчка з такой назвай ужо існуе
 
 Unable to rename the folder
-== 
+== Немагчыма пераназваць тэчку
 
 (paused)
-== 
+== (паўза)
+
+Go back the specified duration
+== Назад на выбраную працягласць
+
+[Demo player duration]
+%d min.
+== %d хв.
+
+[Demo player duration]
+%d sec.
+== % сек.
+
+Change the skip duration
+== Змяніць працягласць пропуску
+
+Go forward the specified duration
+== Уперад на выбраную працягласць
+
+Render cut to video
+== Рэндэрыць адрэзак у відэа
 
 All combined
-== 
+== Усе разам
 
 Folder Link
-== 
+== Ярлык тэчкі
 
 Are you sure that you want to delete the folder '%s'?
-== 
+== Вы ўпэўненыя, што хочаце выдаліць тэчку '%s'?
 
 Delete folder
-== 
+== Выдаліць тэчку
 
 Unable to delete the folder '%s'. Make sure it's empty first.
-== 
+== Немагчыма выдаліць тэчку '%s'. Спачатку пераканайцеся, што яна пустая.
 
 Moved ingame
-== 
+== Перамешчаны ў гульні

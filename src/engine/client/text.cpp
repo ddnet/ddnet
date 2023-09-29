@@ -113,7 +113,7 @@ class CAtlas
 	/**
 	 * Sections with a smaller width or height will not be created
 	 * when cutting larger sections, to prevent collecting many
-	 * small, mostly unuseable sections.
+	 * small, mostly unusable sections.
 	 */
 	static constexpr size_t MIN_SECTION_DIMENSION = 6;
 
@@ -227,7 +227,7 @@ public:
 			}
 
 			// We don't iterate sections in the map with increasing width and height at the same time,
-			// because it's slower and doesn't noticable increase the atlas utilization.
+			// because it's slower and doesn't noticeable increase the atlas utilization.
 		}
 
 		// Check vector for larger section
@@ -261,7 +261,7 @@ public:
 			}
 		} while(SectionIndex > 0);
 		if(SmallestLossIndex == m_vSections.size())
-			return false; // No useable section found in vector
+			return false; // No usable section found in vector
 
 		// Use the section with the smallest loss
 		const SSection Section = m_vSections[SmallestLossIndex];
@@ -729,7 +729,7 @@ public:
 		return vec2(0.0f, 0.0f);
 	}
 
-	void UploadEntityLayerText(void *pTexBuff, size_t ImageColorChannelCount, int TexWidth, int TexHeight, int TexSubWidth, int TexSubHeight, const char *pText, int Length, float x, float y, int FontSize)
+	void UploadEntityLayerText(void *pTexBuff, size_t PixelSize, size_t TexWidth, size_t TexHeight, int TexSubWidth, int TexSubHeight, const char *pText, int Length, float x, float y, int FontSize)
 	{
 		if(FontSize < 1)
 			return;
@@ -777,11 +777,11 @@ public:
 					{
 						const int ImgOffX = clamp(x + OffX + WidthLastChars, x, (x + TexSubWidth) - 1);
 						const int ImgOffY = clamp(y + OffY, y, (y + TexSubHeight) - 1);
-						const size_t ImageOffset = ImgOffY * (TexWidth * ImageColorChannelCount) + ImgOffX * ImageColorChannelCount;
+						const size_t ImageOffset = ImgOffY * (TexWidth * PixelSize) + ImgOffX * PixelSize;
 						const size_t GlyphOffset = OffY * pBitmap->width + OffX;
-						for(size_t i = 0; i < ImageColorChannelCount; ++i)
+						for(size_t i = 0; i < PixelSize; ++i)
 						{
-							if(i != ImageColorChannelCount - 1)
+							if(i != PixelSize - 1)
 							{
 								*(pImageBuff + ImageOffset + i) = 255;
 							}
@@ -1574,7 +1574,11 @@ public:
 		float LastCharX = DrawX;
 		float LastCharWidth = 0;
 
+		// Returns true if line was started
 		const auto &&StartNewLine = [&]() {
+			if(pCursor->m_MaxLines > 0 && LineCount >= pCursor->m_MaxLines)
+				return false;
+
 			DrawX = pCursor->m_StartX;
 			DrawY += pCursor->m_AlignedFontSize;
 			if((RenderFlags & TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT) == 0)
@@ -1587,6 +1591,7 @@ public:
 			LastCharX = DrawX;
 			LastCharWidth = 0;
 			++LineCount;
+			return true;
 		};
 
 		if(pCursor->m_CalculateSelectionMode != TEXT_CURSOR_SELECTION_MODE_NONE || pCursor->m_CursorMode != TEXT_CURSOR_CURSOR_MODE_NONE)
@@ -1606,7 +1611,7 @@ public:
 		bool GotNewLine = false;
 		bool GotNewLineLast = false;
 
-		while(pCurrent < pEnd && (pCursor->m_MaxLines < 1 || LineCount <= pCursor->m_MaxLines) && pCurrent != pEllipsis)
+		while(pCurrent < pEnd && pCurrent != pEllipsis)
 		{
 			bool NewLine = false;
 			const char *pBatchEnd = pEnd;
@@ -1667,8 +1672,7 @@ public:
 					if((pCursor->m_Flags & TEXTFLAG_DISALLOW_NEWLINE) == 0)
 					{
 						pLastGlyph = nullptr;
-						StartNewLine();
-						if(pCursor->m_MaxLines > 0 && LineCount > pCursor->m_MaxLines)
+						if(!StartNewLine())
 							break;
 						continue;
 					}
@@ -1859,7 +1863,8 @@ public:
 
 			if(NewLine)
 			{
-				StartNewLine();
+				if(!StartNewLine())
+					break;
 				GotNewLine = true;
 				GotNewLineLast = true;
 			}
@@ -2139,9 +2144,9 @@ public:
 		return TextContainer.m_BoundingBox;
 	}
 
-	void UploadEntityLayerText(void *pTexBuff, size_t ImageColorChannelCount, int TexWidth, int TexHeight, int TexSubWidth, int TexSubHeight, const char *pText, int Length, float x, float y, int FontSize) override
+	void UploadEntityLayerText(void *pTexBuff, size_t PixelSize, size_t TexWidth, size_t TexHeight, int TexSubWidth, int TexSubHeight, const char *pText, int Length, float x, float y, int FontSize) override
 	{
-		m_pGlyphMap->UploadEntityLayerText(pTexBuff, ImageColorChannelCount, TexWidth, TexHeight, TexSubWidth, TexSubHeight, pText, Length, x, y, FontSize);
+		m_pGlyphMap->UploadEntityLayerText(pTexBuff, PixelSize, TexWidth, TexHeight, TexSubWidth, TexSubHeight, pText, Length, x, y, FontSize);
 	}
 
 	int AdjustFontSize(const char *pText, int TextLength, int MaxSize, int MaxWidth) const override

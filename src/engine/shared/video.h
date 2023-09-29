@@ -3,7 +3,9 @@
 
 #include <base/system.h>
 
-typedef void (*ISoundMixFunc)(short *pFinalOut, unsigned Frames);
+#include <functional>
+
+typedef std::function<void(short *pFinalOut, unsigned Frames)> ISoundMixFunc;
 
 class IVideo
 {

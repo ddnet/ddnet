@@ -879,11 +879,9 @@ typedef struct sockaddr_un UNIXSOCKETADDR;
  *
  * @ingroup Network-General
  *
- * @return 0 on success.
- *
  * @remark You must call this function before using any other network functions.
  */
-int net_init();
+void net_init();
 
 /*
 	Function: net_host_lookup
@@ -2649,6 +2647,15 @@ PROCESS shell_execute(const char *file);
 		1 - Success
 */
 int kill_process(PROCESS process);
+
+/**
+ * Checks if a process is alive.
+ * 
+ * @param process Handle/PID of the process.
+ * 
+ * @return bool Returns true if the process is currently running, false if the process is not running (dead).
+ */
+bool is_process_alive(PROCESS process);
 
 /*
 	Function: generate_password

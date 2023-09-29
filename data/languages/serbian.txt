@@ -149,9 +149,6 @@ Favorites
 Feet
 == Stopala
 
-Filter
-== Filter
-
 Fire
 == Pucaj
 
@@ -163,9 +160,6 @@ Force vote
 
 Free-View
 == Slobodan pregled
-
-Friends
-== Prijatelji
 
 Fullscreen
 == Preko celog ekrana
@@ -355,12 +349,6 @@ Screenshot
 
 Server address:
 == Adresa servera:
-
-Server details
-== Detalji o serveru
-
-Server filter
-== Filter servera
 
 Server info
 == O serveru
@@ -561,9 +549,6 @@ Netversion:
 
 Map:
 == Mapa
-
-Info
-== Info
 
 Hue
 == Nijansa
@@ -1507,15 +1492,6 @@ A render command failed. Try to update your GPU drivers.
 Submitting the render commands failed. Try to update your GPU drivers.
 == Неуспешно слање рендерних команди. Покушајте ажурирати драјвере за вашу графичку картицу.
 
-[Graphics error]
-Failed to swap framebuffers. Try to update your GPU drivers.
-== 
-
-[Graphics error]
-Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== Неуспешно замена бафера фреймова. Покушајте ажурирати драјвере за вашу графичку картицу.
-
-[Graphics error]
 Could not initialize the given graphics backend, reverting to the default backend now.
 == Није било могуће иницијализовати дати графички позадину, сада се враћамо на подразумевану позадину.
 
@@ -1748,3 +1724,31 @@ Open the directory to add custom assets
 
 Moved ingame
 == Померено у игри
+
+[Graphics error]
+Failed to swap framebuffers. Try to update your GPU drivers.
+== 
+
+[Graphics error]
+Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== 
+
+Go back the specified duration
+== 
+
+[Demo player duration]
+%d min.
+== 
+
+[Demo player duration]
+%d sec.
+== 
+
+Change the skip duration
+== 
+
+Go forward the specified duration
+== 
+
+Render cut to video
+== 

@@ -164,9 +164,6 @@ Favorites
 Feet
 == Pies
 
-Filter
-== Filtro
-
 Fire
 == Disparar
 
@@ -178,9 +175,6 @@ Force vote
 
 Free-View
 == Vista libre
-
-Friends
-== Amigos
 
 Fullscreen
 == Pantalla completa
@@ -378,12 +372,6 @@ Screenshot
 Server address:
 == IP del servidor:
 
-Server details
-== Detalles del servidor
-
-Server filter
-== Filtro del servidor
-
 Server info
 == Servidor
 
@@ -556,9 +544,6 @@ Netversion:
 
 Map:
 == Mapa:
-
-Info
-== Información
 
 Hue
 == Matiz
@@ -1763,3 +1748,23 @@ Unable to delete the folder '%s'. Make sure it's empty first.
 
 Moved ingame
 == Movido dentro del juego
+
+Go back the specified duration
+== Retroceder el tiempo especificado
+
+[Demo player duration]
+%d min.
+== %d min.
+
+[Demo player duration]
+%d sec.
+== %d seg.
+
+Change the skip duration
+== Cambiar duración del salto
+
+Go forward the specified duration
+== Adelantar el tiempo especificado
+
+Render cut to video
+== Renderizar corte a vídeo

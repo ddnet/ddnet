@@ -18,6 +18,7 @@ public:
 		int m_Country;
 		int m_Score;
 		bool m_IsPlayer;
+		bool m_IsAfk;
 		char m_aSkin[24 + 1];
 		bool m_CustomSkinColors;
 		int m_CustomSkinColorBody;

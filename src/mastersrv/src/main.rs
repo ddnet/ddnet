@@ -718,8 +718,7 @@ fn handle_register(
                 let info = i.as_object().ok_or("register info must be an object")?;
 
                 // Normalize the JSON to strip any spaces etc.
-                let raw_info = json::to_string(&info).unwrap();
-                Ok(json::value::RawValue::from_string(raw_info).unwrap())
+                Ok(json::value::to_raw_value(&info).unwrap())
             })
             .transpose()?;
 

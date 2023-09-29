@@ -1,0 +1,21 @@
+#ifndef GAME_EDITOR_MAPITEMS_SOUND_H
+#define GAME_EDITOR_MAPITEMS_SOUND_H
+
+#include <base/system.h>
+
+#include <game/editor/component.h>
+
+class CEditorSound : public CEditorComponent
+{
+public:
+	explicit CEditorSound(CEditor *pEditor);
+	~CEditorSound();
+
+	int m_SoundID = 0;
+	char m_aName[IO_MAX_PATH_LENGTH] = "";
+
+	void *m_pData = nullptr;
+	unsigned m_DataSize = 0;
+};
+
+#endif

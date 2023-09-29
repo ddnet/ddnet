@@ -147,9 +147,6 @@ Favorites
 Feet
 == Jalat
 
-Filter
-== Suotimet
-
 Fire
 == Ammu
 
@@ -161,9 +158,6 @@ Force vote
 
 Free-View
 == Vapaa näkymä
-
-Friends
-== Ystävät
 
 Fullscreen
 == Koko näyttö
@@ -358,12 +352,6 @@ Screenshot
 Server address:
 == Palvelimen osoite:
 
-Server details
-== Palvelimen yksityiskohdat
-
-Server filter
-== Palvelinsuotimet
-
 Server info
 == Palvelintiedot
 
@@ -531,9 +519,6 @@ Netversion:
 
 Map:
 == Kenttä:
-
-Info
-== Info
 
 Hue
 == Värisävy
@@ -1320,10 +1305,33 @@ Pause the current demo
 Stop the current demo
 == 
 
+Go back the specified duration
+== 
+
+[Demo player duration]
+%d min.
+== 
+
+[Demo player duration]
+%d sec.
+== 
+
+Change the skip duration
+== 
+
+Go forward the specified duration
+== 
+
 Go back one tick
 == 
 
 Go forward one tick
+== 
+
+Go back one marker
+== 
+
+Go forward one marker
 == 
 
 Slow down the demo
@@ -1341,12 +1349,6 @@ Mark the end of a cut (right click to reset)
 Export cut as a separate demo
 == 
 
-Go back one marker
-== 
-
-Go forward one marker
-== 
-
 Close the demo player
 == 
 
@@ -1360,6 +1362,9 @@ Cut interval
 == 
 
 Cut length
+== 
+
+Render cut to video
 == 
 
 Loading demo files
@@ -1422,10 +1427,10 @@ Automatically create statboard csv
 Max CSVs
 == 
 
-Loading skin files
+Toggle to edit your dummy settings
 == 
 
-Toggle to edit your dummy settings
+Loading skin files
 == 
 
 Download community skins
@@ -1443,13 +1448,13 @@ Create a random skin
 Open the directory to add custom skins
 == 
 
+Converse
+== 
+
 Dummy copy
 == 
 
 Hammerfly dummy
-== 
-
-Converse
 == 
 
 Statboard

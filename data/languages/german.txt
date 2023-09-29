@@ -163,9 +163,6 @@ Favorites
 Feet
 == Füße
 
-Filter
-== Filter
-
 Fire
 == Feuern
 
@@ -177,9 +174,6 @@ Force vote
 
 Free-View
 == Freie Ansicht
-
-Friends
-== Freunde
 
 Fullscreen
 == Vollbild
@@ -377,12 +371,6 @@ Screenshot
 Server address:
 == Serveradresse:
 
-Server details
-== Serverdetails
-
-Server filter
-== Filter
-
 Server info
 == Serverinfo
 
@@ -565,9 +553,6 @@ Netversion:
 
 Map:
 == Karte:
-
-Info
-== Info
 
 Hue
 == Farb.
@@ -1760,3 +1745,23 @@ Unable to delete the folder '%s'. Make sure it's empty first.
 
 Moved ingame
 == Im Spiel bewegt
+
+Go back the specified duration
+== Gesetzte Dauer zurück
+
+[Demo player duration]
+%d min.
+== %d Min.
+
+[Demo player duration]
+%d sec.
+== %d Sek.
+
+Change the skip duration
+== Überspring-Dauer ändern
+
+Go forward the specified duration
+== Gesetzte Dauer vorwärts
+
+Render cut to video
+== Schnitt zu Video rendern

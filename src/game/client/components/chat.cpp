@@ -11,12 +11,10 @@
 #include <game/generated/protocol.h>
 
 #include <game/client/animstate.h>
-#include <game/client/gameclient.h>
-
-#include <game/client/components/console.h>
 #include <game/client/components/scoreboard.h>
 #include <game/client/components/skins.h>
 #include <game/client/components/sounds.h>
+#include <game/client/gameclient.h>
 #include <game/localization.h>
 
 #include "chat.h"
@@ -819,6 +817,10 @@ void CChat::RefindSkins()
 
 			Line.m_RenderSkinMetrics = pSkin->m_Metrics;
 		}
+		else
+		{
+			Line.m_RenderSkin.Reset();
+		}
 	}
 }
 
@@ -830,13 +832,9 @@ void CChat::OnPrepareLines()
 
 	float ScreenRatio = Graphics()->ScreenAspect();
 
-	bool IsScoreBoardOpen = m_pClient->m_Scoreboard.Active() && (ScreenRatio > 1.7f); // only assume scoreboard when screen ratio is widescreen(something around 16:9)
-
-	bool ForceRecreate = IsScoreBoardOpen != m_PrevScoreBoardShowed;
-	bool ShowLargeArea = m_Show || g_Config.m_ClShowChat == 2;
-
-	ForceRecreate |= ShowLargeArea != m_PrevShowChat;
-
+	const bool IsScoreBoardOpen = m_pClient->m_Scoreboard.Active() && (ScreenRatio > 1.7f); // only assume scoreboard when screen ratio is widescreen(something around 16:9)
+	const bool ShowLargeArea = m_Show || (m_Mode != MODE_NONE && g_Config.m_ClShowChat == 1) || g_Config.m_ClShowChat == 2;
+	const bool ForceRecreate = IsScoreBoardOpen != m_PrevScoreBoardShowed || ShowLargeArea != m_PrevShowChat;
 	m_PrevScoreBoardShowed = IsScoreBoardOpen;
 	m_PrevShowChat = ShowLargeArea;
 
@@ -979,7 +977,7 @@ void CChat::OnPrepareLines()
 		else if(m_aLines[r].m_NameColor == TEAM_SPECTATORS)
 			NameColor = ColorRGBA(0.75f, 0.5f, 0.75f, 1.f);
 		else if(m_aLines[r].m_ClientID >= 0 && g_Config.m_ClChatTeamColors && m_pClient->m_Teams.Team(m_aLines[r].m_ClientID))
-			NameColor = color_cast<ColorRGBA>(ColorHSLA(m_pClient->m_Teams.Team(m_aLines[r].m_ClientID) / 64.0f, 1.0f, 0.75f));
+			NameColor = m_pClient->GetDDTeamColor(m_pClient->m_Teams.Team(m_aLines[r].m_ClientID), 0.75f);
 		else
 			NameColor = ColorRGBA(0.8f, 0.8f, 0.8f, 1.f);
 
@@ -1037,7 +1035,7 @@ void CChat::OnPrepareLines()
 			TextRender()->UploadTextContainer(m_aLines[r].m_TextContainerIndex);
 	}
 
-	TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+	TextRender()->TextColor(TextRender()->DefaultTextColor());
 }
 
 void CChat::OnRender()
@@ -1186,9 +1184,9 @@ void CChat::OnRender()
 				RenderTools()->RenderTee(pIdleState, &RenderInfo, EMOTE_NORMAL, vec2(1, 0.1f), TeeRenderPos, Blend);
 			}
 
-			ColorRGBA TextOutline(0.f, 0.f, 0.f, 0.3f * Blend);
-			ColorRGBA Text(1.f, 1.f, 1.f, Blend);
-			TextRender()->RenderTextContainer(m_aLines[r].m_TextContainerIndex, Text, TextOutline, 0, (y + RealMsgPaddingY / 2.0f) - m_aLines[r].m_TextYOffset);
+			const ColorRGBA TextColor = TextRender()->DefaultTextColor().WithMultipliedAlpha(Blend);
+			const ColorRGBA TextOutlineColor = TextRender()->DefaultTextOutlineColor().WithMultipliedAlpha(Blend);
+			TextRender()->RenderTextContainer(m_aLines[r].m_TextContainerIndex, TextColor, TextOutlineColor, 0, (y + RealMsgPaddingY / 2.0f) - m_aLines[r].m_TextYOffset);
 		}
 	}
 }

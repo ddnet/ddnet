@@ -585,7 +585,7 @@ void CVideo::ReadRGBFromGL(size_t ThreadIndex)
 {
 	uint32_t Width;
 	uint32_t Height;
-	uint32_t Format;
+	CImageInfo::EImageFormat Format;
 	m_pGraphics->GetReadPresentedImageDataFuncUnsafe()(Width, Height, Format, m_vPixelHelper[ThreadIndex]);
 }
 

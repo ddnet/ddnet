@@ -1,5 +1,7 @@
 #include <game/editor/editor.h>
 
+#include "image.h"
+
 void CEditorMap::OnModify()
 {
 	m_Modified = true;

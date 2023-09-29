@@ -149,9 +149,6 @@ Favorites
 Feet
 == Stopy
 
-Filter
-== Filtr
-
 Fire
 == Strzał
 
@@ -163,9 +160,6 @@ Force vote
 
 Free-View
 == Wolna kamera
-
-Friends
-== Znajomi
 
 Fullscreen
 == Pełny ekran
@@ -360,12 +354,6 @@ Screenshot
 Server address:
 == Adres serwera:
 
-Server details
-== Szczegóły serwera
-
-Server filter
-== Filtr serwerów
-
 Server info
 == Info serwera
 
@@ -550,9 +538,6 @@ Netversion:
 
 Map:
 == Mapa:
-
-Info
-== Info
 
 Hue
 == Kolor
@@ -1465,10 +1450,33 @@ Pause the current demo
 Stop the current demo
 == 
 
+Go back the specified duration
+== 
+
+[Demo player duration]
+%d min.
+== 
+
+[Demo player duration]
+%d sec.
+== 
+
+Change the skip duration
+== 
+
+Go forward the specified duration
+== 
+
 Go back one tick
 == 
 
 Go forward one tick
+== 
+
+Go back one marker
+== 
+
+Go forward one marker
 == 
 
 Slow down the demo
@@ -1486,12 +1494,6 @@ Mark the end of a cut (right click to reset)
 Export cut as a separate demo
 == 
 
-Go back one marker
-== 
-
-Go forward one marker
-== 
-
 Close the demo player
 == 
 
@@ -1505,6 +1507,9 @@ Cut interval
 == 
 
 Cut length
+== 
+
+Render cut to video
 == 
 
 Loading demo files

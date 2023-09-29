@@ -94,9 +94,6 @@ Favorites
 Feet
 == Ноги
 
-Filter
-== Фільтр
-
 Fire
 == Постріл
 
@@ -266,9 +263,6 @@ Scoreboard
 Screenshot
 == Скріншот
 
-Server details
-== Деталі сервера
-
 Server info
 == Інформація
 
@@ -378,9 +372,6 @@ FSAA samples
 
 Your skin
 == Ваш скін
-
-Info
-== Інформація
 
 Hue
 == Відтінок
@@ -532,9 +523,6 @@ Search
 Exclude
 == Виключити
 
-Server filter
-== Фільтр серверів
-
 Count players only
 == Рахувати тільки гравців
 
@@ -564,9 +552,6 @@ Countries
 
 Types
 == Типи
-
-Friends
-== Друзі
 
 Remove
 == Видалити
@@ -1744,3 +1729,23 @@ Graphics card
 
 Moved ingame
 == Перемістився в грі
+
+Go back the specified duration
+== Повернутися на вказаний проміжок часу
+
+[Demo player duration]
+%d min.
+== %d хв.
+
+[Demo player duration]
+%d sec.
+== %d сек.
+
+Change the skip duration
+== Змінити тривалість пропуску
+
+Go forward the specified duration
+== Перейти вперед на вказаний проміжок часу
+
+Render cut to video
+== Відтворити вирізку відео
