@@ -876,6 +876,7 @@ void CCharacter::TickDeferred()
 			m_ReckoningTick = Server()->Tick();
 			m_SendCore = m_Core;
 			m_ReckoningCore = m_Core;
+			m_ReckoningCore.SetCoreWorld(nullptr, Collision(), nullptr);
 			m_Core.m_Reset = false;
 		}
 	}
