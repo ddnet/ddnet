@@ -3477,11 +3477,11 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		Button.VSplitLeft(120.0f, &KeyLabel, &Button);
 		Button.VSplitLeft(100, &Button, 0);
 		char aBuf[64];
-		str_format(aBuf, sizeof(aBuf), "%s:", Localize((const char *)Key.m_Name));
+		str_format(aBuf, sizeof(aBuf), "%s:", Localize((const char *)Key.m_pName));
 
 		UI()->DoLabel(&KeyLabel, aBuf, 20.0f, TEXTALIGN_LEFT);
 		int OldId = Key.m_KeyId, OldModifierCombination = Key.m_ModifierCombination, NewModifierCombination;
-		int NewId = DoKeyReader((void *)&Key.m_Name, &Button, OldId, OldModifierCombination, &NewModifierCombination);
+		int NewId = DoKeyReader((void *)&Key.m_pName, &Button, OldId, OldModifierCombination, &NewModifierCombination);
 		if(NewId != OldId || NewModifierCombination != OldModifierCombination)
 		{
 			if(OldId != 0 || NewId == 0)
@@ -3612,11 +3612,11 @@ void CMenus::RenderSettingsTClient(CUIRect MainView)
 		Button.VSplitLeft(120.0f, &KeyLabel, &Button);
 		Button.VSplitLeft(100, &Button, 0);
 		char aBuf[64];
-		str_format(aBuf, sizeof(aBuf), "%s:", Localize((const char *)Key.m_Name));
+		str_format(aBuf, sizeof(aBuf), "%s:", Localize((const char *)Key.m_pName));
 
 		UI()->DoLabel(&KeyLabel, aBuf, 13.0f, TEXTALIGN_LEFT);
 		int OldId = Key.m_KeyId, OldModifierCombination = Key.m_ModifierCombination, NewModifierCombination;
-		int NewId = DoKeyReader((void *)&Key.m_Name, &Button, OldId, OldModifierCombination, &NewModifierCombination);
+		int NewId = DoKeyReader((void *)&Key.m_pName, &Button, OldId, OldModifierCombination, &NewModifierCombination);
 		if(NewId != OldId || NewModifierCombination != OldModifierCombination)
 		{
 			if(OldId != 0 || NewId == 0)

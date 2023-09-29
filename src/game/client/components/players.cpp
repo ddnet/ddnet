@@ -1261,8 +1261,9 @@ void CPlayers::OnRender()
 			m_aRenderInfo[i].m_TeeRenderFlags |= TEE_EFFECT_FROZEN;
 
 		const CGameClient::CSnapState::CCharacterInfo &CharacterInfo = m_pClient->m_Snap.m_aCharacters[i];
-		if (((CharacterInfo.m_Cur.m_Weapon == WEAPON_NINJA || Frozen) && g_Config.m_ClShowNinja) || (g_Config.m_ClAmIFrozen && g_Config.m_ClFreezeUpdateFix 
-		&& m_pClient->m_Snap.m_LocalClientID == i && g_Config.m_ClShowNinja) || (Frozen && !m_pClient->m_GameInfo.m_NoSkinChangeForFrozen && g_Config.m_ClShowNinja))
+		const bool Frozen = CharacterInfo.m_HasExtendedData && CharacterInfo.m_ExtendedData.m_FreezeEnd != 0;
+
+		if(((CharacterInfo.m_Cur.m_Weapon == WEAPON_NINJA || Frozen) && g_Config.m_ClShowNinja) || (g_Config.m_ClAmIFrozen && g_Config.m_ClFreezeUpdateFix && m_pClient->m_Snap.m_LocalClientID == i && g_Config.m_ClShowNinja) || (Frozen && !m_pClient->m_GameInfo.m_NoSkinChangeForFrozen && g_Config.m_ClShowNinja))
 		{
 			// change the skin for the player to the ninja
 			const auto *pSkin = m_pClient->m_Skins.FindOrNullptr("x_ninja");

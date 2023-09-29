@@ -13,7 +13,7 @@
 
 void COutlines::OnRender()
 {
-	if(GameClient()->m_MapLayersBackGround.m_OnlineOnly && Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK)
+	if(GameClient()->m_MapLayersBackground.m_OnlineOnly && Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		return;
 	if(!g_Config.m_ClOverlayEntities && g_Config.m_ClOutlineEntities)
 		return;
