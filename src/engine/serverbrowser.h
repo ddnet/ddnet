@@ -35,12 +35,19 @@ public:
 		NUM_LOCS,
 	};
 
-	enum
+	enum EClientScoreKind
 	{
 		CLIENT_SCORE_KIND_UNSPECIFIED,
 		CLIENT_SCORE_KIND_POINTS,
 		CLIENT_SCORE_KIND_TIME,
 		CLIENT_SCORE_KIND_TIME_BACKCOMPAT,
+	};
+
+	enum ERankState
+	{
+		RANK_UNAVAILABLE,
+		RANK_RANKED,
+		RANK_UNRANKED,
 	};
 
 	class CClient
@@ -73,20 +80,21 @@ public:
 
 	int m_QuickSearchHit;
 	int m_FriendState;
+	int m_FriendNum;
 
 	int m_MaxClients;
 	int m_NumClients;
 	int m_MaxPlayers;
 	int m_NumPlayers;
 	int m_Flags;
-	int m_ClientScoreKind;
+	EClientScoreKind m_ClientScoreKind;
 	TRISTATE m_Favorite;
 	TRISTATE m_FavoriteAllowPing;
 	bool m_Official;
 	int m_Location;
 	bool m_LatencyIsEstimated;
 	int m_Latency; // in ms
-	int m_HasRank;
+	ERankState m_HasRank;
 	char m_aGameType[16];
 	char m_aName[64];
 	char m_aMap[MAX_MAP_LENGTH];

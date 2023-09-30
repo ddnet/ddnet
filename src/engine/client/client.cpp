@@ -3,11 +3,6 @@
 
 #define _WIN32_WINNT 0x0501
 
-#include <climits>
-#include <new>
-#include <stack>
-#include <tuple>
-
 #include <base/hash.h>
 #include <base/hash_ctxt.h>
 #include <base/logger.h>
@@ -15,9 +10,6 @@
 #include <base/system.h>
 
 #include <engine/external/json-parser/json.h>
-
-#include <game/client/components/menus.h>
-#include <game/generated/protocol.h>
 
 #include <engine/config.h>
 #include <engine/console.h>
@@ -35,7 +27,6 @@
 #include <engine/storage.h>
 #include <engine/textrender.h>
 
-#include <engine/client/notifications.h>
 #include <engine/shared/assertion_logger.h>
 #include <engine/shared/compression.h>
 #include <engine/shared/config.h>
@@ -52,13 +43,14 @@
 #include <engine/shared/snapshot.h>
 #include <engine/shared/uuid_manager.h>
 
+#include <game/generated/protocol.h>
 #include <game/localization.h>
 #include <game/version.h>
 
-#include <engine/client/demoedit.h>
-
 #include "client.h"
+#include "demoedit.h"
 #include "friends.h"
+#include "notifications.h"
 #include "serverbrowser.h"
 
 #if defined(CONF_VIDEORECORDER)
@@ -71,7 +63,11 @@
 #endif
 
 #include <chrono>
+#include <climits>
+#include <new>
+#include <stack>
 #include <thread>
+#include <tuple>
 
 using namespace std::chrono_literals;
 
@@ -2379,11 +2375,8 @@ void CClient::FinishDDNetInfo()
 	{
 		m_pStorage->RenameFile(m_aDDNetInfoTmp, DDNET_INFO, IStorage::TYPE_SAVE);
 		LoadDDNetInfo();
-
-		if(g_Config.m_UiPage == CMenus::PAGE_DDNET)
-			m_ServerBrowser.Refresh(IServerBrowser::TYPE_DDNET);
-		else if(g_Config.m_UiPage == CMenus::PAGE_KOG)
-			m_ServerBrowser.Refresh(IServerBrowser::TYPE_KOG);
+		if(m_ServerBrowser.GetCurrentType() == IServerBrowser::TYPE_DDNET || m_ServerBrowser.GetCurrentType() == IServerBrowser::TYPE_KOG)
+			m_ServerBrowser.Refresh(m_ServerBrowser.GetCurrentType());
 	}
 	else
 	{
