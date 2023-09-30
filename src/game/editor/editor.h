@@ -995,6 +995,7 @@ public:
 		POPEVENT_SAVE,
 		POPEVENT_SAVE_COPY,
 		POPEVENT_SAVE_IMG,
+		POPEVENT_SAVE_SOUND,
 		POPEVENT_LARGELAYER,
 		POPEVENT_PREVENTUNUSEDTILES,
 		POPEVENT_IMAGEDIV16,
@@ -1288,6 +1289,7 @@ public:
 	static bool CallbackSaveCopyMap(const char *pFileName, int StorageType, void *pUser);
 	static bool CallbackAddTileart(const char *pFilepath, int StorageType, void *pUser);
 	static bool CallbackSaveImage(const char *pFileName, int StorageType, void *pUser);
+	static bool CallbackSaveSound(const char *pFileName, int StorageType, void *pUser);
 
 	void PopupSelectImageInvoke(int Current, float x, float y);
 	int PopupSelectImageResult();

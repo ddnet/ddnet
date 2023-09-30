@@ -1546,6 +1546,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupImage(void *pContext, CUIRect View, 
 		if(pEditor->DoButton_MenuItem(&s_ExportButton, "Export", 0, &Slot, 0, "Export the image"))
 		{
 			pEditor->InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_IMG, "Save image", "Save", "mapres", false, CallbackSaveImage, pEditor);
+			pEditor->m_FileDialogFileNameInput.Set(pImg->m_aName);
 			return CUI::POPUP_CLOSE_CURRENT;
 		}
 	}
@@ -1560,6 +1561,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupSound(void *pContext, CUIRect View, 
 	static int s_ReaddButton = 0;
 	static int s_ReplaceButton = 0;
 	static int s_RemoveButton = 0;
+	static int s_ExportButton = 0;
 
 	CUIRect Slot;
 	View.HSplitTop(12.0f, &Slot, &View);
@@ -1612,6 +1614,15 @@ CUI::EPopupMenuFunctionResult CEditor::PopupSound(void *pContext, CUIRect View, 
 	{
 		pEditor->m_Map.m_vpSounds.erase(pEditor->m_Map.m_vpSounds.begin() + pEditor->m_SelectedSound);
 		pEditor->m_Map.ModifySoundIndex(gs_ModifyIndexDeleted(pEditor->m_SelectedSound));
+		return CUI::POPUP_CLOSE_CURRENT;
+	}
+
+	View.HSplitTop(5.0f, nullptr, &View);
+	View.HSplitTop(12.0f, &Slot, &View);
+	if(pEditor->DoButton_MenuItem(&s_ExportButton, "Export", 0, &Slot, 0, "Export sound"))
+	{
+		pEditor->InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_SOUND, "Save sound", "Save", "mapres", false, CallbackSaveSound, pEditor);
+		pEditor->m_FileDialogFileNameInput.Set(pSound->m_aName);
 		return CUI::POPUP_CLOSE_CURRENT;
 	}
 
@@ -1767,6 +1778,11 @@ CUI::EPopupMenuFunctionResult CEditor::PopupEvent(void *pContext, CUIRect View, 
 		pTitle = "Save image";
 		pMessage = "The file already exists.\n\nDo you want to overwrite the image?";
 	}
+	else if(pEditor->m_PopupEventType == POPEVENT_SAVE_SOUND)
+	{
+		pTitle = "Save sound";
+		pMessage = "The file already exists.\n\nDo you want to overwrite the sound?";
+	}
 	else if(pEditor->m_PopupEventType == POPEVENT_LARGELAYER)
 	{
 		pTitle = "Large layer";
@@ -1889,6 +1905,11 @@ CUI::EPopupMenuFunctionResult CEditor::PopupEvent(void *pContext, CUIRect View, 
 		else if(pEditor->m_PopupEventType == POPEVENT_SAVE_IMG)
 		{
 			CallbackSaveImage(pEditor->m_aFileSaveName, IStorage::TYPE_SAVE, pEditor);
+			return CUI::POPUP_CLOSE_CURRENT;
+		}
+		else if(pEditor->m_PopupEventType == POPEVENT_SAVE_SOUND)
+		{
+			CallbackSaveSound(pEditor->m_aFileSaveName, IStorage::TYPE_SAVE, pEditor);
 			return CUI::POPUP_CLOSE_CURRENT;
 		}
 		else if(pEditor->m_PopupEventType == POPEVENT_PLACE_BORDER_TILES)
