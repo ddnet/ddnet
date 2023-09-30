@@ -35,7 +35,7 @@ public:
 		NUM_LOCS,
 	};
 
-	enum
+	enum EClientScoreKind
 	{
 		CLIENT_SCORE_KIND_UNSPECIFIED,
 		CLIENT_SCORE_KIND_POINTS,
@@ -79,7 +79,7 @@ public:
 	int m_MaxPlayers;
 	int m_NumPlayers;
 	int m_Flags;
-	int m_ClientScoreKind;
+	EClientScoreKind m_ClientScoreKind;
 	TRISTATE m_Favorite;
 	TRISTATE m_FavoriteAllowPing;
 	bool m_Official;

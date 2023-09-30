@@ -3,7 +3,6 @@
 #include "json.h"
 #include <base/math.h>
 #include <engine/external/json-parser/json.h>
-#include <engine/serverbrowser.h>
 
 #include <cstdio>
 
