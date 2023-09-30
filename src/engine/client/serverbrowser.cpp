@@ -439,25 +439,12 @@ int CServerBrowser::SortHash() const
 	return i;
 }
 
-void UpdateFilteredPlayers(CServerInfo &Item)
-{
-	Item.m_NumFilteredPlayers = g_Config.m_BrFilterSpectators ? Item.m_NumPlayers : Item.m_NumClients;
-	if(g_Config.m_BrFilterConnectingPlayers)
-	{
-		for(const auto &Client : Item.m_aClients)
-		{
-			if((!g_Config.m_BrFilterSpectators || Client.m_Player) && str_comp(Client.m_aName, "(connecting)") == 0 && Client.m_aClan[0] == '\0')
-				Item.m_NumFilteredPlayers--;
-		}
-	}
-}
-
 void CServerBrowser::Sort()
 {
-	// fill m_NumFilteredPlayers
+	// update number of filtered players
 	for(int i = 0; i < m_NumServers; i++)
 	{
-		UpdateFilteredPlayers(m_ppServerlist[i]->m_Info);
+		UpdateServerFilteredPlayers(&m_ppServerlist[i]->m_Info);
 	}
 
 	// create filtered list
@@ -1326,6 +1313,19 @@ void CServerBrowser::LoadDDNetInfoJson()
 			char aBuf[64];
 			str_format(aBuf, sizeof(aBuf), "cannot parse location from info.json: '%s'", (const char *)Location);
 			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "serverbrowser", aBuf);
+		}
+	}
+}
+
+void CServerBrowser::UpdateServerFilteredPlayers(CServerInfo *pInfo) const
+{
+	pInfo->m_NumFilteredPlayers = g_Config.m_BrFilterSpectators ? pInfo->m_NumPlayers : pInfo->m_NumClients;
+	if(g_Config.m_BrFilterConnectingPlayers)
+	{
+		for(const auto &Client : pInfo->m_aClients)
+		{
+			if((!g_Config.m_BrFilterSpectators || Client.m_Player) && str_comp(Client.m_aName, "(connecting)") == 0 && Client.m_aClan[0] == '\0')
+				pInfo->m_NumFilteredPlayers--;
 		}
 	}
 }
