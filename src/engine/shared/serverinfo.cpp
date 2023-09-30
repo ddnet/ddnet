@@ -119,7 +119,6 @@ bool CServerInfo2::FromJsonRaw(CServerInfo2 *pOut, const json_value *pJson)
 		Error = Error || Country.type != json_integer;
 		Error = Error || Score.type != json_integer;
 		Error = Error || IsPlayer.type != json_boolean;
-		Error = Error || IsAfk.type != json_boolean;
 		if(Error)
 		{
 			return true;
@@ -132,7 +131,10 @@ bool CServerInfo2::FromJsonRaw(CServerInfo2 *pOut, const json_value *pJson)
 			pClient->m_Country = json_int_get(&Country);
 			pClient->m_Score = json_int_get(&Score);
 			pClient->m_IsPlayer = IsPlayer;
-			pClient->m_IsAfk = IsAfk;
+
+			pClient->m_IsAfk = false;
+			if(IsAfk.type == json_boolean)
+				pClient->m_IsAfk = IsAfk;
 
 			// check if a skin is also available
 			bool HasSkin = false;
