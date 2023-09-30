@@ -12,6 +12,7 @@
 
 #include <engine/client.h>
 #include <engine/console.h>
+#include <engine/gfx/image_loader.h>
 #include <engine/gfx/image_manipulation.h>
 #include <engine/graphics.h>
 #include <engine/input.h>
@@ -781,6 +782,61 @@ bool CEditor::CallbackSaveCopyMap(const char *pFileName, int StorageType, void *
 	else
 	{
 		pEditor->ShowFileDialogError("Failed to save map to file '%s'.", pFileName);
+		return false;
+	}
+}
+
+bool CEditor::CallbackSaveImage(const char *pFileName, int StorageType, void *pUser)
+{
+	dbg_assert(StorageType == IStorage::TYPE_SAVE, "Saving only allowed for IStorage::TYPE_SAVE");
+
+	CEditor *pEditor = static_cast<CEditor *>(pUser);
+	char aBuf[IO_MAX_PATH_LENGTH];
+
+	// add file extension
+	if(!str_endswith(pFileName, ".png"))
+	{
+		str_format(aBuf, sizeof(aBuf), "%s.png", pFileName);
+		pFileName = aBuf;
+	}
+
+	std::shared_ptr<CEditorImage> pImg = pEditor->m_Map.m_vpImages[pEditor->m_SelectedImage];
+
+	EImageFormat OutputFormat;
+	switch(pImg->m_Format)
+	{
+	case CImageInfo::FORMAT_RGB:
+		OutputFormat = IMAGE_FORMAT_RGB;
+		break;
+	case CImageInfo::FORMAT_RGBA:
+		OutputFormat = IMAGE_FORMAT_RGBA;
+		break;
+	case CImageInfo::FORMAT_SINGLE_COMPONENT:
+		OutputFormat = IMAGE_FORMAT_R;
+		break;
+	default:
+		pEditor->ShowFileDialogError("Image has invalid format.");
+		return false;
+	};
+
+	TImageByteBuffer ByteBuffer;
+	SImageByteBuffer ImageByteBuffer(&ByteBuffer);
+	if(SavePNG(OutputFormat, static_cast<const uint8_t *>(pImg->m_pData), ImageByteBuffer, pImg->m_Width, pImg->m_Height))
+	{
+		IOHANDLE File = pEditor->Storage()->OpenFile(pFileName, IOFLAG_WRITE, StorageType);
+		if(File)
+		{
+			io_write(File, &ByteBuffer.front(), ByteBuffer.size());
+			io_close(File);
+			pEditor->m_Dialog = DIALOG_NONE;
+			return true;
+		}
+		pEditor->ShowFileDialogError("Failed to open file '%s'.", pFileName);
+		return false;
+	}
+	else
+	{
+		pEditor->ShowFileDialogError("Failed to write image to file.");
 		return false;
 	}
 }
@@ -4115,7 +4171,7 @@ void CEditor::RenderImagesList(CUIRect ToolBox)
 				if(Result == 2)
 				{
 					const std::shared_ptr<CEditorImage> pImg = m_Map.m_vpImages[m_SelectedImage];
-					const int Height = pImg->m_External || IsVanillaImage(pImg->m_aName) ? 73 : 56;
+					const int Height = !pImg->m_External && IsVanillaImage(pImg->m_aName) ? 90 : 73;
 					static SPopupMenuId s_PopupImageId;
 					UI()->DoPopupMenu(&s_PopupImageId, UI()->MouseX(), UI()->MouseY(), 120, Height, this, PopupImage);
 				}
@@ -4739,7 +4795,12 @@ void CEditor::RenderFileDialog()
 				str_append(m_aFileSaveName, FILETYPE_EXTENSIONS[m_FileDialogFileType]);
 			if(!str_comp(m_pFileDialogButtonText, "Save") && Storage()->FileExists(m_aFileSaveName, StorageType))
 			{
-				m_PopupEventType = m_pfnFileDialogFunc == &CallbackSaveCopyMap ? POPEVENT_SAVE_COPY : POPEVENT_SAVE;
+				if(m_pfnFileDialogFunc == &CallbackSaveMap)
+					m_PopupEventType = POPEVENT_SAVE;
+				else if(m_pfnFileDialogFunc == &CallbackSaveCopyMap)
+					m_PopupEventType = POPEVENT_SAVE_COPY;
+				else
+					m_PopupEventType = POPEVENT_SAVE_IMG;
 				m_PopupEventActivated = true;
 			}
 			else if(m_pfnFileDialogFunc)
