@@ -815,7 +815,7 @@ bool CEditor::CallbackSaveImage(const char *pFileName, int StorageType, void *pU
 		OutputFormat = IMAGE_FORMAT_R;
 		break;
 	default:
-		pEditor->ShowFileDialogError("Image has invalid format.");
+		dbg_assert(false, "Image has invalid format.");
 		return false;
 	};
 
@@ -839,6 +839,33 @@ bool CEditor::CallbackSaveImage(const char *pFileName, int StorageType, void *pU
 		pEditor->ShowFileDialogError("Failed to write image to file.");
 		return false;
 	}
+}
+
+bool CEditor::CallbackSaveSound(const char *pFileName, int StorageType, void *pUser)
+{
+	dbg_assert(StorageType == IStorage::TYPE_SAVE, "Saving only allowed for IStorage::TYPE_SAVE");
+
+	CEditor *pEditor = static_cast<CEditor *>(pUser);
+	char aBuf[IO_MAX_PATH_LENGTH];
+
+	// add file extension
+	if(!str_endswith(pFileName, ".opus"))
+	{
+		str_format(aBuf, sizeof(aBuf), "%s.opus", pFileName);
+		pFileName = aBuf;
+	}
+	std::shared_ptr<CEditorSound> pSound = pEditor->m_Map.m_vpSounds[pEditor->m_SelectedSound];
+	IOHANDLE File = pEditor->Storage()->OpenFile(pFileName, IOFLAG_WRITE, StorageType);
+
+	if(File)
+	{
+		io_write(File, pSound->m_pData, pSound->m_DataSize);
+		io_close(File);
+		pEditor->m_Dialog = DIALOG_NONE;
+		return true;
+	}
+	pEditor->ShowFileDialogError("Failed to open file '%s'.", pFileName);
+	return false;
 }
 
 void CEditor::DoToolbarLayers(CUIRect ToolBar)
@@ -4287,7 +4314,7 @@ void CEditor::RenderSounds(CUIRect ToolBox)
 			if(Result == 2)
 			{
 				static SPopupMenuId s_PopupSoundId;
-				UI()->DoPopupMenu(&s_PopupSoundId, UI()->MouseX(), UI()->MouseY(), 120, 56, this, PopupSound);
+				UI()->DoPopupMenu(&s_PopupSoundId, UI()->MouseX(), UI()->MouseY(), 120, 73, this, PopupSound);
 			}
 		}
 	}
@@ -4799,8 +4826,10 @@ void CEditor::RenderFileDialog()
 					m_PopupEventType = POPEVENT_SAVE;
 				else if(m_pfnFileDialogFunc == &CallbackSaveCopyMap)
 					m_PopupEventType = POPEVENT_SAVE_COPY;
-				else
+				else if(m_pfnFileDialogFunc == &CallbackSaveImage)
 					m_PopupEventType = POPEVENT_SAVE_IMG;
+				else
+					m_PopupEventType = POPEVENT_SAVE_SOUND;
 				m_PopupEventActivated = true;
 			}
 			else if(m_pfnFileDialogFunc)
