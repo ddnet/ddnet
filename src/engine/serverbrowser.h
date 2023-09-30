@@ -43,6 +43,13 @@ public:
 		CLIENT_SCORE_KIND_TIME_BACKCOMPAT,
 	};
 
+	enum ERankState
+	{
+		RANK_UNAVAILABLE,
+		RANK_RANKED,
+		RANK_UNRANKED,
+	};
+
 	class CClient
 	{
 	public:
@@ -86,7 +93,7 @@ public:
 	int m_Location;
 	bool m_LatencyIsEstimated;
 	int m_Latency; // in ms
-	int m_HasRank;
+	ERankState m_HasRank;
 	char m_aGameType[16];
 	char m_aName[64];
 	char m_aMap[MAX_MAP_LENGTH];

@@ -666,7 +666,7 @@ CServerBrowser::CServerEntry *CServerBrowser::Add(const NETADDR *pAddrs, int Num
 	pEntry->m_Info.m_NumAddresses = NumAddrs;
 
 	pEntry->m_Info.m_Latency = 999;
-	pEntry->m_Info.m_HasRank = -1;
+	pEntry->m_Info.m_HasRank = CServerInfo::RANK_UNAVAILABLE;
 	ServerBrowserFormatAddresses(pEntry->m_Info.m_aAddress, sizeof(pEntry->m_Info.m_aAddress), pEntry->m_Info.m_aAddresses, pEntry->m_Info.m_NumAddresses);
 	str_copy(pEntry->m_Info.m_aName, pEntry->m_Info.m_aAddress, sizeof(pEntry->m_Info.m_aName));
 
@@ -1275,14 +1275,14 @@ void CServerBrowser::LoadDDNetRanks()
 	}
 }
 
-int CServerBrowser::HasRank(const char *pMap)
+CServerInfo::ERankState CServerBrowser::HasRank(const char *pMap)
 {
 	if(m_ServerlistType != IServerBrowser::TYPE_DDNET || !m_pDDNetInfo)
-		return -1;
+		return CServerInfo::RANK_UNAVAILABLE;
 
 	const json_value &Ranks = (*m_pDDNetInfo)["maps"];
 	if(Ranks.type != json_array)
-		return -1;
+		return CServerInfo::RANK_UNAVAILABLE;
 
 	for(unsigned i = 0; i < Ranks.u.array.length; ++i)
 	{
@@ -1291,10 +1291,10 @@ int CServerBrowser::HasRank(const char *pMap)
 			continue;
 
 		if(str_comp(pMap, Entry.u.string.ptr) == 0)
-			return 1;
+			return CServerInfo::RANK_RANKED;
 	}
 
-	return 0;
+	return CServerInfo::RANK_UNRANKED;
 }
 
 void CServerBrowser::LoadDDNetInfoJson()

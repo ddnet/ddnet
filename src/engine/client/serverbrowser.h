@@ -59,7 +59,7 @@ public:
 	void LoadDDNetServers();
 	void LoadDDNetInfoJson();
 	const json_value *LoadDDNetInfo();
-	int HasRank(const char *pMap);
+	CServerInfo::ERankState HasRank(const char *pMap);
 
 	const std::vector<CCommunity> &Communities() const override;
 	const CCommunity *Community(const char *pCommunityId) const override;
