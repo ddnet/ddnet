@@ -542,14 +542,30 @@ void CEditor::DeselectQuadPoints()
 	m_SelectedQuadPoints = 0;
 }
 
-void CEditor::SelectQuadPoint(int Index)
+void CEditor::SelectQuadPoint(int QuadIndex, int Index)
 {
+	SelectQuad(QuadIndex);
 	m_SelectedQuadPoints = 1 << Index;
 }
 
-void CEditor::ToggleSelectQuadPoint(int Index)
+void CEditor::ToggleSelectQuadPoint(int QuadIndex, int Index)
 {
-	m_SelectedQuadPoints ^= 1 << Index;
+	if(IsQuadPointSelected(QuadIndex, Index))
+	{
+		m_SelectedQuadPoints ^= 1 << Index;
+	}
+	else
+	{
+		if(!IsQuadSelected(QuadIndex))
+		{
+			ToggleSelectQuad(QuadIndex);
+		}
+
+		if(!(m_SelectedQuadPoints & 1 << Index))
+		{
+			m_SelectedQuadPoints ^= 1 << Index;
+		}
+	}
 }
 
 void CEditor::DeleteSelectedQuads()
@@ -575,9 +591,14 @@ bool CEditor::IsQuadSelected(int Index) const
 	return FindSelectedQuadIndex(Index) >= 0;
 }
 
-bool CEditor::IsQuadPointSelected(int Index) const
+bool CEditor::IsQuadCornerSelected(int Index) const
 {
 	return m_SelectedQuadPoints & (1 << Index);
+}
+
+bool CEditor::IsQuadPointSelected(int QuadIndex, int Index) const
+{
+	return IsQuadSelected(QuadIndex) && IsQuadCornerSelected(Index);
 }
 
 int CEditor::FindSelectedQuadIndex(int Index) const
@@ -1643,7 +1664,7 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 	float py = fx2f(pQuad->m_aPoints[V].y);
 
 	// draw selection background
-	if(IsQuadPointSelected(V))
+	if(IsQuadPointSelected(QuadIndex, V))
 	{
 		Graphics()->SetColor(0, 0, 0, 1);
 		IGraphics::CQuadItem QuadItem(px, py, 7.0f * m_MouseWScale, 7.0f * m_MouseWScale);
@@ -1676,8 +1697,8 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 
 				if(x * x + y * y > 20.0f)
 				{
-					if(!IsQuadPointSelected(V))
-						SelectQuadPoint(V);
+					if(!IsQuadPointSelected(QuadIndex, V))
+						SelectQuadPoint(QuadIndex, V);
 
 					if(Input()->ShiftIsPressed())
 					{
@@ -1701,7 +1722,7 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 
 				for(int m = 0; m < 4; m++)
 				{
-					if(IsQuadPointSelected(m))
+					if(IsQuadPointSelected(QuadIndex, m))
 					{
 						pQuad->m_aPoints[m].x += OffsetX;
 						pQuad->m_aPoints[m].y += OffsetY;
@@ -1712,7 +1733,7 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 			{
 				for(int m = 0; m < 4; m++)
 				{
-					if(IsQuadPointSelected(m))
+					if(IsQuadPointSelected(QuadIndex, m))
 					{
 						// 0,2;1,3 - line x
 						// 0,1;2,3 - line y
@@ -1752,9 +1773,9 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 				if(s_Operation == OP_SELECT)
 				{
 					if(Input()->ShiftIsPressed())
-						ToggleSelectQuadPoint(V);
+						ToggleSelectQuadPoint(QuadIndex, V);
 					else
-						SelectQuadPoint(V);
+						SelectQuadPoint(QuadIndex, V);
 				}
 
 				UI()->DisableMouseLock();
@@ -1786,8 +1807,8 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 
 			UI()->SetActiveItem(pID);
 
-			if(!IsQuadPointSelected(V))
-				SelectQuadPoint(V);
+			if(!IsQuadPointSelected(QuadIndex, V))
+				SelectQuadPoint(QuadIndex, V);
 		}
 	}
 	else
@@ -2530,6 +2551,7 @@ void CEditor::DoMapEditor(CUIRect View)
 						std::shared_ptr<CLayerQuads> pQuadLayer = std::static_pointer_cast<CLayerQuads>(GetSelectedLayerType(0, LAYERTYPE_QUADS));
 						if(Input()->ShiftIsPressed() && pQuadLayer)
 						{
+							DeselectQuads();
 							for(size_t i = 0; i < pQuadLayer->m_vQuads.size(); i++)
 							{
 								const CQuad &Quad = pQuadLayer->m_vQuads[i];
@@ -2537,7 +2559,7 @@ void CEditor::DoMapEditor(CUIRect View)
 								float py = fx2f(Quad.m_aPoints[4].y);
 
 								if(r.Inside(px, py) && !IsQuadSelected(i))
-									SelectQuad(i);
+									ToggleSelectQuad(i);
 							}
 						}
 						else

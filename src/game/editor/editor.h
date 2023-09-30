@@ -950,11 +950,12 @@ public:
 	void ToggleSelectQuad(int Index);
 	void DeselectQuads();
 	void DeselectQuadPoints();
-	void SelectQuadPoint(int Index);
-	void ToggleSelectQuadPoint(int Index);
+	void SelectQuadPoint(int QuadIndex, int Index);
+	void ToggleSelectQuadPoint(int QuadIndex, int Index);
 	void DeleteSelectedQuads();
 	bool IsQuadSelected(int Index) const;
-	bool IsQuadPointSelected(int Index) const;
+	bool IsQuadCornerSelected(int Index) const;
+	bool IsQuadPointSelected(int QuadIndex, int Index) const;
 	int FindSelectedQuadIndex(int Index) const;
 
 	int FindEnvPointIndex(int Index, int Channel) const;
