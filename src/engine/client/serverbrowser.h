@@ -125,6 +125,7 @@ private:
 	int m_NumRequests;
 
 	bool m_NeedResort;
+	int m_Sorthash;
 
 	// used instead of g_Config.br_max_requests to get more servers
 	int m_CurrentMaxRequests;
@@ -133,10 +134,6 @@ private:
 	int m_NumSortedServersCapacity;
 	int m_NumServers;
 	int m_NumServerCapacity;
-
-	int m_Sorthash;
-	char m_aFilterString[64];
-	char m_aFilterGametypeString[128];
 
 	int m_ServerlistType;
 	int64_t m_BroadcastTime;

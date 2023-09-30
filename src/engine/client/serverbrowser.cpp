@@ -66,15 +66,12 @@ CServerBrowser::CServerBrowser()
 	m_NumRequests = 0;
 
 	m_NeedResort = false;
+	m_Sorthash = 0;
 
 	m_NumSortedServers = 0;
 	m_NumSortedServersCapacity = 0;
 	m_NumServers = 0;
 	m_NumServerCapacity = 0;
-
-	m_Sorthash = 0;
-	m_aFilterString[0] = '\0';
-	m_aFilterGametypeString[0] = '\0';
 
 	m_ServerlistType = 0;
 	m_BroadcastTime = 0;
@@ -476,8 +473,6 @@ void CServerBrowser::Sort()
 	else if(g_Config.m_BrSort == IServerBrowser::SORT_GAMETYPE)
 		std::stable_sort(m_pSortedServerlist, m_pSortedServerlist + m_NumSortedServers, CSortWrap(this, &CServerBrowser::SortCompareGametype));
 
-	str_copy(m_aFilterGametypeString, g_Config.m_BrFilterGametype);
-	str_copy(m_aFilterString, g_Config.m_BrFilterString);
 	m_Sorthash = SortHash();
 }
 
