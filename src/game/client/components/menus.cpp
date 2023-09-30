@@ -1220,6 +1220,10 @@ int CMenus::Render()
 		{
 			pTitle = Localize("Render demo");
 		}
+		else if(m_Popup == POPUP_RENDER_DONE)
+		{
+			pTitle = Localize("Render complete");
+		}
 #endif
 		else if(m_Popup == POPUP_PASSWORD)
 		{
@@ -1674,6 +1678,50 @@ int CMenus::Render()
 			TextBox.VSplitRight(60.0f, &TextBox, 0);
 			UI()->DoLabel(&Label, Localize("Video name:"), 18.0f, TEXTALIGN_ML);
 			UI()->DoEditBox(&m_DemoRenderInput, &TextBox, 12.0f);
+		}
+		else if(m_Popup == POPUP_RENDER_DONE)
+		{
+			CUIRect TextBox, Ok, OpenFolder;
+
+			char aFilePath[IO_MAX_PATH_LENGTH];
+			char aSaveFolder[IO_MAX_PATH_LENGTH];
+			Storage()->GetCompletePath(Storage()->TYPE_SAVE, "videos", aSaveFolder, sizeof(aSaveFolder));
+			str_format(aFilePath, sizeof(aFilePath), "%s/%s.mp4", aSaveFolder, m_DemoRenderInput.GetString());
+
+			Box.HSplitBottom(20.f, &Box, &Part);
+			Box.HSplitBottom(24.f, &Box, &Part);
+			Part.VMargin(80.0f, &Part);
+
+			Part.VSplitMid(&OpenFolder, &Ok);
+
+			Ok.VMargin(20.0f, &Ok);
+			OpenFolder.VMargin(20.0f, &OpenFolder);
+
+			static CButtonContainer s_ButtonOpenFolder;
+			if(DoButton_Menu(&s_ButtonOpenFolder, Localize("Videos directory"), 0, &OpenFolder))
+			{
+				if(!open_file(aSaveFolder))
+				{
+					dbg_msg("menus", "couldn't open file '%s'", aBuf);
+				}
+			}
+
+			static CButtonContainer s_ButtonOk;
+			if(DoButton_Menu(&s_ButtonOk, Localize("Ok"), 0, &Ok) || UI()->ConsumeHotkey(CUI::HOTKEY_ENTER))
+			{
+				m_Popup = POPUP_NONE;
+				m_DemoRenderInput.Clear();
+			}
+
+			Box.HSplitBottom(160.f, &Box, &Part);
+
+			Part.VSplitLeft(60.0f, nullptr, &TextBox);
+			TextBox.VSplitLeft(20.0f, nullptr, &TextBox);
+			TextBox.VSplitRight(60.0f, &TextBox, nullptr);
+
+			str_format(aBuf, sizeof(aBuf), Localize("Video was saved to '%s'"), aFilePath);
+
+			UI()->DoLabel(&TextBox, aBuf, 18.0f, TEXTALIGN_TL);
 		}
 #endif
 		else if(m_Popup == POPUP_FIRST_LAUNCH)
