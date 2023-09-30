@@ -1,6 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <engine/keys.h>
+#include <engine/shared/config.h>
 
 #include "lineinput.h"
 #include "ui.h"
@@ -111,6 +112,9 @@ void CLineInput::UpdateStrData()
 
 const char *CLineInput::GetDisplayedString()
 {
+	if(m_pfnDisplayTextCallback)
+		return m_pfnDisplayTextCallback(m_pStr, GetNumChars());
+
 	if(!IsHidden())
 		return m_pStr;
 
@@ -167,18 +171,18 @@ void CLineInput::SetSelection(size_t Start, size_t End)
 	m_WasChanged = true;
 }
 
-size_t CLineInput::OffsetFromActualToDisplay(size_t ActualOffset) const
+size_t CLineInput::OffsetFromActualToDisplay(size_t ActualOffset)
 {
-	if(!IsHidden())
-		return ActualOffset;
-	return str_utf8_offset_bytes_to_chars(m_pStr, ActualOffset);
+	if(IsHidden() || (m_pfnCalculateOffsetCallback && m_pfnCalculateOffsetCallback()))
+		return str_utf8_offset_bytes_to_chars(m_pStr, ActualOffset);
+	return ActualOffset;
 }
 
-size_t CLineInput::OffsetFromDisplayToActual(size_t DisplayOffset) const
+size_t CLineInput::OffsetFromDisplayToActual(size_t DisplayOffset)
 {
-	if(!IsHidden())
-		return DisplayOffset;
-	return str_utf8_offset_chars_to_bytes(m_pStr, DisplayOffset);
+	if(IsHidden() || (m_pfnCalculateOffsetCallback && m_pfnCalculateOffsetCallback()))
+		return str_utf8_offset_bytes_to_chars(m_pStr, DisplayOffset);
+	return DisplayOffset;
 }
 
 bool CLineInput::ProcessInput(const IInput::CEvent &Event)
