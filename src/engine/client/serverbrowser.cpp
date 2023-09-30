@@ -11,26 +11,20 @@
 #include <vector>
 
 #include <base/hash_ctxt.h>
-#include <base/math.h>
 #include <base/system.h>
 
 #include <engine/shared/config.h>
 #include <engine/shared/json.h>
 #include <engine/shared/masterserver.h>
-#include <engine/shared/memheap.h>
 #include <engine/shared/network.h>
 #include <engine/shared/protocol.h>
 #include <engine/shared/serverinfo.h>
 
-#include <engine/config.h>
 #include <engine/console.h>
 #include <engine/engine.h>
 #include <engine/favorites.h>
 #include <engine/friends.h>
-#include <engine/serverbrowser.h>
 #include <engine/storage.h>
-
-#include <engine/external/json-parser/json.h>
 
 #include <game/client/components/menus.h> // PAGE_DDNET
 
@@ -173,6 +167,16 @@ void CServerBrowser::Con_LeakIpAddress(IConsole::IResult *pResult, void *pUserDa
 			Addr = NextAddr;
 		}
 	}
+}
+
+int CServerBrowser::Players(const CServerInfo &Item) const
+{
+	return g_Config.m_BrFilterSpectators ? Item.m_NumPlayers : Item.m_NumClients;
+}
+
+int CServerBrowser::Max(const CServerInfo &Item) const
+{
+	return g_Config.m_BrFilterSpectators ? Item.m_MaxPlayers : Item.m_MaxClients;
 }
 
 const CServerInfo *CServerBrowser::SortedGet(int Index) const

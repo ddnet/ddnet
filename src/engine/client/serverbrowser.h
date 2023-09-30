@@ -7,12 +7,11 @@
 
 #include <engine/console.h>
 #include <engine/serverbrowser.h>
-#include <engine/shared/config.h>
-#include <engine/shared/http.h>
 #include <engine/shared/memheap.h>
 
 #include <unordered_map>
 
+typedef struct _json_value json_value;
 class CNetClient;
 class IConfigManager;
 class IConsole;
@@ -49,17 +48,8 @@ public:
 	void RequestResort() { m_NeedResort = true; }
 
 	int NumServers() const override { return m_NumServers; }
-
-	int Players(const CServerInfo &Item) const override
-	{
-		return g_Config.m_BrFilterSpectators ? Item.m_NumPlayers : Item.m_NumClients;
-	}
-
-	int Max(const CServerInfo &Item) const override
-	{
-		return g_Config.m_BrFilterSpectators ? Item.m_MaxPlayers : Item.m_MaxClients;
-	}
-
+	int Players(const CServerInfo &Item) const override;
+	int Max(const CServerInfo &Item) const override;
 	int NumSortedServers() const override { return m_NumSortedServers; }
 	const CServerInfo *SortedGet(int Index) const override;
 
