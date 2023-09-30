@@ -1030,8 +1030,8 @@ void CMenus::RenderServerbrowserInfo(CUIRect View)
 				if(DoButton_CheckBox_Tristate(&s_LeakIpButton, Localize("Leak IP"), pSelectedServer->m_FavoriteAllowPing, &ButtonLeakIp))
 				{
 					Favorites()->AllowPing(pSelectedServer->m_aAddresses, pSelectedServer->m_NumAddresses, pSelectedServer->m_FavoriteAllowPing == TRISTATE::NONE);
+					Client()->ServerBrowserUpdate();
 				}
-				Client()->ServerBrowserUpdate();
 			}
 		}
 
