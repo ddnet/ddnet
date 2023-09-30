@@ -88,6 +88,7 @@ public:
 
 private:
 	CNetClient *m_pNetClient = nullptr;
+	IConfigManager *m_pConfigManager = nullptr;
 	IConsole *m_pConsole = nullptr;
 	IEngine *m_pEngine = nullptr;
 	IFriends *m_pFriends = nullptr;

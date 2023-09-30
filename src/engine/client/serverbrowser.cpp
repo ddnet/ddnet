@@ -26,8 +26,6 @@
 #include <engine/friends.h>
 #include <engine/storage.h>
 
-#include <game/client/components/menus.h> // PAGE_DDNET
-
 class CSortWrap
 {
 	typedef bool (CServerBrowser::*SortFunc)(int, int) const;
@@ -91,6 +89,7 @@ void CServerBrowser::SetBaseInfo(class CNetClient *pClient, const char *pNetVers
 	m_pNetClient = pClient;
 	str_copy(m_aNetVersion, pNetVersion);
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
+	m_pConfigManager = Kernel()->RequestInterface<IConfigManager>();
 	m_pEngine = Kernel()->RequestInterface<IEngine>();
 	m_pFavorites = Kernel()->RequestInterface<IFavorites>();
 	m_pFriends = Kernel()->RequestInterface<IFriends>();
@@ -1334,7 +1333,7 @@ const char *CServerBrowser::GetTutorialServer()
 {
 	// Use DDNet tab as default after joining tutorial, also makes sure Find() actually works
 	// Note that when no server info has been loaded yet, this will not return a result immediately.
-	g_Config.m_UiPage = CMenus::PAGE_DDNET;
+	m_pConfigManager->Reset("ui_page");
 	Refresh(IServerBrowser::TYPE_DDNET);
 
 	const CCommunity *pCommunity = Community(COMMUNITY_DDNET);
