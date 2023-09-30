@@ -248,19 +248,6 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 		if(ListItem.m_Selected)
 			m_SelectedIndex = i;
 
-		// update friend counter
-		int FriendsOnServer = 0;
-		if(pItem->m_FriendState != IFriends::FRIEND_NO)
-		{
-			for(int j = 0; j < pItem->m_NumReceivedClients; ++j)
-			{
-				if(pItem->m_aClients[j].m_FriendState != IFriends::FRIEND_NO)
-				{
-					FriendsOnServer++;
-				}
-			}
-		}
-
 		if(!ListItem.m_Visible)
 		{
 			// reset active item, if not visible
@@ -374,9 +361,9 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 					Button.VSplitRight(50.0f, &Icon, &Button);
 					Icon.Margin(2.0f, &Icon);
 					RenderBrowserIcons(*pUiElement->Rect(UI_ELEM_FRIEND_ICON), &Icon, ColorRGBA(0.94f, 0.4f, 0.4f, 1.0f), TextRender()->DefaultTextOutlineColor(), FONT_ICON_HEART, TEXTALIGN_MC);
-					if(FriendsOnServer > 1)
+					if(pItem->m_FriendNum > 1)
 					{
-						str_from_int(FriendsOnServer, aTemp);
+						str_from_int(pItem->m_FriendNum, aTemp);
 						TextRender()->TextColor(0.94f, 0.8f, 0.8f, 1.0f);
 						UI()->DoLabel(&Icon, aTemp, 9.0f, TEXTALIGN_MC);
 						TextRender()->TextColor(TextRender()->DefaultTextColor());

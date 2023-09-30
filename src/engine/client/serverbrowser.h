@@ -60,6 +60,7 @@ public:
 	void LoadDDNetInfoJson();
 	const json_value *LoadDDNetInfo();
 	void UpdateServerFilteredPlayers(CServerInfo *pInfo) const;
+	void UpdateServerFriends(CServerInfo *pInfo) const;
 	CServerInfo::ERankState HasRank(const char *pMap);
 
 	const std::vector<CCommunity> &Communities() const override;

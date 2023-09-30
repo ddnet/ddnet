@@ -408,14 +408,7 @@ void CServerBrowser::Filter()
 
 		if(!Filtered)
 		{
-			// check for friend
-			Info.m_FriendState = IFriends::FRIEND_NO;
-			for(int p = 0; p < minimum(Info.m_NumClients, (int)MAX_CLIENTS); p++)
-			{
-				Info.m_aClients[p].m_FriendState = m_pFriends->GetFriendState(Info.m_aClients[p].m_aName,
-					Info.m_aClients[p].m_aClan);
-				Info.m_FriendState = maximum(Info.m_FriendState, Info.m_aClients[p].m_FriendState);
-			}
+			UpdateServerFriends(&Info);
 
 			if(!g_Config.m_BrFilterFriends || Info.m_FriendState != IFriends::FRIEND_NO)
 				m_pSortedServerlist[m_NumSortedServers++] = i;
@@ -1327,6 +1320,19 @@ void CServerBrowser::UpdateServerFilteredPlayers(CServerInfo *pInfo) const
 			if((!g_Config.m_BrFilterSpectators || Client.m_Player) && str_comp(Client.m_aName, "(connecting)") == 0 && Client.m_aClan[0] == '\0')
 				pInfo->m_NumFilteredPlayers--;
 		}
+	}
+}
+
+void CServerBrowser::UpdateServerFriends(CServerInfo *pInfo) const
+{
+	pInfo->m_FriendState = IFriends::FRIEND_NO;
+	pInfo->m_FriendNum = 0;
+	for(int ClientIndex = 0; ClientIndex < minimum(pInfo->m_NumReceivedClients, (int)MAX_CLIENTS); ClientIndex++)
+	{
+		pInfo->m_aClients[ClientIndex].m_FriendState = m_pFriends->GetFriendState(pInfo->m_aClients[ClientIndex].m_aName, pInfo->m_aClients[ClientIndex].m_aClan);
+		pInfo->m_FriendState = maximum(pInfo->m_FriendState, pInfo->m_aClients[ClientIndex].m_FriendState);
+		if(pInfo->m_aClients[ClientIndex].m_FriendState != IFriends::FRIEND_NO)
+			pInfo->m_FriendNum++;
 	}
 }
 
