@@ -220,6 +220,8 @@ public:
 	bool m_VotedForPractice;
 	int m_SwapTargetsClientID; //Client ID of the swap target for the given player
 	bool m_BirthdayAnnounced;
+
+	vec2 LastTelePos;
 };
 
 #endif
