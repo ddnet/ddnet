@@ -169,9 +169,7 @@ protected:
 		IGraphics::CTextureHandle m_GreyTexture;
 	};
 	std::vector<CMenuImage> m_vMenuImages;
-
 	static int MenuImageScan(const char *pName, int IsDir, int DirType, void *pUser);
-
 	const CMenuImage *FindMenuImage(const char *pName);
 
 	// loading

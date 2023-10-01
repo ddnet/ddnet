@@ -2195,58 +2195,52 @@ int CMenus::DoButton_CheckBox_Tristate(const void *pID, const char *pText, TRIST
 
 int CMenus::MenuImageScan(const char *pName, int IsDir, int DirType, void *pUser)
 {
-	CMenus *pSelf = (CMenus *)pUser;
-	if(IsDir || !str_endswith(pName, ".png"))
+	const char *pExtension = ".png";
+	CMenuImage MenuImage;
+	CMenus *pSelf = static_cast<CMenus *>(pUser);
+	if(IsDir || !str_endswith(pName, pExtension) || str_length(pName) - str_length(pExtension) >= (int)sizeof(MenuImage.m_aName))
 		return 0;
 
-	char aBuf[IO_MAX_PATH_LENGTH];
-	bool ImgExists = false;
-	for(const auto &Img : pSelf->m_vMenuImages)
+	char aPath[IO_MAX_PATH_LENGTH];
+	str_format(aPath, sizeof(aPath), "menuimages/%s", pName);
+
+	CImageInfo Info;
+	if(!pSelf->Graphics()->LoadPNG(&Info, aPath, DirType))
 	{
-		str_format(aBuf, std::size(aBuf), "%s.png", Img.m_aName);
-		if(str_comp(aBuf, pName) == 0)
-		{
-			ImgExists = true;
-			break;
-		}
+		char aError[IO_MAX_PATH_LENGTH + 64];
+		str_format(aError, sizeof(aError), "Failed to load menu image from '%s'", aPath);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "menus", aError);
+		return 0;
 	}
-
-	if(!ImgExists)
+	if(Info.m_Format != CImageInfo::FORMAT_RGBA)
 	{
-		str_format(aBuf, sizeof(aBuf), "menuimages/%s", pName);
-		CImageInfo Info;
-		if(!pSelf->Graphics()->LoadPNG(&Info, aBuf, DirType))
-		{
-			str_format(aBuf, sizeof(aBuf), "failed to load menu image from %s", pName);
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "game", aBuf);
-			return 0;
-		}
-
-		CMenuImage MenuImage;
-		MenuImage.m_OrgTexture = pSelf->Graphics()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, Info.m_Format, 0);
-
-		unsigned char *pData = (unsigned char *)Info.m_pData;
-
-		// create colorless version
-		const size_t Step = Info.PixelSize();
-
-		// make the texture gray scale
-		for(int i = 0; i < Info.m_Width * Info.m_Height; i++)
-		{
-			int v = (pData[i * Step] + pData[i * Step + 1] + pData[i * Step + 2]) / 3;
-			pData[i * Step] = v;
-			pData[i * Step + 1] = v;
-			pData[i * Step + 2] = v;
-		}
-
-		MenuImage.m_GreyTexture = pSelf->Graphics()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, Info.m_Format, 0);
 		pSelf->Graphics()->FreePNG(&Info);
-
-		// set menu image data
-		str_truncate(MenuImage.m_aName, sizeof(MenuImage.m_aName), pName, str_length(pName) - 4);
-		pSelf->m_vMenuImages.push_back(MenuImage);
-		pSelf->RenderLoading(Localize("Loading DDNet Client"), Localize("Loading menu images"), 1);
+		char aError[IO_MAX_PATH_LENGTH + 64];
+		str_format(aError, sizeof(aError), "Failed to load menu image from '%s': must be an RGBA image", aPath);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "menus", aError);
+		return 0;
 	}
+
+	MenuImage.m_OrgTexture = pSelf->Graphics()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, Info.m_Format, 0);
+
+	// create gray scale version
+	unsigned char *pData = static_cast<unsigned char *>(Info.m_pData);
+	const size_t Step = Info.PixelSize();
+	for(int i = 0; i < Info.m_Width * Info.m_Height; i++)
+	{
+		int v = (pData[i * Step] + pData[i * Step + 1] + pData[i * Step + 2]) / 3;
+		pData[i * Step] = v;
+		pData[i * Step + 1] = v;
+		pData[i * Step + 2] = v;
+	}
+	MenuImage.m_GreyTexture = pSelf->Graphics()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, Info.m_Format, 0);
+	pSelf->Graphics()->FreePNG(&Info);
+
+	str_truncate(MenuImage.m_aName, sizeof(MenuImage.m_aName), pName, str_length(pName) - str_length(pExtension));
+	pSelf->m_vMenuImages.push_back(MenuImage);
+
+	pSelf->RenderLoading(Localize("Loading DDNet Client"), Localize("Loading menu images"), 1);
+
 	return 0;
 }
 
