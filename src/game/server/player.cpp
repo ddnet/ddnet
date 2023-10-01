@@ -286,6 +286,9 @@ void CPlayer::Tick()
 void CPlayer::PostTick()
 {
 	// update latency value
+	if(m_PlayerFlags & PLAYERFLAG_IN_MENU)
+		m_aCurLatency[m_ClientID] = GameServer()->m_apPlayers[m_ClientID]->m_Latency.m_Min;
+
 	if(m_PlayerFlags & PLAYERFLAG_SCOREBOARD)
 	{
 		for(int i = 0; i < MAX_CLIENTS; ++i)
