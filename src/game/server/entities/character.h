@@ -217,8 +217,6 @@ public:
 	int m_SpawnTick;
 	int m_WeaponChangeTick;
 
-	vec2 LastTelePos;
-
 	// Setters/Getters because i don't want to modify vanilla vars access modifiers
 	int GetLastWeapon() { return m_LastWeapon; }
 	void SetLastWeapon(int LastWeap) { m_LastWeapon = LastWeap; }
