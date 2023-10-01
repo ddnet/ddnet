@@ -235,6 +235,7 @@ public:
 	virtual int Max(const CServerInfo &Item) const = 0;
 
 	virtual int NumSortedServers() const = 0;
+	virtual int NumSortedPlayers() const = 0;
 	virtual const CServerInfo *SortedGet(int Index) const = 0;
 
 	virtual const std::vector<CCommunity> &Communities() const = 0;
