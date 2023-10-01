@@ -51,6 +51,7 @@ public:
 	int Players(const CServerInfo &Item) const override;
 	int Max(const CServerInfo &Item) const override;
 	int NumSortedServers() const override { return m_NumSortedServers; }
+	int NumSortedPlayers() const override { return m_NumSortedPlayers; }
 	const CServerInfo *SortedGet(int Index) const override;
 
 	const char *GetTutorialServer() override;
@@ -125,6 +126,7 @@ private:
 
 	int m_NumSortedServers;
 	int m_NumSortedServersCapacity;
+	int m_NumSortedPlayers;
 	int m_NumServers;
 	int m_NumServerCapacity;
 

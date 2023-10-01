@@ -517,14 +517,10 @@ void CMenus::RenderServerbrowserStatusBox(CUIRect StatusBox, bool WasListboxItem
 			str_format(aBuf, sizeof(aBuf), Localize("%d of %d server"), ServerBrowser()->NumSortedServers(), ServerBrowser()->NumServers());
 		UI()->DoLabel(&ServersOnline, aBuf, 12.0f, TEXTALIGN_MR);
 
-		int NumPlayers = 0;
-		for(int i = 0; i < ServerBrowser()->NumSortedServers(); i++)
-			NumPlayers += ServerBrowser()->SortedGet(i)->m_NumFilteredPlayers;
-
-		if(NumPlayers != 1)
-			str_format(aBuf, sizeof(aBuf), Localize("%d players"), NumPlayers);
+		if(ServerBrowser()->NumSortedPlayers() != 1)
+			str_format(aBuf, sizeof(aBuf), Localize("%d players"), ServerBrowser()->NumSortedPlayers());
 		else
-			str_format(aBuf, sizeof(aBuf), Localize("%d player"), NumPlayers);
+			str_format(aBuf, sizeof(aBuf), Localize("%d player"), ServerBrowser()->NumSortedPlayers());
 		UI()->DoLabel(&PlayersOnline, aBuf, 12.0f, TEXTALIGN_MR);
 	}
 

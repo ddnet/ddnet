@@ -62,6 +62,7 @@ CServerBrowser::CServerBrowser()
 
 	m_NumSortedServers = 0;
 	m_NumSortedServersCapacity = 0;
+	m_NumSortedPlayers = 0;
 	m_NumServers = 0;
 	m_NumServerCapacity = 0;
 
@@ -265,6 +266,7 @@ bool CServerBrowser::SortCompareNumPlayersAndPing(int Index1, int Index2) const
 void CServerBrowser::Filter()
 {
 	m_NumSortedServers = 0;
+	m_NumSortedPlayers = 0;
 
 	// allocate the sorted list
 	if(m_NumSortedServersCapacity < m_NumServers)
@@ -411,7 +413,10 @@ void CServerBrowser::Filter()
 			UpdateServerFriends(&Info);
 
 			if(!g_Config.m_BrFilterFriends || Info.m_FriendState != IFriends::FRIEND_NO)
+			{
+				m_NumSortedPlayers += Info.m_NumFilteredPlayers;
 				m_pSortedServerlist[m_NumSortedServers++] = i;
+			}
 		}
 	}
 }
@@ -1051,6 +1056,7 @@ void CServerBrowser::CleanUp()
 	m_ServerlistHeap.Reset();
 	m_NumServers = 0;
 	m_NumSortedServers = 0;
+	m_NumSortedPlayers = 0;
 	m_ByAddr.clear();
 	m_pFirstReqServer = nullptr;
 	m_pLastReqServer = nullptr;
