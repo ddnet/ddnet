@@ -1518,8 +1518,11 @@ void CGameContext::ConTele(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	vec2 Pos = pPlayer->m_ViewPos;
-
-	if(pResult->NumArguments() > 0)
+	if(pResult->NumArguments() == 0 && !pPlayer->IsPaused())
+	{
+		Pos = Pos + vec2(pChr->Core()->m_Input.m_TargetX, pChr->Core()->m_Input.m_TargetY);
+	}
+	else if(pResult->NumArguments() > 0)
 	{
 		int ClientID;
 		for(ClientID = 0; ClientID < MAX_CLIENTS; ClientID++)

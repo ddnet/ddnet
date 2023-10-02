@@ -383,9 +383,15 @@ void CGameContext::ConTeleport(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	CCharacter *pChr = pSelf->GetPlayerChar(Tele);
-	if(pChr && pSelf->GetPlayerChar(TeleTo))
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+
+	if(pChr && pPlayer && pSelf->GetPlayerChar(TeleTo))
 	{
-		pSelf->Teleport(pChr, pSelf->m_apPlayers[TeleTo]->m_ViewPos);
+		vec2 Pos = pSelf->m_apPlayers[TeleTo]->m_ViewPos;
+		if(!pPlayer->IsPaused() && !pResult->NumArguments())
+			Pos = Pos + vec2(pChr->Core()->m_Input.m_TargetX, pChr->Core()->m_Input.m_TargetY);
+
+		pSelf->Teleport(pChr, Pos);
 		pChr->UnFreeze();
 		pChr->Core()->m_Vel = vec2(0, 0);
 	}
