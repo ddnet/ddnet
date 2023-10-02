@@ -404,7 +404,7 @@ void CPlayers::RenderPlayer(
 
 	m_pClient->m_Flow.Add(Position, Vel * 100.0f, 10.0f);
 
-	RenderInfo.m_GotAirJump = Player.m_Jumped & 2 ? 0 : 1;
+	RenderInfo.m_GotAirJump = Player.m_Jumped & 2 ? false : true;
 
 	RenderInfo.m_FeetFlipped = false;
 

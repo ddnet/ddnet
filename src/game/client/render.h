@@ -34,7 +34,7 @@ public:
 		m_ColorBody = ColorRGBA(1, 1, 1);
 		m_ColorFeet = ColorRGBA(1, 1, 1);
 		m_Size = 1.0f;
-		m_GotAirJump = 1;
+		m_GotAirJump = true;
 		m_TeeRenderFlags = 0;
 	};
 
@@ -49,7 +49,7 @@ public:
 	ColorRGBA m_ColorBody;
 	ColorRGBA m_ColorFeet;
 	float m_Size;
-	int m_GotAirJump;
+	bool m_GotAirJump;
 	int m_TeeRenderFlags;
 	bool m_FeetFlipped;
 };
