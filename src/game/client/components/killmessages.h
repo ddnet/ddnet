@@ -20,15 +20,13 @@ public:
 	{
 		int m_Weapon;
 
-		int m_VictimID;
-		int m_VictimTeam;
+		int m_aVictimIds[MAX_KILLMSG_TEAM_MEMBERS];
 		int m_VictimDDTeam;
 		char m_aVictimName[64];
 		STextContainerIndex m_VictimTextContainerIndex;
 		float m_VictimTextWidth;
-		CTeeRenderInfo m_VictimRenderInfo[MAX_KILLMSG_TEAM_MEMBERS];
+		CTeeRenderInfo m_aVictimRenderInfo[MAX_KILLMSG_TEAM_MEMBERS];
 		int m_KillerID;
-		int m_KillerTeam;
 		char m_aKillerName[64];
 		STextContainerIndex m_KillerTextContainerIndex;
 		float m_KillerTextWidth;
