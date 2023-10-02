@@ -176,8 +176,10 @@ ColorRGBA CEditor::GetButtonColor(const void *pID, int Checked)
 
 void CEditor::UpdateTooltip(const void *pID, const CUIRect *pRect, const char *pToolTip)
 {
-	if((UI()->MouseInside(pRect) && m_pTooltip) || (UI()->HotItem() == pID && pToolTip))
-		m_pTooltip = pToolTip;
+	if(UI()->MouseInside(pRect) && !pToolTip)
+		str_copy(m_aTooltip, "");
+	else if(UI()->HotItem() == pID && pToolTip)
+		str_copy(m_aTooltip, pToolTip);
 }
 
 int CEditor::DoButton_Editor_Common(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip)
@@ -356,7 +358,7 @@ int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, in
 
 	if(s_TextMode && s_pLastTextID == pID)
 	{
-		m_pTooltip = "Type your number";
+		str_copy(m_aTooltip, "Type your number");
 
 		DoEditBox(&s_NumberInput, pRect, 10.0f);
 
@@ -404,7 +406,7 @@ int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, in
 				}
 			}
 			if(pToolTip && !s_TextMode)
-				m_pTooltip = pToolTip;
+				str_copy(m_aTooltip, pToolTip);
 		}
 		else if(UI()->HotItem() == pID)
 		{
@@ -415,7 +417,7 @@ int CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, in
 				s_Value = 0;
 			}
 			if(pToolTip && !s_TextMode)
-				m_pTooltip = pToolTip;
+				str_copy(m_aTooltip, pToolTip);
 		}
 
 		if(Inside)
@@ -1368,7 +1370,7 @@ void CEditor::DoSoundSource(CSoundSource *pSource, int Index)
 		ms_pUiGotContext = pID;
 
 		Graphics()->SetColor(1, 1, 1, 1);
-		m_pTooltip = "Left mouse button to move. Hold alt to ignore grid.";
+		str_copy(m_aTooltip, "Left mouse button to move. Hold alt to ignore grid.");
 
 		if(UI()->MouseButton(0))
 		{
@@ -1613,7 +1615,7 @@ void CEditor::DoQuad(CQuad *pQuad, int Index)
 		ms_pUiGotContext = pID;
 
 		Graphics()->SetColor(1, 1, 1, 1);
-		m_pTooltip = "Left mouse button to move. Hold shift to move pivot. Hold alt to ignore grid. Hold shift and right click to delete.";
+		str_copy(m_aTooltip, "Left mouse button to move. Hold shift to move pivot. Hold alt to ignore grid. Hold shift and right click to delete.");
 
 		if(UI()->MouseButton(0))
 		{
@@ -1790,7 +1792,7 @@ void CEditor::DoQuadPoint(CQuad *pQuad, int QuadIndex, int V)
 		ms_pUiGotContext = pID;
 
 		Graphics()->SetColor(1, 1, 1, 1);
-		m_pTooltip = "Left mouse button to move. Hold shift to move the texture. Hold alt to ignore grid.";
+		str_copy(m_aTooltip, "Left mouse button to move. Hold shift to move the texture. Hold alt to ignore grid.");
 
 		if(UI()->MouseButton(0))
 		{
@@ -1861,7 +1863,7 @@ void CEditor::DoQuadKnife(int QuadIndex)
 		vec2(fx2f(pQuad->m_aPoints[3].x), fx2f(pQuad->m_aPoints[3].y)),
 		vec2(fx2f(pQuad->m_aPoints[2].x), fx2f(pQuad->m_aPoints[2].y))};
 
-	m_pTooltip = "Left click inside the quad to select an area to slice. Hold alt to ignore grid. Right click to leave knife mode";
+	str_copy(m_aTooltip, "Left click inside the quad to select an area to slice. Hold alt to ignore grid. Right click to leave knife mode");
 
 	if(UI()->MouseButtonClicked(1))
 	{
@@ -2254,7 +2256,7 @@ void CEditor::DoQuadEnvPoint(const CQuad *pQuad, int QIndex, int PIndex)
 		ms_pUiGotContext = pID;
 
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
-		m_pTooltip = "Left mouse button to move. Hold ctrl to rotate. Hold alt to ignore grid.";
+		str_copy(m_aTooltip, "Left mouse button to move. Hold ctrl to rotate. Hold alt to ignore grid.");
 
 		if(UI()->MouseButton(0))
 		{
@@ -2490,14 +2492,18 @@ void CEditor::DoMapEditor(CUIRect View)
 					dbg_assert(false, "Unhandled entities image for explanations");
 
 				if(Layer != NUM_LAYERS)
-					m_pTooltip = Explain(Explanation, (int)wx / 32 + (int)wy / 32 * 16, Layer);
+				{
+					const char *pExplanation = Explain(Explanation, (int)wx / 32 + (int)wy / 32 * 16, Layer);
+					if(pExplanation)
+						str_copy(m_aTooltip, pExplanation);
+				}
 			}
 			else if(m_pBrush->IsEmpty() && GetSelectedLayerType(0, LAYERTYPE_QUADS) != nullptr)
-				m_pTooltip = "Use left mouse button to drag and create a brush. Hold shift to select multiple quads. Press R to rotate selected quads. Use ctrl+right mouse to select layer.";
+				str_copy(m_aTooltip, "Use left mouse button to drag and create a brush. Hold shift to select multiple quads. Press R to rotate selected quads. Use ctrl+right mouse to select layer.");
 			else if(m_pBrush->IsEmpty())
-				m_pTooltip = "Use left mouse button to drag and create a brush. Use ctrl+right mouse to select layer.";
+				str_copy(m_aTooltip, "Use left mouse button to drag and create a brush. Use ctrl+right mouse to select layer.");
 			else
-				m_pTooltip = "Use left mouse button to paint with the brush. Right button clears the brush.";
+				str_copy(m_aTooltip, "Use left mouse button to paint with the brush. Right button clears the brush.");
 
 			if(UI()->CheckActiveItem(s_pEditorID))
 			{
@@ -2797,7 +2803,7 @@ void CEditor::DoMapEditor(CUIRect View)
 						}
 						str_format(m_aMenuBackgroundTooltip, sizeof(m_aMenuBackgroundTooltip), "%s %s", aTooltipPrefix, aTooltipPositions);
 
-						m_pTooltip = m_aMenuBackgroundTooltip;
+						str_copy(m_aTooltip, m_aMenuBackgroundTooltip);
 						if(UI()->MouseButton(0))
 							UI()->SetActiveItem(&MapView()->ProofMode()->m_vMenuBackgroundPositions[i]);
 					}
@@ -5203,14 +5209,14 @@ void CEditor::RenderStatusbar(CUIRect View, CUIRect *pTooltipRect)
 
 void CEditor::RenderTooltip(CUIRect TooltipRect)
 {
-	if(m_pTooltip == nullptr)
+	if(str_comp(m_aTooltip, "") == 0)
 		return;
 
-	char aBuf[512];
+	char aBuf[256];
 	if(ms_pUiGotContext && ms_pUiGotContext == UI()->HotItem())
-		str_format(aBuf, sizeof(aBuf), "%s Right click for context menu.", m_pTooltip);
+		str_format(aBuf, sizeof(aBuf), "%s Right click for context menu.", m_aTooltip);
 	else
-		str_copy(aBuf, m_pTooltip);
+		str_copy(aBuf, m_aTooltip);
 
 	SLabelProperties Props;
 	Props.m_MaxWidth = TooltipRect.w;
@@ -5905,7 +5911,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			}
 
 			m_ShowEnvelopePreview = SHOWENV_SELECTED;
-			m_pTooltip = "Double-click to create a new point. Use shift to change the zoom axis. Press S to scale selected envelope points.";
+			str_copy(m_aTooltip, "Double-click to create a new point. Use shift to change the zoom axis. Press S to scale selected envelope points.");
 		}
 
 		UpdateZoomEnvelopeX(View);
@@ -6366,7 +6372,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 							m_ShowEnvelopePreview = SHOWENV_SELECTED;
 							Graphics()->SetColor(1, 1, 1, 1);
-							m_pTooltip = "Envelope point. Left mouse to drag. Hold ctrl to be more precise. Hold shift to alter time. Shift + right-click to delete.";
+							str_copy(m_aTooltip, "Envelope point. Left mouse to drag. Hold ctrl to be more precise. Hold shift to alter time. Shift + right-click to delete.");
 							ms_pUiGotContext = pID;
 						}
 						else
@@ -6500,7 +6506,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 								m_ShowEnvelopePreview = SHOWENV_SELECTED;
 								Graphics()->SetColor(1, 1, 1, 1);
-								m_pTooltip = "Bezier out-tangent. Left mouse to drag. Hold ctrl to be more precise. Shift + right-click to reset.";
+								str_copy(m_aTooltip, "Bezier out-tangent. Left mouse to drag. Hold ctrl to be more precise. Shift + right-click to reset.");
 								ms_pUiGotContext = pID;
 							}
 							else
@@ -6633,7 +6639,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 								m_ShowEnvelopePreview = SHOWENV_SELECTED;
 								Graphics()->SetColor(1, 1, 1, 1);
-								m_pTooltip = "Bezier in-tangent. Left mouse to drag. Hold ctrl to be more precise. Shift + right-click to reset.";
+								str_copy(m_aTooltip, "Bezier in-tangent. Left mouse to drag. Hold ctrl to be more precise. Shift + right-click to reset.");
 								ms_pUiGotContext = pID;
 							}
 							else
@@ -6691,7 +6697,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 		if(s_Operation == OP_SCALE)
 		{
-			m_pTooltip = "Press shift to scale the time. Press alt to scale along midpoint. Press ctrl to be more precise.";
+			str_copy(m_aTooltip, "Press shift to scale the time. Press alt to scale along midpoint. Press ctrl to be more precise.");
 
 			if(Input()->ShiftIsPressed())
 			{
@@ -7106,7 +7112,7 @@ void CEditor::Render()
 	float Height = View.h;
 
 	// reset tip
-	m_pTooltip = nullptr;
+	str_copy(m_aTooltip, "");
 
 	// render checker
 	RenderBackground(View, m_CheckerTexture, 32.0f, 1.0f);
