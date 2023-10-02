@@ -45,3 +45,8 @@ void CLayerFront::Resize(int NewW, int NewH)
 	if(m_pEditor->m_Map.m_pGameLayer->m_Width != NewW || m_pEditor->m_Map.m_pGameLayer->m_Height != NewH)
 		m_pEditor->m_Map.m_pGameLayer->Resize(NewW, NewH);
 }
+
+const char *CLayerFront::TypeName() const
+{
+	return "front";
+}

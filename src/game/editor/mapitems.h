@@ -1,0 +1,125 @@
+#ifndef GAME_EDITOR_MAPITEMS_H
+#define GAME_EDITOR_MAPITEMS_H
+
+enum class EQuadProp
+{
+	PROP_NONE = -1,
+	PROP_ORDER,
+	PROP_POS_X,
+	PROP_POS_Y,
+	PROP_POS_ENV,
+	PROP_POS_ENV_OFFSET,
+	PROP_COLOR_ENV,
+	PROP_COLOR_ENV_OFFSET,
+	NUM_PROPS,
+};
+
+enum class EQuadPointProp
+{
+	PROP_NONE = -1,
+	PROP_POS_X,
+	PROP_POS_Y,
+	PROP_COLOR,
+	PROP_TEX_U,
+	PROP_TEX_V,
+	NUM_PROPS,
+};
+
+enum class ESoundProp
+{
+	PROP_NONE = -1,
+	PROP_POS_X,
+	PROP_POS_Y,
+	PROP_LOOP,
+	PROP_PAN,
+	PROP_TIME_DELAY,
+	PROP_FALLOFF,
+	PROP_POS_ENV,
+	PROP_POS_ENV_OFFSET,
+	PROP_SOUND_ENV,
+	PROP_SOUND_ENV_OFFSET,
+	NUM_PROPS,
+};
+
+enum class ERectangleShapeProp
+{
+	PROP_NONE = -1,
+	PROP_RECTANGLE_WIDTH,
+	PROP_RECTANGLE_HEIGHT,
+	NUM_RECTANGLE_PROPS,
+};
+
+enum class ECircleShapeProp
+{
+	PROP_NONE = -1,
+	PROP_CIRCLE_RADIUS,
+	NUM_CIRCLE_PROPS,
+};
+
+enum class ELayerProp
+{
+	PROP_NONE = -1,
+	PROP_GROUP,
+	PROP_ORDER,
+	PROP_HQ,
+	NUM_PROPS,
+};
+
+enum class ETilesProp
+{
+	PROP_NONE = -1,
+	PROP_WIDTH,
+	PROP_HEIGHT,
+	PROP_SHIFT,
+	PROP_SHIFT_BY,
+	PROP_IMAGE,
+	PROP_COLOR,
+	PROP_COLOR_ENV,
+	PROP_COLOR_ENV_OFFSET,
+	PROP_AUTOMAPPER,
+	PROP_SEED,
+	NUM_PROPS
+};
+
+enum class ETilesCommonProp
+{
+	PROP_NONE = -1,
+	PROP_WIDTH,
+	PROP_HEIGHT,
+	PROP_SHIFT,
+	PROP_SHIFT_BY,
+	PROP_COLOR,
+	NUM_PROPS,
+};
+
+enum class EGroupProp
+{
+	PROP_NONE = -1,
+	PROP_ORDER,
+	PROP_POS_X,
+	PROP_POS_Y,
+	PROP_PARA_X,
+	PROP_PARA_Y,
+	PROP_USE_CLIPPING,
+	PROP_CLIP_X,
+	PROP_CLIP_Y,
+	PROP_CLIP_W,
+	PROP_CLIP_H,
+	NUM_PROPS,
+};
+
+enum class ELayerQuadsProp
+{
+	PROP_NONE = -1,
+	PROP_IMAGE,
+	NUM_PROPS,
+};
+
+enum class ELayerSoundsProp
+{
+	PROP_NONE = -1,
+	PROP_SOUND,
+	NUM_PROPS,
+};
+
+#endif

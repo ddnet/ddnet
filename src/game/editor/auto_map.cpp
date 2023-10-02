@@ -9,6 +9,7 @@
 
 #include "auto_map.h"
 #include "editor.h" // TODO: only needs CLayerTiles
+#include "editor_actions.h"
 
 // Based on triple32inc from https://github.com/skeeto/hash-prospector/tree/79a6074062a84907df6e45b756134b74e2956760
 static uint32_t HashUInt32(uint32_t Num)
@@ -173,9 +174,9 @@ void CAutoMapper::Load(const char *pTileName)
 				{
 					Value = CPosRule::NOTINDEX;
 					CIndexInfo NewIndexInfo1 = {0, 0, false};
-					//CIndexInfo NewIndexInfo2 = {-1, 0};
+					// CIndexInfo NewIndexInfo2 = {-1, 0};
 					vNewIndexList.push_back(NewIndexInfo1);
-					//vNewIndexList.push_back(NewIndexInfo2);
+					// vNewIndexList.push_back(NewIndexInfo2);
 				}
 				else if(!str_comp(aValue, "INDEX") || !str_comp(aValue, "NOTINDEX"))
 				{
@@ -425,8 +426,10 @@ void CAutoMapper::ProceedLocalized(CLayerTiles *pLayer, int ConfigID, int Seed, 
 		{
 			CTile *pIn = &pUpdateLayer->m_pTiles[(y - UpdateFromY) * pUpdateLayer->m_Width + x - UpdateFromX];
 			CTile *pOut = &pLayer->m_pTiles[y * pLayer->m_Width + x];
+			CTile Previous = *pOut;
 			pOut->m_Index = pIn->m_Index;
 			pOut->m_Flags = pIn->m_Flags;
+			pLayer->RecordStateChange(x, y, Previous, *pOut);
 		}
 	}
 
@@ -442,6 +445,7 @@ void CAutoMapper::Proceed(CLayerTiles *pLayer, int ConfigID, int Seed, int SeedO
 		Seed = rand();
 
 	CConfiguration *pConf = &m_vConfigs[ConfigID];
+	pLayer->ClearHistory();
 
 	// for every run: copy tiles, automap, overwrite tiles
 	for(size_t h = 0; h < pConf->m_vRuns.size(); ++h)
@@ -534,8 +538,10 @@ void CAutoMapper::Proceed(CLayerTiles *pLayer, int ConfigID, int Seed, int SeedO
 					if(RespectRules &&
 						(pIndexRule->m_RandomProbability >= 1.0f || HashLocation(Seed, h, i, x + SeedOffsetX, y + SeedOffsetY) < HASH_MAX * pIndexRule->m_RandomProbability))
 					{
+						CTile Previous = *pTile;
 						pTile->m_Index = pIndexRule->m_ID;
 						pTile->m_Flags = pIndexRule->m_Flag;
+						pLayer->RecordStateChange(x, y, Previous, *pTile);
 					}
 				}
 			}

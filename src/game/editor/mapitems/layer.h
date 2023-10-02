@@ -62,6 +62,7 @@ public:
 	virtual void ModifySoundIndex(FIndexModifyFunction pfnFunc) {}
 
 	virtual std::shared_ptr<CLayer> Duplicate() const = 0;
+	virtual const char *TypeName() const = 0;
 
 	virtual void GetSize(float *pWidth, float *pHeight)
 	{

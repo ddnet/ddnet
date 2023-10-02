@@ -150,3 +150,13 @@ bool IsCreditsTile(int TileIndex)
 		(TILE_CREDITS_7 == TileIndex) ||
 		(TILE_CREDITS_8 == TileIndex));
 }
+
+int PackColor(CColor Color)
+{
+	int Res = 0;
+	Res |= Color.r << 24;
+	Res |= Color.g << 16;
+	Res |= Color.b << 8;
+	Res |= Color.a;
+	return Res;
+}

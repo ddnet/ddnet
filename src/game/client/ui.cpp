@@ -490,19 +490,37 @@ int CUI::DoDraggableButtonLogic(const void *pID, int Checked, const CUIRect *pRe
 	return ReturnValue;
 }
 
-int CUI::DoPickerLogic(const void *pID, const CUIRect *pRect, float *pX, float *pY)
+EEditState CUI::DoPickerLogic(const void *pID, const CUIRect *pRect, float *pX, float *pY)
 {
+	static const void *s_pEditing = nullptr;
+
 	if(MouseHovered(pRect))
 		SetHotItem(pID);
 
+	EEditState Res = EEditState::EDITING;
+
 	if(HotItem() == pID && MouseButtonClicked(0))
+	{
 		SetActiveItem(pID);
+		if(!s_pEditing)
+		{
+			s_pEditing = pID;
+			Res = EEditState::START;
+		}
+	}
 
 	if(CheckActiveItem(pID) && !MouseButton(0))
+	{
 		SetActiveItem(nullptr);
+		if(s_pEditing == pID)
+		{
+			s_pEditing = nullptr;
+			Res = EEditState::END;
+		}
+	}
 
-	if(!CheckActiveItem(pID))
-		return 0;
+	if(!CheckActiveItem(pID) && Res == EEditState::EDITING)
+		return EEditState::NONE;
 
 	if(Input()->ShiftIsPressed())
 		m_MouseSlow = true;
@@ -512,7 +530,7 @@ int CUI::DoPickerLogic(const void *pID, const CUIRect *pRect, float *pX, float *
 	if(pY)
 		*pY = clamp(m_MouseY - pRect->y, 0.0f, pRect->h);
 
-	return 1;
+	return Res;
 }
 
 void CUI::DoSmoothScrollLogic(float *pScrollOffset, float *pScrollOffsetChange, float ViewPortSize, float TotalSize, bool SmoothClamp, float ScrollSpeed)
@@ -982,11 +1000,18 @@ int CUI::DoButton_PopupMenu(CButtonContainer *pButtonContainer, const char *pTex
 
 int64_t CUI::DoValueSelector(const void *pID, const CUIRect *pRect, const char *pLabel, int64_t Current, int64_t Min, int64_t Max, const SValueSelectorProperties &Props)
 {
+	return DoValueSelectorWithState(pID, pRect, pLabel, Current, Min, Max, Props).m_Value;
+}
+
+SEditResult<int64_t> CUI::DoValueSelectorWithState(const void *pID, const CUIRect *pRect, const char *pLabel, int64_t Current, int64_t Min, int64_t Max, const SValueSelectorProperties &Props)
+{
 	// logic
 	static float s_Value;
 	static CLineInputNumber s_NumberInput;
 	static const void *s_pLastTextID = pID;
 	const bool Inside = MouseInside(pRect);
+	static const void *s_pEditing = nullptr;
+	EEditState State = EEditState::NONE;
 
 	if(Inside)
 		SetHotItem(pID);
@@ -1091,7 +1116,23 @@ int64_t CUI::DoValueSelector(const void *pID, const CUIRect *pRect, const char *
 	if(!m_ValueSelectorTextMode)
 		s_NumberInput.Clear();
 
-	return Current;
+	if(s_pEditing == pID)
+		State = EEditState::EDITING;
+
+	bool MouseLocked = CheckMouseLock();
+	if((MouseLocked || m_ValueSelectorTextMode) && !s_pEditing)
+	{
+		State = EEditState::START;
+		s_pEditing = pID;
+	}
+
+	if(!CheckMouseLock() && !m_ValueSelectorTextMode && s_pEditing == pID)
+	{
+		State = EEditState::END;
+		s_pEditing = nullptr;
+	}
+
+	return SEditResult<int64_t>{State, Current};
 }
 
 float CUI::DoScrollbarV(const void *pID, const CUIRect *pRect, float Current)
@@ -1686,6 +1727,7 @@ CUI::EPopupMenuFunctionResult CUI::PopupColorPicker(void *pContext, CUIRect View
 {
 	SColorPickerPopupContext *pColorPicker = static_cast<SColorPickerPopupContext *>(pContext);
 	CUI *pUI = pColorPicker->m_pUI;
+	pColorPicker->m_State = EEditState::NONE;
 
 	CUIRect ColorsArea, HueArea, BottomArea, ModeButtonArea, HueRect, SatRect, ValueRect, HexRect, AlphaRect;
 
@@ -1759,10 +1801,10 @@ CUI::EPopupMenuFunctionResult CUI::PopupColorPicker(void *pContext, CUIRect View
 		HuePartialArea.Draw4(TL, TL, BL, BL, IGraphics::CORNER_NONE, 0.0f);
 	}
 
-	const auto &&RenderAlphaSelector = [&](unsigned OldA) -> unsigned {
+	const auto &&RenderAlphaSelector = [&](unsigned OldA) -> SEditResult<int64_t> {
 		if(pColorPicker->m_Alpha)
 		{
-			return pUI->DoValueSelector(&pColorPicker->m_aValueSelectorIds[3], &AlphaRect, "A:", OldA, 0, 255);
+			return pUI->DoValueSelectorWithState(&pColorPicker->m_aValueSelectorIds[3], &AlphaRect, "A:", OldA, 0, 255);
 		}
 		else
 		{
@@ -1770,7 +1812,7 @@ CUI::EPopupMenuFunctionResult CUI::PopupColorPicker(void *pContext, CUIRect View
 			str_format(aBuf, sizeof(aBuf), "A: %d", OldA);
 			pUI->DoLabel(&AlphaRect, aBuf, 10.0f, TEXTALIGN_MC);
 			AlphaRect.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.65f), IGraphics::CORNER_ALL, 3.0f);
-			return OldA;
+			return {EEditState::NONE, OldA};
 		}
 	};
 
@@ -1782,16 +1824,25 @@ CUI::EPopupMenuFunctionResult CUI::PopupColorPicker(void *pContext, CUIRect View
 		const unsigned OldV = (unsigned)(PickerColorHSV.v * 255.0f);
 		const unsigned OldA = (unsigned)(PickerColorHSV.a * 255.0f);
 
-		const unsigned H = pUI->DoValueSelector(&pColorPicker->m_aValueSelectorIds[0], &HueRect, "H:", OldH, 0, 255);
-		const unsigned S = pUI->DoValueSelector(&pColorPicker->m_aValueSelectorIds[1], &SatRect, "S:", OldS, 0, 255);
-		const unsigned V = pUI->DoValueSelector(&pColorPicker->m_aValueSelectorIds[2], &ValueRect, "V:", OldV, 0, 255);
-		const unsigned A = RenderAlphaSelector(OldA);
+		const auto [StateH, H] = pUI->DoValueSelectorWithState(&pColorPicker->m_aValueSelectorIds[0], &HueRect, "H:", OldH, 0, 255);
+		const auto [StateS, S] = pUI->DoValueSelectorWithState(&pColorPicker->m_aValueSelectorIds[1], &SatRect, "S:", OldS, 0, 255);
+		const auto [StateV, V] = pUI->DoValueSelectorWithState(&pColorPicker->m_aValueSelectorIds[2], &ValueRect, "V:", OldV, 0, 255);
+		const auto [StateA, A] = RenderAlphaSelector(OldA);
 
 		if(OldH != H || OldS != S || OldV != V || OldA != A)
 		{
 			PickerColorHSV = ColorHSVA(H / 255.0f, S / 255.0f, V / 255.0f, A / 255.0f);
 			PickerColorHSL = color_cast<ColorHSLA>(PickerColorHSV);
 			PickerColorRGB = color_cast<ColorRGBA>(PickerColorHSL);
+		}
+
+		for(auto State : {StateH, StateS, StateV, StateA})
+		{
+			if(State != EEditState::NONE)
+			{
+				pColorPicker->m_State = State;
+				break;
+			}
 		}
 	}
 	else if(pColorPicker->m_ColorMode == SColorPickerPopupContext::MODE_RGBA)
@@ -1801,16 +1852,25 @@ CUI::EPopupMenuFunctionResult CUI::PopupColorPicker(void *pContext, CUIRect View
 		const unsigned OldB = (unsigned)(PickerColorRGB.b * 255.0f);
 		const unsigned OldA = (unsigned)(PickerColorRGB.a * 255.0f);
 
-		const unsigned R = pUI->DoValueSelector(&pColorPicker->m_aValueSelectorIds[0], &HueRect, "R:", OldR, 0, 255);
-		const unsigned G = pUI->DoValueSelector(&pColorPicker->m_aValueSelectorIds[1], &SatRect, "G:", OldG, 0, 255);
-		const unsigned B = pUI->DoValueSelector(&pColorPicker->m_aValueSelectorIds[2], &ValueRect, "B:", OldB, 0, 255);
-		const unsigned A = RenderAlphaSelector(OldA);
+		const auto [StateR, R] = pUI->DoValueSelectorWithState(&pColorPicker->m_aValueSelectorIds[0], &HueRect, "R:", OldR, 0, 255);
+		const auto [StateG, G] = pUI->DoValueSelectorWithState(&pColorPicker->m_aValueSelectorIds[1], &SatRect, "G:", OldG, 0, 255);
+		const auto [StateB, B] = pUI->DoValueSelectorWithState(&pColorPicker->m_aValueSelectorIds[2], &ValueRect, "B:", OldB, 0, 255);
+		const auto [StateA, A] = RenderAlphaSelector(OldA);
 
 		if(OldR != R || OldG != G || OldB != B || OldA != A)
 		{
 			PickerColorRGB = ColorRGBA(R / 255.0f, G / 255.0f, B / 255.0f, A / 255.0f);
 			PickerColorHSL = color_cast<ColorHSLA>(PickerColorRGB);
 			PickerColorHSV = color_cast<ColorHSVA>(PickerColorHSL);
+		}
+
+		for(auto State : {StateR, StateG, StateB, StateA})
+		{
+			if(State != EEditState::NONE)
+			{
+				pColorPicker->m_State = State;
+				break;
+			}
 		}
 	}
 	else if(pColorPicker->m_ColorMode == SColorPickerPopupContext::MODE_HSLA)
@@ -1820,16 +1880,25 @@ CUI::EPopupMenuFunctionResult CUI::PopupColorPicker(void *pContext, CUIRect View
 		const unsigned OldL = (unsigned)(PickerColorHSL.l * 255.0f);
 		const unsigned OldA = (unsigned)(PickerColorHSL.a * 255.0f);
 
-		const unsigned H = pUI->DoValueSelector(&pColorPicker->m_aValueSelectorIds[0], &HueRect, "H:", OldH, 0, 255);
-		const unsigned S = pUI->DoValueSelector(&pColorPicker->m_aValueSelectorIds[1], &SatRect, "S:", OldS, 0, 255);
-		const unsigned L = pUI->DoValueSelector(&pColorPicker->m_aValueSelectorIds[2], &ValueRect, "L:", OldL, 0, 255);
-		const unsigned A = RenderAlphaSelector(OldA);
+		const auto [StateH, H] = pUI->DoValueSelectorWithState(&pColorPicker->m_aValueSelectorIds[0], &HueRect, "H:", OldH, 0, 255);
+		const auto [StateS, S] = pUI->DoValueSelectorWithState(&pColorPicker->m_aValueSelectorIds[1], &SatRect, "S:", OldS, 0, 255);
+		const auto [StateL, L] = pUI->DoValueSelectorWithState(&pColorPicker->m_aValueSelectorIds[2], &ValueRect, "L:", OldL, 0, 255);
+		const auto [StateA, A] = RenderAlphaSelector(OldA);
 
 		if(OldH != H || OldS != S || OldL != L || OldA != A)
 		{
 			PickerColorHSL = ColorHSLA(H / 255.0f, S / 255.0f, L / 255.0f, A / 255.0f);
 			PickerColorHSV = color_cast<ColorHSVA>(PickerColorHSL);
 			PickerColorRGB = color_cast<ColorRGBA>(PickerColorHSL);
+		}
+
+		for(auto State : {StateH, StateS, StateL, StateA})
+		{
+			if(State != EEditState::NONE)
+			{
+				pColorPicker->m_State = State;
+				break;
+			}
 		}
 	}
 	else
@@ -1842,7 +1911,7 @@ CUI::EPopupMenuFunctionResult CUI::PopupColorPicker(void *pContext, CUIRect View
 	Props.m_IsHex = true;
 	Props.m_HexPrefix = pColorPicker->m_Alpha ? 8 : 6;
 	const unsigned OldHex = PickerColorRGB.PackAlphaLast(pColorPicker->m_Alpha);
-	const unsigned Hex = pUI->DoValueSelector(&pColorPicker->m_aValueSelectorIds[4], &HexRect, "Hex:", OldHex, 0, pColorPicker->m_Alpha ? 0xFFFFFFFFll : 0xFFFFFFll, Props);
+	auto [HexState, Hex] = pUI->DoValueSelectorWithState(&pColorPicker->m_aValueSelectorIds[4], &HexRect, "Hex:", OldHex, 0, pColorPicker->m_Alpha ? 0xFFFFFFFFll : 0xFFFFFFll, Props);
 	if(OldHex != Hex)
 	{
 		const float OldAlpha = PickerColorRGB.a;
@@ -1853,21 +1922,28 @@ CUI::EPopupMenuFunctionResult CUI::PopupColorPicker(void *pContext, CUIRect View
 		PickerColorHSV = color_cast<ColorHSVA>(PickerColorHSL);
 	}
 
+	if(HexState != EEditState::NONE)
+		pColorPicker->m_State = HexState;
+
 	// Logic
 	float PickerX, PickerY;
-	if(pUI->DoPickerLogic(&pColorPicker->m_ColorPickerId, &ColorsArea, &PickerX, &PickerY))
+	EEditState ColorPickerRes = pUI->DoPickerLogic(&pColorPicker->m_ColorPickerId, &ColorsArea, &PickerX, &PickerY);
+	if(ColorPickerRes != EEditState::NONE)
 	{
 		PickerColorHSV.y = PickerX / ColorsArea.w;
 		PickerColorHSV.z = 1.0f - PickerY / ColorsArea.h;
 		PickerColorHSL = color_cast<ColorHSLA>(PickerColorHSV);
 		PickerColorRGB = color_cast<ColorRGBA>(PickerColorHSL);
+		pColorPicker->m_State = ColorPickerRes;
 	}
 
-	if(pUI->DoPickerLogic(&pColorPicker->m_HuePickerId, &HueArea, &PickerX, &PickerY))
+	EEditState HuePickerRes = pUI->DoPickerLogic(&pColorPicker->m_HuePickerId, &HueArea, &PickerX, &PickerY);
+	if(HuePickerRes != EEditState::NONE)
 	{
 		PickerColorHSV.x = 1.0f - PickerY / HueArea.h;
 		PickerColorHSL = color_cast<ColorHSLA>(PickerColorHSV);
 		PickerColorRGB = color_cast<ColorRGBA>(PickerColorHSL);
+		pColorPicker->m_State = HuePickerRes;
 	}
 
 	// Marker Color Area
