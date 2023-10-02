@@ -31,12 +31,23 @@ class CTeeRenderInfo
 public:
 	CTeeRenderInfo()
 	{
-		m_ColorBody = ColorRGBA(1, 1, 1);
-		m_ColorFeet = ColorRGBA(1, 1, 1);
+		Reset();
+	}
+
+	void Reset()
+	{
+		m_OriginalRenderSkin.Reset();
+		m_ColorableRenderSkin.Reset();
+		m_SkinMetrics.Reset();
+		m_CustomColoredSkin = false;
+		m_BloodColor = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
+		m_ColorBody = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
+		m_ColorFeet = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
 		m_Size = 1.0f;
 		m_GotAirJump = true;
 		m_TeeRenderFlags = 0;
-	};
+		m_FeetFlipped = false;
+	}
 
 	CSkin::SSkinTextures m_OriginalRenderSkin;
 	CSkin::SSkinTextures m_ColorableRenderSkin;
