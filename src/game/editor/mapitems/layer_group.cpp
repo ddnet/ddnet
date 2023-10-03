@@ -1,3 +1,5 @@
+#include "layer_group.h"
+
 #include <game/editor/editor.h>
 
 CLayerGroup::CLayerGroup()

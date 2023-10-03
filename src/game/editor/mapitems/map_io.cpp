@@ -640,7 +640,7 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 						std::shared_ptr<CLayerTiles> pTiles;
 						if(pTilemapItem->m_Flags & TILESLAYERFLAG_GAME)
 						{
-							pTiles = std::make_shared<CLayerGame>(pTilemapItem->m_Width, pTilemapItem->m_Height);
+							pTiles = std::make_shared<CLayerGame>(m_pEditor, pTilemapItem->m_Width, pTilemapItem->m_Height);
 							MakeGameLayer(pTiles);
 							MakeGameGroup(pGroup);
 						}
@@ -649,7 +649,7 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 							if(pTilemapItem->m_Version <= 2)
 								pTilemapItem->m_Tele = *((const int *)(pTilemapItem) + 15);
 
-							pTiles = std::make_shared<CLayerTele>(pTilemapItem->m_Width, pTilemapItem->m_Height);
+							pTiles = std::make_shared<CLayerTele>(m_pEditor, pTilemapItem->m_Width, pTilemapItem->m_Height);
 							MakeTeleLayer(pTiles);
 						}
 						else if(pTilemapItem->m_Flags & TILESLAYERFLAG_SPEEDUP)
@@ -657,7 +657,7 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 							if(pTilemapItem->m_Version <= 2)
 								pTilemapItem->m_Speedup = *((const int *)(pTilemapItem) + 16);
 
-							pTiles = std::make_shared<CLayerSpeedup>(pTilemapItem->m_Width, pTilemapItem->m_Height);
+							pTiles = std::make_shared<CLayerSpeedup>(m_pEditor, pTilemapItem->m_Width, pTilemapItem->m_Height);
 							MakeSpeedupLayer(pTiles);
 						}
 						else if(pTilemapItem->m_Flags & TILESLAYERFLAG_FRONT)
@@ -665,7 +665,7 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 							if(pTilemapItem->m_Version <= 2)
 								pTilemapItem->m_Front = *((const int *)(pTilemapItem) + 17);
 
-							pTiles = std::make_shared<CLayerFront>(pTilemapItem->m_Width, pTilemapItem->m_Height);
+							pTiles = std::make_shared<CLayerFront>(m_pEditor, pTilemapItem->m_Width, pTilemapItem->m_Height);
 							MakeFrontLayer(pTiles);
 						}
 						else if(pTilemapItem->m_Flags & TILESLAYERFLAG_SWITCH)
@@ -673,7 +673,7 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 							if(pTilemapItem->m_Version <= 2)
 								pTilemapItem->m_Switch = *((const int *)(pTilemapItem) + 18);
 
-							pTiles = std::make_shared<CLayerSwitch>(pTilemapItem->m_Width, pTilemapItem->m_Height);
+							pTiles = std::make_shared<CLayerSwitch>(m_pEditor, pTilemapItem->m_Width, pTilemapItem->m_Height);
 							MakeSwitchLayer(pTiles);
 						}
 						else if(pTilemapItem->m_Flags & TILESLAYERFLAG_TUNE)
@@ -681,12 +681,12 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 							if(pTilemapItem->m_Version <= 2)
 								pTilemapItem->m_Tune = *((const int *)(pTilemapItem) + 19);
 
-							pTiles = std::make_shared<CLayerTune>(pTilemapItem->m_Width, pTilemapItem->m_Height);
+							pTiles = std::make_shared<CLayerTune>(m_pEditor, pTilemapItem->m_Width, pTilemapItem->m_Height);
 							MakeTuneLayer(pTiles);
 						}
 						else
 						{
-							pTiles = std::make_shared<CLayerTiles>(pTilemapItem->m_Width, pTilemapItem->m_Height);
+							pTiles = std::make_shared<CLayerTiles>(m_pEditor, pTilemapItem->m_Width, pTilemapItem->m_Height);
 							pTiles->m_pEditor = m_pEditor;
 							pTiles->m_Color = pTilemapItem->m_Color;
 							pTiles->m_ColorEnv = pTilemapItem->m_ColorEnv;
@@ -819,8 +819,7 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 					{
 						const CMapItemLayerQuads *pQuadsItem = (CMapItemLayerQuads *)pLayerItem;
 
-						std::shared_ptr<CLayerQuads> pQuads = std::make_shared<CLayerQuads>();
-						pQuads->m_pEditor = m_pEditor;
+						std::shared_ptr<CLayerQuads> pQuads = std::make_shared<CLayerQuads>(m_pEditor);
 						pQuads->m_Flags = pLayerItem->m_Flags;
 						pQuads->m_Image = pQuadsItem->m_Image;
 						if(pQuads->m_Image < -1 || pQuads->m_Image >= (int)m_vpImages.size())
@@ -842,8 +841,7 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 						if(pSoundsItem->m_Version < 1 || pSoundsItem->m_Version > CMapItemLayerSounds::CURRENT_VERSION)
 							continue;
 
-						std::shared_ptr<CLayerSounds> pSounds = std::make_shared<CLayerSounds>();
-						pSounds->m_pEditor = m_pEditor;
+						std::shared_ptr<CLayerSounds> pSounds = std::make_shared<CLayerSounds>(m_pEditor);
 						pSounds->m_Flags = pLayerItem->m_Flags;
 						pSounds->m_Sound = pSoundsItem->m_Sound;
 
@@ -868,8 +866,7 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 						if(pSoundsItem->m_Version < 1 || pSoundsItem->m_Version > CMapItemLayerSounds::CURRENT_VERSION)
 							continue;
 
-						std::shared_ptr<CLayerSounds> pSounds = std::make_shared<CLayerSounds>();
-						pSounds->m_pEditor = m_pEditor;
+						std::shared_ptr<CLayerSounds> pSounds = std::make_shared<CLayerSounds>(m_pEditor);
 						pSounds->m_Flags = pLayerItem->m_Flags;
 						pSounds->m_Sound = pSoundsItem->m_Sound;
 

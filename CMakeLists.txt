@@ -2278,16 +2278,27 @@ if(CLIENT)
     map_view.h
     mapitems/image.cpp
     mapitems/image.h
+    mapitems/layer.h
     mapitems/layer_front.cpp
+    mapitems/layer_front.h
     mapitems/layer_game.cpp
+    mapitems/layer_game.h
     mapitems/layer_group.cpp
+    mapitems/layer_group.h
     mapitems/layer_quads.cpp
+    mapitems/layer_quads.h
     mapitems/layer_sounds.cpp
+    mapitems/layer_sounds.h
     mapitems/layer_speedup.cpp
+    mapitems/layer_speedup.h
     mapitems/layer_switch.cpp
+    mapitems/layer_switch.h
     mapitems/layer_tele.cpp
+    mapitems/layer_tele.h
     mapitems/layer_tiles.cpp
+    mapitems/layer_tiles.h
     mapitems/layer_tune.cpp
+    mapitems/layer_tune.h
     mapitems/map.cpp
     mapitems/map_io.cpp
     mapitems/sound.cpp

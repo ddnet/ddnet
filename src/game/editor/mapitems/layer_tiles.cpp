@@ -1,5 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include "layer_tiles.h"
+
 #include <game/editor/editor.h>
 
 #include <engine/keys.h>
@@ -7,7 +9,8 @@
 
 #include "image.h"
 
-CLayerTiles::CLayerTiles(int w, int h)
+CLayerTiles::CLayerTiles(CEditor *pEditor, int w, int h) :
+	CLayer(pEditor)
 {
 	m_Type = LAYERTYPE_TILES;
 	m_aName[0] = '\0';
@@ -271,7 +274,7 @@ int CLayerTiles::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
 	// create new layers
 	if(this->m_Tele)
 	{
-		std::shared_ptr<CLayerTele> pGrabbed = std::make_shared<CLayerTele>(r.w, r.h);
+		std::shared_ptr<CLayerTele> pGrabbed = std::make_shared<CLayerTele>(m_pEditor, r.w, r.h);
 		InitGrabbedLayer(pGrabbed, this);
 
 		pBrush->AddLayer(pGrabbed);
@@ -297,7 +300,7 @@ int CLayerTiles::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
 	}
 	else if(this->m_Speedup)
 	{
-		std::shared_ptr<CLayerSpeedup> pGrabbed = std::make_shared<CLayerSpeedup>(r.w, r.h);
+		std::shared_ptr<CLayerSpeedup> pGrabbed = std::make_shared<CLayerSpeedup>(m_pEditor, r.w, r.h);
 		InitGrabbedLayer(pGrabbed, this);
 
 		pBrush->AddLayer(pGrabbed);
@@ -327,7 +330,7 @@ int CLayerTiles::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
 	}
 	else if(this->m_Switch)
 	{
-		std::shared_ptr<CLayerSwitch> pGrabbed = std::make_shared<CLayerSwitch>(r.w, r.h);
+		std::shared_ptr<CLayerSwitch> pGrabbed = std::make_shared<CLayerSwitch>(m_pEditor, r.w, r.h);
 		InitGrabbedLayer(pGrabbed, this);
 
 		pBrush->AddLayer(pGrabbed);
@@ -356,7 +359,7 @@ int CLayerTiles::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
 
 	else if(this->m_Tune)
 	{
-		std::shared_ptr<CLayerTune> pGrabbed = std::make_shared<CLayerTune>(r.w, r.h);
+		std::shared_ptr<CLayerTune> pGrabbed = std::make_shared<CLayerTune>(m_pEditor, r.w, r.h);
 		InitGrabbedLayer(pGrabbed, this);
 
 		pBrush->AddLayer(pGrabbed);
@@ -382,7 +385,7 @@ int CLayerTiles::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
 	}
 	else if(this->m_Front)
 	{
-		std::shared_ptr<CLayerFront> pGrabbed = std::make_shared<CLayerFront>(r.w, r.h);
+		std::shared_ptr<CLayerFront> pGrabbed = std::make_shared<CLayerFront>(m_pEditor, r.w, r.h);
 		InitGrabbedLayer(pGrabbed, this);
 
 		pBrush->AddLayer(pGrabbed);
@@ -395,7 +398,7 @@ int CLayerTiles::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
 	}
 	else
 	{
-		std::shared_ptr<CLayerTiles> pGrabbed = std::make_shared<CLayerFront>(r.w, r.h);
+		std::shared_ptr<CLayerTiles> pGrabbed = std::make_shared<CLayerFront>(m_pEditor, r.w, r.h);
 		InitGrabbedLayer(pGrabbed, this);
 
 		pBrush->AddLayer(pGrabbed);
@@ -741,7 +744,7 @@ CUI::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 			{
 				if(!m_pEditor->m_Map.m_pTeleLayer)
 				{
-					std::shared_ptr<CLayer> pLayer = std::make_shared<CLayerTele>(m_Width, m_Height);
+					std::shared_ptr<CLayer> pLayer = std::make_shared<CLayerTele>(m_pEditor, m_Width, m_Height);
 					m_pEditor->m_Map.MakeTeleLayer(pLayer);
 					m_pEditor->m_Map.m_pGameGroup->AddLayer(pLayer);
 				}

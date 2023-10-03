@@ -1,7 +1,7 @@
 #include <game/editor/editor.h>
 
-CLayerFront::CLayerFront(int w, int h) :
-	CLayerTiles(w, h)
+CLayerFront::CLayerFront(CEditor *pEditor, int w, int h) :
+	CLayerTiles(pEditor, w, h)
 {
 	str_copy(m_aName, "Front");
 	m_Front = 1;

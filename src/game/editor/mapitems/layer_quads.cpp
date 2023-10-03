@@ -1,10 +1,13 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include "layer_quads.h"
+
 #include <game/editor/editor.h>
 
 #include "image.h"
 
-CLayerQuads::CLayerQuads()
+CLayerQuads::CLayerQuads(CEditor *pEditor) :
+	CLayer(pEditor)
 {
 	m_Type = LAYERTYPE_QUADS;
 	m_aName[0] = '\0';
@@ -107,8 +110,7 @@ void CLayerQuads::BrushSelecting(CUIRect Rect)
 int CLayerQuads::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
 {
 	// create new layers
-	std::shared_ptr<CLayerQuads> pGrabbed = std::make_shared<CLayerQuads>();
-	pGrabbed->m_pEditor = m_pEditor;
+	std::shared_ptr<CLayerQuads> pGrabbed = std::make_shared<CLayerQuads>(m_pEditor);
 	pGrabbed->m_Image = m_Image;
 	pBrush->AddLayer(pGrabbed);
 
