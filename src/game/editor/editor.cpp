@@ -7907,7 +7907,6 @@ bool CEditor::Load(const char *pFileName, int StorageType)
 	else
 	{
 		m_aFileName[0] = 0;
-		Reset();
 	}
 	return Result;
 }

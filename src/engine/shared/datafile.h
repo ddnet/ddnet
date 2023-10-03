@@ -30,6 +30,13 @@ public:
 		m_pDataFile(nullptr) {}
 	~CDataFileReader() { Close(); }
 
+	CDataFileReader &operator=(CDataFileReader &&Other)
+	{
+		m_pDataFile = Other.m_pDataFile;
+		Other.m_pDataFile = nullptr;
+		return *this;
+	}
+
 	bool Open(class IStorage *pStorage, const char *pFilename, int StorageType);
 	bool Close();
 	bool IsOpen() const { return m_pDataFile != nullptr; }
