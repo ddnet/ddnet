@@ -820,7 +820,7 @@ void CMenus::RenderNews(CUIRect MainView)
 
 	CUIRect Label;
 
-	const char *pStr = Client()->m_aNews;
+	const char *pStr = Client()->News();
 	char aLine[256];
 	while((pStr = str_next_token(pStr, "\n", aLine, sizeof(aLine))))
 	{
@@ -1202,9 +1202,9 @@ int CMenus::Render()
 			pTitle = Localize("Disconnected");
 			pExtraText = Client()->ErrorString();
 			pButtonText = Localize("Ok");
-			if(Client()->m_ReconnectTime > 0)
+			if(Client()->ReconnectTime() > 0)
 			{
-				str_format(aBuf, sizeof(aBuf), Localize("Reconnect in %d sec"), (int)((Client()->m_ReconnectTime - time_get()) / time_freq()));
+				str_format(aBuf, sizeof(aBuf), Localize("Reconnect in %d sec"), (int)((Client()->ReconnectTime() - time_get()) / time_freq()));
 				pTitle = Client()->ErrorString();
 				pExtraText = aBuf;
 				pButtonText = Localize("Abort");
@@ -1250,13 +1250,13 @@ int CMenus::Render()
 		else if(m_Popup == POPUP_POINTS)
 		{
 			pTitle = Localize("Existing Player");
-			if(Client()->m_Points > 50)
+			if(Client()->Points() > 50)
 			{
-				str_format(aBuf, sizeof(aBuf), Localize("Your nickname '%s' is already used (%d points). Do you still want to use it?"), Client()->PlayerName(), Client()->m_Points);
+				str_format(aBuf, sizeof(aBuf), Localize("Your nickname '%s' is already used (%d points). Do you still want to use it?"), Client()->PlayerName(), Client()->Points());
 				pExtraText = aBuf;
 				TopAlign = true;
 			}
-			else if(Client()->m_Points >= 0)
+			else if(Client()->Points() >= 0)
 			{
 				m_Popup = POPUP_NONE;
 			}
@@ -1817,8 +1817,8 @@ int CMenus::Render()
 			static CButtonContainer s_Button;
 			if(DoButton_Menu(&s_Button, pButtonText, 0, &Part) || UI()->ConsumeHotkey(CUI::HOTKEY_ESCAPE) || UI()->ConsumeHotkey(CUI::HOTKEY_ENTER))
 			{
-				if(m_Popup == POPUP_DISCONNECTED && Client()->m_ReconnectTime > 0)
-					Client()->m_ReconnectTime = 0;
+				if(m_Popup == POPUP_DISCONNECTED && Client()->ReconnectTime() > 0)
+					Client()->SetReconnectTime(0);
 				m_Popup = POPUP_NONE;
 			}
 		}
