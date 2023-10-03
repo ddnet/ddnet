@@ -274,12 +274,12 @@ int main(int argc, const char **argv)
 							int ImgTileH = Height / 16;
 							int x = (i % 16) * ImgTileW;
 							int y = (i / 16) * ImgTileH;
-							DilateImageSub(pImgBuff, Width, Height, 4, x, y, ImgTileW, ImgTileH);
+							DilateImageSub(pImgBuff, Width, Height, x, y, ImgTileW, ImgTileH);
 						}
 					}
 					else
 					{
-						DilateImage(pImgBuff, Width, Height, 4);
+						DilateImage(pImgBuff, Width, Height);
 					}
 				}
 			}
