@@ -22,7 +22,7 @@ MACRO_CONFIG_INT(ClAntiPingWeapons, cl_antiping_weapons, 1, 0, 1, CFGFLAG_CLIENT
 MACRO_CONFIG_INT(ClAntiPingSmooth, cl_antiping_smooth, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Make the prediction of other player's movement smoother")
 MACRO_CONFIG_INT(ClAntiPingGunfire, cl_antiping_gunfire, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Predict gunfire and show predicted weapon physics (with cl_antiping_grenade 1 and cl_antiping_weapons 1)")
 MACRO_CONFIG_INT(ClPredictionMargin, cl_prediction_margin, 10, 1, 2000, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Prediction margin in ms (adds latency, can reduce lag from ping jumps)")
-MACRO_CONFIG_INT(ClSubTickAiming, cl_sub_tick_aiming, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Send aiming data at sub-tick accuracy")
+MACRO_CONFIG_INT(ClSubTickAiming, cl_sub_tick_aiming, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Send aiming data at sub-tick accuracy")
 
 MACRO_CONFIG_INT(ClNameplates, cl_nameplates, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show name plates")
 MACRO_CONFIG_INT(ClAfkEmote, cl_afk_emote, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Show zzz emote next to afk players")
