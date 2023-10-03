@@ -877,6 +877,7 @@ void CCharacter::TickDeferred()
 			m_SendCore = m_Core;
 			m_ReckoningCore = m_Core;
 			m_ReckoningCore.SetCoreWorld(nullptr, Collision(), nullptr);
+			m_ReckoningCore.m_Tuning = *GameWorld()->Tuning();
 			m_Core.m_Reset = false;
 		}
 	}
@@ -1916,9 +1917,9 @@ void CCharacter::HandleTuneLayer()
 	m_TuneZone = Collision()->IsTune(CurrentIndex);
 
 	if(m_TuneZone)
-		m_Core.m_Tuning = m_ReckoningCore.m_Tuning = TuningList()[m_TuneZone]; // throw tunings from specific zone into gamecore
+		m_Core.m_Tuning = TuningList()[m_TuneZone]; // throw tunings from specific zone into gamecore
 	else
-		m_Core.m_Tuning = m_ReckoningCore.m_Tuning = *Tuning();
+		m_Core.m_Tuning = *Tuning();
 
 	if(m_TuneZone != m_TuneZoneOld) // don't send tunigs all the time
 	{
