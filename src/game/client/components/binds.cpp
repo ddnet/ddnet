@@ -129,7 +129,7 @@ bool CBinds::OnInput(const IInput::CEvent &Event)
 	// don't handle invalid events
 	if(Event.m_Key <= KEY_FIRST || Event.m_Key >= KEY_LAST)
 		return false;
-	
+
 	int Mask = GetModifierMask(Input());
 	int KeyModifierMask = GetModifierMaskOfKey(Event.m_Key);
 	Mask &= ~KeyModifierMask;
@@ -164,7 +164,7 @@ bool CBinds::OnInput(const IInput::CEvent &Event)
 		ret = true;
 	}
 
-	if(key)
+	if(g_Config.m_ClSubTickAiming && key)
 	{
 		if(strcmp("+fire", key) == 0 || strcmp("+hook", key) == 0)
 		{

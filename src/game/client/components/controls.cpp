@@ -240,7 +240,7 @@ int CControls::SnapInput(int *pData)
 		m_aInputData[g_Config.m_ClDummy].m_TargetX = (int)m_aMousePos[g_Config.m_ClDummy].x;
 		m_aInputData[g_Config.m_ClDummy].m_TargetY = (int)m_aMousePos[g_Config.m_ClDummy].y;
 
-		if(m_aMousePosOnAction[g_Config.m_ClDummy].x != 0 && m_aMousePosOnAction[g_Config.m_ClDummy].y != 0)
+		if(g_Config.m_ClSubTickAiming && m_aMousePosOnAction[g_Config.m_ClDummy].x != 0 && m_aMousePosOnAction[g_Config.m_ClDummy].y != 0)
 		{
 			m_aInputData[g_Config.m_ClDummy].m_TargetX = (int)m_aMousePosOnAction[g_Config.m_ClDummy].x;
 			m_aInputData[g_Config.m_ClDummy].m_TargetY = (int)m_aMousePosOnAction[g_Config.m_ClDummy].y;
