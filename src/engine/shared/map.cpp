@@ -10,19 +10,24 @@
 
 CMap::CMap() = default;
 
-void *CMap::GetData(int Index)
-{
-	return m_DataFile.GetData(Index);
-}
-
 int CMap::GetDataSize(int Index) const
 {
 	return m_DataFile.GetDataSize(Index);
 }
 
+void *CMap::GetData(int Index)
+{
+	return m_DataFile.GetData(Index);
+}
+
 void *CMap::GetDataSwapped(int Index)
 {
 	return m_DataFile.GetDataSwapped(Index);
+}
+
+const char *CMap::GetDataString(int Index)
+{
+	return m_DataFile.GetDataString(Index);
 }
 
 void CMap::UnloadData(int Index)
@@ -35,19 +40,24 @@ int CMap::NumData() const
 	return m_DataFile.NumData();
 }
 
-void *CMap::GetItem(int Index, int *pType, int *pID)
-{
-	return m_DataFile.GetItem(Index, pType, pID);
-}
-
 int CMap::GetItemSize(int Index)
 {
 	return m_DataFile.GetItemSize(Index);
 }
 
+void *CMap::GetItem(int Index, int *pType, int *pID)
+{
+	return m_DataFile.GetItem(Index, pType, pID);
+}
+
 void CMap::GetType(int Type, int *pStart, int *pNum)
 {
 	m_DataFile.GetType(Type, pStart, pNum);
+}
+
+int CMap::FindItemIndex(int Type, int ID)
+{
+	return m_DataFile.FindItemIndex(Type, ID);
 }
 
 void *CMap::FindItem(int Type, int ID)

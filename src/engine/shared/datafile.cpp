@@ -301,7 +301,7 @@ int CDataFileReader::GetDataSize(int Index) const
 	return Size;
 }
 
-void *CDataFileReader::GetDataImpl(int Index, int Swap)
+void *CDataFileReader::GetDataImpl(int Index, bool Swap)
 {
 	if(!m_pDataFile)
 	{
@@ -394,16 +394,31 @@ void *CDataFileReader::GetDataImpl(int Index, int Swap)
 
 void *CDataFileReader::GetData(int Index)
 {
-	return GetDataImpl(Index, 0);
+	return GetDataImpl(Index, false);
 }
 
 void *CDataFileReader::GetDataSwapped(int Index)
 {
-	return GetDataImpl(Index, 1);
+	return GetDataImpl(Index, true);
+}
+
+const char *CDataFileReader::GetDataString(int Index)
+{
+	if(Index == -1)
+		return "";
+	const int DataSize = GetDataSize(Index);
+	if(!DataSize)
+		return nullptr;
+	const char *pData = static_cast<char *>(GetData(Index));
+	if(pData == nullptr || mem_has_null(pData, DataSize - 1) || pData[DataSize - 1] != '\0' || !str_utf8_check(pData))
+		return nullptr;
+	return pData;
 }
 
 void CDataFileReader::ReplaceData(int Index, char *pData, size_t Size)
 {
+	dbg_assert(Index >= 0 && Index < m_pDataFile->m_Header.m_NumRawData, "Index invalid");
+
 	free(m_pDataFile->m_ppDataPtrs[Index]);
 	m_pDataFile->m_ppDataPtrs[Index] = pData;
 	m_pDataFile->m_pDataSizes[Index] = Size;
@@ -743,6 +758,13 @@ int CDataFileWriter::AddDataSwapped(int Size, const void *pData)
 #else
 	return AddData(Size, pData);
 #endif
+}
+
+int CDataFileWriter::AddDataString(const char *pStr)
+{
+	if(pStr[0] == '\0')
+		return -1;
+	return AddData(str_length(pStr) + 1, pStr);
 }
 
 void CDataFileWriter::Finish()
