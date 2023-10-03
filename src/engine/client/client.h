@@ -186,6 +186,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	char m_aCmdEditMap[IO_MAX_PATH_LENGTH];
 
 	// map download
+	char m_aMapDownloadUrl[256];
 	std::shared_ptr<CHttpRequest> m_pMapdownloadTask;
 	char m_aMapdownloadFilename[256];
 	char m_aMapdownloadFilenameTemp[256];
