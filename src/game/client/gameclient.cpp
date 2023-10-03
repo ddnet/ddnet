@@ -410,6 +410,12 @@ void CGameClient::OnUpdate()
 				break;
 		}
 	}
+
+	if(m_Binds.mouseOnAction)
+	{
+		m_Controls.m_aMousePosOnAction[g_Config.m_ClDummy] = m_Controls.m_aMousePos[g_Config.m_ClDummy]; //idk what g_Config.m_ClDummy is
+		m_Binds.mouseOnAction = false;
+	}
 }
 
 void CGameClient::OnDummySwap()

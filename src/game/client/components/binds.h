@@ -35,6 +35,8 @@ public:
 		virtual bool OnInput(const IInput::CEvent &Event) override;
 	};
 
+	bool mouseOnAction;
+
 	enum
 	{
 		MODIFIER_NONE = 0,

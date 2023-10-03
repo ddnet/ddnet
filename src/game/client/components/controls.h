@@ -16,6 +16,7 @@ class CControls : public CComponent
 
 public:
 	vec2 m_aMousePos[NUM_DUMMIES];
+	vec2 m_aMousePosOnAction[NUM_DUMMIES];
 	vec2 m_aTargetPos[NUM_DUMMIES];
 	float m_OldMouseX;
 	float m_OldMouseY;
