@@ -928,6 +928,8 @@ public:
 	static CUI::EPopupMenuFunctionResult PopupSource(void *pContext, CUIRect View, bool Active);
 	static CUI::EPopupMenuFunctionResult PopupPoint(void *pContext, CUIRect View, bool Active);
 	static CUI::EPopupMenuFunctionResult PopupEnvPoint(void *pContext, CUIRect View, bool Active);
+	static CUI::EPopupMenuFunctionResult PopupEnvPointMulti(void *pContext, CUIRect View, bool Active);
+	static CUI::EPopupMenuFunctionResult PopupEnvPointCurveType(void *pContext, CUIRect View, bool Active);
 	static CUI::EPopupMenuFunctionResult PopupImage(void *pContext, CUIRect View, bool Active);
 	static CUI::EPopupMenuFunctionResult PopupSound(void *pContext, CUIRect View, bool Active);
 	static CUI::EPopupMenuFunctionResult PopupNewFolder(void *pContext, CUIRect View, bool Active);

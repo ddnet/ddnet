@@ -1441,6 +1441,110 @@ CUI::EPopupMenuFunctionResult CEditor::PopupEnvPoint(void *pContext, CUIRect Vie
 	return CUI::POPUP_KEEP_OPEN;
 }
 
+CUI::EPopupMenuFunctionResult CEditor::PopupEnvPointMulti(void *pContext, CUIRect View, bool Active)
+{
+	CEditor *pEditor = static_cast<CEditor *>(pContext);
+	const float RowHeight = 12.0f;
+
+	static int s_CurveButtonID = 0;
+	CUIRect CurveButton;
+	View.HSplitTop(RowHeight, &CurveButton, &View);
+	if(pEditor->DoButton_Editor(&s_CurveButtonID, "Project onto", 0, &CurveButton, 0, "Project all selected envelopes onto the curve between the first and last selected envelope."))
+	{
+		static SPopupMenuId s_PopupCurveTypeId;
+		pEditor->UI()->DoPopupMenu(&s_PopupCurveTypeId, pEditor->UI()->MouseX(), pEditor->UI()->MouseY(), 80, 80, pEditor, PopupEnvPointCurveType);
+	}
+
+	return CUI::POPUP_KEEP_OPEN;
+}
+
+CUI::EPopupMenuFunctionResult CEditor::PopupEnvPointCurveType(void *pContext, CUIRect View, bool Active)
+{
+	CEditor *pEditor = static_cast<CEditor *>(pContext);
+	const float RowHeight = 14.0f;
+
+	int CurveType = -1;
+
+	static int s_ButtonLinearID;
+	CUIRect ButtonLinear;
+	View.HSplitTop(RowHeight, &ButtonLinear, &View);
+	if(pEditor->DoButton_MenuItem(&s_ButtonLinearID, "Linear", 0, &ButtonLinear))
+		CurveType = CURVETYPE_LINEAR;
+
+	static int s_ButtonSlowID;
+	CUIRect ButtonSlow;
+	View.HSplitTop(RowHeight, &ButtonSlow, &View);
+	if(pEditor->DoButton_MenuItem(&s_ButtonSlowID, "Slow", 0, &ButtonSlow))
+		CurveType = CURVETYPE_SLOW;
+
+	static int s_ButtonFastID;
+	CUIRect ButtonFast;
+	View.HSplitTop(RowHeight, &ButtonFast, &View);
+	if(pEditor->DoButton_MenuItem(&s_ButtonFastID, "Fast", 0, &ButtonFast))
+		CurveType = CURVETYPE_FAST;
+
+	static int s_ButtonStepID;
+	CUIRect ButtonStep;
+	View.HSplitTop(RowHeight, &ButtonStep, &View);
+	if(pEditor->DoButton_MenuItem(&s_ButtonStepID, "Step", 0, &ButtonStep))
+		CurveType = CURVETYPE_STEP;
+
+	static int s_ButtonSmoothID;
+	CUIRect ButtonSmooth;
+	View.HSplitTop(RowHeight, &ButtonSmooth, &View);
+	if(pEditor->DoButton_MenuItem(&s_ButtonSmoothID, "Smooth", 0, &ButtonSmooth))
+		CurveType = CURVETYPE_SMOOTH;
+
+	if(CurveType >= 0)
+	{
+		std::shared_ptr<CEnvelope> pEnvelope = pEditor->m_Map.m_vpEnvelopes.at(pEditor->m_SelectedEnvelope);
+
+		for(int c = 0; c < pEnvelope->GetChannels(); c++)
+		{
+			int FirstSelectedIndex = pEnvelope->m_vPoints.size();
+			int LastSelectedIndex = -1;
+			for(auto [SelectedIndex, SelectedChannel] : pEditor->m_vSelectedEnvelopePoints)
+			{
+				if(SelectedChannel == c)
+				{
+					FirstSelectedIndex = minimum(FirstSelectedIndex, SelectedIndex);
+					LastSelectedIndex = maximum(LastSelectedIndex, SelectedIndex);
+				}
+			}
+
+			if(FirstSelectedIndex < (int)pEnvelope->m_vPoints.size() && LastSelectedIndex >= 0 && FirstSelectedIndex != LastSelectedIndex)
+			{
+				CEnvPoint FirstPoint = pEnvelope->m_vPoints[FirstSelectedIndex];
+				CEnvPoint LastPoint = pEnvelope->m_vPoints[LastSelectedIndex];
+
+				CEnvelope HelperEnvelope(1);
+				HelperEnvelope.AddPoint(FirstPoint.m_Time, FirstPoint.m_aValues[c]);
+				HelperEnvelope.AddPoint(LastPoint.m_Time, LastPoint.m_aValues[c]);
+				HelperEnvelope.m_vPoints[0].m_Curvetype = CurveType;
+
+				for(auto [SelectedIndex, SelectedChannel] : pEditor->m_vSelectedEnvelopePoints)
+				{
+					if(SelectedChannel == c)
+					{
+						if(SelectedIndex != FirstSelectedIndex && SelectedIndex != LastSelectedIndex)
+						{
+							CEnvPoint &CurrentPoint = pEnvelope->m_vPoints[SelectedIndex];
+							ColorRGBA Channels;
+							HelperEnvelope.Eval(CurrentPoint.m_Time / 1000.0f, Channels);
+							CurrentPoint.m_aValues[c] = f2fx(Channels.r);
+						}
+					}
+				}
+			}
+		}
+
+		pEditor->m_Map.OnModify();
+		return CUI::POPUP_CLOSE_CURRENT;
+	}
+
+	return CUI::POPUP_KEEP_OPEN;
+}
+
 static const auto &&gs_ModifyIndexDeleted = [](int DeletedIndex) {
 	return [DeletedIndex](int *pIndex) {
 		if(*pIndex == DeletedIndex)
