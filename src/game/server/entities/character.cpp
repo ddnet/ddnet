@@ -83,10 +83,8 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 
 	m_ReckoningTick = 0;
 	m_SendCore = CCharacterCore();
-	m_ReckoningCore = CCharacterCore();
-
-	m_ReckoningCore.Init(nullptr, Collision());
-	m_ReckoningCore.m_Tuning = *Tuning();
+	m_ReckoningCore = m_Core;
+	m_ReckoningCore.SetCoreWorld(nullptr, Collision(), nullptr);
 
 	GameServer()->m_World.InsertEntity(this);
 	m_Alive = true;
@@ -877,7 +875,7 @@ void CCharacter::TickDeferred()
 			m_SendCore = m_Core;
 			m_ReckoningCore = m_Core;
 			m_ReckoningCore.SetCoreWorld(nullptr, Collision(), nullptr);
-			m_ReckoningCore.m_Tuning = *GameWorld()->Tuning();
+			m_ReckoningCore.m_Tuning = CTuningParams();
 			m_Core.m_Reset = false;
 		}
 	}
