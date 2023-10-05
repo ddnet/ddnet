@@ -471,7 +471,6 @@ public:
 
 		m_Mode = MODE_LAYERS;
 		m_Dialog = 0;
-		m_pTooltip = nullptr;
 
 		m_BrushColorEnabled = true;
 
@@ -638,7 +637,7 @@ public:
 
 	int m_Mode;
 	int m_Dialog;
-	const char *m_pTooltip;
+	char m_aTooltip[256] = "";
 
 	bool m_BrushColorEnabled;
 
