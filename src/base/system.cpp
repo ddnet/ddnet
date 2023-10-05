@@ -4039,6 +4039,7 @@ void cmdline_fix(int *argc, const char ***argv)
 		new_argv[i + 1] = new_argv[i] + size;
 	}
 
+	LocalFree(wide_argv);
 	new_argv[wide_argc] = 0;
 	*argc = wide_argc;
 	*argv = (const char **)new_argv;
