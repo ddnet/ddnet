@@ -4564,15 +4564,15 @@ int main(int argc, const char **argv)
 
 	const bool RandInitFailed = secure_random_init() != 0;
 	if(!RandInitFailed)
-		CleanerFunctions.push([]() { secure_random_uninit(); });
+		CleanerFunctions.emplace([]() { secure_random_uninit(); });
 
 	NotificationsInit();
-	CleanerFunctions.push([]() { NotificationsUninit(); });
+	CleanerFunctions.emplace([]() { NotificationsUninit(); });
 
 	// Register SDL for cleanup before creating the kernel and client,
 	// so SDL is shutdown after kernel and client. Otherwise the client
 	// may crash when shutting down after SDL is already shutdown.
-	CleanerFunctions.push([]() { SDL_Quit(); });
+	CleanerFunctions.emplace([]() { SDL_Quit(); });
 
 	CClient *pClient = CreateClient();
 	pClient->SetLoggers(pFutureFileLogger, std::move(pStdoutLogger));
@@ -4580,7 +4580,7 @@ int main(int argc, const char **argv)
 	IKernel *pKernel = IKernel::Create();
 	pKernel->RegisterInterface(pClient, false);
 	pClient->RegisterInterfaces();
-	CleanerFunctions.push([pKernel, pClient]() {
+	CleanerFunctions.emplace([pKernel, pClient]() {
 		pKernel->Shutdown();
 		delete pKernel;
 		pClient->~CClient();
@@ -4648,7 +4648,7 @@ int main(int argc, const char **argv)
 
 		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pEngine, false);
 
-		CleanerFunctions.push([pEngine]() {
+		CleanerFunctions.emplace([pEngine]() {
 			// Has to be before destroying graphics so that skin download thread can finish
 			delete pEngine;
 		});
