@@ -2276,6 +2276,7 @@ if(CLIENT)
     map_grid.h
     map_view.cpp
     map_view.h
+    mapitems/envelope.cpp
     mapitems/envelope.h
     mapitems/image.cpp
     mapitems/image.h

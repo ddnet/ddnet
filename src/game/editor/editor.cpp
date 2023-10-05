@@ -5962,6 +5962,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		}
 
 		{
+			using namespace std::chrono_literals;
 			CTimeStep UnitsPerLineX = 1ms;
 			static const CTimeStep s_aUnitPerLineOptionsX[] = {5ms, 10ms, 25ms, 50ms, 100ms, 250ms, 500ms, 1s, 2s, 5s, 10s, 15s, 30s, 1min};
 			for(CTimeStep Value : s_aUnitPerLineOptionsX)
