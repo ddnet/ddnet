@@ -899,16 +899,15 @@ int CMenus::DemolistFetchCallback(const CFsFileInfo *pInfo, int IsDir, int Stora
 	if(IsDir)
 	{
 		str_format(Item.m_aName, sizeof(Item.m_aName), "%s/", pInfo->m_pName);
-		Item.m_InfosLoaded = false;
-		Item.m_Valid = false;
 		Item.m_Date = 0;
 	}
 	else
 	{
 		str_truncate(Item.m_aName, sizeof(Item.m_aName), pInfo->m_pName, str_length(pInfo->m_pName) - str_length(".demo"));
-		Item.m_InfosLoaded = false;
 		Item.m_Date = pInfo->m_TimeModified;
 	}
+	Item.m_InfosLoaded = false;
+	Item.m_Valid = false;
 	Item.m_IsDir = IsDir != 0;
 	Item.m_IsLink = false;
 	Item.m_StorageType = StorageType;
