@@ -16,6 +16,8 @@
 #   Crashes: https://github.com/llvm/llvm-project/issues/53359
 # misc-use-anonymous-namespace
 #   We don't want to use anonymous namespaces instead of static functions.
+# bugprone-suspicious-realloc-usage
+#   We generally don't handle memory allocation failures.
 
 Checks: >
   -*,
@@ -32,6 +34,7 @@ Checks: >
   -bugprone-reserved-identifier,
   -bugprone-suspicious-include,
   -bugprone-unhandled-self-assignment,
+  -bugprone-suspicious-realloc-usage,
   clang-analyzer-*,
   -clang-analyzer-optin.cplusplus.UninitializedObject,
   -clang-analyzer-optin.cplusplus.VirtualCall,
