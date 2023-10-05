@@ -4015,6 +4015,7 @@ void cmdline_fix(int *argc, const char ***argv)
 	int wide_argc = 0;
 	WCHAR **wide_argv = CommandLineToArgvW(GetCommandLineW(), &wide_argc);
 	dbg_assert(wide_argv != NULL, "CommandLineToArgvW failure");
+	dbg_assert(wide_argc > 0, "Invalid argc value");
 
 	int total_size = 0;
 
