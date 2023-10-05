@@ -642,10 +642,8 @@ float CSound::GetSampleCurrentTime(int SampleID)
 			}
 		}
 	}
-	else
-	{
-		return (pSample->m_PausedAt / pSample->m_Rate);
-	}
+
+	return (pSample->m_PausedAt / pSample->m_Rate);
 }
 
 void CSound::SetSampleCurrentTime(int SampleID, float Time)
@@ -862,7 +860,7 @@ void CSound::Pause(int SampleID)
 		if(Voice.m_pSample == pSample)
 		{
 			Voice.m_pSample->m_PausedAt = Voice.m_Tick;
-			Voice.m_pSample = 0;
+			Voice.m_pSample = nullptr;
 		}
 	}
 }
