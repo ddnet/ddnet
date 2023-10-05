@@ -1584,7 +1584,10 @@ int CMenus::Render()
 
 			static CButtonContainer s_ButtonAbort;
 			if(DoButton_Menu(&s_ButtonAbort, Localize("Abort"), 0, &Abort) || UI()->ConsumeHotkey(CUI::HOTKEY_ESCAPE))
+			{
+				m_DemoRenderInput.Clear();
 				m_Popup = POPUP_NONE;
+			}
 
 			static CButtonContainer s_ButtonOk;
 			if(DoButton_Menu(&s_ButtonOk, Localize("Ok"), 0, &Ok) || UI()->ConsumeHotkey(CUI::HOTKEY_ENTER))
@@ -1681,7 +1684,7 @@ int CMenus::Render()
 		}
 		else if(m_Popup == POPUP_RENDER_DONE)
 		{
-			CUIRect TextBox, Ok, OpenFolder;
+			CUIRect Ok, OpenFolder;
 
 			char aFilePath[IO_MAX_PATH_LENGTH];
 			char aSaveFolder[IO_MAX_PATH_LENGTH];
@@ -1702,7 +1705,7 @@ int CMenus::Render()
 			{
 				if(!open_file(aSaveFolder))
 				{
-					dbg_msg("menus", "couldn't open file '%s'", aBuf);
+					dbg_msg("menus", "couldn't open file '%s'", aSaveFolder);
 				}
 			}
 
@@ -1714,14 +1717,13 @@ int CMenus::Render()
 			}
 
 			Box.HSplitBottom(160.f, &Box, &Part);
-
-			Part.VSplitLeft(60.0f, nullptr, &TextBox);
-			TextBox.VSplitLeft(20.0f, nullptr, &TextBox);
-			TextBox.VSplitRight(60.0f, &TextBox, nullptr);
+			Part.VMargin(20.0f, &Part);
 
 			str_format(aBuf, sizeof(aBuf), Localize("Video was saved to '%s'"), aFilePath);
 
-			UI()->DoLabel(&TextBox, aBuf, 18.0f, TEXTALIGN_TL);
+			SLabelProperties MessageProps;
+			MessageProps.m_MaxWidth = (int)Part.w;
+			UI()->DoLabel(&Part, aBuf, 18.0f, TEXTALIGN_TL, MessageProps);
 		}
 #endif
 		else if(m_Popup == POPUP_FIRST_LAUNCH)
@@ -1853,7 +1855,10 @@ void CMenus::PopupConfirmDemoReplaceVideo()
 	m_LastPauseChange = -1.0f;
 	m_LastSpeedChange = -1.0f;
 	if(pError)
+	{
+		m_DemoRenderInput.Clear();
 		PopupMessage(Localize("Error"), str_comp(pError, "error loading demo") ? pError : Localize("Error loading demo"), Localize("Ok"));
+	}
 }
 #endif
 
