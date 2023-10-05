@@ -22,8 +22,6 @@ public:
 	std::vector<CEnvPoint_runtime> m_vPoints;
 	CEnvelopePointAccess m_PointsAccess;
 	char m_aName[32] = "";
-	float m_Bottom = 0;
-	float m_Top = 0;
 	bool m_Synchronized = false;
 
 	enum class EType
@@ -36,7 +34,7 @@ public:
 	explicit CEnvelope(int NumChannels);
 
 	void Resort();
-	void FindTopBottom(int ChannelMask);
+	std::pair<float, float> GetValueRange(int ChannelMask);
 	int Eval(float Time, ColorRGBA &Color);
 	void AddPoint(int Time, int v0, int v1 = 0, int v2 = 0, int v3 = 0);
 	float EndTime() const;

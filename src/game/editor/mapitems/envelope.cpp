@@ -1,6 +1,8 @@
 #include "envelope.h"
 
+#include <algorithm>
 #include <chrono>
+#include <limits>
 
 using namespace std::chrono_literals;
 
@@ -53,13 +55,12 @@ CEnvelope::CEnvelope(int NumChannels) :
 void CEnvelope::Resort()
 {
 	std::sort(m_vPoints.begin(), m_vPoints.end());
-	FindTopBottom(0xf);
 }
 
-void CEnvelope::FindTopBottom(int ChannelMask)
+std::pair<float, float> CEnvelope::GetValueRange(int ChannelMask)
 {
-	m_Top = -1000000000.0f;
-	m_Bottom = 1000000000.0f;
+	float Top = -std::numeric_limits<float>::infinity();
+	float Bottom = std::numeric_limits<float>::infinity();
 	CEnvPoint_runtime *pPrevPoint = nullptr;
 	for(auto &Point : m_vPoints)
 	{
@@ -70,29 +71,31 @@ void CEnvelope::FindTopBottom(int ChannelMask)
 				{
 					// value handle
 					const float v = fx2f(Point.m_aValues[c]);
-					m_Top = maximum(m_Top, v);
-					m_Bottom = minimum(m_Bottom, v);
+					Top = maximum(Top, v);
+					Bottom = minimum(Bottom, v);
 				}
 
 				if(Point.m_Curvetype == CURVETYPE_BEZIER)
 				{
 					// out-tangent handle
 					const float v = fx2f(Point.m_aValues[c] + Point.m_Bezier.m_aOutTangentDeltaY[c]);
-					m_Top = maximum(m_Top, v);
-					m_Bottom = minimum(m_Bottom, v);
+					Top = maximum(Top, v);
+					Bottom = minimum(Bottom, v);
 				}
 
 				if(pPrevPoint != nullptr && pPrevPoint->m_Curvetype == CURVETYPE_BEZIER)
 				{
 					// in-tangent handle
 					const float v = fx2f(Point.m_aValues[c] + Point.m_Bezier.m_aInTangentDeltaY[c]);
-					m_Top = maximum(m_Top, v);
-					m_Bottom = minimum(m_Bottom, v);
+					Top = maximum(Top, v);
+					Bottom = minimum(Bottom, v);
 				}
 			}
 		}
 		pPrevPoint = &Point;
 	}
+
+	return {Bottom, Top};
 }
 
 int CEnvelope::Eval(float Time, ColorRGBA &Color)

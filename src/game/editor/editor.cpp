@@ -5306,9 +5306,7 @@ void CEditor::UpdateZoomEnvelopeY(const CUIRect &View)
 
 void CEditor::ResetZoomEnvelope(const std::shared_ptr<CEnvelope> &pEnvelope, int ActiveChannels)
 {
-	pEnvelope->FindTopBottom(ActiveChannels);
-	float Top = pEnvelope->m_Top;
-	float Bottom = pEnvelope->m_Bottom;
+	auto [Bottom, Top] = pEnvelope->GetValueRange(ActiveChannels);
 	float EndTime = pEnvelope->EndTime();
 	float ValueRange = absolute(Top - Bottom);
 
