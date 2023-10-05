@@ -875,6 +875,8 @@ public:
 	void SortImages();
 	bool SelectLayerByTile();
 
+	void DoAudioPreview(CUIRect View, const void *pPlayPauseButtonID, const void *pStopButtonID, const void *pSeekBarID, const int SampleID);
+
 	// Tile Numbers For Explanations - TODO: Add/Improve tiles and explanations
 	enum
 	{
