@@ -14,6 +14,8 @@
 #   TODO: Many changes
 # readability-static-accessed-through-instance,
 #   Crashes: https://github.com/llvm/llvm-project/issues/53359
+# misc-use-anonymous-namespace
+#   We don't want to use anonymous namespaces instead of static functions.
 
 Checks: >
   -*,
@@ -48,6 +50,7 @@ Checks: >
   -misc-non-private-member-variables-in-classes,
   -misc-static-assert,
   -misc-unused-parameters,
+  -misc-use-anonymous-namespace,
   modernize-avoid-bind,
   modernize-concat-nested-namespaces,
   modernize-deprecated-headers,
