@@ -135,7 +135,7 @@ bool CBinds::OnInput(const IInput::CEvent &Event)
 	Mask &= ~KeyModifierMask;
 
 	bool ret = false;
-	char * key = 0;
+	char *key = 0;
 
 	if(m_aapKeyBindings[Mask][Event.m_Key])
 	{
