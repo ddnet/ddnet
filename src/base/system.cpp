@@ -2464,7 +2464,7 @@ char *fs_getcwd(char *buffer, int buffer_size)
 #if defined(CONF_FAMILY_WINDOWS)
 	const DWORD size_needed = GetCurrentDirectoryW(0, nullptr);
 	std::wstring wide_current_dir(size_needed, L'0');
-	DWORD result = GetCurrentDirectoryW(size_needed, &wide_current_dir[0]);
+	DWORD result = GetCurrentDirectoryW(size_needed, wide_current_dir.data());
 	if(result == 0)
 	{
 		const DWORD LastError = GetLastError();
@@ -4566,7 +4566,7 @@ std::wstring windows_utf8_to_wide(const char *str)
 		return L"";
 	const int size_needed = MultiByteToWideChar(CP_UTF8, 0, str, orig_length, nullptr, 0);
 	std::wstring wide_string(size_needed, L'\0');
-	dbg_assert(MultiByteToWideChar(CP_UTF8, 0, str, orig_length, &wide_string[0], size_needed) == size_needed, "MultiByteToWideChar failure");
+	dbg_assert(MultiByteToWideChar(CP_UTF8, 0, str, orig_length, wide_string.data(), size_needed) == size_needed, "MultiByteToWideChar failure");
 	return wide_string;
 }
 
@@ -4577,7 +4577,7 @@ std::string windows_wide_to_utf8(const wchar_t *wide_str)
 		return "";
 	const int size_needed = WideCharToMultiByte(CP_UTF8, 0, wide_str, orig_length, nullptr, 0, nullptr, nullptr);
 	std::string string(size_needed, '\0');
-	dbg_assert(WideCharToMultiByte(CP_UTF8, 0, wide_str, orig_length, &string[0], size_needed, nullptr, nullptr) == size_needed, "WideCharToMultiByte failure");
+	dbg_assert(WideCharToMultiByte(CP_UTF8, 0, wide_str, orig_length, string.data(), size_needed, nullptr, nullptr) == size_needed, "WideCharToMultiByte failure");
 	return string;
 }
 
