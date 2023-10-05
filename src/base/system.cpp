@@ -1565,7 +1565,7 @@ std::string windows_format_system_message(unsigned long error)
 	if(FormatMessageW(flags, NULL, error, 0, (LPWSTR)&wide_message, 0, NULL) == 0)
 		return "unknown error";
 
-	const std::string message = windows_wide_to_utf8(wide_message);
+	std::string message = windows_wide_to_utf8(wide_message);
 	LocalFree(wide_message);
 	return message;
 }
