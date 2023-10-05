@@ -996,32 +996,38 @@ void CMenus::RefreshFilteredDemos()
 void CMenus::DemolistOnUpdate(bool Reset)
 {
 	if(Reset)
-		m_aCurrentDemoSelectionName[0] = '\0';
+	{
+		if(m_vpFilteredDemos.empty())
+		{
+			m_DemolistSelectedIndex = -1;
+			m_aCurrentDemoSelectionName[0] = '\0';
+		}
+		else
+		{
+			m_DemolistSelectedIndex = 0;
+			str_copy(m_aCurrentDemoSelectionName, m_vpFilteredDemos[m_DemolistSelectedIndex]->m_aName);
+		}
+	}
 	else
 	{
-		bool Found = false;
-		int SelectedIndex = -1;
 		RefreshFilteredDemos();
 
 		// search for selected index
-		for(auto &Item : m_vpFilteredDemos)
+		m_DemolistSelectedIndex = -1;
+		int SelectedIndex = -1;
+		for(const auto &pItem : m_vpFilteredDemos)
 		{
 			SelectedIndex++;
-
-			if(str_comp(m_aCurrentDemoSelectionName, Item->m_aName) == 0)
+			if(str_comp(m_aCurrentDemoSelectionName, pItem->m_aName) == 0)
 			{
-				Found = true;
+				m_DemolistSelectedIndex = SelectedIndex;
 				break;
 			}
 		}
-
-		if(Found)
-			m_DemolistSelectedIndex = SelectedIndex;
 	}
 
-	m_DemolistSelectedIndex = Reset ? !m_vpFilteredDemos.empty() ? 0 : -1 :
-					  m_DemolistSelectedIndex >= (int)m_vpFilteredDemos.size() ? m_vpFilteredDemos.size() - 1 : m_DemolistSelectedIndex;
-	m_DemolistSelectedReveal = true;
+	if(m_DemolistSelectedIndex >= 0)
+		m_DemolistSelectedReveal = true;
 }
 
 bool CMenus::FetchHeader(CDemoItem &Item)
