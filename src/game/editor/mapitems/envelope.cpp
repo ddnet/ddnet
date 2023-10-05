@@ -29,14 +29,7 @@ const CEnvPointBezier *CEnvelope::CEnvelopePointAccess::GetBezier(int Index) con
 }
 
 CEnvelope::CEnvelope(EType Type) :
-	m_PointsAccess(&m_vPoints)
-{
-	m_Type = Type;
-	m_aName[0] = '\0';
-	m_Bottom = 0;
-	m_Top = 0;
-	m_Synchronized = false;
-}
+	m_PointsAccess(&m_vPoints), m_Type(Type) {}
 
 CEnvelope::CEnvelope(int NumChannels) :
 	m_PointsAccess(&m_vPoints)
@@ -55,11 +48,6 @@ CEnvelope::CEnvelope(int NumChannels) :
 	default:
 		dbg_assert(false, "invalid number of channels for envelope");
 	}
-
-	m_aName[0] = '\0';
-	m_Bottom = 0;
-	m_Top = 0;
-	m_Synchronized = false;
 }
 
 void CEnvelope::Resort()

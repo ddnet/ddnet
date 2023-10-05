@@ -21,9 +21,10 @@ class CEnvelope
 public:
 	std::vector<CEnvPoint_runtime> m_vPoints;
 	CEnvelopePointAccess m_PointsAccess;
-	char m_aName[32];
-	float m_Bottom, m_Top;
-	bool m_Synchronized;
+	char m_aName[32] = "";
+	float m_Bottom = 0;
+	float m_Top = 0;
+	bool m_Synchronized = false;
 
 	enum class EType
 	{
