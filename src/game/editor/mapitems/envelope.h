@@ -18,8 +18,6 @@ class CEnvelope
 		const CEnvPointBezier *GetBezier(int Index) const override;
 	};
 
-	int m_Channels;
-
 public:
 	std::vector<CEnvPoint_runtime> m_vPoints;
 	CEnvelopePointAccess m_PointsAccess;
@@ -27,7 +25,14 @@ public:
 	float m_Bottom, m_Top;
 	bool m_Synchronized;
 
-	CEnvelope(int Channels);
+	enum class EType
+	{
+		POSITION,
+		COLOR,
+		SOUND
+	};
+	explicit CEnvelope(EType Type);
+	explicit CEnvelope(int NumChannels);
 
 	void Resort();
 	void FindTopBottom(int ChannelMask);
@@ -35,7 +40,9 @@ public:
 	void AddPoint(int Time, int v0, int v1 = 0, int v2 = 0, int v3 = 0);
 	float EndTime() const;
 	int GetChannels() const;
-	void SetChannels(int Channels);
+
+private:
+	EType m_Type;
 };
 
 #endif

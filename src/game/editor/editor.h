@@ -129,10 +129,10 @@ public:
 	std::shared_ptr<class CLayerGame> m_pGameLayer;
 	std::shared_ptr<CLayerGroup> m_pGameGroup;
 
-	std::shared_ptr<CEnvelope> NewEnvelope(int Channels)
+	std::shared_ptr<CEnvelope> NewEnvelope(CEnvelope::EType Type)
 	{
 		OnModify();
-		std::shared_ptr<CEnvelope> pEnv = std::make_shared<CEnvelope>(Channels);
+		std::shared_ptr<CEnvelope> pEnv = std::make_shared<CEnvelope>(Type);
 		m_vpEnvelopes.push_back(pEnv);
 		return pEnv;
 	}

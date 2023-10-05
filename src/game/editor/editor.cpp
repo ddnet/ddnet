@@ -5599,7 +5599,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		if(DoButton_Editor(&s_NewSoundButton, "Sound+", 0, &Button, 0, "Creates a new sound envelope"))
 		{
 			m_Map.OnModify();
-			pNewEnv = m_Map.NewEnvelope(1);
+			pNewEnv = m_Map.NewEnvelope(CEnvelope::EType::SOUND);
 		}
 
 		ToolBar.VSplitRight(5.0f, &ToolBar, nullptr);
@@ -5608,7 +5608,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		if(DoButton_Editor(&s_New4dButton, "Color+", 0, &Button, 0, "Creates a new color envelope"))
 		{
 			m_Map.OnModify();
-			pNewEnv = m_Map.NewEnvelope(4);
+			pNewEnv = m_Map.NewEnvelope(CEnvelope::EType::COLOR);
 		}
 
 		ToolBar.VSplitRight(5.0f, &ToolBar, nullptr);
@@ -5617,7 +5617,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		if(DoButton_Editor(&s_New2dButton, "Pos.+", 0, &Button, 0, "Creates a new position envelope"))
 		{
 			m_Map.OnModify();
-			pNewEnv = m_Map.NewEnvelope(3);
+			pNewEnv = m_Map.NewEnvelope(CEnvelope::EType::POSITION);
 		}
 
 		if(m_SelectedEnvelope >= 0)

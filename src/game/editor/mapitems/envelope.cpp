@@ -28,10 +28,34 @@ const CEnvPointBezier *CEnvelope::CEnvelopePointAccess::GetBezier(int Index) con
 	return &m_pvPoints->at(Index).m_Bezier;
 }
 
-CEnvelope::CEnvelope(int Channels) :
+CEnvelope::CEnvelope(EType Type) :
 	m_PointsAccess(&m_vPoints)
 {
-	SetChannels(Channels);
+	m_Type = Type;
+	m_aName[0] = '\0';
+	m_Bottom = 0;
+	m_Top = 0;
+	m_Synchronized = false;
+}
+
+CEnvelope::CEnvelope(int NumChannels) :
+	m_PointsAccess(&m_vPoints)
+{
+	switch(NumChannels)
+	{
+	case 1:
+		m_Type = EType::SOUND;
+		break;
+	case 3:
+		m_Type = EType::POSITION;
+		break;
+	case 4:
+		m_Type = EType::COLOR;
+		break;
+	default:
+		dbg_assert(false, "invalid number of channels for envelope");
+	}
+
 	m_aName[0] = '\0';
 	m_Bottom = 0;
 	m_Top = 0;
@@ -51,7 +75,7 @@ void CEnvelope::FindTopBottom(int ChannelMask)
 	CEnvPoint_runtime *pPrevPoint = nullptr;
 	for(auto &Point : m_vPoints)
 	{
-		for(int c = 0; c < m_Channels; c++)
+		for(int c = 0; c < GetChannels(); c++)
 		{
 			if(ChannelMask & (1 << c))
 			{
@@ -85,8 +109,8 @@ void CEnvelope::FindTopBottom(int ChannelMask)
 
 int CEnvelope::Eval(float Time, ColorRGBA &Color)
 {
-	CRenderTools::RenderEvalEnvelope(&m_PointsAccess, m_Channels, std::chrono::nanoseconds((int64_t)((double)Time * (double)std::chrono::nanoseconds(1s).count())), Color);
-	return m_Channels;
+	CRenderTools::RenderEvalEnvelope(&m_PointsAccess, GetChannels(), std::chrono::nanoseconds((int64_t)((double)Time * (double)std::chrono::nanoseconds(1s).count())), Color);
+	return GetChannels();
 }
 
 void CEnvelope::AddPoint(int Time, int v0, int v1, int v2, int v3)
@@ -118,10 +142,16 @@ float CEnvelope::EndTime() const
 
 int CEnvelope::GetChannels() const
 {
-	return m_Channels;
-}
-
-void CEnvelope::SetChannels(int Channels)
-{
-	m_Channels = clamp<int>(Channels, 1, CEnvPoint::MAX_CHANNELS);
+	switch(m_Type)
+	{
+	case EType::POSITION:
+		return 3;
+	case EType::COLOR:
+		return 4;
+	case EType::SOUND:
+		return 1;
+	default:
+		dbg_assert(false, "unknown envelope type");
+		dbg_break();
+	}
 }
