@@ -2271,6 +2271,8 @@ if(CLIENT)
     component.h
     editor.cpp
     editor.h
+    editor_object.cpp
+    editor_object.h
     explanations.cpp
     map_grid.cpp
     map_grid.h
