@@ -8,8 +8,6 @@
 #   Too annoying to always align for perfect padding
 # clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,
 #   TODO: Requires C11 to fix
-# modernize-use-override,
-#   TODO: modernize-use-override.IgnoreDestructors not supported on ubuntu-latest yet for CI
 # misc-unused-parameters
 #   TODO: Many changes
 # readability-static-accessed-through-instance,
@@ -71,6 +69,7 @@ Checks: >
   modernize-use-emplace,
   modernize-use-equals-default,
   modernize-use-equals-delete,
+  modernize-use-override,
   modernize-use-transparent-functors,
   modernize-use-uncaught-exceptions,
   readability-*,

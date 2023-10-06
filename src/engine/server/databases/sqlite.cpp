@@ -11,7 +11,7 @@ class CSqliteConnection : public IDbConnection
 {
 public:
 	CSqliteConnection(const char *pFilename, bool Setup);
-	virtual ~CSqliteConnection();
+	~CSqliteConnection() override;
 	void Print(IConsole *pConsole, const char *pMode) override;
 
 	const char *BinaryCollate() const override { return "BINARY"; }

@@ -19,7 +19,7 @@ public:
 	};
 
 	CServerBrowserPingCache(IConsole *pConsole, IStorage *pStorage);
-	virtual ~CServerBrowserPingCache() = default;
+	~CServerBrowserPingCache() override = default;
 
 	void Load() override;
 
