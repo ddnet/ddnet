@@ -90,13 +90,6 @@ void CRenderTools::SelectSprite(int Id, int Flags, int sx, int sy)
 	SelectSprite(&g_pData->m_aSprites[Id], Flags, sx, sy);
 }
 
-void CRenderTools::GetSpriteScale(client_data7::CDataSprite *pSprite, float &ScaleX, float &ScaleY)
-{
-	int w = pSprite->m_W;
-	int h = pSprite->m_H;
-	GetSpriteScaleImpl(w, h, ScaleX, ScaleY);
-}
-
 void CRenderTools::GetSpriteScale(struct CDataSprite *pSprite, float &ScaleX, float &ScaleY)
 {
 	int w = pSprite->m_W;

@@ -1,5 +1,5 @@
 import sys
-from .datatypes import EmitDefinition, EmitTypeDeclaration
+from .datatypes import EmitDefinition
 from . import content # pylint: disable=no-name-in-module
 from . import network # pylint: disable=no-name-in-module
 
@@ -60,18 +60,8 @@ def main():
 	if gen_client_content_header or gen_server_content_header:
 		# print some includes
 		print('#include <engine/graphics.h>')
+		print('#include "data_types.h"')
 		print("namespace client_data7 {")
-
-		# emit the type declarations
-		with open("datasrc/content.py", "rb") as f:
-			contentlines = f.readlines()
-		order = []
-		for line in contentlines:
-			line = line.strip()
-			if line[:6] == "class ".encode() and "(Struct)".encode() in line:
-				order += [line.split()[1].split("(".encode())[0].decode("ascii")]
-		for name in order:
-			EmitTypeDeclaration(content.__dict__[name])
 
 		# the container pointer
 		print('extern CDataContainer *g_pData;')
