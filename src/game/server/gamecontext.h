@@ -237,11 +237,11 @@ public:
 	void CreatePlayerSpawn(vec2 Pos, CClientMask Mask = CClientMask().set());
 	void CreateDeath(vec2 Pos, int ClientID, CClientMask Mask = CClientMask().set());
 	void CreateSound(vec2 Pos, int Sound, CClientMask Mask = CClientMask().set());
-	void CreateSoundGlobal(int Sound, int Target = -1);
+	void CreateSoundGlobal(int Sound, int Target = -1) const;
 
 	void SnapSwitchers(int SnappingClient);
-	bool SnapLaserObject(const CSnapContext &Context, int SnapID, const vec2 &To, const vec2 &From, int StartTick, int Owner = -1, int LaserType = -1, int Subtype = -1, int SwitchNumber = -1);
-	bool SnapPickup(const CSnapContext &Context, int SnapID, const vec2 &Pos, int Type, int SubType, int SwitchNumber);
+	bool SnapLaserObject(const CSnapContext &Context, int SnapID, const vec2 &To, const vec2 &From, int StartTick, int Owner = -1, int LaserType = -1, int Subtype = -1, int SwitchNumber = -1) const;
+	bool SnapPickup(const CSnapContext &Context, int SnapID, const vec2 &Pos, int Type, int SubType, int SwitchNumber) const;
 
 	enum
 	{
@@ -258,14 +258,14 @@ public:
 
 	// network
 	void CallVote(int ClientID, const char *pDesc, const char *pCmd, const char *pReason, const char *pChatmsg, const char *pSixupDesc = 0);
-	void SendChatTarget(int To, const char *pText, int Flags = CHAT_SIX | CHAT_SIXUP);
-	void SendChatTeam(int Team, const char *pText);
+	void SendChatTarget(int To, const char *pText, int Flags = CHAT_SIX | CHAT_SIXUP) const;
+	void SendChatTeam(int Team, const char *pText) const;
 	void SendChat(int ClientID, int Team, const char *pText, int SpamProtectionClientID = -1, int Flags = CHAT_SIX | CHAT_SIXUP);
 	void SendStartWarning(int ClientID, const char *pMessage);
-	void SendEmoticon(int ClientID, int Emoticon, int TargetClientID);
-	void SendWeaponPickup(int ClientID, int Weapon);
-	void SendMotd(int ClientID);
-	void SendSettings(int ClientID);
+	void SendEmoticon(int ClientID, int Emoticon, int TargetClientID) const;
+	void SendWeaponPickup(int ClientID, int Weapon) const;
+	void SendMotd(int ClientID) const;
+	void SendSettings(int ClientID) const;
 	void SendBroadcast(const char *pText, int ClientID, bool IsImportant = true);
 
 	void List(int ClientID, const char *pFilter);
@@ -274,7 +274,7 @@ public:
 	void CheckPureTuning();
 	void SendTuningParams(int ClientID, int Zone = 0);
 
-	struct CVoteOptionServer *GetVoteOption(int Index);
+	const CVoteOptionServer *GetVoteOption(int Index) const;
 	void ProgressVoteOptions(int ClientID);
 
 	//
@@ -339,12 +339,12 @@ public:
 	bool OnClientDDNetVersionKnown(int ClientID);
 	void FillAntibot(CAntibotRoundData *pData) override;
 	bool ProcessSpamProtection(int ClientID, bool RespectChatInitialDelay = true);
-	int GetDDRaceTeam(int ClientID);
+	int GetDDRaceTeam(int ClientID) const;
 	// Describes the time when the first player joined the server.
 	int64_t m_NonEmptySince;
 	int64_t m_LastMapVote;
 	int GetClientVersion(int ClientID) const;
-	CClientMask ClientsMaskExcludeClientVersionAndHigher(int Version);
+	CClientMask ClientsMaskExcludeClientVersionAndHigher(int Version) const;
 	bool PlayerExists(int ClientID) const override { return m_apPlayers[ClientID]; }
 	// Returns true if someone is actively moderating.
 	bool PlayerModerating() const;
@@ -352,7 +352,7 @@ public:
 
 	// Checks if player can vote and notify them about the reason
 	bool RateLimitPlayerVote(int ClientID);
-	bool RateLimitPlayerMapVote(int ClientID);
+	bool RateLimitPlayerMapVote(int ClientID) const;
 
 	void OnUpdatePlayerServerInfo(char *aBuf, int BufSize, int ID) override;
 
@@ -505,7 +505,7 @@ private:
 	void WhisperID(int ClientID, int VictimID, const char *pMessage);
 	void Converse(int ClientID, char *pStr);
 	bool IsVersionBanned(int Version);
-	void UnlockTeam(int ClientID, int Team);
+	void UnlockTeam(int ClientID, int Team) const;
 
 	enum
 	{

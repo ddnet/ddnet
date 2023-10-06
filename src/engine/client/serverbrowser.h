@@ -217,7 +217,7 @@ private:
 	void RegisterCommands();
 	static void Con_LeakIpAddress(IConsole::IResult *pResult, void *pUserData);
 
-	void SetInfo(CServerEntry *pEntry, const CServerInfo &Info);
+	void SetInfo(CServerEntry *pEntry, const CServerInfo &Info) const;
 	void SetLatency(NETADDR Addr, int Latency);
 
 	static bool ParseCommunityFinishes(CCommunity *pCommunity, const json_value &Finishes);

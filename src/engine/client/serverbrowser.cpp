@@ -122,7 +122,7 @@ void CServerBrowser::Con_LeakIpAddress(IConsole::IResult *pResult, void *pUserDa
 	{
 	public:
 		CServerBrowser *m_pThis;
-		bool operator()(int i, int j)
+		bool operator()(int i, int j) const
 		{
 			NETADDR Addr1 = m_pThis->m_ppServerlist[i]->m_Info.m_aAddresses[0];
 			NETADDR Addr2 = m_pThis->m_ppServerlist[j]->m_Info.m_aAddresses[0];
@@ -541,7 +541,7 @@ void ServerBrowserFormatAddresses(char *pBuffer, int BufferSize, NETADDR *pAddrs
 	}
 }
 
-void CServerBrowser::SetInfo(CServerEntry *pEntry, const CServerInfo &Info)
+void CServerBrowser::SetInfo(CServerEntry *pEntry, const CServerInfo &Info) const
 {
 	const CServerInfo TmpInfo = pEntry->m_Info;
 	pEntry->m_Info = Info;
@@ -575,7 +575,7 @@ void CServerBrowser::SetInfo(CServerEntry *pEntry, const CServerInfo &Info)
 		{
 		}
 
-		bool operator()(const CServerInfo::CClient &p0, const CServerInfo::CClient &p1)
+		bool operator()(const CServerInfo::CClient &p0, const CServerInfo::CClient &p1) const
 		{
 			// Sort players before non players
 			if(p0.m_Player && !p1.m_Player)

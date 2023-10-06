@@ -324,7 +324,7 @@ public:
 	virtual int OnSnapInput(int *pData, bool Dummy, bool Force) = 0;
 	virtual void OnDummySwap() = 0;
 	virtual void SendDummyInfo(bool Start) = 0;
-	virtual int GetLastRaceTick() = 0;
+	virtual int GetLastRaceTick() const = 0;
 
 	virtual const char *GetItemName(int Type) const = 0;
 	virtual const char *Version() const = 0;
@@ -335,8 +335,8 @@ public:
 	virtual void OnDummyDisconnect() = 0;
 	virtual void DummyResetInput() = 0;
 	virtual void Echo(const char *pString) = 0;
-	virtual bool CanDisplayWarning() = 0;
-	virtual bool IsDisplayingWarning() = 0;
+	virtual bool CanDisplayWarning() const = 0;
+	virtual bool IsDisplayingWarning() const = 0;
 
 	virtual CNetObjHandler *GetNetObjHandler() = 0;
 };

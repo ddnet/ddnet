@@ -569,7 +569,7 @@ void CGameConsole::CInstance::ScrollToCenter(int StartLine, int EndLine)
 		m_BacklogCurLine -= ComputedLines;
 }
 
-void CGameConsole::CInstance::UpdateEntryTextAttributes(CBacklogEntry *pEntry)
+void CGameConsole::CInstance::UpdateEntryTextAttributes(CBacklogEntry *pEntry) const
 {
 	CTextCursor Cursor;
 	m_pGameConsole->TextRender()->SetCursor(&Cursor, 0.0f, 0.0f, FONT_SIZE, 0);

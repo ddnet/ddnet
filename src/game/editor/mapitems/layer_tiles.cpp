@@ -84,7 +84,7 @@ void CLayerTiles::SetTile(int x, int y, CTile Tile)
 	RecordStateChange(x, y, CurrentTile, Tile);
 }
 
-void CLayerTiles::SetTileIgnoreHistory(int x, int y, CTile Tile)
+void CLayerTiles::SetTileIgnoreHistory(int x, int y, CTile Tile) const
 {
 	m_pTiles[y * m_Width + x] = Tile;
 }
@@ -111,7 +111,7 @@ void CLayerTiles::PrepareForSave()
 	}
 }
 
-void CLayerTiles::ExtractTiles(int TilemapItemVersion, const CTile *pSavedTiles, size_t SavedTilesSize)
+void CLayerTiles::ExtractTiles(int TilemapItemVersion, const CTile *pSavedTiles, size_t SavedTilesSize) const
 {
 	const size_t DestSize = (size_t)m_Width * m_Height;
 	if(TilemapItemVersion >= CMapItemLayerTilemap::TILE_SKIP_MIN_VERSION)
@@ -120,7 +120,7 @@ void CLayerTiles::ExtractTiles(int TilemapItemVersion, const CTile *pSavedTiles,
 		mem_copy(m_pTiles, pSavedTiles, DestSize * sizeof(CTile));
 }
 
-void CLayerTiles::MakePalette()
+void CLayerTiles::MakePalette() const
 {
 	for(int y = 0; y < m_Height; y++)
 		for(int x = 0; x < m_Width; x++)
@@ -171,7 +171,7 @@ void CLayerTiles::Render(bool Tileset)
 int CLayerTiles::ConvertX(float x) const { return (int)(x / 32.0f); }
 int CLayerTiles::ConvertY(float y) const { return (int)(y / 32.0f); }
 
-void CLayerTiles::Convert(CUIRect Rect, RECTi *pOut)
+void CLayerTiles::Convert(CUIRect Rect, RECTi *pOut) const
 {
 	pOut->x = ConvertX(Rect.x);
 	pOut->y = ConvertY(Rect.y);
@@ -179,7 +179,7 @@ void CLayerTiles::Convert(CUIRect Rect, RECTi *pOut)
 	pOut->h = ConvertY(Rect.y + Rect.h + 31) - pOut->y;
 }
 
-void CLayerTiles::Snap(CUIRect *pRect)
+void CLayerTiles::Snap(CUIRect *pRect) const
 {
 	RECTi Out;
 	Convert(*pRect, &Out);
@@ -189,7 +189,7 @@ void CLayerTiles::Snap(CUIRect *pRect)
 	pRect->h = Out.h * 32.0f;
 }
 
-void CLayerTiles::Clamp(RECTi *pRect)
+void CLayerTiles::Clamp(RECTi *pRect) const
 {
 	if(pRect->x < 0)
 	{

@@ -33,10 +33,10 @@ public:
 	CLayerGroup();
 	~CLayerGroup();
 
-	void Convert(CUIRect *pRect);
+	void Convert(CUIRect *pRect) const;
 	void Render();
-	void MapScreen();
-	void Mapping(float *pPoints);
+	void MapScreen() const;
+	void Mapping(float *pPoints) const;
 
 	void GetSize(float *pWidth, float *pHeight) const;
 

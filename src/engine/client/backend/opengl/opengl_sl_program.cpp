@@ -25,7 +25,7 @@ void CGLSLProgram::DeleteProgram()
 	glDeleteProgram(m_ProgramID);
 }
 
-bool CGLSLProgram::AddShader(CGLSL *pShader)
+bool CGLSLProgram::AddShader(CGLSL *pShader) const
 {
 	if(pShader->IsLoaded())
 	{
@@ -35,7 +35,7 @@ bool CGLSLProgram::AddShader(CGLSL *pShader)
 	return false;
 }
 
-void CGLSLProgram::DetachShader(CGLSL *pShader)
+void CGLSLProgram::DetachShader(CGLSL *pShader) const
 {
 	if(pShader->IsLoaded())
 	{
@@ -43,7 +43,7 @@ void CGLSLProgram::DetachShader(CGLSL *pShader)
 	}
 }
 
-void CGLSLProgram::DetachShaderByID(TWGLuint ShaderID)
+void CGLSLProgram::DetachShaderByID(TWGLuint ShaderID) const
 {
 	glDetachShader(m_ProgramID, ShaderID);
 }
@@ -68,7 +68,7 @@ void CGLSLProgram::LinkProgram()
 	DetachAllShaders();
 }
 
-void CGLSLProgram::DetachAllShaders()
+void CGLSLProgram::DetachAllShaders() const
 {
 	TWGLuint aShaders[100];
 	GLsizei ReturnedCount = 0;
@@ -119,18 +119,18 @@ void CGLSLProgram::SetUniform(int Loc, const bool Value)
 	glUniform1i(Loc, (int)Value);
 }
 
-int CGLSLProgram::GetUniformLoc(const char *pName)
+int CGLSLProgram::GetUniformLoc(const char *pName) const
 {
 	return glGetUniformLocation(m_ProgramID, pName);
 }
 
-void CGLSLProgram::UseProgram()
+void CGLSLProgram::UseProgram() const
 {
 	if(m_IsLinked)
 		glUseProgram(m_ProgramID);
 }
 
-TWGLuint CGLSLProgram::GetProgramID()
+TWGLuint CGLSLProgram::GetProgramID() const
 {
 	return m_ProgramID;
 }

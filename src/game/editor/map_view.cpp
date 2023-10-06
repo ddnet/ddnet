@@ -135,7 +135,7 @@ void CMapView::ResetZoom()
 	m_Zoom.SetValue(100.0f);
 }
 
-float CMapView::ScaleLength(float Value)
+float CMapView::ScaleLength(float Value) const
 {
 	return m_WorldZoom * Value;
 }
