@@ -60,7 +60,7 @@ private:
 	public:
 		CJob(std::shared_ptr<CData> pData) :
 			m_pData(std::move(pData)) { m_Lock = lock_create(); }
-		virtual ~CJob() { lock_destroy(m_Lock); }
+		~CJob() override { lock_destroy(m_Lock); }
 		void Abort() REQUIRES(!m_Lock);
 	};
 
@@ -250,7 +250,7 @@ class CServerBrowserHttp : public IServerBrowserHttp
 {
 public:
 	CServerBrowserHttp(IEngine *pEngine, IConsole *pConsole, const char **ppUrls, int NumUrls, int PreviousBestIndex);
-	virtual ~CServerBrowserHttp();
+	~CServerBrowserHttp() override;
 	void Update() override;
 	bool IsRefreshing() override { return m_State != STATE_DONE; }
 	void Refresh() override;

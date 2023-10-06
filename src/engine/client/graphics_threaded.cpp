@@ -789,7 +789,7 @@ public:
 		str_copy(m_aName, pName);
 	}
 
-	virtual ~CScreenshotSaveJob()
+	~CScreenshotSaveJob() override
 	{
 		free(m_pData);
 	}

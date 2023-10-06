@@ -254,7 +254,7 @@ public:
 		aio_write_newline_unlocked(m_pAio);
 		aio_unlock(m_pAio);
 	}
-	~CLoggerAsync()
+	~CLoggerAsync() override
 	{
 		if(m_Close)
 		{

@@ -5161,7 +5161,7 @@ void CEditor::RenderModebar(CUIRect View)
 
 	// mode button
 	{
-		const char *pModeLabel = "";
+		const char *pModeLabel;
 		if(m_Mode == MODE_LAYERS)
 			pModeLabel = "Layers";
 		else if(m_Mode == MODE_IMAGES)
@@ -5169,7 +5169,10 @@ void CEditor::RenderModebar(CUIRect View)
 		else if(m_Mode == MODE_SOUNDS)
 			pModeLabel = "Sounds";
 		else
+		{
 			dbg_assert(false, "m_Mode invalid");
+			dbg_break();
+		}
 
 		static int s_ModeButton = 0;
 		const int MouseButton = DoButton_Ex(&s_ModeButton, pModeLabel, 0, &ModeButton, 0, "Switch between images, sounds and layers management.", IGraphics::CORNER_T, 10.0f);

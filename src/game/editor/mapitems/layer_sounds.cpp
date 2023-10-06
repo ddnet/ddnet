@@ -40,7 +40,7 @@ void CLayerSounds::Render(bool Tileset)
 		if(Source.m_PosEnv >= 0)
 		{
 			ColorRGBA Channels;
-			m_pEditor->EnvelopeEval(Source.m_PosEnvOffset, Source.m_PosEnv, Channels, m_pEditor);
+			CEditor::EnvelopeEval(Source.m_PosEnvOffset, Source.m_PosEnv, Channels, m_pEditor);
 			OffsetX = Channels.r;
 			OffsetY = Channels.g;
 		}
@@ -90,7 +90,7 @@ void CLayerSounds::Render(bool Tileset)
 		if(Source.m_PosEnv >= 0)
 		{
 			ColorRGBA Channels;
-			m_pEditor->EnvelopeEval(Source.m_PosEnvOffset, Source.m_PosEnv, Channels, m_pEditor);
+			CEditor::EnvelopeEval(Source.m_PosEnvOffset, Source.m_PosEnv, Channels, m_pEditor);
 			OffsetX = Channels.r;
 			OffsetY = Channels.g;
 		}
