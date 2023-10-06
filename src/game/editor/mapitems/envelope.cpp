@@ -31,7 +31,7 @@ const CEnvPointBezier *CEnvelope::CEnvelopePointAccess::GetBezier(int Index) con
 }
 
 CEnvelope::CEnvelope(EType Type) :
-	m_PointsAccess(&m_vPoints), m_Type(Type) {}
+	m_Type(Type), m_PointsAccess(&m_vPoints) {}
 
 CEnvelope::CEnvelope(int NumChannels) :
 	m_PointsAccess(&m_vPoints)
