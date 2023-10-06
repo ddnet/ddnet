@@ -247,7 +247,6 @@ protected:
 	enum
 	{
 		SORT_DEMONAME = 0,
-		SORT_MARKERS,
 		SORT_LENGTH,
 		SORT_DATE,
 	};
@@ -306,8 +305,6 @@ protected:
 			if(!m_InfosLoaded)
 				return !Other.m_InfosLoaded;
 
-			if(g_Config.m_BrDemoSort == SORT_MARKERS)
-				return Left.NumMarkers() < Right.NumMarkers();
 			if(g_Config.m_BrDemoSort == SORT_LENGTH)
 				return Left.Length() < Right.Length();
 
@@ -431,7 +428,11 @@ protected:
 	void HandleDemoSeeking(float PositionToSeek, float TimeToSeek);
 	void RenderDemoPlayer(CUIRect MainView);
 	void RenderDemoPlayerSliceSavePopup(CUIRect MainView);
-	void RenderDemoList(CUIRect MainView);
+	bool m_DemoBrowserListInitialized = false;
+	void RenderDemoBrowser(CUIRect MainView);
+	void RenderDemoBrowserList(CUIRect ListView, bool &WasListboxItemActivated);
+	void RenderDemoBrowserDetails(CUIRect DetailsView);
+	void RenderDemoBrowserButtons(CUIRect ButtonsView, bool WasListboxItemActivated);
 	void PopupConfirmDeleteDemo();
 	void PopupConfirmDeleteFolder();
 

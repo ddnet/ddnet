@@ -1100,7 +1100,7 @@ int CMenus::Render()
 			else if(m_MenuPage == PAGE_DEMOS)
 			{
 				m_pBackground->ChangePosition(CMenuBackground::POS_DEMOS);
-				RenderDemoList(MainView);
+				RenderDemoBrowser(MainView);
 			}
 			else if(m_MenuPage == PAGE_FAVORITES)
 			{
