@@ -2860,7 +2860,7 @@ void CGameContext::ConTunes(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	char aBuf[256];
-	for(int i = 0; i < pSelf->Tuning()->Num(); i++)
+	for(int i = 0; i < CTuningParams::Num(); i++)
 	{
 		float Value;
 		pSelf->Tuning()->Get(i, &Value);
@@ -2899,7 +2899,7 @@ void CGameContext::ConTuneDumpZone(IConsole::IResult *pResult, void *pUserData)
 	char aBuf[256];
 	if(List >= 0 && List < NUM_TUNEZONES)
 	{
-		for(int i = 0; i < pSelf->TuningList()[List].Num(); i++)
+		for(int i = 0; i < CTuningParams::Num(); i++)
 		{
 			float Value;
 			pSelf->TuningList()[List].Get(i, &Value);

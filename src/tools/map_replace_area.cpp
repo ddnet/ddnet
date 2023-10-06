@@ -479,8 +479,8 @@ MapObject CreateMapObject(const CMapItemGroup *pLayerGroup, const int PosX, cons
 
 	for(int i = 0; i < 2; i++)
 	{
-		Ob.m_aaScreenOffset[i][0] = -Ob.ms_aStandardScreen[i];
-		Ob.m_aaScreenOffset[i][1] = Ob.ms_aStandardScreen[i];
+		Ob.m_aaScreenOffset[i][0] = -MapObject::ms_aStandardScreen[i];
+		Ob.m_aaScreenOffset[i][1] = MapObject::ms_aStandardScreen[i];
 		if(Ob.m_aSpeed[i] < 0)
 			std::swap(Ob.m_aaScreenOffset[i][0], Ob.m_aaScreenOffset[i][1]);
 	}

@@ -10,8 +10,6 @@
 #   TODO: Requires C11 to fix
 # misc-unused-parameters
 #   TODO: Many changes
-# readability-static-accessed-through-instance,
-#   Crashes: https://github.com/llvm/llvm-project/issues/53359
 # misc-use-anonymous-namespace
 #   We don't want to use anonymous namespaces instead of static functions.
 # bugprone-suspicious-realloc-usage
@@ -87,7 +85,6 @@ Checks: >
   -readability-named-parameter,
   -readability-non-const-parameter,
   -readability-simplify-boolean-expr,
-  -readability-static-accessed-through-instance,
   -readability-suspicious-call-argument,
   -readability-uppercase-literal-suffix,
   performance-*,
