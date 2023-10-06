@@ -5306,9 +5306,7 @@ void CEditor::UpdateZoomEnvelopeY(const CUIRect &View)
 
 void CEditor::ResetZoomEnvelope(const std::shared_ptr<CEnvelope> &pEnvelope, int ActiveChannels)
 {
-	pEnvelope->FindTopBottom(ActiveChannels);
-	float Top = pEnvelope->m_Top;
-	float Bottom = pEnvelope->m_Bottom;
+	auto [Bottom, Top] = pEnvelope->GetValueRange(ActiveChannels);
 	float EndTime = pEnvelope->EndTime();
 	float ValueRange = absolute(Top - Bottom);
 
@@ -5599,7 +5597,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		if(DoButton_Editor(&s_NewSoundButton, "Sound+", 0, &Button, 0, "Creates a new sound envelope"))
 		{
 			m_Map.OnModify();
-			pNewEnv = m_Map.NewEnvelope(1);
+			pNewEnv = m_Map.NewEnvelope(CEnvelope::EType::SOUND);
 		}
 
 		ToolBar.VSplitRight(5.0f, &ToolBar, nullptr);
@@ -5608,7 +5606,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		if(DoButton_Editor(&s_New4dButton, "Color+", 0, &Button, 0, "Creates a new color envelope"))
 		{
 			m_Map.OnModify();
-			pNewEnv = m_Map.NewEnvelope(4);
+			pNewEnv = m_Map.NewEnvelope(CEnvelope::EType::COLOR);
 		}
 
 		ToolBar.VSplitRight(5.0f, &ToolBar, nullptr);
@@ -5617,7 +5615,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		if(DoButton_Editor(&s_New2dButton, "Pos.+", 0, &Button, 0, "Creates a new position envelope"))
 		{
 			m_Map.OnModify();
-			pNewEnv = m_Map.NewEnvelope(3);
+			pNewEnv = m_Map.NewEnvelope(CEnvelope::EType::POSITION);
 		}
 
 		if(m_SelectedEnvelope >= 0)
@@ -5962,6 +5960,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		}
 
 		{
+			using namespace std::chrono_literals;
 			CTimeStep UnitsPerLineX = 1ms;
 			static const CTimeStep s_aUnitPerLineOptionsX[] = {5ms, 10ms, 25ms, 50ms, 100ms, 250ms, 500ms, 1s, 2s, 5s, 10s, 15s, 30s, 1min};
 			for(CTimeStep Value : s_aUnitPerLineOptionsX)
