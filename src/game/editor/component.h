@@ -85,17 +85,6 @@ public:
 
 private:
 	CEditor *m_pEditor;
-	IInput *m_pInput;
-	IClient *m_pClient;
-	CConfig *m_pConfig;
-	IConsole *m_pConsole;
-	IEngine *m_pEngine;
-	IGraphics *m_pGraphics;
-	ISound *m_pSound;
-	ITextRender *m_pTextRender;
-	IStorage *m_pStorage;
-	CUI *m_pUI;
-	CRenderTools *m_pRenderTools;
 
 	std::vector<std::reference_wrapper<CEditorComponent>> m_vSubComponents = {};
 };
