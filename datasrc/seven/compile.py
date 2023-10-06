@@ -60,7 +60,6 @@ def main():
 	if gen_client_content_header or gen_server_content_header:
 		# print some includes
 		print('#include <engine/graphics.h>')
-		print('#include <engine/sound.h>')
 		print("namespace client_data7 {")
 
 		# emit the type declarations
