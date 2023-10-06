@@ -365,7 +365,7 @@ void RegisterGameUuids(CUuidManager *pManager)
 		print(line)
 
 
-def gen_common_content_header():
+def gen_common_content_types_header():
 	# print some includes
 	print('#include <engine/graphics.h>')
 
@@ -380,6 +380,11 @@ def gen_common_content_header():
 		for name in order:
 			EmitTypeDeclaration(content.__dict__[name])
 
+
+def gen_common_content_header():
+	# print some includes
+	print('#include "data_types.h"')
+
 	# the container pointer
 	print('extern CDataContainer *g_pData;')
 
@@ -391,6 +396,14 @@ def gen_common_content_header():
 def gen_common_content_source():
 	EmitDefinition(content.container, "datacontainer")
 	print('CDataContainer *g_pData = &datacontainer;')
+
+
+def gen_content_types_header():
+	print("#ifndef CONTENT_TYPES_HEADER")
+	print("#define CONTENT_TYPES_HEADER")
+	gen_common_content_types_header()
+	print("#endif")
+
 
 def gen_client_content_header():
 	print("#ifndef CLIENT_CONTENT_HEADER")
@@ -423,6 +436,7 @@ def main():
 	FUNCTION_MAP = {
 						'network_header': gen_network_header,
 						'network_source': gen_network_source,
+						'content_types_header': gen_content_types_header,
 						'client_content_header': gen_client_content_header,
 						'client_content_source': gen_client_content_source,
 						'server_content_header': gen_server_content_header,

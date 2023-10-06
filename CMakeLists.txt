@@ -1806,6 +1806,7 @@ add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/src/game/generated/git_revision.
 )
 generate_source("src/game/generated/client_data.cpp" "client_content_source")
 generate_source("src/game/generated/client_data.h" "client_content_header")
+generate_source("src/game/generated/data_types.h" "content_types_header")
 generate_source("src/game/generated/protocol.cpp" "network_source")
 generate_source("src/game/generated/protocol.h" "network_header")
 generate_source("src/game/generated/server_data.cpp" "server_content_source")
@@ -2027,6 +2028,7 @@ foreach(s ${GAME_SHARED})
 endforeach()
 list(REMOVE_ITEM GAME_SHARED ${ENGINE_UUID_SHARED})
 set(GAME_GENERATED_SHARED
+  src/game/generated/data_types.h
   src/game/generated/git_revision.cpp
   src/game/generated/protocol.h
   src/game/generated/protocol7.h
