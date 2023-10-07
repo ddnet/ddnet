@@ -1047,7 +1047,21 @@ void CGameTeams::OnCharacterDeath(int ClientID, int Weapon)
 	if(g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO && Team != TEAM_SUPER)
 	{
 		ChangeTeamState(Team, CGameTeams::TEAMSTATE_OPEN);
-		ResetRoundState(Team);
+		if(m_aPractice[Team])
+		{
+			if(Weapon == WEAPON_SELF)
+			{
+				ResetRoundState(Team);
+			}
+			else
+			{
+				GameServer()->SendChatTeam(Team, "You died, but will stay in practice until you use kill.");
+			}
+		}
+		else
+		{
+			ResetRoundState(Team);
+		}
 	}
 	else if(Locked)
 	{
