@@ -923,7 +923,6 @@ void CEditor::DoAudioPreview(CUIRect View, const void *pPlayPauseButtonID, const
 		SeekBar.HMargin(2.5f, &SeekBar);
 
 		const float Rounding = 5.0f;
-		const void *pId = pSeekBarID;
 
 		char aBuffer[64];
 		const float CurrentTime = Sound()->GetSampleCurrentTime(SampleID);
@@ -949,43 +948,26 @@ void CEditor::DoAudioPreview(CUIRect View, const void *pPlayPauseButtonID, const
 		// do the logic
 		const bool Inside = UI()->MouseInside(&SeekBar);
 
-		if(UI()->CheckActiveItem(pId))
+		if(UI()->CheckActiveItem(pSeekBarID))
 		{
 			if(!UI()->MouseButton(0))
+			{
 				UI()->SetActiveItem(nullptr);
+			}
 			else
 			{
-				float s_PrevAmount = 0.0f;
-				float AmountSeek = clamp((UI()->MouseX() - SeekBar.x - Rounding) / (float)(SeekBar.w - 2 * Rounding), 0.0f, 1.0f);
-
-				if(Input()->ShiftIsPressed())
-				{
-					AmountSeek = s_PrevAmount + (AmountSeek - s_PrevAmount) * 0.05f;
-					if(AmountSeek >= 0.0f && AmountSeek <= 1.0f && absolute(s_PrevAmount - AmountSeek) >= 0.0001f)
-					{
-						Sound()->SetSampleCurrentTime(SampleID, AmountSeek);
-					}
-				}
-				else
-				{
-					if(AmountSeek >= 0.0f && AmountSeek <= 1.0f && absolute(s_PrevAmount - AmountSeek) >= 0.001f)
-					{
-						s_PrevAmount = AmountSeek;
-						Sound()->SetSampleCurrentTime(SampleID, AmountSeek);
-					}
-				}
+				const float AmountSeek = clamp((UI()->MouseX() - SeekBar.x - Rounding) / (float)(SeekBar.w - 2 * Rounding), 0.0f, 1.0f);
+				Sound()->SetSampleCurrentTime(SampleID, AmountSeek);
 			}
 		}
-		else if(UI()->HotItem() == pId)
+		else if(UI()->HotItem() == pSeekBarID)
 		{
 			if(UI()->MouseButton(0))
-			{
-				UI()->SetActiveItem(pId);
-			}
+				UI()->SetActiveItem(pSeekBarID);
 		}
 
 		if(Inside)
-			UI()->SetHotItem(pId);
+			UI()->SetHotItem(pSeekBarID);
 	}
 }
 

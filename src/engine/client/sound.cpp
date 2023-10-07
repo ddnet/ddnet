@@ -623,7 +623,7 @@ float CSound::GetSampleTotalTime(int SampleID)
 	if(SampleID == -1 || SampleID >= NUM_SAMPLES)
 		return 0.0f;
 
-	return (m_aSamples[SampleID].m_NumFrames / m_aSamples[SampleID].m_Rate);
+	return (m_aSamples[SampleID].m_NumFrames / (float)m_aSamples[SampleID].m_Rate);
 }
 
 float CSound::GetSampleCurrentTime(int SampleID)
@@ -638,12 +638,12 @@ float CSound::GetSampleCurrentTime(int SampleID)
 		{
 			if(Voice.m_pSample == pSample)
 			{
-				return (Voice.m_Tick / pSample->m_Rate);
+				return (Voice.m_Tick / (float)pSample->m_Rate);
 			}
 		}
 	}
 
-	return (pSample->m_PausedAt / pSample->m_Rate);
+	return (pSample->m_PausedAt / (float)pSample->m_Rate);
 }
 
 void CSound::SetSampleCurrentTime(int SampleID, float Time)
