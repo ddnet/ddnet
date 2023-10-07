@@ -1086,17 +1086,21 @@ void CMenus::RenderServerbrowserInfoScoreboard(CUIRect View, const CServerInfo *
 		Name = Item.m_Rect;
 
 		ColorRGBA Color;
-		const float alpha = (i % 2 + 1) * 0.05f;
+		const float Alpha = (i % 2 + 1) * 0.05f;
 		switch(CurrentClient.m_FriendState)
 		{
 		case IFriends::FRIEND_NO:
-			Color = ColorRGBA(1.0f, 1.0f, 1.0f, alpha);
+			Color = ColorRGBA(1.0f, 1.0f, 1.0f, Alpha);
 			break;
 		case IFriends::FRIEND_PLAYER:
-			Color = ColorRGBA(0.5f, 1.0f, 0.5f, 0.15f + alpha);
+			Color = ColorRGBA(0.5f, 1.0f, 0.5f, 0.15f + Alpha);
 			break;
 		case IFriends::FRIEND_CLAN:
-			Color = ColorRGBA(0.4f, 0.4f, 1.0f, 0.15f + alpha);
+			Color = ColorRGBA(0.4f, 0.4f, 1.0f, 0.15f + Alpha);
+			break;
+		default:
+			dbg_assert(false, "Invalid friend state");
+			dbg_break();
 			break;
 		}
 
