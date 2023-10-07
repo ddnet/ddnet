@@ -57,7 +57,7 @@ void CEnvelope::Resort()
 	std::sort(m_vPoints.begin(), m_vPoints.end());
 }
 
-std::pair<float, float> CEnvelope::GetValueRange(int ChannelMask)
+std::pair<float, float> CEnvelope::ValueRange(int ChannelMask)
 {
 	float Top = -std::numeric_limits<float>::infinity();
 	float Bottom = std::numeric_limits<float>::infinity();
