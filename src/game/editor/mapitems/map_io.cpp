@@ -11,7 +11,6 @@
 #include <game/gamecore.h>
 #include <game/mapitems_ex.h>
 
-#include "game/editor/mapitems/envelope_point.h"
 #include "image.h"
 #include "sound.h"
 
@@ -931,15 +930,19 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 		{
 			CMapItemEnvelope *pItem = (CMapItemEnvelope *)DataFile.GetItem(EnvStart + e);
 			std::shared_ptr<CEnvelope> pEnv = std::make_shared<CEnvelope>(pItem->m_Channels);
-			pEnv->m_vPoints.resize(pItem->m_NumPoints);
+			pEnv->m_vPoints.reserve(pItem->m_NumPoints);
 			for(int p = 0; p < pItem->m_NumPoints; p++)
 			{
+				CEnvPoint EnvPoint;
 				const CEnvPoint *pPoint = EnvelopePoints.GetPoint(pItem->m_StartPoint + p);
 				if(pPoint != nullptr)
-					mem_copy(&pEnv->m_vPoints[p], pPoint, sizeof(CEnvPoint));
+					mem_copy(&EnvPoint, pPoint, sizeof(CEnvPoint));
+				CEnvPointBezier Bezier;
 				const CEnvPointBezier *pPointBezier = EnvelopePoints.GetBezier(pItem->m_StartPoint + p);
 				if(pPointBezier != nullptr)
-					mem_copy(&pEnv->m_vPoints[p].m_Bezier, pPointBezier, sizeof(CEnvPointBezier));
+					mem_copy(&Bezier, pPointBezier, sizeof(CEnvPointBezier));
+
+				pEnv->m_vPoints.emplace_back(EnvPoint, Bezier);
 			}
 			if(pItem->m_aName[0] != -1) // compatibility with old maps
 				IntsToStr(pItem->m_aName, sizeof(pItem->m_aName) / sizeof(int), pEnv->m_aName);

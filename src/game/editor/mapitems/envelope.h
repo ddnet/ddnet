@@ -24,6 +24,7 @@ public:
 	std::pair<float, float> GetValueRange(int ChannelMask);
 	int Eval(float Time, ColorRGBA &Color);
 	void AddPoint(int Time, int v0, int v1 = 0, int v2 = 0, int v3 = 0);
+	void RemovePoint(int Index);
 	float EndTime() const;
 	int GetChannels() const;
 

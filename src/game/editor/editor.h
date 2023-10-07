@@ -971,6 +971,7 @@ public:
 	float EnvelopeToScreenY(const CUIRect &View, float y) const;
 	float ScreenToEnvelopeDX(const CUIRect &View, float dx);
 	float ScreenToEnvelopeDY(const CUIRect &View, float dy);
+	vec2 EnvelopeToScreen(const CUIRect &View, vec2 v) const;
 
 	// DDRace
 

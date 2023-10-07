@@ -1,5 +1,4 @@
 #include "envelope.h"
-#include "game/editor/mapitems/envelope_point.h"
 
 #include <algorithm>
 #include <chrono>
@@ -21,7 +20,7 @@ const CEnvPoint *CEnvelope::CEnvelopePointAccess::GetPoint(int Index) const
 {
 	if(Index < 0 || (size_t)Index >= m_pvPoints->size())
 		return nullptr;
-	return &m_pvPoints->at(Index);
+	return &m_pvPoints->at(Index).m_PointInfo;
 }
 
 const CEnvPointBezier *CEnvelope::CEnvelopePointAccess::GetBezier(int Index) const
@@ -62,8 +61,7 @@ std::pair<float, float> CEnvelope::GetValueRange(int ChannelMask)
 {
 	float Top = -std::numeric_limits<float>::infinity();
 	float Bottom = std::numeric_limits<float>::infinity();
-	CEnvelopePoint *pPrevPoint = nullptr;
-	for(auto &Point : m_vPoints)
+	for(size_t i = 0; i < m_vPoints.size(); i++)
 	{
 		for(int c = 0; c < GetChannels(); c++)
 		{
@@ -71,29 +69,26 @@ std::pair<float, float> CEnvelope::GetValueRange(int ChannelMask)
 			{
 				{
 					// value handle
-					const float v = Point.Value(c);
+					const float v = m_vPoints[i].Value(c);
 					Top = maximum(Top, v);
 					Bottom = minimum(Bottom, v);
 				}
 
-				if(Point.CurveType() == CURVETYPE_BEZIER)
+				if(m_vPoints[i].CurveType() == CURVETYPE_BEZIER)
 				{
-					// out-tangent handle
-					const float v = Point.Value(c) + fx2f(Point.m_Bezier.m_aOutTangentDeltaY[c]);
-					Top = maximum(Top, v);
-					Bottom = minimum(Bottom, v);
+					const float ValueIn = m_vPoints[i].InTangentHandle(c).y;
+					Top = maximum(Top, ValueIn);
+					Bottom = minimum(Bottom, ValueIn);
 				}
 
-				if(pPrevPoint != nullptr && pPrevPoint->CurveType() == CURVETYPE_BEZIER)
+				if(i > 0 && m_vPoints[i - 1].CurveType() == CURVETYPE_BEZIER)
 				{
-					// in-tangent handle
-					const float v = Point.Value(c) + fx2f(Point.m_Bezier.m_aInTangentDeltaY[c]);
-					Top = maximum(Top, v);
-					Bottom = minimum(Bottom, v);
+					const float ValueOut = m_vPoints[i].OutTangentHandle(c).y;
+					Top = maximum(Top, ValueOut);
+					Bottom = minimum(Bottom, ValueOut);
 				}
 			}
 		}
-		pPrevPoint = &Point;
 	}
 
 	return {Bottom, Top};
@@ -107,22 +102,14 @@ int CEnvelope::Eval(float Time, ColorRGBA &Color)
 
 void CEnvelope::AddPoint(int Time, int v0, int v1, int v2, int v3)
 {
-	CEnvelopePoint p;
-	p.m_Time = Time;
-	p.m_aValues[0] = v0;
-	p.m_aValues[1] = v1;
-	p.m_aValues[2] = v2;
-	p.m_aValues[3] = v3;
-	p.m_Curvetype = CURVETYPE_LINEAR;
-	for(int c = 0; c < CEnvPoint::MAX_CHANNELS; c++)
-	{
-		p.m_Bezier.m_aInTangentDeltaX[c] = 0;
-		p.m_Bezier.m_aInTangentDeltaY[c] = 0;
-		p.m_Bezier.m_aOutTangentDeltaX[c] = 0;
-		p.m_Bezier.m_aOutTangentDeltaY[c] = 0;
-	}
-	m_vPoints.push_back(p);
+	CEnvelopePoint p(fx2f(Time), CURVETYPE_LINEAR, {fx2f(v0), fx2f(v1), fx2f(v2), fx2f(v3)});
+	m_vPoints.emplace_back(p);
 	Resort();
+}
+
+void CEnvelope::RemovePoint(int Index)
+{
+	m_vPoints.erase(m_vPoints.begin() + Index);
 }
 
 float CEnvelope::EndTime() const

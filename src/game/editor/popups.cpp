@@ -1316,15 +1316,17 @@ CUI::EPopupMenuFunctionResult CEditor::PopupEnvPoint(void *pContext, CUIRect Vie
 		{
 			auto [SelectedIndex, SelectedChannel] = pEditor->m_SelectedTangentInPoint;
 
-			CurrentTime = pEnvelope->m_vPoints[SelectedIndex].Time() + fxt2f(pEnvelope->m_vPoints[SelectedIndex].m_Bezier.m_aInTangentDeltaX[SelectedChannel]);
-			CurrentValue = pEnvelope->m_vPoints[SelectedIndex].Value(SelectedChannel) + fx2f(pEnvelope->m_vPoints[SelectedIndex].m_Bezier.m_aInTangentDeltaY[SelectedChannel]);
+			vec2 TangentHandle = pEnvelope->m_vPoints[SelectedIndex].InTangentHandle(SelectedChannel);
+			CurrentTime = TangentHandle.x;
+			CurrentValue = TangentHandle.y;
 		}
 		else if(pEditor->IsTangentOutSelected())
 		{
 			auto [SelectedIndex, SelectedChannel] = pEditor->m_SelectedTangentOutPoint;
 
-			CurrentTime = pEnvelope->m_vPoints[SelectedIndex].Time() + fxt2f(pEnvelope->m_vPoints[SelectedIndex].m_Bezier.m_aOutTangentDeltaX[SelectedChannel]);
-			CurrentValue = pEnvelope->m_vPoints[SelectedIndex].Value(SelectedChannel) + fx2f(pEnvelope->m_vPoints[SelectedIndex].m_Bezier.m_aOutTangentDeltaY[SelectedChannel]);
+			vec2 TangentHandle = pEnvelope->m_vPoints[SelectedIndex].OutTangentHandle(SelectedChannel);
+			CurrentTime = TangentHandle.x;
+			CurrentValue = TangentHandle.y;
 		}
 		else
 		{
@@ -1360,19 +1362,15 @@ CUI::EPopupMenuFunctionResult CEditor::PopupEnvPoint(void *pContext, CUIRect Vie
 		{
 			auto [SelectedIndex, SelectedChannel] = pEditor->m_SelectedTangentInPoint;
 
-			pEnvelope->m_vPoints[SelectedIndex].m_Bezier.m_aInTangentDeltaX[SelectedChannel] = minimum<int>(f2fxt(CurrentTime - pEnvelope->m_vPoints[SelectedIndex].Time()), 0);
-			CurrentTime = pEnvelope->m_vPoints[SelectedIndex].Time() + fxt2f(pEnvelope->m_vPoints[SelectedIndex].m_Bezier.m_aInTangentDeltaX[SelectedChannel]);
-
-			pEnvelope->m_vPoints[SelectedIndex].m_Bezier.m_aInTangentDeltaY[SelectedChannel] = f2fx(CurrentValue - pEnvelope->m_vPoints[SelectedIndex].Value(SelectedChannel));
+			CurrentTime = minimum(CurrentTime, pEnvelope->m_vPoints[SelectedIndex].Time());
+			pEnvelope->m_vPoints[SelectedIndex].SetInTangentHandle(SelectedChannel, {CurrentTime, CurrentValue});
 		}
 		else if(pEditor->IsTangentOutSelected())
 		{
 			auto [SelectedIndex, SelectedChannel] = pEditor->m_SelectedTangentOutPoint;
 
-			pEnvelope->m_vPoints[SelectedIndex].m_Bezier.m_aOutTangentDeltaX[SelectedChannel] = maximum<int>(f2fxt(CurrentTime - pEnvelope->m_vPoints[SelectedIndex].Time()), 0);
-			CurrentTime = pEnvelope->m_vPoints[SelectedIndex].Time() + fxt2f(pEnvelope->m_vPoints[SelectedIndex].m_Bezier.m_aOutTangentDeltaX[SelectedChannel]);
-
-			pEnvelope->m_vPoints[SelectedIndex].m_Bezier.m_aOutTangentDeltaY[SelectedChannel] = f2fx(CurrentValue - pEnvelope->m_vPoints[SelectedIndex].Value(SelectedChannel));
+			CurrentTime = maximum(CurrentTime, pEnvelope->m_vPoints[SelectedIndex].Time());
+			pEnvelope->m_vPoints[SelectedIndex].SetOutTangentHandle(SelectedChannel, {CurrentTime, CurrentValue});
 		}
 		else
 		{
@@ -1416,16 +1414,12 @@ CUI::EPopupMenuFunctionResult CEditor::PopupEnvPoint(void *pContext, CUIRect Vie
 		if(pEditor->IsTangentInSelected())
 		{
 			auto [SelectedIndex, SelectedChannel] = pEditor->m_SelectedTangentInPoint;
-
-			pEnvelope->m_vPoints[SelectedIndex].m_Bezier.m_aInTangentDeltaX[SelectedChannel] = 0.0f;
-			pEnvelope->m_vPoints[SelectedIndex].m_Bezier.m_aInTangentDeltaY[SelectedChannel] = 0.0f;
+			pEnvelope->m_vPoints[SelectedIndex].ResetInTangentHandle(SelectedChannel);
 		}
 		else if(pEditor->IsTangentOutSelected())
 		{
 			auto [SelectedIndex, SelectedChannel] = pEditor->m_SelectedTangentOutPoint;
-
-			pEnvelope->m_vPoints[SelectedIndex].m_Bezier.m_aOutTangentDeltaX[SelectedChannel] = 0.0f;
-			pEnvelope->m_vPoints[SelectedIndex].m_Bezier.m_aOutTangentDeltaY[SelectedChannel] = 0.0f;
+			pEnvelope->m_vPoints[SelectedIndex - 1].ResetOutTangentHandle(SelectedChannel);
 		}
 		else
 		{
