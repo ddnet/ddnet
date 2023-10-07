@@ -1523,11 +1523,11 @@ CUI::EPopupMenuFunctionResult CEditor::PopupEnvPointCurveType(void *pContext, CU
 					{
 						if(SelectedIndex != FirstSelectedIndex && SelectedIndex != LastSelectedIndex)
 						{
-							// TODO: refactor CEnvelope::Eval to also take float and CTransform
 							CEnvelopePoint &CurrentPoint = pEnvelope->m_vPoints[SelectedIndex];
-							ColorRGBA Channels;
-							HelperEnvelope.Eval(CurrentPoint.Time(), Channels);
-							CurrentPoint.SetValue(c, Channels.r);
+
+							float ProjectedValue;
+							HelperEnvelope.Eval(CurrentPoint.Time(), ProjectedValue);
+							CurrentPoint.SetValue(c, ProjectedValue);
 						}
 					}
 				}

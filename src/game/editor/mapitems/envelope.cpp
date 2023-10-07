@@ -94,10 +94,23 @@ std::pair<float, float> CEnvelope::GetValueRange(int ChannelMask)
 	return {Bottom, Top};
 }
 
-int CEnvelope::Eval(float Time, ColorRGBA &Color)
+void CEnvelope::Eval(float Time, float &Volume)
+{
+	ColorRGBA Tmp;
+	Eval(Time, Tmp);
+	Volume = Tmp.r;
+}
+
+void CEnvelope::Eval(float Time, CTransform &Transform)
+{
+	ColorRGBA Tmp;
+	Eval(Time, Tmp);
+	Transform = {Tmp.r, Tmp.g, Tmp.b};
+}
+
+void CEnvelope::Eval(float Time, ColorRGBA &Color)
 {
 	CRenderTools::RenderEvalEnvelope(&m_PointsAccess, GetChannels(), std::chrono::nanoseconds((int64_t)((double)Time * (double)std::chrono::nanoseconds(1s).count())), Color);
-	return GetChannels();
 }
 
 void CEnvelope::AddPoint(float Time, float Volume)

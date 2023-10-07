@@ -2154,9 +2154,9 @@ void CEditor::DoQuadEnvelopes(const std::vector<CQuad> &vQuads, IGraphics::CText
 		const CPoint *pPivotPoint = &vQuads[j].m_aPoints[4];
 		for(size_t i = 0; i < apEnvelope[j]->m_vPoints.size() - 1; i++)
 		{
-			ColorRGBA Result;
+			CTransform Result;
 			apEnvelope[j]->Eval(apEnvelope[j]->m_vPoints[i].Time() + 0.000001f, Result);
-			vec2 Pos0 = vec2(fx2f(pPivotPoint->x) + Result.r, fx2f(pPivotPoint->y) + Result.g);
+			vec2 Pos0 = vec2(fx2f(pPivotPoint->x) + Result.OffsetX, fx2f(pPivotPoint->y) + Result.OffsetY);
 
 			const int Steps = 15;
 			for(int n = 1; n <= Steps; n++)
@@ -2164,7 +2164,7 @@ void CEditor::DoQuadEnvelopes(const std::vector<CQuad> &vQuads, IGraphics::CText
 				const float Time = mix(apEnvelope[j]->m_vPoints[i].Time(), apEnvelope[j]->m_vPoints[i + 1].Time(), (float)n / Steps);
 				apEnvelope[j]->Eval(Time - 0.000001f, Result);
 
-				vec2 Pos1 = vec2(fx2f(pPivotPoint->x) + Result.r, fx2f(pPivotPoint->y) + Result.g);
+				vec2 Pos1 = vec2(fx2f(pPivotPoint->x) + Result.OffsetX, fx2f(pPivotPoint->y) + Result.OffsetY);
 
 				IGraphics::CLineItem Line = IGraphics::CLineItem(Pos0.x, Pos0.y, Pos1.x, Pos1.y);
 				Graphics()->LinesDraw(&Line, 1);

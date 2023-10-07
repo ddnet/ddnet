@@ -3,6 +3,7 @@
 
 #include <game/client/render.h>
 
+#include "base/color.h"
 #include "envelope_point.h"
 
 class CEnvelope
@@ -22,7 +23,9 @@ public:
 	explicit CEnvelope(int NumChannels);
 
 	std::pair<float, float> GetValueRange(int ChannelMask);
-	int Eval(float Time, ColorRGBA &Color);
+	void Eval(float Time, float &Volume);
+	void Eval(float Time, CTransform &CTransform);
+	void Eval(float Time, ColorRGBA &Color);
 	void AddPoint(float Time, float Volume);
 	void AddPoint(float Time, CTransform Transform);
 	void AddPoint(float Time, ColorRGBA Color);
