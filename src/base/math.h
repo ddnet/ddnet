@@ -73,6 +73,17 @@ constexpr inline float fx2f(int v)
 	return v / (float)fxpscale;
 }
 
+// float to fixed (for time)
+constexpr inline float fxt2f(int t)
+{
+	return t / 1000.0f;
+}
+
+constexpr inline int f2fxt(float t)
+{
+	return static_cast<int>(t * 1000.0f);
+}
+
 // int to fixed
 constexpr inline int i2fx(int v)
 {

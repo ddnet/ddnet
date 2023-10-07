@@ -2,12 +2,13 @@
 #define GAME_EDITOR_MAPITEMS_ENVELOPE_H
 
 #include <game/client/render.h>
-#include <game/mapitems.h>
+
+#include "envelope_point.h"
 
 class CEnvelope
 {
 public:
-	std::vector<CEnvPoint_runtime> m_vPoints;
+	std::vector<CEnvelopePoint> m_vPoints;
 	char m_aName[32] = "";
 	bool m_Synchronized = false;
 
@@ -33,10 +34,10 @@ private:
 
 	class CEnvelopePointAccess : public IEnvelopePointAccess
 	{
-		std::vector<CEnvPoint_runtime> *m_pvPoints;
+		std::vector<CEnvelopePoint> *m_pvPoints;
 
 	public:
-		CEnvelopePointAccess(std::vector<CEnvPoint_runtime> *pvPoints);
+		CEnvelopePointAccess(std::vector<CEnvelopePoint> *pvPoints);
 
 		int NumPoints() const override;
 		const CEnvPoint *GetPoint(int Index) const override;

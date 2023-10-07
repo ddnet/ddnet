@@ -11,6 +11,7 @@
 #include <game/gamecore.h>
 #include <game/mapitems_ex.h>
 
+#include "game/editor/mapitems/envelope_point.h"
 #include "image.h"
 #include "sound.h"
 
@@ -369,7 +370,7 @@ bool CEditorMap::Save(const char *pFileName)
 
 	for(const auto &pEnvelope : m_vpEnvelopes)
 	{
-		const CEnvPoint_runtime *pPrevPoint = nullptr;
+		const CEnvelopePoint *pPrevPoint = nullptr;
 		for(const auto &Point : pEnvelope->m_vPoints)
 		{
 			mem_copy(&pPoints[PointCount], &Point, sizeof(CEnvPoint));

@@ -1,4 +1,5 @@
 #include "envelope.h"
+#include "game/editor/mapitems/envelope_point.h"
 
 #include <algorithm>
 #include <chrono>
@@ -6,7 +7,7 @@
 
 using namespace std::chrono_literals;
 
-CEnvelope::CEnvelopePointAccess::CEnvelopePointAccess(std::vector<CEnvPoint_runtime> *pvPoints)
+CEnvelope::CEnvelopePointAccess::CEnvelopePointAccess(std::vector<CEnvelopePoint> *pvPoints)
 {
 	m_pvPoints = pvPoints;
 }
@@ -61,7 +62,7 @@ std::pair<float, float> CEnvelope::GetValueRange(int ChannelMask)
 {
 	float Top = -std::numeric_limits<float>::infinity();
 	float Bottom = std::numeric_limits<float>::infinity();
-	CEnvPoint_runtime *pPrevPoint = nullptr;
+	CEnvelopePoint *pPrevPoint = nullptr;
 	for(auto &Point : m_vPoints)
 	{
 		for(int c = 0; c < GetChannels(); c++)
@@ -106,7 +107,7 @@ int CEnvelope::Eval(float Time, ColorRGBA &Color)
 
 void CEnvelope::AddPoint(int Time, int v0, int v1, int v2, int v3)
 {
-	CEnvPoint_runtime p;
+	CEnvelopePoint p;
 	p.m_Time = Time;
 	p.m_aValues[0] = v0;
 	p.m_aValues[1] = v1;
@@ -128,7 +129,7 @@ float CEnvelope::EndTime() const
 {
 	if(m_vPoints.empty())
 		return 0.0f;
-	return m_vPoints.back().m_Time / 1000.0f;
+	return m_vPoints.back().Time();
 }
 
 int CEnvelope::GetChannels() const

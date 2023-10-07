@@ -1310,33 +1310,33 @@ CUI::EPopupMenuFunctionResult CEditor::PopupEnvPoint(void *pContext, CUIRect Vie
 	{
 		pEditor->m_UpdateEnvPointInfo = false;
 
-		int CurrentTime;
+		float CurrentTime;
 		int CurrentValue;
 		if(pEditor->IsTangentInSelected())
 		{
 			auto [SelectedIndex, SelectedChannel] = pEditor->m_SelectedTangentInPoint;
 
-			CurrentTime = pEnvelope->m_vPoints[SelectedIndex].m_Time + pEnvelope->m_vPoints[SelectedIndex].m_Bezier.m_aInTangentDeltaX[SelectedChannel];
+			CurrentTime = pEnvelope->m_vPoints[SelectedIndex].Time() + fxt2f(pEnvelope->m_vPoints[SelectedIndex].m_Bezier.m_aInTangentDeltaX[SelectedChannel]);
 			CurrentValue = pEnvelope->m_vPoints[SelectedIndex].m_aValues[SelectedChannel] + pEnvelope->m_vPoints[SelectedIndex].m_Bezier.m_aInTangentDeltaY[SelectedChannel];
 		}
 		else if(pEditor->IsTangentOutSelected())
 		{
 			auto [SelectedIndex, SelectedChannel] = pEditor->m_SelectedTangentOutPoint;
 
-			CurrentTime = pEnvelope->m_vPoints[SelectedIndex].m_Time + pEnvelope->m_vPoints[SelectedIndex].m_Bezier.m_aOutTangentDeltaX[SelectedChannel];
+			CurrentTime = pEnvelope->m_vPoints[SelectedIndex].Time() + fxt2f(pEnvelope->m_vPoints[SelectedIndex].m_Bezier.m_aOutTangentDeltaX[SelectedChannel]);
 			CurrentValue = pEnvelope->m_vPoints[SelectedIndex].m_aValues[SelectedChannel] + pEnvelope->m_vPoints[SelectedIndex].m_Bezier.m_aOutTangentDeltaY[SelectedChannel];
 		}
 		else
 		{
 			auto [SelectedIndex, SelectedChannel] = pEditor->m_vSelectedEnvelopePoints.front();
 
-			CurrentTime = pEnvelope->m_vPoints[SelectedIndex].m_Time;
+			CurrentTime = pEnvelope->m_vPoints[SelectedIndex].Time();
 			CurrentValue = pEnvelope->m_vPoints[SelectedIndex].m_aValues[SelectedChannel];
 		}
 
 		// update displayed text
 		s_CurValueInput.SetFloat(fx2f(CurrentValue));
-		s_CurTimeInput.SetFloat(CurrentTime / 1000.0f);
+		s_CurTimeInput.SetFloat(CurrentTime);
 	}
 
 	View.HSplitTop(RowHeight, &Row, &View);
@@ -1360,8 +1360,8 @@ CUI::EPopupMenuFunctionResult CEditor::PopupEnvPoint(void *pContext, CUIRect Vie
 		{
 			auto [SelectedIndex, SelectedChannel] = pEditor->m_SelectedTangentInPoint;
 
-			pEnvelope->m_vPoints[SelectedIndex].m_Bezier.m_aInTangentDeltaX[SelectedChannel] = minimum<int>(CurrentTime * 1000.0f - pEnvelope->m_vPoints[SelectedIndex].m_Time, 0);
-			CurrentTime = (pEnvelope->m_vPoints[SelectedIndex].m_Time + pEnvelope->m_vPoints[SelectedIndex].m_Bezier.m_aInTangentDeltaX[SelectedChannel]) / 1000.0f;
+			pEnvelope->m_vPoints[SelectedIndex].m_Bezier.m_aInTangentDeltaX[SelectedChannel] = minimum<int>(f2fxt(CurrentTime - pEnvelope->m_vPoints[SelectedIndex].Time()), 0);
+			CurrentTime = pEnvelope->m_vPoints[SelectedIndex].Time() + fxt2f(pEnvelope->m_vPoints[SelectedIndex].m_Bezier.m_aInTangentDeltaX[SelectedChannel]);
 
 			pEnvelope->m_vPoints[SelectedIndex].m_Bezier.m_aInTangentDeltaY[SelectedChannel] = f2fx(CurrentValue) - pEnvelope->m_vPoints[SelectedIndex].m_aValues[SelectedChannel];
 		}
@@ -1369,8 +1369,8 @@ CUI::EPopupMenuFunctionResult CEditor::PopupEnvPoint(void *pContext, CUIRect Vie
 		{
 			auto [SelectedIndex, SelectedChannel] = pEditor->m_SelectedTangentOutPoint;
 
-			pEnvelope->m_vPoints[SelectedIndex].m_Bezier.m_aOutTangentDeltaX[SelectedChannel] = maximum<int>(CurrentTime * 1000.0f - pEnvelope->m_vPoints[SelectedIndex].m_Time, 0);
-			CurrentTime = (pEnvelope->m_vPoints[SelectedIndex].m_Time + pEnvelope->m_vPoints[SelectedIndex].m_Bezier.m_aOutTangentDeltaX[SelectedChannel]) / 1000.0f;
+			pEnvelope->m_vPoints[SelectedIndex].m_Bezier.m_aOutTangentDeltaX[SelectedChannel] = maximum<int>(f2fxt(CurrentTime - pEnvelope->m_vPoints[SelectedIndex].Time()), 0);
+			CurrentTime = pEnvelope->m_vPoints[SelectedIndex].Time() + fxt2f(pEnvelope->m_vPoints[SelectedIndex].m_Bezier.m_aOutTangentDeltaX[SelectedChannel]);
 
 			pEnvelope->m_vPoints[SelectedIndex].m_Bezier.m_aOutTangentDeltaY[SelectedChannel] = f2fx(CurrentValue) - pEnvelope->m_vPoints[SelectedIndex].m_aValues[SelectedChannel];
 		}
@@ -1384,23 +1384,23 @@ CUI::EPopupMenuFunctionResult CEditor::PopupEnvPoint(void *pContext, CUIRect Vie
 
 			if(SelectedIndex != 0)
 			{
-				pEnvelope->m_vPoints[SelectedIndex].m_Time = CurrentTime * 1000.0f;
+				pEnvelope->m_vPoints[SelectedIndex].SetTime(CurrentTime);
 
-				if(pEnvelope->m_vPoints[SelectedIndex].m_Time < pEnvelope->m_vPoints[SelectedIndex - 1].m_Time)
-					pEnvelope->m_vPoints[SelectedIndex].m_Time = pEnvelope->m_vPoints[SelectedIndex - 1].m_Time + 1;
-				if(static_cast<size_t>(SelectedIndex) + 1 != pEnvelope->m_vPoints.size() && pEnvelope->m_vPoints[SelectedIndex].m_Time > pEnvelope->m_vPoints[SelectedIndex + 1].m_Time)
-					pEnvelope->m_vPoints[SelectedIndex].m_Time = pEnvelope->m_vPoints[SelectedIndex + 1].m_Time - 1;
+				if(pEnvelope->m_vPoints[SelectedIndex].Time() < pEnvelope->m_vPoints[SelectedIndex - 1].Time())
+					pEnvelope->m_vPoints[SelectedIndex].SetTimeFixed(pEnvelope->m_vPoints[SelectedIndex - 1].TimeFixed() + 1);
+				if(static_cast<size_t>(SelectedIndex) + 1 != pEnvelope->m_vPoints.size() && pEnvelope->m_vPoints[SelectedIndex].Time() > pEnvelope->m_vPoints[SelectedIndex + 1].Time())
+					pEnvelope->m_vPoints[SelectedIndex].SetTimeFixed(pEnvelope->m_vPoints[SelectedIndex + 1].TimeFixed() - 1);
 
-				CurrentTime = pEnvelope->m_vPoints[SelectedIndex].m_Time / 1000.0f;
+				CurrentTime = pEnvelope->m_vPoints[SelectedIndex].Time();
 			}
 			else
 			{
 				CurrentTime = 0.0f;
-				pEnvelope->m_vPoints[SelectedIndex].m_Time = 0.0f;
+				pEnvelope->m_vPoints[SelectedIndex].SetTime(0.0f);
 			}
 		}
 
-		s_CurTimeInput.SetFloat(static_cast<int>(CurrentTime * 1000.0f) / 1000.0f);
+		s_CurTimeInput.SetFloat(fxt2f(f2fxt(CurrentTime)));
 		s_CurValueInput.SetFloat(fx2f(f2fx(CurrentValue)));
 
 		pEditor->m_Map.OnModify();
@@ -1514,12 +1514,12 @@ CUI::EPopupMenuFunctionResult CEditor::PopupEnvPointCurveType(void *pContext, CU
 
 			if(FirstSelectedIndex < (int)pEnvelope->m_vPoints.size() && LastSelectedIndex >= 0 && FirstSelectedIndex != LastSelectedIndex)
 			{
-				CEnvPoint FirstPoint = pEnvelope->m_vPoints[FirstSelectedIndex];
-				CEnvPoint LastPoint = pEnvelope->m_vPoints[LastSelectedIndex];
+				CEnvelopePoint FirstPoint = pEnvelope->m_vPoints[FirstSelectedIndex];
+				CEnvelopePoint LastPoint = pEnvelope->m_vPoints[LastSelectedIndex];
 
 				CEnvelope HelperEnvelope(1);
-				HelperEnvelope.AddPoint(FirstPoint.m_Time, FirstPoint.m_aValues[c]);
-				HelperEnvelope.AddPoint(LastPoint.m_Time, LastPoint.m_aValues[c]);
+				HelperEnvelope.AddPoint(FirstPoint.TimeFixed(), FirstPoint.m_aValues[c]);
+				HelperEnvelope.AddPoint(LastPoint.TimeFixed(), LastPoint.m_aValues[c]);
 				HelperEnvelope.m_vPoints[0].m_Curvetype = CurveType;
 
 				for(auto [SelectedIndex, SelectedChannel] : pEditor->m_vSelectedEnvelopePoints)
@@ -1528,9 +1528,9 @@ CUI::EPopupMenuFunctionResult CEditor::PopupEnvPointCurveType(void *pContext, CU
 					{
 						if(SelectedIndex != FirstSelectedIndex && SelectedIndex != LastSelectedIndex)
 						{
-							CEnvPoint &CurrentPoint = pEnvelope->m_vPoints[SelectedIndex];
+							CEnvelopePoint &CurrentPoint = pEnvelope->m_vPoints[SelectedIndex];
 							ColorRGBA Channels;
-							HelperEnvelope.Eval(CurrentPoint.m_Time / 1000.0f, Channels);
+							HelperEnvelope.Eval(CurrentPoint.Time(), Channels);
 							CurrentPoint.m_aValues[c] = f2fx(Channels.r);
 						}
 					}

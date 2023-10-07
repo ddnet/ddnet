@@ -404,13 +404,6 @@ struct CEnvPointBezier_upstream : public CEnvPoint
 	CEnvPointBezier m_Bezier;
 };
 
-// Used to represent all envelope point information at runtime in editor.
-// (Can eventually be different than CEnvPointBezier_upstream)
-struct CEnvPoint_runtime : public CEnvPoint
-{
-	CEnvPointBezier m_Bezier;
-};
-
 struct CMapItemEnvelope_v1
 {
 	enum
