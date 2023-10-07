@@ -5642,14 +5642,15 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 	static int s_ActiveChannels = 0xf;
 	{
 		CUIRect Button;
-		std::shared_ptr<CEnvelope> pNewEnv = nullptr;
 
 		ToolBar.VSplitRight(50.0f, &ToolBar, &Button);
 		static int s_NewSoundButton = 0;
 		if(DoButton_Editor(&s_NewSoundButton, "Sound+", 0, &Button, 0, "Creates a new sound envelope"))
 		{
 			m_Map.OnModify();
-			pNewEnv = m_Map.NewEnvelope(CEnvelope::EType::SOUND);
+			std::shared_ptr<CEnvelope> pNewEnv = m_Map.NewEnvelope(CEnvelope::EType::SOUND);
+			pNewEnv->AddPoint(0.0f, 1.0f);
+			pNewEnv->AddPoint(1.0f, 1.0f);
 		}
 
 		ToolBar.VSplitRight(5.0f, &ToolBar, nullptr);
@@ -5658,7 +5659,9 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		if(DoButton_Editor(&s_New4dButton, "Color+", 0, &Button, 0, "Creates a new color envelope"))
 		{
 			m_Map.OnModify();
-			pNewEnv = m_Map.NewEnvelope(CEnvelope::EType::COLOR);
+			std::shared_ptr<CEnvelope> pNewEnv = m_Map.NewEnvelope(CEnvelope::EType::COLOR);
+			pNewEnv->AddPoint(0.0f, {1.0f, 1.0f, 1.0f, 1.0f});
+			pNewEnv->AddPoint(1.0f, {1.0f, 1.0f, 1.0f, 1.0f});
 		}
 
 		ToolBar.VSplitRight(5.0f, &ToolBar, nullptr);
@@ -5667,7 +5670,9 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		if(DoButton_Editor(&s_New2dButton, "Pos.+", 0, &Button, 0, "Creates a new position envelope"))
 		{
 			m_Map.OnModify();
-			pNewEnv = m_Map.NewEnvelope(CEnvelope::EType::POSITION);
+			std::shared_ptr<CEnvelope> pNewEnv = m_Map.NewEnvelope(CEnvelope::EType::POSITION);
+			pNewEnv->AddPoint(0.0f, CTransform{0.0f, 0.0f, 0.0f});
+			pNewEnv->AddPoint(1.0f, CTransform{0.0f, 0.0f, 0.0f});
 		}
 
 		if(m_SelectedEnvelope >= 0)
@@ -5736,20 +5741,6 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 			// Margin on the right side
 			ToolBar.VSplitRight(7.0f, &ToolBar, nullptr);
-		}
-
-		if(pNewEnv) // add the default points
-		{
-			if(pNewEnv->GetChannels() == 4)
-			{
-				pNewEnv->AddPoint(0, f2fx(1.0f), f2fx(1.0f), f2fx(1.0f), f2fx(1.0f));
-				pNewEnv->AddPoint(1000, f2fx(1.0f), f2fx(1.0f), f2fx(1.0f), f2fx(1.0f));
-			}
-			else
-			{
-				pNewEnv->AddPoint(0, 0);
-				pNewEnv->AddPoint(1000, 0);
-			}
 		}
 
 		CUIRect Shifter, Inc, Dec;
@@ -5942,9 +5933,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 					}
 
 					if(!TimeFound)
-						pEnvelope->AddPoint(Time,
-							f2fx(Channels.r), f2fx(Channels.g),
-							f2fx(Channels.b), f2fx(Channels.a));
+						pEnvelope->AddPoint(Time, Channels);
 
 					if(TimeFixed < 0)
 						RemoveTimeOffsetEnvelope(pEnvelope);

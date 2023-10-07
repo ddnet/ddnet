@@ -100,9 +100,23 @@ int CEnvelope::Eval(float Time, ColorRGBA &Color)
 	return GetChannels();
 }
 
-void CEnvelope::AddPoint(int Time, int v0, int v1, int v2, int v3)
+void CEnvelope::AddPoint(float Time, float Volume)
 {
-	CEnvelopePoint p(fx2f(Time), CURVETYPE_LINEAR, {fx2f(v0), fx2f(v1), fx2f(v2), fx2f(v3)});
+	CEnvelopePoint p(Time, CURVETYPE_LINEAR, {Volume});
+	m_vPoints.emplace_back(p);
+	Resort();
+}
+
+void CEnvelope::AddPoint(float Time, CTransform Transform)
+{
+	CEnvelopePoint p(Time, CURVETYPE_LINEAR, {Transform.OffsetX, Transform.OffsetY, Transform.Rotation});
+	m_vPoints.emplace_back(p);
+	Resort();
+}
+
+void CEnvelope::AddPoint(float Time, ColorRGBA Color)
+{
+	CEnvelopePoint p(Time, CURVETYPE_LINEAR, {Color.r, Color.g, Color.b, Color.a});
 	m_vPoints.emplace_back(p);
 	Resort();
 }
