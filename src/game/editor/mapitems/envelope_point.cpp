@@ -69,3 +69,13 @@ void CEnvelopePoint::SetValue(int Channel, float Value)
 	dbg_assert(0 <= Channel && Channel <= CEnvPoint::MAX_CHANNELS, "channel index too big");
 	m_aValues[Channel] = f2fx(Value);
 }
+
+int CEnvelopePoint::CurveType() const
+{
+	return m_Curvetype;
+}
+
+void CEnvelopePoint::SetCurveType(int Type)
+{
+	m_Curvetype = Type;
+}

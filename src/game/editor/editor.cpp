@@ -5570,14 +5570,14 @@ void CEditor::SetHotEnvelopePoint(const CUIRect &View, const std::shared_ptr<CEn
 			if(!(ActiveChannels & (1 << c)))
 				continue;
 
-			if(i > 0 && pEnvelope->m_vPoints[i - 1].m_Curvetype == CURVETYPE_BEZIER)
+			if(i > 0 && pEnvelope->m_vPoints[i - 1].CurveType() == CURVETYPE_BEZIER)
 			{
 				float px = EnvelopeToScreenX(View, pEnvelope->m_vPoints[i].Time() + fxt2f(pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaX[c]));
 				float py = EnvelopeToScreenY(View, pEnvelope->m_vPoints[i].Value(c) + fx2f(pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaY[c]));
 				UpdateMinimum(px, py, &pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaX[c]);
 			}
 
-			if(pEnvelope->m_vPoints[i].m_Curvetype == CURVETYPE_BEZIER)
+			if(pEnvelope->m_vPoints[i].CurveType() == CURVETYPE_BEZIER)
 			{
 				float px = EnvelopeToScreenX(View, pEnvelope->m_vPoints[i].Time() + fxt2f(pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaX[c]));
 				float py = EnvelopeToScreenY(View, pEnvelope->m_vPoints[i].Value(c) + fx2f(pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaY[c]));
@@ -6066,7 +6066,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 					float PosY = EnvelopeToScreenY(View, pEnvelope->m_vPoints[i].Value(c));
 
 					// Out-Tangent
-					if(pEnvelope->m_vPoints[i].m_Curvetype == CURVETYPE_BEZIER)
+					if(pEnvelope->m_vPoints[i].CurveType() == CURVETYPE_BEZIER)
 					{
 						float TangentX = EnvelopeToScreenX(View, pEnvelope->m_vPoints[i].Time() + fxt2f(pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaX[c]));
 						float TangentY = EnvelopeToScreenY(View, pEnvelope->m_vPoints[i].Value(c) + fx2f(pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaY[c]));
@@ -6081,7 +6081,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 					}
 
 					// In-Tangent
-					if(i > 0 && pEnvelope->m_vPoints[i - 1].m_Curvetype == CURVETYPE_BEZIER)
+					if(i > 0 && pEnvelope->m_vPoints[i - 1].CurveType() == CURVETYPE_BEZIER)
 					{
 						float TangentX = EnvelopeToScreenX(View, pEnvelope->m_vPoints[i].Time() + fxt2f(pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaX[c]));
 						float TangentY = EnvelopeToScreenY(View, pEnvelope->m_vPoints[i].Value(c) + fx2f(pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaY[c]));
@@ -6161,13 +6161,13 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 				const void *pID = &pEnvelope->m_vPoints[i].m_Curvetype;
 				const char *apTypeName[] = {"N", "L", "S", "F", "M", "B"};
 				const char *pTypeName = "!?";
-				if(0 <= pEnvelope->m_vPoints[i].m_Curvetype && pEnvelope->m_vPoints[i].m_Curvetype < (int)std::size(apTypeName))
-					pTypeName = apTypeName[pEnvelope->m_vPoints[i].m_Curvetype];
+				if(0 <= pEnvelope->m_vPoints[i].CurveType() && pEnvelope->m_vPoints[i].CurveType() < (int)std::size(apTypeName))
+					pTypeName = apTypeName[pEnvelope->m_vPoints[i].CurveType()];
 
 				if(CurveButton.x >= View.x)
 				{
 					if(DoButton_Editor(pID, pTypeName, 0, &CurveButton, 0, "Switch curve type (N = step, L = linear, S = slow, F = fast, M = smooth, B = bezier)"))
-						pEnvelope->m_vPoints[i].m_Curvetype = (pEnvelope->m_vPoints[i].m_Curvetype + 1) % NUM_CURVETYPES;
+						pEnvelope->m_vPoints[i].SetCurveType((pEnvelope->m_vPoints[i].CurveType() + 1) % NUM_CURVETYPES);
 				}
 			}
 		}
@@ -6433,7 +6433,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 					// tangent handles for bezier curves
 					{
 						// Out-Tangent handle
-						if(pEnvelope->m_vPoints[i].m_Curvetype == CURVETYPE_BEZIER)
+						if(pEnvelope->m_vPoints[i].CurveType() == CURVETYPE_BEZIER)
 						{
 							CUIRect Final;
 							Final.x = EnvelopeToScreenX(View, pEnvelope->m_vPoints[i].Time() + fxt2f(pEnvelope->m_vPoints[i].m_Bezier.m_aOutTangentDeltaX[c]));
@@ -6566,7 +6566,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 						}
 
 						// In-Tangent handle
-						if(i > 0 && pEnvelope->m_vPoints[i - 1].m_Curvetype == CURVETYPE_BEZIER)
+						if(i > 0 && pEnvelope->m_vPoints[i - 1].CurveType() == CURVETYPE_BEZIER)
 						{
 							CUIRect Final;
 							Final.x = EnvelopeToScreenX(View, pEnvelope->m_vPoints[i].Time() + fxt2f(pEnvelope->m_vPoints[i].m_Bezier.m_aInTangentDeltaX[c]));

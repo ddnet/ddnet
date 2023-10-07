@@ -352,7 +352,7 @@ bool CEditorMap::Save(const char *pFileName)
 	{
 		for(const auto &Point : pEnvelope->m_vPoints)
 		{
-			if(Point.m_Curvetype == CURVETYPE_BEZIER)
+			if(Point.CurveType() == CURVETYPE_BEZIER)
 			{
 				BezierUsed = true;
 				break;
@@ -376,12 +376,12 @@ bool CEditorMap::Save(const char *pFileName)
 			mem_copy(&pPoints[PointCount], &Point, sizeof(CEnvPoint));
 			if(pPointsBezier != nullptr)
 			{
-				if(Point.m_Curvetype == CURVETYPE_BEZIER)
+				if(Point.CurveType() == CURVETYPE_BEZIER)
 				{
 					mem_copy(&pPointsBezier[PointCount].m_aOutTangentDeltaX, &Point.m_Bezier.m_aOutTangentDeltaX, sizeof(Point.m_Bezier.m_aOutTangentDeltaX));
 					mem_copy(&pPointsBezier[PointCount].m_aOutTangentDeltaY, &Point.m_Bezier.m_aOutTangentDeltaY, sizeof(Point.m_Bezier.m_aOutTangentDeltaY));
 				}
-				if(pPrevPoint != nullptr && pPrevPoint->m_Curvetype == CURVETYPE_BEZIER)
+				if(pPrevPoint != nullptr && pPrevPoint->CurveType() == CURVETYPE_BEZIER)
 				{
 					mem_copy(&pPointsBezier[PointCount].m_aInTangentDeltaX, &Point.m_Bezier.m_aInTangentDeltaX, sizeof(Point.m_Bezier.m_aInTangentDeltaX));
 					mem_copy(&pPointsBezier[PointCount].m_aInTangentDeltaY, &Point.m_Bezier.m_aInTangentDeltaY, sizeof(Point.m_Bezier.m_aInTangentDeltaY));

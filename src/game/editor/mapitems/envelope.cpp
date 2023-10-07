@@ -76,7 +76,7 @@ std::pair<float, float> CEnvelope::GetValueRange(int ChannelMask)
 					Bottom = minimum(Bottom, v);
 				}
 
-				if(Point.m_Curvetype == CURVETYPE_BEZIER)
+				if(Point.CurveType() == CURVETYPE_BEZIER)
 				{
 					// out-tangent handle
 					const float v = Point.Value(c) + fx2f(Point.m_Bezier.m_aOutTangentDeltaY[c]);
@@ -84,7 +84,7 @@ std::pair<float, float> CEnvelope::GetValueRange(int ChannelMask)
 					Bottom = minimum(Bottom, v);
 				}
 
-				if(pPrevPoint != nullptr && pPrevPoint->m_Curvetype == CURVETYPE_BEZIER)
+				if(pPrevPoint != nullptr && pPrevPoint->CurveType() == CURVETYPE_BEZIER)
 				{
 					// in-tangent handle
 					const float v = Point.Value(c) + fx2f(Point.m_Bezier.m_aInTangentDeltaY[c]);

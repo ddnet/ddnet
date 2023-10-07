@@ -33,6 +33,9 @@ struct CEnvelopePoint : public CEnvPoint
 	float Value(int Channel) const;
 	void SetValue(int Channel, float Value);
 
+	int CurveType() const;
+	void SetCurveType(int Type);
+
 	CEnvPointBezier m_Bezier;
 };
 

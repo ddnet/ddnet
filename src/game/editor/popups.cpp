@@ -1521,7 +1521,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupEnvPointCurveType(void *pContext, CU
 				CEnvelope HelperEnvelope(1);
 				HelperEnvelope.AddPoint(FirstPoint.TimeFixed(), f2fx(FirstPoint.Value(c)));
 				HelperEnvelope.AddPoint(LastPoint.TimeFixed(), f2fx(LastPoint.Value(c)));
-				HelperEnvelope.m_vPoints[0].m_Curvetype = CurveType;
+				HelperEnvelope.m_vPoints[0].SetCurveType(CurveType);
 
 				// TODO: add IsChannelSelected method
 				for(auto [SelectedIndex, SelectedChannel] : pEditor->m_vSelectedEnvelopePoints)
