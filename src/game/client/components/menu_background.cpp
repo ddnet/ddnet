@@ -412,8 +412,8 @@ std::vector<CTheme> &CMenuBackground::GetThemes()
 		m_vThemes.emplace_back("rand", true, true); // random theme
 
 		m_ThemeScanStartTime = time_get_nanoseconds();
-		Storage()->ListDirectory(IStorage::TYPE_ALL, "themes", ThemeScan, (CMenuBackground *)this);
-		Storage()->ListDirectory(IStorage::TYPE_ALL, "themes", ThemeIconScan, (CMenuBackground *)this);
+		Storage()->ListDirectory(IStorage::TYPE_ALL, "themes", ThemeScan, this);
+		Storage()->ListDirectory(IStorage::TYPE_ALL, "themes", ThemeIconScan, this);
 
 		std::sort(m_vThemes.begin() + PREDEFINED_THEMES_COUNT, m_vThemes.end());
 	}
