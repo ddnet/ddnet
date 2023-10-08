@@ -1,6 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "binds.h"
+#include <base/system.h>
 #include <engine/config.h>
 #include <engine/shared/config.h>
 
@@ -134,10 +135,15 @@ bool CBinds::OnInput(const IInput::CEvent &Event)
 	Mask &= ~KeyModifierMask;
 
 	bool ret = false;
+	const char *pKey = nullptr;
+
 	if(m_aapKeyBindings[Mask][Event.m_Key])
 	{
 		if(Event.m_Flags & IInput::FLAG_PRESS)
+		{
 			Console()->ExecuteLineStroked(1, m_aapKeyBindings[Mask][Event.m_Key]);
+			pKey = m_aapKeyBindings[Mask][Event.m_Key];
+		}
 		// Have to check for nullptr again because the previous execute can unbind itself
 		if(Event.m_Flags & IInput::FLAG_RELEASE && m_aapKeyBindings[Mask][Event.m_Key])
 			Console()->ExecuteLineStroked(0, m_aapKeyBindings[Mask][Event.m_Key]);
@@ -148,11 +154,22 @@ bool CBinds::OnInput(const IInput::CEvent &Event)
 	{
 		// When ctrl+shift are pressed (ctrl+shift binds and also the hard-coded ctrl+shift+d, ctrl+shift+g, ctrl+shift+e), ignore other +xxx binds
 		if(Event.m_Flags & IInput::FLAG_PRESS && Mask != ((1 << MODIFIER_CTRL) | (1 << MODIFIER_SHIFT)) && Mask != ((1 << MODIFIER_GUI) | (1 << MODIFIER_SHIFT)))
+		{
 			Console()->ExecuteLineStroked(1, m_aapKeyBindings[0][Event.m_Key]);
+			pKey = m_aapKeyBindings[Mask][Event.m_Key];
+		}
 		// Have to check for nullptr again because the previous execute can unbind itself
 		if(Event.m_Flags & IInput::FLAG_RELEASE && m_aapKeyBindings[0][Event.m_Key])
 			Console()->ExecuteLineStroked(0, m_aapKeyBindings[0][Event.m_Key]);
 		ret = true;
+	}
+
+	if(g_Config.m_ClSubTickAiming && pKey)
+	{
+		if(str_comp("+fire", pKey) == 0 || str_comp("+hook", pKey) == 0)
+		{
+			m_MouseOnAction = true;
+		}
 	}
 
 	return ret;
