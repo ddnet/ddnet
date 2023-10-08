@@ -140,6 +140,8 @@ MAYBE_UNUSED static const char *FONT_ICON_DICE_THREE = "\xEF\x94\xA7";
 MAYBE_UNUSED static const char *FONT_ICON_DICE_FOUR = "\xEF\x94\xA4";
 MAYBE_UNUSED static const char *FONT_ICON_DICE_FIVE = "\xEF\x94\xA3";
 MAYBE_UNUSED static const char *FONT_ICON_DICE_SIX = "\xEF\x94\xA6";
+
+MAYBE_UNUSED static const char *FONT_ICON_LAYER_GROUP = "\xEF\x97\xBD";
 } // end namespace FontIcons
 
 enum ETextCursorSelectionMode

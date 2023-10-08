@@ -5129,11 +5129,11 @@ void CEditor::ShowFileDialogError(const char *pFormat, ...)
 
 void CEditor::RenderModebar(CUIRect View)
 {
-	CUIRect Mentions, IngameMoved, ModeButton;
+	CUIRect Mentions, IngameMoved, ModeButtons, ModeButton;
 	View.HSplitTop(12.0f, &Mentions, &View);
 	View.HSplitTop(12.0f, &IngameMoved, &View);
-	View.HSplitTop(8.0f, nullptr, &ModeButton);
-	ModeButton.VSplitLeft(65.0f, &ModeButton, nullptr);
+	View.HSplitTop(8.0f, nullptr, &ModeButtons);
+	ModeButtons.VSplitLeft(96.0f, &ModeButtons, nullptr);
 
 	// mentions
 	if(m_Mentions)
@@ -5159,28 +5159,34 @@ void CEditor::RenderModebar(CUIRect View)
 		TextRender()->TextColor(TextRender()->DefaultTextColor());
 	}
 
-	// mode button
+	// mode buttons
 	{
-		const char *pModeLabel;
-		if(m_Mode == MODE_LAYERS)
-			pModeLabel = "Layers";
-		else if(m_Mode == MODE_IMAGES)
-			pModeLabel = "Images";
-		else if(m_Mode == MODE_SOUNDS)
-			pModeLabel = "Sounds";
-		else
+		ModeButtons.VSplitLeft(32.0f, &ModeButton, &ModeButtons);
+		static int s_LayersButton = 0;
+		if(DoButton_FontIcon(&s_LayersButton, FONT_ICON_LAYER_GROUP, m_Mode == MODE_LAYERS, &ModeButton, 0, "Go to layers management.", IGraphics::CORNER_L))
 		{
-			dbg_assert(false, "m_Mode invalid");
-			dbg_break();
+			m_Mode = MODE_LAYERS;
 		}
 
-		static int s_ModeButton = 0;
-		const int MouseButton = DoButton_Ex(&s_ModeButton, pModeLabel, 0, &ModeButton, 0, "Switch between images, sounds and layers management.", IGraphics::CORNER_T, 10.0f);
-		if(MouseButton == 2 || (Input()->KeyPress(KEY_LEFT) && m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr))
+		ModeButtons.VSplitLeft(32.0f, &ModeButton, &ModeButtons);
+		static int s_ImagesButton = 0;
+		if(DoButton_FontIcon(&s_ImagesButton, FONT_ICON_IMAGE, m_Mode == MODE_IMAGES, &ModeButton, 0, "Go to images management.", IGraphics::CORNER_NONE))
+		{
+			m_Mode = MODE_IMAGES;
+		}
+
+		ModeButtons.VSplitLeft(32.0f, &ModeButton, &ModeButtons);
+		static int s_SoundsButton = 0;
+		if(DoButton_FontIcon(&s_SoundsButton, FONT_ICON_MUSIC, m_Mode == MODE_SOUNDS, &ModeButton, 0, "Go to sounds management.", IGraphics::CORNER_R))
+		{
+			m_Mode = MODE_SOUNDS;
+		}
+
+		if(Input()->KeyPress(KEY_LEFT) && m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr)
 		{
 			m_Mode = (m_Mode + NUM_MODES - 1) % NUM_MODES;
 		}
-		else if(MouseButton == 1 || (Input()->KeyPress(KEY_RIGHT) && m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr))
+		else if(Input()->KeyPress(KEY_RIGHT) && m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr)
 		{
 			m_Mode = (m_Mode + 1) % NUM_MODES;
 		}
