@@ -1100,9 +1100,7 @@ static void netaddr_to_sockaddr_in6(const NETADDR *src, struct sockaddr_in6 *des
 
 static void sockaddr_to_netaddr(const struct sockaddr *src, NETADDR *dst)
 {
-	// Filled by accept, clang-analyzer probably can't tell because of the
-	// (struct sockaddr *) cast.
-	if(src->sa_family == AF_INET) // NOLINT(clang-analyzer-core.UndefinedBinaryOperatorResult)
+	if(src->sa_family == AF_INET)
 	{
 		mem_zero(dst, sizeof(NETADDR));
 		dst->type = NETTYPE_IPV4;
@@ -2616,7 +2614,7 @@ int net_socket_read_wait(NETSOCKET sock, int time)
 	tv.tv_usec = time % 1000000;
 	sockid = 0;
 
-	FD_ZERO(&readfds); // NOLINT(clang-analyzer-security.insecureAPI.bzero)
+	FD_ZERO(&readfds);
 	if(sock->ipv4sock >= 0)
 	{
 		FD_SET(sock->ipv4sock, &readfds);
