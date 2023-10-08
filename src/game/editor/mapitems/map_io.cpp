@@ -503,10 +503,13 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 				str_format(aBuf, sizeof(aBuf), "mapres/%s.png", pImg->m_aName);
 
 				// load external
-				CEditorImage ImgInfo(m_pEditor);
+				CImageInfo ImgInfo;
 				if(m_pEditor->Graphics()->LoadPNG(&ImgInfo, aBuf, IStorage::TYPE_ALL))
 				{
-					*pImg = ImgInfo;
+					pImg->m_Width = ImgInfo.m_Width;
+					pImg->m_Height = ImgInfo.m_Height;
+					pImg->m_Format = ImgInfo.m_Format;
+					pImg->m_pData = ImgInfo.m_pData;
 					int TextureLoadFlag = m_pEditor->Graphics()->HasTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
 					if(ImgInfo.m_Width % 16 != 0 || ImgInfo.m_Height % 16 != 0)
 						TextureLoadFlag = 0;
