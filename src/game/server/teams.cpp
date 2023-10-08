@@ -1111,7 +1111,14 @@ void CGameTeams::SetClientInvited(int Team, int ClientID, bool Invited)
 
 void CGameTeams::KillSavedTeam(int ClientID, int Team)
 {
-	KillTeam(Team, -1);
+	if(g_Config.m_SvSoloServer || !g_Config.m_SvTeam)
+	{
+		GameServer()->m_apPlayers[ClientID]->KillCharacter(WEAPON_SELF, true);
+	}
+	else
+	{
+		KillTeam(Team, -1);
+	}
 }
 
 void CGameTeams::ResetSavedTeam(int ClientID, int Team)
