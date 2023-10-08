@@ -3139,9 +3139,13 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	Background.HSplitTop(5.0f, nullptr, &Background);
 	UI()->DoLabel(&Label, Localize("Background"), 20.0f, TEXTALIGN_ML);
 
-	static CButtonContainer s_ResetID2;
 	ColorRGBA GreyDefault(0.5f, 0.5f, 0.5f, 1);
-	DoLine_ColorPicker(&s_ResetID2, 25.0f, 13.0f, 5.0f, &Background, Localize("Entities Background color"), &g_Config.m_ClBackgroundEntitiesColor, GreyDefault, false);
+
+	static CButtonContainer s_ResetID1;
+	DoLine_ColorPicker(&s_ResetID1, 25.0f, 13.0f, 5.0f, &Background, Localize("Regular background color"), &g_Config.m_ClBackgroundColor, GreyDefault, false);
+
+	static CButtonContainer s_ResetID2;
+	DoLine_ColorPicker(&s_ResetID2, 25.0f, 13.0f, 5.0f, &Background, Localize("Entities background color"), &g_Config.m_ClBackgroundEntitiesColor, GreyDefault, false);
 
 	CUIRect EditBox;
 	Background.HSplitTop(20.0f, &Label, &Background);
@@ -3184,12 +3188,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 
 	UI()->DoLabel(&Label, Localize("Miscellaneous"), 20.0f, TEXTALIGN_ML);
 
-	static CButtonContainer s_ResetID1;
-	Miscellaneous.HSplitTop(25.0f, &Button, &Miscellaneous);
-	DoLine_ColorPicker(&s_ResetID1, 25.0f, 13.0f, 5.0f, &Button, Localize("Regular Background Color"), &g_Config.m_ClBackgroundColor, GreyDefault, false);
-
 	static CButtonContainer s_ButtonTimeout;
-	Miscellaneous.HSplitTop(10.0f, nullptr, &Miscellaneous);
 	Miscellaneous.HSplitTop(20.0f, &Button, &Miscellaneous);
 	if(DoButton_Menu(&s_ButtonTimeout, Localize("New random timeout code"), 0, &Button))
 	{
