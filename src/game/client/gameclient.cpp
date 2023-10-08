@@ -411,10 +411,10 @@ void CGameClient::OnUpdate()
 		}
 	}
 
-	if(g_Config.m_ClSubTickAiming && m_Binds.mouseOnAction)
+	if(g_Config.m_ClSubTickAiming && m_Binds.m_MouseOnAction)
 	{
-		m_Controls.m_aMousePosOnAction[g_Config.m_ClDummy] = m_Controls.m_aMousePos[g_Config.m_ClDummy]; //idk what g_Config.m_ClDummy is
-		m_Binds.mouseOnAction = false;
+		m_Controls.m_aMousePosOnAction[g_Config.m_ClDummy] = m_Controls.m_aMousePos[g_Config.m_ClDummy];
+		m_Binds.m_MouseOnAction = false;
 	}
 }
 
