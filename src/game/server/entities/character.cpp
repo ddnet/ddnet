@@ -644,8 +644,12 @@ void CCharacter::GiveNinja()
 
 void CCharacter::RemoveNinja()
 {
+	m_Core.m_Ninja.m_ActivationDir = vec2(0, 0);
+	m_Core.m_Ninja.m_ActivationTick = 0;
 	m_Core.m_Ninja.m_CurrentMoveTime = 0;
+	m_Core.m_Ninja.m_OldVelAmount = 0;
 	m_Core.m_aWeapons[WEAPON_NINJA].m_Got = false;
+	m_Core.m_aWeapons[WEAPON_NINJA].m_Ammo = 0;
 	m_Core.m_ActiveWeapon = m_LastWeapon;
 
 	SetWeapon(m_Core.m_ActiveWeapon);
