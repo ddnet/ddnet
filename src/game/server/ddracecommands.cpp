@@ -839,7 +839,8 @@ void CGameContext::ConDrySave(IConsole::IResult *pResult, void *pUserData)
 		return;
 
 	CSaveTeam SavedTeam;
-	int Result = SavedTeam.Save(pSelf, pPlayer->GetTeam(), true);
+	int Team = pSelf->GetDDRaceTeam(pResult->m_ClientID);
+	int Result = SavedTeam.Save(pSelf, Team, true);
 	if(CSaveTeam::HandleSaveError(Result, pResult->m_ClientID, pSelf))
 		return;
 
