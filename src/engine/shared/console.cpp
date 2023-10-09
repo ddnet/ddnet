@@ -1041,7 +1041,9 @@ void CConsole::Init()
 	{ \
 		static char s_aOldValue[Len] = Def; \
 		static CStrVariableData Data = {this, g_Config.m_##Name, Len, s_aOldValue}; \
-		Register(#ScriptName, "?r", Flags, StrVariableCommand, &Data, Desc " (default: " #Def ", max length: " #Len ")"); \
+		static char s_aHelp[256]; \
+		str_format(s_aHelp, sizeof(s_aHelp), "%s (default: \"%s\", max length: %d)", Desc, Def, Len - 1); \
+		Register(#ScriptName, "?r", Flags, StrVariableCommand, &Data, s_aHelp); \
 	}
 
 #include "config_variables.h"
