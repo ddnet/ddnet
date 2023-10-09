@@ -60,6 +60,15 @@ private:
 		int m_Got;
 	} m_aWeapons[NUM_WEAPONS];
 
+	// ninja
+	struct
+	{
+		vec2 m_ActivationDir;
+		int m_ActivationTick;
+		int m_CurrentMoveTime;
+		int m_OldVelAmount;
+	} m_Ninja;
+
 	int m_LastWeapon;
 	int m_QueuedWeapon;
 
