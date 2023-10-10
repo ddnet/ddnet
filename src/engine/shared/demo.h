@@ -160,25 +160,16 @@ public:
 	const CMapInfo *GetMapInfo() const { return &m_MapInfo; }
 };
 
-class CDemoEditor : public IDemoEditor, public CDemoPlayer::IListener
+class CDemoEditor : public IDemoEditor
 {
-	CDemoPlayer *m_pDemoPlayer;
-	CDemoRecorder *m_pDemoRecorder;
 	IConsole *m_pConsole;
 	IStorage *m_pStorage;
 	class CSnapshotDelta *m_pSnapshotDelta;
 	const char *m_pNetVersion;
 
-	bool m_Stop;
-	int m_SliceFrom;
-	int m_SliceTo;
-
 public:
 	virtual void Init(const char *pNetVersion, class CSnapshotDelta *pSnapshotDelta, class IConsole *pConsole, class IStorage *pStorage);
 	void Slice(const char *pDemo, const char *pDst, int StartTick, int EndTick, DEMOFUNC_FILTER pfnFilter, void *pUser) override;
-
-	void OnDemoPlayerSnapshot(void *pData, int Size) override;
-	void OnDemoPlayerMessage(void *pData, int Size) override;
 };
 
 #endif

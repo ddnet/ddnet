@@ -1172,6 +1172,36 @@ int CDemoPlayer::GetDemoType() const
 	return DEMOTYPE_INVALID;
 }
 
+class CDemoRecordingListener : public CDemoPlayer::IListener
+{
+public:
+	CDemoRecorder *m_pDemoRecorder;
+	CDemoPlayer *m_pDemoPlayer;
+	bool m_Stop;
+	int m_StartTick;
+	int m_EndTick;
+
+	void OnDemoPlayerSnapshot(void *pData, int Size) override
+	{
+		const CDemoPlayer::CPlaybackInfo *pInfo = m_pDemoPlayer->Info();
+
+		if(m_EndTick != -1 && pInfo->m_Info.m_CurrentTick > m_EndTick)
+			m_Stop = true;
+		else if(m_StartTick == -1 || pInfo->m_Info.m_CurrentTick >= m_StartTick)
+			m_pDemoRecorder->RecordSnapshot(pInfo->m_Info.m_CurrentTick, pData, Size);
+	}
+
+	void OnDemoPlayerMessage(void *pData, int Size) override
+	{
+		const CDemoPlayer::CPlaybackInfo *pInfo = m_pDemoPlayer->Info();
+
+		if(m_EndTick != -1 && pInfo->m_Info.m_CurrentTick > m_EndTick)
+			m_Stop = true;
+		else if(m_StartTick == -1 || pInfo->m_Info.m_CurrentTick >= m_StartTick)
+			m_pDemoRecorder->RecordMessage(pData, Size);
+	}
+};
+
 void CDemoEditor::Init(const char *pNetVersion, class CSnapshotDelta *pSnapshotDelta, class IConsole *pConsole, class IStorage *pStorage)
 {
 	m_pNetVersion = pNetVersion;
@@ -1182,42 +1212,43 @@ void CDemoEditor::Init(const char *pNetVersion, class CSnapshotDelta *pSnapshotD
 
 void CDemoEditor::Slice(const char *pDemo, const char *pDst, int StartTick, int EndTick, DEMOFUNC_FILTER pfnFilter, void *pUser)
 {
-	class CDemoPlayer DemoPlayer(m_pSnapshotDelta);
-	class CDemoRecorder DemoRecorder(m_pSnapshotDelta);
-
-	m_pDemoPlayer = &DemoPlayer;
-	m_pDemoRecorder = &DemoRecorder;
-
-	m_pDemoPlayer->SetListener(this);
-
-	m_SliceFrom = StartTick;
-	m_SliceTo = EndTick;
-	m_Stop = false;
-
-	if(m_pDemoPlayer->Load(m_pStorage, m_pConsole, pDemo, IStorage::TYPE_ALL_OR_ABSOLUTE) == -1)
+	CDemoPlayer DemoPlayer(m_pSnapshotDelta);
+	if(DemoPlayer.Load(m_pStorage, m_pConsole, pDemo, IStorage::TYPE_ALL_OR_ABSOLUTE) == -1)
 		return;
 
-	const CMapInfo *pMapInfo = m_pDemoPlayer->GetMapInfo();
-	const CDemoPlayer::CPlaybackInfo *pInfo = m_pDemoPlayer->Info();
+	const CMapInfo *pMapInfo = DemoPlayer.GetMapInfo();
+	const CDemoPlayer::CPlaybackInfo *pInfo = DemoPlayer.Info();
 
 	SHA256_DIGEST Sha256 = pMapInfo->m_Sha256;
 	if(pInfo->m_Header.m_Version < gs_Sha256Version)
 	{
-		if(m_pDemoPlayer->ExtractMap(m_pStorage))
+		if(DemoPlayer.ExtractMap(m_pStorage))
 			Sha256 = pMapInfo->m_Sha256;
 	}
 
-	unsigned char *pMapData = m_pDemoPlayer->GetMapData(m_pStorage);
-	const int Result = m_pDemoRecorder->Start(m_pStorage, m_pConsole, pDst, m_pNetVersion, pMapInfo->m_aName, &Sha256, pMapInfo->m_Crc, "client", pMapInfo->m_Size, pMapData, NULL, pfnFilter, pUser) == -1;
+	CDemoRecorder DemoRecorder(m_pSnapshotDelta);
+	unsigned char *pMapData = DemoPlayer.GetMapData(m_pStorage);
+	const int Result = DemoRecorder.Start(m_pStorage, m_pConsole, pDst, m_pNetVersion, pMapInfo->m_aName, &Sha256, pMapInfo->m_Crc, "client", pMapInfo->m_Size, pMapData, NULL, pfnFilter, pUser) == -1;
 	free(pMapData);
 	if(Result != 0)
-		return;
-
-	m_pDemoPlayer->Play();
-
-	while(m_pDemoPlayer->IsPlaying() && !m_Stop)
 	{
-		m_pDemoPlayer->Update(false);
+		DemoPlayer.Stop();
+		return;
+	}
+
+	CDemoRecordingListener Listener;
+	Listener.m_pDemoRecorder = &DemoRecorder;
+	Listener.m_pDemoPlayer = &DemoPlayer;
+	Listener.m_Stop = false;
+	Listener.m_StartTick = StartTick;
+	Listener.m_EndTick = EndTick;
+	DemoPlayer.SetListener(&Listener);
+
+	DemoPlayer.Play();
+
+	while(DemoPlayer.IsPlaying() && !Listener.m_Stop)
+	{
+		DemoPlayer.Update(false);
 
 		if(pInfo->m_Info.m_Paused)
 			break;
@@ -1226,32 +1257,12 @@ void CDemoEditor::Slice(const char *pDemo, const char *pDst, int StartTick, int 
 	// Copy timeline markers to sliced demo
 	for(int i = 0; i < pInfo->m_Info.m_NumTimelineMarkers; i++)
 	{
-		if((m_SliceFrom == -1 || pInfo->m_Info.m_aTimelineMarkers[i] >= m_SliceFrom) && (m_SliceTo == -1 || pInfo->m_Info.m_aTimelineMarkers[i] <= m_SliceTo))
+		if((StartTick == -1 || pInfo->m_Info.m_aTimelineMarkers[i] >= StartTick) && (EndTick == -1 || pInfo->m_Info.m_aTimelineMarkers[i] <= EndTick))
 		{
-			m_pDemoRecorder->AddDemoMarker(pInfo->m_Info.m_aTimelineMarkers[i]);
+			DemoRecorder.AddDemoMarker(pInfo->m_Info.m_aTimelineMarkers[i]);
 		}
 	}
 
-	m_pDemoPlayer->Stop();
-	m_pDemoRecorder->Stop();
-} // NOLINT(clang-analyzer-unix.Malloc)
-
-void CDemoEditor::OnDemoPlayerSnapshot(void *pData, int Size)
-{
-	const CDemoPlayer::CPlaybackInfo *pInfo = m_pDemoPlayer->Info();
-
-	if(m_SliceTo != -1 && pInfo->m_Info.m_CurrentTick > m_SliceTo)
-		m_Stop = true;
-	else if(m_SliceFrom == -1 || pInfo->m_Info.m_CurrentTick >= m_SliceFrom)
-		m_pDemoRecorder->RecordSnapshot(pInfo->m_Info.m_CurrentTick, pData, Size);
-}
-
-void CDemoEditor::OnDemoPlayerMessage(void *pData, int Size)
-{
-	const CDemoPlayer::CPlaybackInfo *pInfo = m_pDemoPlayer->Info();
-
-	if(m_SliceTo != -1 && pInfo->m_Info.m_CurrentTick > m_SliceTo)
-		m_Stop = true;
-	else if(m_SliceFrom == -1 || pInfo->m_Info.m_CurrentTick >= m_SliceFrom)
-		m_pDemoRecorder->RecordMessage(pData, Size);
+	DemoPlayer.Stop();
+	DemoRecorder.Stop();
 }
