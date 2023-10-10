@@ -382,17 +382,6 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadSpriteTexture(CImageInfo &From
 	return LoadSpriteTextureImpl(FromImageInfo, x, y, w, h);
 }
 
-IGraphics::CTextureHandle CGraphics_Threaded::LoadSpriteTexture(CImageInfo &FromImageInfo, client_data7::CDataSprite *pSprite)
-{
-	int imggx = FromImageInfo.m_Width / pSprite->m_pSet->m_Gridx;
-	int imggy = FromImageInfo.m_Height / pSprite->m_pSet->m_Gridy;
-	int x = pSprite->m_X * imggx;
-	int y = pSprite->m_Y * imggy;
-	int w = pSprite->m_W * imggx;
-	int h = pSprite->m_H * imggy;
-	return LoadSpriteTextureImpl(FromImageInfo, x, y, w, h);
-}
-
 bool CGraphics_Threaded::IsImageSubFullyTransparent(CImageInfo &FromImageInfo, int x, int y, int w, int h)
 {
 	if(FromImageInfo.m_Format == CImageInfo::FORMAT_SINGLE_COMPONENT || FromImageInfo.m_Format == CImageInfo::FORMAT_RGBA)
@@ -414,7 +403,7 @@ bool CGraphics_Threaded::IsImageSubFullyTransparent(CImageInfo &FromImageInfo, i
 	return false;
 }
 
-bool CGraphics_Threaded::IsSpriteTextureFullyTransparent(CImageInfo &FromImageInfo, client_data7::CDataSprite *pSprite)
+bool CGraphics_Threaded::IsSpriteTextureFullyTransparent(CImageInfo &FromImageInfo, CDataSprite *pSprite)
 {
 	int imggx = FromImageInfo.m_Width / pSprite->m_pSet->m_Gridx;
 	int imggy = FromImageInfo.m_Height / pSprite->m_pSet->m_Gridy;

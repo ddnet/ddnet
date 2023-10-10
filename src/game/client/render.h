@@ -134,7 +134,6 @@ public:
 	void SelectSprite(CDataSprite *pSprite, int Flags = 0, int sx = 0, int sy = 0);
 	void SelectSprite(int Id, int Flags = 0, int sx = 0, int sy = 0);
 
-	void GetSpriteScale(client_data7::CDataSprite *pSprite, float &ScaleX, float &ScaleY);
 	void GetSpriteScale(CDataSprite *pSprite, float &ScaleX, float &ScaleY);
 	void GetSpriteScale(int Id, float &ScaleX, float &ScaleY);
 	void GetSpriteScaleImpl(int Width, int Height, float &ScaleX, float &ScaleY);
