@@ -587,11 +587,9 @@ void CDemoPlayer::DoTick()
 
 		// read the chunk
 		int DataSize = 0;
-		static char s_aData[CSnapshot::MAX_SIZE];
 		if(ChunkSize)
 		{
-			static char s_aCompresseddata[CSnapshot::MAX_SIZE];
-			if(io_read(m_File, s_aCompresseddata, ChunkSize) != (unsigned)ChunkSize)
+			if(io_read(m_File, m_aCompressedSnapshotData, ChunkSize) != (unsigned)ChunkSize)
 			{
 				// stop on error or eof
 				if(m_pConsole)
@@ -600,8 +598,7 @@ void CDemoPlayer::DoTick()
 				break;
 			}
 
-			static char s_aDecompressed[CSnapshot::MAX_SIZE];
-			DataSize = CNetBase::Decompress(s_aCompresseddata, ChunkSize, s_aDecompressed, sizeof(s_aDecompressed));
+			DataSize = CNetBase::Decompress(m_aCompressedSnapshotData, ChunkSize, m_aDecompressedSnapshotData, sizeof(m_aDecompressedSnapshotData));
 			if(DataSize < 0)
 			{
 				// stop on error or eof
@@ -611,7 +608,7 @@ void CDemoPlayer::DoTick()
 				break;
 			}
 
-			DataSize = CVariableInt::Decompress(s_aDecompressed, DataSize, s_aData, sizeof(s_aData));
+			DataSize = CVariableInt::Decompress(m_aDecompressedSnapshotData, DataSize, m_aCurrentSnapshotData, sizeof(m_aCurrentSnapshotData));
 
 			if(DataSize < 0)
 			{
@@ -625,9 +622,8 @@ void CDemoPlayer::DoTick()
 		if(ChunkType == CHUNKTYPE_DELTA)
 		{
 			// process delta snapshot
-			static char s_aNewsnap[CSnapshot::MAX_SIZE];
-			CSnapshot *pNewsnap = (CSnapshot *)s_aNewsnap;
-			DataSize = m_pSnapshotDelta->UnpackDelta((CSnapshot *)m_aLastSnapshotData, pNewsnap, s_aData, DataSize);
+			CSnapshot *pNewsnap = (CSnapshot *)m_aDeltaSnapshotData;
+			DataSize = m_pSnapshotDelta->UnpackDelta((CSnapshot *)m_aLastSnapshotData, pNewsnap, m_aCurrentSnapshotData, DataSize);
 
 			if(DataSize < 0)
 			{
@@ -650,17 +646,17 @@ void CDemoPlayer::DoTick()
 			else
 			{
 				if(m_pListener)
-					m_pListener->OnDemoPlayerSnapshot(s_aNewsnap, DataSize);
+					m_pListener->OnDemoPlayerSnapshot(m_aDeltaSnapshotData, DataSize);
 
 				m_LastSnapshotDataSize = DataSize;
-				mem_copy(m_aLastSnapshotData, s_aNewsnap, DataSize);
+				mem_copy(m_aLastSnapshotData, m_aDeltaSnapshotData, DataSize);
 				GotSnapshot = true;
 			}
 		}
 		else if(ChunkType == CHUNKTYPE_SNAPSHOT)
 		{
 			// process full snapshot
-			CSnapshot *pSnap = (CSnapshot *)s_aData;
+			CSnapshot *pSnap = (CSnapshot *)m_aCurrentSnapshotData;
 			if(!pSnap->IsValid(DataSize))
 			{
 				if(m_pConsole)
@@ -675,9 +671,9 @@ void CDemoPlayer::DoTick()
 				GotSnapshot = true;
 
 				m_LastSnapshotDataSize = DataSize;
-				mem_copy(m_aLastSnapshotData, s_aData, DataSize);
+				mem_copy(m_aLastSnapshotData, m_aCurrentSnapshotData, DataSize);
 				if(m_pListener)
-					m_pListener->OnDemoPlayerSnapshot(s_aData, DataSize);
+					m_pListener->OnDemoPlayerSnapshot(m_aCurrentSnapshotData, DataSize);
 			}
 		}
 		else
@@ -698,7 +694,7 @@ void CDemoPlayer::DoTick()
 			else if(ChunkType == CHUNKTYPE_MESSAGE)
 			{
 				if(m_pListener)
-					m_pListener->OnDemoPlayerMessage(s_aData, DataSize);
+					m_pListener->OnDemoPlayerMessage(m_aCurrentSnapshotData, DataSize);
 			}
 		}
 	}

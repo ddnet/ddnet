@@ -114,6 +114,10 @@ private:
 
 	CPlaybackInfo m_Info;
 	int m_DemoType;
+	unsigned char m_aCompressedSnapshotData[CSnapshot::MAX_SIZE];
+	unsigned char m_aDecompressedSnapshotData[CSnapshot::MAX_SIZE];
+	unsigned char m_aCurrentSnapshotData[CSnapshot::MAX_SIZE];
+	unsigned char m_aDeltaSnapshotData[CSnapshot::MAX_SIZE];
 	unsigned char m_aLastSnapshotData[CSnapshot::MAX_SIZE];
 	int m_LastSnapshotDataSize;
 	class CSnapshotDelta *m_pSnapshotDelta;
