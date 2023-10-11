@@ -3779,6 +3779,8 @@ float CGameClient::CalculateMultiViewZoom(vec2 MinPos, vec2 MaxPos, float Vel)
 	float Diff = clamp(MapValue(70.0f, 15.0f, Zoom * 0.10f, 0.0f, Vel), 0.0f, Zoom * 0.10f);
 	// zoom should stay between 1.1 and 20.0
 	Zoom = clamp(Zoom + Diff, 1.1f, 20.0f);
+	// dont go below default zoom
+	Zoom = std::max(float(std::pow(CCamera::ZOOM_STEP, g_Config.m_ClDefaultZoom - 10)), Zoom);
 	// add the user preference
 	Zoom -= (Zoom * 0.1f) * m_MultiViewPersonalZoom;
 	m_MultiView.m_OldPersonalZoom = m_MultiViewPersonalZoom;
