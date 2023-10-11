@@ -33,10 +33,7 @@ static void Dilate(int w, int h, const unsigned char *pSrc, unsigned char *pDest
 				if(pSrc[k + AlphaCompIndex] > AlphaThreshold)
 				{
 					for(int p = 0; p < BPP - 1; ++p)
-						// Seems safe for BPP = 3, 4 which we use. clang-analyzer seems to
-						// assume being called with larger value. TODO: Can make this
-						// safer anyway.
-						aSumOfOpaque[p] += pSrc[k + p]; // NOLINT(clang-analyzer-core.uninitialized.Assign)
+						aSumOfOpaque[p] += pSrc[k + p];
 					++Counter;
 					break;
 				}
@@ -230,12 +227,8 @@ static void ResizeImage(const uint8_t *pSourceImage, uint32_t SW, uint32_t SH, u
 
 uint8_t *ResizeImage(const uint8_t *pImageData, int Width, int Height, int NewWidth, int NewHeight, int BPP)
 {
-	// All calls to Resize() ensure width & height are > 0, BPP is always > 0,
-	// thus no allocation size 0 possible.
-	uint8_t *pTmpData = (uint8_t *)malloc((size_t)NewWidth * NewHeight * BPP); // NOLINT(clang-analyzer-optin.portability.UnixAPI)
-
+	uint8_t *pTmpData = (uint8_t *)malloc((size_t)NewWidth * NewHeight * BPP);
 	ResizeImage(pImageData, Width, Height, pTmpData, NewWidth, NewHeight, BPP);
-
 	return pTmpData;
 }
 

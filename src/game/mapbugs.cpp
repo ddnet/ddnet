@@ -76,7 +76,7 @@ int CMapBugs::Update(const char *pBug)
 {
 	CMapBugsInternal *pInternal = (CMapBugsInternal *)m_pData;
 	int Bug = -1;
-	if(false) {} // NOLINT(readability-simplify-boolean-expr)
+	if(false) {}
 #define MAPBUG(constname, string) \
 	else if(str_comp(pBug, string) == 0) { Bug = (constname); }
 #include "mapbugs_list.h"
