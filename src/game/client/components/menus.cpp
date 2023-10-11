@@ -1570,11 +1570,7 @@ int CMenus::Render()
 			CUIRect Label, TextBox, Ok, Abort, Button;
 
 			Box.HSplitBottom(20.f, &Box, &Part);
-#if defined(__ANDROID__)
-			Box.HSplitBottom(60.f, &Box, &Part);
-#else
 			Box.HSplitBottom(24.f, &Box, &Part);
-#endif
 			Part.VMargin(80.0f, &Part);
 
 			Part.VSplitMid(&Abort, &Ok);
@@ -1669,11 +1665,7 @@ int CMenus::Render()
 				g_Config.m_ClVideoShowhud ^= 1;
 
 			Box.HSplitBottom(20.f, &Box, &Part);
-#if defined(__ANDROID__)
-			Box.HSplitBottom(60.f, &Box, &Part);
-#else
 			Box.HSplitBottom(24.f, &Box, &Part);
-#endif
 
 			Part.VSplitLeft(60.0f, 0, &Label);
 			Label.VSplitLeft(120.0f, 0, &TextBox);
