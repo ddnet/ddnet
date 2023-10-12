@@ -1567,16 +1567,13 @@ int CMenus::Render()
 		{
 			dbg_assert(m_DemolistSelectedIndex >= 0 && !m_vpFilteredDemos[m_DemolistSelectedIndex]->m_IsDir, "m_DemolistSelectedIndex invalid for POPUP_RENDER_DEMO");
 
-			CUIRect Label, TextBox, Ok, Abort, Button;
-
-			Box.HSplitBottom(20.f, &Box, &Part);
-			Box.HSplitBottom(24.f, &Box, &Part);
-			Part.VMargin(80.0f, &Part);
-
-			Part.VSplitMid(&Abort, &Ok);
-
-			Ok.VMargin(20.0f, &Ok);
-			Abort.VMargin(20.0f, &Abort);
+			CUIRect Row, Ok, Abort;
+			Box.VMargin(60.0f, &Box);
+			Box.HMargin(20.0f, &Box);
+			Box.HSplitBottom(24.0f, &Box, &Row);
+			Box.HSplitBottom(40.0f, &Box, nullptr);
+			Row.VMargin(40.0f, &Row);
+			Row.VSplitMid(&Abort, &Ok, 40.0f);
 
 			static CButtonContainer s_ButtonAbort;
 			if(DoButton_Menu(&s_ButtonAbort, Localize("Abort"), 0, &Abort) || UI()->ConsumeHotkey(CUI::HOTKEY_ESCAPE))
@@ -1609,70 +1606,63 @@ int CMenus::Render()
 					PopupConfirmDemoReplaceVideo();
 				}
 			}
-			Box.HSplitBottom(30.f, &Box, 0);
-			Box.HSplitBottom(20.f, &Box, &Part);
-			Box.HSplitBottom(10.f, &Box, 0);
 
-			float ButtonSize = 20.0f;
-			Part.VSplitLeft(113.0f, 0, &Part);
-			Part.VSplitLeft(200.0f, &Button, &Part);
-			if(DoButton_CheckBox(&g_Config.m_ClVideoShowChat, Localize("Show chat"), g_Config.m_ClVideoShowChat, &Button))
+			CUIRect ShowChatCheckbox, UseSoundsCheckbox;
+			Box.HSplitBottom(20.0f, &Box, &Row);
+			Box.HSplitBottom(10.0f, &Box, nullptr);
+			Row.VSplitMid(&ShowChatCheckbox, &UseSoundsCheckbox, 20.0f);
+
+			if(DoButton_CheckBox(&g_Config.m_ClVideoShowChat, Localize("Show chat"), g_Config.m_ClVideoShowChat, &ShowChatCheckbox))
 				g_Config.m_ClVideoShowChat ^= 1;
-			Part.VSplitLeft(32.0f, 0, &Part);
-			if(DoButton_CheckBox(&g_Config.m_ClVideoSndEnable, Localize("Use sounds"), g_Config.m_ClVideoSndEnable, &Part))
+
+			if(DoButton_CheckBox(&g_Config.m_ClVideoSndEnable, Localize("Use sounds"), g_Config.m_ClVideoSndEnable, &UseSoundsCheckbox))
 				g_Config.m_ClVideoSndEnable ^= 1;
 
-			Box.HSplitBottom(20.f, &Box, &Part);
-			Part.VSplitLeft(55.0f, 0, &Part);
-			Part.VSplitLeft(60.0f, 0, &Label);
+			CUIRect ShowHudButton;
+			Box.HSplitBottom(20.0f, &Box, &Row);
+			Row.VSplitMid(&Row, &ShowHudButton, 20.0f);
 
-			bool IncDemoSpeed = false, DecDemoSpeed = false;
+			if(DoButton_CheckBox(&g_Config.m_ClVideoShowhud, Localize("Show ingame HUD"), g_Config.m_ClVideoShowhud, &ShowHudButton))
+				g_Config.m_ClVideoShowhud ^= 1;
+
 			// slowdown
-			Part.VSplitLeft(5.0f, 0, &Part);
-			Part.VSplitLeft(ButtonSize, &Button, &Part);
+			CUIRect SlowDownButton;
+			Row.VSplitLeft(20.0f, &SlowDownButton, &Row);
+			Row.VSplitLeft(5.0f, nullptr, &Row);
 			static CButtonContainer s_SlowDownButton;
-			if(DoButton_FontIcon(&s_SlowDownButton, FONT_ICON_BACKWARD, 0, &Button, IGraphics::CORNER_ALL))
-				DecDemoSpeed = true;
+			if(DoButton_FontIcon(&s_SlowDownButton, FONT_ICON_BACKWARD, 0, &SlowDownButton, IGraphics::CORNER_ALL))
+				m_Speed = clamp(m_Speed - 1, 0, (int)(g_DemoSpeeds - 1));
 
 			// paused
-			Part.VSplitLeft(5.0f, 0, &Part);
-			Part.VSplitLeft(ButtonSize, &Button, &Part);
+			CUIRect PausedButton;
+			Row.VSplitLeft(20.0f, &PausedButton, &Row);
+			Row.VSplitLeft(5.0f, nullptr, &Row);
 			static CButtonContainer s_PausedButton;
-			if(DoButton_FontIcon(&s_PausedButton, FONT_ICON_PAUSE, 0, &Button, IGraphics::CORNER_ALL))
+			if(DoButton_FontIcon(&s_PausedButton, FONT_ICON_PAUSE, 0, &PausedButton, IGraphics::CORNER_ALL))
 				m_StartPaused ^= 1;
 
 			// fastforward
-			Part.VSplitLeft(5.0f, 0, &Part);
-			Part.VSplitLeft(ButtonSize, &Button, &Part);
+			CUIRect FastForwardButton;
+			Row.VSplitLeft(20.0f, &FastForwardButton, &Row);
+			Row.VSplitLeft(8.0f, nullptr, &Row);
 			static CButtonContainer s_FastForwardButton;
-			if(DoButton_FontIcon(&s_FastForwardButton, FONT_ICON_FORWARD, 0, &Button, IGraphics::CORNER_ALL))
-				IncDemoSpeed = true;
+			if(DoButton_FontIcon(&s_FastForwardButton, FONT_ICON_FORWARD, 0, &FastForwardButton, IGraphics::CORNER_ALL))
+				m_Speed = clamp(m_Speed + 1, 0, (int)(g_DemoSpeeds - 1));
 
 			// speed meter
-			Part.VSplitLeft(8.0f, 0, &Part);
 			char aBuffer[128];
 			const char *pPaused = m_StartPaused ? Localize("(paused)") : "";
 			str_format(aBuffer, sizeof(aBuffer), "%s: ×%g %s", Localize("Speed"), g_aSpeeds[m_Speed], pPaused);
-			UI()->DoLabel(&Part, aBuffer, 12.8f, TEXTALIGN_ML);
+			UI()->DoLabel(&Row, aBuffer, 12.8f, TEXTALIGN_ML);
 
-			if(IncDemoSpeed)
-				m_Speed = clamp(m_Speed + 1, 0, (int)(g_DemoSpeeds - 1));
-			else if(DecDemoSpeed)
-				m_Speed = clamp(m_Speed - 1, 0, (int)(g_DemoSpeeds - 1));
+			Box.HSplitBottom(16.0f, &Box, nullptr);
+			Box.HSplitBottom(24.0f, &Box, &Row);
 
-			Part.VSplitLeft(207.0f, 0, &Part);
-			if(DoButton_CheckBox(&g_Config.m_ClVideoShowhud, Localize("Show ingame HUD"), g_Config.m_ClVideoShowhud, &Part))
-				g_Config.m_ClVideoShowhud ^= 1;
-
-			Box.HSplitBottom(20.f, &Box, &Part);
-			Box.HSplitBottom(24.f, &Box, &Part);
-
-			Part.VSplitLeft(60.0f, 0, &Label);
-			Label.VSplitLeft(120.0f, 0, &TextBox);
-			TextBox.VSplitLeft(20.0f, 0, &TextBox);
-			TextBox.VSplitRight(60.0f, &TextBox, 0);
-			UI()->DoLabel(&Label, Localize("Video name:"), 18.0f, TEXTALIGN_ML);
-			UI()->DoEditBox(&m_DemoRenderInput, &TextBox, 12.0f);
+			CUIRect Label, TextBox;
+			Row.VSplitLeft(110.0f, &Label, &TextBox);
+			TextBox.VSplitLeft(10.0f, nullptr, &TextBox);
+			UI()->DoLabel(&Label, Localize("Video name:"), 12.8f, TEXTALIGN_ML);
+			UI()->DoEditBox(&m_DemoRenderInput, &TextBox, 12.8f);
 		}
 		else if(m_Popup == POPUP_RENDER_DONE)
 		{
