@@ -16,10 +16,12 @@ bool Process(IStorage *pStorage, const char *pMapName, const char *pPathSave)
 		return false;
 	}
 
-	// check version
-	CMapItemVersion *pVersion = (CMapItemVersion *)Reader.FindItem(MAPITEMTYPE_VERSION, 0);
-	if(pVersion && pVersion->m_Version != 1)
+	const CMapItemVersion *pVersion = static_cast<CMapItemVersion *>(Reader.FindItem(MAPITEMTYPE_VERSION, 0));
+	if(pVersion == nullptr || pVersion->m_Version != CMapItemVersion::CURRENT_VERSION)
+	{
+		dbg_msg("map_extract", "unsupported map version '%s'", pMapName);
 		return false;
+	}
 
 	dbg_msg("map_extract", "Make sure you have the permission to use these images and sounds in your own maps");
 
