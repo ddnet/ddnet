@@ -216,8 +216,6 @@ enum
 	CHUNKTYPE_SNAPSHOT = 1,
 	CHUNKTYPE_MESSAGE = 2,
 	CHUNKTYPE_DELTA = 3,
-
-	CHUNKFLAG_BIGSIZE = 0x10
 };
 
 void CDemoRecorder::WriteTickMarker(int Tick, int Keyframe)
