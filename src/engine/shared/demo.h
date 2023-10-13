@@ -17,7 +17,7 @@ class CDemoRecorder : public IDemoRecorder
 {
 	class IConsole *m_pConsole;
 	IOHANDLE m_File;
-	char m_aCurrentFilename[256];
+	char m_aCurrentFilename[IO_MAX_PATH_LENGTH];
 	int m_LastTickMarker;
 	int m_LastKeyFrame;
 	int m_FirstTick;

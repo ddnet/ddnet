@@ -82,7 +82,7 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 	if(!pMapData && !MapFile)
 	{
 		// open mapfile
-		char aMapFilename[128];
+		char aMapFilename[IO_MAX_PATH_LENGTH];
 		// try the downloaded maps
 		if(pSha256)
 		{
@@ -111,7 +111,7 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 		{
 			if(m_pConsole)
 			{
-				char aBuf[256];
+				char aBuf[32 + IO_MAX_PATH_LENGTH];
 				str_format(aBuf, sizeof(aBuf), "Unable to open mapfile '%s'", pMap);
 				m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_recorder", aBuf, gs_DemoPrintColor);
 			}
@@ -180,7 +180,7 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 
 	if(m_pConsole)
 	{
-		char aBuf[256];
+		char aBuf[32 + IO_MAX_PATH_LENGTH];
 		str_format(aBuf, sizeof(aBuf), "Recording to '%s'", pFilename);
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_recorder", aBuf, gs_DemoPrintColor);
 	}
@@ -724,7 +724,7 @@ int CDemoPlayer::Load(class IStorage *pStorage, class IConsole *pConsole, const 
 	{
 		if(m_pConsole)
 		{
-			char aBuf[256];
+			char aBuf[32 + IO_MAX_PATH_LENGTH];
 			str_format(aBuf, sizeof(aBuf), "could not open '%s'", pFilename);
 			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_player", aBuf);
 		}
@@ -751,7 +751,7 @@ int CDemoPlayer::Load(class IStorage *pStorage, class IConsole *pConsole, const 
 	{
 		if(m_pConsole)
 		{
-			char aBuf[256];
+			char aBuf[32 + IO_MAX_PATH_LENGTH];
 			str_format(aBuf, sizeof(aBuf), "'%s' is not a valid demo file", pFilename);
 			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_player", aBuf);
 		}
@@ -872,7 +872,7 @@ bool CDemoPlayer::ExtractMap(class IStorage *pStorage)
 	}
 
 	// construct name
-	char aSha[SHA256_MAXSTRSIZE], aMapFilename[128];
+	char aSha[SHA256_MAXSTRSIZE], aMapFilename[IO_MAX_PATH_LENGTH];
 	sha256_str(Sha256, aSha, sizeof(aSha));
 	str_format(aMapFilename, sizeof(aMapFilename), "downloadedmaps/%s_%s.map", m_Info.m_Header.m_aMapName, aSha);
 
