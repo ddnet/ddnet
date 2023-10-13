@@ -40,8 +40,9 @@ class CGameConsole : public CComponent
 		CLineInputBuffered<512> m_Input;
 		const char *m_pName;
 		int m_Type;
-		int m_BacklogCurPage;
-		int m_BacklogLastActivePage = -1;
+		int m_BacklogCurLine;
+		int m_BacklogLastActiveLine = -1;
+		int m_LinesRendered;
 
 		STextBoundingBox m_BoundingBox = {0.0f, 0.0f, 0.0f, 0.0f};
 		float m_LastInputHeight = 0.0f;
