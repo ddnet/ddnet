@@ -415,6 +415,7 @@ void CDemoPlayer::Construct(class CSnapshotDelta *pSnapshotDelta)
 
 	m_pSnapshotDelta = pSnapshotDelta;
 	m_LastSnapshotDataSize = -1;
+	m_pListener = nullptr;
 }
 
 void CDemoPlayer::SetListener(IListener *pListener)
