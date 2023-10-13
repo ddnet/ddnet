@@ -718,7 +718,7 @@ void CGameConsole::OnRender()
 
 		pConsole->m_BacklogLock.lock();
 
-		// render console log (current status, wrap lines)
+		// render console log (current entry, status, wrap lines)
 		CInstance::CBacklogEntry *pEntry = pConsole->m_Backlog.Last();
 		float OffsetY = 0.0f;
 		float LineOffset = 1.0f;
@@ -824,17 +824,15 @@ void CGameConsole::OnRender()
 
 		TextRender()->TextColor(TextRender()->DefaultTextColor());
 
-		// render current status (locked, following)
-		if(pConsole->m_BacklogCurLine != 0)
-			TextRender()->Text(10.0f, FontSize / 2.f, FontSize, "Locked", -1.0f);
-		else
-			TextRender()->Text(10.0f, FontSize / 2.f, FontSize, "Following", -1.0f);
+		// render current entry and status (locked, following)
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf), "Entry %d (%s)", pConsole->m_BacklogCurLine + 1, pConsole->m_BacklogCurLine != 0 ? "Locked" : "Following");
+		TextRender()->Text(10.0f, FontSize / 2.f, FontSize, aBuf);
 
 		// render version
-		char aBuf[128];
 		str_copy(aBuf, "v" GAME_VERSION " on " CONF_PLATFORM_STRING " " CONF_ARCH_STRING);
 		float Width = TextRender()->TextWidth(FontSize, aBuf, -1, -1.0f);
-		TextRender()->Text(Screen.w - Width - 10.0f, FontSize / 2.f, FontSize, aBuf, -1.0f);
+		TextRender()->Text(Screen.w - Width - 10.0f, FontSize / 2.f, FontSize, aBuf);
 	}
 }
 
@@ -990,9 +988,9 @@ void CGameConsole::RequireUsername(bool UsernameReq)
 void CGameConsole::PrintLine(int Type, const char *pLine)
 {
 	if(Type == CONSOLETYPE_LOCAL)
-		m_LocalConsole.PrintLine(pLine, str_length(pLine), ColorRGBA{TextRender()->DefaultTextColor()});
+		m_LocalConsole.PrintLine(pLine, str_length(pLine), TextRender()->DefaultTextColor());
 	else if(Type == CONSOLETYPE_REMOTE)
-		m_RemoteConsole.PrintLine(pLine, str_length(pLine), ColorRGBA{TextRender()->DefaultTextColor()});
+		m_RemoteConsole.PrintLine(pLine, str_length(pLine), TextRender()->DefaultTextColor());
 }
 
 void CGameConsole::OnConsoleInit()
