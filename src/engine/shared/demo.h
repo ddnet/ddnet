@@ -122,6 +122,9 @@ private:
 	int m_LastSnapshotDataSize;
 	class CSnapshotDelta *m_pSnapshotDelta;
 
+	bool m_UseVideo;
+	bool m_WasRecording = false;
+
 	int ReadChunkHeader(int *pType, int *pSize, int *pTick);
 	void DoTick();
 	void ScanFile();
@@ -129,11 +132,11 @@ private:
 	int64_t Time();
 
 public:
-	CDemoPlayer(class CSnapshotDelta *pSnapshotDelta);
-	CDemoPlayer(class CSnapshotDelta *pSnapshotDelta, TUpdateIntraTimesFunc &&UpdateIntraTimesFunc);
+	CDemoPlayer(class CSnapshotDelta *pSnapshotDelta, bool UseVideo);
+	CDemoPlayer(class CSnapshotDelta *pSnapshotDelta, bool UseVideo, TUpdateIntraTimesFunc &&UpdateIntraTimesFunc);
 	~CDemoPlayer() override;
 
-	void Construct(class CSnapshotDelta *pSnapshotDelta);
+	void Construct(class CSnapshotDelta *pSnapshotDelta, bool UseVideo);
 
 	void SetListener(IListener *pListener);
 

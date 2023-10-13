@@ -396,16 +396,16 @@ void CDemoRecorder::AddDemoMarker(int Tick)
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_recorder", "Added timeline marker", gs_DemoPrintColor);
 }
 
-CDemoPlayer::CDemoPlayer(class CSnapshotDelta *pSnapshotDelta, TUpdateIntraTimesFunc &&UpdateIntraTimesFunc)
+CDemoPlayer::CDemoPlayer(class CSnapshotDelta *pSnapshotDelta, bool UseVideo, TUpdateIntraTimesFunc &&UpdateIntraTimesFunc)
 {
-	Construct(pSnapshotDelta);
+	Construct(pSnapshotDelta, UseVideo);
 
 	m_UpdateIntraTimesFunc = UpdateIntraTimesFunc;
 }
 
-CDemoPlayer::CDemoPlayer(class CSnapshotDelta *pSnapshotDelta)
+CDemoPlayer::CDemoPlayer(class CSnapshotDelta *pSnapshotDelta, bool UseVideo)
 {
-	Construct(pSnapshotDelta);
+	Construct(pSnapshotDelta, UseVideo);
 }
 
 CDemoPlayer::~CDemoPlayer()
@@ -413,7 +413,7 @@ CDemoPlayer::~CDemoPlayer()
 	dbg_assert(m_File == 0, "Demo player not stopped");
 }
 
-void CDemoPlayer::Construct(class CSnapshotDelta *pSnapshotDelta)
+void CDemoPlayer::Construct(class CSnapshotDelta *pSnapshotDelta, bool UseVideo)
 {
 	m_File = 0;
 	m_pKeyFrames = 0;
@@ -422,6 +422,7 @@ void CDemoPlayer::Construct(class CSnapshotDelta *pSnapshotDelta)
 	m_pSnapshotDelta = pSnapshotDelta;
 	m_LastSnapshotDataSize = -1;
 	m_pListener = nullptr;
+	m_UseVideo = UseVideo;
 }
 
 void CDemoPlayer::SetListener(IListener *pListener)
@@ -571,7 +572,7 @@ void CDemoPlayer::DoTick()
 			if(m_pConsole)
 				m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "demo_player", "end of file");
 #if defined(CONF_VIDEORECORDER)
-			if(IVideo::Current())
+			if(m_UseVideo && IVideo::Current())
 				Stop();
 #endif
 			if(m_Info.m_PreviousTick == -1)
@@ -704,7 +705,7 @@ void CDemoPlayer::Pause()
 {
 	m_Info.m_Info.m_Paused = true;
 #if defined(CONF_VIDEORECORDER)
-	if(IVideo::Current() && g_Config.m_ClVideoPauseWithDemo)
+	if(m_UseVideo && IVideo::Current() && g_Config.m_ClVideoPauseWithDemo)
 		IVideo::Current()->Pause(true);
 #endif
 }
@@ -713,7 +714,7 @@ void CDemoPlayer::Unpause()
 {
 	m_Info.m_Info.m_Paused = false;
 #if defined(CONF_VIDEORECORDER)
-	if(IVideo::Current() && g_Config.m_ClVideoPauseWithDemo)
+	if(m_UseVideo && IVideo::Current() && g_Config.m_ClVideoPauseWithDemo)
 		IVideo::Current()->Pause(false);
 #endif
 }
@@ -899,22 +900,21 @@ bool CDemoPlayer::ExtractMap(class IStorage *pStorage)
 int64_t CDemoPlayer::Time()
 {
 #if defined(CONF_VIDEORECORDER)
-	static bool s_Recording = false;
-	if(IVideo::Current())
+	if(m_UseVideo && IVideo::Current())
 	{
-		if(!s_Recording)
+		if(!m_WasRecording)
 		{
-			s_Recording = true;
+			m_WasRecording = true;
 			m_Info.m_LastUpdate = IVideo::Time();
 		}
 		return IVideo::Time();
 	}
 	else
 	{
-		int64_t Now = time_get();
-		if(s_Recording)
+		const int64_t Now = time_get();
+		if(m_WasRecording)
 		{
-			s_Recording = false;
+			m_WasRecording = false;
 			m_Info.m_LastUpdate = Now;
 		}
 		return Now;
@@ -1077,7 +1077,7 @@ int CDemoPlayer::Update(bool RealTime)
 int CDemoPlayer::Stop()
 {
 #if defined(CONF_VIDEORECORDER)
-	if(IVideo::Current())
+	if(m_UseVideo && IVideo::Current())
 		IVideo::Current()->Stop();
 #endif
 
@@ -1208,7 +1208,7 @@ void CDemoEditor::Init(const char *pNetVersion, class CSnapshotDelta *pSnapshotD
 
 void CDemoEditor::Slice(const char *pDemo, const char *pDst, int StartTick, int EndTick, DEMOFUNC_FILTER pfnFilter, void *pUser)
 {
-	CDemoPlayer DemoPlayer(m_pSnapshotDelta);
+	CDemoPlayer DemoPlayer(m_pSnapshotDelta, false);
 	if(DemoPlayer.Load(m_pStorage, m_pConsole, pDemo, IStorage::TYPE_ALL_OR_ABSOLUTE) == -1)
 		return;
 
