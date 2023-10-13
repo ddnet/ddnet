@@ -94,7 +94,7 @@ public:
 		TICK_NEXT, // go to the next tick
 	};
 
-	~IDemoPlayer() {}
+	virtual ~IDemoPlayer() {}
 	virtual void SetSpeed(float Speed) = 0;
 	virtual void SetSpeedIndex(int SpeedIndex) = 0;
 	virtual void AdjustSpeedIndex(int Offset) = 0;
@@ -115,7 +115,7 @@ class IDemoRecorder : public IInterface
 {
 	MACRO_INTERFACE("demorecorder", 0)
 public:
-	~IDemoRecorder() {}
+	virtual ~IDemoRecorder() {}
 	virtual bool IsRecording() const = 0;
 	virtual int Stop() = 0;
 	virtual int Length() const = 0;
