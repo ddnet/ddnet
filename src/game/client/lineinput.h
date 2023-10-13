@@ -180,7 +180,7 @@ public:
 		return Changed;
 	}
 
-	STextBoundingBox Render(const CUIRect *pRect, float FontSize, int Align, bool Changed, float LineWidth);
+	STextBoundingBox Render(const CUIRect *pRect, float FontSize, int Align, bool Changed, float LineWidth, float LineSpacing);
 	SMouseSelection *GetMouseSelection() { return &m_MouseSelection; }
 
 	const void *GetClearButtonId() const { return &m_ClearButtonId; }
