@@ -114,9 +114,16 @@ private:
 
 	CPlaybackInfo m_Info;
 	int m_DemoType;
+	unsigned char m_aCompressedSnapshotData[CSnapshot::MAX_SIZE];
+	unsigned char m_aDecompressedSnapshotData[CSnapshot::MAX_SIZE];
+	unsigned char m_aCurrentSnapshotData[CSnapshot::MAX_SIZE];
+	unsigned char m_aDeltaSnapshotData[CSnapshot::MAX_SIZE];
 	unsigned char m_aLastSnapshotData[CSnapshot::MAX_SIZE];
 	int m_LastSnapshotDataSize;
 	class CSnapshotDelta *m_pSnapshotDelta;
+
+	bool m_UseVideo;
+	bool m_WasRecording = false;
 
 	int ReadChunkHeader(int *pType, int *pSize, int *pTick);
 	void DoTick();
@@ -125,11 +132,11 @@ private:
 	int64_t Time();
 
 public:
-	CDemoPlayer(class CSnapshotDelta *pSnapshotDelta);
-	CDemoPlayer(class CSnapshotDelta *pSnapshotDelta, TUpdateIntraTimesFunc &&UpdateIntraTimesFunc);
+	CDemoPlayer(class CSnapshotDelta *pSnapshotDelta, bool UseVideo);
+	CDemoPlayer(class CSnapshotDelta *pSnapshotDelta, bool UseVideo, TUpdateIntraTimesFunc &&UpdateIntraTimesFunc);
 	~CDemoPlayer() override;
 
-	void Construct(class CSnapshotDelta *pSnapshotDelta);
+	void Construct(class CSnapshotDelta *pSnapshotDelta, bool UseVideo);
 
 	void SetListener(IListener *pListener);
 
