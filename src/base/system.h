@@ -2210,6 +2210,15 @@ int open_link(const char *link);
 */
 int open_file(const char *path);
 
+/**
+ * Swaps the endianness of data. Each element is swapped individually by reversing its bytes.
+ *
+ * @param data Pointer to data to be swapped.
+ * @param elem_size Size in bytes of each element.
+ * @param num Number of elements.
+ *
+ * @remark The caller must ensure that the data is at least `elem_size * num` bytes in size.
+ */
 void swap_endian(void *data, unsigned elem_size, unsigned num);
 
 typedef struct
