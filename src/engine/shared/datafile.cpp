@@ -596,9 +596,24 @@ int CDataFileReader::MapSize() const
 CDataFileWriter::CDataFileWriter()
 {
 	m_File = 0;
+
 	m_pItemTypes = static_cast<CItemTypeInfo *>(calloc(MAX_ITEM_TYPES, sizeof(CItemTypeInfo)));
+	m_NumItemTypes = 0;
+	mem_zero(m_pItemTypes, sizeof(CItemTypeInfo) * MAX_ITEM_TYPES);
+	for(int i = 0; i < MAX_ITEM_TYPES; i++)
+	{
+		m_pItemTypes[i].m_First = -1;
+		m_pItemTypes[i].m_Last = -1;
+	}
+
 	m_pItems = static_cast<CItemInfo *>(calloc(MAX_ITEMS, sizeof(CItemInfo)));
+	m_NumItems = 0;
+
 	m_pDatas = static_cast<CDataInfo *>(calloc(MAX_DATAS, sizeof(CDataInfo)));
+	m_NumDatas = 0;
+
+	mem_zero(m_aExtendedItemTypes, sizeof(m_aExtendedItemTypes));
+	m_NumExtendedItemTypes = 0;
 }
 
 CDataFileWriter::~CDataFileWriter()
@@ -634,34 +649,11 @@ CDataFileWriter::~CDataFileWriter()
 	}
 }
 
-bool CDataFileWriter::OpenFile(class IStorage *pStorage, const char *pFilename, int StorageType)
-{
-	dbg_assert(!m_File, "a file already exists");
-	m_File = pStorage->OpenFile(pFilename, IOFLAG_WRITE, StorageType);
-	return m_File != 0;
-}
-
-void CDataFileWriter::Init()
-{
-	dbg_assert(!m_File, "a file already exists");
-	m_NumItems = 0;
-	m_NumDatas = 0;
-	m_NumItemTypes = 0;
-	m_NumExtendedItemTypes = 0;
-	mem_zero(m_pItemTypes, sizeof(CItemTypeInfo) * MAX_ITEM_TYPES);
-	mem_zero(m_aExtendedItemTypes, sizeof(m_aExtendedItemTypes));
-
-	for(int i = 0; i < MAX_ITEM_TYPES; i++)
-	{
-		m_pItemTypes[i].m_First = -1;
-		m_pItemTypes[i].m_Last = -1;
-	}
-}
-
 bool CDataFileWriter::Open(class IStorage *pStorage, const char *pFilename, int StorageType)
 {
-	Init();
-	return OpenFile(pStorage, pFilename, StorageType);
+	dbg_assert(!m_File, "File already open");
+	m_File = pStorage->OpenFile(pFilename, IOFLAG_WRITE, StorageType);
+	return m_File != 0;
 }
 
 int CDataFileWriter::GetTypeFromIndex(int Index) const
