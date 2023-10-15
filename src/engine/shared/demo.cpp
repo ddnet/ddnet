@@ -48,7 +48,7 @@ CDemoRecorder::~CDemoRecorder()
 }
 
 // Record
-int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, const char *pNetVersion, const char *pMap, SHA256_DIGEST *pSha256, unsigned Crc, const char *pType, unsigned MapSize, unsigned char *pMapData, IOHANDLE MapFile, DEMOFUNC_FILTER pfnFilter, void *pUser)
+int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, const char *pNetVersion, const char *pMap, const SHA256_DIGEST &Sha256, unsigned Crc, const char *pType, unsigned MapSize, unsigned char *pMapData, IOHANDLE MapFile, DEMOFUNC_FILTER pfnFilter, void *pUser)
 {
 	dbg_assert(m_File == 0, "Demo recorder already recording");
 
@@ -76,22 +76,14 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 		io_seek(MapFile, 0, IOSEEK_START);
 
 	char aSha256[SHA256_MAXSTRSIZE];
-	if(pSha256)
-		sha256_str(*pSha256, aSha256, sizeof(aSha256));
+	sha256_str(Sha256, aSha256, sizeof(aSha256));
 
 	if(!pMapData && !MapFile)
 	{
 		// open mapfile
 		char aMapFilename[IO_MAX_PATH_LENGTH];
 		// try the downloaded maps
-		if(pSha256)
-		{
-			str_format(aMapFilename, sizeof(aMapFilename), "downloadedmaps/%s_%s.map", pMap, aSha256);
-		}
-		else
-		{
-			str_format(aMapFilename, sizeof(aMapFilename), "downloadedmaps/%s_%08x.map", pMap, Crc);
-		}
+		str_format(aMapFilename, sizeof(aMapFilename), "downloadedmaps/%s_%s.map", pMap, aSha256);
 		MapFile = pStorage->OpenFile(aMapFilename, IOFLAG_READ, IStorage::TYPE_ALL);
 		if(!MapFile)
 		{
@@ -102,7 +94,7 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 		if(!MapFile)
 		{
 			// search for the map within subfolders
-			char aBuf[512];
+			char aBuf[IO_MAX_PATH_LENGTH];
 			str_format(aMapFilename, sizeof(aMapFilename), "%s.map", pMap);
 			if(pStorage->FindFile(aMapFilename, "maps", IStorage::TYPE_ALL, aBuf, sizeof(aBuf)))
 				MapFile = pStorage->OpenFile(aBuf, IOFLAG_READ, IStorage::TYPE_ALL);
@@ -144,9 +136,9 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 	mem_zero(&TimelineMarkers, sizeof(TimelineMarkers));
 	io_write(DemoFile, &TimelineMarkers, sizeof(TimelineMarkers)); // fill this on stop
 
-	//Write Sha256
+	// Write Sha256
 	io_write(DemoFile, SHA256_EXTENSION.m_aData, sizeof(SHA256_EXTENSION.m_aData));
-	io_write(DemoFile, pSha256, sizeof(SHA256_DIGEST));
+	io_write(DemoFile, &Sha256, sizeof(SHA256_DIGEST));
 
 	if(m_NoMapData)
 	{
@@ -1174,7 +1166,7 @@ void CDemoEditor::Slice(const char *pDemo, const char *pDst, int StartTick, int 
 
 	CDemoRecorder DemoRecorder(m_pSnapshotDelta);
 	unsigned char *pMapData = DemoPlayer.GetMapData(m_pStorage);
-	const int Result = DemoRecorder.Start(m_pStorage, m_pConsole, pDst, m_pNetVersion, pMapInfo->m_aName, &Sha256, pMapInfo->m_Crc, pInfo->m_Header.m_aType, pMapInfo->m_Size, pMapData, nullptr, pfnFilter, pUser) == -1;
+	const int Result = DemoRecorder.Start(m_pStorage, m_pConsole, pDst, m_pNetVersion, pMapInfo->m_aName, Sha256, pMapInfo->m_Crc, pInfo->m_Header.m_aType, pMapInfo->m_Size, pMapData, nullptr, pfnFilter, pUser) == -1;
 	free(pMapData);
 	if(Result != 0)
 	{
