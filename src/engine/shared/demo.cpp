@@ -308,14 +308,12 @@ void CDemoRecorder::RecordSnapshot(int Tick, const void *pData, int Size)
 	}
 	else
 	{
-		// create delta, prepend tick
-		char aDeltaData[CSnapshot::MAX_SIZE + sizeof(int)];
-		int DeltaSize;
-
 		// write tickmarker
 		WriteTickMarker(Tick, false);
 
-		DeltaSize = m_pSnapshotDelta->CreateDelta((CSnapshot *)m_aLastSnapshotData, (CSnapshot *)pData, &aDeltaData);
+		// create delta
+		char aDeltaData[CSnapshot::MAX_SIZE + sizeof(int)];
+		const int DeltaSize = m_pSnapshotDelta->CreateDelta((CSnapshot *)m_aLastSnapshotData, (CSnapshot *)pData, &aDeltaData);
 		if(DeltaSize)
 		{
 			// record delta
