@@ -218,7 +218,7 @@ enum
 	CHUNKTYPE_DELTA = 3,
 };
 
-void CDemoRecorder::WriteTickMarker(int Tick, int Keyframe)
+void CDemoRecorder::WriteTickMarker(int Tick, bool Keyframe)
 {
 	if(m_LastTickMarker == -1 || Tick - m_LastTickMarker > CHUNKMASK_TICK || Keyframe)
 	{
@@ -298,7 +298,7 @@ void CDemoRecorder::RecordSnapshot(int Tick, const void *pData, int Size)
 	if(m_LastKeyFrame == -1 || (Tick - m_LastKeyFrame) > SERVER_TICK_SPEED * 5)
 	{
 		// write full tickmarker
-		WriteTickMarker(Tick, 1);
+		WriteTickMarker(Tick, true);
 
 		// write snapshot
 		Write(CHUNKTYPE_SNAPSHOT, pData, Size);
@@ -313,7 +313,7 @@ void CDemoRecorder::RecordSnapshot(int Tick, const void *pData, int Size)
 		int DeltaSize;
 
 		// write tickmarker
-		WriteTickMarker(Tick, 0);
+		WriteTickMarker(Tick, false);
 
 		DeltaSize = m_pSnapshotDelta->CreateDelta((CSnapshot *)m_aLastSnapshotData, (CSnapshot *)pData, &aDeltaData);
 		if(DeltaSize)

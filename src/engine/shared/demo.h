@@ -33,7 +33,7 @@ class CDemoRecorder : public IDemoRecorder
 	DEMOFUNC_FILTER m_pfnFilter;
 	void *m_pUser;
 
-	void WriteTickMarker(int Tick, int Keyframe);
+	void WriteTickMarker(int Tick, bool Keyframe);
 	void Write(int Type, const void *pData, int Size);
 
 public:
