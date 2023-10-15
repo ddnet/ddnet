@@ -1386,7 +1386,7 @@ void CGameClient::OnNewSnapshot()
 			{
 				const CNetObj_PlayerInfo *pInfo = (const CNetObj_PlayerInfo *)pData;
 
-				if(pInfo->m_ClientID < MAX_CLIENTS)
+				if(pInfo->m_ClientID < MAX_CLIENTS && pInfo->m_ClientID == Item.m_ID)
 				{
 					m_aClients[pInfo->m_ClientID].m_Team = pInfo->m_Team;
 					m_aClients[pInfo->m_ClientID].m_Active = true;
@@ -1395,7 +1395,7 @@ void CGameClient::OnNewSnapshot()
 
 					if(pInfo->m_Local)
 					{
-						m_Snap.m_LocalClientID = Item.m_ID;
+						m_Snap.m_LocalClientID = pInfo->m_ClientID;
 						m_Snap.m_pLocalInfo = pInfo;
 
 						if(pInfo->m_Team == TEAM_SPECTATORS)
