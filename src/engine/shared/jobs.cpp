@@ -68,9 +68,13 @@ void CJobPool::WorkerThread(void *pUser)
 void CJobPool::Init(int NumThreads)
 {
 	// start threads
+	char aName[32];
 	m_vpThreads.reserve(NumThreads);
 	for(int i = 0; i < NumThreads; i++)
-		m_vpThreads.push_back(thread_init(WorkerThread, this, "CJobPool worker"));
+	{
+		str_format(aName, sizeof(aName), "CJobPool worker %d", i);
+		m_vpThreads.push_back(thread_init(WorkerThread, this, aName));
+	}
 }
 
 void CJobPool::Destroy()
