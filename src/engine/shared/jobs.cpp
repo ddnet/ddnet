@@ -19,7 +19,6 @@ int IJob::Status()
 CJobPool::CJobPool()
 {
 	// empty the pool
-	m_NumThreads = 0;
 	m_Shutdown = false;
 	m_Lock = lock_create();
 	sphore_init(&m_Semaphore);
@@ -69,21 +68,19 @@ void CJobPool::WorkerThread(void *pUser)
 void CJobPool::Init(int NumThreads)
 {
 	// start threads
-	m_NumThreads = NumThreads > MAX_THREADS ? MAX_THREADS : NumThreads;
+	m_vpThreads.reserve(NumThreads);
 	for(int i = 0; i < NumThreads; i++)
-		m_apThreads[i] = thread_init(WorkerThread, this, "CJobPool worker");
+		m_vpThreads.push_back(thread_init(WorkerThread, this, "CJobPool worker"));
 }
 
 void CJobPool::Destroy()
 {
 	m_Shutdown = true;
-	for(int i = 0; i < m_NumThreads; i++)
+	for(size_t i = 0; i < m_vpThreads.size(); i++)
 		sphore_signal(&m_Semaphore);
-	for(int i = 0; i < m_NumThreads; i++)
-	{
-		if(m_apThreads[i])
-			thread_wait(m_apThreads[i]);
-	}
+	for(void *pThread : m_vpThreads)
+		thread_wait(pThread);
+	m_vpThreads.clear();
 	lock_destroy(m_Lock);
 	sphore_destroy(&m_Semaphore);
 }
