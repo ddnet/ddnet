@@ -1015,17 +1015,6 @@ int CDemoPlayer::Update(bool RealTime)
 			m_UpdateIntraTimesFunc();
 	}
 
-	if(m_Info.m_Info.m_CurrentTick == m_Info.m_PreviousTick || m_Info.m_Info.m_CurrentTick == m_Info.m_NextTick)
-	{
-		if(m_pConsole)
-		{
-			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "tick error prev=%d cur=%d next=%d",
-				m_Info.m_PreviousTick, m_Info.m_Info.m_CurrentTick, m_Info.m_NextTick);
-			m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "demo_player", aBuf);
-		}
-	}
-
 	return 0;
 }
 
