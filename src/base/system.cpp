@@ -824,16 +824,14 @@ void *thread_init(void (*threadfunc)(void *), void *u, const char *name)
 #if defined(CONF_PLATFORM_MACOS) && defined(__MAC_10_10) && __MAC_OS_X_VERSION_MIN_REQUIRED >= __MAC_10_10
 		pthread_attr_set_qos_class_np(&attr, QOS_CLASS_USER_INTERACTIVE, 0);
 #endif
-		int result = pthread_create(&id, &attr, thread_run, data);
-		if(result != 0)
-		{
-			dbg_msg("thread", "creating %s thread failed: %d", name, result);
-			return 0;
-		}
+		dbg_assert(pthread_create(&id, &attr, thread_run, data) == 0, "pthread_create failure");
 		return (void *)id;
 	}
 #elif defined(CONF_FAMILY_WINDOWS)
-	return CreateThread(NULL, 0, thread_run, data, 0, NULL);
+	HANDLE thread = CreateThread(nullptr, 0, thread_run, data, 0, nullptr);
+	dbg_assert(thread != nullptr, "CreateThread failure");
+	// TODO: Set thread name using SetThreadDescription (would require minimum Windows 10 version 1607)
+	return thread;
 #else
 #error not implemented
 #endif
