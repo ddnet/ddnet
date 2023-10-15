@@ -123,9 +123,15 @@ private:
 	bool m_UseVideo;
 	bool m_WasRecording = false;
 
-	int ReadChunkHeader(int *pType, int *pSize, int *pTick);
+	enum EReadChunkHeaderResult
+	{
+		CHUNKHEADER_SUCCESS,
+		CHUNKHEADER_ERROR,
+		CHUNKHEADER_EOF,
+	};
+	EReadChunkHeaderResult ReadChunkHeader(int *pType, int *pSize, int *pTick);
 	void DoTick();
-	void ScanFile();
+	bool ScanFile();
 
 	int64_t Time();
 

@@ -418,14 +418,14 @@ void CDemoPlayer::SetListener(IListener *pListener)
 	m_pListener = pListener;
 }
 
-int CDemoPlayer::ReadChunkHeader(int *pType, int *pSize, int *pTick)
+CDemoPlayer::EReadChunkHeaderResult CDemoPlayer::ReadChunkHeader(int *pType, int *pSize, int *pTick)
 {
 	*pSize = 0;
 	*pType = 0;
 
 	unsigned char Chunk = 0;
 	if(io_read(m_File, &Chunk, sizeof(Chunk)) != sizeof(Chunk))
-		return -1;
+		return CHUNKHEADER_EOF;
 
 	if(Chunk & CHUNKTYPEFLAG_TICKMARKER)
 	{
@@ -433,22 +433,30 @@ int CDemoPlayer::ReadChunkHeader(int *pType, int *pSize, int *pTick)
 		int Tickdelta_legacy = Chunk & CHUNKMASK_TICK_LEGACY; // compatibility
 		*pType = Chunk & (CHUNKTYPEFLAG_TICKMARKER | CHUNKTICKFLAG_KEYFRAME);
 
+		int NewTick;
 		if(m_Info.m_Header.m_Version < gs_VersionTickCompression && Tickdelta_legacy != 0)
 		{
-			*pTick += Tickdelta_legacy;
+			if(*pTick < 0) // initial tick not initialized before a tick delta
+				return CHUNKHEADER_ERROR;
+			NewTick = *pTick + Tickdelta_legacy;
 		}
 		else if(Chunk & CHUNKTICKFLAG_TICK_COMPRESSED)
 		{
+			if(*pTick < 0) // initial tick not initialized before a tick delta
+				return CHUNKHEADER_ERROR;
 			int Tickdelta = Chunk & CHUNKMASK_TICK;
-			*pTick += Tickdelta;
+			NewTick = *pTick + Tickdelta;
 		}
 		else
 		{
 			unsigned char aTickdata[sizeof(int32_t)];
 			if(io_read(m_File, aTickdata, sizeof(aTickdata)) != sizeof(aTickdata))
-				return -1;
-			*pTick = bytes_be_to_uint(aTickdata);
+				return CHUNKHEADER_ERROR;
+			NewTick = bytes_be_to_uint(aTickdata);
 		}
+		if(NewTick < MIN_TICK || NewTick >= MAX_TICK) // invalid tick
+			return CHUNKHEADER_ERROR;
+		*pTick = NewTick;
 	}
 	else
 	{
@@ -460,34 +468,42 @@ int CDemoPlayer::ReadChunkHeader(int *pType, int *pSize, int *pTick)
 		{
 			unsigned char aSizedata[1];
 			if(io_read(m_File, aSizedata, sizeof(aSizedata)) != sizeof(aSizedata))
-				return -1;
+				return CHUNKHEADER_ERROR;
 			*pSize = aSizedata[0];
 		}
 		else if(*pSize == 31)
 		{
 			unsigned char aSizedata[2];
 			if(io_read(m_File, aSizedata, sizeof(aSizedata)) != sizeof(aSizedata))
-				return -1;
+				return CHUNKHEADER_ERROR;
 			*pSize = (aSizedata[1] << 8) | aSizedata[0];
 		}
 	}
 
-	return 0;
+	return CHUNKHEADER_SUCCESS;
 }
 
-void CDemoPlayer::ScanFile()
+bool CDemoPlayer::ScanFile()
 {
 	const long StartPos = io_tell(m_File);
 	m_vKeyFrames.clear();
 
-	int ChunkTick = 0;
+	int ChunkTick = -1;
 	while(true)
 	{
 		const long CurrentPos = io_tell(m_File);
 
 		int ChunkType, ChunkSize;
-		if(ReadChunkHeader(&ChunkType, &ChunkSize, &ChunkTick))
+		const EReadChunkHeaderResult Result = ReadChunkHeader(&ChunkType, &ChunkSize, &ChunkTick);
+		if(Result == CHUNKHEADER_EOF)
+		{
 			break;
+		}
+		else if(Result == CHUNKHEADER_ERROR)
+		{
+			m_vKeyFrames.clear();
+			return false;
+		}
 
 		if(ChunkType & CHUNKTYPEFLAG_TICKMARKER)
 		{
@@ -505,6 +521,7 @@ void CDemoPlayer::ScanFile()
 	}
 
 	io_seek(m_File, StartPos, IOSEEK_START);
+	return true;
 }
 
 void CDemoPlayer::DoTick()
@@ -527,11 +544,18 @@ void CDemoPlayer::DoTick()
 	while(true)
 	{
 		int ChunkType, ChunkSize;
-		if(ReadChunkHeader(&ChunkType, &ChunkSize, &ChunkTick))
+		const EReadChunkHeaderResult Result = ReadChunkHeader(&ChunkType, &ChunkSize, &ChunkTick);
+		if(Result != CHUNKHEADER_SUCCESS)
 		{
 			// stop on error or eof
 			if(m_pConsole)
-				m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "demo_player", "end of file");
+			{
+				if(Result == CHUNKHEADER_EOF)
+					m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "demo_player", "end of file");
+				else
+					m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_player", "error reading chunk header");
+			}
+
 #if defined(CONF_VIDEORECORDER)
 			if(m_UseVideo && IVideo::Current())
 				Stop();
@@ -782,7 +806,16 @@ int CDemoPlayer::Load(class IStorage *pStorage, class IConsole *pConsole, const 
 	}
 
 	// scan the file for interesting points
-	ScanFile();
+	if(!ScanFile())
+	{
+		if(m_pConsole)
+		{
+			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_player", "Error scanning demo file");
+		}
+		io_close(m_File);
+		m_File = 0;
+		return -1;
+	}
 
 	// reset slice markers
 	g_Config.m_ClDemoSliceBegin = -1;
