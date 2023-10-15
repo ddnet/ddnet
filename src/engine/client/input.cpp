@@ -259,23 +259,18 @@ bool CInput::MouseRelative(float *pX, float *pY)
 	if(!m_MouseFocus || !m_InputGrabbed)
 		return false;
 
-	int nx = 0, ny = 0;
+	ivec2 Relative;
 #if defined(CONF_PLATFORM_ANDROID) // No relative mouse on Android
-	static int s_LastX = 0;
-	static int s_LastY = 0;
-	SDL_GetMouseState(&nx, &ny);
-	int XTmp = nx - s_LastX;
-	int YTmp = ny - s_LastY;
-	s_LastX = nx;
-	s_LastY = ny;
-	nx = XTmp;
-	ny = YTmp;
+	ivec2 CurrentPos;
+	SDL_GetMouseState(&CurrentPos.x, &CurrentPos.y);
+	Relative = CurrentPos - m_LastMousePos;
+	m_LastMousePos = CurrentPos;
 #else
-	SDL_GetRelativeMouseState(&nx, &ny);
+	SDL_GetRelativeMouseState(&Relative.x, &Relative.y);
 #endif
 
-	*pX = nx;
-	*pY = ny;
+	*pX = Relative.x;
+	*pY = Relative.y;
 	return *pX != 0.0f || *pY != 0.0f;
 }
 
