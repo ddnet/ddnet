@@ -7,6 +7,7 @@
 
 #include <atomic>
 #include <memory>
+#include <vector>
 
 class CJobPool;
 
@@ -37,12 +38,7 @@ public:
 
 class CJobPool
 {
-	enum
-	{
-		MAX_THREADS = 32
-	};
-	int m_NumThreads;
-	void *m_apThreads[MAX_THREADS];
+	std::vector<void *> m_vpThreads;
 	std::atomic<bool> m_Shutdown;
 
 	LOCK m_Lock;

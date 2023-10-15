@@ -4612,7 +4612,7 @@ int main(int argc, const char **argv)
 	});
 
 	// create the components
-	IEngine *pEngine = CreateEngine(GAME_NAME, pFutureConsoleLogger, 2);
+	IEngine *pEngine = CreateEngine(GAME_NAME, pFutureConsoleLogger, 2 * std::thread::hardware_concurrency() + 2);
 	IConsole *pConsole = CreateConsole(CFGFLAG_CLIENT).release();
 	IStorage *pStorage = CreateStorage(IStorage::STORAGETYPE_CLIENT, argc, (const char **)argv);
 	IConfigManager *pConfigManager = CreateConfigManager();
