@@ -435,9 +435,6 @@ int CDemoPlayer::ReadChunkHeader(int *pType, int *pSize, int *pTick)
 	*pSize = 0;
 	*pType = 0;
 
-	if(m_File == NULL)
-		return -1;
-
 	unsigned char Chunk = 0;
 	if(io_read(m_File, &Chunk, sizeof(Chunk)) != sizeof(Chunk))
 		return -1;
