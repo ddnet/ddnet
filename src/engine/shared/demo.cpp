@@ -440,16 +440,16 @@ int CDemoPlayer::ReadChunkHeader(int *pType, int *pSize, int *pTick)
 	if(Chunk & CHUNKTYPEFLAG_TICKMARKER)
 	{
 		// decode tick marker
-		int Tickdelta_legacy = Chunk & (CHUNKMASK_TICK_LEGACY); // compatibility
+		int Tickdelta_legacy = Chunk & CHUNKMASK_TICK_LEGACY; // compatibility
 		*pType = Chunk & (CHUNKTYPEFLAG_TICKMARKER | CHUNKTICKFLAG_KEYFRAME);
 
 		if(m_Info.m_Header.m_Version < gs_VersionTickCompression && Tickdelta_legacy != 0)
 		{
 			*pTick += Tickdelta_legacy;
 		}
-		else if(Chunk & (CHUNKTICKFLAG_TICK_COMPRESSED))
+		else if(Chunk & CHUNKTICKFLAG_TICK_COMPRESSED)
 		{
-			int Tickdelta = Chunk & (CHUNKMASK_TICK);
+			int Tickdelta = Chunk & CHUNKMASK_TICK;
 			*pTick += Tickdelta;
 		}
 		else
@@ -525,8 +525,8 @@ void CDemoPlayer::DoTick()
 	int ChunkTick = m_Info.m_Info.m_CurrentTick;
 
 	int64_t Freq = time_freq();
-	int64_t CurtickStart = (m_Info.m_Info.m_CurrentTick) * Freq / SERVER_TICK_SPEED;
-	int64_t PrevtickStart = (m_Info.m_PreviousTick) * Freq / SERVER_TICK_SPEED;
+	int64_t CurtickStart = m_Info.m_Info.m_CurrentTick * Freq / SERVER_TICK_SPEED;
+	int64_t PrevtickStart = m_Info.m_PreviousTick * Freq / SERVER_TICK_SPEED;
 	m_Info.m_IntraTick = (m_Info.m_CurrentTime - PrevtickStart) / (float)(CurtickStart - PrevtickStart);
 	m_Info.m_IntraTickSincePrev = (m_Info.m_CurrentTime - PrevtickStart) / (float)(Freq / SERVER_TICK_SPEED);
 	m_Info.m_TickTime = (m_Info.m_CurrentTime - PrevtickStart) / (float)Freq;
@@ -1009,7 +1009,7 @@ int CDemoPlayer::Update(bool RealTime)
 
 		while(!m_Info.m_Info.m_Paused)
 		{
-			int64_t CurtickStart = (m_Info.m_Info.m_CurrentTick) * Freq / SERVER_TICK_SPEED;
+			int64_t CurtickStart = m_Info.m_Info.m_CurrentTick * Freq / SERVER_TICK_SPEED;
 
 			// break if we are ready
 			if(RealTime && CurtickStart > m_Info.m_CurrentTime)
@@ -1022,8 +1022,8 @@ int CDemoPlayer::Update(bool RealTime)
 
 	// update intratick
 	{
-		int64_t CurtickStart = (m_Info.m_Info.m_CurrentTick) * Freq / SERVER_TICK_SPEED;
-		int64_t PrevtickStart = (m_Info.m_PreviousTick) * Freq / SERVER_TICK_SPEED;
+		int64_t CurtickStart = m_Info.m_Info.m_CurrentTick * Freq / SERVER_TICK_SPEED;
+		int64_t PrevtickStart = m_Info.m_PreviousTick * Freq / SERVER_TICK_SPEED;
 		m_Info.m_IntraTick = (m_Info.m_CurrentTime - PrevtickStart) / (float)(CurtickStart - PrevtickStart);
 		m_Info.m_IntraTickSincePrev = (m_Info.m_CurrentTime - PrevtickStart) / (float)(Freq / SERVER_TICK_SPEED);
 		m_Info.m_TickTime = (m_Info.m_CurrentTime - PrevtickStart) / (float)Freq;
