@@ -35,8 +35,8 @@ CDemoRecorder::CDemoRecorder(class CSnapshotDelta *pSnapshotDelta, bool NoMapDat
 {
 	m_File = 0;
 	m_aCurrentFilename[0] = '\0';
-	m_pfnFilter = 0;
-	m_pUser = 0;
+	m_pfnFilter = nullptr;
+	m_pUser = nullptr;
 	m_LastTickMarker = -1;
 	m_pSnapshotDelta = pSnapshotDelta;
 	m_NoMapData = NoMapData;
@@ -1182,7 +1182,7 @@ void CDemoEditor::Slice(const char *pDemo, const char *pDst, int StartTick, int 
 
 	CDemoRecorder DemoRecorder(m_pSnapshotDelta);
 	unsigned char *pMapData = DemoPlayer.GetMapData(m_pStorage);
-	const int Result = DemoRecorder.Start(m_pStorage, m_pConsole, pDst, m_pNetVersion, pMapInfo->m_aName, &Sha256, pMapInfo->m_Crc, pInfo->m_Header.m_aType, pMapInfo->m_Size, pMapData, NULL, pfnFilter, pUser) == -1;
+	const int Result = DemoRecorder.Start(m_pStorage, m_pConsole, pDst, m_pNetVersion, pMapInfo->m_aName, &Sha256, pMapInfo->m_Crc, pInfo->m_Header.m_aType, pMapInfo->m_Size, pMapData, nullptr, pfnFilter, pUser) == -1;
 	free(pMapData);
 	if(Result != 0)
 	{
