@@ -775,19 +775,13 @@ int CDemoPlayer::Load(class IStorage *pStorage, class IConsole *pConsole, const 
 	else
 		m_DemoType = DEMOTYPE_INVALID;
 
-	// read map
-	unsigned MapSize = bytes_be_to_uint(m_Info.m_Header.m_aMapSize);
-
-	// check if we already have the map
-	// TODO: improve map checking (maps folder, check crc)
-	unsigned Crc = bytes_be_to_uint(m_Info.m_Header.m_aMapCrc);
-
 	// save byte offset of map for later use
+	const unsigned MapSize = bytes_be_to_uint(m_Info.m_Header.m_aMapSize);
 	m_MapOffset = io_tell(m_File);
 	io_skip(m_File, MapSize);
 
 	// store map information
-	m_MapInfo.m_Crc = Crc;
+	m_MapInfo.m_Crc = bytes_be_to_uint(m_Info.m_Header.m_aMapCrc);
 	m_MapInfo.m_Sha256 = Sha256;
 	m_MapInfo.m_Size = MapSize;
 	str_copy(m_MapInfo.m_aName, m_Info.m_Header.m_aMapName);
