@@ -14,7 +14,6 @@
 
 #include "compression.h"
 #include "demo.h"
-#include "memheap.h"
 #include "network.h"
 #include "snapshot.h"
 
@@ -416,7 +415,6 @@ CDemoPlayer::~CDemoPlayer()
 void CDemoPlayer::Construct(class CSnapshotDelta *pSnapshotDelta, bool UseVideo)
 {
 	m_File = 0;
-	m_pKeyFrames = 0;
 	m_SpeedIndex = 4;
 
 	m_pSnapshotDelta = pSnapshotDelta;
@@ -489,40 +487,23 @@ int CDemoPlayer::ReadChunkHeader(int *pType, int *pSize, int *pTick)
 
 void CDemoPlayer::ScanFile()
 {
-	CHeap Heap;
-	CKeyFrameSearch *pFirstKey = 0;
-	CKeyFrameSearch *pCurrentKey = 0;
+	const long StartPos = io_tell(m_File);
+	m_vKeyFrames.clear();
+
 	int ChunkTick = 0;
-
-	long StartPos = io_tell(m_File);
-	m_Info.m_SeekablePoints = 0;
-
 	while(true)
 	{
-		long CurrentPos = io_tell(m_File);
+		const long CurrentPos = io_tell(m_File);
 
-		int ChunkSize, ChunkType;
+		int ChunkType, ChunkSize;
 		if(ReadChunkHeader(&ChunkType, &ChunkSize, &ChunkTick))
 			break;
 
-		// read the chunk
 		if(ChunkType & CHUNKTYPEFLAG_TICKMARKER)
 		{
 			if(ChunkType & CHUNKTICKFLAG_KEYFRAME)
 			{
-				CKeyFrameSearch *pKey;
-
-				// save the position
-				pKey = (CKeyFrameSearch *)Heap.Allocate(sizeof(CKeyFrameSearch));
-				pKey->m_Frame.m_Filepos = CurrentPos;
-				pKey->m_Frame.m_Tick = ChunkTick;
-				pKey->m_pNext = 0;
-				if(pCurrentKey)
-					pCurrentKey->m_pNext = pKey;
-				if(!pFirstKey)
-					pFirstKey = pKey;
-				pCurrentKey = pKey;
-				m_Info.m_SeekablePoints++;
+				m_vKeyFrames.emplace_back(CurrentPos, ChunkTick);
 			}
 
 			if(m_Info.m_Info.m_FirstTick == -1)
@@ -533,13 +514,6 @@ void CDemoPlayer::ScanFile()
 			io_skip(m_File, ChunkSize);
 	}
 
-	// copy all the frames to an array instead for fast access
-	int i;
-	m_pKeyFrames = (CKeyFrame *)calloc(maximum(m_Info.m_SeekablePoints, 1), sizeof(CKeyFrame));
-	for(pCurrentKey = pFirstKey, i = 0; pCurrentKey; pCurrentKey = pCurrentKey->m_pNext, i++)
-		m_pKeyFrames[i] = pCurrentKey->m_Frame;
-
-	// destroy the temporary heap and seek back to the start
 	io_seek(m_File, StartPos, IOSEEK_START);
 }
 
@@ -980,14 +954,14 @@ int CDemoPlayer::SetPos(int WantedTick)
 	const float Percent = (KeyFrameWantedTick - m_Info.m_Info.m_FirstTick) / (float)(m_Info.m_Info.m_LastTick - m_Info.m_Info.m_FirstTick);
 
 	// get correct key frame
-	int KeyFrame = clamp((int)(m_Info.m_SeekablePoints * Percent), 0, m_Info.m_SeekablePoints - 1);
-	while(KeyFrame < m_Info.m_SeekablePoints - 1 && m_pKeyFrames[KeyFrame].m_Tick < KeyFrameWantedTick)
+	size_t KeyFrame = clamp<size_t>(m_vKeyFrames.size() * Percent, 0, m_vKeyFrames.size() - 1);
+	while(KeyFrame < m_vKeyFrames.size() - 1 && m_vKeyFrames[KeyFrame].m_Tick < KeyFrameWantedTick)
 		KeyFrame++;
-	while(KeyFrame > 0 && m_pKeyFrames[KeyFrame].m_Tick > KeyFrameWantedTick)
+	while(KeyFrame > 0 && m_vKeyFrames[KeyFrame].m_Tick > KeyFrameWantedTick)
 		KeyFrame--;
 
 	// seek to the correct key frame
-	io_seek(m_File, m_pKeyFrames[KeyFrame].m_Filepos, IOSEEK_START);
+	io_seek(m_File, m_vKeyFrames[KeyFrame].m_Filepos, IOSEEK_START);
 
 	m_Info.m_NextTick = -1;
 	m_Info.m_Info.m_CurrentTick = -1;
@@ -1085,8 +1059,7 @@ int CDemoPlayer::Stop()
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_player", "Stopped playback");
 	io_close(m_File);
 	m_File = 0;
-	free(m_pKeyFrames);
-	m_pKeyFrames = 0;
+	m_vKeyFrames.clear();
 	str_copy(m_aFilename, "");
 	return 0;
 }

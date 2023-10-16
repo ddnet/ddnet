@@ -7,7 +7,9 @@
 
 #include <engine/demo.h>
 #include <engine/shared/protocol.h>
+
 #include <functional>
+#include <vector>
 
 #include "snapshot.h"
 
@@ -76,8 +78,6 @@ public:
 		int64_t m_LastUpdate;
 		int64_t m_CurrentTime;
 
-		int m_SeekablePoints;
-
 		int m_NextTick;
 		int m_PreviousTick;
 
@@ -92,23 +92,22 @@ private:
 	TUpdateIntraTimesFunc m_UpdateIntraTimesFunc;
 
 	// Playback
-	struct CKeyFrame
+	struct SKeyFrame
 	{
 		long m_Filepos;
 		int m_Tick;
-	};
 
-	struct CKeyFrameSearch
-	{
-		CKeyFrame m_Frame;
-		CKeyFrameSearch *m_pNext;
+		SKeyFrame(long Filepos, int Tick) :
+			m_Filepos(Filepos), m_Tick(Tick)
+		{
+		}
 	};
 
 	class IConsole *m_pConsole;
 	IOHANDLE m_File;
 	long m_MapOffset;
 	char m_aFilename[IO_MAX_PATH_LENGTH];
-	CKeyFrame *m_pKeyFrames;
+	std::vector<SKeyFrame> m_vKeyFrames;
 	CMapInfo m_MapInfo;
 	int m_SpeedIndex;
 
