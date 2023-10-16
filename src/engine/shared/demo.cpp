@@ -1064,21 +1064,9 @@ int CDemoPlayer::Stop()
 	return 0;
 }
 
-void CDemoPlayer::GetDemoName(char *pBuffer, int BufferSize) const
+void CDemoPlayer::GetDemoName(char *pBuffer, size_t BufferSize) const
 {
-	const char *pFileName = m_aFilename;
-	const char *pExtractedName = pFileName;
-	const char *pEnd = 0;
-	for(; *pFileName; ++pFileName)
-	{
-		if(*pFileName == '/' || *pFileName == '\\')
-			pExtractedName = pFileName + 1;
-		else if(*pFileName == '.')
-			pEnd = pFileName;
-	}
-
-	int Length = pEnd > pExtractedName ? minimum(BufferSize, (int)(pEnd - pExtractedName + 1)) : BufferSize;
-	str_copy(pBuffer, pExtractedName, Length);
+	IStorage::StripPathAndExtension(m_aFilename, pBuffer, BufferSize);
 }
 
 bool CDemoPlayer::GetDemoInfo(class IStorage *pStorage, const char *pFilename, int StorageType, CDemoHeader *pDemoHeader, CTimelineMarkers *pTimelineMarkers, CMapInfo *pMapInfo) const

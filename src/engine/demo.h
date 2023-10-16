@@ -106,7 +106,7 @@ public:
 	virtual void Unpause() = 0;
 	virtual bool IsPlaying() const = 0;
 	virtual const CInfo *BaseInfo() const = 0;
-	virtual void GetDemoName(char *pBuffer, int BufferSize) const = 0;
+	virtual void GetDemoName(char *pBuffer, size_t BufferSize) const = 0;
 	virtual bool GetDemoInfo(class IStorage *pStorage, const char *pFilename, int StorageType, CDemoHeader *pDemoHeader, CTimelineMarkers *pTimelineMarkers, CMapInfo *pMapInfo) const = 0;
 	virtual int GetDemoType() const = 0;
 };

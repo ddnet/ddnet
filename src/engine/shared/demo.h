@@ -154,7 +154,7 @@ public:
 	int SeekTick(ETickOffset TickOffset) override;
 	int SetPos(int WantedTick) override;
 	const CInfo *BaseInfo() const override { return &m_Info.m_Info; }
-	void GetDemoName(char *pBuffer, int BufferSize) const override;
+	void GetDemoName(char *pBuffer, size_t BufferSize) const override;
 	bool GetDemoInfo(class IStorage *pStorage, const char *pFilename, int StorageType, CDemoHeader *pDemoHeader, CTimelineMarkers *pTimelineMarkers, CMapInfo *pMapInfo) const override;
 	const char *GetDemoFileName() { return m_aFilename; }
 	int GetDemoType() const override;
