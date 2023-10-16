@@ -759,14 +759,6 @@ int CDemoPlayer::Load(class IStorage *pStorage, class IConsole *pConsole, const 
 		}
 	}
 
-	// get demo type
-	if(!str_comp(m_Info.m_Header.m_aType, "client"))
-		m_DemoType = DEMOTYPE_CLIENT;
-	else if(!str_comp(m_Info.m_Header.m_aType, "server"))
-		m_DemoType = DEMOTYPE_SERVER;
-	else
-		m_DemoType = DEMOTYPE_INVALID;
-
 	// save byte offset of map for later use
 	const unsigned MapSize = bytes_be_to_uint(m_Info.m_Header.m_aMapSize);
 	m_MapOffset = io_tell(m_File);
@@ -1090,13 +1082,6 @@ bool CDemoPlayer::GetDemoInfo(class IStorage *pStorage, const char *pFilename, i
 
 	io_close(File);
 	return true;
-}
-
-int CDemoPlayer::GetDemoType() const
-{
-	if(m_File)
-		return m_DemoType;
-	return DEMOTYPE_INVALID;
 }
 
 class CDemoRecordingListener : public CDemoPlayer::IListener

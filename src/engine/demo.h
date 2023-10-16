@@ -80,13 +80,6 @@ public:
 		int m_aTimelineMarkers[MAX_TIMELINE_MARKERS];
 	};
 
-	enum
-	{
-		DEMOTYPE_INVALID = 0,
-		DEMOTYPE_CLIENT,
-		DEMOTYPE_SERVER,
-	};
-
 	enum ETickOffset
 	{
 		TICK_CURRENT, // update the current tick again
@@ -108,7 +101,6 @@ public:
 	virtual const CInfo *BaseInfo() const = 0;
 	virtual void GetDemoName(char *pBuffer, size_t BufferSize) const = 0;
 	virtual bool GetDemoInfo(class IStorage *pStorage, const char *pFilename, int StorageType, CDemoHeader *pDemoHeader, CTimelineMarkers *pTimelineMarkers, CMapInfo *pMapInfo) const = 0;
-	virtual int GetDemoType() const = 0;
 };
 
 class IDemoRecorder : public IInterface

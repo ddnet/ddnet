@@ -112,7 +112,6 @@ private:
 	int m_SpeedIndex;
 
 	CPlaybackInfo m_Info;
-	int m_DemoType;
 	unsigned char m_aCompressedSnapshotData[CSnapshot::MAX_SIZE];
 	unsigned char m_aDecompressedSnapshotData[CSnapshot::MAX_SIZE];
 	unsigned char m_aCurrentSnapshotData[CSnapshot::MAX_SIZE];
@@ -157,7 +156,6 @@ public:
 	void GetDemoName(char *pBuffer, size_t BufferSize) const override;
 	bool GetDemoInfo(class IStorage *pStorage, const char *pFilename, int StorageType, CDemoHeader *pDemoHeader, CTimelineMarkers *pTimelineMarkers, CMapInfo *pMapInfo) const override;
 	const char *GetDemoFileName() { return m_aFilename; }
-	int GetDemoType() const override;
 
 	int Update(bool RealTime = true);
 
