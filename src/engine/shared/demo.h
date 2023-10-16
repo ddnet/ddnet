@@ -7,7 +7,9 @@
 
 #include <engine/demo.h>
 #include <engine/shared/protocol.h>
+
 #include <functional>
+#include <vector>
 
 #include "snapshot.h"
 
@@ -31,7 +33,7 @@ class CDemoRecorder : public IDemoRecorder
 	DEMOFUNC_FILTER m_pfnFilter;
 	void *m_pUser;
 
-	void WriteTickMarker(int Tick, int Keyframe);
+	void WriteTickMarker(int Tick, bool Keyframe);
 	void Write(int Type, const void *pData, int Size);
 
 public:
@@ -39,7 +41,7 @@ public:
 	CDemoRecorder() {}
 	~CDemoRecorder() override;
 
-	int Start(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, const char *pNetversion, const char *pMap, SHA256_DIGEST *pSha256, unsigned MapCrc, const char *pType, unsigned MapSize, unsigned char *pMapData, IOHANDLE MapFile = nullptr, DEMOFUNC_FILTER pfnFilter = nullptr, void *pUser = nullptr);
+	int Start(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, const char *pNetversion, const char *pMap, const SHA256_DIGEST &Sha256, unsigned MapCrc, const char *pType, unsigned MapSize, unsigned char *pMapData, IOHANDLE MapFile = nullptr, DEMOFUNC_FILTER pfnFilter = nullptr, void *pUser = nullptr);
 	int Stop() override;
 
 	void AddDemoMarker();
@@ -76,8 +78,6 @@ public:
 		int64_t m_LastUpdate;
 		int64_t m_CurrentTime;
 
-		int m_SeekablePoints;
-
 		int m_NextTick;
 		int m_PreviousTick;
 
@@ -92,28 +92,26 @@ private:
 	TUpdateIntraTimesFunc m_UpdateIntraTimesFunc;
 
 	// Playback
-	struct CKeyFrame
+	struct SKeyFrame
 	{
 		long m_Filepos;
 		int m_Tick;
-	};
 
-	struct CKeyFrameSearch
-	{
-		CKeyFrame m_Frame;
-		CKeyFrameSearch *m_pNext;
+		SKeyFrame(long Filepos, int Tick) :
+			m_Filepos(Filepos), m_Tick(Tick)
+		{
+		}
 	};
 
 	class IConsole *m_pConsole;
 	IOHANDLE m_File;
 	long m_MapOffset;
 	char m_aFilename[IO_MAX_PATH_LENGTH];
-	CKeyFrame *m_pKeyFrames;
+	std::vector<SKeyFrame> m_vKeyFrames;
 	CMapInfo m_MapInfo;
 	int m_SpeedIndex;
 
 	CPlaybackInfo m_Info;
-	int m_DemoType;
 	unsigned char m_aCompressedSnapshotData[CSnapshot::MAX_SIZE];
 	unsigned char m_aDecompressedSnapshotData[CSnapshot::MAX_SIZE];
 	unsigned char m_aCurrentSnapshotData[CSnapshot::MAX_SIZE];
@@ -155,10 +153,9 @@ public:
 	int SeekTick(ETickOffset TickOffset) override;
 	int SetPos(int WantedTick) override;
 	const CInfo *BaseInfo() const override { return &m_Info.m_Info; }
-	void GetDemoName(char *pBuffer, int BufferSize) const override;
+	void GetDemoName(char *pBuffer, size_t BufferSize) const override;
 	bool GetDemoInfo(class IStorage *pStorage, const char *pFilename, int StorageType, CDemoHeader *pDemoHeader, CTimelineMarkers *pTimelineMarkers, CMapInfo *pMapInfo) const override;
 	const char *GetDemoFileName() { return m_aFilename; }
-	int GetDemoType() const override;
 
 	int Update(bool RealTime = true);
 
