@@ -10,6 +10,15 @@
 
 class CSmoothTime
 {
+public:
+	enum EAdjustDirection
+	{
+		ADJUSTDIRECTION_DOWN = 0,
+		ADJUSTDIRECTION_UP,
+		NUM_ADJUSTDIRECTIONS,
+	};
+
+private:
 	int64_t m_Snap;
 	int64_t m_Current;
 	int64_t m_Target;
@@ -21,16 +30,16 @@ class CSmoothTime
 	CGraph m_Graph;
 
 	int m_SpikeCounter;
+	float m_aAdjustSpeed[NUM_ADJUSTDIRECTIONS];
 
-	float m_aAdjustSpeed[2]; // 0 = down, 1 = up
 public:
 	void Init(int64_t Target);
-	void SetAdjustSpeed(int Direction, float Value);
+	void SetAdjustSpeed(EAdjustDirection Direction, float Value);
 
 	int64_t Get(int64_t Now);
 
 	void UpdateInt(int64_t Target);
-	void Update(CGraph *pGraph, int64_t Target, int TimeLeft, int AdjustDirection);
+	void Update(CGraph *pGraph, int64_t Target, int TimeLeft, EAdjustDirection AdjustDirection);
 
 	int64_t GetMargin(int64_t Now);
 	void UpdateMargin(int64_t TargetMargin);

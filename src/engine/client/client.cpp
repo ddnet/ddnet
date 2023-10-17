@@ -1712,7 +1712,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 			}
 
 			if(Target)
-				m_PredictedTime.Update(&m_InputtimeMarginGraph, Target, TimeLeft, 1);
+				m_PredictedTime.Update(&m_InputtimeMarginGraph, Target, TimeLeft, CSmoothTime::ADJUSTDIRECTION_UP);
 		}
 		else if(Msg == NETMSG_SNAP || Msg == NETMSG_SNAPSINGLE || Msg == NETMSG_SNAPEMPTY)
 		{
@@ -1901,7 +1901,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 						if(!Dummy)
 						{
 							m_PredictedTime.Init(GameTick * time_freq() / 50);
-							m_PredictedTime.SetAdjustSpeed(1, 1000.0f);
+							m_PredictedTime.SetAdjustSpeed(CSmoothTime::ADJUSTDIRECTION_UP, 1000.0f);
 							m_PredictedTime.UpdateMargin(PredictionMargin() * time_freq() / 1000);
 						}
 						m_aGameTime[Conn].Init((GameTick - 1) * time_freq() / 50);
@@ -1928,7 +1928,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 						int64_t Now = m_aGameTime[Conn].Get(time_get());
 						int64_t TickStart = GameTick * time_freq() / 50;
 						int64_t TimeLeft = (TickStart - Now) * 1000 / time_freq();
-						m_aGameTime[Conn].Update(&m_GametimeMarginGraph, (GameTick - 1) * time_freq() / 50, TimeLeft, 0);
+						m_aGameTime[Conn].Update(&m_GametimeMarginGraph, (GameTick - 1) * time_freq() / 50, TimeLeft, CSmoothTime::ADJUSTDIRECTION_DOWN);
 					}
 
 					if(m_aReceivedSnapshots[Conn] > 50 && !m_aCodeRunAfterJoin[Conn])

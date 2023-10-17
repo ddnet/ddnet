@@ -14,12 +14,12 @@ void CSmoothTime::Init(int64_t Target)
 	m_SnapMargin = m_Snap;
 	m_CurrentMargin = 0;
 	m_TargetMargin = 0;
-	m_aAdjustSpeed[0] = 0.3f;
-	m_aAdjustSpeed[1] = 0.3f;
+	m_aAdjustSpeed[ADJUSTDIRECTION_DOWN] = 0.3f;
+	m_aAdjustSpeed[ADJUSTDIRECTION_UP] = 0.3f;
 	m_Graph.Init(0.0f, 0.5f);
 }
 
-void CSmoothTime::SetAdjustSpeed(int Direction, float Value)
+void CSmoothTime::SetAdjustSpeed(EAdjustDirection Direction, float Value)
 {
 	m_aAdjustSpeed[Direction] = Value;
 }
@@ -32,9 +32,9 @@ int64_t CSmoothTime::Get(int64_t Now)
 	// it's faster to adjust upward instead of downward
 	// we might need to adjust these abit
 
-	float AdjustSpeed = m_aAdjustSpeed[0];
+	float AdjustSpeed = m_aAdjustSpeed[ADJUSTDIRECTION_DOWN];
 	if(t > c)
-		AdjustSpeed = m_aAdjustSpeed[1];
+		AdjustSpeed = m_aAdjustSpeed[ADJUSTDIRECTION_UP];
 
 	float a = ((Now - m_Snap) / (float)time_freq()) * AdjustSpeed;
 	if(a > 1.0f)
@@ -55,7 +55,7 @@ void CSmoothTime::UpdateInt(int64_t Target)
 	m_Target = Target - GetMargin(Now);
 }
 
-void CSmoothTime::Update(CGraph *pGraph, int64_t Target, int TimeLeft, int AdjustDirection)
+void CSmoothTime::Update(CGraph *pGraph, int64_t Target, int TimeLeft, EAdjustDirection AdjustDirection)
 {
 	int UpdateTimer = 1;
 
