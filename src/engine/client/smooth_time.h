@@ -34,12 +34,12 @@ public:
 	void Init(int64_t Target);
 	void SetAdjustSpeed(EAdjustDirection Direction, float Value);
 
-	int64_t Get(int64_t Now);
+	int64_t Get(int64_t Now) const;
 
 	void UpdateInt(int64_t Target);
 	void Update(CGraph *pGraph, int64_t Target, int TimeLeft, EAdjustDirection AdjustDirection);
 
-	int64_t GetMargin(int64_t Now);
+	int64_t GetMargin(int64_t Now) const;
 	void UpdateMargin(int64_t TargetMargin);
 };
 

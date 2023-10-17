@@ -39,7 +39,7 @@ public:
 	void Scale();
 	void Add(float Value, ColorRGBA Color = ColorRGBA(1.0f, 1.0f, 1.0f, 0.75f));
 	void InsertAt(size_t Index, float Value, ColorRGBA Color = ColorRGBA(1.0f, 1.0f, 1.0f, 0.75f));
-	void Render(IGraphics *pGraphics, ITextRender *pTextRender, float x, float y, float w, float h, const char *pDescription);
+	void Render(IGraphics *pGraphics, ITextRender *pTextRender, float x, float y, float w, float h, const char *pDescription) const;
 };
 
 #endif

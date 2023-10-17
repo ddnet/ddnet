@@ -52,7 +52,7 @@ void CGraph::InsertAt(size_t Index, float Value, ColorRGBA Color)
 	m_aEntries[Index].m_Color = Color;
 }
 
-void CGraph::Render(IGraphics *pGraphics, ITextRender *pTextRender, float x, float y, float w, float h, const char *pDescription)
+void CGraph::Render(IGraphics *pGraphics, ITextRender *pTextRender, float x, float y, float w, float h, const char *pDescription) const
 {
 	pGraphics->TextureClear();
 

@@ -24,7 +24,7 @@ void CSmoothTime::SetAdjustSpeed(EAdjustDirection Direction, float Value)
 	m_aAdjustSpeed[Direction] = Value;
 }
 
-int64_t CSmoothTime::Get(int64_t Now)
+int64_t CSmoothTime::Get(int64_t Now) const
 {
 	int64_t c = m_Current + (Now - m_Snap);
 	int64_t t = m_Target + (Now - m_Snap);
@@ -97,7 +97,7 @@ void CSmoothTime::Update(CGraph *pGraph, int64_t Target, int TimeLeft, EAdjustDi
 		UpdateInt(Target);
 }
 
-int64_t CSmoothTime::GetMargin(int64_t Now)
+int64_t CSmoothTime::GetMargin(int64_t Now) const
 {
 	int64_t TimePassed = Now - m_SnapMargin;
 	int64_t Diff = m_TargetMargin - m_CurrentMargin;
