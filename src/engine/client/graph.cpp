@@ -70,8 +70,8 @@ void CGraph::Render(IGraphics *pGraphics, ITextRender *pTextRender, float x, flo
 	pGraphics->LinesDraw(aLineItems, std::size(aLineItems));
 	for(int i = 1; i < MAX_VALUES; i++)
 	{
-		float a0 = (i - 1) / (float)MAX_VALUES;
-		float a1 = i / (float)MAX_VALUES;
+		float a0 = (i - 1) / (float)(MAX_VALUES - 1);
+		float a1 = i / (float)(MAX_VALUES - 1);
 		int i0 = (m_Index + i - 1) % MAX_VALUES;
 		int i1 = (m_Index + i) % MAX_VALUES;
 
