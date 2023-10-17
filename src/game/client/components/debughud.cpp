@@ -218,7 +218,7 @@ void CDebugHud::RenderTuning()
 			}
 			if(i == 0)
 			{
-				m_ZoomedInGraph.SetMin(RampedSpeed);
+				m_ZoomedInGraph.SetMin(RampedSpeed / 32);
 			}
 			PreviousRampedSpeed = RampedSpeed;
 		}
