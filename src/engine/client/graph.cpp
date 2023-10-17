@@ -38,8 +38,8 @@ void CGraph::Scale()
 
 void CGraph::Add(float Value, ColorRGBA Color)
 {
-	m_Index = (m_Index + 1) % MAX_VALUES;
 	InsertAt(m_Index, Value, Color);
+	m_Index = (m_Index + 1) % MAX_VALUES;
 }
 
 void CGraph::InsertAt(size_t Index, float Value, ColorRGBA Color)
