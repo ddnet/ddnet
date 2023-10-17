@@ -2117,6 +2117,8 @@ if(CLIENT)
     friends.h
     ghost.cpp
     ghost.h
+    graph.cpp
+    graph.h
     graphics_defines.h
     graphics_threaded.cpp
     graphics_threaded.h
@@ -2131,6 +2133,8 @@ if(CLIENT)
     serverbrowser_http.h
     serverbrowser_ping_cache.cpp
     serverbrowser_ping_cache.h
+    smooth_time.cpp
+    smooth_time.h
     sound.cpp
     sound.h
     sqlite.cpp
