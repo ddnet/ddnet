@@ -4,6 +4,8 @@
 #ifndef ENGINE_CLIENT_GRAPH_H
 #define ENGINE_CLIENT_GRAPH_H
 
+#include <base/color.h>
+
 #include <cstddef>
 
 class IGraphics;
@@ -18,10 +20,14 @@ public:
 	};
 
 private:
+	struct SEntry
+	{
+		float m_Value;
+		ColorRGBA m_Color;
+	};
 	float m_Min, m_Max;
 	float m_MinRange, m_MaxRange;
-	float m_aValues[MAX_VALUES];
-	float m_aColors[MAX_VALUES][3];
+	SEntry m_aEntries[MAX_VALUES];
 	size_t m_Index;
 
 public:
@@ -30,8 +36,8 @@ public:
 	void SetMax(float Max);
 
 	void Scale();
-	void Add(float v, float r, float g, float b);
-	void InsertAt(size_t Index, float v, float r, float g, float b);
+	void Add(float Value, ColorRGBA Color = ColorRGBA(1.0f, 1.0f, 1.0f, 0.75f));
+	void InsertAt(size_t Index, float Value, ColorRGBA Color = ColorRGBA(1.0f, 1.0f, 1.0f, 0.75f));
 	void Render(IGraphics *pGraphics, ITextRender *pTextRender, float x, float y, float w, float h, const char *pDescription);
 };
 

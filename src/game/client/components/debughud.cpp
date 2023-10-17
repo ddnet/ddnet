@@ -187,12 +187,12 @@ void CDebugHud::RenderTuning()
 			const float RampedSpeed = Speed * Ramp;
 			if(RampedSpeed >= PreviousRampedSpeed)
 			{
-				m_RampGraph.InsertAt(i, RampedSpeed / 32, 0, 1, 0);
+				m_RampGraph.InsertAt(i, RampedSpeed / 32, ColorRGBA(0.0f, 1.0f, 0.0f, 0.75f));
 				m_SpeedTurningPoint = Speed;
 			}
 			else
 			{
-				m_RampGraph.InsertAt(i, RampedSpeed / 32, 1, 0, 0);
+				m_RampGraph.InsertAt(i, RampedSpeed / 32, ColorRGBA(1.0f, 0.0f, 0.0f, 0.75f));
 			}
 			PreviousRampedSpeed = RampedSpeed;
 		}
@@ -209,12 +209,12 @@ void CDebugHud::RenderTuning()
 			const float RampedSpeed = Speed * Ramp;
 			if(RampedSpeed >= PreviousRampedSpeed)
 			{
-				m_ZoomedInGraph.InsertAt(i, RampedSpeed / 32, 0, 1, 0);
+				m_ZoomedInGraph.InsertAt(i, RampedSpeed / 32, ColorRGBA(0.0f, 1.0f, 0.0f, 0.75f));
 				m_SpeedTurningPoint = Speed;
 			}
 			else
 			{
-				m_ZoomedInGraph.InsertAt(i, RampedSpeed / 32, 1, 0, 0);
+				m_ZoomedInGraph.InsertAt(i, RampedSpeed / 32, ColorRGBA(1.0f, 0.0f, 0.0f, 0.75f));
 			}
 			if(i == 0)
 			{

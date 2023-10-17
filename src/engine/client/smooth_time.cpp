@@ -42,7 +42,7 @@ int64_t CSmoothTime::Get(int64_t Now)
 
 	int64_t r = c + (int64_t)((t - c) * a);
 
-	m_Graph.Add(a + 0.5f, 1, 1, 1);
+	m_Graph.Add(a + 0.5f);
 
 	return r + GetMargin(Now);
 }
@@ -75,11 +75,11 @@ void CSmoothTime::Update(CGraph *pGraph, int64_t Target, int TimeLeft, int Adjus
 		{
 			// ignore this ping spike
 			UpdateTimer = 0;
-			pGraph->Add(TimeLeft, 1, 1, 0);
+			pGraph->Add(TimeLeft, ColorRGBA(1.0f, 1.0f, 0.0f, 0.75f));
 		}
 		else
 		{
-			pGraph->Add(TimeLeft, 1, 0, 0);
+			pGraph->Add(TimeLeft, ColorRGBA(1.0f, 0.0f, 0.0f, 0.75f));
 			if(m_aAdjustSpeed[AdjustDirection] < 30.0f)
 				m_aAdjustSpeed[AdjustDirection] *= 2.0f;
 		}
@@ -89,7 +89,7 @@ void CSmoothTime::Update(CGraph *pGraph, int64_t Target, int TimeLeft, int Adjus
 		if(m_SpikeCounter)
 			m_SpikeCounter--;
 
-		pGraph->Add(TimeLeft, 0, 1, 0);
+		pGraph->Add(TimeLeft, ColorRGBA(0.0f, 1.0f, 0.0f, 0.75f));
 
 		m_aAdjustSpeed[AdjustDirection] *= 0.95f;
 		if(m_aAdjustSpeed[AdjustDirection] < 2.0f)

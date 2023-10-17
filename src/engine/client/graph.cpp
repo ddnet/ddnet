@@ -27,28 +27,26 @@ void CGraph::Scale()
 {
 	m_Min = m_MinRange;
 	m_Max = m_MaxRange;
-	for(auto Value : m_aValues)
+	for(auto &Entry : m_aEntries)
 	{
-		if(Value > m_Max)
-			m_Max = Value;
-		else if(Value < m_Min)
-			m_Min = Value;
+		if(Entry.m_Value > m_Max)
+			m_Max = Entry.m_Value;
+		else if(Entry.m_Value < m_Min)
+			m_Min = Entry.m_Value;
 	}
 }
 
-void CGraph::Add(float v, float r, float g, float b)
+void CGraph::Add(float Value, ColorRGBA Color)
 {
 	m_Index = (m_Index + 1) % MAX_VALUES;
-	InsertAt(m_Index, v, r, g, b);
+	InsertAt(m_Index, Value, Color);
 }
 
-void CGraph::InsertAt(size_t Index, float v, float r, float g, float b)
+void CGraph::InsertAt(size_t Index, float Value, ColorRGBA Color)
 {
 	dbg_assert(Index < MAX_VALUES, "Index out of bounds");
-	m_aValues[Index] = v;
-	m_aColors[Index][0] = r;
-	m_aColors[Index][1] = g;
-	m_aColors[Index][2] = b;
+	m_aEntries[Index].m_Value = Value;
+	m_aEntries[Index].m_Color = Color;
 }
 
 void CGraph::Render(IGraphics *pGraphics, ITextRender *pTextRender, float x, float y, float w, float h, const char *pDescription)
@@ -77,12 +75,12 @@ void CGraph::Render(IGraphics *pGraphics, ITextRender *pTextRender, float x, flo
 		int i0 = (m_Index + i - 1) % MAX_VALUES;
 		int i1 = (m_Index + i) % MAX_VALUES;
 
-		float v0 = (m_aValues[i0] - m_Min) / (m_Max - m_Min);
-		float v1 = (m_aValues[i1] - m_Min) / (m_Max - m_Min);
+		float v0 = (m_aEntries[i0].m_Value - m_Min) / (m_Max - m_Min);
+		float v1 = (m_aEntries[i1].m_Value - m_Min) / (m_Max - m_Min);
 
 		IGraphics::CColorVertex aColorVertices[2] = {
-			IGraphics::CColorVertex(0, m_aColors[i0][0], m_aColors[i0][1], m_aColors[i0][2], 0.75f),
-			IGraphics::CColorVertex(1, m_aColors[i1][0], m_aColors[i1][1], m_aColors[i1][2], 0.75f)};
+			IGraphics::CColorVertex(0, m_aEntries[i0].m_Color.r, m_aEntries[i0].m_Color.g, m_aEntries[i0].m_Color.b, m_aEntries[i0].m_Color.a),
+			IGraphics::CColorVertex(1, m_aEntries[i1].m_Color.r, m_aEntries[i1].m_Color.g, m_aEntries[i1].m_Color.b, m_aEntries[i1].m_Color.a)};
 		pGraphics->SetColorVertex(aColorVertices, std::size(aColorVertices));
 		IGraphics::CLineItem LineItem2(x + a0 * w, y + h - v0 * h, x + a1 * w, y + h - v1 * h);
 		pGraphics->LinesDraw(&LineItem2, 1);
