@@ -22,6 +22,7 @@ public:
 private:
 	struct SEntry
 	{
+		bool m_Initialized;
 		float m_Value;
 		ColorRGBA m_Color;
 	};

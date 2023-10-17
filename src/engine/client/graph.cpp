@@ -11,6 +11,8 @@ void CGraph::Init(float Min, float Max)
 	SetMin(Min);
 	SetMax(Max);
 	m_Index = 0;
+	for(auto &Entry : m_aEntries)
+		Entry.m_Initialized = false;
 }
 
 void CGraph::SetMin(float Min)
@@ -45,6 +47,7 @@ void CGraph::Add(float Value, ColorRGBA Color)
 void CGraph::InsertAt(size_t Index, float Value, ColorRGBA Color)
 {
 	dbg_assert(Index < MAX_VALUES, "Index out of bounds");
+	m_aEntries[Index].m_Initialized = true;
 	m_aEntries[Index].m_Value = Value;
 	m_aEntries[Index].m_Color = Color;
 }
@@ -70,17 +73,18 @@ void CGraph::Render(IGraphics *pGraphics, ITextRender *pTextRender, float x, flo
 	pGraphics->LinesDraw(aLineItems, std::size(aLineItems));
 	for(int i = 1; i < MAX_VALUES; i++)
 	{
+		const auto &Entry0 = m_aEntries[(m_Index + i - 1) % MAX_VALUES];
+		const auto &Entry1 = m_aEntries[(m_Index + i) % MAX_VALUES];
+		if(!Entry0.m_Initialized || !Entry1.m_Initialized)
+			continue;
 		float a0 = (i - 1) / (float)(MAX_VALUES - 1);
 		float a1 = i / (float)(MAX_VALUES - 1);
-		int i0 = (m_Index + i - 1) % MAX_VALUES;
-		int i1 = (m_Index + i) % MAX_VALUES;
-
-		float v0 = (m_aEntries[i0].m_Value - m_Min) / (m_Max - m_Min);
-		float v1 = (m_aEntries[i1].m_Value - m_Min) / (m_Max - m_Min);
+		float v0 = (Entry0.m_Value - m_Min) / (m_Max - m_Min);
+		float v1 = (Entry1.m_Value - m_Min) / (m_Max - m_Min);
 
 		IGraphics::CColorVertex aColorVertices[2] = {
-			IGraphics::CColorVertex(0, m_aEntries[i0].m_Color.r, m_aEntries[i0].m_Color.g, m_aEntries[i0].m_Color.b, m_aEntries[i0].m_Color.a),
-			IGraphics::CColorVertex(1, m_aEntries[i1].m_Color.r, m_aEntries[i1].m_Color.g, m_aEntries[i1].m_Color.b, m_aEntries[i1].m_Color.a)};
+			IGraphics::CColorVertex(0, Entry0.m_Color.r, Entry0.m_Color.g, Entry0.m_Color.b, Entry0.m_Color.a),
+			IGraphics::CColorVertex(1, Entry1.m_Color.r, Entry1.m_Color.g, Entry1.m_Color.b, Entry1.m_Color.a)};
 		pGraphics->SetColorVertex(aColorVertices, std::size(aColorVertices));
 		IGraphics::CLineItem LineItem2(x + a0 * w, y + h - v0 * h, x + a1 * w, y + h - v1 * h);
 		pGraphics->LinesDraw(&LineItem2, 1);
