@@ -57,14 +57,14 @@ void CSmoothTime::UpdateInt(int64_t Target)
 
 void CSmoothTime::Update(CGraph *pGraph, int64_t Target, int TimeLeft, EAdjustDirection AdjustDirection)
 {
-	int UpdateTimer = 1;
+	bool UpdateTimer = true;
 
 	if(TimeLeft < 0)
 	{
-		int IsSpike = 0;
+		bool IsSpike = false;
 		if(TimeLeft < -50)
 		{
-			IsSpike = 1;
+			IsSpike = true;
 
 			m_SpikeCounter += 5;
 			if(m_SpikeCounter > 50)
@@ -74,7 +74,7 @@ void CSmoothTime::Update(CGraph *pGraph, int64_t Target, int TimeLeft, EAdjustDi
 		if(IsSpike && m_SpikeCounter < 15)
 		{
 			// ignore this ping spike
-			UpdateTimer = 0;
+			UpdateTimer = false;
 			pGraph->Add(TimeLeft, ColorRGBA(1.0f, 1.0f, 0.0f, 0.75f));
 		}
 		else
