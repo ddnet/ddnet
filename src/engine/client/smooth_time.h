@@ -4,9 +4,9 @@
 #ifndef ENGINE_CLIENT_SMOOTH_TIME_H
 #define ENGINE_CLIENT_SMOOTH_TIME_H
 
-#include "graph.h"
-
 #include <cstdint>
+
+class CGraph;
 
 class CSmoothTime
 {
@@ -26,8 +26,6 @@ private:
 	int64_t m_SnapMargin;
 	int64_t m_CurrentMargin;
 	int64_t m_TargetMargin;
-
-	CGraph m_Graph;
 
 	int m_SpikeCounter;
 	float m_aAdjustSpeed[NUM_ADJUSTDIRECTIONS];

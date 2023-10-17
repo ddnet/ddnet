@@ -4,6 +4,7 @@
 #include <base/math.h>
 #include <base/system.h>
 
+#include "graph.h"
 #include "smooth_time.h"
 
 void CSmoothTime::Init(int64_t Target)
@@ -16,7 +17,6 @@ void CSmoothTime::Init(int64_t Target)
 	m_TargetMargin = 0;
 	m_aAdjustSpeed[ADJUSTDIRECTION_DOWN] = 0.3f;
 	m_aAdjustSpeed[ADJUSTDIRECTION_UP] = 0.3f;
-	m_Graph.Init(0.0f, 0.5f);
 }
 
 void CSmoothTime::SetAdjustSpeed(EAdjustDirection Direction, float Value)
@@ -41,9 +41,6 @@ int64_t CSmoothTime::Get(int64_t Now)
 		a = 1.0f;
 
 	int64_t r = c + (int64_t)((t - c) * a);
-
-	m_Graph.Add(a + 0.5f);
-
 	return r + GetMargin(Now);
 }
 
