@@ -389,7 +389,7 @@ char *io_read_all_str(IOHANDLE io)
 	return (char *)buffer;
 }
 
-unsigned io_skip(IOHANDLE io, int size)
+int io_skip(IOHANDLE io, int size)
 {
 	return io_seek(io, size, IOSEEK_CUR);
 }

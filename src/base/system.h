@@ -292,9 +292,9 @@ char *io_read_all_str(IOHANDLE io);
  * @param io Handle to the file.
  * @param size Number of bytes to skip.
  *
- * @return Number of bytes skipped.
+ * @return 0 on success.
  */
-unsigned io_skip(IOHANDLE io, int size);
+int io_skip(IOHANDLE io, int size);
 
 /**
  * Writes data from a buffer to file.
