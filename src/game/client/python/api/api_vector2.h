@@ -28,6 +28,11 @@ struct Vector2 {
 	}
 
 	Vector2() {}
+
+	vec2 toVec2()
+	{
+		return vec2((float) this->x, (float) this->y);
+	}
 };
 
 extern PyTypeObject Vector2Type;

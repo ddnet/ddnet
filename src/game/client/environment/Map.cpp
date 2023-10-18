@@ -45,6 +45,10 @@ void Map::OnMapLoad()
 
 int Map::getTile(int mapX, int mapY)
 {
+	if (mapX < 0 || mapX >= GameClient()->Collision()->GetWidth() || mapY < 0 || mapY >= GameClient()->Collision()->GetHeight()) {
+		return MAP_TILE_UNDER_BORDER;
+	}
+
 	return this->tiles[mapX][mapY];
 }
 
@@ -197,6 +201,20 @@ void Map::buildGraph()
 {
 	graph = MapGraph (GameClient()->Collision()->GetWidth(), MapGraphLine (GameClient()->Collision()->GetHeight(), MapGraphCell(0)));
 
+
+	auto clientData = GameClient()->m_aClients[GameClient()->m_aLocalIDs[g_Config.m_ClDummy]];
+	int airJumpImpulse = clientData.m_Predicted.m_Tuning.m_AirJumpImpulse.Get(); // 1200
+	int gravity = clientData.m_Predicted.m_Tuning.m_Gravity.Get(); // 50
+	int airControlAccel = clientData.m_Predicted.m_Tuning.m_AirControlAccel.Get(); // 150
+	int airControlSpeed = clientData.m_Predicted.m_Tuning.m_AirControlSpeed.Get(); // 500
+	int airFriction = clientData.m_Predicted.m_Tuning.m_AirFriction.Get(); // 95
+	int jumpHeight = ceil(airJumpImpulse / gravity / 2.25); // 2.25 подоброное значение
+
+	// 10
+
+	// Movement graph
+	int movementCost = 1;
+
 	for (int x = 0; x < GameClient()->Collision()->GetWidth(); x++)
 	{
 		for (int y = 0; y < GameClient()->Collision()->GetHeight(); y++)
@@ -205,38 +223,154 @@ void Map::buildGraph()
 				continue;
 			}
 
-			int cost = findGroundNear(ivec2(x, y));
+			if (!isTileGround(getTile(x, y + 1))) {
+				if (getTile(x - 1, y) == MAP_TILE_AIR && isTileGround(getTile(x - 1, y + 1)) &&
+				    getTile(x + 1, y) == MAP_TILE_AIR && isTileGround(getTile(x + 1, y + 1))
+				) {
+					graph[x][y].push_back(MapGraphNode(x - 1, y, movementCost));
+					graph[x][y].push_back(MapGraphNode(x + 1, y, movementCost));
+				}
 
-			if (cost == -1) {
-				cost = 300;
-			} else {
-				cost *= 10;
+				continue;
 			}
 
-			int groundBottom = findGroundBottom(ivec2(x, y));
-
-			if (groundBottom >= 0 && groundBottom <= 10 && cost > groundBottom) {
-				cost = groundBottom;
+			if (getTile(x - 1, y) == MAP_TILE_AIR && isTileGround(getTile(x - 1, y + 1))) {
+				graph[x][y].push_back(MapGraphNode(x - 1, y, movementCost));
 			}
 
-			if (y > 0 && getTile(x, y - 1) == MAP_TILE_AIR) {
-				graph[x][y].push_back(MapGraphNode(x, y - 1, cost));
+			if (getTile(x + 1, y) == MAP_TILE_AIR && isTileGround(getTile(x + 1, y + 1))) {
+				graph[x][y].push_back(MapGraphNode(x + 1, y, movementCost));
+			}
+		}
+	}
+
+	// Fall graph
+	int fallCost = 1;
+
+	for (int x = 0; x < GameClient()->Collision()->GetWidth(); x++)
+	{
+		for (int y = 0; y < GameClient()->Collision()->GetHeight(); y++)
+		{
+			if (getTile(x, y) != MAP_TILE_AIR) {
+				continue;
 			}
 
-			if (x > 0 && getTile(x - 1, y) == MAP_TILE_AIR) {
-				graph[x][y].push_back(MapGraphNode(x - 1, y, cost));
+			if (getTile(x, y + 1) == MAP_TILE_AIR) {
+				graph[x][y].push_back(MapGraphNode(x, y + 1, fallCost));
 			}
 
-			if (y + 1 < GameClient()->Collision()->GetHeight() && getTile(x, y + 1) == MAP_TILE_AIR) {
-				graph[x][y].push_back(MapGraphNode(x, y + 1, cost));
+			if (isTileGround(getTile(x, y + 1))) {
+				if (getTile(x + 1, y) == MAP_TILE_AIR && getTile(x + 1, y + 1) == MAP_TILE_AIR) {
+					graph[x][y].push_back(MapGraphNode(x + 1, y + 1, fallCost * 2));
+				}
+
+				if (getTile(x - 1, y) == MAP_TILE_AIR && getTile(x - 1, y + 1) == MAP_TILE_AIR) {
+					graph[x][y].push_back(MapGraphNode(x - 1, y + 1, fallCost * 2));
+				}
+			}
+		}
+	}
+
+	// Jump graph
+	int jumpCost = 1;
+
+	std::string valuesString = std::to_string(airControlAccel) + " " + std::to_string(airControlSpeed) + " " + std::to_string(airFriction);
+
+	GameClient()->Console()->Print(0, "MAP", valuesString.c_str());
+
+	for (int x = 0; x < GameClient()->Collision()->GetWidth(); x++)
+	{
+		for (int y = 0; y < GameClient()->Collision()->GetHeight(); y++)
+		{
+			if (getTile(x, y) != MAP_TILE_AIR) {
+				continue;
 			}
 
-			if (x + 1 < GameClient()->Collision()->GetWidth() && getTile(x + 1, y) == MAP_TILE_AIR) {
-				graph[x][y].push_back(MapGraphNode(x + 1, y, cost));
+			if (!isTileGround(getTile(x, y + 1))) {
+				continue;
+			}
+
+			int height = 1;
+			int leftSideOffset = 1;
+			int rightSideOffset = 1;
+
+			while (height < jumpHeight && getTile(x, y - height) == MAP_TILE_AIR) {
+				graph[x][y].push_back(MapGraphNode(x, y - height, height * jumpCost));
+
+				int i = 1;
+				while (i <= leftSideOffset && getTile(x - i, y - height) == MAP_TILE_AIR) {
+					graph[x][y].push_back(MapGraphNode(x - i, y - height, height * jumpCost + movementCost * i + 1));
+
+					i++;
+				}
+
+				if (i <= leftSideOffset) {
+					leftSideOffset = i;
+				}
+
+				i = 1;
+				while (i <= rightSideOffset && getTile(x + i, y - height) == MAP_TILE_AIR) {
+					graph[x][y].push_back(MapGraphNode(x + i, y - height, height * jumpCost + movementCost * i + 1));
+
+					i++;
+				}
+
+				if (i <= rightSideOffset) {
+					rightSideOffset = i;
+				}
+
+				leftSideOffset++;
+				rightSideOffset++;
+				height++;
 			}
 		}
 	}
 }
+
+//void Map::buildGraph()
+//{
+//	graph = MapGraph (GameClient()->Collision()->GetWidth(), MapGraphLine (GameClient()->Collision()->GetHeight(), MapGraphCell(0)));
+//
+//	for (int x = 0; x < GameClient()->Collision()->GetWidth(); x++)
+//	{
+//		for (int y = 0; y < GameClient()->Collision()->GetHeight(); y++)
+//		{
+//			if (getTile(x, y) != MAP_TILE_AIR) {
+//				continue;
+//			}
+//
+//			int cost = findGroundNear(ivec2(x, y));
+//
+//			if (cost == -1) {
+//				cost = 300;
+//			} else {
+//				cost *= 10;
+//			}
+//
+//			int groundBottom = findGroundBottom(ivec2(x, y));
+//
+//			if (groundBottom >= 0 && groundBottom <= 10 && cost > groundBottom) {
+//				cost = groundBottom;
+//			}
+//
+//			if (y > 0 && getTile(x, y - 1) == MAP_TILE_AIR) {
+//				graph[x][y].push_back(MapGraphNode(x, y - 1, cost));
+//			}
+//
+//			if (x > 0 && getTile(x - 1, y) == MAP_TILE_AIR) {
+//				graph[x][y].push_back(MapGraphNode(x - 1, y, cost));
+//			}
+//
+//			if (y + 1 < GameClient()->Collision()->GetHeight() && getTile(x, y + 1) == MAP_TILE_AIR) {
+//				graph[x][y].push_back(MapGraphNode(x, y + 1, cost));
+//			}
+//
+//			if (x + 1 < GameClient()->Collision()->GetWidth() && getTile(x + 1, y) == MAP_TILE_AIR) {
+//				graph[x][y].push_back(MapGraphNode(x + 1, y, cost));
+//			}
+//		}
+//	}
+//}
 
 std::vector<Node*> Map::aStar(ivec2 startPosition, ivec2 endPosition)
 {

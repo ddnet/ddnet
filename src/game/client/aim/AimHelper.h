@@ -26,7 +26,7 @@ public:
 	std::vector<int> filterPlayersByTeam(std::vector<int> playersIds, int team);
 	std::vector<int> filterPlayersByDistance(std::vector<int> playersIds, int maxDistance);
 
-	std::vector<Line> predictLaserShoot(int shooterId, vec2 shootPoint, int &playerIdTakedLaser);
+	std::vector<Line> predictLaserShoot(int shooterId, vec2 shootPoint, int &playerIdTakeLaser);
 	//	bool canShootFromLaserToPlayer(CGameClient::CClientData player);
 
 	virtual int Sizeof() const override { return sizeof(*this); }

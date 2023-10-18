@@ -63,12 +63,12 @@ std::vector<int> AimHelper::filterPlayersByDistance(std::vector<int> playersIds,
 	return filteredPlayers;
 }
 
-std::vector<Line> AimHelper::predictLaserShoot(int shooterId, vec2 shootPoint, int &playerIdTakedLaser)
+std::vector<Line> AimHelper::predictLaserShoot(int shooterId, vec2 shootPoint, int &playerIdTakeLaser)
 {
 	CGameClient::CClientData shooter = this->m_pClient->m_aClients[shooterId];
 	vec2 shootDirection = normalize(shootPoint - shooter.m_Predicted.m_Pos);
 	std::queue<vec2> shootPoints;
-	vec2 startShootPoint = shooter.m_Predicted.m_Pos;
+	vec2 startShootPoint = shooter.m_Predicted.m_Pos + shooter.m_Predicted.m_Vel;
 	int bouncesLeft = shooter.m_Predicted.m_Tuning.m_LaserBounceNum * 2;
 	int laserLengthLeft = shooter.m_Predicted.m_Tuning.m_LaserReach;
 	std::vector<Line> laserLines;
@@ -88,8 +88,11 @@ std::vector<Line> AimHelper::predictLaserShoot(int shooterId, vec2 shootPoint, i
 		int intersectTile = Collision()->IntersectLineTeleWeapon(startShootPoint, toPoint, 0, &collisionPoint, &null);
 
 		if (playerId >= 0 && distance(startShootPoint, playerTakenShootPosition) <= distance(startShootPoint, collisionPoint)) {
+			auto playerTakeShoot = GameClient()->m_aClients[playerId];
+
 			laserLines.push_back(Line(startShootPoint, playerTakenShootPosition));
-			playerIdTakedLaser = playerId;
+			playerIdTakeLaser = playerId;
+
 			break;
 		}
 

@@ -26,6 +26,7 @@ class HumanLikeMouse : public CComponent
 {
 public:
 	std::vector<Point> getPoints(int start_x, int start_y, int dest_x, int dest_y, double G_0 = 9, double W_0 = 3, double M_0 = 15, double D_0 = 12);
+	void removeMoving();
 	void moveToPoint(Point* targetPoint, float moveTime = 0.02, function<void()> onArrival = [](){});
 	void moveToPlayer(int id, float moveTime = 0.02, function<void()> onArrival = [](){});
 	virtual int Sizeof() const override { return sizeof(*this); }
@@ -36,7 +37,9 @@ protected:
 	std::queue<Point> targetWay;
 	int countPointsInWay;
 	function<void()> onArrival;
-	float moveTime;
+	float endMoveTime;
+	float countIterationsForOnePoint = 10;
+	int movingToUser = -1;
 
 	void processMouseMoving();
 };

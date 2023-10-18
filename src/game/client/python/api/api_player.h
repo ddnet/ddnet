@@ -13,16 +13,16 @@
 
 using namespace std;
 
-typedef struct {
+struct Player {
 	PyObject_HEAD;
 	int useCustomColor;
 	int colorBody;
 	int colorFeet;
 
-	string name;
-	string clan;
+	char name[16];
+	char clan[12];
 	int country;
-	string skinName;
+	char skinName[64];
 	int skinColor;
 	int team;
 	int emoticon;
@@ -67,7 +67,7 @@ typedef struct {
 	Vector2 specChar;
 
 	Tee tee;
-} Player;
+};
 
 extern PyTypeObject PlayerType;
 
@@ -94,10 +94,10 @@ static int Player_init(Player *self, PyObject *args, PyObject *kwds)
 	self->colorBody = clientData.m_ColorBody;
 	self->colorFeet = clientData.m_ColorFeet;
 
-	self->name = string(clientData.m_aName);
-	self->clan = string(clientData.m_aClan);
+	strcpy(self->name, clientData.m_aName);
+	strcpy(self->clan, clientData.m_aClan);
 	self->country = clientData.m_Country;
-	self->skinName = string(clientData.m_aSkinName);
+	strcpy(self->skinName, clientData.m_aSkinName);
 	self->skinColor = clientData.m_SkinColor;
 	self->team = clientData.m_Team;
 	self->emoticon = clientData.m_Emoticon;
@@ -209,12 +209,12 @@ static PyObject* Player_getcolorFeet(Player* self, void* closure)
 
 static PyObject* Player_getname(Player* self, void* closure)
 {
-	return Py_BuildValue("s", self->name.c_str());
+	return Py_BuildValue("s", self->name);
 }
 
 static PyObject* Player_getclan(Player* self, void* closure)
 {
-	return Py_BuildValue("s", self->clan.c_str());
+	return Py_BuildValue("s", self->clan);
 }
 
 static PyObject* Player_getcountry(Player* self, void* closure)
@@ -224,7 +224,7 @@ static PyObject* Player_getcountry(Player* self, void* closure)
 
 static PyObject* Player_getskinName(Player* self, void* closure)
 {
-	return Py_BuildValue("s", self->skinName.c_str());
+	return Py_BuildValue("s", self->skinName);
 }
 
 static PyObject* Player_getskinColor(Player* self, void* closure)
@@ -533,9 +533,9 @@ static PyObject* Player_str(Player* self)
 {
 	char buf[4096];
 
-	PyObject* name_str = PyUnicode_FromString(self->name.c_str());
-	PyObject* clan_str = PyUnicode_FromString(self->clan.c_str());
-	PyObject* skinName_str = PyUnicode_FromString(self->skinName.c_str());
+	PyObject* name_str = PyUnicode_FromString(self->name);
+	PyObject* clan_str = PyUnicode_FromString(self->clan);
+	PyObject* skinName_str = PyUnicode_FromString(self->skinName);
 	PyObject* renderPos_str_obj = Vector2_str(&self->renderPos);
 	PyObject* specChar_str_obj = Vector2_str(&self->specChar);
 	PyObject* tee_str_obj = Tee_str(&self->tee);

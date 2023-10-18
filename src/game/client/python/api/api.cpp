@@ -5,6 +5,10 @@
 #include "api_collision.h"
 #include "api_console.h"
 #include "api_input.h"
+#include "api_dummy_input.h"
+#include "api_time.h"
+#include "api_predict.h"
+#include "api_character.h"
 #include "game/client/gameclient.h"
 #include "structmember.h"
 
@@ -41,15 +45,19 @@ PyMODINIT_FUNC PyInit_API(void) {
 	PyObject* APIModule = PyModule_Create(&API);
 	PyModule_AddObject(APIModule, "Console", PyInit_API_Console());
 	PyModule_AddObject(APIModule, "Input", PyInit_API_Input());
+	PyModule_AddObject(APIModule, "DummyInput", PyInit_API_DummyInput());
 	PyModule_AddObject(APIModule, "Collision", PyInit_API_Collision());
+	PyModule_AddObject(APIModule, "Time", PyInit_API_Time());
+	PyModule_AddObject(APIModule, "Predict", PyInit_API_Predict());
 
-	while (PyType_Ready(&Vector2Type) < 0 || PyType_Ready(&PlayerType) < 0 || PyType_Ready(&TeeType) < 0)
+	while (PyType_Ready(&Vector2Type) < 0 || PyType_Ready(&PlayerType) < 0 || PyType_Ready(&TeeType) < 0 || PyType_Ready(&CharacterType) < 0)
 	{
 	}
 
 	PyModule_AddObject(APIModule, "Vector2", (PyObject *)&Vector2Type);
 	PyModule_AddObject(APIModule, "Player", (PyObject *)&PlayerType);
 	PyModule_AddObject(APIModule, "Tee", (PyObject *)&TeeType);
+	PyModule_AddObject(APIModule, "Character", (PyObject *)&CharacterType);
 
 	return APIModule;
 }

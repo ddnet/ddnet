@@ -17,8 +17,8 @@ public:
 	void AutoloadRemove(PythonScript* pythonScript);
 	bool isScriptAutoloading(PythonScript* pythonScript);
 
-	void InputFire();
-	void ResetInput();
+	void InputFire(int id);
+	void ResetInput(int id = -1);
 
 	void OnUpdate();
 
@@ -31,6 +31,7 @@ public:
 
 	std::vector<PythonScript*> autoLoadPythonScripts;
 	std::vector<PythonScript*> executedPythonScripts;
+	bool enableDummyControl = false;
 protected:
 	bool OnInput(const IInput::CEvent &Event);
 };

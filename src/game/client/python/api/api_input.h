@@ -39,9 +39,15 @@ static PyObject* API_Input_hook(PyObject* self, PyObject* args)
 	Py_RETURN_NONE;
 }
 
+static PyObject* API_Input_reset(PyObject* self, PyObject* args)
+{
+	PythonAPI_GameClient->pythonController.ResetInput(g_Config.m_ClDummy);
+	Py_RETURN_NONE;
+}
+
 static PyObject* API_Input_fire(PyObject* self, PyObject* args)
 {
-	PythonAPI_GameClient->pythonController.InputFire();
+	PythonAPI_GameClient->pythonController.InputFire(g_Config.m_ClDummy);
 	Py_RETURN_NONE;
 }
 
@@ -175,11 +181,51 @@ static PyObject* API_Input_moveMouseToPlayer(PyObject* self, PyObject* args)
 	Py_RETURN_NONE;
 }
 
+static PyObject* API_Input_getMousePosition(PyObject* self, PyObject* args)
+{
+	vec2 mousePos = PythonAPI_GameClient->m_Controls.m_aMousePos[g_Config.m_ClDummy];
+
+	Vector2* mousePosObject = (Vector2*) PyObject_New(Vector2, &Vector2Type);
+	mousePosObject->x = mousePos.x;
+	mousePosObject->y = mousePos.y;
+
+	return (PyObject*) mousePosObject;
+}
+
+static PyObject* API_Input_getTargetPosition(PyObject* self, PyObject* args)
+{
+	Vector2* mousePosObject = (Vector2*) PyObject_New(Vector2, &Vector2Type);
+	mousePosObject->x = PythonAPI_GameClient->pythonController.inputs[g_Config.m_ClDummy].m_TargetX;
+	mousePosObject->y = PythonAPI_GameClient->pythonController.inputs[g_Config.m_ClDummy].m_TargetY;
+
+	return (PyObject*) mousePosObject;
+}
+
 static PyObject* API_Input_isHumanLikeMoveEnded(PyObject* self, PyObject* args)
 {
 	bool moveEnded = PythonAPI_GameClient->humanLikeMouse.isMoveEnded();
 
 	return PyBool_FromLong(moveEnded ? 1 : 0);
+}
+
+static PyObject* API_Input_removeMoving(PyObject* self, PyObject* args)
+{
+	PythonAPI_GameClient->humanLikeMouse.removeMoving();
+
+	Py_RETURN_NONE;
+}
+
+static PyObject* API_Input_setWantedWeapon(PyObject* self, PyObject* args)
+{
+	int wantedWeapon;
+
+	if (!PyArg_ParseTuple(args, "i", &wantedWeapon))
+		return NULL;
+
+
+	PythonAPI_GameClient->pythonController.inputs[g_Config.m_ClDummy].m_WantedWeapon = wantedWeapon;
+
+	Py_RETURN_NONE;
 }
 
 static PyMethodDef API_InputMethods[] = {
@@ -192,6 +238,11 @@ static PyMethodDef API_InputMethods[] = {
 	{"moveMouseToPlayer", API_Input_moveMouseToPlayer, METH_VARARGS, "Move mouse to player human Like(arg: playerId"},
 	{"setBlockUserInput", API_Input_setBlockUserInput, METH_VARARGS, "Block user input"},
 	{"isHumanLikeMoveEnded", API_Input_isHumanLikeMoveEnded, METH_NOARGS, "Return true, if human like moving is ended, else false"},
+	{"getMousePosition", API_Input_getMousePosition, METH_NOARGS, "Return mouse position of current player"},
+	{"getTargetPosition", API_Input_getTargetPosition, METH_NOARGS, "Return Python target position of current player"},
+	{"removeMoving", API_Input_removeMoving, METH_NOARGS, "Remove human like moving"},
+	{"setWantedWeapon", API_Input_setWantedWeapon, METH_VARARGS, "Set wanted weapon for current player"},
+	{"reset", API_Input_reset, METH_VARARGS, "Reset input for current player"},
 	{NULL, NULL, 0, NULL}
 };
 

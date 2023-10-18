@@ -10,6 +10,7 @@
 
 using namespace std;
 
+#define MAP_TILE_UNDER_BORDER -1
 #define MAP_TILE_AIR 0
 #define MAP_TILE_HOOKABLE_GROUND 1
 #define MAP_TILE_NON_HOOKABLE_GROUND 3

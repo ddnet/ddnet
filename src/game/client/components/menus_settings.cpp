@@ -2034,6 +2034,10 @@ void CMenus::RenderSettingsPython(CUIRect MainView)
 	if(DoButton_CheckBox(&g_Config.m_DTHPython, "Enable Python Scripts", g_Config.m_DTHPython, &Button))
 	{
 		g_Config.m_DTHPython ^= 1;
+
+		if (!g_Config.m_DTHPython) {
+
+		}
 	}
 
 	if(!g_Config.m_DTHPython)

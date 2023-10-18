@@ -2309,9 +2309,12 @@ if(CLIENT)
     python/api/api.h
     python/api/api_collision.h
     python/api/api_console.h
+    python/api/api_dummy_input.h
     python/api/api_input.h
     python/api/api_player.h
+    python/api/api_predict.h
     python/api/api_tee.h
+    python/api/api_time.h
     python/api/api_vector2.h
     race.cpp
     race.h
