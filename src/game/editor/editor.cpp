@@ -884,6 +884,11 @@ bool CEditor::CallbackSaveSound(const char *pFileName, int StorageType, void *pU
 	{
 		io_write(File, pSound->m_pData, pSound->m_DataSize);
 		io_close(File);
+		if(pEditor->m_FilePreviewSound)
+		{
+			pEditor->Sound()->UnloadSample(pEditor->m_FilePreviewSound);
+			pEditor->m_FilePreviewSound = -1;
+		}
 		pEditor->m_Dialog = DIALOG_NONE;
 		return true;
 	}
@@ -1347,15 +1352,18 @@ void CEditor::DoToolbarSounds(CUIRect ToolBar)
 	CUIRect ToolBarTop, ToolBarBottom;
 	ToolBar.HSplitMid(&ToolBarTop, &ToolBarBottom, 5.0f);
 
-	m_ToolbarPreviewSound = -1;
 	if(m_SelectedSound >= 0 && (size_t)m_SelectedSound < m_Map.m_vpSounds.size())
 	{
 		const std::shared_ptr<CEditorSound> pSelectedSound = m_Map.m_vpSounds[m_SelectedSound];
+		if(pSelectedSound->m_SoundID != m_ToolbarPreviewSound && m_ToolbarPreviewSound && Sound()->IsPlaying(m_ToolbarPreviewSound))
+			Sound()->Stop(m_ToolbarPreviewSound);
 		m_ToolbarPreviewSound = pSelectedSound->m_SoundID;
 
 		static int s_PlayPauseButton, s_StopButton, s_SeekBar = 0;
 		DoAudioPreview(ToolBarBottom, &s_PlayPauseButton, &s_StopButton, &s_SeekBar, m_ToolbarPreviewSound);
 	}
+	else
+		m_ToolbarPreviewSound = -1;
 }
 
 static void Rotate(const CPoint *pCenter, CPoint *pPoint, float Rotation)
