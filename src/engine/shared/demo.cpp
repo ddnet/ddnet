@@ -411,6 +411,9 @@ void CDemoPlayer::Construct(class CSnapshotDelta *pSnapshotDelta, bool UseVideo)
 	m_LastSnapshotDataSize = -1;
 	m_pListener = nullptr;
 	m_UseVideo = UseVideo;
+
+	m_aFilename[0] = '\0';
+	m_aErrorMessage[0] = '\0';
 }
 
 void CDemoPlayer::SetListener(IListener *pListener)
@@ -487,11 +490,18 @@ bool CDemoPlayer::ScanFile()
 {
 	const long StartPos = io_tell(m_File);
 	m_vKeyFrames.clear();
+	if(StartPos < 0)
+		return false;
 
 	int ChunkTick = -1;
 	while(true)
 	{
 		const long CurrentPos = io_tell(m_File);
+		if(CurrentPos < 0)
+		{
+			m_vKeyFrames.clear();
+			return false;
+		}
 
 		int ChunkType, ChunkSize;
 		const EReadChunkHeaderResult Result = ReadChunkHeader(&ChunkType, &ChunkSize, &ChunkTick);
@@ -517,10 +527,20 @@ bool CDemoPlayer::ScanFile()
 			m_Info.m_Info.m_LastTick = ChunkTick;
 		}
 		else if(ChunkSize)
-			io_skip(m_File, ChunkSize);
+		{
+			if(io_skip(m_File, ChunkSize) != 0)
+			{
+				m_vKeyFrames.clear();
+				return false;
+			}
+		}
 	}
 
-	io_seek(m_File, StartPos, IOSEEK_START);
+	if(io_seek(m_File, StartPos, IOSEEK_START) != 0)
+	{
+		m_vKeyFrames.clear();
+		return false;
+	}
 	return true;
 }
 
@@ -545,29 +565,26 @@ void CDemoPlayer::DoTick()
 	{
 		int ChunkType, ChunkSize;
 		const EReadChunkHeaderResult Result = ReadChunkHeader(&ChunkType, &ChunkSize, &ChunkTick);
-		if(Result != CHUNKHEADER_SUCCESS)
+		if(Result == CHUNKHEADER_EOF)
 		{
-			// stop on error or eof
-			if(m_pConsole)
-			{
-				if(Result == CHUNKHEADER_EOF)
-					m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "demo_player", "end of file");
-				else
-					m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_player", "error reading chunk header");
-			}
-
-#if defined(CONF_VIDEORECORDER)
-			if(m_UseVideo && IVideo::Current())
-				Stop();
-#endif
 			if(m_Info.m_PreviousTick == -1)
 			{
-				if(m_pConsole)
-					m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_player", "empty demo");
-				Stop();
+				Stop("Empty demo");
 			}
 			else
+			{
 				Pause();
+				// Stop rendering when reaching end of file
+#if defined(CONF_VIDEORECORDER)
+				if(m_UseVideo && IVideo::Current())
+					Stop();
+#endif
+			}
+			break;
+		}
+		else if(Result == CHUNKHEADER_ERROR)
+		{
+			Stop("Error reading chunk header");
 			break;
 		}
 
@@ -577,30 +594,21 @@ void CDemoPlayer::DoTick()
 		{
 			if(io_read(m_File, m_aCompressedSnapshotData, ChunkSize) != (unsigned)ChunkSize)
 			{
-				// stop on error or eof
-				if(m_pConsole)
-					m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "demo_player", "error reading chunk");
-				Stop();
+				Stop("Error reading chunk data");
 				break;
 			}
 
 			DataSize = CNetBase::Decompress(m_aCompressedSnapshotData, ChunkSize, m_aDecompressedSnapshotData, sizeof(m_aDecompressedSnapshotData));
 			if(DataSize < 0)
 			{
-				// stop on error or eof
-				if(m_pConsole)
-					m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "demo_player", "error during network decompression");
-				Stop();
+				Stop("Error during network decompression");
 				break;
 			}
 
 			DataSize = CVariableInt::Decompress(m_aDecompressedSnapshotData, DataSize, m_aCurrentSnapshotData, sizeof(m_aCurrentSnapshotData));
-
 			if(DataSize < 0)
 			{
-				if(m_pConsole)
-					m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "demo_player", "error during intpack decompression");
-				Stop();
+				Stop("Error during intpack decompression");
 				break;
 			}
 		}
@@ -615,8 +623,8 @@ void CDemoPlayer::DoTick()
 			{
 				if(m_pConsole)
 				{
-					char aBuf[256];
-					str_format(aBuf, sizeof(aBuf), "error during unpacking of delta, err=%d", DataSize);
+					char aBuf[64];
+					str_format(aBuf, sizeof(aBuf), "Error unpacking snapshot delta. DataSize=%d", DataSize);
 					m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "demo_player", aBuf);
 				}
 			}
@@ -624,8 +632,8 @@ void CDemoPlayer::DoTick()
 			{
 				if(m_pConsole)
 				{
-					char aBuf[256];
-					str_format(aBuf, sizeof(aBuf), "snapshot delta invalid. DataSize=%d", DataSize);
+					char aBuf[64];
+					str_format(aBuf, sizeof(aBuf), "Snapshot delta invalid. DataSize=%d", DataSize);
 					m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "demo_player", aBuf);
 				}
 			}
@@ -647,8 +655,8 @@ void CDemoPlayer::DoTick()
 			{
 				if(m_pConsole)
 				{
-					char aBuf[256];
-					str_format(aBuf, sizeof(aBuf), "snapshot invalid. DataSize=%d", DataSize);
+					char aBuf[64];
+					str_format(aBuf, sizeof(aBuf), "Snapshot invalid. DataSize=%d", DataSize);
 					m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "demo_player", aBuf);
 				}
 			}
@@ -709,20 +717,15 @@ int CDemoPlayer::Load(class IStorage *pStorage, class IConsole *pConsole, const 
 	dbg_assert(m_File == 0, "Demo player already playing");
 
 	m_pConsole = pConsole;
-	m_File = pStorage->OpenFile(pFilename, IOFLAG_READ, StorageType);
-	if(!m_File)
-	{
-		if(m_pConsole)
-		{
-			char aBuf[32 + IO_MAX_PATH_LENGTH];
-			str_format(aBuf, sizeof(aBuf), "could not open '%s'", pFilename);
-			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_player", aBuf);
-		}
-		return -1;
-	}
-
-	// store the filename
 	str_copy(m_aFilename, pFilename);
+	str_copy(m_aErrorMessage, "");
+
+	if(m_pConsole)
+	{
+		char aBuf[32 + IO_MAX_PATH_LENGTH];
+		str_format(aBuf, sizeof(aBuf), "Loading demo '%s'", pFilename);
+		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_player", aBuf);
+	}
 
 	// clear the playback info
 	mem_zero(&m_Info, sizeof(m_Info));
@@ -733,66 +736,21 @@ int CDemoPlayer::Load(class IStorage *pStorage, class IConsole *pConsole, const 
 	m_Info.m_PreviousTick = -1;
 	m_Info.m_Info.m_Speed = 1;
 	m_SpeedIndex = 4;
-
 	m_LastSnapshotDataSize = -1;
 
-	// read the header
-	if(io_read(m_File, &m_Info.m_Header, sizeof(m_Info.m_Header)) != sizeof(m_Info.m_Header) || !m_Info.m_Header.Valid())
+	if(!GetDemoInfo(pStorage, m_pConsole, pFilename, StorageType, &m_Info.m_Header, &m_Info.m_TimelineMarkers, &m_MapInfo, &m_File, m_aErrorMessage, sizeof(m_aErrorMessage)))
 	{
-		if(m_pConsole)
-		{
-			char aBuf[32 + IO_MAX_PATH_LENGTH];
-			str_format(aBuf, sizeof(aBuf), "'%s' is not a valid demo file", pFilename);
-			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_player", aBuf);
-		}
-		io_close(m_File);
-		m_File = 0;
+		str_copy(m_aFilename, "");
 		return -1;
-	}
-
-	if(m_Info.m_Header.m_Version < gs_OldVersion)
-	{
-		if(m_pConsole)
-		{
-			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "demo version %d is not supported", m_Info.m_Header.m_Version);
-			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_player", aBuf);
-		}
-		io_close(m_File);
-		m_File = 0;
-		return -1;
-	}
-	else if(m_Info.m_Header.m_Version > gs_OldVersion)
-		io_read(m_File, &m_Info.m_TimelineMarkers, sizeof(m_Info.m_TimelineMarkers));
-
-	SHA256_DIGEST Sha256 = SHA256_ZEROED;
-	if(m_Info.m_Header.m_Version >= gs_Sha256Version)
-	{
-		CUuid ExtensionUuid = {};
-		io_read(m_File, &ExtensionUuid.m_aData, sizeof(ExtensionUuid.m_aData));
-
-		if(ExtensionUuid == SHA256_EXTENSION)
-		{
-			io_read(m_File, &Sha256, sizeof(SHA256_DIGEST)); // need a safe read
-		}
-		else
-		{
-			// This hopes whatever happened during the version increment didn't add something here
-			dbg_msg("demo", "demo version incremented, but not by ddnet");
-			io_seek(m_File, -(int)sizeof(ExtensionUuid.m_aData), IOSEEK_CUR);
-		}
 	}
 
 	// save byte offset of map for later use
-	const unsigned MapSize = bytes_be_to_uint(m_Info.m_Header.m_aMapSize);
 	m_MapOffset = io_tell(m_File);
-	io_skip(m_File, MapSize);
-
-	// store map information
-	m_MapInfo.m_Crc = bytes_be_to_uint(m_Info.m_Header.m_aMapCrc);
-	m_MapInfo.m_Sha256 = Sha256;
-	m_MapInfo.m_Size = MapSize;
-	str_copy(m_MapInfo.m_aName, m_Info.m_Header.m_aMapName);
+	if(m_MapOffset < 0 || io_skip(m_File, m_MapInfo.m_Size) != 0)
+	{
+		Stop("Error skipping map data");
+		return -1;
+	}
 
 	if(m_Info.m_Header.m_Version > gs_OldVersion)
 	{
@@ -808,12 +766,7 @@ int CDemoPlayer::Load(class IStorage *pStorage, class IConsole *pConsole, const 
 	// scan the file for interesting points
 	if(!ScanFile())
 	{
-		if(m_pConsole)
-		{
-			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_player", "Error scanning demo file");
-		}
-		io_close(m_File);
-		m_File = 0;
+		Stop("Error scanning demo file");
 		return -1;
 	}
 
@@ -828,15 +781,18 @@ int CDemoPlayer::Load(class IStorage *pStorage, class IConsole *pConsole, const 
 unsigned char *CDemoPlayer::GetMapData(class IStorage *pStorage)
 {
 	if(!m_MapInfo.m_Size)
-		return 0;
+		return nullptr;
 
-	long CurSeek = io_tell(m_File);
-
-	// get map data
-	io_seek(m_File, m_MapOffset, IOSEEK_START);
+	const long CurSeek = io_tell(m_File);
+	if(CurSeek < 0 || io_seek(m_File, m_MapOffset, IOSEEK_START) != 0)
+		return nullptr;
 	unsigned char *pMapData = (unsigned char *)malloc(m_MapInfo.m_Size);
-	io_read(m_File, pMapData, m_MapInfo.m_Size);
-	io_seek(m_File, CurSeek, IOSEEK_START);
+	if(io_read(m_File, pMapData, m_MapInfo.m_Size) != m_MapInfo.m_Size ||
+		io_seek(m_File, CurSeek, IOSEEK_START) != 0)
+	{
+		free(pMapData);
+		return nullptr;
+	}
 	return pMapData;
 }
 
@@ -970,7 +926,11 @@ int CDemoPlayer::SetPos(int WantedTick)
 		KeyFrame--;
 
 	// seek to the correct key frame
-	io_seek(m_File, m_vKeyFrames[KeyFrame].m_Filepos, IOSEEK_START);
+	if(io_seek(m_File, m_vKeyFrames[KeyFrame].m_Filepos, IOSEEK_START) != 0)
+	{
+		Stop("Error seeking keyframe position");
+		return -1;
+	}
 
 	m_Info.m_NextTick = -1;
 	m_Info.m_Info.m_CurrentTick = -1;
@@ -1043,7 +1003,7 @@ int CDemoPlayer::Update(bool RealTime)
 	return 0;
 }
 
-int CDemoPlayer::Stop()
+void CDemoPlayer::Stop(const char *pErrorMessage)
 {
 #if defined(CONF_VIDEORECORDER)
 	if(m_UseVideo && IVideo::Current())
@@ -1051,15 +1011,23 @@ int CDemoPlayer::Stop()
 #endif
 
 	if(!m_File)
-		return -1;
+		return;
 
 	if(m_pConsole)
-		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_player", "Stopped playback");
+	{
+		char aBuf[256];
+		if(pErrorMessage[0] == '\0')
+			str_copy(aBuf, "Stopped playback");
+		else
+			str_format(aBuf, sizeof(aBuf), "Stopped playback due to error: %s", pErrorMessage);
+		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_player", aBuf);
+	}
+
 	io_close(m_File);
 	m_File = 0;
 	m_vKeyFrames.clear();
 	str_copy(m_aFilename, "");
-	return 0;
+	str_copy(m_aErrorMessage, pErrorMessage);
 }
 
 void CDemoPlayer::GetDemoName(char *pBuffer, size_t BufferSize) const
@@ -1067,7 +1035,7 @@ void CDemoPlayer::GetDemoName(char *pBuffer, size_t BufferSize) const
 	IStorage::StripPathAndExtension(m_aFilename, pBuffer, BufferSize);
 }
 
-bool CDemoPlayer::GetDemoInfo(class IStorage *pStorage, const char *pFilename, int StorageType, CDemoHeader *pDemoHeader, CTimelineMarkers *pTimelineMarkers, CMapInfo *pMapInfo) const
+bool CDemoPlayer::GetDemoInfo(IStorage *pStorage, IConsole *pConsole, const char *pFilename, int StorageType, CDemoHeader *pDemoHeader, CTimelineMarkers *pTimelineMarkers, CMapInfo *pMapInfo, IOHANDLE *pFile, char *pErrorMessage, size_t ErrorMessageSize) const
 {
 	mem_zero(pDemoHeader, sizeof(CDemoHeader));
 	mem_zero(pTimelineMarkers, sizeof(CTimelineMarkers));
@@ -1075,45 +1043,87 @@ bool CDemoPlayer::GetDemoInfo(class IStorage *pStorage, const char *pFilename, i
 
 	IOHANDLE File = pStorage->OpenFile(pFilename, IOFLAG_READ, StorageType);
 	if(!File)
-		return false;
-
-	if(io_read(File, pDemoHeader, sizeof(CDemoHeader)) != sizeof(CDemoHeader) || !pDemoHeader->Valid() || pDemoHeader->m_Version < gs_OldVersion)
 	{
+		if(pErrorMessage != nullptr)
+			str_copy(pErrorMessage, "Could not open demo file", ErrorMessageSize);
+		return false;
+	}
+
+	if(io_read(File, pDemoHeader, sizeof(CDemoHeader)) != sizeof(CDemoHeader) || !pDemoHeader->Valid())
+	{
+		if(pErrorMessage != nullptr)
+			str_copy(pErrorMessage, "Error reading demo header", ErrorMessageSize);
 		mem_zero(pDemoHeader, sizeof(CDemoHeader));
 		io_close(File);
 		return false;
 	}
 
-	if(pDemoHeader->m_Version > gs_OldVersion)
+	if(pDemoHeader->m_Version < gs_OldVersion)
 	{
-		io_read(File, pTimelineMarkers, sizeof(CTimelineMarkers));
+		if(pErrorMessage != nullptr)
+			str_format(pErrorMessage, ErrorMessageSize, "Demo version '%d' is not supported", pDemoHeader->m_Version);
+		mem_zero(pDemoHeader, sizeof(CDemoHeader));
+		io_close(File);
+		return false;
 	}
-
-	str_copy(pMapInfo->m_aName, pDemoHeader->m_aMapName);
-	pMapInfo->m_Crc = bytes_be_to_uint(pDemoHeader->m_aMapCrc);
+	else if(pDemoHeader->m_Version > gs_OldVersion)
+	{
+		if(io_read(File, pTimelineMarkers, sizeof(CTimelineMarkers)) != sizeof(CTimelineMarkers))
+		{
+			if(pErrorMessage != nullptr)
+				str_copy(pErrorMessage, "Error reading timeline markers", ErrorMessageSize);
+			mem_zero(pDemoHeader, sizeof(CDemoHeader));
+			io_close(File);
+			return false;
+		}
+	}
 
 	SHA256_DIGEST Sha256 = SHA256_ZEROED;
 	if(pDemoHeader->m_Version >= gs_Sha256Version)
 	{
 		CUuid ExtensionUuid = {};
-		io_read(File, &ExtensionUuid.m_aData, sizeof(ExtensionUuid.m_aData));
-
-		if(ExtensionUuid == SHA256_EXTENSION)
+		const unsigned ExtensionUuidSize = io_read(File, &ExtensionUuid.m_aData, sizeof(ExtensionUuid.m_aData));
+		if(ExtensionUuidSize == sizeof(ExtensionUuid.m_aData) && ExtensionUuid == SHA256_EXTENSION)
 		{
-			io_read(File, &Sha256, sizeof(SHA256_DIGEST)); // need a safe read
+			if(io_read(File, &Sha256, sizeof(SHA256_DIGEST)) != sizeof(SHA256_DIGEST))
+			{
+				if(pErrorMessage != nullptr)
+					str_copy(pErrorMessage, "Error reading SHA256", ErrorMessageSize);
+				mem_zero(pDemoHeader, sizeof(CDemoHeader));
+				mem_zero(pTimelineMarkers, sizeof(CTimelineMarkers));
+				io_close(File);
+				return false;
+			}
 		}
 		else
 		{
 			// This hopes whatever happened during the version increment didn't add something here
-			dbg_msg("demo", "demo version incremented, but not by ddnet");
-			io_seek(File, -(int)sizeof(ExtensionUuid.m_aData), IOSEEK_CUR);
+			if(pConsole)
+			{
+				pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "demo_player", "Demo version incremented, but not by DDNet");
+			}
+			if(io_seek(File, -(int)ExtensionUuidSize, IOSEEK_CUR) != 0)
+			{
+				if(pErrorMessage != nullptr)
+					str_copy(pErrorMessage, "Error rewinding SHA256 extension UUID", ErrorMessageSize);
+				mem_zero(pDemoHeader, sizeof(CDemoHeader));
+				mem_zero(pTimelineMarkers, sizeof(CTimelineMarkers));
+				io_close(File);
+				return false;
+			}
 		}
 	}
-	pMapInfo->m_Sha256 = Sha256;
 
+	str_copy(pMapInfo->m_aName, pDemoHeader->m_aMapName);
+	pMapInfo->m_Sha256 = Sha256;
+	pMapInfo->m_Crc = bytes_be_to_uint(pDemoHeader->m_aMapCrc);
 	pMapInfo->m_Size = bytes_be_to_uint(pDemoHeader->m_aMapSize);
 
-	io_close(File);
+	if(pFile == nullptr)
+		io_close(File);
+	else
+		*pFile = File;
+
 	return true;
 }
 

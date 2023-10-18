@@ -1041,7 +1041,7 @@ bool CMenus::FetchHeader(CDemoItem &Item)
 	{
 		char aBuffer[IO_MAX_PATH_LENGTH];
 		str_format(aBuffer, sizeof(aBuffer), "%s/%s", m_aCurrentDemoFolder, Item.m_aFilename);
-		Item.m_Valid = DemoPlayer()->GetDemoInfo(Storage(), aBuffer, Item.m_StorageType, &Item.m_Info, &Item.m_TimelineMarkers, &Item.m_MapInfo);
+		Item.m_Valid = DemoPlayer()->GetDemoInfo(Storage(), nullptr, aBuffer, Item.m_StorageType, &Item.m_Info, &Item.m_TimelineMarkers, &Item.m_MapInfo);
 		Item.m_InfosLoaded = true;
 	}
 	return Item.m_Valid;
@@ -1505,7 +1505,9 @@ void CMenus::RenderDemoBrowserButtons(CUIRect ButtonsView, bool WasListboxItemAc
 				m_LastPauseChange = -1.0f;
 				m_LastSpeedChange = -1.0f;
 				if(pError)
-					PopupMessage(Localize("Error"), str_comp(pError, "error loading demo") ? pError : Localize("Error loading demo"), Localize("Ok"));
+				{
+					PopupMessage(Localize("Error loading demo"), pError, Localize("Ok"));
+				}
 				else
 				{
 					UI()->SetActiveItem(nullptr);

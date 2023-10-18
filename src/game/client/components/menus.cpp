@@ -1839,7 +1839,7 @@ void CMenus::PopupConfirmDemoReplaceVideo()
 	if(pError)
 	{
 		m_DemoRenderInput.Clear();
-		PopupMessage(Localize("Error"), str_comp(pError, "error loading demo") ? pError : Localize("Error loading demo"), Localize("Ok"));
+		PopupMessage(Localize("Error loading demo"), pError, Localize("Ok"));
 	}
 }
 #endif
