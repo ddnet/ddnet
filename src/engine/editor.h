@@ -14,6 +14,7 @@ public:
 	virtual void OnRender() = 0;
 	virtual void OnActivate() = 0;
 	virtual void OnWindowResize() = 0;
+	virtual void OnClose() = 0;
 	virtual bool HasUnsavedData() const = 0;
 	virtual bool HandleMapDrop(const char *pFilename, int StorageType) = 0;
 	virtual bool Load(const char *pFilename, int StorageType) = 0;

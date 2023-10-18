@@ -3182,7 +3182,11 @@ void CClient::Run()
 			g_Config.m_DbgGraphs ^= 1;
 
 		if(CtrlShiftKey(KEY_E, LastE))
+		{
+			if(g_Config.m_ClEditor)
+				m_pEditor->OnClose();
 			g_Config.m_ClEditor = g_Config.m_ClEditor ^ 1;
+		}
 
 		// render
 		{

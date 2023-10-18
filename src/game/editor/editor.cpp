@@ -901,9 +901,16 @@ void CEditor::DoAudioPreview(CUIRect View, const void *pPlayPauseButtonID, const
 			(m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_SPACE)))
 		{
 			if(Sound()->IsPlaying(SampleID))
+			{
 				Sound()->Pause(SampleID);
+			}
 			else
+			{
+				if(SampleID != m_ToolbarPreviewSound && m_ToolbarPreviewSound && Sound()->IsPlaying(m_ToolbarPreviewSound))
+					Sound()->Pause(m_ToolbarPreviewSound);
+
 				Sound()->Play(CSounds::CHN_GUI, SampleID, ISound::FLAG_PREVIEW);
+			}
 		}
 	}
 	// stop button
@@ -1340,12 +1347,14 @@ void CEditor::DoToolbarSounds(CUIRect ToolBar)
 	CUIRect ToolBarTop, ToolBarBottom;
 	ToolBar.HSplitMid(&ToolBarTop, &ToolBarBottom, 5.0f);
 
+	m_ToolbarPreviewSound = -1;
 	if(m_SelectedSound >= 0 && (size_t)m_SelectedSound < m_Map.m_vpSounds.size())
 	{
 		const std::shared_ptr<CEditorSound> pSelectedSound = m_Map.m_vpSounds[m_SelectedSound];
+		m_ToolbarPreviewSound = pSelectedSound->m_SoundID;
 
 		static int s_PlayPauseButton, s_StopButton, s_SeekBar = 0;
-		DoAudioPreview(ToolBarBottom, &s_PlayPauseButton, &s_StopButton, &s_SeekBar, pSelectedSound->m_SoundID);
+		DoAudioPreview(ToolBarBottom, &s_PlayPauseButton, &s_StopButton, &s_SeekBar, m_ToolbarPreviewSound);
 	}
 }
 
@@ -4062,6 +4071,11 @@ bool CEditor::AddSound(const char *pFileName, int StorageType, void *pUser)
 			}
 	}
 
+	if(pEditor->m_FilePreviewSound)
+	{
+		pEditor->Sound()->UnloadSample(pEditor->m_FilePreviewSound);
+		pEditor->m_FilePreviewSound = -1;
+	}
 	pEditor->m_Dialog = DIALOG_NONE;
 	return true;
 }
@@ -4913,7 +4927,14 @@ void CEditor::RenderFileDialog()
 	ButtonBar.VSplitRight(ButtonSpacing, &ButtonBar, nullptr);
 	ButtonBar.VSplitRight(50.0f, &ButtonBar, &Button);
 	if(DoButton_Editor(&s_CancelButton, "Cancel", 0, &Button, 0, nullptr) || (s_ListBox.Active() && UI()->ConsumeHotkey(CUI::HOTKEY_ESCAPE)))
+	{
+		if(m_FilePreviewSound)
+		{
+			Sound()->UnloadSample(m_FilePreviewSound);
+			m_FilePreviewSound = -1;
+		}
 		m_Dialog = DIALOG_NONE;
+	}
 
 	ButtonBar.VSplitRight(ButtonSpacing, &ButtonBar, nullptr);
 	ButtonBar.VSplitRight(50.0f, &ButtonBar, &Button);
@@ -7157,7 +7178,10 @@ void CEditor::RenderMenubar(CUIRect MenuBar)
 
 	static int s_CloseButton = 0;
 	if(DoButton_Editor(&s_CloseButton, "×", 0, &Close, 0, "Exits from the editor") || (m_Dialog == DIALOG_NONE && !UI()->IsPopupOpen() && !m_PopupEventActivated && Input()->KeyPress(KEY_ESCAPE)))
+	{
+		OnClose();
 		g_Config.m_ClEditor = 0;
+	}
 }
 
 void CEditor::Render()
@@ -7909,6 +7933,14 @@ void CEditor::OnActivate()
 void CEditor::OnWindowResize()
 {
 	UI()->OnWindowResize();
+}
+
+void CEditor::OnClose()
+{
+	if(m_ToolbarPreviewSound && Sound()->IsPlaying(m_ToolbarPreviewSound))
+		Sound()->Pause(m_ToolbarPreviewSound);
+	if(m_FilePreviewSound && Sound()->IsPlaying(m_FilePreviewSound))
+		Sound()->Pause(m_FilePreviewSound);
 }
 
 void CEditor::LoadCurrentMap()

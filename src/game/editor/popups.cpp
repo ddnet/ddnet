@@ -141,7 +141,10 @@ CUI::EPopupMenuFunctionResult CEditor::PopupMenuFile(void *pContext, CUIRect Vie
 			pEditor->m_PopupEventActivated = true;
 		}
 		else
+		{
+			pEditor->OnClose();
 			g_Config.m_ClEditor = 0;
+		}
 		return CUI::POPUP_CLOSE_CURRENT;
 	}
 
@@ -1972,6 +1975,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupEvent(void *pContext, CUIRect View, 
 	{
 		if(pEditor->m_PopupEventType == POPEVENT_EXIT)
 		{
+			pEditor->OnClose();
 			g_Config.m_ClEditor = 0;
 		}
 		else if(pEditor->m_PopupEventType == POPEVENT_LOAD)

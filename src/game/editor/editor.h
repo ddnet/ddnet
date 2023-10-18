@@ -356,6 +356,8 @@ public:
 		m_FilePreviewSound = -1;
 		m_FilePreviewState = PREVIEW_UNLOADED;
 
+		m_ToolbarPreviewSound = -1;
+
 		m_SelectEntitiesImage = "DDNet";
 
 		m_ResetZoomEnvelope = true;
@@ -416,6 +418,7 @@ public:
 	void OnRender() override;
 	void OnActivate() override;
 	void OnWindowResize() override;
+	void OnClose() override;
 	bool HasUnsavedData() const override { return m_Map.m_Modified; }
 	void UpdateMentions() override { m_Mentions++; }
 	void ResetMentions() override { m_Mentions = 0; }
@@ -567,6 +570,8 @@ public:
 	EPreviewState m_FilePreviewState;
 	CImageInfo m_FilePreviewImageInfo;
 	bool m_FileDialogOpening;
+
+	int m_ToolbarPreviewSound;
 
 	struct CFilelistItem
 	{
