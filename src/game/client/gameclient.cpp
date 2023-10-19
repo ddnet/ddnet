@@ -673,9 +673,9 @@ void CGameClient::OnRender()
 	// display gfx & client warnings
 	for(SWarning *pWarning : {Graphics()->GetCurWarning(), Client()->GetCurWarning()})
 	{
-		if(pWarning != NULL && m_Menus.CanDisplayWarning())
+		if(pWarning != nullptr && m_Menus.CanDisplayWarning())
 		{
-			m_Menus.PopupWarning(Localize("Warning"), pWarning->m_aWarningMsg, "Ok", 10s);
+			m_Menus.PopupWarning(pWarning->m_aWarningTitle[0] == '\0' ? Localize("Warning") : pWarning->m_aWarningTitle, pWarning->m_aWarningMsg, "Ok", pWarning->m_AutoHide ? 10s : 0s);
 			pWarning->m_WasShown = true;
 		}
 	}

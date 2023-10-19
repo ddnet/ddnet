@@ -609,6 +609,9 @@ void CClient::Connect(const char *pAddress, const char *pPassword)
 
 void CClient::DisconnectWithReason(const char *pReason)
 {
+	if(pReason != nullptr && pReason[0] == '\0')
+		pReason = nullptr;
+
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf), "disconnecting. reason='%s'", pReason ? pReason : "unknown");
 	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf, gs_ClientNetworkPrintColor);
@@ -2437,7 +2440,13 @@ void CClient::Update()
 		else
 		{
 			// disconnect on error
-			Disconnect();
+			DisconnectWithReason(m_DemoPlayer.ErrorMessage());
+			if(m_DemoPlayer.ErrorMessage()[0] != '\0')
+			{
+				SWarning Warning(Localize("Error playing demo"), m_DemoPlayer.ErrorMessage());
+				Warning.m_AutoHide = false;
+				m_vWarnings.emplace_back(Warning);
+			}
 		}
 	}
 	else if(State() == IClient::STATE_ONLINE)
@@ -3581,27 +3590,23 @@ void CClient::DemoSlice(const char *pDstPath, CLIENTFUNC_FILTER pfnFilter, void 
 {
 	if(m_DemoPlayer.IsPlaying())
 	{
-		const char *pDemoFileName = m_DemoPlayer.GetDemoFileName();
-		m_DemoEditor.Slice(pDemoFileName, pDstPath, g_Config.m_ClDemoSliceBegin, g_Config.m_ClDemoSliceEnd, pfnFilter, pUser);
+		m_DemoEditor.Slice(m_DemoPlayer.Filename(), pDstPath, g_Config.m_ClDemoSliceBegin, g_Config.m_ClDemoSliceEnd, pfnFilter, pUser);
 	}
 }
 
 const char *CClient::DemoPlayer_Play(const char *pFilename, int StorageType)
 {
-	IOHANDLE File = Storage()->OpenFile(pFilename, IOFLAG_READ, StorageType);
-	if(!File)
-		return "error opening demo file";
-
-	io_close(File);
+	// Don't disconnect unless the file exists (only for play command)
+	if(!Storage()->FileExists(pFilename, StorageType))
+		return "No demo with this filename exists";
 
 	Disconnect();
 	m_aNetClient[CONN_MAIN].ResetErrorString();
 
 	// try to start playback
 	m_DemoPlayer.SetListener(this);
-
 	if(m_DemoPlayer.Load(Storage(), m_pConsole, pFilename, StorageType))
-		return "error loading demo";
+		return m_DemoPlayer.ErrorMessage();
 
 	// load map
 	const CMapInfo *pMapInfo = m_DemoPlayer.GetMapInfo();
@@ -3669,8 +3674,7 @@ const char *CClient::DemoPlayer_Render(const char *pFilename, int StorageType, c
 	{
 		m_DemoPlayer.Pause();
 	}
-	//m_pConsole->Print(IConsole::OUTPUT_LEVEL_DEBUG, "demo_recorder", "demo eof");
-	return 0;
+	return nullptr;
 }
 #endif
 

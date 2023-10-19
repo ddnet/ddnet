@@ -107,6 +107,7 @@ private:
 	IOHANDLE m_File;
 	long m_MapOffset;
 	char m_aFilename[IO_MAX_PATH_LENGTH];
+	char m_aErrorMessage[256];
 	std::vector<SKeyFrame> m_vKeyFrames;
 	CMapInfo m_MapInfo;
 	int m_SpeedIndex;
@@ -123,9 +124,15 @@ private:
 	bool m_UseVideo;
 	bool m_WasRecording = false;
 
-	int ReadChunkHeader(int *pType, int *pSize, int *pTick);
+	enum EReadChunkHeaderResult
+	{
+		CHUNKHEADER_SUCCESS,
+		CHUNKHEADER_ERROR,
+		CHUNKHEADER_EOF,
+	};
+	EReadChunkHeaderResult ReadChunkHeader(int *pType, int *pSize, int *pTick);
 	void DoTick();
-	void ScanFile();
+	bool ScanFile();
 
 	int64_t Time();
 
@@ -144,7 +151,7 @@ public:
 	int Play();
 	void Pause() override;
 	void Unpause() override;
-	int Stop();
+	void Stop(const char *pErrorMessage = "");
 	void SetSpeed(float Speed) override;
 	void SetSpeedIndex(int SpeedIndex) override;
 	void AdjustSpeedIndex(int Offset) override;
@@ -154,8 +161,9 @@ public:
 	int SetPos(int WantedTick) override;
 	const CInfo *BaseInfo() const override { return &m_Info.m_Info; }
 	void GetDemoName(char *pBuffer, size_t BufferSize) const override;
-	bool GetDemoInfo(class IStorage *pStorage, const char *pFilename, int StorageType, CDemoHeader *pDemoHeader, CTimelineMarkers *pTimelineMarkers, CMapInfo *pMapInfo) const override;
-	const char *GetDemoFileName() { return m_aFilename; }
+	bool GetDemoInfo(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, int StorageType, CDemoHeader *pDemoHeader, CTimelineMarkers *pTimelineMarkers, CMapInfo *pMapInfo, IOHANDLE *pFile = nullptr, char *pErrorMessage = nullptr, size_t ErrorMessageSize = 0) const override;
+	const char *Filename() { return m_aFilename; }
+	const char *ErrorMessage() { return m_aErrorMessage; }
 
 	int Update(bool RealTime = true);
 

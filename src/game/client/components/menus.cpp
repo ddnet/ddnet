@@ -1786,7 +1786,7 @@ int CMenus::Render()
 			Part.VMargin(120.0f, &Part);
 
 			static CButtonContainer s_Button;
-			if(DoButton_Menu(&s_Button, pButtonText, 0, &Part) || UI()->ConsumeHotkey(CUI::HOTKEY_ESCAPE) || UI()->ConsumeHotkey(CUI::HOTKEY_ENTER) || (time_get_nanoseconds() - m_PopupWarningLastTime >= m_PopupWarningDuration))
+			if(DoButton_Menu(&s_Button, pButtonText, 0, &Part) || UI()->ConsumeHotkey(CUI::HOTKEY_ESCAPE) || UI()->ConsumeHotkey(CUI::HOTKEY_ENTER) || (m_PopupWarningDuration > 0s && time_get_nanoseconds() - m_PopupWarningLastTime >= m_PopupWarningDuration))
 			{
 				m_Popup = POPUP_NONE;
 				SetActive(false);
@@ -1839,7 +1839,7 @@ void CMenus::PopupConfirmDemoReplaceVideo()
 	if(pError)
 	{
 		m_DemoRenderInput.Clear();
-		PopupMessage(Localize("Error"), str_comp(pError, "error loading demo") ? pError : Localize("Error loading demo"), Localize("Ok"));
+		PopupMessage(Localize("Error loading demo"), pError, Localize("Ok"));
 	}
 }
 #endif
