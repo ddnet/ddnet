@@ -494,9 +494,13 @@ STextBoundingBox CLineInput::Render(const CUIRect *pRect, float FontSize, int Al
 
 		m_CaretPosition = Cursor.m_CursorRenderedPosition;
 
-		STextBoundingBox CaretBoundingBox = TextRender()->TextBoundingBox(FontSize, pDisplayStr, DisplayCursorOffset, LineWidth);
-		CaretBoundingBox.MoveBy(CursorPos);
-		SetCompositionWindowPosition(vec2(CaretBoundingBox.Right(), CaretBoundingBox.Bottom()), CaretBoundingBox.m_H);
+		CTextCursor CaretCursor;
+		TextRender()->SetCursor(&CaretCursor, CursorPos.x, CursorPos.y, FontSize, 0);
+		CaretCursor.m_LineWidth = LineWidth;
+		CaretCursor.m_CursorMode = TEXT_CURSOR_CURSOR_MODE_SET;
+		CaretCursor.m_CursorCharacter = str_utf8_offset_bytes_to_chars(pDisplayStr, DisplayCursorOffset);
+		TextRender()->TextEx(&CaretCursor, pDisplayStr);
+		SetCompositionWindowPosition(CaretCursor.m_CursorRenderedPosition + vec2(0.0f, CaretCursor.m_AlignedFontSize / 2.0f), CaretCursor.m_AlignedFontSize);
 	}
 	else
 	{
@@ -609,7 +613,7 @@ void CLineInput::SetCompositionWindowPosition(vec2 Anchor, float LineHeight)
 	const vec2 ScreenScale = vec2(ScreenWidth / (ScreenX1 - ScreenX0), ScreenHeight / (ScreenY1 - ScreenY0));
 	ms_CompositionWindowPosition = Anchor * ScreenScale;
 	ms_CompositionLineHeight = LineHeight * ScreenScale.y;
-	Input()->SetCompositionWindowPosition(ms_CompositionWindowPosition.x, ms_CompositionWindowPosition.y - ms_CompositionLineHeight, ms_CompositionLineHeight);
+	Input()->SetCompositionWindowPosition(ms_CompositionWindowPosition.x, ms_CompositionWindowPosition.y, ms_CompositionLineHeight);
 }
 
 void CLineInput::Activate(EInputPriority Priority)
