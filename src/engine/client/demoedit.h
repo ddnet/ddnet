@@ -5,12 +5,12 @@
 #include <engine/shared/jobs.h>
 #include <engine/shared/snapshot.h>
 
-class IStorage;
+class CClient;
 
 class CDemoEdit : public IJob
 {
+	CClient *m_pClient;
 	CSnapshotDelta m_SnapshotDelta;
-	IStorage *m_pStorage;
 
 	CDemoEditor m_DemoEditor;
 
@@ -19,9 +19,11 @@ class CDemoEdit : public IJob
 	int m_StartTick;
 	int m_EndTick;
 
-public:
-	CDemoEdit(const char *pNetVersion, CSnapshotDelta *pSnapshotDelta, IStorage *pStorage, const char *pDemo, const char *pDst, int StartTick, int EndTick);
 	void Run() override;
-	char *Destination() { return m_aDst; }
+	void Done() override;
+
+public:
+	CDemoEdit(CClient *pClient, const char *pNetVersion, CSnapshotDelta *pSnapshotDelta, const char *pDemo, const char *pDst, int StartTick, int EndTick);
+	const char *Destination() const { return m_aDst; }
 };
 #endif

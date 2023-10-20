@@ -33,6 +33,61 @@ struct CSoundSource_DEPRECATED
 	int m_SoundEnvOffset;
 };
 
+void CDataFileWriterFinishJob::Run()
+{
+	m_Writer.Finish();
+}
+
+void CDataFileWriterFinishJob::Done()
+{
+	auto pJob = std::find_if(m_pEditor->m_vpWriterFinishJobs.begin(), m_pEditor->m_vpWriterFinishJobs.end(), [this](const auto &pElem) {
+		return pElem.get() == this;
+	});
+	if(pJob != m_pEditor->m_vpWriterFinishJobs.end())
+	{
+		m_pEditor->m_vpWriterFinishJobs.erase(pJob);
+	}
+
+	char aBuf[2 * IO_MAX_PATH_LENGTH + 128];
+	if(m_pEditor->Storage()->FileExists(GetRealFileName(), IStorage::TYPE_SAVE) && !m_pEditor->Storage()->RemoveFile(GetRealFileName(), IStorage::TYPE_SAVE))
+	{
+		str_format(aBuf, sizeof(aBuf), "Saving failed: Could not remove old map file '%s'.", GetRealFileName());
+		m_pEditor->ShowFileDialogError("%s", aBuf);
+		m_pEditor->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "editor/save", aBuf);
+		return;
+	}
+
+	if(!m_pEditor->Storage()->RenameFile(GetTempFileName(), GetRealFileName(), IStorage::TYPE_SAVE))
+	{
+		str_format(aBuf, sizeof(aBuf), "Saving failed: Could not move temporary map file '%s' to '%s'.", GetTempFileName(), GetRealFileName());
+		m_pEditor->ShowFileDialogError("%s", aBuf);
+		m_pEditor->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "editor/save", aBuf);
+		return;
+	}
+
+	str_format(aBuf, sizeof(aBuf), "saving '%s' done", GetRealFileName());
+	m_pEditor->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "editor/save", aBuf);
+
+	// send rcon.. if we can
+	if(m_pEditor->Client()->RconAuthed())
+	{
+		CServerInfo CurrentServerInfo;
+		m_pEditor->Client()->GetServerInfo(&CurrentServerInfo);
+		NETADDR ServerAddr = m_pEditor->Client()->ServerAddress();
+		const unsigned char aIpv4Localhost[16] = {127, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+		const unsigned char aIpv6Localhost[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
+
+		// and if we're on localhost
+		if(!mem_comp(ServerAddr.ip, aIpv4Localhost, sizeof(aIpv4Localhost)) || !mem_comp(ServerAddr.ip, aIpv6Localhost, sizeof(aIpv6Localhost)))
+		{
+			char aMapName[128];
+			IStorage::StripPathAndExtension(GetRealFileName(), aMapName, sizeof(aMapName));
+			if(!str_comp(aMapName, CurrentServerInfo.m_aMap))
+				m_pEditor->Client()->Rcon("reload");
+		}
+	}
+}
+
 bool CEditorMap::Save(const char *pFileName)
 {
 	char aFileNameTmp[IO_MAX_PATH_LENGTH];
@@ -401,9 +456,9 @@ bool CEditorMap::Save(const char *pFileName)
 	}
 
 	// finish the data file
-	std::shared_ptr<CDataFileWriterFinishJob> pWriterFinishJob = std::make_shared<CDataFileWriterFinishJob>(pFileName, aFileNameTmp, std::move(Writer));
+	std::shared_ptr<CDataFileWriterFinishJob> pWriterFinishJob = std::make_shared<CDataFileWriterFinishJob>(m_pEditor, pFileName, aFileNameTmp, std::move(Writer));
 	m_pEditor->Engine()->AddJob(pWriterFinishJob);
-	m_pEditor->m_WriterFinishJobs.push_back(pWriterFinishJob);
+	m_pEditor->m_vpWriterFinishJobs.push_back(pWriterFinishJob);
 
 	return true;
 }

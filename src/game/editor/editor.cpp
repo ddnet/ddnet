@@ -7466,7 +7466,7 @@ void CEditor::RenderPressedKeys(CUIRect View)
 
 void CEditor::RenderSavingIndicator(CUIRect View)
 {
-	if(m_WriterFinishJobs.empty())
+	if(m_vpWriterFinishJobs.empty())
 		return;
 
 	const char *pText = "Saving…";
@@ -7800,56 +7800,6 @@ bool CEditor::PerformAutosave()
 	}
 }
 
-void CEditor::HandleWriterFinishJobs()
-{
-	if(m_WriterFinishJobs.empty())
-		return;
-
-	std::shared_ptr<CDataFileWriterFinishJob> pJob = m_WriterFinishJobs.front();
-	if(pJob->Status() != IJob::STATE_DONE)
-		return;
-	m_WriterFinishJobs.pop_front();
-
-	char aBuf[2 * IO_MAX_PATH_LENGTH + 128];
-	if(Storage()->FileExists(pJob->GetRealFileName(), IStorage::TYPE_SAVE) && !Storage()->RemoveFile(pJob->GetRealFileName(), IStorage::TYPE_SAVE))
-	{
-		str_format(aBuf, sizeof(aBuf), "Saving failed: Could not remove old map file '%s'.", pJob->GetRealFileName());
-		ShowFileDialogError("%s", aBuf);
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "editor/save", aBuf);
-		return;
-	}
-
-	if(!Storage()->RenameFile(pJob->GetTempFileName(), pJob->GetRealFileName(), IStorage::TYPE_SAVE))
-	{
-		str_format(aBuf, sizeof(aBuf), "Saving failed: Could not move temporary map file '%s' to '%s'.", pJob->GetTempFileName(), pJob->GetRealFileName());
-		ShowFileDialogError("%s", aBuf);
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "editor/save", aBuf);
-		return;
-	}
-
-	str_format(aBuf, sizeof(aBuf), "saving '%s' done", pJob->GetRealFileName());
-	Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "editor/save", aBuf);
-
-	// send rcon.. if we can
-	if(Client()->RconAuthed())
-	{
-		CServerInfo CurrentServerInfo;
-		Client()->GetServerInfo(&CurrentServerInfo);
-		NETADDR ServerAddr = Client()->ServerAddress();
-		const unsigned char aIpv4Localhost[16] = {127, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-		const unsigned char aIpv6Localhost[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
-
-		// and if we're on localhost
-		if(!mem_comp(ServerAddr.ip, aIpv4Localhost, sizeof(aIpv4Localhost)) || !mem_comp(ServerAddr.ip, aIpv6Localhost, sizeof(aIpv6Localhost)))
-		{
-			char aMapName[128];
-			IStorage::StripPathAndExtension(pJob->GetRealFileName(), aMapName, sizeof(aMapName));
-			if(!str_comp(aMapName, CurrentServerInfo.m_aMap))
-				Client()->Rcon("reload");
-		}
-	}
-}
-
 void CEditor::OnUpdate()
 {
 	CUIElementBase::Init(UI()); // update static pointer because game and editor use separate UI
@@ -7877,7 +7827,6 @@ void CEditor::OnUpdate()
 	HandleCursorMovement();
 	DispatchInputEvents();
 	HandleAutosave();
-	HandleWriterFinishJobs();
 }
 
 void CEditor::OnRender()
@@ -7970,7 +7919,7 @@ void CEditor::LoadCurrentMap()
 bool CEditor::Save(const char *pFilename)
 {
 	// Check if file with this name is already being saved at the moment
-	if(std::any_of(std::begin(m_WriterFinishJobs), std::end(m_WriterFinishJobs), [pFilename](const std::shared_ptr<CDataFileWriterFinishJob> &Job) { return str_comp(pFilename, Job->GetRealFileName()) == 0; }))
+	if(std::any_of(std::begin(m_vpWriterFinishJobs), std::end(m_vpWriterFinishJobs), [pFilename](const std::shared_ptr<CDataFileWriterFinishJob> &pJob) { return str_comp(pFilename, pJob->GetRealFileName()) == 0; }))
 		return false;
 
 	return m_Map.Save(pFilename);

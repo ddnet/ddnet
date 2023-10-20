@@ -165,6 +165,14 @@ void CHttpRequest::Run()
 	m_State = OnCompletion(FinalState);
 }
 
+void CHttpRequest::Done()
+{
+	if(m_DoneHandler)
+	{
+		m_DoneHandler(this);
+	}
+}
+
 bool CHttpRequest::BeforeInit()
 {
 	if(m_WriteToFile)

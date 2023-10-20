@@ -100,6 +100,11 @@ public:
 		m_JobPool.Add(std::move(pJob));
 	}
 
+	void UpdateJobs() override
+	{
+		m_JobPool.Update();
+	}
+
 	void SetAdditionalLogger(std::shared_ptr<ILogger> &&pLogger) override
 	{
 		m_pFutureLogger->Set(pLogger);

@@ -24,6 +24,10 @@ protected:
 	{
 		m_Pool.Add(std::move(pJob));
 	}
+	void Update()
+	{
+		m_Pool.Update();
+	}
 	void RunBlocking(IJob *pJob)
 	{
 		CJobPool::RunBlocking(pJob);
@@ -33,11 +37,15 @@ protected:
 class CJob : public IJob
 {
 	std::function<void()> m_JobFunction;
+	std::function<void()> m_DoneFunction;
 	void Run() override { m_JobFunction(); }
+	void Done() override { m_DoneFunction(); }
 
 public:
 	CJob(std::function<void()> &&JobFunction) :
-		m_JobFunction(JobFunction) {}
+		m_JobFunction(JobFunction), m_DoneFunction([] {}) {}
+	CJob(std::function<void()> &&JobFunction, std::function<void()> &&DoneFunction) :
+		m_JobFunction(JobFunction), m_DoneFunction(DoneFunction) {}
 };
 
 TEST_F(Jobs, Constructor)
@@ -56,6 +64,15 @@ TEST_F(Jobs, RunBlocking)
 	EXPECT_EQ(Result, 0);
 	RunBlocking(&Job);
 	EXPECT_EQ(Result, 1);
+}
+
+TEST_F(Jobs, RunBlockingDone)
+{
+	int Result = 0;
+	CJob Job([&] { Result = 1; }, [&] { Result = 2; });
+	EXPECT_EQ(Result, 0);
+	RunBlocking(&Job);
+	EXPECT_EQ(Result, 2);
 }
 
 TEST_F(Jobs, Wait)
@@ -145,4 +162,22 @@ TEST_F(Jobs, Many)
 		EXPECT_EQ(pJob->Status(), IJob::STATE_DONE);
 	}
 	new(&m_Pool) CJobPool();
+}
+
+TEST_F(Jobs, DoneFunction)
+{
+	int Result = 0;
+	EXPECT_EQ(Result, 0);
+	auto pJob = std::make_shared<CJob>([&] { Result = 1; }, [&] { Result = 2; });
+
+	Add(pJob);
+	while(pJob->Status() != IJob::STATE_DONE)
+	{
+		// yay, busy loop...
+		thread_yield();
+	}
+	EXPECT_EQ(Result, 1);
+
+	Update();
+	EXPECT_EQ(Result, 2);
 }

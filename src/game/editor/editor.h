@@ -34,7 +34,6 @@
 #include "map_view.h"
 #include "smooth_value.h"
 
-#include <deque>
 #include <functional>
 #include <map>
 #include <memory>
@@ -241,17 +240,17 @@ enum
 
 class CDataFileWriterFinishJob : public IJob
 {
+	class CEditor *m_pEditor;
 	char m_aRealFileName[IO_MAX_PATH_LENGTH];
 	char m_aTempFileName[IO_MAX_PATH_LENGTH];
 	CDataFileWriter m_Writer;
 
-	void Run() override
-	{
-		m_Writer.Finish();
-	}
+	void Run() override;
+	void Done() override;
 
 public:
-	CDataFileWriterFinishJob(const char *pRealFileName, const char *pTempFileName, CDataFileWriter &&Writer) :
+	CDataFileWriterFinishJob(class CEditor *pEditor, const char *pRealFileName, const char *pTempFileName, CDataFileWriter &&Writer) :
+		m_pEditor(pEditor),
 		m_Writer(std::move(Writer))
 	{
 		str_copy(m_aRealFileName, pRealFileName);
@@ -430,7 +429,6 @@ public:
 	void DispatchInputEvents();
 	void HandleAutosave();
 	bool PerformAutosave();
-	void HandleWriterFinishJobs();
 
 	void RefreshFilteredFileList();
 	void FilelistPopulate(int StorageType, bool KeepSelection = false);
@@ -737,7 +735,7 @@ public:
 	static const void *ms_pUiGotContext;
 
 	CEditorMap m_Map;
-	std::deque<std::shared_ptr<CDataFileWriterFinishJob>> m_WriterFinishJobs;
+	std::vector<std::shared_ptr<CDataFileWriterFinishJob>> m_vpWriterFinishJobs;
 
 	int m_ShiftBy;
 

@@ -21,6 +21,7 @@ public:
 
 	virtual void Init() = 0;
 	virtual void AddJob(std::shared_ptr<IJob> pJob) = 0;
+	virtual void UpdateJobs() = 0;
 	virtual void SetAdditionalLogger(std::shared_ptr<ILogger> &&pLogger) = 0;
 	static void RunJobBlocking(IJob *pJob);
 };

@@ -22,8 +22,11 @@ CJobPool::CJobPool()
 	m_Shutdown = false;
 	m_Lock = lock_create();
 	sphore_init(&m_Semaphore);
-	m_pFirstJob = 0;
-	m_pLastJob = 0;
+	m_pFirstJob = nullptr;
+	m_pLastJob = nullptr;
+	m_LockDone = lock_create();
+	m_pFirstJobDone = nullptr;
+	m_pLastJobDone = nullptr;
 }
 
 CJobPool::~CJobPool()
@@ -40,12 +43,11 @@ void CJobPool::WorkerThread(void *pUser)
 
 	while(!pPool->m_Shutdown)
 	{
-		std::shared_ptr<IJob> pJob = 0;
-
 		// fetch job from queue
 		sphore_wait(&pPool->m_Semaphore);
+		std::shared_ptr<IJob> pJob = nullptr;
 		{
-			CLockScope ls(pPool->m_Lock);
+			CLockScope LockScope(pPool->m_Lock);
 			if(pPool->m_pFirstJob)
 			{
 				pJob = pPool->m_pFirstJob;
@@ -53,14 +55,26 @@ void CJobPool::WorkerThread(void *pUser)
 				// allow remaining objects in list to destruct, even when current object stays alive
 				pJob->m_pNext = nullptr;
 				if(!pPool->m_pFirstJob)
-					pPool->m_pLastJob = 0;
+					pPool->m_pLastJob = nullptr;
 			}
 		}
 
-		// do the job if we have one
+		// run the job if we have one
 		if(pJob)
 		{
-			RunBlocking(pJob.get());
+			pJob->m_Status = IJob::STATE_RUNNING;
+			pJob->Run();
+			pJob->m_Status = IJob::STATE_DONE;
+
+			// add job to queue of done jobs
+			{
+				CLockScope LockScope(pPool->m_LockDone);
+				if(pPool->m_pLastJobDone)
+					pPool->m_pLastJobDone->m_pNext = pJob;
+				pPool->m_pLastJobDone = std::move(pJob);
+				if(!pPool->m_pFirstJobDone)
+					pPool->m_pFirstJobDone = pPool->m_pLastJobDone;
+			}
 		}
 	}
 }
@@ -86,14 +100,38 @@ void CJobPool::Destroy()
 		thread_wait(pThread);
 	m_vpThreads.clear();
 	lock_destroy(m_Lock);
+	lock_destroy(m_LockDone);
 	sphore_destroy(&m_Semaphore);
+}
+
+void CJobPool::Update()
+{
+	while(true)
+	{
+		// fetch job from queue of done jobs
+		std::shared_ptr<IJob> pJob = nullptr;
+		{
+			CLockScope LockScope(m_LockDone);
+			if(m_pFirstJobDone)
+			{
+				pJob = m_pFirstJobDone;
+				m_pFirstJobDone = m_pFirstJobDone->m_pNext;
+				pJob->m_pNext = nullptr;
+				if(!m_pFirstJobDone)
+					m_pLastJobDone = nullptr;
+			}
+		}
+		if(!pJob)
+			break;
+		pJob->Done();
+	}
 }
 
 void CJobPool::Add(std::shared_ptr<IJob> pJob)
 {
+	// add job to queue
 	{
-		CLockScope ls(m_Lock);
-		// add job to queue
+		CLockScope LockScope(m_Lock);
 		if(m_pLastJob)
 			m_pLastJob->m_pNext = pJob;
 		m_pLastJob = std::move(pJob);
@@ -109,4 +147,5 @@ void CJobPool::RunBlocking(IJob *pJob)
 	pJob->m_Status = IJob::STATE_RUNNING;
 	pJob->Run();
 	pJob->m_Status = IJob::STATE_DONE;
+	pJob->Done();
 }

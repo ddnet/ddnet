@@ -1534,6 +1534,18 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 						m_pMapdownloadTask = HttpGetFile(pMapUrl ? pMapUrl : aUrl, Storage(), m_aMapdownloadFilenameTemp, IStorage::TYPE_SAVE);
 						m_pMapdownloadTask->Timeout(CTimeout{g_Config.m_ClMapDownloadConnectTimeoutMs, 0, g_Config.m_ClMapDownloadLowSpeedLimit, g_Config.m_ClMapDownloadLowSpeedTime});
 						m_pMapdownloadTask->MaxResponseSize(1024 * 1024 * 1024); // 1 GiB
+						m_pMapdownloadTask->DoneHandler([this](CHttpRequest *pRequest) {
+							if(pRequest->State() == HTTP_DONE)
+							{
+								FinishMapDownload();
+							}
+							else if(pRequest->State() == HTTP_ERROR || pRequest->State() == HTTP_ABORTED)
+							{
+								dbg_msg("webdl", "http failed, falling back to gameserver");
+								ResetMapDownload();
+								SendMapRequest();
+							}
+						});
 						Engine()->AddJob(m_pMapdownloadTask);
 					}
 					else
@@ -2639,51 +2651,7 @@ void CClient::Update()
 	// pump the network
 	PumpNetwork();
 
-	if(m_pMapdownloadTask)
-	{
-		if(m_pMapdownloadTask->State() == HTTP_DONE)
-			FinishMapDownload();
-		else if(m_pMapdownloadTask->State() == HTTP_ERROR || m_pMapdownloadTask->State() == HTTP_ABORTED)
-		{
-			dbg_msg("webdl", "http failed, falling back to gameserver");
-			ResetMapDownload();
-			SendMapRequest();
-		}
-	}
-
-	if(m_pDDNetInfoTask)
-	{
-		if(m_pDDNetInfoTask->State() == HTTP_DONE)
-			FinishDDNetInfo();
-		else if(m_pDDNetInfoTask->State() == HTTP_ERROR)
-		{
-			Storage()->RemoveFile(m_aDDNetInfoTmp, IStorage::TYPE_SAVE);
-			ResetDDNetInfo();
-		}
-		else if(m_pDDNetInfoTask->State() == HTTP_ABORTED)
-		{
-			Storage()->RemoveFile(m_aDDNetInfoTmp, IStorage::TYPE_SAVE);
-			m_pDDNetInfoTask = NULL;
-		}
-	}
-
-	if(State() == IClient::STATE_ONLINE)
-	{
-		if(!m_EditJobs.empty())
-		{
-			std::shared_ptr<CDemoEdit> pJob = m_EditJobs.front();
-			if(pJob->Status() == IJob::STATE_DONE)
-			{
-				char aBuf[IO_MAX_PATH_LENGTH + 64];
-				str_format(aBuf, sizeof(aBuf), "Successfully saved the replay to %s!", pJob->Destination());
-				m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", aBuf);
-
-				GameClient()->Echo(Localize("Successfully saved the replay!"));
-
-				m_EditJobs.pop_front();
-			}
-		}
-	}
+	Engine()->UpdateJobs();
 
 	// update the server browser
 	m_ServerBrowser.Update();
@@ -3534,39 +3502,49 @@ void CClient::SaveReplay(const int Length, const char *pFilename)
 	}
 
 	if(!DemoRecorder(RECORDER_REPLAYS)->IsRecording())
-		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", "ERROR: demorecorder isn't recording. Try to rejoin to fix that.");
-	else if(DemoRecorder(RECORDER_REPLAYS)->Length() < 1)
-		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", "ERROR: demorecorder isn't recording for at least 1 second.");
-	else
 	{
-		// First we stop the recorder to slice correctly the demo after
-		DemoRecorder_Stop(RECORDER_REPLAYS);
-
-		char aDate[64];
-		str_timestamp(aDate, sizeof(aDate));
-
-		char aFilename[IO_MAX_PATH_LENGTH];
-		if(str_comp(pFilename, "") == 0)
-			str_format(aFilename, sizeof(aFilename), "demos/replays/%s_%s (replay).demo", m_aCurrentMap, aDate);
-		else
-			str_format(aFilename, sizeof(aFilename), "demos/replays/%s.demo", pFilename);
-
-		char *pSrc = m_aDemoRecorder[RECORDER_REPLAYS].GetCurrentFilename();
-
-		// Slice the demo to get only the last cl_replay_length seconds
-		const int EndTick = GameTick(g_Config.m_ClDummy);
-		const int StartTick = EndTick - Length * GameTickSpeed();
-
-		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", "Saving replay...");
-
-		// Create a job to do this slicing in background because it can be a bit long depending on the file size
-		std::shared_ptr<CDemoEdit> pDemoEditTask = std::make_shared<CDemoEdit>(GameClient()->NetVersion(), &m_SnapshotDelta, m_pStorage, pSrc, aFilename, StartTick, EndTick);
-		Engine()->AddJob(pDemoEditTask);
-		m_EditJobs.push_back(pDemoEditTask);
-
-		// And we restart the recorder
-		DemoRecorder_StartReplayRecorder();
+		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", "ERROR: demorecorder isn't recording. Try to rejoin to fix that.");
+		return;
 	}
+	else if(DemoRecorder(RECORDER_REPLAYS)->Length() < 1)
+	{
+		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", "ERROR: demorecorder isn't recording for at least 1 second.");
+		return;
+	}
+
+	char aDate[64];
+	str_timestamp(aDate, sizeof(aDate));
+
+	char aFilename[IO_MAX_PATH_LENGTH];
+	if(str_comp(pFilename, "") == 0)
+		str_format(aFilename, sizeof(aFilename), "demos/replays/%s_%s (replay).demo", m_aCurrentMap, aDate);
+	else
+		str_format(aFilename, sizeof(aFilename), "demos/replays/%s.demo", pFilename);
+
+	// Check if replay with this name is already being saved at the moment
+	if(std::any_of(std::begin(m_vpEditJobs), std::end(m_vpEditJobs), [aFilename](const auto &pJob) { return str_comp(aFilename, pJob->Destination()) == 0; }))
+	{
+		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", "ERROR: demorecorder is already recording to a file with this name.");
+		return;
+	}
+
+	// First we stop the recorder to slice correctly the demo after
+	DemoRecorder_Stop(RECORDER_REPLAYS);
+	char *pSrc = m_aDemoRecorder[RECORDER_REPLAYS].GetCurrentFilename();
+
+	// Slice the demo to get only the last cl_replay_length seconds
+	const int EndTick = GameTick(g_Config.m_ClDummy);
+	const int StartTick = EndTick - Length * GameTickSpeed();
+
+	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", "Saving replay...");
+
+	// Create a job to do this slicing in background because it can be a bit long depending on the file size
+	std::shared_ptr<CDemoEdit> pDemoEditTask = std::make_shared<CDemoEdit>(this, GameClient()->NetVersion(), &m_SnapshotDelta, pSrc, aFilename, StartTick, EndTick);
+	Engine()->AddJob(pDemoEditTask);
+	m_vpEditJobs.push_back(pDemoEditTask);
+
+	// And we restart the recorder
+	DemoRecorder_StartReplayRecorder();
 }
 
 void CClient::DemoSlice(const char *pDstPath, CLIENTFUNC_FILTER pfnFilter, void *pUser)
@@ -4643,6 +4621,17 @@ void CClient::RequestDDNetInfo()
 	m_pDDNetInfoTask = HttpGetFile(aUrl, Storage(), m_aDDNetInfoTmp, IStorage::TYPE_SAVE);
 	m_pDDNetInfoTask->Timeout(CTimeout{10000, 0, 500, 10});
 	m_pDDNetInfoTask->IpResolve(IPRESOLVE::V4);
+	m_pDDNetInfoTask->DoneHandler([this](CHttpRequest *pRequest) {
+		if(pRequest->State() == HTTP_DONE)
+		{
+			FinishDDNetInfo();
+		}
+		else if(pRequest->State() == HTTP_ERROR || pRequest->State() == HTTP_ABORTED)
+		{
+			Storage()->RemoveFile(m_aDDNetInfoTmp, IStorage::TYPE_SAVE);
+			ResetDDNetInfo();
+		}
+	});
 	Engine()->AddJob(m_pDDNetInfoTask);
 }
 

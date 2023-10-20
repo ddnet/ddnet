@@ -3,8 +3,8 @@
 #ifndef ENGINE_CLIENT_CLIENT_H
 #define ENGINE_CLIENT_CLIENT_H
 
-#include <deque>
 #include <memory>
+#include <vector>
 
 #include <base/hash.h>
 
@@ -21,6 +21,7 @@
 #include <engine/shared/fifo.h>
 #include <engine/shared/http.h>
 #include <engine/shared/network.h>
+#include <engine/textrender.h>
 #include <engine/warning.h>
 
 #include "graph.h"
@@ -195,7 +196,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 
 	CSnapshotDelta m_SnapshotDelta;
 
-	std::deque<std::shared_ptr<CDemoEdit>> m_EditJobs;
+	std::vector<std::shared_ptr<CDemoEdit>> m_vpEditJobs;
 
 	//
 	bool m_CanReceiveServerCapabilities;
@@ -252,6 +253,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 public:
 	IConfigManager *ConfigManager() { return m_pConfigManager; }
 	CConfig *Config() { return m_pConfig; }
+	IConsole *Console() { return m_pConsole; }
 	IDiscord *Discord() { return m_pDiscord; }
 	IEngine *Engine() { return m_pEngine; }
 	IGameClient *GameClient() { return m_pGameClient; }

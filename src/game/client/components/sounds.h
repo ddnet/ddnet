@@ -10,16 +10,19 @@
 
 class CSoundLoading : public IJob
 {
-	CGameClient *m_pGameClient;
+	class CSounds *m_pSounds;
 	bool m_Render;
 
 public:
-	CSoundLoading(CGameClient *pGameClient, bool Render);
+	CSoundLoading(class CSounds *pSounds, bool Render);
 	void Run() override;
+	void Done() override;
 };
 
 class CSounds : public CComponent
 {
+	friend CSoundLoading;
+
 	enum
 	{
 		QUEUE_SIZE = 32,
@@ -31,7 +34,6 @@ class CSounds : public CComponent
 	} m_aQueue[QUEUE_SIZE];
 	int m_QueuePos;
 	int64_t m_QueueWaitTime;
-	std::shared_ptr<CSoundLoading> m_pSoundJob;
 	bool m_WaitForSoundJob;
 
 	int GetSampleId(int SetId);
