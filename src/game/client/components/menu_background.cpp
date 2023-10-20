@@ -212,15 +212,18 @@ void CMenuBackground::LoadMenuBackground(bool HasDayHint, bool HasNightHint)
 			switch(time_season())
 			{
 			case SEASON_SPRING:
+			case SEASON_EASTER:
 				pMenuMap = "heavens";
 				break;
 			case SEASON_SUMMER:
 				pMenuMap = "jungle";
 				break;
 			case SEASON_AUTUMN:
+			case SEASON_HALLOWEEN:
 				pMenuMap = "autumn";
 				break;
 			case SEASON_WINTER:
+			case SEASON_XMAS:
 				pMenuMap = "winter";
 				break;
 			case SEASON_NEWYEAR:

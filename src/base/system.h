@@ -803,12 +803,15 @@ int time_houroftheday();
 /**
  * @ingroup Time
  */
-enum
+enum ETimeSeason
 {
 	SEASON_SPRING = 0,
 	SEASON_SUMMER,
 	SEASON_AUTUMN,
 	SEASON_WINTER,
+	SEASON_EASTER,
+	SEASON_HALLOWEEN,
+	SEASON_XMAS,
 	SEASON_NEWYEAR
 };
 
@@ -821,7 +824,7 @@ enum
  *
  * @see SEASON_SPRING
  */
-int time_season();
+ETimeSeason time_season();
 
 /**
  * @defgroup Network-General
