@@ -16,6 +16,26 @@
 
 #include "skins.h"
 
+CSkins::CSkins() :
+	m_PlaceholderSkin("dummy")
+{
+	m_PlaceholderSkin.m_OriginalSkin.Reset();
+	m_PlaceholderSkin.m_ColorableSkin.Reset();
+	m_PlaceholderSkin.m_BloodColor = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
+	m_PlaceholderSkin.m_Metrics.m_Body.m_Width = 64;
+	m_PlaceholderSkin.m_Metrics.m_Body.m_Height = 64;
+	m_PlaceholderSkin.m_Metrics.m_Body.m_OffsetX = 16;
+	m_PlaceholderSkin.m_Metrics.m_Body.m_OffsetY = 16;
+	m_PlaceholderSkin.m_Metrics.m_Body.m_MaxWidth = 96;
+	m_PlaceholderSkin.m_Metrics.m_Body.m_MaxHeight = 96;
+	m_PlaceholderSkin.m_Metrics.m_Feet.m_Width = 32;
+	m_PlaceholderSkin.m_Metrics.m_Feet.m_Height = 16;
+	m_PlaceholderSkin.m_Metrics.m_Feet.m_OffsetX = 16;
+	m_PlaceholderSkin.m_Metrics.m_Feet.m_OffsetY = 8;
+	m_PlaceholderSkin.m_Metrics.m_Feet.m_MaxWidth = 64;
+	m_PlaceholderSkin.m_Metrics.m_Feet.m_MaxHeight = 32;
+}
+
 bool CSkins::IsVanillaSkin(const char *pName)
 {
 	return std::any_of(std::begin(VANILLA_SKINS), std::end(VANILLA_SKINS), [pName](const char *pVanillaSkin) { return str_comp(pName, pVanillaSkin) == 0; });
@@ -323,14 +343,6 @@ void CSkins::Refresh(TSkinLoadedCBFunc &&SkinLoadedFunc)
 	SkinScanUser.m_pThis = this;
 	SkinScanUser.m_SkinLoadedFunc = SkinLoadedFunc;
 	Storage()->ListDirectory(IStorage::TYPE_ALL, "skins", SkinScan, &SkinScanUser);
-	if(m_Skins.empty())
-	{
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "gameclient", "failed to load skins. folder='skins/'");
-		CSkin DummySkin{"dummy"};
-		DummySkin.m_BloodColor = ColorRGBA(1.0f, 1.0f, 1.0f);
-		auto &&pDummySkin = std::make_unique<CSkin>(std::move(DummySkin));
-		m_Skins.insert({pDummySkin->GetName(), std::move(pDummySkin)});
-	}
 }
 
 int CSkins::Num()
@@ -344,15 +356,12 @@ const CSkin *CSkins::Find(const char *pName)
 	if(pSkin == nullptr)
 	{
 		pSkin = FindOrNullptr("default");
-		if(pSkin == nullptr)
-			return m_Skins.begin()->second.get();
-		else
-			return pSkin;
 	}
-	else
+	if(pSkin == nullptr)
 	{
-		return pSkin;
+		pSkin = &m_PlaceholderSkin;
 	}
+	return pSkin;
 }
 
 const CSkin *CSkins::FindOrNullptr(const char *pName, bool IgnorePrefix)

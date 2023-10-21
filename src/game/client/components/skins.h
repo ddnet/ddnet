@@ -13,7 +13,7 @@
 class CSkins : public CComponent
 {
 public:
-	CSkins() = default;
+	CSkins();
 
 	class CGetPngFile : public CHttpRequest
 	{
@@ -79,6 +79,7 @@ public:
 private:
 	std::unordered_map<std::string_view, std::unique_ptr<CSkin>> m_Skins;
 	std::unordered_map<std::string_view, std::unique_ptr<CDownloadSkin>> m_DownloadSkins;
+	CSkin m_PlaceholderSkin;
 	size_t m_DownloadingSkins = 0;
 	char m_aEventSkinPrefix[24];
 
