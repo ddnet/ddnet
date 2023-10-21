@@ -15,10 +15,18 @@ class IJob
 {
 	friend CJobPool;
 
+public:
+	enum EJobState
+	{
+		STATE_PENDING = 0,
+		STATE_RUNNING,
+		STATE_DONE
+	};
+
 private:
 	std::shared_ptr<IJob> m_pNext;
+	std::atomic<EJobState> m_Status;
 
-	std::atomic<int> m_Status;
 	virtual void Run() = 0;
 
 public:
@@ -26,14 +34,7 @@ public:
 	IJob(const IJob &Other) = delete;
 	IJob &operator=(const IJob &Other) = delete;
 	virtual ~IJob();
-	int Status();
-
-	enum
-	{
-		STATE_PENDING = 0,
-		STATE_RUNNING,
-		STATE_DONE
-	};
+	EJobState Status();
 };
 
 class CJobPool

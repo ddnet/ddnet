@@ -11,7 +11,7 @@ IJob::IJob() :
 
 IJob::~IJob() = default;
 
-int IJob::Status()
+IJob::EJobState IJob::Status()
 {
 	return m_Status.load();
 }
