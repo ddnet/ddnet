@@ -143,8 +143,9 @@ struct SingleScore : public Score
 	}
 };
 
-TEST_P(SingleScore, Top)
+TEST_P(SingleScore, TopRegional)
 {
+	g_Config.m_SvRegionalRankings = true;
 	ASSERT_FALSE(CScoreWorker::ShowTop(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
 	ExpectLines(m_pPlayerResult,
 		{"------------ Global Top ------------",
@@ -152,14 +153,32 @@ TEST_P(SingleScore, Top)
 			"------------ GER Top ------------"});
 }
 
-TEST_P(SingleScore, Rank)
+TEST_P(SingleScore, Top)
 {
+	g_Config.m_SvRegionalRankings = false;
+	ASSERT_FALSE(CScoreWorker::ShowTop(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
+	ExpectLines(m_pPlayerResult,
+		{"------------ Global Top ------------",
+			"1. nameless tee Time: 01:40.00"});
+}
+
+TEST_P(SingleScore, RankRegional)
+{
+	g_Config.m_SvRegionalRankings = true;
 	ASSERT_FALSE(CScoreWorker::ShowRank(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
 	ExpectLines(m_pPlayerResult, {"nameless tee - 01:40.00 - better than 100% - requested by brainless tee", "Global rank 1 - GER unranked"}, true);
 }
 
-TEST_P(SingleScore, TopServer)
+TEST_P(SingleScore, Rank)
 {
+	g_Config.m_SvRegionalRankings = false;
+	ASSERT_FALSE(CScoreWorker::ShowRank(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
+	ExpectLines(m_pPlayerResult, {"nameless tee - 01:40.00 - better than 100% - requested by brainless tee", "Global rank 1"}, true);
+}
+
+TEST_P(SingleScore, TopServerRegional)
+{
+	g_Config.m_SvRegionalRankings = true;
 	str_copy(m_PlayerRequest.m_aServer, "USA", sizeof(m_PlayerRequest.m_aServer));
 	ASSERT_FALSE(CScoreWorker::ShowTop(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
 	ExpectLines(m_pPlayerResult,
@@ -169,11 +188,30 @@ TEST_P(SingleScore, TopServer)
 			"1. nameless tee Time: 01:40.00"});
 }
 
-TEST_P(SingleScore, RankServer)
+TEST_P(SingleScore, TopServer)
 {
+	g_Config.m_SvRegionalRankings = false;
+	str_copy(m_PlayerRequest.m_aServer, "USA", sizeof(m_PlayerRequest.m_aServer));
+	ASSERT_FALSE(CScoreWorker::ShowTop(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
+	ExpectLines(m_pPlayerResult,
+		{"------------ Global Top ------------",
+			"1. nameless tee Time: 01:40.00"});
+}
+
+TEST_P(SingleScore, RankServerRegional)
+{
+	g_Config.m_SvRegionalRankings = true;
 	str_copy(m_PlayerRequest.m_aServer, "USA", sizeof(m_PlayerRequest.m_aServer));
 	ASSERT_FALSE(CScoreWorker::ShowRank(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
 	ExpectLines(m_pPlayerResult, {"nameless tee - 01:40.00 - better than 100% - requested by brainless tee", "Global rank 1 - USA rank 1"}, true);
+}
+
+TEST_P(SingleScore, RankServer)
+{
+	g_Config.m_SvRegionalRankings = false;
+	str_copy(m_PlayerRequest.m_aServer, "USA", sizeof(m_PlayerRequest.m_aServer));
+	ASSERT_FALSE(CScoreWorker::ShowRank(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
+	ExpectLines(m_pPlayerResult, {"nameless tee - 01:40.00 - better than 100% - requested by brainless tee", "Global rank 1"}, true);
 }
 
 TEST_P(SingleScore, LoadPlayerData)
