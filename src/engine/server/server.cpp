@@ -2821,7 +2821,7 @@ int CServer::Run()
 					else if(m_aClients[ClientID].m_DnsblState == CClient::DNSBL_STATE_PENDING &&
 						m_aClients[ClientID].m_pDnsblLookup->Status() == IJob::STATE_DONE)
 					{
-						if(m_aClients[ClientID].m_pDnsblLookup->m_Result != 0)
+						if(m_aClients[ClientID].m_pDnsblLookup->Result() != 0)
 						{
 							// entry not found -> whitelisted
 							m_aClients[ClientID].m_DnsblState = CClient::DNSBL_STATE_WHITELISTED;
