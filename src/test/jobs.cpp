@@ -2,7 +2,8 @@
 #include <gtest/gtest.h>
 
 #include <base/system.h>
-#include <engine/engine.h>
+
+#include <engine/shared/host_lookup.h>
 #include <engine/shared/jobs.h>
 
 #include <functional>

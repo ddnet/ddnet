@@ -8,6 +8,7 @@
 #include <game/generated/client_data.h>
 
 #include <engine/console.h>
+#include <engine/engine.h>
 #include <engine/graphics.h>
 #include <engine/keys.h>
 #include <engine/shared/config.h>
