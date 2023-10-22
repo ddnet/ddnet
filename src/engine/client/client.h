@@ -7,6 +7,7 @@
 #include <memory>
 
 #include <base/hash.h>
+
 #include <engine/client.h>
 #include <engine/client/checksum.h>
 #include <engine/client/friends.h>
@@ -14,7 +15,6 @@
 #include <engine/client/serverbrowser.h>
 #include <engine/client/updater.h>
 #include <engine/editor.h>
-#include <engine/engine.h>
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
 #include <engine/shared/demo.h>
@@ -32,10 +32,12 @@ class CMsgPacker;
 class CUnpacker;
 class IConfigManager;
 class IDiscord;
+class IEngine;
 class IEngineInput;
 class IEngineMap;
 class IEngineSound;
 class IFriends;
+class ILogger;
 class ISteam;
 class IStorage;
 class IUpdater;
@@ -221,7 +223,6 @@ class CClient : public IClient, public CDemoPlayer::IListener
 		};
 
 		int m_State;
-		class CHostLookup m_VersionServeraddr;
 	} m_VersionInfo;
 
 	std::vector<SWarning> m_vWarnings;

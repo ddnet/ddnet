@@ -1912,6 +1912,8 @@ set_src(ENGINE_SHARED GLOB_RECURSE src/engine/shared
   filecollection.cpp
   filecollection.h
   global_uuid_manager.cpp
+  host_lookup.cpp
+  host_lookup.h
   http.cpp
   http.h
   huffman.cpp
