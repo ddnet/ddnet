@@ -4127,6 +4127,7 @@ bool CEditor::ReplaceSound(const char *pFileName, int StorageType, bool CheckDup
 	pSound->m_pData = pData;
 	pSound->m_DataSize = DataSize;
 
+	OnDialogClose();
 	m_Dialog = DIALOG_NONE;
 	return true;
 }
