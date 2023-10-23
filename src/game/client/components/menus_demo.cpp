@@ -880,6 +880,8 @@ void CMenus::RenderDemoPlayerSliceSavePopup(CUIRect MainView)
 			m_StartPaused = false;
 			m_DemoRenderInput.Set(m_aCurrentDemoSelectionName);
 			UI()->SetActiveItem(&m_DemoRenderInput);
+			if(m_DemolistStorageType != IStorage::TYPE_ALL && m_DemolistStorageType != IStorage::TYPE_SAVE)
+				m_DemolistStorageType = IStorage::TYPE_ALL; // Select a storage type containing the sliced demo
 		}
 #endif
 	}
