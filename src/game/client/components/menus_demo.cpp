@@ -848,7 +848,7 @@ void CMenus::RenderDemoPlayerSliceSavePopup(CUIRect MainView)
 		else
 		{
 			char aPath[IO_MAX_PATH_LENGTH];
-			str_format(aPath, sizeof(aPath), "%s/%s", m_aCurrentDemoFolder, m_DemoSliceInput.GetString());
+			str_format(aPath, sizeof(aPath), "%s/%s.demo", m_aCurrentDemoFolder, m_DemoSliceInput.GetString());
 			if(Storage()->FileExists(aPath, IStorage::TYPE_SAVE))
 			{
 				s_ConfirmPopupContext.Reset();
@@ -880,6 +880,8 @@ void CMenus::RenderDemoPlayerSliceSavePopup(CUIRect MainView)
 			m_StartPaused = false;
 			m_DemoRenderInput.Set(m_aCurrentDemoSelectionName);
 			UI()->SetActiveItem(&m_DemoRenderInput);
+			if(m_DemolistStorageType != IStorage::TYPE_ALL && m_DemolistStorageType != IStorage::TYPE_SAVE)
+				m_DemolistStorageType = IStorage::TYPE_ALL; // Select a storage type containing the sliced demo
 		}
 #endif
 	}

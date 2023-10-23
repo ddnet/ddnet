@@ -1565,8 +1565,6 @@ int CMenus::Render()
 #if defined(CONF_VIDEORECORDER)
 		else if(m_Popup == POPUP_RENDER_DEMO)
 		{
-			dbg_assert(m_DemolistSelectedIndex >= 0 && !m_vpFilteredDemos[m_DemolistSelectedIndex]->m_IsDir, "m_DemolistSelectedIndex invalid for POPUP_RENDER_DEMO");
-
 			CUIRect Row, Ok, Abort;
 			Box.VMargin(60.0f, &Box);
 			Box.HMargin(20.0f, &Box);
@@ -1826,12 +1824,12 @@ int CMenus::Render()
 void CMenus::PopupConfirmDemoReplaceVideo()
 {
 	char aBuf[IO_MAX_PATH_LENGTH];
-	str_format(aBuf, sizeof(aBuf), "%s/%s", m_aCurrentDemoFolder, m_vpFilteredDemos[m_DemolistSelectedIndex]->m_aFilename);
+	str_format(aBuf, sizeof(aBuf), "%s/%s.demo", m_aCurrentDemoFolder, m_aCurrentDemoSelectionName);
 	char aVideoName[IO_MAX_PATH_LENGTH];
 	str_copy(aVideoName, m_DemoRenderInput.GetString());
 	if(!str_endswith(aVideoName, ".mp4"))
 		str_append(aVideoName, ".mp4");
-	const char *pError = Client()->DemoPlayer_Render(aBuf, m_vpFilteredDemos[m_DemolistSelectedIndex]->m_StorageType, aVideoName, m_Speed, m_StartPaused);
+	const char *pError = Client()->DemoPlayer_Render(aBuf, m_DemolistStorageType, aVideoName, m_Speed, m_StartPaused);
 	m_Speed = 4;
 	m_StartPaused = false;
 	m_LastPauseChange = -1.0f;
