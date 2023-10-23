@@ -419,6 +419,7 @@ public:
 	void OnActivate() override;
 	void OnWindowResize() override;
 	void OnClose() override;
+	void OnDialogClose() override;
 	bool HasUnsavedData() const override { return m_Map.m_Modified; }
 	void UpdateMentions() override { m_Mentions++; }
 	void ResetMentions() override { m_Mentions = 0; }

@@ -884,11 +884,7 @@ bool CEditor::CallbackSaveSound(const char *pFileName, int StorageType, void *pU
 	{
 		io_write(File, pSound->m_pData, pSound->m_DataSize);
 		io_close(File);
-		if(pEditor->m_FilePreviewSound)
-		{
-			pEditor->Sound()->UnloadSample(pEditor->m_FilePreviewSound);
-			pEditor->m_FilePreviewSound = -1;
-		}
+		pEditor->OnDialogClose();
 		pEditor->m_Dialog = DIALOG_NONE;
 		return true;
 	}
@@ -4079,11 +4075,7 @@ bool CEditor::AddSound(const char *pFileName, int StorageType, void *pUser)
 			}
 	}
 
-	if(pEditor->m_FilePreviewSound)
-	{
-		pEditor->Sound()->UnloadSample(pEditor->m_FilePreviewSound);
-		pEditor->m_FilePreviewSound = -1;
-	}
+	pEditor->OnDialogClose();
 	pEditor->m_Dialog = DIALOG_NONE;
 	return true;
 }
@@ -4936,11 +4928,7 @@ void CEditor::RenderFileDialog()
 	ButtonBar.VSplitRight(50.0f, &ButtonBar, &Button);
 	if(DoButton_Editor(&s_CancelButton, "Cancel", 0, &Button, 0, nullptr) || (s_ListBox.Active() && UI()->ConsumeHotkey(CUI::HOTKEY_ESCAPE)))
 	{
-		if(m_FilePreviewSound)
-		{
-			Sound()->UnloadSample(m_FilePreviewSound);
-			m_FilePreviewSound = -1;
-		}
+		OnDialogClose();
 		m_Dialog = DIALOG_NONE;
 	}
 
@@ -7949,6 +7937,15 @@ void CEditor::OnClose()
 		Sound()->Pause(m_ToolbarPreviewSound);
 	if(m_FilePreviewSound && Sound()->IsPlaying(m_FilePreviewSound))
 		Sound()->Pause(m_FilePreviewSound);
+}
+
+void CEditor::OnDialogClose()
+{
+	if(m_FilePreviewSound)
+	{
+		Sound()->UnloadSample(m_FilePreviewSound);
+		m_FilePreviewSound = -1;
+	}
 }
 
 void CEditor::LoadCurrentMap()
