@@ -848,7 +848,7 @@ void CMenus::RenderDemoPlayerSliceSavePopup(CUIRect MainView)
 		else
 		{
 			char aPath[IO_MAX_PATH_LENGTH];
-			str_format(aPath, sizeof(aPath), "%s/%s", m_aCurrentDemoFolder, m_DemoSliceInput.GetString());
+			str_format(aPath, sizeof(aPath), "%s/%s.demo", m_aCurrentDemoFolder, m_DemoSliceInput.GetString());
 			if(Storage()->FileExists(aPath, IStorage::TYPE_SAVE))
 			{
 				s_ConfirmPopupContext.Reset();
