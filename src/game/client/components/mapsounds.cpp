@@ -118,7 +118,7 @@ void CMapSounds::OnRender()
 				Client()->IntraGameTick(g_Config.m_ClDummy));
 		}
 		float Offset = s_Time - Source.m_pSource->m_TimeDelay;
-		if(!DemoPlayerPaused && Offset >= 0.0f && g_Config.m_SndEnable && (g_Config.m_GfxHighDetail || !Source.m_HighDetail))
+		if(!DemoPlayerPaused && Offset >= 0.0f && g_Config.m_SndEnable)
 		{
 			if(Source.m_Voice.IsValid())
 			{
