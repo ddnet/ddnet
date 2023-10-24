@@ -270,9 +270,9 @@ public:
 	// Send via the currently active client (main/dummy)
 	int SendMsgActive(CMsgPacker *pMsg, int Flags) override;
 
-	void SendInfo();
+	void SendInfo(int Conn);
 	void SendEnterGame(int Conn);
-	void SendReady();
+	void SendReady(int Conn);
 	void SendMapRequest();
 
 	bool RconAuthed() const override { return m_aRconAuthed[g_Config.m_ClDummy] != 0; }
