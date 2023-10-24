@@ -130,7 +130,7 @@ mod ffi {
         /// # result = result_param;
         /// assert_eq!(result.GetString(0), "I'm in space");
         /// assert_eq!(result.GetString(1), "''");
-        /// assert_eq!(result.GetString(2), r#""\Escapes\?"\n"#); // only \\ and \" escapes
+        /// assert_eq!(result.GetString(2), r#""\Escapes\?"\n"#); // only \\ and \" escapes  // This fails with and without this PR, I cannot decipher what is going on here, so.. I didn't even try (also make run_tests points me to line 26...?)
         /// assert_eq!(result.GetString(3), ""); // out of range
         /// # }
         /// # assert!(executed);
@@ -240,7 +240,7 @@ mod ffi {
         /// assert_eq!(result.NumArguments(), 2);
         /// # }
         /// # }
-        /// # assert!(executed == 2);
+        /// # assert!(executed == 2); // This fails with and without this PR, I cannot decipher what is going on here, so.. I didn't even try (also make run_tests points me to line 34...?)
         /// ```
         pub fn NumArguments(self: &IConsole_IResult) -> i32;
 

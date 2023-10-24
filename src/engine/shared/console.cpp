@@ -104,7 +104,7 @@ const IConsole::CCommandInfo *CConsole::FirstCommandInfo(int AccessLevel, int Fl
 
 // the maximum number of tokens occurs in a string of length CONSOLE_MAX_STR_LENGTH with tokens size 1 separated by single spaces
 
-int CConsole::ParseStart(CResult *pResult, const char *pString, int Length)
+void CConsole::ParseStart(CResult *pResult, const char *pString, int Length)
 {
 	char *pStr;
 	int Len = sizeof(pResult->m_aStringStorage);
@@ -126,147 +126,117 @@ int CConsole::ParseStart(CResult *pResult, const char *pString, int Length)
 	}
 
 	pResult->m_pArgsStart = pStr;
-	return 0;
 }
 
-int CConsole::ParseArgs(CResult *pResult, const char *pFormat)
+enum CConsole::ParseArgsError CConsole::ParseArgs(CResult *pResult, const char *pFormat)
 {
-	char Command = *pFormat;
-	char *pStr;
-	int Optional = 0;
-	int Error = 0;
-
+	char *pStr = pResult->m_pArgsStart;
+	bool Optional = false;
+	bool Remaining = false; // The last argument may start with a '*' which means any remaining arguments will have the next chars type eg: *s[Penut butter]
+	bool Victim = false;
+	char Type = 0;
 	pResult->ResetVictim();
-
-	pStr = pResult->m_pArgsStart;
 
 	while(true)
 	{
-		if(!Command)
-			break;
-
-		if(Command == '?')
-			Optional = 1;
-		else
+		if(!Remaining)
 		{
-			pStr = str_skip_whitespaces(pStr);
-
-			if(!(*pStr)) // error, non optional command needs value
+			if(!(*pFormat))
 			{
-				if(!Optional)
-				{
-					Error = 1;
-					break;
-				}
-
-				while(Command)
-				{
-					if(Command == 'v')
-					{
-						pResult->SetVictim(CResult::VICTIM_ME);
-						break;
-					}
-					Command = NextParam(pFormat);
-				}
 				break;
 			}
-
-			// add token
-			if(*pStr == '"')
+			else if(*pFormat == '?')
 			{
-				char *pDst;
-				pStr++;
-				pResult->AddArgument(pStr);
-
-				pDst = pStr; // we might have to process escape data
-				while(true)
-				{
-					if(pStr[0] == '"')
-						break;
-					else if(pStr[0] == '\\')
-					{
-						if(pStr[1] == '\\')
-							pStr++; // skip due to escape
-						else if(pStr[1] == '"')
-							pStr++; // skip due to escape
-					}
-					else if(pStr[0] == 0)
-						return 1; // return error
-
-					*pDst = *pStr;
-					pDst++;
-					pStr++;
-				}
-
-				// write null termination
-				*pDst = 0;
-
-				pStr++;
+				Optional = true;
+				pFormat++;
+			}
+			else if(*pFormat == '*')
+			{
+				Remaining = true;
+				Optional = true;
+				pFormat++;
 			}
 			else
 			{
-				char *pVictim = 0;
-
-				pResult->AddArgument(pStr);
-				if(Command == 'v')
-				{
-					pVictim = pStr;
-				}
-
-				if(Command == 'r') // rest of the string
-					break;
-				else if(Command == 'v') // validate victim
-					pStr = str_skip_to_whitespace(pStr);
-				else if(Command == 'i') // validate int
-					pStr = str_skip_to_whitespace(pStr);
-				else if(Command == 'f') // validate float
-					pStr = str_skip_to_whitespace(pStr);
-				else if(Command == 's') // validate string
-					pStr = str_skip_to_whitespace(pStr);
-
-				if(pStr[0] != 0) // check for end of string
-				{
-					pStr[0] = 0;
-					pStr++;
-				}
-
-				if(pVictim)
-				{
-					pResult->SetVictim(pVictim);
-				}
+				Optional = false;
 			}
-		}
-		// fetch next command
-		Command = NextParam(pFormat);
-	}
-
-	return Error;
-}
-
-char CConsole::NextParam(const char *&pFormat)
-{
-	if(*pFormat)
-	{
-		pFormat++;
-
-		if(*pFormat == '[')
-		{
-			// skip bracket contents
-			for(; *pFormat != ']'; pFormat++)
-			{
-				if(!*pFormat)
-					return *pFormat;
-			}
-
-			// skip ']'
+			Type = *pFormat;
 			pFormat++;
-
-			// skip space if there is one
-			if(*pFormat == ' ')
+			if(*pFormat == '[')
+			{
+				for(; *pFormat != ']'; pFormat++) {}
 				pFormat++;
+			}
+			pFormat = str_skip_whitespaces_const(pFormat);
+			if(Type == 'v')
+				Victim = true;
 		}
+		pStr = str_skip_whitespaces(pStr);
+		if(!(*pStr))
+		{
+			if(Remaining || Optional || !pFormat)
+				break;
+			return MissingArgument;
+		}
+		char *victim;
+		if(*pStr == '"')
+		{ // Handle quoted strings
+			pStr++;
+			pResult->AddArgument(pStr);
+			if(Type == 'v')
+				victim = pStr;
+			char *pDst = pStr;
+			bool Ended = false;
+			while(*pStr)
+			{
+				if(*pStr == '\\')
+				{
+					pStr++;
+					if(!(*pStr))
+						break;
+					if(*pStr != '\\' && *pStr != '"')
+					{
+						*pDst = '\\';
+						pDst++;
+					}
+				}
+				else if(*pStr == '"')
+				{
+					Ended = true;
+					break;
+				}
+				*pDst = *pStr;
+				pDst++;
+				pStr++;
+			}
+			if(!Ended)
+				return UnmatchedQuote;
+		}
+		else
+		{
+			pResult->AddArgument(pStr);
+			if(Type == 'v')
+				victim = pStr;
+			pStr = str_skip_to_whitespace(pStr);
+			if(Type == 'r')
+				break; // rest of string
+		}
+		if(*pStr)
+		{
+			*pStr = '\0';
+			++pStr;
+		}
+		if(Type == 'v')
+		{
+			Victim = false;
+			pResult->SetVictim(victim);
+		}
+		pStr = str_skip_whitespaces(pStr);
 	}
-	return *pFormat;
+
+	if(Victim)
+		pResult->SetVictim(CResult::VICTIM_ME);
+	return None;
 }
 
 char *CConsole::Format(char *pBuf, int Size, const char *pFrom, const char *pStr)
@@ -389,8 +359,7 @@ bool CConsole::LineIsValid(const char *pStr)
 			pEnd++;
 		}
 
-		if(ParseStart(&Result, pStr, (pEnd - pStr) + 1) != 0)
-			return false;
+		ParseStart(&Result, pStr, (pEnd - pStr) + 1);
 
 		CCommand *pCommand = FindCommand(Result.m_pCommand, m_FlagMask);
 		if(!pCommand || ParseArgs(&Result, pCommand->m_pParams))
@@ -441,8 +410,7 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientID, bo
 			pEnd++;
 		}
 
-		if(ParseStart(&Result, pStr, (pEnd - pStr) + 1) != 0)
-			return;
+		ParseStart(&Result, pStr, (pEnd - pStr) + 1);
 
 		if(!*Result.m_pCommand)
 			return;
@@ -487,10 +455,10 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientID, bo
 
 				if(Stroke || IsStrokeCommand)
 				{
-					if(ParseArgs(&Result, pCommand->m_pParams))
+					if(ParseArgsError error = ParseArgs(&Result, pCommand->m_pParams))
 					{
 						char aBuf[256];
-						str_format(aBuf, sizeof(aBuf), "Invalid arguments... Usage: %s %s", pCommand->m_pName, pCommand->m_pParams);
+						str_format(aBuf, sizeof(aBuf), "%s... Usage: %s %s", ParseArgsString(error), pCommand->m_pName, pCommand->m_pParams);
 						Print(OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
 					}
 					else if(m_StoreCommands && pCommand->m_Flags & CFGFLAG_STORE)
@@ -1027,7 +995,8 @@ void CConsole::Init()
 	{ \
 		static CIntVariableData Data = {this, &g_Config.m_##Name, Min, Max, Def}; \
 		Register(#ScriptName, "?i", Flags, IntVariableCommand, &Data, \
-			Min == Max ? Desc " (default: " #Def ")" : Max == 0 ? Desc " (default: " #Def ", min: " #Min ")" : Desc " (default: " #Def ", min: " #Min ", max: " #Max ")"); \
+			Min == Max ? Desc " (default: " #Def ")" : Max == 0 ? Desc " (default: " #Def ", min: " #Min ")" : \
+									      Desc " (default: " #Def ", min: " #Min ", max: " #Max ")"); \
 	}
 
 #define MACRO_CONFIG_COL(Name, ScriptName, Def, Flags, Desc) \

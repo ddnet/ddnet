@@ -36,6 +36,28 @@ bool CBinds::CBindsSpecial::OnInput(const IInput::CEvent &Event)
 	return false;
 }
 
+bool CBinds::CBindsChord::OnInput(const IInput::CEvent &Event)
+{
+	if(!(Event.m_Flags & IInput::FLAG_PRESS))
+		return false;
+	if(m_keyBindingsLength == 0)
+		return false;
+
+	for(int i = 0; i < m_keyBindingsLength; i++)
+	{
+		if(Event.m_Key == m_keyBindings[i].Key)
+		{
+			m_pClient->Console()->ExecuteLine(m_keyBindings[i].Command);
+			free(m_keyBindings);
+			m_keyBindings = NULL;
+			m_keyBindingsLength = 0;
+			return true;
+		}
+	}
+
+	return false;
+}
+
 CBinds::CBinds()
 {
 	mem_zero(m_aapKeyBindings, sizeof(m_aapKeyBindings));
@@ -274,6 +296,8 @@ void CBinds::OnConsoleInit()
 	Console()->Register("unbind", "s[key]", CFGFLAG_CLIENT, ConUnbind, this, "Unbind key");
 	Console()->Register("unbindall", "", CFGFLAG_CLIENT, ConUnbindAll, this, "Unbind all keys");
 
+	Console()->Register("chord", "s[key 1] s[command 1] *s[key n] *s[command n]", CFGFLAG_CLIENT, ConChord, this, "Allow a temporary seperate action per key");
+
 	// default bindings
 	SetDefaults();
 }
@@ -374,6 +398,41 @@ void CBinds::ConUnbindAll(IConsole::IResult *pResult, void *pUserData)
 {
 	CBinds *pBinds = (CBinds *)pUserData;
 	pBinds->UnbindAll();
+}
+
+void CBinds::ConChord(IConsole::IResult *pResult, void *pUserData)
+{
+	// TODO? modifiers?
+
+	CBinds *pBinds = (CBinds *)pUserData;
+
+	int NumArgs = pResult->NumArguments();
+	int NumCmds = NumArgs / 2 + (NumArgs & 1); // ceil(NumArgs / 2)
+
+	if(pBinds->m_ChordBinds.m_keyBindingsLength > 0)
+	{
+		pBinds->m_ChordBinds.m_keyBindingsLength = 0;
+		free(pBinds->m_ChordBinds.m_keyBindings);
+		pBinds->m_ChordBinds.m_keyBindings = NULL;
+	}
+	pBinds->m_ChordBinds.m_keyBindings = (CBindsChord::keyBinding *)malloc(sizeof(CBindsChord::keyBinding) * NumCmds);
+	for(int i = 0; i < NumCmds; ++i)
+	{
+		if(!(pBinds->m_ChordBinds.m_keyBindings[i].Key = pBinds->GetKeyID(pResult->GetString(i * 2))))
+		{
+			char aBuf[256];
+			str_format(aBuf, sizeof(aBuf), "key %s not found", pResult->GetString(i * 2));
+			pBinds->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf, gs_BindPrintColor);
+			free(pBinds->m_ChordBinds.m_keyBindings);
+			pBinds->m_ChordBinds.m_keyBindings = NULL;
+			return;
+		}
+		const char *cmd = pResult->GetString(i * 2 + 1);
+		pBinds->m_ChordBinds.m_keyBindings[i].Command = (const char *)malloc(strlen(cmd));
+		strcpy((char *)pBinds->m_ChordBinds.m_keyBindings[i].Command, cmd);
+	}
+
+	pBinds->m_ChordBinds.m_keyBindingsLength = NumCmds;
 }
 
 int CBinds::GetKeyID(const char *pKeyName)

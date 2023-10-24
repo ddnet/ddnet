@@ -18,6 +18,7 @@ class CBinds : public CComponent
 	static void ConBinds(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnbind(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnbindAll(IConsole::IResult *pResult, void *pUserData);
+	static void ConChord(IConsole::IResult *pResult, void *pUserData);
 	class IConsole *GetConsole() const { return Console(); }
 
 	static void ConfigSaveCallback(IConfigManager *pConfigManager, void *pUserData);
@@ -35,6 +36,20 @@ public:
 		virtual bool OnInput(const IInput::CEvent &Event) override;
 	};
 
+	class CBindsChord : public CComponent
+	{
+	public:
+		virtual int Sizeof() const override { return sizeof(*this); }
+		virtual bool OnInput(const IInput::CEvent &Event) override;
+		int m_keyBindingsLength = 0;
+		typedef struct
+		{
+			int Key;
+			const char *Command;
+		} keyBinding;
+		keyBinding *m_keyBindings;
+	};
+
 	bool m_MouseOnAction;
 
 	enum
@@ -49,6 +64,8 @@ public:
 	};
 
 	CBindsSpecial m_SpecialBinds;
+
+	CBindsChord m_ChordBinds;
 
 	void Bind(int KeyID, const char *pStr, bool FreeOnly = false, int ModifierCombination = MODIFIER_NONE);
 	void SetDefaults();
