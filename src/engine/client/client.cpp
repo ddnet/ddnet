@@ -244,12 +244,12 @@ void CClient::SendInfo(int Conn)
 	CMsgPacker MsgVer(NETMSG_CLIENTVER, true);
 	MsgVer.AddRaw(&m_ConnectionID, sizeof(m_ConnectionID));
 	MsgVer.AddInt(GameClient()->DDNetVersion());
-	MsgVer.AddString(GameClient()->DDNetVersionStr(), 0);
+	MsgVer.AddString(GameClient()->DDNetVersionStr());
 	SendMsg(Conn, &MsgVer, MSGFLAG_VITAL);
 
 	CMsgPacker Msg(NETMSG_INFO, true);
-	Msg.AddString(GameClient()->NetVersion(), 128);
-	Msg.AddString(m_aPassword, 128);
+	Msg.AddString(GameClient()->NetVersion());
+	Msg.AddString(m_aPassword);
 	SendMsg(Conn, &Msg, MSGFLAG_VITAL | MSGFLAG_FLUSH);
 }
 
@@ -289,8 +289,8 @@ void CClient::RconAuth(const char *pName, const char *pPassword)
 		str_copy(m_aRconPassword, pPassword);
 
 	CMsgPacker Msg(NETMSG_RCON_AUTH, true);
-	Msg.AddString(pName, 32);
-	Msg.AddString(pPassword, 128);
+	Msg.AddString(pName);
+	Msg.AddString(pPassword);
 	Msg.AddInt(1);
 	SendMsgActive(&Msg, MSGFLAG_VITAL);
 }
@@ -298,7 +298,7 @@ void CClient::RconAuth(const char *pName, const char *pPassword)
 void CClient::Rcon(const char *pCmd)
 {
 	CMsgPacker Msg(NETMSG_RCON_CMD, true);
-	Msg.AddString(pCmd, 256);
+	Msg.AddString(pCmd);
 	SendMsgActive(&Msg, MSGFLAG_VITAL);
 }
 
