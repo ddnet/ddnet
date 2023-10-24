@@ -112,9 +112,9 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	int m_aCurrentRecvTick[NUM_DUMMIES];
 	int m_aRconAuthed[NUM_DUMMIES];
 	char m_aRconUsername[32];
-	char m_aRconPassword[128];
+	char m_aRconPassword[sizeof(g_Config.m_SvRconPassword)];
 	int m_UseTempRconCommands;
-	char m_aPassword[128];
+	char m_aPassword[sizeof(g_Config.m_Password)];
 	bool m_SendPassword;
 	bool m_ButtonRender = false;
 
@@ -270,9 +270,9 @@ public:
 	// Send via the currently active client (main/dummy)
 	int SendMsgActive(CMsgPacker *pMsg, int Flags) override;
 
-	void SendInfo();
+	void SendInfo(int Conn);
 	void SendEnterGame(int Conn);
-	void SendReady();
+	void SendReady(int Conn);
 	void SendMapRequest();
 
 	bool RconAuthed() const override { return m_aRconAuthed[g_Config.m_ClDummy] != 0; }

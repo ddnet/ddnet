@@ -239,18 +239,18 @@ int CClient::SendMsgActive(CMsgPacker *pMsg, int Flags)
 	return SendMsg(g_Config.m_ClDummy, pMsg, Flags);
 }
 
-void CClient::SendInfo()
+void CClient::SendInfo(int Conn)
 {
 	CMsgPacker MsgVer(NETMSG_CLIENTVER, true);
 	MsgVer.AddRaw(&m_ConnectionID, sizeof(m_ConnectionID));
 	MsgVer.AddInt(GameClient()->DDNetVersion());
-	MsgVer.AddString(GameClient()->DDNetVersionStr(), 0);
-	SendMsg(CONN_MAIN, &MsgVer, MSGFLAG_VITAL);
+	MsgVer.AddString(GameClient()->DDNetVersionStr());
+	SendMsg(Conn, &MsgVer, MSGFLAG_VITAL);
 
 	CMsgPacker Msg(NETMSG_INFO, true);
-	Msg.AddString(GameClient()->NetVersion(), 128);
-	Msg.AddString(m_aPassword, 128);
-	SendMsg(CONN_MAIN, &Msg, MSGFLAG_VITAL | MSGFLAG_FLUSH);
+	Msg.AddString(GameClient()->NetVersion());
+	Msg.AddString(m_aPassword);
+	SendMsg(Conn, &Msg, MSGFLAG_VITAL | MSGFLAG_FLUSH);
 }
 
 void CClient::SendEnterGame(int Conn)
@@ -259,10 +259,10 @@ void CClient::SendEnterGame(int Conn)
 	SendMsg(Conn, &Msg, MSGFLAG_VITAL | MSGFLAG_FLUSH);
 }
 
-void CClient::SendReady()
+void CClient::SendReady(int Conn)
 {
 	CMsgPacker Msg(NETMSG_READY, true);
-	SendMsg(CONN_MAIN, &Msg, MSGFLAG_VITAL | MSGFLAG_FLUSH);
+	SendMsg(Conn, &Msg, MSGFLAG_VITAL | MSGFLAG_FLUSH);
 }
 
 void CClient::SendMapRequest()
@@ -289,8 +289,8 @@ void CClient::RconAuth(const char *pName, const char *pPassword)
 		str_copy(m_aRconPassword, pPassword);
 
 	CMsgPacker Msg(NETMSG_RCON_AUTH, true);
-	Msg.AddString(pName, 32);
-	Msg.AddString(pPassword, 128);
+	Msg.AddString(pName);
+	Msg.AddString(pPassword);
 	Msg.AddInt(1);
 	SendMsgActive(&Msg, MSGFLAG_VITAL);
 }
@@ -298,7 +298,7 @@ void CClient::RconAuth(const char *pName, const char *pPassword)
 void CClient::Rcon(const char *pCmd)
 {
 	CMsgPacker Msg(NETMSG_RCON_CMD, true);
-	Msg.AddString(pCmd, 256);
+	Msg.AddString(pCmd);
 	SendMsgActive(&Msg, MSGFLAG_VITAL);
 }
 
@@ -1494,7 +1494,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 				{
 					m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client/network", "loading done");
 					SetLoadingStateDetail(IClient::LOADING_STATE_DETAIL_SENDING_READY);
-					SendReady();
+					SendReady(CONN_MAIN);
 				}
 				else
 				{
@@ -2096,7 +2096,7 @@ void CClient::FinishMapDownload()
 	{
 		ResetMapDownload();
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client/network", "loading done");
-		SendReady();
+		SendReady(CONN_MAIN);
 	}
 	else if(m_pMapdownloadTask) // fallback
 	{
@@ -2329,7 +2329,7 @@ void CClient::PumpNetwork()
 			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", "connected, sending info", gs_ClientNetworkPrintColor);
 			SetState(IClient::STATE_LOADING);
 			SetLoadingStateDetail(IClient::LOADING_STATE_DETAIL_INITIAL);
-			SendInfo();
+			SendInfo(CONN_MAIN);
 		}
 	}
 
@@ -2921,32 +2921,11 @@ void CClient::Run()
 		if(m_DummySendConnInfo && !m_aNetClient[CONN_DUMMY].SecurityTokenUnknown())
 		{
 			m_DummySendConnInfo = false;
-
-			// send client info
-			CMsgPacker MsgVer(NETMSG_CLIENTVER, true);
-			MsgVer.AddRaw(&m_ConnectionID, sizeof(m_ConnectionID));
-			MsgVer.AddInt(GameClient()->DDNetVersion());
-			MsgVer.AddString(GameClient()->DDNetVersionStr(), 0);
-			SendMsg(CONN_DUMMY, &MsgVer, MSGFLAG_VITAL);
-
-			CMsgPacker MsgInfo(NETMSG_INFO, true);
-			MsgInfo.AddString(GameClient()->NetVersion(), 128);
-			MsgInfo.AddString(m_aPassword, 128);
-			SendMsg(CONN_DUMMY, &MsgInfo, MSGFLAG_VITAL | MSGFLAG_FLUSH);
-
-			// update netclient
+			SendInfo(CONN_DUMMY);
 			m_aNetClient[CONN_DUMMY].Update();
-
-			// send ready
-			CMsgPacker MsgReady(NETMSG_READY, true);
-			SendMsg(CONN_DUMMY, &MsgReady, MSGFLAG_VITAL | MSGFLAG_FLUSH);
-
-			// startinfo
+			SendReady(CONN_DUMMY);
 			GameClient()->SendDummyInfo(true);
-
-			// send enter game an finish the connection
-			CMsgPacker MsgEnter(NETMSG_ENTERGAME, true);
-			SendMsg(CONN_DUMMY, &MsgEnter, MSGFLAG_VITAL | MSGFLAG_FLUSH);
+			SendEnterGame(CONN_DUMMY);
 		}
 
 		// update input
