@@ -420,8 +420,9 @@ void CBinds::ConChord(IConsole::IResult *pResult, void *pUserData)
 			return;
 		}
 		const char *cmd = pResult->GetString(i * 2 + 1);
-		pBinds->m_ChordBinds.m_keyBindings[i].Command = (const char *)malloc(strlen(cmd));
-		strcpy((char *)pBinds->m_ChordBinds.m_keyBindings[i].Command, cmd);
+		const char cmdlen = str_length(cmd) + 1;
+		pBinds->m_ChordBinds.m_keyBindings[i].Command = (const char *)malloc(cmdlen);
+		mem_copy((void *)pBinds->m_ChordBinds.m_keyBindings[i].Command, cmd, cmdlen);
 	}
 
 	pBinds->m_ChordBinds.m_keyBindingsLength = NumCmds;
