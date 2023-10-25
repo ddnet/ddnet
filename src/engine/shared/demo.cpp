@@ -937,7 +937,7 @@ int CDemoPlayer::SetPos(int WantedTick)
 	m_Info.m_PreviousTick = -1;
 
 	// playback everything until we hit our tick
-	while(m_Info.m_NextTick < WantedTick)
+	while(m_Info.m_NextTick < WantedTick && IsPlaying())
 		DoTick();
 
 	Play();
@@ -976,7 +976,7 @@ int CDemoPlayer::Update(bool RealTime)
 	{
 		m_Info.m_CurrentTime += (int64_t)(Deltatime * (double)m_Info.m_Info.m_Speed);
 
-		while(!m_Info.m_Info.m_Paused)
+		while(!m_Info.m_Info.m_Paused && IsPlaying())
 		{
 			int64_t CurtickStart = m_Info.m_Info.m_CurrentTick * Freq / SERVER_TICK_SPEED;
 
