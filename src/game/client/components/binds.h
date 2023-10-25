@@ -3,6 +3,7 @@
 #ifndef GAME_CLIENT_COMPONENTS_BINDS_H
 #define GAME_CLIENT_COMPONENTS_BINDS_H
 
+#include <cstdint>
 #include <engine/console.h>
 #include <engine/keys.h>
 
@@ -42,6 +43,7 @@ public:
 		virtual int Sizeof() const override { return sizeof(*this); }
 		virtual bool OnInput(const IInput::CEvent &Event) override;
 		int m_keyBindingsLength = 0;
+		int64_t m_lastDone = -100;
 		void FreeKeyBindings() {
 			if (m_keyBindingsLength == 0) return;
 			for (int i = 0; i < m_keyBindingsLength; i++)

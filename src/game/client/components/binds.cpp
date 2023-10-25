@@ -2,6 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "binds.h"
 #include <base/system.h>
+#include <cstdint>
 #include <engine/config.h>
 #include <engine/shared/config.h>
 
@@ -38,7 +39,14 @@ bool CBinds::CBindsSpecial::OnInput(const IInput::CEvent &Event)
 
 bool CBinds::CBindsChord::OnInput(const IInput::CEvent &Event)
 {
-	if(!(Event.m_Flags & IInput::FLAG_RELEASE))
+
+	static int64_t threshhold = (int64_t)(time_freq() * 0.01f);
+	static int64_t now;
+	now = time_get();
+
+	if (now - m_lastDone < threshhold)
+		return true;
+	if(!(Event.m_Flags & IInput::FLAG_PRESS))
 		return false;
 	if(m_keyBindingsLength == 0)
 		return false;
@@ -47,8 +55,12 @@ bool CBinds::CBindsChord::OnInput(const IInput::CEvent &Event)
 	{
 		if(Event.m_Key == m_keyBindings[i].Key)
 		{
-			m_pClient->Console()->ExecuteLine(m_keyBindings[i].Command);
-			FreeKeyBindings();
+			m_lastDone = now;
+			int commandsize = str_length(m_keyBindings[i].Command) + 1;
+			char* command = (char*)malloc(commandsize);
+			mem_copy(command, m_keyBindings[i].Command, commandsize);
+			FreeKeyBindings(); // Must free before execution to allow chords to call eachother recursivly
+			m_pClient->Console()->ExecuteLine(command);
 			return true;
 		}
 	}
