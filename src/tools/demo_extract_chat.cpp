@@ -192,12 +192,6 @@ public:
 
 int Process(const char *pDemoFilePath, IStorage *pStorage)
 {
-	if(!pStorage->FileExists(pDemoFilePath, IStorage::TYPE_ALL_OR_ABSOLUTE))
-	{
-		dbg_msg(TOOL_NAME, "Demo file '%s' doesn't exist", pDemoFilePath);
-		return -1;
-	}
-
 	CSnapshotDelta DemoSnapshotDelta;
 	CDemoPlayer DemoPlayer(&DemoSnapshotDelta, false);
 

@@ -3000,6 +3000,7 @@ if(TOOLS)
   set(TARGET_TOOLS
     config_retrieve
     config_store
+    demo_extract_chat
     dilate
     map_convert_07
     map_diff
