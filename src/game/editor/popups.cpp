@@ -724,6 +724,12 @@ CUI::EPopupMenuFunctionResult CEditor::PopupLayer(void *pContext, CUIRect View, 
 		aProps[2].m_Type = PROPTYPE_NULL;
 	}
 
+	// don't use Detail from the selection if this is a sound layer
+	if(pCurrentLayer->m_Type == LAYERTYPE_SOUNDS)
+	{
+		aProps[2].m_Type = PROPTYPE_NULL;
+	}
+
 	static int s_aIds[NUM_PROPS] = {0};
 	int NewVal = 0;
 	int Prop = pEditor->DoProperties(&View, aProps, s_aIds, &NewVal);
