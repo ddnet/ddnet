@@ -38,7 +38,7 @@ bool CBinds::CBindsSpecial::OnInput(const IInput::CEvent &Event)
 
 bool CBinds::CBindsChord::OnInput(const IInput::CEvent &Event)
 {
-	if(!(Event.m_Flags & IInput::FLAG_PRESS))
+	if(!(Event.m_Flags & IInput::FLAG_RELEASE))
 		return false;
 	if(m_keyBindingsLength == 0)
 		return false;
