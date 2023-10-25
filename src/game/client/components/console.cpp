@@ -74,6 +74,12 @@ static bool IsTuningCommandPrefix(const char *pStr)
 	return std::any_of(std::begin(gs_apTuningCommands), std::end(gs_apTuningCommands), [pStr](auto *pCmd) { return str_startswith_nocase(pStr, pCmd); });
 }
 
+static const char *gs_apSettingCommands[] = {"reset ", "toggle ", "access_level ", "+toggle "};
+static bool IsSettingCommandPrefix(const char *pStr)
+{
+	return std::any_of(std::begin(gs_apSettingCommands), std::end(gs_apSettingCommands), [pStr](auto *pCmd) { return str_startswith_nocase(pStr, pCmd); });
+}
+
 CGameConsole::CInstance::CInstance(int Type)
 {
 	m_pHistoryEntry = 0x0;
@@ -84,11 +90,13 @@ CGameConsole::CInstance::CInstance(int Type)
 	{
 		m_pName = "local_console";
 		m_CompletionFlagmask = CFGFLAG_CLIENT;
+		m_ArgumentCompletionFlagmask = CFGFLAG_SAVE;
 	}
 	else
 	{
 		m_pName = "remote_console";
 		m_CompletionFlagmask = CFGFLAG_SERVER;
+		m_ArgumentCompletionFlagmask = CFGFLAG_SERVER;
 	}
 
 	m_aCompletionBuffer[0] = 0;
@@ -257,10 +265,10 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 			const int Direction = m_pGameConsole->m_pClient->Input()->ShiftIsPressed() ? -1 : 1;
 
 			// command completion
+			const bool UseTempCommands = m_Type == CGameConsole::CONSOLETYPE_REMOTE && m_pGameConsole->Client()->RconAuthed() && m_pGameConsole->Client()->UseTempRconCommands();
+			int CompletionEnumerationCount = m_pGameConsole->m_pConsole->PossibleCommands(m_aCompletionBuffer, m_CompletionFlagmask, UseTempCommands);
 			if(m_Type == CGameConsole::CONSOLETYPE_LOCAL || m_pGameConsole->Client()->RconAuthed())
 			{
-				const bool UseTempCommands = m_Type == CGameConsole::CONSOLETYPE_REMOTE && m_pGameConsole->Client()->RconAuthed() && m_pGameConsole->Client()->UseTempRconCommands();
-				const int CompletionEnumerationCount = m_pGameConsole->m_pConsole->PossibleCommands(m_aCompletionBuffer, m_CompletionFlagmask, UseTempCommands);
 				if(CompletionEnumerationCount)
 				{
 					if(m_CompletionChosen == -1 && Direction < 0)
@@ -275,26 +283,28 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 				}
 			}
 
-			// argument completion (tuning, ...)
-			if(m_Type == CGameConsole::CONSOLETYPE_REMOTE && m_pGameConsole->Client()->RconAuthed())
+			// Argument completion
+			const bool TuningCompletion = IsTuningCommandPrefix(GetString());
+			const bool SettingCompletion = IsSettingCommandPrefix(GetString());
+			if(TuningCompletion)
+				CompletionEnumerationCount = m_pGameConsole->m_pClient->m_aTuning[g_Config.m_ClDummy].PossibleTunings(m_aCompletionBufferArgument);
+			else if(SettingCompletion)
+				CompletionEnumerationCount = m_pGameConsole->m_pConsole->PossibleCommands(m_aCompletionBufferArgument, m_ArgumentCompletionFlagmask, UseTempCommands);
+
+			if(CompletionEnumerationCount)
 			{
-				const bool TuningCompletion = IsTuningCommandPrefix(GetString());
-				if(TuningCompletion)
-				{
-					int CompletionEnumerationCount = m_pGameConsole->m_pClient->m_aTuning[g_Config.m_ClDummy].PossibleTunings(m_aCompletionBufferArgument);
-					if(CompletionEnumerationCount)
-					{
-						if(m_CompletionChosenArgument == -1 && Direction < 0)
-							m_CompletionChosenArgument = 0;
-						m_CompletionChosenArgument = (m_CompletionChosenArgument + Direction + CompletionEnumerationCount) % CompletionEnumerationCount;
-						m_pGameConsole->m_pClient->m_aTuning[g_Config.m_ClDummy].PossibleTunings(m_aCompletionBufferArgument, PossibleArgumentsCompleteCallback, this);
-					}
-					else if(m_CompletionChosenArgument != -1)
-					{
-						m_CompletionChosenArgument = -1;
-						Reset();
-					}
-				}
+				if(m_CompletionChosenArgument == -1 && Direction < 0)
+					m_CompletionChosenArgument = 0;
+				m_CompletionChosenArgument = (m_CompletionChosenArgument + Direction + CompletionEnumerationCount) % CompletionEnumerationCount;
+				if(TuningCompletion && m_pGameConsole->Client()->RconAuthed() && m_Type == CGameConsole::CONSOLETYPE_REMOTE)
+					m_pGameConsole->m_pClient->m_aTuning[g_Config.m_ClDummy].PossibleTunings(m_aCompletionBufferArgument, PossibleArgumentsCompleteCallback, this);
+				else if(SettingCompletion)
+					m_pGameConsole->m_pConsole->PossibleCommands(m_aCompletionBufferArgument, m_ArgumentCompletionFlagmask, UseTempCommands, PossibleArgumentsCompleteCallback, this);
+			}
+			else if(m_CompletionChosenArgument != -1)
+			{
+				m_CompletionChosenArgument = -1;
+				Reset();
 			}
 		}
 		else if(Event.m_Key == KEY_PAGEUP)
@@ -334,6 +344,15 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 			str_copy(m_aCompletionBuffer, m_Input.GetString());
 
 			for(const auto *pCmd : gs_apTuningCommands)
+			{
+				if(str_startswith_nocase(m_Input.GetString(), pCmd))
+				{
+					m_CompletionChosenArgument = -1;
+					str_copy(m_aCompletionBufferArgument, &m_Input.GetString()[str_length(pCmd)]);
+				}
+			}
+
+			for(const auto *pCmd : gs_apSettingCommands)
 			{
 				if(str_startswith_nocase(m_Input.GetString(), pCmd))
 				{
@@ -680,13 +699,17 @@ void CGameConsole::OnRender()
 			if(NumCommands <= 0 && pConsole->m_IsCommand)
 			{
 				const bool TuningCompletion = IsTuningCommandPrefix(Info.m_pCurrentCmd);
+				const bool SettingCompletion = IsSettingCommandPrefix(Info.m_pCurrentCmd);
 				int NumArguments = 0;
-				if(TuningCompletion)
+				if(TuningCompletion || SettingCompletion)
 				{
 					Info.m_WantedCompletion = pConsole->m_CompletionChosenArgument;
 					Info.m_TotalWidth = 0.0f;
 					Info.m_pCurrentCmd = pConsole->m_aCompletionBufferArgument;
-					NumArguments = m_pClient->m_aTuning[g_Config.m_ClDummy].PossibleTunings(Info.m_pCurrentCmd, PossibleCommandsRenderCallback, &Info);
+					if(TuningCompletion)
+						NumArguments = m_pClient->m_aTuning[g_Config.m_ClDummy].PossibleTunings(Info.m_pCurrentCmd, PossibleCommandsRenderCallback, &Info);
+					else if(SettingCompletion)
+						NumArguments = m_pConsole->PossibleCommands(Info.m_pCurrentCmd, pConsole->m_ArgumentCompletionFlagmask, m_ConsoleType != CGameConsole::CONSOLETYPE_LOCAL && Client()->RconAuthed() && Client()->UseTempRconCommands(), PossibleCommandsRenderCallback, &Info);
 					pConsole->m_CompletionRenderOffset = Info.m_Offset;
 				}
 
