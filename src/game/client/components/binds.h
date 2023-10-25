@@ -42,6 +42,14 @@ public:
 		virtual int Sizeof() const override { return sizeof(*this); }
 		virtual bool OnInput(const IInput::CEvent &Event) override;
 		int m_keyBindingsLength = 0;
+		void FreeKeyBindings() {
+			if (m_keyBindingsLength == 0) return;
+			for (int i = 0; i < m_keyBindingsLength; i++)
+				free((void*)m_keyBindings[i].Command);
+			free((void*)m_keyBindings);
+			m_keyBindingsLength = 0;
+			m_keyBindings = NULL;
+		}
 		typedef struct
 		{
 			int Key;

@@ -48,9 +48,7 @@ bool CBinds::CBindsChord::OnInput(const IInput::CEvent &Event)
 		if(Event.m_Key == m_keyBindings[i].Key)
 		{
 			m_pClient->Console()->ExecuteLine(m_keyBindings[i].Command);
-			free(m_keyBindings);
-			m_keyBindings = NULL;
-			m_keyBindingsLength = 0;
+			FreeKeyBindings();
 			return true;
 		}
 	}
@@ -409,12 +407,7 @@ void CBinds::ConChord(IConsole::IResult *pResult, void *pUserData)
 	int NumArgs = pResult->NumArguments();
 	int NumCmds = NumArgs / 2 + (NumArgs & 1); // ceil(NumArgs / 2)
 
-	if(pBinds->m_ChordBinds.m_keyBindingsLength > 0)
-	{
-		pBinds->m_ChordBinds.m_keyBindingsLength = 0;
-		free(pBinds->m_ChordBinds.m_keyBindings);
-		pBinds->m_ChordBinds.m_keyBindings = NULL;
-	}
+	pBinds->m_ChordBinds.FreeKeyBindings();
 	pBinds->m_ChordBinds.m_keyBindings = (CBindsChord::keyBinding *)malloc(sizeof(CBindsChord::keyBinding) * NumCmds);
 	for(int i = 0; i < NumCmds; ++i)
 	{
@@ -423,8 +416,7 @@ void CBinds::ConChord(IConsole::IResult *pResult, void *pUserData)
 			char aBuf[256];
 			str_format(aBuf, sizeof(aBuf), "key %s not found", pResult->GetString(i * 2));
 			pBinds->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "binds", aBuf, gs_BindPrintColor);
-			free(pBinds->m_ChordBinds.m_keyBindings);
-			pBinds->m_ChordBinds.m_keyBindings = NULL;
+			pBinds->m_ChordBinds.FreeKeyBindings();
 			return;
 		}
 		const char *cmd = pResult->GetString(i * 2 + 1);
