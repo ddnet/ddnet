@@ -2630,6 +2630,7 @@ if(TOOLS)
     config_retrieve.cpp
     config_store.cpp
     crapnet.cpp
+    demo_extract_chat.cpp
     dilate.cpp
     dummy_map.cpp
     map_convert_07.cpp
