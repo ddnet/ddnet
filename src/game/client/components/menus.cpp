@@ -978,22 +978,11 @@ int CMenus::Render()
 	else if(s_Frame == 1)
 	{
 		UpdateMusicState();
-		s_Frame++;
-
 		RefreshBrowserTab(g_Config.m_UiPage);
-		if(g_Config.m_UiPage == PAGE_INTERNET)
-			ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
-		else if(g_Config.m_UiPage == PAGE_LAN)
-			ServerBrowser()->Refresh(IServerBrowser::TYPE_LAN);
-		else if(g_Config.m_UiPage == PAGE_FAVORITES)
-			ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
-		else if(g_Config.m_UiPage == PAGE_DDNET)
-			ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
-		else if(g_Config.m_UiPage == PAGE_KOG)
-			ServerBrowser()->Refresh(IServerBrowser::TYPE_KOG);
+		s_Frame++;
 	}
 
-	if(Client()->State() >= IClient::STATE_ONLINE)
+	if(Client()->State() == IClient::STATE_ONLINE || Client()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
 		ms_ColorTabbarInactive = ms_ColorTabbarInactiveIngame;
 		ms_ColorTabbarActive = ms_ColorTabbarActiveIngame;
