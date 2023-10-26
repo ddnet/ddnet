@@ -40,16 +40,17 @@ bool CBinds::CBindsSpecial::OnInput(const IInput::CEvent &Event)
 bool CBinds::CBindsChord::OnInput(const IInput::CEvent &Event)
 {
 
-	static int64_t threshhold = (int64_t)(time_freq() * 0.01f);
+	if(!(Event.m_Flags & IInput::FLAG_PRESS))
+		return false;
+	if(m_keyBindingsLength == 0)
+		return false;
+
+	static int64_t threshhold = (int64_t)(time_freq() * 0.001f);
 	static int64_t now;
 	now = time_get();
 
 	if (now - m_lastDone < threshhold)
 		return true;
-	if(!(Event.m_Flags & IInput::FLAG_PRESS))
-		return false;
-	if(m_keyBindingsLength == 0)
-		return false;
 
 	for(int i = 0; i < m_keyBindingsLength; i++)
 	{
