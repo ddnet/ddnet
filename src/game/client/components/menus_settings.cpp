@@ -3051,6 +3051,12 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 		{
 			g_Config.m_ClRaceSaveGhost ^= 1;
 		}
+
+		Right.HSplitTop(20.0f, &Button, &Right);
+		if(DoButton_CheckBox(&g_Config.m_ClRaceGhostSaveBest, Localize("Only save improvements"), g_Config.m_ClRaceGhostSaveBest, &Button))
+		{
+			g_Config.m_ClRaceGhostSaveBest ^= 1;
+		}
 	}
 
 	// gameplay
