@@ -389,7 +389,7 @@ void CMenus::RefreshSkins()
 			RenderLoading(Localize("Loading skin files"), "", 0, false);
 		}
 	});
-	if(Client()->State() >= IClient::STATE_ONLINE)
+	if(Client()->State() == IClient::STATE_ONLINE || Client()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
 		m_pClient->RefindSkins();
 	}

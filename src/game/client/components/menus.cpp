@@ -982,7 +982,7 @@ int CMenus::Render()
 		s_Frame++;
 	}
 
-	if(Client()->State() >= IClient::STATE_ONLINE)
+	if(Client()->State() == IClient::STATE_ONLINE || Client()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
 		ms_ColorTabbarInactive = ms_ColorTabbarInactiveIngame;
 		ms_ColorTabbarActive = ms_ColorTabbarActiveIngame;
