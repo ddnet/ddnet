@@ -921,8 +921,11 @@ void CMenus::GhostlistPopulate()
 
 	CGhostItem *pOwnGhost = 0;
 	for(auto &Ghost : m_vGhosts)
+	{
+		Ghost.m_Failed = false;
 		if(str_comp(Ghost.m_aPlayer, Client()->PlayerName()) == 0 && (!pOwnGhost || Ghost < *pOwnGhost))
 			pOwnGhost = &Ghost;
+	}
 
 	if(pOwnGhost)
 	{
@@ -956,6 +959,7 @@ void CMenus::UpdateOwnGhost(CGhostItem Item)
 
 	Item.m_Own = true;
 	Item.m_Date = std::time(0);
+	Item.m_Failed = false;
 	m_vGhosts.insert(std::lower_bound(m_vGhosts.begin(), m_vGhosts.end(), Item), Item);
 }
 
@@ -1029,6 +1033,8 @@ void CMenus::RenderGhost(CUIRect MainView)
 	View.Draw(ColorRGBA(0, 0, 0, 0.15f), 0, 0);
 
 	const int NumGhosts = m_vGhosts.size();
+	int NumFailed = 0;
+	int NumActivated = 0;
 	static int s_SelectedIndex = 0;
 	static CListBox s_ListBox;
 	s_ListBox.DoStart(17.0f, NumGhosts, 1, 3, s_SelectedIndex, &View, false);
@@ -1037,12 +1043,21 @@ void CMenus::RenderGhost(CUIRect MainView)
 	{
 		const CGhostItem *pGhost = &m_vGhosts[i];
 		const CListboxItem Item = s_ListBox.DoNextItem(pGhost);
+
+		if(pGhost->m_Failed)
+			NumFailed++;
+		if(pGhost->Active())
+			NumActivated++;
+
 		if(!Item.m_Visible)
 			continue;
 
 		ColorRGBA rgb = ColorRGBA(1.0f, 1.0f, 1.0f);
 		if(pGhost->m_Own)
 			rgb = color_cast<ColorRGBA>(ColorHSLA(0.33f, 1.0f, 0.75f));
+
+		if(pGhost->m_Failed)
+			rgb = ColorRGBA(0.6f, 0.6f, 0.6f, 1.0f);
 
 		TextRender()->TextColor(rgb.WithAlpha(pGhost->HasFile() ? 1.0f : 0.5f));
 
@@ -1097,13 +1112,62 @@ void CMenus::RenderGhost(CUIRect MainView)
 	Status.Margin(5.0f, &Status);
 
 	CUIRect Button;
-	Status.VSplitLeft(120.0f, &Button, &Status);
+	Status.VSplitLeft(25.0f, &Button, &Status);
 
 	static CButtonContainer s_ReloadButton;
-	if(DoButton_Menu(&s_ReloadButton, Localize("Reload"), 0, &Button) || Input()->KeyPress(KEY_F5))
+	static CButtonContainer s_DirectoryButton;
+	static CButtonContainer s_ActivateAll;
+
+	if(DoButton_FontIcon(&s_ReloadButton, FONT_ICON_ARROW_ROTATE_RIGHT, 0, &Button) || Input()->KeyPress(KEY_F5))
 	{
 		m_pClient->m_Ghost.UnloadAll();
 		GhostlistPopulate();
+	}
+
+	Status.VSplitLeft(5.0f, &Button, &Status);
+	Status.VSplitLeft(175.0f, &Button, &Status);
+	if(DoButton_Menu(&s_DirectoryButton, Localize("Ghosts directory"), 0, &Button))
+	{
+		char aBuf[IO_MAX_PATH_LENGTH];
+		Storage()->GetCompletePath(IStorage::TYPE_SAVE, "ghosts", aBuf, sizeof(aBuf));
+		Storage()->CreateFolder("ghosts", IStorage::TYPE_SAVE);
+		if(!open_file(aBuf))
+		{
+			dbg_msg("menus", "couldn't open file '%s'", aBuf);
+		}
+	}
+
+	Status.VSplitLeft(5.0f, &Button, &Status);
+	if(NumGhosts - NumFailed > 0)
+	{
+		Status.VSplitLeft(175.0f, &Button, &Status);
+		bool ActivateAll = ((NumGhosts - NumFailed) != NumActivated) && m_pClient->m_Ghost.FreeSlots();
+
+		const char *pActionText = ActivateAll ? Localize("Activate all") : Localize("Deactivate all");
+		if(DoButton_Menu(&s_ActivateAll, pActionText, 0, &Button))
+		{
+			for(int i = 0; i < NumGhosts; i++)
+			{
+				CGhostItem *pGhost = &m_vGhosts[i];
+				if(pGhost->m_Failed || (ActivateAll && pGhost->m_Slot != -1))
+					continue;
+
+				if(ActivateAll)
+				{
+					if(!m_pClient->m_Ghost.FreeSlots())
+						break;
+
+					pGhost->m_Slot = m_pClient->m_Ghost.Load(pGhost->m_aFilename);
+					if(pGhost->m_Slot == -1)
+						pGhost->m_Failed = true;
+				}
+				else
+				{
+					m_pClient->m_Ghost.UnloadAll();
+					pGhost->m_Slot = -1;
+				}
+			}
+		}
 	}
 
 	if(s_SelectedIndex == -1 || s_SelectedIndex >= (int)m_vGhosts.size())
@@ -1113,7 +1177,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 
 	CGhostItem *pOwnGhost = GetOwnGhost();
 	int ReservedSlots = !pGhost->m_Own && !(pOwnGhost && pOwnGhost->Active());
-	if(pGhost->HasFile() && (pGhost->Active() || m_pClient->m_Ghost.FreeSlots() > ReservedSlots))
+	if(!pGhost->m_Failed && pGhost->HasFile() && (pGhost->Active() || m_pClient->m_Ghost.FreeSlots() > ReservedSlots))
 	{
 		Status.VSplitRight(120.0f, &Status, &Button);
 
@@ -1127,9 +1191,12 @@ void CMenus::RenderGhost(CUIRect MainView)
 				pGhost->m_Slot = -1;
 			}
 			else
+			{
 				pGhost->m_Slot = m_pClient->m_Ghost.Load(pGhost->m_aFilename);
+				if(pGhost->m_Slot == -1)
+					pGhost->m_Failed = true;
+			}
 		}
-
 		Status.VSplitRight(5.0f, &Status, 0);
 	}
 

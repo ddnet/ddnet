@@ -627,6 +627,7 @@ public:
 		char m_aFilename[IO_MAX_PATH_LENGTH];
 		char m_aPlayer[MAX_NAME_LENGTH];
 
+		bool m_Failed;
 		int m_Time;
 		int m_Slot;
 		bool m_Own;
