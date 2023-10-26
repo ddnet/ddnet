@@ -630,6 +630,7 @@ public:
 		int m_Time;
 		int m_Slot;
 		bool m_Own;
+		time_t m_Date;
 
 		CGhostItem() :
 			m_Slot(-1), m_Own(false) { m_aFilename[0] = 0; }
@@ -682,7 +683,7 @@ public:
 	};
 
 private:
-	static int GhostlistFetchCallback(const char *pName, int IsDir, int StorageType, void *pUser);
+	static int GhostlistFetchCallback(const CFsFileInfo *pInfo, int IsDir, int StorageType, void *pUser);
 	void SetMenuPage(int NewPage);
 	void RefreshBrowserTab(int UiPage);
 

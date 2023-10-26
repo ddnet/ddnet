@@ -882,15 +882,15 @@ void CMenus::RenderInGameNetwork(CUIRect MainView)
 }
 
 // ghost stuff
-int CMenus::GhostlistFetchCallback(const char *pName, int IsDir, int StorageType, void *pUser)
+int CMenus::GhostlistFetchCallback(const CFsFileInfo *pInfo, int IsDir, int StorageType, void *pUser)
 {
 	CMenus *pSelf = (CMenus *)pUser;
 	const char *pMap = pSelf->Client()->GetCurrentMap();
-	if(IsDir || !str_endswith(pName, ".gho") || !str_startswith(pName, pMap))
+	if(IsDir || !str_endswith(pInfo->m_pName, ".gho") || !str_startswith(pInfo->m_pName, pMap))
 		return 0;
 
 	char aFilename[IO_MAX_PATH_LENGTH];
-	str_format(aFilename, sizeof(aFilename), "%s/%s", pSelf->m_pClient->m_Ghost.GetGhostDir(), pName);
+	str_format(aFilename, sizeof(aFilename), "%s/%s", pSelf->m_pClient->m_Ghost.GetGhostDir(), pInfo->m_pName);
 
 	CGhostInfo Info;
 	if(!pSelf->m_pClient->m_Ghost.GhostLoader()->GetGhostInfo(aFilename, &Info, pMap, pSelf->Client()->GetCurrentMapSha256(), pSelf->Client()->GetCurrentMapCrc()))
@@ -899,6 +899,7 @@ int CMenus::GhostlistFetchCallback(const char *pName, int IsDir, int StorageType
 	CGhostItem Item;
 	str_copy(Item.m_aFilename, aFilename);
 	str_copy(Item.m_aPlayer, Info.m_aOwner);
+	Item.m_Date = pInfo->m_TimeModified;
 	Item.m_Time = Info.m_Time;
 	if(Item.m_Time > 0)
 		pSelf->m_vGhosts.push_back(Item);
@@ -915,7 +916,7 @@ void CMenus::GhostlistPopulate()
 {
 	m_vGhosts.clear();
 	m_GhostPopulateStartTime = time_get_nanoseconds();
-	Storage()->ListDirectory(IStorage::TYPE_ALL, m_pClient->m_Ghost.GetGhostDir(), GhostlistFetchCallback, this);
+	Storage()->ListDirectoryInfo(IStorage::TYPE_ALL, m_pClient->m_Ghost.GetGhostDir(), GhostlistFetchCallback, this);
 	std::sort(m_vGhosts.begin(), m_vGhosts.end());
 
 	CGhostItem *pOwnGhost = 0;
@@ -954,6 +955,7 @@ void CMenus::UpdateOwnGhost(CGhostItem Item)
 	}
 
 	Item.m_Own = true;
+	Item.m_Date = std::time(0);
 	m_vGhosts.insert(std::lower_bound(m_vGhosts.begin(), m_vGhosts.end(), Item), Item);
 }
 
@@ -998,13 +1000,15 @@ void CMenus::RenderGhost(CUIRect MainView)
 		COL_ACTIVE = 0,
 		COL_NAME,
 		COL_TIME,
+		COL_DATE,
 	};
 
 	static CColumn s_aCols[] = {
 		{"", -1, 2.0f, {0}, {0}},
 		{"", COL_ACTIVE, 30.0f, {0}, {0}},
-		{Localizable("Name"), COL_NAME, 300.0f, {0}, {0}},
-		{Localizable("Time"), COL_TIME, 200.0f, {0}, {0}},
+		{Localizable("Name"), COL_NAME, 200.0f, {0}, {0}},
+		{Localizable("Time"), COL_TIME, 90.0f, {0}, {0}},
+		{Localizable("Date"), COL_DATE, 150.0f, {0}, {0}},
 	};
 
 	int NumCols = std::size(s_aCols);
@@ -1074,6 +1078,12 @@ void CMenus::RenderGhost(CUIRect MainView)
 			{
 				char aBuf[64];
 				str_time(pGhost->m_Time / 10, TIME_HOURS_CENTISECS, aBuf, sizeof(aBuf));
+				UI()->DoLabel(&Button, aBuf, 12.0f, TEXTALIGN_ML);
+			}
+			else if(Id == COL_DATE)
+			{
+				char aBuf[64];
+				str_timestamp_ex(pGhost->m_Date, aBuf, sizeof(aBuf), FORMAT_SPACE);
 				UI()->DoLabel(&Button, aBuf, 12.0f, TEXTALIGN_ML);
 			}
 		}
