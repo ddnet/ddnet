@@ -97,7 +97,7 @@ bool CConfigManager::Save()
 	if((flags)&CFGFLAG_SAVE && str_comp(g_Config.m_##Name, def) != 0) \
 	{ \
 		EscapeParam(aEscapeBuf, g_Config.m_##Name, sizeof(aEscapeBuf)); \
-		str_format(aLineBuf, sizeof(aLineBuf), "%s \"%s\"", #ScriptName, aEscapeBuf); \
+		str_format(aLineBuf, sizeof(aLineBuf), "%s %s", #ScriptName, aEscapeBuf); \
 		WriteLine(aLineBuf); \
 	}
 
