@@ -90,13 +90,11 @@ CGameConsole::CInstance::CInstance(int Type)
 	{
 		m_pName = "local_console";
 		m_CompletionFlagmask = CFGFLAG_CLIENT;
-		m_ArgumentCompletionFlagmask = CFGFLAG_SAVE;
 	}
 	else
 	{
 		m_pName = "remote_console";
 		m_CompletionFlagmask = CFGFLAG_SERVER;
-		m_ArgumentCompletionFlagmask = CFGFLAG_SERVER;
 	}
 
 	m_aCompletionBuffer[0] = 0;
@@ -289,7 +287,7 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 			if(TuningCompletion)
 				CompletionEnumerationCount = m_pGameConsole->m_pClient->m_aTuning[g_Config.m_ClDummy].PossibleTunings(m_aCompletionBufferArgument);
 			else if(SettingCompletion)
-				CompletionEnumerationCount = m_pGameConsole->m_pConsole->PossibleCommands(m_aCompletionBufferArgument, m_ArgumentCompletionFlagmask, UseTempCommands);
+				CompletionEnumerationCount = m_pGameConsole->m_pConsole->PossibleCommands(m_aCompletionBufferArgument, m_CompletionFlagmask, UseTempCommands);
 
 			if(CompletionEnumerationCount)
 			{
@@ -299,7 +297,7 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 				if(TuningCompletion && m_pGameConsole->Client()->RconAuthed() && m_Type == CGameConsole::CONSOLETYPE_REMOTE)
 					m_pGameConsole->m_pClient->m_aTuning[g_Config.m_ClDummy].PossibleTunings(m_aCompletionBufferArgument, PossibleArgumentsCompleteCallback, this);
 				else if(SettingCompletion)
-					m_pGameConsole->m_pConsole->PossibleCommands(m_aCompletionBufferArgument, m_ArgumentCompletionFlagmask, UseTempCommands, PossibleArgumentsCompleteCallback, this);
+					m_pGameConsole->m_pConsole->PossibleCommands(m_aCompletionBufferArgument, m_CompletionFlagmask, UseTempCommands, PossibleArgumentsCompleteCallback, this);
 			}
 			else if(m_CompletionChosenArgument != -1)
 			{
@@ -709,7 +707,7 @@ void CGameConsole::OnRender()
 					if(TuningCompletion)
 						NumArguments = m_pClient->m_aTuning[g_Config.m_ClDummy].PossibleTunings(Info.m_pCurrentCmd, PossibleCommandsRenderCallback, &Info);
 					else if(SettingCompletion)
-						NumArguments = m_pConsole->PossibleCommands(Info.m_pCurrentCmd, pConsole->m_ArgumentCompletionFlagmask, m_ConsoleType != CGameConsole::CONSOLETYPE_LOCAL && Client()->RconAuthed() && Client()->UseTempRconCommands(), PossibleCommandsRenderCallback, &Info);
+						NumArguments = m_pConsole->PossibleCommands(Info.m_pCurrentCmd, pConsole->m_CompletionFlagmask, m_ConsoleType != CGameConsole::CONSOLETYPE_LOCAL && Client()->RconAuthed() && Client()->UseTempRconCommands(), PossibleCommandsRenderCallback, &Info);
 					pConsole->m_CompletionRenderOffset = Info.m_Offset;
 				}
 

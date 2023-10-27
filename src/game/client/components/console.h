@@ -61,7 +61,6 @@ class CGameConsole : public CComponent
 		char m_aCompletionBufferArgument[128];
 		int m_CompletionChosenArgument;
 		int m_CompletionFlagmask;
-		int m_ArgumentCompletionFlagmask;
 		float m_CompletionRenderOffset;
 		float m_CompletionRenderOffsetChange;
 
