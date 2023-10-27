@@ -3002,6 +3002,9 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	MainView.HSplitTop(110.0f, &Demo, &MainView);
 	Demo.HSplitTop(30.0f, &Label, &Demo);
 	UI()->DoLabel(&Label, Localize("Demo"), 20.0f, TEXTALIGN_ML);
+	Label.VSplitMid(nullptr, &Label, 20.0f);
+	UI()->DoLabel(&Label, Localize("Ghost"), 20.0f, TEXTALIGN_ML);
+
 	Demo.HSplitTop(5.0f, nullptr, &Demo);
 	Demo.VSplitMid(&Left, &Right, 20.0f);
 
@@ -3041,15 +3044,26 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	if(g_Config.m_ClRaceGhost)
 	{
 		Right.HSplitTop(20.0f, &Button, &Right);
-		if(DoButton_CheckBox(&g_Config.m_ClRaceShowGhost, Localize("Show ghost"), g_Config.m_ClRaceShowGhost, &Button))
+		Button.VSplitMid(&LeftLeft, &Button);
+		if(DoButton_CheckBox(&g_Config.m_ClRaceShowGhost, Localize("Show ghost"), g_Config.m_ClRaceShowGhost, &LeftLeft))
 		{
 			g_Config.m_ClRaceShowGhost ^= 1;
 		}
+		UI()->DoScrollbarOption(&g_Config.m_ClRaceGhostAlpha, &g_Config.m_ClRaceGhostAlpha, &Button, Localize("Opacity"), 0, 100, &CUI::ms_LinearScrollbarScale, 0u, "%");
 
 		Right.HSplitTop(20.0f, &Button, &Right);
 		if(DoButton_CheckBox(&g_Config.m_ClRaceSaveGhost, Localize("Save ghost"), g_Config.m_ClRaceSaveGhost, &Button))
 		{
 			g_Config.m_ClRaceSaveGhost ^= 1;
+		}
+
+		if(g_Config.m_ClRaceSaveGhost)
+		{
+			Right.HSplitTop(20.0f, &Button, &Right);
+			if(DoButton_CheckBox(&g_Config.m_ClRaceGhostSaveBest, Localize("Only save improvements"), g_Config.m_ClRaceGhostSaveBest, &Button))
+			{
+				g_Config.m_ClRaceGhostSaveBest ^= 1;
+			}
 		}
 	}
 
@@ -3079,7 +3093,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	if(DoButton_CheckBox(&g_Config.m_ClShowOthers, Localize("Show others"), g_Config.m_ClShowOthers == SHOW_OTHERS_ON, &LeftLeft))
 		g_Config.m_ClShowOthers = g_Config.m_ClShowOthers != SHOW_OTHERS_ON ? SHOW_OTHERS_ON : SHOW_OTHERS_OFF;
 
-	UI()->DoScrollbarOption(&g_Config.m_ClShowOthersAlpha, &g_Config.m_ClShowOthersAlpha, &Button, Localize("Opacity"), 0, 100);
+	UI()->DoScrollbarOption(&g_Config.m_ClShowOthersAlpha, &g_Config.m_ClShowOthersAlpha, &Button, Localize("Opacity"), 0, 100, &CUI::ms_LinearScrollbarScale, 0u, "%");
 
 	GameClient()->m_Tooltips.DoToolTip(&g_Config.m_ClShowOthersAlpha, &Button, Localize("Adjust the opacity of entities belonging to other teams, such as tees and nameplates"));
 

@@ -133,10 +133,13 @@ void CGhost::GetPath(char *pBuf, int Size, const char *pPlayerName, int Time) co
 	str_copy(aPlayerName, pPlayerName);
 	str_sanitize_filename(aPlayerName);
 
+	char aTimestamp[32];
+	str_timestamp_format(aTimestamp, sizeof(aTimestamp), FORMAT_NOSPACE);
+
 	if(Time < 0)
 		str_format(pBuf, Size, "%s/%s_%s_%s_tmp_%d.gho", ms_pGhostDir, pMap, aPlayerName, aSha256, pid());
 	else
-		str_format(pBuf, Size, "%s/%s_%s_%d.%03d_%s.gho", ms_pGhostDir, pMap, aPlayerName, Time / 1000, Time % 1000, aSha256);
+		str_format(pBuf, Size, "%s/%s_%s_%d.%03d_%s_%s.gho", ms_pGhostDir, pMap, aPlayerName, Time / 1000, Time % 1000, aTimestamp, aSha256);
 }
 
 void CGhost::AddInfos(const CNetObj_Character *pChar, const CNetObj_DDNetCharacter *pDDnetChar)
@@ -427,7 +430,7 @@ void CGhost::StopRecord(int Time)
 		GhostRecorder()->Stop(m_CurGhost.m_Path.Size(), Time);
 
 	CMenus::CGhostItem *pOwnGhost = m_pClient->m_Menus.GetOwnGhost();
-	if(Time > 0 && (!pOwnGhost || Time < pOwnGhost->m_Time))
+	if(Time > 0 && (!pOwnGhost || Time < pOwnGhost->m_Time || !g_Config.m_ClRaceGhostSaveBest))
 	{
 		if(pOwnGhost && pOwnGhost->Active())
 			Unload(pOwnGhost->m_Slot);
