@@ -123,8 +123,8 @@ void CGameClient::OnConsoleInit()
 					      &m_MapLayersBackground, // first to render
 					      &m_Particles.m_RenderTrail,
 					      &m_Items,
-					      &m_Players,
 					      &m_Ghost,
+					      &m_Players,
 					      &m_MapLayersForeground,
 					      &m_Particles.m_RenderExplosions,
 					      &m_NamePlates,
