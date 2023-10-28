@@ -115,11 +115,11 @@ int main(int argc, const char **argv)
 		return -1;
 	}
 
-	int aImageFlags[64] = {
+	int aImageFlags[MAX_MAPIMAGES] = {
 		0,
 	};
 
-	bool aaImageTiles[64][256]{
+	bool aaImageTiles[MAX_MAPIMAGES][256]{
 		{
 			false,
 		},
@@ -154,7 +154,7 @@ int main(int argc, const char **argv)
 			if(pLayer->m_Type == LAYERTYPE_TILES)
 			{
 				CMapItemLayerTilemap *pTLayer = (CMapItemLayerTilemap *)pLayer;
-				if(pTLayer->m_Image >= 0 && pTLayer->m_Image < 64 && pTLayer->m_Flags == 0)
+				if(pTLayer->m_Image >= 0 && pTLayer->m_Image < (int)MAX_MAPIMAGES && pTLayer->m_Flags == 0)
 				{
 					aImageFlags[pTLayer->m_Image] |= 1;
 					// check tiles that are used in this image
@@ -180,7 +180,7 @@ int main(int argc, const char **argv)
 			else if(pLayer->m_Type == LAYERTYPE_QUADS)
 			{
 				CMapItemLayerQuads *pQLayer = (CMapItemLayerQuads *)pLayer;
-				if(pQLayer->m_Image >= 0 && pQLayer->m_Image < 64)
+				if(pQLayer->m_Image >= 0 && pQLayer->m_Image < (int)MAX_MAPIMAGES)
 				{
 					aImageFlags[pQLayer->m_Image] |= 2;
 				}

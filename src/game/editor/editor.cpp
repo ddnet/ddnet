@@ -3978,7 +3978,7 @@ bool CEditor::AddImage(const char *pFileName, int StorageType, void *pUser)
 		}
 	}
 
-	if(pEditor->m_Map.m_vpImages.size() >= 64) // hard limit for teeworlds
+	if(pEditor->m_Map.m_vpImages.size() >= MAX_MAPIMAGES)
 	{
 		pEditor->m_PopupEventType = POPEVENT_IMAGE_MAX;
 		pEditor->m_PopupEventActivated = true;
@@ -4037,6 +4037,13 @@ bool CEditor::AddSound(const char *pFileName, int StorageType, void *pUser)
 			pEditor->ShowFileDialogError("Sound named '%s' was already added.", pSound->m_aName);
 			return false;
 		}
+	}
+
+	if(pEditor->m_Map.m_vpSounds.size() >= MAX_MAPSOUNDS)
+	{
+		pEditor->m_PopupEventType = POPEVENT_SOUND_MAX;
+		pEditor->m_PopupEventActivated = true;
+		return false;
 	}
 
 	// load external

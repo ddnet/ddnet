@@ -1739,7 +1739,7 @@ void CMapLayers::OnRender()
 				if(pLayer->m_Type == LAYERTYPE_TILES)
 				{
 					CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
-					if(pTMap->m_Image == -1)
+					if(pTMap->m_Image < 0 || pTMap->m_Image >= m_pImages->Num())
 					{
 						if(!IsGameLayer)
 							Graphics()->TextureClear();
@@ -1803,7 +1803,7 @@ void CMapLayers::OnRender()
 				else if(pLayer->m_Type == LAYERTYPE_QUADS)
 				{
 					CMapItemLayerQuads *pQLayer = (CMapItemLayerQuads *)pLayer;
-					if(pQLayer->m_Image == -1)
+					if(pQLayer->m_Image < 0 || pQLayer->m_Image >= m_pImages->Num())
 						Graphics()->TextureClear();
 					else
 						Graphics()->TextureSet(m_pImages->Get(pQLayer->m_Image));

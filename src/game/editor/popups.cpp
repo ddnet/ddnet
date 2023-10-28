@@ -1864,6 +1864,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupEvent(void *pContext, CUIRect View, 
 
 	const char *pTitle;
 	const char *pMessage;
+	char aMessageBuf[128];
 	if(pEditor->m_PopupEventType == POPEVENT_EXIT)
 	{
 		pTitle = "Exit the editor";
@@ -1912,7 +1913,14 @@ CUI::EPopupMenuFunctionResult CEditor::PopupEvent(void *pContext, CUIRect View, 
 	else if(pEditor->m_PopupEventType == POPEVENT_IMAGE_MAX)
 	{
 		pTitle = "Max images";
-		pMessage = "The client only allows a maximum of 64 images.";
+		str_format(aMessageBuf, sizeof(aMessageBuf), "The client only allows a maximum of %" PRIzu " images.", MAX_MAPIMAGES);
+		pMessage = aMessageBuf;
+	}
+	else if(pEditor->m_PopupEventType == POPEVENT_SOUND_MAX)
+	{
+		pTitle = "Max sounds";
+		str_format(aMessageBuf, sizeof(aMessageBuf), "The client only allows a maximum of %" PRIzu " sounds.", MAX_MAPSOUNDS);
+		pMessage = aMessageBuf;
 	}
 	else if(pEditor->m_PopupEventType == POPEVENT_PLACE_BORDER_TILES)
 	{
@@ -1956,7 +1964,12 @@ CUI::EPopupMenuFunctionResult CEditor::PopupEvent(void *pContext, CUIRect View, 
 
 	// button bar
 	ButtonBar.VSplitLeft(110.0f, &Button, &ButtonBar);
-	if(pEditor->m_PopupEventType != POPEVENT_LARGELAYER && pEditor->m_PopupEventType != POPEVENT_PREVENTUNUSEDTILES && pEditor->m_PopupEventType != POPEVENT_IMAGEDIV16 && pEditor->m_PopupEventType != POPEVENT_IMAGE_MAX && pEditor->m_PopupEventType != POPEVENT_PIXELART_TOO_MANY_COLORS)
+	if(pEditor->m_PopupEventType != POPEVENT_LARGELAYER &&
+		pEditor->m_PopupEventType != POPEVENT_PREVENTUNUSEDTILES &&
+		pEditor->m_PopupEventType != POPEVENT_IMAGEDIV16 &&
+		pEditor->m_PopupEventType != POPEVENT_IMAGE_MAX &&
+		pEditor->m_PopupEventType != POPEVENT_SOUND_MAX &&
+		pEditor->m_PopupEventType != POPEVENT_PIXELART_TOO_MANY_COLORS)
 	{
 		static int s_CancelButton = 0;
 		if(pEditor->DoButton_Editor(&s_CancelButton, "Cancel", 0, &Button, 0, nullptr))

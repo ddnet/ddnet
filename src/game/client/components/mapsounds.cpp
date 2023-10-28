@@ -26,6 +26,8 @@ void CMapSounds::OnMapLoad()
 	int Start;
 	pMap->GetType(MAPITEMTYPE_SOUND, &Start, &m_Count);
 
+	m_Count = clamp<int>(m_Count, 0, MAX_MAPSOUNDS);
+
 	// load new samples
 	for(int i = 0; i < m_Count; i++)
 	{
@@ -85,15 +87,14 @@ void CMapSounds::OnMapLoad()
 
 				for(int i = 0; i < pSoundLayer->m_NumSources; i++)
 				{
-					CSourceQueueEntry source;
-					source.m_Sound = pSoundLayer->m_Sound;
-					source.m_pSource = &pSources[i];
-					source.m_HighDetail = pLayer->m_Flags & LAYERFLAG_DETAIL;
+					CSourceQueueEntry Source;
+					Source.m_Sound = pSoundLayer->m_Sound;
+					Source.m_pSource = &pSources[i];
 
-					if(!source.m_pSource || source.m_Sound == -1)
+					if(!Source.m_pSource || Source.m_Sound < 0 || Source.m_Sound >= m_Count)
 						continue;
 
-					m_vSourceQueue.push_back(source);
+					m_vSourceQueue.push_back(Source);
 				}
 			}
 		}
