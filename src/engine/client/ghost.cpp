@@ -242,7 +242,7 @@ int CGhostLoader::Load(const char *pFilename, const char *pMap, SHA256_DIGEST Ma
 	{
 		io_skip(m_File, -(int)sizeof(SHA256_DIGEST));
 		unsigned GhostMapCrc = bytes_be_to_uint(m_Header.m_aZeroes);
-		if((str_comp(m_Header.m_aMap, pMap) != 0 || GhostMapCrc != MapCrc) && g_Config.m_ClRaceGhostStrictMap)
+		if(GhostMapCrc != MapCrc && g_Config.m_ClRaceGhostStrictMap)
 		{
 			char aBuf[256];
 			str_format(aBuf, sizeof(aBuf), "ghost map '%s' crc mismatch, wanted=%08x ghost=%08x", pMap, MapCrc, GhostMapCrc);
