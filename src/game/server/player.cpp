@@ -87,16 +87,13 @@ void CPlayer::Reset()
 
 	if(g_Config.m_Events)
 	{
-		time_t RawTime;
-		struct tm *pTimeInfo;
-		time(&RawTime);
-		pTimeInfo = localtime(&RawTime);
-		if((pTimeInfo->tm_mon == 11 && pTimeInfo->tm_mday == 31) || (pTimeInfo->tm_mon == 0 && pTimeInfo->tm_mday == 1))
-		{ // New Year
+		const ETimeSeason Season = time_season();
+		if(Season == SEASON_NEWYEAR)
+		{
 			m_DefEmote = EMOTE_HAPPY;
 		}
-		else if((pTimeInfo->tm_mon == 9 && pTimeInfo->tm_mday == 31) || (pTimeInfo->tm_mon == 10 && pTimeInfo->tm_mday == 1))
-		{ // Halloween
+		else if(Season == SEASON_HALLOWEEN)
+		{
 			m_DefEmote = EMOTE_ANGRY;
 			m_Halloween = true;
 		}
