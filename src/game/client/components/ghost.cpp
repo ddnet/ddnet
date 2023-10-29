@@ -432,13 +432,13 @@ void CGhost::StopRecord(int Time)
 	CMenus::CGhostItem *pOwnGhost = m_pClient->m_Menus.GetOwnGhost();
 	if(Time > 0 && (!pOwnGhost || Time < pOwnGhost->m_Time || !g_Config.m_ClRaceGhostSaveBest))
 	{
-		if(pOwnGhost && pOwnGhost->Active())
-			Unload(pOwnGhost->m_Slot);
-
 		// add to active ghosts
 		int Slot = GetSlot();
-		if(Slot != -1)
+		if(Slot != -1 && (!pOwnGhost || Time < pOwnGhost->m_Time))
 			m_aActiveGhosts[Slot] = std::move(m_CurGhost);
+
+		if(pOwnGhost && pOwnGhost->Active() && Time < pOwnGhost->m_Time)
+			Unload(pOwnGhost->m_Slot);
 
 		// create ghost item
 		CMenus::CGhostItem Item;
