@@ -174,10 +174,6 @@ bool CEditorMap::Save(const char *pFileName)
 		// save group name
 		StrToInts(GItem.m_aName, sizeof(GItem.m_aName) / sizeof(int), pGroup->m_aName);
 
-		CMapItemGroupEx GItemEx;
-		GItemEx.m_Version = CMapItemGroupEx::CURRENT_VERSION;
-		GItemEx.m_ParallaxZoom = pGroup->m_ParallaxZoom;
-
 		for(const std::shared_ptr<CLayer> &pLayer : pGroup->m_vpLayers)
 		{
 			if(pLayer->m_Type == LAYERTYPE_TILES)
@@ -323,7 +319,6 @@ bool CEditorMap::Save(const char *pFileName)
 		}
 
 		Writer.AddItem(MAPITEMTYPE_GROUP, GroupCount, sizeof(GItem), &GItem);
-		Writer.AddItem(MAPITEMTYPE_GROUP_EX, GroupCount, sizeof(GItemEx), &GItemEx);
 		GroupCount++;
 	}
 
@@ -605,14 +600,9 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 		int Start, Num;
 		DataFile.GetType(MAPITEMTYPE_GROUP, &Start, &Num);
 
-		int StartEx, NumEx;
-		DataFile.GetType(MAPITEMTYPE_GROUP_EX, &StartEx, &NumEx);
 		for(int g = 0; g < Num; g++)
 		{
 			CMapItemGroup *pGItem = (CMapItemGroup *)DataFile.GetItem(Start + g);
-			CMapItemGroupEx *pGItemEx = nullptr;
-			if(NumEx)
-				pGItemEx = (CMapItemGroupEx *)DataFile.GetItem(StartEx + g);
 
 			if(pGItem->m_Version < 1 || pGItem->m_Version > CMapItemGroup::CURRENT_VERSION)
 				continue;
@@ -635,9 +625,6 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 			// load group name
 			if(pGItem->m_Version >= 3)
 				IntsToStr(pGItem->m_aName, sizeof(pGroup->m_aName) / sizeof(int), pGroup->m_aName);
-
-			pGroup->m_ParallaxZoom = GetParallaxZoom(pGItem, pGItemEx);
-			pGroup->m_CustomParallaxZoom = pGroup->m_ParallaxZoom != GetParallaxZoomDefault(pGroup->m_ParallaxX, pGroup->m_ParallaxY);
 
 			for(int l = 0; l < pGItem->m_NumLayers; l++)
 			{

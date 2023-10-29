@@ -3,8 +3,6 @@
 
 #include "layer.h"
 
-#include <game/mapitems_ex.h>
-
 #include <memory>
 #include <vector>
 
@@ -20,8 +18,6 @@ public:
 
 	int m_ParallaxX;
 	int m_ParallaxY;
-	int m_CustomParallaxZoom;
-	int m_ParallaxZoom;
 
 	int m_UseClipping;
 	int m_ClipX;
@@ -51,12 +47,6 @@ public:
 	bool IsEmpty() const
 	{
 		return m_vpLayers.empty();
-	}
-
-	void OnEdited()
-	{
-		if(!m_CustomParallaxZoom)
-			m_ParallaxZoom = GetParallaxZoomDefault(m_ParallaxX, m_ParallaxY);
 	}
 
 	void Clear()

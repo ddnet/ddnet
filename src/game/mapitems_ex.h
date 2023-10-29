@@ -2,8 +2,6 @@
 #define GAME_MAPITEMS_EX_H
 #include <game/generated/protocol.h>
 
-#include "mapitems.h"
-
 enum
 {
 	__MAPITEMTYPE_UUID_HELPER = OFFSET_MAPITEMTYPE_UUID - 1,
@@ -44,24 +42,6 @@ struct CMapItemAutoMapperConfig
 	int m_AutomapperSeed;
 	int m_Flags;
 };
-
-struct CMapItemGroupEx
-{
-	enum
-	{
-		CURRENT_VERSION = 1
-	};
-
-	int m_Version;
-
-	// ItemGroup's perceived distance from camera when zooming. Similar to how
-	// Parallax{X,Y} works when camera is moving along the X and Y axes,
-	// this setting applies to camera moving closer or away (zooming in or out).
-	int m_ParallaxZoom;
-};
-
-int GetParallaxZoom(const CMapItemGroup *pGroup, const CMapItemGroupEx *pGroupEx);
-int GetParallaxZoomDefault(int ParallaxX, int ParallaxY);
 
 void RegisterMapItemTypeUuids(class CUuidManager *pManager);
 #endif // GAME_MAPITEMS_EX_H

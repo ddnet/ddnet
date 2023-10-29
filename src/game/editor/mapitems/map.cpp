@@ -125,8 +125,6 @@ void CEditorMap::CreateDefault(IGraphics::CTextureHandle EntitiesTexture)
 	std::shared_ptr<CLayerGroup> pGroup = NewGroup();
 	pGroup->m_ParallaxX = 0;
 	pGroup->m_ParallaxY = 0;
-	pGroup->m_CustomParallaxZoom = 0;
-	pGroup->m_ParallaxZoom = 0;
 	std::shared_ptr<CLayerQuads> pLayer = std::make_shared<CLayerQuads>(m_pEditor);
 	CQuad *pQuad = pLayer->NewQuad(0, 0, 1600, 1200);
 	pQuad->m_aColors[0].r = pQuad->m_aColors[1].r = 94;

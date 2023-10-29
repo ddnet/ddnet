@@ -23,7 +23,6 @@ struct CEnvPoint;
 struct CEnvPointBezier;
 struct CEnvPointBezier_upstream;
 struct CMapItemGroup;
-struct CMapItemGroupEx;
 struct CQuad;
 
 class CTeeRenderInfo
@@ -171,7 +170,7 @@ public:
 	void CalcScreenParams(float Aspect, float Zoom, float *pWidth, float *pHeight);
 	void MapScreenToWorld(float CenterX, float CenterY, float ParallaxX, float ParallaxY,
 		float ParallaxZoom, float OffsetX, float OffsetY, float Aspect, float Zoom, float *pPoints);
-	void MapScreenToGroup(float CenterX, float CenterY, CMapItemGroup *pGroup, CMapItemGroupEx *pGroupEx, float Zoom);
+	void MapScreenToGroup(float CenterX, float CenterY, CMapItemGroup *pGroup, float Zoom);
 	void MapScreenToInterface(float CenterX, float CenterY);
 
 	// DDRace
