@@ -17,13 +17,13 @@ CDataFileReader g_DataReader;
 CDataFileWriter g_DataWriter;
 
 // global new image data (set by ReplaceImageItem)
-int g_aNewDataSize[64];
-void *g_apNewData[64];
+int g_aNewDataSize[MAX_MAPIMAGES];
+void *g_apNewData[MAX_MAPIMAGES];
 
 int g_Index = 0;
 int g_NextDataItemID = -1;
 
-int g_aImageIDs[64];
+int g_aImageIDs[MAX_MAPIMAGES];
 
 int LoadPNG(CImageInfo *pImg, const char *pFilename)
 {
@@ -195,19 +195,24 @@ int main(int argc, const char **argv)
 
 	g_NextDataItemID = g_DataReader.NumData();
 
-	int i = 0;
+	size_t i = 0;
 	for(int Index = 0; Index < g_DataReader.NumItems(); Index++)
 	{
 		int Type;
 		g_DataReader.GetItem(Index, &Type);
 		if(Type == MAPITEMTYPE_IMAGE)
-			g_aImageIDs[i++] = Index;
+		{
+			if(i >= MAX_MAPIMAGES)
+			{
+				dbg_msg("map_convert_07", "map uses more images than the client maximum of %" PRIzu ". filename='%s'", MAX_MAPIMAGES, pSourceFileName);
+				break;
+			}
+			g_aImageIDs[i] = Index;
+			i++;
+		}
 	}
 
 	bool Success = true;
-
-	if(i > 64)
-		dbg_msg("map_convert_07", "%s: Uses more textures than the client maximum of 64.", pSourceFileName);
 
 	// add all items
 	for(int Index = 0; Index < g_DataReader.NumItems(); Index++)

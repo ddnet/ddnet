@@ -68,7 +68,7 @@ void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
 	int Start;
 	pMap->GetType(MAPITEMTYPE_IMAGE, &Start, &m_Count);
 
-	m_Count = clamp(m_Count, 0, 64);
+	m_Count = clamp<int>(m_Count, 0, MAX_MAPIMAGES);
 
 	for(int g = 0; g < pLayers->NumGroups(); g++)
 	{
@@ -84,7 +84,7 @@ void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
 			if(pLayer->m_Type == LAYERTYPE_TILES)
 			{
 				CMapItemLayerTilemap *pTLayer = (CMapItemLayerTilemap *)pLayer;
-				if(pTLayer->m_Image != -1 && pTLayer->m_Image < (int)(std::size(m_aTextures)))
+				if(pTLayer->m_Image >= 0 && pTLayer->m_Image < m_Count)
 				{
 					m_aTextureUsedByTileOrQuadLayerFlag[pTLayer->m_Image] |= 1;
 				}
@@ -92,7 +92,7 @@ void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
 			else if(pLayer->m_Type == LAYERTYPE_QUADS)
 			{
 				CMapItemLayerQuads *pQLayer = (CMapItemLayerQuads *)pLayer;
-				if(pQLayer->m_Image != -1 && pQLayer->m_Image < (int)(std::size(m_aTextures)))
+				if(pQLayer->m_Image >= 0 && pQLayer->m_Image < m_Count)
 				{
 					m_aTextureUsedByTileOrQuadLayerFlag[pQLayer->m_Image] |= 2;
 				}
