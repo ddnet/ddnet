@@ -2738,7 +2738,6 @@ void CEditor::DoMapEditor(CUIRect View)
 						m_pBrush->m_OffsetY += pGroup->m_OffsetY;
 						m_pBrush->m_ParallaxX = pGroup->m_ParallaxX;
 						m_pBrush->m_ParallaxY = pGroup->m_ParallaxY;
-						m_pBrush->m_ParallaxZoom = pGroup->m_ParallaxZoom;
 						m_pBrush->Render();
 						float w, h;
 						m_pBrush->GetSize(&w, &h);

@@ -9,7 +9,6 @@
 #include <game/client/render.h>
 #include <game/client/ui.h>
 #include <game/mapitems.h>
-#include <game/mapitems_ex.h>
 
 #include <game/editor/mapitems/envelope.h>
 #include <game/editor/mapitems/layer.h>

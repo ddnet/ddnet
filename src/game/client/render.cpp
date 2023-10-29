@@ -15,7 +15,6 @@
 #include <game/generated/protocol.h>
 
 #include <game/mapitems.h>
-#include <game/mapitems_ex.h>
 
 static float gs_SpriteWScale;
 static float gs_SpriteHScale;
@@ -413,9 +412,9 @@ void CRenderTools::MapScreenToWorld(float CenterX, float CenterY, float Parallax
 	pPoints[3] = pPoints[1] + Height;
 }
 
-void CRenderTools::MapScreenToGroup(float CenterX, float CenterY, CMapItemGroup *pGroup, CMapItemGroupEx *pGroupEx, float Zoom)
+void CRenderTools::MapScreenToGroup(float CenterX, float CenterY, CMapItemGroup *pGroup, float Zoom)
 {
-	float ParallaxZoom = GetParallaxZoom(pGroup, pGroupEx);
+	float ParallaxZoom = clamp((double)(maximum(pGroup->m_ParallaxX, pGroup->m_ParallaxY)), 0., 100.);
 	float aPoints[4];
 	MapScreenToWorld(CenterX, CenterY, pGroup->m_ParallaxX, pGroup->m_ParallaxY, ParallaxZoom,
 		pGroup->m_OffsetX, pGroup->m_OffsetY, Graphics()->ScreenAspect(), Zoom, aPoints);
