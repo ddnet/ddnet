@@ -1106,7 +1106,18 @@ void CCharacter::SnapCharacter(int SnappingClient, int ID)
 
 		pCharacter->m_Health = Health;
 		pCharacter->m_Armor = Armor;
-		pCharacter->m_TriggeredEvents = 0;
+		int TriggeredEvents7 = 0;
+		if(m_Core.m_TriggeredEvents & COREEVENT_GROUND_JUMP)
+			TriggeredEvents7 |= protocol7::COREEVENTFLAG_GROUND_JUMP;
+		if(m_Core.m_TriggeredEvents & COREEVENT_AIR_JUMP)
+			TriggeredEvents7 |= protocol7::COREEVENTFLAG_AIR_JUMP;
+		if(m_Core.m_TriggeredEvents & COREEVENT_HOOK_ATTACH_PLAYER)
+			TriggeredEvents7 |= protocol7::COREEVENTFLAG_HOOK_ATTACH_PLAYER;
+		if(m_Core.m_TriggeredEvents & COREEVENT_HOOK_ATTACH_GROUND)
+			TriggeredEvents7 |= protocol7::COREEVENTFLAG_HOOK_ATTACH_GROUND;
+		if(m_Core.m_TriggeredEvents & COREEVENT_HOOK_HIT_NOHOOK)
+			TriggeredEvents7 |= protocol7::COREEVENTFLAG_HOOK_HIT_NOHOOK;
+		pCharacter->m_TriggeredEvents = TriggeredEvents7;
 	}
 }
 
