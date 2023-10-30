@@ -918,7 +918,16 @@ bool CCharacter::IncreaseArmor(int Amount)
 void CCharacter::Die(int Killer, int Weapon, bool SendKillMsg)
 {
 	if(Server()->IsRecording(m_pPlayer->GetCID()))
-		Server()->StopRecord(m_pPlayer->GetCID());
+	{
+		CPlayerData *pData = GameServer()->Score()->PlayerData(m_pPlayer->GetCID());
+
+		if(pData->m_RecordStopTick - Server()->Tick() <= Server()->TickSpeed() && pData->m_RecordStopTick != -1)
+			Server()->SaveDemo(m_pPlayer->GetCID(), pData->m_RecordFinishTime);
+		else
+			Server()->StopRecord(m_pPlayer->GetCID());
+
+		pData->m_RecordStopTick = -1;
+	}
 
 	int ModeSpecial = GameServer()->m_pController->OnCharacterDeath(this, GameServer()->m_apPlayers[Killer], Weapon);
 

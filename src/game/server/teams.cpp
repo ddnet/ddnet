@@ -214,6 +214,19 @@ void CGameTeams::Tick()
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
+		CPlayerData *pData = GameServer()->Score()->PlayerData(i);
+		if(!Server()->IsRecording(i))
+			continue;
+
+		if(Now >= pData->m_RecordStopTick && pData->m_RecordStopTick != -1)
+		{
+			Server()->SaveDemo(i, pData->m_RecordFinishTime);
+			pData->m_RecordStopTick = -1;
+		}
+	}
+
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
 		if(m_aTeamUnfinishableKillTick[i] == -1 || m_aTeamState[i] != TEAMSTATE_STARTED_UNFINISHABLE)
 		{
 			continue;
@@ -692,7 +705,8 @@ void CGameTeams::OnFinish(CPlayer *Player, float Time, const char *pTimestamp)
 	if(Time - pData->m_BestTime < 0)
 	{
 		// new record \o/
-		Server()->SaveDemo(ClientID, Time);
+		pData->m_RecordStopTick = Server()->Tick() + Server()->TickSpeed();
+		pData->m_RecordFinishTime = Time;
 
 		if(Diff >= 60)
 			str_format(aBuf, sizeof(aBuf), "New record: %d minute(s) %5.2f second(s) better.",
@@ -728,7 +742,8 @@ void CGameTeams::OnFinish(CPlayer *Player, float Time, const char *pTimestamp)
 	}
 	else
 	{
-		Server()->SaveDemo(ClientID, Time);
+		pData->m_RecordStopTick = Server()->Tick() + Server()->TickSpeed();
+		pData->m_RecordFinishTime = Time;
 	}
 
 	if(!Server()->IsSixup(ClientID))
