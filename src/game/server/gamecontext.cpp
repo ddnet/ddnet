@@ -1612,7 +1612,7 @@ void CGameContext::OnClientConnected(int ClientID, void *pData)
 	if(m_apPlayers[ClientID])
 		delete m_apPlayers[ClientID];
 	m_apPlayers[ClientID] = new(ClientID) CPlayer(this, NextUniqueClientID, ClientID, StartTeam);
-	m_apPlayers[ClientID]->SetAfk(Afk);
+	m_apPlayers[ClientID]->SetInitialAfk(Afk);
 	NextUniqueClientID += 1;
 
 #ifdef CONF_DEBUG

@@ -714,15 +714,21 @@ void CPlayer::AfkTimer()
 void CPlayer::SetAfk(bool Afk)
 {
 	if(m_Afk != Afk)
+	{
 		Server()->ExpireServerInfo();
+		m_Afk = Afk;
+	}
+}
 
+void CPlayer::SetInitialAfk(bool Afk)
+{
 	if(g_Config.m_SvMaxAfkTime == 0)
 	{
-		m_Afk = false;
+		SetAfk(false);
 		return;
 	}
 
-	m_Afk = Afk;
+	SetAfk(Afk);
 
 	// Ensure that the AFK state is not reset again automatically
 	if(Afk)
