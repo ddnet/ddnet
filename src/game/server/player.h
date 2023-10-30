@@ -193,6 +193,7 @@ public:
 	void UpdatePlaytime();
 	void AfkTimer();
 	void SetAfk(bool Afk);
+	void SetInitialAfk(bool Afk);
 	bool IsAfk() const { return m_Afk; }
 
 	int64_t m_LastPlaytime;
