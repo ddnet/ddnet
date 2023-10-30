@@ -956,7 +956,7 @@ void CMenus::UpdateOwnGhost(CGhostItem Item)
 			if(Item.HasFile() || !m_vGhosts[Own].HasFile())
 				DeleteGhostItem(Own);
 		}
-		if(m_vGhosts[Own].m_Time >= Item.m_Time)
+		if(m_vGhosts[Own].m_Time > Item.m_Time)
 		{
 			Item.m_Own = true;
 			m_vGhosts[Own].m_Own = false;
