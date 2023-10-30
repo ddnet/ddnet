@@ -159,7 +159,8 @@ TEST_P(SingleScore, Top)
 	ASSERT_FALSE(CScoreWorker::ShowTop(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
 	ExpectLines(m_pPlayerResult,
 		{"------------ Global Top ------------",
-			"1. nameless tee Time: 01:40.00"});
+			"1. nameless tee Time: 01:40.00",
+			"----------------------------------------"});
 }
 
 TEST_P(SingleScore, RankRegional)
@@ -195,7 +196,8 @@ TEST_P(SingleScore, TopServer)
 	ASSERT_FALSE(CScoreWorker::ShowTop(m_pConn, &m_PlayerRequest, m_aError, sizeof(m_aError))) << m_aError;
 	ExpectLines(m_pPlayerResult,
 		{"------------ Global Top ------------",
-			"1. nameless tee Time: 01:40.00"});
+			"1. nameless tee Time: 01:40.00",
+			"----------------------------------------"});
 }
 
 TEST_P(SingleScore, RankServerRegional)
