@@ -1,3 +1,5 @@
+#include "mapsounds.h"
+
 #include <base/log.h>
 
 #include <engine/demo.h>
@@ -7,9 +9,12 @@
 #include <game/client/components/sounds.h>
 #include <game/client/gameclient.h>
 #include <game/layers.h>
+#include <game/localization.h>
 #include <game/mapitems.h>
 
-#include "mapsounds.h"
+#include <chrono>
+
+using namespace std::chrono_literals;
 
 CMapSounds::CMapSounds()
 {
@@ -29,6 +34,7 @@ void CMapSounds::OnMapLoad()
 	m_Count = clamp<int>(m_Count, 0, MAX_MAPSOUNDS);
 
 	// load new samples
+	bool ShowWarning = false;
 	for(int i = 0; i < m_Count; i++)
 	{
 		CMapItemSound *pSound = (CMapItemSound *)pMap->GetItem(Start + i);
@@ -38,6 +44,7 @@ void CMapSounds::OnMapLoad()
 			if(pName == nullptr || pName[0] == '\0')
 			{
 				log_error("mapsounds", "Failed to load map sound %d: failed to load name.", i);
+				ShowWarning = true;
 				continue;
 			}
 
@@ -52,6 +59,11 @@ void CMapSounds::OnMapLoad()
 			m_aSounds[i] = Sound()->LoadOpusFromMem(pData, pSound->m_SoundDataSize);
 			pMap->UnloadData(pSound->m_SoundData);
 		}
+		ShowWarning = ShowWarning || m_aSounds[i] == -1;
+	}
+	if(ShowWarning)
+	{
+		m_pClient->m_Menus.PopupWarning(Localize("Warning"), Localize("Some map sounds could not be loaded. Check the local console for details."), Localize("Ok"), 10s);
 	}
 
 	// enqueue sound sources

@@ -1,5 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include "mapimages.h"
+
 #include <base/log.h>
 
 #include <engine/graphics.h>
@@ -10,9 +12,12 @@
 #include <game/client/gameclient.h>
 #include <game/generated/client_data.h>
 #include <game/layers.h>
+#include <game/localization.h>
 #include <game/mapitems.h>
 
-#include "mapimages.h"
+#include <chrono>
+
+using namespace std::chrono_literals;
 
 const char *const gs_apModEntitiesNames[] = {
 	"ddnet",
@@ -103,6 +108,7 @@ void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
 	const int TextureLoadFlag = Graphics()->HasTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
 
 	// load new textures
+	bool ShowWarning = false;
 	for(int i = 0; i < m_Count; i++)
 	{
 		const int LoadFlag = (((m_aTextureUsedByTileOrQuadLayerFlag[i] & 1) != 0) ? TextureLoadFlag : 0) | (((m_aTextureUsedByTileOrQuadLayerFlag[i] & 2) != 0) ? 0 : (Graphics()->IsTileBufferingEnabled() ? IGraphics::TEXLOAD_NO_2D_TEXTURE : 0));
@@ -112,8 +118,13 @@ void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
 		const char *pName = pMap->GetDataString(pImg->m_ImageName);
 		if(pName == nullptr || pName[0] == '\0')
 		{
-			log_error("mapimages", "Failed to load map image %d: failed to load name.", i);
-			continue;
+			if(pImg->m_External)
+			{
+				log_error("mapimages", "Failed to load map image %d: failed to load name.", i);
+				ShowWarning = true;
+				continue;
+			}
+			pName = "(error)";
 		}
 
 		if(pImg->m_External)
@@ -131,6 +142,11 @@ void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
 			pMap->UnloadData(pImg->m_ImageData);
 		}
 		pMap->UnloadData(pImg->m_ImageName);
+		ShowWarning = ShowWarning || m_aTextures[i].Id() == Graphics()->InvalidTexture().Id();
+	}
+	if(ShowWarning)
+	{
+		m_pClient->m_Menus.PopupWarning(Localize("Warning"), Localize("Some map images could not be loaded. Check the local console for details."), Localize("Ok"), 10s);
 	}
 }
 
