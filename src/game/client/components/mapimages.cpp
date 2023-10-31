@@ -112,8 +112,12 @@ void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
 		const char *pName = pMap->GetDataString(pImg->m_ImageName);
 		if(pName == nullptr || pName[0] == '\0')
 		{
-			log_error("mapimages", "Failed to load map image %d: failed to load name.", i);
-			continue;
+			if(pImg->m_External)
+			{
+				log_error("mapimages", "Failed to load map image %d: failed to load name.", i);
+				continue;
+			}
+			pName = "(error)";
 		}
 
 		if(pImg->m_External)
