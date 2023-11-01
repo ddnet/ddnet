@@ -133,9 +133,9 @@ public:
 	~CDataFileWriter();
 
 	bool Open(class IStorage *pStorage, const char *pFilename, int StorageType = IStorage::TYPE_SAVE);
-	int AddItem(int Type, int ID, int Size, const void *pData);
-	int AddData(int Size, const void *pData, int CompressionLevel = Z_DEFAULT_COMPRESSION);
-	int AddDataSwapped(int Size, const void *pData);
+	int AddItem(int Type, int ID, size_t Size, const void *pData);
+	int AddData(size_t Size, const void *pData, int CompressionLevel = Z_DEFAULT_COMPRESSION);
+	int AddDataSwapped(size_t Size, const void *pData);
 	int AddDataString(const char *pStr);
 	void Finish();
 };
