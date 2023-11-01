@@ -684,7 +684,8 @@ int CDataFileWriter::GetExtendedItemTypeIndex(int Type)
 
 int CDataFileWriter::AddItem(int Type, int ID, size_t Size, const void *pData)
 {
-	dbg_assert((Type >= 0 && Type < MAX_ITEM_TYPES) || Type >= OFFSET_UUID, "incorrect type");
+	dbg_assert((Type >= 0 && Type < MAX_ITEM_TYPES) || Type >= OFFSET_UUID, "Invalid type");
+	dbg_assert(ID >= 0 && ID <= ITEMTYPE_EX, "Invalid ID");
 	dbg_assert(m_NumItems < 1024, "too many items");
 	dbg_assert(Size == 0 || pData != nullptr, "Data missing"); // Items without data are allowed
 	dbg_assert(Size <= (size_t)std::numeric_limits<int>::max(), "Data too large");
