@@ -66,6 +66,12 @@ struct CDatafileHeader
 	int m_NumRawData;
 	int m_ItemSize;
 	int m_DataSize;
+
+	constexpr size_t SizeOffset()
+	{
+		// The size of these members is not included in m_Size and m_Swaplen
+		return sizeof(m_aID) + sizeof(m_Version) + sizeof(m_Size) + sizeof(m_Swaplen);
+	}
 };
 
 struct CDatafileInfo
@@ -591,7 +597,7 @@ int CDataFileReader::MapSize() const
 {
 	if(!m_pDataFile)
 		return 0;
-	return m_pDataFile->m_Header.m_Size + 16;
+	return m_pDataFile->m_Header.m_Size + m_pDataFile->m_Header.SizeOffset();
 }
 
 CDataFileWriter::CDataFileWriter()
@@ -834,8 +840,8 @@ void CDataFileWriter::Finish()
 		Header.m_aID[2] = 'T';
 		Header.m_aID[3] = 'A';
 		Header.m_Version = 4;
-		Header.m_Size = FileSize - 16;
-		Header.m_Swaplen = SwapSize - 16;
+		Header.m_Size = FileSize - Header.SizeOffset();
+		Header.m_Swaplen = SwapSize - Header.SizeOffset();
 		Header.m_NumItemTypes = m_NumItemTypes;
 		Header.m_NumItems = m_NumItems;
 		Header.m_NumRawData = m_NumDatas;
