@@ -12,10 +12,6 @@
 #include <game/localization.h>
 #include <game/mapitems.h>
 
-#include <chrono>
-
-using namespace std::chrono_literals;
-
 CMapSounds::CMapSounds()
 {
 	m_Count = 0;
@@ -63,7 +59,7 @@ void CMapSounds::OnMapLoad()
 	}
 	if(ShowWarning)
 	{
-		m_pClient->m_Menus.PopupWarning(Localize("Warning"), Localize("Some map sounds could not be loaded. Check the local console for details."), Localize("Ok"), 10s);
+		Client()->AddWarning(SWarning(Localize("Some map sounds could not be loaded. Check the local console for details.")));
 	}
 
 	// enqueue sound sources

@@ -15,10 +15,6 @@
 #include <game/localization.h>
 #include <game/mapitems.h>
 
-#include <chrono>
-
-using namespace std::chrono_literals;
-
 const char *const gs_apModEntitiesNames[] = {
 	"ddnet",
 	"ddrace",
@@ -146,7 +142,7 @@ void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
 	}
 	if(ShowWarning)
 	{
-		m_pClient->m_Menus.PopupWarning(Localize("Warning"), Localize("Some map images could not be loaded. Check the local console for details."), Localize("Ok"), 10s);
+		Client()->AddWarning(SWarning(Localize("Some map images could not be loaded. Check the local console for details.")));
 	}
 }
 

@@ -4662,6 +4662,11 @@ void CClient::GetSmoothTick(int *pSmoothTick, float *pSmoothIntraTick, float Mix
 	*pSmoothIntraTick = (SmoothTime - (*pSmoothTick - 1) * time_freq() / 50) / (float)(time_freq() / 50);
 }
 
+void CClient::AddWarning(const SWarning &Warning)
+{
+	m_vWarnings.emplace_back(Warning);
+}
+
 SWarning *CClient::GetCurWarning()
 {
 	if(m_vWarnings.empty())

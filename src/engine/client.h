@@ -279,7 +279,9 @@ public:
 
 	virtual void GetSmoothTick(int *pSmoothTick, float *pSmoothIntraTick, float MixAmount) = 0;
 
+	virtual void AddWarning(const SWarning &Warning) = 0;
 	virtual SWarning *GetCurWarning() = 0;
+
 	virtual CChecksumData *ChecksumData() = 0;
 	virtual bool InfoTaskRunning() = 0;
 	virtual int UdpConnectivity(int NetType) = 0;
