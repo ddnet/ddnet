@@ -3866,7 +3866,6 @@ void CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 	Reader.Open(Storage(), pNewMapName, IStorage::TYPE_ALL);
 
 	CDataFileWriter Writer;
-	Writer.Init();
 
 	int SettingsIndex = Reader.NumData();
 	bool FoundInfo = false;
@@ -3944,7 +3943,7 @@ void CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 	free(pSettings);
 	Reader.Close();
 	char aTemp[IO_MAX_PATH_LENGTH];
-	Writer.OpenFile(Storage(), IStorage::FormatTmpPath(aTemp, sizeof(aTemp), pNewMapName));
+	Writer.Open(Storage(), IStorage::FormatTmpPath(aTemp, sizeof(aTemp), pNewMapName));
 	Writer.Finish();
 
 	str_copy(pNewMapName, aTemp, MapNameSize);
