@@ -926,14 +926,13 @@ void CDataFileWriter::Finish()
 		io_write(m_File, &UncompressedSize, sizeof(UncompressedSize));
 	}
 
-	// write m_pItems
+	// write items sorted by type
 	for(int i = 0; i < MAX_ITEM_TYPES; i++)
 	{
 		if(m_pItemTypes[i].m_Num)
 		{
-			// write all m_pItems in of this type
-			int k = m_pItemTypes[i].m_First;
-			while(k != -1)
+			// write all items of this type
+			for(int k = m_pItemTypes[i].m_First; k != -1; k = m_pItems[k].m_Next)
 			{
 				CDatafileItem Item;
 				Item.m_TypeAndID = (i << 16) | m_pItems[k].m_ID;
@@ -949,9 +948,6 @@ void CDataFileWriter::Finish()
 				io_write(m_File, &Item, sizeof(Item));
 				if(m_pItems[k].m_pData != nullptr)
 					io_write(m_File, m_pItems[k].m_pData, m_pItems[k].m_Size);
-
-				// next
-				k = m_pItems[k].m_Next;
 			}
 		}
 	}
