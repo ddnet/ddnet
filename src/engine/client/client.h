@@ -493,7 +493,9 @@ public:
 
 	void GetSmoothTick(int *pSmoothTick, float *pSmoothIntraTick, float MixAmount) override;
 
+	void AddWarning(const SWarning &Warning) override;
 	SWarning *GetCurWarning() override;
+
 	CChecksumData *ChecksumData() override { return &m_Checksum.m_Data; }
 	bool InfoTaskRunning() override { return m_pDDNetInfoTask != nullptr; }
 	int UdpConnectivity(int NetType) override;
