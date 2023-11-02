@@ -57,7 +57,7 @@ class CGhost : public CComponent
 private:
 	enum
 	{
-		MAX_ACTIVE_GHOSTS = 8,
+		MAX_ACTIVE_GHOSTS = 256,
 	};
 
 	class CGhostPath
@@ -176,7 +176,7 @@ public:
 
 	int GetLastRaceTick();
 
-	void RefindSkin();
+	void RefindSkins();
 };
 
 #endif

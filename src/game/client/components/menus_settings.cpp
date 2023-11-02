@@ -389,7 +389,7 @@ void CMenus::RefreshSkins()
 			RenderLoading(Localize("Loading skin files"), "", 0, false);
 		}
 	});
-	if(Client()->State() >= IClient::STATE_ONLINE)
+	if(Client()->State() == IClient::STATE_ONLINE || Client()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
 		m_pClient->RefindSkins();
 	}
@@ -1730,7 +1730,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		char aTmpBackendName[256];
 
 		auto IsInfoDefault = [](const SMenuBackendInfo &CheckInfo) {
-			return str_comp_nocase(CheckInfo.m_pBackendName, g_Config.ms_pGfxBackend) == 0 && CheckInfo.m_Major == g_Config.ms_GfxGLMajor && CheckInfo.m_Minor == g_Config.ms_GfxGLMinor && CheckInfo.m_Patch == g_Config.ms_GfxGLPatch;
+			return str_comp_nocase(CheckInfo.m_pBackendName, CConfig::ms_pGfxBackend) == 0 && CheckInfo.m_Major == CConfig::ms_GfxGLMajor && CheckInfo.m_Minor == CConfig::ms_GfxGLMinor && CheckInfo.m_Patch == CConfig::ms_GfxGLPatch;
 		};
 
 		int OldSelectedBackend = -1;
@@ -2841,16 +2841,44 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClNameplatesStrong, Localize("Show hook strength indicator"), &g_Config.m_ClNameplatesStrong, &Section, LineSize);
 
 		Section.HSplitTop(LineSize, &Button, &Section);
-		if(DoButton_CheckBox(&g_Config.m_ClShowDirection, Localize("Show other players' key presses"), g_Config.m_ClShowDirection >= 1, &Button))
+		if(DoButton_CheckBox(&g_Config.m_ClShowDirection, Localize("Show other players' key presses"), g_Config.m_ClShowDirection >= 1 && g_Config.m_ClShowDirection != 3, &Button))
 		{
-			g_Config.m_ClShowDirection = g_Config.m_ClShowDirection >= 1 ? 0 : 1;
+			switch(g_Config.m_ClShowDirection)
+			{
+			case 0:
+				g_Config.m_ClShowDirection = 1;
+				break;
+			case 1:
+				g_Config.m_ClShowDirection = 0;
+				break;
+			case 2:
+				g_Config.m_ClShowDirection = 3;
+				break;
+			case 3:
+				g_Config.m_ClShowDirection = 2;
+				break;
+			}
 		}
 
 		Section.HSplitTop(LineSize, &Button, &Section);
 		static int s_ShowLocalPlayer = 0;
-		if(DoButton_CheckBox(&s_ShowLocalPlayer, Localize("Show local player's key presses"), g_Config.m_ClShowDirection == 2, &Button))
+		if(DoButton_CheckBox(&s_ShowLocalPlayer, Localize("Show local player's key presses"), g_Config.m_ClShowDirection >= 2, &Button))
 		{
-			g_Config.m_ClShowDirection = g_Config.m_ClShowDirection != 2 ? 2 : 1;
+			switch(g_Config.m_ClShowDirection)
+			{
+			case 0:
+				g_Config.m_ClShowDirection = 3;
+				break;
+			case 1:
+				g_Config.m_ClShowDirection = 2;
+				break;
+			case 2:
+				g_Config.m_ClShowDirection = 1;
+				break;
+			case 3:
+				g_Config.m_ClShowDirection = 0;
+				break;
+			}
 		}
 	}
 	else if(s_CurTab == APPEARANCE_TAB_HOOK_COLLISION)
@@ -2872,7 +2900,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		}
 
 		Section.HSplitTop(2 * LineSize, &Button, &Section);
-		UI()->DoScrollbarOption(&g_Config.m_ClHookCollSize, &g_Config.m_ClHookCollSize, &Button, Localize("Hook collision line width"), 0, 100, &CUI::ms_LinearScrollbarScale, CUI::SCROLLBAR_OPTION_MULTILINE);
+		UI()->DoScrollbarOption(&g_Config.m_ClHookCollSize, &g_Config.m_ClHookCollSize, &Button, Localize("Hook collision line width"), 0, 20, &CUI::ms_LinearScrollbarScale, CUI::SCROLLBAR_OPTION_MULTILINE);
 
 		Section.HSplitTop(2 * LineSize, &Button, &Section);
 		UI()->DoScrollbarOption(&g_Config.m_ClHookCollAlpha, &g_Config.m_ClHookCollAlpha, &Button, Localize("Hook collision line opacity"), 0, 100, &CUI::ms_LinearScrollbarScale, CUI::SCROLLBAR_OPTION_MULTILINE, "%");
@@ -4060,6 +4088,9 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	MainView.HSplitTop(110.0f, &Demo, &MainView);
 	Demo.HSplitTop(30.0f, &Label, &Demo);
 	UI()->DoLabel(&Label, Localize("Demo"), 20.0f, TEXTALIGN_ML);
+	Label.VSplitMid(nullptr, &Label, 20.0f);
+	UI()->DoLabel(&Label, Localize("Ghost"), 20.0f, TEXTALIGN_ML);
+
 	Demo.HSplitTop(5.0f, nullptr, &Demo);
 	Demo.VSplitMid(&Left, &Right, 20.0f);
 
@@ -4090,7 +4121,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 		UI()->DoScrollbarOption(&g_Config.m_ClReplayLength, &g_Config.m_ClReplayLength, &Button, Localize("Default length"), 10, 600, &CUI::ms_LinearScrollbarScale, CUI::SCROLLBAR_OPTION_NOCLAMPVALUE);
 
 	Right.HSplitTop(20.0f, &Button, &Right);
-	if(DoButton_CheckBox(&g_Config.m_ClRaceGhost, Localize("Ghost"), g_Config.m_ClRaceGhost, &Button))
+	if(DoButton_CheckBox(&g_Config.m_ClRaceGhost, Localize("Enable ghost"), g_Config.m_ClRaceGhost, &Button))
 	{
 		g_Config.m_ClRaceGhost ^= 1;
 	}
@@ -4099,15 +4130,26 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	if(g_Config.m_ClRaceGhost)
 	{
 		Right.HSplitTop(20.0f, &Button, &Right);
-		if(DoButton_CheckBox(&g_Config.m_ClRaceShowGhost, Localize("Show ghost"), g_Config.m_ClRaceShowGhost, &Button))
+		Button.VSplitMid(&LeftLeft, &Button);
+		if(DoButton_CheckBox(&g_Config.m_ClRaceShowGhost, Localize("Show ghost"), g_Config.m_ClRaceShowGhost, &LeftLeft))
 		{
 			g_Config.m_ClRaceShowGhost ^= 1;
 		}
+		UI()->DoScrollbarOption(&g_Config.m_ClRaceGhostAlpha, &g_Config.m_ClRaceGhostAlpha, &Button, Localize("Opacity"), 0, 100, &CUI::ms_LinearScrollbarScale, 0u, "%");
 
 		Right.HSplitTop(20.0f, &Button, &Right);
 		if(DoButton_CheckBox(&g_Config.m_ClRaceSaveGhost, Localize("Save ghost"), g_Config.m_ClRaceSaveGhost, &Button))
 		{
 			g_Config.m_ClRaceSaveGhost ^= 1;
+		}
+
+		if(g_Config.m_ClRaceSaveGhost)
+		{
+			Right.HSplitTop(20.0f, &Button, &Right);
+			if(DoButton_CheckBox(&g_Config.m_ClRaceGhostSaveBest, Localize("Only save improvements"), g_Config.m_ClRaceGhostSaveBest, &Button))
+			{
+				g_Config.m_ClRaceGhostSaveBest ^= 1;
+			}
 		}
 	}
 
@@ -4137,7 +4179,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	if(DoButton_CheckBox(&g_Config.m_ClShowOthers, Localize("Show others"), g_Config.m_ClShowOthers == SHOW_OTHERS_ON, &LeftLeft))
 		g_Config.m_ClShowOthers = g_Config.m_ClShowOthers != SHOW_OTHERS_ON ? SHOW_OTHERS_ON : SHOW_OTHERS_OFF;
 
-	UI()->DoScrollbarOption(&g_Config.m_ClShowOthersAlpha, &g_Config.m_ClShowOthersAlpha, &Button, Localize("Opacity"), 0, 100);
+	UI()->DoScrollbarOption(&g_Config.m_ClShowOthersAlpha, &g_Config.m_ClShowOthersAlpha, &Button, Localize("Opacity"), 0, 100, &CUI::ms_LinearScrollbarScale, 0u, "%");
 
 	GameClient()->m_Tooltips.DoToolTip(&g_Config.m_ClShowOthersAlpha, &Button, Localize("Adjust the opacity of entities belonging to other teams, such as tees and nameplates"));
 
@@ -4156,7 +4198,10 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	GameClient()->m_Tooltips.DoToolTip(&g_Config.m_ClShowQuads, &Button, Localize("Quads are used for background decoration"));
 
 	Right.HSplitTop(20.0f, &Button, &Right);
+	int PreviousZoom = g_Config.m_ClDefaultZoom;
 	UI()->DoScrollbarOption(&g_Config.m_ClDefaultZoom, &g_Config.m_ClDefaultZoom, &Button, Localize("Default zoom"), 0, 20);
+	if(PreviousZoom != g_Config.m_ClDefaultZoom)
+		m_pClient->m_Camera.SetZoom(std::pow(CCamera::ZOOM_STEP, g_Config.m_ClDefaultZoom - 10), g_Config.m_ClSmoothZoomTime);
 
 	Right.HSplitTop(20.0f, &Button, &Right);
 	if(DoButton_CheckBox(&g_Config.m_ClAntiPing, Localize("AntiPing"), g_Config.m_ClAntiPing, &Button))
@@ -4194,9 +4239,13 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	Background.HSplitTop(5.0f, nullptr, &Background);
 	UI()->DoLabel(&Label, Localize("Background"), 20.0f, TEXTALIGN_ML);
 
-	static CButtonContainer s_ResetID2;
 	ColorRGBA GreyDefault(0.5f, 0.5f, 0.5f, 1);
-	DoLine_ColorPicker(&s_ResetID2, 25.0f, 13.0f, 5.0f, &Background, Localize("Entities Background color"), &g_Config.m_ClBackgroundEntitiesColor, GreyDefault, false);
+
+	static CButtonContainer s_ResetID1;
+	DoLine_ColorPicker(&s_ResetID1, 25.0f, 13.0f, 5.0f, &Background, Localize("Regular background color"), &g_Config.m_ClBackgroundColor, GreyDefault, false);
+
+	static CButtonContainer s_ResetID2;
+	DoLine_ColorPicker(&s_ResetID2, 25.0f, 13.0f, 5.0f, &Background, Localize("Entities background color"), &g_Config.m_ClBackgroundEntitiesColor, GreyDefault, false);
 
 	CUIRect EditBox;
 	Background.HSplitTop(20.0f, &Label, &Background);
@@ -4239,12 +4288,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 
 	UI()->DoLabel(&Label, Localize("Miscellaneous"), 20.0f, TEXTALIGN_ML);
 
-	static CButtonContainer s_ResetID1;
-	Miscellaneous.HSplitTop(25.0f, &Button, &Miscellaneous);
-	DoLine_ColorPicker(&s_ResetID1, 25.0f, 13.0f, 5.0f, &Button, Localize("Regular Background Color"), &g_Config.m_ClBackgroundColor, GreyDefault, false);
-
 	static CButtonContainer s_ButtonTimeout;
-	Miscellaneous.HSplitTop(10.0f, nullptr, &Miscellaneous);
 	Miscellaneous.HSplitTop(20.0f, &Button, &Miscellaneous);
 	if(DoButton_Menu(&s_ButtonTimeout, Localize("New random timeout code"), 0, &Button))
 	{

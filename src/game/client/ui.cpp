@@ -51,6 +51,7 @@ void CUIElement::SUIElementRect::Reset()
 	m_TextColor = ColorRGBA(-1, -1, -1, -1);
 	m_TextOutlineColor = ColorRGBA(-1, -1, -1, -1);
 	m_QuadColor = ColorRGBA(-1, -1, -1, -1);
+	m_ReadCursorGlyphCount = -1;
 }
 
 void CUIElement::SUIElementRect::Draw(const CUIRect *pRect, ColorRGBA Color, int Corners, float Rounding)
@@ -688,9 +689,10 @@ void CUI::DoLabel(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, cons
 
 void CUI::DoLabelStreamed(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps, int StrLen, const CTextCursor *pReadCursor)
 {
+	const int ReadCursorGlyphCount = pReadCursor == nullptr ? -1 : pReadCursor->m_GlyphCount;
 	bool NeedsRecreate = false;
 	bool ColorChanged = RectEl.m_TextColor != TextRender()->GetTextColor() || RectEl.m_TextOutlineColor != TextRender()->GetTextOutlineColor();
-	if((!RectEl.m_UITextContainer.Valid() && pText[0] != '\0' && StrLen != 0) || RectEl.m_Width != pRect->w || RectEl.m_Height != pRect->h || ColorChanged)
+	if((!RectEl.m_UITextContainer.Valid() && pText[0] != '\0' && StrLen != 0) || RectEl.m_Width != pRect->w || RectEl.m_Height != pRect->h || ColorChanged || RectEl.m_ReadCursorGlyphCount != ReadCursorGlyphCount)
 	{
 		NeedsRecreate = true;
 	}
@@ -722,6 +724,8 @@ void CUI::DoLabelStreamed(CUIElement::SUIElementRect &RectEl, const CUIRect *pRe
 			RectEl.m_Text = pText;
 		else
 			RectEl.m_Text.clear();
+
+		RectEl.m_ReadCursorGlyphCount = ReadCursorGlyphCount;
 
 		CUIRect TmpRect;
 		TmpRect.x = 0;

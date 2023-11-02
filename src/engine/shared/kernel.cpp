@@ -53,7 +53,7 @@ public:
 		}
 	}
 
-	virtual ~CKernel()
+	~CKernel() override
 	{
 		// delete interfaces in reverse order just the way it would happen to objects on the stack
 		for(int i = m_NumInterfaces - 1; i >= 0; i--)

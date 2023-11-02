@@ -73,9 +73,8 @@ jobs:
       run: |
         pylint --version
         find . -type f -name "*.py" -not -path './ddnet-libs/*' -not -path './googletest-src/*' -print0 | xargs -0 pylint
-    - name: Unused headers
-      run: |
-        find src -name '*.h' | while read -r i; do grep -r -q "$(basename "$i")" || (echo "Header file $i is unused" && exit 1); done
+    - name: Unused header files
+      run: scripts/check_unused_header_files.py
     - name: Check maps
       run: |
         findings=$(find data -type f -name '*.map' -print0 | xargs -0 ~/.cargo/bin/twmap-check-ddnet 2>&1 | \

@@ -17,10 +17,6 @@
 
 #include "menus.h"
 
-#include <chrono>
-
-using namespace std::chrono_literals;
-
 void CMenus::RenderStartMenu(CUIRect MainView)
 {
 	// render logo
@@ -84,7 +80,7 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 		}
 		else
 		{
-			PopupWarning(Localize("Warning"), Localize("Can't find a Tutorial server"), Localize("Ok"), 10s);
+			Client()->AddWarning(SWarning(Localize("Can't find a Tutorial server")));
 			s_JoinTutorialTime = 0.0f;
 		}
 	}
@@ -160,7 +156,7 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 			}
 			else
 			{
-				PopupWarning(Localize("Warning"), Localize("Server executable not found, can't run server"), Localize("Ok"), 10s);
+				Client()->AddWarning(SWarning(Localize("Server executable not found, can't run server")));
 			}
 		}
 	}

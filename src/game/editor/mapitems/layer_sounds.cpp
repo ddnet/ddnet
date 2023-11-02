@@ -1,10 +1,13 @@
+#include "layer_sounds.h"
+
 #include <game/editor/editor.h>
 
 #include <game/generated/client_data.h>
 
 static const float s_SourceVisualSize = 32.0f;
 
-CLayerSounds::CLayerSounds()
+CLayerSounds::CLayerSounds(CEditor *pEditor) :
+	CLayer(pEditor)
 {
 	m_Type = LAYERTYPE_SOUNDS;
 	m_aName[0] = '\0';
@@ -37,7 +40,7 @@ void CLayerSounds::Render(bool Tileset)
 		if(Source.m_PosEnv >= 0)
 		{
 			ColorRGBA Channels;
-			m_pEditor->EnvelopeEval(Source.m_PosEnvOffset, Source.m_PosEnv, Channels, m_pEditor);
+			CEditor::EnvelopeEval(Source.m_PosEnvOffset, Source.m_PosEnv, Channels, m_pEditor);
 			OffsetX = Channels.r;
 			OffsetY = Channels.g;
 		}
@@ -87,7 +90,7 @@ void CLayerSounds::Render(bool Tileset)
 		if(Source.m_PosEnv >= 0)
 		{
 			ColorRGBA Channels;
-			m_pEditor->EnvelopeEval(Source.m_PosEnvOffset, Source.m_PosEnv, Channels, m_pEditor);
+			CEditor::EnvelopeEval(Source.m_PosEnvOffset, Source.m_PosEnv, Channels, m_pEditor);
 			OffsetX = Channels.r;
 			OffsetY = Channels.g;
 		}
@@ -142,8 +145,7 @@ void CLayerSounds::BrushSelecting(CUIRect Rect)
 int CLayerSounds::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
 {
 	// create new layer
-	std::shared_ptr<CLayerSounds> pGrabbed = std::make_shared<CLayerSounds>();
-	pGrabbed->m_pEditor = m_pEditor;
+	std::shared_ptr<CLayerSounds> pGrabbed = std::make_shared<CLayerSounds>(m_pEditor);
 	pGrabbed->m_Sound = m_Sound;
 	pBrush->AddLayer(pGrabbed);
 

@@ -15,17 +15,17 @@
 
 class CChat : public CComponent
 {
-	CLineInputBuffered<512> m_Input;
-
 	static constexpr float CHAT_WIDTH = 200.0f;
 	static constexpr float CHAT_HEIGHT_FULL = 200.0f;
 	static constexpr float CHAT_HEIGHT_MIN = 50.0f;
 
 	enum
 	{
-		MAX_LINES = 25
+		MAX_LINES = 25,
+		MAX_LINE_LENGTH = 256
 	};
 
+	CLineInputBuffered<MAX_LINE_LENGTH> m_Input;
 	struct CLine
 	{
 		int64_t m_Time;
@@ -36,7 +36,7 @@ class CChat : public CComponent
 		bool m_Whisper;
 		int m_NameColor;
 		char m_aName[64];
-		char m_aText[512];
+		char m_aText[MAX_LINE_LENGTH];
 		bool m_Friend;
 		bool m_Highlighted;
 
@@ -82,9 +82,10 @@ class CChat : public CComponent
 	bool m_Show;
 	bool m_CompletionUsed;
 	int m_CompletionChosen;
-	char m_aCompletionBuffer[256];
+	char m_aCompletionBuffer[MAX_LINE_LENGTH];
 	int m_PlaceholderOffset;
 	int m_PlaceholderLength;
+	static char ms_aDisplayText[MAX_LINE_LENGTH];
 	struct CRateablePlayer
 	{
 		int ClientID;
@@ -121,6 +122,7 @@ class CChat : public CComponent
 	int m_PendingChatCounter;
 	int64_t m_LastChatSend;
 	int64_t m_aLastSoundPlayed[CHAT_NUM];
+	bool m_IsInputCensored;
 
 	static void ConSay(IConsole::IResult *pResult, void *pUserData);
 	static void ConSayTeam(IConsole::IResult *pResult, void *pUserData);

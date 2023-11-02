@@ -1,7 +1,9 @@
+#include "layer_tune.h"
+
 #include <game/editor/editor.h>
 
-CLayerTune::CLayerTune(int w, int h) :
-	CLayerTiles(w, h)
+CLayerTune::CLayerTune(CEditor *pEditor, int w, int h) :
+	CLayerTiles(pEditor, w, h)
 {
 	str_copy(m_aName, "Tune");
 	m_Tune = 1;

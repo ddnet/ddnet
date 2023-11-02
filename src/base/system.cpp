@@ -389,7 +389,7 @@ char *io_read_all_str(IOHANDLE io)
 	return (char *)buffer;
 }
 
-unsigned io_skip(IOHANDLE io, int size)
+int io_skip(IOHANDLE io, int size)
 {
 	return io_seek(io, size, IOSEEK_CUR);
 }
@@ -824,16 +824,14 @@ void *thread_init(void (*threadfunc)(void *), void *u, const char *name)
 #if defined(CONF_PLATFORM_MACOS) && defined(__MAC_10_10) && __MAC_OS_X_VERSION_MIN_REQUIRED >= __MAC_10_10
 		pthread_attr_set_qos_class_np(&attr, QOS_CLASS_USER_INTERACTIVE, 0);
 #endif
-		int result = pthread_create(&id, &attr, thread_run, data);
-		if(result != 0)
-		{
-			dbg_msg("thread", "creating %s thread failed: %d", name, result);
-			return 0;
-		}
+		dbg_assert(pthread_create(&id, &attr, thread_run, data) == 0, "pthread_create failure");
 		return (void *)id;
 	}
 #elif defined(CONF_FAMILY_WINDOWS)
-	return CreateThread(NULL, 0, thread_run, data, 0, NULL);
+	HANDLE thread = CreateThread(nullptr, 0, thread_run, data, 0, nullptr);
+	dbg_assert(thread != nullptr, "CreateThread failure");
+	// TODO: Set thread name using SetThreadDescription (would require minimum Windows 10 version 1607)
+	return thread;
 #else
 #error not implemented
 #endif
@@ -1100,9 +1098,7 @@ static void netaddr_to_sockaddr_in6(const NETADDR *src, struct sockaddr_in6 *des
 
 static void sockaddr_to_netaddr(const struct sockaddr *src, NETADDR *dst)
 {
-	// Filled by accept, clang-analyzer probably can't tell because of the
-	// (struct sockaddr *) cast.
-	if(src->sa_family == AF_INET) // NOLINT(clang-analyzer-core.UndefinedBinaryOperatorResult)
+	if(src->sa_family == AF_INET)
 	{
 		mem_zero(dst, sizeof(NETADDR));
 		dst->type = NETTYPE_IPV4;
@@ -1565,7 +1561,7 @@ std::string windows_format_system_message(unsigned long error)
 	if(FormatMessageW(flags, NULL, error, 0, (LPWSTR)&wide_message, 0, NULL) == 0)
 		return "unknown error";
 
-	const std::string message = windows_wide_to_utf8(wide_message);
+	std::string message = windows_wide_to_utf8(wide_message);
 	LocalFree(wide_message);
 	return message;
 }
@@ -2464,7 +2460,7 @@ char *fs_getcwd(char *buffer, int buffer_size)
 #if defined(CONF_FAMILY_WINDOWS)
 	const DWORD size_needed = GetCurrentDirectoryW(0, nullptr);
 	std::wstring wide_current_dir(size_needed, L'0');
-	DWORD result = GetCurrentDirectoryW(size_needed, &wide_current_dir[0]);
+	DWORD result = GetCurrentDirectoryW(size_needed, wide_current_dir.data());
 	if(result == 0)
 	{
 		const DWORD LastError = GetLastError();
@@ -2616,7 +2612,7 @@ int net_socket_read_wait(NETSOCKET sock, int time)
 	tv.tv_usec = time % 1000000;
 	sockid = 0;
 
-	FD_ZERO(&readfds); // NOLINT(clang-analyzer-security.insecureAPI.bzero)
+	FD_ZERO(&readfds);
 	if(sock->ipv4sock >= 0)
 	{
 		FD_SET(sock->ipv4sock, &readfds);
@@ -2673,17 +2669,57 @@ int time_houroftheday()
 	return time_info->tm_hour;
 }
 
-int time_season()
+static bool time_iseasterday(time_t time_data, struct tm *time_info)
+{
+	// compute Easter day (Sunday) using https://en.wikipedia.org/w/index.php?title=Computus&oldid=890710285#Anonymous_Gregorian_algorithm
+	int Y = time_info->tm_year + 1900;
+	int a = Y % 19;
+	int b = Y / 100;
+	int c = Y % 100;
+	int d = b / 4;
+	int e = b % 4;
+	int f = (b + 8) / 25;
+	int g = (b - f + 1) / 3;
+	int h = (19 * a + b - d - g + 15) % 30;
+	int i = c / 4;
+	int k = c % 4;
+	int L = (32 + 2 * e + 2 * i - h - k) % 7;
+	int m = (a + 11 * h + 22 * L) / 451;
+	int month = (h + L - 7 * m + 114) / 31;
+	int day = ((h + L - 7 * m + 114) % 31) + 1;
+
+	// (now-1d ≤ easter ≤ now+2d) <=> (easter-2d ≤ now ≤ easter+1d) <=> (Good Friday ≤ now ≤ Easter Monday)
+	for(int day_offset = -1; day_offset <= 2; day_offset++)
+	{
+		time_data = time_data + day_offset * 60 * 60 * 24;
+		time_info = localtime(&time_data);
+		if(time_info->tm_mon == month - 1 && time_info->tm_mday == day)
+			return true;
+	}
+	return false;
+}
+
+ETimeSeason time_season()
 {
 	time_t time_data;
-	struct tm *time_info;
-
 	time(&time_data);
-	time_info = localtime(&time_data);
+	struct tm *time_info = localtime(&time_data);
 
 	if((time_info->tm_mon == 11 && time_info->tm_mday == 31) || (time_info->tm_mon == 0 && time_info->tm_mday == 1))
 	{
 		return SEASON_NEWYEAR;
+	}
+	else if(time_info->tm_mon == 11 && time_info->tm_mday >= 24 && time_info->tm_mday <= 26)
+	{
+		return SEASON_XMAS;
+	}
+	else if((time_info->tm_mon == 9 && time_info->tm_mday == 31) || (time_info->tm_mon == 10 && time_info->tm_mday == 1))
+	{
+		return SEASON_HALLOWEEN;
+	}
+	else if(time_iseasterday(time_data, time_info))
+	{
+		return SEASON_EASTER;
 	}
 
 	switch(time_info->tm_mon)
@@ -2704,8 +2740,10 @@ int time_season()
 	case 9:
 	case 10:
 		return SEASON_AUTUMN;
+	default:
+		dbg_assert(false, "Invalid month");
+		dbg_break();
 	}
-	return SEASON_SPRING; // should never happen
 }
 
 void str_append(char *dst, const char *src, int dst_size)
@@ -4015,6 +4053,7 @@ void cmdline_fix(int *argc, const char ***argv)
 	int wide_argc = 0;
 	WCHAR **wide_argv = CommandLineToArgvW(GetCommandLineW(), &wide_argc);
 	dbg_assert(wide_argv != NULL, "CommandLineToArgvW failure");
+	dbg_assert(wide_argc > 0, "Invalid argc value");
 
 	int total_size = 0;
 
@@ -4039,6 +4078,7 @@ void cmdline_fix(int *argc, const char ***argv)
 		new_argv[i + 1] = new_argv[i] + size;
 	}
 
+	LocalFree(wide_argv);
 	new_argv[wide_argc] = 0;
 	*argc = wide_argc;
 	*argv = (const char **)new_argv;
@@ -4565,7 +4605,7 @@ std::wstring windows_utf8_to_wide(const char *str)
 		return L"";
 	const int size_needed = MultiByteToWideChar(CP_UTF8, 0, str, orig_length, nullptr, 0);
 	std::wstring wide_string(size_needed, L'\0');
-	dbg_assert(MultiByteToWideChar(CP_UTF8, 0, str, orig_length, &wide_string[0], size_needed) == size_needed, "MultiByteToWideChar failure");
+	dbg_assert(MultiByteToWideChar(CP_UTF8, 0, str, orig_length, wide_string.data(), size_needed) == size_needed, "MultiByteToWideChar failure");
 	return wide_string;
 }
 
@@ -4576,7 +4616,7 @@ std::string windows_wide_to_utf8(const wchar_t *wide_str)
 		return "";
 	const int size_needed = WideCharToMultiByte(CP_UTF8, 0, wide_str, orig_length, nullptr, 0, nullptr, nullptr);
 	std::string string(size_needed, '\0');
-	dbg_assert(WideCharToMultiByte(CP_UTF8, 0, wide_str, orig_length, &string[0], size_needed, nullptr, nullptr) == size_needed, "WideCharToMultiByte failure");
+	dbg_assert(WideCharToMultiByte(CP_UTF8, 0, wide_str, orig_length, string.data(), size_needed, nullptr, nullptr) == size_needed, "WideCharToMultiByte failure");
 	return string;
 }
 

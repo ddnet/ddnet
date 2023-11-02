@@ -32,6 +32,14 @@ void CSaveTee::Save(CCharacter *pChr)
 		m_aWeapons[i].m_Got = pChr->m_Core.m_aWeapons[i].m_Got;
 	}
 
+	m_Ninja.m_ActivationDir = pChr->m_Core.m_Ninja.m_ActivationDir;
+	if(pChr->m_Core.m_Ninja.m_ActivationTick)
+		m_Ninja.m_ActivationTick = pChr->Server()->Tick() - pChr->m_Core.m_Ninja.m_ActivationTick;
+	else
+		m_Ninja.m_ActivationTick = 0;
+	m_Ninja.m_CurrentMoveTime = pChr->m_Core.m_Ninja.m_CurrentMoveTime;
+	m_Ninja.m_OldVelAmount = pChr->m_Core.m_Ninja.m_OldVelAmount;
+
 	m_LastWeapon = pChr->m_LastWeapon;
 	m_QueuedWeapon = pChr->m_QueuedWeapon;
 
@@ -135,6 +143,14 @@ void CSaveTee::Load(CCharacter *pChr, int Team, bool IsSwap)
 		pChr->m_Core.m_aWeapons[i].m_Ammocost = m_aWeapons[i].m_Ammocost;
 		pChr->m_Core.m_aWeapons[i].m_Got = m_aWeapons[i].m_Got;
 	}
+
+	pChr->m_Core.m_Ninja.m_ActivationDir = m_Ninja.m_ActivationDir;
+	if(m_Ninja.m_ActivationTick)
+		pChr->m_Core.m_Ninja.m_ActivationTick = pChr->Server()->Tick() - m_Ninja.m_ActivationTick;
+	else
+		pChr->m_Core.m_Ninja.m_ActivationTick = 0;
+	pChr->m_Core.m_Ninja.m_CurrentMoveTime = m_Ninja.m_CurrentMoveTime;
+	pChr->m_Core.m_Ninja.m_OldVelAmount = m_Ninja.m_OldVelAmount;
 
 	pChr->m_LastWeapon = m_LastWeapon;
 	pChr->m_QueuedWeapon = m_QueuedWeapon;
@@ -272,7 +288,8 @@ char *CSaveTee::GetString(const CSaveTeam *pTeam)
 		"%d\t%d\t%d\t%d\t" // input stuff
 		"%d\t" // m_ReloadTimer
 		"%d\t" // m_TeeStarted
-		"%d", //m_LiveFreeze
+		"%d\t" //m_LiveFreeze
+		"%f\t%f\t%d\t%d\t%d", // m_Ninja
 		m_aName, m_Alive, m_Paused, m_NeededFaketuning, m_TeeFinished, m_IsSolo,
 		// weapons
 		m_aWeapons[0].m_AmmoRegenStart, m_aWeapons[0].m_Ammo, m_aWeapons[0].m_Ammocost, m_aWeapons[0].m_Got,
@@ -305,7 +322,8 @@ char *CSaveTee::GetString(const CSaveTeam *pTeam)
 		m_InputDirection, m_InputJump, m_InputFire, m_InputHook,
 		m_ReloadTimer,
 		m_TeeStarted,
-		m_LiveFrozen);
+		m_LiveFrozen,
+		m_Ninja.m_ActivationDir.x, m_Ninja.m_ActivationDir.y, m_Ninja.m_ActivationTick, m_Ninja.m_CurrentMoveTime, m_Ninja.m_OldVelAmount);
 	return m_aString;
 }
 
@@ -345,7 +363,8 @@ int CSaveTee::FromString(const char *pString)
 		"%d\t%d\t%d\t%d\t" // input stuff
 		"%d\t" // m_ReloadTimer
 		"%d\t" // m_TeeStarted
-		"%d", // m_LiveFreeze
+		"%d\t" // m_LiveFreeze
+		"%f\t%f\t%d\t%d\t%d", // m_Ninja
 		m_aName, &m_Alive, &m_Paused, &m_NeededFaketuning, &m_TeeFinished, &m_IsSolo,
 		// weapons
 		&m_aWeapons[0].m_AmmoRegenStart, &m_aWeapons[0].m_Ammo, &m_aWeapons[0].m_Ammocost, &m_aWeapons[0].m_Got,
@@ -378,7 +397,8 @@ int CSaveTee::FromString(const char *pString)
 		&m_InputDirection, &m_InputJump, &m_InputFire, &m_InputHook,
 		&m_ReloadTimer,
 		&m_TeeStarted,
-		&m_LiveFrozen);
+		&m_LiveFrozen,
+		&m_Ninja.m_ActivationDir.x, &m_Ninja.m_ActivationDir.y, &m_Ninja.m_ActivationTick, &m_Ninja.m_CurrentMoveTime, &m_Ninja.m_OldVelAmount);
 	switch(Num) // Don't forget to update this when you save / load more / less.
 	{
 	case 96:
@@ -408,6 +428,20 @@ int CSaveTee::FromString(const char *pString)
 		m_LiveFrozen = false;
 		[[fallthrough]];
 	case 110:
+		if(m_aWeapons[WEAPON_NINJA].m_Got)
+		{
+			// remove ninja
+			m_aWeapons[WEAPON_NINJA].m_Got = false;
+			m_aWeapons[WEAPON_NINJA].m_Ammo = 0;
+			m_ActiveWeapon = m_LastWeapon;
+		}
+		m_Ninja.m_ActivationDir.x = 0.0;
+		m_Ninja.m_ActivationDir.y = 0.0;
+		m_Ninja.m_ActivationTick = 0;
+		m_Ninja.m_CurrentMoveTime = 0;
+		m_Ninja.m_OldVelAmount = 0;
+		[[fallthrough]];
+	case 115:
 		return 0;
 	default:
 		dbg_msg("load", "failed to load tee-string");

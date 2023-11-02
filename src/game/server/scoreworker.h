@@ -233,6 +233,8 @@ public:
 		m_BestTime = 0;
 		for(float &BestTimeCp : m_aBestTimeCp)
 			BestTimeCp = 0;
+
+		m_RecordStopTick = -1;
 	}
 
 	void Set(float Time, const float aTimeCp[NUM_CHECKPOINTS])
@@ -244,6 +246,9 @@ public:
 
 	float m_BestTime;
 	float m_aBestTimeCp[NUM_CHECKPOINTS];
+
+	int m_RecordStopTick;
+	float m_RecordFinishTime;
 };
 
 struct CTeamrank

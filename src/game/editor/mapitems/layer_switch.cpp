@@ -1,7 +1,9 @@
+#include "layer_switch.h"
+
 #include <game/editor/editor.h>
 
-CLayerSwitch::CLayerSwitch(int w, int h) :
-	CLayerTiles(w, h)
+CLayerSwitch::CLayerSwitch(CEditor *pEditor, int w, int h) :
+	CLayerTiles(pEditor, w, h)
 {
 	str_copy(m_aName, "Switch");
 	m_Switch = 1;

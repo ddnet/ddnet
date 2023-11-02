@@ -7,12 +7,11 @@
 
 #include <engine/console.h>
 #include <engine/serverbrowser.h>
-#include <engine/shared/config.h>
-#include <engine/shared/http.h>
 #include <engine/shared/memheap.h>
 
 #include <unordered_map>
 
+typedef struct _json_value json_value;
 class CNetClient;
 class IConfigManager;
 class IConsole;
@@ -49,18 +48,10 @@ public:
 	void RequestResort() { m_NeedResort = true; }
 
 	int NumServers() const override { return m_NumServers; }
-
-	int Players(const CServerInfo &Item) const override
-	{
-		return g_Config.m_BrFilterSpectators ? Item.m_NumPlayers : Item.m_NumClients;
-	}
-
-	int Max(const CServerInfo &Item) const override
-	{
-		return g_Config.m_BrFilterSpectators ? Item.m_MaxPlayers : Item.m_MaxClients;
-	}
-
+	int Players(const CServerInfo &Item) const override;
+	int Max(const CServerInfo &Item) const override;
 	int NumSortedServers() const override { return m_NumSortedServers; }
+	int NumSortedPlayers() const override { return m_NumSortedPlayers; }
 	const CServerInfo *SortedGet(int Index) const override;
 
 	const char *GetTutorialServer() override;
@@ -69,7 +60,9 @@ public:
 	void LoadDDNetServers();
 	void LoadDDNetInfoJson();
 	const json_value *LoadDDNetInfo();
-	int HasRank(const char *pMap);
+	void UpdateServerFilteredPlayers(CServerInfo *pInfo) const;
+	void UpdateServerFriends(CServerInfo *pInfo) const;
+	CServerInfo::ERankState HasRank(const char *pMap);
 
 	const std::vector<CCommunity> &Communities() const override;
 	const CCommunity *Community(const char *pCommunityId) const override;
@@ -98,6 +91,7 @@ public:
 
 private:
 	CNetClient *m_pNetClient = nullptr;
+	IConfigManager *m_pConfigManager = nullptr;
 	IConsole *m_pConsole = nullptr;
 	IEngine *m_pEngine = nullptr;
 	IFriends *m_pFriends = nullptr;
@@ -125,18 +119,16 @@ private:
 	int m_NumRequests;
 
 	bool m_NeedResort;
+	int m_Sorthash;
 
 	// used instead of g_Config.br_max_requests to get more servers
 	int m_CurrentMaxRequests;
 
 	int m_NumSortedServers;
 	int m_NumSortedServersCapacity;
+	int m_NumSortedPlayers;
 	int m_NumServers;
 	int m_NumServerCapacity;
-
-	int m_Sorthash;
-	char m_aFilterString[64];
-	char m_aFilterGametypeString[128];
 
 	int m_ServerlistType;
 	int64_t m_BroadcastTime;

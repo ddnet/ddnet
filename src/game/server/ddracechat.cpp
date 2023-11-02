@@ -1083,7 +1083,7 @@ void CGameContext::ConJoinTeam(IConsole::IResult *pResult, void *pUserData)
 			else
 			{
 				char aBuf[512];
-				str_format(aBuf, sizeof(aBuf), "%s joined team %d",
+				str_format(aBuf, sizeof(aBuf), "'%s' joined team %d",
 					pSelf->Server()->ClientName(pPlayer->GetCID()),
 					Team);
 				pSelf->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
@@ -1518,8 +1518,11 @@ void CGameContext::ConTele(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	vec2 Pos = pPlayer->m_ViewPos;
-
-	if(pResult->NumArguments() > 0)
+	if(pResult->NumArguments() == 0 && !pPlayer->IsPaused())
+	{
+		Pos = Pos + vec2(pChr->Core()->m_Input.m_TargetX, pChr->Core()->m_Input.m_TargetY);
+	}
+	else if(pResult->NumArguments() > 0)
 	{
 		int ClientID;
 		for(ClientID = 0; ClientID < MAX_CLIENTS; ClientID++)
@@ -1540,7 +1543,7 @@ void CGameContext::ConTele(IConsole::IResult *pResult, void *pUserData)
 			return;
 		Pos = pChrTo->m_Pos;
 	}
-	pChr->LastTelePos = Pos;
+	pPlayer->LastTelePos = Pos;
 	pSelf->Teleport(pChr, Pos);
 	pChr->UnFreeze();
 	pChr->Core()->m_Vel = vec2(0, 0);
@@ -1565,12 +1568,12 @@ void CGameContext::ConLastTele(IConsole::IResult *pResult, void *pUserData)
 		pSelf->SendChatTarget(pPlayer->GetCID(), "You're not in a team with /practice turned on. Note that you can't earn a rank with practice enabled.");
 		return;
 	}
-	if(!pChr->LastTelePos.x)
+	if(!pPlayer->LastTelePos.x)
 	{
 		pSelf->SendChatTarget(pPlayer->GetCID(), "You haven't previously teleported. Use /tp before using this command.");
 		return;
 	}
-	pSelf->Teleport(pChr, pChr->LastTelePos);
+	pSelf->Teleport(pChr, pPlayer->LastTelePos);
 	pChr->UnFreeze();
 	pChr->Core()->m_Vel = vec2(0, 0);
 }

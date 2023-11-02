@@ -1559,7 +1559,6 @@ void CMapLayers::OnRender()
 	for(int g = 0; g < m_pLayers->NumGroups(); g++)
 	{
 		CMapItemGroup *pGroup = m_pLayers->GetGroup(g);
-		CMapItemGroupEx *pGroupEx = m_pLayers->GetGroupEx(g);
 
 		if(!pGroup)
 		{
@@ -1573,7 +1572,7 @@ void CMapLayers::OnRender()
 		{
 			// set clipping
 			float aPoints[4];
-			RenderTools()->MapScreenToGroup(Center.x, Center.y, m_pLayers->GameGroup(), m_pLayers->GameGroupEx(), GetCurCamera()->m_Zoom);
+			RenderTools()->MapScreenToGroup(Center.x, Center.y, m_pLayers->GameGroup(), GetCurCamera()->m_Zoom);
 			Graphics()->GetScreen(&aPoints[0], &aPoints[1], &aPoints[2], &aPoints[3]);
 			float x0 = (pGroup->m_ClipX - aPoints[0]) / (aPoints[2] - aPoints[0]);
 			float y0 = (pGroup->m_ClipY - aPoints[1]) / (aPoints[3] - aPoints[1]);
@@ -1591,7 +1590,7 @@ void CMapLayers::OnRender()
 				(int)((x1 - x0) * Graphics()->ScreenWidth()), (int)((y1 - y0) * Graphics()->ScreenHeight()));
 		}
 
-		RenderTools()->MapScreenToGroup(Center.x, Center.y, pGroup, pGroupEx, GetCurCamera()->m_Zoom);
+		RenderTools()->MapScreenToGroup(Center.x, Center.y, pGroup, GetCurCamera()->m_Zoom);
 
 		for(int l = 0; l < pGroup->m_NumLayers; l++)
 		{
@@ -1739,7 +1738,7 @@ void CMapLayers::OnRender()
 				if(pLayer->m_Type == LAYERTYPE_TILES)
 				{
 					CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
-					if(pTMap->m_Image == -1)
+					if(pTMap->m_Image < 0 || pTMap->m_Image >= m_pImages->Num())
 					{
 						if(!IsGameLayer)
 							Graphics()->TextureClear();
@@ -1803,7 +1802,7 @@ void CMapLayers::OnRender()
 				else if(pLayer->m_Type == LAYERTYPE_QUADS)
 				{
 					CMapItemLayerQuads *pQLayer = (CMapItemLayerQuads *)pLayer;
-					if(pQLayer->m_Image == -1)
+					if(pQLayer->m_Image < 0 || pQLayer->m_Image >= m_pImages->Num())
 						Graphics()->TextureClear();
 					else
 						Graphics()->TextureSet(m_pImages->Get(pQLayer->m_Image));

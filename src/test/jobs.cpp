@@ -2,7 +2,8 @@
 #include <gtest/gtest.h>
 
 #include <base/system.h>
-#include <engine/engine.h>
+
+#include <engine/shared/host_lookup.h>
 #include <engine/shared/jobs.h>
 
 #include <functional>
@@ -72,8 +73,8 @@ TEST_F(Jobs, LookupHost)
 	static const int NETTYPE = NETTYPE_ALL;
 	auto pJob = std::make_shared<CHostLookup>(HOST, NETTYPE);
 
-	EXPECT_STREQ(pJob->m_aHostname, HOST);
-	EXPECT_EQ(pJob->m_Nettype, NETTYPE);
+	EXPECT_STREQ(pJob->Hostname(), HOST);
+	EXPECT_EQ(pJob->Nettype(), NETTYPE);
 
 	Add(pJob);
 	while(pJob->Status() != IJob::STATE_DONE)
@@ -82,11 +83,11 @@ TEST_F(Jobs, LookupHost)
 		thread_yield();
 	}
 
-	EXPECT_STREQ(pJob->m_aHostname, HOST);
-	EXPECT_EQ(pJob->m_Nettype, NETTYPE);
-	if(pJob->m_Result == 0)
+	EXPECT_STREQ(pJob->Hostname(), HOST);
+	EXPECT_EQ(pJob->Nettype(), NETTYPE);
+	if(pJob->Result() == 0)
 	{
-		EXPECT_EQ(pJob->m_Addr.type & NETTYPE, pJob->m_Addr.type);
+		EXPECT_EQ(pJob->Addr().type & NETTYPE, pJob->Addr().type);
 	}
 }
 
@@ -96,8 +97,8 @@ TEST_F(Jobs, LookupHostWebsocket)
 	static const int NETTYPE = NETTYPE_ALL;
 	auto pJob = std::make_shared<CHostLookup>(HOST, NETTYPE);
 
-	EXPECT_STREQ(pJob->m_aHostname, HOST);
-	EXPECT_EQ(pJob->m_Nettype, NETTYPE);
+	EXPECT_STREQ(pJob->Hostname(), HOST);
+	EXPECT_EQ(pJob->Nettype(), NETTYPE);
 
 	Add(pJob);
 	while(pJob->Status() != IJob::STATE_DONE)
@@ -106,11 +107,11 @@ TEST_F(Jobs, LookupHostWebsocket)
 		thread_yield();
 	}
 
-	EXPECT_STREQ(pJob->m_aHostname, HOST);
-	EXPECT_EQ(pJob->m_Nettype, NETTYPE);
-	if(pJob->m_Result == 0)
+	EXPECT_STREQ(pJob->Hostname(), HOST);
+	EXPECT_EQ(pJob->Nettype(), NETTYPE);
+	if(pJob->Result() == 0)
 	{
-		EXPECT_EQ(pJob->m_Addr.type & NETTYPE_WEBSOCKET_IPV4, pJob->m_Addr.type);
+		EXPECT_EQ(pJob->Addr().type & NETTYPE_WEBSOCKET_IPV4, pJob->Addr().type);
 	}
 }
 

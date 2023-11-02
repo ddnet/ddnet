@@ -96,7 +96,9 @@ public:
 	int LoadWVFromMem(const void *pData, unsigned DataSize, bool FromEditor) override;
 	void UnloadSample(int SampleID) override;
 
-	float GetSampleDuration(int SampleID) override; // in s
+	float GetSampleTotalTime(int SampleID) override; // in s
+	float GetSampleCurrentTime(int SampleID) override; // in s
+	void SetSampleCurrentTime(int SampleID, float Time) override;
 
 	void SetChannel(int ChannelID, float Vol, float Pan) override;
 	void SetListenerPos(float x, float y) override;
@@ -112,6 +114,7 @@ public:
 	CVoiceHandle Play(int ChannelID, int SampleID, int Flags, float x, float y);
 	CVoiceHandle PlayAt(int ChannelID, int SampleID, int Flags, float x, float y) override;
 	CVoiceHandle Play(int ChannelID, int SampleID, int Flags) override;
+	void Pause(int SampleID) override;
 	void Stop(int SampleID) override;
 	void StopAll() override;
 	void StopVoice(CVoiceHandle Voice) override;

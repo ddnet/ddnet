@@ -153,6 +153,7 @@ public:
 		int m_Corners;
 
 		std::string m_Text;
+		int m_ReadCursorGlyphCount;
 
 		CTextCursor m_Cursor;
 

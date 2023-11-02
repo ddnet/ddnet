@@ -1,6 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <engine/keys.h>
+#include <engine/shared/config.h>
 
 #include "lineinput.h"
 #include "ui.h"
@@ -111,6 +112,9 @@ void CLineInput::UpdateStrData()
 
 const char *CLineInput::GetDisplayedString()
 {
+	if(m_pfnDisplayTextCallback)
+		return m_pfnDisplayTextCallback(m_pStr, GetNumChars());
+
 	if(!IsHidden())
 		return m_pStr;
 
@@ -167,18 +171,18 @@ void CLineInput::SetSelection(size_t Start, size_t End)
 	m_WasChanged = true;
 }
 
-size_t CLineInput::OffsetFromActualToDisplay(size_t ActualOffset) const
+size_t CLineInput::OffsetFromActualToDisplay(size_t ActualOffset)
 {
-	if(!IsHidden())
-		return ActualOffset;
-	return str_utf8_offset_bytes_to_chars(m_pStr, ActualOffset);
+	if(IsHidden() || (m_pfnCalculateOffsetCallback && m_pfnCalculateOffsetCallback()))
+		return str_utf8_offset_bytes_to_chars(m_pStr, ActualOffset);
+	return ActualOffset;
 }
 
-size_t CLineInput::OffsetFromDisplayToActual(size_t DisplayOffset) const
+size_t CLineInput::OffsetFromDisplayToActual(size_t DisplayOffset)
 {
-	if(!IsHidden())
-		return DisplayOffset;
-	return str_utf8_offset_chars_to_bytes(m_pStr, DisplayOffset);
+	if(IsHidden() || (m_pfnCalculateOffsetCallback && m_pfnCalculateOffsetCallback()))
+		return str_utf8_offset_bytes_to_chars(m_pStr, DisplayOffset);
+	return DisplayOffset;
 }
 
 bool CLineInput::ProcessInput(const IInput::CEvent &Event)
@@ -490,9 +494,13 @@ STextBoundingBox CLineInput::Render(const CUIRect *pRect, float FontSize, int Al
 
 		m_CaretPosition = Cursor.m_CursorRenderedPosition;
 
-		STextBoundingBox CaretBoundingBox = TextRender()->TextBoundingBox(FontSize, pDisplayStr, DisplayCursorOffset, LineWidth);
-		CaretBoundingBox.MoveBy(CursorPos);
-		SetCompositionWindowPosition(vec2(CaretBoundingBox.Right(), CaretBoundingBox.Bottom()), CaretBoundingBox.m_H);
+		CTextCursor CaretCursor;
+		TextRender()->SetCursor(&CaretCursor, CursorPos.x, CursorPos.y, FontSize, 0);
+		CaretCursor.m_LineWidth = LineWidth;
+		CaretCursor.m_CursorMode = TEXT_CURSOR_CURSOR_MODE_SET;
+		CaretCursor.m_CursorCharacter = str_utf8_offset_bytes_to_chars(pDisplayStr, DisplayCursorOffset);
+		TextRender()->TextEx(&CaretCursor, pDisplayStr);
+		SetCompositionWindowPosition(CaretCursor.m_CursorRenderedPosition + vec2(0.0f, CaretCursor.m_AlignedFontSize / 2.0f), CaretCursor.m_AlignedFontSize);
 	}
 	else
 	{
@@ -605,7 +613,7 @@ void CLineInput::SetCompositionWindowPosition(vec2 Anchor, float LineHeight)
 	const vec2 ScreenScale = vec2(ScreenWidth / (ScreenX1 - ScreenX0), ScreenHeight / (ScreenY1 - ScreenY0));
 	ms_CompositionWindowPosition = Anchor * ScreenScale;
 	ms_CompositionLineHeight = LineHeight * ScreenScale.y;
-	Input()->SetCompositionWindowPosition(ms_CompositionWindowPosition.x, ms_CompositionWindowPosition.y - ms_CompositionLineHeight, ms_CompositionLineHeight);
+	Input()->SetCompositionWindowPosition(ms_CompositionWindowPosition.x, ms_CompositionWindowPosition.y, ms_CompositionLineHeight);
 }
 
 void CLineInput::Activate(EInputPriority Priority)

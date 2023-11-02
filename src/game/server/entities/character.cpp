@@ -83,10 +83,8 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 
 	m_ReckoningTick = 0;
 	m_SendCore = CCharacterCore();
-	m_ReckoningCore = CCharacterCore();
-
-	m_ReckoningCore.Init(nullptr, Collision());
-	m_ReckoningCore.m_Tuning = *Tuning();
+	m_ReckoningCore = m_Core;
+	m_ReckoningCore.SetCoreWorld(nullptr, Collision(), nullptr);
 
 	GameServer()->m_World.InsertEntity(this);
 	m_Alive = true;
@@ -646,8 +644,12 @@ void CCharacter::GiveNinja()
 
 void CCharacter::RemoveNinja()
 {
+	m_Core.m_Ninja.m_ActivationDir = vec2(0, 0);
+	m_Core.m_Ninja.m_ActivationTick = 0;
 	m_Core.m_Ninja.m_CurrentMoveTime = 0;
+	m_Core.m_Ninja.m_OldVelAmount = 0;
 	m_Core.m_aWeapons[WEAPON_NINJA].m_Got = false;
+	m_Core.m_aWeapons[WEAPON_NINJA].m_Ammo = 0;
 	m_Core.m_ActiveWeapon = m_LastWeapon;
 
 	SetWeapon(m_Core.m_ActiveWeapon);
@@ -876,6 +878,8 @@ void CCharacter::TickDeferred()
 			m_ReckoningTick = Server()->Tick();
 			m_SendCore = m_Core;
 			m_ReckoningCore = m_Core;
+			m_ReckoningCore.SetCoreWorld(nullptr, Collision(), nullptr);
+			m_ReckoningCore.m_Tuning = CTuningParams();
 			m_Core.m_Reset = false;
 		}
 	}
@@ -914,7 +918,16 @@ bool CCharacter::IncreaseArmor(int Amount)
 void CCharacter::Die(int Killer, int Weapon, bool SendKillMsg)
 {
 	if(Server()->IsRecording(m_pPlayer->GetCID()))
-		Server()->StopRecord(m_pPlayer->GetCID());
+	{
+		CPlayerData *pData = GameServer()->Score()->PlayerData(m_pPlayer->GetCID());
+
+		if(pData->m_RecordStopTick - Server()->Tick() <= Server()->TickSpeed() && pData->m_RecordStopTick != -1)
+			Server()->SaveDemo(m_pPlayer->GetCID(), pData->m_RecordFinishTime);
+		else
+			Server()->StopRecord(m_pPlayer->GetCID());
+
+		pData->m_RecordStopTick = -1;
+	}
 
 	int ModeSpecial = GameServer()->m_pController->OnCharacterDeath(this, GameServer()->m_apPlayers[Killer], Weapon);
 
@@ -1102,7 +1115,18 @@ void CCharacter::SnapCharacter(int SnappingClient, int ID)
 
 		pCharacter->m_Health = Health;
 		pCharacter->m_Armor = Armor;
-		pCharacter->m_TriggeredEvents = 0;
+		int TriggeredEvents7 = 0;
+		if(m_Core.m_TriggeredEvents & COREEVENT_GROUND_JUMP)
+			TriggeredEvents7 |= protocol7::COREEVENTFLAG_GROUND_JUMP;
+		if(m_Core.m_TriggeredEvents & COREEVENT_AIR_JUMP)
+			TriggeredEvents7 |= protocol7::COREEVENTFLAG_AIR_JUMP;
+		if(m_Core.m_TriggeredEvents & COREEVENT_HOOK_ATTACH_PLAYER)
+			TriggeredEvents7 |= protocol7::COREEVENTFLAG_HOOK_ATTACH_PLAYER;
+		if(m_Core.m_TriggeredEvents & COREEVENT_HOOK_ATTACH_GROUND)
+			TriggeredEvents7 |= protocol7::COREEVENTFLAG_HOOK_ATTACH_GROUND;
+		if(m_Core.m_TriggeredEvents & COREEVENT_HOOK_HIT_NOHOOK)
+			TriggeredEvents7 |= protocol7::COREEVENTFLAG_HOOK_HIT_NOHOOK;
+		pCharacter->m_TriggeredEvents = TriggeredEvents7;
 	}
 }
 
@@ -1915,9 +1939,9 @@ void CCharacter::HandleTuneLayer()
 	m_TuneZone = Collision()->IsTune(CurrentIndex);
 
 	if(m_TuneZone)
-		m_Core.m_Tuning = m_ReckoningCore.m_Tuning = TuningList()[m_TuneZone]; // throw tunings from specific zone into gamecore
+		m_Core.m_Tuning = TuningList()[m_TuneZone]; // throw tunings from specific zone into gamecore
 	else
-		m_Core.m_Tuning = m_ReckoningCore.m_Tuning = *Tuning();
+		m_Core.m_Tuning = *Tuning();
 
 	if(m_TuneZone != m_TuneZoneOld) // don't send tunigs all the time
 	{

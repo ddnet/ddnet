@@ -248,19 +248,6 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 		if(ListItem.m_Selected)
 			m_SelectedIndex = i;
 
-		// update friend counter
-		int FriendsOnServer = 0;
-		if(pItem->m_FriendState != IFriends::FRIEND_NO)
-		{
-			for(int j = 0; j < pItem->m_NumReceivedClients; ++j)
-			{
-				if(pItem->m_aClients[j].m_FriendState != IFriends::FRIEND_NO)
-				{
-					FriendsOnServer++;
-				}
-			}
-		}
-
 		if(!ListItem.m_Visible)
 		{
 			// reset active item, if not visible
@@ -342,7 +329,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 					CUIRect Icon;
 					Button.VMargin(4.0f, &Button);
 					Button.VSplitLeft(Button.h, &Icon, &Button);
-					if(g_Config.m_BrIndicateFinished && pItem->m_HasRank == 1)
+					if(g_Config.m_BrIndicateFinished && pItem->m_HasRank == CServerInfo::RANK_RANKED)
 					{
 						Icon.Margin(2.0f, &Icon);
 						RenderBrowserIcons(*pUiElement->Rect(UI_ELEM_FINISH_ICON), &Icon, TextRender()->DefaultTextColor(), TextRender()->DefaultTextOutlineColor(), FONT_ICON_FLAG_CHECKERED, TEXTALIGN_MC);
@@ -374,9 +361,9 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 					Button.VSplitRight(50.0f, &Icon, &Button);
 					Icon.Margin(2.0f, &Icon);
 					RenderBrowserIcons(*pUiElement->Rect(UI_ELEM_FRIEND_ICON), &Icon, ColorRGBA(0.94f, 0.4f, 0.4f, 1.0f), TextRender()->DefaultTextOutlineColor(), FONT_ICON_HEART, TEXTALIGN_MC);
-					if(FriendsOnServer > 1)
+					if(pItem->m_FriendNum > 1)
 					{
-						str_from_int(FriendsOnServer, aTemp);
+						str_from_int(pItem->m_FriendNum, aTemp);
 						TextRender()->TextColor(0.94f, 0.8f, 0.8f, 1.0f);
 						UI()->DoLabel(&Icon, aTemp, 9.0f, TEXTALIGN_MC);
 						TextRender()->TextColor(TextRender()->DefaultTextColor());
@@ -530,14 +517,10 @@ void CMenus::RenderServerbrowserStatusBox(CUIRect StatusBox, bool WasListboxItem
 			str_format(aBuf, sizeof(aBuf), Localize("%d of %d server"), ServerBrowser()->NumSortedServers(), ServerBrowser()->NumServers());
 		UI()->DoLabel(&ServersOnline, aBuf, 12.0f, TEXTALIGN_MR);
 
-		int NumPlayers = 0;
-		for(int i = 0; i < ServerBrowser()->NumSortedServers(); i++)
-			NumPlayers += ServerBrowser()->SortedGet(i)->m_NumFilteredPlayers;
-
-		if(NumPlayers != 1)
-			str_format(aBuf, sizeof(aBuf), Localize("%d players"), NumPlayers);
+		if(ServerBrowser()->NumSortedPlayers() != 1)
+			str_format(aBuf, sizeof(aBuf), Localize("%d players"), ServerBrowser()->NumSortedPlayers());
 		else
-			str_format(aBuf, sizeof(aBuf), Localize("%d player"), NumPlayers);
+			str_format(aBuf, sizeof(aBuf), Localize("%d player"), ServerBrowser()->NumSortedPlayers());
 		UI()->DoLabel(&PlayersOnline, aBuf, 12.0f, TEXTALIGN_MR);
 	}
 
@@ -1066,8 +1049,8 @@ void CMenus::RenderServerbrowserInfo(CUIRect View)
 				if(DoButton_CheckBox_Tristate(&s_LeakIpButton, Localize("Leak IP"), pSelectedServer->m_FavoriteAllowPing, &ButtonLeakIp))
 				{
 					Favorites()->AllowPing(pSelectedServer->m_aAddresses, pSelectedServer->m_NumAddresses, pSelectedServer->m_FavoriteAllowPing == TRISTATE::NONE);
+					Client()->ServerBrowserUpdate();
 				}
-				Client()->ServerBrowserUpdate();
 			}
 		}
 
@@ -1125,9 +1108,25 @@ void CMenus::RenderServerbrowserInfoScoreboard(CUIRect View, const CServerInfo *
 		CUIRect Skin, Name, Clan, Score, Flag;
 		Name = Item.m_Rect;
 
-		ColorRGBA Color = CurrentClient.m_FriendState == IFriends::FRIEND_NO ?
-					  ColorRGBA(1.0f, 1.0f, 1.0f, (i % 2 + 1) * 0.05f) :
-					  ColorRGBA(0.5f, 1.0f, 0.5f, 0.15f + (i % 2 + 1) * 0.05f);
+		ColorRGBA Color;
+		const float Alpha = (i % 2 + 1) * 0.05f;
+		switch(CurrentClient.m_FriendState)
+		{
+		case IFriends::FRIEND_NO:
+			Color = ColorRGBA(1.0f, 1.0f, 1.0f, Alpha);
+			break;
+		case IFriends::FRIEND_PLAYER:
+			Color = ColorRGBA(0.5f, 1.0f, 0.5f, 0.15f + Alpha);
+			break;
+		case IFriends::FRIEND_CLAN:
+			Color = ColorRGBA(0.4f, 0.4f, 1.0f, 0.15f + Alpha);
+			break;
+		default:
+			dbg_assert(false, "Invalid friend state");
+			dbg_break();
+			break;
+		}
+
 		Name.Draw(Color, IGraphics::CORNER_ALL, 4.0f);
 		Name.VSplitLeft(1.0f, nullptr, &Name);
 		Name.VSplitLeft(34.0f, &Score, &Name);

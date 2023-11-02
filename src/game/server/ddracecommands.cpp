@@ -181,6 +181,26 @@ void CGameContext::ConUnSolo(IConsole::IResult *pResult, void *pUserData)
 		pChr->SetSolo(false);
 }
 
+void CGameContext::ConFreeze(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientID(pResult->m_ClientID))
+		return;
+	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
+	if(pChr)
+		pChr->Freeze();
+}
+
+void CGameContext::ConUnFreeze(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientID(pResult->m_ClientID))
+		return;
+	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
+	if(pChr)
+		pChr->UnFreeze();
+}
+
 void CGameContext::ConDeep(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
@@ -383,9 +403,15 @@ void CGameContext::ConTeleport(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	CCharacter *pChr = pSelf->GetPlayerChar(Tele);
-	if(pChr && pSelf->GetPlayerChar(TeleTo))
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+
+	if(pChr && pPlayer && pSelf->GetPlayerChar(TeleTo))
 	{
-		pSelf->Teleport(pChr, pSelf->m_apPlayers[TeleTo]->m_ViewPos);
+		vec2 Pos = pSelf->m_apPlayers[TeleTo]->m_ViewPos;
+		if(!pPlayer->IsPaused() && !pResult->NumArguments())
+			Pos = Pos + vec2(pChr->Core()->m_Input.m_TargetX, pChr->Core()->m_Input.m_TargetY);
+
+		pSelf->Teleport(pChr, Pos);
 		pChr->UnFreeze();
 		pChr->Core()->m_Vel = vec2(0, 0);
 	}
@@ -833,7 +859,8 @@ void CGameContext::ConDrySave(IConsole::IResult *pResult, void *pUserData)
 		return;
 
 	CSaveTeam SavedTeam;
-	int Result = SavedTeam.Save(pSelf, pPlayer->GetTeam(), true);
+	int Team = pSelf->GetDDRaceTeam(pResult->m_ClientID);
+	int Result = SavedTeam.Save(pSelf, Team, true);
 	if(CSaveTeam::HandleSaveError(Result, pResult->m_ClientID, pSelf))
 		return;
 

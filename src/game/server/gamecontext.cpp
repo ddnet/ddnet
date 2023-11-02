@@ -1612,7 +1612,7 @@ void CGameContext::OnClientConnected(int ClientID, void *pData)
 	if(m_apPlayers[ClientID])
 		delete m_apPlayers[ClientID];
 	m_apPlayers[ClientID] = new(ClientID) CPlayer(this, NextUniqueClientID, ClientID, StartTeam);
-	m_apPlayers[ClientID]->SetAfk(Afk);
+	m_apPlayers[ClientID]->SetInitialAfk(Afk);
 	NextUniqueClientID += 1;
 
 #ifdef CONF_DEBUG
@@ -2860,7 +2860,7 @@ void CGameContext::ConTunes(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	char aBuf[256];
-	for(int i = 0; i < pSelf->Tuning()->Num(); i++)
+	for(int i = 0; i < CTuningParams::Num(); i++)
 	{
 		float Value;
 		pSelf->Tuning()->Get(i, &Value);
@@ -2899,7 +2899,7 @@ void CGameContext::ConTuneDumpZone(IConsole::IResult *pResult, void *pUserData)
 	char aBuf[256];
 	if(List >= 0 && List < NUM_TUNEZONES)
 	{
-		for(int i = 0; i < pSelf->TuningList()[List].Num(); i++)
+		for(int i = 0; i < CTuningParams::Num(); i++)
 		{
 			float Value;
 			pSelf->TuningList()[List].Get(i, &Value);
@@ -3866,7 +3866,6 @@ void CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 	Reader.Open(Storage(), pNewMapName, IStorage::TYPE_ALL);
 
 	CDataFileWriter Writer;
-	Writer.Init();
 
 	int SettingsIndex = Reader.NumData();
 	bool FoundInfo = false;
@@ -3944,7 +3943,7 @@ void CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 	free(pSettings);
 	Reader.Close();
 	char aTemp[IO_MAX_PATH_LENGTH];
-	Writer.OpenFile(Storage(), IStorage::FormatTmpPath(aTemp, sizeof(aTemp), pNewMapName));
+	Writer.Open(Storage(), IStorage::FormatTmpPath(aTemp, sizeof(aTemp), pNewMapName));
 	Writer.Finish();
 
 	str_copy(pNewMapName, aTemp, MapNameSize);

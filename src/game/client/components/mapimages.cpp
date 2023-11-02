@@ -1,17 +1,19 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include "mapimages.h"
+
+#include <base/log.h>
+
 #include <engine/graphics.h>
 #include <engine/map.h>
 #include <engine/storage.h>
 #include <engine/textrender.h>
-#include <game/generated/client_data.h>
-#include <game/mapitems.h>
-
-#include <game/layers.h>
-
-#include "mapimages.h"
 
 #include <game/client/gameclient.h>
+#include <game/generated/client_data.h>
+#include <game/layers.h>
+#include <game/localization.h>
+#include <game/mapitems.h>
 
 const char *const gs_apModEntitiesNames[] = {
 	"ddnet",
@@ -67,7 +69,7 @@ void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
 	int Start;
 	pMap->GetType(MAPITEMTYPE_IMAGE, &Start, &m_Count);
 
-	m_Count = clamp(m_Count, 0, 64);
+	m_Count = clamp<int>(m_Count, 0, MAX_MAPIMAGES);
 
 	for(int g = 0; g < pLayers->NumGroups(); g++)
 	{
@@ -83,7 +85,7 @@ void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
 			if(pLayer->m_Type == LAYERTYPE_TILES)
 			{
 				CMapItemLayerTilemap *pTLayer = (CMapItemLayerTilemap *)pLayer;
-				if(pTLayer->m_Image != -1 && pTLayer->m_Image < (int)(std::size(m_aTextures)))
+				if(pTLayer->m_Image >= 0 && pTLayer->m_Image < m_Count)
 				{
 					m_aTextureUsedByTileOrQuadLayerFlag[pTLayer->m_Image] |= 1;
 				}
@@ -91,7 +93,7 @@ void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
 			else if(pLayer->m_Type == LAYERTYPE_QUADS)
 			{
 				CMapItemLayerQuads *pQLayer = (CMapItemLayerQuads *)pLayer;
-				if(pQLayer->m_Image != -1 && pQLayer->m_Image < (int)(std::size(m_aTextures)))
+				if(pQLayer->m_Image >= 0 && pQLayer->m_Image < m_Count)
 				{
 					m_aTextureUsedByTileOrQuadLayerFlag[pQLayer->m_Image] |= 2;
 				}
@@ -99,37 +101,48 @@ void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
 		}
 	}
 
-	int TextureLoadFlag = Graphics()->HasTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
+	const int TextureLoadFlag = Graphics()->HasTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
 
 	// load new textures
+	bool ShowWarning = false;
 	for(int i = 0; i < m_Count; i++)
 	{
-		int LoadFlag = (((m_aTextureUsedByTileOrQuadLayerFlag[i] & 1) != 0) ? TextureLoadFlag : 0) | (((m_aTextureUsedByTileOrQuadLayerFlag[i] & 2) != 0) ? 0 : (Graphics()->IsTileBufferingEnabled() ? IGraphics::TEXLOAD_NO_2D_TEXTURE : 0));
+		const int LoadFlag = (((m_aTextureUsedByTileOrQuadLayerFlag[i] & 1) != 0) ? TextureLoadFlag : 0) | (((m_aTextureUsedByTileOrQuadLayerFlag[i] & 2) != 0) ? 0 : (Graphics()->IsTileBufferingEnabled() ? IGraphics::TEXLOAD_NO_2D_TEXTURE : 0));
 		const CMapItemImage_v2 *pImg = (CMapItemImage_v2 *)pMap->GetItem(Start + i);
 		const CImageInfo::EImageFormat Format = pImg->m_Version < CMapItemImage_v2::CURRENT_VERSION ? CImageInfo::FORMAT_RGBA : CImageInfo::ImageFormatFromInt(pImg->m_Format);
+
+		const char *pName = pMap->GetDataString(pImg->m_ImageName);
+		if(pName == nullptr || pName[0] == '\0')
+		{
+			if(pImg->m_External)
+			{
+				log_error("mapimages", "Failed to load map image %d: failed to load name.", i);
+				ShowWarning = true;
+				continue;
+			}
+			pName = "(error)";
+		}
+
 		if(pImg->m_External)
 		{
 			char aPath[IO_MAX_PATH_LENGTH];
-			char *pName = (char *)pMap->GetData(pImg->m_ImageName);
 			str_format(aPath, sizeof(aPath), "mapres/%s.png", pName);
 			m_aTextures[i] = Graphics()->LoadTexture(aPath, IStorage::TYPE_ALL, LoadFlag);
-			pMap->UnloadData(pImg->m_ImageName);
 		}
-		else if(Format != CImageInfo::FORMAT_RGBA)
-		{
-			m_aTextures[i] = Graphics()->InvalidTexture();
-			pMap->UnloadData(pImg->m_ImageName);
-		}
-		else
+		else if(Format == CImageInfo::FORMAT_RGBA)
 		{
 			void *pData = pMap->GetData(pImg->m_ImageData);
-			char *pName = (char *)pMap->GetData(pImg->m_ImageName);
-			char aTexName[128];
-			str_format(aTexName, sizeof(aTexName), "%s %s", "embedded:", pName);
+			char aTexName[IO_MAX_PATH_LENGTH];
+			str_format(aTexName, sizeof(aTexName), "embedded: %s", pName);
 			m_aTextures[i] = Graphics()->LoadTextureRaw(pImg->m_Width, pImg->m_Height, Format, pData, LoadFlag, aTexName);
-			pMap->UnloadData(pImg->m_ImageName);
 			pMap->UnloadData(pImg->m_ImageData);
 		}
+		pMap->UnloadData(pImg->m_ImageName);
+		ShowWarning = ShowWarning || m_aTextures[i].Id() == Graphics()->InvalidTexture().Id();
+	}
+	if(ShowWarning)
+	{
+		Client()->AddWarning(SWarning(Localize("Some map images could not be loaded. Check the local console for details.")));
 	}
 }
 

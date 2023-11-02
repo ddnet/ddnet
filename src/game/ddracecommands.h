@@ -32,6 +32,8 @@ CONSOLE_COMMAND("endless_hook", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConEndlessHoo
 CONSOLE_COMMAND("unendless_hook", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConUnEndlessHook, this, "Removes endless hook from you")
 CONSOLE_COMMAND("solo", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConSolo, this, "Puts you into solo part")
 CONSOLE_COMMAND("unsolo", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConUnSolo, this, "Puts you out of solo part")
+CONSOLE_COMMAND("freeze", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConFreeze, this, "Puts you into freeze")
+CONSOLE_COMMAND("unfreeze", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConUnFreeze, this, "Puts you out of freeze")
 CONSOLE_COMMAND("deep", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConDeep, this, "Puts you into deep freeze")
 CONSOLE_COMMAND("undeep", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConUnDeep, this, "Puts you out of deep freeze")
 CONSOLE_COMMAND("livefreeze", "", CFGFLAG_SERVER | CMDFLAG_TEST, ConLiveFreeze, this, "Makes you live frozen")

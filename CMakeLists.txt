@@ -22,12 +22,7 @@ else()
   message(FATAL_ERROR "Couldn't parse version from src/game/version.h")
 endif()
 
-# Extra support for CMake pre-3.0
-if(VERSION_PATCH STREQUAL "0")
-  project(DDNet VERSION ${VERSION_MAJOR}.${VERSION_MINOR})
-else()
-  project(DDNet VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH})
-endif()
+project(DDNet VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH})
 
 set(ORIGINAL_CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH})
 set(ORIGINAL_CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES})
@@ -1806,6 +1801,7 @@ add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/src/game/generated/git_revision.
 )
 generate_source("src/game/generated/client_data.cpp" "client_content_source")
 generate_source("src/game/generated/client_data.h" "client_content_header")
+generate_source("src/game/generated/data_types.h" "content_types_header")
 generate_source("src/game/generated/protocol.cpp" "network_source")
 generate_source("src/game/generated/protocol.h" "network_header")
 generate_source("src/game/generated/server_data.cpp" "server_content_source")
@@ -1916,6 +1912,8 @@ set_src(ENGINE_SHARED GLOB_RECURSE src/engine/shared
   filecollection.cpp
   filecollection.h
   global_uuid_manager.cpp
+  host_lookup.cpp
+  host_lookup.h
   http.cpp
   http.h
   huffman.cpp
@@ -2028,6 +2026,7 @@ foreach(s ${GAME_SHARED})
 endforeach()
 list(REMOVE_ITEM GAME_SHARED ${ENGINE_UUID_SHARED})
 set(GAME_GENERATED_SHARED
+  src/game/generated/data_types.h
   src/game/generated/git_revision.cpp
   src/game/generated/protocol.h
   src/game/generated/protocol7.h
@@ -2121,6 +2120,8 @@ if(CLIENT)
     friends.h
     ghost.cpp
     ghost.h
+    graph.cpp
+    graph.h
     graphics_defines.h
     graphics_threaded.cpp
     graphics_threaded.h
@@ -2135,6 +2136,8 @@ if(CLIENT)
     serverbrowser_http.h
     serverbrowser_ping_cache.cpp
     serverbrowser_ping_cache.h
+    smooth_time.cpp
+    smooth_time.h
     sound.cpp
     sound.h
     sqlite.cpp
@@ -2286,23 +2289,38 @@ if(CLIENT)
     component.h
     editor.cpp
     editor.h
+    editor_object.cpp
+    editor_object.h
     explanations.cpp
     map_grid.cpp
     map_grid.h
     map_view.cpp
     map_view.h
+    mapitems/envelope.cpp
+    mapitems/envelope.h
     mapitems/image.cpp
     mapitems/image.h
+    mapitems/layer.h
     mapitems/layer_front.cpp
+    mapitems/layer_front.h
     mapitems/layer_game.cpp
+    mapitems/layer_game.h
     mapitems/layer_group.cpp
+    mapitems/layer_group.h
     mapitems/layer_quads.cpp
+    mapitems/layer_quads.h
     mapitems/layer_sounds.cpp
+    mapitems/layer_sounds.h
     mapitems/layer_speedup.cpp
+    mapitems/layer_speedup.h
     mapitems/layer_switch.cpp
+    mapitems/layer_switch.h
     mapitems/layer_tele.cpp
+    mapitems/layer_tele.h
     mapitems/layer_tiles.cpp
+    mapitems/layer_tiles.h
     mapitems/layer_tune.cpp
+    mapitems/layer_tune.h
     mapitems/map.cpp
     mapitems/map_io.cpp
     mapitems/sound.cpp
@@ -2627,6 +2645,7 @@ if(TOOLS)
     config_retrieve.cpp
     config_store.cpp
     crapnet.cpp
+    demo_extract_chat.cpp
     dilate.cpp
     dummy_map.cpp
     map_convert_07.cpp
@@ -2748,6 +2767,7 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
     serverinfo.cpp
     str.cpp
     strip_path_and_extension.cpp
+    swap_endian.cpp
     teehistorian.cpp
     test.cpp
     test.h
@@ -2995,6 +3015,7 @@ if(TOOLS)
   set(TARGET_TOOLS
     config_retrieve
     config_store
+    demo_extract_chat
     dilate
     map_convert_07
     map_diff
@@ -3359,6 +3380,9 @@ foreach(target ${TARGETS_OWN})
     if(DISCORD_DYNAMIC)
       target_compile_definitions(${target} PRIVATE CONF_DISCORD_DYNAMIC)
     endif()
+  endif()
+  if(VERSION)
+    target_compile_definitions(${target} PRIVATE GAME_RELEASE_VERSION="${VERSION}")
   endif()
   if(CMAKE_SYSTEM_NAME STREQUAL "Emscripten")
    target_compile_definitions(${target} PRIVATE CONF_WEBASM)

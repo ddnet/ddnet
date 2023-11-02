@@ -24,7 +24,7 @@ public:
 		ReadLaunchCommandLine();
 		str_copy(m_aPlayerName, SteamAPI_ISteamFriends_GetPersonaName(m_pSteamFriends));
 	}
-	~CSteam()
+	~CSteam() override
 	{
 		SteamAPI_Shutdown();
 	}

@@ -136,34 +136,29 @@ void CUIRect::VSplitRight(float Cut, CUIRect *pLeft, CUIRect *pRight) const
 	}
 }
 
-void CUIRect::Margin(float Cut, CUIRect *pOtherRect) const
+void CUIRect::Margin(vec2 Cut, CUIRect *pOtherRect) const
 {
 	CUIRect r = *this;
 
-	pOtherRect->x = r.x + Cut;
-	pOtherRect->y = r.y + Cut;
-	pOtherRect->w = r.w - 2 * Cut;
-	pOtherRect->h = r.h - 2 * Cut;
+	pOtherRect->x = r.x + Cut.x;
+	pOtherRect->y = r.y + Cut.y;
+	pOtherRect->w = r.w - 2 * Cut.x;
+	pOtherRect->h = r.h - 2 * Cut.y;
+}
+
+void CUIRect::Margin(float Cut, CUIRect *pOtherRect) const
+{
+	Margin(vec2(Cut, Cut), pOtherRect);
 }
 
 void CUIRect::VMargin(float Cut, CUIRect *pOtherRect) const
 {
-	CUIRect r = *this;
-
-	pOtherRect->x = r.x + Cut;
-	pOtherRect->y = r.y;
-	pOtherRect->w = r.w - 2 * Cut;
-	pOtherRect->h = r.h;
+	Margin(vec2(Cut, 0.0f), pOtherRect);
 }
 
 void CUIRect::HMargin(float Cut, CUIRect *pOtherRect) const
 {
-	CUIRect r = *this;
-
-	pOtherRect->x = r.x;
-	pOtherRect->y = r.y + Cut;
-	pOtherRect->w = r.w;
-	pOtherRect->h = r.h - 2 * Cut;
+	Margin(vec2(0.0f, Cut), pOtherRect);
 }
 
 bool CUIRect::Inside(float PointX, float PointY) const

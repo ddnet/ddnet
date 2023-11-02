@@ -49,7 +49,7 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 	if(IVideo::Current())
 		ShowDirection = g_Config.m_ClVideoShowDirection;
 #endif
-	if((pPlayerInfo->m_Local && ShowDirection == 2) || (!pPlayerInfo->m_Local && ShowDirection >= 1))
+	if((ShowDirection && ShowDirection != 3 && !pPlayerInfo->m_Local) || (ShowDirection >= 2 && pPlayerInfo->m_Local) || (ShowDirection == 3 && Client()->DummyConnected() && Client()->State() != IClient::STATE_DEMOPLAYBACK && ClientID == m_pClient->m_aLocalIDs[!g_Config.m_ClDummy]))
 	{
 		Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 		Graphics()->QuadsSetRotation(0);
@@ -66,7 +66,12 @@ void CNamePlates::RenderNameplatePos(vec2 Position, const CNetObj_PlayerInfo *pP
 			DirRight = m_pClient->m_Controls.m_aInputData[g_Config.m_ClDummy].m_Direction == 1;
 			Jump = m_pClient->m_Controls.m_aInputData[g_Config.m_ClDummy].m_Jump == 1;
 		}
-
+		if(Client()->DummyConnected() && Client()->State() != IClient::STATE_DEMOPLAYBACK && pPlayerInfo->m_ClientID == m_pClient->m_aLocalIDs[!g_Config.m_ClDummy])
+		{
+			DirLeft = m_pClient->m_Controls.m_aInputData[!g_Config.m_ClDummy].m_Direction == -1;
+			DirRight = m_pClient->m_Controls.m_aInputData[!g_Config.m_ClDummy].m_Direction == 1;
+			Jump = m_pClient->m_Controls.m_aInputData[!g_Config.m_ClDummy].m_Jump == 1;
+		}
 		if(DirLeft)
 		{
 			Graphics()->TextureSet(g_pData->m_aImages[IMAGE_ARROW].m_Id);

@@ -19,6 +19,8 @@
 
 #include "chat.h"
 
+char CChat::ms_aDisplayText[MAX_LINE_LENGTH] = {'\0'};
+
 CChat::CChat()
 {
 	for(auto &Line : m_aLines)
@@ -36,6 +38,37 @@ CChat::CChat()
 	m_Mode = MODE_NONE;
 
 	m_Input.SetClipboardLineCallback([this](const char *pStr) { SayChat(pStr); });
+	m_Input.SetCalculateOffsetCallback([this]() { return m_IsInputCensored; });
+	m_Input.SetDisplayTextCallback([this](char *pStr, size_t NumChars) {
+		m_IsInputCensored = false;
+		if(
+			g_Config.m_ClStreamerMode &&
+			(str_startswith(pStr, "/login ") ||
+				str_startswith(pStr, "/register ") ||
+				str_startswith(pStr, "/code ") ||
+				str_startswith(pStr, "/timeout ") ||
+				str_startswith(pStr, "/save ") ||
+				str_startswith(pStr, "/load ")))
+		{
+			bool Censor = false;
+			const size_t NumLetters = minimum(NumChars, sizeof(ms_aDisplayText) - 1);
+			for(size_t i = 0; i < NumLetters; ++i)
+			{
+				if(Censor)
+					ms_aDisplayText[i] = '*';
+				else
+					ms_aDisplayText[i] = pStr[i];
+				if(pStr[i] == ' ')
+				{
+					Censor = true;
+					m_IsInputCensored = true;
+				}
+			}
+			ms_aDisplayText[NumLetters] = '\0';
+			return ms_aDisplayText;
+		}
+		return pStr;
+	});
 }
 
 void CChat::RegisterCommand(const char *pName, const char *pParams, int flags, const char *pHelp)
@@ -86,6 +119,7 @@ void CChat::Reset()
 	m_PendingChatCounter = 0;
 	m_LastChatSend = 0;
 	m_CurrentLine = 0;
+	m_IsInputCensored = false;
 	DisableMode();
 
 	for(int64_t &LastSoundPlayed : m_aLastSoundPlayed)
@@ -292,7 +326,7 @@ bool CChat::OnInput(const IInput::CEvent &Event)
 			// insert the command
 			if(pCompletionCommand)
 			{
-				char aBuf[256];
+				char aBuf[MAX_LINE_LENGTH];
 				// add part before the name
 				str_truncate(aBuf, sizeof(aBuf), m_Input.GetString(), m_PlaceholderOffset);
 
@@ -353,7 +387,7 @@ bool CChat::OnInput(const IInput::CEvent &Event)
 			// insert the name
 			if(pCompletionString)
 			{
-				char aBuf[256];
+				char aBuf[MAX_LINE_LENGTH];
 				// add part before the name
 				str_truncate(aBuf, sizeof(aBuf), m_Input.GetString(), m_PlaceholderOffset);
 
@@ -560,7 +594,7 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 		else if(pEnd == 0)
 			pEnd = pStrOld;
 
-		if(++Length >= 256)
+		if(++Length >= MAX_LINE_LENGTH)
 		{
 			*(const_cast<char *>(pStr)) = 0;
 			break;
@@ -1021,7 +1055,15 @@ void CChat::OnPrepareLines()
 			OriginalWidth = Cursor.m_LongestLineWidth;
 		}
 
-		TextRender()->CreateOrAppendTextContainer(m_aLines[r].m_TextContainerIndex, &AppendCursor, m_aLines[r].m_aText);
+		const char *pText = m_aLines[r].m_aText;
+		if(Config()->m_ClStreamerMode && m_aLines[r].m_ClientID == SERVER_MSG)
+		{
+			if(str_startswith(m_aLines[r].m_aText, "Team save in progress. You'll be able to load with '/load") && str_endswith(m_aLines[r].m_aText, "if it fails"))
+				pText = "Team save in progress. You'll be able to load with '/load ***' if save is successful or with '/load *** *** ***' if it fails";
+			else if(str_startswith(m_aLines[r].m_aText, "Team successfully saved by ") && str_endswith(m_aLines[r].m_aText, " to continue"))
+				pText = "Team successfully saved by ***. Use '/load ***' to continue";
+		}
+		TextRender()->CreateOrAppendTextContainer(m_aLines[r].m_TextContainerIndex, &AppendCursor, pText);
 
 		if(!g_Config.m_ClChatOld && (m_aLines[r].m_aText[0] != '\0' || m_aLines[r].m_aName[0] != '\0'))
 		{

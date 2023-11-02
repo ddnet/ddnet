@@ -58,8 +58,8 @@ struct CMapInfo
 {
 	char m_aName[MAX_MAP_LENGTH];
 	SHA256_DIGEST m_Sha256;
-	int m_Crc;
-	int m_Size;
+	unsigned m_Crc;
+	unsigned m_Size;
 };
 
 class IDemoPlayer : public IInterface
@@ -80,13 +80,6 @@ public:
 		int m_aTimelineMarkers[MAX_TIMELINE_MARKERS];
 	};
 
-	enum
-	{
-		DEMOTYPE_INVALID = 0,
-		DEMOTYPE_CLIENT,
-		DEMOTYPE_SERVER,
-	};
-
 	enum ETickOffset
 	{
 		TICK_CURRENT, // update the current tick again
@@ -94,7 +87,7 @@ public:
 		TICK_NEXT, // go to the next tick
 	};
 
-	~IDemoPlayer() {}
+	virtual ~IDemoPlayer() {}
 	virtual void SetSpeed(float Speed) = 0;
 	virtual void SetSpeedIndex(int SpeedIndex) = 0;
 	virtual void AdjustSpeedIndex(int Offset) = 0;
@@ -106,16 +99,15 @@ public:
 	virtual void Unpause() = 0;
 	virtual bool IsPlaying() const = 0;
 	virtual const CInfo *BaseInfo() const = 0;
-	virtual void GetDemoName(char *pBuffer, int BufferSize) const = 0;
-	virtual bool GetDemoInfo(class IStorage *pStorage, const char *pFilename, int StorageType, CDemoHeader *pDemoHeader, CTimelineMarkers *pTimelineMarkers, CMapInfo *pMapInfo) const = 0;
-	virtual int GetDemoType() const = 0;
+	virtual void GetDemoName(char *pBuffer, size_t BufferSize) const = 0;
+	virtual bool GetDemoInfo(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, int StorageType, CDemoHeader *pDemoHeader, CTimelineMarkers *pTimelineMarkers, CMapInfo *pMapInfo, IOHANDLE *pFile = nullptr, char *pErrorMessage = nullptr, size_t ErrorMessageSize = 0) const = 0;
 };
 
 class IDemoRecorder : public IInterface
 {
 	MACRO_INTERFACE("demorecorder", 0)
 public:
-	~IDemoRecorder() {}
+	virtual ~IDemoRecorder() {}
 	virtual bool IsRecording() const = 0;
 	virtual int Stop() = 0;
 	virtual int Length() const = 0;

@@ -45,7 +45,6 @@ void Process(IStorage *pStorage, const char *pMapName, const char *pConfigName)
 	Reader.Open(pStorage, pMapName, IStorage::TYPE_ABSOLUTE);
 
 	CDataFileWriter Writer;
-	Writer.Init();
 
 	int SettingsIndex = Reader.NumData();
 	bool FoundInfo = false;
@@ -123,7 +122,7 @@ void Process(IStorage *pStorage, const char *pMapName, const char *pConfigName)
 
 	free(pSettings);
 	Reader.Close();
-	if(!Writer.OpenFile(pStorage, pMapName))
+	if(!Writer.Open(pStorage, pMapName))
 	{
 		dbg_msg("config_store", "couldn't open map file '%s' for writing", pMapName);
 		return;

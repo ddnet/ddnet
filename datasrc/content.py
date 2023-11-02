@@ -16,10 +16,11 @@ class SoundSet(Struct):
 			self.sounds.Add(Sound(filename))
 
 class Image(Struct):
-	def __init__(self, name="", filename=""):
+	def __init__(self, name="", filename="", linear_mapping=0):
 		Struct.__init__(self, "CDataImage")
 		self.name = String(name)
 		self.filename = String(filename)
+		self.flag = Int(linear_mapping)
 		self.id = TextureHandle()
 
 class SpriteSet(Struct):

@@ -91,7 +91,7 @@ class CRegister : public IRegister
 				m_pRegister(std::move(pRegister))
 			{
 			}
-			virtual ~CJob() = default;
+			~CJob() override = default;
 		};
 
 		CRegister *m_pParent;

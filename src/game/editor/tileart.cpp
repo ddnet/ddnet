@@ -167,9 +167,8 @@ static std::shared_ptr<CLayerTiles> AddLayerWithImage(CEditor *pEditor, const st
 	std::shared_ptr<CEditorImage> pEditorImage = ImageInfoToEditorImage(pEditor, Image, pName);
 	pEditor->m_Map.m_vpImages.push_back(pEditorImage);
 
-	std::shared_ptr<CLayerTiles> pLayer = std::make_shared<CLayerTiles>(Width, Height);
+	std::shared_ptr<CLayerTiles> pLayer = std::make_shared<CLayerTiles>(pEditor, Width, Height);
 	str_copy(pLayer->m_aName, pName);
-	pLayer->m_pEditor = pEditor;
 	pLayer->m_Image = pEditor->m_Map.m_vpImages.size() - 1;
 	pGroup->AddLayer(pLayer);
 
