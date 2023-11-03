@@ -95,18 +95,13 @@ void CMenuBackground::LoadThemeIcon(CTheme &Theme)
 {
 	char aIconPath[IO_MAX_PATH_LENGTH];
 	str_format(aIconPath, sizeof(aIconPath), "themes/%s.png", Theme.m_Name.empty() ? "none" : Theme.m_Name.c_str());
+	Theme.m_IconTexture = Graphics()->LoadTexture(aIconPath, IStorage::TYPE_ALL);
+
 	char aBuf[32 + IO_MAX_PATH_LENGTH];
-	CImageInfo Info;
-	if(!Graphics()->LoadPNG(&Info, aIconPath, IStorage::TYPE_ALL))
-	{
+	if(Theme.m_IconTexture.IsNullTexture())
 		str_format(aBuf, sizeof(aBuf), "failed to load theme icon '%s'", aIconPath);
-	}
 	else
-	{
 		str_format(aBuf, sizeof(aBuf), "loaded theme icon '%s'", aIconPath);
-		Theme.m_IconTexture = Graphics()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, Info.m_Format, 0);
-		Graphics()->FreePNG(&Info);
-	}
 	Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "menuthemes", aBuf);
 }
 

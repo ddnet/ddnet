@@ -368,7 +368,7 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadSpriteTextureImpl(CImageInfo &
 	const size_t PixelSize = FromImageInfo.PixelSize();
 	m_vSpriteHelper.resize(w * h * PixelSize);
 	CopyTextureFromTextureBufferSub(m_vSpriteHelper.data(), w, h, (uint8_t *)FromImageInfo.m_pData, FromImageInfo.m_Width, FromImageInfo.m_Height, PixelSize, x, y, w, h);
-	return LoadTextureRaw(w, h, FromImageInfo.m_Format, m_vSpriteHelper.data(), FromImageInfo.m_Format, 0);
+	return LoadTextureRaw(w, h, FromImageInfo.m_Format, m_vSpriteHelper.data(), 0);
 }
 
 IGraphics::CTextureHandle CGraphics_Threaded::LoadSpriteTexture(CImageInfo &FromImageInfo, CDataSprite *pSprite)
