@@ -482,11 +482,14 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadTexture(const char *pFilename,
 	CImageInfo Img;
 	if(LoadPNG(&Img, pFilename, StorageType))
 	{
-		IGraphics::CTextureHandle ID = LoadTextureRaw(Img.m_Width, Img.m_Height, Img.m_Format, Img.m_pData, Flags, pFilename);
-		free(Img.m_pData);
-		if(ID.Id() != m_InvalidTexture.Id() && g_Config.m_Debug)
-			dbg_msg("graphics/texture", "loaded %s", pFilename);
-		return ID;
+		CTextureHandle ID = LoadTextureRaw(Img.m_Width, Img.m_Height, Img.m_Format, Img.m_pData, Flags, pFilename);
+		FreePNG(&Img);
+		if(ID.IsValid())
+		{
+			if(g_Config.m_Debug)
+				dbg_msg("graphics/texture", "loaded %s", pFilename);
+			return ID;
+		}
 	}
 
 	return m_InvalidTexture;
