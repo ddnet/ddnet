@@ -1908,8 +1908,8 @@ void CMenus::LoadCommunityIconFinish(const char *pCommunityId, CImageInfo &&Info
 		pData[i * Step + 1] = v;
 		pData[i * Step + 2] = v;
 	}
-	CommunityIcon.m_GreyTexture = Graphics()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, 0);
-	Graphics()->FreePNG(&Info);
+	CommunityIcon.m_GreyTexture = Graphics()->LoadTextureRawMove(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, 0);
+	Info.m_pData = nullptr;
 
 	auto ExistingIcon = std::find_if(m_vCommunityIcons.begin(), m_vCommunityIcons.end(), [pCommunityId](const SCommunityIcon &Element) {
 		return str_comp(Element.m_aCommunityId, pCommunityId) == 0;

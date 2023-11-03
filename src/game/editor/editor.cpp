@@ -5166,8 +5166,8 @@ void CEditor::RenderFileDialog()
 				if(Graphics()->LoadPNG(&m_FilePreviewImageInfo, aBuffer, m_vpFilteredFileList[m_FilesSelectedIndex]->m_StorageType))
 				{
 					Graphics()->UnloadTexture(&m_FilePreviewImage);
-					m_FilePreviewImage = Graphics()->LoadTextureRaw(m_FilePreviewImageInfo.m_Width, m_FilePreviewImageInfo.m_Height, m_FilePreviewImageInfo.m_Format, m_FilePreviewImageInfo.m_pData, 0);
-					Graphics()->FreePNG(&m_FilePreviewImageInfo);
+					m_FilePreviewImage = Graphics()->LoadTextureRawMove(m_FilePreviewImageInfo.m_Width, m_FilePreviewImageInfo.m_Height, m_FilePreviewImageInfo.m_Format, m_FilePreviewImageInfo.m_pData, 0);
+					m_FilePreviewImageInfo.m_pData = nullptr;
 					m_FilePreviewState = PREVIEW_LOADED;
 				}
 				else

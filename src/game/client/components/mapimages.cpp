@@ -445,10 +445,7 @@ IGraphics::CTextureHandle CMapImages::UploadEntityLayerText(int TextureSize, int
 	UpdateEntityLayerText(pMem, PixelSize, Width, Height, TextureSize, MaxWidth, YOffset, 2, 255);
 
 	const int TextureLoadFlag = (Graphics()->Uses2DTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE) | IGraphics::TEXLOAD_NO_2D_TEXTURE;
-	IGraphics::CTextureHandle Texture = Graphics()->LoadTextureRaw(Width, Height, CImageInfo::FORMAT_RGBA, pMem, TextureLoadFlag);
-	free(pMem);
-
-	return Texture;
+	return Graphics()->LoadTextureRawMove(Width, Height, CImageInfo::FORMAT_RGBA, pMem, TextureLoadFlag);
 }
 
 void CMapImages::UpdateEntityLayerText(void *pTexBuffer, size_t PixelSize, size_t TexWidth, size_t TexHeight, int TextureSize, int MaxWidth, int YOffset, int NumbersPower, int MaxNumber)
