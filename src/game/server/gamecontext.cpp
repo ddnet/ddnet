@@ -2042,9 +2042,9 @@ void CGameContext::OnSayNetMessage(const CNetMsg_Cl_Say *pMsg, int ClientID, con
 	if(Length == 0 || (pMsg->m_pMessage[0] != '/' && (g_Config.m_SvSpamprotection && pPlayer->m_LastChat && pPlayer->m_LastChat + Server()->TickSpeed() * ((31 + Length) / 32) > Server()->Tick())))
 		return;
 
-	int GameTeam = ((CGameControllerDDRace *)m_pController)->m_Teams.m_Core.Team(pPlayer->GetCID());
+	// int GameTeam = ((CGameControllerDDRace *)m_pController)->m_Teams.m_Core.Team(pPlayer->GetCID());
 	if(Team)
-		Team = ((pPlayer->GetTeam() == TEAM_SPECTATORS) ? CHAT_SPEC : GameTeam);
+		Team = ((pPlayer->GetTeam() == TEAM_SPECTATORS) ? CHAT_SPEC : pPlayer->GetTeam()); // gctf
 	else
 		Team = CHAT_ALL;
 
@@ -2073,6 +2073,10 @@ void CGameContext::OnSayNetMessage(const CNetMsg_Cl_Say *pMsg, int ClientID, con
 			char aWhisperMsg[256];
 			str_copy(aWhisperMsg, pMsg->m_pMessage + 10, 256);
 			Converse(pPlayer->GetCID(), aWhisperMsg);
+		}
+		else if(!str_comp_nocase(pMsg->m_pMessage + 1, "ready")) // gctf
+		{
+			m_pController->OnPlayerReadyChange(pPlayer);
 		}
 		else
 		{
