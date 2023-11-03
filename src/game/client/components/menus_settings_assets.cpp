@@ -129,7 +129,7 @@ int CMenus::EntitiesScan(const char *pName, int IsDir, int DirType, void *pUser)
 }
 
 template<typename TName>
-static void LoadAsset(TName *pAssetItem, const char *pAssetName, IGraphics *pGraphics, void *pUser)
+static void LoadAsset(TName *pAssetItem, const char *pAssetName, IGraphics *pGraphics)
 {
 	char aBuff[IO_MAX_PATH_LENGTH];
 
@@ -179,7 +179,7 @@ static int AssetScan(const char *pName, int IsDir, int DirType, std::vector<TNam
 
 		TName AssetItem;
 		str_copy(AssetItem.m_aName, pName);
-		LoadAsset(&AssetItem, pAssetName, pGraphics, pUser);
+		LoadAsset(&AssetItem, pAssetName, pGraphics);
 		vAssetList.push_back(AssetItem);
 	}
 	else
@@ -194,7 +194,7 @@ static int AssetScan(const char *pName, int IsDir, int DirType, std::vector<TNam
 
 			TName AssetItem;
 			str_copy(AssetItem.m_aName, aName);
-			LoadAsset(&AssetItem, pAssetName, pGraphics, pUser);
+			LoadAsset(&AssetItem, pAssetName, pGraphics);
 			vAssetList.push_back(AssetItem);
 		}
 	}
@@ -356,7 +356,7 @@ void InitAssetList(std::vector<TName> &vAssetList, const char *pAssetPath, const
 	{
 		TName AssetItem;
 		str_copy(AssetItem.m_aName, "default");
-		LoadAsset(&AssetItem, pAssetName, pGraphics, Caller);
+		LoadAsset(&AssetItem, pAssetName, pGraphics);
 		vAssetList.push_back(AssetItem);
 
 		// load assets
