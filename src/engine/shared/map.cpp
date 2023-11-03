@@ -2,25 +2,32 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "map.h"
 
+#include <base/log.h>
+
 #include <engine/storage.h>
 
 #include <game/mapitems.h>
 
 CMap::CMap() = default;
 
-void *CMap::GetData(int Index)
-{
-	return m_DataFile.GetData(Index);
-}
-
 int CMap::GetDataSize(int Index) const
 {
 	return m_DataFile.GetDataSize(Index);
 }
 
+void *CMap::GetData(int Index)
+{
+	return m_DataFile.GetData(Index);
+}
+
 void *CMap::GetDataSwapped(int Index)
 {
 	return m_DataFile.GetDataSwapped(Index);
+}
+
+const char *CMap::GetDataString(int Index)
+{
+	return m_DataFile.GetDataString(Index);
 }
 
 void CMap::UnloadData(int Index)
@@ -33,19 +40,24 @@ int CMap::NumData() const
 	return m_DataFile.NumData();
 }
 
-void *CMap::GetItem(int Index, int *pType, int *pID)
-{
-	return m_DataFile.GetItem(Index, pType, pID);
-}
-
 int CMap::GetItemSize(int Index)
 {
 	return m_DataFile.GetItemSize(Index);
 }
 
+void *CMap::GetItem(int Index, int *pType, int *pID)
+{
+	return m_DataFile.GetItem(Index, pType, pID);
+}
+
 void CMap::GetType(int Type, int *pStart, int *pNum)
 {
 	m_DataFile.GetType(Type, pStart, pNum);
+}
+
+int CMap::FindItemIndex(int Type, int ID)
+{
+	return m_DataFile.FindItemIndex(Type, ID);
 }
 
 void *CMap::FindItem(int Type, int ID)
@@ -63,23 +75,32 @@ bool CMap::Load(const char *pMapName)
 	IStorage *pStorage = Kernel()->RequestInterface<IStorage>();
 	if(!pStorage)
 		return false;
-	if(!m_DataFile.Open(pStorage, pMapName, IStorage::TYPE_ALL))
-		return false;
-	// check version
-	const CMapItemVersion *pItem = (CMapItemVersion *)m_DataFile.FindItem(MAPITEMTYPE_VERSION, 0);
-	if(!pItem || pItem->m_Version != CMapItemVersion::CURRENT_VERSION)
+
+	// Ensure current datafile is not left in an inconsistent state if loading fails,
+	// by loading the new datafile separately first.
+	CDataFileReader NewDataFile;
+	if(!NewDataFile.Open(pStorage, pMapName, IStorage::TYPE_ALL))
 		return false;
 
-	// replace compressed tile layers with uncompressed ones
+	// Check version
+	const CMapItemVersion *pItem = (CMapItemVersion *)NewDataFile.FindItem(MAPITEMTYPE_VERSION, 0);
+	if(pItem == nullptr || pItem->m_Version != CMapItemVersion::CURRENT_VERSION)
+	{
+		log_error("map/load", "Error: map version not supported.");
+		NewDataFile.Close();
+		return false;
+	}
+
+	// Replace compressed tile layers with uncompressed ones
 	int GroupsStart, GroupsNum, LayersStart, LayersNum;
-	m_DataFile.GetType(MAPITEMTYPE_GROUP, &GroupsStart, &GroupsNum);
-	m_DataFile.GetType(MAPITEMTYPE_LAYER, &LayersStart, &LayersNum);
+	NewDataFile.GetType(MAPITEMTYPE_GROUP, &GroupsStart, &GroupsNum);
+	NewDataFile.GetType(MAPITEMTYPE_LAYER, &LayersStart, &LayersNum);
 	for(int g = 0; g < GroupsNum; g++)
 	{
-		const CMapItemGroup *pGroup = static_cast<CMapItemGroup *>(m_DataFile.GetItem(GroupsStart + g));
+		const CMapItemGroup *pGroup = static_cast<CMapItemGroup *>(NewDataFile.GetItem(GroupsStart + g));
 		for(int l = 0; l < pGroup->m_NumLayers; l++)
 		{
-			CMapItemLayer *pLayer = static_cast<CMapItemLayer *>(m_DataFile.GetItem(LayersStart + pGroup->m_StartLayer + l));
+			CMapItemLayer *pLayer = static_cast<CMapItemLayer *>(NewDataFile.GetItem(LayersStart + pGroup->m_StartLayer + l));
 			if(pLayer->m_Type == LAYERTYPE_TILES)
 			{
 				CMapItemLayerTilemap *pTilemap = reinterpret_cast<CMapItemLayerTilemap *>(pLayer);
@@ -87,13 +108,16 @@ bool CMap::Load(const char *pMapName)
 				{
 					const size_t TilemapSize = (size_t)pTilemap->m_Width * pTilemap->m_Height * sizeof(CTile);
 					CTile *pTiles = static_cast<CTile *>(malloc(TilemapSize));
-					ExtractTiles(pTiles, (size_t)pTilemap->m_Width * pTilemap->m_Height, static_cast<CTile *>(m_DataFile.GetData(pTilemap->m_Data)), m_DataFile.GetDataSize(pTilemap->m_Data) / sizeof(CTile));
-					m_DataFile.ReplaceData(pTilemap->m_Data, reinterpret_cast<char *>(pTiles), TilemapSize);
+					ExtractTiles(pTiles, (size_t)pTilemap->m_Width * pTilemap->m_Height, static_cast<CTile *>(NewDataFile.GetData(pTilemap->m_Data)), NewDataFile.GetDataSize(pTilemap->m_Data) / sizeof(CTile));
+					NewDataFile.ReplaceData(pTilemap->m_Data, reinterpret_cast<char *>(pTiles), TilemapSize);
 				}
 			}
 		}
 	}
 
+	// Replace existing datafile with new datafile
+	m_DataFile.Close();
+	m_DataFile = std::move(NewDataFile);
 	return true;
 }
 

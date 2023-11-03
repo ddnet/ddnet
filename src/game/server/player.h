@@ -7,7 +7,8 @@
 
 #include <engine/shared/protocol.h>
 
-#include "alloc.h"
+#include <game/alloc.h>
+
 #include "teeinfo.h"
 
 #include <memory>
@@ -192,6 +193,7 @@ public:
 	void UpdatePlaytime();
 	void AfkTimer();
 	void SetAfk(bool Afk);
+	void SetInitialAfk(bool Afk);
 	bool IsAfk() const { return m_Afk; }
 
 	int64_t m_LastPlaytime;
@@ -220,6 +222,8 @@ public:
 	int m_SwapTargetsClientID; //Client ID of the swap target for the given player
 
 	bool m_BirthdayAnnounced;
+
+	vec2 LastTelePos;
 
 	// gctf
 	int m_RespawnTick;

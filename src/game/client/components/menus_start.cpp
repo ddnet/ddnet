@@ -13,12 +13,9 @@
 
 #include <game/generated/client_data.h>
 #include <game/localization.h>
+#include <game/version.h>
 
 #include "menus.h"
-
-#include <chrono>
-
-using namespace std::chrono_literals;
 
 void CMenus::RenderStartMenu(CUIRect MainView)
 {
@@ -83,7 +80,7 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 		}
 		else
 		{
-			PopupWarning(Localize("Warning"), Localize("Can't find a Tutorial server"), Localize("Ok"), 10s);
+			Client()->AddWarning(SWarning(Localize("Can't find a Tutorial server")));
 			s_JoinTutorialTime = 0.0f;
 		}
 	}
@@ -134,6 +131,10 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 	Menu.HSplitBottom(5.0f, &Menu, 0); // little space
 	Menu.HSplitBottom(40.0f, &Menu, &Button);
 	static CButtonContainer s_LocalServerButton;
+
+	if(!is_process_alive(m_ServerProcess.m_Process))
+		KillServer();
+
 	if(DoButton_Menu(&s_LocalServerButton, m_ServerProcess.m_Process ? Localize("Stop server") : Localize("Run server"), 0, &Button, g_Config.m_ClShowStartMenuImages ? "local_server" : 0, IGraphics::CORNER_ALL, Rounding, 0.5f, vec4(0.0f, 0.0f, 0.0f, 0.5f), m_ServerProcess.m_Process ? vec4(0.0f, 1.0f, 0.0f, 0.25f) : vec4(0.0f, 0.0f, 0.0f, 0.25f)) || (CheckHotKey(KEY_R) && Input()->KeyPress(KEY_R)))
 	{
 		if(m_ServerProcess.m_Process)
@@ -155,7 +156,7 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 			}
 			else
 			{
-				PopupWarning(Localize("Warning"), Localize("Server executable not found, can't run server"), Localize("Ok"), 10s);
+				Client()->AddWarning(SWarning(Localize("Server executable not found, can't run server")));
 			}
 		}
 	}

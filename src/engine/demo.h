@@ -13,6 +13,8 @@ enum
 	MAX_TIMELINE_MARKERS = 64
 };
 
+static const unsigned char gs_aHeaderMarker[7] = {'T', 'W', 'D', 'E', 'M', 'O', 0};
+
 constexpr int g_DemoSpeeds = 22;
 extern const double g_aSpeeds[g_DemoSpeeds];
 
@@ -34,6 +36,16 @@ struct CDemoHeader
 	char m_aType[8];
 	unsigned char m_aLength[sizeof(int32_t)];
 	char m_aTimestamp[20];
+
+	bool Valid() const
+	{
+		// Check marker and ensure that strings are zero-terminated and valid UTF-8.
+		return mem_comp(m_aMarker, gs_aHeaderMarker, sizeof(gs_aHeaderMarker)) == 0 &&
+		       mem_has_null(m_aNetversion, sizeof(m_aNetversion)) && str_utf8_check(m_aNetversion) &&
+		       mem_has_null(m_aMapName, sizeof(m_aMapName)) && str_utf8_check(m_aMapName) &&
+		       mem_has_null(m_aType, sizeof(m_aType)) && str_utf8_check(m_aType) &&
+		       mem_has_null(m_aTimestamp, sizeof(m_aTimestamp)) && str_utf8_check(m_aTimestamp);
+	}
 };
 
 struct CTimelineMarkers
@@ -46,8 +58,8 @@ struct CMapInfo
 {
 	char m_aName[MAX_MAP_LENGTH];
 	SHA256_DIGEST m_Sha256;
-	int m_Crc;
-	int m_Size;
+	unsigned m_Crc;
+	unsigned m_Size;
 };
 
 class IDemoPlayer : public IInterface
@@ -68,13 +80,6 @@ public:
 		int m_aTimelineMarkers[MAX_TIMELINE_MARKERS];
 	};
 
-	enum
-	{
-		DEMOTYPE_INVALID = 0,
-		DEMOTYPE_CLIENT,
-		DEMOTYPE_SERVER,
-	};
-
 	enum ETickOffset
 	{
 		TICK_CURRENT, // update the current tick again
@@ -82,7 +87,7 @@ public:
 		TICK_NEXT, // go to the next tick
 	};
 
-	~IDemoPlayer() {}
+	virtual ~IDemoPlayer() {}
 	virtual void SetSpeed(float Speed) = 0;
 	virtual void SetSpeedIndex(int SpeedIndex) = 0;
 	virtual void AdjustSpeedIndex(int Offset) = 0;
@@ -94,16 +99,15 @@ public:
 	virtual void Unpause() = 0;
 	virtual bool IsPlaying() const = 0;
 	virtual const CInfo *BaseInfo() const = 0;
-	virtual void GetDemoName(char *pBuffer, int BufferSize) const = 0;
-	virtual bool GetDemoInfo(class IStorage *pStorage, const char *pFilename, int StorageType, CDemoHeader *pDemoHeader, CTimelineMarkers *pTimelineMarkers, CMapInfo *pMapInfo) const = 0;
-	virtual int GetDemoType() const = 0;
+	virtual void GetDemoName(char *pBuffer, size_t BufferSize) const = 0;
+	virtual bool GetDemoInfo(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, int StorageType, CDemoHeader *pDemoHeader, CTimelineMarkers *pTimelineMarkers, CMapInfo *pMapInfo, IOHANDLE *pFile = nullptr, char *pErrorMessage = nullptr, size_t ErrorMessageSize = 0) const = 0;
 };
 
 class IDemoRecorder : public IInterface
 {
 	MACRO_INTERFACE("demorecorder", 0)
 public:
-	~IDemoRecorder() {}
+	virtual ~IDemoRecorder() {}
 	virtual bool IsRecording() const = 0;
 	virtual int Stop() = 0;
 	virtual int Length() const = 0;

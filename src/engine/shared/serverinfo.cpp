@@ -3,7 +3,6 @@
 #include "json.h"
 #include <base/math.h>
 #include <engine/external/json-parser/json.h>
-#include <engine/serverbrowser.h>
 
 #include <cstdio>
 
@@ -112,6 +111,7 @@ bool CServerInfo2::FromJsonRaw(CServerInfo2 *pOut, const json_value *pJson)
 		const json_value &Country = Client["country"];
 		const json_value &Score = Client["score"];
 		const json_value &IsPlayer = Client["is_player"];
+		const json_value &IsAfk = Client["afk"];
 		Error = false;
 		Error = Error || ClientName.type != json_string || str_has_cc(ClientName);
 		Error = Error || Clan.type != json_string || str_has_cc(ClientName);
@@ -131,6 +131,10 @@ bool CServerInfo2::FromJsonRaw(CServerInfo2 *pOut, const json_value *pJson)
 			pClient->m_Score = json_int_get(&Score);
 			pClient->m_IsPlayer = IsPlayer;
 
+			pClient->m_IsAfk = false;
+			if(IsAfk.type == json_boolean)
+				pClient->m_IsAfk = IsAfk;
+
 			// check if a skin is also available
 			bool HasSkin = false;
 			const json_value &SkinObj = Client["skin"];
@@ -142,7 +146,7 @@ bool CServerInfo2::FromJsonRaw(CServerInfo2 *pOut, const json_value *pJson)
 				if(SkinName.type == json_string)
 				{
 					HasSkin = true;
-					str_copy(pClient->m_aSkin, json_string_get(&SkinName));
+					str_copy(pClient->m_aSkin, SkinName.u.string.ptr);
 					// if skin json value existed, then always at least default to "default"
 					if(pClient->m_aSkin[0] == '\0')
 						str_copy(pClient->m_aSkin, "default");
@@ -150,8 +154,8 @@ bool CServerInfo2::FromJsonRaw(CServerInfo2 *pOut, const json_value *pJson)
 					if(SkinBodyColor.type == json_integer && SkinFeetColor.type == json_integer)
 					{
 						pClient->m_CustomSkinColors = true;
-						pClient->m_CustomSkinColorBody = json_int_get(&SkinBodyColor);
-						pClient->m_CustomSkinColorFeet = json_int_get(&SkinFeetColor);
+						pClient->m_CustomSkinColorBody = SkinBodyColor.u.integer;
+						pClient->m_CustomSkinColorFeet = SkinFeetColor.u.integer;
 					}
 					// else set custom colors off
 					else
@@ -203,6 +207,7 @@ bool CServerInfo2::operator==(const CServerInfo2 &Other) const
 		Unequal = Unequal || m_aClients[i].m_Country != Other.m_aClients[i].m_Country;
 		Unequal = Unequal || m_aClients[i].m_Score != Other.m_aClients[i].m_Score;
 		Unequal = Unequal || m_aClients[i].m_IsPlayer != Other.m_aClients[i].m_IsPlayer;
+		Unequal = Unequal || m_aClients[i].m_IsAfk != Other.m_aClients[i].m_IsAfk;
 		if(Unequal)
 		{
 			return false;
@@ -232,6 +237,7 @@ CServerInfo2::operator CServerInfo() const
 		Result.m_aClients[i].m_Country = m_aClients[i].m_Country;
 		Result.m_aClients[i].m_Score = m_aClients[i].m_Score;
 		Result.m_aClients[i].m_Player = m_aClients[i].m_IsPlayer;
+		Result.m_aClients[i].m_Afk = m_aClients[i].m_IsAfk;
 
 		str_copy(Result.m_aClients[i].m_aSkin, m_aClients[i].m_aSkin);
 		Result.m_aClients[i].m_CustomSkinColors = m_aClients[i].m_CustomSkinColors;

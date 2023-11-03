@@ -7,6 +7,7 @@
 #include <memory>
 
 #include <base/hash.h>
+
 #include <engine/client.h>
 #include <engine/client/checksum.h>
 #include <engine/client/friends.h>
@@ -14,7 +15,6 @@
 #include <engine/client/serverbrowser.h>
 #include <engine/client/updater.h>
 #include <engine/editor.h>
-#include <engine/engine.h>
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
 #include <engine/shared/demo.h>
@@ -23,76 +23,27 @@
 #include <engine/shared/network.h>
 #include <engine/warning.h>
 
+#include "graph.h"
+#include "smooth_time.h"
+
 class CDemoEdit;
 class IDemoRecorder;
 class CMsgPacker;
 class CUnpacker;
 class IConfigManager;
 class IDiscord;
+class IEngine;
 class IEngineInput;
 class IEngineMap;
 class IEngineSound;
 class IFriends;
+class ILogger;
 class ISteam;
 class IStorage;
 class IUpdater;
 
 #define CONNECTLINK_DOUBLE_SLASH "ddnet://"
 #define CONNECTLINK_NO_SLASH "ddnet:"
-
-class CGraph
-{
-public:
-	enum
-	{
-		MAX_VALUES = 128,
-	};
-
-private:
-	float m_Min, m_Max;
-	float m_MinRange, m_MaxRange;
-	float m_aValues[MAX_VALUES];
-	float m_aColors[MAX_VALUES][3];
-	size_t m_Index;
-
-public:
-	void Init(float Min, float Max);
-	void SetMin(float Min);
-	void SetMax(float Max);
-
-	void Scale();
-	void Add(float v, float r, float g, float b);
-	void InsertAt(size_t Index, float v, float r, float g, float b);
-	void Render(IGraphics *pGraphics, ITextRender *pTextRender, float x, float y, float w, float h, const char *pDescription);
-};
-
-class CSmoothTime
-{
-	int64_t m_Snap;
-	int64_t m_Current;
-	int64_t m_Target;
-
-	int64_t m_SnapMargin;
-	int64_t m_CurrentMargin;
-	int64_t m_TargetMargin;
-
-	CGraph m_Graph;
-
-	int m_SpikeCounter;
-
-	float m_aAdjustSpeed[2]; // 0 = down, 1 = up
-public:
-	void Init(int64_t Target);
-	void SetAdjustSpeed(int Direction, float Value);
-
-	int64_t Get(int64_t Now);
-
-	void UpdateInt(int64_t Target);
-	void Update(CGraph *pGraph, int64_t Target, int TimeLeft, int AdjustDirection);
-
-	int64_t GetMargin(int64_t Now);
-	void UpdateMargin(int64_t TargetMargin);
-};
 
 class CServerCapabilities
 {
@@ -149,9 +100,6 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	IGraphics::CTextureHandle m_DebugFont;
 
 	int64_t m_LastRenderTime;
-	float m_RenderFrameTimeLow;
-	float m_RenderFrameTimeHigh;
-	int m_RenderFrames;
 
 	int m_SnapCrcErrors;
 	bool m_AutoScreenshotRecycle;
@@ -164,9 +112,9 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	int m_aCurrentRecvTick[NUM_DUMMIES];
 	int m_aRconAuthed[NUM_DUMMIES];
 	char m_aRconUsername[32];
-	char m_aRconPassword[32];
+	char m_aRconPassword[sizeof(g_Config.m_SvRconPassword)];
 	int m_UseTempRconCommands;
-	char m_aPassword[32];
+	char m_aPassword[sizeof(g_Config.m_Password)];
 	bool m_SendPassword;
 	bool m_ButtonRender = false;
 
@@ -189,6 +137,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	char m_aCmdEditMap[IO_MAX_PATH_LENGTH];
 
 	// map download
+	char m_aMapDownloadUrl[256];
 	std::shared_ptr<CHttpRequest> m_pMapdownloadTask;
 	char m_aMapdownloadFilename[256];
 	char m_aMapdownloadFilenameTemp[256];
@@ -274,7 +223,6 @@ class CClient : public IClient, public CDemoPlayer::IListener
 		};
 
 		int m_State;
-		class CHostLookup m_VersionServeraddr;
 	} m_VersionInfo;
 
 	std::vector<SWarning> m_vWarnings;
@@ -322,9 +270,9 @@ public:
 	// Send via the currently active client (main/dummy)
 	int SendMsgActive(CMsgPacker *pMsg, int Flags) override;
 
-	void SendInfo();
+	void SendInfo(int Conn);
 	void SendEnterGame(int Conn);
-	void SendReady();
+	void SendReady(int Conn);
 	void SendMapRequest();
 
 	bool RconAuthed() const override { return m_aRconAuthed[g_Config.m_ClDummy] != 0; }
@@ -468,6 +416,7 @@ public:
 	static void ConchainWindowBordered(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainWindowScreen(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainWindowVSync(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	static void ConchainWindowResize(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainTimeoutSeed(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainPassword(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainReplays(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
@@ -544,7 +493,9 @@ public:
 
 	void GetSmoothTick(int *pSmoothTick, float *pSmoothIntraTick, float MixAmount) override;
 
+	void AddWarning(const SWarning &Warning) override;
 	SWarning *GetCurWarning() override;
+
 	CChecksumData *ChecksumData() override { return &m_Checksum.m_Data; }
 	bool InfoTaskRunning() override { return m_pDDNetInfoTask != nullptr; }
 	int UdpConnectivity(int NetType) override;

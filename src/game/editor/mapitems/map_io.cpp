@@ -59,23 +59,10 @@ bool CEditorMap::Save(const char *pFileName)
 	{
 		CMapItemInfoSettings Item;
 		Item.m_Version = 1;
-
-		if(m_MapInfo.m_aAuthor[0])
-			Item.m_Author = Writer.AddData(str_length(m_MapInfo.m_aAuthor) + 1, m_MapInfo.m_aAuthor);
-		else
-			Item.m_Author = -1;
-		if(m_MapInfo.m_aVersion[0])
-			Item.m_MapVersion = Writer.AddData(str_length(m_MapInfo.m_aVersion) + 1, m_MapInfo.m_aVersion);
-		else
-			Item.m_MapVersion = -1;
-		if(m_MapInfo.m_aCredits[0])
-			Item.m_Credits = Writer.AddData(str_length(m_MapInfo.m_aCredits) + 1, m_MapInfo.m_aCredits);
-		else
-			Item.m_Credits = -1;
-		if(m_MapInfo.m_aLicense[0])
-			Item.m_License = Writer.AddData(str_length(m_MapInfo.m_aLicense) + 1, m_MapInfo.m_aLicense);
-		else
-			Item.m_License = -1;
+		Item.m_Author = Writer.AddDataString(m_MapInfo.m_aAuthor);
+		Item.m_MapVersion = Writer.AddDataString(m_MapInfo.m_aVersion);
+		Item.m_Credits = Writer.AddDataString(m_MapInfo.m_aCredits);
+		Item.m_License = Writer.AddDataString(m_MapInfo.m_aLicense);
 
 		Item.m_Settings = -1;
 		if(!m_vSettings.empty())
@@ -116,7 +103,7 @@ bool CEditorMap::Save(const char *pFileName)
 		Item.m_Width = pImg->m_Width;
 		Item.m_Height = pImg->m_Height;
 		Item.m_External = pImg->m_External;
-		Item.m_ImageName = Writer.AddData(str_length(pImg->m_aName) + 1, pImg->m_aName);
+		Item.m_ImageName = Writer.AddDataString(pImg->m_aName);
 		if(pImg->m_External)
 		{
 			Item.m_ImageData = -1;
@@ -157,7 +144,7 @@ bool CEditorMap::Save(const char *pFileName)
 		Item.m_Version = 1;
 
 		Item.m_External = 0;
-		Item.m_SoundName = Writer.AddData(str_length(pSound->m_aName) + 1, pSound->m_aName);
+		Item.m_SoundName = Writer.AddDataString(pSound->m_aName);
 		Item.m_SoundData = Writer.AddData(pSound->m_DataSize, pSound->m_pData);
 		Item.m_SoundDataSize = pSound->m_DataSize;
 
@@ -186,10 +173,6 @@ bool CEditorMap::Save(const char *pFileName)
 
 		// save group name
 		StrToInts(GItem.m_aName, sizeof(GItem.m_aName) / sizeof(int), pGroup->m_aName);
-
-		CMapItemGroupEx GItemEx;
-		GItemEx.m_Version = CMapItemGroupEx::CURRENT_VERSION;
-		GItemEx.m_ParallaxZoom = pGroup->m_ParallaxZoom;
 
 		for(const std::shared_ptr<CLayer> &pLayer : pGroup->m_vpLayers)
 		{
@@ -336,7 +319,6 @@ bool CEditorMap::Save(const char *pFileName)
 		}
 
 		Writer.AddItem(MAPITEMTYPE_GROUP, GroupCount, sizeof(GItem), &GItem);
-		Writer.AddItem(MAPITEMTYPE_GROUP_EX, GroupCount, sizeof(GItemEx), &GItemEx);
 		GroupCount++;
 	}
 
@@ -427,549 +409,561 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 	if(!DataFile.Open(m_pEditor->Storage(), pFileName, StorageType))
 		return false;
 
+	// check version
+	const CMapItemVersion *pItemVersion = static_cast<CMapItemVersion *>(DataFile.FindItem(MAPITEMTYPE_VERSION, 0));
+	if(pItemVersion == nullptr || pItemVersion->m_Version != CMapItemVersion::CURRENT_VERSION)
+	{
+		ErrorHandler("Error: The map has an unsupported version.");
+		return false;
+	}
+
 	Clean();
 
-	// check version
-	CMapItemVersion *pItemVersion = (CMapItemVersion *)DataFile.FindItem(MAPITEMTYPE_VERSION, 0);
-	if(!pItemVersion)
+	// load map info
 	{
-		return false;
+		int Start, Num;
+		DataFile.GetType(MAPITEMTYPE_INFO, &Start, &Num);
+		for(int i = Start; i < Start + Num; i++)
+		{
+			int ItemSize = DataFile.GetItemSize(Start);
+			int ItemID;
+			CMapItemInfoSettings *pItem = (CMapItemInfoSettings *)DataFile.GetItem(i, nullptr, &ItemID);
+			if(!pItem || ItemID != 0)
+				continue;
+
+			const auto &&ReadStringInfo = [&](int Index, char *pBuffer, size_t BufferSize, const char *pErrorContext) {
+				const char *pStr = DataFile.GetDataString(Index);
+				if(pStr == nullptr)
+				{
+					char aBuf[128];
+					str_format(aBuf, sizeof(aBuf), "Error: Failed to read %s from map info.", pErrorContext);
+					ErrorHandler(aBuf);
+					pBuffer[0] = '\0';
+				}
+				else
+				{
+					str_copy(pBuffer, pStr, BufferSize);
+				}
+			};
+
+			ReadStringInfo(pItem->m_Author, m_MapInfo.m_aAuthor, sizeof(m_MapInfo.m_aAuthor), "author");
+			ReadStringInfo(pItem->m_MapVersion, m_MapInfo.m_aVersion, sizeof(m_MapInfo.m_aVersion), "version");
+			ReadStringInfo(pItem->m_Credits, m_MapInfo.m_aCredits, sizeof(m_MapInfo.m_aCredits), "credits");
+			ReadStringInfo(pItem->m_License, m_MapInfo.m_aLicense, sizeof(m_MapInfo.m_aLicense), "license");
+
+			if(pItem->m_Version != 1 || ItemSize < (int)sizeof(CMapItemInfoSettings))
+				break;
+
+			if(!(pItem->m_Settings > -1))
+				break;
+
+			const unsigned Size = DataFile.GetDataSize(pItem->m_Settings);
+			char *pSettings = (char *)DataFile.GetData(pItem->m_Settings);
+			char *pNext = pSettings;
+			while(pNext < pSettings + Size)
+			{
+				int StrSize = str_length(pNext) + 1;
+				m_vSettings.emplace_back(pNext);
+				pNext += StrSize;
+			}
+		}
 	}
-	else if(pItemVersion->m_Version == CMapItemVersion::CURRENT_VERSION)
+
+	// load images
 	{
-		// load map info
+		int Start, Num;
+		DataFile.GetType(MAPITEMTYPE_IMAGE, &Start, &Num);
+		for(int i = 0; i < Num; i++)
 		{
-			int Start, Num;
-			DataFile.GetType(MAPITEMTYPE_INFO, &Start, &Num);
-			for(int i = Start; i < Start + Num; i++)
+			CMapItemImage_v2 *pItem = (CMapItemImage_v2 *)DataFile.GetItem(Start + i);
+
+			// copy base info
+			std::shared_ptr<CEditorImage> pImg = std::make_shared<CEditorImage>(m_pEditor);
+			pImg->m_External = pItem->m_External;
+
+			const char *pName = DataFile.GetDataString(pItem->m_ImageName);
+			if(pName == nullptr || pName[0] == '\0')
 			{
-				int ItemSize = DataFile.GetItemSize(Start);
-				int ItemID;
-				CMapItemInfoSettings *pItem = (CMapItemInfoSettings *)DataFile.GetItem(i, nullptr, &ItemID);
-				if(!pItem || ItemID != 0)
-					continue;
-
-				if(pItem->m_Author > -1)
-					str_copy(m_MapInfo.m_aAuthor, (char *)DataFile.GetData(pItem->m_Author));
-				if(pItem->m_MapVersion > -1)
-					str_copy(m_MapInfo.m_aVersion, (char *)DataFile.GetData(pItem->m_MapVersion));
-				if(pItem->m_Credits > -1)
-					str_copy(m_MapInfo.m_aCredits, (char *)DataFile.GetData(pItem->m_Credits));
-				if(pItem->m_License > -1)
-					str_copy(m_MapInfo.m_aLicense, (char *)DataFile.GetData(pItem->m_License));
-
-				if(pItem->m_Version != 1 || ItemSize < (int)sizeof(CMapItemInfoSettings))
-					break;
-
-				if(!(pItem->m_Settings > -1))
-					break;
-
-				const unsigned Size = DataFile.GetDataSize(pItem->m_Settings);
-				char *pSettings = (char *)DataFile.GetData(pItem->m_Settings);
-				char *pNext = pSettings;
-				while(pNext < pSettings + Size)
-				{
-					int StrSize = str_length(pNext) + 1;
-					m_vSettings.emplace_back(pNext);
-					pNext += StrSize;
-				}
+				char aBuf[128];
+				str_format(aBuf, sizeof(aBuf), "Error: Failed to read name of image %d.", i);
+				ErrorHandler(aBuf);
 			}
-		}
+			else
+				str_copy(pImg->m_aName, pName);
 
-		// load images
-		{
-			int Start, Num;
-			DataFile.GetType(MAPITEMTYPE_IMAGE, &Start, &Num);
-			for(int i = 0; i < Num; i++)
+			const CImageInfo::EImageFormat Format = pItem->m_Version < CMapItemImage_v2::CURRENT_VERSION ? CImageInfo::FORMAT_RGBA : CImageInfo::ImageFormatFromInt(pItem->m_Format);
+			if(pImg->m_External || (Format != CImageInfo::FORMAT_RGB && Format != CImageInfo::FORMAT_RGBA))
 			{
-				CMapItemImage_v2 *pItem = (CMapItemImage_v2 *)DataFile.GetItem(Start + i);
-				char *pName = (char *)DataFile.GetData(pItem->m_ImageName);
+				char aBuf[IO_MAX_PATH_LENGTH];
+				str_format(aBuf, sizeof(aBuf), "mapres/%s.png", pImg->m_aName);
 
-				// copy base info
-				std::shared_ptr<CEditorImage> pImg = std::make_shared<CEditorImage>(m_pEditor);
-				pImg->m_External = pItem->m_External;
-
-				const CImageInfo::EImageFormat Format = pItem->m_Version < CMapItemImage_v2::CURRENT_VERSION ? CImageInfo::FORMAT_RGBA : CImageInfo::ImageFormatFromInt(pItem->m_Format);
-				if(pImg->m_External || (Format != CImageInfo::FORMAT_RGB && Format != CImageInfo::FORMAT_RGBA))
+				// load external
+				CImageInfo ImgInfo;
+				if(m_pEditor->Graphics()->LoadPNG(&ImgInfo, aBuf, IStorage::TYPE_ALL))
 				{
-					char aBuf[IO_MAX_PATH_LENGTH];
-					str_format(aBuf, sizeof(aBuf), "mapres/%s.png", pName);
-
-					// load external
-					CEditorImage ImgInfo(m_pEditor);
-					if(m_pEditor->Graphics()->LoadPNG(&ImgInfo, aBuf, IStorage::TYPE_ALL))
-					{
-						*pImg = ImgInfo;
-						int TextureLoadFlag = m_pEditor->Graphics()->HasTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
-						if(ImgInfo.m_Width % 16 != 0 || ImgInfo.m_Height % 16 != 0)
-							TextureLoadFlag = 0;
-						pImg->m_Texture = m_pEditor->Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, TextureLoadFlag, aBuf);
-						ImgInfo.m_pData = nullptr;
-						pImg->m_External = 1;
-					}
-				}
-				else
-				{
-					pImg->m_Width = pItem->m_Width;
-					pImg->m_Height = pItem->m_Height;
-					pImg->m_Format = Format;
-
-					// copy image data
-					void *pData = DataFile.GetData(pItem->m_ImageData);
-					const size_t DataSize = (size_t)pImg->m_Width * pImg->m_Height * CImageInfo::PixelSize(Format);
-					pImg->m_pData = malloc(DataSize);
-					mem_copy(pImg->m_pData, pData, DataSize);
+					pImg->m_Width = ImgInfo.m_Width;
+					pImg->m_Height = ImgInfo.m_Height;
+					pImg->m_Format = ImgInfo.m_Format;
+					pImg->m_pData = ImgInfo.m_pData;
 					int TextureLoadFlag = m_pEditor->Graphics()->HasTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
-					if(pImg->m_Width % 16 != 0 || pImg->m_Height % 16 != 0)
+					if(ImgInfo.m_Width % 16 != 0 || ImgInfo.m_Height % 16 != 0)
 						TextureLoadFlag = 0;
-					pImg->m_Texture = m_pEditor->Graphics()->LoadTextureRaw(pImg->m_Width, pImg->m_Height, pImg->m_Format, pImg->m_pData, TextureLoadFlag);
+					pImg->m_Texture = m_pEditor->Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, TextureLoadFlag, aBuf);
+					ImgInfo.m_pData = nullptr;
+					pImg->m_External = 1;
 				}
-
-				// copy image name
-				if(pName)
-					str_copy(pImg->m_aName, pName);
-
-				// load auto mapper file
-				pImg->m_AutoMapper.Load(pImg->m_aName);
-
-				m_vpImages.push_back(pImg);
-
-				// unload image
-				DataFile.UnloadData(pItem->m_ImageData);
-				DataFile.UnloadData(pItem->m_ImageName);
 			}
-		}
-
-		// load sounds
-		{
-			int Start, Num;
-			DataFile.GetType(MAPITEMTYPE_SOUND, &Start, &Num);
-			for(int i = 0; i < Num; i++)
+			else
 			{
-				CMapItemSound *pItem = (CMapItemSound *)DataFile.GetItem(Start + i);
-				char *pName = (char *)DataFile.GetData(pItem->m_SoundName);
+				pImg->m_Width = pItem->m_Width;
+				pImg->m_Height = pItem->m_Height;
+				pImg->m_Format = Format;
 
-				// copy base info
-				std::shared_ptr<CEditorSound> pSound = std::make_shared<CEditorSound>(m_pEditor);
-				if(pItem->m_External)
+				// copy image data
+				void *pData = DataFile.GetData(pItem->m_ImageData);
+				const size_t DataSize = (size_t)pImg->m_Width * pImg->m_Height * CImageInfo::PixelSize(Format);
+				pImg->m_pData = malloc(DataSize);
+				mem_copy(pImg->m_pData, pData, DataSize);
+				int TextureLoadFlag = m_pEditor->Graphics()->HasTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
+				if(pImg->m_Width % 16 != 0 || pImg->m_Height % 16 != 0)
+					TextureLoadFlag = 0;
+				pImg->m_Texture = m_pEditor->Graphics()->LoadTextureRaw(pImg->m_Width, pImg->m_Height, pImg->m_Format, pImg->m_pData, TextureLoadFlag);
+			}
+
+			// load auto mapper file
+			pImg->m_AutoMapper.Load(pImg->m_aName);
+
+			m_vpImages.push_back(pImg);
+
+			// unload image
+			DataFile.UnloadData(pItem->m_ImageData);
+			DataFile.UnloadData(pItem->m_ImageName);
+		}
+	}
+
+	// load sounds
+	{
+		int Start, Num;
+		DataFile.GetType(MAPITEMTYPE_SOUND, &Start, &Num);
+		for(int i = 0; i < Num; i++)
+		{
+			CMapItemSound *pItem = (CMapItemSound *)DataFile.GetItem(Start + i);
+
+			// copy base info
+			std::shared_ptr<CEditorSound> pSound = std::make_shared<CEditorSound>(m_pEditor);
+
+			const char *pName = DataFile.GetDataString(pItem->m_SoundName);
+			if(pName == nullptr || pName[0] == '\0')
+			{
+				char aBuf[128];
+				str_format(aBuf, sizeof(aBuf), "Error: Failed to read name of sound %d.", i);
+				ErrorHandler(aBuf);
+			}
+			else
+				str_copy(pSound->m_aName, pName);
+
+			if(pItem->m_External)
+			{
+				char aBuf[IO_MAX_PATH_LENGTH];
+				str_format(aBuf, sizeof(aBuf), "mapres/%s.opus", pSound->m_aName);
+
+				// load external
+				if(m_pEditor->Storage()->ReadFile(aBuf, IStorage::TYPE_ALL, &pSound->m_pData, &pSound->m_DataSize))
 				{
-					char aBuf[IO_MAX_PATH_LENGTH];
-					str_format(aBuf, sizeof(aBuf), "mapres/%s.opus", pName);
-
-					// load external
-					if(m_pEditor->Storage()->ReadFile(pName, IStorage::TYPE_ALL, &pSound->m_pData, &pSound->m_DataSize))
-					{
-						pSound->m_SoundID = m_pEditor->Sound()->LoadOpusFromMem(pSound->m_pData, pSound->m_DataSize, true);
-					}
-				}
-				else
-				{
-					pSound->m_DataSize = pItem->m_SoundDataSize;
-
-					// copy sample data
-					void *pData = DataFile.GetData(pItem->m_SoundData);
-					pSound->m_pData = malloc(pSound->m_DataSize);
-					mem_copy(pSound->m_pData, pData, pSound->m_DataSize);
 					pSound->m_SoundID = m_pEditor->Sound()->LoadOpusFromMem(pSound->m_pData, pSound->m_DataSize, true);
 				}
-
-				// copy image name
-				if(pName)
-					str_copy(pSound->m_aName, pName);
-
-				m_vpSounds.push_back(pSound);
-
-				// unload image
-				DataFile.UnloadData(pItem->m_SoundData);
-				DataFile.UnloadData(pItem->m_SoundName);
 			}
-		}
-
-		// load groups
-		{
-			int LayersStart, LayersNum;
-			DataFile.GetType(MAPITEMTYPE_LAYER, &LayersStart, &LayersNum);
-
-			int Start, Num;
-			DataFile.GetType(MAPITEMTYPE_GROUP, &Start, &Num);
-
-			int StartEx, NumEx;
-			DataFile.GetType(MAPITEMTYPE_GROUP_EX, &StartEx, &NumEx);
-			for(int g = 0; g < Num; g++)
+			else
 			{
-				CMapItemGroup *pGItem = (CMapItemGroup *)DataFile.GetItem(Start + g);
-				CMapItemGroupEx *pGItemEx = nullptr;
-				if(NumEx)
-					pGItemEx = (CMapItemGroupEx *)DataFile.GetItem(StartEx + g);
+				pSound->m_DataSize = pItem->m_SoundDataSize;
 
-				if(pGItem->m_Version < 1 || pGItem->m_Version > CMapItemGroup::CURRENT_VERSION)
+				// copy sample data
+				void *pData = DataFile.GetData(pItem->m_SoundData);
+				pSound->m_pData = malloc(pSound->m_DataSize);
+				mem_copy(pSound->m_pData, pData, pSound->m_DataSize);
+				pSound->m_SoundID = m_pEditor->Sound()->LoadOpusFromMem(pSound->m_pData, pSound->m_DataSize, true);
+			}
+
+			m_vpSounds.push_back(pSound);
+
+			// unload sound
+			DataFile.UnloadData(pItem->m_SoundData);
+			DataFile.UnloadData(pItem->m_SoundName);
+		}
+	}
+
+	// load groups
+	{
+		int LayersStart, LayersNum;
+		DataFile.GetType(MAPITEMTYPE_LAYER, &LayersStart, &LayersNum);
+
+		int Start, Num;
+		DataFile.GetType(MAPITEMTYPE_GROUP, &Start, &Num);
+
+		for(int g = 0; g < Num; g++)
+		{
+			CMapItemGroup *pGItem = (CMapItemGroup *)DataFile.GetItem(Start + g);
+
+			if(pGItem->m_Version < 1 || pGItem->m_Version > CMapItemGroup::CURRENT_VERSION)
+				continue;
+
+			std::shared_ptr<CLayerGroup> pGroup = NewGroup();
+			pGroup->m_ParallaxX = pGItem->m_ParallaxX;
+			pGroup->m_ParallaxY = pGItem->m_ParallaxY;
+			pGroup->m_OffsetX = pGItem->m_OffsetX;
+			pGroup->m_OffsetY = pGItem->m_OffsetY;
+
+			if(pGItem->m_Version >= 2)
+			{
+				pGroup->m_UseClipping = pGItem->m_UseClipping;
+				pGroup->m_ClipX = pGItem->m_ClipX;
+				pGroup->m_ClipY = pGItem->m_ClipY;
+				pGroup->m_ClipW = pGItem->m_ClipW;
+				pGroup->m_ClipH = pGItem->m_ClipH;
+			}
+
+			// load group name
+			if(pGItem->m_Version >= 3)
+				IntsToStr(pGItem->m_aName, sizeof(pGroup->m_aName) / sizeof(int), pGroup->m_aName);
+
+			for(int l = 0; l < pGItem->m_NumLayers; l++)
+			{
+				CMapItemLayer *pLayerItem = (CMapItemLayer *)DataFile.GetItem(LayersStart + pGItem->m_StartLayer + l);
+				if(!pLayerItem)
 					continue;
 
-				std::shared_ptr<CLayerGroup> pGroup = NewGroup();
-				pGroup->m_ParallaxX = pGItem->m_ParallaxX;
-				pGroup->m_ParallaxY = pGItem->m_ParallaxY;
-				pGroup->m_OffsetX = pGItem->m_OffsetX;
-				pGroup->m_OffsetY = pGItem->m_OffsetY;
-
-				if(pGItem->m_Version >= 2)
+				if(pLayerItem->m_Type == LAYERTYPE_TILES)
 				{
-					pGroup->m_UseClipping = pGItem->m_UseClipping;
-					pGroup->m_ClipX = pGItem->m_ClipX;
-					pGroup->m_ClipY = pGItem->m_ClipY;
-					pGroup->m_ClipW = pGItem->m_ClipW;
-					pGroup->m_ClipH = pGItem->m_ClipH;
+					CMapItemLayerTilemap *pTilemapItem = (CMapItemLayerTilemap *)pLayerItem;
+
+					std::shared_ptr<CLayerTiles> pTiles;
+					if(pTilemapItem->m_Flags & TILESLAYERFLAG_GAME)
+					{
+						pTiles = std::make_shared<CLayerGame>(m_pEditor, pTilemapItem->m_Width, pTilemapItem->m_Height);
+						MakeGameLayer(pTiles);
+						MakeGameGroup(pGroup);
+					}
+					else if(pTilemapItem->m_Flags & TILESLAYERFLAG_TELE)
+					{
+						if(pTilemapItem->m_Version <= 2)
+							pTilemapItem->m_Tele = *((const int *)(pTilemapItem) + 15);
+
+						pTiles = std::make_shared<CLayerTele>(m_pEditor, pTilemapItem->m_Width, pTilemapItem->m_Height);
+						MakeTeleLayer(pTiles);
+					}
+					else if(pTilemapItem->m_Flags & TILESLAYERFLAG_SPEEDUP)
+					{
+						if(pTilemapItem->m_Version <= 2)
+							pTilemapItem->m_Speedup = *((const int *)(pTilemapItem) + 16);
+
+						pTiles = std::make_shared<CLayerSpeedup>(m_pEditor, pTilemapItem->m_Width, pTilemapItem->m_Height);
+						MakeSpeedupLayer(pTiles);
+					}
+					else if(pTilemapItem->m_Flags & TILESLAYERFLAG_FRONT)
+					{
+						if(pTilemapItem->m_Version <= 2)
+							pTilemapItem->m_Front = *((const int *)(pTilemapItem) + 17);
+
+						pTiles = std::make_shared<CLayerFront>(m_pEditor, pTilemapItem->m_Width, pTilemapItem->m_Height);
+						MakeFrontLayer(pTiles);
+					}
+					else if(pTilemapItem->m_Flags & TILESLAYERFLAG_SWITCH)
+					{
+						if(pTilemapItem->m_Version <= 2)
+							pTilemapItem->m_Switch = *((const int *)(pTilemapItem) + 18);
+
+						pTiles = std::make_shared<CLayerSwitch>(m_pEditor, pTilemapItem->m_Width, pTilemapItem->m_Height);
+						MakeSwitchLayer(pTiles);
+					}
+					else if(pTilemapItem->m_Flags & TILESLAYERFLAG_TUNE)
+					{
+						if(pTilemapItem->m_Version <= 2)
+							pTilemapItem->m_Tune = *((const int *)(pTilemapItem) + 19);
+
+						pTiles = std::make_shared<CLayerTune>(m_pEditor, pTilemapItem->m_Width, pTilemapItem->m_Height);
+						MakeTuneLayer(pTiles);
+					}
+					else
+					{
+						pTiles = std::make_shared<CLayerTiles>(m_pEditor, pTilemapItem->m_Width, pTilemapItem->m_Height);
+						pTiles->m_pEditor = m_pEditor;
+						pTiles->m_Color = pTilemapItem->m_Color;
+						pTiles->m_ColorEnv = pTilemapItem->m_ColorEnv;
+						pTiles->m_ColorEnvOffset = pTilemapItem->m_ColorEnvOffset;
+					}
+
+					pTiles->m_Flags = pLayerItem->m_Flags;
+
+					pGroup->AddLayer(pTiles);
+					pTiles->m_Image = pTilemapItem->m_Image;
+					pTiles->m_Game = pTilemapItem->m_Flags & TILESLAYERFLAG_GAME;
+
+					// load layer name
+					if(pTilemapItem->m_Version >= 3)
+						IntsToStr(pTilemapItem->m_aName, sizeof(pTiles->m_aName) / sizeof(int), pTiles->m_aName);
+
+					if(pTiles->m_Tele)
+					{
+						void *pTeleData = DataFile.GetData(pTilemapItem->m_Tele);
+						unsigned int Size = DataFile.GetDataSize(pTilemapItem->m_Tele);
+						if(Size >= (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CTeleTile))
+						{
+							CTeleTile *pLayerTeleTiles = std::static_pointer_cast<CLayerTele>(pTiles)->m_pTeleTile;
+							mem_copy(pLayerTeleTiles, pTeleData, (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CTeleTile));
+
+							for(int i = 0; i < pTiles->m_Width * pTiles->m_Height; i++)
+							{
+								if(IsValidTeleTile(pLayerTeleTiles[i].m_Type))
+									pTiles->m_pTiles[i].m_Index = pLayerTeleTiles[i].m_Type;
+								else
+									pTiles->m_pTiles[i].m_Index = 0;
+							}
+						}
+						DataFile.UnloadData(pTilemapItem->m_Tele);
+					}
+					else if(pTiles->m_Speedup)
+					{
+						void *pSpeedupData = DataFile.GetData(pTilemapItem->m_Speedup);
+						unsigned int Size = DataFile.GetDataSize(pTilemapItem->m_Speedup);
+
+						if(Size >= (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CSpeedupTile))
+						{
+							CSpeedupTile *pLayerSpeedupTiles = std::static_pointer_cast<CLayerSpeedup>(pTiles)->m_pSpeedupTile;
+							mem_copy(pLayerSpeedupTiles, pSpeedupData, (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CSpeedupTile));
+
+							for(int i = 0; i < pTiles->m_Width * pTiles->m_Height; i++)
+							{
+								if(IsValidSpeedupTile(pLayerSpeedupTiles[i].m_Type) && pLayerSpeedupTiles[i].m_Force > 0)
+									pTiles->m_pTiles[i].m_Index = pLayerSpeedupTiles[i].m_Type;
+								else
+									pTiles->m_pTiles[i].m_Index = 0;
+							}
+						}
+
+						DataFile.UnloadData(pTilemapItem->m_Speedup);
+					}
+					else if(pTiles->m_Front)
+					{
+						void *pFrontData = DataFile.GetData(pTilemapItem->m_Front);
+						unsigned int Size = DataFile.GetDataSize(pTilemapItem->m_Front);
+						pTiles->ExtractTiles(pTilemapItem->m_Version, (CTile *)pFrontData, Size);
+						DataFile.UnloadData(pTilemapItem->m_Front);
+					}
+					else if(pTiles->m_Switch)
+					{
+						void *pSwitchData = DataFile.GetData(pTilemapItem->m_Switch);
+						unsigned int Size = DataFile.GetDataSize(pTilemapItem->m_Switch);
+						if(Size >= (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CSwitchTile))
+						{
+							CSwitchTile *pLayerSwitchTiles = std::static_pointer_cast<CLayerSwitch>(pTiles)->m_pSwitchTile;
+							mem_copy(pLayerSwitchTiles, pSwitchData, (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CSwitchTile));
+
+							for(int i = 0; i < pTiles->m_Width * pTiles->m_Height; i++)
+							{
+								if(((pLayerSwitchTiles[i].m_Type > (ENTITY_CRAZY_SHOTGUN + ENTITY_OFFSET) && pLayerSwitchTiles[i].m_Type < (ENTITY_DRAGGER_WEAK + ENTITY_OFFSET)) || pLayerSwitchTiles[i].m_Type == (ENTITY_LASER_O_FAST + 1 + ENTITY_OFFSET)))
+									continue;
+								else if(pLayerSwitchTiles[i].m_Type >= (ENTITY_ARMOR_1 + ENTITY_OFFSET) && pLayerSwitchTiles[i].m_Type <= (ENTITY_DOOR + ENTITY_OFFSET))
+								{
+									pTiles->m_pTiles[i].m_Index = pLayerSwitchTiles[i].m_Type;
+									pTiles->m_pTiles[i].m_Flags = pLayerSwitchTiles[i].m_Flags;
+									continue;
+								}
+
+								if(IsValidSwitchTile(pLayerSwitchTiles[i].m_Type))
+								{
+									pTiles->m_pTiles[i].m_Index = pLayerSwitchTiles[i].m_Type;
+									pTiles->m_pTiles[i].m_Flags = pLayerSwitchTiles[i].m_Flags;
+								}
+							}
+						}
+						DataFile.UnloadData(pTilemapItem->m_Switch);
+					}
+					else if(pTiles->m_Tune)
+					{
+						void *pTuneData = DataFile.GetData(pTilemapItem->m_Tune);
+						unsigned int Size = DataFile.GetDataSize(pTilemapItem->m_Tune);
+						if(Size >= (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CTuneTile))
+						{
+							CTuneTile *pLayerTuneTiles = std::static_pointer_cast<CLayerTune>(pTiles)->m_pTuneTile;
+							mem_copy(pLayerTuneTiles, pTuneData, (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CTuneTile));
+
+							for(int i = 0; i < pTiles->m_Width * pTiles->m_Height; i++)
+							{
+								if(IsValidTuneTile(pLayerTuneTiles[i].m_Type))
+									pTiles->m_pTiles[i].m_Index = pLayerTuneTiles[i].m_Type;
+								else
+									pTiles->m_pTiles[i].m_Index = 0;
+							}
+						}
+						DataFile.UnloadData(pTilemapItem->m_Tune);
+					}
+					else // regular tile layer or game layer
+					{
+						void *pData = DataFile.GetData(pTilemapItem->m_Data);
+						unsigned int Size = DataFile.GetDataSize(pTilemapItem->m_Data);
+						pTiles->ExtractTiles(pTilemapItem->m_Version, (CTile *)pData, Size);
+
+						if(pTiles->m_Game && pTilemapItem->m_Version == MakeVersion(1, *pTilemapItem))
+						{
+							for(int i = 0; i < pTiles->m_Width * pTiles->m_Height; i++)
+							{
+								if(pTiles->m_pTiles[i].m_Index)
+									pTiles->m_pTiles[i].m_Index += ENTITY_OFFSET;
+							}
+						}
+						DataFile.UnloadData(pTilemapItem->m_Data);
+					}
 				}
-
-				// load group name
-				if(pGItem->m_Version >= 3)
-					IntsToStr(pGItem->m_aName, sizeof(pGroup->m_aName) / sizeof(int), pGroup->m_aName);
-
-				pGroup->m_ParallaxZoom = GetParallaxZoom(pGItem, pGItemEx);
-				pGroup->m_CustomParallaxZoom = pGroup->m_ParallaxZoom != GetParallaxZoomDefault(pGroup->m_ParallaxX, pGroup->m_ParallaxY);
-
-				for(int l = 0; l < pGItem->m_NumLayers; l++)
+				else if(pLayerItem->m_Type == LAYERTYPE_QUADS)
 				{
-					CMapItemLayer *pLayerItem = (CMapItemLayer *)DataFile.GetItem(LayersStart + pGItem->m_StartLayer + l);
-					if(!pLayerItem)
+					const CMapItemLayerQuads *pQuadsItem = (CMapItemLayerQuads *)pLayerItem;
+
+					std::shared_ptr<CLayerQuads> pQuads = std::make_shared<CLayerQuads>(m_pEditor);
+					pQuads->m_Flags = pLayerItem->m_Flags;
+					pQuads->m_Image = pQuadsItem->m_Image;
+					if(pQuads->m_Image < -1 || pQuads->m_Image >= (int)m_vpImages.size())
+						pQuads->m_Image = -1;
+
+					// load layer name
+					if(pQuadsItem->m_Version >= 2)
+						IntsToStr(pQuadsItem->m_aName, sizeof(pQuads->m_aName) / sizeof(int), pQuads->m_aName);
+
+					void *pData = DataFile.GetDataSwapped(pQuadsItem->m_Data);
+					pGroup->AddLayer(pQuads);
+					pQuads->m_vQuads.resize(pQuadsItem->m_NumQuads);
+					mem_copy(pQuads->m_vQuads.data(), pData, sizeof(CQuad) * pQuadsItem->m_NumQuads);
+					DataFile.UnloadData(pQuadsItem->m_Data);
+				}
+				else if(pLayerItem->m_Type == LAYERTYPE_SOUNDS)
+				{
+					const CMapItemLayerSounds *pSoundsItem = (CMapItemLayerSounds *)pLayerItem;
+					if(pSoundsItem->m_Version < 1 || pSoundsItem->m_Version > CMapItemLayerSounds::CURRENT_VERSION)
 						continue;
 
-					if(pLayerItem->m_Type == LAYERTYPE_TILES)
+					std::shared_ptr<CLayerSounds> pSounds = std::make_shared<CLayerSounds>(m_pEditor);
+					pSounds->m_Flags = pLayerItem->m_Flags;
+					pSounds->m_Sound = pSoundsItem->m_Sound;
+
+					// validate m_Sound
+					if(pSounds->m_Sound < -1 || pSounds->m_Sound >= (int)m_vpSounds.size())
+						pSounds->m_Sound = -1;
+
+					// load layer name
+					IntsToStr(pSoundsItem->m_aName, sizeof(pSounds->m_aName) / sizeof(int), pSounds->m_aName);
+
+					// load data
+					void *pData = DataFile.GetDataSwapped(pSoundsItem->m_Data);
+					pGroup->AddLayer(pSounds);
+					pSounds->m_vSources.resize(pSoundsItem->m_NumSources);
+					mem_copy(pSounds->m_vSources.data(), pData, sizeof(CSoundSource) * pSoundsItem->m_NumSources);
+					DataFile.UnloadData(pSoundsItem->m_Data);
+				}
+				else if(pLayerItem->m_Type == LAYERTYPE_SOUNDS_DEPRECATED)
+				{
+					// compatibility with old sound layers
+					const CMapItemLayerSounds *pSoundsItem = (CMapItemLayerSounds *)pLayerItem;
+					if(pSoundsItem->m_Version < 1 || pSoundsItem->m_Version > CMapItemLayerSounds::CURRENT_VERSION)
+						continue;
+
+					std::shared_ptr<CLayerSounds> pSounds = std::make_shared<CLayerSounds>(m_pEditor);
+					pSounds->m_Flags = pLayerItem->m_Flags;
+					pSounds->m_Sound = pSoundsItem->m_Sound;
+
+					// validate m_Sound
+					if(pSounds->m_Sound < -1 || pSounds->m_Sound >= (int)m_vpSounds.size())
+						pSounds->m_Sound = -1;
+
+					// load layer name
+					IntsToStr(pSoundsItem->m_aName, sizeof(pSounds->m_aName) / sizeof(int), pSounds->m_aName);
+
+					// load data
+					CSoundSource_DEPRECATED *pData = (CSoundSource_DEPRECATED *)DataFile.GetDataSwapped(pSoundsItem->m_Data);
+					pGroup->AddLayer(pSounds);
+					pSounds->m_vSources.resize(pSoundsItem->m_NumSources);
+
+					for(int i = 0; i < pSoundsItem->m_NumSources; i++)
 					{
-						CMapItemLayerTilemap *pTilemapItem = (CMapItemLayerTilemap *)pLayerItem;
+						CSoundSource_DEPRECATED *pOldSource = &pData[i];
 
-						std::shared_ptr<CLayerTiles> pTiles;
-						if(pTilemapItem->m_Flags & TILESLAYERFLAG_GAME)
-						{
-							pTiles = std::make_shared<CLayerGame>(pTilemapItem->m_Width, pTilemapItem->m_Height);
-							MakeGameLayer(pTiles);
-							MakeGameGroup(pGroup);
-						}
-						else if(pTilemapItem->m_Flags & TILESLAYERFLAG_TELE)
-						{
-							if(pTilemapItem->m_Version <= 2)
-								pTilemapItem->m_Tele = *((const int *)(pTilemapItem) + 15);
+						CSoundSource &Source = pSounds->m_vSources[i];
+						Source.m_Position = pOldSource->m_Position;
+						Source.m_Loop = pOldSource->m_Loop;
+						Source.m_Pan = true;
+						Source.m_TimeDelay = pOldSource->m_TimeDelay;
+						Source.m_Falloff = 0;
 
-							pTiles = std::make_shared<CLayerTele>(pTilemapItem->m_Width, pTilemapItem->m_Height);
-							MakeTeleLayer(pTiles);
-						}
-						else if(pTilemapItem->m_Flags & TILESLAYERFLAG_SPEEDUP)
-						{
-							if(pTilemapItem->m_Version <= 2)
-								pTilemapItem->m_Speedup = *((const int *)(pTilemapItem) + 16);
+						Source.m_PosEnv = pOldSource->m_PosEnv;
+						Source.m_PosEnvOffset = pOldSource->m_PosEnvOffset;
+						Source.m_SoundEnv = pOldSource->m_SoundEnv;
+						Source.m_SoundEnvOffset = pOldSource->m_SoundEnvOffset;
 
-							pTiles = std::make_shared<CLayerSpeedup>(pTilemapItem->m_Width, pTilemapItem->m_Height);
-							MakeSpeedupLayer(pTiles);
-						}
-						else if(pTilemapItem->m_Flags & TILESLAYERFLAG_FRONT)
-						{
-							if(pTilemapItem->m_Version <= 2)
-								pTilemapItem->m_Front = *((const int *)(pTilemapItem) + 17);
-
-							pTiles = std::make_shared<CLayerFront>(pTilemapItem->m_Width, pTilemapItem->m_Height);
-							MakeFrontLayer(pTiles);
-						}
-						else if(pTilemapItem->m_Flags & TILESLAYERFLAG_SWITCH)
-						{
-							if(pTilemapItem->m_Version <= 2)
-								pTilemapItem->m_Switch = *((const int *)(pTilemapItem) + 18);
-
-							pTiles = std::make_shared<CLayerSwitch>(pTilemapItem->m_Width, pTilemapItem->m_Height);
-							MakeSwitchLayer(pTiles);
-						}
-						else if(pTilemapItem->m_Flags & TILESLAYERFLAG_TUNE)
-						{
-							if(pTilemapItem->m_Version <= 2)
-								pTilemapItem->m_Tune = *((const int *)(pTilemapItem) + 19);
-
-							pTiles = std::make_shared<CLayerTune>(pTilemapItem->m_Width, pTilemapItem->m_Height);
-							MakeTuneLayer(pTiles);
-						}
-						else
-						{
-							pTiles = std::make_shared<CLayerTiles>(pTilemapItem->m_Width, pTilemapItem->m_Height);
-							pTiles->m_pEditor = m_pEditor;
-							pTiles->m_Color = pTilemapItem->m_Color;
-							pTiles->m_ColorEnv = pTilemapItem->m_ColorEnv;
-							pTiles->m_ColorEnvOffset = pTilemapItem->m_ColorEnvOffset;
-						}
-
-						pTiles->m_Flags = pLayerItem->m_Flags;
-
-						pGroup->AddLayer(pTiles);
-						pTiles->m_Image = pTilemapItem->m_Image;
-						pTiles->m_Game = pTilemapItem->m_Flags & TILESLAYERFLAG_GAME;
-
-						// load layer name
-						if(pTilemapItem->m_Version >= 3)
-							IntsToStr(pTilemapItem->m_aName, sizeof(pTiles->m_aName) / sizeof(int), pTiles->m_aName);
-
-						if(pTiles->m_Tele)
-						{
-							void *pTeleData = DataFile.GetData(pTilemapItem->m_Tele);
-							unsigned int Size = DataFile.GetDataSize(pTilemapItem->m_Tele);
-							if(Size >= (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CTeleTile))
-							{
-								CTeleTile *pLayerTeleTiles = std::static_pointer_cast<CLayerTele>(pTiles)->m_pTeleTile;
-								mem_copy(pLayerTeleTiles, pTeleData, (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CTeleTile));
-
-								for(int i = 0; i < pTiles->m_Width * pTiles->m_Height; i++)
-								{
-									if(IsValidTeleTile(pLayerTeleTiles[i].m_Type))
-										pTiles->m_pTiles[i].m_Index = pLayerTeleTiles[i].m_Type;
-									else
-										pTiles->m_pTiles[i].m_Index = 0;
-								}
-							}
-							DataFile.UnloadData(pTilemapItem->m_Tele);
-						}
-						else if(pTiles->m_Speedup)
-						{
-							void *pSpeedupData = DataFile.GetData(pTilemapItem->m_Speedup);
-							unsigned int Size = DataFile.GetDataSize(pTilemapItem->m_Speedup);
-
-							if(Size >= (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CSpeedupTile))
-							{
-								CSpeedupTile *pLayerSpeedupTiles = std::static_pointer_cast<CLayerSpeedup>(pTiles)->m_pSpeedupTile;
-								mem_copy(pLayerSpeedupTiles, pSpeedupData, (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CSpeedupTile));
-
-								for(int i = 0; i < pTiles->m_Width * pTiles->m_Height; i++)
-								{
-									if(IsValidSpeedupTile(pLayerSpeedupTiles[i].m_Type) && pLayerSpeedupTiles[i].m_Force > 0)
-										pTiles->m_pTiles[i].m_Index = pLayerSpeedupTiles[i].m_Type;
-									else
-										pTiles->m_pTiles[i].m_Index = 0;
-								}
-							}
-
-							DataFile.UnloadData(pTilemapItem->m_Speedup);
-						}
-						else if(pTiles->m_Front)
-						{
-							void *pFrontData = DataFile.GetData(pTilemapItem->m_Front);
-							unsigned int Size = DataFile.GetDataSize(pTilemapItem->m_Front);
-							pTiles->ExtractTiles(pTilemapItem->m_Version, (CTile *)pFrontData, Size);
-							DataFile.UnloadData(pTilemapItem->m_Front);
-						}
-						else if(pTiles->m_Switch)
-						{
-							void *pSwitchData = DataFile.GetData(pTilemapItem->m_Switch);
-							unsigned int Size = DataFile.GetDataSize(pTilemapItem->m_Switch);
-							if(Size >= (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CSwitchTile))
-							{
-								CSwitchTile *pLayerSwitchTiles = std::static_pointer_cast<CLayerSwitch>(pTiles)->m_pSwitchTile;
-								mem_copy(pLayerSwitchTiles, pSwitchData, (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CSwitchTile));
-
-								for(int i = 0; i < pTiles->m_Width * pTiles->m_Height; i++)
-								{
-									if(((pLayerSwitchTiles[i].m_Type > (ENTITY_CRAZY_SHOTGUN + ENTITY_OFFSET) && pLayerSwitchTiles[i].m_Type < (ENTITY_DRAGGER_WEAK + ENTITY_OFFSET)) || pLayerSwitchTiles[i].m_Type == (ENTITY_LASER_O_FAST + 1 + ENTITY_OFFSET)))
-										continue;
-									else if(pLayerSwitchTiles[i].m_Type >= (ENTITY_ARMOR_1 + ENTITY_OFFSET) && pLayerSwitchTiles[i].m_Type <= (ENTITY_DOOR + ENTITY_OFFSET))
-									{
-										pTiles->m_pTiles[i].m_Index = pLayerSwitchTiles[i].m_Type;
-										pTiles->m_pTiles[i].m_Flags = pLayerSwitchTiles[i].m_Flags;
-										continue;
-									}
-
-									if(IsValidSwitchTile(pLayerSwitchTiles[i].m_Type))
-									{
-										pTiles->m_pTiles[i].m_Index = pLayerSwitchTiles[i].m_Type;
-										pTiles->m_pTiles[i].m_Flags = pLayerSwitchTiles[i].m_Flags;
-									}
-								}
-							}
-							DataFile.UnloadData(pTilemapItem->m_Switch);
-						}
-						else if(pTiles->m_Tune)
-						{
-							void *pTuneData = DataFile.GetData(pTilemapItem->m_Tune);
-							unsigned int Size = DataFile.GetDataSize(pTilemapItem->m_Tune);
-							if(Size >= (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CTuneTile))
-							{
-								CTuneTile *pLayerTuneTiles = std::static_pointer_cast<CLayerTune>(pTiles)->m_pTuneTile;
-								mem_copy(pLayerTuneTiles, pTuneData, (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CTuneTile));
-
-								for(int i = 0; i < pTiles->m_Width * pTiles->m_Height; i++)
-								{
-									if(IsValidTuneTile(pLayerTuneTiles[i].m_Type))
-										pTiles->m_pTiles[i].m_Index = pLayerTuneTiles[i].m_Type;
-									else
-										pTiles->m_pTiles[i].m_Index = 0;
-								}
-							}
-							DataFile.UnloadData(pTilemapItem->m_Tune);
-						}
-						else // regular tile layer or game layer
-						{
-							void *pData = DataFile.GetData(pTilemapItem->m_Data);
-							unsigned int Size = DataFile.GetDataSize(pTilemapItem->m_Data);
-							pTiles->ExtractTiles(pTilemapItem->m_Version, (CTile *)pData, Size);
-
-							if(pTiles->m_Game && pTilemapItem->m_Version == MakeVersion(1, *pTilemapItem))
-							{
-								for(int i = 0; i < pTiles->m_Width * pTiles->m_Height; i++)
-								{
-									if(pTiles->m_pTiles[i].m_Index)
-										pTiles->m_pTiles[i].m_Index += ENTITY_OFFSET;
-								}
-							}
-							DataFile.UnloadData(pTilemapItem->m_Data);
-						}
+						Source.m_Shape.m_Type = CSoundShape::SHAPE_CIRCLE;
+						Source.m_Shape.m_Circle.m_Radius = pOldSource->m_FalloffDistance;
 					}
-					else if(pLayerItem->m_Type == LAYERTYPE_QUADS)
-					{
-						const CMapItemLayerQuads *pQuadsItem = (CMapItemLayerQuads *)pLayerItem;
 
-						std::shared_ptr<CLayerQuads> pQuads = std::make_shared<CLayerQuads>();
-						pQuads->m_pEditor = m_pEditor;
-						pQuads->m_Flags = pLayerItem->m_Flags;
-						pQuads->m_Image = pQuadsItem->m_Image;
-						if(pQuads->m_Image < -1 || pQuads->m_Image >= (int)m_vpImages.size())
-							pQuads->m_Image = -1;
-
-						// load layer name
-						if(pQuadsItem->m_Version >= 2)
-							IntsToStr(pQuadsItem->m_aName, sizeof(pQuads->m_aName) / sizeof(int), pQuads->m_aName);
-
-						void *pData = DataFile.GetDataSwapped(pQuadsItem->m_Data);
-						pGroup->AddLayer(pQuads);
-						pQuads->m_vQuads.resize(pQuadsItem->m_NumQuads);
-						mem_copy(pQuads->m_vQuads.data(), pData, sizeof(CQuad) * pQuadsItem->m_NumQuads);
-						DataFile.UnloadData(pQuadsItem->m_Data);
-					}
-					else if(pLayerItem->m_Type == LAYERTYPE_SOUNDS)
-					{
-						const CMapItemLayerSounds *pSoundsItem = (CMapItemLayerSounds *)pLayerItem;
-						if(pSoundsItem->m_Version < 1 || pSoundsItem->m_Version > CMapItemLayerSounds::CURRENT_VERSION)
-							continue;
-
-						std::shared_ptr<CLayerSounds> pSounds = std::make_shared<CLayerSounds>();
-						pSounds->m_pEditor = m_pEditor;
-						pSounds->m_Flags = pLayerItem->m_Flags;
-						pSounds->m_Sound = pSoundsItem->m_Sound;
-
-						// validate m_Sound
-						if(pSounds->m_Sound < -1 || pSounds->m_Sound >= (int)m_vpSounds.size())
-							pSounds->m_Sound = -1;
-
-						// load layer name
-						IntsToStr(pSoundsItem->m_aName, sizeof(pSounds->m_aName) / sizeof(int), pSounds->m_aName);
-
-						// load data
-						void *pData = DataFile.GetDataSwapped(pSoundsItem->m_Data);
-						pGroup->AddLayer(pSounds);
-						pSounds->m_vSources.resize(pSoundsItem->m_NumSources);
-						mem_copy(pSounds->m_vSources.data(), pData, sizeof(CSoundSource) * pSoundsItem->m_NumSources);
-						DataFile.UnloadData(pSoundsItem->m_Data);
-					}
-					else if(pLayerItem->m_Type == LAYERTYPE_SOUNDS_DEPRECATED)
-					{
-						// compatibility with old sound layers
-						const CMapItemLayerSounds *pSoundsItem = (CMapItemLayerSounds *)pLayerItem;
-						if(pSoundsItem->m_Version < 1 || pSoundsItem->m_Version > CMapItemLayerSounds::CURRENT_VERSION)
-							continue;
-
-						std::shared_ptr<CLayerSounds> pSounds = std::make_shared<CLayerSounds>();
-						pSounds->m_pEditor = m_pEditor;
-						pSounds->m_Flags = pLayerItem->m_Flags;
-						pSounds->m_Sound = pSoundsItem->m_Sound;
-
-						// validate m_Sound
-						if(pSounds->m_Sound < -1 || pSounds->m_Sound >= (int)m_vpSounds.size())
-							pSounds->m_Sound = -1;
-
-						// load layer name
-						IntsToStr(pSoundsItem->m_aName, sizeof(pSounds->m_aName) / sizeof(int), pSounds->m_aName);
-
-						// load data
-						CSoundSource_DEPRECATED *pData = (CSoundSource_DEPRECATED *)DataFile.GetDataSwapped(pSoundsItem->m_Data);
-						pGroup->AddLayer(pSounds);
-						pSounds->m_vSources.resize(pSoundsItem->m_NumSources);
-
-						for(int i = 0; i < pSoundsItem->m_NumSources; i++)
-						{
-							CSoundSource_DEPRECATED *pOldSource = &pData[i];
-
-							CSoundSource &Source = pSounds->m_vSources[i];
-							Source.m_Position = pOldSource->m_Position;
-							Source.m_Loop = pOldSource->m_Loop;
-							Source.m_Pan = true;
-							Source.m_TimeDelay = pOldSource->m_TimeDelay;
-							Source.m_Falloff = 0;
-
-							Source.m_PosEnv = pOldSource->m_PosEnv;
-							Source.m_PosEnvOffset = pOldSource->m_PosEnvOffset;
-							Source.m_SoundEnv = pOldSource->m_SoundEnv;
-							Source.m_SoundEnvOffset = pOldSource->m_SoundEnvOffset;
-
-							Source.m_Shape.m_Type = CSoundShape::SHAPE_CIRCLE;
-							Source.m_Shape.m_Circle.m_Radius = pOldSource->m_FalloffDistance;
-						}
-
-						DataFile.UnloadData(pSoundsItem->m_Data);
-					}
+					DataFile.UnloadData(pSoundsItem->m_Data);
 				}
 			}
 		}
+	}
 
-		// load envelopes
+	// load envelopes
+	{
+		const CMapBasedEnvelopePointAccess EnvelopePoints(&DataFile);
+
+		int EnvStart, EnvNum;
+		DataFile.GetType(MAPITEMTYPE_ENVELOPE, &EnvStart, &EnvNum);
+		for(int e = 0; e < EnvNum; e++)
 		{
-			const CMapBasedEnvelopePointAccess EnvelopePoints(&DataFile);
-
-			int EnvStart, EnvNum;
-			DataFile.GetType(MAPITEMTYPE_ENVELOPE, &EnvStart, &EnvNum);
-			for(int e = 0; e < EnvNum; e++)
+			CMapItemEnvelope *pItem = (CMapItemEnvelope *)DataFile.GetItem(EnvStart + e);
+			std::shared_ptr<CEnvelope> pEnv = std::make_shared<CEnvelope>(pItem->m_Channels);
+			pEnv->m_vPoints.resize(pItem->m_NumPoints);
+			for(int p = 0; p < pItem->m_NumPoints; p++)
 			{
-				CMapItemEnvelope *pItem = (CMapItemEnvelope *)DataFile.GetItem(EnvStart + e);
-				std::shared_ptr<CEnvelope> pEnv = std::make_shared<CEnvelope>(pItem->m_Channels);
-				pEnv->m_vPoints.resize(pItem->m_NumPoints);
-				for(int p = 0; p < pItem->m_NumPoints; p++)
-				{
-					const CEnvPoint *pPoint = EnvelopePoints.GetPoint(pItem->m_StartPoint + p);
-					if(pPoint != nullptr)
-						mem_copy(&pEnv->m_vPoints[p], pPoint, sizeof(CEnvPoint));
-					const CEnvPointBezier *pPointBezier = EnvelopePoints.GetBezier(pItem->m_StartPoint + p);
-					if(pPointBezier != nullptr)
-						mem_copy(&pEnv->m_vPoints[p].m_Bezier, pPointBezier, sizeof(CEnvPointBezier));
-				}
-				if(pItem->m_aName[0] != -1) // compatibility with old maps
-					IntsToStr(pItem->m_aName, sizeof(pItem->m_aName) / sizeof(int), pEnv->m_aName);
-				m_vpEnvelopes.push_back(pEnv);
-				if(pItem->m_Version >= CMapItemEnvelope_v2::CURRENT_VERSION)
-					pEnv->m_Synchronized = pItem->m_Synchronized;
+				const CEnvPoint *pPoint = EnvelopePoints.GetPoint(pItem->m_StartPoint + p);
+				if(pPoint != nullptr)
+					mem_copy(&pEnv->m_vPoints[p], pPoint, sizeof(CEnvPoint));
+				const CEnvPointBezier *pPointBezier = EnvelopePoints.GetBezier(pItem->m_StartPoint + p);
+				if(pPointBezier != nullptr)
+					mem_copy(&pEnv->m_vPoints[p].m_Bezier, pPointBezier, sizeof(CEnvPointBezier));
 			}
+			if(pItem->m_aName[0] != -1) // compatibility with old maps
+				IntsToStr(pItem->m_aName, sizeof(pItem->m_aName) / sizeof(int), pEnv->m_aName);
+			m_vpEnvelopes.push_back(pEnv);
+			if(pItem->m_Version >= CMapItemEnvelope_v2::CURRENT_VERSION)
+				pEnv->m_Synchronized = pItem->m_Synchronized;
 		}
+	}
 
+	// load automapper configurations
+	{
+		int AutomapperConfigStart, AutomapperConfigNum;
+		DataFile.GetType(MAPITEMTYPE_AUTOMAPPER_CONFIG, &AutomapperConfigStart, &AutomapperConfigNum);
+		for(int i = 0; i < AutomapperConfigNum; i++)
 		{
-			int AutomapperConfigStart, AutomapperConfigNum;
-			DataFile.GetType(MAPITEMTYPE_AUTOMAPPER_CONFIG, &AutomapperConfigStart, &AutomapperConfigNum);
-			for(int i = 0; i < AutomapperConfigNum; i++)
+			CMapItemAutoMapperConfig *pItem = (CMapItemAutoMapperConfig *)DataFile.GetItem(AutomapperConfigStart + i);
+			if(pItem->m_Version == CMapItemAutoMapperConfig::CURRENT_VERSION)
 			{
-				CMapItemAutoMapperConfig *pItem = (CMapItemAutoMapperConfig *)DataFile.GetItem(AutomapperConfigStart + i);
-				if(pItem->m_Version == CMapItemAutoMapperConfig::CURRENT_VERSION)
+				if(pItem->m_GroupId >= 0 && (size_t)pItem->m_GroupId < m_vpGroups.size() &&
+					pItem->m_LayerId >= 0 && (size_t)pItem->m_LayerId < m_vpGroups[pItem->m_GroupId]->m_vpLayers.size())
 				{
-					if(pItem->m_GroupId >= 0 && (size_t)pItem->m_GroupId < m_vpGroups.size() &&
-						pItem->m_LayerId >= 0 && (size_t)pItem->m_LayerId < m_vpGroups[pItem->m_GroupId]->m_vpLayers.size())
+					std::shared_ptr<CLayer> pLayer = m_vpGroups[pItem->m_GroupId]->m_vpLayers[pItem->m_LayerId];
+					if(pLayer->m_Type == LAYERTYPE_TILES)
 					{
-						std::shared_ptr<CLayer> pLayer = m_vpGroups[pItem->m_GroupId]->m_vpLayers[pItem->m_LayerId];
-						if(pLayer->m_Type == LAYERTYPE_TILES)
+						std::shared_ptr<CLayerTiles> pTiles = std::static_pointer_cast<CLayerTiles>(m_vpGroups[pItem->m_GroupId]->m_vpLayers[pItem->m_LayerId]);
+						// only load auto mappers for tile layers (not physics layers)
+						if(!(pTiles->m_Game || pTiles->m_Tele || pTiles->m_Speedup ||
+							   pTiles->m_Front || pTiles->m_Switch || pTiles->m_Tune))
 						{
-							std::shared_ptr<CLayerTiles> pTiles = std::static_pointer_cast<CLayerTiles>(m_vpGroups[pItem->m_GroupId]->m_vpLayers[pItem->m_LayerId]);
-							// only load auto mappers for tile layers (not physics layers)
-							if(!(pTiles->m_Game || pTiles->m_Tele || pTiles->m_Speedup ||
-								   pTiles->m_Front || pTiles->m_Switch || pTiles->m_Tune))
-							{
-								pTiles->m_AutoMapperConfig = pItem->m_AutomapperConfig;
-								pTiles->m_Seed = pItem->m_AutomapperSeed;
-								pTiles->m_AutoAutoMap = !!(pItem->m_Flags & CMapItemAutoMapperConfig::FLAG_AUTOMATIC);
-							}
+							pTiles->m_AutoMapperConfig = pItem->m_AutomapperConfig;
+							pTiles->m_Seed = pItem->m_AutomapperSeed;
+							pTiles->m_AutoAutoMap = !!(pItem->m_Flags & CMapItemAutoMapperConfig::FLAG_AUTOMATIC);
 						}
 					}
 				}
 			}
 		}
 	}
-	else
-		return false;
 
 	PerformSanityChecks(ErrorHandler);
 

@@ -28,6 +28,7 @@
 # Rafael Fontenelle   2023-03-26 19:11:00
 # Rafael Fontenelle   2023-07-07 12:11:00
 # Rafael Fontenelle   2023-08-14 14:17:00
+# Rafael Fontenelle   2023-09-25 14:23:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -170,9 +171,6 @@ Favorites
 Feet
 == Pés
 
-Filter
-== Filtro
-
 Fire
 == Atirar
 
@@ -184,9 +182,6 @@ Force vote
 
 Free-View
 == Visualização livre
-
-Friends
-== Amigos
 
 Fullscreen
 == Tela cheia
@@ -384,12 +379,6 @@ Screenshot
 Server address:
 == Endereço:
 
-Server details
-== Detalhes do servidor
-
-Server filter
-== Filtro de servidores
-
 Server info
 == Servidor
 
@@ -575,9 +564,6 @@ Show ghost
 
 Clan plates size
 == Tamanho da placa do clã
-
-Info
-== Info
 
 No updates available
 == Nenhuma atualização disponível
@@ -1768,5 +1754,22 @@ Unable to delete the folder '%s'. Make sure it's empty first.
 Moved ingame
 == Movido no jogo
 
+Go back the specified duration
+== Voltar na duração especificada
+
+[Demo player duration]
+%d min.
+== %d min.
+
+[Demo player duration]
+%d sec.
+== $d seg.
+
+Change the skip duration
+== Alterar a duração de pulo
+
+Go forward the specified duration
+== Avançar na duração especificada
+
 Render cut to video
-== 
+== Renderizar corte do vídeo

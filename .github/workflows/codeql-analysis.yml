@@ -18,6 +18,8 @@ jobs:
   analyze:
     name: Analyze
     runs-on: ubuntu-latest
+    env:
+      CARGO_HTTP_MULTIPLEXING: false
 
     strategy:
       fail-fast: false

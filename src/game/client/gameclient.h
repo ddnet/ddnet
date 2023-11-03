@@ -96,6 +96,7 @@ public:
 	bool m_HudDDRace;
 
 	bool m_NoWeakHookAndBounce;
+	bool m_NoSkinChangeForFrozen;
 };
 
 class CSnapEntities
@@ -140,9 +141,9 @@ public:
 	CItems m_Items;
 	CMapImages m_MapImages;
 
-	CMapLayers m_MapLayersBackGround = CMapLayers{CMapLayers::TYPE_BACKGROUND};
-	CMapLayers m_MapLayersForeGround = CMapLayers{CMapLayers::TYPE_FOREGROUND};
-	CBackground m_BackGround;
+	CMapLayers m_MapLayersBackground = CMapLayers{CMapLayers::TYPE_BACKGROUND};
+	CMapLayers m_MapLayersForeground = CMapLayers{CMapLayers::TYPE_FOREGROUND};
+	CBackground m_Background;
 	CMenuBackground m_MenuBackground;
 
 	CMapSounds m_MapSounds;
@@ -163,6 +164,7 @@ private:
 	class ITextRender *m_pTextRender;
 	class IClient *m_pClient;
 	class ISound *m_pSound;
+	class IConfigManager *m_pConfigManager;
 	class CConfig *m_pConfig;
 	class IConsole *m_pConsole;
 	class IStorage *m_pStorage;
@@ -229,6 +231,7 @@ public:
 	class ISound *Sound() const { return m_pSound; }
 	class IInput *Input() const { return m_pInput; }
 	class IStorage *Storage() const { return m_pStorage; }
+	class IConfigManager *ConfigManager() const { return m_pConfigManager; }
 	class CConfig *Config() const { return m_pConfig; }
 	class IConsole *Console() { return m_pConsole; }
 	class ITextRender *TextRender() const { return m_pTextRender; }
@@ -529,6 +532,7 @@ public:
 	bool Predict() const;
 	bool PredictDummy() { return g_Config.m_ClPredictDummy && Client()->DummyConnected() && m_Snap.m_LocalClientID >= 0 && m_PredictedDummyID >= 0 && !m_aClients[m_PredictedDummyID].m_Paused; }
 	const CTuningParams *GetTuning(int i) { return &m_aTuningList[i]; }
+	ColorRGBA GetDDTeamColor(int DDTeam, float Lightness = 0.5f) const;
 
 	CGameWorld m_GameWorld;
 	CGameWorld m_PredictedWorld;

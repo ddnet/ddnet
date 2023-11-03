@@ -472,38 +472,46 @@ void CItems::OnRender()
 			CLaserData Data = ExtractLaserInfo(Item.m_Type, pData, &GameClient()->m_GameWorld, pEntEx);
 			bool Inactive = !IsSuper && Data.m_SwitchNumber > 0 && Data.m_SwitchNumber < (int)aSwitchers.size() && !aSwitchers[Data.m_SwitchNumber].m_aStatus[SwitcherTeam];
 
+			bool IsEntBlink = false;
+			int EntStartTick = -1;
 			if(Data.m_Type == LASERTYPE_FREEZE)
 			{
-				if(Inactive && BlinkingLight)
-					continue;
-				Data.m_StartTick = DraggerStartTick;
+				IsEntBlink = BlinkingLight;
+				EntStartTick = DraggerStartTick;
 			}
 			else if(Data.m_Type == LASERTYPE_GUN)
 			{
-				if(Inactive && BlinkingGun)
-					continue;
-				Data.m_StartTick = GunStartTick;
+				IsEntBlink = BlinkingGun;
+				EntStartTick = GunStartTick;
 			}
 			else if(Data.m_Type == LASERTYPE_DRAGGER)
 			{
-				if(Inactive && BlinkingDragger)
-					continue;
-				Data.m_StartTick = DraggerStartTick;
+				IsEntBlink = BlinkingDragger;
+				EntStartTick = DraggerStartTick;
 			}
 			else if(Data.m_Type == LASERTYPE_DOOR)
 			{
-				if(Inactive || IsSuper)
+				if(Data.m_Predict && (Inactive || IsSuper))
 				{
 					Data.m_From.x = Data.m_To.x;
 					Data.m_From.y = Data.m_To.y;
 				}
-				Data.m_StartTick = Client()->GameTick(g_Config.m_ClDummy);
+				EntStartTick = Client()->GameTick(g_Config.m_ClDummy);
 			}
-			else if(Data.m_Type >= NUM_LASERTYPES)
+			else
 			{
-				if(Inactive && BlinkingDragger)
-					continue;
-				Data.m_StartTick = Client()->GameTick(g_Config.m_ClDummy);
+				IsEntBlink = BlinkingDragger;
+				EntStartTick = Client()->GameTick(g_Config.m_ClDummy);
+			}
+
+			if(Data.m_Predict && Inactive && IsEntBlink)
+			{
+				continue;
+			}
+
+			if(Data.m_StartTick <= 0 && EntStartTick != -1)
+			{
+				Data.m_StartTick = EntStartTick;
 			}
 
 			RenderLaser(&Data);

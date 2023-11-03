@@ -15,33 +15,41 @@ bool CheckClientID(int ClientID);
 void CGameContext::ConGoLeft(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
+	int Tiles = pResult->NumArguments() == 1 ? pResult->GetInteger(0) : 1;
+
 	if(!CheckClientID(pResult->m_ClientID))
 		return;
-	pSelf->MoveCharacter(pResult->m_ClientID, -1, 0);
+	pSelf->MoveCharacter(pResult->m_ClientID, -1 * Tiles, 0);
 }
 
 void CGameContext::ConGoRight(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
+	int Tiles = pResult->NumArguments() == 1 ? pResult->GetInteger(0) : 1;
+
 	if(!CheckClientID(pResult->m_ClientID))
 		return;
-	pSelf->MoveCharacter(pResult->m_ClientID, 1, 0);
+	pSelf->MoveCharacter(pResult->m_ClientID, Tiles, 0);
 }
 
 void CGameContext::ConGoDown(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
+	int Tiles = pResult->NumArguments() == 1 ? pResult->GetInteger(0) : 1;
+
 	if(!CheckClientID(pResult->m_ClientID))
 		return;
-	pSelf->MoveCharacter(pResult->m_ClientID, 0, 1);
+	pSelf->MoveCharacter(pResult->m_ClientID, 0, Tiles);
 }
 
 void CGameContext::ConGoUp(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
+	int Tiles = pResult->NumArguments() == 1 ? pResult->GetInteger(0) : 1;
+
 	if(!CheckClientID(pResult->m_ClientID))
 		return;
-	pSelf->MoveCharacter(pResult->m_ClientID, 0, -1);
+	pSelf->MoveCharacter(pResult->m_ClientID, 0, -1 * Tiles);
 }
 
 void CGameContext::ConMove(IConsole::IResult *pResult, void *pUserData)
@@ -98,6 +106,12 @@ void CGameContext::ConNinja(IConsole::IResult *pResult, void *pUserData)
 	pSelf->ModifyWeapons(pResult, pUserData, WEAPON_NINJA, false);
 }
 
+void CGameContext::ConUnNinja(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	pSelf->ModifyWeapons(pResult, pUserData, WEAPON_NINJA, true);
+}
+
 void CGameContext::ConEndlessHook(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
@@ -147,6 +161,16 @@ void CGameContext::ConUnSuper(IConsole::IResult *pResult, void *pUserData)
 	}
 }
 
+void CGameContext::ConSolo(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientID(pResult->m_ClientID))
+		return;
+	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
+	if(pChr)
+		pChr->SetSolo(true);
+}
+
 void CGameContext::ConUnSolo(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
@@ -155,6 +179,36 @@ void CGameContext::ConUnSolo(IConsole::IResult *pResult, void *pUserData)
 	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
 	if(pChr)
 		pChr->SetSolo(false);
+}
+
+void CGameContext::ConFreeze(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientID(pResult->m_ClientID))
+		return;
+	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
+	if(pChr)
+		pChr->Freeze();
+}
+
+void CGameContext::ConUnFreeze(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientID(pResult->m_ClientID))
+		return;
+	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
+	if(pChr)
+		pChr->UnFreeze();
+}
+
+void CGameContext::ConDeep(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientID(pResult->m_ClientID))
+		return;
+	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
+	if(pChr)
+		pChr->SetDeepFrozen(true);
 }
 
 void CGameContext::ConUnDeep(IConsole::IResult *pResult, void *pUserData)
@@ -349,9 +403,17 @@ void CGameContext::ConTeleport(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	CCharacter *pChr = pSelf->GetPlayerChar(Tele);
-	if(pChr && pSelf->GetPlayerChar(TeleTo))
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+
+	if(pChr && pPlayer && pSelf->GetPlayerChar(TeleTo))
 	{
-		pSelf->Teleport(pChr, pSelf->m_apPlayers[TeleTo]->m_ViewPos);
+		vec2 Pos = pSelf->m_apPlayers[TeleTo]->m_ViewPos;
+		if(!pPlayer->IsPaused() && !pResult->NumArguments())
+			Pos = Pos + vec2(pChr->Core()->m_Input.m_TargetX, pChr->Core()->m_Input.m_TargetY);
+
+		pSelf->Teleport(pChr, Pos);
+		pChr->UnFreeze();
+		pChr->Core()->m_Vel = vec2(0, 0);
 	}
 }
 
@@ -367,7 +429,6 @@ void CGameContext::ConKill(IConsole::IResult *pResult, void *pUserData)
 
 	pPlayer->m_LastKill = pSelf->Server()->Tick();
 	pPlayer->KillCharacter(WEAPON_SELF);
-	//pPlayer->m_RespawnTick = pSelf->Server()->Tick() + pSelf->Server()->TickSpeed() * g_Config.m_SvSuicidePenalty;
 }
 
 void CGameContext::ConForcePause(IConsole::IResult *pResult, void *pUserData)
@@ -798,7 +859,8 @@ void CGameContext::ConDrySave(IConsole::IResult *pResult, void *pUserData)
 		return;
 
 	CSaveTeam SavedTeam;
-	int Result = SavedTeam.Save(pSelf, pPlayer->GetTeam(), true);
+	int Team = pSelf->GetDDRaceTeam(pResult->m_ClientID);
+	int Result = SavedTeam.Save(pSelf, Team, true);
 	if(CSaveTeam::HandleSaveError(Result, pResult->m_ClientID, pSelf))
 		return;
 

@@ -77,6 +77,9 @@ private:
 
 	bool m_MouseFocus;
 	bool m_MouseDoubleClick;
+#if defined(CONF_PLATFORM_ANDROID) // No relative mouse on Android
+	ivec2 m_LastMousePos = ivec2(0, 0);
+#endif
 
 	// IME support
 	char m_aComposition[MAX_COMPOSITION_ARRAY_SIZE];

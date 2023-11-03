@@ -17,13 +17,13 @@ CDataFileReader g_DataReader;
 CDataFileWriter g_DataWriter;
 
 // global new image data (set by ReplaceImageItem)
-int g_aNewDataSize[64];
-void *g_apNewData[64];
+int g_aNewDataSize[MAX_MAPIMAGES];
+void *g_apNewData[MAX_MAPIMAGES];
 
 int g_Index = 0;
 int g_NextDataItemID = -1;
 
-int g_aImageIDs[64];
+int g_aImageIDs[MAX_MAPIMAGES];
 
 int LoadPNG(CImageInfo *pImg, const char *pFilename)
 {
@@ -91,17 +91,24 @@ bool CheckImageDimensions(void *pLayerItem, int LayerType, const char *pFilename
 
 	char aTileLayerName[12];
 	IntsToStr(pTMap->m_aName, sizeof(pTMap->m_aName) / sizeof(int), aTileLayerName);
-	char *pName = (char *)g_DataReader.GetData(pImgItem->m_ImageName);
-	dbg_msg("map_convert_07", "%s: Tile layer \"%s\" uses image \"%s\" with width %d, height %d, which is not divisible by 16. This is not supported in Teeworlds 0.7. Please scale the image and replace it manually.", pFilename, aTileLayerName, pName, pImgItem->m_Width, pImgItem->m_Height);
+
+	const char *pName = g_DataReader.GetDataString(pImgItem->m_ImageName);
+	dbg_msg("map_convert_07", "%s: Tile layer \"%s\" uses image \"%s\" with width %d, height %d, which is not divisible by 16. This is not supported in Teeworlds 0.7. Please scale the image and replace it manually.", pFilename, aTileLayerName, pName == nullptr ? "(error)" : pName, pImgItem->m_Width, pImgItem->m_Height);
 	return false;
 }
 
-void *ReplaceImageItem(CMapItemImage *pImgItem, CMapItemImage *pNewImgItem)
+void *ReplaceImageItem(int Index, CMapItemImage *pImgItem, CMapItemImage *pNewImgItem)
 {
 	if(!pImgItem->m_External)
 		return pImgItem;
 
-	char *pName = (char *)g_DataReader.GetData(pImgItem->m_ImageName);
+	const char *pName = g_DataReader.GetDataString(pImgItem->m_ImageName);
+	if(pName == nullptr || pName[0] == '\0')
+	{
+		dbg_msg("map_convert_07", "failed to load name of image %d", Index);
+		return pImgItem;
+	}
+
 	dbg_msg("map_convert_07", "embedding image '%s'", pName);
 
 	CImageInfo ImgInfo;
@@ -188,19 +195,24 @@ int main(int argc, const char **argv)
 
 	g_NextDataItemID = g_DataReader.NumData();
 
-	int i = 0;
+	size_t i = 0;
 	for(int Index = 0; Index < g_DataReader.NumItems(); Index++)
 	{
 		int Type;
 		g_DataReader.GetItem(Index, &Type);
 		if(Type == MAPITEMTYPE_IMAGE)
-			g_aImageIDs[i++] = Index;
+		{
+			if(i >= MAX_MAPIMAGES)
+			{
+				dbg_msg("map_convert_07", "map uses more images than the client maximum of %" PRIzu ". filename='%s'", MAX_MAPIMAGES, pSourceFileName);
+				break;
+			}
+			g_aImageIDs[i] = Index;
+			i++;
+		}
 	}
 
 	bool Success = true;
-
-	if(i > 64)
-		dbg_msg("map_convert_07", "%s: Uses more textures than the client maximum of 64.", pSourceFileName);
 
 	// add all items
 	for(int Index = 0; Index < g_DataReader.NumItems(); Index++)
@@ -220,7 +232,7 @@ int main(int argc, const char **argv)
 		CMapItemImage NewImageItem;
 		if(Type == MAPITEMTYPE_IMAGE)
 		{
-			pItem = ReplaceImageItem((CMapItemImage *)pItem, &NewImageItem);
+			pItem = ReplaceImageItem(Index, (CMapItemImage *)pItem, &NewImageItem);
 			if(!pItem)
 				return -1;
 			Size = sizeof(CMapItemImage);

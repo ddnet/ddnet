@@ -11,8 +11,6 @@ class CPlayers : public CComponent
 {
 	friend class CGhost;
 
-	CTeeRenderInfo m_RenderInfoSpec;
-	CTeeRenderInfo m_aRenderInfo[MAX_CLIENTS];
 	void RenderHand(const CTeeRenderInfo *pInfo, vec2 CenterPos, vec2 Dir, float AngleOffset, vec2 PostRotOffset, float Alpha = 1.0f);
 	void RenderPlayer(
 		const CNetObj_Character *pPrevChar,
@@ -31,17 +29,18 @@ class CPlayers : public CComponent
 		const CNetObj_Character *pPlayerChar,
 		int ClientID,
 		float Intra = 0.f);
-	float GetPlayerTargetAngle(
-		const CNetObj_Character *pPrevChar,
-		const CNetObj_Character *pPlayerChar,
-		int ClientID,
-		float Intra = 0.f);
 	bool IsPlayerInfoAvailable(int ClientID) const;
 
 	int m_WeaponEmoteQuadContainerIndex;
 	int m_aWeaponSpriteMuzzleQuadContainerIndex[NUM_WEAPONS];
 
 public:
+	float GetPlayerTargetAngle(
+		const CNetObj_Character *pPrevChar,
+		const CNetObj_Character *pPlayerChar,
+		int ClientID,
+		float Intra = 0.f);
+
 	virtual int Sizeof() const override { return sizeof(*this); }
 	virtual void OnInit() override;
 	virtual void OnRender() override;

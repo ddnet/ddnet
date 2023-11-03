@@ -43,7 +43,7 @@ int DilateFile(const char *pFilename)
 			int w = Img.m_Width;
 			int h = Img.m_Height;
 
-			DilateImage(pBuffer, w, h, 4);
+			DilateImage(pBuffer, w, h);
 
 			// save here
 			IOHANDLE SaveFile = io_open(pFilename, IOFLAG_WRITE);

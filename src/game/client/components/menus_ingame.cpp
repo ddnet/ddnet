@@ -349,6 +349,8 @@ void CMenus::RenderPlayers(CUIRect MainView)
 				m_pClient->Friends()->RemoveFriend(CurrentClient.m_aName, CurrentClient.m_aClan);
 			else
 				m_pClient->Friends()->AddFriend(CurrentClient.m_aName, CurrentClient.m_aClan);
+
+			m_pClient->Client()->ServerBrowserUpdate();
 		}
 	}
 
@@ -812,49 +814,45 @@ void CMenus::RenderServerControl(CUIRect MainView)
 
 void CMenus::RenderInGameNetwork(CUIRect MainView)
 {
-	CUIRect Box = MainView;
-	CUIRect Button;
-
-	int Page = g_Config.m_UiPage;
-	int NewPage = -1;
-
 	MainView.Draw(ms_ColorTabbarActive, IGraphics::CORNER_B, 10.0f);
 
-	Box.HSplitTop(5.0f, &MainView, &MainView);
-	Box.HSplitTop(24.0f, &Box, &MainView);
+	CUIRect TabBar, Button;
+	MainView.HSplitTop(24.0f, &TabBar, &MainView);
 
-	Box.VSplitLeft(100.0f, &Button, &Box);
+	int NewPage = g_Config.m_UiPage;
+
+	TabBar.VSplitLeft(100.0f, &Button, &TabBar);
 	static CButtonContainer s_InternetButton;
-	if(DoButton_MenuTab(&s_InternetButton, Localize("Internet"), Page == PAGE_INTERNET, &Button, 0))
+	if(DoButton_MenuTab(&s_InternetButton, Localize("Internet"), g_Config.m_UiPage == PAGE_INTERNET, &Button, IGraphics::CORNER_NONE))
 	{
-		if(Page != PAGE_INTERNET)
+		if(g_Config.m_UiPage != PAGE_INTERNET)
 			ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
 		NewPage = PAGE_INTERNET;
 	}
 
-	Box.VSplitLeft(80.0f, &Button, &Box);
+	TabBar.VSplitLeft(80.0f, &Button, &TabBar);
 	static CButtonContainer s_LanButton;
-	if(DoButton_MenuTab(&s_LanButton, Localize("LAN"), Page == PAGE_LAN, &Button, 0))
+	if(DoButton_MenuTab(&s_LanButton, Localize("LAN"), g_Config.m_UiPage == PAGE_LAN, &Button, IGraphics::CORNER_NONE))
 	{
-		if(Page != PAGE_LAN)
+		if(g_Config.m_UiPage != PAGE_LAN)
 			ServerBrowser()->Refresh(IServerBrowser::TYPE_LAN);
 		NewPage = PAGE_LAN;
 	}
 
-	Box.VSplitLeft(110.0f, &Button, &Box);
+	TabBar.VSplitLeft(110.0f, &Button, &TabBar);
 	static CButtonContainer s_FavoritesButton;
-	if(DoButton_MenuTab(&s_FavoritesButton, Localize("Favorites"), Page == PAGE_FAVORITES, &Button, 0))
+	if(DoButton_MenuTab(&s_FavoritesButton, Localize("Favorites"), g_Config.m_UiPage == PAGE_FAVORITES, &Button, IGraphics::CORNER_NONE))
 	{
-		if(Page != PAGE_FAVORITES)
+		if(g_Config.m_UiPage != PAGE_FAVORITES)
 			ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
 		NewPage = PAGE_FAVORITES;
 	}
 
-	Box.VSplitLeft(110.0f, &Button, &Box);
+	TabBar.VSplitLeft(110.0f, &Button, &TabBar);
 	static CButtonContainer s_DDNetButton;
-	if(DoButton_MenuTab(&s_DDNetButton, "DDNet", Page == PAGE_DDNET, &Button, 0) || Page < PAGE_INTERNET || Page > PAGE_KOG)
+	if(DoButton_MenuTab(&s_DDNetButton, "DDNet", g_Config.m_UiPage == PAGE_DDNET, &Button, IGraphics::CORNER_NONE) || g_Config.m_UiPage < PAGE_INTERNET || g_Config.m_UiPage > PAGE_KOG)
 	{
-		if(Page != PAGE_DDNET)
+		if(g_Config.m_UiPage != PAGE_DDNET)
 		{
 			Client()->RequestDDNetInfo();
 			ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
@@ -862,11 +860,11 @@ void CMenus::RenderInGameNetwork(CUIRect MainView)
 		NewPage = PAGE_DDNET;
 	}
 
-	Box.VSplitLeft(110.0f, &Button, &Box);
+	TabBar.VSplitLeft(110.0f, &Button, &TabBar);
 	static CButtonContainer s_KoGButton;
-	if(DoButton_MenuTab(&s_KoGButton, "KoG", Page == PAGE_KOG, &Button, IGraphics::CORNER_BR))
+	if(DoButton_MenuTab(&s_KoGButton, "KoG", g_Config.m_UiPage == PAGE_KOG, &Button, IGraphics::CORNER_NONE))
 	{
-		if(Page != PAGE_KOG)
+		if(g_Config.m_UiPage != PAGE_KOG)
 		{
 			Client()->RequestDDNetInfo();
 			ServerBrowser()->Refresh(IServerBrowser::TYPE_KOG);
@@ -874,7 +872,7 @@ void CMenus::RenderInGameNetwork(CUIRect MainView)
 		NewPage = PAGE_KOG;
 	}
 
-	if(NewPage != -1)
+	if(NewPage != g_Config.m_UiPage)
 	{
 		if(Client()->State() != IClient::STATE_OFFLINE)
 			SetMenuPage(NewPage);
@@ -884,15 +882,15 @@ void CMenus::RenderInGameNetwork(CUIRect MainView)
 }
 
 // ghost stuff
-int CMenus::GhostlistFetchCallback(const char *pName, int IsDir, int StorageType, void *pUser)
+int CMenus::GhostlistFetchCallback(const CFsFileInfo *pInfo, int IsDir, int StorageType, void *pUser)
 {
 	CMenus *pSelf = (CMenus *)pUser;
 	const char *pMap = pSelf->Client()->GetCurrentMap();
-	if(IsDir || !str_endswith(pName, ".gho") || !str_startswith(pName, pMap))
+	if(IsDir || !str_endswith(pInfo->m_pName, ".gho") || !str_startswith(pInfo->m_pName, pMap))
 		return 0;
 
 	char aFilename[IO_MAX_PATH_LENGTH];
-	str_format(aFilename, sizeof(aFilename), "%s/%s", pSelf->m_pClient->m_Ghost.GetGhostDir(), pName);
+	str_format(aFilename, sizeof(aFilename), "%s/%s", pSelf->m_pClient->m_Ghost.GetGhostDir(), pInfo->m_pName);
 
 	CGhostInfo Info;
 	if(!pSelf->m_pClient->m_Ghost.GhostLoader()->GetGhostInfo(aFilename, &Info, pMap, pSelf->Client()->GetCurrentMapSha256(), pSelf->Client()->GetCurrentMapCrc()))
@@ -901,6 +899,7 @@ int CMenus::GhostlistFetchCallback(const char *pName, int IsDir, int StorageType
 	CGhostItem Item;
 	str_copy(Item.m_aFilename, aFilename);
 	str_copy(Item.m_aPlayer, Info.m_aOwner);
+	Item.m_Date = pInfo->m_TimeModified;
 	Item.m_Time = Info.m_Time;
 	if(Item.m_Time > 0)
 		pSelf->m_vGhosts.push_back(Item);
@@ -917,13 +916,16 @@ void CMenus::GhostlistPopulate()
 {
 	m_vGhosts.clear();
 	m_GhostPopulateStartTime = time_get_nanoseconds();
-	Storage()->ListDirectory(IStorage::TYPE_ALL, m_pClient->m_Ghost.GetGhostDir(), GhostlistFetchCallback, this);
+	Storage()->ListDirectoryInfo(IStorage::TYPE_ALL, m_pClient->m_Ghost.GetGhostDir(), GhostlistFetchCallback, this);
 	std::sort(m_vGhosts.begin(), m_vGhosts.end());
 
 	CGhostItem *pOwnGhost = 0;
 	for(auto &Ghost : m_vGhosts)
+	{
+		Ghost.m_Failed = false;
 		if(str_comp(Ghost.m_aPlayer, Client()->PlayerName()) == 0 && (!pOwnGhost || Ghost < *pOwnGhost))
 			pOwnGhost = &Ghost;
+	}
 
 	if(pOwnGhost)
 	{
@@ -949,13 +951,30 @@ void CMenus::UpdateOwnGhost(CGhostItem Item)
 
 	if(Own != -1)
 	{
-		m_vGhosts[Own].m_Slot = -1;
-		m_vGhosts[Own].m_Own = false;
-		if(Item.HasFile() || !m_vGhosts[Own].HasFile())
-			DeleteGhostItem(Own);
+		if(g_Config.m_ClRaceGhostSaveBest)
+		{
+			if(Item.HasFile() || !m_vGhosts[Own].HasFile())
+				DeleteGhostItem(Own);
+		}
+		if(m_vGhosts[Own].m_Time > Item.m_Time)
+		{
+			Item.m_Own = true;
+			m_vGhosts[Own].m_Own = false;
+			m_vGhosts[Own].m_Slot = -1;
+		}
+		else
+		{
+			Item.m_Own = false;
+			Item.m_Slot = -1;
+		}
+	}
+	else
+	{
+		Item.m_Own = true;
 	}
 
-	Item.m_Own = true;
+	Item.m_Date = std::time(0);
+	Item.m_Failed = false;
 	m_vGhosts.insert(std::lower_bound(m_vGhosts.begin(), m_vGhosts.end(), Item), Item);
 }
 
@@ -1000,13 +1019,15 @@ void CMenus::RenderGhost(CUIRect MainView)
 		COL_ACTIVE = 0,
 		COL_NAME,
 		COL_TIME,
+		COL_DATE,
 	};
 
 	static CColumn s_aCols[] = {
 		{"", -1, 2.0f, {0}, {0}},
 		{"", COL_ACTIVE, 30.0f, {0}, {0}},
-		{Localizable("Name"), COL_NAME, 300.0f, {0}, {0}},
-		{Localizable("Time"), COL_TIME, 200.0f, {0}, {0}},
+		{Localizable("Name"), COL_NAME, 200.0f, {0}, {0}},
+		{Localizable("Time"), COL_TIME, 90.0f, {0}, {0}},
+		{Localizable("Date"), COL_DATE, 150.0f, {0}, {0}},
 	};
 
 	int NumCols = std::size(s_aCols);
@@ -1027,6 +1048,8 @@ void CMenus::RenderGhost(CUIRect MainView)
 	View.Draw(ColorRGBA(0, 0, 0, 0.15f), 0, 0);
 
 	const int NumGhosts = m_vGhosts.size();
+	int NumFailed = 0;
+	int NumActivated = 0;
 	static int s_SelectedIndex = 0;
 	static CListBox s_ListBox;
 	s_ListBox.DoStart(17.0f, NumGhosts, 1, 3, s_SelectedIndex, &View, false);
@@ -1035,12 +1058,21 @@ void CMenus::RenderGhost(CUIRect MainView)
 	{
 		const CGhostItem *pGhost = &m_vGhosts[i];
 		const CListboxItem Item = s_ListBox.DoNextItem(pGhost);
+
+		if(pGhost->m_Failed)
+			NumFailed++;
+		if(pGhost->Active())
+			NumActivated++;
+
 		if(!Item.m_Visible)
 			continue;
 
 		ColorRGBA rgb = ColorRGBA(1.0f, 1.0f, 1.0f);
 		if(pGhost->m_Own)
 			rgb = color_cast<ColorRGBA>(ColorHSLA(0.33f, 1.0f, 0.75f));
+
+		if(pGhost->m_Failed)
+			rgb = ColorRGBA(0.6f, 0.6f, 0.6f, 1.0f);
 
 		TextRender()->TextColor(rgb.WithAlpha(pGhost->HasFile() ? 1.0f : 0.5f));
 
@@ -1078,6 +1110,12 @@ void CMenus::RenderGhost(CUIRect MainView)
 				str_time(pGhost->m_Time / 10, TIME_HOURS_CENTISECS, aBuf, sizeof(aBuf));
 				UI()->DoLabel(&Button, aBuf, 12.0f, TEXTALIGN_ML);
 			}
+			else if(Id == COL_DATE)
+			{
+				char aBuf[64];
+				str_timestamp_ex(pGhost->m_Date, aBuf, sizeof(aBuf), FORMAT_SPACE);
+				UI()->DoLabel(&Button, aBuf, 12.0f, TEXTALIGN_ML);
+			}
 		}
 
 		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -1089,13 +1127,62 @@ void CMenus::RenderGhost(CUIRect MainView)
 	Status.Margin(5.0f, &Status);
 
 	CUIRect Button;
-	Status.VSplitLeft(120.0f, &Button, &Status);
+	Status.VSplitLeft(25.0f, &Button, &Status);
 
 	static CButtonContainer s_ReloadButton;
-	if(DoButton_Menu(&s_ReloadButton, Localize("Reload"), 0, &Button) || Input()->KeyPress(KEY_F5))
+	static CButtonContainer s_DirectoryButton;
+	static CButtonContainer s_ActivateAll;
+
+	if(DoButton_FontIcon(&s_ReloadButton, FONT_ICON_ARROW_ROTATE_RIGHT, 0, &Button) || Input()->KeyPress(KEY_F5))
 	{
 		m_pClient->m_Ghost.UnloadAll();
 		GhostlistPopulate();
+	}
+
+	Status.VSplitLeft(5.0f, &Button, &Status);
+	Status.VSplitLeft(175.0f, &Button, &Status);
+	if(DoButton_Menu(&s_DirectoryButton, Localize("Ghosts directory"), 0, &Button))
+	{
+		char aBuf[IO_MAX_PATH_LENGTH];
+		Storage()->GetCompletePath(IStorage::TYPE_SAVE, "ghosts", aBuf, sizeof(aBuf));
+		Storage()->CreateFolder("ghosts", IStorage::TYPE_SAVE);
+		if(!open_file(aBuf))
+		{
+			dbg_msg("menus", "couldn't open file '%s'", aBuf);
+		}
+	}
+
+	Status.VSplitLeft(5.0f, &Button, &Status);
+	if(NumGhosts - NumFailed > 0)
+	{
+		Status.VSplitLeft(175.0f, &Button, &Status);
+		bool ActivateAll = ((NumGhosts - NumFailed) != NumActivated) && m_pClient->m_Ghost.FreeSlots();
+
+		const char *pActionText = ActivateAll ? Localize("Activate all") : Localize("Deactivate all");
+		if(DoButton_Menu(&s_ActivateAll, pActionText, 0, &Button))
+		{
+			for(int i = 0; i < NumGhosts; i++)
+			{
+				CGhostItem *pGhost = &m_vGhosts[i];
+				if(pGhost->m_Failed || (ActivateAll && pGhost->m_Slot != -1))
+					continue;
+
+				if(ActivateAll)
+				{
+					if(!m_pClient->m_Ghost.FreeSlots())
+						break;
+
+					pGhost->m_Slot = m_pClient->m_Ghost.Load(pGhost->m_aFilename);
+					if(pGhost->m_Slot == -1)
+						pGhost->m_Failed = true;
+				}
+				else
+				{
+					m_pClient->m_Ghost.UnloadAll();
+					pGhost->m_Slot = -1;
+				}
+			}
+		}
 	}
 
 	if(s_SelectedIndex == -1 || s_SelectedIndex >= (int)m_vGhosts.size())
@@ -1105,7 +1192,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 
 	CGhostItem *pOwnGhost = GetOwnGhost();
 	int ReservedSlots = !pGhost->m_Own && !(pOwnGhost && pOwnGhost->Active());
-	if(pGhost->HasFile() && (pGhost->Active() || m_pClient->m_Ghost.FreeSlots() > ReservedSlots))
+	if(!pGhost->m_Failed && pGhost->HasFile() && (pGhost->Active() || m_pClient->m_Ghost.FreeSlots() > ReservedSlots))
 	{
 		Status.VSplitRight(120.0f, &Status, &Button);
 
@@ -1119,9 +1206,12 @@ void CMenus::RenderGhost(CUIRect MainView)
 				pGhost->m_Slot = -1;
 			}
 			else
+			{
 				pGhost->m_Slot = m_pClient->m_Ghost.Load(pGhost->m_aFilename);
+				if(pGhost->m_Slot == -1)
+					pGhost->m_Failed = true;
+			}
 		}
-
 		Status.VSplitRight(5.0f, &Status, 0);
 	}
 

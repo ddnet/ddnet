@@ -220,7 +220,6 @@ public:
 
 class CCharacterCore
 {
-	friend class CCharacter;
 	CWorldCore *m_pWorld = nullptr;
 	CCollision *m_pCollision;
 	std::map<int, std::vector<vec2>> *m_pTeleOuts;
@@ -236,8 +235,8 @@ public:
 	vec2 m_HookTeleBase;
 	int m_HookTick;
 	int m_HookState;
-	int m_HookedPlayer;
 	std::set<int> m_AttachedPlayers;
+	int HookedPlayer() const { return m_HookedPlayer; }
 	void SetHookedPlayer(int HookedPlayer);
 
 	int m_ActiveWeapon;
@@ -272,6 +271,7 @@ public:
 	int m_TriggeredEvents;
 
 	void Init(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore *pTeams = nullptr, std::map<int, std::vector<vec2>> *pTeleOuts = nullptr);
+	void SetCoreWorld(CWorldCore *pWorld, CCollision *pCollision, CTeamsCore *pTeams);
 	void Reset();
 	void TickDeferred();
 	void Tick(bool UseInput, bool DoDeferredTick = true);
@@ -318,6 +318,7 @@ public:
 private:
 	CTeamsCore *m_pTeams;
 	int m_MoveRestrictions;
+	int m_HookedPlayer;
 	static bool IsSwitchActiveCb(int Number, void *pUser);
 };
 

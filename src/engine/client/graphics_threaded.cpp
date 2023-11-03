@@ -264,18 +264,14 @@ void CGraphics_Threaded::LinesDraw(const CLineItem *pArray, int Num)
 
 IGraphics::CTextureHandle CGraphics_Threaded::FindFreeTextureIndex()
 {
-	int Tex = m_FirstFreeTexture;
-	if(Tex == -1)
+	const size_t CurSize = m_vTextureIndices.size();
+	if(m_FirstFreeTexture == CurSize)
 	{
-		const size_t CurSize = m_vTextureIndices.size();
 		m_vTextureIndices.resize(CurSize * 2);
-		for(size_t i = 0; i < CurSize - 1; ++i)
-		{
+		for(size_t i = 0; i < CurSize; ++i)
 			m_vTextureIndices[CurSize + i] = CurSize + i + 1;
-		}
-		m_vTextureIndices.back() = -1;
-		Tex = CurSize;
 	}
+	const size_t Tex = m_FirstFreeTexture;
 	m_FirstFreeTexture = m_vTextureIndices[Tex];
 	m_vTextureIndices[Tex] = -1;
 	return CreateTextureHandle(Tex);
@@ -284,6 +280,8 @@ IGraphics::CTextureHandle CGraphics_Threaded::FindFreeTextureIndex()
 void CGraphics_Threaded::FreeTextureIndex(CTextureHandle *pIndex)
 {
 	dbg_assert(pIndex->IsValid(), "Cannot free invalid texture index");
+	dbg_assert(m_vTextureIndices[pIndex->Id()] == -1, "Cannot free already freed texture index");
+
 	m_vTextureIndices[pIndex->Id()] = m_FirstFreeTexture;
 	m_FirstFreeTexture = pIndex->Id();
 	pIndex->Invalidate();
@@ -384,17 +382,6 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadSpriteTexture(CImageInfo &From
 	return LoadSpriteTextureImpl(FromImageInfo, x, y, w, h);
 }
 
-IGraphics::CTextureHandle CGraphics_Threaded::LoadSpriteTexture(CImageInfo &FromImageInfo, client_data7::CDataSprite *pSprite)
-{
-	int imggx = FromImageInfo.m_Width / pSprite->m_pSet->m_Gridx;
-	int imggy = FromImageInfo.m_Height / pSprite->m_pSet->m_Gridy;
-	int x = pSprite->m_X * imggx;
-	int y = pSprite->m_Y * imggy;
-	int w = pSprite->m_W * imggx;
-	int h = pSprite->m_H * imggy;
-	return LoadSpriteTextureImpl(FromImageInfo, x, y, w, h);
-}
-
 bool CGraphics_Threaded::IsImageSubFullyTransparent(CImageInfo &FromImageInfo, int x, int y, int w, int h)
 {
 	if(FromImageInfo.m_Format == CImageInfo::FORMAT_SINGLE_COMPONENT || FromImageInfo.m_Format == CImageInfo::FORMAT_RGBA)
@@ -416,7 +403,7 @@ bool CGraphics_Threaded::IsImageSubFullyTransparent(CImageInfo &FromImageInfo, i
 	return false;
 }
 
-bool CGraphics_Threaded::IsSpriteTextureFullyTransparent(CImageInfo &FromImageInfo, client_data7::CDataSprite *pSprite)
+bool CGraphics_Threaded::IsSpriteTextureFullyTransparent(CImageInfo &FromImageInfo, CDataSprite *pSprite)
 {
 	int imggx = FromImageInfo.m_Width / pSprite->m_pSet->m_Gridx;
 	int imggy = FromImageInfo.m_Height / pSprite->m_pSet->m_Gridy;
@@ -430,12 +417,6 @@ bool CGraphics_Threaded::IsSpriteTextureFullyTransparent(CImageInfo &FromImageIn
 
 IGraphics::CTextureHandle CGraphics_Threaded::LoadTextureRaw(size_t Width, size_t Height, CImageInfo::EImageFormat Format, const void *pData, int Flags, const char *pTexName)
 {
-	// don't waste memory on texture if we are stress testing
-#ifdef CONF_DEBUG
-	if(g_Config.m_DbgStress && m_InvalidTexture.IsValid())
-		return m_InvalidTexture;
-#endif
-
 	if((Flags & IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE) != 0 || (Flags & IGraphics::TEXLOAD_TO_3D_TEXTURE) != 0)
 	{
 		if(Width == 0 || (Width % 16) != 0 || Height == 0 || (Height % 16) != 0)
@@ -797,7 +778,7 @@ public:
 		str_copy(m_aName, pName);
 	}
 
-	virtual ~CScreenshotSaveJob()
+	~CScreenshotSaveJob() override
 	{
 		free(m_pData);
 	}
@@ -2598,9 +2579,8 @@ int CGraphics_Threaded::Init()
 	// init textures
 	m_FirstFreeTexture = 0;
 	m_vTextureIndices.resize(CCommandBuffer::MAX_TEXTURES);
-	for(size_t i = 0; i < m_vTextureIndices.size() - 1; ++i)
+	for(size_t i = 0; i < m_vTextureIndices.size(); ++i)
 		m_vTextureIndices[i] = i + 1;
-	m_vTextureIndices.back() = -1;
 
 	m_FirstFreeVertexArrayInfo = -1;
 	m_FirstFreeBufferObjectIndex = -1;

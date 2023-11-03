@@ -30,7 +30,7 @@ public:
 	void Init();
 	int AddKeyHash(const char *pIdent, MD5_DIGEST Hash, const unsigned char *pSalt, int AuthLevel);
 	int AddKey(const char *pIdent, const char *pPw, int AuthLevel);
-	int RemoveKey(int Slot); // Returns the old key slot that is now in the named one.
+	void RemoveKey(int Slot);
 	int FindKey(const char *pIdent) const;
 	bool CheckKey(int Slot, const char *pPw) const;
 	int DefaultKey(int AuthLevel) const;

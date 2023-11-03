@@ -19,6 +19,8 @@ const CSnapshotItem *CSnapshot::GetItem(int Index) const
 	return (const CSnapshotItem *)(DataStart() + Offsets()[Index]);
 }
 
+const CSnapshot CSnapshot::ms_EmptySnapshot;
+
 int CSnapshot::GetItemSize(int Index) const
 {
 	if(Index == m_NumItems - 1)
@@ -168,7 +170,7 @@ inline size_t CalcHashID(int Key)
 	return Hash % HASHLIST_SIZE;
 }
 
-static void GenerateHash(CItemList *pHashlist, CSnapshot *pSnapshot)
+static void GenerateHash(CItemList *pHashlist, const CSnapshot *pSnapshot)
 {
 	for(int i = 0; i < HASHLIST_SIZE; i++)
 		pHashlist[i].m_Num = 0;
@@ -215,7 +217,7 @@ int CSnapshotDelta::DiffItem(const int *pPast, const int *pCurrent, int *pOut, i
 	return Needed;
 }
 
-void CSnapshotDelta::UndiffItem(const int *pPast, int *pDiff, int *pOut, int Size, int *pDataRate)
+void CSnapshotDelta::UndiffItem(const int *pPast, const int *pDiff, int *pOut, int Size, int *pDataRate)
 {
 	while(Size)
 	{
@@ -267,7 +269,7 @@ const CSnapshotDelta::CData *CSnapshotDelta::EmptyDelta() const
 }
 
 // TODO: OPT: this should be made much faster
-int CSnapshotDelta::CreateDelta(CSnapshot *pFrom, CSnapshot *pTo, void *pDstData)
+int CSnapshotDelta::CreateDelta(const CSnapshot *pFrom, CSnapshot *pTo, void *pDstData)
 {
 	CData *pDelta = (CData *)pDstData;
 	int *pData = (int *)pDelta->m_aData;
@@ -357,7 +359,7 @@ static int RangeCheck(void *pEnd, void *pPtr, int Size)
 	return 0;
 }
 
-int CSnapshotDelta::UnpackDelta(CSnapshot *pFrom, CSnapshot *pTo, const void *pSrcData, int DataSize)
+int CSnapshotDelta::UnpackDelta(const CSnapshot *pFrom, CSnapshot *pTo, const void *pSrcData, int DataSize)
 {
 	CData *pDelta = (CData *)pSrcData;
 	int *pData = (int *)pDelta->m_aData;
@@ -509,7 +511,7 @@ void CSnapshotStorage::PurgeUntil(int Tick)
 	m_pLast = 0;
 }
 
-void CSnapshotStorage::Add(int Tick, int64_t Tagtime, int DataSize, void *pData, int AltDataSize, void *pAltData)
+void CSnapshotStorage::Add(int Tick, int64_t Tagtime, int DataSize, const void *pData, int AltDataSize, const void *pAltData)
 {
 	// allocate memory for holder + snapshot_data
 	int TotalSize = sizeof(CHolder) + DataSize;
@@ -550,7 +552,7 @@ void CSnapshotStorage::Add(int Tick, int64_t Tagtime, int DataSize, void *pData,
 	m_pLast = pHolder;
 }
 
-int CSnapshotStorage::Get(int Tick, int64_t *pTagtime, CSnapshot **ppData, CSnapshot **ppAltData)
+int CSnapshotStorage::Get(int Tick, int64_t *pTagtime, const CSnapshot **ppData, const CSnapshot **ppAltData)
 {
 	CHolder *pHolder = m_pFirst;
 

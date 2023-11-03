@@ -182,11 +182,6 @@ void CGameWorld::RemoveEntities()
 		}
 }
 
-bool distCompare(std::pair<float, int> a, std::pair<float, int> b)
-{
-	return (a.first < b.first);
-}
-
 void CGameWorld::Tick()
 {
 	// update all objects
@@ -315,7 +310,7 @@ void CGameWorld::ReleaseHooked(int ClientID)
 	for(; pChr; pChr = (CCharacter *)pChr->TypeNext())
 	{
 		CCharacterCore *pCore = pChr->Core();
-		if(pCore->m_HookedPlayer == ClientID)
+		if(pCore->HookedPlayer() == ClientID)
 		{
 			pCore->SetHookedPlayer(-1);
 			pCore->m_HookState = HOOK_RETRACTED;
@@ -497,8 +492,10 @@ void CGameWorld::NetObjAdd(int ObjID, int ObjType, const void *pObjData, const C
 	else if((ObjType == NETOBJTYPE_LASER || ObjType == NETOBJTYPE_DDNETLASER) && m_WorldConfig.m_PredictWeapons)
 	{
 		CLaserData Data = ExtractLaserInfo(ObjType, pObjData, this, pDataEx);
-		if(!IsLocalTeam(Data.m_Owner))
+		if(!IsLocalTeam(Data.m_Owner) || !Data.m_Predict)
+		{
 			return;
+		}
 
 		if(Data.m_Type == LASERTYPE_RIFLE || Data.m_Type == LASERTYPE_SHOTGUN || Data.m_Type < 0)
 		{
@@ -556,7 +553,7 @@ void CGameWorld::NetObjEnd()
 	for(int i = 0; i < MAX_CLIENTS; i++)
 		if(CCharacter *pChar = GetCharacterByID(i))
 			if(!pChar->m_MarkedForDestroy)
-				if(CCharacter *pHookedChar = GetCharacterByID(pChar->m_Core.m_HookedPlayer))
+				if(CCharacter *pHookedChar = GetCharacterByID(pChar->m_Core.HookedPlayer()))
 					if(pHookedChar->m_MarkedForDestroy)
 					{
 						pHookedChar->m_Pos = pHookedChar->m_Core.m_Pos = pChar->m_Core.m_HookPos;

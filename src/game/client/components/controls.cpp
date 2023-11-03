@@ -239,6 +239,16 @@ int CControls::SnapInput(int *pData)
 	{
 		m_aInputData[g_Config.m_ClDummy].m_TargetX = (int)m_aMousePos[g_Config.m_ClDummy].x;
 		m_aInputData[g_Config.m_ClDummy].m_TargetY = (int)m_aMousePos[g_Config.m_ClDummy].y;
+
+		if(g_Config.m_ClSubTickAiming && m_aMousePosOnAction[g_Config.m_ClDummy].x != 0 && m_aMousePosOnAction[g_Config.m_ClDummy].y != 0)
+		{
+			m_aInputData[g_Config.m_ClDummy].m_TargetX = (int)m_aMousePosOnAction[g_Config.m_ClDummy].x;
+			m_aInputData[g_Config.m_ClDummy].m_TargetY = (int)m_aMousePosOnAction[g_Config.m_ClDummy].y;
+
+			m_aMousePosOnAction[g_Config.m_ClDummy].x = 0;
+			m_aMousePosOnAction[g_Config.m_ClDummy].y = 0;
+		}
+
 		if(!m_aInputData[g_Config.m_ClDummy].m_TargetX && !m_aInputData[g_Config.m_ClDummy].m_TargetY)
 		{
 			m_aInputData[g_Config.m_ClDummy].m_TargetX = 1;
@@ -295,7 +305,6 @@ int CControls::SnapInput(int *pData)
 			m_aInputData[g_Config.m_ClDummy].m_TargetY = (int)(std::cos(t * 3) * 100.0f);
 		}
 #endif
-
 		// check if we need to send input
 		if(m_aInputData[g_Config.m_ClDummy].m_Direction != m_aLastData[g_Config.m_ClDummy].m_Direction)
 			Send = true;
@@ -412,8 +421,8 @@ void CControls::ClampMousePos()
 {
 	if(m_pClient->m_Snap.m_SpecInfo.m_Active && m_pClient->m_Snap.m_SpecInfo.m_SpectatorID < 0)
 	{
-		m_aMousePos[g_Config.m_ClDummy].x = clamp(m_aMousePos[g_Config.m_ClDummy].x, 0.0f, Collision()->GetWidth() * 32.0f);
-		m_aMousePos[g_Config.m_ClDummy].y = clamp(m_aMousePos[g_Config.m_ClDummy].y, 0.0f, Collision()->GetHeight() * 32.0f);
+		m_aMousePos[g_Config.m_ClDummy].x = clamp(m_aMousePos[g_Config.m_ClDummy].x, -201.0f * 32, (Collision()->GetWidth() + 201.0f) * 32.0f);
+		m_aMousePos[g_Config.m_ClDummy].y = clamp(m_aMousePos[g_Config.m_ClDummy].y, -201.0f * 32, (Collision()->GetHeight() + 201.0f) * 32.0f);
 	}
 	else
 	{

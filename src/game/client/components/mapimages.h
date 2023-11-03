@@ -6,6 +6,7 @@
 #include <engine/graphics.h>
 
 #include <game/client/component.h>
+#include <game/mapitems.h>
 
 enum EMapImageEntityLayerType
 {
@@ -35,8 +36,8 @@ class CMapImages : public CComponent
 	friend class CBackground;
 	friend class CMenuBackground;
 
-	IGraphics::CTextureHandle m_aTextures[64];
-	int m_aTextureUsedByTileOrQuadLayerFlag[64]; // 0: nothing, 1(as flag): tile layer, 2(as flag): quad layer
+	IGraphics::CTextureHandle m_aTextures[MAX_MAPIMAGES];
+	int m_aTextureUsedByTileOrQuadLayerFlag[MAX_MAPIMAGES]; // 0: nothing, 1(as flag): tile layer, 2(as flag): quad layer
 	int m_Count;
 
 	char m_aEntitiesPath[IO_MAX_PATH_LENGTH];

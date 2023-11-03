@@ -32,6 +32,7 @@ CLaserData ExtractLaserInfo(int NetObjType, const void *pData, CGameWorld *pGame
 		Result.m_SwitchNumber = 0;
 		Result.m_Subtype = -1;
 		Result.m_TuneZone = pGameWorld && pGameWorld->m_WorldConfig.m_UseTuneZones ? pGameWorld->Collision()->IsTune(pGameWorld->Collision()->GetMapIndex(Result.m_From)) : 0;
+		Result.m_Predict = true;
 	}
 
 	if(pEntEx && !(NetObjType == NETOBJTYPE_DDNETLASER && Result.m_SwitchNumber >= 0))
@@ -72,5 +73,6 @@ CLaserData ExtractLaserInfoDDNet(const CNetObj_DDNetLaser *pLaser, CGameWorld *p
 	Result.m_SwitchNumber = pLaser->m_SwitchNumber;
 	Result.m_Subtype = pLaser->m_Subtype;
 	Result.m_TuneZone = pGameWorld && pGameWorld->m_WorldConfig.m_UseTuneZones ? pGameWorld->Collision()->IsTune(pGameWorld->Collision()->GetMapIndex(Result.m_From)) : 0;
+	Result.m_Predict = !(pLaser->m_Flags & LASERFLAG_NO_PREDICT);
 	return Result;
 }

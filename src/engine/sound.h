@@ -3,9 +3,7 @@
 #ifndef ENGINE_SOUND_H
 #define ENGINE_SOUND_H
 
-#include "kernel.h"
-
-#include <engine/shared/video.h>
+#include <engine/kernel.h>
 #include <engine/storage.h>
 
 class ISound : public IInterface
@@ -17,7 +15,8 @@ public:
 		FLAG_LOOP = 1 << 0,
 		FLAG_POS = 1 << 1,
 		FLAG_NO_PANNING = 1 << 2,
-		FLAG_ALL = FLAG_LOOP | FLAG_POS | FLAG_NO_PANNING,
+		FLAG_PREVIEW = 1 << 3,
+		FLAG_ALL = FLAG_LOOP | FLAG_POS | FLAG_NO_PANNING | FLAG_PREVIEW,
 	};
 
 	enum
@@ -64,13 +63,15 @@ public:
 
 	virtual bool IsSoundEnabled() = 0;
 
-	virtual int LoadWV(const char *pFilename, int StorageType = IStorage::TYPE_ALL) = 0;
 	virtual int LoadOpus(const char *pFilename, int StorageType = IStorage::TYPE_ALL) = 0;
-	virtual int LoadWVFromMem(const void *pData, unsigned DataSize, bool FromEditor = false) = 0;
+	virtual int LoadWV(const char *pFilename, int StorageType = IStorage::TYPE_ALL) = 0;
 	virtual int LoadOpusFromMem(const void *pData, unsigned DataSize, bool FromEditor = false) = 0;
+	virtual int LoadWVFromMem(const void *pData, unsigned DataSize, bool FromEditor = false) = 0;
 	virtual void UnloadSample(int SampleID) = 0;
 
-	virtual float GetSampleDuration(int SampleID) = 0; // in s
+	virtual float GetSampleTotalTime(int SampleID) = 0; // in s
+	virtual float GetSampleCurrentTime(int SampleID) = 0; // in s
+	virtual void SetSampleCurrentTime(int SampleID, float Time) = 0;
 
 	virtual void SetChannel(int ChannelID, float Volume, float Panning) = 0;
 	virtual void SetListenerPos(float x, float y) = 0;
@@ -78,19 +79,20 @@ public:
 	virtual void SetVoiceVolume(CVoiceHandle Voice, float Volume) = 0;
 	virtual void SetVoiceFalloff(CVoiceHandle Voice, float Falloff) = 0;
 	virtual void SetVoiceLocation(CVoiceHandle Voice, float x, float y) = 0;
-	virtual void SetVoiceTimeOffset(CVoiceHandle Voice, float offset) = 0; // in s
+	virtual void SetVoiceTimeOffset(CVoiceHandle Voice, float TimeOffset) = 0; // in s
 
 	virtual void SetVoiceCircle(CVoiceHandle Voice, float Radius) = 0;
 	virtual void SetVoiceRectangle(CVoiceHandle Voice, float Width, float Height) = 0;
 
 	virtual CVoiceHandle PlayAt(int ChannelID, int SampleID, int Flags, float x, float y) = 0;
 	virtual CVoiceHandle Play(int ChannelID, int SampleID, int Flags) = 0;
+	virtual void Pause(int SampleID) = 0;
 	virtual void Stop(int SampleID) = 0;
 	virtual void StopAll() = 0;
 	virtual void StopVoice(CVoiceHandle Voice) = 0;
 	virtual bool IsPlaying(int SampleID) = 0;
 
-	virtual ISoundMixFunc GetSoundMixFunc() = 0;
+	virtual void Mix(short *pFinalOut, unsigned Frames) = 0;
 	// useful for thread synchronization
 	virtual void PauseAudioDevice() = 0;
 	virtual void UnpauseAudioDevice() = 0;

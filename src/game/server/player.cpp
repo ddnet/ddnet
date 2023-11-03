@@ -89,16 +89,13 @@ void CPlayer::Reset()
 
 	if(g_Config.m_Events)
 	{
-		time_t RawTime;
-		struct tm *pTimeInfo;
-		time(&RawTime);
-		pTimeInfo = localtime(&RawTime);
-		if((pTimeInfo->tm_mon == 11 && pTimeInfo->tm_mday == 31) || (pTimeInfo->tm_mon == 0 && pTimeInfo->tm_mday == 1))
-		{ // New Year
+		const ETimeSeason Season = time_season();
+		if(Season == SEASON_NEWYEAR)
+		{
 			m_DefEmote = EMOTE_HAPPY;
 		}
-		else if((pTimeInfo->tm_mon == 9 && pTimeInfo->tm_mday == 31) || (pTimeInfo->tm_mon == 10 && pTimeInfo->tm_mday == 1))
-		{ // Halloween
+		else if(Season == SEASON_HALLOWEEN)
+		{
 			m_DefEmote = EMOTE_ANGRY;
 			m_Halloween = true;
 		}
@@ -226,7 +223,7 @@ void CPlayer::Tick()
 
 	if(Server()->GetNetErrorString(m_ClientID)[0])
 	{
-		m_Afk = true;
+		SetAfk(true);
 
 		char aBuf[512];
 		str_format(aBuf, sizeof(aBuf), "'%s' would have timed out, but can use timeout protection now", Server()->ClientName(m_ClientID));
@@ -292,6 +289,9 @@ void CPlayer::Tick()
 void CPlayer::PostTick()
 {
 	// update latency value
+	if(m_PlayerFlags & PLAYERFLAG_IN_MENU)
+		m_aCurLatency[m_ClientID] = GameServer()->m_apPlayers[m_ClientID]->m_Latency.m_Min;
+
 	if(m_PlayerFlags & PLAYERFLAG_SCOREBOARD)
 	{
 		for(int i = 0; i < MAX_CLIENTS; ++i)
@@ -740,18 +740,27 @@ void CPlayer::UpdatePlaytime()
 
 void CPlayer::AfkTimer()
 {
-	m_Afk = g_Config.m_SvMaxAfkTime != 0 && m_LastPlaytime < time_get() - time_freq() * g_Config.m_SvMaxAfkTime;
+	SetAfk(g_Config.m_SvMaxAfkTime != 0 && m_LastPlaytime < time_get() - time_freq() * g_Config.m_SvMaxAfkTime);
 }
 
 void CPlayer::SetAfk(bool Afk)
 {
+	if(m_Afk != Afk)
+	{
+		Server()->ExpireServerInfo();
+		m_Afk = Afk;
+	}
+}
+
+void CPlayer::SetInitialAfk(bool Afk)
+{
 	if(g_Config.m_SvMaxAfkTime == 0)
 	{
-		m_Afk = false;
+		SetAfk(false);
 		return;
 	}
 
-	m_Afk = Afk;
+	SetAfk(Afk);
 
 	// Ensure that the AFK state is not reset again automatically
 	if(Afk)

@@ -1,5 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include "layer_tiles.h"
+
 #include <game/editor/editor.h>
 
 #include <engine/keys.h>
@@ -7,7 +9,8 @@
 
 #include "image.h"
 
-CLayerTiles::CLayerTiles(int w, int h)
+CLayerTiles::CLayerTiles(CEditor *pEditor, int w, int h) :
+	CLayer(pEditor)
 {
 	m_Type = LAYERTYPE_TILES;
 	m_aName[0] = '\0';
@@ -128,10 +131,10 @@ void CLayerTiles::Render(bool Tileset)
 	ColorRGBA Color = ColorRGBA(m_Color.r / 255.0f, m_Color.g / 255.0f, m_Color.b / 255.0f, m_Color.a / 255.0f);
 	Graphics()->BlendNone();
 	m_pEditor->RenderTools()->RenderTilemap(m_pTiles, m_Width, m_Height, 32.0f, Color, LAYERRENDERFLAG_OPAQUE,
-		m_pEditor->EnvelopeEval, m_pEditor, m_ColorEnv, m_ColorEnvOffset);
+		CEditor::EnvelopeEval, m_pEditor, m_ColorEnv, m_ColorEnvOffset);
 	Graphics()->BlendNormal();
 	m_pEditor->RenderTools()->RenderTilemap(m_pTiles, m_Width, m_Height, 32.0f, Color, LAYERRENDERFLAG_TRANSPARENT,
-		m_pEditor->EnvelopeEval, m_pEditor, m_ColorEnv, m_ColorEnvOffset);
+		CEditor::EnvelopeEval, m_pEditor, m_ColorEnv, m_ColorEnvOffset);
 
 	// Render DDRace Layers
 	if(!Tileset)
@@ -237,7 +240,7 @@ void CLayerTiles::BrushSelecting(CUIRect Rect)
 	m_pEditor->Graphics()->QuadsDrawTL(&QuadItem, 1);
 	m_pEditor->Graphics()->QuadsEnd();
 	char aBuf[16];
-	str_format(aBuf, sizeof(aBuf), "%d,%d", ConvertX(Rect.w), ConvertY(Rect.h));
+	str_format(aBuf, sizeof(aBuf), "%d⨯%d", ConvertX(Rect.w), ConvertY(Rect.h));
 	TextRender()->Text(Rect.x + 3.0f, Rect.y + 3.0f, m_pEditor->m_ShowPicker ? 15.0f : m_pEditor->MapView()->ScaleLength(15.0f), aBuf, -1.0f);
 }
 
@@ -271,7 +274,7 @@ int CLayerTiles::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
 	// create new layers
 	if(this->m_Tele)
 	{
-		std::shared_ptr<CLayerTele> pGrabbed = std::make_shared<CLayerTele>(r.w, r.h);
+		std::shared_ptr<CLayerTele> pGrabbed = std::make_shared<CLayerTele>(m_pEditor, r.w, r.h);
 		InitGrabbedLayer(pGrabbed, this);
 
 		pBrush->AddLayer(pGrabbed);
@@ -297,7 +300,7 @@ int CLayerTiles::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
 	}
 	else if(this->m_Speedup)
 	{
-		std::shared_ptr<CLayerSpeedup> pGrabbed = std::make_shared<CLayerSpeedup>(r.w, r.h);
+		std::shared_ptr<CLayerSpeedup> pGrabbed = std::make_shared<CLayerSpeedup>(m_pEditor, r.w, r.h);
 		InitGrabbedLayer(pGrabbed, this);
 
 		pBrush->AddLayer(pGrabbed);
@@ -327,7 +330,7 @@ int CLayerTiles::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
 	}
 	else if(this->m_Switch)
 	{
-		std::shared_ptr<CLayerSwitch> pGrabbed = std::make_shared<CLayerSwitch>(r.w, r.h);
+		std::shared_ptr<CLayerSwitch> pGrabbed = std::make_shared<CLayerSwitch>(m_pEditor, r.w, r.h);
 		InitGrabbedLayer(pGrabbed, this);
 
 		pBrush->AddLayer(pGrabbed);
@@ -356,7 +359,7 @@ int CLayerTiles::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
 
 	else if(this->m_Tune)
 	{
-		std::shared_ptr<CLayerTune> pGrabbed = std::make_shared<CLayerTune>(r.w, r.h);
+		std::shared_ptr<CLayerTune> pGrabbed = std::make_shared<CLayerTune>(m_pEditor, r.w, r.h);
 		InitGrabbedLayer(pGrabbed, this);
 
 		pBrush->AddLayer(pGrabbed);
@@ -382,7 +385,7 @@ int CLayerTiles::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
 	}
 	else if(this->m_Front)
 	{
-		std::shared_ptr<CLayerFront> pGrabbed = std::make_shared<CLayerFront>(r.w, r.h);
+		std::shared_ptr<CLayerFront> pGrabbed = std::make_shared<CLayerFront>(m_pEditor, r.w, r.h);
 		InitGrabbedLayer(pGrabbed, this);
 
 		pBrush->AddLayer(pGrabbed);
@@ -395,7 +398,7 @@ int CLayerTiles::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
 	}
 	else
 	{
-		std::shared_ptr<CLayerTiles> pGrabbed = std::make_shared<CLayerFront>(r.w, r.h);
+		std::shared_ptr<CLayerTiles> pGrabbed = std::make_shared<CLayerFront>(m_pEditor, r.w, r.h);
 		InitGrabbedLayer(pGrabbed, this);
 
 		pBrush->AddLayer(pGrabbed);
@@ -741,7 +744,7 @@ CUI::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 			{
 				if(!m_pEditor->m_Map.m_pTeleLayer)
 				{
-					std::shared_ptr<CLayer> pLayer = std::make_shared<CLayerTele>(m_Width, m_Height);
+					std::shared_ptr<CLayer> pLayer = std::make_shared<CLayerTele>(m_pEditor, m_Width, m_Height);
 					m_pEditor->m_Map.MakeTeleLayer(pLayer);
 					m_pEditor->m_Map.m_pGameGroup->AddLayer(pLayer);
 				}

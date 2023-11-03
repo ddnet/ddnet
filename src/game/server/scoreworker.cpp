@@ -809,9 +809,17 @@ bool CScoreWorker::ShowRank(IDbConnection *pSqlServer, const ISqlData *pGameData
 					pData->m_aName, aBuf, BetterThanPercent, pData->m_aRequestingPlayer);
 			}
 
-			str_format(pResult->m_Data.m_aaMessages[1], sizeof(pResult->m_Data.m_aaMessages[1]),
-				"Global rank %d - %s %s",
-				Rank, pData->m_aServer, aRegionalRank);
+			if(g_Config.m_SvRegionalRankings)
+			{
+				str_format(pResult->m_Data.m_aaMessages[1], sizeof(pResult->m_Data.m_aaMessages[1]),
+					"Global rank %d - %s %s",
+					Rank, pData->m_aServer, aRegionalRank);
+			}
+			else
+			{
+				str_format(pResult->m_Data.m_aaMessages[1], sizeof(pResult->m_Data.m_aaMessages[1]),
+					"Global rank %d", Rank);
+			}
 		}
 	}
 	else
@@ -959,6 +967,12 @@ bool CScoreWorker::ShowTop(IDbConnection *pSqlServer, const ISqlData *pGameData,
 			"%d. %s Time: %s", Rank, aName, aTime);
 
 		Line++;
+	}
+
+	if(!g_Config.m_SvRegionalRankings)
+	{
+		str_copy(pResult->m_Data.m_aaMessages[Line], "----------------------------------------", sizeof(pResult->m_Data.m_aaMessages[Line]));
+		return !End;
 	}
 
 	char aServerLike[16];

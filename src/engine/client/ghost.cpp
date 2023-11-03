@@ -4,6 +4,7 @@
 
 #include <engine/console.h>
 #include <engine/shared/compression.h>
+#include <engine/shared/config.h>
 #include <engine/shared/network.h>
 #include <engine/storage.h>
 
@@ -220,9 +221,10 @@ int CGhostLoader::Load(const char *pFilename, const char *pMap, SHA256_DIGEST Ma
 		m_File = 0;
 		return -1;
 	}
+
 	if(m_Header.m_Version >= 6)
 	{
-		if(m_Header.m_MapSha256 != MapSha256)
+		if(m_Header.m_MapSha256 != MapSha256 && g_Config.m_ClRaceGhostStrictMap)
 		{
 			char aGhostSha256[SHA256_MAXSTRSIZE];
 			sha256_str(m_Header.m_MapSha256, aGhostSha256, sizeof(aGhostSha256));
@@ -240,7 +242,7 @@ int CGhostLoader::Load(const char *pFilename, const char *pMap, SHA256_DIGEST Ma
 	{
 		io_skip(m_File, -(int)sizeof(SHA256_DIGEST));
 		unsigned GhostMapCrc = bytes_be_to_uint(m_Header.m_aZeroes);
-		if(str_comp(m_Header.m_aMap, pMap) != 0 || GhostMapCrc != MapCrc)
+		if(GhostMapCrc != MapCrc && g_Config.m_ClRaceGhostStrictMap)
 		{
 			char aBuf[256];
 			str_format(aBuf, sizeof(aBuf), "ghost map '%s' crc mismatch, wanted=%08x ghost=%08x", pMap, MapCrc, GhostMapCrc);
@@ -380,14 +382,15 @@ bool CGhostLoader::GetGhostInfo(const char *pFilename, CGhostInfo *pGhostInfo, c
 	{
 		return false;
 	}
-	if(Header.m_Version >= 6)
+
+	if(Header.m_Version >= 6 && g_Config.m_ClRaceGhostStrictMap)
 	{
 		if(Header.m_MapSha256 != MapSha256)
 		{
 			return false;
 		}
 	}
-	else
+	else if(g_Config.m_ClRaceGhostStrictMap)
 	{
 		unsigned GhostMapCrc = bytes_be_to_uint(Header.m_aZeroes);
 		if(GhostMapCrc != MapCrc)

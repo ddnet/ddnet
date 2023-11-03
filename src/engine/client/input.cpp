@@ -147,7 +147,7 @@ void CInput::UpdateActiveJoystick()
 	}
 	// Fall back to first joystick if no match was found
 	if(!m_pActiveJoystick)
-		m_pActiveJoystick = &m_vJoysticks[0]; // NOLINT(readability-container-data-pointer)
+		m_pActiveJoystick = &m_vJoysticks.front();
 }
 
 void CInput::ConchainJoystickGuidChanged(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
@@ -259,23 +259,18 @@ bool CInput::MouseRelative(float *pX, float *pY)
 	if(!m_MouseFocus || !m_InputGrabbed)
 		return false;
 
-	int nx = 0, ny = 0;
+	ivec2 Relative;
 #if defined(CONF_PLATFORM_ANDROID) // No relative mouse on Android
-	static int s_LastX = 0;
-	static int s_LastY = 0;
-	SDL_GetMouseState(&nx, &ny);
-	int XTmp = nx - s_LastX;
-	int YTmp = ny - s_LastY;
-	s_LastX = nx;
-	s_LastY = ny;
-	nx = XTmp;
-	ny = YTmp;
+	ivec2 CurrentPos;
+	SDL_GetMouseState(&CurrentPos.x, &CurrentPos.y);
+	Relative = CurrentPos - m_LastMousePos;
+	m_LastMousePos = CurrentPos;
 #else
-	SDL_GetRelativeMouseState(&nx, &ny);
+	SDL_GetRelativeMouseState(&Relative.x, &Relative.y);
 #endif
 
-	*pX = nx;
-	*pY = ny;
+	*pX = Relative.x;
+	*pY = Relative.y;
 	return *pX != 0.0f || *pY != 0.0f;
 }
 
@@ -556,6 +551,9 @@ int CInput::Update()
 
 	// keep the counter between 1..0xFFFF, 0 means not pressed
 	m_InputCounter = (m_InputCounter % 0xFFFF) + 1;
+
+	// Ensure that we have the latest keyboard, mouse and joystick state
+	SDL_PumpEvents();
 
 	int NumKeyStates;
 	const Uint8 *pState = SDL_GetKeyboardState(&NumKeyStates);

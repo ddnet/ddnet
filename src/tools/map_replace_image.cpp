@@ -67,9 +67,14 @@ int LoadPNG(CImageInfo *pImg, const char *pFilename)
 	return 1;
 }
 
-void *ReplaceImageItem(CMapItemImage *pImgItem, const char *pImgName, const char *pImgFile, CMapItemImage *pNewImgItem)
+void *ReplaceImageItem(int Index, CMapItemImage *pImgItem, const char *pImgName, const char *pImgFile, CMapItemImage *pNewImgItem)
 {
-	char *pName = (char *)g_DataReader.GetData(pImgItem->m_ImageName);
+	const char *pName = g_DataReader.GetDataString(pImgItem->m_ImageName);
+	if(pName == nullptr || pName[0] == '\0')
+	{
+		dbg_msg("map_replace_image", "failed to load name of image %d", Index);
+		return pImgItem;
+	}
 
 	if(str_comp(pImgName, pName) != 0)
 		return pImgItem;
@@ -154,7 +159,7 @@ int main(int argc, const char **argv)
 		CMapItemImage NewImageItem;
 		if(Type == MAPITEMTYPE_IMAGE)
 		{
-			pItem = ReplaceImageItem((CMapItemImage *)pItem, pImageName, pImageFile, &NewImageItem);
+			pItem = ReplaceImageItem(Index, (CMapItemImage *)pItem, pImageName, pImageFile, &NewImageItem);
 			if(!pItem)
 				return -1;
 			Size = sizeof(CMapItemImage);

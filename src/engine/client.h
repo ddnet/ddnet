@@ -93,12 +93,11 @@ protected:
 
 	TMapLoadingCallbackFunc m_MapLoadingCBFunc;
 
-public:
 	char m_aNews[3000];
-	char m_aMapDownloadUrl[256];
 	int m_Points;
 	int64_t m_ReconnectTime;
 
+public:
 	class CSnapItem
 	{
 	public:
@@ -257,6 +256,10 @@ public:
 	virtual SHA256_DIGEST GetCurrentMapSha256() const = 0;
 	virtual unsigned GetCurrentMapCrc() const = 0;
 
+	const char *News() const { return m_aNews; }
+	int Points() const { return m_Points; }
+	int64_t ReconnectTime() const { return m_ReconnectTime; }
+	void SetReconnectTime(int64_t ReconnectTime) { m_ReconnectTime = ReconnectTime; }
 	virtual int GetCurrentRaceTime() = 0;
 
 	virtual void RaceRecord_Start(const char *pFilename) = 0;
@@ -276,7 +279,9 @@ public:
 
 	virtual void GetSmoothTick(int *pSmoothTick, float *pSmoothIntraTick, float MixAmount) = 0;
 
+	virtual void AddWarning(const SWarning &Warning) = 0;
 	virtual SWarning *GetCurWarning() = 0;
+
 	virtual CChecksumData *ChecksumData() = 0;
 	virtual bool InfoTaskRunning() = 0;
 	virtual int UdpConnectivity(int NetType) = 0;

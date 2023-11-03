@@ -23,7 +23,6 @@ struct CEnvPoint;
 struct CEnvPointBezier;
 struct CEnvPointBezier_upstream;
 struct CMapItemGroup;
-struct CMapItemGroupEx;
 struct CQuad;
 
 class CTeeRenderInfo
@@ -31,12 +30,23 @@ class CTeeRenderInfo
 public:
 	CTeeRenderInfo()
 	{
-		m_ColorBody = ColorRGBA(1, 1, 1);
-		m_ColorFeet = ColorRGBA(1, 1, 1);
+		Reset();
+	}
+
+	void Reset()
+	{
+		m_OriginalRenderSkin.Reset();
+		m_ColorableRenderSkin.Reset();
+		m_SkinMetrics.Reset();
+		m_CustomColoredSkin = false;
+		m_BloodColor = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
+		m_ColorBody = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
+		m_ColorFeet = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
 		m_Size = 1.0f;
-		m_GotAirJump = 1;
+		m_GotAirJump = true;
 		m_TeeRenderFlags = 0;
-	};
+		m_FeetFlipped = false;
+	}
 
 	CSkin::SSkinTextures m_OriginalRenderSkin;
 	CSkin::SSkinTextures m_ColorableRenderSkin;
@@ -49,7 +59,7 @@ public:
 	ColorRGBA m_ColorBody;
 	ColorRGBA m_ColorFeet;
 	float m_Size;
-	int m_GotAirJump;
+	bool m_GotAirJump;
 	int m_TeeRenderFlags;
 	bool m_FeetFlipped;
 };
@@ -76,6 +86,7 @@ enum
 class IEnvelopePointAccess
 {
 public:
+	virtual ~IEnvelopePointAccess() = default;
 	virtual int NumPoints() const = 0;
 	virtual const CEnvPoint *GetPoint(int Index) const = 0;
 	virtual const CEnvPointBezier *GetBezier(int Index) const = 0;
@@ -122,7 +133,6 @@ public:
 	void SelectSprite(CDataSprite *pSprite, int Flags = 0, int sx = 0, int sy = 0);
 	void SelectSprite(int Id, int Flags = 0, int sx = 0, int sy = 0);
 
-	void GetSpriteScale(client_data7::CDataSprite *pSprite, float &ScaleX, float &ScaleY);
 	void GetSpriteScale(CDataSprite *pSprite, float &ScaleX, float &ScaleY);
 	void GetSpriteScale(int Id, float &ScaleX, float &ScaleY);
 	void GetSpriteScaleImpl(int Width, int Height, float &ScaleX, float &ScaleY);
@@ -160,7 +170,7 @@ public:
 	void CalcScreenParams(float Aspect, float Zoom, float *pWidth, float *pHeight);
 	void MapScreenToWorld(float CenterX, float CenterY, float ParallaxX, float ParallaxY,
 		float ParallaxZoom, float OffsetX, float OffsetY, float Aspect, float Zoom, float *pPoints);
-	void MapScreenToGroup(float CenterX, float CenterY, CMapItemGroup *pGroup, CMapItemGroupEx *pGroupEx, float Zoom);
+	void MapScreenToGroup(float CenterX, float CenterY, CMapItemGroup *pGroup, float Zoom);
 	void MapScreenToInterface(float CenterX, float CenterY);
 
 	// DDRace

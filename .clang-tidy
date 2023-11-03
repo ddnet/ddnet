@@ -8,12 +8,12 @@
 #   Too annoying to always align for perfect padding
 # clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,
 #   TODO: Requires C11 to fix
-# modernize-use-override,
-#   TODO: modernize-use-override.IgnoreDestructors not supported on ubuntu-latest yet for CI
 # misc-unused-parameters
 #   TODO: Many changes
-# readability-static-accessed-through-instance,
-#   Crashes: https://github.com/llvm/llvm-project/issues/53359
+# misc-use-anonymous-namespace
+#   We don't want to use anonymous namespaces instead of static functions.
+# bugprone-suspicious-realloc-usage
+#   We generally don't handle memory allocation failures.
 
 Checks: >
   -*,
@@ -30,6 +30,7 @@ Checks: >
   -bugprone-reserved-identifier,
   -bugprone-suspicious-include,
   -bugprone-unhandled-self-assignment,
+  -bugprone-suspicious-realloc-usage,
   clang-analyzer-*,
   -clang-analyzer-optin.cplusplus.UninitializedObject,
   -clang-analyzer-optin.cplusplus.VirtualCall,
@@ -48,6 +49,7 @@ Checks: >
   -misc-non-private-member-variables-in-classes,
   -misc-static-assert,
   -misc-unused-parameters,
+  -misc-use-anonymous-namespace,
   modernize-avoid-bind,
   modernize-concat-nested-namespaces,
   modernize-deprecated-headers,
@@ -65,6 +67,7 @@ Checks: >
   modernize-use-emplace,
   modernize-use-equals-default,
   modernize-use-equals-delete,
+  modernize-use-override,
   modernize-use-transparent-functors,
   modernize-use-uncaught-exceptions,
   readability-*,
@@ -82,7 +85,6 @@ Checks: >
   -readability-named-parameter,
   -readability-non-const-parameter,
   -readability-simplify-boolean-expr,
-  -readability-static-accessed-through-instance,
   -readability-suspicious-call-argument,
   -readability-uppercase-literal-suffix,
   performance-*,

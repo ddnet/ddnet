@@ -1,10 +1,13 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include "layer_quads.h"
+
 #include <game/editor/editor.h>
 
 #include "image.h"
 
-CLayerQuads::CLayerQuads()
+CLayerQuads::CLayerQuads(CEditor *pEditor) :
+	CLayer(pEditor)
 {
 	m_Type = LAYERTYPE_QUADS;
 	m_aName[0] = '\0';
@@ -27,9 +30,9 @@ void CLayerQuads::Render(bool QuadPicker)
 		Graphics()->TextureSet(m_pEditor->m_Map.m_vpImages[m_Image]->m_Texture);
 
 	Graphics()->BlendNone();
-	m_pEditor->RenderTools()->ForceRenderQuads(m_vQuads.data(), m_vQuads.size(), LAYERRENDERFLAG_OPAQUE, m_pEditor->EnvelopeEval, m_pEditor);
+	m_pEditor->RenderTools()->ForceRenderQuads(m_vQuads.data(), m_vQuads.size(), LAYERRENDERFLAG_OPAQUE, CEditor::EnvelopeEval, m_pEditor);
 	Graphics()->BlendNormal();
-	m_pEditor->RenderTools()->ForceRenderQuads(m_vQuads.data(), m_vQuads.size(), LAYERRENDERFLAG_TRANSPARENT, m_pEditor->EnvelopeEval, m_pEditor);
+	m_pEditor->RenderTools()->ForceRenderQuads(m_vQuads.data(), m_vQuads.size(), LAYERRENDERFLAG_TRANSPARENT, CEditor::EnvelopeEval, m_pEditor);
 }
 
 CQuad *CLayerQuads::NewQuad(int x, int y, int Width, int Height)
@@ -107,8 +110,7 @@ void CLayerQuads::BrushSelecting(CUIRect Rect)
 int CLayerQuads::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
 {
 	// create new layers
-	std::shared_ptr<CLayerQuads> pGrabbed = std::make_shared<CLayerQuads>();
-	pGrabbed->m_pEditor = m_pEditor;
+	std::shared_ptr<CLayerQuads> pGrabbed = std::make_shared<CLayerQuads>(m_pEditor);
 	pGrabbed->m_Image = m_Image;
 	pBrush->AddLayer(pGrabbed);
 

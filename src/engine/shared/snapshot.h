@@ -26,14 +26,16 @@ public:
 class CSnapshot
 {
 	friend class CSnapshotBuilder;
-	int m_DataSize;
-	int m_NumItems;
+	int m_DataSize = 0;
+	int m_NumItems = 0;
 
 	int *Offsets() const { return (int *)(this + 1); }
 	char *DataStart() const { return (char *)(Offsets() + m_NumItems); }
 
 	size_t OffsetSize() const { return sizeof(int) * m_NumItems; }
 	size_t TotalSize() const { return sizeof(CSnapshot) + OffsetSize() + m_DataSize; }
+
+	static const CSnapshot ms_EmptySnapshot;
 
 public:
 	enum
@@ -46,11 +48,6 @@ public:
 		MAX_SIZE = MAX_PARTS * 1024
 	};
 
-	void Clear()
-	{
-		m_DataSize = 0;
-		m_NumItems = 0;
-	}
 	int NumItems() const { return m_NumItems; }
 	const CSnapshotItem *GetItem(int Index) const;
 	int GetItemSize(int Index) const;
@@ -62,6 +59,8 @@ public:
 	unsigned Crc();
 	void DebugDump();
 	bool IsValid(size_t ActualSize) const;
+
+	static const CSnapshot *EmptySnapshot() { return &ms_EmptySnapshot; }
 };
 
 // CSnapshotDelta
@@ -88,7 +87,7 @@ private:
 	int m_aSnapshotDataUpdates[CSnapshot::MAX_TYPE + 1];
 	CData m_Empty;
 
-	static void UndiffItem(const int *pPast, int *pDiff, int *pOut, int Size, int *pDataRate);
+	static void UndiffItem(const int *pPast, const int *pDiff, int *pOut, int Size, int *pDataRate);
 
 public:
 	static int DiffItem(const int *pPast, const int *pCurrent, int *pOut, int Size);
@@ -98,8 +97,8 @@ public:
 	int GetDataUpdates(int Index) const { return m_aSnapshotDataUpdates[Index]; }
 	void SetStaticsize(int ItemType, int Size);
 	const CData *EmptyDelta() const;
-	int CreateDelta(class CSnapshot *pFrom, class CSnapshot *pTo, void *pDstData);
-	int UnpackDelta(class CSnapshot *pFrom, class CSnapshot *pTo, const void *pSrcData, int DataSize);
+	int CreateDelta(const class CSnapshot *pFrom, class CSnapshot *pTo, void *pDstData);
+	int UnpackDelta(const class CSnapshot *pFrom, class CSnapshot *pTo, const void *pSrcData, int DataSize);
 };
 
 // CSnapshotStorage
@@ -131,8 +130,8 @@ public:
 	void Init();
 	void PurgeAll();
 	void PurgeUntil(int Tick);
-	void Add(int Tick, int64_t Tagtime, int DataSize, void *pData, int AltDataSize, void *pAltData);
-	int Get(int Tick, int64_t *pTagtime, CSnapshot **ppData, CSnapshot **ppAltData);
+	void Add(int Tick, int64_t Tagtime, int DataSize, const void *pData, int AltDataSize, const void *pAltData);
+	int Get(int Tick, int64_t *pTagtime, const CSnapshot **ppData, const CSnapshot **ppAltData);
 };
 
 class CSnapshotBuilder

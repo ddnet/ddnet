@@ -91,7 +91,7 @@ class CRegister : public IRegister
 				m_pRegister(std::move(pRegister))
 			{
 			}
-			virtual ~CJob() = default;
+			~CJob() override = default;
 		};
 
 		CRegister *m_pParent;
@@ -503,7 +503,10 @@ CRegister::CRegister(CConfig *pConfig, IConsole *pConsole, IEngine *pEngine, int
 	str_format(m_aConnlessTokenHex, sizeof(m_aConnlessTokenHex), "%08x", bytes_be_to_uint(aTokenBytes));
 
 	m_pConsole->Chain("sv_register", ConchainOnConfigChange, this);
+	m_pConsole->Chain("sv_register_extra", ConchainOnConfigChange, this);
+	m_pConsole->Chain("sv_register_url", ConchainOnConfigChange, this);
 	m_pConsole->Chain("sv_sixup", ConchainOnConfigChange, this);
+	m_pConsole->Chain("sv_ipv4only", ConchainOnConfigChange, this);
 }
 
 void CRegister::Update()

@@ -153,6 +153,7 @@ public:
 		int m_Corners;
 
 		std::string m_Text;
+		int m_ReadCursorGlyphCount;
 
 		CTextCursor m_Cursor;
 
@@ -203,6 +204,7 @@ struct SMenuButtonProperties
 	bool m_HintRequiresStringCheck = false;
 	bool m_HintCanChangePositionOrSize = false;
 	bool m_UseIconFont = false;
+	bool m_ShowDropDownIcon = false;
 	int m_Corners = IGraphics::CORNER_ALL;
 	float m_Rounding = 5.0f;
 	float m_FontFactor = 0.0f;

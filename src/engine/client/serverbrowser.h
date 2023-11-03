@@ -7,12 +7,11 @@
 
 #include <engine/console.h>
 #include <engine/serverbrowser.h>
-#include <engine/shared/config.h>
-#include <engine/shared/http.h>
 #include <engine/shared/memheap.h>
 
 #include <unordered_map>
 
+typedef struct _json_value json_value;
 class CNetClient;
 class IConfigManager;
 class IConsole;
@@ -38,43 +37,6 @@ public:
 		CServerEntry *m_pNextReq;
 	};
 
-	struct CNetworkCountry
-	{
-		enum
-		{
-			MAX_SERVERS = 1024
-		};
-
-		char m_aName[256];
-		int m_FlagID;
-		NETADDR m_aServers[MAX_SERVERS];
-		char m_aTypes[MAX_SERVERS][32];
-		int m_NumServers;
-
-		void Reset()
-		{
-			m_NumServers = 0;
-			m_FlagID = -1;
-			m_aName[0] = '\0';
-		};
-	};
-
-	enum
-	{
-		MAX_FAVORITES = 2048,
-		MAX_COUNTRIES = 32,
-		MAX_TYPES = 32,
-	};
-
-	struct CNetwork
-	{
-		CNetworkCountry m_aCountries[MAX_COUNTRIES];
-		int m_NumCountries;
-
-		char m_aTypes[MAX_TYPES][32];
-		int m_NumTypes;
-	};
-
 	CServerBrowser();
 	virtual ~CServerBrowser();
 
@@ -86,18 +48,10 @@ public:
 	void RequestResort() { m_NeedResort = true; }
 
 	int NumServers() const override { return m_NumServers; }
-
-	int Players(const CServerInfo &Item) const override
-	{
-		return g_Config.m_BrFilterSpectators ? Item.m_NumPlayers : Item.m_NumClients;
-	}
-
-	int Max(const CServerInfo &Item) const override
-	{
-		return g_Config.m_BrFilterSpectators ? Item.m_MaxPlayers : Item.m_MaxClients;
-	}
-
+	int Players(const CServerInfo &Item) const override;
+	int Max(const CServerInfo &Item) const override;
 	int NumSortedServers() const override { return m_NumSortedServers; }
+	int NumSortedPlayers() const override { return m_NumSortedPlayers; }
 	const CServerInfo *SortedGet(int Index) const override;
 
 	const char *GetTutorialServer() override;
@@ -106,19 +60,18 @@ public:
 	void LoadDDNetServers();
 	void LoadDDNetInfoJson();
 	const json_value *LoadDDNetInfo();
-	int HasRank(const char *pMap);
-	int NumCountries(int Network) override { return m_aNetworks[Network].m_NumCountries; }
-	int GetCountryFlag(int Network, int Index) override { return m_aNetworks[Network].m_aCountries[Index].m_FlagID; }
-	const char *GetCountryName(int Network, int Index) override { return m_aNetworks[Network].m_aCountries[Index].m_aName; }
+	void UpdateServerFilteredPlayers(CServerInfo *pInfo) const;
+	void UpdateServerFriends(CServerInfo *pInfo) const;
+	CServerInfo::ERankState HasRank(const char *pMap);
 
-	int NumTypes(int Network) override { return m_aNetworks[Network].m_NumTypes; }
-	const char *GetType(int Network, int Index) override { return m_aNetworks[Network].m_aTypes[Index]; }
+	const std::vector<CCommunity> &Communities() const override;
+	const CCommunity *Community(const char *pCommunityId) const override;
 
 	void DDNetFilterAdd(char *pFilter, int FilterSize, const char *pName) const override;
 	void DDNetFilterRem(char *pFilter, int FilterSize, const char *pName) const override;
 	bool DDNetFiltered(const char *pFilter, const char *pName) const override;
-	void CountryFilterClean(int Network) override;
-	void TypeFilterClean(int Network) override;
+	void CountryFilterClean(int CommunityIndex) override;
+	void TypeFilterClean(int CommunityIndex) override;
 
 	//
 	void Update();
@@ -138,6 +91,7 @@ public:
 
 private:
 	CNetClient *m_pNetClient = nullptr;
+	IConfigManager *m_pConfigManager = nullptr;
 	IConsole *m_pConsole = nullptr;
 	IEngine *m_pEngine = nullptr;
 	IFriends *m_pFriends = nullptr;
@@ -155,7 +109,7 @@ private:
 	int *m_pSortedServerlist;
 	std::unordered_map<NETADDR, int> m_ByAddr;
 
-	CNetwork m_aNetworks[NUM_NETWORKS];
+	std::vector<CCommunity> m_vCommunities;
 	int m_OwnLocation = CServerInfo::LOC_UNKNOWN;
 
 	json_value *m_pDDNetInfo;
@@ -165,18 +119,16 @@ private:
 	int m_NumRequests;
 
 	bool m_NeedResort;
+	int m_Sorthash;
 
 	// used instead of g_Config.br_max_requests to get more servers
 	int m_CurrentMaxRequests;
 
 	int m_NumSortedServers;
 	int m_NumSortedServersCapacity;
+	int m_NumSortedPlayers;
 	int m_NumServers;
 	int m_NumServerCapacity;
-
-	int m_Sorthash;
-	char m_aFilterString[64];
-	char m_aFilterGametypeString[128];
 
 	int m_ServerlistType;
 	int64_t m_BroadcastTime;

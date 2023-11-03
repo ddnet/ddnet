@@ -391,8 +391,8 @@ private:
 	void UploadTextures()
 	{
 		const size_t NewTextureSize = m_TextureDimension * m_TextureDimension;
-		void *pTmpTextFillData = malloc(NewTextureSize); // NOLINT(clang-analyzer-optin.portability.UnixAPI)
-		void *pTmpTextOutlineData = malloc(NewTextureSize); // NOLINT(clang-analyzer-optin.portability.UnixAPI)
+		void *pTmpTextFillData = malloc(NewTextureSize);
+		void *pTmpTextOutlineData = malloc(NewTextureSize);
 		mem_copy(pTmpTextFillData, m_apTextureData[FONT_TEXTURE_FILL], NewTextureSize);
 		mem_copy(pTmpTextOutlineData, m_apTextureData[FONT_TEXTURE_OUTLINE], NewTextureSize);
 		Graphics()->LoadTextTextures(m_TextureDimension, m_TextureDimension, m_aTextures[FONT_TEXTURE_FILL], m_aTextures[FONT_TEXTURE_OUTLINE], pTmpTextFillData, pTmpTextOutlineData);
@@ -2244,7 +2244,7 @@ public:
 			{
 				log_error("textrender", "Found non empty text container with index %d with %" PRIzu " quads '%s'", pTextContainer->m_StringInfo.m_QuadBufferContainerIndex, pTextContainer->m_StringInfo.m_vCharacterQuads.size(), pTextContainer->m_aDebugText);
 				log_error("textrender", "The text container index was in use by %d ", (int)pTextContainer->m_ContainerIndex.m_UseCount.use_count());
-				HasNonEmptyTextContainer = true; // NOLINT(clang-analyzer-deadcode.DeadStores)
+				HasNonEmptyTextContainer = true;
 			}
 		}
 

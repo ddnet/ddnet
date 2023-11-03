@@ -133,10 +133,13 @@ void CGhost::GetPath(char *pBuf, int Size, const char *pPlayerName, int Time) co
 	str_copy(aPlayerName, pPlayerName);
 	str_sanitize_filename(aPlayerName);
 
+	char aTimestamp[32];
+	str_timestamp_format(aTimestamp, sizeof(aTimestamp), FORMAT_NOSPACE);
+
 	if(Time < 0)
 		str_format(pBuf, Size, "%s/%s_%s_%s_tmp_%d.gho", ms_pGhostDir, pMap, aPlayerName, aSha256, pid());
 	else
-		str_format(pBuf, Size, "%s/%s_%s_%d.%03d_%s.gho", ms_pGhostDir, pMap, aPlayerName, Time / 1000, Time % 1000, aSha256);
+		str_format(pBuf, Size, "%s/%s_%s_%d.%03d_%s_%s.gho", ms_pGhostDir, pMap, aPlayerName, Time / 1000, Time % 1000, aTimestamp, aSha256);
 }
 
 void CGhost::AddInfos(const CNetObj_Character *pChar, const CNetObj_DDNetCharacter *pDDnetChar)
@@ -427,15 +430,15 @@ void CGhost::StopRecord(int Time)
 		GhostRecorder()->Stop(m_CurGhost.m_Path.Size(), Time);
 
 	CMenus::CGhostItem *pOwnGhost = m_pClient->m_Menus.GetOwnGhost();
-	if(Time > 0 && (!pOwnGhost || Time < pOwnGhost->m_Time))
+	if(Time > 0 && (!pOwnGhost || Time < pOwnGhost->m_Time || !g_Config.m_ClRaceGhostSaveBest))
 	{
-		if(pOwnGhost && pOwnGhost->Active())
-			Unload(pOwnGhost->m_Slot);
-
 		// add to active ghosts
 		int Slot = GetSlot();
-		if(Slot != -1)
+		if(Slot != -1 && (!pOwnGhost || Time < pOwnGhost->m_Time))
 			m_aActiveGhosts[Slot] = std::move(m_CurGhost);
+
+		if(pOwnGhost && pOwnGhost->Active() && Time < pOwnGhost->m_Time)
+			Unload(pOwnGhost->m_Slot);
 
 		// create ghost item
 		CMenus::CGhostItem Item;
@@ -608,7 +611,7 @@ void CGhost::OnConsoleInit()
 	m_pGhostLoader = Kernel()->RequestInterface<IGhostLoader>();
 	m_pGhostRecorder = Kernel()->RequestInterface<IGhostRecorder>();
 
-	Console()->Register("gplay", "", CFGFLAG_CLIENT, ConGPlay, this, "");
+	Console()->Register("gplay", "", CFGFLAG_CLIENT, ConGPlay, this, "Start playback of ghosts");
 }
 
 void CGhost::OnMessage(int MsgType, void *pRawMsg)
@@ -667,36 +670,32 @@ int CGhost::GetLastRaceTick()
 	return m_LastRaceTick;
 }
 
-void CGhost::RefindSkin()
+void CGhost::RefindSkins()
 {
-	char aSkinName[64];
-	for(auto &Ghost : m_aActiveGhosts)
-	{
-		if(!Ghost.Empty())
-		{
-			IntsToStr(&Ghost.m_Skin.m_Skin0, 6, aSkinName);
-			if(aSkinName[0] != '\0')
-			{
-				CTeeRenderInfo *pRenderInfo = &Ghost.m_RenderInfo;
-
-				const CSkin *pSkin = m_pClient->m_Skins.Find(aSkinName);
-				pRenderInfo->m_OriginalRenderSkin = pSkin->m_OriginalSkin;
-				pRenderInfo->m_ColorableRenderSkin = pSkin->m_ColorableSkin;
-				pRenderInfo->m_SkinMetrics = pSkin->m_Metrics;
-			}
-		}
-	}
-	if(!m_CurGhost.Empty())
-	{
-		IntsToStr(&m_CurGhost.m_Skin.m_Skin0, 6, aSkinName);
+	const auto &&RefindSkin = [&](auto &Ghost) {
+		if(Ghost.Empty())
+			return;
+		char aSkinName[64];
+		IntsToStr(&Ghost.m_Skin.m_Skin0, 6, aSkinName);
+		CTeeRenderInfo *pRenderInfo = &Ghost.m_RenderInfo;
 		if(aSkinName[0] != '\0')
 		{
-			CTeeRenderInfo *pRenderInfo = &m_CurGhost.m_RenderInfo;
-
 			const CSkin *pSkin = m_pClient->m_Skins.Find(aSkinName);
 			pRenderInfo->m_OriginalRenderSkin = pSkin->m_OriginalSkin;
 			pRenderInfo->m_ColorableRenderSkin = pSkin->m_ColorableSkin;
+			pRenderInfo->m_BloodColor = pSkin->m_BloodColor;
 			pRenderInfo->m_SkinMetrics = pSkin->m_Metrics;
 		}
+		else
+		{
+			pRenderInfo->m_OriginalRenderSkin.Reset();
+			pRenderInfo->m_ColorableRenderSkin.Reset();
+		}
+	};
+
+	for(auto &Ghost : m_aActiveGhosts)
+	{
+		RefindSkin(Ghost);
 	}
+	RefindSkin(m_CurGhost);
 }

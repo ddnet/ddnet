@@ -292,9 +292,9 @@ char *io_read_all_str(IOHANDLE io);
  * @param io Handle to the file.
  * @param size Number of bytes to skip.
  *
- * @return Number of bytes skipped.
+ * @return 0 on success.
  */
-unsigned io_skip(IOHANDLE io, int size);
+int io_skip(IOHANDLE io, int size);
 
 /**
  * Writes data from a buffer to file.
@@ -803,12 +803,15 @@ int time_houroftheday();
 /**
  * @ingroup Time
  */
-enum
+enum ETimeSeason
 {
 	SEASON_SPRING = 0,
 	SEASON_SUMMER,
 	SEASON_AUTUMN,
 	SEASON_WINTER,
+	SEASON_EASTER,
+	SEASON_HALLOWEEN,
+	SEASON_XMAS,
 	SEASON_NEWYEAR
 };
 
@@ -821,7 +824,7 @@ enum
  *
  * @see SEASON_SPRING
  */
-int time_season();
+ETimeSeason time_season();
 
 /**
  * @defgroup Network-General
@@ -879,11 +882,9 @@ typedef struct sockaddr_un UNIXSOCKETADDR;
  *
  * @ingroup Network-General
  *
- * @return 0 on success.
- *
  * @remark You must call this function before using any other network functions.
  */
-int net_init();
+void net_init();
 
 /*
 	Function: net_host_lookup
@@ -2212,6 +2213,15 @@ int open_link(const char *link);
 */
 int open_file(const char *path);
 
+/**
+ * Swaps the endianness of data. Each element is swapped individually by reversing its bytes.
+ *
+ * @param data Pointer to data to be swapped.
+ * @param elem_size Size in bytes of each element.
+ * @param num Number of elements.
+ *
+ * @remark The caller must ensure that the data is at least `elem_size * num` bytes in size.
+ */
 void swap_endian(void *data, unsigned elem_size, unsigned num);
 
 typedef struct
@@ -2649,6 +2659,15 @@ PROCESS shell_execute(const char *file);
 		1 - Success
 */
 int kill_process(PROCESS process);
+
+/**
+ * Checks if a process is alive.
+ * 
+ * @param process Handle/PID of the process.
+ * 
+ * @return bool Returns true if the process is currently running, false if the process is not running (dead).
+ */
+bool is_process_alive(PROCESS process);
 
 /*
 	Function: generate_password

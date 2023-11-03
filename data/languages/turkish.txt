@@ -8,8 +8,9 @@
 #	Learath2		2012-01-01 22:54:29
 #	ardadem			2020-08-20 00:00:00
 #	ardadem			2020-08-22 00:00:00
-# h-kaan      2023-08-23 15:57:36
-# h-kaan      2023-08-30 01:52:04
+#   h-kaan          2023-08-23 15:57:36
+#   h-kaan          2023-08-30 01:52:04
+#   h-kaan          2023-09-21 21:04:35
 ##### /authors #####
 
 ##### translated strings #####
@@ -152,9 +153,6 @@ Favorites
 Feet
 == Ayak
 
-Filter
-== Filtre
-
 Fire
 == Ateş
 
@@ -166,9 +164,6 @@ Force vote
 
 Free-View
 == Serbest Bakış
-
-Friends
-== Arkadaşlar
 
 Fullscreen
 == Tam ekran
@@ -360,12 +355,6 @@ Screenshot
 Server address:
 == Sunucu adresi:
 
-Server details
-== Sunucucu detayları
-
-Server filter
-== Filtreler
-
 Server info
 == Hakkında
 
@@ -533,9 +522,6 @@ Netversion:
 
 Map:
 == Harita:
-
-Info
-== Bilgi
 
 Hue
 == Renk
@@ -1752,5 +1738,22 @@ Loading sound files
 Moved ingame
 == Hareket edildi
 
+Go back the specified duration
+== Belirtilen süre kadar geri git
+
+[Demo player duration]
+%d min.
+== %d dk.
+
+[Demo player duration]
+%d sec.
+== %d sn.
+
+Change the skip duration
+== Atlanacak süreyi değiştir
+
+Go forward the specified duration
+== Belirtilen süre kadar ileri git
+
 Render cut to video
-== 
+== Kesiti videoya dönüştür

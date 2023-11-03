@@ -213,6 +213,9 @@ enum
 	ENTITY_OFFSET = 255 - 16 * 4,
 };
 
+static constexpr size_t MAX_MAPIMAGES = 64;
+static constexpr size_t MAX_MAPSOUNDS = 64;
+
 typedef ivec2 CPoint; // 22.10 fixed point
 typedef ivec4 CColor;
 
