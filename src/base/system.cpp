@@ -191,7 +191,7 @@ void dbg_assert_imp(const char *filename, int line, int test, const char *msg)
 	{
 		const bool already_failing = dbg_assert_has_failed();
 		dbg_assert_failing.store(true, std::memory_order_release);
-		char error[256];
+		char error[512];
 		str_format(error, sizeof(error), "%s(%d): %s", filename, line, msg);
 		dbg_msg("assert", "%s", error);
 		if(!already_failing)
