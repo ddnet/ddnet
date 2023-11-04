@@ -1403,6 +1403,7 @@ set(EXPECTED_DATA
   editor/entities_clear/vanilla.png
   editor/front.png
   editor/speed_arrow.png
+  editor/speed_arrow_array.png
   editor/speedup.png
   editor/switch.png
   editor/tele.png
@@ -1554,6 +1555,8 @@ set(EXPECTED_DATA
   shader/text.vert
   shader/tile.frag
   shader/tile.vert
+  shader/tile_border.frag
+  shader/tile_border.vert
   shader/vulkan/prim.frag
   shader/vulkan/prim.vert
   shader/vulkan/prim3d.frag
@@ -1568,6 +1571,8 @@ set(EXPECTED_DATA
   shader/vulkan/text.vert
   shader/vulkan/tile.frag
   shader/vulkan/tile.vert
+  shader/vulkan/tile_border.frag
+  shader/vulkan/tile_border.vert
   skins/PaladiN.png
   skins/antiantey.png
   skins/beast.png

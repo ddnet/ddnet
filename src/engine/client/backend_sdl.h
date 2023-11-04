@@ -281,7 +281,8 @@ public:
 	bool HasQuadBuffering() override { return m_Capabilites.m_QuadBuffering; }
 	bool HasTextBuffering() override { return m_Capabilites.m_TextBuffering; }
 	bool HasQuadContainerBuffering() override { return m_Capabilites.m_QuadContainerBuffering; }
-	bool Has2DTextureArrays() override { return m_Capabilites.m_2DArrayTextures; }
+	bool Uses2DTextureArrays() override { return m_Capabilites.m_2DArrayTextures; }
+	bool HasTextureArraysSupport() override { return m_Capabilites.m_2DArrayTextures || m_Capabilites.m_3DTextures; }
 
 	const char *GetErrorString() override
 	{
