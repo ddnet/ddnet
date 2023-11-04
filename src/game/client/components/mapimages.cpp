@@ -138,7 +138,7 @@ void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
 			pMap->UnloadData(pImg->m_ImageData);
 		}
 		pMap->UnloadData(pImg->m_ImageName);
-		ShowWarning = ShowWarning || m_aTextures[i].Id() == Graphics()->InvalidTexture().Id();
+		ShowWarning = ShowWarning || m_aTextures[i].IsNullTexture();
 	}
 	if(ShowWarning)
 	{

@@ -263,6 +263,7 @@ public:
 		}
 
 		bool IsValid() const { return Id() >= 0; }
+		bool IsNullTexture() const { return Id() == 0; }
 		int Id() const { return m_Id; }
 		void Invalidate() { m_Id = -1; }
 	};
@@ -337,7 +338,7 @@ public:
 	virtual CTextureHandle LoadTextureRaw(size_t Width, size_t Height, CImageInfo::EImageFormat Format, const void *pData, int Flags, const char *pTexName = nullptr) = 0;
 	virtual int LoadTextureRawSub(CTextureHandle TextureID, int x, int y, size_t Width, size_t Height, CImageInfo::EImageFormat Format, const void *pData) = 0;
 	virtual CTextureHandle LoadTexture(const char *pFilename, int StorageType, int Flags = 0) = 0;
-	virtual CTextureHandle InvalidTexture() const = 0;
+	virtual CTextureHandle NullTexture() const = 0;
 	virtual void TextureSet(CTextureHandle Texture) = 0;
 	void TextureClear() { TextureSet(CTextureHandle()); }
 

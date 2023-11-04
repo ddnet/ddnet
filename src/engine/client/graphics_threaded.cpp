@@ -289,7 +289,7 @@ void CGraphics_Threaded::FreeTextureIndex(CTextureHandle *pIndex)
 
 int CGraphics_Threaded::UnloadTexture(CTextureHandle *pIndex)
 {
-	if(pIndex->Id() == m_InvalidTexture.Id())
+	if(pIndex->Id() == m_NullTexture.Id())
 		return 0;
 
 	if(!pIndex->IsValid())
@@ -368,7 +368,7 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadSpriteTextureImpl(CImageInfo &
 	const size_t PixelSize = FromImageInfo.PixelSize();
 	m_vSpriteHelper.resize(w * h * PixelSize);
 	CopyTextureFromTextureBufferSub(m_vSpriteHelper.data(), w, h, (uint8_t *)FromImageInfo.m_pData, FromImageInfo.m_Width, FromImageInfo.m_Height, PixelSize, x, y, w, h);
-	return LoadTextureRaw(w, h, FromImageInfo.m_Format, m_vSpriteHelper.data(), FromImageInfo.m_Format, 0);
+	return LoadTextureRaw(w, h, FromImageInfo.m_Format, m_vSpriteHelper.data(), 0);
 }
 
 IGraphics::CTextureHandle CGraphics_Threaded::LoadSpriteTexture(CImageInfo &FromImageInfo, CDataSprite *pSprite)
@@ -482,19 +482,22 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadTexture(const char *pFilename,
 	CImageInfo Img;
 	if(LoadPNG(&Img, pFilename, StorageType))
 	{
-		IGraphics::CTextureHandle ID = LoadTextureRaw(Img.m_Width, Img.m_Height, Img.m_Format, Img.m_pData, Flags, pFilename);
-		free(Img.m_pData);
-		if(ID.Id() != m_InvalidTexture.Id() && g_Config.m_Debug)
-			dbg_msg("graphics/texture", "loaded %s", pFilename);
-		return ID;
+		CTextureHandle ID = LoadTextureRaw(Img.m_Width, Img.m_Height, Img.m_Format, Img.m_pData, Flags, pFilename);
+		FreePNG(&Img);
+		if(ID.IsValid())
+		{
+			if(g_Config.m_Debug)
+				dbg_msg("graphics/texture", "loaded %s", pFilename);
+			return ID;
+		}
 	}
 
-	return m_InvalidTexture;
+	return m_NullTexture;
 }
 
-IGraphics::CTextureHandle CGraphics_Threaded::InvalidTexture() const
+IGraphics::CTextureHandle CGraphics_Threaded::NullTexture() const
 {
-	return m_InvalidTexture;
+	return m_NullTexture;
 }
 
 bool CGraphics_Threaded::LoadTextTextures(size_t Width, size_t Height, CTextureHandle &TextTexture, CTextureHandle &TextOutlineTexture, void *pTextData, void *pTextOutlineData)
@@ -2609,27 +2612,28 @@ int CGraphics_Threaded::Init()
 		const unsigned char aGreen[] = {0x00, 0xff, 0x00, 0xff};
 		const unsigned char aBlue[] = {0x00, 0x00, 0xff, 0xff};
 		const unsigned char aYellow[] = {0xff, 0xff, 0x00, 0xff};
-		constexpr size_t InvalidTextureDimension = 16;
-		unsigned char aNullTextureData[InvalidTextureDimension * InvalidTextureDimension * PixelSize];
-		for(size_t y = 0; y < InvalidTextureDimension; ++y)
+		constexpr size_t NullTextureDimension = 16;
+		unsigned char aNullTextureData[NullTextureDimension * NullTextureDimension * PixelSize];
+		for(size_t y = 0; y < NullTextureDimension; ++y)
 		{
-			for(size_t x = 0; x < InvalidTextureDimension; ++x)
+			for(size_t x = 0; x < NullTextureDimension; ++x)
 			{
 				const unsigned char *pColor;
-				if(x < InvalidTextureDimension / 2 && y < InvalidTextureDimension / 2)
+				if(x < NullTextureDimension / 2 && y < NullTextureDimension / 2)
 					pColor = aRed;
-				else if(x >= InvalidTextureDimension / 2 && y < InvalidTextureDimension / 2)
+				else if(x >= NullTextureDimension / 2 && y < NullTextureDimension / 2)
 					pColor = aGreen;
-				else if(x < InvalidTextureDimension / 2 && y >= InvalidTextureDimension / 2)
+				else if(x < NullTextureDimension / 2 && y >= NullTextureDimension / 2)
 					pColor = aBlue;
 				else
 					pColor = aYellow;
-				mem_copy(&aNullTextureData[(y * InvalidTextureDimension + x) * PixelSize], pColor, PixelSize);
+				mem_copy(&aNullTextureData[(y * NullTextureDimension + x) * PixelSize], pColor, PixelSize);
 			}
 		}
 		const int TextureLoadFlags = HasTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
-		m_InvalidTexture.Invalidate();
-		m_InvalidTexture = LoadTextureRaw(InvalidTextureDimension, InvalidTextureDimension, CImageInfo::FORMAT_RGBA, aNullTextureData, TextureLoadFlags);
+		m_NullTexture.Invalidate();
+		m_NullTexture = LoadTextureRaw(NullTextureDimension, NullTextureDimension, CImageInfo::FORMAT_RGBA, aNullTextureData, TextureLoadFlags);
+		dbg_assert(m_NullTexture.IsNullTexture(), "Null texture invalid");
 	}
 
 	ColorRGBA GPUInfoPrintColor{0.6f, 0.5f, 1.0f, 1.0f};

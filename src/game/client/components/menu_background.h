@@ -94,8 +94,8 @@ public:
 
 	void ResetPositions();
 
+	void LoadThemeIcon(CTheme &Theme);
 	static int ThemeScan(const char *pName, int IsDir, int DirType, void *pUser);
-	static int ThemeIconScan(const char *pName, int IsDir, int DirType, void *pUser);
 
 	std::vector<CTheme> m_vThemes;
 

@@ -922,7 +922,7 @@ int CMenus::DemolistFetchCallback(const CFsFileInfo *pInfo, int IsDir, int Stora
 
 	if(time_get_nanoseconds() - pSelf->m_DemoPopulateStartTime > 500ms)
 	{
-		pSelf->GameClient()->m_Menus.RenderLoading(Localize("Loading demo files"), "", 0, false);
+		pSelf->RenderLoading(Localize("Loading demo files"), "", 0, false);
 	}
 
 	return 0;
