@@ -8,6 +8,9 @@
 #include <base/hash.h>
 #include <base/system.h>
 
+#include <array>
+#include <vector>
+
 #include <zlib.h>
 
 enum
@@ -94,41 +97,27 @@ class CDataFileWriter
 	enum
 	{
 		MAX_ITEM_TYPES = 0x10000,
-		MAX_ITEMS = 1024,
-		MAX_DATAS = 1024,
-		MAX_EXTENDED_ITEM_TYPES = 64,
 	};
 
 	IOHANDLE m_File;
-	int m_NumItems;
-	int m_NumDatas;
-	int m_NumItemTypes;
-	int m_NumExtendedItemTypes;
-	CItemTypeInfo *m_pItemTypes;
-	CItemInfo *m_pItems;
-	CDataInfo *m_pDatas;
-	int m_aExtendedItemTypes[MAX_EXTENDED_ITEM_TYPES];
+	std::array<CItemTypeInfo, MAX_ITEM_TYPES> m_aItemTypes;
+	std::vector<CItemInfo> m_vItems;
+	std::vector<CDataInfo> m_vDatas;
+	std::vector<int> m_vExtendedItemTypes;
 
 	int GetTypeFromIndex(int Index) const;
 	int GetExtendedItemTypeIndex(int Type);
 
 public:
 	CDataFileWriter();
-	CDataFileWriter(CDataFileWriter &&Other) :
-		m_NumItems(Other.m_NumItems),
-		m_NumDatas(Other.m_NumDatas),
-		m_NumItemTypes(Other.m_NumItemTypes),
-		m_NumExtendedItemTypes(Other.m_NumExtendedItemTypes)
+	CDataFileWriter(CDataFileWriter &&Other)
 	{
 		m_File = Other.m_File;
 		Other.m_File = 0;
-		m_pItemTypes = Other.m_pItemTypes;
-		Other.m_pItemTypes = nullptr;
-		m_pItems = Other.m_pItems;
-		Other.m_pItems = nullptr;
-		m_pDatas = Other.m_pDatas;
-		Other.m_pDatas = nullptr;
-		mem_copy(m_aExtendedItemTypes, Other.m_aExtendedItemTypes, sizeof(m_aExtendedItemTypes));
+		m_aItemTypes = std::move(Other.m_aItemTypes);
+		m_vItems = std::move(Other.m_vItems);
+		m_vDatas = std::move(Other.m_vDatas);
+		m_vExtendedItemTypes = std::move(Other.m_vExtendedItemTypes);
 	}
 	~CDataFileWriter();
 
