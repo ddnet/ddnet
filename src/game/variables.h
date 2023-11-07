@@ -11,6 +11,12 @@
 #define MACRO_CONFIG_STR(Name, ScriptName, Len, Def, Save, Desc) ;
 #endif
 
+// Rainbow
+MACRO_CONFIG_INT(ClRainbow, mk_rainbow, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Turn on rainbow client side")
+MACRO_CONFIG_INT(ClRainbowOthers, mk_rainbow_others, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Turn on rainbow client side for others")
+MACRO_CONFIG_INT(ClRainbowMode, mk_rainbow_mode, 1, 1, 4, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Rainbow mode (1: rainbow, 2: pulse, 3: darkness)")
+
+
 // client
 MACRO_CONFIG_INT(ClPredict, cl_predict, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Predict client movements")
 MACRO_CONFIG_INT(ClPredictDummy, cl_predict_dummy, 1, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Predict dummy movements")
