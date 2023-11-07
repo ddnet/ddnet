@@ -46,6 +46,7 @@
 #include "components/particles.h"
 #include "components/players.h"
 #include "components/race_demo.h"
+#include "components/rainbow.h"
 #include "components/scoreboard.h"
 #include "components/skins.h"
 #include "components/sounds.h"
@@ -149,6 +150,7 @@ public:
 	CMapSounds m_MapSounds;
 
 	CRaceDemo m_RaceDemo;
+	CRainbow m_Rainbow;
 	CGhost m_Ghost;
 
 	CTooltips m_Tooltips;

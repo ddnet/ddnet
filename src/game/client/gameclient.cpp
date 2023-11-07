@@ -63,6 +63,7 @@
 #include "components/particles.h"
 #include "components/players.h"
 #include "components/race_demo.h"
+#include "components/rainbow.h"
 #include "components/scoreboard.h"
 #include "components/skins.h"
 #include "components/sounds.h"
@@ -118,6 +119,7 @@ void CGameClient::OnConsoleInit()
 					      &m_Voting,
 					      &m_Particles, // doesn't render anything, just updates all the particles
 					      &m_RaceDemo,
+						  &m_Rainbow,
 					      &m_MapSounds,
 					      &m_Background, // render instead of m_MapLayersBackground when g_Config.m_ClOverlayEntities == 100
 					      &m_MapLayersBackground, // first to render
