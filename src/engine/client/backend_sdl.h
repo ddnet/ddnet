@@ -58,20 +58,10 @@ public:
 		virtual ~ICommandProcessor() = default;
 		virtual void RunBuffer(CCommandBuffer *pBuffer) = 0;
 
-		virtual SGFXErrorContainer &GetError() = 0;
+		virtual const SGFXErrorContainer &GetError() const = 0;
 		virtual void ErroneousCleanup() = 0;
 
-		virtual SGFXWarningContainer &GetWarning() = 0;
-
-		bool HasError()
-		{
-			return GetError().m_ErrorType != GFX_ERROR_TYPE_NONE;
-		}
-
-		bool HasWarning()
-		{
-			return GetWarning().m_WarningType != GFX_WARNING_TYPE_NONE;
-		}
+		virtual const SGFXWarningContainer &GetWarning() const = 0;
 	};
 
 	CGraphicsBackend_Threaded(TTranslateFunc &&TranslateFunc);
@@ -81,7 +71,7 @@ public:
 	bool IsIdle() const override;
 	void WaitForIdle() override;
 
-	void ProcessError();
+	void ProcessError(const SGFXErrorContainer &Error);
 
 protected:
 	void StartProcessor(ICommandProcessor *pProcessor);
@@ -199,10 +189,10 @@ public:
 	virtual ~CCommandProcessor_SDL_GL();
 	void RunBuffer(CCommandBuffer *pBuffer) override;
 
-	SGFXErrorContainer &GetError() override;
+	const SGFXErrorContainer &GetError() const override;
 	void ErroneousCleanup() override;
 
-	SGFXWarningContainer &GetWarning() override;
+	const SGFXWarningContainer &GetWarning() const override;
 
 	void HandleError();
 	void HandleWarning();
