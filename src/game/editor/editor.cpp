@@ -4309,9 +4309,9 @@ void CEditor::RenderImagesList(CUIRect ToolBox)
 				if(Result == 2)
 				{
 					const std::shared_ptr<CEditorImage> pImg = m_Map.m_vpImages[m_SelectedImage];
-					const int Height = !pImg->m_External && IsVanillaImage(pImg->m_aName) ? 90 : 73;
+					const int Height = !pImg->m_External && IsVanillaImage(pImg->m_aName) ? 107 : pImg->m_External ? 73 : 90;
 					static SPopupMenuId s_PopupImageId;
-					UI()->DoPopupMenu(&s_PopupImageId, UI()->MouseX(), UI()->MouseY(), 120, Height, this, PopupImage);
+					UI()->DoPopupMenu(&s_PopupImageId, UI()->MouseX(), UI()->MouseY(), 140, Height, this, PopupImage);
 				}
 			}
 		}
@@ -4425,7 +4425,7 @@ void CEditor::RenderSounds(CUIRect ToolBox)
 			if(Result == 2)
 			{
 				static SPopupMenuId s_PopupSoundId;
-				UI()->DoPopupMenu(&s_PopupSoundId, UI()->MouseX(), UI()->MouseY(), 120, 73, this, PopupSound);
+				UI()->DoPopupMenu(&s_PopupSoundId, UI()->MouseX(), UI()->MouseY(), 140, 90, this, PopupSound);
 			}
 		}
 	}
