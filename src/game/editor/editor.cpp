@@ -4947,15 +4947,18 @@ void CEditor::RenderFileDialog()
 	if(DoButton_Editor(&s_RefreshButton, "Refresh", 0, &Button, 0, nullptr) || (s_ListBox.Active() && (Input()->KeyIsPressed(KEY_F5) || (Input()->ModifierIsPressed() && Input()->KeyIsPressed(KEY_R)))))
 		FilelistPopulate(m_FileDialogLastPopulatedStorageType, true);
 
-	ButtonBar.VSplitRight(ButtonSpacing, &ButtonBar, nullptr);
-	ButtonBar.VSplitRight(90.0f, &ButtonBar, &Button);
-	if(DoButton_Editor(&s_ShowDirectoryButton, "Show directory", 0, &Button, 0, "Open the current directory in the file browser"))
+	if(!m_FileDialogShowingRoot || m_FilesSelectedIndex != 0)
 	{
-		char aOpenPath[IO_MAX_PATH_LENGTH];
-		Storage()->GetCompletePath(m_FilesSelectedIndex >= 0 ? m_vpFilteredFileList[m_FilesSelectedIndex]->m_StorageType : IStorage::TYPE_SAVE, m_pFileDialogPath, aOpenPath, sizeof(aOpenPath));
-		if(!open_file(aOpenPath))
+		ButtonBar.VSplitRight(ButtonSpacing, &ButtonBar, nullptr);
+		ButtonBar.VSplitRight(90.0f, &ButtonBar, &Button);
+		if(DoButton_Editor(&s_ShowDirectoryButton, "Show directory", 0, &Button, 0, "Open the current directory in the file browser"))
 		{
-			ShowFileDialogError("Failed to open the directory '%s'.", aOpenPath);
+			char aOpenPath[IO_MAX_PATH_LENGTH];
+			Storage()->GetCompletePath(m_FilesSelectedIndex >= 0 ? m_vpFilteredFileList[m_FilesSelectedIndex]->m_StorageType : IStorage::TYPE_SAVE, m_pFileDialogPath, aOpenPath, sizeof(aOpenPath));
+			if(!open_file(aOpenPath))
+			{
+				ShowFileDialogError("Failed to open the directory '%s'.", aOpenPath);
+			}
 		}
 	}
 
