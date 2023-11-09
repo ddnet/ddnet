@@ -2549,7 +2549,7 @@ void CEditor::DoMapEditor(CUIRect View)
 				else
 					Layer = NUM_LAYERS;
 
-				EExplanation Explanation = EExplanation::DDNET;
+				EExplanation Explanation;
 				if(m_SelectEntitiesImage == "DDNet")
 					Explanation = EExplanation::DDNET;
 				else if(m_SelectEntitiesImage == "FNG")
@@ -2561,7 +2561,7 @@ void CEditor::DoMapEditor(CUIRect View)
 				else if(m_SelectEntitiesImage == "blockworlds")
 					Explanation = EExplanation::BLOCKWORLDS;
 				else
-					dbg_assert(false, "Unhandled entities image for explanations");
+					Explanation = EExplanation::NONE;
 
 				if(Layer != NUM_LAYERS)
 				{

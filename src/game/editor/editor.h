@@ -951,6 +951,7 @@ public:
 	// Explanations
 	enum class EExplanation
 	{
+		NONE,
 		DDNET,
 		FNG,
 		RACE,

@@ -670,6 +670,8 @@ const char *CEditor::Explain(EExplanation Explanation, int Tile, int Layer)
 {
 	switch(Explanation)
 	{
+	case EExplanation::NONE:
+		return nullptr;
 	case EExplanation::DDNET:
 		return ExplainDDNet(Tile, Layer);
 	case EExplanation::FNG:
