@@ -1,6 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
+#include <base/lock.h>
 #include <base/logger.h>
 #include <base/math.h>
 #include <base/system.h>
@@ -28,7 +29,7 @@
 class CConsoleLogger : public ILogger
 {
 	CGameConsole *m_pConsole;
-	std::mutex m_ConsoleMutex;
+	CLock m_ConsoleMutex;
 
 public:
 	CConsoleLogger(CGameConsole *pConsole) :
@@ -37,8 +38,8 @@ public:
 		dbg_assert(pConsole != nullptr, "console pointer must not be null");
 	}
 
-	void Log(const CLogMessage *pMessage) override;
-	void OnConsoleDeletion();
+	void Log(const CLogMessage *pMessage) override REQUIRES(!m_ConsoleMutex);
+	void OnConsoleDeletion() REQUIRES(!m_ConsoleMutex);
 };
 
 void CConsoleLogger::Log(const CLogMessage *pMessage)
@@ -54,7 +55,7 @@ void CConsoleLogger::Log(const CLogMessage *pMessage)
 		Color.g = pMessage->m_Color.g / 255.0;
 		Color.b = pMessage->m_Color.b / 255.0;
 	}
-	std::unique_lock<std::mutex> Guard(m_ConsoleMutex);
+	const CLockScope LockScope(m_ConsoleMutex);
 	if(m_pConsole)
 	{
 		m_pConsole->m_LocalConsole.PrintLine(pMessage->m_aLine, pMessage->m_LineLength, Color);
@@ -63,7 +64,7 @@ void CConsoleLogger::Log(const CLogMessage *pMessage)
 
 void CConsoleLogger::OnConsoleDeletion()
 {
-	std::unique_lock<std::mutex> Guard(m_ConsoleMutex);
+	const CLockScope LockScope(m_ConsoleMutex);
 	m_pConsole = nullptr;
 }
 
@@ -119,22 +120,20 @@ void CGameConsole::CInstance::Init(CGameConsole *pGameConsole)
 
 void CGameConsole::CInstance::ClearBacklog()
 {
-	m_BacklogLock.lock();
+	const CLockScope LockScope(m_BacklogLock);
 	m_Backlog.Init();
 	m_BacklogCurPage = 0;
-	m_BacklogLock.unlock();
 }
 
 void CGameConsole::CInstance::ClearBacklogYOffsets()
 {
-	m_BacklogLock.lock();
+	const CLockScope LockScope(m_BacklogLock);
 	auto *pEntry = m_Backlog.First();
 	while(pEntry)
 	{
 		pEntry->m_YOffset = -1.0f;
 		pEntry = m_Backlog.Next(pEntry);
 	}
-	m_BacklogLock.unlock();
 }
 
 void CGameConsole::CInstance::ClearHistory()
@@ -385,13 +384,12 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 
 void CGameConsole::CInstance::PrintLine(const char *pLine, int Len, ColorRGBA PrintColor)
 {
-	m_BacklogLock.lock();
+	const CLockScope LockScope(m_BacklogLock);
 	CBacklogEntry *pEntry = m_Backlog.Allocate(sizeof(CBacklogEntry) + Len);
 	pEntry->m_YOffset = -1.0f;
 	pEntry->m_PrintColor = PrintColor;
 	str_copy(pEntry->m_aText, pLine, Len + 1);
 	m_NewLineCounter++;
-	m_BacklogLock.unlock();
 }
 
 CGameConsole::CGameConsole() :
@@ -901,13 +899,12 @@ void CGameConsole::Dump(int Type)
 	IOHANDLE File = Storage()->OpenFile(aFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
 	if(File)
 	{
-		pConsole->m_BacklogLock.lock();
+		const CLockScope LockScope(pConsole->m_BacklogLock);
 		for(CInstance::CBacklogEntry *pEntry = pConsole->m_Backlog.First(); pEntry; pEntry = pConsole->m_Backlog.Next(pEntry))
 		{
 			io_write(File, pEntry->m_aText, str_length(pEntry->m_aText));
 			io_write_newline(File);
 		}
-		pConsole->m_BacklogLock.unlock();
 		io_close(File);
 		str_format(aBuf, sizeof(aBuf), "%s contents were written to '%s'", pConsole->m_pName, aFilename);
 	}
