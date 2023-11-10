@@ -2,8 +2,6 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "jobs.h"
 
-#include <base/lock_scope.h>
-
 IJob::IJob() :
 	m_Status(STATE_PENDING)
 {
@@ -20,7 +18,6 @@ CJobPool::CJobPool()
 {
 	// empty the pool
 	m_Shutdown = false;
-	m_Lock = lock_create();
 	sphore_init(&m_Semaphore);
 	m_pFirstJob = 0;
 	m_pLastJob = 0;
@@ -85,7 +82,6 @@ void CJobPool::Destroy()
 	for(void *pThread : m_vpThreads)
 		thread_wait(pThread);
 	m_vpThreads.clear();
-	lock_destroy(m_Lock);
 	sphore_destroy(&m_Semaphore);
 }
 

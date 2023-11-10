@@ -1,6 +1,7 @@
 #include "updater.h"
-#include <base/lock_scope.h>
+
 #include <base/system.h>
+
 #include <engine/client.h>
 #include <engine/engine.h>
 #include <engine/external/json-parser/json.h>
@@ -94,7 +95,6 @@ CUpdater::CUpdater()
 	m_pEngine = NULL;
 	m_State = CLEAN;
 	m_Percent = 0;
-	m_Lock = lock_create();
 
 	IStorage::FormatTmpPath(m_aClientExecTmp, sizeof(m_aClientExecTmp), CLIENT_EXEC);
 	IStorage::FormatTmpPath(m_aServerExecTmp, sizeof(m_aServerExecTmp), SERVER_EXEC);
@@ -105,11 +105,6 @@ void CUpdater::Init()
 	m_pClient = Kernel()->RequestInterface<IClient>();
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 	m_pEngine = Kernel()->RequestInterface<IEngine>();
-}
-
-CUpdater::~CUpdater()
-{
-	lock_destroy(m_Lock);
 }
 
 void CUpdater::SetCurrentState(int NewState)
