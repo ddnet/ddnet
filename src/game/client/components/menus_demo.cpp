@@ -1438,7 +1438,7 @@ void CMenus::RenderDemoBrowserButtons(CUIRect ButtonsView, bool WasListboxItemAc
 	}
 
 	// demos directory button
-	if(m_aCurrentDemoFolder[0] != '\0' || m_DemolistSelectedIndex != 0)
+	if(m_aCurrentDemoFolder[0] != '\0' || (m_DemolistSelectedIndex >= 0 && m_vpFilteredDemos[m_DemolistSelectedIndex]->m_StorageType != IStorage::TYPE_ALL))
 	{
 		CUIRect DemosDirectoryButton;
 		ButtonBarBottom.VSplitLeft(ButtonBarBottom.h * 10.0f, &DemosDirectoryButton, &ButtonBarBottom);
