@@ -66,7 +66,7 @@ constexpr int fxpscale = 1 << 10;
 // float to fixed
 constexpr inline int f2fx(float v)
 {
-	return (int)(v * fxpscale);
+	return round_to_int(v * fxpscale);
 }
 constexpr inline float fx2f(int v)
 {

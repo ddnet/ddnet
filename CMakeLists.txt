@@ -2744,6 +2744,7 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
     jsonwriter.cpp
     linereader.cpp
     mapbugs.cpp
+    math.cpp
     name_ban.cpp
     net.cpp
     netaddr.cpp
