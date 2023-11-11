@@ -3098,58 +3098,15 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 		}
 		else if(pProps[i].m_Type == PROPTYPE_COLOR)
 		{
-			const ColorRGBA ColorPick = ColorRGBA::UnpackAlphaLast<ColorRGBA>(pProps[i].m_Value);
-
-			CUIRect ColorRect;
-			Shifter.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f * UI()->ButtonColorMul(&pIDs[i])), IGraphics::CORNER_ALL, 5.0f);
-			Shifter.Margin(1.0f, &ColorRect);
-			ColorRect.Draw(ColorPick, IGraphics::CORNER_ALL, ColorRect.h / 2.0f);
-
-			static CUI::SColorPickerPopupContext s_ColorPickerPopupContext;
-			const int ButtonResult = DoButton_Editor_Common(&pIDs[i], nullptr, 0, &Shifter, 0, "Click to show the color picker. Shift+rightclick to copy color to clipboard. Shift+leftclick to paste color from clipboard.");
-			if(Input()->ShiftIsPressed())
-			{
-				if(ButtonResult == 1)
+			const auto &&SetColor = [&](ColorRGBA NewColor) {
+				const int NewValue = NewColor.PackAlphaLast();
+				if(NewValue != pProps[i].m_Value)
 				{
-					const char *pClipboard = Input()->GetClipboardText();
-					if(*pClipboard == '#' || *pClipboard == '$') // ignore leading # (web color format) and $ (console color format)
-						++pClipboard;
-					if(str_isallnum_hex(pClipboard))
-					{
-						std::optional<ColorRGBA> ParsedColor = color_parse<ColorRGBA>(pClipboard);
-						if(ParsedColor)
-						{
-							*pNewVal = ParsedColor.value().PackAlphaLast();
-							Change = i;
-						}
-					}
-				}
-				else if(ButtonResult == 2)
-				{
-					char aClipboard[9];
-					str_format(aClipboard, sizeof(aClipboard), "%08X", ColorPick.PackAlphaLast());
-					Input()->SetClipboardText(aClipboard);
-				}
-			}
-			else if(ButtonResult > 0)
-			{
-				if(s_ColorPickerPopupContext.m_ColorMode == CUI::SColorPickerPopupContext::MODE_UNSET)
-					s_ColorPickerPopupContext.m_ColorMode = CUI::SColorPickerPopupContext::MODE_RGBA;
-				s_ColorPickerPopupContext.m_RgbaColor = ColorPick;
-				s_ColorPickerPopupContext.m_HslaColor = color_cast<ColorHSLA>(ColorPick);
-				s_ColorPickerPopupContext.m_HsvaColor = color_cast<ColorHSVA>(s_ColorPickerPopupContext.m_HslaColor);
-				s_ColorPickerPopupContext.m_Alpha = true;
-				UI()->ShowPopupColorPicker(UI()->MouseX(), UI()->MouseY(), &s_ColorPickerPopupContext);
-			}
-			else if(UI()->IsPopupOpen(&s_ColorPickerPopupContext))
-			{
-				const int NewColor = s_ColorPickerPopupContext.m_RgbaColor.PackAlphaLast(s_ColorPickerPopupContext.m_Alpha);
-				if(NewColor != pProps[i].m_Value)
-				{
-					*pNewVal = NewColor;
+					*pNewVal = NewValue;
 					Change = i;
 				}
-			}
+			};
+			DoColorPickerButton(&pIDs[i], &Shifter, ColorRGBA::UnpackAlphaLast<ColorRGBA>(pProps[i].m_Value), SetColor);
 		}
 		else if(pProps[i].m_Type == PROPTYPE_IMAGE)
 		{
@@ -3282,6 +3239,60 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 	}
 
 	return Change;
+}
+
+void CEditor::DoColorPickerButton(const void *pID, const CUIRect *pRect, ColorRGBA Color, const std::function<void(ColorRGBA Color)> &SetColor)
+{
+	CUIRect ColorRect;
+	pRect->Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f * UI()->ButtonColorMul(pID)), IGraphics::CORNER_ALL, 5.0f);
+	pRect->Margin(1.0f, &ColorRect);
+	ColorRect.Draw(Color, IGraphics::CORNER_ALL, 5.0f);
+
+	const int ButtonResult = DoButton_Editor_Common(pID, nullptr, 0, pRect, 0, "Click to show the color picker. Shift+rightclick to copy color to clipboard. Shift+leftclick to paste color from clipboard.");
+	if(Input()->ShiftIsPressed())
+	{
+		if(ButtonResult == 1)
+		{
+			const char *pClipboard = Input()->GetClipboardText();
+			if(*pClipboard == '#' || *pClipboard == '$') // ignore leading # (web color format) and $ (console color format)
+				++pClipboard;
+			if(str_isallnum_hex(pClipboard))
+			{
+				std::optional<ColorRGBA> ParsedColor = color_parse<ColorRGBA>(pClipboard);
+				if(ParsedColor)
+				{
+					SetColor(ParsedColor.value());
+				}
+			}
+		}
+		else if(ButtonResult == 2)
+		{
+			char aClipboard[9];
+			str_format(aClipboard, sizeof(aClipboard), "%08X", Color.PackAlphaLast());
+			Input()->SetClipboardText(aClipboard);
+		}
+	}
+	else if(ButtonResult > 0)
+	{
+		if(m_ColorPickerPopupContext.m_ColorMode == CUI::SColorPickerPopupContext::MODE_UNSET)
+			m_ColorPickerPopupContext.m_ColorMode = CUI::SColorPickerPopupContext::MODE_RGBA;
+		m_ColorPickerPopupContext.m_RgbaColor = Color;
+		m_ColorPickerPopupContext.m_HslaColor = color_cast<ColorHSLA>(Color);
+		m_ColorPickerPopupContext.m_HsvaColor = color_cast<ColorHSVA>(m_ColorPickerPopupContext.m_HslaColor);
+		m_ColorPickerPopupContext.m_Alpha = true;
+		m_pColorPickerPopupActiveID = pID;
+		UI()->ShowPopupColorPicker(UI()->MouseX(), UI()->MouseY(), &m_ColorPickerPopupContext);
+	}
+
+	if(UI()->IsPopupOpen(&m_ColorPickerPopupContext))
+	{
+		if(m_pColorPickerPopupActiveID == pID)
+			SetColor(m_ColorPickerPopupContext.m_RgbaColor);
+	}
+	else
+	{
+		m_pColorPickerPopupActiveID = nullptr;
+	}
 }
 
 void CEditor::RenderLayers(CUIRect LayersBox)
@@ -6258,6 +6269,11 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		}
 
 		{
+			static SPopupMenuId s_PopupEnvPointId;
+			const auto &&ShowPopupEnvPoint = [&]() {
+				UI()->DoPopupMenu(&s_PopupEnvPointId, UI()->MouseX(), UI()->MouseY(), 150, 56 + (pEnvelope->GetChannels() == 4 ? 16.0f : 0.0f), this, PopupEnvPoint);
+			};
+
 			if(s_Operation == OP_NONE)
 				SetHotEnvelopePoint(View, pEnvelope, s_ActiveChannels);
 
@@ -6401,8 +6417,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 									if(m_vSelectedEnvelopePoints.size() == 1)
 									{
 										m_UpdateEnvPointInfo = true;
-										static SPopupMenuId s_PopupEnvPointId;
-										UI()->DoPopupMenu(&s_PopupEnvPointId, UI()->MouseX(), UI()->MouseY(), 150, 56, this, PopupEnvPoint);
+										ShowPopupEnvPoint();
 									}
 									else if(m_vSelectedEnvelopePoints.size() > 1)
 									{
@@ -6545,8 +6560,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 										if(IsTangentOutPointSelected(i, c))
 										{
 											m_UpdateEnvPointInfo = true;
-											static SPopupMenuId s_PopupEnvPointId;
-											UI()->DoPopupMenu(&s_PopupEnvPointId, UI()->MouseX(), UI()->MouseY(), 150, 56, this, PopupEnvPoint);
+											ShowPopupEnvPoint();
 										}
 										UI()->SetActiveItem(nullptr);
 									}
@@ -6678,8 +6692,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 										if(IsTangentInPointSelected(i, c))
 										{
 											m_UpdateEnvPointInfo = true;
-											static SPopupMenuId s_PopupEnvPointId;
-											UI()->DoPopupMenu(&s_PopupEnvPointId, UI()->MouseX(), UI()->MouseY(), 150, 56, this, PopupEnvPoint);
+											ShowPopupEnvPoint();
 										}
 										UI()->SetActiveItem(nullptr);
 									}
