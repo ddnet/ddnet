@@ -1,11 +1,11 @@
 #if defined(CONF_VIDEORECORDER)
 
-#include <engine/shared/config.h>
-#include <engine/storage.h>
+#include "video.h"
 
-#include <base/lock_scope.h>
 #include <engine/client/graphics_threaded.h>
+#include <engine/shared/config.h>
 #include <engine/sound.h>
+#include <engine/storage.h>
 
 extern "C" {
 #include <libavutil/avutil.h>
@@ -14,12 +14,9 @@ extern "C" {
 #include <libswscale/swscale.h>
 };
 
+#include <chrono>
 #include <memory>
 #include <mutex>
-
-#include "video.h"
-
-#include <chrono>
 #include <thread>
 
 using namespace std::chrono_literals;
@@ -35,7 +32,7 @@ using namespace std::chrono_literals;
 #endif
 
 const size_t FORMAT_GL_NCHANNELS = 4;
-LOCK g_WriteLock = 0;
+CLock g_WriteLock;
 
 CVideo::CVideo(CGraphics_Threaded *pGraphics, ISound *pSound, IStorage *pStorage, int Width, int Height, const char *pName) :
 	m_pGraphics(pGraphics),
@@ -66,13 +63,11 @@ CVideo::CVideo(CGraphics_Threaded *pGraphics, ISound *pSound, IStorage *pStorage
 
 	ms_TickTime = time_freq() / m_FPS;
 	ms_pCurrentVideo = this;
-	g_WriteLock = lock_create();
 }
 
 CVideo::~CVideo()
 {
 	ms_pCurrentVideo = 0;
-	lock_destroy(g_WriteLock);
 }
 
 void CVideo::Start()

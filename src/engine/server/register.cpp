@@ -1,7 +1,8 @@
 #include "register.h"
 
-#include <base/lock_scope.h>
+#include <base/lock.h>
 #include <base/log.h>
+
 #include <engine/console.h>
 #include <engine/engine.h>
 #include <engine/shared/config.h>
@@ -40,12 +41,7 @@ class CRegister : public IRegister
 	class CGlobal
 	{
 	public:
-		~CGlobal()
-		{
-			lock_destroy(m_Lock);
-		}
-
-		LOCK m_Lock = lock_create();
+		CLock m_Lock;
 		int m_InfoSerial GUARDED_BY(m_Lock) = -1;
 		int m_LatestSuccessfulInfoSerial GUARDED_BY(m_Lock) = -1;
 	};
@@ -59,13 +55,9 @@ class CRegister : public IRegister
 				m_pGlobal(std::move(pGlobal))
 			{
 			}
-			~CShared()
-			{
-				lock_destroy(m_Lock);
-			}
 
 			std::shared_ptr<CGlobal> m_pGlobal;
-			LOCK m_Lock = lock_create();
+			CLock m_Lock;
 			int m_NumTotalRequests GUARDED_BY(m_Lock) = 0;
 			int m_LatestResponseStatus GUARDED_BY(m_Lock) = STATUS_NONE;
 			int m_LatestResponseIndex GUARDED_BY(m_Lock) = -1;
@@ -326,13 +318,12 @@ void CRegister::CProtocol::SendRegister()
 
 void CRegister::CProtocol::SendDeleteIfRegistered(bool Shutdown)
 {
-	lock_wait(m_pShared->m_Lock);
-	bool ShouldSendDelete = m_pShared->m_LatestResponseStatus == STATUS_OK;
-	m_pShared->m_LatestResponseStatus = STATUS_NONE;
-	lock_unlock(m_pShared->m_Lock);
-	if(!ShouldSendDelete)
 	{
-		return;
+		const CLockScope LockScope(m_pShared->m_Lock);
+		const bool ShouldSendDelete = m_pShared->m_LatestResponseStatus == STATUS_OK;
+		m_pShared->m_LatestResponseStatus = STATUS_NONE;
+		if(!ShouldSendDelete)
+			return;
 	}
 
 	char aAddress[64];

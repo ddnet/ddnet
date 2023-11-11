@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include <base/lock.h>
 #include <base/system.h>
 #include <base/tl/threading.h>
 
@@ -82,17 +83,16 @@ TEST(Thread, SemaphoreMultiThreaded)
 
 static void LockThread(void *pUser)
 {
-	LOCK *pLock = (LOCK *)pUser;
-	lock_wait(*pLock);
-	lock_unlock(*pLock);
+	CLock *pLock = (CLock *)pUser;
+	pLock->lock();
+	pLock->unlock();
 }
 
 TEST(Thread, Lock)
 {
-	LOCK Lock = lock_create();
-	lock_wait(Lock);
+	CLock Lock;
+	Lock.lock();
 	void *pThread = thread_init(LockThread, &Lock, "lock");
-	lock_unlock(Lock);
+	Lock.unlock();
 	thread_wait(pThread);
-	lock_destroy(Lock);
 }
