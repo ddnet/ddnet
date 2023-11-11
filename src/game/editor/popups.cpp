@@ -1296,10 +1296,34 @@ CUI::EPopupMenuFunctionResult CEditor::PopupEnvPoint(void *pContext, CUIRect Vie
 
 	pEditor->m_ShowEnvelopePreview = SHOWENV_SELECTED;
 
+	std::shared_ptr<CEnvelope> pEnvelope = pEditor->m_Map.m_vpEnvelopes[pEditor->m_SelectedEnvelope];
+
+	if(pEnvelope->GetChannels() == 4)
+	{
+		View.HSplitTop(RowHeight, &Row, &View);
+		View.HSplitTop(4.0f, nullptr, &View);
+		Row.VSplitLeft(60.0f, &Label, &Row);
+		Row.VSplitLeft(10.0f, nullptr, &EditBox);
+		pEditor->UI()->DoLabel(&Label, "Color:", RowHeight - 2.0f, TEXTALIGN_ML);
+
+		const auto [SelectedIndex, _] = pEditor->m_vSelectedEnvelopePoints.front();
+		auto *pValues = pEnvelope->m_vPoints[SelectedIndex].m_aValues;
+		const ColorRGBA Color = ColorRGBA(fx2f(pValues[0]), fx2f(pValues[1]), fx2f(pValues[2]), fx2f(pValues[3]));
+		const auto &&SetColor = [&](ColorRGBA NewColor) {
+			if(Color == NewColor)
+				return;
+			for(int Channel = 0; Channel < 4; ++Channel)
+				pValues[Channel] = f2fx(NewColor[Channel]);
+			pEditor->m_UpdateEnvPointInfo = true;
+			pEditor->m_Map.OnModify();
+		};
+		static char s_ColorPickerButton;
+		pEditor->DoColorPickerButton(&s_ColorPickerButton, &EditBox, Color, SetColor);
+	}
+
 	static CLineInputNumber s_CurValueInput;
 	static CLineInputNumber s_CurTimeInput;
 
-	std::shared_ptr<CEnvelope> pEnvelope = pEditor->m_Map.m_vpEnvelopes[pEditor->m_SelectedEnvelope];
 	if(pEditor->m_UpdateEnvPointInfo)
 	{
 		pEditor->m_UpdateEnvPointInfo = false;
@@ -1336,14 +1360,14 @@ CUI::EPopupMenuFunctionResult CEditor::PopupEnvPoint(void *pContext, CUIRect Vie
 	View.HSplitTop(RowHeight, &Row, &View);
 	Row.VSplitLeft(60.0f, &Label, &Row);
 	Row.VSplitLeft(10.0f, nullptr, &EditBox);
-	pEditor->UI()->DoLabel(&Label, "Value:", RowHeight - 2.0f, TEXTALIGN_LEFT);
+	pEditor->UI()->DoLabel(&Label, "Value:", RowHeight - 2.0f, TEXTALIGN_ML);
 	pEditor->DoEditBox(&s_CurValueInput, &EditBox, RowHeight - 2.0f, IGraphics::CORNER_ALL, "The value of the selected envelope point");
 
-	View.HMargin(4.0f, &View);
+	View.HSplitTop(4.0f, nullptr, &View);
 	View.HSplitTop(RowHeight, &Row, &View);
 	Row.VSplitLeft(60.0f, &Label, &Row);
 	Row.VSplitLeft(10.0f, nullptr, &EditBox);
-	pEditor->UI()->DoLabel(&Label, "Time (in s):", RowHeight - 2.0f, TEXTALIGN_LEFT);
+	pEditor->UI()->DoLabel(&Label, "Time (in s):", RowHeight - 2.0f, TEXTALIGN_ML);
 	pEditor->DoEditBox(&s_CurTimeInput, &EditBox, RowHeight - 2.0f, IGraphics::CORNER_ALL, "The time of the selected envelope point");
 
 	if(pEditor->Input()->KeyIsPressed(KEY_RETURN) || pEditor->Input()->KeyIsPressed(KEY_KP_ENTER))
@@ -1371,7 +1395,6 @@ CUI::EPopupMenuFunctionResult CEditor::PopupEnvPoint(void *pContext, CUIRect Vie
 		else
 		{
 			auto [SelectedIndex, SelectedChannel] = pEditor->m_vSelectedEnvelopePoints.front();
-
 			if(pEnvelope->GetChannels() == 4)
 				CurrentValue = clamp(CurrentValue, 0.0f, 1.0f);
 			pEnvelope->m_vPoints[SelectedIndex].m_aValues[SelectedChannel] = f2fx(CurrentValue);
@@ -1400,7 +1423,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupEnvPoint(void *pContext, CUIRect Vie
 		pEditor->m_Map.OnModify();
 	}
 
-	View.HMargin(6.0f, &View);
+	View.HSplitTop(6.0f, nullptr, &View);
 	View.HSplitTop(RowHeight, &Row, &View);
 	static int s_DeleteButtonID = 0;
 	const char *pButtonText = pEditor->IsTangentSelected() ? "Reset" : "Delete";

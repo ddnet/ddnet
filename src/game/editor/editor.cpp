@@ -6271,7 +6271,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		{
 			static SPopupMenuId s_PopupEnvPointId;
 			const auto &&ShowPopupEnvPoint = [&]() {
-				UI()->DoPopupMenu(&s_PopupEnvPointId, UI()->MouseX(), UI()->MouseY(), 150, 56, this, PopupEnvPoint);
+				UI()->DoPopupMenu(&s_PopupEnvPointId, UI()->MouseX(), UI()->MouseY(), 150, 56 + (pEnvelope->GetChannels() == 4 ? 16.0f : 0.0f), this, PopupEnvPoint);
 			};
 
 			if(s_Operation == OP_NONE)
