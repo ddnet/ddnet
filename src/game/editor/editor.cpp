@@ -6269,6 +6269,11 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		}
 
 		{
+			static SPopupMenuId s_PopupEnvPointId;
+			const auto &&ShowPopupEnvPoint = [&]() {
+				UI()->DoPopupMenu(&s_PopupEnvPointId, UI()->MouseX(), UI()->MouseY(), 150, 56, this, PopupEnvPoint);
+			};
+
 			if(s_Operation == OP_NONE)
 				SetHotEnvelopePoint(View, pEnvelope, s_ActiveChannels);
 
@@ -6412,8 +6417,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 									if(m_vSelectedEnvelopePoints.size() == 1)
 									{
 										m_UpdateEnvPointInfo = true;
-										static SPopupMenuId s_PopupEnvPointId;
-										UI()->DoPopupMenu(&s_PopupEnvPointId, UI()->MouseX(), UI()->MouseY(), 150, 56, this, PopupEnvPoint);
+										ShowPopupEnvPoint();
 									}
 									else if(m_vSelectedEnvelopePoints.size() > 1)
 									{
@@ -6556,8 +6560,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 										if(IsTangentOutPointSelected(i, c))
 										{
 											m_UpdateEnvPointInfo = true;
-											static SPopupMenuId s_PopupEnvPointId;
-											UI()->DoPopupMenu(&s_PopupEnvPointId, UI()->MouseX(), UI()->MouseY(), 150, 56, this, PopupEnvPoint);
+											ShowPopupEnvPoint();
 										}
 										UI()->SetActiveItem(nullptr);
 									}
@@ -6689,8 +6692,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 										if(IsTangentInPointSelected(i, c))
 										{
 											m_UpdateEnvPointInfo = true;
-											static SPopupMenuId s_PopupEnvPointId;
-											UI()->DoPopupMenu(&s_PopupEnvPointId, UI()->MouseX(), UI()->MouseY(), 150, 56, this, PopupEnvPoint);
+											ShowPopupEnvPoint();
 										}
 										UI()->SetActiveItem(nullptr);
 									}
