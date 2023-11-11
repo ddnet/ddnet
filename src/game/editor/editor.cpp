@@ -6752,7 +6752,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		static float s_MidpointY = 0.0f;
 		static std::vector<float> s_vInitialPositionsX;
 		static std::vector<float> s_vInitialPositionsY;
-		if(s_Operation == OP_NONE && Input()->KeyIsPressed(KEY_S) && !m_vSelectedEnvelopePoints.empty())
+		if(s_Operation == OP_NONE && Input()->KeyIsPressed(KEY_S) && !Input()->ModifierIsPressed() && !m_vSelectedEnvelopePoints.empty())
 		{
 			s_Operation = OP_SCALE;
 			s_ScaleFactorX = 1.0f;
