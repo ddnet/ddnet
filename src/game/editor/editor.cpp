@@ -4947,7 +4947,7 @@ void CEditor::RenderFileDialog()
 	if(DoButton_Editor(&s_RefreshButton, "Refresh", 0, &Button, 0, nullptr) || (s_ListBox.Active() && (Input()->KeyIsPressed(KEY_F5) || (Input()->ModifierIsPressed() && Input()->KeyIsPressed(KEY_R)))))
 		FilelistPopulate(m_FileDialogLastPopulatedStorageType, true);
 
-	if(!m_FileDialogShowingRoot || (m_FilesSelectedIndex >= 0 && m_vpFilteredFileList[m_FilesSelectedIndex]->m_StorageType != IStorage::TYPE_ALL))
+	if(m_FilesSelectedIndex >= 0 && m_vpFilteredFileList[m_FilesSelectedIndex]->m_StorageType != IStorage::TYPE_ALL)
 	{
 		ButtonBar.VSplitRight(ButtonSpacing, &ButtonBar, nullptr);
 		ButtonBar.VSplitRight(90.0f, &ButtonBar, &Button);
