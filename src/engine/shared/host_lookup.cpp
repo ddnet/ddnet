@@ -17,3 +17,11 @@ void CHostLookup::Run()
 {
 	m_Result = net_host_lookup(m_aHostname, &m_Addr, m_Nettype);
 }
+
+void CHostLookup::Done()
+{
+	if(m_DoneHandler)
+	{
+		m_DoneHandler(this);
+	}
+}

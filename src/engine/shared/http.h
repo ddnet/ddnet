@@ -3,6 +3,8 @@
 
 #include <algorithm>
 #include <atomic>
+#include <functional>
+
 #include <engine/shared/jobs.h>
 
 typedef struct _json_value json_value;
@@ -39,6 +41,8 @@ struct CTimeout
 	long LowSpeedTime;
 };
 
+typedef std::function<void(class CHttpRequest *pRequest)> TRequestDoneHandler;
+
 class CHttpRequest : public IJob
 {
 	enum class REQUEST
@@ -71,6 +75,8 @@ class CHttpRequest : public IJob
 	char m_aDestAbsolute[IO_MAX_PATH_LENGTH] = {0};
 	char m_aDest[IO_MAX_PATH_LENGTH] = {0};
 
+	TRequestDoneHandler m_DoneHandler = nullptr;
+
 	std::atomic<double> m_Size{0.0};
 	std::atomic<double> m_Current{0.0};
 	std::atomic<int> m_Progress{0};
@@ -81,6 +87,7 @@ class CHttpRequest : public IJob
 	std::atomic<bool> m_Abort{false};
 
 	void Run() override;
+	void Done() override;
 	// Abort the request with an error if `BeforeInit()` returns false.
 	bool BeforeInit();
 	int RunImpl(void *pUser);
@@ -133,6 +140,7 @@ public:
 		str_format(aHeader, sizeof(aHeader), "%s: %d", pName, Value);
 		Header(aHeader);
 	}
+	void DoneHandler(TRequestDoneHandler &&DoneHandler) { m_DoneHandler = std::move(DoneHandler); }
 
 	const char *Dest()
 	{

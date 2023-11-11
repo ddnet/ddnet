@@ -31,7 +31,6 @@
 #endif
 
 class CConfig;
-class CHostLookup;
 class CLogMessage;
 class CMsgPacker;
 class CPacker;
@@ -210,10 +209,7 @@ public:
 		CUuid m_ConnectionID;
 		int64_t m_RedirectDropTime;
 
-		// DNSBL
 		int m_DnsblState;
-		std::shared_ptr<CHostLookup> m_pDnsblLookup;
-
 		bool m_Sixup;
 	};
 
@@ -461,7 +457,7 @@ public:
 
 	int *GetIdMap(int ClientID) override;
 
-	void InitDnsbl(int ClientID);
+	void InitDnsblLookup(int ClientID);
 	bool DnsblWhite(int ClientID) override
 	{
 		return m_aClients[ClientID].m_DnsblState == CClient::DNSBL_STATE_NONE ||

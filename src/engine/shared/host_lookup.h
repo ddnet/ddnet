@@ -7,6 +7,10 @@
 
 #include <engine/shared/jobs.h>
 
+#include <functional>
+
+typedef std::function<void(class CHostLookup *pLookup)> TLookupDoneHandler;
+
 class CHostLookup : public IJob
 {
 private:
@@ -16,10 +20,15 @@ private:
 	NETADDR m_Addr;
 
 	void Run() override;
+	void Done() override;
+
+	TLookupDoneHandler m_DoneHandler = nullptr;
 
 public:
 	CHostLookup();
 	CHostLookup(const char *pHostname, int Nettype);
+
+	void DoneHandler(TLookupDoneHandler &&DoneHandler) { m_DoneHandler = std::move(DoneHandler); }
 
 	int Result() const { return m_Result; }
 	const char *Hostname() const { return m_aHostname; }

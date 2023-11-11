@@ -15,17 +15,20 @@ class CSkins : public CComponent
 public:
 	CSkins() = default;
 
-	class CGetPngFile : public CHttpRequest
+	class CSkinDownloadJob : public CHttpRequest
 	{
 		CSkins *m_pSkins;
+		char m_aName[24];
 
 	protected:
 		virtual int OnCompletion(int State) override;
+		void Done() override;
 
 	public:
-		CGetPngFile(CSkins *pSkins, const char *pUrl, IStorage *pStorage, const char *pDest);
+		CSkinDownloadJob(CSkins *pSkins, const char *pName, const char *pUrl, const char *pDest);
 		CImageInfo m_Info;
 	};
+	friend CSkinDownloadJob;
 
 	struct CDownloadSkin
 	{
@@ -33,7 +36,7 @@ public:
 		char m_aName[24];
 
 	public:
-		std::shared_ptr<CSkins::CGetPngFile> m_pTask;
+		std::shared_ptr<CSkins::CSkinDownloadJob> m_pTask;
 		char m_aPath[IO_MAX_PATH_LENGTH];
 
 		CDownloadSkin(CDownloadSkin &&Other) = default;

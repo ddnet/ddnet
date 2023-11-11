@@ -1131,30 +1131,54 @@ int CServer::NewClientCallback(int ClientID, void *pUser, bool Sixup)
 	return 0;
 }
 
-void CServer::InitDnsbl(int ClientID)
+void CServer::InitDnsblLookup(int ClientID)
 {
-	NETADDR Addr = *m_NetServer.ClientAddr(ClientID);
+	const NETADDR Addr = *m_NetServer.ClientAddr(ClientID);
 
 	//TODO: support ipv6
 	if(Addr.type != NETTYPE_IPV4)
 		return;
 
 	// build dnsbl host lookup
-	char aBuf[256];
+	char aDnsblAddrStr[256];
 	if(Config()->m_SvDnsblKey[0] == '\0')
 	{
 		// without key
-		str_format(aBuf, sizeof(aBuf), "%d.%d.%d.%d.%s", Addr.ip[3], Addr.ip[2], Addr.ip[1], Addr.ip[0], Config()->m_SvDnsblHost);
+		str_format(aDnsblAddrStr, sizeof(aDnsblAddrStr), "%d.%d.%d.%d.%s", Addr.ip[3], Addr.ip[2], Addr.ip[1], Addr.ip[0], Config()->m_SvDnsblHost);
 	}
 	else
 	{
 		// with key
-		str_format(aBuf, sizeof(aBuf), "%s.%d.%d.%d.%d.%s", Config()->m_SvDnsblKey, Addr.ip[3], Addr.ip[2], Addr.ip[1], Addr.ip[0], Config()->m_SvDnsblHost);
+		str_format(aDnsblAddrStr, sizeof(aDnsblAddrStr), "%s.%d.%d.%d.%d.%s", Config()->m_SvDnsblKey, Addr.ip[3], Addr.ip[2], Addr.ip[1], Addr.ip[0], Config()->m_SvDnsblHost);
 	}
 
 	IEngine *pEngine = Kernel()->RequestInterface<IEngine>();
-	pEngine->AddJob(m_aClients[ClientID].m_pDnsblLookup = std::make_shared<CHostLookup>(aBuf, NETTYPE_IPV4));
 	m_aClients[ClientID].m_DnsblState = CClient::DNSBL_STATE_PENDING;
+	std::shared_ptr<CHostLookup> pDnsblLookup = std::make_shared<CHostLookup>(aDnsblAddrStr, NETTYPE_IPV4);
+	pDnsblLookup->DoneHandler([this, ClientID, Addr](CHostLookup *pLookup) {
+		if(m_aClients[ClientID].m_State == CClient::STATE_EMPTY || Addr != *m_NetServer.ClientAddr(ClientID))
+			return; // client changed while lookup was running
+
+		if(pLookup->Result() != 0)
+		{
+			// entry not found -> whitelisted
+			m_aClients[ClientID].m_DnsblState = CClient::DNSBL_STATE_WHITELISTED;
+		}
+		else
+		{
+			// entry found -> blacklisted
+			m_aClients[ClientID].m_DnsblState = CClient::DNSBL_STATE_BLACKLISTED;
+
+			// console output
+			char aAddrStr[NETADDR_MAXSTRSIZE];
+			net_addr_str(&Addr, aAddrStr, sizeof(aAddrStr), true);
+
+			char aBuf[256];
+			str_format(aBuf, sizeof(aBuf), "ClientID=%d addr=<{%s}> secure=%s blacklisted", ClientID, aAddrStr, m_NetServer.HasSecurityToken(ClientID) ? "yes" : "no");
+			Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "dnsbl", aBuf);
+		}
+	});
+	pEngine->AddJob(pDnsblLookup);
 }
 
 #ifdef CONF_FAMILY_UNIX
@@ -2745,6 +2769,8 @@ int CServer::Run()
 			int64_t t = time_get();
 			int NewTicks = 0;
 
+			pEngine->UpdateJobs();
+
 			// load new map
 			if(m_MapReload || m_CurrentGameTick >= MAX_TICK) // force reload to make sure the ticks stay within a valid range
 			{
@@ -2814,35 +2840,9 @@ int CServer::Run()
 						continue;
 
 					if(m_aClients[ClientID].m_DnsblState == CClient::DNSBL_STATE_NONE)
-					{
-						// initiate dnsbl lookup
-						InitDnsbl(ClientID);
-					}
-					else if(m_aClients[ClientID].m_DnsblState == CClient::DNSBL_STATE_PENDING &&
-						m_aClients[ClientID].m_pDnsblLookup->Status() == IJob::STATE_DONE)
-					{
-						if(m_aClients[ClientID].m_pDnsblLookup->Result() != 0)
-						{
-							// entry not found -> whitelisted
-							m_aClients[ClientID].m_DnsblState = CClient::DNSBL_STATE_WHITELISTED;
-						}
-						else
-						{
-							// entry found -> blacklisted
-							m_aClients[ClientID].m_DnsblState = CClient::DNSBL_STATE_BLACKLISTED;
+						InitDnsblLookup(ClientID);
 
-							// console output
-							char aAddrStr[NETADDR_MAXSTRSIZE];
-							net_addr_str(m_NetServer.ClientAddr(ClientID), aAddrStr, sizeof(aAddrStr), true);
-
-							str_format(aBuf, sizeof(aBuf), "ClientID=%d addr=<{%s}> secure=%s blacklisted", ClientID, aAddrStr, m_NetServer.HasSecurityToken(ClientID) ? "yes" : "no");
-
-							Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "dnsbl", aBuf);
-						}
-					}
-
-					if(m_aClients[ClientID].m_DnsblState == CClient::DNSBL_STATE_BLACKLISTED &&
-						Config()->m_SvDnsblBan)
+					if(m_aClients[ClientID].m_DnsblState == CClient::DNSBL_STATE_BLACKLISTED && Config()->m_SvDnsblBan)
 						m_NetServer.NetBan()->BanAddr(m_NetServer.ClientAddr(ClientID), 60 * 10, "VPN detected, try connecting without. Contact admin if mistaken");
 				}
 			}

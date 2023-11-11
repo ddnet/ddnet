@@ -12,31 +12,35 @@
 #include <game/generated/client_data.h>
 #include <game/localization.h>
 
-CSoundLoading::CSoundLoading(CGameClient *pGameClient, bool Render) :
-	m_pGameClient(pGameClient),
+CSoundLoading::CSoundLoading(CSounds *pSounds, bool Render) :
+	m_pSounds(pSounds),
 	m_Render(Render)
 {
 }
 
 void CSoundLoading::Run()
 {
+	const char *pLoadingCaption = m_Render ? Localize("Loading DDNet Client") : nullptr;
+	const char *pLoadingContent = m_Render ? Localize("Loading sound files") : nullptr;
+
 	for(int s = 0; s < g_pData->m_NumSounds; s++)
 	{
-		const char *pLoadingCaption = Localize("Loading DDNet Client");
-		const char *pLoadingContent = Localize("Loading sound files");
-
 		for(int i = 0; i < g_pData->m_aSounds[s].m_NumSounds; i++)
 		{
-			int Id = m_pGameClient->Sound()->LoadWV(g_pData->m_aSounds[s].m_aSounds[i].m_pFilename);
-			g_pData->m_aSounds[s].m_aSounds[i].m_Id = Id;
+			g_pData->m_aSounds[s].m_aSounds[i].m_Id = m_pSounds->Sound()->LoadWV(g_pData->m_aSounds[s].m_aSounds[i].m_pFilename);
 			// try to render a frame
 			if(m_Render)
-				m_pGameClient->m_Menus.RenderLoading(pLoadingCaption, pLoadingContent, 0);
+				m_pSounds->m_pClient->m_Menus.RenderLoading(pLoadingCaption, pLoadingContent, 0);
 		}
 
 		if(m_Render)
-			m_pGameClient->m_Menus.RenderLoading(pLoadingCaption, pLoadingContent, 1);
+			m_pSounds->m_pClient->m_Menus.RenderLoading(pLoadingCaption, pLoadingContent, 1);
 	}
+}
+
+void CSoundLoading::Done()
+{
+	m_pSounds->m_WaitForSoundJob = false;
 }
 
 int CSounds::GetSampleId(int SetId)
@@ -82,14 +86,13 @@ void CSounds::OnInit()
 	// load sounds
 	if(g_Config.m_ClThreadsoundloading)
 	{
-		m_pSoundJob = std::make_shared<CSoundLoading>(m_pClient, false);
-		m_pClient->Engine()->AddJob(m_pSoundJob);
 		m_WaitForSoundJob = true;
+		m_pClient->Engine()->AddJob(std::make_shared<CSoundLoading>(this, false));
 		m_pClient->m_Menus.RenderLoading(Localize("Loading DDNet Client"), Localize("Loading sound files"), 0);
 	}
 	else
 	{
-		CSoundLoading(m_pClient, true).Run();
+		CSoundLoading(this, true).Run();
 		m_WaitForSoundJob = false;
 	}
 }
@@ -113,12 +116,7 @@ void CSounds::OnRender()
 {
 	// check for sound initialisation
 	if(m_WaitForSoundJob)
-	{
-		if(m_pSoundJob->Status() == IJob::STATE_DONE)
-			m_WaitForSoundJob = false;
-		else
-			return;
-	}
+		return;
 
 	// set listener pos
 	Sound()->SetListenerPos(m_pClient->m_Camera.m_Center.x, m_pClient->m_Camera.m_Center.y);
