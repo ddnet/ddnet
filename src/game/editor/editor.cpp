@@ -1084,13 +1084,23 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 		TB_Top.VSplitLeft(5.0f, nullptr, &TB_Top);
 
 		// animation button
-		TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
-		static int s_AnimateButton = 0;
-		if(DoButton_Editor(&s_AnimateButton, "Anim", m_Animate, &Button, 0, "[ctrl+m] Toggle animation") ||
+		TB_Top.VSplitLeft(25.0f, &Button, &TB_Top);
+		static char s_AnimateButton;
+		if(DoButton_FontIcon(&s_AnimateButton, FONT_ICON_CIRCLE_PLAY, m_Animate, &Button, 0, "[ctrl+m] Toggle animation", IGraphics::CORNER_L) ||
 			(m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_M) && ModPressed))
 		{
 			m_AnimateStart = time_get();
 			m_Animate = !m_Animate;
+		}
+
+		// animation settings button
+		TB_Top.VSplitLeft(14.0f, &Button, &TB_Top);
+		static char s_AnimateSettingsButton;
+		if(DoButton_FontIcon(&s_AnimateSettingsButton, FONT_ICON_CIRCLE_CHEVRON_DOWN, 0, &Button, 0, "Change animation settings.", IGraphics::CORNER_R, 8.0f))
+		{
+			m_AnimateUpdatePopup = true;
+			static SPopupMenuId s_PopupAnimateSettingsId;
+			UI()->DoPopupMenu(&s_PopupAnimateSettingsId, Button.x, Button.y + Button.h, 150.0f, 37.0f, this, PopupAnimateSettings);
 		}
 
 		TB_Top.VSplitLeft(5.0f, nullptr, &TB_Top);
@@ -1125,12 +1135,20 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 		TB_Top.VSplitLeft(5.0f, nullptr, &TB_Top);
 
 		// grid button
-		TB_Top.VSplitLeft(40.0f, &Button, &TB_Top);
+		TB_Top.VSplitLeft(25.0f, &Button, &TB_Top);
 		static int s_GridButton = 0;
-		if(DoButton_Editor(&s_GridButton, "Grid", MapView()->MapGrid()->IsEnabled(), &Button, 0, "[ctrl+g] Toggle Grid") ||
+		if(DoButton_FontIcon(&s_GridButton, FONT_ICON_BORDER_ALL, MapView()->MapGrid()->IsEnabled(), &Button, 0, "[ctrl+g] Toggle Grid", IGraphics::CORNER_L) ||
 			(m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_G) && ModPressed && !ShiftPressed))
 		{
 			MapView()->MapGrid()->Toggle();
+		}
+
+		// grid settings button
+		TB_Top.VSplitLeft(14.0f, &Button, &TB_Top);
+		static char s_GridSettingsButton;
+		if(DoButton_FontIcon(&s_GridSettingsButton, FONT_ICON_CIRCLE_CHEVRON_DOWN, 0, &Button, 0, "Change grid settings.", IGraphics::CORNER_R, 8.0f))
+		{
+			MapView()->MapGrid()->DoSettingsPopup(vec2(Button.x, Button.y + Button.h));
 		}
 
 		TB_Top.VSplitLeft(5.0f, nullptr, &TB_Top);
@@ -1138,7 +1156,7 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 		// zoom group
 		TB_Top.VSplitLeft(20.0f, &Button, &TB_Top);
 		static int s_ZoomOutButton = 0;
-		if(DoButton_FontIcon(&s_ZoomOutButton, "-", 0, &Button, 0, "[NumPad-] Zoom out", IGraphics::CORNER_L))
+		if(DoButton_FontIcon(&s_ZoomOutButton, FONT_ICON_MINUS, 0, &Button, 0, "[NumPad-] Zoom out", IGraphics::CORNER_L))
 		{
 			MapView()->Zoom()->ChangeValue(50.0f);
 		}
@@ -1152,7 +1170,7 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 
 		TB_Top.VSplitLeft(20.0f, &Button, &TB_Top);
 		static int s_ZoomInButton = 0;
-		if(DoButton_FontIcon(&s_ZoomInButton, "+", 0, &Button, 0, "[NumPad+] Zoom in", IGraphics::CORNER_R))
+		if(DoButton_FontIcon(&s_ZoomInButton, FONT_ICON_PLUS, 0, &Button, 0, "[NumPad+] Zoom in", IGraphics::CORNER_R))
 		{
 			MapView()->Zoom()->ChangeValue(-50.0f);
 		}
@@ -1229,56 +1247,6 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 				for(auto &pLayer : m_pBrush->m_vpLayers)
 					pLayer->BrushRotate(s_RotationAmount / 360.0f * pi * 2);
 			}
-
-			TB_Top.VSplitLeft(5.0f, &Button, &TB_Top);
-		}
-
-		// animation speed
-		if(m_Animate)
-		{
-			TB_Top.VSplitLeft(20.0f, &Button, &TB_Top);
-			static int s_AnimSlowerButton = 0;
-			if(DoButton_FontIcon(&s_AnimSlowerButton, "-", 0, &Button, 0, "Decrease animation speed", IGraphics::CORNER_L))
-			{
-				if(m_AnimateSpeed > 0.5f)
-					m_AnimateSpeed -= 0.5f;
-			}
-
-			TB_Top.VSplitLeft(25.0f, &Button, &TB_Top);
-			static int s_AnimNormalButton = 0;
-			if(DoButton_FontIcon(&s_AnimNormalButton, FONT_ICON_CIRCLE_PLAY, 0, &Button, 0, "Normal animation speed", 0))
-				m_AnimateSpeed = 1.0f;
-
-			TB_Top.VSplitLeft(20.0f, &Button, &TB_Top);
-			static int s_AnimFasterButton = 0;
-			if(DoButton_FontIcon(&s_AnimFasterButton, "+", 0, &Button, 0, "Increase animation speed", IGraphics::CORNER_R))
-				m_AnimateSpeed += 0.5f;
-
-			TB_Top.VSplitLeft(5.0f, &Button, &TB_Top);
-		}
-
-		// grid zoom
-		if(MapView()->MapGrid()->IsEnabled())
-		{
-			TB_Top.VSplitLeft(20.0f, &Button, &TB_Top);
-			static int s_GridIncreaseButton = 0;
-			if(DoButton_FontIcon(&s_GridIncreaseButton, "-", 0, &Button, 0, "Decrease grid", IGraphics::CORNER_L))
-			{
-				MapView()->MapGrid()->DecreaseFactor();
-			}
-
-			TB_Top.VSplitLeft(25.0f, &Button, &TB_Top);
-			static int s_GridNormalButton = 0;
-			if(DoButton_FontIcon(&s_GridNormalButton, FONT_ICON_BORDER_ALL, 0, &Button, 0, "Normal grid", IGraphics::CORNER_NONE))
-				MapView()->MapGrid()->ResetFactor();
-
-			TB_Top.VSplitLeft(20.0f, &Button, &TB_Top);
-			static int s_GridDecreaseButton = 0;
-			if(DoButton_FontIcon(&s_GridDecreaseButton, "+", 0, &Button, 0, "Increase grid", IGraphics::CORNER_R))
-			{
-				MapView()->MapGrid()->IncreaseFactor();
-			}
-			TB_Top.VSplitLeft(5.0f, &Button, &TB_Top);
 		}
 	}
 

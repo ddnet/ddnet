@@ -2725,3 +2725,60 @@ CUI::EPopupMenuFunctionResult CEditor::PopupProofMode(void *pContext, CUIRect Vi
 
 	return CUI::POPUP_KEEP_OPEN;
 }
+
+CUI::EPopupMenuFunctionResult CEditor::PopupAnimateSettings(void *pContext, CUIRect View, bool Active)
+{
+	CEditor *pEditor = static_cast<CEditor *>(pContext);
+
+	constexpr float MIN_ANIM_SPEED = 0.001f;
+	constexpr float MAX_ANIM_SPEED = 1000000.0f;
+
+	CUIRect Row, Label, ButtonDecrease, EditBox, ButtonIncrease, ButtonReset;
+	View.HSplitTop(13.0f, &Row, &View);
+	Row.VSplitMid(&Label, &Row);
+	Row.HMargin(1.0f, &Row);
+	Row.VSplitLeft(10.0f, &ButtonDecrease, &Row);
+	Row.VSplitRight(10.0f, &EditBox, &ButtonIncrease);
+	View.HSplitBottom(12.0f, &View, &ButtonReset);
+	pEditor->UI()->DoLabel(&Label, "Speed", 10.0f, TEXTALIGN_ML);
+
+	static char s_DecreaseButton;
+	if(pEditor->DoButton_Ex(&s_DecreaseButton, "-", 0, &ButtonDecrease, 0, "Decrease animation speed", IGraphics::CORNER_L))
+	{
+		pEditor->m_AnimateSpeed -= pEditor->m_AnimateSpeed <= 1.0f ? 0.1f : 0.5f;
+		pEditor->m_AnimateSpeed = maximum(pEditor->m_AnimateSpeed, MIN_ANIM_SPEED);
+		pEditor->m_AnimateUpdatePopup = true;
+	}
+
+	static char s_IncreaseButton;
+	if(pEditor->DoButton_Ex(&s_IncreaseButton, "+", 0, &ButtonIncrease, 0, "Increase animation speed", IGraphics::CORNER_R))
+	{
+		if(pEditor->m_AnimateSpeed < 0.1f)
+			pEditor->m_AnimateSpeed = 0.1f;
+		else
+			pEditor->m_AnimateSpeed += pEditor->m_AnimateSpeed < 1.0f ? 0.1f : 0.5f;
+		pEditor->m_AnimateSpeed = minimum(pEditor->m_AnimateSpeed, MAX_ANIM_SPEED);
+		pEditor->m_AnimateUpdatePopup = true;
+	}
+
+	static char s_DefaultButton;
+	if(pEditor->DoButton_Ex(&s_DefaultButton, "Default", 0, &ButtonReset, 0, "Normal animation speed", IGraphics::CORNER_ALL))
+	{
+		pEditor->m_AnimateSpeed = 1.0f;
+		pEditor->m_AnimateUpdatePopup = true;
+	}
+
+	static CLineInputNumber s_SpeedInput;
+	if(pEditor->m_AnimateUpdatePopup)
+	{
+		s_SpeedInput.SetFloat(pEditor->m_AnimateSpeed);
+		pEditor->m_AnimateUpdatePopup = false;
+	}
+
+	if(pEditor->DoEditBox(&s_SpeedInput, &EditBox, 10.0f, IGraphics::CORNER_NONE, "The animation speed"))
+	{
+		pEditor->m_AnimateSpeed = clamp(s_SpeedInput.GetFloat(), MIN_ANIM_SPEED, MAX_ANIM_SPEED);
+	}
+
+	return CUI::POPUP_KEEP_OPEN;
+}
