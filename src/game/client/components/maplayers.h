@@ -40,7 +40,7 @@ class CMapLayers : public CComponent
 	struct STileLayerVisuals
 	{
 		STileLayerVisuals() :
-			m_pTilesOfLayer(nullptr), m_pBorderTop(nullptr), m_pBorderLeft(nullptr), m_pBorderRight(nullptr), m_pBorderBottom(nullptr)
+			m_pTilesOfLayer(nullptr)
 		{
 			m_Width = 0;
 			m_Height = 0;
@@ -63,27 +63,27 @@ class CMapLayers : public CComponent
 		public:
 			bool DoDraw()
 			{
-				return (m_IndexBufferByteOffset & 0x00000001) != 0;
+				return (m_IndexBufferByteOffset & 0x10000000) != 0;
 			}
 
 			void Draw(bool SetDraw)
 			{
-				m_IndexBufferByteOffset = (SetDraw ? 0x00000001 : (offset_ptr32)0) | (m_IndexBufferByteOffset & 0xFFFFFFFE);
+				m_IndexBufferByteOffset = (SetDraw ? 0x10000000 : (offset_ptr32)0) | (m_IndexBufferByteOffset & 0xEFFFFFFF);
 			}
 
 			offset_ptr IndexBufferByteOffset()
 			{
-				return ((offset_ptr)(m_IndexBufferByteOffset & 0xFFFFFFFE));
+				return ((offset_ptr)(m_IndexBufferByteOffset & 0xEFFFFFFF) * 6 * sizeof(uint32_t));
 			}
 
 			void SetIndexBufferByteOffset(offset_ptr32 IndexBufferByteOff)
 			{
-				m_IndexBufferByteOffset = IndexBufferByteOff | (m_IndexBufferByteOffset & 0x00000001);
+				m_IndexBufferByteOffset = IndexBufferByteOff | (m_IndexBufferByteOffset & 0x10000000);
 			}
 
 			void AddIndexBufferByteOffset(offset_ptr32 IndexBufferByteOff)
 			{
-				m_IndexBufferByteOffset = ((m_IndexBufferByteOffset & 0xFFFFFFFE) + IndexBufferByteOff) | (m_IndexBufferByteOffset & 0x00000001);
+				m_IndexBufferByteOffset = ((m_IndexBufferByteOffset & 0xEFFFFFFF) + IndexBufferByteOff) | (m_IndexBufferByteOffset & 0x10000000);
 			}
 		};
 		STileVisual *m_pTilesOfLayer;
@@ -95,10 +95,10 @@ class CMapLayers : public CComponent
 
 		STileVisual m_BorderKillTile; //end of map kill tile -- game layer only
 
-		STileVisual *m_pBorderTop;
-		STileVisual *m_pBorderLeft;
-		STileVisual *m_pBorderRight;
-		STileVisual *m_pBorderBottom;
+		std::vector<STileVisual> m_vBorderTop;
+		std::vector<STileVisual> m_vBorderLeft;
+		std::vector<STileVisual> m_vBorderRight;
+		std::vector<STileVisual> m_vBorderBottom;
 
 		unsigned int m_Width;
 		unsigned int m_Height;
@@ -132,8 +132,6 @@ class CMapLayers : public CComponent
 
 	void LayersOfGroupCount(CMapItemGroup *pGroup, int &TileLayerCount, int &QuadLayerCount, bool &PassedGameLayer);
 
-	void RenderTileBorderCornerTiles(int WidthOffsetToOrigin, int HeightOffsetToOrigin, int TileCountWidth, int TileCountHeight, int BufferContainerIndex, const ColorRGBA &Color, offset_ptr_size IndexBufferOffset, const vec2 &Offset, const vec2 &Dir);
-
 protected:
 	virtual bool CanRenderMenuBackground() { return true; }
 
@@ -155,7 +153,7 @@ public:
 	virtual void OnMapLoad() override;
 
 	void RenderTileLayer(int LayerIndex, ColorRGBA &Color, CMapItemLayerTilemap *pTileLayer, CMapItemGroup *pGroup);
-	void RenderTileBorder(int LayerIndex, const ColorRGBA &Color, CMapItemLayerTilemap *pTileLayer, CMapItemGroup *pGroup, int BorderX0, int BorderY0, int BorderX1, int BorderY1, int ScreenWidthTileCount, int ScreenHeightTileCount);
+	void RenderTileBorder(int LayerIndex, const ColorRGBA &Color, CMapItemLayerTilemap *pTileLayer, CMapItemGroup *pGroup, int BorderX0, int BorderY0, int BorderX1, int BorderY1);
 	void RenderKillTileBorder(int LayerIndex, const ColorRGBA &Color, CMapItemLayerTilemap *pTileLayer, CMapItemGroup *pGroup);
 	void RenderQuadLayer(int LayerIndex, CMapItemLayerQuads *pQuadLayer, CMapItemGroup *pGroup, bool ForceRender = false);
 

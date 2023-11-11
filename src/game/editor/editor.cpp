@@ -3955,7 +3955,7 @@ bool CEditor::ReplaceImage(const char *pFileName, int StorageType, bool CheckDup
 	}
 
 	pImg->m_AutoMapper.Load(pImg->m_aName);
-	int TextureLoadFlag = Graphics()->HasTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
+	int TextureLoadFlag = Graphics()->Uses2DTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
 	if(ImgInfo.m_Width % 16 != 0 || ImgInfo.m_Height % 16 != 0)
 		TextureLoadFlag = 0;
 	pImg->m_Texture = Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, TextureLoadFlag, pFileName);
@@ -4014,7 +4014,7 @@ bool CEditor::AddImage(const char *pFileName, int StorageType, void *pUser)
 		DilateImage((unsigned char *)ImgInfo.m_pData, ImgInfo.m_Width, ImgInfo.m_Height);
 	}
 
-	int TextureLoadFlag = pEditor->Graphics()->HasTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
+	int TextureLoadFlag = pEditor->Graphics()->Uses2DTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
 	if(ImgInfo.m_Width % 16 != 0 || ImgInfo.m_Height % 16 != 0)
 		TextureLoadFlag = 0;
 	pImg->m_Texture = pEditor->Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, TextureLoadFlag, pFileName);
@@ -7580,7 +7580,7 @@ void CEditor::Reset(bool CreateDefault)
 
 int CEditor::GetTextureUsageFlag()
 {
-	return Graphics()->HasTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
+	return Graphics()->Uses2DTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
 }
 
 IGraphics::CTextureHandle CEditor::GetFrontTexture()

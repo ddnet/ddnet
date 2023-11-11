@@ -155,6 +155,7 @@ public:
 	int m_LocColor;
 	int m_LocOffset;
 	int m_LocDir;
+	int m_LocScale = -1;
 	int m_LocNum;
 	int m_LocJumpIndex;
 };
