@@ -252,9 +252,6 @@ Exclude
 Server address:
 == Retadreso de servilo:
 
-Refresh
-== Aktualigi
-
 Count players only
 == Nur nombri ludantojn
 
@@ -291,24 +288,8 @@ Remove chat
 Folder
 == Dosierujo
 
-Version:
-== Versio:
-
-Map:
-== Mapo:
-
-Open
-== Malfermi
-
-[Demo browser]
-Play
-== Legi
-
 Delete
 == Forigi
-
-Rename
-== Renomigi
 
 Connect Dummy
 == Konektigi pupon
@@ -602,6 +583,9 @@ Could not initialize the given graphics backend, this is probably because you di
 Could not save downloaded map. Try manually deleting this file: %s
 == 
 
+Error playing demo
+== 
+
 Successfully saved the replay!
 == 
 
@@ -665,7 +649,16 @@ Personal best:
 Team %d
 == 
 
+Some map images could not be loaded. Check the local console for details.
+== 
+
 Uploading map data to GPU
+== 
+
+Some map sounds could not be loaded. Check the local console for details.
+== 
+
+Loading menu themes
 == 
 
 Reset
@@ -707,6 +700,9 @@ Rename demo
 Render demo
 == 
 
+Render complete
+== 
+
 Password incorrect
 == 
 
@@ -737,13 +733,19 @@ File '%s' already exists, do you want to overwrite it?
 Replace video
 == 
 
-(paused)
-== 
-
 Show ingame HUD
 == 
 
+(paused)
+== 
+
 Video name:
+== 
+
+Videos directory
+== 
+
+Video was saved to '%s'
 == 
 
 Show DDNet map finishes in server browser
@@ -914,6 +916,18 @@ Loading demo files
 All combined
 == 
 
+Demo
+== 
+
+Length
+== 
+
+Date
+== 
+
+No demo selected
+== 
+
 Parent Folder
 == 
 
@@ -923,46 +937,26 @@ Folder Link
 Invalid Demo
 == 
 
-Demo details
+Created
 == 
 
-Created:
+Markers
 == 
 
-Type:
+Netversion
 == 
 
-Length:
+Size
 == 
 
-Markers:
-== 
-
-Size:
+[Demo details]
+map not included
 == 
 
 %.2f MiB
 == 
 
 %.2f KiB
-== 
-
-Crc:
-== 
-
-Netversion:
-== 
-
-Demo
-== 
-
-Markers
-== 
-
-Length
-== 
-
-Date
 == 
 
 Fetch Info
@@ -984,9 +978,6 @@ Delete folder
 == 
 
 Delete demo
-== 
-
-Render
 == 
 
 Unable to delete the demo '%s'
@@ -1013,7 +1004,13 @@ Remove
 Loading ghost files
 == 
 
-Reload
+Ghosts directory
+== 
+
+Activate all
+== 
+
+Deactivate all
 == 
 
 Deactivate
@@ -1558,13 +1555,22 @@ Enable replays
 Default length
 == 
 
+Enable ghost
+== 
+
 When you cross the start line, show a ghost tee replicating the movements of your best time
 == 
 
 Show ghost
 == 
 
+Opacity
+== 
+
 Save ghost
+== 
+
+Only save improvements
 == 
 
 Gameplay
@@ -1574,12 +1580,6 @@ Overlay entities
 == 
 
 Show text entities
-== 
-
-Size
-== 
-
-Opacity
 == 
 
 Adjust the opacity of entities belonging to other teams, such as tees and nameplates
@@ -1612,16 +1612,19 @@ AntiPing: predict grenade paths
 Background
 == 
 
-Entities Background color
+Regular background color
+== 
+
+Entities background color
+== 
+
+Reload
 == 
 
 Use current map as background
 == 
 
 Show tiles layers from BG map
-== 
-
-Regular Background Color
 == 
 
 New random timeout code

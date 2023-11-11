@@ -111,9 +111,6 @@ Delete
 Delete demo
 == Demoyu sil
 
-Demo details
-== Demo ayrıntıları
-
 Demofile: %s
 == Demo dosyası: %s
 
@@ -267,9 +264,6 @@ No servers match your filter criteria
 Ok
 == Tamam
 
-Open
-== Aç
-
 Parent Folder
 == Üst dizin
 
@@ -284,10 +278,6 @@ Ping
 
 Pistol
 == Tabanca
-
-[Demo browser]
-Play
-== Oynat
 
 Play background music
 == Arkaplan müziğini çal
@@ -319,9 +309,6 @@ Red team
 Red team wins!
 == Kırmızı takım kazandı!
 
-Refresh
-== Yenile
-
 Remote console
 == Uzak Konsol
 
@@ -330,9 +317,6 @@ Remove
 
 Remove friend
 == Arkadaşı sil
-
-Rename
-== Yeniden isimlendir
 
 Rename demo
 == Demonun adını değiştir
@@ -505,23 +489,11 @@ FSAA samples
 Sound volume
 == Ses seviyesi
 
-Created:
-== Oluşturuldu:
-
 Max Screenshots
 == Maksimum Ekran Görüntüsü Sayısı
 
-Length:
-== Uzunluk:
-
 Laser
 == Lazer
-
-Netversion:
-== Netversion:
-
-Map:
-== Harita:
 
 Hue
 == Renk
@@ -532,19 +504,11 @@ Record demo
 Your skin
 == Sizin görünüşünüz
 
-Size:
-== Boyut:
-
-##### translated strings #####
-
 Reset to defaults
 == Varsayılanlara getir
 
 Quit anyway?
 == Çıkmak istediğinize emin misiniz?
-
-Version:
-== Versiyon:
 
 Round
 == Raunt
@@ -555,9 +519,6 @@ Lht.
 UI Color
 == Menü rengi
 
-Crc:
-== Crc:
-
 Alpha
 == Şeffaflık
 
@@ -566,9 +527,6 @@ LAN
 
 Name plates size
 == Boyut
-
-Type:
-== Tür:
 
 Successfully saved the replay!
 == Başarıyla kaydedildi!
@@ -690,9 +648,6 @@ Please use a different name
 Remove chat
 == Sohbeti kaldır
 
-Markers:
-== İşaretler:
-
 %.2f MiB
 == %.2f MiB
 
@@ -713,9 +668,6 @@ Date
 
 Fetch Info
 == Bilgileri göster
-
-Render
-== Render
 
 Connecting dummy
 == Dummy bağlanıyor
@@ -1656,14 +1608,8 @@ Tries to predict other entities to give a feel of low latency
 Background
 == Arkaplan
 
-Entities Background color
-== Yapıların arkaplan rengi
-
 Use current map as background
 == Mevcut haritayı arkaplan olarak kullan
-
-Regular Background Color
-== Normal arkaplan rengi
 
 Run on join
 == Katılınca çalıştır
@@ -1757,3 +1703,58 @@ Go forward the specified duration
 
 Render cut to video
 == Kesiti videoya dönüştür
+
+Error playing demo
+== 
+
+Some map images could not be loaded. Check the local console for details.
+== 
+
+Some map sounds could not be loaded. Check the local console for details.
+== 
+
+Loading menu themes
+== 
+
+Render complete
+== 
+
+Videos directory
+== 
+
+Video was saved to '%s'
+== 
+
+No demo selected
+== 
+
+Created
+== 
+
+Netversion
+== 
+
+[Demo details]
+map not included
+== 
+
+Ghosts directory
+== 
+
+Activate all
+== 
+
+Deactivate all
+== 
+
+Enable ghost
+== 
+
+Only save improvements
+== 
+
+Regular background color
+== 
+
+Entities background color
+== 

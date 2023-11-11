@@ -118,9 +118,6 @@ Delete
 Delete demo
 == Удалить демо
 
-Demo details
-== Сведения демо
-
 Demofile: %s
 == Демо: %s
 
@@ -274,9 +271,6 @@ No servers match your filter criteria
 Ok
 == ОК
 
-Open
-== Открыть
-
 Parent Folder
 == Родительский каталог
 
@@ -291,10 +285,6 @@ Ping
 
 Pistol
 == Пистолет
-
-[Demo browser]
-Play
-== Просмотр
 
 Play background music
 == Включить фоновую музыку
@@ -329,9 +319,6 @@ Red team
 Red team wins!
 == Красные победили!
 
-Refresh
-== Обновить
-
 Remote console
 == Консоль сервера
 
@@ -340,9 +327,6 @@ Remove
 
 Remove friend
 == Удалить друга
-
-Rename
-== Переименов.
 
 Rename demo
 == Переименовать демо
@@ -578,23 +562,11 @@ FSAA samples
 Sound volume
 == Громкость звука
 
-Created:
-== Создан:
-
 Max Screenshots
 == Максимальное кол-во снимков
 
-Length:
-== Длина:
-
 Laser
 == Лазер
-
-Netversion:
-== Версия:
-
-Map:
-== Карта:
 
 Hue
 == Оттен.
@@ -605,17 +577,11 @@ Record demo
 Your skin
 == Ваш скин
 
-Size:
-== Размер:
-
 Reset to defaults
 == Сбросить настройки
 
 Quit anyway?
 == Все равно выйти?
-
-Version:
-== Версия:
 
 Round
 == Раунд
@@ -626,9 +592,6 @@ Lht.
 UI Color
 == Цвет интерфейса
 
-Crc:
-== Crc:
-
 Alpha
 == Прозр.
 
@@ -637,9 +600,6 @@ LAN
 
 Name plates size
 == Размер имён
-
-Type:
-== Тип:
 
 Show ghost
 == Показывать тень
@@ -788,9 +748,6 @@ Update failed! Check log...
 Restart
 == Рестарт
 
-Markers:
-== Маркеры:
-
 %.2f MiB
 == %.2f МиБ
 
@@ -805,9 +762,6 @@ Date
 
 Fetch Info
 == Показать
-
-Render
-== Рендер
 
 Connect Dummy
 == Подключить дамми
@@ -1157,12 +1111,6 @@ Preview
 
 Background
 == Фон
-
-Entities Background color
-== Цвет фона при наложении
-
-Regular Background Color
-== Стандартный цвет фона
 
 Chat command
 == Чат-команда
@@ -1762,3 +1710,58 @@ Go forward the specified duration
 
 Render cut to video
 == Рендеринг отрезка в видео
+
+Error playing demo
+== 
+
+Some map images could not be loaded. Check the local console for details.
+== 
+
+Some map sounds could not be loaded. Check the local console for details.
+== 
+
+Loading menu themes
+== 
+
+Render complete
+== 
+
+Videos directory
+== 
+
+Video was saved to '%s'
+== 
+
+No demo selected
+== 
+
+Created
+== 
+
+Netversion
+== 
+
+[Demo details]
+map not included
+== 
+
+Ghosts directory
+== 
+
+Activate all
+== 
+
+Deactivate all
+== 
+
+Enable ghost
+== 
+
+Only save improvements
+== 
+
+Regular background color
+== 
+
+Entities background color
+== 

@@ -116,9 +116,6 @@ Delete
 Delete demo
 == Verwijder demo
 
-Demo details
-== Demo details
-
 Demofile: %s
 == Demobestand: %s
 
@@ -272,9 +269,6 @@ No servers match your filter criteria
 Ok
 == Oké
 
-Open
-== Open
-
 Parent Folder
 == Bovenliggende map
 
@@ -289,10 +283,6 @@ Ping
 
 Pistol
 == Pistool
-
-[Demo browser]
-Play
-== Spelen
 
 Play background music
 == Speel achtergrondmuziek
@@ -327,9 +317,6 @@ Red team
 Red team wins!
 == Rode team wint!
 
-Refresh
-== Vernieuwen
-
 Remote console
 == Remote console
 
@@ -338,9 +325,6 @@ Remove
 
 Remove friend
 == Verwijder vriend
-
-Rename
-== Hernoem
 
 Rename demo
 == Hernoem demo
@@ -515,23 +499,11 @@ FSAA samples
 Sound volume
 == Volume
 
-Created:
-== Gemaakt:
-
 Max Screenshots
 == Maximaal aantal schermafbeeldingen
 
-Length:
-== Lengte:
-
 Laser
 == Laser
-
-Netversion:
-== Netversie:
-
-Map:
-== Kaart:
 
 Hue
 == Tint
@@ -542,17 +514,11 @@ Record demo
 Your skin
 == Jouw skin
 
-Size:
-== Grootte:
-
 Reset to defaults
 == Terugzetten naar standaardinstellingen
 
 Quit anyway?
 == Toch afsluiten?
-
-Version:
-== Versie:
 
 Round
 == Ronde
@@ -563,9 +529,6 @@ Lht.
 UI Color
 == UI Kleur
 
-Crc:
-== Crc:
-
 Alpha
 == Alpha
 
@@ -574,9 +537,6 @@ LAN
 
 Name plates size
 == Grootte naamplaat
-
-Type:
-== Type:
 
 Successfully saved the replay!
 == De replay is succesvol opgeslagen!
@@ -692,9 +652,6 @@ Please use a different name
 Remove chat
 == Verwijder chat
 
-Markers:
-== Markeringen:
-
 %.2f MiB
 == %.2f MiB
 
@@ -714,9 +671,6 @@ Date
 
 Fetch Info
 == Info opvragen
-
-Render
-== Verwerken
 
 Connecting dummy
 == Dummy verbinden
@@ -1213,14 +1167,8 @@ Show local player's key presses
 Background
 == Achtergrond
 
-Entities Background color
-== Entities Achtergrondkleur
-
 Use current map as background
 == Gebruik de huidige map als achtergrond
-
-Regular Background Color
-== Reguliere Achtergrondkleur
 
 Run on join
 == Run bij deelnemen
@@ -1328,6 +1276,9 @@ Could not initialize the given graphics backend, this is probably because you di
 Could not save downloaded map. Try manually deleting this file: %s
 == 
 
+Error playing demo
+== 
+
 Preparing demo playback
 == 
 
@@ -1370,7 +1321,16 @@ Angle:
 Multi-View
 == 
 
+Some map images could not be loaded. Check the local console for details.
+== 
+
 Uploading map data to GPU
+== 
+
+Some map sounds could not be loaded. Check the local console for details.
+== 
+
+Loading menu themes
 == 
 
 Trying to determine UDP connectivity...
@@ -1394,6 +1354,9 @@ Requesting to join the game
 Rename folder
 == 
 
+Render complete
+== 
+
 A demo with this name already exists
 == 
 
@@ -1407,6 +1370,12 @@ File '%s' already exists, do you want to overwrite it?
 == 
 
 (paused)
+== 
+
+Videos directory
+== 
+
+Video was saved to '%s'
 == 
 
 Loading menu images
@@ -1526,7 +1495,20 @@ Loading demo files
 All combined
 == 
 
+No demo selected
+== 
+
 Folder Link
+== 
+
+Created
+== 
+
+Netversion
+== 
+
+[Demo details]
+map not included
 == 
 
 Open the directory that contains the demo files
@@ -1548,6 +1530,15 @@ Unable to delete the folder '%s'. Make sure it's empty first.
 == 
 
 Loading ghost files
+== 
+
+Ghosts directory
+== 
+
+Activate all
+== 
+
+Deactivate all
 == 
 
 Menu opened. Press Esc key again to close menu.
@@ -1739,6 +1730,18 @@ Freeze Laser Inner Color
 == 
 
 Set all to Rifle
+== 
+
+Enable ghost
+== 
+
+Only save improvements
+== 
+
+Regular background color
+== 
+
+Entities background color
 == 
 
 Unregister protocol and file extensions

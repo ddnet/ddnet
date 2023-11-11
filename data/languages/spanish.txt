@@ -122,9 +122,6 @@ Delete
 Delete demo
 == Borrar demo
 
-Demo details
-== Detalles de la demo
-
 Demofile: %s
 == Archivo: %s
 
@@ -281,9 +278,6 @@ No servers match your filter criteria
 Ok
 == Aceptar
 
-Open
-== Abrir
-
 Parent Folder
 == Directorio padre
 
@@ -298,10 +292,6 @@ Ping
 
 Pistol
 == Pistola
-
-[Demo browser]
-Play
-== Reproducir
 
 Play background music
 == Reproducir música de fondo
@@ -336,9 +326,6 @@ Red team
 Red team wins!
 == ¡El equipo rojo gana!
 
-Refresh
-== Actualizar
-
 Remote console
 == Consola remota
 
@@ -347,9 +334,6 @@ Remove
 
 Remove friend
 == Eliminar amigo
-
-Rename
-== Renombrar
 
 Rename demo
 == Renombrar demo
@@ -527,23 +511,11 @@ FSAA samples
 Sound volume
 == Volumen del sonido
 
-Created:
-== Creado:
-
 Max Screenshots
 == Número máximo de capturas
 
-Length:
-== Longitud:
-
 Laser
 == Láser
-
-Netversion:
-== Versión Net:
-
-Map:
-== Mapa:
 
 Hue
 == Matiz
@@ -554,17 +526,11 @@ Record demo
 Your skin
 == Tu skin
 
-Size:
-== Tamaño:
-
 Reset to defaults
 == Resetear por defecto
 
 Quit anyway?
 == ¿Salir de todos modos?
-
-Version:
-== Versión:
 
 Round
 == Ronda
@@ -575,9 +541,6 @@ Lht.
 UI Color
 == Color de menú
 
-Crc:
-== Crc:
-
 Alpha
 == Transp.
 
@@ -586,9 +549,6 @@ LAN
 
 Name plates size
 == Tamaño de la fuente de los apodos
-
-Type:
-== Tipo:
 
 Successfully saved the replay!
 == ¡Repetición guardada con éxito!
@@ -701,9 +661,6 @@ Please use a different name
 Remove chat
 == Eliminar chat
 
-Markers:
-== Marcadores:
-
 %.2f MiB
 == %.2f MiB
 
@@ -724,9 +681,6 @@ Date
 
 Fetch Info
 == Obtener info.
-
-Render
-== Renderizar
 
 Connecting dummy
 == Conectando dummy
@@ -1202,12 +1156,6 @@ Preview
 
 Background
 == Fondo
-
-Entities Background color
-== Color de fondo de entidades
-
-Regular Background Color
-== Color de fondo regular
 
 Discord
 == Discord
@@ -1768,3 +1716,58 @@ Go forward the specified duration
 
 Render cut to video
 == Renderizar corte a vídeo
+
+Error playing demo
+== 
+
+Some map images could not be loaded. Check the local console for details.
+== 
+
+Some map sounds could not be loaded. Check the local console for details.
+== 
+
+Loading menu themes
+== 
+
+Render complete
+== 
+
+Videos directory
+== 
+
+Video was saved to '%s'
+== 
+
+No demo selected
+== 
+
+Created
+== 
+
+Netversion
+== 
+
+[Demo details]
+map not included
+== 
+
+Ghosts directory
+== 
+
+Activate all
+== 
+
+Deactivate all
+== 
+
+Enable ghost
+== 
+
+Only save improvements
+== 
+
+Regular background color
+== 
+
+Entities background color
+== 

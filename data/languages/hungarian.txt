@@ -105,9 +105,6 @@ Delete
 Delete demo
 == Demó törlése
 
-Demo details
-== Információk a demóról
-
 Demos
 == Demók
 
@@ -258,9 +255,6 @@ No servers match your filter criteria
 Ok
 == Oké
 
-Open
-== Megnyit
-
 Parent Folder
 == Főmappa
 
@@ -275,10 +269,6 @@ Ping
 
 Pistol
 == Pisztoly
-
-[Demo browser]
-Play
-== Lejátszás
 
 Player
 == Játékos
@@ -307,9 +297,6 @@ Red team
 Red team wins!
 == A piros csapat nyert!
 
-Refresh
-== Újratöltés
-
 Remote console
 == Távoli konzol
 
@@ -318,9 +305,6 @@ Remove
 
 Remove friend
 == Barát eltávolítása
-
-Rename
-== Átnevezés
 
 Rename demo
 == Demó átnevezése
@@ -481,23 +465,11 @@ FSAA samples
 Sound volume
 == Hangerő
 
-Created:
-== Készült:
-
 Max Screenshots
 == Maximum Fotók
 
-Length:
-== Hossza:
-
 Laser
 == Lézer
-
-Netversion:
-== Netes verzió:
-
-Map:
-== Pálya:
 
 Miscellaneous
 == Egyéb
@@ -508,17 +480,11 @@ Record demo
 Your skin
 == Te Karaktered
 
-Size:
-== Méret:
-
 Reset to defaults
 == Visszaállítás alapértelmezettre
 
 Quit anyway?
 == Mindenképpen kilép?
-
-Version:
-== Verzió:
 
 Round
 == Menet
@@ -532,9 +498,6 @@ UI Color
 Hue
 == Színárnyalat
 
-Crc:
-== Crc:
-
 Alpha
 == Alpha
 
@@ -543,9 +506,6 @@ LAN
 
 Name plates size
 == Névtáblák mérete
-
-Type:
-== Típus:
 
 Dummy settings
 == Másolat beállításai
@@ -907,9 +867,6 @@ Zoom in
 Show text entities
 == Textúrázott entitások
 
-Render
-== Render
-
 Show all
 == Mutasson mindent
 
@@ -954,9 +911,6 @@ Size
 
 Server best:
 == Szerver legjobb:
-
-Markers:
-== Jelölések
 
 1 new mention
 == 1 új értesítés
@@ -1159,12 +1113,6 @@ Preview
 
 Background
 == Háttér
-
-Entities Background color
-== Entitás háttérkép színe
-
-Regular Background Color
-== Alap háttérkép színe
 
 Are you sure that you want to disconnect and switch to a different server?
 == Biztos, hogy kilépsz és váltasz egy másik szerverre?
@@ -1636,6 +1584,9 @@ Unregister protocol and file extensions
 Open the directory to add custom assets
 == Megnyitni az egyedi Képek helyét
 
+Error playing demo
+== 
+
 Quitting. Please wait…
 == 
 
@@ -1645,7 +1596,19 @@ Restarting. Please wait…
 Multi-View
 == 
 
+Some map images could not be loaded. Check the local console for details.
+== 
+
+Some map sounds could not be loaded. Check the local console for details.
+== 
+
+Loading menu themes
+== 
+
 Rename folder
+== 
+
+Render complete
 == 
 
 A demo with this name already exists
@@ -1658,6 +1621,12 @@ Unable to rename the folder
 == 
 
 (paused)
+== 
+
+Videos directory
+== 
+
+Video was saved to '%s'
 == 
 
 No server selected
@@ -1729,7 +1698,20 @@ Render cut to video
 All combined
 == 
 
+No demo selected
+== 
+
 Folder Link
+== 
+
+Created
+== 
+
+Netversion
+== 
+
+[Demo details]
+map not included
 == 
 
 Are you sure that you want to delete the folder '%s'?
@@ -1741,10 +1723,31 @@ Delete folder
 Unable to delete the folder '%s'. Make sure it's empty first.
 == 
 
+Ghosts directory
+== 
+
+Activate all
+== 
+
+Deactivate all
+== 
+
 Axis
 == 
 
 Graphics card
+== 
+
+Enable ghost
+== 
+
+Only save improvements
+== 
+
+Regular background color
+== 
+
+Entities background color
 == 
 
 Moved ingame

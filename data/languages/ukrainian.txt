@@ -199,9 +199,6 @@ No servers match your filter criteria
 Ok
 == Ок
 
-Open
-== Відкрити
-
 Password
 == Пароль
 
@@ -213,10 +210,6 @@ Ping
 
 Pistol
 == Пістолет
-
-[Demo browser]
-Play
-== Перегляд демо
 
 Player
 == Гравець
@@ -241,9 +234,6 @@ Red team
 
 Red team wins!
 == Червоні перемогли!
-
-Refresh
-== Оновити
 
 Remote console
 == Консоль сервера
@@ -592,41 +582,11 @@ Demofile: %s
 Parent Folder
 == Батьківський каталог
 
-Demo details
-== Деталі демо
-
-Created:
-== Створений:
-
-Type:
-== Тип:
-
-Length:
-== Довжина:
-
-Version:
-== Версія:
-
-Markers:
-== Маркери:
-
-Map:
-== Карта
-
-Size:
-== Розмір
-
 %.2f MiB
 == %.2f MiB
 
 %.2f KiB
 == %.2f KiB
-
-Crc:
-== Crc
-
-Netversion:
-== Версія:
 
 Demo
 == Демо
@@ -639,12 +599,6 @@ Date
 
 Fetch Info
 == Отримати інформацію
-
-Rename
-== Перейменувати
-
-Render
-== Почати рендер
 
 Connecting dummy
 == Підключення даммі
@@ -1153,14 +1107,8 @@ Show local player's key presses
 Background
 == Задній фон
 
-Entities Background color
-== Колір текстури заднього фону
-
 Use current map as background
 == Використовувати поточну карту як задній фон
-
-Regular Background Color
-== Звичайний колір заднього фону
 
 Entities
 == Текстури
@@ -1749,3 +1697,58 @@ Go forward the specified duration
 
 Render cut to video
 == Відтворити вирізку відео
+
+Error playing demo
+== 
+
+Some map images could not be loaded. Check the local console for details.
+== 
+
+Some map sounds could not be loaded. Check the local console for details.
+== 
+
+Loading menu themes
+== 
+
+Render complete
+== 
+
+Videos directory
+== 
+
+Video was saved to '%s'
+== 
+
+No demo selected
+== 
+
+Created
+== 
+
+Netversion
+== 
+
+[Demo details]
+map not included
+== 
+
+Ghosts directory
+== 
+
+Activate all
+== 
+
+Deactivate all
+== 
+
+Enable ghost
+== 
+
+Only save improvements
+== 
+
+Regular background color
+== 
+
+Entities background color
+== 
