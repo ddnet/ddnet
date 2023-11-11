@@ -110,6 +110,11 @@ bool CConfigManager::Save()
 	for(int i = 0; i < m_NumCallbacks; i++)
 		m_aCallbacks[i].m_pfnFunc(this, m_aCallbacks[i].m_pUserData);
 
+	for(const auto &Command : m_vUnknownCommands)
+	{
+		WriteLine(Command.c_str());
+	}
+
 	if(io_sync(m_ConfigFile) != 0)
 	{
 		m_Failed = true;
@@ -151,6 +156,11 @@ void CConfigManager::WriteLine(const char *pLine)
 	{
 		m_Failed = true;
 	}
+}
+
+void CConfigManager::StoreUnknownCommand(const char *pCommand)
+{
+	m_vUnknownCommands.emplace_back(pCommand);
 }
 
 IConfigManager *CreateConfigManager() { return new CConfigManager; }
