@@ -15,26 +15,22 @@
 #include <base/math.h>
 #include <base/system.h>
 
-#include <array>
-#include <map>
-#include <set>
-#include <vector>
-
 #include <algorithm>
-
+#include <array>
+#include <condition_variable>
 #include <cstddef>
+#include <cstdlib>
 #include <functional>
 #include <limits>
+#include <map>
 #include <memory>
-#include <string>
-
-#include <condition_variable>
 #include <mutex>
+#include <optional>
+#include <set>
+#include <string>
 #include <thread>
-
-#include <cstdlib>
-
 #include <unordered_map>
+#include <vector>
 
 #include <SDL_video.h>
 #include <SDL_vulkan.h>
@@ -904,6 +900,7 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 
 	uint32_t m_MinUniformAlign;
 
+	std::vector<uint8_t> m_vReadPixelHelper;
 	std::vector<uint8_t> m_vScreenshotHelper;
 
 	SDeviceMemoryBlock m_GetPresentedImgDataHelperMem;
@@ -1278,6 +1275,7 @@ protected:
 
 		m_aCommandCallbacks[CommandBufferCMDOff(CCommandBuffer::CMD_VSYNC)] = {false, [](SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand *pBaseCommand) {}, [this](const CCommandBuffer::SCommand *pBaseCommand, SRenderCommandExecuteBuffer &ExecBuffer) { return Cmd_VSync(static_cast<const CCommandBuffer::SCommand_VSync *>(pBaseCommand)); }};
 		m_aCommandCallbacks[CommandBufferCMDOff(CCommandBuffer::CMD_MULTISAMPLING)] = {false, [](SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand *pBaseCommand) {}, [this](const CCommandBuffer::SCommand *pBaseCommand, SRenderCommandExecuteBuffer &ExecBuffer) { return Cmd_MultiSampling(static_cast<const CCommandBuffer::SCommand_MultiSampling *>(pBaseCommand)); }};
+		m_aCommandCallbacks[CommandBufferCMDOff(CCommandBuffer::CMD_TRY_SWAP_AND_READ_PIXEL)] = {false, [](SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand *pBaseCommand) {}, [this](const CCommandBuffer::SCommand *pBaseCommand, SRenderCommandExecuteBuffer &ExecBuffer) { return Cmd_ReadPixel(static_cast<const CCommandBuffer::SCommand_TrySwapAndReadPixel *>(pBaseCommand)); }};
 		m_aCommandCallbacks[CommandBufferCMDOff(CCommandBuffer::CMD_TRY_SWAP_AND_SCREENSHOT)] = {false, [](SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand *pBaseCommand) {}, [this](const CCommandBuffer::SCommand *pBaseCommand, SRenderCommandExecuteBuffer &ExecBuffer) { return Cmd_Screenshot(static_cast<const CCommandBuffer::SCommand_TrySwapAndScreenshot *>(pBaseCommand)); }};
 
 		m_aCommandCallbacks[CommandBufferCMDOff(CCommandBuffer::CMD_UPDATE_VIEWPORT)] = {false, [this](SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand *pBaseCommand) { Cmd_Update_Viewport_FillExecuteBuffer(ExecBuffer, static_cast<const CCommandBuffer::SCommand_Update_Viewport *>(pBaseCommand)); }, [this](const CCommandBuffer::SCommand *pBaseCommand, SRenderCommandExecuteBuffer &ExecBuffer) { return Cmd_Update_Viewport(static_cast<const CCommandBuffer::SCommand_Update_Viewport *>(pBaseCommand)); }};
@@ -1378,15 +1376,29 @@ protected:
 		}
 	}
 
-	[[nodiscard]] bool GetPresentedImageDataImpl(uint32_t &Width, uint32_t &Height, CImageInfo::EImageFormat &Format, std::vector<uint8_t> &vDstData, bool ResetAlpha)
+	[[nodiscard]] bool GetPresentedImageDataImpl(uint32_t &Width, uint32_t &Height, CImageInfo::EImageFormat &Format, std::vector<uint8_t> &vDstData, bool ResetAlpha, std::optional<ivec2> PixelOffset)
 	{
 		bool IsB8G8R8A8 = m_VKSurfFormat.format == VK_FORMAT_B8G8R8A8_UNORM;
 		bool UsesRGBALikeFormat = m_VKSurfFormat.format == VK_FORMAT_R8G8B8A8_UNORM || IsB8G8R8A8;
 		if(UsesRGBALikeFormat && m_LastPresentedSwapChainImageIndex != std::numeric_limits<decltype(m_LastPresentedSwapChainImageIndex)>::max())
 		{
 			auto Viewport = m_VKSwapImgAndViewportExtent.GetPresentedImageViewport();
-			Width = Viewport.width;
-			Height = Viewport.height;
+			VkOffset3D SrcOffset;
+			if(PixelOffset.has_value())
+			{
+				SrcOffset.x = PixelOffset.value().x;
+				SrcOffset.y = PixelOffset.value().y;
+				Width = 1;
+				Height = 1;
+			}
+			else
+			{
+				SrcOffset.x = 0;
+				SrcOffset.y = 0;
+				Width = Viewport.width;
+				Height = Viewport.height;
+			}
+			SrcOffset.z = 0;
 			Format = CImageInfo::FORMAT_RGBA;
 
 			const size_t ImageTotalSize = (size_t)Width * Height * CImageInfo::PixelSize(Format);
@@ -1414,9 +1426,11 @@ protected:
 				BlitSize.x = Width;
 				BlitSize.y = Height;
 				BlitSize.z = 1;
+
 				VkImageBlit ImageBlitRegion{};
 				ImageBlitRegion.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 				ImageBlitRegion.srcSubresource.layerCount = 1;
+				ImageBlitRegion.srcOffsets[0] = SrcOffset;
 				ImageBlitRegion.srcOffsets[1] = BlitSize;
 				ImageBlitRegion.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 				ImageBlitRegion.dstSubresource.layerCount = 1;
@@ -1436,6 +1450,7 @@ protected:
 				VkImageCopy ImageCopyRegion{};
 				ImageCopyRegion.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 				ImageCopyRegion.srcSubresource.layerCount = 1;
+				ImageCopyRegion.srcOffset = SrcOffset;
 				ImageCopyRegion.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 				ImageCopyRegion.dstSubresource.layerCount = 1;
 				ImageCopyRegion.extent.width = Width;
@@ -1458,7 +1473,6 @@ protected:
 
 			VkSubmitInfo SubmitInfo{};
 			SubmitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-
 			SubmitInfo.commandBufferCount = 1;
 			SubmitInfo.pCommandBuffers = &CommandBuffer;
 
@@ -1525,7 +1539,7 @@ protected:
 
 	[[nodiscard]] bool GetPresentedImageData(uint32_t &Width, uint32_t &Height, CImageInfo::EImageFormat &Format, std::vector<uint8_t> &vDstData) override
 	{
-		return GetPresentedImageDataImpl(Width, Height, Format, vDstData, false);
+		return GetPresentedImageDataImpl(Width, Height, Format, vDstData, false, {});
 	}
 
 	/************************
@@ -6523,8 +6537,9 @@ public:
 
 		m_MultiSamplingCount = (g_Config.m_GfxFsaaSamples & 0xFFFFFFFE); // ignore the uneven bit, only even multi sampling works
 
-		TGLBackendReadPresentedImageData &ReadPresentedImgDataFunc = *pCommand->m_pReadPresentedImageDataFunc;
-		ReadPresentedImgDataFunc = [this](uint32_t &Width, uint32_t &Height, CImageInfo::EImageFormat &Format, std::vector<uint8_t> &vDstData) { return GetPresentedImageData(Width, Height, Format, vDstData); };
+		*pCommand->m_pReadPresentedImageDataFunc = [this](uint32_t &Width, uint32_t &Height, CImageInfo::EImageFormat &Format, std::vector<uint8_t> &vDstData) {
+			return GetPresentedImageData(Width, Height, Format, vDstData);
+		};
 
 		m_pWindow = pCommand->m_pWindow;
 
@@ -6748,18 +6763,39 @@ public:
 		return RenderStandard<CCommandBuffer::SVertex, false>(ExecBuffer, pCommand->m_State, pCommand->m_PrimType, pCommand->m_pVertices, pCommand->m_PrimCount);
 	}
 
-	[[nodiscard]] bool Cmd_Screenshot(const CCommandBuffer::SCommand_TrySwapAndScreenshot *pCommand)
+	[[nodiscard]] bool Cmd_ReadPixel(const CCommandBuffer::SCommand_TrySwapAndReadPixel *pCommand)
 	{
-		if(!NextFrame())
+		if(!*pCommand->m_pSwapped && !NextFrame())
 			return false;
 		*pCommand->m_pSwapped = true;
 
 		uint32_t Width;
 		uint32_t Height;
 		CImageInfo::EImageFormat Format;
-		if(GetPresentedImageDataImpl(Width, Height, Format, m_vScreenshotHelper, true))
+		if(GetPresentedImageDataImpl(Width, Height, Format, m_vReadPixelHelper, false, pCommand->m_Position))
 		{
-			size_t ImgSize = (size_t)Width * (size_t)Height * (size_t)4;
+			*pCommand->m_pColor = ColorRGBA(m_vReadPixelHelper[0] / 255.0f, m_vReadPixelHelper[1] / 255.0f, m_vReadPixelHelper[2] / 255.0f, 1.0f);
+		}
+		else
+		{
+			*pCommand->m_pColor = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
+		}
+
+		return true;
+	}
+
+	[[nodiscard]] bool Cmd_Screenshot(const CCommandBuffer::SCommand_TrySwapAndScreenshot *pCommand)
+	{
+		if(!*pCommand->m_pSwapped && !NextFrame())
+			return false;
+		*pCommand->m_pSwapped = true;
+
+		uint32_t Width;
+		uint32_t Height;
+		CImageInfo::EImageFormat Format;
+		if(GetPresentedImageDataImpl(Width, Height, Format, m_vScreenshotHelper, true, {}))
+		{
+			const size_t ImgSize = (size_t)Width * (size_t)Height * CImageInfo::PixelSize(Format);
 			pCommand->m_pImage->m_pData = malloc(ImgSize);
 			mem_copy(pCommand->m_pImage->m_pData, m_vScreenshotHelper.data(), ImgSize);
 		}

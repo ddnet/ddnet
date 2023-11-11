@@ -132,6 +132,7 @@ MAYBE_UNUSED static const char *FONT_ICON_CIRCLE_PLAY = "\xEF\x85\x84";
 MAYBE_UNUSED static const char *FONT_ICON_BORDER_ALL = "\xEF\xA1\x8C";
 MAYBE_UNUSED static const char *FONT_ICON_EYE = "\xEF\x81\xAE";
 MAYBE_UNUSED static const char *FONT_ICON_EYE_SLASH = "\xEF\x81\xB0";
+MAYBE_UNUSED static const char *FONT_ICON_EYE_DROPPER = "\xEF\x87\xBB";
 
 MAYBE_UNUSED static const char *FONT_ICON_DICE_ONE = "\xEF\x94\xA5";
 MAYBE_UNUSED static const char *FONT_ICON_DICE_TWO = "\xEF\x94\xA8";

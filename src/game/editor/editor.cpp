@@ -1248,6 +1248,38 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 					pLayer->BrushRotate(s_RotationAmount / 360.0f * pi * 2);
 			}
 		}
+
+		// Color pipette and palette
+		{
+			const float PipetteButtonWidth = 30.0f;
+			const float ColorPickerButtonWidth = 20.0f;
+			const float Spacing = 2.0f;
+			const size_t NumColorsShown = clamp<int>(round_to_int((TB_Top.w - PipetteButtonWidth - 40.0f) / (ColorPickerButtonWidth + Spacing)), 1, std::size(m_aSavedColors));
+
+			CUIRect ColorPalette;
+			TB_Top.VSplitRight(NumColorsShown * (ColorPickerButtonWidth + Spacing) + PipetteButtonWidth, &TB_Top, &ColorPalette);
+
+			// Pipette button
+			static char s_PipetteButton;
+			ColorPalette.VSplitLeft(PipetteButtonWidth, &Button, &ColorPalette);
+			ColorPalette.VSplitLeft(Spacing, nullptr, &ColorPalette);
+			if(DoButton_FontIcon(&s_PipetteButton, FONT_ICON_EYE_DROPPER, m_ColorPipetteActive ? 1 : 0, &Button, 0, "[Ctrl+Shift+C] Color pipette. Pick a color from the screen by clicking on it.", IGraphics::CORNER_ALL) ||
+				(CLineInput::GetActiveInput() == nullptr && ModPressed && ShiftPressed && Input()->KeyPress(KEY_C)))
+			{
+				m_ColorPipetteActive = !m_ColorPipetteActive;
+			}
+
+			// Palette color pickers
+			for(size_t i = 0; i < NumColorsShown; ++i)
+			{
+				ColorPalette.VSplitLeft(ColorPickerButtonWidth, &Button, &ColorPalette);
+				ColorPalette.VSplitLeft(Spacing, nullptr, &ColorPalette);
+				const auto &&SetColor = [&](ColorRGBA NewColor) {
+					m_aSavedColors[i] = NewColor;
+				};
+				DoColorPickerButton(&m_aSavedColors[i], &Button, m_aSavedColors[i], SetColor);
+			}
+		}
 	}
 
 	// Bottom line buttons
@@ -8202,8 +8234,16 @@ void CEditor::Render()
 
 	MapView()->UpdateZoom();
 
+	// Cancel color pipette with escape before closing popup menus with escape
+	if(m_ColorPipetteActive && UI()->ConsumeHotkey(CUI::HOTKEY_ESCAPE))
+	{
+		m_ColorPipetteActive = false;
+	}
+
 	UI()->RenderPopupMenus();
 	FreeDynamicPopupMenus();
+
+	UpdateColorPipette();
 
 	if(m_Dialog == DIALOG_NONE && !m_PopupEventActivated && UI()->ConsumeHotkey(CUI::HOTKEY_ESCAPE))
 	{
@@ -8274,22 +8314,105 @@ void CEditor::FreeDynamicPopupMenus()
 	}
 }
 
+void CEditor::UpdateColorPipette()
+{
+	if(!m_ColorPipetteActive)
+		return;
+
+	static char s_PipetteScreenButton;
+	if(UI()->HotItem() == &s_PipetteScreenButton)
+	{
+		// Read color one pixel to the top and left as we would otherwise not read the correct
+		// color due to the cursor sprite being rendered over the current mouse position.
+		const int PixelX = clamp<int>(round_to_int((UI()->MouseX() - 1.0f) / UI()->Screen()->w * Graphics()->ScreenWidth()), 0, Graphics()->ScreenWidth() - 1);
+		const int PixelY = clamp<int>(round_to_int((UI()->MouseY() - 1.0f) / UI()->Screen()->h * Graphics()->ScreenHeight()), 0, Graphics()->ScreenHeight() - 1);
+		Graphics()->ReadPixel(ivec2(PixelX, PixelY), &m_PipetteColor);
+	}
+
+	// Simulate button overlaying the entire screen to intercept all clicks for color pipette.
+	const int ButtonResult = DoButton_Editor_Common(&s_PipetteScreenButton, "", 0, UI()->Screen(), 0, "Left click to pick a color from the screen. Right click to cancel pipette mode.");
+	// Don't handle clicks if we are panning, so the pipette stays active while panning.
+	// Checking m_pContainerPanned alone is not enough, as this variable is reset when
+	// panning ends before this function is called.
+	if(m_pContainerPanned == nullptr && m_pContainerPannedLast == nullptr)
+	{
+		if(ButtonResult == 1)
+		{
+			char aClipboard[9];
+			str_format(aClipboard, sizeof(aClipboard), "%08X", m_PipetteColor.PackAlphaLast());
+			Input()->SetClipboardText(aClipboard);
+
+			// Check if any of the saved colors is equal to the picked color and
+			// bring it to the front of the list instead of adding a duplicate.
+			int ShiftEnd = (int)std::size(m_aSavedColors) - 1;
+			for(int i = 0; i < (int)std::size(m_aSavedColors); ++i)
+			{
+				if(m_aSavedColors[i].Pack() == m_PipetteColor.Pack())
+				{
+					ShiftEnd = i;
+					break;
+				}
+			}
+			for(int i = ShiftEnd; i > 0; --i)
+			{
+				m_aSavedColors[i] = m_aSavedColors[i - 1];
+			}
+			m_aSavedColors[0] = m_PipetteColor;
+		}
+		if(ButtonResult > 0)
+		{
+			m_ColorPipetteActive = false;
+		}
+	}
+}
+
 void CEditor::RenderMousePointer()
 {
 	if(!m_ShowMousePointer)
 		return;
 
+	constexpr float CursorSize = 16.0f;
+
+	// Cursor
 	Graphics()->WrapClamp();
 	Graphics()->TextureSet(m_aCursorTextures[m_CursorType]);
 	Graphics()->QuadsBegin();
 	if(m_CursorType == CURSOR_RESIZE_V)
-		Graphics()->QuadsSetRotation(pi / 2);
+	{
+		Graphics()->QuadsSetRotation(pi / 2.0f);
+	}
 	if(ms_pUiGotContext == UI()->HotItem())
-		Graphics()->SetColor(1, 0, 0, 1);
-	IGraphics::CQuadItem QuadItem(UI()->MouseX(), UI()->MouseY(), 16.0f, 16.0f);
+	{
+		Graphics()->SetColor(1.0f, 0.0f, 0.0f, 1.0f);
+	}
+	IGraphics::CQuadItem QuadItem(UI()->MouseX(), UI()->MouseY(), CursorSize, CursorSize);
 	Graphics()->QuadsDrawTL(&QuadItem, 1);
 	Graphics()->QuadsEnd();
 	Graphics()->WrapNormal();
+
+	// Pipette color
+	if(m_ColorPipetteActive)
+	{
+		CUIRect PipetteRect = {UI()->MouseX() + CursorSize, UI()->MouseY() + CursorSize, 80.0f, 20.0f};
+		if(PipetteRect.x + PipetteRect.w + 2.0f > UI()->Screen()->w)
+		{
+			PipetteRect.x = UI()->MouseX() - PipetteRect.w - CursorSize / 2.0f;
+		}
+		if(PipetteRect.y + PipetteRect.h + 2.0f > UI()->Screen()->h)
+		{
+			PipetteRect.y = UI()->MouseY() - PipetteRect.h - CursorSize / 2.0f;
+		}
+		PipetteRect.Draw(ColorRGBA(0.2f, 0.2f, 0.2f, 0.7f), IGraphics::CORNER_ALL, 3.0f);
+
+		CUIRect Pipette, Label;
+		PipetteRect.VSplitLeft(PipetteRect.h, &Pipette, &Label);
+		Pipette.Margin(2.0f, &Pipette);
+		Pipette.Draw(m_PipetteColor, IGraphics::CORNER_ALL, 3.0f);
+
+		char aLabel[8];
+		str_format(aLabel, sizeof(aLabel), "#%06X", m_PipetteColor.PackAlphaLast(false));
+		UI()->DoLabel(&Label, aLabel, 10.0f, TEXTALIGN_MC);
+	}
 }
 
 void CEditor::Reset(bool CreateDefault)
@@ -8320,6 +8443,7 @@ void CEditor::Reset(bool CreateDefault)
 	m_MouseDeltaWx = 0;
 	m_MouseDeltaWy = 0;
 	m_pContainerPanned = nullptr;
+	m_pContainerPannedLast = nullptr;
 
 	m_Map.m_Modified = false;
 	m_Map.m_ModifiedAuto = false;
@@ -8658,6 +8782,8 @@ void CEditor::OnUpdate()
 		Reset();
 	}
 
+	m_pContainerPannedLast = m_pContainerPanned;
+
 	// handle key presses
 	for(size_t i = 0; i < Input()->NumEvents(); i++)
 	{
@@ -8735,6 +8861,8 @@ void CEditor::OnWindowResize()
 
 void CEditor::OnClose()
 {
+	m_ColorPipetteActive = false;
+
 	if(m_ToolbarPreviewSound >= 0 && Sound()->IsPlaying(m_ToolbarPreviewSound))
 		Sound()->Pause(m_ToolbarPreviewSound);
 	if(m_FilePreviewSound >= 0 && Sound()->IsPlaying(m_FilePreviewSound))
