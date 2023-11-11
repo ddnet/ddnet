@@ -4251,6 +4251,13 @@ static bool UnknownArgumentCallback(const char *pCommand, void *pUser)
 	return false;
 }
 
+static bool SaveUnknownCommandCallback(const char *pCommand, void *pUser)
+{
+	CClient *pClient = static_cast<CClient *>(pUser);
+	pClient->ConfigManager()->StoreUnknownCommand(pCommand);
+	return true;
+}
+
 /*
 	Server Time
 	Client Mirror Time
@@ -4478,6 +4485,7 @@ int main(int argc, const char **argv)
 	// execute config file
 	if(pStorage->FileExists(CONFIG_FILE, IStorage::TYPE_ALL))
 	{
+		pConsole->SetUnknownCommandCallback(SaveUnknownCommandCallback, pClient);
 		if(!pConsole->ExecuteFile(CONFIG_FILE))
 		{
 			const char *pError = "Failed to load config from '" CONFIG_FILE "'.";
@@ -4486,6 +4494,7 @@ int main(int argc, const char **argv)
 			PerformAllCleanup();
 			return -1;
 		}
+		pConsole->SetUnknownCommandCallback(IConsole::EmptyUnknownCommandCallback, nullptr);
 	}
 
 	// execute autoexec file
