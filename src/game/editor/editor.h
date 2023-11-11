@@ -496,6 +496,10 @@ public:
 
 	int DoProperties(CUIRect *pToolbox, CProperty *pProps, int *pIDs, int *pNewVal, ColorRGBA Color = ColorRGBA(1, 1, 1, 0.5f));
 
+	CUI::SColorPickerPopupContext m_ColorPickerPopupContext;
+	const void *m_pColorPickerPopupActiveID = nullptr;
+	void DoColorPickerButton(const void *pID, const CUIRect *pRect, ColorRGBA Color, const std::function<void(ColorRGBA Color)> &SetColor);
+
 	int m_Mode;
 	int m_Dialog;
 	char m_aTooltip[256] = "";
