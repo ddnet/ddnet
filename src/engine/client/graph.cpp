@@ -13,6 +13,7 @@ void CGraph::Init(float Min, float Max)
 	m_Index = 0;
 	for(auto &Entry : m_aEntries)
 		Entry.m_Initialized = false;
+	m_StoredIndex = 0;
 }
 
 void CGraph::SetMin(float Min)
@@ -42,6 +43,23 @@ void CGraph::Add(float Value, ColorRGBA Color)
 {
 	InsertAt(m_Index, Value, Color);
 	m_Index = (m_Index + 1) % MAX_VALUES;
+}
+
+void CGraph::AddAveraged(float Value, size_t AveragedCount, ColorRGBA Color)
+{
+	AveragedCount = clamp<size_t>(AveragedCount, 1, std::size(m_aStoredValues));
+
+	m_aStoredValues[m_StoredIndex] = Value;
+	++m_StoredIndex;
+
+	if(m_StoredIndex >= AveragedCount)
+	{
+		float Average = 0.0f;
+		for(size_t i = 0; i < m_StoredIndex; ++i)
+			Average += m_aStoredValues[i];
+		Add(Average / m_StoredIndex, Color);
+		m_StoredIndex = 0;
+	}
 }
 
 void CGraph::InsertAt(size_t Index, float Value, ColorRGBA Color)

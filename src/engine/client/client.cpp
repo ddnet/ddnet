@@ -3017,7 +3017,7 @@ void CClient::Run()
 			{
 				// update frametime
 				m_RenderFrameTime = (Now - m_LastRenderTime) / (float)time_freq();
-				m_FpsGraph.Add(1.0f / m_RenderFrameTime);
+				m_FpsGraph.AddAveraged(1.0f / m_RenderFrameTime, round_to_int(1.0f / m_FrameTimeAvg / 60.0f));
 
 				if(m_BenchmarkFile)
 				{
