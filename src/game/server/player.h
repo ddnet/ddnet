@@ -8,6 +8,7 @@
 #include <engine/shared/protocol.h>
 
 #include <game/alloc.h>
+#include <game/server/save.h>
 
 #include "teeinfo.h"
 
@@ -221,7 +222,7 @@ public:
 	int m_SwapTargetsClientID; //Client ID of the swap target for the given player
 	bool m_BirthdayAnnounced;
 
-	vec2 LastTelePos;
+	CSaveTee m_LastTeleTee;
 };
 
 #endif
