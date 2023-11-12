@@ -103,9 +103,6 @@ Delete
 Delete demo
 == Демо шăлса тасатма
 
-Demo details
-== Демо тĕплĕсем
-
 Demofile: %s
 == Демо: %s
 
@@ -259,9 +256,6 @@ No servers match your filter criteria
 Ok
 == Çапла
 
-Open
-== Уçма
-
 Parent Folder
 == Аслă каталог
 
@@ -276,10 +270,6 @@ Ping
 
 Pistol
 == Пистолет
-
-[Demo browser]
-Play
-== Пăхма
 
 Play background music
 == Кĕвви
@@ -314,9 +304,6 @@ Red team
 Red team wins!
 == Хĕрлĕ ушкăн çĕнтерчĕ!
 
-Refresh
-== Каллех вула
-
 Remote console
 == Сервер консолĕ
 
@@ -325,9 +312,6 @@ Remove
 
 Remove friend
 == Юлташа тасат
-
-Rename
-== Çĕнĕ ят
 
 Rename demo
 == Демо çĕнĕ ят
@@ -496,9 +480,6 @@ News
 Join game
 == Выляма
 
-Crc:
-== Crc:
-
 FSAA samples
 == FSAA якату
 
@@ -511,26 +492,17 @@ LAN
 Sound volume
 == Сасă янравлăш
 
-Created:
-== Хайланă:
-
 Record demo
 == Демо çыр
 
 Miscellaneous
 == Хушнисем
 
-Netversion:
-== Версия:
-
 UI Color
 == Интерфейс тĕсĕ
 
 Max Screenshots
 == Ӳкерчĕксен чи пысăк хисепĕ
-
-Size:
-== Пыçăкăш:
 
 Hue
 == Тĕс сĕмĕ
@@ -544,26 +516,14 @@ Reset to defaults
 Laser
 == Бластер
 
-Version:
-== Версие:
-
-Map:
-== Карта:
-
 Lht.
 == Çутăллăх
 
 Alpha
 == Тăрă
 
-Length:
-== Вăрăмăш
-
 Name plates size
 == Пысăкăш
-
-Type:
-== Тĕс:
 
 [Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
@@ -602,6 +562,9 @@ Could not initialize the given graphics backend, this is probably because you di
 == 
 
 Could not save downloaded map. Try manually deleting this file: %s
+== 
+
+Error playing demo
 == 
 
 Successfully saved the replay!
@@ -682,7 +645,16 @@ Personal best:
 Team %d
 == 
 
+Some map images could not be loaded. Check the local console for details.
+== 
+
 Uploading map data to GPU
+== 
+
+Some map sounds could not be loaded. Check the local console for details.
+== 
+
+Loading menu themes
 == 
 
 Reset
@@ -719,6 +691,9 @@ Rename folder
 == 
 
 Render demo
+== 
+
+Render complete
 == 
 
 Welcome to DDNet
@@ -767,6 +742,12 @@ Speed
 == 
 
 Video name:
+== 
+
+Videos directory
+== 
+
+Video was saved to '%s'
 == 
 
 Join Tutorial Server
@@ -973,28 +954,41 @@ Loading demo files
 All combined
 == 
 
-Folder Link
-== 
-
-Markers:
-== 
-
-%.2f MiB
-== 
-
-%.2f KiB
-== 
-
 Demo
-== 
-
-Markers
 == 
 
 Length
 == 
 
 Date
+== 
+
+No demo selected
+== 
+
+Folder Link
+== 
+
+Created
+== 
+
+Markers
+== 
+
+Netversion
+== 
+
+Size
+== 
+
+[Demo details]
+map not included
+== 
+
+%.2f MiB
+== 
+
+%.2f KiB
 == 
 
 Fetch Info
@@ -1013,9 +1007,6 @@ Are you sure that you want to delete the demo '%s'?
 == 
 
 Delete folder
-== 
-
-Render
 == 
 
 Unable to delete the demo '%s'
@@ -1051,7 +1042,13 @@ Loading ghost files
 Time
 == 
 
-Reload
+Ghosts directory
+== 
+
+Activate all
+== 
+
+Deactivate all
 == 
 
 Deactivate
@@ -1521,13 +1518,22 @@ Enable replays
 Default length
 == 
 
+Enable ghost
+== 
+
 When you cross the start line, show a ghost tee replicating the movements of your best time
 == 
 
 Show ghost
 == 
 
+Opacity
+== 
+
 Save ghost
+== 
+
+Only save improvements
 == 
 
 Gameplay
@@ -1537,12 +1543,6 @@ Overlay entities
 == 
 
 Show text entities
-== 
-
-Size
-== 
-
-Opacity
 == 
 
 Adjust the opacity of entities belonging to other teams, such as tees and nameplates
@@ -1575,16 +1575,19 @@ AntiPing: predict grenade paths
 Background
 == 
 
-Entities Background color
+Regular background color
+== 
+
+Entities background color
+== 
+
+Reload
 == 
 
 Use current map as background
 == 
 
 Show tiles layers from BG map
-== 
-
-Regular Background Color
 == 
 
 New random timeout code

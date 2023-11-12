@@ -103,9 +103,6 @@ Delete
 Delete demo
 == デモを削除
 
-Demo details
-== デモの詳細
-
 Demofile: %s
 == デモファイル: %s
 
@@ -256,9 +253,6 @@ No servers match your filter criteria
 Ok
 == Ok
 
-Open
-== 開く
-
 Parent Folder
 == 親フォルダ
 
@@ -273,10 +267,6 @@ Ping
 
 Pistol
 == ピストル
-
-[Demo browser]
-Play
-== 再生
 
 Play background music
 == BGM
@@ -311,9 +301,6 @@ Red team
 Red team wins!
 == 赤チームの勝ち！
 
-Refresh
-== 更新
-
 Remote console
 == リモートコンソール
 
@@ -322,9 +309,6 @@ Remove
 
 Remove friend
 == 友達を削除
-
-Rename
-== 名前変更
 
 Rename demo
 == デモの名前変更
@@ -493,9 +477,6 @@ News
 Join game
 == ゲームに参加
 
-Crc:
-== Crc:
-
 FSAA samples
 == FSAA サンプル数
 
@@ -508,26 +489,17 @@ LAN
 Sound volume
 == 音量
 
-Created:
-== 作成日時:
-
 Record demo
 == デモを録画
 
 Miscellaneous
 == その他
 
-Netversion:
-== 通信バージョン:
-
 UI Color
 == UI カラー
 
 Max Screenshots
 == スクリーンショットの最大数
-
-Size:
-== サイズ:
 
 Hue
 == 色相
@@ -541,26 +513,14 @@ Reset to defaults
 Laser
 == レーザー
 
-Version:
-== バージョン:
-
-Map:
-== マップ:
-
 Lht.
 == 明るさ
 
 Alpha
 == 透明度
 
-Length:
-== 長さ:
-
 Name plates size
 == 名前表示の大きさ
-
-Type:
-== タイプ:
 
 Successfully saved the replay!
 == リプレイ保存完了しました!
@@ -706,9 +666,6 @@ Please use a different name
 Remove chat
 == チャット履歴を削除
 
-Markers:
-== ブックマーク:
-
 %.2f MiB
 == %.2f MiB
 
@@ -732,9 +689,6 @@ Fetch Info
 
 Demos directory
 == デモ・ディレクトリー
-
-Render
-== 描画
 
 Connecting dummy
 == ダミーを接続中
@@ -1030,17 +984,11 @@ Show other players' key presses
 Background
 == 背景
 
-Entities Background color
-== オブジェの背景色
-
 Use current map as background
 == 現在のマップを背景にする
 
 Show tiles layers from BG map
 == 背景マップのタイル層を表示
-
-Regular Background Color
-== 普通の背景色
 
 New random timeout code
 == ランダムにタイムアウト・コードを生成
@@ -1214,6 +1162,9 @@ Could not initialize the given graphics backend, this is probably because you di
 Could not save downloaded map. Try manually deleting this file: %s
 == 
 
+Error playing demo
+== 
+
 The format of texture %s is not RGBA which will cause visual bugs.
 == 
 
@@ -1262,7 +1213,16 @@ Multi-View
 Team %d
 == 
 
+Some map images could not be loaded. Check the local console for details.
+== 
+
 Uploading map data to GPU
+== 
+
+Some map sounds could not be loaded. Check the local console for details.
+== 
+
+Loading menu themes
 == 
 
 Trying to determine UDP connectivity...
@@ -1286,6 +1246,9 @@ Requesting to join the game
 Rename folder
 == 
 
+Render complete
+== 
+
 A demo with this name already exists
 == 
 
@@ -1299,6 +1262,12 @@ File '%s' already exists, do you want to overwrite it?
 == 
 
 (paused)
+== 
+
+Videos directory
+== 
+
+Video was saved to '%s'
 == 
 
 Join Tutorial Server
@@ -1448,7 +1417,20 @@ Loading demo files
 All combined
 == 
 
+No demo selected
+== 
+
 Folder Link
+== 
+
+Created
+== 
+
+Netversion
+== 
+
+[Demo details]
+map not included
 == 
 
 Open the directory that contains the demo files
@@ -1470,6 +1452,15 @@ Unable to delete the folder '%s'. Make sure it's empty first.
 == 
 
 Loading ghost files
+== 
+
+Ghosts directory
+== 
+
+Activate all
+== 
+
+Deactivate all
 == 
 
 Menu opened. Press Esc key again to close menu.
@@ -1699,10 +1690,16 @@ Freeze Laser Inner Color
 Set all to Rifle
 == 
 
+Enable ghost
+== 
+
 When you cross the start line, show a ghost tee replicating the movements of your best time
 == 
 
 Opacity
+== 
+
+Only save improvements
 == 
 
 Adjust the opacity of entities belonging to other teams, such as tees and nameplates
@@ -1712,6 +1709,12 @@ Quads are used for background decoration
 == 
 
 Tries to predict other entities to give a feel of low latency
+== 
+
+Regular background color
+== 
+
+Entities background color
 == 
 
 Run on join

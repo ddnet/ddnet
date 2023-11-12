@@ -124,9 +124,6 @@ Delete
 Delete demo
 == 刪除回放
 
-Demo details
-== 回放詳細資訊
-
 Demofile: %s
 == 回放檔案：%s
 
@@ -304,9 +301,6 @@ No servers match your filter criteria
 Ok
 == 確定
 
-Open
-== 開啟
-
 Parent Folder
 == 上級目錄
 
@@ -321,10 +315,6 @@ Ping
 
 Pistol
 == 手槍
-
-[Demo browser]
-Play
-== 播放
 
 Play background music
 == 播放背景音樂
@@ -362,9 +352,6 @@ Red team
 Red team wins!
 == 紅隊勝利！
 
-Refresh
-== 重新整理
-
 Remote console
 == 遠端控制檯
 
@@ -373,9 +360,6 @@ Remove
 
 Remove friend
 == 刪除好友
-
-Rename
-== 重新命名
 
 Rename demo
 == 重新命名回放
@@ -572,26 +556,14 @@ Sound volume
 Map sound volume
 == 地圖音效音量
 
-Created:
-== 建立時間：
-
 Max Screenshots
 == 最大截圖數
 
 Dummy settings
 == 分身設定
 
-Length:
-== 長度：
-
 Laser
 == 鐳射
-
-Netversion:
-== 通訊版本：
-
-Map:
-== 地圖：
 
 Hue
 == 色調
@@ -602,17 +574,11 @@ Record demo
 Your skin
 == 你的外觀
 
-Size:
-== 大小：
-
 Reset to defaults
 == 恢復預設設定
 
 Quit anyway?
 == 無論如何都要退出嗎？
-
-Version:
-== 版本：
 
 Round
 == 回合
@@ -626,9 +592,6 @@ Automatically take statboard screenshot
 UI Color
 == 介面顏色
 
-Crc:
-== Crc:
-
 Alpha
 == 透明度
 
@@ -637,9 +600,6 @@ LAN
 
 Name plates size
 == 暱稱大小
-
-Type:
-== 型別：
 
 Use DDRace Scoreboard
 == 使用 DDRace 計分板
@@ -917,9 +877,6 @@ Markers
 Filter connecting players
 == 過濾正在連線的玩家
 
-Markers:
-== 標記
-
 Zoom in
 == 視距放大
 
@@ -997,9 +954,6 @@ It's recommended that you check the settings to adjust them to your liking befor
 
 Please enter your nickname below.
 == 請輸入你的暱稱。
-
-Render
-== 渲染
 
 Server best:
 == 伺服器最佳
@@ -1208,12 +1162,6 @@ Preview
 
 Background
 == 背景
-
-Entities Background color
-== 實體層背景顏色
-
-Regular Background Color
-== 背景層背景顏色
 
 Discord
 == Discord
@@ -1755,6 +1703,27 @@ Unable to delete the folder '%s'. Make sure it's empty first.
 Moved ingame
 == 遊戲內移動
 
+Error playing demo
+== 
+
+Some map images could not be loaded. Check the local console for details.
+== 
+
+Some map sounds could not be loaded. Check the local console for details.
+== 
+
+Loading menu themes
+== 
+
+Render complete
+== 
+
+Videos directory
+== 
+
+Video was saved to '%s'
+== 
+
 Go back the specified duration
 == 
 
@@ -1773,4 +1742,38 @@ Go forward the specified duration
 == 
 
 Render cut to video
+== 
+
+No demo selected
+== 
+
+Created
+== 
+
+Netversion
+== 
+
+[Demo details]
+map not included
+== 
+
+Ghosts directory
+== 
+
+Activate all
+== 
+
+Deactivate all
+== 
+
+Enable ghost
+== 
+
+Only save improvements
+== 
+
+Regular background color
+== 
+
+Entities background color
 == 

@@ -135,9 +135,6 @@ Delete
 Delete demo
 == 删除回放
 
-Demo details
-== 回放详情
-
 Demofile: %s
 == 回放文件：%s
 
@@ -315,9 +312,6 @@ No servers match your filter criteria
 Ok
 == 确定
 
-Open
-== 打开
-
 Parent Folder
 == 上级目录
 
@@ -332,10 +326,6 @@ Ping
 
 Pistol
 == 手枪
-
-[Demo browser]
-Play
-== 播放
 
 Play background music
 == 播放背景音乐
@@ -373,9 +363,6 @@ Red team
 Red team wins!
 == 红队胜利！
 
-Refresh
-== 刷新
-
 Remote console
 == 远程控制台
 
@@ -384,9 +371,6 @@ Remove
 
 Remove friend
 == 删除好友
-
-Rename
-== 重命名
 
 Rename demo
 == 重命名回放
@@ -583,26 +567,14 @@ Sound volume
 Map sound volume
 == 地图音效音量
 
-Created:
-== 创建时间：
-
 Max Screenshots
 == 最大截图数
 
 Dummy settings
 == 分身设置
 
-Length:
-== 时长：
-
 Laser
 == 激光
-
-Netversion:
-== 通信版本：
-
-Map:
-== 地图：
 
 Hue
 == 色调
@@ -613,17 +585,11 @@ Record demo
 Your skin
 == 你的皮肤
 
-Size:
-== 大小：
-
 Reset to defaults
 == 恢复默认设置
 
 Quit anyway?
 == 无论如何都要退出吗？
-
-Version:
-== 版本：
 
 Round
 == 回合
@@ -637,9 +603,6 @@ Automatically take statboard screenshot
 UI Color
 == 界面颜色
 
-Crc:
-== Crc:
-
 Alpha
 == 透明度
 
@@ -648,9 +611,6 @@ LAN
 
 Name plates size
 == 昵称大小
-
-Type:
-== 类型：
 
 Use DDRace Scoreboard
 == 使用 DDRace 计分板
@@ -928,9 +888,6 @@ Markers
 Filter connecting players
 == 筛选正在连接的玩家
 
-Markers:
-== 标记
-
 Zoom in
 == 放大视野
 
@@ -1008,9 +965,6 @@ It's recommended that you check the settings to adjust them to your liking befor
 
 Please enter your nickname below.
 == 请在下方输入你的昵称。
-
-Render
-== 渲染
 
 Server best:
 == 服务器最佳
@@ -1189,12 +1143,6 @@ Preview
 
 Background
 == 背景
-
-Entities Background color
-== 实体层背景颜色
-
-Regular Background Color
-== 背景层背景颜色
 
 AFR
 == 非洲
@@ -1766,6 +1714,27 @@ Unable to delete the folder '%s'. Make sure it's empty first.
 Moved ingame
 == 游戏内移动
 
+Error playing demo
+== 
+
+Some map images could not be loaded. Check the local console for details.
+== 
+
+Some map sounds could not be loaded. Check the local console for details.
+== 
+
+Loading menu themes
+== 
+
+Render complete
+== 
+
+Videos directory
+== 
+
+Video was saved to '%s'
+== 
+
 Go back the specified duration
 == 
 
@@ -1784,4 +1753,38 @@ Go forward the specified duration
 == 
 
 Render cut to video
+== 
+
+No demo selected
+== 
+
+Created
+== 
+
+Netversion
+== 
+
+[Demo details]
+map not included
+== 
+
+Ghosts directory
+== 
+
+Activate all
+== 
+
+Deactivate all
+== 
+
+Enable ghost
+== 
+
+Only save improvements
+== 
+
+Regular background color
+== 
+
+Entities background color
 == 

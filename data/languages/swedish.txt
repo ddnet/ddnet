@@ -108,9 +108,6 @@ Delete
 Delete demo
 == Ta bort demo
 
-Demo details
-== Demoinformation
-
 Demofile: %s
 == Demofil: %s
 
@@ -264,9 +261,6 @@ No servers match your filter criteria
 Ok
 == Ok
 
-Open
-== Öppna
-
 Parent Folder
 == Uppliggande mapp
 
@@ -281,10 +275,6 @@ Ping
 
 Pistol
 == Pistol
-
-[Demo browser]
-Play
-== Spela
 
 Play background music
 == Aktivera bakgrundsmusik
@@ -319,9 +309,6 @@ Red team
 Red team wins!
 == Röda laget vann!
 
-Refresh
-== Uppdatera
-
 Remote console
 == Serverkonsol
 
@@ -330,9 +317,6 @@ Remove
 
 Remove friend
 == Ta bort kompis
-
-Rename
-== Byt namn
 
 Rename demo
 == Byt namn på demo
@@ -505,23 +489,11 @@ FSAA samples
 Sound volume
 == Volym
 
-Created:
-== Skapad:
-
 Max Screenshots
 == Max antal skärmdumpar
 
-Length:
-== Längd
-
 Laser
 == Gevär
-
-Netversion:
-== Nätversion:
-
-Map:
-== Bana
 
 Hue
 == Nyans
@@ -532,17 +504,11 @@ Record demo
 Your skin
 == Ditt skin
 
-Size:
-== Storlek:
-
 Reset to defaults
 == Nollställ till standard
 
 Quit anyway?
 == Avsluta i alla fall?
-
-Version:
-== Version:
 
 Round
 == Runda
@@ -553,9 +519,6 @@ Lht.
 UI Color
 == Gränssnittfärg
 
-Crc:
-== Crc:
-
 Alpha
 == Alpha
 
@@ -564,9 +527,6 @@ LAN
 
 Name plates size
 == Storlek på namnskyltar
-
-Type:
-== Typ:
 
 Vanilla skins only
 == Bara vanilla skins
@@ -688,9 +648,6 @@ It's recommended that you check the settings to adjust them to your liking befor
 Please enter your nickname below.
 == Skriv ditt smeknamn nedanför.
 
-Render
-== Rendera
-
 Are you sure that you want to disconnect?
 == Är du säker på att du vill koppla ifrån?
 
@@ -723,9 +680,6 @@ AntiPing
 
 Messages
 == Meddelanden
-
-Markers:
-== Markeringar:
 
 Time
 == Tid
@@ -1190,14 +1144,8 @@ Show local player's key presses
 Background
 == Bakgrund
 
-Entities Background color
-== Entities bakgrunds färg
-
 Use current map as background
 == Använd nuvarande bana som bakgrund
-
-Regular Background Color
-== Vanlig Bakgrunds Färg
 
 Run on join
 == Kör på join
@@ -1752,3 +1700,58 @@ Change the skip duration
 
 Go forward the specified duration
 == Gå framåt den angivna tiden
+
+Error playing demo
+== 
+
+Some map images could not be loaded. Check the local console for details.
+== 
+
+Some map sounds could not be loaded. Check the local console for details.
+== 
+
+Loading menu themes
+== 
+
+Render complete
+== 
+
+Videos directory
+== 
+
+Video was saved to '%s'
+== 
+
+No demo selected
+== 
+
+Created
+== 
+
+Netversion
+== 
+
+[Demo details]
+map not included
+== 
+
+Ghosts directory
+== 
+
+Activate all
+== 
+
+Deactivate all
+== 
+
+Enable ghost
+== 
+
+Only save improvements
+== 
+
+Regular background color
+== 
+
+Entities background color
+== 
