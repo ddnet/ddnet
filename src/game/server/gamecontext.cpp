@@ -3096,7 +3096,7 @@ void CGameContext::ConSetTeam(IConsole::IResult *pResult, void *pUserData)
 	int ClientID = clamp(pResult->GetInteger(0), 0, (int)MAX_CLIENTS - 1);
 	int Team = clamp(pResult->GetInteger(1), -1, 1);
 	int Delay = pResult->NumArguments() > 2 ? pResult->GetInteger(2) : 0;
-	if(!pSelf->m_apPlayers[ClientID] || !pSelf->m_pController->CanJoinTeam(Team, ClientID))
+	if(!pSelf->m_apPlayers[ClientID])
 		return;
 
 	char aBuf[256];
@@ -3120,7 +3120,7 @@ void CGameContext::ConSetTeamAll(IConsole::IResult *pResult, void *pUserData)
 	pSelf->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
 
 	for(auto &pPlayer : pSelf->m_apPlayers)
-		if(pPlayer && pSelf->m_pController->CanJoinTeam(Team, pPlayer->GetCID()))
+		if(pPlayer)
 			pSelf->m_pController->DoTeamChange(pPlayer, Team, false);
 }
 
