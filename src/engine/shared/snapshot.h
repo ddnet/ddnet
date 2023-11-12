@@ -95,7 +95,7 @@ public:
 	CSnapshotDelta(const CSnapshotDelta &Old);
 	int GetDataRate(int Index) const { return m_aSnapshotDataRate[Index]; }
 	int GetDataUpdates(int Index) const { return m_aSnapshotDataUpdates[Index]; }
-	void SetStaticsize(int ItemType, int Size);
+	void SetStaticsize(int ItemType, size_t Size);
 	const CData *EmptyDelta() const;
 	int CreateDelta(const class CSnapshot *pFrom, class CSnapshot *pTo, void *pDstData);
 	int UnpackDelta(const class CSnapshot *pFrom, class CSnapshot *pTo, const void *pSrcData, int DataSize);

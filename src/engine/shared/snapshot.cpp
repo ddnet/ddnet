@@ -4,8 +4,8 @@
 #include "compression.h"
 #include "uuid_manager.h"
 
-#include <climits>
 #include <cstdlib>
+#include <limits>
 
 #include <base/math.h>
 #include <base/system.h>
@@ -256,10 +256,10 @@ CSnapshotDelta::CSnapshotDelta(const CSnapshotDelta &Old)
 	mem_zero(&m_Empty, sizeof(m_Empty));
 }
 
-void CSnapshotDelta::SetStaticsize(int ItemType, int Size)
+void CSnapshotDelta::SetStaticsize(int ItemType, size_t Size)
 {
-	if(ItemType < 0 || ItemType >= MAX_NETOBJSIZES)
-		return;
+	dbg_assert(ItemType >= 0 && ItemType < MAX_NETOBJSIZES, "ItemType invalid");
+	dbg_assert(Size <= (size_t)std::numeric_limits<int16_t>::max(), "Size invalid");
 	m_aItemSizes[ItemType] = Size;
 }
 
@@ -416,7 +416,7 @@ int CSnapshotDelta::UnpackDelta(const CSnapshot *pFrom, CSnapshot *pTo, const vo
 		{
 			if(pData + 1 > pEnd)
 				return -103;
-			if(*pData < 0 || (size_t)*pData > INT_MAX / sizeof(int32_t))
+			if(*pData < 0 || (size_t)*pData > std::numeric_limits<int32_t>::max() / sizeof(int32_t))
 				return -204;
 			ItemSize = (*pData++) * sizeof(int32_t);
 		}
