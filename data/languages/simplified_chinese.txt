@@ -749,8 +749,8 @@ DDNet
 Deaths
 == 死亡数
 
-Please use a different name
-== 请换一个不同的文件名
+Please use a different filename
+== 
 
 Restart
 == 重新开始

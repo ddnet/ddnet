@@ -489,8 +489,8 @@ Scoreboard
 Remove
 == ﻥﺩﺮﮐ کﺎﭘ
 
-Please use a different name
-== ﻦﮐ ﻩﺩﺎﻔﺘﺳﺍ ﺕﻭﺎﻔﺘﻣ ﻡﺎﻧ ﮏﯾ ﺯﺍ ﺎﻔﻄﻟ
+Please use a different filename
+== 
 
 Remove chat
 == ﺖﭼ ﻥﺩﺮﮐ کﺎﭘ

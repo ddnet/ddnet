@@ -945,7 +945,7 @@ Remove chat
 Render cut to video
 == 
 
-Please use a different name
+Please use a different filename
 == 
 
 File already exists, do you want to overwrite it?

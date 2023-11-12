@@ -733,8 +733,8 @@ Grabs
 Automatically take game over screenshot
 == Automatisches Bildschirmfoto am Spielende
 
-Please use a different name
-== Bitte anderen Namen wählen
+Please use a different filename
+== 
 
 Gameplay
 == Gameplay

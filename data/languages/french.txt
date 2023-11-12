@@ -819,8 +819,8 @@ Show HUD
 DDNet %s is available:
 == DDNet %s est disponible:
 
-Please use a different name
-== Veuillez changer de pseudonyme
+Please use a different filename
+== 
 
 Search
 == Chercher

@@ -613,8 +613,8 @@ Show other players' hook collision lines
 DDNet Client needs to be restarted to complete update!
 == Перезапустите DDNet Client для завершения обновления!
 
-Please use a different name
-== Пожалуйста, используйте другое имя
+Please use a different filename
+== 
 
 Show others
 == Показывать остальных

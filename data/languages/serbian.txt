@@ -664,8 +664,8 @@ Countries
 Types
 == Tipovi
 
-Please use a different name
-== Izaberite drugo ime
+Please use a different filename
+== 
 
 Remove chat
 == Ukloni dopisivanje

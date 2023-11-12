@@ -634,8 +634,8 @@ Update now
 Restart
 == Reiniciar
 
-Please use a different name
-== Por favor usa un nome diferente
+Please use a different filename
+== 
 
 Remove chat
 == Eliminar chat

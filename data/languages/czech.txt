@@ -627,8 +627,8 @@ Update now
 Restart
 == Restartovat
 
-Please use a different name
-== Použijte jiné jméno
+Please use a different filename
+== 
 
 Remove chat
 == Odebrat chat

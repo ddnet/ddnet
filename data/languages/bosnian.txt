@@ -639,8 +639,8 @@ Update now
 Restart
 == Restart
 
-Please use a different name
-== Molimo izaberite drugo ime
+Please use a different filename
+== 
 
 Remove chat
 == Ukloni čat

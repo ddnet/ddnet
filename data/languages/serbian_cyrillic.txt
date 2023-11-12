@@ -663,8 +663,8 @@ Countries
 Types
 == Типови
 
-Please use a different name
-== Изаберите друго име
+Please use a different filename
+== 
 
 Remove chat
 == Уклони дописивање
