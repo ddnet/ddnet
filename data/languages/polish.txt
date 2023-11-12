@@ -763,8 +763,8 @@ Show clan above name plates
 Loading DDNet Client
 == Ładowanie klienta DDNet
 
-Please use a different name
-== Użyj innej nazwy
+Please use a different filename
+== 
 
 HUD
 == HUD

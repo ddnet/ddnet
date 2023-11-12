@@ -700,8 +700,8 @@ Countries
 Types
 == Tipi
 
-Please use a different name
-== Per favore usa un nome differente
+Please use a different filename
+== 
 
 Remove chat
 == Rimuovi chat

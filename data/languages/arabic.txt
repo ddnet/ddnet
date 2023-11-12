@@ -689,8 +689,8 @@ Grabs
 Automatically take game over screenshot
 == ﺔﺷﺎﺸﻟﺍ ﺔﻄﻘﻟ ﻰﻠﻋ ﺍًﻴﺋﺎﻘﻠﺗ ﺔﺒﻌﻠﻟﺍ ﺬﺧﺃ
 
-Please use a different name
-== ﺮﺧﺃ ﻢﺳﺍ ﺭﺎﻴﺘﺧﺎﺑ ﻢﻗ ﺀﺎﺟﺭ
+Please use a different filename
+== 
 
 Gameplay
 == ﺐﻌﻠﻟﺍ

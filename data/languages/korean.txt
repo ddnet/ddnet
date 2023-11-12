@@ -678,8 +678,8 @@ Types
 Leak IP
 == IP 노출하기
 
-Please use a different name
-== 다른 이름을 사용해 주십시오
+Please use a different filename
+== 
 
 Remove chat
 == 채팅 제거

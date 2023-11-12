@@ -738,8 +738,8 @@ DDNet
 Deaths
 == 死亡數
 
-Please use a different name
-== 請換一個不同的檔名
+Please use a different filename
+== 
 
 Restart
 == 重新開始

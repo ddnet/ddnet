@@ -684,8 +684,8 @@ Types
 Leak IP
 == Vuoda IP
 
-Please use a different name
-== Ole hyvä ja käytä toista nimeä
+Please use a different filename
+== 
 
 Remove chat
 == Poista chatti

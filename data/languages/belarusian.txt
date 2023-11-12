@@ -795,8 +795,8 @@ Are you sure that you want to remove the player '%s' from your friends list?
 Are you sure that you want to remove the clan '%s' from your friends list?
 == Вы ўпэўненыя што хочаце выдаліць клан '%s' са спіса вашых сяброў?
 
-Please use a different name
-== Калі ласка, выкарыстайце іншае імя
+Please use a different filename
+== 
 
 File already exists, do you want to overwrite it?
 == Файл ужо існуе, ці вы хочаце перазапісаць яго?

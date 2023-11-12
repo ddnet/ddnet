@@ -888,8 +888,8 @@ Length
 Skin prefix
 == Skin prefix
 
-Please use a different name
-== Använd ett annat namn
+Please use a different filename
+== 
 
 Game paused
 == Spel pausad

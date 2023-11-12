@@ -570,8 +570,8 @@ Update now
 Restart
 == Перезавантажити
 
-Please use a different name
-== Будь ласка, використовуйте інше ім’я
+Please use a different filename
+== 
 
 Remove chat
 == Видалити чат

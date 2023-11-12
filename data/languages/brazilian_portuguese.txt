@@ -591,8 +591,8 @@ Sound volume
 Hue
 == Matiz
 
-Please use a different name
-== Por favor, use um nome diferente
+Please use a different filename
+== 
 
 Show others
 == Mostrar outros

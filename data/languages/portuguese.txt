@@ -590,8 +590,8 @@ Enable game sounds
 DDNet Client needs to be restarted to complete update!
 == O cliente DDNet precisa de ser reiniciado para completar a atualização!
 
-Please use a different name
-== Por favor usa um nome diferente
+Please use a different filename
+== 
 
 Show others
 == Mostrar os outros

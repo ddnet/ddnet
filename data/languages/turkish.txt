@@ -642,8 +642,8 @@ Update now
 Restart
 == Yeniden başlat
 
-Please use a different name
-== Lütfen farklı takma ad kullanın
+Please use a different filename
+== 
 
 Remove chat
 == Sohbeti kaldır

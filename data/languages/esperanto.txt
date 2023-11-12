@@ -279,8 +279,8 @@ Clan
 Add Friend
 == Aldoni amikon
 
-Please use a different name
-== Bonvolu uzi malsaman nomon
+Please use a different filename
+== 
 
 Remove chat
 == Malmontri la diskutejon

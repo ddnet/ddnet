@@ -842,7 +842,7 @@ void CMenus::RenderDemoPlayerSliceSavePopup(CUIRect MainView)
 		{
 			static CUI::SMessagePopupContext s_MessagePopupContext;
 			s_MessagePopupContext.ErrorColor();
-			str_copy(s_MessagePopupContext.m_aMessage, Localize("Please use a different name"));
+			str_copy(s_MessagePopupContext.m_aMessage, Localize("Please use a different filename"));
 			UI()->ShowPopupMessage(UI()->MouseX(), OkButton.y + OkButton.h + 5.0f, &s_MessagePopupContext);
 		}
 		else

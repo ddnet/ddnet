@@ -660,8 +660,8 @@ Types
 Leak IP
 == IP を漏洩する
 
-Please use a different name
-== 別の名前をつけてください
+Please use a different filename
+== 
 
 Remove chat
 == チャット履歴を削除

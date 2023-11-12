@@ -576,8 +576,8 @@ Enable game sounds
 DDNet Client needs to be restarted to complete update!
 == Újra kell indítani a DDNet Klienst a frissítés befejezéséhez!
 
-Please use a different name
-== Kérlek, válassz másik nevet
+Please use a different filename
+== 
 
 Show others
 == Játékosok mutatása

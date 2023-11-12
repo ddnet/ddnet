@@ -652,8 +652,8 @@ Countries
 Types
 == Typer
 
-Please use a different name
-== Brug et andet navn
+Please use a different filename
+== 
 
 Remove chat
 == Fjern chat

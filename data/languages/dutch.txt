@@ -646,8 +646,8 @@ Update now
 Restart
 == Herstarten
 
-Please use a different name
-== Gebruik a.u.b. een andere naam
+Please use a different filename
+== 
 
 Remove chat
 == Verwijder chat

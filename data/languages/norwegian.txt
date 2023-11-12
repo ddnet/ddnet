@@ -635,8 +635,8 @@ Update now
 Restart
 == Restart
 
-Please use a different name
-== Vennligst velg et annet navn
+Please use a different filename
+== 
 
 Remove chat
 == Fjern chat
