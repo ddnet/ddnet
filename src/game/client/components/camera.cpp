@@ -39,7 +39,7 @@ void CCamera::ScaleZoom(float Factor)
 
 float CCamera::MaxZoomLevel()
 {
-	return (g_Config.m_ClLimitMaxZoomLevel) ? ((Graphics()->IsTileBufferingEnabled() ? 60 : 30)) : std::numeric_limits<float>::max();
+	return (g_Config.m_ClLimitMaxZoomLevel) ? ((Graphics()->IsTileBufferingEnabled() ? 240 : 30)) : std::numeric_limits<float>::max();
 }
 
 float CCamera::MinZoomLevel()
