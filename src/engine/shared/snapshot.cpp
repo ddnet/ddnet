@@ -504,16 +504,13 @@ void CSnapshotStorage::PurgeUntil(int Tick)
 	m_pLast = nullptr;
 }
 
-void CSnapshotStorage::Add(int Tick, int64_t Tagtime, int DataSize, const void *pData, int AltDataSize, const void *pAltData)
+void CSnapshotStorage::Add(int Tick, int64_t Tagtime, size_t DataSize, const void *pData, size_t AltDataSize, const void *pAltData)
 {
-	// allocate memory for holder + snapshot_data
-	int TotalSize = sizeof(CHolder) + DataSize;
+	dbg_assert(DataSize <= (size_t)CSnapshot::MAX_SIZE, "Snapshot data size invalid");
+	dbg_assert(AltDataSize <= (size_t)CSnapshot::MAX_SIZE, "Alt snapshot data size invalid");
 
-	if(AltDataSize > 0)
-	{
-		TotalSize += AltDataSize;
-	}
-
+	// allocate memory for holder + snapshot data
+	const size_t TotalSize = sizeof(CHolder) + DataSize + AltDataSize;
 	CHolder *pHolder = (CHolder *)malloc(TotalSize);
 
 	// set data
@@ -523,7 +520,7 @@ void CSnapshotStorage::Add(int Tick, int64_t Tagtime, int DataSize, const void *
 	pHolder->m_pSnap = (CSnapshot *)(pHolder + 1);
 	mem_copy(pHolder->m_pSnap, pData, DataSize);
 
-	if(AltDataSize > 0) // create alternative if wanted
+	if(AltDataSize) // create alternative if wanted
 	{
 		pHolder->m_pAltSnap = (CSnapshot *)(((char *)pHolder->m_pSnap) + DataSize);
 		mem_copy(pHolder->m_pAltSnap, pAltData, AltDataSize);
