@@ -1699,56 +1699,56 @@ Render cut to video
 == Відтворити вирізку відео
 
 Error playing demo
-== 
+== Помилка відтворення демо
 
 Some map images could not be loaded. Check the local console for details.
-== 
+== Деякі зображення мапи не вдалося завантажити. Перевірте локальну консоль для отримання деталей.
 
 Some map sounds could not be loaded. Check the local console for details.
-== 
+== Деякі звуки мапи не вдалося завантажити. Перевірте локальну консоль для отримання деталей.
 
 Loading menu themes
-== 
+== Завантаження тем меню
 
 Render complete
-== 
+== Відтворення завершено
 
 Videos directory
-== 
+== Директорія відео
 
 Video was saved to '%s'
-== 
+== Відео було збережено в '%s'
 
 No demo selected
-== 
+== Демо не обрано
 
 Created
-== 
+== Створено
 
 Netversion
-== 
+== Версія мережі
 
 [Demo details]
 map not included
-== 
+== карта не включена
 
 Ghosts directory
-== 
+== Директорія привидів
 
 Activate all
-== 
+== Активувати все
 
 Deactivate all
-== 
+== Деактивувати все
 
 Enable ghost
-== 
+== Увімкнути привида
 
 Only save improvements
-== 
+== Зберігати лише поліпшення
 
 Regular background color
-== 
+== Звичайний колір фону
 
 Entities background color
-== 
+== Колір фону об'єктів
