@@ -2615,6 +2615,44 @@ int CServer::LoadMap(const char *pMapName)
 	return 1;
 }
 
+#ifdef CONF_DEBUG
+void CServer::UpdateDebugDummies(bool ForceDisconnect)
+{
+	if(m_PreviousDebugDummies == g_Config.m_DbgDummies && !ForceDisconnect)
+		return;
+
+	for(int DummyIndex = 0; DummyIndex < maximum(m_PreviousDebugDummies, g_Config.m_DbgDummies); ++DummyIndex)
+	{
+		const bool AddDummy = !ForceDisconnect && DummyIndex < g_Config.m_DbgDummies;
+		const int ClientID = MAX_CLIENTS - DummyIndex - 1;
+		if(AddDummy && m_aClients[ClientID].m_State == CClient::STATE_EMPTY)
+		{
+			NewClientCallback(ClientID, this, false);
+			GameServer()->OnClientConnected(ClientID, nullptr);
+			m_aClients[ClientID].m_State = CClient::STATE_INGAME;
+			str_format(m_aClients[ClientID].m_aName, sizeof(m_aClients[ClientID].m_aName), "Debug dummy %d", DummyIndex + 1);
+			GameServer()->OnClientEnter(ClientID);
+		}
+		else if(!AddDummy && m_aClients[ClientID].m_State == CClient::STATE_INGAME)
+		{
+			DelClientCallback(ClientID, "Dropping debug dummy", this);
+		}
+
+		if(AddDummy && m_aClients[ClientID].m_State == CClient::STATE_INGAME)
+		{
+			CNetObj_PlayerInput Input = {0};
+			Input.m_Direction = (ClientID & 1) ? -1 : 1;
+			m_aClients[ClientID].m_aInputs[0].m_GameTick = Tick() + 1;
+			mem_copy(m_aClients[ClientID].m_aInputs[0].m_aData, &Input, minimum(sizeof(Input), sizeof(m_aClients[ClientID].m_aInputs[0].m_aData)));
+			m_aClients[ClientID].m_LatestInput = m_aClients[ClientID].m_aInputs[0];
+			m_aClients[ClientID].m_CurrentInput = 0;
+		}
+	}
+
+	m_PreviousDebugDummies = ForceDisconnect ? 0 : g_Config.m_DbgDummies;
+}
+#endif
+
 int CServer::Run()
 {
 	if(m_RunServer == UNINITIALIZED)
@@ -2762,6 +2800,9 @@ int CServer::Run()
 						}
 					}
 
+#ifdef CONF_DEBUG
+					UpdateDebugDummies(true);
+#endif
 					GameServer()->OnShutdown(m_pPersistentData);
 
 					for(int ClientID = 0; ClientID < MAX_CLIENTS; ClientID++)
@@ -2850,6 +2891,10 @@ int CServer::Run()
 			while(t > TickStartTime(m_CurrentGameTick + 1))
 			{
 				GameServer()->OnPreTickTeehistorian();
+
+#ifdef CONF_DEBUG
+				UpdateDebugDummies(false);
+#endif
 
 				for(int c = 0; c < MAX_CLIENTS; c++)
 				{

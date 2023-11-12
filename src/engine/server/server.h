@@ -122,6 +122,11 @@ class CServer : public IServer
 
 	class CDbConnectionPool *m_pConnectionPool;
 
+#ifdef CONF_DEBUG
+	int m_PreviousDebugDummies = 0;
+	void UpdateDebugDummies(bool ForceDisconnect);
+#endif
+
 public:
 	class IGameServer *GameServer() { return m_pGameServer; }
 	class CConfig *Config() { return m_pConfig; }

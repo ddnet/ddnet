@@ -169,14 +169,7 @@ void CPlayer::Tick()
 		m_ScoreFinishResult = nullptr;
 	}
 
-	bool ClientIngame = Server()->ClientIngame(m_ClientID);
-#ifdef CONF_DEBUG
-	if(g_Config.m_DbgDummies && m_ClientID >= MAX_CLIENTS - g_Config.m_DbgDummies)
-	{
-		ClientIngame = true;
-	}
-#endif
-	if(!ClientIngame)
+	if(!Server()->ClientIngame(m_ClientID))
 		return;
 
 	if(m_ChatScore > 0)
@@ -302,11 +295,8 @@ void CPlayer::PostTick()
 
 void CPlayer::PostPostTick()
 {
-#ifdef CONF_DEBUG
-	if(!g_Config.m_DbgDummies || m_ClientID < MAX_CLIENTS - g_Config.m_DbgDummies)
-#endif
-		if(!Server()->ClientIngame(m_ClientID))
-			return;
+	if(!Server()->ClientIngame(m_ClientID))
+		return;
 
 	if(!GameServer()->m_World.m_Paused && !m_pCharacter && m_Spawning && m_WeakHookSpawn)
 		TryRespawn();
@@ -314,11 +304,8 @@ void CPlayer::PostPostTick()
 
 void CPlayer::Snap(int SnappingClient)
 {
-#ifdef CONF_DEBUG
-	if(!g_Config.m_DbgDummies || m_ClientID < MAX_CLIENTS - g_Config.m_DbgDummies)
-#endif
-		if(!Server()->ClientIngame(m_ClientID))
-			return;
+	if(!Server()->ClientIngame(m_ClientID))
+		return;
 
 	int id = m_ClientID;
 	if(!Server()->Translate(id, SnappingClient))
