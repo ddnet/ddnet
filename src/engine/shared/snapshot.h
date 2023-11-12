@@ -97,8 +97,8 @@ public:
 	int GetDataUpdates(int Index) const { return m_aSnapshotDataUpdates[Index]; }
 	void SetStaticsize(int ItemType, size_t Size);
 	const CData *EmptyDelta() const;
-	int CreateDelta(const class CSnapshot *pFrom, class CSnapshot *pTo, void *pDstData);
-	int UnpackDelta(const class CSnapshot *pFrom, class CSnapshot *pTo, const void *pSrcData, int DataSize);
+	int CreateDelta(const CSnapshot *pFrom, const CSnapshot *pTo, void *pDstData);
+	int UnpackDelta(const CSnapshot *pFrom, CSnapshot *pTo, const void *pSrcData, int DataSize);
 };
 
 // CSnapshotStorage
@@ -152,7 +152,7 @@ class CSnapshotBuilder
 
 	void AddExtendedItemType(int Index);
 	int GetExtendedItemTypeIndex(int TypeID);
-	int GetTypeFromIndex(int Index);
+	int GetTypeFromIndex(int Index) const;
 
 	bool m_Sixup;
 

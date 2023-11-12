@@ -269,7 +269,7 @@ const CSnapshotDelta::CData *CSnapshotDelta::EmptyDelta() const
 }
 
 // TODO: OPT: this should be made much faster
-int CSnapshotDelta::CreateDelta(const CSnapshot *pFrom, CSnapshot *pTo, void *pDstData)
+int CSnapshotDelta::CreateDelta(const CSnapshot *pFrom, const CSnapshot *pTo, void *pDstData)
 {
 	CData *pDelta = (CData *)pDstData;
 	int *pData = (int *)pDelta->m_aData;
@@ -612,7 +612,7 @@ int CSnapshotBuilder::Finish(void *pSnapData)
 	return pSnap->TotalSize();
 }
 
-int CSnapshotBuilder::GetTypeFromIndex(int Index)
+int CSnapshotBuilder::GetTypeFromIndex(int Index) const
 {
 	return CSnapshot::MAX_TYPE - Index;
 }
