@@ -7,7 +7,7 @@
 #	3edcxzaq1		2020-06-25 00:00:00
 #	cur.ie			2020-09-28 00:00:00
 #	simpygirl		2022-02-20 00:00:00
-#	furo			2023-08-29 00:00:00
+#	furo			2023-11-12 00:00:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -1702,56 +1702,56 @@ Go forward the specified duration
 == Gå framåt den angivna tiden
 
 Error playing demo
-== 
+== Ett fel uppstod under uppspelning av demo
 
 Some map images could not be loaded. Check the local console for details.
-== 
+== Vissa map bilder kunde inte laddas in. See den lokala konsolen för detaljer.
 
 Some map sounds could not be loaded. Check the local console for details.
-== 
+== Vissa map ljud kunde inte laddas in. See den lokala konsolen för detaljer.
 
 Loading menu themes
-== 
+== Laddar menyteman
 
 Render complete
-== 
+== Rendering klar
 
 Videos directory
-== 
+== Videos mapp
 
 Video was saved to '%s'
-== 
+== Video sparades till '%s'
 
 No demo selected
-== 
+== Ingen demo vald
 
 Created
-== 
+== Skapad
 
 Netversion
-== 
+== Netversion
 
 [Demo details]
 map not included
-== 
+== map inte inkluderad
 
 Ghosts directory
-== 
+== Spök mapp
 
 Activate all
-== 
+== Aktivera alla
 
 Deactivate all
-== 
+== Deaktivera alla
 
 Enable ghost
-== 
+== Aktivera spöken
 
 Only save improvements
-== 
+== Spara bara förbättringar
 
 Regular background color
-== 
+== Vanlig bakgrunds färg
 
 Entities background color
-== 
+== Entities bakgrunds färg
