@@ -1712,44 +1712,44 @@ Render cut to video
 == Рендеринг отрезка в видео
 
 Error playing demo
-== 
+== Ошибка воспроизведения демо
 
 Some map images could not be loaded. Check the local console for details.
-== 
+== Некоторые изображения на карте не удалось загрузить. Проверьте детали в локальной консоли.
 
 Some map sounds could not be loaded. Check the local console for details.
-== 
+== Некоторые звуки на карте не удалось загрузить. Проверьте детали в локальной консоли.
 
 Loading menu themes
-== 
+== Загрузка тем меню
 
 Render complete
-== 
+== Рендеринг завершен
 
 Videos directory
-== 
+== Папка с видео
 
 Video was saved to '%s'
-== 
+== Видео было сохранено в '%s'
 
 No demo selected
-== 
+== Демо не выбрано
 
 Created
-== 
+== Создано
 
 Netversion
-== 
+== Версия сети
 
 [Demo details]
 map not included
-== 
+== карта отсутствует
 
 Ghosts directory
-== 
+== Папка теней
 
 Activate all
-== 
+== Активировать все
 
 Deactivate all
 == 
