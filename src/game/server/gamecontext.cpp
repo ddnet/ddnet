@@ -4797,7 +4797,7 @@ void CGameContext::OnBangCommand(const char *pLine, int ClientID)
 		str_format(aChatmsg, sizeof(aChatmsg), "'%s' called vote to change server option '%s'", Server()->ClientName(ClientID), aDesc);
 		CallVote(ClientID, aDesc, aCmd, "chat cmd", aChatmsg);
 	}
-	else if(!str_comp_nocase(pCmd, "restart") || !str_comp_nocase(pCmd, "reload") || !str_comp_nocase(pCmd, "go"))
+	else if(!str_comp_nocase(pCmd, "restart") || !str_comp_nocase(pCmd, "reload"))
 	{
 		int Seconds = 10;
 		char aCmd[512];
@@ -4807,6 +4807,10 @@ void CGameContext::OnBangCommand(const char *pLine, int ClientID)
 		char aChatmsg[512];
 		str_format(aChatmsg, sizeof(aChatmsg), "'%s' called vote to change server option '%s'", Server()->ClientName(ClientID), aDesc);
 		CallVote(ClientID, aDesc, aCmd, "chat cmd", aChatmsg);
+	}
+	else if(!str_comp_nocase(pCmd, "ready"))
+	{
+		m_pController->OnPlayerReadyChange(pPlayer);
 	}
 }
 
