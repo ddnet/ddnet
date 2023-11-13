@@ -4784,10 +4784,14 @@ void CGameContext::OnBangCommand(const char *pLine, int ClientID)
 	}
 	else if(!str_comp_nocase(pCmd, "restart") || !str_comp_nocase(pCmd, "reload") || !str_comp_nocase(pCmd, "go"))
 	{
-		// if(pResult->NumArguments())
-		// 	m_pController->DoWarmup(pResult->GetInteger(0));
-		// else
-		m_pController->DoWarmup(10);
+		int Seconds = 10;
+		char aCmd[512];
+		str_format(aCmd, sizeof(aCmd), "restart %d", Seconds);
+		char aDesc[512];
+		str_format(aDesc, sizeof(aDesc), "restart %d", Seconds);
+		char aChatmsg[512];
+		str_format(aChatmsg, sizeof(aChatmsg), "'%s' called vote to change server option '%s'", Server()->ClientName(ClientID), aDesc);
+		CallVote(ClientID, aDesc, aCmd, "chat cmd", aChatmsg);
 	}
 }
 
