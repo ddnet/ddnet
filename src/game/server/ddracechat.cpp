@@ -16,13 +16,13 @@ void CGameContext::ConCreditsGctf(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 		"DDNet-gctf written by ChillerDragon");
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 		"https://github.com/ZillyInsta/ddnet-insta/");
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 		"Thanks to AssassinTee and Cuube");
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "credits",
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 		"based on ddnet see /credits_ddnet");
 }
 
