@@ -387,6 +387,10 @@ private:
 	static void ConShotgun(IConsole::IResult *pResult, void *pUserData);
 	static void ConGrenade(IConsole::IResult *pResult, void *pUserData);
 	static void ConLaser(IConsole::IResult *pResult, void *pUserData);
+	static void ConHammer(IConsole::IResult *pResult, void *pUserData); // gctf
+	static void ConGun(IConsole::IResult *pResult, void *pUserData); // gctf
+	static void ConUnHammer(IConsole::IResult *pResult, void *pUserData); // gctf
+	static void ConUnGun(IConsole::IResult *pResult, void *pUserData); // gctf
 	static void ConJetpack(IConsole::IResult *pResult, void *pUserData);
 	static void ConWeapons(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnShotgun(IConsole::IResult *pResult, void *pUserData);
