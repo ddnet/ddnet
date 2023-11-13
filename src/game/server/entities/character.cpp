@@ -414,6 +414,9 @@ void CCharacter::FireWeapon()
 	if(!WillFire)
 		return;
 
+	// gctf
+	m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_AmmoRegenStart = -1;
+
 	if(m_FreezeTime)
 	{
 		// Timer stuff to avoid shrieking orchestra caused by unfreeze-plasma
