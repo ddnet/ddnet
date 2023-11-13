@@ -8058,6 +8058,40 @@ bool CEditor::Append(const char *pFileName, int StorageType)
 	if(!NewMap.Load(pFileName, StorageType, std::move(ErrorHandler)))
 		return false;
 
+	static const auto &&s_ReplaceIndex = [](int ToReplace, int ReplaceWith) {
+		return [ToReplace, ReplaceWith](int *pIndex) {
+			if(*pIndex == ToReplace)
+				*pIndex = ReplaceWith;
+		};
+	};
+
+	//Transfer non-duplicate images
+	for(auto NewMapIt = NewMap.m_vpImages.begin(); NewMapIt != NewMap.m_vpImages.end(); ++NewMapIt)
+	{
+		auto pNewImage = *NewMapIt;
+		auto NameIsTaken = [pNewImage](const std::shared_ptr<CEditorImage> &OtherImage) { return str_comp(pNewImage->m_aName, OtherImage->m_aName) == 0; };
+		auto MatchInCurrentMap = std::find_if(begin(m_Map.m_vpImages), end(m_Map.m_vpImages), NameIsTaken);
+
+		const bool IsDuplicate = MatchInCurrentMap != std::end(m_Map.m_vpImages);
+		const int IndexToReplace = NewMapIt - NewMap.m_vpImages.begin();
+
+		if(IsDuplicate)
+		{
+			const int IndexToReplaceWith = MatchInCurrentMap - m_Map.m_vpImages.begin();
+
+			dbg_msg("editor", "map contains image %s already, removing duplicate", pNewImage->m_aName);
+
+			//In the new map, replace the index of the duplicate image to the index of the same in the current map.
+			NewMap.ModifyImageIndex(s_ReplaceIndex(IndexToReplace, IndexToReplaceWith));
+		}
+		else
+		{
+			NewMap.ModifyImageIndex(s_ReplaceIndex(IndexToReplace, m_Map.m_vpImages.size()));
+			m_Map.m_vpImages.push_back(pNewImage);
+		}
+	}
+	NewMap.m_vpImages.clear();
+
 	// modify indices
 	static const auto &&s_ModifyAddIndex = [](int AddAmount) {
 		return [AddAmount](int *pIndex) {
@@ -8065,14 +8099,9 @@ bool CEditor::Append(const char *pFileName, int StorageType)
 				*pIndex += AddAmount;
 		};
 	};
-	NewMap.ModifyImageIndex(s_ModifyAddIndex(m_Map.m_vpImages.size()));
+
 	NewMap.ModifySoundIndex(s_ModifyAddIndex(m_Map.m_vpSounds.size()));
 	NewMap.ModifyEnvelopeIndex(s_ModifyAddIndex(m_Map.m_vpEnvelopes.size()));
-
-	// transfer images
-	for(const auto &pImage : NewMap.m_vpImages)
-		m_Map.m_vpImages.push_back(pImage);
-	NewMap.m_vpImages.clear();
 
 	// transfer sounds
 	for(const auto &pSound : NewMap.m_vpSounds)
