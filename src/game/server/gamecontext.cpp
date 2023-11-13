@@ -4783,18 +4783,18 @@ void CGameContext::OnBangCommand(const char *pLine, int ClientID)
 
 	int SetSlots = -1;
 	const char aaVs[][16] = {"on", "n", "vs", "v"};
-	for(auto aVs : aaVs)
+	for(const auto *pVs : aaVs)
 	{
 		for(int i = 1; i <= 8; i++)
 		{
 			char a1on1[32];
-			str_format(a1on1, sizeof(a1on1), "%d%s%d", i, aVs, i);
+			str_format(a1on1, sizeof(a1on1), "%d%s%d", i, pVs, i);
 			if(!str_comp_nocase(pCmd, a1on1))
 			{
 				SetSlots = i;
 				break;
 			}
-			str_format(a1on1, sizeof(a1on1), "%s%d", aVs, i);
+			str_format(a1on1, sizeof(a1on1), "%s%d", pVs, i);
 			if(!str_comp_nocase(pCmd, a1on1))
 			{
 				SetSlots = i;
