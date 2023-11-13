@@ -1016,6 +1016,10 @@ void CGameContext::OnTick()
 											     GetPlayerChar(m_VoteCreator)->Team() != GetPlayerChar(i)->Team())))
 						continue;
 
+					// gctf
+					if(m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS && !g_Config.m_SvSpectatorVotes)
+						continue;
+
 					if(m_apPlayers[i]->IsAfk() && i != m_VoteCreator)
 						continue;
 
@@ -2382,6 +2386,12 @@ void CGameContext::OnVoteNetMessage(const CNetMsg_Cl_Vote *pMsg, int ClientID)
 		return;
 
 	CPlayer *pPlayer = m_apPlayers[ClientID];
+
+	if(pPlayer->GetTeam() == TEAM_SPECTATORS && !g_Config.m_SvSpectatorVotes)
+	{
+		// SendChatTarget(ClientID, "Spectators aren't allowed to vote.");
+		return;
+	}
 
 	if(g_Config.m_SvSpamprotection && pPlayer->m_LastVoteTry && pPlayer->m_LastVoteTry + Server()->TickSpeed() * 3 > Server()->Tick())
 		return;
