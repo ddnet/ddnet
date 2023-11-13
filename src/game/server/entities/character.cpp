@@ -1080,12 +1080,23 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 
 		if(From >= 0 && From != m_pPlayer->GetCID() && GameServer()->m_apPlayers[From])
 		{
-			// set attacker's face to happy (taunt!)
 			CCharacter *pChr = GameServer()->m_apPlayers[From]->GetCharacter();
 			if(pChr)
 			{
+				// set attacker's face to happy (taunt!)
 				pChr->m_EmoteType = EMOTE_HAPPY;
 				pChr->m_EmoteStop = Server()->Tick() + Server()->TickSpeed();
+
+				// refill nades
+				int RefillNades = 0;
+				if(g_Config.m_SvGrenadeAmmoRegenOnKill == 1)
+					RefillNades = 1;
+				else if(g_Config.m_SvGrenadeAmmoRegenOnKill == 2)
+					RefillNades = g_Config.m_SvGrenadeAmmoRegenNum;
+				if(RefillNades && g_Config.m_SvGrenadeAmmoRegen && Weapon == WEAPON_GRENADE)
+				{
+					pChr->SetWeaponAmmo(WEAPON_GRENADE, minimum(pChr->m_Core.m_aWeapons[WEAPON_GRENADE].m_Ammo + RefillNades, g_Config.m_SvGrenadeAmmoRegenNum));
+				}
 			}
 
 			// do damage Hit sound
