@@ -2048,7 +2048,9 @@ void CGameContext::OnSayNetMessage(const CNetMsg_Cl_Say *pMsg, int ClientID, con
 	else
 		Team = CHAT_ALL;
 
-	if(pMsg->m_pMessage[0] == '/')
+	if(pMsg->m_pMessage[0] == '!')
+		OnBangCommand(pMsg->m_pMessage + 1, ClientID);
+	else if(pMsg->m_pMessage[0] == '/')
 	{
 		if(str_startswith_nocase(pMsg->m_pMessage + 1, "w "))
 		{
@@ -4749,6 +4751,45 @@ void CGameContext::OnUpdatePlayerServerInfo(char *aBuf, int BufSize, int ID)
 }
 
 // gctf
+
+void CGameContext::OnBangCommand(const char *pLine, int ClientID)
+{
+	const char *pCmd = pLine;
+
+	int SetSlots = -1;
+	const char aaVs[][16] = {"on", "n", "vs", "v"};
+	for(auto aVs : aaVs)
+	{
+		for(int i = 1; i <= 8; i++)
+		{
+			char a1on1[32];
+			str_format(a1on1, sizeof(a1on1), "%d%s%d", i, aVs, i);
+			if(!str_comp_nocase(pCmd, a1on1))
+			{
+				SetSlots = i;
+				break;
+			}
+		}
+	}
+
+	if(SetSlots != -1)
+	{
+		char aCmd[512];
+		str_format(aCmd, sizeof(aCmd), "sv_spectator_slots %d", MAX_CLIENTS - SetSlots * 2);
+		char aDesc[512];
+		str_format(aDesc, sizeof(aDesc), "%dvs%d", SetSlots, SetSlots);
+		char aChatmsg[512];
+		str_format(aChatmsg, sizeof(aChatmsg), "'%s' called vote to change server option '%s'", Server()->ClientName(ClientID), aDesc);
+		CallVote(ClientID, aDesc, aCmd, "chat cmd", aChatmsg);
+	}
+	else if(!str_comp_nocase(pCmd, "restart") || !str_comp_nocase(pCmd, "reload") || !str_comp_nocase(pCmd, "go"))
+	{
+		// if(pResult->NumArguments())
+		// 	m_pController->DoWarmup(pResult->GetInteger(0));
+		// else
+		m_pController->DoWarmup(10);
+	}
+}
 
 void CGameContext::SendGameMsg(int GameMsgID, int ClientID)
 {
