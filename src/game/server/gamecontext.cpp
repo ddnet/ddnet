@@ -2124,6 +2124,11 @@ void CGameContext::OnCallVoteNetMessage(const CNetMsg_Cl_CallVote *pMsg, int Cli
 {
 	if(RateLimitPlayerVote(ClientID) || m_VoteCloseTime)
 		return;
+	if(m_apPlayers[ClientID]->GetTeam() == TEAM_SPECTATORS && !g_Config.m_SvSpectatorVotes)
+	{
+		SendChatTarget(ClientID, "Spectators aren't allowed to vote.");
+		return;
+	}
 
 	m_apPlayers[ClientID]->UpdatePlaytime();
 
@@ -4754,6 +4759,16 @@ void CGameContext::OnUpdatePlayerServerInfo(char *aBuf, int BufSize, int ID)
 
 void CGameContext::OnBangCommand(const char *pLine, int ClientID)
 {
+	if(ClientID < 0 || ClientID >= MAX_CLIENTS)
+		return;
+	CPlayer *pPlayer = m_apPlayers[ClientID];
+	if(!pPlayer)
+		return;
+	if(pPlayer->GetTeam() == TEAM_SPECTATORS && !g_Config.m_SvSpectatorVotes)
+	{
+		SendChatTarget(ClientID, "Spectators aren't allowed to vote.");
+		return;
+	}
 	const char *pCmd = pLine;
 
 	int SetSlots = -1;
