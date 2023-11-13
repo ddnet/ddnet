@@ -15,7 +15,7 @@
 #define TEST_TYPE_NAME "TestDDraceNetwork"
 
 CGameControllerDDRace::CGameControllerDDRace(class CGameContext *pGameServer) :
-	IGameController(pGameServer), m_Teams(pGameServer), m_pLoadBestTimeResult(nullptr)
+	IGameController(pGameServer), m_pLoadBestTimeResult(nullptr)
 {
 	m_pGameType = g_Config.m_SvTestingCommands ? TEST_TYPE_NAME : GAME_TYPE_NAME;
 

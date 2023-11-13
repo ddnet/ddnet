@@ -617,7 +617,7 @@ void CGameContext::ConPractice(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
-	CGameTeams &Teams = ((CGameControllerDDRace *)pSelf->m_pController)->m_Teams;
+	CGameTeams &Teams = pSelf->m_pController->m_Teams;
 
 	int Team = Teams.m_Core.Team(pResult->m_ClientID);
 
@@ -694,7 +694,7 @@ void CGameContext::ConSwap(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
-	CGameTeams &Teams = ((CGameControllerDDRace *)pSelf->m_pController)->m_Teams;
+	CGameTeams &Teams = pSelf->m_pController->m_Teams;
 
 	int Team = Teams.m_Core.Team(pResult->m_ClientID);
 
@@ -880,9 +880,9 @@ void CGameContext::ConLockTeam(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
-	int Team = ((CGameControllerDDRace *)pSelf->m_pController)->m_Teams.m_Core.Team(pResult->m_ClientID);
+	int Team = pSelf->m_pController->m_Teams.m_Core.Team(pResult->m_ClientID);
 
-	bool Lock = ((CGameControllerDDRace *)pSelf->m_pController)->m_Teams.TeamLocked(Team);
+	bool Lock = pSelf->m_pController->m_Teams.TeamLocked(Team);
 
 	if(pResult->NumArguments() > 0)
 		Lock = !pResult->GetInteger(0);
@@ -906,7 +906,7 @@ void CGameContext::ConLockTeam(IConsole::IResult *pResult, void *pUserData)
 	}
 	else
 	{
-		((CGameControllerDDRace *)pSelf->m_pController)->m_Teams.SetTeamLock(Team, true);
+		pSelf->m_pController->m_Teams.SetTeamLock(Team, true);
 
 		str_format(aBuf, sizeof(aBuf), "'%s' locked your team. After the race starts, killing will kill everyone in your team.", pSelf->Server()->ClientName(pResult->m_ClientID));
 		pSelf->SendChatTeam(Team, aBuf);
@@ -926,7 +926,7 @@ void CGameContext::ConUnlockTeam(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
-	int Team = ((CGameControllerDDRace *)pSelf->m_pController)->m_Teams.m_Core.Team(pResult->m_ClientID);
+	int Team = pSelf->m_pController->m_Teams.m_Core.Team(pResult->m_ClientID);
 
 	if(Team <= TEAM_FLOCK || Team >= TEAM_SUPER)
 		return;
@@ -1110,7 +1110,7 @@ void CGameContext::ConJoinTeam(IConsole::IResult *pResult, void *pUserData)
 				aBuf,
 				sizeof(aBuf),
 				"You are in team %d",
-				((CGameControllerDDRace *)pSelf->m_pController)->m_Teams.m_Core.Team(pResult->m_ClientID));
+				pSelf->m_pController->m_Teams.m_Core.Team(pResult->m_ClientID));
 			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 				aBuf);
 		}
@@ -1485,7 +1485,7 @@ void CGameContext::ConRescue(IConsole::IResult *pResult, void *pUserData)
 	if(!pChr)
 		return;
 
-	CGameTeams &Teams = ((CGameControllerDDRace *)pSelf->m_pController)->m_Teams;
+	CGameTeams &Teams = pSelf->m_pController->m_Teams;
 	int Team = Teams.m_Core.Team(pResult->m_ClientID);
 	if(!g_Config.m_SvRescue && !Teams.IsPractice(Team))
 	{
@@ -1509,7 +1509,7 @@ void CGameContext::ConTele(IConsole::IResult *pResult, void *pUserData)
 	if(!pChr)
 		return;
 
-	CGameTeams &Teams = ((CGameControllerDDRace *)pSelf->m_pController)->m_Teams;
+	CGameTeams &Teams = pSelf->m_pController->m_Teams;
 	int Team = Teams.m_Core.Team(pResult->m_ClientID);
 	if(!Teams.IsPractice(Team))
 	{
@@ -1561,7 +1561,7 @@ void CGameContext::ConLastTele(IConsole::IResult *pResult, void *pUserData)
 	if(!pChr)
 		return;
 
-	CGameTeams &Teams = ((CGameControllerDDRace *)pSelf->m_pController)->m_Teams;
+	CGameTeams &Teams = pSelf->m_pController->m_Teams;
 	int Team = Teams.m_Core.Team(pResult->m_ClientID);
 	if(!Teams.IsPractice(Team))
 	{
@@ -1596,7 +1596,7 @@ void CGameContext::ConPracticeUnSolo(IConsole::IResult *pResult, void *pUserData
 		return;
 	}
 
-	CGameTeams &Teams = ((CGameControllerDDRace *)pSelf->m_pController)->m_Teams;
+	CGameTeams &Teams = pSelf->m_pController->m_Teams;
 	int Team = Teams.m_Core.Team(pResult->m_ClientID);
 	if(!Teams.IsPractice(Team))
 	{
@@ -1619,7 +1619,7 @@ void CGameContext::ConPracticeUnDeep(IConsole::IResult *pResult, void *pUserData
 	if(!pChr)
 		return;
 
-	CGameTeams &Teams = ((CGameControllerDDRace *)pSelf->m_pController)->m_Teams;
+	CGameTeams &Teams = pSelf->m_pController->m_Teams;
 	int Team = Teams.m_Core.Team(pResult->m_ClientID);
 	if(!Teams.IsPractice(Team))
 	{

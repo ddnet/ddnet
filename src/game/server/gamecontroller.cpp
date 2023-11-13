@@ -18,7 +18,8 @@
 #include "entities/pickup.h"
 #include "entities/projectile.h"
 
-IGameController::IGameController(class CGameContext *pGameServer)
+IGameController::IGameController(class CGameContext *pGameServer) :
+	m_Teams(pGameServer)
 {
 	m_pGameServer = pGameServer;
 	m_pConfig = m_pGameServer->Config();

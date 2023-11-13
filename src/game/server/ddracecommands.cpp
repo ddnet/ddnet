@@ -776,7 +776,7 @@ void CGameContext::ConModerate(IConsole::IResult *pResult, void *pUserData)
 void CGameContext::ConSetDDRTeam(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	CGameControllerDDRace *pController = (CGameControllerDDRace *)pSelf->m_pController;
+	IGameController *pController = (IGameController *)pSelf->m_pController;
 
 	if(g_Config.m_SvTeam == SV_TEAM_FORBIDDEN || g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO)
 	{
@@ -802,7 +802,7 @@ void CGameContext::ConSetDDRTeam(IConsole::IResult *pResult, void *pUserData)
 void CGameContext::ConUninvite(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	CGameControllerDDRace *pController = (CGameControllerDDRace *)pSelf->m_pController;
+	IGameController *pController = (IGameController *)pSelf->m_pController;
 
 	pController->m_Teams.SetClientInvited(pResult->GetInteger(1), pResult->GetVictim(), false);
 }

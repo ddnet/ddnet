@@ -3,7 +3,6 @@
 #define GAME_SERVER_GAMEMODES_DDRACE_H
 
 #include <game/server/gamecontroller.h>
-#include <game/server/teams.h>
 
 #include <map>
 #include <vector>
@@ -34,8 +33,6 @@ public:
 	void InitTeleporter();
 
 	int GetPlayerTeam(int ClientID) const;
-
-	CGameTeams m_Teams;
 
 	std::map<int, std::vector<vec2>> m_TeleOuts;
 	std::map<int, std::vector<vec2>> m_TeleCheckOuts;
