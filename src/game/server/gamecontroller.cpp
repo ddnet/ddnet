@@ -490,6 +490,15 @@ void IGameController::ResetGame()
 
 const char *IGameController::GetTeamName(int Team)
 {
+	// gctf
+	if(IsTeamplay())
+	{
+		if(Team == TEAM_RED)
+			return "red team";
+		if(Team == TEAM_BLUE)
+			return "blue team";
+	}
+
 	if(Team == 0)
 		return "game";
 	return "spectators";
@@ -836,11 +845,10 @@ void IGameController::DoTeamChange(CPlayer *pPlayer, int Team, bool DoChatMsg)
 	int ClientID = pPlayer->GetCID();
 
 	char aBuf[128];
-	DoChatMsg = false;
 	if(DoChatMsg)
 	{
 		str_format(aBuf, sizeof(aBuf), "'%s' joined the %s", Server()->ClientName(ClientID), GameServer()->m_pController->GetTeamName(Team));
-		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
+		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, CGameContext::CHAT_SIX);
 	}
 
 	str_format(aBuf, sizeof(aBuf), "team_join player='%d:%s' m_Team=%d", ClientID, Server()->ClientName(ClientID), Team);
