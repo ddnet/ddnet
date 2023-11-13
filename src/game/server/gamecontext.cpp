@@ -3453,6 +3453,7 @@ void CGameContext::ConchainSettingUpdate(IConsole::IResult *pResult, void *pUser
 	}
 }
 
+// gctf
 void CGameContext::ConchainGameinfoUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	pfnCallback(pResult, pCallbackUserData);
@@ -3462,6 +3463,38 @@ void CGameContext::ConchainGameinfoUpdate(IConsole::IResult *pResult, void *pUse
 		if(pSelf->m_pController)
 			pSelf->m_pController->CheckGameInfo();
 	}
+}
+
+// gctf
+void CGameContext::ConShuffleTeams(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!pSelf->m_pController->IsTeamplay())
+		return;
+
+	int rnd = 0;
+	int PlayerTeam = 0;
+	int aPlayer[MAX_CLIENTS];
+
+	for(int i = 0; i < MAX_CLIENTS; i++)
+		if(pSelf->m_apPlayers[i] && pSelf->m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS)
+			aPlayer[PlayerTeam++] = i;
+
+	// pSelf->SendGameMsg(GAMEMSG_TEAM_SHUFFLE, -1);
+
+	//creating random permutation
+	for(int i = PlayerTeam; i > 1; i--)
+	{
+		rnd = rand() % i;
+		int tmp = aPlayer[rnd];
+		aPlayer[rnd] = aPlayer[i - 1];
+		aPlayer[i - 1] = tmp;
+	}
+	//uneven Number of Players?
+	rnd = PlayerTeam % 2 ? rand() % 2 : 0;
+
+	for(int i = 0; i < PlayerTeam; i++)
+		pSelf->m_pController->DoTeamChange(pSelf->m_apPlayers[aPlayer[i]], i < (PlayerTeam + rnd) / 2 ? TEAM_RED : TEAM_BLUE, false);
 }
 
 void CGameContext::OnConsoleInit()
@@ -3506,6 +3539,7 @@ void CGameContext::OnConsoleInit()
 
 	Console()->Chain("sv_scorelimit", ConchainGameinfoUpdate, this); // gctf
 	Console()->Chain("sv_timelimit", ConchainGameinfoUpdate, this); // gctf
+	Console()->Register("shuffle_teams", "", CFGFLAG_SERVER, ConShuffleTeams, this, "Shuffle the current teams"); // gctf
 
 	Console()->Chain("sv_vote_kick", ConchainSettingUpdate, this);
 	Console()->Chain("sv_vote_kick_min", ConchainSettingUpdate, this);
