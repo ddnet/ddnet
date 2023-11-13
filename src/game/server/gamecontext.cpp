@@ -4784,6 +4784,12 @@ void CGameContext::OnBangCommand(const char *pLine, int ClientID)
 				SetSlots = i;
 				break;
 			}
+			str_format(a1on1, sizeof(a1on1), "%s%d", aVs, i);
+			if(!str_comp_nocase(pCmd, a1on1))
+			{
+				SetSlots = i;
+				break;
+			}
 		}
 	}
 
