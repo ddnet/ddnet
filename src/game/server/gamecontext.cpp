@@ -2076,7 +2076,7 @@ void CGameContext::OnSayNetMessage(const CNetMsg_Cl_Say *pMsg, int ClientID, con
 			str_copy(aWhisperMsg, pMsg->m_pMessage + 10, 256);
 			Converse(pPlayer->GetCID(), aWhisperMsg);
 		}
-		else if(!str_comp_nocase(pMsg->m_pMessage + 1, "ready")) // gctf
+		else if(!str_comp_nocase(pMsg->m_pMessage + 1, "ready") || !str_comp_nocase(pMsg->m_pMessage + 1, "pause")) // gctf
 		{
 			m_pController->OnPlayerReadyChange(pPlayer);
 		}
@@ -4814,7 +4814,7 @@ void CGameContext::OnBangCommand(const char *pLine, int ClientID)
 		str_format(aChatmsg, sizeof(aChatmsg), "'%s' called vote to change server option '%s'", Server()->ClientName(ClientID), aDesc);
 		CallVote(ClientID, aDesc, aCmd, "chat cmd", aChatmsg);
 	}
-	else if(!str_comp_nocase(pCmd, "ready"))
+	else if(!str_comp_nocase(pCmd, "ready") || !str_comp_nocase(pCmd, "pause"))
 	{
 		m_pController->OnPlayerReadyChange(pPlayer);
 	}
