@@ -317,7 +317,7 @@ class CWindowsConsoleLogger : public ILogger
 	HANDLE m_pConsole;
 	int m_BackgroundColor;
 	int m_ForegroundColor;
-	std::mutex m_OutputLock;
+	CLock m_OutputLock;
 	bool m_Finished = false;
 
 public:
@@ -336,7 +336,7 @@ public:
 			m_ForegroundColor = FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY;
 		}
 	}
-	void Log(const CLogMessage *pMessage) override
+	void Log(const CLogMessage *pMessage) override REQUIRES(!m_OutputLock)
 	{
 		if(m_Filter.Filters(pMessage))
 		{
@@ -356,44 +356,41 @@ public:
 		else
 			Color |= FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED | FOREGROUND_INTENSITY;
 
-		m_OutputLock.lock();
+		const CLockScope LockScope(m_OutputLock);
 		if(!m_Finished)
 		{
 			SetConsoleTextAttribute(m_pConsole, Color);
 			WriteConsoleW(m_pConsole, WideMessage.c_str(), WideMessage.length(), NULL, NULL);
 		}
-		m_OutputLock.unlock();
 	}
-	void GlobalFinish() override
+	void GlobalFinish() override REQUIRES(!m_OutputLock)
 	{
 		// Restore original color
-		m_OutputLock.lock();
+		const CLockScope LockScope(m_OutputLock);
 		SetConsoleTextAttribute(m_pConsole, m_BackgroundColor | m_ForegroundColor);
 		m_Finished = true;
-		m_OutputLock.unlock();
 	}
 };
 class CWindowsFileLogger : public ILogger
 {
 	HANDLE m_pFile;
-	std::mutex m_OutputLock;
+	CLock m_OutputLock;
 
 public:
 	CWindowsFileLogger(HANDLE pFile) :
 		m_pFile(pFile)
 	{
 	}
-	void Log(const CLogMessage *pMessage) override
+	void Log(const CLogMessage *pMessage) override REQUIRES(!m_OutputLock)
 	{
 		if(m_Filter.Filters(pMessage))
 		{
 			return;
 		}
-		m_OutputLock.lock();
+		const CLockScope LockScope(m_OutputLock);
 		DWORD Written; // we don't care about the value, but Windows 7 crashes if we pass NULL
 		WriteFile(m_pFile, pMessage->m_aLine, pMessage->m_LineLength, &Written, NULL);
 		WriteFile(m_pFile, "\r\n", 2, &Written, NULL);
-		m_OutputLock.unlock();
 	}
 };
 #endif
@@ -447,9 +444,9 @@ std::unique_ptr<ILogger> log_logger_windows_debugger()
 
 void CFutureLogger::Set(std::shared_ptr<ILogger> pLogger)
 {
-	std::shared_ptr<ILogger> null;
-	m_PendingLock.lock();
-	if(!std::atomic_compare_exchange_strong_explicit(&m_pLogger, &null, pLogger, std::memory_order_acq_rel, std::memory_order_acq_rel))
+	const CLockScope LockScope(m_PendingLock);
+	std::shared_ptr<ILogger> pNullLogger;
+	if(!std::atomic_compare_exchange_strong_explicit(&m_pLogger, &pNullLogger, pLogger, std::memory_order_acq_rel, std::memory_order_acq_rel))
 	{
 		dbg_assert(false, "future logger has already been set and can only be set once");
 	}
@@ -461,7 +458,6 @@ void CFutureLogger::Set(std::shared_ptr<ILogger> pLogger)
 	}
 	m_vPending.clear();
 	m_vPending.shrink_to_fit();
-	m_PendingLock.unlock();
 }
 
 void CFutureLogger::Log(const CLogMessage *pMessage)
@@ -472,7 +468,7 @@ void CFutureLogger::Log(const CLogMessage *pMessage)
 		pLogger->Log(pMessage);
 		return;
 	}
-	m_PendingLock.lock();
+	const CLockScope LockScope(m_PendingLock);
 	pLogger = std::atomic_load_explicit(&m_pLogger, std::memory_order_relaxed);
 	if(pLogger)
 	{
@@ -480,7 +476,6 @@ void CFutureLogger::Log(const CLogMessage *pMessage)
 		return;
 	}
 	m_vPending.push_back(*pMessage);
-	m_PendingLock.unlock();
 }
 
 void CFutureLogger::GlobalFinish()

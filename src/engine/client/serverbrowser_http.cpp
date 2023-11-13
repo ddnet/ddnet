@@ -10,7 +10,7 @@
 #include <engine/shared/serverinfo.h>
 #include <engine/storage.h>
 
-#include <base/lock_scope.h>
+#include <base/lock.h>
 #include <base/system.h>
 
 #include <memory>
@@ -51,7 +51,7 @@ private:
 	};
 	class CJob : public IJob
 	{
-		LOCK m_Lock;
+		CLock m_Lock;
 		std::shared_ptr<CData> m_pData;
 		std::unique_ptr<CHttpRequest> m_pHead PT_GUARDED_BY(m_Lock);
 		std::unique_ptr<CHttpRequest> m_pGet PT_GUARDED_BY(m_Lock);
@@ -59,8 +59,7 @@ private:
 
 	public:
 		CJob(std::shared_ptr<CData> pData) :
-			m_pData(std::move(pData)) { m_Lock = lock_create(); }
-		~CJob() override { lock_destroy(m_Lock); }
+			m_pData(std::move(pData)) {}
 		void Abort() REQUIRES(!m_Lock);
 	};
 

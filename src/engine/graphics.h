@@ -57,10 +57,10 @@ struct SGraphicTile
 
 struct SGraphicTileTexureCoords
 {
-	vec3 m_TexCoordTopLeft;
-	vec3 m_TexCoordTopRight;
-	vec3 m_TexCoordBottomRight;
-	vec3 m_TexCoordBottomLeft;
+	ubvec4 m_TexCoordTopLeft;
+	ubvec4 m_TexCoordTopRight;
+	ubvec4 m_TexCoordBottomRight;
+	ubvec4 m_TexCoordBottomLeft;
 };
 
 class CImageInfo
@@ -246,9 +246,7 @@ public:
 		TEXLOAD_NO_COMPRESSION = 1 << 2,
 		TEXLOAD_TO_3D_TEXTURE = (1 << 3),
 		TEXLOAD_TO_2D_ARRAY_TEXTURE = (1 << 4),
-		TEXLOAD_TO_3D_TEXTURE_SINGLE_LAYER = (1 << 5),
-		TEXLOAD_TO_2D_ARRAY_TEXTURE_SINGLE_LAYER = (1 << 6),
-		TEXLOAD_NO_2D_TEXTURE = (1 << 7),
+		TEXLOAD_NO_2D_TEXTURE = (1 << 5),
 	};
 
 	class CTextureHandle
@@ -263,6 +261,7 @@ public:
 		}
 
 		bool IsValid() const { return Id() >= 0; }
+		bool IsNullTexture() const { return Id() == 0; }
 		int Id() const { return m_Id; }
 		void Invalidate() { m_Id = -1; }
 	};
@@ -337,7 +336,7 @@ public:
 	virtual CTextureHandle LoadTextureRaw(size_t Width, size_t Height, CImageInfo::EImageFormat Format, const void *pData, int Flags, const char *pTexName = nullptr) = 0;
 	virtual int LoadTextureRawSub(CTextureHandle TextureID, int x, int y, size_t Width, size_t Height, CImageInfo::EImageFormat Format, const void *pData) = 0;
 	virtual CTextureHandle LoadTexture(const char *pFilename, int StorageType, int Flags = 0) = 0;
-	virtual CTextureHandle InvalidTexture() const = 0;
+	virtual CTextureHandle NullTexture() const = 0;
 	virtual void TextureSet(CTextureHandle Texture) = 0;
 	void TextureClear() { TextureSet(CTextureHandle()); }
 
@@ -356,8 +355,7 @@ public:
 
 	// specific render functions
 	virtual void RenderTileLayer(int BufferContainerIndex, const ColorRGBA &Color, char **pOffsets, unsigned int *pIndicedVertexDrawNum, size_t NumIndicesOffset) = 0;
-	virtual void RenderBorderTiles(int BufferContainerIndex, const ColorRGBA &Color, char *pIndexBufferOffset, const vec2 &Offset, const vec2 &Dir, int JumpIndex, unsigned int DrawNum) = 0;
-	virtual void RenderBorderTileLines(int BufferContainerIndex, const ColorRGBA &Color, char *pIndexBufferOffset, const vec2 &Offset, const vec2 &Dir, unsigned int IndexDrawNum, unsigned int RedrawNum) = 0;
+	virtual void RenderBorderTiles(int BufferContainerIndex, const ColorRGBA &Color, char *pIndexBufferOffset, const vec2 &Offset, const vec2 &Scale, uint32_t DrawNum) = 0;
 	virtual void RenderQuadLayer(int BufferContainerIndex, SQuadRenderInfo *pQuadInfo, size_t QuadNum, int QuadOffset) = 0;
 	virtual void RenderText(int BufferContainerIndex, int TextQuadNum, int TextureSize, int TextureTextIndex, int TextureTextOutlineIndex, const ColorRGBA &TextColor, const ColorRGBA &TextOutlineColor) = 0;
 
@@ -386,7 +384,8 @@ public:
 	virtual bool IsQuadBufferingEnabled() = 0;
 	virtual bool IsTextBufferingEnabled() = 0;
 	virtual bool IsQuadContainerBufferingEnabled() = 0;
-	virtual bool HasTextureArrays() = 0;
+	virtual bool Uses2DTextureArrays() = 0;
+	virtual bool HasTextureArraysSupport() = 0;
 
 	virtual const char *GetVendorString() = 0;
 	virtual const char *GetVersionString() = 0;

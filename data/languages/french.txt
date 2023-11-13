@@ -127,9 +127,6 @@ Delete
 Delete demo
 == Supprimer la démo
 
-Demo details
-== Détails de la démo
-
 Demofile: %s
 == Démo : %s
 
@@ -283,9 +280,6 @@ No servers match your filter criteria
 Ok
 == Ok
 
-Open
-== Ouvrir
-
 Parent Folder
 == Dossier parent
 
@@ -300,10 +294,6 @@ Ping
 
 Pistol
 == Pistolet
-
-[Demo browser]
-Play
-== Jouer
 
 Play background music
 == Jouer la musique de fond
@@ -338,9 +328,6 @@ Red team
 Red team wins!
 == L'équipe rouge gagne !
 
-Refresh
-== Rafraîchir
-
 Remote console
 == Console serveur
 
@@ -349,9 +336,6 @@ Remove
 
 Remove friend
 == Retirer des amis
-
-Rename
-== Renommer
 
 Rename demo
 == Renommer la démo
@@ -526,23 +510,11 @@ FSAA samples
 Sound volume
 == Volume du son général
 
-Created:
-== Créé le :
-
 Max Screenshots
 == Nombre maximum de captures d'écran
 
-Length:
-== Durée :
-
 Laser
 == Laser
-
-Netversion:
-== Netversion :
-
-Map:
-== Carte :
 
 Hue
 == Teinte
@@ -553,17 +525,11 @@ Record demo
 Your skin
 == Votre skin
 
-Size:
-== Taille :
-
 Reset to defaults
 == Réinitialiser
 
 Quit anyway?
 == Quitter quand même ?
-
-Version:
-== Version :
 
 Round
 == Round
@@ -574,9 +540,6 @@ Lht.
 UI Color
 == Couleur du menu
 
-Crc:
-== Crc :
-
 Alpha
 == Alpha
 
@@ -585,9 +548,6 @@ LAN
 
 Name plates size
 == Taille des pseudonymes
-
-Type:
-== Type :
 
 Enable game sounds
 == Activer les sons du jeu
@@ -799,9 +759,6 @@ Show only chat messages from friends
 Remove chat
 == Desactiver le chat
 
-Markers:
-== Marqueurs :
-
 Pause
 == Pause
 
@@ -862,8 +819,8 @@ Show HUD
 DDNet %s is available:
 == DDNet %s est disponible:
 
-Please use a different name
-== Veuillez changer de pseudonyme
+Please use a different filename
+== 
 
 Search
 == Chercher
@@ -957,9 +914,6 @@ AntiPing: predict weapons
 
 Automatically create statboard csv
 == Créer un tableau CSV des stats automatiquement
-
-Render
-== Convertir
 
 Video name:
 == Nom de la vidéo
@@ -1210,12 +1164,6 @@ Preview
 
 Background
 == Arrière-plan
-
-Entities Background color
-== Couleur de l'arrière-plan des entités
-
-Regular Background Color
-== Couleur de l'arrière-plan
 
 Discord
 == Discord
@@ -1685,6 +1633,9 @@ Add Clan
 Create a random skin
 == Créer un skin aléatoire
 
+Error playing demo
+== 
+
 Quitting. Please wait…
 == 
 
@@ -1694,7 +1645,19 @@ Restarting. Please wait…
 Multi-View
 == 
 
+Some map images could not be loaded. Check the local console for details.
+== 
+
+Some map sounds could not be loaded. Check the local console for details.
+== 
+
+Loading menu themes
+== 
+
 Rename folder
+== 
+
+Render complete
 == 
 
 A demo with this name already exists
@@ -1707,6 +1670,12 @@ Unable to rename the folder
 == 
 
 (paused)
+== 
+
+Videos directory
+== 
+
+Video was saved to '%s'
 == 
 
 No server selected
@@ -1753,7 +1722,20 @@ Render cut to video
 All combined
 == 
 
+No demo selected
+== 
+
 Folder Link
+== 
+
+Created
+== 
+
+Netversion
+== 
+
+[Demo details]
+map not included
 == 
 
 Are you sure that you want to delete the folder '%s'?
@@ -1765,10 +1747,31 @@ Delete folder
 Unable to delete the folder '%s'. Make sure it's empty first.
 == 
 
+Ghosts directory
+== 
+
+Activate all
+== 
+
+Deactivate all
+== 
+
 Axis
 == 
 
 Graphics card
+== 
+
+Enable ghost
+== 
+
+Only save improvements
+== 
+
+Regular background color
+== 
+
+Entities background color
 == 
 
 Moved ingame

@@ -22,6 +22,44 @@ class IServerBrowserHttp;
 class IServerBrowserPingCache;
 class IStorage;
 
+class CCommunityServer
+{
+	char m_aCommunityId[CServerInfo::MAX_COMMUNITY_ID_LENGTH];
+	char m_aCountryName[CServerInfo::MAX_COMMUNITY_COUNTRY_LENGTH];
+	char m_aTypeName[CServerInfo::MAX_COMMUNITY_TYPE_LENGTH];
+
+public:
+	CCommunityServer(const char *pCommunityId, const char *pCountryName, const char *pTypeName)
+	{
+		str_copy(m_aCommunityId, pCommunityId);
+		str_copy(m_aCountryName, pCountryName);
+		str_copy(m_aTypeName, pTypeName);
+	}
+
+	const char *CommunityId() const { return m_aCommunityId; }
+	const char *CountryName() const { return m_aCountryName; }
+	const char *TypeName() const { return m_aTypeName; }
+};
+
+class CFilterList : public IFilterList
+{
+	char *m_pFilter;
+	size_t m_FilterSize;
+
+public:
+	CFilterList(char *pFilter, size_t FilterSize) :
+		m_pFilter(pFilter), m_FilterSize(FilterSize)
+	{
+	}
+
+	void Add(const char *pElement) override;
+	void Remove(const char *pElement) override;
+	void Clear() override;
+	bool Filtered(const char *pElement) const override;
+	bool Empty() const override;
+	void Clean(const std::vector<const char *> &vpAllowedElements);
+};
+
 class CServerBrowser : public IServerBrowser
 {
 public:
@@ -54,24 +92,32 @@ public:
 	int NumSortedPlayers() const override { return m_NumSortedPlayers; }
 	const CServerInfo *SortedGet(int Index) const override;
 
-	const char *GetTutorialServer() override;
-	void LoadDDNetRanks();
-	void RecheckOfficial();
-	void LoadDDNetServers();
-	void LoadDDNetInfoJson();
 	const json_value *LoadDDNetInfo();
+	void LoadDDNetInfoJson();
+	void LoadDDNetLocation();
+	void LoadDDNetServers();
 	void UpdateServerFilteredPlayers(CServerInfo *pInfo) const;
 	void UpdateServerFriends(CServerInfo *pInfo) const;
-	CServerInfo::ERankState HasRank(const char *pMap);
+	void UpdateServerCommunity(CServerInfo *pInfo) const;
+	void UpdateServerRank(CServerInfo *pInfo) const;
+	const char *GetTutorialServer() override;
 
 	const std::vector<CCommunity> &Communities() const override;
 	const CCommunity *Community(const char *pCommunityId) const override;
+	std::vector<const CCommunity *> SelectedCommunities() const override;
+	int64_t DDNetInfoUpdateTime() const override { return m_DDNetInfoUpdateTime; }
 
-	void DDNetFilterAdd(char *pFilter, int FilterSize, const char *pName) const override;
-	void DDNetFilterRem(char *pFilter, int FilterSize, const char *pName) const override;
-	bool DDNetFiltered(const char *pFilter, const char *pName) const override;
-	void CountryFilterClean(int CommunityIndex) override;
-	void TypeFilterClean(int CommunityIndex) override;
+	CFilterList &CommunitiesFilter() override { return m_CommunitiesFilter; }
+	CFilterList &CountriesFilter() override { return m_CountriesFilter; }
+	CFilterList &TypesFilter() override { return m_TypesFilter; }
+	const CFilterList &CommunitiesFilter() const override { return m_CommunitiesFilter; }
+	const CFilterList &CountriesFilter() const override { return m_CountriesFilter; }
+	const CFilterList &TypesFilter() const override { return m_TypesFilter; }
+	void CleanFilters() override;
+
+	void CommunitiesFilterClean();
+	void CountriesFilterClean();
+	void TypesFilterClean();
 
 	//
 	void Update();
@@ -110,9 +156,16 @@ private:
 	std::unordered_map<NETADDR, int> m_ByAddr;
 
 	std::vector<CCommunity> m_vCommunities;
+	std::unordered_map<NETADDR, CCommunityServer> m_CommunityServersByAddr;
+
 	int m_OwnLocation = CServerInfo::LOC_UNKNOWN;
 
+	CFilterList m_CommunitiesFilter;
+	CFilterList m_CountriesFilter;
+	CFilterList m_TypesFilter;
+
 	json_value *m_pDDNetInfo;
+	int64_t m_DDNetInfoUpdateTime;
 
 	CServerEntry *m_pFirstReqServer; // request list
 	CServerEntry *m_pLastReqServer;

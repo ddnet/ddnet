@@ -721,22 +721,17 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 		float m_aPos[4 * 2];
 	};
 
-	struct SUniformTileGPosBorderLine : public SUniformTileGPos
+	struct SUniformTileGPosBorder : public SUniformTileGPos
 	{
-		vec2 m_Dir;
 		vec2 m_Offset;
-	};
-
-	struct SUniformTileGPosBorder : public SUniformTileGPosBorderLine
-	{
-		int32_t m_JumpIndex;
+		vec2 m_Scale;
 	};
 
 	typedef ColorRGBA SUniformTileGVertColor;
 
 	struct SUniformTileGVertColorAlign
 	{
-		float m_aPad[(64 - 52) / 4];
+		float m_aPad[(64 - 48) / 4];
 	};
 
 	struct SUniformPrimExGPosRotationless
@@ -1011,7 +1006,6 @@ private:
 	SPipelineContainer m_TextPipeline;
 	SPipelineContainer m_TilePipeline;
 	SPipelineContainer m_TileBorderPipeline;
-	SPipelineContainer m_TileBorderLinePipeline;
 	SPipelineContainer m_PrimExPipeline;
 	SPipelineContainer m_PrimExRotationlessPipeline;
 	SPipelineContainer m_SpriteMultiPipeline;
@@ -1274,7 +1268,6 @@ protected:
 
 		m_aCommandCallbacks[CommandBufferCMDOff(CCommandBuffer::CMD_RENDER_TILE_LAYER)] = {true, [this](SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand *pBaseCommand) { Cmd_RenderTileLayer_FillExecuteBuffer(ExecBuffer, static_cast<const CCommandBuffer::SCommand_RenderTileLayer *>(pBaseCommand)); }, [this](const CCommandBuffer::SCommand *pBaseCommand, SRenderCommandExecuteBuffer &ExecBuffer) { return Cmd_RenderTileLayer(static_cast<const CCommandBuffer::SCommand_RenderTileLayer *>(pBaseCommand), ExecBuffer); }};
 		m_aCommandCallbacks[CommandBufferCMDOff(CCommandBuffer::CMD_RENDER_BORDER_TILE)] = {true, [this](SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand *pBaseCommand) { Cmd_RenderBorderTile_FillExecuteBuffer(ExecBuffer, static_cast<const CCommandBuffer::SCommand_RenderBorderTile *>(pBaseCommand)); }, [this](const CCommandBuffer::SCommand *pBaseCommand, SRenderCommandExecuteBuffer &ExecBuffer) { return Cmd_RenderBorderTile(static_cast<const CCommandBuffer::SCommand_RenderBorderTile *>(pBaseCommand), ExecBuffer); }};
-		m_aCommandCallbacks[CommandBufferCMDOff(CCommandBuffer::CMD_RENDER_BORDER_TILE_LINE)] = {true, [this](SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand *pBaseCommand) { Cmd_RenderBorderTileLine_FillExecuteBuffer(ExecBuffer, static_cast<const CCommandBuffer::SCommand_RenderBorderTileLine *>(pBaseCommand)); }, [this](const CCommandBuffer::SCommand *pBaseCommand, SRenderCommandExecuteBuffer &ExecBuffer) { return Cmd_RenderBorderTileLine(static_cast<const CCommandBuffer::SCommand_RenderBorderTileLine *>(pBaseCommand), ExecBuffer); }};
 		m_aCommandCallbacks[CommandBufferCMDOff(CCommandBuffer::CMD_RENDER_QUAD_LAYER)] = {true, [this](SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand *pBaseCommand) { Cmd_RenderQuadLayer_FillExecuteBuffer(ExecBuffer, static_cast<const CCommandBuffer::SCommand_RenderQuadLayer *>(pBaseCommand)); }, [this](const CCommandBuffer::SCommand *pBaseCommand, SRenderCommandExecuteBuffer &ExecBuffer) { return Cmd_RenderQuadLayer(static_cast<const CCommandBuffer::SCommand_RenderQuadLayer *>(pBaseCommand), ExecBuffer); }};
 		m_aCommandCallbacks[CommandBufferCMDOff(CCommandBuffer::CMD_RENDER_TEXT)] = {true, [this](SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand *pBaseCommand) { Cmd_RenderText_FillExecuteBuffer(ExecBuffer, static_cast<const CCommandBuffer::SCommand_RenderText *>(pBaseCommand)); }, [this](const CCommandBuffer::SCommand *pBaseCommand, SRenderCommandExecuteBuffer &ExecBuffer) { return Cmd_RenderText(static_cast<const CCommandBuffer::SCommand_RenderText *>(pBaseCommand), ExecBuffer); }};
 		m_aCommandCallbacks[CommandBufferCMDOff(CCommandBuffer::CMD_RENDER_QUAD_CONTAINER)] = {true, [this](SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand *pBaseCommand) { Cmd_RenderQuadContainer_FillExecuteBuffer(ExecBuffer, static_cast<const CCommandBuffer::SCommand_RenderQuadContainer *>(pBaseCommand)); }, [this](const CCommandBuffer::SCommand *pBaseCommand, SRenderCommandExecuteBuffer &ExecBuffer) { return Cmd_RenderQuadContainer(static_cast<const CCommandBuffer::SCommand_RenderQuadContainer *>(pBaseCommand), ExecBuffer); }};
@@ -2600,8 +2593,7 @@ protected:
 		}
 
 		bool Requires2DTexture = (Flags & CCommandBuffer::TEXFLAG_NO_2D_TEXTURE) == 0;
-		bool Requires2DTextureArray = (Flags & (CCommandBuffer::TEXFLAG_TO_2D_ARRAY_TEXTURE | CCommandBuffer::TEXFLAG_TO_2D_ARRAY_TEXTURE_SINGLE_LAYER)) != 0;
-		bool Is2DTextureSingleLayer = (Flags & CCommandBuffer::TEXFLAG_TO_2D_ARRAY_TEXTURE_SINGLE_LAYER) != 0;
+		bool Requires2DTextureArray = (Flags & (CCommandBuffer::TEXFLAG_TO_2D_ARRAY_TEXTURE)) != 0;
 		bool RequiresMipMaps = (Flags & CCommandBuffer::TEXFLAG_NOMIPMAPS) == 0;
 		size_t MipMapLevelCount = 1;
 		if(RequiresMipMaps)
@@ -2645,44 +2637,32 @@ protected:
 			int ConvertWidth = Width;
 			int ConvertHeight = Height;
 
-			if(!Is2DTextureSingleLayer)
+			if(ConvertWidth == 0 || (ConvertWidth % 16) != 0 || ConvertHeight == 0 || (ConvertHeight % 16) != 0)
 			{
-				if(ConvertWidth == 0 || (ConvertWidth % 16) != 0 || ConvertHeight == 0 || (ConvertHeight % 16) != 0)
-				{
-					dbg_msg("vulkan", "3D/2D array texture was resized");
-					int NewWidth = maximum<int>(HighestBit(ConvertWidth), 16);
-					int NewHeight = maximum<int>(HighestBit(ConvertHeight), 16);
-					uint8_t *pNewTexData = (uint8_t *)Resize((const uint8_t *)pData, ConvertWidth, ConvertHeight, NewWidth, NewHeight, PixelSize);
+				dbg_msg("vulkan", "3D/2D array texture was resized");
+				int NewWidth = maximum<int>(HighestBit(ConvertWidth), 16);
+				int NewHeight = maximum<int>(HighestBit(ConvertHeight), 16);
+				uint8_t *pNewTexData = (uint8_t *)Resize((const uint8_t *)pData, ConvertWidth, ConvertHeight, NewWidth, NewHeight, PixelSize);
 
-					ConvertWidth = NewWidth;
-					ConvertHeight = NewHeight;
+				ConvertWidth = NewWidth;
+				ConvertHeight = NewHeight;
 
-					free(pData);
-					pData = pNewTexData;
-				}
+				free(pData);
+				pData = pNewTexData;
 			}
 
-			void *p3DTexData = pData;
 			bool Needs3DTexDel = false;
-			if(!Is2DTextureSingleLayer)
+			void *p3DTexData = malloc((size_t)PixelSize * ConvertWidth * ConvertHeight);
+			if(!Texture2DTo3D(pData, ConvertWidth, ConvertHeight, PixelSize, 16, 16, p3DTexData, Image3DWidth, Image3DHeight))
 			{
-				p3DTexData = malloc((size_t)PixelSize * ConvertWidth * ConvertHeight);
-				if(!Texture2DTo3D(pData, ConvertWidth, ConvertHeight, PixelSize, 16, 16, p3DTexData, Image3DWidth, Image3DHeight))
-				{
-					free(p3DTexData);
-					p3DTexData = nullptr;
-				}
-				Needs3DTexDel = true;
+				free(p3DTexData);
+				p3DTexData = nullptr;
 			}
-			else
-			{
-				Image3DWidth = ConvertWidth;
-				Image3DHeight = ConvertHeight;
-			}
+			Needs3DTexDel = true;
 
 			if(p3DTexData != nullptr)
 			{
-				const size_t ImageDepth2DArray = Is2DTextureSingleLayer ? 1 : ((size_t)16 * 16);
+				const size_t ImageDepth2DArray = (size_t)16 * 16;
 				VkExtent3D ImgSize{(uint32_t)Image3DWidth, (uint32_t)Image3DHeight, 1};
 				if(RequiresMipMaps)
 				{
@@ -3224,24 +3204,20 @@ protected:
 			return GetPipeline(m_StandardPipeline, IsTextured, BlendModeIndex, DynamicIndex);
 	}
 
-	VkPipelineLayout &GetTileLayerPipeLayout(int Type, bool IsTextured, size_t BlendModeIndex, size_t DynamicIndex)
+	VkPipelineLayout &GetTileLayerPipeLayout(bool IsBorder, bool IsTextured, size_t BlendModeIndex, size_t DynamicIndex)
 	{
-		if(Type == 0)
+		if(!IsBorder)
 			return GetPipeLayout(m_TilePipeline, IsTextured, BlendModeIndex, DynamicIndex);
-		else if(Type == 1)
-			return GetPipeLayout(m_TileBorderPipeline, IsTextured, BlendModeIndex, DynamicIndex);
 		else
-			return GetPipeLayout(m_TileBorderLinePipeline, IsTextured, BlendModeIndex, DynamicIndex);
+			return GetPipeLayout(m_TileBorderPipeline, IsTextured, BlendModeIndex, DynamicIndex);
 	}
 
-	VkPipeline &GetTileLayerPipe(int Type, bool IsTextured, size_t BlendModeIndex, size_t DynamicIndex)
+	VkPipeline &GetTileLayerPipe(bool IsBorder, bool IsTextured, size_t BlendModeIndex, size_t DynamicIndex)
 	{
-		if(Type == 0)
+		if(!IsBorder)
 			return GetPipeline(m_TilePipeline, IsTextured, BlendModeIndex, DynamicIndex);
-		else if(Type == 1)
-			return GetPipeline(m_TileBorderPipeline, IsTextured, BlendModeIndex, DynamicIndex);
 		else
-			return GetPipeline(m_TileBorderLinePipeline, IsTextured, BlendModeIndex, DynamicIndex);
+			return GetPipeline(m_TileBorderPipeline, IsTextured, BlendModeIndex, DynamicIndex);
 	}
 
 	void GetStateIndices(const SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SState &State, bool &IsTextured, size_t &BlendModeIndex, size_t &DynamicIndex, size_t &AddressModeIndex)
@@ -3372,7 +3348,7 @@ protected:
 		ExecBufferFillDynamicStates(State, ExecBuffer);
 	}
 
-	[[nodiscard]] bool RenderTileLayer(SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SState &State, int Type, const GL_SColorf &Color, const vec2 &Dir, const vec2 &Off, int32_t JumpIndex, size_t IndicesDrawNum, char *const *pIndicesOffsets, const unsigned int *pDrawCount, size_t InstanceCount)
+	[[nodiscard]] bool RenderTileLayer(SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SState &State, bool IsBorder, const GL_SColorf &Color, const vec2 &Scale, const vec2 &Off, size_t IndicesDrawNum, char *const *pIndicesOffsets, const unsigned int *pDrawCount)
 	{
 		std::array<float, (size_t)4 * 2> m;
 		GetStateMatrix(State, m);
@@ -3382,8 +3358,8 @@ protected:
 		size_t DynamicIndex;
 		size_t AddressModeIndex;
 		GetStateIndices(ExecBuffer, State, IsTextured, BlendModeIndex, DynamicIndex, AddressModeIndex);
-		auto &PipeLayout = GetTileLayerPipeLayout(Type, IsTextured, BlendModeIndex, DynamicIndex);
-		auto &PipeLine = GetTileLayerPipe(Type, IsTextured, BlendModeIndex, DynamicIndex);
+		auto &PipeLayout = GetTileLayerPipeLayout(IsBorder, IsTextured, BlendModeIndex, DynamicIndex);
+		auto &PipeLine = GetTileLayerPipe(IsBorder, IsTextured, BlendModeIndex, DynamicIndex);
 
 		VkCommandBuffer *pCommandBuffer;
 		if(!GetGraphicCommandBuffer(pCommandBuffer, ExecBuffer.m_ThreadIndex))
@@ -3409,18 +3385,11 @@ protected:
 		mem_copy(VertexPushConstants.m_aPos, m.data(), m.size() * sizeof(float));
 		FragPushConstants = Color;
 
-		if(Type == 1)
+		if(IsBorder)
 		{
-			VertexPushConstants.m_Dir = Dir;
+			VertexPushConstants.m_Scale = Scale;
 			VertexPushConstants.m_Offset = Off;
-			VertexPushConstants.m_JumpIndex = JumpIndex;
 			VertexPushConstantSize = sizeof(SUniformTileGPosBorder);
-		}
-		else if(Type == 2)
-		{
-			VertexPushConstants.m_Dir = Dir;
-			VertexPushConstants.m_Offset = Off;
-			VertexPushConstantSize = sizeof(SUniformTileGPosBorderLine);
 		}
 
 		vkCmdPushConstants(CommandBuffer, PipeLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, VertexPushConstantSize, &VertexPushConstants);
@@ -3432,7 +3401,7 @@ protected:
 		{
 			VkDeviceSize IndexOffset = (VkDeviceSize)((ptrdiff_t)pIndicesOffsets[i] / sizeof(uint32_t));
 
-			vkCmdDrawIndexed(CommandBuffer, static_cast<uint32_t>(pDrawCount[i]), InstanceCount, IndexOffset, 0, 0);
+			vkCmdDrawIndexed(CommandBuffer, static_cast<uint32_t>(pDrawCount[i]), 1, IndexOffset, 0, 0);
 		}
 
 		return true;
@@ -4911,21 +4880,19 @@ public:
 	}
 
 	template<bool HasSampler>
-	[[nodiscard]] bool CreateTileGraphicsPipelineImpl(const char *pVertName, const char *pFragName, int Type, SPipelineContainer &PipeContainer, EVulkanBackendTextureModes TexMode, EVulkanBackendBlendModes BlendMode, EVulkanBackendClipModes DynamicMode)
+	[[nodiscard]] bool CreateTileGraphicsPipelineImpl(const char *pVertName, const char *pFragName, bool IsBorder, SPipelineContainer &PipeContainer, EVulkanBackendTextureModes TexMode, EVulkanBackendBlendModes BlendMode, EVulkanBackendClipModes DynamicMode)
 	{
 		std::array<VkVertexInputAttributeDescription, HasSampler ? 2 : 1> aAttributeDescriptions = {};
 		aAttributeDescriptions[0] = {0, 0, VK_FORMAT_R32G32_SFLOAT, 0};
 		if(HasSampler)
-			aAttributeDescriptions[1] = {1, 0, VK_FORMAT_R32G32B32_SFLOAT, sizeof(float) * 2};
+			aAttributeDescriptions[1] = {1, 0, VK_FORMAT_R8G8B8A8_UINT, sizeof(float) * 2};
 
 		std::array<VkDescriptorSetLayout, 1> aSetLayouts;
 		aSetLayouts[0] = m_Standard3DTexturedDescriptorSetLayout;
 
 		uint32_t VertPushConstantSize = sizeof(SUniformTileGPos);
-		if(Type == 1)
+		if(IsBorder)
 			VertPushConstantSize = sizeof(SUniformTileGPosBorder);
-		else if(Type == 2)
-			VertPushConstantSize = sizeof(SUniformTileGPosBorderLine);
 
 		uint32_t FragPushConstantSize = sizeof(SUniformTileGVertColor);
 
@@ -4933,11 +4900,11 @@ public:
 		aPushConstants[0] = {VK_SHADER_STAGE_VERTEX_BIT, 0, VertPushConstantSize};
 		aPushConstants[1] = {VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(SUniformTileGPosBorder) + sizeof(SUniformTileGVertColorAlign), FragPushConstantSize};
 
-		return CreateGraphicsPipeline<false>(pVertName, pFragName, PipeContainer, HasSampler ? (sizeof(float) * (2 + 3)) : (sizeof(float) * 2), aAttributeDescriptions, aSetLayouts, aPushConstants, TexMode, BlendMode, DynamicMode);
+		return CreateGraphicsPipeline<false>(pVertName, pFragName, PipeContainer, HasSampler ? (sizeof(float) * 2 + sizeof(uint8_t) * 4) : (sizeof(float) * 2), aAttributeDescriptions, aSetLayouts, aPushConstants, TexMode, BlendMode, DynamicMode);
 	}
 
 	template<bool HasSampler>
-	[[nodiscard]] bool CreateTileGraphicsPipeline(const char *pVertName, const char *pFragName, int Type)
+	[[nodiscard]] bool CreateTileGraphicsPipeline(const char *pVertName, const char *pFragName, bool IsBorder)
 	{
 		bool Ret = true;
 
@@ -4947,7 +4914,7 @@ public:
 		{
 			for(size_t j = 0; j < VULKAN_BACKEND_CLIP_MODE_COUNT; ++j)
 			{
-				Ret &= CreateTileGraphicsPipelineImpl<HasSampler>(pVertName, pFragName, Type, Type == 0 ? m_TilePipeline : (Type == 1 ? m_TileBorderPipeline : m_TileBorderLinePipeline), TexMode, EVulkanBackendBlendModes(i), EVulkanBackendClipModes(j));
+				Ret &= CreateTileGraphicsPipelineImpl<HasSampler>(pVertName, pFragName, IsBorder, !IsBorder ? m_TilePipeline : m_TileBorderPipeline, TexMode, EVulkanBackendBlendModes(i), EVulkanBackendClipModes(j));
 			}
 		}
 
@@ -5429,7 +5396,6 @@ public:
 		m_TextPipeline.Destroy(m_VKDevice);
 		m_TilePipeline.Destroy(m_VKDevice);
 		m_TileBorderPipeline.Destroy(m_VKDevice);
-		m_TileBorderLinePipeline.Destroy(m_VKDevice);
 		m_PrimExPipeline.Destroy(m_VKDevice);
 		m_PrimExRotationlessPipeline.Destroy(m_VKDevice);
 		m_SpriteMultiPipeline.Destroy(m_VKDevice);
@@ -6086,22 +6052,16 @@ public:
 		if(!CreateTextGraphicsPipeline("shader/vulkan/text.vert.spv", "shader/vulkan/text.frag.spv"))
 			return -1;
 
-		if(!CreateTileGraphicsPipeline<false>("shader/vulkan/tile.vert.spv", "shader/vulkan/tile.frag.spv", 0))
+		if(!CreateTileGraphicsPipeline<false>("shader/vulkan/tile.vert.spv", "shader/vulkan/tile.frag.spv", false))
 			return -1;
 
-		if(!CreateTileGraphicsPipeline<true>("shader/vulkan/tile_textured.vert.spv", "shader/vulkan/tile_textured.frag.spv", 0))
+		if(!CreateTileGraphicsPipeline<true>("shader/vulkan/tile_textured.vert.spv", "shader/vulkan/tile_textured.frag.spv", false))
 			return -1;
 
-		if(!CreateTileGraphicsPipeline<false>("shader/vulkan/tile_border.vert.spv", "shader/vulkan/tile_border.frag.spv", 1))
+		if(!CreateTileGraphicsPipeline<false>("shader/vulkan/tile_border.vert.spv", "shader/vulkan/tile_border.frag.spv", true))
 			return -1;
 
-		if(!CreateTileGraphicsPipeline<true>("shader/vulkan/tile_border_textured.vert.spv", "shader/vulkan/tile_border_textured.frag.spv", 1))
-			return -1;
-
-		if(!CreateTileGraphicsPipeline<false>("shader/vulkan/tile_border_line.vert.spv", "shader/vulkan/tile_border_line.frag.spv", 2))
-			return -1;
-
-		if(!CreateTileGraphicsPipeline<true>("shader/vulkan/tile_border_line_textured.vert.spv", "shader/vulkan/tile_border_line_textured.frag.spv", 2))
+		if(!CreateTileGraphicsPipeline<true>("shader/vulkan/tile_border_textured.vert.spv", "shader/vulkan/tile_border_textured.frag.spv", true))
 			return -1;
 
 		if(!CreatePrimExGraphicsPipeline("shader/vulkan/primex_rotationless.vert.spv", "shader/vulkan/primex_rotationless.frag.spv", false, true))
@@ -7076,11 +7036,9 @@ public:
 
 	[[nodiscard]] bool Cmd_RenderTileLayer(const CCommandBuffer::SCommand_RenderTileLayer *pCommand, SRenderCommandExecuteBuffer &ExecBuffer)
 	{
-		int Type = 0;
-		vec2 Dir{};
+		vec2 Scale{};
 		vec2 Off{};
-		int32_t JumpIndex = 0;
-		return RenderTileLayer(ExecBuffer, pCommand->m_State, Type, pCommand->m_Color, Dir, Off, JumpIndex, (size_t)pCommand->m_IndicesDrawNum, pCommand->m_pIndicesOffsets, pCommand->m_pDrawCount, 1);
+		return RenderTileLayer(ExecBuffer, pCommand->m_State, false, pCommand->m_Color, Scale, Off, (size_t)pCommand->m_IndicesDrawNum, pCommand->m_pIndicesOffsets, pCommand->m_pDrawCount);
 	}
 
 	void Cmd_RenderBorderTile_FillExecuteBuffer(SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand_RenderBorderTile *pCommand)
@@ -7090,24 +7048,10 @@ public:
 
 	[[nodiscard]] bool Cmd_RenderBorderTile(const CCommandBuffer::SCommand_RenderBorderTile *pCommand, SRenderCommandExecuteBuffer &ExecBuffer)
 	{
-		int Type = 1;
-		vec2 Dir = pCommand->m_Dir;
+		vec2 Scale = pCommand->m_Scale;
 		vec2 Off = pCommand->m_Offset;
-		unsigned int DrawNum = 6;
-		return RenderTileLayer(ExecBuffer, pCommand->m_State, Type, pCommand->m_Color, Dir, Off, pCommand->m_JumpIndex, (size_t)1, &pCommand->m_pIndicesOffset, &DrawNum, pCommand->m_DrawNum);
-	}
-
-	void Cmd_RenderBorderTileLine_FillExecuteBuffer(SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand_RenderBorderTileLine *pCommand)
-	{
-		RenderTileLayer_FillExecuteBuffer(ExecBuffer, 1, pCommand->m_State, pCommand->m_BufferContainerIndex);
-	}
-
-	[[nodiscard]] bool Cmd_RenderBorderTileLine(const CCommandBuffer::SCommand_RenderBorderTileLine *pCommand, SRenderCommandExecuteBuffer &ExecBuffer)
-	{
-		int Type = 2;
-		vec2 Dir = pCommand->m_Dir;
-		vec2 Off = pCommand->m_Offset;
-		return RenderTileLayer(ExecBuffer, pCommand->m_State, Type, pCommand->m_Color, Dir, Off, 0, (size_t)1, &pCommand->m_pIndicesOffset, &pCommand->m_IndexDrawNum, pCommand->m_DrawNum);
+		unsigned int DrawNum = pCommand->m_DrawNum * 6;
+		return RenderTileLayer(ExecBuffer, pCommand->m_State, true, pCommand->m_Color, Scale, Off, 1, &pCommand->m_pIndicesOffset, &DrawNum);
 	}
 
 	void Cmd_RenderQuadLayer_FillExecuteBuffer(SRenderCommandExecuteBuffer &ExecBuffer, const CCommandBuffer::SCommand_RenderQuadLayer *pCommand)

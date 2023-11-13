@@ -11,6 +11,7 @@
 #include <vector>
 
 #include <base/hash_ctxt.h>
+#include <base/log.h>
 #include <base/system.h>
 
 #include <engine/shared/config.h>
@@ -48,7 +49,10 @@ bool matchesExactly(const char *a, const char *b)
 	return str_comp(a, &b[1]) == 0;
 }
 
-CServerBrowser::CServerBrowser()
+CServerBrowser::CServerBrowser() :
+	m_CommunitiesFilter(g_Config.m_BrFilterExcludeCommunities, sizeof(g_Config.m_BrFilterExcludeCommunities)),
+	m_CountriesFilter(g_Config.m_BrFilterExcludeCountries, sizeof(g_Config.m_BrFilterExcludeCountries)),
+	m_TypesFilter(g_Config.m_BrFilterExcludeTypes, sizeof(g_Config.m_BrFilterExcludeTypes))
 {
 	m_ppServerlist = nullptr;
 	m_pSortedServerlist = nullptr;
@@ -71,6 +75,7 @@ CServerBrowser::CServerBrowser()
 	secure_random_fill(m_aTokenSeed, sizeof(m_aTokenSeed));
 
 	m_pDDNetInfo = nullptr;
+	m_DDNetInfoUpdateTime = 0;
 }
 
 CServerBrowser::~CServerBrowser()
@@ -298,7 +303,14 @@ void CServerBrowser::Filter()
 			Filtered = true;
 		else
 		{
-			if(g_Config.m_BrFilterCountry)
+			if(m_ServerlistType == IServerBrowser::TYPE_INTERNET || m_ServerlistType == IServerBrowser::TYPE_FAVORITES)
+			{
+				Filtered = CommunitiesFilter().Filtered(Info.m_aCommunityId);
+				Filtered = Filtered || CountriesFilter().Filtered(Info.m_aCommunityCountry);
+				Filtered = Filtered || TypesFilter().Filtered(Info.m_aCommunityType);
+			}
+
+			if(!Filtered && g_Config.m_BrFilterCountry)
 			{
 				Filtered = true;
 				// match against player country
@@ -536,14 +548,15 @@ void ServerBrowserFormatAddresses(char *pBuffer, int BufferSize, NETADDR *pAddrs
 
 void CServerBrowser::SetInfo(CServerEntry *pEntry, const CServerInfo &Info)
 {
-	CServerInfo TmpInfo = pEntry->m_Info;
+	const CServerInfo TmpInfo = pEntry->m_Info;
 	pEntry->m_Info = Info;
 	pEntry->m_Info.m_Favorite = TmpInfo.m_Favorite;
 	pEntry->m_Info.m_FavoriteAllowPing = TmpInfo.m_FavoriteAllowPing;
-	pEntry->m_Info.m_Official = TmpInfo.m_Official;
 	mem_copy(pEntry->m_Info.m_aAddresses, TmpInfo.m_aAddresses, sizeof(pEntry->m_Info.m_aAddresses));
 	pEntry->m_Info.m_NumAddresses = TmpInfo.m_NumAddresses;
 	ServerBrowserFormatAddresses(pEntry->m_Info.m_aAddress, sizeof(pEntry->m_Info.m_aAddress), pEntry->m_Info.m_aAddresses, pEntry->m_Info.m_NumAddresses);
+	UpdateServerCommunity(&pEntry->m_Info);
+	UpdateServerRank(&pEntry->m_Info);
 
 	if(pEntry->m_Info.m_ClientScoreKind == CServerInfo::CLIENT_SCORE_KIND_UNSPECIFIED)
 	{
@@ -659,33 +672,6 @@ CServerBrowser::CServerEntry *CServerBrowser::Add(const NETADDR *pAddrs, int Num
 	// check if it's a favorite
 	pEntry->m_Info.m_Favorite = m_pFavorites->IsFavorite(pEntry->m_Info.m_aAddresses, pEntry->m_Info.m_NumAddresses);
 	pEntry->m_Info.m_FavoriteAllowPing = m_pFavorites->IsPingAllowed(pEntry->m_Info.m_aAddresses, pEntry->m_Info.m_NumAddresses);
-
-	// check if it's an official server
-	bool Official = false;
-	for(const auto &Community : Communities())
-	{
-		for(const auto &Country : Community.Countries())
-		{
-			for(const auto &Server : Country.Servers())
-			{
-				for(int l = 0; l < NumAddrs; l++)
-				{
-					if(pAddrs[l] == Server.Address())
-					{
-						Official = true;
-						break;
-					}
-				}
-				if(Official)
-					break;
-			}
-			if(Official)
-				break;
-		}
-		if(Official)
-			break;
-	}
-	pEntry->m_Info.m_Official = Official;
 
 	for(int i = 0; i < NumAddrs; i++)
 	{
@@ -828,7 +814,7 @@ void CServerBrowser::Refresh(int Type)
 		if(g_Config.m_Debug)
 			m_pConsole->Print(IConsole::OUTPUT_LEVEL_DEBUG, "serverbrowser", "broadcasting for servers");
 	}
-	else if(Type == IServerBrowser::TYPE_FAVORITES || Type == IServerBrowser::TYPE_INTERNET || Type == IServerBrowser::TYPE_DDNET || Type == IServerBrowser::TYPE_KOG)
+	else if(Type == IServerBrowser::TYPE_FAVORITES || Type == IServerBrowser::TYPE_INTERNET)
 	{
 		m_pHttp->Refresh();
 		m_pPingCache->Load();
@@ -927,65 +913,12 @@ void CServerBrowser::UpdateFromHttp()
 
 	int NumServers = m_pHttp->NumServers();
 	int NumLegacyServers = m_pHttp->NumLegacyServers();
-	std::unordered_set<NETADDR> WantedAddrs;
 	std::function<bool(const NETADDR *, int)> Want = [](const NETADDR *pAddrs, int NumAddrs) { return true; };
-	if(m_ServerlistType != IServerBrowser::TYPE_INTERNET)
+	if(m_ServerlistType == IServerBrowser::TYPE_FAVORITES)
 	{
-		if(m_ServerlistType == IServerBrowser::TYPE_FAVORITES)
-		{
-			Want = [&](const NETADDR *pAddrs, int NumAddrs) -> bool { return m_pFavorites->IsFavorite(pAddrs, NumAddrs) != TRISTATE::NONE; };
-		}
-		else
-		{
-			int CommunityIndex;
-			char *pExcludeCountries;
-			char *pExcludeTypes;
-			switch(m_ServerlistType)
-			{
-			case IServerBrowser::TYPE_DDNET:
-				CommunityIndex = NETWORK_DDNET;
-				pExcludeCountries = g_Config.m_BrFilterExcludeCountries;
-				pExcludeTypes = g_Config.m_BrFilterExcludeTypes;
-				break;
-			case IServerBrowser::TYPE_KOG:
-				CommunityIndex = NETWORK_KOG;
-				pExcludeCountries = g_Config.m_BrFilterExcludeCountriesKoG;
-				pExcludeTypes = g_Config.m_BrFilterExcludeTypesKoG;
-				break;
-			default:
-				dbg_assert(false, "invalid network");
-				return;
-			}
-			// remove unknown elements from exclude lists
-			CountryFilterClean(CommunityIndex);
-			TypeFilterClean(CommunityIndex);
-
-			const CCommunity &Community = Communities()[CommunityIndex];
-			for(const auto &Country : Community.Countries())
-			{
-				// check for filter
-				if(DDNetFiltered(pExcludeCountries, Country.Name()))
-					continue;
-
-				for(const auto &Server : Country.Servers())
-				{
-					if(DDNetFiltered(pExcludeTypes, Server.TypeName()))
-						continue;
-					WantedAddrs.insert(Server.Address());
-				}
-			}
-			Want = [&](const NETADDR *pAddrs, int NumAddrs) -> bool {
-				for(int i = 0; i < NumAddrs; i++)
-				{
-					if(WantedAddrs.count(pAddrs[i]))
-					{
-						return true;
-					}
-				}
-				return false;
-			};
-		}
+		Want = [&](const NETADDR *pAddrs, int NumAddrs) -> bool { return m_pFavorites->IsFavorite(pAddrs, NumAddrs) != TRISTATE::NONE; };
 	}
+
 	for(int i = 0; i < NumServers; i++)
 	{
 		CServerInfo Info = m_pHttp->Server(i);
@@ -1003,11 +936,11 @@ void CServerBrowser::UpdateFromHttp()
 		{
 			Info.m_Latency = Ping;
 		}
-		Info.m_HasRank = HasRank(Info.m_aMap);
 		CServerEntry *pEntry = Add(Info.m_aAddresses, Info.m_NumAddresses);
 		SetInfo(pEntry, Info);
 		pEntry->m_RequestIgnoreInfo = true;
 	}
+
 	for(int i = 0; i < NumLegacyServers; i++)
 	{
 		NETADDR Addr = m_pHttp->LegacyServer(i);
@@ -1156,22 +1089,131 @@ void CServerBrowser::Update()
 	}
 }
 
+const json_value *CServerBrowser::LoadDDNetInfo()
+{
+	LoadDDNetInfoJson();
+	LoadDDNetLocation();
+	LoadDDNetServers();
+	for(int i = 0; i < m_NumServers; i++)
+	{
+		UpdateServerCommunity(&m_ppServerlist[i]->m_Info);
+		UpdateServerRank(&m_ppServerlist[i]->m_Info);
+	}
+	m_DDNetInfoUpdateTime = time_get();
+	return m_pDDNetInfo;
+}
+
+void CServerBrowser::LoadDDNetInfoJson()
+{
+	void *pBuf;
+	unsigned Length;
+	if(!m_pStorage->ReadFile(DDNET_INFO_FILE, IStorage::TYPE_SAVE, &pBuf, &Length))
+		return;
+
+	json_value_free(m_pDDNetInfo);
+	json_settings JsonSettings{};
+	char aError[256];
+	m_pDDNetInfo = json_parse_ex(&JsonSettings, static_cast<json_char *>(pBuf), Length, aError);
+	free(pBuf);
+
+	if(m_pDDNetInfo == nullptr)
+	{
+		log_error("serverbrowser", "invalid info json: '%s'", aError);
+	}
+	else if(m_pDDNetInfo->type != json_object)
+	{
+		log_error("serverbrowser", "invalid info root");
+		json_value_free(m_pDDNetInfo);
+		m_pDDNetInfo = nullptr;
+	}
+}
+
+void CServerBrowser::LoadDDNetLocation()
+{
+	m_OwnLocation = CServerInfo::LOC_UNKNOWN;
+	if(m_pDDNetInfo)
+	{
+		const json_value &Location = (*m_pDDNetInfo)["location"];
+		if(Location.type != json_string || CServerInfo::ParseLocation(&m_OwnLocation, Location))
+		{
+			log_error("serverbrowser", "invalid location");
+		}
+	}
+}
+
 void CServerBrowser::LoadDDNetServers()
 {
-	// parse communities (hard-coded for now)
+	// Parse communities
 	m_vCommunities.clear();
-	m_vCommunities.emplace_back(COMMUNITY_DDNET, "DDNet", "servers");
-	m_vCommunities.emplace_back("kog", "KoG", "servers-kog");
+	m_CommunityServersByAddr.clear();
 
 	if(!m_pDDNetInfo)
 		return;
+
+	const json_value &Communities = (*m_pDDNetInfo)["communities"];
+	if(Communities.type != json_object)
+		return;
+
+	for(unsigned CommunityIndex = 0; CommunityIndex < Communities.u.object.length; ++CommunityIndex)
+	{
+		const char *pCommunityId = Communities.u.object.values[CommunityIndex].name;
+		const json_value &Community = *Communities.u.object.values[CommunityIndex].value;
+		if(Community.type != json_object)
+		{
+			log_error("serverbrowser", "invalid community (CommunityId=%s)", pCommunityId);
+			continue;
+		}
+		const json_value &Name = Community["name"];
+		const json_value &JsonServersKey = Community["servers-key"];
+		const json_value &JsonRanksKey = Community["ranks-key"];
+		const json_value &IconSha256 = Community["icon-sha256"];
+		if(Name.type != json_string || JsonServersKey.type != json_string || JsonRanksKey.type != json_string || IconSha256.type != json_string)
+		{
+			log_error("serverbrowser", "invalid community attribute (CommunityId=%s)", pCommunityId);
+			continue;
+		}
+		SHA256_DIGEST ParsedIconSha256;
+		if(sha256_from_str(&ParsedIconSha256, IconSha256.u.string.ptr) != 0)
+		{
+			log_error("serverbrowser", "invalid community icon sha256 (CommunityId=%s)", pCommunityId);
+			continue;
+		}
+		m_vCommunities.emplace_back(pCommunityId, Name.u.string.ptr, JsonServersKey.u.string.ptr, JsonRanksKey.u.string.ptr, ParsedIconSha256);
+	}
+
+	// Parse finishes for each community
+	for(auto &Community : m_vCommunities)
+	{
+		if(!Community.HasRanks())
+			continue;
+		const json_value &Ranks = (*m_pDDNetInfo)[Community.JsonRanksKey()];
+		if(Ranks.type != json_array)
+		{
+			log_error("serverbrowser", "invalid community ranks (CommunityId=%s)", Community.Id());
+			continue;
+		}
+
+		for(unsigned RankIndex = 0; RankIndex < Ranks.u.array.length; ++RankIndex)
+		{
+			const json_value &Rank = *Ranks.u.array.values[RankIndex];
+			if(Rank.type != json_string)
+			{
+				log_error("serverbrowser", "invalid rank (RankIndex=%u)", RankIndex);
+				continue;
+			}
+			Community.m_RankedMaps.emplace(Rank.u.string.ptr);
+		}
+	}
 
 	// parse servers for each community
 	for(auto &Community : m_vCommunities)
 	{
 		const json_value &Servers = (*m_pDDNetInfo)[Community.JsonServersKey()];
 		if(Servers.type != json_array)
-			return;
+		{
+			log_error("serverbrowser", "invalid community servers (CommunityId=%s)", Community.Id());
+			continue;
+		}
 
 		for(unsigned ServerIndex = 0; ServerIndex < Servers.u.array.length; ++ServerIndex)
 		{
@@ -1179,7 +1221,7 @@ void CServerBrowser::LoadDDNetServers()
 			const json_value &Server = *Servers.u.array.values[ServerIndex];
 			if(Server.type != json_object)
 			{
-				dbg_msg("serverbrowser", "invalid attributes (ServerIndex=%u)", ServerIndex);
+				log_error("serverbrowser", "invalid server (ServerIndex=%u)", ServerIndex);
 				continue;
 			}
 
@@ -1188,9 +1230,11 @@ void CServerBrowser::LoadDDNetServers()
 			const json_value &Types = Server["servers"];
 			if(Name.type != json_string || FlagId.type != json_integer || Types.type != json_object)
 			{
-				dbg_msg("serverbrowser", "invalid attributes (ServerIndex=%u)", ServerIndex);
+				log_error("serverbrowser", "invalid server attribute (ServerIndex=%u)", ServerIndex);
 				continue;
 			}
+			if(Types.u.object.length == 0)
+				continue;
 
 			Community.m_vCountries.emplace_back(Name.u.string.ptr, FlagId.u.integer);
 			CCommunityCountry *pCountry = &Community.m_vCountries.back();
@@ -1200,7 +1244,7 @@ void CServerBrowser::LoadDDNetServers()
 				const json_value &Addresses = *Types.u.object.values[TypeIndex].value;
 				if(Addresses.type != json_array)
 				{
-					dbg_msg("serverbrowser", "invalid attributes (ServerIndex=%u, TypeIndex=%u)", ServerIndex, TypeIndex);
+					log_error("serverbrowser", "invalid addresses (ServerIndex=%u, TypeIndex=%u)", ServerIndex, TypeIndex);
 					continue;
 				}
 				if(Addresses.u.array.length == 0)
@@ -1223,97 +1267,23 @@ void CServerBrowser::LoadDDNetServers()
 					const json_value &Address = *Addresses.u.array.values[AddressIndex];
 					if(Address.type != json_string)
 					{
-						dbg_msg("serverbrowser", "invalid attributes (ServerIndex=%u, TypeIndex=%u, AddressIndex=%u)", ServerIndex, TypeIndex, AddressIndex);
+						log_error("serverbrowser", "invalid address (ServerIndex=%u, TypeIndex=%u, AddressIndex=%u)", ServerIndex, TypeIndex, AddressIndex);
 						continue;
 					}
 					NETADDR NetAddr;
 					net_addr_from_str(&NetAddr, Address.u.string.ptr);
 					pCountry->m_vServers.emplace_back(NetAddr, pTypeName);
+					m_CommunityServersByAddr.emplace(std::make_pair(NetAddr, CCommunityServer(Community.Id(), pCountry->Name(), pTypeName)));
 				}
 			}
 		}
 	}
-}
 
-void CServerBrowser::RecheckOfficial()
-{
-	for(const auto &Community : Communities())
-	{
-		for(const auto &Country : Community.Countries())
-		{
-			for(const auto &Server : Country.Servers())
-			{
-				CServerEntry *pEntry = Find(Server.Address());
-				if(pEntry)
-				{
-					pEntry->m_Info.m_Official = true;
-				}
-			}
-		}
-	}
-}
+	// Add default none community
+	m_vCommunities.emplace_back(COMMUNITY_NONE, "None", "", "", SHA256_ZEROED);
 
-void CServerBrowser::LoadDDNetRanks()
-{
-	for(int i = 0; i < m_NumServers; i++)
-	{
-		if(m_ppServerlist[i]->m_Info.m_aMap[0])
-			m_ppServerlist[i]->m_Info.m_HasRank = HasRank(m_ppServerlist[i]->m_Info.m_aMap);
-	}
-}
-
-CServerInfo::ERankState CServerBrowser::HasRank(const char *pMap)
-{
-	if(m_ServerlistType != IServerBrowser::TYPE_DDNET || !m_pDDNetInfo)
-		return CServerInfo::RANK_UNAVAILABLE;
-
-	const json_value &Ranks = (*m_pDDNetInfo)["maps"];
-	if(Ranks.type != json_array)
-		return CServerInfo::RANK_UNAVAILABLE;
-
-	for(unsigned i = 0; i < Ranks.u.array.length; ++i)
-	{
-		const json_value &Entry = *Ranks.u.array.values[i];
-		if(Entry.type != json_string)
-			continue;
-
-		if(str_comp(pMap, Entry.u.string.ptr) == 0)
-			return CServerInfo::RANK_RANKED;
-	}
-
-	return CServerInfo::RANK_UNRANKED;
-}
-
-void CServerBrowser::LoadDDNetInfoJson()
-{
-	void *pBuf;
-	unsigned Length;
-	if(!m_pStorage->ReadFile(DDNET_INFO, IStorage::TYPE_SAVE, &pBuf, &Length))
-		return;
-
-	json_value_free(m_pDDNetInfo);
-
-	m_pDDNetInfo = json_parse((json_char *)pBuf, Length);
-
-	free(pBuf);
-
-	if(m_pDDNetInfo && m_pDDNetInfo->type != json_object)
-	{
-		json_value_free(m_pDDNetInfo);
-		m_pDDNetInfo = nullptr;
-	}
-
-	m_OwnLocation = CServerInfo::LOC_UNKNOWN;
-	if(m_pDDNetInfo)
-	{
-		const json_value &Location = (*m_pDDNetInfo)["location"];
-		if(Location.type != json_string || CServerInfo::ParseLocation(&m_OwnLocation, Location))
-		{
-			char aBuf[64];
-			str_format(aBuf, sizeof(aBuf), "cannot parse location from info.json: '%s'", (const char *)Location);
-			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "serverbrowser", aBuf);
-		}
-	}
+	// Remove unknown elements from exclude lists
+	CleanFilters();
 }
 
 void CServerBrowser::UpdateServerFilteredPlayers(CServerInfo *pInfo) const
@@ -1342,12 +1312,36 @@ void CServerBrowser::UpdateServerFriends(CServerInfo *pInfo) const
 	}
 }
 
+void CServerBrowser::UpdateServerCommunity(CServerInfo *pInfo) const
+{
+	for(int AddressIndex = 0; AddressIndex < pInfo->m_NumAddresses; AddressIndex++)
+	{
+		const auto Community = m_CommunityServersByAddr.find(pInfo->m_aAddresses[AddressIndex]);
+		if(Community != m_CommunityServersByAddr.end())
+		{
+			str_copy(pInfo->m_aCommunityId, Community->second.CommunityId());
+			str_copy(pInfo->m_aCommunityCountry, Community->second.CountryName());
+			str_copy(pInfo->m_aCommunityType, Community->second.TypeName());
+			return;
+		}
+	}
+	str_copy(pInfo->m_aCommunityId, COMMUNITY_NONE);
+	str_copy(pInfo->m_aCommunityCountry, "");
+	str_copy(pInfo->m_aCommunityType, "");
+}
+
+void CServerBrowser::UpdateServerRank(CServerInfo *pInfo) const
+{
+	const CCommunity *pCommunity = Community(pInfo->m_aCommunityId);
+	pInfo->m_HasRank = pCommunity == nullptr ? CServerInfo::RANK_UNAVAILABLE : pCommunity->HasRank(pInfo->m_aMap);
+}
+
 const char *CServerBrowser::GetTutorialServer()
 {
-	// Use DDNet tab as default after joining tutorial, also makes sure Find() actually works
+	// Use internet tab as default after joining tutorial, also makes sure Find() actually works.
 	// Note that when no server info has been loaded yet, this will not return a result immediately.
 	m_pConfigManager->Reset("ui_page");
-	Refresh(IServerBrowser::TYPE_DDNET);
+	Refresh(IServerBrowser::TYPE_INTERNET);
 
 	const CCommunity *pCommunity = Community(COMMUNITY_DDNET);
 	if(pCommunity == nullptr)
@@ -1375,17 +1369,6 @@ const char *CServerBrowser::GetTutorialServer()
 	return pBestAddr;
 }
 
-const json_value *CServerBrowser::LoadDDNetInfo()
-{
-	LoadDDNetInfoJson();
-	LoadDDNetServers();
-
-	RecheckOfficial();
-	LoadDDNetRanks();
-
-	return m_pDDNetInfo;
-}
-
 bool CServerBrowser::IsRefreshing() const
 {
 	return m_pFirstReqServer != nullptr;
@@ -1406,6 +1389,14 @@ int CServerBrowser::LoadingProgression() const
 	return 100.0f * Loaded / Servers;
 }
 
+CServerInfo::ERankState CCommunity::HasRank(const char *pMap) const
+{
+	if(!HasRanks() || pMap[0] == '\0')
+		return CServerInfo::RANK_UNAVAILABLE;
+	const CCommunityMap Needle(pMap);
+	return m_RankedMaps.count(Needle) == 0 ? CServerInfo::RANK_UNRANKED : CServerInfo::RANK_RANKED;
+}
+
 const std::vector<CCommunity> &CServerBrowser::Communities() const
 {
 	return m_vCommunities;
@@ -1419,80 +1410,128 @@ const CCommunity *CServerBrowser::Community(const char *pCommunityId) const
 	return Community == Communities().end() ? nullptr : &(*Community);
 }
 
-void CServerBrowser::DDNetFilterAdd(char *pFilter, int FilterSize, const char *pName) const
+std::vector<const CCommunity *> CServerBrowser::SelectedCommunities() const
 {
-	if(DDNetFiltered(pFilter, pName))
-		return;
-
-	str_append(pFilter, ",", FilterSize);
-	str_append(pFilter, pName, FilterSize);
+	std::vector<const CCommunity *> vpSelected;
+	for(const auto &Community : Communities())
+	{
+		if(!CommunitiesFilter().Filtered(Community.Id()))
+		{
+			vpSelected.push_back(&Community);
+		}
+	}
+	return vpSelected;
 }
 
-void CServerBrowser::DDNetFilterRem(char *pFilter, int FilterSize, const char *pName) const
+void CFilterList::Add(const char *pElement)
 {
-	if(!DDNetFiltered(pFilter, pName))
+	if(Filtered(pElement))
+		return;
+
+	if(m_pFilter[0] != '\0')
+		str_append(m_pFilter, ",", m_FilterSize);
+	str_append(m_pFilter, pElement, m_FilterSize);
+}
+
+void CFilterList::Remove(const char *pElement)
+{
+	if(!Filtered(pElement))
 		return;
 
 	// rewrite exclude/filter list
-	char aBuf[128];
+	char aBuf[512];
 
-	str_copy(aBuf, pFilter);
-	pFilter[0] = '\0';
+	str_copy(aBuf, m_pFilter);
+	m_pFilter[0] = '\0';
 
-	char aToken[128];
+	char aToken[512];
 	for(const char *pTok = aBuf; (pTok = str_next_token(pTok, ",", aToken, sizeof(aToken)));)
 	{
-		if(str_comp_nocase(pName, aToken) != 0)
+		if(str_comp_nocase(pElement, aToken) != 0)
 		{
-			str_append(pFilter, ",", FilterSize);
-			str_append(pFilter, aToken, FilterSize);
+			if(m_pFilter[0] != '\0')
+				str_append(m_pFilter, ",", m_FilterSize);
+			str_append(m_pFilter, aToken, m_FilterSize);
 		}
 	}
 }
 
-bool CServerBrowser::DDNetFiltered(const char *pFilter, const char *pName) const
+void CFilterList::Clear()
 {
-	return str_in_list(pFilter, ",", pName); // element not excluded
+	m_pFilter[0] = '\0';
 }
 
-void CServerBrowser::CountryFilterClean(int CommunityIndex)
+bool CFilterList::Filtered(const char *pElement) const
 {
-	char *pExcludeCountries = CommunityIndex == NETWORK_DDNET ? g_Config.m_BrFilterExcludeCountries : g_Config.m_BrFilterExcludeCountriesKoG;
-	char aNewList[sizeof(g_Config.m_BrFilterExcludeCountries)];
+	// If the needle is not defined, we exclude it if there is any other
+	// exclusion, i.e. we only show those elements when the filter is empty.
+	if(pElement[0] == '\0')
+		return !Empty();
+
+	// Special case: "*element" means anything except that element is excluded.
+	// Necessary because the default filter cannot exclude unknown elements,
+	// but we want to select only the DDNet community by default.
+	if(m_pFilter[0] == '*')
+		return str_comp(m_pFilter + 1, pElement) != 0;
+
+	// Comma separated list of excluded elements.
+	return str_in_list(m_pFilter, ",", pElement);
+}
+
+bool CFilterList::Empty() const
+{
+	return m_pFilter[0] == '\0';
+}
+
+void CFilterList::Clean(const std::vector<const char *> &vpAllowedElements)
+{
+	char aNewList[512];
 	aNewList[0] = '\0';
 
-	for(const auto &Community : Communities())
+	for(const char *pElement : vpAllowedElements)
 	{
-		for(const auto &Country : Community.Countries())
+		if(Filtered(pElement))
 		{
-			if(DDNetFiltered(pExcludeCountries, Country.Name()))
-			{
+			if(aNewList[0] != '\0')
 				str_append(aNewList, ",");
-				str_append(aNewList, Country.Name());
-			}
+			str_append(aNewList, pElement);
 		}
 	}
 
-	str_copy(pExcludeCountries, aNewList, sizeof(g_Config.m_BrFilterExcludeCountries));
+	str_copy(m_pFilter, aNewList, m_FilterSize);
 }
 
-void CServerBrowser::TypeFilterClean(int CommunityIndex)
+void CServerBrowser::CleanFilters()
 {
-	char *pExcludeTypes = CommunityIndex == NETWORK_DDNET ? g_Config.m_BrFilterExcludeTypes : g_Config.m_BrFilterExcludeTypesKoG;
-	char aNewList[sizeof(g_Config.m_BrFilterExcludeTypes)];
-	aNewList[0] = '\0';
+	CommunitiesFilterClean();
+	CountriesFilterClean();
+	TypesFilterClean();
+}
 
-	const CCommunity &Community = Communities()[CommunityIndex];
-	for(const auto &Type : Community.Types())
-	{
-		if(DDNetFiltered(pExcludeTypes, Type.Name()))
-		{
-			str_append(aNewList, ",");
-			str_append(aNewList, Type.Name());
-		}
-	}
+void CServerBrowser::CommunitiesFilterClean()
+{
+	std::vector<const char *> vpCommunityNames;
+	for(const auto &Community : Communities())
+		vpCommunityNames.push_back(Community.Id());
+	m_CommunitiesFilter.Clean(vpCommunityNames);
+}
 
-	str_copy(pExcludeTypes, aNewList, sizeof(g_Config.m_BrFilterExcludeTypes));
+void CServerBrowser::CountriesFilterClean()
+{
+	std::vector<const char *> vpCountryNames;
+	for(const auto &Community : Communities())
+		for(const auto &Country : Community.Countries())
+			vpCountryNames.push_back(Country.Name());
+	m_CountriesFilter.Clean(vpCountryNames);
+}
+
+void CServerBrowser::TypesFilterClean()
+{
+	std::vector<const char *> vpTypeNames;
+	for(const auto &Community : Communities())
+		for(const auto &Type : Community.Types())
+			vpTypeNames.push_back(Type.Name());
+	m_TypesFilter.Clean(vpTypeNames);
 }
 
 bool CServerBrowser::IsRegistered(const NETADDR &Addr)

@@ -3,6 +3,8 @@
 #include <atomic>
 #include <cctype>
 #include <charconv>
+#include <chrono>
+#include <cinttypes>
 #include <cmath>
 #include <cstdarg>
 #include <cstdio>
@@ -10,16 +12,11 @@
 #include <iterator> // std::size
 #include <string_view>
 
+#include "lock.h"
+#include "logger.h"
 #include "system.h"
 
-#include "lock_scope.h"
-#include "logger.h"
-
 #include <sys/types.h>
-
-#include <chrono>
-
-#include <cinttypes>
 
 #if defined(CONF_WEBSOCKETS)
 #include <engine/shared/websockets.h>
@@ -191,7 +188,7 @@ void dbg_assert_imp(const char *filename, int line, int test, const char *msg)
 	{
 		const bool already_failing = dbg_assert_has_failed();
 		dbg_assert_failing.store(true, std::memory_order_release);
-		char error[256];
+		char error[512];
 		str_format(error, sizeof(error), "%s(%d): %s", filename, line, msg);
 		dbg_msg("assert", "%s", error);
 		if(!already_failing)
@@ -474,10 +471,9 @@ int io_sync(IOHANDLE io)
 #define ASYNC_BUFSIZE (8 * 1024)
 #define ASYNC_LOCAL_BUFSIZE (64 * 1024)
 
-// TODO: Use Thread Safety Analysis when this file is converted to C++
 struct ASYNCIO
 {
-	LOCK lock;
+	CLock lock;
 	IOHANDLE io;
 	SEMAPHORE sphore;
 	void *thread;
@@ -530,13 +526,12 @@ static void aio_handle_free_and_unlock(ASYNCIO *aio) RELEASE(aio->lock)
 	aio->refcount--;
 
 	do_free = aio->refcount == 0;
-	lock_unlock(aio->lock);
+	aio->lock.unlock();
 	if(do_free)
 	{
 		free(aio->buffer);
 		sphore_destroy(&aio->sphore);
-		lock_destroy(aio->lock);
-		free(aio);
+		delete aio;
 	}
 }
 
@@ -544,7 +539,7 @@ static void aio_thread(void *user)
 {
 	ASYNCIO *aio = (ASYNCIO *)user;
 
-	lock_wait(aio->lock);
+	aio->lock.lock();
 	while(true)
 	{
 		struct BUFFERS buffers;
@@ -563,9 +558,9 @@ static void aio_thread(void *user)
 				aio_handle_free_and_unlock(aio);
 				break;
 			}
-			lock_unlock(aio->lock);
+			aio->lock.unlock();
 			sphore_wait(&aio->sphore);
-			lock_wait(aio->lock);
+			aio->lock.lock();
 			continue;
 		}
 
@@ -589,26 +584,25 @@ static void aio_thread(void *user)
 			}
 		}
 		aio->read_pos = (aio->read_pos + buffers.len1 + buffers.len2) % aio->buffer_size;
-		lock_unlock(aio->lock);
+		aio->lock.unlock();
 
 		io_write(aio->io, local_buffer, local_buffer_len);
 		io_flush(aio->io);
 		result_io_error = io_error(aio->io);
 
-		lock_wait(aio->lock);
+		aio->lock.lock();
 		aio->error = result_io_error;
 	}
 }
 
 ASYNCIO *aio_new(IOHANDLE io)
 {
-	ASYNCIO *aio = (ASYNCIO *)malloc(sizeof(*aio));
+	ASYNCIO *aio = new ASYNCIO;
 	if(!aio)
 	{
 		return 0;
 	}
 	aio->io = io;
-	aio->lock = lock_create();
 	sphore_init(&aio->sphore);
 	aio->thread = 0;
 
@@ -616,8 +610,7 @@ ASYNCIO *aio_new(IOHANDLE io)
 	if(!aio->buffer)
 	{
 		sphore_destroy(&aio->sphore);
-		lock_destroy(aio->lock);
-		free(aio);
+		delete aio;
 		return 0;
 	}
 	aio->buffer_size = ASYNC_BUFSIZE;
@@ -632,8 +625,7 @@ ASYNCIO *aio_new(IOHANDLE io)
 	{
 		free(aio->buffer);
 		sphore_destroy(&aio->sphore);
-		lock_destroy(aio->lock);
-		free(aio);
+		delete aio;
 		return 0;
 	}
 	return aio;
@@ -662,12 +654,12 @@ static unsigned int next_buffer_size(unsigned int cur_size, unsigned int need_si
 
 void aio_lock(ASYNCIO *aio) ACQUIRE(aio->lock)
 {
-	lock_wait(aio->lock);
+	aio->lock.lock();
 }
 
 void aio_unlock(ASYNCIO *aio) RELEASE(aio->lock)
 {
-	lock_unlock(aio->lock);
+	aio->lock.unlock();
 	sphore_signal(&aio->sphore);
 }
 
@@ -752,7 +744,7 @@ int aio_error(ASYNCIO *aio)
 
 void aio_free(ASYNCIO *aio)
 {
-	lock_wait(aio->lock);
+	aio->lock.lock();
 	if(aio->thread)
 	{
 		thread_detach(aio->thread);
@@ -884,98 +876,6 @@ bool thread_init_and_detach(void (*threadfunc)(void *), void *u, const char *nam
 		thread_detach(thread);
 	return thread != nullptr;
 }
-
-#if defined(CONF_FAMILY_UNIX)
-typedef pthread_mutex_t LOCKINTERNAL;
-#elif defined(CONF_FAMILY_WINDOWS)
-typedef CRITICAL_SECTION LOCKINTERNAL;
-#else
-#error not implemented on this platform
-#endif
-
-LOCK lock_create()
-{
-	LOCKINTERNAL *lock = (LOCKINTERNAL *)malloc(sizeof(*lock));
-#if defined(CONF_FAMILY_UNIX)
-	int result;
-#endif
-
-	if(!lock)
-		return 0;
-
-#if defined(CONF_FAMILY_UNIX)
-	result = pthread_mutex_init(lock, 0x0);
-	if(result != 0)
-	{
-		dbg_msg("lock", "init failed: %d", result);
-		free(lock);
-		return 0;
-	}
-#elif defined(CONF_FAMILY_WINDOWS)
-	InitializeCriticalSection((LPCRITICAL_SECTION)lock);
-#else
-#error not implemented on this platform
-#endif
-	return (LOCK)lock;
-}
-
-void lock_destroy(LOCK lock)
-{
-#if defined(CONF_FAMILY_UNIX)
-	int result = pthread_mutex_destroy((LOCKINTERNAL *)lock);
-	if(result != 0)
-		dbg_msg("lock", "destroy failed: %d", result);
-#elif defined(CONF_FAMILY_WINDOWS)
-	DeleteCriticalSection((LPCRITICAL_SECTION)lock);
-#else
-#error not implemented on this platform
-#endif
-	free(lock);
-}
-
-int lock_trylock(LOCK lock)
-{
-#if defined(CONF_FAMILY_UNIX)
-	return pthread_mutex_trylock((LOCKINTERNAL *)lock);
-#elif defined(CONF_FAMILY_WINDOWS)
-	return !TryEnterCriticalSection((LPCRITICAL_SECTION)lock);
-#else
-#error not implemented on this platform
-#endif
-}
-
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wthread-safety-analysis"
-#endif
-void lock_wait(LOCK lock)
-{
-#if defined(CONF_FAMILY_UNIX)
-	int result = pthread_mutex_lock((LOCKINTERNAL *)lock);
-	if(result != 0)
-		dbg_msg("lock", "lock failed: %d", result);
-#elif defined(CONF_FAMILY_WINDOWS)
-	EnterCriticalSection((LPCRITICAL_SECTION)lock);
-#else
-#error not implemented on this platform
-#endif
-}
-
-void lock_unlock(LOCK lock)
-{
-#if defined(CONF_FAMILY_UNIX)
-	int result = pthread_mutex_unlock((LOCKINTERNAL *)lock);
-	if(result != 0)
-		dbg_msg("lock", "unlock failed: %d", result);
-#elif defined(CONF_FAMILY_WINDOWS)
-	LeaveCriticalSection((LPCRITICAL_SECTION)lock);
-#else
-#error not implemented on this platform
-#endif
-}
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
 
 #if defined(CONF_FAMILY_WINDOWS)
 void sphore_init(SEMAPHORE *sem)

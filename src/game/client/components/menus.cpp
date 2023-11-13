@@ -34,7 +34,6 @@
 #include <game/generated/client_data.h>
 #include <game/localization.h>
 
-#include "countryflags.h"
 #include "menus.h"
 
 using namespace FontIcons;
@@ -411,7 +410,9 @@ ColorHSLA CMenus::DoButton_ColorPicker(const CUIRect *pRect, unsigned int *pHsla
 	if(UI()->DoButtonLogic(pHslaColor, 0, pRect))
 	{
 		s_ColorPickerPopupContext.m_pHslaColor = pHslaColor;
+		s_ColorPickerPopupContext.m_HslaColor = HslaColor;
 		s_ColorPickerPopupContext.m_HsvaColor = color_cast<ColorHSVA>(HslaColor);
+		s_ColorPickerPopupContext.m_RgbaColor = color_cast<ColorRGBA>(s_ColorPickerPopupContext.m_HsvaColor);
 		s_ColorPickerPopupContext.m_Alpha = Alpha;
 		UI()->ShowPopupColorPicker(UI()->MouseX(), UI()->MouseY(), &s_ColorPickerPopupContext);
 	}
@@ -604,7 +605,11 @@ int CMenus::RenderMenubar(CUIRect r)
 			if(DoButton_MenuTab(&s_InternetButton, Localize("Internet"), m_ActivePage == PAGE_INTERNET, &Button, IGraphics::CORNER_T, &m_aAnimatorsBigPage[BIG_TAB_INTERNET]))
 			{
 				if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_INTERNET)
+				{
+					if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_FAVORITES)
+						Client()->RequestDDNetInfo();
 					ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
+				}
 				NewPage = PAGE_INTERNET;
 			}
 
@@ -622,32 +627,12 @@ int CMenus::RenderMenubar(CUIRect r)
 			if(DoButton_MenuTab(&s_FavoritesButton, Localize("Favorites"), m_ActivePage == PAGE_FAVORITES, &Button, IGraphics::CORNER_T, &m_aAnimatorsBigPage[BIG_TAB_FAVORITES]))
 			{
 				if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_FAVORITES)
+				{
+					if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_INTERNET)
+						Client()->RequestDDNetInfo();
 					ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
+				}
 				NewPage = PAGE_FAVORITES;
-			}
-
-			Box.VSplitLeft(90.0f, &Button, &Box);
-			static CButtonContainer s_DDNetButton;
-			if(DoButton_MenuTab(&s_DDNetButton, "DDNet", m_ActivePage == PAGE_DDNET, &Button, IGraphics::CORNER_T, &m_aAnimatorsBigPage[BIG_TAB_DDNET]))
-			{
-				if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_DDNET)
-				{
-					Client()->RequestDDNetInfo();
-					ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
-				}
-				NewPage = PAGE_DDNET;
-			}
-
-			Box.VSplitLeft(90.0f, &Button, &Box);
-			static CButtonContainer s_KoGButton;
-			if(DoButton_MenuTab(&s_KoGButton, "KoG", m_ActivePage == PAGE_KOG, &Button, IGraphics::CORNER_T, &m_aAnimatorsBigPage[BIG_TAB_KOG]))
-			{
-				if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_KOG)
-				{
-					Client()->RequestDDNetInfo();
-					ServerBrowser()->Refresh(IServerBrowser::TYPE_KOG);
-				}
-				NewPage = PAGE_KOG;
 			}
 		}
 	}
@@ -842,17 +827,21 @@ void CMenus::RenderNews(CUIRect MainView)
 void CMenus::OnInit()
 {
 	if(g_Config.m_ClShowWelcome)
+	{
 		m_Popup = POPUP_LANGUAGE;
+		str_copy(g_Config.m_BrFilterExcludeCommunities, "*ddnet");
+	}
 	if(g_Config.m_ClSkipStartMenu)
 		m_ShowStart = false;
 
 	m_RefreshButton.Init(UI(), -1);
 	m_ConnectButton.Init(UI(), -1);
 
-	Console()->Chain("add_favorite", ConchainServerbrowserUpdate, this);
-	Console()->Chain("remove_favorite", ConchainServerbrowserUpdate, this);
+	Console()->Chain("add_favorite", ConchainFavoritesUpdate, this);
+	Console()->Chain("remove_favorite", ConchainFavoritesUpdate, this);
 	Console()->Chain("add_friend", ConchainFriendlistUpdate, this);
 	Console()->Chain("remove_friend", ConchainFriendlistUpdate, this);
+	Console()->Chain("br_filter_exclude_communities", ConchainCommunitiesUpdate, this);
 
 	Console()->Chain("snd_enable", ConchainUpdateMusicState, this);
 	Console()->Chain("snd_enable_music", ConchainUpdateMusicState, this);
@@ -878,6 +867,10 @@ void CMenus::OnInit()
 	// load menu images
 	m_vMenuImages.clear();
 	Storage()->ListDirectory(IStorage::TYPE_ALL, "menuimages", MenuImageScan, this);
+
+	// load community icons
+	m_vCommunityIcons.clear();
+	Storage()->ListDirectory(IStorage::TYPE_ALL, "communityicons", CommunityIconScan, this);
 }
 
 void CMenus::OnConsoleInit()
@@ -972,7 +965,7 @@ int CMenus::Render()
 	static int s_Frame = 0;
 	if(s_Frame == 0)
 	{
-		m_MenuPage = g_Config.m_UiPage;
+		SetMenuPage(g_Config.m_UiPage);
 		s_Frame++;
 	}
 	else if(s_Frame == 1)
@@ -1094,16 +1087,6 @@ int CMenus::Render()
 			else if(m_MenuPage == PAGE_FAVORITES)
 			{
 				m_pBackground->ChangePosition(CMenuBackground::POS_BROWSER_FAVORITES);
-				RenderServerbrowser(MainView);
-			}
-			else if(m_MenuPage == PAGE_DDNET)
-			{
-				m_pBackground->ChangePosition(CMenuBackground::POS_BROWSER_CUSTOM0);
-				RenderServerbrowser(MainView);
-			}
-			else if(m_MenuPage == PAGE_KOG)
-			{
-				m_pBackground->ChangePosition(CMenuBackground::POS_BROWSER_CUSTOM0 + 1);
 				RenderServerbrowser(MainView);
 			}
 			else if(m_MenuPage == PAGE_SETTINGS)
@@ -2195,7 +2178,7 @@ int CMenus::MenuImageScan(const char *pName, int IsDir, int DirType, void *pUser
 		return 0;
 	}
 
-	MenuImage.m_OrgTexture = pSelf->Graphics()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, Info.m_Format, 0);
+	MenuImage.m_OrgTexture = pSelf->Graphics()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, 0);
 
 	// create gray scale version
 	unsigned char *pData = static_cast<unsigned char *>(Info.m_pData);
@@ -2207,7 +2190,7 @@ int CMenus::MenuImageScan(const char *pName, int IsDir, int DirType, void *pUser
 		pData[i * Step + 1] = v;
 		pData[i * Step + 2] = v;
 	}
-	MenuImage.m_GreyTexture = pSelf->Graphics()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, Info.m_Format, 0);
+	MenuImage.m_GreyTexture = pSelf->Graphics()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, 0);
 	pSelf->Graphics()->FreePNG(&Info);
 
 	str_truncate(MenuImage.m_aName, sizeof(MenuImage.m_aName), pName, str_length(pName) - str_length(pExtension));
@@ -2228,29 +2211,28 @@ const CMenus::CMenuImage *CMenus::FindMenuImage(const char *pName)
 
 void CMenus::SetMenuPage(int NewPage)
 {
+	if(NewPage == PAGE_DDNET_LEGACY || NewPage == PAGE_KOG_LEGACY)
+		NewPage = PAGE_INTERNET;
+
 	m_MenuPage = NewPage;
-	if(NewPage >= PAGE_INTERNET && NewPage <= PAGE_KOG)
+	if(NewPage >= PAGE_INTERNET && NewPage <= PAGE_FAVORITES)
 		g_Config.m_UiPage = NewPage;
 }
 
 void CMenus::RefreshBrowserTab(int UiPage)
 {
 	if(UiPage == PAGE_INTERNET)
+	{
+		Client()->RequestDDNetInfo();
 		ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
-	else if(UiPage == PAGE_LAN)
-		ServerBrowser()->Refresh(IServerBrowser::TYPE_LAN);
-	else if(UiPage == PAGE_FAVORITES)
-		ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
-	else if(UiPage == PAGE_DDNET)
-	{
-		// start a new server list request
-		Client()->RequestDDNetInfo();
-		ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
 	}
-	else if(UiPage == PAGE_KOG)
+	else if(UiPage == PAGE_LAN)
 	{
-		// start a new server list request
+		ServerBrowser()->Refresh(IServerBrowser::TYPE_LAN);
+	}
+	else if(UiPage == PAGE_FAVORITES)
+	{
 		Client()->RequestDDNetInfo();
-		ServerBrowser()->Refresh(IServerBrowser::TYPE_KOG);
+		ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
 	}
 }

@@ -103,9 +103,6 @@ Delete
 Delete demo
 == Обриши снимак
 
-Demo details
-== Детаљи снимка
-
 Demofile: %s
 == Снимак: %s
 
@@ -259,9 +256,6 @@ No servers match your filter criteria
 Ok
 == У реду
 
-Open
-== Отвори
-
 Parent Folder
 == Претходна датотека
 
@@ -310,9 +304,6 @@ Red team
 Red team wins!
 == Црвени тим је победио!
 
-Refresh
-== Освежи
-
 Remote console
 == Удаљена конзола
 
@@ -321,9 +312,6 @@ Remove
 
 Remove friend
 == Обриши пријатеља
-
-Rename
-== Преименуј
 
 Rename demo
 == Преименуј снимак
@@ -531,20 +519,8 @@ FSAA samples
 Sound volume
 == Јачина звука
 
-Created:
-== Направљено
-
 Max Screenshots
 == Максималан број снимака екрана
-
-Length:
-== Дужина
-
-Netversion:
-== Нет Верзија
-
-Map:
-== Мапа
 
 Hue
 == Нијанса
@@ -555,17 +531,11 @@ Record demo
 Your skin
 == Ваша тема
 
-Size:
-== Величина
-
 Reset to defaults
 == Ресетуј
 
 Quit anyway?
 == Излаз?
-
-Version:
-== Верзија:
 
 Round
 == Рунда
@@ -576,9 +546,6 @@ Lht.
 UI Color
 == Боја менија
 
-Crc:
-== Crc:
-
 Alpha
 == Провид.
 
@@ -587,9 +554,6 @@ LAN
 
 Name plates size
 == Величина плочице са именом
-
-Type:
-== Тип:
 
 Successfully saved the replay!
 == Снимак је успешно сачуван!
@@ -699,14 +663,11 @@ Countries
 Types
 == Типови
 
-Please use a different name
-== Изаберите друго име
+Please use a different filename
+== 
 
 Remove chat
 == Уклони дописивање
-
-Markers:
-== Маркери:
 
 %.2f MiB
 == %.2f MiB
@@ -723,15 +684,8 @@ Date
 Fetch Info
 == Дохвати информације
 
-[Demo browser]
-Play
-== Пусти
-
 Demos directory
 == Видео директоријум
-
-Render
-== Рендеруј
 
 Connecting dummy
 == Повезујем копију
@@ -1426,14 +1380,8 @@ Tries to predict other entities to give a feel of low latency
 Background
 == Позадина
 
-Entities Background color
-== Статична боја позадине
-
 Use current map as background
 == Користи ову мапу као позадину
-
-Regular Background Color
-== Уобичајена боја позадине
 
 Run on join
 == Уради када уђеш
@@ -1510,6 +1458,9 @@ Could not initialize the given graphics backend, this is probably because you di
 Could not save downloaded map. Try manually deleting this file: %s
 == 
 
+Error playing demo
+== 
+
 Initializing components
 == 
 
@@ -1522,7 +1473,19 @@ Restarting. Please wait…
 Multi-View
 == 
 
+Some map images could not be loaded. Check the local console for details.
+== 
+
+Some map sounds could not be loaded. Check the local console for details.
+== 
+
+Loading menu themes
+== 
+
 Rename folder
+== 
+
+Render complete
 == 
 
 A demo with this name already exists
@@ -1538,6 +1501,12 @@ File '%s' already exists, do you want to overwrite it?
 == 
 
 (paused)
+== 
+
+Videos directory
+== 
+
+Video was saved to '%s'
 == 
 
 Copy info
@@ -1651,7 +1620,20 @@ Render cut to video
 All combined
 == 
 
+No demo selected
+== 
+
 Folder Link
+== 
+
+Created
+== 
+
+Netversion
+== 
+
+[Demo details]
+map not included
 == 
 
 Open the directory that contains the demo files
@@ -1670,6 +1652,15 @@ Unable to delete the demo '%s'
 == 
 
 Unable to delete the folder '%s'. Make sure it's empty first.
+== 
+
+Ghosts directory
+== 
+
+Activate all
+== 
+
+Deactivate all
 == 
 
 Menu opened. Press Esc key again to close menu.
@@ -1739,6 +1730,18 @@ Freeze Laser Inner Color
 == 
 
 Set all to Rifle
+== 
+
+Enable ghost
+== 
+
+Only save improvements
+== 
+
+Regular background color
+== 
+
+Entities background color
 == 
 
 Unregister protocol and file extensions

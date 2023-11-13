@@ -289,7 +289,7 @@ void CGraphics_Threaded::FreeTextureIndex(CTextureHandle *pIndex)
 
 int CGraphics_Threaded::UnloadTexture(CTextureHandle *pIndex)
 {
-	if(pIndex->Id() == m_InvalidTexture.Id())
+	if(pIndex->Id() == m_NullTexture.Id())
 		return 0;
 
 	if(!pIndex->IsValid())
@@ -368,7 +368,7 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadSpriteTextureImpl(CImageInfo &
 	const size_t PixelSize = FromImageInfo.PixelSize();
 	m_vSpriteHelper.resize(w * h * PixelSize);
 	CopyTextureFromTextureBufferSub(m_vSpriteHelper.data(), w, h, (uint8_t *)FromImageInfo.m_pData, FromImageInfo.m_Width, FromImageInfo.m_Height, PixelSize, x, y, w, h);
-	return LoadTextureRaw(w, h, FromImageInfo.m_Format, m_vSpriteHelper.data(), FromImageInfo.m_Format, 0);
+	return LoadTextureRaw(w, h, FromImageInfo.m_Format, m_vSpriteHelper.data(), 0);
 }
 
 IGraphics::CTextureHandle CGraphics_Threaded::LoadSpriteTexture(CImageInfo &FromImageInfo, CDataSprite *pSprite)
@@ -454,10 +454,6 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadTextureRaw(size_t Width, size_
 		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_TO_2D_ARRAY_TEXTURE;
 	if((Flags & IGraphics::TEXLOAD_TO_3D_TEXTURE) != 0)
 		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_TO_3D_TEXTURE;
-	if((Flags & IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE_SINGLE_LAYER) != 0)
-		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_TO_2D_ARRAY_TEXTURE_SINGLE_LAYER;
-	if((Flags & IGraphics::TEXLOAD_TO_3D_TEXTURE_SINGLE_LAYER) != 0)
-		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_TO_3D_TEXTURE_SINGLE_LAYER;
 	if((Flags & IGraphics::TEXLOAD_NO_2D_TEXTURE) != 0)
 		Cmd.m_Flags |= CCommandBuffer::TEXFLAG_NO_2D_TEXTURE;
 
@@ -482,19 +478,22 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadTexture(const char *pFilename,
 	CImageInfo Img;
 	if(LoadPNG(&Img, pFilename, StorageType))
 	{
-		IGraphics::CTextureHandle ID = LoadTextureRaw(Img.m_Width, Img.m_Height, Img.m_Format, Img.m_pData, Flags, pFilename);
-		free(Img.m_pData);
-		if(ID.Id() != m_InvalidTexture.Id() && g_Config.m_Debug)
-			dbg_msg("graphics/texture", "loaded %s", pFilename);
-		return ID;
+		CTextureHandle ID = LoadTextureRaw(Img.m_Width, Img.m_Height, Img.m_Format, Img.m_pData, Flags, pFilename);
+		FreePNG(&Img);
+		if(ID.IsValid())
+		{
+			if(g_Config.m_Debug)
+				dbg_msg("graphics/texture", "loaded %s", pFilename);
+			return ID;
+		}
 	}
 
-	return m_InvalidTexture;
+	return m_NullTexture;
 }
 
-IGraphics::CTextureHandle CGraphics_Threaded::InvalidTexture() const
+IGraphics::CTextureHandle CGraphics_Threaded::NullTexture() const
 {
-	return m_InvalidTexture;
+	return m_NullTexture;
 }
 
 bool CGraphics_Threaded::LoadTextTextures(size_t Width, size_t Height, CTextureHandle &TextTexture, CTextureHandle &TextOutlineTexture, void *pTextData, void *pTextOutlineData)
@@ -1091,7 +1090,7 @@ void CGraphics_Threaded::QuadsTex3DDrawTL(const CQuadItem *pArray, int Num)
 	{
 		for(int n = 0; n < VertNum; ++n)
 		{
-			if(HasTextureArrays())
+			if(Uses2DTextureArrays())
 				m_aVerticesTex3D[CurNumVert + VertNum * i + n].m_Tex.w = (float)m_CurIndex;
 			else
 				m_aVerticesTex3D[CurNumVert + VertNum * i + n].m_Tex.w = ((float)m_CurIndex + 0.5f) / 256.f;
@@ -1561,7 +1560,7 @@ void CGraphics_Threaded::RenderTileLayer(int BufferContainerIndex, const ColorRG
 	// todo max indices group check!!
 }
 
-void CGraphics_Threaded::RenderBorderTiles(int BufferContainerIndex, const ColorRGBA &Color, char *pIndexBufferOffset, const vec2 &Offset, const vec2 &Dir, int JumpIndex, unsigned int DrawNum)
+void CGraphics_Threaded::RenderBorderTiles(int BufferContainerIndex, const ColorRGBA &Color, char *pIndexBufferOffset, const vec2 &Offset, const vec2 &Scale, uint32_t DrawNum)
 {
 	if(DrawNum == 0)
 		return;
@@ -1573,32 +1572,9 @@ void CGraphics_Threaded::RenderBorderTiles(int BufferContainerIndex, const Color
 	Cmd.m_Color = Color;
 
 	Cmd.m_pIndicesOffset = pIndexBufferOffset;
-	Cmd.m_JumpIndex = JumpIndex;
 
 	Cmd.m_Offset = Offset;
-	Cmd.m_Dir = Dir;
-
-	AddCmd(Cmd);
-
-	m_pCommandBuffer->AddRenderCalls(1);
-}
-
-void CGraphics_Threaded::RenderBorderTileLines(int BufferContainerIndex, const ColorRGBA &Color, char *pIndexBufferOffset, const vec2 &Offset, const vec2 &Dir, unsigned int IndexDrawNum, unsigned int RedrawNum)
-{
-	if(IndexDrawNum == 0 || RedrawNum == 0)
-		return;
-	// Draw a border tile a lot of times
-	CCommandBuffer::SCommand_RenderBorderTileLine Cmd;
-	Cmd.m_State = m_State;
-	Cmd.m_IndexDrawNum = IndexDrawNum;
-	Cmd.m_DrawNum = RedrawNum;
-	Cmd.m_BufferContainerIndex = BufferContainerIndex;
-	Cmd.m_Color = Color;
-
-	Cmd.m_pIndicesOffset = pIndexBufferOffset;
-
-	Cmd.m_Offset = Offset;
-	Cmd.m_Dir = Dir;
+	Cmd.m_Scale = Scale;
 
 	AddCmd(Cmd);
 
@@ -2393,7 +2369,8 @@ int CGraphics_Threaded::IssueInit()
 		m_GLQuadBufferingEnabled = m_pBackend->HasQuadBuffering();
 		m_GLQuadContainerBufferingEnabled = m_pBackend->HasQuadContainerBuffering();
 		m_GLTextBufferingEnabled = (m_GLQuadContainerBufferingEnabled && m_pBackend->HasTextBuffering());
-		m_GLHasTextureArrays = m_pBackend->Has2DTextureArrays();
+		m_GLUses2DTextureArrays = m_pBackend->Uses2DTextureArrays();
+		m_GLHasTextureArraysSupport = m_pBackend->HasTextureArraysSupport();
 		m_ScreenHiDPIScale = m_ScreenWidth / (float)g_Config.m_GfxScreenWidth;
 		m_ScreenRefreshRate = g_Config.m_GfxScreenRefreshRate;
 	}
@@ -2609,27 +2586,28 @@ int CGraphics_Threaded::Init()
 		const unsigned char aGreen[] = {0x00, 0xff, 0x00, 0xff};
 		const unsigned char aBlue[] = {0x00, 0x00, 0xff, 0xff};
 		const unsigned char aYellow[] = {0xff, 0xff, 0x00, 0xff};
-		constexpr size_t InvalidTextureDimension = 16;
-		unsigned char aNullTextureData[InvalidTextureDimension * InvalidTextureDimension * PixelSize];
-		for(size_t y = 0; y < InvalidTextureDimension; ++y)
+		constexpr size_t NullTextureDimension = 16;
+		unsigned char aNullTextureData[NullTextureDimension * NullTextureDimension * PixelSize];
+		for(size_t y = 0; y < NullTextureDimension; ++y)
 		{
-			for(size_t x = 0; x < InvalidTextureDimension; ++x)
+			for(size_t x = 0; x < NullTextureDimension; ++x)
 			{
 				const unsigned char *pColor;
-				if(x < InvalidTextureDimension / 2 && y < InvalidTextureDimension / 2)
+				if(x < NullTextureDimension / 2 && y < NullTextureDimension / 2)
 					pColor = aRed;
-				else if(x >= InvalidTextureDimension / 2 && y < InvalidTextureDimension / 2)
+				else if(x >= NullTextureDimension / 2 && y < NullTextureDimension / 2)
 					pColor = aGreen;
-				else if(x < InvalidTextureDimension / 2 && y >= InvalidTextureDimension / 2)
+				else if(x < NullTextureDimension / 2 && y >= NullTextureDimension / 2)
 					pColor = aBlue;
 				else
 					pColor = aYellow;
-				mem_copy(&aNullTextureData[(y * InvalidTextureDimension + x) * PixelSize], pColor, PixelSize);
+				mem_copy(&aNullTextureData[(y * NullTextureDimension + x) * PixelSize], pColor, PixelSize);
 			}
 		}
-		const int TextureLoadFlags = HasTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
-		m_InvalidTexture.Invalidate();
-		m_InvalidTexture = LoadTextureRaw(InvalidTextureDimension, InvalidTextureDimension, CImageInfo::FORMAT_RGBA, aNullTextureData, TextureLoadFlags);
+		const int TextureLoadFlags = Uses2DTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
+		m_NullTexture.Invalidate();
+		m_NullTexture = LoadTextureRaw(NullTextureDimension, NullTextureDimension, CImageInfo::FORMAT_RGBA, aNullTextureData, TextureLoadFlags);
+		dbg_assert(m_NullTexture.IsNullTexture(), "Null texture invalid");
 	}
 
 	ColorRGBA GPUInfoPrintColor{0.6f, 0.5f, 1.0f, 1.0f};

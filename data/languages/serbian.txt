@@ -107,9 +107,6 @@ Delete
 Delete demo
 == Obriši snimak
 
-Demo details
-== Detalji snimka
-
 Demofile: %s
 == Snimak: %s
 
@@ -263,9 +260,6 @@ No servers match your filter criteria
 Ok
 == U redu
 
-Open
-== Otvori
-
 Parent Folder
 == Prethodna datoteka
 
@@ -314,9 +308,6 @@ Red team
 Red team wins!
 == Crveni tim je pobedio!
 
-Refresh
-== Osveži
-
 Remote console
 == Udaljena konzola
 
@@ -325,9 +316,6 @@ Remove
 
 Remove friend
 == Obriši prijatelja
-
-Rename
-== Preimenuj
 
 Rename demo
 == Preimenuj snimak
@@ -535,20 +523,8 @@ FSAA samples
 Sound volume
 == Jačina zvuka
 
-Created:
-== Napravljeno
-
 Max Screenshots
 == Maksimalan broj snimaka ekrana
-
-Length:
-== Dužina
-
-Netversion:
-== Net Verzija
-
-Map:
-== Mapa
 
 Hue
 == Nijansa
@@ -559,17 +535,11 @@ Record demo
 Your skin
 == Vaša tema
 
-Size:
-== Veličina
-
 Reset to defaults
 == Resetuj
 
 Quit anyway?
 == Izlaz?
-
-Version:
-== Verzija:
 
 Round
 == Runda
@@ -580,9 +550,6 @@ Lht.
 UI Color
 == Boja menija
 
-Crc:
-== Crc:
-
 Alpha
 == Provid.
 
@@ -591,9 +558,6 @@ LAN
 
 Name plates size
 == Veličina pločice sa imenom
-
-Type:
-== Tip:
 
 Successfully saved the replay!
 == Snimak je uspešno sačuvan!
@@ -700,14 +664,11 @@ Countries
 Types
 == Tipovi
 
-Please use a different name
-== Izaberite drugo ime
+Please use a different filename
+== 
 
 Remove chat
 == Ukloni dopisivanje
-
-Markers:
-== Markeri:
 
 %.2f MiB
 == %.2f MiB
@@ -724,15 +685,8 @@ Date
 Fetch Info
 == Dohvati informacije
 
-[Demo browser]
-Play
-== Pusti
-
 Demos directory
 == Video direktorijum
-
-Render
-== Renderuj
 
 Connecting dummy
 == Povezujem kopiju
@@ -1427,14 +1381,8 @@ Tries to predict other entities to give a feel of low latency
 Background
 == Pozadina
 
-Entities Background color
-== Statična boja pozadine
-
 Use current map as background
 == Koristi ovu mapu kao pozadinu
-
-Regular Background Color
-== Uobičajena boja pozadine
 
 Run on join
 == Uradi kada uđeš
@@ -1492,10 +1440,6 @@ A render command failed. Try to update your GPU drivers.
 Submitting the render commands failed. Try to update your GPU drivers.
 == Неуспешно слање рендерних команди. Покушајте ажурирати драјвере за вашу графичку картицу.
 
-Could not initialize the given graphics backend, reverting to the default backend now.
-== Није било могуће иницијализовати дати графички позадину, сада се враћамо на подразумевану позадину.
-
-[Graphics error]
 Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
 == Није било могуће иницијализовати дати графички позадину, највероватније зато што нисте инсталирали драјвер за интегрисану графичку картицу.
 
@@ -1733,6 +1677,31 @@ Failed to swap framebuffers. Try to update your GPU drivers.
 Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
 == 
 
+[Graphics error]
+Could not initialize the given graphics backend, reverting to the default backend now.
+== 
+
+Error playing demo
+== 
+
+Some map images could not be loaded. Check the local console for details.
+== 
+
+Some map sounds could not be loaded. Check the local console for details.
+== 
+
+Loading menu themes
+== 
+
+Render complete
+== 
+
+Videos directory
+== 
+
+Video was saved to '%s'
+== 
+
 Go back the specified duration
 == 
 
@@ -1751,4 +1720,38 @@ Go forward the specified duration
 == 
 
 Render cut to video
+== 
+
+No demo selected
+== 
+
+Created
+== 
+
+Netversion
+== 
+
+[Demo details]
+map not included
+== 
+
+Ghosts directory
+== 
+
+Activate all
+== 
+
+Deactivate all
+== 
+
+Enable ghost
+== 
+
+Only save improvements
+== 
+
+Regular background color
+== 
+
+Entities background color
 == 

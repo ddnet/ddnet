@@ -61,7 +61,11 @@ void CGameContext::ConCredits(IConsole::IResult *pResult, void *pUserData)
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 		"Vy0x2, Avolicious, louis, Marmare314, hus3h,");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
-		"ArijanJ & others");
+		"ArijanJ, tarunsamanta2k20, Possseidon, M0REKZ,");
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
+		"Teero, furo, dobrykafe, Moiman, JSaurusRex,");
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
+		"Steinchen & others");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 		"Based on DDRace by the DDRace developers,");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
@@ -1563,10 +1567,10 @@ void CGameContext::ConTele(IConsole::IResult *pResult, void *pUserData)
 			return;
 		Pos = pChrTo->m_Pos;
 	}
-	pPlayer->LastTelePos = Pos;
 	pSelf->Teleport(pChr, Pos);
 	pChr->UnFreeze();
 	pChr->Core()->m_Vel = vec2(0, 0);
+	pPlayer->m_LastTeleTee.Save(pChr);
 }
 
 void CGameContext::ConLastTele(IConsole::IResult *pResult, void *pUserData)
@@ -1588,14 +1592,13 @@ void CGameContext::ConLastTele(IConsole::IResult *pResult, void *pUserData)
 		pSelf->SendChatTarget(pPlayer->GetCID(), "You're not in a team with /practice turned on. Note that you can't earn a rank with practice enabled.");
 		return;
 	}
-	if(!pPlayer->LastTelePos.x)
+	if(!pPlayer->m_LastTeleTee.GetPos().x)
 	{
 		pSelf->SendChatTarget(pPlayer->GetCID(), "You haven't previously teleported. Use /tp before using this command.");
 		return;
 	}
-	pSelf->Teleport(pChr, pPlayer->LastTelePos);
-	pChr->UnFreeze();
-	pChr->Core()->m_Vel = vec2(0, 0);
+	pPlayer->m_LastTeleTee.Load(pChr, pChr->Team(), true);
+	pPlayer->Pause(CPlayer::PAUSE_NONE, true);
 }
 
 void CGameContext::ConPracticeUnSolo(IConsole::IResult *pResult, void *pUserData)

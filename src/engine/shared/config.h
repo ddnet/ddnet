@@ -6,6 +6,9 @@
 #include <base/detect.h>
 #include <engine/config.h>
 
+#include <string>
+#include <vector>
+
 // include protocol for MAX_CLIENT used in config_variables
 #include <engine/shared/protocol.h>
 
@@ -72,6 +75,8 @@ class CConfigManager : public IConfigManager
 	CCallback m_aCallbacks[MAX_CALLBACKS];
 	int m_NumCallbacks;
 
+	std::vector<std::string> m_vUnknownCommands;
+
 public:
 	CConfigManager();
 
@@ -84,6 +89,8 @@ public:
 	void RegisterCallback(SAVECALLBACKFUNC pfnFunc, void *pUserData) override;
 
 	void WriteLine(const char *pLine) override;
+
+	void StoreUnknownCommand(const char *pCommand) override;
 };
 
 #endif

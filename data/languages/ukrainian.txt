@@ -199,9 +199,6 @@ No servers match your filter criteria
 Ok
 == Ок
 
-Open
-== Відкрити
-
 Password
 == Пароль
 
@@ -213,10 +210,6 @@ Ping
 
 Pistol
 == Пістолет
-
-[Demo browser]
-Play
-== Перегляд демо
 
 Player
 == Гравець
@@ -241,9 +234,6 @@ Red team
 
 Red team wins!
 == Червоні перемогли!
-
-Refresh
-== Оновити
 
 Remote console
 == Консоль сервера
@@ -580,8 +570,8 @@ Update now
 Restart
 == Перезавантажити
 
-Please use a different name
-== Будь ласка, використовуйте інше ім’я
+Please use a different filename
+== 
 
 Remove chat
 == Видалити чат
@@ -592,41 +582,11 @@ Demofile: %s
 Parent Folder
 == Батьківський каталог
 
-Demo details
-== Деталі демо
-
-Created:
-== Створений:
-
-Type:
-== Тип:
-
-Length:
-== Довжина:
-
-Version:
-== Версія:
-
-Markers:
-== Маркери:
-
-Map:
-== Карта
-
-Size:
-== Розмір
-
 %.2f MiB
 == %.2f MiB
 
 %.2f KiB
 == %.2f KiB
-
-Crc:
-== Crc
-
-Netversion:
-== Версія:
 
 Demo
 == Демо
@@ -639,12 +599,6 @@ Date
 
 Fetch Info
 == Отримати інформацію
-
-Rename
-== Перейменувати
-
-Render
-== Почати рендер
 
 Connecting dummy
 == Підключення даммі
@@ -1153,14 +1107,8 @@ Show local player's key presses
 Background
 == Задній фон
 
-Entities Background color
-== Колір текстури заднього фону
-
 Use current map as background
 == Використовувати поточну карту як задній фон
-
-Regular Background Color
-== Звичайний колір заднього фону
 
 Entities
 == Текстури
@@ -1749,3 +1697,58 @@ Go forward the specified duration
 
 Render cut to video
 == Відтворити вирізку відео
+
+Error playing demo
+== Помилка відтворення демо
+
+Some map images could not be loaded. Check the local console for details.
+== Деякі зображення мапи не вдалося завантажити. Перевірте локальну консоль для отримання деталей.
+
+Some map sounds could not be loaded. Check the local console for details.
+== Деякі звуки мапи не вдалося завантажити. Перевірте локальну консоль для отримання деталей.
+
+Loading menu themes
+== Завантаження тем меню
+
+Render complete
+== Відтворення завершено
+
+Videos directory
+== Директорія відео
+
+Video was saved to '%s'
+== Відео було збережено в '%s'
+
+No demo selected
+== Демо не обрано
+
+Created
+== Створено
+
+Netversion
+== Версія мережі
+
+[Demo details]
+map not included
+== карта не включена
+
+Ghosts directory
+== Директорія привидів
+
+Activate all
+== Активувати все
+
+Deactivate all
+== Деактивувати все
+
+Enable ghost
+== Увімкнути привида
+
+Only save improvements
+== Зберігати лише поліпшення
+
+Regular background color
+== Звичайний колір фону
+
+Entities background color
+== Колір фону об'єктів

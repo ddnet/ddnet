@@ -968,16 +968,16 @@ int CUI::DoButton_Menu(CUIElement &UIElement, const CButtonContainer *pID, const
 	return DoButtonLogic(pID, Props.m_Checked, pRect);
 }
 
-int CUI::DoButton_PopupMenu(CButtonContainer *pButtonContainer, const char *pText, const CUIRect *pRect, float Size, int Align, float Padding, bool TransparentInactive)
+int CUI::DoButton_PopupMenu(CButtonContainer *pButtonContainer, const char *pText, const CUIRect *pRect, float Size, int Align, float Padding, bool TransparentInactive, bool Enabled)
 {
 	if(!TransparentInactive || CheckActiveItem(pButtonContainer) || HotItem() == pButtonContainer)
-		pRect->Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f * ButtonColorMul(pButtonContainer)), IGraphics::CORNER_ALL, 3.0f);
+		pRect->Draw(Enabled ? ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f * ButtonColorMul(pButtonContainer)) : ColorRGBA(0.0f, 0.0f, 0.0f, 0.4f), IGraphics::CORNER_ALL, 3.0f);
 
 	CUIRect Label;
 	pRect->Margin(Padding, &Label);
 	DoLabel(&Label, pText, Size, Align);
 
-	return DoButtonLogic(pButtonContainer, 0, pRect);
+	return Enabled ? DoButtonLogic(pButtonContainer, 0, pRect) : 0;
 }
 
 int64_t CUI::DoValueSelector(const void *pID, const CUIRect *pRect, const char *pLabel, int64_t Current, int64_t Min, int64_t Max, const SValueSelectorProperties &Props)
@@ -1687,9 +1687,9 @@ CUI::EPopupMenuFunctionResult CUI::PopupColorPicker(void *pContext, CUIRect View
 	SColorPickerPopupContext *pColorPicker = static_cast<SColorPickerPopupContext *>(pContext);
 	CUI *pUI = pColorPicker->m_pUI;
 
-	CUIRect ColorsArea = View, HueArea, BottomArea, HueRect, SatRect, ValueRect, HexRect, AlphaRect;
+	CUIRect ColorsArea, HueArea, BottomArea, ModeButtonArea, HueRect, SatRect, ValueRect, HexRect, AlphaRect;
 
-	ColorsArea.HSplitBottom(View.h - 140.0f, &ColorsArea, &BottomArea);
+	View.HSplitTop(140.0f, &ColorsArea, &BottomArea);
 	ColorsArea.VSplitRight(20.0f, &ColorsArea, &HueArea);
 
 	BottomArea.HSplitTop(3.0f, nullptr, &BottomArea);
@@ -1708,8 +1708,10 @@ CUI::EPopupMenuFunctionResult CUI::PopupColorPicker(void *pContext, CUIRect View
 	ValueRect.VSplitLeft(ValuePadding, nullptr, &ValueRect);
 
 	BottomArea.HSplitTop(20.0f, &HexRect, &BottomArea);
+	BottomArea.HSplitTop(3.0f, nullptr, &BottomArea);
 	HexRect.VSplitLeft(HexValueWidth, &HexRect, &AlphaRect);
 	AlphaRect.VSplitLeft(ValuePadding, nullptr, &AlphaRect);
+	BottomArea.HSplitTop(20.0f, &ModeButtonArea, &BottomArea);
 
 	const ColorRGBA BlackColor = ColorRGBA(0.0f, 0.0f, 0.0f, 0.5f);
 
@@ -1720,10 +1722,8 @@ CUI::EPopupMenuFunctionResult CUI::PopupColorPicker(void *pContext, CUIRect View
 	ColorsArea.Margin(1.0f, &ColorsArea);
 
 	ColorHSVA PickerColorHSV = pColorPicker->m_HsvaColor;
-	unsigned H = (unsigned)(PickerColorHSV.x * 255.0f);
-	unsigned S = (unsigned)(PickerColorHSV.y * 255.0f);
-	unsigned V = (unsigned)(PickerColorHSV.z * 255.0f);
-	unsigned A = (unsigned)(PickerColorHSV.a * 255.0f);
+	ColorRGBA PickerColorRGB = pColorPicker->m_RgbaColor;
+	ColorHSLA PickerColorHSL = pColorPicker->m_HslaColor;
 
 	// Color Area
 	ColorRGBA TL, TR, BL, BR;
@@ -1759,35 +1759,98 @@ CUI::EPopupMenuFunctionResult CUI::PopupColorPicker(void *pContext, CUIRect View
 		HuePartialArea.Draw4(TL, TL, BL, BL, IGraphics::CORNER_NONE, 0.0f);
 	}
 
+	const auto &&RenderAlphaSelector = [&](unsigned OldA) -> unsigned {
+		if(pColorPicker->m_Alpha)
+		{
+			return pUI->DoValueSelector(&pColorPicker->m_aValueSelectorIds[3], &AlphaRect, "A:", OldA, 0, 255);
+		}
+		else
+		{
+			char aBuf[8];
+			str_format(aBuf, sizeof(aBuf), "A: %d", OldA);
+			pUI->DoLabel(&AlphaRect, aBuf, 10.0f, TEXTALIGN_MC);
+			AlphaRect.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.65f), IGraphics::CORNER_ALL, 3.0f);
+			return OldA;
+		}
+	};
+
 	// Editboxes Area
-	H = pUI->DoValueSelector(&pColorPicker->m_aValueSelectorIds[0], &HueRect, "H:", H, 0, 255);
-	S = pUI->DoValueSelector(&pColorPicker->m_aValueSelectorIds[1], &SatRect, "S:", S, 0, 255);
-	V = pUI->DoValueSelector(&pColorPicker->m_aValueSelectorIds[2], &ValueRect, "V:", V, 0, 255);
-	if(pColorPicker->m_Alpha)
+	if(pColorPicker->m_ColorMode == SColorPickerPopupContext::MODE_HSVA)
 	{
-		A = pUI->DoValueSelector(&pColorPicker->m_aValueSelectorIds[3], &AlphaRect, "A:", A, 0, 255);
+		const unsigned OldH = (unsigned)(PickerColorHSV.h * 255.0f);
+		const unsigned OldS = (unsigned)(PickerColorHSV.s * 255.0f);
+		const unsigned OldV = (unsigned)(PickerColorHSV.v * 255.0f);
+		const unsigned OldA = (unsigned)(PickerColorHSV.a * 255.0f);
+
+		const unsigned H = pUI->DoValueSelector(&pColorPicker->m_aValueSelectorIds[0], &HueRect, "H:", OldH, 0, 255);
+		const unsigned S = pUI->DoValueSelector(&pColorPicker->m_aValueSelectorIds[1], &SatRect, "S:", OldS, 0, 255);
+		const unsigned V = pUI->DoValueSelector(&pColorPicker->m_aValueSelectorIds[2], &ValueRect, "V:", OldV, 0, 255);
+		const unsigned A = RenderAlphaSelector(OldA);
+
+		if(OldH != H || OldS != S || OldV != V || OldA != A)
+		{
+			PickerColorHSV = ColorHSVA(H / 255.0f, S / 255.0f, V / 255.0f, A / 255.0f);
+			PickerColorHSL = color_cast<ColorHSLA>(PickerColorHSV);
+			PickerColorRGB = color_cast<ColorRGBA>(PickerColorHSL);
+		}
+	}
+	else if(pColorPicker->m_ColorMode == SColorPickerPopupContext::MODE_RGBA)
+	{
+		const unsigned OldR = (unsigned)(PickerColorRGB.r * 255.0f);
+		const unsigned OldG = (unsigned)(PickerColorRGB.g * 255.0f);
+		const unsigned OldB = (unsigned)(PickerColorRGB.b * 255.0f);
+		const unsigned OldA = (unsigned)(PickerColorRGB.a * 255.0f);
+
+		const unsigned R = pUI->DoValueSelector(&pColorPicker->m_aValueSelectorIds[0], &HueRect, "R:", OldR, 0, 255);
+		const unsigned G = pUI->DoValueSelector(&pColorPicker->m_aValueSelectorIds[1], &SatRect, "G:", OldG, 0, 255);
+		const unsigned B = pUI->DoValueSelector(&pColorPicker->m_aValueSelectorIds[2], &ValueRect, "B:", OldB, 0, 255);
+		const unsigned A = RenderAlphaSelector(OldA);
+
+		if(OldR != R || OldG != G || OldB != B || OldA != A)
+		{
+			PickerColorRGB = ColorRGBA(R / 255.0f, G / 255.0f, B / 255.0f, A / 255.0f);
+			PickerColorHSL = color_cast<ColorHSLA>(PickerColorRGB);
+			PickerColorHSV = color_cast<ColorHSVA>(PickerColorHSL);
+		}
+	}
+	else if(pColorPicker->m_ColorMode == SColorPickerPopupContext::MODE_HSLA)
+	{
+		const unsigned OldH = (unsigned)(PickerColorHSL.h * 255.0f);
+		const unsigned OldS = (unsigned)(PickerColorHSL.s * 255.0f);
+		const unsigned OldL = (unsigned)(PickerColorHSL.l * 255.0f);
+		const unsigned OldA = (unsigned)(PickerColorHSL.a * 255.0f);
+
+		const unsigned H = pUI->DoValueSelector(&pColorPicker->m_aValueSelectorIds[0], &HueRect, "H:", OldH, 0, 255);
+		const unsigned S = pUI->DoValueSelector(&pColorPicker->m_aValueSelectorIds[1], &SatRect, "S:", OldS, 0, 255);
+		const unsigned L = pUI->DoValueSelector(&pColorPicker->m_aValueSelectorIds[2], &ValueRect, "L:", OldL, 0, 255);
+		const unsigned A = RenderAlphaSelector(OldA);
+
+		if(OldH != H || OldS != S || OldL != L || OldA != A)
+		{
+			PickerColorHSL = ColorHSLA(H / 255.0f, S / 255.0f, L / 255.0f, A / 255.0f);
+			PickerColorHSV = color_cast<ColorHSVA>(PickerColorHSL);
+			PickerColorRGB = color_cast<ColorRGBA>(PickerColorHSL);
+		}
 	}
 	else
 	{
-		char aBuf[8];
-		str_format(aBuf, sizeof(aBuf), "A: %d", A);
-		pUI->DoLabel(&AlphaRect, aBuf, 10.0f, TEXTALIGN_MC);
-		AlphaRect.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.65f), IGraphics::CORNER_ALL, 3.0f);
+		dbg_assert(false, "Color picker mode invalid");
 	}
-
-	PickerColorHSV = ColorHSVA(H / 255.0f, S / 255.0f, V / 255.0f, A / 255.0f);
 
 	SValueSelectorProperties Props;
 	Props.m_UseScroll = false;
 	Props.m_IsHex = true;
 	Props.m_HexPrefix = pColorPicker->m_Alpha ? 8 : 6;
-	const unsigned Hex = color_cast<ColorRGBA>(PickerColorHSV).PackAlphaLast(pColorPicker->m_Alpha);
-	const unsigned NewHex = pUI->DoValueSelector(&pColorPicker->m_aValueSelectorIds[4], &HexRect, "Hex:", Hex, 0, pColorPicker->m_Alpha ? 0xFFFFFFFFll : 0xFFFFFFll, Props);
-	if(Hex != NewHex)
+	const unsigned OldHex = PickerColorRGB.PackAlphaLast(pColorPicker->m_Alpha);
+	const unsigned Hex = pUI->DoValueSelector(&pColorPicker->m_aValueSelectorIds[4], &HexRect, "Hex:", OldHex, 0, pColorPicker->m_Alpha ? 0xFFFFFFFFll : 0xFFFFFFll, Props);
+	if(OldHex != Hex)
 	{
-		PickerColorHSV = color_cast<ColorHSVA>(ColorRGBA::UnpackAlphaLast<ColorRGBA>(NewHex, pColorPicker->m_Alpha));
+		const float OldAlpha = PickerColorRGB.a;
+		PickerColorRGB = ColorRGBA::UnpackAlphaLast<ColorRGBA>(Hex, pColorPicker->m_Alpha);
 		if(!pColorPicker->m_Alpha)
-			PickerColorHSV.a = A / 255.0f;
+			PickerColorRGB.a = OldAlpha;
+		PickerColorHSL = color_cast<ColorHSLA>(PickerColorRGB);
+		PickerColorHSV = color_cast<ColorHSVA>(PickerColorHSL);
 	}
 
 	// Logic
@@ -1796,10 +1859,16 @@ CUI::EPopupMenuFunctionResult CUI::PopupColorPicker(void *pContext, CUIRect View
 	{
 		PickerColorHSV.y = PickerX / ColorsArea.w;
 		PickerColorHSV.z = 1.0f - PickerY / ColorsArea.h;
+		PickerColorHSL = color_cast<ColorHSLA>(PickerColorHSV);
+		PickerColorRGB = color_cast<ColorRGBA>(PickerColorHSL);
 	}
 
 	if(pUI->DoPickerLogic(&pColorPicker->m_HuePickerId, &HueArea, &PickerX, &PickerY))
+	{
 		PickerColorHSV.x = 1.0f - PickerY / HueArea.h;
+		PickerColorHSL = color_cast<ColorHSLA>(PickerColorHSV);
+		PickerColorRGB = color_cast<ColorRGBA>(PickerColorHSL);
+	}
 
 	// Marker Color Area
 	const float MarkerX = ColorsArea.x + ColorsArea.w * PickerColorHSV.y;
@@ -1812,7 +1881,7 @@ CUI::EPopupMenuFunctionResult CUI::PopupColorPicker(void *pContext, CUIRect View
 	pUI->Graphics()->QuadsBegin();
 	pUI->Graphics()->SetColor(MarkerOutline);
 	pUI->Graphics()->DrawCircle(MarkerX, MarkerY, 4.5f, 32);
-	pUI->Graphics()->SetColor(color_cast<ColorRGBA>(PickerColorHSV));
+	pUI->Graphics()->SetColor(PickerColorRGB);
 	pUI->Graphics()->DrawCircle(MarkerX, MarkerY, 3.5f, 32);
 	pUI->Graphics()->QuadsEnd();
 
@@ -1831,8 +1900,23 @@ CUI::EPopupMenuFunctionResult CUI::PopupColorPicker(void *pContext, CUIRect View
 	HueMarker.Draw(HueMarkerColor, IGraphics::CORNER_ALL, 1.2f);
 
 	pColorPicker->m_HsvaColor = PickerColorHSV;
+	pColorPicker->m_RgbaColor = PickerColorRGB;
+	pColorPicker->m_HslaColor = PickerColorHSL;
 	if(pColorPicker->m_pHslaColor != nullptr)
-		*pColorPicker->m_pHslaColor = color_cast<ColorHSLA>(PickerColorHSV).Pack(pColorPicker->m_Alpha);
+		*pColorPicker->m_pHslaColor = PickerColorHSL.Pack(pColorPicker->m_Alpha);
+
+	static const SColorPickerPopupContext::EColorPickerMode s_aModes[] = {SColorPickerPopupContext::MODE_HSVA, SColorPickerPopupContext::MODE_RGBA, SColorPickerPopupContext::MODE_HSLA};
+	static const char *s_apModeLabels[std::size(s_aModes)] = {"HSVA", "RGBA", "HSLA"};
+	for(SColorPickerPopupContext::EColorPickerMode Mode : s_aModes)
+	{
+		CUIRect ModeButton;
+		ModeButtonArea.VSplitLeft(HsvValueWidth, &ModeButton, &ModeButtonArea);
+		ModeButtonArea.VSplitLeft(ValuePadding, nullptr, &ModeButtonArea);
+		if(pUI->DoButton_PopupMenu(&pColorPicker->m_aModeButtons[(int)Mode], s_apModeLabels[Mode], &ModeButton, 10.0f, TEXTALIGN_MC, 2.0f, false, pColorPicker->m_ColorMode != Mode))
+		{
+			pColorPicker->m_ColorMode = Mode;
+		}
+	}
 
 	return CUI::POPUP_KEEP_OPEN;
 }
@@ -1840,5 +1924,7 @@ CUI::EPopupMenuFunctionResult CUI::PopupColorPicker(void *pContext, CUIRect View
 void CUI::ShowPopupColorPicker(float X, float Y, SColorPickerPopupContext *pContext)
 {
 	pContext->m_pUI = this;
-	DoPopupMenu(pContext, X, Y, 160.0f + 10.0f, 186.0f + 10.0f, pContext, PopupColorPicker);
+	if(pContext->m_ColorMode == SColorPickerPopupContext::MODE_UNSET)
+		pContext->m_ColorMode = SColorPickerPopupContext::MODE_HSVA;
+	DoPopupMenu(pContext, X, Y, 160.0f + 10.0f, 209.0f + 10.0f, pContext, PopupColorPicker);
 }

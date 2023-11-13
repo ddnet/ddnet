@@ -132,7 +132,7 @@ MACRO_CONFIG_INT(ClPlayerDefaultEyes, player_default_eyes, 0, 0, 5, CFGFLAG_CLIE
 MACRO_CONFIG_STR(ClSkinPrefix, cl_skin_prefix, 12, "", CFGFLAG_CLIENT | CFGFLAG_SAVE, "Replace the skins by skins with this prefix (e.g. kitty, santa)")
 MACRO_CONFIG_INT(ClFatSkins, cl_fat_skins, 0, 0, 1, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Enable fat skins")
 
-MACRO_CONFIG_INT(UiPage, ui_page, 9, 6, 10, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Interface page")
+MACRO_CONFIG_INT(UiPage, ui_page, 6, 6, 10, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Interface page")
 MACRO_CONFIG_INT(UiSettingsPage, ui_settings_page, 0, 0, 9, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Interface settings page")
 MACRO_CONFIG_INT(UiToolboxPage, ui_toolbox_page, 0, 0, 2, CFGFLAG_CLIENT | CFGFLAG_SAVE, "Toolbox page")
 MACRO_CONFIG_STR(UiServerAddress, ui_server_address, 1024, "localhost:8303", CFGFLAG_CLIENT | CFGFLAG_SAVE | CFGFLAG_INSENSITIVE, "Interface server address")

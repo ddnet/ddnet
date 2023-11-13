@@ -106,9 +106,6 @@ Delete
 Delete demo
 == Smazat záznam
 
-Demo details
-== Detaily záznamu:
-
 Demofile: %s
 == Soubor záznamu: %s
 
@@ -262,9 +259,6 @@ No servers match your filter criteria
 Ok
 == OK
 
-Open
-== Otevřít
-
 Parent Folder
 == Nadřazená složka
 
@@ -313,9 +307,6 @@ Red team
 Red team wins!
 == Červení vyhráli!
 
-Refresh
-== Obnovit
-
 Remote console
 == Vzdálená konzola
 
@@ -324,9 +315,6 @@ Remove
 
 Remove friend
 == Odebrat přítele
-
-Rename
-== Přejmenovat
 
 Rename demo
 == Přejmenovat záznam
@@ -501,23 +489,11 @@ FSAA samples
 Sound volume
 == Hlasitost
 
-Created:
-== Vytvořeno:
-
 Max Screenshots
 == Maximální počet vyfocených obrazovek
 
-Length:
-== Délka:
-
 Laser
 == Laser
-
-Netversion:
-== Netversion:
-
-Map:
-== Mapa:
 
 Hue
 == Tón
@@ -528,17 +504,11 @@ Record demo
 Your skin
 == Zvolený vzhled
 
-Size:
-== Velikost:
-
 Reset to defaults
 == Obnovit výchozí
 
 Quit anyway?
 == Opravdu odejít?
-
-Version:
-== Verze:
 
 Round
 == Kolo
@@ -549,9 +519,6 @@ Lht.
 UI Color
 == Barvy uživatelského rozhraní
 
-Crc:
-== Crc:
-
 Alpha
 == Alfa
 
@@ -560,9 +527,6 @@ LAN
 
 Name plates size
 == Velikost jmen
-
-Type:
-== Typ:
 
 Successfully saved the replay!
 == Záznam byl úspěšně uložen!
@@ -663,14 +627,11 @@ Update now
 Restart
 == Restartovat
 
-Please use a different name
-== Použijte jiné jméno
+Please use a different filename
+== 
 
 Remove chat
 == Odebrat chat
-
-Markers:
-== Markery:
 
 %.2f MiB
 == %.2f MiB
@@ -692,9 +653,6 @@ Date
 
 Fetch Info
 == Načíst informace
-
-Render
-== Render
 
 Connecting dummy
 == Připojování dummyho
@@ -1050,10 +1008,6 @@ Theme
 %d player
 ==  %d hráč
 
-[Demo browser]
-Play
-== Přehrát
-
 Demos directory
 == Adresář dem
 
@@ -1175,6 +1129,9 @@ Could not initialize the given graphics backend, this is probably because you di
 Could not save downloaded map. Try manually deleting this file: %s
 == 
 
+Error playing demo
+== 
+
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
 == 
 
@@ -1226,7 +1183,16 @@ Multi-View
 Team %d
 == 
 
+Some map images could not be loaded. Check the local console for details.
+== 
+
 Uploading map data to GPU
+== 
+
+Some map sounds could not be loaded. Check the local console for details.
+== 
+
+Loading menu themes
 == 
 
 Trying to determine UDP connectivity...
@@ -1250,6 +1216,9 @@ Requesting to join the game
 Rename folder
 == 
 
+Render complete
+== 
+
 A demo with this name already exists
 == 
 
@@ -1263,6 +1232,12 @@ File '%s' already exists, do you want to overwrite it?
 == 
 
 (paused)
+== 
+
+Videos directory
+== 
+
+Video was saved to '%s'
 == 
 
 Join Tutorial Server
@@ -1418,7 +1393,20 @@ Loading demo files
 All combined
 == 
 
+No demo selected
+== 
+
 Folder Link
+== 
+
+Created
+== 
+
+Netversion
+== 
+
+[Demo details]
+map not included
 == 
 
 Open the directory that contains the demo files
@@ -1440,6 +1428,15 @@ Unable to delete the folder '%s'. Make sure it's empty first.
 == 
 
 Loading ghost files
+== 
+
+Ghosts directory
+== 
+
+Activate all
+== 
+
+Deactivate all
 == 
 
 Menu opened. Press Esc key again to close menu.
@@ -1687,10 +1684,16 @@ Freeze Laser Inner Color
 Set all to Rifle
 == 
 
+Enable ghost
+== 
+
 When you cross the start line, show a ghost tee replicating the movements of your best time
 == 
 
 Opacity
+== 
+
+Only save improvements
 == 
 
 Adjust the opacity of entities belonging to other teams, such as tees and nameplates
@@ -1705,10 +1708,10 @@ Tries to predict other entities to give a feel of low latency
 Background
 == 
 
-Entities Background color
+Regular background color
 == 
 
-Regular Background Color
+Entities background color
 == 
 
 Run on join

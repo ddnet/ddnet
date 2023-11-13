@@ -110,9 +110,6 @@ Delete demo
 Demo
 == Demo
 
-Demo details
-== Detalhes da demo
-
 Demofile: %s
 == Demo: %s
 
@@ -272,9 +269,6 @@ No servers match your filter criteria
 Ok
 == Aceitar
 
-Open
-== Abrir
-
 Parent Folder
 == Pasta superior
 
@@ -289,10 +283,6 @@ Ping
 
 Pistol
 == Pistola
-
-[Demo browser]
-Play
-== Ver
 
 Play background music
 == Tocar a música de fundo
@@ -327,9 +317,6 @@ Red team
 Red team wins!
 == Ganhou a equipa vermelha!
 
-Refresh
-== Atualizar
-
 Remote console
 == Remote console
 
@@ -338,9 +325,6 @@ Remove
 
 Remove friend
 == Apagar amigo
-
-Rename
-== Renomear
 
 Rename demo
 == Renomear demo
@@ -516,23 +500,11 @@ New name:
 Sound volume
 == Volume de som
 
-Created:
-== Criado:
-
 Max Screenshots
 == Máximo de Capturas de Ecrã
 
 Record demo
 == Gravar uma demo
-
-Length:
-== Longitude:
-
-Netversion:
-== Netversion:
-
-Map:
-== Mapa:
 
 FSAA samples
 == Amostras FSAA
@@ -546,17 +518,11 @@ Lht.
 Your skin
 == A tua skin
 
-Size:
-== Tamanho:
-
 Reset to defaults
 == Restaurar predefinições
 
 Quit anyway?
 == Sair na mesma?
-
-Version:
-== Versão:
 
 Round
 == Ronda
@@ -567,9 +533,6 @@ UI Color
 Hue
 == Matiz
 
-Crc:
-== Crc:
-
 Alpha
 == Alpha
 
@@ -578,9 +541,6 @@ LAN
 
 Name plates size
 == Tamanho dos nick's
-
-Type:
-== Tipo:
 
 Dummy settings
 == Configurações do Dummy
@@ -630,8 +590,8 @@ Enable game sounds
 DDNet Client needs to be restarted to complete update!
 == O cliente DDNet precisa de ser reiniciado para completar a atualização!
 
-Please use a different name
-== Por favor usa um nome diferente
+Please use a different filename
+== 
 
 Show others
 == Mostrar os outros
@@ -957,6 +917,9 @@ Could not initialize the given graphics backend, this is probably because you di
 Could not save downloaded map. Try manually deleting this file: %s
 == 
 
+Error playing demo
+== 
+
 Successfully saved the replay!
 == 
 
@@ -1023,7 +986,16 @@ Personal best:
 Team %d
 == 
 
+Some map images could not be loaded. Check the local console for details.
+== 
+
 Uploading map data to GPU
+== 
+
+Some map sounds could not be loaded. Check the local console for details.
+== 
+
+Loading menu themes
 == 
 
 Trying to determine UDP connectivity...
@@ -1050,6 +1022,9 @@ Rename folder
 Render demo
 == 
 
+Render complete
+== 
+
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
 == 
 
@@ -1072,6 +1047,12 @@ Replace video
 == 
 
 (paused)
+== 
+
+Videos directory
+== 
+
+Video was saved to '%s'
 == 
 
 Join Tutorial Server
@@ -1236,22 +1217,32 @@ Loading demo files
 All combined
 == 
 
+Length
+== 
+
+No demo selected
+== 
+
 Folder Link
 == 
 
-Markers:
+Created
+== 
+
+Markers
+== 
+
+Netversion
+== 
+
+[Demo details]
+map not included
 == 
 
 %.2f MiB
 == 
 
 %.2f KiB
-== 
-
-Markers
-== 
-
-Length
 == 
 
 Fetch Info
@@ -1272,9 +1263,6 @@ Are you sure that you want to delete the demo '%s'?
 Delete folder
 == 
 
-Render
-== 
-
 Unable to delete the demo '%s'
 == 
 
@@ -1288,6 +1276,15 @@ Pause
 == 
 
 Loading ghost files
+== 
+
+Ghosts directory
+== 
+
+Activate all
+== 
+
+Deactivate all
 == 
 
 Menu opened. Press Esc key again to close menu.
@@ -1613,16 +1610,22 @@ Enable replays
 Default length
 == 
 
+Enable ghost
+== 
+
 When you cross the start line, show a ghost tee replicating the movements of your best time
+== 
+
+Opacity
+== 
+
+Only save improvements
 == 
 
 Overlay entities
 == 
 
 Show text entities
-== 
-
-Opacity
 == 
 
 Adjust the opacity of entities belonging to other teams, such as tees and nameplates
@@ -1640,16 +1643,16 @@ Quads are used for background decoration
 Tries to predict other entities to give a feel of low latency
 == 
 
-Entities Background color
+Regular background color
+== 
+
+Entities background color
 == 
 
 Use current map as background
 == 
 
 Show tiles layers from BG map
-== 
-
-Regular Background Color
 == 
 
 Run on join

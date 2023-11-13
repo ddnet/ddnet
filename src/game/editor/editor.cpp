@@ -1137,18 +1137,18 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 				}
 
 			static int s_CcwButton = 0;
-			if(DoButton_FontIcon(&s_CcwButton, FONT_ICON_ARROW_ROTATE_LEFT, Enabled, &Button, 0, "[R] Rotates the brush counter clockwise", IGraphics::CORNER_ALL) || (Input()->KeyPress(KEY_R) && m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr))
+			if(DoButton_FontIcon(&s_CcwButton, FONT_ICON_ARROW_ROTATE_LEFT, Enabled, &Button, 0, "[R] Rotates the brush counter clockwise", IGraphics::CORNER_L) || (Input()->KeyPress(KEY_R) && m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr))
 			{
 				for(auto &pLayer : m_pBrush->m_vpLayers)
 					pLayer->BrushRotate(-s_RotationAmount / 360.0f * pi * 2);
 			}
 
 			TB_Top.VSplitLeft(30.0f, &Button, &TB_Top);
-			s_RotationAmount = UiDoValueSelector(&s_RotationAmount, &Button, "", s_RotationAmount, TileLayer ? 90 : 1, 359, TileLayer ? 90 : 1, TileLayer ? 10.0f : 2.0f, "Rotation of the brush in degrees. Use left mouse button to drag and change the value. Hold shift to be more precise.", true);
+			s_RotationAmount = UiDoValueSelector(&s_RotationAmount, &Button, "", s_RotationAmount, TileLayer ? 90 : 1, 359, TileLayer ? 90 : 1, TileLayer ? 10.0f : 2.0f, "Rotation of the brush in degrees. Use left mouse button to drag and change the value. Hold shift to be more precise.", true, false, IGraphics::CORNER_NONE);
 
 			TB_Top.VSplitLeft(25.0f, &Button, &TB_Top);
 			static int s_CwButton = 0;
-			if(DoButton_FontIcon(&s_CwButton, FONT_ICON_ARROW_ROTATE_RIGHT, Enabled, &Button, 0, "[T] Rotates the brush clockwise", IGraphics::CORNER_ALL) || (Input()->KeyPress(KEY_T) && m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr))
+			if(DoButton_FontIcon(&s_CwButton, FONT_ICON_ARROW_ROTATE_RIGHT, Enabled, &Button, 0, "[T] Rotates the brush clockwise", IGraphics::CORNER_R) || (Input()->KeyPress(KEY_T) && m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr))
 			{
 				for(auto &pLayer : m_pBrush->m_vpLayers)
 					pLayer->BrushRotate(s_RotationAmount / 360.0f * pi * 2);
@@ -2549,7 +2549,7 @@ void CEditor::DoMapEditor(CUIRect View)
 				else
 					Layer = NUM_LAYERS;
 
-				EExplanation Explanation = EExplanation::DDNET;
+				EExplanation Explanation;
 				if(m_SelectEntitiesImage == "DDNet")
 					Explanation = EExplanation::DDNET;
 				else if(m_SelectEntitiesImage == "FNG")
@@ -2561,7 +2561,7 @@ void CEditor::DoMapEditor(CUIRect View)
 				else if(m_SelectEntitiesImage == "blockworlds")
 					Explanation = EExplanation::BLOCKWORLDS;
 				else
-					dbg_assert(false, "Unhandled entities image for explanations");
+					Explanation = EExplanation::NONE;
 
 				if(Layer != NUM_LAYERS)
 				{
@@ -3098,55 +3098,15 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 		}
 		else if(pProps[i].m_Type == PROPTYPE_COLOR)
 		{
-			const ColorRGBA ColorPick = ColorRGBA::UnpackAlphaLast<ColorRGBA>(pProps[i].m_Value);
-
-			CUIRect ColorRect;
-			Shifter.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f * UI()->ButtonColorMul(&pIDs[i])), IGraphics::CORNER_ALL, 5.0f);
-			Shifter.Margin(1.0f, &ColorRect);
-			ColorRect.Draw(ColorPick, IGraphics::CORNER_ALL, ColorRect.h / 2.0f);
-
-			static CUI::SColorPickerPopupContext s_ColorPickerPopupContext;
-			const int ButtonResult = DoButton_Editor_Common(&pIDs[i], nullptr, 0, &Shifter, 0, "Click to show the color picker. Shift+rightclick to copy color to clipboard. Shift+leftclick to paste color from clipboard.");
-			if(Input()->ShiftIsPressed())
-			{
-				if(ButtonResult == 1)
+			const auto &&SetColor = [&](ColorRGBA NewColor) {
+				const int NewValue = NewColor.PackAlphaLast();
+				if(NewValue != pProps[i].m_Value)
 				{
-					const char *pClipboard = Input()->GetClipboardText();
-					if(*pClipboard == '#' || *pClipboard == '$') // ignore leading # (web color format) and $ (console color format)
-						++pClipboard;
-					if(str_isallnum_hex(pClipboard))
-					{
-						std::optional<ColorRGBA> ParsedColor = color_parse<ColorRGBA>(pClipboard);
-						if(ParsedColor)
-						{
-							*pNewVal = ParsedColor.value().PackAlphaLast();
-							Change = i;
-						}
-					}
-				}
-				else if(ButtonResult == 2)
-				{
-					char aClipboard[9];
-					str_format(aClipboard, sizeof(aClipboard), "%08X", ColorPick.PackAlphaLast());
-					Input()->SetClipboardText(aClipboard);
-				}
-			}
-			else if(ButtonResult > 0)
-			{
-				s_ColorPickerPopupContext.m_HsvaColor = color_cast<ColorHSVA>(ColorPick);
-				s_ColorPickerPopupContext.m_Alpha = true;
-				UI()->ShowPopupColorPicker(UI()->MouseX(), UI()->MouseY(), &s_ColorPickerPopupContext);
-			}
-			else if(UI()->IsPopupOpen(&s_ColorPickerPopupContext))
-			{
-				ColorRGBA c = color_cast<ColorRGBA>(s_ColorPickerPopupContext.m_HsvaColor);
-				const int NewColor = c.PackAlphaLast(s_ColorPickerPopupContext.m_Alpha);
-				if(NewColor != pProps[i].m_Value)
-				{
-					*pNewVal = NewColor;
+					*pNewVal = NewValue;
 					Change = i;
 				}
-			}
+			};
+			DoColorPickerButton(&pIDs[i], &Shifter, ColorRGBA::UnpackAlphaLast<ColorRGBA>(pProps[i].m_Value), SetColor);
 		}
 		else if(pProps[i].m_Type == PROPTYPE_IMAGE)
 		{
@@ -3279,6 +3239,60 @@ int CEditor::DoProperties(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *
 	}
 
 	return Change;
+}
+
+void CEditor::DoColorPickerButton(const void *pID, const CUIRect *pRect, ColorRGBA Color, const std::function<void(ColorRGBA Color)> &SetColor)
+{
+	CUIRect ColorRect;
+	pRect->Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f * UI()->ButtonColorMul(pID)), IGraphics::CORNER_ALL, 5.0f);
+	pRect->Margin(1.0f, &ColorRect);
+	ColorRect.Draw(Color, IGraphics::CORNER_ALL, 5.0f);
+
+	const int ButtonResult = DoButton_Editor_Common(pID, nullptr, 0, pRect, 0, "Click to show the color picker. Shift+rightclick to copy color to clipboard. Shift+leftclick to paste color from clipboard.");
+	if(Input()->ShiftIsPressed())
+	{
+		if(ButtonResult == 1)
+		{
+			const char *pClipboard = Input()->GetClipboardText();
+			if(*pClipboard == '#' || *pClipboard == '$') // ignore leading # (web color format) and $ (console color format)
+				++pClipboard;
+			if(str_isallnum_hex(pClipboard))
+			{
+				std::optional<ColorRGBA> ParsedColor = color_parse<ColorRGBA>(pClipboard);
+				if(ParsedColor)
+				{
+					SetColor(ParsedColor.value());
+				}
+			}
+		}
+		else if(ButtonResult == 2)
+		{
+			char aClipboard[9];
+			str_format(aClipboard, sizeof(aClipboard), "%08X", Color.PackAlphaLast());
+			Input()->SetClipboardText(aClipboard);
+		}
+	}
+	else if(ButtonResult > 0)
+	{
+		if(m_ColorPickerPopupContext.m_ColorMode == CUI::SColorPickerPopupContext::MODE_UNSET)
+			m_ColorPickerPopupContext.m_ColorMode = CUI::SColorPickerPopupContext::MODE_RGBA;
+		m_ColorPickerPopupContext.m_RgbaColor = Color;
+		m_ColorPickerPopupContext.m_HslaColor = color_cast<ColorHSLA>(Color);
+		m_ColorPickerPopupContext.m_HsvaColor = color_cast<ColorHSVA>(m_ColorPickerPopupContext.m_HslaColor);
+		m_ColorPickerPopupContext.m_Alpha = true;
+		m_pColorPickerPopupActiveID = pID;
+		UI()->ShowPopupColorPicker(UI()->MouseX(), UI()->MouseY(), &m_ColorPickerPopupContext);
+	}
+
+	if(UI()->IsPopupOpen(&m_ColorPickerPopupContext))
+	{
+		if(m_pColorPickerPopupActiveID == pID)
+			SetColor(m_ColorPickerPopupContext.m_RgbaColor);
+	}
+	else
+	{
+		m_pColorPickerPopupActiveID = nullptr;
+	}
 }
 
 void CEditor::RenderLayers(CUIRect LayersBox)
@@ -3941,7 +3955,7 @@ bool CEditor::ReplaceImage(const char *pFileName, int StorageType, bool CheckDup
 	}
 
 	pImg->m_AutoMapper.Load(pImg->m_aName);
-	int TextureLoadFlag = Graphics()->HasTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
+	int TextureLoadFlag = Graphics()->Uses2DTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
 	if(ImgInfo.m_Width % 16 != 0 || ImgInfo.m_Height % 16 != 0)
 		TextureLoadFlag = 0;
 	pImg->m_Texture = Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, TextureLoadFlag, pFileName);
@@ -4000,7 +4014,7 @@ bool CEditor::AddImage(const char *pFileName, int StorageType, void *pUser)
 		DilateImage((unsigned char *)ImgInfo.m_pData, ImgInfo.m_Width, ImgInfo.m_Height);
 	}
 
-	int TextureLoadFlag = pEditor->Graphics()->HasTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
+	int TextureLoadFlag = pEditor->Graphics()->Uses2DTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
 	if(ImgInfo.m_Width % 16 != 0 || ImgInfo.m_Height % 16 != 0)
 		TextureLoadFlag = 0;
 	pImg->m_Texture = pEditor->Graphics()->LoadTextureRaw(ImgInfo.m_Width, ImgInfo.m_Height, ImgInfo.m_Format, ImgInfo.m_pData, TextureLoadFlag, pFileName);
@@ -4306,9 +4320,9 @@ void CEditor::RenderImagesList(CUIRect ToolBox)
 				if(Result == 2)
 				{
 					const std::shared_ptr<CEditorImage> pImg = m_Map.m_vpImages[m_SelectedImage];
-					const int Height = !pImg->m_External && IsVanillaImage(pImg->m_aName) ? 90 : 73;
+					const int Height = !pImg->m_External && IsVanillaImage(pImg->m_aName) ? 107 : pImg->m_External ? 73 : 90;
 					static SPopupMenuId s_PopupImageId;
-					UI()->DoPopupMenu(&s_PopupImageId, UI()->MouseX(), UI()->MouseY(), 120, Height, this, PopupImage);
+					UI()->DoPopupMenu(&s_PopupImageId, UI()->MouseX(), UI()->MouseY(), 140, Height, this, PopupImage);
 				}
 			}
 		}
@@ -4422,7 +4436,7 @@ void CEditor::RenderSounds(CUIRect ToolBox)
 			if(Result == 2)
 			{
 				static SPopupMenuId s_PopupSoundId;
-				UI()->DoPopupMenu(&s_PopupSoundId, UI()->MouseX(), UI()->MouseY(), 120, 73, this, PopupSound);
+				UI()->DoPopupMenu(&s_PopupSoundId, UI()->MouseX(), UI()->MouseY(), 140, 90, this, PopupSound);
 			}
 		}
 	}
@@ -4944,15 +4958,18 @@ void CEditor::RenderFileDialog()
 	if(DoButton_Editor(&s_RefreshButton, "Refresh", 0, &Button, 0, nullptr) || (s_ListBox.Active() && (Input()->KeyIsPressed(KEY_F5) || (Input()->ModifierIsPressed() && Input()->KeyIsPressed(KEY_R)))))
 		FilelistPopulate(m_FileDialogLastPopulatedStorageType, true);
 
-	ButtonBar.VSplitRight(ButtonSpacing, &ButtonBar, nullptr);
-	ButtonBar.VSplitRight(90.0f, &ButtonBar, &Button);
-	if(DoButton_Editor(&s_ShowDirectoryButton, "Show directory", 0, &Button, 0, "Open the current directory in the file browser"))
+	if(m_FilesSelectedIndex >= 0 && m_vpFilteredFileList[m_FilesSelectedIndex]->m_StorageType != IStorage::TYPE_ALL)
 	{
-		char aOpenPath[IO_MAX_PATH_LENGTH];
-		Storage()->GetCompletePath(m_FilesSelectedIndex >= 0 ? m_vpFilteredFileList[m_FilesSelectedIndex]->m_StorageType : IStorage::TYPE_SAVE, m_pFileDialogPath, aOpenPath, sizeof(aOpenPath));
-		if(!open_file(aOpenPath))
+		ButtonBar.VSplitRight(ButtonSpacing, &ButtonBar, nullptr);
+		ButtonBar.VSplitRight(90.0f, &ButtonBar, &Button);
+		if(DoButton_Editor(&s_ShowDirectoryButton, "Show directory", 0, &Button, 0, "Open the current directory in the file browser"))
 		{
-			ShowFileDialogError("Failed to open the directory '%s'.", aOpenPath);
+			char aOpenPath[IO_MAX_PATH_LENGTH];
+			Storage()->GetCompletePath(m_FilesSelectedIndex >= 0 ? m_vpFilteredFileList[m_FilesSelectedIndex]->m_StorageType : IStorage::TYPE_SAVE, m_pFileDialogPath, aOpenPath, sizeof(aOpenPath));
+			if(!open_file(aOpenPath))
+			{
+				ShowFileDialogError("Failed to open the directory '%s'.", aOpenPath);
+			}
 		}
 	}
 
@@ -6252,6 +6269,11 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		}
 
 		{
+			static SPopupMenuId s_PopupEnvPointId;
+			const auto &&ShowPopupEnvPoint = [&]() {
+				UI()->DoPopupMenu(&s_PopupEnvPointId, UI()->MouseX(), UI()->MouseY(), 150, 56 + (pEnvelope->GetChannels() == 4 ? 16.0f : 0.0f), this, PopupEnvPoint);
+			};
+
 			if(s_Operation == OP_NONE)
 				SetHotEnvelopePoint(View, pEnvelope, s_ActiveChannels);
 
@@ -6395,8 +6417,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 									if(m_vSelectedEnvelopePoints.size() == 1)
 									{
 										m_UpdateEnvPointInfo = true;
-										static SPopupMenuId s_PopupEnvPointId;
-										UI()->DoPopupMenu(&s_PopupEnvPointId, UI()->MouseX(), UI()->MouseY(), 150, 56, this, PopupEnvPoint);
+										ShowPopupEnvPoint();
 									}
 									else if(m_vSelectedEnvelopePoints.size() > 1)
 									{
@@ -6539,8 +6560,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 										if(IsTangentOutPointSelected(i, c))
 										{
 											m_UpdateEnvPointInfo = true;
-											static SPopupMenuId s_PopupEnvPointId;
-											UI()->DoPopupMenu(&s_PopupEnvPointId, UI()->MouseX(), UI()->MouseY(), 150, 56, this, PopupEnvPoint);
+											ShowPopupEnvPoint();
 										}
 										UI()->SetActiveItem(nullptr);
 									}
@@ -6672,8 +6692,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 										if(IsTangentInPointSelected(i, c))
 										{
 											m_UpdateEnvPointInfo = true;
-											static SPopupMenuId s_PopupEnvPointId;
-											UI()->DoPopupMenu(&s_PopupEnvPointId, UI()->MouseX(), UI()->MouseY(), 150, 56, this, PopupEnvPoint);
+											ShowPopupEnvPoint();
 										}
 										UI()->SetActiveItem(nullptr);
 									}
@@ -6746,7 +6765,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		static float s_MidpointY = 0.0f;
 		static std::vector<float> s_vInitialPositionsX;
 		static std::vector<float> s_vInitialPositionsY;
-		if(s_Operation == OP_NONE && Input()->KeyIsPressed(KEY_S) && !m_vSelectedEnvelopePoints.empty())
+		if(s_Operation == OP_NONE && Input()->KeyIsPressed(KEY_S) && !Input()->ModifierIsPressed() && !m_vSelectedEnvelopePoints.empty())
 		{
 			s_Operation = OP_SCALE;
 			s_ScaleFactorX = 1.0f;
@@ -7561,7 +7580,7 @@ void CEditor::Reset(bool CreateDefault)
 
 int CEditor::GetTextureUsageFlag()
 {
-	return Graphics()->HasTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
+	return Graphics()->Uses2DTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
 }
 
 IGraphics::CTextureHandle CEditor::GetFrontTexture()

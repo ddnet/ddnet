@@ -1,5 +1,6 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include <base/hash_ctxt.h>
 #include <base/math.h>
 #include <base/system.h>
 
@@ -12,6 +13,8 @@
 #ifdef CONF_PLATFORM_HAIKU
 #include <cstdlib>
 #endif
+
+#include <zlib.h>
 
 class CStorage : public IStorage
 {
@@ -77,6 +80,7 @@ public:
 				CreateFolder("skins", TYPE_SAVE);
 				CreateFolder("downloadedskins", TYPE_SAVE);
 				CreateFolder("themes", TYPE_SAVE);
+				CreateFolder("communityicons", TYPE_SAVE);
 				CreateFolder("assets", TYPE_SAVE);
 				CreateFolder("assets/emoticons", TYPE_SAVE);
 				CreateFolder("assets/entities", TYPE_SAVE);
@@ -536,6 +540,37 @@ public:
 		char *pResult = io_read_all_str(File);
 		io_close(File);
 		return pResult;
+	}
+
+	bool CalculateHashes(const char *pFilename, int Type, SHA256_DIGEST *pSha256, unsigned *pCrc) override
+	{
+		dbg_assert(pSha256 != nullptr || pCrc != nullptr, "At least one output argument required");
+
+		IOHANDLE File = OpenFile(pFilename, IOFLAG_READ, Type);
+		if(!File)
+			return false;
+
+		SHA256_CTX Sha256Ctxt;
+		if(pSha256 != nullptr)
+			sha256_init(&Sha256Ctxt);
+		if(pCrc != nullptr)
+			*pCrc = 0;
+		unsigned char aBuffer[64 * 1024];
+		while(true)
+		{
+			unsigned Bytes = io_read(File, aBuffer, sizeof(aBuffer));
+			if(Bytes == 0)
+				break;
+			if(pSha256 != nullptr)
+				sha256_update(&Sha256Ctxt, aBuffer, Bytes);
+			if(pCrc != nullptr)
+				*pCrc = crc32(*pCrc, aBuffer, Bytes);
+		}
+		if(pSha256 != nullptr)
+			*pSha256 = sha256_finish(&Sha256Ctxt);
+
+		io_close(File);
+		return true;
 	}
 
 	struct CFindCBData

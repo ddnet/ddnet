@@ -8,6 +8,7 @@
 #include <engine/shared/protocol.h>
 
 #include <game/alloc.h>
+#include <game/server/save.h>
 
 #include "teeinfo.h"
 
@@ -112,7 +113,6 @@ public:
 	bool m_ForceBalanced;
 	int m_LastActionTick;
 	int m_TeamChangeTick;
-	bool m_SentSemicolonTip;
 
 	// network latency calculations
 	struct
@@ -224,6 +224,7 @@ public:
 	bool m_BirthdayAnnounced;
 
 	vec2 LastTelePos;
+	CSaveTee m_LastTeleTee;
 
 	// gctf
 	int m_RespawnTick;

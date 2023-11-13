@@ -826,7 +826,11 @@ void CMenus::RenderInGameNetwork(CUIRect MainView)
 	if(DoButton_MenuTab(&s_InternetButton, Localize("Internet"), g_Config.m_UiPage == PAGE_INTERNET, &Button, IGraphics::CORNER_NONE))
 	{
 		if(g_Config.m_UiPage != PAGE_INTERNET)
+		{
+			if(g_Config.m_UiPage != PAGE_FAVORITES)
+				Client()->RequestDDNetInfo();
 			ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
+		}
 		NewPage = PAGE_INTERNET;
 	}
 
@@ -844,32 +848,12 @@ void CMenus::RenderInGameNetwork(CUIRect MainView)
 	if(DoButton_MenuTab(&s_FavoritesButton, Localize("Favorites"), g_Config.m_UiPage == PAGE_FAVORITES, &Button, IGraphics::CORNER_NONE))
 	{
 		if(g_Config.m_UiPage != PAGE_FAVORITES)
+		{
+			if(g_Config.m_UiPage != PAGE_INTERNET)
+				Client()->RequestDDNetInfo();
 			ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
+		}
 		NewPage = PAGE_FAVORITES;
-	}
-
-	TabBar.VSplitLeft(110.0f, &Button, &TabBar);
-	static CButtonContainer s_DDNetButton;
-	if(DoButton_MenuTab(&s_DDNetButton, "DDNet", g_Config.m_UiPage == PAGE_DDNET, &Button, IGraphics::CORNER_NONE) || g_Config.m_UiPage < PAGE_INTERNET || g_Config.m_UiPage > PAGE_KOG)
-	{
-		if(g_Config.m_UiPage != PAGE_DDNET)
-		{
-			Client()->RequestDDNetInfo();
-			ServerBrowser()->Refresh(IServerBrowser::TYPE_DDNET);
-		}
-		NewPage = PAGE_DDNET;
-	}
-
-	TabBar.VSplitLeft(110.0f, &Button, &TabBar);
-	static CButtonContainer s_KoGButton;
-	if(DoButton_MenuTab(&s_KoGButton, "KoG", g_Config.m_UiPage == PAGE_KOG, &Button, IGraphics::CORNER_NONE))
-	{
-		if(g_Config.m_UiPage != PAGE_KOG)
-		{
-			Client()->RequestDDNetInfo();
-			ServerBrowser()->Refresh(IServerBrowser::TYPE_KOG);
-		}
-		NewPage = PAGE_KOG;
 	}
 
 	if(NewPage != g_Config.m_UiPage)
@@ -906,7 +890,7 @@ int CMenus::GhostlistFetchCallback(const CFsFileInfo *pInfo, int IsDir, int Stor
 
 	if(time_get_nanoseconds() - pSelf->m_GhostPopulateStartTime > 500ms)
 	{
-		pSelf->GameClient()->m_Menus.RenderLoading(Localize("Loading ghost files"), "", 0, false);
+		pSelf->RenderLoading(Localize("Loading ghost files"), "", 0, false);
 	}
 
 	return 0;

@@ -687,7 +687,7 @@ void CSound::SetVoiceVolume(CVoiceHandle Voice, float Volume)
 
 	int VoiceID = Voice.Id();
 
-	std::unique_lock<std::mutex> Lock(m_SoundLock);
+	const CLockScope LockScope(m_SoundLock);
 	if(m_aVoices[VoiceID].m_Age != Voice.Age())
 		return;
 
@@ -702,7 +702,7 @@ void CSound::SetVoiceFalloff(CVoiceHandle Voice, float Falloff)
 
 	int VoiceID = Voice.Id();
 
-	std::unique_lock<std::mutex> Lock(m_SoundLock);
+	const CLockScope LockScope(m_SoundLock);
 	if(m_aVoices[VoiceID].m_Age != Voice.Age())
 		return;
 
@@ -717,7 +717,7 @@ void CSound::SetVoiceLocation(CVoiceHandle Voice, float x, float y)
 
 	int VoiceID = Voice.Id();
 
-	std::unique_lock<std::mutex> Lock(m_SoundLock);
+	const CLockScope LockScope(m_SoundLock);
 	if(m_aVoices[VoiceID].m_Age != Voice.Age())
 		return;
 
@@ -732,7 +732,7 @@ void CSound::SetVoiceTimeOffset(CVoiceHandle Voice, float TimeOffset)
 
 	int VoiceID = Voice.Id();
 
-	std::unique_lock<std::mutex> Lock(m_SoundLock);
+	const CLockScope LockScope(m_SoundLock);
 	if(m_aVoices[VoiceID].m_Age != Voice.Age())
 		return;
 
@@ -766,7 +766,7 @@ void CSound::SetVoiceCircle(CVoiceHandle Voice, float Radius)
 
 	int VoiceID = Voice.Id();
 
-	std::unique_lock<std::mutex> Lock(m_SoundLock);
+	const CLockScope LockScope(m_SoundLock);
 	if(m_aVoices[VoiceID].m_Age != Voice.Age())
 		return;
 
@@ -781,7 +781,7 @@ void CSound::SetVoiceRectangle(CVoiceHandle Voice, float Width, float Height)
 
 	int VoiceID = Voice.Id();
 
-	std::unique_lock<std::mutex> Lock(m_SoundLock);
+	const CLockScope LockScope(m_SoundLock);
 	if(m_aVoices[VoiceID].m_Age != Voice.Age())
 		return;
 
@@ -792,7 +792,7 @@ void CSound::SetVoiceRectangle(CVoiceHandle Voice, float Width, float Height)
 
 ISound::CVoiceHandle CSound::Play(int ChannelID, int SampleID, int Flags, float x, float y)
 {
-	m_SoundLock.lock();
+	const CLockScope LockScope(m_SoundLock);
 
 	// search for voice
 	int VoiceID = -1;
@@ -836,7 +836,6 @@ ISound::CVoiceHandle CSound::Play(int ChannelID, int SampleID, int Flags, float 
 		Age = m_aVoices[VoiceID].m_Age;
 	}
 
-	m_SoundLock.unlock();
 	return CreateVoiceHandle(VoiceID, Age);
 }
 
@@ -853,7 +852,7 @@ ISound::CVoiceHandle CSound::Play(int ChannelID, int SampleID, int Flags)
 void CSound::Pause(int SampleID)
 {
 	// TODO: a nice fade out
-	std::unique_lock<std::mutex> Lock(m_SoundLock);
+	const CLockScope LockScope(m_SoundLock);
 	CSample *pSample = &m_aSamples[SampleID];
 	for(auto &Voice : m_aVoices)
 	{
@@ -868,7 +867,7 @@ void CSound::Pause(int SampleID)
 void CSound::Stop(int SampleID)
 {
 	// TODO: a nice fade out
-	std::unique_lock<std::mutex> Lock(m_SoundLock);
+	const CLockScope LockScope(m_SoundLock);
 	CSample *pSample = &m_aSamples[SampleID];
 	for(auto &Voice : m_aVoices)
 	{
@@ -886,7 +885,7 @@ void CSound::Stop(int SampleID)
 void CSound::StopAll()
 {
 	// TODO: a nice fade out
-	std::unique_lock<std::mutex> Lock(m_SoundLock);
+	const CLockScope LockScope(m_SoundLock);
 	for(auto &Voice : m_aVoices)
 	{
 		if(Voice.m_pSample)
@@ -907,7 +906,7 @@ void CSound::StopVoice(CVoiceHandle Voice)
 
 	int VoiceID = Voice.Id();
 
-	std::unique_lock<std::mutex> Lock(m_SoundLock);
+	const CLockScope LockScope(m_SoundLock);
 	if(m_aVoices[VoiceID].m_Age != Voice.Age())
 		return;
 
@@ -917,7 +916,7 @@ void CSound::StopVoice(CVoiceHandle Voice)
 
 bool CSound::IsPlaying(int SampleID)
 {
-	std::unique_lock<std::mutex> Lock(m_SoundLock);
+	const CLockScope LockScope(m_SoundLock);
 	const CSample *pSample = &m_aSamples[SampleID];
 	return std::any_of(std::begin(m_aVoices), std::end(m_aVoices), [pSample](const auto &Voice) { return Voice.m_pSample == pSample; });
 }

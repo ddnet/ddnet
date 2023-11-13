@@ -103,9 +103,6 @@ Delete
 Delete demo
 == Borrar demo
 
-Demo details
-== Detalles de la demo
-
 Demofile: %s
 == Arquivo: %s
 
@@ -262,9 +259,6 @@ No servers match your filter criteria
 Ok
 == Aceptar
 
-Open
-== Abrir
-
 Parent Folder
 == Directorio pai
 
@@ -279,10 +273,6 @@ Ping
 
 Pistol
 == Pistola
-
-[Demo browser]
-Play
-== Reproducir
 
 Play background music
 == Reproducir música de fondo
@@ -317,9 +307,6 @@ Red team
 Red team wins!
 == O equipo vermello gana!
 
-Refresh
-== Actualizar
-
 Remote console
 == Consola remota
 
@@ -328,9 +315,6 @@ Remove
 
 Remove friend
 == Eliminar amigo
-
-Rename
-== Renombrar
 
 Rename demo
 == Renombrar demo
@@ -506,23 +490,11 @@ FSAA samples
 Sound volume
 == Volume do son
 
-Created:
-== Creado:
-
 Max Screenshots
 == Número máximo de capturas
 
-Length:
-== Lonxitude:
-
 Laser
 == Láser
-
-Netversion:
-== Versión Net:
-
-Map:
-== Mapa:
 
 Hue
 == Matiz
@@ -533,17 +505,11 @@ Record demo
 Your skin
 == O teu skin
 
-Size:
-== Tamaño:
-
 Reset to defaults
 == Restablecer por defecto
 
 Quit anyway?
 == Saír de todos os xeitos?
-
-Version:
-== Versión:
 
 Round
 == Rolda
@@ -554,9 +520,6 @@ Lht.
 UI Color
 == Cor de menú
 
-Crc:
-== Crc:
-
 Alpha
 == Transp.
 
@@ -565,9 +528,6 @@ LAN
 
 Name plates size
 == Tamaño da fonte dos alcumes
-
-Type:
-== Tipo:
 
 Successfully saved the replay!
 == Repetición gardada con éxito!
@@ -674,14 +634,11 @@ Update now
 Restart
 == Reiniciar
 
-Please use a different name
-== Por favor usa un nome diferente
+Please use a different filename
+== 
 
 Remove chat
 == Eliminar chat
-
-Markers:
-== Marcadores:
 
 %.2f MiB
 == %.2f MiB
@@ -703,9 +660,6 @@ Date
 
 Fetch Info
 == Obter info.
-
-Render
-== Renderizar
 
 Connecting dummy
 == Conectando dummy
@@ -1179,12 +1133,6 @@ Preview
 Background
 == Fondo
 
-Entities Background color
-== Cor de fondo de entidades
-
-Regular Background Color
-== Cor de fondo regular
-
 Discord
 == Discord
 
@@ -1656,6 +1604,9 @@ Relative
 Absolute
 == Absoluto
 
+Error playing demo
+== 
+
 Quitting. Please wait…
 == 
 
@@ -1665,7 +1616,19 @@ Restarting. Please wait…
 Multi-View
 == 
 
+Some map images could not be loaded. Check the local console for details.
+== 
+
+Some map sounds could not be loaded. Check the local console for details.
+== 
+
+Loading menu themes
+== 
+
 Rename folder
+== 
+
+Render complete
 == 
 
 A demo with this name already exists
@@ -1678,6 +1641,12 @@ Unable to rename the folder
 == 
 
 (paused)
+== 
+
+Videos directory
+== 
+
+Video was saved to '%s'
 == 
 
 No server selected
@@ -1724,7 +1693,20 @@ Render cut to video
 All combined
 == 
 
+No demo selected
+== 
+
 Folder Link
+== 
+
+Created
+== 
+
+Netversion
+== 
+
+[Demo details]
+map not included
 == 
 
 Are you sure that you want to delete the folder '%s'?
@@ -1736,6 +1718,15 @@ Delete folder
 Unable to delete the folder '%s'. Make sure it's empty first.
 == 
 
+Ghosts directory
+== 
+
+Activate all
+== 
+
+Deactivate all
+== 
+
 Axis
 == 
 
@@ -1743,6 +1734,18 @@ Graphics card
 == 
 
 Default length
+== 
+
+Enable ghost
+== 
+
+Only save improvements
+== 
+
+Regular background color
+== 
+
+Entities background color
 == 
 
 Moved ingame
