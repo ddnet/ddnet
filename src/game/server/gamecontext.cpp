@@ -5029,20 +5029,11 @@ void CGameContext::UpdateVoteCheckboxes()
 			else if(!str_comp(pCurrent->m_aCommand, "sv_kill_hook 0"))
 				Checked = g_Config.m_SvKillHook == 0;
 			else if(!str_comp(pCurrent->m_aCommand, "sv_kill_hook 1"))
-			{
 				Checked = g_Config.m_SvKillHook == 1;
-				dbg_msg("votes", "set checked = %d", Checked);
-			}
 			else
-			{
-				dbg_msg("votes", "not found '%s'", pCurrent->m_aCommand);
 				Found = false;
-			}
 			if(Found)
-			{
 				pCurrent->m_aDescription[1] = Checked ? 'x' : ' ';
-				dbg_msg("votes", "set to '%s'", pCurrent->m_aDescription);
-			}
 		}
 		pCurrent = pCurrent->m_pNext;
 	}
