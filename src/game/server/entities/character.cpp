@@ -2484,7 +2484,6 @@ void CCharacter::SwapClients(int Client1, int Client2)
 
 // gctf
 
-
 void CCharacter::ResetInstaSettings()
 {
 	GiveWeapon(GameServer()->GetDDNetInstaWeapon(), false, g_Config.m_SvGrenadeAmmoRegen ? g_Config.m_SvGrenadeAmmoRegenNum : -1);
