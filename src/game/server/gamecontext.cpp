@@ -3593,6 +3593,12 @@ void CGameContext::OnConsoleInit()
 	Console()->Chain("sv_timelimit", ConchainGameinfoUpdate, this); // gctf
 	Console()->Chain("sv_grenade_ammo_regen", ConchainResetInstasettingTees, this); // gctf
 	Console()->Chain("sv_grenade_ammo_regen", ConchainInstaSettingsUpdate, this); // gctf
+	Console()->Chain("sv_grenade_ammo_regen_on_kill", ConchainInstaSettingsUpdate, this); // gctf
+	Console()->Chain("sv_grenade_ammo_regen_reset_on_fire", ConchainInstaSettingsUpdate, this); // gctf
+	Console()->Chain("sv_sprayprotection", ConchainInstaSettingsUpdate, this); // gctf
+	Console()->Chain("sv_only_hook_kills", ConchainInstaSettingsUpdate, this); // gctf
+	Console()->Chain("sv_kill_hook", ConchainInstaSettingsUpdate, this); // gctf
+
 	Console()->Register("shuffle_teams", "", CFGFLAG_SERVER, ConShuffleTeams, this, "Shuffle the current teams"); // gctf
 
 	Console()->Chain("sv_vote_kick", ConchainSettingUpdate, this);
