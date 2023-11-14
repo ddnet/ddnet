@@ -4994,16 +4994,38 @@ void CGameContext::UpdateVoteCheckboxes()
 {
 	CVoteOptionServer *pCurrent = m_pVoteOptionFirst;
 
+	// TODO: use macro magic to generate this code
+	//       will use more performance if done for all settings
+	//       could also introduce flags
+	//       can flags be done without conflicts?
 	while(pCurrent != NULL)
 	{
 		if(str_startswith(pCurrent->m_aDescription, "[ ]") || str_startswith(pCurrent->m_aDescription, "[x]"))
 		{
 			bool Checked = false;
 			bool Found = true;
-			if(!str_comp(pCurrent->m_aCommand, "sv_grenade_ammo_regen 1"))
-				Checked = g_Config.m_SvGrenadeAmmoRegen;
-			else if(!str_comp(pCurrent->m_aCommand, "sv_grenade_ammo_regen 0"))
-				Checked = !g_Config.m_SvGrenadeAmmoRegen;
+			if(!str_comp(pCurrent->m_aCommand, "sv_grenade_ammo_regen 0"))
+				Checked = g_Config.m_SvGrenadeAmmoRegen == 0;
+			else if(!str_comp(pCurrent->m_aCommand, "sv_grenade_ammo_regen 1"))
+				Checked = g_Config.m_SvGrenadeAmmoRegen == 1;
+			else if(!str_comp(pCurrent->m_aCommand, "sv_grenade_ammo_regen_on_kill 0"))
+				Checked = g_Config.m_SvGrenadeAmmoRegenOnKill == 0;
+			else if(!str_comp(pCurrent->m_aCommand, "sv_grenade_ammo_regen_on_kill 1"))
+				Checked = g_Config.m_SvGrenadeAmmoRegenOnKill == 1;
+			else if(!str_comp(pCurrent->m_aCommand, "sv_grenade_ammo_regen_on_kill 2"))
+				Checked = g_Config.m_SvGrenadeAmmoRegenOnKill == 2;
+			else if(!str_comp(pCurrent->m_aCommand, "sv_grenade_ammo_regen_reset_on_fire 0"))
+				Checked = g_Config.m_SvGrenadeAmmoRegenResetOnFire == 0;
+			else if(!str_comp(pCurrent->m_aCommand, "sv_grenade_ammo_regen_reset_on_fire 1"))
+				Checked = g_Config.m_SvGrenadeAmmoRegenResetOnFire == 1;
+			else if(!str_comp(pCurrent->m_aCommand, "sv_sprayprotection 0"))
+				Checked = g_Config.m_SvSprayprotection == 0;
+			else if(!str_comp(pCurrent->m_aCommand, "sv_sprayprotection 1"))
+				Checked = g_Config.m_SvSprayprotection == 1;
+			else if(!str_comp(pCurrent->m_aCommand, "sv_only_hook_kills 0"))
+				Checked = g_Config.m_SvOnlyHookKills == 0;
+			else if(!str_comp(pCurrent->m_aCommand, "sv_only_hook_kills 1"))
+				Checked = g_Config.m_SvOnlyHookKills == 1;
 			else
 				Found = false;
 			if(Found)

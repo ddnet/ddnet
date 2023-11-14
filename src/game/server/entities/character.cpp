@@ -1025,7 +1025,7 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 			}
 		}
 
-		if(g_Config.m_SvHookKill && From >= 0 && From <= MAX_CLIENTS)
+		if(g_Config.m_SvOnlyHookKills && From >= 0 && From <= MAX_CLIENTS)
 		{
 			CCharacter *pChr = GameServer()->m_apPlayers[From]->GetCharacter();
 			if(!pChr || pChr->m_Core.HookedPlayer() != m_pPlayer->GetCID())
