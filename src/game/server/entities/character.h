@@ -250,6 +250,14 @@ public:
 	bool IsSuper() { return m_Core.m_Super; }
 
 	CSaveTee &GetRescueTeeRef() { return m_RescueTee; }
+
+	// gctf
+	/*
+		Reset instagib tee without resetting ddnet or teeworlds tee
+		update grenade ammo state without selfkill
+		useful for votes
+	*/
+	void ResetInstaSettings();
 };
 
 enum

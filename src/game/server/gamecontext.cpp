@@ -3490,6 +3490,25 @@ void CGameContext::ConchainGameinfoUpdate(IConsole::IResult *pResult, void *pUse
 }
 
 // gctf
+void CGameContext::ConchainResetInstasettingTees(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	pfnCallback(pResult, pCallbackUserData);
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(pResult->NumArguments())
+	{
+		for(auto *pPlayer : pSelf->m_apPlayers)
+		{
+			if(!pPlayer)
+				continue;
+			CCharacter *pChr = pPlayer->GetCharacter();
+			if(!pChr)
+				continue;
+			pChr->ResetInstaSettings();
+		}
+	}
+}
+
+// gctf
 void CGameContext::ConchainInstaSettingsUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	pfnCallback(pResult, pCallbackUserData);
@@ -3572,6 +3591,7 @@ void CGameContext::OnConsoleInit()
 
 	Console()->Chain("sv_scorelimit", ConchainGameinfoUpdate, this); // gctf
 	Console()->Chain("sv_timelimit", ConchainGameinfoUpdate, this); // gctf
+	Console()->Chain("sv_grenade_ammo_regen", ConchainResetInstasettingTees, this); // gctf
 	Console()->Chain("sv_grenade_ammo_regen", ConchainInstaSettingsUpdate, this); // gctf
 	Console()->Register("shuffle_teams", "", CFGFLAG_SERVER, ConShuffleTeams, this, "Shuffle the current teams"); // gctf
 

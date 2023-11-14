@@ -2475,3 +2475,12 @@ void CCharacter::SwapClients(int Client1, int Client2)
 	const int HookedPlayer = m_Core.HookedPlayer();
 	m_Core.SetHookedPlayer(HookedPlayer == Client1 ? Client2 : HookedPlayer == Client2 ? Client1 : HookedPlayer);
 }
+
+// gctf
+
+
+void CCharacter::ResetInstaSettings()
+{
+	GiveWeapon(GameServer()->GetDDNetInstaWeapon(), false, g_Config.m_SvGrenadeAmmoRegen ? g_Config.m_SvGrenadeAmmoRegenNum : -1);
+	m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_AmmoRegenStart = -1;
+}
