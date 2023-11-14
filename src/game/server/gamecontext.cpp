@@ -2055,7 +2055,7 @@ void CGameContext::OnSayNetMessage(const CNetMsg_Cl_Say *pMsg, int ClientID, con
 	// gctf bang commands
 	// allow sending ! to chat or !!
 	// swallow all other ! prefixed chat messages
-	if(pMsg->m_pMessage[0] == '!' && pMsg->m_pMessage[1] && pMsg->m_pMessage[0] != '!')
+	if(pMsg->m_pMessage[0] == '!' && pMsg->m_pMessage[1] && pMsg->m_pMessage[1] != '!')
 		ParseChatCmd('!', ClientID, pMsg->m_pMessage + 1);
 	else if(pMsg->m_pMessage[0] == '/')
 	{
