@@ -271,7 +271,8 @@ public:
 	void SendGameMsg(int GameMsgID, int ParaI1, int ClientID);
 	void SendGameMsg(int GameMsgID, int ParaI1, int ParaI2, int ParaI3, int ClientID); // gctf
 	int GetDDNetInstaWeapon();
-	void OnBangCommand(const char *pLine, int ClientID);
+	bool ParseChatCmd(char Prefix, int ClientID, const char *pCmdWithArgs);
+	bool OnBangCommand(int ClientID, const char *pCmd, int NumArgs, const char **ppArgs);
 	void BangCommandVote(int ClientID, const char *pCommand, const char *pDesc);
 	void ComCallShuffleVote(int ClientID);
 
