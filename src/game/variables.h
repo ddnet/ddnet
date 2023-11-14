@@ -240,6 +240,7 @@ MACRO_CONFIG_INT(SvGrenadeAmmoRegenTime, sv_grenade_ammo_regen_time, 128, 1, 900
 MACRO_CONFIG_INT(SvGrenadeAmmoRegenNum, sv_grenade_ammo_regen_num, 6, 1, 10, CFGFLAG_SAVE | CFGFLAG_SERVER, "Maximum number of grenades if ammo regeneration on")
 MACRO_CONFIG_INT(SvGrenadeAmmoRegenSpeedNade, sv_grenade_ammo_regen_speed, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_SERVER, "Give grenades back that push own player")
 MACRO_CONFIG_INT(SvGrenadeAmmoRegenOnKill, sv_grenade_ammo_regen_on_kill, 2, 0, 2, CFGFLAG_SAVE | CFGFLAG_SERVER, "Refill nades on kill (0=off, 1=1, 2=all)")
+MACRO_CONFIG_INT(SvGrenadeAmmoRegenResetTimerOnFire, sv_grenade_ammo_regen_reset_timer_on_fire, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_SERVER, "Reset regen time if shot is fired")
 MACRO_CONFIG_INT(SvSprayprotection, sv_sprayprotection, 0, 0, 1, CFGFLAG_SERVER, "Spray protection")
 MACRO_CONFIG_INT(SvHookKill, sv_hook_kill, 0, 0, 1, CFGFLAG_SERVER, "Only count kills when enemy is hooked")
 
