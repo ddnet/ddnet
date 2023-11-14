@@ -4935,6 +4935,7 @@ bool CGameContext::OnBangCommand(int ClientID, const char *pCmd, int NumArgs, co
 	else if(!str_comp_nocase(pCmd, "restart") || !str_comp_nocase(pCmd, "reload"))
 	{
 		int Seconds = NumArgs > 0 ? atoi(ppArgs[0]) : 10;
+		Seconds = clamp(Seconds, 1, 200);
 		char aCmd[512];
 		str_format(aCmd, sizeof(aCmd), "restart %d", Seconds);
 		char aDesc[512];
