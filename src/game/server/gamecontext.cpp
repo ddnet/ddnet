@@ -2052,7 +2052,10 @@ void CGameContext::OnSayNetMessage(const CNetMsg_Cl_Say *pMsg, int ClientID, con
 	else
 		Team = CHAT_ALL;
 
-	if(pMsg->m_pMessage[0] == '!')
+	// gctf bang commands
+	// allow sending ! to chat or !!
+	// swallow all other ! prefixed chat messages
+	if(pMsg->m_pMessage[0] == '!' && pMsg->m_pMessage[1] && pMsg->m_pMessage[0] != '!')
 		ParseChatCmd('!', ClientID, pMsg->m_pMessage + 1);
 	else if(pMsg->m_pMessage[0] == '/')
 	{
@@ -4948,6 +4951,7 @@ bool CGameContext::OnBangCommand(int ClientID, const char *pCmd, int NumArgs, co
 	}
 	else
 	{
+		SendChatTarget(ClientID, "Unknown command. Commands: !restart, !ready, !shuffle, !1on1");
 		return false;
 	}
 	return true;
