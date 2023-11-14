@@ -1024,6 +1024,13 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 			}
 		}
 
+		if(g_Config.m_SvHookKill && From >= 0 && From <= MAX_CLIENTS)
+		{
+			CCharacter *pChr = GameServer()->m_apPlayers[From]->GetCharacter();
+			if(!pChr || pChr->m_Core.HookedPlayer() != m_pPlayer->GetCID())
+				Dmg = 0;
+		}
+
 		// no self damage
 		if(Dmg >= 4)
 			m_Health = From == m_pPlayer->GetCID() ? m_Health : 0;

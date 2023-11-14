@@ -14,3 +14,4 @@ For build instructions visit the [ddnet repo](https://github.com/ddnet/ddnet).
 + `sv_grenade_ammo_regen_speed` Give grenades back that push own player
 + `sv_grenade_ammo_regen_on_kill` Give grenades back on kill (0=0ff, 1=one nade back, 2=all nades back)
 + `sv_sprayprotection` Spray protection
++ `sv_hook_kill` Only count kills when enemy is hooked
