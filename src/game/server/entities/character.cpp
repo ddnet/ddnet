@@ -430,7 +430,7 @@ void CCharacter::FireWeapon()
 		return;
 
 	// gctf
-	if(g_Config.m_SvGrenadeAmmoRegenResetTimerOnFire)
+	if(g_Config.m_SvGrenadeAmmoRegenResetOnFire)
 		m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_AmmoRegenStart = -1;
 
 	vec2 ProjStartPos = m_Pos + Direction * GetProximityRadius() * 0.75f;
