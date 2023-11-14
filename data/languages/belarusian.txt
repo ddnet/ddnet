@@ -5,6 +5,7 @@
 #	Chill & PoKeMoN		2023-03-31 16:00:00
 #	Chill & PoKeMoN		2023-07-02 00:54:00
 #	Chill [TD] & PoKeMoN [TD]		2023-09-22 17:49:00
+#	Chill [TD] & PoKeMoN [TD]		2023-11-14 12:42:00
 #	
 ##### /authors #####
 
@@ -796,7 +797,7 @@ Are you sure that you want to remove the clan '%s' from your friends list?
 == Вы ўпэўненыя што хочаце выдаліць клан '%s' са спіса вашых сяброў?
 
 Please use a different filename
-== 
+== Калі ласка, выкарыстайце іншае імя файла
 
 File already exists, do you want to overwrite it?
 == Файл ужо існуе, ці вы хочаце перазапісаць яго?
@@ -1699,56 +1700,56 @@ Moved ingame
 == Перамешчаны ў гульні
 
 Error playing demo
-== 
+== Памылка прайгравання дэма
 
 Some map images could not be loaded. Check the local console for details.
-== 
+== Некаторыя відарысы карты немагчыма спампаваць. Для атрымання дэталей праверце лакальную кансоль.
 
 Some map sounds could not be loaded. Check the local console for details.
-== 
+== Некаторыя гукі карты немагчыма спампаваць. Для атрымання дэталей праверце лакальную кансоль.
 
 Loading menu themes
-== 
+== Спампоўка тэм меню
 
 Render complete
-== 
+== Рэндэр завершаны
 
 Videos directory
-== 
+== Тэчка відэа
 
 Video was saved to '%s'
-== 
+== Відэа было захавана ў '%s'
 
 No demo selected
-== 
+== Дэма не выбрана
 
 Created
-== 
+== Створана
 
 Netversion
-== 
+== Сеткавая версія
 
 [Demo details]
 map not included
-== 
+== карта не ўключана
 
 Ghosts directory
-== 
+== Тэчка прывідаў
 
 Activate all
-== 
+== Актываваць усе
 
 Deactivate all
-== 
+== Дэактываваць усе
 
 Enable ghost
-== 
+== Уключыць прывід
 
 Only save improvements
-== 
+== Захоўваць толькі паляпшэнні
 
 Regular background color
-== 
+== Колер звычайнага фону
 
 Entities background color
-== 
+== Колер фону энтыты
