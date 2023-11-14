@@ -3490,6 +3490,15 @@ void CGameContext::ConchainGameinfoUpdate(IConsole::IResult *pResult, void *pUse
 }
 
 // gctf
+void CGameContext::ConchainInstaSettingsUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	pfnCallback(pResult, pCallbackUserData);
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	pSelf->UpdateVoteCheckboxes();
+	pSelf->RefreshVotes();
+}
+
+// gctf
 void CGameContext::ConShuffleTeams(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
@@ -3563,6 +3572,7 @@ void CGameContext::OnConsoleInit()
 
 	Console()->Chain("sv_scorelimit", ConchainGameinfoUpdate, this); // gctf
 	Console()->Chain("sv_timelimit", ConchainGameinfoUpdate, this); // gctf
+	Console()->Chain("sv_grenade_ammo_regen", ConchainInstaSettingsUpdate, this); // gctf
 	Console()->Register("shuffle_teams", "", CFGFLAG_SERVER, ConShuffleTeams, this, "Shuffle the current teams"); // gctf
 
 	Console()->Chain("sv_vote_kick", ConchainSettingUpdate, this);
@@ -3788,6 +3798,8 @@ void CGameContext::OnInit(const void *pPersistentData)
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "git-revision", GIT_SHORTREV_HASH);
 
 	m_pAntibot->RoundStart(this);
+
+	UpdateVoteCheckboxes(); // gctf
 
 #ifdef CONF_DEBUG
 	if(g_Config.m_DbgDummies)
@@ -4956,6 +4968,42 @@ bool CGameContext::OnBangCommand(int ClientID, const char *pCmd, int NumArgs, co
 		return false;
 	}
 	return true;
+}
+
+void CGameContext::UpdateVoteCheckboxes()
+{
+	CVoteOptionServer *pCurrent = m_pVoteOptionFirst;
+
+	while(pCurrent != NULL)
+	{
+		if(str_startswith(pCurrent->m_aDescription, "[ ]") || str_startswith(pCurrent->m_aDescription, "[x]"))
+		{
+			bool Checked = false;
+			bool Found = true;
+			if(!str_comp(pCurrent->m_aCommand, "sv_grenade_ammo_regen 1"))
+				Checked = g_Config.m_SvGrenadeAmmoRegen;
+			else if(!str_comp(pCurrent->m_aCommand, "sv_grenade_ammo_regen 0"))
+				Checked = !g_Config.m_SvGrenadeAmmoRegen;
+			else
+				Found = false;
+			if(Found)
+				pCurrent->m_aDescription[1] = Checked ? 'x' : ' ';
+		}
+		pCurrent = pCurrent->m_pNext;
+	}
+}
+
+void CGameContext::RefreshVotes()
+{
+	// start reloading vote option list
+	// clear vote options
+	CNetMsg_Sv_VoteClearOptions VoteClearOptionsMsg;
+	Server()->SendPackMsg(&VoteClearOptionsMsg, MSGFLAG_VITAL, -1);
+
+	// reset sending of vote options
+	for(auto &pPlayer : m_apPlayers)
+		if(pPlayer)
+			pPlayer->m_SendVoteIndex = 0;
 }
 
 void CGameContext::SendGameMsg(int GameMsgID, int ClientID)
