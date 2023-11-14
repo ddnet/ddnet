@@ -18,6 +18,7 @@
 #	unban   	2023-03-10 21:50:50
 #	eblan   	2023-08-07 14:27:00
 #	kaban   	2023-9-21 19:00:00
+#	ByFox   	2023-11-14 11:24:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -614,7 +615,7 @@ DDNet Client needs to be restarted to complete update!
 == Перезапустите DDNet Client для завершения обновления!
 
 Please use a different filename
-== 
+== Пожалуйста, используйте другое имя файла
 
 Show others
 == Показывать остальных
@@ -1752,16 +1753,16 @@ Activate all
 == Активировать все
 
 Deactivate all
-== 
+== Отключить все
 
 Enable ghost
-== 
+== Включить привидение
 
 Only save improvements
-== 
+== Сохранять только улучшения
 
 Regular background color
-== 
+== Обычный цвет фона
 
 Entities background color
-== 
+== Цвет фона сущностей
