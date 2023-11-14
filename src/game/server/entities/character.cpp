@@ -414,9 +414,6 @@ void CCharacter::FireWeapon()
 	if(!WillFire)
 		return;
 
-	// gctf
-	m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_AmmoRegenStart = -1;
-
 	if(m_FreezeTime)
 	{
 		// Timer stuff to avoid shrieking orchestra caused by unfreeze-plasma
@@ -431,6 +428,9 @@ void CCharacter::FireWeapon()
 	// check for ammo
 	if(!m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo)
 		return;
+
+	// gctf
+	m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_AmmoRegenStart = -1;
 
 	vec2 ProjStartPos = m_Pos + Direction * GetProximityRadius() * 0.75f;
 
