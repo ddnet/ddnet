@@ -4877,6 +4877,8 @@ bool CGameContext::ParseChatCmd(char Prefix, int ClientID, const char *pCmdWithA
 
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf), "got cmd '%s' with %d args: %s", aCmd, NumArgs, aArgsStr);
+	Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "bang-command", aBuf);
+
 	bool match = OnBangCommand(ClientID, aCmd, NumArgs, (const char **)ppArgs);
 	for(int x = 0; x < 8; ++x)
 		delete[] ppArgs[x];
