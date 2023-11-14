@@ -5026,6 +5026,10 @@ void CGameContext::UpdateVoteCheckboxes()
 				Checked = g_Config.m_SvOnlyHookKills == 0;
 			else if(!str_comp(pCurrent->m_aCommand, "sv_only_hook_kills 1"))
 				Checked = g_Config.m_SvOnlyHookKills == 1;
+			else if(!str_comp(pCurrent->m_aCommand, "sv_kill_hook 0"))
+				Checked = g_Config.m_SvKillHook == 0;
+			else if(!str_comp(pCurrent->m_aCommand, "sv_kill_hook 1"))
+				Checked = g_Config.m_SvKillHook == 1;
 			else
 				Found = false;
 			if(Found)

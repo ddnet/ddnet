@@ -820,6 +820,12 @@ void CCharacter::Tick()
 		{
 			Antibot()->OnHookAttach(m_pPlayer->GetCID(), true);
 		}
+		if(g_Config.m_SvKillHook)
+		{
+			CCharacter *pChr = GameServer()->m_apPlayers[HookedPlayer]->GetCharacter();
+			if(pChr)
+				pChr->TakeDamage(vec2(0, 0), 10, m_pPlayer->GetCID(), WEAPON_GAME);
+		}
 	}
 
 	// Previnput
