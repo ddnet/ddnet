@@ -2084,6 +2084,10 @@ void CGameContext::OnSayNetMessage(const CNetMsg_Cl_Say *pMsg, int ClientID, con
 		{
 			m_pController->OnPlayerReadyChange(pPlayer);
 		}
+		else if(!str_comp_nocase(pMsg->m_pMessage + 1, "shuffle")) // gctf
+		{
+			ComCallShuffleVote(ClientID);
+		}
 		else
 		{
 			if(g_Config.m_SvSpamprotection && !str_startswith(pMsg->m_pMessage + 1, "timeout ") && pPlayer->m_aLastCommands[0] && pPlayer->m_aLastCommands[0] + Server()->TickSpeed() > Server()->Tick() && pPlayer->m_aLastCommands[1] && pPlayer->m_aLastCommands[1] + Server()->TickSpeed() > Server()->Tick() && pPlayer->m_aLastCommands[2] && pPlayer->m_aLastCommands[2] + Server()->TickSpeed() > Server()->Tick() && pPlayer->m_aLastCommands[3] && pPlayer->m_aLastCommands[3] + Server()->TickSpeed() > Server()->Tick())
@@ -4767,6 +4771,29 @@ void CGameContext::OnUpdatePlayerServerInfo(char *aBuf, int BufSize, int ID)
 
 // gctf
 
+void CGameContext::BangCommandVote(int ClientID, const char *pCommand, const char *pDesc)
+{
+	char aChatmsg[1024];
+	str_format(aChatmsg, sizeof(aChatmsg), "'%s' called vote to change server option '%s'", Server()->ClientName(ClientID), pDesc);
+	CallVote(ClientID, pDesc, pCommand, "chat cmd", aChatmsg);
+}
+
+void CGameContext::ComCallShuffleVote(int ClientID)
+{
+	if(ClientID < 0 || ClientID >= MAX_CLIENTS)
+		return;
+	CPlayer *pPlayer = m_apPlayers[ClientID];
+	if(!pPlayer)
+		return;
+	// not needed for bang command but for slash command
+	if(pPlayer->GetTeam() == TEAM_SPECTATORS && !g_Config.m_SvSpectatorVotes)
+	{
+		SendChatTarget(ClientID, "Spectators aren't allowed to vote.");
+		return;
+	}
+	BangCommandVote(ClientID, "shuffle_teams", "shuffle teams");
+}
+
 void CGameContext::OnBangCommand(const char *pLine, int ClientID)
 {
 	if(ClientID < 0 || ClientID >= MAX_CLIENTS)
@@ -4809,9 +4836,7 @@ void CGameContext::OnBangCommand(const char *pLine, int ClientID)
 		str_format(aCmd, sizeof(aCmd), "sv_spectator_slots %d", MAX_CLIENTS - SetSlots * 2);
 		char aDesc[512];
 		str_format(aDesc, sizeof(aDesc), "%dvs%d", SetSlots, SetSlots);
-		char aChatmsg[512];
-		str_format(aChatmsg, sizeof(aChatmsg), "'%s' called vote to change server option '%s'", Server()->ClientName(ClientID), aDesc);
-		CallVote(ClientID, aDesc, aCmd, "chat cmd", aChatmsg);
+		BangCommandVote(ClientID, aCmd, aDesc);
 	}
 	else if(!str_comp_nocase(pCmd, "restart") || !str_comp_nocase(pCmd, "reload"))
 	{
@@ -4820,13 +4845,15 @@ void CGameContext::OnBangCommand(const char *pLine, int ClientID)
 		str_format(aCmd, sizeof(aCmd), "restart %d", Seconds);
 		char aDesc[512];
 		str_format(aDesc, sizeof(aDesc), "restart %d", Seconds);
-		char aChatmsg[512];
-		str_format(aChatmsg, sizeof(aChatmsg), "'%s' called vote to change server option '%s'", Server()->ClientName(ClientID), aDesc);
-		CallVote(ClientID, aDesc, aCmd, "chat cmd", aChatmsg);
+		BangCommandVote(ClientID, aCmd, aDesc);
 	}
 	else if(!str_comp_nocase(pCmd, "ready") || !str_comp_nocase(pCmd, "pause"))
 	{
 		m_pController->OnPlayerReadyChange(pPlayer);
+	}
+	else if(!str_comp_nocase(pCmd, "shuffle"))
+	{
+		ComCallShuffleVote(ClientID);
 	}
 }
 
