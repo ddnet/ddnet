@@ -3,7 +3,6 @@
 #define GAME_SERVER_GAMEMODES_DDRACE_H
 
 #include <game/server/gamecontroller.h>
-#include <game/server/teams.h>
 
 struct CScoreLoadBestTimeResult;
 class CGameControllerDDRace : public IGameController
@@ -14,7 +13,6 @@ public:
 
 	CScore *Score();
 
-	void OnCharacterSpawn(class CCharacter *pChr) override;
 	void HandleCharacterTiles(class CCharacter *pChr, int MapIndex) override;
 
 	void OnPlayerConnect(class CPlayer *pPlayer) override;
@@ -27,10 +25,6 @@ public:
 	void DoTeamChange(class CPlayer *pPlayer, int Team, bool DoChatMsg = true) override;
 
 	CClientMask GetMaskForPlayerWorldEvent(int Asker, int ExceptID = -1) override;
-
-	int GetPlayerTeam(int ClientID) const;
-
-	CGameTeams m_Teams;
 
 	std::shared_ptr<CScoreLoadBestTimeResult> m_pLoadBestTimeResult;
 };

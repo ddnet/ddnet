@@ -18,7 +18,8 @@
 #include "entities/pickup.h"
 #include "entities/projectile.h"
 
-IGameController::IGameController(class CGameContext *pGameServer)
+IGameController::IGameController(class CGameContext *pGameServer) :
+	m_Teams(pGameServer)
 {
 	m_pGameServer = pGameServer;
 	m_pConfig = m_pGameServer->Config();
@@ -480,6 +481,9 @@ int IGameController::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *
 
 void IGameController::OnCharacterSpawn(class CCharacter *pChr)
 {
+	pChr->SetTeams(&Teams());
+	Teams().OnCharacterSpawn(pChr->GetPlayer()->GetCID());
+
 	// default health
 	pChr->IncreaseHealth(10);
 

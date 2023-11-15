@@ -791,10 +791,10 @@ void CGameContext::ConSetDDRTeam(IConsole::IResult *pResult, void *pUserData)
 
 	CCharacter *pChr = pSelf->GetPlayerChar(Target);
 
-	if((pController->m_Teams.m_Core.Team(Target) && pController->m_Teams.GetDDRaceState(pSelf->m_apPlayers[Target]) == DDRACE_STARTED) || (pChr && pController->m_Teams.IsPractice(pChr->Team())))
+	if((pSelf->GetDDRaceTeam(Target) && pController->Teams().GetDDRaceState(pSelf->m_apPlayers[Target]) == DDRACE_STARTED) || (pChr && pController->Teams().IsPractice(pChr->Team())))
 		pSelf->m_apPlayers[Target]->KillCharacter(WEAPON_GAME);
 
-	pController->m_Teams.SetForceCharacterTeam(Target, Team);
+	pController->Teams().SetForceCharacterTeam(Target, Team);
 }
 
 void CGameContext::ConUninvite(IConsole::IResult *pResult, void *pUserData)
@@ -802,7 +802,7 @@ void CGameContext::ConUninvite(IConsole::IResult *pResult, void *pUserData)
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	CGameControllerDDRace *pController = (CGameControllerDDRace *)pSelf->m_pController;
 
-	pController->m_Teams.SetClientInvited(pResult->GetInteger(1), pResult->GetVictim(), false);
+	pController->Teams().SetClientInvited(pResult->GetInteger(1), pResult->GetVictim(), false);
 }
 
 void CGameContext::ConFreezeHammer(IConsole::IResult *pResult, void *pUserData)

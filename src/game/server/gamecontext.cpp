@@ -522,7 +522,7 @@ void CGameContext::SendChatTarget(int To, const char *pText, int Flags)
 void CGameContext::SendChatTeam(int Team, const char *pText)
 {
 	for(int i = 0; i < MAX_CLIENTS; i++)
-		if(m_apPlayers[i] != nullptr && ((CGameControllerDDRace *)m_pController)->m_Teams.m_Core.Team(i) == Team)
+		if(m_apPlayers[i] != nullptr && GetDDRaceTeam(i) == Team)
 			SendChatTarget(i, pText);
 }
 
@@ -574,7 +574,7 @@ void CGameContext::SendChat(int ChatterClientID, int Team, const char *pText, in
 	}
 	else
 	{
-		CTeamsCore *pTeams = &((CGameControllerDDRace *)m_pController)->m_Teams.m_Core;
+		CTeamsCore *pTeams = &m_pController->Teams().m_Core;
 		CNetMsg_Sv_Chat Msg;
 		Msg.m_Team = 1;
 		Msg.m_ClientID = ChatterClientID;
@@ -907,17 +907,16 @@ void CGameContext::OnPreTickTeehistorian()
 	if(!m_TeeHistorianActive)
 		return;
 
-	auto *pController = ((CGameControllerDDRace *)m_pController);
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		if(m_apPlayers[i] != nullptr)
-			m_TeeHistorian.RecordPlayerTeam(i, pController->m_Teams.m_Core.Team(i));
+			m_TeeHistorian.RecordPlayerTeam(i, GetDDRaceTeam(i));
 		else
 			m_TeeHistorian.RecordPlayerTeam(i, 0);
 	}
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		m_TeeHistorian.RecordTeamPractice(i, pController->m_Teams.IsPractice(i));
+		m_TeeHistorian.RecordTeamPractice(i, m_pController->Teams().IsPractice(i));
 	}
 }
 
@@ -1726,7 +1725,7 @@ bool CGameContext::OnClientDDNetVersionKnown(int ClientID)
 		pPlayer->m_TimerType = g_Config.m_SvDefaultTimerType;
 
 	// First update the teams state.
-	((CGameControllerDDRace *)m_pController)->m_Teams.SendTeamsState(ClientID);
+	m_pController->Teams().SendTeamsState(ClientID);
 
 	// Then send records.
 	SendRecord(ClientID);
@@ -2033,7 +2032,7 @@ void CGameContext::OnSayNetMessage(const CNetMsg_Cl_Say *pMsg, int ClientID, con
 	if(Length == 0 || (pMsg->m_pMessage[0] != '/' && (g_Config.m_SvSpamprotection && pPlayer->m_LastChat && pPlayer->m_LastChat + Server()->TickSpeed() * ((31 + Length) / 32) > Server()->Tick())))
 		return;
 
-	int GameTeam = ((CGameControllerDDRace *)m_pController)->m_Teams.m_Core.Team(pPlayer->GetCID());
+	int GameTeam = GetDDRaceTeam(pPlayer->GetCID());
 	if(Team)
 		Team = ((pPlayer->GetTeam() == TEAM_SPECTATORS) ? CHAT_SPEC : GameTeam);
 	else
@@ -4223,8 +4222,7 @@ bool CGameContext::ProcessSpamProtection(int ClientID, bool RespectChatInitialDe
 
 int CGameContext::GetDDRaceTeam(int ClientID)
 {
-	CGameControllerDDRace *pController = (CGameControllerDDRace *)m_pController;
-	return pController->m_Teams.m_Core.Team(ClientID);
+	return m_pController->Teams().m_Core.Team(ClientID);
 }
 
 void CGameContext::ResetTuning()
