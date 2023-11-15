@@ -389,7 +389,7 @@ int CBinds::GetKeyID(const char *pKeyName)
 	// search for key
 	for(int i = 0; i < KEY_LAST; i++)
 	{
-		if(str_comp(pKeyName, Input()->KeyName(i)) == 0)
+		if(str_comp_nocase(pKeyName, Input()->KeyName(i)) == 0)
 			return i;
 	}
 
@@ -404,13 +404,13 @@ int CBinds::GetBindSlot(const char *pBindString, int *pModifierCombination)
 	const char *pKey = str_next_token(pBindString, "+", aMod, sizeof(aMod));
 	while(aMod[0] && *(pKey))
 	{
-		if(!str_comp(aMod, "shift"))
+		if(!str_comp_nocase(aMod, "shift"))
 			*pModifierCombination |= (1 << MODIFIER_SHIFT);
-		else if(!str_comp(aMod, "ctrl"))
+		else if(!str_comp_nocase(aMod, "ctrl"))
 			*pModifierCombination |= (1 << MODIFIER_CTRL);
-		else if(!str_comp(aMod, "alt"))
+		else if(!str_comp_nocase(aMod, "alt"))
 			*pModifierCombination |= (1 << MODIFIER_ALT);
-		else if(!str_comp(aMod, "gui"))
+		else if(!str_comp_nocase(aMod, "gui"))
 			*pModifierCombination |= (1 << MODIFIER_GUI);
 		else
 			return 0;
