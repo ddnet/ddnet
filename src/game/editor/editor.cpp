@@ -5003,6 +5003,7 @@ void CEditor::RenderFileDialog()
 				else
 					ShowFileDialogError("Failed to delete file '%s'.", aDeleteFilePath);
 			}
+			UpdateFileNameInput();
 		}
 		if(s_ConfirmDeletePopupContext.m_Result != CUI::SConfirmPopupContext::UNSET)
 			s_ConfirmDeletePopupContext.Reset();
