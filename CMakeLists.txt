@@ -2011,6 +2011,7 @@ set_src(GAME_SHARED GLOB src/game
   teamscore.h
   tuning.h
   variables.h
+  variables_insta.h
   version.h
   voting.h
 )
