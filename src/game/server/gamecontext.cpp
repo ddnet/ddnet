@@ -3592,13 +3592,18 @@ void CGameContext::OnConsoleInit()
 	Console()->Chain("sv_scorelimit", ConchainGameinfoUpdate, this); // gctf
 	Console()->Chain("sv_timelimit", ConchainGameinfoUpdate, this); // gctf
 	Console()->Chain("sv_grenade_ammo_regen", ConchainResetInstasettingTees, this); // gctf
-	Console()->Chain("sv_grenade_ammo_regen", ConchainInstaSettingsUpdate, this); // gctf
-	Console()->Chain("sv_grenade_ammo_regen_on_kill", ConchainInstaSettingsUpdate, this); // gctf
-	Console()->Chain("sv_grenade_ammo_regen_reset_on_fire", ConchainInstaSettingsUpdate, this); // gctf
-	Console()->Chain("sv_sprayprotection", ConchainInstaSettingsUpdate, this); // gctf
-	Console()->Chain("sv_only_hook_kills", ConchainInstaSettingsUpdate, this); // gctf
-	Console()->Chain("sv_kill_hook", ConchainInstaSettingsUpdate, this); // gctf
 
+	// generate callbacks to trigger insta settings update for all instagib configs
+	// when one of the insta configs is changed
+	// we update the checkboxes [x] in the vote menu
+#define MACRO_CONFIG_INT(Name, ScriptName, Def, Min, Max, Flags, Desc) \
+	Console()->Chain(#ScriptName, ConchainInstaSettingsUpdate, this);
+#define MACRO_CONFIG_COL(Name, ScriptName, Def, Flags, Desc) // only int checkboxes for now
+#define MACRO_CONFIG_STR(Name, ScriptName, Len, Def, Flags, Desc) // only int checkboxes for now
+#include <game/variables_insta.h>
+#undef MACRO_CONFIG_INT
+#undef MACRO_CONFIG_COL
+#undef MACRO_CONFIG_STR
 	Console()->Register("shuffle_teams", "", CFGFLAG_SERVER, ConShuffleTeams, this, "Shuffle the current teams"); // gctf
 
 	Console()->Chain("sv_vote_kick", ConchainSettingUpdate, this);
@@ -5000,44 +5005,31 @@ void CGameContext::UpdateVoteCheckboxes()
 {
 	CVoteOptionServer *pCurrent = m_pVoteOptionFirst;
 
-	// TODO: use macro magic to generate this code
-	//       will use more performance if done for all settings
-	//       could also introduce flags
-	//       can flags be done without conflicts?
 	while(pCurrent != NULL)
 	{
 		if(str_startswith(pCurrent->m_aDescription, "[ ]") || str_startswith(pCurrent->m_aDescription, "[x]"))
 		{
 			bool Checked = false;
 			bool Found = true;
-			if(!str_comp(pCurrent->m_aCommand, "sv_grenade_ammo_regen 0"))
-				Checked = g_Config.m_SvGrenadeAmmoRegen == 0;
-			else if(!str_comp(pCurrent->m_aCommand, "sv_grenade_ammo_regen 1"))
-				Checked = g_Config.m_SvGrenadeAmmoRegen == 1;
-			else if(!str_comp(pCurrent->m_aCommand, "sv_grenade_ammo_regen_on_kill 0"))
-				Checked = g_Config.m_SvGrenadeAmmoRegenOnKill == 0;
-			else if(!str_comp(pCurrent->m_aCommand, "sv_grenade_ammo_regen_on_kill 1"))
-				Checked = g_Config.m_SvGrenadeAmmoRegenOnKill == 1;
-			else if(!str_comp(pCurrent->m_aCommand, "sv_grenade_ammo_regen_on_kill 2"))
-				Checked = g_Config.m_SvGrenadeAmmoRegenOnKill == 2;
-			else if(!str_comp(pCurrent->m_aCommand, "sv_grenade_ammo_regen_reset_on_fire 0"))
-				Checked = g_Config.m_SvGrenadeAmmoRegenResetOnFire == 0;
-			else if(!str_comp(pCurrent->m_aCommand, "sv_grenade_ammo_regen_reset_on_fire 1"))
-				Checked = g_Config.m_SvGrenadeAmmoRegenResetOnFire == 1;
-			else if(!str_comp(pCurrent->m_aCommand, "sv_sprayprotection 0"))
-				Checked = g_Config.m_SvSprayprotection == 0;
-			else if(!str_comp(pCurrent->m_aCommand, "sv_sprayprotection 1"))
-				Checked = g_Config.m_SvSprayprotection == 1;
-			else if(!str_comp(pCurrent->m_aCommand, "sv_only_hook_kills 0"))
-				Checked = g_Config.m_SvOnlyHookKills == 0;
-			else if(!str_comp(pCurrent->m_aCommand, "sv_only_hook_kills 1"))
-				Checked = g_Config.m_SvOnlyHookKills == 1;
-			else if(!str_comp(pCurrent->m_aCommand, "sv_kill_hook 0"))
-				Checked = g_Config.m_SvKillHook == 0;
-			else if(!str_comp(pCurrent->m_aCommand, "sv_kill_hook 1"))
-				Checked = g_Config.m_SvKillHook == 1;
-			else
-				Found = false;
+
+#define MACRO_CONFIG_INT(Name, ScriptName, Def, Min, Max, Flags, Desc) \
+	for(int val = Min; val <= Max; val++) \
+	{ \
+		char aBuf[512]; \
+		str_format(aBuf, sizeof(aBuf), "%s %d", #ScriptName, val); \
+		if(!str_comp(pCurrent->m_aCommand, aBuf)) \
+		{ \
+			Checked = g_Config.m_##Name == val; \
+			Found = true; \
+		} \
+	}
+#define MACRO_CONFIG_COL(Name, ScriptName, Def, Flags, Desc) // only int checkboxes for now
+#define MACRO_CONFIG_STR(Name, ScriptName, Len, Def, Flags, Desc) // only int checkboxes for now
+#include <game/variables_insta.h>
+#undef MACRO_CONFIG_INT
+#undef MACRO_CONFIG_COL
+#undef MACRO_CONFIG_STR
+
 			if(Found)
 				pCurrent->m_aDescription[1] = Checked ? 'x' : ' ';
 		}
