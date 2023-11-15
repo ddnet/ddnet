@@ -5043,7 +5043,7 @@ void CGameContext::ShowCurrentInstagibConfigsMotd(int ClientID, bool Force)
 	}
 	else
 
-	if(g_Config.m_SvOnlyHookKills)
+		if(g_Config.m_SvOnlyHookKills)
 		str_append(aMotd, "! WARNING: only hooked enemies can be killed\n");
 	if(g_Config.m_SvKillHook)
 		str_append(aMotd, "! WARNING: the hook kills\n");
