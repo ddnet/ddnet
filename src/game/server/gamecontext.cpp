@@ -4995,9 +4995,13 @@ bool CGameContext::OnBangCommand(int ClientID, const char *pCmd, int NumArgs, co
 	{
 		ComCallShuffleVote(ClientID);
 	}
+	else if(!str_comp_nocase(pCmd, "set") || !str_comp_nocase(pCmd, "settings") || !str_comp_nocase(pCmd, "config"))
+	{
+		ShowCurrentInstagibConfigsMotd(ClientID, true);
+	}
 	else
 	{
-		SendChatTarget(ClientID, "Unknown command. Commands: !restart, !ready, !shuffle, !1on1");
+		SendChatTarget(ClientID, "Unknown command. Commands: !restart, !ready, !shuffle, !1on1, !settings");
 		return false;
 	}
 	return true;
@@ -5011,9 +5015,9 @@ void CGameContext::AlertOnSpecialInstagibConfigs(int ClientID)
 		SendChatTarget(ClientID, "WARNING: the hook kills");
 }
 
-void CGameContext::ShowCurrentInstagibConfigsMotd(int ClientID)
+void CGameContext::ShowCurrentInstagibConfigsMotd(int ClientID, bool Force)
 {
-	if(!g_Config.m_SvShowSettingsMotd)
+	if(!g_Config.m_SvShowSettingsMotd && !Force)
 		return;
 
 	char aMotd[2048];
