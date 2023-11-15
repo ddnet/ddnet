@@ -5024,11 +5024,14 @@ void CGameContext::ShowCurrentInstagibConfigsMotd(int ClientID, bool Force)
 	char aBuf[512];
 	aMotd[0] = '\0';
 
+	str_format(aBuf, sizeof(aBuf), "* ready mode: %s\n", g_Config.m_SvPlayerReadyMode ? "on" : "off");
+	str_append(aMotd, aBuf);
+
 	if(!str_comp_nocase(g_Config.m_SvGametype, "gctf"))
 	{
-		str_format(aBuf, sizeof(aBuf), "* spray protection is: %s\n", g_Config.m_SvSprayprotection ? "on" : "off");
+		str_format(aBuf, sizeof(aBuf), "* spray protection: %s\n", g_Config.m_SvSprayprotection ? "on" : "off");
 		str_append(aMotd, aBuf);
-		str_format(aBuf, sizeof(aBuf), "* spam protection is: %s\n", g_Config.m_SvGrenadeAmmoRegen ? "on" : "off");
+		str_format(aBuf, sizeof(aBuf), "* spam protection: %s\n", g_Config.m_SvGrenadeAmmoRegen ? "on" : "off");
 		str_append(aMotd, aBuf);
 		if(g_Config.m_SvGrenadeAmmoRegen)
 		{
