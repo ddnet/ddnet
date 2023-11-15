@@ -237,7 +237,7 @@ int main(int argc, const char *argv[])
 
 	if(argc != 2)
 	{
-		dbg_msg(TOOL_NAME, "Usage: %s [demo_filename]", TOOL_NAME);
+		dbg_msg(TOOL_NAME, "Usage: %s <demo_filename>", TOOL_NAME);
 		return -1;
 	}
 
