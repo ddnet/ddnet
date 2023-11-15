@@ -27,4 +27,6 @@ MACRO_CONFIG_INT(SvSprayprotection, sv_sprayprotection, 0, 0, 1, CFGFLAG_SERVER,
 MACRO_CONFIG_INT(SvOnlyHookKills, sv_only_hook_kills, 0, 0, 1, CFGFLAG_SERVER, "Only count kills when enemy is hooked")
 MACRO_CONFIG_INT(SvKillHook, sv_kill_hook, 0, 0, 1, CFGFLAG_SERVER, "Hook kills")
 
+MACRO_CONFIG_INT(SvShowSettingsMotd, sv_show_settings_motd, 1, 0, 1, CFGFLAG_SERVER, "Show insta game settings in motd on join")
+
 #endif

@@ -157,6 +157,7 @@ void CGameControllerDDRace::OnPlayerConnect(CPlayer *pPlayer)
 		GameServer()->SendChatTarget(ClientID, "DDraceNetwork Mod. Version: " GAME_VERSION);
 
 		GameServer()->AlertOnSpecialInstagibConfigs(ClientID);
+		GameServer()->ShowCurrentInstagibConfigsMotd(ClientID);
 	}
 }
 

@@ -3832,6 +3832,7 @@ void CGameContext::OnInit(const void *pPersistentData)
 
 	UpdateVoteCheckboxes(); // gctf
 	AlertOnSpecialInstagibConfigs(); // gctf
+	ShowCurrentInstagibConfigsMotd(); // gctf
 
 #ifdef CONF_DEBUG
 	if(g_Config.m_DbgDummies)
@@ -5008,6 +5009,44 @@ void CGameContext::AlertOnSpecialInstagibConfigs(int ClientID)
 		SendChatTarget(ClientID, "WARNING: only hooked enemies can be killed");
 	if(g_Config.m_SvKillHook)
 		SendChatTarget(ClientID, "WARNING: the hook kills");
+}
+
+void CGameContext::ShowCurrentInstagibConfigsMotd(int ClientID)
+{
+	if(!g_Config.m_SvShowSettingsMotd)
+		return;
+
+	char aMotd[2048];
+	char aBuf[512];
+	aMotd[0] = '\0';
+
+	if(!str_comp_nocase(g_Config.m_SvGametype, "gctf"))
+	{
+		str_format(aBuf, sizeof(aBuf), "* spray protection is: %s\n", g_Config.m_SvSprayprotection ? "on" : "off");
+		str_append(aMotd, aBuf);
+		str_format(aBuf, sizeof(aBuf), "* spam protection is: %s\n", g_Config.m_SvGrenadeAmmoRegen ? "on" : "off");
+		str_append(aMotd, aBuf);
+		if(g_Config.m_SvGrenadeAmmoRegen)
+		{
+			const char *pMode = "off";
+			if(g_Config.m_SvGrenadeAmmoRegenOnKill == 1)
+				pMode = "one";
+			else if(g_Config.m_SvGrenadeAmmoRegenOnKill == 2)
+				pMode = "all";
+			str_format(aBuf, sizeof(aBuf), "  - refill nades on kill: %s\n", pMode);
+			str_append(aMotd, aBuf);
+		}
+	}
+	else
+
+	if(g_Config.m_SvOnlyHookKills)
+		str_append(aMotd, "! WARNING: only hooked enemies can be killed\n");
+	if(g_Config.m_SvKillHook)
+		str_append(aMotd, "! WARNING: the hook kills\n");
+
+	CNetMsg_Sv_Motd Msg;
+	Msg.m_pMessage = aMotd;
+	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
 }
 
 void CGameContext::UpdateVoteCheckboxes()
