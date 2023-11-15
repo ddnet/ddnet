@@ -523,7 +523,7 @@ void CGameContext::SendChatTarget(int To, const char *pText, int Flags)
 void CGameContext::SendChatTeam(int Team, const char *pText)
 {
 	for(int i = 0; i < MAX_CLIENTS; i++)
-		if(((CGameControllerDDRace *)m_pController)->m_Teams.m_Core.Team(i) == Team)
+		if(m_apPlayers[i] != nullptr && ((CGameControllerDDRace *)m_pController)->m_Teams.m_Core.Team(i) == Team)
 			SendChatTarget(i, pText);
 }
 
