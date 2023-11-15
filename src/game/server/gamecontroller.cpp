@@ -885,6 +885,15 @@ void IGameController::DoTeamChange(CPlayer *pPlayer, int Team, bool DoChatMsg)
 
 // gctf
 
+void IGameController::ToggleGamePause()
+{
+	SetPlayersReadyState(false);
+	if(GameServer()->m_World.m_Paused)
+		SetGameState(IGS_GAME_RUNNING);
+	else
+		SetGameState(IGS_GAME_PAUSED, TIMER_INFINITE);
+}
+
 bool IGameController::IsPlayerReadyMode()
 {
 	return Config()->m_SvPlayerReadyMode != 0 && (m_GameStateTimer == TIMER_INFINITE && (m_GameState == IGS_WARMUP_USER || m_GameState == IGS_GAME_PAUSED));

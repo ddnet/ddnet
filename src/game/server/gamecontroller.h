@@ -162,6 +162,7 @@ public:
 	void SetPlayersReadyState(bool ReadyState);
 	bool IsPlayerReadyMode();
 	int IsGameRunning() { return m_GameState == IGS_GAME_RUNNING; }
+	void ToggleGamePause();
 
 private:
 	int m_aTeamSize[protocol7::NUM_TEAMS];

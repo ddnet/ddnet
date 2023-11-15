@@ -3047,7 +3047,7 @@ void CGameContext::ConPause(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 
-	pSelf->m_World.m_Paused ^= 1;
+	pSelf->m_pController->ToggleGamePause();
 }
 
 void CGameContext::ConChangeMap(IConsole::IResult *pResult, void *pUserData)
