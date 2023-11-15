@@ -917,8 +917,11 @@ void IGameController::OnPlayerReadyChange(CPlayer *pPlayer)
 			GameServer()->SendGameMsg(protocol7::GAMEMSG_GAME_PAUSED, pPlayer->GetCID(), -1);
 		}
 
+		GameServer()->PlayerReadyStateBroadcast();
 		CheckReadyStates();
 	}
+	else
+		GameServer()->PlayerReadyStateBroadcast();
 }
 
 // to be called when a player changes state, spectates or disconnects
@@ -936,7 +939,10 @@ void IGameController::CheckReadyStates(int WithoutID)
 		case IGS_GAME_PAUSED:
 			// all players are ready -> unpause the game
 			if(GetPlayersReadyState(WithoutID))
+			{
 				SetGameState(IGS_GAME_PAUSED, 0);
+				GameServer()->SendBroadcastSix("", false); // clear "%d players not ready" 0.6 backport
+			}
 			break;
 		case IGS_GAME_RUNNING:
 		case IGS_WARMUP_GAME:
@@ -949,15 +955,22 @@ void IGameController::CheckReadyStates(int WithoutID)
 	}
 }
 
-bool IGameController::GetPlayersReadyState(int WithoutID)
+bool IGameController::GetPlayersReadyState(int WithoutID, int *pNumUnready)
 {
+	int Unready = 0;
 	for(int i = 0; i < MAX_CLIENTS; ++i)
 	{
 		if(i == WithoutID)
 			continue; // skip
 		if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS && !GameServer()->m_apPlayers[i]->m_IsReadyToPlay)
-			return false;
+		{
+			if(!pNumUnready)
+				return false;
+			Unready++;
+		}
 	}
+	if(pNumUnready)
+		*pNumUnready = Unready;
 
 	return true;
 }

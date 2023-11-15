@@ -1216,6 +1216,9 @@ void CGameContext::OnTick()
 	}
 #endif
 
+	// gctf TODO: move to controller
+	InstagibTick();
+
 	// Record player position at the end of the tick
 	if(m_TeeHistorianActive)
 	{
@@ -5115,6 +5118,44 @@ void CGameContext::RefreshVotes()
 	for(auto &pPlayer : m_apPlayers)
 		if(pPlayer)
 			pPlayer->m_SendVoteIndex = 0;
+}
+
+void CGameContext::SendBroadcastSix(const char *pText, bool Important)
+{
+	for(const CPlayer *pPlayer : m_apPlayers)
+	{
+		if(!pPlayer)
+			continue;
+		if(Server()->IsSixup(pPlayer->GetCID()))
+			continue;
+
+		SendBroadcast(pText, pPlayer->GetCID(), Important);
+	}
+}
+
+void CGameContext::PlayerReadyStateBroadcast()
+{
+	if(!Config()->m_SvPlayerReadyMode)
+		return;
+
+	int NumUnready = 0;
+	m_pController->GetPlayersReadyState(-1, &NumUnready);
+
+	if(!NumUnready)
+		return;
+
+	// TODO: create Sendbroadcast sixup
+	//       better pr a sixup flag upstream for sendbroadcast
+	char aBuf[512];
+	str_format(aBuf, sizeof(aBuf), "%d players not ready", NumUnready);
+	SendBroadcastSix(aBuf, false);
+}
+
+void CGameContext::InstagibTick()
+{
+	if(Config()->m_SvPlayerReadyMode && m_World.m_Paused)
+		if(Server()->Tick() % Server()->TickSpeed() * 5 == 0)
+			PlayerReadyStateBroadcast();
 }
 
 void CGameContext::SendGameMsg(int GameMsgID, int ClientID)
