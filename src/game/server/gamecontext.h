@@ -279,6 +279,7 @@ public:
 	void ComCallShuffleVote(int ClientID);
 	void UpdateVoteCheckboxes();
 	void RefreshVotes();
+	void AlertOnSpecialInstagibConfigs(int ClientID = -1);
 
 	//
 	void CheckPureTuning();

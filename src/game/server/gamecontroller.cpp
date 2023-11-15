@@ -858,6 +858,9 @@ void IGameController::DoTeamChange(CPlayer *pPlayer, int Team, bool DoChatMsg)
 
 	// gctf
 
+	if(OldTeam == TEAM_SPECTATORS)
+		GameServer()->AlertOnSpecialInstagibConfigs(pPlayer->GetCID());
+
 	// update effected game settings
 	if(OldTeam != TEAM_SPECTATORS)
 	{

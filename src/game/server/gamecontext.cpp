@@ -3831,6 +3831,7 @@ void CGameContext::OnInit(const void *pPersistentData)
 	m_pAntibot->RoundStart(this);
 
 	UpdateVoteCheckboxes(); // gctf
+	AlertOnSpecialInstagibConfigs(); // gctf
 
 #ifdef CONF_DEBUG
 	if(g_Config.m_DbgDummies)
@@ -4999,6 +5000,14 @@ bool CGameContext::OnBangCommand(int ClientID, const char *pCmd, int NumArgs, co
 		return false;
 	}
 	return true;
+}
+
+void CGameContext::AlertOnSpecialInstagibConfigs(int ClientID)
+{
+	if(g_Config.m_SvOnlyHookKills)
+		SendChatTarget(ClientID, "WARNING: only hooked enemies can be killed");
+	if(g_Config.m_SvKillHook)
+		SendChatTarget(ClientID, "WARNING: the hook kills");
 }
 
 void CGameContext::UpdateVoteCheckboxes()

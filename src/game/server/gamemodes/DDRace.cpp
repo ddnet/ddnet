@@ -155,6 +155,8 @@ void CGameControllerDDRace::OnPlayerConnect(CPlayer *pPlayer)
 
 		GameServer()->SendChatTarget(ClientID, "DDNet-insta https://github.com/ZillyInsta/ddnet-insta/");
 		GameServer()->SendChatTarget(ClientID, "DDraceNetwork Mod. Version: " GAME_VERSION);
+
+		GameServer()->AlertOnSpecialInstagibConfigs(ClientID);
 	}
 }
 
