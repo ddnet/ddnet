@@ -5087,6 +5087,7 @@ void CGameContext::UpdateVoteCheckboxes()
 		}
 		pCurrent = pCurrent->m_pNext;
 	}
+	ShowCurrentInstagibConfigsMotd();
 }
 
 void CGameContext::RefreshVotes()
