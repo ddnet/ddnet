@@ -602,6 +602,90 @@ bool IGameController::CanBeMovedOnBalance(int ClientID)
 
 void IGameController::Tick()
 {
+	// handle game states
+	if(m_GameState != IGS_GAME_RUNNING)
+	{
+		if(m_GameStateTimer > 0)
+		{
+			--m_GameStateTimer;
+
+			static int s_LastSecs = -1;
+			int Secs = m_GameStateTimer / Server()->TickSpeed();
+			if(s_LastSecs != Secs)
+			{
+				s_LastSecs = Secs;
+				if(Secs == 0)
+					GameServer()->SendBroadcastSix("", false);
+				else
+				{
+					char aBuf[512];
+					str_format(aBuf, sizeof(aBuf), "Game starts in: %d", Secs);
+					GameServer()->SendBroadcastSix(aBuf, false);
+				}
+			}
+		}
+
+		if(m_GameStateTimer == 0)
+		{
+			// timer fires
+			switch(m_GameState)
+			{
+			case IGS_WARMUP_USER:
+				// end warmup
+				SetGameState(IGS_WARMUP_USER, 0);
+				break;
+			case IGS_START_COUNTDOWN:
+				// unpause the game
+				SetGameState(IGS_GAME_RUNNING);
+				break;
+			case IGS_GAME_PAUSED:
+				// end pause
+				SetGameState(IGS_GAME_PAUSED, 0);
+				break;
+			case IGS_END_ROUND:
+				StartRound();
+				break;
+			case IGS_END_MATCH:
+				// start next match
+				// if(m_MatchCount >= m_GameInfo.m_MatchNum-1)
+				// 	CycleMap();
+
+				// if(Config()->m_SvMatchSwap)
+				// 	GameServer()->SwapTeams();
+				// m_MatchCount++;
+				StartMatch();
+				break;
+			case IGS_WARMUP_GAME:
+			case IGS_GAME_RUNNING:
+				// not effected
+				break;
+			}
+		}
+		else
+		{
+			// timer still running
+			switch(m_GameState)
+			{
+			case IGS_WARMUP_USER:
+				// check if player ready mode was disabled and it waits that all players are ready -> end warmup
+				if(!Config()->m_SvPlayerReadyMode && m_GameStateTimer == TIMER_INFINITE)
+					SetGameState(IGS_WARMUP_USER, 0);
+				break;
+			case IGS_START_COUNTDOWN:
+			case IGS_GAME_PAUSED:
+				// freeze the game
+				++m_GameStartTick;
+				break;
+			case IGS_WARMUP_GAME:
+			case IGS_GAME_RUNNING:
+			case IGS_END_MATCH:
+			case IGS_END_ROUND:
+				// not effected
+				break;
+			}
+		}
+	}
+
 	// do warmup
 	if(m_Warmup)
 	{
@@ -1055,7 +1139,7 @@ void IGameController::StartMatch()
 
 	// start countdown if there're enough players, otherwise do warmup till there're
 	// if(HasEnoughPlayers())
-	// 	SetGameState(IGS_START_COUNTDOWN);
+	SetGameState(IGS_START_COUNTDOWN);
 	// else
 	// 	SetGameState(IGS_WARMUP_GAME, TIMER_INFINITE);
 
@@ -1218,20 +1302,19 @@ void IGameController::SetGameState(EGameState GameState, int Timer)
 		// only possible when game, pause or start countdown is running
 		if(m_GameState == IGS_GAME_RUNNING || m_GameState == IGS_GAME_PAUSED || m_GameState == IGS_START_COUNTDOWN)
 		{
-			// if(Config()->m_SvCountdown == 0 && m_GameFlags&protocol7::GAMEFLAG_SURVIVAL)
-			// {
-			// 	m_GameState = GameState;
-			// 	m_GameStateTimer = 3*Server()->TickSpeed();
-			// 	GameServer()->m_World.m_Paused = true;
-
-			// }
-			// else if(Config()->m_SvCountdown > 0)
-			// {
-			// 	m_GameState = GameState;
-			// 	m_GameStateTimer = Config()->m_SvCountdown*Server()->TickSpeed();
-			// 	GameServer()->m_World.m_Paused = true;
-			// }
-			// else
+			if(Config()->m_SvCountdown == 0 && m_GameFlags & protocol7::GAMEFLAG_SURVIVAL)
+			{
+				m_GameState = GameState;
+				m_GameStateTimer = 3 * Server()->TickSpeed();
+				GameServer()->m_World.m_Paused = true;
+			}
+			else if(Config()->m_SvCountdown > 0)
+			{
+				m_GameState = GameState;
+				m_GameStateTimer = Config()->m_SvCountdown * Server()->TickSpeed();
+				GameServer()->m_World.m_Paused = true;
+			}
+			else
 			{
 				// no countdown, start new match right away
 				SetGameState(IGS_GAME_RUNNING);
