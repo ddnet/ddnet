@@ -279,7 +279,7 @@ Ok
 == Aceptar
 
 Parent Folder
-== Directorio padre
+== Carpeta principal
 
 Password
 == Contraseña
@@ -674,7 +674,7 @@ Markers
 == Marcadores
 
 Length
-== Longitud
+== Duración
 
 Date
 == Fecha
@@ -869,7 +869,7 @@ Save the best demo of each race
 == Guardar la mejor demo de cada carrera
 
 Default length
-== Longitud predeterminada
+== Duración predeterminada
 
 Enable replays
 == Habilitar repeticiones
@@ -1718,56 +1718,56 @@ Render cut to video
 == Renderizar corte a vídeo
 
 Error playing demo
-== 
+== Error al reproducir la demo
 
 Some map images could not be loaded. Check the local console for details.
-== 
+== Algunas imágenes de mapas no se pudieron cargar. Revisa la consola local para más detalles.
 
 Some map sounds could not be loaded. Check the local console for details.
-== 
+== Algunos sonidos de mapas no se pudieron cargar. Revisa la consola local para más detalles.
 
 Loading menu themes
-== 
+== Cargando temas del menú
 
 Render complete
-== 
+== Renderización completada
 
 Videos directory
-== 
+== Carpeta de videos
 
 Video was saved to '%s'
-== 
+== El video guardó en '%s'
 
 No demo selected
-== 
+== Ninguna demo seleccionada
 
 Created
-== 
+== Creado
 
 Netversion
-== 
+== Netversion
 
 [Demo details]
 map not included
-== 
+== mapa no incluido
 
 Ghosts directory
-== 
+== Carpeta de Fantasmas
 
 Activate all
-== 
+== Activar todo
 
 Deactivate all
-== 
+== Desactivar todo
 
 Enable ghost
-== 
+== Habilitar fantasma
 
 Only save improvements
-== 
+== Solo guardar las mejoras
 
 Regular background color
-== 
+== Color del fondo normal
 
 Entities background color
-== 
+== Color del fondo de entidades
