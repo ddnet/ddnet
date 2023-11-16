@@ -1444,4 +1444,5 @@ void IGameController::SetGameState(EGameState GameState, int Timer)
 
 void IGameController::OnFlagReturn(CFlag *pFlag)
 {
+	GameServer()->CreateSoundGlobal(SOUND_CTF_RETURN);
 }

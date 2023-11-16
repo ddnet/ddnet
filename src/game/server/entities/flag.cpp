@@ -18,8 +18,6 @@ CFlag::CFlag(CGameWorld *pGameWorld, int Team) :
 
 void CFlag::Reset()
 {
-	GameServer()->CreateSoundGlobal(SOUND_CTF_RETURN);
-
 	m_pCarrier = NULL;
 	m_AtStand = 1;
 	m_Pos = m_StandPos;
