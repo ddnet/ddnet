@@ -5143,8 +5143,7 @@ void CGameContext::SendBroadcastSix(const char *pText, bool Important)
 		// it is a countdown until the game begins and is a different thing already
 		if(!pPlayer->m_HasGhostCharInGame && pPlayer->GetTeam() != TEAM_SPECTATORS)
 			SendChatTarget(pPlayer->GetCID(), pText);
-		else
-			SendBroadcast(pText, pPlayer->GetCID(), Important);
+		SendBroadcast(pText, pPlayer->GetCID(), Important);
 	}
 }
 
