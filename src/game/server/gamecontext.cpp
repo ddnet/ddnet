@@ -5137,6 +5137,10 @@ void CGameContext::PlayerReadyStateBroadcast()
 {
 	if(!Config()->m_SvPlayerReadyMode)
 		return;
+	// if someone presses ready change during countdown
+	// we ignore it
+	if(m_pController->IsGameCountdown())
+		return;
 
 	int NumUnready = 0;
 	m_pController->GetPlayersReadyState(-1, &NumUnready);

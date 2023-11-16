@@ -162,6 +162,7 @@ public:
 	void SetPlayersReadyState(bool ReadyState);
 	bool IsPlayerReadyMode();
 	int IsGameRunning() { return m_GameState == IGS_GAME_RUNNING; }
+	int IsGameCountdown() { return m_GameState == IGS_START_COUNTDOWN; }
 	void ToggleGamePause();
 
 private:
