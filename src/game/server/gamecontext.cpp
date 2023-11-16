@@ -30,6 +30,7 @@
 
 #include "entities/character.h"
 #include "gamemodes/DDRace.h"
+#include "gamemodes/mod.h"
 #include "player.h"
 #include "score.h"
 
@@ -3592,7 +3593,10 @@ void CGameContext::OnInit(const void *pPersistentData)
 		}
 	}
 
-	m_pController = new CGameControllerDDRace(this);
+	if(!str_comp(Config()->m_SvGametype, "mod"))
+		m_pController = new CGameControllerMod(this);
+	else
+		m_pController = new CGameControllerDDRace(this);
 
 	const char *pCensorFilename = "censorlist.txt";
 	IOHANDLE File = Storage()->OpenFile(pCensorFilename, IOFLAG_READ | IOFLAG_SKIP_BOM, IStorage::TYPE_ALL);
