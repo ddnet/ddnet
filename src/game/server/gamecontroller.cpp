@@ -26,7 +26,6 @@ IGameController::IGameController(class CGameContext *pGameServer)
 	m_pGameType = "unknown";
 
 	//
-	DoWarmup(g_Config.m_SvWarmup);
 	m_GameOverTick = -1;
 	m_SuddenDeath = 0;
 	m_RoundStartTick = Server()->Tick();
@@ -43,6 +42,10 @@ IGameController::IGameController(class CGameContext *pGameServer)
 	m_GameState = IGS_GAME_RUNNING;
 	m_GameStateTimer = TIMER_INFINITE;
 	m_GameStartTick = Server()->Tick();
+	if(Config()->m_SvWarmup)
+		SetGameState(IGS_WARMUP_USER, Config()->m_SvWarmup);
+	else
+		SetGameState(IGS_WARMUP_GAME, TIMER_INFINITE);
 
 	m_aTeamSize[TEAM_RED] = 0;
 	m_aTeamSize[TEAM_BLUE] = 0;
