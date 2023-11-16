@@ -1336,6 +1336,7 @@ void IGameController::SetGameState(EGameState GameState, int Timer)
 	case IGS_GAME_RUNNING:
 		// always possible
 		{
+			m_Warmup = 0;
 			m_GameState = GameState;
 			m_GameStateTimer = TIMER_INFINITE;
 			SetPlayersReadyState(true);
