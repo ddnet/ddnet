@@ -1799,6 +1799,12 @@ CMenus::CAbstractCommunityIconJob::CAbstractCommunityIconJob(CMenus *pMenus, con
 	str_format(m_aPath, sizeof(m_aPath), "communityicons/%s.png", pCommunityId);
 }
 
+CMenus::CAbstractCommunityIconJob::~CAbstractCommunityIconJob()
+{
+	free(m_ImageInfo.m_pData);
+	m_ImageInfo.m_pData = nullptr;
+}
+
 int CMenus::CCommunityIconDownloadJob::OnCompletion(int State)
 {
 	State = CHttpRequest::OnCompletion(State);
