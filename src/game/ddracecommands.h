@@ -6,6 +6,10 @@
 #define CONSOLE_COMMAND(name, params, flags, callback, userdata, help)
 #endif
 
+#if __has_include("ddracecommands_mod.h")
+#include "ddracecommands_mod.h"
+#endif
+
 CONSOLE_COMMAND("kill_pl", "v[id]", CFGFLAG_SERVER, ConKillPlayer, this, "Kills player v and announces the kill")
 CONSOLE_COMMAND("totele", "i[number]", CFGFLAG_SERVER | CMDFLAG_TEST, ConToTeleporter, this, "Teleports you to teleporter v")
 CONSOLE_COMMAND("totelecp", "i[number]", CFGFLAG_SERVER | CMDFLAG_TEST, ConToCheckTeleporter, this, "Teleports you to checkpoint teleporter v")

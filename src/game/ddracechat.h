@@ -6,6 +6,10 @@
 #define CHAT_COMMAND(name, params, flags, callback, userdata, help)
 #endif
 
+#if __has_include("ddracechat_mod.h")
+#include "ddracechat_mod.h"
+#endif
+
 CHAT_COMMAND("credits", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConCredits, this, "Shows the credits of the DDNet mod")
 CHAT_COMMAND("rules", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConRules, this, "Shows the server rules")
 CHAT_COMMAND("emote", "?s[emote name] i[duration in seconds]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConEyeEmote, this, "Sets your tee's eye emote")
