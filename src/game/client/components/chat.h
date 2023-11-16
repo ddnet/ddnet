@@ -123,6 +123,8 @@ class CChat : public CComponent
 	int64_t m_LastChatSend;
 	int64_t m_aLastSoundPlayed[CHAT_NUM];
 	bool m_IsInputCensored;
+	char m_aCurrentInputText[MAX_LINE_LENGTH];
+	bool m_EditingNewLine;
 
 	static void ConSay(IConsole::IResult *pResult, void *pUserData);
 	static void ConSayTeam(IConsole::IResult *pResult, void *pUserData);
