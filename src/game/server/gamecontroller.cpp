@@ -39,6 +39,7 @@ IGameController::IGameController(class CGameContext *pGameServer)
 	m_CurrentRecord = 0;
 
 	// gctf
+	m_Warmup = 0;
 	m_GameState = IGS_GAME_RUNNING;
 	m_GameStateTimer = TIMER_INFINITE;
 	m_GameStartTick = Server()->Tick();
