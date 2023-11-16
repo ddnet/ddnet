@@ -486,6 +486,9 @@ void IGameController::ResetGame()
 
 	// gctf
 	m_GameStartTick = Server()->Tick();
+	SetGameState(IGS_GAME_RUNNING);
+	m_GameStartTick = Server()->Tick();
+	m_SuddenDeath = 0;
 }
 
 const char *IGameController::GetTeamName(int Team)
@@ -584,10 +587,11 @@ void IGameController::HandleCharacterTiles(CCharacter *pChr, int MapIndex)
 
 void IGameController::DoWarmup(int Seconds)
 {
-	if(Seconds < 0)
-		m_Warmup = 0;
-	else
-		m_Warmup = Seconds * Server()->TickSpeed();
+	// gets overwritten by SetGameState
+	// but SetGameState might not set it
+	// and then it is unitialized
+	m_Warmup = 0;
+	SetGameState(IGS_WARMUP_USER, Seconds);
 }
 
 bool IGameController::IsForceBalanced()
@@ -609,18 +613,23 @@ void IGameController::Tick()
 		{
 			--m_GameStateTimer;
 
-			static int s_LastSecs = -1;
-			int Secs = m_GameStateTimer / Server()->TickSpeed();
-			if(s_LastSecs != Secs)
+			// 0.6 can do warmup timers (world unpaused incoming reload)
+			// but no game countdown timers (world paused incoming unpause)
+			if(m_GameState == IGS_START_COUNTDOWN)
 			{
-				s_LastSecs = Secs;
-				if(Secs == 0)
-					GameServer()->SendBroadcastSix("", false);
-				else
+				static int s_LastSecs = -1;
+				int Secs = m_GameStateTimer / Server()->TickSpeed();
+				if(s_LastSecs != Secs)
 				{
-					char aBuf[512];
-					str_format(aBuf, sizeof(aBuf), "Game starts in: %d", Secs);
-					GameServer()->SendBroadcastSix(aBuf, false);
+					s_LastSecs = Secs;
+					if(Secs == 0)
+						GameServer()->SendBroadcastSix("", false);
+					else
+					{
+						char aBuf[512];
+						str_format(aBuf, sizeof(aBuf), "Game starts in: %d", Secs);
+						GameServer()->SendBroadcastSix(aBuf, false);
+					}
 				}
 			}
 		}
@@ -690,8 +699,9 @@ void IGameController::Tick()
 	if(m_Warmup)
 	{
 		m_Warmup--;
-		if(!m_Warmup)
-			StartRound();
+		// gctf uses StartRound() in SetGameState() vanilla style
+		// if(!m_Warmup)
+		// 	StartRound();
 	}
 
 	if(m_GameOverTick != -1)
@@ -1267,6 +1277,7 @@ void IGameController::SetGameState(EGameState GameState, int Timer)
 				// start warmup
 				if(Timer < 0)
 				{
+					m_Warmup = 0;
 					m_GameState = GameState;
 					m_GameStateTimer = TIMER_INFINITE;
 					if(Config()->m_SvPlayerReadyMode)
@@ -1279,7 +1290,8 @@ void IGameController::SetGameState(EGameState GameState, int Timer)
 				{
 					// run warmup for a specific time intervall
 					m_GameState = GameState;
-					m_GameStateTimer = Timer * Server()->TickSpeed();
+					m_GameStateTimer = Timer * Server()->TickSpeed(); // TODO: this is vanilla timer
+					m_Warmup = Timer * Server()->TickSpeed(); // TODO: this is ddnet timer
 				}
 
 				// enable respawning in survival when activating warmup

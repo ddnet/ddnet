@@ -164,6 +164,13 @@ public:
 	int IsGameRunning() { return m_GameState == IGS_GAME_RUNNING; }
 	int IsGameCountdown() { return m_GameState == IGS_START_COUNTDOWN; }
 	void ToggleGamePause();
+	void AbortWarmup()
+	{
+		if((m_GameState == IGS_WARMUP_GAME || m_GameState == IGS_WARMUP_USER) && m_GameStateTimer != TIMER_INFINITE)
+		{
+			SetGameState(IGS_GAME_RUNNING);
+		}
+	}
 
 private:
 	int m_aTeamSize[protocol7::NUM_TEAMS];

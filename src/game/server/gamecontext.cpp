@@ -3083,7 +3083,7 @@ void CGameContext::ConRestart(IConsole::IResult *pResult, void *pUserData)
 	if(pResult->NumArguments())
 		pSelf->m_pController->DoWarmup(pResult->GetInteger(0));
 	else
-		pSelf->m_pController->StartRound();
+		pSelf->m_pController->AbortWarmup();
 }
 
 void CGameContext::ConBroadcast(IConsole::IResult *pResult, void *pUserData)
