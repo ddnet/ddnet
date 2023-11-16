@@ -5123,14 +5123,28 @@ void CGameContext::RefreshVotes()
 
 void CGameContext::SendBroadcastSix(const char *pText, bool Important)
 {
-	for(const CPlayer *pPlayer : m_apPlayers)
+	for(CPlayer *pPlayer : m_apPlayers)
 	{
 		if(!pPlayer)
 			continue;
 		if(Server()->IsSixup(pPlayer->GetCID()))
 			continue;
 
-		SendBroadcast(pText, pPlayer->GetCID(), Important);
+		// not very nice but the best hack that comes to my mind
+		// the broadcast is not rendered if the scoreboard is shown
+		// the client shows the scorebaord if he is dead
+		// and if there is sv_warmup(igs countdown) in the beginning of a round
+		// the chracter did not spawn yet. And thus the server forces a scoreboard
+		// on the client. And 0.6 clients just get stuck in that screen without
+		// even noticing that a sv_warmup(igs countdown) is happenin.
+		//
+		// could also abuse the 0.6 warmup timer for that
+		// but this causes confusion since a sv_warmup(igs countdown) is not a warmup
+		// it is a countdown until the game begins and is a different thing already
+		if(!pPlayer->m_HasGhostCharInGame && pPlayer->GetTeam() != TEAM_SPECTATORS)
+			SendChatTarget(pPlayer->GetCID(), pText);
+		else
+			SendBroadcast(pText, pPlayer->GetCID(), Important);
 	}
 }
 

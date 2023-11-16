@@ -24,6 +24,7 @@ CPlayer::CPlayer(CGameContext *pGameServer, uint32_t UniqueClientID, int ClientI
 {
 	m_pGameServer = pGameServer;
 	m_RespawnTick = Server()->Tick(); // gctf
+	m_HasGhostCharInGame = false; // gctf
 	m_ClientID = ClientID;
 	m_Team = GameServer()->m_pController->GetStartTeam();
 	m_NumInputs = 0;

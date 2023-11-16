@@ -485,6 +485,13 @@ void IGameController::EndRound()
 
 void IGameController::ResetGame()
 {
+	for(CPlayer *pPlayer : GameServer()->m_apPlayers)
+	{
+		if(!pPlayer)
+			continue;
+
+		pPlayer->m_HasGhostCharInGame = pPlayer->GetCharacter() != 0;
+	}
 	GameServer()->m_World.m_ResetRequested = true;
 
 	// gctf
