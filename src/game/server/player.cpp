@@ -578,6 +578,13 @@ CCharacter *CPlayer::GetCharacter()
 	return 0;
 }
 
+const CCharacter *CPlayer::GetCharacter() const
+{
+	if(m_pCharacter && m_pCharacter->IsAlive())
+		return m_pCharacter;
+	return 0;
+}
+
 void CPlayer::KillCharacter(int Weapon, bool SendKillMsg)
 {
 	if(m_pCharacter)
