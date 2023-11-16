@@ -3369,6 +3369,11 @@ void CGameClient::RefindSkins()
 	m_KillMessages.RefindSkins();
 }
 
+static bool UnknownMapSettingCallback(const char *pCommand, void *pUser)
+{
+	return true;
+}
+
 void CGameClient::LoadMapSettings()
 {
 	// Reset Tunezones
@@ -3403,13 +3408,14 @@ void CGameClient::LoadMapSettings()
 		int Size = pMap->GetDataSize(pItem->m_Settings);
 		char *pSettings = (char *)pMap->GetData(pItem->m_Settings);
 		char *pNext = pSettings;
-		dbg_msg("tune", "%s", pNext);
+		Console()->SetUnknownCommandCallback(UnknownMapSettingCallback, nullptr);
 		while(pNext < pSettings + Size)
 		{
 			int StrSize = str_length(pNext) + 1;
 			Console()->ExecuteLine(pNext, IConsole::CLIENT_ID_GAME);
 			pNext += StrSize;
 		}
+		Console()->SetUnknownCommandCallback(IConsole::EmptyUnknownCommandCallback, nullptr);
 		pMap->UnloadData(pItem->m_Settings);
 		break;
 	}
