@@ -833,6 +833,36 @@ void IGameController::Snap(int SnappingClient)
 			pGameDataTeam->m_TeamscoreRed = m_aTeamscore[TEAM_RED];
 			pGameDataTeam->m_TeamscoreBlue = m_aTeamscore[TEAM_BLUE];
 		}
+		switch(m_GameState)
+		{
+		case IGS_WARMUP_GAME:
+		case IGS_WARMUP_USER:
+			pGameData->m_GameStateFlags |= protocol7::GAMESTATEFLAG_WARMUP;
+			if(m_GameStateTimer != TIMER_INFINITE)
+				pGameData->m_GameStateEndTick = Server()->Tick() + m_GameStateTimer;
+			break;
+		case IGS_START_COUNTDOWN:
+			pGameData->m_GameStateFlags |= protocol7::GAMESTATEFLAG_STARTCOUNTDOWN | protocol7::GAMESTATEFLAG_PAUSED;
+			if(m_GameStateTimer != TIMER_INFINITE)
+				pGameData->m_GameStateEndTick = Server()->Tick() + m_GameStateTimer;
+			break;
+		case IGS_GAME_PAUSED:
+			pGameData->m_GameStateFlags |= protocol7::GAMESTATEFLAG_PAUSED;
+			if(m_GameStateTimer != TIMER_INFINITE)
+				pGameData->m_GameStateEndTick = Server()->Tick() + m_GameStateTimer;
+			break;
+		case IGS_END_ROUND:
+			pGameData->m_GameStateFlags |= protocol7::GAMESTATEFLAG_ROUNDOVER;
+			pGameData->m_GameStateEndTick = Server()->Tick() - m_GameStartTick - TIMER_END / 2 * Server()->TickSpeed() + m_GameStateTimer;
+			break;
+		case IGS_END_MATCH:
+			pGameData->m_GameStateFlags |= protocol7::GAMESTATEFLAG_GAMEOVER;
+			pGameData->m_GameStateEndTick = Server()->Tick() - m_GameStartTick - TIMER_END * Server()->TickSpeed() + m_GameStateTimer;
+			break;
+		case IGS_GAME_RUNNING:
+			// not effected
+			break;
+		}
 	}
 
 	if(!GameServer()->Switchers().empty())
