@@ -36,7 +36,9 @@ void log_set_global_logger(ILogger *logger)
 
 void log_global_logger_finish()
 {
-	global_logger.load(std::memory_order_acquire)->GlobalFinish();
+	ILogger *logger = global_logger.load(std::memory_order_acquire);
+	if(logger)
+		logger->GlobalFinish();
 }
 
 void log_set_global_logger_default()
