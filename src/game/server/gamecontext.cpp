@@ -2187,21 +2187,18 @@ void CGameContext::OnCallVoteNetMessage(const CNetMsg_Cl_CallVote *pMsg, int Cli
 	else if(str_comp_nocase(pMsg->m_pType, "kick") == 0)
 	{
 		int Authed = Server()->GetAuthedState(ClientID);
-		if(!Authed && time_get() < m_apPlayers[ClientID]->m_Last_KickVote + (time_freq() * 5))
+
+		if(!g_Config.m_SvVoteKick && !Authed) // allow admins to call kick votes even if they are forbidden
+		{
+			SendChatTarget(ClientID, "Server does not allow voting to kick players");
 			return;
-		else if(!Authed && time_get() < m_apPlayers[ClientID]->m_Last_KickVote + (time_freq() * g_Config.m_SvVoteKickDelay))
+		}
+		if(!Authed && time_get() < m_apPlayers[ClientID]->m_Last_KickVote + (time_freq() * g_Config.m_SvVoteKickDelay))
 		{
 			str_format(aChatmsg, sizeof(aChatmsg), "There's a %d second wait time between kick votes for each player please wait %d second(s)",
 				g_Config.m_SvVoteKickDelay,
-				(int)(((m_apPlayers[ClientID]->m_Last_KickVote + (m_apPlayers[ClientID]->m_Last_KickVote * time_freq())) / time_freq()) - (time_get() / time_freq())));
+				(int)((m_apPlayers[ClientID]->m_Last_KickVote + g_Config.m_SvVoteKickDelay * time_freq() - time_get()) / time_freq()));
 			SendChatTarget(ClientID, aChatmsg);
-			m_apPlayers[ClientID]->m_Last_KickVote = time_get();
-			return;
-		}
-		else if(!g_Config.m_SvVoteKick && !Authed) // allow admins to call kick votes even if they are forbidden
-		{
-			SendChatTarget(ClientID, "Server does not allow voting to kick players");
-			m_apPlayers[ClientID]->m_Last_KickVote = time_get();
 			return;
 		}
 
@@ -2263,7 +2260,6 @@ void CGameContext::OnCallVoteNetMessage(const CNetMsg_Cl_CallVote *pMsg, int Cli
 		if(KickedAuthed > Authed)
 		{
 			SendChatTarget(ClientID, "You can't kick authorized players");
-			m_apPlayers[ClientID]->m_Last_KickVote = time_get();
 			char aBufKick[128];
 			str_format(aBufKick, sizeof(aBufKick), "'%s' called for vote to kick you", Server()->ClientName(ClientID));
 			SendChatTarget(KickID, aBufKick);
@@ -2274,7 +2270,6 @@ void CGameContext::OnCallVoteNetMessage(const CNetMsg_Cl_CallVote *pMsg, int Cli
 		if(!GetPlayerChar(ClientID) || !GetPlayerChar(KickID) || GetDDRaceTeam(ClientID) != GetDDRaceTeam(KickID))
 		{
 			SendChatTarget(ClientID, "You can kick only your team member");
-			m_apPlayers[ClientID]->m_Last_KickVote = time_get();
 			return;
 		}
 
