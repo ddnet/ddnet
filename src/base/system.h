@@ -171,7 +171,12 @@ void mem_move(void *dest, const void *source, size_t size);
  * @param block Pointer to the block to zero out.
  * @param size Size of the block.
  */
-void mem_zero(void *block, size_t size);
+template<typename T>
+inline void mem_zero(T *block, size_t size)
+{
+	static_assert((std::is_trivially_constructible<T>::value && std::is_trivially_destructible<T>::value) || std::is_fundamental<T>::value);
+	memset(block, 0, size);
+}
 
 /**
  * Compares two blocks of memory
@@ -2830,7 +2835,7 @@ bool shell_unregister_application(const char *executable, bool *updated);
  * Notifies the system that a protocol or file extension has been changed and the shell needs to be updated.
  *
  * @ingroup Shell
- * 
+ *
  * @remark This is a potentially expensive operation, so it should only be called when necessary.
  */
 void shell_update();

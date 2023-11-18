@@ -23,11 +23,7 @@ public:
 		T y, v;
 	};
 
-	constexpr vector2_base() :
-		x(T()), y(T())
-	{
-	}
-
+	constexpr vector2_base() = default;
 	constexpr vector2_base(T nx, T ny) :
 		x(nx), y(ny)
 	{
@@ -198,11 +194,7 @@ public:
 		T z, b, l, w;
 	};
 
-	constexpr vector3_base() :
-		x(T()), y(T()), z(T())
-	{
-	}
-
+	constexpr vector3_base() = default;
 	constexpr vector3_base(T nx, T ny, T nz) :
 		x(nx), y(ny), z(nz)
 	{
@@ -326,11 +318,7 @@ public:
 		T w, a;
 	};
 
-	constexpr vector4_base() :
-		x(T()), y(T()), z(T()), w(T())
-	{
-	}
-
+	constexpr vector4_base() = default;
 	constexpr vector4_base(T nx, T ny, T nz, T nw) :
 		x(nx), y(ny), z(nz), w(nw)
 	{
