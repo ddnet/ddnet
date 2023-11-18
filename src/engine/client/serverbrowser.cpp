@@ -1296,13 +1296,13 @@ void CServerBrowser::LoadDDNetServers()
 			continue;
 		}
 		CCommunity NewCommunity(Id, Name, ParsedIconSha256, IconUrl);
-		if(ParseCommunityServers(&NewCommunity, *pServers))
+		if(!ParseCommunityServers(&NewCommunity, *pServers))
 		{
 			log_error("serverbrowser", "invalid community servers (CommunityId=%s)", NewCommunity.Id());
 			continue;
 		}
 		NewCommunity.m_HasFinishes = pFinishes->type == json_array;
-		if(NewCommunity.m_HasFinishes && ParseCommunityFinishes(&NewCommunity, *pFinishes))
+		if(NewCommunity.m_HasFinishes && !ParseCommunityFinishes(&NewCommunity, *pFinishes))
 		{
 			log_error("serverbrowser", "invalid community finishes (CommunityId=%s)", NewCommunity.Id());
 			continue;
