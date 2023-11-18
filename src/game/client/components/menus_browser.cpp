@@ -1989,10 +1989,6 @@ void CMenus::UpdateCommunityIcons()
 		}
 	}
 
-	const char *pDownloadUrl = Client()->CommunityIconsDownloadUrl();
-	if(pDownloadUrl[0] == '\0')
-		return;
-
 	// Find added and updated community icons
 	for(const auto &Community : ServerBrowser()->Communities())
 	{
@@ -2006,9 +2002,7 @@ void CMenus::UpdateCommunityIcons()
 		});
 		if(pExistingDownload == m_CommunityIconDownloadJobs.end() && (ExistingIcon == m_vCommunityIcons.end() || ExistingIcon->m_Sha256 != Community.IconSha256()))
 		{
-			char aUrl[256];
-			str_format(aUrl, sizeof(aUrl), "%s/%s.png", pDownloadUrl, Community.Id());
-			std::shared_ptr<CCommunityIconDownloadJob> pJob = std::make_shared<CCommunityIconDownloadJob>(this, Community.Id(), aUrl);
+			std::shared_ptr<CCommunityIconDownloadJob> pJob = std::make_shared<CCommunityIconDownloadJob>(this, Community.Id(), Community.IconUrl());
 			Engine()->AddJob(pJob);
 			m_CommunityIconDownloadJobs.push_back(pJob);
 		}

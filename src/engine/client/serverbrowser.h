@@ -219,6 +219,9 @@ private:
 
 	void SetInfo(CServerEntry *pEntry, const CServerInfo &Info);
 	void SetLatency(NETADDR Addr, int Latency);
+
+	static bool ParseCommunityFinishes(CCommunity *pCommunity, const json_value &Finishes);
+	static bool ParseCommunityServers(CCommunity *pCommunity, const json_value &Servers);
 };
 
 #endif

@@ -135,7 +135,6 @@ CClient::CClient() :
 	m_pDDNetInfoTask = NULL;
 	m_aNews[0] = '\0';
 	m_aMapDownloadUrl[0] = '\0';
-	m_aCommunityIconsDownloadUrl[0] = '\0';
 	m_Points = -1;
 
 	m_CurrentServerInfoRequestTime = -1;
@@ -2243,12 +2242,6 @@ void CClient::LoadDDNetInfo()
 	if(MapDownloadUrl.type == json_string)
 	{
 		str_copy(m_aMapDownloadUrl, MapDownloadUrl);
-	}
-
-	const json_value &CommunityIconsDownloadUrl = DDNetInfo["community-icons-download-url"];
-	if(CommunityIconsDownloadUrl.type == json_string)
-	{
-		str_copy(m_aCommunityIconsDownloadUrl, CommunityIconsDownloadUrl);
 	}
 
 	const json_value &Points = DDNetInfo["points"];
