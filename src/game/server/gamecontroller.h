@@ -7,6 +7,7 @@
 #include <engine/map.h>
 #include <engine/shared/protocol.h>
 
+#include <map>
 #include <vector>
 
 /*
@@ -143,10 +144,13 @@ public:
 	int ClampTeam(int Team);
 
 	virtual CClientMask GetMaskForPlayerWorldEvent(int Asker, int ExceptID = -1);
+	virtual void InitTeleporter();
 
 	// DDRace
 
 	float m_CurrentRecord;
+	std::map<int, std::vector<vec2>> m_TeleOuts;
+	std::map<int, std::vector<vec2>> m_TeleCheckOuts;
 };
 
 #endif

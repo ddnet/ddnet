@@ -358,15 +358,14 @@ void CGameContext::ConToTeleporter(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	unsigned int TeleTo = pResult->GetInteger(0);
-	CGameControllerDDRace *pGameControllerDDRace = (CGameControllerDDRace *)pSelf->m_pController;
 
-	if(!pGameControllerDDRace->m_TeleOuts[TeleTo - 1].empty())
+	if(!pSelf->m_pController->m_TeleOuts[TeleTo - 1].empty())
 	{
 		CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
 		if(pChr)
 		{
-			int TeleOut = pSelf->m_World.m_Core.RandomOr0(pGameControllerDDRace->m_TeleOuts[TeleTo - 1].size());
-			pSelf->Teleport(pChr, pGameControllerDDRace->m_TeleOuts[TeleTo - 1][TeleOut]);
+			int TeleOut = pSelf->m_World.m_Core.RandomOr0(pSelf->m_pController->m_TeleOuts[TeleTo - 1].size());
+			pSelf->Teleport(pChr, pSelf->m_pController->m_TeleOuts[TeleTo - 1][TeleOut]);
 		}
 	}
 }
@@ -375,15 +374,14 @@ void CGameContext::ConToCheckTeleporter(IConsole::IResult *pResult, void *pUserD
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	unsigned int TeleTo = pResult->GetInteger(0);
-	CGameControllerDDRace *pGameControllerDDRace = (CGameControllerDDRace *)pSelf->m_pController;
 
-	if(!pGameControllerDDRace->m_TeleCheckOuts[TeleTo - 1].empty())
+	if(!pSelf->m_pController->m_TeleCheckOuts[TeleTo - 1].empty())
 	{
 		CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
 		if(pChr)
 		{
-			int TeleOut = pSelf->m_World.m_Core.RandomOr0(pGameControllerDDRace->m_TeleCheckOuts[TeleTo - 1].size());
-			pSelf->Teleport(pChr, pGameControllerDDRace->m_TeleCheckOuts[TeleTo - 1][TeleOut]);
+			int TeleOut = pSelf->m_World.m_Core.RandomOr0(pSelf->m_pController->m_TeleCheckOuts[TeleTo - 1].size());
+			pSelf->Teleport(pChr, pSelf->m_pController->m_TeleCheckOuts[TeleTo - 1][TeleOut]);
 			pChr->m_TeleCheckpoint = TeleTo;
 		}
 	}

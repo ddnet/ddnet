@@ -18,8 +18,6 @@ CGameControllerDDRace::CGameControllerDDRace(class CGameContext *pGameServer) :
 	IGameController(pGameServer), m_Teams(pGameServer), m_pLoadBestTimeResult(nullptr)
 {
 	m_pGameType = g_Config.m_SvTestingCommands ? TEST_TYPE_NAME : GAME_TYPE_NAME;
-
-	InitTeleporter();
 }
 
 CGameControllerDDRace::~CGameControllerDDRace() = default;
@@ -33,7 +31,6 @@ void CGameControllerDDRace::OnCharacterSpawn(CCharacter *pChr)
 {
 	IGameController::OnCharacterSpawn(pChr);
 	pChr->SetTeams(&m_Teams);
-	pChr->SetTeleports(&m_TeleOuts, &m_TeleCheckOuts);
 	m_Teams.OnCharacterSpawn(pChr->GetPlayer()->GetCID());
 }
 
@@ -217,31 +214,6 @@ CClientMask CGameControllerDDRace::GetMaskForPlayerWorldEvent(int Asker, int Exc
 		return CClientMask().set().reset(ExceptID);
 
 	return m_Teams.TeamMask(GetPlayerTeam(Asker), ExceptID, Asker);
-}
-
-void CGameControllerDDRace::InitTeleporter()
-{
-	if(!GameServer()->Collision()->Layers()->TeleLayer())
-		return;
-	int Width = GameServer()->Collision()->Layers()->TeleLayer()->m_Width;
-	int Height = GameServer()->Collision()->Layers()->TeleLayer()->m_Height;
-
-	for(int i = 0; i < Width * Height; i++)
-	{
-		int Number = GameServer()->Collision()->TeleLayer()[i].m_Number;
-		int Type = GameServer()->Collision()->TeleLayer()[i].m_Type;
-		if(Number > 0)
-		{
-			if(Type == TILE_TELEOUT)
-			{
-				m_TeleOuts[Number - 1].emplace_back(i % Width * 32.0f + 16.0f, i / Width * 32.0f + 16.0f);
-			}
-			else if(Type == TILE_TELECHECKOUT)
-			{
-				m_TeleCheckOuts[Number - 1].emplace_back(i % Width * 32.0f + 16.0f, i / Width * 32.0f + 16.0f);
-			}
-		}
-	}
 }
 
 int CGameControllerDDRace::GetPlayerTeam(int ClientID) const
