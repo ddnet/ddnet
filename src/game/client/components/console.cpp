@@ -134,20 +134,39 @@ void CGameConsole::CInstance::Init(CGameConsole *pGameConsole)
 
 void CGameConsole::CInstance::ClearBacklog()
 {
-	const CLockScope LockScope(m_BacklogLock);
+	{
+		// We must ensure that no log messages are printed while owning
+		// m_BacklogPendingLock or this will result in a dead lock.
+		const CLockScope LockScope(m_BacklogPendingLock);
+		m_BacklogPending.Init();
+	}
+
 	m_Backlog.Init();
 	m_BacklogCurPage = 0;
 }
 
 void CGameConsole::CInstance::ClearBacklogYOffsets()
 {
-	const CLockScope LockScope(m_BacklogLock);
-	auto *pEntry = m_Backlog.First();
-	while(pEntry)
+	// Pending backlog entries are not handled because they don't have a Y offset yet.
+	for(CInstance::CBacklogEntry *pEntry = m_Backlog.First(); pEntry; pEntry = m_Backlog.Next(pEntry))
 	{
 		pEntry->m_YOffset = -1.0f;
-		pEntry = m_Backlog.Next(pEntry);
 	}
+}
+
+void CGameConsole::CInstance::PumpBacklogPending()
+{
+	// We must ensure that no log messages are printed while owning
+	// m_BacklogPendingLock or this will result in a dead lock.
+	const CLockScope LockScopePending(m_BacklogPendingLock);
+	for(CInstance::CBacklogEntry *pPendingEntry = m_BacklogPending.First(); pPendingEntry; pPendingEntry = m_BacklogPending.Next(pPendingEntry))
+	{
+		const size_t EntrySize = sizeof(CBacklogEntry) + pPendingEntry->m_Length;
+		CBacklogEntry *pEntry = m_Backlog.Allocate(EntrySize);
+		mem_copy(pEntry, pPendingEntry, EntrySize);
+		++m_NewLineCounter;
+	}
+	m_BacklogPending.Init();
 }
 
 void CGameConsole::CInstance::ClearHistory()
@@ -398,12 +417,14 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 
 void CGameConsole::CInstance::PrintLine(const char *pLine, int Len, ColorRGBA PrintColor)
 {
-	const CLockScope LockScope(m_BacklogLock);
-	CBacklogEntry *pEntry = m_Backlog.Allocate(sizeof(CBacklogEntry) + Len);
+	// We must ensure that no log messages are printed while owning
+	// m_BacklogPendingLock or this will result in a dead lock.
+	const CLockScope LockScope(m_BacklogPendingLock);
+	CBacklogEntry *pEntry = m_BacklogPending.Allocate(sizeof(CBacklogEntry) + Len);
 	pEntry->m_YOffset = -1.0f;
 	pEntry->m_PrintColor = PrintColor;
+	pEntry->m_Length = Len;
 	str_copy(pEntry->m_aText, pLine, Len + 1);
-	m_NewLineCounter++;
 }
 
 CGameConsole::CGameConsole() :
@@ -737,7 +758,7 @@ void CGameConsole::OnRender()
 			UI()->DoSmoothScrollLogic(&pConsole->m_CompletionRenderOffset, &pConsole->m_CompletionRenderOffsetChange, Info.m_Width, Info.m_TotalWidth);
 		}
 
-		pConsole->m_BacklogLock.lock();
+		pConsole->PumpBacklogPending();
 
 		// render log (current page, wrap lines)
 		CInstance::CBacklogEntry *pEntry = pConsole->m_Backlog.Last();
@@ -819,8 +840,6 @@ void CGameConsole::OnRender()
 		}
 		pConsole->m_BacklogCurPage = clamp(pConsole->m_BacklogCurPage, 0, TotalPages - 1);
 		pConsole->m_BacklogLastActivePage = pConsole->m_BacklogCurPage;
-
-		pConsole->m_BacklogLock.unlock();
 
 		if(m_WantsSelectionCopy && !SelectionString.empty())
 		{
@@ -913,10 +932,10 @@ void CGameConsole::Dump(int Type)
 	IOHANDLE File = Storage()->OpenFile(aFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
 	if(File)
 	{
-		const CLockScope LockScope(pConsole->m_BacklogLock);
+		pConsole->PumpBacklogPending();
 		for(CInstance::CBacklogEntry *pEntry = pConsole->m_Backlog.First(); pEntry; pEntry = pConsole->m_Backlog.Next(pEntry))
 		{
-			io_write(File, pEntry->m_aText, str_length(pEntry->m_aText));
+			io_write(File, pEntry->m_aText, pEntry->m_Length);
 			io_write_newline(File);
 		}
 		io_close(File);

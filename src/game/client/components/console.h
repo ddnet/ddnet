@@ -31,10 +31,12 @@ class CGameConsole : public CComponent
 		{
 			float m_YOffset;
 			ColorRGBA m_PrintColor;
+			size_t m_Length;
 			char m_aText[1];
 		};
-		CLock m_BacklogLock;
 		CStaticRingBuffer<CBacklogEntry, 1024 * 1024, CRingBufferBase::FLAG_RECYCLE> m_Backlog;
+		CLock m_BacklogPendingLock;
+		CStaticRingBuffer<CBacklogEntry, 1024 * 1024, CRingBufferBase::FLAG_RECYCLE> m_BacklogPending GUARDED_BY(m_BacklogPendingLock);
 		CStaticRingBuffer<char, 64 * 1024, CRingBufferBase::FLAG_RECYCLE> m_History;
 		char *m_pHistoryEntry;
 
@@ -77,15 +79,16 @@ class CGameConsole : public CComponent
 		CInstance(int t);
 		void Init(CGameConsole *pGameConsole);
 
-		void ClearBacklog() REQUIRES(!m_BacklogLock);
-		void ClearBacklogYOffsets() REQUIRES(!m_BacklogLock);
+		void ClearBacklog() REQUIRES(!m_BacklogPendingLock);
+		void ClearBacklogYOffsets();
+		void PumpBacklogPending() REQUIRES(!m_BacklogPendingLock);
 		void ClearHistory();
 		void Reset();
 
 		void ExecuteLine(const char *pLine);
 
 		bool OnInput(const IInput::CEvent &Event);
-		void PrintLine(const char *pLine, int Len, ColorRGBA PrintColor) REQUIRES(!m_BacklogLock);
+		void PrintLine(const char *pLine, int Len, ColorRGBA PrintColor) REQUIRES(!m_BacklogPendingLock);
 
 		const char *GetString() const { return m_Input.GetString(); }
 		static void PossibleCommandsCompleteCallback(int Index, const char *pStr, void *pUser);
