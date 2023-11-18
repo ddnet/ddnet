@@ -731,8 +731,10 @@ int IGameController::ClampTeam(int Team)
 
 CClientMask IGameController::GetMaskForPlayerWorldEvent(int Asker, int ExceptID)
 {
-	// Send all world events to everyone by default
-	return CClientMask().set().reset(ExceptID);
+	if(Asker == -1)
+		return CClientMask().set().reset(ExceptID);
+
+	return Teams().TeamMask(GameServer()->GetDDRaceTeam(Asker), ExceptID, Asker);
 }
 
 void IGameController::InitTeleporter()

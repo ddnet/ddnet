@@ -146,7 +146,7 @@ public:
 	virtual bool CanJoinTeam(int Team, int NotThisID);
 	int ClampTeam(int Team);
 
-	virtual CClientMask GetMaskForPlayerWorldEvent(int Asker, int ExceptID = -1);
+	CClientMask GetMaskForPlayerWorldEvent(int Asker, int ExceptID = -1);
 	virtual void InitTeleporter();
 
 	// DDRace
