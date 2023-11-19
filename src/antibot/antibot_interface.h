@@ -16,7 +16,7 @@ ANTIBOTAPI void AntibotRoundStart(CAntibotRoundData *pRoundData);
 ANTIBOTAPI void AntibotRoundEnd(void);
 ANTIBOTAPI void AntibotUpdateData(void);
 ANTIBOTAPI void AntibotDestroy(void);
-ANTIBOTAPI void AntibotDump(void);
+ANTIBOTAPI void AntibotConsoleCommand(const char *pCommand);
 ANTIBOTAPI void AntibotOnPlayerInit(int ClientID);
 ANTIBOTAPI void AntibotOnPlayerDestroy(int ClientID);
 ANTIBOTAPI void AntibotOnSpawn(int ClientID);

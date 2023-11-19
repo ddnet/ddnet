@@ -120,6 +120,8 @@ void CChat::Reset()
 	m_LastChatSend = 0;
 	m_CurrentLine = 0;
 	m_IsInputCensored = false;
+	m_EditingNewLine = true;
+	mem_zero(m_aCurrentInputText, sizeof(m_aCurrentInputText));
 	DisableMode();
 
 	for(int64_t &LastSoundPlayed : m_aLastSoundPlayed)
@@ -426,6 +428,12 @@ bool CChat::OnInput(const IInput::CEvent &Event)
 
 	if(Event.m_Flags & IInput::FLAG_PRESS && Event.m_Key == KEY_UP)
 	{
+		if(m_EditingNewLine)
+		{
+			str_copy(m_aCurrentInputText, m_Input.GetString());
+			m_EditingNewLine = false;
+		}
+
 		if(m_pHistoryEntry)
 		{
 			CHistoryEntry *pTest = m_History.Prev(m_pHistoryEntry);
@@ -445,9 +453,14 @@ bool CChat::OnInput(const IInput::CEvent &Event)
 			m_pHistoryEntry = m_History.Next(m_pHistoryEntry);
 
 		if(m_pHistoryEntry)
+		{
 			m_Input.Set(m_pHistoryEntry->m_aText);
-		else
-			m_Input.Clear();
+		}
+		else if(!m_EditingNewLine)
+		{
+			m_Input.Set(m_aCurrentInputText);
+			m_EditingNewLine = true;
+		}
 	}
 
 	return true;

@@ -4,6 +4,7 @@
 
 #include <game/generated/protocol.h>
 #include <game/mapitems.h>
+#include <game/server/score.h>
 #include <game/teamscore.h>
 
 #include "gamecontext.h"
@@ -18,7 +19,8 @@
 #include "entities/pickup.h"
 #include "entities/projectile.h"
 
-IGameController::IGameController(class CGameContext *pGameServer)
+IGameController::IGameController(class CGameContext *pGameServer) :
+	m_Teams(pGameServer), m_pLoadBestTimeResult(nullptr)
 {
 	m_pGameServer = pGameServer;
 	m_pConfig = m_pGameServer->Config();
@@ -38,6 +40,8 @@ IGameController::IGameController(class CGameContext *pGameServer)
 	m_ForceBalanced = false;
 
 	m_CurrentRecord = 0;
+
+	InitTeleporter();
 }
 
 IGameController::~IGameController() = default;
@@ -381,11 +385,11 @@ bool IGameController::OnEntity(int Index, int x, int y, int Layer, int Flags, bo
 		new CGun(&GameServer()->m_World, Pos, false, false, Layer, Number);
 	}
 
-	if(Type != -1)
+	if(Type != -1) // NOLINT(clang-analyzer-unix.Malloc)
 	{
 		CPickup *pPickup = new CPickup(&GameServer()->m_World, Type, SubType, Layer, Number);
 		pPickup->m_Pos = Pos;
-		return true;
+		return true; // NOLINT(clang-analyzer-unix.Malloc)
 	}
 
 	return false;
@@ -478,12 +482,17 @@ int IGameController::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *
 
 void IGameController::OnCharacterSpawn(class CCharacter *pChr)
 {
+	pChr->SetTeams(&Teams());
+	Teams().OnCharacterSpawn(pChr->GetPlayer()->GetCID());
+
 	// default health
 	pChr->IncreaseHealth(10);
 
 	// give default weapons
 	pChr->GiveWeapon(WEAPON_HAMMER);
 	pChr->GiveWeapon(WEAPON_GUN);
+
+	pChr->SetTeleports(&m_TeleOuts, &m_TeleCheckOuts);
 }
 
 void IGameController::HandleCharacterTiles(CCharacter *pChr, int MapIndex)
@@ -527,6 +536,23 @@ void IGameController::Tick()
 			StartRound();
 			m_RoundCount++;
 		}
+	}
+
+	if(m_pLoadBestTimeResult != nullptr && m_pLoadBestTimeResult->m_Completed)
+	{
+		if(m_pLoadBestTimeResult->m_Success)
+		{
+			m_CurrentRecord = m_pLoadBestTimeResult->m_CurrentRecord;
+
+			for(int i = 0; i < MAX_CLIENTS; i++)
+			{
+				if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetClientVersion() >= VERSION_DDRACE)
+				{
+					GameServer()->SendRecord(i);
+				}
+			}
+		}
+		m_pLoadBestTimeResult = nullptr;
 	}
 
 	DoActivityCheck();
@@ -723,8 +749,35 @@ int IGameController::ClampTeam(int Team)
 
 CClientMask IGameController::GetMaskForPlayerWorldEvent(int Asker, int ExceptID)
 {
-	// Send all world events to everyone by default
-	return CClientMask().set().reset(ExceptID);
+	if(Asker == -1)
+		return CClientMask().set().reset(ExceptID);
+
+	return Teams().TeamMask(GameServer()->GetDDRaceTeam(Asker), ExceptID, Asker);
+}
+
+void IGameController::InitTeleporter()
+{
+	if(!GameServer()->Collision()->Layers()->TeleLayer())
+		return;
+	int Width = GameServer()->Collision()->Layers()->TeleLayer()->m_Width;
+	int Height = GameServer()->Collision()->Layers()->TeleLayer()->m_Height;
+
+	for(int i = 0; i < Width * Height; i++)
+	{
+		int Number = GameServer()->Collision()->TeleLayer()[i].m_Number;
+		int Type = GameServer()->Collision()->TeleLayer()[i].m_Type;
+		if(Number > 0)
+		{
+			if(Type == TILE_TELEOUT)
+			{
+				m_TeleOuts[Number - 1].emplace_back(i % Width * 32.0f + 16.0f, i / Width * 32.0f + 16.0f);
+			}
+			else if(Type == TILE_TELECHECKOUT)
+			{
+				m_TeleCheckOuts[Number - 1].emplace_back(i % Width * 32.0f + 16.0f, i / Width * 32.0f + 16.0f);
+			}
+		}
+	}
 }
 
 void IGameController::DoTeamChange(CPlayer *pPlayer, int Team, bool DoChatMsg)

@@ -842,7 +842,7 @@ void CMenus::RenderDemoPlayerSliceSavePopup(CUIRect MainView)
 		{
 			static CUI::SMessagePopupContext s_MessagePopupContext;
 			s_MessagePopupContext.ErrorColor();
-			str_copy(s_MessagePopupContext.m_aMessage, Localize("Please use a different name"));
+			str_copy(s_MessagePopupContext.m_aMessage, Localize("Please use a different filename"));
 			UI()->ShowPopupMessage(UI()->MouseX(), OkButton.y + OkButton.h + 5.0f, &s_MessagePopupContext);
 		}
 		else
@@ -922,7 +922,7 @@ int CMenus::DemolistFetchCallback(const CFsFileInfo *pInfo, int IsDir, int Stora
 
 	if(time_get_nanoseconds() - pSelf->m_DemoPopulateStartTime > 500ms)
 	{
-		pSelf->GameClient()->m_Menus.RenderLoading(Localize("Loading demo files"), "", 0, false);
+		pSelf->RenderLoading(Localize("Loading demo files"), "", 0, false);
 	}
 
 	return 0;
@@ -1438,6 +1438,7 @@ void CMenus::RenderDemoBrowserButtons(CUIRect ButtonsView, bool WasListboxItemAc
 	}
 
 	// demos directory button
+	if(m_DemolistSelectedIndex >= 0 && m_vpFilteredDemos[m_DemolistSelectedIndex]->m_StorageType != IStorage::TYPE_ALL)
 	{
 		CUIRect DemosDirectoryButton;
 		ButtonBarBottom.VSplitLeft(ButtonBarBottom.h * 10.0f, &DemosDirectoryButton, &ButtonBarBottom);

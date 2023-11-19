@@ -9,8 +9,10 @@
 #include <game/client/components/camera.h>
 #include <game/client/components/mapimages.h>
 #include <game/client/components/maplayers.h>
+#include <game/client/gameclient.h>
 
 #include <game/layers.h>
+#include <game/localization.h>
 #include <game/mapitems.h>
 
 #include "menu_background.h"
@@ -89,6 +91,20 @@ void CMenuBackground::ResetPositions()
 	m_aPositions = GenerateMenuBackgroundPositions();
 }
 
+void CMenuBackground::LoadThemeIcon(CTheme &Theme)
+{
+	char aIconPath[IO_MAX_PATH_LENGTH];
+	str_format(aIconPath, sizeof(aIconPath), "themes/%s.png", Theme.m_Name.empty() ? "none" : Theme.m_Name.c_str());
+	Theme.m_IconTexture = Graphics()->LoadTexture(aIconPath, IStorage::TYPE_ALL);
+
+	char aBuf[32 + IO_MAX_PATH_LENGTH];
+	if(Theme.m_IconTexture.IsNullTexture())
+		str_format(aBuf, sizeof(aBuf), "failed to load theme icon '%s'", aIconPath);
+	else
+		str_format(aBuf, sizeof(aBuf), "loaded theme icon '%s'", aIconPath);
+	Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "menuthemes", aBuf);
+}
+
 int CMenuBackground::ThemeScan(const char *pName, int IsDir, int DirType, void *pUser)
 {
 	CMenuBackground *pSelf = (CMenuBackground *)pUser;
@@ -131,60 +147,17 @@ int CMenuBackground::ThemeScan(const char *pName, int IsDir, int DirType, void *
 	}
 
 	// make new theme
-	CTheme Theme(aThemeName, IsDay, IsNight);
 	char aBuf[512];
-	str_format(aBuf, sizeof(aBuf), "added theme %s from themes/%s", aThemeName, pName);
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "game", aBuf);
-	pSelf->m_vThemes.push_back(Theme);
-	auto TimeNow = time_get_nanoseconds();
-	if(TimeNow - pSelf->m_ThemeScanStartTime >= std::chrono::nanoseconds(1s) / 60)
+	str_format(aBuf, sizeof(aBuf), "added theme '%s' from 'themes/%s'", aThemeName, pName);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "menuthemes", aBuf);
+	pSelf->m_vThemes.emplace_back(aThemeName, IsDay, IsNight);
+	pSelf->LoadThemeIcon(pSelf->m_vThemes.back());
+
+	if(time_get_nanoseconds() - pSelf->m_ThemeScanStartTime > 500ms)
 	{
-		pSelf->Client()->UpdateAndSwap();
-		pSelf->m_ThemeScanStartTime = TimeNow;
+		pSelf->GameClient()->m_Menus.RenderLoading(Localize("Loading menu themes"), "", 0, false);
 	}
 	return 0;
-}
-
-int CMenuBackground::ThemeIconScan(const char *pName, int IsDir, int DirType, void *pUser)
-{
-	CMenuBackground *pSelf = (CMenuBackground *)pUser;
-	const char *pSuffix = str_endswith(pName, ".png");
-	if(IsDir || !pSuffix)
-		return 0;
-
-	auto TimeNow = time_get_nanoseconds();
-	if(TimeNow - pSelf->m_ThemeScanStartTime >= std::chrono::nanoseconds(1s) / 60)
-	{
-		pSelf->Client()->UpdateAndSwap();
-		pSelf->m_ThemeScanStartTime = TimeNow;
-	}
-
-	char aThemeName[128];
-	str_truncate(aThemeName, sizeof(aThemeName), pName, pSuffix - pName);
-
-	// save icon for an existing theme
-	for(CTheme &Theme : pSelf->m_vThemes) // bit slow but whatever
-	{
-		if(str_comp(Theme.m_Name.c_str(), aThemeName) == 0 || (Theme.m_Name.empty() && str_comp(aThemeName, "none") == 0))
-		{
-			char aBuf[IO_MAX_PATH_LENGTH];
-			str_format(aBuf, sizeof(aBuf), "themes/%s", pName);
-			CImageInfo Info;
-			if(!pSelf->Graphics()->LoadPNG(&Info, aBuf, DirType))
-			{
-				str_format(aBuf, sizeof(aBuf), "failed to load theme icon from %s", pName);
-				pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "game", aBuf);
-				return 0;
-			}
-			str_format(aBuf, sizeof(aBuf), "loaded theme icon %s", pName);
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "game", aBuf);
-
-			Theme.m_IconTexture = pSelf->Graphics()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, Info.m_Format, 0);
-			pSelf->Graphics()->FreePNG(&Info);
-			return 0;
-		}
-	}
-	return 0; // no existing theme
 }
 
 void CMenuBackground::LoadMenuBackground(bool HasDayHint, bool HasNightHint)
@@ -408,12 +381,16 @@ std::vector<CTheme> &CMenuBackground::GetThemes()
 	{
 		// when adding more here, make sure to change the value of PREDEFINED_THEMES_COUNT too
 		m_vThemes.emplace_back("", true, true); // no theme
+		LoadThemeIcon(m_vThemes.back());
+
 		m_vThemes.emplace_back("auto", true, true); // auto theme
+		LoadThemeIcon(m_vThemes.back());
+
 		m_vThemes.emplace_back("rand", true, true); // random theme
+		LoadThemeIcon(m_vThemes.back());
 
 		m_ThemeScanStartTime = time_get_nanoseconds();
-		Storage()->ListDirectory(IStorage::TYPE_ALL, "themes", ThemeScan, (CMenuBackground *)this);
-		Storage()->ListDirectory(IStorage::TYPE_ALL, "themes", ThemeIconScan, (CMenuBackground *)this);
+		Storage()->ListDirectory(IStorage::TYPE_ALL, "themes", ThemeScan, this);
 
 		std::sort(m_vThemes.begin() + PREDEFINED_THEMES_COUNT, m_vThemes.end());
 	}

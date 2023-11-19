@@ -14,10 +14,14 @@
 #define __USE_GNU
 #endif
 
+#include <chrono>
 #include <cinttypes>
 #include <cstdarg>
 #include <cstdint>
+#include <cstring>
 #include <ctime>
+#include <functional>
+#include <mutex>
 #include <string>
 
 #ifdef __MINGW32__
@@ -40,9 +44,6 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 #endif
-
-#include <chrono>
-#include <functional>
 
 #if __cplusplus >= 201703L
 #define MAYBE_UNUSED [[maybe_unused]]
@@ -171,7 +172,12 @@ void mem_move(void *dest, const void *source, size_t size);
  * @param block Pointer to the block to zero out.
  * @param size Size of the block.
  */
-void mem_zero(void *block, size_t size);
+template<typename T>
+inline void mem_zero(T *block, size_t size)
+{
+	static_assert((std::is_trivially_constructible<T>::value && std::is_trivially_destructible<T>::value) || std::is_fundamental<T>::value);
+	memset(block, 0, size);
+}
 
 /**
  * Compares two blocks of memory
@@ -607,107 +613,11 @@ void thread_detach(void *thread);
  */
 bool thread_init_and_detach(void (*threadfunc)(void *), void *user, const char *name);
 
-// Enable thread safety attributes only with clang.
-// The attributes can be safely erased when compiling with other compilers.
-#if defined(__clang__) && (!defined(SWIG))
-#define THREAD_ANNOTATION_ATTRIBUTE__(x) __attribute__((x))
-#else
-#define THREAD_ANNOTATION_ATTRIBUTE__(x) // no-op
-#endif
-
-#define CAPABILITY(x) \
-	THREAD_ANNOTATION_ATTRIBUTE__(capability(x))
-
-#define SCOPED_CAPABILITY \
-	THREAD_ANNOTATION_ATTRIBUTE__(scoped_lockable)
-
-#define GUARDED_BY(x) \
-	THREAD_ANNOTATION_ATTRIBUTE__(guarded_by(x))
-
-#define PT_GUARDED_BY(x) \
-	THREAD_ANNOTATION_ATTRIBUTE__(pt_guarded_by(x))
-
-#define ACQUIRED_BEFORE(...) \
-	THREAD_ANNOTATION_ATTRIBUTE__(acquired_before(__VA_ARGS__))
-
-#define ACQUIRED_AFTER(...) \
-	THREAD_ANNOTATION_ATTRIBUTE__(acquired_after(__VA_ARGS__))
-
-#define REQUIRES(...) \
-	THREAD_ANNOTATION_ATTRIBUTE__(requires_capability(__VA_ARGS__))
-
-#define REQUIRES_SHARED(...) \
-	THREAD_ANNOTATION_ATTRIBUTE__(requires_shared_capability(__VA_ARGS__))
-
-#define ACQUIRE(...) \
-	THREAD_ANNOTATION_ATTRIBUTE__(acquire_capability(__VA_ARGS__))
-
-#define ACQUIRE_SHARED(...) \
-	THREAD_ANNOTATION_ATTRIBUTE__(acquire_shared_capability(__VA_ARGS__))
-
-#define RELEASE(...) \
-	THREAD_ANNOTATION_ATTRIBUTE__(release_capability(__VA_ARGS__))
-
-#define RELEASE_SHARED(...) \
-	THREAD_ANNOTATION_ATTRIBUTE__(release_shared_capability(__VA_ARGS__))
-
-#define RELEASE_GENERIC(...) \
-	THREAD_ANNOTATION_ATTRIBUTE__(release_generic_capability(__VA_ARGS__))
-
-#define TRY_ACQUIRE(...) \
-	THREAD_ANNOTATION_ATTRIBUTE__(try_acquire_capability(__VA_ARGS__))
-
-#define TRY_ACQUIRE_SHARED(...) \
-	THREAD_ANNOTATION_ATTRIBUTE__(try_acquire_shared_capability(__VA_ARGS__))
-
-#define EXCLUDES(...) \
-	THREAD_ANNOTATION_ATTRIBUTE__(locks_excluded(__VA_ARGS__))
-
-#define ASSERT_CAPABILITY(x) \
-	THREAD_ANNOTATION_ATTRIBUTE__(assert_capability(x))
-
-#define ASSERT_SHARED_CAPABILITY(x) \
-	THREAD_ANNOTATION_ATTRIBUTE__(assert_shared_capability(x))
-
-#define RETURN_CAPABILITY(x) \
-	THREAD_ANNOTATION_ATTRIBUTE__(lock_returned(x))
-
-#define NO_THREAD_SAFETY_ANALYSIS \
-	THREAD_ANNOTATION_ATTRIBUTE__(no_thread_safety_analysis)
-
 /**
- * @defgroup Locks
- *
- * Synchronization primitives.
- *
+ * @defgroup Semaphore
  * @see Threads
  */
 
-typedef CAPABILITY("mutex") void *LOCK;
-
-/**
- * @ingroup Locks
- */
-LOCK lock_create();
-/**
- * @ingroup Locks
- */
-void lock_destroy(LOCK lock);
-
-/**
- * @ingroup Locks
- */
-int lock_trylock(LOCK lock) TRY_ACQUIRE(1, lock);
-/**
- * @ingroup Locks
- */
-void lock_wait(LOCK lock) ACQUIRE(lock);
-/**
- * @ingroup Locks
- */
-void lock_unlock(LOCK lock) RELEASE(lock);
-
-/* Group: Semaphores */
 #if defined(CONF_FAMILY_WINDOWS)
 typedef void *SEMAPHORE;
 #elif defined(CONF_PLATFORM_MACOS)
@@ -721,19 +631,19 @@ typedef sem_t SEMAPHORE;
 #endif
 
 /**
- * @ingroup Locks
+ * @ingroup Semaphore
  */
 void sphore_init(SEMAPHORE *sem);
 /**
- * @ingroup Locks
+ * @ingroup Semaphore
  */
 void sphore_wait(SEMAPHORE *sem);
 /**
- * @ingroup Locks
+ * @ingroup Semaphore
  */
 void sphore_signal(SEMAPHORE *sem);
 /**
- * @ingroup Locks
+ * @ingroup Semaphore
  */
 void sphore_destroy(SEMAPHORE *sem);
 
@@ -2926,7 +2836,7 @@ bool shell_unregister_application(const char *executable, bool *updated);
  * Notifies the system that a protocol or file extension has been changed and the shell needs to be updated.
  *
  * @ingroup Shell
- * 
+ *
  * @remark This is a potentially expensive operation, so it should only be called when necessary.
  */
 void shell_update();

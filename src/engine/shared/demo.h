@@ -122,7 +122,9 @@ private:
 	class CSnapshotDelta *m_pSnapshotDelta;
 
 	bool m_UseVideo;
+#if defined(CONF_VIDEORECORDER)
 	bool m_WasRecording = false;
+#endif
 
 	enum EReadChunkHeaderResult
 	{

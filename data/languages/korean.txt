@@ -115,9 +115,6 @@ Delete
 Delete demo
 == 데모 삭제
 
-Demo details
-== 데모 세부정보
-
 Demos
 == 데모
 
@@ -268,9 +265,6 @@ No servers match your filter criteria
 Ok
 == 확인
 
-Open
-== 열기
-
 Parent Folder
 == 상위 폴더
 
@@ -285,10 +279,6 @@ Ping
 
 Pistol
 == 권총
-
-[Demo browser]
-Play
-== 재생
 
 Player
 == 플레이어
@@ -317,9 +307,6 @@ Red team
 Red team wins!
 == 레드팀 승리!
 
-Refresh
-== 새로고침
-
 Remote console
 == 원격 콘솔
 
@@ -328,9 +315,6 @@ Remove
 
 Remove friend
 == 친구 제거
-
-Rename
-== 이름 변경
 
 Rename demo
 == 데모 이름 변경
@@ -511,9 +495,6 @@ News
 Join game
 == 게임 참가
 
-Crc:
-== Crc:
-
 FSAA samples
 == FSAA 샘플
 
@@ -526,17 +507,11 @@ LAN
 Sound volume
 == 음량
 
-Created:
-== 날짜:
-
 Record demo
 == 데모 녹화
 
 Miscellaneous
 == 여러가지
-
-Netversion:
-== 통신 버전:
 
 UI Color
 == UI 색상
@@ -547,9 +522,6 @@ Your skin
 Max Screenshots
 == 최대 스크린샷 수
 
-Size:
-== 사이즈:
-
 Hue
 == 색조
 
@@ -559,26 +531,14 @@ Reset to defaults
 Laser
 == 레이저
 
-Version:
-== 버전:
-
-Map:
-== 맵:
-
 Lht.
 == 명도
 
 Alpha
 == 투명도
 
-Length:
-== 길이:
-
 Name plates size
 == 이름 표시 크기
-
-Type:
-== 종류:
 
 Successfully saved the replay!
 == 리플레이 저장에 성공했습니다!
@@ -718,17 +678,14 @@ Types
 Leak IP
 == IP 노출하기
 
-Please use a different name
-== 다른 이름을 사용해 주십시오
+Please use a different filename
+== 
 
 Remove chat
 == 채팅 제거
 
 Demofile: %s
 == 데모 파일: %s
-
-Markers:
-== 마커:
 
 Demo
 == 데모
@@ -747,9 +704,6 @@ Fetch Info
 
 Demos directory
 == 데모 폴더
-
-Render
-== 렌더링
 
 Connect Dummy
 == 더미 연결
@@ -1057,17 +1011,11 @@ Show local player's key presses
 Background
 == 배경
 
-Entities Background color
-== 엔티티 배경 색상
-
 Use current map as background
 == 현재 맵을 배경으로 사용
 
 Show tiles layers from BG map
 == 배경 맵의 타일 레이어 표시
-
-Regular Background Color
-== 기본 배경 색상
 
 New random timeout code
 == 새로운 무작위 타임아웃 코드 생성
@@ -1648,6 +1596,9 @@ Copy info
 Create a random skin
 == 무작위 스킨 생성
 
+Error playing demo
+== 
+
 Quitting. Please wait…
 == 
 
@@ -1657,7 +1608,19 @@ Restarting. Please wait…
 Multi-View
 == 
 
+Some map images could not be loaded. Check the local console for details.
+== 
+
+Some map sounds could not be loaded. Check the local console for details.
+== 
+
+Loading menu themes
+== 
+
 Rename folder
+== 
+
+Render complete
 == 
 
 A demo with this name already exists
@@ -1670,6 +1633,12 @@ Unable to rename the folder
 == 
 
 (paused)
+== 
+
+Videos directory
+== 
+
+Video was saved to '%s'
 == 
 
 No server selected
@@ -1741,7 +1710,20 @@ Render cut to video
 All combined
 == 
 
+No demo selected
+== 
+
 Folder Link
+== 
+
+Created
+== 
+
+Netversion
+== 
+
+[Demo details]
+map not included
 == 
 
 Are you sure that you want to delete the folder '%s'?
@@ -1753,10 +1735,31 @@ Delete folder
 Unable to delete the folder '%s'. Make sure it's empty first.
 == 
 
+Ghosts directory
+== 
+
+Activate all
+== 
+
+Deactivate all
+== 
+
 Axis
 == 
 
 Graphics card
+== 
+
+Enable ghost
+== 
+
+Only save improvements
+== 
+
+Regular background color
+== 
+
+Entities background color
 == 
 
 Moved ingame

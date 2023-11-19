@@ -1,10 +1,11 @@
 #ifndef BASE_LOGGER_H
 #define BASE_LOGGER_H
 
+#include "lock.h"
 #include "log.h"
+
 #include <atomic>
 #include <memory>
-#include <mutex>
 #include <vector>
 
 typedef void *IOHANDLE;
@@ -226,15 +227,15 @@ class CFutureLogger : public ILogger
 private:
 	std::shared_ptr<ILogger> m_pLogger;
 	std::vector<CLogMessage> m_vPending;
-	std::mutex m_PendingLock;
+	CLock m_PendingLock;
 
 public:
 	/**
 	 * Replace the `CFutureLogger` instance with the given logger. It'll
 	 * receive all log messages sent to the `CFutureLogger` so far.
 	 */
-	void Set(std::shared_ptr<ILogger> pLogger);
-	void Log(const CLogMessage *pMessage) override;
+	void Set(std::shared_ptr<ILogger> pLogger) REQUIRES(!m_PendingLock);
+	void Log(const CLogMessage *pMessage) override REQUIRES(!m_PendingLock);
 	void GlobalFinish() override;
 	void OnFilterChange() override;
 };

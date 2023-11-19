@@ -3,6 +3,8 @@
 #include <atomic>
 #include <cctype>
 #include <charconv>
+#include <chrono>
+#include <cinttypes>
 #include <cmath>
 #include <cstdarg>
 #include <cstdio>
@@ -10,16 +12,11 @@
 #include <iterator> // std::size
 #include <string_view>
 
+#include "lock.h"
+#include "logger.h"
 #include "system.h"
 
-#include "lock_scope.h"
-#include "logger.h"
-
 #include <sys/types.h>
-
-#include <chrono>
-
-#include <cinttypes>
 
 #if defined(CONF_WEBSOCKETS)
 #include <engine/shared/websockets.h>
@@ -191,7 +188,7 @@ void dbg_assert_imp(const char *filename, int line, int test, const char *msg)
 	{
 		const bool already_failing = dbg_assert_has_failed();
 		dbg_assert_failing.store(true, std::memory_order_release);
-		char error[256];
+		char error[512];
 		str_format(error, sizeof(error), "%s(%d): %s", filename, line, msg);
 		dbg_msg("assert", "%s", error);
 		if(!already_failing)
@@ -237,11 +234,6 @@ void mem_copy(void *dest, const void *source, size_t size)
 void mem_move(void *dest, const void *source, size_t size)
 {
 	memmove(dest, source, size);
-}
-
-void mem_zero(void *block, size_t size)
-{
-	memset(block, 0, size);
 }
 
 int mem_comp(const void *a, const void *b, size_t size)
@@ -474,10 +466,9 @@ int io_sync(IOHANDLE io)
 #define ASYNC_BUFSIZE (8 * 1024)
 #define ASYNC_LOCAL_BUFSIZE (64 * 1024)
 
-// TODO: Use Thread Safety Analysis when this file is converted to C++
 struct ASYNCIO
 {
-	LOCK lock;
+	CLock lock;
 	IOHANDLE io;
 	SEMAPHORE sphore;
 	void *thread;
@@ -530,13 +521,12 @@ static void aio_handle_free_and_unlock(ASYNCIO *aio) RELEASE(aio->lock)
 	aio->refcount--;
 
 	do_free = aio->refcount == 0;
-	lock_unlock(aio->lock);
+	aio->lock.unlock();
 	if(do_free)
 	{
 		free(aio->buffer);
 		sphore_destroy(&aio->sphore);
-		lock_destroy(aio->lock);
-		free(aio);
+		delete aio;
 	}
 }
 
@@ -544,7 +534,7 @@ static void aio_thread(void *user)
 {
 	ASYNCIO *aio = (ASYNCIO *)user;
 
-	lock_wait(aio->lock);
+	aio->lock.lock();
 	while(true)
 	{
 		struct BUFFERS buffers;
@@ -563,9 +553,9 @@ static void aio_thread(void *user)
 				aio_handle_free_and_unlock(aio);
 				break;
 			}
-			lock_unlock(aio->lock);
+			aio->lock.unlock();
 			sphore_wait(&aio->sphore);
-			lock_wait(aio->lock);
+			aio->lock.lock();
 			continue;
 		}
 
@@ -589,26 +579,25 @@ static void aio_thread(void *user)
 			}
 		}
 		aio->read_pos = (aio->read_pos + buffers.len1 + buffers.len2) % aio->buffer_size;
-		lock_unlock(aio->lock);
+		aio->lock.unlock();
 
 		io_write(aio->io, local_buffer, local_buffer_len);
 		io_flush(aio->io);
 		result_io_error = io_error(aio->io);
 
-		lock_wait(aio->lock);
+		aio->lock.lock();
 		aio->error = result_io_error;
 	}
 }
 
 ASYNCIO *aio_new(IOHANDLE io)
 {
-	ASYNCIO *aio = (ASYNCIO *)malloc(sizeof(*aio));
+	ASYNCIO *aio = new ASYNCIO;
 	if(!aio)
 	{
 		return 0;
 	}
 	aio->io = io;
-	aio->lock = lock_create();
 	sphore_init(&aio->sphore);
 	aio->thread = 0;
 
@@ -616,8 +605,7 @@ ASYNCIO *aio_new(IOHANDLE io)
 	if(!aio->buffer)
 	{
 		sphore_destroy(&aio->sphore);
-		lock_destroy(aio->lock);
-		free(aio);
+		delete aio;
 		return 0;
 	}
 	aio->buffer_size = ASYNC_BUFSIZE;
@@ -632,8 +620,7 @@ ASYNCIO *aio_new(IOHANDLE io)
 	{
 		free(aio->buffer);
 		sphore_destroy(&aio->sphore);
-		lock_destroy(aio->lock);
-		free(aio);
+		delete aio;
 		return 0;
 	}
 	return aio;
@@ -662,12 +649,12 @@ static unsigned int next_buffer_size(unsigned int cur_size, unsigned int need_si
 
 void aio_lock(ASYNCIO *aio) ACQUIRE(aio->lock)
 {
-	lock_wait(aio->lock);
+	aio->lock.lock();
 }
 
 void aio_unlock(ASYNCIO *aio) RELEASE(aio->lock)
 {
-	lock_unlock(aio->lock);
+	aio->lock.unlock();
 	sphore_signal(&aio->sphore);
 }
 
@@ -752,7 +739,7 @@ int aio_error(ASYNCIO *aio)
 
 void aio_free(ASYNCIO *aio)
 {
-	lock_wait(aio->lock);
+	aio->lock.lock();
 	if(aio->thread)
 	{
 		thread_detach(aio->thread);
@@ -884,98 +871,6 @@ bool thread_init_and_detach(void (*threadfunc)(void *), void *u, const char *nam
 		thread_detach(thread);
 	return thread != nullptr;
 }
-
-#if defined(CONF_FAMILY_UNIX)
-typedef pthread_mutex_t LOCKINTERNAL;
-#elif defined(CONF_FAMILY_WINDOWS)
-typedef CRITICAL_SECTION LOCKINTERNAL;
-#else
-#error not implemented on this platform
-#endif
-
-LOCK lock_create()
-{
-	LOCKINTERNAL *lock = (LOCKINTERNAL *)malloc(sizeof(*lock));
-#if defined(CONF_FAMILY_UNIX)
-	int result;
-#endif
-
-	if(!lock)
-		return 0;
-
-#if defined(CONF_FAMILY_UNIX)
-	result = pthread_mutex_init(lock, 0x0);
-	if(result != 0)
-	{
-		dbg_msg("lock", "init failed: %d", result);
-		free(lock);
-		return 0;
-	}
-#elif defined(CONF_FAMILY_WINDOWS)
-	InitializeCriticalSection((LPCRITICAL_SECTION)lock);
-#else
-#error not implemented on this platform
-#endif
-	return (LOCK)lock;
-}
-
-void lock_destroy(LOCK lock)
-{
-#if defined(CONF_FAMILY_UNIX)
-	int result = pthread_mutex_destroy((LOCKINTERNAL *)lock);
-	if(result != 0)
-		dbg_msg("lock", "destroy failed: %d", result);
-#elif defined(CONF_FAMILY_WINDOWS)
-	DeleteCriticalSection((LPCRITICAL_SECTION)lock);
-#else
-#error not implemented on this platform
-#endif
-	free(lock);
-}
-
-int lock_trylock(LOCK lock)
-{
-#if defined(CONF_FAMILY_UNIX)
-	return pthread_mutex_trylock((LOCKINTERNAL *)lock);
-#elif defined(CONF_FAMILY_WINDOWS)
-	return !TryEnterCriticalSection((LPCRITICAL_SECTION)lock);
-#else
-#error not implemented on this platform
-#endif
-}
-
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wthread-safety-analysis"
-#endif
-void lock_wait(LOCK lock)
-{
-#if defined(CONF_FAMILY_UNIX)
-	int result = pthread_mutex_lock((LOCKINTERNAL *)lock);
-	if(result != 0)
-		dbg_msg("lock", "lock failed: %d", result);
-#elif defined(CONF_FAMILY_WINDOWS)
-	EnterCriticalSection((LPCRITICAL_SECTION)lock);
-#else
-#error not implemented on this platform
-#endif
-}
-
-void lock_unlock(LOCK lock)
-{
-#if defined(CONF_FAMILY_UNIX)
-	int result = pthread_mutex_unlock((LOCKINTERNAL *)lock);
-	if(result != 0)
-		dbg_msg("lock", "unlock failed: %d", result);
-#elif defined(CONF_FAMILY_WINDOWS)
-	LeaveCriticalSection((LPCRITICAL_SECTION)lock);
-#else
-#error not implemented on this platform
-#endif
-}
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
 
 #if defined(CONF_FAMILY_WINDOWS)
 void sphore_init(SEMAPHORE *sem)
@@ -2211,7 +2106,6 @@ void fs_listdir(const char *dir, FS_LISTDIR_CALLBACK cb, int type, void *user)
 	if(handle == INVALID_HANDLE_VALUE)
 		return;
 
-	/* add all the entries */
 	do
 	{
 		const std::string current_entry = windows_wide_to_utf8(finddata.cFileName);
@@ -2221,26 +2115,29 @@ void fs_listdir(const char *dir, FS_LISTDIR_CALLBACK cb, int type, void *user)
 
 	FindClose(handle);
 #else
-	struct dirent *entry;
-	char buffer[IO_MAX_PATH_LENGTH];
-	int length;
-	DIR *d = opendir(dir);
-
-	if(!d)
+	DIR *dir_handle = opendir(dir);
+	if(dir_handle == nullptr)
 		return;
 
+	char buffer[IO_MAX_PATH_LENGTH];
 	str_format(buffer, sizeof(buffer), "%s/", dir);
-	length = str_length(buffer);
-
-	while((entry = readdir(d)) != NULL)
+	size_t length = str_length(buffer);
+	while(true)
 	{
-		str_copy(buffer + length, entry->d_name, (int)sizeof(buffer) - length);
+		struct dirent *entry = readdir(dir_handle);
+		if(entry == nullptr)
+			break;
+		if(!str_utf8_check(entry->d_name))
+		{
+			log_error("filesystem", "ERROR: file/folder name containing invalid UTF-8 found in folder '%s'", dir);
+			continue;
+		}
+		str_copy(buffer + length, entry->d_name, sizeof(buffer) - length);
 		if(cb(entry->d_name, fs_is_dir(buffer), type, user))
 			break;
 	}
 
-	/* close the directory and return */
-	closedir(d);
+	closedir(dir_handle);
 #endif
 }
 
@@ -2256,7 +2153,6 @@ void fs_listdir_fileinfo(const char *dir, FS_LISTDIR_CALLBACK_FILEINFO cb, int t
 	if(handle == INVALID_HANDLE_VALUE)
 		return;
 
-	/* add all the entries */
 	do
 	{
 		const std::string current_entry = windows_wide_to_utf8(finddata.cFileName);
@@ -2272,25 +2168,29 @@ void fs_listdir_fileinfo(const char *dir, FS_LISTDIR_CALLBACK_FILEINFO cb, int t
 
 	FindClose(handle);
 #else
-	struct dirent *entry;
-	time_t created = -1, modified = -1;
-	char buffer[IO_MAX_PATH_LENGTH];
-	int length;
-	DIR *d = opendir(dir);
-
-	if(!d)
+	DIR *dir_handle = opendir(dir);
+	if(dir_handle == nullptr)
 		return;
 
+	char buffer[IO_MAX_PATH_LENGTH];
 	str_format(buffer, sizeof(buffer), "%s/", dir);
-	length = str_length(buffer);
+	size_t length = str_length(buffer);
 
-	while((entry = readdir(d)) != NULL)
+	while(true)
 	{
-		CFsFileInfo info;
-
-		str_copy(buffer + length, entry->d_name, (int)sizeof(buffer) - length);
+		struct dirent *entry = readdir(dir_handle);
+		if(entry == nullptr)
+			break;
+		if(!str_utf8_check(entry->d_name))
+		{
+			log_error("filesystem", "ERROR: file/folder name containing invalid UTF-8 found in folder '%s'", dir);
+			continue;
+		}
+		str_copy(buffer + length, entry->d_name, sizeof(buffer) - length);
+		time_t created = -1, modified = -1;
 		fs_file_time(buffer, &created, &modified);
 
+		CFsFileInfo info;
 		info.m_pName = entry->d_name;
 		info.m_TimeCreated = created;
 		info.m_TimeModified = modified;
@@ -2299,8 +2199,7 @@ void fs_listdir_fileinfo(const char *dir, FS_LISTDIR_CALLBACK_FILEINFO cb, int t
 			break;
 	}
 
-	/* close the directory and return */
-	closedir(d);
+	closedir(dir_handle);
 #endif
 }
 
@@ -2309,17 +2208,27 @@ int fs_storage_path(const char *appname, char *path, int max)
 #if defined(CONF_FAMILY_WINDOWS)
 	WCHAR *wide_home = _wgetenv(L"APPDATA");
 	if(!wide_home)
+	{
+		path[0] = '\0';
 		return -1;
+	}
 	const std::string home = windows_wide_to_utf8(wide_home);
 	str_format(path, max, "%s/%s", home.c_str(), appname);
 	return 0;
-#elif defined(CONF_PLATFORM_ANDROID)
-	// just use the data directory
-	return -1;
 #else
 	char *home = getenv("HOME");
 	if(!home)
+	{
+		path[0] = '\0';
 		return -1;
+	}
+
+	if(!str_utf8_check(home))
+	{
+		log_error("filesystem", "ERROR: the HOME environment variable contains invalid UTF-8");
+		path[0] = '\0';
+		return -1;
+	}
 
 #if defined(CONF_PLATFORM_HAIKU)
 	str_format(path, max, "%s/config/settings/%s", home, appname);
@@ -2335,7 +2244,15 @@ int fs_storage_path(const char *appname, char *path, int max)
 	{
 		char *data_home = getenv("XDG_DATA_HOME");
 		if(data_home)
+		{
+			if(!str_utf8_check(data_home))
+			{
+				log_error("filesystem", "ERROR: the XDG_DATA_HOME environment variable contains invalid UTF-8");
+				path[0] = '\0';
+				return -1;
+			}
 			str_format(path, max, "%s/%s", data_home, appname);
+		}
 		else
 			str_format(path, max, "%s/.local/share/%s", home, appname);
 	}
@@ -2466,13 +2383,20 @@ char *fs_getcwd(char *buffer, int buffer_size)
 		const DWORD LastError = GetLastError();
 		const std::string ErrorMsg = windows_format_system_message(LastError);
 		dbg_msg("filesystem", "GetCurrentDirectoryW failed: %ld %s", LastError, ErrorMsg.c_str());
+		buffer[0] = '\0';
 		return nullptr;
 	}
 	const std::string current_dir = windows_wide_to_utf8(wide_current_dir.c_str());
 	str_copy(buffer, current_dir.c_str(), buffer_size);
 	return buffer;
 #else
-	return getcwd(buffer, buffer_size);
+	char *result = getcwd(buffer, buffer_size);
+	if(result == nullptr || !str_utf8_check(result))
+	{
+		buffer[0] = '\0';
+		return nullptr;
+	}
+	return result;
 #endif
 }
 

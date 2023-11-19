@@ -4,6 +4,7 @@
 #define BASE_VMATH_H
 
 #include <cmath>
+#include <cstdint>
 
 #include "math.h"
 
@@ -22,11 +23,7 @@ public:
 		T y, v;
 	};
 
-	constexpr vector2_base() :
-		x(T()), y(T())
-	{
-	}
-
+	constexpr vector2_base() = default;
 	constexpr vector2_base(T nx, T ny) :
 		x(nx), y(ny)
 	{
@@ -197,11 +194,7 @@ public:
 		T z, b, l, w;
 	};
 
-	constexpr vector3_base() :
-		x(T()), y(T()), z(T())
-	{
-	}
-
+	constexpr vector3_base() = default;
 	constexpr vector3_base(T nx, T ny, T nz) :
 		x(nx), y(ny), z(nz)
 	{
@@ -325,11 +318,7 @@ public:
 		T w, a;
 	};
 
-	constexpr vector4_base() :
-		x(T()), y(T()), z(T()), w(T())
-	{
-	}
-
+	constexpr vector4_base() = default;
 	constexpr vector4_base(T nx, T ny, T nz, T nw) :
 		x(nx), y(ny), z(nz), w(nw)
 	{
@@ -399,5 +388,6 @@ public:
 typedef vector4_base<float> vec4;
 typedef vector4_base<bool> bvec4;
 typedef vector4_base<int> ivec4;
+typedef vector4_base<uint8_t> ubvec4;
 
 #endif

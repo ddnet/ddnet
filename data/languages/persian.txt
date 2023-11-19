@@ -103,9 +103,6 @@ Delete
 Delete demo
 == ﻮﻣﺩ ﻥﺩﺮﻛ کﺎﭘ
 
-Demo details
-== ﻮﻣﺩ ﺕﺎﯿﺋﺰﺟ
-
 Demofile: %s
 == %s :ﻮﻣﺩ ﻞﯾﺎﻓ
 
@@ -262,9 +259,6 @@ No servers match your filter criteria
 Ok
 == ﻪﺷﺎﺑ
 
-Open
-== ﻥﺩﺮﻛﺯﺎﺑ
-
 Parent Folder
 == ﯽﻠﺻﺍ ﻪﺷﻮﭘ
 
@@ -279,10 +273,6 @@ Ping
 
 Pistol
 == ﺮﯿﺗ ﺖﻔﻫ
-
-[Demo browser]
-Play
-== ﺶﺨﭘ
 
 Successfully saved the replay!
 == !ﺪﺷ ﻩﺮﯿﺧﺫ ﺖﯿﻘﻓﻮﻣ ﺎﺑ ﺶﺨﭘﺯﺎﺑ
@@ -463,9 +453,6 @@ Exclude
 Server address:
 == ﺭﻭﺮﺳ ﺱﺭﺩﺁ
 
-Refresh
-== ﯼﺯﺎﺳ ﻩﺯﺎﺗ
-
 Server not full
 == ﺪﺷﺎﺒﻧ ﺮﭘ ﺭﻭﺮﺳ
 
@@ -502,32 +489,11 @@ Scoreboard
 Remove
 == ﻥﺩﺮﮐ کﺎﭘ
 
-Please use a different name
-== ﻦﮐ ﻩﺩﺎﻔﺘﺳﺍ ﺕﻭﺎﻔﺘﻣ ﻡﺎﻧ ﮏﯾ ﺯﺍ ﺎﻔﻄﻟ
+Please use a different filename
+== 
 
 Remove chat
 == ﺖﭼ ﻥﺩﺮﮐ کﺎﭘ
-
-Created:
-== :ﺖﺧﺎﺳ ﺦﯾﺭﺎﺗ
-
-Type:
-== :ﻉﻮﻧ
-
-Length:
-== :ﻝﻮﻃ
-
-Version:
-== :ﻪﺨﺴﻧ
-
-Markers:
-== :ﺎﻫ ﺮﮕﻧﺎﺸﻧ
-
-Map:
-== :ﭗﻣ
-
-Size:
-== :ﻢﺠﺣ
 
 Demo
 == ﻮﻣﺩ
@@ -543,9 +509,6 @@ Date
 
 Demos directory
 == ﺎﻫﻮﻣﺩ ﻪﺷﻮﭘ
-
-Rename
-== ﻡﺎﻧ ﺮﯿﯿﻐﺗ
 
 Connect Dummy
 == ﯽﻣﺍﺩ ﻝﺎﺼﺗﺍ
@@ -1044,12 +1007,6 @@ Loading demo files
 %.2f KiB
 == %.2f KiB
 
-Crc:
-== Crc
-
-Netversion:
-== ﻦﯾﻼﻧﺁ ﻪﺨﺴﻧ
-
 Fetch Info
 == ﺕﺎﻋﻼﻃﺍ ﯽﺸﮐﺍﻭ
 
@@ -1058,9 +1015,6 @@ Open the directory that contains the demo files
 
 Are you sure that you want to delete the demo '%s'?
 == ؟ﺪﯿﻨﮐ ﻑﺬﺣ ﺍﺭ '%s' ﻮﻣﺩ ﺪﯿﻫﺍﻮﺧ ﯽﻣ ﻪﮐ ﺪﯿﺘﺴﻫ ﻦﺌﻤﻄﻣ ﺎﯾﺁ
-
-Render
-== ﺭﺪﻧﺭ
 
 Unable to delete the demo '%s'
 == ﺩﺭﺍﺪﻧ ﺩﻮﺟﻭ '%s' ﻮﻣﺩ ﻑﺬﺣ ﻥﺎﮑﻣﺍ
@@ -1478,17 +1432,11 @@ AntiPing: predict weapons
 AntiPing: predict grenade paths
 == ﺎﻫ ﮏﺠﻧﺭﺎﻧ ﺮﯿﺴﻣ ﯽﻨﯿﺑ‌ﺶﯿﭘ AntiPing:
 
-Entities Background color
-== ﺎﻫ ﺖﯾﺩﻮﺟﻮﻣ ﻪﻨﯿﻣﺯﺲﭘ ﮓﻧﺭ
-
 Use current map as background
 == ﺪﯿﻨﮐ ﻩﺩﺎﻔﺘﺳﺍ ﻪﻨﯿﻣﺯ ﺲﭘ ﻥﺍﻮﻨﻋ ﻪﺑ ﯽﻠﻌﻓ ﻪﺸﻘﻧ ﺯﺍ
 
 Show tiles layers from BG map
 == BG ﭗﻣ ﺯﺍﺎﻫ ﯽﺷﺎﮐ ﯼﺎﻫ ﻪﯾﻻ ﺶﯾﺎﻤﻧ
-
-Regular Background Color
-== ﯼﺩﺎﻋ ﻪﻨﯿﻣﺯ ﺲﭘ ﮓﻧﺭ
 
 New random timeout code
 == ﺪﯾﺪﺟ ﯽﻓﺩﺎﺼﺗ ﺕﻭﺍﻢﯾﺎﺗ ﺪﮐ
@@ -1606,6 +1554,9 @@ Could not initialize the given graphics backend, this is probably because you di
 Could not save downloaded map. Try manually deleting this file: %s
 == 
 
+Error playing demo
+== 
+
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
 == 
 
@@ -1624,7 +1575,19 @@ Restarting. Please wait…
 Multi-View
 == 
 
+Some map images could not be loaded. Check the local console for details.
+== 
+
+Some map sounds could not be loaded. Check the local console for details.
+== 
+
+Loading menu themes
+== 
+
 Rename folder
+== 
+
+Render complete
 == 
 
 A demo with this name already exists
@@ -1637,6 +1600,12 @@ Unable to rename the folder
 == 
 
 (paused)
+== 
+
+Videos directory
+== 
+
+Video was saved to '%s'
 == 
 
 Copy info
@@ -1711,7 +1680,20 @@ Render cut to video
 All combined
 == 
 
+No demo selected
+== 
+
 Folder Link
+== 
+
+Created
+== 
+
+Netversion
+== 
+
+[Demo details]
+map not included
 == 
 
 Are you sure that you want to delete the folder '%s'?
@@ -1723,6 +1705,15 @@ Delete folder
 Unable to delete the folder '%s'. Make sure it's empty first.
 == 
 
+Ghosts directory
+== 
+
+Activate all
+== 
+
+Deactivate all
+== 
+
 Create a random skin
 == 
 
@@ -1730,6 +1721,18 @@ Axis
 == 
 
 Graphics card
+== 
+
+Enable ghost
+== 
+
+Only save improvements
+== 
+
+Regular background color
+== 
+
+Entities background color
 == 
 
 Unregister protocol and file extensions

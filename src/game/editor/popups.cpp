@@ -1296,10 +1296,34 @@ CUI::EPopupMenuFunctionResult CEditor::PopupEnvPoint(void *pContext, CUIRect Vie
 
 	pEditor->m_ShowEnvelopePreview = SHOWENV_SELECTED;
 
+	std::shared_ptr<CEnvelope> pEnvelope = pEditor->m_Map.m_vpEnvelopes[pEditor->m_SelectedEnvelope];
+
+	if(pEnvelope->GetChannels() == 4)
+	{
+		View.HSplitTop(RowHeight, &Row, &View);
+		View.HSplitTop(4.0f, nullptr, &View);
+		Row.VSplitLeft(60.0f, &Label, &Row);
+		Row.VSplitLeft(10.0f, nullptr, &EditBox);
+		pEditor->UI()->DoLabel(&Label, "Color:", RowHeight - 2.0f, TEXTALIGN_ML);
+
+		const auto [SelectedIndex, _] = pEditor->m_vSelectedEnvelopePoints.front();
+		auto *pValues = pEnvelope->m_vPoints[SelectedIndex].m_aValues;
+		const ColorRGBA Color = ColorRGBA(fx2f(pValues[0]), fx2f(pValues[1]), fx2f(pValues[2]), fx2f(pValues[3]));
+		const auto &&SetColor = [&](ColorRGBA NewColor) {
+			if(Color == NewColor)
+				return;
+			for(int Channel = 0; Channel < 4; ++Channel)
+				pValues[Channel] = f2fx(NewColor[Channel]);
+			pEditor->m_UpdateEnvPointInfo = true;
+			pEditor->m_Map.OnModify();
+		};
+		static char s_ColorPickerButton;
+		pEditor->DoColorPickerButton(&s_ColorPickerButton, &EditBox, Color, SetColor);
+	}
+
 	static CLineInputNumber s_CurValueInput;
 	static CLineInputNumber s_CurTimeInput;
 
-	std::shared_ptr<CEnvelope> pEnvelope = pEditor->m_Map.m_vpEnvelopes[pEditor->m_SelectedEnvelope];
 	if(pEditor->m_UpdateEnvPointInfo)
 	{
 		pEditor->m_UpdateEnvPointInfo = false;
@@ -1336,14 +1360,14 @@ CUI::EPopupMenuFunctionResult CEditor::PopupEnvPoint(void *pContext, CUIRect Vie
 	View.HSplitTop(RowHeight, &Row, &View);
 	Row.VSplitLeft(60.0f, &Label, &Row);
 	Row.VSplitLeft(10.0f, nullptr, &EditBox);
-	pEditor->UI()->DoLabel(&Label, "Value:", RowHeight - 2.0f, TEXTALIGN_LEFT);
+	pEditor->UI()->DoLabel(&Label, "Value:", RowHeight - 2.0f, TEXTALIGN_ML);
 	pEditor->DoEditBox(&s_CurValueInput, &EditBox, RowHeight - 2.0f, IGraphics::CORNER_ALL, "The value of the selected envelope point");
 
-	View.HMargin(4.0f, &View);
+	View.HSplitTop(4.0f, nullptr, &View);
 	View.HSplitTop(RowHeight, &Row, &View);
 	Row.VSplitLeft(60.0f, &Label, &Row);
 	Row.VSplitLeft(10.0f, nullptr, &EditBox);
-	pEditor->UI()->DoLabel(&Label, "Time (in s):", RowHeight - 2.0f, TEXTALIGN_LEFT);
+	pEditor->UI()->DoLabel(&Label, "Time (in s):", RowHeight - 2.0f, TEXTALIGN_ML);
 	pEditor->DoEditBox(&s_CurTimeInput, &EditBox, RowHeight - 2.0f, IGraphics::CORNER_ALL, "The time of the selected envelope point");
 
 	if(pEditor->Input()->KeyIsPressed(KEY_RETURN) || pEditor->Input()->KeyIsPressed(KEY_KP_ENTER))
@@ -1371,7 +1395,6 @@ CUI::EPopupMenuFunctionResult CEditor::PopupEnvPoint(void *pContext, CUIRect Vie
 		else
 		{
 			auto [SelectedIndex, SelectedChannel] = pEditor->m_vSelectedEnvelopePoints.front();
-
 			if(pEnvelope->GetChannels() == 4)
 				CurrentValue = clamp(CurrentValue, 0.0f, 1.0f);
 			pEnvelope->m_vPoints[SelectedIndex].m_aValues[SelectedChannel] = f2fx(CurrentValue);
@@ -1400,7 +1423,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupEnvPoint(void *pContext, CUIRect Vie
 		pEditor->m_Map.OnModify();
 	}
 
-	View.HMargin(6.0f, &View);
+	View.HSplitTop(6.0f, nullptr, &View);
 	View.HSplitTop(RowHeight, &Row, &View);
 	static int s_DeleteButtonID = 0;
 	const char *pButtonText = pEditor->IsTangentSelected() ? "Reset" : "Delete";
@@ -1552,16 +1575,37 @@ CUI::EPopupMenuFunctionResult CEditor::PopupImage(void *pContext, CUIRect View, 
 {
 	CEditor *pEditor = static_cast<CEditor *>(pContext);
 
+	static int s_ExternalButton = 0;
 	static int s_ReaddButton = 0;
 	static int s_ReplaceButton = 0;
 	static int s_RemoveButton = 0;
 	static int s_ExportButton = 0;
 
+	const float RowHeight = 12.0f;
+
 	CUIRect Slot;
-	View.HSplitTop(12.0f, &Slot, &View);
+	View.HSplitTop(RowHeight, &Slot, &View);
 	std::shared_ptr<CEditorImage> pImg = pEditor->m_Map.m_vpImages[pEditor->m_SelectedImage];
 
-	static int s_ExternalButton = 0;
+	if(!pImg->m_External)
+	{
+		CUIRect Label, EditBox;
+
+		static CLineInput s_RenameInput;
+
+		Slot.VMargin(5.0f, &Slot);
+		Slot.VSplitLeft(35.0f, &Label, &Slot);
+		Slot.VSplitLeft(RowHeight - 2.0f, nullptr, &EditBox);
+		pEditor->UI()->DoLabel(&Label, "Name:", RowHeight - 2.0f, TEXTALIGN_ML);
+
+		s_RenameInput.SetBuffer(pImg->m_aName, sizeof(pImg->m_aName));
+		if(pEditor->DoEditBox(&s_RenameInput, &EditBox, RowHeight - 2.0f))
+			pEditor->m_Map.OnModify();
+
+		View.HSplitTop(5.0f, nullptr, &View);
+		View.HSplitTop(RowHeight, &Slot, &View);
+	}
+
 	if(pImg->m_External)
 	{
 		if(pEditor->DoButton_MenuItem(&s_ExternalButton, "Embed", 0, &Slot, 0, "Embeds the image into the map file."))
@@ -1570,7 +1614,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupImage(void *pContext, CUIRect View, 
 			return CUI::POPUP_CLOSE_CURRENT;
 		}
 		View.HSplitTop(5.0f, nullptr, &View);
-		View.HSplitTop(12.0f, &Slot, &View);
+		View.HSplitTop(RowHeight, &Slot, &View);
 	}
 	else if(CEditor::IsVanillaImage(pImg->m_aName))
 	{
@@ -1580,7 +1624,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupImage(void *pContext, CUIRect View, 
 			return CUI::POPUP_CLOSE_CURRENT;
 		}
 		View.HSplitTop(5.0f, nullptr, &View);
-		View.HSplitTop(12.0f, &Slot, &View);
+		View.HSplitTop(RowHeight, &Slot, &View);
 	}
 
 	static CUI::SSelectionPopupContext s_SelectionPopupContext;
@@ -1619,7 +1663,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupImage(void *pContext, CUIRect View, 
 	}
 
 	View.HSplitTop(5.0f, nullptr, &View);
-	View.HSplitTop(12.0f, &Slot, &View);
+	View.HSplitTop(RowHeight, &Slot, &View);
 	if(pEditor->DoButton_MenuItem(&s_ReplaceButton, "Replace", 0, &Slot, 0, "Replaces the image with a new one"))
 	{
 		pEditor->InvokeFileDialog(IStorage::TYPE_ALL, FILETYPE_IMG, "Replace Image", "Replace", "mapres", false, ReplaceImageCallback, pEditor);
@@ -1627,7 +1671,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupImage(void *pContext, CUIRect View, 
 	}
 
 	View.HSplitTop(5.0f, nullptr, &View);
-	View.HSplitTop(12.0f, &Slot, &View);
+	View.HSplitTop(RowHeight, &Slot, &View);
 	if(pEditor->DoButton_MenuItem(&s_RemoveButton, "Remove", 0, &Slot, 0, "Removes the image from the map"))
 	{
 		pEditor->m_Map.m_vpImages.erase(pEditor->m_Map.m_vpImages.begin() + pEditor->m_SelectedImage);
@@ -1638,7 +1682,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupImage(void *pContext, CUIRect View, 
 	if(!pImg->m_External)
 	{
 		View.HSplitTop(5.0f, nullptr, &View);
-		View.HSplitTop(12.0f, &Slot, &View);
+		View.HSplitTop(RowHeight, &Slot, &View);
 		if(pEditor->DoButton_MenuItem(&s_ExportButton, "Export", 0, &Slot, 0, "Export the image"))
 		{
 			pEditor->InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_IMG, "Save image", "Save", "mapres", false, CallbackSaveImage, pEditor);
@@ -1659,13 +1703,32 @@ CUI::EPopupMenuFunctionResult CEditor::PopupSound(void *pContext, CUIRect View, 
 	static int s_RemoveButton = 0;
 	static int s_ExportButton = 0;
 
+	const float RowHeight = 12.0f;
+
 	CUIRect Slot;
-	View.HSplitTop(12.0f, &Slot, &View);
+	View.HSplitTop(RowHeight, &Slot, &View);
 	std::shared_ptr<CEditorSound> pSound = pEditor->m_Map.m_vpSounds[pEditor->m_SelectedSound];
 
 	static CUI::SSelectionPopupContext s_SelectionPopupContext;
 	static CScrollRegion s_SelectionPopupScrollRegion;
 	s_SelectionPopupContext.m_pScrollRegion = &s_SelectionPopupScrollRegion;
+
+	CUIRect Label, EditBox;
+
+	static CLineInput s_RenameInput;
+
+	Slot.VMargin(5.0f, &Slot);
+	Slot.VSplitLeft(35.0f, &Label, &Slot);
+	Slot.VSplitLeft(RowHeight - 2.0f, nullptr, &EditBox);
+	pEditor->UI()->DoLabel(&Label, "Name:", RowHeight - 2.0f, TEXTALIGN_ML);
+
+	s_RenameInput.SetBuffer(pSound->m_aName, sizeof(pSound->m_aName));
+	if(pEditor->DoEditBox(&s_RenameInput, &EditBox, RowHeight - 2.0f))
+		pEditor->m_Map.OnModify();
+
+	View.HSplitTop(5.0f, nullptr, &View);
+	View.HSplitTop(RowHeight, &Slot, &View);
+
 	if(pEditor->DoButton_MenuItem(&s_ReaddButton, "Readd", 0, &Slot, 0, "Reloads the sound from the mapres folder"))
 	{
 		char aFilename[IO_MAX_PATH_LENGTH];
@@ -1697,7 +1760,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupSound(void *pContext, CUIRect View, 
 	}
 
 	View.HSplitTop(5.0f, nullptr, &View);
-	View.HSplitTop(12.0f, &Slot, &View);
+	View.HSplitTop(RowHeight, &Slot, &View);
 	if(pEditor->DoButton_MenuItem(&s_ReplaceButton, "Replace", 0, &Slot, 0, "Replaces the sound with a new one"))
 	{
 		pEditor->InvokeFileDialog(IStorage::TYPE_ALL, FILETYPE_SOUND, "Replace sound", "Replace", "mapres", false, ReplaceSoundCallback, pEditor);
@@ -1705,7 +1768,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupSound(void *pContext, CUIRect View, 
 	}
 
 	View.HSplitTop(5.0f, nullptr, &View);
-	View.HSplitTop(12.0f, &Slot, &View);
+	View.HSplitTop(RowHeight, &Slot, &View);
 	if(pEditor->DoButton_MenuItem(&s_RemoveButton, "Remove", 0, &Slot, 0, "Removes the sound from the map"))
 	{
 		pEditor->m_Map.m_vpSounds.erase(pEditor->m_Map.m_vpSounds.begin() + pEditor->m_SelectedSound);
@@ -1714,7 +1777,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupSound(void *pContext, CUIRect View, 
 	}
 
 	View.HSplitTop(5.0f, nullptr, &View);
-	View.HSplitTop(12.0f, &Slot, &View);
+	View.HSplitTop(RowHeight, &Slot, &View);
 	if(pEditor->DoButton_MenuItem(&s_ExportButton, "Export", 0, &Slot, 0, "Export sound"))
 	{
 		pEditor->InvokeFileDialog(IStorage::TYPE_SAVE, FILETYPE_SOUND, "Save sound", "Save", "mapres", false, CallbackSaveSound, pEditor);

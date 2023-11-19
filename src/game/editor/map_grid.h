@@ -19,7 +19,7 @@ public:
 
 	void Toggle();
 
-	bool Factor() const;
+	int Factor() const;
 	void ResetFactor();
 	void IncreaseFactor();
 	void DecreaseFactor();

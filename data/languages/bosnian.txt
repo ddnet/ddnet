@@ -106,9 +106,6 @@ Delete
 Delete demo
 == Brisanje demo-snimka
 
-Demo details
-== Podaci o demo-snimku
-
 Demofile: %s
 == Demo-snimak: %s
 
@@ -262,9 +259,6 @@ No servers match your filter criteria
 Ok
 == OK
 
-Open
-== Otvori
-
 Parent Folder
 == Prethodni folder
 
@@ -279,10 +273,6 @@ Ping
 
 Pistol
 == Pištolj
-
-[Demo browser]
-Play
-== Pogledaj
 
 Play background music
 == Pozadinska muzika
@@ -317,9 +307,6 @@ Red team
 Red team wins!
 == Crveni tim je pobijedio!
 
-Refresh
-== Osvježi
-
 Remote console
 == Udaljena konzola
 
@@ -328,9 +315,6 @@ Remove
 
 Remove friend
 == Ukloni prijatelja
-
-Rename
-== Preimenuj
 
 Rename demo
 == Preimenuj demo-snimak
@@ -505,23 +489,11 @@ FSAA samples
 Sound volume
 == Jačina zvuka
 
-Created:
-== Kreirano:
-
 Max Screenshots
 == Maksimalan broj screenshot-a
 
-Length:
-== Dužina:
-
 Laser
 == Laser
-
-Netversion:
-== Net-verzija:
-
-Map:
-== Mapa:
 
 Hue
 == Nijans.
@@ -532,17 +504,11 @@ Record demo
 Your skin
 == Vaš skin
 
-Size:
-== Veličina:
-
 Reset to defaults
 == Vrati na početne postavke
 
 Quit anyway?
 == Izlaz?
-
-Version:
-== Verzija:
 
 Round
 == Runda
@@ -553,9 +519,6 @@ Lht.
 UI Color
 == Boja menija
 
-Crc:
-== Crc:
-
 Alpha
 == Provid.
 
@@ -564,9 +527,6 @@ LAN
 
 Name plates size
 == Veličina podloge za ime
-
-Type:
-== Tip:
 
 Successfully saved the replay!
 == Uspješno sačuvan replay-snimak!
@@ -679,14 +639,11 @@ Update now
 Restart
 == Restart
 
-Please use a different name
-== Molimo izaberite drugo ime
+Please use a different filename
+== 
 
 Remove chat
 == Ukloni čat
-
-Markers:
-== Markeri
 
 Demo
 == Demo-snimak
@@ -702,9 +659,6 @@ Date
 
 Fetch Info
 == Dohvati info
-
-Render
-== Renderuj
 
 Connecting dummy
 == Konektovanje dummy-a
@@ -1021,6 +975,9 @@ Could not initialize the given graphics backend, this is probably because you di
 Could not save downloaded map. Try manually deleting this file: %s
 == 
 
+Error playing demo
+== 
+
 Saving ddnet-settings.cfg failed
 == 
 
@@ -1081,7 +1038,16 @@ Multi-View
 Team %d
 == 
 
+Some map images could not be loaded. Check the local console for details.
+== 
+
 Uploading map data to GPU
+== 
+
+Some map sounds could not be loaded. Check the local console for details.
+== 
+
+Loading menu themes
 == 
 
 Trying to determine UDP connectivity...
@@ -1103,6 +1069,9 @@ Requesting to join the game
 == 
 
 Rename folder
+== 
+
+Render complete
 == 
 
 Existing Player
@@ -1130,6 +1099,12 @@ File '%s' already exists, do you want to overwrite it?
 == 
 
 Speed
+== 
+
+Videos directory
+== 
+
+Video was saved to '%s'
 == 
 
 Join Tutorial Server
@@ -1300,7 +1275,20 @@ Loading demo files
 All combined
 == 
 
+No demo selected
+== 
+
 Folder Link
+== 
+
+Created
+== 
+
+Netversion
+== 
+
+[Demo details]
+map not included
 == 
 
 %.2f MiB
@@ -1331,6 +1319,15 @@ Unable to delete the folder '%s'. Make sure it's empty first.
 == 
 
 Loading ghost files
+== 
+
+Ghosts directory
+== 
+
+Activate all
+== 
+
+Deactivate all
 == 
 
 Menu opened. Press Esc key again to close menu.
@@ -1623,13 +1620,19 @@ Freeze Laser Inner Color
 Set all to Rifle
 == 
 
+Enable ghost
+== 
+
 When you cross the start line, show a ghost tee replicating the movements of your best time
 == 
 
-Overlay entities
+Opacity
 == 
 
-Opacity
+Only save improvements
+== 
+
+Overlay entities
 == 
 
 Adjust the opacity of entities belonging to other teams, such as tees and nameplates
@@ -1647,13 +1650,13 @@ Tries to predict other entities to give a feel of low latency
 Background
 == 
 
-Entities Background color
+Regular background color
+== 
+
+Entities background color
 == 
 
 Use current map as background
-== 
-
-Regular Background Color
 == 
 
 Run on join

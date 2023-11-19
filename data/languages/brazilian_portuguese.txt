@@ -129,9 +129,6 @@ Delete
 Delete demo
 == Deletar demo
 
-Demo details
-== Detalhes da demo
-
 Demofile: %s
 == Demo: %s
 
@@ -288,9 +285,6 @@ No servers match your filter criteria
 Ok
 == Ok
 
-Open
-== Abrir
-
 Parent Folder
 == Diretório pai
 
@@ -305,10 +299,6 @@ Ping
 
 Pistol
 == Pistola
-
-[Demo browser]
-Play
-== Assistir
 
 Play background music
 == Tocar música de fundo
@@ -343,9 +333,6 @@ Red team
 Red team wins!
 == Vitória do time vermelho!
 
-Refresh
-== Atualizar
-
 Remote console
 == Console remoto
 
@@ -354,9 +341,6 @@ Remove
 
 Remove friend
 == Deletar amigo
-
-Rename
-== Renomear
 
 Rename demo
 == Renomear demo
@@ -544,9 +528,6 @@ Join game
 Countries
 == Países
 
-Crc:
-== CRC:
-
 FSAA samples
 == Amostras FSAA
 
@@ -583,9 +564,6 @@ HUD
 Show names in chat in team colors
 == Mostrar nomes no chat com cores do time
 
-Netversion:
-== Netversion:
-
 Enable team chat sound
 == Habilitar som de chat do time
 
@@ -607,17 +585,14 @@ DDNet Client needs to be restarted to complete update!
 Max Screenshots
 == Máximo de capturas de tela
 
-Size:
-== Tamanho:
-
 Sound volume
 == Volume do som
 
 Hue
 == Matiz
 
-Please use a different name
-== Por favor, use um nome diferente
+Please use a different filename
+== 
 
 Show others
 == Mostrar outros
@@ -673,9 +648,6 @@ Exclude
 DDNet Client updated!
 == DDNet Client atualizado!
 
-Type:
-== Tipo:
-
 Internet
 == Internet
 
@@ -723,9 +695,6 @@ Refresh Rate
 
 New random timeout code
 == Novo código aleatório de timeout
-
-Created:
-== Criado:
 
 Suicides
 == Suicídios
@@ -781,12 +750,6 @@ LAN
 Connecting dummy
 == Conectando dummy
 
-Version:
-== Versão:
-
-Map:
-== Mapa:
-
 Lht.
 == Lumin.
 
@@ -807,9 +770,6 @@ Highlighted message
 
 Alpha
 == Alfa
-
-Length:
-== Duração:
 
 Switch weapon when out of ammo
 == Trocar de arma quando acabar munição
@@ -909,9 +869,6 @@ Are you sure that you want to disconnect your dummy?
 
 Skin prefix
 == Prefixo de skins
-
-Markers:
-== Marcadores:
 
 Markers
 == Marcadores
@@ -1017,9 +974,6 @@ Please enter your nickname below.
 
 Video name:
 == Nome do vídeo
-
-Render
-== Renderizar
 
 Connect Dummy
 == Conectar dummy
@@ -1168,12 +1122,6 @@ Preview
 
 Background
 == Plano de fundo
-
-Entities Background color
-== Cor de fundo das entidades
-
-Regular Background Color
-== Cor de fundo comum
 
 AFR
 == AFR
@@ -1773,3 +1721,58 @@ Go forward the specified duration
 
 Render cut to video
 == Renderizar corte do vídeo
+
+Error playing demo
+== 
+
+Some map images could not be loaded. Check the local console for details.
+== 
+
+Some map sounds could not be loaded. Check the local console for details.
+== 
+
+Loading menu themes
+== 
+
+Render complete
+== 
+
+Videos directory
+== 
+
+Video was saved to '%s'
+== 
+
+No demo selected
+== 
+
+Created
+== 
+
+Netversion
+== 
+
+[Demo details]
+map not included
+== 
+
+Ghosts directory
+== 
+
+Activate all
+== 
+
+Deactivate all
+== 
+
+Enable ghost
+== 
+
+Only save improvements
+== 
+
+Regular background color
+== 
+
+Entities background color
+== 

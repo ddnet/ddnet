@@ -4171,7 +4171,13 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 		g_Config.m_ClTextEntities ^= 1;
 
 	if(g_Config.m_ClTextEntities)
+	{
+		int PreviousSize = g_Config.m_ClTextEntitiesSize;
 		UI()->DoScrollbarOption(&g_Config.m_ClTextEntitiesSize, &g_Config.m_ClTextEntitiesSize, &Button, Localize("Size"), 0, 100);
+
+		if(PreviousSize != g_Config.m_ClTextEntitiesSize)
+			m_pClient->m_MapImages.SetTextureScale(g_Config.m_ClTextEntitiesSize);
+	}
 
 	Left.HSplitTop(20.0f, &Button, &Left);
 	Button.VSplitMid(&LeftLeft, &Button);

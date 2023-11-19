@@ -2,13 +2,14 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #ifndef GAME_CLIENT_COMPONENTS_CONSOLE_H
 #define GAME_CLIENT_COMPONENTS_CONSOLE_H
-#include <engine/shared/ringbuffer.h>
-#include <game/client/component.h>
-#include <game/client/lineinput.h>
+
+#include <base/lock.h>
 
 #include <engine/console.h>
+#include <engine/shared/ringbuffer.h>
 
-#include <mutex>
+#include <game/client/component.h>
+#include <game/client/lineinput.h>
 
 enum
 {
@@ -30,10 +31,12 @@ class CGameConsole : public CComponent
 		{
 			float m_YOffset;
 			ColorRGBA m_PrintColor;
+			size_t m_Length;
 			char m_aText[1];
 		};
-		std::mutex m_BacklogLock;
 		CStaticRingBuffer<CBacklogEntry, 1024 * 1024, CRingBufferBase::FLAG_RECYCLE> m_Backlog;
+		CLock m_BacklogPendingLock;
+		CStaticRingBuffer<CBacklogEntry, 1024 * 1024, CRingBufferBase::FLAG_RECYCLE> m_BacklogPending GUARDED_BY(m_BacklogPendingLock);
 		CStaticRingBuffer<char, 64 * 1024, CRingBufferBase::FLAG_RECYCLE> m_History;
 		char *m_pHistoryEntry;
 
@@ -76,15 +79,16 @@ class CGameConsole : public CComponent
 		CInstance(int t);
 		void Init(CGameConsole *pGameConsole);
 
-		void ClearBacklog();
+		void ClearBacklog() REQUIRES(!m_BacklogPendingLock);
 		void ClearBacklogYOffsets();
+		void PumpBacklogPending() REQUIRES(!m_BacklogPendingLock);
 		void ClearHistory();
 		void Reset();
 
 		void ExecuteLine(const char *pLine);
 
 		bool OnInput(const IInput::CEvent &Event);
-		void PrintLine(const char *pLine, int Len, ColorRGBA PrintColor);
+		void PrintLine(const char *pLine, int Len, ColorRGBA PrintColor) REQUIRES(!m_BacklogPendingLock);
 
 		const char *GetString() const { return m_Input.GetString(); }
 		static void PossibleCommandsCompleteCallback(int Index, const char *pStr, void *pUser);

@@ -7,6 +7,7 @@
 #include <base/vmath.h>
 
 #include <chrono>
+#include <deque>
 #include <unordered_set>
 #include <vector>
 
@@ -15,6 +16,7 @@
 #include <engine/friends.h>
 #include <engine/serverbrowser.h>
 #include <engine/shared/config.h>
+#include <engine/shared/http.h>
 #include <engine/shared/linereader.h>
 #include <engine/textrender.h>
 
@@ -390,6 +392,7 @@ protected:
 
 		const void *ListItemId() const { return &m_aName; }
 		const void *RemoveButtonId() const { return &m_FriendState; }
+		const void *CommunityTooltipId() const { return &m_IsPlayer; }
 
 		bool operator<(const CFriendItem &Other) const
 		{
@@ -462,13 +465,15 @@ protected:
 	void PopupConfirmSwitchServer();
 	void RenderServerbrowserFilters(CUIRect View);
 	void RenderServerbrowserDDNetFilter(CUIRect View,
-		char *pFilterExclude, int FilterExcludeSize,
+		IFilterList &Filter,
 		float ItemHeight, int MaxItems, int ItemsPerRow,
 		CScrollRegion &ScrollRegion, std::vector<unsigned char> &vItemIds,
+		bool UpdateCommunityCacheOnChange,
 		const std::function<const char *(int ItemIndex)> &GetItemName,
 		const std::function<void(int ItemIndex, CUIRect Item, const void *pItemId, bool Active)> &RenderItem);
-	void RenderServerbrowserCountriesFilter(CUIRect View, const CCommunity &Community);
-	void RenderServerbrowserTypesFilter(CUIRect View, const CCommunity &Community);
+	void RenderServerbrowserCommunitiesFilter(CUIRect View);
+	void RenderServerbrowserCountriesFilter(CUIRect View);
+	void RenderServerbrowserTypesFilter(CUIRect View);
 	struct SPopupCountrySelectionContext
 	{
 		CMenus *m_pMenus;
@@ -488,7 +493,74 @@ protected:
 	bool PrintHighlighted(const char *pName, F &&PrintFn);
 	CTeeRenderInfo GetTeeRenderInfo(vec2 Size, const char *pSkinName, bool CustomSkinColors, int CustomSkinColorBody, int CustomSkinColorFeet) const;
 	static void ConchainFriendlistUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
-	static void ConchainServerbrowserUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	static void ConchainFavoritesUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	static void ConchainCommunitiesUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	struct SCommunityCache
+	{
+		int64_t m_UpdateTime = 0;
+		bool m_PageWithCommunities;
+		std::vector<const CCommunity *> m_vpSelectedCommunities;
+		std::vector<const CCommunityCountry *> m_vpSelectableCountries;
+		std::vector<const CCommunityType *> m_vpSelectableTypes;
+		bool m_AnyRanksAvailable;
+	};
+	SCommunityCache m_CommunityCache;
+	void UpdateCommunityCache(bool Force);
+
+	// community icons
+	class CAbstractCommunityIconJob
+	{
+	protected:
+		CMenus *m_pMenus;
+		char m_aCommunityId[CServerInfo::MAX_COMMUNITY_ID_LENGTH];
+		char m_aPath[IO_MAX_PATH_LENGTH];
+		int m_StorageType;
+		bool m_Success = false;
+		CImageInfo m_ImageInfo;
+		SHA256_DIGEST m_Sha256;
+
+		CAbstractCommunityIconJob(CMenus *pMenus, const char *pCommunityId, int StorageType);
+		virtual ~CAbstractCommunityIconJob();
+
+	public:
+		const char *CommunityId() const { return m_aCommunityId; }
+		bool Success() const { return m_Success; }
+		CImageInfo &&ImageInfo() { return std::move(m_ImageInfo); }
+		SHA256_DIGEST &&Sha256() { return std::move(m_Sha256); }
+	};
+	class CCommunityIconLoadJob : public IJob, public CAbstractCommunityIconJob
+	{
+	protected:
+		void Run() override;
+
+	public:
+		CCommunityIconLoadJob(CMenus *pMenus, const char *pCommunityId, int StorageType);
+	};
+	class CCommunityIconDownloadJob : public CHttpRequest, public CAbstractCommunityIconJob
+	{
+	protected:
+		int OnCompletion(int State) override;
+
+	public:
+		CCommunityIconDownloadJob(CMenus *pMenus, const char *pCommunityId, const char *pUrl);
+	};
+	struct SCommunityIcon
+	{
+		char m_aCommunityId[CServerInfo::MAX_COMMUNITY_ID_LENGTH];
+		SHA256_DIGEST m_Sha256;
+		IGraphics::CTextureHandle m_OrgTexture;
+		IGraphics::CTextureHandle m_GreyTexture;
+	};
+	std::vector<SCommunityIcon> m_vCommunityIcons;
+	std::deque<std::shared_ptr<CCommunityIconLoadJob>> m_CommunityIconLoadJobs;
+	std::deque<std::shared_ptr<CCommunityIconDownloadJob>> m_CommunityIconDownloadJobs;
+	int64_t m_CommunityIconsUpdateTime = 0;
+	static int CommunityIconScan(const char *pName, int IsDir, int DirType, void *pUser);
+	const SCommunityIcon *FindCommunityIcon(const char *pCommunityId);
+	bool LoadCommunityIconFile(const char *pPath, int DirType, CImageInfo &Info, SHA256_DIGEST &Sha256);
+	void LoadCommunityIconFinish(const char *pCommunityId, CImageInfo &&Info, SHA256_DIGEST &&Sha256);
+	void RenderCommunityIcon(const SCommunityIcon *pIcon, CUIRect Rect, bool Active);
+	void UpdateCommunityIcons();
 
 	// skin favorite list
 	bool m_SkinFavoritesChanged = false;
@@ -560,8 +632,8 @@ public:
 		PAGE_INTERNET,
 		PAGE_LAN,
 		PAGE_FAVORITES,
-		PAGE_DDNET,
-		PAGE_KOG,
+		PAGE_DDNET_LEGACY, // removed, redirects to PAGE_INTERNET
+		PAGE_KOG_LEGACY, // removed, redirects to PAGE_INTERNET
 		PAGE_DEMOS,
 		PAGE_SETTINGS,
 		PAGE_SYSTEM,
@@ -589,8 +661,6 @@ public:
 		BIG_TAB_INTERNET,
 		BIG_TAB_LAN,
 		BIG_TAB_FAVORITES,
-		BIG_TAB_DDNET,
-		BIG_TAB_KOG,
 		BIG_TAB_DEMOS,
 
 		BIG_TAB_LENGTH,

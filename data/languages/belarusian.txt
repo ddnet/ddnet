@@ -5,6 +5,7 @@
 #	Chill & PoKeMoN		2023-03-31 16:00:00
 #	Chill & PoKeMoN		2023-07-02 00:54:00
 #	Chill [TD] & PoKeMoN [TD]		2023-09-22 17:49:00
+#	Chill [TD] & PoKeMoN [TD]		2023-11-14 12:42:00
 #	
 ##### /authors #####
 
@@ -105,9 +106,6 @@ Delete
 
 Delete demo
 == Выдаліць дэма
-
-Demo details
-== Дэталі дэма
 
 Demofile: %s
 == Дэма: %s
@@ -262,9 +260,6 @@ No servers match your filter criteria
 Ok
 == ОК
 
-Open
-== Адкрыць
-
 Parent Folder
 == Бацькоўская тэчка
 
@@ -279,10 +274,6 @@ Ping
 
 Pistol
 == Пісталет
-
-[Demo browser]
-Play
-== Прайграць
 
 Play background music
 == Граць фонавую музыку
@@ -317,9 +308,6 @@ Red team
 Red team wins!
 == Чырвоная каманда перамагае!
 
-Refresh
-== Абнавіць
-
 Remote console
 == Кансоль сервера
 
@@ -328,9 +316,6 @@ Remove
 
 Remove friend
 == Выдаліць сябра
-
-Rename
-== Пераназв.
 
 Rename demo
 == Пераназваць дэма
@@ -503,23 +488,11 @@ FSAA samples
 Sound volume
 == Гучнасць
 
-Created:
-== Створана:
-
 Max Screenshots
 == Максімальная колькасць здымкаў
 
-Length:
-== Працягласць:
-
 Laser
 == Лазер
-
-Netversion:
-== Сеткавая версія:
-
-Map:
-== Карта:
 
 Hue
 == Адценне
@@ -530,17 +503,11 @@ Record demo
 Your skin
 == Ваш скін
 
-Size:
-== Памер:
-
 Reset to defaults
 == Скінуць налады
 
 Quit anyway?
 == Усё адно выйсці?
-
-Version:
-== Версія:
 
 Round
 == Раўнд
@@ -551,9 +518,6 @@ Lht.
 UI Color
 == Колер інтэрфейсу
 
-Crc:
-== Crc:
-
 Alpha
 == Непразрыст.
 
@@ -563,10 +527,6 @@ LAN
 Name plates size
 == Памер таблічак з імёнамі
 
-Type:
-== Тып:
-
-[Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
 == Памылка падчас ініцыялізацыі. Паспрабуйце змяніць gfx_backend на OpenGL або Vulkan у settings_ddnet.cfg ў тэчцы config і паспрабуйце зноў.
 
@@ -836,8 +796,8 @@ Are you sure that you want to remove the player '%s' from your friends list?
 Are you sure that you want to remove the clan '%s' from your friends list?
 == Вы ўпэўненыя што хочаце выдаліць клан '%s' са спіса вашых сяброў?
 
-Please use a different name
-== Калі ласка, выкарыстайце іншае імя
+Please use a different filename
+== Калі ласка, выкарыстайце іншае імя файла
 
 File already exists, do you want to overwrite it?
 == Файл ужо існуе, ці вы хочаце перазапісаць яго?
@@ -881,9 +841,6 @@ Toggle keyboard shortcuts
 Loading demo files
 == Загрузка дэма файлаў
 
-Markers:
-== Пазнакі
-
 %.2f MiB
 == %.2f МіБ
 
@@ -913,9 +870,6 @@ Open the directory that contains the demo files
 
 Are you sure that you want to delete the demo '%s'?
 == Вы ўпэўненыя, што хочаце выдаліць дэма '%s'?
-
-Render
-== Рэндэр
 
 Unable to delete the demo '%s'
 == Немагчыма выдаліць дэма '%s'
@@ -1462,17 +1416,11 @@ AntiPing: predict grenade paths
 Background
 == Фон
 
-Entities Background color
-== Колер фону энтыты
-
 Use current map as background
 == Выкарыстоўваць бягучую карту як фон
 
 Show tiles layers from BG map
 == Таксама выкарыстоўваць фонавыя тэкстуры карты
-
-Regular Background Color
-== Звычайны колер фону
 
 New random timeout code
 == Новы выпадковы таймаўт код
@@ -1750,3 +1698,58 @@ Unable to delete the folder '%s'. Make sure it's empty first.
 
 Moved ingame
 == Перамешчаны ў гульні
+
+Error playing demo
+== Памылка прайгравання дэма
+
+Some map images could not be loaded. Check the local console for details.
+== Некаторыя відарысы карты немагчыма спампаваць. Для атрымання дэталей праверце лакальную кансоль.
+
+Some map sounds could not be loaded. Check the local console for details.
+== Некаторыя гукі карты немагчыма спампаваць. Для атрымання дэталей праверце лакальную кансоль.
+
+Loading menu themes
+== Спампоўка тэм меню
+
+Render complete
+== Рэндэр завершаны
+
+Videos directory
+== Тэчка відэа
+
+Video was saved to '%s'
+== Відэа было захавана ў '%s'
+
+No demo selected
+== Дэма не выбрана
+
+Created
+== Створана
+
+Netversion
+== Сеткавая версія
+
+[Demo details]
+map not included
+== карта не ўключана
+
+Ghosts directory
+== Тэчка прывідаў
+
+Activate all
+== Актываваць усе
+
+Deactivate all
+== Дэактываваць усе
+
+Enable ghost
+== Уключыць прывід
+
+Only save improvements
+== Захоўваць толькі паляпшэнні
+
+Regular background color
+== Колер звычайнага фону
+
+Entities background color
+== Колер фону энтыты

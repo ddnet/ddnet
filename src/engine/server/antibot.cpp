@@ -23,6 +23,11 @@ CAntibot::~CAntibot()
 	if(m_Initialized)
 		AntibotDestroy();
 }
+void CAntibot::Kick(int ClientID, const char *pMessage, void *pUser)
+{
+	CAntibot *pAntibot = (CAntibot *)pUser;
+	pAntibot->Server()->Kick(ClientID, pMessage);
+}
 void CAntibot::Log(const char *pMessage, void *pUser)
 {
 	CAntibot *pAntibot = (CAntibot *)pUser;
@@ -67,6 +72,7 @@ void CAntibot::Init()
 
 	m_Data.m_Now = time_get();
 	m_Data.m_Freq = time_freq();
+	m_Data.m_pfnKick = Kick;
 	m_Data.m_pfnLog = Log;
 	m_Data.m_pfnReport = Report;
 	m_Data.m_pfnSend = Send;
@@ -92,7 +98,10 @@ void CAntibot::RoundEnd()
 	m_pGameServer = 0;
 	free(m_RoundData.m_Map.m_pTiles);
 }
-void CAntibot::Dump() { AntibotDump(); }
+void CAntibot::ConsoleCommand(const char *pCommand)
+{
+	AntibotConsoleCommand(pCommand);
+}
 void CAntibot::Update()
 {
 	m_Data.m_Now = time_get();
@@ -221,9 +230,16 @@ void CAntibot::RoundEnd()
 {
 	m_pGameServer = 0;
 }
-void CAntibot::Dump()
+void CAntibot::ConsoleCommand(const char *pCommand)
 {
-	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "antibot", "antibot support not compiled in");
+	if(str_comp(pCommand, "dump") == 0)
+	{
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "antibot", "antibot support not compiled in");
+	}
+	else
+	{
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "antibot", "unknown command");
+	}
 }
 void CAntibot::Update()
 {

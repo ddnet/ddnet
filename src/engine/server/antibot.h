@@ -19,6 +19,7 @@ class CAntibot : public IEngineAntibot
 	bool m_Initialized;
 
 	void Update();
+	static void Kick(int ClientID, const char *pMessage, void *pUser);
 	static void Log(const char *pMessage, void *pUser);
 	static void Report(int ClientID, const char *pMessage, void *pUser);
 	static void Send(int ClientID, const void *pData, int Size, int Flags, void *pUser);
@@ -52,7 +53,7 @@ public:
 	void OnCharacterTick(int ClientID) override;
 	void OnHookAttach(int ClientID, bool Player) override;
 
-	void Dump() override;
+	void ConsoleCommand(const char *pCommand) override;
 };
 
 extern IEngineAntibot *CreateEngineAntibot();

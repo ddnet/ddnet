@@ -1,7 +1,10 @@
 #ifndef ENGINE_CLIENT_UPDATER_H
 #define ENGINE_CLIENT_UPDATER_H
 
+#include <base/lock.h>
+
 #include <engine/updater.h>
+
 #include <map>
 #include <string>
 
@@ -39,7 +42,7 @@ class CUpdater : public IUpdater
 	class IStorage *m_pStorage;
 	class IEngine *m_pEngine;
 
-	LOCK m_Lock;
+	CLock m_Lock;
 
 	int m_State;
 	char m_aStatus[256] GUARDED_BY(m_Lock);
@@ -68,7 +71,6 @@ class CUpdater : public IUpdater
 
 public:
 	CUpdater();
-	~CUpdater();
 
 	int GetCurrentState() override REQUIRES(!m_Lock);
 	void GetCurrentFile(char *pBuf, int BufSize) override REQUIRES(!m_Lock);

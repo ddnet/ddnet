@@ -1,6 +1,7 @@
 #ifndef ENGINE_CLIENT_VIDEO_H
 #define ENGINE_CLIENT_VIDEO_H
 
+#include <base/lock.h>
 #include <base/system.h>
 
 extern "C" {
@@ -21,7 +22,7 @@ class CGraphics_Threaded;
 class ISound;
 class IStorage;
 
-extern LOCK g_WriteLock;
+extern CLock g_WriteLock;
 
 // a wrapper around a single output AVStream
 struct OutputStream

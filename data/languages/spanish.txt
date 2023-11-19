@@ -122,9 +122,6 @@ Delete
 Delete demo
 == Borrar demo
 
-Demo details
-== Detalles de la demo
-
 Demofile: %s
 == Archivo: %s
 
@@ -281,11 +278,8 @@ No servers match your filter criteria
 Ok
 == Aceptar
 
-Open
-== Abrir
-
 Parent Folder
-== Directorio padre
+== Carpeta principal
 
 Password
 == Contraseña
@@ -298,10 +292,6 @@ Ping
 
 Pistol
 == Pistola
-
-[Demo browser]
-Play
-== Reproducir
 
 Play background music
 == Reproducir música de fondo
@@ -336,9 +326,6 @@ Red team
 Red team wins!
 == ¡El equipo rojo gana!
 
-Refresh
-== Actualizar
-
 Remote console
 == Consola remota
 
@@ -347,9 +334,6 @@ Remove
 
 Remove friend
 == Eliminar amigo
-
-Rename
-== Renombrar
 
 Rename demo
 == Renombrar demo
@@ -527,23 +511,11 @@ FSAA samples
 Sound volume
 == Volumen del sonido
 
-Created:
-== Creado:
-
 Max Screenshots
 == Número máximo de capturas
 
-Length:
-== Longitud:
-
 Laser
 == Láser
-
-Netversion:
-== Versión Net:
-
-Map:
-== Mapa:
 
 Hue
 == Matiz
@@ -554,17 +526,11 @@ Record demo
 Your skin
 == Tu skin
 
-Size:
-== Tamaño:
-
 Reset to defaults
 == Resetear por defecto
 
 Quit anyway?
 == ¿Salir de todos modos?
-
-Version:
-== Versión:
 
 Round
 == Ronda
@@ -575,9 +541,6 @@ Lht.
 UI Color
 == Color de menú
 
-Crc:
-== Crc:
-
 Alpha
 == Transp.
 
@@ -586,9 +549,6 @@ LAN
 
 Name plates size
 == Tamaño de la fuente de los apodos
-
-Type:
-== Tipo:
 
 Successfully saved the replay!
 == ¡Repetición guardada con éxito!
@@ -695,14 +655,11 @@ Update now
 Restart
 == Reiniciar
 
-Please use a different name
-== Por favor usa un nombre diferente
+Please use a different filename
+== 
 
 Remove chat
 == Eliminar chat
-
-Markers:
-== Marcadores:
 
 %.2f MiB
 == %.2f MiB
@@ -717,16 +674,13 @@ Markers
 == Marcadores
 
 Length
-== Longitud
+== Duración
 
 Date
 == Fecha
 
 Fetch Info
 == Obtener info.
-
-Render
-== Renderizar
 
 Connecting dummy
 == Conectando dummy
@@ -915,7 +869,7 @@ Save the best demo of each race
 == Guardar la mejor demo de cada carrera
 
 Default length
-== Longitud predeterminada
+== Duración predeterminada
 
 Enable replays
 == Habilitar repeticiones
@@ -1202,12 +1156,6 @@ Preview
 
 Background
 == Fondo
-
-Entities Background color
-== Color de fondo de entidades
-
-Regular Background Color
-== Color de fondo regular
 
 Discord
 == Discord
@@ -1768,3 +1716,58 @@ Go forward the specified duration
 
 Render cut to video
 == Renderizar corte a vídeo
+
+Error playing demo
+== Error al reproducir la demo
+
+Some map images could not be loaded. Check the local console for details.
+== Algunas imágenes de mapas no se pudieron cargar. Revisa la consola local para más detalles.
+
+Some map sounds could not be loaded. Check the local console for details.
+== Algunos sonidos de mapas no se pudieron cargar. Revisa la consola local para más detalles.
+
+Loading menu themes
+== Cargando temas del menú
+
+Render complete
+== Renderización completada
+
+Videos directory
+== Carpeta de videos
+
+Video was saved to '%s'
+== El video guardó en '%s'
+
+No demo selected
+== Ninguna demo seleccionada
+
+Created
+== Creado
+
+Netversion
+== Netversion
+
+[Demo details]
+map not included
+== mapa no incluido
+
+Ghosts directory
+== Carpeta de Fantasmas
+
+Activate all
+== Activar todo
+
+Deactivate all
+== Desactivar todo
+
+Enable ghost
+== Habilitar fantasma
+
+Only save improvements
+== Solo guardar las mejoras
+
+Regular background color
+== Color del fondo normal
+
+Entities background color
+== Color del fondo de entidades
