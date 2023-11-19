@@ -13,7 +13,7 @@ public:
 	~CGameControllerCTF();
 
 	void Tick() override;
-    virtual void Snap(int SnappingClient) override;
+	virtual void Snap(int SnappingClient) override;
 	virtual int OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon) override;
 	virtual void OnFlagReturn(class CFlag *pFlag) override;
 	bool OnEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number) override;

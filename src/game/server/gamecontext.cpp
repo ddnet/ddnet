@@ -30,9 +30,9 @@
 
 #include "entities/character.h"
 #include "gamemodes/DDRace.h"
-#include "gamemodes/mod.h"
 #include "gamemodes/gctf.h"
 #include "gamemodes/ictf.h"
+#include "gamemodes/mod.h"
 #include "player.h"
 #include "score.h"
 

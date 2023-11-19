@@ -14,9 +14,9 @@ CGameControllerCTF::CGameControllerCTF(class CGameContext *pGameServer) :
 	CGameControllerInstagib(pGameServer)
 {
 	m_pGameType = g_Config.m_SvTestingCommands ? "gCTF-test" : "gCTF";
-    m_GameFlags = GAMEFLAG_TEAMS | GAMEFLAG_FLAGS;
+	m_GameFlags = GAMEFLAG_TEAMS | GAMEFLAG_FLAGS;
 
-    m_apFlags[0] = 0;
+	m_apFlags[0] = 0;
 	m_apFlags[1] = 0;
 }
 
