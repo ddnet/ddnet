@@ -18,6 +18,7 @@
 #include <cinttypes>
 #include <cstdarg>
 #include <cstdint>
+#include <cstring>
 #include <ctime>
 #include <functional>
 #include <mutex>
