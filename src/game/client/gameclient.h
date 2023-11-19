@@ -35,7 +35,7 @@
 #include "components/ghost.h"
 #include "components/hud.h"
 #include "components/items.h"
-#include "components/killmessages.h"
+#include "components/infomessages.h"
 #include "components/mapimages.h"
 #include "components/maplayers.h"
 #include "components/mapsounds.h"
@@ -111,7 +111,7 @@ class CGameClient : public IGameClient
 {
 public:
 	// all components
-	CKillMessages m_KillMessages;
+	CInfoMessages m_InfoMessages;
 	CCamera m_Camera;
 	CChat m_Chat;
 	CMotd m_Motd;

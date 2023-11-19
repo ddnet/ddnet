@@ -1,24 +1,27 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#ifndef GAME_CLIENT_COMPONENTS_KILLMESSAGES_H
-#define GAME_CLIENT_COMPONENTS_KILLMESSAGES_H
+#ifndef GAME_CLIENT_COMPONENTS_INFOMESSAGES_H
+#define GAME_CLIENT_COMPONENTS_INFOMESSAGES_H
 #include <game/client/component.h>
 
 #include <game/client/render.h>
-class CKillMessages : public CComponent
+class CInfoMessages : public CComponent
 {
 	int m_SpriteQuadContainerIndex;
 	enum
 	{
-		MAX_KILLMSGS = 5,
+		MAX_INFOMSGS = 5,
 		MAX_KILLMSG_TEAM_MEMBERS = 4,
+
+		INFOMSG_KILL = 0,
 	};
 
 public:
-	// kill messages
-	struct CKillMsg
+	// info messages
+	struct CInfoMsg
 	{
-		int m_Weapon;
+		int m_Type;
+		int m_Tick;
 
 		int m_aVictimIds[MAX_KILLMSG_TEAM_MEMBERS];
 		int m_VictimDDTeam;
@@ -32,18 +35,22 @@ public:
 		float m_KillerTextWidth;
 		CTeeRenderInfo m_KillerRenderInfo;
 
+		// kill msg
+		int m_Weapon;
 		int m_ModeSpecial; // for CTF, if the guy is carrying a flag for example
-		int m_Tick;
 		int m_FlagCarrierBlue;
 		int m_TeamSize;
 	};
 
 private:
-	void CreateKillmessageNamesIfNotCreated(CKillMsg &Kill);
+	void AddInfoMsg(int Type, CInfoMsg NewMsg);
+	void RenderKillMsg(CInfoMsg *pInfoMsg, float x, float y);
+
+	void CreateKillmessageNamesIfNotCreated(CInfoMsg *pInfoMsg);
 
 public:
-	CKillMsg m_aKillmsgs[MAX_KILLMSGS];
-	int m_KillmsgCurrent;
+	CInfoMsg m_aInfoMsgs[MAX_INFOMSGS];
+	int m_InfoMsgCurrent;
 
 	virtual int Sizeof() const override { return sizeof(*this); }
 	virtual void OnWindowResize() override;
