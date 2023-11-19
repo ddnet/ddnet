@@ -30,8 +30,6 @@ protected:
 private:
 	vec2 m_From;
 	vec2 m_Dir;
-	vec2 m_TelePos;
-	bool m_WasTele;
 	float m_Energy;
 	int m_Bounces;
 	int m_EvalTick;

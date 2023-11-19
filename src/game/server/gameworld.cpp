@@ -349,7 +349,6 @@ std::vector<CCharacter *> CGameWorld::IntersectedCharacters(vec2 Pos0, vec2 Pos1
 			float Len = distance(pChr->m_Pos, IntersectPos);
 			if(Len < pChr->m_ProximityRadius + Radius)
 			{
-				pChr->m_Intersection = IntersectPos;
 				vpCharacters.push_back(pChr);
 			}
 		}
