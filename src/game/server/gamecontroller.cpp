@@ -4,6 +4,7 @@
 
 #include <game/generated/protocol.h>
 #include <game/mapitems.h>
+#include <game/server/score.h>
 #include <game/teamscore.h>
 
 #include "gamecontext.h"
@@ -19,7 +20,7 @@
 #include "entities/projectile.h"
 
 IGameController::IGameController(class CGameContext *pGameServer) :
-	m_Teams(pGameServer)
+	m_Teams(pGameServer), m_pLoadBestTimeResult(nullptr)
 {
 	m_pGameServer = pGameServer;
 	m_pConfig = m_pGameServer->Config();
@@ -731,6 +732,23 @@ void IGameController::Tick()
 			StartRound();
 			m_RoundCount++;
 		}
+	}
+
+	if(m_pLoadBestTimeResult != nullptr && m_pLoadBestTimeResult->m_Completed)
+	{
+		if(m_pLoadBestTimeResult->m_Success)
+		{
+			m_CurrentRecord = m_pLoadBestTimeResult->m_CurrentRecord;
+
+			for(int i = 0; i < MAX_CLIENTS; i++)
+			{
+				if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetClientVersion() >= VERSION_DDRACE)
+				{
+					GameServer()->SendRecord(i);
+				}
+			}
+		}
+		m_pLoadBestTimeResult = nullptr;
 	}
 
 	DoActivityCheck();

@@ -25,7 +25,7 @@ static const char *GetGameTypeName()
 }
 
 CGameControllerDDRace::CGameControllerDDRace(class CGameContext *pGameServer) :
-	IGameController(pGameServer), m_pLoadBestTimeResult(nullptr)
+	IGameController(pGameServer)
 {
 	// game
 	m_apFlags[0] = 0;
@@ -177,23 +177,6 @@ void CGameControllerDDRace::Tick()
 	Teams().ProcessSaveTeam();
 	Teams().Tick();
 	FlagTick(); // gctf
-
-	if(m_pLoadBestTimeResult != nullptr && m_pLoadBestTimeResult->m_Completed)
-	{
-		if(m_pLoadBestTimeResult->m_Success)
-		{
-			m_CurrentRecord = m_pLoadBestTimeResult->m_CurrentRecord;
-
-			for(int i = 0; i < MAX_CLIENTS; i++)
-			{
-				if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetClientVersion() >= VERSION_DDRACE)
-				{
-					GameServer()->SendRecord(i);
-				}
-			}
-		}
-		m_pLoadBestTimeResult = nullptr;
-	}
 }
 
 void CGameControllerDDRace::DoTeamChange(class CPlayer *pPlayer, int Team, bool DoChatMsg)
