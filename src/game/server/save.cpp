@@ -479,7 +479,7 @@ int CSaveTeam::Save(CGameContext *pGameServer, int Team, bool Dry)
 		return 1;
 
 	IGameController *pController = pGameServer->m_pController;
-	CGameTeams *pTeams = &(((CGameControllerDDRace *)pController)->m_Teams);
+	CGameTeams *pTeams = &pController->Teams();
 
 	m_MembersCount = pTeams->Count(Team);
 	if(m_MembersCount <= 0)
@@ -564,7 +564,7 @@ bool CSaveTeam::HandleSaveError(int Result, int ClientID, CGameContext *pGameCon
 void CSaveTeam::Load(CGameContext *pGameServer, int Team, bool KeepCurrentWeakStrong)
 {
 	IGameController *pController = pGameServer->m_pController;
-	CGameTeams *pTeams = &(((CGameControllerDDRace *)pController)->m_Teams);
+	CGameTeams *pTeams = &pController->Teams();
 
 	pTeams->ChangeTeamState(Team, m_TeamState);
 	pTeams->SetTeamLock(Team, m_TeamLocked);

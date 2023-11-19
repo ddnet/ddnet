@@ -236,11 +236,6 @@ void mem_move(void *dest, const void *source, size_t size)
 	memmove(dest, source, size);
 }
 
-void mem_zero(void *block, size_t size)
-{
-	memset(block, 0, size);
-}
-
 int mem_comp(const void *a, const void *b, size_t size)
 {
 	return memcmp(a, b, size);
@@ -2111,7 +2106,6 @@ void fs_listdir(const char *dir, FS_LISTDIR_CALLBACK cb, int type, void *user)
 	if(handle == INVALID_HANDLE_VALUE)
 		return;
 
-	/* add all the entries */
 	do
 	{
 		const std::string current_entry = windows_wide_to_utf8(finddata.cFileName);
@@ -2121,26 +2115,29 @@ void fs_listdir(const char *dir, FS_LISTDIR_CALLBACK cb, int type, void *user)
 
 	FindClose(handle);
 #else
-	struct dirent *entry;
-	char buffer[IO_MAX_PATH_LENGTH];
-	int length;
-	DIR *d = opendir(dir);
-
-	if(!d)
+	DIR *dir_handle = opendir(dir);
+	if(dir_handle == nullptr)
 		return;
 
+	char buffer[IO_MAX_PATH_LENGTH];
 	str_format(buffer, sizeof(buffer), "%s/", dir);
-	length = str_length(buffer);
-
-	while((entry = readdir(d)) != NULL)
+	size_t length = str_length(buffer);
+	while(true)
 	{
-		str_copy(buffer + length, entry->d_name, (int)sizeof(buffer) - length);
+		struct dirent *entry = readdir(dir_handle);
+		if(entry == nullptr)
+			break;
+		if(!str_utf8_check(entry->d_name))
+		{
+			log_error("filesystem", "ERROR: file/folder name containing invalid UTF-8 found in folder '%s'", dir);
+			continue;
+		}
+		str_copy(buffer + length, entry->d_name, sizeof(buffer) - length);
 		if(cb(entry->d_name, fs_is_dir(buffer), type, user))
 			break;
 	}
 
-	/* close the directory and return */
-	closedir(d);
+	closedir(dir_handle);
 #endif
 }
 
@@ -2156,7 +2153,6 @@ void fs_listdir_fileinfo(const char *dir, FS_LISTDIR_CALLBACK_FILEINFO cb, int t
 	if(handle == INVALID_HANDLE_VALUE)
 		return;
 
-	/* add all the entries */
 	do
 	{
 		const std::string current_entry = windows_wide_to_utf8(finddata.cFileName);
@@ -2172,25 +2168,29 @@ void fs_listdir_fileinfo(const char *dir, FS_LISTDIR_CALLBACK_FILEINFO cb, int t
 
 	FindClose(handle);
 #else
-	struct dirent *entry;
-	time_t created = -1, modified = -1;
-	char buffer[IO_MAX_PATH_LENGTH];
-	int length;
-	DIR *d = opendir(dir);
-
-	if(!d)
+	DIR *dir_handle = opendir(dir);
+	if(dir_handle == nullptr)
 		return;
 
+	char buffer[IO_MAX_PATH_LENGTH];
 	str_format(buffer, sizeof(buffer), "%s/", dir);
-	length = str_length(buffer);
+	size_t length = str_length(buffer);
 
-	while((entry = readdir(d)) != NULL)
+	while(true)
 	{
-		CFsFileInfo info;
-
-		str_copy(buffer + length, entry->d_name, (int)sizeof(buffer) - length);
+		struct dirent *entry = readdir(dir_handle);
+		if(entry == nullptr)
+			break;
+		if(!str_utf8_check(entry->d_name))
+		{
+			log_error("filesystem", "ERROR: file/folder name containing invalid UTF-8 found in folder '%s'", dir);
+			continue;
+		}
+		str_copy(buffer + length, entry->d_name, sizeof(buffer) - length);
+		time_t created = -1, modified = -1;
 		fs_file_time(buffer, &created, &modified);
 
+		CFsFileInfo info;
 		info.m_pName = entry->d_name;
 		info.m_TimeCreated = created;
 		info.m_TimeModified = modified;
@@ -2199,8 +2199,7 @@ void fs_listdir_fileinfo(const char *dir, FS_LISTDIR_CALLBACK_FILEINFO cb, int t
 			break;
 	}
 
-	/* close the directory and return */
-	closedir(d);
+	closedir(dir_handle);
 #endif
 }
 
@@ -2209,17 +2208,27 @@ int fs_storage_path(const char *appname, char *path, int max)
 #if defined(CONF_FAMILY_WINDOWS)
 	WCHAR *wide_home = _wgetenv(L"APPDATA");
 	if(!wide_home)
+	{
+		path[0] = '\0';
 		return -1;
+	}
 	const std::string home = windows_wide_to_utf8(wide_home);
 	str_format(path, max, "%s/%s", home.c_str(), appname);
 	return 0;
-#elif defined(CONF_PLATFORM_ANDROID)
-	// just use the data directory
-	return -1;
 #else
 	char *home = getenv("HOME");
 	if(!home)
+	{
+		path[0] = '\0';
 		return -1;
+	}
+
+	if(!str_utf8_check(home))
+	{
+		log_error("filesystem", "ERROR: the HOME environment variable contains invalid UTF-8");
+		path[0] = '\0';
+		return -1;
+	}
 
 #if defined(CONF_PLATFORM_HAIKU)
 	str_format(path, max, "%s/config/settings/%s", home, appname);
@@ -2235,7 +2244,15 @@ int fs_storage_path(const char *appname, char *path, int max)
 	{
 		char *data_home = getenv("XDG_DATA_HOME");
 		if(data_home)
+		{
+			if(!str_utf8_check(data_home))
+			{
+				log_error("filesystem", "ERROR: the XDG_DATA_HOME environment variable contains invalid UTF-8");
+				path[0] = '\0';
+				return -1;
+			}
 			str_format(path, max, "%s/%s", data_home, appname);
+		}
 		else
 			str_format(path, max, "%s/.local/share/%s", home, appname);
 	}
@@ -2366,13 +2383,20 @@ char *fs_getcwd(char *buffer, int buffer_size)
 		const DWORD LastError = GetLastError();
 		const std::string ErrorMsg = windows_format_system_message(LastError);
 		dbg_msg("filesystem", "GetCurrentDirectoryW failed: %ld %s", LastError, ErrorMsg.c_str());
+		buffer[0] = '\0';
 		return nullptr;
 	}
 	const std::string current_dir = windows_wide_to_utf8(wide_current_dir.c_str());
 	str_copy(buffer, current_dir.c_str(), buffer_size);
 	return buffer;
 #else
-	return getcwd(buffer, buffer_size);
+	char *result = getcwd(buffer, buffer_size);
+	if(result == nullptr || !str_utf8_check(result))
+	{
+		buffer[0] = '\0';
+		return nullptr;
+	}
+	return result;
 #endif
 }
 

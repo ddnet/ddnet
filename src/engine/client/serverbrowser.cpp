@@ -1141,6 +1141,91 @@ void CServerBrowser::LoadDDNetLocation()
 	}
 }
 
+bool CServerBrowser::ParseCommunityServers(CCommunity *pCommunity, const json_value &Servers)
+{
+	for(unsigned ServerIndex = 0; ServerIndex < Servers.u.array.length; ++ServerIndex)
+	{
+		// pServer - { name, flagId, servers }
+		const json_value &Server = Servers[ServerIndex];
+		if(Server.type != json_object)
+		{
+			log_error("serverbrowser", "invalid server (ServerIndex=%u)", ServerIndex);
+			return false;
+		}
+
+		const json_value &Name = Server["name"];
+		const json_value &FlagId = Server["flagId"];
+		const json_value &Types = Server["servers"];
+		if(Name.type != json_string || FlagId.type != json_integer || Types.type != json_object)
+		{
+			log_error("serverbrowser", "invalid server attribute (ServerIndex=%u)", ServerIndex);
+			return false;
+		}
+		if(Types.u.object.length == 0)
+			continue;
+
+		pCommunity->m_vCountries.emplace_back(Name.u.string.ptr, FlagId.u.integer);
+		CCommunityCountry *pCountry = &pCommunity->m_vCountries.back();
+
+		for(unsigned TypeIndex = 0; TypeIndex < Types.u.object.length; ++TypeIndex)
+		{
+			const json_value &Addresses = *Types.u.object.values[TypeIndex].value;
+			if(Addresses.type != json_array)
+			{
+				log_error("serverbrowser", "invalid addresses (ServerIndex=%u, TypeIndex=%u)", ServerIndex, TypeIndex);
+				return false;
+			}
+			if(Addresses.u.array.length == 0)
+				continue;
+
+			const char *pTypeName = Types.u.object.values[TypeIndex].name;
+
+			// add type if it doesn't exist already
+			const auto CommunityType = std::find_if(pCommunity->m_vTypes.begin(), pCommunity->m_vTypes.end(), [pTypeName](const auto &Elem) {
+				return str_comp(Elem.Name(), pTypeName) == 0;
+			});
+			if(CommunityType == pCommunity->m_vTypes.end())
+			{
+				pCommunity->m_vTypes.emplace_back(pTypeName);
+			}
+
+			// add addresses
+			for(unsigned AddressIndex = 0; AddressIndex < Addresses.u.array.length; ++AddressIndex)
+			{
+				const json_value &Address = Addresses[AddressIndex];
+				if(Address.type != json_string)
+				{
+					log_error("serverbrowser", "invalid address (ServerIndex=%u, TypeIndex=%u, AddressIndex=%u)", ServerIndex, TypeIndex, AddressIndex);
+					return false;
+				}
+				NETADDR NetAddr;
+				if(net_addr_from_str(&NetAddr, Address.u.string.ptr))
+				{
+					log_error("serverbrowser", "invalid address (ServerIndex=%u, TypeIndex=%u, AddressIndex=%u)", ServerIndex, TypeIndex, AddressIndex);
+					continue;
+				}
+				pCountry->m_vServers.emplace_back(NetAddr, pTypeName);
+			}
+		}
+	}
+	return true;
+}
+
+bool CServerBrowser::ParseCommunityFinishes(CCommunity *pCommunity, const json_value &Finishes)
+{
+	for(unsigned FinishIndex = 0; FinishIndex < Finishes.u.array.length; ++FinishIndex)
+	{
+		const json_value &Finish = Finishes[FinishIndex];
+		if(Finish.type != json_string)
+		{
+			log_error("serverbrowser", "invalid rank (FinishIndex=%u)", FinishIndex);
+			return false;
+		}
+		pCommunity->m_FinishedMaps.emplace((const char *)Finish);
+	}
+	return true;
+}
+
 void CServerBrowser::LoadDDNetServers()
 {
 	// Parse communities
@@ -1151,136 +1236,90 @@ void CServerBrowser::LoadDDNetServers()
 		return;
 
 	const json_value &Communities = (*m_pDDNetInfo)["communities"];
-	if(Communities.type != json_object)
+	if(Communities.type != json_array)
 		return;
 
-	for(unsigned CommunityIndex = 0; CommunityIndex < Communities.u.object.length; ++CommunityIndex)
+	for(unsigned CommunityIndex = 0; CommunityIndex < Communities.u.array.length; ++CommunityIndex)
 	{
-		const char *pCommunityId = Communities.u.object.values[CommunityIndex].name;
-		const json_value &Community = *Communities.u.object.values[CommunityIndex].value;
+		const json_value &Community = Communities[CommunityIndex];
 		if(Community.type != json_object)
 		{
-			log_error("serverbrowser", "invalid community (CommunityId=%s)", pCommunityId);
+			log_error("serverbrowser", "invalid community (CommunityIndex=%d)", (int)CommunityIndex);
 			continue;
 		}
-		const json_value &Name = Community["name"];
-		const json_value &JsonServersKey = Community["servers-key"];
-		const json_value &JsonRanksKey = Community["ranks-key"];
-		const json_value &IconSha256 = Community["icon-sha256"];
-		if(Name.type != json_string || JsonServersKey.type != json_string || JsonRanksKey.type != json_string || IconSha256.type != json_string)
+		const json_value &Id = Community["id"];
+		if(Id.type != json_string)
 		{
-			log_error("serverbrowser", "invalid community attribute (CommunityId=%s)", pCommunityId);
+			log_error("serverbrowser", "invalid community id (CommunityIndex=%d)", (int)CommunityIndex);
+			continue;
+		}
+		const json_value &Icon = Community["icon"];
+		const json_value &IconSha256 = Icon["sha256"];
+		const json_value &IconUrl = Icon["url"];
+		const json_value &Name = Community["name"];
+		const json_value *pFinishes = &Icon["finishes"];
+		const json_value *pServers = &Icon["servers"];
+		if(pFinishes->type == json_none)
+		{
+			if(str_comp(Id, COMMUNITY_DDNET) == 0)
+			{
+				pFinishes = &(*m_pDDNetInfo)["maps"];
+			}
+		}
+		// Backward compatibility.
+		if(pServers->type == json_none)
+		{
+			if(str_comp(Id, COMMUNITY_DDNET) == 0)
+			{
+				pServers = &(*m_pDDNetInfo)["servers"];
+			}
+			else if(str_comp(Id, "kog") == 0)
+			{
+				pServers = &(*m_pDDNetInfo)["servers-kog"];
+			}
+		}
+		if(false ||
+			Icon.type != json_object ||
+			IconSha256.type != json_string ||
+			IconUrl.type != json_string ||
+			Name.type != json_string ||
+			(pFinishes->type != json_array && pFinishes->type != json_none) ||
+			pServers->type != json_array)
+		{
+			log_error("serverbrowser", "invalid community attribute (CommunityId=%s)", (const char *)Id);
 			continue;
 		}
 		SHA256_DIGEST ParsedIconSha256;
-		if(sha256_from_str(&ParsedIconSha256, IconSha256.u.string.ptr) != 0)
+		if(sha256_from_str(&ParsedIconSha256, IconSha256) != 0)
 		{
-			log_error("serverbrowser", "invalid community icon sha256 (CommunityId=%s)", pCommunityId);
+			log_error("serverbrowser", "invalid community icon sha256 (CommunityId=%s)", (const char *)Id);
 			continue;
 		}
-		m_vCommunities.emplace_back(pCommunityId, Name.u.string.ptr, JsonServersKey.u.string.ptr, JsonRanksKey.u.string.ptr, ParsedIconSha256);
-	}
-
-	// Parse finishes for each community
-	for(auto &Community : m_vCommunities)
-	{
-		if(!Community.HasRanks())
-			continue;
-		const json_value &Ranks = (*m_pDDNetInfo)[Community.JsonRanksKey()];
-		if(Ranks.type != json_array)
+		CCommunity NewCommunity(Id, Name, ParsedIconSha256, IconUrl);
+		if(!ParseCommunityServers(&NewCommunity, *pServers))
 		{
-			log_error("serverbrowser", "invalid community ranks (CommunityId=%s)", Community.Id());
+			log_error("serverbrowser", "invalid community servers (CommunityId=%s)", NewCommunity.Id());
 			continue;
 		}
-
-		for(unsigned RankIndex = 0; RankIndex < Ranks.u.array.length; ++RankIndex)
+		NewCommunity.m_HasFinishes = pFinishes->type == json_array;
+		if(NewCommunity.m_HasFinishes && !ParseCommunityFinishes(&NewCommunity, *pFinishes))
 		{
-			const json_value &Rank = *Ranks.u.array.values[RankIndex];
-			if(Rank.type != json_string)
-			{
-				log_error("serverbrowser", "invalid rank (RankIndex=%u)", RankIndex);
-				continue;
-			}
-			Community.m_RankedMaps.emplace(Rank.u.string.ptr);
-		}
-	}
-
-	// parse servers for each community
-	for(auto &Community : m_vCommunities)
-	{
-		const json_value &Servers = (*m_pDDNetInfo)[Community.JsonServersKey()];
-		if(Servers.type != json_array)
-		{
-			log_error("serverbrowser", "invalid community servers (CommunityId=%s)", Community.Id());
+			log_error("serverbrowser", "invalid community finishes (CommunityId=%s)", NewCommunity.Id());
 			continue;
 		}
 
-		for(unsigned ServerIndex = 0; ServerIndex < Servers.u.array.length; ++ServerIndex)
+		for(const auto &Country : NewCommunity.Countries())
 		{
-			// pServer - { name, flagId, servers }
-			const json_value &Server = *Servers.u.array.values[ServerIndex];
-			if(Server.type != json_object)
+			for(const auto &Server : Country.Servers())
 			{
-				log_error("serverbrowser", "invalid server (ServerIndex=%u)", ServerIndex);
-				continue;
-			}
-
-			const json_value &Name = Server["name"];
-			const json_value &FlagId = Server["flagId"];
-			const json_value &Types = Server["servers"];
-			if(Name.type != json_string || FlagId.type != json_integer || Types.type != json_object)
-			{
-				log_error("serverbrowser", "invalid server attribute (ServerIndex=%u)", ServerIndex);
-				continue;
-			}
-			if(Types.u.object.length == 0)
-				continue;
-
-			Community.m_vCountries.emplace_back(Name.u.string.ptr, FlagId.u.integer);
-			CCommunityCountry *pCountry = &Community.m_vCountries.back();
-
-			for(unsigned TypeIndex = 0; TypeIndex < Types.u.object.length; ++TypeIndex)
-			{
-				const json_value &Addresses = *Types.u.object.values[TypeIndex].value;
-				if(Addresses.type != json_array)
-				{
-					log_error("serverbrowser", "invalid addresses (ServerIndex=%u, TypeIndex=%u)", ServerIndex, TypeIndex);
-					continue;
-				}
-				if(Addresses.u.array.length == 0)
-					continue;
-
-				const char *pTypeName = Types.u.object.values[TypeIndex].name;
-
-				// add type if it doesn't exist already
-				const auto CommunityType = std::find_if(Community.m_vTypes.begin(), Community.m_vTypes.end(), [pTypeName](const auto &Elem) {
-					return str_comp(Elem.Name(), pTypeName) == 0;
-				});
-				if(CommunityType == Community.m_vTypes.end())
-				{
-					Community.m_vTypes.emplace_back(pTypeName);
-				}
-
-				// add addresses
-				for(unsigned AddressIndex = 0; AddressIndex < Addresses.u.array.length; ++AddressIndex)
-				{
-					const json_value &Address = *Addresses.u.array.values[AddressIndex];
-					if(Address.type != json_string)
-					{
-						log_error("serverbrowser", "invalid address (ServerIndex=%u, TypeIndex=%u, AddressIndex=%u)", ServerIndex, TypeIndex, AddressIndex);
-						continue;
-					}
-					NETADDR NetAddr;
-					net_addr_from_str(&NetAddr, Address.u.string.ptr);
-					pCountry->m_vServers.emplace_back(NetAddr, pTypeName);
-					m_CommunityServersByAddr.emplace(std::make_pair(NetAddr, CCommunityServer(Community.Id(), pCountry->Name(), pTypeName)));
-				}
+				m_CommunityServersByAddr.emplace(Server.Address(), CCommunityServer(NewCommunity.Id(), Country.Name(), Server.TypeName()));
 			}
 		}
+		m_vCommunities.push_back(std::move(NewCommunity));
 	}
 
 	// Add default none community
-	m_vCommunities.emplace_back(COMMUNITY_NONE, "None", "", "", SHA256_ZEROED);
+	m_vCommunities.emplace_back(COMMUNITY_NONE, "None", SHA256_ZEROED, "");
 
 	// Remove unknown elements from exclude lists
 	CleanFilters();
@@ -1391,10 +1430,10 @@ int CServerBrowser::LoadingProgression() const
 
 CServerInfo::ERankState CCommunity::HasRank(const char *pMap) const
 {
-	if(!HasRanks() || pMap[0] == '\0')
+	if(!HasRanks())
 		return CServerInfo::RANK_UNAVAILABLE;
 	const CCommunityMap Needle(pMap);
-	return m_RankedMaps.count(Needle) == 0 ? CServerInfo::RANK_UNRANKED : CServerInfo::RANK_RANKED;
+	return m_FinishedMaps.count(Needle) == 0 ? CServerInfo::RANK_UNRANKED : CServerInfo::RANK_RANKED;
 }
 
 const std::vector<CCommunity> &CServerBrowser::Communities() const

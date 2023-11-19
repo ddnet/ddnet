@@ -787,7 +787,6 @@ bool CGraphics_Threaded::ScreenshotDirect()
 {
 	// add swap command
 	CImageInfo Image;
-	mem_zero(&Image, sizeof(Image));
 
 	bool DidSwap = false;
 

@@ -457,7 +457,7 @@ void CCharacter::FireWeapon()
 	break;
 	}
 
-	m_AttackTick = GameWorld()->GameTick();
+	m_AttackTick = GameWorld()->GameTick(); // NOLINT(clang-analyzer-unix.Malloc)
 
 	if(!m_ReloadTimer)
 	{

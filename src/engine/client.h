@@ -94,7 +94,6 @@ protected:
 	TMapLoadingCallbackFunc m_MapLoadingCBFunc;
 
 	char m_aNews[3000];
-	char m_aCommunityIconsDownloadUrl[256];
 	int m_Points;
 	int64_t m_ReconnectTime;
 
@@ -258,7 +257,6 @@ public:
 	virtual unsigned GetCurrentMapCrc() const = 0;
 
 	const char *News() const { return m_aNews; }
-	const char *CommunityIconsDownloadUrl() const { return m_aCommunityIconsDownloadUrl; }
 	int Points() const { return m_Points; }
 	int64_t ReconnectTime() const { return m_ReconnectTime; }
 	void SetReconnectTime(int64_t ReconnectTime) { m_ReconnectTime = ReconnectTime; }

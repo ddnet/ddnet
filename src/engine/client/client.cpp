@@ -135,7 +135,6 @@ CClient::CClient() :
 	m_pDDNetInfoTask = NULL;
 	m_aNews[0] = '\0';
 	m_aMapDownloadUrl[0] = '\0';
-	m_aCommunityIconsDownloadUrl[0] = '\0';
 	m_Points = -1;
 
 	m_CurrentServerInfoRequestTime = -1;
@@ -2245,12 +2244,6 @@ void CClient::LoadDDNetInfo()
 		str_copy(m_aMapDownloadUrl, MapDownloadUrl);
 	}
 
-	const json_value &CommunityIconsDownloadUrl = DDNetInfo["community-icons-download-url"];
-	if(CommunityIconsDownloadUrl.type == json_string)
-	{
-		str_copy(m_aCommunityIconsDownloadUrl, CommunityIconsDownloadUrl);
-	}
-
 	const json_value &Points = DDNetInfo["points"];
 	if(Points.type == json_integer)
 	{
@@ -4202,9 +4195,7 @@ void CClient::RegisterCommands()
 
 static CClient *CreateClient()
 {
-	CClient *pClient = static_cast<CClient *>(malloc(sizeof(*pClient)));
-	mem_zero(pClient, sizeof(CClient));
-	return new(pClient) CClient;
+	return new CClient;
 }
 
 void CClient::HandleConnectAddress(const NETADDR *pAddr)
@@ -4376,8 +4367,7 @@ int main(int argc, const char **argv)
 	CleanerFunctions.emplace([pKernel, pClient]() {
 		pKernel->Shutdown();
 		delete pKernel;
-		pClient->~CClient();
-		free(pClient);
+		delete pClient;
 	});
 
 	const std::thread::id MainThreadId = std::this_thread::get_id();

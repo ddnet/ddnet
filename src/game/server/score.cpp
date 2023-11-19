@@ -282,8 +282,8 @@ void CScore::SaveTeam(int ClientID, const char *pCode, const char *pServer)
 	if(RateLimitPlayer(ClientID))
 		return;
 	auto *pController = ((CGameControllerDDRace *)(GameServer()->m_pController));
-	int Team = pController->m_Teams.m_Core.Team(ClientID);
-	if(pController->m_Teams.GetSaving(Team))
+	int Team = pController->Teams().m_Core.Team(ClientID);
+	if(pController->Teams().GetSaving(Team))
 		return;
 
 	auto SaveResult = std::make_shared<CScoreSaveResult>(ClientID);
@@ -291,7 +291,7 @@ void CScore::SaveTeam(int ClientID, const char *pCode, const char *pServer)
 	int Result = SaveResult->m_SavedTeam.Save(GameServer(), Team);
 	if(CSaveTeam::HandleSaveError(Result, ClientID, GameServer()))
 		return;
-	pController->m_Teams.SetSaving(Team, SaveResult);
+	pController->Teams().SetSaving(Team, SaveResult);
 
 	auto Tmp = std::make_unique<CSqlTeamSave>(SaveResult);
 	str_copy(Tmp->m_aCode, pCode, sizeof(Tmp->m_aCode));
@@ -317,7 +317,7 @@ void CScore::SaveTeam(int ClientID, const char *pCode, const char *pServer)
 			Tmp->m_aCode,
 			Tmp->m_aGeneratedCode);
 	}
-	pController->m_Teams.KillSavedTeam(ClientID, Team);
+	pController->Teams().KillSavedTeam(ClientID, Team);
 	GameServer()->SendChatTeam(Team, aBuf);
 	m_pPool->ExecuteWrite(CScoreWorker::SaveTeam, std::move(Tmp), "save team");
 }
@@ -327,22 +327,22 @@ void CScore::LoadTeam(const char *pCode, int ClientID)
 	if(RateLimitPlayer(ClientID))
 		return;
 	auto *pController = ((CGameControllerDDRace *)(GameServer()->m_pController));
-	int Team = pController->m_Teams.m_Core.Team(ClientID);
-	if(pController->m_Teams.GetSaving(Team))
+	int Team = pController->Teams().m_Core.Team(ClientID);
+	if(pController->Teams().GetSaving(Team))
 		return;
 	if(Team < TEAM_FLOCK || Team >= MAX_CLIENTS || (g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO && Team == TEAM_FLOCK))
 	{
 		GameServer()->SendChatTarget(ClientID, "You have to be in a team (from 1-63)");
 		return;
 	}
-	if(pController->m_Teams.GetTeamState(Team) != CGameTeams::TEAMSTATE_OPEN)
+	if(pController->Teams().GetTeamState(Team) != CGameTeams::TEAMSTATE_OPEN)
 	{
 		GameServer()->SendChatTarget(ClientID, "Team can't be loaded while racing");
 		return;
 	}
 	auto SaveResult = std::make_shared<CScoreSaveResult>(ClientID);
 	SaveResult->m_Status = CScoreSaveResult::LOAD_FAILED;
-	pController->m_Teams.SetSaving(Team, SaveResult);
+	pController->Teams().SetSaving(Team, SaveResult);
 	auto Tmp = std::make_unique<CSqlTeamLoad>(SaveResult);
 	str_copy(Tmp->m_aCode, pCode, sizeof(Tmp->m_aCode));
 	str_copy(Tmp->m_aMap, g_Config.m_SvMap, sizeof(Tmp->m_aMap));
@@ -351,7 +351,7 @@ void CScore::LoadTeam(const char *pCode, int ClientID)
 	Tmp->m_NumPlayer = 0;
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if(pController->m_Teams.m_Core.Team(i) == Team)
+		if(pController->Teams().m_Core.Team(i) == Team)
 		{
 			// put all names at the beginning of the array
 			str_copy(Tmp->m_aClientNames[Tmp->m_NumPlayer], Server()->ClientName(i), sizeof(Tmp->m_aClientNames[Tmp->m_NumPlayer]));

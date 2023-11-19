@@ -1,6 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <base/hash_ctxt.h>
+#include <base/log.h>
 #include <base/math.h>
 #include <base/system.h>
 
@@ -30,21 +31,31 @@ public:
 	{
 		mem_zero(m_aaStoragePaths, sizeof(m_aaStoragePaths));
 		m_NumPaths = 0;
-		m_aDatadir[0] = 0;
-		m_aUserdir[0] = 0;
+		m_aDatadir[0] = '\0';
+		m_aUserdir[0] = '\0';
+		m_aCurrentdir[0] = '\0';
+		m_aBinarydir[0] = '\0';
 	}
 
 	int Init(int StorageType, int NumArgs, const char **ppArguments)
 	{
-		// get userdir
+#if !defined(CONF_PLATFORM_ANDROID)
+		// get userdir, just use data directory on android
 		char aFallbackUserdir[IO_MAX_PATH_LENGTH];
-		fs_storage_path("DDNet", m_aUserdir, sizeof(m_aUserdir));
-		fs_storage_path("Teeworlds", aFallbackUserdir, sizeof(aFallbackUserdir));
+		if(fs_storage_path("DDNet", m_aUserdir, sizeof(m_aUserdir)))
+		{
+			log_error("storage", "could not determine user directory");
+		}
+		if(fs_storage_path("Teeworlds", aFallbackUserdir, sizeof(aFallbackUserdir)))
+		{
+			log_error("storage", "could not determine fallback user directory");
+		}
 
-		if(!fs_is_dir(m_aUserdir) && fs_is_dir(aFallbackUserdir))
+		if((m_aUserdir[0] == '\0' || !fs_is_dir(m_aUserdir)) && aFallbackUserdir[0] != '\0' && fs_is_dir(aFallbackUserdir))
 		{
 			str_copy(m_aUserdir, aFallbackUserdir);
 		}
+#endif
 
 		// get datadir
 		FindDatadir(ppArguments[0]);
@@ -54,7 +65,9 @@ public:
 
 		// get currentdir
 		if(!fs_getcwd(m_aCurrentdir, sizeof(m_aCurrentdir)))
-			m_aCurrentdir[0] = 0;
+		{
+			log_error("storage", "could not determine current directory");
+		}
 
 		// load paths from storage.cfg
 		LoadPaths(ppArguments[0]);
@@ -161,12 +174,12 @@ public:
 	{
 		if(!pPath[0])
 		{
-			dbg_msg("storage", "cannot add empty path");
+			log_error("storage", "cannot add empty path");
 			return;
 		}
 		if(m_NumPaths >= MAX_PATHS)
 		{
-			dbg_msg("storage", "cannot add path '%s', the maximum number of paths is %d", pPath, MAX_PATHS);
+			log_error("storage", "cannot add path '%s', the maximum number of paths is %d", pPath, MAX_PATHS);
 			return;
 		}
 
@@ -177,6 +190,10 @@ public:
 				str_copy(m_aaStoragePaths[m_NumPaths++], m_aUserdir);
 				dbg_msg("storage", "added path '$USERDIR' ('%s')", m_aUserdir);
 			}
+			else
+			{
+				log_error("storage", "cannot add path '$USERDIR' because it could not be determined");
+			}
 		}
 		else if(!str_comp(pPath, "$DATADIR"))
 		{
@@ -185,13 +202,17 @@ public:
 				str_copy(m_aaStoragePaths[m_NumPaths++], m_aDatadir);
 				dbg_msg("storage", "added path '$DATADIR' ('%s')", m_aDatadir);
 			}
+			else
+			{
+				log_error("storage", "cannot add path '$DATADIR' because it could not be determined");
+			}
 		}
 		else if(!str_comp(pPath, "$CURRENTDIR"))
 		{
-			m_aaStoragePaths[m_NumPaths++][0] = 0;
+			m_aaStoragePaths[m_NumPaths++][0] = '\0';
 			dbg_msg("storage", "added path '$CURRENTDIR' ('%s')", m_aCurrentdir);
 		}
-		else
+		else if(str_utf8_check(pPath))
 		{
 			if(fs_is_dir(pPath))
 			{
@@ -200,8 +221,12 @@ public:
 			}
 			else
 			{
-				dbg_msg("storage", "cannot add path '%s', which is not a directory", pPath);
+				log_error("storage", "cannot add path '%s', which is not a directory", pPath);
 			}
+		}
+		else
+		{
+			log_error("storage", "cannot add path containing invalid UTF-8");
 		}
 	}
 
@@ -817,8 +842,6 @@ public:
 				str_append(pBuffer, "/", BufferSize);
 				str_append(pBuffer, aBinaryPath, BufferSize);
 			}
-			else
-				pBuffer[0] = '\0';
 		}
 		else
 			str_copy(pBuffer, aBinaryPath, BufferSize);

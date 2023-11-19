@@ -91,7 +91,7 @@ void CMapGrid::Toggle()
 	m_GridActive = !m_GridActive;
 }
 
-bool CMapGrid::Factor() const
+int CMapGrid::Factor() const
 {
 	return m_GridFactor;
 }
