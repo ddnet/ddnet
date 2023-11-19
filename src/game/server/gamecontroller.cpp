@@ -425,7 +425,7 @@ bool IGameController::OnEntity(int Index, int x, int y, int Layer, int Flags, bo
 
 	// gctf
 	// do not spawn pickups
-	if(Index == ENTITY_ARMOR_1 || Index == ENTITY_HEALTH_1 || Index == ENTITY_WEAPON_SHOTGUN || Index == ENTITY_WEAPON_GRENADE || Index == ENTITY_WEAPON_LASER || Index == ENTITY_POWERUP_NINJA)
+	if(Index == ENTITY_ARMOR_1 || Index == ENTITY_HEALTH_1 || Index == ENTITY_WEAPON_SHOTGUN || Index == ENTITY_WEAPON_GRENADE || Index == ENTITY_WEAPON_LASER || Index == ENTITY_POWERUP_NINJA) // NOLINT(clang-analyzer-unix.Malloc)
 		Type = -1;
 
 	if(Type != -1) // NOLINT(clang-analyzer-unix.Malloc)
