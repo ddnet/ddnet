@@ -15,6 +15,7 @@ static constexpr int gs_PickupPhysSize = 14;
 CPickup::CPickup(CGameWorld *pGameWorld, int Type, int SubType, int Layer, int Number) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_PICKUP, vec2(0, 0), gs_PickupPhysSize)
 {
+	m_Core = vec2(0.0f, 0.0f);
 	m_Type = Type;
 	m_Subtype = SubType;
 

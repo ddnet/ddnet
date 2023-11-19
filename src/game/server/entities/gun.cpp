@@ -16,6 +16,7 @@
 CGun::CGun(CGameWorld *pGameWorld, vec2 Pos, bool Freeze, bool Explosive, int Layer, int Number) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER)
 {
+	m_Core = vec2(0.0f, 0.0f);
 	m_Pos = Pos;
 	m_Freeze = Freeze;
 	m_Explosive = Explosive;

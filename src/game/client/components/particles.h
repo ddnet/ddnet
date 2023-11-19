@@ -10,6 +10,7 @@ struct CParticle
 {
 	void SetDefault()
 	{
+		m_Pos = vec2(0, 0);
 		m_Vel = vec2(0, 0);
 		m_LifeSpan = 0;
 		m_StartSize = 32;
