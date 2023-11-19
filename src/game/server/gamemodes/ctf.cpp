@@ -91,6 +91,32 @@ void CGameControllerCTF::OnFlagReturn(CFlag *pFlag)
 	GameServer()->CreateSoundGlobal(SOUND_CTF_RETURN);
 }
 
+void CGameControllerCTF::OnFlagGrab(class CFlag *pFlag)
+{
+	if(!g_Config.m_SvFastcap)
+		return;
+	if(!pFlag)
+		return;
+	if(!pFlag->IsAtStand())
+		return;
+	if(!pFlag->m_pCarrier)
+		return;
+
+	Teams().OnCharacterStart(pFlag->m_pCarrier->GetPlayer()->GetCID());
+}
+
+void CGameControllerCTF::OnFlagCapture(class CFlag *pFlag, float Time)
+{
+	if(!g_Config.m_SvFastcap)
+		return;
+	if(!pFlag)
+		return;
+	if(!pFlag->m_pCarrier)
+		return;
+
+	Teams().OnCharacterFinish(pFlag->m_pCarrier->GetPlayer()->GetCID());
+}
+
 void CGameControllerCTF::FlagTick()
 {
 	if(GameServer()->m_World.m_ResetRequested || GameServer()->m_World.m_Paused)
@@ -144,6 +170,7 @@ void CGameControllerCTF::FlagTick()
 
 						GameServer()->SendChatTarget(pPlayer->GetCID(), aBuf);
 					}
+					GameServer()->m_pController->OnFlagCapture(F, Diff);
 					GameServer()->SendGameMsg(protocol7::GAMEMSG_CTF_CAPTURE, fi, F->GetCarrier()->GetPlayer()->GetCID(), Diff, -1);
 					GameServer()->CreateSoundGlobal(SOUND_CTF_CAPTURE);
 					for(int i = 0; i < 2; i++)

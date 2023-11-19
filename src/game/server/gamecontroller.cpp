@@ -1501,3 +1501,11 @@ void IGameController::SetGameState(EGameState GameState, int Timer)
 void IGameController::OnFlagReturn(CFlag *pFlag)
 {
 }
+
+void IGameController::OnFlagGrab(CFlag *pFlag)
+{
+}
+
+void IGameController::OnFlagCapture(CFlag *pFlag, float Time)
+{
+}

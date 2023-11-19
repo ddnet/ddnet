@@ -234,7 +234,9 @@ public:
 
 	int GetStartTeam();
 	virtual bool DoWincheckMatch(); // returns true when the match is over
-	virtual void OnFlagReturn(class CFlag *pFlag);
+	virtual void OnFlagReturn(class CFlag *pFlag); // gctf
+	virtual void OnFlagGrab(class CFlag *pFlag); // gctf
+	virtual void OnFlagCapture(class CFlag *pFlag, float Time); // gctf
 };
 
 #endif

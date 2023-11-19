@@ -28,6 +28,9 @@ void CFlag::Reset()
 void CFlag::Grab(CCharacter *pChar)
 {
 	m_pCarrier = pChar;
+
+	GameServer()->m_pController->OnFlagGrab(this);
+
 	if(m_AtStand)
 		m_GrabTick = Server()->Tick();
 	m_AtStand = false;

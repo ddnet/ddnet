@@ -16,6 +16,8 @@ public:
 	virtual void Snap(int SnappingClient) override;
 	virtual int OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon) override;
 	virtual void OnFlagReturn(class CFlag *pFlag) override;
+	virtual void OnFlagGrab(class CFlag *pFlag) override;
+	virtual void OnFlagCapture(class CFlag *pFlag, float Time) override;
 	bool OnEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number) override;
 
 	void FlagTick();
