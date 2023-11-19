@@ -52,7 +52,7 @@ public:
 	void OnCharacterTick(int ClientID) override;
 	void OnHookAttach(int ClientID, bool Player) override;
 
-	void Dump() override;
+	void ConsoleCommand(const char *pCommand) override;
 };
 
 extern IEngineAntibot *CreateEngineAntibot();
