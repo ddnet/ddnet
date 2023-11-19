@@ -40,7 +40,7 @@ void CDamageInd::Create(vec2 Pos, vec2 Dir, float Alpha)
 	{
 		pItem->m_Pos = Pos;
 		pItem->m_StartTime = LocalTime();
-		pItem->m_Dir = Dir * -1;
+		pItem->m_Dir = -Dir;
 		pItem->m_StartAngle = -random_angle();
 		pItem->m_Color = ColorRGBA(1.0f, 1.0f, 1.0f, Alpha);
 		pItem->m_StartAlpha = Alpha;

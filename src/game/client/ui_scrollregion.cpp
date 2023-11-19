@@ -22,6 +22,7 @@ CScrollRegion::CScrollRegion()
 	m_AnimInitScrollY = 0.0f;
 	m_AnimTargetScrollY = 0.0f;
 
+	m_SliderGrabPos = 0.0f;
 	m_ContentScrollOff = vec2(0.0f, 0.0f);
 	m_Params = CScrollRegionParams();
 }
@@ -146,8 +147,8 @@ void CScrollRegion::End()
 	if(UI()->CheckActiveItem(pID) && UI()->MouseButton(0))
 	{
 		float MouseY = UI()->MouseY();
-		m_ScrollY += (MouseY - (Slider.y + m_SliderGrabPos.y)) / MaxSlider * MaxScroll;
-		m_SliderGrabPos.y = clamp(m_SliderGrabPos.y, 0.0f, SliderHeight);
+		m_ScrollY += (MouseY - (Slider.y + m_SliderGrabPos)) / MaxSlider * MaxScroll;
+		m_SliderGrabPos = clamp(m_SliderGrabPos, 0.0f, SliderHeight);
 		m_AnimTargetScrollY = m_ScrollY;
 		m_AnimTime = 0.0f;
 		Grabbed = true;
@@ -159,7 +160,7 @@ void CScrollRegion::End()
 		if(!UI()->CheckActiveItem(pID) && UI()->MouseButtonClicked(0))
 		{
 			UI()->SetActiveItem(pID);
-			m_SliderGrabPos.y = UI()->MouseY() - Slider.y;
+			m_SliderGrabPos = UI()->MouseY() - Slider.y;
 			m_AnimTargetScrollY = m_ScrollY;
 			m_AnimTime = 0.0f;
 			m_Params.m_Active = true;
@@ -170,7 +171,7 @@ void CScrollRegion::End()
 		m_ScrollY += (UI()->MouseY() - (Slider.y + Slider.h / 2.0f)) / MaxSlider * MaxScroll;
 		UI()->SetHotItem(pID);
 		UI()->SetActiveItem(pID);
-		m_SliderGrabPos.y = Slider.h / 2.0f;
+		m_SliderGrabPos = Slider.h / 2.0f;
 		m_AnimTargetScrollY = m_ScrollY;
 		m_AnimTime = 0.0f;
 		m_Params.m_Active = true;
