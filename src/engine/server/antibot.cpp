@@ -92,7 +92,10 @@ void CAntibot::RoundEnd()
 	m_pGameServer = 0;
 	free(m_RoundData.m_Map.m_pTiles);
 }
-void CAntibot::Dump() { AntibotDump(); }
+void CAntibot::ConsoleCommand(const char *pCommand)
+{
+	AntibotConsoleCommand(pCommand);
+}
 void CAntibot::Update()
 {
 	m_Data.m_Now = time_get();
@@ -221,9 +224,16 @@ void CAntibot::RoundEnd()
 {
 	m_pGameServer = 0;
 }
-void CAntibot::Dump()
+void CAntibot::ConsoleCommand(const char *pCommand)
 {
-	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "antibot", "antibot support not compiled in");
+	if(str_comp(pCommand, "dump") == 0)
+	{
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "antibot", "antibot support not compiled in");
+	}
+	else
+	{
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "antibot", "unknown command");
+	}
 }
 void CAntibot::Update()
 {

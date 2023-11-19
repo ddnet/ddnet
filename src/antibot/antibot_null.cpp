@@ -2,6 +2,8 @@
 
 #include "antibot_interface.h"
 
+#include <cstring>
+
 static CAntibotData *g_pData;
 
 extern "C" {
@@ -19,9 +21,16 @@ void AntibotRoundStart(CAntibotRoundData *pRoundData){};
 void AntibotRoundEnd(void){};
 void AntibotUpdateData(void) {}
 void AntibotDestroy(void) { g_pData = 0; }
-void AntibotDump(void)
+void AntibotConsoleCommand(const char *pCommand)
 {
-	g_pData->m_pfnLog("null antibot", g_pData->m_pUser);
+	if(strcmp(pCommand, "dump") == 0)
+	{
+		g_pData->m_pfnLog("null antibot", g_pData->m_pUser);
+	}
+	else
+	{
+		g_pData->m_pfnLog("unknown command", g_pData->m_pUser);
+	}
 }
 void AntibotOnPlayerInit(int /*ClientID*/) {}
 void AntibotOnPlayerDestroy(int /*ClientID*/) {}

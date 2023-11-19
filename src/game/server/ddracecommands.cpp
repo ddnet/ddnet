@@ -878,7 +878,13 @@ void CGameContext::ConDrySave(IConsole::IResult *pResult, void *pUserData)
 void CGameContext::ConDumpAntibot(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->Antibot()->Dump();
+	pSelf->Antibot()->ConsoleCommand("dump");
+}
+
+void CGameContext::ConAntibot(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	pSelf->Antibot()->ConsoleCommand(pResult->GetString(0));
 }
 
 void CGameContext::ConDumpLog(IConsole::IResult *pResult, void *pUserData)
