@@ -1,0 +1,14 @@
+#ifndef GAME_SERVER_GAMEMODES_ICTF_H
+#define GAME_SERVER_GAMEMODES_ICTF_H
+
+#include "ctf.h"
+
+class CGameControllerICTF : public CGameControllerCTF
+{
+public:
+	CGameControllerICTF(class CGameContext *pGameServer);
+	~CGameControllerICTF();
+
+	void Tick() override;
+};
+#endif // GAME_SERVER_GAMEMODES_ICTF_H

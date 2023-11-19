@@ -6,10 +6,6 @@
 
 class CGameControllerDDRace : public IGameController
 {
-	// gctf
-	class CFlag *m_apFlags[2];
-	virtual bool DoWincheckMatch() override;
-
 public:
 	CGameControllerDDRace(class CGameContext *pGameServer);
 	~CGameControllerDDRace();
@@ -26,14 +22,5 @@ public:
 	void Tick() override;
 
 	void DoTeamChange(class CPlayer *pPlayer, int Team, bool DoChatMsg = true) override;
-
-	// gctf
-
-	virtual void Snap(int SnappingClient) override;
-	virtual int OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon) override;
-	virtual void OnFlagReturn(class CFlag *pFlag) override;
-	bool OnEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number) override;
-
-	void FlagTick();
 };
 #endif // GAME_SERVER_GAMEMODES_DDRACE_H

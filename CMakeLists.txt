@@ -2545,6 +2545,14 @@ if(SERVER)
     gamecontroller.h
     gamemodes/DDRace.cpp
     gamemodes/DDRace.h
+    gamemodes/ctf.cpp
+    gamemodes/ctf.h
+    gamemodes/gctf.cpp
+    gamemodes/gctf.h
+    gamemodes/ictf.cpp
+    gamemodes/ictf.h
+    gamemodes/instagib.cpp
+    gamemodes/instagib.h
     gamemodes/mod.cpp
     gamemodes/mod.h
     gameworld.cpp

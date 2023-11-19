@@ -31,6 +31,8 @@
 #include "entities/character.h"
 #include "gamemodes/DDRace.h"
 #include "gamemodes/mod.h"
+#include "gamemodes/gctf.h"
+#include "gamemodes/ictf.h"
 #include "player.h"
 #include "score.h"
 
@@ -3726,6 +3728,10 @@ void CGameContext::OnInit(const void *pPersistentData)
 
 	if(!str_comp(Config()->m_SvGametype, "mod"))
 		m_pController = new CGameControllerMod(this);
+	else if(!str_comp_nocase(Config()->m_SvGametype, "gctf"))
+		m_pController = new CGameControllerGCTF(this);
+	else if(!str_comp_nocase(Config()->m_SvGametype, "ictf"))
+		m_pController = new CGameControllerICTF(this);
 	else
 		m_pController = new CGameControllerDDRace(this);
 
