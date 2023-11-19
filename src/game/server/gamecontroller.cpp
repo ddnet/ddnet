@@ -217,6 +217,11 @@ bool IGameController::CanSpawn(int Team, vec2 *pOutPos, int DDTeam)
 
 bool IGameController::OnEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number)
 {
+	// gctf
+	// do not spawn pickups
+	if(Index == ENTITY_ARMOR_1 || Index == ENTITY_HEALTH_1 || Index == ENTITY_WEAPON_SHOTGUN || Index == ENTITY_WEAPON_GRENADE || Index == ENTITY_WEAPON_LASER || Index == ENTITY_POWERUP_NINJA)
+		return false;
+
 	dbg_assert(Index >= 0, "Invalid entity index");
 
 	const vec2 Pos(x * 32.0f + 16.0f, y * 32.0f + 16.0f);
@@ -422,11 +427,6 @@ bool IGameController::OnEntity(int Index, int x, int y, int Layer, int Flags, bo
 	{
 		new CGun(&GameServer()->m_World, Pos, false, false, Layer, Number);
 	}
-
-	// gctf
-	// do not spawn pickups
-	if(Index == ENTITY_ARMOR_1 || Index == ENTITY_HEALTH_1 || Index == ENTITY_WEAPON_SHOTGUN || Index == ENTITY_WEAPON_GRENADE || Index == ENTITY_WEAPON_LASER || Index == ENTITY_POWERUP_NINJA) // NOLINT(clang-analyzer-unix.Malloc)
-		Type = -1;
 
 	if(Type != -1) // NOLINT(clang-analyzer-unix.Malloc)
 	{
