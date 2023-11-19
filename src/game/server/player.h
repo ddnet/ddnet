@@ -64,6 +64,7 @@ public:
 
 	void KillCharacter(int Weapon = WEAPON_GAME, bool SendKillMsg = true);
 	CCharacter *GetCharacter();
+	const CCharacter *GetCharacter() const;
 
 	void SpectatePlayerName(const char *pName);
 
