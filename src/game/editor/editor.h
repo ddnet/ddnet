@@ -390,6 +390,7 @@ public:
 
 		m_QuadKnifeActive = false;
 		m_QuadKnifeCount = 0;
+		mem_zero(m_aQuadKnifePoints, sizeof(m_aQuadKnifePoints));
 
 		m_CheckerTexture.Invalidate();
 		m_BackgroundTexture.Invalidate();

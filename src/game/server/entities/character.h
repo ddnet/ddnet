@@ -203,7 +203,6 @@ public:
 
 	int m_MoveRestrictions;
 
-	vec2 m_Intersection;
 	int64_t m_LastStartWarning;
 	int64_t m_LastRescue;
 	bool m_LastRefillJumps;
