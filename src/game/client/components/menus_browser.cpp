@@ -688,8 +688,6 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 	// community filter
 	if((g_Config.m_UiPage == PAGE_INTERNET || g_Config.m_UiPage == PAGE_FAVORITES) && !ServerBrowser()->Communities().empty())
 	{
-		ServerBrowser()->CleanFilters();
-
 		CUIRect Row;
 		View.HSplitTop(6.0f, nullptr, &View);
 		View.HSplitTop(19.0f, &Row, &View);
@@ -1742,8 +1740,13 @@ void CMenus::ConchainFavoritesUpdate(IConsole::IResult *pResult, void *pUserData
 void CMenus::ConchainCommunitiesUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	pfnCallback(pResult, pCallbackUserData);
+	CMenus *pThis = static_cast<CMenus *>(pUserData);
 	if(pResult->NumArguments() >= 1 && (g_Config.m_UiPage == PAGE_INTERNET || g_Config.m_UiPage == PAGE_FAVORITES))
-		((CMenus *)pUserData)->UpdateCommunityCache(true);
+	{
+		pThis->ServerBrowser()->CleanFilters();
+		pThis->UpdateCommunityCache(true);
+		pThis->Client()->ServerBrowserUpdate();
+	}
 }
 
 void CMenus::UpdateCommunityCache(bool Force)
