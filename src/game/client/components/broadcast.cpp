@@ -17,13 +17,29 @@ void CBroadcast::OnReset()
 {
 	m_BroadcastTick = 0;
 	m_BroadcastRenderOffset = -1.0f;
+	m_ClientBroadcastRenderOffset = -1.0f;
+	m_ClientBroadcastTime = 0.0f;
 	TextRender()->DeleteTextContainer(m_TextContainerIndex);
+	TextRender()->DeleteTextContainer(m_ClientTextContainerIndex);
 }
 
 void CBroadcast::OnWindowResize()
 {
 	m_BroadcastRenderOffset = -1.0f;
+	m_ClientBroadcastRenderOffset = -1.0f;
 	TextRender()->DeleteTextContainer(m_TextContainerIndex);
+	TextRender()->DeleteTextContainer(m_ClientTextContainerIndex);
+}
+
+void CBroadcast::OnConsoleInit()
+{
+	Console()->Register("client_broadcast", "r[text]", CFGFLAG_CLIENT, ConClientBroadcast, this, "Show client side broadcast");
+}
+
+void CBroadcast::ConClientBroadcast(IConsole::IResult *pResult, void *pUserData)
+{
+	CBroadcast *pSelf = (CBroadcast *)pUserData;
+	pSelf->DoClientBroadcast(pResult->GetString(0));
 }
 
 void CBroadcast::OnRender()
@@ -32,6 +48,45 @@ void CBroadcast::OnRender()
 		return;
 
 	RenderServerBroadcast();
+	RenderClientBroadcast();
+}
+
+void CBroadcast::RenderClientBroadcast()
+{
+	if(Client()->LocalTime() >= m_ClientBroadcastTime)
+	{
+		TextRender()->DeleteTextContainer(m_ClientTextContainerIndex);
+		return;
+	}
+
+	const float Height = 340.0f;
+	const float Width = Height * Graphics()->ScreenAspect();
+	Graphics()->MapScreen(0.0f, 0.0f, Width, Height);
+
+	if(m_ClientBroadcastRenderOffset < 0.0f)
+		m_ClientBroadcastRenderOffset = Width / 2.0f - TextRender()->TextWidth(12.0f, m_aClientBroadcastText, -1, Width) / 2.0f;
+
+	if(!m_ClientTextContainerIndex.Valid())
+	{
+		CTextCursor Cursor;
+		TextRender()->SetCursor(&Cursor, m_ClientBroadcastRenderOffset, 20.0f, 12.0f, TEXTFLAG_RENDER);
+		Cursor.m_LineWidth = Width;
+		TextRender()->CreateTextContainer(m_ClientTextContainerIndex, &Cursor, m_aClientBroadcastText);
+	}
+	if(m_ClientTextContainerIndex.Valid())
+	{
+		ColorRGBA TextColor = ColorRGBA(1, 1, 0.5f, 1);
+		ColorRGBA OutlineColor = TextRender()->DefaultTextOutlineColor();
+		TextRender()->RenderTextContainer(m_ClientTextContainerIndex, TextColor, OutlineColor);
+	}
+}
+
+void CBroadcast::DoClientBroadcast(const char *pText)
+{
+	str_copy(m_aClientBroadcastText, pText);
+	TextRender()->DeleteTextContainer(m_ClientTextContainerIndex);
+	m_BroadcastRenderOffset = -1.0f;
+	m_ClientBroadcastTime = Client()->LocalTime() + 10.0f;
 }
 
 void CBroadcast::RenderServerBroadcast()
