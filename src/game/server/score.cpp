@@ -110,11 +110,11 @@ CScore::CScore(CGameContext *pGameServer, CDbConnectionPool *pPool) :
 
 void CScore::LoadBestTime()
 {
-	if(((CGameControllerDDRace *)(m_pGameServer->m_pController))->m_pLoadBestTimeResult)
+	if(m_pGameServer->m_pController->m_pLoadBestTimeResult)
 		return; // already in progress
 
 	auto LoadBestTimeResult = std::make_shared<CScoreLoadBestTimeResult>();
-	((CGameControllerDDRace *)(m_pGameServer->m_pController))->m_pLoadBestTimeResult = LoadBestTimeResult;
+	m_pGameServer->m_pController->m_pLoadBestTimeResult = LoadBestTimeResult;
 
 	auto Tmp = std::make_unique<CSqlLoadBestTimeData>(LoadBestTimeResult);
 	str_copy(Tmp->m_aMap, g_Config.m_SvMap, sizeof(Tmp->m_aMap));
@@ -281,7 +281,7 @@ void CScore::SaveTeam(int ClientID, const char *pCode, const char *pServer)
 {
 	if(RateLimitPlayer(ClientID))
 		return;
-	auto *pController = ((CGameControllerDDRace *)(GameServer()->m_pController));
+	auto *pController = GameServer()->m_pController;
 	int Team = pController->Teams().m_Core.Team(ClientID);
 	if(pController->Teams().GetSaving(Team))
 		return;
@@ -326,7 +326,7 @@ void CScore::LoadTeam(const char *pCode, int ClientID)
 {
 	if(RateLimitPlayer(ClientID))
 		return;
-	auto *pController = ((CGameControllerDDRace *)(GameServer()->m_pController));
+	auto *pController = GameServer()->m_pController;
 	int Team = pController->Teams().m_Core.Team(ClientID);
 	if(pController->Teams().GetSaving(Team))
 		return;
