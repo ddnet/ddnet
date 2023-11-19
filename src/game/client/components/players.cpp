@@ -425,7 +425,7 @@ void CPlayers::RenderPlayer(
 	if(!OtherTeam && g_Config.m_ClShowOthersGhosts && !Local && g_Config.m_ClUnpredOthersInFreeze && g_Config.m_ClAmIFrozen && !Spec)
 		Alpha = 1.0f;
 
-	if(ClentID == -2) // ghost
+	if(ClientID == -2) // ghost
 		Alpha = g_Config.m_ClRaceGhostAlpha / 100.0f;
 
 	// set size
@@ -1381,7 +1381,7 @@ void CPlayers::OnRender()
 
 		//If we are frozen and hiding frozen ghosts and not swapping render only the regular player
 		if(RenderGhost && g_Config.m_ClShowOthersGhosts && !Spec && Client()->State() != IClient::STATE_DEMOPLAYBACK)
-			RenderPlayerGhost(&m_pClient->m_aClients[ClientID].m_RenderPrev, &m_pClient->m_aClients[ClientID].m_RenderCur, &m_aRenderInfo[ClientID], ClientID);
+			RenderPlayerGhost(&m_pClient->m_aClients[ClientID].m_RenderPrev, &m_pClient->m_aClients[ClientID].m_RenderCur, &aRenderInfo[ClientID], ClientID);
 
 		if(RenderRegular || Spec)
 			RenderPlayer(&m_pClient->m_aClients[ClientID].m_RenderPrev, &m_pClient->m_aClients[ClientID].m_RenderCur, &aRenderInfo[ClientID], ClientID);

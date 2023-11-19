@@ -1,5 +1,6 @@
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
+#include <engine/engine.h>
 
 #include <game/client/animstate.h>
 #include <game/client/render.h>
