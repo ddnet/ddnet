@@ -11,6 +11,8 @@
 #include <map>
 #include <vector>
 
+struct CScoreLoadBestTimeResult;
+
 /*
 	Class: Game Controller
 		Controls the main game logic. Keeping track of team and player score,
@@ -155,6 +157,7 @@ public:
 	std::map<int, std::vector<vec2>> m_TeleOuts;
 	std::map<int, std::vector<vec2>> m_TeleCheckOuts;
 	CGameTeams &Teams() { return m_Teams; }
+	std::shared_ptr<CScoreLoadBestTimeResult> m_pLoadBestTimeResult;
 };
 
 #endif
