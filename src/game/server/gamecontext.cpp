@@ -570,7 +570,7 @@ void CGameContext::SendChat(int ChatterClientID, int Team, const char *pText, in
 				Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, i);
 		}
 
-		str_format(aBuf, sizeof aBuf, "Chat: %s", aText);
+		str_format(aBuf, sizeof(aBuf), "Chat: %s", aText);
 		LogEvent(aBuf, ChatterClientID);
 	}
 	else
@@ -1558,7 +1558,7 @@ void CGameContext::OnClientEnter(int ClientID)
 		char aBuf[128];
 		NETADDR Addr;
 		Server()->GetClientAddr(ClientID, &Addr);
-		str_format(aBuf, sizeof aBuf, "This server has an initial chat delay, you will need to wait %d seconds before talking.", g_Config.m_SvChatInitialDelay);
+		str_format(aBuf, sizeof(aBuf), "This server has an initial chat delay, you will need to wait %d seconds before talking.", g_Config.m_SvChatInitialDelay);
 		SendChatTarget(ClientID, aBuf);
 		Mute(&Addr, g_Config.m_SvChatInitialDelay, Server()->ClientName(ClientID), "Initial chat delay", true);
 	}
@@ -4203,9 +4203,9 @@ bool CGameContext::ProcessSpamProtection(int ClientID, bool RespectChatInitialDe
 	{
 		char aBuf[128];
 		if(Muted.m_InitialChatDelay)
-			str_format(aBuf, sizeof aBuf, "This server has an initial chat delay, you will be able to talk in %d seconds.", Expires);
+			str_format(aBuf, sizeof(aBuf), "This server has an initial chat delay, you will be able to talk in %d seconds.", Expires);
 		else
-			str_format(aBuf, sizeof aBuf, "You are not permitted to talk for the next %d seconds.", Expires);
+			str_format(aBuf, sizeof(aBuf), "You are not permitted to talk for the next %d seconds.", Expires);
 		SendChatTarget(ClientID, aBuf);
 		return true;
 	}
