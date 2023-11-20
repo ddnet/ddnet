@@ -576,9 +576,9 @@ int CGraphics_Threaded::LoadPNG(CImageInfo *pImg, const char *pFilename, int Sto
 		{
 			pImg->m_pData = pImgBuffer;
 
-			if(ImageFormat == IMAGE_FORMAT_RGB) // ignore_convention
+			if(ImageFormat == IMAGE_FORMAT_RGB)
 				pImg->m_Format = CImageInfo::FORMAT_RGB;
-			else if(ImageFormat == IMAGE_FORMAT_RGBA) // ignore_convention
+			else if(ImageFormat == IMAGE_FORMAT_RGBA)
 				pImg->m_Format = CImageInfo::FORMAT_RGBA;
 			else
 			{
