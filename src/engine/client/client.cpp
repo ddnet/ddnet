@@ -2279,8 +2279,6 @@ void CClient::LoadDDNetInfo()
 			log_debug("info", "got global tcp ip address: %s", (const char *)ConnectingIp);
 		}
 	}
-	const json_value &WarnPngliteIncompatibleImages = DDNetInfo["warn-pnglite-incompatible-images"];
-	Graphics()->WarnPngliteIncompatibleImages(WarnPngliteIncompatibleImages.type == json_boolean && (bool)WarnPngliteIncompatibleImages);
 }
 
 int CClient::ConnectNetTypes() const
