@@ -575,8 +575,6 @@ bool CGraphics_Threaded::LoadPNG(CImageInfo *pImg, const char *pFilename, int St
 		int PngliteIncompatible;
 		if(::LoadPNG(ImageByteBuffer, pFilename, PngliteIncompatible, pImg->m_Width, pImg->m_Height, pImgBuffer, ImageFormat))
 		{
-			pImg->m_pData = pImgBuffer;
-
 			if(ImageFormat == IMAGE_FORMAT_RGB)
 				pImg->m_Format = CImageInfo::FORMAT_RGB;
 			else if(ImageFormat == IMAGE_FORMAT_RGBA)
@@ -587,6 +585,7 @@ bool CGraphics_Threaded::LoadPNG(CImageInfo *pImg, const char *pFilename, int St
 				log_error("game/png", "image had unsupported image format. filename='%s' format='%d'", pFilename, (int)ImageFormat);
 				return false;
 			}
+			pImg->m_pData = pImgBuffer;
 
 			if(m_WarnPngliteIncompatibleImages && PngliteIncompatible != 0)
 			{
