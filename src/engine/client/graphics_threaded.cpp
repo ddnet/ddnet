@@ -2,6 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
 #include <base/detect.h>
+#include <base/log.h>
 #include <base/math.h>
 
 #if defined(CONF_FAMILY_UNIX)
@@ -583,6 +584,7 @@ bool CGraphics_Threaded::LoadPNG(CImageInfo *pImg, const char *pFilename, int St
 			else
 			{
 				free(pImgBuffer);
+				log_error("game/png", "image had unsupported image format. filename='%s' format='%d'", pFilename, (int)ImageFormat);
 				return false;
 			}
 
@@ -612,13 +614,13 @@ bool CGraphics_Threaded::LoadPNG(CImageInfo *pImg, const char *pFilename, int St
 		}
 		else
 		{
-			dbg_msg("game/png", "image had unsupported image format. filename='%s'", pFilename);
+			log_error("game/png", "failed to load file. filename='%s'", pFilename);
 			return false;
 		}
 	}
 	else
 	{
-		dbg_msg("game/png", "failed to open file. filename='%s'", pFilename);
+		log_error("game/png", "failed to open file. filename='%s'", pFilename);
 		return false;
 	}
 
