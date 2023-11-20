@@ -409,8 +409,10 @@ void CGameContext::ConTeleport(IConsole::IResult *pResult, void *pUserData)
 	{
 		vec2 Pos = pSelf->m_apPlayers[TeleTo]->m_ViewPos;
 		if(!pPlayer->IsPaused() && !pResult->NumArguments())
-			Pos = Pos + vec2(pChr->Core()->m_Input.m_TargetX, pChr->Core()->m_Input.m_TargetY);
-
+		{
+			vec2 ZoomScale = vec2(pPlayer->m_ShowDistance.x / 1400.0f, pPlayer->m_ShowDistance.y / 800.0f);
+			Pos = Pos + (vec2(pChr->Core()->m_Input.m_TargetX, pChr->Core()->m_Input.m_TargetY) * ZoomScale);
+		}
 		pSelf->Teleport(pChr, Pos);
 		pChr->UnFreeze();
 		pChr->Core()->m_Vel = vec2(0, 0);
