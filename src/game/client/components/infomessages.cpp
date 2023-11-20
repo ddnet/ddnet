@@ -154,7 +154,7 @@ void CInfoMessages::OnMessage(int MsgType, void *pRawMsg)
 	if(m_pClient->m_SuppressEvents)
 		return;
 
-	if(MsgType == NETMSGTYPE_SV_KILLMSGTEAM)
+	if(MsgType == NETMSGTYPE_SV_KILLMSGTEAM && g_Config.m_ClShowKillMessages)
 	{
 		CNetMsg_Sv_KillMsgTeam *pMsg = (CNetMsg_Sv_KillMsgTeam *)pRawMsg;
 
@@ -233,7 +233,7 @@ void CInfoMessages::OnMessage(int MsgType, void *pRawMsg)
 		Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 	}
 
-	if(MsgType == NETMSGTYPE_SV_KILLMSG)
+	if(MsgType == NETMSGTYPE_SV_KILLMSG && g_Config.m_ClShowKillMessages)
 	{
 		CNetMsg_Sv_KillMsg *pMsg = (CNetMsg_Sv_KillMsg *)pRawMsg;
 
@@ -300,7 +300,7 @@ void CInfoMessages::OnMessage(int MsgType, void *pRawMsg)
 		Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 	}
 
-	if(MsgType == NETMSGTYPE_SV_RACEFINISH)
+	if(MsgType == NETMSGTYPE_SV_RACEFINISH && g_Config.m_ClShowFinishMessages)
 	{
 		CNetMsg_Sv_RaceFinish *pMsg = (CNetMsg_Sv_RaceFinish *)pRawMsg;
 
@@ -524,11 +524,15 @@ void CInfoMessages::OnRender()
 			continue;
 
 		if(pInfoMsg->m_Type == EType::TYPE_KILL && g_Config.m_ClShowKillMessages)
+		{
 			RenderKillMsg(pInfoMsg, StartX, y);
-		else if(pInfoMsg->m_Type == EType::TYPE_FINISH)
+			y += 46.0f;
+		}
+		else if(pInfoMsg->m_Type == EType::TYPE_FINISH && g_Config.m_ClShowFinishMessages)
+		{
 			RenderFinishMsg(pInfoMsg, StartX, y);
-
-		y += 46.0f;
+			y += 46.0f;
+		}
 	}
 }
 
