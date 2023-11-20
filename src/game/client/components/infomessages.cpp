@@ -18,22 +18,26 @@ void CInfoMessages::OnWindowResize()
 {
 	for(auto &InfoMsg : m_aInfoMsgs)
 	{
-		TextRender()->DeleteTextContainer(InfoMsg.m_VictimTextContainerIndex);
-		TextRender()->DeleteTextContainer(InfoMsg.m_KillerTextContainerIndex);
+		DeleteTextContainers(&InfoMsg);
 	}
 }
 
 void CInfoMessages::OnReset()
 {
 	m_InfoMsgCurrent = 0;
-
 	for(auto &InfoMsg : m_aInfoMsgs)
 	{
 		InfoMsg.m_Tick = -100000;
-
-		TextRender()->DeleteTextContainer(InfoMsg.m_VictimTextContainerIndex);
-		TextRender()->DeleteTextContainer(InfoMsg.m_KillerTextContainerIndex);
+		DeleteTextContainers(&InfoMsg);
 	}
+}
+
+void CInfoMessages::DeleteTextContainers(CInfoMsg *pInfoMsg)
+{
+	TextRender()->DeleteTextContainer(pInfoMsg->m_VictimTextContainerIndex);
+	TextRender()->DeleteTextContainer(pInfoMsg->m_KillerTextContainerIndex);
+	TextRender()->DeleteTextContainer(pInfoMsg->m_DiffTextContainerIndex);
+	TextRender()->DeleteTextContainer(pInfoMsg->m_TimeTextContainerIndex);
 }
 
 void CInfoMessages::OnInit()
@@ -61,21 +65,22 @@ void CInfoMessages::OnInit()
 	Graphics()->QuadContainerUpload(m_SpriteQuadContainerIndex);
 }
 
-void CInfoMessages::AddInfoMsg(int Type, CInfoMsg NewMsg)
+void CInfoMessages::AddInfoMsg(EType Type, CInfoMsg NewMsg)
 {
 	NewMsg.m_Type = Type;
 	NewMsg.m_Tick = Client()->GameTick(g_Config.m_ClDummy);
 
-	m_InfoMsgCurrent = (m_InfoMsgCurrent+1)%MAX_INFOMSGS;
+	m_InfoMsgCurrent = (m_InfoMsgCurrent + 1) % MAX_INFOMSGS;
+	DeleteTextContainers(&m_aInfoMsgs[m_InfoMsgCurrent]);
 	m_aInfoMsgs[m_InfoMsgCurrent] = NewMsg;
 }
 
-void CInfoMessages::CreateKillmessageNamesIfNotCreated(CInfoMsg *pInfoMsg)
+void CInfoMessages::CreateNamesIfNotCreated(CInfoMsg *pInfoMsg)
 {
 	const float FontSize = 36.0f;
 	if(!pInfoMsg->m_VictimTextContainerIndex.Valid() && pInfoMsg->m_aVictimName[0] != 0)
 	{
-		pInfoMsg->m_VictimTextWidth = TextRender()->TextWidth(FontSize, pInfoMsg->m_aVictimName, -1, -1.0f);
+		pInfoMsg->m_VictimTextWidth = TextRender()->TextWidth(FontSize, pInfoMsg->m_aVictimName);
 
 		CTextCursor Cursor;
 		TextRender()->SetCursor(&Cursor, 0, 0, FontSize, TEXTFLAG_RENDER);
@@ -93,7 +98,7 @@ void CInfoMessages::CreateKillmessageNamesIfNotCreated(CInfoMsg *pInfoMsg)
 
 	if(!pInfoMsg->m_KillerTextContainerIndex.Valid() && pInfoMsg->m_aKillerName[0] != 0)
 	{
-		pInfoMsg->m_KillerTextWidth = TextRender()->TextWidth(FontSize, pInfoMsg->m_aKillerName, -1, -1.0f);
+		pInfoMsg->m_KillerTextWidth = TextRender()->TextWidth(FontSize, pInfoMsg->m_aKillerName);
 
 		CTextCursor Cursor;
 		TextRender()->SetCursor(&Cursor, 0, 0, FontSize, TEXTFLAG_RENDER);
@@ -111,6 +116,39 @@ void CInfoMessages::CreateKillmessageNamesIfNotCreated(CInfoMsg *pInfoMsg)
 	TextRender()->TextColor(TextRender()->DefaultTextColor());
 }
 
+void CInfoMessages::CreateFinishTextContainersIfNotCreated(CInfoMsg *pInfoMsg)
+{
+	const float FontSize = 36.0f;
+	if(!pInfoMsg->m_DiffTextContainerIndex.Valid() && pInfoMsg->m_aDiffText[0] != 0)
+	{
+		pInfoMsg->m_DiffTextWidth = TextRender()->TextWidth(FontSize, pInfoMsg->m_aDiffText);
+		CTextCursor Cursor;
+		TextRender()->SetCursor(&Cursor, 0, 0, FontSize, TEXTFLAG_RENDER);
+		Cursor.m_LineWidth = -1;
+
+		if(pInfoMsg->m_Diff > 0)
+			TextRender()->TextColor(1.0f, 0.5f, 0.5f, 1); // red
+		else if(pInfoMsg->m_Diff < 0)
+			TextRender()->TextColor(0.5f, 1.0f, 0.5f, 1); // green
+		else
+			TextRender()->TextColor(TextRender()->DefaultTextColor());
+
+		TextRender()->CreateTextContainer(pInfoMsg->m_DiffTextContainerIndex, &Cursor, pInfoMsg->m_aDiffText);
+	}
+	if(!pInfoMsg->m_TimeTextContainerIndex.Valid() && pInfoMsg->m_aTimeText[0] != 0)
+	{
+		pInfoMsg->m_TimeTextWidth = TextRender()->TextWidth(FontSize, pInfoMsg->m_aTimeText);
+		CTextCursor Cursor;
+		TextRender()->SetCursor(&Cursor, 0, 0, FontSize, TEXTFLAG_RENDER);
+		Cursor.m_LineWidth = -1;
+
+		TextRender()->TextColor(TextRender()->DefaultTextColor());
+
+		TextRender()->CreateTextContainer(pInfoMsg->m_TimeTextContainerIndex, &Cursor, pInfoMsg->m_aTimeText);
+	}
+	TextRender()->TextColor(TextRender()->DefaultTextColor());
+}
+
 void CInfoMessages::OnMessage(int MsgType, void *pRawMsg)
 {
 	if(m_pClient->m_SuppressEvents)
@@ -121,7 +159,6 @@ void CInfoMessages::OnMessage(int MsgType, void *pRawMsg)
 		CNetMsg_Sv_KillMsgTeam *pMsg = (CNetMsg_Sv_KillMsgTeam *)pRawMsg;
 
 		CInfoMsg Kill{};
-		Kill.m_Type = INFOMSG_KILL;
 
 		std::vector<std::pair<int, int>> vStrongWeakSorted;
 		for(int i = 0; i < MAX_CLIENTS; i++)
@@ -166,7 +203,6 @@ void CInfoMessages::OnMessage(int MsgType, void *pRawMsg)
 
 		Kill.m_Weapon = -1;
 		Kill.m_ModeSpecial = 0;
-		Kill.m_Tick = Client()->GameTick(g_Config.m_ClDummy);
 
 		Kill.m_VictimTextWidth = Kill.m_KillerTextWidth = 0.f;
 
@@ -177,7 +213,7 @@ void CInfoMessages::OnMessage(int MsgType, void *pRawMsg)
 		Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
 		Graphics()->MapScreen(0, 0, Width * 1.5f, Height * 1.5f);
 
-		CreateKillmessageNamesIfNotCreated(&Kill);
+		CreateNamesIfNotCreated(&Kill);
 
 		bool KillMsgValid = true;
 		for(int i = 0; i < Kill.m_TeamSize; i++)
@@ -187,18 +223,11 @@ void CInfoMessages::OnMessage(int MsgType, void *pRawMsg)
 
 		if(KillMsgValid)
 		{
-			// add the message
-			m_InfoMsgCurrent = (m_InfoMsgCurrent + 1) % MAX_INFOMSGS;
-
-			TextRender()->DeleteTextContainer(m_aInfoMsgs[m_InfoMsgCurrent].m_VictimTextContainerIndex);
-			TextRender()->DeleteTextContainer(m_aInfoMsgs[m_InfoMsgCurrent].m_KillerTextContainerIndex);
-
-			m_aInfoMsgs[m_InfoMsgCurrent] = Kill;
+			AddInfoMsg(EType::TYPE_KILL, Kill);
 		}
 		else
 		{
-			TextRender()->DeleteTextContainer(Kill.m_VictimTextContainerIndex);
-			TextRender()->DeleteTextContainer(Kill.m_KillerTextContainerIndex);
+			DeleteTextContainers(&Kill);
 		}
 
 		Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
@@ -209,7 +238,6 @@ void CInfoMessages::OnMessage(int MsgType, void *pRawMsg)
 		CNetMsg_Sv_KillMsg *pMsg = (CNetMsg_Sv_KillMsg *)pRawMsg;
 
 		CInfoMsg Kill{};
-		Kill.m_Type = INFOMSG_KILL;
 
 		Kill.m_TeamSize = 1;
 		Kill.m_aVictimIds[0] = pMsg->m_Victim;
@@ -244,7 +272,6 @@ void CInfoMessages::OnMessage(int MsgType, void *pRawMsg)
 
 		Kill.m_Weapon = pMsg->m_Weapon;
 		Kill.m_ModeSpecial = pMsg->m_ModeSpecial;
-		Kill.m_Tick = Client()->GameTick(g_Config.m_ClDummy);
 
 		Kill.m_FlagCarrierBlue = m_pClient->m_Snap.m_pGameDataObj ? m_pClient->m_Snap.m_pGameDataObj->m_FlagCarrierBlue : -1;
 
@@ -257,25 +284,72 @@ void CInfoMessages::OnMessage(int MsgType, void *pRawMsg)
 		Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
 		Graphics()->MapScreen(0, 0, Width * 1.5f, Height * 1.5f);
 
-		CreateKillmessageNamesIfNotCreated(&Kill);
+		CreateNamesIfNotCreated(&Kill);
 
 		bool KillMsgValid = (Kill.m_aVictimRenderInfo[0].m_CustomColoredSkin && Kill.m_aVictimRenderInfo[0].m_ColorableRenderSkin.m_Body.IsValid()) || (!Kill.m_aVictimRenderInfo[0].m_CustomColoredSkin && Kill.m_aVictimRenderInfo[0].m_OriginalRenderSkin.m_Body.IsValid());
 		KillMsgValid &= Kill.m_KillerID == -1 || ((Kill.m_KillerRenderInfo.m_CustomColoredSkin && Kill.m_KillerRenderInfo.m_ColorableRenderSkin.m_Body.IsValid()) || (!Kill.m_KillerRenderInfo.m_CustomColoredSkin && Kill.m_KillerRenderInfo.m_OriginalRenderSkin.m_Body.IsValid()));
 		if(KillMsgValid)
 		{
-			// add the message
-			m_InfoMsgCurrent = (m_InfoMsgCurrent + 1) % MAX_INFOMSGS;
-
-			TextRender()->DeleteTextContainer(m_aInfoMsgs[m_InfoMsgCurrent].m_VictimTextContainerIndex);
-			TextRender()->DeleteTextContainer(m_aInfoMsgs[m_InfoMsgCurrent].m_KillerTextContainerIndex);
-
-			m_aInfoMsgs[m_InfoMsgCurrent] = Kill;
+			AddInfoMsg(EType::TYPE_KILL, Kill);
 		}
 		else
 		{
-			TextRender()->DeleteTextContainer(Kill.m_VictimTextContainerIndex);
-			TextRender()->DeleteTextContainer(Kill.m_KillerTextContainerIndex);
+			DeleteTextContainers(&Kill);
 		}
+
+		Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
+	}
+
+	if(MsgType == NETMSGTYPE_SV_RACEFINISH)
+	{
+		CNetMsg_Sv_RaceFinish *pMsg = (CNetMsg_Sv_RaceFinish *)pRawMsg;
+
+		char aBuf[256];
+
+		CInfoMsg Finish;
+		Finish.m_TeamSize = 1;
+		Finish.m_aVictimIds[0] = pMsg->m_ClientID;
+		Finish.m_VictimDDTeam = m_pClient->m_Teams.Team(Finish.m_aVictimIds[0]);
+		str_copy(Finish.m_aVictimName, m_pClient->m_aClients[Finish.m_aVictimIds[0]].m_aName);
+		Finish.m_aVictimRenderInfo[0] = m_pClient->m_aClients[pMsg->m_ClientID].m_RenderInfo;
+
+		Finish.m_aKillerName[0] = '\0';
+
+		Finish.m_Diff = pMsg->m_Diff;
+		Finish.m_RecordPersonal = (pMsg->m_RecordPersonal || pMsg->m_RecordServer);
+
+		// diff time text
+		if(Finish.m_Diff)
+		{
+			if(Finish.m_Diff < 0)
+			{
+				str_time_float(-Finish.m_Diff / 1000.0f, TIME_HOURS_CENTISECS, aBuf, sizeof(aBuf));
+				str_format(Finish.m_aDiffText, sizeof(Finish.m_aDiffText), "(-%s)", aBuf);
+			}
+			else
+			{
+				str_time_float(Finish.m_Diff / 1000.0f, TIME_HOURS_CENTISECS, aBuf, sizeof(aBuf));
+				str_format(Finish.m_aDiffText, sizeof(Finish.m_aDiffText), "(+%s)", aBuf);
+			}
+		}
+		else
+		{
+			Finish.m_aDiffText[0] = '\0';
+		}
+
+		// finish time text
+		str_time_float(pMsg->m_Time / 1000.0f, TIME_HOURS_CENTISECS, Finish.m_aTimeText, sizeof(Finish.m_aTimeText));
+
+		float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
+		float Height = 400 * 3.0f;
+		float Width = Height * Graphics()->ScreenAspect();
+		Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
+		Graphics()->MapScreen(0, 0, Width * 1.5f, Height * 1.5f);
+
+		CreateNamesIfNotCreated(&Finish);
+		CreateFinishTextContainersIfNotCreated(&Finish);
+
+		AddInfoMsg(EType::TYPE_FINISH, Finish);
 
 		Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 	}
@@ -291,7 +365,7 @@ void CInfoMessages::RenderKillMsg(CInfoMsg *pInfoMsg, float x, float y)
 	else
 		TextColor = TextRender()->DefaultTextColor();
 
-	CreateKillmessageNamesIfNotCreated(pInfoMsg);
+	CreateNamesIfNotCreated(pInfoMsg);
 
 	if(pInfoMsg->m_VictimTextContainerIndex.Valid())
 		TextRender()->RenderTextContainer(pInfoMsg->m_VictimTextContainerIndex, TextColor, TextRender()->DefaultTextOutlineColor(), x, y + (46.f - 36.f) / 2.f);
@@ -380,12 +454,60 @@ void CInfoMessages::RenderKillMsg(CInfoMsg *pInfoMsg, float x, float y)
 	}
 }
 
+void CInfoMessages::RenderFinishMsg(CInfoMsg *pInfoMsg, float x, float y)
+{
+	// render time diff
+	CreateFinishTextContainersIfNotCreated(pInfoMsg);
+
+	if(pInfoMsg->m_Diff)
+	{
+		x -= pInfoMsg->m_DiffTextWidth;
+
+		if(pInfoMsg->m_DiffTextContainerIndex.Valid())
+			TextRender()->RenderTextContainer(pInfoMsg->m_DiffTextContainerIndex, TextRender()->DefaultTextColor(), TextRender()->DefaultTextOutlineColor(), x, y + (46.f - 36.f) / 2.f);
+	}
+
+	// render time
+	x -= pInfoMsg->m_TimeTextWidth;
+
+	if(pInfoMsg->m_TimeTextContainerIndex.Valid())
+		TextRender()->RenderTextContainer(pInfoMsg->m_TimeTextContainerIndex, TextRender()->DefaultTextColor(), TextRender()->DefaultTextOutlineColor(), x, y + (46.f - 36.f) / 2.f);
+
+	// render flag
+	x -= 52.0f;
+
+	Graphics()->TextureSet(g_pData->m_aImages[IMAGE_RACEFLAG].m_Id);
+	Graphics()->QuadsBegin();
+	IGraphics::CQuadItem QuadItem(x, y, 52, 52);
+	Graphics()->QuadsDrawTL(&QuadItem, 1);
+	Graphics()->QuadsEnd();
+
+	// render victim name
+	ColorRGBA TextColor;
+	x -= pInfoMsg->m_VictimTextWidth;
+	if(g_Config.m_ClChatTeamColors && pInfoMsg->m_VictimDDTeam)
+		TextColor = m_pClient->GetDDTeamColor(pInfoMsg->m_VictimDDTeam, 0.75f);
+	else
+		TextColor = TextRender()->DefaultTextColor();
+
+	CreateNamesIfNotCreated(pInfoMsg);
+
+	if(pInfoMsg->m_VictimTextContainerIndex.Valid())
+		TextRender()->RenderTextContainer(pInfoMsg->m_VictimTextContainerIndex, TextColor, TextRender()->DefaultTextOutlineColor(), x, y + (46.f - 36.f) / 2.f);
+
+	// render victim tee
+	x -= 24.0f;
+
+	const CAnimState *pIdleState = CAnimState::GetIdle();
+	vec2 OffsetToMid;
+	RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &pInfoMsg->m_aVictimRenderInfo[0], OffsetToMid);
+	const vec2 TeeRenderPos = vec2(x, y + 46.0f / 2.0f + OffsetToMid.y);
+	const int Emote = pInfoMsg->m_RecordPersonal ? EMOTE_HAPPY : EMOTE_NORMAL;
+	RenderTools()->RenderTee(pIdleState, &pInfoMsg->m_aVictimRenderInfo[0], Emote, vec2(-1, 0), TeeRenderPos);
+}
 
 void CInfoMessages::OnRender()
 {
-	if(!g_Config.m_ClShowKillMessages)
-		return;
-
 	float Height = 400 * 3.0f;
 	float Width = Height * Graphics()->ScreenAspect();
 
@@ -397,12 +519,14 @@ void CInfoMessages::OnRender()
 
 	for(int i = 1; i <= MAX_INFOMSGS; i++)
 	{
-		int r = (m_KillmsgCurrent + i) % MAX_KILLMSGS;
-		if(Client()->GameTick(g_Config.m_ClDummy) > m_aKillmsgs[r].m_Tick + Client()->GameTickSpeed() * 10)
+		CInfoMsg *pInfoMsg = &m_aInfoMsgs[(m_InfoMsgCurrent + i) % MAX_INFOMSGS];
+		if(Client()->GameTick(g_Config.m_ClDummy) > pInfoMsg->m_Tick + Client()->GameTickSpeed() * 10)
 			continue;
 
-		if(pInfoMsg->m_Type == INFOMSG_KILL)
+		if(pInfoMsg->m_Type == EType::TYPE_KILL && g_Config.m_ClShowKillMessages)
 			RenderKillMsg(pInfoMsg, StartX, y);
+		else if(pInfoMsg->m_Type == EType::TYPE_FINISH)
+			RenderFinishMsg(pInfoMsg, StartX, y);
 
 		y += 46.0f;
 	}

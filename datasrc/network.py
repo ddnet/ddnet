@@ -558,4 +558,12 @@ Messages = [
 	NetMessageEx("Sv_YourVote", "yourvote@netmsg.ddnet.org", [
 		NetIntRange("m_Voted", -1, 1),
 	]),
+
+	NetMessageEx("Sv_RaceFinish", "racefinish@netmsg.ddnet.org", [
+		NetIntRange("m_ClientID", 0, 'MAX_CLIENTS-1'),
+		NetIntAny("m_Time"),
+		NetIntAny("m_Diff"),
+		NetBool("m_RecordPersonal"),
+		NetBool("m_RecordServer", default=False),
+	]),
 ]

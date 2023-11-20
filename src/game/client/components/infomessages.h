@@ -12,15 +12,19 @@ class CInfoMessages : public CComponent
 	{
 		MAX_INFOMSGS = 5,
 		MAX_KILLMSG_TEAM_MEMBERS = 4,
+	};
 
-		INFOMSG_KILL = 0,
+	enum EType
+	{
+		TYPE_KILL,
+		TYPE_FINISH,
 	};
 
 public:
 	// info messages
 	struct CInfoMsg
 	{
-		int m_Type;
+		EType m_Type;
 		int m_Tick;
 
 		int m_aVictimIds[MAX_KILLMSG_TEAM_MEMBERS];
@@ -40,13 +44,27 @@ public:
 		int m_ModeSpecial; // for CTF, if the guy is carrying a flag for example
 		int m_FlagCarrierBlue;
 		int m_TeamSize;
+
+		// finish msg
+		int m_Diff;
+		char m_aTimeText[32];
+		char m_aDiffText[32];
+		STextContainerIndex m_TimeTextContainerIndex;
+		STextContainerIndex m_DiffTextContainerIndex;
+		float m_TimeTextWidth;
+		float m_DiffTextWidth;
+		bool m_RecordPersonal;
 	};
 
 private:
-	void AddInfoMsg(int Type, CInfoMsg NewMsg);
+	void AddInfoMsg(EType Type, CInfoMsg NewMsg);
 	void RenderKillMsg(CInfoMsg *pInfoMsg, float x, float y);
+	void RenderFinishMsg(CInfoMsg *pInfoMsg, float x, float y);
 
-	void CreateKillmessageNamesIfNotCreated(CInfoMsg *pInfoMsg);
+	void CreateNamesIfNotCreated(CInfoMsg *pInfoMsg);
+	void CreateFinishTextContainersIfNotCreated(CInfoMsg *pInfoMsg);
+
+	void DeleteTextContainers(CInfoMsg *pInfoMsg);
 
 public:
 	CInfoMsg m_aInfoMsgs[MAX_INFOMSGS];
