@@ -19,7 +19,7 @@ char *CSaveTeam::GetString()
 	return nullptr;
 }
 
-int CSaveTeam::FromString(char const *)
+int CSaveTeam::FromString(const char *)
 {
 	// Dummy implementation for testing
 	return 1;

@@ -288,7 +288,7 @@ public:
 
 	bool WouldClientNameChange(int ClientID, const char *pNameRequest) override;
 	void SetClientName(int ClientID, const char *pName) override;
-	void SetClientClan(int ClientID, char const *pClan) override;
+	void SetClientClan(int ClientID, const char *pClan) override;
 	void SetClientCountry(int ClientID, int Country) override;
 	void SetClientScore(int ClientID, std::optional<int> Score) override;
 	void SetClientFlags(int ClientID, int Flags) override;
@@ -457,7 +457,7 @@ public:
 
 	void GetClientAddr(int ClientID, NETADDR *pAddr) const override;
 	int m_aPrevStates[MAX_CLIENTS];
-	const char *GetAnnouncementLine(char const *pFileName) override;
+	const char *GetAnnouncementLine(const char *pFileName) override;
 
 	int *GetIdMap(int ClientID) override;
 

@@ -3868,7 +3868,7 @@ void CServer::GetClientAddr(int ClientID, NETADDR *pAddr) const
 	}
 }
 
-const char *CServer::GetAnnouncementLine(char const *pFileName)
+const char *CServer::GetAnnouncementLine(const char *pFileName)
 {
 	if(str_comp(pFileName, m_aAnnouncementFile) != 0)
 	{
