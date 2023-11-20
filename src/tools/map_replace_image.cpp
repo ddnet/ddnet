@@ -23,7 +23,7 @@ int g_NewDataID = -1;
 int g_NewDataSize = 0;
 void *g_pNewData = nullptr;
 
-int LoadPNG(CImageInfo *pImg, const char *pFilename)
+bool LoadPNG(CImageInfo *pImg, const char *pFilename)
 {
 	IOHANDLE File = io_open(pFilename, IOFLAG_READ);
 	if(File)
@@ -55,16 +55,16 @@ int LoadPNG(CImageInfo *pImg, const char *pFilename)
 				else
 				{
 					free(pImgBuffer);
-					return 0;
+					return false;
 				}
 			}
 		}
 		else
-			return 0;
+			return false;
 	}
 	else
-		return 0;
-	return 1;
+		return false;
+	return true;
 }
 
 void *ReplaceImageItem(int Index, CMapItemImage *pImgItem, const char *pImgName, const char *pImgFile, CMapItemImage *pNewImgItem)

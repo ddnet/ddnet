@@ -551,7 +551,7 @@ bool CGraphics_Threaded::UpdateTextTexture(CTextureHandle TextureID, int x, int 
 	return true;
 }
 
-int CGraphics_Threaded::LoadPNG(CImageInfo *pImg, const char *pFilename, int StorageType)
+bool CGraphics_Threaded::LoadPNG(CImageInfo *pImg, const char *pFilename, int StorageType)
 {
 	char aCompleteFilename[IO_MAX_PATH_LENGTH];
 	IOHANDLE File = m_pStorage->OpenFile(pFilename, IOFLAG_READ, StorageType, aCompleteFilename, sizeof(aCompleteFilename));
@@ -583,7 +583,7 @@ int CGraphics_Threaded::LoadPNG(CImageInfo *pImg, const char *pFilename, int Sto
 			else
 			{
 				free(pImgBuffer);
-				return 0;
+				return false;
 			}
 
 			if(m_WarnPngliteIncompatibleImages && PngliteIncompatible != 0)
@@ -613,16 +613,16 @@ int CGraphics_Threaded::LoadPNG(CImageInfo *pImg, const char *pFilename, int Sto
 		else
 		{
 			dbg_msg("game/png", "image had unsupported image format. filename='%s'", pFilename);
-			return 0;
+			return false;
 		}
 	}
 	else
 	{
 		dbg_msg("game/png", "failed to open file. filename='%s'", pFilename);
-		return 0;
+		return false;
 	}
 
-	return 1;
+	return true;
 }
 
 void CGraphics_Threaded::FreePNG(CImageInfo *pImg)

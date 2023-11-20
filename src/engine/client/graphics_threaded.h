@@ -965,7 +965,7 @@ public:
 
 	// simple uncompressed RGBA loaders
 	IGraphics::CTextureHandle LoadTexture(const char *pFilename, int StorageType, int Flags = 0) override;
-	int LoadPNG(CImageInfo *pImg, const char *pFilename, int StorageType) override;
+	bool LoadPNG(CImageInfo *pImg, const char *pFilename, int StorageType) override;
 	void FreePNG(CImageInfo *pImg) override;
 
 	bool CheckImageDivisibility(const char *pFileName, CImageInfo &Img, int DivX, int DivY, bool AllowResize) override;
