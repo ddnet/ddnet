@@ -1524,7 +1524,8 @@ void CGameContext::ConTele(IConsole::IResult *pResult, void *pUserData)
 	vec2 Pos = pPlayer->m_ViewPos;
 	if(pResult->NumArguments() == 0 && !pPlayer->IsPaused())
 	{
-		Pos = Pos + vec2(pChr->Core()->m_Input.m_TargetX, pChr->Core()->m_Input.m_TargetY);
+		vec2 ZoomScale = vec2(pPlayer->m_ShowDistance.x / 1400.0f, pPlayer->m_ShowDistance.y / 800.0f);
+		Pos = Pos + (vec2(pChr->Core()->m_Input.m_TargetX, pChr->Core()->m_Input.m_TargetY) * ZoomScale);
 	}
 	else if(pResult->NumArguments() > 0)
 	{
