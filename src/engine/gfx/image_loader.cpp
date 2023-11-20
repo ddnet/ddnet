@@ -59,12 +59,15 @@ static EImageFormat LibPNGGetImageFormat(int ColorChannelCount)
 	{
 	case 1:
 		return IMAGE_FORMAT_R;
+	case 2:
+		return IMAGE_FORMAT_RA;
 	case 3:
 		return IMAGE_FORMAT_RGB;
 	case 4:
 		return IMAGE_FORMAT_RGBA;
 	default:
-		return IMAGE_FORMAT_RGBA;
+		dbg_assert(false, "ColorChannelCount invalid");
+		dbg_break();
 	}
 }
 
@@ -276,14 +279,20 @@ static void FlushPNGWrite(png_structp png_ptr) {}
 
 static int ImageLoaderHelperFormatToColorChannel(EImageFormat Format)
 {
-	if(Format == IMAGE_FORMAT_R)
+	switch(Format)
+	{
+	case IMAGE_FORMAT_R:
 		return 1;
-	else if(Format == IMAGE_FORMAT_RGB)
+	case IMAGE_FORMAT_RA:
+		return 2;
+	case IMAGE_FORMAT_RGB:
 		return 3;
-	else if(Format == IMAGE_FORMAT_RGBA)
+	case IMAGE_FORMAT_RGBA:
 		return 4;
-
-	return 4;
+	default:
+		dbg_assert(false, "Format invalid");
+		dbg_break();
+	}
 }
 
 bool SavePNG(EImageFormat ImageFormat, const uint8_t *pRawBuffer, SImageByteBuffer &WrittenBytes, int Width, int Height)

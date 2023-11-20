@@ -320,7 +320,7 @@ public:
 
 	virtual const TTWGraphicsGPUList &GetGPUs() const = 0;
 
-	virtual int LoadPNG(CImageInfo *pImg, const char *pFilename, int StorageType) = 0;
+	virtual bool LoadPNG(CImageInfo *pImg, const char *pFilename, int StorageType) = 0;
 	virtual void FreePNG(CImageInfo *pImg) = 0;
 
 	virtual bool CheckImageDivisibility(const char *pFileName, CImageInfo &Img, int DivX, int DivY, bool AllowResize) = 0;

@@ -8,6 +8,7 @@
 enum EImageFormat
 {
 	IMAGE_FORMAT_R = 0,
+	IMAGE_FORMAT_RA,
 	IMAGE_FORMAT_RGB,
 	IMAGE_FORMAT_RGBA,
 };
