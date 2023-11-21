@@ -452,6 +452,7 @@ private:
 	static void ConSetTimerType(IConsole::IResult *pResult, void *pUserData);
 	static void ConRescue(IConsole::IResult *pResult, void *pUserData);
 	static void ConTele(IConsole::IResult *pResult, void *pUserData);
+	static void ConTeleCursor(IConsole::IResult *pResult, void *pUserData);
 	static void ConLastTele(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeUnSolo(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeUnDeep(IConsole::IResult *pResult, void *pUserData);
