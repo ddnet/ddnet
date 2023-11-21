@@ -1195,21 +1195,6 @@ void CGameContext::OnTick()
 		m_SqlRandomMapResult = nullptr;
 	}
 
-#ifdef CONF_DEBUG
-	if(g_Config.m_DbgDummies)
-	{
-		for(int i = 0; i < g_Config.m_DbgDummies; i++)
-		{
-			if(m_apPlayers[MAX_CLIENTS - i - 1])
-			{
-				CNetObj_PlayerInput Input = {0};
-				Input.m_Direction = (i & 1) ? -1 : 1;
-				m_apPlayers[MAX_CLIENTS - i - 1]->OnPredictedInput(&Input);
-			}
-		}
-	}
-#endif
-
 	// Record player position at the end of the tick
 	if(m_TeeHistorianActive)
 	{
@@ -1614,14 +1599,6 @@ void CGameContext::OnClientConnected(int ClientID, void *pData)
 	m_apPlayers[ClientID] = new(ClientID) CPlayer(this, NextUniqueClientID, ClientID, StartTeam);
 	m_apPlayers[ClientID]->SetInitialAfk(Afk);
 	NextUniqueClientID += 1;
-
-#ifdef CONF_DEBUG
-	if(g_Config.m_DbgDummies)
-	{
-		if(ClientID >= MAX_CLIENTS - g_Config.m_DbgDummies)
-			return;
-	}
-#endif
 
 	SendMotd(ClientID);
 	SendSettings(ClientID);
@@ -3702,16 +3679,6 @@ void CGameContext::OnInit(const void *pPersistentData)
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "git-revision", GIT_SHORTREV_HASH);
 
 	m_pAntibot->RoundStart(this);
-
-#ifdef CONF_DEBUG
-	if(g_Config.m_DbgDummies)
-	{
-		for(int i = 0; i < g_Config.m_DbgDummies; i++)
-		{
-			OnClientConnected(MAX_CLIENTS - i - 1, 0);
-		}
-	}
-#endif
 }
 
 void CGameContext::CreateAllEntities(bool Initial)
