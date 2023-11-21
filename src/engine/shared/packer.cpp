@@ -72,12 +72,8 @@ void CPacker::AddRaw(const void *pData, int Size)
 		return;
 	}
 
-	const unsigned char *pSrc = (const unsigned char *)pData;
-	while(Size)
-	{
-		*m_pCurrent++ = *pSrc++;
-		Size--;
-	}
+	mem_copy(m_pCurrent, pData, Size);
+	m_pCurrent += Size;
 }
 
 void CUnpacker::Reset(const void *pData, int Size)
