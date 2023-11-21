@@ -130,7 +130,8 @@ int CUnpacker::GetUncompressedInt()
 		return 0;
 	}
 
-	int i = *(int *)m_pCurrent;
+	int i;
+	mem_copy(&i, m_pCurrent, sizeof(int));
 	m_pCurrent += sizeof(int);
 	return i;
 }
