@@ -635,6 +635,15 @@ void CGameContext::ConPractice(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
+	if(Teams.TeamMode(Team))
+	{
+		pSelf->Console()->Print(
+			IConsole::OUTPUT_LEVEL_STANDARD,
+			"chatresp",
+			"Practice mode can't be enabled in team 0 mode.");
+		return;
+	}
+
 	if(Teams.IsPractice(Team))
 	{
 		pSelf->Console()->Print(
@@ -759,7 +768,7 @@ void CGameContext::ConSwap(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	CPlayer *pSwapPlayer = pSelf->m_apPlayers[TargetClientId];
-	if(Team == TEAM_FLOCK && g_Config.m_SvTeam != 3)
+	if((Team == TEAM_FLOCK || Teams.TeamMode(Team)) && g_Config.m_SvTeam != 3)
 	{
 		CCharacter *pChr = pPlayer->GetCharacter();
 		CCharacter *pSwapChr = pSwapPlayer->GetCharacter();
@@ -769,7 +778,7 @@ void CGameContext::ConSwap(IConsole::IResult *pResult, void *pUserData)
 			return;
 		}
 	}
-	else if(!Teams.IsStarted(Team))
+	else if(!Teams.IsStarted(Team) && !Teams.TeamMode(Team))
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "Need to have started the map to swap with a player.");
 		return;
@@ -913,7 +922,10 @@ void CGameContext::ConLock(IConsole::IResult *pResult, void *pUserData)
 	{
 		pSelf->m_pController->Teams().SetTeamLock(Team, true);
 
-		str_format(aBuf, sizeof(aBuf), "'%s' locked your team. After the race starts, killing will kill everyone in your team.", pSelf->Server()->ClientName(pResult->m_ClientID));
+		if(pSelf->m_pController->Teams().TeamMode(Team))
+			str_format(aBuf, sizeof(aBuf), "'%s' locked your team.", pSelf->Server()->ClientName(pResult->m_ClientID));
+		else
+			str_format(aBuf, sizeof(aBuf), "'%s' locked your team. After the race starts, killing will kill everyone in your team.", pSelf->Server()->ClientName(pResult->m_ClientID));
 		pSelf->SendChatTeam(Team, aBuf);
 	}
 }
@@ -1002,7 +1014,7 @@ void CGameContext::AttemptJoinTeam(int ClientID, int Team)
 					"This team is locked using /lock. Only members of the team can unlock it using /lock." :
 					"This team is locked using /lock. Only members of the team can invite you or unlock it using /lock.");
 		}
-		else if(Team > 0 && Team < MAX_CLIENTS && m_pController->Teams().Count(Team) >= g_Config.m_SvMaxTeamSize)
+		else if(Team > 0 && Team < MAX_CLIENTS && m_pController->Teams().Count(Team) >= g_Config.m_SvMaxTeamSize && !m_pController->Teams().TeamMode(Team))
 		{
 			char aBuf[512];
 			str_format(aBuf, sizeof(aBuf), "This team already has the maximum allowed size of %d players", g_Config.m_SvMaxTeamSize);
@@ -1023,6 +1035,9 @@ void CGameContext::AttemptJoinTeam(int ClientID, int Team)
 
 			if(m_pController->Teams().IsPractice(Team))
 				SendChatTarget(pPlayer->GetCID(), "Practice mode enabled for your team, happy practicing!");
+
+			if(m_pController->Teams().TeamMode(Team))
+				SendChatTarget(pPlayer->GetCID(), "Team 0 mode enabled for your team, happy team 0-ing!");
 		}
 	}
 }
@@ -1089,6 +1104,70 @@ void CGameContext::ConInvite(IConsole::IResult *pResult, void *pUserData)
 	}
 	else
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "Can't invite players to this team");
+}
+
+void CGameContext::ConMode(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	auto *pController = pSelf->m_pController;
+
+	if(!CheckClientID(pResult->m_ClientID))
+		return;
+
+	if(g_Config.m_SvTeam == SV_TEAM_FORBIDDEN || g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO || g_Config.m_SvTeam == SV_TEAM_MANDATORY)
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
+			"Team mode change disabled");
+		return;
+	}
+
+	int Team = pController->Teams().m_Core.Team(pResult->m_ClientID);
+	bool Mode = pController->Teams().TeamMode(Team);
+
+	if(Team <= TEAM_FLOCK || Team >= TEAM_SUPER)
+	{
+		pSelf->Console()->Print(
+			IConsole::OUTPUT_LEVEL_STANDARD,
+			"chatresp",
+			"This team can't have the mode changed");
+		return;
+	}
+
+	if(pController->Teams().GetTeamState(Team) != CGameTeams::TEAMSTATE_OPEN)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientID, "Team mode can't be changed while racing");
+		return;
+	}
+
+	if(pResult->NumArguments() > 0)
+		Mode = !pResult->GetInteger(0);
+
+	if(pSelf->ProcessSpamProtection(pResult->m_ClientID, false))
+		return;
+
+	char aBuf[512];
+	if(Mode)
+	{
+		if(pController->Teams().Count(Team) > g_Config.m_SvMaxTeamSize)
+		{
+			str_format(aBuf, sizeof(aBuf), "Can't disable team 0 mode. This team exceeds the maximum allowed size of %d players for regular team", g_Config.m_SvMaxTeamSize);
+			pSelf->SendChatTarget(pResult->m_ClientID, aBuf);
+		}
+		else
+		{
+			pController->Teams().SetTeamMode(Team, false);
+
+			str_format(aBuf, sizeof(aBuf), "'%s' disabled team 0 mode.", pSelf->Server()->ClientName(pResult->m_ClientID));
+			pSelf->SendChatTeam(Team, aBuf);
+		}
+	}
+	else
+	{
+		pController->Teams().SetTeamMode(Team, true);
+
+		str_format(aBuf, sizeof(aBuf), "'%s' enabled team 0 mode.", pSelf->Server()->ClientName(pResult->m_ClientID));
+		pSelf->SendChatTeam(Team, aBuf);
+	}
 }
 
 void CGameContext::ConTeam(IConsole::IResult *pResult, void *pUserData)
