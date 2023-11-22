@@ -83,8 +83,7 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 
 	m_ReckoningTick = 0;
 	m_SendCore = CCharacterCore();
-	m_ReckoningCore = m_Core;
-	m_ReckoningCore.SetCoreWorld(nullptr, Collision(), nullptr);
+	m_ReckoningCore = CCharacterCore();
 
 	GameServer()->m_World.InsertEntity(this);
 	m_Alive = true;
@@ -790,6 +789,9 @@ void CCharacter::TickDeferred()
 {
 	// advance the dummy
 	{
+		CWorldCore TempWorld;
+		m_ReckoningCore.Init(&TempWorld, Collision(), &Teams()->m_Core, m_pTeleOuts);
+		m_ReckoningCore.m_Id = m_pPlayer->GetCID();
 		m_ReckoningCore.Tick(false);
 		m_ReckoningCore.Move();
 		m_ReckoningCore.Quantize();
@@ -878,8 +880,6 @@ void CCharacter::TickDeferred()
 			m_ReckoningTick = Server()->Tick();
 			m_SendCore = m_Core;
 			m_ReckoningCore = m_Core;
-			m_ReckoningCore.SetCoreWorld(nullptr, Collision(), nullptr);
-			m_ReckoningCore.m_Tuning = CTuningParams();
 			m_Core.m_Reset = false;
 		}
 	}
