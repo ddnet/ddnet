@@ -1311,7 +1311,7 @@ void CConsole::ResetGameSettings()
 			FCommandCallback pfnCallback = pCommand->m_pfnCallback; \
 			TraverseChain(&pfnCallback, &pUserData); \
 			CStrVariableData *pData = (CStrVariableData *)pUserData; \
-			str_copy(pData->m_pOldValue, pData->m_pStr, pData->m_MaxSize); \
+			str_copy(pData->m_pStr, pData->m_pOldValue, pData->m_MaxSize); \
 		} \
 	}
 
