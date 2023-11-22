@@ -1233,11 +1233,17 @@ void CServerBrowser::LoadDDNetServers()
 	m_CommunityServersByAddr.clear();
 
 	if(!m_pDDNetInfo)
+	{
+		CleanFilters();
 		return;
+	}
 
 	const json_value &Communities = (*m_pDDNetInfo)["communities"];
 	if(Communities.type != json_array)
+	{
+		CleanFilters();
 		return;
+	}
 
 	for(unsigned CommunityIndex = 0; CommunityIndex < Communities.u.array.length; ++CommunityIndex)
 	{
@@ -1524,6 +1530,7 @@ bool CFilterList::Empty() const
 
 void CFilterList::Clean(const std::vector<const char *> &vpAllowedElements)
 {
+	size_t NumFiltered = 0;
 	char aNewList[512];
 	aNewList[0] = '\0';
 
@@ -1534,10 +1541,15 @@ void CFilterList::Clean(const std::vector<const char *> &vpAllowedElements)
 			if(aNewList[0] != '\0')
 				str_append(aNewList, ",");
 			str_append(aNewList, pElement);
+			++NumFiltered;
 		}
 	}
 
-	str_copy(m_pFilter, aNewList, m_FilterSize);
+	// Prevent filter that would exclude all allowed elements
+	if(NumFiltered == vpAllowedElements.size())
+		m_pFilter[0] = '\0';
+	else
+		str_copy(m_pFilter, aNewList, m_FilterSize);
 }
 
 void CServerBrowser::CleanFilters()

@@ -2,6 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
 #include <base/detect.h>
+#include <base/log.h>
 #include <base/math.h>
 
 #if defined(CONF_FAMILY_UNIX)
@@ -551,7 +552,7 @@ bool CGraphics_Threaded::UpdateTextTexture(CTextureHandle TextureID, int x, int 
 	return true;
 }
 
-int CGraphics_Threaded::LoadPNG(CImageInfo *pImg, const char *pFilename, int StorageType)
+bool CGraphics_Threaded::LoadPNG(CImageInfo *pImg, const char *pFilename, int StorageType)
 {
 	char aCompleteFilename[IO_MAX_PATH_LENGTH];
 	IOHANDLE File = m_pStorage->OpenFile(pFilename, IOFLAG_READ, StorageType, aCompleteFilename, sizeof(aCompleteFilename));
@@ -574,17 +575,17 @@ int CGraphics_Threaded::LoadPNG(CImageInfo *pImg, const char *pFilename, int Sto
 		int PngliteIncompatible;
 		if(::LoadPNG(ImageByteBuffer, pFilename, PngliteIncompatible, pImg->m_Width, pImg->m_Height, pImgBuffer, ImageFormat))
 		{
-			pImg->m_pData = pImgBuffer;
-
-			if(ImageFormat == IMAGE_FORMAT_RGB) // ignore_convention
+			if(ImageFormat == IMAGE_FORMAT_RGB)
 				pImg->m_Format = CImageInfo::FORMAT_RGB;
-			else if(ImageFormat == IMAGE_FORMAT_RGBA) // ignore_convention
+			else if(ImageFormat == IMAGE_FORMAT_RGBA)
 				pImg->m_Format = CImageInfo::FORMAT_RGBA;
 			else
 			{
 				free(pImgBuffer);
-				return 0;
+				log_error("game/png", "image had unsupported image format. filename='%s' format='%d'", pFilename, (int)ImageFormat);
+				return false;
 			}
+			pImg->m_pData = pImgBuffer;
 
 			if(m_WarnPngliteIncompatibleImages && PngliteIncompatible != 0)
 			{
@@ -612,17 +613,17 @@ int CGraphics_Threaded::LoadPNG(CImageInfo *pImg, const char *pFilename, int Sto
 		}
 		else
 		{
-			dbg_msg("game/png", "image had unsupported image format. filename='%s'", pFilename);
-			return 0;
+			log_error("game/png", "failed to load file. filename='%s'", pFilename);
+			return false;
 		}
 	}
 	else
 	{
-		dbg_msg("game/png", "failed to open file. filename='%s'", pFilename);
-		return 0;
+		log_error("game/png", "failed to open file. filename='%s'", pFilename);
+		return false;
 	}
 
-	return 1;
+	return true;
 }
 
 void CGraphics_Threaded::FreePNG(CImageInfo *pImg)

@@ -200,9 +200,9 @@ bool CUpdater::ReplaceClient()
 	str_format(aPath, sizeof(aPath), "update/%s", m_aClientExecTmp);
 	Success &= m_pStorage->RenameBinaryFile(aPath, PLAT_CLIENT_EXEC);
 #if !defined(CONF_FAMILY_WINDOWS)
-	m_pStorage->GetBinaryPath(PLAT_CLIENT_EXEC, aPath, sizeof aPath);
+	m_pStorage->GetBinaryPath(PLAT_CLIENT_EXEC, aPath, sizeof(aPath));
 	char aBuf[512];
-	str_format(aBuf, sizeof aBuf, "chmod +x %s", aPath);
+	str_format(aBuf, sizeof(aBuf), "chmod +x %s", aPath);
 	if(system(aBuf))
 	{
 		dbg_msg("updater", "ERROR: failed to set client executable bit");
@@ -224,9 +224,9 @@ bool CUpdater::ReplaceServer()
 	str_format(aPath, sizeof(aPath), "update/%s", m_aServerExecTmp);
 	Success &= m_pStorage->RenameBinaryFile(aPath, PLAT_SERVER_EXEC);
 #if !defined(CONF_FAMILY_WINDOWS)
-	m_pStorage->GetBinaryPath(PLAT_SERVER_EXEC, aPath, sizeof aPath);
+	m_pStorage->GetBinaryPath(PLAT_SERVER_EXEC, aPath, sizeof(aPath));
 	char aBuf[512];
-	str_format(aBuf, sizeof aBuf, "chmod +x %s", aPath);
+	str_format(aBuf, sizeof(aBuf), "chmod +x %s", aPath);
 	if(system(aBuf))
 	{
 		dbg_msg("updater", "ERROR: failed to set server executable bit");
@@ -241,7 +241,7 @@ void CUpdater::ParseUpdate()
 	char aPath[IO_MAX_PATH_LENGTH];
 	void *pBuf;
 	unsigned Length;
-	if(!m_pStorage->ReadFile(m_pStorage->GetBinaryPath("update/update.json", aPath, sizeof aPath), IStorage::TYPE_ABSOLUTE, &pBuf, &Length))
+	if(!m_pStorage->ReadFile(m_pStorage->GetBinaryPath("update/update.json", aPath, sizeof(aPath)), IStorage::TYPE_ABSOLUTE, &pBuf, &Length))
 		return;
 
 	json_value *pVersions = json_parse((json_char *)pBuf, Length);

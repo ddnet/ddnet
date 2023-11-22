@@ -390,6 +390,7 @@ public:
 
 		m_QuadKnifeActive = false;
 		m_QuadKnifeCount = 0;
+		mem_zero(m_aQuadKnifePoints, sizeof(m_aQuadKnifePoints));
 
 		m_CheckerTexture.Invalidate();
 		m_BackgroundTexture.Invalidate();
@@ -438,7 +439,7 @@ public:
 		bool (*pfnFunc)(const char *pFilename, int StorageType, void *pUser), void *pUser);
 	struct SStringKeyComparator
 	{
-		bool operator()(char const *pLhs, char const *pRhs) const
+		bool operator()(const char *pLhs, const char *pRhs) const
 		{
 			return str_comp(pLhs, pRhs) < 0;
 		}
