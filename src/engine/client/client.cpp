@@ -4467,8 +4467,8 @@ int main(int argc, const char **argv)
 	}
 
 	pEngine->Init();
-	pConfigManager->Init();
 	pConsole->Init();
+	pConfigManager->Init();
 
 	// register all console commands
 	pClient->RegisterCommands();

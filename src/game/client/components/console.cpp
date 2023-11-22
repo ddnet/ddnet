@@ -227,7 +227,7 @@ void CGameConsole::CInstance::PossibleArgumentsCompleteCallback(int Index, const
 	if(pInstance->m_CompletionChosenArgument == Index)
 	{
 		// get command
-		char aBuf[512];
+		char aBuf[IConsole::CMDLINE_LENGTH];
 		StrCopyUntilSpace(aBuf, sizeof(aBuf), pInstance->GetString());
 		str_append(aBuf, " ");
 
@@ -256,7 +256,7 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 						str_copy(pEntry, m_Input.GetString(), m_Input.GetLength() + 1);
 					}
 					// print out the user's commands before they get run
-					char aBuf[256];
+					char aBuf[IConsole::CMDLINE_LENGTH + 3];
 					str_format(aBuf, sizeof(aBuf), "> %s", m_Input.GetString());
 					m_pGameConsole->PrintLine(m_Type, aBuf);
 				}
@@ -400,7 +400,7 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 
 		// find the current command
 		{
-			char aBuf[512];
+			char aBuf[IConsole::CMDLINE_LENGTH];
 			StrCopyUntilSpace(aBuf, sizeof(aBuf), GetString());
 			const IConsole::CCommandInfo *pCommand = m_pGameConsole->m_pConsole->GetCommandInfo(aBuf, m_CompletionFlagmask,
 				m_Type != CGameConsole::CONSOLETYPE_LOCAL && m_pGameConsole->Client()->RconAuthed() && m_pGameConsole->Client()->UseTempRconCommands());
