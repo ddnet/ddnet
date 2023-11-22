@@ -197,6 +197,7 @@ public:
 		int m_NextMapChunk;
 		int m_Flags;
 		bool m_ShowIps;
+		bool m_DebugDummy;
 
 		const IConsole::CCommandInfo *m_pRconCmdToSend;
 
@@ -220,6 +221,11 @@ public:
 		std::shared_ptr<CHostLookup> m_pDnsblLookup;
 
 		bool m_Sixup;
+
+		bool IncludedInServerInfo() const
+		{
+			return m_State != STATE_EMPTY && !m_DebugDummy;
+		}
 	};
 
 	CClient m_aClients[MAX_CLIENTS];
