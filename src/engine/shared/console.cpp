@@ -1289,7 +1289,18 @@ void CConsole::ResetGameSettings()
 		} \
 	}
 
-#define MACRO_CONFIG_COL(Name, ScriptName, Def, Save, Desc) MACRO_CONFIG_INT(Name, ScriptName, Def, 0, 0, Save, Desc)
+#define MACRO_CONFIG_COL(Name, ScriptName, Def, Flags, Desc) \
+	{ \
+		if(((Flags)&CFGFLAG_GAME) == CFGFLAG_GAME) \
+		{ \
+			CCommand *pCommand = FindCommand(#ScriptName, CFGFLAG_GAME); \
+			void *pUserData = pCommand->m_pUserData; \
+			FCommandCallback pfnCallback = pCommand->m_pfnCallback; \
+			TraverseChain(&pfnCallback, &pUserData); \
+			CColVariableData *pData = (CColVariableData *)pUserData; \
+			*pData->m_pVariable = pData->m_OldValue; \
+		} \
+	}
 
 #define MACRO_CONFIG_STR(Name, ScriptName, Len, Def, Flags, Desc) \
 	{ \
@@ -1300,7 +1311,7 @@ void CConsole::ResetGameSettings()
 			FCommandCallback pfnCallback = pCommand->m_pfnCallback; \
 			TraverseChain(&pfnCallback, &pUserData); \
 			CStrVariableData *pData = (CStrVariableData *)pUserData; \
-			str_copy(pData->m_pOldValue, pData->m_pStr, pData->m_MaxSize); \
+			str_copy(pData->m_pStr, pData->m_pOldValue, pData->m_MaxSize); \
 		} \
 	}
 
