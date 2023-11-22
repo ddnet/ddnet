@@ -657,7 +657,7 @@ void CServerBrowser::SetLatency(NETADDR Addr, int Latency)
 CServerBrowser::CServerEntry *CServerBrowser::Add(const NETADDR *pAddrs, int NumAddrs)
 {
 	// create new pEntry
-	CServerEntry *pEntry = (CServerEntry *)m_ServerlistHeap.Allocate(sizeof(CServerEntry));
+	CServerEntry *pEntry = m_ServerlistHeap.Allocate<CServerEntry>();
 	mem_zero(pEntry, sizeof(CServerEntry));
 
 	// set the info

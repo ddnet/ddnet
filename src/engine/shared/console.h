@@ -172,7 +172,7 @@ class CConsole : public IConsole
 
 		void AddEntry()
 		{
-			CQueueEntry *pEntry = static_cast<CQueueEntry *>(m_Queue.Allocate(sizeof(CQueueEntry)));
+			CQueueEntry *pEntry = m_Queue.Allocate<CQueueEntry>();
 			pEntry->m_pNext = 0;
 			if(!m_pFirst)
 				m_pFirst = pEntry;
