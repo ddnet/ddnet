@@ -4,6 +4,9 @@ DDNet-insta based on DDRaceNetwork, a Teeworlds mod. See the [website](https://d
 
 For build instructions visit the [ddnet repo](https://github.com/ddnet/ddnet).
 
++ `sv_spectator_votes` - Allow spectators to vote
++ `sv_countdown_unpause` - Number of seconds to freeze the game in a countdown before match continues after pause
++ `sv_countdown_round_start` - Number of seconds to freeze the game in a countdown before match starts (0 enables only for survival gamemodes, -1 disables)
 + `sv_scorelimit` Score limit (0 disables)
 + `sv_timelimit` Time limit in minutes (0 disables)
 + `sv_gametype` Game type (gctf, ictf)

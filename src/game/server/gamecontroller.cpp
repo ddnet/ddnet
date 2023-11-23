@@ -1406,16 +1406,21 @@ void IGameController::SetGameState(EGameState GameState, int Timer)
 		// only possible when game, pause or start countdown is running
 		if(m_GameState == IGS_GAME_RUNNING || m_GameState == IGS_GAME_PAUSED || m_GameState == IGS_START_COUNTDOWN)
 		{
-			if(Config()->m_SvCountdown == 0 && m_GameFlags & protocol7::GAMEFLAG_SURVIVAL)
+			int CountDownSeconds = 0;
+			if(m_GameState == IGS_GAME_PAUSED)
+				CountDownSeconds = Config()->m_SvCountdownUnpause;
+			else
+				CountDownSeconds = Config()->m_SvCountdownRoundStart;
+			if(CountDownSeconds == 0 && m_GameFlags & protocol7::GAMEFLAG_SURVIVAL)
 			{
 				m_GameState = GameState;
 				m_GameStateTimer = 3 * Server()->TickSpeed();
 				GameServer()->m_World.m_Paused = true;
 			}
-			else if(Config()->m_SvCountdown > 0)
+			else if(CountDownSeconds > 0)
 			{
 				m_GameState = GameState;
-				m_GameStateTimer = Config()->m_SvCountdown * Server()->TickSpeed();
+				m_GameStateTimer = CountDownSeconds * Server()->TickSpeed();
 				GameServer()->m_World.m_Paused = true;
 			}
 			else
