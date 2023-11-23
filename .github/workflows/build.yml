@@ -92,7 +92,7 @@ jobs:
         brew update || true
         brew install pkg-config sdl2 ffmpeg ninja molten-vk vulkan-headers glslang spirv-tools || true
         # --overwrite for:  Target /usr/local/bin/2to3 already exists.
-        brew link --overwrite python@3.10
+        brew link --overwrite python@3.11
         brew upgrade freetype
         pip3 install dmgbuild
         echo /Library/Frameworks/Python.framework/Versions/3.11/bin >> $GITHUB_PATH
