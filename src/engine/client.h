@@ -87,8 +87,6 @@ protected:
 	float m_GlobalTime;
 	float m_RenderFrameTime;
 
-	int m_GameTickSpeed;
-
 	float m_FrameTimeAvg;
 
 	TMapLoadingCallbackFunc m_MapLoadingCBFunc;
@@ -141,7 +139,7 @@ public:
 	inline float PredIntraGameTick(int Conn) const { return m_aPredIntraTick[Conn]; }
 	inline float IntraGameTickSincePrev(int Conn) const { return m_aGameIntraTickSincePrev[Conn]; }
 	inline float GameTickTime(int Conn) const { return m_aGameTickTime[Conn]; }
-	inline int GameTickSpeed() const { return m_GameTickSpeed; }
+	inline int GameTickSpeed() const { return SERVER_TICK_SPEED; }
 
 	// other time access
 	inline float RenderFrameTime() const { return m_RenderFrameTime; }
