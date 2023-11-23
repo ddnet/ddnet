@@ -317,8 +317,6 @@ CServer::CServer()
 		m_aDemoRecorder[i] = CDemoRecorder(&m_SnapshotDelta, true);
 	m_aDemoRecorder[MAX_CLIENTS] = CDemoRecorder(&m_SnapshotDelta, false);
 
-	m_TickSpeed = TickSpeed();
-
 	m_pGameServer = 0;
 
 	m_CurrentGameTick = MIN_TICK;

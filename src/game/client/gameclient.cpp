@@ -355,7 +355,6 @@ void CGameClient::OnInit()
 	str_format(aBuf, sizeof(aBuf), "initialisation finished after %.2fms", ((End - Start) * 1000) / (float)time_freq());
 	Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "gameclient", aBuf);
 
-	m_GameWorld.m_GameTickSpeed = Client()->GameTickSpeed();
 	m_GameWorld.m_pCollision = Collision();
 	m_GameWorld.m_pTuningList = m_aTuningList;
 

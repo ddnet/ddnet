@@ -83,8 +83,6 @@ CClient::CClient() :
 	m_RenderFrameTime = 0.0001f;
 	m_LastRenderTime = time_get();
 
-	m_GameTickSpeed = SERVER_TICK_SPEED;
-
 	m_SnapCrcErrors = 0;
 	m_AutoScreenshotRecycle = false;
 	m_AutoStatScreenshotRecycle = false;

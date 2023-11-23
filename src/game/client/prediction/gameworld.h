@@ -51,12 +51,11 @@ public:
 	std::vector<CCharacter *> IntersectedCharacters(vec2 Pos0, vec2 Pos1, float Radius, const CEntity *pNotThis = nullptr);
 
 	int m_GameTick;
-	int m_GameTickSpeed;
 	CCollision *m_pCollision;
 
 	// getter for server variables
 	int GameTick() { return m_GameTick; }
-	int GameTickSpeed() { return m_GameTickSpeed; }
+	int GameTickSpeed() { return SERVER_TICK_SPEED; }
 	CCollision *Collision() { return m_pCollision; }
 	CTeamsCore *Teams() { return &m_Teams; }
 	std::vector<SSwitchers> &Switchers() { return m_Core.m_vSwitchers; }
