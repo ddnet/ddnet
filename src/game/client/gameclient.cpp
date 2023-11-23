@@ -934,6 +934,30 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 			}
 		}
 	}
+	else if(MsgId == NETMSGTYPE_SV_KILLMSGTEAM)
+	{
+		CNetMsg_Sv_KillMsgTeam *pMsg = (CNetMsg_Sv_KillMsgTeam *)pRawMsg;
+
+		// reset prediction
+		std::vector<std::pair<int, int>> vStrongWeakSorted;
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if(m_Teams.Team(i) == pMsg->m_Team)
+			{
+				if(CCharacter *pChar = m_GameWorld.GetCharacterByID(i))
+				{
+					pChar->ResetPrediction();
+					vStrongWeakSorted.emplace_back(i, pMsg->m_First == i ? MAX_CLIENTS : pChar ? pChar->GetStrongWeakID() : 0);
+				}
+				m_GameWorld.ReleaseHooked(i);
+			}
+		}
+		std::stable_sort(vStrongWeakSorted.begin(), vStrongWeakSorted.end(), [](auto &Left, auto &Right) { return Left.second > Right.second; });
+		for(auto ID : vStrongWeakSorted)
+		{
+			m_CharOrder.GiveWeak(ID.first);
+		}
+	}
 }
 
 void CGameClient::OnStateChange(int NewState, int OldState)

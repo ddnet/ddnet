@@ -406,7 +406,7 @@ void CPlayer::Snap(int SnappingClient)
 			pPlayerInfo->m_PlayerFlags |= protocol7::PLAYERFLAG_READY;
 
 		// Times are in milliseconds for 0.7
-		// pPlayerInfo->m_Score = Score == -9999 ? -1 : -Score * 1000;
+		// pPlayerInfo->m_Score = m_Score.has_value() ? GameServer()->Score()->PlayerData(id)->m_BestTime * 1000 : -1;
 		pPlayerInfo->m_Score = Score; // gctf
 		pPlayerInfo->m_Latency = Latency;
 	}
