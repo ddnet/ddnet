@@ -73,6 +73,20 @@ void CStatboard::OnMessage(int MsgType, void *pRawMsg)
 		else
 			pStats[pMsg->m_Victim].m_Suicides++;
 	}
+	else if(MsgType == NETMSGTYPE_SV_KILLMSGTEAM)
+	{
+		CNetMsg_Sv_KillMsgTeam *pMsg = (CNetMsg_Sv_KillMsgTeam *)pRawMsg;
+		CGameClient::CClientStats *pStats = m_pClient->m_aStats;
+
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if(m_pClient->m_Teams.Team(i) == pMsg->m_Team)
+			{
+				pStats[i].m_Deaths++;
+				pStats[i].m_Suicides++;
+			}
+		}
+	}
 	else if(MsgType == NETMSGTYPE_SV_CHAT)
 	{
 		CNetMsg_Sv_Chat *pMsg = (CNetMsg_Sv_Chat *)pRawMsg;
