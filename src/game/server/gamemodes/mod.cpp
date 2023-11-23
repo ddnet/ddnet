@@ -22,3 +22,16 @@ void CGameControllerMod::Tick()
 
 	IGameController::Tick();
 }
+
+void CGameControllerMod::OnSayNetMessage(const CNetMsg_Cl_Say *pMsg, int ClientID, const CUnpacker *pUnpacker)
+{
+	if(!str_utf8_check(pMsg->m_pMessage))
+		return;
+
+	char aBuf[512];
+	str_format(aBuf, sizeof(aBuf), "%s UwU", pMsg->m_pMessage);
+	CNetMsg_Cl_Say Msg;
+	Msg.m_Team = pMsg->m_Team;
+	Msg.m_pMessage = aBuf;
+	IGameController::OnSayNetMessage(&Msg, ClientID, pUnpacker);
+}
