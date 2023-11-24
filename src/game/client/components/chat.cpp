@@ -393,6 +393,19 @@ bool CChat::OnInput(const IInput::CEvent &Event)
 				// add part before the name
 				str_truncate(aBuf, sizeof(aBuf), m_Input.GetString(), m_PlaceholderOffset);
 
+				// quote the name
+				char aQuoted[128];
+				if(m_Input.GetString()[0] == '/' && (str_find(pCompletionString, " ") || str_find(pCompletionString, "\"")))
+				{
+					// escape the name
+					str_copy(aQuoted, "\"");
+					char *pDst = aQuoted + str_length(aQuoted);
+					str_escape(&pDst, pCompletionString, aQuoted + sizeof(aQuoted));
+					str_append(aQuoted, "\"");
+
+					pCompletionString = aQuoted;
+				}
+
 				// add the name
 				str_append(aBuf, pCompletionString);
 
