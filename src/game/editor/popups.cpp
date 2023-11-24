@@ -280,15 +280,18 @@ CUI::EPopupMenuFunctionResult CEditor::PopupMenuSettings(void *pContext, CUIRect
 		Selector.VSplitMid(&No, &Yes);
 
 		pEditor->UI()->DoLabel(&Label, "Allow unused", 10.0f, TEXTALIGN_ML);
-		static int s_ButtonNo = 0;
-		static int s_ButtonYes = 0;
-		if(pEditor->DoButton_ButtonDec(&s_ButtonNo, "No", !pEditor->m_AllowPlaceUnusedTiles, &No, 0, "[ctrl+u] Disallow placing unused tiles"))
+		if(pEditor->m_AllowPlaceUnusedTiles != -1)
 		{
-			pEditor->m_AllowPlaceUnusedTiles = false;
-		}
-		if(pEditor->DoButton_ButtonInc(&s_ButtonYes, "Yes", pEditor->m_AllowPlaceUnusedTiles, &Yes, 0, "[ctrl+u] Allow placing unused tiles"))
-		{
-			pEditor->m_AllowPlaceUnusedTiles = true;
+			static int s_ButtonNo = 0;
+			static int s_ButtonYes = 0;
+			if(pEditor->DoButton_ButtonDec(&s_ButtonNo, "No", !pEditor->m_AllowPlaceUnusedTiles, &No, 0, "[ctrl+u] Disallow placing unused tiles"))
+			{
+				pEditor->m_AllowPlaceUnusedTiles = false;
+			}
+			if(pEditor->DoButton_ButtonInc(&s_ButtonYes, "Yes", pEditor->m_AllowPlaceUnusedTiles, &Yes, 0, "[ctrl+u] Allow placing unused tiles"))
+			{
+				pEditor->m_AllowPlaceUnusedTiles = true;
+			}
 		}
 	}
 
