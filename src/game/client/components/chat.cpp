@@ -179,6 +179,22 @@ void CChat::ConchainChatOld(IConsole::IResult *pResult, void *pUserData, IConsol
 	((CChat *)pUserData)->RebuildChat();
 }
 
+void CChat::ConchainChatFontSize(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	pfnCallback(pResult, pCallbackUserData);
+	CChat *pChat = (CChat *)pUserData;
+	pChat->EnsureCoherentWidth();
+	pChat->RebuildChat();
+}
+
+void CChat::ConchainChatWidth(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	pfnCallback(pResult, pCallbackUserData);
+	CChat *pChat = (CChat *)pUserData;
+	pChat->EnsureCoherentFontSize();
+	pChat->RebuildChat();
+}
+
 void CChat::Echo(const char *pString)
 {
 	AddLine(CLIENT_MSG, 0, pString);
@@ -197,6 +213,8 @@ void CChat::OnInit()
 {
 	Reset();
 	Console()->Chain("cl_chat_old", ConchainChatOld, this);
+	Console()->Chain("cl_chat_size", ConchainChatFontSize, this);
+	Console()->Chain("cl_chat_width", ConchainChatWidth, this);
 }
 
 bool CChat::OnInput(const IInput::CEvent &Event)
@@ -884,11 +902,10 @@ void CChat::RefindSkins()
 	}
 }
 
-void CChat::OnPrepareLines()
+void CChat::OnPrepareLines(float y)
 {
 	float x = 5.0f;
-	float y = 300.0f - 28.0f;
-	float FontSize = FONT_SIZE;
+	float FontSize = this->FontSize();
 
 	float ScreenRatio = Graphics()->ScreenAspect();
 
@@ -898,9 +915,10 @@ void CChat::OnPrepareLines()
 	m_PrevScoreBoardShowed = IsScoreBoardOpen;
 	m_PrevShowChat = ShowLargeArea;
 
-	float RealMsgPaddingX = MESSAGE_PADDING_X;
-	float RealMsgPaddingY = MESSAGE_PADDING_Y;
-	float RealMsgPaddingTee = MESSAGE_TEE_SIZE + MESSAGE_TEE_PADDING_RIGHT;
+	const int TeeSize = MessageTeeSize();
+	float RealMsgPaddingX = MessagePaddingX();
+	float RealMsgPaddingY = MessagePaddingY();
+	float RealMsgPaddingTee = TeeSize + MESSAGE_TEE_PADDING_RIGHT;
 
 	if(g_Config.m_ClChatOld)
 	{
@@ -910,9 +928,9 @@ void CChat::OnPrepareLines()
 	}
 
 	int64_t Now = time();
-	float LineWidth = (IsScoreBoardOpen ? 85.0f : 200.0f) - (RealMsgPaddingX * 1.5f) - RealMsgPaddingTee;
+	float LineWidth = (IsScoreBoardOpen ? maximum(85.f, (FontSize * 85.0f / 6.f)) : g_Config.m_ClChatWidth) - (RealMsgPaddingX * 1.5f) - RealMsgPaddingTee;
 
-	float HeightLimit = IsScoreBoardOpen ? 180.0f : m_PrevShowChat ? 50.0f : 200.0f;
+	float HeightLimit = IsScoreBoardOpen ? 180.0f : (m_PrevShowChat ? 50.0f : 200.0f);
 	float Begin = x;
 	float TextBegin = Begin + RealMsgPaddingX / 2.0f;
 	CTextCursor Cursor;
@@ -1095,7 +1113,7 @@ void CChat::OnPrepareLines()
 		{
 			float Height = m_aLines[r].m_aYOffset[OffsetType];
 			Graphics()->SetColor(1, 1, 1, 1);
-			m_aLines[r].m_QuadContainerIndex = Graphics()->CreateRectQuadContainer(Begin, y, OriginalWidth + AppendCursor.m_LongestLineWidth + RealMsgPaddingX * 1.5f, Height, MESSAGE_ROUNDING, IGraphics::CORNER_ALL);
+			m_aLines[r].m_QuadContainerIndex = Graphics()->CreateRectQuadContainer(Begin, y, OriginalWidth + AppendCursor.m_LongestLineWidth + RealMsgPaddingX * 1.5f, Height, MessageRounding(), IGraphics::CORNER_ALL);
 		}
 
 		TextRender()->SetRenderFlags(CurRenderFlags);
@@ -1128,12 +1146,13 @@ void CChat::OnRender()
 	Graphics()->MapScreen(0.0f, 0.0f, Width, Height);
 
 	float x = 5.0f;
-	float y = 300.0f - 20.0f;
+	float y = 300.0f - 20.0f * FontSize() / 6.f;
+	float ScaledFontSize = FontSize() * (8 / 6.f);
 	if(m_Mode != MODE_NONE)
 	{
 		// render chat input
 		CTextCursor Cursor;
-		TextRender()->SetCursor(&Cursor, x, y, 8.0f, TEXTFLAG_RENDER);
+		TextRender()->SetCursor(&Cursor, x, y, ScaledFontSize, TEXTFLAG_RENDER);
 		Cursor.m_LineWidth = Width - 190.0f;
 
 		if(m_Mode == MODE_ALL)
@@ -1180,19 +1199,19 @@ void CChat::OnRender()
 #endif
 		return;
 
-	y -= 8.0f;
+	y -= ScaledFontSize;
 
-	OnPrepareLines();
+	OnPrepareLines(y);
 
 	float ScreenRatio = Graphics()->ScreenAspect();
 	bool IsScoreBoardOpen = m_pClient->m_Scoreboard.Active() && (ScreenRatio > 1.7f); // only assume scoreboard when screen ratio is widescreen(something around 16:9)
 
 	int64_t Now = time();
-	float HeightLimit = IsScoreBoardOpen ? 180.0f : m_PrevShowChat ? 50.0f : 200.0f;
+	float HeightLimit = IsScoreBoardOpen ? 180.0f : (m_PrevShowChat ? 50.0f : 200.0f);
 	int OffsetType = IsScoreBoardOpen ? 1 : 0;
 
-	float RealMsgPaddingX = MESSAGE_PADDING_X;
-	float RealMsgPaddingY = MESSAGE_PADDING_Y;
+	float RealMsgPaddingX = MessagePaddingX();
+	float RealMsgPaddingY = MessagePaddingY();
 
 	if(g_Config.m_ClChatOld)
 	{
@@ -1229,6 +1248,7 @@ void CChat::OnRender()
 		{
 			if(!g_Config.m_ClChatOld && m_aLines[r].m_HasRenderTee)
 			{
+				const int TeeSize = MessageTeeSize();
 				CTeeRenderInfo RenderInfo;
 				RenderInfo.m_CustomColoredSkin = m_aLines[r].m_CustomColoredSkin;
 				if(m_aLines[r].m_CustomColoredSkin)
@@ -1239,16 +1259,16 @@ void CChat::OnRender()
 
 				RenderInfo.m_ColorBody = m_aLines[r].m_ColorBody;
 				RenderInfo.m_ColorFeet = m_aLines[r].m_ColorFeet;
-				RenderInfo.m_Size = MESSAGE_TEE_SIZE;
+				RenderInfo.m_Size = TeeSize;
 
-				float RowHeight = FONT_SIZE + RealMsgPaddingY;
-				float OffsetTeeY = MESSAGE_TEE_SIZE / 2.0f;
-				float FullHeightMinusTee = RowHeight - MESSAGE_TEE_SIZE;
+				float RowHeight = FontSize() + RealMsgPaddingY;
+				float OffsetTeeY = TeeSize / 2.0f;
+				float FullHeightMinusTee = RowHeight - TeeSize;
 
 				const CAnimState *pIdleState = CAnimState::GetIdle();
 				vec2 OffsetToMid;
 				RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &RenderInfo, OffsetToMid);
-				vec2 TeeRenderPos(x + (RealMsgPaddingX + MESSAGE_TEE_SIZE) / 2.0f, y + OffsetTeeY + FullHeightMinusTee / 2.0f + OffsetToMid.y);
+				vec2 TeeRenderPos(x + (RealMsgPaddingX + TeeSize) / 2.0f, y + OffsetTeeY + FullHeightMinusTee / 2.0f + OffsetToMid.y);
 				RenderTools()->RenderTee(pIdleState, &RenderInfo, EMOTE_NORMAL, vec2(1, 0.1f), TeeRenderPos, Blend);
 			}
 
@@ -1298,4 +1318,24 @@ void CChat::SayChat(const char *pLine)
 		pEntry->m_Team = m_Mode == MODE_ALL ? 0 : 1;
 		mem_copy(pEntry->m_aText, pLine, str_length(pLine));
 	}
+}
+
+void CChat::EnsureCoherentFontSize() const
+{
+	// Adjust font size based on width
+	if(g_Config.m_ClChatWidth / (float)g_Config.m_ClChatFontSize >= CHAT_FONTSIZE_WIDTH_RATIO)
+		return;
+
+	// We want to keep a ration between font size and font width so that we don't have a weird rendering
+	g_Config.m_ClChatFontSize = g_Config.m_ClChatWidth / CHAT_FONTSIZE_WIDTH_RATIO;
+}
+
+void CChat::EnsureCoherentWidth() const
+{
+	// Adjust width based on font size
+	if(g_Config.m_ClChatWidth / (float)g_Config.m_ClChatFontSize >= CHAT_FONTSIZE_WIDTH_RATIO)
+		return;
+
+	// We want to keep a ration between font size and font width so that we don't have a weird rendering
+	g_Config.m_ClChatWidth = CHAT_FONTSIZE_WIDTH_RATIO * g_Config.m_ClChatFontSize;
 }
