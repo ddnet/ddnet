@@ -2012,7 +2012,6 @@ set_src(GAME_SHARED GLOB src/game
   teamscore.cpp
   teamscore.h
   tuning.h
-  variables.h
   version.h
   voting.h
 )
