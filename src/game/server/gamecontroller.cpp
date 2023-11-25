@@ -606,6 +606,15 @@ void IGameController::DoWarmup(int Seconds)
 	// and then it is unitialized
 	m_Warmup = 0;
 	SetGameState(IGS_WARMUP_USER, Seconds);
+
+	if(Seconds)
+	{
+		if(g_Config.m_SvTournamentChatSmart)
+		{
+			g_Config.m_SvTournamentChat = 1;
+			GameServer()->SendChat(-1, CGameContext::CHAT_ALL, "Spectators can no longer use public chat");
+		}
+	}
 }
 
 bool IGameController::IsForceBalanced()
@@ -1177,6 +1186,12 @@ void IGameController::EndMatch()
 	GameServer()->m_World.m_Paused = true;
 	m_GameOverTick = Server()->Tick();
 	m_SuddenDeath = 0;
+
+	if(g_Config.m_SvTournamentChatSmart)
+	{
+		g_Config.m_SvTournamentChat = 0;
+		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, "Spectators can use public chat again");
+	}
 }
 
 bool IGameController::DoWincheckMatch()

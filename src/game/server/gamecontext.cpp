@@ -2036,11 +2036,17 @@ void CGameContext::OnSayNetMessage(const CNetMsg_Cl_Say *pMsg, int ClientID, con
 	else
 		Team = CHAT_ALL;
 
+	if(g_Config.m_SvTournamentChat)
+	{
+		if(pPlayer->GetTeam() == TEAM_SPECTATORS)
+			Team = CHAT_SPEC;
+	}
+
 	// gctf fine grained chat spam control
 	if(pMsg->m_pMessage[0] != '/')
 	{
 		bool RateLimit = false;
-		if(g_Config.m_SvChatRatelimitSpectators && Team == CHAT_SPEC)
+		if(g_Config.m_SvChatRatelimitSpectators && pPlayer->GetTeam() == TEAM_SPECTATORS)
 		{
 			if(g_Config.m_SvChatRatelimitDebug)
 				dbg_msg("ratelimit", "m_SvChatRatelimitSpectators %s", pMsg->m_pMessage);
@@ -5144,6 +5150,9 @@ void CGameContext::ShowCurrentInstagibConfigsMotd(int ClientID, bool Force)
 	str_append(aMotd, aBuf);
 
 	str_format(aBuf, sizeof(aBuf), "* damage needed for kill: %d\n", g_Config.m_SvDamageNeededForKill);
+	str_append(aMotd, aBuf);
+
+	str_format(aBuf, sizeof(aBuf), "* allow spec public chat: %s\n", g_Config.m_SvTournamentChat ? "no" : "yes");
 	str_append(aMotd, aBuf);
 
 	if(!str_comp_nocase(g_Config.m_SvGametype, "gctf"))

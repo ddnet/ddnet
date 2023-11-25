@@ -56,5 +56,7 @@ MACRO_CONFIG_INT(SvFastcap, sv_fastcap, 0, 0, 1, CFGFLAG_SERVER, "Insert flag ca
 
 MACRO_CONFIG_INT(SvShowSettingsMotd, sv_show_settings_motd, 1, 0, 1, CFGFLAG_SERVER, "Show insta game settings in motd on join")
 MACRO_CONFIG_INT(SvUnstackChat, sv_unstack_chat, 1, 0, 1, CFGFLAG_SERVER, "Revert ddnet clients duplicated chat message stacking")
+MACRO_CONFIG_INT(SvTournamentChat, sv_tournament_chat, 0, 0, 1, CFGFLAG_SERVER, "Spectators can not public chat")
+MACRO_CONFIG_INT(SvTournamentChatSmart, sv_tournament_chat_smart, 0, 0, 1, CFGFLAG_SERVER, "Turns sv_tournament_chat on on restart and off on round end")
 
 #endif
