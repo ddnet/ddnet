@@ -403,7 +403,7 @@ bool CServer::SetClientNameImpl(int ClientID, const char *pNameRequest, bool Set
 	if(m_aClients[ClientID].m_State < CClient::STATE_READY)
 		return false;
 
-	CNameBan *pBanned = IsNameBanned(pNameRequest, m_vNameBans);
+	const CNameBan *pBanned = m_NameBans.IsBanned(pNameRequest);
 	if(pBanned)
 	{
 		if(m_aClients[ClientID].m_State == CClient::STATE_READY && Set)
@@ -3352,63 +3352,6 @@ void CServer::ConAuthList(IConsole::IResult *pResult, void *pUser)
 	pManager->ListKeys(ListKeysCallback, pThis);
 }
 
-void CServer::ConNameBan(IConsole::IResult *pResult, void *pUser)
-{
-	CServer *pThis = (CServer *)pUser;
-	char aBuf[256];
-	const char *pName = pResult->GetString(0);
-	const char *pReason = pResult->NumArguments() > 3 ? pResult->GetString(3) : "";
-	int Distance = pResult->NumArguments() > 1 ? pResult->GetInteger(1) : str_length(pName) / 3;
-	int IsSubstring = pResult->NumArguments() > 2 ? pResult->GetInteger(2) : 0;
-
-	for(auto &Ban : pThis->m_vNameBans)
-	{
-		if(str_comp(Ban.m_aName, pName) == 0)
-		{
-			str_format(aBuf, sizeof(aBuf), "changed name='%s' distance=%d old_distance=%d is_substring=%d old_is_substring=%d reason='%s' old_reason='%s'", pName, Distance, Ban.m_Distance, IsSubstring, Ban.m_IsSubstring, pReason, Ban.m_aReason);
-			pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "name_ban", aBuf);
-			Ban.m_Distance = Distance;
-			Ban.m_IsSubstring = IsSubstring;
-			str_copy(Ban.m_aReason, pReason);
-			return;
-		}
-	}
-
-	pThis->m_vNameBans.emplace_back(pName, Distance, IsSubstring, pReason);
-	str_format(aBuf, sizeof(aBuf), "added name='%s' distance=%d is_substring=%d reason='%s'", pName, Distance, IsSubstring, pReason);
-	pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "name_ban", aBuf);
-}
-
-void CServer::ConNameUnban(IConsole::IResult *pResult, void *pUser)
-{
-	CServer *pThis = (CServer *)pUser;
-	const char *pName = pResult->GetString(0);
-
-	for(size_t i = 0; i < pThis->m_vNameBans.size(); i++)
-	{
-		CNameBan *pBan = &pThis->m_vNameBans[i];
-		if(str_comp(pBan->m_aName, pName) == 0)
-		{
-			char aBuf[128];
-			str_format(aBuf, sizeof(aBuf), "removed name='%s' distance=%d is_substring=%d reason='%s'", pBan->m_aName, pBan->m_Distance, pBan->m_IsSubstring, pBan->m_aReason);
-			pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "name_ban", aBuf);
-			pThis->m_vNameBans.erase(pThis->m_vNameBans.begin() + i);
-		}
-	}
-}
-
-void CServer::ConNameBans(IConsole::IResult *pResult, void *pUser)
-{
-	CServer *pThis = (CServer *)pUser;
-
-	for(auto &Ban : pThis->m_vNameBans)
-	{
-		char aBuf[128];
-		str_format(aBuf, sizeof(aBuf), "name='%s' distance=%d is_substring=%d reason='%s'", Ban.m_aName, Ban.m_Distance, Ban.m_IsSubstring, Ban.m_aReason);
-		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "name_ban", aBuf);
-	}
-}
-
 void CServer::ConShutdown(IConsole::IResult *pResult, void *pUser)
 {
 	CServer *pThis = static_cast<CServer *>(pUser);
@@ -3852,10 +3795,6 @@ void CServer::RegisterCommands()
 	Console()->Register("auth_remove", "s[ident]", CFGFLAG_SERVER | CFGFLAG_NONTEEHISTORIC, ConAuthRemove, this, "Remove a rcon key");
 	Console()->Register("auth_list", "", CFGFLAG_SERVER, ConAuthList, this, "List all rcon keys");
 
-	Console()->Register("name_ban", "s[name] ?i[distance] ?i[is_substring] ?r[reason]", CFGFLAG_SERVER, ConNameBan, this, "Ban a certain nickname");
-	Console()->Register("name_unban", "s[name]", CFGFLAG_SERVER, ConNameUnban, this, "Unban a certain nickname");
-	Console()->Register("name_bans", "", CFGFLAG_SERVER, ConNameBans, this, "List all name bans");
-
 	RustVersionRegister(*Console());
 
 	Console()->Chain("sv_name", ConchainSpecialInfoupdate, this);
@@ -3880,6 +3819,7 @@ void CServer::RegisterCommands()
 
 	// register console commands in sub parts
 	m_ServerBan.InitServerBan(Console(), Storage(), this);
+	m_NameBans.InitConsole(Console());
 	m_pGameServer->OnConsoleInit();
 }
 
