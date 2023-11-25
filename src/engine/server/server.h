@@ -296,8 +296,10 @@ public:
 
 	bool IsClientNameAvailable(int ClientID, const char *pNameRequest);
 	bool SetClientNameImpl(int ClientID, const char *pNameRequest, bool Set);
+	bool SetClientClanImpl(int ClientID, const char *pClanRequest, bool Set);
 
 	bool WouldClientNameChange(int ClientID, const char *pNameRequest) override;
+	bool WouldClientClanChange(int ClientID, const char *pClanRequest) override;
 	void SetClientName(int ClientID, const char *pName) override;
 	void SetClientClan(int ClientID, const char *pClan) override;
 	void SetClientCountry(int ClientID, int Country) override;

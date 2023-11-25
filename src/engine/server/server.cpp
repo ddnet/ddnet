@@ -452,9 +452,55 @@ bool CServer::SetClientNameImpl(int ClientID, const char *pNameRequest, bool Set
 	return Changed;
 }
 
+bool CServer::SetClientClanImpl(int ClientID, const char *pClanRequest, bool Set)
+{
+	dbg_assert(0 <= ClientID && ClientID < MAX_CLIENTS, "invalid client id");
+	if(m_aClients[ClientID].m_State < CClient::STATE_READY)
+		return false;
+
+	const CNameBan *pBanned = m_NameBans.IsBanned(pClanRequest);
+	if(pBanned)
+	{
+		if(m_aClients[ClientID].m_State == CClient::STATE_READY && Set)
+		{
+			char aBuf[256];
+			if(pBanned->m_aReason[0])
+			{
+				str_format(aBuf, sizeof(aBuf), "Kicked (your clan is banned: %s)", pBanned->m_aReason);
+			}
+			else
+			{
+				str_copy(aBuf, "Kicked (your clan is banned)");
+			}
+			Kick(ClientID, aBuf);
+		}
+		return false;
+	}
+
+	// trim the clan
+	char aTrimmedClan[MAX_CLAN_LENGTH];
+	str_copy(aTrimmedClan, str_utf8_skip_whitespaces(pClanRequest));
+	str_utf8_trim_right(aTrimmedClan);
+
+	bool Changed = str_comp(m_aClients[ClientID].m_aClan, aTrimmedClan) != 0;
+
+	if(Set)
+	{
+		// set the client clan
+		str_copy(m_aClients[ClientID].m_aClan, aTrimmedClan);
+	}
+
+	return Changed;
+}
+
 bool CServer::WouldClientNameChange(int ClientID, const char *pNameRequest)
 {
 	return SetClientNameImpl(ClientID, pNameRequest, false);
+}
+
+bool CServer::WouldClientClanChange(int ClientID, const char *pClanRequest)
+{
+	return SetClientClanImpl(ClientID, pClanRequest, false);
 }
 
 void CServer::SetClientName(int ClientID, const char *pName)
@@ -464,10 +510,7 @@ void CServer::SetClientName(int ClientID, const char *pName)
 
 void CServer::SetClientClan(int ClientID, const char *pClan)
 {
-	if(ClientID < 0 || ClientID >= MAX_CLIENTS || m_aClients[ClientID].m_State < CClient::STATE_READY || !pClan)
-		return;
-
-	str_copy(m_aClients[ClientID].m_aClan, pClan);
+	SetClientClanImpl(ClientID, pClan, true);
 }
 
 void CServer::SetClientCountry(int ClientID, int Country)
