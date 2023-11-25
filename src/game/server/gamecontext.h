@@ -284,6 +284,9 @@ public:
 	void ShowCurrentInstagibConfigsMotd(int ClientID = -1, bool Force = false);
 	void PlayerReadyStateBroadcast();
 	void SendBroadcastSix(const char *pText, bool Important = true);
+	char m_aLastChatMessage[256];
+	const char *m_pUnstackHackCharacter;
+	void InstagibUnstackChatMessage(char *pUnstacked, const char *pMessage, int Size);
 
 	//
 	void CheckPureTuning();

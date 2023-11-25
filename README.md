@@ -21,3 +21,4 @@ For build instructions visit the [ddnet repo](https://github.com/ddnet/ddnet).
 + `sv_only_hook_kills` Only count kills when enemy is hooked
 + `sv_kill_hook` Hooking kills
 + `sv_show_settings_motd` Show insta game settings in motd on join
++ `sv_unstack_chat` Revert ddnet clients duplicated chat message stacking

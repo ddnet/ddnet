@@ -112,6 +112,8 @@ void CGameContext::Construct(int Resetting)
 
 	m_aDeleteTempfile[0] = 0;
 	m_TeeHistorianActive = false;
+
+	m_pUnstackHackCharacter = "";
 }
 
 void CGameContext::Destruct(int Resetting)
@@ -2106,8 +2108,21 @@ void CGameContext::OnSayNetMessage(const CNetMsg_Cl_Say *pMsg, int ClientID, con
 		pPlayer->UpdatePlaytime();
 		char aCensoredMessage[256];
 		CensorMessage(aCensoredMessage, pMsg->m_pMessage, sizeof(aCensoredMessage));
+		if(g_Config.m_SvUnstackChat)
+			InstagibUnstackChatMessage(aCensoredMessage, pMsg->m_pMessage, sizeof(aCensoredMessage));
 		SendChat(ClientID, Team, aCensoredMessage, ClientID);
 	}
+}
+
+void CGameContext::InstagibUnstackChatMessage(char *pUnstacked, const char *pMessage, int Size)
+{
+	if(!str_comp(m_aLastChatMessage, pMessage))
+	{
+		// U+200D ZERO WIDTH JOINER
+		m_pUnstackHackCharacter = m_pUnstackHackCharacter[0] != '\0' ? "" : "‍";
+		str_format(pUnstacked, Size, "%s%s", m_pUnstackHackCharacter, pMessage);
+	}
+	str_copy(m_aLastChatMessage, pMessage);
 }
 
 void CGameContext::OnCallVoteNetMessage(const CNetMsg_Cl_CallVote *pMsg, int ClientID)
