@@ -204,6 +204,7 @@ public:
 	virtual void GetMapInfo(char *pMapName, int MapNameSize, int *pMapSize, SHA256_DIGEST *pSha256, int *pMapCrc) = 0;
 
 	virtual bool WouldClientNameChange(int ClientID, const char *pNameRequest) = 0;
+	virtual bool WouldClientClanChange(int ClientID, const char *pClanRequest) = 0;
 	virtual void SetClientName(int ClientID, const char *pName) = 0;
 	virtual void SetClientClan(int ClientID, const char *pClan) = 0;
 	virtual void SetClientCountry(int ClientID, int Country) = 0;

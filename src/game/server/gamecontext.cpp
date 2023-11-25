@@ -2508,9 +2508,11 @@ void CGameContext::OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int
 		LogEvent("Name change", ClientID);
 	}
 
-	if(str_comp(Server()->ClientClan(ClientID), pMsg->m_pClan))
+	if(Server()->WouldClientClanChange(ClientID, pMsg->m_pClan))
+	{
 		SixupNeedsUpdate = true;
-	Server()->SetClientClan(ClientID, pMsg->m_pClan);
+		Server()->SetClientClan(ClientID, pMsg->m_pClan);
+	}
 
 	if(Server()->ClientCountry(ClientID) != pMsg->m_Country)
 		SixupNeedsUpdate = true;
@@ -2717,6 +2719,11 @@ void CGameContext::OnStartInfoNetMessage(const CNetMsg_Cl_StartInfo *pMsg, int C
 		return;
 	}
 	Server()->SetClientClan(ClientID, pMsg->m_pClan);
+	// trying to set client clan can delete the player object, check if it still exists
+	if(!m_apPlayers[ClientID])
+	{
+		return;
+	}
 	Server()->SetClientCountry(ClientID, pMsg->m_Country);
 	str_copy(pPlayer->m_TeeInfos.m_aSkinName, pMsg->m_pSkin, sizeof(pPlayer->m_TeeInfos.m_aSkinName));
 	pPlayer->m_TeeInfos.m_UseCustomColor = pMsg->m_UseCustomColor;
