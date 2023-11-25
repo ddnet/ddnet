@@ -292,6 +292,7 @@ public:
 	char m_aaLastChatMessages[MAX_LINES][MAX_LINE_LENGTH];
 	int m_UnstackHackCharacterOffset;
 	void InstagibUnstackChatMessage(char *pUnstacked, const char *pMessage, int Size);
+	bool AllowPublicChat(const CPlayer *pPlayer);
 
 	//
 	void CheckPureTuning();

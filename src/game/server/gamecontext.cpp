@@ -2030,22 +2030,36 @@ void CGameContext::OnSayNetMessage(const CNetMsg_Cl_Say *pMsg, int ClientID, con
 	if(Length == 0 || (pMsg->m_pMessage[0] != '/' && (g_Config.m_SvSpamprotection && pPlayer->m_LastChat && pPlayer->m_LastChat + Server()->TickSpeed() * ((31 + Length) / 32) > Server()->Tick())))
 		return;
 
-	if(g_Config.m_SvTournamentChat)
-	{
-		if(g_Config.m_SvTournamentChat == 1)
-		{
-			if(pPlayer->GetTeam() == TEAM_SPECTATORS)
-				Team = 1;
-		}
-		else if (g_Config.m_SvTournamentChat == 2)
-			Team = 1;
-	}
+	if(!AllowPublicChat(pPlayer))
+		Team = 1;
 
 	// int GameTeam = GetDDRaceTeam(pPlayer->GetCID());
 	if(Team)
 		Team = ((pPlayer->GetTeam() == TEAM_SPECTATORS) ? CHAT_SPEC : pPlayer->GetTeam()); // gctf
 	else
 		Team = CHAT_ALL;
+
+	// gctf warn on ping if cant respond
+	if(Team == CHAT_ALL && pPlayer->GetTeam() != TEAM_SPECTATORS)
+	{
+		for(const CPlayer *pSpecPlayer : m_apPlayers)
+		{
+			if(!pSpecPlayer)
+				continue;
+			if(pSpecPlayer->GetTeam() != TEAM_SPECTATORS)
+				continue;
+			if(AllowPublicChat(pSpecPlayer))
+				continue;
+			if(!str_find_nocase(pMsg->m_pMessage, Server()->ClientName(pSpecPlayer->GetCID())))
+				continue;
+
+			char aChatText[256];
+			str_format(aChatText, sizeof(aChatText), "Warning: '%s' got pinged in chat but can not respond", Server()->ClientName(pSpecPlayer->GetCID()));
+			SendChat(-1, CGameContext::CHAT_ALL, aChatText);
+			SendChat(-1, CGameContext::CHAT_ALL, "turn off tournament chat or make sure there are enough in game slots");
+			break;
+		}
+	}
 
 	// gctf fine grained chat spam control
 	if(pMsg->m_pMessage[0] != '/')
@@ -5061,6 +5075,18 @@ bool CGameContext::ParseChatCmd(char Prefix, int ClientID, const char *pCmdWithA
 	return match;
 }
 
+bool CGameContext::AllowPublicChat(const CPlayer *pPlayer)
+{
+	if(!g_Config.m_SvTournamentChat)
+		return true;
+
+	if(g_Config.m_SvTournamentChat == 1 && pPlayer->GetTeam() == TEAM_SPECTATORS)
+		return false;
+	else if (g_Config.m_SvTournamentChat == 2)
+		return false;
+	return true;
+}
+
 bool CGameContext::OnBangCommand(int ClientID, const char *pCmd, int NumArgs, const char **ppArgs)
 {
 	if(ClientID < 0 || ClientID >= MAX_CLIENTS)
@@ -5068,6 +5094,13 @@ bool CGameContext::OnBangCommand(int ClientID, const char *pCmd, int NumArgs, co
 	CPlayer *pPlayer = m_apPlayers[ClientID];
 	if(!pPlayer)
 		return false;
+
+	if(!str_comp_nocase(pCmd, "set") || !str_comp_nocase(pCmd, "settings") || !str_comp_nocase(pCmd, "config"))
+	{
+		ShowCurrentInstagibConfigsMotd(ClientID, true);
+		return true;
+	}
+
 	if(pPlayer->GetTeam() == TEAM_SPECTATORS && !g_Config.m_SvSpectatorVotes)
 	{
 		SendChatTarget(ClientID, "Spectators aren't allowed to vote.");
@@ -5121,10 +5154,6 @@ bool CGameContext::OnBangCommand(int ClientID, const char *pCmd, int NumArgs, co
 	else if(!str_comp_nocase(pCmd, "shuffle"))
 	{
 		ComCallShuffleVote(ClientID);
-	}
-	else if(!str_comp_nocase(pCmd, "set") || !str_comp_nocase(pCmd, "settings") || !str_comp_nocase(pCmd, "config"))
-	{
-		ShowCurrentInstagibConfigsMotd(ClientID, true);
 	}
 	else
 	{
