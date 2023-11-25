@@ -35,14 +35,27 @@ void CGameControllerInstagib::OnCharacterSpawn(class CCharacter *pChr)
 
 void CGameControllerInstagib::OnPlayerConnect(CPlayer *pPlayer)
 {
+	IGameController::OnPlayerConnect(pPlayer);
 	int ClientID = pPlayer->GetCID();
-	pPlayer->Respawn();
+
+	// init the player
+	Score()->PlayerData(ClientID)->Reset();
+
+	// Can't set score here as LoadScore() is threaded, run it in
+	// LoadScoreThreaded() instead
+	Score()->LoadPlayerData(ClientID);
 
 	if(!Server()->ClientPrevIngame(ClientID))
 	{
-		char aBuf[128];
-		str_format(aBuf, sizeof(aBuf), "team_join player='%d:%s' team=%d", ClientID, Server()->ClientName(ClientID), pPlayer->GetTeam());
-		GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
+		char aBuf[512];
+		str_format(aBuf, sizeof(aBuf), "'%s' entered and joined the %s", Server()->ClientName(ClientID), GetTeamName(pPlayer->GetTeam()));
+		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, -1, CGameContext::CHAT_SIX);
+
+		GameServer()->SendChatTarget(ClientID, "DDNet-insta https://github.com/ZillyInsta/ddnet-insta/");
+		GameServer()->SendChatTarget(ClientID, "DDraceNetwork Mod. Version: " GAME_VERSION);
+
+		GameServer()->AlertOnSpecialInstagibConfigs(ClientID);
+		GameServer()->ShowCurrentInstagibConfigsMotd(ClientID);
 	}
 
 	CheckReadyStates(); // gctf
