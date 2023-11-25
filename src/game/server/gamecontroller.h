@@ -184,7 +184,6 @@ public:
 		}
 	}
 
-private:
 	int m_aTeamSize[protocol7::NUM_TEAMS];
 
 	// game

@@ -1036,47 +1036,21 @@ void IGameController::DoTeamChange(CPlayer *pPlayer, int Team, bool DoChatMsg)
 	if(Team == pPlayer->GetTeam())
 		return;
 
-	int OldTeam = pPlayer->GetTeam(); // gctf
 	pPlayer->SetTeam(Team);
 	int ClientID = pPlayer->GetCID();
 
 	char aBuf[128];
+	DoChatMsg = false;
 	if(DoChatMsg)
 	{
 		str_format(aBuf, sizeof(aBuf), "'%s' joined the %s", Server()->ClientName(ClientID), GameServer()->m_pController->GetTeamName(Team));
-		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, CGameContext::CHAT_SIX);
+		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
 	}
 
 	str_format(aBuf, sizeof(aBuf), "team_join player='%d:%s' m_Team=%d", ClientID, Server()->ClientName(ClientID), Team);
 	GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
 
 	// OnPlayerInfoChange(pPlayer);
-
-	// gctf
-
-	if(OldTeam == TEAM_SPECTATORS)
-	{
-		GameServer()->AlertOnSpecialInstagibConfigs(pPlayer->GetCID());
-		GameServer()->ShowCurrentInstagibConfigsMotd(pPlayer->GetCID());
-	}
-
-	// update effected game settings
-	if(OldTeam != TEAM_SPECTATORS)
-	{
-		--m_aTeamSize[OldTeam];
-		// m_UnbalancedTick = TBALANCE_CHECK;
-	}
-	if(Team != TEAM_SPECTATORS)
-	{
-		++m_aTeamSize[Team];
-		// m_UnbalancedTick = TBALANCE_CHECK;
-		// if(m_GameState == IGS_WARMUP_GAME && HasEnoughPlayers())
-		// 	SetGameState(IGS_WARMUP_GAME, 0);
-		// pPlayer->m_IsReadyToPlay = !IsPlayerReadyMode();
-		// if(m_GameFlags&GAMEFLAG_SURVIVAL)
-		// 	pPlayer->m_RespawnDisabled = GetStartRespawnState();
-	}
-	CheckReadyStates();
 }
 
 // gctf
