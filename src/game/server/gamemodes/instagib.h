@@ -9,6 +9,7 @@ public:
 	CGameControllerInstagib(class CGameContext *pGameServer);
 	~CGameControllerInstagib();
 
+	void SendChatSpectators(const char *pMessage, int Flags);
 	void OnPlayerConnect(CPlayer *pPlayer) override;
 	void OnPlayerDisconnect(class CPlayer *pPlayer, const char *pReason) override;
 	void DoTeamChange(CPlayer *pPlayer, int Team, bool DoChatMsg) override;

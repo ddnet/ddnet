@@ -53,6 +53,8 @@ void CGameControllerInstagib::OnPlayerConnect(CPlayer *pPlayer)
 		str_format(aBuf, sizeof(aBuf), "'%s' entered and joined the %s", Server()->ClientName(ClientID), GetTeamName(pPlayer->GetTeam()));
 		if(!g_Config.m_SvTournamentJoinMsgs || pPlayer->GetTeam() != TEAM_SPECTATORS)
 			GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, -1, CGameContext::CHAT_SIX);
+		else if(g_Config.m_SvTournamentJoinMsgs == 2)
+			SendChatSpectators(aBuf, CGameContext::CHAT_SIX);
 
 		GameServer()->SendChatTarget(ClientID, "DDNet-insta https://github.com/ZillyInsta/ddnet-insta/");
 		GameServer()->SendChatTarget(ClientID, "DDraceNetwork Mod. Version: " GAME_VERSION);
@@ -62,6 +64,23 @@ void CGameControllerInstagib::OnPlayerConnect(CPlayer *pPlayer)
 	}
 
 	CheckReadyStates(); // gctf
+}
+
+void CGameControllerInstagib::SendChatSpectators(const char *pMessage, int Flags)
+{
+	for(const CPlayer *pPlayer : GameServer()->m_apPlayers)
+	{
+		if(!pPlayer)
+			continue;
+		if(pPlayer->GetTeam() != TEAM_SPECTATORS)
+			continue;
+		bool Send = (Server()->IsSixup(pPlayer->GetCID()) && (Flags & CGameContext::CHAT_SIXUP)) ||
+				(!Server()->IsSixup(pPlayer->GetCID()) && (Flags & CGameContext::CHAT_SIX));
+		if(!Send)
+			continue;
+
+		GameServer()->SendChat(pPlayer->GetCID(), CGameContext::CHAT_ALL, pMessage, -1, Flags);
+	}
 }
 
 void CGameControllerInstagib::OnPlayerDisconnect(class CPlayer *pPlayer, const char *pReason)
@@ -77,6 +96,8 @@ void CGameControllerInstagib::OnPlayerDisconnect(class CPlayer *pPlayer, const c
 			str_format(aBuf, sizeof(aBuf), "'%s' has left the game", Server()->ClientName(ClientID));
 		if(!g_Config.m_SvTournamentJoinMsgs || pPlayer->GetTeam() != TEAM_SPECTATORS)
 			GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, -1, CGameContext::CHAT_SIX);
+		else if(g_Config.m_SvTournamentJoinMsgs == 2)
+			SendChatSpectators(aBuf, CGameContext::CHAT_SIX);
 
 		str_format(aBuf, sizeof(aBuf), "leave player='%d:%s'", ClientID, Server()->ClientName(ClientID));
 		GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
