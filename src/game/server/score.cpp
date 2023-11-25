@@ -143,7 +143,7 @@ void CScore::MapInfo(int ClientID, const char *pMapName)
 void CScore::SaveScore(int ClientID, float Time, const char *pTimestamp, const float aTimeCp[NUM_CHECKPOINTS], bool NotEligible)
 {
 	CConsole *pCon = (CConsole *)GameServer()->Console();
-	if(pCon->m_Cheated || NotEligible)
+	if(pCon->Cheated() || NotEligible)
 		return;
 
 	CPlayer *pCurPlayer = GameServer()->m_apPlayers[ClientID];
@@ -166,7 +166,7 @@ void CScore::SaveScore(int ClientID, float Time, const char *pTimestamp, const f
 void CScore::SaveTeamScore(int *pClientIDs, unsigned int Size, float Time, const char *pTimestamp)
 {
 	CConsole *pCon = (CConsole *)GameServer()->Console();
-	if(pCon->m_Cheated)
+	if(pCon->Cheated())
 		return;
 	for(unsigned int i = 0; i < Size; i++)
 	{
