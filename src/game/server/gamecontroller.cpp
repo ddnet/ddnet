@@ -443,8 +443,6 @@ void IGameController::OnPlayerConnect(CPlayer *pPlayer)
 		str_format(aBuf, sizeof(aBuf), "team_join player='%d:%s' team=%d", ClientID, Server()->ClientName(ClientID), pPlayer->GetTeam());
 		GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
 	}
-
-	CheckReadyStates(); // gctf
 }
 
 void IGameController::OnPlayerDisconnect(class CPlayer *pPlayer, const char *pReason)
