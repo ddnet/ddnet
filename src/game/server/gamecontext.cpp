@@ -5082,7 +5082,7 @@ bool CGameContext::AllowPublicChat(const CPlayer *pPlayer)
 
 	if(g_Config.m_SvTournamentChat == 1 && pPlayer->GetTeam() == TEAM_SPECTATORS)
 		return false;
-	else if (g_Config.m_SvTournamentChat == 2)
+	else if(g_Config.m_SvTournamentChat == 2)
 		return false;
 	return true;
 }
