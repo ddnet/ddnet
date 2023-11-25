@@ -4,8 +4,8 @@
 #define GAME_SERVER_INSTAGIB_H
 
 #include "stdio.h"
-#include <cstring>
 #include <cctype>
+#include <cstring>
 
 #include <base/system.h>
 
