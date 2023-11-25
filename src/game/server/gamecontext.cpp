@@ -5095,7 +5095,7 @@ bool CGameContext::OnBangCommand(int ClientID, const char *pCmd, int NumArgs, co
 	if(!pPlayer)
 		return false;
 
-	if(!str_comp_nocase(pCmd, "set") || !str_comp_nocase(pCmd, "settings") || !str_comp_nocase(pCmd, "config"))
+	if(!str_comp_nocase(pCmd, "set") || !str_comp_nocase(pCmd, "sett") || !str_comp_nocase(pCmd, "settings") || !str_comp_nocase(pCmd, "config"))
 	{
 		ShowCurrentInstagibConfigsMotd(ClientID, true);
 		return true;
@@ -5165,6 +5165,14 @@ bool CGameContext::OnBangCommand(int ClientID, const char *pCmd, int NumArgs, co
 
 void CGameContext::AlertOnSpecialInstagibConfigs(int ClientID)
 {
+	if(g_Config.m_SvTournament)
+	{
+		SendChatTarget(ClientID, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+		SendChatTarget(ClientID, "THERE IS A TOURNAMENT IN PROGRESS RIGHT NOW");
+		SendChatTarget(ClientID, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+		if(g_Config.m_SvTournamentWelcomeChat[0])
+			SendChatTarget(ClientID, g_Config.m_SvTournamentWelcomeChat);
+	}
 	if(g_Config.m_SvOnlyHookKills)
 		SendChatTarget(ClientID, "WARNING: only hooked enemies can be killed");
 	if(g_Config.m_SvKillHook)
@@ -5179,6 +5187,9 @@ void CGameContext::ShowCurrentInstagibConfigsMotd(int ClientID, bool Force)
 	char aMotd[2048];
 	char aBuf[512];
 	aMotd[0] = '\0';
+
+	if(g_Config.m_SvTournament)
+		str_append(aMotd, "!!! ACTIVE TOURNAMENT RUNNING !!!");
 
 	str_format(aBuf, sizeof(aBuf), "* ready mode: %s\n", g_Config.m_SvPlayerReadyMode ? "on" : "off");
 	str_append(aMotd, aBuf);
