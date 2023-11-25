@@ -463,12 +463,6 @@ void IGameController::OnPlayerDisconnect(class CPlayer *pPlayer, const char *pRe
 		str_format(aBuf, sizeof(aBuf), "leave player='%d:%s'", ClientID, Server()->ClientName(ClientID));
 		GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
 	}
-
-	// gctf
-	if(pPlayer->GetTeam() != TEAM_SPECTATORS)
-	{
-		--m_aTeamSize[pPlayer->GetTeam()];
-	}
 }
 
 void IGameController::EndRound()
