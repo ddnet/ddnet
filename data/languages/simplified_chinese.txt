@@ -35,6 +35,7 @@
 # 2023-05-21 RemakePower
 # 2023-07-20 By
 # 2023-08-11 By
+# 2023-11-25 By
 ##### /authors #####
 
 ##### translated strings #####
@@ -1715,76 +1716,76 @@ Moved ingame
 == 游戏内移动
 
 Error playing demo
-== 
+== 回放播放错误
 
 Some map images could not be loaded. Check the local console for details.
-== 
+== 未能加载某些地图图片。检查本地控制台以获取详情。
 
 Some map sounds could not be loaded. Check the local console for details.
-== 
+== 未能加载某些地图音效。检查本地控制台以获取详情。
 
 Loading menu themes
-== 
+== 正在加载主菜单主题
 
 Render complete
-== 
+== 渲染完毕
 
 Videos directory
-== 
+== 视频目录
 
 Video was saved to '%s'
-== 
+== 视频保存至 "%s"
 
 Go back the specified duration
-== 
+== 快退指定时长
 
 [Demo player duration]
 %d min.
-== 
+== %d 分
 
 [Demo player duration]
 %d sec.
-== 
+== %d 秒
 
 Change the skip duration
-== 
+== 变更指定时长
 
 Go forward the specified duration
-== 
+== 快进指定时长
 
 Render cut to video
-== 
+== 渲染裁剪部分
 
 No demo selected
-== 
+== 未选择回放
 
 Created
-== 
+== 创建日期
 
 Netversion
-== 
+== Netversion
 
 [Demo details]
 map not included
-== 
+== 未包含地图
 
 Ghosts directory
-== 
+== 影子目录
 
 Activate all
-== 
+== 全部启用
 
 Deactivate all
-== 
+== 全部停用
 
 Enable ghost
-== 
+== 启用影子
 
 Only save improvements
-== 
+== 只保存更佳记录
 
 Regular background color
-== 
+== 原图层背景颜色
 
 Entities background color
-== 
+== 实体层背景颜色
