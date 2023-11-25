@@ -29,7 +29,10 @@ void CGameControllerCTF::Tick()
 	FlagTick(); // gctf
 }
 
-// gctf
+void CGameControllerCTF::OnCharacterSpawn(class CCharacter *pChr)
+{
+	CGameControllerInstagib::OnCharacterSpawn(pChr);
+}
 
 int CGameControllerCTF::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int WeaponID)
 {

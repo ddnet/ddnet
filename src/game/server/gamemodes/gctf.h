@@ -9,6 +9,7 @@ public:
 	CGameControllerGCTF(class CGameContext *pGameServer);
 	~CGameControllerGCTF();
 
+	void OnCharacterSpawn(class CCharacter *pChr) override;
 	void Tick() override;
 };
 #endif // GAME_SERVER_GAMEMODES_GCTF_H

@@ -18,6 +18,7 @@ public:
 	virtual void OnFlagReturn(class CFlag *pFlag) override;
 	virtual void OnFlagGrab(class CFlag *pFlag) override;
 	virtual void OnFlagCapture(class CFlag *pFlag, float Time) override;
+	void OnCharacterSpawn(class CCharacter *pChr) override;
 	bool OnEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number) override;
 
 	void FlagTick();
