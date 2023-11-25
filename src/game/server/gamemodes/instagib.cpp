@@ -75,7 +75,7 @@ void CGameControllerInstagib::SendChatSpectators(const char *pMessage, int Flags
 		if(pPlayer->GetTeam() != TEAM_SPECTATORS)
 			continue;
 		bool Send = (Server()->IsSixup(pPlayer->GetCID()) && (Flags & CGameContext::CHAT_SIXUP)) ||
-				(!Server()->IsSixup(pPlayer->GetCID()) && (Flags & CGameContext::CHAT_SIX));
+			    (!Server()->IsSixup(pPlayer->GetCID()) && (Flags & CGameContext::CHAT_SIX));
 		if(!Send)
 			continue;
 
