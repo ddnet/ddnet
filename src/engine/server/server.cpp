@@ -317,8 +317,6 @@ CServer::CServer()
 		m_aDemoRecorder[i] = CDemoRecorder(&m_SnapshotDelta, true);
 	m_aDemoRecorder[MAX_CLIENTS] = CDemoRecorder(&m_SnapshotDelta, false);
 
-	m_TickSpeed = SERVER_TICK_SPEED;
-
 	m_pGameServer = 0;
 
 	m_CurrentGameTick = MIN_TICK;
@@ -558,7 +556,7 @@ void CServer::RedirectClient(int ClientID, int Port, bool Verbose)
 
 int64_t CServer::TickStartTime(int Tick)
 {
-	return m_GameStartTime + (time_freq() * Tick) / SERVER_TICK_SPEED;
+	return m_GameStartTime + (time_freq() * Tick) / TickSpeed();
 }
 
 int CServer::Init()
@@ -943,7 +941,7 @@ void CServer::DoSnapshot()
 			continue;
 
 		// this client is trying to recover, don't spam snapshots
-		if(m_aClients[i].m_SnapRate == CClient::SNAPRATE_RECOVER && (Tick() % 50) != 0)
+		if(m_aClients[i].m_SnapRate == CClient::SNAPRATE_RECOVER && (Tick() % TickSpeed()) != 0)
 			continue;
 
 		// this client is trying to recover, don't spam snapshots
@@ -970,7 +968,7 @@ void CServer::DoSnapshot()
 
 			// remove old snapshots
 			// keep 3 seconds worth of snapshots
-			m_aClients[i].m_Snapshots.PurgeUntil(m_CurrentGameTick - SERVER_TICK_SPEED * 3);
+			m_aClients[i].m_Snapshots.PurgeUntil(m_CurrentGameTick - TickSpeed() * 3);
 
 			// save the snapshot
 			m_aClients[i].m_Snapshots.Add(m_CurrentGameTick, time_get(), SnapshotSize, pData, 0, nullptr);

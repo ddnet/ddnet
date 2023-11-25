@@ -593,7 +593,6 @@ void CGameWorld::CopyWorld(CGameWorld *pFrom)
 	pFrom->m_pChild = this;
 
 	m_GameTick = pFrom->m_GameTick;
-	m_GameTickSpeed = pFrom->m_GameTickSpeed;
 	m_pCollision = pFrom->m_pCollision;
 	m_WorldConfig = pFrom->m_WorldConfig;
 	for(int i = 0; i < 2; i++)

@@ -1181,7 +1181,7 @@ void CCharacter::SnapCharacter(int SnappingClient, int ID)
 
 	if(Emote == EMOTE_NORMAL)
 	{
-		if(250 - ((Server()->Tick() - m_LastAction) % (250)) < 5)
+		if(5 * Server()->TickSpeed() - ((Server()->Tick() - m_LastAction) % (5 * Server()->TickSpeed())) < 5)
 			Emote = EMOTE_BLINK;
 	}
 

@@ -155,7 +155,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 
 	static int s_SkipDurationIndex = 1;
 	static const int s_aSkipDurationsSeconds[] = {1, 5, 10, 30, 60, 5 * 60, 10 * 60};
-	const int DemoLengthSeconds = TotalTicks / SERVER_TICK_SPEED;
+	const int DemoLengthSeconds = TotalTicks / Client()->GameTickSpeed();
 	int NumDurationLabels = 0;
 	for(size_t i = 0; i < std::size(s_aSkipDurationsSeconds); ++i)
 	{
@@ -445,9 +445,9 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 
 		// draw time
 		char aCurrentTime[32];
-		str_time((int64_t)CurrentTick / SERVER_TICK_SPEED * 100, TIME_HOURS, aCurrentTime, sizeof(aCurrentTime));
+		str_time((int64_t)CurrentTick / Client()->GameTickSpeed() * 100, TIME_HOURS, aCurrentTime, sizeof(aCurrentTime));
 		char aTotalTime[32];
-		str_time((int64_t)TotalTicks / SERVER_TICK_SPEED * 100, TIME_HOURS, aTotalTime, sizeof(aTotalTime));
+		str_time((int64_t)TotalTicks / Client()->GameTickSpeed() * 100, TIME_HOURS, aTotalTime, sizeof(aTotalTime));
 		str_format(aBuffer, sizeof(aBuffer), "%s / %s", aCurrentTime, aTotalTime);
 		UI()->DoLabel(&SeekBar, aBuffer, SeekBar.h * 0.70f, TEXTALIGN_MC);
 
@@ -491,7 +491,7 @@ void CMenus::RenderDemoPlayer(CUIRect MainView)
 			{
 				const int HoveredTick = (int)(clamp((UI()->MouseX() - SeekBar.x - Rounding) / (float)(SeekBar.w - 2 * Rounding), 0.0f, 1.0f) * TotalTicks);
 				static char s_aHoveredTime[32];
-				str_time((int64_t)HoveredTick / SERVER_TICK_SPEED * 100, TIME_HOURS, s_aHoveredTime, sizeof(s_aHoveredTime));
+				str_time((int64_t)HoveredTick / Client()->GameTickSpeed() * 100, TIME_HOURS, s_aHoveredTime, sizeof(s_aHoveredTime));
 				GameClient()->m_Tooltips.DoToolTip(pId, &SeekBar, s_aHoveredTime);
 			}
 		}
@@ -779,11 +779,11 @@ void CMenus::RenderDemoPlayerSliceSavePopup(CUIRect MainView)
 	const int64_t RealSliceBegin = g_Config.m_ClDemoSliceBegin == -1 ? 0 : (g_Config.m_ClDemoSliceBegin - pInfo->m_FirstTick);
 	const int64_t RealSliceEnd = (g_Config.m_ClDemoSliceEnd == -1 ? pInfo->m_LastTick : g_Config.m_ClDemoSliceEnd) - pInfo->m_FirstTick;
 	char aSliceBegin[32];
-	str_time(RealSliceBegin / SERVER_TICK_SPEED * 100, TIME_HOURS, aSliceBegin, sizeof(aSliceBegin));
+	str_time(RealSliceBegin / Client()->GameTickSpeed() * 100, TIME_HOURS, aSliceBegin, sizeof(aSliceBegin));
 	char aSliceEnd[32];
-	str_time(RealSliceEnd / SERVER_TICK_SPEED * 100, TIME_HOURS, aSliceEnd, sizeof(aSliceEnd));
+	str_time(RealSliceEnd / Client()->GameTickSpeed() * 100, TIME_HOURS, aSliceEnd, sizeof(aSliceEnd));
 	char aSliceLength[32];
-	str_time((RealSliceEnd - RealSliceBegin) / SERVER_TICK_SPEED * 100, TIME_HOURS, aSliceLength, sizeof(aSliceLength));
+	str_time((RealSliceEnd - RealSliceBegin) / Client()->GameTickSpeed() * 100, TIME_HOURS, aSliceLength, sizeof(aSliceLength));
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "%s: %s – %s", Localize("Cut interval"), aSliceBegin, aSliceEnd);
 	UI()->DoLabel(&SliceInterval, aBuf, 18.0f, TEXTALIGN_ML);
