@@ -1203,9 +1203,6 @@ void CGameContext::OnTick()
 		m_SqlRandomMapResult = nullptr;
 	}
 
-	// gctf TODO: move to controller
-	InstagibTick();
-
 	// Record player position at the end of the tick
 	if(m_TeeHistorianActive)
 	{
@@ -5138,13 +5135,6 @@ void CGameContext::PlayerReadyStateBroadcast()
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf), "%d players not ready", NumUnready);
 	SendBroadcastSix(aBuf, false);
-}
-
-void CGameContext::InstagibTick()
-{
-	if(Config()->m_SvPlayerReadyMode && m_World.m_Paused)
-		if(Server()->Tick() % Server()->TickSpeed() * 5 == 0)
-			PlayerReadyStateBroadcast();
 }
 
 void CGameContext::SendGameMsg(int GameMsgID, int ClientID)

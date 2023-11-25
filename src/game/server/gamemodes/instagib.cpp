@@ -13,4 +13,8 @@ CGameControllerInstagib::~CGameControllerInstagib() = default;
 void CGameControllerInstagib::Tick()
 {
 	CGameControllerDDRace::Tick();
+
+	if(Config()->m_SvPlayerReadyMode && GameServer()->m_World.m_Paused)
+		if(Server()->Tick() % Server()->TickSpeed() * 5 == 0)
+			GameServer()->PlayerReadyStateBroadcast();
 }

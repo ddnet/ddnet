@@ -282,7 +282,6 @@ public:
 	void RefreshVotes();
 	void AlertOnSpecialInstagibConfigs(int ClientID = -1);
 	void ShowCurrentInstagibConfigsMotd(int ClientID = -1, bool Force = false);
-	void InstagibTick();
 	void PlayerReadyStateBroadcast();
 	void SendBroadcastSix(const char *pText, bool Important = true);
 
