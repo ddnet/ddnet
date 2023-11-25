@@ -284,8 +284,13 @@ public:
 	void ShowCurrentInstagibConfigsMotd(int ClientID = -1, bool Force = false);
 	void PlayerReadyStateBroadcast();
 	void SendBroadcastSix(const char *pText, bool Important = true);
-	char m_aLastChatMessage[256];
-	const char *m_pUnstackHackCharacter;
+	enum
+	{
+		MAX_LINES = 25,
+		MAX_LINE_LENGTH = 256
+	};
+	char m_aaLastChatMessages[MAX_LINES][MAX_LINE_LENGTH];
+	int m_UnstackHackCharacterOffset;
 	void InstagibUnstackChatMessage(char *pUnstacked, const char *pMessage, int Size);
 
 	//

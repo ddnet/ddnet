@@ -115,7 +115,8 @@ void CGameContext::Construct(int Resetting)
 	m_aDeleteTempfile[0] = 0;
 	m_TeeHistorianActive = false;
 
-	m_pUnstackHackCharacter = "";
+	m_UnstackHackCharacterOffset = 0;
+	mem_zero(m_aaLastChatMessages, sizeof(m_aaLastChatMessages));
 }
 
 void CGameContext::Destruct(int Resetting)
@@ -2164,7 +2165,7 @@ void CGameContext::OnSayNetMessage(const CNetMsg_Cl_Say *pMsg, int ClientID, con
 			if(str_contains_ip(pMsg->m_pMessage))
 			{
 				if(g_Config.m_SvChatRatelimitDebug)
-						dbg_msg("ratelimit", "m_SvChatRatelimitSpam (ip) %s", pMsg->m_pMessage);
+					dbg_msg("ratelimit", "m_SvChatRatelimitSpam (ip) %s", pMsg->m_pMessage);
 				RateLimit = true;
 			}
 		}
@@ -2251,17 +2252,6 @@ void CGameContext::OnSayNetMessage(const CNetMsg_Cl_Say *pMsg, int ClientID, con
 			InstagibUnstackChatMessage(aCensoredMessage, pMsg->m_pMessage, sizeof(aCensoredMessage));
 		SendChat(ClientID, Team, aCensoredMessage, ClientID);
 	}
-}
-
-void CGameContext::InstagibUnstackChatMessage(char *pUnstacked, const char *pMessage, int Size)
-{
-	if(!str_comp(m_aLastChatMessage, pMessage))
-	{
-		// U+200D ZERO WIDTH JOINER
-		m_pUnstackHackCharacter = m_pUnstackHackCharacter[0] != '\0' ? "" : "‍";
-		str_format(pUnstacked, Size, "%s%s", m_pUnstackHackCharacter, pMessage);
-	}
-	str_copy(m_aLastChatMessage, pMessage);
 }
 
 void CGameContext::OnCallVoteNetMessage(const CNetMsg_Cl_CallVote *pMsg, int ClientID)
@@ -5359,6 +5349,43 @@ void CGameContext::SendGameMsg(int GameMsgID, int ParaI1, int ParaI2, int ParaI3
 		}
 		// TODO: 0.6
 	}
+}
+
+void CGameContext::InstagibUnstackChatMessage(char *pUnstacked, const char *pMessage, int Size)
+{
+	bool Match = false;
+	for(const char *aLastChatMessage : m_aaLastChatMessages)
+	{
+		if(!str_comp(aLastChatMessage, pMessage))
+		{
+			Match = true;
+			break;
+		}
+	}
+	if(Match)
+	{
+		char aaInvisibleUnicodes[][8] = {
+			"", // no unicode is also different than unicode :D
+			"‌", // U+200C ZERO WIDTH NON-JOINER
+			"‍", // U+200D ZERO WIDTH JOINER
+			"‌", // U+200E LEFT-TO-RIGHT MARK
+			"‎", // U+200F RIGHT-TO-LEFT MARK
+			"⁠", // U+2060 WORD JOINER
+			"⁡", // U+2061 FUNCTION APPLICATION
+			"⁢", // U+2062 INVISIBLE TIMES
+			"⁣", // U+2063 INVISIBLE SEPARATOR
+			"⁤" // U+2064 INVISIBLE PLUS
+		};
+		m_UnstackHackCharacterOffset++;
+		if(m_UnstackHackCharacterOffset >= (int)(sizeof(aaInvisibleUnicodes) / 8))
+			m_UnstackHackCharacterOffset = 0;
+		str_format(pUnstacked, Size, "%s%s", aaInvisibleUnicodes[m_UnstackHackCharacterOffset], pMessage);
+	}
+	for(int i = MAX_LINES - 1; i > 0; i--)
+	{
+		str_copy(m_aaLastChatMessages[i], m_aaLastChatMessages[i - 1]);
+	}
+	str_copy(m_aaLastChatMessages[0], pMessage);
 }
 
 int CGameContext::GetDDNetInstaWeapon()
