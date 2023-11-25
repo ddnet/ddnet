@@ -127,6 +127,8 @@ public:
 	// DDRace
 
 	bool m_Cheated;
+
+	virtual int FlagMask() const = 0;
 	virtual void SetFlagMask(int FlagMask) = 0;
 };
 
