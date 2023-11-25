@@ -5014,6 +5014,9 @@ void CGameContext::ShowCurrentInstagibConfigsMotd(int ClientID, bool Force)
 	str_format(aBuf, sizeof(aBuf), "* ready mode: %s\n", g_Config.m_SvPlayerReadyMode ? "on" : "off");
 	str_append(aMotd, aBuf);
 
+	str_format(aBuf, sizeof(aBuf), "* damage needed for kill: %d\n", g_Config.m_SvDamageNeededForKill);
+	str_append(aMotd, aBuf);
+
 	if(!str_comp_nocase(g_Config.m_SvGametype, "gctf"))
 	{
 		str_format(aBuf, sizeof(aBuf), "* spray protection: %s\n", g_Config.m_SvSprayprotection ? "on" : "off");

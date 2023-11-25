@@ -1039,7 +1039,7 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 		}
 
 		// no self damage
-		if(Dmg >= 4)
+		if(Dmg >= g_Config.m_SvDamageNeededForKill)
 			m_Health = From == m_pPlayer->GetCID() ? m_Health : 0;
 
 		// check for death
