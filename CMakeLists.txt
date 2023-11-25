@@ -2557,6 +2557,8 @@ if(SERVER)
     gamemodes/mod.h
     gameworld.cpp
     gameworld.h
+    instagib.cpp
+    instagib.h
     player.cpp
     player.h
     save.cpp

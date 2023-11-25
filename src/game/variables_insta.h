@@ -28,6 +28,29 @@ MACRO_CONFIG_INT(SvSprayprotection, sv_sprayprotection, 0, 0, 1, CFGFLAG_SERVER,
 MACRO_CONFIG_INT(SvOnlyHookKills, sv_only_hook_kills, 0, 0, 1, CFGFLAG_SERVER, "Only count kills when enemy is hooked")
 MACRO_CONFIG_INT(SvKillHook, sv_kill_hook, 0, 0, 1, CFGFLAG_SERVER, "Hook kills")
 MACRO_CONFIG_INT(SvDamageNeededForKill, sv_damage_needed_for_kill, 4, 0, 5, CFGFLAG_SERVER, "Damage needed to kill")
+/*
+
+sv_chat_ratelimit_long_messages
+
+12 is the magic max size of team call binds
+TODO: count characters not size because 🅷🅴🅻🅿 is longer than 12 chars
+
+         0123456789
+1234567891111111111
+           |
+top        |
+bottom     |
+help!      |
+come base  |
+need help  |
+
+*/
+MACRO_CONFIG_INT(SvChatRatelimitLongMessages, sv_chat_ratelimit_long_messages, 1, 0, 1, CFGFLAG_SERVER, "Needs sv_spamprotection 0 (0=off, 1=only messages longer than 12 chars are limited)")
+MACRO_CONFIG_INT(SvChatRatelimitSpectators, sv_chat_ratelimit_spectators, 1, 0, 1, CFGFLAG_SERVER, "Needs sv_spamprotection 0 (0=off, 1=specs have slow chat)")
+MACRO_CONFIG_INT(SvChatRatelimitPublicChat, sv_chat_ratelimit_public_chat, 1, 0, 1, CFGFLAG_SERVER, "Needs sv_spamprotection 0 (0=off, 1=non team chat is slow)")
+MACRO_CONFIG_INT(SvChatRatelimitNonCalls, sv_chat_ratelimit_non_calls, 1, 0, 1, CFGFLAG_SERVER, "Needs sv_spamprotection 0 (0=off, 1=ratelimit all but call binds such as 'help')")
+MACRO_CONFIG_INT(SvChatRatelimitSpam, sv_chat_ratelimit_spam, 1, 0, 1, CFGFLAG_SERVER, "Needs sv_spamprotection 0 (0=off, 1=ratelimit chat detected as spam)")
+MACRO_CONFIG_INT(SvChatRatelimitDebug, sv_chat_ratelimit_debug, 0, 0, 1, CFGFLAG_SERVER, "Logs which of the ratelimits kicked in")
 
 MACRO_CONFIG_INT(SvFastcap, sv_fastcap, 0, 0, 1, CFGFLAG_SERVER, "Insert flag captures into ddrace rank database")
 

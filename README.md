@@ -21,5 +21,12 @@ For build instructions visit the [ddnet repo](https://github.com/ddnet/ddnet).
 + `sv_only_hook_kills` Only count kills when enemy is hooked
 + `sv_kill_hook` Hooking kills
 + `sv_damage_needed_for_kill` Damage needed to kill
++ `sv_chat_ratelimit_long_messages` Needs sv_spamprotection 0 (0=off, 1=only messages longer than 12 chars are limited)
++ `sv_chat_ratelimit_spectators` Needs sv_spamprotection 0 (0=off, 1=specs have slow chat)
++ `sv_chat_ratelimit_public_chat` Needs sv_spamprotection 0 (0=off, 1=non team chat is slow)
++ `sv_chat_ratelimit_non_calls` Needs sv_spamprotection 0 (0=off, 1=ratelimit all but call binds such as 'help')
++ `sv_chat_ratelimit_spam` Needs sv_spamprotection 0 (0=off, 1=ratelimit chat detected as spam)
++ `sv_chat_ratelimit_debug` Logs which of the ratelimits kicked in
++ `sv_fastcap` Insert flag captures into ddrace rank database
 + `sv_show_settings_motd` Show insta game settings in motd on join
 + `sv_unstack_chat` Revert ddnet clients duplicated chat message stacking

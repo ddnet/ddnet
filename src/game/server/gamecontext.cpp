@@ -36,6 +36,8 @@
 #include "player.h"
 #include "score.h"
 
+#include "instagib.h"
+
 // Not thread-safe!
 class CClientChatLogger : public ILogger
 {
@@ -2032,6 +2034,143 @@ void CGameContext::OnSayNetMessage(const CNetMsg_Cl_Say *pMsg, int ClientID, con
 		Team = ((pPlayer->GetTeam() == TEAM_SPECTATORS) ? CHAT_SPEC : pPlayer->GetTeam()); // gctf
 	else
 		Team = CHAT_ALL;
+
+	// gctf fine grained chat spam control
+	if(pMsg->m_pMessage[0] != '/')
+	{
+		bool RateLimit = false;
+		if(g_Config.m_SvChatRatelimitSpectators && Team == CHAT_SPEC)
+		{
+			if(g_Config.m_SvChatRatelimitDebug)
+				dbg_msg("ratelimit", "m_SvChatRatelimitSpectators %s", pMsg->m_pMessage);
+			RateLimit = true;
+		}
+		if(g_Config.m_SvChatRatelimitPublicChat && Team == CHAT_ALL)
+		{
+			if(g_Config.m_SvChatRatelimitDebug)
+				dbg_msg("ratelimit", "m_SvChatRatelimitPublicChat %s", pMsg->m_pMessage);
+			RateLimit = true;
+		}
+		if(g_Config.m_SvChatRatelimitLongMessages && Length >= 12)
+		{
+			if(g_Config.m_SvChatRatelimitDebug)
+				dbg_msg("ratelimit", "m_SvChatRatelimitLongMessages %s", pMsg->m_pMessage);
+			RateLimit = true;
+		}
+		if(g_Config.m_SvChatRatelimitNonCalls)
+		{
+			// grep -r teamchat | cut -d: -f8- | sort | uniq -c | sort -nr
+			const char aaCalls[][24] = {
+				"help",
+				"mid",
+				"top",
+				"bot",
+				"Back!!!",
+				"back",
+				"Enemy Base!",
+				"enemy_base",
+				"mid!",
+				"TOP !",
+				"Mid",
+				"back! / help!",
+				"top!",
+				"Top",
+				"MID !",
+				"BACK !",
+				"bottom",
+				"Ready!!",
+				"back!",
+				"BOT !",
+				"help",
+				"Back",
+				"ENNEMIE BASE !",
+				"Backkk",
+				"back!!",
+				"left",
+				"READY !",
+				"Double Attack!!",
+				"Mid!",
+				"Help! / Back!",
+				"bot!",
+				"Back!",
+				"Top!",
+				"🅷🅴🅻🅿",
+				"right",
+				"enemy base",
+				"b",
+				"Bottom",
+				"Ready!",
+				"middle",
+				"bottom!",
+				"Bot!",
+				"Bot",
+				"right down",
+				"pos?",
+				"atk",
+				"ready!",
+				"DoubleAttack!",
+				"Our base!!!",
+				"HELP !",
+				"def",
+				"pos",
+				"Back!Help!",
+				"right top",
+				"pos ?",
+				"Take weapons",
+				"go",
+				"enemy base!",
+				"deff",
+				"BACK!!!",
+				"safe",
+			};
+			bool IsCall = false;
+			for(const char *aCall : aaCalls)
+			{
+				if(!str_comp_nocase(aCall, pMsg->m_pMessage))
+				{
+					IsCall = true;
+					break;
+				}
+			}
+			if(!IsCall)
+			{
+				if(g_Config.m_SvChatRatelimitDebug)
+					dbg_msg("ratelimit", "m_SvChatRatelimitNonCalls %s", pMsg->m_pMessage);
+				RateLimit = true;
+			}
+		}
+		if(g_Config.m_SvChatRatelimitSpam)
+		{
+			char aaSpams[][24] = {
+				"discord.gg",
+				"fuck",
+				"idiot",
+				"http://",
+				"https://",
+				"www.",
+				".com",
+				".de",
+				".io"};
+			for(const char *aSpam : aaSpams)
+			{
+				if(str_find_nocase(aSpam, pMsg->m_pMessage))
+				{
+					if(g_Config.m_SvChatRatelimitDebug)
+						dbg_msg("ratelimit", "m_SvChatRatelimitSpam (bad word) %s", pMsg->m_pMessage);
+					RateLimit = true;
+					break;
+				}
+			}
+			if(str_contains_ip(pMsg->m_pMessage))
+			{
+				if(g_Config.m_SvChatRatelimitDebug)
+						dbg_msg("ratelimit", "m_SvChatRatelimitSpam (ip) %s", pMsg->m_pMessage);
+				RateLimit = true;
+			}
+		}
+		if(RateLimit && pPlayer->m_LastChat && pPlayer->m_LastChat + Server()->TickSpeed() * ((31 + Length) / 32) > Server()->Tick())
+			return;
+	}
 
 	// gctf bang commands
 	// allow sending ! to chat or !!
