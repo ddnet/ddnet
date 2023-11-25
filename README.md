@@ -30,3 +30,5 @@ For build instructions visit the [ddnet repo](https://github.com/ddnet/ddnet).
 + `sv_fastcap` Insert flag captures into ddrace rank database
 + `sv_show_settings_motd` Show insta game settings in motd on join
 + `sv_unstack_chat` Revert ddnet clients duplicated chat message stacking
++ `sv_tournament_chat` 0=off, 1=Spectators can not public chat, 2=Nobody can public chat
++ `sv_tournament_chat_smart` s sv_tournament_chat on on restart and off on round end (1=specs,2=all)

@@ -611,8 +611,8 @@ void IGameController::DoWarmup(int Seconds)
 	{
 		if(g_Config.m_SvTournamentChatSmart)
 		{
-			g_Config.m_SvTournamentChat = 1;
-			GameServer()->SendChat(-1, CGameContext::CHAT_ALL, "Spectators can no longer use public chat");
+			g_Config.m_SvTournamentChat = g_Config.m_SvTournamentChatSmart;
+			GameServer()->SendChat(-1, CGameContext::CHAT_ALL, g_Config.m_SvTournamentChatSmart == 1 ? "Spectators can no longer use public chat" : "All can no longer use public chat");
 		}
 	}
 }
@@ -1190,7 +1190,7 @@ void IGameController::EndMatch()
 	if(g_Config.m_SvTournamentChatSmart)
 	{
 		g_Config.m_SvTournamentChat = 0;
-		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, "Spectators can use public chat again");
+		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, g_Config.m_SvTournamentChatSmart == 1 ? "Spectators can use public chat again" : "All can use public chat again");
 	}
 }
 

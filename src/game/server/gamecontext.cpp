@@ -2030,17 +2030,22 @@ void CGameContext::OnSayNetMessage(const CNetMsg_Cl_Say *pMsg, int ClientID, con
 	if(Length == 0 || (pMsg->m_pMessage[0] != '/' && (g_Config.m_SvSpamprotection && pPlayer->m_LastChat && pPlayer->m_LastChat + Server()->TickSpeed() * ((31 + Length) / 32) > Server()->Tick())))
 		return;
 
+	if(g_Config.m_SvTournamentChat)
+	{
+		if(g_Config.m_SvTournamentChat == 1)
+		{
+			if(pPlayer->GetTeam() == TEAM_SPECTATORS)
+				Team = 1;
+		}
+		else if (g_Config.m_SvTournamentChat == 2)
+			Team = 1;
+	}
+
 	// int GameTeam = GetDDRaceTeam(pPlayer->GetCID());
 	if(Team)
 		Team = ((pPlayer->GetTeam() == TEAM_SPECTATORS) ? CHAT_SPEC : pPlayer->GetTeam()); // gctf
 	else
 		Team = CHAT_ALL;
-
-	if(g_Config.m_SvTournamentChat)
-	{
-		if(pPlayer->GetTeam() == TEAM_SPECTATORS)
-			Team = CHAT_SPEC;
-	}
 
 	// gctf fine grained chat spam control
 	if(pMsg->m_pMessage[0] != '/')
