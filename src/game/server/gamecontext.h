@@ -293,6 +293,7 @@ public:
 	int m_UnstackHackCharacterOffset;
 	void InstagibUnstackChatMessage(char *pUnstacked, const char *pMessage, int Size);
 	bool AllowPublicChat(const CPlayer *pPlayer);
+	bool OnInstaChatMessage(const CNetMsg_Cl_Say *pMsg, int Length, int &Team, CPlayer *pPlayer);
 
 	//
 	void CheckPureTuning();
