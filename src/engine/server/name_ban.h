@@ -1,7 +1,7 @@
 #ifndef ENGINE_SERVER_NAME_BAN_H
 #define ENGINE_SERVER_NAME_BAN_H
 
-#include <base/system.h>
+#include <engine/console.h>
 #include <engine/shared/protocol.h>
 
 #include <vector>
@@ -15,22 +15,31 @@ enum
 class CNameBan
 {
 public:
-	CNameBan() {}
-	CNameBan(const char *pName, int Distance, int IsSubstring, const char *pReason = "") :
-		m_Distance(Distance), m_IsSubstring(IsSubstring)
-	{
-		str_copy(m_aName, pName);
-		m_SkeletonLength = str_utf8_to_skeleton(m_aName, m_aSkeleton, std::size(m_aSkeleton));
-		str_copy(m_aReason, pReason);
-	}
+	CNameBan(const char *pName, const char *pReason, int Distance, bool IsSubstring);
+
 	char m_aName[MAX_NAME_LENGTH];
 	char m_aReason[MAX_NAMEBAN_REASON_LENGTH];
 	int m_aSkeleton[MAX_NAME_SKELETON_LENGTH];
 	int m_SkeletonLength;
 	int m_Distance;
-	int m_IsSubstring;
+	bool m_IsSubstring;
 };
 
-CNameBan *IsNameBanned(const char *pName, std::vector<CNameBan> &vNameBans);
+class CNameBans
+{
+	IConsole *m_pConsole = nullptr;
+	std::vector<CNameBan> m_vNameBans;
+
+	static void ConNameBan(IConsole::IResult *pResult, void *pUser);
+	static void ConNameUnban(IConsole::IResult *pResult, void *pUser);
+	static void ConNameBans(IConsole::IResult *pResult, void *pUser);
+
+public:
+	void InitConsole(IConsole *pConsole);
+	void Ban(const char *pName, const char *pReason, const int Distance, const bool IsSubstring);
+	void Unban(const char *pName);
+	void Dump() const;
+	const CNameBan *IsBanned(const char *pName) const;
+};
 
 #endif // ENGINE_SERVER_NAME_BAN_H

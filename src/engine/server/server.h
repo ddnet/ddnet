@@ -282,7 +282,7 @@ public:
 
 	char m_aErrorShutdownReason[128];
 
-	std::vector<CNameBan> m_vNameBans;
+	CNameBans m_NameBans;
 
 	size_t m_AnnouncementLastLine;
 	std::vector<std::string> m_vAnnouncements;
@@ -296,8 +296,10 @@ public:
 
 	bool IsClientNameAvailable(int ClientID, const char *pNameRequest);
 	bool SetClientNameImpl(int ClientID, const char *pNameRequest, bool Set);
+	bool SetClientClanImpl(int ClientID, const char *pClanRequest, bool Set);
 
 	bool WouldClientNameChange(int ClientID, const char *pNameRequest) override;
+	bool WouldClientClanChange(int ClientID, const char *pClanRequest) override;
 	void SetClientName(int ClientID, const char *pName) override;
 	void SetClientClan(int ClientID, const char *pClan) override;
 	void SetClientCountry(int ClientID, int Country) override;
@@ -428,10 +430,6 @@ public:
 	static void ConAuthUpdateHashed(IConsole::IResult *pResult, void *pUser);
 	static void ConAuthRemove(IConsole::IResult *pResult, void *pUser);
 	static void ConAuthList(IConsole::IResult *pResult, void *pUser);
-
-	static void ConNameBan(IConsole::IResult *pResult, void *pUser);
-	static void ConNameUnban(IConsole::IResult *pResult, void *pUser);
-	static void ConNameBans(IConsole::IResult *pResult, void *pUser);
 
 	// console commands for sqlmasters
 	static void ConAddSqlServer(IConsole::IResult *pResult, void *pUserData);

@@ -1976,6 +1976,7 @@ set_src(ENGINE_SHARED GLOB_RECURSE src/engine/shared
   teehistorian_ex_chunks.h
   uuid_manager.cpp
   uuid_manager.h
+  variables_insta.h
   video.cpp
   video.h
   websockets.cpp
@@ -2012,8 +2013,6 @@ set_src(GAME_SHARED GLOB src/game
   teamscore.cpp
   teamscore.h
   tuning.h
-  variables.h
-  variables_insta.h
   version.h
   voting.h
 )
