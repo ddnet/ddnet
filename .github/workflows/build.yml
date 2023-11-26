@@ -56,7 +56,6 @@ jobs:
     - name: Prepare Linux (non-fancy)
       if: ${{ contains(matrix.os, 'ubuntu') && !matrix.fancy }}
       run: |
-        rustup default 1.48.0
         sudo rm -rf /var/lib/mysql/ /var/run/mysqld
         sudo mkdir /var/lib/mysql/ /var/run/mysqld/
         sudo chown mysql:mysql /var/lib/mysql/ /var/run/mysqld/
