@@ -1,7 +1,7 @@
 // ddnet-insta config variables
-#ifndef GAME_VARIABLES_INSTA_H
-#define GAME_VARIABLES_INSTA_H
-#undef GAME_VARIABLES_INSTA_H // this file will be included several times
+#ifndef ENGINE_SHARED_VARIABLES_INSTA_H
+#define ENGINE_SHARED_VARIABLES_INSTA_H
+#undef ENGINE_SHARED_VARIABLES_INSTA_H // this file will be included several times
 
 #ifndef MACRO_CONFIG_INT
 #error "The config macros must be defined"
