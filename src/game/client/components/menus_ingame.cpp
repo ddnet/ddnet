@@ -631,21 +631,19 @@ void CMenus::RenderServerControl(CUIRect MainView)
 		MainView.HSplitBottom(90.0f, &MainView, &RconExtension);
 
 	// tab bar
-	{
-		TabBar.VSplitLeft(TabBar.w / 3, &Button, &TabBar);
-		static CButtonContainer s_Button0;
-		if(DoButton_MenuTab(&s_Button0, Localize("Change settings"), s_ControlPage == 0, &Button, 0))
-			s_ControlPage = 0;
+	TabBar.VSplitLeft(TabBar.w / 3, &Button, &TabBar);
+	static CButtonContainer s_Button0;
+	if(DoButton_MenuTab(&s_Button0, Localize("Change settings"), s_ControlPage == 0, &Button, 0))
+		s_ControlPage = 0;
 
-		TabBar.VSplitMid(&Button, &TabBar);
-		static CButtonContainer s_Button1;
-		if(DoButton_MenuTab(&s_Button1, Localize("Kick player"), s_ControlPage == 1, &Button, 0))
-			s_ControlPage = 1;
+	TabBar.VSplitMid(&Button, &TabBar);
+	static CButtonContainer s_Button1;
+	if(DoButton_MenuTab(&s_Button1, Localize("Kick player"), s_ControlPage == 1, &Button, 0))
+		s_ControlPage = 1;
 
-		static CButtonContainer s_Button2;
-		if(DoButton_MenuTab(&s_Button2, Localize("Move player to spectators"), s_ControlPage == 2, &TabBar, 0))
-			s_ControlPage = 2;
-	}
+	static CButtonContainer s_Button2;
+	if(DoButton_MenuTab(&s_Button2, Localize("Move player to spectators"), s_ControlPage == 2, &TabBar, 0))
+		s_ControlPage = 2;
 
 	// render page
 	MainView.HSplitBottom(ms_ButtonHeight + 5 * 2, &MainView, &Bottom);
@@ -660,50 +658,105 @@ void CMenus::RenderServerControl(CUIRect MainView)
 		Call = RenderServerControlKick(MainView, true);
 
 	// vote menu
+	CUIRect QuickSearch;
+
+	// render quick search
+	Bottom.VSplitLeft(5.0f, 0, &Bottom);
+	Bottom.VSplitLeft(250.0f, &QuickSearch, &Bottom);
+	QuickSearch.HSplitTop(5.0f, 0, &QuickSearch);
+	TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
+	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
+
+	UI()->DoLabel(&QuickSearch, FONT_ICON_MAGNIFYING_GLASS, 14.0f, TEXTALIGN_ML);
+	float wSearch = TextRender()->TextWidth(14.0f, FONT_ICON_MAGNIFYING_GLASS, -1, -1.0f);
+	TextRender()->SetRenderFlags(0);
+	TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
+	QuickSearch.VSplitLeft(wSearch, 0, &QuickSearch);
+	QuickSearch.VSplitLeft(5.0f, 0, &QuickSearch);
+
+	if(m_ControlPageOpening || (Input()->KeyPress(KEY_F) && Input()->ModifierIsPressed()))
 	{
-		CUIRect QuickSearch;
+		UI()->SetActiveItem(&m_FilterInput);
+		m_ControlPageOpening = false;
+		m_FilterInput.SelectAll();
+	}
+	m_FilterInput.SetEmptyText(Localize("Search"));
+	UI()->DoClearableEditBox(&m_FilterInput, &QuickSearch, 14.0f);
 
-		// render quick search
+	// call vote
+	Bottom.VSplitRight(10.0f, &Bottom, 0);
+	Bottom.VSplitRight(120.0f, &Bottom, &Button);
+	Button.HSplitTop(5.0f, 0, &Button);
+
+	static CButtonContainer s_CallVoteButton;
+	if(DoButton_Menu(&s_CallVoteButton, Localize("Call vote"), 0, &Button) || Call)
+	{
+		if(s_ControlPage == 0)
 		{
-			Bottom.VSplitLeft(240.0f, &QuickSearch, &Bottom);
-			QuickSearch.HSplitTop(5.0f, 0, &QuickSearch);
-			TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
-			TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
-
-			UI()->DoLabel(&QuickSearch, FONT_ICON_MAGNIFYING_GLASS, 14.0f, TEXTALIGN_ML);
-			float wSearch = TextRender()->TextWidth(14.0f, FONT_ICON_MAGNIFYING_GLASS, -1, -1.0f);
-			TextRender()->SetRenderFlags(0);
-			TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
-			QuickSearch.VSplitLeft(wSearch, 0, &QuickSearch);
-			QuickSearch.VSplitLeft(5.0f, 0, &QuickSearch);
-
-			if(m_ControlPageOpening || (Input()->KeyPress(KEY_F) && Input()->ModifierIsPressed()))
-			{
-				UI()->SetActiveItem(&m_FilterInput);
-				m_ControlPageOpening = false;
-				m_FilterInput.SelectAll();
-			}
-			m_FilterInput.SetEmptyText(Localize("Search"));
-			UI()->DoClearableEditBox(&m_FilterInput, &QuickSearch, 14.0f);
+			m_pClient->m_Voting.CallvoteOption(m_CallvoteSelectedOption, m_CallvoteReasonInput.GetString());
+			if(g_Config.m_UiCloseWindowAfterChangingSetting)
+				SetActive(false);
 		}
+		else if(s_ControlPage == 1)
+		{
+			if(m_CallvoteSelectedPlayer >= 0 && m_CallvoteSelectedPlayer < MAX_CLIENTS &&
+				m_pClient->m_Snap.m_apPlayerInfos[m_CallvoteSelectedPlayer])
+			{
+				m_pClient->m_Voting.CallvoteKick(m_CallvoteSelectedPlayer, m_CallvoteReasonInput.GetString());
+				SetActive(false);
+			}
+		}
+		else if(s_ControlPage == 2)
+		{
+			if(m_CallvoteSelectedPlayer >= 0 && m_CallvoteSelectedPlayer < MAX_CLIENTS &&
+				m_pClient->m_Snap.m_apPlayerInfos[m_CallvoteSelectedPlayer])
+			{
+				m_pClient->m_Voting.CallvoteSpectate(m_CallvoteSelectedPlayer, m_CallvoteReasonInput.GetString());
+				SetActive(false);
+			}
+		}
+		m_CallvoteReasonInput.Clear();
+	}
 
-		Bottom.VSplitRight(120.0f, &Bottom, &Button);
+	// render kick reason
+	CUIRect Reason;
+	Bottom.VSplitRight(20.0f, &Bottom, 0);
+	Bottom.VSplitRight(200.0f, &Bottom, &Reason);
+	Reason.HSplitTop(5.0f, 0, &Reason);
+	const char *pLabel = Localize("Reason:");
+	UI()->DoLabel(&Reason, pLabel, 14.0f, TEXTALIGN_ML);
+	float w = TextRender()->TextWidth(14.0f, pLabel, -1, -1.0f);
+	Reason.VSplitLeft(w + 10.0f, 0, &Reason);
+	if(Input()->KeyPress(KEY_R) && Input()->ModifierIsPressed())
+	{
+		UI()->SetActiveItem(&m_CallvoteReasonInput);
+		m_CallvoteReasonInput.SelectAll();
+	}
+	UI()->DoEditBox(&m_CallvoteReasonInput, &Reason, 14.0f);
 
-		static CButtonContainer s_CallVoteButton;
-		if(DoButton_Menu(&s_CallVoteButton, Localize("Call vote"), 0, &Button) || Call)
+	// extended features (only available when authed in rcon)
+	if(Client()->RconAuthed())
+	{
+		// background
+		RconExtension.HSplitTop(10.0f, 0, &RconExtension);
+		RconExtension.HSplitTop(20.0f, &Bottom, &RconExtension);
+		RconExtension.HSplitTop(5.0f, 0, &RconExtension);
+
+		// force vote
+		Bottom.VSplitLeft(5.0f, 0, &Bottom);
+		Bottom.VSplitLeft(120.0f, &Button, &Bottom);
+
+		static CButtonContainer s_ForceVoteButton;
+		if(DoButton_Menu(&s_ForceVoteButton, Localize("Force vote"), 0, &Button))
 		{
 			if(s_ControlPage == 0)
-			{
-				m_pClient->m_Voting.CallvoteOption(m_CallvoteSelectedOption, m_CallvoteReasonInput.GetString());
-				if(g_Config.m_UiCloseWindowAfterChangingSetting)
-					SetActive(false);
-			}
+				m_pClient->m_Voting.CallvoteOption(m_CallvoteSelectedOption, m_CallvoteReasonInput.GetString(), true);
 			else if(s_ControlPage == 1)
 			{
 				if(m_CallvoteSelectedPlayer >= 0 && m_CallvoteSelectedPlayer < MAX_CLIENTS &&
 					m_pClient->m_Snap.m_apPlayerInfos[m_CallvoteSelectedPlayer])
 				{
-					m_pClient->m_Voting.CallvoteKick(m_CallvoteSelectedPlayer, m_CallvoteReasonInput.GetString());
+					m_pClient->m_Voting.CallvoteKick(m_CallvoteSelectedPlayer, m_CallvoteReasonInput.GetString(), true);
 					SetActive(false);
 				}
 			}
@@ -712,102 +765,47 @@ void CMenus::RenderServerControl(CUIRect MainView)
 				if(m_CallvoteSelectedPlayer >= 0 && m_CallvoteSelectedPlayer < MAX_CLIENTS &&
 					m_pClient->m_Snap.m_apPlayerInfos[m_CallvoteSelectedPlayer])
 				{
-					m_pClient->m_Voting.CallvoteSpectate(m_CallvoteSelectedPlayer, m_CallvoteReasonInput.GetString());
+					m_pClient->m_Voting.CallvoteSpectate(m_CallvoteSelectedPlayer, m_CallvoteReasonInput.GetString(), true);
 					SetActive(false);
 				}
 			}
 			m_CallvoteReasonInput.Clear();
 		}
 
-		// render kick reason
-		CUIRect Reason;
-		Bottom.VSplitRight(40.0f, &Bottom, 0);
-		Bottom.VSplitRight(160.0f, &Bottom, &Reason);
-		Reason.HSplitTop(5.0f, 0, &Reason);
-		const char *pLabel = Localize("Reason:");
-		UI()->DoLabel(&Reason, pLabel, 14.0f, TEXTALIGN_ML);
-		float w = TextRender()->TextWidth(14.0f, pLabel, -1, -1.0f);
-		Reason.VSplitLeft(w + 10.0f, 0, &Reason);
-		if(Input()->KeyPress(KEY_R) && Input()->ModifierIsPressed())
+		if(s_ControlPage == 0)
 		{
-			UI()->SetActiveItem(&m_CallvoteReasonInput);
-			m_CallvoteReasonInput.SelectAll();
-		}
-		UI()->DoEditBox(&m_CallvoteReasonInput, &Reason, 14.0f);
+			// remove vote
+			Bottom.VSplitRight(10.0f, &Bottom, 0);
+			Bottom.VSplitRight(120.0f, 0, &Button);
+			static CButtonContainer s_RemoveVoteButton;
+			if(DoButton_Menu(&s_RemoveVoteButton, Localize("Remove"), 0, &Button))
+				m_pClient->m_Voting.RemovevoteOption(m_CallvoteSelectedOption);
 
-		// extended features (only available when authed in rcon)
-		if(Client()->RconAuthed())
-		{
-			// background
-			RconExtension.Margin(10.0f, &RconExtension);
+			// add vote
 			RconExtension.HSplitTop(20.0f, &Bottom, &RconExtension);
-			RconExtension.HSplitTop(5.0f, 0, &RconExtension);
-
-			// force vote
 			Bottom.VSplitLeft(5.0f, 0, &Bottom);
-			Bottom.VSplitLeft(120.0f, &Button, &Bottom);
+			Bottom.VSplitLeft(250.0f, &Button, &Bottom);
+			UI()->DoLabel(&Button, Localize("Vote description:"), 14.0f, TEXTALIGN_ML);
 
-			static CButtonContainer s_ForceVoteButton;
-			if(DoButton_Menu(&s_ForceVoteButton, Localize("Force vote"), 0, &Button))
-			{
-				if(s_ControlPage == 0)
-					m_pClient->m_Voting.CallvoteOption(m_CallvoteSelectedOption, m_CallvoteReasonInput.GetString(), true);
-				else if(s_ControlPage == 1)
-				{
-					if(m_CallvoteSelectedPlayer >= 0 && m_CallvoteSelectedPlayer < MAX_CLIENTS &&
-						m_pClient->m_Snap.m_apPlayerInfos[m_CallvoteSelectedPlayer])
-					{
-						m_pClient->m_Voting.CallvoteKick(m_CallvoteSelectedPlayer, m_CallvoteReasonInput.GetString(), true);
-						SetActive(false);
-					}
-				}
-				else if(s_ControlPage == 2)
-				{
-					if(m_CallvoteSelectedPlayer >= 0 && m_CallvoteSelectedPlayer < MAX_CLIENTS &&
-						m_pClient->m_Snap.m_apPlayerInfos[m_CallvoteSelectedPlayer])
-					{
-						m_pClient->m_Voting.CallvoteSpectate(m_CallvoteSelectedPlayer, m_CallvoteReasonInput.GetString(), true);
-						SetActive(false);
-					}
-				}
-				m_CallvoteReasonInput.Clear();
-			}
+			Bottom.VSplitLeft(20.0f, 0, &Button);
+			UI()->DoLabel(&Button, Localize("Vote command:"), 14.0f, TEXTALIGN_ML);
 
-			if(s_ControlPage == 0)
-			{
-				// remove vote
-				Bottom.VSplitRight(10.0f, &Bottom, 0);
-				Bottom.VSplitRight(120.0f, 0, &Button);
-				static CButtonContainer s_RemoveVoteButton;
-				if(DoButton_Menu(&s_RemoveVoteButton, Localize("Remove"), 0, &Button))
-					m_pClient->m_Voting.RemovevoteOption(m_CallvoteSelectedOption);
+			static CLineInputBuffered<VOTE_DESC_LENGTH> s_VoteDescriptionInput;
+			static CLineInputBuffered<VOTE_CMD_LENGTH> s_VoteCommandInput;
+			RconExtension.HSplitTop(20.0f, &Bottom, &RconExtension);
+			Bottom.VSplitRight(10.0f, &Bottom, 0);
+			Bottom.VSplitRight(120.0f, &Bottom, &Button);
+			static CButtonContainer s_AddVoteButton;
+			if(DoButton_Menu(&s_AddVoteButton, Localize("Add"), 0, &Button))
+				if(!s_VoteDescriptionInput.IsEmpty() && !s_VoteCommandInput.IsEmpty())
+					m_pClient->m_Voting.AddvoteOption(s_VoteDescriptionInput.GetString(), s_VoteCommandInput.GetString());
 
-				// add vote
-				RconExtension.HSplitTop(20.0f, &Bottom, &RconExtension);
-				Bottom.VSplitLeft(5.0f, 0, &Bottom);
-				Bottom.VSplitLeft(250.0f, &Button, &Bottom);
-				UI()->DoLabel(&Button, Localize("Vote description:"), 14.0f, TEXTALIGN_ML);
+			Bottom.VSplitLeft(5.0f, 0, &Bottom);
+			Bottom.VSplitLeft(250.0f, &Button, &Bottom);
+			UI()->DoEditBox(&s_VoteDescriptionInput, &Button, 14.0f);
 
-				Bottom.VSplitLeft(20.0f, 0, &Button);
-				UI()->DoLabel(&Button, Localize("Vote command:"), 14.0f, TEXTALIGN_ML);
-
-				static CLineInputBuffered<64> s_VoteDescriptionInput;
-				static CLineInputBuffered<512> s_VoteCommandInput;
-				RconExtension.HSplitTop(20.0f, &Bottom, &RconExtension);
-				Bottom.VSplitRight(10.0f, &Bottom, 0);
-				Bottom.VSplitRight(120.0f, &Bottom, &Button);
-				static CButtonContainer s_AddVoteButton;
-				if(DoButton_Menu(&s_AddVoteButton, Localize("Add"), 0, &Button))
-					if(!s_VoteDescriptionInput.IsEmpty() && !s_VoteCommandInput.IsEmpty())
-						m_pClient->m_Voting.AddvoteOption(s_VoteDescriptionInput.GetString(), s_VoteCommandInput.GetString());
-
-				Bottom.VSplitLeft(5.0f, 0, &Bottom);
-				Bottom.VSplitLeft(250.0f, &Button, &Bottom);
-				UI()->DoEditBox(&s_VoteDescriptionInput, &Button, 14.0f);
-
-				Bottom.VMargin(20.0f, &Button);
-				UI()->DoEditBox(&s_VoteCommandInput, &Button, 14.0f);
-			}
+			Bottom.VMargin(20.0f, &Button);
+			UI()->DoEditBox(&s_VoteCommandInput, &Button, 14.0f);
 		}
 	}
 }
