@@ -22,6 +22,22 @@ void CGameControllerInstagib::Tick()
 	if(Config()->m_SvPlayerReadyMode && GameServer()->m_World.m_Paused)
 		if(Server()->Tick() % Server()->TickSpeed() * 5 == 0)
 			GameServer()->PlayerReadyStateBroadcast();
+
+	for(const CPlayer *pPlayer : GameServer()->m_apPlayers)
+	{
+		if(!pPlayer)
+			continue;
+		if(pPlayer->m_GameStateBroadcast)
+		{
+			char aBuf[512];
+			str_format(
+				aBuf,
+				sizeof(aBuf),
+				"GameState: %s                                                                                                                               ",
+				GameStateToStr(GameState()));
+			GameServer()->SendBroadcast(aBuf, pPlayer->GetCID());
+		}
+	}
 }
 
 void CGameControllerInstagib::OnCharacterSpawn(class CCharacter *pChr)

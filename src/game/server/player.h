@@ -228,6 +228,7 @@ public:
 	CSaveTee m_LastTeleTee;
 
 	// gctf
+	bool m_GameStateBroadcast;
 	int m_RespawnTick;
 	bool m_IsReadyToEnter; // 0.7 ready change
 	bool m_IsReadyToPlay; // 0.7 ready change

@@ -125,7 +125,7 @@ public:
 	void DoWarmup(int Seconds);
 
 	void StartRound();
-	void EndRound();
+	// void EndRound(); // gctf
 	void ChangeMap(const char *pToMap);
 
 	void CheckGameInfo();
@@ -202,6 +202,7 @@ public:
 		IGS_END_ROUND, // round is over (tick timer)
 	};
 	EGameState m_GameState;
+	EGameState GameState() { return m_GameState; }
 	int m_GameStateTimer;
 
 	const char *GameStateToStr(EGameState GameState)
@@ -229,7 +230,7 @@ public:
 	virtual void DoWincheckRound() {}
 	bool HasEnoughPlayers() const { return (IsTeamplay() && m_aTeamSize[TEAM_RED] > 0 && m_aTeamSize[TEAM_BLUE] > 0) || (!IsTeamplay() && m_aTeamSize[TEAM_RED] > 1); }
 	void SetGameState(EGameState GameState, int Timer = 0);
-	void StartMatch();
+	void StartMatch(bool RoundEnd);
 
 protected:
 	struct CGameInfo
@@ -243,8 +244,8 @@ protected:
 	int m_GameStartTick;
 	int m_aTeamscore[protocol7::NUM_TEAMS];
 
-	// void EndMatch() { SetGameState(IGS_END_MATCH, TIMER_END); }
-	void EndMatch();
+	void EndMatch() { SetGameState(IGS_END_MATCH, TIMER_END); }
+	void EndRound() { SetGameState(IGS_END_ROUND, TIMER_END/2); }
 
 public:
 	enum

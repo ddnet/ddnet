@@ -478,6 +478,20 @@ bool CGameContext::OnBangCommand(int ClientID, const char *pCmd, int NumArgs, co
 	{
 		ComCallShuffleVote(ClientID);
 	}
+	else if(!str_comp_nocase(pCmd, "gamestate"))
+	{
+		if(NumArgs > 0)
+		{
+			if(!str_comp_nocase(ppArgs[0], "on"))
+				pPlayer->m_GameStateBroadcast = true;
+			else if(!str_comp_nocase(ppArgs[0], "off"))
+				pPlayer->m_GameStateBroadcast = false;
+			else
+				SendChatTarget(ClientID, "usage: !gamestate [on|off]");
+		}
+		else
+			pPlayer->m_GameStateBroadcast = !pPlayer->m_GameStateBroadcast;
+	}
 	else
 	{
 		SendChatTarget(ClientID, "Unknown command. Commands: !restart, !ready, !shuffle, !1on1, !settings");

@@ -151,6 +151,7 @@ void CPlayer::Reset()
 	// gctf
 	m_IsReadyToPlay = !GameServer()->m_pController->IsPlayerReadyMode();
 	m_DeadSpecMode = false;
+	m_GameStateBroadcast = false;
 }
 
 static int PlayerFlags_SixToSeven(int Flags)

@@ -47,10 +47,29 @@ IGameController::IGameController(class CGameContext *pGameServer) :
 	m_GameState = IGS_GAME_RUNNING;
 	m_GameStateTimer = TIMER_INFINITE;
 	m_GameStartTick = Server()->Tick();
-	if(Config()->m_SvWarmup)
-		SetGameState(IGS_WARMUP_USER, Config()->m_SvWarmup);
-	else
-		SetGameState(IGS_WARMUP_GAME, TIMER_INFINITE);
+	// if(Config()->m_SvWarmup)
+	// 	SetGameState(IGS_WARMUP_USER, Config()->m_SvWarmup);
+	// else
+	// 	SetGameState(IGS_WARMUP_GAME, TIMER_INFINITE);
+
+	// if new game starts with warmup
+	// then ready change wont kick in
+	// because it only pauses running games
+	// think about wether we want warump with timer infinite at all?
+	// if yes it should also be active when a round finishes
+	// until a new restart is triggered
+	// then we also have to indicate to users
+	// that there is currently no game running
+	// also nice for tournaments to activate public chat again
+	//
+	// i drafted out a sv_casual_rounds config that decides wether
+	// games do go into state warmup infinite or running after match ends
+	// and then decided to not fully implement the idea
+	// because even for pro games it is confusing that rounds do not auto start
+	// one might forget to !restart and then we play a full game in state warmup
+	// which will block a bunch of features such as winning pausing the game
+	// so if we go down that route make sure to properly indicate
+	// that a game is not running
 
 	m_aTeamSize[TEAM_RED] = 0;
 	m_aTeamSize[TEAM_BLUE] = 0;
@@ -463,16 +482,6 @@ void IGameController::OnPlayerDisconnect(class CPlayer *pPlayer, const char *pRe
 	}
 }
 
-void IGameController::EndRound()
-{
-	if(m_Warmup) // game can't end when we are running warmup
-		return;
-
-	GameServer()->m_World.m_Paused = true;
-	m_GameOverTick = Server()->Tick();
-	m_SuddenDeath = 0;
-}
-
 void IGameController::ResetGame()
 {
 	for(CPlayer *pPlayer : GameServer()->m_apPlayers)
@@ -677,7 +686,7 @@ void IGameController::Tick()
 				// if(Config()->m_SvMatchSwap)
 				// 	GameServer()->SwapTeams();
 				// m_MatchCount++;
-				StartMatch();
+				StartMatch(true);
 				break;
 			case IGS_WARMUP_GAME:
 			case IGS_GAME_RUNNING:
@@ -1144,22 +1153,6 @@ void IGameController::SetPlayersReadyState(bool ReadyState)
 			pPlayer->m_IsReadyToPlay = ReadyState;
 }
 
-void IGameController::EndMatch()
-{
-	if(m_Warmup) // game can't end when we are running warmup
-		return;
-
-	GameServer()->m_World.m_Paused = true;
-	m_GameOverTick = Server()->Tick();
-	m_SuddenDeath = 0;
-
-	if(g_Config.m_SvTournamentChatSmart)
-	{
-		g_Config.m_SvTournamentChat = 0;
-		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, g_Config.m_SvTournamentChatSmart == 1 ? "Spectators can use public chat again" : "All can use public chat again");
-	}
-}
-
 bool IGameController::DoWincheckMatch()
 {
 	if(IsTeamplay())
@@ -1213,7 +1206,7 @@ bool IGameController::DoWincheckMatch()
 	return false;
 }
 
-void IGameController::StartMatch()
+void IGameController::StartMatch(bool RoundEnd)
 {
 	ResetGame();
 
@@ -1221,11 +1214,12 @@ void IGameController::StartMatch()
 	m_aTeamscore[TEAM_RED] = 0;
 	m_aTeamscore[TEAM_BLUE] = 0;
 
-	// start countdown if there're enough players, otherwise do warmup till there're
-	// if(HasEnoughPlayers())
-	SetGameState(IGS_START_COUNTDOWN);
-	// else
+	// only auto start round if we are in casual mode and there is no tournament running
+	// otherwise set infinite warmup and wait for !restart
+	// if(RoundEnd && (!g_Config.m_SvCasualRounds || g_Config.m_SvTournament))
 	// 	SetGameState(IGS_WARMUP_GAME, TIMER_INFINITE);
+	// else
+	SetGameState(IGS_START_COUNTDOWN);
 
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "start match type='%s' teamplay='%d'", m_pGameType, m_GameFlags & GAMEFLAG_TEAMS);
@@ -1338,7 +1332,7 @@ void IGameController::SetGameState(EGameState GameState, int Timer)
 			else if(Timer == 0)
 			{
 				// start new match
-				StartMatch();
+				StartMatch(false);
 			}
 		}
 		break;
@@ -1380,7 +1374,7 @@ void IGameController::SetGameState(EGameState GameState, int Timer)
 			else
 			{
 				// start new match
-				StartMatch();
+				StartMatch(false);
 			}
 		}
 		break;
@@ -1468,15 +1462,25 @@ void IGameController::SetGameState(EGameState GameState, int Timer)
 		break;
 	case IGS_END_ROUND:
 	case IGS_END_MATCH:
+		if(m_Warmup) // game can't end when we are running warmup
+			break;
+		m_GameOverTick = Server()->Tick();
 		if(GameState == IGS_END_ROUND && DoWincheckMatch())
 			break;
 		// only possible when game is running or over
-		if(m_GameState == IGS_GAME_RUNNING || m_GameState == IGS_END_MATCH || m_GameState == IGS_END_ROUND || m_GameState == IGS_GAME_PAUSED)
+		// if(m_GameState == IGS_GAME_RUNNING || m_GameState == IGS_END_MATCH || m_GameState == IGS_END_ROUND || m_GameState == IGS_GAME_PAUSED)
 		{
 			m_GameState = GameState;
 			m_GameStateTimer = Timer * Server()->TickSpeed();
+			// m_GameOverTick = Timer * Server()->Tick();
 			m_SuddenDeath = 0;
 			GameServer()->m_World.m_Paused = true;
+
+			if(g_Config.m_SvTournamentChatSmart)
+			{
+				g_Config.m_SvTournamentChat = 0;
+				GameServer()->SendChat(-1, CGameContext::CHAT_ALL, g_Config.m_SvTournamentChatSmart == 1 ? "Spectators can use public chat again" : "All can use public chat again");
+			}
 		}
 	}
 }
