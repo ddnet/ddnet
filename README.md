@@ -4,6 +4,8 @@ DDNet-insta based on DDRaceNetwork, a Teeworlds mod. See the [website](https://d
 
 For build instructions visit the [ddnet repo](https://github.com/ddnet/ddnet).
 
+# Configs
+
 + `sv_spectator_votes` - Allow spectators to vote
 + `sv_countdown_unpause` - Number of seconds to freeze the game in a countdown before match continues after pause
 + `sv_countdown_round_start` - Number of seconds to freeze the game in a countdown before match starts (0 enables only for survival gamemodes, -1 disables)
@@ -35,3 +37,16 @@ For build instructions visit the [ddnet repo](https://github.com/ddnet/ddnet).
 + `sv_tournament_chat` 0=off, 1=Spectators can not public chat, 2=Nobody can public chat
 + `sv_tournament_chat_smart` s sv_tournament_chat on on restart and off on round end (1=specs,2=all)
 + `sv_tournament_join_msgs` Hide join/leave of spectators in chat (0=off,1=hidden,2=shown for specs)
+
+# Chat commands
+
+Most ddnet slash chat commands were inherited and are still functional.
+But /pause and /spec got removed since it is conflicting with pausing games and usually not wanted for pvp games.
+
+ddnet-insta then added a bunch of own slash chat commands and also bang (!) chat commands
+
++ `!ready` `!pause` `/pause` `/ready` to pause the game. Needs `sv_player_ready_mode 1` and 0.7 clients can also send the 0.7 ready change message
++ `!shuffle` `/shuffle` call vote to shuffle teams
++ `!settings` show current game settings in the message of the day. It will show if spray protection is on or off and similar game relevant settings.
++ `!1v1` `!2v2` `!v1` `!v2` `!1on1` ... call vote to change in game slots
++ `!restart ?(seconds)` call vote to restart game with optional parameter of warmup seconds (default: 10)
