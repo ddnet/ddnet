@@ -245,7 +245,7 @@ protected:
 	int m_aTeamscore[protocol7::NUM_TEAMS];
 
 	void EndMatch() { SetGameState(IGS_END_MATCH, TIMER_END); }
-	void EndRound() { SetGameState(IGS_END_ROUND, TIMER_END/2); }
+	void EndRound() { SetGameState(IGS_END_ROUND, TIMER_END / 2); }
 
 public:
 	enum
