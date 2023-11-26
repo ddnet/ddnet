@@ -888,10 +888,12 @@ void IGameController::Snap(int SnappingClient)
 				pGameData->m_GameStateEndTick = Server()->Tick() + m_GameStateTimer;
 			break;
 		case IGS_END_ROUND:
+			pGameData->m_GameStateFlags = pGameData->m_GameStateFlags & ~protocol7::GAMESTATEFLAG_PAUSED; // clear pause
 			pGameData->m_GameStateFlags |= protocol7::GAMESTATEFLAG_ROUNDOVER;
 			pGameData->m_GameStateEndTick = Server()->Tick() - m_GameStartTick - TIMER_END / 2 * Server()->TickSpeed() + m_GameStateTimer;
 			break;
 		case IGS_END_MATCH:
+			pGameData->m_GameStateFlags = pGameData->m_GameStateFlags & ~protocol7::GAMESTATEFLAG_PAUSED; // clear pause
 			pGameData->m_GameStateFlags |= protocol7::GAMESTATEFLAG_GAMEOVER;
 			pGameData->m_GameStateEndTick = Server()->Tick() - m_GameStartTick - TIMER_END * Server()->TickSpeed() + m_GameStateTimer;
 			break;
