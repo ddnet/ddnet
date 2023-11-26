@@ -379,6 +379,9 @@ void CPlayer::Snap(int SnappingClient)
 		// gctf
 		if(!GameServer()->m_pController->IsGameRunning() &&
 			GameServer()->m_World.m_Paused &&
+			GameServer()->m_pController->GameState() != IGameController::IGS_END_MATCH &&
+			GameServer()->m_pController->GameState() != IGameController::IGS_END_ROUND &&
+			GetTeam() != TEAM_SPECTATORS &&
 			(!GameServer()->m_pController->IsPlayerReadyMode() || m_IsReadyToPlay))
 		{
 			char aReady[512];
