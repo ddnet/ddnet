@@ -163,7 +163,7 @@ void CVoting::AddOption(const char *pDescription)
 			m_pRecycleLast = 0;
 	}
 	else
-		pOption = (CVoteOptionClient *)m_Heap.Allocate(sizeof(CVoteOptionClient));
+		pOption = m_Heap.Allocate<CVoteOptionClient>();
 
 	pOption->m_pNext = 0;
 	pOption->m_pPrev = m_pLast;
