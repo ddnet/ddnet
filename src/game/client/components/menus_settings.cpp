@@ -2556,14 +2556,18 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 	}
 	else if(s_CurTab == APPEARANCE_TAB_CHAT)
 	{
-		MainView.VSplitMid(&LeftView, &RightView);
+		CChat &Chat = GameClient()->m_Chat;
+		CUIRect TopView, PreviewView;
+		MainView.h += 20.f; // Increase height a little
+		MainView.HSplitTop(MainView.h - 260, &TopView, &PreviewView);
+		TopView.VSplitMid(&LeftView, &RightView);
 
 		// ***** Chat ***** //
 		LeftView.HSplitTop(HeadlineAndVMargin, &Label, &LeftView);
 		UI()->DoLabel(&Label, Localize("Chat"), HeadlineFontSize, TEXTALIGN_ML);
 
 		// General chat settings
-		LeftView.HSplitTop(SectionTotalMargin + 3 * LineSize, &Section, &LeftView);
+		LeftView.HSplitTop(SectionTotalMargin + 7 * LineSize, &Section, &LeftView);
 		Section.Margin(SectionMargin, &Section);
 
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClChatTeamColors, Localize("Show names in chat in team colors"), &g_Config.m_ClChatTeamColors, &Section, LineSize);
@@ -2572,13 +2576,30 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		if(DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClChatOld, Localize("Use old chat style"), &g_Config.m_ClChatOld, &Section, LineSize))
 			GameClient()->m_Chat.RebuildChat();
 
+		Section.HSplitTop(2 * LineSize, &Button, &Section);
+		int PrevFontSize = g_Config.m_ClChatFontSize;
+		UI()->DoScrollbarOption(&g_Config.m_ClChatFontSize, &g_Config.m_ClChatFontSize, &Button, Localize("Chat font size"), 10, 100, &CUI::ms_LinearScrollbarScale, CUI::SCROLLBAR_OPTION_MULTILINE);
+		if(PrevFontSize != g_Config.m_ClChatFontSize)
+		{
+			Chat.EnsureCoherentWidth();
+			Chat.RebuildChat();
+		}
+
+		Section.HSplitTop(2 * LineSize, &Button, &Section);
+		int PrevWidth = g_Config.m_ClChatWidth;
+		UI()->DoScrollbarOption(&g_Config.m_ClChatWidth, &g_Config.m_ClChatWidth, &Button, Localize("Chat width"), 120, 400, &CUI::ms_LinearScrollbarScale, CUI::SCROLLBAR_OPTION_MULTILINE);
+		if(PrevWidth != g_Config.m_ClChatWidth)
+		{
+			Chat.EnsureCoherentFontSize();
+			Chat.RebuildChat();
+		}
+
 		// ***** Messages ***** //
-		LeftView.HSplitTop(MarginToNextSection, 0x0, &LeftView);
-		LeftView.HSplitTop(HeadlineAndVMargin, &Label, &LeftView);
+		RightView.HSplitTop(HeadlineAndVMargin, &Label, &RightView);
 		UI()->DoLabel(&Label, Localize("Messages"), HeadlineFontSize, TEXTALIGN_ML);
 
 		// Message Colors and extra settings
-		LeftView.HSplitTop(SectionTotalMargin + 6 * ColorPickerLineSize, &Section, &LeftView);
+		RightView.HSplitTop(SectionTotalMargin + 6 * ColorPickerLineSize, &Section, &RightView);
 		Section.Margin(SectionMargin, &Section);
 
 		int i = 0;
@@ -2594,11 +2615,11 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		DoLine_ColorPicker(&s_aResetIDs[i++], ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, aBuf, &g_Config.m_ClMessageClientColor, ColorRGBA(0.5f, 0.78f, 1.0f));
 
 		// ***** Chat Preview ***** //
-		RightView.HSplitTop(HeadlineAndVMargin, &Label, &RightView);
+		PreviewView.HSplitTop(HeadlineAndVMargin, &Label, &PreviewView);
 		UI()->DoLabel(&Label, Localize("Preview"), HeadlineFontSize, TEXTALIGN_ML);
 
 		// Use the rest of the view for preview
-		Section = RightView;
+		Section = PreviewView;
 		Section.Margin(SectionMargin, &Section);
 
 		Section.Draw(ColorRGBA(1, 1, 1, 0.1f), IGraphics::CORNER_ALL, 8.0f);
@@ -2613,29 +2634,200 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		ColorRGBA ClientColor = color_cast<ColorRGBA, ColorHSLA>(ColorHSLA(g_Config.m_ClMessageClientColor));
 		ColorRGBA DefaultNameColor(0.8f, 0.8f, 0.8f, 1.0f);
 
-		constexpr float RealFontSize = CChat::FONT_SIZE * 2;
-		const float RealMsgPaddingX = (!g_Config.m_ClChatOld ? CChat::MESSAGE_PADDING_X : 0) * 2;
-		const float RealMsgPaddingY = (!g_Config.m_ClChatOld ? CChat::MESSAGE_PADDING_Y : 0) * 2;
-		const float RealMsgPaddingTee = (!g_Config.m_ClChatOld ? CChat::MESSAGE_TEE_SIZE + CChat::MESSAGE_TEE_PADDING_RIGHT : 0) * 2;
+		const float RealFontSize = Chat.FontSize() * 2;
+		const float RealMsgPaddingX = (!g_Config.m_ClChatOld ? Chat.MessagePaddingX() : 0) * 2;
+		const float RealMsgPaddingY = (!g_Config.m_ClChatOld ? Chat.MessagePaddingY() : 0) * 2;
+		const float RealMsgPaddingTee = (!g_Config.m_ClChatOld ? Chat.MessageTeeSize() + CChat::MESSAGE_TEE_PADDING_RIGHT : 0) * 2;
 		const float RealOffsetY = RealFontSize + RealMsgPaddingY;
 
 		const float X = 5.0f + RealMsgPaddingX / 2.0f + Section.x;
 		float Y = Section.y;
+		float LineWidth = g_Config.m_ClChatWidth * 2 - (RealMsgPaddingX * 1.5f) - RealMsgPaddingTee;
 
 		CTextCursor Cursor;
 		TextRender()->SetCursor(&Cursor, X, Y, RealFontSize, TEXTFLAG_RENDER);
+		Cursor.m_LineWidth = LineWidth;
 
 		str_copy(aBuf, Client()->PlayerName());
 
 		const CAnimState *pIdleState = CAnimState::GetIdle();
-		constexpr int PreviewTeeCount = 4;
-		constexpr float RealTeeSize = CChat::MESSAGE_TEE_SIZE * 2;
-		constexpr float RealTeeSizeHalved = CChat::MESSAGE_TEE_SIZE;
+		const float RealTeeSize = Chat.MessageTeeSize() * 2;
+		const float RealTeeSizeHalved = Chat.MessageTeeSize();
 		constexpr float TWSkinUnreliableOffset = -0.25f;
-		constexpr float OffsetTeeY = RealTeeSizeHalved;
+		const float OffsetTeeY = RealTeeSizeHalved;
 		const float FullHeightMinusTee = RealOffsetY - RealTeeSize;
 
-		CTeeRenderInfo aRenderInfo[PreviewTeeCount];
+		struct SPreviewLine
+		{
+			int m_ClientID;
+			bool m_Team;
+			char m_aName[64];
+			char m_aText[256];
+			bool m_Friend;
+			bool m_Player;
+			bool m_Client;
+			bool m_Highlighted;
+			int m_TimesRepeated;
+
+			CTeeRenderInfo m_RenderInfo;
+		};
+
+		static std::vector<SPreviewLine> s_vLines;
+
+		const auto *pDefaultSkin = GameClient()->m_Skins.Find("default");
+		enum ELineFlag
+		{
+			FLAG_TEAM = 1 << 0,
+			FLAG_FRIEND = 1 << 1,
+			FLAG_HIGHLIGHT = 1 << 2,
+			FLAG_CLIENT = 1 << 3
+		};
+		enum
+		{
+			PREVIEW_SYS,
+			PREVIEW_HIGHLIGHT,
+			PREVIEW_TEAM,
+			PREVIEW_FRIEND,
+			PREVIEW_SPAMMER,
+			PREVIEW_CLIENT
+		};
+		auto &&AddPreviewLine = [](int Index, int ClientID, const char *pName, const char *pText, int Flag, int Repeats) {
+			s_vLines.emplace_back();
+			SPreviewLine *pLine = &s_vLines[s_vLines.size() - 1];
+			pLine->m_ClientID = ClientID;
+			pLine->m_Team = Flag & FLAG_TEAM;
+			pLine->m_Friend = Flag & FLAG_FRIEND;
+			pLine->m_Player = ClientID >= 0;
+			pLine->m_Highlighted = Flag & FLAG_HIGHLIGHT;
+			pLine->m_Client = Flag & FLAG_CLIENT;
+			pLine->m_TimesRepeated = Repeats;
+			str_copy(pLine->m_aName, pName);
+			str_copy(pLine->m_aText, pText);
+		};
+		auto &&SetLineSkin = [RealTeeSize, &pDefaultSkin](int Index, const CSkin *pSkin) {
+			if(Index >= (int)s_vLines.size())
+				return;
+			s_vLines[Index].m_RenderInfo.m_Size = RealTeeSize;
+			s_vLines[Index].m_RenderInfo.m_CustomColoredSkin = false;
+			if(pSkin != nullptr)
+				s_vLines[Index].m_RenderInfo.m_OriginalRenderSkin = pSkin->m_OriginalSkin;
+			else if(pDefaultSkin != nullptr)
+				s_vLines[Index].m_RenderInfo.m_OriginalRenderSkin = pDefaultSkin->m_OriginalSkin;
+		};
+
+		auto &&RenderPreview = [&](int LineIndex, int x, int y, bool Render = true) {
+			if(LineIndex >= (int)s_vLines.size())
+				return vec2(0, 0);
+			CTextCursor LocalCursor;
+			TextRender()->SetCursor(&LocalCursor, x, y, RealFontSize, Render ? TEXTFLAG_RENDER : 0);
+			LocalCursor.m_LineWidth = LineWidth;
+			const auto &Line = s_vLines[LineIndex];
+
+			char aName[64 + 12] = "";
+
+			if(g_Config.m_ClShowIDs && Line.m_ClientID >= 0 && Line.m_aName[0] != '\0')
+			{
+				if(Line.m_ClientID < 10)
+					str_format(aName, sizeof(aName), " %d: ", Line.m_ClientID);
+				else
+					str_format(aName, sizeof(aName), "%d: ", Line.m_ClientID);
+			}
+
+			str_append(aName, Line.m_aName);
+
+			char aCount[12];
+			if(Line.m_ClientID < 0)
+				str_format(aCount, sizeof(aCount), "[%d] ", Line.m_TimesRepeated + 1);
+			else
+				str_format(aCount, sizeof(aCount), " [%d]", Line.m_TimesRepeated + 1);
+
+			if(Line.m_Player)
+			{
+				LocalCursor.m_X += RealMsgPaddingTee;
+
+				if(Line.m_Friend && g_Config.m_ClMessageFriend)
+				{
+					if(Render)
+						TextRender()->TextColor(FriendColor);
+					TextRender()->TextEx(&LocalCursor, "♥ ", -1);
+				}
+			}
+
+			ColorRGBA NameColor;
+			if(Line.m_Team)
+				NameColor = CalculateNameColor(color_cast<ColorHSLA>(TeamColor));
+			else if(Line.m_Player)
+				NameColor = DefaultNameColor;
+			else if(Line.m_Client)
+				NameColor = ClientColor;
+			else
+				NameColor = SystemColor;
+
+			if(Render)
+				TextRender()->TextColor(NameColor);
+
+			TextRender()->TextEx(&LocalCursor, aName, -1);
+
+			if(Line.m_TimesRepeated > 0)
+			{
+				if(Render)
+					TextRender()->TextColor(1.0f, 1.0f, 1.0f, 0.3f);
+				TextRender()->TextEx(&LocalCursor, aCount, -1);
+			}
+
+			if(Line.m_ClientID >= 0 && Line.m_aName[0] != '\0')
+			{
+				if(Render)
+					TextRender()->TextColor(NameColor);
+				TextRender()->TextEx(&LocalCursor, ": ", -1);
+			}
+
+			CTextCursor AppendCursor = LocalCursor;
+			AppendCursor.m_LongestLineWidth = 0.0f;
+			if(!g_Config.m_ClChatOld)
+			{
+				AppendCursor.m_StartX = LocalCursor.m_X;
+				AppendCursor.m_LineWidth -= LocalCursor.m_LongestLineWidth;
+			}
+
+			if(Render)
+			{
+				if(Line.m_Highlighted)
+					TextRender()->TextColor(HighlightedColor);
+				else if(Line.m_Team)
+					TextRender()->TextColor(TeamColor);
+				else if(Line.m_Player)
+					TextRender()->TextColor(NormalColor);
+			}
+
+			TextRender()->TextEx(&AppendCursor, Line.m_aText, -1);
+			if(Render)
+				TextRender()->TextColor(TextRender()->DefaultTextColor());
+
+			return vec2{LocalCursor.m_LongestLineWidth + AppendCursor.m_LongestLineWidth, AppendCursor.Height() + RealMsgPaddingY};
+		};
+
+		// Init lines
+		if(s_vLines.empty())
+		{
+			char aLineBuilder[128];
+
+			str_format(aLineBuilder, sizeof(aLineBuilder), "'%s' entered and joined the game", aBuf);
+			AddPreviewLine(PREVIEW_SYS, -1, "*** ", aLineBuilder, 0, 0);
+
+			str_format(aLineBuilder, sizeof(aLineBuilder), "Hey, how are you %s?", aBuf);
+			AddPreviewLine(PREVIEW_HIGHLIGHT, 7, "Random Tee", aLineBuilder, FLAG_HIGHLIGHT, 0);
+
+			AddPreviewLine(PREVIEW_TEAM, 11, "Your Teammate", "Let's speedrun this!", FLAG_TEAM, 0);
+			AddPreviewLine(PREVIEW_FRIEND, 8, "Friend", "Hello there", FLAG_FRIEND, 0);
+			AddPreviewLine(PREVIEW_SPAMMER, 9, "Spammer", "Hey fools, I'm spamming here!", 0, 5);
+			AddPreviewLine(PREVIEW_CLIENT, -1, "— ", "Echo command executed", FLAG_CLIENT, 0);
+		}
+
+		SetLineSkin(1, GameClient()->m_Skins.FindOrNullptr("pinky"));
+		SetLineSkin(2, pDefaultSkin);
+		SetLineSkin(3, GameClient()->m_Skins.FindOrNullptr("cammostripes"));
+		SetLineSkin(4, GameClient()->m_Skins.FindOrNullptr("beast"));
 
 		// Backgrounds first
 		if(!g_Config.m_ClChatOld)
@@ -2644,142 +2836,71 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 			Graphics()->QuadsBegin();
 			Graphics()->SetColor(0, 0, 0, 0.12f);
 
-			char aLineBuilder[128];
-			float Width;
 			float TempY = Y;
-			constexpr float RealBackgroundRounding = CChat::MESSAGE_ROUNDING * 2.0f;
+			const float RealBackgroundRounding = Chat.MessageRounding() * 2.0f;
+
+			auto &&RenderMessageBackground = [&](int LineIndex) {
+				auto Size = RenderPreview(LineIndex, 0, 0, false);
+				Graphics()->DrawRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Size.x + RealMsgPaddingX * 1.5f, Size.y, RealBackgroundRounding, IGraphics::CORNER_ALL);
+				return Size.y;
+			};
 
 			if(g_Config.m_ClShowChatSystem)
 			{
-				str_format(aLineBuilder, sizeof(aLineBuilder), "*** '%s' entered and joined the game", aBuf);
-				Width = TextRender()->TextWidth(RealFontSize, aLineBuilder, -1, -1);
-				Graphics()->DrawRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Width + RealMsgPaddingX, RealFontSize + RealMsgPaddingY, RealBackgroundRounding, IGraphics::CORNER_ALL);
-				TempY += RealOffsetY;
+				TempY += RenderMessageBackground(PREVIEW_SYS);
 			}
 
 			if(!g_Config.m_ClShowChatFriends)
 			{
-				str_format(aLineBuilder, sizeof(aLineBuilder), "%sRandom Tee: Hey, how are you %s?", g_Config.m_ClShowIDs ? " 7: " : "", aBuf);
-				Width = TextRender()->TextWidth(RealFontSize, aLineBuilder, -1, -1);
-				Graphics()->DrawRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Width + RealMsgPaddingX + RealMsgPaddingTee, RealFontSize + RealMsgPaddingY, RealBackgroundRounding, IGraphics::CORNER_ALL);
-				TempY += RealOffsetY;
-
-				str_format(aLineBuilder, sizeof(aLineBuilder), "%sYour Teammate: Let's speedrun this!", g_Config.m_ClShowIDs ? "11: " : "");
-				Width = TextRender()->TextWidth(RealFontSize, aLineBuilder, -1, -1);
-				Graphics()->DrawRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Width + RealMsgPaddingX + RealMsgPaddingTee, RealFontSize + RealMsgPaddingY, RealBackgroundRounding, IGraphics::CORNER_ALL);
-				TempY += RealOffsetY;
+				TempY += RenderMessageBackground(PREVIEW_HIGHLIGHT);
+				TempY += RenderMessageBackground(PREVIEW_TEAM);
 			}
 
-			str_format(aLineBuilder, sizeof(aLineBuilder), "%s%sFriend: Hello there", g_Config.m_ClMessageFriend ? "♥ " : "", g_Config.m_ClShowIDs ? " 8: " : "");
-			Width = TextRender()->TextWidth(RealFontSize, aLineBuilder, -1, -1);
-			Graphics()->DrawRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Width + RealMsgPaddingX + RealMsgPaddingTee, RealFontSize + RealMsgPaddingY, RealBackgroundRounding, IGraphics::CORNER_ALL);
-			TempY += RealOffsetY;
+			TempY += RenderMessageBackground(PREVIEW_FRIEND);
 
 			if(!g_Config.m_ClShowChatFriends)
 			{
-				str_format(aLineBuilder, sizeof(aLineBuilder), "%sSpammer [6]: Hey fools, I'm spamming here!", g_Config.m_ClShowIDs ? " 9: " : "");
-				Width = TextRender()->TextWidth(RealFontSize, aLineBuilder, -1, -1);
-				Graphics()->DrawRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Width + RealMsgPaddingX + RealMsgPaddingTee, RealFontSize + RealMsgPaddingY, RealBackgroundRounding, IGraphics::CORNER_ALL);
-				TempY += RealOffsetY;
+				TempY += RenderMessageBackground(PREVIEW_SPAMMER);
 			}
 
-			Width = TextRender()->TextWidth(RealFontSize, "— Echo command executed", -1, -1);
-			Graphics()->DrawRectExt(X - RealMsgPaddingX / 2.0f, TempY - RealMsgPaddingY / 2.0f, Width + RealMsgPaddingX, RealFontSize + RealMsgPaddingY, RealBackgroundRounding, IGraphics::CORNER_ALL);
+			TempY += RenderMessageBackground(PREVIEW_CLIENT);
 
 			Graphics()->QuadsEnd();
-
-			// Load skins
-
-			const auto *pDefaultSkin = GameClient()->m_Skins.Find("default");
-
-			for(auto &Info : aRenderInfo)
-			{
-				Info.m_Size = RealTeeSize;
-				Info.m_CustomColoredSkin = false;
-			}
-
-			const CSkin *pSkin = nullptr;
-			int pos = 0;
-
-			aRenderInfo[pos++].m_OriginalRenderSkin = pDefaultSkin->m_OriginalSkin;
-			aRenderInfo[pos++].m_OriginalRenderSkin = (pSkin = GameClient()->m_Skins.FindOrNullptr("pinky")) != nullptr ? pSkin->m_OriginalSkin : aRenderInfo[0].m_OriginalRenderSkin;
-			aRenderInfo[pos++].m_OriginalRenderSkin = (pSkin = GameClient()->m_Skins.FindOrNullptr("cammostripes")) != nullptr ? pSkin->m_OriginalSkin : aRenderInfo[0].m_OriginalRenderSkin;
-			aRenderInfo[pos++].m_OriginalRenderSkin = (pSkin = GameClient()->m_Skins.FindOrNullptr("beast")) != nullptr ? pSkin->m_OriginalSkin : aRenderInfo[0].m_OriginalRenderSkin;
 		}
 
 		// System
 		if(g_Config.m_ClShowChatSystem)
 		{
-			TextRender()->TextColor(SystemColor);
-			TextRender()->TextEx(&Cursor, "*** '", -1);
-			TextRender()->TextEx(&Cursor, aBuf, -1);
-			TextRender()->TextEx(&Cursor, "' entered and joined the game", -1);
-			TextRender()->SetCursorPosition(&Cursor, X, Y += RealOffsetY);
+			Y += RenderPreview(PREVIEW_SYS, X, Y).y;
 		}
 
 		if(!g_Config.m_ClShowChatFriends)
 		{
 			// Highlighted
-			TextRender()->MoveCursor(&Cursor, RealMsgPaddingTee, 0);
-			TextRender()->TextColor(DefaultNameColor);
-			if(g_Config.m_ClShowIDs)
-				TextRender()->TextEx(&Cursor, " 7: ", -1);
-			TextRender()->TextEx(&Cursor, "Random Tee: ", -1);
-			TextRender()->TextColor(HighlightedColor);
-			TextRender()->TextEx(&Cursor, "Hey, how are you ", -1);
-			TextRender()->TextEx(&Cursor, aBuf, -1);
-			TextRender()->TextEx(&Cursor, "?", -1);
 			if(!g_Config.m_ClChatOld)
-				RenderTools()->RenderTee(pIdleState, &aRenderInfo[1], EMOTE_NORMAL, vec2(1, 0.1f), vec2(X + RealTeeSizeHalved, Y + OffsetTeeY + FullHeightMinusTee / 2.0f + TWSkinUnreliableOffset));
-			TextRender()->SetCursorPosition(&Cursor, X, Y += RealOffsetY);
+				RenderTools()->RenderTee(pIdleState, &s_vLines[PREVIEW_HIGHLIGHT].m_RenderInfo, EMOTE_NORMAL, vec2(1, 0.1f), vec2(X + RealTeeSizeHalved, Y + OffsetTeeY + FullHeightMinusTee / 2.0f + TWSkinUnreliableOffset));
+			Y += RenderPreview(PREVIEW_HIGHLIGHT, X, Y).y;
 
 			// Team
-			TextRender()->MoveCursor(&Cursor, RealMsgPaddingTee, 0);
-			TextRender()->TextColor(TeamColor);
-			if(g_Config.m_ClShowIDs)
-				TextRender()->TextEx(&Cursor, "11: ", -1);
-			TextRender()->TextEx(&Cursor, "Your Teammate: Let's speedrun this!", -1);
 			if(!g_Config.m_ClChatOld)
-				RenderTools()->RenderTee(pIdleState, &aRenderInfo[0], EMOTE_NORMAL, vec2(1, 0.1f), vec2(X + RealTeeSizeHalved, Y + OffsetTeeY + FullHeightMinusTee / 2.0f + TWSkinUnreliableOffset));
-			TextRender()->SetCursorPosition(&Cursor, X, Y += RealOffsetY);
+				RenderTools()->RenderTee(pIdleState, &s_vLines[PREVIEW_TEAM].m_RenderInfo, EMOTE_NORMAL, vec2(1, 0.1f), vec2(X + RealTeeSizeHalved, Y + OffsetTeeY + FullHeightMinusTee / 2.0f + TWSkinUnreliableOffset));
+			Y += RenderPreview(PREVIEW_TEAM, X, Y).y;
 		}
 
 		// Friend
-		TextRender()->MoveCursor(&Cursor, RealMsgPaddingTee, 0);
-		if(g_Config.m_ClMessageFriend)
-		{
-			TextRender()->TextColor(FriendColor);
-			TextRender()->TextEx(&Cursor, "♥ ", -1);
-		}
-		TextRender()->TextColor(DefaultNameColor);
-		if(g_Config.m_ClShowIDs)
-			TextRender()->TextEx(&Cursor, " 8: ", -1);
-		TextRender()->TextEx(&Cursor, "Friend: ", -1);
-		TextRender()->TextColor(NormalColor);
-		TextRender()->TextEx(&Cursor, "Hello there", -1);
 		if(!g_Config.m_ClChatOld)
-			RenderTools()->RenderTee(pIdleState, &aRenderInfo[2], EMOTE_NORMAL, vec2(1, 0.1f), vec2(X + RealTeeSizeHalved, Y + OffsetTeeY + FullHeightMinusTee / 2.0f + TWSkinUnreliableOffset));
-		TextRender()->SetCursorPosition(&Cursor, X, Y += RealOffsetY);
+			RenderTools()->RenderTee(pIdleState, &s_vLines[PREVIEW_FRIEND].m_RenderInfo, EMOTE_NORMAL, vec2(1, 0.1f), vec2(X + RealTeeSizeHalved, Y + OffsetTeeY + FullHeightMinusTee / 2.0f + TWSkinUnreliableOffset));
+		Y += RenderPreview(PREVIEW_FRIEND, X, Y).y;
 
 		// Normal
 		if(!g_Config.m_ClShowChatFriends)
 		{
-			TextRender()->MoveCursor(&Cursor, RealMsgPaddingTee, 0);
-			TextRender()->TextColor(DefaultNameColor);
-			if(g_Config.m_ClShowIDs)
-				TextRender()->TextEx(&Cursor, " 9: ", -1);
-			TextRender()->TextEx(&Cursor, "Spammer ", -1);
-			TextRender()->TextColor(1.0f, 1.0f, 1.0f, 0.3f);
-			TextRender()->TextEx(&Cursor, "[6]", -1);
-			TextRender()->TextColor(NormalColor);
-			TextRender()->TextEx(&Cursor, ": Hey fools, I'm spamming here!", -1);
 			if(!g_Config.m_ClChatOld)
-				RenderTools()->RenderTee(pIdleState, &aRenderInfo[3], EMOTE_NORMAL, vec2(1, 0.1f), vec2(X + RealTeeSizeHalved, Y + OffsetTeeY + FullHeightMinusTee / 2.0f + TWSkinUnreliableOffset));
-			TextRender()->SetCursorPosition(&Cursor, X, Y += RealOffsetY);
+				RenderTools()->RenderTee(pIdleState, &s_vLines[PREVIEW_SPAMMER].m_RenderInfo, EMOTE_NORMAL, vec2(1, 0.1f), vec2(X + RealTeeSizeHalved, Y + OffsetTeeY + FullHeightMinusTee / 2.0f + TWSkinUnreliableOffset));
+			Y += RenderPreview(PREVIEW_SPAMMER, X, Y).y;
 		}
 		// Client
-		TextRender()->TextColor(ClientColor);
-		TextRender()->TextEx(&Cursor, "— Echo command executed", -1);
+		RenderPreview(PREVIEW_CLIENT, X, Y);
 		TextRender()->SetCursorPosition(&Cursor, X, Y);
 
 		TextRender()->TextColor(TextRender()->DefaultTextColor());
