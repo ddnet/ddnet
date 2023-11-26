@@ -204,6 +204,28 @@ public:
 	EGameState m_GameState;
 	int m_GameStateTimer;
 
+	const char *GameStateToStr(EGameState GameState)
+	{
+		switch(GameState)
+		{
+		case IGS_WARMUP_GAME:
+			return "IGS_WARMUP_GAME";
+		case IGS_WARMUP_USER:
+			return "IGS_WARMUP_USER";
+		case IGS_START_COUNTDOWN:
+			return "IGS_START_COUNTDOWN";
+		case IGS_GAME_PAUSED:
+			return "IGS_GAME_PAUSED";
+		case IGS_GAME_RUNNING:
+			return "IGS_GAME_RUNNING";
+		case IGS_END_MATCH:
+			return "IGS_END_MATCH";
+		case IGS_END_ROUND:
+			return "IGS_END_ROUND";
+		}
+		return "UNKNOWN";
+	}
+
 	virtual void DoWincheckRound() {}
 	bool HasEnoughPlayers() const { return (IsTeamplay() && m_aTeamSize[TEAM_RED] > 0 && m_aTeamSize[TEAM_BLUE] > 0) || (!IsTeamplay() && m_aTeamSize[TEAM_RED] > 1); }
 	void SetGameState(EGameState GameState, int Timer = 0);
