@@ -120,13 +120,17 @@ int CMenus::DoButton_Toggle(const void *pID, int Checked, const CUIRect *pRect, 
 	return Active ? UI()->DoButtonLogic(pID, Checked, pRect) : 0;
 }
 
-int CMenus::DoButton_Menu(CButtonContainer *pButtonContainer, const char *pText, int Checked, const CUIRect *pRect, const char *pImageName, int Corners, float r, float FontFactor, vec4 ColorHot, vec4 Color)
+int CMenus::DoButton_Menu(CButtonContainer *pButtonContainer, const char *pText, int Checked, const CUIRect *pRect, const char *pImageName, int Corners, float r, float FontFactor, ColorRGBA ColorHot, ColorRGBA Color)
 {
+	const float FadeVal = pButtonContainer->GetFade(Checked);
+	float AlphaMultiplier = UI()->CheckActiveItem(pButtonContainer) ? UI()->ButtonColorMulActive() : UI()->ButtonColorMulHot();
+
 	CUIRect Text = *pRect;
 
 	if(Checked)
 		Color = ColorRGBA(0.6f, 0.6f, 0.6f, 0.5f);
-	Color.a *= UI()->ButtonColorMul(pButtonContainer);
+
+	Color.a = mix(Color.a, Color.a * AlphaMultiplier, FadeVal);
 
 	pRect->Draw(Color, Corners, r);
 
@@ -139,13 +143,22 @@ int CMenus::DoButton_Menu(CButtonContainer *pButtonContainer, const char *pText,
 		const CMenuImage *pImage = FindMenuImage(pImageName);
 		if(pImage)
 		{
-			Graphics()->TextureSet(UI()->HotItem() == pButtonContainer ? pImage->m_OrgTexture : pImage->m_GreyTexture);
+			Graphics()->TextureSet(pImage->m_GreyTexture);
 			Graphics()->WrapClamp();
 			Graphics()->QuadsBegin();
 			Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 			IGraphics::CQuadItem QuadItem(Image.x, Image.y, Image.w, Image.h);
 			Graphics()->QuadsDrawTL(&QuadItem, 1);
 			Graphics()->QuadsEnd();
+			if(FadeVal > 0.0f)
+			{
+				Graphics()->TextureSet(pImage->m_OrgTexture);
+				Graphics()->WrapClamp();
+				Graphics()->QuadsBegin();
+				Graphics()->SetColor(1.0f, 1.0f, 1.0f, FadeVal);
+				Graphics()->QuadsDrawTL(&QuadItem, 1);
+				Graphics()->QuadsEnd();
+			}
 			Graphics()->WrapNormal();
 		}
 	}
@@ -157,9 +170,15 @@ int CMenus::DoButton_Menu(CButtonContainer *pButtonContainer, const char *pText,
 	return UI()->DoButtonLogic(pButtonContainer, Checked, pRect);
 }
 
-void CMenus::DoButton_KeySelect(const void *pID, const char *pText, const CUIRect *pRect)
+void CMenus::DoButton_KeySelect(CButtonContainer *pButtonContainer, const char *pText, const CUIRect *pRect)
 {
-	pRect->Draw(ColorRGBA(1, 1, 1, 0.5f * UI()->ButtonColorMul(pID)), IGraphics::CORNER_ALL, 5.0f);
+	const float FadeVal = pButtonContainer->GetFade();
+	ColorRGBA Color = ColorRGBA(1, 1, 1, 0.5f);
+	float AlphaMultiplier = UI()->CheckActiveItem(pButtonContainer) ? UI()->ButtonColorMulActive() : UI()->ButtonColorMulHot();
+
+	Color.a = mix(Color.a, Color.a * AlphaMultiplier, FadeVal);
+
+	pRect->Draw(Color, IGraphics::CORNER_ALL, 5.0f);
 	CUIRect Temp;
 	pRect->HMargin(1.0f, &Temp);
 	UI()->DoLabel(&Temp, pText, Temp.h * CUI::ms_FontmodHeight, TEXTALIGN_MC);
@@ -205,22 +224,13 @@ int CMenus::DoButton_MenuTab(CButtonContainer *pButtonContainer, const char *pTe
 	}
 	else
 	{
-		if(MouseInside)
-		{
-			ColorRGBA HoverColorMenuTab = ms_ColorTabbarHover;
-			if(pHoverColor)
-				HoverColorMenuTab = *pHoverColor;
+		const float FadeVal = pButtonContainer->GetFade(Checked);
+		vec4 HoverColor = pHoverColor ? *pHoverColor : ms_ColorTabbarHover;
+		vec4 InactiveColor = pDefaultColor ? *pDefaultColor : ms_ColorTabbarInactive;
 
-			Rect.Draw(HoverColorMenuTab, Corners, EdgeRounding);
-		}
-		else
-		{
-			ColorRGBA ColorMenuTab = ms_ColorTabbarInactive;
-			if(pDefaultColor)
-				ColorMenuTab = *pDefaultColor;
+		ColorRGBA Color = mix(InactiveColor, HoverColor, FadeVal);
 
-			Rect.Draw(ColorMenuTab, Corners, EdgeRounding);
-		}
+		Rect.Draw(Color, Corners, EdgeRounding);
 	}
 
 	if(pAnimator != NULL)
@@ -449,7 +459,7 @@ int CMenus::DoButton_CheckBox_Number(const void *pID, const char *pText, int Che
 	return DoButton_CheckBox_Common(pID, pText, aBuf, pRect);
 }
 
-int CMenus::DoKeyReader(const void *pID, const CUIRect *pRect, int Key, int ModifierCombination, int *pNewModifierCombination)
+int CMenus::DoKeyReader(CButtonContainer *pButtonContainer, const CUIRect *pRect, int Key, int ModifierCombination, int *pNewModifierCombination)
 {
 	// process
 	static const void *pGrabbedID = 0;
@@ -459,10 +469,13 @@ int CMenus::DoKeyReader(const void *pID, const CUIRect *pRect, int Key, int Modi
 	int NewKey = Key;
 	*pNewModifierCombination = ModifierCombination;
 
-	if(!UI()->MouseButton(0) && !UI()->MouseButton(1) && pGrabbedID == pID)
+	if(!pButtonContainer)
+		return NewKey;
+
+	if(!UI()->MouseButton(0) && !UI()->MouseButton(1) && pGrabbedID == pButtonContainer)
 		MouseReleased = true;
 
-	if(UI()->CheckActiveItem(pID))
+	if(UI()->CheckActiveItem(pButtonContainer))
 	{
 		if(m_Binder.m_GotKey)
 		{
@@ -475,7 +488,7 @@ int CMenus::DoKeyReader(const void *pID, const CUIRect *pRect, int Key, int Modi
 			m_Binder.m_GotKey = false;
 			UI()->SetActiveItem(nullptr);
 			MouseReleased = false;
-			pGrabbedID = pID;
+			pGrabbedID = pButtonContainer;
 		}
 
 		if(s_ButtonUsed == 1 && !UI()->MouseButton(1))
@@ -485,7 +498,7 @@ int CMenus::DoKeyReader(const void *pID, const CUIRect *pRect, int Key, int Modi
 			UI()->SetActiveItem(nullptr);
 		}
 	}
-	else if(UI()->HotItem() == pID)
+	else if(UI()->HotItem() == pButtonContainer)
 	{
 		if(MouseReleased)
 		{
@@ -493,31 +506,31 @@ int CMenus::DoKeyReader(const void *pID, const CUIRect *pRect, int Key, int Modi
 			{
 				m_Binder.m_TakeKey = true;
 				m_Binder.m_GotKey = false;
-				UI()->SetActiveItem(pID);
+				UI()->SetActiveItem(pButtonContainer);
 				s_ButtonUsed = 0;
 			}
 
 			if(UI()->MouseButton(1))
 			{
-				UI()->SetActiveItem(pID);
+				UI()->SetActiveItem(pButtonContainer);
 				s_ButtonUsed = 1;
 			}
 		}
 	}
 
 	if(Inside)
-		UI()->SetHotItem(pID);
+		UI()->SetHotItem(pButtonContainer);
 
 	// draw
-	if(UI()->CheckActiveItem(pID) && s_ButtonUsed == 0)
-		DoButton_KeySelect(pID, "???", pRect);
+	if(UI()->CheckActiveItem(pButtonContainer) && s_ButtonUsed == 0)
+		DoButton_KeySelect(pButtonContainer, "???", pRect);
 	else if(NewKey == 0)
-		DoButton_KeySelect(pID, "", pRect);
+		DoButton_KeySelect(pButtonContainer, "", pRect);
 	else
 	{
 		char aBuf[64];
 		str_format(aBuf, sizeof(aBuf), "%s%s", CBinds::GetKeyBindModifiersName(*pNewModifierCombination), Input()->KeyName(NewKey));
-		DoButton_KeySelect(pID, aBuf, pRect);
+		DoButton_KeySelect(pButtonContainer, aBuf, pRect);
 	}
 
 	return NewKey;

@@ -226,8 +226,12 @@ public:
 	CUI *UI() const { return s_pUI; }
 };
 
-class CButtonContainer
+class CButtonContainer : public CUIElementBase
 {
+	float m_FadeStartTime;
+
+public:
+	float GetFade(bool Checked = false, float Seconds = 0.2f);
 };
 
 struct SValueSelectorProperties

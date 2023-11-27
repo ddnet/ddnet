@@ -942,6 +942,7 @@ typedef struct
 	const char *m_pCommand;
 	int m_KeyId;
 	int m_ModifierCombination;
+	CButtonContainer m_ButtonContainer;
 } CKeyInfo;
 
 static CKeyInfo gs_aKeys[] =
@@ -1001,7 +1002,7 @@ void CMenus::DoSettingsControlsButtons(int Start, int Stop, CUIRect View)
 {
 	for(int i = Start; i < Stop; i++)
 	{
-		const CKeyInfo &Key = gs_aKeys[i];
+		CKeyInfo &Key = gs_aKeys[i];
 
 		CUIRect Button, Label;
 		View.HSplitTop(20.0f, &Button, &View);
@@ -1012,7 +1013,7 @@ void CMenus::DoSettingsControlsButtons(int Start, int Stop, CUIRect View)
 
 		UI()->DoLabel(&Label, aBuf, 13.0f, TEXTALIGN_ML);
 		int OldId = Key.m_KeyId, OldModifierCombination = Key.m_ModifierCombination, NewModifierCombination;
-		int NewId = DoKeyReader(&Key.m_KeyId, &Button, OldId, OldModifierCombination, &NewModifierCombination);
+		int NewId = DoKeyReader(&Key.m_ButtonContainer, &Button, OldId, OldModifierCombination, &NewModifierCombination);
 		if(NewId != OldId || NewModifierCombination != OldModifierCombination)
 		{
 			if(OldId != 0 || NewId == 0)

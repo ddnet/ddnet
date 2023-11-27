@@ -1928,3 +1928,14 @@ void CUI::ShowPopupColorPicker(float X, float Y, SColorPickerPopupContext *pCont
 		pContext->m_ColorMode = SColorPickerPopupContext::MODE_HSVA;
 	DoPopupMenu(pContext, X, Y, 160.0f + 10.0f, 209.0f + 10.0f, pContext, PopupColorPicker);
 }
+
+float CButtonContainer::GetFade(bool Checked, float Seconds)
+{
+	if(UI()->HotItem() == this || UI()->CheckActiveItem(this) || Checked)
+	{
+		m_FadeStartTime = Client()->GlobalTime();
+		return 1.0f;
+	}
+
+	return maximum(0.0f, m_FadeStartTime - Client()->GlobalTime() + Seconds) / Seconds;
+}
