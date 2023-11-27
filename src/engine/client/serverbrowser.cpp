@@ -57,17 +57,10 @@ CServerBrowser::CServerBrowser() :
 	m_ppServerlist = nullptr;
 	m_pSortedServerlist = nullptr;
 
-	m_pFirstReqServer = nullptr; // request list
-	m_pLastReqServer = nullptr;
-	m_NumRequests = 0;
-
 	m_NeedResort = false;
 	m_Sorthash = 0;
 
-	m_NumSortedServers = 0;
 	m_NumSortedServersCapacity = 0;
-	m_NumSortedPlayers = 0;
-	m_NumServers = 0;
 	m_NumServerCapacity = 0;
 
 	m_ServerlistType = 0;
@@ -76,6 +69,8 @@ CServerBrowser::CServerBrowser() :
 
 	m_pDDNetInfo = nullptr;
 	m_DDNetInfoUpdateTime = 0;
+
+	CleanUp();
 }
 
 CServerBrowser::~CServerBrowser()
