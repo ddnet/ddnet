@@ -5,7 +5,7 @@
 
 class IAntibot : public IInterface
 {
-	MACRO_INTERFACE("antibot", 0)
+	MACRO_INTERFACE("antibot")
 public:
 	virtual void RoundStart(class IGameServer *pGameServer) = 0;
 	virtual void RoundEnd() = 0;
@@ -29,7 +29,7 @@ public:
 
 class IEngineAntibot : public IAntibot
 {
-	MACRO_INTERFACE("engineantibot", 0)
+	MACRO_INTERFACE("engineantibot")
 public:
 	virtual void Init() = 0;
 

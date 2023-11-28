@@ -16,7 +16,7 @@ struct CChecksumData;
 
 class IConsole : public IInterface
 {
-	MACRO_INTERFACE("console", 0)
+	MACRO_INTERFACE("console")
 public:
 	//	TODO: rework/cleanup
 	enum

@@ -64,7 +64,7 @@ struct CMapInfo
 
 class IDemoPlayer : public IInterface
 {
-	MACRO_INTERFACE("demoplayer", 0)
+	MACRO_INTERFACE("demoplayer")
 public:
 	class CInfo
 	{
@@ -105,7 +105,7 @@ public:
 
 class IDemoRecorder : public IInterface
 {
-	MACRO_INTERFACE("demorecorder", 0)
+	MACRO_INTERFACE("demorecorder")
 public:
 	virtual ~IDemoRecorder() {}
 	virtual bool IsRecording() const = 0;
@@ -116,7 +116,7 @@ public:
 
 class IDemoEditor : public IInterface
 {
-	MACRO_INTERFACE("demoeditor", 0)
+	MACRO_INTERFACE("demoeditor")
 public:
 	virtual void Slice(const char *pDemo, const char *pDst, int StartTick, int EndTick, DEMOFUNC_FILTER pfnFilter, void *pUser) = 0;
 };

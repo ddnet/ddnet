@@ -11,7 +11,7 @@
 
 class CMenuMap : public CBackgroundEngineMap
 {
-	MACRO_INTERFACE("menu_enginemap", 0)
+	MACRO_INTERFACE("menu_enginemap")
 };
 
 // themes

@@ -7,7 +7,7 @@
 
 class IConfigManager : public IInterface
 {
-	MACRO_INTERFACE("config", 0)
+	MACRO_INTERFACE("config")
 public:
 	typedef void (*SAVECALLBACKFUNC)(IConfigManager *pConfig, void *pUserData);
 

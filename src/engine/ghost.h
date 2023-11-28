@@ -17,7 +17,7 @@ public:
 
 class IGhostRecorder : public IInterface
 {
-	MACRO_INTERFACE("ghostrecorder", 0)
+	MACRO_INTERFACE("ghostrecorder")
 public:
 	virtual ~IGhostRecorder() {}
 
@@ -30,7 +30,7 @@ public:
 
 class IGhostLoader : public IInterface
 {
-	MACRO_INTERFACE("ghostloader", 0)
+	MACRO_INTERFACE("ghostloader")
 public:
 	virtual ~IGhostLoader() {}
 
