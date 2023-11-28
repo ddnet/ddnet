@@ -18,6 +18,7 @@
 #include <game/client/prediction/gameworld.h>
 
 // components
+#include "binds_manager.h"
 #include "components/background.h"
 #include "components/binds.h"
 #include "components/broadcast.h"
@@ -118,6 +119,7 @@ public:
 	CBroadcast m_Broadcast;
 	CGameConsole m_GameConsole;
 	CBinds m_Binds;
+	CBindsManager m_BindsManager;
 	CParticles m_Particles;
 	CMenus m_Menus;
 	CSkins m_Skins;
@@ -156,6 +158,7 @@ public:
 private:
 	std::vector<class CComponent *> m_vpAll;
 	std::vector<class CComponent *> m_vpInput;
+	std::vector<class CComponent *> m_vpGlobal;
 	CNetObjHandler m_NetObjHandler;
 
 	class IEngine *m_pEngine;
@@ -478,6 +481,7 @@ public:
 	void OnNewSnapshot() override;
 	void OnPredict() override;
 	void OnActivateEditor() override;
+	void OnHideEditor() override;
 	void OnDummySwap() override;
 	int OnSnapInput(int *pData, bool Dummy, bool Force) override;
 	void OnShutdown() override;
@@ -549,6 +553,9 @@ public:
 	bool CanDisplayWarning() override;
 	bool IsDisplayingWarning() override;
 	CNetObjHandler *GetNetObjHandler() override;
+
+	void OnUpdateGlobalComponents() override;
+	void OnRenderGlobalComponents() override;
 
 	void LoadGameSkin(const char *pPath, bool AsDir = false);
 	void LoadEmoticonsSkin(const char *pPath, bool AsDir = false);

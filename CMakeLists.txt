@@ -2160,12 +2160,16 @@ if(CLIENT)
   set_src(GAME_CLIENT GLOB_RECURSE src/game/client
     animstate.cpp
     animstate.h
+    binds_manager.cpp
+    binds_manager.h
     component.cpp
     component.h
     components/background.cpp
     components/background.h
     components/binds.cpp
     components/binds.h
+    components/bindsv2.cpp
+    components/bindsv2.h
     components/broadcast.cpp
     components/broadcast.h
     components/camera.cpp
@@ -2212,6 +2216,7 @@ if(CLIENT)
     components/menus_demo.cpp
     components/menus_ingame.cpp
     components/menus_settings.cpp
+    components/menus_settings.h
     components/menus_settings_assets.cpp
     components/menus_start.cpp
     components/motd.cpp

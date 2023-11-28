@@ -25,6 +25,7 @@
 
 #include <engine/client/updater.h>
 
+#include <game/client/binds_manager.h>
 #include <game/client/components/binds.h>
 #include <game/client/components/console.h>
 #include <game/client/components/menu_background.h>
@@ -447,6 +448,51 @@ int CMenus::DoButton_CheckBox_Number(const void *pID, const char *pText, int Che
 	char aBuf[16];
 	str_from_int(Checked, aBuf);
 	return DoButton_CheckBox_Common(pID, pText, aBuf, pRect);
+}
+
+int CMenus::DoButton_FoldableSection(SFoldableSection *pSection, const char *pText, float FontSize, const CUIRect *pRect, float CornerRounding)
+{
+	CUIRect Box, Label;
+	pRect->VSplitLeft(pRect->h, &Box, &Label);
+	Label.VSplitLeft(5.0f, nullptr, &Label);
+
+	int Checked = (int)pSection->m_Opened;
+	pRect->Draw(ColorRGBA(1, 1, 1, (Checked ? 0.4f : 0.25f) * UI()->ButtonColorMul(pSection)), !Checked ? IGraphics::CORNER_ALL : IGraphics::CORNER_TL | IGraphics::CORNER_TR, CornerRounding);
+
+	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT);
+	TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
+	UI()->DoLabel(&Box, Checked ? FONT_ICON_CIRCLE_CHEVRON_DOWN : FONT_ICON_CIRCLE_CHEVRON_RIGHT, FontSize, TEXTALIGN_MC);
+	TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
+
+	TextRender()->SetRenderFlags(0);
+	UI()->DoLabel(&Label, pText, FontSize, TEXTALIGN_ML);
+
+	if(UI()->DoButtonLogic(pSection, 0, pRect))
+		pSection->m_Opened = !pSection->m_Opened;
+
+	return pSection->m_Opened;
+}
+
+int CMenus::DoFoldableSection(SFoldableSection *pSection, const char *pText, float FontSize, CUIRect *pRect, CUIRect *pRectAfter, float CornerRounding, std::function<int()> fnRender)
+{
+	const float Margin = 10.0f;
+	const float HeaderHeight = FontSize + 5.0f + Margin;
+
+	CUIRect Button;
+
+	pRect->HSplitTop(HeaderHeight, &Button, pRect);
+	pRect->HSplitTop(pSection->m_Height, pRect, pRectAfter);
+
+	if(DoButton_FoldableSection(pSection, pText, FontSize, &Button, CornerRounding))
+	{
+		if(pSection->m_Height > 0)
+			pRect->Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_BL | IGraphics::CORNER_BR, CornerRounding);
+		pSection->m_Height = fnRender();
+	}
+	else
+		pSection->m_Height = 0;
+
+	return HeaderHeight + pSection->m_Height;
 }
 
 int CMenus::DoKeyReader(const void *pID, const CUIRect *pRect, int Key, int ModifierCombination, int *pNewModifierCombination)
@@ -1892,6 +1938,14 @@ void CMenus::SetActive(bool Active)
 	{
 		UI()->SetHotItem(nullptr);
 		UI()->SetActiveItem(nullptr);
+
+		if(Client()->State() == IClient::STATE_ONLINE)
+		{
+			if(!Active)
+				m_pClient->m_BindsManager.SetActiveBindGroup(CBindsManager::GROUP_INGAME);
+			else
+				m_pClient->m_BindsManager.SetActiveBindGroup(CBindsManager::GROUP_MENUS);
+		}
 	}
 	m_MenuActive = Active;
 	if(!m_MenuActive)
@@ -1944,8 +1998,7 @@ bool CMenus::OnInput(const IInput::CEvent &Event)
 	// Escape key is always handled to activate/deactivate menu
 	if((Event.m_Flags & IInput::FLAG_PRESS && Event.m_Key == KEY_ESCAPE) || IsActive())
 	{
-		UI()->OnInput(Event);
-		return true;
+		return UI()->OnInput(Event) || (Event.m_Key >= KEY_MOUSE_1 && Event.m_Key <= KEY_MOUSE_WHEEL_RIGHT);
 	}
 	return false;
 }

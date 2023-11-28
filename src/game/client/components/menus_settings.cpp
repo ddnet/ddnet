@@ -1,5 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
+#include "menus_settings.h"
+
 #include <base/math.h>
 #include <base/system.h>
 
@@ -936,68 +938,106 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
 }
 
-typedef struct
-{
-	const char *m_pName;
-	const char *m_pCommand;
-	int m_KeyId;
-	int m_ModifierCombination;
-} CKeyInfo;
-
-static CKeyInfo gs_aKeys[] =
-	{
-		{Localizable("Move left"), "+left", 0, 0},
-		{Localizable("Move right"), "+right", 0, 0},
-		{Localizable("Jump"), "+jump", 0, 0},
-		{Localizable("Fire"), "+fire", 0, 0},
-		{Localizable("Hook"), "+hook", 0, 0},
-		{Localizable("Hook collisions"), "+showhookcoll", 0, 0},
-		{Localizable("Pause"), "say /pause", 0, 0},
-		{Localizable("Kill"), "kill", 0, 0},
-		{Localizable("Zoom in"), "zoom+", 0, 0},
-		{Localizable("Zoom out"), "zoom-", 0, 0},
-		{Localizable("Default zoom"), "zoom", 0, 0},
-		{Localizable("Show others"), "say /showothers", 0, 0},
-		{Localizable("Show all"), "say /showall", 0, 0},
-		{Localizable("Toggle dyncam"), "toggle cl_dyncam 0 1", 0, 0},
-		{Localizable("Toggle ghost"), "toggle cl_race_show_ghost 0 1", 0, 0},
-
-		{Localizable("Hammer"), "+weapon1", 0, 0},
-		{Localizable("Pistol"), "+weapon2", 0, 0},
-		{Localizable("Shotgun"), "+weapon3", 0, 0},
-		{Localizable("Grenade"), "+weapon4", 0, 0},
-		{Localizable("Laser"), "+weapon5", 0, 0},
-		{Localizable("Next weapon"), "+nextweapon", 0, 0},
-		{Localizable("Prev. weapon"), "+prevweapon", 0, 0},
-
-		{Localizable("Vote yes"), "vote yes", 0, 0},
-		{Localizable("Vote no"), "vote no", 0, 0},
-
-		{Localizable("Chat"), "+show_chat; chat all", 0, 0},
-		{Localizable("Team chat"), "+show_chat; chat team", 0, 0},
-		{Localizable("Converse"), "+show_chat; chat all /c ", 0, 0},
-		{Localizable("Chat command"), "+show_chat; chat all /", 0, 0},
-		{Localizable("Show chat"), "+show_chat", 0, 0},
-
-		{Localizable("Toggle dummy"), "toggle cl_dummy 0 1", 0, 0},
-		{Localizable("Dummy copy"), "toggle cl_dummy_copy_moves 0 1", 0, 0},
-		{Localizable("Hammerfly dummy"), "toggle cl_dummy_hammer 0 1", 0, 0},
-
-		{Localizable("Emoticon"), "+emote", 0, 0},
-		{Localizable("Spectator mode"), "+spectate", 0, 0},
-		{Localizable("Spectate next"), "spectate_next", 0, 0},
-		{Localizable("Spectate previous"), "spectate_previous", 0, 0},
-		{Localizable("Console"), "toggle_local_console", 0, 0},
-		{Localizable("Remote console"), "toggle_remote_console", 0, 0},
-		{Localizable("Screenshot"), "screenshot", 0, 0},
-		{Localizable("Scoreboard"), "+scoreboard", 0, 0},
-		{Localizable("Statboard"), "+statboard", 0, 0},
-		{Localizable("Lock team"), "say /lock", 0, 0},
-		{Localizable("Show entities"), "toggle cl_overlay_entities 0 100", 0, 0},
-		{Localizable("Show HUD"), "toggle cl_showhud 0 1", 0, 0},
+static CKeyInfo gs_aKeys[] = {
+	{Localizable("Console"), "toggle_local_console", 0, 0},
+	{Localizable("Remote console"), "toggle_remote_console", 0, 0},
+	{Localizable("Screenshot"), "screenshot", 0, 0},
 };
 
-void CMenus::DoSettingsControlsButtons(int Start, int Stop, CUIRect View)
+static std::map<std::string, std::shared_ptr<IBindListNode>> gs_KeyBindsRoot{
+	{
+		CBindsManager::GROUP_INGAME,
+		BindGroup(
+			Localize("In Game"),
+			{
+				BindGroup(
+					Localize("Movement"),
+					{
+						KeyBind(Localizable("Move left"), "+left"),
+						KeyBind(Localizable("Move right"), "+right"),
+						KeyBind(Localizable("Jump"), "+jump"),
+						KeyBind(Localizable("Fire"), "+fire"),
+						KeyBind(Localizable("Hook"), "+hook"),
+						KeyBind(Localizable("Hook collisions"), "+showhookcoll"),
+						KeyBind(Localizable("Pause"), "say /pause"),
+						KeyBind(Localizable("Kill"), "kill"),
+						KeyBind(Localizable("Zoom in"), "zoom+"),
+						KeyBind(Localizable("Zoom out"), "zoom-"),
+						KeyBind(Localizable("Default zoom"), "zoom"),
+						KeyBind(Localizable("Show others"), "say /showothers"),
+						KeyBind(Localizable("Show all"), "say /showall"),
+						KeyBind(Localizable("Toggle dyncam"), "toggle cl_dyncam 0 1"),
+						KeyBind(Localizable("Toggle ghost"), "toggle cl_race_show_ghost 0 1"),
+					}),
+				BindGroup(
+					Localize("Weapons"),
+					{
+						KeyBind(Localizable("Hammer"), "+weapon1"),
+						KeyBind(Localizable("Pistol"), "+weapon2"),
+						KeyBind(Localizable("Shotgun"), "+weapon3"),
+						KeyBind(Localizable("Grenade"), "+weapon4"),
+						KeyBind(Localizable("Laser"), "+weapon5"),
+						KeyBind(Localizable("Next weapon"), "+nextweapon"),
+						KeyBind(Localizable("Prev. weapon"), "+prevweapon"),
+					}),
+				BindGroup(
+					Localize("Voting"),
+					{
+						KeyBind(Localizable("Vote yes"), "vote yes"),
+						KeyBind(Localizable("Vote no"), "vote no"),
+					}),
+				BindGroup(
+					Localize("Chat"),
+					{
+						KeyBind(Localizable("Chat"), "+show_chat; chat all"),
+						KeyBind(Localizable("Team chat"), "+show_chat; chat team"),
+						KeyBind(Localizable("Converse"), "+show_chat; chat all /c "),
+						KeyBind(Localizable("Chat command"), "+show_chat; chat all /"),
+						KeyBind(Localizable("Show chat"), "+show_chat"),
+					}),
+				BindGroup(
+					Localize("Dummy"),
+					{
+						KeyBind(Localizable("Toggle dummy"), "toggle cl_dummy 0 1"),
+						KeyBind(Localizable("Dummy copy"), "toggle cl_dummy_copy_moves 0 1"),
+						KeyBind(Localizable("Hammerfly dummy"), "toggle cl_dummy_hammer 0 1"),
+					}),
+				BindGroup(
+					Localize("Miscellaneous"),
+					{
+						KeyBind(Localizable("Emoticon"), "+emote"),
+						KeyBind(Localizable("Spectator mode"), "+spectate"),
+						KeyBind(Localizable("Spectate next"), "spectate_next"),
+						KeyBind(Localizable("Spectate previous"), "spectate_previous"),
+						KeyBind(Localizable("Scoreboard"), "+scoreboard"),
+						KeyBind(Localizable("Statboard"), "+statboard"),
+						KeyBind(Localizable("Lock team"), "say /lock"),
+						KeyBind(Localizable("Show entities"), "toggle cl_overlay_entities 0 100"),
+						KeyBind(Localizable("Show HUD"), "toggle cl_showhud 0 1"),
+					}),
+			}),
+	},
+	{
+		CBindsManager::GROUP_EDITOR,
+		BindGroup(
+			Localize("Editor"),
+			{}),
+	},
+	{
+		CBindsManager::GROUP_MENUS,
+		BindGroup(
+			Localize("Menus"),
+			{}),
+	},
+	{
+		CBindsManager::GROUP_DEMO_PLAYER,
+		BindGroup(
+			Localize("Demo Player"),
+			{}),
+	},
+};
+
+int CMenus::DoSettingsControlsButtons(int Start, int Stop, CUIRect View)
 {
 	for(int i = Start; i < Stop; i++)
 	{
@@ -1005,7 +1045,7 @@ void CMenus::DoSettingsControlsButtons(int Start, int Stop, CUIRect View)
 
 		CUIRect Button, Label;
 		View.HSplitTop(20.0f, &Button, &View);
-		Button.VSplitLeft(135.0f, &Label, &Button);
+		Button.VSplitMid(&Label, &Button);
 
 		char aBuf[64];
 		str_format(aBuf, sizeof(aBuf), "%s:", Localize(Key.m_pName));
@@ -1023,6 +1063,81 @@ void CMenus::DoSettingsControlsButtons(int Start, int Stop, CUIRect View)
 
 		View.HSplitTop(2.0f, 0, &View);
 	}
+
+	return 22.0f * (Stop - Start);
+}
+
+int CMenus::DoSettingsControlsButtons(const char *pGroupName, std::shared_ptr<IBindListNode> &pNode, CUIRect View)
+{
+	auto pBinds = m_pClient->m_BindsManager.Binds(pGroupName);
+	if(!pBinds)
+		return 0;
+
+	auto &&RenderKeyBind = [&]() -> int {
+		const auto &Key = std::static_pointer_cast<SBindKey>(pNode);
+		CUIRect Button, Label;
+		View.HSplitTop(20.0f, &Button, &View);
+		Button.VSplitMid(&Label, &Button);
+
+		char aBuf[64];
+		str_format(aBuf, sizeof(aBuf), "%s:", Localize(Key->m_pName));
+
+		UI()->DoLabel(&Label, aBuf, 13.0f, TEXTALIGN_ML);
+		int OldId = Key->m_KeyId, OldModifierCombination = Key->m_ModifierCombination, NewModifierCombination;
+		int NewId = DoKeyReader(&Key->m_KeyId, &Button, OldId, OldModifierCombination, &NewModifierCombination);
+		if(NewId != OldId || NewModifierCombination != OldModifierCombination)
+		{
+			if(OldId != 0 || NewId == 0)
+				pBinds->Bind(OldId, "", false, OldModifierCombination);
+			if(NewId != 0)
+				pBinds->Bind(NewId, Key->m_pCommand, false, NewModifierCombination);
+		}
+
+		View.HSplitTop(2.0f, 0, &View);
+		return 22.0f;
+	};
+
+	if(!pNode->IsGroup())
+	{
+		return RenderKeyBind();
+	}
+
+	const float FontSize = 14.0f;
+	const float Margin = 10.0f;
+	int TotalHeight = 0;
+
+	auto &pGroup = std::static_pointer_cast<SBindGroup>(pNode);
+
+	for(const auto &Node : pGroup->m_vChildren)
+	{
+		if(Node->IsGroup())
+		{
+			CUIRect GroupRect = View;
+			auto &pChildGroup = std::static_pointer_cast<SBindGroup>(Node);
+			int Height = DoFoldableSection(&pChildGroup->m_Section, pChildGroup->m_pName, FontSize, &GroupRect, &View, 10.0f, [&]() -> int {
+				int LocalTotalHeight = 0;
+				GroupRect.HMargin(Margin, &GroupRect);
+				CUIRect ChildRect = GroupRect;
+				ChildRect.VMargin(Margin, &ChildRect);
+				for(auto &Child : pChildGroup->m_vChildren)
+				{
+					int LocalHeight = DoSettingsControlsButtons(pGroupName, Child, ChildRect);
+					ChildRect.y += LocalHeight;
+					LocalTotalHeight += LocalHeight;
+				}
+
+				return LocalTotalHeight + 2 * Margin;
+			});
+			View.HSplitTop(Margin, nullptr, &View);
+			TotalHeight += Height + Margin;
+		}
+		else
+		{
+			TotalHeight += RenderKeyBind();
+		}
+	}
+
+	return TotalHeight;
 }
 
 float CMenus::RenderSettingsControlsJoystick(CUIRect View)
@@ -1263,6 +1378,19 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 		}
 	}
 
+	for(auto [pGroupName, pBinds] : m_pClient->m_BindsManager.Groups())
+	{
+		auto &pNode = gs_KeyBindsRoot.at(pGroupName);
+		ResetKeys(pNode);
+		for(int Mod = 0; Mod < CBinds::MODIFIER_COMBINATION_COUNT; Mod++)
+		{
+			for(int KeyId = 0; KeyId < KEY_LAST; KeyId++)
+			{
+				FindAndAssignKeys(pBinds, Mod, KeyId, pNode);
+			}
+		}
+	}
+
 	// scrollable controls
 	static float s_JoystickSettingsHeight = 0.0f; // we calculate this later and don't render until enough space is available
 	static CScrollRegion s_ScrollRegion;
@@ -1275,18 +1403,20 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 	const float FontSize = 14.0f;
 	const float Margin = 10.0f;
 	const float HeaderHeight = FontSize + 5.0f + Margin;
+	const int SectionCorners = IGraphics::CORNER_BR | IGraphics::CORNER_BL;
 
+	CUIRect Top, Bottom;
 	CUIRect MouseSettings, MovementSettings, WeaponSettings, VotingSettings, ChatSettings, DummySettings, MiscSettings, JoystickSettings, ResetButton, Button;
-	MainView.VSplitMid(&MouseSettings, &VotingSettings);
+	MainView.HSplitTop(maximum(80.0f, s_JoystickSettingsHeight + HeaderHeight + Margin), &Top, &Bottom);
+	Top.VSplitMid(&MouseSettings, &JoystickSettings, 10.0f);
 
 	// mouse settings
 	{
-		MouseSettings.VMargin(5.0f, &MouseSettings);
-		MouseSettings.HSplitTop(80.0f, &MouseSettings, &JoystickSettings);
+		MouseSettings.HSplitTop(80.0f, &MouseSettings, nullptr);
 		if(s_ScrollRegion.AddRect(MouseSettings))
 		{
 			MouseSettings.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
-			MouseSettings.VMargin(10.0f, &MouseSettings);
+			MouseSettings.VMargin(Margin, &MouseSettings);
 
 			MouseSettings.HSplitTop(HeaderHeight, &Button, &MouseSettings);
 			UI()->DoLabel(&Button, Localize("Mouse"), FontSize, TEXTALIGN_ML);
@@ -1303,8 +1433,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 
 	// joystick settings
 	{
-		JoystickSettings.HSplitTop(Margin, nullptr, &JoystickSettings);
-		JoystickSettings.HSplitTop(s_JoystickSettingsHeight + HeaderHeight + Margin, &JoystickSettings, &MovementSettings);
+		JoystickSettings.HSplitTop(s_JoystickSettingsHeight + HeaderHeight + Margin, &JoystickSettings, nullptr);
 		if(s_ScrollRegion.AddRect(JoystickSettings))
 		{
 			JoystickSettings.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
@@ -1317,41 +1446,39 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 		}
 	}
 
-	// movement settings
+	CUIRect GeneralGroup;
+	static SFoldableSection s_InGameGroup;
+	Bottom.HSplitTop(Margin, nullptr, &GeneralGroup);
+	DoFoldableSection(&s_InGameGroup, Localize("General"), FontSize, &GeneralGroup, &Bottom, 10.0f, [&]() -> int {
+		GeneralGroup.VMargin(Margin, &GeneralGroup);
+		GeneralGroup.HMargin(Margin, &GeneralGroup);
+
+		return DoSettingsControlsButtons(0, 2, GeneralGroup) + 2 * Margin;
+	});
+
+	s_ScrollRegion.AddRect(GeneralGroup);
+
+	CUIRect SectionRect;
+	for(auto [pGroupName, _] : m_pClient->m_BindsManager.Groups())
 	{
-		MovementSettings.HSplitTop(Margin, nullptr, &MovementSettings);
-		MovementSettings.HSplitTop(365.0f, &MovementSettings, &WeaponSettings);
-		if(s_ScrollRegion.AddRect(MovementSettings))
-		{
-			MovementSettings.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
-			MovementSettings.VMargin(Margin, &MovementSettings);
+		const char *pGroupNameStr = pGroupName.c_str();
+		auto &pGroup = std::static_pointer_cast<SBindGroup>(gs_KeyBindsRoot.at(pGroupName));
+		Bottom.HSplitTop(Margin, nullptr, &SectionRect);
+		DoFoldableSection(&pGroup->m_Section, pGroup->m_pName, FontSize, &SectionRect, &Bottom, 10.0f, [&]() -> int {
+			int TotalHeight = 0;
+			SectionRect.HSplitTop(Margin, nullptr, &SectionRect);
+			SectionRect.VMargin(Margin, &SectionRect);
 
-			MovementSettings.HSplitTop(HeaderHeight, &Button, &MovementSettings);
-			UI()->DoLabel(&Button, Localize("Movement"), FontSize, TEXTALIGN_ML);
+			TotalHeight += DoSettingsControlsButtons(pGroupNameStr, gs_KeyBindsRoot.at(pGroupNameStr), SectionRect);
 
-			DoSettingsControlsButtons(0, 15, MovementSettings);
-		}
-	}
-
-	// weapon settings
-	{
-		WeaponSettings.HSplitTop(Margin, nullptr, &WeaponSettings);
-		WeaponSettings.HSplitTop(190.0f, &WeaponSettings, &ResetButton);
-		if(s_ScrollRegion.AddRect(WeaponSettings))
-		{
-			WeaponSettings.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
-			WeaponSettings.VMargin(Margin, &WeaponSettings);
-
-			WeaponSettings.HSplitTop(HeaderHeight, &Button, &WeaponSettings);
-			UI()->DoLabel(&Button, Localize("Weapon"), FontSize, TEXTALIGN_ML);
-
-			DoSettingsControlsButtons(15, 22, WeaponSettings);
-		}
+			return TotalHeight + Margin;
+		});
+		s_ScrollRegion.AddRect(SectionRect);
 	}
 
 	// defaults
 	{
-		ResetButton.HSplitTop(Margin, nullptr, &ResetButton);
+		Bottom.HSplitTop(Margin, nullptr, &ResetButton);
 		ResetButton.HSplitTop(40.0f, &ResetButton, nullptr);
 		if(s_ScrollRegion.AddRect(ResetButton))
 		{
@@ -1366,76 +1493,54 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 		}
 	}
 
-	// voting settings
-	{
-		VotingSettings.VMargin(5.0f, &VotingSettings);
-		VotingSettings.HSplitTop(80.0f, &VotingSettings, &ChatSettings);
-		if(s_ScrollRegion.AddRect(VotingSettings))
-		{
-			VotingSettings.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
-			VotingSettings.VMargin(Margin, &VotingSettings);
-
-			VotingSettings.HSplitTop(HeaderHeight, &Button, &VotingSettings);
-			UI()->DoLabel(&Button, Localize("Voting"), FontSize, TEXTALIGN_ML);
-
-			DoSettingsControlsButtons(22, 24, VotingSettings);
-		}
-	}
-
-	// chat settings
-	{
-		ChatSettings.HSplitTop(Margin, nullptr, &ChatSettings);
-		ChatSettings.HSplitTop(145.0f, &ChatSettings, &DummySettings);
-		if(s_ScrollRegion.AddRect(ChatSettings))
-		{
-			ChatSettings.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
-			ChatSettings.VMargin(Margin, &ChatSettings);
-
-			ChatSettings.HSplitTop(HeaderHeight, &Button, &ChatSettings);
-			UI()->DoLabel(&Button, Localize("Chat"), FontSize, TEXTALIGN_ML);
-
-			DoSettingsControlsButtons(24, 29, ChatSettings);
-		}
-	}
-
-	// dummy settings
-	{
-		DummySettings.HSplitTop(Margin, nullptr, &DummySettings);
-		DummySettings.HSplitTop(100.0f, &DummySettings, &MiscSettings);
-		if(s_ScrollRegion.AddRect(DummySettings))
-		{
-			DummySettings.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
-			DummySettings.VMargin(Margin, &DummySettings);
-
-			DummySettings.HSplitTop(HeaderHeight, &Button, &DummySettings);
-			UI()->DoLabel(&Button, Localize("Dummy"), FontSize, TEXTALIGN_ML);
-
-			DoSettingsControlsButtons(29, 32, DummySettings);
-		}
-	}
-
-	// misc settings
-	{
-		MiscSettings.HSplitTop(Margin, nullptr, &MiscSettings);
-		MiscSettings.HSplitTop(300.0f, &MiscSettings, 0);
-		if(s_ScrollRegion.AddRect(MiscSettings))
-		{
-			MiscSettings.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 10.0f);
-			MiscSettings.VMargin(Margin, &MiscSettings);
-
-			MiscSettings.HSplitTop(HeaderHeight, &Button, &MiscSettings);
-			UI()->DoLabel(&Button, Localize("Miscellaneous"), FontSize, TEXTALIGN_ML);
-
-			DoSettingsControlsButtons(32, 44, MiscSettings);
-		}
-	}
-
 	s_ScrollRegion.End();
+}
+
+void CMenus::ResetKeys(std::shared_ptr<IBindListNode> &pNode)
+{
+	if(!pNode->IsGroup())
+	{
+		auto &pKey = std::static_pointer_cast<SBindKey>(pNode);
+		pKey->m_KeyId = pKey->m_ModifierCombination = 0;
+		return;
+	}
+	auto &pGroup = std::static_pointer_cast<SBindGroup>(pNode);
+	for(auto &pChild : pGroup->m_vChildren)
+	{
+		ResetKeys(pChild);
+	}
+}
+
+void CMenus::FindAndAssignKeys(std::shared_ptr<CBindsV2> &pBinds, int Mod, int KeyId, std::shared_ptr<IBindListNode> &pNode)
+{
+	if(!pNode->IsGroup())
+	{
+		auto &pKey = std::static_pointer_cast<SBindKey>(pNode);
+		if(pKey->m_KeyId != 0)
+			return;
+
+		const char *pBind = pBinds->Get(KeyId, Mod);
+		if(!pBind[0])
+			return;
+
+		if(str_comp(pBind, pKey->m_pCommand) == 0)
+		{
+			pKey->m_KeyId = KeyId;
+			pKey->m_ModifierCombination = Mod;
+		}
+		return;
+	}
+	auto &pGroup = std::static_pointer_cast<SBindGroup>(pNode);
+	for(auto &pChild : pGroup->m_vChildren)
+	{
+		FindAndAssignKeys(pBinds, Mod, KeyId, pChild);
+	}
 }
 
 void CMenus::ResetSettingsControls()
 {
 	m_pClient->m_Binds.SetDefaults();
+	m_pClient->m_BindsManager.SetDefaults();
 
 	g_Config.m_InpMousesens = 200;
 	g_Config.m_UiMousesens = 200;
