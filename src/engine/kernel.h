@@ -24,7 +24,7 @@ public:
 	virtual ~IInterface() {}
 };
 
-#define MACRO_INTERFACE(Name, ver) \
+#define MACRO_INTERFACE(Name) \
 public: \
 	static const char *InterfaceName() { return Name; } \
 \

@@ -5,7 +5,7 @@
 
 class IDiscord : public IInterface
 {
-	MACRO_INTERFACE("discord", 0)
+	MACRO_INTERFACE("discord")
 public:
 	virtual void Update() = 0;
 

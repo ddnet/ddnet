@@ -8,7 +8,7 @@
 
 class ISound : public IInterface
 {
-	MACRO_INTERFACE("sound", 0)
+	MACRO_INTERFACE("sound")
 public:
 	enum
 	{
@@ -109,7 +109,7 @@ protected:
 
 class IEngineSound : public ISound
 {
-	MACRO_INTERFACE("enginesound", 0)
+	MACRO_INTERFACE("enginesound")
 public:
 	virtual int Init() = 0;
 	virtual int Update() = 0;

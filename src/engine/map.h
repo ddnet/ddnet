@@ -13,7 +13,7 @@ enum
 
 class IMap : public IInterface
 {
-	MACRO_INTERFACE("map", 0)
+	MACRO_INTERFACE("map")
 public:
 	virtual int GetDataSize(int Index) const = 0;
 	virtual void *GetData(int Index) = 0;
@@ -32,7 +32,7 @@ public:
 
 class IEngineMap : public IMap
 {
-	MACRO_INTERFACE("enginemap", 0)
+	MACRO_INTERFACE("enginemap")
 public:
 	virtual bool Load(const char *pMapName) = 0;
 	virtual void Unload() = 0;

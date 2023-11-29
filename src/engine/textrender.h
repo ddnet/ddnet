@@ -254,7 +254,7 @@ struct STextSizeProperties
 
 class ITextRender : public IInterface
 {
-	MACRO_INTERFACE("textrender", 0)
+	MACRO_INTERFACE("textrender")
 public:
 	virtual void SetCursor(CTextCursor *pCursor, float x, float y, float FontSize, int Flags) const = 0;
 	virtual void MoveCursor(CTextCursor *pCursor, float x, float y) const = 0;
@@ -315,7 +315,7 @@ public:
 
 class IEngineTextRender : public ITextRender
 {
-	MACRO_INTERFACE("enginetextrender", 0)
+	MACRO_INTERFACE("enginetextrender")
 public:
 	virtual void Init() = 0;
 	virtual void Shutdown() override = 0;

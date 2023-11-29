@@ -247,7 +247,7 @@ public:
 
 class IServerBrowser : public IInterface
 {
-	MACRO_INTERFACE("serverbrowser", 0)
+	MACRO_INTERFACE("serverbrowser")
 public:
 	/* Constants: Server Browser Sorting
 		SORT_NAME - Sort by name.

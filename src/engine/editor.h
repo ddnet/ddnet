@@ -6,7 +6,7 @@
 
 class IEditor : public IInterface
 {
-	MACRO_INTERFACE("editor", 0)
+	MACRO_INTERFACE("editor")
 public:
 	virtual ~IEditor() {}
 	virtual void Init() = 0;

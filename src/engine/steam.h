@@ -5,7 +5,7 @@
 
 class ISteam : public IInterface
 {
-	MACRO_INTERFACE("steam", 0)
+	MACRO_INTERFACE("steam")
 public:
 	// Returns NULL if the name cannot be determined.
 	virtual const char *GetPlayerName() = 0;
