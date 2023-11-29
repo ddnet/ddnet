@@ -11,5 +11,6 @@ public:
 
 	void OnCharacterSpawn(class CCharacter *pChr) override;
 	void Tick() override;
+	void OnPlayerConnect(CPlayer *pPlayer) override;
 };
 #endif // GAME_SERVER_GAMEMODES_ICTF_H
