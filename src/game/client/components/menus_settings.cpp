@@ -1033,7 +1033,9 @@ static std::map<std::string, std::shared_ptr<IBindListNode>> gs_KeyBindsRoot{
 		CBindsManager::GROUP_DEMO_PLAYER,
 		BindGroup(
 			Localize("Demo Player"),
-			{}),
+			{
+				KeyBind(Localizable("Play/pause demo"), "demo_play"),
+			}),
 	},
 };
 
@@ -1073,8 +1075,8 @@ int CMenus::DoSettingsControlsButtons(const char *pGroupName, std::shared_ptr<IB
 	if(!pBinds)
 		return 0;
 
-	auto &&RenderKeyBind = [&]() -> int {
-		const auto &Key = std::static_pointer_cast<SBindKey>(pNode);
+	auto &&RenderKeyBind = [&](const std::shared_ptr<IBindListNode> &pLocalNode) -> int {
+		const auto Key = std::static_pointer_cast<SBindKey>(pLocalNode);
 		CUIRect Button, Label;
 		View.HSplitTop(20.0f, &Button, &View);
 		Button.VSplitMid(&Label, &Button);
@@ -1099,21 +1101,22 @@ int CMenus::DoSettingsControlsButtons(const char *pGroupName, std::shared_ptr<IB
 
 	if(!pNode->IsGroup())
 	{
-		return RenderKeyBind();
+		return RenderKeyBind(pNode);
 	}
 
 	const float FontSize = 14.0f;
 	const float Margin = 10.0f;
 	int TotalHeight = 0;
 
-	auto &pGroup = std::static_pointer_cast<SBindGroup>(pNode);
+	auto pGroup = std::static_pointer_cast<SBindGroup>(pNode);
 
 	for(const auto &Node : pGroup->m_vChildren)
 	{
 		if(Node->IsGroup())
 		{
+			View.HSplitTop(Margin / 2, nullptr, &View);
 			CUIRect GroupRect = View;
-			auto &pChildGroup = std::static_pointer_cast<SBindGroup>(Node);
+			auto pChildGroup = std::static_pointer_cast<SBindGroup>(Node);
 			int Height = DoFoldableSection(&pChildGroup->m_Section, pChildGroup->m_pName, FontSize, &GroupRect, &View, 10.0f, [&]() -> int {
 				int LocalTotalHeight = 0;
 				GroupRect.HMargin(Margin, &GroupRect);
@@ -1128,12 +1131,12 @@ int CMenus::DoSettingsControlsButtons(const char *pGroupName, std::shared_ptr<IB
 
 				return LocalTotalHeight + 2 * Margin;
 			});
-			View.HSplitTop(Margin, nullptr, &View);
+			View.HSplitTop(Margin / 2, nullptr, &View);
 			TotalHeight += Height + Margin;
 		}
 		else
 		{
-			TotalHeight += RenderKeyBind();
+			TotalHeight += RenderKeyBind(Node);
 		}
 	}
 
@@ -1403,10 +1406,9 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 	const float FontSize = 14.0f;
 	const float Margin = 10.0f;
 	const float HeaderHeight = FontSize + 5.0f + Margin;
-	const int SectionCorners = IGraphics::CORNER_BR | IGraphics::CORNER_BL;
 
 	CUIRect Top, Bottom;
-	CUIRect MouseSettings, MovementSettings, WeaponSettings, VotingSettings, ChatSettings, DummySettings, MiscSettings, JoystickSettings, ResetButton, Button;
+	CUIRect MouseSettings, JoystickSettings, ResetButton, Button;
 	MainView.HSplitTop(maximum(80.0f, s_JoystickSettingsHeight + HeaderHeight + Margin), &Top, &Bottom);
 	Top.VSplitMid(&MouseSettings, &JoystickSettings, 10.0f);
 
@@ -1462,11 +1464,11 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 	for(auto [pGroupName, _] : m_pClient->m_BindsManager.Groups())
 	{
 		const char *pGroupNameStr = pGroupName.c_str();
-		auto &pGroup = std::static_pointer_cast<SBindGroup>(gs_KeyBindsRoot.at(pGroupName));
+		auto pGroup = std::static_pointer_cast<SBindGroup>(gs_KeyBindsRoot.at(pGroupName));
 		Bottom.HSplitTop(Margin, nullptr, &SectionRect);
 		DoFoldableSection(&pGroup->m_Section, pGroup->m_pName, FontSize, &SectionRect, &Bottom, 10.0f, [&]() -> int {
 			int TotalHeight = 0;
-			SectionRect.HSplitTop(Margin, nullptr, &SectionRect);
+			SectionRect.HMargin(Margin / 2, &SectionRect);
 			SectionRect.VMargin(Margin, &SectionRect);
 
 			TotalHeight += DoSettingsControlsButtons(pGroupNameStr, gs_KeyBindsRoot.at(pGroupNameStr), SectionRect);
@@ -1500,11 +1502,11 @@ void CMenus::ResetKeys(std::shared_ptr<IBindListNode> &pNode)
 {
 	if(!pNode->IsGroup())
 	{
-		auto &pKey = std::static_pointer_cast<SBindKey>(pNode);
+		auto pKey = std::static_pointer_cast<SBindKey>(pNode);
 		pKey->m_KeyId = pKey->m_ModifierCombination = 0;
 		return;
 	}
-	auto &pGroup = std::static_pointer_cast<SBindGroup>(pNode);
+	auto pGroup = std::static_pointer_cast<SBindGroup>(pNode);
 	for(auto &pChild : pGroup->m_vChildren)
 	{
 		ResetKeys(pChild);
@@ -1515,7 +1517,7 @@ void CMenus::FindAndAssignKeys(std::shared_ptr<CBindsV2> &pBinds, int Mod, int K
 {
 	if(!pNode->IsGroup())
 	{
-		auto &pKey = std::static_pointer_cast<SBindKey>(pNode);
+		auto pKey = std::static_pointer_cast<SBindKey>(pNode);
 		if(pKey->m_KeyId != 0)
 			return;
 
@@ -1530,7 +1532,7 @@ void CMenus::FindAndAssignKeys(std::shared_ptr<CBindsV2> &pBinds, int Mod, int K
 		}
 		return;
 	}
-	auto &pGroup = std::static_pointer_cast<SBindGroup>(pNode);
+	auto pGroup = std::static_pointer_cast<SBindGroup>(pNode);
 	for(auto &pChild : pGroup->m_vChildren)
 	{
 		FindAndAssignKeys(pBinds, Mod, KeyId, pChild);

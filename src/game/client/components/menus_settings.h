@@ -5,6 +5,7 @@
 
 #include <any>
 #include <memory>
+#include <string>
 #include <vector>
 
 struct IBindListNode
@@ -22,7 +23,7 @@ struct SBindGroup : IBindListNode
 	std::vector<std::shared_ptr<IBindListNode>> m_vChildren;
 	SFoldableSection m_Section;
 
-	SBindGroup(const char *pName, std::vector<std::shared_ptr<IBindListNode>> vChildren) :
+	SBindGroup(const char *pName, const std::vector<std::shared_ptr<IBindListNode>> &vChildren) :
 		IBindListNode(pName), m_vChildren(vChildren) {}
 
 	bool IsGroup() override { return true; }
@@ -31,16 +32,17 @@ struct SBindGroup : IBindListNode
 struct SBindKey : public IBindListNode
 {
 	const char *m_pCommand;
+	std::string m_test;
 	int m_KeyId;
 	int m_ModifierCombination;
 
 	SBindKey(const char *pName, const char *pCommand) :
-		IBindListNode(pName), m_pCommand(pCommand), m_KeyId(0), m_ModifierCombination(0) {}
+		IBindListNode(pName), m_pCommand(pCommand), m_test(pCommand), m_KeyId(0), m_ModifierCombination(0) {}
 
 	bool IsGroup() override { return false; }
 };
 
-std::shared_ptr<IBindListNode> BindGroup(const char *pName, std::vector<std::shared_ptr<IBindListNode>> &&vNodes)
+std::shared_ptr<IBindListNode> BindGroup(const char *pName, const std::vector<std::shared_ptr<IBindListNode>> &vNodes)
 {
 	return std::make_shared<SBindGroup>(pName, vNodes);
 }
