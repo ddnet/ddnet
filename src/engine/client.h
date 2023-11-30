@@ -31,7 +31,7 @@ struct CChecksumData;
 
 class IClient : public IInterface
 {
-	MACRO_INTERFACE("client", 0)
+	MACRO_INTERFACE("client")
 public:
 	/* Constants: Client States
 		STATE_OFFLINE - The client is offline.
@@ -301,7 +301,7 @@ public:
 
 class IGameClient : public IInterface
 {
-	MACRO_INTERFACE("gameclient", 0)
+	MACRO_INTERFACE("gameclient")
 protected:
 public:
 	virtual void OnConsoleInit() = 0;

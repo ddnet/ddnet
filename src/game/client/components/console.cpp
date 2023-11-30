@@ -254,11 +254,11 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 					{
 						char *pEntry = m_History.Allocate(m_Input.GetLength() + 1);
 						str_copy(pEntry, m_Input.GetString(), m_Input.GetLength() + 1);
-						// print out the user's commands before they get run
-						char aBuf[256];
-						str_format(aBuf, sizeof(aBuf), "> %s", m_Input.GetString());
-						m_pGameConsole->PrintLine(m_Type, aBuf);
 					}
+					// print out the user's commands before they get run
+					char aBuf[256];
+					str_format(aBuf, sizeof(aBuf), "> %s", m_Input.GetString());
+					m_pGameConsole->PrintLine(m_Type, aBuf);
 				}
 				ExecuteLine(m_Input.GetString());
 				m_Input.Clear();

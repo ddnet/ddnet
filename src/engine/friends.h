@@ -17,7 +17,7 @@ struct CFriendInfo
 
 class IFriends : public IInterface
 {
-	MACRO_INTERFACE("friends", 0)
+	MACRO_INTERFACE("friends")
 public:
 	enum
 	{

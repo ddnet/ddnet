@@ -16,7 +16,7 @@ struct CChecksumData;
 
 class IConsole : public IInterface
 {
-	MACRO_INTERFACE("console", 0)
+	MACRO_INTERFACE("console")
 public:
 	//	TODO: rework/cleanup
 	enum
@@ -33,8 +33,6 @@ public:
 		TEMPCMD_NAME_LENGTH = 32,
 		TEMPCMD_HELP_LENGTH = 192,
 		TEMPCMD_PARAMS_LENGTH = 96,
-
-		MAX_PRINT_CB = 4,
 
 		CLIENT_ID_GAME = -2,
 		CLIENT_ID_NO_GAME = -3,

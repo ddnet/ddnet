@@ -26,7 +26,7 @@ enum
 
 class IServer : public IInterface
 {
-	MACRO_INTERFACE("server", 0)
+	MACRO_INTERFACE("server")
 protected:
 	int m_CurrentGameTick;
 
@@ -274,7 +274,7 @@ public:
 
 class IGameServer : public IInterface
 {
-	MACRO_INTERFACE("gameserver", 0)
+	MACRO_INTERFACE("gameserver")
 protected:
 public:
 	// `pPersistentData` may be null if this is the first time `IGameServer`
