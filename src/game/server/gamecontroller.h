@@ -183,6 +183,15 @@ public:
 			SetGameState(IGS_GAME_RUNNING);
 		}
 	}
+	void SwapTeamscore()
+	{
+		if(!IsTeamplay())
+			return;
+
+		int Score = m_aTeamscore[TEAM_RED];
+		m_aTeamscore[TEAM_RED] = m_aTeamscore[TEAM_BLUE];
+		m_aTeamscore[TEAM_BLUE] = Score;
+	};
 
 	int m_aTeamSize[protocol7::NUM_TEAMS];
 

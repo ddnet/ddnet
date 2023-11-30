@@ -134,6 +134,7 @@ class CGameContext : public IGameServer
 	static void ConDumpAntibot(IConsole::IResult *pResult, void *pUserData);
 	static void ConAntibot(IConsole::IResult *pResult, void *pUserData);
 	static void ConShuffleTeams(IConsole::IResult *pResult, void *pUserData); // gctf
+	static void ConSwapTeams(IConsole::IResult *pResult, void *pUserData); // gctf
 	static void ConchainGameinfoUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData); // gctf
 	static void ConchainInstaSettingsUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData); // gctf
 	static void ConchainResetInstasettingTees(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData); // gctf
@@ -278,6 +279,8 @@ public:
 	bool OnBangCommand(int ClientID, const char *pCmd, int NumArgs, const char **ppArgs);
 	void BangCommandVote(int ClientID, const char *pCommand, const char *pDesc);
 	void ComCallShuffleVote(int ClientID);
+	void ComCallSwapTeamsVote(int ClientID);
+	void SwapTeams();
 	void UpdateVoteCheckboxes();
 	void RefreshVotes();
 	void AlertOnSpecialInstagibConfigs(int ClientID = -1);

@@ -84,6 +84,29 @@ void CGameContext::ConShuffleTeams(IConsole::IResult *pResult, void *pUserData)
 		pSelf->m_pController->DoTeamChange(pSelf->m_apPlayers[aPlayer[i]], i < (PlayerTeam + rnd) / 2 ? TEAM_RED : TEAM_BLUE, false);
 }
 
+// gctf
+void CGameContext::ConSwapTeams(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	pSelf->SwapTeams();
+}
+
+void CGameContext::SwapTeams()
+{
+	if(!m_pController->IsTeamplay())
+		return;
+
+	SendGameMsg(protocol7::GAMEMSG_TEAM_SWAP, -1);
+
+	for(int i = 0; i < MAX_CLIENTS; ++i)
+	{
+		if(m_apPlayers[i] && m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS)
+			m_pController->DoTeamChange(m_apPlayers[i], m_apPlayers[i]->GetTeam()^1, false);
+	}
+
+	m_pController->SwapTeamscore();
+}
+
 bool CGameContext::OnInstaChatMessage(const CNetMsg_Cl_Say *pMsg, int Length, int &Team, CPlayer *pPlayer)
 {
 	int ClientID = pPlayer->GetCID();
@@ -277,6 +300,11 @@ bool CGameContext::OnInstaChatMessage(const CNetMsg_Cl_Say *pMsg, int Length, in
 			ComCallShuffleVote(ClientID);
 			return true;
 		}
+		else if(!str_comp_nocase(pMsg->m_pMessage + 1, "swap")) // gctf
+		{
+			ComCallSwapTeamsVote(ClientID);
+			return true;
+		}
 	}
 	return false;
 }
@@ -304,6 +332,22 @@ void CGameContext::ComCallShuffleVote(int ClientID)
 		return;
 	}
 	BangCommandVote(ClientID, "shuffle_teams", "shuffle teams");
+}
+
+void CGameContext::ComCallSwapTeamsVote(int ClientID)
+{
+	if(ClientID < 0 || ClientID >= MAX_CLIENTS)
+		return;
+	CPlayer *pPlayer = m_apPlayers[ClientID];
+	if(!pPlayer)
+		return;
+	// not needed for bang command but for slash command
+	if(pPlayer->GetTeam() == TEAM_SPECTATORS && !g_Config.m_SvSpectatorVotes)
+	{
+		SendChatTarget(ClientID, "Spectators aren't allowed to vote.");
+		return;
+	}
+	BangCommandVote(ClientID, "swap_teams", "swap teams");
 }
 
 bool CGameContext::ParseChatCmd(char Prefix, int ClientID, const char *pCmdWithArgs)
@@ -477,6 +521,10 @@ bool CGameContext::OnBangCommand(int ClientID, const char *pCmd, int NumArgs, co
 	else if(!str_comp_nocase(pCmd, "shuffle"))
 	{
 		ComCallShuffleVote(ClientID);
+	}
+	else if(!str_comp_nocase(pCmd, "swap"))
+	{
+		ComCallSwapTeamsVote(ClientID);
 	}
 	else if(!str_comp_nocase(pCmd, "gamestate"))
 	{

@@ -3513,6 +3513,7 @@ void CGameContext::OnConsoleInit()
 #undef MACRO_CONFIG_COL
 #undef MACRO_CONFIG_STR
 	Console()->Register("shuffle_teams", "", CFGFLAG_SERVER, ConShuffleTeams, this, "Shuffle the current teams"); // gctf
+	Console()->Register("swap_teams", "", CFGFLAG_SERVER, ConSwapTeams, this, "Swap the current teams");
 
 	Console()->Chain("sv_vote_kick", ConchainSettingUpdate, this);
 	Console()->Chain("sv_vote_kick_min", ConchainSettingUpdate, this);
