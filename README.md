@@ -38,6 +38,12 @@ For build instructions visit the [ddnet repo](https://github.com/ddnet/ddnet).
 + `sv_tournament_chat_smart` s sv_tournament_chat on on restart and off on round end (1=specs,2=all)
 + `sv_tournament_join_msgs` Hide join/leave of spectators in chat (0=off,1=hidden,2=shown for specs)
 
+# Rcon commmands
+
++ `shuffle_teams` Shuffle the current teams
++ `swap_teams` Swap the current teams
++ `swap_teams_random` Swap the current teams or not (random chance)
+
 # Chat commands
 
 Most ddnet slash chat commands were inherited and are still functional.
@@ -47,6 +53,8 @@ ddnet-insta then added a bunch of own slash chat commands and also bang (!) chat
 
 + `!ready` `!pause` `/pause` `/ready` to pause the game. Needs `sv_player_ready_mode 1` and 0.7 clients can also send the 0.7 ready change message
 + `!shuffle` `/shuffle` call vote to shuffle teams
++ `!swap` `/swap` call vote to swap teams
++ `!swap_random` `/swap_random` call vote to swap teams to random sides
 + `!settings` show current game settings in the message of the day. It will show if spray protection is on or off and similar game relevant settings.
 + `!1v1` `!2v2` `!v1` `!v2` `!1on1` ... call vote to change in game slots
 + `!restart ?(seconds)` call vote to restart game with optional parameter of warmup seconds (default: 10)
