@@ -91,6 +91,15 @@ void CGameContext::ConSwapTeams(IConsole::IResult *pResult, void *pUserData)
 	pSelf->SwapTeams();
 }
 
+void CGameContext::ConSwapTeamsRandom(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(rand() % 2)
+		pSelf->SwapTeams();
+	else
+		dbg_msg("swap", "did not swap due to random chance");
+}
+
 void CGameContext::SwapTeams()
 {
 	if(!m_pController->IsTeamplay())
@@ -305,6 +314,11 @@ bool CGameContext::OnInstaChatMessage(const CNetMsg_Cl_Say *pMsg, int Length, in
 			ComCallSwapTeamsVote(ClientID);
 			return true;
 		}
+		else if(!str_comp_nocase(pMsg->m_pMessage + 1, "swap_random")) // gctf
+		{
+			ComCallSwapTeamsRandomVote(ClientID);
+			return true;
+		}
 	}
 	return false;
 }
@@ -348,6 +362,22 @@ void CGameContext::ComCallSwapTeamsVote(int ClientID)
 		return;
 	}
 	BangCommandVote(ClientID, "swap_teams", "swap teams");
+}
+
+void CGameContext::ComCallSwapTeamsRandomVote(int ClientID)
+{
+	if(ClientID < 0 || ClientID >= MAX_CLIENTS)
+		return;
+	CPlayer *pPlayer = m_apPlayers[ClientID];
+	if(!pPlayer)
+		return;
+	// not needed for bang command but for slash command
+	if(pPlayer->GetTeam() == TEAM_SPECTATORS && !g_Config.m_SvSpectatorVotes)
+	{
+		SendChatTarget(ClientID, "Spectators aren't allowed to vote.");
+		return;
+	}
+	BangCommandVote(ClientID, "swap_teams_random", "swap teams (random)");
 }
 
 bool CGameContext::ParseChatCmd(char Prefix, int ClientID, const char *pCmdWithArgs)
@@ -525,6 +555,10 @@ bool CGameContext::OnBangCommand(int ClientID, const char *pCmd, int NumArgs, co
 	else if(!str_comp_nocase(pCmd, "swap"))
 	{
 		ComCallSwapTeamsVote(ClientID);
+	}
+	else if(!str_comp_nocase(pCmd, "swap_random"))
+	{
+		ComCallSwapTeamsRandomVote(ClientID);
 	}
 	else if(!str_comp_nocase(pCmd, "gamestate"))
 	{
