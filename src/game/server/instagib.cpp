@@ -107,10 +107,10 @@ void CGameContext::SwapTeams()
 
 	SendGameMsg(protocol7::GAMEMSG_TEAM_SWAP, -1);
 
-	for(int i = 0; i < MAX_CLIENTS; ++i)
+	for(CPlayer *pPlayer : m_apPlayers)
 	{
-		if(m_apPlayers[i] && m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS)
-			m_pController->DoTeamChange(m_apPlayers[i], m_apPlayers[i]->GetTeam()^1, false);
+		if(pPlayer && pPlayer->GetTeam() != TEAM_SPECTATORS)
+			m_pController->DoTeamChange(pPlayer, pPlayer->GetTeam() ^ 1, false);
 	}
 
 	m_pController->SwapTeamscore();
