@@ -1821,11 +1821,12 @@ int CMenus::CCommunityIconDownloadJob::OnCompletion(int State)
 	return State;
 }
 
-CMenus::CCommunityIconDownloadJob::CCommunityIconDownloadJob(CMenus *pMenus, const char *pCommunityId, const char *pUrl) :
+CMenus::CCommunityIconDownloadJob::CCommunityIconDownloadJob(CMenus *pMenus, const char *pCommunityId, const char *pUrl, const SHA256_DIGEST &Sha256) :
 	CHttpRequest(pUrl),
 	CAbstractCommunityIconJob(pMenus, pCommunityId, IStorage::TYPE_SAVE)
 {
 	WriteToFile(pMenus->Storage(), m_aPath, IStorage::TYPE_SAVE);
+	ExpectSha256(Sha256);
 	Timeout(CTimeout{0, 0, 0, 0});
 	LogProgress(HTTPLOG::FAILURE);
 }
@@ -2005,7 +2006,7 @@ void CMenus::UpdateCommunityIcons()
 		});
 		if(pExistingDownload == m_CommunityIconDownloadJobs.end() && (ExistingIcon == m_vCommunityIcons.end() || ExistingIcon->m_Sha256 != Community.IconSha256()))
 		{
-			std::shared_ptr<CCommunityIconDownloadJob> pJob = std::make_shared<CCommunityIconDownloadJob>(this, Community.Id(), Community.IconUrl());
+			std::shared_ptr<CCommunityIconDownloadJob> pJob = std::make_shared<CCommunityIconDownloadJob>(this, Community.Id(), Community.IconUrl(), Community.IconSha256());
 			Engine()->AddJob(pJob);
 			m_CommunityIconDownloadJobs.push_back(pJob);
 		}

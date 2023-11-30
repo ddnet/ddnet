@@ -542,7 +542,7 @@ protected:
 		int OnCompletion(int State) override;
 
 	public:
-		CCommunityIconDownloadJob(CMenus *pMenus, const char *pCommunityId, const char *pUrl);
+		CCommunityIconDownloadJob(CMenus *pMenus, const char *pCommunityId, const char *pUrl, const SHA256_DIGEST &Sha256);
 	};
 	struct SCommunityIcon
 	{
