@@ -948,10 +948,10 @@ static std::map<std::string, std::shared_ptr<IBindListNode>> gs_KeyBindsRoot{
 	{
 		CBindsManager::GROUP_INGAME,
 		BindGroup(
-			Localize("In Game"),
+			Localizable("In Game"),
 			{
 				BindGroup(
-					Localize("Movement"),
+					Localizable("Movement"),
 					{
 						KeyBind(Localizable("Move left"), "+left"),
 						KeyBind(Localizable("Move right"), "+right"),
@@ -970,7 +970,7 @@ static std::map<std::string, std::shared_ptr<IBindListNode>> gs_KeyBindsRoot{
 						KeyBind(Localizable("Toggle ghost"), "toggle cl_race_show_ghost 0 1"),
 					}),
 				BindGroup(
-					Localize("Weapons"),
+					Localizable("Weapons"),
 					{
 						KeyBind(Localizable("Hammer"), "+weapon1"),
 						KeyBind(Localizable("Pistol"), "+weapon2"),
@@ -981,13 +981,13 @@ static std::map<std::string, std::shared_ptr<IBindListNode>> gs_KeyBindsRoot{
 						KeyBind(Localizable("Prev. weapon"), "+prevweapon"),
 					}),
 				BindGroup(
-					Localize("Voting"),
+					Localizable("Voting"),
 					{
 						KeyBind(Localizable("Vote yes"), "vote yes"),
 						KeyBind(Localizable("Vote no"), "vote no"),
 					}),
 				BindGroup(
-					Localize("Chat"),
+					Localizable("Chat"),
 					{
 						KeyBind(Localizable("Chat"), "+show_chat; chat all"),
 						KeyBind(Localizable("Team chat"), "+show_chat; chat team"),
@@ -996,14 +996,14 @@ static std::map<std::string, std::shared_ptr<IBindListNode>> gs_KeyBindsRoot{
 						KeyBind(Localizable("Show chat"), "+show_chat"),
 					}),
 				BindGroup(
-					Localize("Dummy"),
+					Localizable("Dummy"),
 					{
 						KeyBind(Localizable("Toggle dummy"), "toggle cl_dummy 0 1"),
 						KeyBind(Localizable("Dummy copy"), "toggle cl_dummy_copy_moves 0 1"),
 						KeyBind(Localizable("Hammerfly dummy"), "toggle cl_dummy_hammer 0 1"),
 					}),
 				BindGroup(
-					Localize("Miscellaneous"),
+					Localizable("Miscellaneous"),
 					{
 						KeyBind(Localizable("Emoticon"), "+emote"),
 						KeyBind(Localizable("Spectator mode"), "+spectate"),
@@ -1020,19 +1020,19 @@ static std::map<std::string, std::shared_ptr<IBindListNode>> gs_KeyBindsRoot{
 	{
 		CBindsManager::GROUP_EDITOR,
 		BindGroup(
-			Localize("Editor"),
+			Localizable("Editor"),
 			{}),
 	},
 	{
 		CBindsManager::GROUP_MENUS,
 		BindGroup(
-			Localize("Menus"),
+			Localizable("Menus"),
 			{}),
 	},
 	{
 		CBindsManager::GROUP_DEMO_PLAYER,
 		BindGroup(
-			Localize("Demo Player"),
+			Localizable("Demo Player"),
 			{
 				KeyBind(Localizable("Play/pause demo"), "demo_play"),
 			}),
@@ -1381,9 +1381,9 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 		}
 	}
 
-	for(auto [pGroupName, pBinds] : m_pClient->m_BindsManager.Groups())
+	for(auto pBinds : m_pClient->m_BindsManager.Groups())
 	{
-		auto &pNode = gs_KeyBindsRoot.at(pGroupName);
+		auto &pNode = gs_KeyBindsRoot.at(pBinds->GroupName());
 		ResetKeys(pNode);
 		for(int Mod = 0; Mod < CBinds::MODIFIER_COMBINATION_COUNT; Mod++)
 		{
@@ -1461,9 +1461,9 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 	s_ScrollRegion.AddRect(GeneralGroup);
 
 	CUIRect SectionRect;
-	for(auto [pGroupName, _] : m_pClient->m_BindsManager.Groups())
+	for(auto &pBinds : m_pClient->m_BindsManager.Groups())
 	{
-		const char *pGroupNameStr = pGroupName.c_str();
+		const char *pGroupName = pBinds->GroupName();
 		auto pGroup = std::static_pointer_cast<SBindGroup>(gs_KeyBindsRoot.at(pGroupName));
 		Bottom.HSplitTop(Margin, nullptr, &SectionRect);
 		DoFoldableSection(&pGroup->m_Section, pGroup->m_pName, FontSize, &SectionRect, &Bottom, 10.0f, [&]() -> int {
@@ -1471,7 +1471,7 @@ void CMenus::RenderSettingsControls(CUIRect MainView)
 			SectionRect.HMargin(Margin / 2, &SectionRect);
 			SectionRect.VMargin(Margin, &SectionRect);
 
-			TotalHeight += DoSettingsControlsButtons(pGroupNameStr, gs_KeyBindsRoot.at(pGroupNameStr), SectionRect);
+			TotalHeight += DoSettingsControlsButtons(pGroupName, gs_KeyBindsRoot.at(pGroupName), SectionRect);
 
 			return TotalHeight + Margin;
 		});

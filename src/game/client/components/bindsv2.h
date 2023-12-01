@@ -8,8 +8,6 @@
 
 #include <game/client/component.h>
 
-class IConfigManager;
-
 enum
 {
 	MAX_GROUP_NAME_LENGTH = 16
@@ -71,6 +69,7 @@ public:
 	// DDRace
 
 	void SetDDRaceBinds(bool FreeOnly);
+	const char *GroupName() const { return m_aGroupName; }
 
 private:
 	char *m_aapKeyBindings[MODIFIER_COMBINATION_COUNT][KEY_LAST];

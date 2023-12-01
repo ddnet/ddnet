@@ -11,11 +11,11 @@ bool CBindsManager::CBindsSpecial::OnInput(const IInput::CEvent &Event)
 	if(m_pBindsManager->m_aActiveBindGroup[0] == '\0')
 		return false;
 
-	return m_pBindsManager->m_BindGroups[m_pBindsManager->m_aActiveBindGroup]->m_SpecialBinds.OnInput(Event);
+	return m_pBindsManager->Binds(m_pBindsManager->m_aActiveBindGroup)->m_SpecialBinds.OnInput(Event);
 }
 
 CBindsManager::CBindsManager() :
-	m_BindGroups()
+	m_vpBinds()
 {
 	m_SpecialBinds.m_pBindsManager = this;
 	m_aActiveBindGroup[0] = '\0';
@@ -43,7 +43,7 @@ bool CBindsManager::OnInput(const IInput::CEvent &Event)
 	if(m_aActiveBindGroup[0] == '\0')
 		return false;
 
-	return m_BindGroups[m_aActiveBindGroup]->OnInput(Event);
+	return Binds(m_aActiveBindGroup)->OnInput(Event);
 }
 
 void CBindsManager::SetDefaults()
@@ -92,15 +92,16 @@ void CBindsManager::SetDefaults()
 
 void CBindsManager::RegisterBindGroup(const char *pName)
 {
-	if(m_BindGroups[pName] != nullptr)
+	if(Binds(pName) != nullptr)
 	{
 		log_error("binds manager", "Group with name '%s' has already been registered!", pName);
 		return;
 	}
 
-	m_BindGroups[pName] = std::make_shared<CBindsV2>(pName);
-	m_BindGroups[pName]->m_pClient = m_pClient;
-	m_BindGroups[pName]->m_SpecialBinds.m_pClient = m_pClient;
+	std::shared_ptr<CBindsV2> pBinds = std::make_shared<CBindsV2>(pName);
+	pBinds->m_pClient = m_pClient;
+	pBinds->m_SpecialBinds.m_pClient = m_pClient;
+	m_vpBinds.push_back(pBinds);
 
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "Registered bind group '%s'", pName);
@@ -109,9 +110,9 @@ void CBindsManager::RegisterBindGroup(const char *pName)
 
 void CBindsManager::SetActiveBindGroup(const char *pName)
 {
-	for(auto &Pair : m_BindGroups)
+	for(auto &pBind : m_vpBinds)
 	{
-		if(!str_comp_nocase(Pair.first.c_str(), pName))
+		if(!str_comp_nocase(pBind->GroupName(), pName))
 		{
 			str_copy(m_aActiveBindGroup, pName);
 			return;
@@ -125,20 +126,20 @@ void CBindsManager::ConfigSaveCallback(IConfigManager *pConfigManager, void *pUs
 {
 	CBindsManager *pSelf = (CBindsManager *)pUserData;
 
-	for(auto &BindGroup : pSelf->m_BindGroups)
+	for(auto &BindGroup : pSelf->m_vpBinds)
 	{
-		BindGroup.second->SaveBinds();
+		BindGroup->SaveBinds();
 	}
 }
 
 std::shared_ptr<CBindsV2> CBindsManager::Binds(const char *pGroupName)
 {
-	auto ItRes = std::find_if(m_BindGroups.begin(), m_BindGroups.end(), [&pGroupName](const std::pair<std::string, std::shared_ptr<CBindsV2>> &Pair) {
-		return !str_comp_nocase(Pair.first.c_str(), pGroupName);
+	auto ItRes = std::find_if(m_vpBinds.begin(), m_vpBinds.end(), [&pGroupName](const std::shared_ptr<CBindsV2> &pBind) {
+		return !str_comp_nocase(pBind->GroupName(), pGroupName);
 	});
-	if(ItRes == m_BindGroups.end())
+	if(ItRes == m_vpBinds.end())
 		return nullptr;
-	return ItRes->second;
+	return *ItRes;
 }
 
 std::shared_ptr<CBindsV2> CBindsManager::CheckGroup(const char *pGroupName)
@@ -174,10 +175,10 @@ void CBindsManager::ConBinds(IConsole::IResult *pResult, void *pUserData)
 		char aBuf[256];
 		str_format(aBuf, sizeof(aBuf), "available bind groups:");
 
-		for(auto &Pair : pSelf->m_BindGroups)
+		for(auto &pBinds : pSelf->m_vpBinds)
 		{
 			str_append(aBuf, " ");
-			str_append(aBuf, Pair.first.c_str());
+			str_append(aBuf, pBinds->GroupName());
 		}
 
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "bindsv2", aBuf, gs_BindPrintColor);
@@ -207,8 +208,8 @@ void CBindsManager::ConUnbindAll(IConsole::IResult *pResult, void *pUserData)
 	CBindsManager *pSelf = (CBindsManager *)pUserData;
 	if(pResult->NumArguments() == 0)
 	{
-		for(auto &Pair : pSelf->m_BindGroups)
-			Pair.second->UnbindAll();
+		for(auto &pBinds : pSelf->m_vpBinds)
+			pBinds->UnbindAll();
 
 		return;
 	}

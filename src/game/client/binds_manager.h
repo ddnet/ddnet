@@ -3,9 +3,6 @@
 
 #include <game/client/components/bindsv2.h>
 
-#include <functional>
-#include <map>
-
 class CBindsManager : public CComponent
 {
 	static void ConBind(IConsole::IResult *pResult, void *pUserData);
@@ -36,7 +33,7 @@ public:
 	void RegisterBindGroup(const char *pName);
 	void SetActiveBindGroup(const char *pName);
 	std::shared_ptr<CBindsV2> Binds(const char *pGroupName);
-	const std::unordered_map<std::string, std::shared_ptr<CBindsV2>> &Groups() const { return m_BindGroups; }
+	const std::vector<std::shared_ptr<CBindsV2>> &Groups() const { return m_vpBinds; }
 
 	static constexpr const char *GROUP_INGAME = "ingame";
 	static constexpr const char *GROUP_MENUS = "menus";
@@ -44,7 +41,7 @@ public:
 	static constexpr const char *GROUP_EDITOR = "editor";
 
 private:
-	std::unordered_map<std::string, std::shared_ptr<CBindsV2>> m_BindGroups;
+	std::vector<std::shared_ptr<CBindsV2>> m_vpBinds;
 	char m_aActiveBindGroup[MAX_GROUP_NAME_LENGTH];
 
 	friend class CGameClient;

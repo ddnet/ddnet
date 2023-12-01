@@ -473,7 +473,7 @@ int CMenus::DoButton_FoldableSection(SFoldableSection *pSection, const char *pTe
 	return pSection->m_Opened;
 }
 
-int CMenus::DoFoldableSection(SFoldableSection *pSection, const char *pText, float FontSize, CUIRect *pRect, CUIRect *pRectAfter, float CornerRounding, std::function<int()> fnRender)
+int CMenus::DoFoldableSection(SFoldableSection *pSection, const char *pText, float FontSize, CUIRect *pRect, CUIRect *pRectAfter, float CornerRounding, const std::function<int()> &fnRender)
 {
 	const float Margin = 10.0f;
 	const float HeaderHeight = FontSize + 5.0f + Margin;
