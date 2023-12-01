@@ -168,6 +168,7 @@ public:
 	std::shared_ptr<CScoreLoadBestTimeResult> m_pLoadBestTimeResult;
 
 	// gctf
+	// virtual bool OnLaserHitCharacter(vec2 From, vec2 To, class CLaser &Laser) {};
 	virtual void OnPlayerReadyChange(class CPlayer *pPlayer); // 0.7 ready change
 	void CheckReadyStates(int WithoutID = -1);
 	bool GetPlayersReadyState(int WithoutID = -1, int *pNumUnready = nullptr);

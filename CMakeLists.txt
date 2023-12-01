@@ -2545,6 +2545,8 @@ if(SERVER)
     gamecontroller.h
     gamemodes/DDRace.cpp
     gamemodes/DDRace.h
+    gamemodes/base_fng.cpp
+    gamemodes/base_fng.h
     gamemodes/ctf.cpp
     gamemodes/ctf.h
     gamemodes/gctf.cpp
@@ -2555,6 +2557,10 @@ if(SERVER)
     gamemodes/instagib.h
     gamemodes/mod.cpp
     gamemodes/mod.h
+    gamemodes/solofng.cpp
+    gamemodes/solofng.h
+    gamemodes/team_fng.cpp
+    gamemodes/team_fng.h
     gameworld.cpp
     gameworld.h
     instagib.cpp

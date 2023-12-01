@@ -33,6 +33,7 @@
 #include "gamemodes/gctf.h"
 #include "gamemodes/ictf.h"
 #include "gamemodes/mod.h"
+#include "gamemodes/solofng.h"
 #include "player.h"
 #include "score.h"
 
@@ -3642,6 +3643,8 @@ void CGameContext::OnInit(const void *pPersistentData)
 		m_pController = new CGameControllerGCTF(this);
 	else if(!str_comp_nocase(Config()->m_SvGametype, "ictf"))
 		m_pController = new CGameControllerICTF(this);
+	else if(!str_comp_nocase(Config()->m_SvGametype, "solofng"))
+		m_pController = new CGameControllerSoloFng(this);
 	else
 		m_pController = new CGameControllerDDRace(this);
 
