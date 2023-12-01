@@ -47,6 +47,7 @@ enum
 };
 
 class CCharacter;
+class IConfigManager;
 class CConfig;
 class CHeap;
 class CPlayer;
@@ -77,6 +78,7 @@ private:
 class CGameContext : public IGameServer
 {
 	IServer *m_pServer;
+	IConfigManager *m_pConfigManager;
 	CConfig *m_pConfig;
 	IConsole *m_pConsole;
 	IEngine *m_pEngine;
@@ -161,6 +163,7 @@ class CGameContext : public IGameServer
 
 public:
 	IServer *Server() const { return m_pServer; }
+	IConfigManager *ConfigManager() const { return m_pConfigManager; }
 	CConfig *Config() { return m_pConfig; }
 	IConsole *Console() { return m_pConsole; }
 	IEngine *Engine() { return m_pEngine; }

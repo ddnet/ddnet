@@ -153,8 +153,8 @@ int main(int argc, const char **argv)
 	}
 
 	pEngine->Init();
-	pConfigManager->Init();
 	pConsole->Init();
+	pConfigManager->Init();
 
 	// register all console commands
 	pServer->RegisterCommands();
@@ -173,8 +173,8 @@ int main(int argc, const char **argv)
 	if(argc > 1)
 		pConsole->ParseArguments(argc - 1, &argv[1]);
 
-	pConsole->Register("sv_test_cmds", "", CFGFLAG_SERVER, CServer::ConTestingCommands, pConsole, "Turns testing commands aka cheats on/off (setting only works in initial config)");
-	pConsole->Register("sv_rescue", "", CFGFLAG_SERVER, CServer::ConRescue, pConsole, "Allow /rescue command so players can teleport themselves out of freeze (setting only works in initial config)");
+	pConfigManager->SetReadOnly("sv_test_cmds", true);
+	pConfigManager->SetReadOnly("sv_rescue", true);
 
 	const int Mode = g_Config.m_Logappend ? IOFLAG_APPEND : IOFLAG_WRITE;
 	if(g_Config.m_Logfile[0])
