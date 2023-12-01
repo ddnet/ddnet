@@ -1522,10 +1522,57 @@ void CGameContext::ConTele(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	vec2 Pos = pPlayer->m_ViewPos;
+	if(pResult->NumArguments() > 0)
+	{
+		int ClientID;
+		for(ClientID = 0; ClientID < MAX_CLIENTS; ClientID++)
+		{
+			if(str_comp(pResult->GetString(0), pSelf->Server()->ClientName(ClientID)) == 0)
+				break;
+		}
+		if(ClientID == MAX_CLIENTS)
+		{
+			pSelf->SendChatTarget(pPlayer->GetCID(), "No player with this name found.");
+			return;
+		}
+		CPlayer *pPlayerTo = pSelf->m_apPlayers[ClientID];
+		if(!pPlayerTo)
+			return;
+		CCharacter *pChrTo = pPlayerTo->GetCharacter();
+		if(!pChrTo)
+			return;
+		Pos = pChrTo->m_Pos;
+	}
+	pSelf->Teleport(pChr, Pos);
+	pChr->UnFreeze();
+	pChr->Core()->m_Vel = vec2(0, 0);
+	pPlayer->m_LastTeleTee.Save(pChr);
+}
+
+void CGameContext::ConTeleCursor(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientID(pResult->m_ClientID))
+		return;
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if(!pPlayer)
+		return;
+	CCharacter *pChr = pPlayer->GetCharacter();
+	if(!pChr)
+		return;
+
+	CGameTeams &Teams = pSelf->m_pController->Teams();
+	int Team = pSelf->GetDDRaceTeam(pResult->m_ClientID);
+	if(!Teams.IsPractice(Team))
+	{
+		pSelf->SendChatTarget(pPlayer->GetCID(), "You're not in a team with /practice turned on. Note that you can't earn a rank with practice enabled.");
+		return;
+	}
+
+	vec2 Pos = pPlayer->m_ViewPos;
 	if(pResult->NumArguments() == 0 && !pPlayer->IsPaused())
 	{
-		vec2 ZoomScale = vec2(pPlayer->m_ShowDistance.x / 1400.0f, pPlayer->m_ShowDistance.y / 800.0f);
-		Pos = Pos + (vec2(pChr->Core()->m_Input.m_TargetX, pChr->Core()->m_Input.m_TargetY) * ZoomScale);
+		Pos += vec2(pChr->Core()->m_Input.m_TargetX, pChr->Core()->m_Input.m_TargetY);
 	}
 	else if(pResult->NumArguments() > 0)
 	{
