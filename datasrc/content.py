@@ -255,6 +255,7 @@ container.images.Add(image_audio_source)
 container.images.Add(image_strongweak)
 container.images.Add(image_hud)
 container.images.Add(image_extras)
+container.images.Add(Image("raceflag", "race_flag.png"))
 
 container.pickups.Add(Pickup("health"))
 container.pickups.Add(Pickup("armor"))

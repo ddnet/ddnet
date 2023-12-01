@@ -2429,7 +2429,7 @@ enum
 	APPEARANCE_TAB_CHAT = 1,
 	APPEARANCE_TAB_NAME_PLATE = 2,
 	APPEARANCE_TAB_HOOK_COLLISION = 3,
-	APPEARANCE_TAB_KILL_MESSAGES = 4,
+	APPEARANCE_TAB_INFO_MESSAGES = 4,
 	APPEARANCE_TAB_LASER = 5,
 	NUMBER_OF_APPEARANCE_TABS = 6,
 };
@@ -2459,8 +2459,8 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		s_CurTab = APPEARANCE_TAB_NAME_PLATE;
 	if(DoButton_MenuTab(&s_aPageTabs[APPEARANCE_TAB_HOOK_COLLISION], Localize("Hook Collisions"), s_CurTab == APPEARANCE_TAB_HOOK_COLLISION, &Page4Tab, 0, NULL, NULL, NULL, NULL, 4))
 		s_CurTab = APPEARANCE_TAB_HOOK_COLLISION;
-	if(DoButton_MenuTab(&s_aPageTabs[APPEARANCE_TAB_KILL_MESSAGES], Localize("Kill Messages"), s_CurTab == APPEARANCE_TAB_KILL_MESSAGES, &Page5Tab, 0, NULL, NULL, NULL, NULL, 4))
-		s_CurTab = APPEARANCE_TAB_KILL_MESSAGES;
+	if(DoButton_MenuTab(&s_aPageTabs[APPEARANCE_TAB_INFO_MESSAGES], Localize("Info Messages"), s_CurTab == APPEARANCE_TAB_INFO_MESSAGES, &Page5Tab, 0, NULL, NULL, NULL, NULL, 4))
+		s_CurTab = APPEARANCE_TAB_INFO_MESSAGES;
 	if(DoButton_MenuTab(&s_aPageTabs[APPEARANCE_TAB_LASER], Localize("Laser"), s_CurTab == APPEARANCE_TAB_LASER, &Page6Tab, IGraphics::CORNER_R, NULL, NULL, NULL, NULL, 4))
 		s_CurTab = APPEARANCE_TAB_LASER;
 
@@ -3005,20 +3005,31 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		DoLine_ColorPicker(&s_HookCollHookableCollResetID, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Something hookable"), &g_Config.m_ClHookCollColorHookableColl, ColorRGBA(130.0f / 255.0f, 232.0f / 255.0f, 160.0f / 255.0f, 1.0f), false);
 		DoLine_ColorPicker(&s_HookCollTeeCollResetID, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("A Tee"), &g_Config.m_ClHookCollColorTeeColl, ColorRGBA(1.0f, 1.0f, 0.0f, 1.0f), false);
 	}
-	else if(s_CurTab == APPEARANCE_TAB_KILL_MESSAGES)
+	else if(s_CurTab == APPEARANCE_TAB_INFO_MESSAGES)
 	{
 		MainView.VSplitMid(&LeftView, &RightView);
 
-		// ***** Kill Messages ***** //
+		// ***** Info Messages ***** //
 		LeftView.HSplitTop(HeadlineAndVMargin, &Label, &LeftView);
-		UI()->DoLabel(&Label, Localize("Kill Messages"), HeadlineFontSize, TEXTALIGN_ML);
+		UI()->DoLabel(&Label, Localize("Info Messages"), HeadlineFontSize, TEXTALIGN_ML);
 
-		// General kill messages settings
-		LeftView.HSplitTop(SectionTotalMargin + 2 * ColorPickerLineSize, &Section, &LeftView);
+		// General info messages settings
+		LeftView.HSplitTop(SectionTotalMargin + 2 * LineSize + 2 * ColorPickerLineSize, &Section, &LeftView);
 		Section.Margin(SectionMargin, &Section);
 
-		static CButtonContainer s_KillMessageNormalColorID, s_KillMessageHighlightColorID;
+		Section.HSplitTop(LineSize, &Button, &Section);
+		if(DoButton_CheckBox(&g_Config.m_ClShowKillMessages, Localize("Show kill messages"), g_Config.m_ClShowKillMessages, &Button))
+		{
+			g_Config.m_ClShowKillMessages ^= 1;
+		}
 
+		Section.HSplitTop(LineSize, &Button, &Section);
+		if(DoButton_CheckBox(&g_Config.m_ClShowFinishMessages, Localize("Show finish messages"), g_Config.m_ClShowFinishMessages, &Button))
+		{
+			g_Config.m_ClShowFinishMessages ^= 1;
+		}
+
+		static CButtonContainer s_KillMessageNormalColorID, s_KillMessageHighlightColorID;
 		DoLine_ColorPicker(&s_KillMessageNormalColorID, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Normal Color"), &g_Config.m_ClKillMessageNormalColor, ColorRGBA(1.0f, 1.0f, 1.0f), false);
 		DoLine_ColorPicker(&s_KillMessageHighlightColorID, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Highlight Color"), &g_Config.m_ClKillMessageHighlightColor, ColorRGBA(1.0f, 1.0f, 1.0f), false);
 	}

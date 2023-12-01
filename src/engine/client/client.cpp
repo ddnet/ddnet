@@ -1533,6 +1533,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 						m_pMapdownloadTask = HttpGetFile(pMapUrl ? pMapUrl : aUrl, Storage(), m_aMapdownloadFilenameTemp, IStorage::TYPE_SAVE);
 						m_pMapdownloadTask->Timeout(CTimeout{g_Config.m_ClMapDownloadConnectTimeoutMs, 0, g_Config.m_ClMapDownloadLowSpeedLimit, g_Config.m_ClMapDownloadLowSpeedTime});
 						m_pMapdownloadTask->MaxResponseSize(1024 * 1024 * 1024); // 1 GiB
+						m_pMapdownloadTask->ExpectSha256(*pMapSha256);
 						Engine()->AddJob(m_pMapdownloadTask);
 					}
 					else
