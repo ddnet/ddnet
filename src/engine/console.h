@@ -34,6 +34,8 @@ public:
 		TEMPCMD_HELP_LENGTH = 192,
 		TEMPCMD_PARAMS_LENGTH = 96,
 
+		CMDLINE_LENGTH = 512,
+
 		CLIENT_ID_GAME = -2,
 		CLIENT_ID_NO_GAME = -3,
 	};
@@ -116,8 +118,6 @@ public:
 	virtual void InitChecksum(CChecksumData *pData) const = 0;
 
 	virtual void SetAccessLevel(int AccessLevel) = 0;
-
-	virtual void ResetGameSettings() = 0;
 
 	static LEVEL ToLogLevel(int ConsoleLevel);
 	static int ToLogLevelFilter(int ConsoleLevel);
