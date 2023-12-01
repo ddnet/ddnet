@@ -1107,9 +1107,10 @@ TEST(Str, WindowsUtf8WideConversion)
 	static_assert(std::size(apUtf8Strings) == std::size(apWideStrings));
 	for(size_t i = 0; i < std::size(apUtf8Strings); i++)
 	{
-		const std::string ConvertedUtf8 = windows_wide_to_utf8(apWideStrings[i]);
+		const std::optional<std::string> ConvertedUtf8 = windows_wide_to_utf8(apWideStrings[i]);
 		const std::wstring ConvertedWide = windows_utf8_to_wide(apUtf8Strings[i]);
-		EXPECT_STREQ(ConvertedUtf8.c_str(), apUtf8Strings[i]);
+		ASSERT_TRUE(ConvertedUtf8.has_value());
+		EXPECT_STREQ(ConvertedUtf8.value().c_str(), apUtf8Strings[i]);
 		EXPECT_STREQ(ConvertedWide.c_str(), apWideStrings[i]);
 	}
 }
