@@ -169,6 +169,17 @@ public:
 
 	// gctf
 	// virtual bool OnLaserHitCharacter(vec2 From, vec2 To, class CLaser &Laser) {};
+	/*
+		Function: OnCharacterTakeDamage
+			this function was added in ddnet-insta and is a non standard controller method.
+			neither ddnet nor teeworlds have this
+
+		Returns:
+			return true to skip ddnet CCharacter::TakeDamage() behavior
+			which is applying the force and moving the damaged tee
+			it also sets the happy eyes if the Dmg is not zero
+	*/
+	virtual bool OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character) { return false; };
 	virtual void OnPlayerReadyChange(class CPlayer *pPlayer); // 0.7 ready change
 	void CheckReadyStates(int WithoutID = -1);
 	bool GetPlayersReadyState(int WithoutID = -1, int *pNumUnready = nullptr);

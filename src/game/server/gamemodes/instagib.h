@@ -15,5 +15,8 @@ public:
 	void DoTeamChange(CPlayer *pPlayer, int Team, bool DoChatMsg) override;
 	void OnCharacterSpawn(class CCharacter *pChr) override;
 	void Tick() override;
+
+	// ddnet-insta only
+	bool OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character) override;
 };
 #endif // GAME_SERVER_GAMEMODES_INSTAGIB_H

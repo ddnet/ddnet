@@ -1015,82 +1015,13 @@ void CCharacter::Die(int Killer, int Weapon, bool SendKillMsg)
 
 bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 {
-	// m_Core.m_Vel += Force;
+	if(GameServer()->m_pController->OnCharacterTakeDamage(Force, Dmg, From, Weapon, *this))
+		return false;
 
-	// TODO: gctf cfg team damage
-	// if(GameServer()->m_pController->IsFriendlyFire(m_pPlayer->GetCID(), From) && !g_Config.m_SvTeamdamage)
-	if(!GameServer()->m_pController->IsFriendlyFire(m_pPlayer->GetCID(), From))
+	if(Dmg)
 	{
-		if(From == m_pPlayer->GetCID())
-		{
-			Dmg = 0;
-			//Give back ammo on grenade self push//Only if not infinite ammo and activated
-			if(Weapon == WEAPON_GRENADE && g_Config.m_SvGrenadeAmmoRegen && g_Config.m_SvGrenadeAmmoRegenSpeedNade)
-			{
-				SetWeaponAmmo(WEAPON_GRENADE, minimum(m_Core.m_aWeapons[WEAPON_GRENADE].m_Ammo + 1, g_Config.m_SvGrenadeAmmoRegenNum));
-			}
-		}
-
-		if(g_Config.m_SvOnlyHookKills && From >= 0 && From <= MAX_CLIENTS)
-		{
-			CCharacter *pChr = GameServer()->m_apPlayers[From]->GetCharacter();
-			if(!pChr || pChr->m_Core.HookedPlayer() != m_pPlayer->GetCID())
-				Dmg = 0;
-		}
-
-		// no self damage
-		if(Dmg >= g_Config.m_SvDamageNeededForKill)
-			m_Health = From == m_pPlayer->GetCID() ? m_Health : 0;
-
-		// check for death
-		if(m_Health <= 0)
-		{
-			Die(From, Weapon);
-
-			if(From >= 0 && From != m_pPlayer->GetCID() && GameServer()->m_apPlayers[From])
-			{
-				CCharacter *pChr = GameServer()->m_apPlayers[From]->GetCharacter();
-				if(pChr)
-				{
-					// set attacker's face to happy (taunt!)
-					pChr->m_EmoteType = EMOTE_HAPPY;
-					pChr->m_EmoteStop = Server()->Tick() + Server()->TickSpeed();
-
-					// refill nades
-					int RefillNades = 0;
-					if(g_Config.m_SvGrenadeAmmoRegenOnKill == 1)
-						RefillNades = 1;
-					else if(g_Config.m_SvGrenadeAmmoRegenOnKill == 2)
-						RefillNades = g_Config.m_SvGrenadeAmmoRegenNum;
-					if(RefillNades && g_Config.m_SvGrenadeAmmoRegen && Weapon == WEAPON_GRENADE)
-					{
-						pChr->SetWeaponAmmo(WEAPON_GRENADE, minimum(pChr->m_Core.m_aWeapons[WEAPON_GRENADE].m_Ammo + RefillNades, g_Config.m_SvGrenadeAmmoRegenNum));
-					}
-				}
-
-				// do damage Hit sound
-				CClientMask Mask = CClientMask().set(From);
-				for(int i = 0; i < MAX_CLIENTS; i++)
-				{
-					if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS && GameServer()->m_apPlayers[i]->m_SpectatorID == From)
-						Mask.set(i);
-				}
-				GameServer()->CreateSound(GameServer()->m_apPlayers[From]->m_ViewPos, SOUND_HIT, Mask);
-			}
-			return false;
-		}
-
-		/*
-		if (Dmg > 2)
-			GameServer()->CreateSound(m_Pos, SOUND_PLAYER_PAIN_LONG);
-		else
-			GameServer()->CreateSound(m_Pos, SOUND_PLAYER_PAIN_SHORT);*/
-
-		if(Dmg)
-		{
-			m_EmoteType = EMOTE_PAIN;
-			m_EmoteStop = Server()->Tick() + 500 * Server()->TickSpeed() / 1000;
-		}
+		m_EmoteType = EMOTE_PAIN;
+		m_EmoteStop = Server()->Tick() + 500 * Server()->TickSpeed() / 1000;
 	}
 
 	vec2 Temp = m_Core.m_Vel + Force;
