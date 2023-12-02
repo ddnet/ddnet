@@ -3950,6 +3950,9 @@ void CGameContext::OnShutdown(void *pPersistentData)
 		aio_free(m_pTeeHistorianFile);
 	}
 
+	// Stop any demos being recorded.
+	Server()->StopDemos();
+
 	DeleteTempfile();
 	ConfigManager()->ResetGameSettings();
 	Collision()->Dest();
