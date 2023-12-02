@@ -22,6 +22,7 @@
 #include <ctime>
 #include <functional>
 #include <mutex>
+#include <optional>
 #include <string>
 
 #ifdef __MINGW32__
@@ -2727,6 +2728,7 @@ public:
  * @return The argument as a wide character string.
  *
  * @remark The argument string must be zero-terminated.
+ * @remark Fails with assertion error if passed utf8 is invalid.
  */
 std::wstring windows_utf8_to_wide(const char *str);
 
@@ -2736,11 +2738,12 @@ std::wstring windows_utf8_to_wide(const char *str);
  *
  * @param wide_str The wide character string to convert.
  *
- * @return The argument as a utf8 encoded string.
+ * @return The argument as a utf8 encoded string, wrapped in an optional.
+ * The optional is empty, if the wide string contains invalid codepoints.
  *
  * @remark The argument string must be zero-terminated.
  */
-std::string windows_wide_to_utf8(const wchar_t *wide_str);
+std::optional<std::string> windows_wide_to_utf8(const wchar_t *wide_str);
 
 /**
  * This is a RAII wrapper to initialize/uninitialize the Windows COM library,

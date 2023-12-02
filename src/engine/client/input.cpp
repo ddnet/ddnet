@@ -800,7 +800,7 @@ void CInput::ProcessSystemMessage(SDL_SysWMmsg *pMsg)
 				for(DWORD i = pCandidateList->dwPageStart; i < pCandidateList->dwCount && (int)m_vCandidates.size() < (int)pCandidateList->dwPageSize; i++)
 				{
 					LPCWSTR pCandidate = (LPCWSTR)((DWORD_PTR)pCandidateList + pCandidateList->dwOffset[i]);
-					m_vCandidates.push_back(std::move(windows_wide_to_utf8(pCandidate)));
+					m_vCandidates.push_back(std::move(windows_wide_to_utf8(pCandidate).value_or("<invalid candidate>")));
 				}
 				m_CandidateSelectedIndex = pCandidateList->dwSelection - pCandidateList->dwPageStart;
 			}

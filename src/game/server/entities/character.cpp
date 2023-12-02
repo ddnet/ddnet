@@ -776,8 +776,7 @@ void CCharacter::PreTick()
 	// set emote
 	if(m_EmoteStop < Server()->Tick())
 	{
-		m_EmoteType = m_pPlayer->GetDefaultEmote();
-		m_EmoteStop = -1;
+		SetEmote(m_pPlayer->GetDefaultEmote(), -1);
 	}
 
 	DDRaceTick();
@@ -1020,8 +1019,7 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 
 	if(Dmg)
 	{
-		m_EmoteType = EMOTE_PAIN;
-		m_EmoteStop = Server()->Tick() + 500 * Server()->TickSpeed() / 1000;
+		SetEmote(EMOTE_PAIN, Server()->Tick() + 500 * Server()->TickSpeed() / 1000);
 	}
 
 	vec2 Temp = m_Core.m_Vel + Force;
