@@ -516,7 +516,7 @@ CClientMask CGameTeams::TeamMask(int Team, int ExceptID, int Asker)
 		{ // Not spectator
 			if(i != Asker)
 			{ // Actions of other players
-				// if(!Character(i))
+				// if(!Character(i)) // commented out by ddnet-insta
 				// 	continue; // Player is currently dead
 				if(GetPlayer(i)->m_ShowOthers == SHOW_OTHERS_ONLY_TEAM)
 				{
