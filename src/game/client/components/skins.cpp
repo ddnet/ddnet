@@ -373,14 +373,14 @@ const CSkin *CSkins::Find(const char *pName)
 	}
 }
 
-const CSkin *CSkins::FindOrNullptr(const char *pName)
+const CSkin *CSkins::FindOrNullptr(const char *pName, bool IgnorePrefix)
 {
 	const char *pSkinPrefix = m_aEventSkinPrefix[0] ? m_aEventSkinPrefix : g_Config.m_ClSkinPrefix;
 	if(g_Config.m_ClVanillaSkinsOnly && !IsVanillaSkin(pName))
 	{
 		return nullptr;
 	}
-	else if(pSkinPrefix && pSkinPrefix[0])
+	else if(pSkinPrefix && pSkinPrefix[0] && !IgnorePrefix)
 	{
 		char aBuf[24];
 		str_format(aBuf, sizeof(aBuf), "%s_%s", pSkinPrefix, pName);
