@@ -516,8 +516,8 @@ CClientMask CGameTeams::TeamMask(int Team, int ExceptID, int Asker)
 		{ // Not spectator
 			if(i != Asker)
 			{ // Actions of other players
-				if(!Character(i))
-					continue; // Player is currently dead
+				// if(!Character(i))
+				// 	continue; // Player is currently dead
 				if(GetPlayer(i)->m_ShowOthers == SHOW_OTHERS_ONLY_TEAM)
 				{
 					if(m_Core.Team(i) != Team && m_Core.Team(i) != TEAM_SUPER)
