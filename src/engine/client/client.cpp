@@ -77,104 +77,21 @@ static const ColorRGBA gs_ClientNetworkErrPrintColor{1.0f, 0.25f, 0.25f, 1.0f};
 CClient::CClient() :
 	m_DemoPlayer(&m_SnapshotDelta, true, [&]() { UpdateDemoIntraTimers(); })
 {
+	m_StateStartTime = time_get();
 	for(auto &DemoRecorder : m_aDemoRecorder)
 		DemoRecorder = CDemoRecorder(&m_SnapshotDelta);
-
-	m_RenderFrameTime = 0.0001f;
 	m_LastRenderTime = time_get();
-
-	m_SnapCrcErrors = 0;
-	m_AutoScreenshotRecycle = false;
-	m_AutoStatScreenshotRecycle = false;
-	m_AutoCSVRecycle = false;
-	m_EditorActive = false;
-
-	m_aAckGameTick[0] = -1;
-	m_aAckGameTick[1] = -1;
-	m_aCurrentRecvTick[0] = 0;
-	m_aCurrentRecvTick[1] = 0;
-	m_aRconAuthed[0] = 0;
-	m_aRconAuthed[1] = 0;
-	m_aRconUsername[0] = '\0';
-	m_aRconPassword[0] = '\0';
-	m_aPassword[0] = '\0';
-
-	// version-checking
-	m_aVersionStr[0] = '0';
-	m_aVersionStr[1] = '\0';
-
-	// pinging
-	m_PingStartTime = 0;
-
-	m_aCurrentMap[0] = 0;
-
-	m_aCmdConnect[0] = 0;
-
-	// map download
-	m_aMapdownloadFilename[0] = 0;
-	m_aMapdownloadFilenameTemp[0] = 0;
-	m_aMapdownloadName[0] = 0;
-	m_pMapdownloadTask = NULL;
-	m_MapdownloadFileTemp = 0;
-	m_MapdownloadChunk = 0;
-	m_MapdownloadSha256Present = false;
-	m_MapdownloadSha256 = SHA256_ZEROED;
-	m_MapdownloadCrc = 0;
-	m_MapdownloadAmount = -1;
-	m_MapdownloadTotalsize = -1;
-
-	m_MapDetailsPresent = false;
-	m_aMapDetailsName[0] = 0;
-	m_MapDetailsSha256 = SHA256_ZEROED;
-	m_MapDetailsCrc = 0;
-	m_aMapDetailsUrl[0] = 0;
-
 	IStorage::FormatTmpPath(m_aDDNetInfoTmp, sizeof(m_aDDNetInfoTmp), DDNET_INFO_FILE);
-	m_pDDNetInfoTask = NULL;
-	m_aNews[0] = '\0';
-	m_aMapDownloadUrl[0] = '\0';
-	m_Points = -1;
-
-	m_CurrentServerInfoRequestTime = -1;
-	m_CurrentServerPingInfoType = -1;
-	m_CurrentServerPingBasicToken = -1;
-	m_CurrentServerPingToken = -1;
-	mem_zero(&m_CurrentServerPingUuid, sizeof(m_CurrentServerPingUuid));
-	m_CurrentServerCurrentPingTime = -1;
-	m_CurrentServerNextPingTime = -1;
-
-	m_aCurrentInput[0] = 0;
-	m_aCurrentInput[1] = 0;
-	m_LastDummy = false;
-
-	mem_zero(&m_aInputs, sizeof(m_aInputs));
-
-	m_State = IClient::STATE_OFFLINE;
-	m_StateStartTime = time_get();
-	m_aConnectAddressStr[0] = 0;
-
+	mem_zero(m_aInputs, sizeof(m_aInputs));
 	mem_zero(m_aapSnapshots, sizeof(m_aapSnapshots));
-	m_aSnapshotStorage[0].Init();
-	m_aSnapshotStorage[1].Init();
-	m_aReceivedSnapshots[0] = 0;
-	m_aReceivedSnapshots[1] = 0;
-	m_aSnapshotParts[0] = 0;
-	m_aSnapshotParts[1] = 0;
-
-	m_VersionInfo.m_State = CVersionInfo::STATE_INIT;
-
-	if(g_Config.m_ClDummy == 0)
-		m_LastDummyConnectTime = 0;
-
-	m_ReconnectTime = 0;
-
-	m_GenerateTimeoutSeed = true;
-
-	m_FrameTimeAvg = 0.0001f;
-	m_BenchmarkFile = 0;
-	m_BenchmarkStopTime = 0;
-
+	for(auto &SnapshotStorage : m_aSnapshotStorage)
+		SnapshotStorage.Init();
+	mem_zero(m_aDemorecSnapshotHolders, sizeof(m_aDemorecSnapshotHolders));
+	mem_zero(&m_CurrentServerInfo, sizeof(m_CurrentServerInfo));
 	mem_zero(&m_Checksum, sizeof(m_Checksum));
+	for(auto &GameTime : m_aGameTime)
+		GameTime.Init(0);
+	m_PredictedTime.Init(0);
 }
 
 // ----- send functions -----
@@ -610,6 +527,8 @@ void CClient::DisconnectWithReason(const char *pReason)
 	if(pReason != nullptr && pReason[0] == '\0')
 		pReason = nullptr;
 
+	DummyDisconnect(pReason);
+
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf), "disconnecting. reason='%s'", pReason ? pReason : "unknown");
 	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf, gs_ClientNetworkPrintColor);
@@ -657,16 +576,14 @@ void CClient::DisconnectWithReason(const char *pReason)
 	mem_zero(&m_CurrentServerInfo, sizeof(m_CurrentServerInfo));
 
 	// clear snapshots
-	m_aapSnapshots[g_Config.m_ClDummy][SNAP_CURRENT] = 0;
-	m_aapSnapshots[g_Config.m_ClDummy][SNAP_PREV] = 0;
-	m_aReceivedSnapshots[g_Config.m_ClDummy] = 0;
+	m_aapSnapshots[0][SNAP_CURRENT] = 0;
+	m_aapSnapshots[0][SNAP_PREV] = 0;
+	m_aReceivedSnapshots[0] = 0;
 }
 
 void CClient::Disconnect()
 {
 	m_ButtonRender = false;
-	if(m_DummyConnected)
-		DummyDisconnect(0);
 	if(m_State != IClient::STATE_OFFLINE)
 		DisconnectWithReason(0);
 
@@ -2273,7 +2190,6 @@ void CClient::LoadDDNetInfo()
 		NETADDR Addr;
 		if(!net_addr_from_str(&Addr, ConnectingIp))
 		{
-			m_HaveGlobalTcpAddr = true;
 			m_GlobalTcpAddr = Addr;
 			log_debug("info", "got global tcp ip address: %s", (const char *)ConnectingIp);
 		}
@@ -4735,7 +4651,7 @@ int CClient::UdpConnectivity(int NetType)
 			break;
 		case CONNECTIVITY::ADDRESS_KNOWN:
 			GlobalUdpAddr.port = 0;
-			if(m_HaveGlobalTcpAddr && NetType == (int)m_GlobalTcpAddr.type && net_addr_comp(&m_GlobalTcpAddr, &GlobalUdpAddr) != 0)
+			if(NetType == (int)m_GlobalTcpAddr.type && net_addr_comp(&m_GlobalTcpAddr, &GlobalUdpAddr) != 0)
 			{
 				NewConnectivity = CONNECTIVITY_DIFFERING_UDP_TCP_IP_ADDRESSES;
 				break;

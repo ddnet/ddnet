@@ -777,6 +777,8 @@ typedef struct NETADDR
 	bool operator!=(const NETADDR &other) const { return !(*this == other); }
 } NETADDR;
 
+extern const NETADDR NETADDR_ZEROED;
+
 #ifdef CONF_FAMILY_UNIX
 /**
  * @ingroup Network-General

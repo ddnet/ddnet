@@ -13,6 +13,7 @@ void CSmoothTime::Init(int64_t Target)
 	m_Current = Target;
 	m_Target = Target;
 	m_Margin = 0;
+	m_SpikeCounter = 0;
 	m_aAdjustSpeed[ADJUSTDIRECTION_DOWN] = 0.3f;
 	m_aAdjustSpeed[ADJUSTDIRECTION_UP] = 0.3f;
 }
