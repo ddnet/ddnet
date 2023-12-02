@@ -745,7 +745,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 		for(const auto &it : m_SkinFavorites)
 		{
-			const CSkin *pSkinToBeSelected = m_pClient->m_Skins.FindOrNullptr(it.c_str());
+			const CSkin *pSkinToBeSelected = m_pClient->m_Skins.FindOrNullptr(it.c_str(), true);
 
 			if(pSkinToBeSelected == nullptr || !SkinNotFiltered(pSkinToBeSelected))
 				continue;
