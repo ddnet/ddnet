@@ -1,16 +1,9 @@
-#import <engine/client/notifications.h>
-
 #import <Foundation/Foundation.h>
 #import <Foundation/NSUserNotification.h>
 #import <Cocoa/Cocoa.h>
 
-void NotificationsInit()
-{
-}
-void NotificationsUninit()
-{
-}
-void NotificationsNotify(const char *pTitle, const char *pMessage)
+// TODO: NSUserNotification is deprecated. Use the User Notifications framework instead: https://developer.apple.com/documentation/usernotifications?language=objc
+void NotificationsNotifyMacOsInternal(const char *pTitle, const char *pMessage)
 {
 	NSString* pNsTitle = [NSString stringWithCString:pTitle encoding:NSUTF8StringEncoding];
 	NSString* pNsMsg = [NSString stringWithCString:pMessage encoding:NSUTF8StringEncoding];
