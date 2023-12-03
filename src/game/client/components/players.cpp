@@ -202,8 +202,7 @@ void CPlayers::RenderHookCollLine(
 					DoBreak = true;
 				}
 
-				int TeleNr = 0;
-				int Hit = Collision()->IntersectLineTeleHook(OldPos, NewPos, &FinishPos, 0x0, &TeleNr);
+				int Hit = Collision()->IntersectLineTeleHook(OldPos, NewPos, &FinishPos, 0x0);
 
 				if(!DoBreak && Hit)
 				{

@@ -99,11 +99,9 @@ void CLaser::DoBounce()
 	vec2 Coltile;
 
 	int Res;
-	int z;
-
 	vec2 To = m_Pos + m_Dir * m_Energy;
 
-	Res = Collision()->IntersectLineTeleWeapon(m_Pos, To, &Coltile, &To, &z);
+	Res = Collision()->IntersectLineTeleWeapon(m_Pos, To, &Coltile, &To);
 
 	if(Res)
 	{
