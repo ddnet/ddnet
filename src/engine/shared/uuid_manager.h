@@ -24,6 +24,8 @@ struct CUuid
 	bool operator<(const CUuid &Other) const { return mem_comp(m_aData, Other.m_aData, sizeof(m_aData)) < 0; }
 };
 
+extern const CUuid UUID_ZEROED;
+
 CUuid RandomUuid();
 CUuid CalculateUuid(const char *pName);
 // The buffer length should be at least UUID_MAXSTRSIZE.

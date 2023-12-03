@@ -245,6 +245,7 @@ public:
 	virtual void StartRecord(int ClientID) = 0;
 	virtual void StopRecord(int ClientID) = 0;
 	virtual bool IsRecording(int ClientID) = 0;
+	virtual void StopDemos() = 0;
 
 	virtual void GetClientAddr(int ClientID, NETADDR *pAddr) const = 0;
 
