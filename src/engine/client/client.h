@@ -90,6 +90,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 
 	CUuid m_ConnectionID = UUID_ZEROED;
 
+	bool m_HaveGlobalTcpAddr = false;
 	NETADDR m_GlobalTcpAddr = NETADDR_ZEROED;
 
 	uint64_t m_aSnapshotParts[NUM_DUMMIES] = {0, 0};
