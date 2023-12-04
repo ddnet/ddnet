@@ -47,6 +47,23 @@ CCharacter::CCharacter(CGameWorld *pWorld, CNetObj_PlayerInput LastInput) :
 
 void CCharacter::Reset()
 {
+	// this will conflict with ddnet when
+	// https://github.com/ddnet/ddnet/pull/7588
+	// is merged
+	// just accept incoming changes
+	if(Server()->IsRecording(m_pPlayer->GetCID()))
+	{
+		CPlayerData *pData = GameServer()->Score()->PlayerData(m_pPlayer->GetCID());
+
+		if(pData->m_RecordStopTick - Server()->Tick() <= Server()->TickSpeed() && pData->m_RecordStopTick != -1)
+			Server()->SaveDemo(m_pPlayer->GetCID(), pData->m_RecordFinishTime);
+		else
+			Server()->StopRecord(m_pPlayer->GetCID());
+
+		pData->m_RecordStopTick = -1;
+	}
+
+
 	Destroy();
 }
 
