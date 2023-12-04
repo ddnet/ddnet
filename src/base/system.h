@@ -73,7 +73,7 @@
  * @see dbg_break
  */
 #define dbg_assert(test, msg) dbg_assert_imp(__FILE__, __LINE__, test, msg)
-void dbg_assert_imp(const char *filename, int line, int test, const char *msg);
+void dbg_assert_imp(const char *filename, int line, bool test, const char *msg);
 
 #ifdef __clang_analyzer__
 #include <cassert>

@@ -182,7 +182,7 @@ bool dbg_assert_has_failed()
 	return dbg_assert_failing.load(std::memory_order_acquire);
 }
 
-void dbg_assert_imp(const char *filename, int line, int test, const char *msg)
+void dbg_assert_imp(const char *filename, int line, bool test, const char *msg)
 {
 	if(!test)
 	{
