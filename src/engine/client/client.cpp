@@ -2190,6 +2190,7 @@ void CClient::LoadDDNetInfo()
 		NETADDR Addr;
 		if(!net_addr_from_str(&Addr, ConnectingIp))
 		{
+			m_HaveGlobalTcpAddr = true;
 			m_GlobalTcpAddr = Addr;
 			log_debug("info", "got global tcp ip address: %s", (const char *)ConnectingIp);
 		}
@@ -4651,7 +4652,7 @@ int CClient::UdpConnectivity(int NetType)
 			break;
 		case CONNECTIVITY::ADDRESS_KNOWN:
 			GlobalUdpAddr.port = 0;
-			if(NetType == (int)m_GlobalTcpAddr.type && net_addr_comp(&m_GlobalTcpAddr, &GlobalUdpAddr) != 0)
+			if(m_HaveGlobalTcpAddr && NetType == (int)m_GlobalTcpAddr.type && net_addr_comp(&m_GlobalTcpAddr, &GlobalUdpAddr) != 0)
 			{
 				NewConnectivity = CONNECTIVITY_DIFFERING_UDP_TCP_IP_ADDRESSES;
 				break;
