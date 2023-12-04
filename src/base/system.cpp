@@ -1461,7 +1461,7 @@ std::string windows_format_system_message(unsigned long error)
 
 	std::optional<std::string> message = windows_wide_to_utf8(wide_message);
 	LocalFree(wide_message);
-	return message.value_or("invalid error");
+	return message.value_or("(invalid UTF-16 in error message)");
 }
 #endif
 
@@ -4430,7 +4430,8 @@ void os_locale_str(char *locale, size_t length)
 	dbg_assert(GetUserDefaultLocaleName(wide_buffer, std::size(wide_buffer)) > 0, "GetUserDefaultLocaleName failure");
 
 	const std::optional<std::string> buffer = windows_wide_to_utf8(wide_buffer);
-	str_copy(locale, buffer.value_or("en-US").c_str(), length);
+	dbg_assert(buffer.has_value(), "GetUserDefaultLocaleName returned invalid UTF-16");
+	str_copy(locale, buffer.value().c_str(), length);
 #elif defined(CONF_PLATFORM_MACOS)
 	CFLocaleRef locale_ref = CFLocaleCopyCurrent();
 	CFStringRef locale_identifier_ref = static_cast<CFStringRef>(CFLocaleGetValue(locale_ref, kCFLocaleIdentifier));
