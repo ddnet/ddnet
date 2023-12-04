@@ -1415,7 +1415,7 @@ void IGameController::SetGameState(EGameState GameState, int Timer)
 			// vanilla does not do this
 			// but ddnet sends m_RoundStartTick in snap
 			// so we have to also update that to show current game timer
-			if(m_GameState == IGS_START_COUNTDOWN)
+			if(m_GameState == IGS_START_COUNTDOWN || m_GameState == IGS_GAME_RUNNING)
 				m_RoundStartTick = Server()->Tick();
 			// this is also gctf specific
 			// no idea how vanilla does it
