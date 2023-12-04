@@ -47,6 +47,7 @@ CCharacter::CCharacter(CGameWorld *pWorld, CNetObj_PlayerInput LastInput) :
 
 void CCharacter::Reset()
 {
+	StopRecording();
 	Destroy();
 }
 
@@ -914,7 +915,7 @@ bool CCharacter::IncreaseArmor(int Amount)
 	return true;
 }
 
-void CCharacter::Die(int Killer, int Weapon, bool SendKillMsg)
+void CCharacter::StopRecording()
 {
 	if(Server()->IsRecording(m_pPlayer->GetCID()))
 	{
@@ -927,7 +928,11 @@ void CCharacter::Die(int Killer, int Weapon, bool SendKillMsg)
 
 		pData->m_RecordStopTick = -1;
 	}
+}
 
+void CCharacter::Die(int Killer, int Weapon, bool SendKillMsg)
+{
+	StopRecording();
 	int ModeSpecial = GameServer()->m_pController->OnCharacterDeath(this, GameServer()->m_apPlayers[Killer], Weapon);
 
 	char aBuf[256];
