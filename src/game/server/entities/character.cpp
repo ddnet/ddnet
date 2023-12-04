@@ -63,7 +63,6 @@ void CCharacter::Reset()
 		pData->m_RecordStopTick = -1;
 	}
 
-
 	Destroy();
 }
 
