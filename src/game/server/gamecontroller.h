@@ -262,6 +262,10 @@ protected:
 		int m_TimeLimit;
 	} m_GameInfo;
 	void UpdateGameInfo(int ClientID);
+	/*
+		Variable: m_GameStartTick
+			Sent in snap to 0.7 clients for timer
+	*/
 	int m_GameStartTick;
 	int m_aTeamscore[protocol7::NUM_TEAMS];
 

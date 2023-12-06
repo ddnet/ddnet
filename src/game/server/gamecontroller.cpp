@@ -707,6 +707,7 @@ void IGameController::Tick()
 			case IGS_START_COUNTDOWN:
 			case IGS_GAME_PAUSED:
 				// freeze the game
+				++m_RoundStartTick;
 				++m_GameStartTick;
 				break;
 			case IGS_WARMUP_GAME:
