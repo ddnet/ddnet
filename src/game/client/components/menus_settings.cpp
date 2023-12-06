@@ -2691,9 +2691,17 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 			PREVIEW_SPAMMER,
 			PREVIEW_CLIENT
 		};
-		auto &&AddPreviewLine = [](int Index, int ClientID, const char *pName, const char *pText, int Flag, int Repeats) {
-			s_vLines.emplace_back();
-			SPreviewLine *pLine = &s_vLines[s_vLines.size() - 1];
+		auto &&SetPreviewLine = [](int Index, int ClientID, const char *pName, const char *pText, int Flag, int Repeats) {
+			SPreviewLine *pLine;
+			if((int)s_vLines.size() <= Index)
+			{
+				s_vLines.emplace_back();
+				pLine = &s_vLines.back();
+			}
+			else
+			{
+				pLine = &s_vLines[Index];
+			}
 			pLine->m_ClientID = ClientID;
 			pLine->m_Team = Flag & FLAG_TEAM;
 			pLine->m_Friend = Flag & FLAG_FRIEND;
@@ -2807,21 +2815,20 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 			return vec2{LocalCursor.m_LongestLineWidth + AppendCursor.m_LongestLineWidth, AppendCursor.Height() + RealMsgPaddingY};
 		};
 
-		// Init lines
-		if(s_vLines.empty())
+		// Set preview lines
 		{
 			char aLineBuilder[128];
 
 			str_format(aLineBuilder, sizeof(aLineBuilder), "'%s' entered and joined the game", aBuf);
-			AddPreviewLine(PREVIEW_SYS, -1, "*** ", aLineBuilder, 0, 0);
+			SetPreviewLine(PREVIEW_SYS, -1, "*** ", aLineBuilder, 0, 0);
 
 			str_format(aLineBuilder, sizeof(aLineBuilder), "Hey, how are you %s?", aBuf);
-			AddPreviewLine(PREVIEW_HIGHLIGHT, 7, "Random Tee", aLineBuilder, FLAG_HIGHLIGHT, 0);
+			SetPreviewLine(PREVIEW_HIGHLIGHT, 7, "Random Tee", aLineBuilder, FLAG_HIGHLIGHT, 0);
 
-			AddPreviewLine(PREVIEW_TEAM, 11, "Your Teammate", "Let's speedrun this!", FLAG_TEAM, 0);
-			AddPreviewLine(PREVIEW_FRIEND, 8, "Friend", "Hello there", FLAG_FRIEND, 0);
-			AddPreviewLine(PREVIEW_SPAMMER, 9, "Spammer", "Hey fools, I'm spamming here!", 0, 5);
-			AddPreviewLine(PREVIEW_CLIENT, -1, "— ", "Echo command executed", FLAG_CLIENT, 0);
+			SetPreviewLine(PREVIEW_TEAM, 11, "Your Teammate", "Let's speedrun this!", FLAG_TEAM, 0);
+			SetPreviewLine(PREVIEW_FRIEND, 8, "Friend", "Hello there", FLAG_FRIEND, 0);
+			SetPreviewLine(PREVIEW_SPAMMER, 9, "Spammer", "Hey fools, I'm spamming here!", 0, 5);
+			SetPreviewLine(PREVIEW_CLIENT, -1, "— ", "Echo command executed", FLAG_CLIENT, 0);
 		}
 
 		SetLineSkin(1, GameClient()->m_Skins.FindOrNullptr("pinky"));
