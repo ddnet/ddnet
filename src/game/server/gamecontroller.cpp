@@ -1417,7 +1417,10 @@ void IGameController::SetGameState(EGameState GameState, int Timer)
 			// but ddnet sends m_RoundStartTick in snap
 			// so we have to also update that to show current game timer
 			if(m_GameState == IGS_START_COUNTDOWN || m_GameState == IGS_GAME_RUNNING)
+			{
 				m_RoundStartTick = Server()->Tick();
+				// dbg_msg("ddnet-insta", "reset m_RoundStartTick");
+			}
 			// this is also gctf specific
 			// no idea how vanilla does it
 			// but this solves countdown delaying timelimit end
@@ -1425,8 +1428,11 @@ void IGameController::SetGameState(EGameState GameState, int Timer)
 			// timerstops at 00:00 and waits the additional countdown time
 			// before actually ending the game
 			// https://github.com/ZillyInsta/ddnet-insta/issues/41
-			if(m_GameState != IGS_GAME_RUNNING)
+			if(m_GameState == IGS_START_COUNTDOWN)
+			{
 				m_GameStartTick = Server()->Tick();
+				// dbg_msg("ddnet-insta", "reset m_GameStartTick");
+			}
 			m_Warmup = 0;
 			m_GameState = GameState;
 			m_GameStateTimer = TIMER_INFINITE;
