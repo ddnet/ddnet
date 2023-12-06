@@ -172,6 +172,12 @@ const char *CUnpacker::GetString(int SanitizeType)
 	}
 	m_pCurrent++;
 
+	if(!str_utf8_check(pPtr))
+	{
+		m_Error = true;
+		return "";
+	}
+
 	// sanitize all strings
 	if(SanitizeType & SANITIZE)
 		str_sanitize(pPtr);

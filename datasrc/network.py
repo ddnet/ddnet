@@ -439,7 +439,7 @@ Messages = [
 	]),
 
 	NetMessage("Sv_VoteSet", [
-		NetIntRange("m_Timeout", 0, 60),
+		NetIntRange("m_Timeout", 0, 'max_int'),
 		NetStringStrict("m_pDescription"),
 		NetStringStrict("m_pReason"),
 	]),

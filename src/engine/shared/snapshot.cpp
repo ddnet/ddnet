@@ -4,8 +4,8 @@
 #include "compression.h"
 #include "uuid_manager.h"
 
-#include <climits>
 #include <cstdlib>
+#include <limits>
 
 #include <base/math.h>
 #include <base/system.h>
@@ -256,10 +256,10 @@ CSnapshotDelta::CSnapshotDelta(const CSnapshotDelta &Old)
 	mem_zero(&m_Empty, sizeof(m_Empty));
 }
 
-void CSnapshotDelta::SetStaticsize(int ItemType, int Size)
+void CSnapshotDelta::SetStaticsize(int ItemType, size_t Size)
 {
-	if(ItemType < 0 || ItemType >= MAX_NETOBJSIZES)
-		return;
+	dbg_assert(ItemType >= 0 && ItemType < MAX_NETOBJSIZES, "ItemType invalid");
+	dbg_assert(Size <= (size_t)std::numeric_limits<int16_t>::max(), "Size invalid");
 	m_aItemSizes[ItemType] = Size;
 }
 
@@ -269,7 +269,7 @@ const CSnapshotDelta::CData *CSnapshotDelta::EmptyDelta() const
 }
 
 // TODO: OPT: this should be made much faster
-int CSnapshotDelta::CreateDelta(const CSnapshot *pFrom, CSnapshot *pTo, void *pDstData)
+int CSnapshotDelta::CreateDelta(const CSnapshot *pFrom, const CSnapshot *pTo, void *pDstData)
 {
 	CData *pDelta = (CData *)pDstData;
 	int *pData = (int *)pDelta->m_aData;
@@ -352,13 +352,6 @@ int CSnapshotDelta::CreateDelta(const CSnapshot *pFrom, CSnapshot *pTo, void *pD
 	return (int)((char *)pData - (char *)pDstData);
 }
 
-static int RangeCheck(void *pEnd, void *pPtr, int Size)
-{
-	if((const char *)pPtr + Size > (const char *)pEnd)
-		return -1;
-	return 0;
-}
-
 int CSnapshotDelta::UnpackDelta(const CSnapshot *pFrom, CSnapshot *pTo, const void *pSrcData, int DataSize)
 {
 	CData *pDelta = (CData *)pSrcData;
@@ -423,12 +416,12 @@ int CSnapshotDelta::UnpackDelta(const CSnapshot *pFrom, CSnapshot *pTo, const vo
 		{
 			if(pData + 1 > pEnd)
 				return -103;
-			if(*pData < 0 || (size_t)*pData > INT_MAX / sizeof(int32_t))
+			if(*pData < 0 || (size_t)*pData > std::numeric_limits<int32_t>::max() / sizeof(int32_t))
 				return -204;
 			ItemSize = (*pData++) * sizeof(int32_t);
 		}
 
-		if(ItemSize < 0 || RangeCheck(pEnd, pData, ItemSize))
+		if(ItemSize < 0 || (const char *)pEnd - (const char *)pData < ItemSize)
 			return -205;
 
 		const int Key = (Type << 16) | ID;
@@ -465,8 +458,8 @@ int CSnapshotDelta::UnpackDelta(const CSnapshot *pFrom, CSnapshot *pTo, const vo
 
 void CSnapshotStorage::Init()
 {
-	m_pFirst = 0;
-	m_pLast = 0;
+	m_pFirst = nullptr;
+	m_pLast = nullptr;
 }
 
 void CSnapshotStorage::PurgeAll()
@@ -481,8 +474,8 @@ void CSnapshotStorage::PurgeAll()
 	}
 
 	// no more snapshots in storage
-	m_pFirst = 0;
-	m_pLast = 0;
+	m_pFirst = nullptr;
+	m_pLast = nullptr;
 }
 
 void CSnapshotStorage::PurgeUntil(int Tick)
@@ -501,26 +494,23 @@ void CSnapshotStorage::PurgeUntil(int Tick)
 			break;
 
 		m_pFirst = pNext;
-		pNext->m_pPrev = 0x0;
+		pNext->m_pPrev = nullptr;
 
 		pHolder = pNext;
 	}
 
 	// no more snapshots in storage
-	m_pFirst = 0;
-	m_pLast = 0;
+	m_pFirst = nullptr;
+	m_pLast = nullptr;
 }
 
-void CSnapshotStorage::Add(int Tick, int64_t Tagtime, int DataSize, const void *pData, int AltDataSize, const void *pAltData)
+void CSnapshotStorage::Add(int Tick, int64_t Tagtime, size_t DataSize, const void *pData, size_t AltDataSize, const void *pAltData)
 {
-	// allocate memory for holder + snapshot_data
-	int TotalSize = sizeof(CHolder) + DataSize;
+	dbg_assert(DataSize <= (size_t)CSnapshot::MAX_SIZE, "Snapshot data size invalid");
+	dbg_assert(AltDataSize <= (size_t)CSnapshot::MAX_SIZE, "Alt snapshot data size invalid");
 
-	if(AltDataSize > 0)
-	{
-		TotalSize += AltDataSize;
-	}
-
+	// allocate memory for holder + snapshot data
+	const size_t TotalSize = sizeof(CHolder) + DataSize + AltDataSize;
 	CHolder *pHolder = (CHolder *)malloc(TotalSize);
 
 	// set data
@@ -530,7 +520,7 @@ void CSnapshotStorage::Add(int Tick, int64_t Tagtime, int DataSize, const void *
 	pHolder->m_pSnap = (CSnapshot *)(pHolder + 1);
 	mem_copy(pHolder->m_pSnap, pData, DataSize);
 
-	if(AltDataSize > 0) // create alternative if wanted
+	if(AltDataSize) // create alternative if wanted
 	{
 		pHolder->m_pAltSnap = (CSnapshot *)(((char *)pHolder->m_pSnap) + DataSize);
 		mem_copy(pHolder->m_pAltSnap, pAltData, AltDataSize);
@@ -538,12 +528,12 @@ void CSnapshotStorage::Add(int Tick, int64_t Tagtime, int DataSize, const void *
 	}
 	else
 	{
-		pHolder->m_pAltSnap = 0;
+		pHolder->m_pAltSnap = nullptr;
 		pHolder->m_AltSnapSize = 0;
 	}
 
 	// link
-	pHolder->m_pNext = 0;
+	pHolder->m_pNext = nullptr;
 	pHolder->m_pPrev = m_pLast;
 	if(m_pLast)
 		m_pLast->m_pNext = pHolder;
@@ -605,7 +595,7 @@ int *CSnapshotBuilder::GetItemData(int Key)
 		if(GetItem(i)->Key() == Key)
 			return GetItem(i)->Data();
 	}
-	return 0;
+	return nullptr;
 }
 
 int CSnapshotBuilder::Finish(void *pSnapData)
@@ -619,7 +609,7 @@ int CSnapshotBuilder::Finish(void *pSnapData)
 	return pSnap->TotalSize();
 }
 
-int CSnapshotBuilder::GetTypeFromIndex(int Index)
+int CSnapshotBuilder::GetTypeFromIndex(int Index) const
 {
 	return CSnapshot::MAX_TYPE - Index;
 }
@@ -657,7 +647,7 @@ void *CSnapshotBuilder::NewItem(int Type, int ID, int Size)
 {
 	if(ID == -1)
 	{
-		return 0;
+		return nullptr;
 	}
 
 	if(m_DataSize + sizeof(CSnapshotItem) + Size >= CSnapshot::MAX_SIZE ||
@@ -665,7 +655,7 @@ void *CSnapshotBuilder::NewItem(int Type, int ID, int Size)
 	{
 		dbg_assert(m_DataSize < CSnapshot::MAX_SIZE, "too much data");
 		dbg_assert(m_NumItems < CSnapshot::MAX_ITEMS, "too many items");
-		return 0;
+		return nullptr;
 	}
 
 	bool Extended = false;
