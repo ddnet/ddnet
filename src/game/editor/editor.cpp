@@ -907,7 +907,7 @@ void CEditor::DoAudioPreview(CUIRect View, const void *pPlayPauseButtonID, const
 			}
 			else
 			{
-				if(SampleID != m_ToolbarPreviewSound && m_ToolbarPreviewSound && Sound()->IsPlaying(m_ToolbarPreviewSound))
+				if(SampleID != m_ToolbarPreviewSound && m_ToolbarPreviewSound >= 0 && Sound()->IsPlaying(m_ToolbarPreviewSound))
 					Sound()->Pause(m_ToolbarPreviewSound);
 
 				Sound()->Play(CSounds::CHN_GUI, SampleID, ISound::FLAG_PREVIEW);
@@ -1351,7 +1351,7 @@ void CEditor::DoToolbarSounds(CUIRect ToolBar)
 	if(m_SelectedSound >= 0 && (size_t)m_SelectedSound < m_Map.m_vpSounds.size())
 	{
 		const std::shared_ptr<CEditorSound> pSelectedSound = m_Map.m_vpSounds[m_SelectedSound];
-		if(pSelectedSound->m_SoundID != m_ToolbarPreviewSound && m_ToolbarPreviewSound && Sound()->IsPlaying(m_ToolbarPreviewSound))
+		if(pSelectedSound->m_SoundID != m_ToolbarPreviewSound && m_ToolbarPreviewSound >= 0 && Sound()->IsPlaying(m_ToolbarPreviewSound))
 			Sound()->Stop(m_ToolbarPreviewSound);
 		m_ToolbarPreviewSound = pSelectedSound->m_SoundID;
 
@@ -7966,15 +7966,15 @@ void CEditor::OnWindowResize()
 
 void CEditor::OnClose()
 {
-	if(m_ToolbarPreviewSound && Sound()->IsPlaying(m_ToolbarPreviewSound))
+	if(m_ToolbarPreviewSound >= 0 && Sound()->IsPlaying(m_ToolbarPreviewSound))
 		Sound()->Pause(m_ToolbarPreviewSound);
-	if(m_FilePreviewSound && Sound()->IsPlaying(m_FilePreviewSound))
+	if(m_FilePreviewSound >= 0 && Sound()->IsPlaying(m_FilePreviewSound))
 		Sound()->Pause(m_FilePreviewSound);
 }
 
 void CEditor::OnDialogClose()
 {
-	if(m_FilePreviewSound)
+	if(m_FilePreviewSound >= 0)
 	{
 		Sound()->UnloadSample(m_FilePreviewSound);
 		m_FilePreviewSound = -1;
