@@ -186,7 +186,7 @@ public:
 	void SetPlayersReadyState(bool ReadyState);
 	bool IsPlayerReadyMode();
 	int IsGameRunning() { return m_GameState == IGS_GAME_RUNNING; }
-	int IsGameCountdown() { return m_GameState == IGS_START_COUNTDOWN; }
+	int IsGameCountdown() { return m_GameState == IGS_START_COUNTDOWN_ROUND_START || m_GameState == IGS_START_COUNTDOWN_UNPAUSE; }
 	void ToggleGamePause();
 	void AbortWarmup()
 	{
@@ -214,7 +214,8 @@ public:
 		IGS_WARMUP_GAME, // warmup started by game because there're not enough players (infinite)
 		IGS_WARMUP_USER, // warmup started by user action via rcon or new match (infinite or timer)
 
-		IGS_START_COUNTDOWN, // start countown to unpause the game or start match/round (tick timer)
+		IGS_START_COUNTDOWN_ROUND_START, // start countown to start match/round (tick timer)
+		IGS_START_COUNTDOWN_UNPAUSE, // start countown to unpause the game
 
 		IGS_GAME_PAUSED, // game paused (infinite or tick timer)
 		IGS_GAME_RUNNING, // game running (infinite)
@@ -234,8 +235,10 @@ public:
 			return "IGS_WARMUP_GAME";
 		case IGS_WARMUP_USER:
 			return "IGS_WARMUP_USER";
-		case IGS_START_COUNTDOWN:
-			return "IGS_START_COUNTDOWN";
+		case IGS_START_COUNTDOWN_ROUND_START:
+			return "IGS_START_COUNTDOWN_ROUND_START";
+		case IGS_START_COUNTDOWN_UNPAUSE:
+			return "IGS_START_COUNTDOWN_UNPAUSE";
 		case IGS_GAME_PAUSED:
 			return "IGS_GAME_PAUSED";
 		case IGS_GAME_RUNNING:
