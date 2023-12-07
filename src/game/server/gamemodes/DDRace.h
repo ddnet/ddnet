@@ -16,6 +16,7 @@ public:
 
 	void OnPlayerConnect(class CPlayer *pPlayer) override;
 	void OnPlayerDisconnect(class CPlayer *pPlayer, const char *pReason) override;
+	int OnSnapPlayerScore(class CPlayer *pPlayer, int SnappingClient) override;
 
 	void OnReset() override;
 

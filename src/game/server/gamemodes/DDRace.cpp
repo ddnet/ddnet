@@ -148,6 +148,34 @@ void CGameControllerDDRace::OnPlayerDisconnect(CPlayer *pPlayer, const char *pRe
 		Teams().SetForceCharacterTeam(ClientID, TEAM_FLOCK);
 }
 
+int CGameControllerDDRace::OnSnapPlayerScore(CPlayer *pPlayer, int SnappingClient)
+{
+	int Score;
+	// This is the time sent to the player while ingame (do not confuse to the one reported to the master server).
+	// Due to clients expecting this as a negative value, we have to make sure it's negative.
+	// Special numbers:
+	// -9999: means no time and isn't displayed in the scoreboard.
+	if(pPlayer->m_Score.has_value())
+	{
+		// shift the time by a second if the player actually took 9999
+		// seconds to finish the map.
+		if(pPlayer->m_Score.value() == 9999)
+			Score = -10000;
+		else
+			Score = -pPlayer->m_Score.value();
+	}
+	else
+	{
+		Score = -9999;
+	}
+
+	// send 0 if times of others are not shown
+	if(SnappingClient != pPlayer->GetCID() && g_Config.m_SvHideScore)
+		Score = -9999;
+
+	return Score;
+}
+
 void CGameControllerDDRace::OnReset()
 {
 	IGameController::OnReset();
