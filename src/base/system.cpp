@@ -1603,6 +1603,8 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 				dbg_msg("socket", "Setting BROADCAST on ipv6 failed: %d", net_errno());
 			}
 
+			// TODO: setting IP_TOS on ipv6 with setsockopt is not supported on Windows, see https://github.com/ddnet/ddnet/issues/7605
+#if !defined(CONF_FAMILY_WINDOWS)
 			{
 				/* set DSCP/TOS */
 				int iptos = 0x10 /* IPTOS_LOWDELAY */;
@@ -1611,6 +1613,7 @@ NETSOCKET net_udp_create(NETADDR bindaddr)
 					dbg_msg("socket", "Setting TOS on ipv6 failed: %d", net_errno());
 				}
 			}
+#endif
 		}
 	}
 
