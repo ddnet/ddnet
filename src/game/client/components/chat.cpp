@@ -261,6 +261,7 @@ bool CChat::OnInput(const IInput::CEvent &Event)
 	if(Event.m_Flags & IInput::FLAG_PRESS && Event.m_Key == KEY_TAB)
 	{
 		const bool ShiftPressed = Input()->ShiftIsPressed();
+		const char *pInputString = m_Input.GetString();
 
 		// fill the completion buffer
 		if(!m_CompletionUsed)
@@ -268,12 +269,12 @@ bool CChat::OnInput(const IInput::CEvent &Event)
 			const char *pCursor = m_Input.GetString() + m_Input.GetCursorOffset();
 			for(size_t Count = 0; Count < m_Input.GetCursorOffset() && *(pCursor - 1) != ' '; --pCursor, ++Count)
 				;
-			m_PlaceholderOffset = pCursor - m_Input.GetString();
+			m_PlaceholderOffset = pCursor - pInputString;
 
 			for(m_PlaceholderLength = 0; *pCursor && *pCursor != ' '; ++pCursor)
 				++m_PlaceholderLength;
 
-			str_truncate(m_aCompletionBuffer, sizeof(m_aCompletionBuffer), m_Input.GetString() + m_PlaceholderOffset, m_PlaceholderLength);
+			str_truncate(m_aCompletionBuffer, sizeof(m_aCompletionBuffer), pInputString + m_PlaceholderOffset, m_PlaceholderLength);
 		}
 
 		if(!m_CompletionUsed && m_aCompletionBuffer[0] != '/')
@@ -287,11 +288,13 @@ bool CChat::OnInput(const IInput::CEvent &Event)
 				{
 					PlayerName = m_pClient->m_aClients[PlayerInfo->m_ClientID].m_aName;
 					FoundInput = str_utf8_find_nocase(PlayerName, m_aCompletionBuffer);
+					bool IsTeamChatMember = (m_Mode == MODE_TEAM && pInputString[0] != '/' && m_pClient->m_Teams.SameTeam(PlayerInfo->m_ClientID, m_pClient->m_aLocalIDs[g_Config.m_ClDummy]));
 					if(FoundInput != 0)
 					{
 						m_aPlayerCompletionList[m_PlayerCompletionListLength].ClientID = PlayerInfo->m_ClientID;
 						// The score for suggesting a player name is determined by the distance of the search input to the beginning of the player name
-						m_aPlayerCompletionList[m_PlayerCompletionListLength].Score = (int)(FoundInput - PlayerName);
+						// If player is in team chat mode, then we first suggest team members by assigning them a score of -1
+						m_aPlayerCompletionList[m_PlayerCompletionListLength].Score = IsTeamChatMember ? -1 : (int)(FoundInput - PlayerName);
 						m_PlayerCompletionListLength++;
 					}
 				}
