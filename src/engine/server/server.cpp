@@ -308,6 +308,35 @@ void CServer::CClient::Reset()
 	m_NextMapChunk = 0;
 	m_Flags = 0;
 	m_RedirectDropTime = 0;
+
+	m_State = 0;
+	m_Latency = 0;
+
+	m_Traffic = 0;
+	m_TrafficSince = 0;
+
+	m_aName[0] = '\0';
+	m_aClan[0] = '\0';
+	m_Country = 0;
+	m_Authed = 0;
+	m_AuthKey = 0;
+	m_AuthTries = 0;
+	m_ShowIps = false;
+	m_DebugDummy = false;
+
+	m_HasPersistentData = false;
+	m_pPersistentData = nullptr;
+
+	mem_zero(&m_Addr, sizeof(m_Addr));
+	m_GotDDNetVersionPacket = false;
+	m_DDNetVersionSettled = false;
+	m_DDNetVersion = 0;
+	m_aDDNetVersionStr[0] = '\0';
+	m_ConnectionID = RandomUuid();
+	m_RedirectDropTime = 0;
+
+	m_DnsblState = 0;
+	m_Sixup = false;
 }
 
 CServer::CServer()
