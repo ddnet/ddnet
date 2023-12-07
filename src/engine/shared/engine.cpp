@@ -71,6 +71,7 @@ public:
 	~CEngine() override
 	{
 		m_JobPool.Destroy();
+		CNetBase::CloseLog();
 	}
 
 	void Init() override
