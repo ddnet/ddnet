@@ -791,13 +791,37 @@ typedef struct sockaddr_un UNIXSOCKETADDR;
 #endif
 
 /**
- * Initiates network functionality.
+ * Initializes network functionality.
  *
  * @ingroup Network-General
  *
  * @remark You must call this function before using any other network functions.
+ * @remark Each call to this function must eventually be balanced by a call to
+ * `net_uninit` to uninitialize the network functionality.
  */
 void net_init();
+
+/**
+ * Uninitializes network functionality.
+ *
+ * @ingroup Network-General
+ *
+ * @remark You must call this function once for every previous call to `net_init`.
+ */
+void net_uninit();
+
+/**
+ * This is a RAII wrapper to initialize/uninitialize the network functionality,
+ * i.e. it wraps the `net_init` and `net_uninit` functions.
+ *
+ * @ingroup Network-General
+ */
+class CNetworkBase
+{
+public:
+	CNetworkBase();
+	~CNetworkBase();
+};
 
 /*
 	Function: net_host_lookup

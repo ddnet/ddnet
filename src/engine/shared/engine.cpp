@@ -59,7 +59,6 @@ public:
 			}
 
 			// init the network
-			net_init();
 			CNetBase::Init();
 		}
 

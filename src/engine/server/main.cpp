@@ -106,6 +106,8 @@ int main(int argc, const char **argv)
 	init_exception_handler();
 #endif
 
+	const CNetworkBase NetworkBase;
+
 	CServer *pServer = CreateServer();
 	pServer->SetLoggers(pFutureFileLogger, std::move(pStdoutLogger));
 

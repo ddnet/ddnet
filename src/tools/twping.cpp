@@ -13,8 +13,8 @@ int main(int argc, const char **argv)
 
 	secure_random_init();
 	log_set_global_logger_default();
+	const CNetworkBase NetworkBase;
 
-	net_init();
 	NETADDR BindAddr;
 	mem_zero(&BindAddr, sizeof(BindAddr));
 	BindAddr.type = NETTYPE_ALL;

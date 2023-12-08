@@ -137,7 +137,7 @@ int main(int argc, const char **argv)
 	CCmdlineFix CmdlineFix(&argc, &argv);
 	log_set_global_logger_default();
 	::testing::InitGoogleTest(&argc, const_cast<char **>(argv));
-	net_init();
+	const CNetworkBase NetworkBase;
 	if(secure_random_init())
 	{
 		fprintf(stderr, "random init failed\n");

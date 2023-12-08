@@ -21,7 +21,8 @@ int main(int argc, const char **argv)
 		return 2;
 	}
 
-	net_init();
+	const CNetworkBase NetworkBase;
+
 	NETADDR BindAddr;
 	mem_zero(&BindAddr, sizeof(BindAddr));
 	BindAddr.type = NETTYPE_ALL;

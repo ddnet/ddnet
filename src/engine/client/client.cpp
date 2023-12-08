@@ -4334,6 +4334,8 @@ int main(int argc, const char **argv)
 		// Client will crash due to assertion, don't call PerformAllCleanup in this inconsistent state
 	});
 
+	const CNetworkBase NetworkBase;
+
 	// create the components
 	IEngine *pEngine = CreateEngine(GAME_NAME, pFutureConsoleLogger, 2 * std::thread::hardware_concurrency() + 2);
 	pKernel->RegisterInterface(pEngine, false);

@@ -2062,8 +2062,25 @@ void net_init()
 {
 #if defined(CONF_FAMILY_WINDOWS)
 	WSADATA wsa_data;
-	dbg_assert(WSAStartup(MAKEWORD(1, 1), &wsa_data) == 0, "network initialization failed.");
+	dbg_assert(WSAStartup(MAKEWORD(1, 1), &wsa_data) == 0, "Network initialization failed");
 #endif
+}
+
+void net_uninit()
+{
+#if defined(CONF_FAMILY_WINDOWS)
+	dbg_assert(WSACleanup() == 0, "Network uninitialization failed");
+#endif
+}
+
+CNetworkBase::CNetworkBase()
+{
+	net_init();
+}
+
+CNetworkBase::~CNetworkBase()
+{
+	net_uninit();
 }
 
 #if defined(CONF_FAMILY_UNIX)
