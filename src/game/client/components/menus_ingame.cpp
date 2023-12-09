@@ -325,7 +325,7 @@ void CMenus::RenderPlayers(CUIRect MainView)
 		);
 
 		// copy button
-		if (DoButton_Menu(&s_CopySkins[Index], Localize("Copy"), 0, &Button2))
+		if (DoButton_Menu(&s_CopySkins[Index], Localize("Copy Skins"), 0, &Button2))
 		{
 			g_Config.m_ClPlayerUseCustomColor = CurrentClient.m_UseCustomColor;
 			g_Config.m_ClPlayerColorBody = CurrentClient.m_ColorBody;
