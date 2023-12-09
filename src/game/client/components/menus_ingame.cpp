@@ -271,6 +271,7 @@ void CMenus::RenderPlayers(CUIRect MainView)
 
 	// options
 	static char s_aPlayerIDs[MAX_CLIENTS][3] = {{0}};
+	static CButtonContainer s_CopySkins[MAX_CLIENTS]; 
 
 	for(int i = 0, Count = 0; i < MAX_CLIENTS; ++i)
 	{
@@ -300,14 +301,13 @@ void CMenus::RenderPlayers(CUIRect MainView)
 
 		CTeeRenderInfo TeeInfo = CurrentClient.m_RenderInfo;
 		TeeInfo.m_Size = Button.h;
-
 		const CAnimState *pIdleState = CAnimState::GetIdle();
 		vec2 OffsetToMid;
 		RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &TeeInfo, OffsetToMid);
 		vec2 TeeRenderPos(Button.x + Button.h / 2, Button.y + Button.h / 2 + OffsetToMid.y);
-
+	    // Lista de players do servidor
 		RenderTools()->RenderTee(pIdleState, &TeeInfo, EMOTE_NORMAL, vec2(1.0f, 0.0f), TeeRenderPos);
-
+		// Lista de players do servidor
 		Player.HSplitTop(1.5f, nullptr, &Player);
 		Player.VSplitMid(&Player, &Button);
 		Row.VSplitRight(210.0f, &Button2, &Row);
@@ -315,8 +315,25 @@ void CMenus::RenderPlayers(CUIRect MainView)
 		UI()->DoLabel(&Player, CurrentClient.m_aName, 14.0f, TEXTALIGN_ML);
 		UI()->DoLabel(&Button, CurrentClient.m_aClan, 14.0f, TEXTALIGN_ML);
 
-		m_pClient->m_CountryFlags.Render(CurrentClient.m_Country, ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f),
-			Button2.x, Button2.y + Button2.h / 2.0f - 0.75f * Button2.h / 2.0f, 1.5f * Button2.h, 0.75f * Button2.h);
+		m_pClient->m_CountryFlags.Render(
+			CurrentClient.m_Country, 
+			ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f),
+			Button2.x - 60.0f, 
+			Button2.y + Button2.h / 2.0f - 0.75f * Button2.h / 2.0f, 
+			1.5f * Button2.h, 
+			0.75f * Button2.h
+		);
+
+		// copy button
+		if (DoButton_Menu(&s_CopySkins[Index], Localize("Copy"), 0, &Button2))
+		{
+			g_Config.m_ClPlayerUseCustomColor = CurrentClient.m_UseCustomColor;
+			g_Config.m_ClPlayerColorBody = CurrentClient.m_ColorBody;
+			g_Config.m_ClPlayerColorFeet = CurrentClient.m_ColorFeet;
+			str_copy(g_Config.m_ClPlayerSkin, CurrentClient.m_aSkinName, sizeof(g_Config.m_ClPlayerSkin));
+
+			m_pClient->SendInfo(false);
+		}
 
 		// ignore chat button
 		Row.HMargin(2.0f, &Row);
