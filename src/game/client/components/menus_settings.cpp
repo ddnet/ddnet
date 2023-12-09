@@ -2500,7 +2500,9 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClNameplates, Localize("Show name plates"), &g_Config.m_ClNameplates, &Section, LineSize);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowKillMessages, Localize("Show kill messages"), &g_Config.m_ClShowKillMessages, &Section, LineSize);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowhudScore, Localize("Show score"), &g_Config.m_ClShowhudScore, &Section, LineSize);
-
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowfps, Localize("Show FPS"), &g_Config.m_ClShowfps , &Section, LineSize);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowpred, Localize("Show Pred"), &g_Config.m_ClShowpred , &Section, LineSize);
+		
 		// Settings of the HUD element for votes
 		LeftView.HSplitTop(SectionTotalMargin + LineSize, &Section, &LeftView);
 		Section.Margin(SectionMargin, &Section);
