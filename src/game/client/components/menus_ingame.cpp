@@ -305,9 +305,7 @@ void CMenus::RenderPlayers(CUIRect MainView)
 		vec2 OffsetToMid;
 		RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &TeeInfo, OffsetToMid);
 		vec2 TeeRenderPos(Button.x + Button.h / 2, Button.y + Button.h / 2 + OffsetToMid.y);
-	    // Lista de players do servidor
 		RenderTools()->RenderTee(pIdleState, &TeeInfo, EMOTE_NORMAL, vec2(1.0f, 0.0f), TeeRenderPos);
-		// Lista de players do servidor
 		Player.HSplitTop(1.5f, nullptr, &Player);
 		Player.VSplitMid(&Player, &Button);
 		Row.VSplitRight(210.0f, &Button2, &Row);
@@ -324,7 +322,7 @@ void CMenus::RenderPlayers(CUIRect MainView)
 			0.75f * Button2.h
 		);
 
-		// copy button
+		// copy skins button
 		if (DoButton_Menu(&s_CopySkins[Index], Localize("Copy Skins"), 0, &Button2))
 		{
 			g_Config.m_ClPlayerUseCustomColor = CurrentClient.m_UseCustomColor;
