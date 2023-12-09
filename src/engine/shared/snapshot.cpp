@@ -464,17 +464,14 @@ void CSnapshotStorage::Init()
 
 void CSnapshotStorage::PurgeAll()
 {
-	CHolder *pHolder = m_pFirst;
-
-	while(pHolder)
+	while(m_pFirst)
 	{
-		CHolder *pNext = pHolder->m_pNext;
-		free(pHolder);
-		pHolder = pNext;
+		CHolder *pNext = m_pFirst->m_pNext;
+		free(m_pFirst->m_pSnap);
+		free(m_pFirst->m_pAltSnap);
+		free(m_pFirst);
+		m_pFirst = pNext;
 	}
-
-	// no more snapshots in storage
-	m_pFirst = nullptr;
 	m_pLast = nullptr;
 }
 
@@ -487,6 +484,8 @@ void CSnapshotStorage::PurgeUntil(int Tick)
 		CHolder *pNext = pHolder->m_pNext;
 		if(pHolder->m_Tick >= Tick)
 			return; // no more to remove
+		free(pHolder->m_pSnap);
+		free(pHolder->m_pAltSnap);
 		free(pHolder);
 
 		// did we come to the end of the list?
@@ -495,7 +494,6 @@ void CSnapshotStorage::PurgeUntil(int Tick)
 
 		m_pFirst = pNext;
 		pNext->m_pPrev = nullptr;
-
 		pHolder = pNext;
 	}
 
@@ -509,20 +507,17 @@ void CSnapshotStorage::Add(int Tick, int64_t Tagtime, size_t DataSize, const voi
 	dbg_assert(DataSize <= (size_t)CSnapshot::MAX_SIZE, "Snapshot data size invalid");
 	dbg_assert(AltDataSize <= (size_t)CSnapshot::MAX_SIZE, "Alt snapshot data size invalid");
 
-	// allocate memory for holder + snapshot data
-	const size_t TotalSize = sizeof(CHolder) + DataSize + AltDataSize;
-	CHolder *pHolder = (CHolder *)malloc(TotalSize);
-
-	// set data
+	CHolder *pHolder = static_cast<CHolder *>(malloc(sizeof(CHolder)));
 	pHolder->m_Tick = Tick;
 	pHolder->m_Tagtime = Tagtime;
-	pHolder->m_SnapSize = DataSize;
-	pHolder->m_pSnap = (CSnapshot *)(pHolder + 1);
+
+	pHolder->m_pSnap = static_cast<CSnapshot *>(malloc(DataSize));
 	mem_copy(pHolder->m_pSnap, pData, DataSize);
+	pHolder->m_SnapSize = DataSize;
 
 	if(AltDataSize) // create alternative if wanted
 	{
-		pHolder->m_pAltSnap = (CSnapshot *)(((char *)pHolder->m_pSnap) + DataSize);
+		pHolder->m_pAltSnap = static_cast<CSnapshot *>(malloc(AltDataSize));
 		mem_copy(pHolder->m_pAltSnap, pAltData, AltDataSize);
 		pHolder->m_AltSnapSize = AltDataSize;
 	}
