@@ -1,4 +1,5 @@
 #include "editor.h"
+#include "editor_actions.h"
 
 #include <game/editor/mapitems/image.h>
 
@@ -184,10 +185,15 @@ static void SetTilelayerIndices(const std::shared_ptr<CLayerTiles> &pLayer, cons
 	}
 }
 
-void CEditor::AddTileart()
+void CEditor::AddTileart(bool IgnoreHistory)
 {
+	char aTileArtFileName[IO_MAX_PATH_LENGTH];
+	IStorage::StripPathAndExtension(m_aTileartFilename, aTileArtFileName, sizeof(aTileArtFileName));
+
 	std::shared_ptr<CLayerGroup> pGroup = m_Map.NewGroup();
-	str_copy(pGroup->m_aName, m_aTileartFilename);
+	str_copy(pGroup->m_aName, aTileArtFileName);
+
+	int ImageCount = m_Map.m_vpImages.size();
 
 	auto vUniqueColors = GetUniqueColors(m_TileartImageInfo);
 	auto vaColorGroups = GroupColors(vUniqueColors);
@@ -195,11 +201,16 @@ void CEditor::AddTileart()
 	char aImageName[IO_MAX_PATH_LENGTH];
 	for(size_t i = 0; i < vColorImages.size(); i++)
 	{
-		str_format(aImageName, sizeof(aImageName), "%s %" PRIzu, m_aTileartFilename, i + 1);
+		str_format(aImageName, sizeof(aImageName), "%s %" PRIzu, aTileArtFileName, i + 1);
 		std::shared_ptr<CLayerTiles> pLayer = AddLayerWithImage(this, pGroup, m_TileartImageInfo.m_Width, m_TileartImageInfo.m_Height, vColorImages[i], aImageName);
 		SetTilelayerIndices(pLayer, vaColorGroups[i], m_TileartImageInfo);
 	}
-	SortImages();
+	auto IndexMap = SortImages();
+
+	if(!IgnoreHistory)
+	{
+		m_EditorHistory.RecordAction(std::make_shared<CEditorActionTileArt>(this, ImageCount, m_aTileartFilename, IndexMap));
+	}
 
 	free(m_TileartImageInfo.m_pData);
 	m_TileartImageInfo.m_pData = nullptr;
@@ -237,7 +248,7 @@ bool CEditor::CallbackAddTileart(const char *pFilepath, int StorageType, void *p
 		return false;
 	}
 
-	IStorage::StripPathAndExtension(pFilepath, pEditor->m_aTileartFilename, sizeof(pEditor->m_aTileartFilename));
+	str_copy(pEditor->m_aTileartFilename, pFilepath);
 	if(pEditor->m_TileartImageInfo.m_Width * pEditor->m_TileartImageInfo.m_Height > 10'000)
 	{
 		pEditor->m_PopupEventType = CEditor::POPEVENT_PIXELART_BIG_IMAGE;

@@ -25,6 +25,7 @@ public:
 	void AddPoint(int Time, int v0, int v1 = 0, int v2 = 0, int v3 = 0);
 	float EndTime() const;
 	int GetChannels() const;
+	EType Type() const { return m_Type; }
 
 private:
 	void Resort();

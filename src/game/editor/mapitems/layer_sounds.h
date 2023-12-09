@@ -23,6 +23,7 @@ public:
 	void ModifySoundIndex(FIndexModifyFunction pfnFunc) override;
 
 	std::shared_ptr<CLayer> Duplicate() const override;
+	const char *TypeName() const override;
 
 	int m_Sound;
 	std::vector<CSoundSource> m_vSources;

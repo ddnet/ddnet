@@ -1,7 +1,20 @@
 #ifndef GAME_EDITOR_MAPITEMS_LAYER_TILES_H
 #define GAME_EDITOR_MAPITEMS_LAYER_TILES_H
 
+#include <game/editor/editor_trackers.h>
+#include <map>
+
 #include "layer.h"
+
+struct STileStateChange
+{
+	bool m_Changed;
+	CTile m_Previous;
+	CTile m_Current;
+};
+
+template<typename T>
+using EditorTileStateChangeHistory = std::map<int, std::map<int, T>>;
 
 enum
 {
@@ -89,6 +102,7 @@ public:
 
 	virtual CTile GetTile(int x, int y);
 	virtual void SetTile(int x, int y, CTile Tile);
+	void SetTileIgnoreHistory(int x, int y, CTile Tile);
 
 	virtual void Resize(int NewW, int NewH);
 	virtual void Shift(int Direction);
@@ -114,6 +128,7 @@ public:
 	void BrushRotate(float Amount) override;
 
 	std::shared_ptr<CLayer> Duplicate() const override;
+	const char *TypeName() const override;
 
 	virtual void ShowInfo();
 	CUI::EPopupMenuFunctionResult RenderProperties(CUIRect *pToolbox) override;
@@ -130,7 +145,7 @@ public:
 		int m_Height = -1;
 		int m_Color = 0;
 	};
-	static CUI::EPopupMenuFunctionResult RenderCommonProperties(SCommonPropState &State, CEditor *pEditor, CUIRect *pToolbox, std::vector<std::shared_ptr<CLayerTiles>> &vpLayers);
+	static CUI::EPopupMenuFunctionResult RenderCommonProperties(SCommonPropState &State, CEditor *pEditor, CUIRect *pToolbox, std::vector<std::shared_ptr<CLayerTiles>> &vpLayers, std::vector<int> &vLayerIndices);
 
 	void ModifyImageIndex(FIndexModifyFunction pfnFunc) override;
 	void ModifyEnvelopeIndex(FIndexModifyFunction pfnFunc) override;
@@ -166,6 +181,14 @@ public:
 	int m_Switch;
 	int m_Tune;
 	char m_aFileName[IO_MAX_PATH_LENGTH];
+
+	EditorTileStateChangeHistory<STileStateChange> m_TilesHistory;
+	inline virtual void ClearHistory() { m_TilesHistory.clear(); }
+
+protected:
+	void RecordStateChange(int x, int y, CTile Previous, CTile Tile);
+
+	friend class CAutoMapper;
 };
 
 #endif
