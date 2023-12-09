@@ -199,6 +199,7 @@ public:
 
 	float m_FontSize;
 	float m_AlignedFontSize;
+	float m_LineSpacing;
 
 	ETextCursorSelectionMode m_CalculateSelectionMode;
 	float m_SelectionHeightFactor;
@@ -221,7 +222,7 @@ public:
 
 	float Height() const
 	{
-		return m_LineCount * m_AlignedFontSize;
+		return m_LineCount * m_AlignedFontSize + std::max(0, m_LineCount - 1) * m_LineSpacing;
 	}
 
 	STextBoundingBox BoundingBox() const
@@ -305,7 +306,7 @@ public:
 	virtual void TextSelectionColor(ColorRGBA rgb) = 0;
 	virtual void Text(float x, float y, float Size, const char *pText, float LineWidth = -1.0f) = 0;
 	virtual float TextWidth(float Size, const char *pText, int StrLength = -1, float LineWidth = -1.0f, int Flags = 0, const STextSizeProperties &TextSizeProps = {}) = 0;
-	virtual STextBoundingBox TextBoundingBox(float Size, const char *pText, int StrLength = -1, float LineWidth = -1.0f, int Flags = 0) = 0;
+	virtual STextBoundingBox TextBoundingBox(float Size, const char *pText, int StrLength = -1, float LineWidth = -1.0f, float LineSpacing = 0.0f, int Flags = 0) = 0;
 
 	virtual ColorRGBA GetTextColor() const = 0;
 	virtual ColorRGBA GetTextOutlineColor() const = 0;

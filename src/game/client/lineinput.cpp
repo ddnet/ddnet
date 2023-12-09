@@ -388,7 +388,7 @@ bool CLineInput::ProcessInput(const IInput::CEvent &Event)
 	return m_WasChanged || KeyHandled;
 }
 
-STextBoundingBox CLineInput::Render(const CUIRect *pRect, float FontSize, int Align, bool Changed, float LineWidth)
+STextBoundingBox CLineInput::Render(const CUIRect *pRect, float FontSize, int Align, bool Changed, float LineWidth, float LineSpacing)
 {
 	// update derived attributes to handle external changes to the buffer
 	UpdateStrData();
@@ -422,12 +422,13 @@ STextBoundingBox CLineInput::Render(const CUIRect *pRect, float FontSize, int Al
 			pDisplayStr = DisplayStrBuffer.c_str();
 		}
 
-		const STextBoundingBox BoundingBox = TextRender()->TextBoundingBox(FontSize, pDisplayStr, -1, LineWidth);
+		const STextBoundingBox BoundingBox = TextRender()->TextBoundingBox(FontSize, pDisplayStr, -1, LineWidth, LineSpacing);
 		const vec2 CursorPos = CUI::CalcAlignedCursorPos(pRect, BoundingBox.Size(), Align);
 
 		TextRender()->SetCursor(&Cursor, CursorPos.x, CursorPos.y, FontSize, TEXTFLAG_RENDER);
 		Cursor.m_LineWidth = LineWidth;
 		Cursor.m_ForceCursorRendering = Changed;
+		Cursor.m_LineSpacing = LineSpacing;
 		Cursor.m_PressMouse.x = m_MouseSelection.m_PressMouse.x;
 		Cursor.m_ReleaseMouse.x = m_MouseSelection.m_ReleaseMouse.x;
 		if(LineWidth < 0.0f)
@@ -497,6 +498,7 @@ STextBoundingBox CLineInput::Render(const CUIRect *pRect, float FontSize, int Al
 		CTextCursor CaretCursor;
 		TextRender()->SetCursor(&CaretCursor, CursorPos.x, CursorPos.y, FontSize, 0);
 		CaretCursor.m_LineWidth = LineWidth;
+		CaretCursor.m_LineSpacing = LineSpacing;
 		CaretCursor.m_CursorMode = TEXT_CURSOR_CURSOR_MODE_SET;
 		CaretCursor.m_CursorCharacter = str_utf8_offset_bytes_to_chars(pDisplayStr, DisplayCursorOffset);
 		TextRender()->TextEx(&CaretCursor, pDisplayStr);
@@ -504,10 +506,11 @@ STextBoundingBox CLineInput::Render(const CUIRect *pRect, float FontSize, int Al
 	}
 	else
 	{
-		const STextBoundingBox BoundingBox = TextRender()->TextBoundingBox(FontSize, pDisplayStr, -1, LineWidth);
+		const STextBoundingBox BoundingBox = TextRender()->TextBoundingBox(FontSize, pDisplayStr, -1, LineWidth, LineSpacing);
 		const vec2 CursorPos = CUI::CalcAlignedCursorPos(pRect, BoundingBox.Size(), Align);
 		TextRender()->SetCursor(&Cursor, CursorPos.x, CursorPos.y, FontSize, TEXTFLAG_RENDER);
 		Cursor.m_LineWidth = LineWidth;
+		Cursor.m_LineSpacing = LineSpacing;
 		TextRender()->TextEx(&Cursor, pDisplayStr);
 	}
 
