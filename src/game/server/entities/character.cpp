@@ -995,6 +995,7 @@ void CCharacter::Die(int Killer, int Weapon, bool SendKillMsg)
 	m_pPlayer->m_RespawnTick = Server()->Tick() + Server()->TickSpeed() / 2;
 	int ModeSpecial = GameServer()->m_pController->OnCharacterDeath(this, (Killer < 0) ? nullptr : GameServer()->m_apPlayers[Killer], Weapon);
 
+	char aBuf[512];
 	if(Killer < 0)
 	{
 		str_format(aBuf, sizeof(aBuf), "kill killer='%d:%d:' victim='%d:%d:%s' weapon=%d special=%d",
