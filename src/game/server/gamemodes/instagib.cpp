@@ -15,6 +15,24 @@ CGameControllerInstagib::CGameControllerInstagib(class CGameContext *pGameServer
 
 CGameControllerInstagib::~CGameControllerInstagib() = default;
 
+int CGameControllerInstagib::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon)
+{
+	int ModeSpecial = CGameControllerDDRace::OnCharacterDeath(pVictim, pKiller, Weapon);
+	// always log kill messages because they are nice for stats
+	// do not log them twice when log level is above debug
+	if(g_Config.m_StdoutOutputLevel < IConsole::OUTPUT_LEVEL_DEBUG)
+	{
+		int Killer = pKiller->GetCID();
+		char aBuf[256];
+		str_format(aBuf, sizeof(aBuf), "kill killer='%d:%s' victim='%d:%s' weapon=%d special=%d",
+			Killer, Server()->ClientName(Killer),
+			pVictim->GetPlayer()->GetCID(), Server()->ClientName(pVictim->GetPlayer()->GetCID()), Weapon, ModeSpecial);
+		GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
+	}
+
+	return ModeSpecial;
+}
+
 void CGameControllerInstagib::Tick()
 {
 	CGameControllerDDRace::Tick();
