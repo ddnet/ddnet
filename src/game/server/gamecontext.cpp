@@ -1662,9 +1662,8 @@ void CGameContext::OnClientConnected(int ClientID, void *pData)
 
 	if(m_apPlayers[ClientID])
 		delete m_apPlayers[ClientID];
-	m_apPlayers[ClientID] = new(ClientID) CPlayer(this, NextUniqueClientID, ClientID, StartTeam);
+	m_apPlayers[ClientID] = new(ClientID) CPlayer(this, GetNextUniqueClientID(), ClientID, StartTeam);
 	m_apPlayers[ClientID]->SetInitialAfk(Afk);
-	NextUniqueClientID += 1;
 
 	SendMotd(ClientID);
 	SendSettings(ClientID);
@@ -4558,6 +4557,12 @@ void CGameContext::ForceVote(int EnforcerID, bool Success)
 	SendChatTarget(-1, aBuf);
 	str_format(aBuf, sizeof(aBuf), "forcing vote %s", pOption);
 	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+}
+
+uint32_t CGameContext::GetNextUniqueClientID()
+{
+	// starting 1 to make 0 the special value "no client id"
+	return ++m_LastUniqueClientID;
 }
 
 bool CGameContext::RateLimitPlayerVote(int ClientID)
