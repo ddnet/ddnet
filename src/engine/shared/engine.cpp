@@ -49,15 +49,8 @@ public:
 		str_copy(m_aAppName, pAppname);
 		if(!Test)
 		{
-			//
 			dbg_msg("engine", "running on %s-%s-%s", CONF_FAMILY_STRING, CONF_PLATFORM_STRING, CONF_ARCH_STRING);
-#ifdef CONF_ARCH_ENDIAN_LITTLE
-			dbg_msg("engine", "arch is little endian");
-#elif defined(CONF_ARCH_ENDIAN_BIG)
-			dbg_msg("engine", "arch is big endian");
-#else
-			dbg_msg("engine", "unknown endian");
-#endif
+			dbg_msg("engine", "arch is %s", CONF_ARCH_ENDIAN_STRING);
 
 			char aVersionStr[128];
 			if(os_version_str(aVersionStr, sizeof(aVersionStr)))

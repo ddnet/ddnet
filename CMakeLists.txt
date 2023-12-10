@@ -2286,13 +2286,22 @@ if(CLIENT)
     component.h
     editor.cpp
     editor.h
+    editor_action.h
+    editor_actions.cpp
+    editor_actions.h
+    editor_history.cpp
+    editor_history.h
     editor_object.cpp
     editor_object.h
+    editor_props.cpp
+    editor_trackers.cpp
+    editor_trackers.h
     explanations.cpp
     map_grid.cpp
     map_grid.h
     map_view.cpp
     map_view.h
+    mapitems.h
     mapitems/envelope.cpp
     mapitems/envelope.h
     mapitems/image.cpp

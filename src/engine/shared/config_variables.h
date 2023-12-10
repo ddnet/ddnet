@@ -248,6 +248,7 @@ MACRO_CONFIG_INT(ClRefreshRateInactive, cl_refresh_rate_inactive, 120, 0, 10000,
 MACRO_CONFIG_INT(ClEditor, cl_editor, 0, 0, 1, CFGFLAG_CLIENT, "Open the map editor")
 MACRO_CONFIG_INT(ClEditorDilate, cl_editor_dilate, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Automatically dilates embedded images")
 MACRO_CONFIG_STR(ClSkinFilterString, cl_skin_filter_string, 25, "", CFGFLAG_SAVE | CFGFLAG_CLIENT, "Skin filtering string")
+MACRO_CONFIG_INT(ClEditorMaxHistory, cl_editor_max_history, 50, 1, 500, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Maximum number of undo actions in the editor history (not shared between editor, envelope editor and server settings editor)")
 
 MACRO_CONFIG_INT(ClAutoDemoRecord, cl_auto_demo_record, 1, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Automatically record demos")
 MACRO_CONFIG_INT(ClAutoDemoOnConnect, cl_auto_demo_on_connect, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_CLIENT, "Only start a new demo when connect while automatically record demos")

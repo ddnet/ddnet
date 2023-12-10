@@ -156,7 +156,7 @@ struct SIntConfigVariable : public SConfigVariable
 
 	void ResetToOld() override
 	{
-		SetValue(m_OldValue);
+		*m_pVariable = m_OldValue;
 	}
 };
 
@@ -257,7 +257,7 @@ struct SColorConfigVariable : public SConfigVariable
 
 	void ResetToOld() override
 	{
-		SetValue(m_OldValue);
+		*m_pVariable = m_OldValue;
 	}
 };
 
@@ -362,7 +362,7 @@ struct SStringConfigVariable : public SConfigVariable
 
 	void ResetToOld() override
 	{
-		SetValue(m_pOldValue);
+		str_copy(m_pStr, m_pOldValue, m_MaxSize);
 	}
 };
 

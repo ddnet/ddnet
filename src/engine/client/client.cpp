@@ -1402,7 +1402,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 				pMapUrl = m_aMapDetailsUrl[0] ? m_aMapDetailsUrl : nullptr;
 			}
 
-			if(LoadMapSearch(pMap, pMapSha256, MapCrc) != nullptr)
+			if(LoadMapSearch(pMap, pMapSha256, MapCrc) == nullptr)
 			{
 				m_pConsole->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "client/network", "loading done");
 				SetLoadingStateDetail(IClient::LOADING_STATE_DETAIL_SENDING_READY);

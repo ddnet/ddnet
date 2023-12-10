@@ -72,3 +72,8 @@ CUI::EPopupMenuFunctionResult CLayerGame::RenderProperties(CUIRect *pToolbox)
 	m_Image = -1;
 	return Result;
 }
+
+const char *CLayerGame::TypeName() const
+{
+	return "game";
+}
