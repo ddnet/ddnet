@@ -993,13 +993,23 @@ void CCharacter::Die(int Killer, int Weapon, bool SendKillMsg)
 	}
 
 	m_pPlayer->m_RespawnTick = Server()->Tick() + Server()->TickSpeed() / 2;
-	int ModeSpecial = GameServer()->m_pController->OnCharacterDeath(this, GameServer()->m_apPlayers[Killer], Weapon);
+	int ModeSpecial = GameServer()->m_pController->OnCharacterDeath(this, (Killer < 0) ? nullptr : GameServer()->m_apPlayers[Killer], Weapon);
 
-	char aBuf[256];
-	str_format(aBuf, sizeof(aBuf), "kill killer='%d:%s' victim='%d:%s' weapon=%d special=%d",
-		Killer, Server()->ClientName(Killer),
-		m_pPlayer->GetCID(), Server()->ClientName(m_pPlayer->GetCID()), Weapon, ModeSpecial);
-	GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
+	if(Killer < 0)
+	{
+		str_format(aBuf, sizeof(aBuf), "kill killer='%d:%d:' victim='%d:%d:%s' weapon=%d special=%d",
+			Killer, - 1 - Killer,
+			m_pPlayer->GetCID(), m_pPlayer->GetTeam(), Server()->ClientName(m_pPlayer->GetCID()), Weapon, ModeSpecial
+		);
+	}
+	else
+	{
+		str_format(aBuf, sizeof(aBuf), "kill killer='%d:%d:%s' victim='%d:%d:%s' weapon=%d special=%d",
+			Killer, GameServer()->m_apPlayers[Killer]->GetTeam(), Server()->ClientName(Killer),
+			m_pPlayer->GetCID(), m_pPlayer->GetTeam(), Server()->ClientName(m_pPlayer->GetCID()), Weapon, ModeSpecial
+		);
+	}
+	GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
 
 	// send the kill message
 	if(SendKillMsg && (Team() == TEAM_FLOCK || Teams()->Count(Team()) == 1 || Teams()->GetTeamState(Team()) == CGameTeams::TEAMSTATE_OPEN || Teams()->TeamLocked(Team()) == false))

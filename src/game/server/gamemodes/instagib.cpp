@@ -17,20 +17,31 @@ CGameControllerInstagib::~CGameControllerInstagib() = default;
 
 int CGameControllerInstagib::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon)
 {
-	int ModeSpecial = CGameControllerDDRace::OnCharacterDeath(pVictim, pKiller, Weapon);
-	// always log kill messages because they are nice for stats
-	// do not log them twice when log level is above debug
-	if(g_Config.m_StdoutOutputLevel < IConsole::OUTPUT_LEVEL_DEBUG)
-	{
-		int Killer = pKiller->GetCID();
-		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "kill killer='%d:%s' victim='%d:%s' weapon=%d special=%d",
-			Killer, Server()->ClientName(Killer),
-			pVictim->GetPlayer()->GetCID(), Server()->ClientName(pVictim->GetPlayer()->GetCID()), Weapon, ModeSpecial);
-		GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
-	}
+	CGameControllerDDRace::OnCharacterDeath(pVictim, pKiller, Weapon);
 
-	return ModeSpecial;
+	// do scoreing
+	if(!pKiller || Weapon == WEAPON_GAME)
+		return 0;
+	if(pKiller == pVictim->GetPlayer())
+		pVictim->GetPlayer()->DecrementScore(); // suicide or world
+	else
+	{
+		if(IsTeamplay() && pVictim->GetPlayer()->GetTeam() == pKiller->GetTeam())
+			pKiller->DecrementScore(); // teamkill
+		else
+			pKiller->IncrementScore(); // normal kill
+	}
+	if(Weapon == WEAPON_SELF)
+		pVictim->GetPlayer()->m_RespawnTick = Server()->Tick() + Server()->TickSpeed() * 3.0f;
+
+	// update spectator modes for dead players in survival
+	// if(m_GameFlags&GAMEFLAG_SURVIVAL)
+	// {
+	// 	for(int i = 0; i < MAX_CLIENTS; ++i)
+	// 		if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->m_DeadSpecMode)
+	// 			GameServer()->m_apPlayers[i]->UpdateDeadSpecMode();
+	// }
+	return 0;
 }
 
 void CGameControllerInstagib::Tick()
