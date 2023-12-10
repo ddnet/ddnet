@@ -1662,7 +1662,7 @@ void CGameContext::OnClientConnected(int ClientID, void *pData)
 
 	if(m_apPlayers[ClientID])
 		delete m_apPlayers[ClientID];
-	m_apPlayers[ClientID] = new(ClientID) CPlayer(this, GetNextUniqueClientID(), ClientID, StartTeam);
+	m_apPlayers[ClientID] = m_pController->CreatePlayer(ClientID, StartTeam);
 	m_apPlayers[ClientID]->SetInitialAfk(Afk);
 
 	SendMotd(ClientID);
