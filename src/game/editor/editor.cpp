@@ -442,7 +442,7 @@ SEditResult<int> CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const cha
 			str_format(aBuf, sizeof(aBuf), "#%06X", Current);
 		else
 			str_from_int(Current, aBuf);
-		pRect->Draw(pColor ? *pColor : GetButtonColor(pID, 0), Corners, 5.0f);
+		pRect->Draw(pColor ? *pColor : GetButtonColor(pID, 0), Corners, 3.0f);
 		UI()->DoLabel(pRect, aBuf, 10, TEXTALIGN_MC);
 	}
 
@@ -3106,9 +3106,9 @@ void CEditor::SetHotQuadPoint(const std::shared_ptr<CLayerQuads> &pLayer)
 void CEditor::DoColorPickerButton(const void *pID, const CUIRect *pRect, ColorRGBA Color, const std::function<void(ColorRGBA Color)> &SetColor)
 {
 	CUIRect ColorRect;
-	pRect->Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f * UI()->ButtonColorMul(pID)), IGraphics::CORNER_ALL, 5.0f);
+	pRect->Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f * UI()->ButtonColorMul(pID)), IGraphics::CORNER_ALL, 3.0f);
 	pRect->Margin(1.0f, &ColorRect);
-	ColorRect.Draw(Color, IGraphics::CORNER_ALL, 5.0f);
+	ColorRect.Draw(Color, IGraphics::CORNER_ALL, 3.0f);
 
 	const int ButtonResult = DoButton_Editor_Common(pID, nullptr, 0, pRect, 0, "Click to show the color picker. Shift+rightclick to copy color to clipboard. Shift+leftclick to paste color from clipboard.");
 	if(Input()->ShiftIsPressed())
