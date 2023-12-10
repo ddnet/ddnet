@@ -77,6 +77,7 @@ private:
 	FDisplayTextCallback m_pfnDisplayTextCallback;
 	FCalculateOffsetCallback m_pfnCalculateOffsetCallback;
 	bool m_WasChanged;
+	bool m_WasCursorChanged;
 	bool m_WasRendered;
 
 	char m_ClearButtonId;
@@ -177,6 +178,12 @@ public:
 	{
 		const bool Changed = m_WasChanged;
 		m_WasChanged = false;
+		return Changed;
+	}
+	bool WasCursorChanged()
+	{
+		const bool Changed = m_WasCursorChanged;
+		m_WasCursorChanged = false;
 		return Changed;
 	}
 

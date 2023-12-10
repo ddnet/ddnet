@@ -767,7 +767,7 @@ void CGameConsole::OnRender()
 		pConsole->m_Input.SetHidden(m_ConsoleType == CONSOLETYPE_REMOTE && Client()->State() == IClient::STATE_ONLINE && !Client()->RconAuthed() && (pConsole->m_UserGot || !pConsole->m_UsernameReq));
 		pConsole->m_Input.Activate(EInputPriority::CONSOLE); // Ensure that the input is active
 		const CUIRect InputCursorRect = {x, y + FONT_SIZE, 0.0f, 0.0f};
-		pConsole->m_BoundingBox = pConsole->m_Input.Render(&InputCursorRect, FONT_SIZE, TEXTALIGN_BL, pConsole->m_Input.WasChanged(), Screen.w - 10.0f - x, LINE_SPACING);
+		pConsole->m_BoundingBox = pConsole->m_Input.Render(&InputCursorRect, FONT_SIZE, TEXTALIGN_BL, pConsole->m_Input.WasCursorChanged(), Screen.w - 10.0f - x, LINE_SPACING);
 		if(pConsole->m_LastInputHeight == 0.0f && pConsole->m_BoundingBox.m_H != 0.0f)
 			pConsole->m_LastInputHeight = pConsole->m_BoundingBox.m_H;
 		if(pConsole->m_Input.HasSelection())

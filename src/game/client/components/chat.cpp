@@ -1178,7 +1178,7 @@ void CChat::OnRender()
 
 		m_Input.Activate(EInputPriority::CHAT); // Ensure that the input is active
 		const CUIRect InputCursorRect = {Cursor.m_X, Cursor.m_Y - ScrollOffset, 0.0f, 0.0f};
-		const STextBoundingBox BoundingBox = m_Input.Render(&InputCursorRect, Cursor.m_FontSize, TEXTALIGN_TL, m_Input.WasChanged(), MessageMaxWidth, 0.0f);
+		const STextBoundingBox BoundingBox = m_Input.Render(&InputCursorRect, Cursor.m_FontSize, TEXTALIGN_TL, m_Input.WasCursorChanged(), MessageMaxWidth, 0.0f);
 
 		Graphics()->ClipDisable();
 
