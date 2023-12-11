@@ -233,6 +233,9 @@ public:
 	bool m_IsReadyToEnter; // 0.7 ready change
 	bool m_IsReadyToPlay; // 0.7 ready change
 	bool m_DeadSpecMode; // 0.7 dead players
+
+	//ictf
+	int m_Spree;
 	/*
 		m_HasGhostCharInGame
 

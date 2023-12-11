@@ -14,6 +14,10 @@ public:
 	void OnPlayerDisconnect(class CPlayer *pPlayer, const char *pReason) override;
 	void DoTeamChange(CPlayer *pPlayer, int Team, bool DoChatMsg) override;
 	void OnCharacterSpawn(class CCharacter *pChr) override;
+	int OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon) override;
 	void Tick() override;
+
+	void AddSpree(CPlayer * pPlayer);
+	void EndSpree(CPlayer * pPlayer, CPlayer * pKiller);
 };
 #endif // GAME_SERVER_GAMEMODES_INSTAGIB_H
