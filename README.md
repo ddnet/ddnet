@@ -23,6 +23,15 @@ Newer DDNet clients do not show duplicated messages multiple times. This is not 
 
 ![unstack_chat](https://raw.githubusercontent.com/ZillyInsta/images/3c437acdea599788fb245518e9c25de7c0e63795/unstack_chat.png)
 
+## 0.6 and 0.7 support including ready change
+
+ddnet-insta uses the 0.6/0.7 server side version bridge from ddnet. So all gametypes are playable by latest teeworlds clients and ddnet clients at the same time.
+
+In 0.7 there was a ready change added which allows users to pause the game. It only continues when everyone presses the ready bind.
+This feature is now also possible for 0.6 clients using the /pause chat command.
+
+![pause game](https://raw.githubusercontent.com/ZillyInsta/images/1a2d10c893605d704aeea8320cf0e65f8e0c2aa3/ready_change.png)
+
 ## gametype support
 
 ### iCTF
