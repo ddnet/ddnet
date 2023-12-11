@@ -8,6 +8,7 @@
 
 #include <base/hash.h>
 #include <base/math.h>
+#include <base/system.h>
 
 #include "kernel.h"
 #include "message.h"
