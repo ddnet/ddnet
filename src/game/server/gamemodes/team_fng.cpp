@@ -13,7 +13,7 @@
 CGameControllerTeamFng::CGameControllerTeamFng(class CGameContext *pGameServer) :
 	CGameControllerBaseFng(pGameServer)
 {
-	m_pGameType = g_Config.m_SvTestingCommands ? "fng-test" : "fng";
+	m_pGameType = "fng";
 	m_GameFlags = GAMEFLAG_TEAMS | GAMEFLAG_FLAGS;
 }
 

@@ -13,7 +13,6 @@
 CGameControllerBaseFng::CGameControllerBaseFng(class CGameContext *pGameServer) :
 	CGameControllerInstagib(pGameServer)
 {
-	m_pGameType = g_Config.m_SvTestingCommands ? "fng-test" : "fng";
 }
 
 CGameControllerBaseFng::~CGameControllerBaseFng() = default;

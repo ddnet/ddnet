@@ -13,7 +13,7 @@
 CGameControllerSoloFng::CGameControllerSoloFng(class CGameContext *pGameServer) :
 	CGameControllerBaseFng(pGameServer)
 {
-	m_pGameType = g_Config.m_SvTestingCommands ? "solofng-test" : "solofng";
+	m_pGameType = "solofng";
 }
 
 CGameControllerSoloFng::~CGameControllerSoloFng() = default;

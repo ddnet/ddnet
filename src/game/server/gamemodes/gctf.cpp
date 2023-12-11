@@ -5,7 +5,7 @@
 CGameControllerGCTF::CGameControllerGCTF(class CGameContext *pGameServer) :
 	CGameControllerCTF(pGameServer)
 {
-	m_pGameType = g_Config.m_SvTestingCommands ? "gCTF-test" : "gCTF";
+	m_pGameType = "gCTF";
 }
 
 CGameControllerGCTF::~CGameControllerGCTF() = default;
