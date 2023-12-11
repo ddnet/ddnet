@@ -1543,6 +1543,7 @@ set(EXPECTED_DATA
   menuimages/play_game.png
   menuimages/settings.png
   particles.png
+  race_flag.png
   shader/pipeline.frag
   shader/pipeline.vert
   shader/prim.frag
@@ -2195,10 +2196,10 @@ if(CLIENT)
     components/ghost.h
     components/hud.cpp
     components/hud.h
+    components/infomessages.cpp
+    components/infomessages.h
     components/items.cpp
     components/items.h
-    components/killmessages.cpp
-    components/killmessages.h
     components/mapimages.cpp
     components/mapimages.h
     components/maplayers.cpp
@@ -2285,13 +2286,22 @@ if(CLIENT)
     component.h
     editor.cpp
     editor.h
+    editor_action.h
+    editor_actions.cpp
+    editor_actions.h
+    editor_history.cpp
+    editor_history.h
     editor_object.cpp
     editor_object.h
+    editor_props.cpp
+    editor_trackers.cpp
+    editor_trackers.h
     explanations.cpp
     map_grid.cpp
     map_grid.h
     map_view.cpp
     map_view.h
+    mapitems.h
     mapitems/envelope.cpp
     mapitems/envelope.h
     mapitems/image.cpp
@@ -2544,6 +2554,8 @@ if(SERVER)
     gamecontroller.h
     gamemodes/DDRace.cpp
     gamemodes/DDRace.h
+    gamemodes/base_fng.cpp
+    gamemodes/base_fng.h
     gamemodes/ctf.cpp
     gamemodes/ctf.h
     gamemodes/gctf.cpp
@@ -2554,6 +2566,10 @@ if(SERVER)
     gamemodes/instagib.h
     gamemodes/mod.cpp
     gamemodes/mod.h
+    gamemodes/solofng.cpp
+    gamemodes/solofng.h
+    gamemodes/team_fng.cpp
+    gamemodes/team_fng.h
     gameworld.cpp
     gameworld.h
     instagib.cpp

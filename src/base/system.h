@@ -22,6 +22,7 @@
 #include <ctime>
 #include <functional>
 #include <mutex>
+#include <optional>
 #include <string>
 
 #ifdef __MINGW32__
@@ -72,7 +73,7 @@
  * @see dbg_break
  */
 #define dbg_assert(test, msg) dbg_assert_imp(__FILE__, __LINE__, test, msg)
-void dbg_assert_imp(const char *filename, int line, int test, const char *msg);
+void dbg_assert_imp(const char *filename, int line, bool test, const char *msg);
 
 #ifdef __clang_analyzer__
 #include <cassert>
@@ -775,6 +776,8 @@ typedef struct NETADDR
 	bool operator==(const NETADDR &other) const;
 	bool operator!=(const NETADDR &other) const { return !(*this == other); }
 } NETADDR;
+
+extern const NETADDR NETADDR_ZEROED;
 
 #ifdef CONF_FAMILY_UNIX
 /**
@@ -1754,6 +1757,7 @@ enum
 	TIME_MINS,
 	TIME_HOURS_CENTISECS,
 	TIME_MINS_CENTISECS,
+	TIME_SECS_CENTISECS,
 };
 
 /*
@@ -2726,6 +2730,7 @@ public:
  * @return The argument as a wide character string.
  *
  * @remark The argument string must be zero-terminated.
+ * @remark Fails with assertion error if passed utf8 is invalid.
  */
 std::wstring windows_utf8_to_wide(const char *str);
 
@@ -2735,11 +2740,12 @@ std::wstring windows_utf8_to_wide(const char *str);
  *
  * @param wide_str The wide character string to convert.
  *
- * @return The argument as a utf8 encoded string.
+ * @return The argument as a utf8 encoded string, wrapped in an optional.
+ * The optional is empty, if the wide string contains invalid codepoints.
  *
  * @remark The argument string must be zero-terminated.
  */
-std::string windows_wide_to_utf8(const wchar_t *wide_str);
+std::optional<std::string> windows_wide_to_utf8(const wchar_t *wide_str);
 
 /**
  * This is a RAII wrapper to initialize/uninitialize the Windows COM library,

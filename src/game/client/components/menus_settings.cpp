@@ -625,7 +625,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 			EyesLabel.HSplitTop(10.0f, 0, &EyesLabel);
 		}
 		float Highlight = (m_Dummy ? g_Config.m_ClDummyDefaultEyes == CurrentEyeEmote : g_Config.m_ClPlayerDefaultEyes == CurrentEyeEmote) ? 1.0f : 0.0f;
-		if(DoButton_Menu(&s_aEyeButtons[CurrentEyeEmote], "", 0, &EyesTee, 0, IGraphics::CORNER_ALL, 10.0f, 0.0f, vec4(1, 1, 1, 0.5f + Highlight * 0.25f), vec4(1, 1, 1, 0.25f + Highlight * 0.25f)))
+		if(DoButton_Menu(&s_aEyeButtons[CurrentEyeEmote], "", 0, &EyesTee, 0, IGraphics::CORNER_ALL, 10.0f, 0.0f, ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f + Highlight * 0.25f)))
 		{
 			if(m_Dummy)
 			{
@@ -745,7 +745,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 
 		for(const auto &it : m_SkinFavorites)
 		{
-			const CSkin *pSkinToBeSelected = m_pClient->m_Skins.FindOrNullptr(it.c_str());
+			const CSkin *pSkinToBeSelected = m_pClient->m_Skins.FindOrNullptr(it.c_str(), true);
 
 			if(pSkinToBeSelected == nullptr || !SkinNotFiltered(pSkinToBeSelected))
 				continue;
@@ -924,7 +924,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
 	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
 	static CButtonContainer s_SkinRefreshButtonID;
-	if(DoButton_Menu(&s_SkinRefreshButtonID, FONT_ICON_ARROW_ROTATE_RIGHT, 0, &RefreshButton, nullptr, IGraphics::CORNER_ALL, 5, 0, vec4(1.0f, 1.0f, 1.0f, 0.75f), vec4(1, 1, 1, 0.5f)))
+	if(DoButton_Menu(&s_SkinRefreshButtonID, FONT_ICON_ARROW_ROTATE_RIGHT, 0, &RefreshButton) || Input()->KeyPress(KEY_F5) || (Input()->KeyPress(KEY_R) && Input()->ModifierIsPressed()))
 	{
 		// reset render flags for possible loading screen
 		TextRender()->SetRenderFlags(0);
@@ -2429,7 +2429,7 @@ enum
 	APPEARANCE_TAB_CHAT = 1,
 	APPEARANCE_TAB_NAME_PLATE = 2,
 	APPEARANCE_TAB_HOOK_COLLISION = 3,
-	APPEARANCE_TAB_KILL_MESSAGES = 4,
+	APPEARANCE_TAB_INFO_MESSAGES = 4,
 	APPEARANCE_TAB_LASER = 5,
 	NUMBER_OF_APPEARANCE_TABS = 6,
 };
@@ -2459,8 +2459,8 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		s_CurTab = APPEARANCE_TAB_NAME_PLATE;
 	if(DoButton_MenuTab(&s_aPageTabs[APPEARANCE_TAB_HOOK_COLLISION], Localize("Hook Collisions"), s_CurTab == APPEARANCE_TAB_HOOK_COLLISION, &Page4Tab, 0, NULL, NULL, NULL, NULL, 4))
 		s_CurTab = APPEARANCE_TAB_HOOK_COLLISION;
-	if(DoButton_MenuTab(&s_aPageTabs[APPEARANCE_TAB_KILL_MESSAGES], Localize("Kill Messages"), s_CurTab == APPEARANCE_TAB_KILL_MESSAGES, &Page5Tab, 0, NULL, NULL, NULL, NULL, 4))
-		s_CurTab = APPEARANCE_TAB_KILL_MESSAGES;
+	if(DoButton_MenuTab(&s_aPageTabs[APPEARANCE_TAB_INFO_MESSAGES], Localize("Info Messages"), s_CurTab == APPEARANCE_TAB_INFO_MESSAGES, &Page5Tab, 0, NULL, NULL, NULL, NULL, 4))
+		s_CurTab = APPEARANCE_TAB_INFO_MESSAGES;
 	if(DoButton_MenuTab(&s_aPageTabs[APPEARANCE_TAB_LASER], Localize("Laser"), s_CurTab == APPEARANCE_TAB_LASER, &Page6Tab, IGraphics::CORNER_R, NULL, NULL, NULL, NULL, 4))
 		s_CurTab = APPEARANCE_TAB_LASER;
 
@@ -2691,9 +2691,17 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 			PREVIEW_SPAMMER,
 			PREVIEW_CLIENT
 		};
-		auto &&AddPreviewLine = [](int Index, int ClientID, const char *pName, const char *pText, int Flag, int Repeats) {
-			s_vLines.emplace_back();
-			SPreviewLine *pLine = &s_vLines[s_vLines.size() - 1];
+		auto &&SetPreviewLine = [](int Index, int ClientID, const char *pName, const char *pText, int Flag, int Repeats) {
+			SPreviewLine *pLine;
+			if((int)s_vLines.size() <= Index)
+			{
+				s_vLines.emplace_back();
+				pLine = &s_vLines.back();
+			}
+			else
+			{
+				pLine = &s_vLines[Index];
+			}
 			pLine->m_ClientID = ClientID;
 			pLine->m_Team = Flag & FLAG_TEAM;
 			pLine->m_Friend = Flag & FLAG_FRIEND;
@@ -2807,21 +2815,20 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 			return vec2{LocalCursor.m_LongestLineWidth + AppendCursor.m_LongestLineWidth, AppendCursor.Height() + RealMsgPaddingY};
 		};
 
-		// Init lines
-		if(s_vLines.empty())
+		// Set preview lines
 		{
 			char aLineBuilder[128];
 
 			str_format(aLineBuilder, sizeof(aLineBuilder), "'%s' entered and joined the game", aBuf);
-			AddPreviewLine(PREVIEW_SYS, -1, "*** ", aLineBuilder, 0, 0);
+			SetPreviewLine(PREVIEW_SYS, -1, "*** ", aLineBuilder, 0, 0);
 
 			str_format(aLineBuilder, sizeof(aLineBuilder), "Hey, how are you %s?", aBuf);
-			AddPreviewLine(PREVIEW_HIGHLIGHT, 7, "Random Tee", aLineBuilder, FLAG_HIGHLIGHT, 0);
+			SetPreviewLine(PREVIEW_HIGHLIGHT, 7, "Random Tee", aLineBuilder, FLAG_HIGHLIGHT, 0);
 
-			AddPreviewLine(PREVIEW_TEAM, 11, "Your Teammate", "Let's speedrun this!", FLAG_TEAM, 0);
-			AddPreviewLine(PREVIEW_FRIEND, 8, "Friend", "Hello there", FLAG_FRIEND, 0);
-			AddPreviewLine(PREVIEW_SPAMMER, 9, "Spammer", "Hey fools, I'm spamming here!", 0, 5);
-			AddPreviewLine(PREVIEW_CLIENT, -1, "— ", "Echo command executed", FLAG_CLIENT, 0);
+			SetPreviewLine(PREVIEW_TEAM, 11, "Your Teammate", "Let's speedrun this!", FLAG_TEAM, 0);
+			SetPreviewLine(PREVIEW_FRIEND, 8, "Friend", "Hello there", FLAG_FRIEND, 0);
+			SetPreviewLine(PREVIEW_SPAMMER, 9, "Spammer", "Hey fools, I'm spamming here!", 0, 5);
+			SetPreviewLine(PREVIEW_CLIENT, -1, "— ", "Echo command executed", FLAG_CLIENT, 0);
 		}
 
 		SetLineSkin(1, GameClient()->m_Skins.FindOrNullptr("pinky"));
@@ -3005,20 +3012,31 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		DoLine_ColorPicker(&s_HookCollHookableCollResetID, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Something hookable"), &g_Config.m_ClHookCollColorHookableColl, ColorRGBA(130.0f / 255.0f, 232.0f / 255.0f, 160.0f / 255.0f, 1.0f), false);
 		DoLine_ColorPicker(&s_HookCollTeeCollResetID, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("A Tee"), &g_Config.m_ClHookCollColorTeeColl, ColorRGBA(1.0f, 1.0f, 0.0f, 1.0f), false);
 	}
-	else if(s_CurTab == APPEARANCE_TAB_KILL_MESSAGES)
+	else if(s_CurTab == APPEARANCE_TAB_INFO_MESSAGES)
 	{
 		MainView.VSplitMid(&LeftView, &RightView);
 
-		// ***** Kill Messages ***** //
+		// ***** Info Messages ***** //
 		LeftView.HSplitTop(HeadlineAndVMargin, &Label, &LeftView);
-		UI()->DoLabel(&Label, Localize("Kill Messages"), HeadlineFontSize, TEXTALIGN_ML);
+		UI()->DoLabel(&Label, Localize("Info Messages"), HeadlineFontSize, TEXTALIGN_ML);
 
-		// General kill messages settings
-		LeftView.HSplitTop(SectionTotalMargin + 2 * ColorPickerLineSize, &Section, &LeftView);
+		// General info messages settings
+		LeftView.HSplitTop(SectionTotalMargin + 2 * LineSize + 2 * ColorPickerLineSize, &Section, &LeftView);
 		Section.Margin(SectionMargin, &Section);
 
-		static CButtonContainer s_KillMessageNormalColorID, s_KillMessageHighlightColorID;
+		Section.HSplitTop(LineSize, &Button, &Section);
+		if(DoButton_CheckBox(&g_Config.m_ClShowKillMessages, Localize("Show kill messages"), g_Config.m_ClShowKillMessages, &Button))
+		{
+			g_Config.m_ClShowKillMessages ^= 1;
+		}
 
+		Section.HSplitTop(LineSize, &Button, &Section);
+		if(DoButton_CheckBox(&g_Config.m_ClShowFinishMessages, Localize("Show finish messages"), g_Config.m_ClShowFinishMessages, &Button))
+		{
+			g_Config.m_ClShowFinishMessages ^= 1;
+		}
+
+		static CButtonContainer s_KillMessageNormalColorID, s_KillMessageHighlightColorID;
 		DoLine_ColorPicker(&s_KillMessageNormalColorID, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Normal Color"), &g_Config.m_ClKillMessageNormalColor, ColorRGBA(1.0f, 1.0f, 1.0f), false);
 		DoLine_ColorPicker(&s_KillMessageHighlightColorID, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Highlight Color"), &g_Config.m_ClKillMessageHighlightColor, ColorRGBA(1.0f, 1.0f, 1.0f), false);
 	}

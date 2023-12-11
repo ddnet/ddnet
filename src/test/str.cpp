@@ -757,11 +757,11 @@ TEST(Str, Time)
 	EXPECT_EQ(str_time(123456, TIME_DAYS, aBuf, 0), -1);
 	EXPECT_STREQ(aBuf, "foobar");
 
-	EXPECT_EQ(str_time(123456, TIME_MINS_CENTISECS + 1, aBuf, sizeof(aBuf)), -1);
+	EXPECT_EQ(str_time(123456, TIME_SECS_CENTISECS + 1, aBuf, sizeof(aBuf)), -1);
 	EXPECT_STREQ(aBuf, "");
 
-	EXPECT_EQ(str_time(-123456, TIME_MINS_CENTISECS, aBuf, sizeof(aBuf)), 8);
-	EXPECT_STREQ(aBuf, "00:00.00");
+	EXPECT_EQ(str_time(-123456, TIME_MINS_CENTISECS, aBuf, sizeof(aBuf)), 5);
+	EXPECT_STREQ(aBuf, "00.00");
 
 	EXPECT_EQ(str_time(INT64_MAX, TIME_DAYS, aBuf, sizeof(aBuf)), 23);
 	EXPECT_STREQ(aBuf, "1067519911673d 00:09:18");
@@ -800,6 +800,13 @@ TEST(Str, Time)
 	EXPECT_STREQ(aBuf, "205:45.67");
 	EXPECT_EQ(str_time(12345678, TIME_MINS_CENTISECS, aBuf, sizeof(aBuf)), 10);
 	EXPECT_STREQ(aBuf, "2057:36.78");
+
+	EXPECT_EQ(str_time(123456, TIME_SECS_CENTISECS, aBuf, sizeof(aBuf)), 5);
+	EXPECT_STREQ(aBuf, "34.56");
+	EXPECT_EQ(str_time(1234567, TIME_SECS_CENTISECS, aBuf, sizeof(aBuf)), 5);
+	EXPECT_STREQ(aBuf, "45.67");
+	EXPECT_EQ(str_time(12345678, TIME_SECS_CENTISECS, aBuf, sizeof(aBuf)), 5);
+	EXPECT_STREQ(aBuf, "36.78");
 }
 
 TEST(Str, TimeFloat)
@@ -808,8 +815,8 @@ TEST(Str, TimeFloat)
 	EXPECT_EQ(str_time_float(123456.78, TIME_DAYS, aBuf, sizeof(aBuf)), 11);
 	EXPECT_STREQ(aBuf, "1d 10:17:36");
 
-	EXPECT_EQ(str_time_float(12.16, TIME_HOURS_CENTISECS, aBuf, sizeof(aBuf)), 8);
-	EXPECT_STREQ(aBuf, "00:12.16");
+	EXPECT_EQ(str_time_float(12.16, TIME_HOURS_CENTISECS, aBuf, sizeof(aBuf)), 5);
+	EXPECT_STREQ(aBuf, "12.16");
 
 	EXPECT_EQ(str_time_float(22.995, TIME_MINS, aBuf, sizeof(aBuf)), 5);
 	EXPECT_STREQ(aBuf, "00:22");
@@ -1100,9 +1107,10 @@ TEST(Str, WindowsUtf8WideConversion)
 	static_assert(std::size(apUtf8Strings) == std::size(apWideStrings));
 	for(size_t i = 0; i < std::size(apUtf8Strings); i++)
 	{
-		const std::string ConvertedUtf8 = windows_wide_to_utf8(apWideStrings[i]);
+		const std::optional<std::string> ConvertedUtf8 = windows_wide_to_utf8(apWideStrings[i]);
 		const std::wstring ConvertedWide = windows_utf8_to_wide(apUtf8Strings[i]);
-		EXPECT_STREQ(ConvertedUtf8.c_str(), apUtf8Strings[i]);
+		ASSERT_TRUE(ConvertedUtf8.has_value());
+		EXPECT_STREQ(ConvertedUtf8.value().c_str(), apUtf8Strings[i]);
 		EXPECT_STREQ(ConvertedWide.c_str(), apWideStrings[i]);
 	}
 }

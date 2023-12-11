@@ -12,6 +12,16 @@ CLayerTele::CLayerTele(CEditor *pEditor, int w, int h) :
 	mem_zero(m_pTeleTile, (size_t)w * h * sizeof(CTeleTile));
 }
 
+CLayerTele::CLayerTele(const CLayerTele &Other) :
+	CLayerTiles(Other)
+{
+	str_copy(m_aName, "Tele copy");
+	m_Tele = 1;
+
+	m_pTeleTile = new CTeleTile[m_Width * m_Height];
+	mem_copy(m_pTeleTile, Other.m_pTeleTile, (size_t)m_Width * m_Height * sizeof(CTeleTile));
+}
+
 CLayerTele::~CLayerTele()
 {
 	delete[] m_pTeleTile;
@@ -80,46 +90,78 @@ void CLayerTele::BrushDraw(std::shared_ptr<CLayer> pBrush, float wx, float wy)
 			if(!Destructive && GetTile(fx, fy).m_Index)
 				continue;
 
+			int Index = fy * m_Width + fx;
+			STeleTileStateChange::SData Previous{
+				m_pTeleTile[Index].m_Number,
+				m_pTeleTile[Index].m_Type,
+				m_pTiles[Index].m_Index};
+
 			if((m_pEditor->m_AllowPlaceUnusedTiles || IsValidTeleTile(pTeleLayer->m_pTiles[y * pTeleLayer->m_Width + x].m_Index)) && pTeleLayer->m_pTiles[y * pTeleLayer->m_Width + x].m_Index != TILE_AIR)
 			{
 				if(!IsTeleTileNumberUsed(pTeleLayer->m_pTiles[y * pTeleLayer->m_Width + x].m_Index))
 				{
 					// Tele tile number is unused. Set a known value which is not 0,
 					// as tiles with number 0 would be ignored by previous versions.
-					m_pTeleTile[fy * m_Width + fx].m_Number = 255;
+					m_pTeleTile[Index].m_Number = 255;
 				}
 				else if(m_pEditor->m_TeleNumber != pTeleLayer->m_TeleNum)
 				{
-					m_pTeleTile[fy * m_Width + fx].m_Number = m_pEditor->m_TeleNumber;
+					m_pTeleTile[Index].m_Number = m_pEditor->m_TeleNumber;
 				}
 				else if(pTeleLayer->m_pTeleTile[y * pTeleLayer->m_Width + x].m_Number)
 				{
-					m_pTeleTile[fy * m_Width + fx].m_Number = pTeleLayer->m_pTeleTile[y * pTeleLayer->m_Width + x].m_Number;
+					m_pTeleTile[Index].m_Number = pTeleLayer->m_pTeleTile[y * pTeleLayer->m_Width + x].m_Number;
 				}
 				else
 				{
 					if(!m_pEditor->m_TeleNumber)
 					{
-						m_pTeleTile[fy * m_Width + fx].m_Number = 0;
-						m_pTeleTile[fy * m_Width + fx].m_Type = 0;
-						m_pTiles[fy * m_Width + fx].m_Index = 0;
+						m_pTeleTile[Index].m_Number = 0;
+						m_pTeleTile[Index].m_Type = 0;
+						m_pTiles[Index].m_Index = 0;
+
+						STeleTileStateChange::SData Current{
+							m_pTeleTile[Index].m_Number,
+							m_pTeleTile[Index].m_Type,
+							m_pTiles[Index].m_Index};
+
+						RecordStateChange(fx, fy, Previous, Current);
 						continue;
 					}
 					else
-						m_pTeleTile[fy * m_Width + fx].m_Number = m_pEditor->m_TeleNumber;
+					{
+						m_pTeleTile[Index].m_Number = m_pEditor->m_TeleNumber;
+					}
 				}
 
-				m_pTeleTile[fy * m_Width + fx].m_Type = pTeleLayer->m_pTiles[y * pTeleLayer->m_Width + x].m_Index;
-				m_pTiles[fy * m_Width + fx].m_Index = pTeleLayer->m_pTiles[y * pTeleLayer->m_Width + x].m_Index;
+				m_pTeleTile[Index].m_Type = pTeleLayer->m_pTiles[y * pTeleLayer->m_Width + x].m_Index;
+				m_pTiles[Index].m_Index = pTeleLayer->m_pTiles[y * pTeleLayer->m_Width + x].m_Index;
 			}
 			else
 			{
-				m_pTeleTile[fy * m_Width + fx].m_Number = 0;
-				m_pTeleTile[fy * m_Width + fx].m_Type = 0;
-				m_pTiles[fy * m_Width + fx].m_Index = 0;
+				m_pTeleTile[Index].m_Number = 0;
+				m_pTeleTile[Index].m_Type = 0;
+				m_pTiles[Index].m_Index = 0;
 			}
+
+			STeleTileStateChange::SData Current{
+				m_pTeleTile[Index].m_Number,
+				m_pTeleTile[Index].m_Type,
+				m_pTiles[Index].m_Index};
+
+			RecordStateChange(fx, fy, Previous, Current);
 		}
 	FlagModified(sx, sy, pTeleLayer->m_Width, pTeleLayer->m_Height);
+}
+
+void CLayerTele::RecordStateChange(int x, int y, STeleTileStateChange::SData Previous, STeleTileStateChange::SData Current)
+{
+	if(!m_History[y][x].m_Changed)
+		m_History[y][x] = STeleTileStateChange{true, Previous, Current};
+	else
+	{
+		m_History[y][x].m_Current = Current;
+	}
 }
 
 void CLayerTele::BrushFlipX()
@@ -202,6 +244,11 @@ void CLayerTele::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIRe
 			const int SrcIndex = Empty ? 0 : (y * pLt->m_Width + x % pLt->m_Width) % (pLt->m_Width * pLt->m_Height);
 			const int TgtIndex = fy * m_Width + fx;
 
+			STeleTileStateChange::SData Previous{
+				m_pTeleTile[TgtIndex].m_Number,
+				m_pTeleTile[TgtIndex].m_Type,
+				m_pTiles[TgtIndex].m_Index};
+
 			if(Empty || (!m_pEditor->m_AllowPlaceUnusedTiles && !IsValidTeleTile((pLt->m_pTiles[SrcIndex]).m_Index)))
 			{
 				m_pTiles[TgtIndex].m_Index = 0;
@@ -227,6 +274,13 @@ void CLayerTele::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIRe
 						m_pTeleTile[TgtIndex].m_Number = pLt->m_pTeleTile[SrcIndex].m_Number;
 				}
 			}
+
+			STeleTileStateChange::SData Current{
+				m_pTeleTile[TgtIndex].m_Number,
+				m_pTeleTile[TgtIndex].m_Type,
+				m_pTiles[TgtIndex].m_Index};
+
+			RecordStateChange(fx, fy, Previous, Current);
 		}
 	}
 	FlagModified(sx, sy, w, h);
@@ -246,4 +300,14 @@ bool CLayerTele::ContainsElementWithId(int Id)
 	}
 
 	return false;
+}
+
+std::shared_ptr<CLayer> CLayerTele::Duplicate() const
+{
+	return std::make_shared<CLayerTele>(*this);
+}
+
+const char *CLayerTele::TypeName() const
+{
+	return "tele";
 }

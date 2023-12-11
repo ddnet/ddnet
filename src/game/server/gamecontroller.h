@@ -168,13 +168,25 @@ public:
 	std::shared_ptr<CScoreLoadBestTimeResult> m_pLoadBestTimeResult;
 
 	// gctf
+	// virtual bool OnLaserHitCharacter(vec2 From, vec2 To, class CLaser &Laser) {};
+	/*
+		Function: OnCharacterTakeDamage
+			this function was added in ddnet-insta and is a non standard controller method.
+			neither ddnet nor teeworlds have this
+
+		Returns:
+			return true to skip ddnet CCharacter::TakeDamage() behavior
+			which is applying the force and moving the damaged tee
+			it also sets the happy eyes if the Dmg is not zero
+	*/
+	virtual bool OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character) { return false; };
 	virtual void OnPlayerReadyChange(class CPlayer *pPlayer); // 0.7 ready change
 	void CheckReadyStates(int WithoutID = -1);
 	bool GetPlayersReadyState(int WithoutID = -1, int *pNumUnready = nullptr);
 	void SetPlayersReadyState(bool ReadyState);
 	bool IsPlayerReadyMode();
 	int IsGameRunning() { return m_GameState == IGS_GAME_RUNNING; }
-	int IsGameCountdown() { return m_GameState == IGS_START_COUNTDOWN; }
+	int IsGameCountdown() { return m_GameState == IGS_START_COUNTDOWN_ROUND_START || m_GameState == IGS_START_COUNTDOWN_UNPAUSE; }
 	void ToggleGamePause();
 	void AbortWarmup()
 	{
@@ -183,6 +195,15 @@ public:
 			SetGameState(IGS_GAME_RUNNING);
 		}
 	}
+	void SwapTeamscore()
+	{
+		if(!IsTeamplay())
+			return;
+
+		int Score = m_aTeamscore[TEAM_RED];
+		m_aTeamscore[TEAM_RED] = m_aTeamscore[TEAM_BLUE];
+		m_aTeamscore[TEAM_BLUE] = Score;
+	};
 
 	int m_aTeamSize[protocol7::NUM_TEAMS];
 
@@ -193,7 +214,8 @@ public:
 		IGS_WARMUP_GAME, // warmup started by game because there're not enough players (infinite)
 		IGS_WARMUP_USER, // warmup started by user action via rcon or new match (infinite or timer)
 
-		IGS_START_COUNTDOWN, // start countown to unpause the game or start match/round (tick timer)
+		IGS_START_COUNTDOWN_ROUND_START, // start countown to start match/round (tick timer)
+		IGS_START_COUNTDOWN_UNPAUSE, // start countown to unpause the game
 
 		IGS_GAME_PAUSED, // game paused (infinite or tick timer)
 		IGS_GAME_RUNNING, // game running (infinite)
@@ -213,8 +235,10 @@ public:
 			return "IGS_WARMUP_GAME";
 		case IGS_WARMUP_USER:
 			return "IGS_WARMUP_USER";
-		case IGS_START_COUNTDOWN:
-			return "IGS_START_COUNTDOWN";
+		case IGS_START_COUNTDOWN_ROUND_START:
+			return "IGS_START_COUNTDOWN_ROUND_START";
+		case IGS_START_COUNTDOWN_UNPAUSE:
+			return "IGS_START_COUNTDOWN_UNPAUSE";
 		case IGS_GAME_PAUSED:
 			return "IGS_GAME_PAUSED";
 		case IGS_GAME_RUNNING:
@@ -241,6 +265,10 @@ protected:
 		int m_TimeLimit;
 	} m_GameInfo;
 	void UpdateGameInfo(int ClientID);
+	/*
+		Variable: m_GameStartTick
+			Sent in snap to 0.7 clients for timer
+	*/
 	int m_GameStartTick;
 	int m_aTeamscore[protocol7::NUM_TEAMS];
 

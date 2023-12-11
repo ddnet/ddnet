@@ -1020,7 +1020,7 @@ void CServer::DoSnapshot()
 			int DeltaTick = -1;
 			const CSnapshot *pDeltashot = CSnapshot::EmptySnapshot();
 			{
-				int DeltashotSize = m_aClients[i].m_Snapshots.Get(m_aClients[i].m_LastAckedSnapshot, 0, &pDeltashot, 0);
+				int DeltashotSize = m_aClients[i].m_Snapshots.Get(m_aClients[i].m_LastAckedSnapshot, nullptr, &pDeltashot, nullptr);
 				if(DeltashotSize >= 0)
 					DeltaTick = m_aClients[i].m_LastAckedSnapshot;
 				else
@@ -1540,7 +1540,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				CUuid *pConnectionID = (CUuid *)Unpacker.GetRaw(sizeof(*pConnectionID));
 				int DDNetVersion = Unpacker.GetInt();
 				const char *pDDNetVersionStr = Unpacker.GetString(CUnpacker::SANITIZE_CC);
-				if(Unpacker.Error() || !str_utf8_check(pDDNetVersionStr) || DDNetVersion < 0)
+				if(Unpacker.Error() || DDNetVersion < 0)
 				{
 					return;
 				}
@@ -1557,7 +1557,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 			if((pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && (m_aClients[ClientID].m_State == CClient::STATE_PREAUTH || m_aClients[ClientID].m_State == CClient::STATE_AUTH))
 			{
 				const char *pVersion = Unpacker.GetString(CUnpacker::SANITIZE_CC);
-				if(!str_utf8_check(pVersion))
+				if(Unpacker.Error())
 				{
 					return;
 				}
@@ -1571,7 +1571,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				}
 
 				const char *pPassword = Unpacker.GetString(CUnpacker::SANITIZE_CC);
-				if(!str_utf8_check(pPassword))
+				if(Unpacker.Error())
 				{
 					return;
 				}
@@ -1610,6 +1610,10 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 			}
 
 			int Chunk = Unpacker.GetInt();
+			if(Unpacker.Error())
+			{
+				return;
+			}
 			if(Chunk != m_aClients[ClientID].m_NextMapChunk || !Config()->m_SvFastDownload)
 			{
 				SendMapData(ClientID, Chunk);
@@ -1675,19 +1679,20 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		}
 		else if(Msg == NETMSG_INPUT)
 		{
-			m_aClients[ClientID].m_LastAckedSnapshot = Unpacker.GetInt();
+			const int LastAckedSnapshot = Unpacker.GetInt();
 			int IntendedTick = Unpacker.GetInt();
 			int Size = Unpacker.GetInt();
-
-			// check for errors
 			if(Unpacker.Error() || Size / 4 > MAX_INPUT_SIZE || IntendedTick < MIN_TICK || IntendedTick >= MAX_TICK)
+			{
 				return;
+			}
 
+			m_aClients[ClientID].m_LastAckedSnapshot = LastAckedSnapshot;
 			if(m_aClients[ClientID].m_LastAckedSnapshot > 0)
 				m_aClients[ClientID].m_SnapRate = CClient::SNAPRATE_FULL;
 
 			int64_t TagTime;
-			if(m_aClients[ClientID].m_Snapshots.Get(m_aClients[ClientID].m_LastAckedSnapshot, &TagTime, 0, 0) >= 0)
+			if(m_aClients[ClientID].m_Snapshots.Get(m_aClients[ClientID].m_LastAckedSnapshot, &TagTime, nullptr, nullptr) >= 0)
 				m_aClients[ClientID].m_Latency = (int)(((time_get() - TagTime) * 1000) / time_freq());
 
 			// add message to report the input timing
@@ -1712,7 +1717,13 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 			pInput->m_GameTick = IntendedTick;
 
 			for(int i = 0; i < Size / 4; i++)
+			{
 				pInput->m_aData[i] = Unpacker.GetInt();
+			}
+			if(Unpacker.Error())
+			{
+				return;
+			}
 
 			GameServer()->OnClientPrepareInput(ClientID, pInput->m_aData);
 			mem_copy(m_aClients[ClientID].m_LatestInput.m_aData, pInput->m_aData, MAX_INPUT_SIZE * sizeof(int));
@@ -1727,11 +1738,11 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		else if(Msg == NETMSG_RCON_CMD)
 		{
 			const char *pCmd = Unpacker.GetString();
-			if(!str_utf8_check(pCmd))
+			if(Unpacker.Error())
 			{
 				return;
 			}
-			if(Unpacker.Error() == 0 && !str_comp(pCmd, "crashmeplx"))
+			if(!str_comp(pCmd, "crashmeplx"))
 			{
 				int Version = m_aClients[ClientID].m_DDNetVersion;
 				if(GameServer()->PlayerExists(ClientID) && Version < VERSION_DDNET_OLD)
@@ -1739,7 +1750,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 					m_aClients[ClientID].m_DDNetVersion = VERSION_DDNET_OLD;
 				}
 			}
-			else if((pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Unpacker.Error() == 0 && m_aClients[ClientID].m_Authed)
+			else if((pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && m_aClients[ClientID].m_Authed)
 			{
 				if(GameServer()->PlayerExists(ClientID))
 				{
@@ -1762,107 +1773,112 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		}
 		else if(Msg == NETMSG_RCON_AUTH)
 		{
+			if((pPacket->m_Flags & NET_CHUNKFLAG_VITAL) == 0)
+			{
+				return;
+			}
 			const char *pName = "";
 			if(!IsSixup(ClientID))
+			{
 				pName = Unpacker.GetString(CUnpacker::SANITIZE_CC); // login name, now used
+			}
 			const char *pPw = Unpacker.GetString(CUnpacker::SANITIZE_CC);
-			if(!str_utf8_check(pPw) || !str_utf8_check(pName))
+			if(Unpacker.Error())
 			{
 				return;
 			}
 
-			if((pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Unpacker.Error() == 0)
+			int AuthLevel = -1;
+			int KeySlot = -1;
+
+			if(!pName[0])
 			{
-				int AuthLevel = -1;
-				int KeySlot = -1;
+				if(m_AuthManager.CheckKey((KeySlot = m_AuthManager.DefaultKey(AUTHED_ADMIN)), pPw))
+					AuthLevel = AUTHED_ADMIN;
+				else if(m_AuthManager.CheckKey((KeySlot = m_AuthManager.DefaultKey(AUTHED_MOD)), pPw))
+					AuthLevel = AUTHED_MOD;
+				else if(m_AuthManager.CheckKey((KeySlot = m_AuthManager.DefaultKey(AUTHED_HELPER)), pPw))
+					AuthLevel = AUTHED_HELPER;
+			}
+			else
+			{
+				KeySlot = m_AuthManager.FindKey(pName);
+				if(m_AuthManager.CheckKey(KeySlot, pPw))
+					AuthLevel = m_AuthManager.KeyLevel(KeySlot);
+			}
 
-				if(!pName[0])
+			if(AuthLevel != -1)
+			{
+				if(m_aClients[ClientID].m_Authed != AuthLevel)
 				{
-					if(m_AuthManager.CheckKey((KeySlot = m_AuthManager.DefaultKey(AUTHED_ADMIN)), pPw))
-						AuthLevel = AUTHED_ADMIN;
-					else if(m_AuthManager.CheckKey((KeySlot = m_AuthManager.DefaultKey(AUTHED_MOD)), pPw))
-						AuthLevel = AUTHED_MOD;
-					else if(m_AuthManager.CheckKey((KeySlot = m_AuthManager.DefaultKey(AUTHED_HELPER)), pPw))
-						AuthLevel = AUTHED_HELPER;
-				}
-				else
-				{
-					KeySlot = m_AuthManager.FindKey(pName);
-					if(m_AuthManager.CheckKey(KeySlot, pPw))
-						AuthLevel = m_AuthManager.KeyLevel(KeySlot);
-				}
-
-				if(AuthLevel != -1)
-				{
-					if(m_aClients[ClientID].m_Authed != AuthLevel)
+					if(!IsSixup(ClientID))
 					{
-						if(!IsSixup(ClientID))
-						{
-							CMsgPacker Msgp(NETMSG_RCON_AUTH_STATUS, true);
-							Msgp.AddInt(1); //authed
-							Msgp.AddInt(1); //cmdlist
-							SendMsg(&Msgp, MSGFLAG_VITAL, ClientID);
-						}
-						else
-						{
-							CMsgPacker Msgp(protocol7::NETMSG_RCON_AUTH_ON, true, true);
-							SendMsg(&Msgp, MSGFLAG_VITAL, ClientID);
-						}
-
-						m_aClients[ClientID].m_Authed = AuthLevel; // Keeping m_Authed around is unwise...
-						m_aClients[ClientID].m_AuthKey = KeySlot;
-						int SendRconCmds = IsSixup(ClientID) ? true : Unpacker.GetInt();
-						if(Unpacker.Error() == 0 && SendRconCmds)
-							// AUTHED_ADMIN - AuthLevel gets the proper IConsole::ACCESS_LEVEL_<x>
-							m_aClients[ClientID].m_pRconCmdToSend = Console()->FirstCommandInfo(AUTHED_ADMIN - AuthLevel, CFGFLAG_SERVER);
-
-						char aBuf[256];
-						const char *pIdent = m_AuthManager.KeyIdent(KeySlot);
-						switch(AuthLevel)
-						{
-						case AUTHED_ADMIN:
-						{
-							SendRconLine(ClientID, "Admin authentication successful. Full remote console access granted.");
-							str_format(aBuf, sizeof(aBuf), "ClientID=%d authed with key=%s (admin)", ClientID, pIdent);
-							break;
-						}
-						case AUTHED_MOD:
-						{
-							SendRconLine(ClientID, "Moderator authentication successful. Limited remote console access granted.");
-							str_format(aBuf, sizeof(aBuf), "ClientID=%d authed with key=%s (moderator)", ClientID, pIdent);
-							break;
-						}
-						case AUTHED_HELPER:
-						{
-							SendRconLine(ClientID, "Helper authentication successful. Limited remote console access granted.");
-							str_format(aBuf, sizeof(aBuf), "ClientID=%d authed with key=%s (helper)", ClientID, pIdent);
-							break;
-						}
-						}
-						Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
-
-						// DDRace
-						GameServer()->OnSetAuthed(ClientID, AuthLevel);
+						CMsgPacker Msgp(NETMSG_RCON_AUTH_STATUS, true);
+						Msgp.AddInt(1); //authed
+						Msgp.AddInt(1); //cmdlist
+						SendMsg(&Msgp, MSGFLAG_VITAL, ClientID);
 					}
-				}
-				else if(Config()->m_SvRconMaxTries)
-				{
-					m_aClients[ClientID].m_AuthTries++;
-					char aBuf[128];
-					str_format(aBuf, sizeof(aBuf), "Wrong password %d/%d.", m_aClients[ClientID].m_AuthTries, Config()->m_SvRconMaxTries);
-					SendRconLine(ClientID, aBuf);
-					if(m_aClients[ClientID].m_AuthTries >= Config()->m_SvRconMaxTries)
+					else
 					{
-						if(!Config()->m_SvRconBantime)
-							m_NetServer.Drop(ClientID, "Too many remote console authentication tries");
-						else
-							m_ServerBan.BanAddr(m_NetServer.ClientAddr(ClientID), Config()->m_SvRconBantime * 60, "Too many remote console authentication tries");
+						CMsgPacker Msgp(protocol7::NETMSG_RCON_AUTH_ON, true, true);
+						SendMsg(&Msgp, MSGFLAG_VITAL, ClientID);
 					}
+
+					m_aClients[ClientID].m_Authed = AuthLevel; // Keeping m_Authed around is unwise...
+					m_aClients[ClientID].m_AuthKey = KeySlot;
+					int SendRconCmds = IsSixup(ClientID) ? true : Unpacker.GetInt();
+					if(!Unpacker.Error() && SendRconCmds)
+					{
+						// AUTHED_ADMIN - AuthLevel gets the proper IConsole::ACCESS_LEVEL_<x>
+						m_aClients[ClientID].m_pRconCmdToSend = Console()->FirstCommandInfo(AUTHED_ADMIN - AuthLevel, CFGFLAG_SERVER);
+					}
+
+					char aBuf[256];
+					const char *pIdent = m_AuthManager.KeyIdent(KeySlot);
+					switch(AuthLevel)
+					{
+					case AUTHED_ADMIN:
+					{
+						SendRconLine(ClientID, "Admin authentication successful. Full remote console access granted.");
+						str_format(aBuf, sizeof(aBuf), "ClientID=%d authed with key=%s (admin)", ClientID, pIdent);
+						break;
+					}
+					case AUTHED_MOD:
+					{
+						SendRconLine(ClientID, "Moderator authentication successful. Limited remote console access granted.");
+						str_format(aBuf, sizeof(aBuf), "ClientID=%d authed with key=%s (moderator)", ClientID, pIdent);
+						break;
+					}
+					case AUTHED_HELPER:
+					{
+						SendRconLine(ClientID, "Helper authentication successful. Limited remote console access granted.");
+						str_format(aBuf, sizeof(aBuf), "ClientID=%d authed with key=%s (helper)", ClientID, pIdent);
+						break;
+					}
+					}
+					Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+
+					// DDRace
+					GameServer()->OnSetAuthed(ClientID, AuthLevel);
 				}
-				else
+			}
+			else if(Config()->m_SvRconMaxTries)
+			{
+				m_aClients[ClientID].m_AuthTries++;
+				char aBuf[128];
+				str_format(aBuf, sizeof(aBuf), "Wrong password %d/%d.", m_aClients[ClientID].m_AuthTries, Config()->m_SvRconMaxTries);
+				SendRconLine(ClientID, aBuf);
+				if(m_aClients[ClientID].m_AuthTries >= Config()->m_SvRconMaxTries)
 				{
-					SendRconLine(ClientID, "Wrong password.");
+					if(!Config()->m_SvRconBantime)
+						m_NetServer.Drop(ClientID, "Too many remote console authentication tries");
+					else
+						m_ServerBan.BanAddr(m_NetServer.ClientAddr(ClientID), Config()->m_SvRconBantime * 60, "Too many remote console authentication tries");
 				}
+			}
+			else
+			{
+				SendRconLine(ClientID, "Wrong password.");
 			}
 		}
 		else if(Msg == NETMSG_PING)
@@ -1896,11 +1912,10 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 			}
 		}
 	}
-	else
+	else if((pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && m_aClients[ClientID].m_State >= CClient::STATE_READY)
 	{
 		// game message
-		if((pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && m_aClients[ClientID].m_State >= CClient::STATE_READY)
-			GameServer()->OnMessage(Msg, &Unpacker, ClientID);
+		GameServer()->OnMessage(Msg, &Unpacker, ClientID);
 	}
 }
 
@@ -2491,13 +2506,14 @@ void CServer::PumpNetwork(bool PacketWaiting)
 						Unpacker.Reset((unsigned char *)Packet.m_pData + sizeof(SERVERBROWSE_GETINFO), Packet.m_DataSize - sizeof(SERVERBROWSE_GETINFO));
 						int SrvBrwsToken = Unpacker.GetInt();
 						if(Unpacker.Error())
+						{
 							continue;
+						}
 
 						CPacker Packer;
-						CNetChunk Response;
-
 						GetServerInfoSixup(&Packer, SrvBrwsToken, RateLimitServerInfoConnless());
 
+						CNetChunk Response;
 						Response.m_ClientID = -1;
 						Response.m_Address = Packet.m_Address;
 						Response.m_Flags = NETSENDFLAG_CONNLESS;
@@ -2580,23 +2596,6 @@ int CServer::LoadMap(const char *pMapName)
 
 	if(!m_pMap->Load(aBuf))
 		return 0;
-
-	// stop recording when we change map
-	for(int i = 0; i < MAX_CLIENTS + 1; i++)
-	{
-		if(!m_aDemoRecorder[i].IsRecording())
-			continue;
-
-		m_aDemoRecorder[i].Stop();
-
-		// remove tmp demos
-		if(i < MAX_CLIENTS)
-		{
-			char aPath[256];
-			str_format(aPath, sizeof(aPath), "demos/%s_%d_%d_tmp.demo", m_aCurrentMap, m_NetServer.Address().port, i);
-			Storage()->RemoveFile(aPath, IStorage::TYPE_SAVE);
-		}
-	}
 
 	// reinit snapshot ids
 	m_IDPool.TimeoutIDs();
@@ -3096,22 +3095,6 @@ int CServer::Run()
 	return ErrorShutdown();
 }
 
-void CServer::ConTestingCommands(CConsole::IResult *pResult, void *pUser)
-{
-	CConsole *pThis = static_cast<CConsole *>(pUser);
-	char aBuf[128];
-	str_format(aBuf, sizeof(aBuf), "Value: %d", pThis->Config()->m_SvTestingCommands);
-	pThis->Print(CConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
-}
-
-void CServer::ConRescue(CConsole::IResult *pResult, void *pUser)
-{
-	CConsole *pThis = static_cast<CConsole *>(pUser);
-	char aBuf[128];
-	str_format(aBuf, sizeof(aBuf), "Value: %d", pThis->Config()->m_SvRescue);
-	pThis->Print(CConsole::OUTPUT_LEVEL_STANDARD, "console", aBuf);
-}
-
 void CServer::ConKick(IConsole::IResult *pResult, void *pUser)
 {
 	if(pResult->NumArguments() > 1)
@@ -3467,10 +3450,35 @@ bool CServer::IsRecording(int ClientID)
 	return m_aDemoRecorder[ClientID].IsRecording();
 }
 
+void CServer::StopDemos()
+{
+	for(int i = 0; i < MAX_CLIENTS + 1; i++)
+	{
+		if(!m_aDemoRecorder[i].IsRecording())
+			continue;
+
+		m_aDemoRecorder[i].Stop();
+
+		// remove tmp demos
+		if(i < MAX_CLIENTS)
+		{
+			char aPath[256];
+			str_format(aPath, sizeof(aPath), "demos/%s_%d_%d_tmp.demo", m_aCurrentMap, m_NetServer.Address().port, i);
+			Storage()->RemoveFile(aPath, IStorage::TYPE_SAVE);
+		}
+	}
+}
+
 void CServer::ConRecord(IConsole::IResult *pResult, void *pUser)
 {
 	CServer *pServer = (CServer *)pUser;
 	char aFilename[IO_MAX_PATH_LENGTH];
+
+	if(pServer->IsRecording(MAX_CLIENTS))
+	{
+		pServer->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_recorder", "Demo recorder already recording");
+		return;
+	}
 
 	if(pResult->NumArguments())
 		str_format(aFilename, sizeof(aFilename), "demos/%s.demo", pResult->GetString(0));

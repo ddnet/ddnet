@@ -19,5 +19,8 @@ public:
 
 	void AddSpree(CPlayer * pPlayer);
 	void EndSpree(CPlayer * pPlayer, CPlayer * pKiller);
+
+	// ddnet-insta only
+	bool OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character) override;
 };
 #endif // GAME_SERVER_GAMEMODES_INSTAGIB_H

@@ -26,6 +26,9 @@
 
 #include "console.h"
 
+static constexpr float FONT_SIZE = 10.0f;
+static constexpr float LINE_SPACING = 1.0f;
+
 class CConsoleLogger : public ILogger
 {
 	CGameConsole *m_pConsole;
@@ -142,31 +145,42 @@ void CGameConsole::CInstance::ClearBacklog()
 	}
 
 	m_Backlog.Init();
-	m_BacklogCurPage = 0;
+	m_BacklogCurLine = 0;
 }
 
-void CGameConsole::CInstance::ClearBacklogYOffsets()
+void CGameConsole::CInstance::UpdateBacklogTextAttributes()
 {
-	// Pending backlog entries are not handled because they don't have a Y offset yet.
+	// Pending backlog entries are not handled because they don't have text attributes yet.
 	for(CInstance::CBacklogEntry *pEntry = m_Backlog.First(); pEntry; pEntry = m_Backlog.Next(pEntry))
 	{
-		pEntry->m_YOffset = -1.0f;
+		UpdateEntryTextAttributes(pEntry);
 	}
 }
 
 void CGameConsole::CInstance::PumpBacklogPending()
 {
-	// We must ensure that no log messages are printed while owning
-	// m_BacklogPendingLock or this will result in a dead lock.
-	const CLockScope LockScopePending(m_BacklogPendingLock);
-	for(CInstance::CBacklogEntry *pPendingEntry = m_BacklogPending.First(); pPendingEntry; pPendingEntry = m_BacklogPending.Next(pPendingEntry))
+	std::vector<CInstance::CBacklogEntry *> vpEntries;
 	{
-		const size_t EntrySize = sizeof(CBacklogEntry) + pPendingEntry->m_Length;
-		CBacklogEntry *pEntry = m_Backlog.Allocate(EntrySize);
-		mem_copy(pEntry, pPendingEntry, EntrySize);
-		++m_NewLineCounter;
+		// We must ensure that no log messages are printed while owning
+		// m_BacklogPendingLock or this will result in a dead lock.
+		const CLockScope LockScopePending(m_BacklogPendingLock);
+		for(CInstance::CBacklogEntry *pPendingEntry = m_BacklogPending.First(); pPendingEntry; pPendingEntry = m_BacklogPending.Next(pPendingEntry))
+		{
+			const size_t EntrySize = sizeof(CBacklogEntry) + pPendingEntry->m_Length;
+			CBacklogEntry *pEntry = m_Backlog.Allocate(EntrySize);
+			mem_copy(pEntry, pPendingEntry, EntrySize);
+			vpEntries.push_back(pEntry);
+		}
+
+		m_BacklogPending.Init();
 	}
-	m_BacklogPending.Init();
+
+	m_pGameConsole->UI()->MapScreen();
+	for(CInstance::CBacklogEntry *pEntry : vpEntries)
+	{
+		UpdateEntryTextAttributes(pEntry);
+		m_NewLineCounter += pEntry->m_LineCount;
+	}
 }
 
 void CGameConsole::CInstance::ClearHistory()
@@ -227,7 +241,7 @@ void CGameConsole::CInstance::PossibleArgumentsCompleteCallback(int Index, const
 	if(pInstance->m_CompletionChosenArgument == Index)
 	{
 		// get command
-		char aBuf[512];
+		char aBuf[IConsole::CMDLINE_LENGTH];
 		StrCopyUntilSpace(aBuf, sizeof(aBuf), pInstance->GetString());
 		str_append(aBuf, " ");
 
@@ -254,11 +268,11 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 					{
 						char *pEntry = m_History.Allocate(m_Input.GetLength() + 1);
 						str_copy(pEntry, m_Input.GetString(), m_Input.GetLength() + 1);
-						// print out the user's commands before they get run
-						char aBuf[256];
-						str_format(aBuf, sizeof(aBuf), "> %s", m_Input.GetString());
-						m_pGameConsole->PrintLine(m_Type, aBuf);
 					}
+					// print out the user's commands before they get run
+					char aBuf[IConsole::CMDLINE_LENGTH + 3];
+					str_format(aBuf, sizeof(aBuf), "> %s", m_Input.GetString());
+					m_pGameConsole->PrintLine(m_Type, aBuf);
 				}
 				ExecuteLine(m_Input.GetString());
 				m_Input.Clear();
@@ -343,26 +357,41 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 		}
 		else if(Event.m_Key == KEY_PAGEUP)
 		{
-			++m_BacklogCurPage;
+			m_BacklogCurLine += GetLinesToScroll(-1, m_LinesRendered);
 			m_HasSelection = false;
 		}
 		else if(Event.m_Key == KEY_PAGEDOWN)
 		{
 			m_HasSelection = false;
-			--m_BacklogCurPage;
-			if(m_BacklogCurPage < 0)
-				m_BacklogCurPage = 0;
+			m_BacklogCurLine -= GetLinesToScroll(1, m_LinesRendered);
+
+			if(m_BacklogCurLine < 0)
+				m_BacklogCurLine = 0;
+		}
+		else if(Event.m_Key == KEY_MOUSE_WHEEL_UP)
+		{
+			m_BacklogCurLine += GetLinesToScroll(-1, 1);
+			m_HasSelection = false;
+		}
+		else if(Event.m_Key == KEY_MOUSE_WHEEL_DOWN)
+		{
+			m_HasSelection = false;
+			--m_BacklogCurLine;
+			if(m_BacklogCurLine < 0)
+				m_BacklogCurLine = 0;
 		}
 		// in order not to conflict with CLineInput's handling of Home/End only
 		// react to it when the input is empty
 		else if(Event.m_Key == KEY_HOME && m_Input.IsEmpty())
 		{
-			m_BacklogCurPage = INT_MAX;
+			int Lines = GetLinesToScroll(-1, -1);
+			m_BacklogCurLine += Lines;
+			m_BacklogLastActiveLine = m_BacklogCurLine;
 			m_HasSelection = false;
 		}
 		else if(Event.m_Key == KEY_END && m_Input.IsEmpty())
 		{
-			m_BacklogCurPage = 0;
+			m_BacklogCurLine = 0;
 			m_HasSelection = false;
 		}
 	}
@@ -400,7 +429,7 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 
 		// find the current command
 		{
-			char aBuf[512];
+			char aBuf[IConsole::CMDLINE_LENGTH];
 			StrCopyUntilSpace(aBuf, sizeof(aBuf), GetString());
 			const IConsole::CCommandInfo *pCommand = m_pGameConsole->m_pConsole->GetCommandInfo(aBuf, m_CompletionFlagmask,
 				m_Type != CGameConsole::CONSOLETYPE_LOCAL && m_pGameConsole->Client()->RconAuthed() && m_pGameConsole->Client()->UseTempRconCommands());
@@ -428,7 +457,45 @@ void CGameConsole::CInstance::PrintLine(const char *pLine, int Len, ColorRGBA Pr
 	pEntry->m_YOffset = -1.0f;
 	pEntry->m_PrintColor = PrintColor;
 	pEntry->m_Length = Len;
+	pEntry->m_LineCount = -1;
 	str_copy(pEntry->m_aText, pLine, Len + 1);
+}
+
+int CGameConsole::CInstance::GetLinesToScroll(int Direction, int LinesToScroll)
+{
+	auto *pEntry = m_Backlog.Last();
+	int Line = 0;
+	int LinesToSkip = (Direction == -1 ? m_BacklogCurLine + m_LinesRendered : m_BacklogCurLine - 1);
+	while(Line < LinesToSkip && pEntry)
+	{
+		if(pEntry->m_LineCount == -1)
+			UpdateEntryTextAttributes(pEntry);
+		Line += pEntry->m_LineCount;
+		pEntry = m_Backlog.Prev(pEntry);
+	}
+
+	int Amount = maximum(0, Line - LinesToSkip);
+	while(pEntry && (LinesToScroll > 0 ? Amount < LinesToScroll : true))
+	{
+		if(pEntry->m_LineCount == -1)
+			UpdateEntryTextAttributes(pEntry);
+		Amount += pEntry->m_LineCount;
+		pEntry = Direction == -1 ? m_Backlog.Prev(pEntry) : m_Backlog.Next(pEntry);
+	}
+
+	return LinesToScroll > 0 ? minimum(Amount, LinesToScroll) : Amount;
+}
+
+void CGameConsole::CInstance::UpdateEntryTextAttributes(CBacklogEntry *pEntry)
+{
+	CTextCursor Cursor;
+	m_pGameConsole->TextRender()->SetCursor(&Cursor, 0.0f, 0.0f, FONT_SIZE, 0);
+	Cursor.m_LineWidth = m_pGameConsole->UI()->Screen()->w - 10;
+	Cursor.m_MaxLines = 10;
+	Cursor.m_LineSpacing = LINE_SPACING;
+	m_pGameConsole->TextRender()->TextEx(&Cursor, pEntry->m_aText, -1);
+	pEntry->m_YOffset = Cursor.Height() + LINE_SPACING;
+	pEntry->m_LineCount = Cursor.m_LineCount;
 }
 
 CGameConsole::CGameConsole() :
@@ -539,7 +606,7 @@ void CGameConsole::OnRender()
 		{
 			m_ConsoleState = CONSOLE_CLOSED;
 			pConsole->m_Input.Deactivate();
-			pConsole->m_BacklogLastActivePage = -1;
+			pConsole->m_BacklogLastActiveLine = -1;
 		}
 		else if(m_ConsoleState == CONSOLE_OPENING)
 		{
@@ -620,8 +687,10 @@ void CGameConsole::OnRender()
 	ConsoleHeight -= 22.0f;
 
 	{
-		float FontSize = 10.0f;
-		float RowHeight = FontSize * 1.25f;
+		// Get height of 1 line
+		float LineHeight = TextRender()->TextBoundingBox(FONT_SIZE, " ", -1, -1, LINE_SPACING).m_H + LINE_SPACING;
+
+		float RowHeight = FONT_SIZE * 1.25f;
 		float x = 3;
 		float y = ConsoleHeight - RowHeight - 5.0f;
 
@@ -630,7 +699,7 @@ void CGameConsole::OnRender()
 
 		// render prompt
 		CTextCursor Cursor;
-		TextRender()->SetCursor(&Cursor, x, y, FontSize, TEXTFLAG_RENDER);
+		TextRender()->SetCursor(&Cursor, x, y, FONT_SIZE, TEXTFLAG_RENDER);
 		const char *pPrompt = "> ";
 		if(m_ConsoleType == CONSOLETYPE_REMOTE)
 		{
@@ -697,16 +766,17 @@ void CGameConsole::OnRender()
 		// render console input (wrap line)
 		pConsole->m_Input.SetHidden(m_ConsoleType == CONSOLETYPE_REMOTE && Client()->State() == IClient::STATE_ONLINE && !Client()->RconAuthed() && (pConsole->m_UserGot || !pConsole->m_UsernameReq));
 		pConsole->m_Input.Activate(EInputPriority::CONSOLE); // Ensure that the input is active
-		const CUIRect InputCursorRect = {x, y + FontSize, 0.0f, 0.0f};
-		pConsole->m_BoundingBox = pConsole->m_Input.Render(&InputCursorRect, FontSize, TEXTALIGN_BL, pConsole->m_Input.WasChanged(), Screen.w - 10.0f - x);
+		const CUIRect InputCursorRect = {x, y + FONT_SIZE, 0.0f, 0.0f};
+		pConsole->m_BoundingBox = pConsole->m_Input.Render(&InputCursorRect, FONT_SIZE, TEXTALIGN_BL, pConsole->m_Input.WasCursorChanged(), Screen.w - 10.0f - x, LINE_SPACING);
 		if(pConsole->m_LastInputHeight == 0.0f && pConsole->m_BoundingBox.m_H != 0.0f)
 			pConsole->m_LastInputHeight = pConsole->m_BoundingBox.m_H;
 		if(pConsole->m_Input.HasSelection())
 			pConsole->m_HasSelection = false; // Clear console selection if we have a line input selection
 
-		y -= pConsole->m_BoundingBox.m_H - FontSize;
-		TextRender()->SetCursor(&Cursor, x, y, FontSize, TEXTFLAG_RENDER);
+		y -= pConsole->m_BoundingBox.m_H - FONT_SIZE;
+		TextRender()->SetCursor(&Cursor, x, y, FONT_SIZE, TEXTFLAG_RENDER);
 		Cursor.m_LineWidth = Screen.w - 10.0f - x;
+		Cursor.m_LineSpacing = LINE_SPACING;
 
 		if(pConsole->m_LastInputHeight != pConsole->m_BoundingBox.m_H)
 		{
@@ -726,7 +796,7 @@ void CGameConsole::OnRender()
 			Info.m_Width = Screen.w;
 			Info.m_TotalWidth = 0.0f;
 			Info.m_pCurrentCmd = pConsole->m_aCompletionBuffer;
-			TextRender()->SetCursor(&Info.m_Cursor, InitialX - Info.m_Offset, InitialY + RowHeight + 2.0f, FontSize, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
+			TextRender()->SetCursor(&Info.m_Cursor, InitialX - Info.m_Offset, InitialY + RowHeight + 2.0f, FONT_SIZE, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
 			Info.m_Cursor.m_LineWidth = std::numeric_limits<float>::max();
 			const int NumCommands = m_pConsole->PossibleCommands(Info.m_pCurrentCmd, pConsole->m_CompletionFlagmask, m_ConsoleType != CGameConsole::CONSOLETYPE_LOCAL && Client()->RconAuthed() && Client()->UseTempRconCommands(), PossibleCommandsRenderCallback, &Info);
 			pConsole->m_CompletionRenderOffset = Info.m_Offset;
@@ -764,86 +834,122 @@ void CGameConsole::OnRender()
 
 		pConsole->PumpBacklogPending();
 
-		// render log (current page, wrap lines)
+		// render console log (current entry, status, wrap lines)
 		CInstance::CBacklogEntry *pEntry = pConsole->m_Backlog.Last();
 		float OffsetY = 0.0f;
-		float LineOffset = 1.0f;
 
 		std::string SelectionString;
 
-		if(pConsole->m_BacklogLastActivePage < 0)
-			pConsole->m_BacklogLastActivePage = pConsole->m_BacklogCurPage;
-		int TotalPages = 1;
-		for(int Page = 0; Page <= maximum(pConsole->m_BacklogLastActivePage, pConsole->m_BacklogCurPage); ++Page, OffsetY = 0.0f)
+		if(pConsole->m_BacklogLastActiveLine < 0)
+			pConsole->m_BacklogLastActiveLine = pConsole->m_BacklogCurLine;
+
+		int LineNum = -1;
+		pConsole->m_LinesRendered = 0;
+
+		int SkippedLines = 0;
+		bool First = true;
+
+		const float XScale = Graphics()->ScreenWidth() / Screen.w;
+		const float YScale = Graphics()->ScreenHeight() / Screen.h;
+		float CalcOffsetY = 0;
+		while(y - (CalcOffsetY + LineHeight) > RowHeight)
+			CalcOffsetY += LineHeight;
+		float ClipStartY = y - CalcOffsetY;
+		Graphics()->ClipEnable(0, ClipStartY * YScale, Screen.w * XScale, y * YScale - ClipStartY * YScale);
+
+		while(pEntry)
 		{
-			while(pEntry)
+			if(pEntry->m_LineCount == -1)
+				pConsole->UpdateEntryTextAttributes(pEntry);
+
+			LineNum += pEntry->m_LineCount;
+			while(pConsole->m_NewLineCounter > 0)
 			{
-				TextRender()->TextColor(pEntry->m_PrintColor);
+				--pConsole->m_NewLineCounter;
 
-				// get y offset (calculate it if we haven't yet)
-				if(pEntry->m_YOffset < 0.0f)
+				// keep scroll position when new entries are printed.
+				if(pConsole->m_BacklogCurLine != 0)
 				{
-					TextRender()->SetCursor(&Cursor, 0.0f, 0.0f, FontSize, 0);
-					Cursor.m_LineWidth = Screen.w - 10;
-					Cursor.m_MaxLines = 10;
-					TextRender()->TextEx(&Cursor, pEntry->m_aText, -1);
-					pEntry->m_YOffset = Cursor.Height() + LineOffset;
+					pConsole->m_BacklogCurLine++;
+					pConsole->m_BacklogLastActiveLine++;
 				}
-				OffsetY += pEntry->m_YOffset;
-
-				if((pConsole->m_HasSelection || pConsole->m_MouseIsPress) && pConsole->m_NewLineCounter > 0)
-				{
-					float MouseExtraOff = pEntry->m_YOffset;
-					pConsole->m_MousePress.y -= MouseExtraOff;
-					if(!pConsole->m_MouseIsPress)
-						pConsole->m_MouseRelease.y -= MouseExtraOff;
-				}
-
-				// next page when lines reach the top
-				if(y - OffsetY <= RowHeight)
-					break;
-
-				// just render output from current backlog page (render bottom up)
-				if(Page == pConsole->m_BacklogLastActivePage)
-				{
-					TextRender()->SetCursor(&Cursor, 0.0f, y - OffsetY, FontSize, TEXTFLAG_RENDER);
-					Cursor.m_LineWidth = Screen.w - 10.0f;
-					Cursor.m_MaxLines = 10;
-					Cursor.m_CalculateSelectionMode = (m_ConsoleState == CONSOLE_OPEN && pConsole->m_MousePress.y < pConsole->m_BoundingBox.m_Y && (pConsole->m_MouseIsPress || (pConsole->m_CurSelStart != pConsole->m_CurSelEnd) || pConsole->m_HasSelection)) ? TEXT_CURSOR_SELECTION_MODE_CALCULATE : TEXT_CURSOR_SELECTION_MODE_NONE;
-					Cursor.m_PressMouse = pConsole->m_MousePress;
-					Cursor.m_ReleaseMouse = pConsole->m_MouseRelease;
-					TextRender()->TextEx(&Cursor, pEntry->m_aText, -1);
-					if(Cursor.m_CalculateSelectionMode == TEXT_CURSOR_SELECTION_MODE_CALCULATE)
-					{
-						pConsole->m_CurSelStart = minimum(Cursor.m_SelectionStart, Cursor.m_SelectionEnd);
-						pConsole->m_CurSelEnd = maximum(Cursor.m_SelectionStart, Cursor.m_SelectionEnd);
-					}
-					if(pConsole->m_CurSelStart != pConsole->m_CurSelEnd)
-					{
-						if(m_WantsSelectionCopy)
-						{
-							const bool HasNewLine = !SelectionString.empty();
-							const size_t OffUTF8Start = str_utf8_offset_chars_to_bytes(pEntry->m_aText, pConsole->m_CurSelStart);
-							const size_t OffUTF8End = str_utf8_offset_chars_to_bytes(pEntry->m_aText, pConsole->m_CurSelEnd);
-							SelectionString.insert(0, (std::string(&pEntry->m_aText[OffUTF8Start], OffUTF8End - OffUTF8Start) + (HasNewLine ? "\n" : "")));
-						}
-						pConsole->m_HasSelection = true;
-					}
-				}
-				pEntry = pConsole->m_Backlog.Prev(pEntry);
-
-				// reset color
-				TextRender()->TextColor(1, 1, 1, 1);
-				if(pConsole->m_NewLineCounter > 0)
-					--pConsole->m_NewLineCounter;
 			}
+			if(LineNum < pConsole->m_BacklogLastActiveLine)
+			{
+				SkippedLines += pEntry->m_LineCount;
+				pEntry = pConsole->m_Backlog.Prev(pEntry);
+				continue;
+			}
+			TextRender()->TextColor(pEntry->m_PrintColor);
+
+			if(First)
+			{
+				int Diff = pConsole->m_BacklogLastActiveLine - SkippedLines;
+				OffsetY -= Diff * LineHeight - LINE_SPACING;
+			}
+
+			float LocalOffsetY = OffsetY + pEntry->m_YOffset / (float)pEntry->m_LineCount;
+			OffsetY += pEntry->m_YOffset;
+
+			if((pConsole->m_HasSelection || pConsole->m_MouseIsPress) && pConsole->m_NewLineCounter > 0)
+			{
+				float MouseExtraOff = pEntry->m_YOffset;
+				pConsole->m_MousePress.y -= MouseExtraOff;
+				if(!pConsole->m_MouseIsPress)
+					pConsole->m_MouseRelease.y -= MouseExtraOff;
+			}
+
+			// stop rendering when lines reach the top
+			bool Outside = y - OffsetY <= RowHeight;
+			int CanRenderOneLine = y - LocalOffsetY > RowHeight;
+			if(Outside && !CanRenderOneLine)
+				break;
+
+			int LinesNotRendered = pEntry->m_LineCount - minimum((int)std::floor((y - LocalOffsetY) / RowHeight), pEntry->m_LineCount);
+			pConsole->m_LinesRendered -= LinesNotRendered;
+
+			TextRender()->SetCursor(&Cursor, 0.0f, y - OffsetY, FONT_SIZE, TEXTFLAG_RENDER);
+			Cursor.m_LineWidth = Screen.w - 10.0f;
+			Cursor.m_MaxLines = pEntry->m_LineCount;
+			Cursor.m_LineSpacing = LINE_SPACING;
+			Cursor.m_CalculateSelectionMode = (m_ConsoleState == CONSOLE_OPEN && pConsole->m_MousePress.y < pConsole->m_BoundingBox.m_Y && (pConsole->m_MouseIsPress || (pConsole->m_CurSelStart != pConsole->m_CurSelEnd) || pConsole->m_HasSelection)) ? TEXT_CURSOR_SELECTION_MODE_CALCULATE : TEXT_CURSOR_SELECTION_MODE_NONE;
+			Cursor.m_PressMouse = pConsole->m_MousePress;
+			Cursor.m_ReleaseMouse = pConsole->m_MouseRelease;
+			TextRender()->TextEx(&Cursor, pEntry->m_aText, -1);
+			if(Cursor.m_CalculateSelectionMode == TEXT_CURSOR_SELECTION_MODE_CALCULATE)
+			{
+				pConsole->m_CurSelStart = minimum(Cursor.m_SelectionStart, Cursor.m_SelectionEnd);
+				pConsole->m_CurSelEnd = maximum(Cursor.m_SelectionStart, Cursor.m_SelectionEnd);
+			}
+			pConsole->m_LinesRendered += First ? pEntry->m_LineCount - (pConsole->m_BacklogLastActiveLine - SkippedLines) : pEntry->m_LineCount;
+
+			if(pConsole->m_CurSelStart != pConsole->m_CurSelEnd)
+			{
+				if(m_WantsSelectionCopy)
+				{
+					const bool HasNewLine = !SelectionString.empty();
+					const size_t OffUTF8Start = str_utf8_offset_chars_to_bytes(pEntry->m_aText, pConsole->m_CurSelStart);
+					const size_t OffUTF8End = str_utf8_offset_chars_to_bytes(pEntry->m_aText, pConsole->m_CurSelEnd);
+					SelectionString.insert(0, (std::string(&pEntry->m_aText[OffUTF8Start], OffUTF8End - OffUTF8Start) + (HasNewLine ? "\n" : "")));
+				}
+				pConsole->m_HasSelection = true;
+			}
+
+			pEntry = pConsole->m_Backlog.Prev(pEntry);
+
+			// reset color
+			TextRender()->TextColor(TextRender()->DefaultTextColor());
+			First = false;
 
 			if(!pEntry)
 				break;
-			TotalPages++;
 		}
-		pConsole->m_BacklogCurPage = clamp(pConsole->m_BacklogCurPage, 0, TotalPages - 1);
-		pConsole->m_BacklogLastActivePage = pConsole->m_BacklogCurPage;
+
+		Graphics()->ClipDisable();
+
+		if(LineNum >= 0)
+			pConsole->m_BacklogCurLine = clamp(pConsole->m_BacklogCurLine, 0, LineNum);
+		pConsole->m_BacklogLastActiveLine = pConsole->m_BacklogCurLine;
 
 		if(m_WantsSelectionCopy && !SelectionString.empty())
 		{
@@ -854,16 +960,17 @@ void CGameConsole::OnRender()
 			m_WantsSelectionCopy = false;
 		}
 
-		// render page
+		TextRender()->TextColor(TextRender()->DefaultTextColor());
+
+		// render current lines and status (locked, following)
 		char aBuf[128];
-		TextRender()->TextColor(1, 1, 1, 1);
-		str_format(aBuf, sizeof(aBuf), Localize("-Page %d-"), pConsole->m_BacklogCurPage + 1);
-		TextRender()->Text(10.0f, FontSize / 2.f, FontSize, aBuf, -1.0f);
+		str_format(aBuf, sizeof(aBuf), Localize("Lines %d - %d (%s)"), pConsole->m_BacklogCurLine + 1, pConsole->m_BacklogCurLine + pConsole->m_LinesRendered, pConsole->m_BacklogCurLine != 0 ? Localize("Locked") : Localize("Following"));
+		TextRender()->Text(10.0f, FONT_SIZE / 2.f, FONT_SIZE, aBuf);
 
 		// render version
 		str_copy(aBuf, "v" GAME_VERSION " on " CONF_PLATFORM_STRING " " CONF_ARCH_STRING);
-		float Width = TextRender()->TextWidth(FontSize, aBuf, -1, -1.0f);
-		TextRender()->Text(Screen.w - Width - 10.0f, FontSize / 2.f, FontSize, aBuf, -1.0f);
+		float Width = TextRender()->TextWidth(FONT_SIZE, aBuf, -1, -1.0f);
+		TextRender()->Text(Screen.w - Width - 10.0f, FONT_SIZE / 2.f, FONT_SIZE, aBuf);
 	}
 }
 
@@ -985,15 +1092,15 @@ void CGameConsole::ConDumpRemoteConsole(IConsole::IResult *pResult, void *pUserD
 void CGameConsole::ConConsolePageUp(IConsole::IResult *pResult, void *pUserData)
 {
 	CInstance *pConsole = ((CGameConsole *)pUserData)->CurrentConsole();
-	pConsole->m_BacklogCurPage++;
+	pConsole->m_BacklogCurLine += pConsole->GetLinesToScroll(-1, pConsole->m_LinesRendered);
 }
 
 void CGameConsole::ConConsolePageDown(IConsole::IResult *pResult, void *pUserData)
 {
 	CInstance *pConsole = ((CGameConsole *)pUserData)->CurrentConsole();
-	--pConsole->m_BacklogCurPage;
-	if(pConsole->m_BacklogCurPage < 0)
-		pConsole->m_BacklogCurPage = 0;
+	pConsole->m_BacklogCurLine -= pConsole->GetLinesToScroll(1, pConsole->m_LinesRendered);
+	if(pConsole->m_BacklogCurLine < 0)
+		pConsole->m_BacklogCurLine = 0;
 }
 
 void CGameConsole::ConchainConsoleOutputLevel(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
@@ -1018,9 +1125,9 @@ void CGameConsole::RequireUsername(bool UsernameReq)
 void CGameConsole::PrintLine(int Type, const char *pLine)
 {
 	if(Type == CONSOLETYPE_LOCAL)
-		m_LocalConsole.PrintLine(pLine, str_length(pLine), ColorRGBA{1, 1, 1, 1});
+		m_LocalConsole.PrintLine(pLine, str_length(pLine), TextRender()->DefaultTextColor());
 	else if(Type == CONSOLETYPE_REMOTE)
-		m_RemoteConsole.PrintLine(pLine, str_length(pLine), ColorRGBA{1, 1, 1, 1});
+		m_RemoteConsole.PrintLine(pLine, str_length(pLine), TextRender()->DefaultTextColor());
 }
 
 void CGameConsole::OnConsoleInit()
@@ -1048,9 +1155,9 @@ void CGameConsole::OnInit()
 	Engine()->SetAdditionalLogger(std::unique_ptr<ILogger>(m_pConsoleLogger));
 	// add resize event
 	Graphics()->AddWindowResizeListener([this]() {
-		m_LocalConsole.ClearBacklogYOffsets();
+		m_LocalConsole.UpdateBacklogTextAttributes();
 		m_LocalConsole.m_HasSelection = false;
-		m_RemoteConsole.ClearBacklogYOffsets();
+		m_RemoteConsole.UpdateBacklogTextAttributes();
 		m_RemoteConsole.m_HasSelection = false;
 	});
 }

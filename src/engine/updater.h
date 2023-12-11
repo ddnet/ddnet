@@ -5,7 +5,7 @@
 
 class IUpdater : public IInterface
 {
-	MACRO_INTERFACE("updater", 0)
+	MACRO_INTERFACE("updater")
 public:
 	enum
 	{

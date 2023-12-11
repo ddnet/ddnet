@@ -47,6 +47,7 @@ enum
 };
 
 class CCharacter;
+class IConfigManager;
 class CConfig;
 class CHeap;
 class CPlayer;
@@ -77,6 +78,7 @@ private:
 class CGameContext : public IGameServer
 {
 	IServer *m_pServer;
+	IConfigManager *m_pConfigManager;
 	CConfig *m_pConfig;
 	IConsole *m_pConsole;
 	IEngine *m_pEngine;
@@ -134,6 +136,8 @@ class CGameContext : public IGameServer
 	static void ConDumpAntibot(IConsole::IResult *pResult, void *pUserData);
 	static void ConAntibot(IConsole::IResult *pResult, void *pUserData);
 	static void ConShuffleTeams(IConsole::IResult *pResult, void *pUserData); // gctf
+	static void ConSwapTeams(IConsole::IResult *pResult, void *pUserData); // gctf
+	static void ConSwapTeamsRandom(IConsole::IResult *pResult, void *pUserData); // gctf
 	static void ConchainGameinfoUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData); // gctf
 	static void ConchainInstaSettingsUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData); // gctf
 	static void ConchainResetInstasettingTees(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData); // gctf
@@ -159,6 +163,7 @@ class CGameContext : public IGameServer
 
 public:
 	IServer *Server() const { return m_pServer; }
+	IConfigManager *ConfigManager() const { return m_pConfigManager; }
 	CConfig *Config() { return m_pConfig; }
 	IConsole *Console() { return m_pConsole; }
 	IEngine *Engine() { return m_pEngine; }
@@ -278,6 +283,9 @@ public:
 	bool OnBangCommand(int ClientID, const char *pCmd, int NumArgs, const char **ppArgs);
 	void BangCommandVote(int ClientID, const char *pCommand, const char *pDesc);
 	void ComCallShuffleVote(int ClientID);
+	void ComCallSwapTeamsVote(int ClientID);
+	void ComCallSwapTeamsRandomVote(int ClientID);
+	void SwapTeams();
 	void UpdateVoteCheckboxes();
 	void RefreshVotes();
 	void AlertOnSpecialInstagibConfigs(int ClientID = -1);
@@ -486,6 +494,7 @@ private:
 	static void ConSetTimerType(IConsole::IResult *pResult, void *pUserData);
 	static void ConRescue(IConsole::IResult *pResult, void *pUserData);
 	static void ConTele(IConsole::IResult *pResult, void *pUserData);
+	static void ConTeleCursor(IConsole::IResult *pResult, void *pUserData);
 	static void ConLastTele(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeUnSolo(IConsole::IResult *pResult, void *pUserData);
 	static void ConPracticeUnDeep(IConsole::IResult *pResult, void *pUserData);

@@ -15,6 +15,35 @@ CGameControllerInstagib::CGameControllerInstagib(class CGameContext *pGameServer
 
 CGameControllerInstagib::~CGameControllerInstagib() = default;
 
+int CGameControllerInstagib::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon)
+{
+	CGameControllerDDRace::OnCharacterDeath(pVictim, pKiller, Weapon);
+
+	// do scoreing
+	if(!pKiller || Weapon == WEAPON_GAME)
+		return 0;
+	if(pKiller == pVictim->GetPlayer())
+		pVictim->GetPlayer()->DecrementScore(); // suicide or world
+	else
+	{
+		if(IsTeamplay() && pVictim->GetPlayer()->GetTeam() == pKiller->GetTeam())
+			pKiller->DecrementScore(); // teamkill
+		else
+			pKiller->IncrementScore(); // normal kill
+	}
+	if(Weapon == WEAPON_SELF)
+		pVictim->GetPlayer()->m_RespawnTick = Server()->Tick() + Server()->TickSpeed() * 3.0f;
+
+	// update spectator modes for dead players in survival
+	// if(m_GameFlags&GAMEFLAG_SURVIVAL)
+	// {
+	// 	for(int i = 0; i < MAX_CLIENTS; ++i)
+	// 		if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->m_DeadSpecMode)
+	// 			GameServer()->m_apPlayers[i]->UpdateDeadSpecMode();
+	// }
+	return 0;
+}
+
 void CGameControllerInstagib::Tick()
 {
 	CGameControllerDDRace::Tick();
@@ -38,6 +67,87 @@ void CGameControllerInstagib::Tick()
 			GameServer()->SendBroadcast(aBuf, pPlayer->GetCID());
 		}
 	}
+}
+
+bool CGameControllerInstagib::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character)
+{
+	// TODO: gctf cfg team damage
+	// if(GameServer()->m_pController->IsFriendlyFire(Character.GetPlayer()->GetCID(), From) && !g_Config.m_SvTeamdamage)
+	if(!GameServer()->m_pController->IsFriendlyFire(Character.GetPlayer()->GetCID(), From))
+	{
+		if(From == Character.GetPlayer()->GetCID())
+		{
+			Dmg = 0;
+			//Give back ammo on grenade self push//Only if not infinite ammo and activated
+			if(Weapon == WEAPON_GRENADE && g_Config.m_SvGrenadeAmmoRegen && g_Config.m_SvGrenadeAmmoRegenSpeedNade)
+			{
+				Character.SetWeaponAmmo(WEAPON_GRENADE, minimum(Character.GetCore().m_aWeapons[WEAPON_GRENADE].m_Ammo + 1, g_Config.m_SvGrenadeAmmoRegenNum));
+			}
+		}
+
+		if(g_Config.m_SvOnlyHookKills && From >= 0 && From <= MAX_CLIENTS)
+		{
+			CCharacter *pChr = GameServer()->m_apPlayers[From]->GetCharacter();
+			if(!pChr || pChr->GetCore().HookedPlayer() != Character.GetPlayer()->GetCID())
+				Dmg = 0;
+		}
+
+		int Health = 10;
+
+		// no self damage
+		if(Dmg >= g_Config.m_SvDamageNeededForKill)
+			Health = From == Character.GetPlayer()->GetCID() ? Health : 0;
+
+		// check for death
+		if(Health <= 0)
+		{
+			Character.Die(From, Weapon);
+
+			if(From >= 0 && From != Character.GetPlayer()->GetCID() && GameServer()->m_apPlayers[From])
+			{
+				CCharacter *pChr = GameServer()->m_apPlayers[From]->GetCharacter();
+				if(pChr)
+				{
+					// set attacker's face to happy (taunt!)
+					pChr->SetEmote(EMOTE_HAPPY, Server()->Tick() + Server()->TickSpeed());
+
+					// refill nades
+					int RefillNades = 0;
+					if(g_Config.m_SvGrenadeAmmoRegenOnKill == 1)
+						RefillNades = 1;
+					else if(g_Config.m_SvGrenadeAmmoRegenOnKill == 2)
+						RefillNades = g_Config.m_SvGrenadeAmmoRegenNum;
+					if(RefillNades && g_Config.m_SvGrenadeAmmoRegen && Weapon == WEAPON_GRENADE)
+					{
+						pChr->SetWeaponAmmo(WEAPON_GRENADE, minimum(pChr->GetCore().m_aWeapons[WEAPON_GRENADE].m_Ammo + RefillNades, g_Config.m_SvGrenadeAmmoRegenNum));
+					}
+				}
+
+				// do damage Hit sound
+				CClientMask Mask = CClientMask().set(From);
+				for(int i = 0; i < MAX_CLIENTS; i++)
+				{
+					if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS && GameServer()->m_apPlayers[i]->m_SpectatorID == From)
+						Mask.set(i);
+				}
+				GameServer()->CreateSound(GameServer()->m_apPlayers[From]->m_ViewPos, SOUND_HIT, Mask);
+			}
+			return false;
+		}
+
+		/*
+		if (Dmg > 2)
+			GameServer()->CreateSound(m_Pos, SOUND_PLAYER_PAIN_LONG);
+		else
+			GameServer()->CreateSound(m_Pos, SOUND_PLAYER_PAIN_SHORT);*/
+
+		if(Dmg)
+		{
+			Character.SetEmote(EMOTE_PAIN, Server()->Tick() + 500 * Server()->TickSpeed() / 1000);
+		}
+	}
+
+	return false;
 }
 
 void CGameControllerInstagib::OnCharacterSpawn(class CCharacter *pChr)

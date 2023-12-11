@@ -29,6 +29,7 @@
 # Rafael Fontenelle   2023-07-07 12:11:00
 # Rafael Fontenelle   2023-08-14 14:17:00
 # Rafael Fontenelle   2023-09-25 14:23:00
+# Rafael Fontenelle   2023-12-05 17:01:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -1723,56 +1724,56 @@ Render cut to video
 == Renderizar corte do vídeo
 
 Error playing demo
-== 
+== Erro ao reproduzir demo
 
 Some map images could not be loaded. Check the local console for details.
-== 
+== Algumas imagens de mapa não puderam ser carregadas. Verifique o console local para detalhes.
 
 Some map sounds could not be loaded. Check the local console for details.
-== 
+== Alguns sons de mapa não puderam ser carregadas. Verifique o console local para detalhes.
 
 Loading menu themes
-== 
+== Carregando temas de menu
 
 Render complete
-== 
+== Renderização concluída
 
 Videos directory
-== 
+== Diretório de vídeos
 
 Video was saved to '%s'
-== 
+== O vídeo foi salvo em "%s"
 
 No demo selected
-== 
+== Nenhuma demo selecionada
 
 Created
-== 
+== Criada
 
 Netversion
-== 
+== Netversion
 
 [Demo details]
 map not included
-== 
+== mapa não incluído
 
 Ghosts directory
-== 
+== Diretório de fantasmas
 
 Activate all
-== 
+== Ativar tudo
 
 Deactivate all
-== 
+== Desativar tudo
 
 Enable ghost
-== 
+== Habilitar fantasma
 
 Only save improvements
-== 
+== Salvar somente melhorias
 
 Regular background color
-== 
+== Cor de fundo regular
 
 Entities background color
-== 
+== Cor de fundo de entidades

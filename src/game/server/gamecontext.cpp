@@ -33,6 +33,7 @@
 #include "gamemodes/gctf.h"
 #include "gamemodes/ictf.h"
 #include "gamemodes/mod.h"
+#include "gamemodes/solofng.h"
 #include "player.h"
 #include "score.h"
 
@@ -3459,7 +3460,8 @@ void CGameContext::ConchainSettingUpdate(IConsole::IResult *pResult, void *pUser
 void CGameContext::OnConsoleInit()
 {
 	m_pServer = Kernel()->RequestInterface<IServer>();
-	m_pConfig = Kernel()->RequestInterface<IConfigManager>()->Values();
+	m_pConfigManager = Kernel()->RequestInterface<IConfigManager>();
+	m_pConfig = m_pConfigManager->Values();
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
 	m_pEngine = Kernel()->RequestInterface<IEngine>();
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
@@ -3513,6 +3515,8 @@ void CGameContext::OnConsoleInit()
 #undef MACRO_CONFIG_COL
 #undef MACRO_CONFIG_STR
 	Console()->Register("shuffle_teams", "", CFGFLAG_SERVER, ConShuffleTeams, this, "Shuffle the current teams"); // gctf
+	Console()->Register("swap_teams", "", CFGFLAG_SERVER, ConSwapTeams, this, "Swap the current teams"); // gctf
+	Console()->Register("swap_teams_random", "", CFGFLAG_SERVER, ConSwapTeamsRandom, this, "Swap the current teams or not (random chance)"); // gctf
 
 	Console()->Chain("sv_vote_kick", ConchainSettingUpdate, this);
 	Console()->Chain("sv_vote_kick_min", ConchainSettingUpdate, this);
@@ -3531,7 +3535,8 @@ void CGameContext::OnInit(const void *pPersistentData)
 	const CPersistentData *pPersistent = (const CPersistentData *)pPersistentData;
 
 	m_pServer = Kernel()->RequestInterface<IServer>();
-	m_pConfig = Kernel()->RequestInterface<IConfigManager>()->Values();
+	m_pConfigManager = Kernel()->RequestInterface<IConfigManager>();
+	m_pConfig = m_pConfigManager->Values();
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
 	m_pEngine = Kernel()->RequestInterface<IEngine>();
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
@@ -3638,6 +3643,8 @@ void CGameContext::OnInit(const void *pPersistentData)
 		m_pController = new CGameControllerGCTF(this);
 	else if(!str_comp_nocase(Config()->m_SvGametype, "ictf"))
 		m_pController = new CGameControllerICTF(this);
+	else if(!str_comp_nocase(Config()->m_SvGametype, "solofng"))
+		m_pController = new CGameControllerSoloFng(this);
 	else
 		m_pController = new CGameControllerDDRace(this);
 
@@ -4010,8 +4017,11 @@ void CGameContext::OnShutdown(void *pPersistentData)
 		aio_free(m_pTeeHistorianFile);
 	}
 
+	// Stop any demos being recorded.
+	Server()->StopDemos();
+
 	DeleteTempfile();
-	Console()->ResetGameSettings();
+	ConfigManager()->ResetGameSettings();
 	Collision()->Dest();
 	delete m_pController;
 	m_pController = 0;

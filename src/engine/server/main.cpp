@@ -110,17 +110,17 @@ int main(int argc, const char **argv)
 	pServer->SetLoggers(pFutureFileLogger, std::move(pStdoutLogger));
 
 	IKernel *pKernel = IKernel::Create();
+	pKernel->RegisterInterface(pServer);
 
 	// create the components
 	IEngine *pEngine = CreateEngine(GAME_NAME, pFutureConsoleLogger, 2 * std::thread::hardware_concurrency() + 2);
-	IEngineMap *pEngineMap = CreateEngineMap();
-	IGameServer *pGameServer = CreateGameServer();
-	IConsole *pConsole = CreateConsole(CFGFLAG_SERVER | CFGFLAG_ECON).release();
+	pKernel->RegisterInterface(pEngine);
+
 	IStorage *pStorage = CreateStorage(IStorage::STORAGETYPE_SERVER, argc, argv);
-	IConfigManager *pConfigManager = CreateConfigManager();
-	IEngineAntibot *pEngineAntibot = CreateEngineAntibot();
+	pKernel->RegisterInterface(pStorage);
 
 	pFutureAssertionLogger->Set(CreateAssertionLogger(pStorage, GAME_NAME));
+
 #if defined(CONF_EXCEPTION_HANDLING)
 	char aBuf[IO_MAX_PATH_LENGTH];
 	char aBufName[IO_MAX_PATH_LENGTH];
@@ -131,30 +131,26 @@ int main(int argc, const char **argv)
 	set_exception_handler_log_file(aBuf);
 #endif
 
-	{
-		bool RegisterFail = false;
+	IConsole *pConsole = CreateConsole(CFGFLAG_SERVER | CFGFLAG_ECON).release();
+	pKernel->RegisterInterface(pConsole);
 
-		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pServer);
-		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pEngine);
-		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pEngineMap); // register as both
-		RegisterFail = RegisterFail || !pKernel->RegisterInterface(static_cast<IMap *>(pEngineMap), false);
-		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pGameServer);
-		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pConsole);
-		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pStorage);
-		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pConfigManager);
-		RegisterFail = RegisterFail || !pKernel->RegisterInterface(pEngineAntibot);
-		RegisterFail = RegisterFail || !pKernel->RegisterInterface(static_cast<IAntibot *>(pEngineAntibot), false);
+	IConfigManager *pConfigManager = CreateConfigManager();
+	pKernel->RegisterInterface(pConfigManager);
 
-		if(RegisterFail)
-		{
-			delete pKernel;
-			return -1;
-		}
-	}
+	IEngineMap *pEngineMap = CreateEngineMap();
+	pKernel->RegisterInterface(pEngineMap); // IEngineMap
+	pKernel->RegisterInterface(static_cast<IMap *>(pEngineMap), false);
+
+	IEngineAntibot *pEngineAntibot = CreateEngineAntibot();
+	pKernel->RegisterInterface(pEngineAntibot); // IEngineAntibot
+	pKernel->RegisterInterface(static_cast<IAntibot *>(pEngineAntibot), false);
+
+	IGameServer *pGameServer = CreateGameServer();
+	pKernel->RegisterInterface(pGameServer);
 
 	pEngine->Init();
-	pConfigManager->Init();
 	pConsole->Init();
+	pConfigManager->Init();
 
 	// register all console commands
 	pServer->RegisterCommands();
@@ -173,8 +169,8 @@ int main(int argc, const char **argv)
 	if(argc > 1)
 		pConsole->ParseArguments(argc - 1, &argv[1]);
 
-	pConsole->Register("sv_test_cmds", "", CFGFLAG_SERVER, CServer::ConTestingCommands, pConsole, "Turns testing commands aka cheats on/off (setting only works in initial config)");
-	pConsole->Register("sv_rescue", "", CFGFLAG_SERVER, CServer::ConRescue, pConsole, "Allow /rescue command so players can teleport themselves out of freeze (setting only works in initial config)");
+	pConfigManager->SetReadOnly("sv_test_cmds", true);
+	pConfigManager->SetReadOnly("sv_rescue", true);
 
 	const int Mode = g_Config.m_Logappend ? IOFLAG_APPEND : IOFLAG_WRITE;
 	if(g_Config.m_Logfile[0])

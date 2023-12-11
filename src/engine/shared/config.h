@@ -4,9 +4,11 @@
 #define ENGINE_SHARED_CONFIG_H
 
 #include <base/detect.h>
-#include <engine/config.h>
 
-#include <string>
+#include <engine/config.h>
+#include <engine/console.h>
+#include <engine/shared/memheap.h>
+
 #include <vector>
 
 // include protocol for MAX_CLIENT used in config_variables
@@ -20,13 +22,13 @@
 class CConfig
 {
 public:
-#define MACRO_CONFIG_INT(Name, ScriptName, Def, Min, Max, Save, Desc) \
+#define MACRO_CONFIG_INT(Name, ScriptName, Def, Min, Max, Flags, Desc) \
 	static constexpr int ms_##Name = Def; \
 	int m_##Name;
-#define MACRO_CONFIG_COL(Name, ScriptName, Def, Save, Desc) \
+#define MACRO_CONFIG_COL(Name, ScriptName, Def, Flags, Desc) \
 	static constexpr unsigned ms_##Name = Def; \
 	unsigned m_##Name;
-#define MACRO_CONFIG_STR(Name, ScriptName, Len, Def, Save, Desc) \
+#define MACRO_CONFIG_STR(Name, ScriptName, Len, Def, Flags, Desc) \
 	static constexpr const char *ms_p##Name = Def; \
 	char m_##Name[Len]; // Flawfinder: ignore
 #include "config_variables.h"
@@ -58,31 +60,41 @@ enum
 
 class CConfigManager : public IConfigManager
 {
-	enum
-	{
-		MAX_CALLBACKS = 16
-	};
+	IConsole *m_pConsole;
+	class IStorage *m_pStorage;
 
-	struct CCallback
+	IOHANDLE m_ConfigFile;
+	bool m_Failed;
+
+	struct SCallback
 	{
 		SAVECALLBACKFUNC m_pfnFunc;
 		void *m_pUserData;
+
+		SCallback(SAVECALLBACKFUNC pfnFunc, void *pUserData) :
+			m_pfnFunc(pfnFunc),
+			m_pUserData(pUserData)
+		{
+		}
 	};
+	std::vector<SCallback> m_vCallbacks;
 
-	class IStorage *m_pStorage;
-	IOHANDLE m_ConfigFile;
-	bool m_Failed;
-	CCallback m_aCallbacks[MAX_CALLBACKS];
-	int m_NumCallbacks;
+	std::vector<struct SConfigVariable *> m_vpAllVariables;
+	std::vector<struct SConfigVariable *> m_vpGameVariables;
+	std::vector<const char *> m_vpUnknownCommands;
+	CHeap m_ConfigHeap;
 
-	std::vector<std::string> m_vUnknownCommands;
+	static void Con_Reset(IConsole::IResult *pResult, void *pUserData);
+	static void Con_Toggle(IConsole::IResult *pResult, void *pUserData);
+	static void Con_ToggleStroke(IConsole::IResult *pResult, void *pUserData);
 
 public:
 	CConfigManager();
 
 	void Init() override;
-	void Reset() override;
 	void Reset(const char *pScriptName) override;
+	void ResetGameSettings() override;
+	void SetReadOnly(const char *pScriptName, bool ReadOnly) override;
 	bool Save() override;
 	CConfig *Values() override { return &g_Config; }
 

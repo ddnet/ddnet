@@ -516,8 +516,8 @@ CClientMask CGameTeams::TeamMask(int Team, int ExceptID, int Asker)
 		{ // Not spectator
 			if(i != Asker)
 			{ // Actions of other players
-				if(!Character(i))
-					continue; // Player is currently dead
+				// if(!Character(i)) // commented out by ddnet-insta
+				// 	continue; // Player is currently dead
 				if(GetPlayer(i)->m_ShowOthers == SHOW_OTHERS_ONLY_TEAM)
 				{
 					if(m_Core.Team(i) != Team && m_Core.Team(i) != TEAM_SUPER)
@@ -770,6 +770,18 @@ void CGameTeams::OnFinish(CPlayer *Player, float Time, const char *pTimestamp)
 				Server()->SendPackMsg(&MsgLegacy, MSGFLAG_VITAL, ClientID);
 			}
 		}
+
+		CNetMsg_Sv_RaceFinish RaceFinishMsg;
+		RaceFinishMsg.m_ClientID = ClientID;
+		RaceFinishMsg.m_Time = Time * 1000;
+		RaceFinishMsg.m_Diff = 0;
+		if(pData->m_BestTime)
+		{
+			RaceFinishMsg.m_Diff = Diff * 1000 * (Time < pData->m_BestTime ? -1 : 1);
+		}
+		RaceFinishMsg.m_RecordPersonal = (Time < pData->m_BestTime || !pData->m_BestTime);
+		RaceFinishMsg.m_RecordServer = Time < GameServer()->m_pController->m_CurrentRecord;
+		Server()->SendPackMsg(&RaceFinishMsg, MSGFLAG_VITAL | MSGFLAG_NORECORD, -1);
 	}
 	else
 	{
@@ -781,7 +793,7 @@ void CGameTeams::OnFinish(CPlayer *Player, float Time, const char *pTimestamp)
 		{
 			Msg.m_Diff = Diff * 1000 * (Time < pData->m_BestTime ? -1 : 1);
 		}
-		Msg.m_RecordPersonal = Time < pData->m_BestTime;
+		Msg.m_RecordPersonal = (Time < pData->m_BestTime || !pData->m_BestTime);
 		Msg.m_RecordServer = Time < GameServer()->m_pController->m_CurrentRecord;
 		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, -1);
 	}

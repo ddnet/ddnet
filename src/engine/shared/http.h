@@ -1,9 +1,12 @@
 #ifndef ENGINE_SHARED_HTTP_H
 #define ENGINE_SHARED_HTTP_H
 
+#include <base/hash_ctxt.h>
+
+#include <engine/shared/jobs.h>
+
 #include <algorithm>
 #include <atomic>
-#include <engine/shared/jobs.h>
 
 typedef struct _json_value json_value;
 class IStorage;
@@ -58,6 +61,9 @@ class CHttpRequest : public IJob
 	int64_t m_MaxResponseSize = -1;
 	REQUEST m_Type = REQUEST::GET;
 
+	SHA256_CTX m_ActualSha256;
+	SHA256_DIGEST m_ExpectedSha256 = SHA256_ZEROED;
+
 	bool m_WriteToFile = false;
 
 	uint64_t m_ResponseLength = 0;
@@ -105,6 +111,7 @@ public:
 	void LogProgress(HTTPLOG LogProgress) { m_LogProgress = LogProgress; }
 	void IpResolve(IPRESOLVE IpResolve) { m_IpResolve = IpResolve; }
 	void WriteToFile(IStorage *pStorage, const char *pDest, int StorageType);
+	void ExpectSha256(const SHA256_DIGEST &Sha256) { m_ExpectedSha256 = Sha256; }
 	void Head() { m_Type = REQUEST::HEAD; }
 	void Post(const unsigned char *pData, size_t DataLength)
 	{

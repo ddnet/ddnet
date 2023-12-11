@@ -17,7 +17,7 @@ enum
 
 class IStorage : public IInterface
 {
-	MACRO_INTERFACE("storage", 0)
+	MACRO_INTERFACE("storage")
 public:
 	enum
 	{

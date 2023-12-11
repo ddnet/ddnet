@@ -1268,6 +1268,7 @@ public:
 		pCursor->m_GlyphCount = 0;
 		pCursor->m_CharCount = 0;
 		pCursor->m_MaxLines = 0;
+		pCursor->m_LineSpacing = 0;
 
 		pCursor->m_StartX = x;
 		pCursor->m_StartY = y;
@@ -1330,11 +1331,12 @@ public:
 		return Cursor.m_LongestLineWidth;
 	}
 
-	STextBoundingBox TextBoundingBox(float Size, const char *pText, int StrLength = -1, float LineWidth = -1.0f, int Flags = 0) override
+	STextBoundingBox TextBoundingBox(float Size, const char *pText, int StrLength = -1, float LineWidth = -1.0f, float LineSpacing = 0.0f, int Flags = 0) override
 	{
 		CTextCursor Cursor;
 		SetCursor(&Cursor, 0, 0, Size, Flags);
 		Cursor.m_LineWidth = LineWidth;
+		Cursor.m_LineSpacing = LineSpacing;
 		TextEx(&Cursor, pText, StrLength);
 		return Cursor.BoundingBox();
 	}
@@ -1477,6 +1479,7 @@ public:
 		const float CursorY = round_to_int(pCursor->m_Y * FakeToScreen.y) / FakeToScreen.y;
 		const int ActualSize = round_truncate(pCursor->m_FontSize * FakeToScreen.y);
 		pCursor->m_AlignedFontSize = ActualSize / FakeToScreen.y;
+		const float LineSpacing = pCursor->m_LineSpacing;
 
 		// string length
 		if(Length < 0)
@@ -1534,10 +1537,10 @@ public:
 		const auto &&CheckInsideChar = [&](bool CheckOuter, vec2 CursorPos, float LastCharX, float LastCharWidth, float CharX, float CharWidth, float CharY) -> bool {
 			return (LastCharX - LastCharWidth / 2 <= CursorPos.x &&
 				       CharX + CharWidth / 2 > CursorPos.x &&
-				       CharY - pCursor->m_AlignedFontSize <= CursorPos.y &&
-				       CharY > CursorPos.y) ||
+				       CharY - pCursor->m_AlignedFontSize - LineSpacing <= CursorPos.y &&
+				       CharY + LineSpacing > CursorPos.y) ||
 			       (CheckOuter &&
-				       CharY - pCursor->m_AlignedFontSize > CursorPos.y);
+				       CharY - pCursor->m_AlignedFontSize + LineSpacing > CursorPos.y);
 		};
 		const auto &&CheckSelectionStart = [&](bool CheckOuter, vec2 CursorPos, int &SelectionChar, bool &SelectionUsedCase, float LastCharX, float LastCharWidth, float CharX, float CharWidth, float CharY) {
 			if(!SelectionStarted && !SelectionUsedCase)
@@ -1552,10 +1555,10 @@ public:
 		};
 		const auto &&CheckOutsideChar = [&](bool CheckOuter, vec2 CursorPos, float CharX, float CharWidth, float CharY) -> bool {
 			return (CharX + CharWidth / 2 > CursorPos.x &&
-				       CharY - pCursor->m_AlignedFontSize <= CursorPos.y &&
-				       CharY > CursorPos.y) ||
+				       CharY - pCursor->m_AlignedFontSize - LineSpacing <= CursorPos.y &&
+				       CharY + LineSpacing > CursorPos.y) ||
 			       (CheckOuter &&
-				       CharY <= CursorPos.y);
+				       CharY - LineSpacing <= CursorPos.y);
 		};
 		const auto &&CheckSelectionEnd = [&](bool CheckOuter, vec2 CursorPos, int &SelectionChar, bool &SelectionUsedCase, float CharX, float CharWidth, float CharY) {
 			if(SelectionStarted && !SelectionUsedCase)
@@ -1580,7 +1583,7 @@ public:
 				return false;
 
 			DrawX = pCursor->m_StartX;
-			DrawY += pCursor->m_AlignedFontSize;
+			DrawY += pCursor->m_AlignedFontSize + pCursor->m_LineSpacing;
 			if((RenderFlags & TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT) == 0)
 			{
 				DrawX = round_to_int(DrawX * FakeToScreen.x) / FakeToScreen.x; // realign

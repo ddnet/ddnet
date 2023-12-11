@@ -55,6 +55,8 @@ MACRO_CONFIG_INT(SvChatRatelimitDebug, sv_chat_ratelimit_debug, 0, 0, 1, CFGFLAG
 
 MACRO_CONFIG_INT(SvFastcap, sv_fastcap, 0, 0, 1, CFGFLAG_SERVER, "Insert flag captures into ddrace rank database")
 
+MACRO_CONFIG_INT(SvVoteCheckboxes, sv_vote_checkboxes, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_SERVER, "Fill [ ] checkbox in vote name if the config is already set")
+MACRO_CONFIG_INT(SvHideAdmins, sv_hide_admins, 0, 0, 1, CFGFLAG_SAVE | CFGFLAG_SERVER, "Only send admin status to other authed players")
 MACRO_CONFIG_INT(SvShowSettingsMotd, sv_show_settings_motd, 1, 0, 1, CFGFLAG_SERVER, "Show insta game settings in motd on join")
 MACRO_CONFIG_INT(SvUnstackChat, sv_unstack_chat, 1, 0, 1, CFGFLAG_SERVER, "Revert ddnet clients duplicated chat message stacking")
 // MACRO_CONFIG_INT(SvCasualRounds, sv_casual_rounds, 1, 0, 1, CFGFLAG_SERVER, "1=start rounds automatically, 2=require restart vote to properly start game")

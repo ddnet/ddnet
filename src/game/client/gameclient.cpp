@@ -51,8 +51,8 @@
 #include "components/freezebars.h"
 #include "components/ghost.h"
 #include "components/hud.h"
+#include "components/infomessages.h"
 #include "components/items.h"
-#include "components/killmessages.h"
 #include "components/mapimages.h"
 #include "components/maplayers.h"
 #include "components/mapsounds.h"
@@ -135,7 +135,7 @@ void CGameClient::OnConsoleInit()
 					      &m_Hud,
 					      &m_Spectator,
 					      &m_Emoticon,
-					      &m_KillMessages,
+					      &m_InfoMessages,
 					      &m_Chat,
 					      &m_Broadcast,
 					      &m_DebugHud,
@@ -530,7 +530,7 @@ void CGameClient::OnConnected()
 	m_GameWorld.m_WorldConfig.m_InfiniteAmmo = true;
 	mem_zero(&m_GameInfo, sizeof(m_GameInfo));
 	m_PredictedDummyID = -1;
-	Console()->ResetGameSettings();
+	ConfigManager()->ResetGameSettings();
 	LoadMapSettings();
 
 	if(Client()->State() != IClient::STATE_DEMOPLAYBACK && g_Config.m_ClAutoDemoOnConnect)
@@ -3389,7 +3389,7 @@ void CGameClient::RefindSkins()
 	}
 	m_Ghost.RefindSkins();
 	m_Chat.RefindSkins();
-	m_KillMessages.RefindSkins();
+	m_InfoMessages.RefindSkins();
 }
 
 static bool UnknownMapSettingCallback(const char *pCommand, void *pUser)

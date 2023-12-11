@@ -30,6 +30,7 @@ class CGameConsole : public CComponent
 		struct CBacklogEntry
 		{
 			float m_YOffset;
+			int m_LineCount;
 			ColorRGBA m_PrintColor;
 			size_t m_Length;
 			char m_aText[1];
@@ -40,11 +41,12 @@ class CGameConsole : public CComponent
 		CStaticRingBuffer<char, 64 * 1024, CRingBufferBase::FLAG_RECYCLE> m_History;
 		char *m_pHistoryEntry;
 
-		CLineInputBuffered<512> m_Input;
+		CLineInputBuffered<IConsole::CMDLINE_LENGTH> m_Input;
 		const char *m_pName;
 		int m_Type;
-		int m_BacklogCurPage;
-		int m_BacklogLastActivePage = -1;
+		int m_BacklogCurLine;
+		int m_BacklogLastActiveLine = -1;
+		int m_LinesRendered;
 
 		STextBoundingBox m_BoundingBox = {0.0f, 0.0f, 0.0f, 0.0f};
 		float m_LastInputHeight = 0.0f;
@@ -59,9 +61,9 @@ class CGameConsole : public CComponent
 
 		CGameConsole *m_pGameConsole;
 
-		char m_aCompletionBuffer[128];
+		char m_aCompletionBuffer[IConsole::CMDLINE_LENGTH];
 		int m_CompletionChosen;
-		char m_aCompletionBufferArgument[128];
+		char m_aCompletionBufferArgument[IConsole::CMDLINE_LENGTH];
 		int m_CompletionChosenArgument;
 		int m_CompletionFlagmask;
 		float m_CompletionRenderOffset;
@@ -80,7 +82,7 @@ class CGameConsole : public CComponent
 		void Init(CGameConsole *pGameConsole);
 
 		void ClearBacklog() REQUIRES(!m_BacklogPendingLock);
-		void ClearBacklogYOffsets();
+		void UpdateBacklogTextAttributes();
 		void PumpBacklogPending() REQUIRES(!m_BacklogPendingLock);
 		void ClearHistory();
 		void Reset();
@@ -89,10 +91,13 @@ class CGameConsole : public CComponent
 
 		bool OnInput(const IInput::CEvent &Event);
 		void PrintLine(const char *pLine, int Len, ColorRGBA PrintColor) REQUIRES(!m_BacklogPendingLock);
+		int GetLinesToScroll(int Direction, int LinesToScroll);
 
 		const char *GetString() const { return m_Input.GetString(); }
 		static void PossibleCommandsCompleteCallback(int Index, const char *pStr, void *pUser);
 		static void PossibleArgumentsCompleteCallback(int Index, const char *pStr, void *pUser);
+
+		void UpdateEntryTextAttributes(CBacklogEntry *pEntry);
 	};
 
 	class IConsole *m_pConsole;

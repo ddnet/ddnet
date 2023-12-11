@@ -28,6 +28,7 @@ public:
 
 	void GetSize(float *pWidth, float *pHeight) override;
 	std::shared_ptr<CLayer> Duplicate() const override;
+	const char *TypeName() const override;
 
 	int m_Image;
 	std::vector<CQuad> m_vQuads;

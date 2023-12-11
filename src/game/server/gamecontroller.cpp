@@ -553,30 +553,6 @@ void IGameController::OnReset()
 
 int IGameController::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon)
 {
-	// gctf
-	// do scoreing
-	if(!pKiller || Weapon == WEAPON_GAME)
-		return 0;
-	if(pKiller == pVictim->GetPlayer())
-		pVictim->GetPlayer()->DecrementScore(); // suicide or world
-	else
-	{
-		if(IsTeamplay() && pVictim->GetPlayer()->GetTeam() == pKiller->GetTeam())
-			pKiller->DecrementScore(); // teamkill
-		else
-			pKiller->IncrementScore(); // normal kill
-	}
-	if(Weapon == WEAPON_SELF)
-		pVictim->GetPlayer()->m_RespawnTick = Server()->Tick() + Server()->TickSpeed() * 3.0f;
-
-	// update spectator modes for dead players in survival
-	// if(m_GameFlags&GAMEFLAG_SURVIVAL)
-	// {
-	// 	for(int i = 0; i < MAX_CLIENTS; ++i)
-	// 		if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->m_DeadSpecMode)
-	// 			GameServer()->m_apPlayers[i]->UpdateDeadSpecMode();
-	// }
-
 	return 0;
 }
 
@@ -639,7 +615,7 @@ void IGameController::Tick()
 
 			// 0.6 can do warmup timers (world unpaused incoming reload)
 			// but no game countdown timers (world paused incoming unpause)
-			if(m_GameState == IGS_START_COUNTDOWN)
+			if(m_GameState == IGS_START_COUNTDOWN_ROUND_START || m_GameState == IGS_START_COUNTDOWN_UNPAUSE)
 			{
 				static int s_LastSecs = -1;
 				int Secs = m_GameStateTimer / Server()->TickSpeed();
@@ -667,7 +643,8 @@ void IGameController::Tick()
 				// end warmup
 				SetGameState(IGS_WARMUP_USER, 0);
 				break;
-			case IGS_START_COUNTDOWN:
+			case IGS_START_COUNTDOWN_ROUND_START:
+			case IGS_START_COUNTDOWN_UNPAUSE:
 				// unpause the game
 				SetGameState(IGS_GAME_RUNNING);
 				break;
@@ -704,9 +681,11 @@ void IGameController::Tick()
 				if(!Config()->m_SvPlayerReadyMode && m_GameStateTimer == TIMER_INFINITE)
 					SetGameState(IGS_WARMUP_USER, 0);
 				break;
-			case IGS_START_COUNTDOWN:
+			case IGS_START_COUNTDOWN_ROUND_START:
+			case IGS_START_COUNTDOWN_UNPAUSE:
 			case IGS_GAME_PAUSED:
 				// freeze the game
+				++m_RoundStartTick;
 				++m_GameStartTick;
 				break;
 			case IGS_WARMUP_GAME:
@@ -877,7 +856,8 @@ void IGameController::Snap(int SnappingClient)
 			if(m_GameStateTimer != TIMER_INFINITE)
 				pGameData->m_GameStateEndTick = Server()->Tick() + m_GameStateTimer;
 			break;
-		case IGS_START_COUNTDOWN:
+		case IGS_START_COUNTDOWN_ROUND_START:
+		case IGS_START_COUNTDOWN_UNPAUSE:
 			pGameData->m_GameStateFlags |= protocol7::GAMESTATEFLAG_STARTCOUNTDOWN | protocol7::GAMESTATEFLAG_PAUSED;
 			if(m_GameStateTimer != TIMER_INFINITE)
 				pGameData->m_GameStateEndTick = Server()->Tick() + m_GameStateTimer;
@@ -1119,7 +1099,8 @@ void IGameController::CheckReadyStates(int WithoutID)
 			break;
 		case IGS_GAME_RUNNING:
 		case IGS_WARMUP_GAME:
-		case IGS_START_COUNTDOWN:
+		case IGS_START_COUNTDOWN_UNPAUSE:
+		case IGS_START_COUNTDOWN_ROUND_START:
 		case IGS_END_MATCH:
 		case IGS_END_ROUND:
 			// not affected
@@ -1221,7 +1202,7 @@ void IGameController::StartMatch(bool RoundEnd)
 	// if(RoundEnd && (!g_Config.m_SvCasualRounds || g_Config.m_SvTournament))
 	// 	SetGameState(IGS_WARMUP_GAME, TIMER_INFINITE);
 	// else
-	SetGameState(IGS_START_COUNTDOWN);
+	SetGameState(IGS_START_COUNTDOWN_ROUND_START);
 
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "start match type='%s' teamplay='%d'", m_pGameType, m_GameFlags & GAMEFLAG_TEAMS);
@@ -1380,9 +1361,10 @@ void IGameController::SetGameState(EGameState GameState, int Timer)
 			}
 		}
 		break;
-	case IGS_START_COUNTDOWN:
+	case IGS_START_COUNTDOWN_ROUND_START:
+	case IGS_START_COUNTDOWN_UNPAUSE:
 		// only possible when game, pause or start countdown is running
-		if(m_GameState == IGS_GAME_RUNNING || m_GameState == IGS_GAME_PAUSED || m_GameState == IGS_START_COUNTDOWN)
+		if(m_GameState == IGS_GAME_RUNNING || m_GameState == IGS_GAME_PAUSED || m_GameState == IGS_START_COUNTDOWN_ROUND_START || m_GameState == IGS_START_COUNTDOWN_UNPAUSE)
 		{
 			int CountDownSeconds = 0;
 			if(m_GameState == IGS_GAME_PAUSED)
@@ -1415,8 +1397,11 @@ void IGameController::SetGameState(EGameState GameState, int Timer)
 			// vanilla does not do this
 			// but ddnet sends m_RoundStartTick in snap
 			// so we have to also update that to show current game timer
-			if(m_GameState == IGS_START_COUNTDOWN)
+			if(m_GameState == IGS_START_COUNTDOWN_ROUND_START || m_GameState == IGS_GAME_RUNNING)
+			{
 				m_RoundStartTick = Server()->Tick();
+				dbg_msg("ddnet-insta", "reset m_RoundStartTick");
+			}
 			// this is also gctf specific
 			// no idea how vanilla does it
 			// but this solves countdown delaying timelimit end
@@ -1424,8 +1409,11 @@ void IGameController::SetGameState(EGameState GameState, int Timer)
 			// timerstops at 00:00 and waits the additional countdown time
 			// before actually ending the game
 			// https://github.com/ZillyInsta/ddnet-insta/issues/41
-			if(m_GameState != IGS_GAME_RUNNING)
+			if(m_GameState == IGS_START_COUNTDOWN_ROUND_START)
+			{
 				m_GameStartTick = Server()->Tick();
+				dbg_msg("ddnet-insta", "reset m_GameStartTick");
+			}
 			m_Warmup = 0;
 			m_GameState = GameState;
 			m_GameStateTimer = TIMER_INFINITE;
@@ -1458,7 +1446,7 @@ void IGameController::SetGameState(EGameState GameState, int Timer)
 			else
 			{
 				// start a countdown to end pause
-				SetGameState(IGS_START_COUNTDOWN);
+				SetGameState(IGS_START_COUNTDOWN_UNPAUSE);
 			}
 		}
 		break;
