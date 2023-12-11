@@ -41,6 +41,13 @@ int CGameControllerInstagib::OnCharacterDeath(class CCharacter *pVictim, class C
 	// 		if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->m_DeadSpecMode)
 	// 			GameServer()->m_apPlayers[i]->UpdateDeadSpecMode();
 	// }
+
+	if(g_Config.m_SvKillingspreeKills > 0 && pKiller && pVictim)
+	{
+		if(pKiller->GetCharacter() && pKiller != pVictim->GetPlayer())
+			AddSpree(pKiller);
+		EndSpree(pVictim->GetPlayer(), pKiller);
+	}
 	return 0;
 }
 
@@ -159,18 +166,6 @@ void CGameControllerInstagib::OnCharacterSpawn(class CCharacter *pChr)
 	pChr->IncreaseHealth(10);
 
 	pChr->SetTeleports(&m_TeleOuts, &m_TeleCheckOuts);
-}
-
-int CGameControllerInstagib::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon)
-{
-	if(g_Config.m_SvKillingspreeKills > 0 && pKiller && pVictim)
-	{
-		if(pKiller->GetCharacter() && pKiller != pVictim->GetPlayer())
-			AddSpree(pKiller);
-		EndSpree(pVictim->GetPlayer(), pKiller);
-	}
-
-	return 0;
 }
 
 void CGameControllerInstagib::AddSpree(class CPlayer * pPlayer)
