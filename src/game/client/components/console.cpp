@@ -575,7 +575,7 @@ void CGameConsole::CInstance::UpdateEntryTextAttributes(CBacklogEntry *pEntry) c
 	Cursor.m_MaxLines = 10;
 	Cursor.m_LineSpacing = LINE_SPACING;
 	m_pGameConsole->TextRender()->TextEx(&Cursor, pEntry->m_aText, -1);
-	pEntry->m_YOffset = Cursor.Height() + LINE_SPACING;
+	pEntry->m_YOffset = Cursor.Height();
 	pEntry->m_LineCount = Cursor.m_LineCount;
 }
 
@@ -909,9 +909,9 @@ void CGameConsole::OnRender()
 
 	{
 		// Get height of 1 line
-		float LineHeight = TextRender()->TextBoundingBox(FONT_SIZE, " ", -1, -1, LINE_SPACING).m_H + LINE_SPACING;
+		float LineHeight = TextRender()->TextBoundingBox(FONT_SIZE, " ", -1, -1, LINE_SPACING).m_H;
 
-		float RowHeight = FONT_SIZE * 1.25f;
+		float RowHeight = FONT_SIZE * 1.5f;
 		float x = 3;
 		float y = ConsoleHeight - RowHeight - 5.0f;
 
@@ -1104,8 +1104,7 @@ void CGameConsole::OnRender()
 
 			if(First)
 			{
-				int Diff = pConsole->m_BacklogLastActiveLine - SkippedLines;
-				OffsetY -= Diff * LineHeight - LINE_SPACING;
+				OffsetY -= (pConsole->m_BacklogLastActiveLine - SkippedLines) * LineHeight;
 			}
 
 			float LocalOffsetY = OffsetY + pEntry->m_YOffset / (float)pEntry->m_LineCount;

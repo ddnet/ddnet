@@ -212,6 +212,7 @@ public:
 	float m_FontSize;
 	float m_AlignedFontSize;
 	float m_LineSpacing;
+	float m_AlignedLineSpacing;
 
 	ETextCursorSelectionMode m_CalculateSelectionMode;
 	float m_SelectionHeightFactor;
@@ -237,7 +238,7 @@ public:
 
 	float Height() const
 	{
-		return m_LineCount * m_AlignedFontSize + std::max(0, m_LineCount - 1) * m_LineSpacing;
+		return m_LineCount * (m_AlignedFontSize + m_AlignedLineSpacing);
 	}
 
 	STextBoundingBox BoundingBox() const
