@@ -5599,6 +5599,8 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 	static float s_MouseXStart = 0.0f;
 	static float s_MouseYStart = 0.0f;
 
+	static CLineInput s_NameInput;
+
 	CUIRect ToolBar, CurveBar, ColorBar, DragBar;
 	View.HSplitTop(30.0f, &DragBar, nullptr);
 	DragBar.y -= 2.0f;
@@ -5800,7 +5802,6 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			ToolBar.VSplitLeft(3.0f, nullptr, &ToolBar);
 			ToolBar.VSplitLeft(ToolBar.w > ToolBar.h * 40 ? 80.0f : 60.0f, &Button, &ToolBar);
 
-			static CLineInput s_NameInput;
 			s_NameInput.SetBuffer(pEnvelope->m_aName, sizeof(pEnvelope->m_aName));
 			if(DoEditBox(&s_NameInput, &Button, 10.0f, IGraphics::CORNER_ALL, "The name of the selected envelope"))
 			{
@@ -6737,7 +6738,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		static float s_MidpointY = 0.0f;
 		static std::vector<float> s_vInitialPositionsX;
 		static std::vector<float> s_vInitialPositionsY;
-		if(s_Operation == EEnvelopeEditorOp::OP_NONE && Input()->KeyIsPressed(KEY_S) && !Input()->ModifierIsPressed() && !m_vSelectedEnvelopePoints.empty())
+		if(s_Operation == EEnvelopeEditorOp::OP_NONE && !s_NameInput.IsActive() && Input()->KeyIsPressed(KEY_S) && !Input()->ModifierIsPressed() && !m_vSelectedEnvelopePoints.empty())
 		{
 			s_Operation = EEnvelopeEditorOp::OP_SCALE;
 			s_ScaleFactorX = 1.0f;
