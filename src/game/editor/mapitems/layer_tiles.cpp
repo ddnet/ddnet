@@ -1125,7 +1125,7 @@ CUI::EPopupMenuFunctionResult CLayerTiles::RenderCommonProperties(SCommonPropSta
 					}
 				}
 
-				if(HasModifiedColor)
+				if(HasModifiedColor && !pLayer->IsEntitiesLayer())
 				{
 					int Color = 0;
 					Color |= pLayer->m_Color.r << 24;
