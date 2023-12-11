@@ -2,6 +2,7 @@
 
 #include "json.h"
 #include <base/math.h>
+#include <base/system.h>
 #include <engine/external/json-parser/json.h>
 
 #include <cstdio>

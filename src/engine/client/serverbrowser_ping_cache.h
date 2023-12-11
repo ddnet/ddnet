@@ -1,6 +1,6 @@
 #ifndef ENGINE_CLIENT_SERVERBROWSER_PING_CACHE_H
 #define ENGINE_CLIENT_SERVERBROWSER_PING_CACHE_H
-#include <base/system.h>
+#include <base/types.h>
 
 class IConsole;
 class IStorage;

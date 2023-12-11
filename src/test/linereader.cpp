@@ -1,6 +1,7 @@
 #include "test.h"
 #include <gtest/gtest.h>
 
+#include <base/system.h>
 #include <engine/shared/linereader.h>
 
 void TestFileLineReader(const char *pWritten, bool SkipBom, std::initializer_list<const char *> pReads)

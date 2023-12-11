@@ -2,6 +2,7 @@
 #define ENGINE_DISCORD_H
 
 #include "kernel.h"
+#include <base/types.h>
 
 class IDiscord : public IInterface
 {

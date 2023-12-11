@@ -5,6 +5,7 @@
 
 #include "kernel.h"
 #include <base/hash.h>
+#include <base/types.h>
 
 enum
 {

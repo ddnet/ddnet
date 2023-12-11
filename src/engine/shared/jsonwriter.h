@@ -3,9 +3,10 @@
 #ifndef ENGINE_SHARED_JSONWRITER_H
 #define ENGINE_SHARED_JSONWRITER_H
 
-#include <base/system.h>
+#include <base/types.h>
 
 #include <stack>
+#include <string>
 
 /**
  * JSON writer with abstract writing function.

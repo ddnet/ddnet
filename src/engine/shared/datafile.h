@@ -6,7 +6,7 @@
 #include <engine/storage.h>
 
 #include <base/hash.h>
-#include <base/system.h>
+#include <base/types.h>
 
 #include <array>
 #include <vector>

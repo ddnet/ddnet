@@ -3,6 +3,8 @@
 
 #include <engine/ghost.h>
 
+#include <base/system.h>
+
 enum
 {
 	MAX_ITEM_SIZE = 128,

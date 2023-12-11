@@ -1,4 +1,5 @@
 #include "backend_base.h"
+#include <base/system.h>
 #include <engine/gfx/image_manipulation.h>
 
 void *CCommandProcessorFragment_GLBase::Resize(const unsigned char *pData, int Width, int Height, int NewWidth, int NewHeight, int BPP)

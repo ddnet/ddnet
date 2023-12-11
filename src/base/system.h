@@ -9,6 +9,7 @@
 #define BASE_SYSTEM_H
 
 #include "detect.h"
+#include "types.h"
 
 #ifndef __USE_GNU
 #define __USE_GNU
@@ -226,11 +227,7 @@ enum
 	IOSEEK_START = 0,
 	IOSEEK_CUR = 1,
 	IOSEEK_END = 2,
-
-	IO_MAX_PATH_LENGTH = 512,
 };
-
-typedef void *IOHANDLE;
 
 /**
  * Opens a file.
@@ -741,43 +738,11 @@ ETimeSeason time_season();
  * @defgroup Network-General
  */
 
-/**
- * @ingroup Network-General
- */
-typedef struct NETSOCKET_INTERNAL *NETSOCKET;
-
-/**
- * @ingroup Network-General
- */
-enum
-{
-	NETADDR_MAXSTRSIZE = 1 + (8 * 4 + 7) + 1 + 1 + 5 + 1, // [XXXX:XXXX:XXXX:XXXX:XXXX:XXXX:XXXX:XXXX]:XXXXX
-
-	NETTYPE_LINK_BROADCAST = 4,
-
-	NETTYPE_INVALID = 0,
-	NETTYPE_IPV4 = 1,
-	NETTYPE_IPV6 = 2,
-	NETTYPE_WEBSOCKET_IPV4 = 8,
-
-	NETTYPE_ALL = NETTYPE_IPV4 | NETTYPE_IPV6 | NETTYPE_WEBSOCKET_IPV4,
-	NETTYPE_MASK = NETTYPE_ALL | NETTYPE_LINK_BROADCAST,
-};
-
-/**
- * @ingroup Network-General
- */
-typedef struct NETADDR
-{
-	unsigned int type;
-	unsigned char ip[16];
-	unsigned short port;
-
-	bool operator==(const NETADDR &other) const;
-	bool operator!=(const NETADDR &other) const { return !(*this == other); }
-} NETADDR;
-
 extern const NETADDR NETADDR_ZEROED;
+
+/**
+ * @ingroup Network-General
+ */
 
 #ifdef CONF_FAMILY_UNIX
 /**
@@ -1810,15 +1775,7 @@ void str_escape(char **dst, const char *src, const char *end);
  *
  * @remark The strings are treated as zero-terminated strings.
  */
-typedef int (*FS_LISTDIR_CALLBACK)(const char *name, int is_dir, int dir_type, void *user);
 void fs_listdir(const char *dir, FS_LISTDIR_CALLBACK cb, int type, void *user);
-
-typedef struct
-{
-	const char *m_pName;
-	time_t m_TimeCreated; // seconds since UNIX Epoch
-	time_t m_TimeModified; // seconds since UNIX Epoch
-} CFsFileInfo;
 
 /**
  * Lists the files and folders in a directory and gets additional file information.
@@ -1832,7 +1789,6 @@ typedef struct
  *
  * @remark The strings are treated as zero-terminated strings.
  */
-typedef int (*FS_LISTDIR_CALLBACK_FILEINFO)(const CFsFileInfo *info, int is_dir, int dir_type, void *user);
 void fs_listdir_fileinfo(const char *dir, FS_LISTDIR_CALLBACK_FILEINFO cb, int type, void *user);
 
 /**
@@ -2182,14 +2138,6 @@ int str_isallnum(const char *str);
 int str_isallnum_hex(const char *str);
 
 unsigned str_quickhash(const char *str);
-
-enum
-{
-	/**
-	 * The maximum bytes necessary to encode one Unicode codepoint with UTF-8.
-	 */
-	UTF8_BYTE_LENGTH = 4,
-};
 
 int str_utf8_to_skeleton(const char *str, int *buf, int buf_len);
 

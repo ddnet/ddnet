@@ -3,8 +3,6 @@
 
 #include <vector>
 
-#include <base/system.h>
-
 enum
 {
 	UUID_MAXSTRSIZE = 37, // 12345678-0123-5678-0123-567890123456
@@ -21,7 +19,7 @@ struct CUuid
 
 	bool operator==(const CUuid &Other) const;
 	bool operator!=(const CUuid &Other) const;
-	bool operator<(const CUuid &Other) const { return mem_comp(m_aData, Other.m_aData, sizeof(m_aData)) < 0; }
+	bool operator<(const CUuid &Other) const;
 };
 
 extern const CUuid UUID_ZEROED;

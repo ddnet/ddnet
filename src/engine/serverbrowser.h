@@ -4,7 +4,7 @@
 #define ENGINE_SERVERBROWSER_H
 
 #include <base/hash.h>
-#include <base/types.h>
+#include <base/system.h>
 
 #include <engine/map.h>
 #include <engine/shared/protocol.h>
