@@ -30,6 +30,7 @@ For build instructions visit the [ddnet repo](https://github.com/ddnet/ddnet).
 + `sv_chat_ratelimit_spam` Needs sv_spamprotection 0 (0=off, 1=ratelimit chat detected as spam)
 + `sv_chat_ratelimit_debug` Logs which of the ratelimits kicked in
 + `sv_fastcap` Insert flag captures into ddrace rank database
++ `sv_vote_checkboxes` Fill [ ] checkbox in vote name if the config is already set
 + `sv_hide_admins` Only send admin status to other authed players
 + `sv_show_settings_motd` Show insta game settings in motd on join
 + `sv_unstack_chat` Revert ddnet clients duplicated chat message stacking

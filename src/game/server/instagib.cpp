@@ -650,8 +650,10 @@ void CGameContext::ShowCurrentInstagibConfigsMotd(int ClientID, bool Force)
 
 void CGameContext::UpdateVoteCheckboxes()
 {
-	CVoteOptionServer *pCurrent = m_pVoteOptionFirst;
+	if(!g_Config.m_SvVoteCheckboxes)
+		return;
 
+	CVoteOptionServer *pCurrent = m_pVoteOptionFirst;
 	while(pCurrent != NULL)
 	{
 		if(str_startswith(pCurrent->m_aDescription, "[ ]") || str_startswith(pCurrent->m_aDescription, "[x]"))
