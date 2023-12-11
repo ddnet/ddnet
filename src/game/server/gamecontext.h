@@ -422,6 +422,7 @@ private:
 	static void ConGun(IConsole::IResult *pResult, void *pUserData); // gctf
 	static void ConUnHammer(IConsole::IResult *pResult, void *pUserData); // gctf
 	static void ConUnGun(IConsole::IResult *pResult, void *pUserData); // gctf
+	static void ConGodmode(IConsole::IResult *pResult, void *pUserData); // gctf
 	static void ConJetpack(IConsole::IResult *pResult, void *pUserData);
 	static void ConWeapons(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnShotgun(IConsole::IResult *pResult, void *pUserData);

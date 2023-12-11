@@ -78,6 +78,8 @@ void CGameControllerInstagib::Tick()
 
 bool CGameControllerInstagib::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character)
 {
+	if(Character.m_IsGodmode)
+		return false;
 	// TODO: gctf cfg team damage
 	// if(GameServer()->m_pController->IsFriendlyFire(Character.GetPlayer()->GetCID(), From) && !g_Config.m_SvTeamdamage)
 	if(!GameServer()->m_pController->IsFriendlyFire(Character.GetPlayer()->GetCID(), From))

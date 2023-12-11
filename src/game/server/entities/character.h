@@ -257,6 +257,7 @@ public:
 		useful for votes
 	*/
 	void ResetInstaSettings();
+	bool m_IsGodmode;
 };
 
 enum

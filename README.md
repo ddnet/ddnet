@@ -45,6 +45,8 @@ For build instructions visit the [ddnet repo](https://github.com/ddnet/ddnet).
 + `shuffle_teams` Shuffle the current teams
 + `swap_teams` Swap the current teams
 + `swap_teams_random` Swap the current teams or not (random chance)
++ `godmode ?v[id]` Removes damage
+
 
 # Chat commands
 

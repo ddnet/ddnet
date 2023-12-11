@@ -1995,6 +1995,7 @@ set_src(GAME_SHARED GLOB src/game
   collision.h
   ddracechat.h
   ddracecommands.h
+  ddracecommands_insta.h
   gamecore.cpp
   gamecore.h
   layers.cpp
@@ -2522,6 +2523,7 @@ if(SERVER)
   set_src(GAME_SERVER GLOB_RECURSE src/game/server
     ddracechat.cpp
     ddracecommands.cpp
+    ddracecommands_insta.cpp
     entities/character.cpp
     entities/character.h
     entities/door.cpp
