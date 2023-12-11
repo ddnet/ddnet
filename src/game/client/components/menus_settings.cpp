@@ -2976,6 +2976,11 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 				break;
 			}
 		}
+
+		Section.HSplitTop(LineSize, &Button, &Section);
+		ColorRGBA GreenDefault(0.7f, 1.0f, 0.7f, 1);
+		static CButtonContainer s_AuthedColor;
+		DoLine_ColorPicker(&s_AuthedColor, 25.0f, 13.0f, 5.0f, &Button, Localize("Authed name color in scoreboard"), &g_Config.m_ClAuthedPlayerColor, GreenDefault, false);
 	}
 	else if(s_CurTab == APPEARANCE_TAB_HOOK_COLLISION)
 	{
