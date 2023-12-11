@@ -3,7 +3,7 @@
 #ifndef ENGINE_SHARED_MAP_H
 #define ENGINE_SHARED_MAP_H
 
-#include <base/system.h>
+#include <base/types.h>
 
 #include "datafile.h"
 #include <engine/map.h>

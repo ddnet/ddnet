@@ -1,6 +1,8 @@
 #ifndef ENGINE_STEAM_H
 #define ENGINE_STEAM_H
 
+#include <base/types.h>
+
 #include "kernel.h"
 
 class ISteam : public IInterface

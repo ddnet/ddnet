@@ -3,6 +3,7 @@
 #include "test.h"
 #include <gtest/gtest.h>
 
+#include <base/system.h>
 #include <engine/shared/jsonwriter.h>
 
 #include <climits>

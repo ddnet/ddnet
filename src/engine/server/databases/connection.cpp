@@ -2,6 +2,11 @@
 
 #include <engine/shared/protocol.h>
 
+IDbConnection::IDbConnection(const char *pPrefix)
+{
+	str_copy(m_aPrefix, pPrefix);
+}
+
 void IDbConnection::FormatCreateRace(char *aBuf, unsigned int BufferSize, bool Backup)
 {
 	str_format(aBuf, BufferSize,

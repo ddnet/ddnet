@@ -1,6 +1,7 @@
 #ifndef ENGINE_SHARED_FIFO_H
 #define ENGINE_SHARED_FIFO_H
 
+#include <base/detect.h>
 #include <engine/console.h>
 
 class CFifo

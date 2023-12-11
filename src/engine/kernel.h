@@ -3,8 +3,6 @@
 #ifndef ENGINE_KERNEL_H
 #define ENGINE_KERNEL_H
 
-#include <base/system.h>
-
 class IKernel;
 class IInterface;
 

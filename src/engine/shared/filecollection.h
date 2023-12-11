@@ -3,7 +3,7 @@
 #ifndef ENGINE_SHARED_FILECOLLECTION_H
 #define ENGINE_SHARED_FILECOLLECTION_H
 
-#include <base/system.h>
+#include <base/types.h>
 
 #include <cstdint>
 

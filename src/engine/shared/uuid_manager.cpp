@@ -1,6 +1,7 @@
 #include "uuid_manager.h"
 
 #include <base/hash_ctxt.h>
+#include <base/system.h>
 #include <engine/shared/packer.h>
 
 #include <algorithm>
@@ -98,6 +99,11 @@ bool CUuid::operator==(const CUuid &Other) const
 bool CUuid::operator!=(const CUuid &Other) const
 {
 	return !(*this == Other);
+}
+
+bool CUuid::operator<(const CUuid &Other) const
+{
+	return mem_comp(this, &Other, sizeof(*this)) < 0;
 }
 
 static int GetIndex(int ID)
