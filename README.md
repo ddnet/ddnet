@@ -4,6 +4,41 @@ DDNet-insta based on DDRaceNetwork, a Teeworlds mod. See the [website](https://d
 
 For build instructions visit the [ddnet repo](https://github.com/ddnet/ddnet).
 
+# Features
+
+## checkbox votes
+
+If a vote is added starting with a ``[ ]`` in the display name. It will be used as a checkbox.
+If the underlying config is currently set that checkbox will be ticked and users see ``[x]`` in the vote menu.
+This feature is optional and if you do not put any  ``[ ]`` in your config it will not be using any checkboxes.
+It is only applied for ddnet-insta settings not for all ddnet configs.
+It is recommended to set ``sv_vote_checkboxes 0`` at the start of your autoexec and ``sv_vote_checkboxes 1``
+at the end so it does not update all votes for every setting it loads.
+
+![checkbox votes](https://raw.githubusercontent.com/ZillyInsta/images/c6c3e871a844fa06b460b8be61ba0ff01d0a82f6/checkbox_votes.png)
+
+## unstack chat for ddnet clients
+
+Newer DDNet clients do not show duplicated messages multiple times. This is not always wanted when using call binds for team communication during pvp games. So there is ``sv_unstack_chat`` to revert that ddnet feature and ensure every message is sent properly in chat.
+
+![unstack_chat](https://raw.githubusercontent.com/ZillyInsta/images/3c437acdea599788fb245518e9c25de7c0e63795/unstack_chat.png)
+
+## gametype support
+
+### iCTF
+
+``sv_gametype iCTF``
+
+Instagib capture the flag. Is a team based mode where every player only has a laser rifle.
+It kills with one shot and capturing the enemy flag scores your team 100 points.
+
+### gCTF
+
+``sv_gametype gCTF``
+
+Grenade capture the flag. Is a team based mode where every player only has a rocket launcher.
+It kills with one shot and capturing the enemy flag scores your team 100 points.
+
 # Configs
 
 + `sv_spectator_votes` - Allow spectators to vote
