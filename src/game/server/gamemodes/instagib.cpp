@@ -161,6 +161,61 @@ void CGameControllerInstagib::OnCharacterSpawn(class CCharacter *pChr)
 	pChr->SetTeleports(&m_TeleOuts, &m_TeleCheckOuts);
 }
 
+int CGameControllerInstagib::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon)
+{
+	if(g_Config.m_SvKillingspreeKills > 0 && pKiller && pVictim)
+	{
+		if(pKiller->GetCharacter() && pKiller != pVictim->GetPlayer())
+			AddSpree(pKiller);
+		EndSpree(pVictim->GetPlayer(), pKiller);
+	}
+
+	return 0;
+}
+
+void CGameControllerInstagib::AddSpree(class CPlayer * pPlayer)
+{
+	pPlayer->m_Spree++;
+	const int NumMsg = 5;
+	char aBuf[128];
+
+	if(pPlayer->m_Spree % g_Config.m_SvKillingspreeKills == 0)
+	{
+		static const char aaSpreeMsg[NumMsg][32] = { "is on a killing spree", "is on a rampage", "is dominating", "is unstoppable", "is godlike"};
+		int No = pPlayer->m_Spree/g_Config.m_SvKillingspreeKills;
+
+		str_format(aBuf, sizeof(aBuf), "'%s' %s with %d kills!", Server()->ClientName(pPlayer->GetCID()), aaSpreeMsg[(No > NumMsg-1) ? NumMsg-1 : No], pPlayer->m_Spree);
+		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
+	}
+}
+
+void CGameControllerInstagib::EndSpree(class CPlayer * pPlayer, class CPlayer *pKiller)
+{
+	if(pPlayer->m_Spree >= g_Config.m_SvKillingspreeKills)
+	{
+		CCharacter * charac = pPlayer->GetCharacter();
+
+		if(charac)
+		{
+			GameServer()->CreateSound(charac->m_Pos, SOUND_GRENADE_EXPLODE);
+			// GameServer()->CreateExplosion(charac->m_Pos,  pPlayer->GetCID(), WEAPON_GRENADE, true, -1, -1);
+			CNetEvent_Explosion *pEvent = GameServer()->m_Events.Create<CNetEvent_Explosion>(CClientMask());
+			if(pEvent)
+			{
+				pEvent->m_X = (int)charac->m_Pos.x;
+				pEvent->m_Y = (int)charac->m_Pos.y;
+			}
+
+			char aBuf[128];
+			str_format(aBuf, sizeof(aBuf), "'%s' %d-kills killing spree was ended by %s",
+				Server()->ClientName(pPlayer->GetCID()), pPlayer->m_Spree, Server()->ClientName(pKiller->GetCID()));
+			GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
+		}
+	}
+	// pPlayer->m_GotAward = false;
+	pPlayer->m_Spree = 0;
+}
+
 void CGameControllerInstagib::OnPlayerConnect(CPlayer *pPlayer)
 {
 	IGameController::OnPlayerConnect(pPlayer);
