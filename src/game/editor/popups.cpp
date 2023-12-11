@@ -1903,6 +1903,14 @@ CUI::EPopupMenuFunctionResult CEditor::PopupMapInfo(void *pContext, CUIRect View
 	static int s_ConfirmButton = 0;
 	if(pEditor->DoButton_Editor(&s_ConfirmButton, "Confirm", 0, &Label, 0, nullptr) || (Active && pEditor->UI()->ConsumeHotkey(CUI::HOTKEY_ENTER)))
 	{
+		bool AuthorDifferent = str_comp(pEditor->m_Map.m_MapInfoTmp.m_aAuthor, pEditor->m_Map.m_MapInfo.m_aAuthor) != 0;
+		bool VersionDifferent = str_comp(pEditor->m_Map.m_MapInfoTmp.m_aVersion, pEditor->m_Map.m_MapInfo.m_aVersion) != 0;
+		bool CreditsDifferent = str_comp(pEditor->m_Map.m_MapInfoTmp.m_aCredits, pEditor->m_Map.m_MapInfo.m_aCredits) != 0;
+		bool LicenseDifferent = str_comp(pEditor->m_Map.m_MapInfoTmp.m_aLicense, pEditor->m_Map.m_MapInfo.m_aLicense) != 0;
+
+		if(AuthorDifferent || VersionDifferent || CreditsDifferent || LicenseDifferent)
+			pEditor->m_Map.OnModify();
+
 		pEditor->m_Map.m_MapInfo.Copy(pEditor->m_Map.m_MapInfoTmp);
 		return CUI::POPUP_CLOSE_CURRENT;
 	}

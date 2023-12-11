@@ -86,6 +86,7 @@ void CLineInput::SetRange(const char *pString, size_t Begin, size_t End)
 		m_Len += AddedCharSize - RemovedCharSize;
 		m_NumChars += AddedCharCount - RemovedCharCount;
 		m_WasChanged = true;
+		m_WasCursorChanged = true;
 		m_pStr[m_Len] = '\0';
 		m_SelectionStart = m_SelectionEnd = m_CursorPos;
 	}
@@ -158,7 +159,7 @@ void CLineInput::MoveCursor(EMoveDirection Direction, bool MoveWord, const char 
 void CLineInput::SetCursorOffset(size_t Offset)
 {
 	m_SelectionStart = m_SelectionEnd = m_LastCompositionCursorPos = m_CursorPos = clamp<size_t>(Offset, 0, m_Len);
-	m_WasChanged = true;
+	m_WasCursorChanged = true;
 }
 
 void CLineInput::SetSelection(size_t Start, size_t End)
@@ -168,7 +169,7 @@ void CLineInput::SetSelection(size_t Start, size_t End)
 		std::swap(Start, End);
 	m_SelectionStart = clamp<size_t>(Start, 0, m_Len);
 	m_SelectionEnd = clamp<size_t>(End, 0, m_Len);
-	m_WasChanged = true;
+	m_WasCursorChanged = true;
 }
 
 size_t CLineInput::OffsetFromActualToDisplay(size_t ActualOffset)
@@ -383,9 +384,9 @@ bool CLineInput::ProcessInput(const IInput::CEvent &Event)
 		}
 	}
 
-	m_WasChanged |= OldCursorPos != m_CursorPos;
+	m_WasCursorChanged |= OldCursorPos != m_CursorPos;
 	m_WasChanged |= SelectionLength != GetSelectionLength();
-	return m_WasChanged || KeyHandled;
+	return m_WasChanged || m_WasCursorChanged || KeyHandled;
 }
 
 STextBoundingBox CLineInput::Render(const CUIRect *pRect, float FontSize, int Align, bool Changed, float LineWidth, float LineSpacing)

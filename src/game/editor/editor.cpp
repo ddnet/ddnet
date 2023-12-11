@@ -5674,6 +5674,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 				if(m_SelectedEnvelope >= (int)m_Map.m_vpEnvelopes.size())
 					m_SelectedEnvelope = m_Map.m_vpEnvelopes.size() - 1;
 				pEnvelope = m_SelectedEnvelope >= 0 ? m_Map.m_vpEnvelopes[m_SelectedEnvelope] : nullptr;
+				m_Map.OnModify();
 			}
 
 			// Move right button
@@ -5686,6 +5687,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 				m_Map.SwapEnvelopes(m_SelectedEnvelope, m_SelectedEnvelope + 1);
 				m_SelectedEnvelope = clamp<int>(m_SelectedEnvelope + 1, 0, m_Map.m_vpEnvelopes.size() - 1);
 				pEnvelope = m_Map.m_vpEnvelopes[m_SelectedEnvelope];
+				m_Map.OnModify();
 			}
 
 			// Move left button
@@ -5697,6 +5699,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 				m_Map.SwapEnvelopes(m_SelectedEnvelope - 1, m_SelectedEnvelope);
 				m_SelectedEnvelope = clamp<int>(m_SelectedEnvelope - 1, 0, m_Map.m_vpEnvelopes.size() - 1);
 				pEnvelope = m_Map.m_vpEnvelopes[m_SelectedEnvelope];
+				m_Map.OnModify();
 			}
 
 			if(pEnvelope)
@@ -5875,6 +5878,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		{
 			m_EnvelopeEditorHistory.RecordAction(std::make_shared<CEditorActionEnvelopeEdit>(this, m_SelectedEnvelope, CEditorActionEnvelopeEdit::EEditType::SYNC, pEnvelope->m_Synchronized, !pEnvelope->m_Synchronized));
 			pEnvelope->m_Synchronized = !pEnvelope->m_Synchronized;
+			m_Map.OnModify();
 		}
 
 		ToolBar.VSplitLeft(4.0f, nullptr, &ToolBar);
@@ -6172,6 +6176,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 						m_EnvelopeEditorHistory.RecordAction(std::make_shared<CEditorActionEnvelopeEditPoint>(this,
 							m_SelectedEnvelope, i, 0, CEditorActionEnvelopeEditPoint::EEditType::CURVE_TYPE, PrevCurve, pEnvelope->m_vPoints[i].m_Curvetype));
+						m_Map.OnModify();
 					}
 				}
 			}

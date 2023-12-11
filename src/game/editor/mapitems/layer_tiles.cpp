@@ -1058,7 +1058,7 @@ CUI::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 			m_AutoMapperConfig = -1;
 	}
 
-	if(Prop != ETilesProp::PROP_NONE)
+	if(Prop != ETilesProp::PROP_NONE && Prop != ETilesProp::PROP_SHIFT_BY)
 	{
 		FlagModified(0, 0, m_Width, m_Height);
 	}
@@ -1125,7 +1125,7 @@ CUI::EPopupMenuFunctionResult CLayerTiles::RenderCommonProperties(SCommonPropSta
 					}
 				}
 
-				if(HasModifiedColor)
+				if(HasModifiedColor && !pLayer->IsEntitiesLayer())
 				{
 					int Color = 0;
 					Color |= pLayer->m_Color.r << 24;

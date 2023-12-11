@@ -625,7 +625,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 			EyesLabel.HSplitTop(10.0f, 0, &EyesLabel);
 		}
 		float Highlight = (m_Dummy ? g_Config.m_ClDummyDefaultEyes == CurrentEyeEmote : g_Config.m_ClPlayerDefaultEyes == CurrentEyeEmote) ? 1.0f : 0.0f;
-		if(DoButton_Menu(&s_aEyeButtons[CurrentEyeEmote], "", 0, &EyesTee, 0, IGraphics::CORNER_ALL, 10.0f, 0.0f, vec4(1, 1, 1, 0.5f + Highlight * 0.25f), vec4(1, 1, 1, 0.25f + Highlight * 0.25f)))
+		if(DoButton_Menu(&s_aEyeButtons[CurrentEyeEmote], "", 0, &EyesTee, 0, IGraphics::CORNER_ALL, 10.0f, 0.0f, ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f + Highlight * 0.25f)))
 		{
 			if(m_Dummy)
 			{
@@ -924,7 +924,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
 	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
 	static CButtonContainer s_SkinRefreshButtonID;
-	if(DoButton_Menu(&s_SkinRefreshButtonID, FONT_ICON_ARROW_ROTATE_RIGHT, 0, &RefreshButton, nullptr, IGraphics::CORNER_ALL, 5, 0, vec4(1.0f, 1.0f, 1.0f, 0.75f), vec4(1, 1, 1, 0.5f)))
+	if(DoButton_Menu(&s_SkinRefreshButtonID, FONT_ICON_ARROW_ROTATE_RIGHT, 0, &RefreshButton) || Input()->KeyPress(KEY_F5) || (Input()->KeyPress(KEY_R) && Input()->ModifierIsPressed()))
 	{
 		// reset render flags for possible loading screen
 		TextRender()->SetRenderFlags(0);

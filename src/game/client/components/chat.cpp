@@ -227,7 +227,10 @@ bool CChat::OnInput(const IInput::CEvent &Event)
 		DisableMode();
 		m_pClient->OnRelease();
 		if(g_Config.m_ClChatReset)
+		{
 			m_Input.Clear();
+			m_pHistoryEntry = nullptr;
+		}
 	}
 	else if(Event.m_Flags & IInput::FLAG_PRESS && (Event.m_Key == KEY_RETURN || Event.m_Key == KEY_KP_ENTER))
 	{
@@ -253,7 +256,7 @@ bool CChat::OnInput(const IInput::CEvent &Event)
 				mem_copy(pEntry->m_aText, m_Input.GetString(), m_Input.GetLength() + 1);
 			}
 		}
-		m_pHistoryEntry = 0x0;
+		m_pHistoryEntry = nullptr;
 		DisableMode();
 		m_pClient->OnRelease();
 		m_Input.Clear();
@@ -1175,7 +1178,7 @@ void CChat::OnRender()
 
 		m_Input.Activate(EInputPriority::CHAT); // Ensure that the input is active
 		const CUIRect InputCursorRect = {Cursor.m_X, Cursor.m_Y - ScrollOffset, 0.0f, 0.0f};
-		const STextBoundingBox BoundingBox = m_Input.Render(&InputCursorRect, Cursor.m_FontSize, TEXTALIGN_TL, m_Input.WasChanged(), MessageMaxWidth, 0.0f);
+		const STextBoundingBox BoundingBox = m_Input.Render(&InputCursorRect, Cursor.m_FontSize, TEXTALIGN_TL, m_Input.WasCursorChanged(), MessageMaxWidth, 0.0f);
 
 		Graphics()->ClipDisable();
 
