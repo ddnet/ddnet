@@ -22,7 +22,7 @@ For build instructions visit the [ddnet repo](https://github.com/ddnet/ddnet).
 + `sv_sprayprotection` Spray protection
 + `sv_only_hook_kills` Only count kills when enemy is hooked
 + `sv_kill_hook` Hooking kills
-+ `sv_damage_needed_for_kill` Damage needed to kill
++ `sv_killingspree_kills` How many kills are needed to be on a killing-spree (0=off)
 + `sv_chat_ratelimit_long_messages` Needs sv_spamprotection 0 (0=off, 1=only messages longer than 12 chars are limited)
 + `sv_chat_ratelimit_spectators` Needs sv_spamprotection 0 (0=off, 1=specs have slow chat)
 + `sv_chat_ratelimit_public_chat` Needs sv_spamprotection 0 (0=off, 1=non team chat is slow)
