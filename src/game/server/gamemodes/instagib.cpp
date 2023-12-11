@@ -168,7 +168,7 @@ void CGameControllerInstagib::OnCharacterSpawn(class CCharacter *pChr)
 	pChr->SetTeleports(&m_TeleOuts, &m_TeleCheckOuts);
 }
 
-void CGameControllerInstagib::AddSpree(class CPlayer * pPlayer)
+void CGameControllerInstagib::AddSpree(class CPlayer *pPlayer)
 {
 	pPlayer->m_Spree++;
 	const int NumMsg = 5;
@@ -176,19 +176,19 @@ void CGameControllerInstagib::AddSpree(class CPlayer * pPlayer)
 
 	if(pPlayer->m_Spree % g_Config.m_SvKillingspreeKills == 0)
 	{
-		static const char aaSpreeMsg[NumMsg][32] = { "is on a killing spree", "is on a rampage", "is dominating", "is unstoppable", "is godlike"};
-		int No = pPlayer->m_Spree/g_Config.m_SvKillingspreeKills;
+		static const char aaSpreeMsg[NumMsg][32] = {"is on a killing spree", "is on a rampage", "is dominating", "is unstoppable", "is godlike"};
+		int No = pPlayer->m_Spree / g_Config.m_SvKillingspreeKills;
 
-		str_format(aBuf, sizeof(aBuf), "'%s' %s with %d kills!", Server()->ClientName(pPlayer->GetCID()), aaSpreeMsg[(No > NumMsg-1) ? NumMsg-1 : No], pPlayer->m_Spree);
+		str_format(aBuf, sizeof(aBuf), "'%s' %s with %d kills!", Server()->ClientName(pPlayer->GetCID()), aaSpreeMsg[(No > NumMsg - 1) ? NumMsg - 1 : No], pPlayer->m_Spree);
 		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
 	}
 }
 
-void CGameControllerInstagib::EndSpree(class CPlayer * pPlayer, class CPlayer *pKiller)
+void CGameControllerInstagib::EndSpree(class CPlayer *pPlayer, class CPlayer *pKiller)
 {
 	if(pPlayer->m_Spree >= g_Config.m_SvKillingspreeKills)
 	{
-		CCharacter * charac = pPlayer->GetCharacter();
+		CCharacter *charac = pPlayer->GetCharacter();
 
 		if(charac)
 		{

@@ -17,8 +17,8 @@ public:
 	int OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon) override;
 	void Tick() override;
 
-	void AddSpree(CPlayer * pPlayer);
-	void EndSpree(CPlayer * pPlayer, CPlayer * pKiller);
+	void AddSpree(CPlayer *pPlayer);
+	void EndSpree(CPlayer *pPlayer, CPlayer *pKiller);
 
 	// ddnet-insta only
 	bool OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character) override;
