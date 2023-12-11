@@ -6,6 +6,26 @@
 #define GAME_TYPE_NAME "Mod"
 #define TEST_TYPE_NAME "TestMod"
 
+#include <game/server/player.h>
+
+class CPlayerMod : public CPlayer
+{
+	MACRO_ALLOC_POOL_ID()
+public:
+	CPlayerMod(CGameControllerMod *pGameController, uint32_t UniqueClientID, int ClientID, int Team);
+
+private:
+	CGameControllerMod *m_pGameController = nullptr;
+};
+
+MACRO_ALLOC_POOL_ID_IMPL(CPlayerMod, MAX_CLIENTS)
+
+CPlayerMod::CPlayerMod(CGameControllerMod *pGameController, uint32_t UniqueClientID, int ClientID, int Team) :
+	CPlayer(pGameController->GameServer(), UniqueClientID, ClientID, Team),
+	m_pGameController(pGameController)
+{
+}
+
 CGameControllerMod::CGameControllerMod(class CGameContext *pGameServer) :
 	IGameController(pGameServer)
 {
@@ -15,6 +35,11 @@ CGameControllerMod::CGameControllerMod(class CGameContext *pGameServer) :
 }
 
 CGameControllerMod::~CGameControllerMod() = default;
+
+CPlayer *CGameControllerMod::CreatePlayer(int ClientID, int StartTeam)
+{
+	return new(ClientID) CPlayerMod(this, GameServer()->GetNextUniqueClientID(), ClientID, StartTeam);
+}
 
 void CGameControllerMod::Tick()
 {
