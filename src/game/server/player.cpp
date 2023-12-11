@@ -445,6 +445,9 @@ void CPlayer::Snap(int SnappingClient)
 		return;
 
 	pDDNetPlayer->m_AuthLevel = Server()->GetAuthedState(m_ClientID);
+	// ddnet-insta
+	if(g_Config.m_SvHideAdmins && Server()->GetAuthedState(SnappingClient) == AUTHED_NO)
+		pDDNetPlayer->m_AuthLevel = AUTHED_NO;
 	pDDNetPlayer->m_Flags = 0;
 	if(m_Afk)
 		pDDNetPlayer->m_Flags |= EXPLAYERFLAG_AFK;
