@@ -4145,18 +4145,64 @@ void CClient::HandleConnectAddress(const NETADDR *pAddr)
 
 void CClient::HandleConnectLink(const char *pLink)
 {
+    int linkFormatSize = 0;
+    char aLink[256];
+    char aPassword[256];
+    int delim = 0;
+
 	// Chrome works fine with ddnet:// but not with ddnet:
 	// Check ddnet:// before ddnet: because we don't want the // as part of connect command
 	if(str_startswith(pLink, CONNECTLINK_DOUBLE_SLASH))
-		str_copy(m_aCmdConnect, pLink + sizeof(CONNECTLINK_DOUBLE_SLASH) - 1);
-	else if(str_startswith(pLink, CONNECTLINK_NO_SLASH))
-		str_copy(m_aCmdConnect, pLink + sizeof(CONNECTLINK_NO_SLASH) - 1);
-	else
+    {
+        linkFormatSize = sizeof(CONNECTLINK_DOUBLE_SLASH);
+    }
+    else if(str_startswith(pLink, CONNECTLINK_NO_SLASH))
+    {
+        linkFormatSize = sizeof(CONNECTLINK_NO_SLASH);
+    }
+    else
+    {
 		str_copy(m_aCmdConnect, pLink);
-	// Edge appends / to the URL
-	const int len = str_length(m_aCmdConnect);
-	if(m_aCmdConnect[len - 1] == '/')
-		m_aCmdConnect[len - 1] = '\0';
+
+        return;
+    }
+
+    for (int i = 0; pLink[linkFormatSize + i] != '\0'; i++)
+    {
+        if (pLink[linkFormatSize + i] == '/') {
+            delim = i + 1;
+            break;
+        }
+    }
+
+    if(delim == 0)
+    {
+        str_copy(m_aCmdConnect, pLink + linkFormatSize - 1);
+
+        // Edge appends / to the URL
+        const int len = str_length(aPassword);
+        if(aPassword[len - 1] == '/')
+            aPassword[len - 1] = '\0';
+    }
+    else
+    {
+        memcpy(aLink, pLink + linkFormatSize - 1, delim);
+        memcpy(aPassword, pLink + linkFormatSize + delim, strlen(pLink));
+
+        // Edge appends / to the URL
+        const int len = str_length(aPassword);
+        if(aPassword[len - 1] == '/')
+            aPassword[len - 1] = '\0';
+
+        str_copy(m_aCmdConnect, aLink);
+
+        if(aPassword[0] != 0)
+        {
+            str_copy(g_Config.m_Password, aPassword);
+
+            m_SendPassword = true;
+        }
+    }
 }
 
 void CClient::HandleDemoPath(const char *pPath)
