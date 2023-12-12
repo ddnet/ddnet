@@ -71,6 +71,7 @@ public:
 	~CEngine() override
 	{
 		m_JobPool.Destroy();
+		CNetBase::CloseLog();
 	}
 
 	void Init() override
@@ -81,8 +82,6 @@ public:
 		if(!m_pConsole || !m_pStorage)
 			return;
 
-		char aFullPath[IO_MAX_PATH_LENGTH];
-		m_pStorage->GetCompletePath(IStorage::TYPE_SAVE, "dumps/", aFullPath, sizeof(aFullPath));
 		m_pConsole->Register("dbg_lognetwork", "", CFGFLAG_SERVER | CFGFLAG_CLIENT, Con_DbgLognetwork, this, "Log the network");
 	}
 
