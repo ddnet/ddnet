@@ -3,17 +3,38 @@
 #include <game/server/score.h>
 #include <game/version.h>
 
-#include "instagib.h"
+#include "base_instagib.h"
 
 CGameControllerInstagib::CGameControllerInstagib(class CGameContext *pGameServer) :
 	CGameControllerDDRace(pGameServer)
 {
-	m_pGameType = "instagib";
-
 	m_GameFlags = GAMEFLAG_TEAMS | GAMEFLAG_FLAGS;
+
+	m_SpawnWeapons = SPAWN_WEAPON_GRENADE;
+
+	GameServer()->Console()->Chain("sv_spawn_weapons", ConchainSpawnWeapons, this);
 }
 
 CGameControllerInstagib::~CGameControllerInstagib() = default;
+
+void CGameControllerInstagib::ConchainSpawnWeapons(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	pfnCallback(pResult, pCallbackUserData);
+	if(pResult->NumArguments())
+	{
+		CGameControllerInstagib *pThis = static_cast<CGameControllerInstagib *>(pUserData);
+		const char *pWeapons = pThis->Config()->m_SvSpawnWeapons;
+		if(!str_comp_nocase(pWeapons, "grenade"))
+			pThis->m_SpawnWeapons = SPAWN_WEAPON_GRENADE;
+		else if(!str_comp_nocase(pWeapons, "laser") || !str_comp_nocase(pWeapons, "rifle"))
+			pThis->m_SpawnWeapons = SPAWN_WEAPON_LASER;
+		else
+		{
+			dbg_msg("ddnet-insta", "warning invalid spawn weapon falling back to grenade");
+			pThis->m_SpawnWeapons = SPAWN_WEAPON_GRENADE;
+		}
+	}
+}
 
 int CGameControllerInstagib::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon)
 {
@@ -161,8 +182,26 @@ bool CGameControllerInstagib::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &
 	return false;
 }
 
+void CGameControllerInstagib::SetSpawnWeapons(class CCharacter *pChr)
+{
+	switch(CGameControllerInstagib::GetSpawnWeapons(pChr->GetPlayer()->GetCID()))
+	{
+	case SPAWN_WEAPON_LASER:
+		pChr->GiveWeapon(WEAPON_LASER, false);
+		break;
+	case SPAWN_WEAPON_GRENADE:
+		pChr->GiveWeapon(WEAPON_GRENADE, false, g_Config.m_SvGrenadeAmmoRegen ? g_Config.m_SvGrenadeAmmoRegenNum : -1);
+		break;
+	default:
+		dbg_msg("zcatch", "invalid sv_spawn_weapons");
+		break;
+	}
+}
+
 void CGameControllerInstagib::OnCharacterSpawn(class CCharacter *pChr)
 {
+	OnCharacterConstruct(pChr);
+
 	pChr->SetTeams(&Teams());
 	Teams().OnCharacterSpawn(pChr->GetPlayer()->GetCID());
 
@@ -217,6 +256,7 @@ void CGameControllerInstagib::EndSpree(class CPlayer *pPlayer, class CPlayer *pK
 
 void CGameControllerInstagib::OnPlayerConnect(CPlayer *pPlayer)
 {
+	OnPlayerConstruct(pPlayer);
 	IGameController::OnPlayerConnect(pPlayer);
 	int ClientID = pPlayer->GetCID();
 

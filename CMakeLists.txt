@@ -2559,20 +2559,26 @@ if(SERVER)
     gamemodes/DDRace.h
     gamemodes/base_fng.cpp
     gamemodes/base_fng.h
+    gamemodes/base_instagib.cpp
+    gamemodes/base_instagib.h
     gamemodes/ctf.cpp
     gamemodes/ctf.h
     gamemodes/gctf.cpp
     gamemodes/gctf.h
     gamemodes/ictf.cpp
     gamemodes/ictf.h
-    gamemodes/instagib.cpp
-    gamemodes/instagib.h
+    gamemodes/instagib/character.cpp
+    gamemodes/instagib/character.h
+    gamemodes/instagib/player.cpp
+    gamemodes/instagib/player.h
     gamemodes/mod.cpp
     gamemodes/mod.h
     gamemodes/solofng.cpp
     gamemodes/solofng.h
     gamemodes/team_fng.cpp
     gamemodes/team_fng.h
+    gamemodes/zcatch.cpp
+    gamemodes/zcatch.h
     gameworld.cpp
     gameworld.h
     instagib.cpp

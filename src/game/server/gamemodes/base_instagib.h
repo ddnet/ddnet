@@ -9,6 +9,9 @@ public:
 	CGameControllerInstagib(class CGameContext *pGameServer);
 	~CGameControllerInstagib();
 
+	void OnPlayerConstruct(class CPlayer *pPlayer);
+	void OnCharacterConstruct(class CCharacter *pChr);
+
 	void SendChatSpectators(const char *pMessage, int Flags);
 	void OnPlayerConnect(CPlayer *pPlayer) override;
 	void OnPlayerDisconnect(class CPlayer *pPlayer, const char *pReason) override;
@@ -19,6 +22,17 @@ public:
 
 	void AddSpree(CPlayer *pPlayer);
 	void EndSpree(CPlayer *pPlayer, CPlayer *pKiller);
+	enum ESpawnWeapons
+	{
+		SPAWN_WEAPON_LASER,
+		SPAWN_WEAPON_GRENADE,
+		NUM_SPAWN_WEAPONS
+	};
+	ESpawnWeapons m_SpawnWeapons;
+	ESpawnWeapons GetSpawnWeapons(int ClientID) { return m_SpawnWeapons; }
+	void SetSpawnWeapons(class CCharacter *pChr);
+
+	static void ConchainSpawnWeapons(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
 	// ddnet-insta only
 	bool OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character) override;

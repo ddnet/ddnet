@@ -1,7 +1,7 @@
 #ifndef GAME_SERVER_GAMEMODES_CTF_H
 #define GAME_SERVER_GAMEMODES_CTF_H
 
-#include "instagib.h"
+#include "base_instagib.h"
 
 class CGameControllerCTF : public CGameControllerInstagib
 {

@@ -34,6 +34,7 @@
 #include "gamemodes/ictf.h"
 #include "gamemodes/mod.h"
 #include "gamemodes/solofng.h"
+#include "gamemodes/zcatch.h"
 #include "player.h"
 #include "score.h"
 
@@ -3645,8 +3646,14 @@ void CGameContext::OnInit(const void *pPersistentData)
 		m_pController = new CGameControllerICTF(this);
 	else if(!str_comp_nocase(Config()->m_SvGametype, "solofng"))
 		m_pController = new CGameControllerSoloFng(this);
+	else if(!str_comp_nocase(Config()->m_SvGametype, "zcatch"))
+		m_pController = new CGameControllerZcatch(this);
 	else
+	{
+		if(str_comp_nocase(Config()->m_SvGametype, "ddnet"))
+			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "gametype", "unknown gametype falling back to ddnet");
 		m_pController = new CGameControllerDDRace(this);
+	}
 
 	const char *pCensorFilename = "censorlist.txt";
 	IOHANDLE File = Storage()->OpenFile(pCensorFilename, IOFLAG_READ | IOFLAG_SKIP_BOM, IStorage::TYPE_ALL);

@@ -1,7 +1,7 @@
 #ifndef GAME_SERVER_GAMEMODES_BASE_FNG_H
 #define GAME_SERVER_GAMEMODES_BASE_FNG_H
 
-#include "instagib.h"
+#include "base_instagib.h"
 
 class CGameControllerBaseFng : public CGameControllerInstagib
 {
