@@ -1529,6 +1529,51 @@ void CEditor::DoSoundSource(CSoundSource *pSource, int Index)
 	Graphics()->QuadsDraw(&QuadItem, 1);
 }
 
+void CEditor::PreparePointDrag(const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, int QuadIndex, int PointIndex)
+{
+	m_QuadDragOriginalPoints[QuadIndex][PointIndex] = pQuad->m_aPoints[PointIndex];
+}
+
+void CEditor::DoPointDrag(const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, int QuadIndex, int PointIndex, int OffsetX, int OffsetY)
+{
+	EAxis Axis = GetDragAxis(OffsetX, OffsetY);
+	pQuad->m_aPoints[PointIndex].x = m_QuadDragOriginalPoints[QuadIndex][PointIndex].x + ((Axis == EAxis::AXIS_NONE || Axis == EAxis::AXIS_X) ? OffsetX : 0);
+	pQuad->m_aPoints[PointIndex].y = m_QuadDragOriginalPoints[QuadIndex][PointIndex].y + ((Axis == EAxis::AXIS_NONE || Axis == EAxis::AXIS_Y) ? OffsetY : 0);
+}
+
+CEditor::EAxis CEditor::GetDragAxis(int OffsetX, int OffsetY)
+{
+	if(Input()->ShiftIsPressed())
+		if(absolute(OffsetX) < absolute(OffsetY))
+			return EAxis::AXIS_Y;
+		else
+			return EAxis::AXIS_X;
+	else
+		return EAxis::AXIS_NONE;
+}
+
+void CEditor::DrawAxis(EAxis Axis, CPoint &Point)
+{
+	if(Axis == EAxis::AXIS_NONE)
+		return;
+
+	Graphics()->SetColor(1, 0, 0.1f, 1);
+	if(Axis == EAxis::AXIS_X)
+	{
+		IGraphics::CQuadItem QuadItem(0, fx2f(Point.y), Graphics()->ScreenWidth() * m_MouseWScale, 1.0f * m_MouseWScale);
+		Graphics()->QuadsDraw(&QuadItem, 1);
+	}
+	else if(Axis == EAxis::AXIS_Y)
+	{
+		IGraphics::CQuadItem QuadItem(fx2f(Point.x), 0, 1.0f * m_MouseWScale, Graphics()->ScreenHeight() * m_MouseWScale);
+		Graphics()->QuadsDraw(&QuadItem, 1);
+	}
+
+	// Draw ghost of original point
+	IGraphics::CQuadItem QuadItem(fx2f(Point.x), fx2f(Point.y), 5.0f * m_MouseWScale, 5.0f * m_MouseWScale);
+	Graphics()->QuadsDraw(&QuadItem, 1);
+}
+
 void CEditor::DoQuad(const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, int Index)
 {
 	enum
@@ -1551,12 +1596,25 @@ void CEditor::DoQuad(const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, i
 	static float s_RotateAngle = 0;
 	float wx = UI()->MouseWorldX();
 	float wy = UI()->MouseWorldY();
+	static CPoint s_OriginalPosition;
 
 	// get pivot
 	float CenterX = fx2f(pQuad->m_aPoints[4].x);
 	float CenterY = fx2f(pQuad->m_aPoints[4].y);
 
 	const bool IgnoreGrid = Input()->AltIsPressed();
+
+	auto &&GetDragOffset = [&]() -> ivec2 {
+		float x = wx;
+		float y = wy;
+		if(MapView()->MapGrid()->IsEnabled() && !IgnoreGrid)
+			MapView()->MapGrid()->SnapToGrid(x, y);
+
+		int OffsetX = f2fx(x) - s_OriginalPosition.x;
+		int OffsetY = f2fx(y) - s_OriginalPosition.y;
+
+		return {OffsetX, OffsetY};
+	};
 
 	// draw selection background
 	if(IsQuadSelected(Index))
@@ -1580,10 +1638,27 @@ void CEditor::DoQuad(const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, i
 					if(!IsQuadSelected(Index))
 						SelectQuad(Index);
 
+					s_OriginalPosition = pQuad->m_aPoints[4];
+
 					if(Input()->ShiftIsPressed())
+					{
 						s_Operation = OP_MOVE_PIVOT;
+						for(size_t i = 0; i < m_vSelectedQuads.size(); ++i)
+						{
+							CQuad *pCurrentQuad = &pLayer->m_vQuads[m_vSelectedQuads[i]];
+							PreparePointDrag(pLayer, pCurrentQuad, m_vSelectedQuads[i], 4);
+						}
+					}
 					else
+					{
 						s_Operation = OP_MOVE_ALL;
+						for(size_t i = 0; i < m_vSelectedQuads.size(); ++i)
+						{
+							CQuad *pCurrentQuad = &pLayer->m_vQuads[m_vSelectedQuads[i]];
+							for(size_t v = 0; v < 5; v++)
+								PreparePointDrag(pLayer, pCurrentQuad, m_vSelectedQuads[i], v);
+						}
+					}
 				}
 			}
 
@@ -1591,41 +1666,27 @@ void CEditor::DoQuad(const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, i
 			if(s_Operation == OP_MOVE_PIVOT)
 			{
 				m_QuadTracker.BeginQuadTrack(pLayer, m_vSelectedQuads);
-				float x = wx;
-				float y = wy;
-				if(MapView()->MapGrid()->IsEnabled() && !IgnoreGrid)
-					MapView()->MapGrid()->SnapToGrid(x, y);
 
-				int OffsetX = f2fx(x) - pQuad->m_aPoints[4].x;
-				int OffsetY = f2fx(y) - pQuad->m_aPoints[4].y;
+				ivec2 Offset = GetDragOffset();
 
 				for(auto &Selected : m_vSelectedQuads)
 				{
 					CQuad *pCurrentQuad = &pLayer->m_vQuads[Selected];
-					pCurrentQuad->m_aPoints[4].x += OffsetX;
-					pCurrentQuad->m_aPoints[4].y += OffsetY;
+					DoPointDrag(pLayer, pCurrentQuad, Selected, 4, Offset.x, Offset.y);
 				}
 			}
 			else if(s_Operation == OP_MOVE_ALL)
 			{
 				m_QuadTracker.BeginQuadTrack(pLayer, m_vSelectedQuads);
 				// move all points including pivot
-				float x = wx;
-				float y = wy;
-				if(MapView()->MapGrid()->IsEnabled() && !IgnoreGrid)
-					MapView()->MapGrid()->SnapToGrid(x, y);
+				ivec2 Offset = GetDragOffset();
 
-				int OffsetX = f2fx(x) - pQuad->m_aPoints[4].x;
-				int OffsetY = f2fx(y) - pQuad->m_aPoints[4].y;
-
-				for(auto &Selected : m_vSelectedQuads)
+				for(size_t i = 0; i < m_vSelectedQuads.size(); i++)
 				{
+					int Selected = m_vSelectedQuads[i];
 					CQuad *pCurrentQuad = &pLayer->m_vQuads[Selected];
-					for(auto &Point : pCurrentQuad->m_aPoints)
-					{
-						Point.x += OffsetX;
-						Point.y += OffsetY;
-					}
+					for(int v = 0; v < 5; v++)
+						DoPointDrag(pLayer, pCurrentQuad, Selected, v, Offset.x, Offset.y);
 				}
 			}
 			else if(s_Operation == OP_ROTATE)
@@ -1647,6 +1708,14 @@ void CEditor::DoQuad(const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, i
 				else
 					s_RotateAngle += (m_MouseDeltaX)*0.002f;
 			}
+		}
+
+		// Draw axis when moving
+		if(s_Operation == OP_MOVE_PIVOT || s_Operation == OP_MOVE_ALL)
+		{
+			ivec2 Offset = GetDragOffset();
+			EAxis Axis = GetDragAxis(Offset.x, Offset.y);
+			DrawAxis(Axis, s_OriginalPosition);
 		}
 
 		if(s_Operation == OP_CONTEXT_MENU)
@@ -1822,8 +1891,21 @@ void CEditor::DoQuadPoint(const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQu
 	static int s_Operation = OP_NONE;
 	static float s_MouseXStart = 0.0f;
 	static float s_MouseYStart = 0.0f;
+	static CPoint s_OriginalPoint;
 
 	const bool IgnoreGrid = Input()->AltIsPressed();
+
+	auto &&GetDragOffset = [&]() -> ivec2 {
+		float x = wx;
+		float y = wy;
+		if(MapView()->MapGrid()->IsEnabled() && !IgnoreGrid)
+			MapView()->MapGrid()->SnapToGrid(x, y);
+
+		int OffsetX = f2fx(x) - s_OriginalPoint.x;
+		int OffsetY = f2fx(y) - s_OriginalPoint.y;
+
+		return {OffsetX, OffsetY};
+	};
 
 	if(UI()->CheckActiveItem(pID))
 	{
@@ -1845,7 +1927,13 @@ void CEditor::DoQuadPoint(const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQu
 						UI()->EnableMouseLock(pID);
 					}
 					else
+					{
 						s_Operation = OP_MOVEPOINT;
+						s_OriginalPoint = pQuad->m_aPoints[V];
+						for(int m = 0; m < 4; m++)
+							if(IsQuadPointSelected(QuadIndex, m))
+								PreparePointDrag(pLayer, pQuad, QuadIndex, m);
+					}
 				}
 			}
 
@@ -1853,22 +1941,11 @@ void CEditor::DoQuadPoint(const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQu
 			{
 				m_QuadTracker.BeginQuadTrack(pLayer, m_vSelectedQuads);
 
-				float x = wx;
-				float y = wy;
-				if(MapView()->MapGrid()->IsEnabled() && !IgnoreGrid)
-					MapView()->MapGrid()->SnapToGrid(x, y);
-
-				int OffsetX = f2fx(x) - pQuad->m_aPoints[V].x;
-				int OffsetY = f2fx(y) - pQuad->m_aPoints[V].y;
+				ivec2 Offset = GetDragOffset();
 
 				for(int m = 0; m < 4; m++)
-				{
 					if(IsQuadPointSelected(QuadIndex, m))
-					{
-						pQuad->m_aPoints[m].x += OffsetX;
-						pQuad->m_aPoints[m].y += OffsetY;
-					}
-				}
+						DoPointDrag(pLayer, pQuad, QuadIndex, m, Offset.x, Offset.y);
 			}
 			else if(s_Operation == OP_MOVEUV)
 			{
@@ -1893,6 +1970,14 @@ void CEditor::DoQuadPoint(const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQu
 					}
 				}
 			}
+		}
+
+		// Draw axis when dragging
+		if(s_Operation == OP_MOVEPOINT)
+		{
+			ivec2 Offset = GetDragOffset();
+			EAxis Axis = GetDragAxis(Offset.x, Offset.y);
+			DrawAxis(Axis, s_OriginalPoint);
 		}
 
 		if(s_Operation == OP_CONTEXT_MENU)

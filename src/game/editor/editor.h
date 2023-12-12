@@ -853,10 +853,20 @@ public:
 
 	void DoSoundSource(CSoundSource *pSource, int Index);
 
+	enum class EAxis
+	{
+		AXIS_NONE = 0,
+		AXIS_X,
+		AXIS_Y
+	};
 	void DoMapEditor(CUIRect View);
 	void DoToolbarLayers(CUIRect Toolbar);
 	void DoToolbarSounds(CUIRect Toolbar);
 	void DoQuad(const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, int Index);
+	void PreparePointDrag(const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, int QuadIndex, int PointIndex);
+	void DoPointDrag(const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, int QuadIndex, int PointIndex, int OffsetX, int OffsetY);
+	EAxis GetDragAxis(int OffsetX, int OffsetY);
+	void DrawAxis(EAxis Axis, CPoint &Point);
 	ColorRGBA GetButtonColor(const void *pID, int Checked);
 
 	bool ReplaceImage(const char *pFilename, int StorageType, bool CheckDuplicate);
@@ -1011,6 +1021,7 @@ public:
 	unsigned char m_SwitchNum;
 	unsigned char m_SwitchDelay;
 
+public:
 	// Undo/Redo
 	CEditorHistory m_EditorHistory;
 	CEditorHistory m_ServerSettingsHistory;
@@ -1021,6 +1032,9 @@ public:
 private:
 	void UndoLastAction();
 	void RedoLastAction();
+
+private:
+	std::map<int, std::map<int, CPoint>> m_QuadDragOriginalPoints;
 };
 
 // make sure to inline this function
