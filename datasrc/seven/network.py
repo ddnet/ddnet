@@ -55,10 +55,6 @@ enum
 };
 '''
 
-RawSource = '''
-#include "protocol.h"
-'''
-
 Enums = [
 	Pickups,
 	Emotes,

@@ -2,7 +2,6 @@
 #define ENGINE_CLIENT_VIDEO_H
 
 #include <base/lock.h>
-#include <base/system.h>
 
 extern "C" {
 #include <libavcodec/avcodec.h>

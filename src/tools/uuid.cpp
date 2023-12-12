@@ -1,4 +1,5 @@
 #include <base/logger.h>
+#include <base/system.h>
 #include <engine/shared/uuid_manager.h>
 int main(int argc, const char **argv)
 {

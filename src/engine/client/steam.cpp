@@ -1,5 +1,6 @@
 #include <engine/steam.h>
 
+#include <base/system.h>
 #include <engine/shared/config.h>
 
 #include <steam/steam_api_flat.h>

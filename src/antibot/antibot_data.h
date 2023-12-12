@@ -1,7 +1,6 @@
 #ifndef ANTIBOT_ANTIBOT_DATA_H
 #define ANTIBOT_ANTIBOT_DATA_H
 
-#include <base/system.h>
 #include <base/vmath.h>
 
 enum

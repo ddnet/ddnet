@@ -2,7 +2,6 @@
 #define ENGINE_SERVER_DATABASES_CONNECTION_H
 
 #include "connection_pool.h"
-#include <base/system.h>
 
 #include <memory>
 
@@ -12,10 +11,7 @@ class IConsole;
 class IDbConnection
 {
 public:
-	IDbConnection(const char *pPrefix)
-	{
-		str_copy(m_aPrefix, pPrefix);
-	}
+	IDbConnection(const char *pPrefix);
 	virtual ~IDbConnection() {}
 	IDbConnection &operator=(const IDbConnection &) = delete;
 	virtual void Print(IConsole *pConsole, const char *pMode) = 0;

@@ -3,7 +3,6 @@
 #ifndef GAME_GAMECORE_H
 #define GAME_GAMECORE_H
 
-#include <base/system.h>
 #include <base/vmath.h>
 
 #include <map>
@@ -191,7 +190,10 @@ class CWorldCore
 public:
 	CWorldCore()
 	{
-		mem_zero(m_apCharacters, sizeof(m_apCharacters));
+		for(auto &pCharacter : m_apCharacters)
+		{
+			pCharacter = nullptr;
+		}
 		m_pPrng = nullptr;
 	}
 

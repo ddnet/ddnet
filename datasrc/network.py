@@ -78,10 +78,6 @@ enum
 };
 '''
 
-RawSource = '''
-#include "protocol.h"
-'''
-
 Enums = [
 	Enum("EMOTE", Emotes),
 	Enum("POWERUP", Powerups),

@@ -1,5 +1,6 @@
 #include "teehistorian.h"
 
+#include <base/system.h>
 #include <engine/external/json-parser/json.h>
 #include <engine/shared/config.h>
 #include <engine/shared/json.h>

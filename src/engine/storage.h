@@ -4,6 +4,7 @@
 #define ENGINE_STORAGE_H
 
 #include <base/hash.h>
+#include <base/types.h>
 
 #include "kernel.h"
 

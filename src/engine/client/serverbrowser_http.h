@@ -1,6 +1,6 @@
 #ifndef ENGINE_CLIENT_SERVERBROWSER_HTTP_H
 #define ENGINE_CLIENT_SERVERBROWSER_HTTP_H
-#include <base/system.h>
+#include <base/types.h>
 
 class CServerInfo;
 class IConsole;

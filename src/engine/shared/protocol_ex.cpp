@@ -3,6 +3,7 @@
 #include "config.h"
 #include "uuid_manager.h"
 
+#include <base/system.h>
 #include <engine/message.h>
 
 #include <new>

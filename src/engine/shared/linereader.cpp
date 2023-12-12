@@ -2,6 +2,8 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "linereader.h"
 
+#include <base/system.h>
+
 void CLineReader::Init(IOHANDLE File)
 {
 	m_BufferMaxSize = sizeof(m_aBuffer) - 1;
