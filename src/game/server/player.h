@@ -176,7 +176,7 @@ public:
 	void ProcessPause();
 	int Pause(int State, bool Force);
 	int ForcePause(int Time);
-	int IsPaused();
+	int IsPaused() const;
 
 	bool IsPlaying();
 	int64_t m_Last_KickVote;
