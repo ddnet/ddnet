@@ -1536,9 +1536,8 @@ void CEditor::PreparePointDrag(const std::shared_ptr<CLayerQuads> &pLayer, CQuad
 
 void CEditor::DoPointDrag(const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, int QuadIndex, int PointIndex, int OffsetX, int OffsetY)
 {
-	EAxis Axis = GetDragAxis(OffsetX, OffsetY);
-	pQuad->m_aPoints[PointIndex].x = m_QuadDragOriginalPoints[QuadIndex][PointIndex].x + ((Axis == EAxis::AXIS_NONE || Axis == EAxis::AXIS_X) ? OffsetX : 0);
-	pQuad->m_aPoints[PointIndex].y = m_QuadDragOriginalPoints[QuadIndex][PointIndex].y + ((Axis == EAxis::AXIS_NONE || Axis == EAxis::AXIS_Y) ? OffsetY : 0);
+	pQuad->m_aPoints[PointIndex].x = m_QuadDragOriginalPoints[QuadIndex][PointIndex].x + OffsetX;
+	pQuad->m_aPoints[PointIndex].y = m_QuadDragOriginalPoints[QuadIndex][PointIndex].y + OffsetY;
 }
 
 CEditor::EAxis CEditor::GetDragAxis(int OffsetX, int OffsetY)
@@ -1552,7 +1551,7 @@ CEditor::EAxis CEditor::GetDragAxis(int OffsetX, int OffsetY)
 		return EAxis::AXIS_NONE;
 }
 
-void CEditor::DrawAxis(EAxis Axis, CPoint &Point)
+void CEditor::DrawAxis(EAxis Axis, CPoint &OriginalPoint, CPoint &Point)
 {
 	if(Axis == EAxis::AXIS_NONE)
 		return;
@@ -1560,18 +1559,429 @@ void CEditor::DrawAxis(EAxis Axis, CPoint &Point)
 	Graphics()->SetColor(1, 0, 0.1f, 1);
 	if(Axis == EAxis::AXIS_X)
 	{
-		IGraphics::CQuadItem QuadItem(0, fx2f(Point.y), Graphics()->ScreenWidth() * m_MouseWScale, 1.0f * m_MouseWScale);
-		Graphics()->QuadsDraw(&QuadItem, 1);
+		IGraphics::CQuadItem Line(fx2f(OriginalPoint.x + Point.x) / 2.0f, fx2f(OriginalPoint.y), fx2f(Point.x - OriginalPoint.x), 1.0f * m_MouseWScale);
+		Graphics()->QuadsDraw(&Line, 1);
 	}
 	else if(Axis == EAxis::AXIS_Y)
 	{
-		IGraphics::CQuadItem QuadItem(fx2f(Point.x), 0, 1.0f * m_MouseWScale, Graphics()->ScreenHeight() * m_MouseWScale);
-		Graphics()->QuadsDraw(&QuadItem, 1);
+		IGraphics::CQuadItem Line(fx2f(OriginalPoint.x), fx2f(OriginalPoint.y + Point.y) / 2.0f, 1.0f * m_MouseWScale, fx2f(Point.y - OriginalPoint.y));
+		Graphics()->QuadsDraw(&Line, 1);
 	}
 
 	// Draw ghost of original point
-	IGraphics::CQuadItem QuadItem(fx2f(Point.x), fx2f(Point.y), 5.0f * m_MouseWScale, 5.0f * m_MouseWScale);
+	IGraphics::CQuadItem QuadItem(fx2f(OriginalPoint.x), fx2f(OriginalPoint.y), 5.0f * m_MouseWScale, 5.0f * m_MouseWScale);
 	Graphics()->QuadsDraw(&QuadItem, 1);
+}
+
+void CEditor::ComputePointAlignments(const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, int QuadIndex, int PointIndex, int OffsetX, int OffsetY, std::vector<SAlignmentInfo> &vAlignments, bool Append) const
+{
+	if(!Append)
+		vAlignments.clear();
+	if(!g_Config.m_EdAlignQuads)
+		return;
+
+	// Perform computation from the original position of this point
+	int Threshold = f2fx(maximum(10.0f, 10.0f * m_MouseWScale));
+	CPoint OrigPoint = m_QuadDragOriginalPoints.at(QuadIndex)[PointIndex];
+	// Get the "current" point by applying the offset
+	CPoint Point = OrigPoint + ivec2(OffsetX, OffsetY);
+
+	// Save smallest diff on both axis to only keep closest alignments
+	int SmallestDiffX = Threshold + 1, SmallestDiffY = Threshold + 1;
+	// Store both axis alignments in separate vectors
+	std::vector<SAlignmentInfo> vAlignmentsX, vAlignmentsY;
+
+	// Check if we can align/snap to a specific point
+	auto &&CheckAlignment = [&](CPoint *pQuadPoint) {
+		int DX = pQuadPoint->x - Point.x;
+		int DY = pQuadPoint->y - Point.y;
+		int DiffX = absolute(DX);
+		int DiffY = absolute(DY);
+
+		// Check the X axis
+		if(DiffX <= Threshold)
+		{
+			// Only store alignments that have the smallest difference
+			if(DiffX < SmallestDiffX)
+			{
+				vAlignmentsX.clear();
+				SmallestDiffX = DiffX;
+			}
+
+			// We can have multiple alignments having the same difference/distance
+			if(DiffX == SmallestDiffX)
+			{
+				vAlignmentsX.push_back(SAlignmentInfo{
+					*pQuadPoint, // Aligned point
+					{OrigPoint.y}, // Value that can change (which is not snapped), original position
+					EAxis::AXIS_Y, // The alignment axis
+					PointIndex, // The index of the point
+					DX,
+				});
+			}
+		}
+		if(DiffY <= Threshold)
+		{
+			// Only store alignments that have the smallest difference
+			if(DiffY < SmallestDiffY)
+			{
+				vAlignmentsY.clear();
+				SmallestDiffY = DiffY;
+			}
+
+			if(DiffY == SmallestDiffY)
+			{
+				vAlignmentsY.push_back(SAlignmentInfo{
+					*pQuadPoint,
+					{OrigPoint.x},
+					EAxis::AXIS_X,
+					PointIndex,
+					DY,
+				});
+			}
+		}
+	};
+
+	// Iterate through all the quads of the current layer
+	// Check alignment with each point of the quad (corners & pivot)
+	// Compute an AABB (Axis Aligned Bounding Box) to get the center of the quad
+	// Check alignment with the center of the quad
+	for(size_t i = 0; i < pLayer->m_vQuads.size(); i++)
+	{
+		auto *pCurrentQuad = &pLayer->m_vQuads[i];
+		CPoint Min = pCurrentQuad->m_aPoints[0];
+		CPoint Max = pCurrentQuad->m_aPoints[0];
+
+		for(int v = 0; v < 5; v++)
+		{
+			CPoint *pQuadPoint = &pCurrentQuad->m_aPoints[v];
+
+			if(v != 4)
+			{ // Don't use pivot to compute AABB
+				if(pQuadPoint->x < Min.x)
+					Min.x = pQuadPoint->x;
+				if(pQuadPoint->y < Min.y)
+					Min.y = pQuadPoint->y;
+				if(pQuadPoint->x > Max.x)
+					Max.x = pQuadPoint->x;
+				if(pQuadPoint->y > Max.y)
+					Max.y = pQuadPoint->y;
+			}
+
+			// Don't check alignment with current point
+			if(pQuadPoint == &pQuad->m_aPoints[PointIndex])
+				continue;
+
+			// Don't check alignment with other selected points
+			bool IsCurrentPointSelected = IsQuadSelected(i) && (IsQuadCornerSelected(v) || (v == PointIndex && PointIndex == 4));
+			if(IsCurrentPointSelected)
+				continue;
+
+			CheckAlignment(pQuadPoint);
+		}
+
+		CPoint Center = (Min + Max) / 2.0f;
+		CheckAlignment(&Center);
+	}
+
+	// Finally concatenate both alignment vectors into the output
+	vAlignments.reserve(vAlignmentsX.size() + vAlignmentsY.size());
+	vAlignments.insert(vAlignments.end(), vAlignmentsX.begin(), vAlignmentsX.end());
+	vAlignments.insert(vAlignments.end(), vAlignmentsY.begin(), vAlignmentsY.end());
+}
+
+void CEditor::ComputePointsAlignments(const std::shared_ptr<CLayerQuads> &pLayer, bool Pivot, int OffsetX, int OffsetY, std::vector<SAlignmentInfo> &vAlignments) const
+{
+	// This method is used to compute alignments from selected points
+	// and only apply the closest alignment on X and Y to the offset.
+
+	vAlignments.clear();
+	std::vector<SAlignmentInfo> vAllAlignments;
+
+	for(int Selected : m_vSelectedQuads)
+	{
+		CQuad *pQuad = &pLayer->m_vQuads[Selected];
+
+		if(!Pivot)
+		{
+			for(int m = 0; m < 4; m++)
+			{
+				if(IsQuadPointSelected(Selected, m))
+				{
+					ComputePointAlignments(pLayer, pQuad, Selected, m, OffsetX, OffsetY, vAllAlignments, true);
+				}
+			}
+		}
+		else
+		{
+			ComputePointAlignments(pLayer, pQuad, Selected, 4, OffsetX, OffsetY, vAllAlignments, true);
+		}
+	}
+
+	int SmallestDiffX, SmallestDiffY;
+	SmallestDiffX = SmallestDiffY = std::numeric_limits<int>::max();
+
+	std::vector<SAlignmentInfo> vAlignmentsX, vAlignmentsY;
+
+	for(const auto &Alignment : vAllAlignments)
+	{
+		int AbsDiff = absolute(Alignment.m_Diff);
+		if(Alignment.m_Axis == EAxis::AXIS_X)
+		{
+			if(AbsDiff < SmallestDiffY)
+			{
+				SmallestDiffY = AbsDiff;
+				vAlignmentsY.clear();
+			}
+			if(AbsDiff == SmallestDiffY)
+				vAlignmentsY.emplace_back(Alignment);
+		}
+		else if(Alignment.m_Axis == EAxis::AXIS_Y)
+		{
+			if(AbsDiff < SmallestDiffX)
+			{
+				SmallestDiffX = AbsDiff;
+				vAlignmentsX.clear();
+			}
+			if(AbsDiff == SmallestDiffX)
+				vAlignmentsX.emplace_back(Alignment);
+		}
+	}
+
+	vAlignments.reserve(vAlignmentsX.size() + vAlignmentsY.size());
+	vAlignments.insert(vAlignments.end(), vAlignmentsX.begin(), vAlignmentsX.end());
+	vAlignments.insert(vAlignments.end(), vAlignmentsY.begin(), vAlignmentsY.end());
+}
+
+void CEditor::ComputeAABBAlignments(const std::shared_ptr<CLayerQuads> &pLayer, const SAxisAlignedBoundingBox &AABB, int OffsetX, int OffsetY, std::vector<SAlignmentInfo> &vAlignments) const
+{
+	vAlignments.clear();
+	if(!g_Config.m_EdAlignQuads)
+		return;
+
+	// This method is a bit different than the point alignment in the way where instead of trying to aling 1 point to all quads,
+	// we try to align 5 points to all quads, these 5 points being 5 points of an AABB.
+	// Otherwise, the concept is the same, we use the original position of the AABB to make the computations.
+	int Threshold = f2fx(maximum(10.0f, 10.0f * m_MouseWScale));
+	int SmallestDiffX = Threshold + 1, SmallestDiffY = Threshold + 1;
+	std::vector<SAlignmentInfo> vAlignmentsX, vAlignmentsY;
+
+	auto &&CheckAlignment = [&](CPoint &Aligned, int Point) {
+		CPoint ToCheck = AABB.m_aPoints[Point] + ivec2(OffsetX, OffsetY);
+		int DX = Aligned.x - ToCheck.x;
+		int DY = Aligned.y - ToCheck.y;
+		int DiffX = absolute(DX);
+		int DiffY = absolute(DY);
+
+		if(DiffX <= Threshold)
+		{
+			if(DiffX < SmallestDiffX)
+			{
+				SmallestDiffX = DiffX;
+				vAlignmentsX.clear();
+			}
+
+			if(DiffX == SmallestDiffX)
+			{
+				vAlignmentsX.push_back(SAlignmentInfo{
+					Aligned,
+					{AABB.m_aPoints[Point].y},
+					EAxis::AXIS_Y,
+					Point,
+					DX,
+				});
+			}
+		}
+		if(DiffY <= Threshold)
+		{
+			if(DiffY < SmallestDiffY)
+			{
+				SmallestDiffY = DiffY;
+				vAlignmentsY.clear();
+			}
+
+			if(DiffY == SmallestDiffY)
+			{
+				vAlignmentsY.push_back(SAlignmentInfo{
+					Aligned,
+					{AABB.m_aPoints[Point].x},
+					EAxis::AXIS_X,
+					Point,
+					DY,
+				});
+			}
+		}
+	};
+
+	auto &&CheckAABBAlignment = [&](CPoint &QuadMin, CPoint &QuadMax) {
+		CPoint QuadCenter = (QuadMin + QuadMax) / 2.0f;
+		CPoint aQuadPoints[5] = {
+			QuadMin, // Top left
+			{QuadMax.x, QuadMin.y}, // Top right
+			{QuadMin.x, QuadMax.y}, // Bottom left
+			QuadMax, // Bottom right
+			QuadCenter,
+		};
+
+		// Check all points with all the other points
+		for(auto &QuadPoint : aQuadPoints)
+		{
+			// i is the quad point which is "aligned" and that we want to compare with
+			for(int j = 0; j < 5; j++)
+			{
+				// j is the point we try to align
+				CheckAlignment(QuadPoint, j);
+			}
+		}
+	};
+
+	// Iterate through all quads of the current layer
+	// Compute AABB of all quads and check if the dragged AABB can be aligned to this AABB.
+	for(size_t i = 0; i < pLayer->m_vQuads.size(); i++)
+	{
+		auto *pCurrentQuad = &pLayer->m_vQuads[i];
+		if(IsQuadSelected(i)) // Don't check with other selected quads
+			continue;
+
+		// Get AABB of this quad
+		CPoint QuadMin = pCurrentQuad->m_aPoints[0], QuadMax = pCurrentQuad->m_aPoints[0];
+		for(int v = 1; v < 4; v++)
+		{
+			QuadMin.x = minimum(QuadMin.x, pCurrentQuad->m_aPoints[v].x);
+			QuadMin.y = minimum(QuadMin.y, pCurrentQuad->m_aPoints[v].y);
+			QuadMax.x = maximum(QuadMax.x, pCurrentQuad->m_aPoints[v].x);
+			QuadMax.y = maximum(QuadMax.y, pCurrentQuad->m_aPoints[v].y);
+		}
+
+		CheckAABBAlignment(QuadMin, QuadMax);
+	}
+
+	// Finally, concatenate both alignment vectors into the output
+	vAlignments.reserve(vAlignmentsX.size() + vAlignmentsY.size());
+	vAlignments.insert(vAlignments.end(), vAlignmentsX.begin(), vAlignmentsX.end());
+	vAlignments.insert(vAlignments.end(), vAlignmentsY.begin(), vAlignmentsY.end());
+}
+
+void CEditor::DrawPointAlignments(const std::vector<SAlignmentInfo> &vAlignments, int OffsetX, int OffsetY)
+{
+	if(!g_Config.m_EdAlignQuads)
+		return;
+
+	// Drawing an alignment is easy, we convert fixed to float for the aligned point coords
+	// and we also convert the "changing" value after applying the offset (which might be edited to actually align the value with the alignment).
+	Graphics()->SetColor(1, 0, 0.1f, 1);
+	for(const SAlignmentInfo &Alignment : vAlignments)
+	{
+		// We don't use IGraphics::CLineItem to draw because we don't want to stop QuadsBegin(), quads work just fine.
+		if(Alignment.m_Axis == EAxis::AXIS_X)
+		{ // Alignment on X axis is same Y values but different X values
+			IGraphics::CQuadItem Line(fx2f(Alignment.m_AlignedPoint.x), fx2f(Alignment.m_AlignedPoint.y), fx2f(Alignment.m_X + OffsetX - Alignment.m_AlignedPoint.x), 1.0f * m_MouseWScale);
+			Graphics()->QuadsDrawTL(&Line, 1);
+		}
+		else if(Alignment.m_Axis == EAxis::AXIS_Y)
+		{ // Alignment on Y axis is same X values but different Y values
+			IGraphics::CQuadItem Line(fx2f(Alignment.m_AlignedPoint.x), fx2f(Alignment.m_AlignedPoint.y), 1.0f * m_MouseWScale, fx2f(Alignment.m_Y + OffsetY - Alignment.m_AlignedPoint.y));
+			Graphics()->QuadsDrawTL(&Line, 1);
+		}
+	}
+}
+
+void CEditor::DrawAABB(const SAxisAlignedBoundingBox &AABB, int OffsetX, int OffsetY)
+{
+	// Drawing an AABB is simply converting the points from fixed to float
+	// Then making lines out of quads and drawing them
+	vec2 TL = {fx2f(AABB.m_aPoints[SAxisAlignedBoundingBox::POINT_TL].x + OffsetX), fx2f(AABB.m_aPoints[SAxisAlignedBoundingBox::POINT_TL].y + OffsetY)};
+	vec2 TR = {fx2f(AABB.m_aPoints[SAxisAlignedBoundingBox::POINT_TR].x + OffsetX), fx2f(AABB.m_aPoints[SAxisAlignedBoundingBox::POINT_TR].y + OffsetY)};
+	vec2 BL = {fx2f(AABB.m_aPoints[SAxisAlignedBoundingBox::POINT_BL].x + OffsetX), fx2f(AABB.m_aPoints[SAxisAlignedBoundingBox::POINT_BL].y + OffsetY)};
+	vec2 BR = {fx2f(AABB.m_aPoints[SAxisAlignedBoundingBox::POINT_BR].x + OffsetX), fx2f(AABB.m_aPoints[SAxisAlignedBoundingBox::POINT_BR].y + OffsetY)};
+	vec2 Center = {fx2f(AABB.m_aPoints[SAxisAlignedBoundingBox::POINT_CENTER].x + OffsetX), fx2f(AABB.m_aPoints[SAxisAlignedBoundingBox::POINT_CENTER].y + OffsetY)};
+
+	// We don't use IGraphics::CLineItem to draw because we don't want to stop QuadsBegin(), quads work just fine.
+	IGraphics::CQuadItem Lines[4] = {
+		{TL.x, TL.y, TR.x - TL.x, 1.0f * m_MouseWScale},
+		{TL.x, TL.y, 1.0f * m_MouseWScale, BL.y - TL.y},
+		{TR.x, TR.y, 1.0f * m_MouseWScale, BR.y - TR.y},
+		{BL.x, BL.y, BR.x - BL.x, 1.0f * m_MouseWScale},
+	};
+	Graphics()->SetColor(1, 0, 1, 1);
+	Graphics()->QuadsDrawTL(Lines, 4);
+
+	IGraphics::CQuadItem CenterQuad(Center.x, Center.y, 5.0f * m_MouseWScale, 5.0f * m_MouseWScale);
+	Graphics()->QuadsDraw(&CenterQuad, 1);
+}
+
+void CEditor::QuadSelectionAABB(const std::shared_ptr<CLayerQuads> &pLayer, SAxisAlignedBoundingBox &OutAABB)
+{
+	// Compute an englobing AABB of the current selection of quads
+	CPoint Min{
+		std::numeric_limits<int>::max(),
+		std::numeric_limits<int>::max(),
+	};
+	CPoint Max{
+		std::numeric_limits<int>::min(),
+		std::numeric_limits<int>::min(),
+	};
+	for(int Selected : m_vSelectedQuads)
+	{
+		CQuad *pQuad = &pLayer->m_vQuads[Selected];
+		for(auto &Point : pQuad->m_aPoints)
+		{
+			Min.x = minimum(Min.x, Point.x);
+			Min.y = minimum(Min.y, Point.y);
+			Max.x = maximum(Max.x, Point.x);
+			Max.y = maximum(Max.y, Point.y);
+		}
+	}
+	CPoint Center = (Min + Max) / 2.0f;
+	CPoint aPoints[SAxisAlignedBoundingBox::NUM_POINTS] = {
+		Min, // Top left
+		{Max.x, Min.y}, // Top right
+		{Min.x, Max.y}, // Bottom left
+		Max, // Bottom right
+		Center,
+	};
+	mem_copy(OutAABB.m_aPoints, aPoints, sizeof(CPoint) * SAxisAlignedBoundingBox::NUM_POINTS);
+}
+
+void CEditor::ApplyAlignments(const std::vector<SAlignmentInfo> &vAlignments, int &OffsetX, int &OffsetY)
+{
+	if(vAlignments.empty())
+		return;
+
+	// Find X and Y aligment
+	const int *pAlignedX = nullptr;
+	const int *pAlignedY = nullptr;
+
+	// To Find the alignments we simply iterate through the vector of alignments and find the first
+	// X and Y alignments.
+	// Then, we use the saved m_Diff to adjust the offset
+	int AdjustX = 0, AdjustY = 0;
+	for(const SAlignmentInfo &Alignment : vAlignments)
+	{
+		if(Alignment.m_Axis == EAxis::AXIS_X && !pAlignedY)
+		{
+			pAlignedY = &Alignment.m_AlignedPoint.y;
+			AdjustY = Alignment.m_Diff;
+		}
+		else if(Alignment.m_Axis == EAxis::AXIS_Y && !pAlignedX)
+		{
+			pAlignedX = &Alignment.m_AlignedPoint.x;
+			AdjustX = Alignment.m_Diff;
+		}
+	}
+
+	// Adjust offset
+	OffsetX += AdjustX;
+	OffsetY += AdjustY;
+}
+
+void CEditor::ApplyAxisAlignment(int &OffsetX, int &OffsetY)
+{
+	// This is used to preserve axis alignment when pressing `Shift`
+	// Should be called before any other computation
+	EAxis Axis = GetDragAxis(OffsetX, OffsetY);
+	OffsetX = ((Axis == EAxis::AXIS_NONE || Axis == EAxis::AXIS_X) ? OffsetX : 0);
+	OffsetY = ((Axis == EAxis::AXIS_NONE || Axis == EAxis::AXIS_Y) ? OffsetY : 0);
 }
 
 void CEditor::DoQuad(const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, int Index)
@@ -1597,6 +2007,10 @@ void CEditor::DoQuad(const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, i
 	float wx = UI()->MouseWorldX();
 	float wy = UI()->MouseWorldY();
 	static CPoint s_OriginalPosition;
+	static std::vector<SAlignmentInfo> s_PivotAlignments; // Alignments per pivot per quad
+	static std::vector<SAlignmentInfo> s_vAABBAlignments; // Alignments for one AABB (single quad or selection of multiple quads)
+	static SAxisAlignedBoundingBox s_SelectionAABB; // Selection AABB
+	static ivec2 s_LastOffset; // Last offset, stored as static so we can use it to draw every frame
 
 	// get pivot
 	float CenterX = fx2f(pQuad->m_aPoints[4].x);
@@ -1643,21 +2057,26 @@ void CEditor::DoQuad(const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, i
 					if(Input()->ShiftIsPressed())
 					{
 						s_Operation = OP_MOVE_PIVOT;
-						for(size_t i = 0; i < m_vSelectedQuads.size(); ++i)
+						// When moving, we need to save the original position of all selected pivots
+						for(int Selected : m_vSelectedQuads)
 						{
-							CQuad *pCurrentQuad = &pLayer->m_vQuads[m_vSelectedQuads[i]];
-							PreparePointDrag(pLayer, pCurrentQuad, m_vSelectedQuads[i], 4);
+							CQuad *pCurrentQuad = &pLayer->m_vQuads[Selected];
+							PreparePointDrag(pLayer, pCurrentQuad, Selected, 4);
 						}
 					}
 					else
 					{
 						s_Operation = OP_MOVE_ALL;
-						for(size_t i = 0; i < m_vSelectedQuads.size(); ++i)
+						// When moving, we need to save the original position of all selected quads points
+						for(int Selected : m_vSelectedQuads)
 						{
-							CQuad *pCurrentQuad = &pLayer->m_vQuads[m_vSelectedQuads[i]];
+							CQuad *pCurrentQuad = &pLayer->m_vQuads[Selected];
 							for(size_t v = 0; v < 5; v++)
-								PreparePointDrag(pLayer, pCurrentQuad, m_vSelectedQuads[i], v);
+								PreparePointDrag(pLayer, pCurrentQuad, Selected, v);
 						}
+						// And precompute AABB of selection since it will not change during drag
+						if(g_Config.m_EdAlignQuads)
+							QuadSelectionAABB(pLayer, s_SelectionAABB);
 					}
 				}
 			}
@@ -1667,26 +2086,36 @@ void CEditor::DoQuad(const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, i
 			{
 				m_QuadTracker.BeginQuadTrack(pLayer, m_vSelectedQuads);
 
-				ivec2 Offset = GetDragOffset();
+				s_LastOffset = GetDragOffset(); // Update offset
+				ApplyAxisAlignment(s_LastOffset.x, s_LastOffset.y); // Apply axis alignment to the offset
+
+				ComputePointsAlignments(pLayer, true, s_LastOffset.x, s_LastOffset.y, s_PivotAlignments);
+				ApplyAlignments(s_PivotAlignments, s_LastOffset.x, s_LastOffset.y);
 
 				for(auto &Selected : m_vSelectedQuads)
 				{
 					CQuad *pCurrentQuad = &pLayer->m_vQuads[Selected];
-					DoPointDrag(pLayer, pCurrentQuad, Selected, 4, Offset.x, Offset.y);
+					DoPointDrag(pLayer, pCurrentQuad, Selected, 4, s_LastOffset.x, s_LastOffset.y);
 				}
 			}
 			else if(s_Operation == OP_MOVE_ALL)
 			{
 				m_QuadTracker.BeginQuadTrack(pLayer, m_vSelectedQuads);
-				// move all points including pivot
-				ivec2 Offset = GetDragOffset();
 
-				for(size_t i = 0; i < m_vSelectedQuads.size(); i++)
+				// Compute drag offset
+				s_LastOffset = GetDragOffset();
+				ApplyAxisAlignment(s_LastOffset.x, s_LastOffset.y);
+
+				// Then compute possible alignments with the selection AABB
+				ComputeAABBAlignments(pLayer, s_SelectionAABB, s_LastOffset.x, s_LastOffset.y, s_vAABBAlignments);
+				// Apply alignments before drag
+				ApplyAlignments(s_vAABBAlignments, s_LastOffset.x, s_LastOffset.y);
+				// Then do the drag
+				for(int Selected : m_vSelectedQuads)
 				{
-					int Selected = m_vSelectedQuads[i];
 					CQuad *pCurrentQuad = &pLayer->m_vQuads[Selected];
 					for(int v = 0; v < 5; v++)
-						DoPointDrag(pLayer, pCurrentQuad, Selected, v, Offset.x, Offset.y);
+						DoPointDrag(pLayer, pCurrentQuad, Selected, v, s_LastOffset.x, s_LastOffset.y);
 				}
 			}
 			else if(s_Operation == OP_ROTATE)
@@ -1710,12 +2139,22 @@ void CEditor::DoQuad(const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, i
 			}
 		}
 
-		// Draw axis when moving
+		// Draw axis and aligments when moving
 		if(s_Operation == OP_MOVE_PIVOT || s_Operation == OP_MOVE_ALL)
 		{
-			ivec2 Offset = GetDragOffset();
-			EAxis Axis = GetDragAxis(Offset.x, Offset.y);
-			DrawAxis(Axis, s_OriginalPosition);
+			EAxis Axis = GetDragAxis(s_LastOffset.x, s_LastOffset.y);
+			DrawAxis(Axis, s_OriginalPosition, pQuad->m_aPoints[4]);
+		}
+
+		if(s_Operation == OP_MOVE_PIVOT)
+			DrawPointAlignments(s_PivotAlignments, s_LastOffset.x, s_LastOffset.y);
+
+		if(s_Operation == OP_MOVE_ALL)
+		{
+			DrawPointAlignments(s_vAABBAlignments, s_LastOffset.x, s_LastOffset.y);
+
+			if(g_Config.m_EdShowQuadsRect)
+				DrawAABB(s_SelectionAABB, s_LastOffset.x, s_LastOffset.y);
 		}
 
 		if(s_Operation == OP_CONTEXT_MENU)
@@ -1791,6 +2230,11 @@ void CEditor::DoQuad(const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, i
 				UI()->DisableMouseLock();
 				s_Operation = OP_NONE;
 				UI()->SetActiveItem(nullptr);
+
+				s_LastOffset = ivec2();
+				s_OriginalPosition = ivec2();
+				s_vAABBAlignments.clear();
+				s_PivotAlignments.clear();
 			}
 		}
 
@@ -1892,6 +2336,8 @@ void CEditor::DoQuadPoint(const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQu
 	static float s_MouseXStart = 0.0f;
 	static float s_MouseYStart = 0.0f;
 	static CPoint s_OriginalPoint;
+	static std::vector<SAlignmentInfo> s_Alignments; // Alignments
+	static ivec2 s_LastOffset;
 
 	const bool IgnoreGrid = Input()->AltIsPressed();
 
@@ -1929,6 +2375,7 @@ void CEditor::DoQuadPoint(const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQu
 					else
 					{
 						s_Operation = OP_MOVEPOINT;
+						// Save original positions before moving
 						s_OriginalPoint = pQuad->m_aPoints[V];
 						for(int m = 0; m < 4; m++)
 							if(IsQuadPointSelected(QuadIndex, m))
@@ -1941,11 +2388,19 @@ void CEditor::DoQuadPoint(const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQu
 			{
 				m_QuadTracker.BeginQuadTrack(pLayer, m_vSelectedQuads);
 
-				ivec2 Offset = GetDragOffset();
+				s_LastOffset = GetDragOffset(); // Update offset
+				ApplyAxisAlignment(s_LastOffset.x, s_LastOffset.y); // Apply axis alignment to offset
+
+				ComputePointsAlignments(pLayer, false, s_LastOffset.x, s_LastOffset.y, s_Alignments);
+				ApplyAlignments(s_Alignments, s_LastOffset.x, s_LastOffset.y);
 
 				for(int m = 0; m < 4; m++)
+				{
 					if(IsQuadPointSelected(QuadIndex, m))
-						DoPointDrag(pLayer, pQuad, QuadIndex, m, Offset.x, Offset.y);
+					{
+						DoPointDrag(pLayer, pQuad, QuadIndex, m, s_LastOffset.x, s_LastOffset.y);
+					}
+				}
 			}
 			else if(s_Operation == OP_MOVEUV)
 			{
@@ -1972,12 +2427,17 @@ void CEditor::DoQuadPoint(const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQu
 			}
 		}
 
-		// Draw axis when dragging
+		// Draw axis and alignments when dragging
 		if(s_Operation == OP_MOVEPOINT)
 		{
-			ivec2 Offset = GetDragOffset();
-			EAxis Axis = GetDragAxis(Offset.x, Offset.y);
-			DrawAxis(Axis, s_OriginalPoint);
+			Graphics()->SetColor(1, 0, 0.1f, 1);
+
+			// Axis
+			EAxis Axis = GetDragAxis(s_LastOffset.x, s_LastOffset.y);
+			DrawAxis(Axis, s_OriginalPoint, pQuad->m_aPoints[V]);
+
+			// Alignments
+			DrawPointAlignments(s_Alignments, s_LastOffset.x, s_LastOffset.y);
 		}
 
 		if(s_Operation == OP_CONTEXT_MENU)
@@ -7402,7 +7862,7 @@ void CEditor::RenderMenubar(CUIRect MenuBar)
 	if(DoButton_Menu(&s_SettingsButton, "Settings", 0, &SettingsButton, 0, nullptr))
 	{
 		static SPopupMenuId s_PopupMenuEntitiesId;
-		UI()->DoPopupMenu(&s_PopupMenuEntitiesId, SettingsButton.x, SettingsButton.y + SettingsButton.h - 1.0f, 200.0f, 64.0f, this, PopupMenuSettings, PopupProperties);
+		UI()->DoPopupMenu(&s_PopupMenuEntitiesId, SettingsButton.x, SettingsButton.y + SettingsButton.h - 1.0f, 200.0f, 92.0f, this, PopupMenuSettings, PopupProperties);
 	}
 
 	CUIRect ChangedIndicator, Info, Close;

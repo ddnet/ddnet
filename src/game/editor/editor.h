@@ -859,6 +859,19 @@ public:
 		AXIS_X,
 		AXIS_Y
 	};
+	struct SAxisAlignedBoundingBox
+	{
+		enum
+		{
+			POINT_TL = 0,
+			POINT_TR,
+			POINT_BL,
+			POINT_BR,
+			POINT_CENTER,
+			NUM_POINTS
+		};
+		CPoint m_aPoints[NUM_POINTS];
+	};
 	void DoMapEditor(CUIRect View);
 	void DoToolbarLayers(CUIRect Toolbar);
 	void DoToolbarSounds(CUIRect Toolbar);
@@ -866,8 +879,35 @@ public:
 	void PreparePointDrag(const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, int QuadIndex, int PointIndex);
 	void DoPointDrag(const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, int QuadIndex, int PointIndex, int OffsetX, int OffsetY);
 	EAxis GetDragAxis(int OffsetX, int OffsetY);
-	void DrawAxis(EAxis Axis, CPoint &Point);
+	void DrawAxis(EAxis Axis, CPoint &OriginalPoint, CPoint &Point);
+	void DrawAABB(const SAxisAlignedBoundingBox &AABB, int OffsetX = 0, int OffsetY = 0);
 	ColorRGBA GetButtonColor(const void *pID, int Checked);
+
+	// Alignment methods
+	// These methods take `OffsetX` and `OffsetY` because the calculations are made with the original positions
+	// of the quad(s), before we started dragging. This allows us to edit `OffsetX` and `OffsetY` based on the previously
+	// calculated alignments.
+	struct SAlignmentInfo
+	{
+		CPoint m_AlignedPoint; // The "aligned" point, which we want to align/snap to
+		union
+		{
+			// The current changing value when aligned to this point. When aligning to a point on the X axis, then the X value is changing because
+			// we aligned the Y values (X axis aligned => Y values are the same, Y axis aligned => X values are the same).
+			int m_X;
+			int m_Y;
+		};
+		EAxis m_Axis; // The axis we are aligning on
+		int m_PointIndex; // The point index we are aligning
+		int m_Diff; // Store the difference
+	};
+	void ComputePointAlignments(const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, int QuadIndex, int PointIndex, int OffsetX, int OffsetY, std::vector<SAlignmentInfo> &vAlignments, bool Append = false) const;
+	void ComputePointsAlignments(const std::shared_ptr<CLayerQuads> &pLayer, bool Pivot, int OffsetX, int OffsetY, std::vector<SAlignmentInfo> &vAlignments) const;
+	void ComputeAABBAlignments(const std::shared_ptr<CLayerQuads> &pLayer, const SAxisAlignedBoundingBox &AABB, int OffsetX, int OffsetY, std::vector<SAlignmentInfo> &vAlignments) const;
+	void DrawPointAlignments(const std::vector<SAlignmentInfo> &vAlignments, int OffsetX, int OffsetY);
+	void QuadSelectionAABB(const std::shared_ptr<CLayerQuads> &pLayer, SAxisAlignedBoundingBox &OutAABB);
+	void ApplyAlignments(const std::vector<SAlignmentInfo> &vAlignments, int &OffsetX, int &OffsetY);
+	void ApplyAxisAlignment(int &OffsetX, int &OffsetY);
 
 	bool ReplaceImage(const char *pFilename, int StorageType, bool CheckDuplicate);
 	static bool ReplaceImageCallback(const char *pFilename, int StorageType, void *pUser);
@@ -1034,7 +1074,7 @@ private:
 	void RedoLastAction();
 
 private:
-	std::map<int, std::map<int, CPoint>> m_QuadDragOriginalPoints;
+	std::map<int, CPoint[5]> m_QuadDragOriginalPoints;
 };
 
 // make sure to inline this function
