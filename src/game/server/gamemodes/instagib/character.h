@@ -1,3 +1,7 @@
+#ifndef GAME_SERVER_GAMEMODES_INSTAGIB_CHARACTER_H
+// hack for headerguard linter
+#endif
+
 #ifndef IN_CLASS_CHARACTER
 
 #include <game/server/entity.h>

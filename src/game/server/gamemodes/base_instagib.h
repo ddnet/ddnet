@@ -1,5 +1,5 @@
-#ifndef GAME_SERVER_GAMEMODES_INSTAGIB_H
-#define GAME_SERVER_GAMEMODES_INSTAGIB_H
+#ifndef GAME_SERVER_GAMEMODES_BASE_INSTAGIB_H
+#define GAME_SERVER_GAMEMODES_BASE_INSTAGIB_H
 
 #include "DDRace.h"
 
@@ -37,4 +37,4 @@ public:
 	// ddnet-insta only
 	bool OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character) override;
 };
-#endif // GAME_SERVER_GAMEMODES_INSTAGIB_H
+#endif // GAME_SERVER_GAMEMODES_BASE_INSTAGIB_H
