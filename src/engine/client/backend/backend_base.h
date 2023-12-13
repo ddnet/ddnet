@@ -15,7 +15,7 @@
 
 struct SBackendCapabilites;
 
-enum EDebugGFXModes
+enum EDebugGfxModes
 {
 	DEBUG_GFX_MODE_NONE = 0,
 	DEBUG_GFX_MODE_MINIMUM,
@@ -32,7 +32,7 @@ enum ERunCommandReturnTypes
 	RUN_COMMAND_COMMAND_ERROR,
 };
 
-enum EGFXErrorType
+enum EGfxErrorType
 {
 	GFX_ERROR_TYPE_NONE = 0,
 	GFX_ERROR_TYPE_INIT,
@@ -46,7 +46,7 @@ enum EGFXErrorType
 	GFX_ERROR_TYPE_UNKNOWN,
 };
 
-enum EGFXWarningType
+enum EGfxWarningType
 {
 	GFX_WARNING_TYPE_NONE = 0,
 	GFX_WARNING_TYPE_INIT_FAILED,
@@ -56,7 +56,7 @@ enum EGFXWarningType
 	GFX_WARNING_TYPE_UNKNOWN,
 };
 
-struct SGFXErrorContainer
+struct SGfxErrorContainer
 {
 	struct SError
 	{
@@ -68,21 +68,21 @@ struct SGFXErrorContainer
 			return m_RequiresTranslation == Other.m_RequiresTranslation && m_Err == Other.m_Err;
 		}
 	};
-	EGFXErrorType m_ErrorType = EGFXErrorType::GFX_ERROR_TYPE_NONE;
+	EGfxErrorType m_ErrorType = EGfxErrorType::GFX_ERROR_TYPE_NONE;
 	std::vector<SError> m_vErrors;
 };
 
-struct SGFXWarningContainer
+struct SGfxWarningContainer
 {
-	EGFXWarningType m_WarningType = EGFXWarningType::GFX_WARNING_TYPE_NONE;
+	EGfxWarningType m_WarningType = EGfxWarningType::GFX_WARNING_TYPE_NONE;
 	std::vector<std::string> m_vWarnings;
 };
 
 class CCommandProcessorFragment_GLBase
 {
 protected:
-	SGFXErrorContainer m_Error;
-	SGFXWarningContainer m_Warning;
+	SGfxErrorContainer m_Error;
+	SGfxWarningContainer m_Warning;
 
 	static void *Resize(const unsigned char *pData, int Width, int Height, int NewWidth, int NewHeight, int BPP);
 
@@ -97,10 +97,10 @@ public:
 	virtual void StartCommands(size_t CommandCount, size_t EstimatedRenderCallCount) {}
 	virtual void EndCommands() {}
 
-	const SGFXErrorContainer &GetError() { return m_Error; }
+	const SGfxErrorContainer &GetError() { return m_Error; }
 	virtual void ErroneousCleanup() {}
 
-	const SGFXWarningContainer &GetWarning() { return m_Warning; }
+	const SGfxWarningContainer &GetWarning() { return m_Warning; }
 
 	enum
 	{

@@ -879,7 +879,7 @@ int CPlayer::ForcePause(int Time)
 	return Pause(PAUSE_SPEC, true);
 }
 
-int CPlayer::IsPaused()
+int CPlayer::IsPaused() const
 {
 	return m_ForcePauseTime ? m_ForcePauseTime : -1 * m_Paused;
 }

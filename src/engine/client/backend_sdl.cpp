@@ -108,7 +108,7 @@ void CGraphicsBackend_Threaded::StopProcessor()
 
 void CGraphicsBackend_Threaded::RunBuffer(CCommandBuffer *pBuffer)
 {
-	SGFXErrorContainer Error;
+	SGfxErrorContainer Error;
 #ifdef CONF_WEBASM
 	// run everything single threaded for now, context binding in a thread seems to not work as of now
 	Error = m_pProcessor->GetError();
@@ -153,7 +153,7 @@ void CGraphicsBackend_Threaded::WaitForIdle()
 	m_BufferSwapCond.wait(Lock, [this]() { return m_pBuffer == nullptr; });
 }
 
-void CGraphicsBackend_Threaded::ProcessError(const SGFXErrorContainer &Error)
+void CGraphicsBackend_Threaded::ProcessError(const SGfxErrorContainer &Error)
 {
 	std::string VerboseStr = "Graphics Assertion:";
 	for(const auto &ErrStr : Error.m_vErrors)
@@ -274,31 +274,31 @@ void CCommandProcessor_SDL_GL::HandleError()
 	switch(m_Error.m_ErrorType)
 	{
 	case GFX_ERROR_TYPE_INIT:
-		m_Error.m_vErrors.emplace_back(SGFXErrorContainer::SError{true, Localizable("Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.", "Graphics error")});
+		m_Error.m_vErrors.emplace_back(SGfxErrorContainer::SError{true, Localizable("Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.", "Graphics error")});
 		break;
 	case GFX_ERROR_TYPE_OUT_OF_MEMORY_IMAGE:
 		[[fallthrough]];
 	case GFX_ERROR_TYPE_OUT_OF_MEMORY_BUFFER:
 		[[fallthrough]];
 	case GFX_ERROR_TYPE_OUT_OF_MEMORY_STAGING:
-		m_Error.m_vErrors.emplace_back(SGFXErrorContainer::SError{true, Localizable("Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.", "Graphics error")});
+		m_Error.m_vErrors.emplace_back(SGfxErrorContainer::SError{true, Localizable("Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.", "Graphics error")});
 		break;
 	case GFX_ERROR_TYPE_RENDER_RECORDING:
-		m_Error.m_vErrors.emplace_back(SGFXErrorContainer::SError{true, Localizable("An error during command recording occurred. Try to update your GPU drivers.", "Graphics error")});
+		m_Error.m_vErrors.emplace_back(SGfxErrorContainer::SError{true, Localizable("An error during command recording occurred. Try to update your GPU drivers.", "Graphics error")});
 		break;
 	case GFX_ERROR_TYPE_RENDER_CMD_FAILED:
-		m_Error.m_vErrors.emplace_back(SGFXErrorContainer::SError{true, Localizable("A render command failed. Try to update your GPU drivers.", "Graphics error")});
+		m_Error.m_vErrors.emplace_back(SGfxErrorContainer::SError{true, Localizable("A render command failed. Try to update your GPU drivers.", "Graphics error")});
 		break;
 	case GFX_ERROR_TYPE_RENDER_SUBMIT_FAILED:
-		m_Error.m_vErrors.emplace_back(SGFXErrorContainer::SError{true, Localizable("Submitting the render commands failed. Try to update your GPU drivers.", "Graphics error")});
+		m_Error.m_vErrors.emplace_back(SGfxErrorContainer::SError{true, Localizable("Submitting the render commands failed. Try to update your GPU drivers.", "Graphics error")});
 		break;
 	case GFX_ERROR_TYPE_SWAP_FAILED:
-		m_Error.m_vErrors.emplace_back(SGFXErrorContainer::SError{true, Localizable("Failed to swap framebuffers. Try to update your GPU drivers.", "Graphics error")});
+		m_Error.m_vErrors.emplace_back(SGfxErrorContainer::SError{true, Localizable("Failed to swap framebuffers. Try to update your GPU drivers.", "Graphics error")});
 		break;
 	case GFX_ERROR_TYPE_UNKNOWN:
 		[[fallthrough]];
 	default:
-		m_Error.m_vErrors.emplace_back(SGFXErrorContainer::SError{true, Localizable("Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.", "Graphics error")});
+		m_Error.m_vErrors.emplace_back(SGfxErrorContainer::SError{true, Localizable("Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.", "Graphics error")});
 		break;
 	}
 }
@@ -416,7 +416,7 @@ CCommandProcessor_SDL_GL::~CCommandProcessor_SDL_GL()
 	delete m_pGLBackend;
 }
 
-const SGFXErrorContainer &CCommandProcessor_SDL_GL::GetError() const
+const SGfxErrorContainer &CCommandProcessor_SDL_GL::GetError() const
 {
 	return m_Error;
 }
@@ -426,7 +426,7 @@ void CCommandProcessor_SDL_GL::ErroneousCleanup()
 	return m_pGLBackend->ErroneousCleanup();
 }
 
-const SGFXWarningContainer &CCommandProcessor_SDL_GL::GetWarning() const
+const SGfxWarningContainer &CCommandProcessor_SDL_GL::GetWarning() const
 {
 	return m_Warning;
 }
