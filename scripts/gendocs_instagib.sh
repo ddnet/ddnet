@@ -16,6 +16,7 @@ gen_configs() {
 	local cfg
 	local desc
 	local cmd
+	# shellcheck disable=SC2016
 	echo '+ `sv_gametype` Game type (gctf, ictf)'
 	while read -r cfg
 	do
