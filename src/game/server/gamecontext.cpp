@@ -1410,18 +1410,30 @@ void CGameContext::OnClientEnter(int ClientID)
 			Msg.m_pName = "team";
 			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientID);
 		}
+	}
 
-		for(const IConsole::CCommandInfo *pCmd = Console()->FirstCommandInfo(IConsole::ACCESS_LEVEL_USER, CFGFLAG_CHAT);
-			pCmd; pCmd = pCmd->NextCommandInfo(IConsole::ACCESS_LEVEL_USER, CFGFLAG_CHAT))
+	for(const IConsole::CCommandInfo *pCmd = Console()->FirstCommandInfo(IConsole::ACCESS_LEVEL_USER, CFGFLAG_CHAT);
+		pCmd; pCmd = pCmd->NextCommandInfo(IConsole::ACCESS_LEVEL_USER, CFGFLAG_CHAT))
+	{
+		const char *pName = pCmd->m_pName;
+
+		if(Server()->IsSixup(ClientID))
 		{
-			if(!str_comp_nocase(pCmd->m_pName, "w") || !str_comp_nocase(pCmd->m_pName, "whisper"))
+			if(!str_comp_nocase(pName, "w") || !str_comp_nocase(pName, "whisper"))
 				continue;
 
-			const char *pName = pCmd->m_pName;
-			if(!str_comp_nocase(pCmd->m_pName, "r"))
+			if(!str_comp_nocase(pName, "r"))
 				pName = "rescue";
 
 			protocol7::CNetMsg_Sv_CommandInfo Msg;
+			Msg.m_pName = pName;
+			Msg.m_pArgsFormat = pCmd->m_pParams;
+			Msg.m_pHelpText = pCmd->m_pHelp;
+			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientID);
+		}
+		else
+		{
+			CNetMsg_Sv_CommandInfo Msg;
 			Msg.m_pName = pName;
 			Msg.m_pArgsFormat = pCmd->m_pParams;
 			Msg.m_pHelpText = pCmd->m_pHelp;
