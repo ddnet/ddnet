@@ -38,8 +38,6 @@
 #include "player.h"
 #include "score.h"
 
-#include "instagib.h"
-
 // Not thread-safe!
 class CClientChatLogger : public ILogger
 {

@@ -2581,8 +2581,12 @@ if(SERVER)
     gamemodes/zcatch.h
     gameworld.cpp
     gameworld.h
-    instagib.cpp
-    instagib.h
+    instagib/bangcommands.cpp
+    instagib/chat.cpp
+    instagib/gamelogic.cpp
+    instagib/rcon_commands.cpp
+    instagib/strhelpers.cpp
+    instagib/strhelpers.h
     player.cpp
     player.h
     save.cpp
