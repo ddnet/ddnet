@@ -62,4 +62,4 @@ insert_at() {
 insert_at '^# Configs$' '^# ' "$(gen_configs)" README.md
 
 [[ -f "$(tmp)" ]] && rm "$(tmp)"
-
+exit 0

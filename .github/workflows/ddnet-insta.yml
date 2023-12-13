@@ -11,5 +11,5 @@ jobs:
 
     - name: Check doc gen
       run: |
-        bash -x ./scripts/gendocs_instagib.sh
+        ./scripts/gendocs_instagib.sh
 
