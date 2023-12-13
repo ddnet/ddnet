@@ -77,13 +77,19 @@ int CGameControllerZcatch::OnCharacterDeath(class CCharacter *pVictim, class CPl
 	return 0;
 }
 
-bool CGameControllerZcatch::CanJoinTeam(int Team, int NotThisID)
+bool CGameControllerZcatch::CanJoinTeam(int Team, int NotThisID, char *pErrorReason, int ErrorReasonSize)
 {
 	CPlayer *pPlayer = GameServer()->m_apPlayers[NotThisID];
 	if(!pPlayer)
 		return false;
 
-	return !pPlayer->m_IsDead || Team == TEAM_SPECTATORS;
+
+	if(pPlayer->m_IsDead && Team != TEAM_SPECTATORS)
+	{
+		str_copy(pErrorReason, "Wait until someone dies", ErrorReasonSize);
+		return false;
+	}
+	return true;
 }
 
 bool CGameControllerZcatch::OnEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number)
