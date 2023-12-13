@@ -1,0 +1,15 @@
+name: ddnet-insta
+on: [push]
+
+jobs:
+  check-docs:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: true
+
+    - name: Check doc gen
+      run: |
+        ./scripts/gendocs_instagib.sh
+
