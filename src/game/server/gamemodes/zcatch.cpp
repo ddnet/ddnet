@@ -83,7 +83,6 @@ bool CGameControllerZcatch::CanJoinTeam(int Team, int NotThisID, char *pErrorRea
 	if(!pPlayer)
 		return false;
 
-
 	if(pPlayer->m_IsDead && Team != TEAM_SPECTATORS)
 	{
 		str_copy(pErrorReason, "Wait until someone dies", ErrorReasonSize);

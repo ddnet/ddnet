@@ -22,7 +22,6 @@ bool CGameContext::AllowPublicChat(const CPlayer *pPlayer)
 	return true;
 }
 
-
 bool CGameContext::ParseChatCmd(char Prefix, int ClientID, const char *pCmdWithArgs)
 {
 	const int MAX_ARG_LEN = 256;
