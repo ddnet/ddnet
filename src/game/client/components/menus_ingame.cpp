@@ -554,7 +554,9 @@ bool CMenus::RenderServerControlServer(CUIRect MainView)
 		if(!Item.m_Visible)
 			continue;
 
-		UI()->DoLabel(&Item.m_Rect, pOption->m_aDescription, 13.0f, TEXTALIGN_ML);
+		CUIRect Label;
+		Item.m_Rect.VMargin(2.0f, &Label);
+		UI()->DoLabel(&Label, pOption->m_aDescription, 13.0f, TEXTALIGN_ML);
 	}
 
 	s_CurVoteOption = s_ListBox.DoEnd();
