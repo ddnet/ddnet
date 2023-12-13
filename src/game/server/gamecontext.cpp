@@ -380,6 +380,60 @@ void CGameContext::CreateSoundGlobal(int Sound, int Target)
 	}
 }
 
+void CGameContext::SnapSwitchers(int SnappingClient)
+{
+	if(Switchers().empty())
+		return;
+
+	CPlayer *pPlayer = SnappingClient != SERVER_DEMO_CLIENT ? m_apPlayers[SnappingClient] : 0;
+	int Team = pPlayer && pPlayer->GetCharacter() ? pPlayer->GetCharacter()->Team() : 0;
+
+	if(pPlayer && (pPlayer->GetTeam() == TEAM_SPECTATORS || pPlayer->IsPaused()) && pPlayer->m_SpectatorID != SPEC_FREEVIEW && m_apPlayers[pPlayer->m_SpectatorID] && m_apPlayers[pPlayer->m_SpectatorID]->GetCharacter())
+		Team = m_apPlayers[pPlayer->m_SpectatorID]->GetCharacter()->Team();
+
+	if(Team == TEAM_SUPER)
+		return;
+
+	int SentTeam = Team;
+	if(g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO)
+		SentTeam = 0;
+
+	CNetObj_SwitchState *pSwitchState = Server()->SnapNewItem<CNetObj_SwitchState>(SentTeam);
+	if(!pSwitchState)
+		return;
+
+	pSwitchState->m_HighestSwitchNumber = clamp((int)Switchers().size() - 1, 0, 255);
+	mem_zero(pSwitchState->m_aStatus, sizeof(pSwitchState->m_aStatus));
+
+	std::vector<std::pair<int, int>> vEndTicks; // <EndTick, SwitchNumber>
+
+	for(int i = 0; i <= pSwitchState->m_HighestSwitchNumber; i++)
+	{
+		int Status = (int)Switchers()[i].m_aStatus[Team];
+		pSwitchState->m_aStatus[i / 32] |= (Status << (i % 32));
+
+		int EndTick = Switchers()[i].m_aEndTick[Team];
+		if(EndTick > 0 && EndTick < Server()->Tick() + 3 * Server()->TickSpeed() && Switchers()[i].m_aLastUpdateTick[Team] < Server()->Tick())
+		{
+			// only keep track of EndTicks that have less than three second left and are not currently being updated by a player being present on a switch tile, to limit how often these are sent
+			vEndTicks.emplace_back(Switchers()[i].m_aEndTick[Team], i);
+		}
+	}
+
+	// send the endtick of switchers that are about to toggle back (up to four, prioritizing those with the earliest endticks)
+	mem_zero(pSwitchState->m_aSwitchNumbers, sizeof(pSwitchState->m_aSwitchNumbers));
+	mem_zero(pSwitchState->m_aEndTicks, sizeof(pSwitchState->m_aEndTicks));
+
+	std::sort(vEndTicks.begin(), vEndTicks.end());
+	const int NumTimedSwitchers = minimum((int)vEndTicks.size(), (int)std::size(pSwitchState->m_aEndTicks));
+
+	for(int i = 0; i < NumTimedSwitchers; i++)
+	{
+		pSwitchState->m_aSwitchNumbers[i] = vEndTicks[i].second;
+		pSwitchState->m_aEndTicks[i] = vEndTicks[i].first;
+	}
+}
+
 bool CGameContext::SnapLaserObject(const CSnapContext &Context, int SnapID, const vec2 &To, const vec2 &From, int StartTick, int Owner, int LaserType, int Subtype, int SwitchNumber)
 {
 	if(Context.GetClientVersion() >= VERSION_DDNET_MULTI_LASER)
