@@ -14,7 +14,9 @@ CGameControllerInstagib::CGameControllerInstagib(class CGameContext *pGameServer
 
 	GameServer()->Console()->Chain("sv_spawn_weapons", ConchainSpawnWeapons, this);
 
-	GameServer()->Console()->Register("shuffle_teams", "", CFGFLAG_SERVER, ConShuffleTeams, this, "Shuffle the current teams");
+#define CONSOLE_COMMAND(name, params, flags, callback, userdata, help) GameServer()->Console()->Register(name, params, flags, callback, userdata, help);
+#include "instagib/rcon_commands.h"
+#undef CONSOLE_COMMAND
 }
 
 CGameControllerInstagib::~CGameControllerInstagib() = default;
