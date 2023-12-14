@@ -1,3 +1,4 @@
+#include <base/system.h>
 #include <engine/discord.h>
 
 // Hack for universal binary builds on macOS: Ignore arm64 until Discord
