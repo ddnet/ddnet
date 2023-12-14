@@ -941,7 +941,7 @@ void CGameContext::ConUnlockTeam(IConsole::IResult *pResult, void *pUserData)
 	pSelf->UnlockTeam(pResult->m_ClientID, Team);
 }
 
-void CGameContext::UnlockTeam(int ClientID, int Team)
+void CGameContext::UnlockTeam(int ClientID, int Team) const
 {
 	m_pController->Teams().SetTeamLock(Team, false);
 

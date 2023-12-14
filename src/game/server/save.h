@@ -140,7 +140,7 @@ public:
 	// MatchPlayers has to be called afterwards
 	int FromString(const char *pString);
 	// returns true if a team can load, otherwise writes a nice error Message in pMessage
-	bool MatchPlayers(const char (*paNames)[MAX_NAME_LENGTH], const int *pClientID, int NumPlayer, char *pMessage, int MessageLen);
+	bool MatchPlayers(const char (*paNames)[MAX_NAME_LENGTH], const int *pClientID, int NumPlayer, char *pMessage, int MessageLen) const;
 	int Save(CGameContext *pGameServer, int Team, bool Dry = false);
 	void Load(CGameContext *pGameServer, int Team, bool KeepCurrentWeakStrong);
 
@@ -150,7 +150,7 @@ public:
 	static bool HandleSaveError(int Result, int ClientID, CGameContext *pGameContext);
 
 private:
-	CCharacter *MatchCharacter(CGameContext *pGameServer, int ClientID, int SaveID, bool KeepCurrentCharacter);
+	CCharacter *MatchCharacter(CGameContext *pGameServer, int ClientID, int SaveID, bool KeepCurrentCharacter) const;
 
 	char m_aString[65536];
 

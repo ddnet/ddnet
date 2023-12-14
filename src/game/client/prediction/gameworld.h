@@ -89,8 +89,8 @@ public:
 
 	int m_LocalClientID;
 
-	bool IsLocalTeam(int OwnerID);
-	void OnModified();
+	bool IsLocalTeam(int OwnerID) const;
+	void OnModified() const;
 	void NetObjBegin(CTeamsCore Teams, int LocalClientID);
 	void NetCharAdd(int ObjID, CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended, int GameTeam, bool IsLocal);
 	void NetObjAdd(int ObjID, int ObjType, const void *pObjData, const CNetObj_EntityEx *pDataEx);

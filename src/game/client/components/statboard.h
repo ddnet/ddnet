@@ -28,7 +28,7 @@ public:
 	virtual void OnRender() override;
 	virtual void OnRelease() override;
 	virtual void OnMessage(int MsgType, void *pRawMsg) override;
-	bool IsActive();
+	bool IsActive() const;
 };
 
 #endif // GAME_CLIENT_COMPONENTS_STATBOARD_H

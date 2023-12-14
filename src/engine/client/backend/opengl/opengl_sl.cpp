@@ -142,12 +142,12 @@ void CGLSL::DeleteShader()
 	glDeleteShader(m_ShaderID);
 }
 
-bool CGLSL::IsLoaded()
+bool CGLSL::IsLoaded() const
 {
 	return m_IsLoaded;
 }
 
-TWGLuint CGLSL::GetShaderID()
+TWGLuint CGLSL::GetShaderID() const
 {
 	return m_ShaderID;
 }

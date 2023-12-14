@@ -152,7 +152,7 @@ void CUI::AddUIElement(CUIElement *pElement)
 	m_vpUIElements.push_back(pElement);
 }
 
-void CUI::ResetUIElement(CUIElement &UIElement)
+void CUI::ResetUIElement(CUIElement &UIElement) const
 {
 	for(CUIElement::SUIElementRect &Rect : UIElement.m_vUIRects)
 	{
@@ -533,7 +533,7 @@ EEditState CUI::DoPickerLogic(const void *pID, const CUIRect *pRect, float *pX, 
 	return Res;
 }
 
-void CUI::DoSmoothScrollLogic(float *pScrollOffset, float *pScrollOffsetChange, float ViewPortSize, float TotalSize, bool SmoothClamp, float ScrollSpeed)
+void CUI::DoSmoothScrollLogic(float *pScrollOffset, float *pScrollOffsetChange, float ViewPortSize, float TotalSize, bool SmoothClamp, float ScrollSpeed) const
 {
 	// reset scrolling if it's not necessary anymore
 	if(TotalSize < ViewPortSize)
@@ -666,7 +666,7 @@ vec2 CUI::CalcAlignedCursorPos(const CUIRect *pRect, vec2 TextSize, int Align, c
 	return Cursor;
 }
 
-void CUI::DoLabel(const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps)
+void CUI::DoLabel(const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps) const
 {
 	const int Flags = GetFlagsForLabelProperties(LabelProps, nullptr);
 	const SCursorAndBoundingBox TextBounds = CalcFontSizeCursorHeightAndBoundingBox(TextRender(), pText, Flags, Size, pRect->w, LabelProps);
@@ -678,7 +678,7 @@ void CUI::DoLabel(const CUIRect *pRect, const char *pText, float Size, int Align
 	TextRender()->TextEx(&Cursor, pText, -1);
 }
 
-void CUI::DoLabel(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps, int StrLen, const CTextCursor *pReadCursor)
+void CUI::DoLabel(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps, int StrLen, const CTextCursor *pReadCursor) const
 {
 	const int Flags = GetFlagsForLabelProperties(LabelProps, pReadCursor);
 	const SCursorAndBoundingBox TextBounds = CalcFontSizeCursorHeightAndBoundingBox(TextRender(), pText, Flags, Size, pRect->w, LabelProps);
@@ -705,7 +705,7 @@ void CUI::DoLabel(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, cons
 	RectEl.m_Cursor = Cursor;
 }
 
-void CUI::DoLabelStreamed(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps, int StrLen, const CTextCursor *pReadCursor)
+void CUI::DoLabelStreamed(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps, int StrLen, const CTextCursor *pReadCursor) const
 {
 	const int ReadCursorGlyphCount = pReadCursor == nullptr ? -1 : pReadCursor->m_GlyphCount;
 	bool NeedsRecreate = false;
@@ -1335,7 +1335,7 @@ void CUI::DoScrollbarOption(const void *pID, int *pOption, const CUIRect *pRect,
 	*pOption = Value;
 }
 
-void CUI::RenderProgressSpinner(vec2 Center, float OuterRadius, const SProgressSpinnerProperties &Props)
+void CUI::RenderProgressSpinner(vec2 Center, float OuterRadius, const SProgressSpinnerProperties &Props) const
 {
 	static float s_SpinnerOffset = 0.0f;
 	static float s_LastRender = Client()->LocalTime();

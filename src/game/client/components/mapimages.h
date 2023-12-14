@@ -70,7 +70,7 @@ public:
 	IGraphics::CTextureHandle GetOverlayCenter();
 
 	void SetTextureScale(int Scale);
-	int GetTextureScale();
+	int GetTextureScale() const;
 
 	void ChangeEntitiesPath(const char *pPath);
 

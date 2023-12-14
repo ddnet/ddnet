@@ -77,10 +77,10 @@ class CSound : public IEngineSound
 	int *m_pMixBuffer = nullptr;
 
 	int AllocID();
-	void RateConvert(CSample &Sample);
+	void RateConvert(CSample &Sample) const;
 
-	bool DecodeOpus(CSample &Sample, const void *pData, unsigned DataSize);
-	bool DecodeWV(CSample &Sample, const void *pData, unsigned DataSize);
+	bool DecodeOpus(CSample &Sample, const void *pData, unsigned DataSize) const;
+	bool DecodeWV(CSample &Sample, const void *pData, unsigned DataSize) const;
 
 	void UpdateVolume();
 

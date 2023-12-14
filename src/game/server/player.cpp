@@ -837,7 +837,7 @@ int CPlayer::IsPaused() const
 	return m_ForcePauseTime ? m_ForcePauseTime : -1 * m_Paused;
 }
 
-bool CPlayer::IsPlaying()
+bool CPlayer::IsPlaying() const
 {
 	return m_pCharacter && m_pCharacter->IsAlive();
 }

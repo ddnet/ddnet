@@ -507,7 +507,7 @@ public:
 	void SendSwitchTeam(int Team);
 	void SendInfo(bool Start);
 	void SendDummyInfo(bool Start) override;
-	void SendKill(int ClientID);
+	void SendKill(int ClientID) const;
 
 	// DDRace
 
@@ -521,7 +521,7 @@ public:
 
 	int IntersectCharacter(vec2 HookPos, vec2 NewPos, vec2 &NewPos2, int ownID);
 
-	int GetLastRaceTick() override;
+	int GetLastRaceTick() const override;
 
 	bool IsTeamPlay() { return m_Snap.m_pGameInfoObj && m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_TEAMS; }
 
@@ -543,11 +543,11 @@ public:
 
 	void DummyResetInput() override;
 	void Echo(const char *pString) override;
-	bool IsOtherTeam(int ClientID);
-	int SwitchStateTeam();
-	bool IsLocalCharSuper();
-	bool CanDisplayWarning() override;
-	bool IsDisplayingWarning() override;
+	bool IsOtherTeam(int ClientID) const;
+	int SwitchStateTeam() const;
+	bool IsLocalCharSuper() const;
+	bool CanDisplayWarning() const override;
+	bool IsDisplayingWarning() const override;
 	CNetObjHandler *GetNetObjHandler() override;
 
 	void LoadGameSkin(const char *pPath, bool AsDir = false);

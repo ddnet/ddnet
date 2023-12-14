@@ -1358,7 +1358,7 @@ void CCharacter::SetCoreWorld(CGameWorld *pGameWorld)
 	m_Core.SetCoreWorld(&pGameWorld->m_Core, pGameWorld->Collision(), pGameWorld->Teams());
 }
 
-bool CCharacter::Match(CCharacter *pChar)
+bool CCharacter::Match(CCharacter *pChar) const
 {
 	return distance(pChar->m_Core.m_Pos, m_Core.m_Pos) <= 32.f;
 }

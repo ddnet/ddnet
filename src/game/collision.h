@@ -62,7 +62,7 @@ public:
 	int GetIndex(vec2 PrevPos, vec2 Pos) const;
 	int GetFIndex(int x, int y) const;
 
-	int GetMoveRestrictions(CALLBACK_SWITCHACTIVE pfnSwitchActive, void *pUser, vec2 Pos, float Distance = 18.0f, int OverrideCenterTileIndex = -1);
+	int GetMoveRestrictions(CALLBACK_SWITCHACTIVE pfnSwitchActive, void *pUser, vec2 Pos, float Distance = 18.0f, int OverrideCenterTileIndex = -1) const;
 	int GetMoveRestrictions(vec2 Pos, float Distance = 18.0f)
 	{
 		return GetMoveRestrictions(nullptr, nullptr, Pos, Distance);

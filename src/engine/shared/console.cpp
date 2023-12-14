@@ -1034,7 +1034,7 @@ void CConsole::CResult::ResetVictim()
 	m_Victim = VICTIM_NONE;
 }
 
-bool CConsole::CResult::HasVictim()
+bool CConsole::CResult::HasVictim() const
 {
 	return m_Victim != VICTIM_NONE;
 }

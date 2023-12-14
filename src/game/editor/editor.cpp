@@ -508,7 +508,7 @@ std::vector<CQuad *> CEditor::GetSelectedQuads()
 	return vpQuads;
 }
 
-CSoundSource *CEditor::GetSelectedSource()
+CSoundSource *CEditor::GetSelectedSource() const
 {
 	std::shared_ptr<CLayerSounds> pSounds = std::static_pointer_cast<CLayerSounds>(GetSelectedLayerType(0, LAYERTYPE_SOUNDS));
 	if(!pSounds)

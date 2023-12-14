@@ -633,7 +633,7 @@ void CLineInput::Activate(EInputPriority Priority)
 	ms_ActiveInputPriority = Priority;
 }
 
-void CLineInput::Deactivate()
+void CLineInput::Deactivate() const
 {
 	if(!IsActive())
 		return;

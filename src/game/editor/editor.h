@@ -467,7 +467,7 @@ public:
 	std::shared_ptr<CLayer> GetSelectedLayerType(int Index, int Type) const;
 	std::shared_ptr<CLayer> GetSelectedLayer(int Index) const;
 	std::shared_ptr<CLayerGroup> GetSelectedGroup() const;
-	CSoundSource *GetSelectedSource();
+	CSoundSource *GetSelectedSource() const;
 	void SelectLayer(int LayerIndex, int GroupIndex = -1);
 	void AddSelectedLayer(int LayerIndex);
 	void SelectQuad(int Index);
