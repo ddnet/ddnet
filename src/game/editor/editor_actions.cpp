@@ -48,7 +48,7 @@ CEditorBrushDrawAction::CEditorBrushDrawAction(CEditor *pEditor, int Group) :
 
 			if(!pLayerTiles->m_TilesHistory.empty())
 			{
-				m_vTileChanges.emplace_back(std::make_pair(k, std::map(pLayerTiles->m_TilesHistory)));
+				m_vTileChanges.emplace_back(k, std::map(pLayerTiles->m_TilesHistory));
 				pLayerTiles->ClearHistory();
 			}
 		}
