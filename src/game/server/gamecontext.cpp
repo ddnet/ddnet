@@ -2463,7 +2463,7 @@ void CGameContext::OnSetTeamNetMessage(const CNetMsg_Cl_SetTeam *pMsg, int Clien
 		m_pController->DoTeamChange(pPlayer, pMsg->m_Team);
 		pPlayer->m_TeamChangeTick = Server()->Tick();
 	}
-	if(aTeamJoinError[0])
+	else if(aTeamJoinError[0])
 		SendBroadcast(aTeamJoinError, ClientID);
 }
 
