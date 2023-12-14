@@ -86,11 +86,14 @@ It kills with one shot and capturing the enemy flag scores your team 100 points.
 
 # Rcon commmands
 
++ `hammer` Gives a hammer to you
++ `gun` Gives a gun to you
++ `unhammer` Removes a hammer from you
++ `ungun` Removes a gun from you
++ `godmode` Removes damage
 + `shuffle_teams` Shuffle the current teams
 + `swap_teams` Swap the current teams
 + `swap_teams_random` Swap the current teams or not (random chance)
-+ `godmode ?v[id]` Removes damage
-
 
 # Chat commands
 

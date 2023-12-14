@@ -27,6 +27,19 @@ gen_configs() {
 	done < <(grep '^MACRO_CONFIG_INT' src/engine/shared/variables_insta.h)
 }
 
+gen_rcon_cmds() {
+	local cfg
+	local desc
+	local cmd
+	while read -r cfg
+	do
+		desc="$(echo "$cfg" | cut -d',' -f3- | cut -d'"' -f2-)"
+		desc="${desc::-2}"
+		cmd="$(echo "$cfg" | cut -d',' -f1 | cut -d'"' -f2)"
+		echo "+ \`$cmd\` $desc"
+	done < <(grep '^CONSOLE_COMMAND' src/game/server/gamemodes/instagib/rcon_commands.h)
+}
+
 insert_at() {
 	# insert_at [from_pattern] [to_pattern] [new content] [filename]
 	local from_pattern="$1"
@@ -35,6 +48,11 @@ insert_at() {
 	local filename="$4"
 	local from_ln
 	local to_ln
+	if ! grep -q "$from_pattern" "$filename"
+	then
+		echo "Error: pattern '$from_pattern' not found in '$filename'"
+		exit 1
+	fi
 	from_ln="$(grep -n "$from_pattern" "$filename" | cut -d':' -f1 | head -n1)"
 	from_ln="$((from_ln+1))"
 	to_ln="$(tail -n +"$from_ln" "$filename" | grep -n "$to_pattern" | cut -d':' -f1 | head -n1)"
@@ -60,6 +78,7 @@ insert_at() {
 }
 
 insert_at '^# Configs$' '^# ' "$(gen_configs)" README.md
+insert_at '^# Rcon commmands$' '^# ' "$(gen_rcon_cmds)" README.md
 
 [[ -f "$(tmp)" ]] && rm "$(tmp)"
 exit 0
