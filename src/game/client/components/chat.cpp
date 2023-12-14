@@ -30,11 +30,11 @@ CChat::CChat()
 		Line.m_QuadContainerIndex = -1;
 	}
 
-#define CHAT_COMMAND(name, params, flags, callback, userdata, help) RegisterCommand(name, params, flags, help);
+#define CHAT_COMMAND(name, params, flags, callback, userdata, help) m_vDefaultCommands.emplace_back(name, params, help);
 #include <game/ddracechat.h>
 #undef CHAT_COMMAND
-	std::sort(m_vCommands.begin(), m_vCommands.end());
 
+	std::sort(m_vDefaultCommands.begin(), m_vDefaultCommands.end());
 	m_Mode = MODE_NONE;
 
 	m_Input.SetClipboardLineCallback([this](const char *pStr) { SayChat(pStr); });
@@ -71,9 +71,20 @@ CChat::CChat()
 	});
 }
 
-void CChat::RegisterCommand(const char *pName, const char *pParams, int flags, const char *pHelp)
+void CChat::RegisterCommand(const char *pName, const char *pParams, const char *pHelpText)
 {
-	m_vCommands.emplace_back(pName, pParams);
+	// Don't allow duplicate commands.
+	for(const auto &Command : m_vCommands)
+		if(str_comp(Command.m_aName, pName) == 0)
+			return;
+
+	m_vCommands.emplace_back(pName, pParams, pHelpText);
+	m_CommandsNeedSorting = true;
+}
+
+void CChat::UnregisterCommand(const char *pName)
+{
+	m_vCommands.erase(std::remove_if(m_vCommands.begin(), m_vCommands.end(), [pName](const CCommand &Command) { return str_comp(Command.m_aName, pName) == 0; }), m_vCommands.end());
 }
 
 void CChat::RebuildChat()
@@ -121,6 +132,8 @@ void CChat::Reset()
 	m_CurrentLine = 0;
 	m_IsInputCensored = false;
 	m_EditingNewLine = true;
+	m_ServerSupportsCommandInfo = false;
+	m_CommandsNeedSorting = false;
 	mem_zero(m_aCurrentInputText, sizeof(m_aCurrentInputText));
 	DisableMode();
 
@@ -217,6 +230,11 @@ void CChat::OnInit()
 	Console()->Chain("cl_chat_width", ConchainChatWidth, this);
 }
 
+void CChat::OnMapLoad()
+{
+	m_vCommands = m_vDefaultCommands;
+}
+
 bool CChat::OnInput(const IInput::CEvent &Event)
 {
 	if(m_Mode == MODE_NONE)
@@ -234,6 +252,12 @@ bool CChat::OnInput(const IInput::CEvent &Event)
 	}
 	else if(Event.m_Flags & IInput::FLAG_PRESS && (Event.m_Key == KEY_RETURN || Event.m_Key == KEY_KP_ENTER))
 	{
+		if(m_CommandsNeedSorting)
+		{
+			std::sort(m_vCommands.begin(), m_vCommands.end());
+			m_CommandsNeedSorting = false;
+		}
+
 		if(m_Input.GetString()[0])
 		{
 			bool AddEntry = false;
@@ -305,7 +329,7 @@ bool CChat::OnInput(const IInput::CEvent &Event)
 				});
 		}
 
-		if(m_aCompletionBuffer[0] == '/')
+		if(m_aCompletionBuffer[0] == '/' && !m_vCommands.empty())
 		{
 			CCommand *pCompletionCommand = 0;
 
@@ -338,7 +362,7 @@ bool CChat::OnInput(const IInput::CEvent &Event)
 
 				auto &Command = m_vCommands[Index];
 
-				if(str_startswith(Command.m_pName, pCommandStart))
+				if(str_startswith(Command.m_aName, pCommandStart))
 				{
 					pCompletionCommand = &Command;
 					m_CompletionChosen = Index + SearchType * NumCommands;
@@ -355,10 +379,10 @@ bool CChat::OnInput(const IInput::CEvent &Event)
 
 				// add the command
 				str_append(aBuf, "/");
-				str_append(aBuf, pCompletionCommand->m_pName);
+				str_append(aBuf, pCompletionCommand->m_aName);
 
 				// add separator
-				const char *pSeparator = pCompletionCommand->m_pParams[0] == '\0' ? "" : " ";
+				const char *pSeparator = pCompletionCommand->m_aParams[0] == '\0' ? "" : " ";
 				str_append(aBuf, pSeparator);
 				if(*pSeparator)
 					str_append(aBuf, pSeparator);
@@ -366,7 +390,7 @@ bool CChat::OnInput(const IInput::CEvent &Event)
 				// add part after the name
 				str_append(aBuf, m_Input.GetString() + m_PlaceholderOffset + m_PlaceholderLength);
 
-				m_PlaceholderLength = str_length(pSeparator) + str_length(pCompletionCommand->m_pName) + 1;
+				m_PlaceholderLength = str_length(pSeparator) + str_length(pCompletionCommand->m_aName) + 1;
 				m_Input.Set(aBuf);
 				m_Input.SetCursorOffset(m_PlaceholderOffset + m_PlaceholderLength);
 			}
@@ -537,6 +561,21 @@ void CChat::OnMessage(int MsgType, void *pRawMsg)
 	{
 		CNetMsg_Sv_Chat *pMsg = (CNetMsg_Sv_Chat *)pRawMsg;
 		AddLine(pMsg->m_ClientID, pMsg->m_Team, pMsg->m_pMessage);
+	}
+	else if(MsgType == NETMSGTYPE_SV_COMMANDINFO)
+	{
+		CNetMsg_Sv_CommandInfo *pMsg = (CNetMsg_Sv_CommandInfo *)pRawMsg;
+		if(!m_ServerSupportsCommandInfo)
+		{
+			m_vCommands.clear();
+			m_ServerSupportsCommandInfo = true;
+		}
+		RegisterCommand(pMsg->m_pName, pMsg->m_pArgsFormat, pMsg->m_pHelpText);
+	}
+	else if(MsgType == NETMSGTYPE_SV_COMMANDINFOREMOVE)
+	{
+		CNetMsg_Sv_CommandInfoRemove *pMsg = (CNetMsg_Sv_CommandInfoRemove *)pRawMsg;
+		UnregisterCommand(pMsg->m_pName);
 	}
 }
 

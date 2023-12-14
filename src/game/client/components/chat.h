@@ -96,21 +96,26 @@ class CChat : public CComponent
 
 	struct CCommand
 	{
-		const char *m_pName;
-		const char *m_pParams;
+		char m_aName[IConsole::TEMPCMD_NAME_LENGTH];
+		char m_aParams[IConsole::TEMPCMD_PARAMS_LENGTH];
+		char m_aHelpText[IConsole::TEMPCMD_HELP_LENGTH];
 
 		CCommand() = default;
-		CCommand(const char *pName, const char *pParams) :
-			m_pName(pName), m_pParams(pParams)
+		CCommand(const char *pName, const char *pParams, const char *pHelpText)
 		{
+			str_copy(m_aName, pName);
+			str_copy(m_aParams, pParams);
+			str_copy(m_aHelpText, pHelpText);
 		}
 
-		bool operator<(const CCommand &Other) const { return str_comp(m_pName, Other.m_pName) < 0; }
-		bool operator<=(const CCommand &Other) const { return str_comp(m_pName, Other.m_pName) <= 0; }
-		bool operator==(const CCommand &Other) const { return str_comp(m_pName, Other.m_pName) == 0; }
+		bool operator<(const CCommand &Other) const { return str_comp(m_aName, Other.m_aName) < 0; }
+		bool operator<=(const CCommand &Other) const { return str_comp(m_aName, Other.m_aName) <= 0; }
+		bool operator==(const CCommand &Other) const { return str_comp(m_aName, Other.m_aName) == 0; }
 	};
 
 	std::vector<CCommand> m_vCommands;
+	std::vector<CCommand> m_vDefaultCommands;
+	bool m_CommandsNeedSorting;
 
 	struct CHistoryEntry
 	{
@@ -125,6 +130,8 @@ class CChat : public CComponent
 	bool m_IsInputCensored;
 	char m_aCurrentInputText[MAX_LINE_LENGTH];
 	bool m_EditingNewLine;
+
+	bool m_ServerSupportsCommandInfo;
 
 	static void ConSay(IConsole::IResult *pResult, void *pUserData);
 	static void ConSayTeam(IConsole::IResult *pResult, void *pUserData);
@@ -151,7 +158,8 @@ public:
 	void DisableMode();
 	void Say(int Team, const char *pLine);
 	void SayChat(const char *pLine);
-	void RegisterCommand(const char *pName, const char *pParams, int flags, const char *pHelp);
+	void RegisterCommand(const char *pName, const char *pParams, const char *pHelpText);
+	void UnregisterCommand(const char *pName);
 	void Echo(const char *pString);
 
 	void OnWindowResize() override;
@@ -165,6 +173,7 @@ public:
 	void OnMessage(int MsgType, void *pRawMsg) override;
 	bool OnInput(const IInput::CEvent &Event) override;
 	void OnInit() override;
+	void OnMapLoad() override;
 
 	void RebuildChat();
 
