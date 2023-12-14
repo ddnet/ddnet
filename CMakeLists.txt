@@ -2571,6 +2571,7 @@ if(SERVER)
     gamemodes/instagib/character.h
     gamemodes/instagib/player.cpp
     gamemodes/instagib/player.h
+    gamemodes/instagib/rcon_commands.cpp
     gamemodes/mod.cpp
     gamemodes/mod.h
     gamemodes/solofng.cpp

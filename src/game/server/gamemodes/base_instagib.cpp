@@ -13,6 +13,8 @@ CGameControllerInstagib::CGameControllerInstagib(class CGameContext *pGameServer
 	m_SpawnWeapons = SPAWN_WEAPON_GRENADE;
 
 	GameServer()->Console()->Chain("sv_spawn_weapons", ConchainSpawnWeapons, this);
+
+	GameServer()->Console()->Register("shuffle_teams", "", CFGFLAG_SERVER, ConShuffleTeams, this, "Shuffle the current teams");
 }
 
 CGameControllerInstagib::~CGameControllerInstagib() = default;

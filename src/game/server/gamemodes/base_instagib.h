@@ -20,6 +20,8 @@ public:
 	int OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon) override;
 	void Tick() override;
 
+	static void ConShuffleTeams(IConsole::IResult *pResult, void *pUserData);
+
 	void AddSpree(CPlayer *pPlayer);
 	void EndSpree(CPlayer *pPlayer, CPlayer *pKiller);
 	enum ESpawnWeapons
