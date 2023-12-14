@@ -90,7 +90,6 @@ bool HttpInit(IStorage *pStorage)
 
 	curl_share_setopt(gs_pShare, CURLSHOPT_SHARE, CURL_LOCK_DATA_DNS);
 	curl_share_setopt(gs_pShare, CURLSHOPT_SHARE, CURL_LOCK_DATA_SSL_SESSION);
-	curl_share_setopt(gs_pShare, CURLSHOPT_SHARE, CURL_LOCK_DATA_CONNECT);
 	curl_share_setopt(gs_pShare, CURLSHOPT_LOCKFUNC, CurlLock);
 	curl_share_setopt(gs_pShare, CURLSHOPT_UNLOCKFUNC, CurlUnlock);
 
