@@ -49,34 +49,3 @@ void CGameContext::ConchainInstaSettingsUpdate(IConsole::IResult *pResult, void 
 	pSelf->UpdateVoteCheckboxes();
 	pSelf->RefreshVotes();
 }
-
-void CGameContext::ConSwapTeams(IConsole::IResult *pResult, void *pUserData)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->SwapTeams();
-}
-
-void CGameContext::ConSwapTeamsRandom(IConsole::IResult *pResult, void *pUserData)
-{
-	CGameContext *pSelf = (CGameContext *)pUserData;
-	if(rand() % 2)
-		pSelf->SwapTeams();
-	else
-		dbg_msg("swap", "did not swap due to random chance");
-}
-
-void CGameContext::SwapTeams()
-{
-	if(!m_pController->IsTeamplay())
-		return;
-
-	SendGameMsg(protocol7::GAMEMSG_TEAM_SWAP, -1);
-
-	for(CPlayer *pPlayer : m_apPlayers)
-	{
-		if(pPlayer && pPlayer->GetTeam() != TEAM_SPECTATORS)
-			m_pController->DoTeamChange(pPlayer, pPlayer->GetTeam() ^ 1, false);
-	}
-
-	m_pController->SwapTeamscore();
-}

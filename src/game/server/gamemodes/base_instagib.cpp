@@ -21,6 +21,35 @@ CGameControllerInstagib::CGameControllerInstagib(class CGameContext *pGameServer
 
 CGameControllerInstagib::~CGameControllerInstagib() = default;
 
+void CGameControllerInstagib::ModifyWeapons(IConsole::IResult *pResult, void *pUserData,
+	int Weapon, bool Remove)
+{
+	CGameControllerInstagib *pSelf = (CGameControllerInstagib *)pUserData;
+	CCharacter *pChr = GameServer()->GetPlayerChar(pResult->m_ClientID);
+	if(!pChr)
+		return;
+
+	if(clamp(Weapon, -1, NUM_WEAPONS - 1) != Weapon)
+	{
+		pSelf->GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "info",
+			"invalid weapon id");
+		return;
+	}
+
+	if(Weapon == -1)
+	{
+		pChr->GiveWeapon(WEAPON_SHOTGUN, Remove);
+		pChr->GiveWeapon(WEAPON_GRENADE, Remove);
+		pChr->GiveWeapon(WEAPON_LASER, Remove);
+	}
+	else
+	{
+		pChr->GiveWeapon(Weapon, Remove);
+	}
+
+	pChr->m_DDRaceState = DDRACE_CHEAT;
+}
+
 void CGameControllerInstagib::ConchainSpawnWeapons(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	pfnCallback(pResult, pCallbackUserData);

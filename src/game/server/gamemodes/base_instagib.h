@@ -20,7 +20,17 @@ public:
 	int OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon) override;
 	void Tick() override;
 
+	static void ConHammer(IConsole::IResult *pResult, void *pUserData);
+	static void ConGun(IConsole::IResult *pResult, void *pUserData);
+	static void ConUnHammer(IConsole::IResult *pResult, void *pUserData);
+	static void ConUnGun(IConsole::IResult *pResult, void *pUserData);
+	static void ConGodmode(IConsole::IResult *pResult, void *pUserData);
 	static void ConShuffleTeams(IConsole::IResult *pResult, void *pUserData);
+	static void ConSwapTeams(IConsole::IResult *pResult, void *pUserData);
+	static void ConSwapTeamsRandom(IConsole::IResult *pResult, void *pUserData);
+
+	void SwapTeams();
+	void ModifyWeapons(IConsole::IResult *pResult, void *pUserData, int Weapon, bool Remove);
 
 	void AddSpree(CPlayer *pPlayer);
 	void EndSpree(CPlayer *pPlayer, CPlayer *pKiller);

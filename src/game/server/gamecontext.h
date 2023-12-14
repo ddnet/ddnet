@@ -135,8 +135,6 @@ class CGameContext : public IGameServer
 	static void ConDrySave(IConsole::IResult *pResult, void *pUserData);
 	static void ConDumpAntibot(IConsole::IResult *pResult, void *pUserData);
 	static void ConAntibot(IConsole::IResult *pResult, void *pUserData);
-	static void ConSwapTeams(IConsole::IResult *pResult, void *pUserData); // gctf
-	static void ConSwapTeamsRandom(IConsole::IResult *pResult, void *pUserData); // gctf
 	static void ConchainGameinfoUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData); // gctf
 	static void ConchainInstaSettingsUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData); // gctf
 	static void ConchainResetInstasettingTees(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData); // gctf
@@ -285,7 +283,6 @@ public:
 	void ComCallShuffleVote(int ClientID);
 	void ComCallSwapTeamsVote(int ClientID);
 	void ComCallSwapTeamsRandomVote(int ClientID);
-	void SwapTeams();
 	void UpdateVoteCheckboxes();
 	void RefreshVotes();
 	void AlertOnSpecialInstagibConfigs(int ClientID = -1);
@@ -418,11 +415,6 @@ private:
 	static void ConShotgun(IConsole::IResult *pResult, void *pUserData);
 	static void ConGrenade(IConsole::IResult *pResult, void *pUserData);
 	static void ConLaser(IConsole::IResult *pResult, void *pUserData);
-	static void ConHammer(IConsole::IResult *pResult, void *pUserData); // gctf
-	static void ConGun(IConsole::IResult *pResult, void *pUserData); // gctf
-	static void ConUnHammer(IConsole::IResult *pResult, void *pUserData); // gctf
-	static void ConUnGun(IConsole::IResult *pResult, void *pUserData); // gctf
-	static void ConGodmode(IConsole::IResult *pResult, void *pUserData); // gctf
 	static void ConJetpack(IConsole::IResult *pResult, void *pUserData);
 	static void ConWeapons(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnShotgun(IConsole::IResult *pResult, void *pUserData);
