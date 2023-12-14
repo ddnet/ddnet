@@ -1197,7 +1197,7 @@ CUI::EPopupMenuFunctionResult CLayerTiles::RenderCommonProperties(SCommonPropSta
 	{
 		if(NewVal > 1000 && !pEditor->m_LargeLayerWasWarned)
 		{
-			pEditor->m_PopupEventType = pEditor->POPEVENT_LARGELAYER;
+			pEditor->m_PopupEventType = CEditor::POPEVENT_LARGELAYER;
 			pEditor->m_PopupEventActivated = true;
 			pEditor->m_LargeLayerWasWarned = true;
 		}
@@ -1207,7 +1207,7 @@ CUI::EPopupMenuFunctionResult CLayerTiles::RenderCommonProperties(SCommonPropSta
 	{
 		if(NewVal > 1000 && !pEditor->m_LargeLayerWasWarned)
 		{
-			pEditor->m_PopupEventType = pEditor->POPEVENT_LARGELAYER;
+			pEditor->m_PopupEventType = CEditor::POPEVENT_LARGELAYER;
 			pEditor->m_PopupEventActivated = true;
 			pEditor->m_LargeLayerWasWarned = true;
 		}
