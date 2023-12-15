@@ -584,6 +584,14 @@ CConsole::CCommand *CConsole::FindCommand(const char *pName, int FlagMask)
 	return 0x0;
 }
 
+CConsole::CCommand *CConsole::FindCommand(FCommandCallback pfnCallback)
+{
+	for(CCommand *pCommand = m_pFirstCommand; pCommand; pCommand = pCommand->m_pNext)
+		if(pCommand->m_pfnCallback == pfnCallback)
+			return pCommand;
+	return 0x0;
+}
+
 void CConsole::ExecuteLine(const char *pStr, int ClientID, bool InterpretSemicolons)
 {
 	CConsole::ExecuteLineStroked(1, pStr, ClientID, InterpretSemicolons); // press it
@@ -876,6 +884,28 @@ void CConsole::Register(const char *pName, const char *pParams,
 
 	if(pCommand->m_Flags & CFGFLAG_CHAT)
 		pCommand->SetAccessLevel(ACCESS_LEVEL_USER);
+}
+
+void CConsole::RegisterAlias(const char *pName, FCommandCallback pfnFunc)
+{
+	CCommand *pCommand = FindCommand(pfnFunc);
+	dbg_assert(pCommand, "Registered alias for non existing command. Make sure the alias is registered after the main command.");
+
+	CCommand *pAlias = new CCommand();
+	pAlias->m_pfnCallback = pfnFunc;
+	pAlias->m_pUserData = pCommand->m_pUserData;
+
+	pAlias->m_pName = pName;
+	pAlias->m_pHelp = pCommand->m_pHelp;
+	pAlias->m_pParams = pCommand->m_pParams;
+
+	pAlias->m_Flags = pCommand->m_Flags;
+	pAlias->m_Temp = false;
+
+	AddCommandSorted(pAlias);
+
+	if(pAlias->m_Flags & CFGFLAG_CHAT)
+		pAlias->SetAccessLevel(ACCESS_LEVEL_USER);
 }
 
 void CConsole::RegisterTemp(const char *pName, const char *pParams, int Flags, const char *pHelp)

@@ -186,6 +186,7 @@ class CConsole : public IConsole
 
 	void AddCommandSorted(CCommand *pCommand);
 	CCommand *FindCommand(const char *pName, int FlagMask);
+	CCommand *FindCommand(FCommandCallback pfnCallback);
 
 	bool m_Cheated;
 
@@ -200,6 +201,7 @@ public:
 
 	void ParseArguments(int NumArgs, const char **ppArguments) override;
 	void Register(const char *pName, const char *pParams, int Flags, FCommandCallback pfnFunc, void *pUser, const char *pHelp) override;
+	void RegisterAlias(const char *pName, FCommandCallback pfnFunc) override;
 	void RegisterTemp(const char *pName, const char *pParams, int Flags, const char *pHelp) override;
 	void DeregisterTemp(const char *pName) override;
 	void DeregisterTempAll() override;

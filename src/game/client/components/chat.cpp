@@ -31,6 +31,7 @@ CChat::CChat()
 	}
 
 #define CHAT_COMMAND(name, params, flags, callback, userdata, help) m_vDefaultCommands.emplace_back(name, params, help);
+#undef COMMAND_ALIAS // aliases will not be active until the server sends them
 #include <game/ddracechat.h>
 #undef CHAT_COMMAND
 
