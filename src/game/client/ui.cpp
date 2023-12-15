@@ -766,6 +766,7 @@ bool CUI::DoEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize
 	const bool Inside = MouseHovered(pRect);
 	const bool Active = m_pLastActiveItem == pLineInput;
 	const bool Changed = pLineInput->WasChanged();
+	const bool CursorChanged = pLineInput->WasCursorChanged();
 
 	const float VSpacing = 2.0f;
 	CUIRect Textbox;
@@ -842,11 +843,11 @@ bool CUI::DoEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize
 	pRect->Draw(ms_LightButtonColorFunction.GetColor(Active, HotItem() == pLineInput), Corners, 3.0f);
 	ClipEnable(pRect);
 	Textbox.x -= ScrollOffset;
-	const STextBoundingBox BoundingBox = pLineInput->Render(&Textbox, FontSize, TEXTALIGN_ML, pLineInput->WasCursorChanged(), -1.0f, 0.0f);
+	const STextBoundingBox BoundingBox = pLineInput->Render(&Textbox, FontSize, TEXTALIGN_ML, Changed || CursorChanged, -1.0f, 0.0f);
 	ClipDisable();
 
 	// Scroll left or right if necessary
-	if(Active && !JustGotActive && (Changed || Input()->HasComposition()))
+	if(Active && !JustGotActive && (Changed || CursorChanged || Input()->HasComposition()))
 	{
 		const float CaretPositionX = pLineInput->GetCaretPosition().x - Textbox.x - ScrollOffset - ScrollOffsetChange;
 		if(CaretPositionX > Textbox.w)
