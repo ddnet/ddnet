@@ -2982,7 +2982,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		static CButtonContainer s_AuthedColor;
 		static CButtonContainer s_SameClanColor;
 		DoLine_ColorPicker(&s_AuthedColor, 25.0f, 13.0f, 5.0f, &Button, Localize("Authed name color in scoreboard"), &g_Config.m_ClAuthedPlayerColor, GreenDefault, false);
-	        DoLine_ColorPicker(&s_SameClanColor, 25.0f, 13.0f, 5.0f, &Button, Localize("Same clan color in scoreboard"), &g_Config.m_ClSameClanColor, GreenDefault, false);
+		DoLine_ColorPicker(&s_SameClanColor, 25.0f, 13.0f, 5.0f, &Button, Localize("Same clan color in scoreboard"), &g_Config.m_ClSameClanColor, GreenDefault, false);
 	}
 	else if(s_CurTab == APPEARANCE_TAB_HOOK_COLLISION)
 	{
