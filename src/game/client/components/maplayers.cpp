@@ -440,7 +440,7 @@ void CMapLayers::OnMapLoad()
 					continue;
 			}
 
-			if(pLayer->m_Type == LAYERTYPE_TILES && Graphics()->IsTileBufferingEnabled())
+			if(pLayer->m_Type == LAYERTYPE_TILES)
 			{
 				bool DoTextureCoords = false;
 				CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
