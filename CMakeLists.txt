@@ -1888,6 +1888,7 @@ set_src(ENGINE_INTERFACE GLOB src/engine
   keys.h
   map.h
   message.h
+  notifications.h
   rust.h
   server.h
   serverbrowser.h
