@@ -164,6 +164,13 @@ public:
 		bool m_DebugDummy;
 
 		const IConsole::CCommandInfo *m_pRconCmdToSend;
+		enum
+		{
+			MAPLIST_UNINITIALIZED = -1,
+			MAPLIST_DISABLED = -2,
+			MAPLIST_DONE = -3,
+		};
+		int m_MaplistEntryToSend;
 
 		bool m_HasPersistentData;
 		void *m_pPersistentData;
@@ -344,6 +351,20 @@ public:
 	int NumRconCommands(int ClientId);
 	void UpdateClientRconCommands(int ClientId);
 
+	class CMaplistEntry
+	{
+	public:
+		char m_aName[128];
+
+		CMaplistEntry() = default;
+		CMaplistEntry(const char *pName);
+		bool operator<(const CMaplistEntry &Other) const;
+	};
+	std::vector<CMaplistEntry> m_vMaplistEntries;
+	void SendMaplistGroupStart(int ClientId);
+	void SendMaplistGroupEnd(int ClientId);
+	void UpdateClientMaplistEntries(int ClientId);
+
 	bool CheckReservedSlotAuth(int ClientId, const char *pPassword);
 	void ProcessClientPacket(CNetChunk *pPacket);
 
@@ -420,6 +441,7 @@ public:
 	static void ConDumpSqlServers(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConReloadAnnouncement(IConsole::IResult *pResult, void *pUserData);
+	static void ConReloadMaplist(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConchainSpecialInfoupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainMaxclientsperipUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
@@ -455,6 +477,9 @@ public:
 	int m_aPrevStates[MAX_CLIENTS];
 	const char *GetAnnouncementLine() override;
 	void ReadAnnouncementsFile();
+
+	static int MaplistEntryCallback(const char *pFilename, int IsDir, int DirType, void *pUser);
+	void InitMaplist();
 
 	int *GetIdMap(int ClientId) override;
 

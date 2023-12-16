@@ -124,6 +124,9 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	char m_aPassword[sizeof(g_Config.m_Password)] = "";
 	bool m_SendPassword = false;
 
+	int m_ExpectedMaplistEntries = -1;
+	std::vector<std::string> m_vMaplistEntries;
+
 	// version-checking
 	char m_aVersionStr[10] = "0";
 
@@ -299,6 +302,9 @@ public:
 	void Rcon(const char *pCmd) override;
 	bool ReceivingRconCommands() const override { return m_ExpectedRconCommands > 0; }
 	float GotRconCommandsPercentage() const override;
+	bool ReceivingMaplist() const override { return m_ExpectedMaplistEntries > 0; }
+	float GotMaplistPercentage() const override;
+	const std::vector<std::string> &MaplistEntries() const override { return m_vMaplistEntries; }
 
 	bool ConnectionProblems() const override;
 
