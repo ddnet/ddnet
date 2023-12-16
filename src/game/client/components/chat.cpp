@@ -1217,8 +1217,9 @@ void CChat::OnRender()
 
 		m_Input.Activate(EInputPriority::CHAT); // Ensure that the input is active
 		const CUIRect InputCursorRect = {Cursor.m_X, Cursor.m_Y - ScrollOffset, 0.0f, 0.0f};
-		// Arithmetic or to ensure that both functions are called so both flags are purged
-		const bool Changed = m_Input.WasChanged() | m_Input.WasCursorChanged();
+		const bool WasChanged = m_Input.WasChanged();
+		const bool WasCursorChanged = m_Input.WasCursorChanged();
+		const bool Changed = WasChanged || WasCursorChanged;
 		const STextBoundingBox BoundingBox = m_Input.Render(&InputCursorRect, Cursor.m_FontSize, TEXTALIGN_TL, Changed, MessageMaxWidth, 0.0f);
 
 		Graphics()->ClipDisable();
