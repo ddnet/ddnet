@@ -10,7 +10,7 @@ layout(push_constant) uniform SVertexColorBO {
 } gColorBO;
 
 #ifdef TW_TILE_TEXTURED
-layout (location = 0) noperspective in vec3 TexCoord;
+layout (location = 0) noperspective centroid in vec3 TexCoord;
 #endif
 
 layout (location = 0) out vec4 FragClr;
