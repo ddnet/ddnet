@@ -437,10 +437,12 @@ private:
 	static void ConMap(IConsole::IResult *pResult, void *pUserData);
 	static void ConTeamRank(IConsole::IResult *pResult, void *pUserData);
 	static void ConRank(IConsole::IResult *pResult, void *pUserData);
-	static void ConJoinTeam(IConsole::IResult *pResult, void *pUserData);
-	static void ConLockTeam(IConsole::IResult *pResult, void *pUserData);
-	static void ConUnlockTeam(IConsole::IResult *pResult, void *pUserData);
-	static void ConInviteTeam(IConsole::IResult *pResult, void *pUserData);
+	static void ConTeam(IConsole::IResult *pResult, void *pUserData);
+	static void ConLock(IConsole::IResult *pResult, void *pUserData);
+	static void ConUnlock(IConsole::IResult *pResult, void *pUserData);
+	static void ConInvite(IConsole::IResult *pResult, void *pUserData);
+	static void ConJoin(IConsole::IResult *pResult, void *pUserData);
+	static void ConAccept(IConsole::IResult *pResult, void *pUserData);
 	static void ConMe(IConsole::IResult *pResult, void *pUserData);
 	static void ConWhisper(IConsole::IResult *pResult, void *pUserData);
 	static void ConConverse(IConsole::IResult *pResult, void *pUserData);
@@ -506,6 +508,7 @@ private:
 	void Converse(int ClientID, char *pStr);
 	bool IsVersionBanned(int Version);
 	void UnlockTeam(int ClientID, int Team) const;
+	void AttemptJoinTeam(int ClientID, int Team);
 
 	enum
 	{
