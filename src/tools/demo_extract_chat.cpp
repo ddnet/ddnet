@@ -1,7 +1,13 @@
 #include <base/logger.h>
 #include <base/system.h>
+
 #include <engine/client.h>
-#include <game/client/gameclient.h>
+#include <engine/shared/demo.h>
+#include <engine/shared/network.h>
+#include <engine/shared/snapshot.h>
+#include <engine/storage.h>
+
+#include <game/gamecore.h>
 
 static const char *TOOL_NAME = "demo_extract_chat";
 
@@ -190,14 +196,14 @@ public:
 	}
 };
 
-int Process(const char *pDemoFilePath, IStorage *pStorage)
+static int ExtractDemoChat(const char *pDemoFilePath, IStorage *pStorage)
 {
 	CSnapshotDelta DemoSnapshotDelta;
 	CDemoPlayer DemoPlayer(&DemoSnapshotDelta, false);
 
 	if(DemoPlayer.Load(pStorage, nullptr, pDemoFilePath, IStorage::TYPE_ALL_OR_ABSOLUTE) == -1)
 	{
-		dbg_msg(TOOL_NAME, "Demo file '%s' failed to load: %s", pDemoFilePath, DemoPlayer.ErrorMessage());
+		log_error(TOOL_NAME, "Demo file '%s' failed to load: %s", pDemoFilePath, DemoPlayer.ErrorMessage());
 		return -1;
 	}
 
@@ -225,21 +231,23 @@ int Process(const char *pDemoFilePath, IStorage *pStorage)
 
 int main(int argc, const char *argv[])
 {
+	// Create storage before setting logger to avoid log messages from storage creation
 	IStorage *pStorage = CreateLocalStorage();
-	if(!pStorage)
-	{
-		dbg_msg(TOOL_NAME, "Error loading storage");
-		return -1;
-	}
 
 	CCmdlineFix CmdlineFix(&argc, &argv);
 	log_set_global_logger_default();
 
-	if(argc != 2)
+	if(!pStorage)
 	{
-		dbg_msg(TOOL_NAME, "Usage: %s <demo_filename>", TOOL_NAME);
+		log_error(TOOL_NAME, "Error creating local storage");
 		return -1;
 	}
 
-	return Process(argv[1], pStorage);
+	if(argc != 2)
+	{
+		log_error(TOOL_NAME, "Usage: %s <demo_filename>", TOOL_NAME);
+		return -1;
+	}
+
+	return ExtractDemoChat(argv[1], pStorage);
 }
