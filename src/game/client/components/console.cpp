@@ -313,7 +313,11 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 		}
 		else if(Event.m_Key == KEY_UP)
 		{
-			if(!m_Searching)
+			if(m_Searching)
+			{
+				SelectNextSearchMatch(-1);
+			}
+			else if(m_Type == CONSOLETYPE_LOCAL || m_pGameConsole->Client()->RconAuthed())
 			{
 				if(m_pHistoryEntry)
 				{
@@ -328,15 +332,15 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 				if(m_pHistoryEntry)
 					m_Input.Set(m_pHistoryEntry);
 			}
-			else
-			{
-				SelectNextSearchMatch(-1);
-			}
 			Handled = true;
 		}
 		else if(Event.m_Key == KEY_DOWN)
 		{
-			if(!m_Searching)
+			if(m_Searching)
+			{
+				SelectNextSearchMatch(1);
+			}
+			else if(m_Type == CONSOLETYPE_LOCAL || m_pGameConsole->Client()->RconAuthed())
 			{
 				if(m_pHistoryEntry)
 					m_pHistoryEntry = m_History.Next(m_pHistoryEntry);
@@ -345,10 +349,6 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 					m_Input.Set(m_pHistoryEntry);
 				else
 					m_Input.Clear();
-			}
-			else
-			{
-				SelectNextSearchMatch(1);
 			}
 			Handled = true;
 		}
