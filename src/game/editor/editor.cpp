@@ -6918,7 +6918,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 											s_vAccurateDragValuesY[k] -= DeltaY;
 											pEnvelope->m_vPoints[SelectedIndex].m_aValues[SelectedChannel] = std::round(s_vAccurateDragValuesY[k]);
 
-											if(pEnvelope->GetChannels() == 4)
+											if(pEnvelope->GetChannels() == 1 || pEnvelope->GetChannels() == 4)
 											{
 												pEnvelope->m_vPoints[i].m_aValues[c] = clamp(pEnvelope->m_vPoints[i].m_aValues[c], 0, 1024);
 												s_vAccurateDragValuesY[k] = clamp<float>(s_vAccurateDragValuesY[k], 0, 1024);
@@ -7383,7 +7383,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 					else
 						pEnvelope->m_vPoints[SelectedIndex].m_aValues[SelectedChannel] = std::round(s_vInitialPositionsY[k] * s_ScaleFactorY);
 
-					if(pEnvelope->GetChannels() == 4)
+					if(pEnvelope->GetChannels() == 1 || pEnvelope->GetChannels() == 4)
 						pEnvelope->m_vPoints[SelectedIndex].m_aValues[SelectedChannel] = clamp(pEnvelope->m_vPoints[SelectedIndex].m_aValues[SelectedChannel], 0, 1024);
 				}
 			}
