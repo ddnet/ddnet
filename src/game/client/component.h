@@ -128,6 +128,11 @@ protected:
 	 */
 	float LocalTime() const;
 
+	/**
+	 * Get the http interface
+	 */
+	class IHttp *Http() const;
+
 public:
 	/**
 	 * The component virtual destructor.

@@ -17,6 +17,7 @@
 #include <engine/serverbrowser.h>
 #include <engine/shared/config.h>
 #include <engine/shared/http.h>
+#include <engine/shared/jobs.h>
 #include <engine/shared/linereader.h>
 #include <engine/textrender.h>
 
@@ -515,34 +516,35 @@ protected:
 		char m_aPath[IO_MAX_PATH_LENGTH];
 		int m_StorageType;
 		bool m_Success = false;
-		CImageInfo m_ImageInfo;
 		SHA256_DIGEST m_Sha256;
 
 		CAbstractCommunityIconJob(CMenus *pMenus, const char *pCommunityId, int StorageType);
-		virtual ~CAbstractCommunityIconJob();
+		virtual ~CAbstractCommunityIconJob() {};
 
 	public:
 		const char *CommunityId() const { return m_aCommunityId; }
 		bool Success() const { return m_Success; }
-		CImageInfo &&ImageInfo() { return std::move(m_ImageInfo); }
 		SHA256_DIGEST &&Sha256() { return std::move(m_Sha256); }
 	};
+
 	class CCommunityIconLoadJob : public IJob, public CAbstractCommunityIconJob
 	{
+		CImageInfo m_ImageInfo;
 	protected:
 		void Run() override;
 
 	public:
 		CCommunityIconLoadJob(CMenus *pMenus, const char *pCommunityId, int StorageType);
+
+		CImageInfo &&ImageInfo() { return std::move(m_ImageInfo); }
 	};
+
 	class CCommunityIconDownloadJob : public CHttpRequest, public CAbstractCommunityIconJob
 	{
-	protected:
-		int OnCompletion(int State) override;
-
 	public:
 		CCommunityIconDownloadJob(CMenus *pMenus, const char *pCommunityId, const char *pUrl, const SHA256_DIGEST &Sha256);
 	};
+
 	struct SCommunityIcon
 	{
 		char m_aCommunityId[CServerInfo::MAX_COMMUNITY_ID_LENGTH];

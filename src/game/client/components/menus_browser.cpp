@@ -1802,25 +1802,6 @@ CMenus::CAbstractCommunityIconJob::CAbstractCommunityIconJob(CMenus *pMenus, con
 	str_format(m_aPath, sizeof(m_aPath), "communityicons/%s.png", pCommunityId);
 }
 
-CMenus::CAbstractCommunityIconJob::~CAbstractCommunityIconJob()
-{
-	free(m_ImageInfo.m_pData);
-	m_ImageInfo.m_pData = nullptr;
-}
-
-int CMenus::CCommunityIconDownloadJob::OnCompletion(int State)
-{
-	State = CHttpRequest::OnCompletion(State);
-	if(State == HTTP_DONE)
-	{
-		if(m_pMenus->LoadCommunityIconFile(Dest(), IStorage::TYPE_SAVE, m_ImageInfo, m_Sha256))
-			m_Success = true;
-		else
-			State = HTTP_ERROR;
-	}
-	return State;
-}
-
 CMenus::CCommunityIconDownloadJob::CCommunityIconDownloadJob(CMenus *pMenus, const char *pCommunityId, const char *pUrl, const SHA256_DIGEST &Sha256) :
 	CHttpRequest(pUrl),
 	CAbstractCommunityIconJob(pMenus, pCommunityId, IStorage::TYPE_SAVE)
@@ -1964,10 +1945,14 @@ void CMenus::UpdateCommunityIcons()
 	if(!m_CommunityIconDownloadJobs.empty())
 	{
 		std::shared_ptr<CCommunityIconDownloadJob> pJob = m_CommunityIconDownloadJobs.front();
-		if(pJob->Status() == IJob::STATE_DONE)
+		if(pJob->Done())
 		{
-			if(pJob->Success())
-				LoadCommunityIconFinish(pJob->CommunityId(), pJob->ImageInfo(), pJob->Sha256());
+			if(pJob->State() == HTTP_DONE)
+			{
+				std::shared_ptr<CCommunityIconLoadJob> pLoadJob = std::make_shared<CCommunityIconLoadJob>(this, pJob->CommunityId(), IStorage::TYPE_SAVE);
+				Engine()->AddJob(pLoadJob);
+				m_CommunityIconLoadJobs.emplace_back(std::move(pLoadJob));
+			}
 			m_CommunityIconDownloadJobs.pop_front();
 		}
 	}
@@ -2007,7 +1992,7 @@ void CMenus::UpdateCommunityIcons()
 		if(pExistingDownload == m_CommunityIconDownloadJobs.end() && (ExistingIcon == m_vCommunityIcons.end() || ExistingIcon->m_Sha256 != Community.IconSha256()))
 		{
 			std::shared_ptr<CCommunityIconDownloadJob> pJob = std::make_shared<CCommunityIconDownloadJob>(this, Community.Id(), Community.IconUrl(), Community.IconSha256());
-			Engine()->AddJob(pJob);
+			Http()->Run(pJob);
 			m_CommunityIconDownloadJobs.push_back(pJob);
 		}
 	}

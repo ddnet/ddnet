@@ -7,6 +7,12 @@
 
 #include <algorithm>
 #include <atomic>
+#include <mutex>
+#include <condition_variable>
+#include <deque>
+#include <optional>
+
+#include <engine/http.h>
 
 typedef struct _json_value json_value;
 class IStorage;
@@ -42,8 +48,10 @@ struct CTimeout
 	long LowSpeedTime;
 };
 
-class CHttpRequest : public IJob
+class CHttpRequest : public IHttpRequest
 {
+	friend class CHttp;
+
 	enum class REQUEST
 	{
 		GET = 0,
@@ -51,6 +59,24 @@ class CHttpRequest : public IJob
 		POST,
 		POST_JSON,
 	};
+
+	static constexpr const char *GetRequestType(REQUEST Type)
+	{
+		switch(Type)
+		{
+		case REQUEST::GET:
+			return "GET";
+		case REQUEST::HEAD:
+			return "HEAD";
+		case REQUEST::POST:
+		case REQUEST::POST_JSON:
+			return "POST";
+		}
+
+		// Unreachable, maybe assert instead?
+		return "UNKNOWN";
+	}
+
 	char m_aUrl[256] = {0};
 
 	void *m_pHeaders = nullptr;
@@ -83,13 +109,14 @@ class CHttpRequest : public IJob
 	HTTPLOG m_LogProgress = HTTPLOG::ALL;
 	IPRESOLVE m_IpResolve = IPRESOLVE::WHATEVER;
 
+	char m_aErr[256]; // 256 == CURL_ERROR_SIZE
 	std::atomic<int> m_State{HTTP_QUEUED};
 	std::atomic<bool> m_Abort{false};
 
-	void Run() override;
 	// Abort the request with an error if `BeforeInit()` returns false.
 	bool BeforeInit();
-	int RunImpl(void *pUser);
+	bool ConfigureHandle(void *pHandle); // void * == CURL *
+	void OnCompletionInternal(std::optional<unsigned int> Result); // unsigned int == CURLcode
 
 	// Abort the request if `OnData()` returns something other than
 	// `DataSize`.
@@ -99,8 +126,9 @@ class CHttpRequest : public IJob
 	static size_t WriteCallback(char *pData, size_t Size, size_t Number, void *pUser);
 
 protected:
-	virtual void OnProgress() {}
-	virtual int OnCompletion(int State);
+	// These run on the curl thread now, DO NOT STALL THE THREAD
+	virtual void OnProgress() {};
+	virtual void OnCompletion() {};
 
 public:
 	CHttpRequest(const char *pUrl);
@@ -157,7 +185,10 @@ public:
 	double Size() const { return m_Size.load(std::memory_order_relaxed); }
 	int Progress() const { return m_Progress.load(std::memory_order_relaxed); }
 	int State() const { return m_State; }
+	bool Done() const { int State = m_State; return State != HTTP_QUEUED && State != HTTP_DONE; }
 	void Abort() { m_Abort = true; }
+
+	void Wait();
 
 	void Result(unsigned char **ppResult, size_t *pResultLength) const;
 	json_value *ResultJson() const;
@@ -202,4 +233,41 @@ inline std::unique_ptr<CHttpRequest> HttpPostJson(const char *pUrl, const char *
 bool HttpInit(IStorage *pStorage);
 void EscapeUrl(char *pBuf, int Size, const char *pStr);
 bool HttpHasIpresolveBug();
+
+// In an ideal world this would be a kernel interface
+class CHttp : public IHttp
+{
+	enum EState {
+		UNINITIALIZED,
+		RUNNING,
+		STOPPING,
+		ERROR,
+	};
+
+	void *m_pThread = nullptr;
+
+	std::mutex m_Lock{};
+	std::condition_variable m_Cv{};
+	std::atomic<EState> m_State = UNINITIALIZED;
+	std::deque<std::shared_ptr<CHttpRequest>> m_PendingRequests{};
+	std::unordered_map<void *, std::shared_ptr<CHttpRequest>> m_RunningRequests{}; // void * == CURL *
+	std::chrono::milliseconds m_ShutdownDelay{};
+	std::optional<std::chrono::time_point<std::chrono::steady_clock>> m_ShutdownTime{};
+	std::atomic<bool> m_Shutdown = false;
+
+	// Only to be used with curl_multi_wakeup
+	void *m_pMultiH = nullptr; // void * == CURLM *
+
+	static void ThreadMain(void *pUser);
+	void RunLoop();
+
+public:
+	// Startup
+	bool Init(std::chrono::milliseconds ShutdownDelay);
+
+	// User
+	virtual void Run(std::shared_ptr<IHttpRequest> pRequest) override;
+	void Shutdown() override;
+};
+
 #endif // ENGINE_SHARED_HTTP_H

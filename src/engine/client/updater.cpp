@@ -25,7 +25,7 @@ class CUpdaterFetchTask : public CHttpRequest
 	void OnProgress() override;
 
 protected:
-	int OnCompletion(int State) override;
+	void OnCompletion() override;
 
 public:
 	CUpdaterFetchTask(CUpdater *pUpdater, const char *pFile, const char *pDestPath);
@@ -61,10 +61,8 @@ void CUpdaterFetchTask::OnProgress()
 	m_pUpdater->m_Percent = Progress();
 }
 
-int CUpdaterFetchTask::OnCompletion(int State)
+void CUpdaterFetchTask::OnCompletion()
 {
-	State = CHttpRequest::OnCompletion(State);
-
 	const char *pFileName = 0;
 	for(const char *pPath = Dest(); *pPath; pPath++)
 		if(*pPath == '/')
@@ -72,27 +70,26 @@ int CUpdaterFetchTask::OnCompletion(int State)
 	pFileName = pFileName ? pFileName : Dest();
 	if(!str_comp(pFileName, "update.json"))
 	{
-		if(State == HTTP_DONE)
+		if(State() == HTTP_DONE)
 			m_pUpdater->SetCurrentState(IUpdater::GOT_MANIFEST);
-		else if(State == HTTP_ERROR)
+		else if(State() == HTTP_ERROR)
 			m_pUpdater->SetCurrentState(IUpdater::FAIL);
 	}
 	else if(!str_comp(pFileName, m_pUpdater->m_aLastFile))
 	{
-		if(State == HTTP_DONE)
+		if(State() == HTTP_DONE)
 			m_pUpdater->SetCurrentState(IUpdater::MOVE_FILES);
-		else if(State == HTTP_ERROR)
+		else if(State() == HTTP_ERROR)
 			m_pUpdater->SetCurrentState(IUpdater::FAIL);
 	}
-
-	return State;
 }
 
 CUpdater::CUpdater()
 {
-	m_pClient = NULL;
-	m_pStorage = NULL;
-	m_pEngine = NULL;
+	m_pClient = nullptr;
+	m_pStorage = nullptr;
+	m_pEngine = nullptr;
+	m_pHttp = nullptr;
 	m_State = CLEAN;
 	m_Percent = 0;
 
@@ -100,11 +97,12 @@ CUpdater::CUpdater()
 	IStorage::FormatTmpPath(m_aServerExecTmp, sizeof(m_aServerExecTmp), SERVER_EXEC);
 }
 
-void CUpdater::Init()
+void CUpdater::Init(CHttp *pHttp)
 {
 	m_pClient = Kernel()->RequestInterface<IClient>();
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 	m_pEngine = Kernel()->RequestInterface<IEngine>();
+	m_pHttp = pHttp;
 }
 
 void CUpdater::SetCurrentState(int NewState)
@@ -133,7 +131,7 @@ int CUpdater::GetCurrentPercent()
 
 void CUpdater::FetchFile(const char *pFile, const char *pDestPath)
 {
-	m_pEngine->AddJob(std::make_shared<CUpdaterFetchTask>(this, pFile, pDestPath));
+	m_pHttp->Run(std::make_shared<CUpdaterFetchTask>(this, pFile, pDestPath));
 }
 
 bool CUpdater::MoveFile(const char *pFile)
