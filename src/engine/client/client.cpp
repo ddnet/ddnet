@@ -4568,6 +4568,9 @@ bool CClient::RaceRecord_IsRecording()
 
 void CClient::RequestDDNetInfo()
 {
+	if(m_pDDNetInfoTask && !m_pDDNetInfoTask->Done())
+		return;
+
 	char aUrl[256];
 	str_copy(aUrl, DDNET_INFO_URL);
 

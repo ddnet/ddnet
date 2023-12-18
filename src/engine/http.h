@@ -7,7 +7,7 @@ class IHttpRequest {};
 
 class IHttp : public IInterface
 {
-    MACRO_INTERFACE("http", 0)
+    MACRO_INTERFACE("http")
 
 public:
     virtual void Run(std::shared_ptr<IHttpRequest> pRequest) = 0;
