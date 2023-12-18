@@ -389,7 +389,7 @@ bool CLineInput::ProcessInput(const IInput::CEvent &Event)
 	return m_WasChanged || m_WasCursorChanged || KeyHandled;
 }
 
-STextBoundingBox CLineInput::Render(const CUIRect *pRect, float FontSize, int Align, bool Changed, float LineWidth, float LineSpacing)
+STextBoundingBox CLineInput::Render(const CUIRect *pRect, float FontSize, int Align, bool Changed, float LineWidth, float LineSpacing, const std::vector<STextColorSplit> &vColorSplits)
 {
 	// update derived attributes to handle external changes to the buffer
 	UpdateStrData();
@@ -432,6 +432,7 @@ STextBoundingBox CLineInput::Render(const CUIRect *pRect, float FontSize, int Al
 		Cursor.m_LineSpacing = LineSpacing;
 		Cursor.m_PressMouse.x = m_MouseSelection.m_PressMouse.x;
 		Cursor.m_ReleaseMouse.x = m_MouseSelection.m_ReleaseMouse.x;
+		Cursor.m_vColorSplits = vColorSplits;
 		if(LineWidth < 0.0f)
 		{
 			// Using a Y position that's always inside the line input makes it so the selection does not reset when
@@ -512,6 +513,7 @@ STextBoundingBox CLineInput::Render(const CUIRect *pRect, float FontSize, int Al
 		TextRender()->SetCursor(&Cursor, CursorPos.x, CursorPos.y, FontSize, TEXTFLAG_RENDER);
 		Cursor.m_LineWidth = LineWidth;
 		Cursor.m_LineSpacing = LineSpacing;
+		Cursor.m_vColorSplits = vColorSplits;
 		TextRender()->TextEx(&Cursor, pDisplayStr);
 	}
 

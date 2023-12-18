@@ -1305,6 +1305,7 @@ void CEditorCommandAction::Undo()
 	}
 	case EType::EDIT:
 	{
+		printf("Restoring %s\n", m_PreviousCommand.c_str());
 		str_copy(Map.m_vSettings[m_CommandIndex].m_aCommand, m_PreviousCommand.c_str());
 		*m_pSelectedCommandIndex = m_CommandIndex;
 		break;
