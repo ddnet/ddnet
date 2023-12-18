@@ -270,20 +270,18 @@ public:
 
 	void List(int ClientID, const char *pFilter);
 
-	void SendGameMsg(int GameMsgID, int ClientID);
-	void SendGameMsg(int GameMsgID, int ParaI1, int ClientID);
-	void SendGameMsg(int GameMsgID, int ParaI1, int ParaI2, int ParaI3, int ClientID); // gctf
+	void SendGameMsg(int GameMsgID, int ClientID) const;
+	void SendGameMsg(int GameMsgID, int ParaI1, int ClientID) const;
+	void SendGameMsg(int GameMsgID, int ParaI1, int ParaI2, int ParaI3, int ClientID) const; // gctf
 	int GetDDNetInstaWeapon();
-	bool ParseChatCmd(char Prefix, int ClientID, const char *pCmdWithArgs);
-	bool OnBangCommand(int ClientID, const char *pCmd, int NumArgs, const char **ppArgs);
 	void BangCommandVote(int ClientID, const char *pCommand, const char *pDesc);
 	void ComCallShuffleVote(int ClientID);
 	void ComCallSwapTeamsVote(int ClientID);
 	void ComCallSwapTeamsRandomVote(int ClientID);
 	void UpdateVoteCheckboxes();
 	void RefreshVotes();
-	void AlertOnSpecialInstagibConfigs(int ClientID = -1);
-	void ShowCurrentInstagibConfigsMotd(int ClientID = -1, bool Force = false);
+	void AlertOnSpecialInstagibConfigs(int ClientID = -1) const;
+	void ShowCurrentInstagibConfigsMotd(int ClientID = -1, bool Force = false) const;
 	void PlayerReadyStateBroadcast();
 	void SendBroadcastSix(const char *pText, bool Important = true);
 	enum
@@ -294,8 +292,6 @@ public:
 	char m_aaLastChatMessages[MAX_LINES][MAX_LINE_LENGTH];
 	int m_UnstackHackCharacterOffset;
 	void InstagibUnstackChatMessage(char *pUnstacked, const char *pMessage, int Size);
-	bool AllowPublicChat(const CPlayer *pPlayer);
-	bool OnInstaChatMessage(const CNetMsg_Cl_Say *pMsg, int Length, int &Team, CPlayer *pPlayer);
 
 	//
 	void CheckPureTuning();

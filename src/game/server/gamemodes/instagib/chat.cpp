@@ -1,16 +1,12 @@
-#include <engine/shared/config.h>
+#include <game/server/entities/character.h>
+#include <game/server/instagib/strhelpers.h>
+#include <game/server/player.h>
+#include <game/server/score.h>
+#include <game/version.h>
 
-#include "../entities/character.h"
-#include "../gamecontext.h"
-#include "../gamemodes/DDRace.h"
-#include "../gamemodes/gctf.h"
-#include "../gamemodes/ictf.h"
-#include "../gamemodes/mod.h"
-#include "../player.h"
+#include "../base_instagib.h"
 
-#include "strhelpers.h"
-
-bool CGameContext::AllowPublicChat(const CPlayer *pPlayer)
+bool CGameControllerInstagib::AllowPublicChat(const CPlayer *pPlayer)
 {
 	if(!g_Config.m_SvTournamentChat)
 		return true;
@@ -22,7 +18,7 @@ bool CGameContext::AllowPublicChat(const CPlayer *pPlayer)
 	return true;
 }
 
-bool CGameContext::ParseChatCmd(char Prefix, int ClientID, const char *pCmdWithArgs)
+bool CGameControllerInstagib::ParseChatCmd(char Prefix, int ClientID, const char *pCmdWithArgs)
 {
 	const int MAX_ARG_LEN = 256;
 	char aCmd[MAX_ARG_LEN];
@@ -114,19 +110,117 @@ bool CGameContext::ParseChatCmd(char Prefix, int ClientID, const char *pCmdWithA
 	return match;
 }
 
-bool CGameContext::OnInstaChatMessage(const CNetMsg_Cl_Say *pMsg, int Length, int &Team, CPlayer *pPlayer)
+bool CGameControllerInstagib::OnBangCommand(int ClientID, const char *pCmd, int NumArgs, const char **ppArgs)
+{
+	if(ClientID < 0 || ClientID >= MAX_CLIENTS)
+		return false;
+	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientID];
+	if(!pPlayer)
+		return false;
+
+	if(!str_comp_nocase(pCmd, "set") || !str_comp_nocase(pCmd, "sett") || !str_comp_nocase(pCmd, "settings") || !str_comp_nocase(pCmd, "config"))
+	{
+		GameServer()->ShowCurrentInstagibConfigsMotd(ClientID, true);
+		return true;
+	}
+
+	if(pPlayer->GetTeam() == TEAM_SPECTATORS && !g_Config.m_SvSpectatorVotes)
+	{
+		SendChatTarget(ClientID, "Spectators aren't allowed to vote.");
+		return false;
+	}
+
+	int SetSlots = -1;
+	const char aaVs[][16] = {"on", "n", "vs", "v"};
+	for(const auto *pVs : aaVs)
+	{
+		for(int i = 1; i <= 8; i++)
+		{
+			char a1on1[32];
+			str_format(a1on1, sizeof(a1on1), "%d%s%d", i, pVs, i);
+			if(!str_comp_nocase(pCmd, a1on1))
+			{
+				SetSlots = i;
+				break;
+			}
+			str_format(a1on1, sizeof(a1on1), "%s%d", pVs, i);
+			if(!str_comp_nocase(pCmd, a1on1))
+			{
+				SetSlots = i;
+				break;
+			}
+		}
+	}
+
+	if(SetSlots != -1)
+	{
+		char aCmd[512];
+		str_format(aCmd, sizeof(aCmd), "sv_spectator_slots %d", MAX_CLIENTS - SetSlots * 2);
+		char aDesc[512];
+		str_format(aDesc, sizeof(aDesc), "%dvs%d", SetSlots, SetSlots);
+		GameServer()->BangCommandVote(ClientID, aCmd, aDesc);
+	}
+	else if(!str_comp_nocase(pCmd, "restart") || !str_comp_nocase(pCmd, "reload"))
+	{
+		int Seconds = NumArgs > 0 ? atoi(ppArgs[0]) : 10;
+		Seconds = clamp(Seconds, 1, 200);
+		char aCmd[512];
+		str_format(aCmd, sizeof(aCmd), "restart %d", Seconds);
+		char aDesc[512];
+		str_format(aDesc, sizeof(aDesc), "restart %d", Seconds);
+		GameServer()->BangCommandVote(ClientID, aCmd, aDesc);
+	}
+	else if(!str_comp_nocase(pCmd, "ready") || !str_comp_nocase(pCmd, "pause"))
+	{
+		GameServer()->m_pController->OnPlayerReadyChange(pPlayer);
+	}
+	else if(!str_comp_nocase(pCmd, "shuffle"))
+	{
+		GameServer()->ComCallShuffleVote(ClientID);
+	}
+	else if(!str_comp_nocase(pCmd, "swap"))
+	{
+		GameServer()->ComCallSwapTeamsVote(ClientID);
+	}
+	else if(!str_comp_nocase(pCmd, "swap_random"))
+	{
+		GameServer()->ComCallSwapTeamsRandomVote(ClientID);
+	}
+	else if(!str_comp_nocase(pCmd, "gamestate"))
+	{
+		if(NumArgs > 0)
+		{
+			if(!str_comp_nocase(ppArgs[0], "on"))
+				pPlayer->m_GameStateBroadcast = true;
+			else if(!str_comp_nocase(ppArgs[0], "off"))
+				pPlayer->m_GameStateBroadcast = false;
+			else
+				SendChatTarget(ClientID, "usage: !gamestate [on|off]");
+		}
+		else
+			pPlayer->m_GameStateBroadcast = !pPlayer->m_GameStateBroadcast;
+	}
+	else
+	{
+		SendChatTarget(ClientID, "Unknown command. Commands: !restart, !ready, !shuffle, !1on1, !settings");
+		return false;
+	}
+	return true;
+}
+
+bool CGameControllerInstagib::OnChatMessage(const CNetMsg_Cl_Say *pMsg, int Length, int &Team, CPlayer *pPlayer)
 {
 	int ClientID = pPlayer->GetCID();
 
 	if(pMsg->m_Team || !AllowPublicChat(pPlayer))
-		Team = ((pPlayer->GetTeam() == TEAM_SPECTATORS) ? CHAT_SPEC : pPlayer->GetTeam()); // gctf
+		Team = ((pPlayer->GetTeam() == TEAM_SPECTATORS) ? CGameContext::CHAT_SPEC : pPlayer->GetTeam()); // gctf
 	else
-		Team = CHAT_ALL;
+		Team = CGameContext::CHAT_ALL;
 
 	// gctf warn on ping if cant respond
-	if(Team == CHAT_ALL && pPlayer->GetTeam() != TEAM_SPECTATORS)
+	if(Team == CGameContext::CHAT_ALL && pPlayer->GetTeam() != TEAM_SPECTATORS)
 	{
-		for(const CPlayer *pSpecPlayer : m_apPlayers)
+		for(const CPlayer *pSpecPlayer : GameServer()->m_apPlayers)
 		{
 			if(!pSpecPlayer)
 				continue;
@@ -139,8 +233,8 @@ bool CGameContext::OnInstaChatMessage(const CNetMsg_Cl_Say *pMsg, int Length, in
 
 			char aChatText[256];
 			str_format(aChatText, sizeof(aChatText), "Warning: '%s' got pinged in chat but can not respond", Server()->ClientName(pSpecPlayer->GetCID()));
-			SendChat(-1, CGameContext::CHAT_ALL, aChatText);
-			SendChat(-1, CGameContext::CHAT_ALL, "turn off tournament chat or make sure there are enough in game slots");
+			GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aChatText);
+			GameServer()->SendChat(-1, CGameContext::CHAT_ALL, "turn off tournament chat or make sure there are enough in game slots");
 			break;
 		}
 	}
@@ -155,7 +249,7 @@ bool CGameContext::OnInstaChatMessage(const CNetMsg_Cl_Say *pMsg, int Length, in
 				dbg_msg("ratelimit", "m_SvChatRatelimitSpectators %s", pMsg->m_pMessage);
 			RateLimit = true;
 		}
-		if(g_Config.m_SvChatRatelimitPublicChat && Team == CHAT_ALL)
+		if(g_Config.m_SvChatRatelimitPublicChat && Team == CGameContext::CHAT_ALL)
 		{
 			if(g_Config.m_SvChatRatelimitDebug)
 				dbg_msg("ratelimit", "m_SvChatRatelimitPublicChat %s", pMsg->m_pMessage);
@@ -295,26 +389,26 @@ bool CGameContext::OnInstaChatMessage(const CNetMsg_Cl_Say *pMsg, int Length, in
 	{
 		char aBuf[256];
 		str_format(aBuf, sizeof(aBuf), "%d used %s", ClientID, pMsg->m_pMessage);
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chat-command", aBuf);
+		GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chat-command", aBuf);
 
 		if(!str_comp_nocase(pMsg->m_pMessage + 1, "ready") || !str_comp_nocase(pMsg->m_pMessage + 1, "pause")) // gctf
 		{
-			m_pController->OnPlayerReadyChange(pPlayer);
+			GameServer()->m_pController->OnPlayerReadyChange(pPlayer);
 			return true;
 		}
 		else if(!str_comp_nocase(pMsg->m_pMessage + 1, "shuffle")) // gctf
 		{
-			ComCallShuffleVote(ClientID);
+			GameServer()->ComCallShuffleVote(ClientID);
 			return true;
 		}
 		else if(!str_comp_nocase(pMsg->m_pMessage + 1, "swap")) // gctf
 		{
-			ComCallSwapTeamsVote(ClientID);
+			GameServer()->ComCallSwapTeamsVote(ClientID);
 			return true;
 		}
 		else if(!str_comp_nocase(pMsg->m_pMessage + 1, "swap_random")) // gctf
 		{
-			ComCallSwapTeamsRandomVote(ClientID);
+			GameServer()->ComCallSwapTeamsRandomVote(ClientID);
 			return true;
 		}
 	}

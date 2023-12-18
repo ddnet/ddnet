@@ -153,7 +153,7 @@ public:
 	virtual const char *GetTeamName(int Team);
 	virtual int GetAutoTeam(int NotThisID);
 	virtual bool CanJoinTeam(int Team, int NotThisID, char *pErrorReason, int ErrorReasonSize);
-	int ClampTeam(int Team);
+	int ClampTeam(int Team) const;
 
 	CClientMask GetMaskForPlayerWorldEvent(int Asker, int ExceptID = -1);
 	virtual void InitTeleporter();
@@ -180,6 +180,16 @@ public:
 			it also sets the happy eyes if the Dmg is not zero
 	*/
 	virtual bool OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character) { return false; };
+	/*
+		Function: OnChatMessage
+			hooks into CGameContext::OnSayNetMessage()
+			after unicode check and teehistorian already happend
+
+		Returns:
+			return true to not run the rest of CGameContext::OnSayNetMessage()
+			which would print it to the chat or run it as a ddrace chat command
+	*/
+	virtual bool OnChatMessage(const CNetMsg_Cl_Say *pMsg, int Length, int &Team, CPlayer *pPlayer) { return false; };
 	virtual void OnPlayerReadyChange(class CPlayer *pPlayer); // 0.7 ready change
 	void CheckReadyStates(int WithoutID = -1);
 	bool GetPlayersReadyState(int WithoutID = -1, int *pNumUnready = nullptr);

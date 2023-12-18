@@ -10,7 +10,7 @@
 
 #include "strhelpers.h"
 
-void CGameContext::AlertOnSpecialInstagibConfigs(int ClientID)
+void CGameContext::AlertOnSpecialInstagibConfigs(int ClientID) const
 {
 	if(g_Config.m_SvTournament)
 	{
@@ -26,7 +26,7 @@ void CGameContext::AlertOnSpecialInstagibConfigs(int ClientID)
 		SendChatTarget(ClientID, "WARNING: the hook kills");
 }
 
-void CGameContext::ShowCurrentInstagibConfigsMotd(int ClientID, bool Force)
+void CGameContext::ShowCurrentInstagibConfigsMotd(int ClientID, bool Force) const
 {
 	if(!g_Config.m_SvShowSettingsMotd && !Force)
 		return;
@@ -187,7 +187,7 @@ void CGameContext::PlayerReadyStateBroadcast()
 	SendBroadcastSix(aBuf, false);
 }
 
-void CGameContext::SendGameMsg(int GameMsgID, int ClientID)
+void CGameContext::SendGameMsg(int GameMsgID, int ClientID) const
 {
 	CMsgPacker Msg(protocol7::NETMSGTYPE_SV_GAMEMSG, false, true);
 	Msg.AddInt(GameMsgID);
@@ -207,7 +207,7 @@ void CGameContext::SendGameMsg(int GameMsgID, int ClientID)
 	}
 }
 
-void CGameContext::SendGameMsg(int GameMsgID, int ParaI1, int ClientID)
+void CGameContext::SendGameMsg(int GameMsgID, int ParaI1, int ClientID) const
 {
 	CMsgPacker Msg(protocol7::NETMSGTYPE_SV_GAMEMSG, false, true);
 	Msg.AddInt(GameMsgID);
@@ -234,7 +234,7 @@ void CGameContext::SendGameMsg(int GameMsgID, int ParaI1, int ClientID)
 	}
 }
 
-void CGameContext::SendGameMsg(int GameMsgID, int ParaI1, int ParaI2, int ParaI3, int ClientID)
+void CGameContext::SendGameMsg(int GameMsgID, int ParaI1, int ParaI2, int ParaI3, int ClientID) const
 {
 	CMsgPacker Msg(protocol7::NETMSGTYPE_SV_GAMEMSG, false, true);
 	Msg.AddInt(GameMsgID);

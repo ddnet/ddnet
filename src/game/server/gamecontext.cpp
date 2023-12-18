@@ -2102,7 +2102,7 @@ void CGameContext::OnSayNetMessage(const CNetMsg_Cl_Say *pMsg, int ClientID, con
 	else
 		Team = CHAT_ALL;
 
-	if(OnInstaChatMessage(pMsg, Length, Team, pPlayer))
+	if(m_pController->OnChatMessage(pMsg, Length, Team, pPlayer))
 		return;
 
 	if(pMsg->m_pMessage[0] == '/')

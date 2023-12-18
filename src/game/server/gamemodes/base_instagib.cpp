@@ -36,6 +36,16 @@ CGameControllerInstagib::CGameControllerInstagib(class CGameContext *pGameServer
 
 CGameControllerInstagib::~CGameControllerInstagib() = default;
 
+void CGameControllerInstagib::SendChatTarget(int To, const char *pText, int Flags) const
+{
+	GameServer()->SendChatTarget(To, pText, Flags);
+}
+
+void CGameControllerInstagib::SendChat(int ClientID, int Team, const char *pText, int SpamProtectionClientID, int Flags)
+{
+	GameServer()->SendChat(ClientID, Team, pText, SpamProtectionClientID, Flags);
+}
+
 void CGameControllerInstagib::ConchainGameinfoUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
 {
 	pfnCallback(pResult, pCallbackUserData);

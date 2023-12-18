@@ -935,7 +935,7 @@ bool IGameController::CanJoinTeam(int Team, int NotThisID, char *pErrorReason, i
 	return false;
 }
 
-int IGameController::ClampTeam(int Team)
+int IGameController::ClampTeam(int Team) const
 {
 	if(Team < TEAM_RED)
 		return TEAM_SPECTATORS;

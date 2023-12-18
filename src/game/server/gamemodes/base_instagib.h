@@ -9,6 +9,14 @@ public:
 	CGameControllerInstagib(class CGameContext *pGameServer);
 	~CGameControllerInstagib();
 
+	// convience accessors to copy code from gamecontext to the instagib controller
+	class IServer *Server() const { return GameServer()->Server(); }
+	class CConfig *Config() { return GameServer()->Config(); }
+	class IConsole *Console() { return GameServer()->Console(); }
+	class IStorage *Storage() { return GameServer()->Storage(); }
+	void SendChatTarget(int To, const char *pText, int Flags = CGameContext::CHAT_SIX | CGameContext::CHAT_SIXUP) const;
+	void SendChat(int ClientID, int Team, const char *pText, int SpamProtectionClientID = -1, int Flags = CGameContext::CHAT_SIX | CGameContext::CHAT_SIXUP);
+
 	void OnPlayerConstruct(class CPlayer *pPlayer);
 	void OnCharacterConstruct(class CCharacter *pChr);
 
@@ -36,6 +44,9 @@ public:
 	void SwapTeams();
 	void ModifyWeapons(IConsole::IResult *pResult, void *pUserData, int Weapon, bool Remove);
 
+	bool AllowPublicChat(const CPlayer *pPlayer);
+	bool ParseChatCmd(char Prefix, int ClientID, const char *pCmdWithArgs);
+	bool OnBangCommand(int ClientID, const char *pCmd, int NumArgs, const char **ppArgs);
 	void AddSpree(CPlayer *pPlayer);
 	void EndSpree(CPlayer *pPlayer, CPlayer *pKiller);
 	enum ESpawnWeapons
@@ -52,5 +63,6 @@ public:
 
 	// ddnet-insta only
 	bool OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character) override;
+	bool OnChatMessage(const CNetMsg_Cl_Say *pMsg, int Length, int &Team, CPlayer *pPlayer) override;
 };
 #endif // GAME_SERVER_GAMEMODES_BASE_INSTAGIB_H
