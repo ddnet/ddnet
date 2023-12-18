@@ -20,6 +20,10 @@ public:
 	int OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon) override;
 	void Tick() override;
 
+	static void ConchainInstaSettingsUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	static void ConchainGameinfoUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	static void ConchainResetInstasettingTees(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+
 	static void ConHammer(IConsole::IResult *pResult, void *pUserData);
 	static void ConGun(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnHammer(IConsole::IResult *pResult, void *pUserData);

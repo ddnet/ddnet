@@ -3556,22 +3556,6 @@ void CGameContext::OnConsoleInit()
 
 	Console()->Chain("sv_motd", ConchainSpecialMotdupdate, this);
 
-	Console()->Chain("sv_scorelimit", ConchainGameinfoUpdate, this); // gctf
-	Console()->Chain("sv_timelimit", ConchainGameinfoUpdate, this); // gctf
-	Console()->Chain("sv_grenade_ammo_regen", ConchainResetInstasettingTees, this); // gctf
-
-	// generate callbacks to trigger insta settings update for all instagib configs
-	// when one of the insta configs is changed
-	// we update the checkboxes [x] in the vote menu
-#define MACRO_CONFIG_INT(Name, ScriptName, Def, Min, Max, Flags, Desc) \
-	Console()->Chain(#ScriptName, ConchainInstaSettingsUpdate, this);
-#define MACRO_CONFIG_COL(Name, ScriptName, Def, Flags, Desc) // only int checkboxes for now
-#define MACRO_CONFIG_STR(Name, ScriptName, Len, Def, Flags, Desc) // only int checkboxes for now
-#include <engine/shared/variables_insta.h>
-#undef MACRO_CONFIG_INT
-#undef MACRO_CONFIG_COL
-#undef MACRO_CONFIG_STR
-
 	Console()->Chain("sv_vote_kick", ConchainSettingUpdate, this);
 	Console()->Chain("sv_vote_kick_min", ConchainSettingUpdate, this);
 	Console()->Chain("sv_vote_spectate", ConchainSettingUpdate, this);

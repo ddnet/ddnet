@@ -2585,7 +2585,6 @@ if(SERVER)
     instagib/bangcommands.cpp
     instagib/chat.cpp
     instagib/gamelogic.cpp
-    instagib/rcon_commands.cpp
     instagib/strhelpers.cpp
     instagib/strhelpers.h
     player.cpp

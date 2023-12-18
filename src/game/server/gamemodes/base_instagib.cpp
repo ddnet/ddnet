@@ -12,14 +12,66 @@ CGameControllerInstagib::CGameControllerInstagib(class CGameContext *pGameServer
 
 	m_SpawnWeapons = SPAWN_WEAPON_GRENADE;
 
+	GameServer()->Console()->Chain("sv_scorelimit", ConchainGameinfoUpdate, this);
+	GameServer()->Console()->Chain("sv_timelimit", ConchainGameinfoUpdate, this);
+	GameServer()->Console()->Chain("sv_grenade_ammo_regen", ConchainResetInstasettingTees, this);
 	GameServer()->Console()->Chain("sv_spawn_weapons", ConchainSpawnWeapons, this);
 
 #define CONSOLE_COMMAND(name, params, flags, callback, userdata, help) GameServer()->Console()->Register(name, params, flags, callback, userdata, help);
 #include "instagib/rcon_commands.h"
 #undef CONSOLE_COMMAND
+
+	// generate callbacks to trigger insta settings update for all instagib configs
+	// when one of the insta configs is changed
+	// we update the checkboxes [x] in the vote menu
+#define MACRO_CONFIG_INT(Name, ScriptName, Def, Min, Max, Flags, Desc) \
+	GameServer()->Console()->Chain(#ScriptName, ConchainInstaSettingsUpdate, this);
+#define MACRO_CONFIG_COL(Name, ScriptName, Def, Flags, Desc) // only int checkboxes for now
+#define MACRO_CONFIG_STR(Name, ScriptName, Len, Def, Flags, Desc) // only int checkboxes for now
+#include <engine/shared/variables_insta.h>
+#undef MACRO_CONFIG_INT
+#undef MACRO_CONFIG_COL
+#undef MACRO_CONFIG_STR
 }
 
 CGameControllerInstagib::~CGameControllerInstagib() = default;
+
+void CGameControllerInstagib::ConchainGameinfoUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	pfnCallback(pResult, pCallbackUserData);
+	if(pResult->NumArguments())
+	{
+		CGameControllerInstagib *pSelf = (CGameControllerInstagib *)pUserData;
+		if(pSelf->GameServer()->m_pController)
+			pSelf->GameServer()->m_pController->CheckGameInfo();
+	}
+}
+
+void CGameControllerInstagib::ConchainResetInstasettingTees(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	pfnCallback(pResult, pCallbackUserData);
+	CGameControllerInstagib *pSelf = (CGameControllerInstagib *)pUserData;
+	if(pResult->NumArguments())
+	{
+		for(auto *pPlayer : pSelf->GameServer()->m_apPlayers)
+		{
+			if(!pPlayer)
+				continue;
+			CCharacter *pChr = pPlayer->GetCharacter();
+			if(!pChr)
+				continue;
+			pChr->ResetInstaSettings();
+		}
+	}
+}
+
+void CGameControllerInstagib::ConchainInstaSettingsUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	pfnCallback(pResult, pCallbackUserData);
+	CGameControllerInstagib *pSelf = (CGameControllerInstagib *)pUserData;
+	pSelf->GameServer()->UpdateVoteCheckboxes();
+	pSelf->GameServer()->RefreshVotes();
+}
 
 void CGameControllerInstagib::ModifyWeapons(IConsole::IResult *pResult, void *pUserData,
 	int Weapon, bool Remove)
