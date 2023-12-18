@@ -252,7 +252,10 @@ public:
 		return m_pUpdater;
 	}
 #endif
-	class IHttp *Http() { return m_pHttp; }
+	class IHttp *Http()
+	{
+		return m_pHttp;
+	}
 
 	int NetobjNumCorrections()
 	{

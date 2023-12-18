@@ -7,9 +7,9 @@
 
 #include <algorithm>
 #include <atomic>
-#include <mutex>
 #include <condition_variable>
 #include <deque>
+#include <mutex>
 #include <optional>
 
 #include <engine/http.h>
@@ -127,8 +127,8 @@ class CHttpRequest : public IHttpRequest
 
 protected:
 	// These run on the curl thread now, DO NOT STALL THE THREAD
-	virtual void OnProgress() {};
-	virtual void OnCompletion() {};
+	virtual void OnProgress(){};
+	virtual void OnCompletion(){};
 
 public:
 	CHttpRequest(const char *pUrl);
@@ -185,7 +185,11 @@ public:
 	double Size() const { return m_Size.load(std::memory_order_relaxed); }
 	int Progress() const { return m_Progress.load(std::memory_order_relaxed); }
 	int State() const { return m_State; }
-	bool Done() const { int State = m_State; return State != HTTP_QUEUED && State != HTTP_DONE; }
+	bool Done() const
+	{
+		int State = m_State;
+		return State != HTTP_QUEUED && State != HTTP_DONE;
+	}
 	void Abort() { m_Abort = true; }
 
 	void Wait();
@@ -237,7 +241,8 @@ bool HttpHasIpresolveBug();
 // In an ideal world this would be a kernel interface
 class CHttp : public IHttp
 {
-	enum EState {
+	enum EState
+	{
 		UNINITIALIZED,
 		RUNNING,
 		STOPPING,

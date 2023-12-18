@@ -519,7 +519,7 @@ protected:
 		SHA256_DIGEST m_Sha256;
 
 		CAbstractCommunityIconJob(CMenus *pMenus, const char *pCommunityId, int StorageType);
-		virtual ~CAbstractCommunityIconJob() {};
+		virtual ~CAbstractCommunityIconJob(){};
 
 	public:
 		const char *CommunityId() const { return m_aCommunityId; }
@@ -530,6 +530,7 @@ protected:
 	class CCommunityIconLoadJob : public IJob, public CAbstractCommunityIconJob
 	{
 		CImageInfo m_ImageInfo;
+
 	protected:
 		void Run() override;
 

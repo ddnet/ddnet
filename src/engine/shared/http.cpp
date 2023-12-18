@@ -8,8 +8,8 @@
 #include <engine/storage.h>
 #include <game/version.h>
 
-#include <thread>
 #include <limits>
+#include <thread>
 
 #if !defined(CONF_FAMILY_WINDOWS)
 #include <csignal>
@@ -272,8 +272,8 @@ void CHttpRequest::OnCompletionInternal(std::optional<unsigned int> Result)
 		if(Code != CURLE_OK)
 		{
 			if(g_Config.m_DbgCurl || m_LogProgress >= HTTPLOG::FAILURE)
-					dbg_msg("http", "%s failed. libcurl error (%u): %s", m_aUrl, Code, m_aErr);
-				State = (Code == CURLE_ABORTED_BY_CALLBACK) ? HTTP_ABORTED : HTTP_ERROR;
+				dbg_msg("http", "%s failed. libcurl error (%u): %s", m_aUrl, Code, m_aErr);
+			State = (Code == CURLE_ABORTED_BY_CALLBACK) ? HTTP_ABORTED : HTTP_ERROR;
 		}
 		else
 		{
@@ -282,7 +282,8 @@ void CHttpRequest::OnCompletionInternal(std::optional<unsigned int> Result)
 			State = HTTP_DONE;
 		}
 	}
-	else {
+	else
+	{
 		dbg_msg("http", "%s failed. internal error: %s", m_aUrl, m_aErr);
 		State = HTTP_ERROR;
 	}
@@ -346,9 +347,11 @@ void CHttpRequest::Wait()
 	using namespace std::chrono_literals;
 
 	// This is so uncommon that polling just might work
-	for(;;) {
+	for(;;)
+	{
 		int State = m_State.load(std::memory_order_seq_cst);
-		if(State != HTTP_QUEUED && State != HTTP_RUNNING) {
+		if(State != HTTP_QUEUED && State != HTTP_RUNNING)
+		{
 			return;
 		}
 		std::this_thread::sleep_for(10ms);
@@ -391,7 +394,7 @@ bool CHttp::Init(std::chrono::milliseconds ShutdownDelay)
 	m_pThread = thread_init(CHttp::ThreadMain, this, "http");
 
 	std::unique_lock Lock(m_Lock);
-	m_Cv.wait(Lock, [this](){ return m_State != UNINITIALIZED; });
+	m_Cv.wait(Lock, [this]() { return m_State != UNINITIALIZED; });
 	if(m_State != RUNNING)
 	{
 		return false;
@@ -437,24 +440,29 @@ void CHttp::RunLoop()
 	dbg_msg("http", "running");
 	Lock.unlock();
 
-	while(m_State == RUNNING) {
+	while(m_State == RUNNING)
+	{
 		static int NextTimeout = std::numeric_limits<int>::max();
 		int Events = 0;
 		CURLMcode mc = curl_multi_poll(m_pMultiH, NULL, 0, NextTimeout, &Events);
 
 		// We may have been woken up for a shutdown
-		if(m_Shutdown) {
+		if(m_Shutdown)
+		{
 			auto Now = std::chrono::steady_clock::now();
-			if(!m_ShutdownTime.has_value()) {
+			if(!m_ShutdownTime.has_value())
+			{
 				m_ShutdownTime = Now + m_ShutdownDelay;
 				NextTimeout = m_ShutdownDelay.count();
 			}
-			else if(m_ShutdownTime < Now || m_RunningRequests.empty()) {
+			else if(m_ShutdownTime < Now || m_RunningRequests.empty())
+			{
 				break;
 			}
 		}
 
-		if(mc != CURLM_OK) {
+		if(mc != CURLM_OK)
+		{
 			Lock.lock();
 			dbg_msg("http", "Failed multi wait: %s", curl_multi_strerror(mc));
 			m_State = ERROR;
@@ -462,7 +470,8 @@ void CHttp::RunLoop()
 		}
 
 		mc = curl_multi_perform(m_pMultiH, &Events);
-		if(mc != CURLM_OK) {
+		if(mc != CURLM_OK)
+		{
 			Lock.lock();
 			dbg_msg("http", "Failed multi perform: %s", curl_multi_strerror(mc));
 			m_State = ERROR;
@@ -470,8 +479,10 @@ void CHttp::RunLoop()
 		}
 
 		struct CURLMsg *m;
-		while((m = curl_multi_info_read(m_pMultiH, &Events))) {
-			if(m->msg == CURLMSG_DONE) {
+		while((m = curl_multi_info_read(m_pMultiH, &Events)))
+		{
+			if(m->msg == CURLMSG_DONE)
+			{
 				auto RequestIt = m_RunningRequests.find(m->easy_handle);
 				dbg_assert(RequestIt != m_RunningRequests.end(), "Running handle not added to map");
 				auto pRequest = std::move(RequestIt->second);
@@ -488,7 +499,8 @@ void CHttp::RunLoop()
 		std::swap(m_PendingRequests, NewRequests);
 		Lock.unlock();
 
-		while(!NewRequests.empty()) {
+		while(!NewRequests.empty())
+		{
 			auto &pRequest = NewRequests.front();
 			dbg_msg("http", "task: %s %s", CHttpRequest::GetRequestType(pRequest->m_Type), pRequest->m_aUrl);
 
@@ -518,7 +530,8 @@ void CHttp::RunLoop()
 		}
 
 		// Only happens if m_State == ERROR, thus we already hold the lock
-		if(!NewRequests.empty()) {
+		if(!NewRequests.empty())
+		{
 			m_PendingRequests.insert(m_PendingRequests.end(), std::make_move_iterator(NewRequests.begin()), std::make_move_iterator(NewRequests.end()));
 			break;
 		}
@@ -528,14 +541,17 @@ void CHttp::RunLoop()
 		Lock.lock();
 
 	bool Cleanup = m_State != ERROR;
-	for(auto &pRequest : m_PendingRequests) {
+	for(auto &pRequest : m_PendingRequests)
+	{
 		str_copy(pRequest->m_aErr, "Shutting down");
 		pRequest->OnCompletionInternal(std::nullopt);
 	}
 
-	for(auto &ReqPair : m_RunningRequests) {
+	for(auto &ReqPair : m_RunningRequests)
+	{
 		auto &[pHandle, pRequest] = ReqPair;
-		if(Cleanup) {
+		if(Cleanup)
+		{
 			curl_multi_remove_handle(m_pMultiH, pHandle);
 			curl_easy_cleanup(pHandle);
 		}
@@ -544,7 +560,8 @@ void CHttp::RunLoop()
 		pRequest->OnCompletionInternal(std::nullopt);
 	}
 
-	if(Cleanup) {
+	if(Cleanup)
+	{
 		curl_multi_cleanup(m_pMultiH);
 		curl_global_cleanup();
 	}
@@ -553,7 +570,7 @@ void CHttp::RunLoop()
 void CHttp::Run(std::shared_ptr<IHttpRequest> pRequest)
 {
 	std::unique_lock Lock(m_Lock);
-	m_Cv.wait(Lock, [this](){ return m_State != UNINITIALIZED; });
+	m_Cv.wait(Lock, [this]() { return m_State != UNINITIALIZED; });
 	m_PendingRequests.emplace_back(std::move(std::static_pointer_cast<CHttpRequest>(pRequest)));
 	curl_multi_wakeup(m_pMultiH);
 }
