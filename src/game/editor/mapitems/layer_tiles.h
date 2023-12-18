@@ -102,19 +102,19 @@ public:
 
 	virtual CTile GetTile(int x, int y);
 	virtual void SetTile(int x, int y, CTile Tile);
-	void SetTileIgnoreHistory(int x, int y, CTile Tile);
+	void SetTileIgnoreHistory(int x, int y, CTile Tile) const;
 
 	virtual void Resize(int NewW, int NewH);
 	virtual void Shift(int Direction);
 
-	void MakePalette();
+	void MakePalette() const;
 	void Render(bool Tileset = false) override;
 
 	int ConvertX(float x) const;
 	int ConvertY(float y) const;
-	void Convert(CUIRect Rect, RECTi *pOut);
-	void Snap(CUIRect *pRect);
-	void Clamp(RECTi *pRect);
+	void Convert(CUIRect Rect, RECTi *pOut) const;
+	void Snap(CUIRect *pRect) const;
+	void Clamp(RECTi *pRect) const;
 
 	virtual bool IsEntitiesLayer() const override;
 
@@ -151,7 +151,7 @@ public:
 	void ModifyEnvelopeIndex(FIndexModifyFunction pfnFunc) override;
 
 	void PrepareForSave();
-	void ExtractTiles(int TilemapItemVersion, const CTile *pSavedTiles, size_t SavedTilesSize);
+	void ExtractTiles(int TilemapItemVersion, const CTile *pSavedTiles, size_t SavedTilesSize) const;
 
 	void GetSize(float *pWidth, float *pHeight) override
 	{

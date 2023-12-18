@@ -385,7 +385,7 @@ bool CLineInput::ProcessInput(const IInput::CEvent &Event)
 	}
 
 	m_WasCursorChanged |= OldCursorPos != m_CursorPos;
-	m_WasChanged |= SelectionLength != GetSelectionLength();
+	m_WasCursorChanged |= SelectionLength != GetSelectionLength();
 	return m_WasChanged || m_WasCursorChanged || KeyHandled;
 }
 
@@ -633,7 +633,7 @@ void CLineInput::Activate(EInputPriority Priority)
 	ms_ActiveInputPriority = Priority;
 }
 
-void CLineInput::Deactivate()
+void CLineInput::Deactivate() const
 {
 	if(!IsActive())
 		return;

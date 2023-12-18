@@ -41,7 +41,7 @@ void CStatboard::OnConsoleInit()
 	Console()->Register("+statboard", "", CFGFLAG_CLIENT, ConKeyStats, this, "Show stats");
 }
 
-bool CStatboard::IsActive()
+bool CStatboard::IsActive() const
 {
 	return m_Active;
 }

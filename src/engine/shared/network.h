@@ -133,7 +133,7 @@ public:
 	int m_Size;
 	int m_Sequence;
 
-	unsigned char *Pack(unsigned char *pData, int Split = 4);
+	unsigned char *Pack(unsigned char *pData, int Split = 4) const;
 	unsigned char *Unpack(unsigned char *pData, int Split = 4);
 };
 

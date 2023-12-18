@@ -68,7 +68,7 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 		return g_Config.m_DbgGfx == DEBUG_GFX_MODE_VERBOSE || g_Config.m_DbgGfx == DEBUG_GFX_MODE_ALL;
 	}
 
-	void VerboseAllocatedMemory(VkDeviceSize Size, size_t FrameImageIndex, EMemoryBlockUsage MemUsage)
+	void VerboseAllocatedMemory(VkDeviceSize Size, size_t FrameImageIndex, EMemoryBlockUsage MemUsage) const
 	{
 		const char *pUsage = "unknown";
 		switch(MemUsage)
@@ -90,7 +90,7 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 		dbg_msg("vulkan", "allocated chunk of memory with size: %" PRIzu " for frame %" PRIzu " (%s)", (size_t)Size, (size_t)m_CurImageIndex, pUsage);
 	}
 
-	void VerboseDeallocatedMemory(VkDeviceSize Size, size_t FrameImageIndex, EMemoryBlockUsage MemUsage)
+	void VerboseDeallocatedMemory(VkDeviceSize Size, size_t FrameImageIndex, EMemoryBlockUsage MemUsage) const
 	{
 		const char *pUsage = "unknown";
 		switch(MemUsage)
@@ -300,7 +300,7 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 			}
 		}
 
-		[[nodiscard]] bool IsUnused()
+		[[nodiscard]] bool IsUnused() const
 		{
 			return !m_Root.m_InUse;
 		}
@@ -829,7 +829,7 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 		// the viewport of the resulting presented image on the screen
 		// if there is a forced viewport the resulting image is smaller
 		// than the full swap image size
-		VkExtent2D GetPresentedImageViewport()
+		VkExtent2D GetPresentedImageViewport() const
 		{
 			uint32_t ViewportWidth = m_SwapImageViewport.width;
 			uint32_t ViewportHeight = m_SwapImageViewport.height;
@@ -3168,7 +3168,7 @@ protected:
 		return State.m_BlendMode == CCommandBuffer::BLEND_ADDITIVE ? VULKAN_BACKEND_BLEND_MODE_ADDITATIVE : (State.m_BlendMode == CCommandBuffer::BLEND_NONE ? VULKAN_BACKEND_BLEND_MODE_NONE : VULKAN_BACKEND_BLEND_MODE_ALPHA);
 	}
 
-	size_t GetDynamicModeIndexFromState(const CCommandBuffer::SState &State)
+	size_t GetDynamicModeIndexFromState(const CCommandBuffer::SState &State) const
 	{
 		return (State.m_ClipEnable || m_HasDynamicViewport || m_VKSwapImgAndViewportExtent.m_HasForcedViewport) ? VULKAN_BACKEND_CLIP_MODE_DYNAMIC_SCISSOR_AND_VIEWPORT : VULKAN_BACKEND_CLIP_MODE_NONE;
 	}
@@ -4598,7 +4598,7 @@ public:
 		VkPipelineRasterizationStateCreateInfo &Rasterizer,
 		VkPipelineMultisampleStateCreateInfo &Multisampling,
 		VkPipelineColorBlendAttachmentState &ColorBlendAttachment,
-		VkPipelineColorBlendStateCreateInfo &ColorBlending)
+		VkPipelineColorBlendStateCreateInfo &ColorBlending) const
 	{
 		InputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
 		InputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
@@ -5967,12 +5967,12 @@ public:
 		FreeDescriptorSetFromPool(DescrSet);
 	}
 
-	[[nodiscard]] bool HasMultiSampling()
+	[[nodiscard]] bool HasMultiSampling() const
 	{
 		return GetSampleCount() != VK_SAMPLE_COUNT_1_BIT;
 	}
 
-	VkSampleCountFlagBits GetMaxSampleCount()
+	VkSampleCountFlagBits GetMaxSampleCount() const
 	{
 		if(m_MaxMultiSample & VK_SAMPLE_COUNT_64_BIT)
 			return VK_SAMPLE_COUNT_64_BIT;
@@ -5990,7 +5990,7 @@ public:
 		return VK_SAMPLE_COUNT_1_BIT;
 	}
 
-	VkSampleCountFlagBits GetSampleCount()
+	VkSampleCountFlagBits GetSampleCount() const
 	{
 		auto MaxSampleCount = GetMaxSampleCount();
 		if(m_MultiSamplingCount >= 64 && MaxSampleCount >= VK_SAMPLE_COUNT_64_BIT)

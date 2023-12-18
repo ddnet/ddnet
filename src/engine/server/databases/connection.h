@@ -84,11 +84,11 @@ private:
 	char m_aPrefix[64];
 
 protected:
-	void FormatCreateRace(char *aBuf, unsigned int BufferSize, bool Backup);
-	void FormatCreateTeamrace(char *aBuf, unsigned int BufferSize, const char *pIdType, bool Backup);
-	void FormatCreateMaps(char *aBuf, unsigned int BufferSize);
-	void FormatCreateSaves(char *aBuf, unsigned int BufferSize, bool Backup);
-	void FormatCreatePoints(char *aBuf, unsigned int BufferSize);
+	void FormatCreateRace(char *aBuf, unsigned int BufferSize, bool Backup) const;
+	void FormatCreateTeamrace(char *aBuf, unsigned int BufferSize, const char *pIdType, bool Backup) const;
+	void FormatCreateMaps(char *aBuf, unsigned int BufferSize) const;
+	void FormatCreateSaves(char *aBuf, unsigned int BufferSize, bool Backup) const;
+	void FormatCreatePoints(char *aBuf, unsigned int BufferSize) const;
 };
 
 bool MysqlAvailable();

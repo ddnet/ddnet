@@ -48,7 +48,7 @@ CEditorBrushDrawAction::CEditorBrushDrawAction(CEditor *pEditor, int Group) :
 
 			if(!pLayerTiles->m_TilesHistory.empty())
 			{
-				m_vTileChanges.emplace_back(std::make_pair(k, std::map(pLayerTiles->m_TilesHistory)));
+				m_vTileChanges.emplace_back(k, std::map(pLayerTiles->m_TilesHistory));
 				pLayerTiles->ClearHistory();
 			}
 		}
@@ -1078,6 +1078,7 @@ void CEditorActionEditLayersGroupAndOrder::Undo()
 	auto &pCurrentGroup = Map.m_vpGroups[m_NewGroupIndex];
 	auto &pPreviousGroup = Map.m_vpGroups[m_GroupIndex];
 	std::vector<std::shared_ptr<CLayer>> vpLayers;
+	vpLayers.reserve(m_NewLayerIndices.size());
 	for(auto &LayerIndex : m_NewLayerIndices)
 		vpLayers.push_back(pCurrentGroup->m_vpLayers[LayerIndex]);
 
@@ -1099,6 +1100,7 @@ void CEditorActionEditLayersGroupAndOrder::Redo()
 	auto &pCurrentGroup = Map.m_vpGroups[m_GroupIndex];
 	auto &pPreviousGroup = Map.m_vpGroups[m_NewGroupIndex];
 	std::vector<std::shared_ptr<CLayer>> vpLayers;
+	vpLayers.reserve(m_LayerIndices.size());
 	for(auto &LayerIndex : m_LayerIndices)
 		vpLayers.push_back(pCurrentGroup->m_vpLayers[LayerIndex]);
 

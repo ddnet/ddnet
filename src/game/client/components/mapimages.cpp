@@ -427,7 +427,7 @@ void CMapImages::SetTextureScale(int Scale)
 	}
 }
 
-int CMapImages::GetTextureScale()
+int CMapImages::GetTextureScale() const
 {
 	return m_TextureScale;
 }

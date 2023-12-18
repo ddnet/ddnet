@@ -596,7 +596,7 @@ void CSaveTeam::Load(CGameContext *pGameServer, int Team, bool KeepCurrentWeakSt
 	pGameServer->m_World.RemoveEntitiesFromPlayers(aPlayerCIDs, m_MembersCount);
 }
 
-CCharacter *CSaveTeam::MatchCharacter(CGameContext *pGameServer, int ClientID, int SaveID, bool KeepCurrentCharacter)
+CCharacter *CSaveTeam::MatchCharacter(CGameContext *pGameServer, int ClientID, int SaveID, bool KeepCurrentCharacter) const
 {
 	if(KeepCurrentCharacter && pGameServer->m_apPlayers[ClientID]->GetCharacter())
 	{
@@ -785,7 +785,7 @@ int CSaveTeam::FromString(const char *pString)
 	return 0;
 }
 
-bool CSaveTeam::MatchPlayers(const char (*paNames)[MAX_NAME_LENGTH], const int *pClientID, int NumPlayer, char *pMessage, int MessageLen)
+bool CSaveTeam::MatchPlayers(const char (*paNames)[MAX_NAME_LENGTH], const int *pClientID, int NumPlayer, char *pMessage, int MessageLen) const
 {
 	if(NumPlayer > m_MembersCount)
 	{

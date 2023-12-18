@@ -114,7 +114,7 @@ class CGameConsole : public CComponent
 		static void PossibleCommandsCompleteCallback(int Index, const char *pStr, void *pUser);
 		static void PossibleArgumentsCompleteCallback(int Index, const char *pStr, void *pUser);
 
-		void UpdateEntryTextAttributes(CBacklogEntry *pEntry);
+		void UpdateEntryTextAttributes(CBacklogEntry *pEntry) const;
 
 	private:
 		void UpdateSearch();

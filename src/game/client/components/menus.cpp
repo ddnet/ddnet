@@ -942,7 +942,7 @@ void CMenus::PopupWarning(const char *pTopic, const char *pBody, const char *pBu
 	m_PopupWarningLastTime = time_get_nanoseconds();
 }
 
-bool CMenus::CanDisplayWarning()
+bool CMenus::CanDisplayWarning() const
 {
 	return m_Popup == POPUP_NONE;
 }
@@ -1634,7 +1634,7 @@ int CMenus::Render()
 
 			char aFilePath[IO_MAX_PATH_LENGTH];
 			char aSaveFolder[IO_MAX_PATH_LENGTH];
-			Storage()->GetCompletePath(Storage()->TYPE_SAVE, "videos", aSaveFolder, sizeof(aSaveFolder));
+			Storage()->GetCompletePath(IStorage::TYPE_SAVE, "videos", aSaveFolder, sizeof(aSaveFolder));
 			str_format(aFilePath, sizeof(aFilePath), "%s/%s.mp4", aSaveFolder, m_DemoRenderInput.GetString());
 
 			Box.HSplitBottom(20.f, &Box, &Part);
@@ -2008,7 +2008,7 @@ void CMenus::OnRender()
 		RenderDemoPlayer(*UI()->Screen());
 	}
 
-	if(Client()->State() == IClient::STATE_ONLINE && m_pClient->m_ServerMode == m_pClient->SERVERMODE_PUREMOD)
+	if(Client()->State() == IClient::STATE_ONLINE && m_pClient->m_ServerMode == CGameClient::SERVERMODE_PUREMOD)
 	{
 		Client()->Disconnect();
 		SetActive(true);

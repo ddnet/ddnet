@@ -317,7 +317,7 @@ void CNetBase::SendControlMsg(NETSOCKET Socket, NETADDR *pAddr, int Ack, int Con
 	CNetBase::SendPacket(Socket, pAddr, &Construct, SecurityToken, Sixup, true);
 }
 
-unsigned char *CNetChunkHeader::Pack(unsigned char *pData, int Split)
+unsigned char *CNetChunkHeader::Pack(unsigned char *pData, int Split) const
 {
 	pData[0] = ((m_Flags & 3) << 6) | ((m_Size >> Split) & 0x3f);
 	pData[1] = (m_Size & ((1 << Split) - 1));

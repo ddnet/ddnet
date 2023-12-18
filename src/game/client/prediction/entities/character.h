@@ -123,7 +123,7 @@ public:
 	int m_GameTeam;
 	bool m_CanMoveInFreeze;
 
-	bool Match(CCharacter *pChar);
+	bool Match(CCharacter *pChar) const;
 	void ResetPrediction();
 	void SetTuneZone(int Zone);
 

@@ -286,7 +286,7 @@ int CSound::AllocID()
 	return -1;
 }
 
-void CSound::RateConvert(CSample &Sample)
+void CSound::RateConvert(CSample &Sample) const
 {
 	// make sure that we need to convert this sound
 	if(!Sample.m_pData || Sample.m_Rate == m_MixingRate)
@@ -321,7 +321,7 @@ void CSound::RateConvert(CSample &Sample)
 	Sample.m_Rate = m_MixingRate;
 }
 
-bool CSound::DecodeOpus(CSample &Sample, const void *pData, unsigned DataSize)
+bool CSound::DecodeOpus(CSample &Sample, const void *pData, unsigned DataSize) const
 {
 	OggOpusFile *pOpusFile = op_open_memory((const unsigned char *)pData, DataSize, nullptr);
 	if(pOpusFile)
@@ -414,7 +414,7 @@ static int PushBackByte(void *pId, int Char)
 }
 #endif
 
-bool CSound::DecodeWV(CSample &Sample, const void *pData, unsigned DataSize)
+bool CSound::DecodeWV(CSample &Sample, const void *pData, unsigned DataSize) const
 {
 	char aError[100];
 

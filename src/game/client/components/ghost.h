@@ -174,7 +174,7 @@ public:
 	class IGhostLoader *GhostLoader() const { return m_pGhostLoader; }
 	class IGhostRecorder *GhostRecorder() const { return m_pGhostRecorder; }
 
-	int GetLastRaceTick();
+	int GetLastRaceTick() const;
 
 	void RefindSkins();
 };

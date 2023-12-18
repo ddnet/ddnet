@@ -194,7 +194,7 @@ public:
 
 	bool IsActive() const { return GetActiveInput() == this; }
 	void Activate(EInputPriority Priority);
-	void Deactivate();
+	void Deactivate() const;
 };
 
 template<size_t MaxSize, size_t MaxChars = MaxSize>

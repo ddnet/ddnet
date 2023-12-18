@@ -313,7 +313,11 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 		}
 		else if(Event.m_Key == KEY_UP)
 		{
-			if(!m_Searching)
+			if(m_Searching)
+			{
+				SelectNextSearchMatch(-1);
+			}
+			else if(m_Type == CONSOLETYPE_LOCAL || m_pGameConsole->Client()->RconAuthed())
 			{
 				if(m_pHistoryEntry)
 				{
@@ -328,15 +332,15 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 				if(m_pHistoryEntry)
 					m_Input.Set(m_pHistoryEntry);
 			}
-			else
-			{
-				SelectNextSearchMatch(-1);
-			}
 			Handled = true;
 		}
 		else if(Event.m_Key == KEY_DOWN)
 		{
-			if(!m_Searching)
+			if(m_Searching)
+			{
+				SelectNextSearchMatch(1);
+			}
+			else if(m_Type == CONSOLETYPE_LOCAL || m_pGameConsole->Client()->RconAuthed())
 			{
 				if(m_pHistoryEntry)
 					m_pHistoryEntry = m_History.Next(m_pHistoryEntry);
@@ -345,10 +349,6 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 					m_Input.Set(m_pHistoryEntry);
 				else
 					m_Input.Clear();
-			}
-			else
-			{
-				SelectNextSearchMatch(1);
 			}
 			Handled = true;
 		}
@@ -569,7 +569,7 @@ void CGameConsole::CInstance::ScrollToCenter(int StartLine, int EndLine)
 		m_BacklogCurLine -= ComputedLines;
 }
 
-void CGameConsole::CInstance::UpdateEntryTextAttributes(CBacklogEntry *pEntry)
+void CGameConsole::CInstance::UpdateEntryTextAttributes(CBacklogEntry *pEntry) const
 {
 	CTextCursor Cursor;
 	m_pGameConsole->TextRender()->SetCursor(&Cursor, 0.0f, 0.0f, FONT_SIZE, 0);
@@ -970,7 +970,10 @@ void CGameConsole::OnRender()
 		pConsole->m_Input.SetHidden(m_ConsoleType == CONSOLETYPE_REMOTE && Client()->State() == IClient::STATE_ONLINE && !Client()->RconAuthed() && (pConsole->m_UserGot || !pConsole->m_UsernameReq));
 		pConsole->m_Input.Activate(EInputPriority::CONSOLE); // Ensure that the input is active
 		const CUIRect InputCursorRect = {x, y + FONT_SIZE, 0.0f, 0.0f};
-		pConsole->m_BoundingBox = pConsole->m_Input.Render(&InputCursorRect, FONT_SIZE, TEXTALIGN_BL, pConsole->m_Input.WasCursorChanged(), Screen.w - 10.0f - x, LINE_SPACING);
+		const bool WasChanged = pConsole->m_Input.WasChanged();
+		const bool WasCursorChanged = pConsole->m_Input.WasCursorChanged();
+		const bool Changed = WasChanged || WasCursorChanged;
+		pConsole->m_BoundingBox = pConsole->m_Input.Render(&InputCursorRect, FONT_SIZE, TEXTALIGN_BL, Changed, Screen.w - 10.0f - x, LINE_SPACING);
 		if(pConsole->m_LastInputHeight == 0.0f && pConsole->m_BoundingBox.m_H != 0.0f)
 			pConsole->m_LastInputHeight = pConsole->m_BoundingBox.m_H;
 		if(pConsole->m_Input.HasSelection())

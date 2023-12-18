@@ -34,7 +34,7 @@ public:
 	/**
 	 * Scale length according to zoom value.
 	 */
-	float ScaleLength(float Value);
+	float ScaleLength(float Value) const;
 
 	bool m_ShowPicker; // TODO: make private
 

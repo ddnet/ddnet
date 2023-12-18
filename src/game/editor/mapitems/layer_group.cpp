@@ -27,13 +27,13 @@ CLayerGroup::~CLayerGroup()
 	m_vpLayers.clear();
 }
 
-void CLayerGroup::Convert(CUIRect *pRect)
+void CLayerGroup::Convert(CUIRect *pRect) const
 {
 	pRect->x += m_OffsetX;
 	pRect->y += m_OffsetY;
 }
 
-void CLayerGroup::Mapping(float *pPoints)
+void CLayerGroup::Mapping(float *pPoints) const
 {
 	float NormalParallaxZoom = clamp((double)(maximum(m_ParallaxX, m_ParallaxY)), 0., 100.);
 	float ParallaxZoom = m_pMap->m_pEditor->m_PreviewZoom ? NormalParallaxZoom : 100.0f;
@@ -49,7 +49,7 @@ void CLayerGroup::Mapping(float *pPoints)
 	pPoints[3] += m_pMap->m_pEditor->MapView()->GetEditorOffset().y;
 }
 
-void CLayerGroup::MapScreen()
+void CLayerGroup::MapScreen() const
 {
 	float aPoints[4];
 	Mapping(aPoints);

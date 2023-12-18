@@ -56,8 +56,8 @@ public:
 	int GetExternalItemType(int InternalType) const;
 	const void *FindItem(int Type, int ID) const;
 
-	unsigned Crc();
-	void DebugDump();
+	unsigned Crc() const;
+	void DebugDump() const;
 	bool IsValid(size_t ActualSize) const;
 
 	static const CSnapshot *EmptySnapshot() { return &ms_EmptySnapshot; }
@@ -131,7 +131,7 @@ public:
 	void PurgeAll();
 	void PurgeUntil(int Tick);
 	void Add(int Tick, int64_t Tagtime, size_t DataSize, const void *pData, size_t AltDataSize, const void *pAltData);
-	int Get(int Tick, int64_t *pTagtime, const CSnapshot **ppData, const CSnapshot **ppAltData);
+	int Get(int Tick, int64_t *pTagtime, const CSnapshot **ppData, const CSnapshot **ppAltData) const;
 };
 
 class CSnapshotBuilder
