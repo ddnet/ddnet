@@ -1074,26 +1074,14 @@ void CGraphics_Threaded::QuadsDrawTL(const CQuadItem *pArray, int Num)
 
 void CGraphics_Threaded::QuadsTex3DDrawTL(const CQuadItem *pArray, int Num)
 {
-	int CurNumVert = m_NumVertices;
-
-	int VertNum = 0;
-	if(g_Config.m_GfxQuadAsTriangle && !m_GLUseTrianglesAsQuad)
-	{
-		VertNum = 6;
-	}
-	else
-	{
-		VertNum = 4;
-	}
+	const int VertNum = g_Config.m_GfxQuadAsTriangle && !m_GLUseTrianglesAsQuad ? 6 : 4;
+	const float CurIndex = Uses2DTextureArrays() ? m_CurIndex : (m_CurIndex + 0.5f) / 256.0f;
 
 	for(int i = 0; i < Num; ++i)
 	{
 		for(int n = 0; n < VertNum; ++n)
 		{
-			if(Uses2DTextureArrays())
-				m_aVerticesTex3D[CurNumVert + VertNum * i + n].m_Tex.w = (float)m_CurIndex;
-			else
-				m_aVerticesTex3D[CurNumVert + VertNum * i + n].m_Tex.w = ((float)m_CurIndex + 0.5f) / 256.f;
+			m_aVerticesTex3D[m_NumVertices + VertNum * i + n].m_Tex.w = CurIndex;
 		}
 	}
 
