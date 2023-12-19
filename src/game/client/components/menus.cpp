@@ -1045,14 +1045,6 @@ void CMenus::Render()
 		ms_ColorTabbarHover = ms_ColorTabbarHoverOutgame;
 	}
 
-	static bool s_SoundCheck = false;
-	if(!s_SoundCheck && m_Popup == POPUP_NONE)
-	{
-		if(Client()->SoundInitFailed())
-			PopupMessage(Localize("Sound error"), Localize("The audio device couldn't be initialised."), Localize("Ok"));
-		s_SoundCheck = true;
-	}
-
 	if(m_Popup == POPUP_NONE)
 	{
 		if(m_JoinTutorial && ServerBrowser()->DDNetInfoAvailable() && !ServerBrowser()->IsGettingServerlist())

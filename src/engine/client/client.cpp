@@ -2727,7 +2727,7 @@ void CClient::Run()
 	Graphics()->Swap();
 
 	// init sound, allowed to fail
-	m_SoundInitFailed = Sound()->Init() != 0;
+	const bool SoundInitFailed = Sound()->Init() != 0;
 
 #if defined(CONF_VIDEORECORDER)
 	// init video recorder aka ffmpeg
@@ -2804,6 +2804,13 @@ void CClient::Run()
 		g_Config.m_ClShowWelcome = 0;
 	else
 		RequestDDNetInfo();
+
+	if(SoundInitFailed)
+	{
+		SWarning Warning(Localize("Sound error"), Localize("The audio device couldn't be initialised."));
+		Warning.m_AutoHide = false;
+		m_vWarnings.emplace_back(Warning);
+	}
 
 	bool LastD = false;
 	bool LastE = false;

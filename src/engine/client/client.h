@@ -109,7 +109,6 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	bool m_AutoStatScreenshotRecycle = false;
 	bool m_AutoCSVRecycle = false;
 	bool m_EditorActive = false;
-	bool m_SoundInitFailed = false;
 
 	int m_aAckGameTick[NUM_DUMMIES] = {-1, -1};
 	int m_aCurrentRecvTick[NUM_DUMMIES] = {0, 0};
@@ -286,8 +285,6 @@ public:
 	void Rcon(const char *pCmd) override;
 
 	bool ConnectionProblems() const override;
-
-	bool SoundInitFailed() const override { return m_SoundInitFailed; }
 
 	IGraphics::CTextureHandle GetDebugFont() const override { return m_DebugFont; }
 
