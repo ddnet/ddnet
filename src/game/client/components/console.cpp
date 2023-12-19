@@ -1147,9 +1147,7 @@ void CGameConsole::OnRender()
 
 		const float XScale = Graphics()->ScreenWidth() / Screen.w;
 		const float YScale = Graphics()->ScreenHeight() / Screen.h;
-		float CalcOffsetY = 0;
-		while(y - (CalcOffsetY + LineHeight) > RowHeight)
-			CalcOffsetY += LineHeight;
+		const float CalcOffsetY = LineHeight * std::floor((y - RowHeight) / LineHeight);
 		const float ClipStartY = (y - CalcOffsetY) * YScale;
 		Graphics()->ClipEnable(0, ClipStartY, Screen.w * XScale, y * YScale - ClipStartY);
 
