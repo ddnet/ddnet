@@ -278,6 +278,7 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 		}
 	};
 
+	const int BacklogPrevLine = m_BacklogCurLine;
 	if(Event.m_Flags & IInput::FLAG_PRESS)
 	{
 		if(Event.m_Key == KEY_RETURN || Event.m_Key == KEY_KP_ENTER)
@@ -410,24 +411,19 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 		else if(Event.m_Key == KEY_PAGEUP)
 		{
 			m_BacklogCurLine += GetLinesToScroll(-1, m_LinesRendered);
-			m_HasSelection = false;
 		}
 		else if(Event.m_Key == KEY_PAGEDOWN)
 		{
-			m_HasSelection = false;
 			m_BacklogCurLine -= GetLinesToScroll(1, m_LinesRendered);
-
 			if(m_BacklogCurLine < 0)
 				m_BacklogCurLine = 0;
 		}
 		else if(Event.m_Key == KEY_MOUSE_WHEEL_UP)
 		{
 			m_BacklogCurLine += GetLinesToScroll(-1, 1);
-			m_HasSelection = false;
 		}
 		else if(Event.m_Key == KEY_MOUSE_WHEEL_DOWN)
 		{
-			m_HasSelection = false;
 			--m_BacklogCurLine;
 			if(m_BacklogCurLine < 0)
 				m_BacklogCurLine = 0;
@@ -436,15 +432,12 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 		// react to it when the input is empty
 		else if(Event.m_Key == KEY_HOME && m_Input.IsEmpty())
 		{
-			int Lines = GetLinesToScroll(-1, -1);
-			m_BacklogCurLine += Lines;
+			m_BacklogCurLine += GetLinesToScroll(-1, -1);
 			m_BacklogLastActiveLine = m_BacklogCurLine;
-			m_HasSelection = false;
 		}
 		else if(Event.m_Key == KEY_END && m_Input.IsEmpty())
 		{
 			m_BacklogCurLine = 0;
-			m_HasSelection = false;
 		}
 		else if(Event.m_Key == KEY_F && m_pGameConsole->Input()->ModifierIsPressed() && Event.m_Flags & IInput::FLAG_PRESS)
 		{
@@ -453,6 +446,11 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 
 			Handled = true;
 		}
+	}
+
+	if(m_BacklogCurLine != BacklogPrevLine)
+	{
+		m_HasSelection = false;
 	}
 
 	if(!Handled)
