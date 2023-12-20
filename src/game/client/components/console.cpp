@@ -1111,7 +1111,8 @@ void CGameConsole::OnRender()
 			float LocalOffsetY = OffsetY + pEntry->m_YOffset / (float)pEntry->m_LineCount;
 			OffsetY += pEntry->m_YOffset;
 
-			if((pConsole->m_HasSelection || pConsole->m_MouseIsPress) && pConsole->m_NewLineCounter > 0)
+			// Only apply offset if we do not keep scroll position (m_BacklogCurLine == 0)
+			if((pConsole->m_HasSelection || pConsole->m_MouseIsPress) && pConsole->m_NewLineCounter > 0 && pConsole->m_BacklogCurLine == 0)
 			{
 				float MouseExtraOff = pEntry->m_YOffset;
 				pConsole->m_MousePress.y -= MouseExtraOff;
@@ -1176,14 +1177,13 @@ void CGameConsole::OnRender()
 				pConsole->m_HasSelection = true;
 			}
 
+			if(pConsole->m_NewLineCounter > 0) // Decrease by the entry line count since we can have multiline entries
+				pConsole->m_NewLineCounter -= pEntry->m_LineCount;
+
 			pEntry = pConsole->m_Backlog.Prev(pEntry);
 
 			// reset color
 			TextRender()->TextColor(TextRender()->DefaultTextColor());
-			if(pConsole->m_NewLineCounter > 0)
-			{
-				--pConsole->m_NewLineCounter;
-			}
 			First = false;
 
 			if(!pEntry)
