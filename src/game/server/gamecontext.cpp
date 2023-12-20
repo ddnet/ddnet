@@ -4711,6 +4711,7 @@ void CGameContext::OnUpdatePlayerServerInfo(char *aBuf, int BufSize, int ID)
 		}
 	}
 
+	const int Team = m_pController->IsTeamPlay() ? m_apPlayers[ID]->GetTeam() : m_apPlayers[ID]->GetTeam() == TEAM_SPECTATORS ? -1 : GetDDRaceTeam(ID);
 	str_format(aBuf, BufSize,
 		",\"skin\":{"
 		"%s"
@@ -4719,5 +4720,5 @@ void CGameContext::OnUpdatePlayerServerInfo(char *aBuf, int BufSize, int ID)
 		"\"team\":%d",
 		aJsonSkin,
 		JsonBool(m_apPlayers[ID]->IsAfk()),
-		m_apPlayers[ID]->GetTeam());
+		Team);
 }
