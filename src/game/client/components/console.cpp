@@ -1054,7 +1054,16 @@ void CGameConsole::OnRender()
 
 		pConsole->PumpBacklogPending();
 		if(pConsole->m_NewLineCounter > 0)
+		{
 			pConsole->UpdateSearch();
+
+			// keep scroll position when new entries are printed.
+			if(pConsole->m_BacklogCurLine != 0)
+			{
+				pConsole->m_BacklogCurLine += pConsole->m_NewLineCounter;
+				pConsole->m_BacklogLastActiveLine += pConsole->m_NewLineCounter;
+			}
+		}
 
 		// render console log (current entry, status, wrap lines)
 		CInstance::CBacklogEntry *pEntry = pConsole->m_Backlog.Last();
@@ -1085,17 +1094,6 @@ void CGameConsole::OnRender()
 				pConsole->UpdateEntryTextAttributes(pEntry);
 
 			LineNum += pEntry->m_LineCount;
-			while(pConsole->m_NewLineCounter > 0)
-			{
-				--pConsole->m_NewLineCounter;
-
-				// keep scroll position when new entries are printed.
-				if(pConsole->m_BacklogCurLine != 0)
-				{
-					pConsole->m_BacklogCurLine++;
-					pConsole->m_BacklogLastActiveLine++;
-				}
-			}
 			if(LineNum < pConsole->m_BacklogLastActiveLine)
 			{
 				SkippedLines += pEntry->m_LineCount;
@@ -1182,6 +1180,10 @@ void CGameConsole::OnRender()
 
 			// reset color
 			TextRender()->TextColor(TextRender()->DefaultTextColor());
+			if(pConsole->m_NewLineCounter > 0)
+			{
+				--pConsole->m_NewLineCounter;
+			}
 			First = false;
 
 			if(!pEntry)
