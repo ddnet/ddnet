@@ -51,8 +51,9 @@ void CMapSounds::OnMapLoad()
 		}
 		else
 		{
-			void *pData = pMap->GetData(pSound->m_SoundData);
-			m_aSounds[i] = Sound()->LoadOpusFromMem(pData, pSound->m_SoundDataSize);
+			const int SoundDataSize = pMap->GetDataSize(pSound->m_SoundData);
+			const void *pData = pMap->GetData(pSound->m_SoundData);
+			m_aSounds[i] = Sound()->LoadOpusFromMem(pData, SoundDataSize);
 			pMap->UnloadData(pSound->m_SoundData);
 		}
 		ShowWarning = ShowWarning || m_aSounds[i] == -1;
