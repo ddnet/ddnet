@@ -278,7 +278,7 @@ public:
 	void ComCallShuffleVote(int ClientID);
 	void ComCallSwapTeamsVote(int ClientID);
 	void ComCallSwapTeamsRandomVote(int ClientID);
-	void UpdateVoteCheckboxes();
+	void UpdateVoteCheckboxes() const;
 	void RefreshVotes();
 	void AlertOnSpecialInstagibConfigs(int ClientID = -1) const;
 	void ShowCurrentInstagibConfigsMotd(int ClientID = -1, bool Force = false) const;

@@ -76,7 +76,7 @@ void CGameContext::ShowCurrentInstagibConfigsMotd(int ClientID, bool Force) cons
 	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
 }
 
-void CGameContext::UpdateVoteCheckboxes()
+void CGameContext::UpdateVoteCheckboxes() const
 {
 	if(!g_Config.m_SvVoteCheckboxes)
 		return;
