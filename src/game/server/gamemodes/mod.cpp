@@ -15,6 +15,8 @@ class CCharacterMod : public CCharacter
 public:
 	CCharacterMod(CGameControllerMod *pGameController, CNetObj_PlayerInput LastInput);
 
+	bool TakeDamage(vec2 Force, int Dmg, int From, int Weapon) override;
+
 protected:
 	CGameControllerMod *m_pGameController = nullptr;
 };
@@ -24,6 +26,12 @@ CCharacterMod::CCharacterMod(CGameControllerMod *pGameController, CNetObj_Player
 	m_pGameController(pGameController)
 
 {
+}
+
+bool CCharacterMod::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
+{
+	m_pGameController->OnCharacterTakeDamage(this, Dmg, From, Weapon);
+	return CCharacter::TakeDamage(Force, Dmg, From, Weapon);
 }
 
 MACRO_ALLOC_POOL_ID_IMPL(CCharacterMod, MAX_CLIENTS)
@@ -73,4 +81,11 @@ void CGameControllerMod::Tick()
 	// this is the main part of the gamemode, this function is run every tick
 
 	IGameController::Tick();
+}
+
+void CGameControllerMod::OnCharacterTakeDamage(CCharacterMod *pCharacter, int Damage, int From, int Weapon)
+{
+	char aBuf[128];
+	str_format(aBuf, sizeof(aBuf), "You've received %d damage points from player %d", Damage, From);
+	GameServer()->SendChatTarget(pCharacter->GetPlayer()->GetCID(), aBuf);
 }

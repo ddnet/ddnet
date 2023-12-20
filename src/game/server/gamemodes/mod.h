@@ -13,6 +13,8 @@ public:
 
 	void Tick() override;
 
+	void OnCharacterTakeDamage(class CCharacterMod *pCharacter, int Damage, int From, int Weapon);
+
 	using IGameController::GameServer;
 };
 #endif // GAME_SERVER_GAMEMODES_MOD_H
