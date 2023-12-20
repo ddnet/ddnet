@@ -2566,6 +2566,7 @@ if(SERVER)
     gamemodes/gctf.h
     gamemodes/ictf.cpp
     gamemodes/ictf.h
+    gamemodes/instagib/bangcommands.cpp
     gamemodes/instagib/character.cpp
     gamemodes/instagib/character.h
     gamemodes/instagib/chat.cpp
@@ -2583,7 +2584,6 @@ if(SERVER)
     gamemodes/zcatch.h
     gameworld.cpp
     gameworld.h
-    instagib/bangcommands.cpp
     instagib/gamelogic.cpp
     instagib/strhelpers.cpp
     instagib/strhelpers.h

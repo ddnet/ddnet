@@ -274,10 +274,6 @@ public:
 	void SendGameMsg(int GameMsgID, int ParaI1, int ClientID) const;
 	void SendGameMsg(int GameMsgID, int ParaI1, int ParaI2, int ParaI3, int ClientID) const; // gctf
 	int GetDDNetInstaWeapon();
-	void BangCommandVote(int ClientID, const char *pCommand, const char *pDesc);
-	void ComCallShuffleVote(int ClientID);
-	void ComCallSwapTeamsVote(int ClientID);
-	void ComCallSwapTeamsRandomVote(int ClientID);
 	void UpdateVoteCheckboxes() const;
 	void RefreshVotes();
 	void AlertOnSpecialInstagibConfigs(int ClientID = -1) const;

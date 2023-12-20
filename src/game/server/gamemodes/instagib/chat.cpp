@@ -158,7 +158,7 @@ bool CGameControllerInstagib::OnBangCommand(int ClientID, const char *pCmd, int 
 		str_format(aCmd, sizeof(aCmd), "sv_spectator_slots %d", MAX_CLIENTS - SetSlots * 2);
 		char aDesc[512];
 		str_format(aDesc, sizeof(aDesc), "%dvs%d", SetSlots, SetSlots);
-		GameServer()->BangCommandVote(ClientID, aCmd, aDesc);
+		BangCommandVote(ClientID, aCmd, aDesc);
 	}
 	else if(!str_comp_nocase(pCmd, "restart") || !str_comp_nocase(pCmd, "reload"))
 	{
@@ -168,7 +168,7 @@ bool CGameControllerInstagib::OnBangCommand(int ClientID, const char *pCmd, int 
 		str_format(aCmd, sizeof(aCmd), "restart %d", Seconds);
 		char aDesc[512];
 		str_format(aDesc, sizeof(aDesc), "restart %d", Seconds);
-		GameServer()->BangCommandVote(ClientID, aCmd, aDesc);
+		BangCommandVote(ClientID, aCmd, aDesc);
 	}
 	else if(!str_comp_nocase(pCmd, "ready") || !str_comp_nocase(pCmd, "pause"))
 	{
@@ -176,15 +176,15 @@ bool CGameControllerInstagib::OnBangCommand(int ClientID, const char *pCmd, int 
 	}
 	else if(!str_comp_nocase(pCmd, "shuffle"))
 	{
-		GameServer()->ComCallShuffleVote(ClientID);
+		ComCallShuffleVote(ClientID);
 	}
 	else if(!str_comp_nocase(pCmd, "swap"))
 	{
-		GameServer()->ComCallSwapTeamsVote(ClientID);
+		ComCallSwapTeamsVote(ClientID);
 	}
 	else if(!str_comp_nocase(pCmd, "swap_random"))
 	{
-		GameServer()->ComCallSwapTeamsRandomVote(ClientID);
+		ComCallSwapTeamsRandomVote(ClientID);
 	}
 	else if(!str_comp_nocase(pCmd, "gamestate"))
 	{
@@ -398,17 +398,17 @@ bool CGameControllerInstagib::OnChatMessage(const CNetMsg_Cl_Say *pMsg, int Leng
 		}
 		else if(!str_comp_nocase(pMsg->m_pMessage + 1, "shuffle")) // gctf
 		{
-			GameServer()->ComCallShuffleVote(ClientID);
+			ComCallShuffleVote(ClientID);
 			return true;
 		}
 		else if(!str_comp_nocase(pMsg->m_pMessage + 1, "swap")) // gctf
 		{
-			GameServer()->ComCallSwapTeamsVote(ClientID);
+			ComCallSwapTeamsVote(ClientID);
 			return true;
 		}
 		else if(!str_comp_nocase(pMsg->m_pMessage + 1, "swap_random")) // gctf
 		{
-			GameServer()->ComCallSwapTeamsRandomVote(ClientID);
+			ComCallSwapTeamsRandomVote(ClientID);
 			return true;
 		}
 	}

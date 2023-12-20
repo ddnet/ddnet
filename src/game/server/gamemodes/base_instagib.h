@@ -44,6 +44,11 @@ public:
 	void SwapTeams();
 	void ModifyWeapons(IConsole::IResult *pResult, void *pUserData, int Weapon, bool Remove);
 
+	void BangCommandVote(int ClientID, const char *pCommand, const char *pDesc);
+	void ComCallShuffleVote(int ClientID);
+	void ComCallSwapTeamsVote(int ClientID);
+	void ComCallSwapTeamsRandomVote(int ClientID);
+
 	bool AllowPublicChat(const CPlayer *pPlayer);
 	bool ParseChatCmd(char Prefix, int ClientID, const char *pCmdWithArgs);
 	bool OnBangCommand(int ClientID, const char *pCmd, int NumArgs, const char **ppArgs);

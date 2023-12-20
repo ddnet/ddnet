@@ -1,27 +1,22 @@
-#include <engine/shared/config.h>
+#include <game/server/entities/character.h>
+#include <game/server/player.h>
+#include <game/server/score.h>
+#include <game/version.h>
 
-#include "../entities/character.h"
-#include "../gamecontext.h"
-#include "../gamemodes/DDRace.h"
-#include "../gamemodes/gctf.h"
-#include "../gamemodes/ictf.h"
-#include "../gamemodes/mod.h"
-#include "../player.h"
+#include "../base_instagib.h"
 
-#include "strhelpers.h"
-
-void CGameContext::BangCommandVote(int ClientID, const char *pCommand, const char *pDesc)
+void CGameControllerInstagib::BangCommandVote(int ClientID, const char *pCommand, const char *pDesc)
 {
 	char aChatmsg[1024];
 	str_format(aChatmsg, sizeof(aChatmsg), "'%s' called vote to change server option '%s'", Server()->ClientName(ClientID), pDesc);
-	CallVote(ClientID, pDesc, pCommand, "chat cmd", aChatmsg);
+	GameServer()->CallVote(ClientID, pDesc, pCommand, "chat cmd", aChatmsg);
 }
 
-void CGameContext::ComCallShuffleVote(int ClientID)
+void CGameControllerInstagib::ComCallShuffleVote(int ClientID)
 {
 	if(ClientID < 0 || ClientID >= MAX_CLIENTS)
 		return;
-	CPlayer *pPlayer = m_apPlayers[ClientID];
+	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientID];
 	if(!pPlayer)
 		return;
 	// not needed for bang command but for slash command
@@ -33,11 +28,11 @@ void CGameContext::ComCallShuffleVote(int ClientID)
 	BangCommandVote(ClientID, "shuffle_teams", "shuffle teams");
 }
 
-void CGameContext::ComCallSwapTeamsVote(int ClientID)
+void CGameControllerInstagib::ComCallSwapTeamsVote(int ClientID)
 {
 	if(ClientID < 0 || ClientID >= MAX_CLIENTS)
 		return;
-	CPlayer *pPlayer = m_apPlayers[ClientID];
+	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientID];
 	if(!pPlayer)
 		return;
 	// not needed for bang command but for slash command
@@ -49,11 +44,11 @@ void CGameContext::ComCallSwapTeamsVote(int ClientID)
 	BangCommandVote(ClientID, "swap_teams", "swap teams");
 }
 
-void CGameContext::ComCallSwapTeamsRandomVote(int ClientID)
+void CGameControllerInstagib::ComCallSwapTeamsRandomVote(int ClientID)
 {
 	if(ClientID < 0 || ClientID >= MAX_CLIENTS)
 		return;
-	CPlayer *pPlayer = m_apPlayers[ClientID];
+	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientID];
 	if(!pPlayer)
 		return;
 	// not needed for bang command but for slash command
