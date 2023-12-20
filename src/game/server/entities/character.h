@@ -62,10 +62,10 @@ public:
 	void OnDirectInput(CNetObj_PlayerInput *pNewInput);
 	void ResetHook();
 	void ResetInput();
-	void FireWeapon();
+	virtual void FireWeapon();
 
-	void Die(int Killer, int Weapon, bool SendKillMsg = true);
-	bool TakeDamage(vec2 Force, int Dmg, int From, int Weapon);
+	virtual void Die(int Killer, int Weapon, bool SendKillMsg = true);
+	virtual bool TakeDamage(vec2 Force, int Dmg, int From, int Weapon);
 
 	bool Spawn(class CPlayer *pPlayer, vec2 Pos);
 	bool Remove();
@@ -88,7 +88,7 @@ public:
 	class CPlayer *GetPlayer() { return m_pPlayer; }
 	CClientMask TeamMask();
 
-private:
+protected:
 	// player controlling this character
 	class CPlayer *m_pPlayer;
 
