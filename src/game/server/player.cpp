@@ -626,6 +626,11 @@ void CPlayer::SetTeam(int Team, bool DoChatMsg)
 				pPlayer->m_SpectatorID = SPEC_FREEVIEW;
 		}
 	}
+
+	if(!GameServer()->m_pController->IsTeamPlay())
+	{
+		Server()->ExpireServerInfo();
+	}
 }
 
 bool CPlayer::SetTimerType(int TimerType)
