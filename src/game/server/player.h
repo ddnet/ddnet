@@ -39,7 +39,7 @@ public:
 
 	void Reset();
 
-	void TryRespawn();
+	virtual void TryRespawn();
 	void Respawn(bool WeakHook = false); // with WeakHook == true the character will be spawned after all calls of Tick from other Players
 	CCharacter *ForceSpawn(vec2 Pos); // required for loading savegames
 	void SetTeam(int Team, bool DoChatMsg = true);
@@ -126,7 +126,9 @@ public:
 		int m_Max;
 	} m_Latency;
 
-private:
+protected:
+	virtual CCharacter *CreateCharacter();
+
 	const uint32_t m_UniqueClientID;
 	CCharacter *m_pCharacter;
 	int m_NumInputs;
