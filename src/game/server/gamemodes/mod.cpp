@@ -6,7 +6,27 @@
 #define GAME_TYPE_NAME "Mod"
 #define TEST_TYPE_NAME "TestMod"
 
+#include <game/server/entities/character.h>
 #include <game/server/player.h>
+
+class CCharacterMod : public CCharacter
+{
+	MACRO_ALLOC_POOL_ID()
+public:
+	CCharacterMod(CGameControllerMod *pGameController, CNetObj_PlayerInput LastInput);
+
+protected:
+	CGameControllerMod *m_pGameController = nullptr;
+};
+
+CCharacterMod::CCharacterMod(CGameControllerMod *pGameController, CNetObj_PlayerInput LastInput) :
+	CCharacter(&pGameController->GameServer()->m_World, LastInput),
+	m_pGameController(pGameController)
+
+{
+}
+
+MACRO_ALLOC_POOL_ID_IMPL(CCharacterMod, MAX_CLIENTS)
 
 class CPlayerMod : public CPlayer
 {
@@ -14,7 +34,9 @@ class CPlayerMod : public CPlayer
 public:
 	CPlayerMod(CGameControllerMod *pGameController, uint32_t UniqueClientID, int ClientID, int Team);
 
-private:
+protected:
+	CCharacter *CreateCharacter() override;
+
 	CGameControllerMod *m_pGameController = nullptr;
 };
 
@@ -24,6 +46,11 @@ CPlayerMod::CPlayerMod(CGameControllerMod *pGameController, uint32_t UniqueClien
 	CPlayer(pGameController->GameServer(), UniqueClientID, ClientID, Team),
 	m_pGameController(pGameController)
 {
+}
+
+CCharacter *CPlayerMod::CreateCharacter()
+{
+	return new(m_ClientID) CCharacterMod(m_pGameController, GameServer()->GetLastPlayerInput(m_ClientID));
 }
 
 CGameControllerMod::CGameControllerMod(class CGameContext *pGameServer) :
