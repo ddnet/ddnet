@@ -168,8 +168,13 @@ void SaveOutputMap(CDataFileReader &InputMap, CDataFileWriter &OutputMap)
 		int ID, Type;
 		void *pItem = InputMap.GetItem(i, &Type, &ID);
 
-		if(Type == ITEMTYPE_EX)
+		// Filter items with unknown type, as we can't write them back.
+		// Filter ITEMTYPE_EX items, they will be automatically added again.
+		if(Type < 0 || Type == ITEMTYPE_EX)
+		{
 			continue;
+		}
+
 		if(g_apNewItem[i])
 			pItem = g_apNewItem[i];
 

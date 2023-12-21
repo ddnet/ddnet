@@ -140,13 +140,14 @@ int main(int argc, const char **argv)
 	{
 		int Type, ID;
 		void *pPtr = Reader.GetItem(Index, &Type, &ID);
-		int Size = Reader.GetItemSize(Index);
 
-		// filter ITEMTYPE_EX items, they will be automatically added again
-		if(Type == ITEMTYPE_EX)
+		// Filter items with unknown type, as we can't write them back.
+		// Filter ITEMTYPE_EX items, they will be automatically added again.
+		if(Type < 0 || Type == ITEMTYPE_EX)
 		{
 			continue;
 		}
+
 		// for all layers, check if it uses a image and set the corresponding flag
 		if(Type == MAPITEMTYPE_LAYER)
 		{
@@ -203,6 +204,7 @@ int main(int argc, const char **argv)
 			++i;
 		}
 
+		int Size = Reader.GetItemSize(Index);
 		Writer.AddItem(Type, ID, Size, pPtr);
 	}
 

@@ -150,9 +150,12 @@ int main(int argc, const char **argv)
 		int Type, ID;
 		void *pItem = g_DataReader.GetItem(Index, &Type, &ID);
 
-		// filter ITEMTYPE_EX items, they will be automatically added again
-		if(Type == ITEMTYPE_EX)
+		// Filter items with unknown type, as we can't write them back.
+		// Filter ITEMTYPE_EX items, they will be automatically added again.
+		if(Type < 0 || Type == ITEMTYPE_EX)
+		{
 			continue;
+		}
 
 		int Size = g_DataReader.GetItemSize(Index);
 
