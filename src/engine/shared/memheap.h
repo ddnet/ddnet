@@ -4,7 +4,12 @@
 #define ENGINE_SHARED_MEMHEAP_H
 
 #include <cstddef>
+#if __has_include(<memory_resource>)
 #include <memory_resource>
+#else
+// macOS < 14.0 needs this
+#include <experimental/memory_resource>
+#endif
 #include <new>
 #include <utility>
 
