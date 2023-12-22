@@ -4,36 +4,23 @@
 #define ENGINE_SHARED_MEMHEAP_H
 
 #include <cstddef>
+#include <memory_resource>
 #include <new>
 #include <utility>
 
+// A Heap backed by a bump allocator.
+// The size of buffers obtained follows a geometric progression.
 class CHeap
 {
-	struct CChunk
-	{
-		char *m_pMemory;
-		char *m_pCurrent;
-		char *m_pEnd;
-		CChunk *m_pNext;
-	};
-
-	enum
-	{
-		// how large each chunk should be
-		CHUNK_SIZE = 1025 * 64,
-	};
-
-	CChunk *m_pCurrent;
-
+	std::pmr::monotonic_buffer_resource m_BumpAllocator;
 	void Clear();
-	void NewChunk();
-	void *AllocateFromChunk(unsigned int Size, unsigned Alignment);
 
 public:
 	CHeap();
 	~CHeap();
+	// Resets the heap, deallocating everything at once.
 	void Reset();
-	void *Allocate(unsigned Size, unsigned Alignment = alignof(std::max_align_t));
+	void *Allocate(size_t Size, size_t Alignment = alignof(std::max_align_t));
 	const char *StoreString(const char *pSrc);
 
 	template<typename T, typename... TArgs>
