@@ -142,6 +142,23 @@ public:
 	CSkin &operator=(CSkin &&) = default;
 
 	const char *GetName() const { return m_aName; }
+
+	static bool IsValidName(const char *pName)
+	{
+		if(pName[0] == '\0' || str_length(pName) >= (int)sizeof(CSkin("").m_aName))
+		{
+			return false;
+		}
+
+		for(int i = 0; pName[i] != '\0'; ++i)
+		{
+			if(pName[i] == '"' || pName[i] == '/' || pName[i] == '\\')
+			{
+				return false;
+			}
+		}
+		return true;
+	}
 };
 
 #endif

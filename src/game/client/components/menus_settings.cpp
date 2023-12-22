@@ -430,7 +430,15 @@ void CMenus::Con_AddFavoriteSkin(IConsole::IResult *pResult, void *pUserData)
 	auto *pSelf = (CMenus *)pUserData;
 	if(pResult->NumArguments() >= 1)
 	{
-		pSelf->m_SkinFavorites.emplace(pResult->GetString(0));
+		const char *pStr = pResult->GetString(0);
+		if(!CSkin::IsValidName(pStr))
+		{
+			char aError[IConsole::CMDLINE_LENGTH + 64];
+			str_format(aError, sizeof(aError), "Favorite skin name '%s' is not valid", pStr);
+			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "menus/settings", aError);
+			return;
+		}
+		pSelf->m_SkinFavorites.emplace(pStr);
 		pSelf->m_SkinFavoritesChanged = true;
 	}
 }
@@ -460,9 +468,6 @@ void CMenus::OnConfigSave(IConfigManager *pConfigManager)
 	for(const auto &Entry : m_SkinFavorites)
 	{
 		char aBuffer[256];
-		char aNameEscaped[256];
-		char *pDst = aNameEscaped;
-		str_escape(&pDst, Entry.c_str(), aNameEscaped + std::size(aNameEscaped));
 		str_format(aBuffer, std::size(aBuffer), "add_favorite_skin \"%s\"", Entry.c_str());
 		pConfigManager->WriteLine(aBuffer);
 	}
