@@ -17,7 +17,12 @@
 // The size of buffers obtained follows a geometric progression.
 class CHeap
 {
-	std::pmr::monotonic_buffer_resource m_BumpAllocator;
+#if __has_include(<memory_resource>)
+	std::pmr::monotonic_buffer_resource
+#else
+	std::experimental::pmr::monotonic_buffer_resource
+#endif
+		m_BumpAllocator;
 	void Clear();
 
 public:
