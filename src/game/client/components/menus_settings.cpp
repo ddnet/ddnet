@@ -428,32 +428,26 @@ void CMenus::RandomSkin()
 void CMenus::Con_AddFavoriteSkin(IConsole::IResult *pResult, void *pUserData)
 {
 	auto *pSelf = (CMenus *)pUserData;
-	if(pResult->NumArguments() >= 1)
+	const char *pStr = pResult->GetString(0);
+	if(!CSkin::IsValidName(pStr))
 	{
-		const char *pStr = pResult->GetString(0);
-		if(!CSkin::IsValidName(pStr))
-		{
-			char aError[IConsole::CMDLINE_LENGTH + 64];
-			str_format(aError, sizeof(aError), "Favorite skin name '%s' is not valid", pStr);
-			pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "menus/settings", aError);
-			return;
-		}
-		pSelf->m_SkinFavorites.emplace(pStr);
-		pSelf->m_SkinFavoritesChanged = true;
+		char aError[IConsole::CMDLINE_LENGTH + 64];
+		str_format(aError, sizeof(aError), "Favorite skin name '%s' is not valid", pStr);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "menus/settings", aError);
+		return;
 	}
+	pSelf->m_SkinFavorites.emplace(pStr);
+	pSelf->m_SkinFavoritesChanged = true;
 }
 
 void CMenus::Con_RemFavoriteSkin(IConsole::IResult *pResult, void *pUserData)
 {
 	auto *pSelf = (CMenus *)pUserData;
-	if(pResult->NumArguments() >= 1)
+	const auto it = pSelf->m_SkinFavorites.find(pResult->GetString(0));
+	if(it != pSelf->m_SkinFavorites.end())
 	{
-		const auto it = pSelf->m_SkinFavorites.find(pResult->GetString(0));
-		if(it != pSelf->m_SkinFavorites.end())
-		{
-			pSelf->m_SkinFavorites.erase(it);
-			pSelf->m_SkinFavoritesChanged = true;
-		}
+		pSelf->m_SkinFavorites.erase(it);
+		pSelf->m_SkinFavoritesChanged = true;
 	}
 }
 
