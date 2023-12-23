@@ -74,6 +74,52 @@ void CGameClient::DoTeamChangeMessage7(const char *pName, int ClientId, int Team
 	m_Chat.AddLine(-1, 0, aBuf);
 }
 
+template<typename T>
+void CGameClient::ApplySkin7InfoFromGameMsg(const T *pMsg, int ClientId)
+{
+	CClientData *pClient = &m_aClients[ClientId];
+	char *apSkinPartsPtr[protocol7::NUM_SKINPARTS];
+	for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
+	{
+		str_utf8_copy_num(pClient->m_aaSkinPartNames[Part], pMsg->m_apSkinPartNames[Part], sizeof(pClient->m_aaSkinPartNames[Part]), protocol7::MAX_SKIN_LENGTH);
+		apSkinPartsPtr[Part] = pClient->m_aaSkinPartNames[Part];
+		pClient->m_aUseCustomColors[Part] = pMsg->m_aUseCustomColors[Part];
+		pClient->m_aSkinPartColors[Part] = pMsg->m_aSkinPartColors[Part];
+	}
+	m_Skins7.ValidateSkinParts(apSkinPartsPtr, pClient->m_aUseCustomColors, pClient->m_aSkinPartColors, m_pClient->m_TranslationContext.m_GameFlags);
+
+	if(time_season() == SEASON_XMAS)
+	{
+		pClient->m_SkinInfo.m_Sixup.m_HatTexture = m_Skins7.m_XmasHatTexture;
+		pClient->m_SkinInfo.m_Sixup.m_HatSpriteIndex = ClientId % CSkins7::HAT_NUM;
+	}
+	else
+		pClient->m_SkinInfo.m_Sixup.m_HatTexture.Invalidate();
+
+	for(int Part = 0; Part < protocol7::NUM_SKINPARTS; Part++)
+	{
+		int Id = m_Skins7.FindSkinPart(Part, pClient->m_aaSkinPartNames[Part], false);
+		const CSkins7::CSkinPart *pSkinPart = m_Skins7.GetSkinPart(Part, Id);
+		if(pClient->m_aUseCustomColors[Part])
+		{
+			pClient->m_SkinInfo.m_Sixup.m_aTextures[Part] = pSkinPart->m_ColorTexture;
+			pClient->m_SkinInfo.m_Sixup.m_aColors[Part] = m_Skins7.GetColor(pClient->m_aSkinPartColors[Part], Part == protocol7::SKINPART_MARKING);
+		}
+		else
+		{
+			pClient->m_SkinInfo.m_Sixup.m_aTextures[Part] = pSkinPart->m_OrgTexture;
+			pClient->m_SkinInfo.m_Sixup.m_aColors[Part] = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
+		}
+		if(pClient->m_SkinInfo.m_Sixup.m_HatTexture.IsValid())
+		{
+			if(Part == protocol7::SKINPART_BODY && str_comp(pClient->m_aaSkinPartNames[Part], "standard"))
+				pClient->m_SkinInfo.m_Sixup.m_HatSpriteIndex = CSkins7::HAT_OFFSET_SIDE + (ClientId % CSkins7::HAT_NUM);
+			if(Part == protocol7::SKINPART_DECORATION && !str_comp(pClient->m_aaSkinPartNames[Part], "twinbopp"))
+				pClient->m_SkinInfo.m_Sixup.m_HatSpriteIndex = CSkins7::HAT_OFFSET_SIDE + (ClientId % CSkins7::HAT_NUM);
+		}
+	}
+}
+
 void *CGameClient::TranslateGameMsg(int *pMsgId, CUnpacker *pUnpacker, int Conn)
 {
 	if(!m_pClient->IsSixup())
@@ -228,22 +274,7 @@ void *CGameClient::TranslateGameMsg(int *pMsgId, CUnpacker *pUnpacker, int Conn)
 
 		CTranslationContext::CClientData &Client = m_pClient->m_TranslationContext.m_aClients[pMsg7->m_ClientId];
 		Client.m_Active = true;
-		CClientData *pClient = &m_aClients[pMsg7->m_ClientId];
-		for(int p = 0; p < protocol7::NUM_SKINPARTS; p++)
-		{
-			int Id = m_Skins7.FindSkinPart(p, pMsg7->m_apSkinPartNames[p], false);
-			const CSkins7::CSkinPart *pSkinPart = m_Skins7.GetSkinPart(p, Id);
-			if(pMsg7->m_aUseCustomColors[p])
-			{
-				pClient->m_SkinInfo.m_Sixup.m_aTextures[p] = pSkinPart->m_ColorTexture;
-				pClient->m_SkinInfo.m_Sixup.m_aColors[p] = m_Skins7.GetColor(pMsg7->m_aSkinPartColors[p], p == protocol7::SKINPART_MARKING);
-			}
-			else
-			{
-				pClient->m_SkinInfo.m_Sixup.m_aTextures[p] = pSkinPart->m_OrgTexture;
-				pClient->m_SkinInfo.m_Sixup.m_aColors[p] = vec4(1.0f, 1.0f, 1.0f, 1.0f);
-			}
-		}
+		ApplySkin7InfoFromGameMsg(pMsg7, pMsg7->m_ClientId);
 		// skin will be moved to the 0.6 snap by the translation context
 		// and we drop the game message
 		return nullptr;
@@ -445,23 +476,7 @@ void *CGameClient::TranslateGameMsg(int *pMsgId, CUnpacker *pUnpacker, int Conn)
 		str_copy(Client.m_aName, pMsg7->m_pName);
 		str_copy(Client.m_aClan, pMsg7->m_pClan);
 		Client.m_Country = pMsg7->m_Country;
-		CClientData *pClient = &m_aClients[pMsg7->m_ClientId];
-		for(int p = 0; p < protocol7::NUM_SKINPARTS; p++)
-		{
-			int Id = m_Skins7.FindSkinPart(p, pMsg7->m_apSkinPartNames[p], false);
-			const CSkins7::CSkinPart *pSkinPart = m_Skins7.GetSkinPart(p, Id);
-			if(pMsg7->m_aUseCustomColors[p])
-			{
-				pClient->m_SkinInfo.m_Sixup.m_aTextures[p] = pSkinPart->m_ColorTexture;
-				pClient->m_SkinInfo.m_Sixup.m_aColors[p] = m_Skins7.GetColor(pMsg7->m_aSkinPartColors[p], p == protocol7::SKINPART_MARKING);
-			}
-			else
-			{
-				pClient->m_SkinInfo.m_Sixup.m_aTextures[p] = pSkinPart->m_OrgTexture;
-				pClient->m_SkinInfo.m_Sixup.m_aColors[p] = vec4(1.0f, 1.0f, 1.0f, 1.0f);
-			}
-		}
-
+		ApplySkin7InfoFromGameMsg(pMsg7, pMsg7->m_ClientId);
 		if(m_pClient->m_TranslationContext.m_aLocalClientId[Conn] == -1)
 			return nullptr;
 		if(pMsg7->m_Silent || pMsg7->m_Local)
