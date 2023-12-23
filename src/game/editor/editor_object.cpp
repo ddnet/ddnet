@@ -8,9 +8,8 @@ void CEditorObject::Init(CEditor *pEditor)
 	OnReset();
 }
 
-void CEditorObject::OnUpdate(CUIRect View)
+void CEditorObject::OnUpdate()
 {
-	OnRender(View);
 	if(IsActive())
 		OnActive();
 	else if(IsHot())
