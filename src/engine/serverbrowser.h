@@ -238,6 +238,7 @@ public:
 class IFilterList
 {
 public:
+	virtual ~IFilterList() = default;
 	virtual void Add(const char *pElement) = 0;
 	virtual void Remove(const char *pElement) = 0;
 	virtual void Clear() = 0;

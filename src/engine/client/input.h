@@ -35,9 +35,9 @@ public:
 		CInput *Input() { return m_pInput; }
 
 	public:
-		CJoystick() {}
+		CJoystick() = default;
 		CJoystick(CInput *pInput, int Index, SDL_Joystick *pDelegate);
-		virtual ~CJoystick() = default;
+		~CJoystick() override = default;
 
 		int GetIndex() const override { return m_Index; }
 		const char *GetName() const override { return m_aName; }

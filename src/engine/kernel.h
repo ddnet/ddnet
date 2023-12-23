@@ -19,7 +19,7 @@ public:
 	IInterface() :
 		m_pKernel(nullptr) {}
 	virtual void Shutdown() {}
-	virtual ~IInterface() {}
+	virtual ~IInterface() = default;
 };
 
 #define MACRO_INTERFACE(Name) \
@@ -40,7 +40,7 @@ class IKernel
 public:
 	static IKernel *Create();
 	virtual void Shutdown() = 0;
-	virtual ~IKernel() {}
+	virtual ~IKernel() = default;
 
 	// templated access to handle pointer conversions and interface names
 	template<class TINTERFACE>

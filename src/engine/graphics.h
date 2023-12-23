@@ -395,7 +395,7 @@ public:
 	struct CLineItem
 	{
 		float m_X0, m_Y0, m_X1, m_Y1;
-		CLineItem() {}
+		CLineItem() = default;
 		CLineItem(float x0, float y0, float x1, float y1) :
 			m_X0(x0), m_Y0(y0), m_X1(x1), m_Y1(y1) {}
 	};
@@ -418,7 +418,7 @@ public:
 	struct CFreeformItem
 	{
 		float m_X0, m_Y0, m_X1, m_Y1, m_X2, m_Y2, m_X3, m_Y3;
-		CFreeformItem() {}
+		CFreeformItem() = default;
 		CFreeformItem(float x0, float y0, float x1, float y1, float x2, float y2, float x3, float y3) :
 			m_X0(x0), m_Y0(y0), m_X1(x1), m_Y1(y1), m_X2(x2), m_Y2(y2), m_X3(x3), m_Y3(y3) {}
 	};
@@ -426,7 +426,7 @@ public:
 	struct CQuadItem
 	{
 		float m_X, m_Y, m_Width, m_Height;
-		CQuadItem() {}
+		CQuadItem() = default;
 		CQuadItem(float x, float y, float w, float h) :
 			m_X(x), m_Y(y), m_Width(w), m_Height(h) {}
 		void Set(float x, float y, float w, float h)
@@ -500,7 +500,7 @@ public:
 	{
 		int m_Index;
 		float m_R, m_G, m_B, m_A;
-		CColorVertex() {}
+		CColorVertex() = default;
 		CColorVertex(int i, float r, float g, float b, float a) :
 			m_Index(i), m_R(r), m_G(g), m_B(b), m_A(a) {}
 	};
@@ -551,7 +551,7 @@ class IEngineGraphics : public IGraphics
 	MACRO_INTERFACE("enginegraphics")
 public:
 	virtual int Init() = 0;
-	virtual void Shutdown() override = 0;
+	void Shutdown() override = 0;
 
 	virtual void Minimize() = 0;
 	virtual void Maximize() = 0;

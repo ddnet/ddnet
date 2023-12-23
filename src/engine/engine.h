@@ -17,7 +17,7 @@ protected:
 	class CJobPool m_JobPool;
 
 public:
-	virtual ~IEngine() = default;
+	~IEngine() override = default;
 
 	virtual void Init() = 0;
 	virtual void AddJob(std::shared_ptr<IJob> pJob) = 0;

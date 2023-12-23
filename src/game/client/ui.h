@@ -52,6 +52,7 @@ struct SUIAnimator
 class IScrollbarScale
 {
 public:
+	virtual ~IScrollbarScale() = default;
 	virtual float ToRelative(int AbsoluteValue, int Min, int Max) const = 0;
 	virtual int ToAbsolute(float RelativeValue, int Min, int Max) const = 0;
 };
@@ -103,6 +104,7 @@ public:
 class IButtonColorFunction
 {
 public:
+	virtual ~IButtonColorFunction() = default;
 	virtual ColorRGBA GetColor(bool Active, bool Hovered) const = 0;
 };
 class CDarkButtonColorFunction : public IButtonColorFunction

@@ -13,7 +13,7 @@ public:
 	 * if the event was consumed. By default the events
 	 * are forwarded to the subcomponents.
 	 */
-	virtual bool OnInput(const IInput::CEvent &Event) override;
+	bool OnInput(const IInput::CEvent &Event) override;
 
 	/**
 	 * Initialise all registered subcomponents.

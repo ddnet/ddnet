@@ -48,7 +48,7 @@ public:
 
 	public:
 		IResult() { m_NumArgs = 0; }
-		virtual ~IResult() {}
+		virtual ~IResult() = default;
 
 		virtual int GetInteger(unsigned Index) const = 0;
 		virtual float GetFloat(unsigned Index) const = 0;
@@ -72,7 +72,7 @@ public:
 
 	public:
 		CCommandInfo() { m_AccessLevel = ACCESS_LEVEL_ADMIN; }
-		virtual ~CCommandInfo() {}
+		virtual ~CCommandInfo() = default;
 		const char *m_pName;
 		const char *m_pHelp;
 		const char *m_pParams;

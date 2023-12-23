@@ -33,7 +33,7 @@ public:
 		m_pDataFile(nullptr) {}
 	~CDataFileReader() { Close(); }
 
-	CDataFileReader &operator=(CDataFileReader &&Other)
+	CDataFileReader &operator=(CDataFileReader &&Other) noexcept
 	{
 		m_pDataFile = Other.m_pDataFile;
 		Other.m_pDataFile = nullptr;
@@ -110,11 +110,11 @@ class CDataFileWriter
 
 public:
 	CDataFileWriter();
-	CDataFileWriter(CDataFileWriter &&Other)
+	CDataFileWriter(CDataFileWriter &&Other) noexcept
 	{
 		m_File = Other.m_File;
 		Other.m_File = 0;
-		m_aItemTypes = std::move(Other.m_aItemTypes);
+		m_aItemTypes = Other.m_aItemTypes;
 		m_vItems = std::move(Other.m_vItems);
 		m_vDatas = std::move(Other.m_vDatas);
 		m_vExtendedItemTypes = std::move(Other.m_vExtendedItemTypes);

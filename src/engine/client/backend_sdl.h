@@ -77,7 +77,7 @@ protected:
 	void StartProcessor(ICommandProcessor *pProcessor);
 	void StopProcessor();
 
-	bool HasWarning()
+	bool HasWarning() const
 	{
 		return m_Warning.m_WarningType != GFX_WARNING_TYPE_NONE;
 	}
@@ -186,7 +186,7 @@ class CCommandProcessor_SDL_GL : public CGraphicsBackend_Threaded::ICommandProce
 
 public:
 	CCommandProcessor_SDL_GL(EBackendType BackendType, int GLMajor, int GLMinor, int GLPatch);
-	virtual ~CCommandProcessor_SDL_GL();
+	~CCommandProcessor_SDL_GL() override;
 	void RunBuffer(CCommandBuffer *pBuffer) override;
 
 	const SGfxErrorContainer &GetError() const override;

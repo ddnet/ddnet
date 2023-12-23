@@ -8,7 +8,7 @@ class CEditorSound : public CEditorComponent
 {
 public:
 	explicit CEditorSound(CEditor *pEditor);
-	~CEditorSound();
+	~CEditorSound() override;
 
 	int m_SoundID = 0;
 	char m_aName[IO_MAX_PATH_LENGTH] = "";
