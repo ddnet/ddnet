@@ -81,6 +81,12 @@ public:
 			for(auto &Texture : m_aTextures)
 				Texture = IGraphics::CTextureHandle();
 			m_BotTexture = IGraphics::CTextureHandle();
+			for(ColorRGBA &PartColor : m_aColors)
+			{
+				PartColor = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
+			}
+			m_HatSpriteIndex = 0;
+			m_BotColor = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
 		}
 		bool Valid() const
 		{
@@ -91,9 +97,11 @@ public:
 		}
 
 		IGraphics::CTextureHandle m_aTextures[protocol7::NUM_SKINPARTS];
-		vec4 m_aColors[protocol7::NUM_SKINPARTS];
+		ColorRGBA m_aColors[protocol7::NUM_SKINPARTS];
+		IGraphics::CTextureHandle m_HatTexture;
 		IGraphics::CTextureHandle m_BotTexture;
-		vec4 m_BotColor;
+		int m_HatSpriteIndex;
+		ColorRGBA m_BotColor;
 	};
 
 	CSixup m_Sixup;

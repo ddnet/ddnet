@@ -3985,6 +3985,24 @@ int str_utf8_check(const char *str)
 	return 1;
 }
 
+void str_utf8_copy_num(char *dst, const char *src, int dst_size, int num)
+{
+	int new_cursor;
+	int cursor = 0;
+
+	while(src[cursor] && num > 0)
+	{
+		new_cursor = str_utf8_forward(src, cursor);
+		if(new_cursor >= dst_size) // reserve 1 byte for the null termination
+			break;
+		else
+			cursor = new_cursor;
+		--num;
+	}
+
+	str_copy(dst, src, cursor < dst_size ? cursor + 1 : dst_size);
+}
+
 void str_utf8_stats(const char *str, size_t max_size, size_t max_count, size_t *size, size_t *count)
 {
 	const char *cursor = str;
