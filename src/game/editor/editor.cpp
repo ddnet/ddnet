@@ -8164,6 +8164,9 @@ void CEditor::Render()
 			MapView()->Zoom()->ChangeValue(-20.0f);
 	}
 
+	for(CEditorComponent &Component : m_vComponents)
+		Component.OnRender(View);
+
 	MapView()->UpdateZoom();
 
 	UI()->RenderPopupMenus();
@@ -8259,7 +8262,9 @@ void CEditor::Reset(bool CreateDefault)
 	UI()->ClosePopupMenus();
 	m_Map.Clean();
 
-	m_MapView.OnReset();
+	for(CEditorComponent &Component : m_vComponents)
+		Component.OnReset();
+
 	// create default layers
 	if(CreateDefault)
 	{
@@ -8633,6 +8638,9 @@ void CEditor::OnUpdate()
 	DispatchInputEvents();
 	HandleAutosave();
 	HandleWriterFinishJobs();
+
+	for(CEditorComponent &Component : m_vComponents)
+		Component.OnUpdate();
 }
 
 void CEditor::OnRender()
@@ -8760,7 +8768,9 @@ bool CEditor::Load(const char *pFileName, int StorageType)
 		str_copy(m_aFileName, pFileName);
 		SortImages();
 		SelectGameLayer();
-		MapView()->OnMapLoad();
+
+		for(CEditorComponent &Component : m_vComponents)
+			Component.OnMapLoad();
 	}
 	else
 	{

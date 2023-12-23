@@ -31,9 +31,9 @@ public:
 	virtual void Init(CEditor *pEditor);
 
 	/**
-	 * Calls `OnRender` and then maybe `OnHot` or `OnActive`.
+	 * Maybe calls `OnHot` or `OnActive`.
 	 */
-	void OnUpdate(CUIRect View);
+	virtual void OnUpdate();
 
 	/**
 	 * Gets called before `OnRender`. Should return true
