@@ -147,7 +147,7 @@ MAYBE_UNUSED static const char *FONT_ICON_UNDO = "\xEF\x8B\xAA";
 MAYBE_UNUSED static const char *FONT_ICON_REDO = "\xEF\x8B\xB9";
 
 MAYBE_UNUSED static const char *FONT_ICON_ARROWS_ROTATE = "\xEF\x80\xA1";
-MAYBE_UNUSED static const char *FONT_ICON_QUESTION = "\x3F";
+MAYBE_UNUSED static const char *FONT_ICON_QUESTION = "?";
 } // end namespace FontIcons
 
 enum ETextCursorSelectionMode

@@ -779,7 +779,8 @@ bool CEditor::CallbackOpenMap(const char *pFileName, int StorageType, void *pUse
 	if(pEditor->Load(pFileName, StorageType))
 	{
 		pEditor->m_ValidSaveFilename = StorageType == IStorage::TYPE_SAVE && (pEditor->m_pFileDialogPath == pEditor->m_aFileDialogCurrentFolder || (pEditor->m_pFileDialogPath == pEditor->m_aFileDialogCurrentLink && str_comp(pEditor->m_aFileDialogCurrentLink, "themes") == 0));
-		pEditor->m_Dialog = DIALOG_NONE;
+		if(pEditor->m_Dialog == DIALOG_FILE)
+			pEditor->m_Dialog = DIALOG_NONE;
 		return true;
 	}
 	else
@@ -8037,6 +8038,12 @@ void CEditor::Render()
 		static int s_NullUiTarget = 0;
 		UI()->SetHotItem(&s_NullUiTarget);
 		RenderFileDialog();
+	}
+	else if(m_Dialog == DIALOG_MAPSETTINGS_ERROR)
+	{
+		static int s_NullUiTarget = 0;
+		UI()->SetHotItem(&s_NullUiTarget);
+		RenderMapSettingsErrorDialog();
 	}
 
 	if(m_PopupEventActivated)

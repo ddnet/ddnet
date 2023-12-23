@@ -14,6 +14,16 @@ struct SMapSettingCommand;
 struct IMapSetting;
 class CLineInput;
 
+struct CEditorMapSetting
+{
+	char m_aCommand[256];
+
+	CEditorMapSetting(const char *pCommand)
+	{
+		str_copy(m_aCommand, pCommand);
+	}
+};
+
 // A parsed map setting argument, storing the name and the type
 // Used for validation and to display arguments names
 struct SParsedMapSettingArg
@@ -44,6 +54,32 @@ struct SCommandParseError
 {
 	char m_aMessage[256];
 	int m_ArgIndex;
+};
+
+struct SInvalidSetting
+{
+	enum
+	{
+		TYPE_INVALID = 1 << 0,
+		TYPE_DUPLICATE = 1 << 1
+	};
+	int m_Index; // Index of the command in the loaded map settings list
+	char m_aSetting[256]; // String of the setting
+	int m_Type; // Type of that invalid setting
+	int m_CollidingIndex; // The colliding line index in case type is TYPE_DUPLICATE
+
+	struct SContext
+	{
+		bool m_Fixed;
+		bool m_Deleted;
+		bool m_Chosen;
+	} m_Context;
+
+	SInvalidSetting(int Index, const char *pSetting, int Type, int CollidingIndex) :
+		m_Index(Index), m_Type(Type), m_CollidingIndex(CollidingIndex), m_Context()
+	{
+		str_copy(m_aSetting, pSetting);
+	}
 };
 
 // --------------------------------------
@@ -151,7 +187,8 @@ public: // General methods
 
 	void Init(CEditor *pEditor) override;
 	bool OnInput(const IInput::CEvent &Event) override;
-	void OnUpdate();
+	void OnUpdate() override;
+	void OnMapLoad() override;
 
 public: // Constraints methods
 	enum class EArgConstraint
@@ -197,9 +234,14 @@ public: // CContext
 		const SCurrentSettingArg &Arg(int Index) const { return m_vCurrentArgs.at(Index); }
 		const std::shared_ptr<IMapSetting> &Setting() const { return m_pCurrentSetting; }
 		CLineInput *LineInput() const { return m_pLineInput; }
+		void SetFontSize(float FontSize) { m_FontSize = FontSize; }
 
 		int CheckCollision(ECollisionCheckResult &Result) const;
+		int CheckCollision(const std::vector<CEditorMapSetting> &vSettings, ECollisionCheckResult &Result) const;
+		int CheckCollision(const char *pInputString, const std::vector<CEditorMapSetting> &vSettings, ECollisionCheckResult &Result) const;
+
 		void Update();
+		void UpdateFromString(const char *pStr);
 		bool UpdateCursor(bool Force = false);
 		void Reset();
 		void GetCommandHelpText(char *pStr, int Length) const;
@@ -221,10 +263,13 @@ public: // CContext
 		void ClearError();
 		EValidationResult ValidateArg(int Index, const char *pArg);
 		void UpdatePossibleMatches();
-		void ParseArgs(const char *pStr);
+		void ParseArgs(const char *pLineInputStr, const char *pStr);
 		bool OnInput(const IInput::CEvent &Event);
 		const char *InputString() const;
 		void UpdateCompositionString();
+
+		template<int N>
+		void FormatDisplayValue(const char *pValue, char (&aOut)[N]);
 
 	private: // Fields
 		std::shared_ptr<IMapSetting> m_pCurrentSetting; // Current setting, can be nullptr in case of invalid setting name
@@ -238,6 +283,7 @@ public: // CContext
 
 		CMapSettingsBackend *m_pBackend;
 		std::string m_CompositionStringBuffer;
+		float m_FontSize;
 	};
 
 	CContext NewContext(CLineInput *pLineInput)
@@ -328,6 +374,27 @@ private: // Backend fields
 	static CContext *ms_pActiveContext;
 
 	friend class CEditor;
+
+private: // Map settings validation on load
+	struct SLoadedMapSettings
+	{
+		std::vector<SInvalidSetting> m_vSettingsInvalid;
+		std::vector<CEditorMapSetting> m_vSettingsValid;
+		std::map<int, std::vector<int>> m_SettingsDuplicate;
+
+		SLoadedMapSettings() :
+			m_vSettingsInvalid(), m_vSettingsValid(), m_SettingsDuplicate()
+		{
+		}
+
+		void Reset()
+		{
+			m_vSettingsInvalid.clear();
+			m_vSettingsValid.clear();
+			m_SettingsDuplicate.clear();
+		}
+
+	} m_LoadedMapSettings;
 };
 
 #endif

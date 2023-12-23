@@ -60,6 +60,7 @@ enum
 
 	DIALOG_NONE = 0,
 	DIALOG_FILE,
+	DIALOG_MAPSETTINGS_ERROR
 };
 
 class CEditorImage;
@@ -122,16 +123,7 @@ public:
 	CMapInfo m_MapInfo;
 	CMapInfo m_MapInfoTmp;
 
-	struct CSetting
-	{
-		char m_aCommand[256];
-
-		CSetting(const char *pCommand)
-		{
-			str_copy(m_aCommand, pCommand);
-		}
-	};
-	std::vector<CSetting> m_vSettings;
+	std::vector<CEditorMapSetting> m_vSettings;
 
 	std::shared_ptr<class CLayerGame> m_pGameLayer;
 	std::shared_ptr<CLayerGroup> m_pGameGroup;
@@ -981,6 +973,7 @@ public:
 
 	void RenderEnvelopeEditor(CUIRect View);
 
+	void RenderMapSettingsErrorDialog();
 	void RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEditorLast);
 	static void MapSettingsDropdownRenderCallback(const SPossibleValueMatch &Match, char (&aOutput)[128], std::vector<STextColorSplit> &vColorSplits);
 

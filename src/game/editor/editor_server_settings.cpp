@@ -1,4 +1,4 @@
-#include "editor_server_settings.h"
+﻿#include "editor_server_settings.h"
 #include "editor.h"
 
 #include <engine/keys.h>
@@ -268,7 +268,7 @@ void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEd
 	if(s_CommandSelectedIndex != NewSelected || s_ListBox.WasItemSelected())
 	{
 		s_CommandSelectedIndex = NewSelected;
-		if(m_SettingsCommandInput.IsEmpty() || Input()->ModifierIsPressed()) // Allow ctrl+click to fill the input even if empty
+		if(m_SettingsCommandInput.IsEmpty() || !Input()->ModifierIsPressed()) // Allow ctrl+click to only change selection
 		{
 			m_SettingsCommandInput.Set(m_Map.m_vSettings[s_CommandSelectedIndex].m_aCommand);
 			m_MapSettingsCommandContext.Update();
@@ -288,6 +288,7 @@ void CEditor::DoMapSettingsEditBox(CMapSettingsBackend::CContext *pContext, cons
 
 	auto *pLineInput = pContext->LineInput();
 	auto &Context = *pContext;
+	Context.SetFontSize(FontSize);
 
 	// Set current active context if input is active
 	if(pLineInput->IsActive())
@@ -540,6 +541,464 @@ int CEditor::RenderEditBoxDropdown(SEditBoxDropdownContext *pDropdown, CUIRect V
 	return -1;
 }
 
+void CEditor::RenderMapSettingsErrorDialog()
+{
+	auto &LoadedMapSettings = m_MapSettingsBackend.m_LoadedMapSettings;
+	auto &vSettingsInvalid = LoadedMapSettings.m_vSettingsInvalid;
+	auto &vSettingsValid = LoadedMapSettings.m_vSettingsValid;
+	auto &SettingsDuplicate = LoadedMapSettings.m_SettingsDuplicate;
+
+	UI()->MapScreen();
+	CUIRect Overlay = *UI()->Screen();
+
+	Overlay.Draw(ColorRGBA(0, 0, 0, 0.33f), IGraphics::CORNER_NONE, 0.0f);
+	CUIRect Background;
+	Overlay.VMargin(150.0f, &Background);
+	Background.HMargin(50.0f, &Background);
+	Background.Draw(ColorRGBA(0, 0, 0, 0.80f), IGraphics::CORNER_ALL, 5.0f);
+
+	CUIRect View;
+	Background.Margin(10.0f, &View);
+
+	CUIRect Title, ButtonBar, Label;
+	View.HSplitTop(18.0f, &Title, &View);
+	View.HSplitTop(5.0f, nullptr, &View); // some spacing
+	View.HSplitBottom(18.0f, &View, &ButtonBar);
+	View.HSplitBottom(10.0f, &View, nullptr); // some spacing
+
+	// title bar
+	Title.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 4.0f);
+	Title.VMargin(10.0f, &Title);
+	UI()->DoLabel(&Title, "Map settings error", 12.0f, TEXTALIGN_ML);
+
+	// Render body
+	{
+		static CLineInputBuffered<256> s_Input;
+		static CMapSettingsBackend::CContext s_Context = m_MapSettingsBackend.NewContext(&s_Input);
+
+		// Some text
+		SLabelProperties Props;
+		CUIRect Text;
+		View.HSplitTop(30.0f, &Text, &View);
+		Props.m_MaxWidth = Text.w;
+		UI()->DoLabel(&Text, "Below is a report of the invalid map settings found when loading the map. Please fix them before proceeding further.", 10.0f, TEXTALIGN_MC, Props);
+
+		// Mixed list
+		CUIRect List = View;
+		View.Draw(ColorRGBA(1, 1, 1, 0.25f), IGraphics::CORNER_ALL, 3.0f);
+
+		const float RowHeight = 18.0f;
+		static CScrollRegion s_ScrollRegion;
+		vec2 ScrollOffset(0.0f, 0.0f);
+		CScrollRegionParams ScrollParams;
+		ScrollParams.m_ScrollUnit = 120.0f;
+		s_ScrollRegion.Begin(&List, &ScrollOffset, &ScrollParams);
+		const float EndY = List.y + List.h;
+		List.y += ScrollOffset.y;
+
+		List.HSplitTop(20.0f, nullptr, &List);
+
+		static int s_FixingCommandIndex = -1;
+
+		auto &&SetInput = [&](const char *pString) {
+			s_Input.Set(pString);
+			s_Context.Update();
+			s_Context.UpdateCursor(true);
+			UI()->SetActiveItem(&s_Input);
+		};
+
+		CUIRect FixInput;
+		bool DisplayFixInput = false;
+		float DropdownHeight = 110.0f;
+
+		for(int i = 0; i < (int)m_Map.m_vSettings.size(); i++)
+		{
+			CUIRect Slot;
+
+			auto pInvalidSetting = std::find_if(vSettingsInvalid.begin(), vSettingsInvalid.end(), [i](const SInvalidSetting &Setting) { return Setting.m_Index == i; });
+			if(pInvalidSetting != vSettingsInvalid.end())
+			{ // This setting is invalid, only display it if its not a duplicate
+				if(!(pInvalidSetting->m_Type & SInvalidSetting::TYPE_DUPLICATE))
+				{
+					bool IsFixing = s_FixingCommandIndex == i;
+					List.HSplitTop(RowHeight, &Slot, &List);
+
+					// Draw a reddish background if setting is marked as deleted
+					if(pInvalidSetting->m_Context.m_Deleted)
+						Slot.Draw(ColorRGBA(0.85f, 0.0f, 0.0f, 0.15f), IGraphics::CORNER_ALL, 3.0f);
+
+					Slot.VMargin(5.0f, &Slot);
+					Slot.HMargin(1.0f, &Slot);
+
+					if(!IsFixing && !pInvalidSetting->m_Context.m_Fixed)
+					{ // Display "Fix" and "delete" buttons if we're not fixing the command and the command has not been fixed
+						CUIRect FixBtn, DelBtn;
+						Slot.VSplitRight(30.0f, &Slot, &DelBtn);
+						Slot.VSplitRight(5.0f, &Slot, nullptr);
+						DelBtn.HMargin(1.0f, &DelBtn);
+
+						Slot.VSplitRight(30.0f, &Slot, &FixBtn);
+						Slot.VSplitRight(10.0f, &Slot, nullptr);
+						FixBtn.HMargin(1.0f, &FixBtn);
+
+						// Delete button
+						if(DoButton_FontIcon(&pInvalidSetting->m_Context.m_Deleted, FONT_ICON_TRASH, pInvalidSetting->m_Context.m_Deleted, &DelBtn, 0, "Delete this command", IGraphics::CORNER_ALL, 10.0f))
+							pInvalidSetting->m_Context.m_Deleted = !pInvalidSetting->m_Context.m_Deleted;
+
+						// Fix button
+						if(DoButton_Editor(&pInvalidSetting->m_Context.m_Fixed, "Fix", !pInvalidSetting->m_Context.m_Deleted ? (s_FixingCommandIndex == -1 ? 0 : (IsFixing ? 1 : -1)) : -1, &FixBtn, 0, "Fix this command"))
+						{
+							s_FixingCommandIndex = i;
+							SetInput(pInvalidSetting->m_aSetting);
+						}
+					}
+					else if(IsFixing)
+					{ // If we're fixing this command, then display "Done" and "Cancel" buttons
+						// Also setup the input rect
+						CUIRect OkBtn, CancelBtn;
+						Slot.VSplitRight(50.0f, &Slot, &CancelBtn);
+						Slot.VSplitRight(5.0f, &Slot, nullptr);
+						CancelBtn.HMargin(1.0f, &CancelBtn);
+
+						Slot.VSplitRight(30.0f, &Slot, &OkBtn);
+						Slot.VSplitRight(10.0f, &Slot, nullptr);
+						OkBtn.HMargin(1.0f, &OkBtn);
+
+						// Buttons
+						static int s_Cancel = 0, s_Ok = 0;
+						if(DoButton_Editor(&s_Cancel, "Cancel", 0, &CancelBtn, 0, "Cancel fixing this command") || UI()->ConsumeHotkey(CUI::HOTKEY_ESCAPE))
+						{
+							s_FixingCommandIndex = -1;
+							s_Input.Clear();
+						}
+
+						// "Done" button only enabled if the fixed setting is valid
+						// For that we use a local CContext s_Context and use it to check
+						// that the setting is valid and that it is not a duplicate
+						ECollisionCheckResult Res = ECollisionCheckResult::ERROR;
+						s_Context.CheckCollision(vSettingsValid, Res);
+						bool Valid = s_Context.Valid() && Res == ECollisionCheckResult::ADD;
+
+						if(DoButton_Editor(&s_Ok, "Done", Valid ? 0 : -1, &OkBtn, 0, "Confirm edition of this command") || (s_Input.IsActive() && Valid && UI()->ConsumeHotkey(CUI::HOTKEY_ENTER)))
+						{
+							if(Valid) // Just to make sure
+							{
+								// Mark the setting is being fixed
+								pInvalidSetting->m_Context.m_Fixed = true;
+								str_copy(pInvalidSetting->m_aSetting, s_Input.GetString());
+								// Add it to the list for future collision checks
+								vSettingsValid.emplace_back(s_Input.GetString());
+
+								// Clear the input & fixing command index
+								s_FixingCommandIndex = -1;
+								s_Input.Clear();
+							}
+						}
+					}
+
+					Label = Slot;
+					Props.m_EllipsisAtEnd = true;
+					Props.m_MaxWidth = Label.w;
+
+					if(IsFixing)
+					{
+						// Setup input rect, which will be used to draw the map settings input later
+						Label.HMargin(1.0, &FixInput);
+						DisplayFixInput = true;
+						DropdownHeight = minimum(DropdownHeight, EndY - FixInput.y - 16.0f);
+					}
+					else
+					{
+						// Draw label in case we're not fixing this setting.
+						// Deleted settings are shown in gray with a red line through them
+						// Fixed settings are shown in green
+						// Invalid settings are shown in red
+						if(!pInvalidSetting->m_Context.m_Deleted)
+						{
+							if(pInvalidSetting->m_Context.m_Fixed)
+								TextRender()->TextColor(0.0f, 1.0f, 0.0f, 1.0f);
+							else
+								TextRender()->TextColor(1.0f, 0.0f, 0.0f, 1.0f);
+							UI()->DoLabel(&Label, pInvalidSetting->m_aSetting, 10.0f, TEXTALIGN_ML, Props);
+						}
+						else
+						{
+							TextRender()->TextColor(0.3f, 0.3f, 0.3f, 1.0f);
+							UI()->DoLabel(&Label, pInvalidSetting->m_aSetting, 10.0f, TEXTALIGN_ML, Props);
+
+							CUIRect Line = Label;
+							Line.y = Label.y + Label.h / 2;
+							Line.h = 1;
+							Line.Draw(ColorRGBA(1, 0, 0, 1), IGraphics::CORNER_NONE, 0.0f);
+						}
+					}
+					TextRender()->TextColor(TextRender()->DefaultTextColor());
+				}
+			}
+			else
+			{ // This setting is valid
+				// Check for duplicates
+				const std::vector<int> &vDuplicates = SettingsDuplicate.at(i);
+				int Chosen = -1; // This is the chosen duplicate setting. -1 means the first valid setting that was found which was not a duplicate
+				for(int d = 0; d < (int)vDuplicates.size(); d++)
+				{
+					int DupIndex = vDuplicates[d];
+					if(vSettingsInvalid[DupIndex].m_Context.m_Chosen)
+					{
+						Chosen = d;
+						break;
+					}
+				}
+
+				List.HSplitTop(RowHeight * (vDuplicates.size() + 1) + 2.0f, &Slot, &List);
+				Slot.HMargin(1.0f, &Slot);
+
+				// Draw a background to highlight group of duplicates
+				if(!vDuplicates.empty())
+					Slot.Draw(ColorRGBA(1, 1, 1, 0.15f), IGraphics::CORNER_ALL, 3.0f);
+
+				Slot.VMargin(5.0f, &Slot);
+				Slot.HSplitTop(RowHeight, &Label, &Slot);
+				Label.HMargin(1.0f, &Label);
+
+				// Draw a "choose" button next to the label in case we have duplicates for this line
+				if(!vDuplicates.empty())
+				{
+					CUIRect ChooseBtn;
+					Label.VSplitRight(50.0f, &Label, &ChooseBtn);
+					Label.VSplitRight(5.0f, &Label, nullptr);
+					ChooseBtn.HMargin(1.0f, &ChooseBtn);
+					if(DoButton_Editor(&vDuplicates, "Choose", Chosen == -1, &ChooseBtn, 0, "Choose this command"))
+					{
+						if(Chosen != -1)
+							vSettingsInvalid[vDuplicates[Chosen]].m_Context.m_Chosen = false;
+						Chosen = -1; // Choosing this means that we do not choose any of the duplicates
+					}
+				}
+
+				// Draw the label
+				Props.m_MaxWidth = Label.w;
+				UI()->DoLabel(&Label, m_Map.m_vSettings[i].m_aCommand, 10.0f, TEXTALIGN_ML, Props);
+
+				// Draw the list of duplicates, with a "Choose" button for each duplicate
+				// In case a duplicate is also invalid, then we draw a "Fix" button which behaves like the fix button above
+				// Duplicate settings name are shown in light blue, or in purple if they are also invalid
+				Slot.VSplitLeft(10.0f, nullptr, &Slot);
+				for(int DuplicateIndex = 0; DuplicateIndex < (int)vDuplicates.size(); DuplicateIndex++)
+				{
+					auto &Duplicate = vSettingsInvalid.at(vDuplicates[DuplicateIndex]);
+					bool IsFixing = s_FixingCommandIndex == Duplicate.m_Index;
+					bool IsInvalid = Duplicate.m_Type & SInvalidSetting::TYPE_INVALID;
+
+					ColorRGBA Color(0.329f, 0.714f, 0.859f, 1.0f);
+					CUIRect SubSlot;
+					Slot.HSplitTop(RowHeight, &SubSlot, &Slot);
+					SubSlot.HMargin(1.0f, &SubSlot);
+
+					if(!IsFixing)
+					{
+						// If not fixing, then display "Choose" and maybe "Fix" buttons.
+
+						CUIRect ChooseBtn;
+						SubSlot.VSplitRight(50.0f, &SubSlot, &ChooseBtn);
+						SubSlot.VSplitRight(5.0f, &SubSlot, nullptr);
+						ChooseBtn.HMargin(1.0f, &ChooseBtn);
+						if(DoButton_Editor(&Duplicate.m_Context.m_Chosen, "Choose", IsInvalid && !Duplicate.m_Context.m_Fixed ? -1 : Duplicate.m_Context.m_Chosen, &ChooseBtn, 0, "Override with this command"))
+						{
+							Duplicate.m_Context.m_Chosen = !Duplicate.m_Context.m_Chosen;
+							if(Chosen != -1 && Chosen != DuplicateIndex)
+								vSettingsInvalid[vDuplicates[Chosen]].m_Context.m_Chosen = false;
+							Chosen = DuplicateIndex;
+						}
+
+						if(IsInvalid)
+						{
+							if(!Duplicate.m_Context.m_Fixed)
+							{
+								Color = ColorRGBA(1, 0, 1, 1);
+								CUIRect FixBtn;
+								SubSlot.VSplitRight(30.0f, &SubSlot, &FixBtn);
+								SubSlot.VSplitRight(10.0f, &SubSlot, nullptr);
+								FixBtn.HMargin(1.0f, &FixBtn);
+								if(DoButton_Editor(&Duplicate.m_Context.m_Fixed, "Fix", s_FixingCommandIndex == -1 ? 0 : (IsFixing ? 1 : -1), &FixBtn, 0, "Fix this command (needed before it can be chosen)"))
+								{
+									s_FixingCommandIndex = Duplicate.m_Index;
+									SetInput(Duplicate.m_aSetting);
+								}
+							}
+							else
+							{
+								Color = ColorRGBA(0.329f, 0.714f, 0.859f, 1.0f);
+							}
+						}
+					}
+					else
+					{
+						// If we're fixing, display "Done" and "Cancel" buttons
+						CUIRect OkBtn, CancelBtn;
+						SubSlot.VSplitRight(50.0f, &SubSlot, &CancelBtn);
+						SubSlot.VSplitRight(5.0f, &SubSlot, nullptr);
+						CancelBtn.HMargin(1.0f, &CancelBtn);
+
+						SubSlot.VSplitRight(30.0f, &SubSlot, &OkBtn);
+						SubSlot.VSplitRight(10.0f, &SubSlot, nullptr);
+						OkBtn.HMargin(1.0f, &OkBtn);
+
+						static int s_Cancel = 0, s_Ok = 0;
+						if(DoButton_Editor(&s_Cancel, "Cancel", 0, &CancelBtn, 0, "Cancel fixing this command") || UI()->ConsumeHotkey(CUI::HOTKEY_ESCAPE))
+						{
+							s_FixingCommandIndex = -1;
+							s_Input.Clear();
+						}
+
+						// Use the local CContext s_Context to validate the input
+						// We also need to make sure the fixed setting matches the initial duplicate setting
+						// For example:
+						//   sv_deepfly 0
+						//      sv_deepfly 5  <- This is invalid and duplicate. We can only fix it by writing "sv_deepfly 0" or "sv_deepfly 1".
+						//                       If we write any other setting, like "sv_hit 1", it won't work as it does not match "sv_deepfly".
+						// To do that, we use the context and we check for collision with the current map setting
+						ECollisionCheckResult Res = ECollisionCheckResult::ERROR;
+						s_Context.CheckCollision({m_Map.m_vSettings[i]}, Res);
+						bool Valid = s_Context.Valid() && Res == ECollisionCheckResult::REPLACE;
+
+						if(DoButton_Editor(&s_Ok, "Done", Valid ? 0 : -1, &OkBtn, 0, "Confirm edition of this command") || (s_Input.IsActive() && Valid && UI()->ConsumeHotkey(CUI::HOTKEY_ENTER)))
+						{
+							if(Valid) // Just to make sure
+							{
+								// Mark the setting as fixed
+								Duplicate.m_Context.m_Fixed = true;
+								str_copy(Duplicate.m_aSetting, s_Input.GetString());
+
+								s_FixingCommandIndex = -1;
+								s_Input.Clear();
+							}
+						}
+					}
+
+					Label = SubSlot;
+					Props.m_MaxWidth = Label.w;
+
+					if(IsFixing)
+					{
+						// Setup input rect in case we are fixing the setting
+						Label.HMargin(1.0, &FixInput);
+						DisplayFixInput = true;
+						DropdownHeight = minimum(DropdownHeight, EndY - FixInput.y - 16.0f);
+					}
+					else
+					{
+						// Otherwise, render the setting label
+						TextRender()->TextColor(Color);
+						UI()->DoLabel(&Label, Duplicate.m_aSetting, 10.0f, TEXTALIGN_ML, Props);
+						TextRender()->TextColor(TextRender()->DefaultTextColor());
+					}
+				}
+			}
+
+			// Finally, add the slot to the scroll region
+			s_ScrollRegion.AddRect(Slot);
+		}
+
+		// Add some padding to the bottom so the dropdown can actually display some values in case we
+		// fix an invalid setting at the bottom of the list
+		CUIRect PaddingBottom;
+		List.HSplitTop(30.0f, &PaddingBottom, &List);
+		s_ScrollRegion.AddRect(PaddingBottom);
+
+		// Display the map settings edit box after having rendered all the lines, so the dropdown shows in
+		// front of everything, but is still being clipped by the scroll region.
+		if(DisplayFixInput)
+			DoMapSettingsEditBox(&s_Context, &FixInput, 10.0f, maximum(DropdownHeight, 30.0f));
+
+		s_ScrollRegion.End();
+	}
+
+	// Confirm button
+	static int s_ConfirmButton = 0, s_CancelButton = 0;
+	CUIRect ConfimButton, CancelButton;
+	ButtonBar.VSplitLeft(110.0f, &CancelButton, &ButtonBar);
+	ButtonBar.VSplitRight(110.0f, &ButtonBar, &ConfimButton);
+
+	bool CanConfirm = true;
+	for(auto &InvalidSetting : vSettingsInvalid)
+	{
+		if(!InvalidSetting.m_Context.m_Fixed && !InvalidSetting.m_Context.m_Deleted && !(InvalidSetting.m_Type & SInvalidSetting::TYPE_DUPLICATE))
+		{
+			CanConfirm = false;
+			break;
+		}
+	}
+
+	auto &&Execute = [&]() {
+		// Execute will modify the actual map settings according to the fixes that were just made within the dialog.
+
+		// Fix fixed settings, erase deleted settings
+		for(auto &FixedSetting : vSettingsInvalid)
+		{
+			if(FixedSetting.m_Context.m_Fixed)
+			{
+				str_copy(m_Map.m_vSettings[FixedSetting.m_Index].m_aCommand, FixedSetting.m_aSetting);
+			}
+		}
+
+		// Choose chosen settings
+		// => Erase settings that don't match
+		// => Erase settings that were not chosen
+		std::vector<CEditorMapSetting> vSettingsToErase;
+		for(auto &Setting : vSettingsInvalid)
+		{
+			if(Setting.m_Type & SInvalidSetting::TYPE_DUPLICATE)
+			{
+				if(!Setting.m_Context.m_Chosen)
+					vSettingsToErase.emplace_back(Setting.m_aSetting);
+				else
+					vSettingsToErase.emplace_back(m_Map.m_vSettings[Setting.m_CollidingIndex].m_aCommand);
+			}
+		}
+
+		// Erase deleted settings
+		for(auto &DeletedSetting : vSettingsInvalid)
+		{
+			if(DeletedSetting.m_Context.m_Deleted)
+			{
+				m_Map.m_vSettings.erase(
+					std::remove_if(m_Map.m_vSettings.begin(), m_Map.m_vSettings.end(), [&](const CEditorMapSetting &MapSetting) {
+						return str_comp_nocase(MapSetting.m_aCommand, DeletedSetting.m_aSetting) == 0;
+					}),
+					m_Map.m_vSettings.end());
+			}
+		}
+
+		// Erase settings to erase
+		for(auto &Setting : vSettingsToErase)
+		{
+			m_Map.m_vSettings.erase(
+				std::remove_if(m_Map.m_vSettings.begin(), m_Map.m_vSettings.end(), [&](const CEditorMapSetting &MapSetting) {
+					return str_comp_nocase(MapSetting.m_aCommand, Setting.m_aCommand) == 0;
+				}),
+				m_Map.m_vSettings.end());
+		}
+
+		m_Map.OnModify();
+	};
+
+	// Confirm - execute the fixes
+	if(DoButton_Editor(&s_ConfirmButton, "Confirm", CanConfirm ? 0 : -1, &ConfimButton, 0, nullptr) || (CanConfirm && UI()->ConsumeHotkey(CUI::HOTKEY_ENTER)))
+	{
+		Execute();
+		m_Dialog = DIALOG_NONE;
+	}
+
+	// Cancel - we load a new empty map
+	if(DoButton_Editor(&s_CancelButton, "Cancel", 0, &CancelButton, 0, nullptr) || (UI()->ConsumeHotkey(CUI::HOTKEY_ESCAPE)))
+	{
+		Reset();
+		m_aFileName[0] = 0;
+		m_Dialog = DIALOG_NONE;
+	}
+}
+
 void CEditor::MapSettingsDropdownRenderCallback(const SPossibleValueMatch &Match, char (&aOutput)[128], std::vector<STextColorSplit> &vColorSplits)
 {
 	// Check the match argument index.
@@ -661,8 +1120,7 @@ void CMapSettingsBackend::LoadSettingCommand(const std::shared_ptr<SMapSettingCo
 		size_t Len = pIterator - pNameStart;
 		pIterator++; // Skip ']'
 
-		if(Len + 1 >= sizeof(SParsedMapSettingArg::m_aName))
-			dbg_msg("editor", "Warning: length of server setting name exceeds limit.");
+		dbg_assert(Len + 1 < sizeof(SParsedMapSettingArg::m_aName), "Length of server setting name exceeds limit.");
 
 		// Append parsed arg
 		m_ParsedCommandArgs[pSetting].emplace_back();
@@ -740,6 +1198,11 @@ void CMapSettingsBackend::CContext::Reset()
 
 void CMapSettingsBackend::CContext::Update()
 {
+	UpdateFromString(InputString());
+}
+
+void CMapSettingsBackend::CContext::UpdateFromString(const char *pStr)
+{
 	// This is the main method that does all the argument parsing and validating.
 	// It fills pretty much all the context values, the arguments, their position,
 	// if they are valid or not, etc.
@@ -747,7 +1210,6 @@ void CMapSettingsBackend::CContext::Update()
 	m_pCurrentSetting = nullptr;
 	m_vCurrentArgs.clear();
 
-	const char *pStr = InputString();
 	const char *pIterator = pStr;
 
 	// Get the command/setting
@@ -768,10 +1230,10 @@ void CMapSettingsBackend::CContext::Update()
 	}
 
 	// Parse args
-	ParseArgs(pIterator);
+	ParseArgs(InputString(), pIterator);
 }
 
-void CMapSettingsBackend::CContext::ParseArgs(const char *pStr)
+void CMapSettingsBackend::CContext::ParseArgs(const char *pLineInputStr, const char *pStr)
 {
 	// This method parses the arguments of the current command, starting at pStr
 
@@ -789,7 +1251,6 @@ void CMapSettingsBackend::CContext::ParseArgs(const char *pStr)
 	ClearError();
 
 	const char *pIterator = pStr;
-	const char *pLineInputStr = InputString();
 
 	if(!pStr || *pStr == '\0')
 		return; // No arguments
@@ -864,8 +1325,8 @@ void CMapSettingsBackend::CContext::ParseArgs(const char *pStr)
 
 	// Also keep track of the visual X position of each argument within the input
 	float PosX = 0;
-	const float WW = m_pBackend->TextRender()->TextWidth(FONT_SIZE, " ");
-	PosX += m_pBackend->TextRender()->TextWidth(FONT_SIZE, m_aCommand);
+	const float WW = m_pBackend->TextRender()->TextWidth(m_FontSize, " ");
+	PosX += m_pBackend->TextRender()->TextWidth(m_FontSize, m_aCommand);
 
 	// Parsing beings
 	while(*pIterator)
@@ -969,12 +1430,15 @@ void CMapSettingsBackend::CContext::ParseArgs(const char *pStr)
 			size_t ErrorArgIndex = m_vCurrentArgs.size() - 1;
 			SCurrentSettingArg &ErrorArg = m_vCurrentArgs.back();
 			SParsedMapSettingArg &SettingArg = m_pBackend->m_ParsedCommandArgs[m_pCurrentSetting].at(ArgIndex);
+			char aFormattedValue[256];
+			FormatDisplayValue(ErrorArg.m_aValue, aFormattedValue);
+
 			if(Error == ERROR_INVALID_VALUE || Error == ERROR_UNKNOWN_VALUE)
-				str_format(m_Error.m_aMessage, sizeof(m_Error.m_aMessage), "%s argument value: %s at position %d for argument '%s'", Error == ERROR_INVALID_VALUE ? "Invalid" : "Unknown", ErrorArg.m_aValue, (int)ErrorArg.m_Start, SettingArg.m_aName);
+				str_format(m_Error.m_aMessage, sizeof(m_Error.m_aMessage), "%s argument value: %s at position %d for argument '%s'", Error == ERROR_INVALID_VALUE ? "Invalid" : "Unknown", aFormattedValue, (int)ErrorArg.m_Start, SettingArg.m_aName);
 			else
 			{
 				std::shared_ptr<SMapSettingInt> pSettingInt = std::static_pointer_cast<SMapSettingInt>(m_pCurrentSetting);
-				str_format(m_Error.m_aMessage, sizeof(m_Error.m_aMessage), "Invalid argument value: %s at position %d for argument '%s': out of range [%d, %d]", ErrorArg.m_aValue, (int)ErrorArg.m_Start, SettingArg.m_aName, pSettingInt->m_Min, pSettingInt->m_Max);
+				str_format(m_Error.m_aMessage, sizeof(m_Error.m_aMessage), "Invalid argument value: %s at position %d for argument '%s': out of range [%d, %d]", aFormattedValue, (int)ErrorArg.m_Start, SettingArg.m_aName, pSettingInt->m_Min, pSettingInt->m_Max);
 			}
 			m_Error.m_ArgIndex = (int)ErrorArgIndex;
 			break;
@@ -989,13 +1453,15 @@ void CMapSettingsBackend::CContext::ParseArgs(const char *pStr)
 			}
 			else if(!m_AllowUnknownCommands)
 			{
-				str_format(m_Error.m_aMessage, sizeof(m_Error.m_aMessage), "Unknown server setting: %s", m_aCommand);
+				char aFormattedValue[256];
+				FormatDisplayValue(m_aCommand, aFormattedValue);
+				str_format(m_Error.m_aMessage, sizeof(m_Error.m_aMessage), "Unknown server setting: %s", aFormattedValue);
 				m_Error.m_ArgIndex = -1;
 				break;
 			}
 		}
 
-		PosX += m_pBackend->TextRender()->TextWidth(FONT_SIZE, pArgStart, Length); // Advance argument position
+		PosX += m_pBackend->TextRender()->TextWidth(m_FontSize, pArgStart, Length); // Advance argument position
 		ArgIndex++;
 	}
 }
@@ -1012,6 +1478,9 @@ bool CMapSettingsBackend::CContext::UpdateCursor(bool Force)
 	// It also updates the argument index where the cursor is at
 	// and the possible values matches if the argument index changes.
 	// Returns true in case the cursor changed position
+
+	if(!m_pLineInput)
+		return false;
 
 	size_t Offset = m_pLineInput->GetCursorOffset();
 	if(Offset == m_LastCursorOffset && !Force)
@@ -1142,7 +1611,9 @@ void CMapSettingsBackend::CContext::UpdatePossibleMatches()
 		if(m_vPossibleMatches.empty() && !m_AllowUnknownCommands)
 		{
 			// Fill the error if we do not allow unknown commands
-			str_format(m_Error.m_aMessage, sizeof(m_Error.m_aMessage), "Unknown server setting: %s", m_aCommand);
+			char aFormattedValue[256];
+			FormatDisplayValue(m_aCommand, aFormattedValue);
+			str_format(m_Error.m_aMessage, sizeof(m_Error.m_aMessage), "Unknown server setting: %s", aFormattedValue);
 			m_Error.m_ArgIndex = -1;
 		}
 	}
@@ -1202,6 +1673,9 @@ void CMapSettingsBackend::CContext::UpdatePossibleMatches()
 
 bool CMapSettingsBackend::CContext::OnInput(const IInput::CEvent &Event)
 {
+	if(!m_pLineInput)
+		return false;
+
 	if(!m_pLineInput->IsActive())
 		return false;
 
@@ -1227,40 +1701,9 @@ bool CMapSettingsBackend::CContext::OnInput(const IInput::CEvent &Event)
 
 const char *CMapSettingsBackend::CContext::InputString() const
 {
+	if(!m_pLineInput)
+		return nullptr;
 	return m_pBackend->Input()->HasComposition() ? m_CompositionStringBuffer.c_str() : m_pLineInput->GetString();
-}
-
-void CMapSettingsBackend::CContext::UpdateCompositionString()
-{
-	const bool HasComposition = m_pBackend->Input()->HasComposition();
-
-	if(HasComposition)
-	{
-		const size_t CursorOffset = m_pLineInput->GetCursorOffset();
-		const size_t DisplayCursorOffset = m_pLineInput->OffsetFromActualToDisplay(CursorOffset);
-		const std::string DisplayStr = std::string(m_pLineInput->GetString());
-		std::string CompositionBuffer = DisplayStr.substr(0, DisplayCursorOffset) + m_pBackend->Input()->GetComposition() + DisplayStr.substr(DisplayCursorOffset);
-		if(CompositionBuffer != m_CompositionStringBuffer)
-		{
-			m_CompositionStringBuffer = CompositionBuffer;
-			Update();
-			UpdateCursor();
-		}
-	}
-}
-
-bool CMapSettingsBackend::OnInput(const IInput::CEvent &Event)
-{
-	if(ms_pActiveContext)
-		return ms_pActiveContext->OnInput(Event);
-
-	return false;
-}
-
-void CMapSettingsBackend::OnUpdate()
-{
-	if(ms_pActiveContext && ms_pActiveContext->m_pLineInput->IsActive())
-		ms_pActiveContext->UpdateCompositionString();
 }
 
 const ColorRGBA CMapSettingsBackend::CContext::ms_ArgumentStringColor = ColorRGBA(84 / 255.0f, 1.0f, 1.0f, 1.0f);
@@ -1290,7 +1733,7 @@ void CMapSettingsBackend::CContext::ColorArguments(std::vector<STextColorSplit> 
 		vColorSplits.emplace_back(Argument.m_Start, Argument.m_End - Argument.m_Start, Color);
 	}
 
-	if(!m_pLineInput->IsEmpty())
+	if(m_pLineInput && !m_pLineInput->IsEmpty())
 	{
 		if(!CommandIsValid() && !m_AllowUnknownCommands)
 		{
@@ -1307,6 +1750,16 @@ void CMapSettingsBackend::CContext::ColorArguments(std::vector<STextColorSplit> 
 
 int CMapSettingsBackend::CContext::CheckCollision(ECollisionCheckResult &Result) const
 {
+	return CheckCollision(m_pBackend->Editor()->m_Map.m_vSettings, Result);
+}
+
+int CMapSettingsBackend::CContext::CheckCollision(const std::vector<CEditorMapSetting> &vSettings, ECollisionCheckResult &Result) const
+{
+	return CheckCollision(InputString(), vSettings, Result);
+}
+
+int CMapSettingsBackend::CContext::CheckCollision(const char *pInputString, const std::vector<CEditorMapSetting> &vSettings, ECollisionCheckResult &Result) const
+{
 	// Checks for a collision with the current map settings.
 	// A collision is when a setting with the same arguments already exists and that it can't be added multiple times.
 	// For this, we use argument constraints that we define in CMapSettingsCommandObject::LoadConstraints().
@@ -1315,7 +1768,7 @@ int CMapSettingsBackend::CContext::CheckCollision(ECollisionCheckResult &Result)
 	// This method CheckCollision(ECollisionCheckResult&) returns an integer which is the index of the colliding line. If no
 	//   colliding line was found, then it returns -1.
 
-	const char *pInputString = InputString();
+	const int InputLength = str_length(pInputString);
 
 	struct SArgument
 	{
@@ -1331,8 +1784,6 @@ int CMapSettingsBackend::CContext::CheckCollision(ECollisionCheckResult &Result)
 		int m_Index;
 		std::vector<SArgument> m_vArgs;
 	};
-
-	auto &vSettings = m_pBackend->Editor()->m_Map.m_vSettings;
 
 	// For now we split each map setting corresponding to the setting we want to add by spaces
 	auto &&SplitSetting = [](const char *pStr) {
@@ -1355,7 +1806,7 @@ int CMapSettingsBackend::CContext::CheckCollision(ECollisionCheckResult &Result)
 		if(!m_AllowUnknownCommands)
 			return -1;
 
-		if(m_pLineInput->GetLength() == 0)
+		if(InputLength == 0)
 			return -1;
 
 		// If we get here, it means we allow unknown commands.
@@ -1395,7 +1846,7 @@ int CMapSettingsBackend::CContext::CheckCollision(ECollisionCheckResult &Result)
 		// can have is REPLACE.
 		// In this case, the collision is found only by checking the command name for every setting in the current map settings.
 		char aBuffer[256];
-		auto It = std::find_if(vSettings.begin(), vSettings.end(), [&](const CEditorMap::CSetting &Setting) {
+		auto It = std::find_if(vSettings.begin(), vSettings.end(), [&](const CEditorMapSetting &Setting) {
 			const char *pLineSettingValue = Setting.m_aCommand; // Get the map setting command
 			pLineSettingValue = str_next_token(pLineSettingValue, " ", aBuffer, sizeof(aBuffer)); // Get the first token before the first space
 			return str_comp_nocase(aBuffer, pSetting->m_pName) == 0; // Check if that equals our current command
@@ -1427,10 +1878,10 @@ int CMapSettingsBackend::CContext::CheckCollision(ECollisionCheckResult &Result)
 
 		std::shared_ptr<SMapSettingCommand> pSettingCommand = std::static_pointer_cast<SMapSettingCommand>(pSetting);
 		// Get matching lines for that command
-		std::vector<SLineArgs> vvArgs;
+		std::vector<SLineArgs> vLineArgs;
 		for(int i = 0; i < (int)vSettings.size(); i++)
 		{
-			auto &Setting = vSettings.at(i);
+			const auto &Setting = vSettings.at(i);
 
 			// Split this setting into its arguments
 			std::vector<SArgument> vArgs = SplitSetting(Setting.m_aCommand);
@@ -1439,7 +1890,7 @@ int CMapSettingsBackend::CContext::CheckCollision(ECollisionCheckResult &Result)
 			{
 				// When that's the case, we save them
 				vArgs.erase(vArgs.begin());
-				vvArgs.push_back(SLineArgs{
+				vLineArgs.push_back(SLineArgs{
 					i,
 					vArgs,
 				});
@@ -1453,7 +1904,7 @@ int CMapSettingsBackend::CContext::CheckCollision(ECollisionCheckResult &Result)
 		{
 			bool Collide = false;
 			const char *pValue = Arg(ArgIndex).m_aValue;
-			for(auto &Line : vvArgs)
+			for(auto &Line : vLineArgs)
 			{
 				// Check first colliding line
 				if(str_comp_nocase(pValue, Line.m_vArgs[ArgIndex].m_aValue) == 0)
@@ -1470,6 +1921,13 @@ int CMapSettingsBackend::CContext::CheckCollision(ECollisionCheckResult &Result)
 			// (or if we had an error)
 			if(!Collide || Error)
 				break;
+
+			// Otherwise, remove non-colliding args from the list
+			vLineArgs.erase(
+				std::remove_if(vLineArgs.begin(), vLineArgs.end(), [&](const SLineArgs &Line) {
+					return str_comp_nocase(pValue, Line.m_vArgs[ArgIndex].m_aValue) != 0;
+				}),
+				vLineArgs.end());
 		}
 
 		// The result is either REPLACE when we found a collision, or ADD
@@ -1496,8 +1954,7 @@ bool CMapSettingsBackend::CContext::Valid() const
 			return false;
 
 		// Check that we have the same number of arguments
-		const bool ArgCountValid = m_vCurrentArgs.size() == m_pBackend->m_ParsedCommandArgs.at(m_pCurrentSetting).size();
-		return ArgCountValid;
+		return m_vCurrentArgs.size() == m_pBackend->m_ParsedCommandArgs.at(m_pCurrentSetting).size();
 	}
 	else
 	{
@@ -1513,6 +1970,127 @@ void CMapSettingsBackend::CContext::GetCommandHelpText(char *pStr, int Length) c
 		return;
 
 	str_copy(pStr, m_pCurrentSetting->m_pHelp, Length);
+}
+
+void CMapSettingsBackend::CContext::UpdateCompositionString()
+{
+	if(!m_pLineInput)
+		return;
+
+	const bool HasComposition = m_pBackend->Input()->HasComposition();
+
+	if(HasComposition)
+	{
+		const size_t CursorOffset = m_pLineInput->GetCursorOffset();
+		const size_t DisplayCursorOffset = m_pLineInput->OffsetFromActualToDisplay(CursorOffset);
+		const std::string DisplayStr = std::string(m_pLineInput->GetString());
+		std::string CompositionBuffer = DisplayStr.substr(0, DisplayCursorOffset) + m_pBackend->Input()->GetComposition() + DisplayStr.substr(DisplayCursorOffset);
+		if(CompositionBuffer != m_CompositionStringBuffer)
+		{
+			m_CompositionStringBuffer = CompositionBuffer;
+			Update();
+			UpdateCursor();
+		}
+	}
+}
+
+template<int N>
+void CMapSettingsBackend::CContext::FormatDisplayValue(const char *pValue, char (&aOut)[N])
+{
+	const int MaxLength = 32;
+	if(str_length(pValue) > MaxLength)
+	{
+		str_copy(aOut, pValue, MaxLength);
+		str_append(aOut, "...");
+	}
+	else
+	{
+		str_copy(aOut, pValue);
+	}
+}
+
+bool CMapSettingsBackend::OnInput(const IInput::CEvent &Event)
+{
+	if(ms_pActiveContext)
+		return ms_pActiveContext->OnInput(Event);
+
+	return false;
+}
+
+void CMapSettingsBackend::OnUpdate()
+{
+	if(ms_pActiveContext && ms_pActiveContext->m_pLineInput && ms_pActiveContext->m_pLineInput->IsActive())
+		ms_pActiveContext->UpdateCompositionString();
+}
+
+void CMapSettingsBackend::OnMapLoad()
+{
+	// Load & validate all map settings
+	m_LoadedMapSettings.Reset();
+
+	auto &vLoadedMapSettings = Editor()->m_Map.m_vSettings;
+
+	// Keep a vector of valid map settings, to check collision against: m_vValidLoadedMapSettings
+
+	// Create a local context with no lineinput, only used to parse the commands
+	CContext LocalContext = NewContext(nullptr);
+
+	// Iterate through map settings
+	// Two steps:
+	// 1. Save valid and invalid settings
+	// 2. Check for duplicates
+
+	std::vector<std::tuple<int, bool, CEditorMapSetting>> vSettingsInvalid;
+
+	for(int i = 0; i < (int)vLoadedMapSettings.size(); i++)
+	{
+		CEditorMapSetting &Setting = vLoadedMapSettings.at(i);
+		// Parse the setting using the context
+		LocalContext.UpdateFromString(Setting.m_aCommand);
+
+		bool Valid = LocalContext.Valid();
+		ECollisionCheckResult Result = ECollisionCheckResult::ERROR;
+		LocalContext.CheckCollision(Setting.m_aCommand, m_LoadedMapSettings.m_vSettingsValid, Result);
+
+		if(Valid && Result == ECollisionCheckResult::ADD)
+			m_LoadedMapSettings.m_vSettingsValid.emplace_back(Setting);
+		else
+			vSettingsInvalid.emplace_back(i, Valid, Setting);
+
+		LocalContext.Reset();
+
+		// Empty duplicates for this line, might be filled later
+		m_LoadedMapSettings.m_SettingsDuplicate.insert({i, {}});
+	}
+
+	for(const auto &[Index, Valid, Setting] : vSettingsInvalid)
+	{
+		LocalContext.UpdateFromString(Setting.m_aCommand);
+
+		ECollisionCheckResult Result = ECollisionCheckResult::ERROR;
+		int CollidingLineIndex = LocalContext.CheckCollision(Setting.m_aCommand, m_LoadedMapSettings.m_vSettingsValid, Result);
+		int RealCollidingLineIndex = CollidingLineIndex;
+
+		if(CollidingLineIndex != -1)
+			RealCollidingLineIndex = std::find_if(vLoadedMapSettings.begin(), vLoadedMapSettings.end(), [&](const CEditorMapSetting &MapSetting) {
+				return str_comp_nocase(MapSetting.m_aCommand, m_LoadedMapSettings.m_vSettingsValid.at(CollidingLineIndex).m_aCommand) == 0;
+			}) - vLoadedMapSettings.begin();
+
+		int Type = 0;
+		if(!Valid)
+			Type |= SInvalidSetting::TYPE_INVALID;
+		if(Result == ECollisionCheckResult::REPLACE)
+			Type |= SInvalidSetting::TYPE_DUPLICATE;
+
+		m_LoadedMapSettings.m_vSettingsInvalid.emplace_back(Index, Setting.m_aCommand, Type, RealCollidingLineIndex);
+		if(Type & SInvalidSetting::TYPE_DUPLICATE)
+			m_LoadedMapSettings.m_SettingsDuplicate[RealCollidingLineIndex].emplace_back(m_LoadedMapSettings.m_vSettingsInvalid.size() - 1);
+
+		LocalContext.Reset();
+	}
+
+	if(!m_LoadedMapSettings.m_vSettingsInvalid.empty())
+		Editor()->m_Dialog = DIALOG_MAPSETTINGS_ERROR;
 }
 
 // ------ loaders
