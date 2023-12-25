@@ -1331,24 +1331,31 @@ void CCharacter::HandleBroadcast()
 
 void CCharacter::HandleSkippableTiles(int Index)
 {
+	const int ClientID = m_pPlayer->GetCID();
+
 	// handle death-tiles and leaving gamelayer
-	if((Collision()->GetCollisionAt(m_Pos.x + GetProximityRadius() / 3.f, m_Pos.y - GetProximityRadius() / 3.f) == TILE_DEATH ||
-		   Collision()->GetCollisionAt(m_Pos.x + GetProximityRadius() / 3.f, m_Pos.y + GetProximityRadius() / 3.f) == TILE_DEATH ||
-		   Collision()->GetCollisionAt(m_Pos.x - GetProximityRadius() / 3.f, m_Pos.y - GetProximityRadius() / 3.f) == TILE_DEATH ||
-		   Collision()->GetCollisionAt(m_Pos.x - GetProximityRadius() / 3.f, m_Pos.y + GetProximityRadius() / 3.f) == TILE_DEATH ||
-		   Collision()->GetFCollisionAt(m_Pos.x + GetProximityRadius() / 3.f, m_Pos.y - GetProximityRadius() / 3.f) == TILE_DEATH ||
-		   Collision()->GetFCollisionAt(m_Pos.x + GetProximityRadius() / 3.f, m_Pos.y + GetProximityRadius() / 3.f) == TILE_DEATH ||
-		   Collision()->GetFCollisionAt(m_Pos.x - GetProximityRadius() / 3.f, m_Pos.y - GetProximityRadius() / 3.f) == TILE_DEATH ||
-		   Collision()->GetFCollisionAt(m_Pos.x - GetProximityRadius() / 3.f, m_Pos.y + GetProximityRadius() / 3.f) == TILE_DEATH) &&
-		!m_Core.m_Super && !(Team() && Teams()->TeeFinished(m_pPlayer->GetCID())))
+
+	const float NearRadius = GetProximityRadius() / 3.f, LeftTileOffset = m_Pos.x - NearRadius, RightTileOffset = m_Pos.x + NearRadius, AboveTileOffset = m_Pos.y - NearRadius, BelowTileOffset = m_Pos.y + NearRadius;
+	if((Collision()->GetCollisionAt(RightTileOffset, AboveTileOffset) == TILE_DEATH ||
+		   Collision()->GetCollisionAt(RightTileOffset, BelowTileOffset) == TILE_DEATH ||
+		   Collision()->GetCollisionAt(LeftTileOffset, AboveTileOffset) == TILE_DEATH ||
+		   Collision()->GetCollisionAt(LeftTileOffset, BelowTileOffset) == TILE_DEATH ||
+		   Collision()->GetFCollisionAt(RightTileOffset, AboveTileOffset) == TILE_DEATH ||
+		   Collision()->GetFCollisionAt(RightTileOffset, BelowTileOffset) == TILE_DEATH ||
+		   Collision()->GetFCollisionAt(LeftTileOffset, AboveTileOffset) == TILE_DEATH ||
+		   Collision()->GetFCollisionAt(LeftTileOffset, BelowTileOffset) == TILE_DEATH) &&
+		!m_Core.m_Super && !(Team() && Teams()->TeeFinished(ClientID)))
 	{
-		Die(m_pPlayer->GetCID(), WEAPON_WORLD);
+		if(Teams()->IsPractice(GameServer()->GetDDRaceTeam(ClientID)) && Teams()->TeamLocked(GameServer()->GetDDRaceTeam(ClientID)))
+			Rescue();
+		else
+			Die(ClientID, WEAPON_WORLD);
 		return;
 	}
 
 	if(GameLayerClipped(m_Pos))
 	{
-		Die(m_pPlayer->GetCID(), WEAPON_WORLD);
+		Die(ClientID, WEAPON_WORLD);
 		return;
 	}
 
@@ -2045,37 +2052,48 @@ void CCharacter::DDRaceTick()
 		}
 	}
 
-	// check for nearby health pickups (also freeze)
-	bool InHealthPickup = false;
-	if(!m_Core.m_IsInFreeze)
-	{
-		CEntity *apEnts[9];
-		int Num = GameWorld()->FindEntities(m_Pos, GetProximityRadius() + CPickup::ms_CollisionExtraSize, apEnts, std::size(apEnts), CGameWorld::ENTTYPE_PICKUP);
-		for(int i = 0; i < Num; ++i)
-		{
-			CPickup *pPickup = static_cast<CPickup *>(apEnts[i]);
-			if(pPickup->Type() == POWERUP_HEALTH)
-			{
-				// This uses a separate variable InHealthPickup instead of setting m_Core.m_IsInFreeze
-				// as the latter causes freezebars to flicker when standing in the freeze range of a
-				// health pickup. When the same code for client prediction is added, the freezebars
-				// still flicker, but only when standing at the edge of the health pickup's freeze range.
-				InHealthPickup = true;
-				break;
-			}
-		}
-	}
+	m_Core.m_Id = GetPlayer()->GetCID();
 
 	// look for save position for rescue feature
 	if(g_Config.m_SvRescue || ((g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO || Team() > TEAM_FLOCK) && Team() >= TEAM_FLOCK && Team() < TEAM_SUPER))
 	{
-		if(!m_Core.m_IsInFreeze && IsGrounded() && !m_Core.m_DeepFrozen && !InHealthPickup)
 		{
-			SetRescue();
+			// check for nearby health pickups (also freeze)
+			bool InHealthPickup = false;
+			if(!m_Core.m_IsInFreeze)
+			{
+				CEntity *apEnts[9];
+				int Num = GameWorld()->FindEntities(m_Pos, GetProximityRadius() + CPickup::ms_CollisionExtraSize, apEnts, std::size(apEnts), CGameWorld::ENTTYPE_PICKUP);
+				for(int i = 0; i < Num; ++i)
+				{
+					CPickup *pPickup = static_cast<CPickup *>(apEnts[i]);
+					if(pPickup->Type() == POWERUP_HEALTH)
+					{
+						// This uses a separate variable InHealthPickup instead of setting m_Core.m_IsInFreeze
+						// as the latter causes freezebars to flicker when standing in the freeze range of a
+						// health pickup. When the same code for client prediction is added, the freezebars
+						// still flicker, but only when standing at the edge of the health pickup's freeze range.
+						InHealthPickup = true;
+						break;
+					}
+				}
+			}
+
+			// don't set rescue if inside a kill tile
+			const float NearRadius = GetProximityRadius() / 3.f, LeftTileOffset = m_Pos.x - NearRadius, RightTileOffset = m_Pos.x + NearRadius, AboveTileOffset = m_Pos.y - NearRadius, BelowTileOffset = m_Pos.y + NearRadius;
+			bool InKillTile = (Collision()->GetCollisionAt(RightTileOffset, AboveTileOffset) == TILE_DEATH ||
+					   Collision()->GetCollisionAt(RightTileOffset, BelowTileOffset) == TILE_DEATH ||
+					   Collision()->GetCollisionAt(LeftTileOffset, AboveTileOffset) == TILE_DEATH ||
+					   Collision()->GetCollisionAt(LeftTileOffset, BelowTileOffset) == TILE_DEATH ||
+					   Collision()->GetFCollisionAt(RightTileOffset, AboveTileOffset) == TILE_DEATH ||
+					   Collision()->GetFCollisionAt(RightTileOffset, BelowTileOffset) == TILE_DEATH ||
+					   Collision()->GetFCollisionAt(LeftTileOffset, AboveTileOffset) == TILE_DEATH ||
+					   Collision()->GetFCollisionAt(LeftTileOffset, BelowTileOffset) == TILE_DEATH);
+
+			if(!m_Core.m_IsInFreeze && IsGrounded() && !m_Core.m_DeepFrozen && !InHealthPickup && !InKillTile)
+				SetRescue();
 		}
 	}
-
-	m_Core.m_Id = GetPlayer()->GetCID();
 }
 
 void CCharacter::DDRacePostCoreTick()
