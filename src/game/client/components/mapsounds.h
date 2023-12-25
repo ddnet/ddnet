@@ -18,6 +18,7 @@ class CMapSounds : public CComponent
 	struct CSourceQueueEntry
 	{
 		int m_Sound;
+		bool m_HighDetail;
 		ISound::CVoiceHandle m_Voice;
 		CSoundSource *m_pSource;
 
