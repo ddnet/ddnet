@@ -357,6 +357,8 @@ void CGameWorld::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage,
 		else
 			Strength = GetCharacterByID(Owner)->Tuning()->m_ExplosionStrength;
 
+		float scaleStrength = pChar->Core()->PhysicsTickSpeedScaling(CCharacterCore::TUNING_SCALE_LINEAR, 1);
+
 		float Dmg = Strength * l;
 		if((int)Dmg)
 			if((GetCharacterByID(Owner) ? !GetCharacterByID(Owner)->GrenadeHitDisabled() : g_Config.m_SvHit || NoDamage) || Owner == pChar->GetCID())
@@ -365,7 +367,7 @@ void CGameWorld::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage,
 					continue;
 				if(Owner == -1 && ActivatedTeam != -1 && pChar->Team() != ActivatedTeam)
 					continue;
-				pChar->TakeDamage(ForceDir * Dmg * 2, (int)Dmg, Owner, Weapon);
+				pChar->TakeDamage(ForceDir * Dmg * 2 * scaleStrength, (int)Dmg, Owner, Weapon);
 				if(GetCharacterByID(Owner) ? GetCharacterByID(Owner)->GrenadeHitDisabled() : !g_Config.m_SvHit || NoDamage)
 					break;
 			}
@@ -593,6 +595,7 @@ void CGameWorld::CopyWorld(CGameWorld *pFrom)
 	pFrom->m_pChild = this;
 
 	m_GameTick = pFrom->m_GameTick;
+	m_Core.m_GameTickSpeed = pFrom->m_Core.m_GameTickSpeed;
 	m_pCollision = pFrom->m_pCollision;
 	m_WorldConfig = pFrom->m_WorldConfig;
 	for(int i = 0; i < 2; i++)

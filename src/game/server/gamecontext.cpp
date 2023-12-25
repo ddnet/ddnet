@@ -110,6 +110,9 @@ void CGameContext::Construct(int Resetting)
 
 	m_aDeleteTempfile[0] = 0;
 	m_TeeHistorianActive = false;
+
+	if(Server())
+		m_World.m_Core.m_GameTickSpeed = Server()->TickSpeed();
 }
 
 void CGameContext::Destruct(int Resetting)
@@ -297,8 +300,10 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 		else
 			Strength = TuningList()[m_apPlayers[Owner]->m_TuneZone].m_ExplosionStrength;
 
+		Strength = pChr->Core()->PhysicsTickSpeedScaling(CCharacterCore::TUNING_SCALE_LINEAR, Strength);
+
 		float Dmg = Strength * l;
-		if(!(int)Dmg)
+		if(!(int)(Dmg * pChr->Core()->m_TickSpeed / 50.0f))
 			continue;
 
 		if((GetPlayerChar(Owner) ? !GetPlayerChar(Owner)->GrenadeHitDisabled() : g_Config.m_SvHit) || NoDamage || Owner == pChr->GetPlayer()->GetCID())
@@ -1257,7 +1262,7 @@ void CGameContext::OnTick()
 			if(m_apPlayers[i] && m_apPlayers[i]->GetCharacter())
 			{
 				CNetObj_CharacterCore Char;
-				m_apPlayers[i]->GetCharacter()->GetCore().Write(&Char);
+				m_apPlayers[i]->GetCharacter()->GetCore().Write(&Char, Server()->TickSpeed());
 				m_TeeHistorian.RecordPlayer(i, &Char);
 			}
 			else
@@ -1519,6 +1524,11 @@ void CGameContext::OnClientEnter(int ClientID)
 		if(OnClientDDNetVersionKnown(ClientID))
 			return; // kicked
 	}
+	else if(Server()->TickSpeed() != 50)
+	{
+		Server()->Kick(ClientID, "unsupported client, need at least DDNet version 17.5");
+		return; // client doesn't support non 50hz servers
+	}
 
 	if(!Server()->ClientPrevIngame(ClientID))
 	{
@@ -1762,6 +1772,17 @@ bool CGameContext::OnClientDDNetVersionKnown(int ClientID)
 	{
 		Server()->Kick(ClientID, "unsupported client");
 		return true;
+	}
+
+	if(ClientVersion < VERSION_DDNET_TICKSPEED && Server()->TickSpeed() != 50)
+	{
+		Server()->Kick(ClientID, "unsupported client, need at least DDNet version 17.5");
+		return true;
+	}
+
+	if(Server()->TickSpeed() != 50)
+	{
+		SendTickRate(ClientID);
 	}
 
 	CPlayer *pPlayer = m_apPlayers[ClientID];
@@ -3560,8 +3581,10 @@ void CGameContext::OnInit(const void *pPersistentData)
 
 	m_Layers.Init(Kernel());
 	m_Collision.Init(&m_Layers);
+	m_Collision.m_TickSpeed = Server()->TickSpeed();
 	m_World.m_pTuningList = m_aTuningList;
 	m_World.m_Core.InitSwitchers(m_Collision.m_HighestSwitchNumber);
+	m_World.m_Core.m_GameTickSpeed = Server()->TickSpeed();
 
 	char aMapName[IO_MAX_PATH_LENGTH];
 	int MapSize;
@@ -4203,6 +4226,13 @@ void CGameContext::SendRecord(int ClientID)
 	{
 		Server()->SendPackMsg(&MsgLegacy, MSGFLAG_VITAL, ClientID);
 	}
+}
+
+void CGameContext::SendTickRate(int ClientID)
+{
+	CNetMsg_Sv_TickRate Msg;
+	Msg.m_TickRate = Server()->TickSpeed();
+	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
 }
 
 bool CGameContext::ProcessSpamProtection(int ClientID, bool RespectChatInitialDelay)

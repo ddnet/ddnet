@@ -548,6 +548,7 @@ public:
 	bool IsLocalCharSuper() const;
 	bool CanDisplayWarning() const override;
 	bool IsDisplayingWarning() const override;
+	void SetGameTickSpeed(int Tickspeed) override;
 	CNetObjHandler *GetNetObjHandler() override;
 
 	void LoadGameSkin(const char *pPath, bool AsDir = false);

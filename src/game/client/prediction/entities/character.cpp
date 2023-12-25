@@ -87,6 +87,8 @@ void CCharacter::HandleJetpack()
 			float Strength = GetTuning(m_TuneZone)->m_JetpackStrength;
 			if(!m_TuneZone)
 				Strength = m_LastJetpackStrength;
+
+			Strength = m_Core.PhysicsTickSpeedScaling(CCharacterCore::TUNING_SCALE_ACCEL, Strength);
 			TakeDamage(Direction * -1.0f * (Strength / 100.0f / 6.11f), 0, GetCID(), m_Core.m_ActiveWeapon);
 		}
 	}
@@ -324,6 +326,8 @@ void CCharacter::FireWeapon()
 				Dir = vec2(0.f, -1.f);
 
 			float Strength = GetTuning(m_TuneZone)->m_HammerStrength;
+
+			Strength = pTarget->Core()->PhysicsTickSpeedScaling(CCharacterCore::TUNING_SCALE_LINEAR, Strength);
 
 			vec2 Temp = pTarget->m_Core.m_Vel + normalize(Dir + vec2(0.f, -1.1f)) * 10.0f;
 			Temp = ClampVel(pTarget->m_MoveRestrictions, Temp);
@@ -1119,7 +1123,9 @@ CCharacter::CCharacter(CGameWorld *pGameWorld, int ID, CNetObj_Character *pChar,
 	m_LastWeapon = WEAPON_HAMMER;
 	m_QueuedWeapon = -1;
 	m_LastRefillJumps = false;
-	m_PrevPrevPos = m_PrevPos = m_Pos = vec2(pChar->m_X, pChar->m_Y);
+	CCharacterCore tmp;
+	tmp.Read(pChar, pGameWorld->m_Core.m_GameTickSpeed);
+	m_PrevPrevPos = m_PrevPos = m_Pos = tmp.m_Pos;
 	m_Core.Reset();
 	m_Core.Init(&GameWorld()->m_Core, GameWorld()->Collision(), GameWorld()->Teams());
 	m_Core.m_Id = ID;
@@ -1182,7 +1188,7 @@ void CCharacter::ResetPrediction()
 
 void CCharacter::Read(CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended, bool IsLocal)
 {
-	m_Core.Read((const CNetObj_CharacterCore *)pChar);
+	m_Core.Read((const CNetObj_CharacterCore *)pChar, GameWorld()->m_Core.m_GameTickSpeed);
 	m_IsLocal = IsLocal;
 
 	if(pExtended)

@@ -195,6 +195,7 @@ public:
 			pCharacter = nullptr;
 		}
 		m_pPrng = nullptr;
+		m_GameTickSpeed = SERVER_TICK_SPEED;
 	}
 
 	int RandomOr0(int BelowThis)
@@ -212,6 +213,7 @@ public:
 	CTuningParams m_aTuning[2];
 	class CCharacterCore *m_apCharacters[MAX_CLIENTS];
 	CPrng *m_pPrng;
+	int m_GameTickSpeed;
 
 	void InitSwitchers(int HighestSwitchNumber);
 	std::vector<SSwitchers> m_vSwitchers;
@@ -232,6 +234,7 @@ public:
 	vec2 m_HookPos;
 	vec2 m_HookDir;
 	vec2 m_HookTeleBase;
+	int m_TickSpeed;
 	int m_HookTick;
 	int m_HookState;
 	std::set<int> m_AttachedPlayers;
@@ -256,6 +259,16 @@ public:
 		int m_OldVelAmount;
 	} m_Ninja;
 
+	enum TUNING_SCALE
+	{
+		TUNING_SCALE_NOTHING,
+		TUNING_SCALE_LINEAR,
+		TUNING_SCALE_ACCEL,
+		TUNING_SCALE_FRICTION
+	};
+
+	float PhysicsTickSpeedScaling(TUNING_SCALE Scaling, float value);
+
 	bool m_NewHook;
 
 	int m_Jumped;
@@ -276,8 +289,8 @@ public:
 	void Tick(bool UseInput, bool DoDeferredTick = true);
 	void Move();
 
-	void Read(const CNetObj_CharacterCore *pObjCore);
-	void Write(CNetObj_CharacterCore *pObjCore) const;
+	void Read(const CNetObj_CharacterCore *pObjCore, int tickspeed);
+	void Write(CNetObj_CharacterCore *pObjCore, int tickspeed) const;
 	void Quantize();
 
 	// DDRace

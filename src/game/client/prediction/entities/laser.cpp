@@ -48,7 +48,7 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 	if(m_Type == WEAPON_SHOTGUN)
 	{
 		vec2 Temp;
-		float Strength = GetTuning(m_TuneZone)->m_ShotgunStrength;
+		float Strength = pHit->Core()->PhysicsTickSpeedScaling(CCharacterCore::TUNING_SCALE_LINEAR, GetTuning(m_TuneZone)->m_ShotgunStrength);
 		const vec2 &HitPos = pHit->Core()->m_Pos;
 		if(!g_Config.m_SvOldLaser)
 		{

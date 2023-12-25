@@ -551,6 +551,7 @@ public:
 	inline bool IsSpecVote() const { return m_VoteType == VOTE_TYPE_SPECTATE; }
 
 	void SendRecord(int ClientID);
+	void SendTickRate(int ClientID);
 	void OnSetAuthed(int ClientID, int Level) override;
 
 	void ResetTuning();

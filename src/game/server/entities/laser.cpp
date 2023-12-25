@@ -63,6 +63,8 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 		else
 			Strength = TuningList()[m_TuneZone].m_ShotgunStrength;
 
+		Strength = pHit->Core()->PhysicsTickSpeedScaling(CCharacterCore::TUNING_SCALE_LINEAR, Strength);
+
 		vec2 &HitPos = pHit->Core()->m_Pos;
 		if(!g_Config.m_SvOldLaser)
 		{

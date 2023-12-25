@@ -545,7 +545,7 @@ Messages = [
 		NetIntAny("m_ServerTimeBest"),
 		NetIntAny("m_PlayerTimeBest"),
 	]),
-    
+
 	NetMessageEx("Sv_KillMsgTeam", "killmsgteam@netmsg.ddnet.tw", [
 		NetIntRange("m_Team", 0, 'MAX_CLIENTS-1'),
 		NetIntRange("m_First", -1, 'MAX_CLIENTS-1'),
@@ -571,5 +571,9 @@ Messages = [
 
 	NetMessageEx("Sv_CommandInfoRemove", "commandinfo-remove@netmsg.ddnet.org", [
 			NetStringStrict("m_pName")
+	]),
+
+	NetMessageEx("Sv_TickRate", "tickrate@netmsg.ddnet.org", [
+		NetIntRange("m_TickRate", 50, 200),
 	]),
 ]

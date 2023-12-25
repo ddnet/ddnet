@@ -22,12 +22,13 @@ const CUuid SHA256_EXTENSION =
 	{{0x6b, 0xe6, 0xda, 0x4a, 0xce, 0xbd, 0x38, 0x0c,
 		0x9b, 0x5b, 0x12, 0x89, 0xc8, 0x42, 0xd7, 0x80}};
 
-static const unsigned char gs_CurVersion = 6;
+static const unsigned char gs_CurVersion = 7;
 static const unsigned char gs_OldVersion = 3;
 static const unsigned char gs_Sha256Version = 6;
+static const unsigned char gs_CustomTickrateVersion = 7;
 static const unsigned char gs_VersionTickCompression = 5; // demo files with this version or higher will use `CHUNKTICKFLAG_TICK_COMPRESSED`
 static const int gs_LengthOffset = 152;
-static const int gs_NumMarkersOffset = 176;
+static const int gs_NumMarkersOffset = 176 + sizeof(int);
 
 static const ColorRGBA gs_DemoPrintColor{0.75f, 0.7f, 0.7f, 1.0f};
 
@@ -58,7 +59,7 @@ CDemoRecorder::~CDemoRecorder()
 }
 
 // Record
-int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, const char *pNetVersion, const char *pMap, const SHA256_DIGEST &Sha256, unsigned Crc, const char *pType, unsigned MapSize, unsigned char *pMapData, IOHANDLE MapFile, DEMOFUNC_FILTER pfnFilter, void *pUser)
+int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, const char *pFilename, const char *pNetVersion, const char *pMap, const SHA256_DIGEST &Sha256, unsigned Crc, const char *pType, unsigned MapSize, unsigned char *pMapData, int tickrate, IOHANDLE MapFile, DEMOFUNC_FILTER pfnFilter, void *pUser)
 {
 	dbg_assert(m_File == 0, "Demo recorder already recording");
 
@@ -141,6 +142,7 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 	// Header.m_Length - add this on stop
 	str_timestamp(Header.m_aTimestamp, sizeof(Header.m_aTimestamp));
 	io_write(DemoFile, &Header, sizeof(Header));
+	io_write(DemoFile, &tickrate, sizeof(int));
 
 	CTimelineMarkers TimelineMarkers;
 	mem_zero(&TimelineMarkers, sizeof(TimelineMarkers));
@@ -297,7 +299,7 @@ void CDemoRecorder::Write(int Type, const void *pData, int Size)
 
 void CDemoRecorder::RecordSnapshot(int Tick, const void *pData, int Size)
 {
-	if(m_LastKeyFrame == -1 || (Tick - m_LastKeyFrame) > SERVER_TICK_SPEED * 5)
+	if(m_LastKeyFrame == -1 || (Tick - m_LastKeyFrame) > m_TickRate * 5)
 	{
 		// write full tickmarker
 		WriteTickMarker(Tick, true);
@@ -385,7 +387,7 @@ void CDemoRecorder::AddDemoMarker(int Tick)
 	if(m_NumTimelineMarkers > 0)
 	{
 		int Diff = Tick - m_aTimelineMarkers[m_NumTimelineMarkers - 1];
-		if(Diff < (float)SERVER_TICK_SPEED)
+		if(Diff < (float)m_TickRate)
 			return;
 	}
 
@@ -562,10 +564,10 @@ void CDemoPlayer::DoTick()
 	int ChunkTick = m_Info.m_Info.m_CurrentTick;
 
 	int64_t Freq = time_freq();
-	int64_t CurtickStart = m_Info.m_Info.m_CurrentTick * Freq / SERVER_TICK_SPEED;
-	int64_t PrevtickStart = m_Info.m_PreviousTick * Freq / SERVER_TICK_SPEED;
+	int64_t CurtickStart = m_Info.m_Info.m_CurrentTick * Freq / m_Info.m_Info.m_TickSpeed;
+	int64_t PrevtickStart = m_Info.m_PreviousTick * Freq / m_Info.m_Info.m_TickSpeed;
 	m_Info.m_IntraTick = (m_Info.m_CurrentTime - PrevtickStart) / (float)(CurtickStart - PrevtickStart);
-	m_Info.m_IntraTickSincePrev = (m_Info.m_CurrentTime - PrevtickStart) / (float)(Freq / SERVER_TICK_SPEED);
+	m_Info.m_IntraTickSincePrev = (m_Info.m_CurrentTime - PrevtickStart) / (float)(Freq / m_Info.m_Info.m_TickSpeed);
 	m_Info.m_TickTime = (m_Info.m_CurrentTime - PrevtickStart) / (float)Freq;
 	if(m_UpdateIntraTimesFunc)
 		m_UpdateIntraTimesFunc();
@@ -745,10 +747,11 @@ int CDemoPlayer::Load(class IStorage *pStorage, class IConsole *pConsole, const 
 	m_Info.m_Info.m_CurrentTick = -1;
 	m_Info.m_PreviousTick = -1;
 	m_Info.m_Info.m_Speed = 1;
+	m_Info.m_Info.m_TickSpeed = 50;
 	m_SpeedIndex = 4;
 	m_LastSnapshotDataSize = -1;
 
-	if(!GetDemoInfo(pStorage, m_pConsole, pFilename, StorageType, &m_Info.m_Header, &m_Info.m_TimelineMarkers, &m_MapInfo, &m_File, m_aErrorMessage, sizeof(m_aErrorMessage)))
+	if(!GetDemoInfo(pStorage, m_pConsole, pFilename, StorageType, &m_Info.m_Header, &m_Info.m_TimelineMarkers, &m_MapInfo, &m_Info.m_Info, &m_File, m_aErrorMessage, sizeof(m_aErrorMessage)))
 	{
 		str_copy(m_aFilename, "");
 		return -1;
@@ -877,7 +880,7 @@ int CDemoPlayer::Play()
 		DoTick();
 
 	// set start info
-	m_Info.m_CurrentTime = m_Info.m_PreviousTick * time_freq() / SERVER_TICK_SPEED;
+	m_Info.m_CurrentTime = m_Info.m_PreviousTick * time_freq() / m_Info.m_Info.m_TickSpeed;
 	m_Info.m_LastUpdate = Time();
 	return 0;
 }
@@ -890,7 +893,7 @@ int CDemoPlayer::SeekPercent(float Percent)
 
 int CDemoPlayer::SeekTime(float Seconds)
 {
-	int WantedTick = m_Info.m_Info.m_CurrentTick + round_truncate(Seconds * (float)SERVER_TICK_SPEED);
+	int WantedTick = m_Info.m_Info.m_CurrentTick + round_truncate(Seconds * (float)m_Info.m_Info.m_TickSpeed);
 	return SetPos(WantedTick);
 }
 
@@ -988,7 +991,7 @@ int CDemoPlayer::Update(bool RealTime)
 
 		while(!m_Info.m_Info.m_Paused && IsPlaying())
 		{
-			int64_t CurtickStart = m_Info.m_Info.m_CurrentTick * Freq / SERVER_TICK_SPEED;
+			int64_t CurtickStart = m_Info.m_Info.m_CurrentTick * Freq / m_Info.m_Info.m_TickSpeed;
 
 			// break if we are ready
 			if(RealTime && CurtickStart > m_Info.m_CurrentTime)
@@ -1001,10 +1004,10 @@ int CDemoPlayer::Update(bool RealTime)
 
 	// update intratick
 	{
-		int64_t CurtickStart = m_Info.m_Info.m_CurrentTick * Freq / SERVER_TICK_SPEED;
-		int64_t PrevtickStart = m_Info.m_PreviousTick * Freq / SERVER_TICK_SPEED;
+		int64_t CurtickStart = m_Info.m_Info.m_CurrentTick * Freq / m_Info.m_Info.m_TickSpeed;
+		int64_t PrevtickStart = m_Info.m_PreviousTick * Freq / m_Info.m_Info.m_TickSpeed;
 		m_Info.m_IntraTick = (m_Info.m_CurrentTime - PrevtickStart) / (float)(CurtickStart - PrevtickStart);
-		m_Info.m_IntraTickSincePrev = (m_Info.m_CurrentTime - PrevtickStart) / (float)(Freq / SERVER_TICK_SPEED);
+		m_Info.m_IntraTickSincePrev = (m_Info.m_CurrentTime - PrevtickStart) / (float)(Freq / m_Info.m_Info.m_TickSpeed);
 		m_Info.m_TickTime = (m_Info.m_CurrentTime - PrevtickStart) / (float)Freq;
 		if(m_UpdateIntraTimesFunc)
 			m_UpdateIntraTimesFunc();
@@ -1045,7 +1048,7 @@ void CDemoPlayer::GetDemoName(char *pBuffer, size_t BufferSize) const
 	IStorage::StripPathAndExtension(m_aFilename, pBuffer, BufferSize);
 }
 
-bool CDemoPlayer::GetDemoInfo(IStorage *pStorage, IConsole *pConsole, const char *pFilename, int StorageType, CDemoHeader *pDemoHeader, CTimelineMarkers *pTimelineMarkers, CMapInfo *pMapInfo, IOHANDLE *pFile, char *pErrorMessage, size_t ErrorMessageSize) const
+bool CDemoPlayer::GetDemoInfo(IStorage *pStorage, IConsole *pConsole, const char *pFilename, int StorageType, CDemoHeader *pDemoHeader, CTimelineMarkers *pTimelineMarkers, CMapInfo *pMapInfo, CInfo *pCInfo, IOHANDLE *pFile, char *pErrorMessage, size_t ErrorMessageSize) const
 {
 	mem_zero(pDemoHeader, sizeof(CDemoHeader));
 	mem_zero(pTimelineMarkers, sizeof(CTimelineMarkers));
@@ -1066,6 +1069,22 @@ bool CDemoPlayer::GetDemoInfo(IStorage *pStorage, IConsole *pConsole, const char
 		mem_zero(pDemoHeader, sizeof(CDemoHeader));
 		io_close(File);
 		return false;
+	}
+
+	if(pDemoHeader->m_Version >= gs_CustomTickrateVersion)
+	{
+		int tickSpeed;
+		if(io_read(File, &tickSpeed, sizeof(int)) != sizeof(int))
+		{
+			if(pErrorMessage != nullptr)
+				str_copy(pErrorMessage, "Error reading tickrate", ErrorMessageSize);
+			mem_zero(pDemoHeader, sizeof(CDemoHeader));
+			io_close(File);
+			return false;
+		}
+
+		if(pCInfo)
+			pCInfo->m_TickSpeed = tickSpeed;
 	}
 
 	if(pDemoHeader->m_Version < gs_OldVersion)
@@ -1193,7 +1212,7 @@ void CDemoEditor::Slice(const char *pDemo, const char *pDst, int StartTick, int 
 
 	CDemoRecorder DemoRecorder(m_pSnapshotDelta);
 	unsigned char *pMapData = DemoPlayer.GetMapData(m_pStorage);
-	const int Result = DemoRecorder.Start(m_pStorage, m_pConsole, pDst, m_pNetVersion, pMapInfo->m_aName, Sha256, pMapInfo->m_Crc, pInfo->m_Header.m_aType, pMapInfo->m_Size, pMapData, nullptr, pfnFilter, pUser) == -1;
+	const int Result = DemoRecorder.Start(m_pStorage, m_pConsole, pDst, m_pNetVersion, pMapInfo->m_aName, Sha256, pMapInfo->m_Crc, pInfo->m_Header.m_aType, pMapInfo->m_Size, pMapData, pInfo->m_Info.m_TickSpeed, nullptr, pfnFilter, pUser) == -1;
 	free(pMapData);
 	if(Result != 0)
 	{
