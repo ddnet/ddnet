@@ -109,6 +109,7 @@ public:
 			CreateFolder("demos", TYPE_SAVE);
 			CreateFolder("demos/auto", TYPE_SAVE);
 			CreateFolder("demos/auto/race", TYPE_SAVE);
+			CreateFolder("demos/auto/server", TYPE_SAVE);
 			CreateFolder("demos/replays", TYPE_SAVE);
 			CreateFolder("editor", TYPE_SAVE);
 			CreateFolder("ghosts", TYPE_SAVE);
