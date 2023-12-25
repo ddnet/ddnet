@@ -99,6 +99,7 @@ void CMapSounds::OnMapLoad()
 					CSourceQueueEntry Source;
 					Source.m_Sound = pSoundLayer->m_Sound;
 					Source.m_pSource = &pSources[i];
+					Source.m_HighDetail = pLayer->m_Flags & LAYERFLAG_DETAIL;
 
 					if(!Source.m_pSource || Source.m_Sound < 0 || Source.m_Sound >= m_Count)
 						continue;
@@ -128,7 +129,7 @@ void CMapSounds::OnRender()
 				Client()->IntraGameTick(g_Config.m_ClDummy));
 		}
 		float Offset = s_Time - Source.m_pSource->m_TimeDelay;
-		if(!DemoPlayerPaused && Offset >= 0.0f && g_Config.m_SndEnable)
+		if(!DemoPlayerPaused && Offset >= 0.0f && g_Config.m_SndEnable && (g_Config.m_GfxHighDetail || !Source.m_HighDetail))
 		{
 			if(Source.m_Voice.IsValid())
 			{
