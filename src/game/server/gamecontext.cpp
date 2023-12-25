@@ -3734,6 +3734,8 @@ void CGameContext::OnInit(const void *pPersistentData)
 		}
 	}
 
+	Server()->DemoRecorder_HandleAutoStart();
+
 	if(!m_pScore)
 	{
 		m_pScore = new CScore(this, ((CServer *)Server())->DbPool());
