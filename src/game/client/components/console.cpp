@@ -1190,6 +1190,14 @@ void CGameConsole::OnRender()
 				break;
 		}
 
+		// Make sure to reset m_NewLineCounter when we are done drawing
+		// This is because otherwise, if many entries are printed at once while console is
+		// hidden, m_NewLineCounter will always be > 0 since the console won't be able to render
+		// them all, thus wont be able to decrease m_NewLineCounter to 0.
+		// This leads to an infinite increase of m_BacklogCurLine and m_BacklogLastActiveLine
+		// when we want to keep scroll position.
+		pConsole->m_NewLineCounter = 0;
+
 		Graphics()->ClipDisable();
 
 		pConsole->m_BacklogLastActiveLine = pConsole->m_BacklogCurLine;
