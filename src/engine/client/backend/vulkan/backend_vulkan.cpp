@@ -1400,17 +1400,6 @@ protected:
 				return false;
 			VkCommandBuffer &CommandBuffer = *pCommandBuffer;
 
-			VkBufferImageCopy Region{};
-			Region.bufferOffset = 0;
-			Region.bufferRowLength = 0;
-			Region.bufferImageHeight = 0;
-			Region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-			Region.imageSubresource.mipLevel = 0;
-			Region.imageSubresource.baseArrayLayer = 0;
-			Region.imageSubresource.layerCount = 1;
-			Region.imageOffset = {0, 0, 0};
-			Region.imageExtent = {Viewport.width, Viewport.height, 1};
-
 			auto &SwapImg = m_vSwapChainImages[m_LastPresentedSwapChainImageIndex];
 
 			if(!ImageBarrier(m_GetPresentedImgDataHelperImage, 0, 1, 0, 1, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_GENERAL, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL))
