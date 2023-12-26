@@ -7949,9 +7949,9 @@ void CEditor::Render()
 	if(m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr)
 	{
 		// handle undo/redo hotkeys
-		if(Input()->KeyPress(KEY_Z) && Input()->ModifierIsPressed())
+		if(Input()->KeyPress(KEY_Z) && Input()->ModifierIsPressed() && !Input()->ShiftIsPressed())
 			UndoLastAction();
-		if(Input()->KeyPress(KEY_Y) && Input()->ModifierIsPressed())
+		if((Input()->KeyPress(KEY_Y) && Input()->ModifierIsPressed()) || (Input()->KeyPress(KEY_Z) && Input()->ModifierIsPressed() && Input()->ShiftIsPressed()))
 			RedoLastAction();
 
 		// handle brush save/load hotkeys
