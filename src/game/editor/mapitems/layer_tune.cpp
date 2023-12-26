@@ -127,6 +127,9 @@ void CLayerTune::BrushDraw(std::shared_ptr<CLayer> pBrush, float wx, float wy)
 				m_pTuneTile[Index].m_Number = 0;
 				m_pTuneTile[Index].m_Type = 0;
 				m_pTiles[Index].m_Index = 0;
+
+				if(pTuneLayer->m_pTiles[y * pTuneLayer->m_Width + x].m_Index != TILE_AIR)
+					ShowPreventUnusedTilesWarning();
 			}
 
 			STuneTileStateChange::SData Current{
@@ -235,6 +238,9 @@ void CLayerTune::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIRe
 				m_pTiles[TgtIndex].m_Index = 0;
 				m_pTuneTile[TgtIndex].m_Type = 0;
 				m_pTuneTile[TgtIndex].m_Number = 0;
+
+				if(!Empty)
+					ShowPreventUnusedTilesWarning();
 			}
 			else
 			{
