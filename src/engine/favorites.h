@@ -26,7 +26,7 @@ public:
 		bool m_AllowPing;
 	};
 
-	virtual ~IFavorites() {}
+	~IFavorites() override = default;
 
 	virtual TRISTATE IsFavorite(const NETADDR *pAddrs, int NumAddrs) const = 0;
 	// Only considers the addresses that are actually favorites.

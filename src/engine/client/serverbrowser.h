@@ -47,6 +47,7 @@ class CFilterList : public IFilterList
 	size_t m_FilterSize;
 
 public:
+	virtual ~CFilterList() = default;
 	CFilterList(char *pFilter, size_t FilterSize) :
 		m_pFilter(pFilter), m_FilterSize(FilterSize)
 	{
@@ -76,7 +77,7 @@ public:
 	};
 
 	CServerBrowser();
-	virtual ~CServerBrowser();
+	~CServerBrowser() override;
 
 	// interface functions
 	void Refresh(int Type) override;

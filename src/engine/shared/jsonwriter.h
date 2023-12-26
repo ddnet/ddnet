@@ -95,7 +95,7 @@ public:
 	 * The file will automatically be closed by the destructor.
 	 */
 	CJsonFileWriter(IOHANDLE IO);
-	~CJsonFileWriter();
+	~CJsonFileWriter() override;
 };
 
 /**
@@ -111,7 +111,7 @@ protected:
 
 public:
 	CJsonStringWriter() = default;
-	~CJsonStringWriter() = default;
+	~CJsonStringWriter() override = default;
 	std::string &&GetOutputString();
 };
 

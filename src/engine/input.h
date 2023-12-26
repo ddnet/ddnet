@@ -87,6 +87,7 @@ public:
 	class IJoystick
 	{
 	public:
+		virtual ~IJoystick() = default;
 		virtual int GetIndex() const = 0;
 		virtual const char *GetName() const = 0;
 		virtual int GetNumAxes() const = 0;
@@ -145,7 +146,7 @@ class IEngineInput : public IInput
 	MACRO_INTERFACE("engineinput")
 public:
 	virtual void Init() = 0;
-	virtual void Shutdown() override = 0;
+	void Shutdown() override = 0;
 	virtual int Update() = 0;
 };
 

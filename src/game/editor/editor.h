@@ -173,21 +173,21 @@ public:
 		m_vpGroups.erase(m_vpGroups.begin() + Index);
 	}
 
-	void ModifyImageIndex(FIndexModifyFunction pfnFunc)
+	void ModifyImageIndex(const FIndexModifyFunction &pfnFunc)
 	{
 		OnModify();
 		for(auto &pGroup : m_vpGroups)
 			pGroup->ModifyImageIndex(pfnFunc);
 	}
 
-	void ModifyEnvelopeIndex(FIndexModifyFunction pfnFunc)
+	void ModifyEnvelopeIndex(const FIndexModifyFunction &pfnFunc)
 	{
 		OnModify();
 		for(auto &pGroup : m_vpGroups)
 			pGroup->ModifyEnvelopeIndex(pfnFunc);
 	}
 
-	void ModifySoundIndex(FIndexModifyFunction pfnFunc)
+	void ModifySoundIndex(const FIndexModifyFunction &pfnFunc)
 	{
 		OnModify();
 		for(auto &pGroup : m_vpGroups)
@@ -302,15 +302,15 @@ class CEditor : public IEditor
 	std::shared_ptr<CLayerGroup> m_apSavedBrushes[10];
 
 public:
-	class IInput *Input() { return m_pInput; }
-	class IClient *Client() { return m_pClient; }
-	class CConfig *Config() { return m_pConfig; }
-	class IConsole *Console() { return m_pConsole; }
-	class IEngine *Engine() { return m_pEngine; }
-	class IGraphics *Graphics() { return m_pGraphics; }
-	class ISound *Sound() { return m_pSound; }
-	class ITextRender *TextRender() { return m_pTextRender; }
-	class IStorage *Storage() { return m_pStorage; }
+	class IInput *Input() const { return m_pInput; }
+	class IClient *Client() const { return m_pClient; }
+	class CConfig *Config() const { return m_pConfig; }
+	class IConsole *Console() const { return m_pConsole; }
+	class IEngine *Engine() const { return m_pEngine; }
+	class IGraphics *Graphics() const { return m_pGraphics; }
+	class ISound *Sound() const { return m_pSound; }
+	class ITextRender *TextRender() const { return m_pTextRender; }
+	class IStorage *Storage() const { return m_pStorage; }
 	CUI *UI() { return &m_UI; }
 	CRenderTools *RenderTools() { return &m_RenderTools; }
 
@@ -944,7 +944,7 @@ public:
 	std::vector<int> SortImages();
 	bool SelectLayerByTile();
 
-	void DoAudioPreview(CUIRect View, const void *pPlayPauseButtonID, const void *pStopButtonID, const void *pSeekBarID, const int SampleID);
+	void DoAudioPreview(CUIRect View, const void *pPlayPauseButtonID, const void *pStopButtonID, const void *pSeekBarID, int SampleID);
 
 	// Tile Numbers For Explanations - TODO: Add/Improve tiles and explanations
 	enum
@@ -1061,7 +1061,6 @@ public:
 	unsigned char m_SwitchNum;
 	unsigned char m_SwitchDelay;
 
-public:
 	// Undo/Redo
 	CEditorHistory m_EditorHistory;
 	CEditorHistory m_ServerSettingsHistory;
@@ -1073,12 +1072,11 @@ private:
 	void UndoLastAction();
 	void RedoLastAction();
 
-private:
 	std::map<int, CPoint[5]> m_QuadDragOriginalPoints;
 };
 
 // make sure to inline this function
-inline class IGraphics *CLayer::Graphics() { return m_pEditor->Graphics(); }
-inline class ITextRender *CLayer::TextRender() { return m_pEditor->TextRender(); }
+inline class IGraphics *CLayer::Graphics() const { return m_pEditor->Graphics(); }
+inline class ITextRender *CLayer::TextRender() const { return m_pEditor->TextRender(); }
 
 #endif

@@ -104,7 +104,7 @@ protected:
 
 public:
 	CHttpRequest(const char *pUrl);
-	~CHttpRequest();
+	~CHttpRequest() override;
 
 	void Timeout(CTimeout Timeout) { m_Timeout = Timeout; }
 	void MaxResponseSize(int64_t MaxResponseSize) { m_MaxResponseSize = MaxResponseSize; }

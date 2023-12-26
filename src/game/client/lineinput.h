@@ -11,6 +11,7 @@
 #include <engine/textrender.h>
 
 #include <game/client/ui_rect.h>
+#include <utility>
 
 enum class EInputPriority
 {
@@ -169,9 +170,9 @@ public:
 	const char *GetEmptyText() const { return m_pEmptyText; }
 	void SetEmptyText(const char *pText) { m_pEmptyText = pText; }
 
-	void SetClipboardLineCallback(FClipboardLineCallback pfnClipboardLineCallback) { m_pfnClipboardLineCallback = pfnClipboardLineCallback; }
-	void SetDisplayTextCallback(FDisplayTextCallback pfnDisplayTextCallback) { m_pfnDisplayTextCallback = pfnDisplayTextCallback; }
-	void SetCalculateOffsetCallback(FCalculateOffsetCallback pfnCalculateOffsetCallback) { m_pfnCalculateOffsetCallback = pfnCalculateOffsetCallback; }
+	void SetClipboardLineCallback(FClipboardLineCallback pfnClipboardLineCallback) { m_pfnClipboardLineCallback = std::move(pfnClipboardLineCallback); }
+	void SetDisplayTextCallback(FDisplayTextCallback pfnDisplayTextCallback) { m_pfnDisplayTextCallback = std::move(pfnDisplayTextCallback); }
+	void SetCalculateOffsetCallback(FCalculateOffsetCallback pfnCalculateOffsetCallback) { m_pfnCalculateOffsetCallback = std::move(pfnCalculateOffsetCallback); }
 
 	bool ProcessInput(const IInput::CEvent &Event);
 	bool WasChanged()
@@ -214,19 +215,14 @@ public:
 class CLineInputNumber : public CLineInputBuffered<32>
 {
 public:
-	CLineInputNumber() :
-		CLineInputBuffered()
-	{
-	}
+	CLineInputNumber() = default;
 
-	CLineInputNumber(int Number) :
-		CLineInputBuffered()
+	CLineInputNumber(int Number)
 	{
 		SetInteger(Number);
 	}
 
-	CLineInputNumber(float Number) :
-		CLineInputBuffered()
+	CLineInputNumber(float Number)
 	{
 		SetFloat(Number);
 	}

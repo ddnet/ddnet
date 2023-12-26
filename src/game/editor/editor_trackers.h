@@ -108,6 +108,7 @@ template<typename T, typename E>
 class CPropTracker
 {
 public:
+	virtual ~CPropTracker() = default;
 	CPropTracker(CEditor *pEditor) :
 		m_pEditor(pEditor), m_OriginalValue(0) {}
 	CEditor *m_pEditor;
