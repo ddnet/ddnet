@@ -262,7 +262,7 @@ void CRenderTools::GetRenderTeeOffsetToRenderedTee(const CAnimState *pAnim, cons
 	TeeOffsetToMid.y = -MidOfRendered;
 }
 
-void CRenderTools::RenderTee(const CAnimState *pAnim, const CTeeRenderInfo *pInfo, int Emote, vec2 Dir, vec2 Pos, float Alpha)
+void CRenderTools::RenderTee(const CAnimState *pAnim, const CTeeRenderInfo *pInfo, int Emote, vec2 Dir, vec2 Pos, float Alpha) const
 {
 	vec2 Direction = Dir;
 	vec2 Position = Pos;
