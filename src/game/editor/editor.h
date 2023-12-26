@@ -1061,6 +1061,9 @@ public:
 	unsigned char m_SwitchNum;
 	unsigned char m_SwitchDelay;
 
+	void AdjustBrushSpecialTiles(bool UseNextFree, int Adjust = 0);
+	int FindNextFreeTileNumber(int Type);
+
 public:
 	// Undo/Redo
 	CEditorHistory m_EditorHistory;

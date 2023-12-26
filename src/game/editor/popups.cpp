@@ -2430,20 +2430,10 @@ CUI::EPopupMenuFunctionResult CEditor::PopupTele(void *pContext, CUIRect View, b
 		static int s_EmptySlotPid = 0;
 		if(pEditor->DoButton_Editor(&s_EmptySlotPid, "F", 0, &FindEmptySlot, 0, "[ctrl+f] Find empty slot") || (Active && pEditor->Input()->ModifierIsPressed() && pEditor->Input()->KeyPress(KEY_F)))
 		{
-			int number = -1;
-			for(int i = 1; i <= 255; i++)
-			{
-				if(!pEditor->m_Map.m_pTeleLayer->ContainsElementWithId(i))
-				{
-					number = i;
-					break;
-				}
-			}
+			int Number = pEditor->FindNextFreeTileNumber(LAYERTYPE_TELE);
 
-			if(number != -1)
-			{
-				pEditor->m_TeleNumber = number;
-			}
+			if(Number != -1)
+				pEditor->m_TeleNumber = Number;
 		}
 	}
 
@@ -2536,20 +2526,10 @@ CUI::EPopupMenuFunctionResult CEditor::PopupSwitch(void *pContext, CUIRect View,
 		static int s_EmptySlotPid = 0;
 		if(pEditor->DoButton_Editor(&s_EmptySlotPid, "F", 0, &FindEmptySlot, 0, "[ctrl+f] Find empty slot") || (Active && pEditor->Input()->ModifierIsPressed() && pEditor->Input()->KeyPress(KEY_F)))
 		{
-			int Number = -1;
-			for(int i = 1; i <= 255; i++)
-			{
-				if(!pEditor->m_Map.m_pSwitchLayer->ContainsElementWithId(i))
-				{
-					Number = i;
-					break;
-				}
-			}
+			int Number = pEditor->FindNextFreeTileNumber(LAYERTYPE_SWITCH);
 
 			if(Number != -1)
-			{
 				pEditor->m_SwitchNum = Number;
-			}
 		}
 	}
 
