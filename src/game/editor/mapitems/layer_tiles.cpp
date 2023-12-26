@@ -1259,3 +1259,13 @@ void CLayerTiles::ModifyEnvelopeIndex(FIndexModifyFunction Func)
 {
 	Func(&m_ColorEnv);
 }
+
+void CLayerTiles::ShowPreventUnusedTilesWarning()
+{
+	if(!m_pEditor->m_PreventUnusedTilesWasWarned)
+	{
+		m_pEditor->m_PopupEventType = CEditor::POPEVENT_PREVENTUNUSEDTILES;
+		m_pEditor->m_PopupEventActivated = true;
+		m_pEditor->m_PreventUnusedTilesWasWarned = true;
+	}
+}
