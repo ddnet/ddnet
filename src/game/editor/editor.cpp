@@ -8158,10 +8158,21 @@ void CEditor::Render()
 			MapView()->Zoom()->ChangeValue(-50.0f);
 		if(Input()->KeyPress(KEY_KP_MULTIPLY))
 			MapView()->ResetZoom();
-		if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
-			MapView()->Zoom()->ChangeValue(20.0f);
-		if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
-			MapView()->Zoom()->ChangeValue(-20.0f);
+
+		if(m_pBrush->IsEmpty() || !Input()->ShiftIsPressed())
+		{
+			if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
+				MapView()->Zoom()->ChangeValue(20.0f);
+			if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
+				MapView()->Zoom()->ChangeValue(-20.0f);
+		}
+		else
+		{
+			if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
+				AdjustBrushSpecialTiles(-1);
+			if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
+				AdjustBrushSpecialTiles(1);
+		}
 	}
 
 	for(CEditorComponent &Component : m_vComponents)
@@ -8872,8 +8883,6 @@ bool CEditor::Append(const char *pFileName, int StorageType, bool IgnoreHistory)
 	return true;
 }
 
-IEditor *CreateEditor() { return new CEditor; }
-
 void CEditor::UndoLastAction()
 {
 	if(m_ActiveExtraEditor == EXTRAEDITOR_SERVER_SETTINGS)
@@ -8893,3 +8902,69 @@ void CEditor::RedoLastAction()
 	else
 		m_EditorHistory.Redo();
 }
+
+void CEditor::AdjustBrushSpecialTiles(int Adjust)
+{
+	// Adjust m_Number field of tune, switch and tele tiles by `Adjust`
+
+	auto &&AdjustNumber = [Adjust](unsigned char &Number) {
+		Number = ((Number + Adjust) - 1 + 255) % 255 + 1;
+	};
+
+	for(auto &pLayer : m_pBrush->m_vpLayers)
+	{
+		if(pLayer->m_Type != LAYERTYPE_TILES)
+			continue;
+
+		std::shared_ptr<CLayerTiles> pLayerTiles = std::static_pointer_cast<CLayerTiles>(pLayer);
+
+		// Only handle tele, switch and tune layers
+		if(pLayerTiles->m_Tele)
+		{
+			std::shared_ptr<CLayerTele> pTeleLayer = std::static_pointer_cast<CLayerTele>(pLayer);
+			for(int y = 0; y < pTeleLayer->m_Height; y++)
+			{
+				for(int x = 0; x < pTeleLayer->m_Width; x++)
+				{
+					int i = y * pTeleLayer->m_Width + x;
+					if(!IsValidTeleTile(pTeleLayer->m_pTiles[i].m_Index) || !pTeleLayer->m_pTeleTile[i].m_Number)
+						continue;
+
+					AdjustNumber(pTeleLayer->m_pTeleTile[i].m_Number);
+				}
+			}
+		}
+		else if(pLayerTiles->m_Tune)
+		{
+			std::shared_ptr<CLayerTune> pTuneLayer = std::static_pointer_cast<CLayerTune>(pLayer);
+			for(int y = 0; y < pTuneLayer->m_Height; y++)
+			{
+				for(int x = 0; x < pTuneLayer->m_Width; x++)
+				{
+					int i = y * pTuneLayer->m_Width + x;
+					if(!IsValidTuneTile(pTuneLayer->m_pTiles[i].m_Index) || !pTuneLayer->m_pTuneTile[i].m_Number)
+						continue;
+
+					AdjustNumber(pTuneLayer->m_pTuneTile[i].m_Number);
+				}
+			}
+		}
+		else if(pLayerTiles->m_Switch)
+		{
+			std::shared_ptr<CLayerSwitch> pSwitchLayer = std::static_pointer_cast<CLayerSwitch>(pLayer);
+			for(int y = 0; y < pSwitchLayer->m_Height; y++)
+			{
+				for(int x = 0; x < pSwitchLayer->m_Width; x++)
+				{
+					int i = y * pSwitchLayer->m_Width + x;
+					if(!IsValidSwitchTile(pSwitchLayer->m_pTiles[i].m_Index) || !pSwitchLayer->m_pSwitchTile[i].m_Number)
+						continue;
+
+					AdjustNumber(pSwitchLayer->m_pSwitchTile[i].m_Number);
+				}
+			}
+		}
+	}
+}
+
+IEditor *CreateEditor() { return new CEditor; }

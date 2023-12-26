@@ -1061,6 +1061,8 @@ public:
 	unsigned char m_SwitchNum;
 	unsigned char m_SwitchDelay;
 
+	void AdjustBrushSpecialTiles(int Adjust);
+
 public:
 	// Undo/Redo
 	CEditorHistory m_EditorHistory;
