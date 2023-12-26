@@ -434,7 +434,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		TeeInfo.m_Size *= TeeSizeMod;
 		const CAnimState *pIdleState = CAnimState::GetIdle();
 		vec2 OffsetToMid;
-		RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &TeeInfo, OffsetToMid);
+		CRenderTools::GetRenderTeeOffsetToRenderedTee(pIdleState, &TeeInfo, OffsetToMid);
 		vec2 TeeRenderPos(TeeOffset + TeeLength / 2, y + LineHeight / 2.0f + OffsetToMid.y);
 
 		RenderTools()->RenderTee(pIdleState, &TeeInfo, EMOTE_NORMAL, vec2(1.0f, 0.0f), TeeRenderPos);

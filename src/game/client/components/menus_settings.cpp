@@ -587,7 +587,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	Label.VSplitLeft(260.0f, &Label, 0);
 	const CAnimState *pIdleState = CAnimState::GetIdle();
 	vec2 OffsetToMid;
-	RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &OwnSkinInfo, OffsetToMid);
+	CRenderTools::GetRenderTeeOffsetToRenderedTee(pIdleState, &OwnSkinInfo, OffsetToMid);
 	vec2 TeeRenderPos(Label.x + 30.0f, Label.y + Label.h / 2.0f + OffsetToMid.y);
 	int Emote = m_Dummy ? g_Config.m_ClDummyDefaultEyes : g_Config.m_ClPlayerDefaultEyes;
 	RenderTools()->RenderTee(pIdleState, &OwnSkinInfo, Emote, vec2(1, 0), TeeRenderPos);
@@ -805,7 +805,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		Info.m_ColorableRenderSkin = pSkinToBeDraw->m_ColorableSkin;
 		Info.m_SkinMetrics = pSkinToBeDraw->m_Metrics;
 
-		RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &Info, OffsetToMid);
+		CRenderTools::GetRenderTeeOffsetToRenderedTee(pIdleState, &Info, OffsetToMid);
 		TeeRenderPos = vec2(OriginalRect.x + 30, OriginalRect.y + OriginalRect.h / 2 + OffsetToMid.y);
 		RenderTools()->RenderTee(pIdleState, &Info, Emote, vec2(1.0f, 0.0f), TeeRenderPos);
 

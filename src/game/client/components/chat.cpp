@@ -1312,7 +1312,7 @@ void CChat::OnRender()
 
 				const CAnimState *pIdleState = CAnimState::GetIdle();
 				vec2 OffsetToMid;
-				RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &RenderInfo, OffsetToMid);
+				CRenderTools::GetRenderTeeOffsetToRenderedTee(pIdleState, &RenderInfo, OffsetToMid);
 				vec2 TeeRenderPos(x + (RealMsgPaddingX + TeeSize) / 2.0f, y + OffsetTeeY + FullHeightMinusTee / 2.0f + OffsetToMid.y);
 				RenderTools()->RenderTee(pIdleState, &RenderInfo, EMOTE_NORMAL, vec2(1, 0.1f), TeeRenderPos, Blend);
 			}
