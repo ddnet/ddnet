@@ -8166,12 +8166,19 @@ void CEditor::Render()
 			if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
 				MapView()->Zoom()->ChangeValue(-20.0f);
 		}
-		else
+		if(!m_pBrush->IsEmpty())
 		{
-			if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
-				AdjustBrushSpecialTiles(-1);
-			if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
-				AdjustBrushSpecialTiles(1);
+			if(Input()->ShiftIsPressed())
+			{
+				if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
+					AdjustBrushSpecialTiles(false, -1);
+				if(Input()->KeyPress(KEY_MOUSE_WHEEL_UP))
+					AdjustBrushSpecialTiles(false, 1);
+			}
+
+			// Use ctrl+f to replace number in brush with next free
+			if(Input()->ModifierIsPressed() && Input()->KeyPress(KEY_F))
+				AdjustBrushSpecialTiles(true);
 		}
 	}
 
@@ -8903,9 +8910,10 @@ void CEditor::RedoLastAction()
 		m_EditorHistory.Redo();
 }
 
-void CEditor::AdjustBrushSpecialTiles(int Adjust)
+void CEditor::AdjustBrushSpecialTiles(bool UseNextFree, int Adjust)
 {
-	// Adjust m_Number field of tune, switch and tele tiles by `Adjust`
+	// Adjust m_Number field of tune, switch and tele tiles by `Adjust` if `UseNextFree` is false
+	// If true, then use the next free number instead
 
 	auto &&AdjustNumber = [Adjust](unsigned char &Number) {
 		Number = ((Number + Adjust) - 1 + 255) % 255 + 1;
@@ -8921,50 +8929,91 @@ void CEditor::AdjustBrushSpecialTiles(int Adjust)
 		// Only handle tele, switch and tune layers
 		if(pLayerTiles->m_Tele)
 		{
+			int NextFreeNumber = FindNextFreeTileNumber(LAYERTYPE_TELE);
+
 			std::shared_ptr<CLayerTele> pTeleLayer = std::static_pointer_cast<CLayerTele>(pLayer);
 			for(int y = 0; y < pTeleLayer->m_Height; y++)
 			{
 				for(int x = 0; x < pTeleLayer->m_Width; x++)
 				{
 					int i = y * pTeleLayer->m_Width + x;
-					if(!IsValidTeleTile(pTeleLayer->m_pTiles[i].m_Index) || !pTeleLayer->m_pTeleTile[i].m_Number)
+					if(!IsValidTeleTile(pTeleLayer->m_pTiles[i].m_Index) || (!UseNextFree && !pTeleLayer->m_pTeleTile[i].m_Number))
 						continue;
 
-					AdjustNumber(pTeleLayer->m_pTeleTile[i].m_Number);
+					if(UseNextFree)
+						pTeleLayer->m_pTeleTile[i].m_Number = NextFreeNumber;
+					else
+						AdjustNumber(pTeleLayer->m_pTeleTile[i].m_Number);
 				}
 			}
 		}
 		else if(pLayerTiles->m_Tune)
 		{
-			std::shared_ptr<CLayerTune> pTuneLayer = std::static_pointer_cast<CLayerTune>(pLayer);
-			for(int y = 0; y < pTuneLayer->m_Height; y++)
+			if(!UseNextFree)
 			{
-				for(int x = 0; x < pTuneLayer->m_Width; x++)
+				std::shared_ptr<CLayerTune> pTuneLayer = std::static_pointer_cast<CLayerTune>(pLayer);
+				for(int y = 0; y < pTuneLayer->m_Height; y++)
 				{
-					int i = y * pTuneLayer->m_Width + x;
-					if(!IsValidTuneTile(pTuneLayer->m_pTiles[i].m_Index) || !pTuneLayer->m_pTuneTile[i].m_Number)
-						continue;
+					for(int x = 0; x < pTuneLayer->m_Width; x++)
+					{
+						int i = y * pTuneLayer->m_Width + x;
+						if(!IsValidTuneTile(pTuneLayer->m_pTiles[i].m_Index) || !pTuneLayer->m_pTuneTile[i].m_Number)
+							continue;
 
-					AdjustNumber(pTuneLayer->m_pTuneTile[i].m_Number);
+						AdjustNumber(pTuneLayer->m_pTuneTile[i].m_Number);
+					}
 				}
 			}
 		}
 		else if(pLayerTiles->m_Switch)
 		{
+			int NextFreeNumber = FindNextFreeTileNumber(LAYERTYPE_SWITCH);
+
 			std::shared_ptr<CLayerSwitch> pSwitchLayer = std::static_pointer_cast<CLayerSwitch>(pLayer);
 			for(int y = 0; y < pSwitchLayer->m_Height; y++)
 			{
 				for(int x = 0; x < pSwitchLayer->m_Width; x++)
 				{
 					int i = y * pSwitchLayer->m_Width + x;
-					if(!IsValidSwitchTile(pSwitchLayer->m_pTiles[i].m_Index) || !pSwitchLayer->m_pSwitchTile[i].m_Number)
+					if(!IsValidSwitchTile(pSwitchLayer->m_pTiles[i].m_Index) || (!UseNextFree && !pSwitchLayer->m_pSwitchTile[i].m_Number))
 						continue;
 
-					AdjustNumber(pSwitchLayer->m_pSwitchTile[i].m_Number);
+					if(UseNextFree)
+						pSwitchLayer->m_pSwitchTile[i].m_Number = NextFreeNumber;
+					else
+						AdjustNumber(pSwitchLayer->m_pSwitchTile[i].m_Number);
 				}
 			}
 		}
 	}
+}
+
+int CEditor::FindNextFreeTileNumber(int Type)
+{
+	int Number = -1;
+	if(Type == LAYERTYPE_TELE)
+	{
+		for(int i = 1; i <= 255; i++)
+		{
+			if(!m_Map.m_pTeleLayer->ContainsElementWithId(i))
+			{
+				Number = i;
+				break;
+			}
+		}
+	}
+	else if(Type == LAYERTYPE_SWITCH)
+	{
+		for(int i = 1; i <= 255; i++)
+		{
+			if(!m_Map.m_pSwitchLayer->ContainsElementWithId(i))
+			{
+				Number = i;
+				break;
+			}
+		}
+	}
+	return Number;
 }
 
 IEditor *CreateEditor() { return new CEditor; }
