@@ -339,18 +339,16 @@ CUI::EPopupMenuFunctionResult CEditor::PopupMenuSettings(void *pContext, CUIRect
 		Selector.VSplitMid(&No, &Yes);
 
 		pEditor->UI()->DoLabel(&Label, "Align quads", 10.0f, TEXTALIGN_ML);
-		if(pEditor->m_AllowPlaceUnusedTiles != -1)
+
+		static int s_ButtonNo = 0;
+		static int s_ButtonYes = 0;
+		if(pEditor->DoButton_ButtonDec(&s_ButtonNo, "No", !g_Config.m_EdAlignQuads, &No, 0, "Do not perform quad alignment to other quads/points when moving quads"))
 		{
-			static int s_ButtonNo = 0;
-			static int s_ButtonYes = 0;
-			if(pEditor->DoButton_ButtonDec(&s_ButtonNo, "No", !g_Config.m_EdAlignQuads, &No, 0, "Do not perform quad alignment to other quads/points when moving quads"))
-			{
-				g_Config.m_EdAlignQuads = false;
-			}
-			if(pEditor->DoButton_ButtonInc(&s_ButtonYes, "Yes", g_Config.m_EdAlignQuads, &Yes, 0, "Allow quad alignment to other quads/points when moving quads"))
-			{
-				g_Config.m_EdAlignQuads = true;
-			}
+			g_Config.m_EdAlignQuads = false;
+		}
+		if(pEditor->DoButton_ButtonInc(&s_ButtonYes, "Yes", g_Config.m_EdAlignQuads, &Yes, 0, "Allow quad alignment to other quads/points when moving quads"))
+		{
+			g_Config.m_EdAlignQuads = true;
 		}
 	}
 
@@ -365,18 +363,16 @@ CUI::EPopupMenuFunctionResult CEditor::PopupMenuSettings(void *pContext, CUIRect
 		Selector.VSplitMid(&No, &Yes);
 
 		pEditor->UI()->DoLabel(&Label, "Show quads bounds", 10.0f, TEXTALIGN_ML);
-		if(pEditor->m_AllowPlaceUnusedTiles != -1)
+
+		static int s_ButtonNo = 0;
+		static int s_ButtonYes = 0;
+		if(pEditor->DoButton_ButtonDec(&s_ButtonNo, "No", !g_Config.m_EdShowQuadsRect, &No, 0, "Do not show quad bounds when moving quads"))
 		{
-			static int s_ButtonNo = 0;
-			static int s_ButtonYes = 0;
-			if(pEditor->DoButton_ButtonDec(&s_ButtonNo, "No", !g_Config.m_EdShowQuadsRect, &No, 0, "Do not show quad bounds when moving quads"))
-			{
-				g_Config.m_EdShowQuadsRect = false;
-			}
-			if(pEditor->DoButton_ButtonInc(&s_ButtonYes, "Yes", g_Config.m_EdShowQuadsRect, &Yes, 0, "Show quad bounds when moving quads"))
-			{
-				g_Config.m_EdShowQuadsRect = true;
-			}
+			g_Config.m_EdShowQuadsRect = false;
+		}
+		if(pEditor->DoButton_ButtonInc(&s_ButtonYes, "Yes", g_Config.m_EdShowQuadsRect, &Yes, 0, "Show quad bounds when moving quads"))
+		{
+			g_Config.m_EdShowQuadsRect = true;
 		}
 	}
 
