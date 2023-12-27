@@ -707,6 +707,7 @@ public:
 	};
 	EExtraEditor m_ActiveExtraEditor = EXTRAEDITOR_NONE;
 	float m_aExtraEditorSplits[NUM_EXTRAEDITORS] = {250.0f, 250.0f, 250.0f};
+	float m_ToolBoxWidth = 100.0f;
 
 	enum EShowEnvelope
 	{
@@ -936,7 +937,14 @@ public:
 	void RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEditorLast);
 	void RenderEditorHistory(CUIRect View);
 
-	void RenderExtraEditorDragBar(CUIRect View, CUIRect DragBar);
+	enum class EDragSide // Which side is the drag bar on
+	{
+		SIDE_BOTTOM,
+		SIDE_LEFT,
+		SIDE_TOP,
+		SIDE_RIGHT
+	};
+	void DoEditorDragBar(CUIRect View, CUIRect *pDragBar, EDragSide Side, float *pValue, float MinValue = 100.0f, float MaxValue = 400.0f);
 
 	void SetHotEnvelopePoint(const CUIRect &View, const std::shared_ptr<CEnvelope> &pEnvelope, int ActiveChannels);
 

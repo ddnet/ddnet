@@ -5705,7 +5705,9 @@ void CEditor::RenderModebar(CUIRect View)
 	View.HSplitTop(12.0f, &Mentions, &View);
 	View.HSplitTop(12.0f, &IngameMoved, &View);
 	View.HSplitTop(8.0f, nullptr, &ModeButtons);
-	ModeButtons.VSplitLeft(96.0f, &ModeButtons, nullptr);
+	const float Width = m_ToolBoxWidth - 5.0f;
+	ModeButtons.VSplitLeft(Width, &ModeButtons, nullptr);
+	const float ButtonWidth = Width / 3;
 
 	// mentions
 	if(m_Mentions)
@@ -5733,21 +5735,21 @@ void CEditor::RenderModebar(CUIRect View)
 
 	// mode buttons
 	{
-		ModeButtons.VSplitLeft(32.0f, &ModeButton, &ModeButtons);
+		ModeButtons.VSplitLeft(ButtonWidth, &ModeButton, &ModeButtons);
 		static int s_LayersButton = 0;
 		if(DoButton_FontIcon(&s_LayersButton, FONT_ICON_LAYER_GROUP, m_Mode == MODE_LAYERS, &ModeButton, 0, "Go to layers management.", IGraphics::CORNER_L))
 		{
 			m_Mode = MODE_LAYERS;
 		}
 
-		ModeButtons.VSplitLeft(32.0f, &ModeButton, &ModeButtons);
+		ModeButtons.VSplitLeft(ButtonWidth, &ModeButton, &ModeButtons);
 		static int s_ImagesButton = 0;
 		if(DoButton_FontIcon(&s_ImagesButton, FONT_ICON_IMAGE, m_Mode == MODE_IMAGES, &ModeButton, 0, "Go to images management.", IGraphics::CORNER_NONE))
 		{
 			m_Mode = MODE_IMAGES;
 		}
 
-		ModeButtons.VSplitLeft(32.0f, &ModeButton, &ModeButtons);
+		ModeButtons.VSplitLeft(ButtonWidth, &ModeButton, &ModeButtons);
 		static int s_SoundsButton = 0;
 		if(DoButton_FontIcon(&s_SoundsButton, FONT_ICON_MUSIC, m_Mode == MODE_SOUNDS, &ModeButton, 0, "Go to sounds management.", IGraphics::CORNER_R))
 		{
@@ -6158,7 +6160,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 	DragBar.y -= 2.0f;
 	DragBar.w += 2.0f;
 	DragBar.h += 4.0f;
-	RenderExtraEditorDragBar(View, DragBar);
+	DoEditorDragBar(View, &DragBar, EDragSide::SIDE_TOP, &m_aExtraEditorSplits[EXTRAEDITOR_ENVELOPES]);
 	View.HSplitTop(15.0f, &ToolBar, &View);
 	View.HSplitTop(15.0f, &CurveBar, &View);
 	ToolBar.Margin(2.0f, &ToolBar);
@@ -7498,7 +7500,7 @@ void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEd
 	DragBar.y -= 2.0f;
 	DragBar.w += 2.0f;
 	DragBar.h += 4.0f;
-	RenderExtraEditorDragBar(View, DragBar);
+	DoEditorDragBar(View, &DragBar, EDragSide::SIDE_TOP, &m_aExtraEditorSplits[EXTRAEDITOR_SERVER_SETTINGS]);
 	View.HSplitTop(20.0f, &ToolBar, &View);
 	View.HSplitTop(2.0f, nullptr, &List);
 	ToolBar.HMargin(2.0f, &ToolBar);
@@ -7682,7 +7684,7 @@ void CEditor::RenderEditorHistory(CUIRect View)
 	DragBar.y -= 2.0f;
 	DragBar.w += 2.0f;
 	DragBar.h += 4.0f;
-	RenderExtraEditorDragBar(View, DragBar);
+	DoEditorDragBar(View, &DragBar, EDragSide::SIDE_TOP, &m_aExtraEditorSplits[EXTRAEDITOR_HISTORY]);
 	View.HSplitTop(20.0f, &ToolBar, &View);
 	View.HSplitTop(2.0f, nullptr, &List);
 	ToolBar.HMargin(2.0f, &ToolBar);
@@ -7812,7 +7814,7 @@ void CEditor::RenderEditorHistory(CUIRect View)
 	}
 }
 
-void CEditor::RenderExtraEditorDragBar(CUIRect View, CUIRect DragBar)
+void CEditor::DoEditorDragBar(CUIRect View, CUIRect *pDragBar, EDragSide Side, float *pValue, float MinValue, float MaxValue)
 {
 	enum EDragOperation
 	{
@@ -7823,26 +7825,41 @@ void CEditor::RenderExtraEditorDragBar(CUIRect View, CUIRect DragBar)
 	static EDragOperation s_Operation = OP_NONE;
 	static float s_InitialMouseY = 0.0f;
 	static float s_InitialMouseOffsetY = 0.0f;
+	static float s_InitialMouseX = 0.0f;
+	static float s_InitialMouseOffsetX = 0.0f;
 
 	bool Clicked;
 	bool Abrupted;
-	if(int Result = DoButton_DraggableEx(&s_Operation, "", 8, &DragBar, &Clicked, &Abrupted, 0, "Change the size of the editor by dragging."))
+	if(int Result = DoButton_DraggableEx(pDragBar, "", 8, pDragBar, &Clicked, &Abrupted, 0, "Change the size of the editor by dragging."))
 	{
 		if(s_Operation == OP_NONE && Result == 1)
 		{
 			s_InitialMouseY = UI()->MouseY();
-			s_InitialMouseOffsetY = UI()->MouseY() - DragBar.y;
+			s_InitialMouseOffsetY = UI()->MouseY() - pDragBar->y;
+			s_InitialMouseX = UI()->MouseX();
+			s_InitialMouseOffsetX = UI()->MouseX() - pDragBar->x;
 			s_Operation = OP_CLICKED;
 		}
 
 		if(Clicked || Abrupted)
 			s_Operation = OP_NONE;
 
-		if(s_Operation == OP_CLICKED && absolute(UI()->MouseY() - s_InitialMouseY) > 5.0f)
+		bool IsVertical = Side == EDragSide::SIDE_TOP || Side == EDragSide::SIDE_BOTTOM;
+
+		if(s_Operation == OP_CLICKED && absolute(IsVertical ? UI()->MouseY() - s_InitialMouseY : UI()->MouseX() - s_InitialMouseX) > 5.0f)
 			s_Operation = OP_DRAGGING;
 
 		if(s_Operation == OP_DRAGGING)
-			m_aExtraEditorSplits[(int)m_ActiveExtraEditor] = clamp(s_InitialMouseOffsetY + View.y + View.h - UI()->MouseY(), 100.0f, 400.0f);
+		{
+			if(Side == EDragSide::SIDE_TOP)
+				*pValue = clamp(s_InitialMouseOffsetY + View.y + View.h - UI()->MouseY(), MinValue, MaxValue);
+			else if(Side == EDragSide::SIDE_RIGHT)
+				*pValue = clamp(UI()->MouseX() - s_InitialMouseOffsetX - View.x + pDragBar->w, MinValue, MaxValue);
+			else if(Side == EDragSide::SIDE_BOTTOM)
+				*pValue = clamp(UI()->MouseY() - s_InitialMouseOffsetY - View.y + pDragBar->h, MinValue, MaxValue);
+			else if(Side == EDragSide::SIDE_LEFT)
+				*pValue = clamp(s_InitialMouseOffsetX + View.x + View.w - UI()->MouseX(), MinValue, MaxValue);
+		}
 	}
 }
 
@@ -7945,7 +7962,8 @@ void CEditor::Render()
 	{
 		View.HSplitTop(16.0f, &MenuBar, &View);
 		View.HSplitTop(53.0f, &ToolBar, &View);
-		View.VSplitLeft(100.0f, &ToolBox, &View);
+		View.VSplitLeft(m_ToolBoxWidth, &ToolBox, &View);
+
 		View.HSplitBottom(16.0f, &View, &StatusBar);
 		if(!m_ShowPicker && m_ActiveExtraEditor != EXTRAEDITOR_NONE)
 			View.HSplitBottom(m_aExtraEditorSplits[(int)m_ActiveExtraEditor], &View, &ExtraEditor);
@@ -8003,7 +8021,7 @@ void CEditor::Render()
 
 		RenderBackground(ToolBar, m_BackgroundTexture, 128.0f, Brightness);
 		ToolBar.Margin(2.0f, &ToolBar);
-		ToolBar.VSplitLeft(100.0f, &ModeBar, &ToolBar);
+		ToolBar.VSplitLeft(m_ToolBoxWidth, &ModeBar, &ToolBar);
 
 		RenderBackground(StatusBar, m_BackgroundTexture, 128.0f, Brightness);
 		StatusBar.Margin(2.0f, &StatusBar);
@@ -8101,6 +8119,12 @@ void CEditor::Render()
 
 	if(m_GuiActive)
 	{
+		CUIRect DragBar;
+		ToolBox.VSplitRight(1.0f, &ToolBox, &DragBar);
+		DragBar.x -= 2.0f;
+		DragBar.w += 4.0f;
+		DoEditorDragBar(ToolBox, &DragBar, EDragSide::SIDE_RIGHT, &m_ToolBoxWidth);
+
 		if(m_Mode == MODE_LAYERS)
 			RenderLayers(ToolBox);
 		else if(m_Mode == MODE_IMAGES)
