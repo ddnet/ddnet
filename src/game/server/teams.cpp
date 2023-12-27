@@ -388,9 +388,9 @@ const char *CGameTeams::SetCharacterTeam(int ClientID, int Team)
 	// you can not join a team which is currently in the process of saving,
 	// because the save-process can fail and then the team is reset into the game
 	if(Team != TEAM_SUPER && GetSaving(Team))
-		return "Your team is currently saving";
-	if(CurrentTeam != TEAM_SUPER && GetSaving(CurrentTeam))
 		return "This team is currently saving";
+	if(CurrentTeam != TEAM_SUPER && GetSaving(CurrentTeam))
+		return "Your team is currently saving";
 
 	SetForceCharacterTeam(ClientID, Team);
 	return nullptr;
