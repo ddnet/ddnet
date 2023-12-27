@@ -23,6 +23,7 @@ public:
 
 	CTeleTile *m_pTeleTile;
 	unsigned char m_TeleNum;
+	unsigned char m_TeleCheckpointNum;
 
 	void Resize(int NewW, int NewH) override;
 	void Shift(int Direction) override;
@@ -32,7 +33,7 @@ public:
 	void BrushFlipY() override;
 	void BrushRotate(float Amount) override;
 	void FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIRect Rect) override;
-	virtual bool ContainsElementWithId(int Id);
+	virtual bool ContainsElementWithId(int Id, bool Checkpoint);
 
 	EditorTileStateChangeHistory<STeleTileStateChange> m_History;
 	inline void ClearHistory() override

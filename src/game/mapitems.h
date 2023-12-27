@@ -571,7 +571,9 @@ public:
 bool IsValidGameTile(int Index);
 bool IsValidFrontTile(int Index);
 bool IsValidTeleTile(int Index);
-bool IsTeleTileNumberUsed(int Index); // Assumes that Index is a valid tele tile index
+bool IsTeleTileCheckpoint(int Index); // Assumes that Index is a valid tele tile index
+bool IsTeleTileNumberUsed(int Index, bool Checkpoint); // Assumes that Index is a valid tele tile index
+bool IsTeleTileNumberUsedAny(int Index); // Does not check for checkpoint only
 bool IsValidSpeedupTile(int Index);
 bool IsValidSwitchTile(int Index);
 bool IsSwitchTileFlagsUsed(int Index); // Assumes that Index is a valid switch tile index

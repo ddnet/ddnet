@@ -3,20 +3,24 @@
 #include <game/editor/mapitems/image.h>
 #include <game/editor/mapitems/sound.h>
 
-int CEditor::DoProperties(CUIRect *pToolbox, CProperty *pProps, int *pIDs, int *pNewVal, ColorRGBA Color)
+const ColorRGBA CEditor::ms_DefaultPropColor = ColorRGBA(1, 1, 1, 0.5f);
+
+int CEditor::DoProperties(CUIRect *pToolbox, CProperty *pProps, int *pIDs, int *pNewVal, const std::vector<ColorRGBA> &vColors)
 {
-	auto Res = DoPropertiesWithState<int>(pToolbox, pProps, pIDs, pNewVal, Color);
+	auto Res = DoPropertiesWithState<int>(pToolbox, pProps, pIDs, pNewVal, vColors);
 	return Res.m_Value;
 }
 
 template<typename E>
-SEditResult<E> CEditor::DoPropertiesWithState(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *pNewVal, ColorRGBA Color)
+SEditResult<E> CEditor::DoPropertiesWithState(CUIRect *pToolBox, CProperty *pProps, int *pIDs, int *pNewVal, const std::vector<ColorRGBA> &vColors)
 {
 	int Change = -1;
 	EEditState State = EEditState::EDITING;
 
 	for(int i = 0; pProps[i].m_pName; i++)
 	{
+		const ColorRGBA *pColor = i >= (int)vColors.size() ? &ms_DefaultPropColor : &vColors[i];
+
 		CUIRect Slot;
 		pToolBox->HSplitTop(13.0f, &Slot, pToolBox);
 		CUIRect Label, Shifter;
@@ -32,7 +36,7 @@ SEditResult<E> CEditor::DoPropertiesWithState(CUIRect *pToolBox, CProperty *pPro
 			Shifter.VSplitRight(10.0f, &Shifter, &Inc);
 			Shifter.VSplitLeft(10.0f, &Dec, &Shifter);
 			str_from_int(pProps[i].m_Value, aBuf);
-			auto NewValueRes = UiDoValueSelector((char *)&pIDs[i], &Shifter, "", pProps[i].m_Value, pProps[i].m_Min, pProps[i].m_Max, 1, 1.0f, "Use left mouse button to drag and change the value. Hold shift to be more precise. Rightclick to edit as text.", false, false, 0, &Color);
+			auto NewValueRes = UiDoValueSelector((char *)&pIDs[i], &Shifter, "", pProps[i].m_Value, pProps[i].m_Min, pProps[i].m_Max, 1, 1.0f, "Use left mouse button to drag and change the value. Hold shift to be more precise. Rightclick to edit as text.", false, false, 0, pColor);
 			int NewValue = NewValueRes.m_Value;
 			if(NewValue != pProps[i].m_Value || NewValueRes.m_State != EEditState::EDITING)
 			{
@@ -269,14 +273,14 @@ SEditResult<E> CEditor::DoPropertiesWithState(CUIRect *pToolBox, CProperty *pPro
 	return SEditResult<E>{State, static_cast<E>(Change)};
 }
 
-template SEditResult<ECircleShapeProp> CEditor::DoPropertiesWithState(CUIRect *, CProperty *, int *, int *, ColorRGBA);
-template SEditResult<ERectangleShapeProp> CEditor::DoPropertiesWithState(CUIRect *, CProperty *, int *, int *, ColorRGBA);
-template SEditResult<EGroupProp> CEditor::DoPropertiesWithState(CUIRect *, CProperty *, int *, int *, ColorRGBA);
-template SEditResult<ELayerProp> CEditor::DoPropertiesWithState(CUIRect *, CProperty *, int *, int *, ColorRGBA);
-template SEditResult<ELayerQuadsProp> CEditor::DoPropertiesWithState(CUIRect *, CProperty *, int *, int *, ColorRGBA);
-template SEditResult<ETilesProp> CEditor::DoPropertiesWithState(CUIRect *, CProperty *, int *, int *, ColorRGBA);
-template SEditResult<ETilesCommonProp> CEditor::DoPropertiesWithState(CUIRect *, CProperty *, int *, int *, ColorRGBA);
-template SEditResult<ELayerSoundsProp> CEditor::DoPropertiesWithState(CUIRect *, CProperty *, int *, int *, ColorRGBA);
-template SEditResult<EQuadProp> CEditor::DoPropertiesWithState(CUIRect *, CProperty *, int *, int *, ColorRGBA);
-template SEditResult<EQuadPointProp> CEditor::DoPropertiesWithState(CUIRect *, CProperty *, int *, int *, ColorRGBA);
-template SEditResult<ESoundProp> CEditor::DoPropertiesWithState(CUIRect *, CProperty *, int *, int *, ColorRGBA);
+template SEditResult<ECircleShapeProp> CEditor::DoPropertiesWithState(CUIRect *, CProperty *, int *, int *, const std::vector<ColorRGBA> &);
+template SEditResult<ERectangleShapeProp> CEditor::DoPropertiesWithState(CUIRect *, CProperty *, int *, int *, const std::vector<ColorRGBA> &);
+template SEditResult<EGroupProp> CEditor::DoPropertiesWithState(CUIRect *, CProperty *, int *, int *, const std::vector<ColorRGBA> &);
+template SEditResult<ELayerProp> CEditor::DoPropertiesWithState(CUIRect *, CProperty *, int *, int *, const std::vector<ColorRGBA> &);
+template SEditResult<ELayerQuadsProp> CEditor::DoPropertiesWithState(CUIRect *, CProperty *, int *, int *, const std::vector<ColorRGBA> &);
+template SEditResult<ETilesProp> CEditor::DoPropertiesWithState(CUIRect *, CProperty *, int *, int *, const std::vector<ColorRGBA> &);
+template SEditResult<ETilesCommonProp> CEditor::DoPropertiesWithState(CUIRect *, CProperty *, int *, int *, const std::vector<ColorRGBA> &);
+template SEditResult<ELayerSoundsProp> CEditor::DoPropertiesWithState(CUIRect *, CProperty *, int *, int *, const std::vector<ColorRGBA> &);
+template SEditResult<EQuadProp> CEditor::DoPropertiesWithState(CUIRect *, CProperty *, int *, int *, const std::vector<ColorRGBA> &);
+template SEditResult<EQuadPointProp> CEditor::DoPropertiesWithState(CUIRect *, CProperty *, int *, int *, const std::vector<ColorRGBA> &);
+template SEditResult<ESoundProp> CEditor::DoPropertiesWithState(CUIRect *, CProperty *, int *, int *, const std::vector<ColorRGBA> &);

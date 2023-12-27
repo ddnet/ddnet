@@ -300,6 +300,7 @@ class CEditor : public IEditor
 	};
 
 	std::shared_ptr<CLayerGroup> m_apSavedBrushes[10];
+	static const ColorRGBA ms_DefaultPropColor;
 
 public:
 	class IInput *Input() { return m_pInput; }
@@ -403,6 +404,7 @@ public:
 		// DDRace
 
 		m_TeleNumber = 1;
+		m_TeleCheckpointNumber = 1;
 		m_SwitchNum = 1;
 		m_TuningNum = 1;
 		m_SwitchDelay = 0;
@@ -499,8 +501,8 @@ public:
 	std::pair<int, int> EnvGetSelectedTimeAndValue() const;
 
 	template<typename E>
-	SEditResult<E> DoPropertiesWithState(CUIRect *pToolbox, CProperty *pProps, int *pIDs, int *pNewVal, ColorRGBA Color = ColorRGBA(1, 1, 1, 0.5f));
-	int DoProperties(CUIRect *pToolbox, CProperty *pProps, int *pIDs, int *pNewVal, ColorRGBA Color = ColorRGBA(1, 1, 1, 0.5f));
+	SEditResult<E> DoPropertiesWithState(CUIRect *pToolbox, CProperty *pProps, int *pIDs, int *pNewVal, const std::vector<ColorRGBA> &vColors = {});
+	int DoProperties(CUIRect *pToolbox, CProperty *pProps, int *pIDs, int *pNewVal, const std::vector<ColorRGBA> &vColors = {});
 
 	CUI::SColorPickerPopupContext m_ColorPickerPopupContext;
 	const void *m_pColorPickerPopupActiveID = nullptr;
@@ -785,7 +787,7 @@ public:
 
 	void RenderBackground(CUIRect View, IGraphics::CTextureHandle Texture, float Size, float Brightness);
 
-	SEditResult<int> UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, int Current, int Min, int Max, int Step, float Scale, const char *pToolTip, bool IsDegree = false, bool IsHex = false, int corners = IGraphics::CORNER_ALL, ColorRGBA *pColor = nullptr, bool ShowValue = true);
+	SEditResult<int> UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, int Current, int Min, int Max, int Step, float Scale, const char *pToolTip, bool IsDegree = false, bool IsHex = false, int corners = IGraphics::CORNER_ALL, const ColorRGBA *pColor = nullptr, bool ShowValue = true);
 
 	static CUI::EPopupMenuFunctionResult PopupMenuFile(void *pContext, CUIRect View, bool Active);
 	static CUI::EPopupMenuFunctionResult PopupMenuTools(void *pContext, CUIRect View, bool Active);
@@ -1051,6 +1053,7 @@ public:
 	IGraphics::CTextureHandle GetTuneTexture();
 
 	unsigned char m_TeleNumber;
+	unsigned char m_TeleCheckpointNumber;
 
 	unsigned char m_TuningNum;
 
@@ -1062,7 +1065,8 @@ public:
 	unsigned char m_SwitchDelay;
 
 	void AdjustBrushSpecialTiles(bool UseNextFree, int Adjust = 0);
-	int FindNextFreeTileNumber(int Type);
+	int FindNextFreeSwitchNumber();
+	int FindNextFreeTeleNumber(bool IsCheckpoint = false);
 
 public:
 	// Undo/Redo

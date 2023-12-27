@@ -581,7 +581,7 @@ void CMapLayers::OnMapLoad()
 										Flags = 0;
 										if(CurOverlay == 1)
 										{
-											if(IsTeleTileNumberUsed(Index))
+											if(IsTeleTileNumberUsedAny(Index))
 												Index = ((CTeleTile *)pTiles)[y * pTMap->m_Width + x].m_Number;
 											else
 												Index = 0;

@@ -330,7 +330,7 @@ void CEditor::RenderBackground(CUIRect View, IGraphics::CTextureHandle Texture, 
 	Graphics()->QuadsEnd();
 }
 
-SEditResult<int> CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, int Current, int Min, int Max, int Step, float Scale, const char *pToolTip, bool IsDegree, bool IsHex, int Corners, ColorRGBA *pColor, bool ShowValue)
+SEditResult<int> CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, int Current, int Min, int Max, int Step, float Scale, const char *pToolTip, bool IsDegree, bool IsHex, int Corners, const ColorRGBA *pColor, bool ShowValue)
 {
 	// logic
 	static float s_Value;
@@ -1326,7 +1326,7 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 					{
 						pButtonName = "Tele";
 						pfnPopupFunc = PopupTele;
-						Rows = 1;
+						Rows = 2;
 					}
 
 					if(pButtonName != nullptr)
@@ -8929,7 +8929,8 @@ void CEditor::AdjustBrushSpecialTiles(bool UseNextFree, int Adjust)
 		// Only handle tele, switch and tune layers
 		if(pLayerTiles->m_Tele)
 		{
-			int NextFreeNumber = FindNextFreeTileNumber(LAYERTYPE_TELE);
+			int NextFreeTeleNumber = FindNextFreeTeleNumber();
+			int NextFreeCPNumber = FindNextFreeTeleNumber(true);
 
 			std::shared_ptr<CLayerTele> pTeleLayer = std::static_pointer_cast<CLayerTele>(pLayer);
 			for(int y = 0; y < pTeleLayer->m_Height; y++)
@@ -8941,7 +8942,12 @@ void CEditor::AdjustBrushSpecialTiles(bool UseNextFree, int Adjust)
 						continue;
 
 					if(UseNextFree)
-						pTeleLayer->m_pTeleTile[i].m_Number = NextFreeNumber;
+					{
+						if(IsTeleTileCheckpoint(pTeleLayer->m_pTiles[i].m_Index))
+							pTeleLayer->m_pTeleTile[i].m_Number = NextFreeCPNumber;
+						else
+							pTeleLayer->m_pTeleTile[i].m_Number = NextFreeTeleNumber;
+					}
 					else
 						AdjustNumber(pTeleLayer->m_pTeleTile[i].m_Number);
 				}
@@ -8967,7 +8973,7 @@ void CEditor::AdjustBrushSpecialTiles(bool UseNextFree, int Adjust)
 		}
 		else if(pLayerTiles->m_Switch)
 		{
-			int NextFreeNumber = FindNextFreeTileNumber(LAYERTYPE_SWITCH);
+			int NextFreeNumber = FindNextFreeSwitchNumber();
 
 			std::shared_ptr<CLayerSwitch> pSwitchLayer = std::static_pointer_cast<CLayerSwitch>(pLayer);
 			for(int y = 0; y < pSwitchLayer->m_Height; y++)
@@ -8988,29 +8994,30 @@ void CEditor::AdjustBrushSpecialTiles(bool UseNextFree, int Adjust)
 	}
 }
 
-int CEditor::FindNextFreeTileNumber(int Type)
+int CEditor::FindNextFreeSwitchNumber()
 {
 	int Number = -1;
-	if(Type == LAYERTYPE_TELE)
+
+	for(int i = 1; i <= 255; i++)
 	{
-		for(int i = 1; i <= 255; i++)
+		if(!m_Map.m_pSwitchLayer->ContainsElementWithId(i))
 		{
-			if(!m_Map.m_pTeleLayer->ContainsElementWithId(i))
-			{
-				Number = i;
-				break;
-			}
+			Number = i;
+			break;
 		}
 	}
-	else if(Type == LAYERTYPE_SWITCH)
+	return Number;
+}
+
+int CEditor::FindNextFreeTeleNumber(bool IsCheckpoint)
+{
+	int Number = -1;
+	for(int i = 1; i <= 255; i++)
 	{
-		for(int i = 1; i <= 255; i++)
+		if(!m_Map.m_pTeleLayer->ContainsElementWithId(i, IsCheckpoint))
 		{
-			if(!m_Map.m_pSwitchLayer->ContainsElementWithId(i))
-			{
-				Number = i;
-				break;
-			}
+			Number = i;
+			break;
 		}
 	}
 	return Number;
