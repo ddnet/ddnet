@@ -3133,10 +3133,11 @@ void CEditor::DoMapEditor(CUIRect View)
 		MapView()->MapGrid()->OnRender(View);
 	}
 
+	const bool ShouldPan = (Input()->ModifierIsPressed() && UI()->MouseButton(0)) || UI()->MouseButton(2);
 	if(m_pContainerPanned == &s_pEditorID)
 	{
 		// do panning
-		if((Input()->ModifierIsPressed() && UI()->MouseButton(0)) || UI()->MouseButton(2))
+		if(ShouldPan)
 		{
 			if(Input()->ShiftIsPressed())
 				s_Operation = OP_PAN_EDITOR;
@@ -3160,11 +3161,13 @@ void CEditor::DoMapEditor(CUIRect View)
 		UI()->SetHotItem(s_pEditorID);
 
 		// do global operations like pan and zoom
-		if(UI()->CheckActiveItem(nullptr) && m_pContainerPanned == nullptr && ((Input()->ModifierIsPressed() && UI()->MouseButton(0)) || UI()->MouseButton(2)))
+		if(UI()->CheckActiveItem(nullptr) && (UI()->MouseButton(0) || UI()->MouseButton(2)))
 		{
 			s_StartWx = wx;
 			s_StartWy = wy;
-			m_pContainerPanned = &s_pEditorID;
+
+			if(ShouldPan && m_pContainerPanned == nullptr)
+				m_pContainerPanned = &s_pEditorID;
 		}
 
 		// brush editing
