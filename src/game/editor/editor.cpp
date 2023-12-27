@@ -4072,6 +4072,9 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 					}
 					else if(Result == 2)
 					{
+						s_LayerPopupContext.m_vpLayers.clear();
+						s_LayerPopupContext.m_vLayerIndices.clear();
+
 						if(!IsLayerSelected)
 						{
 							SelectLayer(i, g);
@@ -4098,11 +4101,6 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 								s_LayerPopupContext.m_vpLayers.clear();
 								s_LayerPopupContext.m_vLayerIndices.clear();
 							}
-						}
-						else
-						{
-							s_LayerPopupContext.m_vpLayers.clear();
-							s_LayerPopupContext.m_vLayerIndices.clear();
 						}
 
 						UI()->DoPopupMenu(&s_LayerPopupContext, UI()->MouseX(), UI()->MouseY(), 120, 270, &s_LayerPopupContext, PopupLayer);
