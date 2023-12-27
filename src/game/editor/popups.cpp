@@ -2415,58 +2415,82 @@ CUI::EPopupMenuFunctionResult CEditor::PopupTele(void *pContext, CUIRect View, b
 {
 	CEditor *pEditor = static_cast<CEditor *>(pContext);
 
-	static int s_PreviousNumber = -1;
+	static int s_PreviousTeleNumber;
+	static int s_PreviousCheckpointNumber;
 
 	CUIRect NumberPicker;
 	CUIRect FindEmptySlot;
+	CUIRect FindFreeTeleSlot, FindFreeCheckpointSlot;
 
 	View.VSplitRight(15.f, &NumberPicker, &FindEmptySlot);
 	NumberPicker.VSplitRight(2.f, &NumberPicker, nullptr);
-	FindEmptySlot.HSplitTop(13.0f, &FindEmptySlot, nullptr);
-	FindEmptySlot.HMargin(1.0f, &FindEmptySlot);
 
-	// find empty number button
+	FindEmptySlot.HSplitTop(13.0f, &FindFreeTeleSlot, &FindEmptySlot);
+	FindEmptySlot.HSplitTop(13.0f, &FindFreeCheckpointSlot, &FindEmptySlot);
+
+	FindFreeTeleSlot.HMargin(1.0f, &FindFreeTeleSlot);
+	FindFreeCheckpointSlot.HMargin(1.0f, &FindFreeCheckpointSlot);
+
+	// find next free numbers buttons
 	{
-		static int s_EmptySlotPid = 0;
-		if(pEditor->DoButton_Editor(&s_EmptySlotPid, "F", 0, &FindEmptySlot, 0, "[ctrl+f] Find empty slot") || (Active && pEditor->Input()->ModifierIsPressed() && pEditor->Input()->KeyPress(KEY_F)))
-		{
-			int Number = pEditor->FindNextFreeTileNumber(LAYERTYPE_TELE);
+		// Pressing ctrl+f will find next free numbers for both tele and checkpoints
 
-			if(Number != -1)
-				pEditor->m_TeleNumber = Number;
+		static int s_NextFreeTelePid = 0;
+		if(pEditor->DoButton_Editor(&s_NextFreeTelePid, "F", 0, &FindFreeTeleSlot, 0, "[ctrl+f] Find next free tele number") || (Active && pEditor->Input()->ModifierIsPressed() && pEditor->Input()->KeyPress(KEY_F)))
+		{
+			int TeleNumber = pEditor->FindNextFreeTeleNumber();
+
+			if(TeleNumber != -1)
+				pEditor->m_TeleNumber = TeleNumber;
+		}
+
+		static int s_NextFreeCheckpointPid = 0;
+		if(pEditor->DoButton_Editor(&s_NextFreeCheckpointPid, "F", 0, &FindFreeCheckpointSlot, 0, "[ctrl+f] Find next free checkpoint number") || (Active && pEditor->Input()->ModifierIsPressed() && pEditor->Input()->KeyPress(KEY_F)))
+		{
+			int CPNumber = pEditor->FindNextFreeTeleNumber(true);
+
+			if(CPNumber != -1)
+				pEditor->m_TeleCheckpointNumber = CPNumber;
 		}
 	}
 
 	// number picker
 	{
-		static ColorRGBA s_Color = ColorRGBA(0.5f, 1, 0.5f, 0.5f);
+		static std::vector<ColorRGBA> s_vColors = {
+			ColorRGBA(0.5f, 1, 0.5f, 0.5f),
+			ColorRGBA(0.5f, 1, 0.5f, 0.5f),
+		};
 
 		enum
 		{
 			PROP_TELE = 0,
+			PROP_TELE_CP = 1,
 			NUM_PROPS,
 		};
 		CProperty aProps[] = {
 			{"Number", pEditor->m_TeleNumber, PROPTYPE_INT_STEP, 1, 255},
+			{"Checkpoint", pEditor->m_TeleCheckpointNumber, PROPTYPE_INT_STEP, 1, 255},
 			{nullptr},
 		};
 
 		static int s_aIds[NUM_PROPS] = {0};
 
 		static int NewVal = 0;
-		int Prop = pEditor->DoProperties(&NumberPicker, aProps, s_aIds, &NewVal, s_Color);
+		int Prop = pEditor->DoProperties(&NumberPicker, aProps, s_aIds, &NewVal, s_vColors);
 		if(Prop == PROP_TELE)
-		{
 			pEditor->m_TeleNumber = (NewVal - 1 + 255) % 255 + 1;
-		}
+		else if(Prop == PROP_TELE_CP)
+			pEditor->m_TeleCheckpointNumber = (NewVal - 1 + 255) % 255 + 1;
 
-		if(s_PreviousNumber == 1 || s_PreviousNumber != pEditor->m_TeleNumber)
-		{
-			s_Color = pEditor->m_Map.m_pTeleLayer->ContainsElementWithId(pEditor->m_TeleNumber) ? ColorRGBA(1, 0.5f, 0.5f, 0.5f) : ColorRGBA(0.5f, 1, 0.5f, 0.5f);
-		}
+		if(s_PreviousTeleNumber == 1 || s_PreviousTeleNumber != pEditor->m_TeleNumber)
+			s_vColors[PROP_TELE] = pEditor->m_Map.m_pTeleLayer->ContainsElementWithId(pEditor->m_TeleNumber, false) ? ColorRGBA(1, 0.5f, 0.5f, 0.5f) : ColorRGBA(0.5f, 1, 0.5f, 0.5f);
+
+		if(s_PreviousCheckpointNumber == 1 || s_PreviousCheckpointNumber != pEditor->m_TeleCheckpointNumber)
+			s_vColors[PROP_TELE_CP] = pEditor->m_Map.m_pTeleLayer->ContainsElementWithId(pEditor->m_TeleCheckpointNumber, true) ? ColorRGBA(1, 0.5f, 0.5f, 0.5f) : ColorRGBA(0.5f, 1, 0.5f, 0.5f);
 	}
 
-	s_PreviousNumber = pEditor->m_TeleNumber;
+	s_PreviousTeleNumber = pEditor->m_TeleNumber;
+	s_PreviousCheckpointNumber = pEditor->m_TeleCheckpointNumber;
 
 	return CUI::POPUP_KEEP_OPEN;
 }
@@ -2526,7 +2550,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupSwitch(void *pContext, CUIRect View,
 		static int s_EmptySlotPid = 0;
 		if(pEditor->DoButton_Editor(&s_EmptySlotPid, "F", 0, &FindEmptySlot, 0, "[ctrl+f] Find empty slot") || (Active && pEditor->Input()->ModifierIsPressed() && pEditor->Input()->KeyPress(KEY_F)))
 		{
-			int Number = pEditor->FindNextFreeTileNumber(LAYERTYPE_SWITCH);
+			int Number = pEditor->FindNextFreeSwitchNumber();
 
 			if(Number != -1)
 				pEditor->m_SwitchNum = Number;
@@ -2536,7 +2560,9 @@ CUI::EPopupMenuFunctionResult CEditor::PopupSwitch(void *pContext, CUIRect View,
 	// number picker
 	static int s_PreviousNumber = -1;
 	{
-		static ColorRGBA s_Color = ColorRGBA(1, 1, 1, 0.5f);
+		static std::vector<ColorRGBA> s_vColors = {
+			ColorRGBA(1, 1, 1, 0.5f),
+		};
 
 		enum
 		{
@@ -2553,7 +2579,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupSwitch(void *pContext, CUIRect View,
 
 		static int s_aIds[NUM_PROPS] = {0};
 		int NewVal = 0;
-		int Prop = pEditor->DoProperties(&NumberPicker, aProps, s_aIds, &NewVal, s_Color);
+		int Prop = pEditor->DoProperties(&NumberPicker, aProps, s_aIds, &NewVal, s_vColors);
 
 		if(Prop == PROP_SWITCH_NUMBER)
 		{
@@ -2565,9 +2591,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupSwitch(void *pContext, CUIRect View,
 		}
 
 		if(s_PreviousNumber == 1 || s_PreviousNumber != pEditor->m_SwitchNum)
-		{
-			s_Color = pEditor->m_Map.m_pSwitchLayer->ContainsElementWithId(pEditor->m_SwitchNum) ? ColorRGBA(1, 0.5f, 0.5f, 0.5f) : ColorRGBA(0.5f, 1, 0.5f, 0.5f);
-		}
+			s_vColors[PROP_SWITCH_NUMBER] = pEditor->m_Map.m_pSwitchLayer->ContainsElementWithId(pEditor->m_SwitchNum) ? ColorRGBA(1, 0.5f, 0.5f, 0.5f) : ColorRGBA(0.5f, 1, 0.5f, 0.5f);
 	}
 
 	s_PreviousNumber = pEditor->m_SwitchNum;
@@ -2622,7 +2646,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupGoto(void *pContext, CUIRect View, b
 
 	static int s_aIds[NUM_PROPS] = {0};
 	int NewVal = 0;
-	int Prop = pEditor->DoProperties(&View, aProps, s_aIds, &NewVal, ColorRGBA(1, 1, 1, 0.5f));
+	int Prop = pEditor->DoProperties(&View, aProps, s_aIds, &NewVal);
 
 	if(Prop == PROP_COORD_X)
 	{

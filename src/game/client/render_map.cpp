@@ -746,7 +746,7 @@ void CRenderTools::RenderTeleOverlay(CTeleTile *pTele, int w, int h, float Scale
 			int c = mx + my * w;
 
 			unsigned char Index = pTele[c].m_Number;
-			if(Index && IsTeleTileNumberUsed(pTele[c].m_Type))
+			if(Index && IsTeleTileNumberUsedAny(pTele[c].m_Type))
 			{
 				str_from_int(Index, aBuf);
 				// Auto-resize text to fit inside the tile

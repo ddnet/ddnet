@@ -57,7 +57,20 @@ bool IsValidTeleTile(int Index)
 		Index == TILE_TELECHECKINEVIL);
 }
 
-bool IsTeleTileNumberUsed(int Index)
+bool IsTeleTileCheckpoint(int Index)
+{
+	return Index == TILE_TELECHECK || Index == TILE_TELECHECKOUT;
+}
+
+bool IsTeleTileNumberUsed(int Index, bool Checkpoint)
+{
+	if(Checkpoint)
+		return IsTeleTileCheckpoint(Index);
+	return !IsTeleTileCheckpoint(Index) && Index != TILE_TELECHECKIN &&
+	       Index != TILE_TELECHECKINEVIL;
+}
+
+bool IsTeleTileNumberUsedAny(int Index)
 {
 	return Index != TILE_TELECHECKIN &&
 	       Index != TILE_TELECHECKINEVIL;
