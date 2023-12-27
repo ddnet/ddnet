@@ -1532,6 +1532,7 @@ public:
 		const float CursorOuterInnerDiff = (CursorOuterWidth - CursorInnerWidth) / 2;
 
 		std::vector<IGraphics::CQuadItem> vSelectionQuads;
+		int SelectionQuadLine = -1;
 		bool SelectionStarted = false;
 		bool SelectionUsedPress = false;
 		bool SelectionUsedRelease = false;
@@ -1866,8 +1867,18 @@ public:
 
 					if(SelectionStarted && IsRendered)
 					{
-						const float SelectionHeight = pCursor->m_AlignedFontSize + pCursor->m_AlignedLineSpacing;
-						vSelectionQuads.emplace_back(SelX, DrawY + (1.0f - pCursor->m_SelectionHeightFactor) * SelectionHeight, SelWidth, pCursor->m_SelectionHeightFactor * SelectionHeight);
+						if(!vSelectionQuads.empty() && SelectionQuadLine == pCursor->m_LineCount)
+						{
+							vSelectionQuads.back().m_Width += SelWidth;
+						}
+						else
+						{
+							const float SelectionHeight = pCursor->m_AlignedFontSize + pCursor->m_AlignedLineSpacing;
+							const float SelectionY = DrawY + (1.0f - pCursor->m_SelectionHeightFactor) * SelectionHeight;
+							const float ScaledSelectionHeight = pCursor->m_SelectionHeightFactor * SelectionHeight;
+							vSelectionQuads.emplace_back(SelX, SelectionY, SelWidth, ScaledSelectionHeight);
+							SelectionQuadLine = pCursor->m_LineCount;
+						}
 					}
 
 					LastSelX = SelX;
