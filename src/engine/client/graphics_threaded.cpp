@@ -893,7 +893,7 @@ void CGraphics_Threaded::QuadsSetRotation(float Angle)
 
 static unsigned char NormalizeColorComponent(float ColorComponent)
 {
-	return (unsigned char)(clamp(ColorComponent, 0.0f, 1.0f) * 255.0f);
+	return (unsigned char)(clamp(ColorComponent, 0.0f, 1.0f) * 255.0f + 0.5f); // +0.5f to round to nearest
 }
 
 void CGraphics_Threaded::SetColorVertex(const CColorVertex *pArray, size_t Num)
