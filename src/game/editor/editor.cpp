@@ -8832,31 +8832,63 @@ bool CEditor::Append(const char *pFileName, int StorageType, bool IgnoreHistory)
 		(int)m_Map.m_vpSounds.size(),
 		(int)m_Map.m_vpEnvelopes.size()};
 
+	// Keep a map to check if specific indices have already been replaced to prevent
+	// replacing those indices again when transfering images
+	static std::map<int *, bool> s_ReplacedMap;
 	static const auto &&s_ReplaceIndex = [](int ToReplace, int ReplaceWith) {
 		return [ToReplace, ReplaceWith](int *pIndex) {
-			if(*pIndex == ToReplace)
+			if(*pIndex == ToReplace && !s_ReplacedMap[pIndex])
+			{
 				*pIndex = ReplaceWith;
+				s_ReplacedMap[pIndex] = true;
+			}
 		};
 	};
 
-	//Transfer non-duplicate images
+	const auto &&Rename = [&](const std::shared_ptr<CEditorImage> &pImage) {
+		char aRenamed[IO_MAX_PATH_LENGTH];
+		int DuplicateCount = 1;
+		str_copy(aRenamed, pImage->m_aName);
+		while(std::find_if(m_Map.m_vpImages.begin(), m_Map.m_vpImages.end(), [aRenamed](const std::shared_ptr<CEditorImage> &OtherImage) { return str_comp(OtherImage->m_aName, aRenamed) == 0; }) != m_Map.m_vpImages.end())
+			str_format(aRenamed, sizeof(aRenamed), "%s (%d)", pImage->m_aName, DuplicateCount++); // Rename to "image_name (%d)"
+		str_copy(pImage->m_aName, aRenamed);
+	};
+
+	// Transfer non-duplicate images
+	s_ReplacedMap.clear();
 	for(auto NewMapIt = NewMap.m_vpImages.begin(); NewMapIt != NewMap.m_vpImages.end(); ++NewMapIt)
 	{
 		auto pNewImage = *NewMapIt;
 		auto NameIsTaken = [pNewImage](const std::shared_ptr<CEditorImage> &OtherImage) { return str_comp(pNewImage->m_aName, OtherImage->m_aName) == 0; };
-		auto MatchInCurrentMap = std::find_if(begin(m_Map.m_vpImages), end(m_Map.m_vpImages), NameIsTaken);
+		auto MatchInCurrentMap = std::find_if(m_Map.m_vpImages.begin(), m_Map.m_vpImages.end(), NameIsTaken);
 
-		const bool IsDuplicate = MatchInCurrentMap != std::end(m_Map.m_vpImages);
+		const bool IsDuplicate = MatchInCurrentMap != m_Map.m_vpImages.end();
 		const int IndexToReplace = NewMapIt - NewMap.m_vpImages.begin();
 
 		if(IsDuplicate)
 		{
-			const int IndexToReplaceWith = MatchInCurrentMap - m_Map.m_vpImages.begin();
+			// Check for image data
+			const bool ImageDataEquals = (*MatchInCurrentMap)->DataEquals(*pNewImage);
 
-			dbg_msg("editor", "map contains image %s already, removing duplicate", pNewImage->m_aName);
+			if(ImageDataEquals)
+			{
+				const int IndexToReplaceWith = MatchInCurrentMap - m_Map.m_vpImages.begin();
 
-			//In the new map, replace the index of the duplicate image to the index of the same in the current map.
-			NewMap.ModifyImageIndex(s_ReplaceIndex(IndexToReplace, IndexToReplaceWith));
+				dbg_msg("editor", "map already contains image %s with the same data, removing duplicate", pNewImage->m_aName);
+
+				// In the new map, replace the index of the duplicate image to the index of the same in the current map.
+				NewMap.ModifyImageIndex(s_ReplaceIndex(IndexToReplace, IndexToReplaceWith));
+			}
+			else
+			{
+				// Rename image and add it
+				Rename(pNewImage);
+
+				dbg_msg("editor", "map already contains image %s but contents of appended image is different. Renaming to %s", (*MatchInCurrentMap)->m_aName, pNewImage->m_aName);
+
+				NewMap.ModifyImageIndex(s_ReplaceIndex(IndexToReplace, m_Map.m_vpImages.size()));
+				m_Map.m_vpImages.push_back(pNewImage);
+			}
 		}
 		else
 		{
