@@ -73,11 +73,59 @@ void CConsoleLogger::OnConsoleDeletion()
 	m_pConsole = nullptr;
 }
 
-// TODO: support "tune_zone", which has tuning as second argument
-static const char *gs_apTuningCommands[] = {"tune ", "tune_reset ", "toggle_tune "};
-static bool IsTuningCommandPrefix(const char *pStr)
+static int ArgumentPosition(const char *pStr, const std::vector<std::pair<const char *, int>> &vCommands)
 {
-	return std::any_of(std::begin(gs_apTuningCommands), std::end(gs_apTuningCommands), [pStr](auto *pCmd) { return str_startswith_nocase(pStr, pCmd); });
+	const char *pCommandStart = pStr;
+	const char *pIt = pStr;
+	pIt = str_skip_to_whitespace_const(pIt);
+	int CommandLength = pIt - pCommandStart;
+	const char *pCommandEnd = pIt;
+
+	if(!CommandLength)
+		return -1;
+
+	pIt = str_skip_whitespaces_const(pIt);
+	if(pIt == pCommandEnd)
+		return -1;
+
+	for(const auto &[pCommand, ArgIndex] : vCommands)
+	{
+		int Length = maximum(str_length(pCommand), CommandLength);
+		if(str_comp_nocase_num(pCommand, pCommandStart, Length) == 0)
+		{
+			int CurrentArg = 0;
+			const char *pArgStart = nullptr, *pArgEnd = nullptr;
+			while(CurrentArg < ArgIndex)
+			{
+				pArgStart = pIt;
+				pIt = str_skip_to_whitespace_const(pIt); // Skip argument value
+				pArgEnd = pIt;
+
+				if(!pIt[0] || pArgStart == pIt) // Check that argument is not empty
+					return -1;
+
+				pIt = str_skip_whitespaces_const(pIt); // Go to next argument position
+				CurrentArg++;
+			}
+			if(pIt == pArgEnd)
+				return -1; // Check that there is at least one space after
+			return pIt - pStr;
+		}
+	}
+	return -1;
+}
+
+// Vector of pair, where each pair is <command, index to autocomplete>
+static const std::vector<std::pair<const char *, int>> gs_vTuningCommands{
+	{"tune", 0},
+	{"tune_reset", 0},
+	{"toggle_tune", 0},
+	{"tune_zone", 1},
+};
+// Returns the position of the start of the autocompletion, or -1
+static int TuningCommandArgumentPos(const char *pStr)
+{
+	return ArgumentPosition(pStr, gs_vTuningCommands);
 }
 
 static int PossibleTunings(const char *pStr, IConsole::FPossibleCallback pfnCallback = IConsole::EmptyPossibleCommandCallback, void *pUser = nullptr)
@@ -94,10 +142,15 @@ static int PossibleTunings(const char *pStr, IConsole::FPossibleCallback pfnCall
 	return Index;
 }
 
-static const char *gs_apSettingCommands[] = {"reset ", "toggle ", "access_level ", "+toggle "};
-static bool IsSettingCommandPrefix(const char *pStr)
+static const std::vector<std::pair<const char *, int>> gs_vSettingCommands{
+	{"reset", 0},
+	{"toggle", 0},
+	{"access_level", 0},
+	{"+toggle", 0},
+};
+static int SettingCommandArgumentPos(const char *pStr)
 {
-	return std::any_of(std::begin(gs_apSettingCommands), std::end(gs_apSettingCommands), [pStr](auto *pCmd) { return str_startswith_nocase(pStr, pCmd); });
+	return ArgumentPosition(pStr, gs_vSettingCommands);
 }
 
 const ColorRGBA CGameConsole::ms_SearchHighlightColor = ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f);
@@ -124,6 +177,7 @@ CGameConsole::CInstance::CInstance(int Type)
 	m_CompletionChosen = -1;
 	m_aCompletionBufferArgument[0] = 0;
 	m_CompletionChosenArgument = -1;
+	m_CompletionArgumentPosition = 0;
 	Reset();
 
 	m_aUser[0] = '\0';
@@ -205,6 +259,7 @@ void CGameConsole::CInstance::Reset()
 	m_pCommandName = "";
 	m_pCommandHelp = "";
 	m_pCommandParams = "";
+	m_CompletionArgumentPosition = 0;
 }
 
 void CGameConsole::CInstance::ExecuteLine(const char *pLine)
@@ -251,7 +306,7 @@ void CGameConsole::CInstance::PossibleArgumentsCompleteCallback(int Index, const
 	{
 		// get command
 		char aBuf[IConsole::CMDLINE_LENGTH];
-		StrCopyUntilSpace(aBuf, sizeof(aBuf), pInstance->GetString());
+		str_copy(aBuf, pInstance->GetString(), pInstance->m_CompletionArgumentPosition);
 		str_append(aBuf, " ");
 
 		// append argument
@@ -369,6 +424,7 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 						if(m_CompletionChosen == -1 && Direction < 0)
 							m_CompletionChosen = 0;
 						m_CompletionChosen = (m_CompletionChosen + Direction + CompletionEnumerationCount) % CompletionEnumerationCount;
+						m_CompletionArgumentPosition = 0;
 						m_pGameConsole->m_pConsole->PossibleCommands(m_aCompletionBuffer, m_CompletionFlagmask, UseTempCommands, PossibleCommandsCompleteCallback, this);
 					}
 					else if(m_CompletionChosen != -1)
@@ -379,11 +435,11 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 				}
 
 				// Argument completion
-				const bool TuningCompletion = IsTuningCommandPrefix(GetString());
-				const bool SettingCompletion = IsSettingCommandPrefix(GetString());
-				if(TuningCompletion)
+				const int SettingCompletionPos = SettingCommandArgumentPos(GetString());
+				const int TuningCompletionPos = TuningCommandArgumentPos(GetString());
+				if(TuningCompletionPos != -1)
 					CompletionEnumerationCount = PossibleTunings(m_aCompletionBufferArgument);
-				else if(SettingCompletion)
+				else if(SettingCompletionPos != -1)
 					CompletionEnumerationCount = m_pGameConsole->m_pConsole->PossibleCommands(m_aCompletionBufferArgument, m_CompletionFlagmask, UseTempCommands);
 
 				if(CompletionEnumerationCount)
@@ -391,10 +447,16 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 					if(m_CompletionChosenArgument == -1 && Direction < 0)
 						m_CompletionChosenArgument = 0;
 					m_CompletionChosenArgument = (m_CompletionChosenArgument + Direction + CompletionEnumerationCount) % CompletionEnumerationCount;
-					if(TuningCompletion && m_pGameConsole->Client()->RconAuthed() && m_Type == CGameConsole::CONSOLETYPE_REMOTE)
+					if(TuningCompletionPos != -1 && m_pGameConsole->Client()->RconAuthed() && m_Type == CGameConsole::CONSOLETYPE_REMOTE)
+					{
+						m_CompletionArgumentPosition = TuningCompletionPos;
 						PossibleTunings(m_aCompletionBufferArgument, PossibleArgumentsCompleteCallback, this);
-					else if(SettingCompletion)
+					}
+					else if(SettingCompletionPos != -1)
+					{
+						m_CompletionArgumentPosition = SettingCompletionPos;
 						m_pGameConsole->m_pConsole->PossibleCommands(m_aCompletionBufferArgument, m_CompletionFlagmask, UseTempCommands, PossibleArgumentsCompleteCallback, this);
+					}
 				}
 				else if(m_CompletionChosenArgument != -1)
 				{
@@ -467,21 +529,27 @@ bool CGameConsole::CInstance::OnInput(const IInput::CEvent &Event)
 			m_CompletionChosen = -1;
 			str_copy(m_aCompletionBuffer, m_Input.GetString());
 
-			for(const auto *pCmd : gs_apTuningCommands)
+			const char *pInputStr = m_Input.GetString();
+
+			const int TuningCompletionPos = TuningCommandArgumentPos(GetString());
+			for(const auto &[pCmd, _] : gs_vTuningCommands)
 			{
-				if(str_startswith_nocase(m_Input.GetString(), pCmd))
+				const int Len = str_length(pCmd);
+				if(str_comp_nocase_num(pInputStr, pCmd, Len) == 0 && str_isspace(pInputStr[Len]))
 				{
 					m_CompletionChosenArgument = -1;
-					str_copy(m_aCompletionBufferArgument, &m_Input.GetString()[str_length(pCmd)]);
+					str_copy(m_aCompletionBufferArgument, &pInputStr[TuningCompletionPos]);
 				}
 			}
 
-			for(const auto *pCmd : gs_apSettingCommands)
+			const int SettingCompletionPos = SettingCommandArgumentPos(GetString());
+			for(const auto &[pCmd, _] : gs_vSettingCommands)
 			{
-				if(str_startswith_nocase(m_Input.GetString(), pCmd))
+				const int Len = str_length(pCmd);
+				if(str_comp_nocase_num(pInputStr, pCmd, Len) == 0 && str_isspace(pInputStr[Len]))
 				{
 					m_CompletionChosenArgument = -1;
-					str_copy(m_aCompletionBufferArgument, &m_Input.GetString()[str_length(pCmd)]);
+					str_copy(m_aCompletionBufferArgument, &pInputStr[SettingCompletionPos]);
 				}
 			}
 
@@ -1007,17 +1075,17 @@ void CGameConsole::OnRender()
 
 			if(NumCommands <= 0 && pConsole->m_IsCommand)
 			{
-				const bool TuningCompletion = IsTuningCommandPrefix(Info.m_pCurrentCmd);
-				const bool SettingCompletion = IsSettingCommandPrefix(Info.m_pCurrentCmd);
+				const int TuningCompletionPos = TuningCommandArgumentPos(Info.m_pCurrentCmd);
+				const int SettingCompletionPos = SettingCommandArgumentPos(Info.m_pCurrentCmd);
 				int NumArguments = 0;
-				if(TuningCompletion || SettingCompletion)
+				if(TuningCompletionPos != -1 || SettingCompletionPos != -1)
 				{
 					Info.m_WantedCompletion = pConsole->m_CompletionChosenArgument;
 					Info.m_TotalWidth = 0.0f;
 					Info.m_pCurrentCmd = pConsole->m_aCompletionBufferArgument;
-					if(TuningCompletion)
+					if(TuningCompletionPos != -1)
 						NumArguments = PossibleTunings(Info.m_pCurrentCmd, PossibleCommandsRenderCallback, &Info);
-					else if(SettingCompletion)
+					else if(SettingCompletionPos != -1)
 						NumArguments = m_pConsole->PossibleCommands(Info.m_pCurrentCmd, pConsole->m_CompletionFlagmask, m_ConsoleType != CGameConsole::CONSOLETYPE_LOCAL && Client()->RconAuthed() && Client()->UseTempRconCommands(), PossibleCommandsRenderCallback, &Info);
 					pConsole->m_CompletionRenderOffset = Info.m_Offset;
 				}
