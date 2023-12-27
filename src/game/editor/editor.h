@@ -680,6 +680,7 @@ public:
 	float m_MouseDeltaY;
 	float m_MouseDeltaWx;
 	float m_MouseDeltaWy;
+	void *m_pContainerPanned;
 
 	enum EShowTile
 	{

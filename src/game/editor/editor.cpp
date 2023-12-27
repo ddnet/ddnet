@@ -3133,26 +3133,38 @@ void CEditor::DoMapEditor(CUIRect View)
 		MapView()->MapGrid()->OnRender(View);
 	}
 
+	if(m_pContainerPanned == &s_pEditorID)
+	{
+		// do panning
+		if((Input()->ModifierIsPressed() && UI()->MouseButton(0)) || UI()->MouseButton(2))
+		{
+			if(Input()->ShiftIsPressed())
+				s_Operation = OP_PAN_EDITOR;
+			else
+				s_Operation = OP_PAN_WORLD;
+		}
+		else
+			s_Operation = OP_NONE;
+
+		if(s_Operation == OP_PAN_WORLD)
+			MapView()->OffsetWorld(-vec2(m_MouseDeltaX, m_MouseDeltaY) * m_MouseWScale);
+		else if(s_Operation == OP_PAN_EDITOR)
+			MapView()->OffsetEditor(-vec2(m_MouseDeltaX, m_MouseDeltaY) * m_MouseWScale);
+
+		if(s_Operation == OP_NONE)
+			m_pContainerPanned = nullptr;
+	}
+
 	if(Inside)
 	{
 		UI()->SetHotItem(s_pEditorID);
 
 		// do global operations like pan and zoom
-		if(UI()->CheckActiveItem(nullptr) && (UI()->MouseButton(0) || UI()->MouseButton(2)))
+		if(UI()->CheckActiveItem(nullptr) && m_pContainerPanned == nullptr && ((Input()->ModifierIsPressed() && UI()->MouseButton(0)) || UI()->MouseButton(2)))
 		{
 			s_StartWx = wx;
 			s_StartWy = wy;
-
-			if(Input()->ModifierIsPressed() || UI()->MouseButton(2))
-			{
-				if(Input()->ShiftIsPressed())
-					s_Operation = OP_PAN_EDITOR;
-				else
-					s_Operation = OP_PAN_WORLD;
-				UI()->SetActiveItem(s_pEditorID);
-			}
-			else
-				s_Operation = OP_NONE;
+			m_pContainerPanned = &s_pEditorID;
 		}
 
 		// brush editing
@@ -3516,12 +3528,6 @@ void CEditor::DoMapEditor(CUIRect View)
 
 		if(UI()->CheckActiveItem(s_pEditorID))
 		{
-			// do panning
-			if(s_Operation == OP_PAN_WORLD)
-				MapView()->OffsetWorld(-vec2(m_MouseDeltaX, m_MouseDeltaY) * m_MouseWScale);
-			else if(s_Operation == OP_PAN_EDITOR)
-				MapView()->OffsetEditor(-vec2(m_MouseDeltaX, m_MouseDeltaY) * m_MouseWScale);
-
 			// release mouse
 			if(!UI()->MouseButton(0))
 			{
@@ -6431,15 +6437,25 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		ToolBar.VSplitLeft(40.0f, &Button, &ToolBar);
 		UI()->DoLabel(&Button, "Sync.", 10.0f, TEXTALIGN_ML);
 
-		if(UI()->MouseInside(&View) && m_Dialog == DIALOG_NONE)
+		const bool ShouldPan = s_Operation == EEnvelopeEditorOp::OP_NONE && (UI()->MouseButton(2) || (UI()->MouseButton(0) && Input()->ModifierIsPressed()));
+		if(m_pContainerPanned == &s_EnvelopeEditorID)
 		{
-			UI()->SetHotItem(&s_EnvelopeEditorID);
-
-			if(s_Operation == EEnvelopeEditorOp::OP_NONE && (UI()->MouseButton(2) || (UI()->MouseButton(0) && Input()->ModifierIsPressed())))
+			if(!ShouldPan)
+				m_pContainerPanned = nullptr;
+			else
 			{
 				m_OffsetEnvelopeX += UI()->MouseDeltaX() / Graphics()->ScreenWidth() * UI()->Screen()->w / View.w;
 				m_OffsetEnvelopeY -= UI()->MouseDeltaY() / Graphics()->ScreenHeight() * UI()->Screen()->h / View.h;
 			}
+		}
+
+		if(UI()->MouseInside(&View) && m_Dialog == DIALOG_NONE)
+		{
+			UI()->SetHotItem(&s_EnvelopeEditorID);
+
+			if(ShouldPan && m_pContainerPanned == nullptr)
+				m_pContainerPanned = &s_EnvelopeEditorID;
+
 			if(Input()->KeyPress(KEY_KP_MULTIPLY))
 				ResetZoomEnvelope(pEnvelope, s_ActiveChannels);
 			if(Input()->ShiftIsPressed())
@@ -8302,6 +8318,7 @@ void CEditor::Reset(bool CreateDefault)
 	m_MouseDeltaY = 0;
 	m_MouseDeltaWx = 0;
 	m_MouseDeltaWy = 0;
+	m_pContainerPanned = nullptr;
 
 	m_Map.m_Modified = false;
 	m_Map.m_ModifiedAuto = false;
