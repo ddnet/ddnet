@@ -285,7 +285,9 @@ int CControls::SnapInput(int *pData)
 			pDummyInput->m_TargetY = m_aInputData[g_Config.m_ClDummy].m_TargetY;
 			pDummyInput->m_WantedWeapon = m_aInputData[g_Config.m_ClDummy].m_WantedWeapon;
 
-			pDummyInput->m_Fire += m_aInputData[g_Config.m_ClDummy].m_Fire - m_aLastData[g_Config.m_ClDummy].m_Fire;
+			if(!g_Config.m_ClDummyControl)
+				pDummyInput->m_Fire += m_aInputData[g_Config.m_ClDummy].m_Fire - m_aLastData[g_Config.m_ClDummy].m_Fire;
+
 			pDummyInput->m_NextWeapon += m_aInputData[g_Config.m_ClDummy].m_NextWeapon - m_aLastData[g_Config.m_ClDummy].m_NextWeapon;
 			pDummyInput->m_PrevWeapon += m_aInputData[g_Config.m_ClDummy].m_PrevWeapon - m_aLastData[g_Config.m_ClDummy].m_PrevWeapon;
 
@@ -296,7 +298,12 @@ int CControls::SnapInput(int *pData)
 		{
 			CNetObj_PlayerInput *pDummyInput = &m_pClient->m_DummyInput;
 			pDummyInput->m_Jump = g_Config.m_ClDummyJump;
-			pDummyInput->m_Fire = g_Config.m_ClDummyFire;
+
+			if(g_Config.m_ClDummyFire)
+				pDummyInput->m_Fire = g_Config.m_ClDummyFire;
+			else if((pDummyInput->m_Fire & 1) != 0)
+				pDummyInput->m_Fire++;
+
 			pDummyInput->m_Hook = g_Config.m_ClDummyHook;
 		}
 
