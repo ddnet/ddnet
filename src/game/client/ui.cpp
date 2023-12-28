@@ -179,8 +179,8 @@ void CUI::OnCursorMove(float X, float Y)
 {
 	if(!CheckMouseLock())
 	{
-		m_UpdatedMousePos.x = clamp(m_UpdatedMousePos.x + X, 0.0f, (float)Graphics()->WindowWidth());
-		m_UpdatedMousePos.y = clamp(m_UpdatedMousePos.y + Y, 0.0f, (float)Graphics()->WindowHeight());
+		m_UpdatedMousePos.x = clamp(m_UpdatedMousePos.x + X, 0.0f, Graphics()->WindowWidth() - 1.0f);
+		m_UpdatedMousePos.y = clamp(m_UpdatedMousePos.y + Y, 0.0f, Graphics()->WindowHeight() - 1.0f);
 	}
 
 	m_UpdatedMouseDelta += vec2(X, Y);
