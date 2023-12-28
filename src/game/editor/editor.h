@@ -397,7 +397,10 @@ public:
 
 		m_CheckerTexture.Invalidate();
 		m_BackgroundTexture.Invalidate();
-		m_CursorTexture.Invalidate();
+		for(int i = 0; i < NUM_CURSORS; i++)
+			m_aCursorTextures[i].Invalidate();
+
+		m_CursorType = CURSOR_NORMAL;
 
 		ms_pUiGotContext = nullptr;
 
@@ -707,6 +710,7 @@ public:
 	};
 	EExtraEditor m_ActiveExtraEditor = EXTRAEDITOR_NONE;
 	float m_aExtraEditorSplits[NUM_EXTRAEDITORS] = {250.0f, 250.0f, 250.0f};
+	float m_ToolBoxWidth = 100.0f;
 
 	enum EShowEnvelope
 	{
@@ -740,7 +744,16 @@ public:
 
 	IGraphics::CTextureHandle m_CheckerTexture;
 	IGraphics::CTextureHandle m_BackgroundTexture;
-	IGraphics::CTextureHandle m_CursorTexture;
+
+	enum ECursorType
+	{
+		CURSOR_NORMAL,
+		CURSOR_RESIZE_V,
+		CURSOR_RESIZE_H,
+		NUM_CURSORS
+	};
+	IGraphics::CTextureHandle m_aCursorTextures[ECursorType::NUM_CURSORS];
+	ECursorType m_CursorType;
 
 	IGraphics::CTextureHandle GetEntitiesTexture();
 
@@ -936,7 +949,14 @@ public:
 	void RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEditorLast);
 	void RenderEditorHistory(CUIRect View);
 
-	void RenderExtraEditorDragBar(CUIRect View, CUIRect DragBar);
+	enum class EDragSide // Which side is the drag bar on
+	{
+		SIDE_BOTTOM,
+		SIDE_LEFT,
+		SIDE_TOP,
+		SIDE_RIGHT
+	};
+	void DoEditorDragBar(CUIRect View, CUIRect *pDragBar, EDragSide Side, float *pValue, float MinValue = 100.0f, float MaxValue = 400.0f);
 
 	void SetHotEnvelopePoint(const CUIRect &View, const std::shared_ptr<CEnvelope> &pEnvelope, int ActiveChannels);
 
