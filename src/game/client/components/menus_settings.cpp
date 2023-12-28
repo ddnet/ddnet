@@ -1988,11 +1988,12 @@ bool CMenus::RenderLanguageSelection(CUIRect MainView)
 void CMenus::RenderSettings(CUIRect MainView)
 {
 	// render background
-	CUIRect Button, TabBar, RestartWarning;
+	CUIRect Button, TabBar, RestartBar, RestartWarning, RestartButton;
 	MainView.VSplitRight(120.0f, &MainView, &TabBar);
 	MainView.Draw(ms_ColorTabbarActive, IGraphics::CORNER_B, 10.0f);
 	MainView.Margin(10.0f, &MainView);
-	MainView.HSplitBottom(15.0f, &MainView, &RestartWarning);
+	MainView.HSplitBottom(15.0f, &MainView, &RestartBar);
+	RestartBar.VSplitRight(125.0f, &RestartWarning, &RestartButton);
 	TabBar.HSplitTop(50.0f, &Button, &TabBar);
 	Button.Draw(ms_ColorTabbarActive, IGraphics::CORNER_BR, 10.0f);
 
@@ -2020,7 +2021,7 @@ void CMenus::RenderSettings(CUIRect MainView)
 	}
 
 	MainView.Margin(10.0f, &MainView);
-	RestartWarning.VMargin(10.0f, &RestartWarning);
+	RestartBar.VMargin(10.0f, &RestartBar);
 
 	if(g_Config.m_UiSettingsPage == SETTINGS_LANGUAGE)
 	{
@@ -2073,14 +2074,32 @@ void CMenus::RenderSettings(CUIRect MainView)
 		RenderSettingsCustom(MainView);
 	}
 
-	if(m_NeedRestartUpdate)
+	if(m_NeedRestartGraphics || m_NeedRestartSound || m_NeedRestartUpdate)
 	{
-		TextRender()->TextColor(1.0f, 0.4f, 0.4f, 1.0f);
-		UI()->DoLabel(&RestartWarning, Localize("DDNet Client needs to be restarted to complete update!"), 14.0f, TEXTALIGN_ML);
-		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+		if(m_NeedRestartUpdate)
+		{
+			TextRender()->TextColor(1.0f, 0.4f, 0.4f, 1.0f);
+			UI()->DoLabel(&RestartWarning, Localize("DDNet Client needs to be restarted to complete update!"), 14.0f, TEXTALIGN_ML);
+			TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+		}
+		else
+		{
+			UI()->DoLabel(&RestartWarning, Localize("You must restart the game for all settings to take effect."), 14.0f, TEXTALIGN_ML);
+		}
+
+		static CButtonContainer s_RestartButton;
+		if(DoButton_Menu(&s_RestartButton, Localize("Restart"), 0, &RestartButton))
+		{
+			if(Client()->State() == IClient::STATE_ONLINE || m_pClient->Editor()->HasUnsavedData())
+			{
+				m_Popup = POPUP_RESTART;
+			}
+			else
+			{
+				Client()->Restart();
+			}
+		}
 	}
-	else if(m_NeedRestartGeneral || m_NeedRestartSkins || m_NeedRestartGraphics || m_NeedRestartSound || m_NeedRestartDDNet)
-		UI()->DoLabel(&RestartWarning, Localize("You must restart the game for all settings to take effect."), 14.0f, TEXTALIGN_ML);
 }
 
 ColorHSLA CMenus::RenderHSLScrollbars(CUIRect *pRect, unsigned int *pColor, bool Alpha, bool ClampedLight)
