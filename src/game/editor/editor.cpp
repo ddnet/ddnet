@@ -2978,7 +2978,7 @@ void CEditor::DoMapEditor(CUIRect View)
 	}
 
 	static void *s_pEditorID = (void *)&s_pEditorID;
-	const bool Inside = !m_GuiActive || UI()->MouseInside(&View);
+	const bool Inside = UI()->MouseInside(&View);
 
 	// fetch mouse position
 	float wx = UI()->MouseWorldX();
@@ -8164,7 +8164,7 @@ void CEditor::Render()
 		m_PopupEventWasActivated = true;
 	}
 
-	if(m_Dialog == DIALOG_NONE && !UI()->IsPopupHovered() && (!m_GuiActive || UI()->MouseInside(&View)))
+	if(m_Dialog == DIALOG_NONE && !UI()->IsPopupHovered() && UI()->MouseInside(&View))
 	{
 		// handle zoom hotkeys
 		if(Input()->KeyPress(KEY_KP_MINUS))
@@ -8472,8 +8472,8 @@ void CEditor::HandleCursorMovement()
 
 	if(!UI()->CheckMouseLock())
 	{
-		s_MouseX = clamp<float>(s_MouseX + MouseRelX, 0.0f, Graphics()->WindowWidth());
-		s_MouseY = clamp<float>(s_MouseY + MouseRelY, 0.0f, Graphics()->WindowHeight());
+		s_MouseX = clamp(s_MouseX + MouseRelX, 0.0f, Graphics()->WindowWidth() - 1.0f);
+		s_MouseY = clamp(s_MouseY + MouseRelY, 0.0f, Graphics()->WindowHeight() - 1.0f);
 	}
 
 	// update positions for ui, but only update ui when rendering
