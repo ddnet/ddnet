@@ -623,7 +623,7 @@ float CSound::GetSampleTotalTime(int SampleID)
 	if(SampleID == -1 || SampleID >= NUM_SAMPLES)
 		return 0.0f;
 
-	return (m_aSamples[SampleID].m_NumFrames / (float)m_aSamples[SampleID].m_Rate);
+	return m_aSamples[SampleID].TotalTime();
 }
 
 float CSound::GetSampleCurrentTime(int SampleID)

@@ -20,6 +20,11 @@ struct CSample
 	int m_LoopStart;
 	int m_LoopEnd;
 	int m_PausedAt;
+
+	float TotalTime() const
+	{
+		return m_NumFrames / (float)m_Rate;
+	}
 };
 
 struct CChannel
