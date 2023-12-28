@@ -219,12 +219,9 @@ protected:
 	static float ms_ListitemAdditionalHeight;
 
 	// for settings
-	bool m_NeedRestartGeneral;
-	bool m_NeedRestartSkins;
 	bool m_NeedRestartGraphics;
 	bool m_NeedRestartSound;
 	bool m_NeedRestartUpdate;
-	bool m_NeedRestartDDNet;
 	bool m_NeedSendinfo;
 	bool m_NeedSendDummyinfo;
 	int m_SettingPlayerPage;
@@ -745,6 +742,7 @@ public:
 		POPUP_RENDER_DONE,
 		POPUP_PASSWORD,
 		POPUP_QUIT,
+		POPUP_RESTART,
 		POPUP_WARNING,
 
 		// demo player states
