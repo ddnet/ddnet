@@ -7828,6 +7828,11 @@ void CEditor::DoEditorDragBar(CUIRect View, CUIRect *pDragBar, EDragSide Side, f
 	static float s_InitialMouseX = 0.0f;
 	static float s_InitialMouseOffsetX = 0.0f;
 
+	bool IsVertical = Side == EDragSide::SIDE_TOP || Side == EDragSide::SIDE_BOTTOM;
+
+	if(UI()->MouseInside(pDragBar) && UI()->HotItem() == pDragBar)
+		m_CursorType = IsVertical ? CURSOR_RESIZE_V : CURSOR_RESIZE_H;
+
 	bool Clicked;
 	bool Abrupted;
 	if(int Result = DoButton_DraggableEx(pDragBar, "", 8, pDragBar, &Clicked, &Abrupted, 0, "Change the size of the editor by dragging."))
@@ -7844,8 +7849,6 @@ void CEditor::DoEditorDragBar(CUIRect View, CUIRect *pDragBar, EDragSide Side, f
 		if(Clicked || Abrupted)
 			s_Operation = OP_NONE;
 
-		bool IsVertical = Side == EDragSide::SIDE_TOP || Side == EDragSide::SIDE_BOTTOM;
-
 		if(s_Operation == OP_CLICKED && absolute(IsVertical ? UI()->MouseY() - s_InitialMouseY : UI()->MouseX() - s_InitialMouseX) > 5.0f)
 			s_Operation = OP_DRAGGING;
 
@@ -7859,6 +7862,8 @@ void CEditor::DoEditorDragBar(CUIRect View, CUIRect *pDragBar, EDragSide Side, f
 				*pValue = clamp(UI()->MouseY() - s_InitialMouseOffsetY - View.y + pDragBar->h, MinValue, MaxValue);
 			else if(Side == EDragSide::SIDE_LEFT)
 				*pValue = clamp(s_InitialMouseOffsetX + View.x + View.w - UI()->MouseX(), MinValue, MaxValue);
+
+			m_CursorType = IsVertical ? CURSOR_RESIZE_V : CURSOR_RESIZE_H;
 		}
 	}
 }
@@ -7945,6 +7950,7 @@ void CEditor::Render()
 	Graphics()->Clear(0.0f, 0.0f, 0.0f);
 	CUIRect View = *UI()->Screen();
 	UI()->MapScreen();
+	m_CursorType = CURSOR_NORMAL;
 
 	float Width = View.w;
 	float Height = View.h;
@@ -8306,8 +8312,10 @@ void CEditor::RenderMousePointer()
 		return;
 
 	Graphics()->WrapClamp();
-	Graphics()->TextureSet(m_CursorTexture);
+	Graphics()->TextureSet(m_aCursorTextures[m_CursorType]);
 	Graphics()->QuadsBegin();
+	if(m_CursorType == CURSOR_RESIZE_V)
+		Graphics()->QuadsSetRotation(pi / 2);
 	if(ms_pUiGotContext == UI()->HotItem())
 		Graphics()->SetColor(1, 0, 0, 1);
 	IGraphics::CQuadItem QuadItem(UI()->MouseX(), UI()->MouseY(), 16.0f, 16.0f);
@@ -8440,7 +8448,9 @@ void CEditor::Init()
 
 	m_CheckerTexture = Graphics()->LoadTexture("editor/checker.png", IStorage::TYPE_ALL);
 	m_BackgroundTexture = Graphics()->LoadTexture("editor/background.png", IStorage::TYPE_ALL);
-	m_CursorTexture = Graphics()->LoadTexture("editor/cursor.png", IStorage::TYPE_ALL);
+	m_aCursorTextures[CURSOR_NORMAL] = Graphics()->LoadTexture("editor/cursor.png", IStorage::TYPE_ALL);
+	m_aCursorTextures[CURSOR_RESIZE_H] = Graphics()->LoadTexture("editor/cursor_resize.png", IStorage::TYPE_ALL);
+	m_aCursorTextures[CURSOR_RESIZE_V] = m_aCursorTextures[CURSOR_RESIZE_H];
 
 	m_pTilesetPicker = std::make_shared<CLayerTiles>(this, 16, 16);
 	m_pTilesetPicker->MakePalette();

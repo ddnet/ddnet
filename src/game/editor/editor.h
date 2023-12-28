@@ -397,7 +397,10 @@ public:
 
 		m_CheckerTexture.Invalidate();
 		m_BackgroundTexture.Invalidate();
-		m_CursorTexture.Invalidate();
+		for(int i = 0; i < NUM_CURSORS; i++)
+			m_aCursorTextures[i].Invalidate();
+
+		m_CursorType = CURSOR_NORMAL;
 
 		ms_pUiGotContext = nullptr;
 
@@ -741,7 +744,16 @@ public:
 
 	IGraphics::CTextureHandle m_CheckerTexture;
 	IGraphics::CTextureHandle m_BackgroundTexture;
-	IGraphics::CTextureHandle m_CursorTexture;
+
+	enum ECursorType
+	{
+		CURSOR_NORMAL,
+		CURSOR_RESIZE_V,
+		CURSOR_RESIZE_H,
+		NUM_CURSORS
+	};
+	IGraphics::CTextureHandle m_aCursorTextures[ECursorType::NUM_CURSORS];
+	ECursorType m_CursorType;
 
 	IGraphics::CTextureHandle GetEntitiesTexture();
 
