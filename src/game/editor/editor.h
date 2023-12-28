@@ -381,6 +381,7 @@ public:
 		m_AnimateStart = 0;
 		m_AnimateTime = 0;
 		m_AnimateSpeed = 1;
+		m_AnimateUpdatePopup = false;
 
 		m_ShowEnvelopePreview = SHOWENV_NONE;
 		m_SelectedQuadEnvelope = -1;
@@ -695,10 +696,12 @@ public:
 	};
 	EShowTile m_ShowTileInfo;
 	bool m_ShowDetail;
+
 	bool m_Animate;
 	int64_t m_AnimateStart;
 	float m_AnimateTime;
 	float m_AnimateSpeed;
+	bool m_AnimateUpdatePopup;
 
 	enum EExtraEditor
 	{
@@ -837,6 +840,7 @@ public:
 	static CUI::EPopupMenuFunctionResult PopupGoto(void *pContext, CUIRect View, bool Active);
 	static CUI::EPopupMenuFunctionResult PopupEntities(void *pContext, CUIRect View, bool Active);
 	static CUI::EPopupMenuFunctionResult PopupProofMode(void *pContext, CUIRect View, bool Active);
+	static CUI::EPopupMenuFunctionResult PopupAnimateSettings(void *pContext, CUIRect View, bool Active);
 
 	static bool CallbackOpenMap(const char *pFileName, int StorageType, void *pUser);
 	static bool CallbackAppendMap(const char *pFileName, int StorageType, void *pUser);
