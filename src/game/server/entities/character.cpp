@@ -1099,6 +1099,10 @@ void CCharacter::SnapCharacter(int SnappingClient, int ID)
 			pCharacter->m_Angle -= (int)(2.0f * pi * 256.0f);
 		}
 
+		// m_HookTick can be negative when using the hook_duration tune, which 0.7 clients
+		// will consider invalid. https://github.com/ddnet/ddnet/issues/3915
+		pCharacter->m_HookTick = maximum(0, pCharacter->m_HookTick);
+
 		pCharacter->m_Tick = Tick;
 		pCharacter->m_Emote = Emote;
 		pCharacter->m_AttackTick = m_AttackTick;
