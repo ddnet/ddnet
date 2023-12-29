@@ -8,6 +8,8 @@
 #include <base/hash.h>
 #include <base/types.h>
 
+#include "uuid_manager.h"
+
 #include <array>
 #include <vector>
 
@@ -25,7 +27,7 @@ class CDataFileReader
 	void *GetDataImpl(int Index, bool Swap);
 	int GetFileDataSize(int Index) const;
 
-	int GetExternalItemType(int InternalType);
+	int GetExternalItemType(int InternalType, CUuid *pUuid);
 	int GetInternalItemType(int ExternalType);
 
 public:
@@ -54,7 +56,7 @@ public:
 	int NumData() const;
 
 	int GetItemSize(int Index) const;
-	void *GetItem(int Index, int *pType = nullptr, int *pID = nullptr);
+	void *GetItem(int Index, int *pType = nullptr, int *pID = nullptr, CUuid *pUuid = nullptr);
 	void GetType(int Type, int *pStart, int *pNum);
 	int FindItemIndex(int Type, int ID);
 	void *FindItem(int Type, int ID);
@@ -94,6 +96,12 @@ class CDataFileWriter
 		int m_Last;
 	};
 
+	struct CExtendedItemType
+	{
+		int m_Type;
+		CUuid m_Uuid;
+	};
+
 	enum
 	{
 		MAX_ITEM_TYPES = 0x10000,
@@ -103,10 +111,10 @@ class CDataFileWriter
 	std::array<CItemTypeInfo, MAX_ITEM_TYPES> m_aItemTypes;
 	std::vector<CItemInfo> m_vItems;
 	std::vector<CDataInfo> m_vDatas;
-	std::vector<int> m_vExtendedItemTypes;
+	std::vector<CExtendedItemType> m_vExtendedItemTypes;
 
 	int GetTypeFromIndex(int Index) const;
-	int GetExtendedItemTypeIndex(int Type);
+	int GetExtendedItemTypeIndex(int Type, const CUuid *pUuid);
 
 public:
 	CDataFileWriter();
@@ -122,7 +130,7 @@ public:
 	~CDataFileWriter();
 
 	bool Open(class IStorage *pStorage, const char *pFilename, int StorageType = IStorage::TYPE_SAVE);
-	int AddItem(int Type, int ID, size_t Size, const void *pData);
+	int AddItem(int Type, int ID, size_t Size, const void *pData, const CUuid *pUuid = nullptr);
 	int AddData(size_t Size, const void *pData, int CompressionLevel = Z_DEFAULT_COMPRESSION);
 	int AddDataSwapped(size_t Size, const void *pData);
 	int AddDataString(const char *pStr);
