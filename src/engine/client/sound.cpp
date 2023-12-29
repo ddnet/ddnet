@@ -631,19 +631,17 @@ float CSound::GetSampleCurrentTime(int SampleID)
 	if(SampleID == -1 || SampleID >= NUM_SAMPLES)
 		return 0.0f;
 
+	const CLockScope LockScope(m_SoundLock);
 	CSample *pSample = &m_aSamples[SampleID];
-	if(IsPlaying(SampleID))
+	for(auto &Voice : m_aVoices)
 	{
-		for(auto &Voice : m_aVoices)
+		if(Voice.m_pSample == pSample)
 		{
-			if(Voice.m_pSample == pSample)
-			{
-				return (Voice.m_Tick / (float)pSample->m_Rate);
-			}
+			return Voice.m_Tick / (float)pSample->m_Rate;
 		}
 	}
 
-	return (pSample->m_PausedAt / (float)pSample->m_Rate);
+	return pSample->m_PausedAt / (float)pSample->m_Rate;
 }
 
 void CSound::SetSampleCurrentTime(int SampleID, float Time)
@@ -651,21 +649,18 @@ void CSound::SetSampleCurrentTime(int SampleID, float Time)
 	if(SampleID == -1 || SampleID >= NUM_SAMPLES)
 		return;
 
+	const CLockScope LockScope(m_SoundLock);
 	CSample *pSample = &m_aSamples[SampleID];
-	if(IsPlaying(SampleID))
+	for(auto &Voice : m_aVoices)
 	{
-		for(auto &Voice : m_aVoices)
+		if(Voice.m_pSample == pSample)
 		{
-			if(Voice.m_pSample == pSample)
-			{
-				Voice.m_Tick = pSample->m_NumFrames * Time;
-			}
+			Voice.m_Tick = pSample->m_NumFrames * Time;
+			return;
 		}
 	}
-	else
-	{
-		pSample->m_PausedAt = pSample->m_NumFrames * Time;
-	}
+
+	pSample->m_PausedAt = pSample->m_NumFrames * Time;
 }
 
 void CSound::SetChannel(int ChannelID, float Vol, float Pan)
