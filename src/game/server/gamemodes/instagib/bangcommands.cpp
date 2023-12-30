@@ -20,6 +20,7 @@ void CGameControllerInstagib::BangCommandVote(int ClientID, const char *pCommand
 	}
 	char aChatmsg[1024];
 	str_format(aChatmsg, sizeof(aChatmsg), "'%s' called vote to change server option '%s'", Server()->ClientName(ClientID), pDesc);
+	GameServer()->m_VoteType = GameServer()->VOTE_TYPE_OPTION;
 	GameServer()->CallVote(ClientID, pDesc, pCommand, "chat cmd", aChatmsg);
 }
 
