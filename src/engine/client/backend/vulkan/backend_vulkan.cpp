@@ -1378,7 +1378,7 @@ protected:
 		}
 	}
 
-	[[nodiscard]] bool GetPresentedImageDataImpl(uint32_t &Width, uint32_t &Height, CImageInfo::EImageFormat &Format, std::vector<uint8_t> &vDstData, bool FlipImgData, bool ResetAlpha)
+	[[nodiscard]] bool GetPresentedImageDataImpl(uint32_t &Width, uint32_t &Height, CImageInfo::EImageFormat &Format, std::vector<uint8_t> &vDstData, bool ResetAlpha)
 	{
 		bool IsB8G8R8A8 = m_VKSurfFormat.format == VK_FORMAT_B8G8R8A8_UNORM;
 		bool UsesRGBALikeFormat = m_VKSurfFormat.format == VK_FORMAT_R8G8B8A8_UNORM || IsB8G8R8A8;
@@ -1399,17 +1399,6 @@ protected:
 			if(!GetMemoryCommandBuffer(pCommandBuffer))
 				return false;
 			VkCommandBuffer &CommandBuffer = *pCommandBuffer;
-
-			VkBufferImageCopy Region{};
-			Region.bufferOffset = 0;
-			Region.bufferRowLength = 0;
-			Region.bufferImageHeight = 0;
-			Region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-			Region.imageSubresource.mipLevel = 0;
-			Region.imageSubresource.baseArrayLayer = 0;
-			Region.imageSubresource.layerCount = 1;
-			Region.imageOffset = {0, 0, 0};
-			Region.imageExtent = {Viewport.width, Viewport.height, 1};
 
 			auto &SwapImg = m_vSwapChainImages[m_LastPresentedSwapChainImageIndex];
 
@@ -1485,8 +1474,8 @@ protected:
 			vkInvalidateMappedMemoryRanges(m_VKDevice, 1, &MemRange);
 
 			size_t RealFullImageSize = maximum(ImageTotalSize, (size_t)(Height * m_GetPresentedImgDataHelperMappedLayoutPitch));
-			if(vDstData.size() < RealFullImageSize + (Width * 4))
-				vDstData.resize(RealFullImageSize + (Width * 4)); // extra space for flipping
+			if(vDstData.size() < RealFullImageSize)
+				vDstData.resize(RealFullImageSize);
 
 			mem_copy(vDstData.data(), pResImageData, RealFullImageSize);
 
@@ -1518,17 +1507,6 @@ protected:
 				}
 			}
 
-			if(FlipImgData)
-			{
-				uint8_t *pTempRow = vDstData.data() + Width * Height * 4;
-				for(uint32_t Y = 0; Y < Height / 2; ++Y)
-				{
-					mem_copy(pTempRow, vDstData.data() + Y * Width * 4, Width * 4);
-					mem_copy(vDstData.data() + Y * Width * 4, vDstData.data() + ((Height - Y) - 1) * Width * 4, Width * 4);
-					mem_copy(vDstData.data() + ((Height - Y) - 1) * Width * 4, pTempRow, Width * 4);
-				}
-			}
-
 			return true;
 		}
 		else
@@ -1547,7 +1525,7 @@ protected:
 
 	[[nodiscard]] bool GetPresentedImageData(uint32_t &Width, uint32_t &Height, CImageInfo::EImageFormat &Format, std::vector<uint8_t> &vDstData) override
 	{
-		return GetPresentedImageDataImpl(Width, Height, Format, vDstData, false, false);
+		return GetPresentedImageDataImpl(Width, Height, Format, vDstData, false);
 	}
 
 	/************************
@@ -6779,7 +6757,7 @@ public:
 		uint32_t Width;
 		uint32_t Height;
 		CImageInfo::EImageFormat Format;
-		if(GetPresentedImageDataImpl(Width, Height, Format, m_vScreenshotHelper, false, true))
+		if(GetPresentedImageDataImpl(Width, Height, Format, m_vScreenshotHelper, true))
 		{
 			size_t ImgSize = (size_t)Width * (size_t)Height * (size_t)4;
 			pCommand->m_pImage->m_pData = malloc(ImgSize);

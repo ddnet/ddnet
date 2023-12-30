@@ -1391,6 +1391,7 @@ set(EXPECTED_DATA
   editor/background.png
   editor/checker.png
   editor/cursor.png
+  editor/cursor_resize.png
   editor/entities/DDNet.png
   editor/entities/FNG.png
   editor/entities/Race.png

@@ -21,6 +21,9 @@ extern "C" {
 
 #include <cmath>
 
+static constexpr int SAMPLE_INDEX_USED = -2;
+static constexpr int SAMPLE_INDEX_FULL = -1;
+
 void CSound::Mix(short *pFinalOut, unsigned Frames)
 {
 	Frames = minimum(Frames, m_MaxFrames);
@@ -240,6 +243,15 @@ int CSound::Init()
 #endif
 	m_pMixBuffer = (int *)calloc(m_MaxFrames * 2, sizeof(int));
 
+	m_FirstFreeSampleIndex = 0;
+	for(size_t i = 0; i < std::size(m_aSamples) - 1; ++i)
+	{
+		m_aSamples[i].m_Index = i;
+		m_aSamples[i].m_NextFreeSampleIndex = i + 1;
+	}
+	m_aSamples[std::size(m_aSamples) - 1].m_Index = std::size(m_aSamples) - 1;
+	m_aSamples[std::size(m_aSamples) - 1].m_NextFreeSampleIndex = SAMPLE_INDEX_FULL;
+
 	SDL_PauseAudioDevice(m_Device, 0);
 
 	m_SoundEnabled = true;
@@ -274,22 +286,28 @@ void CSound::Shutdown()
 	m_pMixBuffer = nullptr;
 }
 
-int CSound::AllocID()
+CSample *CSound::AllocSample()
 {
-	// TODO: linear search, get rid of it
-	for(unsigned SampleID = 0; SampleID < NUM_SAMPLES; SampleID++)
-	{
-		if(m_aSamples[SampleID].m_pData == nullptr)
-			return SampleID;
-	}
+	if(m_FirstFreeSampleIndex == SAMPLE_INDEX_FULL)
+		return nullptr;
 
-	return -1;
+	CSample *pSample = &m_aSamples[m_FirstFreeSampleIndex];
+	m_FirstFreeSampleIndex = pSample->m_NextFreeSampleIndex;
+	pSample->m_NextFreeSampleIndex = SAMPLE_INDEX_USED;
+	if(pSample->m_pData != nullptr)
+	{
+		char aError[64];
+		str_format(aError, sizeof(aError), "Sample was not unloaded (index=%d, duration=%f)", pSample->m_Index, pSample->TotalTime());
+		dbg_assert(false, aError);
+	}
+	return pSample;
 }
 
 void CSound::RateConvert(CSample &Sample) const
 {
+	dbg_assert(Sample.m_pData != nullptr, "Sample is not loaded");
 	// make sure that we need to convert this sound
-	if(!Sample.m_pData || Sample.m_Rate == m_MixingRate)
+	if(Sample.m_Rate == m_MixingRate)
 		return;
 
 	// allocate new data
@@ -505,8 +523,8 @@ int CSound::LoadOpus(const char *pFilename, int StorageType)
 	if(!m_pStorage)
 		return -1;
 
-	const int SampleID = AllocID();
-	if(SampleID < 0)
+	CSample *pSample = AllocSample();
+	if(!pSample)
 	{
 		dbg_msg("sound/opus", "failed to allocate sample ID. filename='%s'", pFilename);
 		return -1;
@@ -516,20 +534,24 @@ int CSound::LoadOpus(const char *pFilename, int StorageType)
 	unsigned DataSize;
 	if(!m_pStorage->ReadFile(pFilename, StorageType, &pData, &DataSize))
 	{
+		UnloadSample(pSample->m_Index);
 		dbg_msg("sound/opus", "failed to open file. filename='%s'", pFilename);
 		return -1;
 	}
 
-	const bool DecodeSuccess = DecodeOpus(m_aSamples[SampleID], pData, DataSize);
+	const bool DecodeSuccess = DecodeOpus(*pSample, pData, DataSize);
 	free(pData);
 	if(!DecodeSuccess)
+	{
+		UnloadSample(pSample->m_Index);
 		return -1;
+	}
 
 	if(g_Config.m_Debug)
 		dbg_msg("sound/opus", "loaded %s", pFilename);
 
-	RateConvert(m_aSamples[SampleID]);
-	return SampleID;
+	RateConvert(*pSample);
+	return pSample->m_Index;
 }
 
 int CSound::LoadWV(const char *pFilename, int StorageType)
@@ -541,8 +563,8 @@ int CSound::LoadWV(const char *pFilename, int StorageType)
 	if(!m_pStorage)
 		return -1;
 
-	const int SampleID = AllocID();
-	if(SampleID < 0)
+	CSample *pSample = AllocSample();
+	if(!pSample)
 	{
 		dbg_msg("sound/wv", "failed to allocate sample ID. filename='%s'", pFilename);
 		return -1;
@@ -552,20 +574,24 @@ int CSound::LoadWV(const char *pFilename, int StorageType)
 	unsigned DataSize;
 	if(!m_pStorage->ReadFile(pFilename, StorageType, &pData, &DataSize))
 	{
+		UnloadSample(pSample->m_Index);
 		dbg_msg("sound/wv", "failed to open file. filename='%s'", pFilename);
 		return -1;
 	}
 
-	const bool DecodeSuccess = DecodeWV(m_aSamples[SampleID], pData, DataSize);
+	const bool DecodeSuccess = DecodeWV(*pSample, pData, DataSize);
 	free(pData);
 	if(!DecodeSuccess)
+	{
+		UnloadSample(pSample->m_Index);
 		return -1;
+	}
 
 	if(g_Config.m_Debug)
 		dbg_msg("sound/wv", "loaded %s", pFilename);
 
-	RateConvert(m_aSamples[SampleID]);
-	return SampleID;
+	RateConvert(*pSample);
+	return pSample->m_Index;
 }
 
 int CSound::LoadOpusFromMem(const void *pData, unsigned DataSize, bool FromEditor = false)
@@ -577,15 +603,18 @@ int CSound::LoadOpusFromMem(const void *pData, unsigned DataSize, bool FromEdito
 	if(!pData)
 		return -1;
 
-	const int SampleID = AllocID();
-	if(SampleID < 0)
+	CSample *pSample = AllocSample();
+	if(!pSample)
 		return -1;
 
-	if(!DecodeOpus(m_aSamples[SampleID], pData, DataSize))
+	if(!DecodeOpus(*pSample, pData, DataSize))
+	{
+		UnloadSample(pSample->m_Index);
 		return -1;
+	}
 
-	RateConvert(m_aSamples[SampleID]);
-	return SampleID;
+	RateConvert(*pSample);
+	return pSample->m_Index;
 }
 
 int CSound::LoadWVFromMem(const void *pData, unsigned DataSize, bool FromEditor = false)
@@ -597,15 +626,18 @@ int CSound::LoadWVFromMem(const void *pData, unsigned DataSize, bool FromEditor 
 	if(!pData)
 		return -1;
 
-	const int SampleID = AllocID();
-	if(SampleID < 0)
+	CSample *pSample = AllocSample();
+	if(!pSample)
 		return -1;
 
-	if(!DecodeWV(m_aSamples[SampleID], pData, DataSize))
+	if(!DecodeWV(*pSample, pData, DataSize))
+	{
+		UnloadSample(pSample->m_Index);
 		return -1;
+	}
 
-	RateConvert(m_aSamples[SampleID]);
-	return SampleID;
+	RateConvert(*pSample);
+	return pSample->m_Index;
 }
 
 void CSound::UnloadSample(int SampleID)
@@ -614,8 +646,18 @@ void CSound::UnloadSample(int SampleID)
 		return;
 
 	Stop(SampleID);
-	free(m_aSamples[SampleID].m_pData);
-	m_aSamples[SampleID].m_pData = nullptr;
+
+	// Free data
+	CSample &Sample = m_aSamples[SampleID];
+	free(Sample.m_pData);
+	Sample.m_pData = nullptr;
+
+	// Free slot
+	if(Sample.m_NextFreeSampleIndex == SAMPLE_INDEX_USED)
+	{
+		Sample.m_NextFreeSampleIndex = m_FirstFreeSampleIndex;
+		m_FirstFreeSampleIndex = Sample.m_Index;
+	}
 }
 
 float CSound::GetSampleTotalTime(int SampleID)
@@ -623,7 +665,7 @@ float CSound::GetSampleTotalTime(int SampleID)
 	if(SampleID == -1 || SampleID >= NUM_SAMPLES)
 		return 0.0f;
 
-	return (m_aSamples[SampleID].m_NumFrames / (float)m_aSamples[SampleID].m_Rate);
+	return m_aSamples[SampleID].TotalTime();
 }
 
 float CSound::GetSampleCurrentTime(int SampleID)
@@ -631,19 +673,17 @@ float CSound::GetSampleCurrentTime(int SampleID)
 	if(SampleID == -1 || SampleID >= NUM_SAMPLES)
 		return 0.0f;
 
+	const CLockScope LockScope(m_SoundLock);
 	CSample *pSample = &m_aSamples[SampleID];
-	if(IsPlaying(SampleID))
+	for(auto &Voice : m_aVoices)
 	{
-		for(auto &Voice : m_aVoices)
+		if(Voice.m_pSample == pSample)
 		{
-			if(Voice.m_pSample == pSample)
-			{
-				return (Voice.m_Tick / (float)pSample->m_Rate);
-			}
+			return Voice.m_Tick / (float)pSample->m_Rate;
 		}
 	}
 
-	return (pSample->m_PausedAt / (float)pSample->m_Rate);
+	return pSample->m_PausedAt / (float)pSample->m_Rate;
 }
 
 void CSound::SetSampleCurrentTime(int SampleID, float Time)
@@ -651,21 +691,18 @@ void CSound::SetSampleCurrentTime(int SampleID, float Time)
 	if(SampleID == -1 || SampleID >= NUM_SAMPLES)
 		return;
 
+	const CLockScope LockScope(m_SoundLock);
 	CSample *pSample = &m_aSamples[SampleID];
-	if(IsPlaying(SampleID))
+	for(auto &Voice : m_aVoices)
 	{
-		for(auto &Voice : m_aVoices)
+		if(Voice.m_pSample == pSample)
 		{
-			if(Voice.m_pSample == pSample)
-			{
-				Voice.m_Tick = pSample->m_NumFrames * Time;
-			}
+			Voice.m_Tick = pSample->m_NumFrames * Time;
+			return;
 		}
 	}
-	else
-	{
-		pSample->m_PausedAt = pSample->m_NumFrames * Time;
-	}
+
+	pSample->m_PausedAt = pSample->m_NumFrames * Time;
 }
 
 void CSound::SetChannel(int ChannelID, float Vol, float Pan)

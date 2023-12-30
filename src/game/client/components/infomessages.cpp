@@ -397,7 +397,7 @@ void CInfoMessages::RenderKillMsg(CInfoMsg *pInfoMsg, float x, float y)
 
 		const CAnimState *pIdleState = CAnimState::GetIdle();
 		vec2 OffsetToMid;
-		RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &pInfoMsg->m_aVictimRenderInfo[j], OffsetToMid);
+		CRenderTools::GetRenderTeeOffsetToRenderedTee(pIdleState, &pInfoMsg->m_aVictimRenderInfo[j], OffsetToMid);
 		const vec2 TeeRenderPos = vec2(x, y + 46.0f / 2.0f + OffsetToMid.y);
 		RenderTools()->RenderTee(pIdleState, &pInfoMsg->m_aVictimRenderInfo[j], EMOTE_PAIN, vec2(-1, 0), TeeRenderPos);
 
@@ -439,7 +439,7 @@ void CInfoMessages::RenderKillMsg(CInfoMsg *pInfoMsg, float x, float y)
 		{
 			const CAnimState *pIdleState = CAnimState::GetIdle();
 			vec2 OffsetToMid;
-			RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &pInfoMsg->m_KillerRenderInfo, OffsetToMid);
+			CRenderTools::GetRenderTeeOffsetToRenderedTee(pIdleState, &pInfoMsg->m_KillerRenderInfo, OffsetToMid);
 			const vec2 TeeRenderPos = vec2(x, y + 46.0f / 2.0f + OffsetToMid.y);
 			RenderTools()->RenderTee(pIdleState, &pInfoMsg->m_KillerRenderInfo, EMOTE_ANGRY, vec2(1, 0), TeeRenderPos);
 		}
@@ -500,7 +500,7 @@ void CInfoMessages::RenderFinishMsg(CInfoMsg *pInfoMsg, float x, float y)
 
 	const CAnimState *pIdleState = CAnimState::GetIdle();
 	vec2 OffsetToMid;
-	RenderTools()->GetRenderTeeOffsetToRenderedTee(pIdleState, &pInfoMsg->m_aVictimRenderInfo[0], OffsetToMid);
+	CRenderTools::GetRenderTeeOffsetToRenderedTee(pIdleState, &pInfoMsg->m_aVictimRenderInfo[0], OffsetToMid);
 	const vec2 TeeRenderPos = vec2(x, y + 46.0f / 2.0f + OffsetToMid.y);
 	const int Emote = pInfoMsg->m_RecordPersonal ? EMOTE_HAPPY : EMOTE_NORMAL;
 	RenderTools()->RenderTee(pIdleState, &pInfoMsg->m_aVictimRenderInfo[0], Emote, vec2(-1, 0), TeeRenderPos);

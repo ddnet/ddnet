@@ -724,9 +724,11 @@ void CRenderTools::RenderTeleOverlay(CTeleTile *pTele, int w, int h, float Scale
 		return; // its useless to render text at this distance
 
 	float Size = g_Config.m_ClTextEntitiesSize / 100.f;
-	float ToCenterOffset = (1 - Size) / 2.f;
+	char aBuf[16];
 
+	TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
 	for(int y = StartY; y < EndY; y++)
+	{
 		for(int x = StartX; x < EndX; x++)
 		{
 			int mx = x;
@@ -744,16 +746,19 @@ void CRenderTools::RenderTeleOverlay(CTeleTile *pTele, int w, int h, float Scale
 			int c = mx + my * w;
 
 			unsigned char Index = pTele[c].m_Number;
-			if(Index && IsTeleTileNumberUsed(pTele[c].m_Type))
+			if(Index && IsTeleTileNumberUsedAny(pTele[c].m_Type))
 			{
-				char aBuf[16];
 				str_from_int(Index, aBuf);
-				TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
-				TextRender()->Text(mx * Scale - 3.f, (my + ToCenterOffset) * Scale, Size * Scale, aBuf, -1.0f);
-				TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+				// Auto-resize text to fit inside the tile
+				float ScaledWidth = TextRender()->TextWidth(Size * Scale, aBuf, -1);
+				float Factor = clamp(Scale / ScaledWidth, 0.0f, 1.0f);
+				float LocalSize = Size * Factor;
+				float ToCenterOffset = (1 - LocalSize) / 2.f;
+				TextRender()->Text((mx + 0.5f) * Scale - (ScaledWidth * Factor) / 2.0f, (my + ToCenterOffset) * Scale, LocalSize * Scale, aBuf);
 			}
 		}
-
+	}
+	TextRender()->TextColor(TextRender()->DefaultTextColor());
 	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 }
 
@@ -772,8 +777,11 @@ void CRenderTools::RenderSpeedupOverlay(CSpeedupTile *pSpeedup, int w, int h, fl
 
 	float Size = g_Config.m_ClTextEntitiesSize / 100.f;
 	float ToCenterOffset = (1 - Size) / 2.f;
+	char aBuf[16];
 
+	TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
 	for(int y = StartY; y < EndY; y++)
+	{
 		for(int x = StartX; x < EndX; x++)
 		{
 			int mx = x;
@@ -797,32 +805,27 @@ void CRenderTools::RenderSpeedupOverlay(CSpeedupTile *pSpeedup, int w, int h, fl
 				// draw arrow
 				Graphics()->TextureSet(g_pData->m_aImages[IMAGE_SPEEDUP_ARROW].m_Id);
 				Graphics()->QuadsBegin();
-				Graphics()->SetColor(255.0f, 255.0f, 255.0f, Alpha);
-
+				Graphics()->SetColor(1.0f, 1.0f, 1.0f, Alpha);
 				SelectSprite(SPRITE_SPEEDUP_ARROW);
 				Graphics()->QuadsSetRotation(pSpeedup[c].m_Angle * (pi / 180.0f));
 				DrawSprite(mx * Scale + 16, my * Scale + 16, 35.0f);
-
 				Graphics()->QuadsEnd();
 
+				// draw force and max speed
 				if(g_Config.m_ClTextEntities)
 				{
-					// draw force
-					char aBuf[16];
 					str_from_int(Force, aBuf);
-					TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
-					TextRender()->Text(mx * Scale, (my + 0.5f + ToCenterOffset / 2) * Scale, Size * Scale / 2.f, aBuf, -1.0f);
-					TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+					TextRender()->Text(mx * Scale, (my + 0.5f + ToCenterOffset / 2) * Scale, Size * Scale / 2.f, aBuf);
 					if(MaxSpeed)
 					{
 						str_from_int(MaxSpeed, aBuf);
-						TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
-						TextRender()->Text(mx * Scale, (my + ToCenterOffset / 2) * Scale, Size * Scale / 2.f, aBuf, -1.0f);
-						TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+						TextRender()->Text(mx * Scale, (my + ToCenterOffset / 2) * Scale, Size * Scale / 2.f, aBuf);
 					}
 				}
 			}
 		}
+	}
+	TextRender()->TextColor(TextRender()->DefaultTextColor());
 	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 }
 
@@ -844,8 +847,11 @@ void CRenderTools::RenderSwitchOverlay(CSwitchTile *pSwitch, int w, int h, float
 
 	float Size = g_Config.m_ClTextEntitiesSize / 100.f;
 	float ToCenterOffset = (1 - Size) / 2.f;
+	char aBuf[16];
 
+	TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
 	for(int y = StartY; y < EndY; y++)
+	{
 		for(int x = StartX; x < EndX; x++)
 		{
 			int mx = x;
@@ -865,24 +871,19 @@ void CRenderTools::RenderSwitchOverlay(CSwitchTile *pSwitch, int w, int h, float
 			unsigned char Index = pSwitch[c].m_Number;
 			if(Index && IsSwitchTileNumberUsed(pSwitch[c].m_Type))
 			{
-				char aBuf[16];
 				str_from_int(Index, aBuf);
-				TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
-				TextRender()->Text(mx * Scale, (my + ToCenterOffset / 2) * Scale, Size * Scale / 2.f, aBuf, -1.0f);
-				TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+				TextRender()->Text(mx * Scale, (my + ToCenterOffset / 2) * Scale, Size * Scale / 2.f, aBuf);
 			}
 
 			unsigned char Delay = pSwitch[c].m_Delay;
 			if(Delay && IsSwitchTileDelayUsed(pSwitch[c].m_Type))
 			{
-				char aBuf[16];
 				str_from_int(Delay, aBuf);
-				TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
-				TextRender()->Text(mx * Scale, (my + 0.5f + ToCenterOffset / 2) * Scale, Size * Scale / 2.f, aBuf, -1.0f);
-				TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+				TextRender()->Text(mx * Scale, (my + 0.5f + ToCenterOffset / 2) * Scale, Size * Scale / 2.f, aBuf);
 			}
 		}
-
+	}
+	TextRender()->TextColor(TextRender()->DefaultTextColor());
 	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 }
 
@@ -903,8 +904,11 @@ void CRenderTools::RenderTuneOverlay(CTuneTile *pTune, int w, int h, float Scale
 		return; // its useless to render text at this distance
 
 	float Size = g_Config.m_ClTextEntitiesSize / 100.f;
+	char aBuf[16];
 
+	TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
 	for(int y = StartY; y < EndY; y++)
+	{
 		for(int x = StartX; x < EndX; x++)
 		{
 			int mx = x;
@@ -924,14 +928,12 @@ void CRenderTools::RenderTuneOverlay(CTuneTile *pTune, int w, int h, float Scale
 			unsigned char Index = pTune[c].m_Number;
 			if(Index)
 			{
-				char aBuf[16];
 				str_from_int(Index, aBuf);
-				TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
-				TextRender()->Text(mx * Scale + 11.f, my * Scale + 6.f, Size * Scale / 1.5f - 5.f, aBuf, -1.0f); // numbers shouldn't be too big and in the center of the tile
-				TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
+				TextRender()->Text(mx * Scale + 11.f, my * Scale + 6.f, Size * Scale / 1.5f - 5.f, aBuf); // numbers shouldn't be too big and in the center of the tile
 			}
 		}
-
+	}
+	TextRender()->TextColor(TextRender()->DefaultTextColor());
 	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 }
 

@@ -179,8 +179,8 @@ void CUI::OnCursorMove(float X, float Y)
 {
 	if(!CheckMouseLock())
 	{
-		m_UpdatedMousePos.x = clamp(m_UpdatedMousePos.x + X, 0.0f, (float)Graphics()->WindowWidth());
-		m_UpdatedMousePos.y = clamp(m_UpdatedMousePos.y + Y, 0.0f, (float)Graphics()->WindowHeight());
+		m_UpdatedMousePos.x = clamp(m_UpdatedMousePos.x + X, 0.0f, Graphics()->WindowWidth() - 1.0f);
+		m_UpdatedMousePos.y = clamp(m_UpdatedMousePos.y + Y, 0.0f, Graphics()->WindowHeight() - 1.0f);
 	}
 
 	m_UpdatedMouseDelta += vec2(X, Y);
@@ -1825,10 +1825,10 @@ CUI::EPopupMenuFunctionResult CUI::PopupColorPicker(void *pContext, CUIRect View
 	// Editboxes Area
 	if(pColorPicker->m_ColorMode == SColorPickerPopupContext::MODE_HSVA)
 	{
-		const unsigned OldH = (unsigned)(PickerColorHSV.h * 255.0f);
-		const unsigned OldS = (unsigned)(PickerColorHSV.s * 255.0f);
-		const unsigned OldV = (unsigned)(PickerColorHSV.v * 255.0f);
-		const unsigned OldA = (unsigned)(PickerColorHSV.a * 255.0f);
+		const unsigned OldH = round_to_int(PickerColorHSV.h * 255.0f);
+		const unsigned OldS = round_to_int(PickerColorHSV.s * 255.0f);
+		const unsigned OldV = round_to_int(PickerColorHSV.v * 255.0f);
+		const unsigned OldA = round_to_int(PickerColorHSV.a * 255.0f);
 
 		const auto [StateH, H] = pUI->DoValueSelectorWithState(&pColorPicker->m_aValueSelectorIds[0], &HueRect, "H:", OldH, 0, 255);
 		const auto [StateS, S] = pUI->DoValueSelectorWithState(&pColorPicker->m_aValueSelectorIds[1], &SatRect, "S:", OldS, 0, 255);
@@ -1853,10 +1853,10 @@ CUI::EPopupMenuFunctionResult CUI::PopupColorPicker(void *pContext, CUIRect View
 	}
 	else if(pColorPicker->m_ColorMode == SColorPickerPopupContext::MODE_RGBA)
 	{
-		const unsigned OldR = (unsigned)(PickerColorRGB.r * 255.0f);
-		const unsigned OldG = (unsigned)(PickerColorRGB.g * 255.0f);
-		const unsigned OldB = (unsigned)(PickerColorRGB.b * 255.0f);
-		const unsigned OldA = (unsigned)(PickerColorRGB.a * 255.0f);
+		const unsigned OldR = round_to_int(PickerColorRGB.r * 255.0f);
+		const unsigned OldG = round_to_int(PickerColorRGB.g * 255.0f);
+		const unsigned OldB = round_to_int(PickerColorRGB.b * 255.0f);
+		const unsigned OldA = round_to_int(PickerColorRGB.a * 255.0f);
 
 		const auto [StateR, R] = pUI->DoValueSelectorWithState(&pColorPicker->m_aValueSelectorIds[0], &HueRect, "R:", OldR, 0, 255);
 		const auto [StateG, G] = pUI->DoValueSelectorWithState(&pColorPicker->m_aValueSelectorIds[1], &SatRect, "G:", OldG, 0, 255);
@@ -1881,10 +1881,10 @@ CUI::EPopupMenuFunctionResult CUI::PopupColorPicker(void *pContext, CUIRect View
 	}
 	else if(pColorPicker->m_ColorMode == SColorPickerPopupContext::MODE_HSLA)
 	{
-		const unsigned OldH = (unsigned)(PickerColorHSL.h * 255.0f);
-		const unsigned OldS = (unsigned)(PickerColorHSL.s * 255.0f);
-		const unsigned OldL = (unsigned)(PickerColorHSL.l * 255.0f);
-		const unsigned OldA = (unsigned)(PickerColorHSL.a * 255.0f);
+		const unsigned OldH = round_to_int(PickerColorHSL.h * 255.0f);
+		const unsigned OldS = round_to_int(PickerColorHSL.s * 255.0f);
+		const unsigned OldL = round_to_int(PickerColorHSL.l * 255.0f);
+		const unsigned OldA = round_to_int(PickerColorHSL.a * 255.0f);
 
 		const auto [StateH, H] = pUI->DoValueSelectorWithState(&pColorPicker->m_aValueSelectorIds[0], &HueRect, "H:", OldH, 0, 255);
 		const auto [StateS, S] = pUI->DoValueSelectorWithState(&pColorPicker->m_aValueSelectorIds[1], &SatRect, "S:", OldS, 0, 255);

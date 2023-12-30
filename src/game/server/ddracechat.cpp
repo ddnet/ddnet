@@ -982,11 +982,13 @@ void CGameContext::AttemptJoinTeam(int ClientID, int Team)
 			IConsole::OUTPUT_LEVEL_STANDARD,
 			"chatresp",
 			"You are running a vote please try again after the vote is done!");
+		return;
 	}
 	else if(g_Config.m_SvTeam == SV_TEAM_FORBIDDEN || g_Config.m_SvTeam == SV_TEAM_FORCED_SOLO)
 	{
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 			"Teams are disabled");
+		return;
 	}
 	else if(g_Config.m_SvTeam == SV_TEAM_MANDATORY && Team == 0 && pPlayer->GetCharacter() && pPlayer->GetCharacter()->m_LastStartWarning < Server()->Tick() - 3 * Server()->TickSpeed())
 	{

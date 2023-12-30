@@ -146,6 +146,7 @@ bool CEditorMap::Save(const char *pFileName)
 		Item.m_External = 0;
 		Item.m_SoundName = Writer.AddDataString(pSound->m_aName);
 		Item.m_SoundData = Writer.AddData(pSound->m_DataSize, pSound->m_pData);
+		// Value is not read in new versions, but we still need to write it for compatibility with old versions.
 		Item.m_SoundDataSize = pSound->m_DataSize;
 
 		Writer.AddItem(MAPITEMTYPE_SOUND, i, sizeof(Item), &Item);
@@ -575,9 +576,7 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 			}
 			else
 			{
-				pSound->m_DataSize = pItem->m_SoundDataSize;
-
-				// copy sample data
+				pSound->m_DataSize = DataFile.GetDataSize(pItem->m_SoundData);
 				void *pData = DataFile.GetData(pItem->m_SoundData);
 				pSound->m_pData = malloc(pSound->m_DataSize);
 				mem_copy(pSound->m_pData, pData, pSound->m_DataSize);

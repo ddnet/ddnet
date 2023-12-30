@@ -339,18 +339,16 @@ CUI::EPopupMenuFunctionResult CEditor::PopupMenuSettings(void *pContext, CUIRect
 		Selector.VSplitMid(&No, &Yes);
 
 		pEditor->UI()->DoLabel(&Label, "Align quads", 10.0f, TEXTALIGN_ML);
-		if(pEditor->m_AllowPlaceUnusedTiles != -1)
+
+		static int s_ButtonNo = 0;
+		static int s_ButtonYes = 0;
+		if(pEditor->DoButton_ButtonDec(&s_ButtonNo, "No", !g_Config.m_EdAlignQuads, &No, 0, "Do not perform quad alignment to other quads/points when moving quads"))
 		{
-			static int s_ButtonNo = 0;
-			static int s_ButtonYes = 0;
-			if(pEditor->DoButton_ButtonDec(&s_ButtonNo, "No", !g_Config.m_EdAlignQuads, &No, 0, "Do not perform quad alignment to other quads/points when moving quads"))
-			{
-				g_Config.m_EdAlignQuads = false;
-			}
-			if(pEditor->DoButton_ButtonInc(&s_ButtonYes, "Yes", g_Config.m_EdAlignQuads, &Yes, 0, "Allow quad alignment to other quads/points when moving quads"))
-			{
-				g_Config.m_EdAlignQuads = true;
-			}
+			g_Config.m_EdAlignQuads = false;
+		}
+		if(pEditor->DoButton_ButtonInc(&s_ButtonYes, "Yes", g_Config.m_EdAlignQuads, &Yes, 0, "Allow quad alignment to other quads/points when moving quads"))
+		{
+			g_Config.m_EdAlignQuads = true;
 		}
 	}
 
@@ -365,18 +363,16 @@ CUI::EPopupMenuFunctionResult CEditor::PopupMenuSettings(void *pContext, CUIRect
 		Selector.VSplitMid(&No, &Yes);
 
 		pEditor->UI()->DoLabel(&Label, "Show quads bounds", 10.0f, TEXTALIGN_ML);
-		if(pEditor->m_AllowPlaceUnusedTiles != -1)
+
+		static int s_ButtonNo = 0;
+		static int s_ButtonYes = 0;
+		if(pEditor->DoButton_ButtonDec(&s_ButtonNo, "No", !g_Config.m_EdShowQuadsRect, &No, 0, "Do not show quad bounds when moving quads"))
 		{
-			static int s_ButtonNo = 0;
-			static int s_ButtonYes = 0;
-			if(pEditor->DoButton_ButtonDec(&s_ButtonNo, "No", !g_Config.m_EdShowQuadsRect, &No, 0, "Do not show quad bounds when moving quads"))
-			{
-				g_Config.m_EdShowQuadsRect = false;
-			}
-			if(pEditor->DoButton_ButtonInc(&s_ButtonYes, "Yes", g_Config.m_EdShowQuadsRect, &Yes, 0, "Show quad bounds when moving quads"))
-			{
-				g_Config.m_EdShowQuadsRect = true;
-			}
+			g_Config.m_EdShowQuadsRect = false;
+		}
+		if(pEditor->DoButton_ButtonInc(&s_ButtonYes, "Yes", g_Config.m_EdShowQuadsRect, &Yes, 0, "Show quad bounds when moving quads"))
+		{
+			g_Config.m_EdShowQuadsRect = true;
 		}
 	}
 
@@ -647,11 +643,11 @@ CUI::EPopupMenuFunctionResult CEditor::PopupGroup(void *pContext, CUIRect View, 
 		}
 		else if(Prop == EGroupProp::PROP_POS_X)
 		{
-			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_OffsetX = NewVal;
+			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_OffsetX = -NewVal;
 		}
 		else if(Prop == EGroupProp::PROP_POS_Y)
 		{
-			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_OffsetY = NewVal;
+			pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_OffsetY = -NewVal;
 		}
 		else if(Prop == EGroupProp::PROP_USE_CLIPPING)
 		{
@@ -765,12 +761,6 @@ CUI::EPopupMenuFunctionResult CEditor::PopupLayer(void *pContext, CUIRect View, 
 	if(EntitiesLayer)
 	{
 		aProps[0].m_Type = PROPTYPE_NULL;
-		aProps[2].m_Type = PROPTYPE_NULL;
-	}
-
-	// don't use Detail from the selection if this is a sound layer
-	if(pCurrentLayer->m_Type == LAYERTYPE_SOUNDS)
-	{
 		aProps[2].m_Type = PROPTYPE_NULL;
 	}
 
@@ -2425,68 +2415,82 @@ CUI::EPopupMenuFunctionResult CEditor::PopupTele(void *pContext, CUIRect View, b
 {
 	CEditor *pEditor = static_cast<CEditor *>(pContext);
 
-	static int s_PreviousNumber = -1;
+	static int s_PreviousTeleNumber;
+	static int s_PreviousCheckpointNumber;
 
 	CUIRect NumberPicker;
 	CUIRect FindEmptySlot;
+	CUIRect FindFreeTeleSlot, FindFreeCheckpointSlot;
 
 	View.VSplitRight(15.f, &NumberPicker, &FindEmptySlot);
 	NumberPicker.VSplitRight(2.f, &NumberPicker, nullptr);
-	FindEmptySlot.HSplitTop(13.0f, &FindEmptySlot, nullptr);
-	FindEmptySlot.HMargin(1.0f, &FindEmptySlot);
 
-	// find empty number button
+	FindEmptySlot.HSplitTop(13.0f, &FindFreeTeleSlot, &FindEmptySlot);
+	FindEmptySlot.HSplitTop(13.0f, &FindFreeCheckpointSlot, &FindEmptySlot);
+
+	FindFreeTeleSlot.HMargin(1.0f, &FindFreeTeleSlot);
+	FindFreeCheckpointSlot.HMargin(1.0f, &FindFreeCheckpointSlot);
+
+	// find next free numbers buttons
 	{
-		static int s_EmptySlotPid = 0;
-		if(pEditor->DoButton_Editor(&s_EmptySlotPid, "F", 0, &FindEmptySlot, 0, "[ctrl+f] Find empty slot") || (Active && pEditor->Input()->ModifierIsPressed() && pEditor->Input()->KeyPress(KEY_F)))
-		{
-			int number = -1;
-			for(int i = 1; i <= 255; i++)
-			{
-				if(!pEditor->m_Map.m_pTeleLayer->ContainsElementWithId(i))
-				{
-					number = i;
-					break;
-				}
-			}
+		// Pressing ctrl+f will find next free numbers for both tele and checkpoints
 
-			if(number != -1)
-			{
-				pEditor->m_TeleNumber = number;
-			}
+		static int s_NextFreeTelePid = 0;
+		if(pEditor->DoButton_Editor(&s_NextFreeTelePid, "F", 0, &FindFreeTeleSlot, 0, "[ctrl+f] Find next free tele number") || (Active && pEditor->Input()->ModifierIsPressed() && pEditor->Input()->KeyPress(KEY_F)))
+		{
+			int TeleNumber = pEditor->FindNextFreeTeleNumber();
+
+			if(TeleNumber != -1)
+				pEditor->m_TeleNumber = TeleNumber;
+		}
+
+		static int s_NextFreeCheckpointPid = 0;
+		if(pEditor->DoButton_Editor(&s_NextFreeCheckpointPid, "F", 0, &FindFreeCheckpointSlot, 0, "[ctrl+f] Find next free checkpoint number") || (Active && pEditor->Input()->ModifierIsPressed() && pEditor->Input()->KeyPress(KEY_F)))
+		{
+			int CPNumber = pEditor->FindNextFreeTeleNumber(true);
+
+			if(CPNumber != -1)
+				pEditor->m_TeleCheckpointNumber = CPNumber;
 		}
 	}
 
 	// number picker
 	{
-		static ColorRGBA s_Color = ColorRGBA(0.5f, 1, 0.5f, 0.5f);
+		static std::vector<ColorRGBA> s_vColors = {
+			ColorRGBA(0.5f, 1, 0.5f, 0.5f),
+			ColorRGBA(0.5f, 1, 0.5f, 0.5f),
+		};
 
 		enum
 		{
 			PROP_TELE = 0,
+			PROP_TELE_CP = 1,
 			NUM_PROPS,
 		};
 		CProperty aProps[] = {
 			{"Number", pEditor->m_TeleNumber, PROPTYPE_INT_STEP, 1, 255},
+			{"Checkpoint", pEditor->m_TeleCheckpointNumber, PROPTYPE_INT_STEP, 1, 255},
 			{nullptr},
 		};
 
 		static int s_aIds[NUM_PROPS] = {0};
 
 		static int NewVal = 0;
-		int Prop = pEditor->DoProperties(&NumberPicker, aProps, s_aIds, &NewVal, s_Color);
+		int Prop = pEditor->DoProperties(&NumberPicker, aProps, s_aIds, &NewVal, s_vColors);
 		if(Prop == PROP_TELE)
-		{
 			pEditor->m_TeleNumber = (NewVal - 1 + 255) % 255 + 1;
-		}
+		else if(Prop == PROP_TELE_CP)
+			pEditor->m_TeleCheckpointNumber = (NewVal - 1 + 255) % 255 + 1;
 
-		if(s_PreviousNumber == 1 || s_PreviousNumber != pEditor->m_TeleNumber)
-		{
-			s_Color = pEditor->m_Map.m_pTeleLayer->ContainsElementWithId(pEditor->m_TeleNumber) ? ColorRGBA(1, 0.5f, 0.5f, 0.5f) : ColorRGBA(0.5f, 1, 0.5f, 0.5f);
-		}
+		if(s_PreviousTeleNumber == 1 || s_PreviousTeleNumber != pEditor->m_TeleNumber)
+			s_vColors[PROP_TELE] = pEditor->m_Map.m_pTeleLayer->ContainsElementWithId(pEditor->m_TeleNumber, false) ? ColorRGBA(1, 0.5f, 0.5f, 0.5f) : ColorRGBA(0.5f, 1, 0.5f, 0.5f);
+
+		if(s_PreviousCheckpointNumber == 1 || s_PreviousCheckpointNumber != pEditor->m_TeleCheckpointNumber)
+			s_vColors[PROP_TELE_CP] = pEditor->m_Map.m_pTeleLayer->ContainsElementWithId(pEditor->m_TeleCheckpointNumber, true) ? ColorRGBA(1, 0.5f, 0.5f, 0.5f) : ColorRGBA(0.5f, 1, 0.5f, 0.5f);
 	}
 
-	s_PreviousNumber = pEditor->m_TeleNumber;
+	s_PreviousTeleNumber = pEditor->m_TeleNumber;
+	s_PreviousCheckpointNumber = pEditor->m_TeleCheckpointNumber;
 
 	return CUI::POPUP_KEEP_OPEN;
 }
@@ -2546,27 +2550,19 @@ CUI::EPopupMenuFunctionResult CEditor::PopupSwitch(void *pContext, CUIRect View,
 		static int s_EmptySlotPid = 0;
 		if(pEditor->DoButton_Editor(&s_EmptySlotPid, "F", 0, &FindEmptySlot, 0, "[ctrl+f] Find empty slot") || (Active && pEditor->Input()->ModifierIsPressed() && pEditor->Input()->KeyPress(KEY_F)))
 		{
-			int Number = -1;
-			for(int i = 1; i <= 255; i++)
-			{
-				if(!pEditor->m_Map.m_pSwitchLayer->ContainsElementWithId(i))
-				{
-					Number = i;
-					break;
-				}
-			}
+			int Number = pEditor->FindNextFreeSwitchNumber();
 
 			if(Number != -1)
-			{
 				pEditor->m_SwitchNum = Number;
-			}
 		}
 	}
 
 	// number picker
 	static int s_PreviousNumber = -1;
 	{
-		static ColorRGBA s_Color = ColorRGBA(1, 1, 1, 0.5f);
+		static std::vector<ColorRGBA> s_vColors = {
+			ColorRGBA(1, 1, 1, 0.5f),
+		};
 
 		enum
 		{
@@ -2583,7 +2579,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupSwitch(void *pContext, CUIRect View,
 
 		static int s_aIds[NUM_PROPS] = {0};
 		int NewVal = 0;
-		int Prop = pEditor->DoProperties(&NumberPicker, aProps, s_aIds, &NewVal, s_Color);
+		int Prop = pEditor->DoProperties(&NumberPicker, aProps, s_aIds, &NewVal, s_vColors);
 
 		if(Prop == PROP_SWITCH_NUMBER)
 		{
@@ -2595,9 +2591,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupSwitch(void *pContext, CUIRect View,
 		}
 
 		if(s_PreviousNumber == 1 || s_PreviousNumber != pEditor->m_SwitchNum)
-		{
-			s_Color = pEditor->m_Map.m_pSwitchLayer->ContainsElementWithId(pEditor->m_SwitchNum) ? ColorRGBA(1, 0.5f, 0.5f, 0.5f) : ColorRGBA(0.5f, 1, 0.5f, 0.5f);
-		}
+			s_vColors[PROP_SWITCH_NUMBER] = pEditor->m_Map.m_pSwitchLayer->ContainsElementWithId(pEditor->m_SwitchNum) ? ColorRGBA(1, 0.5f, 0.5f, 0.5f) : ColorRGBA(0.5f, 1, 0.5f, 0.5f);
 	}
 
 	s_PreviousNumber = pEditor->m_SwitchNum;
@@ -2652,7 +2646,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupGoto(void *pContext, CUIRect View, b
 
 	static int s_aIds[NUM_PROPS] = {0};
 	int NewVal = 0;
-	int Prop = pEditor->DoProperties(&View, aProps, s_aIds, &NewVal, ColorRGBA(1, 1, 1, 0.5f));
+	int Prop = pEditor->DoProperties(&View, aProps, s_aIds, &NewVal);
 
 	if(Prop == PROP_COORD_X)
 	{
@@ -2727,6 +2721,63 @@ CUI::EPopupMenuFunctionResult CEditor::PopupProofMode(void *pContext, CUIRect Vi
 	{
 		pEditor->MapView()->ProofMode()->SetModeMenu();
 		return CUI::POPUP_CLOSE_CURRENT;
+	}
+
+	return CUI::POPUP_KEEP_OPEN;
+}
+
+CUI::EPopupMenuFunctionResult CEditor::PopupAnimateSettings(void *pContext, CUIRect View, bool Active)
+{
+	CEditor *pEditor = static_cast<CEditor *>(pContext);
+
+	constexpr float MIN_ANIM_SPEED = 0.001f;
+	constexpr float MAX_ANIM_SPEED = 1000000.0f;
+
+	CUIRect Row, Label, ButtonDecrease, EditBox, ButtonIncrease, ButtonReset;
+	View.HSplitTop(13.0f, &Row, &View);
+	Row.VSplitMid(&Label, &Row);
+	Row.HMargin(1.0f, &Row);
+	Row.VSplitLeft(10.0f, &ButtonDecrease, &Row);
+	Row.VSplitRight(10.0f, &EditBox, &ButtonIncrease);
+	View.HSplitBottom(12.0f, &View, &ButtonReset);
+	pEditor->UI()->DoLabel(&Label, "Speed", 10.0f, TEXTALIGN_ML);
+
+	static char s_DecreaseButton;
+	if(pEditor->DoButton_Ex(&s_DecreaseButton, "-", 0, &ButtonDecrease, 0, "Decrease animation speed", IGraphics::CORNER_L))
+	{
+		pEditor->m_AnimateSpeed -= pEditor->m_AnimateSpeed <= 1.0f ? 0.1f : 0.5f;
+		pEditor->m_AnimateSpeed = maximum(pEditor->m_AnimateSpeed, MIN_ANIM_SPEED);
+		pEditor->m_AnimateUpdatePopup = true;
+	}
+
+	static char s_IncreaseButton;
+	if(pEditor->DoButton_Ex(&s_IncreaseButton, "+", 0, &ButtonIncrease, 0, "Increase animation speed", IGraphics::CORNER_R))
+	{
+		if(pEditor->m_AnimateSpeed < 0.1f)
+			pEditor->m_AnimateSpeed = 0.1f;
+		else
+			pEditor->m_AnimateSpeed += pEditor->m_AnimateSpeed < 1.0f ? 0.1f : 0.5f;
+		pEditor->m_AnimateSpeed = minimum(pEditor->m_AnimateSpeed, MAX_ANIM_SPEED);
+		pEditor->m_AnimateUpdatePopup = true;
+	}
+
+	static char s_DefaultButton;
+	if(pEditor->DoButton_Ex(&s_DefaultButton, "Default", 0, &ButtonReset, 0, "Normal animation speed", IGraphics::CORNER_ALL))
+	{
+		pEditor->m_AnimateSpeed = 1.0f;
+		pEditor->m_AnimateUpdatePopup = true;
+	}
+
+	static CLineInputNumber s_SpeedInput;
+	if(pEditor->m_AnimateUpdatePopup)
+	{
+		s_SpeedInput.SetFloat(pEditor->m_AnimateSpeed);
+		pEditor->m_AnimateUpdatePopup = false;
+	}
+
+	if(pEditor->DoEditBox(&s_SpeedInput, &EditBox, 10.0f, IGraphics::CORNER_NONE, "The animation speed"))
+	{
+		pEditor->m_AnimateSpeed = clamp(s_SpeedInput.GetFloat(), MIN_ANIM_SPEED, MAX_ANIM_SPEED);
 	}
 
 	return CUI::POPUP_KEEP_OPEN;

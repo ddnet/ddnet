@@ -188,6 +188,8 @@ public:
 protected:
 	void RecordStateChange(int x, int y, CTile Previous, CTile Tile);
 
+	void ShowPreventUnusedTilesWarning();
+
 	friend class CAutoMapper;
 };
 

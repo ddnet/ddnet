@@ -2211,6 +2211,8 @@ void CGameClient::CClientData::Reset()
 	m_aName[0] = 0;
 	m_aClan[0] = 0;
 	m_Country = -1;
+	m_aSkinName[0] = '\0';
+	m_SkinColor = 0;
 	m_Team = 0;
 	m_Angle = 0;
 	m_Emoticon = 0;

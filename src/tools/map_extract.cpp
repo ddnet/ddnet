@@ -102,12 +102,13 @@ bool Process(IStorage *pStorage, const char *pMapName, const char *pPathSave)
 			continue;
 		}
 
+		const int SoundDataSize = Reader.GetDataSize(pItem->m_SoundData);
 		char aBuf[IO_MAX_PATH_LENGTH];
 		str_format(aBuf, sizeof(aBuf), "%s/%s.opus", pPathSave, pName);
-		dbg_msg("map_extract", "writing sound: %s (%d B)", aBuf, pItem->m_SoundDataSize);
+		dbg_msg("map_extract", "writing sound: %s (%d B)", aBuf, SoundDataSize);
 
 		IOHANDLE Opus = io_open(aBuf, IOFLAG_WRITE);
-		io_write(Opus, (unsigned char *)Reader.GetData(pItem->m_SoundData), pItem->m_SoundDataSize);
+		io_write(Opus, Reader.GetData(pItem->m_SoundData), SoundDataSize);
 		io_close(Opus);
 	}
 

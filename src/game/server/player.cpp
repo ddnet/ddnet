@@ -672,7 +672,10 @@ void CPlayer::SetTeam(int Team, bool DoChatMsg)
 		}
 	}
 
-	// m_DeadSpecMode = false; // gctf
+	if(!GameServer()->m_pController->IsTeamPlay())
+	{
+		Server()->ExpireServerInfo();
+	}
 }
 
 bool CPlayer::SetTimerType(int TimerType)

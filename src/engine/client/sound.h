@@ -13,6 +13,9 @@
 
 struct CSample
 {
+	int m_Index;
+	int m_NextFreeSampleIndex;
+
 	short *m_pData;
 	int m_NumFrames;
 	int m_Rate;
@@ -20,6 +23,11 @@ struct CSample
 	int m_LoopStart;
 	int m_LoopEnd;
 	int m_PausedAt;
+
+	float TotalTime() const
+	{
+		return m_NumFrames / (float)m_Rate;
+	}
 };
 
 struct CChannel
@@ -61,6 +69,8 @@ class CSound : public IEngineSound
 	CLock m_SoundLock;
 
 	CSample m_aSamples[NUM_SAMPLES] = {{0}};
+	int m_FirstFreeSampleIndex = 0;
+
 	CVoice m_aVoices[NUM_VOICES] = {{0}};
 	CChannel m_aChannels[NUM_CHANNELS] = {{255, 0}};
 	int m_NextVoice = 0;
@@ -76,7 +86,7 @@ class CSound : public IEngineSound
 
 	int *m_pMixBuffer = nullptr;
 
-	int AllocID();
+	CSample *AllocSample();
 	void RateConvert(CSample &Sample) const;
 
 	bool DecodeOpus(CSample &Sample, const void *pData, unsigned DataSize) const;
@@ -91,10 +101,10 @@ public:
 
 	bool IsSoundEnabled() override { return m_SoundEnabled; }
 
-	int LoadOpus(const char *pFilename, int StorageType = IStorage::TYPE_ALL) override;
-	int LoadWV(const char *pFilename, int StorageType = IStorage::TYPE_ALL) override;
-	int LoadOpusFromMem(const void *pData, unsigned DataSize, bool FromEditor) override;
-	int LoadWVFromMem(const void *pData, unsigned DataSize, bool FromEditor) override;
+	int LoadOpus(const char *pFilename, int StorageType = IStorage::TYPE_ALL) override REQUIRES(!m_SoundLock);
+	int LoadWV(const char *pFilename, int StorageType = IStorage::TYPE_ALL) override REQUIRES(!m_SoundLock);
+	int LoadOpusFromMem(const void *pData, unsigned DataSize, bool FromEditor) override REQUIRES(!m_SoundLock);
+	int LoadWVFromMem(const void *pData, unsigned DataSize, bool FromEditor) override REQUIRES(!m_SoundLock);
 	void UnloadSample(int SampleID) override REQUIRES(!m_SoundLock);
 
 	float GetSampleTotalTime(int SampleID) override; // in s

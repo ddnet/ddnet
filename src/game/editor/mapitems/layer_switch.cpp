@@ -144,6 +144,9 @@ void CLayerSwitch::BrushDraw(std::shared_ptr<CLayer> pBrush, float wx, float wy)
 				m_pSwitchTile[Index].m_Flags = 0;
 				m_pSwitchTile[Index].m_Delay = 0;
 				m_pTiles[Index].m_Index = 0;
+
+				if(pSwitchLayer->m_pTiles[y * pSwitchLayer->m_Width + x].m_Index != TILE_AIR)
+					ShowPreventUnusedTilesWarning();
 			}
 
 			SSwitchTileStateChange::SData Current{
@@ -265,6 +268,9 @@ void CLayerSwitch::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUI
 				m_pSwitchTile[TgtIndex].m_Type = 0;
 				m_pSwitchTile[TgtIndex].m_Number = 0;
 				m_pSwitchTile[TgtIndex].m_Delay = 0;
+
+				if(!Empty)
+					ShowPreventUnusedTilesWarning();
 			}
 			else
 			{

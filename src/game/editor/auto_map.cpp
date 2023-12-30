@@ -5,10 +5,10 @@
 #include <engine/shared/linereader.h>
 #include <engine/storage.h>
 
+#include <game/editor/mapitems/layer_tiles.h>
 #include <game/mapitems.h>
 
 #include "auto_map.h"
-#include "editor.h" // TODO: only needs CLayerTiles
 #include "editor_actions.h"
 
 // Based on triple32inc from https://github.com/skeeto/hash-prospector/tree/79a6074062a84907df6e45b756134b74e2956760

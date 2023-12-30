@@ -1196,6 +1196,11 @@ int CMenus::Render()
 			pTitle = Localize("Password incorrect");
 			pButtonText = Localize("Try again");
 		}
+		else if(m_Popup == POPUP_RESTART)
+		{
+			pTitle = Localize("Restart");
+			pExtraText = Localize("Are you sure that you want to restart?");
+		}
 		else if(m_Popup == POPUP_QUIT)
 		{
 			pTitle = Localize("Quit");
@@ -1319,7 +1324,7 @@ int CMenus::Render()
 				}
 			}
 		}
-		else if(m_Popup == POPUP_QUIT)
+		else if(m_Popup == POPUP_QUIT || m_Popup == POPUP_RESTART)
 		{
 			CUIRect Yes, No;
 			Box.HSplitBottom(20.f, &Box, &Part);
@@ -1329,7 +1334,7 @@ int CMenus::Render()
 			Box.VMargin(20.f, &Box);
 			if(m_pClient->Editor()->HasUnsavedData())
 			{
-				str_format(aBuf, sizeof(aBuf), "%s\n%s", Localize("There's an unsaved map in the editor, you might want to save it before you quit the game."), Localize("Quit anyway?"));
+				str_format(aBuf, sizeof(aBuf), "%s\n\n%s", Localize("There's an unsaved map in the editor, you might want to save it."), Localize("Continue anyway?"));
 				Props.m_MaxWidth = Part.w - 20.0f;
 				UI()->DoLabel(&Box, aBuf, 20.f, TEXTALIGN_ML, Props);
 			}
@@ -1347,8 +1352,16 @@ int CMenus::Render()
 			static CButtonContainer s_ButtonTryAgain;
 			if(DoButton_Menu(&s_ButtonTryAgain, Localize("Yes"), 0, &Yes) || UI()->ConsumeHotkey(CUI::HOTKEY_ENTER))
 			{
-				m_Popup = POPUP_NONE;
-				Client()->Quit();
+				if(m_Popup == POPUP_RESTART)
+				{
+					m_Popup = POPUP_NONE;
+					Client()->Restart();
+				}
+				else
+				{
+					m_Popup = POPUP_NONE;
+					Client()->Quit();
+				}
 			}
 		}
 		else if(m_Popup == POPUP_PASSWORD)

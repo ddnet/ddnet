@@ -1268,7 +1268,9 @@ public:
 		pCursor->m_GlyphCount = 0;
 		pCursor->m_CharCount = 0;
 		pCursor->m_MaxLines = 0;
+
 		pCursor->m_LineSpacing = 0;
+		pCursor->m_AlignedLineSpacing = 0;
 
 		pCursor->m_StartX = x;
 		pCursor->m_StartY = y;
@@ -1481,7 +1483,7 @@ public:
 		const float CursorY = round_to_int(pCursor->m_Y * FakeToScreen.y) / FakeToScreen.y;
 		const int ActualSize = round_truncate(pCursor->m_FontSize * FakeToScreen.y);
 		pCursor->m_AlignedFontSize = ActualSize / FakeToScreen.y;
-		const float LineSpacing = pCursor->m_LineSpacing;
+		pCursor->m_AlignedLineSpacing = round_truncate(pCursor->m_LineSpacing * FakeToScreen.y) / FakeToScreen.y;
 
 		// string length
 		if(Length < 0)
@@ -1530,6 +1532,7 @@ public:
 		const float CursorOuterInnerDiff = (CursorOuterWidth - CursorInnerWidth) / 2;
 
 		std::vector<IGraphics::CQuadItem> vSelectionQuads;
+		int SelectionQuadLine = -1;
 		bool SelectionStarted = false;
 		bool SelectionUsedPress = false;
 		bool SelectionUsedRelease = false;
@@ -1539,38 +1542,34 @@ public:
 		const auto &&CheckInsideChar = [&](bool CheckOuter, vec2 CursorPos, float LastCharX, float LastCharWidth, float CharX, float CharWidth, float CharY) -> bool {
 			return (LastCharX - LastCharWidth / 2 <= CursorPos.x &&
 				       CharX + CharWidth / 2 > CursorPos.x &&
-				       CharY - pCursor->m_AlignedFontSize - LineSpacing <= CursorPos.y &&
-				       CharY + LineSpacing > CursorPos.y) ||
+				       CursorPos.y >= CharY - pCursor->m_AlignedFontSize &&
+				       CursorPos.y < CharY + pCursor->m_AlignedLineSpacing) ||
 			       (CheckOuter &&
-				       CharY - pCursor->m_AlignedFontSize + LineSpacing > CursorPos.y);
+				       CursorPos.y <= CharY - pCursor->m_AlignedFontSize);
 		};
 		const auto &&CheckSelectionStart = [&](bool CheckOuter, vec2 CursorPos, int &SelectionChar, bool &SelectionUsedCase, float LastCharX, float LastCharWidth, float CharX, float CharWidth, float CharY) {
-			if(!SelectionStarted && !SelectionUsedCase)
+			if(!SelectionStarted && !SelectionUsedCase &&
+				CheckInsideChar(CheckOuter, CursorPos, LastCharX, LastCharWidth, CharX, CharWidth, CharY))
 			{
-				if(CheckInsideChar(CheckOuter, CursorPos, LastCharX, LastCharWidth, CharX, CharWidth, CharY))
-				{
-					SelectionChar = pCursor->m_GlyphCount;
-					SelectionStarted = !SelectionStarted;
-					SelectionUsedCase = true;
-				}
+				SelectionChar = pCursor->m_GlyphCount;
+				SelectionStarted = !SelectionStarted;
+				SelectionUsedCase = true;
 			}
 		};
 		const auto &&CheckOutsideChar = [&](bool CheckOuter, vec2 CursorPos, float CharX, float CharWidth, float CharY) -> bool {
 			return (CharX + CharWidth / 2 > CursorPos.x &&
-				       CharY - pCursor->m_AlignedFontSize - LineSpacing <= CursorPos.y &&
-				       CharY + LineSpacing > CursorPos.y) ||
+				       CursorPos.y >= CharY - pCursor->m_AlignedFontSize &&
+				       CursorPos.y < CharY + pCursor->m_AlignedLineSpacing) ||
 			       (CheckOuter &&
-				       CharY - LineSpacing <= CursorPos.y);
+				       CursorPos.y >= CharY + pCursor->m_AlignedLineSpacing);
 		};
 		const auto &&CheckSelectionEnd = [&](bool CheckOuter, vec2 CursorPos, int &SelectionChar, bool &SelectionUsedCase, float CharX, float CharWidth, float CharY) {
-			if(SelectionStarted && !SelectionUsedCase)
+			if(SelectionStarted && !SelectionUsedCase &&
+				CheckOutsideChar(CheckOuter, CursorPos, CharX, CharWidth, CharY))
 			{
-				if(CheckOutsideChar(CheckOuter, CursorPos, CharX, CharWidth, CharY))
-				{
-					SelectionChar = pCursor->m_GlyphCount;
-					SelectionStarted = !SelectionStarted;
-					SelectionUsedCase = true;
-				}
+				SelectionChar = pCursor->m_GlyphCount;
+				SelectionStarted = !SelectionStarted;
+				SelectionUsedCase = true;
 			}
 		};
 
@@ -1585,7 +1584,7 @@ public:
 				return false;
 
 			DrawX = pCursor->m_StartX;
-			DrawY += pCursor->m_AlignedFontSize + pCursor->m_LineSpacing;
+			DrawY += pCursor->m_AlignedFontSize + pCursor->m_AlignedLineSpacing;
 			if((RenderFlags & TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT) == 0)
 			{
 				DrawX = round_to_int(DrawX * FakeToScreen.x) / FakeToScreen.x; // realign
@@ -1868,7 +1867,18 @@ public:
 
 					if(SelectionStarted && IsRendered)
 					{
-						vSelectionQuads.emplace_back(SelX, DrawY + (1.0f - pCursor->m_SelectionHeightFactor) * pCursor->m_AlignedFontSize, SelWidth, pCursor->m_SelectionHeightFactor * pCursor->m_AlignedFontSize);
+						if(!vSelectionQuads.empty() && SelectionQuadLine == pCursor->m_LineCount)
+						{
+							vSelectionQuads.back().m_Width += SelWidth;
+						}
+						else
+						{
+							const float SelectionHeight = pCursor->m_AlignedFontSize + pCursor->m_AlignedLineSpacing;
+							const float SelectionY = DrawY + (1.0f - pCursor->m_SelectionHeightFactor) * SelectionHeight;
+							const float ScaledSelectionHeight = pCursor->m_SelectionHeightFactor * SelectionHeight;
+							vSelectionQuads.emplace_back(SelX, SelectionY, SelWidth, ScaledSelectionHeight);
+							SelectionQuadLine = pCursor->m_LineCount;
+						}
 					}
 
 					LastSelX = SelX;
@@ -1957,9 +1967,9 @@ public:
 			if(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex == -1)
 				TextContainer.m_StringInfo.m_SelectionQuadContainerIndex = Graphics()->CreateQuadContainer(false);
 			if(HasCursor)
-				Graphics()->QuadContainerAddQuads(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex, aCursorQuads, 2);
+				Graphics()->QuadContainerAddQuads(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex, aCursorQuads, std::size(aCursorQuads));
 			if(HasSelection)
-				Graphics()->QuadContainerAddQuads(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex, vSelectionQuads.data(), (int)vSelectionQuads.size());
+				Graphics()->QuadContainerAddQuads(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex, vSelectionQuads.data(), vSelectionQuads.size());
 			Graphics()->QuadContainerUpload(TextContainer.m_StringInfo.m_SelectionQuadContainerIndex);
 
 			TextContainer.m_HasCursor = HasCursor;

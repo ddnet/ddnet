@@ -308,12 +308,18 @@ int CLayerTiles::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
 				for(int x = 0; x < r.w; x++)
 				{
 					pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x] = static_cast<CLayerTele *>(this)->m_pTeleTile[(r.y + y) * m_Width + (r.x + x)];
-					if(IsValidTeleTile(pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x].m_Type) && IsTeleTileNumberUsed(pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x].m_Type))
+					if(IsValidTeleTile(pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x].m_Type))
 					{
-						m_pEditor->m_TeleNumber = pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x].m_Number;
+						if(IsTeleTileNumberUsed(pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x].m_Type, false))
+							m_pEditor->m_TeleNumber = pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x].m_Number;
+						else if(IsTeleTileNumberUsed(pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x].m_Type, true))
+							m_pEditor->m_TeleCheckpointNumber = pGrabbed->m_pTeleTile[y * pGrabbed->m_Width + x].m_Number;
 					}
 				}
+
 		pGrabbed->m_TeleNum = m_pEditor->m_TeleNumber;
+		pGrabbed->m_TeleCheckpointNum = m_pEditor->m_TeleCheckpointNumber;
+
 		str_copy(pGrabbed->m_aFileName, m_pEditor->m_aFileName);
 	}
 	else if(this->m_Speedup)
@@ -1258,4 +1264,14 @@ void CLayerTiles::ModifyImageIndex(FIndexModifyFunction Func)
 void CLayerTiles::ModifyEnvelopeIndex(FIndexModifyFunction Func)
 {
 	Func(&m_ColorEnv);
+}
+
+void CLayerTiles::ShowPreventUnusedTilesWarning()
+{
+	if(!m_pEditor->m_PreventUnusedTilesWasWarned)
+	{
+		m_pEditor->m_PopupEventType = CEditor::POPEVENT_PREVENTUNUSEDTILES;
+		m_pEditor->m_PopupEventActivated = true;
+		m_pEditor->m_PreventUnusedTilesWasWarned = true;
+	}
 }
