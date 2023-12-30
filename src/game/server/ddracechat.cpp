@@ -2,6 +2,7 @@
 #include "gamecontext.h"
 #include <engine/shared/config.h>
 #include <engine/shared/protocol.h>
+#include <game/mapitems.h>
 #include <game/server/gamemodes/DDRace.h>
 #include <game/server/teams.h>
 #include <game/version.h>
@@ -1541,24 +1542,34 @@ void CGameContext::ConTele(IConsole::IResult *pResult, void *pUserData)
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	if(!CheckClientID(pResult->m_ClientID))
 		return;
-	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
-	if(!pPlayer)
+	CPlayer *pCallingPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if(!pCallingPlayer)
 		return;
-	CCharacter *pChr = pPlayer->GetCharacter();
-	if(!pChr)
+	CCharacter *pCallingCharacter = pCallingPlayer->GetCharacter();
+	if(!pCallingCharacter)
 		return;
 
 	CGameTeams &Teams = pSelf->m_pController->Teams();
 	int Team = pSelf->GetDDRaceTeam(pResult->m_ClientID);
 	if(!Teams.IsPractice(Team))
 	{
-		pSelf->SendChatTarget(pPlayer->GetCID(), "You're not in a team with /practice turned on. Note that you can't earn a rank with practice enabled.");
+		pSelf->SendChatTarget(pCallingPlayer->GetCID(), "You're not in a team with /practice turned on. Note that you can't earn a rank with practice enabled.");
 		return;
 	}
 
-	vec2 Pos = pPlayer->m_ViewPos;
-	if(pResult->NumArguments() > 0)
+	vec2 Pos = {};
+
+	switch(pResult->NumArguments())
 	{
+	case 0:
+	{
+		// Set calling tee's position to the origin of its spectating viewport
+		Pos = pCallingPlayer->m_ViewPos;
+		break;
+	}
+	case 1:
+	{
+		// Search for player with this name
 		int ClientID;
 		for(ClientID = 0; ClientID < MAX_CLIENTS; ClientID++)
 		{
@@ -1567,21 +1578,71 @@ void CGameContext::ConTele(IConsole::IResult *pResult, void *pUserData)
 		}
 		if(ClientID == MAX_CLIENTS)
 		{
-			pSelf->SendChatTarget(pPlayer->GetCID(), "No player with this name found.");
+			pSelf->SendChatTarget(pCallingPlayer->GetCID(), "No player with this name found.");
 			return;
 		}
-		CPlayer *pPlayerTo = pSelf->m_apPlayers[ClientID];
-		if(!pPlayerTo)
+
+		CPlayer *pDestPlayer = pSelf->m_apPlayers[ClientID];
+		if(!pDestPlayer)
 			return;
-		CCharacter *pChrTo = pPlayerTo->GetCharacter();
-		if(!pChrTo)
+		CCharacter *pDestCharacter = pDestPlayer->GetCharacter();
+		if(!pDestCharacter)
 			return;
-		Pos = pChrTo->m_Pos;
+
+		// Set calling tee's position to that of the destination tee
+		Pos = pDestCharacter->m_Pos;
+		break;
 	}
-	pSelf->Teleport(pChr, Pos);
-	pChr->UnFreeze();
-	pChr->Core()->m_Vel = vec2(0, 0);
-	pPlayer->m_LastTeleTee.Save(pChr);
+	case 2:
+	{
+		float BaseX = 0.f, BaseY = 0.f;
+
+		CMapItemLayerTilemap *pGameLayer = pSelf->m_Layers.GameLayer();
+		constexpr float OuterKillTileBoundaryDistance = 201 * 32.f;
+		float MapWidth = (pGameLayer->m_Width * 32) + (OuterKillTileBoundaryDistance * 2.f), MapHeight = (pGameLayer->m_Height * 32) + (OuterKillTileBoundaryDistance * 2.f);
+
+		const auto DetermineCoordinateRelativity = [](const char *pInString, const float AbsoluteDefaultValue, float &OutFloat) -> bool {
+			// mode 0 = abs, 1 = sub, 2 = add
+
+			// Relative?
+			const char *pStrDelta = str_startswith(pInString, "~");
+
+			// Is the number valid?
+			float d = str_tofloat(pStrDelta ? pStrDelta : pInString);
+			if(std::isnan(d) || std::isinf(d))
+				return false;
+
+			// Convert our gleaned 'display' coordinate to an actual map coordinate
+			d *= 32.f;
+
+			OutFloat = (pStrDelta ? AbsoluteDefaultValue : 0) + d;
+			return true;
+		};
+
+		if(!DetermineCoordinateRelativity(pResult->GetString(0), pCallingPlayer->m_ViewPos.x, BaseX))
+		{
+			pSelf->SendChatTarget(pCallingPlayer->GetCID(), "Invalid X coordinate.");
+			return;
+		}
+		if(!DetermineCoordinateRelativity(pResult->GetString(1), pCallingPlayer->m_ViewPos.y, BaseY))
+		{
+			pSelf->SendChatTarget(pCallingPlayer->GetCID(), "Invalid Y coordinate.");
+			return;
+		}
+
+		Pos = {std::clamp(BaseX, (-OuterKillTileBoundaryDistance) + 1.f, (-OuterKillTileBoundaryDistance) + MapWidth - 1.f), std::clamp(BaseY, (-OuterKillTileBoundaryDistance) + 1.f, (-OuterKillTileBoundaryDistance) + MapHeight - 1.f)};
+		break;
+	}
+	default:
+		pSelf->SendChatTarget(pCallingPlayer->GetCID(), "Too many arguments.");
+		return;
+	}
+
+	// Teleport tee
+	pSelf->Teleport(pCallingCharacter, Pos);
+	pCallingCharacter->UnFreeze();
+	pCallingCharacter->Core()->m_Vel = vec2(0, 0);
+	pCallingPlayer->m_LastTeleTee.Save(pCallingCharacter);
 }
 
 void CGameContext::ConTeleCursor(IConsole::IResult *pResult, void *pUserData)
