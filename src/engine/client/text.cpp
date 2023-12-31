@@ -1757,7 +1757,15 @@ public:
 						if(PrevCharCount >= Split.m_CharIndex && (Split.m_Length == -1 || PrevCharCount < Split.m_CharIndex + Split.m_Length))
 							Color = Split.m_Color;
 						if(Split.m_Length != -1 && PrevCharCount >= (Split.m_CharIndex + Split.m_Length - 1))
+						{
 							ColorOption++;
+							if(ColorOption < (int)pCursor->m_vColorSplits.size())
+							{ // Handle splits that are
+								Split = pCursor->m_vColorSplits.at(ColorOption);
+								if(PrevCharCount >= Split.m_CharIndex)
+									Color = Split.m_Color;
+							}
+						}
 					}
 
 					// don't add text that isn't drawn, the color overwrite is used for that

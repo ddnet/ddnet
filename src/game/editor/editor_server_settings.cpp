@@ -232,8 +232,9 @@ void CEditor::RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEd
 			m_Map.m_vSettings.emplace_back(m_SettingsCommandInput.GetString());
 			s_CommandSelectedIndex = m_Map.m_vSettings.size() - 1;
 			m_ServerSettingsHistory.RecordAction(std::make_shared<CEditorCommandAction>(this, CEditorCommandAction::EType::ADD, &s_CommandSelectedIndex, s_CommandSelectedIndex, m_Map.m_vSettings[s_CommandSelectedIndex].m_aCommand));
-			m_Map.OnModify();
 		}
+
+		m_Map.OnModify();
 		s_ListBox.ScrollToSelected();
 		m_SettingsCommandInput.Clear();
 		m_MapSettingsCommandContext.Reset(); // Reset context
@@ -308,7 +309,7 @@ void CEditor::DoMapSettingsEditBox(CMapSettingsBackend::CContext *pContext, cons
 		CUIRect Label;
 		Background.VSplitLeft(PartMargin, nullptr, &Label);
 		TextRender()->TextColor(0.8f, 0.8f, 0.8f, 1.0f);
-		UI()->DoLabel(&Label, pStr, FontSize, TEXTALIGN_MIDDLE);
+		UI()->DoLabel(&Label, pStr, FontSize, TEXTALIGN_ML);
 		TextRender()->TextColor(TextRender()->DefaultTextColor());
 	};
 
@@ -350,7 +351,7 @@ void CEditor::DoMapSettingsEditBox(CMapSettingsBackend::CContext *pContext, cons
 	{
 		// If line input is active, let's display a floating part for either the current argument name
 		// or for the error, if any. The error is only displayed when the cursor is at the end of the input.
-		const bool IsAtEnd = pLineInput->GetCursorOffset() == pLineInput->GetLength();
+		const bool IsAtEnd = pLineInput->GetCursorOffset() >= (m_MapSettingsCommandContext.CommentOffset() != -1 ? m_MapSettingsCommandContext.CommentOffset() : pLineInput->GetLength());
 
 		if(Context.CurrentArgName() && (!Context.HasError() || !IsAtEnd)) // Render argument name
 			RenderFloatingPart(&ToolBar, x, Context.CurrentArgName());
@@ -467,12 +468,11 @@ int CEditor::RenderEditBoxDropdown(SEditBoxDropdownContext *pDropdown, CUIRect V
 	const int NumEntries = vData.size();
 
 	// Setup the rect
-	static float s_Width = View.w;
 	CUIRect CommandsDropdown = View;
 	CommandsDropdown.y += View.h + 0.1f;
 	CommandsDropdown.x = x;
 	if(AutoWidth)
-		CommandsDropdown.w = s_Width + pListBox->ScrollbarWidth();
+		CommandsDropdown.w = pDropdown->m_Width + pListBox->ScrollbarWidth();
 
 	pListBox->SetActive(NumEntries > 0);
 	if(NumEntries > 0)
@@ -520,7 +520,7 @@ int CEditor::RenderEditBoxDropdown(SEditBoxDropdownContext *pDropdown, CUIRect V
 			}
 		}
 
-		s_Width = LargestWidth;
+		pDropdown->m_Width = LargestWidth;
 
 		int EndIndex = pListBox->DoEnd();
 		if(NewIndex == Selected)
@@ -679,20 +679,17 @@ void CEditor::RenderMapSettingsErrorDialog()
 						s_Context.CheckCollision(vSettingsValid, Res);
 						bool Valid = s_Context.Valid() && Res == ECollisionCheckResult::ADD;
 
-						if(DoButton_Editor(&s_Ok, "Done", Valid ? 0 : -1, &OkBtn, 0, "Confirm edition of this command") || (s_Input.IsActive() && Valid && UI()->ConsumeHotkey(CUI::HOTKEY_ENTER)))
+						if(DoButton_Editor(&s_Ok, "Done", Valid ? 0 : -1, &OkBtn, 0, "Confirm editing of this command") || (s_Input.IsActive() && Valid && UI()->ConsumeHotkey(CUI::HOTKEY_ENTER)))
 						{
-							if(Valid) // Just to make sure
-							{
-								// Mark the setting is being fixed
-								pInvalidSetting->m_Context.m_Fixed = true;
-								str_copy(pInvalidSetting->m_aSetting, s_Input.GetString());
-								// Add it to the list for future collision checks
-								vSettingsValid.emplace_back(s_Input.GetString());
+							// Mark the setting is being fixed
+							pInvalidSetting->m_Context.m_Fixed = true;
+							str_copy(pInvalidSetting->m_aSetting, s_Input.GetString());
+							// Add it to the list for future collision checks
+							vSettingsValid.emplace_back(s_Input.GetString());
 
-								// Clear the input & fixing command index
-								s_FixingCommandIndex = -1;
-								s_Input.Clear();
-							}
+							// Clear the input & fixing command index
+							s_FixingCommandIndex = -1;
+							s_Input.Clear();
 						}
 					}
 
@@ -862,7 +859,7 @@ void CEditor::RenderMapSettingsErrorDialog()
 						s_Context.CheckCollision({m_Map.m_vSettings[i]}, Res);
 						bool Valid = s_Context.Valid() && Res == ECollisionCheckResult::REPLACE;
 
-						if(DoButton_Editor(&s_Ok, "Done", Valid ? 0 : -1, &OkBtn, 0, "Confirm edition of this command") || (s_Input.IsActive() && Valid && UI()->ConsumeHotkey(CUI::HOTKEY_ENTER)))
+						if(DoButton_Editor(&s_Ok, "Done", Valid ? 0 : -1, &OkBtn, 0, "Confirm editing of this command") || (s_Input.IsActive() && Valid && UI()->ConsumeHotkey(CUI::HOTKEY_ENTER)))
 						{
 							if(Valid) // Just to make sure
 							{
@@ -915,17 +912,22 @@ void CEditor::RenderMapSettingsErrorDialog()
 	}
 
 	// Confirm button
-	static int s_ConfirmButton = 0, s_CancelButton = 0;
-	CUIRect ConfimButton, CancelButton;
+	static int s_ConfirmButton = 0, s_CancelButton = 0, s_FixAllButton = 0;
+	CUIRect ConfimButton, CancelButton, FixAllUnknownButton;
 	ButtonBar.VSplitLeft(110.0f, &CancelButton, &ButtonBar);
 	ButtonBar.VSplitRight(110.0f, &ButtonBar, &ConfimButton);
+	ButtonBar.VSplitRight(5.0f, &ButtonBar, nullptr);
+	ButtonBar.VSplitRight(150.0f, &ButtonBar, &FixAllUnknownButton);
 
 	bool CanConfirm = true;
+	bool CanFixAllUnknown = false;
 	for(auto &InvalidSetting : vSettingsInvalid)
 	{
 		if(!InvalidSetting.m_Context.m_Fixed && !InvalidSetting.m_Context.m_Deleted && !(InvalidSetting.m_Type & SInvalidSetting::TYPE_DUPLICATE))
 		{
 			CanConfirm = false;
+			if(InvalidSetting.m_Unknown)
+				CanFixAllUnknown = true;
 			break;
 		}
 	}
@@ -982,6 +984,19 @@ void CEditor::RenderMapSettingsErrorDialog()
 
 		m_Map.OnModify();
 	};
+
+	auto &&FixAllUnknown = [&] {
+		// Mark unknown settings as fixed
+		for(auto &InvalidSetting : vSettingsInvalid)
+			if(!InvalidSetting.m_Context.m_Fixed && !InvalidSetting.m_Context.m_Deleted && !(InvalidSetting.m_Type & SInvalidSetting::TYPE_DUPLICATE) && InvalidSetting.m_Unknown)
+				InvalidSetting.m_Context.m_Fixed = true;
+	};
+
+	// Fix all unknown settings
+	if(DoButton_Editor(&s_FixAllButton, "Allow all unknown settings", CanFixAllUnknown ? 0 : -1, &FixAllUnknownButton, 0, nullptr))
+	{
+		FixAllUnknown();
+	}
 
 	// Confirm - execute the fixes
 	if(DoButton_Editor(&s_ConfirmButton, "Confirm", CanConfirm ? 0 : -1, &ConfimButton, 0, nullptr) || (CanConfirm && UI()->ConsumeHotkey(CUI::HOTKEY_ENTER)))
@@ -1192,6 +1207,7 @@ void CMapSettingsBackend::CContext::Reset()
 	m_DropdownContext.m_MousePressedInside = false;
 	m_DropdownContext.m_Visible = false;
 	m_DropdownContext.m_ShouldHide = false;
+	m_CommentOffset = -1;
 
 	ClearError();
 }
@@ -1209,15 +1225,49 @@ void CMapSettingsBackend::CContext::UpdateFromString(const char *pStr)
 
 	m_pCurrentSetting = nullptr;
 	m_vCurrentArgs.clear();
+	m_CommentOffset = -1;
 
 	const char *pIterator = pStr;
+
+	// Check for comment
+	const char *pEnd = pStr;
+	int InString = 0;
+
+	while(*pEnd)
+	{
+		if(*pEnd == '"')
+			InString ^= 1;
+		else if(*pEnd == '\\') // Escape sequences
+		{
+			if(pEnd[1] == '"')
+				pEnd++;
+		}
+		else if(!InString)
+		{
+			if(*pEnd == '#') // Found comment
+			{
+				m_CommentOffset = pEnd - pStr;
+				break;
+			}
+		}
+
+		pEnd++;
+	}
+
+	if(m_CommentOffset == 0)
+		return;
+
+	// End command at start of comment, if any
+	char aInputString[256];
+	str_copy(aInputString, pStr, m_CommentOffset != -1 ? m_CommentOffset + 1 : sizeof(aInputString));
+	pIterator = aInputString;
 
 	// Get the command/setting
 	m_aCommand[0] = '\0';
 	while(pIterator && *pIterator != ' ' && *pIterator != '\0')
 		pIterator++;
 
-	str_copy(m_aCommand, pStr, (pIterator - pStr) + 1);
+	str_copy(m_aCommand, aInputString, (pIterator - aInputString) + 1);
 
 	// Get the command if it is a recognized one
 	for(auto &pSetting : m_pBackend->m_vpMapSettings)
@@ -1230,23 +1280,12 @@ void CMapSettingsBackend::CContext::UpdateFromString(const char *pStr)
 	}
 
 	// Parse args
-	ParseArgs(InputString(), pIterator);
+	ParseArgs(aInputString, pIterator);
 }
 
 void CMapSettingsBackend::CContext::ParseArgs(const char *pLineInputStr, const char *pStr)
 {
 	// This method parses the arguments of the current command, starting at pStr
-
-	enum EError
-	{
-		ERROR_NONE = 0,
-		ERROR_TOO_MANY_ARGS,
-		ERROR_INVALID_VALUE,
-		ERROR_UNKNOWN_VALUE,
-		ERROR_INCOMPLETE,
-		ERROR_OUT_OF_RANGE,
-		ERROR_UNKNOWN
-	};
 
 	ClearError();
 
@@ -1321,7 +1360,7 @@ void CMapSettingsBackend::CContext::ParseArgs(const char *pLineInputStr, const c
 
 	const int CommandArgCount = m_pCurrentSetting != nullptr ? m_pBackend->m_ParsedCommandArgs.at(m_pCurrentSetting).size() : 0;
 	int ArgIndex = 0;
-	EError Error = ERROR_NONE;
+	SCommandParseError::EErrorType Error = SCommandParseError::ERROR_NONE;
 
 	// Also keep track of the visual X position of each argument within the input
 	float PosX = 0;
@@ -1331,6 +1370,7 @@ void CMapSettingsBackend::CContext::ParseArgs(const char *pLineInputStr, const c
 	// Parsing beings
 	while(*pIterator)
 	{
+		Error = SCommandParseError::ERROR_NONE;
 		pIterator++; // Skip whitespace
 		PosX += WW; // Add whitespace width
 
@@ -1344,7 +1384,8 @@ void CMapSettingsBackend::CContext::ParseArgs(const char *pLineInputStr, const c
 		// Add new argument, copy the argument contents
 		m_vCurrentArgs.emplace_back();
 		auto &NewArg = m_vCurrentArgs.back();
-		str_copy(NewArg.m_aValue, pArgStart, Length + 1);
+		// Fill argument value, with a maximum length of 256
+		str_copy(NewArg.m_aValue, pArgStart, minimum((int)sizeof(SCurrentSettingArg::m_aValue), Length + 1));
 
 		// Validate argument from the parsed argument of the current setting.
 		// If current setting is not valid, then there are no arguments which results in an error.
@@ -1365,26 +1406,26 @@ void CMapSettingsBackend::CContext::ParseArgs(const char *pLineInputStr, const c
 					str_copy(NewArg.m_aValue, pArgStart, Length + 1);
 				}
 
-				if(!Valid || (Char != '"' && !ValidateStr(NewArg.m_aValue)))
-					Error = ERROR_INVALID_VALUE;
+				if(!Valid)
+					Error = SCommandParseError::ERROR_INVALID_VALUE;
 			}
 			else if(Arg.m_Type == 'i')
 			{
 				// Validate int
 				if(!str_toint(NewArg.m_aValue, nullptr))
-					Error = ERROR_INVALID_VALUE;
+					Error = SCommandParseError::ERROR_INVALID_VALUE;
 			}
 			else if(Arg.m_Type == 'f')
 			{
 				// Validate float
 				if(!str_tofloat(NewArg.m_aValue, nullptr))
-					Error = ERROR_INVALID_VALUE;
+					Error = SCommandParseError::ERROR_INVALID_VALUE;
 			}
 			else if(Arg.m_Type == 's')
 			{
 				// Validate string
-				if(!Valid)
-					Error = ERROR_INVALID_VALUE;
+				if(!Valid || (Char != '"' && !ValidateStr(NewArg.m_aValue)))
+					Error = SCommandParseError::ERROR_INVALID_VALUE;
 			}
 
 			// Extended argument validation:
@@ -1394,30 +1435,45 @@ void CMapSettingsBackend::CContext::ParseArgs(const char *pLineInputStr, const c
 			if(Length && !Error && Result != EValidationResult::VALID)
 			{
 				if(Result == EValidationResult::ERROR)
-					Error = ERROR_INVALID_VALUE; // Invalid argument value (invalid int, invalid float)
+					Error = SCommandParseError::ERROR_INVALID_VALUE; // Invalid argument value (invalid int, invalid float)
 				else if(Result == EValidationResult::UNKNOWN)
-					Error = ERROR_UNKNOWN_VALUE; // Unknown argument value
+					Error = SCommandParseError::ERROR_UNKNOWN_VALUE; // Unknown argument value
 				else if(Result == EValidationResult::INCOMPLETE)
-					Error = ERROR_INCOMPLETE; // Incomplete argument in case of possible values
+					Error = SCommandParseError::ERROR_INCOMPLETE; // Incomplete argument in case of possible values
 				else if(Result == EValidationResult::OUT_OF_RANGE)
-					Error = ERROR_OUT_OF_RANGE; // Out of range argument value in case of int settings
+					Error = SCommandParseError::ERROR_OUT_OF_RANGE; // Out of range argument value in case of int settings
 				else
-					Error = ERROR_UNKNOWN; // Unknown error
+					Error = SCommandParseError::ERROR_UNKNOWN; // Unknown error
 			}
 
 			Type = Arg.m_Type;
 		}
 		else
 		{
-			// Error: too many arguments
-			Error = ERROR_TOO_MANY_ARGS;
+			// Error: too many arguments if no comment after
+			if(m_CommentOffset == -1)
+				Error = SCommandParseError::ERROR_TOO_MANY_ARGS;
+			else
+			{ // Otherwise, check if there are any arguments left between this argument and the comment
+				const char *pSubIt = pArgStart;
+				pSubIt = str_skip_whitespaces_const(pSubIt);
+				if(*pSubIt != '\0')
+				{ // If there aren't only spaces between the last argument and the comment, then this is an error
+					Error = SCommandParseError::ERROR_TOO_MANY_ARGS;
+				}
+				else // If there are, then just exit the loop to avoid getting an error
+				{
+					m_vCurrentArgs.pop_back();
+					break;
+				}
+			}
 		}
 
 		// Fill argument informations
 		NewArg.m_X = PosX;
 		NewArg.m_Start = Offset;
 		NewArg.m_End = Offset + Length;
-		NewArg.m_Error = Error != ERROR_NONE || Length == 0;
+		NewArg.m_Error = Error != SCommandParseError::ERROR_NONE || Length == 0 || m_Error.m_Type != SCommandParseError::ERROR_NONE;
 		NewArg.m_ExpectedType = Type;
 
 		// Do not emit an error if we allow unknown commands and the current setting is invalid
@@ -1425,39 +1481,55 @@ void CMapSettingsBackend::CContext::ParseArgs(const char *pLineInputStr, const c
 			NewArg.m_Error = false;
 
 		// Check error and fill the error field with different messages
-		if(Error == ERROR_INVALID_VALUE || Error == ERROR_UNKNOWN_VALUE || Error == ERROR_OUT_OF_RANGE)
+		if(Error == SCommandParseError::ERROR_INVALID_VALUE || Error == SCommandParseError::ERROR_UNKNOWN_VALUE || Error == SCommandParseError::ERROR_OUT_OF_RANGE || Error == SCommandParseError::ERROR_INCOMPLETE)
 		{
-			size_t ErrorArgIndex = m_vCurrentArgs.size() - 1;
-			SCurrentSettingArg &ErrorArg = m_vCurrentArgs.back();
-			SParsedMapSettingArg &SettingArg = m_pBackend->m_ParsedCommandArgs[m_pCurrentSetting].at(ArgIndex);
-			char aFormattedValue[256];
-			FormatDisplayValue(ErrorArg.m_aValue, aFormattedValue);
-
-			if(Error == ERROR_INVALID_VALUE || Error == ERROR_UNKNOWN_VALUE)
-				str_format(m_Error.m_aMessage, sizeof(m_Error.m_aMessage), "%s argument value: %s at position %d for argument '%s'", Error == ERROR_INVALID_VALUE ? "Invalid" : "Unknown", aFormattedValue, (int)ErrorArg.m_Start, SettingArg.m_aName);
-			else
+			// Only keep first error
+			if(!m_Error.m_aMessage[0])
 			{
-				std::shared_ptr<SMapSettingInt> pSettingInt = std::static_pointer_cast<SMapSettingInt>(m_pCurrentSetting);
-				str_format(m_Error.m_aMessage, sizeof(m_Error.m_aMessage), "Invalid argument value: %s at position %d for argument '%s': out of range [%d, %d]", aFormattedValue, (int)ErrorArg.m_Start, SettingArg.m_aName, pSettingInt->m_Min, pSettingInt->m_Max);
-			}
-			m_Error.m_ArgIndex = (int)ErrorArgIndex;
-			break;
-		}
-		else if(Error == ERROR_TOO_MANY_ARGS)
-		{
-			if(m_pCurrentSetting != nullptr)
-			{
-				str_copy(m_Error.m_aMessage, "Too many arguments");
-				m_Error.m_ArgIndex = ArgIndex;
-				break;
-			}
-			else if(!m_AllowUnknownCommands)
-			{
+				int ErrorArgIndex = (int)m_vCurrentArgs.size() - 1;
+				SCurrentSettingArg &ErrorArg = m_vCurrentArgs.back();
+				SParsedMapSettingArg &SettingArg = m_pBackend->m_ParsedCommandArgs[m_pCurrentSetting].at(ArgIndex);
 				char aFormattedValue[256];
-				FormatDisplayValue(m_aCommand, aFormattedValue);
-				str_format(m_Error.m_aMessage, sizeof(m_Error.m_aMessage), "Unknown server setting: %s", aFormattedValue);
-				m_Error.m_ArgIndex = -1;
-				break;
+				FormatDisplayValue(ErrorArg.m_aValue, aFormattedValue);
+
+				if(Error == SCommandParseError::ERROR_INVALID_VALUE || Error == SCommandParseError::ERROR_UNKNOWN_VALUE || Error == SCommandParseError::ERROR_INCOMPLETE)
+				{
+					static const std::map<int, const char *> s_Names = {
+						{SCommandParseError::ERROR_INVALID_VALUE, "Invalid"},
+						{SCommandParseError::ERROR_UNKNOWN_VALUE, "Unknown"},
+						{SCommandParseError::ERROR_INCOMPLETE, "Incomplete"},
+					};
+					str_format(m_Error.m_aMessage, sizeof(m_Error.m_aMessage), "%s argument value: %s at position %d for argument '%s'", s_Names.at(Error), aFormattedValue, (int)ErrorArg.m_Start, SettingArg.m_aName);
+				}
+				else
+				{
+					std::shared_ptr<SMapSettingInt> pSettingInt = std::static_pointer_cast<SMapSettingInt>(m_pCurrentSetting);
+					str_format(m_Error.m_aMessage, sizeof(m_Error.m_aMessage), "Invalid argument value: %s at position %d for argument '%s': out of range [%d, %d]", aFormattedValue, (int)ErrorArg.m_Start, SettingArg.m_aName, pSettingInt->m_Min, pSettingInt->m_Max);
+				}
+				m_Error.m_ArgIndex = ErrorArgIndex;
+				m_Error.m_Type = Error;
+			}
+		}
+		else if(Error == SCommandParseError::ERROR_TOO_MANY_ARGS)
+		{
+			// Only keep first error
+			if(!m_Error.m_aMessage[0])
+			{
+				if(m_pCurrentSetting != nullptr)
+				{
+					str_copy(m_Error.m_aMessage, "Too many arguments");
+					m_Error.m_ArgIndex = ArgIndex;
+					break;
+				}
+				else if(!m_AllowUnknownCommands)
+				{
+					char aFormattedValue[256];
+					FormatDisplayValue(m_aCommand, aFormattedValue);
+					str_format(m_Error.m_aMessage, sizeof(m_Error.m_aMessage), "Unknown server setting: %s", aFormattedValue);
+					m_Error.m_ArgIndex = -1;
+					break;
+				}
+				m_Error.m_Type = Error;
 			}
 		}
 
@@ -1469,6 +1541,7 @@ void CMapSettingsBackend::CContext::ParseArgs(const char *pLineInputStr, const c
 void CMapSettingsBackend::CContext::ClearError()
 {
 	m_Error.m_aMessage[0] = '\0';
+	m_Error.m_Type = SCommandParseError::ERROR_NONE;
 }
 
 bool CMapSettingsBackend::CContext::UpdateCursor(bool Force)
@@ -1490,22 +1563,36 @@ bool CMapSettingsBackend::CContext::UpdateCursor(bool Force)
 	int NewArg = m_CursorArgIndex;
 
 	// Update current argument under cursor
-	bool FoundArg = false;
-	for(int i = (int)m_vCurrentArgs.size() - 1; i >= 0; i--)
+	if(m_CommentOffset != -1 && Offset >= (size_t)m_CommentOffset)
 	{
-		if(Offset >= m_vCurrentArgs[i].m_Start)
-		{
-			NewArg = i;
-			FoundArg = true;
-			break;
-		}
+		NewArg = (int)m_vCurrentArgs.size();
 	}
+	else
+	{
+		bool FoundArg = false;
+		for(int i = (int)m_vCurrentArgs.size() - 1; i >= 0; i--)
+		{
+			if(Offset >= m_vCurrentArgs[i].m_Start)
+			{
+				NewArg = i;
+				FoundArg = true;
+				break;
+			}
+		}
 
-	if(!FoundArg)
-		NewArg = -1;
+		if(!FoundArg)
+			NewArg = -1;
+	}
 
 	bool ShouldUpdate = NewArg != m_CursorArgIndex;
 	m_CursorArgIndex = NewArg;
+
+	// Do not show error if current argument is incomplete, as we are editing it
+	if(m_pLineInput != nullptr)
+	{
+		if(Offset == m_pLineInput->GetLength() && m_Error.m_aMessage[0] && m_Error.m_ArgIndex == m_CursorArgIndex && m_Error.m_Type == SCommandParseError::ERROR_INCOMPLETE)
+			ClearError();
+	}
 
 	if(m_DropdownContext.m_Selected == -1 || ShouldUpdate || Force)
 	{
@@ -1552,15 +1639,13 @@ EValidationResult CMapSettingsBackend::CContext::ValidateArg(int Index, const ch
 					// If equals, then argument is valid
 					if(EqualsAny)
 						return EValidationResult::VALID;
-					else if(Index != m_CursorArgIndex)
-						return EValidationResult::ERROR; // If we're not checking current argument, this is an error
 
 					// Here we check if argument is incomplete
 					const bool StartsAny = std::any_of(ValuesIt->second.begin(), ValuesIt->second.end(), [pArg](auto *pValue) { return str_startswith_nocase(pValue, pArg) != nullptr; });
 					if(StartsAny)
 						return EValidationResult::INCOMPLETE;
 
-					return EValidationResult::ERROR;
+					return EValidationResult::UNKNOWN;
 				}
 			}
 		}
@@ -1587,12 +1672,15 @@ void CMapSettingsBackend::CContext::UpdatePossibleMatches()
 	m_vPossibleMatches.clear();
 	m_DropdownContext.m_Selected = -1;
 
+	if(m_CommentOffset == 0)
+		return;
+
 	// First case: argument index under cursor is -1 => we're on the command/setting name
 	if(m_CursorArgIndex == -1)
 	{
 		// Use a substring from the start of the input to the cursor offset
 		char aSubString[128];
-		str_copy(aSubString, m_aCommand, minimum((int)m_LastCursorOffset + 1, 128));
+		str_copy(aSubString, m_aCommand, minimum(m_LastCursorOffset + 1, sizeof(aSubString)));
 
 		// Iterate through available map settings and find those which the beginning matches with the command/setting name we are writing
 		for(auto &pSetting : m_pBackend->m_vpMapSettings)
@@ -1650,7 +1738,7 @@ void CMapSettingsBackend::CContext::UpdatePossibleMatches()
 						int SubstringLength = minimum(m_LastCursorOffset, CurrentArg.m_End) - CurrentArg.m_Start;
 
 						// Substring based on the cursor position inside that argument
-						char aSubString[160];
+						char aSubString[256];
 						str_copy(aSubString, CurrentArg.m_aValue, SubstringLength + 1);
 
 						for(auto &pValue : ValuesIt->second)
@@ -1709,6 +1797,7 @@ const char *CMapSettingsBackend::CContext::InputString() const
 const ColorRGBA CMapSettingsBackend::CContext::ms_ArgumentStringColor = ColorRGBA(84 / 255.0f, 1.0f, 1.0f, 1.0f);
 const ColorRGBA CMapSettingsBackend::CContext::ms_ArgumentNumberColor = ColorRGBA(0.1f, 0.9f, 0.05f, 1.0f);
 const ColorRGBA CMapSettingsBackend::CContext::ms_ArgumentUnknownColor = ColorRGBA(0.6f, 0.6f, 0.6f, 1.0f);
+const ColorRGBA CMapSettingsBackend::CContext::ms_CommentColor = ColorRGBA(0.5f, 0.5f, 0.5f, 1.0f);
 const ColorRGBA CMapSettingsBackend::CContext::ms_ErrorColor = ColorRGBA(240 / 255.0f, 70 / 255.0f, 70 / 255.0f, 1.0f);
 
 void CMapSettingsBackend::CContext::ColorArguments(std::vector<STextColorSplit> &vColorSplits) const
@@ -1735,17 +1824,27 @@ void CMapSettingsBackend::CContext::ColorArguments(std::vector<STextColorSplit> 
 
 	if(m_pLineInput && !m_pLineInput->IsEmpty())
 	{
-		if(!CommandIsValid() && !m_AllowUnknownCommands)
+		if(!CommandIsValid() && !m_AllowUnknownCommands && m_CommentOffset != 0)
 		{
-			// If command is invalid, override color splits with red
-			vColorSplits = {{0, -1, ms_ErrorColor}};
+			// If command is invalid, override color splits with red, but not comment
+			int ErrorLength = m_CommentOffset == -1 ? -1 : m_CommentOffset;
+			vColorSplits = {{0, ErrorLength, ms_ErrorColor}};
 		}
 		else if(HasError())
 		{
-			// If there is an error, then color the wrong part of the input
-			vColorSplits.emplace_back(ErrorOffset(), -1, ms_ErrorColor);
+			// If there is an error, then color the wrong part of the input, excluding comment
+			int ErrorLength = m_CommentOffset == -1 ? -1 : m_CommentOffset - ErrorOffset();
+			vColorSplits.emplace_back(ErrorOffset(), ErrorLength, ms_ErrorColor);
+		}
+		if(m_CommentOffset != -1)
+		{ // Color comment if there is one
+			vColorSplits.emplace_back(m_CommentOffset, -1, ms_CommentColor);
 		}
 	}
+
+	std::sort(vColorSplits.begin(), vColorSplits.end(), [](const STextColorSplit &a, const STextColorSplit &b) {
+		return a.m_CharIndex < b.m_CharIndex;
+	});
 }
 
 int CMapSettingsBackend::CContext::CheckCollision(ECollisionCheckResult &Result) const
@@ -1767,6 +1866,12 @@ int CMapSettingsBackend::CContext::CheckCollision(const char *pInputString, cons
 	//   the tune argument must be defined as UNIQUE.
 	// This method CheckCollision(ECollisionCheckResult&) returns an integer which is the index of the colliding line. If no
 	//   colliding line was found, then it returns -1.
+
+	if(m_CommentOffset == 0)
+	{ // Ignore comments
+		Result = ECollisionCheckResult::ADD;
+		return -1;
+	}
 
 	const int InputLength = str_length(pInputString);
 
@@ -1790,7 +1895,7 @@ int CMapSettingsBackend::CContext::CheckCollision(const char *pInputString, cons
 		std::vector<SArgument> vaArgs;
 		const char *pIt = pStr;
 		char aBuffer[128];
-		while((pIt = str_next_token(pIt, " ", aBuffer, 128)))
+		while((pIt = str_next_token(pIt, " ", aBuffer, sizeof(aBuffer))))
 			vaArgs.emplace_back(aBuffer);
 		return vaArgs;
 	};
@@ -1942,6 +2047,9 @@ bool CMapSettingsBackend::CContext::Valid() const
 {
 	// Check if the entire setting is valid or not
 
+	if(m_CommentOffset == 0)
+		return true; // A "comment" setting is considered valid.
+
 	// Check if command is valid
 	if(m_pCurrentSetting)
 	{
@@ -2082,7 +2190,7 @@ void CMapSettingsBackend::OnMapLoad()
 		if(Result == ECollisionCheckResult::REPLACE)
 			Type |= SInvalidSetting::TYPE_DUPLICATE;
 
-		m_LoadedMapSettings.m_vSettingsInvalid.emplace_back(Index, Setting.m_aCommand, Type, RealCollidingLineIndex);
+		m_LoadedMapSettings.m_vSettingsInvalid.emplace_back(Index, Setting.m_aCommand, Type, RealCollidingLineIndex, !LocalContext.CommandIsValid());
 		if(Type & SInvalidSetting::TYPE_DUPLICATE)
 			m_LoadedMapSettings.m_SettingsDuplicate[RealCollidingLineIndex].emplace_back(m_LoadedMapSettings.m_vSettingsInvalid.size() - 1);
 

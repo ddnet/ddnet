@@ -12,6 +12,7 @@ struct SEditBoxDropdownContext
 	bool m_DidBecomeVisible = false;
 	bool m_MousePressedInside = false;
 	bool m_ShouldHide = false;
+	int m_Width = 0;
 };
 
 #endif

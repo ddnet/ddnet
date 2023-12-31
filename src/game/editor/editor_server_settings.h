@@ -35,7 +35,7 @@ struct SParsedMapSettingArg
 // An argument for the current setting
 struct SCurrentSettingArg
 {
-	char m_aValue[160]; // Value of the argument
+	char m_aValue[256]; // Value of the argument
 	float m_X; // The X position
 	size_t m_Start; // Start offset within the input string
 	size_t m_End; // End offset within the input string
@@ -54,6 +54,18 @@ struct SCommandParseError
 {
 	char m_aMessage[256];
 	int m_ArgIndex;
+
+	enum EErrorType
+	{
+		ERROR_NONE = 0,
+		ERROR_TOO_MANY_ARGS,
+		ERROR_INVALID_VALUE,
+		ERROR_UNKNOWN_VALUE,
+		ERROR_INCOMPLETE,
+		ERROR_OUT_OF_RANGE,
+		ERROR_UNKNOWN
+	};
+	EErrorType m_Type;
 };
 
 struct SInvalidSetting
@@ -67,6 +79,7 @@ struct SInvalidSetting
 	char m_aSetting[256]; // String of the setting
 	int m_Type; // Type of that invalid setting
 	int m_CollidingIndex; // The colliding line index in case type is TYPE_DUPLICATE
+	bool m_Unknown; // Is the command unknown
 
 	struct SContext
 	{
@@ -75,8 +88,8 @@ struct SInvalidSetting
 		bool m_Chosen;
 	} m_Context;
 
-	SInvalidSetting(int Index, const char *pSetting, int Type, int CollidingIndex) :
-		m_Index(Index), m_Type(Type), m_CollidingIndex(CollidingIndex), m_Context()
+	SInvalidSetting(int Index, const char *pSetting, int Type, int CollidingIndex, bool Unknown) :
+		m_Index(Index), m_Type(Type), m_CollidingIndex(CollidingIndex), m_Unknown(Unknown), m_Context()
 	{
 		str_copy(m_aSetting, pSetting);
 	}
@@ -215,6 +228,7 @@ public: // CContext
 		static const ColorRGBA ms_ArgumentStringColor;
 		static const ColorRGBA ms_ArgumentNumberColor;
 		static const ColorRGBA ms_ArgumentUnknownColor;
+		static const ColorRGBA ms_CommentColor;
 		static const ColorRGBA ms_ErrorColor;
 
 		friend class CMapSettingsBackend;
@@ -223,7 +237,7 @@ public: // CContext
 		bool CommandIsValid() const { return m_pCurrentSetting != nullptr; }
 		int CurrentArg() const { return m_CursorArgIndex; }
 		const char *CurrentArgName() const { return (!m_pCurrentSetting || m_CursorArgIndex < 0 || m_CursorArgIndex >= (int)m_pBackend->m_ParsedCommandArgs.at(m_pCurrentSetting).size()) ? nullptr : m_pBackend->m_ParsedCommandArgs.at(m_pCurrentSetting).at(m_CursorArgIndex).m_aName; }
-		float CurrentArgPos() const { return m_CursorArgIndex == -1 ? 0 : m_vCurrentArgs[m_CursorArgIndex].m_X; }
+		float CurrentArgPos() const { return (m_CursorArgIndex < 0 || m_CursorArgIndex >= (int)m_vCurrentArgs.size()) ? 0 : m_vCurrentArgs[m_CursorArgIndex].m_X; }
 		size_t CurrentArgOffset() const { return m_CursorArgIndex == -1 ? 0 : m_vCurrentArgs[m_CursorArgIndex].m_Start; }
 		const char *CurrentArgValue() const { return m_CursorArgIndex == -1 ? m_aCommand : m_vCurrentArgs[m_CursorArgIndex].m_aValue; }
 		const std::vector<SPossibleValueMatch> &PossibleMatches() const { return m_vPossibleMatches; }
@@ -235,6 +249,7 @@ public: // CContext
 		const std::shared_ptr<IMapSetting> &Setting() const { return m_pCurrentSetting; }
 		CLineInput *LineInput() const { return m_pLineInput; }
 		void SetFontSize(float FontSize) { m_FontSize = FontSize; }
+		int CommentOffset() const { return m_CommentOffset; };
 
 		int CheckCollision(ECollisionCheckResult &Result) const;
 		int CheckCollision(const std::vector<CEditorMapSetting> &vSettings, ECollisionCheckResult &Result) const;
@@ -280,6 +295,7 @@ public: // CContext
 		CLineInput *m_pLineInput;
 		char m_aCommand[128]; // The current command, not necessarily valid
 		SCommandParseError m_Error; // Error
+		int m_CommentOffset; // Position of the comment, if there is one
 
 		CMapSettingsBackend *m_pBackend;
 		std::string m_CompositionStringBuffer;
