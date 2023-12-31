@@ -2730,7 +2730,7 @@ void CClient::Run()
 	Kernel()->RegisterInterface(static_cast<IGraphics *>(m_pGraphics), false);
 	if(m_pGraphics->Init() != 0)
 	{
-		dbg_msg("client", "couldn't init graphics");
+		log_error("client", "couldn't init graphics");
 		ShowMessageBox("Graphics Error", "The graphics could not be initialized.");
 		return;
 	}
@@ -2751,7 +2751,7 @@ void CClient::Run()
 	char aNetworkError[256];
 	if(!InitNetworkClient(aNetworkError, sizeof(aNetworkError)))
 	{
-		dbg_msg("client", "%s", aNetworkError);
+		log_error("client", "%s", aNetworkError);
 		ShowMessageBox("Network Error", aNetworkError);
 		return;
 	}
@@ -2834,7 +2834,7 @@ void CClient::Run()
 		{
 			const char *pError = DemoPlayer_Play(m_aCmdPlayDemo, IStorage::TYPE_ALL_OR_ABSOLUTE);
 			if(pError)
-				dbg_msg("demo_player", "playing passed demo file '%s' failed: %s", m_aCmdPlayDemo, pError);
+				log_error("demo_player", "playing passed demo file '%s' failed: %s", m_aCmdPlayDemo, pError);
 			m_aCmdPlayDemo[0] = 0;
 		}
 
@@ -2845,7 +2845,7 @@ void CClient::Run()
 			if(Result)
 				g_Config.m_ClEditor = true;
 			else
-				dbg_msg("editor", "editing passed map file '%s' failed", m_aCmdEditMap);
+				log_error("editor", "editing passed map file '%s' failed", m_aCmdEditMap);
 			m_aCmdEditMap[0] = 0;
 		}
 
@@ -4211,6 +4211,8 @@ int SDL_main(int argc, char *argv2[])
 int main(int argc, const char **argv)
 #endif
 {
+	const int64_t MainStart = time_get();
+
 #if defined(CONF_PLATFORM_ANDROID)
 	const char **argv = const_cast<const char **>(argv2);
 #elif defined(CONF_FAMILY_WINDOWS)
@@ -4350,7 +4352,7 @@ int main(int argc, const char **argv)
 	if(RandInitFailed)
 	{
 		const char *pError = "Failed to initialize the secure RNG.";
-		dbg_msg("secure", "%s", pError);
+		log_error("secure", "%s", pError);
 		pClient->ShowMessageBox("Secure RNG Error", pError);
 		PerformAllCleanup();
 		return -1;
@@ -4411,7 +4413,7 @@ int main(int argc, const char **argv)
 		if(!pConsole->ExecuteFile(CONFIG_FILE))
 		{
 			const char *pError = "Failed to load config from '" CONFIG_FILE "'.";
-			dbg_msg("client", "%s", pError);
+			log_error("client", "%s", pError);
 			pClient->ShowMessageBox("Config File Error", pError);
 			PerformAllCleanup();
 			return -1;
@@ -4461,7 +4463,7 @@ int main(int argc, const char **argv)
 		}
 		else
 		{
-			dbg_msg("client", "failed to open '%s' for logging", g_Config.m_Logfile);
+			log_error("client", "failed to open '%s' for logging", g_Config.m_Logfile);
 		}
 	}
 
@@ -4487,14 +4489,14 @@ int main(int argc, const char **argv)
 	{
 		char aError[256];
 		str_format(aError, sizeof(aError), "Unable to initialize SDL base: %s", SDL_GetError());
-		dbg_msg("client", "%s", aError);
+		log_error("client", "%s", aError);
 		pClient->ShowMessageBox("SDL Error", aError);
 		PerformAllCleanup();
 		return -1;
 	}
 
 	// run the client
-	dbg_msg("client", "starting...");
+	log_trace("client", "initialization finished after %.2fms, starting...", (time_get() - MainStart) * 1000.0f / (float)time_freq());
 	pClient->Run();
 
 	const bool Restarting = pClient->State() == CClient::STATE_RESTARTING;
@@ -4681,19 +4683,19 @@ void CClient::ShellRegister()
 	Storage()->GetBinaryPathAbsolute(PLAT_CLIENT_EXEC, aFullPath, sizeof(aFullPath));
 	if(!aFullPath[0])
 	{
-		dbg_msg("client", "Failed to register protocol and file extensions: could not determine absolute path");
+		log_error("client", "Failed to register protocol and file extensions: could not determine absolute path");
 		return;
 	}
 
 	bool Updated = false;
 	if(!shell_register_protocol("ddnet", aFullPath, &Updated))
-		dbg_msg("client", "Failed to register ddnet protocol");
+		log_error("client", "Failed to register ddnet protocol");
 	if(!shell_register_extension(".map", "Map File", GAME_NAME, aFullPath, &Updated))
-		dbg_msg("client", "Failed to register .map file extension");
+		log_error("client", "Failed to register .map file extension");
 	if(!shell_register_extension(".demo", "Demo File", GAME_NAME, aFullPath, &Updated))
-		dbg_msg("client", "Failed to register .demo file extension");
+		log_error("client", "Failed to register .demo file extension");
 	if(!shell_register_application(GAME_NAME, aFullPath, &Updated))
-		dbg_msg("client", "Failed to register application");
+		log_error("client", "Failed to register application");
 	if(Updated)
 		shell_update();
 }
@@ -4704,19 +4706,19 @@ void CClient::ShellUnregister()
 	Storage()->GetBinaryPathAbsolute(PLAT_CLIENT_EXEC, aFullPath, sizeof(aFullPath));
 	if(!aFullPath[0])
 	{
-		dbg_msg("client", "Failed to unregister protocol and file extensions: could not determine absolute path");
+		log_error("client", "Failed to unregister protocol and file extensions: could not determine absolute path");
 		return;
 	}
 
 	bool Updated = false;
 	if(!shell_unregister_class("ddnet", &Updated))
-		dbg_msg("client", "Failed to unregister ddnet protocol");
+		log_error("client", "Failed to unregister ddnet protocol");
 	if(!shell_unregister_class(GAME_NAME ".map", &Updated))
-		dbg_msg("client", "Failed to unregister .map file extension");
+		log_error("client", "Failed to unregister .map file extension");
 	if(!shell_unregister_class(GAME_NAME ".demo", &Updated))
-		dbg_msg("client", "Failed to unregister .demo file extension");
+		log_error("client", "Failed to unregister .demo file extension");
 	if(!shell_unregister_application(aFullPath, &Updated))
-		dbg_msg("client", "Failed to unregister application");
+		log_error("client", "Failed to unregister application");
 	if(Updated)
 		shell_update();
 }
