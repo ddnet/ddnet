@@ -364,7 +364,7 @@ SEditResult<int> CEditor::UiDoValueSelector(void *pID, CUIRect *pRect, const cha
 	{
 		str_copy(m_aTooltip, "Type your number");
 
-		DoEditBox(&s_NumberInput, pRect, 10.0f);
+		DoEditBox(&s_NumberInput, pRect, 10.0f, Corners);
 
 		UI()->SetActiveItem(&s_NumberInput);
 
