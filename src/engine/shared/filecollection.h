@@ -20,7 +20,7 @@ class CFileCollection
 
 	struct CFileEntry
 	{
-		int64_t m_Timestamp;
+		time_t m_Timestamp;
 		char m_aFilename[IO_MAX_PATH_LENGTH];
 		CFileEntry(int64_t Timestamp, const char *pFilename)
 		{
@@ -29,7 +29,7 @@ class CFileCollection
 		}
 	};
 
-	std::vector<CFileEntry> m_vTimestamps;
+	std::vector<CFileEntry> m_vFileEntries;
 	char m_aFileDesc[128];
 	int m_FileDescLength;
 	char m_aFileExt[32];
@@ -37,9 +37,8 @@ class CFileCollection
 	char m_aPath[IO_MAX_PATH_LENGTH];
 	IStorage *m_pStorage;
 
-	bool IsFilenameValid(const char *pFilename);
-	int64_t ExtractTimestamp(const char *pTimestring);
-	int64_t GetTimestamp(const char *pFilename);
+	bool ExtractTimestamp(const char *pTimestring, time_t *pTimestamp);
+	bool ParseFilename(const char *pFilename, time_t *pTimestamp);
 
 public:
 	void Init(IStorage *pStorage, const char *pPath, const char *pFileDesc, const char *pFileExt, int MaxEntries);
