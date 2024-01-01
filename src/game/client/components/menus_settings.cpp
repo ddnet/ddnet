@@ -3194,16 +3194,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	if(DoButton_CheckBox(&g_Config.m_ClReplays, Localize("Enable replays"), g_Config.m_ClReplays, &Button))
 	{
 		g_Config.m_ClReplays ^= 1;
-		if(!g_Config.m_ClReplays)
-		{
-			// stop recording and remove the tmp demo file
-			Client()->DemoRecorder_Stop(RECORDER_REPLAYS, true);
-		}
-		else
-		{
-			// start recording
-			Client()->DemoRecorder_HandleAutoStart();
-		}
+		Client()->DemoRecorder_UpdateReplayRecorder();
 	}
 
 	Left.HSplitTop(20.0f, &Button, &Left);

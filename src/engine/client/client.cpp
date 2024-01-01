@@ -529,11 +529,13 @@ void CClient::DisconnectWithReason(const char *pReason)
 	m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "client", aBuf, gs_ClientNetworkPrintColor);
 
 	// stop demo playback and recorder
+	// make sure to remove replay tmp demo
 	m_DemoPlayer.Stop();
-	for(int i = 0; i < RECORDER_MAX; i++)
-		DemoRecorder_Stop(i);
+	for(int Recorder = 0; Recorder < RECORDER_MAX; Recorder++)
+	{
+		DemoRecorder_Stop(Recorder, Recorder == RECORDER_REPLAYS);
+	}
 
-	//
 	m_aRconAuthed[0] = 0;
 	mem_zero(m_aRconUsername, sizeof(m_aRconUsername));
 	mem_zero(m_aRconPassword, sizeof(m_aRconPassword));
@@ -578,14 +580,9 @@ void CClient::DisconnectWithReason(const char *pReason)
 
 void CClient::Disconnect()
 {
-	m_ButtonRender = false;
 	if(m_State != IClient::STATE_OFFLINE)
-		DisconnectWithReason(0);
-
-	// make sure to remove replay tmp demo
-	if(g_Config.m_ClReplays)
 	{
-		DemoRecorder_Stop(RECORDER_REPLAYS, true);
+		DisconnectWithReason(nullptr);
 	}
 }
 
@@ -943,8 +940,10 @@ const char *CClient::LoadMap(const char *pName, const char *pFilename, SHA256_DI
 	}
 
 	// stop demo recording if we loaded a new map
-	for(int i = 0; i < RECORDER_MAX; i++)
-		DemoRecorder_Stop(i, i == RECORDER_REPLAYS);
+	for(int Recorder = 0; Recorder < RECORDER_MAX; Recorder++)
+	{
+		DemoRecorder_Stop(Recorder, Recorder == RECORDER_REPLAYS);
+	}
 
 	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), "loaded map '%s'", pFilename);
@@ -2349,22 +2348,20 @@ void CClient::Update()
 {
 	if(State() == IClient::STATE_DEMOPLAYBACK)
 	{
-#if defined(CONF_VIDEORECORDER)
-		if(m_DemoPlayer.IsPlaying() && IVideo::Current())
-		{
-			IVideo::Current()->NextVideoFrame();
-			IVideo::Current()->NextAudioFrameTimeline([this](short *pFinalOut, unsigned Frames) {
-				Sound()->Mix(pFinalOut, Frames);
-			});
-		}
-		else if(m_ButtonRender)
-			Disconnect();
-#endif
-
-		m_DemoPlayer.Update();
-
 		if(m_DemoPlayer.IsPlaying())
 		{
+#if defined(CONF_VIDEORECORDER)
+			if(IVideo::Current())
+			{
+				IVideo::Current()->NextVideoFrame();
+				IVideo::Current()->NextAudioFrameTimeline([this](short *pFinalOut, unsigned Frames) {
+					Sound()->Mix(pFinalOut, Frames);
+				});
+			}
+#endif
+
+			m_DemoPlayer.Update();
+
 			// update timers
 			const CDemoPlayer::CPlaybackInfo *pInfo = m_DemoPlayer.Info();
 			m_aCurGameTick[g_Config.m_ClDummy] = pInfo->m_Info.m_CurrentTick;
@@ -2374,7 +2371,8 @@ void CClient::Update()
 		}
 		else
 		{
-			// disconnect on error
+			// Disconnect when demo playback stopped, either due to playback error
+			// or because the end of the demo was reached when rendering it.
 			DisconnectWithReason(m_DemoPlayer.ErrorMessage());
 			if(m_DemoPlayer.ErrorMessage()[0] != '\0')
 			{
@@ -3468,26 +3466,32 @@ void CClient::SaveReplay(const int Length, const char *pFilename)
 	}
 
 	if(!DemoRecorder(RECORDER_REPLAYS)->IsRecording())
+	{
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", "ERROR: demorecorder isn't recording. Try to rejoin to fix that.");
+	}
 	else if(DemoRecorder(RECORDER_REPLAYS)->Length() < 1)
+	{
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", "ERROR: demorecorder isn't recording for at least 1 second.");
+	}
 	else
 	{
 		// First we stop the recorder to slice correctly the demo after
 		DemoRecorder_Stop(RECORDER_REPLAYS);
 
-		char aDate[64];
-		str_timestamp(aDate, sizeof(aDate));
-
 		char aFilename[IO_MAX_PATH_LENGTH];
-		if(str_comp(pFilename, "") == 0)
-			str_format(aFilename, sizeof(aFilename), "demos/replays/%s_%s (replay).demo", m_aCurrentMap, aDate);
+		if(pFilename[0] == '\0')
+		{
+			char aTimestamp[20];
+			str_timestamp(aTimestamp, sizeof(aTimestamp));
+			str_format(aFilename, sizeof(aFilename), "demos/replays/%s_%s_(replay).demo", m_aCurrentMap, aTimestamp);
+		}
 		else
+		{
 			str_format(aFilename, sizeof(aFilename), "demos/replays/%s.demo", pFilename);
-
-		char *pSrc = m_aDemoRecorder[RECORDER_REPLAYS].GetCurrentFilename();
+		}
 
 		// Slice the demo to get only the last cl_replay_length seconds
+		const char *pSrc = m_aDemoRecorder[RECORDER_REPLAYS].CurrentFilename();
 		const int EndTick = GameTick(g_Config.m_ClDummy);
 		const int StartTick = EndTick - Length * GameTickSpeed();
 
@@ -3499,7 +3503,7 @@ void CClient::SaveReplay(const int Length, const char *pFilename)
 		m_EditJobs.push_back(pDemoEditTask);
 
 		// And we restart the recorder
-		DemoRecorder_StartReplayRecorder();
+		DemoRecorder_UpdateReplayRecorder();
 	}
 }
 
@@ -3582,7 +3586,6 @@ const char *CClient::DemoPlayer_Render(const char *pFilename, int StorageType, c
 	const char *pError = DemoPlayer_Play(pFilename, StorageType);
 	if(pError)
 		return pError;
-	m_ButtonRender = true;
 
 	this->CClient::StartVideo(NULL, this, pVideoName);
 	m_DemoPlayer.Play();
@@ -3628,19 +3631,23 @@ void CClient::DemoRecorder_Start(const char *pFilename, bool WithTimestamp, int 
 	if(State() != IClient::STATE_ONLINE)
 	{
 		if(Verbose)
+		{
 			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demorec/record", "client is not online");
+		}
 	}
 	else
 	{
 		char aFilename[IO_MAX_PATH_LENGTH];
 		if(WithTimestamp)
 		{
-			char aDate[20];
-			str_timestamp(aDate, sizeof(aDate));
-			str_format(aFilename, sizeof(aFilename), "demos/%s_%s.demo", pFilename, aDate);
+			char aTimestamp[20];
+			str_timestamp(aTimestamp, sizeof(aTimestamp));
+			str_format(aFilename, sizeof(aFilename), "demos/%s_%s.demo", pFilename, aTimestamp);
 		}
 		else
+		{
 			str_format(aFilename, sizeof(aFilename), "demos/%s.demo", pFilename);
+		}
 
 		m_aDemoRecorder[Recorder].Start(Storage(), m_pConsole, aFilename, GameClient()->NetVersion(), m_aCurrentMap, m_pMap->Sha256(), m_pMap->Crc(), "client", m_pMap->MapSize(), 0, m_pMap->File());
 	}
@@ -3651,9 +3658,11 @@ void CClient::DemoRecorder_HandleAutoStart()
 	if(g_Config.m_ClAutoDemoRecord)
 	{
 		DemoRecorder_Stop(RECORDER_AUTO);
-		char aBuf[512];
-		str_format(aBuf, sizeof(aBuf), "auto/%s", m_aCurrentMap);
-		DemoRecorder_Start(aBuf, true, RECORDER_AUTO);
+
+		char aFilename[IO_MAX_PATH_LENGTH];
+		str_format(aFilename, sizeof(aFilename), "auto/%s", m_aCurrentMap);
+		DemoRecorder_Start(aFilename, true, RECORDER_AUTO);
+
 		if(g_Config.m_ClAutoDemoMax)
 		{
 			// clean up auto recorded demos
@@ -3661,35 +3670,31 @@ void CClient::DemoRecorder_HandleAutoStart()
 			AutoDemos.Init(Storage(), "demos/auto", "" /* empty for wild card */, ".demo", g_Config.m_ClAutoDemoMax);
 		}
 	}
-	if(!DemoRecorder(RECORDER_REPLAYS)->IsRecording())
-	{
-		DemoRecorder_StartReplayRecorder();
-	}
+
+	DemoRecorder_UpdateReplayRecorder();
 }
 
-void CClient::DemoRecorder_StartReplayRecorder()
+void CClient::DemoRecorder_UpdateReplayRecorder()
 {
-	if(g_Config.m_ClReplays)
+	if(!g_Config.m_ClReplays && DemoRecorder(RECORDER_REPLAYS)->IsRecording())
 	{
-		DemoRecorder_Stop(RECORDER_REPLAYS);
-		char aBuf[512];
-		str_format(aBuf, sizeof(aBuf), "replays/replay_tmp-%s", m_aCurrentMap);
-		DemoRecorder_Start(aBuf, true, RECORDER_REPLAYS);
+		DemoRecorder_Stop(RECORDER_REPLAYS, true);
+	}
+
+	if(g_Config.m_ClReplays && !DemoRecorder(RECORDER_REPLAYS)->IsRecording())
+	{
+		// Ensure that replay filenames are unique by appending a random number.
+		// The replay demo is sliced in a background job, so we need to avoid
+		// recording to the same file when restarting the replay recorder.
+		char aFilename[IO_MAX_PATH_LENGTH];
+		str_format(aFilename, sizeof(aFilename), "replays/replay_tmp-%s-%d", m_aCurrentMap, secure_rand());
+		DemoRecorder_Start(aFilename, true, RECORDER_REPLAYS);
 	}
 }
 
 void CClient::DemoRecorder_Stop(int Recorder, bool RemoveFile)
 {
-	m_aDemoRecorder[Recorder].Stop();
-	if(RemoveFile)
-	{
-		const char *pFilename = m_aDemoRecorder[Recorder].GetCurrentFilename();
-		if(pFilename[0] != '\0')
-		{
-			Storage()->RemoveFile(pFilename, IStorage::TYPE_SAVE);
-			m_aDemoRecorder[Recorder].ClearCurrentFilename();
-		}
-	}
+	m_aDemoRecorder[Recorder].Stop(RemoveFile);
 }
 
 void CClient::DemoRecorder_AddDemoMarker(int Recorder)
@@ -4015,17 +4020,7 @@ void CClient::ConchainReplays(IConsole::IResult *pResult, void *pUserData, ICons
 	pfnCallback(pResult, pCallbackUserData);
 	if(pResult->NumArguments())
 	{
-		int Status = pResult->GetInteger(0);
-		if(Status == 0)
-		{
-			// stop recording and remove the tmp demo file
-			pSelf->DemoRecorder_Stop(RECORDER_REPLAYS, true);
-		}
-		else
-		{
-			// start recording
-			pSelf->DemoRecorder_HandleAutoStart();
-		}
+		pSelf->DemoRecorder_UpdateReplayRecorder();
 	}
 }
 

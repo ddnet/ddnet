@@ -45,6 +45,7 @@ CDemoRecorder::CDemoRecorder(class CSnapshotDelta *pSnapshotDelta, bool NoMapDat
 {
 	m_File = 0;
 	m_aCurrentFilename[0] = '\0';
+	m_aTempFilename[0] = '\0';
 	m_pfnFilter = nullptr;
 	m_pUser = nullptr;
 	m_LastTickMarker = -1;
@@ -62,19 +63,18 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 {
 	dbg_assert(m_File == 0, "Demo recorder already recording");
 
-	m_pfnFilter = pfnFilter;
-	m_pUser = pUser;
-
-	m_pMapData = pMapData;
 	m_pConsole = pConsole;
+	m_pStorage = pStorage;
 
-	IOHANDLE DemoFile = pStorage->OpenFile(pFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
+	char aTempFilename[IO_MAX_PATH_LENGTH];
+	IStorage::FormatTmpPath(aTempFilename, sizeof(aTempFilename), pFilename);
+	IOHANDLE DemoFile = pStorage->OpenFile(aTempFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
 	if(!DemoFile)
 	{
 		if(m_pConsole)
 		{
-			char aBuf[256];
-			str_format(aBuf, sizeof(aBuf), "Unable to open '%s' for recording", pFilename);
+			char aBuf[64 + IO_MAX_PATH_LENGTH];
+			str_format(aBuf, sizeof(aBuf), "Unable to open '%s' for recording", aTempFilename);
 			m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_recorder", aBuf, gs_DemoPrintColor);
 		}
 		return -1;
@@ -183,11 +183,16 @@ int CDemoRecorder::Start(class IStorage *pStorage, class IConsole *pConsole, con
 	if(m_pConsole)
 	{
 		char aBuf[32 + IO_MAX_PATH_LENGTH];
-		str_format(aBuf, sizeof(aBuf), "Recording to '%s'", pFilename);
+		str_format(aBuf, sizeof(aBuf), "Recording to '%s'", aTempFilename);
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_recorder", aBuf, gs_DemoPrintColor);
 	}
+
+	m_pfnFilter = pfnFilter;
+	m_pUser = pUser;
+
 	m_File = DemoFile;
 	str_copy(m_aCurrentFilename, pFilename);
+	str_copy(m_aTempFilename, aTempFilename);
 
 	return 0;
 }
@@ -337,33 +342,73 @@ void CDemoRecorder::RecordMessage(const void *pData, int Size)
 	Write(CHUNKTYPE_MESSAGE, pData, Size);
 }
 
-int CDemoRecorder::Stop()
+void CDemoRecorder::SetCurrentFilename(const char *pFilename)
+{
+	str_copy(m_aCurrentFilename, pFilename);
+}
+
+int CDemoRecorder::Stop(bool RemoveFile)
 {
 	if(!m_File)
 		return -1;
 
-	// add the demo length to the header
-	io_seek(m_File, gs_LengthOffset, IOSEEK_START);
-	unsigned char aLength[sizeof(int32_t)];
-	uint_to_bytes_be(aLength, Length());
-	io_write(m_File, aLength, sizeof(aLength));
-
-	// add the timeline markers to the header
-	io_seek(m_File, gs_NumMarkersOffset, IOSEEK_START);
-	unsigned char aNumMarkers[sizeof(int32_t)];
-	uint_to_bytes_be(aNumMarkers, m_NumTimelineMarkers);
-	io_write(m_File, aNumMarkers, sizeof(aNumMarkers));
-	for(int i = 0; i < m_NumTimelineMarkers; i++)
+	if(!RemoveFile)
 	{
-		unsigned char aMarker[sizeof(int32_t)];
-		uint_to_bytes_be(aMarker, m_aTimelineMarkers[i]);
-		io_write(m_File, aMarker, sizeof(aMarker));
+		// add the demo length to the header
+		io_seek(m_File, gs_LengthOffset, IOSEEK_START);
+		unsigned char aLength[sizeof(int32_t)];
+		uint_to_bytes_be(aLength, Length());
+		io_write(m_File, aLength, sizeof(aLength));
+
+		// add the timeline markers to the header
+		io_seek(m_File, gs_NumMarkersOffset, IOSEEK_START);
+		unsigned char aNumMarkers[sizeof(int32_t)];
+		uint_to_bytes_be(aNumMarkers, m_NumTimelineMarkers);
+		io_write(m_File, aNumMarkers, sizeof(aNumMarkers));
+		for(int i = 0; i < m_NumTimelineMarkers; i++)
+		{
+			unsigned char aMarker[sizeof(int32_t)];
+			uint_to_bytes_be(aMarker, m_aTimelineMarkers[i]);
+			io_write(m_File, aMarker, sizeof(aMarker));
+		}
 	}
 
 	io_close(m_File);
 	m_File = 0;
+
+	if(RemoveFile)
+	{
+		if(!m_pStorage->RemoveFile(m_aTempFilename, IStorage::TYPE_SAVE))
+		{
+			if(m_pConsole)
+			{
+				char aBuf[64 + IO_MAX_PATH_LENGTH];
+				str_format(aBuf, sizeof(aBuf), "Could not remove temporary demo file '%s'.", m_aTempFilename);
+				m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_recorder", aBuf, gs_DemoPrintColor);
+			}
+			return -1;
+		}
+	}
+	else
+	{
+		if(!m_pStorage->RenameFile(m_aTempFilename, m_aCurrentFilename, IStorage::TYPE_SAVE))
+		{
+			if(m_pConsole)
+			{
+				char aBuf[64 + 2 * IO_MAX_PATH_LENGTH];
+				str_format(aBuf, sizeof(aBuf), "Could not move temporary demo file '%s' to '%s'.", m_aTempFilename, m_aCurrentFilename);
+				m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_recorder", aBuf, gs_DemoPrintColor);
+			}
+			return -1;
+		}
+	}
+
 	if(m_pConsole)
-		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_recorder", "Stopped recording", gs_DemoPrintColor);
+	{
+		char aBuf[64 + IO_MAX_PATH_LENGTH];
+		str_format(aBuf, sizeof(aBuf), "Stopped recording to '%s'", m_aTempFilename);
+		m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "demo_recorder", aBuf, gs_DemoPrintColor);
+	}
 
 	return 0;
 }

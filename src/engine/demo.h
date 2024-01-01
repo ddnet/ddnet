@@ -103,9 +103,10 @@ class IDemoRecorder : public IInterface
 public:
 	virtual ~IDemoRecorder() {}
 	virtual bool IsRecording() const = 0;
-	virtual int Stop() = 0;
+	virtual int Stop(bool RemoveFile = false) = 0;
 	virtual int Length() const = 0;
-	virtual char *GetCurrentFilename() = 0;
+	virtual const char *CurrentFilename() const = 0;
+	virtual void SetCurrentFilename(const char *pFilename) = 0;
 };
 
 class IDemoEditor : public IInterface
