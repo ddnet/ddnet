@@ -2784,6 +2784,7 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
     test.cpp
     test.h
     thread.cpp
+    timestamp.cpp
     unix.cpp
     uuid.cpp
   )

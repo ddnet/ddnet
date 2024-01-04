@@ -1711,6 +1711,21 @@ void str_timestamp_format(char *buffer, int buffer_size, const char *format)
 void str_timestamp_ex(time_t time, char *buffer, int buffer_size, const char *format)
 	GNUC_ATTRIBUTE((format(strftime, 4, 0)));
 
+/**
+ * Parses a string into a timestamp following a specified format.
+ *
+ * @ingroup Timestamp
+ *
+ * @param string Pointer to the string to parse
+ * @param format The time format to use (for example FORMAT_NOSPACE below)
+ * @param timestamp Pointer to the timestamp result
+ *
+ * @return true on success, false if the string could not be parsed with the specified format
+ *
+ */
+bool timestamp_from_str(const char *string, const char *format, time_t *timestamp)
+	GNUC_ATTRIBUTE((format(strftime, 2, 0)));
+
 #define FORMAT_TIME "%H:%M:%S"
 #define FORMAT_SPACE "%Y-%m-%d %H:%M:%S"
 #define FORMAT_NOSPACE "%Y-%m-%d_%H-%M-%S"
