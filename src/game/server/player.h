@@ -80,6 +80,8 @@ public:
 	// used for snapping to just update latency if the scoreboard is active
 	int m_aCurLatency[MAX_CLIENTS];
 
+	int m_SentSnaps = 0;
+
 	// used for spectator mode
 	int m_SpectatorID;
 

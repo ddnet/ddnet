@@ -4078,8 +4078,10 @@ void CGameContext::OnSnap(int ClientID)
 			pPlayer->Snap(ClientID);
 	}
 
-	if(ClientID > -1)
+	if(ClientID > -1) {
 		m_apPlayers[ClientID]->FakeSnap();
+		m_apPlayers[ClientID]->m_SentSnaps++;
+	}
 
 	m_World.Snap(ClientID);
 	m_Events.Snap(ClientID);
