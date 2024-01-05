@@ -40,6 +40,12 @@ def EmitFlags(names):
 	print("};")
 
 
+def only(x):
+	if len(x) != 1:
+		raise ValueError
+	return list(x)[0]
+
+
 def gen_network_header():
 	print("#ifndef GAME_GENERATED_PROTOCOL_H")
 	print("#define GAME_GENERATED_PROTOCOL_H")
@@ -265,7 +271,7 @@ void *CNetObjHandler::SecureUnpackObj(int Type, CUnpacker *pUnpacker)
 	for item in network.Objects:
 		base_item = None
 		if item.base:
-			base_item = next(i for i in network.Objects if i.name == item.base)
+			base_item = only([i for i in network.Objects if i.name == item.base])
 		for line in item.emit_uncompressed_unpack_and_validate(base_item):
 			lines += ["\t" + line]
 		lines += ['\t']

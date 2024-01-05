@@ -40,6 +40,11 @@ def EmitFlags(names):
 		i += 1
 	print("};")
 
+def only(x):
+	if len(x) != 1:
+		raise ValueError
+	return list(x)[0]
+
 def main():
 	gen_network_header = "network_header" in sys.argv
 	gen_network_source = "network_source" in sys.argv
@@ -263,7 +268,7 @@ def main():
 		for item in network.Objects:
 			base_item = None
 			if item.base:
-				base_item = next(i for i in network.Objects if i.name == item.base)
+				base_item = only([i for i in network.Objects if i.name == item.base])
 			for line in item.emit_validate(base_item):
 				lines += ["\t" + line]
 			lines += ['\t']
