@@ -281,10 +281,10 @@ void *CNetObjHandler::SecureUnpackObj(int Type, CUnpacker *pUnpacker)
 		m_pObjFailedOn = "(type out of range)";
 		break;
 	}
-	
+
 	if(pUnpacker->Error())
 		m_pObjFailedOn = "(unpack error)";
-	
+
 	if(m_pObjFailedOn)
 		return 0;
 	m_pObjFailedOn = "";
@@ -314,10 +314,10 @@ void *CNetObjHandler::SecureUnpackMsg(int Type, CUnpacker *pUnpacker)
 		m_pMsgFailedOn = "(type out of range)";
 		break;
 	}
-	
+
 	if(pUnpacker->Error())
 		m_pMsgFailedOn = "(unpack error)";
-	
+
 	if(m_pMsgFailedOn)
 		return 0;
 	m_pMsgFailedOn = "";
