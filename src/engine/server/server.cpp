@@ -1100,7 +1100,7 @@ int CServer::ClientRejoinCallback(int ClientID, void *pUser)
 
 	pThis->m_aClients[ClientID].m_Authed = AUTHED_NO;
 	pThis->m_aClients[ClientID].m_AuthKey = -1;
-	pThis->m_aClients[ClientID].m_pRconCmdToSend = 0;
+	pThis->m_aClients[ClientID].m_pRconCmdToSend = nullptr;
 	pThis->m_aClients[ClientID].m_DDNetVersion = VERSION_NONE;
 	pThis->m_aClients[ClientID].m_GotDDNetVersionPacket = false;
 	pThis->m_aClients[ClientID].m_DDNetVersionSettled = false;
@@ -1129,7 +1129,7 @@ int CServer::NewClientNoAuthCallback(int ClientID, void *pUser)
 	pThis->m_aClients[ClientID].m_Authed = AUTHED_NO;
 	pThis->m_aClients[ClientID].m_AuthKey = -1;
 	pThis->m_aClients[ClientID].m_AuthTries = 0;
-	pThis->m_aClients[ClientID].m_pRconCmdToSend = 0;
+	pThis->m_aClients[ClientID].m_pRconCmdToSend = nullptr;
 	pThis->m_aClients[ClientID].m_ShowIps = false;
 	pThis->m_aClients[ClientID].m_DebugDummy = false;
 	pThis->m_aClients[ClientID].m_DDNetVersion = VERSION_NONE;
@@ -1159,7 +1159,7 @@ int CServer::NewClientCallback(int ClientID, void *pUser, bool Sixup)
 	pThis->m_aClients[ClientID].m_Authed = AUTHED_NO;
 	pThis->m_aClients[ClientID].m_AuthKey = -1;
 	pThis->m_aClients[ClientID].m_AuthTries = 0;
-	pThis->m_aClients[ClientID].m_pRconCmdToSend = 0;
+	pThis->m_aClients[ClientID].m_pRconCmdToSend = nullptr;
 	pThis->m_aClients[ClientID].m_Traffic = 0;
 	pThis->m_aClients[ClientID].m_TrafficSince = 0;
 	pThis->m_aClients[ClientID].m_ShowIps = false;
@@ -1246,7 +1246,7 @@ int CServer::DelClientCallback(int ClientID, const char *pReason, void *pUser)
 	pThis->m_aClients[ClientID].m_Authed = AUTHED_NO;
 	pThis->m_aClients[ClientID].m_AuthKey = -1;
 	pThis->m_aClients[ClientID].m_AuthTries = 0;
-	pThis->m_aClients[ClientID].m_pRconCmdToSend = 0;
+	pThis->m_aClients[ClientID].m_pRconCmdToSend = nullptr;
 	pThis->m_aClients[ClientID].m_Traffic = 0;
 	pThis->m_aClients[ClientID].m_TrafficSince = 0;
 	pThis->m_aClients[ClientID].m_ShowIps = false;
@@ -1436,6 +1436,11 @@ void CServer::UpdateClientRconCommands()
 		{
 			SendRconCmdAdd(m_aClients[ClientID].m_pRconCmdToSend, ClientID);
 			m_aClients[ClientID].m_pRconCmdToSend = m_aClients[ClientID].m_pRconCmdToSend->NextCommandInfo(ConsoleAccessLevel, CFGFLAG_SERVER);
+			if(m_aClients[ClientID].m_pRconCmdToSend == nullptr)
+			{
+				CMsgPacker Msg(NETMSG_RCON_CMD_GROUP_END, true);
+				SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
+			}
 		}
 	}
 }
@@ -1837,6 +1842,13 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 					{
 						// AUTHED_ADMIN - AuthLevel gets the proper IConsole::ACCESS_LEVEL_<x>
 						m_aClients[ClientID].m_pRconCmdToSend = Console()->FirstCommandInfo(AUTHED_ADMIN - AuthLevel, CFGFLAG_SERVER);
+						CMsgPacker MsgStart(NETMSG_RCON_CMD_GROUP_START, true);
+						SendMsg(&MsgStart, MSGFLAG_VITAL, ClientID);
+						if(m_aClients[ClientID].m_pRconCmdToSend == nullptr)
+						{
+							CMsgPacker MsgEnd(NETMSG_RCON_CMD_GROUP_END, true);
+							SendMsg(&MsgEnd, MSGFLAG_VITAL, ClientID);
+						}
 					}
 
 					char aBuf[256];
@@ -3673,7 +3685,7 @@ void CServer::LogoutClient(int ClientID, const char *pReason)
 	}
 
 	m_aClients[ClientID].m_AuthTries = 0;
-	m_aClients[ClientID].m_pRconCmdToSend = 0;
+	m_aClients[ClientID].m_pRconCmdToSend = nullptr;
 
 	char aBuf[64];
 	if(*pReason)
