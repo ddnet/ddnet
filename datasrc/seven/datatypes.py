@@ -228,12 +228,15 @@ class NetObject:
 			lines += ["\t"+line for line in v.emit_declaration()]
 		lines += ["};"]
 		return lines
-	def emit_validate(self):
+	def emit_validate(self, base_item):
 		lines = [f"case {self.enum_name}:"]
 		lines += ["{"]
-		lines += [f"\t{self.struct_name} *pObj = ({self.struct_name} *)pData;"]
+		lines += [f"\tconst {self.struct_name} *pObj = (const {self.struct_name} *)pData;"]
 		lines += ["\tif(sizeof(*pObj) != Size) return -1;"]
-		for v in self.variables:
+		variables = self.variables
+		if base_item:
+			variables += base_item.variables
+		for v in variables:
 			lines += ["\t"+line for line in v.emit_validate()]
 		lines += ["\treturn 0;"]
 		lines += ["}"]
