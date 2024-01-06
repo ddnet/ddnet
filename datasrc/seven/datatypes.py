@@ -1,3 +1,8 @@
+def only(x):
+	if len(x) != 1:
+		raise ValueError
+	return list(x)[0]
+
 GlobalIdCounter = 0
 def GetID():
 	global GlobalIdCounter
@@ -210,15 +215,16 @@ class NetObject:
 	def __init__(self, name, variables):
 		l = name.split(":")
 		self.name = l[0]
-		self.base = ""
+		self.base = None
+		self.base_struct_name = None
 		if len(l) > 1:
 			self.base = l[1]
-		self.base_struct_name = f"CNetObj_{self.base}"
+			self.base_struct_name = f"CNetObj_{self.base}"
 		self.struct_name = f"CNetObj_{self.name}"
 		self.enum_name = f"NETOBJTYPE_{self.name.upper()}"
 		self.variables = variables
 	def emit_declaration(self):
-		if self.base:
+		if self.base is not None:
 			lines = [f"struct {self.struct_name} : public {self.base_struct_name}", "{"]
 		else:
 			lines = [f"struct {self.struct_name}", "{"]
@@ -228,12 +234,20 @@ class NetObject:
 			lines += ["\t"+line for line in v.emit_declaration()]
 		lines += ["};"]
 		return lines
-	def emit_validate(self):
+	def emit_validate(self, objects):
 		lines = [f"case {self.enum_name}:"]
 		lines += ["{"]
 		lines += [f"\t{self.struct_name} *pObj = ({self.struct_name} *)pData;"]
 		lines += ["\tif(sizeof(*pObj) != Size) return -1;"]
-		for v in self.variables:
+
+		variables = self.variables
+		next_base_name = self.base
+		while next_base_name is not None:
+			base_item = only([i for i in objects if i.name == next_base_name])
+			variables = base_item.variables + variables
+			next_base_name = base_item.base
+
+		for v in variables:
 			lines += ["\t"+line for line in v.emit_validate()]
 		lines += ["\treturn 0;"]
 		lines += ["}"]
@@ -243,14 +257,16 @@ class NetObject:
 class NetEvent(NetObject):
 	def __init__(self, name, variables):
 		NetObject.__init__(self, name, variables)
-		self.base_struct_name = f"CNetEvent_{self.base}"
+		if self.base is not None:
+			self.base_struct_name = f"CNetEvent_{self.base}"
 		self.struct_name = f"CNetEvent_{self.name}"
 		self.enum_name = f"NETEVENTTYPE_{self.name.upper()}"
 
 class NetMessage(NetObject):
 	def __init__(self, name, variables):
 		NetObject.__init__(self, name, variables)
-		self.base_struct_name = f"CNetMsg_{self.base}"
+		if self.base is not None:
+			self.base_struct_name = f"CNetMsg_{self.base}"
 		self.struct_name = f"CNetMsg_{self.name}"
 		self.enum_name = f"NETMSGTYPE_{self.name.upper()}"
 	def emit_unpack(self):
