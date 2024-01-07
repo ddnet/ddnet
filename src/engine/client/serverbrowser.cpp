@@ -97,7 +97,6 @@ void CServerBrowser::SetBaseInfo(class CNetClient *pClient, const char *pNetVers
 	m_pFriends = Kernel()->RequestInterface<IFriends>();
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 	m_pHttpClient = Kernel()->RequestInterface<IHttp>();
-	dbg_msg("cserverbrowser", "%p", m_pHttpClient);
 	m_pPingCache = CreateServerBrowserPingCache(m_pConsole, m_pStorage);
 
 	RegisterCommands();

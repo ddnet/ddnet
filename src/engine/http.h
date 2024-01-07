@@ -1,5 +1,5 @@
-#ifndef HTTP_H
-#define HTTP_H
+#ifndef ENGINE_HTTP_H
+#define ENGINE_HTTP_H
 
 #include "kernel.h"
 

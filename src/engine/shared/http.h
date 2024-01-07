@@ -188,7 +188,7 @@ public:
 	bool Done() const
 	{
 		int State = m_State;
-		return State != HTTP_QUEUED && State != HTTP_DONE;
+		return State != HTTP_QUEUED && State != HTTP_RUNNING;
 	}
 	void Abort() { m_Abort = true; }
 

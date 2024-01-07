@@ -104,9 +104,9 @@ bool CHttpRequest::BeforeInit()
 	return true;
 }
 
-bool CHttpRequest::ConfigureHandle(void *pUser)
+bool CHttpRequest::ConfigureHandle(void *pHandle)
 {
-	CURL *pHandle = (CURL *)pUser;
+	CURL *pH = (CURL *)pHandle;
 	if(!BeforeInit())
 	{
 		return false;
@@ -114,8 +114,8 @@ bool CHttpRequest::ConfigureHandle(void *pUser)
 
 	if(g_Config.m_DbgCurl)
 	{
-		curl_easy_setopt(pHandle, CURLOPT_VERBOSE, 1L);
-		curl_easy_setopt(pHandle, CURLOPT_DEBUGFUNCTION, CurlDebug);
+		curl_easy_setopt(pH, CURLOPT_VERBOSE, 1L);
+		curl_easy_setopt(pH, CURLOPT_DEBUGFUNCTION, CurlDebug);
 	}
 	long Protocols = CURLPROTO_HTTPS;
 	if(g_Config.m_HttpAllowInsecure)
@@ -123,15 +123,15 @@ bool CHttpRequest::ConfigureHandle(void *pUser)
 		Protocols |= CURLPROTO_HTTP;
 	}
 
-	curl_easy_setopt(pHandle, CURLOPT_ERRORBUFFER, m_aErr);
+	curl_easy_setopt(pH, CURLOPT_ERRORBUFFER, m_aErr);
 
-	curl_easy_setopt(pHandle, CURLOPT_CONNECTTIMEOUT_MS, m_Timeout.ConnectTimeoutMs);
-	curl_easy_setopt(pHandle, CURLOPT_TIMEOUT_MS, m_Timeout.TimeoutMs);
-	curl_easy_setopt(pHandle, CURLOPT_LOW_SPEED_LIMIT, m_Timeout.LowSpeedLimit);
-	curl_easy_setopt(pHandle, CURLOPT_LOW_SPEED_TIME, m_Timeout.LowSpeedTime);
+	curl_easy_setopt(pH, CURLOPT_CONNECTTIMEOUT_MS, m_Timeout.ConnectTimeoutMs);
+	curl_easy_setopt(pH, CURLOPT_TIMEOUT_MS, m_Timeout.TimeoutMs);
+	curl_easy_setopt(pH, CURLOPT_LOW_SPEED_LIMIT, m_Timeout.LowSpeedLimit);
+	curl_easy_setopt(pH, CURLOPT_LOW_SPEED_TIME, m_Timeout.LowSpeedTime);
 	if(m_MaxResponseSize >= 0)
 	{
-		curl_easy_setopt(pHandle, CURLOPT_MAXFILESIZE_LARGE, (curl_off_t)m_MaxResponseSize);
+		curl_easy_setopt(pH, CURLOPT_MAXFILESIZE_LARGE, (curl_off_t)m_MaxResponseSize);
 	}
 
 	// ‘CURLOPT_PROTOCOLS’ is deprecated: since 7.85.0. Use CURLOPT_PROTOCOLS_STR
@@ -140,43 +140,43 @@ bool CHttpRequest::ConfigureHandle(void *pUser)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #endif
-	curl_easy_setopt(pHandle, CURLOPT_PROTOCOLS, Protocols);
+	curl_easy_setopt(pH, CURLOPT_PROTOCOLS, Protocols);
 #ifdef __GNUC__
 #pragma GCC diagnostic pop
 #endif
-	curl_easy_setopt(pHandle, CURLOPT_FOLLOWLOCATION, 1L);
-	curl_easy_setopt(pHandle, CURLOPT_MAXREDIRS, 4L);
-	curl_easy_setopt(pHandle, CURLOPT_FAILONERROR, 1L);
-	curl_easy_setopt(pHandle, CURLOPT_URL, m_aUrl);
-	curl_easy_setopt(pHandle, CURLOPT_NOSIGNAL, 1L);
-	curl_easy_setopt(pHandle, CURLOPT_USERAGENT, GAME_NAME " " GAME_RELEASE_VERSION " (" CONF_PLATFORM_STRING "; " CONF_ARCH_STRING ")");
-	curl_easy_setopt(pHandle, CURLOPT_ACCEPT_ENCODING, ""); // Use any compression algorithm supported by libcurl.
+	curl_easy_setopt(pH, CURLOPT_FOLLOWLOCATION, 1L);
+	curl_easy_setopt(pH, CURLOPT_MAXREDIRS, 4L);
+	curl_easy_setopt(pH, CURLOPT_FAILONERROR, 1L);
+	curl_easy_setopt(pH, CURLOPT_URL, m_aUrl);
+	curl_easy_setopt(pH, CURLOPT_NOSIGNAL, 1L);
+	curl_easy_setopt(pH, CURLOPT_USERAGENT, GAME_NAME " " GAME_RELEASE_VERSION " (" CONF_PLATFORM_STRING "; " CONF_ARCH_STRING ")");
+	curl_easy_setopt(pH, CURLOPT_ACCEPT_ENCODING, ""); // Use any compression algorithm supported by libcurl.
 
-	curl_easy_setopt(pHandle, CURLOPT_WRITEDATA, this);
-	curl_easy_setopt(pHandle, CURLOPT_WRITEFUNCTION, WriteCallback);
-	curl_easy_setopt(pHandle, CURLOPT_NOPROGRESS, 0L);
-	curl_easy_setopt(pHandle, CURLOPT_PROGRESSDATA, this);
+	curl_easy_setopt(pH, CURLOPT_WRITEDATA, this);
+	curl_easy_setopt(pH, CURLOPT_WRITEFUNCTION, WriteCallback);
+	curl_easy_setopt(pH, CURLOPT_NOPROGRESS, 0L);
+	curl_easy_setopt(pH, CURLOPT_PROGRESSDATA, this);
 	// ‘CURLOPT_PROGRESSFUNCTION’ is deprecated: since 7.32.0. Use CURLOPT_XFERINFOFUNCTION
 	// See problems with curl_off_t type in header file in https://github.com/ddnet/ddnet/pull/6185/
 #ifdef __GNUC__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #endif
-	curl_easy_setopt(pHandle, CURLOPT_PROGRESSFUNCTION, ProgressCallback);
+	curl_easy_setopt(pH, CURLOPT_PROGRESSFUNCTION, ProgressCallback);
 #ifdef __GNUC__
 #pragma GCC diagnostic pop
 #endif
-	curl_easy_setopt(pHandle, CURLOPT_IPRESOLVE, m_IpResolve == IPRESOLVE::V4 ? CURL_IPRESOLVE_V4 : m_IpResolve == IPRESOLVE::V6 ? CURL_IPRESOLVE_V6 : CURL_IPRESOLVE_WHATEVER);
+	curl_easy_setopt(pH, CURLOPT_IPRESOLVE, m_IpResolve == IPRESOLVE::V4 ? CURL_IPRESOLVE_V4 : m_IpResolve == IPRESOLVE::V6 ? CURL_IPRESOLVE_V6 : CURL_IPRESOLVE_WHATEVER);
 	if(g_Config.m_Bindaddr[0] != '\0')
 	{
-		curl_easy_setopt(pHandle, CURLOPT_INTERFACE, g_Config.m_Bindaddr);
+		curl_easy_setopt(pH, CURLOPT_INTERFACE, g_Config.m_Bindaddr);
 	}
 
 	if(curl_version_info(CURLVERSION_NOW)->version_num < 0x074400)
 	{
 		// Causes crashes, see https://github.com/ddnet/ddnet/issues/4342.
 		// No longer a problem in curl 7.68 and above, and 0x44 = 68.
-		curl_easy_setopt(pHandle, CURLOPT_FORBID_REUSE, 1L);
+		curl_easy_setopt(pH, CURLOPT_FORBID_REUSE, 1L);
 	}
 
 #ifdef CONF_PLATFORM_ANDROID
@@ -188,7 +188,7 @@ bool CHttpRequest::ConfigureHandle(void *pUser)
 	case REQUEST::GET:
 		break;
 	case REQUEST::HEAD:
-		curl_easy_setopt(pHandle, CURLOPT_NOBODY, 1L);
+		curl_easy_setopt(pH, CURLOPT_NOBODY, 1L);
 		break;
 	case REQUEST::POST:
 	case REQUEST::POST_JSON:
@@ -200,12 +200,12 @@ bool CHttpRequest::ConfigureHandle(void *pUser)
 		{
 			Header("Content-Type:");
 		}
-		curl_easy_setopt(pHandle, CURLOPT_POSTFIELDS, m_pBody);
-		curl_easy_setopt(pHandle, CURLOPT_POSTFIELDSIZE, m_BodyLength);
+		curl_easy_setopt(pH, CURLOPT_POSTFIELDS, m_pBody);
+		curl_easy_setopt(pH, CURLOPT_POSTFIELDSIZE, m_BodyLength);
 		break;
 	}
 
-	curl_easy_setopt(pHandle, CURLOPT_HTTPHEADER, m_pHeaders);
+	curl_easy_setopt(pH, CURLOPT_HTTPHEADER, m_pHeaders);
 
 	return true;
 }
