@@ -261,7 +261,7 @@ def main():
 		lines += ['\t{']
 
 		for item in network.Objects:
-			for line in item.emit_validate():
+			for line in item.emit_validate(network.Objects):
 				lines += ["\t" + line]
 			lines += ['\t']
 		lines += ['\t}']
