@@ -496,19 +496,27 @@ bool CConfigManager::Save()
 		WriteLine(pCommand);
 	}
 
+	if(m_Failed)
+	{
+		log_error("config", "ERROR: writing to %s failed", aConfigFileTmp);
+	}
+
 	if(io_sync(m_ConfigFile) != 0)
 	{
 		m_Failed = true;
+		log_error("config", "ERROR: synchronizing %s failed", aConfigFileTmp);
 	}
 
 	if(io_close(m_ConfigFile) != 0)
+	{
 		m_Failed = true;
+		log_error("config", "ERROR: closing %s failed", aConfigFileTmp);
+	}
 
 	m_ConfigFile = 0;
 
 	if(m_Failed)
 	{
-		log_error("config", "ERROR: writing to %s failed", aConfigFileTmp);
 		return false;
 	}
 
