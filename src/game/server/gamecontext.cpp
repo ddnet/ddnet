@@ -4744,3 +4744,31 @@ void CGameContext::OnUpdatePlayerServerInfo(char *aBuf, int BufSize, int ID)
 		JsonBool(m_apPlayers[ID]->IsAfk()),
 		Team);
 }
+
+void CGameContext::OnUpdateServerInfo(char *aBuf, int BufSize) const
+{
+	if(BufSize <= 0)
+		return;
+
+	aBuf[0] = '\0';
+	const char *pScoreKind;
+
+	switch(m_pController->ScoreKind())
+	{
+	case CServerInfo::CLIENT_SCORE_KIND_TIME:
+		pScoreKind = "time";
+		break;
+	case CServerInfo::CLIENT_SCORE_KIND_POINTS:
+		pScoreKind = "points";
+		break;
+	case CServerInfo::CLIENT_SCORE_KIND_TIME_BACKCOMPAT:
+	case CServerInfo::CLIENT_SCORE_KIND_UNSPECIFIED:
+	default:
+		dbg_assert(false, "IGameController::ScoreKind returned invalid value");
+		dbg_break();
+	}
+
+	str_format(aBuf, BufSize,
+		"\"client_score_kind\":\"%s\",",
+		pScoreKind);
+}

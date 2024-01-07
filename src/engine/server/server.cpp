@@ -2383,6 +2383,9 @@ void CServer::UpdateRegisterServerInfo()
 
 	sha256_str(m_aCurrentMapSha256[MAP_TYPE_SIX], aMapSha256, sizeof(aMapSha256));
 
+	char aExtraServerInfo[512];
+	GameServer()->OnUpdateServerInfo(aExtraServerInfo, sizeof(aExtraServerInfo));
+
 	char aInfo[16384];
 	str_format(aInfo, sizeof(aInfo),
 		"{"
@@ -2397,7 +2400,7 @@ void CServer::UpdateRegisterServerInfo()
 		"\"size\":%d"
 		"},"
 		"\"version\":\"%s\","
-		"\"client_score_kind\":\"time\","
+		"%s"
 		"\"clients\":[",
 		MaxClients,
 		MaxPlayers,
@@ -2407,7 +2410,8 @@ void CServer::UpdateRegisterServerInfo()
 		EscapeJson(aMapName, sizeof(aMapName), m_aCurrentMap),
 		aMapSha256,
 		m_aCurrentMapSize[MAP_TYPE_SIX],
-		EscapeJson(aVersion, sizeof(aVersion), GameServer()->Version()));
+		EscapeJson(aVersion, sizeof(aVersion), GameServer()->Version()),
+		aExtraServerInfo);
 
 	bool FirstPlayer = true;
 	for(int i = 0; i < MAX_CLIENTS; i++)

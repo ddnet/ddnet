@@ -5,6 +5,7 @@
 
 #include <base/vmath.h>
 #include <engine/map.h>
+#include <engine/serverbrowser.h>
 #include <engine/shared/protocol.h>
 #include <game/server/teams.h>
 
@@ -150,6 +151,7 @@ public:
 
 	CClientMask GetMaskForPlayerWorldEvent(int Asker, int ExceptID = -1);
 	virtual void InitTeleporter();
+	virtual CServerInfo::EClientScoreKind ScoreKind() const { return CServerInfo::CLIENT_SCORE_KIND_TIME; };
 
 	bool IsTeamPlay() { return m_GameFlags & GAMEFLAG_TEAMS; }
 	// DDRace

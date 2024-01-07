@@ -365,6 +365,12 @@ public:
 	 * @param i The client id.
 	 */
 	virtual void OnUpdatePlayerServerInfo(char *aBuf, int BufSize, int ID) = 0;
+	/**
+	 * Used to report custom server info to master servers.
+	 *
+	 * @param aBuf Should be the json key values to add, starting with a ',' beforehand, like: ',"client_score_kind": "points", "custom": 1'
+	 */
+	virtual void OnUpdateServerInfo(char *aBuf, int BufSize) const = 0;
 };
 
 extern IGameServer *CreateGameServer();
