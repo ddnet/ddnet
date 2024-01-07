@@ -17,11 +17,19 @@ IGNORE_FILES = [
 	"src/engine/client/keynames.h",
 	"src/engine/keys.h",
 ]
+IGNORE_DIRS = [
+	"src/game/generated",
+	"src/rust-bridge"
+]
 def filter_ignored(filenames):
-	return [filename for filename in filenames
-		if filename not in IGNORE_FILES
-		and not filename.startswith("src/game/generated/")
-        and not filename.startswith("src/rust-bridge")]
+	result = []
+	for filename in filenames:
+		real_filename = os.path.realpath(filename)
+		if real_filename not in [os.path.realpath(ignore_file) for ignore_file in IGNORE_FILES] \
+			and not any(real_filename.startswith(os.path.realpath(subdir) + os.path.sep) for subdir in IGNORE_DIRS):
+			result.append(filename)
+
+	return result
 
 def filter_cpp(filenames):
 	return [filename for filename in filenames
