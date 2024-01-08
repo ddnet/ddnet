@@ -5,7 +5,8 @@
 
 #include <engine/updater.h>
 
-#include <map>
+#include <forward_list>
+#include <memory>
 #include <string>
 
 #define CLIENT_EXEC "DDNet"
@@ -34,6 +35,8 @@
 #define PLAT_CLIENT_EXEC CLIENT_EXEC PLAT_EXT
 #define PLAT_SERVER_EXEC SERVER_EXEC PLAT_EXT
 
+class CUpdaterFetchTask;
+
 class CUpdater : public IUpdater
 {
 	friend class CUpdaterFetchTask;
@@ -48,14 +51,15 @@ class CUpdater : public IUpdater
 	int m_State;
 	char m_aStatus[256] GUARDED_BY(m_Lock);
 	int m_Percent GUARDED_BY(m_Lock);
-	char m_aLastFile[256];
 	char m_aClientExecTmp[64];
 	char m_aServerExecTmp[64];
 
+	std::forward_list<std::pair<std::string, bool>> m_FileJobs;
+	std::shared_ptr<CUpdaterFetchTask> m_pCurrentTask;
+	decltype(m_FileJobs)::iterator m_CurrentJob;
+
 	bool m_ClientUpdate;
 	bool m_ServerUpdate;
-
-	std::map<std::string, bool> m_FileJobs;
 
 	void AddFileJob(const char *pFile, bool Job);
 	void FetchFile(const char *pFile, const char *pDestPath = nullptr);
@@ -63,6 +67,7 @@ class CUpdater : public IUpdater
 
 	void ParseUpdate();
 	void PerformUpdate();
+	void RunningUpdate();
 	void CommitUpdate();
 
 	bool ReplaceClient();

@@ -13,7 +13,6 @@
 
 #include <cstdlib> // system
 
-using std::map;
 using std::string;
 
 class CUpdaterFetchTask : public CHttpRequest
@@ -57,7 +56,6 @@ CUpdaterFetchTask::CUpdaterFetchTask(CUpdater *pUpdater, const char *pFile, cons
 void CUpdaterFetchTask::OnProgress()
 {
 	CLockScope ls(m_pUpdater->m_Lock);
-	str_copy(m_pUpdater->m_aStatus, Dest());
 	m_pUpdater->m_Percent = Progress();
 }
 
@@ -75,13 +73,6 @@ void CUpdaterFetchTask::OnCompletion()
 		else if(State() == HTTP_ERROR)
 			m_pUpdater->SetCurrentState(IUpdater::FAIL);
 	}
-	else if(!str_comp(pFileName, m_pUpdater->m_aLastFile))
-	{
-		if(State() == HTTP_DONE)
-			m_pUpdater->SetCurrentState(IUpdater::MOVE_FILES);
-		else if(State() == HTTP_ERROR)
-			m_pUpdater->SetCurrentState(IUpdater::FAIL);
-	}
 }
 
 CUpdater::CUpdater()
@@ -92,6 +83,7 @@ CUpdater::CUpdater()
 	m_pHttp = nullptr;
 	m_State = CLEAN;
 	m_Percent = 0;
+	m_pCurrentTask = nullptr;
 
 	IStorage::FormatTmpPath(m_aClientExecTmp, sizeof(m_aClientExecTmp), CLIENT_EXEC);
 	IStorage::FormatTmpPath(m_aServerExecTmp, sizeof(m_aServerExecTmp), SERVER_EXEC);
@@ -131,7 +123,10 @@ int CUpdater::GetCurrentPercent()
 
 void CUpdater::FetchFile(const char *pFile, const char *pDestPath)
 {
-	m_pHttp->Run(std::make_shared<CUpdaterFetchTask>(this, pFile, pDestPath));
+	CLockScope ls(m_Lock);
+	m_pCurrentTask = std::make_shared<CUpdaterFetchTask>(this, pFile, pDestPath);
+	str_copy(m_aStatus, m_pCurrentTask->Dest());
+	m_pHttp->Run(m_pCurrentTask);
 }
 
 bool CUpdater::MoveFile(const char *pFile)
@@ -173,6 +168,9 @@ void CUpdater::Update()
 	case IUpdater::GOT_MANIFEST:
 		PerformUpdate();
 		break;
+	case IUpdater::DOWNLOADING:
+		RunningUpdate();
+		break;
 	case IUpdater::MOVE_FILES:
 		CommitUpdate();
 		break;
@@ -183,7 +181,7 @@ void CUpdater::Update()
 
 void CUpdater::AddFileJob(const char *pFile, bool Job)
 {
-	m_FileJobs[string(pFile)] = Job;
+	m_FileJobs.emplace_front(std::make_pair(pFile, Job));
 }
 
 bool CUpdater::ReplaceClient()
@@ -276,33 +274,39 @@ void CUpdater::ParseUpdate()
 
 void CUpdater::InitiateUpdate()
 {
-	m_State = GETTING_MANIFEST;
+	SetCurrentState(IUpdater::GETTING_MANIFEST);
 	FetchFile("update.json");
 }
 
 void CUpdater::PerformUpdate()
 {
-	m_State = PARSING_UPDATE;
+	SetCurrentState(IUpdater::PARSING_UPDATE);
 	dbg_msg("updater", "parsing update.json");
 	ParseUpdate();
-	m_State = DOWNLOADING;
+	m_CurrentJob = m_FileJobs.begin();
+	SetCurrentState(IUpdater::DOWNLOADING);
+}
 
-	const char *pLastFile;
-	pLastFile = "";
-	for(map<string, bool>::reverse_iterator it = m_FileJobs.rbegin(); it != m_FileJobs.rend(); ++it)
+void CUpdater::RunningUpdate()
+{
+	if(m_pCurrentTask)
 	{
-		if(it->second)
+		if(!m_pCurrentTask->Done())
 		{
-			pLastFile = it->first.c_str();
-			break;
+			return;
+		}
+		else if(m_pCurrentTask->State() == HTTP_ERROR || m_pCurrentTask->State() == HTTP_ABORTED)
+		{
+			SetCurrentState(IUpdater::FAIL);
 		}
 	}
 
-	for(auto &FileJob : m_FileJobs)
+	if(m_CurrentJob != m_FileJobs.end())
 	{
-		if(FileJob.second)
+		auto &Job = *m_CurrentJob;
+		if(Job.second)
 		{
-			const char *pFile = FileJob.first.c_str();
+			const char *pFile = Job.first.c_str();
 			size_t len = str_length(pFile);
 			if(!str_comp_nocase(pFile + len - 4, ".dll"))
 			{
@@ -330,24 +334,32 @@ void CUpdater::PerformUpdate()
 			{
 				FetchFile(pFile);
 			}
-			pLastFile = pFile;
 		}
 		else
-			m_pStorage->RemoveBinaryFile(FileJob.first.c_str());
-	}
+		{
+			m_pStorage->RemoveBinaryFile(Job.first.c_str());
+		}
 
-	if(m_ServerUpdate)
-	{
-		FetchFile(PLAT_SERVER_DOWN, m_aServerExecTmp);
-		pLastFile = m_aServerExecTmp;
+		m_CurrentJob++;
 	}
-	if(m_ClientUpdate)
+	else
 	{
-		FetchFile(PLAT_CLIENT_DOWN, m_aClientExecTmp);
-		pLastFile = m_aClientExecTmp;
-	}
+		if(m_ServerUpdate)
+		{
+			FetchFile(PLAT_SERVER_DOWN, m_aServerExecTmp);
+			m_ServerUpdate = false;
+			return;
+		}
 
-	str_copy(m_aLastFile, pLastFile);
+		if(m_ClientUpdate)
+		{
+			FetchFile(PLAT_SERVER_DOWN, m_aServerExecTmp);
+			m_ClientUpdate = false;
+			return;
+		}
+
+		SetCurrentState(IUpdater::MOVE_FILES);
+	}
 }
 
 void CUpdater::CommitUpdate()
