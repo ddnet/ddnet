@@ -465,8 +465,8 @@ private:
 						if(GetX >= 0 && GetY >= 0 && GetX < w && GetY < h)
 						{
 							int Index = GetY * w + GetX;
-							if(pIn[Index] > c)
-								c = pIn[Index];
+							float Mask = 1.f - clamp(length(vec2(sx, sy)) - OutlineCount, 0.f, 1.f);
+							c = maximum(c, int(pIn[Index] * Mask));
 						}
 					}
 				}
