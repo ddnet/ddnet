@@ -13,8 +13,6 @@
 #include <array>
 #include <vector>
 
-#include <zlib.h>
-
 enum
 {
 	ITEMTYPE_EX = 0xffff,
@@ -70,13 +68,21 @@ public:
 // write access
 class CDataFileWriter
 {
+public:
+	enum ECompressionLevel
+	{
+		COMPRESSION_DEFAULT,
+		COMPRESSION_BEST,
+	};
+
+private:
 	struct CDataInfo
 	{
 		void *m_pUncompressedData;
 		int m_UncompressedSize;
 		void *m_pCompressedData;
 		int m_CompressedSize;
-		int m_CompressionLevel;
+		ECompressionLevel m_CompressionLevel;
 	};
 
 	struct CItemInfo
@@ -131,7 +137,7 @@ public:
 
 	bool Open(class IStorage *pStorage, const char *pFilename, int StorageType = IStorage::TYPE_SAVE);
 	int AddItem(int Type, int ID, size_t Size, const void *pData, const CUuid *pUuid = nullptr);
-	int AddData(size_t Size, const void *pData, int CompressionLevel = Z_DEFAULT_COMPRESSION);
+	int AddData(size_t Size, const void *pData, ECompressionLevel CompressionLevel = COMPRESSION_DEFAULT);
 	int AddDataSwapped(size_t Size, const void *pData);
 	int AddDataString(const char *pStr);
 	void Finish();
