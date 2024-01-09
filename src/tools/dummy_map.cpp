@@ -7,6 +7,8 @@
 
 #include <game/mapitems.h>
 
+#include <zlib.h>
+
 void CreateEmptyMap(IStorage *pStorage)
 {
 	const char *pMapName = "maps/dummy3.map";

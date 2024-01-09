@@ -308,7 +308,7 @@ int main(int argc, const char **argv)
 			}
 		}
 
-		Writer.AddData(Size, pPtr, Z_BEST_COMPRESSION);
+		Writer.AddData(Size, pPtr, CDataFileWriter::COMPRESSION_BEST);
 
 		if(DeletePtr)
 			free(pPtr);

@@ -14,6 +14,8 @@
 #include <cstdlib>
 #include <limits>
 
+#include <zlib.h>
+
 static const int DEBUG = 0;
 
 enum
@@ -732,7 +734,7 @@ int CDataFileWriter::AddItem(int Type, int ID, size_t Size, const void *pData, c
 	return NumItems;
 }
 
-int CDataFileWriter::AddData(size_t Size, const void *pData, int CompressionLevel)
+int CDataFileWriter::AddData(size_t Size, const void *pData, ECompressionLevel CompressionLevel)
 {
 	dbg_assert(Size > 0 && pData != nullptr, "Data missing");
 	dbg_assert(Size <= (size_t)std::numeric_limits<int>::max(), "Data too large");
@@ -776,6 +778,20 @@ int CDataFileWriter::AddDataString(const char *pStr)
 	return AddData(str_length(pStr) + 1, pStr);
 }
 
+static int CompressionLevelToZlib(CDataFileWriter::ECompressionLevel CompressionLevel)
+{
+	switch(CompressionLevel)
+	{
+	case CDataFileWriter::COMPRESSION_DEFAULT:
+		return Z_DEFAULT_COMPRESSION;
+	case CDataFileWriter::COMPRESSION_BEST:
+		return Z_BEST_COMPRESSION;
+	default:
+		dbg_assert(false, "CompressionLevel invalid");
+		dbg_break();
+	}
+}
+
 void CDataFileWriter::Finish()
 {
 	dbg_assert((bool)m_File, "File not open");
@@ -786,7 +802,7 @@ void CDataFileWriter::Finish()
 	{
 		unsigned long CompressedSize = compressBound(DataInfo.m_UncompressedSize);
 		DataInfo.m_pCompressedData = malloc(CompressedSize);
-		const int Result = compress2((Bytef *)DataInfo.m_pCompressedData, &CompressedSize, (Bytef *)DataInfo.m_pUncompressedData, DataInfo.m_UncompressedSize, DataInfo.m_CompressionLevel);
+		const int Result = compress2((Bytef *)DataInfo.m_pCompressedData, &CompressedSize, (Bytef *)DataInfo.m_pUncompressedData, DataInfo.m_UncompressedSize, CompressionLevelToZlib(DataInfo.m_CompressionLevel));
 		DataInfo.m_CompressedSize = CompressedSize;
 		free(DataInfo.m_pUncompressedData);
 		DataInfo.m_pUncompressedData = nullptr;

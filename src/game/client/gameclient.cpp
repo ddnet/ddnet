@@ -3741,7 +3741,7 @@ bool CGameClient::InitMultiView(int Team)
 			CurPosition.y = CurCharacter.m_Y;
 		}
 
-		int ClosestDistance = INT_MAX;
+		int ClosestDistance = std::numeric_limits<int>::max();
 		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
 			if(!m_Snap.m_apPlayerInfos[i] || m_Snap.m_apPlayerInfos[i]->m_Team == TEAM_SPECTATORS || m_Teams.Team(i) != m_MultiViewTeam)
