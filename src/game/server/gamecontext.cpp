@@ -1445,10 +1445,22 @@ void CGameContext::ProgressVoteOptions(int ClientID)
 	}
 
 	// send msg
+	if(pPl->m_SendVoteIndex == 0)
+	{
+		CNetMsg_Sv_VoteOptionGroupStart StartMsg;
+		Server()->SendPackMsg(&StartMsg, MSGFLAG_VITAL, ClientID);
+	}
+
 	OptionMsg.m_NumOptions = NumVotesToSend;
 	Server()->SendPackMsg(&OptionMsg, MSGFLAG_VITAL, ClientID);
 
 	pPl->m_SendVoteIndex += NumVotesToSend;
+
+	if(pPl->m_SendVoteIndex == m_NumVoteOptions)
+	{
+		CNetMsg_Sv_VoteOptionGroupEnd EndMsg;
+		Server()->SendPackMsg(&EndMsg, MSGFLAG_VITAL, ClientID);
+	}
 }
 
 void CGameContext::OnClientEnter(int ClientID)
@@ -1480,6 +1492,10 @@ void CGameContext::OnClientEnter(int ClientID)
 		}
 	}
 
+	{
+		CNetMsg_Sv_CommandInfoGroupStart Msg;
+		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientID);
+	}
 	for(const IConsole::CCommandInfo *pCmd = Console()->FirstCommandInfo(IConsole::ACCESS_LEVEL_USER, CFGFLAG_CHAT);
 		pCmd; pCmd = pCmd->NextCommandInfo(IConsole::ACCESS_LEVEL_USER, CFGFLAG_CHAT))
 	{
@@ -1507,6 +1523,10 @@ void CGameContext::OnClientEnter(int ClientID)
 			Msg.m_pHelpText = pCmd->m_pHelp;
 			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientID);
 		}
+	}
+	{
+		CNetMsg_Sv_CommandInfoGroupEnd Msg;
+		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientID);
 	}
 
 	{

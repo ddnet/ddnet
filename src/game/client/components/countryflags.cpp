@@ -75,8 +75,7 @@ void CCountryFlags::LoadCountryflagsIndexfile()
 		CCountryFlag CountryFlag;
 		CountryFlag.m_CountryCode = CountryCode;
 		str_copy(CountryFlag.m_aCountryCodeString, aOrigin);
-		CountryFlag.m_Texture = Graphics()->LoadTextureRaw(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, 0, aOrigin);
-		Graphics()->FreePNG(&Info);
+		CountryFlag.m_Texture = Graphics()->LoadTextureRawMove(Info.m_Width, Info.m_Height, Info.m_Format, Info.m_pData, 0, aOrigin);
 
 		if(g_Config.m_Debug)
 		{

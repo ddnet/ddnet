@@ -2997,7 +2997,11 @@ void CClient::Run()
 			{
 				// write down the config and quit
 				if(!m_pConfigManager->Save())
-					m_vWarnings.emplace_back(Localize("Saving ddnet-settings.cfg failed"));
+				{
+					char aWarning[128];
+					str_format(aWarning, sizeof(aWarning), Localize("Saving settings to '%s' failed"), CONFIG_FILE);
+					m_vWarnings.emplace_back(aWarning);
+				}
 				s_SavedConfig = true;
 			}
 
@@ -4303,6 +4307,8 @@ int main(int argc, const char **argv)
 	pKernel->RegisterInterface(pClient, false);
 	pClient->RegisterInterfaces();
 	CleanerFunctions.emplace([pKernel, pClient]() {
+		// Ensure that the assert handler doesn't use the client/graphics after they've been destroyed
+		dbg_assert_set_handler(nullptr);
 		pKernel->Shutdown();
 		delete pKernel;
 		delete pClient;

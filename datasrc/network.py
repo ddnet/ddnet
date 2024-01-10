@@ -572,4 +572,10 @@ Messages = [
 	NetMessageEx("Sv_CommandInfoRemove", "commandinfo-remove@netmsg.ddnet.org", [
 			NetStringStrict("m_pName")
 	]),
+
+	NetMessageEx("Sv_VoteOptionGroupStart", "sv-vote-option-group-start@netmsg.ddnet.org", []),
+	NetMessageEx("Sv_VoteOptionGroupEnd", "sv-vote-option-group-end@netmsg.ddnet.org", []),
+
+	NetMessageEx("Sv_CommandInfoGroupStart", "sv-commandinfo-group-start@netmsg.ddnet.org", []),
+	NetMessageEx("Sv_CommandInfoGroupEnd", "sv-commandinfo-group-end@netmsg.ddnet.org", []),
 ]

@@ -9,7 +9,9 @@
 #include <cstdarg>
 #include <cstdio>
 #include <cstring>
+#include <iomanip> // std::get_time
 #include <iterator> // std::size
+#include <sstream> // std::istringstream
 #include <string_view>
 
 #include "lock.h"
@@ -271,7 +273,7 @@ IOHANDLE io_open_impl(const char *filename, int flags)
 	else if(flags == IOFLAG_WRITE)
 	{
 		desired_access = FILE_WRITE_DATA;
-		creation_disposition = OPEN_ALWAYS;
+		creation_disposition = CREATE_ALWAYS;
 		open_mode = "wb";
 	}
 	else if(flags == IOFLAG_APPEND)
@@ -3445,6 +3447,22 @@ void str_timestamp_format(char *buffer, int buffer_size, const char *format)
 void str_timestamp(char *buffer, int buffer_size)
 {
 	str_timestamp_format(buffer, buffer_size, FORMAT_NOSPACE);
+}
+
+bool timestamp_from_str(const char *string, const char *format, time_t *timestamp)
+{
+	std::tm tm{};
+	std::istringstream ss(string);
+	ss >> std::get_time(&tm, format);
+	if(ss.fail() || !ss.eof())
+		return false;
+
+	time_t result = mktime(&tm);
+	if(result < 0)
+		return false;
+
+	*timestamp = result;
+	return true;
 }
 #ifdef __GNUC__
 #pragma GCC diagnostic pop

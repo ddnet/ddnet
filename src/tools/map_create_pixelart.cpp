@@ -375,11 +375,11 @@ void SaveOutputMap(CDataFileReader &InputMap, CDataFileWriter &OutputMap, CMapIt
 	for(int i = 0; i < InputMap.NumItems(); i++)
 	{
 		int ID, Type;
-		void *pItem = InputMap.GetItem(i, &Type, &ID);
+		CUuid Uuid;
+		void *pItem = InputMap.GetItem(i, &Type, &ID, &Uuid);
 
-		// Filter items with unknown type, as we can't write them back.
 		// Filter ITEMTYPE_EX items, they will be automatically added again.
-		if(Type < 0 || Type == ITEMTYPE_EX)
+		if(Type == ITEMTYPE_EX)
 		{
 			continue;
 		}
@@ -388,7 +388,7 @@ void SaveOutputMap(CDataFileReader &InputMap, CDataFileWriter &OutputMap, CMapIt
 			pItem = pNewItem;
 
 		int Size = InputMap.GetItemSize(i);
-		OutputMap.AddItem(Type, ID, Size, pItem);
+		OutputMap.AddItem(Type, ID, Size, pItem, &Uuid);
 	}
 
 	for(int i = 0; i < InputMap.NumData(); i++)

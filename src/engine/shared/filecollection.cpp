@@ -8,88 +8,9 @@
 
 #include "filecollection.h"
 
-bool CFileCollection::IsFilenameValid(const char *pFilename)
-{
-	if(!str_endswith(pFilename, m_aFileExt))
-		return false;
-
-	if(m_aFileDesc[0] == '\0')
-	{
-		int FilenameLength = str_length(pFilename);
-		if(m_FileExtLength + TIMESTAMP_LENGTH > FilenameLength)
-		{
-			return false;
-		}
-
-		pFilename += FilenameLength - m_FileExtLength - TIMESTAMP_LENGTH;
-	}
-	else
-	{
-		if(str_length(pFilename) != m_FileDescLength + TIMESTAMP_LENGTH + m_FileExtLength ||
-			!str_startswith(pFilename, m_aFileDesc))
-			return false;
-
-		pFilename += m_FileDescLength;
-	}
-
-	return pFilename[0] == '_' &&
-	       pFilename[1] >= '0' && pFilename[1] <= '9' &&
-	       pFilename[2] >= '0' && pFilename[2] <= '9' &&
-	       pFilename[3] >= '0' && pFilename[3] <= '9' &&
-	       pFilename[4] >= '0' && pFilename[4] <= '9' &&
-	       pFilename[5] == '-' &&
-	       pFilename[6] >= '0' && pFilename[6] <= '9' &&
-	       pFilename[7] >= '0' && pFilename[7] <= '9' &&
-	       pFilename[8] == '-' &&
-	       pFilename[9] >= '0' && pFilename[9] <= '9' &&
-	       pFilename[10] >= '0' && pFilename[10] <= '9' &&
-	       pFilename[11] == '_' &&
-	       pFilename[12] >= '0' && pFilename[12] <= '9' &&
-	       pFilename[13] >= '0' && pFilename[13] <= '9' &&
-	       pFilename[14] == '-' &&
-	       pFilename[15] >= '0' && pFilename[15] <= '9' &&
-	       pFilename[16] >= '0' && pFilename[16] <= '9' &&
-	       pFilename[17] == '-' &&
-	       pFilename[18] >= '0' && pFilename[18] <= '9' &&
-	       pFilename[19] >= '0' && pFilename[19] <= '9';
-}
-
-int64_t CFileCollection::ExtractTimestamp(const char *pTimestring)
-{
-	int64_t Timestamp = pTimestring[0] - '0';
-	Timestamp <<= 4;
-	Timestamp += pTimestring[1] - '0';
-	Timestamp <<= 4;
-	Timestamp += pTimestring[2] - '0';
-	Timestamp <<= 4;
-	Timestamp += pTimestring[3] - '0';
-	Timestamp <<= 4;
-	Timestamp += pTimestring[5] - '0';
-	Timestamp <<= 4;
-	Timestamp += pTimestring[6] - '0';
-	Timestamp <<= 4;
-	Timestamp += pTimestring[8] - '0';
-	Timestamp <<= 4;
-	Timestamp += pTimestring[9] - '0';
-	Timestamp <<= 4;
-	Timestamp += pTimestring[11] - '0';
-	Timestamp <<= 4;
-	Timestamp += pTimestring[12] - '0';
-	Timestamp <<= 4;
-	Timestamp += pTimestring[14] - '0';
-	Timestamp <<= 4;
-	Timestamp += pTimestring[15] - '0';
-	Timestamp <<= 4;
-	Timestamp += pTimestring[17] - '0';
-	Timestamp <<= 4;
-	Timestamp += pTimestring[18] - '0';
-
-	return Timestamp;
-}
-
 void CFileCollection::Init(IStorage *pStorage, const char *pPath, const char *pFileDesc, const char *pFileExt, int MaxEntries)
 {
-	m_vTimestamps.clear();
+	m_vFileEntries.clear();
 	str_copy(m_aFileDesc, pFileDesc);
 	m_FileDescLength = str_length(m_aFileDesc);
 	str_copy(m_aFileExt, pFileExt);
@@ -98,12 +19,12 @@ void CFileCollection::Init(IStorage *pStorage, const char *pPath, const char *pF
 	m_pStorage = pStorage;
 
 	m_pStorage->ListDirectory(IStorage::TYPE_SAVE, m_aPath, FilelistCallback, this);
-	std::sort(m_vTimestamps.begin(), m_vTimestamps.end(), [](const CFileEntry &lhs, const CFileEntry &rhs) { return lhs.m_Timestamp < rhs.m_Timestamp; });
+	std::sort(m_vFileEntries.begin(), m_vFileEntries.end(), [](const CFileEntry &lhs, const CFileEntry &rhs) { return lhs.m_Timestamp < rhs.m_Timestamp; });
 
 	int FilesDeleted = 0;
-	for(auto FileEntry : m_vTimestamps)
+	for(auto FileEntry : m_vFileEntries)
 	{
-		if((int)m_vTimestamps.size() - FilesDeleted <= MaxEntries)
+		if((int)m_vFileEntries.size() - FilesDeleted <= MaxEntries)
 			break;
 
 		char aBuf[IO_MAX_PATH_LENGTH];
@@ -123,32 +44,59 @@ void CFileCollection::Init(IStorage *pStorage, const char *pPath, const char *pF
 	}
 }
 
-int64_t CFileCollection::GetTimestamp(const char *pFilename)
+bool CFileCollection::ExtractTimestamp(const char *pTimestring, time_t *pTimestamp)
 {
+	// Discard anything after timestamp length from pTimestring (most likely the extension)
+	char aStrippedTimestring[TIMESTAMP_LENGTH];
+	str_copy(aStrippedTimestring, pTimestring);
+	return timestamp_from_str(aStrippedTimestring, FORMAT_NOSPACE, pTimestamp);
+}
+
+bool CFileCollection::ParseFilename(const char *pFilename, time_t *pTimestamp)
+{
+	// Check if filename is valid
+	if(!str_endswith(pFilename, m_aFileExt))
+		return false;
+
+	const char *pTimestring = pFilename;
+
 	if(m_aFileDesc[0] == '\0')
 	{
 		int FilenameLength = str_length(pFilename);
-		return ExtractTimestamp(pFilename + FilenameLength - m_FileExtLength - TIMESTAMP_LENGTH + 1);
+		if(m_FileExtLength + TIMESTAMP_LENGTH > FilenameLength)
+		{
+			return false;
+		}
+
+		pTimestring += FilenameLength - m_FileExtLength - TIMESTAMP_LENGTH + 1;
 	}
 	else
 	{
-		return ExtractTimestamp(pFilename + m_FileDescLength + 1);
+		if(str_length(pFilename) != m_FileDescLength + TIMESTAMP_LENGTH + m_FileExtLength ||
+			!str_startswith(pFilename, m_aFileDesc))
+			return false;
+
+		pTimestring += m_FileDescLength + 1;
 	}
+
+	// Extract timestamp
+	if(!ExtractTimestamp(pTimestring, pTimestamp))
+		return false;
+
+	return true;
 }
 
 int CFileCollection::FilelistCallback(const char *pFilename, int IsDir, int StorageType, void *pUser)
 {
 	CFileCollection *pThis = static_cast<CFileCollection *>(pUser);
 
-	// check for valid file name format
-	if(IsDir || !pThis->IsFilenameValid(pFilename))
+	// Try to parse filename and extract timestamp
+	time_t Timestamp;
+	if(IsDir || !pThis->ParseFilename(pFilename, &Timestamp))
 		return 0;
 
-	// extract the timestamp
-	int64_t Timestamp = pThis->GetTimestamp(pFilename);
-
-	// add the entry
-	pThis->m_vTimestamps.emplace_back(Timestamp, pFilename);
+	// Add the entry
+	pThis->m_vFileEntries.emplace_back(Timestamp, pFilename);
 
 	return 0;
 }

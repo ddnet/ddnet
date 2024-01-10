@@ -218,11 +218,11 @@ int main(int argc, const char **argv)
 	for(int Index = 0; Index < g_DataReader.NumItems(); Index++)
 	{
 		int Type, ID;
-		void *pItem = g_DataReader.GetItem(Index, &Type, &ID);
+		CUuid Uuid;
+		void *pItem = g_DataReader.GetItem(Index, &Type, &ID, &Uuid);
 
-		// Filter items with unknown type, as we can't write them back.
 		// Filter ITEMTYPE_EX items, they will be automatically added again.
-		if(Type < 0 || Type == ITEMTYPE_EX)
+		if(Type == ITEMTYPE_EX)
 		{
 			continue;
 		}
@@ -239,7 +239,7 @@ int main(int argc, const char **argv)
 			Size = sizeof(CMapItemImage);
 			NewImageItem.m_Version = CMapItemImage::CURRENT_VERSION;
 		}
-		g_DataWriter.AddItem(Type, ID, Size, pItem);
+		g_DataWriter.AddItem(Type, ID, Size, pItem, &Uuid);
 	}
 
 	// add all data

@@ -14,6 +14,8 @@
 #include <cstdlib>
 #include <limits>
 
+#include <zlib.h>
+
 static const int DEBUG = 0;
 
 enum
@@ -450,20 +452,27 @@ int CDataFileReader::GetItemSize(int Index) const
 	return m_pDataFile->m_Info.m_pItemOffsets[Index + 1] - m_pDataFile->m_Info.m_pItemOffsets[Index] - sizeof(CDatafileItem);
 }
 
-int CDataFileReader::GetExternalItemType(int InternalType)
+int CDataFileReader::GetExternalItemType(int InternalType, CUuid *pUuid)
 {
 	if(InternalType <= OFFSET_UUID_TYPE || InternalType == ITEMTYPE_EX)
 	{
+		if(pUuid)
+			*pUuid = UUID_ZEROED;
 		return InternalType;
 	}
 	int TypeIndex = FindItemIndex(ITEMTYPE_EX, InternalType);
 	if(TypeIndex < 0 || GetItemSize(TypeIndex) < (int)sizeof(CItemEx))
 	{
+		if(pUuid)
+			*pUuid = UUID_ZEROED;
 		return InternalType;
 	}
 	const CItemEx *pItemEx = (const CItemEx *)GetItem(TypeIndex);
+	CUuid Uuid = pItemEx->ToUuid();
+	if(pUuid)
+		*pUuid = Uuid;
 	// Propagate UUID_UNKNOWN, it doesn't hurt.
-	return g_UuidManager.LookupUuid(pItemEx->ToUuid());
+	return g_UuidManager.LookupUuid(Uuid);
 }
 
 int CDataFileReader::GetInternalItemType(int ExternalType)
@@ -490,7 +499,7 @@ int CDataFileReader::GetInternalItemType(int ExternalType)
 	return -1;
 }
 
-void *CDataFileReader::GetItem(int Index, int *pType, int *pID)
+void *CDataFileReader::GetItem(int Index, int *pType, int *pID, CUuid *pUuid)
 {
 	if(!m_pDataFile)
 	{
@@ -498,14 +507,18 @@ void *CDataFileReader::GetItem(int Index, int *pType, int *pID)
 			*pType = 0;
 		if(pID)
 			*pID = 0;
+		if(pUuid)
+			*pUuid = UUID_ZEROED;
 		return nullptr;
 	}
 
 	CDatafileItem *pItem = (CDatafileItem *)(m_pDataFile->m_Info.m_pItemStart + m_pDataFile->m_Info.m_pItemOffsets[Index]);
+
+	// remove sign extension
+	const int Type = GetExternalItemType((pItem->m_TypeAndID >> 16) & 0xffff, pUuid);
 	if(pType)
 	{
-		// remove sign extension
-		*pType = GetExternalItemType((pItem->m_TypeAndID >> 16) & 0xffff);
+		*pType = Type;
 	}
 	if(pID)
 	{
@@ -643,35 +656,51 @@ int CDataFileWriter::GetTypeFromIndex(int Index) const
 	return ITEMTYPE_EX - Index - 1;
 }
 
-int CDataFileWriter::GetExtendedItemTypeIndex(int Type)
+int CDataFileWriter::GetExtendedItemTypeIndex(int Type, const CUuid *pUuid)
 {
 	int Index = 0;
-	for(int ExtendedItemType : m_vExtendedItemTypes)
+	if(Type == -1)
 	{
-		if(ExtendedItemType == Type)
-			return Index;
-		++Index;
+		// Unknown type, search for UUID
+		for(const auto &ExtendedItemType : m_vExtendedItemTypes)
+		{
+			if(ExtendedItemType.m_Uuid == *pUuid)
+				return Index;
+			++Index;
+		}
+	}
+	else
+	{
+		for(const auto &ExtendedItemType : m_vExtendedItemTypes)
+		{
+			if(ExtendedItemType.m_Type == Type)
+				return Index;
+			++Index;
+		}
 	}
 
 	// Type not found, add it.
-	m_vExtendedItemTypes.push_back(Type);
+	CExtendedItemType ExtendedType;
+	ExtendedType.m_Type = Type;
+	ExtendedType.m_Uuid = Type == -1 ? *pUuid : g_UuidManager.GetUuid(Type);
+	m_vExtendedItemTypes.push_back(ExtendedType);
 
-	CItemEx ExtendedType = CItemEx::FromUuid(g_UuidManager.GetUuid(Type));
-	AddItem(ITEMTYPE_EX, GetTypeFromIndex(Index), sizeof(ExtendedType), &ExtendedType);
+	CItemEx ItemEx = CItemEx::FromUuid(ExtendedType.m_Uuid);
+	AddItem(ITEMTYPE_EX, GetTypeFromIndex(Index), sizeof(ItemEx), &ItemEx);
 	return Index;
 }
 
-int CDataFileWriter::AddItem(int Type, int ID, size_t Size, const void *pData)
+int CDataFileWriter::AddItem(int Type, int ID, size_t Size, const void *pData, const CUuid *pUuid)
 {
-	dbg_assert((Type >= 0 && Type < MAX_ITEM_TYPES) || Type >= OFFSET_UUID, "Invalid type");
+	dbg_assert((Type >= 0 && Type < MAX_ITEM_TYPES) || Type >= OFFSET_UUID || (Type == -1 && pUuid != nullptr), "Invalid type");
 	dbg_assert(ID >= 0 && ID <= ITEMTYPE_EX, "Invalid ID");
 	dbg_assert(Size == 0 || pData != nullptr, "Data missing"); // Items without data are allowed
 	dbg_assert(Size <= (size_t)std::numeric_limits<int>::max(), "Data too large");
 	dbg_assert(Size % sizeof(int) == 0, "Invalid data boundary");
 
-	if(Type >= OFFSET_UUID)
+	if(Type == -1 || Type >= OFFSET_UUID)
 	{
-		Type = GetTypeFromIndex(GetExtendedItemTypeIndex(Type));
+		Type = GetTypeFromIndex(GetExtendedItemTypeIndex(Type, pUuid));
 	}
 
 	const int NumItems = m_vItems.size();
@@ -705,7 +734,7 @@ int CDataFileWriter::AddItem(int Type, int ID, size_t Size, const void *pData)
 	return NumItems;
 }
 
-int CDataFileWriter::AddData(size_t Size, const void *pData, int CompressionLevel)
+int CDataFileWriter::AddData(size_t Size, const void *pData, ECompressionLevel CompressionLevel)
 {
 	dbg_assert(Size > 0 && pData != nullptr, "Data missing");
 	dbg_assert(Size <= (size_t)std::numeric_limits<int>::max(), "Data too large");
@@ -749,6 +778,20 @@ int CDataFileWriter::AddDataString(const char *pStr)
 	return AddData(str_length(pStr) + 1, pStr);
 }
 
+static int CompressionLevelToZlib(CDataFileWriter::ECompressionLevel CompressionLevel)
+{
+	switch(CompressionLevel)
+	{
+	case CDataFileWriter::COMPRESSION_DEFAULT:
+		return Z_DEFAULT_COMPRESSION;
+	case CDataFileWriter::COMPRESSION_BEST:
+		return Z_BEST_COMPRESSION;
+	default:
+		dbg_assert(false, "CompressionLevel invalid");
+		dbg_break();
+	}
+}
+
 void CDataFileWriter::Finish()
 {
 	dbg_assert((bool)m_File, "File not open");
@@ -759,7 +802,7 @@ void CDataFileWriter::Finish()
 	{
 		unsigned long CompressedSize = compressBound(DataInfo.m_UncompressedSize);
 		DataInfo.m_pCompressedData = malloc(CompressedSize);
-		const int Result = compress2((Bytef *)DataInfo.m_pCompressedData, &CompressedSize, (Bytef *)DataInfo.m_pUncompressedData, DataInfo.m_UncompressedSize, DataInfo.m_CompressionLevel);
+		const int Result = compress2((Bytef *)DataInfo.m_pCompressedData, &CompressedSize, (Bytef *)DataInfo.m_pUncompressedData, DataInfo.m_UncompressedSize, CompressionLevelToZlib(DataInfo.m_CompressionLevel));
 		DataInfo.m_CompressedSize = CompressedSize;
 		free(DataInfo.m_pUncompressedData);
 		DataInfo.m_pUncompressedData = nullptr;

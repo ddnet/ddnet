@@ -167,7 +167,7 @@ static int PlayerFlags_SixToSeven(int Flags)
 
 void CPlayer::Tick()
 {
-	if(m_ScoreQueryResult != nullptr && m_ScoreQueryResult->m_Completed)
+	if(m_ScoreQueryResult != nullptr && m_ScoreQueryResult->m_Completed && m_SentSnaps >= 3)
 	{
 		ProcessScoreResult(*m_ScoreQueryResult);
 		m_ScoreQueryResult = nullptr;
@@ -486,6 +486,7 @@ void CPlayer::Snap(int SnappingClient)
 
 void CPlayer::FakeSnap()
 {
+	m_SentSnaps++;
 	if(GetClientVersion() >= VERSION_DDNET_OLD)
 		return;
 
