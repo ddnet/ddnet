@@ -225,6 +225,7 @@ void CVoting::OnReset()
 	m_aReason[0] = 0;
 	m_Yes = m_No = m_Pass = m_Total = 0;
 	m_Voted = 0;
+	m_ReceivingOptions = false;
 }
 
 void CVoting::OnConsoleInit()
@@ -307,6 +308,14 @@ void CVoting::OnMessage(int MsgType, void *pRawMsg)
 	{
 		CNetMsg_Sv_YourVote *pMsg = (CNetMsg_Sv_YourVote *)pRawMsg;
 		m_Voted = pMsg->m_Voted;
+	}
+	else if(MsgType == NETMSGTYPE_SV_VOTEOPTIONGROUPSTART)
+	{
+		m_ReceivingOptions = true;
+	}
+	else if(MsgType == NETMSGTYPE_SV_VOTEOPTIONGROUPEND)
+	{
+		m_ReceivingOptions = false;
 	}
 }
 
