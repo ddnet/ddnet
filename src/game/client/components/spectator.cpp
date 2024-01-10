@@ -1,7 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
-#include <climits>
+#include <limits>
 
 #include <engine/graphics.h>
 #include <engine/shared/config.h>
@@ -132,7 +132,7 @@ void CSpectator::ConSpectateClosest(IConsole::IResult *pResult, void *pUserData)
 		CurPosition.y = CurCharacter.m_Y;
 	}
 
-	int ClosestDistance = INT_MAX;
+	int ClosestDistance = std::numeric_limits<int>::max();
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		if(i == SpectatorID || !Snap.m_apPlayerInfos[i] || Snap.m_apPlayerInfos[i]->m_Team == TEAM_SPECTATORS || (SpectatorID == SPEC_FREEVIEW && i == Snap.m_LocalClientID))
