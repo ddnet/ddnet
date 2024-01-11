@@ -8416,7 +8416,8 @@ void CEditor::RenderMousePointer()
 	{
 		Graphics()->SetColor(1.0f, 0.0f, 0.0f, 1.0f);
 	}
-	IGraphics::CQuadItem QuadItem(UI()->MouseX(), UI()->MouseY(), CursorSize, CursorSize);
+	const float CursorOffset = m_CursorType == CURSOR_RESIZE_V || m_CursorType == CURSOR_RESIZE_H ? -CursorSize / 2.0f : 0.0f;
+	IGraphics::CQuadItem QuadItem(UI()->MouseX() + CursorOffset, UI()->MouseY() + CursorOffset, CursorSize, CursorSize);
 	Graphics()->QuadsDrawTL(&QuadItem, 1);
 	Graphics()->QuadsEnd();
 	Graphics()->WrapNormal();
