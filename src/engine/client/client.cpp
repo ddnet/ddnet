@@ -63,7 +63,7 @@
 #endif
 
 #include <chrono>
-#include <climits>
+#include <limits>
 #include <new>
 #include <stack>
 #include <thread>
@@ -3798,7 +3798,7 @@ int CClient::HandleChecksum(int Conn, CUuid Uuid, CUnpacker *pUnpacker)
 	{
 		return 1;
 	}
-	if(Start < 0 || Length < 0 || Start > INT_MAX - Length)
+	if(Start < 0 || Length < 0 || Start > std::numeric_limits<int>::max() - Length)
 	{
 		return 2;
 	}
