@@ -54,8 +54,8 @@ private:
 		CChooseMaster *m_pParent;
 		CLock m_Lock;
 		std::shared_ptr<CData> m_pData;
-		std::shared_ptr<CHttpRequest> m_pHead PT_GUARDED_BY(m_Lock);
-		std::shared_ptr<CHttpRequest> m_pGet PT_GUARDED_BY(m_Lock);
+		std::shared_ptr<CHttpRequest> m_pHead;
+		std::shared_ptr<CHttpRequest> m_pGet;
 		void Run() override REQUIRES(!m_Lock);
 
 	public:
@@ -174,7 +174,7 @@ void CChooseMaster::CJob::Run()
 	{
 		aTimeMs[i] = -1;
 		const char *pUrl = m_pData->m_aaUrls[aRandomized[i]];
-		std::shared_ptr<CHttpRequest> pHead = std::move(HttpHead(pUrl));
+		std::shared_ptr<CHttpRequest> pHead = HttpHead(pUrl);
 		pHead->Timeout(Timeout);
 		pHead->LogProgress(HTTPLOG::FAILURE);
 		{
@@ -195,7 +195,7 @@ void CChooseMaster::CJob::Run()
 		}
 
 		auto StartTime = time_get_nanoseconds();
-		std::shared_ptr<CHttpRequest> pGet = std::move(HttpGet(pUrl));
+		std::shared_ptr<CHttpRequest> pGet = HttpGet(pUrl);
 		pGet->Timeout(Timeout);
 		pGet->LogProgress(HTTPLOG::FAILURE);
 		{
@@ -296,7 +296,6 @@ private:
 	static bool Validate(json_value *pJson);
 	static bool Parse(json_value *pJson, std::vector<CServerInfo> *pvServers, std::vector<NETADDR> *pvLegacyServers);
 
-	IEngine *m_pEngine;
 	IConsole *m_pConsole;
 	IHttp *m_pHttp;
 
@@ -309,7 +308,6 @@ private:
 };
 
 CServerBrowserHttp::CServerBrowserHttp(IEngine *pEngine, IConsole *pConsole, IHttp *pHttp, const char **ppUrls, int NumUrls, int PreviousBestIndex) :
-	m_pEngine(pEngine),
 	m_pConsole(pConsole),
 	m_pHttp(pHttp),
 	m_pChooseMaster(new CChooseMaster(pEngine, pHttp, Validate, ppUrls, NumUrls, PreviousBestIndex))

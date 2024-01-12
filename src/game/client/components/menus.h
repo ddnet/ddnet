@@ -536,6 +536,7 @@ protected:
 
 	public:
 		CCommunityIconLoadJob(CMenus *pMenus, const char *pCommunityId, int StorageType);
+		~CCommunityIconLoadJob();
 
 		CImageInfo &&ImageInfo() { return std::move(m_ImageInfo); }
 	};

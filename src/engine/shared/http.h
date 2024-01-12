@@ -132,7 +132,7 @@ protected:
 
 public:
 	CHttpRequest(const char *pUrl);
-	~CHttpRequest();
+	virtual ~CHttpRequest();
 
 	void Timeout(CTimeout Timeout) { m_Timeout = Timeout; }
 	void MaxResponseSize(int64_t MaxResponseSize) { m_MaxResponseSize = MaxResponseSize; }
@@ -273,6 +273,7 @@ public:
 	// User
 	virtual void Run(std::shared_ptr<IHttpRequest> pRequest) override;
 	void Shutdown() override;
+	~CHttp();
 };
 
 #endif // ENGINE_SHARED_HTTP_H

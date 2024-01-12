@@ -48,7 +48,7 @@ class CUpdater : public IUpdater
 
 	CLock m_Lock;
 
-	int m_State;
+	int m_State GUARDED_BY(m_Lock);
 	char m_aStatus[256] GUARDED_BY(m_Lock);
 	int m_Percent GUARDED_BY(m_Lock);
 	char m_aClientExecTmp[64];
@@ -62,13 +62,13 @@ class CUpdater : public IUpdater
 	bool m_ServerUpdate;
 
 	void AddFileJob(const char *pFile, bool Job);
-	void FetchFile(const char *pFile, const char *pDestPath = nullptr);
+	void FetchFile(const char *pFile, const char *pDestPath = nullptr) REQUIRES(!m_Lock);
 	bool MoveFile(const char *pFile);
 
-	void ParseUpdate();
-	void PerformUpdate();
-	void RunningUpdate();
-	void CommitUpdate();
+	void ParseUpdate() REQUIRES(!m_Lock);
+	void PerformUpdate() REQUIRES(!m_Lock);
+	void RunningUpdate() REQUIRES(!m_Lock);
+	void CommitUpdate() REQUIRES(!m_Lock);
 
 	bool ReplaceClient();
 	bool ReplaceServer();
@@ -82,9 +82,9 @@ public:
 	void GetCurrentFile(char *pBuf, int BufSize) override REQUIRES(!m_Lock);
 	int GetCurrentPercent() override REQUIRES(!m_Lock);
 
-	void InitiateUpdate() override;
+	void InitiateUpdate() REQUIRES(!m_Lock) override;
 	void Init(CHttp *pHttp);
-	void Update() override;
+	void Update() REQUIRES(!m_Lock) override;
 };
 
 #endif

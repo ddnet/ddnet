@@ -163,7 +163,8 @@ bool CUpdater::MoveFile(const char *pFile)
 
 void CUpdater::Update()
 {
-	switch(m_State)
+	auto State = GetCurrentState();
+	switch(State)
 	{
 	case IUpdater::GOT_MANIFEST:
 		PerformUpdate();
@@ -270,6 +271,7 @@ void CUpdater::ParseUpdate()
 				break;
 		}
 	}
+	json_value_free(pVersions);
 }
 
 void CUpdater::InitiateUpdate()
@@ -375,9 +377,9 @@ void CUpdater::CommitUpdate()
 	if(m_ServerUpdate)
 		Success &= ReplaceServer();
 	if(!Success)
-		m_State = FAIL;
+		SetCurrentState(IUpdater::FAIL);
 	else if(m_pClient->State() == IClient::STATE_ONLINE || m_pClient->EditorHasUnsavedData())
-		m_State = NEED_RESTART;
+		SetCurrentState(IUpdater::NEED_RESTART);
 	else
 	{
 		m_pClient->Restart();

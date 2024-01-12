@@ -571,7 +571,7 @@ void CHttp::Run(std::shared_ptr<IHttpRequest> pRequest)
 {
 	std::unique_lock Lock(m_Lock);
 	m_Cv.wait(Lock, [this]() { return m_State != UNINITIALIZED; });
-	m_PendingRequests.emplace_back(std::move(std::static_pointer_cast<CHttpRequest>(pRequest)));
+	m_PendingRequests.emplace_back(std::static_pointer_cast<CHttpRequest>(pRequest));
 	curl_multi_wakeup(m_pMultiH);
 }
 
@@ -583,4 +583,13 @@ void CHttp::Shutdown()
 
 	m_Shutdown = true;
 	curl_multi_wakeup(m_pMultiH);
+}
+
+CHttp::~CHttp()
+{
+	if(!m_pThread)
+		return;
+
+	Shutdown();
+	thread_wait(m_pThread);
 }

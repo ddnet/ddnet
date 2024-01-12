@@ -1822,6 +1822,12 @@ CMenus::CCommunityIconLoadJob::CCommunityIconLoadJob(CMenus *pMenus, const char 
 {
 }
 
+CMenus::CCommunityIconLoadJob::~CCommunityIconLoadJob()
+{
+	free(m_ImageInfo.m_pData);
+	m_ImageInfo.m_pData = nullptr;
+}
+
 int CMenus::CommunityIconScan(const char *pName, int IsDir, int DirType, void *pUser)
 {
 	const char *pExtension = ".png";
