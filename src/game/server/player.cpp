@@ -210,6 +210,8 @@ void CPlayer::Tick()
 	if(Server()->GetNetErrorString(m_ClientID)[0])
 	{
 		SetAfk(true);
+		// Ensure that the AFK state is not reset again automatically
+		m_LastPlaytime = time_get() - time_freq() * g_Config.m_SvMaxAfkTime - 1; 
 
 		char aBuf[512];
 		str_format(aBuf, sizeof(aBuf), "'%s' would have timed out, but can use timeout protection now", Server()->ClientName(m_ClientID));
