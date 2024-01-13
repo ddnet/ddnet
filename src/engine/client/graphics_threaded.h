@@ -130,6 +130,7 @@ public:
 		// misc
 		CMD_MULTISAMPLING,
 		CMD_VSYNC,
+		CMD_TRY_SWAP_AND_READ_PIXEL,
 		CMD_TRY_SWAP_AND_SCREENSHOT,
 		CMD_UPDATE_VIEWPORT,
 
@@ -462,12 +463,21 @@ public:
 		void *m_pOffset;
 	};
 
+	struct SCommand_TrySwapAndReadPixel : public SCommand
+	{
+		SCommand_TrySwapAndReadPixel() :
+			SCommand(CMD_TRY_SWAP_AND_READ_PIXEL) {}
+		ivec2 m_Position;
+		SColorf *m_pColor; // processor will fill this out
+		bool *m_pSwapped; // processor may set this to true, must be initialized to false by the caller
+	};
+
 	struct SCommand_TrySwapAndScreenshot : public SCommand
 	{
 		SCommand_TrySwapAndScreenshot() :
 			SCommand(CMD_TRY_SWAP_AND_SCREENSHOT) {}
 		CImageInfo *m_pImage; // processor will fill this out, the one who adds this command must free the data as well
-		bool *m_pSwapped;
+		bool *m_pSwapped; // processor may set this to true, must be initialized to false by the caller
 	};
 
 	struct SCommand_Swap : public SCommand
@@ -917,6 +927,11 @@ class CGraphics_Threaded : public IEngineGraphics
 
 	void AdjustViewport(bool SendViewportChangeToBackend);
 
+	ivec2 m_ReadPixelPosition = ivec2(0, 0);
+	ColorRGBA *m_pReadPixelColor = nullptr;
+	void ReadPixelDirect(bool *pSwapped);
+	void ScreenshotDirect(bool *pSwapped);
+
 	int IssueInit();
 	int InitWindow();
 
@@ -975,8 +990,6 @@ public:
 
 	void CopyTextureBufferSub(uint8_t *pDestBuffer, uint8_t *pSourceBuffer, size_t FullWidth, size_t FullHeight, size_t PixelSize, size_t SubOffsetX, size_t SubOffsetY, size_t SubCopyWidth, size_t SubCopyHeight) override;
 	void CopyTextureFromTextureBufferSub(uint8_t *pDestBuffer, size_t DestWidth, size_t DestHeight, uint8_t *pSourceBuffer, size_t SrcWidth, size_t SrcHeight, size_t PixelSize, size_t SrcSubOffsetX, size_t SrcSubOffsetY, size_t SrcSubCopyWidth, size_t SrcSubCopyHeight) override;
-
-	bool ScreenshotDirect();
 
 	void TextureSet(CTextureHandle TextureID) override;
 
@@ -1244,6 +1257,7 @@ public:
 	int Init() override;
 	void Shutdown() override;
 
+	void ReadPixel(ivec2 Position, ColorRGBA *pColor) override;
 	void TakeScreenshot(const char *pFilename) override;
 	void TakeCustomScreenshot(const char *pFilename) override;
 	void Swap() override;
