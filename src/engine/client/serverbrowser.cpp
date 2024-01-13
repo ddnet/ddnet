@@ -6,7 +6,6 @@
 #include "serverbrowser_ping_cache.h"
 
 #include <algorithm>
-#include <climits>
 #include <unordered_set>
 #include <vector>
 

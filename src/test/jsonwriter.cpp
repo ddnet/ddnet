@@ -6,7 +6,7 @@
 #include <base/system.h>
 #include <engine/shared/jsonwriter.h>
 
-#include <climits>
+#include <limits>
 
 class JsonFileWriter
 {
@@ -201,12 +201,12 @@ TYPED_TEST(JsonWriters, MinusOne)
 
 TYPED_TEST(JsonWriters, Large)
 {
-	this->Impl.m_pJson->WriteIntValue(INT_MAX);
+	this->Impl.m_pJson->WriteIntValue(std::numeric_limits<int>::max());
 	this->Impl.Expect("2147483647\n");
 }
 
 TYPED_TEST(JsonWriters, Small)
 {
-	this->Impl.m_pJson->WriteIntValue(INT_MIN);
+	this->Impl.m_pJson->WriteIntValue(std::numeric_limits<int>::min());
 	this->Impl.Expect("-2147483648\n");
 }
