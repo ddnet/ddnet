@@ -1037,17 +1037,17 @@ void CChat::OnPrepareLines(float y)
 
 				if(Line.m_Friend && g_Config.m_ClMessageFriend)
 				{
-					TextRender()->TextEx(&Cursor, "♥ ", -1);
+					TextRender()->TextEx(&Cursor, "♥ ");
 				}
 			}
 
-			TextRender()->TextEx(&Cursor, aName, -1);
+			TextRender()->TextEx(&Cursor, aName);
 			if(Line.m_TimesRepeated > 0)
-				TextRender()->TextEx(&Cursor, aCount, -1);
+				TextRender()->TextEx(&Cursor, aCount);
 
 			if(Line.m_ClientID >= 0 && Line.m_aName[0] != '\0')
 			{
-				TextRender()->TextEx(&Cursor, ": ", -1);
+				TextRender()->TextEx(&Cursor, ": ");
 			}
 
 			CTextCursor AppendCursor = Cursor;
@@ -1058,7 +1058,7 @@ void CChat::OnPrepareLines(float y)
 				AppendCursor.m_LineWidth -= Cursor.m_LongestLineWidth;
 			}
 
-			TextRender()->TextEx(&AppendCursor, pText, -1);
+			TextRender()->TextEx(&AppendCursor, pText);
 
 			Line.m_aYOffset[OffsetType] = AppendCursor.m_Y + AppendCursor.m_FontSize + RealMsgPaddingY;
 		}
@@ -1198,13 +1198,13 @@ void CChat::OnRender()
 		Cursor.m_LineWidth = Width - 190.0f;
 
 		if(m_Mode == MODE_ALL)
-			TextRender()->TextEx(&Cursor, Localize("All"), -1);
+			TextRender()->TextEx(&Cursor, Localize("All"));
 		else if(m_Mode == MODE_TEAM)
-			TextRender()->TextEx(&Cursor, Localize("Team"), -1);
+			TextRender()->TextEx(&Cursor, Localize("Team"));
 		else
-			TextRender()->TextEx(&Cursor, Localize("Chat"), -1);
+			TextRender()->TextEx(&Cursor, Localize("Chat"));
 
-		TextRender()->TextEx(&Cursor, ": ", -1);
+		TextRender()->TextEx(&Cursor, ": ");
 
 		const float MessageMaxWidth = Cursor.m_LineWidth - (Cursor.m_X - Cursor.m_StartX);
 		const CUIRect ClippingRect = {Cursor.m_X, Cursor.m_Y, MessageMaxWidth, 2.25f * Cursor.m_FontSize};
