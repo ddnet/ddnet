@@ -1060,7 +1060,7 @@ void CChat::OnPrepareLines(float y)
 
 			TextRender()->TextEx(&AppendCursor, pText);
 
-			Line.m_aYOffset[OffsetType] = AppendCursor.m_Y + AppendCursor.m_FontSize + RealMsgPaddingY;
+			Line.m_aYOffset[OffsetType] = AppendCursor.Height() + RealMsgPaddingY;
 		}
 
 		y -= Line.m_aYOffset[OffsetType];
