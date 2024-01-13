@@ -1142,20 +1142,27 @@ void CChat::OnPrepareLines(float y)
 
 		CTextCursor AppendCursor = Cursor;
 		AppendCursor.m_LongestLineWidth = 0.0f;
-		float OriginalWidth = 0.0f;
 		if(!IsScoreBoardOpen && !g_Config.m_ClChatOld)
 		{
 			AppendCursor.m_StartX = Cursor.m_X;
 			AppendCursor.m_LineWidth -= Cursor.m_LongestLineWidth;
-			OriginalWidth = Cursor.m_LongestLineWidth;
 		}
 
 		TextRender()->CreateOrAppendTextContainer(Line.m_TextContainerIndex, &AppendCursor, pText);
 
 		if(!g_Config.m_ClChatOld && (Line.m_aText[0] != '\0' || Line.m_aName[0] != '\0'))
 		{
+			float FullWidth = RealMsgPaddingX * 1.5f;
+			if(!IsScoreBoardOpen && !g_Config.m_ClChatOld)
+			{
+				FullWidth += Cursor.m_LongestLineWidth + AppendCursor.m_LongestLineWidth;
+			}
+			else
+			{
+				FullWidth += maximum(Cursor.m_LongestLineWidth, AppendCursor.m_LongestLineWidth);
+			}
 			Graphics()->SetColor(1, 1, 1, 1);
-			Line.m_QuadContainerIndex = Graphics()->CreateRectQuadContainer(Begin, y, OriginalWidth + AppendCursor.m_LongestLineWidth + RealMsgPaddingX * 1.5f, Line.m_aYOffset[OffsetType], MessageRounding(), IGraphics::CORNER_ALL);
+			Line.m_QuadContainerIndex = Graphics()->CreateRectQuadContainer(Begin, y, FullWidth, Line.m_aYOffset[OffsetType], MessageRounding(), IGraphics::CORNER_ALL);
 		}
 
 		TextRender()->SetRenderFlags(CurRenderFlags);
