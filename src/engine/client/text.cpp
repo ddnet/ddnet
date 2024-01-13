@@ -1867,7 +1867,7 @@ public:
 
 					if(SelectionStarted && IsRendered)
 					{
-						if(!vSelectionQuads.empty() && SelectionQuadLine == pCursor->m_LineCount)
+						if(!vSelectionQuads.empty() && SelectionQuadLine == LineCount)
 						{
 							vSelectionQuads.back().m_Width += SelWidth;
 						}
@@ -1877,7 +1877,7 @@ public:
 							const float SelectionY = DrawY + (1.0f - pCursor->m_SelectionHeightFactor) * SelectionHeight;
 							const float ScaledSelectionHeight = pCursor->m_SelectionHeightFactor * SelectionHeight;
 							vSelectionQuads.emplace_back(SelX, SelectionY, SelWidth, ScaledSelectionHeight);
-							SelectionQuadLine = pCursor->m_LineCount;
+							SelectionQuadLine = LineCount;
 						}
 					}
 
