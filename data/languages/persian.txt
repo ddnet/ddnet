@@ -25,9 +25,6 @@
 %s wins!
 == %s ﺪﺷ ﻩﺪﻧﺮﺑ!
 
--Page %d-
-== ﻪﺤﻔﺻ- %d-
-
 Abort
 == ﻥﺩﺮﻛ ﺩﺭ
 
@@ -390,12 +387,6 @@ Checking for existing player with your name
 Are you sure that you want to disconnect and switch to a different server?
 == ؟ﻪﮕﯾﺩ ﺭﻭﺮﺳ ﻪﺑ ﯼﺮﺑ ﻭ ﯽﻨﮐ ﻊﻄﻗ ﯼﺍﻮﺨﯿﻣ ﯽﻨﺌﻤﻄﻣ
 
-There's an unsaved map in the editor, you might want to save it before you quit the game.
-== ؟ﯽﻨﮐ ﻩﺮﯿﺧﺫ ﻮﻧﻭﺍ ﯼﺍﻮﺨﯿﻣ ﺝﻭﺮﺧ ﻞﺒﻗ ﯼﺩﺮﮑﻧ ﻩﺮﯿﺧﺫ ﻮﻧﻭﺍ ﻭ ﯼﺭﺍﺩ ﺖﺧﺎﺳ ﻝﺎﺣﺭﺩ ﻪﺸﻘﻧ ﻪﯾ
-
-Quit anyway?
-== ﻮﺷ ﺝﺭﺎﺧ ﻝﺎﺣﺮﻫ ﻪﺑ
-
 Yes
 == ﻪﻠﺑ
 
@@ -488,9 +479,6 @@ Scoreboard
 
 Remove
 == ﻥﺩﺮﮐ کﺎﭘ
-
-Please use a different filename
-== 
 
 Remove chat
 == ﺖﭼ ﻥﺩﺮﮐ کﺎﭘ
@@ -590,9 +578,6 @@ Max Screenshots
 
 Refresh Rate
 == ﯽﻧﺎﺳﺭﺯﻭﺮﺑ ﺥﺮﻧ
-
-Dummy settings
-== ﯽﻣﺍﺩ ﺕﺎﻤﯿﻈﻨﺗ
 
 Your skin
 == ﺎﻤﺷ ﻦﯿﮑﺳﺍ
@@ -842,9 +827,6 @@ Failed to swap framebuffers. Try to update your GPU drivers.
 Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
 == .ﺪﯿﻨﮐ ﺵﻼﺗ ﻩﺭﺎﺑﻭﺩ ﻭ ﺪﯿﻫﺩ ﺮﯿﯿﻐﺗ Vulkan ﺎﯾ OpenGL ﻪﺑ ﺍﺭ gfx_backend ، settings_ddnet.cfg ﺭﺩ ،ﮓﯿﻔﻧﺎﮐ ﻪﺷﻮﭘ ﺭﺩ ﺪﯿﻨﮐ ﯽﻌﺳ .ﺺﺨﺸﻣﺎﻧ ﯼﺎﻄﺧ
 
-Saving ddnet-settings.cfg failed
-== ﺪﺸﻧ ﻡﺎﺠﻧﺍ ddnet-settings.cfg ﻩﺮﯿﺧﺫ
-
 Preparing demo playback
 == ﻮﻣﺩ ﺶﺨﭘ ﯼﺯﺎﺳ ﻩﺩﺎﻣﺁ ﻝﺎﺣ ﺭﺩ
 
@@ -1058,9 +1040,6 @@ Max CSVs
 Loading skin files
 == ﻦﯿﮑﺳﺍ ﯼﺎﻫ ﻞﯾﺎﻓ ﻥﺩﺮﮐ ﻩﺩﺎﻣﺁ ﻝﺎﺣ ﺭﺩ
 
-Toggle to edit your dummy settings
-== ﺪﯿﻫﺩ ﺮﯿﯿﻐﺗ،ﯽﻣﺍﺩ ﺕﺎﻤﯿﻈﻨﺗ ﺶﯾﺍﺮﯾﻭ ﯼﺍﺮﺑ
-
 Download community skins
 == ﻦﻤﺠﻧﺍ ﯼﺎﻫ ﻦﯿﮑﺳﺍ ﺩﻮﻠﻧﺍﺩ
 
@@ -1233,9 +1212,6 @@ Name Plate
 
 Hook Collisions
 == ﺏﻼﻗ ﯼﺎﻫ ﺩﺭﻮﺧﺮﺑ
-
-Kill Messages
-== ﻥﺪﺷ ﻪﺘﺸﮐ ﯼﺎﻫ ﻡﺎﯿﭘ
 
 Show health, shields and ammo
 == ﺕﺎﻤﻬﻣ ﻭ ﺮﭙﺳ ،ﯽﺘﻣﻼﺳ ﺶﯾﺎﻤﻧ
@@ -1557,6 +1533,9 @@ Could not save downloaded map. Try manually deleting this file: %s
 Error playing demo
 == 
 
+Saving settings to '%s' failed
+== 
+
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
 == 
 
@@ -1572,6 +1551,33 @@ Quitting. Please wait…
 Restarting. Please wait…
 == 
 
+Searching
+== 
+
+Enter Username
+== 
+
+Enter Password
+== 
+
+NOT CONNECTED
+== 
+
+Match %d of %d
+== 
+
+No results
+== 
+
+Lines %d - %d (%s)
+== 
+
+Locked
+== 
+
+Following
+== 
+
 Multi-View
 == 
 
@@ -1584,10 +1590,22 @@ Some map sounds could not be loaded. Check the local console for details.
 Loading menu themes
 == 
 
+Press a key…
+== 
+
 Rename folder
 == 
 
 Render complete
+== 
+
+Are you sure that you want to restart?
+== 
+
+There's an unsaved map in the editor, you might want to save it.
+== 
+
+Continue anyway?
 == 
 
 A demo with this name already exists
@@ -1606,6 +1624,9 @@ Videos directory
 == 
 
 Video was saved to '%s'
+== 
+
+Communities
 == 
 
 Copy info
@@ -1677,6 +1698,9 @@ Cut length
 Render cut to video
 == 
 
+Please use a different filename
+== 
+
 All combined
 == 
 
@@ -1721,6 +1745,27 @@ Axis
 == 
 
 Graphics card
+== 
+
+Info Messages
+== 
+
+Show local time always
+== 
+
+Chat font size
+== 
+
+Chat width
+== 
+
+Authed name color in scoreboard
+== 
+
+Same clan color in scoreboard
+== 
+
+Show finish messages
 == 
 
 Enable ghost

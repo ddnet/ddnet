@@ -25,9 +25,6 @@
 %s wins!
 == %s の勝ち!
 
--Page %d-
-== -ページ %d-
-
 Abort
 == 中止
 
@@ -397,9 +394,6 @@ The audio device couldn't be initialised.
 The server is running a non-standard tuning on a pure game type.
 == サーバーが MOD を導入しているようです。
 
-There's an unsaved map in the editor, you might want to save it before you quit the game.
-== 保存されていないデータがありますが、保存せずに閉じますか。
-
 Time limit
 == 時間上限
 
@@ -468,9 +462,6 @@ Internet
 Round
 == ラウンド
 
-Quit anyway?
-== 終了しますか？
-
 News
 == ニュース
 
@@ -524,9 +515,6 @@ Name plates size
 
 Successfully saved the replay!
 == リプレイ保存完了しました!
-
-Saving ddnet-settings.cfg failed
-== ddnet-settings.cfg 保存失敗
 
 Replay feature is disabled!
 == リプレイ機能はオフにしました!
@@ -660,9 +648,6 @@ Types
 Leak IP
 == IP を漏洩する
 
-Please use a different filename
-== 
-
 Remove chat
 == チャット履歴を削除
 
@@ -746,9 +731,6 @@ Automatically create statboard csv
 
 Max CSVs
 == 最大 CSV ファイル数
-
-Dummy settings
-== ダミー設定
 
 Download skins
 == スキンをダウンロード
@@ -1165,6 +1147,9 @@ Could not save downloaded map. Try manually deleting this file: %s
 Error playing demo
 == 
 
+Saving settings to '%s' failed
+== 
+
 The format of texture %s is not RGBA which will cause visual bugs.
 == 
 
@@ -1198,6 +1183,33 @@ Quitting. Please wait…
 Restarting. Please wait…
 == 
 
+Searching
+== 
+
+Enter Username
+== 
+
+Enter Password
+== 
+
+NOT CONNECTED
+== 
+
+Match %d of %d
+== 
+
+No results
+== 
+
+Lines %d - %d (%s)
+== 
+
+Locked
+== 
+
+Following
+== 
+
 Position:
 == 
 
@@ -1225,6 +1237,9 @@ Some map sounds could not be loaded. Check the local console for details.
 Loading menu themes
 == 
 
+Press a key…
+== 
+
 Trying to determine UDP connectivity...
 == 
 
@@ -1247,6 +1262,15 @@ Rename folder
 == 
 
 Render complete
+== 
+
+Are you sure that you want to restart?
+== 
+
+There's an unsaved map in the editor, you might want to save it.
+== 
+
+Continue anyway?
 == 
 
 A demo with this name already exists
@@ -1301,6 +1325,9 @@ CHN
 == 
 
 Are you sure that you want to disconnect and switch to a different server?
+== 
+
+Communities
 == 
 
 Copy info
@@ -1411,6 +1438,9 @@ Cut length
 Render cut to video
 == 
 
+Please use a different filename
+== 
+
 Loading demo files
 == 
 
@@ -1484,19 +1514,16 @@ Open the directory that contains the configuration and user files
 Open the directory to add custom themes
 == 
 
-Toggle to edit your dummy settings
-== 
-
 Loading skin files
 == 
 
 Download community skins
 == 
 
-Choose default eyes when joining a server
+Create a random skin
 == 
 
-Create a random skin
+Choose default eyes when joining a server
 == 
 
 Open the directory to add custom skins
@@ -1588,10 +1615,13 @@ Name Plate
 Hook Collisions
 == 
 
-Kill Messages
+Info Messages
 == 
 
 Show health, shields and ammo
+== 
+
+Show local time always
 == 
 
 DDRace HUD
@@ -1624,10 +1654,22 @@ Show freeze bars
 Opacity of freeze bars inside freeze
 == 
 
+Chat font size
+== 
+
+Chat width
+== 
+
 Show hook strength indicator
 == 
 
 Show local player's key presses
+== 
+
+Authed name color in scoreboard
+== 
+
+Same clan color in scoreboard
 == 
 
 Hook collision line
@@ -1652,6 +1694,9 @@ Something hookable
 == 
 
 A Tee
+== 
+
+Show finish messages
 == 
 
 Normal Color

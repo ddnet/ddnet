@@ -58,9 +58,6 @@
 %s wins!
 == %s 胜利！
 
--Page %d-
-== -第 %d 页-
-
 Abort
 == 取消
 
@@ -472,9 +469,6 @@ The audio device couldn't be initialised.
 The server is running a non-standard tuning on a pure game type.
 == 此服务器运行着经过调整的非标准游戏模式。
 
-There's an unsaved map in the editor, you might want to save it before you quit the game.
-== 编辑器中的地图尚未保存，建议你在退出游戏之前返回编辑器进行保存。
-
 Time limit
 == 规定时限
 
@@ -571,9 +565,6 @@ Map sound volume
 Max Screenshots
 == 最大截图数
 
-Dummy settings
-== 分身设置
-
 Laser
 == 激光
 
@@ -588,9 +579,6 @@ Your skin
 
 Reset to defaults
 == 恢复默认设置
-
-Quit anyway?
-== 无论如何都要退出吗？
 
 Round
 == 回合
@@ -749,9 +737,6 @@ DDNet
 
 Deaths
 == 死亡数
-
-Please use a different filename
-== 
 
 Restart
 == 重新开始
@@ -1046,9 +1031,6 @@ Auto
 Replay
 == 回放
 
-Saving ddnet-settings.cfg failed
-== 配置文件 ddnet-settings.cfg 保存失败
-
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
 == 调试模式已启用。按 Ctrl+Shift+D 禁用调试模式。
 
@@ -1184,9 +1166,6 @@ Desktop fullscreen
 Are you sure that you want to disconnect and switch to a different server?
 == 你确定要断开此服务器连接并进入其他服务器吗？
 
-Kill Messages
-== 击杀消息
-
 Show local player's key presses
 == 显示自己的按键
 
@@ -1231,9 +1210,6 @@ Tutorial
 
 Can't find a Tutorial server
 == 无法找到教学服务器
-
-Toggle to edit your dummy settings
-== 编辑分身设置
 
 Choose default eyes when joining a server
 == 进入服务器时的默认表情
@@ -1789,3 +1765,72 @@ Regular background color
 
 Entities background color
 == 实体层背景颜色
+
+Saving settings to '%s' failed
+== 
+
+Searching
+== 
+
+Enter Username
+== 
+
+Enter Password
+== 
+
+NOT CONNECTED
+== 
+
+Match %d of %d
+== 
+
+No results
+== 
+
+Lines %d - %d (%s)
+== 
+
+Locked
+== 
+
+Following
+== 
+
+Press a key…
+== 
+
+Are you sure that you want to restart?
+== 
+
+There's an unsaved map in the editor, you might want to save it.
+== 
+
+Continue anyway?
+== 
+
+Communities
+== 
+
+Please use a different filename
+== 
+
+Info Messages
+== 
+
+Show local time always
+== 
+
+Chat font size
+== 
+
+Chat width
+== 
+
+Authed name color in scoreboard
+== 
+
+Same clan color in scoreboard
+== 
+
+Show finish messages
+== 
