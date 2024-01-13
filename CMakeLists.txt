@@ -2018,6 +2018,8 @@ set_src(GAME_SHARED GLOB src/game
   version.h
   voting.h
 )
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "src/game/version.h")
+
 # A bit hacky, but these are needed to register all the UUIDs, even for stuff
 # that doesn't link game.
 set(ENGINE_UUID_SHARED
