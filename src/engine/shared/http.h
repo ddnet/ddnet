@@ -234,7 +234,6 @@ inline std::unique_ptr<CHttpRequest> HttpPostJson(const char *pUrl, const char *
 	return pResult;
 }
 
-bool HttpInit(IStorage *pStorage);
 void EscapeUrl(char *pBuf, int Size, const char *pStr);
 bool HttpHasIpresolveBug();
 
