@@ -1009,6 +1009,19 @@ void CChat::OnPrepareLines(float y)
 		else
 			str_format(aCount, sizeof(aCount), " [%d]", Line.m_TimesRepeated + 1);
 
+		const char *pText = Line.m_aText;
+		if(Config()->m_ClStreamerMode && Line.m_ClientID == SERVER_MSG)
+		{
+			if(str_startswith(Line.m_aText, "Team save in progress. You'll be able to load with '/load") && str_endswith(Line.m_aText, "if it fails"))
+			{
+				pText = "Team save in progress. You'll be able to load with '/load ***' if save is successful or with '/load *** *** ***' if it fails";
+			}
+			else if(str_startswith(Line.m_aText, "Team successfully saved by ") && str_endswith(Line.m_aText, " to continue"))
+			{
+				pText = "Team successfully saved by ***. Use '/load ***' to continue";
+			}
+		}
+
 		if(g_Config.m_ClChatOld)
 		{
 			Line.m_HasRenderTee = false;
@@ -1047,7 +1060,7 @@ void CChat::OnPrepareLines(float y)
 				AppendCursor.m_LineWidth -= Cursor.m_LongestLineWidth;
 			}
 
-			TextRender()->TextEx(&AppendCursor, Line.m_aText, -1);
+			TextRender()->TextEx(&AppendCursor, pText, -1);
 
 			Line.m_aYOffset[OffsetType] = AppendCursor.m_Y + AppendCursor.m_FontSize + RealMsgPaddingY;
 		}
@@ -1141,14 +1154,6 @@ void CChat::OnPrepareLines(float y)
 			OriginalWidth = Cursor.m_LongestLineWidth;
 		}
 
-		const char *pText = Line.m_aText;
-		if(Config()->m_ClStreamerMode && Line.m_ClientID == SERVER_MSG)
-		{
-			if(str_startswith(Line.m_aText, "Team save in progress. You'll be able to load with '/load") && str_endswith(Line.m_aText, "if it fails"))
-				pText = "Team save in progress. You'll be able to load with '/load ***' if save is successful or with '/load *** *** ***' if it fails";
-			else if(str_startswith(Line.m_aText, "Team successfully saved by ") && str_endswith(Line.m_aText, " to continue"))
-				pText = "Team successfully saved by ***. Use '/load ***' to continue";
-		}
 		TextRender()->CreateOrAppendTextContainer(Line.m_TextContainerIndex, &AppendCursor, pText);
 
 		if(!g_Config.m_ClChatOld && (Line.m_aText[0] != '\0' || Line.m_aName[0] != '\0'))
