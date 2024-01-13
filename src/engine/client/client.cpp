@@ -543,6 +543,7 @@ void CClient::DisconnectWithReason(const char *pReason)
 	mem_zero(m_aRconPassword, sizeof(m_aRconPassword));
 	m_ServerSentCapabilities = false;
 	m_UseTempRconCommands = 0;
+	m_ReceivingRconCommands = false;
 	m_pConsole->DeregisterTempAll();
 	m_aNetClient[CONN_MAIN].Disconnect(pReason);
 	SetState(IClient::STATE_OFFLINE);
@@ -1605,6 +1606,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 				if(Old != 0 && m_UseTempRconCommands == 0)
 				{
 					m_pConsole->DeregisterTempAll();
+					m_ReceivingRconCommands = false;
 				}
 			}
 		}
@@ -1939,6 +1941,14 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 			{
 				GameClient()->OnRconType(UsernameReq);
 			}
+		}
+		else if(Conn == CONN_MAIN && (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_RCON_CMD_GROUP_START)
+		{
+			m_ReceivingRconCommands = true;
+		}
+		else if(Conn == CONN_MAIN && (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_RCON_CMD_GROUP_END)
+		{
+			m_ReceivingRconCommands = false;
 		}
 	}
 	else if((pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0)

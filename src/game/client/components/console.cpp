@@ -1279,10 +1279,15 @@ void CGameConsole::OnRender()
 		str_format(aBuf, sizeof(aBuf), Localize("Lines %d - %d (%s)"), pConsole->m_BacklogCurLine + 1, pConsole->m_BacklogCurLine + pConsole->m_LinesRendered, pConsole->m_BacklogCurLine != 0 ? Localize("Locked") : Localize("Following"));
 		TextRender()->Text(10.0f, FONT_SIZE / 2.f, FONT_SIZE, aBuf);
 
+		if(m_ConsoleType == CONSOLETYPE_REMOTE && Client()->ReceivingRconCommands())
+		{
+			UI()->RenderProgressSpinner(vec2(Screen.w / 4.0f + FONT_SIZE / 2.f, FONT_SIZE), FONT_SIZE / 2.f);
+			TextRender()->Text(Screen.w / 4.0f + FONT_SIZE + 2.0f, FONT_SIZE / 2.f, FONT_SIZE, Localize("Loading commands…"));
+		}
+
 		// render version
 		str_copy(aBuf, "v" GAME_VERSION " on " CONF_PLATFORM_STRING " " CONF_ARCH_STRING);
-		float Width = TextRender()->TextWidth(FONT_SIZE, aBuf, -1, -1.0f);
-		TextRender()->Text(Screen.w - Width - 10.0f, FONT_SIZE / 2.f, FONT_SIZE, aBuf);
+		TextRender()->Text(Screen.w - TextRender()->TextWidth(FONT_SIZE, aBuf) - 10.0f, FONT_SIZE / 2.f, FONT_SIZE, aBuf);
 	}
 }
 
