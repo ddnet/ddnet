@@ -44,9 +44,6 @@
 %s wins!
 == ¡%s gana!
 
--Page %d-
-== -Página %d-
-
 Abort
 == Cancelar
 
@@ -425,9 +422,6 @@ The audio device couldn't be initialised.
 The server is running a non-standard tuning on a pure game type.
 == El servidor está ejecutando una configuración no estándar en un tipo de juego puro.
 
-There's an unsaved map in the editor, you might want to save it before you quit the game.
-== Tienes un mapa sin guardar en el editor, quizá quieras guardarlo antes de salir.
-
 Time limit
 == Tiempo límite
 
@@ -528,9 +522,6 @@ Your skin
 
 Reset to defaults
 == Resetear por defecto
-
-Quit anyway?
-== ¿Salir de todos modos?
 
 Round
 == Ronda
@@ -655,9 +646,6 @@ Update now
 Restart
 == Reiniciar
 
-Please use a different filename
-== 
-
 Remove chat
 == Eliminar chat
 
@@ -720,9 +708,6 @@ Automatically create statboard csv
 
 Max CSVs
 == CSV máx
-
-Dummy settings
-== Config. del Dummy
 
 Vanilla skins only
 == Solo skins Vanilla
@@ -976,9 +961,6 @@ Grabs
 9+ new mentions
 == 9+ nuevas menciones
 
-Saving ddnet-settings.cfg failed
-== Error al guardar ddnet-settings.cfg
-
 Warning
 == Advertencia
 
@@ -1166,9 +1148,6 @@ https://ddnet.org/discord
 Are you sure that you want to disconnect and switch to a different server?
 == ¿Seguro que quieres desconectarte y cambiar de servidor?
 
-Kill Messages
-== Mensajes de Muerte
-
 Show local player's key presses
 == Mostrar las teclas presionadas por el jugador local
 
@@ -1213,9 +1192,6 @@ Tutorial
 
 Can't find a Tutorial server
 == No se pudo encontrar un servidor Tutorial
-
-Toggle to edit your dummy settings
-== Actívalo para editar la configuración de tu dummy
 
 Choose default eyes when joining a server
 == Escoge los ojos predeterminados al unirte a un servidor
@@ -1771,3 +1747,72 @@ Regular background color
 
 Entities background color
 == Color del fondo de entidades
+
+Saving settings to '%s' failed
+== 
+
+Searching
+== 
+
+Enter Username
+== 
+
+Enter Password
+== 
+
+NOT CONNECTED
+== 
+
+Match %d of %d
+== 
+
+No results
+== 
+
+Lines %d - %d (%s)
+== 
+
+Locked
+== 
+
+Following
+== 
+
+Press a key…
+== 
+
+Are you sure that you want to restart?
+== 
+
+There's an unsaved map in the editor, you might want to save it.
+== 
+
+Continue anyway?
+== 
+
+Communities
+== 
+
+Please use a different filename
+== 
+
+Info Messages
+== 
+
+Show local time always
+== 
+
+Chat font size
+== 
+
+Chat width
+== 
+
+Authed name color in scoreboard
+== 
+
+Same clan color in scoreboard
+== 
+
+Show finish messages
+== 

@@ -25,9 +25,6 @@
 %s wins!
 == %s је победио!
 
--Page %d-
-== -Страна %d-
-
 Abort
 == Одустани
 
@@ -403,9 +400,6 @@ The audio device couldn't be initialised.
 The server is running a non-standard tuning on a pure game type.
 == Сервер изводи нестандардно подешавање чистог типа игре.
 
-There's an unsaved map in the editor, you might want to save it before you quit the game.
-== Мапа није сачувана, вероватно желите да је сачувате пре изласка из игре.
-
 Time limit
 == Временско ограничење
 
@@ -534,9 +528,6 @@ Your skin
 Reset to defaults
 == Ресетуј
 
-Quit anyway?
-== Излаз?
-
 Round
 == Рунда
 
@@ -663,9 +654,6 @@ Countries
 Types
 == Типови
 
-Please use a different filename
-== 
-
 Remove chat
 == Уклони дописивање
 
@@ -734,9 +722,6 @@ Automatically create statboard csv
 
 Max CSVs
 == Највише csv-ова
-
-Dummy settings
-== Подешавања копије
 
 Download skins
 == Преузимај теме
@@ -1054,9 +1039,6 @@ Auto
 Replay
 == Помнови
 
-Saving ddnet-settings.cfg failed
-== Чување ddnet-settings.cfg неуспело
-
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
 == Ширина текстуре %s није дељива са %d, или висина није дељива са %d, што ће проузроковати видљиве грешке.
 
@@ -1180,9 +1162,6 @@ Settings file
 Config directory
 == Директоријум конфигурацији
 
-Toggle to edit your dummy settings
-== Укључи да уређујеш подешавања лутке
-
 Download community skins
 == Преузми остале теме
 
@@ -1283,9 +1262,6 @@ Name Plate
 
 Hook Collisions
 == Додир куке
-
-Kill Messages
-== Поруке убистава
 
 Show health, shields and ammo
 == Прикажи животе, штитове и меткове
@@ -1461,6 +1437,9 @@ Could not save downloaded map. Try manually deleting this file: %s
 Error playing demo
 == 
 
+Saving settings to '%s' failed
+== 
+
 Initializing components
 == 
 
@@ -1468,6 +1447,33 @@ Quitting. Please wait…
 == 
 
 Restarting. Please wait…
+== 
+
+Searching
+== 
+
+Enter Username
+== 
+
+Enter Password
+== 
+
+NOT CONNECTED
+== 
+
+Match %d of %d
+== 
+
+No results
+== 
+
+Lines %d - %d (%s)
+== 
+
+Locked
+== 
+
+Following
 == 
 
 Multi-View
@@ -1482,10 +1488,22 @@ Some map sounds could not be loaded. Check the local console for details.
 Loading menu themes
 == 
 
+Press a key…
+== 
+
 Rename folder
 == 
 
 Render complete
+== 
+
+Are you sure that you want to restart?
+== 
+
+There's an unsaved map in the editor, you might want to save it.
+== 
+
+Continue anyway?
 == 
 
 A demo with this name already exists
@@ -1507,6 +1525,9 @@ Videos directory
 == 
 
 Video was saved to '%s'
+== 
+
+Communities
 == 
 
 Copy info
@@ -1617,6 +1638,9 @@ Cut length
 Render cut to video
 == 
 
+Please use a different filename
+== 
+
 All combined
 == 
 
@@ -1700,6 +1724,27 @@ Cancel
 == 
 
 Graphics card
+== 
+
+Info Messages
+== 
+
+Show local time always
+== 
+
+Chat font size
+== 
+
+Chat width
+== 
+
+Authed name color in scoreboard
+== 
+
+Same clan color in scoreboard
+== 
+
+Show finish messages
 == 
 
 Weapons

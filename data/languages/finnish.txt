@@ -27,9 +27,6 @@
 %s wins!
 == %s voitti!
 
--Page %d-
-== -Sivu %d-
-
 Abort
 == Keskeytä
 
@@ -402,9 +399,6 @@ The audio device couldn't be initialised.
 The server is running a non-standard tuning on a pure game type.
 == Tämä palvelin ajaa ei-standardeja virityksiä standardipelityypillä.
 
-There's an unsaved map in the editor, you might want to save it before you quit the game.
-== Editorissa on tallentamaton kenttä, saatat haluta tallentaa sen ennen kuin lopetat pelin.
-
 Time limit
 == Aikaraja
 
@@ -504,9 +498,6 @@ Your skin
 Reset to defaults
 == Palaa oletusasetuksiin
 
-Quit anyway?
-== Lopeta siitä huolimatta?
-
 Round
 == Kierros
 
@@ -527,9 +518,6 @@ Name plates size
 
 Successfully saved the replay!
 == Uudelleentoisto tallentui onnistuneesti!
-
-Saving ddnet-settings.cfg failed
-== ddnet-settings.cfg:n tallentaminen epäonnistui
 
 Replay feature is disabled!
 == Uudelleentoisto-ominaisuus on pois käytöstä!
@@ -684,9 +672,6 @@ Types
 Leak IP
 == Vuoda IP
 
-Please use a different filename
-== 
-
 Remove chat
 == Poista chatti
 
@@ -761,9 +746,6 @@ Refresh Rate
 
 Themes directory
 == Teemahakemisto
-
-Dummy settings
-== Dummyn asetukset
 
 Download skins
 == Lataa ulkonäköjä
@@ -1117,6 +1099,9 @@ Could not save downloaded map. Try manually deleting this file: %s
 Error playing demo
 == 
 
+Saving settings to '%s' failed
+== 
+
 The format of texture %s is not RGBA which will cause visual bugs.
 == 
 
@@ -1150,6 +1135,33 @@ Quitting. Please wait…
 Restarting. Please wait…
 == 
 
+Searching
+== 
+
+Enter Username
+== 
+
+Enter Password
+== 
+
+NOT CONNECTED
+== 
+
+Match %d of %d
+== 
+
+No results
+== 
+
+Lines %d - %d (%s)
+== 
+
+Locked
+== 
+
+Following
+== 
+
 Position:
 == 
 
@@ -1177,6 +1189,9 @@ Some map sounds could not be loaded. Check the local console for details.
 Loading menu themes
 == 
 
+Press a key…
+== 
+
 Trying to determine UDP connectivity...
 == 
 
@@ -1199,6 +1214,15 @@ Rename folder
 == 
 
 Render complete
+== 
+
+Are you sure that you want to restart?
+== 
+
+There's an unsaved map in the editor, you might want to save it.
+== 
+
+Continue anyway?
 == 
 
 A demo with this name already exists
@@ -1232,6 +1256,9 @@ Loading menu images
 == 
 
 Are you sure that you want to disconnect and switch to a different server?
+== 
+
+Communities
 == 
 
 Copy info
@@ -1342,6 +1369,9 @@ Cut length
 Render cut to video
 == 
 
+Please use a different filename
+== 
+
 Loading demo files
 == 
 
@@ -1424,9 +1454,6 @@ Automatically create statboard csv
 Max CSVs
 == 
 
-Toggle to edit your dummy settings
-== 
-
 Loading skin files
 == 
 
@@ -1436,10 +1463,10 @@ Download community skins
 Fat skins (DDFat)
 == 
 
-Choose default eyes when joining a server
+Create a random skin
 == 
 
-Create a random skin
+Choose default eyes when joining a server
 == 
 
 Open the directory to add custom skins
@@ -1552,10 +1579,13 @@ Name Plate
 Hook Collisions
 == 
 
-Kill Messages
+Info Messages
 == 
 
 Show health, shields and ammo
+== 
+
+Show local time always
 == 
 
 DDRace HUD
@@ -1588,10 +1618,22 @@ Show freeze bars
 Opacity of freeze bars inside freeze
 == 
 
+Chat font size
+== 
+
+Chat width
+== 
+
 Show hook strength indicator
 == 
 
 Show local player's key presses
+== 
+
+Authed name color in scoreboard
+== 
+
+Same clan color in scoreboard
 == 
 
 Hook collision line
@@ -1616,6 +1658,9 @@ Something hookable
 == 
 
 A Tee
+== 
+
+Show finish messages
 == 
 
 Normal Color

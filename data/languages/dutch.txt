@@ -38,9 +38,6 @@
 %s wins!
 == %s wint!
 
--Page %d-
-== -Pagina %d-
-
 Abort
 == Afbreken
 
@@ -413,9 +410,6 @@ The audio device couldn't be initialised.
 The server is running a non-standard tuning on a pure game type.
 == The server draait geen standaard spel type.
 
-There's an unsaved map in the editor, you might want to save it before you quit the game.
-== Er is een onopgeslagen kaart in de editor, misschien wil je deze opslaan voordat je stopt.
-
 Time limit
 == Tijdslimiet
 
@@ -516,9 +510,6 @@ Your skin
 
 Reset to defaults
 == Terugzetten naar standaardinstellingen
-
-Quit anyway?
-== Toch afsluiten?
 
 Round
 == Ronde
@@ -646,9 +637,6 @@ Update now
 Restart
 == Herstarten
 
-Please use a different filename
-== 
-
 Remove chat
 == Verwijder chat
 
@@ -713,9 +701,6 @@ Automatically create statboard csv
 
 Max CSVs
 == Max CSVs
-
-Dummy settings
-== Dummy instellingen
 
 Vanilla skins only
 == Alleen vanilla skins
@@ -975,9 +960,6 @@ Auto
 Replay
 == Herhaling
 
-Saving ddnet-settings.cfg failed
-== Het opslaan van ddnet-settings.cfg is mislukt
-
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
 == De wijdte van de texture %s is niet te delen door %d, of de hoogte is niet te delen door %d wat visuele bugs kan veroorzaken.
 
@@ -1074,9 +1056,6 @@ Config directory
 Themes directory
 == Thema map
 
-Toggle to edit your dummy settings
-== Schakel in om je dummyinstellingen te bewerken
-
 Download skins
 == Skins downloaden
 
@@ -1133,9 +1112,6 @@ Background music volume
 
 Assets
 == Assets
-
-Kill Messages
-== Kill Berichten
 
 Use old chat style
 == Oude chatstijl gebruiken
@@ -1279,6 +1255,9 @@ Could not save downloaded map. Try manually deleting this file: %s
 Error playing demo
 == 
 
+Saving settings to '%s' failed
+== 
+
 Preparing demo playback
 == 
 
@@ -1309,6 +1288,33 @@ Quitting. Please wait…
 Restarting. Please wait…
 == 
 
+Searching
+== 
+
+Enter Username
+== 
+
+Enter Password
+== 
+
+NOT CONNECTED
+== 
+
+Match %d of %d
+== 
+
+No results
+== 
+
+Lines %d - %d (%s)
+== 
+
+Locked
+== 
+
+Following
+== 
+
 Position:
 == 
 
@@ -1331,6 +1337,9 @@ Some map sounds could not be loaded. Check the local console for details.
 == 
 
 Loading menu themes
+== 
+
+Press a key…
 == 
 
 Trying to determine UDP connectivity...
@@ -1357,6 +1366,15 @@ Rename folder
 Render complete
 == 
 
+Are you sure that you want to restart?
+== 
+
+There's an unsaved map in the editor, you might want to save it.
+== 
+
+Continue anyway?
+== 
+
 A demo with this name already exists
 == 
 
@@ -1379,6 +1397,9 @@ Video was saved to '%s'
 == 
 
 Loading menu images
+== 
+
+Communities
 == 
 
 Copy info
@@ -1487,6 +1508,9 @@ Cut length
 == 
 
 Render cut to video
+== 
+
+Please use a different filename
 == 
 
 Loading demo files
@@ -1636,7 +1660,13 @@ Name Plate
 Hook Collisions
 == 
 
+Info Messages
+== 
+
 Show health, shields and ammo
+== 
+
+Show local time always
 == 
 
 DDRace HUD
@@ -1669,7 +1699,19 @@ Show freeze bars
 Opacity of freeze bars inside freeze
 == 
 
+Chat font size
+== 
+
+Chat width
+== 
+
 Show hook strength indicator
+== 
+
+Authed name color in scoreboard
+== 
+
+Same clan color in scoreboard
 == 
 
 Hook collision line
@@ -1694,6 +1736,9 @@ Something hookable
 == 
 
 A Tee
+== 
+
+Show finish messages
 == 
 
 Normal Color

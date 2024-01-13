@@ -30,9 +30,6 @@
 %s wins!
 == %s vinner!
 
--Page %d-
-== -Sida %d-
-
 Abort
 == Avbryt
 
@@ -405,9 +402,6 @@ The audio device couldn't be initialised.
 The server is running a non-standard tuning on a pure game type.
 == Denna server kör inte standardinställningar på en reserverad speltyp.
 
-There's an unsaved map in the editor, you might want to save it before you quit the game.
-== Det finns en osparad bana i redigeraren, du kanske vill spara den innan du avslutar.
-
 Time limit
 == Tidsbegränsning
 
@@ -506,9 +500,6 @@ Your skin
 
 Reset to defaults
 == Nollställ till standard
-
-Quit anyway?
-== Avsluta i alla fall?
 
 Round
 == Runda
@@ -888,9 +879,6 @@ Length
 Skin prefix
 == Skin prefix
 
-Please use a different filename
-== 
-
 Game paused
 == Spel pausad
 
@@ -941,9 +929,6 @@ Update now
 
 Toggle ghost
 == Växla spöke
-
-Dummy settings
-== Dummy inställningar
 
 Team message
 == Lag meddelande
@@ -1026,9 +1011,6 @@ Auto
 
 Replay
 == Repris
-
-Saving ddnet-settings.cfg failed
-== Det gick inte att spara ddnet-settings.cfg
 
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
 == Bredden på texturen %s är inte delbar med %d, eller är höjden inte delbar med %d, vilket kan orsaka visuella buggar.
@@ -1128,9 +1110,6 @@ Background music volume
 
 Assets
 == Assets
-
-Kill Messages
-== Döds meddelanden
 
 Use old chat style
 == Använd gammal chatt stil
@@ -1442,9 +1421,6 @@ Open the directory to add custom themes
 Loading skin files
 == Laddar skin filer
 
-Toggle to edit your dummy settings
-== Växla till att ändra dina dummy inställningar
-
 Download community skins
 == Ladda ner community skins
 
@@ -1755,3 +1731,72 @@ Regular background color
 
 Entities background color
 == Entities bakgrunds färg
+
+Saving settings to '%s' failed
+== 
+
+Searching
+== 
+
+Enter Username
+== 
+
+Enter Password
+== 
+
+NOT CONNECTED
+== 
+
+Match %d of %d
+== 
+
+No results
+== 
+
+Lines %d - %d (%s)
+== 
+
+Locked
+== 
+
+Following
+== 
+
+Press a key…
+== 
+
+Are you sure that you want to restart?
+== 
+
+There's an unsaved map in the editor, you might want to save it.
+== 
+
+Continue anyway?
+== 
+
+Communities
+== 
+
+Please use a different filename
+== 
+
+Info Messages
+== 
+
+Show local time always
+== 
+
+Chat font size
+== 
+
+Chat width
+== 
+
+Authed name color in scoreboard
+== 
+
+Same clan color in scoreboard
+== 
+
+Show finish messages
+== 
