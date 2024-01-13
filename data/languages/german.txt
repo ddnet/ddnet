@@ -1746,70 +1746,70 @@ Entities background color
 == Entities-Hintergrundfarbe
 
 Saving settings to '%s' failed
-== 
+== Einstellungen als '%s' speichern fehlgeschlagen
 
 Searching
-== 
+== Suche
 
 Enter Username
-== 
+== Benutzername eingeben
 
 Enter Password
-== 
+== Passwort eingeben
 
 NOT CONNECTED
-== 
+== NICHT VERBUNDEN
 
 Match %d of %d
-== 
+== Treffer %d von %d
 
 No results
-== 
+== Keine Ergebnisse
 
 Lines %d - %d (%s)
-== 
+== Zeilen %d - %d (%s)
 
 Locked
-== 
+== Gesperrt
 
 Following
-== 
+== Folgen
 
 Press a key…
-== 
+== Drück eine Taste…
 
 Are you sure that you want to restart?
-== 
+== Bist du sicher dass du neustarten willst?
 
 There's an unsaved map in the editor, you might want to save it.
-== 
+== Es gibt eine ungespeicherte Karte im Editor, du könntest sie speichern wollen.
 
 Continue anyway?
-== 
+== Trotzdem fortfahren?
 
 Communities
-== 
+== Gemeinschaften
 
 Please use a different filename
-== 
+== Bitte nutz einen anderen Dateinamen
 
 Info Messages
-== 
+== Info-Nachrichten
 
 Show local time always
-== 
+== Immer lokale Zeit anzeigen
 
 Chat font size
-== 
+== Chat-Schriftgröße
 
 Chat width
-== 
+== Chat-Breite
 
 Authed name color in scoreboard
-== 
+== Authorisierte Namensfarbe in der Punktetafel
 
 Same clan color in scoreboard
-== 
+== Gleicher-Clan-Farbe in der Punktetafel
 
 Show finish messages
-== 
+== Siegnachrichten anzeigen
