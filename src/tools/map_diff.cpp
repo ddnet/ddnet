@@ -99,7 +99,11 @@ int main(int argc, const char *argv[])
 {
 	CCmdlineFix CmdlineFix(&argc, &argv);
 	std::vector<std::shared_ptr<ILogger>> vpLoggers;
-	vpLoggers.push_back(std::shared_ptr<ILogger>(log_logger_stdout()));
+	std::shared_ptr<ILogger> pStdoutLogger = std::shared_ptr<ILogger>(log_logger_stdout());
+	if(pStdoutLogger)
+	{
+		vpLoggers.push_back(pStdoutLogger);
+	}
 	IOHANDLE LogFile = io_open("map_diff.txt", IOFLAG_WRITE);
 	if(LogFile)
 	{

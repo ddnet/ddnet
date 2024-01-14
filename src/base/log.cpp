@@ -11,6 +11,8 @@
 #define WIN32_LEAN_AND_MEAN
 #undef _WIN32_WINNT
 #define _WIN32_WINNT 0x0501 /* required for mingw to get getaddrinfo to work */
+#include <fcntl.h>
+#include <io.h>
 #include <windows.h>
 #else
 #include <unistd.h>
@@ -49,7 +51,10 @@ void log_set_global_logger_default()
 #else
 	logger = log_logger_stdout();
 #endif
-	log_set_global_logger(logger.release());
+	if(logger)
+	{
+		log_set_global_logger(logger.release());
+	}
 }
 
 ILogger *log_get_scope_logger()
@@ -233,19 +238,16 @@ public:
 			return;
 		}
 		aio_lock(m_pAio);
-		if(m_AnsiTruecolor)
+		if(m_AnsiTruecolor && pMessage->m_HaveColor)
 		{
 			// https://en.wikipedia.org/w/index.php?title=ANSI_escape_code&oldid=1077146479#24-bit
 			char aAnsi[32];
-			if(pMessage->m_HaveColor)
-			{
-				str_format(aAnsi, sizeof(aAnsi),
-					"\x1b[38;2;%d;%d;%dm",
-					pMessage->m_Color.r,
-					pMessage->m_Color.g,
-					pMessage->m_Color.b);
-				aio_write_unlocked(m_pAio, aAnsi, str_length(aAnsi));
-			}
+			str_format(aAnsi, sizeof(aAnsi),
+				"\x1b[38;2;%d;%d;%dm",
+				pMessage->m_Color.r,
+				pMessage->m_Color.g,
+				pMessage->m_Color.b);
+			aio_write_unlocked(m_pAio, aAnsi, str_length(aAnsi));
 		}
 		aio_write_unlocked(m_pAio, pMessage->m_aLine, pMessage->m_LineLength);
 		if(m_AnsiTruecolor && pMessage->m_HaveColor)
@@ -317,14 +319,16 @@ static int color_hsv_to_windows_console_color(const ColorHSVA &Hsv)
 class CWindowsConsoleLogger : public ILogger
 {
 	HANDLE m_pConsole;
+	bool m_EnableColor;
 	int m_BackgroundColor;
 	int m_ForegroundColor;
 	CLock m_OutputLock;
 	bool m_Finished = false;
 
 public:
-	CWindowsConsoleLogger(HANDLE pConsole) :
-		m_pConsole(pConsole)
+	CWindowsConsoleLogger(HANDLE pConsole, bool EnableColor) :
+		m_pConsole(pConsole),
+		m_EnableColor(EnableColor)
 	{
 		CONSOLE_SCREEN_BUFFER_INFO ConsoleInfo;
 		if(GetConsoleScreenBufferInfo(pConsole, &ConsoleInfo))
@@ -344,15 +348,12 @@ public:
 		{
 			return;
 		}
-		const std::wstring WideMessage = windows_utf8_to_wide(pMessage->m_aLine) + L"\r\n";
+		const std::wstring WideMessage = windows_utf8_to_wide(pMessage->m_aLine);
 
 		int Color = m_BackgroundColor;
-		if(pMessage->m_HaveColor)
+		if(m_EnableColor && pMessage->m_HaveColor)
 		{
-			ColorRGBA Rgba(1.0, 1.0, 1.0, 1.0);
-			Rgba.r = pMessage->m_Color.r / 255.0;
-			Rgba.g = pMessage->m_Color.g / 255.0;
-			Rgba.b = pMessage->m_Color.b / 255.0;
+			const ColorRGBA Rgba(pMessage->m_Color.r / 255.0f, pMessage->m_Color.g / 255.0f, pMessage->m_Color.b / 255.0f);
 			Color |= color_hsv_to_windows_console_color(color_cast<ColorHSVA>(Rgba));
 		}
 		else
@@ -362,7 +363,8 @@ public:
 		if(!m_Finished)
 		{
 			SetConsoleTextAttribute(m_pConsole, Color);
-			WriteConsoleW(m_pConsole, WideMessage.c_str(), WideMessage.length(), NULL, NULL);
+			WriteConsoleW(m_pConsole, WideMessage.c_str(), WideMessage.length(), nullptr, nullptr);
+			WriteConsoleW(m_pConsole, L"\r\n", 2, nullptr, nullptr);
 		}
 	}
 	void GlobalFinish() override REQUIRES(!m_OutputLock)
@@ -373,28 +375,15 @@ public:
 		m_Finished = true;
 	}
 };
-class CWindowsFileLogger : public ILogger
-{
-	HANDLE m_pFile;
-	CLock m_OutputLock;
 
-public:
-	CWindowsFileLogger(HANDLE pFile) :
-		m_pFile(pFile)
-	{
-	}
-	void Log(const CLogMessage *pMessage) override REQUIRES(!m_OutputLock)
-	{
-		if(m_Filter.Filters(pMessage))
-		{
-			return;
-		}
-		const CLockScope LockScope(m_OutputLock);
-		DWORD Written; // we don't care about the value, but Windows 7 crashes if we pass NULL
-		WriteFile(m_pFile, pMessage->m_aLine, pMessage->m_LineLength, &Written, NULL);
-		WriteFile(m_pFile, "\r\n", 2, &Written, NULL);
-	}
-};
+static IOHANDLE ConvertWindowsHandle(HANDLE pHandle, int OpenFlags)
+{
+	int FileDescriptor = _open_osfhandle(reinterpret_cast<intptr_t>(pHandle), OpenFlags);
+	dbg_assert(FileDescriptor != -1, "_open_osfhandle failure");
+	IOHANDLE FileStream = _wfdopen(FileDescriptor, L"w");
+	dbg_assert(FileStream != nullptr, "_wfdopen failure");
+	return FileStream;
+}
 #endif
 
 std::unique_ptr<ILogger> log_logger_stdout()
@@ -402,18 +391,65 @@ std::unique_ptr<ILogger> log_logger_stdout()
 #if !defined(CONF_FAMILY_WINDOWS)
 	// TODO: Only enable true color when COLORTERM contains "truecolor".
 	// https://github.com/termstandard/colors/tree/65bf0cd1ece7c15fa33a17c17528b02c99f1ae0b#checking-for-colorterm
-	const bool colors = getenv("NO_COLOR") == nullptr && isatty(STDOUT_FILENO);
-	return std::make_unique<CLoggerAsync>(io_stdout(), colors, false);
+	const bool Colors = getenv("NO_COLOR") == nullptr && isatty(STDOUT_FILENO);
+	return std::make_unique<CLoggerAsync>(io_stdout(), Colors, false);
 #else
+	// If we currently have no stdout (console, file, pipe),
+	// try to attach to the console of the parent process.
 	if(GetFileType(GetStdHandle(STD_OUTPUT_HANDLE)) == FILE_TYPE_UNKNOWN)
-		AttachConsole(ATTACH_PARENT_PROCESS);
-	HANDLE pOutput = GetStdHandle(STD_OUTPUT_HANDLE);
-	switch(GetFileType(pOutput))
 	{
-	case FILE_TYPE_CHAR: return std::make_unique<CWindowsConsoleLogger>(pOutput);
-	case FILE_TYPE_PIPE: [[fallthrough]]; // writing to pipe works the same as writing to a file
-	case FILE_TYPE_DISK: return std::make_unique<CWindowsFileLogger>(pOutput);
-	default: return std::make_unique<CLoggerAsync>(io_stdout(), false, false);
+		AttachConsole(ATTACH_PARENT_PROCESS);
+	}
+
+	HANDLE pOutput = GetStdHandle(STD_OUTPUT_HANDLE);
+	if(pOutput == nullptr)
+	{
+		// There is no console, file or pipe that we can output to.
+		return nullptr;
+	}
+	dbg_assert(pOutput != INVALID_HANDLE_VALUE, "GetStdHandle failure");
+
+	const DWORD OutputType = GetFileType(pOutput);
+	if(OutputType == FILE_TYPE_CHAR)
+	{
+		DWORD OldConsoleMode = 0;
+		dbg_assert(GetConsoleMode(pOutput, &OldConsoleMode), "GetConsoleMode failure");
+
+		const bool Colors = _wgetenv(L"NO_COLOR") == nullptr;
+
+		// Try to enable virtual terminal processing in the Windows console.
+		// See https://learn.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences
+		if(!SetConsoleMode(pOutput, OldConsoleMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING | DISABLE_NEWLINE_AUTO_RETURN))
+		{
+			// Try to downgrade mode gracefully when failing to set both.
+			if(!SetConsoleMode(pOutput, OldConsoleMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING))
+			{
+				// Fallback to old, slower Windows logging API, when failung to enable virtual terminal processing.
+				return std::make_unique<CWindowsConsoleLogger>(pOutput, Colors);
+			}
+		}
+
+		// Virtual terminal processing was enabled successfully. We can
+		// use the async logger with ANSI escape codes for colors now.
+		// We need to set the output encoding to UTF-8 manually and
+		// convert the HANDLE to an IOHANDLE to use the async logger.
+		// We assume UTF-8 is available when virtual terminal processing is.
+		dbg_assert(SetConsoleOutputCP(CP_UTF8) != 0, "SetConsoleOutputCP failure");
+		return std::make_unique<CLoggerAsync>(ConvertWindowsHandle(pOutput, _O_TEXT), Colors, false);
+	}
+	else if(OutputType == FILE_TYPE_DISK || OutputType == FILE_TYPE_PIPE)
+	{
+		// Writing to a pipe works the same as writing to a file.
+		// We can use the async logger to write to files and pipes
+		// by converting the HANDLE to an IOHANDLE.
+		// For pipes there does not seem to be any way to determine
+		// whether the console support ANSI escape codes.
+		return std::make_unique<CLoggerAsync>(ConvertWindowsHandle(pOutput, _O_APPEND), false, false);
+	}
+	else
+	{
+		dbg_assert(false, "GetFileType failure");
+		dbg_break();
 	}
 #endif
 }
