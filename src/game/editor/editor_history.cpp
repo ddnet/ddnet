@@ -17,6 +17,12 @@ void CEditorHistory::Execute(const std::shared_ptr<IEditorAction> &pAction, cons
 
 void CEditorHistory::RecordAction(const std::shared_ptr<IEditorAction> &pAction, const char *pDisplay)
 {
+	if(m_IsBulk)
+	{
+		m_vpBulkActions.push_back(pAction);
+		return;
+	}
+
 	m_vpRedoActions.clear();
 
 	if((int)m_vpUndoActions.size() >= g_Config.m_ClEditorMaxHistory)
@@ -62,4 +68,23 @@ void CEditorHistory::Clear()
 {
 	m_vpUndoActions.clear();
 	m_vpRedoActions.clear();
+}
+
+void CEditorHistory::BeginBulk()
+{
+	m_IsBulk = true;
+	m_vpBulkActions.clear();
+}
+
+void CEditorHistory::EndBulk(const char *pDisplay)
+{
+	if(!m_IsBulk)
+		return;
+	m_IsBulk = false;
+
+	// Record bulk action
+	if(!m_vpBulkActions.empty())
+		RecordAction(std::make_shared<CEditorActionBulk>(m_pEditor, m_vpBulkActions, pDisplay, true));
+
+	m_vpBulkActions.clear();
 }

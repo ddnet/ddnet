@@ -876,14 +876,14 @@ public:
 
 	void DoQuadEnvelopes(const std::vector<CQuad> &vQuads, IGraphics::CTextureHandle Texture = IGraphics::CTextureHandle());
 	void DoQuadEnvPoint(const CQuad *pQuad, int QIndex, int pIndex);
-	void DoQuadPoint(const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, int QuadIndex, int v);
+	void DoQuadPoint(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, int QuadIndex, int v);
 	void SetHotQuadPoint(const std::shared_ptr<CLayerQuads> &pLayer);
 
 	float TriangleArea(vec2 A, vec2 B, vec2 C);
 	bool IsInTriangle(vec2 Point, vec2 A, vec2 B, vec2 C);
 	void DoQuadKnife(int QuadIndex);
 
-	void DoSoundSource(CSoundSource *pSource, int Index);
+	void DoSoundSource(int LayerIndex, CSoundSource *pSource, int Index);
 
 	enum class EAxis
 	{
@@ -907,7 +907,7 @@ public:
 	void DoMapEditor(CUIRect View);
 	void DoToolbarLayers(CUIRect Toolbar);
 	void DoToolbarSounds(CUIRect Toolbar);
-	void DoQuad(const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, int Index);
+	void DoQuad(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, int Index);
 	void PreparePointDrag(const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, int QuadIndex, int PointIndex);
 	void DoPointDrag(const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, int QuadIndex, int PointIndex, int OffsetX, int OffsetY);
 	EAxis GetDragAxis(int OffsetX, int OffsetY);

@@ -645,4 +645,18 @@ private:
 	CQuad m_Quad;
 };
 
+class CEditorActionMoveSoundSource : public CEditorActionLayerBase
+{
+public:
+	CEditorActionMoveSoundSource(CEditor *pEditor, int GroupIndex, int LayerIndex, int SourceIndex, CPoint OriginalPosition, CPoint CurrentPosition);
+
+	void Undo() override;
+	void Redo() override;
+
+private:
+	int m_SourceIndex;
+	CPoint m_OriginalPosition;
+	CPoint m_CurrentPosition;
+};
+
 #endif
