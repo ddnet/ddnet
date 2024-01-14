@@ -1680,8 +1680,12 @@ void CEditor::ComputePointAlignments(const std::shared_ptr<CLayerQuads> &pLayer,
 			CheckAlignment(pQuadPoint);
 		}
 
-		CPoint Center = (Min + Max) / 2.0f;
-		CheckAlignment(&Center);
+		// Don't check alignment with center of selected quads
+		if(!IsQuadSelected(i))
+		{
+			CPoint Center = (Min + Max) / 2.0f;
+			CheckAlignment(&Center);
+		}
 	}
 
 	// Finally concatenate both alignment vectors into the output
@@ -2377,9 +2381,12 @@ void CEditor::DoQuadPoint(const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQu
 						s_Operation = OP_MOVEPOINT;
 						// Save original positions before moving
 						s_OriginalPoint = pQuad->m_aPoints[V];
-						for(int m = 0; m < 4; m++)
-							if(IsQuadPointSelected(QuadIndex, m))
-								PreparePointDrag(pLayer, pQuad, QuadIndex, m);
+						for(int Selected : m_vSelectedQuads)
+						{
+							for(int m = 0; m < 4; m++)
+								if(IsQuadPointSelected(Selected, m))
+									PreparePointDrag(pLayer, &pLayer->m_vQuads[Selected], Selected, m);
+						}
 					}
 				}
 			}
@@ -2394,11 +2401,14 @@ void CEditor::DoQuadPoint(const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQu
 				ComputePointsAlignments(pLayer, false, s_LastOffset.x, s_LastOffset.y, s_Alignments);
 				ApplyAlignments(s_Alignments, s_LastOffset.x, s_LastOffset.y);
 
-				for(int m = 0; m < 4; m++)
+				for(int Selected : m_vSelectedQuads)
 				{
-					if(IsQuadPointSelected(QuadIndex, m))
+					for(int m = 0; m < 4; m++)
 					{
-						DoPointDrag(pLayer, pQuad, QuadIndex, m, s_LastOffset.x, s_LastOffset.y);
+						if(IsQuadPointSelected(Selected, m))
+						{
+							DoPointDrag(pLayer, &pLayer->m_vQuads[Selected], Selected, m, s_LastOffset.x, s_LastOffset.y);
+						}
 					}
 				}
 			}
@@ -2410,18 +2420,22 @@ void CEditor::DoQuadPoint(const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQu
 				m_QuadTracker.AddQuadPointPropTrack(EQuadPointProp::PROP_TEX_U);
 				m_QuadTracker.AddQuadPointPropTrack(EQuadPointProp::PROP_TEX_V);
 
-				for(int m = 0; m < 4; m++)
+				for(int Selected : m_vSelectedQuads)
 				{
-					if(IsQuadPointSelected(QuadIndex, m))
+					CQuad *pSelectedQuad = &pLayer->m_vQuads[Selected];
+					for(int m = 0; m < 4; m++)
 					{
-						// 0,2;1,3 - line x
-						// 0,1;2,3 - line y
+						if(IsQuadPointSelected(Selected, m))
+						{
+							// 0,2;1,3 - line x
+							// 0,1;2,3 - line y
 
-						pQuad->m_aTexcoords[m].x += f2fx(m_MouseDeltaWx * 0.001f);
-						pQuad->m_aTexcoords[(m + 2) % 4].x += f2fx(m_MouseDeltaWx * 0.001f);
+							pSelectedQuad->m_aTexcoords[m].x += f2fx(m_MouseDeltaWx * 0.001f);
+							pSelectedQuad->m_aTexcoords[(m + 2) % 4].x += f2fx(m_MouseDeltaWx * 0.001f);
 
-						pQuad->m_aTexcoords[m].y += f2fx(m_MouseDeltaWy * 0.001f);
-						pQuad->m_aTexcoords[m ^ 1].y += f2fx(m_MouseDeltaWy * 0.001f);
+							pSelectedQuad->m_aTexcoords[m].y += f2fx(m_MouseDeltaWy * 0.001f);
+							pSelectedQuad->m_aTexcoords[m ^ 1].y += f2fx(m_MouseDeltaWy * 0.001f);
+						}
 					}
 				}
 			}
