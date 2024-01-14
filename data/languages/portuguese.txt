@@ -29,9 +29,6 @@
 %s wins!
 == %s ganhou!
 
--Page %d-
-== -Página %d-
-
 Abort
 == Cancelar
 
@@ -422,9 +419,6 @@ The audio device couldn't be initialised.
 The server is running a non-standard tuning on a pure game type.
 == O servidor está a usar um tipo de jogo não oficial com o nome de um oficial.
 
-There's an unsaved map in the editor, you might want to save it before you quit the game.
-== O mapa que editaste não foi gravado. Queres gravar antes de sair?
-
 Time limit
 == Tempo máximo
 
@@ -521,9 +515,6 @@ Your skin
 Reset to defaults
 == Restaurar predefinições
 
-Quit anyway?
-== Sair na mesma?
-
 Round
 == Ronda
 
@@ -541,9 +532,6 @@ LAN
 
 Name plates size
 == Tamanho dos nick's
-
-Dummy settings
-== Configurações do Dummy
 
 AntiPing
 == Antiping
@@ -589,9 +577,6 @@ Enable game sounds
 
 DDNet Client needs to be restarted to complete update!
 == O cliente DDNet precisa de ser reiniciado para completar a atualização!
-
-Please use a different filename
-== 
 
 Show others
 == Mostrar os outros
@@ -724,9 +709,6 @@ Switch weapon when out of ammo
 
 AntiPing: predict grenade paths
 == Antiping: prever os caminhos da granada
-
-Saving ddnet-settings.cfg failed
-== Falha ao guardar ddnet-settings.cfg
 
 Warning
 == Aviso
@@ -923,6 +905,9 @@ Error playing demo
 Successfully saved the replay!
 == 
 
+Saving settings to '%s' failed
+== 
+
 Replay feature is disabled!
 == 
 
@@ -962,6 +947,33 @@ Quitting. Please wait…
 Restarting. Please wait…
 == 
 
+Searching
+== 
+
+Enter Username
+== 
+
+Enter Password
+== 
+
+NOT CONNECTED
+== 
+
+Match %d of %d
+== 
+
+No results
+== 
+
+Lines %d - %d (%s)
+== 
+
+Locked
+== 
+
+Following
+== 
+
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
 == 
 
@@ -998,6 +1010,9 @@ Some map sounds could not be loaded. Check the local console for details.
 Loading menu themes
 == 
 
+Press a key…
+== 
+
 Trying to determine UDP connectivity...
 == 
 
@@ -1025,10 +1040,19 @@ Render demo
 Render complete
 == 
 
+Are you sure that you want to restart?
+== 
+
 DDraceNetwork is a cooperative online game where the goal is for you and your group of tees to reach the finish line of the map. As a newcomer you should start on Novice servers, which host the easiest maps. Consider the ping to choose a server close to you.
 == 
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
+== 
+
+There's an unsaved map in the editor, you might want to save it.
+== 
+
+Continue anyway?
 == 
 
 A demo with this name already exists
@@ -1092,6 +1116,9 @@ Getting server list from master server
 == 
 
 Filter connecting players
+== 
+
+Communities
 == 
 
 Indicate map finish
@@ -1211,6 +1238,9 @@ Cut length
 Render cut to video
 == 
 
+Please use a different filename
+== 
+
 Loading demo files
 == 
 
@@ -1311,9 +1341,6 @@ Open the directory that contains the configuration and user files
 Open the directory to add custom themes
 == 
 
-Toggle to edit your dummy settings
-== 
-
 Loading skin files
 == 
 
@@ -1332,10 +1359,10 @@ Fat skins (DDFat)
 Skin prefix
 == 
 
-Choose default eyes when joining a server
+Create a random skin
 == 
 
-Create a random skin
+Choose default eyes when joining a server
 == 
 
 Skin Database
@@ -1487,10 +1514,13 @@ Name Plate
 Hook Collisions
 == 
 
-Kill Messages
+Info Messages
 == 
 
 Show health, shields and ammo
+== 
+
+Show local time always
 == 
 
 DDRace HUD
@@ -1523,6 +1553,12 @@ Show freeze bars
 Opacity of freeze bars inside freeze
 == 
 
+Chat font size
+== 
+
+Chat width
+== 
+
 Client message
 == 
 
@@ -1536,6 +1572,12 @@ Show other players' key presses
 == 
 
 Show local player's key presses
+== 
+
+Authed name color in scoreboard
+== 
+
+Same clan color in scoreboard
 == 
 
 Hook collision line
@@ -1563,6 +1605,9 @@ Something hookable
 == 
 
 A Tee
+== 
+
+Show finish messages
 == 
 
 Normal Color

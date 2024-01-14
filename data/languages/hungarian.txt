@@ -27,9 +27,6 @@
 %s wins!
 == %s nyert!
 
--Page %d-
-== -oldal %d-
-
 Abort
 == Mégse
 
@@ -384,9 +381,6 @@ The audio device couldn't be initialised.
 The server is running a non-standard tuning on a pure game type.
 == A szerver egy nem szabványos hangolást futtat a tiszta játék típuson.
 
-There's an unsaved map in the editor, you might want to save it before you quit the game.
-== Van egy mentett térkép a szerkesztőben, talán elakarod menteni, mielőtt kilépnél a játékból.
-
 Time limit
 == Időhatár
 
@@ -483,9 +477,6 @@ Your skin
 Reset to defaults
 == Visszaállítás alapértelmezettre
 
-Quit anyway?
-== Mindenképpen kilép?
-
 Round
 == Menet
 
@@ -506,9 +497,6 @@ LAN
 
 Name plates size
 == Névtáblák mérete
-
-Dummy settings
-== Másolat beállításai
 
 AntiPing
 == Antiping
@@ -575,9 +563,6 @@ Enable game sounds
 
 DDNet Client needs to be restarted to complete update!
 == Újra kell indítani a DDNet Klienst a frissítés befejezéséhez!
-
-Please use a different filename
-== 
 
 Show others
 == Játékosok mutatása
@@ -951,9 +936,6 @@ Length
 Are you sure that you want to disconnect your dummy?
 == Biztos vagy benne, hogy a másolatod lecsatlakozzon?
 
-Saving ddnet-settings.cfg failed
-== Nem sikerült elmenteni a ddnet-settings.cfg fájlt
-
 Warning
 == Figyelmeztetés
 
@@ -1138,9 +1120,6 @@ SA
 CHN
 == KíNA
 
-Kill Messages
-== Halálüzenetek
-
 Show local player's key presses
 == Saját mozgásod nyilakkal mutatása
 
@@ -1176,9 +1155,6 @@ Run on join
 
 Chat command (e.g. showall 1)
 == Chat parancs (például: "showall 1")
-
-Toggle to edit your dummy settings
-== Átváltát a másolatod beállításaira.
 
 Choose default eyes when joining a server
 == Alapértelmezett szemek kiválasztása, amikor egy szerverre csatlakozol.
@@ -1587,10 +1563,40 @@ Open the directory to add custom assets
 Error playing demo
 == 
 
+Saving settings to '%s' failed
+== 
+
 Quitting. Please wait…
 == 
 
 Restarting. Please wait…
+== 
+
+Searching
+== 
+
+Enter Username
+== 
+
+Enter Password
+== 
+
+NOT CONNECTED
+== 
+
+Match %d of %d
+== 
+
+No results
+== 
+
+Lines %d - %d (%s)
+== 
+
+Locked
+== 
+
+Following
 == 
 
 Multi-View
@@ -1605,10 +1611,22 @@ Some map sounds could not be loaded. Check the local console for details.
 Loading menu themes
 == 
 
+Press a key…
+== 
+
 Rename folder
 == 
 
 Render complete
+== 
+
+Are you sure that you want to restart?
+== 
+
+There's an unsaved map in the editor, you might want to save it.
+== 
+
+Continue anyway?
 == 
 
 A demo with this name already exists
@@ -1627,6 +1645,9 @@ Videos directory
 == 
 
 Video was saved to '%s'
+== 
+
+Communities
 == 
 
 No server selected
@@ -1695,6 +1716,9 @@ Cut length
 Render cut to video
 == 
 
+Please use a different filename
+== 
+
 All combined
 == 
 
@@ -1736,6 +1760,27 @@ Axis
 == 
 
 Graphics card
+== 
+
+Info Messages
+== 
+
+Show local time always
+== 
+
+Chat font size
+== 
+
+Chat width
+== 
+
+Authed name color in scoreboard
+== 
+
+Same clan color in scoreboard
+== 
+
+Show finish messages
 == 
 
 Enable ghost

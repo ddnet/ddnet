@@ -396,9 +396,6 @@ Successfully saved the replay!
 Replay feature is disabled!
 == Функція повтору вимкнена
 
--Page %d-
-== -Сторінка %d-
-
 Game paused
 == Гра призупинена
 
@@ -470,12 +467,6 @@ It's recommended that you check the settings to adjust them to your liking befor
 
 Please enter your nickname below.
 == Будь ласка, введіть свій нікнейм нижче
-
-There's an unsaved map in the editor, you might want to save it before you quit the game.
-== У редакторі є незбережена карта. Ви можете зберегти її, перш ніж вийти з гри.
-
-Quit anyway?
-== Вийти?
 
 %i minute left
 == Залишилася %i хвилина
@@ -569,9 +560,6 @@ Update now
 
 Restart
 == Перезавантажити
-
-Please use a different filename
-== 
 
 Remove chat
 == Видалити чат
@@ -683,9 +671,6 @@ Automatically create statboard csv
 
 Max CSVs
 == Максимум CSV
-
-Dummy settings
-== Налаштування даммі
 
 Vanilla skins only
 == Тільки базові скіни
@@ -969,9 +954,6 @@ Auto
 Replay
 == Повтор
 
-Saving ddnet-settings.cfg failed
-== Збереження налаштувань ddnet-settings.cfg невдалося
-
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
 == Ширина або висота текстури %s не поділяється на %d, що може викликати візуальні помилки
 
@@ -1091,9 +1073,6 @@ Background music volume
 
 Assets
 == Текстури
-
-Kill Messages
-== Повідомлення вбивств
 
 Use old chat style
 == Використовувати стиль старого чату
@@ -1372,9 +1351,6 @@ Open the directory to add custom themes
 
 Loading skin files
 == Завантаження файлів скінів
-
-Toggle to edit your dummy settings
-== Перейти до редагування налаштувань даммі
 
 Download community skins
 == Завантажити скіни спільноти
@@ -1752,3 +1728,72 @@ Regular background color
 
 Entities background color
 == Колір фону об'єктів
+
+Saving settings to '%s' failed
+== 
+
+Searching
+== 
+
+Enter Username
+== 
+
+Enter Password
+== 
+
+NOT CONNECTED
+== 
+
+Match %d of %d
+== 
+
+No results
+== 
+
+Lines %d - %d (%s)
+== 
+
+Locked
+== 
+
+Following
+== 
+
+Press a key…
+== 
+
+Are you sure that you want to restart?
+== 
+
+There's an unsaved map in the editor, you might want to save it.
+== 
+
+Continue anyway?
+== 
+
+Communities
+== 
+
+Please use a different filename
+== 
+
+Info Messages
+== 
+
+Show local time always
+== 
+
+Chat font size
+== 
+
+Chat width
+== 
+
+Authed name color in scoreboard
+== 
+
+Same clan color in scoreboard
+== 
+
+Show finish messages
+== 

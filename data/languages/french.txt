@@ -49,9 +49,6 @@
 %s wins!
 == %s gagne !
 
--Page %d-
-== -Page %d-
-
 Abort
 == Annuler
 
@@ -424,9 +421,6 @@ The audio device couldn't be initialised.
 The server is running a non-standard tuning on a pure game type.
 == Le serveur utilise des paramètres non standards sur un type de jeu standard.
 
-There's an unsaved map in the editor, you might want to save it before you quit the game.
-== Il y a une carte non-enregistrée dans l'éditeur, il se peut que vous vouliez l'enregistrer avant de quitter le jeu.
-
 Time limit
 == Limite de temps
 
@@ -527,9 +521,6 @@ Your skin
 
 Reset to defaults
 == Réinitialiser
-
-Quit anyway?
-== Quitter quand même ?
 
 Round
 == Round
@@ -702,9 +693,6 @@ Default zoom
 System message
 == Message du système
 
-Dummy settings
-== Config. du dummy
-
 Are you sure that you want to disconnect?
 == Êtes-vous sûrs de vouloir vous déconnecter ?
 
@@ -818,9 +806,6 @@ Show HUD
 
 DDNet %s is available:
 == DDNet %s est disponible:
-
-Please use a different filename
-== 
 
 Search
 == Chercher
@@ -977,9 +962,6 @@ Show DDNet map finishes in server browser
 
 transmits your player name to info.ddnet.org
 == transmet votre pseudonyme à info.ddnet.org
-
-Saving ddnet-settings.cfg failed
-== L'enregistrement de ddnet-settings.cfg a échoué
 
 Warning
 == Alerte
@@ -1156,9 +1138,6 @@ Windowed borderless
 Desktop fullscreen
 == Bureau plein écran
 
-Kill Messages
-== Messages d'élimination
-
 Preview
 == Prévisualisation
 
@@ -1200,9 +1179,6 @@ Join Tutorial Server
 
 Skip Tutorial
 == Passer le tutoriel
-
-Toggle to edit your dummy settings
-== Basculer pour modifier les paramètres du dummy
 
 Choose default eyes when joining a server
 == Choisissez les yeux par défaut lorsque vous rejoignez un serveur
@@ -1636,10 +1612,40 @@ Create a random skin
 Error playing demo
 == 
 
+Saving settings to '%s' failed
+== 
+
 Quitting. Please wait…
 == 
 
 Restarting. Please wait…
+== 
+
+Searching
+== 
+
+Enter Username
+== 
+
+Enter Password
+== 
+
+NOT CONNECTED
+== 
+
+Match %d of %d
+== 
+
+No results
+== 
+
+Lines %d - %d (%s)
+== 
+
+Locked
+== 
+
+Following
 == 
 
 Multi-View
@@ -1654,10 +1660,22 @@ Some map sounds could not be loaded. Check the local console for details.
 Loading menu themes
 == 
 
+Press a key…
+== 
+
 Rename folder
 == 
 
 Render complete
+== 
+
+Are you sure that you want to restart?
+== 
+
+There's an unsaved map in the editor, you might want to save it.
+== 
+
+Continue anyway?
 == 
 
 A demo with this name already exists
@@ -1676,6 +1694,9 @@ Videos directory
 == 
 
 Video was saved to '%s'
+== 
+
+Communities
 == 
 
 No server selected
@@ -1719,6 +1740,9 @@ Cut length
 Render cut to video
 == 
 
+Please use a different filename
+== 
+
 All combined
 == 
 
@@ -1760,6 +1784,27 @@ Axis
 == 
 
 Graphics card
+== 
+
+Info Messages
+== 
+
+Show local time always
+== 
+
+Chat font size
+== 
+
+Chat width
+== 
+
+Authed name color in scoreboard
+== 
+
+Same clan color in scoreboard
+== 
+
+Show finish messages
 == 
 
 Enable ghost

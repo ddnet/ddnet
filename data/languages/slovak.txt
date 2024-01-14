@@ -25,9 +25,6 @@
 %s wins!
 == %s vyhráva!
 
--Page %d-
-== -Strana %d-
-
 Abort
 == Zrušiť
 
@@ -400,9 +397,6 @@ The audio device couldn't be initialised.
 The server is running a non-standard tuning on a pure game type.
 == Server používa neštandardné nastavenia na základnom hernom móde.
 
-There's an unsaved map in the editor, you might want to save it before you quit the game.
-== V editore máte neuloženú mapu, možno si ju chcete pred skončením hry uložiť.
-
 Time limit
 == Časový limit
 
@@ -504,9 +498,6 @@ Your skin
 Reset to defaults
 == Vrátiť na pôvodné
 
-Quit anyway?
-== Aj tak ukončiť?
-
 Round
 == Kolo
 
@@ -570,7 +561,7 @@ Error playing demo
 Successfully saved the replay!
 == 
 
-Saving ddnet-settings.cfg failed
+Saving settings to '%s' failed
 == 
 
 Replay feature is disabled!
@@ -618,6 +609,33 @@ Quitting. Please wait…
 Restarting. Please wait…
 == 
 
+Searching
+== 
+
+Enter Username
+== 
+
+Enter Password
+== 
+
+NOT CONNECTED
+== 
+
+Match %d of %d
+== 
+
+No results
+== 
+
+Lines %d - %d (%s)
+== 
+
+Locked
+== 
+
+Following
+== 
+
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
 == 
 
@@ -660,6 +678,9 @@ Loading menu themes
 Reset
 == 
 
+Press a key…
+== 
+
 Browser
 == 
 
@@ -696,6 +717,12 @@ Render demo
 Render complete
 == 
 
+Restart
+== 
+
+Are you sure that you want to restart?
+== 
+
 Welcome to DDNet
 == 
 
@@ -718,6 +745,12 @@ Your nickname '%s' is already used (%d points). Do you still want to use it?
 == 
 
 Checking for existing player with your name
+== 
+
+There's an unsaved map in the editor, you might want to save it.
+== 
+
+Continue anyway?
 == 
 
 A demo with this name already exists
@@ -814,6 +847,9 @@ Are you sure that you want to disconnect and switch to a different server?
 == 
 
 Filter connecting players
+== 
+
+Communities
 == 
 
 Indicate map finish
@@ -1105,10 +1141,7 @@ Automatically create statboard csv
 Max CSVs
 == 
 
-Dummy settings
-== 
-
-Toggle to edit your dummy settings
+Dummy
 == 
 
 Loading skin files
@@ -1129,10 +1162,10 @@ Fat skins (DDFat)
 Skin prefix
 == 
 
-Choose default eyes when joining a server
+Create a random skin
 == 
 
-Create a random skin
+Choose default eyes when joining a server
 == 
 
 Skin Database
@@ -1251,9 +1284,6 @@ Are you sure that you want to reset the controls to their defaults?
 Cancel
 == 
 
-Dummy
-== 
-
 Windowed
 == 
 
@@ -1347,7 +1377,7 @@ Name Plate
 Hook Collisions
 == 
 
-Kill Messages
+Info Messages
 == 
 
 Show health, shields and ammo
@@ -1357,6 +1387,9 @@ Show kill messages
 == 
 
 Show score
+== 
+
+Show local time always
 == 
 
 Show votes window after voting
@@ -1404,6 +1437,12 @@ Show only chat messages from friends
 Use old chat style
 == 
 
+Chat font size
+== 
+
+Chat width
+== 
+
 Messages
 == 
 
@@ -1443,6 +1482,12 @@ Show other players' key presses
 Show local player's key presses
 == 
 
+Authed name color in scoreboard
+== 
+
+Same clan color in scoreboard
+== 
+
 Hook collision line
 == 
 
@@ -1468,6 +1513,9 @@ Something hookable
 == 
 
 A Tee
+== 
+
+Show finish messages
 == 
 
 Normal Color
@@ -1685,9 +1733,6 @@ Downloading %s:
 == 
 
 Update failed! Check log...
-== 
-
-Restart
 == 
 
 Loading race demo files
