@@ -18,6 +18,11 @@
 #define WIN32_LEAN_AND_MEAN
 #include <curl/curl.h>
 
+// There is a stray constant on Windows/MSVC...
+#ifdef ERROR
+#undef ERROR
+#endif
+
 int CurlDebug(CURL *pHandle, curl_infotype Type, char *pData, size_t DataSize, void *pUser)
 {
 	char TypeChar;
@@ -394,8 +399,8 @@ bool CHttp::Init(std::chrono::milliseconds ShutdownDelay)
 	m_pThread = thread_init(CHttp::ThreadMain, this, "http");
 
 	std::unique_lock Lock(m_Lock);
-	m_Cv.wait(Lock, [this]() { return m_State != UNINITIALIZED; });
-	if(m_State != RUNNING)
+	m_Cv.wait(Lock, [this]() { return m_State != CHttp::UNINITIALIZED; });
+	if(m_State != CHttp::RUNNING)
 	{
 		return false;
 	}
@@ -415,7 +420,7 @@ void CHttp::RunLoop()
 	if(curl_global_init(CURL_GLOBAL_DEFAULT))
 	{
 		dbg_msg("http", "curl_global_init failed");
-		m_State = ERROR;
+		m_State = CHttp::ERROR;
 		m_Cv.notify_all();
 		return;
 	}
@@ -424,7 +429,7 @@ void CHttp::RunLoop()
 	if(!m_pMultiH)
 	{
 		dbg_msg("http", "curl_multi_init failed");
-		m_State = ERROR;
+		m_State = CHttp::ERROR;
 		m_Cv.notify_all();
 		return;
 	}
@@ -435,12 +440,12 @@ void CHttp::RunLoop()
 		dbg_msg("http", "libcurl version %s (compiled = " LIBCURL_VERSION ")", pVersion->version);
 	}
 
-	m_State = RUNNING;
+	m_State = CHttp::RUNNING;
 	m_Cv.notify_all();
 	dbg_msg("http", "running");
 	Lock.unlock();
 
-	while(m_State == RUNNING)
+	while(m_State == CHttp::RUNNING)
 	{
 		static int NextTimeout = std::numeric_limits<int>::max();
 		int Events = 0;
@@ -465,7 +470,7 @@ void CHttp::RunLoop()
 		{
 			Lock.lock();
 			dbg_msg("http", "Failed multi wait: %s", curl_multi_strerror(mc));
-			m_State = ERROR;
+			m_State = CHttp::ERROR;
 			break;
 		}
 
@@ -474,7 +479,7 @@ void CHttp::RunLoop()
 		{
 			Lock.lock();
 			dbg_msg("http", "Failed multi perform: %s", curl_multi_strerror(mc));
-			m_State = ERROR;
+			m_State = CHttp::ERROR;
 			break;
 		}
 
@@ -525,7 +530,7 @@ void CHttp::RunLoop()
 		error_init:
 			dbg_msg("http", "failed to start new request");
 			Lock.lock();
-			m_State = ERROR;
+			m_State = CHttp::ERROR;
 			break;
 		}
 
@@ -540,7 +545,7 @@ void CHttp::RunLoop()
 	if(!Lock.owns_lock())
 		Lock.lock();
 
-	bool Cleanup = m_State != ERROR;
+	bool Cleanup = m_State != CHttp::ERROR;
 	for(auto &pRequest : m_PendingRequests)
 	{
 		str_copy(pRequest->m_aErr, "Shutting down");
@@ -570,7 +575,7 @@ void CHttp::RunLoop()
 void CHttp::Run(std::shared_ptr<IHttpRequest> pRequest)
 {
 	std::unique_lock Lock(m_Lock);
-	m_Cv.wait(Lock, [this]() { return m_State != UNINITIALIZED; });
+	m_Cv.wait(Lock, [this]() { return m_State != CHttp::UNINITIALIZED; });
 	m_PendingRequests.emplace_back(std::static_pointer_cast<CHttpRequest>(pRequest));
 	curl_multi_wakeup(m_pMultiH);
 }
@@ -578,7 +583,7 @@ void CHttp::Run(std::shared_ptr<IHttpRequest> pRequest)
 void CHttp::Shutdown()
 {
 	std::unique_lock Lock(m_Lock);
-	if(m_Shutdown || m_State != RUNNING)
+	if(m_Shutdown || m_State != CHttp::RUNNING)
 		return;
 
 	m_Shutdown = true;
