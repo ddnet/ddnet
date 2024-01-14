@@ -809,19 +809,21 @@ public:
 	}
 };
 
-bool CGraphics_Threaded::ScreenshotDirect()
+void CGraphics_Threaded::ScreenshotDirect(bool *pSwapped)
 {
-	// add swap command
-	CImageInfo Image;
+	if(!m_DoScreenshot)
+		return;
+	m_DoScreenshot = false;
+	if(!WindowActive())
+		return;
 
-	bool DidSwap = false;
+	CImageInfo Image;
 
 	CCommandBuffer::SCommand_TrySwapAndScreenshot Cmd;
 	Cmd.m_pImage = &Image;
-	Cmd.m_pSwapped = &DidSwap;
+	Cmd.m_pSwapped = pSwapped;
 	AddCmd(Cmd);
 
-	// kick the buffer and wait for the result
 	KickCommandBuffer();
 	WaitForIdle();
 
@@ -829,8 +831,6 @@ bool CGraphics_Threaded::ScreenshotDirect()
 	{
 		m_pEngine->AddJob(std::make_shared<CScreenshotSaveJob>(m_pStorage, m_pConsole, m_aScreenshotName, Image.m_Width, Image.m_Height, Image.m_pData));
 	}
-
-	return DidSwap;
 }
 
 void CGraphics_Threaded::TextureSet(CTextureHandle TextureID)
@@ -2780,6 +2780,32 @@ void CGraphics_Threaded::NotifyWindow()
 	return m_pBackend->NotifyWindow();
 }
 
+void CGraphics_Threaded::ReadPixel(ivec2 Position, ColorRGBA *pColor)
+{
+	dbg_assert(Position.x >= 0 && Position.x < ScreenWidth(), "ReadPixel position x out of range");
+	dbg_assert(Position.y >= 0 && Position.y < ScreenHeight(), "ReadPixel position y out of range");
+
+	m_ReadPixelPosition = Position;
+	m_pReadPixelColor = pColor;
+}
+
+void CGraphics_Threaded::ReadPixelDirect(bool *pSwapped)
+{
+	if(m_pReadPixelColor == nullptr)
+		return;
+
+	CCommandBuffer::SCommand_TrySwapAndReadPixel Cmd;
+	Cmd.m_Position = m_ReadPixelPosition;
+	Cmd.m_pColor = m_pReadPixelColor;
+	Cmd.m_pSwapped = pSwapped;
+	AddCmd(Cmd);
+
+	KickCommandBuffer();
+	WaitForIdle();
+
+	m_pReadPixelColor = nullptr;
+}
+
 void CGraphics_Threaded::TakeScreenshot(const char *pFilename)
 {
 	// TODO: screenshot support
@@ -2806,23 +2832,16 @@ void CGraphics_Threaded::Swap()
 		}
 	}
 
-	bool TookScreenshotAndSwapped = false;
+	bool Swapped = false;
+	ScreenshotDirect(&Swapped);
+	ReadPixelDirect(&Swapped);
 
-	if(m_DoScreenshot)
+	if(!Swapped)
 	{
-		if(WindowActive())
-			TookScreenshotAndSwapped = ScreenshotDirect();
-		m_DoScreenshot = false;
-	}
-
-	if(!TookScreenshotAndSwapped)
-	{
-		// add swap command
 		CCommandBuffer::SCommand_Swap Cmd;
 		AddCmd(Cmd);
 	}
 
-	// kick the command buffer
 	KickCommandBuffer();
 	// TODO: Remove when https://github.com/libsdl-org/SDL/issues/5203 is fixed
 #ifdef CONF_PLATFORM_MACOS

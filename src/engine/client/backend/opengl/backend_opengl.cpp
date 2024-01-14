@@ -313,8 +313,9 @@ bool CCommandProcessorFragment_OpenGL::InitOpenGL(const SCommand_Init *pCommand)
 {
 	m_IsOpenGLES = pCommand->m_RequestedBackend == BACKEND_TYPE_OPENGL_ES;
 
-	TGLBackendReadPresentedImageData &ReadPresentedImgDataFunc = *pCommand->m_pReadPresentedImageDataFunc;
-	ReadPresentedImgDataFunc = [this](uint32_t &Width, uint32_t &Height, CImageInfo::EImageFormat &Format, std::vector<uint8_t> &vDstData) { return GetPresentedImageData(Width, Height, Format, vDstData); };
+	*pCommand->m_pReadPresentedImageDataFunc = [this](uint32_t &Width, uint32_t &Height, CImageInfo::EImageFormat &Format, std::vector<uint8_t> &vDstData) {
+		return GetPresentedImageData(Width, Height, Format, vDstData);
+	};
 
 	const char *pVendorString = (const char *)glGetString(GL_VENDOR);
 	dbg_msg("opengl", "Vendor string: %s", pVendorString);
@@ -983,10 +984,27 @@ void CCommandProcessorFragment_OpenGL::Cmd_Render(const CCommandBuffer::SCommand
 #endif
 }
 
+void CCommandProcessorFragment_OpenGL::Cmd_ReadPixel(const CCommandBuffer::SCommand_TrySwapAndReadPixel *pCommand)
+{
+	// get size of viewport
+	GLint aViewport[4] = {0, 0, 0, 0};
+	glGetIntegerv(GL_VIEWPORT, aViewport);
+	const int h = aViewport[3];
+
+	// fetch the pixel
+	uint8_t aPixelData[3];
+	GLint Alignment;
+	glGetIntegerv(GL_PACK_ALIGNMENT, &Alignment);
+	glPixelStorei(GL_PACK_ALIGNMENT, 1);
+	glReadPixels(pCommand->m_Position.x, h - 1 - pCommand->m_Position.y, 1, 1, GL_RGB, GL_UNSIGNED_BYTE, aPixelData);
+	glPixelStorei(GL_PACK_ALIGNMENT, Alignment);
+
+	// fill in the information
+	*pCommand->m_pColor = ColorRGBA(aPixelData[0] / 255.0f, aPixelData[1] / 255.0f, aPixelData[2] / 255.0f, 1.0f);
+}
+
 void CCommandProcessorFragment_OpenGL::Cmd_Screenshot(const CCommandBuffer::SCommand_TrySwapAndScreenshot *pCommand)
 {
-	*pCommand->m_pSwapped = false;
-
 	// fetch image data
 	GLint aViewport[4] = {0, 0, 0, 0};
 	glGetIntegerv(GL_VIEWPORT, aViewport);
@@ -1067,6 +1085,9 @@ ERunCommandReturnTypes CCommandProcessorFragment_OpenGL::RunCommand(const CComma
 		break;
 	case CCommandBuffer::CMD_RENDER_TEX3D:
 		Cmd_RenderTex3D(static_cast<const CCommandBuffer::SCommand_RenderTex3D *>(pBaseCommand));
+		break;
+	case CCommandBuffer::CMD_TRY_SWAP_AND_READ_PIXEL:
+		Cmd_ReadPixel(static_cast<const CCommandBuffer::SCommand_TrySwapAndReadPixel *>(pBaseCommand));
 		break;
 	case CCommandBuffer::CMD_TRY_SWAP_AND_SCREENSHOT:
 		Cmd_Screenshot(static_cast<const CCommandBuffer::SCommand_TrySwapAndScreenshot *>(pBaseCommand));

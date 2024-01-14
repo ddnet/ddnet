@@ -396,6 +396,11 @@ public:
 		m_QuadKnifeCount = 0;
 		mem_zero(m_aQuadKnifePoints, sizeof(m_aQuadKnifePoints));
 
+		for(size_t i = 0; i < std::size(m_aSavedColors); ++i)
+		{
+			m_aSavedColors[i] = color_cast<ColorRGBA>(ColorHSLA(i / (float)std::size(m_aSavedColors), 1.0f, 0.5f));
+		}
+
 		m_CheckerTexture.Invalidate();
 		m_BackgroundTexture.Invalidate();
 		for(int i = 0; i < NUM_CURSORS; i++)
@@ -467,6 +472,7 @@ public:
 	void RenderPressedKeys(CUIRect View);
 	void RenderSavingIndicator(CUIRect View);
 	void FreeDynamicPopupMenus();
+	void UpdateColorPipette();
 	void RenderMousePointer();
 
 	std::vector<CQuad *> GetSelectedQuads();
@@ -686,7 +692,8 @@ public:
 	float m_MouseDeltaY;
 	float m_MouseDeltaWx;
 	float m_MouseDeltaWy;
-	void *m_pContainerPanned;
+	const void *m_pContainerPanned;
+	const void *m_pContainerPannedLast;
 
 	enum EShowTile
 	{
@@ -744,6 +751,11 @@ public:
 	bool m_QuadKnifeActive;
 	int m_QuadKnifeCount;
 	vec2 m_aQuadKnifePoints[4];
+
+	// Color palette and pipette
+	ColorRGBA m_aSavedColors[8];
+	ColorRGBA m_PipetteColor = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
+	bool m_ColorPipetteActive = false;
 
 	IGraphics::CTextureHandle m_CheckerTexture;
 	IGraphics::CTextureHandle m_BackgroundTexture;

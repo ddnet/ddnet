@@ -514,6 +514,15 @@ public:
 	virtual void ChangeColorOfCurrentQuadVertices(float r, float g, float b, float a) = 0;
 	virtual void ChangeColorOfQuadVertices(size_t QuadOffset, unsigned char r, unsigned char g, unsigned char b, unsigned char a) = 0;
 
+	/**
+	 * Reads the color at the specified position from the backbuffer once,
+	 * after the next swap operation.
+	 *
+	 * @param Position The pixel position to read.
+	 * @param pColor Pointer that will receive the read pixel color.
+	 * The pointer must be valid until the next swap operation.
+	 */
+	virtual void ReadPixel(ivec2 Position, ColorRGBA *pColor) = 0;
 	virtual void TakeScreenshot(const char *pFilename) = 0;
 	virtual void TakeCustomScreenshot(const char *pFilename) = 0;
 	virtual int GetVideoModes(CVideoMode *pModes, int MaxModes, int Screen) = 0;
