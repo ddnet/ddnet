@@ -7,7 +7,7 @@
 #	3edcxzaq1		2020-06-25 00:00:00
 #	cur.ie			2020-09-28 00:00:00
 #	simpygirl		2022-02-20 00:00:00
-#	furo			2023-11-12 00:00:00
+#	furo			2024-01-14 00:00:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -1681,10 +1681,10 @@ Error playing demo
 == Ett fel uppstod under uppspelning av demo
 
 Some map images could not be loaded. Check the local console for details.
-== Vissa map bilder kunde inte laddas in. See den lokala konsolen för detaljer.
+== Vissa map bilder kunde inte laddas in. Se den lokala konsolen för detaljer.
 
 Some map sounds could not be loaded. Check the local console for details.
-== Vissa map ljud kunde inte laddas in. See den lokala konsolen för detaljer.
+== Vissa map ljud kunde inte laddas in. Se den lokala konsolen för detaljer.
 
 Loading menu themes
 == Laddar menyteman
@@ -1733,70 +1733,70 @@ Entities background color
 == Entities bakgrunds färg
 
 Saving settings to '%s' failed
-== 
+== Sparning av inställningar till '%s' misslyckades
 
 Searching
-== 
+== Söker
 
 Enter Username
-== 
+== Ange Användarnamn
 
 Enter Password
-== 
+== Ange Lösenord
 
 NOT CONNECTED
-== 
+== INTE ANSLUTEN
 
 Match %d of %d
-== 
+== Resultat %d av %d
 
 No results
-== 
+== Inga resultat
 
 Lines %d - %d (%s)
-== 
+== Rader %d - %d (%s)
 
 Locked
-== 
+== Låst
 
 Following
-== 
+== Följer
 
 Press a key…
-== 
+== Tryck en knapp…
 
 Are you sure that you want to restart?
-== 
+== Är du säker att du vill starta om?
 
 There's an unsaved map in the editor, you might want to save it.
-== 
+== Det finns en osparad bana i redigeraren, du kanske vill spara den.
 
 Continue anyway?
-== 
+== Fortsätt ändå?
 
 Communities
-== 
+== Gemenskaper
 
 Please use a different filename
-== 
+== Använd ett annat filnamn
 
 Info Messages
-== 
+== Info Meddelanden
 
 Show local time always
-== 
+== Visa alltid lokal tid
 
 Chat font size
-== 
+== Chatt textstorlek
 
 Chat width
-== 
+== Chatt bredd
 
 Authed name color in scoreboard
-== 
+== Autentiserade namn färg i poänglistan
 
 Same clan color in scoreboard
-== 
+== Samma klan färg i poänglistan
 
 Show finish messages
-== 
+== Visa avklarnings meddelanden
