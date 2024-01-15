@@ -40,3 +40,5 @@ class IClient *CComponent::Client() const
 {
 	return m_pClient->Client();
 }
+
+class IHttp *CComponent::Http() const { return m_pClient->Http(); }

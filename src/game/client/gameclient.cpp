@@ -100,6 +100,7 @@ void CGameClient::OnConsoleInit()
 #if defined(CONF_AUTOUPDATE)
 	m_pUpdater = Kernel()->RequestInterface<IUpdater>();
 #endif
+	m_pHttp = Kernel()->RequestInterface<IHttp>();
 
 	m_Menus.SetMenuBackground(&m_MenuBackground);
 

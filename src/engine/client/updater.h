@@ -5,7 +5,8 @@
 
 #include <engine/updater.h>
 
-#include <map>
+#include <forward_list>
+#include <memory>
 #include <string>
 
 #define CLIENT_EXEC "DDNet"
@@ -34,6 +35,8 @@
 #define PLAT_CLIENT_EXEC CLIENT_EXEC PLAT_EXT
 #define PLAT_SERVER_EXEC SERVER_EXEC PLAT_EXT
 
+class CUpdaterFetchTask;
+
 class CUpdater : public IUpdater
 {
 	friend class CUpdaterFetchTask;
@@ -41,28 +44,31 @@ class CUpdater : public IUpdater
 	class IClient *m_pClient;
 	class IStorage *m_pStorage;
 	class IEngine *m_pEngine;
+	class CHttp *m_pHttp;
 
 	CLock m_Lock;
 
-	int m_State;
+	int m_State GUARDED_BY(m_Lock);
 	char m_aStatus[256] GUARDED_BY(m_Lock);
 	int m_Percent GUARDED_BY(m_Lock);
-	char m_aLastFile[256];
 	char m_aClientExecTmp[64];
 	char m_aServerExecTmp[64];
+
+	std::forward_list<std::pair<std::string, bool>> m_FileJobs;
+	std::shared_ptr<CUpdaterFetchTask> m_pCurrentTask;
+	decltype(m_FileJobs)::iterator m_CurrentJob;
 
 	bool m_ClientUpdate;
 	bool m_ServerUpdate;
 
-	std::map<std::string, bool> m_FileJobs;
-
 	void AddFileJob(const char *pFile, bool Job);
-	void FetchFile(const char *pFile, const char *pDestPath = nullptr);
+	void FetchFile(const char *pFile, const char *pDestPath = nullptr) REQUIRES(!m_Lock);
 	bool MoveFile(const char *pFile);
 
-	void ParseUpdate();
-	void PerformUpdate();
-	void CommitUpdate();
+	void ParseUpdate() REQUIRES(!m_Lock);
+	void PerformUpdate() REQUIRES(!m_Lock);
+	void RunningUpdate() REQUIRES(!m_Lock);
+	void CommitUpdate() REQUIRES(!m_Lock);
 
 	bool ReplaceClient();
 	bool ReplaceServer();
@@ -76,9 +82,9 @@ public:
 	void GetCurrentFile(char *pBuf, int BufSize) override REQUIRES(!m_Lock);
 	int GetCurrentPercent() override REQUIRES(!m_Lock);
 
-	void InitiateUpdate() override;
-	void Init();
-	void Update() override;
+	void InitiateUpdate() REQUIRES(!m_Lock) override;
+	void Init(CHttp *pHttp);
+	void Update() REQUIRES(!m_Lock) override;
 };
 
 #endif

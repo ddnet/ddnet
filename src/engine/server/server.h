@@ -11,6 +11,7 @@
 #include <engine/shared/demo.h>
 #include <engine/shared/econ.h>
 #include <engine/shared/fifo.h>
+#include <engine/shared/http.h>
 #include <engine/shared/netban.h>
 #include <engine/shared/network.h>
 #include <engine/shared/protocol.h>
@@ -238,6 +239,7 @@ public:
 	CEcon m_Econ;
 	CFifo m_Fifo;
 	CServerBan m_ServerBan;
+	CHttp m_Http;
 
 	IEngineMap *m_pMap;
 

@@ -2539,9 +2539,9 @@ int kill_process(PROCESS process);
 
 /**
  * Checks if a process is alive.
- * 
+ *
  * @param process Handle/PID of the process.
- * 
+ *
  * @return bool Returns true if the process is currently running, false if the process is not running (dead).
  */
 bool is_process_alive(PROCESS process);
