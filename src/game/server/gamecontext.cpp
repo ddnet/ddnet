@@ -4310,8 +4310,9 @@ bool CGameContext::ParseNameAndIndex(char *&pStr, char *&pName, int &index)
     size_t len = str_length(pStr);
     size_t lastDigitIndex = len;
     while (lastDigitIndex > 0 
-		&& pStr[lastDigitIndex - 1] >= '0' 
+		&& ((pStr[lastDigitIndex - 1] >= '0' 
 		&& pStr[lastDigitIndex - 1] <= '9')
+		|| pStr[lastDigitIndex - 1] == '-'))
     {
         lastDigitIndex--;
     }
