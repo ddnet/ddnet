@@ -470,20 +470,26 @@ void CGameContext::ConTimes(IConsole::IResult *pResult, void *pUserData)
 	if(pResult->NumArguments() == 0)
 	{
 		pSelf->Score()->ShowTimes(pResult->m_ClientID, 1);
+		return;
 	}
-	else if(pResult->NumArguments() == 1)
+
+	if(pResult->NumArguments() == 1)
 	{
 		if(pResult->GetInteger(0) != 0)
 		{
 			pSelf->Score()->ShowTimes(pResult->m_ClientID, pResult->GetInteger(0));
+			return;
 		}
-		else
-		{
-			const char *pRequestedName = (str_comp(pResult->GetString(0), "me") == 0) ?
-							     pSelf->Server()->ClientName(pResult->m_ClientID) :
-							     pResult->GetString(0);
-			pSelf->Score()->ShowTimes(pResult->m_ClientID, pRequestedName, pResult->GetInteger(1));
-		}
+
+		char *pStr = (char *)pResult->GetString(0);
+		char *pName;
+		int index;
+		pSelf->ParseNameAndIndex(pStr, pName, index);
+
+		const char *pRequestedName = (str_comp(pName, "me") == 0) ?
+								pSelf->Server()->ClientName(pResult->m_ClientID) :
+								pName;
+		pSelf->Score()->ShowTimes(pResult->m_ClientID, pRequestedName, index);
 	}
 	else if(pResult->NumArguments() == 2 && pResult->GetInteger(1) != 0)
 	{
@@ -496,7 +502,6 @@ void CGameContext::ConTimes(IConsole::IResult *pResult, void *pUserData)
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "/times needs 0, 1 or 2 parameter. 1. = name, 2. = start number");
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "Example: /times, /times me, /times Hans, /times \"Papa Smurf\" 5");
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "Bad: /times Papa Smurf 5 # Good: /times \"Papa Smurf\" 5 ");
 	}
 }
 
