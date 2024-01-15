@@ -36,6 +36,7 @@
 # 2023-07-20 By
 # 2023-08-11 By
 # 2023-11-25 By
+# 2024-01-15 By
 ##### /authors #####
 
 ##### translated strings #####
@@ -74,7 +75,7 @@ All
 == 全体
 
 Are you sure that you want to quit?
-== 你确定要退出吗？
+== 确定要退出吗？
 
 Automatically record demos
 == 自动录制回放
@@ -1164,7 +1165,7 @@ Desktop fullscreen
 == 无边框全屏
 
 Are you sure that you want to disconnect and switch to a different server?
-== 你确定要断开此服务器连接并进入其他服务器吗？
+== 确定要断开此服务器连接并进入其他服务器吗？
 
 Show local player's key presses
 == 显示自己的按键
@@ -1496,10 +1497,10 @@ File '%s' already exists, do you want to overwrite it?
 == 文件名 "%s" 已经存在，是否要覆盖该文件？
 
 Are you sure that you want to remove the player '%s' from your friends list?
-== 你确定要将好友 "%s" 从你的好友列表中删除？
+== 确定要将好友 "%s" 从你的好友列表中删除？
 
 Are you sure that you want to remove the clan '%s' from your friends list?
-== 你确定要将战队 "%s" 从你的好友列表中删除？
+== 确定要将战队 "%s" 从你的好友列表中删除？
 
 Go back one tick
 == 上一个 tick
@@ -1514,7 +1515,7 @@ Go forward one marker
 == 跳至下一个标记
 
 Are you sure that you want to delete the demo '%s'?
-== 你确定要删除回放文件 "%s" ？
+== 确定要删除回放文件 "%s" ？
 
 Unable to delete the demo '%s'
 == 无法删除回放文件 "%s"
@@ -1523,7 +1524,7 @@ Reset controls
 == 恢复默认设置
 
 Are you sure that you want to reset the controls to their defaults?
-== 你确定要将当前的控制恢复至默认设置？
+== 确定要将当前的控制恢复至默认设置？
 
 [Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
@@ -1680,7 +1681,7 @@ Folder Link
 == 文件夹链接
 
 Are you sure that you want to delete the folder '%s'?
-== 你确定要删除文件夹 "%s" ？
+== 确定要删除文件夹 "%s" ？
 
 Delete folder
 == 删除文件夹
@@ -1767,70 +1768,70 @@ Entities background color
 == 实体层背景颜色
 
 Saving settings to '%s' failed
-== 
+== 无法保存设置至 "%s"
 
 Searching
-== 
+== 正在搜索
 
 Enter Username
-== 
+== 输入账号名称
 
 Enter Password
-== 
+== 输入密码
 
 NOT CONNECTED
-== 
+== 连接未成功
 
 Match %d of %d
-== 
+== 结果 %d / 总共 %d 则
 
 No results
-== 
+== 无结果
 
 Lines %d - %d (%s)
-== 
+== 行 %d - %d (%s)
 
 Locked
-== 
+== 锁定
 
 Following
-== 
+== 当前
 
 Press a key…
-== 
+== 按任意键...
 
 Are you sure that you want to restart?
-== 
+== 确定要重新开始？
 
 There's an unsaved map in the editor, you might want to save it.
-== 
+== 编辑器中有尚未保存的地图，你或需要保存
 
 Continue anyway?
-== 
+== 仍要退出？
 
 Communities
-== 
+== 社区
 
 Please use a different filename
-== 
+== 请使用不同的文件名
 
 Info Messages
-== 
+== 消息
 
 Show local time always
-== 
+== 始终显示本地时间
 
 Chat font size
-== 
+== 聊天字体大小
 
 Chat width
-== 
+== 聊天框宽度
 
 Authed name color in scoreboard
-== 
+== 管理权限者名字计分板显示颜色
 
 Same clan color in scoreboard
-== 
+== 相同战队计分板显示颜色
 
 Show finish messages
-== 
+== 显示完成消息
