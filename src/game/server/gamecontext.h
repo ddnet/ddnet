@@ -498,6 +498,8 @@ private:
 	int m_NumMutes;
 	CMute m_aVoteMutes[MAX_VOTE_MUTES];
 	int m_NumVoteMutes;
+	bool ParseNameAndIndex(char *&pStr, char *&pName, int &index);
+	
 	bool TryMute(const NETADDR *pAddr, int Secs, const char *pReason, bool InitialChatDelay);
 	void Mute(const NETADDR *pAddr, int Secs, const char *pDisplayName, const char *pReason = "", bool InitialChatDelay = false);
 	bool TryVoteMute(const NETADDR *pAddr, int Secs, const char *pReason);

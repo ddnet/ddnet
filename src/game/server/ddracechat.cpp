@@ -394,7 +394,6 @@ void CGameContext::ConTeamTop5(IConsole::IResult *pResult, void *pUserData)
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	if(!CheckClientID(pResult->m_ClientID))
 		return;
-
 	if(g_Config.m_SvHideScore)
 	{
 		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
@@ -405,33 +404,41 @@ void CGameContext::ConTeamTop5(IConsole::IResult *pResult, void *pUserData)
 	if(pResult->NumArguments() == 0)
 	{
 		pSelf->Score()->ShowTeamTop5(pResult->m_ClientID, 1);
+		return;
 	}
-	else if(pResult->NumArguments() == 1)
+	
+	if (pResult->NumArguments() == 1 && pResult->GetInteger(0) != 0) {
+		pSelf->Score()->ShowTeamTop5(pResult->m_ClientID, pResult->GetInteger(0));
+		return;
+	}
+	char *pStr = (char *)pResult->GetString(0);
+	char *pName;
+	int index;
+	if (pResult->NumArguments() == 1) {
+
+		pSelf->ParseNameAndIndex(pStr, pName, index);
+	}
+
+	if(pResult->NumArguments() == 1 && index == 0)
 	{
-		if(pResult->GetInteger(0) != 0)
-		{
-			pSelf->Score()->ShowTeamTop5(pResult->m_ClientID, pResult->GetInteger(0));
-		}
-		else
-		{
-			const char *pRequestedName = (str_comp(pResult->GetString(0), "me") == 0) ?
-							     pSelf->Server()->ClientName(pResult->m_ClientID) :
-							     pResult->GetString(0);
-			pSelf->Score()->ShowPlayerTeamTop5(pResult->m_ClientID, pRequestedName, 0);
-		}
+		const char *pRequestedName = (str_comp(pName, "me") == 0) ?
+								pSelf->Server()->ClientName(pResult->m_ClientID) :
+								pName;
+		pSelf->Score()->ShowPlayerTeamTop5(pResult->m_ClientID, pRequestedName, 0);
 	}
-	else if(pResult->NumArguments() == 2 && pResult->GetInteger(1) != 0)
+	else if(pResult->NumArguments() == 1 && index != 0)
+	{
+		const char *pRequestedName = (str_comp(pName, "me") == 0) ?
+						     pSelf->Server()->ClientName(pResult->m_ClientID) :
+						     pName;
+		pSelf->Score()->ShowPlayerTeamTop5(pResult->m_ClientID, pRequestedName, index);
+	}
+	else if(pResult->NumArguments() == 2)
 	{
 		const char *pRequestedName = (str_comp(pResult->GetString(0), "me") == 0) ?
 						     pSelf->Server()->ClientName(pResult->m_ClientID) :
 						     pResult->GetString(0);
 		pSelf->Score()->ShowPlayerTeamTop5(pResult->m_ClientID, pRequestedName, pResult->GetInteger(1));
-	}
-	else
-	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "/top5team needs 0, 1 or 2 parameter. 1. = name, 2. = start number");
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "Example: /top5team, /top5team me, /top5team Hans, /top5team \"Papa Smurf\" 5");
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "Bad: /top5team Papa Smurf 5 # Good: /top5team \"Papa Smurf\" 5 ");
 	}
 }
 
