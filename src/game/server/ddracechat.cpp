@@ -406,24 +406,25 @@ void CGameContext::ConTeamTop5(IConsole::IResult *pResult, void *pUserData)
 		pSelf->Score()->ShowTeamTop5(pResult->m_ClientID, 1);
 		return;
 	}
-	
-	if (pResult->NumArguments() == 1 && pResult->GetInteger(0) != 0) {
+
+	if(pResult->NumArguments() == 1 && pResult->GetInteger(0) != 0)
+	{
 		pSelf->Score()->ShowTeamTop5(pResult->m_ClientID, pResult->GetInteger(0));
 		return;
 	}
 	char *pStr = (char *)pResult->GetString(0);
 	char *pName;
 	int index;
-	if (pResult->NumArguments() == 1) {
-
+	if(pResult->NumArguments() == 1)
+	{
 		pSelf->ParseNameAndIndex(pStr, pName, index);
 	}
 
 	if(pResult->NumArguments() == 1 && index == 0)
 	{
 		const char *pRequestedName = (str_comp(pName, "me") == 0) ?
-								pSelf->Server()->ClientName(pResult->m_ClientID) :
-								pName;
+						     pSelf->Server()->ClientName(pResult->m_ClientID) :
+						     pName;
 		pSelf->Score()->ShowPlayerTeamTop5(pResult->m_ClientID, pRequestedName, 0);
 	}
 	else if(pResult->NumArguments() == 1 && index != 0)
@@ -487,8 +488,8 @@ void CGameContext::ConTimes(IConsole::IResult *pResult, void *pUserData)
 		pSelf->ParseNameAndIndex(pStr, pName, index);
 
 		const char *pRequestedName = (str_comp(pName, "me") == 0) ?
-								pSelf->Server()->ClientName(pResult->m_ClientID) :
-								pName;
+						     pSelf->Server()->ClientName(pResult->m_ClientID) :
+						     pName;
 		pSelf->Score()->ShowTimes(pResult->m_ClientID, pRequestedName, index);
 	}
 	else if(pResult->NumArguments() == 2 && pResult->GetInteger(1) != 0)

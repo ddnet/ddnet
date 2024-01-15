@@ -4303,35 +4303,32 @@ bool CheckClientID2(int ClientID)
 
 bool CGameContext::ParseNameAndIndex(char *&pStr, char *&pName, int &index)
 {
-    pStr = str_skip_whitespaces(pStr);
-    bool NumFound = true;
+	pStr = str_skip_whitespaces(pStr);
+	bool NumFound = true;
 	index = 0;
-    // Check if the text ends with a number
-    size_t len = str_length(pStr);
-    size_t lastDigitIndex = len;
-    while (lastDigitIndex > 0 
-		&& ((pStr[lastDigitIndex - 1] >= '0' 
-		&& pStr[lastDigitIndex - 1] <= '9')
-		|| pStr[lastDigitIndex - 1] == '-'))
-    {
-        lastDigitIndex--;
-    }
+	// Check if the text ends with a number
+	size_t len = str_length(pStr);
+	size_t lastDigitIndex = len;
+	while(lastDigitIndex > 0 && ((pStr[lastDigitIndex - 1] >= '0' && pStr[lastDigitIndex - 1] <= '9') || pStr[lastDigitIndex - 1] == '-'))
+	{
+		lastDigitIndex--;
+	}
 
-    // Extract player name
+	// Extract player name
 	pName = pStr;
-    if (lastDigitIndex < len)
-    {
+	if(lastDigitIndex < len)
+	{
 		pStr[lastDigitIndex - 1] = 0;
-        // Parse the index
-        index = str_toint(&pStr[lastDigitIndex]);
-    }
-    else
-    {
-        // No number found at the end, set error
-        NumFound = false;
-    }
+		// Parse the index
+		index = str_toint(&pStr[lastDigitIndex]);
+	}
+	else
+	{
+		// No number found at the end, set error
+		NumFound = false;
+	}
 
-    return NumFound;
+	return NumFound;
 }
 
 void CGameContext::Whisper(int ClientID, char *pStr)
