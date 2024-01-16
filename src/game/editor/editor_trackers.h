@@ -21,13 +21,13 @@ public:
 	CQuadEditTracker();
 	~CQuadEditTracker();
 
-	void BeginQuadTrack(const std::shared_ptr<CLayerQuads> &pLayer, const std::vector<int> &vSelectedQuads);
+	void BeginQuadTrack(const std::shared_ptr<CLayerQuads> &pLayer, const std::vector<int> &vSelectedQuads, int GroupIndex = -1, int LayerIndex = -1);
 	void EndQuadTrack();
 
-	void BeginQuadPropTrack(const std::shared_ptr<CLayerQuads> &pLayer, const std::vector<int> &vSelectedQuads, EQuadProp Prop);
+	void BeginQuadPropTrack(const std::shared_ptr<CLayerQuads> &pLayer, const std::vector<int> &vSelectedQuads, EQuadProp Prop, int GroupIndex = -1, int LayerIndex = -1);
 	void EndQuadPropTrack(EQuadProp Prop);
 
-	void BeginQuadPointPropTrack(const std::shared_ptr<CLayerQuads> &pLayer, const std::vector<int> &vSelectedQuads, int SelectedQuadPoints);
+	void BeginQuadPointPropTrack(const std::shared_ptr<CLayerQuads> &pLayer, const std::vector<int> &vSelectedQuads, int SelectedQuadPoints, int GroupIndex = -1, int LayerIndex = -1);
 	void AddQuadPointPropTrack(EQuadPointProp Prop);
 	void EndQuadPointPropTrack(EQuadPointProp Prop);
 	void EndQuadPointPropTrackAll();
@@ -46,23 +46,8 @@ private:
 	std::vector<EQuadPointProp> m_vTrackedProps;
 	std::map<int, int> m_PreviousValues;
 	std::map<int, std::vector<std::map<EQuadPointProp, int>>> m_PreviousValuesPoint;
-};
-
-class CEditorPropTracker
-{
-public:
-	CEditorPropTracker() = default;
-
-	void BeginPropTrack(int Prop, int Value);
-	void StopPropTrack(int Prop, int Value);
-	inline void Reset() { m_TrackedProp = -1; }
-
-	CEditor *m_pEditor;
-	int m_PreviousValue;
-	int m_CurrentValue;
-
-private:
-	int m_TrackedProp = -1;
+	int m_LayerIndex;
+	int m_GroupIndex;
 };
 
 enum class EEnvelopeEditorOp
@@ -75,6 +60,13 @@ enum class EEnvelopeEditorOp
 	OP_CONTEXT_MENU,
 	OP_BOX_SELECT,
 	OP_SCALE
+};
+
+enum class ESoundSourceOp
+{
+	OP_NONE = 0,
+	OP_MOVE,
+	OP_CONTEXT_MENU,
 };
 
 class CEnvelopeEditorOperationTracker
@@ -104,34 +96,81 @@ private:
 	void HandlePointDragEnd(bool Switch);
 };
 
+class CSoundSourceOperationTracker
+{
+public:
+	CSoundSourceOperationTracker(CEditor *pEditor);
+
+	void Begin(CSoundSource *pSource, ESoundSourceOp Operation, int LayerIndex);
+	void End();
+
+private:
+	CEditor *m_pEditor;
+	CSoundSource *m_pSource;
+	ESoundSourceOp m_TrackedOp;
+	int m_LayerIndex;
+
+	struct SData
+	{
+		CPoint m_OriginalPoint;
+	};
+	SData m_Data;
+
+	enum EState
+	{
+		STATE_BEGIN,
+		STATE_EDITING,
+		STATE_END
+	};
+	void HandlePointMove(EState State);
+};
+
+struct SPropTrackerHelper
+{
+	static int GetDefaultGroupIndex(CEditor *pEditor);
+	static int GetDefaultLayerIndex(CEditor *pEditor);
+};
+
 template<typename T, typename E>
 class CPropTracker
 {
 public:
 	CPropTracker(CEditor *pEditor) :
-		m_pEditor(pEditor), m_OriginalValue(0) {}
+		m_pEditor(pEditor), m_OriginalValue(0), m_pObject(nullptr), m_OriginalLayerIndex(-1), m_OriginalGroupIndex(-1), m_CurrentLayerIndex(-1), m_CurrentGroupIndex(-1), m_Tracking(false) {}
 	CEditor *m_pEditor;
 
-	void Begin(T *pObject, E Prop, EEditState State)
+	void Begin(T *pObject, E Prop, EEditState State, int GroupIndex = -1, int LayerIndex = -1)
 	{
-		if(Prop == static_cast<E>(-1))
+		if(m_Tracking || Prop == static_cast<E>(-1))
 			return;
 		m_pObject = pObject;
+
+		m_OriginalGroupIndex = GroupIndex < 0 ? SPropTrackerHelper::GetDefaultGroupIndex(m_pEditor) : GroupIndex;
+		m_OriginalLayerIndex = LayerIndex < 0 ? SPropTrackerHelper::GetDefaultLayerIndex(m_pEditor) : LayerIndex;
+		m_CurrentGroupIndex = m_OriginalGroupIndex;
+		m_CurrentLayerIndex = m_OriginalLayerIndex;
+
 		int Value = PropToValue(Prop);
 		if(StartChecker(Prop, State, Value))
 		{
+			m_Tracking = true;
 			m_OriginalValue = Value;
 			OnStart(Prop);
 		}
 	}
 
-	void End(E Prop, EEditState State)
+	void End(E Prop, EEditState State, int GroupIndex = -1, int LayerIndex = -1)
 	{
-		if(Prop == static_cast<E>(-1))
+		if(!m_Tracking || Prop == static_cast<E>(-1))
 			return;
+
+		m_CurrentGroupIndex = GroupIndex < 0 ? SPropTrackerHelper::GetDefaultGroupIndex(m_pEditor) : GroupIndex;
+		m_CurrentLayerIndex = LayerIndex < 0 ? SPropTrackerHelper::GetDefaultLayerIndex(m_pEditor) : LayerIndex;
+
 		int Value = PropToValue(Prop);
 		if(EndChecker(Prop, State, Value))
 		{
+			m_Tracking = false;
 			OnEnd(Prop, Value);
 		}
 	}
@@ -151,6 +190,11 @@ protected:
 
 	int m_OriginalValue;
 	T *m_pObject;
+	int m_OriginalLayerIndex;
+	int m_OriginalGroupIndex;
+	int m_CurrentLayerIndex;
+	int m_CurrentGroupIndex;
+	bool m_Tracking;
 };
 
 class CLayerPropTracker : public CPropTracker<CLayer, ELayerProp>

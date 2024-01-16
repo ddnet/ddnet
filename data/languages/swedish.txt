@@ -7,7 +7,7 @@
 #	3edcxzaq1		2020-06-25 00:00:00
 #	cur.ie			2020-09-28 00:00:00
 #	simpygirl		2022-02-20 00:00:00
-#	furo			2023-11-12 00:00:00
+#	furo			2024-01-14 00:00:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -29,9 +29,6 @@
 
 %s wins!
 == %s vinner!
-
--Page %d-
-== -Sida %d-
 
 Abort
 == Avbryt
@@ -405,9 +402,6 @@ The audio device couldn't be initialised.
 The server is running a non-standard tuning on a pure game type.
 == Denna server kör inte standardinställningar på en reserverad speltyp.
 
-There's an unsaved map in the editor, you might want to save it before you quit the game.
-== Det finns en osparad bana i redigeraren, du kanske vill spara den innan du avslutar.
-
 Time limit
 == Tidsbegränsning
 
@@ -506,9 +500,6 @@ Your skin
 
 Reset to defaults
 == Nollställ till standard
-
-Quit anyway?
-== Avsluta i alla fall?
 
 Round
 == Runda
@@ -888,9 +879,6 @@ Length
 Skin prefix
 == Skin prefix
 
-Please use a different filename
-== 
-
 Game paused
 == Spel pausad
 
@@ -941,9 +929,6 @@ Update now
 
 Toggle ghost
 == Växla spöke
-
-Dummy settings
-== Dummy inställningar
 
 Team message
 == Lag meddelande
@@ -1026,9 +1011,6 @@ Auto
 
 Replay
 == Repris
-
-Saving ddnet-settings.cfg failed
-== Det gick inte att spara ddnet-settings.cfg
 
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
 == Bredden på texturen %s är inte delbar med %d, eller är höjden inte delbar med %d, vilket kan orsaka visuella buggar.
@@ -1128,9 +1110,6 @@ Background music volume
 
 Assets
 == Assets
-
-Kill Messages
-== Döds meddelanden
 
 Use old chat style
 == Använd gammal chatt stil
@@ -1442,9 +1421,6 @@ Open the directory to add custom themes
 Loading skin files
 == Laddar skin filer
 
-Toggle to edit your dummy settings
-== Växla till att ändra dina dummy inställningar
-
 Download community skins
 == Ladda ner community skins
 
@@ -1705,10 +1681,10 @@ Error playing demo
 == Ett fel uppstod under uppspelning av demo
 
 Some map images could not be loaded. Check the local console for details.
-== Vissa map bilder kunde inte laddas in. See den lokala konsolen för detaljer.
+== Vissa map bilder kunde inte laddas in. Se den lokala konsolen för detaljer.
 
 Some map sounds could not be loaded. Check the local console for details.
-== Vissa map ljud kunde inte laddas in. See den lokala konsolen för detaljer.
+== Vissa map ljud kunde inte laddas in. Se den lokala konsolen för detaljer.
 
 Loading menu themes
 == Laddar menyteman
@@ -1755,3 +1731,72 @@ Regular background color
 
 Entities background color
 == Entities bakgrunds färg
+
+Saving settings to '%s' failed
+== Sparning av inställningar till '%s' misslyckades
+
+Searching
+== Söker
+
+Enter Username
+== Ange Användarnamn
+
+Enter Password
+== Ange Lösenord
+
+NOT CONNECTED
+== INTE ANSLUTEN
+
+Match %d of %d
+== Resultat %d av %d
+
+No results
+== Inga resultat
+
+Lines %d - %d (%s)
+== Rader %d - %d (%s)
+
+Locked
+== Låst
+
+Following
+== Följer
+
+Press a key…
+== Tryck en knapp…
+
+Are you sure that you want to restart?
+== Är du säker att du vill starta om?
+
+There's an unsaved map in the editor, you might want to save it.
+== Det finns en osparad bana i redigeraren, du kanske vill spara den.
+
+Continue anyway?
+== Fortsätt ändå?
+
+Communities
+== Gemenskaper
+
+Please use a different filename
+== Använd ett annat filnamn
+
+Info Messages
+== Info Meddelanden
+
+Show local time always
+== Visa alltid lokal tid
+
+Chat font size
+== Chatt textstorlek
+
+Chat width
+== Chatt bredd
+
+Authed name color in scoreboard
+== Autentiserade namn färg i poänglistan
+
+Same clan color in scoreboard
+== Samma klan färg i poänglistan
+
+Show finish messages
+== Visa avklarnings meddelanden

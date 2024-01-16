@@ -25,9 +25,6 @@
 %s wins!
 == ¡%s gana!
 
--Page %d-
-== -Páxina %d-
-
 Abort
 == Cancelar
 
@@ -406,9 +403,6 @@ The audio device couldn't be initialised.
 The server is running a non-standard tuning on a pure game type.
 == O servidor está a executar unha configuración non estándar nun tipo de xogo puro.
 
-There's an unsaved map in the editor, you might want to save it before you quit the game.
-== Tes un mapa sen gardar no editor, quizá queiras gardalo antes de saír.
-
 Time limit
 == Tempo límite
 
@@ -507,9 +501,6 @@ Your skin
 
 Reset to defaults
 == Restablecer por defecto
-
-Quit anyway?
-== Saír de todos os xeitos?
 
 Round
 == Rolda
@@ -634,9 +625,6 @@ Update now
 Restart
 == Reiniciar
 
-Please use a different filename
-== 
-
 Remove chat
 == Eliminar chat
 
@@ -699,9 +687,6 @@ Automatically create statboard csv
 
 Max CSVs
 == CSV máx
-
-Dummy settings
-== Config. del Dummy
 
 Vanilla skins only
 == Só skins Vanilla
@@ -952,9 +937,6 @@ Grabs
 9+ new mentions
 == 9+ novas mencións
 
-Saving ddnet-settings.cfg failed
-== Erro ao gardar ddnet-settings.cfg
-
 Warning
 == Advertencia
 
@@ -1142,9 +1124,6 @@ https://ddnet.org/discord
 Are you sure that you want to disconnect and switch to a different server?
 == Seguro que queres desconectarche e cambiar de servidor?
 
-Kill Messages
-== Mensaxes de morte
-
 Show local player's key presses
 == Mostrar as teclas presionadas polo xogador local
 
@@ -1189,9 +1168,6 @@ Tutorial
 
 Can't find a Tutorial server
 == Non se puido atopar un servidor Titorial
-
-Toggle to edit your dummy settings
-== Actívao para editar a configuración do téu monicreque
 
 Choose default eyes when joining a server
 == Escolle os ollos predeterminados ao unirche a un servidor
@@ -1607,10 +1583,40 @@ Absolute
 Error playing demo
 == 
 
+Saving settings to '%s' failed
+== 
+
 Quitting. Please wait…
 == 
 
 Restarting. Please wait…
+== 
+
+Searching
+== 
+
+Enter Username
+== 
+
+Enter Password
+== 
+
+NOT CONNECTED
+== 
+
+Match %d of %d
+== 
+
+No results
+== 
+
+Lines %d - %d (%s)
+== 
+
+Locked
+== 
+
+Following
 == 
 
 Multi-View
@@ -1625,10 +1631,22 @@ Some map sounds could not be loaded. Check the local console for details.
 Loading menu themes
 == 
 
+Press a key…
+== 
+
 Rename folder
 == 
 
 Render complete
+== 
+
+Are you sure that you want to restart?
+== 
+
+There's an unsaved map in the editor, you might want to save it.
+== 
+
+Continue anyway?
 == 
 
 A demo with this name already exists
@@ -1647,6 +1665,9 @@ Videos directory
 == 
 
 Video was saved to '%s'
+== 
+
+Communities
 == 
 
 No server selected
@@ -1690,6 +1711,9 @@ Cut length
 Render cut to video
 == 
 
+Please use a different filename
+== 
+
 All combined
 == 
 
@@ -1731,6 +1755,27 @@ Axis
 == 
 
 Graphics card
+== 
+
+Info Messages
+== 
+
+Show local time always
+== 
+
+Chat font size
+== 
+
+Chat width
+== 
+
+Authed name color in scoreboard
+== 
+
+Same clan color in scoreboard
+== 
+
+Show finish messages
 == 
 
 Default length

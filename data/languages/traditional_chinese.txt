@@ -25,6 +25,7 @@
 # 2023-07-20 By
 # 2023-08-11 By
 # 2023-11-25 By
+# 2024-01-15 By
 ##### /authors #####
 
 ##### translated strings #####
@@ -47,9 +48,6 @@
 %s wins!
 == %s勝利！
 
--Page %d-
-== -第%d頁-
-
 Abort
 == 取消
 
@@ -66,7 +64,7 @@ All
 == 全部
 
 Are you sure that you want to quit?
-== 你確定要退出嗎？
+== 確定要退出嗎？
 
 Automatically record demos
 == 自動錄製回放
@@ -461,9 +459,6 @@ The audio device couldn't be initialised.
 The server is running a non-standard tuning on a pure game type.
 == 此伺服器執行著經過調整的非標準遊戲模式。
 
-There's an unsaved map in the editor, you might want to save it before you quit the game.
-== 編輯器中的地圖尚未儲存，建議你在退出遊戲之前返回編輯器進行儲存。
-
 Time limit
 == 規定時限
 
@@ -560,9 +555,6 @@ Map sound volume
 Max Screenshots
 == 最大截圖數
 
-Dummy settings
-== 分身設定
-
 Laser
 == 鐳射
 
@@ -577,9 +569,6 @@ Your skin
 
 Reset to defaults
 == 恢復預設設定
-
-Quit anyway?
-== 無論如何都要退出嗎？
 
 Round
 == 回合
@@ -738,9 +727,6 @@ DDNet
 
 Deaths
 == 死亡數
-
-Please use a different filename
-== 
 
 Restart
 == 重新開始
@@ -1035,9 +1021,6 @@ Auto
 Replay
 == 回放
 
-Saving ddnet-settings.cfg failed
-== 配置檔案 ddnet-settings.cfg 儲存失敗
-
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
 == 偵錯模式已啟用。按 Ctrl+Shift+D 禁用偵錯模式。
 
@@ -1171,10 +1154,7 @@ https://ddnet.org/discord
 == https://ddnet.org/discord
 
 Are you sure that you want to disconnect and switch to a different server?
-== 你確定要中斷此伺服器并嘗試加入其他伺服器嗎？
-
-Kill Messages
-== 擊殺訊息
+== 確定要中斷此伺服器并嘗試加入其他伺服器嗎？
 
 Show local player's key presses
 == 顯示周圍玩家的按鍵輸入
@@ -1217,9 +1197,6 @@ auto
 
 Tutorial
 == 教學
-
-Toggle to edit your dummy settings
-== 編輯分身設定
 
 Choose default eyes when joining a server
 == 加入伺服器時的預設表情
@@ -1527,7 +1504,7 @@ Go forward one marker
 == 跳至下一個標記
 
 Are you sure that you want to delete the demo '%s'?
-== 你確定要刪除回放檔案 "%s" ？
+== 確定要刪除回放檔案 "%s" ？
 
 Unable to delete the demo '%s'
 == 無法刪除回放檔案 "%s"
@@ -1536,7 +1513,7 @@ Reset controls
 == 恢復預設設定
 
 Are you sure that you want to reset the controls to their defaults?
-== 你確定要將當前的控制恢復至預設設定
+== 確定要將當前的控制恢復至預設設定？
 
 [Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
@@ -1693,7 +1670,7 @@ Folder Link
 == 資料夾連結
 
 Are you sure that you want to delete the folder '%s'?
-== 你確定要刪除資料夾 "%s" ？
+== 確定要刪除資料夾 "%s" ？
 
 Delete folder
 == 刪除資料夾
@@ -1778,3 +1755,72 @@ Regular background color
 
 Entities background color
 == 實體層背景顏色
+
+Saving settings to '%s' failed
+== 無法儲存設定至 "%s"
+
+Searching
+== 正在搜尋
+
+Enter Username
+== 輸入用戶名稱
+
+Enter Password
+== 輸入密碼
+
+NOT CONNECTED
+== 連線未成功
+
+Match %d of %d
+== 結果 %d / 總共 %d 則
+
+No results
+== 無結果
+
+Lines %d - %d (%s)
+== 行 %d - %d (%s)
+
+Locked
+== 鎖定
+
+Following
+== 當前
+
+Press a key…
+== 按任意鍵...
+
+Are you sure that you want to restart?
+== 確定要重新開始？
+
+There's an unsaved map in the editor, you might want to save it.
+== 編輯器中有尚未儲存的地圖，你或需要儲存
+
+Continue anyway?
+== 仍要退出？
+
+Communities
+== 社區
+
+Please use a different filename
+== 請使用不同的檔案名
+
+Info Messages
+== 訊息
+
+Show local time always
+== 始終顯示本地時間
+
+Chat font size
+== 聊天字體大小
+
+Chat width
+== 聊天框寬度
+
+Authed name color in scoreboard
+== 管理權限人員名字計分板顯示顔色
+
+Same clan color in scoreboard
+== 相同戰隊計分板顯示顔色
+
+Show finish messages
+== 顯示完成訊息

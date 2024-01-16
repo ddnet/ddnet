@@ -76,6 +76,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	IStorage *m_pStorage = nullptr;
 	IEngineTextRender *m_pTextRender = nullptr;
 	IUpdater *m_pUpdater = nullptr;
+	CHttp m_Http;
 
 	CNetClient m_aNetClient[NUM_CONNS];
 	CDemoPlayer m_DemoPlayer;
@@ -266,6 +267,7 @@ public:
 	IStorage *Storage() { return m_pStorage; }
 	IEngineTextRender *TextRender() { return m_pTextRender; }
 	IUpdater *Updater() { return m_pUpdater; }
+	IHttp *Http() { return &m_Http; }
 
 	CClient();
 

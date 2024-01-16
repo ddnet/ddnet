@@ -15,13 +15,15 @@ CQuadEditTracker::~CQuadEditTracker()
 	m_vSelectedQuads.clear();
 }
 
-void CQuadEditTracker::BeginQuadTrack(const std::shared_ptr<CLayerQuads> &pLayer, const std::vector<int> &vSelectedQuads)
+void CQuadEditTracker::BeginQuadTrack(const std::shared_ptr<CLayerQuads> &pLayer, const std::vector<int> &vSelectedQuads, int GroupIndex, int LayerIndex)
 {
 	if(m_Tracking)
 		return;
 	m_Tracking = true;
 	m_vSelectedQuads.clear();
 	m_pLayer = pLayer;
+	m_GroupIndex = GroupIndex < 0 ? m_pEditor->m_SelectedGroup : GroupIndex;
+	m_LayerIndex = LayerIndex < 0 ? m_pEditor->m_vSelectedLayers[0] : LayerIndex;
 	// Init all points
 	for(auto QuadIndex : vSelectedQuads)
 	{
@@ -37,26 +39,25 @@ void CQuadEditTracker::EndQuadTrack()
 		return;
 	m_Tracking = false;
 
-	int GroupIndex = m_pEditor->m_SelectedGroup;
-	int LayerIndex = m_pEditor->m_vSelectedLayers[0];
-
 	// Record all moved stuff
 	std::vector<std::shared_ptr<IEditorAction>> vpActions;
 	for(auto QuadIndex : m_vSelectedQuads)
 	{
 		auto &pQuad = m_pLayer->m_vQuads[QuadIndex];
 		auto vCurrentPoints = std::vector<CPoint>(pQuad.m_aPoints, pQuad.m_aPoints + 5);
-		vpActions.push_back(std::make_shared<CEditorActionEditQuadPoint>(m_pEditor, GroupIndex, LayerIndex, QuadIndex, m_InitalPoints[QuadIndex], vCurrentPoints));
+		vpActions.push_back(std::make_shared<CEditorActionEditQuadPoint>(m_pEditor, m_GroupIndex, m_LayerIndex, QuadIndex, m_InitalPoints[QuadIndex], vCurrentPoints));
 	}
 	m_pEditor->m_EditorHistory.RecordAction(std::make_shared<CEditorActionBulk>(m_pEditor, vpActions));
 }
 
-void CQuadEditTracker::BeginQuadPropTrack(const std::shared_ptr<CLayerQuads> &pLayer, const std::vector<int> &vSelectedQuads, EQuadProp Prop)
+void CQuadEditTracker::BeginQuadPropTrack(const std::shared_ptr<CLayerQuads> &pLayer, const std::vector<int> &vSelectedQuads, EQuadProp Prop, int GroupIndex, int LayerIndex)
 {
 	if(m_TrackedProp != EQuadProp::PROP_NONE)
 		return;
 	m_TrackedProp = Prop;
 	m_pLayer = pLayer;
+	m_GroupIndex = GroupIndex < 0 ? m_pEditor->m_SelectedGroup : GroupIndex;
+	m_LayerIndex = LayerIndex < 0 ? m_pEditor->m_vSelectedLayers[0] : LayerIndex;
 	m_vSelectedQuads = vSelectedQuads;
 	m_PreviousValues.clear();
 
@@ -83,16 +84,13 @@ void CQuadEditTracker::EndQuadPropTrack(EQuadProp Prop)
 
 	std::vector<std::shared_ptr<IEditorAction>> vpActions;
 
-	int GroupIndex = m_pEditor->m_SelectedGroup;
-	int LayerIndex = m_pEditor->m_vSelectedLayers[0];
-
 	for(auto QuadIndex : m_vSelectedQuads)
 	{
 		auto &Quad = m_pLayer->m_vQuads[QuadIndex];
 		if(Prop == EQuadProp::PROP_POS_X || Prop == EQuadProp::PROP_POS_Y)
 		{
 			auto vCurrentPoints = std::vector<CPoint>(Quad.m_aPoints, Quad.m_aPoints + 5);
-			vpActions.push_back(std::make_shared<CEditorActionEditQuadPoint>(m_pEditor, GroupIndex, LayerIndex, QuadIndex, m_InitalPoints[QuadIndex], vCurrentPoints));
+			vpActions.push_back(std::make_shared<CEditorActionEditQuadPoint>(m_pEditor, m_GroupIndex, m_LayerIndex, QuadIndex, m_InitalPoints[QuadIndex], vCurrentPoints));
 		}
 		else
 		{
@@ -107,7 +105,7 @@ void CQuadEditTracker::EndQuadPropTrack(EQuadProp Prop)
 				Value = Quad.m_ColorEnvOffset;
 
 			if(Value != m_PreviousValues[QuadIndex])
-				vpActions.push_back(std::make_shared<CEditorActionEditQuadProp>(m_pEditor, GroupIndex, LayerIndex, QuadIndex, Prop, m_PreviousValues[QuadIndex], Value));
+				vpActions.push_back(std::make_shared<CEditorActionEditQuadProp>(m_pEditor, m_GroupIndex, m_LayerIndex, QuadIndex, Prop, m_PreviousValues[QuadIndex], Value));
 		}
 	}
 
@@ -115,12 +113,14 @@ void CQuadEditTracker::EndQuadPropTrack(EQuadProp Prop)
 		m_pEditor->m_EditorHistory.RecordAction(std::make_shared<CEditorActionBulk>(m_pEditor, vpActions));
 }
 
-void CQuadEditTracker::BeginQuadPointPropTrack(const std::shared_ptr<CLayerQuads> &pLayer, const std::vector<int> &vSelectedQuads, int SelectedQuadPoints)
+void CQuadEditTracker::BeginQuadPointPropTrack(const std::shared_ptr<CLayerQuads> &pLayer, const std::vector<int> &vSelectedQuads, int SelectedQuadPoints, int GroupIndex, int LayerIndex)
 {
 	if(!m_vTrackedProps.empty())
 		return;
 
 	m_pLayer = pLayer;
+	m_GroupIndex = GroupIndex < 0 ? m_pEditor->m_SelectedGroup : GroupIndex;
+	m_LayerIndex = LayerIndex < 0 ? m_pEditor->m_vSelectedLayers[0] : LayerIndex;
 	m_SelectedQuadPoints = SelectedQuadPoints;
 	m_vSelectedQuads = vSelectedQuads;
 	m_PreviousValuesPoint.clear();
@@ -187,16 +187,13 @@ void CQuadEditTracker::EndQuadPointPropTrack(EQuadPointProp Prop)
 
 	std::vector<std::shared_ptr<IEditorAction>> vpActions;
 
-	int GroupIndex = m_pEditor->m_SelectedGroup;
-	int LayerIndex = m_pEditor->m_vSelectedLayers[0];
-
 	for(auto QuadIndex : m_vSelectedQuads)
 	{
 		auto &Quad = m_pLayer->m_vQuads[QuadIndex];
 		if(Prop == EQuadPointProp::PROP_POS_X || Prop == EQuadPointProp::PROP_POS_Y)
 		{
 			auto vCurrentPoints = std::vector<CPoint>(Quad.m_aPoints, Quad.m_aPoints + 5);
-			vpActions.push_back(std::make_shared<CEditorActionEditQuadPoint>(m_pEditor, GroupIndex, LayerIndex, QuadIndex, m_InitalPoints[QuadIndex], vCurrentPoints));
+			vpActions.push_back(std::make_shared<CEditorActionEditQuadPoint>(m_pEditor, m_GroupIndex, m_LayerIndex, QuadIndex, m_InitalPoints[QuadIndex], vCurrentPoints));
 		}
 		else
 		{
@@ -219,7 +216,7 @@ void CQuadEditTracker::EndQuadPointPropTrack(EQuadPointProp Prop)
 					}
 
 					if(Value != m_PreviousValuesPoint[QuadIndex][v][Prop])
-						vpActions.push_back(std::make_shared<CEditorActionEditQuadPointProp>(m_pEditor, GroupIndex, LayerIndex, QuadIndex, v, Prop, m_PreviousValuesPoint[QuadIndex][v][Prop], Value));
+						vpActions.push_back(std::make_shared<CEditorActionEditQuadPointProp>(m_pEditor, m_GroupIndex, m_LayerIndex, QuadIndex, v, Prop, m_PreviousValuesPoint[QuadIndex][v][Prop], Value));
 				}
 			}
 		}
@@ -234,16 +231,13 @@ void CQuadEditTracker::EndQuadPointPropTrackAll()
 	std::vector<std::shared_ptr<IEditorAction>> vpActions;
 	for(auto &Prop : m_vTrackedProps)
 	{
-		int GroupIndex = m_pEditor->m_SelectedGroup;
-		int LayerIndex = m_pEditor->m_vSelectedLayers[0];
-
 		for(auto QuadIndex : m_vSelectedQuads)
 		{
 			auto &Quad = m_pLayer->m_vQuads[QuadIndex];
 			if(Prop == EQuadPointProp::PROP_POS_X || Prop == EQuadPointProp::PROP_POS_Y)
 			{
 				auto vCurrentPoints = std::vector<CPoint>(Quad.m_aPoints, Quad.m_aPoints + 5);
-				vpActions.push_back(std::make_shared<CEditorActionEditQuadPoint>(m_pEditor, GroupIndex, LayerIndex, QuadIndex, m_InitalPoints[QuadIndex], vCurrentPoints));
+				vpActions.push_back(std::make_shared<CEditorActionEditQuadPoint>(m_pEditor, m_GroupIndex, m_LayerIndex, QuadIndex, m_InitalPoints[QuadIndex], vCurrentPoints));
 			}
 			else
 			{
@@ -266,7 +260,7 @@ void CQuadEditTracker::EndQuadPointPropTrackAll()
 						}
 
 						if(Value != m_PreviousValuesPoint[QuadIndex][v][Prop])
-							vpActions.push_back(std::make_shared<CEditorActionEditQuadPointProp>(m_pEditor, GroupIndex, LayerIndex, QuadIndex, v, Prop, m_PreviousValuesPoint[QuadIndex][v][Prop], Value));
+							vpActions.push_back(std::make_shared<CEditorActionEditQuadPointProp>(m_pEditor, m_GroupIndex, m_LayerIndex, QuadIndex, v, Prop, m_PreviousValuesPoint[QuadIndex][v][Prop], Value));
 					}
 				}
 			}
@@ -277,22 +271,6 @@ void CQuadEditTracker::EndQuadPointPropTrackAll()
 		m_pEditor->m_EditorHistory.RecordAction(std::make_shared<CEditorActionBulk>(m_pEditor, vpActions));
 
 	m_vTrackedProps.clear();
-}
-
-void CEditorPropTracker::BeginPropTrack(int Prop, int Value)
-{
-	if(m_TrackedProp != -1 || m_TrackedProp == Prop)
-		return;
-	m_TrackedProp = Prop;
-	m_PreviousValue = Value;
-}
-
-void CEditorPropTracker::StopPropTrack(int Prop, int Value)
-{
-	if(Prop != m_TrackedProp)
-		return;
-	m_TrackedProp = -1;
-	m_CurrentValue = Value;
 }
 
 // -----------------------------
@@ -386,19 +364,80 @@ void CEnvelopeEditorOperationTracker::HandlePointDragEnd(bool Switch)
 }
 
 // -----------------------------------------------------------------------
+CSoundSourceOperationTracker::CSoundSourceOperationTracker(CEditor *pEditor) :
+	m_pEditor(pEditor), m_pSource(nullptr), m_TrackedOp(ESoundSourceOp::OP_NONE), m_LayerIndex(-1)
+{
+}
+
+void CSoundSourceOperationTracker::Begin(CSoundSource *pSource, ESoundSourceOp Operation, int LayerIndex)
+{
+	if(m_TrackedOp == Operation || m_TrackedOp != ESoundSourceOp::OP_NONE)
+		return;
+
+	m_TrackedOp = Operation;
+	m_pSource = pSource;
+	m_LayerIndex = LayerIndex;
+
+	if(m_TrackedOp == ESoundSourceOp::OP_MOVE)
+		HandlePointMove(EState::STATE_BEGIN);
+}
+
+void CSoundSourceOperationTracker::End()
+{
+	if(m_TrackedOp == ESoundSourceOp::OP_NONE)
+		return;
+
+	if(m_TrackedOp == ESoundSourceOp::OP_MOVE)
+		HandlePointMove(EState::STATE_END);
+
+	m_TrackedOp = ESoundSourceOp::OP_NONE;
+}
+
+void CSoundSourceOperationTracker::HandlePointMove(EState State)
+{
+	if(State == EState::STATE_BEGIN)
+	{
+		m_Data.m_OriginalPoint = m_pSource->m_Position;
+	}
+	else if(State == EState::STATE_END)
+	{
+		m_pEditor->m_EditorHistory.RecordAction(std::make_shared<CEditorActionMoveSoundSource>(m_pEditor, m_pEditor->m_SelectedGroup, m_LayerIndex, m_pEditor->m_SelectedSource, m_Data.m_OriginalPoint, m_pSource->m_Position));
+	}
+}
+
+// -----------------------------------------------------------------------
+
+int SPropTrackerHelper::GetDefaultGroupIndex(CEditor *pEditor)
+{
+	return pEditor->m_SelectedGroup;
+}
+
+int SPropTrackerHelper::GetDefaultLayerIndex(CEditor *pEditor)
+{
+	return pEditor->m_vSelectedLayers[0];
+}
+
+// -----------------------------------------------------------------------
 
 void CLayerPropTracker::OnEnd(ELayerProp Prop, int Value)
 {
-	m_pEditor->m_EditorHistory.RecordAction(std::make_shared<CEditorActionEditLayerProp>(m_pEditor, m_pEditor->m_SelectedGroup, m_pEditor->m_vSelectedLayers[0], Prop, m_OriginalValue, Value));
+	if(Prop == ELayerProp::PROP_GROUP)
+	{
+		m_pEditor->m_EditorHistory.RecordAction(std::make_shared<CEditorActionEditLayersGroupAndOrder>(m_pEditor, m_OriginalGroupIndex, std::vector<int>{m_OriginalLayerIndex}, m_CurrentGroupIndex, std::vector<int>{m_CurrentLayerIndex}));
+	}
+	else
+	{
+		m_pEditor->m_EditorHistory.RecordAction(std::make_shared<CEditorActionEditLayerProp>(m_pEditor, m_CurrentGroupIndex, m_CurrentLayerIndex, Prop, m_OriginalValue, Value));
+	}
 }
 
 int CLayerPropTracker::PropToValue(ELayerProp Prop)
 {
 	switch(Prop)
 	{
-	case ELayerProp::PROP_GROUP: return m_pEditor->m_SelectedGroup;
+	case ELayerProp::PROP_GROUP: return m_CurrentGroupIndex;
 	case ELayerProp::PROP_HQ: return m_pObject->m_Flags;
-	case ELayerProp::PROP_ORDER: return m_pEditor->m_vSelectedLayers[0];
+	case ELayerProp::PROP_ORDER: return m_CurrentLayerIndex;
 	default: return 0;
 	}
 }
@@ -439,7 +478,7 @@ void CLayerTilesPropTracker::OnStart(ETilesProp Prop)
 
 void CLayerTilesPropTracker::OnEnd(ETilesProp Prop, int Value)
 {
-	auto pAction = std::make_shared<CEditorActionEditLayerTilesProp>(m_pEditor, m_pEditor->m_SelectedGroup, m_pEditor->m_vSelectedLayers[0], Prop, m_OriginalValue, Value);
+	auto pAction = std::make_shared<CEditorActionEditLayerTilesProp>(m_pEditor, m_OriginalGroupIndex, m_OriginalLayerIndex, Prop, m_OriginalValue, Value);
 
 	pAction->SetSavedLayers(m_SavedLayers);
 	m_SavedLayers.clear();
@@ -490,7 +529,7 @@ void CLayerTilesCommonPropTracker::OnEnd(ETilesCommonProp Prop, int Value)
 	for(auto &pLayer : m_vpLayers)
 	{
 		int LayerIndex = m_vLayerIndices[j++];
-		auto pAction = std::make_shared<CEditorActionEditLayerTilesProp>(m_pEditor, m_pEditor->m_SelectedGroup, LayerIndex, s_PropMap[Prop], m_OriginalValue, Value);
+		auto pAction = std::make_shared<CEditorActionEditLayerTilesProp>(m_pEditor, m_OriginalGroupIndex, LayerIndex, s_PropMap[Prop], m_OriginalValue, Value);
 		pAction->SetSavedLayers(m_SavedLayers[pLayer]);
 		vpActions.push_back(pAction);
 	}
@@ -549,7 +588,7 @@ int CLayerGroupPropTracker::PropToValue(EGroupProp Prop)
 
 void CLayerQuadsPropTracker::OnEnd(ELayerQuadsProp Prop, int Value)
 {
-	auto pAction = std::make_shared<CEditorActionEditLayerQuadsProp>(m_pEditor, m_pEditor->m_SelectedGroup, m_pEditor->m_vSelectedLayers[0], Prop, m_OriginalValue, Value);
+	auto pAction = std::make_shared<CEditorActionEditLayerQuadsProp>(m_pEditor, m_OriginalGroupIndex, m_OriginalLayerIndex, Prop, m_OriginalValue, Value);
 	m_pEditor->m_EditorHistory.RecordAction(pAction);
 }
 
@@ -564,7 +603,7 @@ int CLayerQuadsPropTracker::PropToValue(ELayerQuadsProp Prop)
 
 void CLayerSoundsPropTracker::OnEnd(ELayerSoundsProp Prop, int Value)
 {
-	auto pAction = std::make_shared<CEditorActionEditLayerSoundsProp>(m_pEditor, m_pEditor->m_SelectedGroup, m_pEditor->m_vSelectedLayers[0], Prop, m_OriginalValue, Value);
+	auto pAction = std::make_shared<CEditorActionEditLayerSoundsProp>(m_pEditor, m_OriginalGroupIndex, m_OriginalLayerIndex, Prop, m_OriginalValue, Value);
 	m_pEditor->m_EditorHistory.RecordAction(pAction);
 }
 
@@ -579,7 +618,7 @@ int CLayerSoundsPropTracker::PropToValue(ELayerSoundsProp Prop)
 
 void CSoundSourcePropTracker::OnEnd(ESoundProp Prop, int Value)
 {
-	m_pEditor->m_EditorHistory.RecordAction(std::make_shared<CEditorActionEditSoundSourceProp>(m_pEditor, m_pEditor->m_SelectedGroup, m_pEditor->m_vSelectedLayers[0], m_pEditor->m_SelectedSource, Prop, m_OriginalValue, Value));
+	m_pEditor->m_EditorHistory.RecordAction(std::make_shared<CEditorActionEditSoundSourceProp>(m_pEditor, m_OriginalGroupIndex, m_OriginalLayerIndex, m_pEditor->m_SelectedSource, Prop, m_OriginalValue, Value));
 }
 
 int CSoundSourcePropTracker::PropToValue(ESoundProp Prop)
@@ -604,7 +643,7 @@ int CSoundSourcePropTracker::PropToValue(ESoundProp Prop)
 
 void CSoundSourceRectShapePropTracker::OnEnd(ERectangleShapeProp Prop, int Value)
 {
-	m_pEditor->m_EditorHistory.RecordAction(std::make_shared<CEditorActionEditRectSoundSourceShapeProp>(m_pEditor, m_pEditor->m_SelectedGroup, m_pEditor->m_vSelectedLayers[0], m_pEditor->m_SelectedSource, Prop, m_OriginalValue, Value));
+	m_pEditor->m_EditorHistory.RecordAction(std::make_shared<CEditorActionEditRectSoundSourceShapeProp>(m_pEditor, m_OriginalGroupIndex, m_OriginalLayerIndex, m_pEditor->m_SelectedSource, Prop, m_OriginalValue, Value));
 }
 
 int CSoundSourceRectShapePropTracker::PropToValue(ERectangleShapeProp Prop)
@@ -619,7 +658,7 @@ int CSoundSourceRectShapePropTracker::PropToValue(ERectangleShapeProp Prop)
 
 void CSoundSourceCircleShapePropTracker::OnEnd(ECircleShapeProp Prop, int Value)
 {
-	m_pEditor->m_EditorHistory.RecordAction(std::make_shared<CEditorActionEditCircleSoundSourceShapeProp>(m_pEditor, m_pEditor->m_SelectedGroup, m_pEditor->m_vSelectedLayers[0], m_pEditor->m_SelectedSource, Prop, m_OriginalValue, Value));
+	m_pEditor->m_EditorHistory.RecordAction(std::make_shared<CEditorActionEditCircleSoundSourceShapeProp>(m_pEditor, m_OriginalGroupIndex, m_OriginalLayerIndex, m_pEditor->m_SelectedSource, Prop, m_OriginalValue, Value));
 }
 
 int CSoundSourceCircleShapePropTracker::PropToValue(ECircleShapeProp Prop)

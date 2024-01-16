@@ -13,12 +13,12 @@
 #	gerdoe		2020-09-17 22:49:22
 #	Vy0x2		2021-06-08 15:48:25
 #	Anime.pdf	2021-06-13 13:08:50
-#	banan   	2022-06-12 11:36:50
-#	ban   	2023-01-5 10:22:50
-#	unban   	2023-03-10 21:50:50
-#	eblan   	2023-08-07 14:27:00
-#	kaban   	2023-9-21 19:00:00
-#	ByFox   	2023-11-14 11:24:00
+#	banan		2022-06-12 11:36:50
+#	ban			2023-01-5 10:22:50
+#	unban		2023-03-10 21:50:50
+#	eblan		2023-08-07 14:27:00
+#	kaban		2023-9-21 19:00:00
+#	ByFox		2023-11-14 11:24:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -40,9 +40,6 @@
 
 %s wins!
 == %s победил!
-
--Page %d-
-== -Страница %d-
 
 Abort
 == Отмена
@@ -428,9 +425,6 @@ The audio device couldn't be initialised.
 The server is running a non-standard tuning on a pure game type.
 == Сервер запущен с нестандартными настройками на стандартном типе игры.
 
-There's an unsaved map in the editor, you might want to save it before you quit the game.
-== Вы не сохранили карту в редакторе. Можете сохранить её перед тем, как выйти.
-
 Time limit
 == Лимит времени
 
@@ -524,9 +518,6 @@ Show votes window after voting
 Reset
 == Сброс
 
-Dummy settings
-== Настройки дамми
-
 Search
 == Поиск
 
@@ -580,9 +571,6 @@ Your skin
 
 Reset to defaults
 == Сбросить настройки
-
-Quit anyway?
-== Все равно выйти?
 
 Round
 == Раунд
@@ -1026,9 +1014,6 @@ Learn
 Play
 == Играть
 
-Saving ddnet-settings.cfg failed
-== Неудачное сохранение ddnet-settings.cfg
-
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
 == Отладка включена. Нажмите Ctrl+Shift+D, чтобы выйти.
 
@@ -1161,9 +1146,6 @@ Desktop fullscreen
 Are you sure that you want to disconnect and switch to a different server?
 == Вы уверены, что хотите отключиться и перейти на другой сервер?
 
-Kill Messages
-== Сообщения о смерти
-
 Show local player's key presses
 == Показывать нажатия клавиш игрока
 
@@ -1229,9 +1211,6 @@ UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or netwo
 
 No answer from server yet.
 == Сервер еще не ответил.
-
-Toggle to edit your dummy settings
-== Переключите, чтобы изменить настройки дамми
 
 Download community skins
 == Скачивать скины сообщества
@@ -1398,7 +1377,7 @@ Show jumps indicator
 == Показывать индикатор прыжка
 
 Show hook strength indicator
-== Показывать индикатор силы крюка
+== Показывать тип крюка
 
 Hook collision line
 == Линия коллизии крюка
@@ -1410,19 +1389,19 @@ Hook collision line opacity
 == Прозрачность линии
 
 Colors of the hook collision line, in case of a possible collision with:
-== Цвет линии, в случае если:
+== Цвет линии при:
 
 Your movements are not taken into account when calculating the line colors
-== Ваши движения не учитываются, когда рассчитывается цвет линии
+== Ваши движения не учитываются при расчете цвета линии
 
 Nothing hookable
-== Невозможно зацепиться
+== Касании нехукабельных тайлов
 
 Something hookable
-== Возможно зацепиться
+== Касании хукабельных тайлов
 
 A Tee
-== Столкновение с Tee
+== Касании игрока
 
 Loading assets
 == Загрузка ресурсов
@@ -1756,7 +1735,7 @@ Deactivate all
 == Отключить все
 
 Enable ghost
-== Включить привидение
+== Включить тень
 
 Only save improvements
 == Сохранять только улучшения
@@ -1766,3 +1745,69 @@ Regular background color
 
 Entities background color
 == Цвет фона сущностей
+
+Saving settings to '%s' failed
+== Не получилось сохранить настройки в '%s'
+
+Searching
+== В поиске
+
+Enter Username
+== Введите имя
+
+Enter Password
+== Введите пароль
+
+NOT CONNECTED
+== НЕТ ПОДКЛЮЧЕНИЯ
+
+Match %d of %d
+== %d совпадения из %d
+
+No results
+== Не найдено
+
+Lines %d - %d (%s)
+== Строк %d - %d (%s)
+
+Locked
+== Закрыто
+
+Following
+== 
+
+Press a key…
+== Нажмите любую кнопку…
+
+Are you sure that you want to restart?
+== Вы уверены, что хотите начать заново?
+
+There's an unsaved map in the editor, you might want to save it.
+== Вы не сохранили последнюю отредактированную карту, возможно, вы хотите ее сохранить
+
+Continue anyway?
+== Все равно продолжить?
+
+Communities
+== Соообщества
+
+Info Messages
+== Инф. Сообщения
+
+Show local time always
+== Всегда показывать местное время
+
+Chat font size
+== Размер шрифта в чате
+
+Chat width
+== Ширина чата
+
+Authed name color in scoreboard
+== Цвет ника администратора в таблице счета
+
+Same clan color in scoreboard
+== Одинаковый цвет клана в таблице счета
+
+Show finish messages
+== Показывать сообщения о финишах

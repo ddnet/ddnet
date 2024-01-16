@@ -21,6 +21,7 @@ class IFriends;
 class IServerBrowserHttp;
 class IServerBrowserPingCache;
 class IStorage;
+class IHttp;
 
 class CCommunityServer
 {
@@ -143,6 +144,7 @@ private:
 	IFriends *m_pFriends = nullptr;
 	IFavorites *m_pFavorites = nullptr;
 	IStorage *m_pStorage = nullptr;
+	IHttp *m_pHttpClient = nullptr;
 	char m_aNetVersion[128];
 
 	bool m_RefreshingHttp = false;

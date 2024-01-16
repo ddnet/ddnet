@@ -177,6 +177,7 @@ private:
 #if defined(CONF_AUTOUPDATE)
 	class IUpdater *m_pUpdater;
 #endif
+	class IHttp *m_pHttp;
 
 	CLayers m_Layers;
 	CCollision m_Collision;
@@ -251,6 +252,10 @@ public:
 		return m_pUpdater;
 	}
 #endif
+	class IHttp *Http()
+	{
+		return m_pHttp;
+	}
 
 	int NetobjNumCorrections()
 	{

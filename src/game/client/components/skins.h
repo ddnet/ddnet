@@ -20,7 +20,7 @@ public:
 		CSkins *m_pSkins;
 
 	protected:
-		virtual int OnCompletion(int State) override;
+		virtual void OnCompletion() override;
 
 	public:
 		CGetPngFile(CSkins *pSkins, const char *pUrl, IStorage *pStorage, const char *pDest);

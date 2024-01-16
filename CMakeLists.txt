@@ -1884,6 +1884,7 @@ set_src(ENGINE_INTERFACE GLOB src/engine
   friends.h
   ghost.h
   graphics.h
+  http.h
   input.h
   kernel.h
   keys.h

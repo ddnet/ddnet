@@ -29,9 +29,6 @@
 %s wins!
 == %s перамагае!
 
--Page %d-
-== -Старонка %d-
-
 Abort
 == Перапыніць
 
@@ -404,9 +401,6 @@ The audio device couldn't be initialised.
 The server is running a non-standard tuning on a pure game type.
 == Сервер запушчаны з нестандартнымі наладамі на стандартным тыпе гульні.
 
-There's an unsaved map in the editor, you might want to save it before you quit the game.
-== Ёсць незахаваная карта ў рэдактары, Вы можаце захацець захаваць яе перад тым, як выйсці.
-
 Time limit
 == Ліміт часу
 
@@ -506,9 +500,6 @@ Your skin
 Reset to defaults
 == Скінуць налады
 
-Quit anyway?
-== Усё адно выйсці?
-
 Round
 == Раўнд
 
@@ -527,10 +518,6 @@ LAN
 Name plates size
 == Памер таблічак з імёнамі
 
-Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== Памылка падчас ініцыялізацыі. Паспрабуйце змяніць gfx_backend на OpenGL або Vulkan у settings_ddnet.cfg ў тэчцы config і паспрабуйце зноў.
-
-[Graphics error]
 Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
 == Недахоп памяці VRAM. Паспрабуйце выдаліць карыстацкія рэсурсы (скіны, тэкстуры і г.д.), асабліва тыя, што маюць высокае разрознасць.
 
@@ -567,9 +554,6 @@ Could not save downloaded map. Try manually deleting this file: %s
 
 Successfully saved the replay!
 == Паўтор паспяхова захаваны!
-
-Saving ddnet-settings.cfg failed
-== Не атрымалася захаваць ddnet-settings.cfg
 
 Replay feature is disabled!
 == Функцыя паўтору адключаная!
@@ -958,14 +942,8 @@ Automatically create statboard csv
 Max CSVs
 == Максімум CSV
 
-Dummy settings
-== Налады даммі
-
 Loading skin files
 == Загрузка файлаў скінаў
-
-Toggle to edit your dummy settings
-== Пераключыце, каб змяніць налады даммі
 
 Download skins
 == Спампаваць скіны
@@ -1190,9 +1168,6 @@ Name Plate
 
 Hook Collisions
 == Сутыкненні крука
-
-Kill Messages
-== Паведамленні пра смерць
 
 Show health, shields and ammo
 == Паказваць здароўе, шчыты і боепрыпасы
@@ -1753,3 +1728,73 @@ Regular background color
 
 Entities background color
 == Колер фону энтыты
+
+[Graphics error]
+Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
+== 
+
+Saving settings to '%s' failed
+== 
+
+Searching
+== 
+
+Enter Username
+== 
+
+Enter Password
+== 
+
+NOT CONNECTED
+== 
+
+Match %d of %d
+== 
+
+No results
+== 
+
+Lines %d - %d (%s)
+== 
+
+Locked
+== 
+
+Following
+== 
+
+Press a key…
+== 
+
+Are you sure that you want to restart?
+== 
+
+There's an unsaved map in the editor, you might want to save it.
+== 
+
+Continue anyway?
+== 
+
+Communities
+== 
+
+Info Messages
+== 
+
+Show local time always
+== 
+
+Chat font size
+== 
+
+Chat width
+== 
+
+Authed name color in scoreboard
+== 
+
+Same clan color in scoreboard
+== 
+
+Show finish messages
+== 

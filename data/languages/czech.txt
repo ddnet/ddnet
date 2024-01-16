@@ -28,9 +28,6 @@
 %s wins!
 == Vítězí %s!
 
--Page %d-
-== -Strana %d-
-
 Abort
 == Přerušit
 
@@ -403,9 +400,6 @@ The audio device couldn't be initialised.
 The server is running a non-standard tuning on a pure game type.
 == Server používá nestandartní nastavení (tuning) pro základní módy.
 
-There's an unsaved map in the editor, you might want to save it before you quit the game.
-== V editoru map je neuložená mapa, možná ji chcete před ukončením hry uložit.
-
 Time limit
 == Časový limit
 
@@ -506,9 +500,6 @@ Your skin
 
 Reset to defaults
 == Obnovit výchozí
-
-Quit anyway?
-== Opravdu odejít?
 
 Round
 == Kolo
@@ -627,9 +618,6 @@ Update now
 Restart
 == Restartovat
 
-Please use a different filename
-== 
-
 Remove chat
 == Odebrat chat
 
@@ -695,9 +683,6 @@ Automatically create statboard csv
 
 Max CSVs
 == Maximální CSV
-
-Dummy settings
-== Nastavení dummyho
 
 Vanilla skins only
 == Pouze vanilla skiny
@@ -963,9 +948,6 @@ Grabs
 9+ new mentions
 == 9+ nových zmínek
 
-Saving ddnet-settings.cfg failed
-== Uložení souboru ddnet-settings.cfg se nezdařilo
-
 Warning
 == Varování
 
@@ -1132,6 +1114,9 @@ Could not save downloaded map. Try manually deleting this file: %s
 Error playing demo
 == 
 
+Saving settings to '%s' failed
+== 
+
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
 == 
 
@@ -1168,6 +1153,33 @@ Quitting. Please wait…
 Restarting. Please wait…
 == 
 
+Searching
+== 
+
+Enter Username
+== 
+
+Enter Password
+== 
+
+NOT CONNECTED
+== 
+
+Match %d of %d
+== 
+
+No results
+== 
+
+Lines %d - %d (%s)
+== 
+
+Locked
+== 
+
+Following
+== 
+
 Position:
 == 
 
@@ -1195,6 +1207,9 @@ Some map sounds could not be loaded. Check the local console for details.
 Loading menu themes
 == 
 
+Press a key…
+== 
+
 Trying to determine UDP connectivity...
 == 
 
@@ -1217,6 +1232,15 @@ Rename folder
 == 
 
 Render complete
+== 
+
+Are you sure that you want to restart?
+== 
+
+There's an unsaved map in the editor, you might want to save it.
+== 
+
+Continue anyway?
 == 
 
 A demo with this name already exists
@@ -1274,6 +1298,9 @@ Getting server list from master server
 == 
 
 Are you sure that you want to disconnect and switch to a different server?
+== 
+
+Communities
 == 
 
 Copy info
@@ -1387,6 +1414,9 @@ Cut length
 Render cut to video
 == 
 
+Please use a different filename
+== 
+
 Loading demo files
 == 
 
@@ -1460,7 +1490,7 @@ Open the directory that contains the configuration and user files
 Open the directory to add custom themes
 == 
 
-Toggle to edit your dummy settings
+Dummy
 == 
 
 Loading skin files
@@ -1469,10 +1499,10 @@ Loading skin files
 Download community skins
 == 
 
-Choose default eyes when joining a server
+Create a random skin
 == 
 
-Create a random skin
+Choose default eyes when joining a server
 == 
 
 Open the directory to add custom skins
@@ -1537,9 +1567,6 @@ Are you sure that you want to reset the controls to their defaults?
 Cancel
 == 
 
-Dummy
-== 
-
 Windowed
 == 
 
@@ -1579,10 +1606,13 @@ Name Plate
 Hook Collisions
 == 
 
-Kill Messages
+Info Messages
 == 
 
 Show health, shields and ammo
+== 
+
+Show local time always
 == 
 
 DDRace HUD
@@ -1615,6 +1645,12 @@ Show freeze bars
 Opacity of freeze bars inside freeze
 == 
 
+Chat font size
+== 
+
+Chat width
+== 
+
 Preview
 == 
 
@@ -1622,6 +1658,12 @@ Show hook strength indicator
 == 
 
 Show local player's key presses
+== 
+
+Authed name color in scoreboard
+== 
+
+Same clan color in scoreboard
 == 
 
 Hook collision line
@@ -1646,6 +1688,9 @@ Something hookable
 == 
 
 A Tee
+== 
+
+Show finish messages
 == 
 
 Normal Color

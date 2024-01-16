@@ -21,15 +21,13 @@ bool CSkins::IsVanillaSkin(const char *pName)
 	return std::any_of(std::begin(VANILLA_SKINS), std::end(VANILLA_SKINS), [pName](const char *pVanillaSkin) { return str_comp(pName, pVanillaSkin) == 0; });
 }
 
-int CSkins::CGetPngFile::OnCompletion(int State)
+void CSkins::CGetPngFile::OnCompletion()
 {
-	State = CHttpRequest::OnCompletion(State);
-
-	if(State != HTTP_ERROR && State != HTTP_ABORTED && !m_pSkins->LoadSkinPNG(m_Info, Dest(), Dest(), IStorage::TYPE_SAVE))
+	// Maybe this should start another thread to load the png in instead of stalling the curl thread
+	if(State() != HTTP_ERROR && State() != HTTP_ABORTED)
 	{
-		State = HTTP_ERROR;
+		m_pSkins->LoadSkinPNG(m_Info, Dest(), Dest(), IStorage::TYPE_SAVE);
 	}
-	return State;
 }
 
 CSkins::CGetPngFile::CGetPngFile(CSkins *pSkins, const char *pUrl, IStorage *pStorage, const char *pDest) :
@@ -436,12 +434,16 @@ const CSkin *CSkins::FindImpl(const char *pName)
 	char aEscapedName[256];
 	EscapeUrl(aEscapedName, sizeof(aEscapedName), pName);
 	str_format(aUrl, sizeof(aUrl), "%s%s.png", g_Config.m_ClDownloadCommunitySkins != 0 ? g_Config.m_ClSkinCommunityDownloadUrl : g_Config.m_ClSkinDownloadUrl, aEscapedName);
+
 	char aBuf[IO_MAX_PATH_LENGTH];
 	str_format(Skin.m_aPath, sizeof(Skin.m_aPath), "downloadedskins/%s", IStorage::FormatTmpPath(aBuf, sizeof(aBuf), pName));
+
 	Skin.m_pTask = std::make_shared<CGetPngFile>(this, aUrl, Storage(), Skin.m_aPath);
-	m_pClient->Engine()->AddJob(Skin.m_pTask);
+	Http()->Run(Skin.m_pTask);
+
 	auto &&pDownloadSkin = std::make_unique<CDownloadSkin>(std::move(Skin));
 	m_DownloadSkins.insert({pDownloadSkin->GetName(), std::move(pDownloadSkin)});
 	++m_DownloadingSkins;
+
 	return nullptr;
 }
