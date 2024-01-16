@@ -2153,6 +2153,8 @@ void CEditor::DoQuad(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer,
 		{
 			EAxis Axis = GetDragAxis(s_LastOffset.x, s_LastOffset.y);
 			DrawAxis(Axis, s_OriginalPosition, pQuad->m_aPoints[4]);
+
+			str_copy(m_aTooltip, "Hold shift to keep alignment on one axis.");
 		}
 
 		if(s_Operation == OP_MOVE_PIVOT)
@@ -2457,6 +2459,8 @@ void CEditor::DoQuadPoint(int LayerIndex, const std::shared_ptr<CLayerQuads> &pL
 
 			// Alignments
 			DrawPointAlignments(s_Alignments, s_LastOffset.x, s_LastOffset.y);
+
+			str_copy(m_aTooltip, "Hold shift to keep alignment on one axis.");
 		}
 
 		if(s_Operation == OP_CONTEXT_MENU)
@@ -8246,6 +8250,12 @@ void CEditor::Render()
 		}
 		if(!m_pBrush->IsEmpty())
 		{
+			const bool HasTeleTiles = std::any_of(m_pBrush->m_vpLayers.begin(), m_pBrush->m_vpLayers.end(), [](auto pLayer) {
+				return pLayer->m_Type == LAYERTYPE_TILES && std::static_pointer_cast<CLayerTiles>(pLayer)->m_Tele;
+			});
+			if(HasTeleTiles)
+				str_copy(m_aTooltip, "Use shift+mousewheel up/down to adjust the tele numbers. Use ctrl+f to change all tele numbers to the first unused number.");
+
 			if(Input()->ShiftIsPressed())
 			{
 				if(Input()->KeyPress(KEY_MOUSE_WHEEL_DOWN))
