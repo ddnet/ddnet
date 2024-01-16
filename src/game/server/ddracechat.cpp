@@ -1537,7 +1537,7 @@ void CGameContext::ConRescue(IConsole::IResult *pResult, void *pUserData)
 	pChr->UnFreeze();
 }
 
-void CGameContext::ConTele(IConsole::IResult *pResult, void *pUserData)
+void CGameContext::ConTeleTo(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	if(!CheckClientID(pResult->m_ClientID))
@@ -1559,15 +1559,12 @@ void CGameContext::ConTele(IConsole::IResult *pResult, void *pUserData)
 
 	vec2 Pos = {};
 
-	switch(pResult->NumArguments())
-	{
-	case 0:
+	if(pResult->NumArguments() == 0)
 	{
 		// Set calling tee's position to the origin of its spectating viewport
 		Pos = pCallingPlayer->m_ViewPos;
-		break;
 	}
-	case 1:
+	else
 	{
 		// Search for player with this name
 		int ClientID;
@@ -1591,9 +1588,43 @@ void CGameContext::ConTele(IConsole::IResult *pResult, void *pUserData)
 
 		// Set calling tee's position to that of the destination tee
 		Pos = pDestCharacter->m_Pos;
-		break;
 	}
-	case 2:
+
+	// Teleport tee
+	pSelf->Teleport(pCallingCharacter, Pos);
+	pCallingCharacter->UnFreeze();
+	pCallingCharacter->Core()->m_Vel = vec2(0, 0);
+	pCallingPlayer->m_LastTeleTee.Save(pCallingCharacter);
+}
+
+void CGameContext::ConTeleXY(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientID(pResult->m_ClientID))
+		return;
+	CPlayer *pCallingPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if(!pCallingPlayer)
+		return;
+	CCharacter *pCallingCharacter = pCallingPlayer->GetCharacter();
+	if(!pCallingCharacter)
+		return;
+
+	CGameTeams &Teams = pSelf->m_pController->Teams();
+	int Team = pSelf->GetDDRaceTeam(pResult->m_ClientID);
+	if(!Teams.IsPractice(Team))
+	{
+		pSelf->SendChatTarget(pCallingPlayer->GetCID(), "You're not in a team with /practice turned on. Note that you can't earn a rank with practice enabled.");
+		return;
+	}
+
+	vec2 Pos = {};
+	
+	if(pResult->NumArguments() != 2)
+	{
+		pSelf->SendChatTarget(pCallingPlayer->GetCID(), "Can't recognize specified arguments. Usage: /tpxy x y, e.g. /tpxy 9 3.");
+		return;
+	}
+	else
 	{
 		float BaseX = 0.f, BaseY = 0.f;
 
@@ -1606,6 +1637,9 @@ void CGameContext::ConTele(IConsole::IResult *pResult, void *pUserData)
 
 			// Relative?
 			const char *pStrDelta = str_startswith(pInString, "~");
+
+			if(!str_isallnum(pStrDelta ? pStrDelta : pInString))
+				return false;
 
 			// Is the number valid?
 			float d = str_tofloat(pStrDelta ? pStrDelta : pInString);
@@ -1631,13 +1665,8 @@ void CGameContext::ConTele(IConsole::IResult *pResult, void *pUserData)
 		}
 
 		Pos = {std::clamp(BaseX, (-OuterKillTileBoundaryDistance) + 1.f, (-OuterKillTileBoundaryDistance) + MapWidth - 1.f), std::clamp(BaseY, (-OuterKillTileBoundaryDistance) + 1.f, (-OuterKillTileBoundaryDistance) + MapHeight - 1.f)};
-		break;
 	}
-	default:
-		pSelf->SendChatTarget(pCallingPlayer->GetCID(), "Too many arguments.");
-		return;
-	}
-
+	
 	// Teleport tee
 	pSelf->Teleport(pCallingCharacter, Pos);
 	pCallingCharacter->UnFreeze();
