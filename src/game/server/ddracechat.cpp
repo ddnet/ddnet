@@ -1618,7 +1618,7 @@ void CGameContext::ConTeleXY(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	vec2 Pos = {};
-	
+
 	if(pResult->NumArguments() != 2)
 	{
 		pSelf->SendChatTarget(pCallingPlayer->GetCID(), "Can't recognize specified arguments. Usage: /tpxy x y, e.g. /tpxy 9 3.");
@@ -1666,7 +1666,7 @@ void CGameContext::ConTeleXY(IConsole::IResult *pResult, void *pUserData)
 
 		Pos = {std::clamp(BaseX, (-OuterKillTileBoundaryDistance) + 1.f, (-OuterKillTileBoundaryDistance) + MapWidth - 1.f), std::clamp(BaseY, (-OuterKillTileBoundaryDistance) + 1.f, (-OuterKillTileBoundaryDistance) + MapHeight - 1.f)};
 	}
-	
+
 	// Teleport tee
 	pSelf->Teleport(pCallingCharacter, Pos);
 	pCallingCharacter->UnFreeze();
