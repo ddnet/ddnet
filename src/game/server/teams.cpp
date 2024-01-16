@@ -266,6 +266,7 @@ void CGameTeams::Tick()
 	}
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
+		bool TeamHasSuperCharacter = false;
 		if(((TeamHasWantedStartTime >> i) & 1) == 0)
 		{
 			continue;
@@ -279,6 +280,8 @@ void CGameTeams::Tick()
 		aPlayerNames[0] = 0;
 		for(int j = 0; j < MAX_CLIENTS; j++)
 		{
+			if(GameServer()->GetPlayerChar(j) && GameServer()->GetPlayerChar(j)->IsSuper())
+				TeamHasSuperCharacter = true;
 			if(m_Core.Team(j) == i && !m_aTeeStarted[j])
 			{
 				if(aPlayerNames[0])
@@ -289,7 +292,7 @@ void CGameTeams::Tick()
 				NumPlayersNotStarted += 1;
 			}
 		}
-		if(!aPlayerNames[0])
+		if(!aPlayerNames[0] || TeamHasSuperCharacter)
 		{
 			continue;
 		}
