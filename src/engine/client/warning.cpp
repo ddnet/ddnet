@@ -4,7 +4,6 @@
 
 SWarning::SWarning(const char *pMsg)
 {
-	str_copy(m_aWarningTitle, "");
 	str_copy(m_aWarningMsg, pMsg);
 }
 SWarning::SWarning(const char *pTitle, const char *pMsg)
