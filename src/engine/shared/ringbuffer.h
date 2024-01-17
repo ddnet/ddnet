@@ -3,6 +3,8 @@
 #ifndef ENGINE_SHARED_RINGBUFFER_H
 #define ENGINE_SHARED_RINGBUFFER_H
 
+#include <base/system.h>
+
 class CRingBufferBase
 {
 	class CItem
@@ -44,18 +46,13 @@ public:
 		// Will start to destroy items to try to fit the next one
 		FLAG_RECYCLE = 1
 	};
+	static constexpr int ITEM_SIZE = sizeof(CItem);
 };
 
-template<typename T, int TSIZE, int TFLAGS = 0>
-class CStaticRingBuffer : public CRingBufferBase
+template<typename T>
+class CTypedRingBuffer : public CRingBufferBase
 {
-	unsigned char m_aBuffer[TSIZE];
-
 public:
-	CStaticRingBuffer() { Init(); }
-
-	void Init() { CRingBufferBase::Init(m_aBuffer, TSIZE, TFLAGS); }
-
 	T *Allocate(int Size) { return (T *)CRingBufferBase::Allocate(Size); }
 	int PopFirst() { return CRingBufferBase::PopFirst(); }
 
@@ -63,6 +60,38 @@ public:
 	T *Next(T *pCurrent) { return (T *)CRingBufferBase::Next(pCurrent); }
 	T *First() { return (T *)CRingBufferBase::First(); }
 	T *Last() { return (T *)CRingBufferBase::Last(); }
+};
+
+template<typename T, int TSIZE, int TFLAGS = 0>
+class CStaticRingBuffer : public CTypedRingBuffer<T>
+{
+	unsigned char m_aBuffer[TSIZE];
+
+public:
+	CStaticRingBuffer() { Init(); }
+
+	void Init() { CRingBufferBase::Init(m_aBuffer, TSIZE, TFLAGS); }
+};
+
+template<typename T>
+class CDynamicRingBuffer : public CTypedRingBuffer<T>
+{
+	unsigned char *m_pBuffer = nullptr;
+
+public:
+	CDynamicRingBuffer(int Size, int Flags = 0) { Init(Size, Flags); }
+
+	virtual ~CDynamicRingBuffer()
+	{
+		free(m_pBuffer);
+	}
+
+	void Init(int Size, int Flags)
+	{
+		free(m_pBuffer);
+		m_pBuffer = static_cast<unsigned char *>(malloc(Size));
+		CRingBufferBase::Init(m_pBuffer, Size, Flags);
+	}
 };
 
 #endif

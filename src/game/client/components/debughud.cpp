@@ -12,6 +12,14 @@
 
 #include "debughud.h"
 
+static constexpr int64_t GRAPH_MAX_VALUES = 128;
+
+CDebugHud::CDebugHud() :
+	m_RampGraph(GRAPH_MAX_VALUES),
+	m_ZoomedInGraph(GRAPH_MAX_VALUES)
+{
+}
+
 void CDebugHud::RenderNetCorrections()
 {
 	if(!g_Config.m_Debug || g_Config.m_DbgGraphs || !m_pClient->m_Snap.m_pLocalCharacter || !m_pClient->m_Snap.m_pLocalPrevCharacter)
@@ -179,7 +187,7 @@ void CDebugHud::RenderTuning()
 		m_RampGraph.Init(0.0f, 0.0f);
 		m_SpeedTurningPoint = 0;
 		float PreviousRampedSpeed = 1.0f;
-		for(size_t i = 0; i < CGraph::MAX_VALUES; i++)
+		for(int64_t i = 0; i < GRAPH_MAX_VALUES; i++)
 		{
 			// This is a calculation of the speed values per second on the X axis, from 270 to 34560 in steps of 270
 			const float Speed = (i + 1) * StepSizeRampGraph;
@@ -196,12 +204,12 @@ void CDebugHud::RenderTuning()
 			}
 			PreviousRampedSpeed = RampedSpeed;
 		}
-		m_RampGraph.Scale();
+		m_RampGraph.Scale(GRAPH_MAX_VALUES - 1);
 
 		m_ZoomedInGraph.Init(0.0f, 0.0f);
 		PreviousRampedSpeed = 1.0f;
 		MiddleOfZoomedInGraph = m_SpeedTurningPoint;
-		for(size_t i = 0; i < CGraph::MAX_VALUES; i++)
+		for(int64_t i = 0; i < GRAPH_MAX_VALUES; i++)
 		{
 			// This is a calculation of the speed values per second on the X axis, from (MiddleOfZoomedInGraph - 64 * StepSize) to (MiddleOfZoomedInGraph + 64 * StepSize)
 			const float Speed = MiddleOfZoomedInGraph - 64 * StepSizeZoomedInGraph + i * StepSizeZoomedInGraph;
@@ -222,7 +230,7 @@ void CDebugHud::RenderTuning()
 			}
 			PreviousRampedSpeed = RampedSpeed;
 		}
-		m_ZoomedInGraph.Scale();
+		m_ZoomedInGraph.Scale(GRAPH_MAX_VALUES - 1);
 	}
 
 	const float GraphFontSize = 12.0f;
