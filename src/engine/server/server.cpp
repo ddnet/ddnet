@@ -2808,6 +2808,9 @@ int CServer::Run()
 					m_ServerInfoFirstRequest = 0;
 					Kernel()->ReregisterInterface(GameServer());
 					GameServer()->OnInit(m_pPersistentData);
+					GameServer()->RegisterChains();
+					m_pRegister->RegisterChains();
+					RegisterChains();
 					if(ErrorShutdown())
 					{
 						break;
@@ -3772,7 +3775,16 @@ void CServer::RegisterCommands()
 	Console()->Register("auth_list", "", CFGFLAG_SERVER, ConAuthList, this, "List all rcon keys");
 
 	RustVersionRegister(*Console());
+	RegisterChains();
 
+	// register console commands in sub parts
+	m_ServerBan.InitServerBan(Console(), Storage(), this);
+	m_NameBans.InitConsole(Console());
+	m_pGameServer->OnConsoleInit();
+}
+
+void CServer::RegisterChains()
+{
 	Console()->Chain("sv_name", ConchainSpecialInfoupdate, this);
 	Console()->Chain("password", ConchainSpecialInfoupdate, this);
 	Console()->Chain("sv_spectator_slots", ConchainSpecialInfoupdate, this);
@@ -3792,11 +3804,6 @@ void CServer::RegisterCommands()
 #if defined(CONF_FAMILY_UNIX)
 	Console()->Chain("sv_conn_logging_server", ConchainConnLoggingServerChange, this);
 #endif
-
-	// register console commands in sub parts
-	m_ServerBan.InitServerBan(Console(), Storage(), this);
-	m_NameBans.InitConsole(Console());
-	m_pGameServer->OnConsoleInit();
 }
 
 int CServer::SnapNewID()

@@ -204,6 +204,7 @@ public:
 	void DeregisterTemp(const char *pName) override;
 	void DeregisterTempAll() override;
 	void Chain(const char *pName, FChainCommandCallback pfnChainFunc, void *pUser) override;
+	void UnchainAll() override;
 	void StoreCommands(bool Store) override;
 
 	bool LineIsValid(const char *pStr) override;

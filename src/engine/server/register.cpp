@@ -135,6 +135,7 @@ class CRegister : public IRegister
 
 public:
 	CRegister(CConfig *pConfig, IConsole *pConsole, IEngine *pEngine, IHttp *pHttp, int ServerPort, unsigned SixupSecurityToken);
+	void RegisterChains() override;
 	void Update() override;
 	void OnConfigChange() override;
 	bool OnPacket(const CNetChunk *pPacket) override;
@@ -499,6 +500,11 @@ CRegister::CRegister(CConfig *pConfig, IConsole *pConsole, IEngine *pEngine, IHt
 	mem_copy(aTokenBytes, &SixupSecurityToken, sizeof(aTokenBytes));
 	str_format(m_aConnlessTokenHex, sizeof(m_aConnlessTokenHex), "%08x", bytes_be_to_uint(aTokenBytes));
 
+	RegisterChains();
+}
+
+void CRegister::RegisterChains()
+{
 	m_pConsole->Chain("sv_register", ConchainOnConfigChange, this);
 	m_pConsole->Chain("sv_register_extra", ConchainOnConfigChange, this);
 	m_pConsole->Chain("sv_register_url", ConchainOnConfigChange, this);

@@ -1003,6 +1003,25 @@ void CConsole::Chain(const char *pName, FChainCommandCallback pfnChainFunc, void
 	pCommand->m_pUserData = pChainInfo;
 }
 
+void CConsole::UnchainAll()
+{
+	for(CCommand *pCommand = m_pFirstCommand; pCommand; pCommand = pCommand->m_pNext)
+	{
+		FCommandCallback pfnCallback = pCommand->m_pfnCallback;
+		void *pUserData = pCommand->m_pUserData;
+		CChain *pChain = nullptr;
+		while(pfnCallback == Con_Chain)
+		{
+			pChain = static_cast<CChain *>(pUserData);
+			pfnCallback = pChain->m_pfnCallback;
+			pUserData = pChain->m_pCallbackUserData;
+			delete pChain;
+		}
+		pCommand->m_pfnCallback = pfnCallback;
+		pCommand->m_pUserData = pUserData;
+	}
+}
+
 void CConsole::StoreCommands(bool Store)
 {
 	if(!Store)

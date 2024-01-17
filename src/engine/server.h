@@ -299,6 +299,7 @@ public:
 	// is instantiated.
 	virtual void OnInit(const void *pPersistentData) = 0;
 	virtual void OnConsoleInit() = 0;
+	virtual void RegisterChains() = 0;
 	virtual void OnMapChange(char *pNewMapName, int MapNameSize) = 0;
 	// `pPersistentData` may be null if this is the last time `IGameServer`
 	// is destroyed.

@@ -3518,6 +3518,13 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("dump_antibot", "", CFGFLAG_SERVER, ConDumpAntibot, this, "Dumps the antibot status");
 	Console()->Register("antibot", "r[command]", CFGFLAG_SERVER, ConAntibot, this, "Sends a command to the antibot");
 
+	RegisterDDRaceCommands();
+	RegisterChatCommands();
+	RegisterChains();
+}
+
+void CGameContext::RegisterChains()
+{
 	Console()->Chain("sv_motd", ConchainSpecialMotdupdate, this);
 
 	Console()->Chain("sv_vote_kick", ConchainSettingUpdate, this);
@@ -3525,9 +3532,6 @@ void CGameContext::OnConsoleInit()
 	Console()->Chain("sv_vote_spectate", ConchainSettingUpdate, this);
 	Console()->Chain("sv_spectator_slots", ConchainSettingUpdate, this);
 	Console()->Chain("sv_max_clients", ConchainSettingUpdate, this);
-
-	RegisterDDRaceCommands();
-	RegisterChatCommands();
 }
 
 void CGameContext::RegisterDDRaceCommands()
@@ -4151,6 +4155,7 @@ void CGameContext::OnShutdown(void *pPersistentData)
 	DeleteTempfile();
 	ConfigManager()->ResetGameSettings();
 	Collision()->Dest();
+	Console()->UnchainAll();
 	delete m_pController;
 	m_pController = 0;
 	Clear();

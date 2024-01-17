@@ -285,6 +285,7 @@ public:
 	void OnConsoleInit() override;
 	void RegisterDDRaceCommands();
 	void RegisterChatCommands();
+	void RegisterChains() override;
 	void OnMapChange(char *pNewMapName, int MapNameSize) override;
 	void OnShutdown(void *pPersistentData) override;
 
