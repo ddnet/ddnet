@@ -274,11 +274,14 @@ void CGameTeams::Tick()
 		{
 			continue;
 		}
+		bool TeamHasCheatCharacter = false;
 		int NumPlayersNotStarted = 0;
 		char aPlayerNames[256];
 		aPlayerNames[0] = 0;
 		for(int j = 0; j < MAX_CLIENTS; j++)
 		{
+			if(Character(j) && Character(j)->m_DDRaceState == DDRACE_CHEAT)
+				TeamHasCheatCharacter = true;
 			if(m_Core.Team(j) == i && !m_aTeeStarted[j])
 			{
 				if(aPlayerNames[0])
@@ -289,7 +292,7 @@ void CGameTeams::Tick()
 				NumPlayersNotStarted += 1;
 			}
 		}
-		if(!aPlayerNames[0])
+		if(!aPlayerNames[0] || TeamHasCheatCharacter)
 		{
 			continue;
 		}
