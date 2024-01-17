@@ -551,8 +551,8 @@ int CMenus::RenderMenubar(CUIRect r)
 
 		ColorRGBA HomeButtonColorAlert(0, 1, 0, 0.25f);
 		ColorRGBA HomeButtonColorAlertHover(0, 1, 0, 0.5f);
-		ColorRGBA *pHomeButtonColor = NULL;
-		ColorRGBA *pHomeButtonColorHover = NULL;
+		ColorRGBA *pHomeButtonColor = nullptr;
+		ColorRGBA *pHomeButtonColorHover = nullptr;
 
 		const char *pHomeScreenButtonLabel = FONT_ICON_HOUSE;
 		if(GotNewsOrUpdate)
@@ -567,68 +567,47 @@ int CMenus::RenderMenubar(CUIRect r)
 			m_ShowStart = true;
 		}
 
-		TextRender()->SetRenderFlags(0);
-		TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
-
-		Box.VSplitLeft(10.0f, 0, &Box);
-
-		// offline menus
-		if(m_ActivePage == PAGE_NEWS)
+		Box.VSplitLeft(10.0f, nullptr, &Box);
+		Box.VSplitLeft(75.0f, &Button, &Box);
+		static CButtonContainer s_InternetButton;
+		if(DoButton_MenuTab(&s_InternetButton, FONT_ICON_EARTH_AMERICAS, m_ActivePage == PAGE_INTERNET, &Button, IGraphics::CORNER_T, &m_aAnimatorsBigPage[BIG_TAB_INTERNET]))
 		{
-			Box.VSplitLeft(100.0f, &Button, &Box);
-			static CButtonContainer s_NewsButton;
-			if(DoButton_MenuTab(&s_NewsButton, Localize("News"), m_ActivePage == PAGE_NEWS, &Button, IGraphics::CORNER_T, &m_aAnimatorsBigPage[BIG_TAB_NEWS]))
-			{
-				NewPage = PAGE_NEWS;
-			}
-		}
-		else if(m_ActivePage == PAGE_DEMOS)
-		{
-			Box.VSplitLeft(100.0f, &Button, &Box);
-			static CButtonContainer s_DemosButton;
-			if(DoButton_MenuTab(&s_DemosButton, Localize("Demos"), m_ActivePage == PAGE_DEMOS, &Button, IGraphics::CORNER_T, &m_aAnimatorsBigPage[BIG_TAB_DEMOS]))
-			{
-				DemolistPopulate();
-				NewPage = PAGE_DEMOS;
-			}
-		}
-		else
-		{
-			Box.VSplitLeft(100.0f, &Button, &Box);
-			static CButtonContainer s_InternetButton;
-			if(DoButton_MenuTab(&s_InternetButton, Localize("Internet"), m_ActivePage == PAGE_INTERNET, &Button, IGraphics::CORNER_T, &m_aAnimatorsBigPage[BIG_TAB_INTERNET]))
-			{
-				if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_INTERNET)
-				{
-					if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_FAVORITES)
-						Client()->RequestDDNetInfo();
-					ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
-				}
-				NewPage = PAGE_INTERNET;
-			}
-
-			Box.VSplitLeft(100.0f, &Button, &Box);
-			static CButtonContainer s_LanButton;
-			if(DoButton_MenuTab(&s_LanButton, Localize("LAN"), m_ActivePage == PAGE_LAN, &Button, IGraphics::CORNER_T, &m_aAnimatorsBigPage[BIG_TAB_LAN]))
-			{
-				if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_LAN)
-					ServerBrowser()->Refresh(IServerBrowser::TYPE_LAN);
-				NewPage = PAGE_LAN;
-			}
-
-			Box.VSplitLeft(100.0f, &Button, &Box);
-			static CButtonContainer s_FavoritesButton;
-			if(DoButton_MenuTab(&s_FavoritesButton, Localize("Favorites"), m_ActivePage == PAGE_FAVORITES, &Button, IGraphics::CORNER_T, &m_aAnimatorsBigPage[BIG_TAB_FAVORITES]))
+			if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_INTERNET)
 			{
 				if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_FAVORITES)
-				{
-					if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_INTERNET)
-						Client()->RequestDDNetInfo();
-					ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
-				}
-				NewPage = PAGE_FAVORITES;
+					Client()->RequestDDNetInfo();
+				ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
 			}
+			NewPage = PAGE_INTERNET;
 		}
+		GameClient()->m_Tooltips.DoToolTip(&s_InternetButton, &Button, Localize("Internet"));
+
+		Box.VSplitLeft(75.0f, &Button, &Box);
+		static CButtonContainer s_LanButton;
+		if(DoButton_MenuTab(&s_LanButton, FONT_ICON_NETWORK_WIRED, m_ActivePage == PAGE_LAN, &Button, IGraphics::CORNER_T, &m_aAnimatorsBigPage[BIG_TAB_LAN]))
+		{
+			if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_LAN)
+				ServerBrowser()->Refresh(IServerBrowser::TYPE_LAN);
+			NewPage = PAGE_LAN;
+		}
+		GameClient()->m_Tooltips.DoToolTip(&s_LanButton, &Button, Localize("LAN"));
+
+		Box.VSplitLeft(75.0f, &Button, &Box);
+		static CButtonContainer s_FavoritesButton;
+		if(DoButton_MenuTab(&s_FavoritesButton, FONT_ICON_STAR, m_ActivePage == PAGE_FAVORITES, &Button, IGraphics::CORNER_T, &m_aAnimatorsBigPage[BIG_TAB_FAVORITES]))
+		{
+			if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_FAVORITES)
+			{
+				if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_INTERNET)
+					Client()->RequestDDNetInfo();
+				ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
+			}
+			NewPage = PAGE_FAVORITES;
+		}
+		GameClient()->m_Tooltips.DoToolTip(&s_FavoritesButton, &Button, Localize("Favorites"));
+
+		TextRender()->SetRenderFlags(0);
+		TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
 	}
 	else
 	{
@@ -664,7 +643,7 @@ int CMenus::RenderMenubar(CUIRect r)
 		}
 
 		Box.VSplitLeft(100.0f, &Button, &Box);
-		Box.VSplitLeft(4.0f, 0, &Box);
+		Box.VSplitLeft(4.0f, nullptr, &Box);
 		static CButtonContainer s_CallVoteButton;
 		if(DoButton_MenuTab(&s_CallVoteButton, Localize("Call vote"), m_ActivePage == PAGE_CALLVOTE, &Button, IGraphics::CORNER_TR))
 		{
@@ -691,14 +670,13 @@ int CMenus::RenderMenubar(CUIRect r)
 		}
 	}
 
-	Box.VSplitRight(10.0f, &Box, &Button);
+	Box.VSplitRight(10.0f, &Box, nullptr);
 	Box.VSplitRight(33.0f, &Box, &Button);
 	static CButtonContainer s_SettingsButton;
-
 	if(DoButton_MenuTab(&s_SettingsButton, FONT_ICON_GEAR, m_ActivePage == PAGE_SETTINGS, &Button, IGraphics::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_SETTINGS], nullptr, nullptr, nullptr, 10.0f))
 		NewPage = PAGE_SETTINGS;
 
-	Box.VSplitRight(10.0f, &Box, &Button);
+	Box.VSplitRight(10.0f, &Box, nullptr);
 	Box.VSplitRight(33.0f, &Box, &Button);
 	static CButtonContainer s_EditorButton;
 	if(DoButton_MenuTab(&s_EditorButton, FONT_ICON_PEN_TO_SQUARE, 0, &Button, IGraphics::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_EDITOR], nullptr, nullptr, nullptr, 10.0f))
@@ -708,19 +686,11 @@ int CMenus::RenderMenubar(CUIRect r)
 
 	if(Client()->State() == IClient::STATE_OFFLINE)
 	{
-		Box.VSplitRight(10.0f, &Box, &Button);
+		Box.VSplitRight(10.0f, &Box, nullptr);
 		Box.VSplitRight(33.0f, &Box, &Button);
 		static CButtonContainer s_DemoButton;
-
 		if(DoButton_MenuTab(&s_DemoButton, FONT_ICON_CLAPPERBOARD, m_ActivePage == PAGE_DEMOS, &Button, IGraphics::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_DEMOBUTTON], nullptr, nullptr, nullptr, 10.0f))
 			NewPage = PAGE_DEMOS;
-
-		Box.VSplitRight(10.0f, &Box, &Button);
-		Box.VSplitRight(33.0f, &Box, &Button);
-		static CButtonContainer s_ServerButton;
-
-		if(DoButton_MenuTab(&s_ServerButton, FONT_ICON_EARTH_AMERICAS, m_ActivePage == g_Config.m_UiPage, &Button, IGraphics::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_SERVER], nullptr, nullptr, nullptr, 10.0f))
-			NewPage = g_Config.m_UiPage;
 	}
 
 	TextRender()->SetRenderFlags(0);

@@ -806,7 +806,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	const auto &&RenderFavIcon = [&](const CUIRect &FavIcon, bool AsFav, bool Hot) {
 		TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
 		TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
-		TextRender()->TextColor(AsFav ? ColorRGBA(1.0f, 1.0f, 0.0f, 0.8f + (Hot ? 0.2f : 0.0f)) : ColorRGBA(0.5f, 0.5f, 0.5f, 0.8f + (Hot ? 0.2f : 0.0f)));
+		TextRender()->TextColor(AsFav ? ColorRGBA(1.0f, 0.85f, 0.3f, 0.8f + (Hot ? 0.2f : 0.0f)) : ColorRGBA(0.5f, 0.5f, 0.5f, 0.8f + (Hot ? 0.2f : 0.0f)));
 		TextRender()->TextOutlineColor(TextRender()->DefaultTextOutlineColor());
 		SLabelProperties Props;
 		Props.m_MaxWidth = FavIcon.w;
