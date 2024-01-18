@@ -227,19 +227,19 @@ void Map::buildGraph()
 				if (getTile(x - 1, y) == MAP_TILE_AIR && isTileGround(getTile(x - 1, y + 1)) &&
 				    getTile(x + 1, y) == MAP_TILE_AIR && isTileGround(getTile(x + 1, y + 1))
 				) {
-					graph[x][y].push_back(MapGraphNode(x - 1, y, movementCost));
-					graph[x][y].push_back(MapGraphNode(x + 1, y, movementCost));
+					graph[x][y].push_back(MapGraphNode(x - 1, y, movementCost, FREE_MOVE_ACTION_LEFT));
+					graph[x][y].push_back(MapGraphNode(x + 1, y, movementCost, FREE_MOVE_ACTION_RIGHT));
 				}
 
 				continue;
 			}
 
 			if (getTile(x - 1, y) == MAP_TILE_AIR && isTileGround(getTile(x - 1, y + 1))) {
-				graph[x][y].push_back(MapGraphNode(x - 1, y, movementCost));
+				graph[x][y].push_back(MapGraphNode(x - 1, y, movementCost, FREE_MOVE_ACTION_LEFT));
 			}
 
 			if (getTile(x + 1, y) == MAP_TILE_AIR && isTileGround(getTile(x + 1, y + 1))) {
-				graph[x][y].push_back(MapGraphNode(x + 1, y, movementCost));
+				graph[x][y].push_back(MapGraphNode(x + 1, y, movementCost, FREE_MOVE_ACTION_RIGHT));
 			}
 		}
 	}
@@ -256,16 +256,16 @@ void Map::buildGraph()
 			}
 
 			if (getTile(x, y + 1) == MAP_TILE_AIR) {
-				graph[x][y].push_back(MapGraphNode(x, y + 1, fallCost));
+				graph[x][y].push_back(MapGraphNode(x, y + 1, fallCost, FREE_MOVE_ACTION_FALL));
 			}
 
 			if (isTileGround(getTile(x, y + 1))) {
 				if (getTile(x + 1, y) == MAP_TILE_AIR && getTile(x + 1, y + 1) == MAP_TILE_AIR) {
-					graph[x][y].push_back(MapGraphNode(x + 1, y + 1, fallCost * 2));
+					graph[x][y].push_back(MapGraphNode(x + 1, y + 1, fallCost * 2, FREE_MOVE_ACTION_FALL));
 				}
 
 				if (getTile(x - 1, y) == MAP_TILE_AIR && getTile(x - 1, y + 1) == MAP_TILE_AIR) {
-					graph[x][y].push_back(MapGraphNode(x - 1, y + 1, fallCost * 2));
+					graph[x][y].push_back(MapGraphNode(x - 1, y + 1, fallCost * 2, FREE_MOVE_ACTION_FALL));
 				}
 			}
 		}
@@ -295,11 +295,11 @@ void Map::buildGraph()
 			int rightSideOffset = 1;
 
 			while (height < jumpHeight && getTile(x, y - height) == MAP_TILE_AIR) {
-				graph[x][y].push_back(MapGraphNode(x, y - height, height * jumpCost));
+				graph[x][y].push_back(MapGraphNode(x, y - height, height * jumpCost, FREE_MOVE_ACTION_JUMP));
 
 				int i = 1;
 				while (i <= leftSideOffset && getTile(x - i, y - height) == MAP_TILE_AIR) {
-					graph[x][y].push_back(MapGraphNode(x - i, y - height, height * jumpCost + movementCost * i + 1));
+					graph[x][y].push_back(MapGraphNode(x - i, y - height, height * jumpCost + movementCost * i + 1, FREE_MOVE_ACTION_JUMP));
 
 					i++;
 				}
@@ -310,7 +310,7 @@ void Map::buildGraph()
 
 				i = 1;
 				while (i <= rightSideOffset && getTile(x + i, y - height) == MAP_TILE_AIR) {
-					graph[x][y].push_back(MapGraphNode(x + i, y - height, height * jumpCost + movementCost * i + 1));
+					graph[x][y].push_back(MapGraphNode(x + i, y - height, height * jumpCost + movementCost * i + 1, FREE_MOVE_ACTION_JUMP));
 
 					i++;
 				}

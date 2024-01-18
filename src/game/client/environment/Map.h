@@ -15,24 +15,31 @@ using namespace std;
 #define MAP_TILE_HOOKABLE_GROUND 1
 #define MAP_TILE_NON_HOOKABLE_GROUND 3
 
+#define FREE_MOVE_ACTION_NONE 0
+#define FREE_MOVE_ACTION_LEFT 1
+#define FREE_MOVE_ACTION_RIGHT 2
+#define FREE_MOVE_ACTION_JUMP 3
+#define FREE_MOVE_ACTION_FALL 4
+
 struct MapGraphNode {
 	ivec2 connectionWith;
 	int cost;
+	int freeMoveAction;
 
-	MapGraphNode()
-	{
-	}
+	MapGraphNode() = default;
 
-	MapGraphNode(ivec2 connectionWith, int cost)
+	MapGraphNode(ivec2 connectionWith, int cost, int freeMoveAction = FREE_MOVE_ACTION_NONE)
 	{
 		this->connectionWith = connectionWith;
 		this->cost = cost;
+		this->freeMoveAction = freeMoveAction;
 	}
 
-	MapGraphNode(int x, int y, int cost)
+	MapGraphNode(int x, int y, int cost, int freeMoveAction = FREE_MOVE_ACTION_NONE)
 	{
 		this->connectionWith = ivec2(x, y);
 		this->cost = cost;
+		this->freeMoveAction = freeMoveAction;
 	}
 };
 typedef vector<MapGraphNode> MapGraphCell;
