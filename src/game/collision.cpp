@@ -1032,51 +1032,26 @@ int CCollision::GetFTile(int x, int y) const
 int CCollision::Entity(int x, int y, int Layer) const
 {
 	if(x < 0 || x >= m_Width || y < 0 || y >= m_Height)
-	{
-		const char *pName;
-		switch(Layer)
-		{
-		case LAYER_GAME:
-			pName = "Game";
-			break;
-		case LAYER_FRONT:
-			pName = "Front";
-			break;
-		case LAYER_SWITCH:
-			pName = "Switch";
-			break;
-		case LAYER_TELE:
-			pName = "Tele";
-			break;
-		case LAYER_SPEEDUP:
-			pName = "Speedup";
-			break;
-		case LAYER_TUNE:
-			pName = "Tune";
-			break;
-		default:
-			pName = "Unknown";
-		}
-		dbg_msg("collision", "Something is VERY wrong with the %s layer near (%d, %d). Please report this at https://github.com/ddnet/ddnet/issues, you will need to post the map as well and any steps that you think may have led to this.", pName, x, y);
 		return 0;
-	}
+
+	const int Index = y * m_Width + x;
 	switch(Layer)
 	{
 	case LAYER_GAME:
-		return m_pTiles[y * m_Width + x].m_Index - ENTITY_OFFSET;
+		return m_pTiles[Index].m_Index - ENTITY_OFFSET;
 	case LAYER_FRONT:
-		return m_pFront[y * m_Width + x].m_Index - ENTITY_OFFSET;
+		return m_pFront[Index].m_Index - ENTITY_OFFSET;
 	case LAYER_SWITCH:
-		return m_pSwitch[y * m_Width + x].m_Type - ENTITY_OFFSET;
+		return m_pSwitch[Index].m_Type - ENTITY_OFFSET;
 	case LAYER_TELE:
-		return m_pTele[y * m_Width + x].m_Type - ENTITY_OFFSET;
+		return m_pTele[Index].m_Type - ENTITY_OFFSET;
 	case LAYER_SPEEDUP:
-		return m_pSpeedup[y * m_Width + x].m_Type - ENTITY_OFFSET;
+		return m_pSpeedup[Index].m_Type - ENTITY_OFFSET;
 	case LAYER_TUNE:
-		return m_pTune[y * m_Width + x].m_Type - ENTITY_OFFSET;
+		return m_pTune[Index].m_Type - ENTITY_OFFSET;
 	default:
-		return 0;
-		break;
+		dbg_assert(false, "Layer invalid");
+		dbg_break();
 	}
 }
 
