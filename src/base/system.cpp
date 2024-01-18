@@ -2618,13 +2618,24 @@ int time_timestamp()
 	return time(0);
 }
 
+static struct tm *time_localtime_threadlocal(time_t *time_data)
+{
+#if defined(CONF_FAMILY_WINDOWS)
+	// The result of localtime is thread-local on Windows
+	// https://learn.microsoft.com/en-us/cpp/c-runtime-library/reference/localtime-localtime32-localtime64
+	return localtime(time_data);
+#else
+	// Thread-local buffer for the result of localtime_r
+	thread_local struct tm time_info_buf;
+	return localtime_r(time_data, &time_info_buf);
+#endif
+}
+
 int time_houroftheday()
 {
 	time_t time_data;
-	struct tm *time_info;
-
 	time(&time_data);
-	time_info = localtime(&time_data);
+	struct tm *time_info = time_localtime_threadlocal(&time_data);
 	return time_info->tm_hour;
 }
 
@@ -2651,7 +2662,7 @@ static bool time_iseasterday(time_t time_data, struct tm *time_info)
 	for(int day_offset = -1; day_offset <= 2; day_offset++)
 	{
 		time_data = time_data + day_offset * 60 * 60 * 24;
-		time_info = localtime(&time_data);
+		time_info = time_localtime_threadlocal(&time_data);
 		if(time_info->tm_mon == month - 1 && time_info->tm_mday == day)
 			return true;
 	}
@@ -2662,7 +2673,7 @@ ETimeSeason time_season()
 {
 	time_t time_data;
 	time(&time_data);
-	struct tm *time_info = localtime(&time_data);
+	struct tm *time_info = time_localtime_threadlocal(&time_data);
 
 	if((time_info->tm_mon == 11 && time_info->tm_mday == 31) || (time_info->tm_mon == 0 && time_info->tm_mday == 1))
 	{
@@ -3431,8 +3442,7 @@ int str_base64_decode(void *dst_raw, int dst_size, const char *data)
 #endif
 void str_timestamp_ex(time_t time_data, char *buffer, int buffer_size, const char *format)
 {
-	struct tm *time_info;
-	time_info = localtime(&time_data);
+	struct tm *time_info = time_localtime_threadlocal(&time_data);
 	strftime(buffer, buffer_size, format, time_info);
 	buffer[buffer_size - 1] = 0; /* assure null termination */
 }
