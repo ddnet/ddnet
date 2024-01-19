@@ -507,7 +507,8 @@ void CHttp::RunLoop()
 		while(!NewRequests.empty())
 		{
 			auto &pRequest = NewRequests.front();
-			dbg_msg("http", "task: %s %s", CHttpRequest::GetRequestType(pRequest->m_Type), pRequest->m_aUrl);
+			if(g_Config.m_DbgCurl)
+				dbg_msg("http", "task: %s %s", CHttpRequest::GetRequestType(pRequest->m_Type), pRequest->m_aUrl);
 
 			CURL *pEH = curl_easy_init();
 			if(!pEH)
