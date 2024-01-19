@@ -71,8 +71,7 @@ void CDraggerBeam::Tick()
 	// In the center of the dragger a tee does not experience speed-up
 	else if(distance(pTarget->m_Pos, m_Pos) > 28)
 	{
-		vec2 Temp = pTarget->Core()->m_Vel + (normalize(m_Pos - pTarget->m_Pos) * m_Strength);
-		pTarget->Core()->m_Vel = ClampVel(pTarget->m_MoveRestrictions, Temp);
+		pTarget->AddVelocity(normalize(m_Pos - pTarget->m_Pos) * m_Strength);
 	}
 }
 
