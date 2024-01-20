@@ -32,6 +32,15 @@ CGameControllerInstagib::CGameControllerInstagib(class CGameContext *pGameServer
 #undef MACRO_CONFIG_INT
 #undef MACRO_CONFIG_COL
 #undef MACRO_CONFIG_STR
+
+	// ugly hack to fix https://github.com/ZillyInsta/ddnet-insta/issues/88
+	// we load the autoexec again after the insta controller registered its commands
+	// loading the autoexec twice might cause some weird bugs so this hack is far from ideal
+	// a clean fix requires refactoring ddnet code upstream
+	if(GameServer()->Storage()->FileExists(AUTOEXEC_SERVER_FILE, IStorage::TYPE_ALL))
+		GameServer()->Console()->ExecuteFile(AUTOEXEC_SERVER_FILE);
+	else // fallback
+		GameServer()->Console()->ExecuteFile(AUTOEXEC_FILE);
 }
 
 CGameControllerInstagib::~CGameControllerInstagib() = default;
