@@ -350,6 +350,8 @@ public:
 	bool PlayerModerating() const;
 	void ForceVote(int EnforcerID, bool Success);
 
+	uint32_t GetNextUniqueClientID();
+
 	// Checks if player can vote and notify them about the reason
 	bool RateLimitPlayerVote(int ClientID);
 	bool RateLimitPlayerMapVote(int ClientID) const;
@@ -359,8 +361,7 @@ public:
 	std::shared_ptr<CScoreRandomMapResult> m_SqlRandomMapResult;
 
 private:
-	// starting 1 to make 0 the special value "no client id"
-	uint32_t NextUniqueClientID = 1;
+	uint32_t m_LastUniqueClientID = 0;
 	bool m_VoteWillPass;
 	CScore *m_pScore;
 

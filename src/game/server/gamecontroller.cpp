@@ -388,6 +388,11 @@ bool IGameController::OnEntity(int Index, int x, int y, int Layer, int Flags, bo
 	return false;
 }
 
+CPlayer *IGameController::CreatePlayer(int ClientID, int StartTeam)
+{
+	return new(ClientID) CPlayer(m_pGameServer, m_pGameServer->GetNextUniqueClientID(), ClientID, StartTeam);
+}
+
 void IGameController::OnPlayerConnect(CPlayer *pPlayer)
 {
 	int ClientID = pPlayer->GetCID();

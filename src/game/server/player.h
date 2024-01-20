@@ -35,11 +35,11 @@ class CPlayer
 
 public:
 	CPlayer(CGameContext *pGameServer, uint32_t UniqueClientID, int ClientID, int Team);
-	~CPlayer();
+	virtual ~CPlayer();
 
 	void Reset();
 
-	void TryRespawn();
+	virtual void TryRespawn();
 	void Respawn(bool WeakHook = false); // with WeakHook == true the character will be spawned after all calls of Tick from other Players
 	CCharacter *ForceSpawn(vec2 Pos); // required for loading savegames
 	void SetTeam(int Team, bool DoChatMsg = true);
@@ -49,12 +49,12 @@ public:
 	int GetClientVersion() const;
 	bool SetTimerType(int TimerType);
 
-	void Tick();
-	void PostTick();
+	virtual void Tick();
+	virtual void PostTick();
 
 	// will be called after all Tick and PostTick calls from other players
 	void PostPostTick();
-	void Snap(int SnappingClient);
+	virtual void Snap(int SnappingClient);
 	void FakeSnap();
 
 	void OnDirectInput(CNetObj_PlayerInput *pNewInput);
@@ -62,7 +62,7 @@ public:
 	void OnPredictedEarlyInput(CNetObj_PlayerInput *pNewInput);
 	void OnDisconnect();
 
-	void KillCharacter(int Weapon = WEAPON_GAME, bool SendKillMsg = true);
+	virtual void KillCharacter(int Weapon = WEAPON_GAME, bool SendKillMsg = true);
 	CCharacter *GetCharacter();
 	const CCharacter *GetCharacter() const;
 
@@ -128,7 +128,9 @@ public:
 		int m_Max;
 	} m_Latency;
 
-private:
+protected:
+	virtual CCharacter *CreateCharacter();
+
 	const uint32_t m_UniqueClientID;
 	CCharacter *m_pCharacter;
 	int m_NumInputs;
