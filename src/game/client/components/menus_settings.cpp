@@ -806,7 +806,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	const auto &&RenderFavIcon = [&](const CUIRect &FavIcon, bool AsFav, bool Hot) {
 		TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
 		TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
-		TextRender()->TextColor(AsFav ? ColorRGBA(1.0f, 1.0f, 0.0f, 0.8f + (Hot ? 0.2f : 0.0f)) : ColorRGBA(0.5f, 0.5f, 0.5f, 0.8f + (Hot ? 0.2f : 0.0f)));
+		TextRender()->TextColor(AsFav ? ColorRGBA(1.0f, 0.85f, 0.3f, 0.8f + (Hot ? 0.2f : 0.0f)) : ColorRGBA(0.5f, 0.5f, 0.5f, 0.8f + (Hot ? 0.2f : 0.0f)));
 		TextRender()->TextOutlineColor(TextRender()->DefaultTextOutlineColor());
 		SLabelProperties Props;
 		Props.m_MaxWidth = FavIcon.w;
@@ -2521,12 +2521,11 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowhud, Localize("Show ingame HUD"), &g_Config.m_ClShowhud, &Section, LineSize);
 
 		// Switches of the various normal HUD elements
-		LeftView.HSplitTop(SectionTotalMargin + 6 * LineSize, &Section, &LeftView);
+		LeftView.HSplitTop(SectionTotalMargin + 5 * LineSize, &Section, &LeftView);
 		Section.Margin(SectionMargin, &Section);
 
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowhudHealthAmmo, Localize("Show health, shields and ammo"), &g_Config.m_ClShowhudHealthAmmo, &Section, LineSize);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowChat, Localize("Show chat"), &g_Config.m_ClShowChat, &Section, LineSize);
-		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClNameplates, Localize("Show name plates"), &g_Config.m_ClNameplates, &Section, LineSize);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowKillMessages, Localize("Show kill messages"), &g_Config.m_ClShowKillMessages, &Section, LineSize);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowhudScore, Localize("Show score"), &g_Config.m_ClShowhudScore, &Section, LineSize);
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClShowLocalTimeAlways, Localize("Show local time always"), &g_Config.m_ClShowLocalTimeAlways, &Section, LineSize);
@@ -2953,6 +2952,7 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		// General chat settings
 		LeftView.HSplitTop(SectionTotalMargin + 9 * LineSize, &Section, &LeftView);
 		Section.Margin(SectionMargin, &Section);
+		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClNameplates, Localize("Show name plates"), &g_Config.m_ClNameplates, &Section, LineSize);
 		Section.HSplitTop(2 * LineSize, &Button, &Section);
 		UI()->DoScrollbarOption(&g_Config.m_ClNameplatesSize, &g_Config.m_ClNameplatesSize, &Button, Localize("Name plates size"), 0, 100, &CUI::ms_LinearScrollbarScale, CUI::SCROLLBAR_OPTION_MULTILINE);
 

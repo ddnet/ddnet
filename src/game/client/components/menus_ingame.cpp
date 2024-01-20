@@ -822,9 +822,12 @@ void CMenus::RenderInGameNetwork(CUIRect MainView)
 
 	int NewPage = g_Config.m_UiPage;
 
-	TabBar.VSplitLeft(100.0f, &Button, &TabBar);
+	TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
+	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
+
+	TabBar.VSplitLeft(75.0f, &Button, &TabBar);
 	static CButtonContainer s_InternetButton;
-	if(DoButton_MenuTab(&s_InternetButton, Localize("Internet"), g_Config.m_UiPage == PAGE_INTERNET, &Button, IGraphics::CORNER_NONE))
+	if(DoButton_MenuTab(&s_InternetButton, FONT_ICON_EARTH_AMERICAS, g_Config.m_UiPage == PAGE_INTERNET, &Button, IGraphics::CORNER_NONE))
 	{
 		if(g_Config.m_UiPage != PAGE_INTERNET)
 		{
@@ -834,19 +837,21 @@ void CMenus::RenderInGameNetwork(CUIRect MainView)
 		}
 		NewPage = PAGE_INTERNET;
 	}
+	GameClient()->m_Tooltips.DoToolTip(&s_InternetButton, &Button, Localize("Internet"));
 
-	TabBar.VSplitLeft(80.0f, &Button, &TabBar);
+	TabBar.VSplitLeft(75.0f, &Button, &TabBar);
 	static CButtonContainer s_LanButton;
-	if(DoButton_MenuTab(&s_LanButton, Localize("LAN"), g_Config.m_UiPage == PAGE_LAN, &Button, IGraphics::CORNER_NONE))
+	if(DoButton_MenuTab(&s_LanButton, FONT_ICON_NETWORK_WIRED, g_Config.m_UiPage == PAGE_LAN, &Button, IGraphics::CORNER_NONE))
 	{
 		if(g_Config.m_UiPage != PAGE_LAN)
 			ServerBrowser()->Refresh(IServerBrowser::TYPE_LAN);
 		NewPage = PAGE_LAN;
 	}
+	GameClient()->m_Tooltips.DoToolTip(&s_LanButton, &Button, Localize("LAN"));
 
-	TabBar.VSplitLeft(110.0f, &Button, &TabBar);
+	TabBar.VSplitLeft(75.0f, &Button, &TabBar);
 	static CButtonContainer s_FavoritesButton;
-	if(DoButton_MenuTab(&s_FavoritesButton, Localize("Favorites"), g_Config.m_UiPage == PAGE_FAVORITES, &Button, IGraphics::CORNER_NONE))
+	if(DoButton_MenuTab(&s_FavoritesButton, FONT_ICON_STAR, g_Config.m_UiPage == PAGE_FAVORITES, &Button, IGraphics::CORNER_NONE))
 	{
 		if(g_Config.m_UiPage != PAGE_FAVORITES)
 		{
@@ -856,6 +861,10 @@ void CMenus::RenderInGameNetwork(CUIRect MainView)
 		}
 		NewPage = PAGE_FAVORITES;
 	}
+	GameClient()->m_Tooltips.DoToolTip(&s_FavoritesButton, &Button, Localize("Favorites"));
+
+	TextRender()->SetRenderFlags(0);
+	TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
 
 	if(NewPage != g_Config.m_UiPage)
 	{

@@ -63,7 +63,11 @@ void CMapGrid::OnRender(CUIRect View)
 
 int CMapGrid::GridLineDistance() const
 {
-	if(Editor()->MapView()->Zoom()->GetValue() <= 100.0f)
+	if(Editor()->MapView()->Zoom()->GetValue() <= 10.0f)
+		return 4;
+	else if(Editor()->MapView()->Zoom()->GetValue() <= 50.0f)
+		return 8;
+	else if(Editor()->MapView()->Zoom()->GetValue() <= 100.0f)
 		return 16;
 	else if(Editor()->MapView()->Zoom()->GetValue() <= 250.0f)
 		return 32;
