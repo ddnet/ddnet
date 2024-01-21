@@ -637,7 +637,6 @@ public:
 		PAGE_KOG_LEGACY, // removed, redirects to PAGE_INTERNET
 		PAGE_DEMOS,
 		PAGE_SETTINGS,
-		PAGE_SYSTEM,
 		PAGE_NETWORK,
 		PAGE_GHOST,
 
