@@ -47,36 +47,39 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 	m_Energy = -1;
 	if(m_Type == WEAPON_SHOTGUN)
 	{
-		vec2 Temp;
-		float Strength = GetTuning(m_TuneZone)->m_ShotgunStrength;
+		float Strength;
+		if(!m_TuneZone)
+			Strength = Tuning()->m_ShotgunStrength;
+		else
+			Strength = TuningList()[m_TuneZone].m_ShotgunStrength;
+
 		const vec2 &HitPos = pHit->Core()->m_Pos;
 		if(!g_Config.m_SvOldLaser)
 		{
 			if(m_PrevPos != HitPos)
 			{
-				Temp = pHit->Core()->m_Vel + normalize(m_PrevPos - HitPos) * Strength;
-				pHit->Core()->m_Vel = ClampVel(pHit->m_MoveRestrictions, Temp);
+				pHit->AddVelocity(normalize(m_PrevPos - HitPos) * Strength);
 			}
 			else
 			{
-				pHit->Core()->m_Vel = StackedLaserShotgunBugSpeed;
+				pHit->SetRawVelocity(StackedLaserShotgunBugSpeed);
 			}
 		}
 		else if(g_Config.m_SvOldLaser && pOwnerChar)
 		{
 			if(pOwnerChar->Core()->m_Pos != HitPos)
 			{
-				Temp = pHit->Core()->m_Vel + normalize(pOwnerChar->Core()->m_Pos - HitPos) * Strength;
-				pHit->Core()->m_Vel = ClampVel(pHit->m_MoveRestrictions, Temp);
+				pHit->AddVelocity(normalize(pOwnerChar->Core()->m_Pos - HitPos) * Strength);
 			}
 			else
 			{
-				pHit->Core()->m_Vel = StackedLaserShotgunBugSpeed;
+				pHit->SetRawVelocity(StackedLaserShotgunBugSpeed);
 			}
 		}
 		else
 		{
-			pHit->Core()->m_Vel = ClampVel(pHit->m_MoveRestrictions, pHit->Core()->m_Vel);
+			// Re-apply move restrictions as a part of 'shotgun bug' reproduction
+			pHit->ApplyMoveRestrictions();
 		}
 	}
 	else if(m_Type == WEAPON_LASER)
