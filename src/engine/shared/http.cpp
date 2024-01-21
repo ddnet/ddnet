@@ -324,8 +324,11 @@ void CHttpRequest::OnCompletionInternal(std::optional<unsigned int> Result)
 		}
 	}
 
+	// The globally visible state must be updated after OnCompletion has finished,
+	// or other threads may try to access the result of a completed HTTP request,
+	// before the result has been initialized/updated in OnCompletion.
+	OnCompletion(State);
 	m_State = State;
-	OnCompletion();
 }
 
 void CHttpRequest::WriteToFile(IStorage *pStorage, const char *pDest, int StorageType)

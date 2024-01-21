@@ -128,8 +128,8 @@ class CHttpRequest : public IHttpRequest
 
 protected:
 	// These run on the curl thread now, DO NOT STALL THE THREAD
-	virtual void OnProgress(){};
-	virtual void OnCompletion(){};
+	virtual void OnProgress() {}
+	virtual void OnCompletion(int State) {}
 
 public:
 	CHttpRequest(const char *pUrl);
