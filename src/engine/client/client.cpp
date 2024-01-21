@@ -2579,9 +2579,9 @@ void CClient::Update()
 
 	if(m_pMapdownloadTask)
 	{
-		if(m_pMapdownloadTask->State() == HTTP_DONE)
+		if(m_pMapdownloadTask->State() == EHttpState::DONE)
 			FinishMapDownload();
-		else if(m_pMapdownloadTask->State() == HTTP_ERROR || m_pMapdownloadTask->State() == HTTP_ABORTED)
+		else if(m_pMapdownloadTask->State() == EHttpState::ERROR || m_pMapdownloadTask->State() == EHttpState::ABORTED)
 		{
 			dbg_msg("webdl", "http failed, falling back to gameserver");
 			ResetMapDownload();
@@ -2591,14 +2591,14 @@ void CClient::Update()
 
 	if(m_pDDNetInfoTask)
 	{
-		if(m_pDDNetInfoTask->State() == HTTP_DONE)
+		if(m_pDDNetInfoTask->State() == EHttpState::DONE)
 			FinishDDNetInfo();
-		else if(m_pDDNetInfoTask->State() == HTTP_ERROR)
+		else if(m_pDDNetInfoTask->State() == EHttpState::ERROR)
 		{
 			Storage()->RemoveFile(m_aDDNetInfoTmp, IStorage::TYPE_SAVE);
 			ResetDDNetInfo();
 		}
-		else if(m_pDDNetInfoTask->State() == HTTP_ABORTED)
+		else if(m_pDDNetInfoTask->State() == EHttpState::ABORTED)
 		{
 			Storage()->RemoveFile(m_aDDNetInfoTmp, IStorage::TYPE_SAVE);
 			m_pDDNetInfoTask = NULL;

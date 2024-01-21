@@ -184,12 +184,12 @@ void CChooseMaster::CJob::Run()
 
 		m_pParent->m_pHttp->Run(pHead);
 		pHead->Wait();
-		if(pHead->State() == HTTP_ABORTED)
+		if(pHead->State() == EHttpState::ABORTED)
 		{
 			dbg_msg("serverbrowse_http", "master chooser aborted");
 			return;
 		}
-		if(pHead->State() != HTTP_DONE)
+		if(pHead->State() != EHttpState::DONE)
 		{
 			continue;
 		}
@@ -207,12 +207,12 @@ void CChooseMaster::CJob::Run()
 		pGet->Wait();
 
 		auto Time = std::chrono::duration_cast<std::chrono::milliseconds>(time_get_nanoseconds() - StartTime);
-		if(pHead->State() == HTTP_ABORTED)
+		if(pHead->State() == EHttpState::ABORTED)
 		{
 			dbg_msg("serverbrowse_http", "master chooser aborted");
 			return;
 		}
-		if(pGet->State() != HTTP_DONE)
+		if(pGet->State() != EHttpState::DONE)
 		{
 			continue;
 		}
@@ -345,7 +345,7 @@ void CServerBrowserHttp::Update()
 	}
 	else if(m_State == STATE_REFRESHING)
 	{
-		if(m_pGetServers->State() == HTTP_QUEUED || m_pGetServers->State() == HTTP_RUNNING)
+		if(m_pGetServers->State() == EHttpState::QUEUED || m_pGetServers->State() == EHttpState::RUNNING)
 		{
 			return;
 		}

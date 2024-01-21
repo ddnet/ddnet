@@ -411,7 +411,7 @@ void CRegister::CProtocol::CJob::Run()
 {
 	m_pHttp->Run(m_pRegister);
 	m_pRegister->Wait();
-	if(m_pRegister->State() != HTTP_DONE)
+	if(m_pRegister->State() != EHttpState::DONE)
 	{
 		// TODO: log the error response content from master
 		// TODO: exponential backoff

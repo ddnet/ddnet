@@ -1953,7 +1953,7 @@ void CMenus::UpdateCommunityIcons()
 		std::shared_ptr<CCommunityIconDownloadJob> pJob = m_CommunityIconDownloadJobs.front();
 		if(pJob->Done())
 		{
-			if(pJob->State() == HTTP_DONE)
+			if(pJob->State() == EHttpState::DONE)
 			{
 				std::shared_ptr<CCommunityIconLoadJob> pLoadJob = std::make_shared<CCommunityIconLoadJob>(this, pJob->CommunityId(), IStorage::TYPE_SAVE);
 				Engine()->AddJob(pLoadJob);
