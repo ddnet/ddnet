@@ -59,7 +59,6 @@ CMenus::CMenus()
 	m_ActivePage = PAGE_INTERNET;
 	m_MenuPage = 0;
 	m_GamePage = PAGE_GAME;
-	m_JoinTutorial = false;
 
 	m_NeedRestartGraphics = false;
 	m_NeedRestartSound = false;
@@ -157,7 +156,7 @@ int CMenus::DoButton_Menu(CButtonContainer *pButtonContainer, const char *pText,
 	return UI()->DoButtonLogic(pButtonContainer, Checked, pRect);
 }
 
-int CMenus::DoButton_MenuTab(CButtonContainer *pButtonContainer, const char *pText, int Checked, const CUIRect *pRect, int Corners, SUIAnimator *pAnimator, const ColorRGBA *pDefaultColor, const ColorRGBA *pActiveColor, const ColorRGBA *pHoverColor, float EdgeRounding)
+int CMenus::DoButton_MenuTab(CButtonContainer *pButtonContainer, const char *pText, int Checked, const CUIRect *pRect, int Corners, SUIAnimator *pAnimator, const ColorRGBA *pDefaultColor, const ColorRGBA *pActiveColor, const ColorRGBA *pHoverColor, float EdgeRounding, const SCommunityIcon *pCommunityIcon)
 {
 	const bool MouseInside = UI()->HotItem() == pButtonContainer;
 	CUIRect Rect = *pRect;
@@ -230,9 +229,18 @@ int CMenus::DoButton_MenuTab(CButtonContainer *pButtonContainer, const char *pTe
 		}
 	}
 
-	CUIRect Temp;
-	Rect.HMargin(2.0f, &Temp);
-	UI()->DoLabel(&Temp, pText, Temp.h * CUI::ms_FontmodHeight, TEXTALIGN_MC);
+	if(pCommunityIcon)
+	{
+		CUIRect CommunityIcon;
+		Rect.Margin(2.0f, &CommunityIcon);
+		RenderCommunityIcon(pCommunityIcon, CommunityIcon, true);
+	}
+	else
+	{
+		CUIRect Label;
+		Rect.HMargin(2.0f, &Label);
+		UI()->DoLabel(&Label, pText, Label.h * CUI::ms_FontmodHeight, TEXTALIGN_MC);
+	}
 
 	return UI()->DoButtonLogic(pButtonContainer, Checked, pRect);
 }
@@ -591,7 +599,7 @@ void CMenus::RenderMenubar(CUIRect Box)
 		{
 			if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_INTERNET)
 			{
-				if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_FAVORITES)
+				if(ServerBrowser()->GetCurrentType() == IServerBrowser::TYPE_LAN)
 					Client()->RequestDDNetInfo();
 				ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
 			}
@@ -615,13 +623,40 @@ void CMenus::RenderMenubar(CUIRect Box)
 		{
 			if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_FAVORITES)
 			{
-				if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_INTERNET)
+				if(ServerBrowser()->GetCurrentType() == IServerBrowser::TYPE_LAN)
 					Client()->RequestDDNetInfo();
 				ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
 			}
 			NewPage = PAGE_FAVORITES;
 		}
 		GameClient()->m_Tooltips.DoToolTip(&s_FavoritesButton, &Button, Localize("Favorites"));
+
+		size_t FavoriteCommunityIndex = 0;
+		static CButtonContainer s_aFavoriteCommunityButtons[3];
+		static_assert(std::size(s_aFavoriteCommunityButtons) == (size_t)PAGE_FAVORITE_COMMUNITY_3 - PAGE_FAVORITE_COMMUNITY_1 + 1);
+		static_assert(std::size(s_aFavoriteCommunityButtons) == (size_t)BIT_TAB_FAVORITE_COMMUNITY_3 - BIT_TAB_FAVORITE_COMMUNITY_1 + 1);
+		static_assert(std::size(s_aFavoriteCommunityButtons) == (size_t)IServerBrowser::TYPE_FAVORITE_COMMUNITY_3 - IServerBrowser::TYPE_FAVORITE_COMMUNITY_1 + 1);
+		for(const CCommunity *pCommunity : ServerBrowser()->FavoriteCommunities())
+		{
+			Box.VSplitLeft(75.0f, &Button, &Box);
+			const int Page = PAGE_FAVORITE_COMMUNITY_1 + FavoriteCommunityIndex;
+			if(DoButton_MenuTab(&s_aFavoriteCommunityButtons[FavoriteCommunityIndex], FONT_ICON_ELLIPSIS, m_ActivePage == Page, &Button, IGraphics::CORNER_T, &m_aAnimatorsBigPage[BIT_TAB_FAVORITE_COMMUNITY_1 + FavoriteCommunityIndex], nullptr, nullptr, nullptr, 10.0f, FindCommunityIcon(pCommunity->Id())))
+			{
+				const int BrowserType = IServerBrowser::TYPE_FAVORITE_COMMUNITY_1 + FavoriteCommunityIndex;
+				if(ServerBrowser()->GetCurrentType() != BrowserType)
+				{
+					if(ServerBrowser()->GetCurrentType() == IServerBrowser::TYPE_LAN)
+						Client()->RequestDDNetInfo();
+					ServerBrowser()->Refresh(BrowserType);
+				}
+				NewPage = Page;
+			}
+			GameClient()->m_Tooltips.DoToolTip(&s_aFavoriteCommunityButtons[FavoriteCommunityIndex], &Button, pCommunity->Name());
+
+			++FavoriteCommunityIndex;
+			if(FavoriteCommunityIndex >= std::size(s_aFavoriteCommunityButtons))
+				break;
+		}
 
 		TextRender()->SetRenderFlags(0);
 		TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
@@ -808,10 +843,22 @@ void CMenus::OnInit()
 	if(g_Config.m_ClShowWelcome)
 	{
 		m_Popup = POPUP_LANGUAGE;
-		str_copy(g_Config.m_BrFilterExcludeCommunities, "*ddnet");
+		m_CreateDefaultFavoriteCommunities = true;
 	}
+
+	if(g_Config.m_UiPage >= PAGE_FAVORITE_COMMUNITY_1 && g_Config.m_UiPage <= PAGE_FAVORITE_COMMUNITY_3 &&
+		(size_t)(g_Config.m_UiPage - PAGE_FAVORITE_COMMUNITY_1) >= ServerBrowser()->FavoriteCommunities().size())
+	{
+		// Reset page to internet when there is no favorite community for this page.
+		g_Config.m_UiPage = PAGE_INTERNET;
+	}
+
 	if(g_Config.m_ClSkipStartMenu)
+	{
 		m_ShowStart = false;
+	}
+
+	SetMenuPage(g_Config.m_UiPage);
 
 	m_RefreshButton.Init(UI(), -1);
 	m_ConnectButton.Init(UI(), -1);
@@ -820,7 +867,15 @@ void CMenus::OnInit()
 	Console()->Chain("remove_favorite", ConchainFavoritesUpdate, this);
 	Console()->Chain("add_friend", ConchainFriendlistUpdate, this);
 	Console()->Chain("remove_friend", ConchainFriendlistUpdate, this);
-	Console()->Chain("br_filter_exclude_communities", ConchainCommunitiesUpdate, this);
+
+	Console()->Chain("add_excluded_community", ConchainCommunitiesUpdate, this);
+	Console()->Chain("remove_excluded_community", ConchainCommunitiesUpdate, this);
+	Console()->Chain("add_excluded_country", ConchainCommunitiesUpdate, this);
+	Console()->Chain("remove_excluded_country", ConchainCommunitiesUpdate, this);
+	Console()->Chain("add_excluded_type", ConchainCommunitiesUpdate, this);
+	Console()->Chain("remove_excluded_type", ConchainCommunitiesUpdate, this);
+
+	Console()->Chain("ui_page", ConchainUiPageUpdate, this);
 
 	Console()->Chain("snd_enable", ConchainUpdateMusicState, this);
 	Console()->Chain("snd_enable_music", ConchainUpdateMusicState, this);
@@ -946,14 +1001,31 @@ void CMenus::Render()
 	static int s_Frame = 0;
 	if(s_Frame == 0)
 	{
-		SetMenuPage(g_Config.m_UiPage);
+		RefreshBrowserTab(g_Config.m_UiPage);
 		s_Frame++;
 	}
 	else if(s_Frame == 1)
 	{
 		UpdateMusicState();
-		RefreshBrowserTab(g_Config.m_UiPage);
 		s_Frame++;
+	}
+	else
+	{
+		UpdateCommunityIcons();
+	}
+
+	// Initially add DDNet as favorite community and select its tab.
+	// This must be delayed until the DDNet info is available.
+	if(m_CreateDefaultFavoriteCommunities && ServerBrowser()->DDNetInfoAvailable())
+	{
+		m_CreateDefaultFavoriteCommunities = false;
+		if(ServerBrowser()->Community(IServerBrowser::COMMUNITY_DDNET) != nullptr)
+		{
+			ServerBrowser()->FavoriteCommunitiesFilter().Clear();
+			ServerBrowser()->FavoriteCommunitiesFilter().Add(IServerBrowser::COMMUNITY_DDNET);
+			SetMenuPage(PAGE_FAVORITE_COMMUNITY_1);
+			ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITE_COMMUNITY_1);
+		}
 	}
 
 	if(Client()->State() == IClient::STATE_ONLINE || Client()->State() == IClient::STATE_DEMOPLAYBACK)
@@ -983,13 +1055,18 @@ void CMenus::Render()
 
 	if(m_Popup == POPUP_NONE)
 	{
-		if(m_JoinTutorial && !Client()->InfoTaskRunning() && !ServerBrowser()->IsGettingServerlist())
+		if(m_JoinTutorial && ServerBrowser()->DDNetInfoAvailable() && !ServerBrowser()->IsGettingServerlist())
 		{
 			m_JoinTutorial = false;
+			// This is only reached on first launch, when the DDNet community tab has been created and
+			// activated by default, so the server info for the tutorial server should be available.
 			const char *pAddr = ServerBrowser()->GetTutorialServer();
 			if(pAddr)
+			{
 				Client()->Connect(pAddr);
+			}
 		}
+
 		if(m_ShowStart && Client()->State() == IClient::STATE_OFFLINE)
 		{
 			m_pBackground->ChangePosition(CMenuBackground::POS_START);
@@ -1065,10 +1142,16 @@ void CMenus::Render()
 				m_pBackground->ChangePosition(CMenuBackground::POS_BROWSER_FAVORITES);
 				RenderServerbrowser(MainView);
 			}
+			else if(m_MenuPage >= PAGE_FAVORITE_COMMUNITY_1 && m_MenuPage <= PAGE_FAVORITE_COMMUNITY_3)
+			{
+				m_pBackground->ChangePosition(m_MenuPage - PAGE_FAVORITE_COMMUNITY_1 + CMenuBackground::POS_BROWSER_CUSTOM0);
+				RenderServerbrowser(MainView);
+			}
 			else if(m_MenuPage == PAGE_SETTINGS)
+			{
 				RenderSettings(MainView);
+			}
 
-			// do tab bar
 			RenderMenubar(TabBar);
 		}
 	}
@@ -2197,11 +2280,8 @@ const CMenus::CMenuImage *CMenus::FindMenuImage(const char *pName)
 
 void CMenus::SetMenuPage(int NewPage)
 {
-	if(NewPage == PAGE_DDNET_LEGACY || NewPage == PAGE_KOG_LEGACY)
-		NewPage = PAGE_INTERNET;
-
 	m_MenuPage = NewPage;
-	if(NewPage >= PAGE_INTERNET && NewPage <= PAGE_FAVORITES)
+	if(NewPage >= PAGE_INTERNET && NewPage <= PAGE_FAVORITE_COMMUNITY_3)
 		g_Config.m_UiPage = NewPage;
 }
 
@@ -2220,5 +2300,10 @@ void CMenus::RefreshBrowserTab(int UiPage)
 	{
 		Client()->RequestDDNetInfo();
 		ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
+	}
+	else if(UiPage >= PAGE_FAVORITE_COMMUNITY_1 && UiPage <= PAGE_FAVORITE_COMMUNITY_3)
+	{
+		Client()->RequestDDNetInfo();
+		ServerBrowser()->Refresh(UiPage - PAGE_FAVORITE_COMMUNITY_1 + IServerBrowser::TYPE_FAVORITE_COMMUNITY_1);
 	}
 }

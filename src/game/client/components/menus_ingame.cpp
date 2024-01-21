@@ -837,9 +837,9 @@ void CMenus::RenderInGameNetwork(CUIRect MainView)
 	static CButtonContainer s_InternetButton;
 	if(DoButton_MenuTab(&s_InternetButton, FONT_ICON_EARTH_AMERICAS, g_Config.m_UiPage == PAGE_INTERNET, &Button, IGraphics::CORNER_NONE))
 	{
-		if(g_Config.m_UiPage != PAGE_INTERNET)
+		if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_INTERNET)
 		{
-			if(g_Config.m_UiPage != PAGE_FAVORITES)
+			if(ServerBrowser()->GetCurrentType() == IServerBrowser::TYPE_LAN)
 				Client()->RequestDDNetInfo();
 			ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
 		}
@@ -851,7 +851,7 @@ void CMenus::RenderInGameNetwork(CUIRect MainView)
 	static CButtonContainer s_LanButton;
 	if(DoButton_MenuTab(&s_LanButton, FONT_ICON_NETWORK_WIRED, g_Config.m_UiPage == PAGE_LAN, &Button, IGraphics::CORNER_NONE))
 	{
-		if(g_Config.m_UiPage != PAGE_LAN)
+		if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_LAN)
 			ServerBrowser()->Refresh(IServerBrowser::TYPE_LAN);
 		NewPage = PAGE_LAN;
 	}
@@ -861,15 +861,40 @@ void CMenus::RenderInGameNetwork(CUIRect MainView)
 	static CButtonContainer s_FavoritesButton;
 	if(DoButton_MenuTab(&s_FavoritesButton, FONT_ICON_STAR, g_Config.m_UiPage == PAGE_FAVORITES, &Button, IGraphics::CORNER_NONE))
 	{
-		if(g_Config.m_UiPage != PAGE_FAVORITES)
+		if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_FAVORITES)
 		{
-			if(g_Config.m_UiPage != PAGE_INTERNET)
+			if(ServerBrowser()->GetCurrentType() == IServerBrowser::TYPE_LAN)
 				Client()->RequestDDNetInfo();
 			ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITES);
 		}
 		NewPage = PAGE_FAVORITES;
 	}
 	GameClient()->m_Tooltips.DoToolTip(&s_FavoritesButton, &Button, Localize("Favorites"));
+
+	size_t FavoriteCommunityIndex = 0;
+	static CButtonContainer s_aFavoriteCommunityButtons[3];
+	static_assert(std::size(s_aFavoriteCommunityButtons) == (size_t)PAGE_FAVORITE_COMMUNITY_3 - PAGE_FAVORITE_COMMUNITY_1 + 1);
+	for(const CCommunity *pCommunity : ServerBrowser()->FavoriteCommunities())
+	{
+		TabBar.VSplitLeft(75.0f, &Button, &TabBar);
+		const int Page = PAGE_FAVORITE_COMMUNITY_1 + FavoriteCommunityIndex;
+		if(DoButton_MenuTab(&s_aFavoriteCommunityButtons[FavoriteCommunityIndex], FONT_ICON_ELLIPSIS, g_Config.m_UiPage == Page, &Button, IGraphics::CORNER_NONE, nullptr, nullptr, nullptr, nullptr, 10.0f, FindCommunityIcon(pCommunity->Id())))
+		{
+			const int BrowserType = IServerBrowser::TYPE_FAVORITE_COMMUNITY_1 + FavoriteCommunityIndex;
+			if(ServerBrowser()->GetCurrentType() != BrowserType)
+			{
+				if(ServerBrowser()->GetCurrentType() == IServerBrowser::TYPE_LAN)
+					Client()->RequestDDNetInfo();
+				ServerBrowser()->Refresh(BrowserType);
+			}
+			NewPage = Page;
+		}
+		GameClient()->m_Tooltips.DoToolTip(&s_aFavoriteCommunityButtons[FavoriteCommunityIndex], &Button, pCommunity->Name());
+
+		++FavoriteCommunityIndex;
+		if(FavoriteCommunityIndex >= std::size(s_aFavoriteCommunityButtons))
+			break;
+	}
 
 	TextRender()->SetRenderFlags(0);
 	TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);

@@ -1117,6 +1117,7 @@ set(EXPECTED_DATA
   autoexec_server.cfg
   blob.png
   censorlist.txt
+  communityicons/none.png
   console.png
   console_bar.png
   countryflags/AD.png
