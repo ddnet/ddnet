@@ -1743,7 +1743,6 @@ void CMenus::ConchainCommunitiesUpdate(IConsole::IResult *pResult, void *pUserDa
 	CMenus *pThis = static_cast<CMenus *>(pUserData);
 	if(pResult->NumArguments() >= 1 && (g_Config.m_UiPage == PAGE_INTERNET || g_Config.m_UiPage == PAGE_FAVORITES))
 	{
-		pThis->ServerBrowser()->CleanFilters();
 		pThis->UpdateCommunityCache(true);
 		pThis->Client()->ServerBrowserUpdate();
 	}
@@ -1754,6 +1753,8 @@ void CMenus::UpdateCommunityCache(bool Force)
 	const bool PageWithCommunities = g_Config.m_UiPage == PAGE_INTERNET || g_Config.m_UiPage == PAGE_FAVORITES;
 	if(!Force && m_CommunityCache.m_UpdateTime != 0 && m_CommunityCache.m_UpdateTime == ServerBrowser()->DDNetInfoUpdateTime() && m_CommunityCache.m_PageWithCommunities == PageWithCommunities)
 		return;
+
+	ServerBrowser()->CleanFilters();
 
 	m_CommunityCache.m_UpdateTime = ServerBrowser()->DDNetInfoUpdateTime();
 	m_CommunityCache.m_PageWithCommunities = PageWithCommunities;
