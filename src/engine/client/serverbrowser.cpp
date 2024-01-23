@@ -1569,8 +1569,8 @@ void CServerBrowser::CommunitiesFilterClean()
 void CServerBrowser::CountriesFilterClean()
 {
 	std::vector<const char *> vpCountryNames;
-	for(const auto &Community : Communities())
-		for(const auto &Country : Community.Countries())
+	for(const CCommunity *pCommunity : SelectedCommunities())
+		for(const auto &Country : pCommunity->Countries())
 			vpCountryNames.push_back(Country.Name());
 	m_CountriesFilter.Clean(vpCountryNames);
 }
@@ -1578,8 +1578,8 @@ void CServerBrowser::CountriesFilterClean()
 void CServerBrowser::TypesFilterClean()
 {
 	std::vector<const char *> vpTypeNames;
-	for(const auto &Community : Communities())
-		for(const auto &Type : Community.Types())
+	for(const CCommunity *pCommunity : SelectedCommunities())
+		for(const auto &Type : pCommunity->Types())
 			vpTypeNames.push_back(Type.Name());
 	m_TypesFilter.Clean(vpTypeNames);
 }
