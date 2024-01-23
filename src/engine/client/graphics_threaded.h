@@ -719,7 +719,7 @@ public:
 
 	virtual void Minimize() = 0;
 	virtual void Maximize() = 0;
-	virtual void SetWindowParams(int FullscreenMode, bool IsBorderless, bool AllowResizing) = 0;
+	virtual void SetWindowParams(int FullscreenMode, bool IsBorderless) = 0;
 	virtual bool SetWindowScreen(int Index) = 0;
 	virtual bool UpdateDisplayMode(int Index) = 0;
 	virtual int GetWindowScreen() = 0;
@@ -1235,7 +1235,7 @@ public:
 	void Minimize() override;
 	void Maximize() override;
 	void WarnPngliteIncompatibleImages(bool Warn) override;
-	void SetWindowParams(int FullscreenMode, bool IsBorderless, bool AllowResizing) override;
+	void SetWindowParams(int FullscreenMode, bool IsBorderless) override;
 	bool SetWindowScreen(int Index) override;
 	void Move(int x, int y) override;
 	void Resize(int w, int h, int RefreshRate) override;

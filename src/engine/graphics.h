@@ -275,7 +275,7 @@ public:
 	int WindowHeight() const { return m_ScreenHeight / m_ScreenHiDPIScale; }
 
 	virtual void WarnPngliteIncompatibleImages(bool Warn) = 0;
-	virtual void SetWindowParams(int FullscreenMode, bool IsBorderless, bool AllowResizing) = 0;
+	virtual void SetWindowParams(int FullscreenMode, bool IsBorderless) = 0;
 	virtual bool SetWindowScreen(int Index) = 0;
 	virtual bool SetVSync(bool State) = 0;
 	virtual bool SetMultiSampling(uint32_t ReqMultiSamplingCount, uint32_t &MultiSamplingCountBackend) = 0;
