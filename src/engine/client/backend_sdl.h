@@ -250,7 +250,7 @@ public:
 
 	void Minimize() override;
 	void Maximize() override;
-	void SetWindowParams(int FullscreenMode, bool IsBorderless, bool AllowResizing) override;
+	void SetWindowParams(int FullscreenMode, bool IsBorderless) override;
 	bool SetWindowScreen(int Index) override;
 	bool UpdateDisplayMode(int Index) override;
 	int GetWindowScreen() override;
