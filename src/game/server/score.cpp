@@ -340,7 +340,7 @@ void CScore::LoadTeam(const char *pCode, int ClientID)
 		GameServer()->SendChatTarget(ClientID, "Team can't be loaded while racing");
 		return;
 	}
-	if(pController->Teams().TeamMode(Team))
+	if(pController->Teams().TeamFlock(Team))
 	{
 		GameServer()->SendChatTarget(ClientID, "Team can't be loaded while in team 0 mode");
 		return;
