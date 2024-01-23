@@ -405,10 +405,14 @@ CUI::EPopupMenuFunctionResult CEditor::PopupGroup(void *pContext, CUIRect View, 
 		{
 			// gather all tile layers
 			std::vector<std::shared_ptr<CLayerTiles>> vpLayers;
-			for(auto &pLayer : pEditor->m_Map.m_pGameGroup->m_vpLayers)
+			int GameLayerIndex;
+			for(int LayerIndex = 0; LayerIndex < (int)pEditor->m_Map.m_pGameGroup->m_vpLayers.size(); LayerIndex++)
 			{
+				auto &pLayer = pEditor->m_Map.m_pGameGroup->m_vpLayers.at(LayerIndex);
 				if(pLayer != pEditor->m_Map.m_pGameLayer && pLayer->m_Type == LAYERTYPE_TILES)
 					vpLayers.push_back(std::static_pointer_cast<CLayerTiles>(pLayer));
+				else if(pLayer == pEditor->m_Map.m_pGameLayer)
+					GameLayerIndex = LayerIndex;
 			}
 
 			// search for unneeded game tiles
@@ -430,12 +434,21 @@ CUI::EPopupMenuFunctionResult CEditor::PopupGroup(void *pContext, CUIRect View, 
 						}
 					}
 
-					if(!Found)
+					CTile Tile = pGameLayer->GetTile(x, y);
+					if(!Found && Tile.m_Index != TILE_AIR)
 					{
-						pGameLayer->m_pTiles[y * pGameLayer->m_Width + x].m_Index = TILE_AIR;
+						Tile.m_Index = TILE_AIR;
+						pGameLayer->SetTile(x, y, Tile);
 						pEditor->m_Map.OnModify();
 					}
 				}
+			}
+
+			if(!pGameLayer->m_TilesHistory.empty())
+			{
+				// record undo
+				pEditor->m_EditorHistory.RecordAction(std::make_shared<CEditorActionTileChanges>(pEditor, pEditor->m_SelectedGroup, GameLayerIndex, "Clean up game tiles", pGameLayer->m_TilesHistory));
+				pGameLayer->ClearHistory();
 			}
 
 			return CUI::POPUP_CLOSE_CURRENT;

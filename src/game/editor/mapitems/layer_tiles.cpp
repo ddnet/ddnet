@@ -924,7 +924,7 @@ CUI::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 					if(!m_TilesHistory.empty()) // Sometimes pressing that button causes the automap to run so we should be able to undo that
 					{
 						// record undo
-						m_pEditor->m_EditorHistory.RecordAction(std::make_shared<CEditorActionAutoMap>(m_pEditor, m_pEditor->m_SelectedGroup, m_pEditor->m_vSelectedLayers[0], m_TilesHistory));
+						m_pEditor->m_EditorHistory.RecordAction(std::make_shared<CEditorActionTileChanges>(m_pEditor, m_pEditor->m_SelectedGroup, m_pEditor->m_vSelectedLayers[0], "Auto map", m_TilesHistory));
 						ClearHistory();
 					}
 				}
@@ -935,7 +935,7 @@ CUI::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 			{
 				m_pEditor->m_Map.m_vpImages[m_Image]->m_AutoMapper.Proceed(this, m_AutoMapperConfig, m_Seed);
 				// record undo
-				m_pEditor->m_EditorHistory.RecordAction(std::make_shared<CEditorActionAutoMap>(m_pEditor, m_pEditor->m_SelectedGroup, m_pEditor->m_vSelectedLayers[0], m_TilesHistory));
+				m_pEditor->m_EditorHistory.RecordAction(std::make_shared<CEditorActionTileChanges>(m_pEditor, m_pEditor->m_SelectedGroup, m_pEditor->m_vSelectedLayers[0], "Auto map", m_TilesHistory));
 				ClearHistory();
 				return CUI::POPUP_CLOSE_CURRENT;
 			}

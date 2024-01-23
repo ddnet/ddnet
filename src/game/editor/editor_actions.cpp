@@ -476,24 +476,24 @@ void CEditorActionBulk::Redo()
 
 // ---------
 
-CEditorActionAutoMap::CEditorActionAutoMap(CEditor *pEditor, int GroupIndex, int LayerIndex, const EditorTileStateChangeHistory<STileStateChange> &Changes) :
+CEditorActionTileChanges::CEditorActionTileChanges(CEditor *pEditor, int GroupIndex, int LayerIndex, const char *pAction, const EditorTileStateChangeHistory<STileStateChange> &Changes) :
 	CEditorActionLayerBase(pEditor, GroupIndex, LayerIndex), m_Changes(Changes)
 {
 	ComputeInfos();
-	str_format(m_aDisplayText, sizeof(m_aDisplayText), "Auto map (x%d)", m_TotalChanges);
+	str_format(m_aDisplayText, sizeof(m_aDisplayText), "%s (x%d)", pAction, m_TotalChanges);
 }
 
-void CEditorActionAutoMap::Undo()
+void CEditorActionTileChanges::Undo()
 {
 	Apply(true);
 }
 
-void CEditorActionAutoMap::Redo()
+void CEditorActionTileChanges::Redo()
 {
 	Apply(false);
 }
 
-void CEditorActionAutoMap::Apply(bool Undo)
+void CEditorActionTileChanges::Apply(bool Undo)
 {
 	auto &Map = m_pEditor->m_Map;
 	std::shared_ptr<CLayerTiles> pLayerTiles = std::static_pointer_cast<CLayerTiles>(m_pLayer);
@@ -512,7 +512,7 @@ void CEditorActionAutoMap::Apply(bool Undo)
 	Map.OnModify();
 }
 
-void CEditorActionAutoMap::ComputeInfos()
+void CEditorActionTileChanges::ComputeInfos()
 {
 	m_TotalChanges = 0;
 	for(auto &Line : m_Changes)
