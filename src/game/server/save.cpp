@@ -481,7 +481,7 @@ int CSaveTeam::Save(CGameContext *pGameServer, int Team, bool Dry)
 	IGameController *pController = pGameServer->m_pController;
 	CGameTeams *pTeams = &pController->Teams();
 
-	if(pTeams->TeamMode(Team))
+	if(pTeams->TeamFlock(Team))
 	{
 		return 5;
 	}
