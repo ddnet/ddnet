@@ -250,6 +250,24 @@ int CMenus::DoButton_GridHeader(const void *pID, const char *pText, int Checked,
 	return UI()->DoButtonLogic(pID, Checked, pRect);
 }
 
+int CMenus::DoButton_Favorite(const void *pButtonId, const void *pParentId, bool Checked, const CUIRect *pRect)
+{
+	if(Checked || (pParentId != nullptr && UI()->HotItem() == pParentId) || UI()->HotItem() == pButtonId)
+	{
+		TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
+		TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
+		const float Alpha = UI()->HotItem() == pButtonId ? 0.2f : 0.0f;
+		TextRender()->TextColor(Checked ? ColorRGBA(1.0f, 0.85f, 0.3f, 0.8f + Alpha) : ColorRGBA(0.5f, 0.5f, 0.5f, 0.8f + Alpha));
+		SLabelProperties Props;
+		Props.m_MaxWidth = pRect->w;
+		UI()->DoLabel(pRect, FONT_ICON_STAR, 12.0f, TEXTALIGN_MC, Props);
+		TextRender()->TextColor(TextRender()->DefaultTextColor());
+		TextRender()->SetRenderFlags(0);
+		TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
+	}
+	return UI()->DoButtonLogic(pButtonId, 0, pRect);
+}
+
 int CMenus::DoButton_CheckBox_Common(const void *pID, const char *pText, const char *pBoxText, const CUIRect *pRect)
 {
 	CUIRect Box, Label;
