@@ -1004,7 +1004,6 @@ void CMenus::RenderGhost(CUIRect MainView)
 		int m_Id;
 		float m_Width;
 		CUIRect m_Rect;
-		CUIRect m_Spacer;
 	};
 
 	enum
@@ -1016,11 +1015,11 @@ void CMenus::RenderGhost(CUIRect MainView)
 	};
 
 	static CColumn s_aCols[] = {
-		{"", -1, 2.0f, {0}, {0}},
-		{"", COL_ACTIVE, 30.0f, {0}, {0}},
-		{Localizable("Name"), COL_NAME, 200.0f, {0}, {0}},
-		{Localizable("Time"), COL_TIME, 90.0f, {0}, {0}},
-		{Localizable("Date"), COL_DATE, 150.0f, {0}, {0}},
+		{"", -1, 2.0f, {0}},
+		{"", COL_ACTIVE, 30.0f, {0}},
+		{Localizable("Name"), COL_NAME, 200.0f, {0}},
+		{Localizable("Time"), COL_TIME, 90.0f, {0}},
+		{Localizable("Date"), COL_DATE, 150.0f, {0}},
 	};
 
 	int NumCols = std::size(s_aCols);
@@ -1031,7 +1030,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 		Headers.VSplitLeft(s_aCols[i].m_Width, &s_aCols[i].m_Rect, &Headers);
 
 		if(i + 1 < NumCols)
-			Headers.VSplitLeft(2, &s_aCols[i].m_Spacer, &Headers);
+			Headers.VSplitLeft(2, nullptr, &Headers);
 	}
 
 	// do headers
