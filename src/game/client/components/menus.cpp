@@ -517,9 +517,8 @@ int CMenus::DoKeyReader(const void *pID, const CUIRect *pRect, int Key, int Modi
 	return NewKey;
 }
 
-void CMenus::RenderMenubar(CUIRect r)
+void CMenus::RenderMenubar(CUIRect Box)
 {
-	CUIRect Box = r;
 	CUIRect Button;
 
 	m_ActivePage = m_MenuPage;

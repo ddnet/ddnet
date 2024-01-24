@@ -413,7 +413,7 @@ protected:
 #if defined(CONF_VIDEORECORDER)
 	void PopupConfirmDemoReplaceVideo();
 #endif
-	void RenderMenubar(CUIRect r);
+	void RenderMenubar(CUIRect Box);
 	void RenderNews(CUIRect MainView);
 	static void ConchainUpdateMusicState(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	void UpdateMusicState();
