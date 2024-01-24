@@ -1668,7 +1668,7 @@ public:
 
 			while(pCurrent < pBatchEnd && pCurrent != pEllipsis)
 			{
-				const int PrevCharCount = pCursor->m_CharCount;
+				const int PrevCharCount = pCursor->m_GlyphCount;
 				pCursor->m_CharCount += pTmp - pCurrent;
 				pCurrent = pTmp;
 				int Character = NextCharacter;
@@ -1754,10 +1754,18 @@ public:
 					if(ColorOption < (int)pCursor->m_vColorSplits.size())
 					{
 						STextColorSplit &Split = pCursor->m_vColorSplits.at(ColorOption);
-						if(PrevCharCount >= Split.m_CharIndex && PrevCharCount < Split.m_CharIndex + Split.m_Length)
+						if(PrevCharCount >= Split.m_CharIndex && (Split.m_Length == -1 || PrevCharCount < Split.m_CharIndex + Split.m_Length))
 							Color = Split.m_Color;
-						if(PrevCharCount >= (Split.m_CharIndex + Split.m_Length - 1))
+						if(Split.m_Length != -1 && PrevCharCount >= (Split.m_CharIndex + Split.m_Length - 1))
+						{
 							ColorOption++;
+							if(ColorOption < (int)pCursor->m_vColorSplits.size())
+							{ // Handle splits that are
+								Split = pCursor->m_vColorSplits.at(ColorOption);
+								if(PrevCharCount >= Split.m_CharIndex)
+									Color = Split.m_Color;
+							}
+						}
 					}
 
 					// don't add text that isn't drawn, the color overwrite is used for that

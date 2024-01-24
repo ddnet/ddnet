@@ -145,6 +145,9 @@ MAYBE_UNUSED static const char *FONT_ICON_DICE_SIX = "\xEF\x94\xA6";
 MAYBE_UNUSED static const char *FONT_ICON_LAYER_GROUP = "\xEF\x97\xBD";
 MAYBE_UNUSED static const char *FONT_ICON_UNDO = "\xEF\x8B\xAA";
 MAYBE_UNUSED static const char *FONT_ICON_REDO = "\xEF\x8B\xB9";
+
+MAYBE_UNUSED static const char *FONT_ICON_ARROWS_ROTATE = "\xEF\x80\xA1";
+MAYBE_UNUSED static const char *FONT_ICON_QUESTION = "?";
 } // end namespace FontIcons
 
 enum ETextCursorSelectionMode

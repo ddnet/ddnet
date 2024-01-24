@@ -2299,8 +2299,11 @@ if(CLIENT)
     editor_object.cpp
     editor_object.h
     editor_props.cpp
+    editor_server_settings.cpp
+    editor_server_settings.h
     editor_trackers.cpp
     editor_trackers.h
+    editor_ui.h
     explanations.cpp
     map_grid.cpp
     map_grid.h

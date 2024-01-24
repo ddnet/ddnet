@@ -58,6 +58,127 @@ enum
 	CFGFLAG_INSENSITIVE = 1 << 12,
 };
 
+struct SConfigVariable
+{
+	enum EVariableType
+	{
+		VAR_INT,
+		VAR_COLOR,
+		VAR_STRING,
+	};
+	IConsole *m_pConsole;
+	const char *m_pScriptName;
+	EVariableType m_Type;
+	int m_Flags;
+	const char *m_pHelp;
+	// Note that this only applies to the console command and the SetValue function,
+	// but the underlying config variable can still be modified programatically.
+	bool m_ReadOnly = false;
+
+	SConfigVariable(IConsole *pConsole, const char *pScriptName, EVariableType Type, int Flags, const char *pHelp) :
+		m_pConsole(pConsole),
+		m_pScriptName(pScriptName),
+		m_Type(Type),
+		m_Flags(Flags),
+		m_pHelp(pHelp)
+	{
+	}
+
+	virtual ~SConfigVariable() = default;
+
+	virtual void Register() = 0;
+	virtual bool IsDefault() const = 0;
+	virtual void Serialize(char *pOut, size_t Size) const = 0;
+	virtual void ResetToDefault() = 0;
+	virtual void ResetToOld() = 0;
+
+protected:
+	void ExecuteLine(const char *pLine) const;
+	bool CheckReadOnly() const;
+};
+
+struct SIntConfigVariable : public SConfigVariable
+{
+	int *m_pVariable;
+	int m_Default;
+	int m_Min;
+	int m_Max;
+	int m_OldValue;
+
+	SIntConfigVariable(IConsole *pConsole, const char *pScriptName, EVariableType Type, int Flags, const char *pHelp, int *pVariable, int Default, int Min, int Max) :
+		SConfigVariable(pConsole, pScriptName, Type, Flags, pHelp),
+		m_pVariable(pVariable),
+		m_Default(Default),
+		m_Min(Min),
+		m_Max(Max),
+		m_OldValue(Default)
+	{
+		*m_pVariable = m_Default;
+	}
+
+	~SIntConfigVariable() override = default;
+
+	static void CommandCallback(IConsole::IResult *pResult, void *pUserData);
+	void Register() override;
+	bool IsDefault() const override;
+	void Serialize(char *pOut, size_t Size, int Value) const;
+	void Serialize(char *pOut, size_t Size) const override;
+	void SetValue(int Value);
+	void ResetToDefault() override;
+	void ResetToOld() override;
+};
+
+struct SColorConfigVariable : public SConfigVariable
+{
+	unsigned *m_pVariable;
+	unsigned m_Default;
+	bool m_Light;
+	bool m_Alpha;
+	unsigned m_OldValue;
+
+	SColorConfigVariable(IConsole *pConsole, const char *pScriptName, EVariableType Type, int Flags, const char *pHelp, unsigned *pVariable, unsigned Default) :
+		SConfigVariable(pConsole, pScriptName, Type, Flags, pHelp),
+		m_pVariable(pVariable),
+		m_Default(Default),
+		m_Light(Flags & CFGFLAG_COLLIGHT),
+		m_Alpha(Flags & CFGFLAG_COLALPHA),
+		m_OldValue(Default)
+	{
+		*m_pVariable = m_Default;
+	}
+
+	~SColorConfigVariable() override = default;
+
+	static void CommandCallback(IConsole::IResult *pResult, void *pUserData);
+	void Register() override;
+	bool IsDefault() const override;
+	void Serialize(char *pOut, size_t Size, unsigned Value) const;
+	void Serialize(char *pOut, size_t Size) const override;
+	void SetValue(unsigned Value);
+	void ResetToDefault() override;
+	void ResetToOld() override;
+};
+
+struct SStringConfigVariable : public SConfigVariable
+{
+	char *m_pStr;
+	const char *m_pDefault;
+	size_t m_MaxSize;
+	char *m_pOldValue;
+
+	SStringConfigVariable(IConsole *pConsole, const char *pScriptName, EVariableType Type, int Flags, const char *pHelp, char *pStr, const char *pDefault, size_t MaxSize, char *pOldValue);
+	~SStringConfigVariable() override = default;
+
+	static void CommandCallback(IConsole::IResult *pResult, void *pUserData);
+	void Register() override;
+	bool IsDefault() const override;
+	void Serialize(char *pOut, size_t Size, const char *pValue) const;
+	void Serialize(char *pOut, size_t Size) const override;
+	void SetValue(const char *pValue);
+	void ResetToDefault() override;
+	void ResetToOld() override;
+};
+
 class CConfigManager : public IConfigManager
 {
 	IConsole *m_pConsole;
@@ -79,8 +200,8 @@ class CConfigManager : public IConfigManager
 	};
 	std::vector<SCallback> m_vCallbacks;
 
-	std::vector<struct SConfigVariable *> m_vpAllVariables;
-	std::vector<struct SConfigVariable *> m_vpGameVariables;
+	std::vector<SConfigVariable *> m_vpAllVariables;
+	std::vector<SConfigVariable *> m_vpGameVariables;
 	std::vector<const char *> m_vpUnknownCommands;
 	CHeap m_ConfigHeap;
 
@@ -103,6 +224,8 @@ public:
 	void WriteLine(const char *pLine) override;
 
 	void StoreUnknownCommand(const char *pCommand) override;
+
+	void PossibleConfigVariables(const char *pStr, int FlagMask, POSSIBLECFGFUNC pfnCallback, void *pUserData) override;
 };
 
 #endif
