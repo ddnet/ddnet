@@ -517,7 +517,7 @@ int CMenus::DoKeyReader(const void *pID, const CUIRect *pRect, int Key, int Modi
 	return NewKey;
 }
 
-int CMenus::RenderMenubar(CUIRect r)
+void CMenus::RenderMenubar(CUIRect r)
 {
 	CUIRect Box = r;
 	CUIRect Button;
@@ -703,8 +703,6 @@ int CMenus::RenderMenubar(CUIRect r)
 		else
 			m_GamePage = NewPage;
 	}
-
-	return 0;
 }
 
 void CMenus::RenderLoading(const char *pCaption, const char *pContent, int IncreaseCounter, bool RenderLoadingBar, bool RenderMenuBackgroundMap)
@@ -917,10 +915,10 @@ bool CMenus::CanDisplayWarning() const
 	return m_Popup == POPUP_NONE;
 }
 
-int CMenus::Render()
+void CMenus::Render()
 {
 	if(Client()->State() == IClient::STATE_DEMOPLAYBACK && m_Popup == POPUP_NONE)
-		return 0;
+		return;
 
 	CUIRect Screen = *UI()->Screen();
 	UI()->MapScreen();
@@ -1765,8 +1763,6 @@ int CMenus::Render()
 	{
 		m_ShowStart = true;
 	}
-
-	return 0;
 }
 
 #if defined(CONF_VIDEORECORDER)

@@ -409,11 +409,11 @@ protected:
 	const CFriendItem *m_pRemoveFriend = nullptr;
 
 	// found in menus.cpp
-	int Render();
+	void Render();
 #if defined(CONF_VIDEORECORDER)
 	void PopupConfirmDemoReplaceVideo();
 #endif
-	int RenderMenubar(CUIRect r);
+	void RenderMenubar(CUIRect r);
 	void RenderNews(CUIRect MainView);
 	static void ConchainUpdateMusicState(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	void UpdateMusicState();
