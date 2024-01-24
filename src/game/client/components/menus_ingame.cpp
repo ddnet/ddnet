@@ -868,8 +868,7 @@ void CMenus::RenderInGameNetwork(CUIRect MainView)
 
 	if(NewPage != g_Config.m_UiPage)
 	{
-		if(Client()->State() != IClient::STATE_OFFLINE)
-			SetMenuPage(NewPage);
+		SetMenuPage(NewPage);
 	}
 
 	RenderServerbrowser(MainView);
