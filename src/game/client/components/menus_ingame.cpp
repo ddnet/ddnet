@@ -636,16 +636,16 @@ void CMenus::RenderServerControl(CUIRect MainView)
 	// tab bar
 	TabBar.VSplitLeft(TabBar.w / 3, &Button, &TabBar);
 	static CButtonContainer s_Button0;
-	if(DoButton_MenuTab(&s_Button0, Localize("Change settings"), s_ControlPage == 0, &Button, 0))
+	if(DoButton_MenuTab(&s_Button0, Localize("Change settings"), s_ControlPage == 0, &Button, IGraphics::CORNER_NONE))
 		s_ControlPage = 0;
 
 	TabBar.VSplitMid(&Button, &TabBar);
 	static CButtonContainer s_Button1;
-	if(DoButton_MenuTab(&s_Button1, Localize("Kick player"), s_ControlPage == 1, &Button, 0))
+	if(DoButton_MenuTab(&s_Button1, Localize("Kick player"), s_ControlPage == 1, &Button, IGraphics::CORNER_NONE))
 		s_ControlPage = 1;
 
 	static CButtonContainer s_Button2;
-	if(DoButton_MenuTab(&s_Button2, Localize("Move player to spectators"), s_ControlPage == 2, &TabBar, 0))
+	if(DoButton_MenuTab(&s_Button2, Localize("Move player to spectators"), s_ControlPage == 2, &TabBar, IGraphics::CORNER_NONE))
 		s_ControlPage = 2;
 
 	// render page

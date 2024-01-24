@@ -618,17 +618,17 @@ void CMenus::RenderMenubar(CUIRect Box)
 
 		Box.VSplitLeft(90.0f, &Button, &Box);
 		static CButtonContainer s_PlayersButton;
-		if(DoButton_MenuTab(&s_PlayersButton, Localize("Players"), m_ActivePage == PAGE_PLAYERS, &Button, 0))
+		if(DoButton_MenuTab(&s_PlayersButton, Localize("Players"), m_ActivePage == PAGE_PLAYERS, &Button, IGraphics::CORNER_NONE))
 			NewPage = PAGE_PLAYERS;
 
 		Box.VSplitLeft(130.0f, &Button, &Box);
 		static CButtonContainer s_ServerInfoButton;
-		if(DoButton_MenuTab(&s_ServerInfoButton, Localize("Server info"), m_ActivePage == PAGE_SERVER_INFO, &Button, 0))
+		if(DoButton_MenuTab(&s_ServerInfoButton, Localize("Server info"), m_ActivePage == PAGE_SERVER_INFO, &Button, IGraphics::CORNER_NONE))
 			NewPage = PAGE_SERVER_INFO;
 
 		Box.VSplitLeft(90.0f, &Button, &Box);
 		static CButtonContainer s_NetworkButton;
-		if(DoButton_MenuTab(&s_NetworkButton, Localize("Browser"), m_ActivePage == PAGE_NETWORK, &Button, 0))
+		if(DoButton_MenuTab(&s_NetworkButton, Localize("Browser"), m_ActivePage == PAGE_NETWORK, &Button, IGraphics::CORNER_NONE))
 			NewPage = PAGE_NETWORK;
 
 		{
@@ -636,7 +636,7 @@ void CMenus::RenderMenubar(CUIRect Box)
 			if(GameClient()->m_GameInfo.m_Race)
 			{
 				Box.VSplitLeft(90.0f, &Button, &Box);
-				if(DoButton_MenuTab(&s_GhostButton, Localize("Ghost"), m_ActivePage == PAGE_GHOST, &Button, 0))
+				if(DoButton_MenuTab(&s_GhostButton, Localize("Ghost"), m_ActivePage == PAGE_GHOST, &Button, IGraphics::CORNER_NONE))
 					NewPage = PAGE_GHOST;
 			}
 		}
@@ -672,13 +672,13 @@ void CMenus::RenderMenubar(CUIRect Box)
 	Box.VSplitRight(10.0f, &Box, nullptr);
 	Box.VSplitRight(33.0f, &Box, &Button);
 	static CButtonContainer s_SettingsButton;
-	if(DoButton_MenuTab(&s_SettingsButton, FONT_ICON_GEAR, m_ActivePage == PAGE_SETTINGS, &Button, IGraphics::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_SETTINGS], nullptr, nullptr, nullptr, 10.0f))
+	if(DoButton_MenuTab(&s_SettingsButton, FONT_ICON_GEAR, m_ActivePage == PAGE_SETTINGS, &Button, IGraphics::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_SETTINGS]))
 		NewPage = PAGE_SETTINGS;
 
 	Box.VSplitRight(10.0f, &Box, nullptr);
 	Box.VSplitRight(33.0f, &Box, &Button);
 	static CButtonContainer s_EditorButton;
-	if(DoButton_MenuTab(&s_EditorButton, FONT_ICON_PEN_TO_SQUARE, 0, &Button, IGraphics::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_EDITOR], nullptr, nullptr, nullptr, 10.0f))
+	if(DoButton_MenuTab(&s_EditorButton, FONT_ICON_PEN_TO_SQUARE, 0, &Button, IGraphics::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_EDITOR]))
 	{
 		g_Config.m_ClEditor = 1;
 	}
@@ -688,7 +688,7 @@ void CMenus::RenderMenubar(CUIRect Box)
 		Box.VSplitRight(10.0f, &Box, nullptr);
 		Box.VSplitRight(33.0f, &Box, &Button);
 		static CButtonContainer s_DemoButton;
-		if(DoButton_MenuTab(&s_DemoButton, FONT_ICON_CLAPPERBOARD, m_ActivePage == PAGE_DEMOS, &Button, IGraphics::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_DEMOBUTTON], nullptr, nullptr, nullptr, 10.0f))
+		if(DoButton_MenuTab(&s_DemoButton, FONT_ICON_CLAPPERBOARD, m_ActivePage == PAGE_DEMOS, &Button, IGraphics::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_DEMOBUTTON]))
 			NewPage = PAGE_DEMOS;
 	}
 
