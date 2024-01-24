@@ -625,7 +625,7 @@ void CMenus::RenderServerControl(CUIRect MainView)
 	// render background
 	CUIRect Bottom, RconExtension, TabBar, Button;
 	MainView.HSplitTop(20.0f, &Bottom, &MainView);
-	Bottom.Draw(ms_ColorTabbarActive, 0, 10.0f);
+	Bottom.Draw(ms_ColorTabbarActive, IGraphics::CORNER_NONE, 0.0f);
 	MainView.HSplitTop(20.0f, &TabBar, &MainView);
 	MainView.Draw(ms_ColorTabbarActive, IGraphics::CORNER_B, 10.0f);
 	MainView.Margin(10.0f, &MainView);
