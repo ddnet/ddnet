@@ -2517,15 +2517,21 @@ typedef pid_t PROCESS;
 constexpr PROCESS INVALID_PROCESS = 0;
 #endif
 
+enum class EShellExecuteWindowState
+{
+	FOREGROUND,
+	BACKGROUND,
+};
 
 /**
  * Executes a given file.
  *
  * @param file The file to execute.
+ * @param window_state The window state how the process window should be shown.
  *
  * @return Handle of the new process, or `INVALID_PROCESS` on error.
  */
-PROCESS shell_execute(const char *file);
+PROCESS shell_execute(const char *file, EShellExecuteWindowState window_state);
 
 /**
  * Sends kill signal to a process.

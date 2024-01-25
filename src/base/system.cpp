@@ -4106,7 +4106,7 @@ void cmdline_free(int argc, const char **argv)
 #endif
 }
 
-PROCESS shell_execute(const char *file)
+PROCESS shell_execute(const char *file, EShellExecuteWindowState window_state)
 {
 #if defined(CONF_FAMILY_WINDOWS)
 	const std::wstring wide_file = windows_utf8_to_wide(file);
@@ -4116,7 +4116,18 @@ PROCESS shell_execute(const char *file)
 	info.cbSize = sizeof(SHELLEXECUTEINFOW);
 	info.lpVerb = L"open";
 	info.lpFile = wide_file.c_str();
-	info.nShow = SW_SHOWMINNOACTIVE;
+	switch(window_state)
+	{
+	case EShellExecuteWindowState::FOREGROUND:
+		info.nShow = SW_SHOW;
+		break;
+	case EShellExecuteWindowState::BACKGROUND:
+		info.nShow = SW_SHOWMINNOACTIVE;
+		break;
+	default:
+		dbg_assert(false, "window_state invalid");
+		dbg_break();
+	}
 	info.fMask = SEE_MASK_NOCLOSEPROCESS;
 	// Save and restore the FPU control word because ShellExecute might change it
 	fenv_t floating_point_environment;
