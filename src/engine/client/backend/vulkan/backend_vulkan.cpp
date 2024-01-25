@@ -6571,7 +6571,20 @@ public:
 			Primq += 4;
 		}
 
-		if(!PrepareFrame())
+
+		VkSurfaceCapabilitiesKHR VKSurfCap;
+		if(!GetSurfaceProperties(VKSurfCap)) {
+			*pCommand->m_pInitError = -2;
+			return false;
+		}
+
+		auto Caps = GetSwapImageSize(VKSurfCap);
+		// if swapchain cannot be created, start paused
+		if (Caps.m_SwapImageViewport.width == 0 || Caps.m_SwapImageViewport.height == 0) {
+			m_RenderingPaused = true;
+			m_RecreateSwapChain = true;
+		}
+		else if(!PrepareFrame())
 			return false;
 		if(m_HasError)
 		{
