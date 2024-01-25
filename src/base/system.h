@@ -2517,26 +2517,23 @@ typedef pid_t PROCESS;
 constexpr PROCESS INVALID_PROCESS = 0;
 #endif
 
-/*
-	Function: shell_execute
-		Executes a given file.
 
-	Returns:
-		handle/pid of the new process
-*/
+/**
+ * Executes a given file.
+ *
+ * @param file The file to execute.
+ *
+ * @return Handle of the new process, or `INVALID_PROCESS` on error.
+ */
 PROCESS shell_execute(const char *file);
 
-/*
-	Function: kill_process
-		Sends kill signal to a process.
-
-	Parameters:
-		process - handle/pid of the process
-
-	Returns:
-		0 - Error
-		1 - Success
-*/
+/**
+ * Sends kill signal to a process.
+ *
+ * @param process Handle of the process to kill.
+ *
+ * @return 1 on success, 0 on error.
+ */
 int kill_process(PROCESS process);
 
 /**
