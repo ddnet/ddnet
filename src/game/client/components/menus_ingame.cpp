@@ -620,7 +620,13 @@ bool CMenus::RenderServerControlKick(CUIRect MainView, bool FilterSpectators)
 
 void CMenus::RenderServerControl(CUIRect MainView)
 {
-	static int s_ControlPage = 0;
+	enum class EServerControlTab
+	{
+		SETTINGS,
+		KICKVOTE,
+		SPECVOTE,
+	};
+	static EServerControlTab s_ControlPage = EServerControlTab::SETTINGS;
 
 	// render background
 	CUIRect Bottom, RconExtension, TabBar, Button;
@@ -636,28 +642,28 @@ void CMenus::RenderServerControl(CUIRect MainView)
 	// tab bar
 	TabBar.VSplitLeft(TabBar.w / 3, &Button, &TabBar);
 	static CButtonContainer s_Button0;
-	if(DoButton_MenuTab(&s_Button0, Localize("Change settings"), s_ControlPage == 0, &Button, IGraphics::CORNER_NONE))
-		s_ControlPage = 0;
+	if(DoButton_MenuTab(&s_Button0, Localize("Change settings"), s_ControlPage == EServerControlTab::SETTINGS, &Button, IGraphics::CORNER_NONE))
+		s_ControlPage = EServerControlTab::SETTINGS;
 
 	TabBar.VSplitMid(&Button, &TabBar);
 	static CButtonContainer s_Button1;
-	if(DoButton_MenuTab(&s_Button1, Localize("Kick player"), s_ControlPage == 1, &Button, IGraphics::CORNER_NONE))
-		s_ControlPage = 1;
+	if(DoButton_MenuTab(&s_Button1, Localize("Kick player"), s_ControlPage == EServerControlTab::KICKVOTE, &Button, IGraphics::CORNER_NONE))
+		s_ControlPage = EServerControlTab::KICKVOTE;
 
 	static CButtonContainer s_Button2;
-	if(DoButton_MenuTab(&s_Button2, Localize("Move player to spectators"), s_ControlPage == 2, &TabBar, IGraphics::CORNER_NONE))
-		s_ControlPage = 2;
+	if(DoButton_MenuTab(&s_Button2, Localize("Move player to spectators"), s_ControlPage == EServerControlTab::SPECVOTE, &TabBar, IGraphics::CORNER_NONE))
+		s_ControlPage = EServerControlTab::SPECVOTE;
 
 	// render page
 	MainView.HSplitBottom(ms_ButtonHeight + 5 * 2, &MainView, &Bottom);
 	Bottom.HMargin(5.0f, &Bottom);
 
 	bool Call = false;
-	if(s_ControlPage == 0)
+	if(s_ControlPage == EServerControlTab::SETTINGS)
 		Call = RenderServerControlServer(MainView);
-	else if(s_ControlPage == 1)
+	else if(s_ControlPage == EServerControlTab::KICKVOTE)
 		Call = RenderServerControlKick(MainView, false);
-	else if(s_ControlPage == 2)
+	else if(s_ControlPage == EServerControlTab::SPECVOTE)
 		Call = RenderServerControlKick(MainView, true);
 
 	// vote menu
@@ -694,13 +700,13 @@ void CMenus::RenderServerControl(CUIRect MainView)
 	static CButtonContainer s_CallVoteButton;
 	if(DoButton_Menu(&s_CallVoteButton, Localize("Call vote"), 0, &Button) || Call)
 	{
-		if(s_ControlPage == 0)
+		if(s_ControlPage == EServerControlTab::SETTINGS)
 		{
 			m_pClient->m_Voting.CallvoteOption(m_CallvoteSelectedOption, m_CallvoteReasonInput.GetString());
 			if(g_Config.m_UiCloseWindowAfterChangingSetting)
 				SetActive(false);
 		}
-		else if(s_ControlPage == 1)
+		else if(s_ControlPage == EServerControlTab::KICKVOTE)
 		{
 			if(m_CallvoteSelectedPlayer >= 0 && m_CallvoteSelectedPlayer < MAX_CLIENTS &&
 				m_pClient->m_Snap.m_apPlayerInfos[m_CallvoteSelectedPlayer])
@@ -709,7 +715,7 @@ void CMenus::RenderServerControl(CUIRect MainView)
 				SetActive(false);
 			}
 		}
-		else if(s_ControlPage == 2)
+		else if(s_ControlPage == EServerControlTab::SPECVOTE)
 		{
 			if(m_CallvoteSelectedPlayer >= 0 && m_CallvoteSelectedPlayer < MAX_CLIENTS &&
 				m_pClient->m_Snap.m_apPlayerInfos[m_CallvoteSelectedPlayer])
@@ -752,9 +758,11 @@ void CMenus::RenderServerControl(CUIRect MainView)
 		static CButtonContainer s_ForceVoteButton;
 		if(DoButton_Menu(&s_ForceVoteButton, Localize("Force vote"), 0, &Button))
 		{
-			if(s_ControlPage == 0)
+			if(s_ControlPage == EServerControlTab::SETTINGS)
+			{
 				m_pClient->m_Voting.CallvoteOption(m_CallvoteSelectedOption, m_CallvoteReasonInput.GetString(), true);
-			else if(s_ControlPage == 1)
+			}
+			else if(s_ControlPage == EServerControlTab::KICKVOTE)
 			{
 				if(m_CallvoteSelectedPlayer >= 0 && m_CallvoteSelectedPlayer < MAX_CLIENTS &&
 					m_pClient->m_Snap.m_apPlayerInfos[m_CallvoteSelectedPlayer])
@@ -763,7 +771,7 @@ void CMenus::RenderServerControl(CUIRect MainView)
 					SetActive(false);
 				}
 			}
-			else if(s_ControlPage == 2)
+			else if(s_ControlPage == EServerControlTab::SPECVOTE)
 			{
 				if(m_CallvoteSelectedPlayer >= 0 && m_CallvoteSelectedPlayer < MAX_CLIENTS &&
 					m_pClient->m_Snap.m_apPlayerInfos[m_CallvoteSelectedPlayer])
@@ -775,7 +783,7 @@ void CMenus::RenderServerControl(CUIRect MainView)
 			m_CallvoteReasonInput.Clear();
 		}
 
-		if(s_ControlPage == 0)
+		if(s_ControlPage == EServerControlTab::SETTINGS)
 		{
 			// remove vote
 			Bottom.VSplitRight(10.0f, &Bottom, 0);
