@@ -546,6 +546,19 @@ void CCharacter::OnDirectInput(CNetObj_PlayerInput *pNewInput)
 	mem_copy(&m_LatestPrevInput, &m_LatestInput, sizeof(m_LatestInput));
 }
 
+void CCharacter::ReleaseHook()
+{
+	m_Core.SetHookedPlayer(-1);
+	m_Core.m_HookState = HOOK_RETRACTED;
+	m_Core.m_TriggeredEvents |= COREEVENT_HOOK_RETRACT;
+}
+
+void CCharacter::ResetHook()
+{
+	ReleaseHook();
+	m_Core.m_HookPos = m_Core.m_Pos;
+}
+
 void CCharacter::ResetInput()
 {
 	m_Input.m_Direction = 0;
@@ -1103,6 +1116,33 @@ void CCharacter::GiveAllWeapons()
 	{
 		GiveWeapon(i);
 	}
+}
+
+void CCharacter::ResetVelocity()
+{
+	m_Core.m_Vel = vec2(0, 0);
+}
+
+// The method is needed only to reproduce 'shotgun bug' ddnet#5258
+// Use SetVelocity() instead.
+void CCharacter::SetVelocity(const vec2 NewVelocity)
+{
+	m_Core.m_Vel = ClampVel(m_MoveRestrictions, NewVelocity);
+}
+
+void CCharacter::SetRawVelocity(const vec2 NewVelocity)
+{
+	m_Core.m_Vel = NewVelocity;
+}
+
+void CCharacter::AddVelocity(const vec2 Addition)
+{
+	SetVelocity(m_Core.m_Vel + Addition);
+}
+
+void CCharacter::ApplyMoveRestrictions()
+{
+	m_Core.m_Vel = ClampVel(m_MoveRestrictions, m_Core.m_Vel);
 }
 
 CTeamsCore *CCharacter::TeamsCore()

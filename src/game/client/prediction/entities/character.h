@@ -51,6 +51,8 @@ public:
 
 	void OnPredictedInput(CNetObj_PlayerInput *pNewInput);
 	void OnDirectInput(CNetObj_PlayerInput *pNewInput);
+	void ReleaseHook();
+	void ResetHook();
 	void ResetInput();
 	void FireWeapon();
 
@@ -59,6 +61,12 @@ public:
 	void GiveWeapon(int Weapon, bool Remove = false);
 	void GiveNinja();
 	void RemoveNinja();
+
+	void ResetVelocity();
+	void SetVelocity(vec2 NewVelocity);
+	void SetRawVelocity(vec2 NewVelocity);
+	void AddVelocity(vec2 Addition);
+	void ApplyMoveRestrictions();
 
 	bool m_IsLocal;
 
@@ -81,7 +89,6 @@ public:
 	int m_TileIndex;
 	int m_TileFIndex;
 
-	int m_MoveRestrictions;
 	bool m_LastRefillJumps;
 
 	// Setters/Getters because i don't want to modify vanilla vars access modifiers
@@ -91,7 +98,7 @@ public:
 	void SetActiveWeapon(int ActiveWeap);
 	CCharacterCore GetCore() { return m_Core; }
 	void SetCore(CCharacterCore Core) { m_Core = Core; }
-	CCharacterCore *Core() { return &m_Core; }
+	const CCharacterCore *Core() const { return &m_Core; }
 	bool GetWeaponGot(int Type) { return m_Core.m_aWeapons[Type].m_Got; }
 	void SetWeaponGot(int Type, bool Value) { m_Core.m_aWeapons[Type].m_Got = Value; }
 	int GetWeaponAmmo(int Type) { return m_Core.m_aWeapons[Type].m_Ammo; }
@@ -144,6 +151,8 @@ private:
 
 	int m_ReloadTimer;
 	int m_AttackTick;
+
+	int m_MoveRestrictions;
 
 	// these are non-heldback inputs
 	CNetObj_PlayerInput m_LatestPrevInput;

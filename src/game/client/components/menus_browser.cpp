@@ -199,11 +199,27 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 	// users misses it
 	{
 		if(!ServerBrowser()->NumServers() && ServerBrowser()->IsGettingServerlist())
+		{
 			UI()->DoLabel(&View, Localize("Getting server list from master server"), 16.0f, TEXTALIGN_MC);
+		}
 		else if(!ServerBrowser()->NumServers())
+		{
 			UI()->DoLabel(&View, Localize("No servers found"), 16.0f, TEXTALIGN_MC);
+		}
 		else if(ServerBrowser()->NumServers() && !NumServers)
-			UI()->DoLabel(&View, Localize("No servers match your filter criteria"), 16.0f, TEXTALIGN_MC);
+		{
+			CUIRect Label, ResetButton;
+			View.HMargin((View.h - (16.0f + 18.0f + 8.0f)) / 2.0f, &Label);
+			Label.HSplitTop(16.0f, &Label, &ResetButton);
+			ResetButton.HSplitTop(8.0f, nullptr, &ResetButton);
+			ResetButton.VMargin((ResetButton.w - 200.0f) / 2.0f, &ResetButton);
+			UI()->DoLabel(&Label, Localize("No servers match your filter criteria"), 16.0f, TEXTALIGN_MC);
+			static CButtonContainer s_ResetButton;
+			if(DoButton_Menu(&s_ResetButton, Localize("Reset filter"), 0, &ResetButton))
+			{
+				ResetServerbrowserFilters();
+			}
+		}
 	}
 
 	s_ListBox.SetActive(!UI()->IsPopupOpen());
@@ -767,26 +783,31 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 	static CButtonContainer s_ResetButton;
 	if(DoButton_Menu(&s_ResetButton, Localize("Reset filter"), 0, &ResetButton))
 	{
-		g_Config.m_BrFilterString[0] = '\0';
-		g_Config.m_BrExcludeString[0] = '\0';
-		g_Config.m_BrFilterFull = 0;
-		g_Config.m_BrFilterEmpty = 0;
-		g_Config.m_BrFilterSpectators = 0;
-		g_Config.m_BrFilterFriends = 0;
-		g_Config.m_BrFilterCountry = 0;
-		g_Config.m_BrFilterCountryIndex = -1;
-		g_Config.m_BrFilterPw = 0;
-		g_Config.m_BrFilterGametype[0] = '\0';
-		g_Config.m_BrFilterGametypeStrict = 0;
-		g_Config.m_BrFilterConnectingPlayers = 1;
-		g_Config.m_BrFilterUnfinishedMap = 0;
-		g_Config.m_BrFilterServerAddress[0] = '\0';
-		ConfigManager()->Reset("br_filter_exclude_communities");
-		ConfigManager()->Reset("br_filter_exclude_countries");
-		ConfigManager()->Reset("br_filter_exclude_types");
-		Client()->ServerBrowserUpdate();
-		UpdateCommunityCache(true);
+		ResetServerbrowserFilters();
 	}
+}
+
+void CMenus::ResetServerbrowserFilters()
+{
+	g_Config.m_BrFilterString[0] = '\0';
+	g_Config.m_BrExcludeString[0] = '\0';
+	g_Config.m_BrFilterFull = 0;
+	g_Config.m_BrFilterEmpty = 0;
+	g_Config.m_BrFilterSpectators = 0;
+	g_Config.m_BrFilterFriends = 0;
+	g_Config.m_BrFilterCountry = 0;
+	g_Config.m_BrFilterCountryIndex = -1;
+	g_Config.m_BrFilterPw = 0;
+	g_Config.m_BrFilterGametype[0] = '\0';
+	g_Config.m_BrFilterGametypeStrict = 0;
+	g_Config.m_BrFilterConnectingPlayers = 1;
+	g_Config.m_BrFilterUnfinishedMap = 0;
+	g_Config.m_BrFilterServerAddress[0] = '\0';
+	ConfigManager()->Reset("br_filter_exclude_communities");
+	ConfigManager()->Reset("br_filter_exclude_countries");
+	ConfigManager()->Reset("br_filter_exclude_types");
+	Client()->ServerBrowserUpdate();
+	UpdateCommunityCache(true);
 }
 
 void CMenus::RenderServerbrowserDDNetFilter(CUIRect View,
@@ -1743,7 +1764,6 @@ void CMenus::ConchainCommunitiesUpdate(IConsole::IResult *pResult, void *pUserDa
 	CMenus *pThis = static_cast<CMenus *>(pUserData);
 	if(pResult->NumArguments() >= 1 && (g_Config.m_UiPage == PAGE_INTERNET || g_Config.m_UiPage == PAGE_FAVORITES))
 	{
-		pThis->ServerBrowser()->CleanFilters();
 		pThis->UpdateCommunityCache(true);
 		pThis->Client()->ServerBrowserUpdate();
 	}
@@ -1754,6 +1774,8 @@ void CMenus::UpdateCommunityCache(bool Force)
 	const bool PageWithCommunities = g_Config.m_UiPage == PAGE_INTERNET || g_Config.m_UiPage == PAGE_FAVORITES;
 	if(!Force && m_CommunityCache.m_UpdateTime != 0 && m_CommunityCache.m_UpdateTime == ServerBrowser()->DDNetInfoUpdateTime() && m_CommunityCache.m_PageWithCommunities == PageWithCommunities)
 		return;
+
+	ServerBrowser()->CleanFilters();
 
 	m_CommunityCache.m_UpdateTime = ServerBrowser()->DDNetInfoUpdateTime();
 	m_CommunityCache.m_PageWithCommunities = PageWithCommunities;
@@ -1953,7 +1975,7 @@ void CMenus::UpdateCommunityIcons()
 		std::shared_ptr<CCommunityIconDownloadJob> pJob = m_CommunityIconDownloadJobs.front();
 		if(pJob->Done())
 		{
-			if(pJob->State() == HTTP_DONE)
+			if(pJob->State() == EHttpState::DONE)
 			{
 				std::shared_ptr<CCommunityIconLoadJob> pLoadJob = std::make_shared<CCommunityIconLoadJob>(this, pJob->CommunityId(), IStorage::TYPE_SAVE);
 				Engine()->AddJob(pLoadJob);

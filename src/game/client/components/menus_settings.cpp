@@ -1562,15 +1562,15 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 	if(OldWindowMode != NewWindowMode)
 	{
 		if(NewWindowMode == 0)
-			Client()->SetWindowParams(0, false, true);
+			Client()->SetWindowParams(0, false);
 		else if(NewWindowMode == 1)
-			Client()->SetWindowParams(0, true, true);
+			Client()->SetWindowParams(0, true);
 		else if(NewWindowMode == 2)
-			Client()->SetWindowParams(3, false, false);
+			Client()->SetWindowParams(3, false);
 		else if(NewWindowMode == 3)
-			Client()->SetWindowParams(2, false, true);
+			Client()->SetWindowParams(2, false);
 		else if(NewWindowMode == 4)
-			Client()->SetWindowParams(1, false, true);
+			Client()->SetWindowParams(1, false);
 	}
 
 	if(Graphics()->GetNumScreens() > 1)
@@ -3194,16 +3194,7 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	if(DoButton_CheckBox(&g_Config.m_ClReplays, Localize("Enable replays"), g_Config.m_ClReplays, &Button))
 	{
 		g_Config.m_ClReplays ^= 1;
-		if(!g_Config.m_ClReplays)
-		{
-			// stop recording and remove the tmp demo file
-			Client()->DemoRecorder_Stop(RECORDER_REPLAYS, true);
-		}
-		else
-		{
-			// start recording
-			Client()->DemoRecorder_HandleAutoStart();
-		}
+		Client()->DemoRecorder_UpdateReplayRecorder();
 	}
 
 	Left.HSplitTop(20.0f, &Button, &Left);

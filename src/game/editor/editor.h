@@ -8,6 +8,7 @@
 
 #include <game/client/render.h>
 #include <game/client/ui.h>
+#include <game/client/ui_listbox.h>
 #include <game/mapitems.h>
 
 #include <game/editor/mapitems/envelope.h>
@@ -23,6 +24,7 @@
 #include <game/editor/mapitems/layer_tiles.h>
 #include <game/editor/mapitems/layer_tune.h>
 
+#include <engine/console.h>
 #include <engine/editor.h>
 #include <engine/engine.h>
 #include <engine/graphics.h>
@@ -31,7 +33,9 @@
 
 #include "auto_map.h"
 #include "editor_history.h"
+#include "editor_server_settings.h"
 #include "editor_trackers.h"
+#include "editor_ui.h"
 #include "map_view.h"
 #include "smooth_value.h"
 
@@ -43,6 +47,8 @@
 #include <vector>
 
 typedef std::function<void(int *pIndex)> FIndexModifyFunction;
+template<typename T>
+using FDropdownRenderCallback = std::function<void(const T &, char (&aOutput)[128], std::vector<STextColorSplit> &)>;
 
 // CEditor SPECIFIC
 enum
@@ -54,6 +60,7 @@ enum
 
 	DIALOG_NONE = 0,
 	DIALOG_FILE,
+	DIALOG_MAPSETTINGS_ERROR
 };
 
 class CEditorImage;
@@ -116,16 +123,7 @@ public:
 	CMapInfo m_MapInfo;
 	CMapInfo m_MapInfoTmp;
 
-	struct CSetting
-	{
-		char m_aCommand[256];
-
-		CSetting(const char *pCommand)
-		{
-			str_copy(m_aCommand, pCommand);
-		}
-	};
-	std::vector<CSetting> m_vSettings;
+	std::vector<CEditorMapSetting> m_vSettings;
 
 	std::shared_ptr<class CLayerGame> m_pGameLayer;
 	std::shared_ptr<CLayerGroup> m_pGameGroup;
@@ -267,6 +265,7 @@ class CEditor : public IEditor
 {
 	class IInput *m_pInput = nullptr;
 	class IClient *m_pClient = nullptr;
+	class IConfigManager *m_pConfigManager = nullptr;
 	class CConfig *m_pConfig = nullptr;
 	class IConsole *m_pConsole = nullptr;
 	class IEngine *m_pEngine = nullptr;
@@ -305,6 +304,7 @@ class CEditor : public IEditor
 public:
 	class IInput *Input() { return m_pInput; }
 	class IClient *Client() { return m_pClient; }
+	class IConfigManager *ConfigManager() { return m_pConfigManager; }
 	class CConfig *Config() { return m_pConfig; }
 	class IConsole *Console() { return m_pConsole; }
 	class IEngine *Engine() { return m_pEngine; }
@@ -320,7 +320,8 @@ public:
 
 	CEditor() :
 		m_ZoomEnvelopeX(1.0f, 0.1f, 600.0f),
-		m_ZoomEnvelopeY(640.0f, 0.1f, 32000.0f)
+		m_ZoomEnvelopeY(640.0f, 0.1f, 32000.0f),
+		m_MapSettingsCommandContext(m_MapSettingsBackend.NewContext(&m_SettingsCommandInput))
 	{
 		m_EntitiesTexture.Invalidate();
 		m_FrontTexture.Invalidate();
@@ -786,6 +787,8 @@ public:
 	static void EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Channels, void *pUser);
 
 	CLineInputBuffered<256> m_SettingsCommandInput;
+	CMapSettingsBackend m_MapSettingsBackend;
+	CMapSettingsBackend::CContext m_MapSettingsCommandContext;
 
 	CImageInfo m_TileartImageInfo;
 	char m_aTileartFilename[IO_MAX_PATH_LENGTH];
@@ -811,8 +814,15 @@ public:
 
 	int DoButton_DraggableEx(const void *pID, const char *pText, int Checked, const CUIRect *pRect, bool *pClicked, bool *pAbrupted, int Flags, const char *pToolTip = nullptr, int Corners = IGraphics::CORNER_ALL, float FontSize = 10.0f);
 
-	bool DoEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize, int Corners = IGraphics::CORNER_ALL, const char *pToolTip = nullptr);
-	bool DoClearableEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize, int Corners = IGraphics::CORNER_ALL, const char *pToolTip = nullptr);
+	bool DoEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize, int Corners = IGraphics::CORNER_ALL, const char *pToolTip = nullptr, const std::vector<STextColorSplit> &vColorSplits = {});
+	bool DoClearableEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize, int Corners = IGraphics::CORNER_ALL, const char *pToolTip = nullptr, const std::vector<STextColorSplit> &vColorSplits = {});
+
+	void DoMapSettingsEditBox(CMapSettingsBackend::CContext *pContext, const CUIRect *pRect, float FontSize, float DropdownMaxHeight, int Corners = IGraphics::CORNER_ALL, const char *pToolTip = nullptr);
+
+	template<typename T>
+	int DoEditBoxDropdown(SEditBoxDropdownContext *pDropdown, CLineInput *pLineInput, const CUIRect *pEditBoxRect, int x, float MaxHeight, bool AutoWidth, const std::vector<T> &vData, const FDropdownRenderCallback<T> &fnMatchCallback);
+	template<typename T>
+	int RenderEditBoxDropdown(SEditBoxDropdownContext *pDropdown, CUIRect View, CLineInput *pLineInput, int x, float MaxHeight, bool AutoWidth, const std::vector<T> &vData, const FDropdownRenderCallback<T> &fnMatchCallback);
 
 	void RenderBackground(CUIRect View, IGraphics::CTextureHandle Texture, float Size, float Brightness);
 
@@ -962,7 +972,11 @@ public:
 	void RenderTooltip(CUIRect TooltipRect);
 
 	void RenderEnvelopeEditor(CUIRect View);
+
+	void RenderMapSettingsErrorDialog();
 	void RenderServerSettingsEditor(CUIRect View, bool ShowServerSettingsEditorLast);
+	static void MapSettingsDropdownRenderCallback(const SPossibleValueMatch &Match, char (&aOutput)[128], std::vector<STextColorSplit> &vColorSplits);
+
 	void RenderEditorHistory(CUIRect View);
 
 	enum class EDragSide // Which side is the drag bar on

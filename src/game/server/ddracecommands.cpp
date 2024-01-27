@@ -77,8 +77,7 @@ void CGameContext::MoveCharacter(int ClientID, int X, int Y, bool Raw)
 	if(!pChr)
 		return;
 
-	pChr->Core()->m_Pos.x += ((Raw) ? 1 : 32) * X;
-	pChr->Core()->m_Pos.y += ((Raw) ? 1 : 32) * Y;
+	pChr->Move(vec2((Raw ? 1 : 32) * X, Raw ? 1 : 32) * Y);
 	pChr->m_DDRaceState = DDRACE_CHEAT;
 }
 
@@ -348,7 +347,7 @@ void CGameContext::ModifyWeapons(IConsole::IResult *pResult, void *pUserData,
 
 void CGameContext::Teleport(CCharacter *pChr, vec2 Pos)
 {
-	pChr->Core()->m_Pos = Pos;
+	pChr->SetPosition(Pos);
 	pChr->m_Pos = Pos;
 	pChr->m_PrevPos = Pos;
 	pChr->m_DDRaceState = DDRACE_CHEAT;
@@ -412,7 +411,7 @@ void CGameContext::ConTeleport(IConsole::IResult *pResult, void *pUserData)
 		}
 		pSelf->Teleport(pChr, Pos);
 		pChr->UnFreeze();
-		pChr->Core()->m_Vel = vec2(0, 0);
+		pChr->SetVelocity(vec2(0, 0));
 	}
 }
 

@@ -155,10 +155,10 @@ private:
 
 //
 
-class CEditorActionAutoMap : public CEditorActionLayerBase
+class CEditorActionTileChanges : public CEditorActionLayerBase
 {
 public:
-	CEditorActionAutoMap(CEditor *pEditor, int GroupIndex, int LayerIndex, const EditorTileStateChangeHistory<STileStateChange> &Changes);
+	CEditorActionTileChanges(CEditor *pEditor, int GroupIndex, int LayerIndex, const char *pAction, const EditorTileStateChangeHistory<STileStateChange> &Changes);
 
 	void Undo() override;
 	void Redo() override;

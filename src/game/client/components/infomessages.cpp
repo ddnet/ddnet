@@ -154,7 +154,7 @@ void CInfoMessages::OnMessage(int MsgType, void *pRawMsg)
 	if(m_pClient->m_SuppressEvents)
 		return;
 
-	if(MsgType == NETMSGTYPE_SV_KILLMSGTEAM && g_Config.m_ClShowKillMessages)
+	if(MsgType == NETMSGTYPE_SV_KILLMSGTEAM)
 	{
 		CNetMsg_Sv_KillMsgTeam *pMsg = (CNetMsg_Sv_KillMsgTeam *)pRawMsg;
 
@@ -233,7 +233,7 @@ void CInfoMessages::OnMessage(int MsgType, void *pRawMsg)
 		Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 	}
 
-	if(MsgType == NETMSGTYPE_SV_KILLMSG && g_Config.m_ClShowKillMessages)
+	if(MsgType == NETMSGTYPE_SV_KILLMSG)
 	{
 		CNetMsg_Sv_KillMsg *pMsg = (CNetMsg_Sv_KillMsg *)pRawMsg;
 
@@ -300,7 +300,7 @@ void CInfoMessages::OnMessage(int MsgType, void *pRawMsg)
 		Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 	}
 
-	if(MsgType == NETMSGTYPE_SV_RACEFINISH && g_Config.m_ClShowFinishMessages)
+	if(MsgType == NETMSGTYPE_SV_RACEFINISH)
 	{
 		CNetMsg_Sv_RaceFinish *pMsg = (CNetMsg_Sv_RaceFinish *)pRawMsg;
 

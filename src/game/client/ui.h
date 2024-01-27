@@ -212,6 +212,7 @@ struct SLabelProperties
 	bool m_StopAtEnd = false;
 	bool m_EllipsisAtEnd = false;
 	bool m_EnableWidthCheck = true;
+	std::vector<STextColorSplit> m_vColorSplits = {};
 };
 
 struct SMenuButtonProperties
@@ -513,8 +514,8 @@ public:
 	void DoLabel(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps = {}, int StrLen = -1, const CTextCursor *pReadCursor = nullptr) const;
 	void DoLabelStreamed(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps = {}, int StrLen = -1, const CTextCursor *pReadCursor = nullptr) const;
 
-	bool DoEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize, int Corners = IGraphics::CORNER_ALL);
-	bool DoClearableEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize, int Corners = IGraphics::CORNER_ALL);
+	bool DoEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize, int Corners = IGraphics::CORNER_ALL, const std::vector<STextColorSplit> &vColorSplits = {});
+	bool DoClearableEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize, int Corners = IGraphics::CORNER_ALL, const std::vector<STextColorSplit> &vColorSplits = {});
 
 	int DoButton_Menu(CUIElement &UIElement, const CButtonContainer *pID, const std::function<const char *()> &GetTextLambda, const CUIRect *pRect, const SMenuButtonProperties &Props = {});
 	// only used for popup menus

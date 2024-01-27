@@ -165,7 +165,7 @@ public:
 #endif
 	virtual void DemoRecorder_Start(const char *pFilename, bool WithTimestamp, int Recorder, bool Verbose = false) = 0;
 	virtual void DemoRecorder_HandleAutoStart() = 0;
-	virtual void DemoRecorder_Stop(int Recorder, bool RemoveFile = false) = 0;
+	virtual void DemoRecorder_UpdateReplayRecorder() = 0;
 	virtual class IDemoRecorder *DemoRecorder(int Recorder) = 0;
 	virtual void AutoScreenshot_Start() = 0;
 	virtual void AutoStatScreenshot_Start() = 0;
@@ -174,7 +174,7 @@ public:
 
 	// gfx
 	virtual void SwitchWindowScreen(int Index) = 0;
-	virtual void SetWindowParams(int FullscreenMode, bool IsBorderless, bool AllowResizing) = 0;
+	virtual void SetWindowParams(int FullscreenMode, bool IsBorderless) = 0;
 	virtual void ToggleWindowVSync() = 0;
 	virtual void Notify(const char *pTitle, const char *pMessage) = 0;
 	virtual void OnWindowResize() = 0;

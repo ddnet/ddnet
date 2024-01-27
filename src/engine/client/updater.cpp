@@ -24,7 +24,7 @@ class CUpdaterFetchTask : public CHttpRequest
 	void OnProgress() override;
 
 protected:
-	void OnCompletion() override;
+	void OnCompletion(EHttpState State) override;
 
 public:
 	CUpdaterFetchTask(CUpdater *pUpdater, const char *pFile, const char *pDestPath);
@@ -59,7 +59,7 @@ void CUpdaterFetchTask::OnProgress()
 	m_pUpdater->m_Percent = Progress();
 }
 
-void CUpdaterFetchTask::OnCompletion()
+void CUpdaterFetchTask::OnCompletion(EHttpState State)
 {
 	const char *pFileName = 0;
 	for(const char *pPath = Dest(); *pPath; pPath++)
@@ -68,9 +68,9 @@ void CUpdaterFetchTask::OnCompletion()
 	pFileName = pFileName ? pFileName : Dest();
 	if(!str_comp(pFileName, "update.json"))
 	{
-		if(State() == HTTP_DONE)
+		if(State == EHttpState::DONE)
 			m_pUpdater->SetCurrentState(IUpdater::GOT_MANIFEST);
-		else if(State() == HTTP_ERROR)
+		else if(State == EHttpState::ERROR)
 			m_pUpdater->SetCurrentState(IUpdater::FAIL);
 	}
 }
@@ -297,7 +297,7 @@ void CUpdater::RunningUpdate()
 		{
 			return;
 		}
-		else if(m_pCurrentTask->State() == HTTP_ERROR || m_pCurrentTask->State() == HTTP_ABORTED)
+		else if(m_pCurrentTask->State() == EHttpState::ERROR || m_pCurrentTask->State() == EHttpState::ABORTED)
 		{
 			SetCurrentState(IUpdater::FAIL);
 		}

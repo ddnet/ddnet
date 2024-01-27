@@ -270,7 +270,7 @@ int CHttpRequest::ProgressCallback(void *pUser, double DlTotal, double DlCurr, d
 
 void CHttpRequest::OnCompletionInternal(std::optional<unsigned int> Result)
 {
-	int State;
+	EHttpState State;
 	if(Result.has_value())
 	{
 		CURLcode Code = static_cast<CURLcode>(Result.value());
@@ -278,22 +278,22 @@ void CHttpRequest::OnCompletionInternal(std::optional<unsigned int> Result)
 		{
 			if(g_Config.m_DbgCurl || m_LogProgress >= HTTPLOG::FAILURE)
 				dbg_msg("http", "%s failed. libcurl error (%u): %s", m_aUrl, Code, m_aErr);
-			State = (Code == CURLE_ABORTED_BY_CALLBACK) ? HTTP_ABORTED : HTTP_ERROR;
+			State = (Code == CURLE_ABORTED_BY_CALLBACK) ? EHttpState::ABORTED : EHttpState::ERROR;
 		}
 		else
 		{
 			if(g_Config.m_DbgCurl || m_LogProgress >= HTTPLOG::ALL)
 				dbg_msg("http", "task done: %s", m_aUrl);
-			State = HTTP_DONE;
+			State = EHttpState::DONE;
 		}
 	}
 	else
 	{
 		dbg_msg("http", "%s failed. internal error: %s", m_aUrl, m_aErr);
-		State = HTTP_ERROR;
+		State = EHttpState::ERROR;
 	}
 
-	if(State == HTTP_DONE && m_ExpectedSha256 != SHA256_ZEROED)
+	if(State == EHttpState::DONE && m_ExpectedSha256 != SHA256_ZEROED)
 	{
 		const SHA256_DIGEST ActualSha256 = sha256_finish(&m_ActualSha256);
 		if(ActualSha256 != m_ExpectedSha256)
@@ -306,7 +306,7 @@ void CHttpRequest::OnCompletionInternal(std::optional<unsigned int> Result)
 				sha256_str(m_ExpectedSha256, aExpectedSha256, sizeof(aExpectedSha256));
 				dbg_msg("http", "SHA256 mismatch: got=%s, expected=%s, url=%s", aActualSha256, aExpectedSha256, m_aUrl);
 			}
-			State = HTTP_ERROR;
+			State = EHttpState::ERROR;
 		}
 	}
 
@@ -315,17 +315,20 @@ void CHttpRequest::OnCompletionInternal(std::optional<unsigned int> Result)
 		if(m_File && io_close(m_File) != 0)
 		{
 			dbg_msg("http", "i/o error, cannot close file: %s", m_aDest);
-			State = HTTP_ERROR;
+			State = EHttpState::ERROR;
 		}
 
-		if(State == HTTP_ERROR || State == HTTP_ABORTED)
+		if(State == EHttpState::ERROR || State == EHttpState::ABORTED)
 		{
 			fs_remove(m_aDestAbsolute);
 		}
 	}
 
+	// The globally visible state must be updated after OnCompletion has finished,
+	// or other threads may try to access the result of a completed HTTP request,
+	// before the result has been initialized/updated in OnCompletion.
+	OnCompletion(State);
 	m_State = State;
-	OnCompletion();
 }
 
 void CHttpRequest::WriteToFile(IStorage *pStorage, const char *pDest, int StorageType)
@@ -354,8 +357,8 @@ void CHttpRequest::Wait()
 	// This is so uncommon that polling just might work
 	for(;;)
 	{
-		int State = m_State.load(std::memory_order_seq_cst);
-		if(State != HTTP_QUEUED && State != HTTP_RUNNING)
+		EHttpState State = m_State.load(std::memory_order_seq_cst);
+		if(State != EHttpState::QUEUED && State != EHttpState::RUNNING)
 		{
 			return;
 		}
@@ -365,7 +368,7 @@ void CHttpRequest::Wait()
 
 void CHttpRequest::Result(unsigned char **ppResult, size_t *pResultLength) const
 {
-	if(m_WriteToFile || State() != HTTP_DONE)
+	if(m_WriteToFile || State() != EHttpState::DONE)
 	{
 		*ppResult = nullptr;
 		*pResultLength = 0;

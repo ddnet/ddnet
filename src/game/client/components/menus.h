@@ -461,6 +461,7 @@ protected:
 	void Connect(const char *pAddress);
 	void PopupConfirmSwitchServer();
 	void RenderServerbrowserFilters(CUIRect View);
+	void ResetServerbrowserFilters();
 	void RenderServerbrowserDDNetFilter(CUIRect View,
 		IFilterList &Filter,
 		float ItemHeight, int MaxItems, int ItemsPerRow,

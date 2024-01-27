@@ -101,11 +101,17 @@ class IDemoRecorder : public IInterface
 {
 	MACRO_INTERFACE("demorecorder")
 public:
+	enum class EStopMode
+	{
+		KEEP_FILE,
+		REMOVE_FILE,
+	};
+
 	virtual ~IDemoRecorder() {}
 	virtual bool IsRecording() const = 0;
-	virtual int Stop() = 0;
+	virtual int Stop(IDemoRecorder::EStopMode Mode, const char *pTargetFilename = "") = 0;
 	virtual int Length() const = 0;
-	virtual char *GetCurrentFilename() = 0;
+	virtual const char *CurrentFilename() const = 0;
 };
 
 class IDemoEditor : public IInterface

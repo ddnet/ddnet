@@ -60,6 +60,7 @@ public:
 
 	void OnPredictedInput(CNetObj_PlayerInput *pNewInput);
 	void OnDirectInput(CNetObj_PlayerInput *pNewInput);
+	void ReleaseHook();
 	void ResetHook();
 	void ResetInput();
 	void FireWeapon();
@@ -88,6 +89,15 @@ public:
 	class CPlayer *GetPlayer() { return m_pPlayer; }
 	CClientMask TeamMask();
 
+	void SetPosition(const vec2 &Position);
+	void Move(vec2 RelPos);
+
+	void ResetVelocity();
+	void SetVelocity(vec2 NewVelocity);
+	void SetRawVelocity(vec2 NewVelocity);
+	void AddVelocity(vec2 Addition);
+	void ApplyMoveRestrictions();
+
 private:
 	// player controlling this character
 	class CPlayer *m_pPlayer;
@@ -105,6 +115,8 @@ private:
 
 	int m_ReloadTimer;
 	int m_AttackTick;
+
+	int m_MoveRestrictions;
 
 	int m_DamageTaken;
 
@@ -201,8 +213,6 @@ public:
 	int m_TileIndex;
 	int m_TileFIndex;
 
-	int m_MoveRestrictions;
-
 	int64_t m_LastStartWarning;
 	int64_t m_LastRescue;
 	bool m_LastRefillJumps;
@@ -226,7 +236,7 @@ public:
 	void SetArmor(int Armor) { m_Armor = Armor; }
 	CCharacterCore GetCore() { return m_Core; }
 	void SetCore(CCharacterCore Core) { m_Core = Core; }
-	CCharacterCore *Core() { return &m_Core; }
+	const CCharacterCore *Core() const { return &m_Core; }
 	bool GetWeaponGot(int Type) { return m_Core.m_aWeapons[Type].m_Got; }
 	void SetWeaponGot(int Type, bool Value) { m_Core.m_aWeapons[Type].m_Got = Value; }
 	int GetWeaponAmmo(int Type) { return m_Core.m_aWeapons[Type].m_Ammo; }

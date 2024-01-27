@@ -21,10 +21,10 @@ bool CSkins::IsVanillaSkin(const char *pName)
 	return std::any_of(std::begin(VANILLA_SKINS), std::end(VANILLA_SKINS), [pName](const char *pVanillaSkin) { return str_comp(pName, pVanillaSkin) == 0; });
 }
 
-void CSkins::CGetPngFile::OnCompletion()
+void CSkins::CGetPngFile::OnCompletion(EHttpState State)
 {
 	// Maybe this should start another thread to load the png in instead of stalling the curl thread
-	if(State() != HTTP_ERROR && State() != HTTP_ABORTED)
+	if(State == EHttpState::DONE)
 	{
 		m_pSkins->LoadSkinPNG(m_Info, Dest(), Dest(), IStorage::TYPE_SAVE);
 	}
@@ -410,7 +410,7 @@ const CSkin *CSkins::FindImpl(const char *pName)
 	const auto SkinDownloadIt = m_DownloadSkins.find(pName);
 	if(SkinDownloadIt != m_DownloadSkins.end())
 	{
-		if(SkinDownloadIt->second->m_pTask && SkinDownloadIt->second->m_pTask->State() == HTTP_DONE)
+		if(SkinDownloadIt->second->m_pTask && SkinDownloadIt->second->m_pTask->State() == EHttpState::DONE && SkinDownloadIt->second->m_pTask->m_Info.m_pData)
 		{
 			char aPath[IO_MAX_PATH_LENGTH];
 			str_format(aPath, sizeof(aPath), "downloadedskins/%s.png", SkinDownloadIt->second->GetName());
@@ -420,7 +420,7 @@ const CSkin *CSkins::FindImpl(const char *pName)
 			--m_DownloadingSkins;
 			return pSkin;
 		}
-		if(SkinDownloadIt->second->m_pTask && (SkinDownloadIt->second->m_pTask->State() == HTTP_ERROR || SkinDownloadIt->second->m_pTask->State() == HTTP_ABORTED))
+		if(SkinDownloadIt->second->m_pTask && (SkinDownloadIt->second->m_pTask->State() == EHttpState::ERROR || SkinDownloadIt->second->m_pTask->State() == EHttpState::ABORTED))
 		{
 			SkinDownloadIt->second->m_pTask = nullptr;
 			--m_DownloadingSkins;

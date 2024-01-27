@@ -18,13 +18,13 @@
 typedef struct _json_value json_value;
 class IStorage;
 
-enum
+enum class EHttpState
 {
-	HTTP_ERROR = -1,
-	HTTP_QUEUED,
-	HTTP_RUNNING,
-	HTTP_DONE,
-	HTTP_ABORTED,
+	ERROR = -1,
+	QUEUED,
+	RUNNING,
+	DONE,
+	ABORTED,
 };
 
 enum class HTTPLOG
@@ -111,7 +111,7 @@ class CHttpRequest : public IHttpRequest
 	IPRESOLVE m_IpResolve = IPRESOLVE::WHATEVER;
 
 	char m_aErr[256]; // 256 == CURL_ERROR_SIZE
-	std::atomic<int> m_State{HTTP_QUEUED};
+	std::atomic<EHttpState> m_State{EHttpState::QUEUED};
 	std::atomic<bool> m_Abort{false};
 
 	// Abort the request with an error if `BeforeInit()` returns false.
@@ -128,8 +128,8 @@ class CHttpRequest : public IHttpRequest
 
 protected:
 	// These run on the curl thread now, DO NOT STALL THE THREAD
-	virtual void OnProgress(){};
-	virtual void OnCompletion(){};
+	virtual void OnProgress() {}
+	virtual void OnCompletion(EHttpState State) {}
 
 public:
 	CHttpRequest(const char *pUrl);
@@ -185,11 +185,11 @@ public:
 	double Current() const { return m_Current.load(std::memory_order_relaxed); }
 	double Size() const { return m_Size.load(std::memory_order_relaxed); }
 	int Progress() const { return m_Progress.load(std::memory_order_relaxed); }
-	int State() const { return m_State; }
+	EHttpState State() const { return m_State; }
 	bool Done() const
 	{
-		int State = m_State;
-		return State != HTTP_QUEUED && State != HTTP_RUNNING;
+		EHttpState State = m_State;
+		return State != EHttpState::QUEUED && State != EHttpState::RUNNING;
 	}
 	void Abort() { m_Abort = true; }
 
