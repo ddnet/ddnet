@@ -168,7 +168,15 @@ public:
 	CGameTeams &Teams() { return m_Teams; }
 	std::shared_ptr<CScoreLoadBestTimeResult> m_pLoadBestTimeResult;
 
-	// gctf
+	//      _     _            _        _           _
+	//   __| | __| |_ __   ___| |_     (_)_ __  ___| |_ __ _
+	//  / _` |/ _` | '_ \ / _ \ __|____| | '_ \/ __| __/ _` |
+	// | (_| | (_| | | | |  __/ ||_____| | | | \__ \ || (_| |
+	//  \__,_|\__,_|_| |_|\___|\__|    |_|_| |_|___/\__\__,_|
+	//
+	// all code below should be ddnet-insta
+	//
+
 	// virtual bool OnLaserHitCharacter(vec2 From, vec2 To, class CLaser &Laser) {};
 	/*
 		Function: OnCharacterTakeDamage
@@ -298,6 +306,18 @@ public:
 	virtual void OnFlagReturn(class CFlag *pFlag); // gctf
 	virtual void OnFlagGrab(class CFlag *pFlag); // gctf
 	virtual void OnFlagCapture(class CFlag *pFlag, float Time); // gctf
+
+	/*
+		Variable: m_GamePauseStartTime
+
+		gets set to time_get() when a player pauses the game
+		using the ready change if sv_player_ready_mode is active
+
+		it can then be used to track how long a game has been paused already
+
+		it is set to -1 if the game is currently not paused
+	*/
+	int64_t m_GamePauseStartTime;
 };
 
 #endif

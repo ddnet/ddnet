@@ -57,6 +57,7 @@ It kills with one shot and capturing the enemy flag scores your team 100 points.
 + `sv_scorelimit` Score limit (0 disables)
 + `sv_timelimit` Time limit in minutes (0 disables)
 + `sv_player_ready_mode` When enabled, players can pause/unpause the game and start the game on warmup via their ready state
++ `sv_force_ready_all` minutes after which a game will be force unpaused (0=off) related to sv_player_ready_mode
 + `sv_grenade_ammo_regen` Activate or deactivate grenade ammo regeneration in general
 + `sv_grenade_ammo_regen_time` Grenade ammo regeneration time in miliseconds
 + `sv_grenade_ammo_regen_num` Maximum number of grenades if ammo regeneration on

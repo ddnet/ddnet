@@ -54,6 +54,7 @@ public:
 	bool OnBangCommand(int ClientID, const char *pCmd, int NumArgs, const char **ppArgs);
 	void AddSpree(CPlayer *pPlayer);
 	void EndSpree(CPlayer *pPlayer, CPlayer *pKiller);
+	void CheckForceUnpauseGame();
 	enum ESpawnWeapons
 	{
 		SPAWN_WEAPON_LASER,

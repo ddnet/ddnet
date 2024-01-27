@@ -1281,6 +1281,7 @@ void IGameController::SetGameState(EGameState GameState, int Timer)
 				// start new match
 				StartMatch(false);
 			}
+			m_GamePauseStartTime = -1;
 		}
 		break;
 	case IGS_WARMUP_USER:
@@ -1323,6 +1324,7 @@ void IGameController::SetGameState(EGameState GameState, int Timer)
 				// start new match
 				StartMatch(false);
 			}
+			m_GamePauseStartTime = -1;
 		}
 		break;
 	case IGS_START_COUNTDOWN_ROUND_START:
@@ -1352,6 +1354,7 @@ void IGameController::SetGameState(EGameState GameState, int Timer)
 				// no countdown, start new match right away
 				SetGameState(IGS_GAME_RUNNING);
 			}
+			// m_GamePauseStartTime = -1; // countdown while paused still counts as paused
 		}
 		break;
 	case IGS_GAME_RUNNING:
@@ -1383,6 +1386,7 @@ void IGameController::SetGameState(EGameState GameState, int Timer)
 			m_GameStateTimer = TIMER_INFINITE;
 			SetPlayersReadyState(true);
 			GameServer()->m_World.m_Paused = false;
+			m_GamePauseStartTime = -1;
 		}
 		break;
 	case IGS_GAME_PAUSED:
@@ -1412,12 +1416,14 @@ void IGameController::SetGameState(EGameState GameState, int Timer)
 				// start a countdown to end pause
 				SetGameState(IGS_START_COUNTDOWN_UNPAUSE);
 			}
+			m_GamePauseStartTime = time_get();
 		}
 		break;
 	case IGS_END_ROUND:
 	case IGS_END_MATCH:
 		if(m_Warmup) // game can't end when we are running warmup
 			break;
+		m_GamePauseStartTime = -1;
 		m_GameOverTick = Server()->Tick();
 		if(GameState == IGS_END_ROUND && DoWincheckMatch())
 			break;

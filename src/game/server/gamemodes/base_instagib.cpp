@@ -176,13 +176,60 @@ int CGameControllerInstagib::OnCharacterDeath(class CCharacter *pVictim, class C
 	return 0;
 }
 
+void CGameControllerInstagib::CheckForceUnpauseGame()
+{
+	if(!Config()->m_SvForceReadyAll)
+		return;
+	if(m_GamePauseStartTime == -1)
+		return;
+
+	const int MinutesPaused = ((time_get() - m_GamePauseStartTime) / time_freq()) / 60;
+	// dbg_msg("insta", "paused since %d minutes", MinutesPaused);
+
+	const int SecondsPausedDebug = (time_get() - m_GamePauseStartTime) / time_freq();
+	// dbg_msg("insta", "paused since %d seconds [DEBUG ONLY REMOVE THIS]", SecondsPausedDebug);
+
+	const int64_t ForceUnpauseTime = m_GamePauseStartTime + (Config()->m_SvForceReadyAll * 60 * time_freq());
+	// dbg_msg("insta", "    ForceUnpauseTime=%ld secs=%ld secs_diff_now=%ld [DEBUG ONLY REMOVE THIS]", ForceUnpauseTime, ForceUnpauseTime / time_freq(), (time_get() - ForceUnpauseTime) / time_freq());
+	// dbg_msg("insta", "m_GamePauseStartTime=%ld secs=%ld secs_diff_now=%ld [DEBUG ONLY REMOVE THIS]", m_GamePauseStartTime, m_GamePauseStartTime / time_freq(), (time_get() - m_GamePauseStartTime) / time_freq());
+	const int SecondsUntilForceUnpause = (ForceUnpauseTime - time_get()) / time_freq();
+	// dbg_msg("insta", "seconds until force unpause %d [DEBUG ONLY REMOVE THIS]", SecondsUntilForceUnpause);
+
+	char aBuf[512];
+	aBuf[0] = '\0';
+	if(SecondsUntilForceUnpause == 60)
+		str_copy(aBuf, "Game will be force unpaused in 1 minute.");
+	else if(SecondsUntilForceUnpause == 10)
+		str_copy(aBuf, "Game will be force unpaused in 10 seconds.");
+	if(aBuf[0])
+	{
+		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
+	}
+
+	if(MinutesPaused >= Config()->m_SvForceReadyAll)
+	{
+		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, "Force unpaused the game because the maximum pause time was reached.");
+		SetPlayersReadyState(true);
+		CheckReadyStates();
+	}
+}
+
 void CGameControllerInstagib::Tick()
 {
 	CGameControllerDDRace::Tick();
 
 	if(Config()->m_SvPlayerReadyMode && GameServer()->m_World.m_Paused)
+	{
 		if(Server()->Tick() % Server()->TickSpeed() * 5 == 0)
 			GameServer()->PlayerReadyStateBroadcast();
+
+		// checks that only need to happen every second
+		// and not every tick
+		if(Server()->Tick() % Server()->TickSpeed() == 0)
+		{
+			CheckForceUnpauseGame();
+		}
+	}
 
 	for(const CPlayer *pPlayer : GameServer()->m_apPlayers)
 	{
