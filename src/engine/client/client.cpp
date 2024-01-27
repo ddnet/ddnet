@@ -4508,7 +4508,7 @@ int main(int argc, const char **argv)
 
 	if(Restarting)
 	{
-		shell_execute(aRestartBinaryPath);
+		shell_execute(aRestartBinaryPath, EShellExecuteWindowState::FOREGROUND);
 	}
 
 	PerformFinalCleanup();
