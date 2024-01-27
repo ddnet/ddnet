@@ -2468,30 +2468,28 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 	char aBuf[128];
 	static int s_CurTab = 0;
 
-	CUIRect TabBar, Page1Tab, Page2Tab, Page3Tab, Page4Tab, Page5Tab, Page6Tab, LeftView, RightView, Section, Button, Label;
+	CUIRect TabBar, LeftView, RightView, Section, Button, Label;
 
-	MainView.HSplitTop(20, &TabBar, &MainView);
-	float TabsW = TabBar.w;
-	TabBar.VSplitLeft(TabsW / NUMBER_OF_APPEARANCE_TABS, &Page1Tab, &Page2Tab);
-	Page2Tab.VSplitLeft(TabsW / NUMBER_OF_APPEARANCE_TABS, &Page2Tab, &Page3Tab);
-	Page3Tab.VSplitLeft(TabsW / NUMBER_OF_APPEARANCE_TABS, &Page3Tab, &Page4Tab);
-	Page4Tab.VSplitLeft(TabsW / NUMBER_OF_APPEARANCE_TABS, &Page4Tab, &Page5Tab);
-	Page5Tab.VSplitLeft(TabsW / NUMBER_OF_APPEARANCE_TABS, &Page5Tab, &Page6Tab);
-
+	MainView.HSplitTop(20.0f, &TabBar, &MainView);
+	const float TabWidth = TabBar.w / NUMBER_OF_APPEARANCE_TABS;
 	static CButtonContainer s_aPageTabs[NUMBER_OF_APPEARANCE_TABS] = {};
+	const char *apTabNames[NUMBER_OF_APPEARANCE_TABS] = {
+		Localize("HUD"),
+		Localize("Chat"),
+		Localize("Name Plate"),
+		Localize("Hook Collisions"),
+		Localize("Info Messages"),
+		Localize("Laser")};
 
-	if(DoButton_MenuTab(&s_aPageTabs[APPEARANCE_TAB_HUD], Localize("HUD"), s_CurTab == APPEARANCE_TAB_HUD, &Page1Tab, IGraphics::CORNER_L, NULL, NULL, NULL, NULL, 4))
-		s_CurTab = APPEARANCE_TAB_HUD;
-	if(DoButton_MenuTab(&s_aPageTabs[APPEARANCE_TAB_CHAT], Localize("Chat"), s_CurTab == APPEARANCE_TAB_CHAT, &Page2Tab, 0, NULL, NULL, NULL, NULL, 4))
-		s_CurTab = APPEARANCE_TAB_CHAT;
-	if(DoButton_MenuTab(&s_aPageTabs[APPEARANCE_TAB_NAME_PLATE], Localize("Name Plate"), s_CurTab == APPEARANCE_TAB_NAME_PLATE, &Page3Tab, 0, NULL, NULL, NULL, NULL, 4))
-		s_CurTab = APPEARANCE_TAB_NAME_PLATE;
-	if(DoButton_MenuTab(&s_aPageTabs[APPEARANCE_TAB_HOOK_COLLISION], Localize("Hook Collisions"), s_CurTab == APPEARANCE_TAB_HOOK_COLLISION, &Page4Tab, 0, NULL, NULL, NULL, NULL, 4))
-		s_CurTab = APPEARANCE_TAB_HOOK_COLLISION;
-	if(DoButton_MenuTab(&s_aPageTabs[APPEARANCE_TAB_INFO_MESSAGES], Localize("Info Messages"), s_CurTab == APPEARANCE_TAB_INFO_MESSAGES, &Page5Tab, 0, NULL, NULL, NULL, NULL, 4))
-		s_CurTab = APPEARANCE_TAB_INFO_MESSAGES;
-	if(DoButton_MenuTab(&s_aPageTabs[APPEARANCE_TAB_LASER], Localize("Laser"), s_CurTab == APPEARANCE_TAB_LASER, &Page6Tab, IGraphics::CORNER_R, NULL, NULL, NULL, NULL, 4))
-		s_CurTab = APPEARANCE_TAB_LASER;
+	for(int Tab = APPEARANCE_TAB_HUD; Tab < NUMBER_OF_APPEARANCE_TABS; ++Tab)
+	{
+		TabBar.VSplitLeft(TabWidth, &Button, &TabBar);
+		const int Corners = Tab == APPEARANCE_TAB_HUD ? IGraphics::CORNER_L : Tab == NUMBER_OF_APPEARANCE_TABS - 1 ? IGraphics::CORNER_R : IGraphics::CORNER_NONE;
+		if(DoButton_MenuTab(&s_aPageTabs[Tab], apTabNames[Tab], s_CurTab == Tab, &Button, Corners, nullptr, nullptr, nullptr, nullptr, 4.0f))
+		{
+			s_CurTab = Tab;
+		}
+	}
 
 	MainView.HSplitTop(10.0f, nullptr, &MainView);
 

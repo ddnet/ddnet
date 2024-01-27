@@ -352,30 +352,29 @@ int InitSearchList(std::vector<const TName *> &vpSearchList, std::vector<TName> 
 
 void CMenus::RenderSettingsCustom(CUIRect MainView)
 {
-	CUIRect TabBar, CustomList, QuickSearch, QuickSearchClearButton, DirectoryButton, Page1Tab, Page2Tab, Page3Tab, Page4Tab, Page5Tab, Page6Tab, ReloadButton;
+	CUIRect TabBar, CustomList, QuickSearch, QuickSearchClearButton, DirectoryButton, ReloadButton;
 
-	MainView.HSplitTop(20, &TabBar, &MainView);
-	float TabsW = TabBar.w;
-	TabBar.VSplitLeft(TabsW / NUMBER_OF_ASSETS_TABS, &Page1Tab, &Page2Tab);
-	Page2Tab.VSplitLeft(TabsW / NUMBER_OF_ASSETS_TABS, &Page2Tab, &Page3Tab);
-	Page3Tab.VSplitLeft(TabsW / NUMBER_OF_ASSETS_TABS, &Page3Tab, &Page4Tab);
-	Page4Tab.VSplitLeft(TabsW / NUMBER_OF_ASSETS_TABS, &Page4Tab, &Page5Tab);
-	Page5Tab.VSplitLeft(TabsW / NUMBER_OF_ASSETS_TABS, &Page5Tab, &Page6Tab);
-
+	MainView.HSplitTop(20.0f, &TabBar, &MainView);
+	const float TabWidth = TabBar.w / NUMBER_OF_ASSETS_TABS;
 	static CButtonContainer s_aPageTabs[NUMBER_OF_ASSETS_TABS] = {};
+	const char *apTabNames[NUMBER_OF_ASSETS_TABS] = {
+		Localize("Entities"),
+		Localize("Game"),
+		Localize("Emoticons"),
+		Localize("Particles"),
+		Localize("HUD"),
+		Localize("Extras")};
 
-	if(DoButton_MenuTab((CButtonContainer *)&s_aPageTabs[ASSETS_TAB_ENTITIES], Localize("Entities"), s_CurCustomTab == ASSETS_TAB_ENTITIES, &Page1Tab, IGraphics::CORNER_L, NULL, NULL, NULL, NULL, 4))
-		s_CurCustomTab = ASSETS_TAB_ENTITIES;
-	if(DoButton_MenuTab((CButtonContainer *)&s_aPageTabs[ASSETS_TAB_GAME], Localize("Game"), s_CurCustomTab == ASSETS_TAB_GAME, &Page2Tab, 0, NULL, NULL, NULL, NULL, 4))
-		s_CurCustomTab = ASSETS_TAB_GAME;
-	if(DoButton_MenuTab((CButtonContainer *)&s_aPageTabs[ASSETS_TAB_EMOTICONS], Localize("Emoticons"), s_CurCustomTab == ASSETS_TAB_EMOTICONS, &Page3Tab, 0, NULL, NULL, NULL, NULL, 4))
-		s_CurCustomTab = ASSETS_TAB_EMOTICONS;
-	if(DoButton_MenuTab((CButtonContainer *)&s_aPageTabs[ASSETS_TAB_PARTICLES], Localize("Particles"), s_CurCustomTab == ASSETS_TAB_PARTICLES, &Page4Tab, 0, NULL, NULL, NULL, NULL, 4))
-		s_CurCustomTab = ASSETS_TAB_PARTICLES;
-	if(DoButton_MenuTab((CButtonContainer *)&s_aPageTabs[ASSETS_TAB_HUD], Localize("HUD"), s_CurCustomTab == ASSETS_TAB_HUD, &Page5Tab, 0, NULL, NULL, NULL, NULL, 4))
-		s_CurCustomTab = ASSETS_TAB_HUD;
-	if(DoButton_MenuTab((CButtonContainer *)&s_aPageTabs[ASSETS_TAB_EXTRAS], Localize("Extras"), s_CurCustomTab == ASSETS_TAB_EXTRAS, &Page6Tab, IGraphics::CORNER_R, NULL, NULL, NULL, NULL, 4))
-		s_CurCustomTab = ASSETS_TAB_EXTRAS;
+	for(int Tab = ASSETS_TAB_ENTITIES; Tab < NUMBER_OF_ASSETS_TABS; ++Tab)
+	{
+		CUIRect Button;
+		TabBar.VSplitLeft(TabWidth, &Button, &TabBar);
+		const int Corners = Tab == ASSETS_TAB_ENTITIES ? IGraphics::CORNER_L : Tab == NUMBER_OF_ASSETS_TABS - 1 ? IGraphics::CORNER_R : IGraphics::CORNER_NONE;
+		if(DoButton_MenuTab(&s_aPageTabs[Tab], apTabNames[Tab], s_CurCustomTab == Tab, &Button, Corners, nullptr, nullptr, nullptr, nullptr, 4.0f))
+		{
+			s_CurCustomTab = Tab;
+		}
+	}
 
 	auto LoadStartTime = time_get_nanoseconds();
 	SMenuAssetScanUser User;
