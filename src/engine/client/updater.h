@@ -1,6 +1,7 @@
 #ifndef ENGINE_CLIENT_UPDATER_H
 #define ENGINE_CLIENT_UPDATER_H
 
+#include <base/detect.h>
 #include <base/lock.h>
 
 #include <engine/updater.h>
@@ -24,6 +25,9 @@
 #define PLAT_NAME CONF_PLATFORM_STRING "-unsupported"
 #endif
 #else
+#if defined(AUTOUPDATE)
+#error Compiling with autoupdater on an unsupported platform
+#endif
 #define PLAT_EXT ""
 #define PLAT_NAME "unsupported-unsupported"
 #endif
