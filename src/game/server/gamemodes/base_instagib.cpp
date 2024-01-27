@@ -186,7 +186,7 @@ void CGameControllerInstagib::CheckForceUnpauseGame()
 	const int MinutesPaused = ((time_get() - m_GamePauseStartTime) / time_freq()) / 60;
 	// dbg_msg("insta", "paused since %d minutes", MinutesPaused);
 
-	const int SecondsPausedDebug = (time_get() - m_GamePauseStartTime) / time_freq();
+	// const int SecondsPausedDebug = (time_get() - m_GamePauseStartTime) / time_freq();
 	// dbg_msg("insta", "paused since %d seconds [DEBUG ONLY REMOVE THIS]", SecondsPausedDebug);
 
 	const int64_t ForceUnpauseTime = m_GamePauseStartTime + (Config()->m_SvForceReadyAll * 60 * time_freq());
