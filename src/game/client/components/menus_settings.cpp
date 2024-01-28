@@ -1600,6 +1600,32 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		{
 			Client()->SwitchWindowScreen(NewScreen);
 			s_NumNodes = Graphics()->GetVideoModes(s_aModes, MAX_RESOLUTIONS, g_Config.m_GfxScreen);
+			for(int i = 0; i < s_NumNodes; ++i)
+			{
+				if(s_aModes[i].m_WindowWidth == g_Config.m_GfxDesktopWidth && s_aModes[i].m_WindowHeight == g_Config.m_GfxDesktopHeight)
+				{
+					const int Depth = s_aModes[i].m_Red + s_aModes[i].m_Green + s_aModes[i].m_Blue > 16 ? 24 : 16;
+					g_Config.m_GfxColorDepth = Depth;
+					g_Config.m_GfxScreenWidth = s_aModes[i].m_WindowWidth;
+					g_Config.m_GfxScreenHeight = s_aModes[i].m_WindowHeight;
+					g_Config.m_GfxScreenRefreshRate = s_aModes[i].m_RefreshRate;
+
+					Graphics()->Resize(g_Config.m_GfxScreenWidth, g_Config.m_GfxScreenHeight, g_Config.m_GfxScreenRefreshRate);
+
+					Client()->SetWindowParams(3, false);
+				}
+			}
+
+			if(NewWindowMode == 0)
+				Client()->SetWindowParams(0, false);
+			else if(NewWindowMode == 1)
+				Client()->SetWindowParams(0, true);
+			else if(NewWindowMode == 2)
+				Client()->SetWindowParams(3, false);
+			else if(NewWindowMode == 3)
+				Client()->SetWindowParams(2, false);
+			else if(NewWindowMode == 4)
+				Client()->SetWindowParams(1, false);
 		}
 	}
 
