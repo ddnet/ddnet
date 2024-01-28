@@ -95,6 +95,8 @@ CUpdater::CUpdater()
 	m_State = CLEAN;
 	m_Percent = 0;
 
+	m_ClientUpdate = m_ServerUpdate = m_ClientFetched = m_ServerFetched = false;
+
 	IStorage::FormatTmpPath(m_aClientExecTmp, sizeof(m_aClientExecTmp), CLIENT_EXEC);
 	IStorage::FormatTmpPath(m_aServerExecTmp, sizeof(m_aServerExecTmp), SERVER_EXEC);
 }
@@ -337,14 +339,16 @@ void CUpdater::PerformUpdate()
 			m_pStorage->RemoveBinaryFile(FileJob.first.c_str());
 	}
 
-	if(m_ServerUpdate)
+	if(m_ServerUpdate && !m_ServerFetched)
 	{
 		FetchFile(PLAT_SERVER_DOWN, m_aServerExecTmp);
+		m_ServerFetched = true;
 		pLastFile = m_aServerExecTmp;
 	}
-	if(m_ClientUpdate)
+	if(m_ClientUpdate && !m_ClientFetched)
 	{
 		FetchFile(PLAT_CLIENT_DOWN, m_aClientExecTmp);
+		m_ClientFetched = true;
 		pLastFile = m_aClientExecTmp;
 	}
 
