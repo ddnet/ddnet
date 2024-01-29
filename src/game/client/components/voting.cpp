@@ -1,13 +1,16 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#include <engine/shared/config.h>
-
 #include "voting.h"
+
+#include <engine/shared/config.h>
+#include <engine/textrender.h>
+
+#include <game/client/components/scoreboard.h>
 #include <game/client/components/sounds.h>
+#include <game/client/gameclient.h>
 #include <game/client/render.h>
 #include <game/generated/protocol.h>
-
-#include <game/client/gameclient.h>
+#include <game/localization.h>
 
 void CVoting::ConCallvote(IConsole::IResult *pResult, void *pUserData)
 {
@@ -311,11 +314,58 @@ void CVoting::OnMessage(int MsgType, void *pRawMsg)
 	}
 }
 
-void CVoting::OnRender()
+void CVoting::Render()
 {
+	if((!g_Config.m_ClShowVotesAfterVoting && !m_pClient->m_Scoreboard.Active() && TakenChoice()) || !IsVoting() || Client()->State() == IClient::STATE_DEMOPLAYBACK)
+		return;
+
+	Graphics()->DrawRect(-10, 60 - 2, 100 + 10 + 4 + 5, 46, ColorRGBA(0.0f, 0.0f, 0.0f, 0.4f), IGraphics::CORNER_ALL, 5.0f);
+
+	TextRender()->TextColor(TextRender()->DefaultTextColor());
+
+	CTextCursor Cursor;
+	char aBuf[512];
+	str_format(aBuf, sizeof(aBuf), Localize("%ds left"), SecondsLeft());
+	float tw = TextRender()->TextWidth(6, aBuf, -1, -1.0f);
+	TextRender()->SetCursor(&Cursor, 5.0f + 100.0f - tw, 60.0f, 6.0f, TEXTFLAG_RENDER);
+	TextRender()->TextEx(&Cursor, aBuf, -1);
+
+	TextRender()->SetCursor(&Cursor, 5.0f, 60.0f, 6.0f, TEXTFLAG_RENDER);
+	Cursor.m_LineWidth = 100.0f - tw;
+	Cursor.m_MaxLines = 3;
+	TextRender()->TextEx(&Cursor, VoteDescription(), -1);
+
+	// reason
+	str_format(aBuf, sizeof(aBuf), "%s %s", Localize("Reason:"), VoteReason());
+	TextRender()->SetCursor(&Cursor, 5.0f, 79.0f, 6.0f, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
+	Cursor.m_LineWidth = 100.0f;
+	TextRender()->TextEx(&Cursor, aBuf, -1);
+
+	CUIRect Base = {5, 88, 100, 4};
+	RenderBars(Base);
+
+	char aKey[64];
+	m_pClient->m_Binds.GetKey("vote yes", aKey, sizeof(aKey));
+
+	str_format(aBuf, sizeof(aBuf), "%s - %s", aKey, Localize("Vote yes"));
+	Base.y += Base.h;
+	Base.h = 12.0f;
+	if(TakenChoice() == 1)
+		TextRender()->TextColor(ColorRGBA(0.2f, 0.9f, 0.2f, 0.85f));
+	UI()->DoLabel(&Base, aBuf, 6.0f, TEXTALIGN_ML);
+
+	TextRender()->TextColor(TextRender()->DefaultTextColor());
+
+	m_pClient->m_Binds.GetKey("vote no", aKey, sizeof(aKey));
+	str_format(aBuf, sizeof(aBuf), "%s - %s", Localize("Vote no"), aKey);
+	if(TakenChoice() == -1)
+		TextRender()->TextColor(ColorRGBA(0.9f, 0.2f, 0.2f, 0.85f));
+	UI()->DoLabel(&Base, aBuf, 6.0f, TEXTALIGN_MR);
+
+	TextRender()->TextColor(TextRender()->DefaultTextColor());
 }
 
-void CVoting::RenderBars(CUIRect Bars)
+void CVoting::RenderBars(CUIRect Bars) const
 {
 	Bars.Draw(ColorRGBA(0.8f, 0.8f, 0.8f, 0.5f), IGraphics::CORNER_ALL, Bars.h / 3);
 

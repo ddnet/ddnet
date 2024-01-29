@@ -29,6 +29,8 @@ class CVoting : public CComponent
 	void ClearOptions();
 	void Callvote(const char *pType, const char *pValue, const char *pReason);
 
+	void RenderBars(CUIRect Bars) const;
+
 public:
 	int m_NumVoteOptions;
 	CVoteOptionClient *m_pFirst;
@@ -42,9 +44,8 @@ public:
 	virtual void OnReset() override;
 	virtual void OnConsoleInit() override;
 	virtual void OnMessage(int Msgtype, void *pRawMsg) override;
-	virtual void OnRender() override;
 
-	void RenderBars(CUIRect Bars);
+	void Render();
 
 	void CallvoteSpectate(int ClientID, const char *pReason, bool ForceVote = false);
 	void CallvoteKick(int ClientID, const char *pReason, bool ForceVote = false);
