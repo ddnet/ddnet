@@ -142,12 +142,7 @@ void CVoting::Vote(int v)
 CVoting::CVoting()
 {
 	ClearOptions();
-
-	m_Closetime = 0;
-	m_aDescription[0] = 0;
-	m_aReason[0] = 0;
-	m_Yes = m_No = m_Pass = m_Total = 0;
-	m_Voted = 0;
+	OnReset();
 }
 
 void CVoting::AddOption(const char *pDescription)
@@ -225,7 +220,7 @@ void CVoting::ClearOptions()
 
 void CVoting::OnReset()
 {
-	m_Closetime = 0;
+	m_Opentime = m_Closetime = 0;
 	m_aDescription[0] = 0;
 	m_aReason[0] = 0;
 	m_Yes = m_No = m_Pass = m_Total = 0;
@@ -248,6 +243,7 @@ void CVoting::OnMessage(int MsgType, void *pRawMsg)
 		{
 			str_copy(m_aDescription, pMsg->m_pDescription);
 			str_copy(m_aReason, pMsg->m_pReason);
+			m_Opentime = time();
 			m_Closetime = time() + time_freq() * pMsg->m_Timeout;
 
 			if(Client()->RconAuthed())
@@ -325,77 +321,82 @@ void CVoting::Render()
 		return;
 	}
 
-	Graphics()->DrawRect(-10, 60 - 2, 100 + 10 + 4 + 5, 46, ColorRGBA(0.0f, 0.0f, 0.0f, 0.4f), IGraphics::CORNER_ALL, 5.0f);
+	CUIRect View = {0.0f, 60.0f, 120.0f, 38.0f};
+	View.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.4f), IGraphics::CORNER_R, 3.0f);
+	View.Margin(3.0f, &View);
 
-	TextRender()->TextColor(TextRender()->DefaultTextColor());
+	SLabelProperties Props;
+	Props.m_EllipsisAtEnd = true;
 
-	CTextCursor Cursor;
-	char aBuf[512];
+	char aBuf[256];
 	str_format(aBuf, sizeof(aBuf), Localize("%ds left"), Seconds);
-	float tw = TextRender()->TextWidth(6, aBuf, -1, -1.0f);
-	TextRender()->SetCursor(&Cursor, 5.0f + 100.0f - tw, 60.0f, 6.0f, TEXTFLAG_RENDER);
-	TextRender()->TextEx(&Cursor, aBuf, -1);
 
-	TextRender()->SetCursor(&Cursor, 5.0f, 60.0f, 6.0f, TEXTFLAG_RENDER);
-	Cursor.m_LineWidth = 100.0f - tw;
-	Cursor.m_MaxLines = 3;
-	TextRender()->TextEx(&Cursor, VoteDescription(), -1);
+	CUIRect Row, LeftColumn, RightColumn, ProgressSpinner;
+	View.HSplitTop(6.0f, &Row, &View);
+	Row.VSplitRight(TextRender()->TextWidth(6.0f, aBuf), &LeftColumn, &RightColumn);
+	LeftColumn.VSplitRight(2.0f, &LeftColumn, nullptr);
+	LeftColumn.VSplitRight(6.0f, &LeftColumn, &ProgressSpinner);
+	LeftColumn.VSplitRight(2.0f, &LeftColumn, nullptr);
 
-	// reason
+	SProgressSpinnerProperties ProgressProps;
+	ProgressProps.m_Progress = clamp((time() - m_Opentime) / (float)(m_Closetime - m_Opentime), 0.0f, 1.0f);
+	UI()->RenderProgressSpinner(ProgressSpinner.Center(), ProgressSpinner.h / 2.0f, ProgressProps);
+
+	UI()->DoLabel(&RightColumn, aBuf, 6.0f, TEXTALIGN_MR);
+
+	Props.m_MaxWidth = LeftColumn.w;
+	UI()->DoLabel(&LeftColumn, VoteDescription(), 6.0f, TEXTALIGN_ML, Props);
+
+	View.HSplitTop(3.0f, nullptr, &View);
+	View.HSplitTop(6.0f, &Row, &View);
 	str_format(aBuf, sizeof(aBuf), "%s %s", Localize("Reason:"), VoteReason());
-	TextRender()->SetCursor(&Cursor, 5.0f, 79.0f, 6.0f, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
-	Cursor.m_LineWidth = 100.0f;
-	TextRender()->TextEx(&Cursor, aBuf, -1);
+	Props.m_MaxWidth = Row.w;
+	UI()->DoLabel(&Row, aBuf, 6.0f, TEXTALIGN_ML, Props);
 
-	CUIRect Base = {5, 88, 100, 4};
-	RenderBars(Base);
+	View.HSplitTop(3.0f, nullptr, &View);
+	View.HSplitTop(4.0f, &Row, &View);
+	RenderBars(Row);
+
+	View.HSplitTop(3.0f, nullptr, &View);
+	View.HSplitTop(6.0f, &Row, &View);
+	Row.VSplitMid(&LeftColumn, &RightColumn, 4.0f);
 
 	char aKey[64];
 	m_pClient->m_Binds.GetKey("vote yes", aKey, sizeof(aKey));
-
 	str_format(aBuf, sizeof(aBuf), "%s - %s", aKey, Localize("Vote yes"));
-	Base.y += Base.h;
-	Base.h = 12.0f;
-	if(TakenChoice() == 1)
-		TextRender()->TextColor(ColorRGBA(0.2f, 0.9f, 0.2f, 0.85f));
-	UI()->DoLabel(&Base, aBuf, 6.0f, TEXTALIGN_ML);
-
-	TextRender()->TextColor(TextRender()->DefaultTextColor());
+	TextRender()->TextColor(TakenChoice() == 1 ? ColorRGBA(0.2f, 0.9f, 0.2f, 0.85f) : TextRender()->DefaultTextColor());
+	UI()->DoLabel(&LeftColumn, aBuf, 6.0f, TEXTALIGN_ML);
 
 	m_pClient->m_Binds.GetKey("vote no", aKey, sizeof(aKey));
 	str_format(aBuf, sizeof(aBuf), "%s - %s", Localize("Vote no"), aKey);
-	if(TakenChoice() == -1)
-		TextRender()->TextColor(ColorRGBA(0.9f, 0.2f, 0.2f, 0.85f));
-	UI()->DoLabel(&Base, aBuf, 6.0f, TEXTALIGN_MR);
+	TextRender()->TextColor(TakenChoice() == -1 ? ColorRGBA(0.95f, 0.25f, 0.25f, 0.85f) : TextRender()->DefaultTextColor());
+	UI()->DoLabel(&RightColumn, aBuf, 6.0f, TEXTALIGN_MR);
 
 	TextRender()->TextColor(TextRender()->DefaultTextColor());
 }
 
 void CVoting::RenderBars(CUIRect Bars) const
 {
-	Bars.Draw(ColorRGBA(0.8f, 0.8f, 0.8f, 0.5f), IGraphics::CORNER_ALL, Bars.h / 3);
+	Bars.Draw(ColorRGBA(0.8f, 0.8f, 0.8f, 0.5f), IGraphics::CORNER_ALL, Bars.h / 2.0f);
 
-	CUIRect Splitter = Bars;
-	Splitter.x = Splitter.x + Splitter.w / 2;
-	Splitter.w = Splitter.h / 2.0f;
-	Splitter.x -= Splitter.w / 2;
-	Splitter.Draw(ColorRGBA(0.4f, 0.4f, 0.4f, 0.5f), IGraphics::CORNER_ALL, Splitter.h / 4);
+	CUIRect Splitter;
+	Bars.VMargin((Bars.w - 2.0f) / 2.0f, &Splitter);
+	Splitter.Draw(ColorRGBA(0.4f, 0.4f, 0.4f, 0.5f), IGraphics::CORNER_NONE, 0.0f);
 
 	if(m_Total)
 	{
 		if(m_Yes)
 		{
-			CUIRect YesArea = Bars;
-			YesArea.w *= m_Yes / (float)m_Total;
-			YesArea.Draw(ColorRGBA(0.2f, 0.9f, 0.2f, 0.85f), IGraphics::CORNER_ALL, Bars.h / 3);
+			CUIRect YesArea;
+			Bars.VSplitLeft(Bars.w * m_Yes / m_Total, &YesArea, nullptr);
+			YesArea.Draw(ColorRGBA(0.2f, 0.9f, 0.2f, 0.85f), IGraphics::CORNER_ALL, YesArea.h / 2.0f);
 		}
 
 		if(m_No)
 		{
-			CUIRect NoArea = Bars;
-			NoArea.w *= m_No / (float)m_Total;
-			NoArea.x = (Bars.x + Bars.w) - NoArea.w;
-			NoArea.Draw(ColorRGBA(0.9f, 0.2f, 0.2f, 0.85f), IGraphics::CORNER_ALL, Bars.h / 3);
+			CUIRect NoArea;
+			Bars.VSplitRight(Bars.w * m_No / m_Total, nullptr, &NoArea);
+			NoArea.Draw(ColorRGBA(0.9f, 0.2f, 0.2f, 0.85f), IGraphics::CORNER_ALL, NoArea.h / 2.0f);
 		}
 	}
 }
