@@ -311,7 +311,7 @@ void CVoting::OnRender()
 {
 }
 
-void CVoting::RenderBars(CUIRect Bars, bool Text)
+void CVoting::RenderBars(CUIRect Bars)
 {
 	Bars.Draw(ColorRGBA(0.8f, 0.8f, 0.8f, 0.5f), IGraphics::CORNER_ALL, Bars.h / 3);
 
@@ -323,22 +323,11 @@ void CVoting::RenderBars(CUIRect Bars, bool Text)
 
 	if(m_Total)
 	{
-		CUIRect PassArea = Bars;
 		if(m_Yes)
 		{
 			CUIRect YesArea = Bars;
 			YesArea.w *= m_Yes / (float)m_Total;
 			YesArea.Draw(ColorRGBA(0.2f, 0.9f, 0.2f, 0.85f), IGraphics::CORNER_ALL, Bars.h / 3);
-
-			if(Text)
-			{
-				char aBuf[256];
-				str_from_int(m_Yes, aBuf);
-				UI()->DoLabel(&YesArea, aBuf, Bars.h * 0.75f, TEXTALIGN_MC);
-			}
-
-			PassArea.x += YesArea.w;
-			PassArea.w -= YesArea.w;
 		}
 
 		if(m_No)
@@ -347,22 +336,6 @@ void CVoting::RenderBars(CUIRect Bars, bool Text)
 			NoArea.w *= m_No / (float)m_Total;
 			NoArea.x = (Bars.x + Bars.w) - NoArea.w;
 			NoArea.Draw(ColorRGBA(0.9f, 0.2f, 0.2f, 0.85f), IGraphics::CORNER_ALL, Bars.h / 3);
-
-			if(Text)
-			{
-				char aBuf[256];
-				str_from_int(m_No, aBuf);
-				UI()->DoLabel(&NoArea, aBuf, Bars.h * 0.75f, TEXTALIGN_MC);
-			}
-
-			PassArea.w -= NoArea.w;
-		}
-
-		if(Text && m_Pass)
-		{
-			char aBuf[256];
-			str_from_int(m_Pass, aBuf);
-			UI()->DoLabel(&PassArea, aBuf, Bars.h * 0.75f, TEXTALIGN_MC);
 		}
 	}
 }

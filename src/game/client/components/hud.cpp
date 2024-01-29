@@ -590,7 +590,7 @@ void CHud::RenderVoting()
 	TextRender()->TextEx(&Cursor, aBuf, -1);
 
 	CUIRect Base = {5, 88, 100, 4};
-	m_pClient->m_Voting.RenderBars(Base, false);
+	m_pClient->m_Voting.RenderBars(Base);
 
 	char aKey[64];
 	m_pClient->m_Binds.GetKey("vote yes", aKey, sizeof(aKey));
