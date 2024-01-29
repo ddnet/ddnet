@@ -177,6 +177,37 @@ void CVoting::AddOption(const char *pDescription)
 	++m_NumVoteOptions;
 }
 
+void CVoting::RemoveOption(const char *pDescription)
+{
+	for(CVoteOptionClient *pOption = m_pFirst; pOption; pOption = pOption->m_pNext)
+	{
+		if(str_comp(pOption->m_aDescription, pDescription) == 0)
+		{
+			// remove it from the list
+			if(m_pFirst == pOption)
+				m_pFirst = m_pFirst->m_pNext;
+			if(m_pLast == pOption)
+				m_pLast = m_pLast->m_pPrev;
+			if(pOption->m_pPrev)
+				pOption->m_pPrev->m_pNext = pOption->m_pNext;
+			if(pOption->m_pNext)
+				pOption->m_pNext->m_pPrev = pOption->m_pPrev;
+			--m_NumVoteOptions;
+
+			// add it to recycle list
+			pOption->m_pNext = 0;
+			pOption->m_pPrev = m_pRecycleLast;
+			if(pOption->m_pPrev)
+				pOption->m_pPrev->m_pNext = pOption;
+			m_pRecycleLast = pOption;
+			if(!m_pRecycleFirst)
+				m_pRecycleLast = pOption;
+
+			break;
+		}
+	}
+}
+
 void CVoting::ClearOptions()
 {
 	m_Heap.Reset();
@@ -271,34 +302,7 @@ void CVoting::OnMessage(int MsgType, void *pRawMsg)
 	else if(MsgType == NETMSGTYPE_SV_VOTEOPTIONREMOVE)
 	{
 		CNetMsg_Sv_VoteOptionRemove *pMsg = (CNetMsg_Sv_VoteOptionRemove *)pRawMsg;
-
-		for(CVoteOptionClient *pOption = m_pFirst; pOption; pOption = pOption->m_pNext)
-		{
-			if(str_comp(pOption->m_aDescription, pMsg->m_pDescription) == 0)
-			{
-				// remove it from the list
-				if(m_pFirst == pOption)
-					m_pFirst = m_pFirst->m_pNext;
-				if(m_pLast == pOption)
-					m_pLast = m_pLast->m_pPrev;
-				if(pOption->m_pPrev)
-					pOption->m_pPrev->m_pNext = pOption->m_pNext;
-				if(pOption->m_pNext)
-					pOption->m_pNext->m_pPrev = pOption->m_pPrev;
-				--m_NumVoteOptions;
-
-				// add it to recycle list
-				pOption->m_pNext = 0;
-				pOption->m_pPrev = m_pRecycleLast;
-				if(pOption->m_pPrev)
-					pOption->m_pPrev->m_pNext = pOption;
-				m_pRecycleLast = pOption;
-				if(!m_pRecycleFirst)
-					m_pRecycleLast = pOption;
-
-				break;
-			}
-		}
+		RemoveOption(pMsg->m_pDescription);
 	}
 	else if(MsgType == NETMSGTYPE_SV_YOURVOTE)
 	{

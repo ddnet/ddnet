@@ -25,6 +25,7 @@ class CVoting : public CComponent
 	int m_Yes, m_No, m_Pass, m_Total;
 
 	void AddOption(const char *pDescription);
+	void RemoveOption(const char *pDescription);
 	void ClearOptions();
 	void Callvote(const char *pType, const char *pValue, const char *pReason);
 
