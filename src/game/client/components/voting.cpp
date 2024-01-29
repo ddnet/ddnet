@@ -318,6 +318,12 @@ void CVoting::Render()
 {
 	if((!g_Config.m_ClShowVotesAfterVoting && !m_pClient->m_Scoreboard.Active() && TakenChoice()) || !IsVoting() || Client()->State() == IClient::STATE_DEMOPLAYBACK)
 		return;
+	const int Seconds = SecondsLeft();
+	if(Seconds < 0)
+	{
+		OnReset();
+		return;
+	}
 
 	Graphics()->DrawRect(-10, 60 - 2, 100 + 10 + 4 + 5, 46, ColorRGBA(0.0f, 0.0f, 0.0f, 0.4f), IGraphics::CORNER_ALL, 5.0f);
 
@@ -325,7 +331,7 @@ void CVoting::Render()
 
 	CTextCursor Cursor;
 	char aBuf[512];
-	str_format(aBuf, sizeof(aBuf), Localize("%ds left"), SecondsLeft());
+	str_format(aBuf, sizeof(aBuf), Localize("%ds left"), Seconds);
 	float tw = TextRender()->TextWidth(6, aBuf, -1, -1.0f);
 	TextRender()->SetCursor(&Cursor, 5.0f + 100.0f - tw, 60.0f, 6.0f, TEXTFLAG_RENDER);
 	TextRender()->TextEx(&Cursor, aBuf, -1);
