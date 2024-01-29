@@ -125,7 +125,7 @@ public:
 	void DoWarmup(int Seconds);
 
 	void StartRound();
-	// void EndRound(); // gctf
+	// void EndRound(); // ddnet-insta
 	void ChangeMap(const char *pToMap);
 
 	void CheckGameInfo();
@@ -303,9 +303,9 @@ public:
 
 	int GetStartTeam();
 	virtual bool DoWincheckMatch(); // returns true when the match is over
-	virtual void OnFlagReturn(class CFlag *pFlag); // gctf
-	virtual void OnFlagGrab(class CFlag *pFlag); // gctf
-	virtual void OnFlagCapture(class CFlag *pFlag, float Time); // gctf
+	virtual void OnFlagReturn(class CFlag *pFlag); // ddnet-insta
+	virtual void OnFlagGrab(class CFlag *pFlag); // ddnet-insta
+	virtual void OnFlagCapture(class CFlag *pFlag, float Time); // ddnet-insta
 
 	/*
 		Variable: m_GamePauseStartTime

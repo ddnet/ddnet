@@ -23,8 +23,8 @@ CPlayer::CPlayer(CGameContext *pGameServer, uint32_t UniqueClientID, int ClientI
 	m_UniqueClientID(UniqueClientID)
 {
 	m_pGameServer = pGameServer;
-	m_RespawnTick = Server()->Tick(); // gctf
-	m_HasGhostCharInGame = false; // gctf
+	m_RespawnTick = Server()->Tick(); // ddnet-insta
+	m_HasGhostCharInGame = false; // ddnet-insta
 	m_ClientID = ClientID;
 	m_Team = GameServer()->m_pController->GetStartTeam();
 	m_NumInputs = 0;
@@ -122,7 +122,7 @@ void CPlayer::Reset()
 
 	m_LastPause = 0;
 	m_Score.reset();
-	m_Score = 0; // gctf
+	m_Score = 0; // ddnet-insta
 
 	// Variable initialized:
 	m_Last_Team = 0;
@@ -148,7 +148,7 @@ void CPlayer::Reset()
 	m_SwapTargetsClientID = -1;
 	m_BirthdayAnnounced = false;
 
-	// gctf
+	// ddnet-insta
 	m_IsReadyToPlay = !GameServer()->m_pController->IsPlayerReadyMode();
 	m_DeadSpecMode = false;
 	m_GameStateBroadcast = false;
@@ -357,7 +357,7 @@ void CPlayer::Snap(int SnappingClient)
 	// if(SnappingClient != m_ClientID && g_Config.m_SvHideScore)
 	// 	Score = -9999;
 
-	Score = m_Score.value_or(0); // gctf
+	Score = m_Score.value_or(0); // ddnet-insta
 
 	if(!Server()->IsSixup(SnappingClient))
 	{
@@ -376,7 +376,7 @@ void CPlayer::Snap(int SnappingClient)
 			pPlayerInfo->m_Team = (m_Paused != PAUSE_PAUSED || m_ClientID != SnappingClient) && m_Paused < PAUSE_SPEC ? m_Team : TEAM_SPECTATORS;
 		}
 
-		// gctf
+		// ddnet-insta
 		if(!GameServer()->m_pController->IsGameRunning() &&
 			GameServer()->m_World.m_Paused &&
 			GameServer()->m_pController->GameState() != IGameController::IGS_END_MATCH &&
@@ -411,7 +411,7 @@ void CPlayer::Snap(int SnappingClient)
 
 		// Times are in milliseconds for 0.7
 		// pPlayerInfo->m_Score = m_Score.has_value() ? GameServer()->Score()->PlayerData(m_ClientID)->m_BestTime * 1000 : -1;
-		pPlayerInfo->m_Score = Score; // gctf
+		pPlayerInfo->m_Score = Score; // ddnet-insta
 		pPlayerInfo->m_Latency = Latency;
 	}
 
@@ -626,7 +626,7 @@ void CPlayer::Respawn(bool WeakHook)
 		m_WeakHookSpawn = WeakHook;
 		m_Spawning = true;
 
-		// gctf
+		// ddnet-insta
 		m_IsReadyToPlay = true;
 		// m_DeadSpecMode = true;
 		return;
@@ -958,7 +958,7 @@ void CPlayer::ProcessScoreResult(CScorePlayerResult &Result)
 			if(Result.m_Data.m_Info.m_Time.has_value())
 			{
 				GameServer()->Score()->PlayerData(m_ClientID)->Set(Result.m_Data.m_Info.m_Time.value(), Result.m_Data.m_Info.m_aTimeCp);
-				// m_Score = Result.m_Data.m_Info.m_Time; // gctf
+				// m_Score = Result.m_Data.m_Info.m_Time; // ddnet-insta
 			}
 			Server()->ExpireServerInfo();
 			int Birthday = Result.m_Data.m_Info.m_Birthday;

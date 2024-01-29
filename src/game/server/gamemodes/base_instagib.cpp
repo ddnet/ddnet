@@ -255,7 +255,7 @@ bool CGameControllerInstagib::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &
 		Dmg = 0;
 		return false;
 	}
-	// TODO: gctf cfg team damage
+	// TODO: ddnet-insta cfg team damage
 	// if(GameServer()->m_pController->IsFriendlyFire(Character.GetPlayer()->GetCID(), From) && !g_Config.m_SvTeamdamage)
 	if(GameServer()->m_pController->IsFriendlyFire(Character.GetPlayer()->GetCID(), From))
 		return false;
@@ -434,7 +434,7 @@ void CGameControllerInstagib::OnPlayerConnect(CPlayer *pPlayer)
 		GameServer()->ShowCurrentInstagibConfigsMotd(ClientID);
 	}
 
-	CheckReadyStates(); // gctf
+	CheckReadyStates(); // ddnet-insta
 }
 
 void CGameControllerInstagib::SendChatSpectators(const char *pMessage, int Flags)
@@ -474,7 +474,7 @@ void CGameControllerInstagib::OnPlayerDisconnect(class CPlayer *pPlayer, const c
 		GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
 	}
 
-	// gctf
+	// ddnet-insta
 	if(pPlayer->GetTeam() != TEAM_SPECTATORS)
 	{
 		--m_aTeamSize[pPlayer->GetTeam()];
@@ -487,7 +487,7 @@ void CGameControllerInstagib::DoTeamChange(CPlayer *pPlayer, int Team, bool DoCh
 	if(Team == pPlayer->GetTeam())
 		return;
 
-	int OldTeam = pPlayer->GetTeam(); // gctf
+	int OldTeam = pPlayer->GetTeam(); // ddnet-insta
 	pPlayer->SetTeam(Team);
 	int ClientID = pPlayer->GetCID();
 
@@ -503,7 +503,7 @@ void CGameControllerInstagib::DoTeamChange(CPlayer *pPlayer, int Team, bool DoCh
 
 	// OnPlayerInfoChange(pPlayer);
 
-	// gctf
+	// ddnet-insta
 
 	if(OldTeam == TEAM_SPECTATORS)
 	{

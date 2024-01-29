@@ -213,11 +213,11 @@ bool CGameControllerInstagib::OnChatMessage(const CNetMsg_Cl_Say *pMsg, int Leng
 	int ClientID = pPlayer->GetCID();
 
 	if(pMsg->m_Team || !AllowPublicChat(pPlayer))
-		Team = ((pPlayer->GetTeam() == TEAM_SPECTATORS) ? CGameContext::CHAT_SPEC : pPlayer->GetTeam()); // gctf
+		Team = ((pPlayer->GetTeam() == TEAM_SPECTATORS) ? CGameContext::CHAT_SPEC : pPlayer->GetTeam()); // ddnet-insta
 	else
 		Team = CGameContext::CHAT_ALL;
 
-	// gctf warn on ping if cant respond
+	// ddnet-insta warn on ping if cant respond
 	if(Team == CGameContext::CHAT_ALL && pPlayer->GetTeam() != TEAM_SPECTATORS)
 	{
 		for(const CPlayer *pSpecPlayer : GameServer()->m_apPlayers)
@@ -239,7 +239,7 @@ bool CGameControllerInstagib::OnChatMessage(const CNetMsg_Cl_Say *pMsg, int Leng
 		}
 	}
 
-	// gctf fine grained chat spam control
+	// ddnet-insta fine grained chat spam control
 	if(pMsg->m_pMessage[0] != '/')
 	{
 		bool RateLimit = false;
@@ -376,7 +376,7 @@ bool CGameControllerInstagib::OnChatMessage(const CNetMsg_Cl_Say *pMsg, int Leng
 			return true;
 	}
 
-	// gctf bang commands
+	// ddnet-insta bang commands
 	// allow sending ! to chat or !!
 	// swallow all other ! prefixed chat messages
 	if(pMsg->m_pMessage[0] == '!' && pMsg->m_pMessage[1] && pMsg->m_pMessage[1] != '!')
@@ -391,22 +391,22 @@ bool CGameControllerInstagib::OnChatMessage(const CNetMsg_Cl_Say *pMsg, int Leng
 		str_format(aBuf, sizeof(aBuf), "%d used %s", ClientID, pMsg->m_pMessage);
 		GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chat-command", aBuf);
 
-		if(!str_comp_nocase(pMsg->m_pMessage + 1, "ready") || !str_comp_nocase(pMsg->m_pMessage + 1, "pause")) // gctf
+		if(!str_comp_nocase(pMsg->m_pMessage + 1, "ready") || !str_comp_nocase(pMsg->m_pMessage + 1, "pause")) // ddnet-insta
 		{
 			GameServer()->m_pController->OnPlayerReadyChange(pPlayer);
 			return true;
 		}
-		else if(!str_comp_nocase(pMsg->m_pMessage + 1, "shuffle")) // gctf
+		else if(!str_comp_nocase(pMsg->m_pMessage + 1, "shuffle")) // ddnet-insta
 		{
 			ComCallShuffleVote(ClientID);
 			return true;
 		}
-		else if(!str_comp_nocase(pMsg->m_pMessage + 1, "swap")) // gctf
+		else if(!str_comp_nocase(pMsg->m_pMessage + 1, "swap")) // ddnet-insta
 		{
 			ComCallSwapTeamsVote(ClientID);
 			return true;
 		}
-		else if(!str_comp_nocase(pMsg->m_pMessage + 1, "swap_random")) // gctf
+		else if(!str_comp_nocase(pMsg->m_pMessage + 1, "swap_random")) // ddnet-insta
 		{
 			ComCallSwapTeamsRandomVote(ClientID);
 			return true;

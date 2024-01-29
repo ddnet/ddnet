@@ -49,7 +49,7 @@ private:
 	bool m_BelongsToPracticeTeam;
 	vec2 m_InitDir;
 
-	// gctf
+	// ddnet-insta
 	CClientMask m_AffectedCharacters;
 
 public:

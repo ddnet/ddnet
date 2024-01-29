@@ -637,7 +637,7 @@ void CGameContext::SendChat(int ChatterClientID, int Team, const char *pText, in
 	}
 	else
 	{
-		// CTeamsCore *pTeams = &m_pController->Teams().m_Core; // gctf
+		// CTeamsCore *pTeams = &m_pController->Teams().m_Core; // ddnet-insta
 		CNetMsg_Sv_Chat Msg;
 		Msg.m_Team = 1;
 		Msg.m_ClientID = ChatterClientID;
@@ -662,7 +662,7 @@ void CGameContext::SendChat(int ChatterClientID, int Team, const char *pText, in
 				else
 				{
 					// if(pTeams->Team(i) == Team && m_apPlayers[i]->GetTeam() != CHAT_SPEC)
-					if(m_apPlayers[i]->GetTeam() == Team && m_apPlayers[i]->GetTeam() != CHAT_SPEC) // gctf
+					if(m_apPlayers[i]->GetTeam() == Team && m_apPlayers[i]->GetTeam() != CHAT_SPEC) // ddnet-insta
 					{
 						Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, i);
 					}
@@ -1077,7 +1077,7 @@ void CGameContext::OnTick()
 											     GetPlayerChar(m_VoteCreator)->Team() != GetPlayerChar(i)->Team())))
 						continue;
 
-					// gctf
+					// ddnet-insta
 					if(m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS && !g_Config.m_SvSpectatorVotes)
 						continue;
 
@@ -1476,11 +1476,11 @@ void CGameContext::OnClientEnter(int ClientID)
 		{
 			protocol7::CNetMsg_Sv_GameInfo Msg;
 			Msg.m_GameFlags = protocol7::GAMEFLAG_RACE;
-			Msg.m_GameFlags = protocol7::GAMEFLAG_TEAMS | protocol7::GAMEFLAG_FLAGS; // gctf
+			Msg.m_GameFlags = protocol7::GAMEFLAG_TEAMS | protocol7::GAMEFLAG_FLAGS; // ddnet-insta
 			Msg.m_MatchCurrent = 1;
 			Msg.m_MatchNum = 0;
-			Msg.m_ScoreLimit = Config()->m_SvScorelimit; // gctf
-			Msg.m_TimeLimit = Config()->m_SvTimelimit; // gctf
+			Msg.m_ScoreLimit = Config()->m_SvScorelimit; // ddnet-insta
+			Msg.m_TimeLimit = Config()->m_SvTimelimit; // ddnet-insta
 			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientID);
 		}
 
@@ -1872,12 +1872,12 @@ void *CGameContext::PreProcessMsg(int *pMsgID, CUnpacker *pUnpacker, int ClientI
 			pMsg->m_ColorBody = pPlayer->m_TeeInfos.m_ColorBody;
 			pMsg->m_ColorFeet = pPlayer->m_TeeInfos.m_ColorFeet;
 		}
-		// gctf ready start
+		// ddnet-insta ready start
 		else if(*pMsgID == protocol7::NETMSGTYPE_CL_READYCHANGE)
 		{
 			m_pController->OnPlayerReadyChange(pPlayer);
 		}
-		// gctf ready end
+		// ddnet-insta ready end
 		else if(*pMsgID == protocol7::NETMSGTYPE_CL_SKINCHANGE)
 		{
 			protocol7::CNetMsg_Cl_SkinChange *pMsg = (protocol7::CNetMsg_Cl_SkinChange *)pRawMsg;
@@ -3818,9 +3818,9 @@ void CGameContext::OnInit(const void *pPersistentData)
 
 	m_pAntibot->RoundStart(this);
 
-	UpdateVoteCheckboxes(); // gctf
-	AlertOnSpecialInstagibConfigs(); // gctf
-	ShowCurrentInstagibConfigsMotd(); // gctf
+	UpdateVoteCheckboxes(); // ddnet-insta
+	AlertOnSpecialInstagibConfigs(); // ddnet-insta
+	ShowCurrentInstagibConfigsMotd(); // ddnet-insta
 }
 
 void CGameContext::CreateAllEntities(bool Initial)

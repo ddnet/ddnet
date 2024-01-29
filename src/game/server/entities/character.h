@@ -260,7 +260,7 @@ public:
 
 	CSaveTee &GetRescueTeeRef() { return m_RescueTee; }
 
-	// gctf
+	// ddnet-insta
 	/*
 		Reset instagib tee without resetting ddnet or teeworlds tee
 		update grenade ammo state without selfkill

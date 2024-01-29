@@ -272,7 +272,7 @@ public:
 
 	void SendGameMsg(int GameMsgID, int ClientID) const;
 	void SendGameMsg(int GameMsgID, int ParaI1, int ClientID) const;
-	void SendGameMsg(int GameMsgID, int ParaI1, int ParaI2, int ParaI3, int ClientID) const; // gctf
+	void SendGameMsg(int GameMsgID, int ParaI1, int ParaI2, int ParaI3, int ClientID) const; // ddnet-insta
 	int GetDDNetInstaWeapon();
 	void UpdateVoteCheckboxes() const;
 	void RefreshVotes();

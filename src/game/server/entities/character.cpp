@@ -444,7 +444,7 @@ void CCharacter::FireWeapon()
 	if(!m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo)
 		return;
 
-	// gctf
+	// ddnet-insta
 	if(g_Config.m_SvGrenadeAmmoRegenResetOnFire)
 		m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_AmmoRegenStart = -1;
 
@@ -2482,7 +2482,7 @@ void CCharacter::SwapClients(int Client1, int Client2)
 	m_Core.SetHookedPlayer(HookedPlayer == Client1 ? Client2 : HookedPlayer == Client2 ? Client1 : HookedPlayer);
 }
 
-// gctf
+// ddnet-insta
 
 void CCharacter::ResetInstaSettings()
 {

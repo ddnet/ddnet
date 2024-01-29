@@ -42,7 +42,7 @@ IGameController::IGameController(class CGameContext *pGameServer) :
 
 	InitTeleporter();
 
-	// gctf
+	// ddnet-insta
 	m_Warmup = 0;
 	m_GameState = IGS_GAME_RUNNING;
 	m_GameStateTimer = TIMER_INFINITE;
@@ -204,7 +204,7 @@ bool IGameController::CanSpawn(int Team, vec2 *pOutPos, int DDTeam)
 		return false;
 
 	CSpawnEval Eval;
-	if(IsTeamplay()) // gctf
+	if(IsTeamplay()) // ddnet-insta
 	{
 		Eval.m_FriendlyTeam = Team;
 
@@ -230,7 +230,7 @@ bool IGameController::CanSpawn(int Team, vec2 *pOutPos, int DDTeam)
 
 bool IGameController::OnEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number)
 {
-	// gctf
+	// ddnet-insta
 	// do not spawn pickups
 	if(Index == ENTITY_ARMOR_1 || Index == ENTITY_HEALTH_1 || Index == ENTITY_WEAPON_SHOTGUN || Index == ENTITY_WEAPON_GRENADE || Index == ENTITY_WEAPON_LASER || Index == ENTITY_POWERUP_NINJA)
 		return false;
@@ -493,7 +493,7 @@ void IGameController::ResetGame()
 	}
 	GameServer()->m_World.m_ResetRequested = true;
 
-	// gctf
+	// ddnet-insta
 	m_GameStartTick = Server()->Tick();
 	SetGameState(IGS_GAME_RUNNING);
 	m_GameStartTick = Server()->Tick();
@@ -502,7 +502,7 @@ void IGameController::ResetGame()
 
 const char *IGameController::GetTeamName(int Team)
 {
-	// gctf
+	// ddnet-insta
 	if(IsTeamplay())
 	{
 		if(Team == TEAM_RED)
@@ -524,8 +524,8 @@ void IGameController::StartRound()
 	m_SuddenDeath = 0;
 	m_GameOverTick = -1;
 	GameServer()->m_World.m_Paused = false;
-	m_aTeamscore[TEAM_RED] = 0; // gctf
-	m_aTeamscore[TEAM_BLUE] = 0; // gctf
+	m_aTeamscore[TEAM_RED] = 0; // ddnet-insta
+	m_aTeamscore[TEAM_BLUE] = 0; // ddnet-insta
 	m_ForceBalanced = false;
 	Server()->DemoRecorder_HandleAutoStart();
 	char aBuf[256];
@@ -547,7 +547,7 @@ void IGameController::OnReset()
 		pPlayer->Respawn();
 		pPlayer->m_RespawnTick = Server()->Tick() + Server()->TickSpeed() / 2;
 		pPlayer->m_Score = 0;
-		pPlayer->m_IsReadyToPlay = true; // gctf
+		pPlayer->m_IsReadyToPlay = true; // ddnet-insta
 	}
 }
 
@@ -702,7 +702,7 @@ void IGameController::Tick()
 	if(m_Warmup)
 	{
 		m_Warmup--;
-		// gctf uses StartRound() in SetGameState() vanilla style
+		// ddnet-insta uses StartRound() in SetGameState() vanilla style
 		// if(!m_Warmup)
 		// 	StartRound();
 	}
@@ -786,7 +786,7 @@ void IGameController::Snap(int SnappingClient)
 		return;
 
 	pGameInfoEx->m_Flags =
-		/* GAMEINFOFLAG_TIMESCORE | */ // gctf
+		/* GAMEINFOFLAG_TIMESCORE | */ // ddnet-insta
 		GAMEINFOFLAG_GAMETYPE_RACE |
 		GAMEINFOFLAG_GAMETYPE_DDRACE |
 		GAMEINFOFLAG_GAMETYPE_DDNET |
@@ -794,7 +794,7 @@ void IGameController::Snap(int SnappingClient)
 		GAMEINFOFLAG_RACE_RECORD_MESSAGE |
 		GAMEINFOFLAG_ALLOW_EYE_WHEEL |
 		GAMEINFOFLAG_ALLOW_HOOK_COLL |
-		/* GAMEINFOFLAG_ALLOW_ZOOM | */ // gctf
+		/* GAMEINFOFLAG_ALLOW_ZOOM | */ // ddnet-insta
 		GAMEINFOFLAG_BUG_DDRACE_GHOST |
 		GAMEINFOFLAG_BUG_DDRACE_INPUT |
 		GAMEINFOFLAG_PREDICT_DDRACE |
@@ -803,12 +803,12 @@ void IGameController::Snap(int SnappingClient)
 		GAMEINFOFLAG_ENTITIES_DDRACE |
 		GAMEINFOFLAG_ENTITIES_RACE |
 		GAMEINFOFLAG_RACE;
-	if(g_Config.m_SvFastcap) //gctf
+	if(g_Config.m_SvFastcap) //ddnet-insta
 	{
 		pGameInfoEx->m_Flags |= GAMEINFOFLAG_GAMETYPE_FASTCAP;
 		pGameInfoEx->m_Flags |= GAMEINFOFLAG_FLAG_STARTS_RACE;
 	}
-	pGameInfoEx->m_Flags2 = GAMEINFOFLAG2_HUD_AMMO | GAMEINFOFLAG2_HUD_HEALTH_ARMOR; // gctf
+	pGameInfoEx->m_Flags2 = GAMEINFOFLAG2_HUD_AMMO | GAMEINFOFLAG2_HUD_HEALTH_ARMOR; // ddnet-insta
 	if(g_Config.m_SvNoWeakHook)
 		pGameInfoEx->m_Flags2 |= GAMEINFOFLAG2_NO_WEAK_HOOK;
 	pGameInfoEx->m_Version = GAMEINFO_CURVERSION;
@@ -838,7 +838,7 @@ void IGameController::Snap(int SnappingClient)
 		pRaceData->m_Precision = 2;
 		pRaceData->m_RaceFlags = protocol7::RACEFLAG_HIDE_KILLMSG | protocol7::RACEFLAG_KEEP_WANTED_WEAPON;
 
-		// gctf
+		// ddnet-insta
 		if(IsTeamplay())
 		{
 			protocol7::CNetObj_GameDataTeam *pGameDataTeam = static_cast<protocol7::CNetObj_GameDataTeam *>(Server()->SnapNewItem(-protocol7::NETOBJTYPE_GAMEDATATEAM, 0, sizeof(protocol7::CNetObj_GameDataTeam)));
@@ -1000,7 +1000,7 @@ void IGameController::DoTeamChange(CPlayer *pPlayer, int Team, bool DoChatMsg)
 	// OnPlayerInfoChange(pPlayer);
 }
 
-// gctf
+// ddnet-insta
 
 void IGameController::ToggleGamePause()
 {
@@ -1232,7 +1232,7 @@ bool IGameController::IsFriendlyFire(int ClientID1, int ClientID2)
 
 void IGameController::UpdateGameInfo(int ClientID)
 {
-	// gctf
+	// ddnet-insta
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		if(ClientID != -1)
@@ -1360,7 +1360,7 @@ void IGameController::SetGameState(EGameState GameState, int Timer)
 	case IGS_GAME_RUNNING:
 		// always possible
 		{
-			// gctf specific
+			// ddnet-insta specific
 			// vanilla does not do this
 			// but ddnet sends m_RoundStartTick in snap
 			// so we have to also update that to show current game timer
@@ -1369,7 +1369,7 @@ void IGameController::SetGameState(EGameState GameState, int Timer)
 				m_RoundStartTick = Server()->Tick();
 				dbg_msg("ddnet-insta", "reset m_RoundStartTick");
 			}
-			// this is also gctf specific
+			// this is also ddnet-insta specific
 			// no idea how vanilla does it
 			// but this solves countdown delaying timelimit end
 			// meaning that if countdown and timelimit is set the

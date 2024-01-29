@@ -12,7 +12,7 @@ class CCharacter : public CEntity
 #endif // IN_CLASS_CHARACTER
 
 public:
-	// gctf
+	// ddnet-insta
 	/*
 		Reset instagib tee without resetting ddnet or teeworlds tee
 		update grenade ammo state without selfkill

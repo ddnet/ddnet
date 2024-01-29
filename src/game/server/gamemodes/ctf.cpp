@@ -25,7 +25,7 @@ void CGameControllerCTF::Tick()
 {
 	CGameControllerInstagib::Tick();
 
-	FlagTick(); // gctf
+	FlagTick(); // ddnet-insta
 }
 
 void CGameControllerCTF::OnCharacterSpawn(class CCharacter *pChr)
