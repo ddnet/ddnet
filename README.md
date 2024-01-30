@@ -69,6 +69,7 @@ It kills with one shot and capturing the enemy flag scores your team 100 points.
 + `sv_kill_hook` Hook kills
 + `sv_killingspree_kills` How many kills are needed to be on a killing-spree (0=off)
 + `sv_damage_needed_for_kill` Damage needed to kill
++ `sv_allow_zoom` allow ddnet clients to use the client side zoom feature
 + `sv_chat_ratelimit_long_messages` Needs sv_spamprotection 0 (0=off, 1=only messages longer than 12 chars are limited)
 + `sv_chat_ratelimit_spectators` Needs sv_spamprotection 0 (0=off, 1=specs have slow chat)
 + `sv_chat_ratelimit_public_chat` Needs sv_spamprotection 0 (0=off, 1=non team chat is slow)

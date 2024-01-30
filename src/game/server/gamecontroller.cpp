@@ -794,7 +794,7 @@ void IGameController::Snap(int SnappingClient)
 		GAMEINFOFLAG_RACE_RECORD_MESSAGE |
 		GAMEINFOFLAG_ALLOW_EYE_WHEEL |
 		GAMEINFOFLAG_ALLOW_HOOK_COLL |
-		/* GAMEINFOFLAG_ALLOW_ZOOM | */ // ddnet-insta
+		GAMEINFOFLAG_ALLOW_ZOOM |
 		GAMEINFOFLAG_BUG_DDRACE_GHOST |
 		GAMEINFOFLAG_BUG_DDRACE_INPUT |
 		GAMEINFOFLAG_PREDICT_DDRACE |
@@ -803,6 +803,8 @@ void IGameController::Snap(int SnappingClient)
 		GAMEINFOFLAG_ENTITIES_DDRACE |
 		GAMEINFOFLAG_ENTITIES_RACE |
 		GAMEINFOFLAG_RACE;
+	if(!g_Config.m_SvAllowZoom) //ddnet-insta
+		pGameInfoEx->m_Flags &= ~(GAMEINFOFLAG_ALLOW_ZOOM);
 	if(g_Config.m_SvFastcap) //ddnet-insta
 	{
 		pGameInfoEx->m_Flags |= GAMEINFOFLAG_GAMETYPE_FASTCAP;
