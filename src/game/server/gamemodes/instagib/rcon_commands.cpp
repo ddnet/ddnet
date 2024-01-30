@@ -48,6 +48,32 @@ void CGameControllerInstagib::ConGodmode(IConsole::IResult *pResult, void *pUser
 	pChr->m_IsGodmode = true;
 }
 
+void CGameControllerInstagib::ConForceReady(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameControllerInstagib *pSelf = (CGameControllerInstagib *)pUserData;
+	int Victim = pResult->GetVictim();
+	if(Victim < 0 || Victim >= MAX_CLIENTS)
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ddnet-insta", "victim has to be in 0-64 range");
+		return;
+	}
+	CPlayer *pPlayer = pSelf->GameServer()->m_apPlayers[Victim];
+	if(!pPlayer)
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ddnet-insta", "victim with that id not found");
+		return;
+	}
+
+	char aBuf[128];
+	str_format(aBuf, sizeof(aBuf), "'%s' was forced ready by an admin!",
+		pSelf->GameServer()->Server()->ClientName(Victim));
+	pSelf->GameServer()->SendChat(-1, pSelf->GameServer()->CHAT_ALL, aBuf);
+
+	pPlayer->m_IsReadyToPlay = true;
+	pSelf->GameServer()->PlayerReadyStateBroadcast();
+	pSelf->CheckReadyStates();
+}
+
 void CGameControllerInstagib::ConShuffleTeams(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameControllerInstagib *pSelf = (CGameControllerInstagib *)pUserData;
