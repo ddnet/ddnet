@@ -38,8 +38,14 @@ void CGameContext::ShowCurrentInstagibConfigsMotd(int ClientID, bool Force) cons
 	if(g_Config.m_SvTournament)
 		str_append(aMotd, "!!! ACTIVE TOURNAMENT RUNNING !!!");
 
-	str_format(aBuf, sizeof(aBuf), "* ready mode: %s\n", g_Config.m_SvPlayerReadyMode ? "on" : "off");
-	str_append(aMotd, aBuf);
+	if(g_Config.m_SvPlayerReadyMode)
+	{
+		str_append(aMotd, "* ready mode: on\n");
+		str_format(aBuf, sizeof(aBuf), "  - max pause time: %d\n", g_Config.m_SvForceReadyAll);
+		str_append(aMotd, aBuf);
+	}
+	else
+		str_append(aMotd, "* ready mode: off\n");
 
 	str_format(aBuf, sizeof(aBuf), "* damage needed for kill: %d\n", g_Config.m_SvDamageNeededForKill);
 	str_append(aMotd, aBuf);
@@ -64,9 +70,10 @@ void CGameContext::ShowCurrentInstagibConfigsMotd(int ClientID, bool Force) cons
 			str_append(aMotd, aBuf);
 		}
 	}
-	else
 
-		if(g_Config.m_SvOnlyHookKills)
+	if(g_Config.m_SvAllowZoom)
+		str_append(aMotd, "! WARNING: using zoom is allowed\n");
+	if(g_Config.m_SvOnlyHookKills)
 		str_append(aMotd, "! WARNING: only hooked enemies can be killed\n");
 	if(g_Config.m_SvKillHook)
 		str_append(aMotd, "! WARNING: the hook kills\n");
