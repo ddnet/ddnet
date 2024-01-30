@@ -440,7 +440,7 @@ void CMenus::RandomSkin()
 		{
 			auto it = m_pClient->m_Skins.GetSkinsUnsafe().begin();
 			std::advance(it, rand() % m_pClient->m_Skins.GetSkinsUnsafe().size());
-			str_copy(aRandomSkinName, (*it).second.get()->GetName(), SkinNameSize);
+			str_copy(aRandomSkinName, (*it).second->GetName(), SkinNameSize);
 		} while(!str_comp(aRandomSkinName, "x_ninja") || !str_comp(aRandomSkinName, "x_spec"));
 	}
 	char *pSkinName = !m_Dummy ? g_Config.m_ClPlayerSkin : g_Config.m_ClDummySkin;
