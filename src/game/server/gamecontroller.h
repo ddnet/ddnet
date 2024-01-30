@@ -293,14 +293,38 @@ protected:
 
 	void EndMatch()
 	{
-		OnEndMatchInsta();
+		// can be called twice
+		// for example from gamecontroller score check
+		// and ctf flag capture at the same time
+		if(m_GameState != IGS_END_MATCH)
+			OnEndMatchInsta();
 		SetGameState(IGS_END_MATCH, TIMER_END);
 	}
 	void EndRound() { SetGameState(IGS_END_ROUND, TIMER_END / 2); } // never called ddnet-insta has no round support yet
 
 	void OnEndMatchInsta();
+	void GetRoundEndStatsStrCsv(char *pBuf, size_t Size);
+	void PsvRowPlayer(const CPlayer *pPlayer, char *pBuf, size_t Size);
+	void GetRoundEndStatsStrPsv(char *pBuf, size_t Size);
+	void GetRoundEndStatsStrAsciiTable(char *pBuf, size_t Size);
 	void GetRoundEndStatsStr(char *pBuf, size_t Size);
 	void PublishRoundEndStatsStr(const char *pStr);
+	class CInstaPlayerStats
+	{
+	public:
+		int m_Kills;
+		int m_Deaths;
+		void Reset()
+		{
+			m_Kills = 0;
+			m_Deaths = 0;
+		}
+		CInstaPlayerStats()
+		{
+			Reset();
+		}
+	};
+	CInstaPlayerStats m_aInstaPlayerStats[MAX_CLIENTS];
 
 public:
 	enum
