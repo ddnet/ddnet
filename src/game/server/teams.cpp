@@ -372,7 +372,7 @@ const char *CGameTeams::SetCharacterTeam(int ClientID, int Team)
 		return "Invalid client ID";
 	if(Team < 0 || Team >= MAX_CLIENTS + 1)
 		return "Invalid team number";
-	if(Team != TEAM_SUPER && m_aTeamState[Team] > TEAMSTATE_OPEN)
+	if(Team != TEAM_SUPER && m_aTeamState[Team] > TEAMSTATE_OPEN && !m_aPractice[Team])
 		return "This team started already";
 	if(m_Core.Team(ClientID) == Team)
 		return "You are in this team already";
