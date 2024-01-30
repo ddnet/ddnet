@@ -16,6 +16,7 @@ CGameControllerInstagib::CGameControllerInstagib(class CGameContext *pGameServer
 	GameServer()->Console()->Chain("sv_timelimit", ConchainGameinfoUpdate, this);
 	GameServer()->Console()->Chain("sv_grenade_ammo_regen", ConchainResetInstasettingTees, this);
 	GameServer()->Console()->Chain("sv_spawn_weapons", ConchainSpawnWeapons, this);
+	GameServer()->Console()->Chain("sv_tournament_chat_smart", ConchainSmartChat, this);
 
 #define CONSOLE_COMMAND(name, params, flags, callback, userdata, help) GameServer()->Console()->Register(name, params, flags, callback, userdata, help);
 #include "instagib/rcon_commands.h"
@@ -138,6 +139,23 @@ void CGameControllerInstagib::ConchainSpawnWeapons(IConsole::IResult *pResult, v
 			pThis->m_SpawnWeapons = SPAWN_WEAPON_GRENADE;
 		}
 	}
+}
+
+void CGameControllerInstagib::ConchainSmartChat(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	pfnCallback(pResult, pCallbackUserData);
+
+	if(!pResult->NumArguments())
+		return;
+
+	CGameControllerInstagib *pSelf = static_cast<CGameControllerInstagib *>(pUserData);
+	char aBuf[512];
+	str_format(
+		aBuf,
+		sizeof(aBuf),
+		"Warning: sv_tournament_chat is currently set to %d you might want to update that too.",
+		pSelf->Config()->m_SvTournamentChat);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ddnet-insta", aBuf);
 }
 
 int CGameControllerInstagib::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon)
