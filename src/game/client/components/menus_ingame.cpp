@@ -114,10 +114,6 @@ void CMenus::RenderGame(CUIRect MainView)
 			Client()->DemoRecorder(RECORDER_MANUAL)->Stop(IDemoRecorder::EStopMode::KEEP_FILE);
 	}
 
-	static CButtonContainer s_SpectateButton;
-	static CButtonContainer s_JoinRedButton;
-	static CButtonContainer s_JoinBlueButton;
-
 	bool Paused = false;
 	bool Spec = false;
 	if(m_pClient->m_Snap.m_LocalClientID >= 0)
@@ -128,6 +124,8 @@ void CMenus::RenderGame(CUIRect MainView)
 
 	if(m_pClient->m_Snap.m_pLocalInfo && m_pClient->m_Snap.m_pGameInfoObj && !Paused && !Spec)
 	{
+		static CButtonContainer s_SpectateButton;
+
 		if(m_pClient->m_Snap.m_pLocalInfo->m_Team != TEAM_SPECTATORS)
 		{
 			ButtonBar.VSplitLeft(5.0f, 0, &ButtonBar);
@@ -148,6 +146,7 @@ void CMenus::RenderGame(CUIRect MainView)
 			{
 				ButtonBar.VSplitLeft(5.0f, 0, &ButtonBar);
 				ButtonBar.VSplitLeft(120.0f, &Button, &ButtonBar);
+				static CButtonContainer s_JoinRedButton;
 				if(!DummyConnecting && DoButton_Menu(&s_JoinRedButton, Localize("Join red"), 0, &Button))
 				{
 					m_pClient->SendSwitchTeam(TEAM_RED);
@@ -159,6 +158,7 @@ void CMenus::RenderGame(CUIRect MainView)
 			{
 				ButtonBar.VSplitLeft(5.0f, 0, &ButtonBar);
 				ButtonBar.VSplitLeft(120.0f, &Button, &ButtonBar);
+				static CButtonContainer s_JoinBlueButton;
 				if(!DummyConnecting && DoButton_Menu(&s_JoinBlueButton, Localize("Join blue"), 0, &Button))
 				{
 					m_pClient->SendSwitchTeam(TEAM_BLUE);
@@ -620,12 +620,18 @@ bool CMenus::RenderServerControlKick(CUIRect MainView, bool FilterSpectators)
 
 void CMenus::RenderServerControl(CUIRect MainView)
 {
-	static int s_ControlPage = 0;
+	enum class EServerControlTab
+	{
+		SETTINGS,
+		KICKVOTE,
+		SPECVOTE,
+	};
+	static EServerControlTab s_ControlPage = EServerControlTab::SETTINGS;
 
 	// render background
 	CUIRect Bottom, RconExtension, TabBar, Button;
 	MainView.HSplitTop(20.0f, &Bottom, &MainView);
-	Bottom.Draw(ms_ColorTabbarActive, 0, 10.0f);
+	Bottom.Draw(ms_ColorTabbarActive, IGraphics::CORNER_NONE, 0.0f);
 	MainView.HSplitTop(20.0f, &TabBar, &MainView);
 	MainView.Draw(ms_ColorTabbarActive, IGraphics::CORNER_B, 10.0f);
 	MainView.Margin(10.0f, &MainView);
@@ -636,28 +642,28 @@ void CMenus::RenderServerControl(CUIRect MainView)
 	// tab bar
 	TabBar.VSplitLeft(TabBar.w / 3, &Button, &TabBar);
 	static CButtonContainer s_Button0;
-	if(DoButton_MenuTab(&s_Button0, Localize("Change settings"), s_ControlPage == 0, &Button, 0))
-		s_ControlPage = 0;
+	if(DoButton_MenuTab(&s_Button0, Localize("Change settings"), s_ControlPage == EServerControlTab::SETTINGS, &Button, IGraphics::CORNER_NONE))
+		s_ControlPage = EServerControlTab::SETTINGS;
 
 	TabBar.VSplitMid(&Button, &TabBar);
 	static CButtonContainer s_Button1;
-	if(DoButton_MenuTab(&s_Button1, Localize("Kick player"), s_ControlPage == 1, &Button, 0))
-		s_ControlPage = 1;
+	if(DoButton_MenuTab(&s_Button1, Localize("Kick player"), s_ControlPage == EServerControlTab::KICKVOTE, &Button, IGraphics::CORNER_NONE))
+		s_ControlPage = EServerControlTab::KICKVOTE;
 
 	static CButtonContainer s_Button2;
-	if(DoButton_MenuTab(&s_Button2, Localize("Move player to spectators"), s_ControlPage == 2, &TabBar, 0))
-		s_ControlPage = 2;
+	if(DoButton_MenuTab(&s_Button2, Localize("Move player to spectators"), s_ControlPage == EServerControlTab::SPECVOTE, &TabBar, IGraphics::CORNER_NONE))
+		s_ControlPage = EServerControlTab::SPECVOTE;
 
 	// render page
 	MainView.HSplitBottom(ms_ButtonHeight + 5 * 2, &MainView, &Bottom);
 	Bottom.HMargin(5.0f, &Bottom);
 
 	bool Call = false;
-	if(s_ControlPage == 0)
+	if(s_ControlPage == EServerControlTab::SETTINGS)
 		Call = RenderServerControlServer(MainView);
-	else if(s_ControlPage == 1)
+	else if(s_ControlPage == EServerControlTab::KICKVOTE)
 		Call = RenderServerControlKick(MainView, false);
-	else if(s_ControlPage == 2)
+	else if(s_ControlPage == EServerControlTab::SPECVOTE)
 		Call = RenderServerControlKick(MainView, true);
 
 	// vote menu
@@ -694,13 +700,13 @@ void CMenus::RenderServerControl(CUIRect MainView)
 	static CButtonContainer s_CallVoteButton;
 	if(DoButton_Menu(&s_CallVoteButton, Localize("Call vote"), 0, &Button) || Call)
 	{
-		if(s_ControlPage == 0)
+		if(s_ControlPage == EServerControlTab::SETTINGS)
 		{
 			m_pClient->m_Voting.CallvoteOption(m_CallvoteSelectedOption, m_CallvoteReasonInput.GetString());
 			if(g_Config.m_UiCloseWindowAfterChangingSetting)
 				SetActive(false);
 		}
-		else if(s_ControlPage == 1)
+		else if(s_ControlPage == EServerControlTab::KICKVOTE)
 		{
 			if(m_CallvoteSelectedPlayer >= 0 && m_CallvoteSelectedPlayer < MAX_CLIENTS &&
 				m_pClient->m_Snap.m_apPlayerInfos[m_CallvoteSelectedPlayer])
@@ -709,7 +715,7 @@ void CMenus::RenderServerControl(CUIRect MainView)
 				SetActive(false);
 			}
 		}
-		else if(s_ControlPage == 2)
+		else if(s_ControlPage == EServerControlTab::SPECVOTE)
 		{
 			if(m_CallvoteSelectedPlayer >= 0 && m_CallvoteSelectedPlayer < MAX_CLIENTS &&
 				m_pClient->m_Snap.m_apPlayerInfos[m_CallvoteSelectedPlayer])
@@ -752,9 +758,11 @@ void CMenus::RenderServerControl(CUIRect MainView)
 		static CButtonContainer s_ForceVoteButton;
 		if(DoButton_Menu(&s_ForceVoteButton, Localize("Force vote"), 0, &Button))
 		{
-			if(s_ControlPage == 0)
+			if(s_ControlPage == EServerControlTab::SETTINGS)
+			{
 				m_pClient->m_Voting.CallvoteOption(m_CallvoteSelectedOption, m_CallvoteReasonInput.GetString(), true);
-			else if(s_ControlPage == 1)
+			}
+			else if(s_ControlPage == EServerControlTab::KICKVOTE)
 			{
 				if(m_CallvoteSelectedPlayer >= 0 && m_CallvoteSelectedPlayer < MAX_CLIENTS &&
 					m_pClient->m_Snap.m_apPlayerInfos[m_CallvoteSelectedPlayer])
@@ -763,7 +771,7 @@ void CMenus::RenderServerControl(CUIRect MainView)
 					SetActive(false);
 				}
 			}
-			else if(s_ControlPage == 2)
+			else if(s_ControlPage == EServerControlTab::SPECVOTE)
 			{
 				if(m_CallvoteSelectedPlayer >= 0 && m_CallvoteSelectedPlayer < MAX_CLIENTS &&
 					m_pClient->m_Snap.m_apPlayerInfos[m_CallvoteSelectedPlayer])
@@ -775,7 +783,7 @@ void CMenus::RenderServerControl(CUIRect MainView)
 			m_CallvoteReasonInput.Clear();
 		}
 
-		if(s_ControlPage == 0)
+		if(s_ControlPage == EServerControlTab::SETTINGS)
 		{
 			// remove vote
 			Bottom.VSplitRight(10.0f, &Bottom, 0);
@@ -868,8 +876,7 @@ void CMenus::RenderInGameNetwork(CUIRect MainView)
 
 	if(NewPage != g_Config.m_UiPage)
 	{
-		if(Client()->State() != IClient::STATE_OFFLINE)
-			SetMenuPage(NewPage);
+		SetMenuPage(NewPage);
 	}
 
 	RenderServerbrowser(MainView);
@@ -1005,7 +1012,6 @@ void CMenus::RenderGhost(CUIRect MainView)
 		int m_Id;
 		float m_Width;
 		CUIRect m_Rect;
-		CUIRect m_Spacer;
 	};
 
 	enum
@@ -1017,11 +1023,11 @@ void CMenus::RenderGhost(CUIRect MainView)
 	};
 
 	static CColumn s_aCols[] = {
-		{"", -1, 2.0f, {0}, {0}},
-		{"", COL_ACTIVE, 30.0f, {0}, {0}},
-		{Localizable("Name"), COL_NAME, 200.0f, {0}, {0}},
-		{Localizable("Time"), COL_TIME, 90.0f, {0}, {0}},
-		{Localizable("Date"), COL_DATE, 150.0f, {0}, {0}},
+		{"", -1, 2.0f, {0}},
+		{"", COL_ACTIVE, 30.0f, {0}},
+		{Localizable("Name"), COL_NAME, 200.0f, {0}},
+		{Localizable("Time"), COL_TIME, 90.0f, {0}},
+		{Localizable("Date"), COL_DATE, 150.0f, {0}},
 	};
 
 	int NumCols = std::size(s_aCols);
@@ -1032,7 +1038,7 @@ void CMenus::RenderGhost(CUIRect MainView)
 		Headers.VSplitLeft(s_aCols[i].m_Width, &s_aCols[i].m_Rect, &Headers);
 
 		if(i + 1 < NumCols)
-			Headers.VSplitLeft(2, &s_aCols[i].m_Spacer, &Headers);
+			Headers.VSplitLeft(2, nullptr, &Headers);
 	}
 
 	// do headers

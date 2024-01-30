@@ -492,6 +492,8 @@ bool CGameContext::SnapPickup(const CSnapContext &Context, int SnapID, const vec
 			pPickup->m_Type = SubType == WEAPON_SHOTGUN ? protocol7::PICKUP_SHOTGUN : SubType == WEAPON_GRENADE ? protocol7::PICKUP_GRENADE : protocol7::PICKUP_LASER;
 		else if(Type == POWERUP_NINJA)
 			pPickup->m_Type = protocol7::PICKUP_NINJA;
+		else if(Type == POWERUP_ARMOR)
+			pPickup->m_Type = protocol7::PICKUP_ARMOR;
 	}
 	else if(Context.GetClientVersion() >= VERSION_DDNET_ENTITY_NETOBJS)
 	{
@@ -2067,10 +2069,6 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 
 void CGameContext::OnSayNetMessage(const CNetMsg_Cl_Say *pMsg, int ClientID, const CUnpacker *pUnpacker)
 {
-	if(!str_utf8_check(pMsg->m_pMessage))
-	{
-		return;
-	}
 	CPlayer *pPlayer = m_apPlayers[ClientID];
 	bool Check = !pPlayer->m_NotEligibleForFinish && pPlayer->m_EligibleForFinishCheck + 10 * time_freq() >= time_get();
 	if(Check && str_comp(pMsg->m_pMessage, "xd sure chillerbot.png is lyfe") == 0 && pMsg->m_Team == 0)
@@ -2211,10 +2209,6 @@ void CGameContext::OnCallVoteNetMessage(const CNetMsg_Cl_CallVote *pMsg, int Cli
 	char aSixupDesc[VOTE_DESC_LENGTH] = {0};
 	char aCmd[VOTE_CMD_LENGTH] = {0};
 	char aReason[VOTE_REASON_LENGTH] = "No reason given";
-	if(!str_utf8_check(pMsg->m_pType) || !str_utf8_check(pMsg->m_pReason) || !str_utf8_check(pMsg->m_pValue))
-	{
-		return;
-	}
 	if(pMsg->m_pReason[0])
 	{
 		str_copy(aReason, pMsg->m_pReason, sizeof(aReason));
@@ -2593,10 +2587,6 @@ void CGameContext::OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int
 
 	bool SixupNeedsUpdate = false;
 
-	if(!str_utf8_check(pMsg->m_pName) || !str_utf8_check(pMsg->m_pClan) || !str_utf8_check(pMsg->m_pSkin))
-	{
-		return;
-	}
 	pPlayer->m_LastChangeInfo = Server()->Tick();
 	pPlayer->UpdatePlaytime();
 
@@ -2806,22 +2796,6 @@ void CGameContext::OnStartInfoNetMessage(const CNetMsg_Cl_StartInfo *pMsg, int C
 
 	if(pPlayer->m_IsReady)
 		return;
-
-	if(!str_utf8_check(pMsg->m_pName))
-	{
-		Server()->Kick(ClientID, "name is not valid utf8");
-		return;
-	}
-	if(!str_utf8_check(pMsg->m_pClan))
-	{
-		Server()->Kick(ClientID, "clan is not valid utf8");
-		return;
-	}
-	if(!str_utf8_check(pMsg->m_pSkin))
-	{
-		Server()->Kick(ClientID, "skin is not valid utf8");
-		return;
-	}
 
 	pPlayer->m_LastChangeInfo = Server()->Tick();
 

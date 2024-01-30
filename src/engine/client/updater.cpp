@@ -1,7 +1,6 @@
-#include "updater.h"
-
 #include <base/system.h>
 
+#include "updater.h"
 #include <engine/client.h>
 #include <engine/engine.h>
 #include <engine/external/json-parser/json.h>
@@ -84,6 +83,8 @@ CUpdater::CUpdater()
 	m_State = CLEAN;
 	m_Percent = 0;
 	m_pCurrentTask = nullptr;
+
+	m_ClientUpdate = m_ServerUpdate = m_ClientFetched = m_ServerFetched = false;
 
 	IStorage::FormatTmpPath(m_aClientExecTmp, sizeof(m_aClientExecTmp), CLIENT_EXEC);
 	IStorage::FormatTmpPath(m_aServerExecTmp, sizeof(m_aServerExecTmp), SERVER_EXEC);
@@ -346,17 +347,17 @@ void CUpdater::RunningUpdate()
 	}
 	else
 	{
-		if(m_ServerUpdate)
+		if(m_ServerUpdate && !m_ServerFetched)
 		{
 			FetchFile(PLAT_SERVER_DOWN, m_aServerExecTmp);
-			m_ServerUpdate = false;
+			m_ServerFetched = true;
 			return;
 		}
 
-		if(m_ClientUpdate)
+		if(m_ClientUpdate && !m_ClientFetched)
 		{
-			FetchFile(PLAT_SERVER_DOWN, m_aServerExecTmp);
-			m_ClientUpdate = false;
+			FetchFile(PLAT_CLIENT_DOWN, m_aClientExecTmp);
+			m_ClientFetched = true;
 			return;
 		}
 

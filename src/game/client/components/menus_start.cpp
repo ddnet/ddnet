@@ -146,13 +146,9 @@ void CMenus::RenderStartMenu(CUIRect MainView)
 			char aBuf[IO_MAX_PATH_LENGTH];
 			Storage()->GetBinaryPath(PLAT_SERVER_EXEC, aBuf, sizeof(aBuf));
 			// No / in binary path means to search in $PATH, so it is expected that the file can't be opened. Just try executing anyway.
-			if(str_find(aBuf, "/") == 0)
+			if(str_find(aBuf, "/") == 0 || fs_is_file(aBuf))
 			{
-				m_ServerProcess.m_Process = shell_execute(aBuf);
-			}
-			else if(fs_is_file(aBuf))
-			{
-				m_ServerProcess.m_Process = shell_execute(aBuf);
+				m_ServerProcess.m_Process = shell_execute(aBuf, EShellExecuteWindowState::BACKGROUND);
 			}
 			else
 			{

@@ -405,7 +405,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupGroup(void *pContext, CUIRect View, 
 		{
 			// gather all tile layers
 			std::vector<std::shared_ptr<CLayerTiles>> vpLayers;
-			int GameLayerIndex;
+			int GameLayerIndex = -1;
 			for(int LayerIndex = 0; LayerIndex < (int)pEditor->m_Map.m_pGameGroup->m_vpLayers.size(); LayerIndex++)
 			{
 				auto &pLayer = pEditor->m_Map.m_pGameGroup->m_vpLayers.at(LayerIndex);
@@ -446,8 +446,15 @@ CUI::EPopupMenuFunctionResult CEditor::PopupGroup(void *pContext, CUIRect View, 
 
 			if(!pGameLayer->m_TilesHistory.empty())
 			{
-				// record undo
-				pEditor->m_EditorHistory.RecordAction(std::make_shared<CEditorActionTileChanges>(pEditor, pEditor->m_SelectedGroup, GameLayerIndex, "Clean up game tiles", pGameLayer->m_TilesHistory));
+				if(GameLayerIndex == -1)
+				{
+					dbg_msg("editor", "failed to record action (GameLayerIndex not found)");
+				}
+				else
+				{
+					// record undo
+					pEditor->m_EditorHistory.RecordAction(std::make_shared<CEditorActionTileChanges>(pEditor, pEditor->m_SelectedGroup, GameLayerIndex, "Clean up game tiles", pGameLayer->m_TilesHistory));
+				}
 				pGameLayer->ClearHistory();
 			}
 
