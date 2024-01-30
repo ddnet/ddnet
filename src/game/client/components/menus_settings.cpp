@@ -432,7 +432,7 @@ void CMenus::RandomSkin()
 	}
 
 	const size_t SkinNameSize = !m_Dummy ? sizeof(g_Config.m_ClPlayerSkin) : sizeof(g_Config.m_ClDummySkin);
-	char aRandomSkinName[SkinNameSize];
+	char aRandomSkinName[24];
 	str_copy(aRandomSkinName, "default", SkinNameSize);
 	if(!m_pClient->m_Skins.GetSkinsUnsafe().empty())
 	{
