@@ -2522,6 +2522,8 @@ if(SERVER)
     server.h
     server_logger.cpp
     server_logger.h
+    snap_id_pool.cpp
+    snap_id_pool.h
     sql_string_helpers.cpp
     sql_string_helpers.h
     upnp.cpp
