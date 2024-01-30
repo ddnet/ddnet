@@ -2592,6 +2592,7 @@ if(SERVER)
     gameworld.cpp
     gameworld.h
     instagib/gamelogic.cpp
+    instagib/round_stats.cpp
     instagib/strhelpers.cpp
     instagib/strhelpers.h
     player.cpp

@@ -291,8 +291,16 @@ protected:
 	int m_GameStartTick;
 	int m_aTeamscore[protocol7::NUM_TEAMS];
 
-	void EndMatch() { SetGameState(IGS_END_MATCH, TIMER_END); }
-	void EndRound() { SetGameState(IGS_END_ROUND, TIMER_END / 2); }
+	void EndMatch()
+	{
+		OnEndMatchInsta();
+		SetGameState(IGS_END_MATCH, TIMER_END);
+	}
+	void EndRound() { SetGameState(IGS_END_ROUND, TIMER_END / 2); } // never called ddnet-insta has no round support yet
+
+	void OnEndMatchInsta();
+	void GetRoundEndStatsStr(char *pBuf, size_t Size);
+	void PublishRoundEndStatsStr(const char *pStr);
 
 public:
 	enum
