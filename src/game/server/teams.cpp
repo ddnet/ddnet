@@ -1102,7 +1102,7 @@ void CGameTeams::OnCharacterDeath(int ClientID, int Weapon)
 	}
 	else
 	{
-		if(m_aTeamState[m_Core.Team(ClientID)] == CGameTeams::TEAMSTATE_STARTED && !m_aTeeStarted[ClientID])
+		if(m_aTeamState[m_Core.Team(ClientID)] == CGameTeams::TEAMSTATE_STARTED && !m_aTeeStarted[ClientID] && !m_aPractice[Team])
 		{
 			char aBuf[128];
 			str_format(aBuf, sizeof(aBuf), "This team cannot finish anymore because '%s' left the team before hitting the start", Server()->ClientName(ClientID));
