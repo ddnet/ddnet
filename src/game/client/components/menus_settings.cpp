@@ -408,30 +408,43 @@ void CMenus::RefreshSkins()
 void CMenus::RandomSkin()
 {
 	static const float s_aSchemes[] = {1.0f / 2.0f, 1.0f / 3.0f, 1.0f / -3.0f, 1.0f / 12.0f, 1.0f / -12.0f}; // complementary, triadic, analogous
+	const bool UseCustomColor = !m_Dummy ? g_Config.m_ClPlayerUseCustomColor : g_Config.m_ClDummyUseCustomColor;
+	if(UseCustomColor)
+	{
+		float GoalSat = random_float(0.3f, 1.0f);
+		float MaxBodyLht = 1.0f - GoalSat * GoalSat; // max allowed lightness before we start losing saturation
 
-	float GoalSat = random_float(0.3f, 1.0f);
-	float MaxBodyLht = 1.0f - GoalSat * GoalSat; // max allowed lightness before we start losing saturation
+		ColorHSLA Body;
+		Body.h = random_float();
+		Body.l = random_float(0.0f, MaxBodyLht);
+		Body.s = clamp(GoalSat * GoalSat / (1.0f - Body.l), 0.0f, 1.0f);
 
-	ColorHSLA Body;
-	Body.h = random_float();
-	Body.l = random_float(0.0f, MaxBodyLht);
-	Body.s = clamp(GoalSat * GoalSat / (1.0f - Body.l), 0.0f, 1.0f);
+		ColorHSLA Feet;
+		Feet.h = std::fmod(Body.h + s_aSchemes[rand() % std::size(s_aSchemes)], 1.0f);
+		Feet.l = random_float();
+		Feet.s = clamp(GoalSat * GoalSat / (1.0f - Feet.l), 0.0f, 1.0f);
 
-	ColorHSLA Feet;
-	Feet.h = std::fmod(Body.h + s_aSchemes[rand() % std::size(s_aSchemes)], 1.0f);
-	Feet.l = random_float();
-	Feet.s = clamp(GoalSat * GoalSat / (1.0f - Feet.l), 0.0f, 1.0f);
+		unsigned *pColorBody = !m_Dummy ? &g_Config.m_ClPlayerColorBody : &g_Config.m_ClDummyColorBody;
+		unsigned *pColorFeet = !m_Dummy ? &g_Config.m_ClPlayerColorFeet : &g_Config.m_ClDummyColorFeet;
 
-	const char *pRandomSkinName = CSkins::VANILLA_SKINS[rand() % (std::size(CSkins::VANILLA_SKINS) - 2)]; // last 2 skins are x_ninja and x_spec
+		*pColorBody = Body.Pack(false);
+		*pColorFeet = Feet.Pack(false);
+	}
 
-	char *pSkinName = !m_Dummy ? g_Config.m_ClPlayerSkin : g_Config.m_ClDummySkin;
 	const size_t SkinNameSize = !m_Dummy ? sizeof(g_Config.m_ClPlayerSkin) : sizeof(g_Config.m_ClDummySkin);
-	unsigned *pColorBody = !m_Dummy ? &g_Config.m_ClPlayerColorBody : &g_Config.m_ClDummyColorBody;
-	unsigned *pColorFeet = !m_Dummy ? &g_Config.m_ClPlayerColorFeet : &g_Config.m_ClDummyColorFeet;
-
-	str_copy(pSkinName, pRandomSkinName, SkinNameSize);
-	*pColorBody = Body.Pack(false);
-	*pColorFeet = Feet.Pack(false);
+	char aRandomSkinName[SkinNameSize];
+	str_copy(aRandomSkinName, "default", SkinNameSize);
+	if(!m_pClient->m_Skins.GetSkinsUnsafe().empty())
+	{
+		do
+		{
+			auto it = m_pClient->m_Skins.GetSkinsUnsafe().begin();
+			std::advance(it, rand() % m_pClient->m_Skins.GetSkinsUnsafe().size());
+			str_copy(aRandomSkinName, (*it).second.get()->GetName(), SkinNameSize);
+		} while(!str_comp(aRandomSkinName, "x_ninja") || !str_comp(aRandomSkinName, "x_spec"));
+	}
+	char *pSkinName = !m_Dummy ? g_Config.m_ClPlayerSkin : g_Config.m_ClDummySkin;
+	str_copy(pSkinName, aRandomSkinName, SkinNameSize);
 
 	SetNeedSendInfo();
 }
