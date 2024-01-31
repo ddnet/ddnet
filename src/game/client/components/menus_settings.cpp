@@ -3454,3 +3454,13 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 	}
 #endif
 }
+
+void CMenus::ConchainReloadSkins(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	CMenus *pThis = (CMenus *)pUserData;
+	pfnCallback(pResult, pCallbackUserData);
+	if(pResult->NumArguments() && (pThis->Client()->State() == IClient::STATE_ONLINE || pThis->Client()->State() == IClient::STATE_DEMOPLAYBACK))
+	{
+		pThis->RefreshSkins();
+	}
+}
