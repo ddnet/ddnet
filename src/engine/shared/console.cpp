@@ -547,7 +547,7 @@ void CConsole::ExecuteLineStroked(int Stroke, const char *pStr, int ClientID, bo
 			if(!m_pfnUnknownCommandCallback(pStr, m_pUnknownCommandUserdata))
 			{
 				char aBuf[CMDLINE_LENGTH + 32];
-				str_format(aBuf, sizeof(aBuf), "No such command: %s.", Result.m_pCommand);
+				str_format(aBuf, sizeof(aBuf), "No such command: %s. Use /cmdlist for a list of all commands.", Result.m_pCommand);
 				Print(OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
 			}
 		}
