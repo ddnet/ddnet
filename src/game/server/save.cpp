@@ -481,6 +481,11 @@ int CSaveTeam::Save(CGameContext *pGameServer, int Team, bool Dry)
 	IGameController *pController = pGameServer->m_pController;
 	CGameTeams *pTeams = &pController->Teams();
 
+	if(pTeams->TeamFlock(Team))
+	{
+		return 5;
+	}
+
 	m_MembersCount = pTeams->Count(Team);
 	if(m_MembersCount <= 0)
 	{
@@ -553,6 +558,9 @@ bool CSaveTeam::HandleSaveError(int Result, int ClientID, CGameContext *pGameCon
 		break;
 	case 4:
 		pGameContext->SendChatTarget(ClientID, "Your team has not started yet");
+		break;
+	case 5:
+		pGameContext->SendChatTarget(ClientID, "Team can't be saved while in team 0 mode");
 		break;
 	default: // this state should never be reached
 		pGameContext->SendChatTarget(ClientID, "Unknown error while saving");
