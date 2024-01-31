@@ -2741,7 +2741,7 @@ int CServer::Run()
 	// load map
 	if(!LoadMap(Config()->m_SvMap))
 	{
-		dbg_msg("server", "failed to load map. mapname='%s'", Config()->m_SvMap);
+		log_error("server", "failed to load map. mapname='%s'", Config()->m_SvMap);
 		return -1;
 	}
 
@@ -2769,7 +2769,7 @@ int CServer::Run()
 	}
 	else if(net_host_lookup(g_Config.m_Bindaddr, &BindAddr, NETTYPE_ALL) != 0)
 	{
-		dbg_msg("server", "The configured bindaddr '%s' cannot be resolved", g_Config.m_Bindaddr);
+		log_error("server", "The configured bindaddr '%s' cannot be resolved", g_Config.m_Bindaddr);
 		return -1;
 	}
 	BindAddr.type = Config()->m_SvIpv4Only ? NETTYPE_IPV4 : NETTYPE_ALL;
@@ -2779,13 +2779,13 @@ int CServer::Run()
 	{
 		if(Port != 0 || BindAddr.port >= 8310)
 		{
-			dbg_msg("server", "couldn't open socket. port %d might already be in use", BindAddr.port);
+			log_error("server", "couldn't open socket. port %d might already be in use", BindAddr.port);
 			return -1;
 		}
 	}
 
 	if(Port == 0)
-		dbg_msg("server", "using port %d", BindAddr.port);
+		log_info("server", "using port %d", BindAddr.port);
 
 #if defined(CONF_UPNP)
 	m_UPnP.Open(BindAddr);
@@ -2824,9 +2824,9 @@ int CServer::Run()
 
 	if(m_AuthManager.IsGenerated())
 	{
-		dbg_msg("server", "+-------------------------+");
-		dbg_msg("server", "| rcon password: '%s' |", Config()->m_SvRconPassword);
-		dbg_msg("server", "+-------------------------+");
+		log_info("server", "+-------------------------+");
+		log_info("server", "| rcon password: '%s' |", Config()->m_SvRconPassword);
+		log_info("server", "+-------------------------+");
 	}
 
 	// start game
@@ -3084,7 +3084,7 @@ int CServer::Run()
 
 	if(ErrorShutdown())
 	{
-		dbg_msg("server", "shutdown from game server (%s)", m_aErrorShutdownReason);
+		log_info("server", "shutdown from game server (%s)", m_aErrorShutdownReason);
 		pDisconnectReason = m_aErrorShutdownReason;
 	}
 	// disconnect all clients on shutdown

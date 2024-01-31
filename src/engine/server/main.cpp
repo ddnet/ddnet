@@ -47,6 +47,8 @@ void HandleSigIntTerm(int Param)
 
 int main(int argc, const char **argv)
 {
+	const int64_t MainStart = time_get();
+
 	CCmdlineFix CmdlineFix(&argc, &argv);
 	bool Silent = false;
 
@@ -90,12 +92,12 @@ int main(int argc, const char **argv)
 
 	if(secure_random_init() != 0)
 	{
-		dbg_msg("secure", "could not initialize secure RNG");
+		log_error("secure", "could not initialize secure RNG");
 		return -1;
 	}
 	if(MysqlInit() != 0)
 	{
-		dbg_msg("mysql", "failed to initialize MySQL library");
+		log_error("mysql", "failed to initialize MySQL library");
 		return -1;
 	}
 
@@ -182,14 +184,14 @@ int main(int argc, const char **argv)
 		}
 		else
 		{
-			dbg_msg("server", "failed to open '%s' for logging", g_Config.m_Logfile);
+			log_error("server", "failed to open '%s' for logging", g_Config.m_Logfile);
 		}
 	}
 	auto pServerLogger = std::make_shared<CServerLogger>(pServer);
 	pEngine->SetAdditionalLogger(pServerLogger);
 
 	// run the server
-	dbg_msg("server", "starting...");
+	log_trace("server", "initialization finished after %.2fms, starting...", (time_get() - MainStart) * 1000.0f / (float)time_freq());
 	int Ret = pServer->Run();
 
 	pServerLogger->OnServerDeletion();
