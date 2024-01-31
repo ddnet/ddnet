@@ -595,6 +595,8 @@ protected:
 
 	class CMenuBackground *m_pBackground;
 
+	static void ConchainReloadSkins(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+
 public:
 	void RenderBackground();
 
