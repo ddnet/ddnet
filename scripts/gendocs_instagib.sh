@@ -25,6 +25,13 @@ gen_configs() {
 		cmd="$(echo "$cfg" | cut -d',' -f2 | xargs)"
 		echo "+ \`$cmd\` $desc"
 	done < <(grep '^MACRO_CONFIG_INT' src/engine/shared/variables_insta.h)
+	while read -r cfg
+	do
+		desc="$(echo "$cfg" | cut -d',' -f6- | cut -d'"' -f2-)"
+		desc="${desc::-2}"
+		cmd="$(echo "$cfg" | cut -d',' -f2 | xargs)"
+		echo "+ \`$cmd\` $desc"
+	done < <(grep '^MACRO_CONFIG_STR' src/engine/shared/variables_insta.h)
 }
 
 gen_rcon_cmds() {

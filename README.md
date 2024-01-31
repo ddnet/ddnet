@@ -86,6 +86,10 @@ It kills with one shot and capturing the enemy flag scores your team 100 points.
 + `sv_tournament_chat_smart` Turns sv_tournament_chat on on restart and off on round end (1=specs,2=all)
 + `sv_tournament_join_msgs` Hide join/leave of spectators in chat !0.6 only for now! (0=off,1=hidden,2=shown for specs)
 + `sv_round_stats_format` 0=csv 1=psv 2=ascii table 3=markdown table 4=json
++ `sv_spawn_weapons` possible values: grenade, laser
++ `sv_tournament_welcome_chat` Chat message shown in chat on join when sv_tournament is 1
++ `sv_round_stats_discord_webhook` If set will post score stats there on round end
++ `sv_round_stats_output_file` If set will write score stats there on round end
 
 # Rcon commmands
 
