@@ -22,6 +22,7 @@ headers = "0.3.7"
 hex = "0.4.3"
 ipnet = { version = "2.5.0", features = ["serde"] }
 log = "0.4.17"
+mime = "0.3.16"
 rand = "0.8.4"
 serde = { version = "1.0.126", features = ["derive"] }
 serde_json = { version = "1.0.64", features = [
