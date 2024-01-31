@@ -11,6 +11,7 @@
 #include <map>
 #include <vector>
 
+#include <engine/shared/http.h> // ddnet-insta
 #include <game/generated/protocol.h>
 #include <game/generated/protocol7.h>
 
@@ -308,7 +309,10 @@ protected:
 	void GetRoundEndStatsStrPsv(char *pBuf, size_t Size);
 	void GetRoundEndStatsStrAsciiTable(char *pBuf, size_t Size);
 	void GetRoundEndStatsStr(char *pBuf, size_t Size);
+	void PublishRoundEndStatsStrFile(const char *pStr);
+	void PublishRoundEndStatsStrDiscord(const char *pStr);
 	void PublishRoundEndStatsStr(const char *pStr);
+	CHttp m_HttpInsta;
 	class CInstaPlayerStats
 	{
 	public:

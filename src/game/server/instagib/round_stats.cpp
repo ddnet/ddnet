@@ -1,4 +1,6 @@
 #include <engine/shared/config.h>
+#include <engine/shared/http.h>
+#include <engine/shared/json.h>
 
 #include "../entities/character.h"
 #include "../gamecontext.h"
@@ -97,7 +99,30 @@ void IGameController::GetRoundEndStatsStr(char *pBuf, size_t Size)
 		dbg_msg("ddnet-insta", "sv_round_stats_format %d not implemented", g_Config.m_SvRoundStatsFormat);
 }
 
+void IGameController::PublishRoundEndStatsStrFile(const char *pStr)
+{
+}
+
+void IGameController::PublishRoundEndStatsStrDiscord(const char *pStr)
+{
+	// TODO: do not init here!
+	m_HttpInsta.Init(std::chrono::seconds{2});
+
+	char aPayload[2048];
+	char aStatsStr[2000];
+	str_format(aPayload, sizeof(aPayload), "{\"content\": \"%s\"}", EscapeJson(aStatsStr, sizeof(aStatsStr), pStr));
+	std::shared_ptr<CHttpRequest> pDiscord = HttpPost(g_Config.m_SvRoundStatsDiscordWebhook, (const unsigned char *)aPayload, 0);
+	pDiscord->LogProgress(HTTPLOG::FAILURE);
+	pDiscord->IpResolve(IPRESOLVE::V4);
+	// pDiscord->Timeout(CTimeout{1000, 1000, 0, 0});
+	m_HttpInsta.Run(pDiscord);
+}
+
 void IGameController::PublishRoundEndStatsStr(const char *pStr)
 {
 	dbg_msg("ddnet-insta", "publishing round stats:\n%s", pStr);
+	if(g_Config.m_SvRoundStatsDiscordWebhook[0] != '\0')
+		PublishRoundEndStatsStrDiscord(pStr);
+	if(g_Config.m_SvRoundStatsOutputFile[0] != '\0')
+		PublishRoundEndStatsStrFile(pStr);
 }
