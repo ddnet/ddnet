@@ -85,7 +85,7 @@ void IGameController::GetRoundEndStatsStr(char *pBuf, size_t Size)
 {
 	if(!IsTeamPlay())
 	{
-		dbg_msg("ddnet-insta", "failed to build stats (only teams not implemented)");
+		dbg_msg("ddnet-insta", "failed to build stats (no teams not implemented)");
 		return;
 	}
 
