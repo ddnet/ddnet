@@ -389,20 +389,9 @@ struct CUISkin
 	bool operator==(const char *pOther) const { return !str_comp_nocase(m_pSkin->GetName(), pOther); }
 };
 
-void CMenus::RefreshSkins()
+void CMenus::OnRefreshSkins()
 {
-	auto SkinStartLoadTime = time_get_nanoseconds();
-	m_pClient->m_Skins.Refresh([&](int) {
-		// if skin refreshing takes to long, swap to a loading screen
-		if(time_get_nanoseconds() - SkinStartLoadTime > 500ms)
-		{
-			RenderLoading(Localize("Loading skin files"), "", 0, false);
-		}
-	});
-	if(Client()->State() == IClient::STATE_ONLINE || Client()->State() == IClient::STATE_DEMOPLAYBACK)
-	{
-		m_pClient->RefindSkins();
-	}
+	m_SkinListNeedsUpdate = true;
 }
 
 void CMenus::RandomSkin()
@@ -560,29 +549,25 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	Checkboxes.VSplitRight(20.0f, &Checkboxes, nullptr);
 
 	// Checkboxes
-	static bool s_InitSkinlist = true;
 	Checkboxes.HSplitTop(20.0f, &Button, &Checkboxes);
 	if(DoButton_CheckBox(&g_Config.m_ClDownloadSkins, Localize("Download skins"), g_Config.m_ClDownloadSkins, &Button))
 	{
 		g_Config.m_ClDownloadSkins ^= 1;
-		RefreshSkins();
-		s_InitSkinlist = true;
+		m_pClient->RefreshSkins();
 	}
 
 	Checkboxes.HSplitTop(20.0f, &Button, &Checkboxes);
 	if(DoButton_CheckBox(&g_Config.m_ClDownloadCommunitySkins, Localize("Download community skins"), g_Config.m_ClDownloadCommunitySkins, &Button))
 	{
 		g_Config.m_ClDownloadCommunitySkins ^= 1;
-		RefreshSkins();
-		s_InitSkinlist = true;
+		m_pClient->RefreshSkins();
 	}
 
 	Checkboxes.HSplitTop(20.0f, &Button, &Checkboxes);
 	if(DoButton_CheckBox(&g_Config.m_ClVanillaSkinsOnly, Localize("Vanilla skins only"), g_Config.m_ClVanillaSkinsOnly, &Button))
 	{
 		g_Config.m_ClVanillaSkinsOnly ^= 1;
-		RefreshSkins();
-		s_InitSkinlist = true;
+		m_pClient->RefreshSkins();
 	}
 
 	Checkboxes.HSplitTop(20.0f, &Button, &Checkboxes);
@@ -768,7 +753,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	// be nice to the CPU
 	static auto s_SkinLastRebuildTime = time_get_nanoseconds();
 	const auto CurTime = time_get_nanoseconds();
-	if(s_InitSkinlist || m_pClient->m_Skins.Num() != s_SkinCount || m_SkinFavoritesChanged || (m_pClient->m_Skins.IsDownloadingSkins() && (CurTime - s_SkinLastRebuildTime > 500ms)))
+	if(m_SkinListNeedsUpdate || m_pClient->m_Skins.Num() != s_SkinCount || m_SkinFavoritesChanged || (m_pClient->m_Skins.IsDownloadingSkins() && (CurTime - s_SkinLastRebuildTime > 500ms)))
 	{
 		s_SkinLastRebuildTime = CurTime;
 		s_vSkinList.clear();
@@ -813,7 +798,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		std::sort(s_vFavoriteSkinListHelper.begin(), s_vFavoriteSkinListHelper.end());
 		s_vSkinList = s_vFavoriteSkinListHelper;
 		s_vSkinList.insert(s_vSkinList.end(), s_vSkinListHelper.begin(), s_vSkinListHelper.end());
-		s_InitSkinlist = false;
+		m_SkinListNeedsUpdate = false;
 	}
 
 	const auto &&RenderFavIcon = [&](const CUIRect &FavIcon, bool AsFav, bool Hot) {
@@ -890,7 +875,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 				{
 					m_SkinFavorites.emplace(pSkinToBeDraw->GetName());
 				}
-				s_InitSkinlist = true;
+				m_SkinListNeedsUpdate = true;
 			}
 		}
 	}
@@ -919,7 +904,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		}
 		s_SkinFilterInput.SetEmptyText(Localize("Search"));
 		if(UI()->DoClearableEditBox(&s_SkinFilterInput, &QuickSearch, 14.0f))
-			s_InitSkinlist = true;
+			m_SkinListNeedsUpdate = true;
 	}
 
 	static CButtonContainer s_SkinDatabaseButton;
@@ -952,8 +937,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		// reset render flags for possible loading screen
 		TextRender()->SetRenderFlags(0);
 		TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
-		RefreshSkins();
-		s_InitSkinlist = true;
+		m_pClient->RefreshSkins();
 	}
 	TextRender()->SetRenderFlags(0);
 	TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
@@ -3452,14 +3436,4 @@ void CMenus::RenderSettingsDDNet(CUIRect MainView)
 		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 #endif
-}
-
-void CMenus::ConchainReloadSkins(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
-{
-	CMenus *pThis = (CMenus *)pUserData;
-	pfnCallback(pResult, pCallbackUserData);
-	if(pResult->NumArguments() && (pThis->Client()->State() == IClient::STATE_ONLINE || pThis->Client()->State() == IClient::STATE_DEMOPLAYBACK))
-	{
-		pThis->RefreshSkins();
-	}
 }

@@ -814,12 +814,6 @@ void CMenus::OnInit()
 	Console()->Chain("cl_asset_hud", ConchainAssetHud, this);
 	Console()->Chain("cl_asset_extras", ConchainAssetExtras, this);
 
-	Console()->Chain("cl_skin_download_url", ConchainReloadSkins, this);
-	Console()->Chain("cl_skin_community_download_url", ConchainReloadSkins, this);
-	Console()->Chain("cl_download_skins", ConchainReloadSkins, this);
-	Console()->Chain("cl_download_community_skins", ConchainReloadSkins, this);
-	Console()->Chain("cl_vanilla_skins_only", ConchainReloadSkins, this);
-
 	m_TextureBlob = Graphics()->LoadTexture("blob.png", IStorage::TYPE_ALL);
 
 	// setup load amount

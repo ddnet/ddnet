@@ -212,6 +212,12 @@ void CGameClient::OnConsoleInit()
 	Console()->Chain("dummy_color_feet", ConchainSpecialDummyInfoupdate, this);
 	Console()->Chain("dummy_skin", ConchainSpecialDummyInfoupdate, this);
 
+	Console()->Chain("cl_skin_download_url", ConchainRefreshSkins, this);
+	Console()->Chain("cl_skin_community_download_url", ConchainRefreshSkins, this);
+	Console()->Chain("cl_download_skins", ConchainRefreshSkins, this);
+	Console()->Chain("cl_download_community_skins", ConchainRefreshSkins, this);
+	Console()->Chain("cl_vanilla_skins_only", ConchainRefreshSkins, this);
+
 	Console()->Chain("cl_dummy", ConchainSpecialDummy, this);
 	Console()->Chain("cl_text_entities_size", ConchainClTextEntitiesSize, this);
 
@@ -3371,8 +3377,17 @@ void CGameClient::LoadExtrasSkin(const char *pPath, bool AsDir)
 	}
 }
 
-void CGameClient::RefindSkins()
+void CGameClient::RefreshSkins()
 {
+	const auto SkinStartLoadTime = time_get_nanoseconds();
+	m_Skins.Refresh([&](int) {
+		// if skin refreshing takes to long, swap to a loading screen
+		if(time_get_nanoseconds() - SkinStartLoadTime > 500ms)
+		{
+			m_Menus.RenderLoading(Localize("Loading skin files"), "", 0, false);
+		}
+	});
+
 	for(auto &Client : m_aClients)
 	{
 		Client.m_SkinInfo.m_OriginalRenderSkin.Reset();
@@ -3390,9 +3405,19 @@ void CGameClient::RefindSkins()
 		}
 		Client.UpdateRenderInfo(IsTeamPlay());
 	}
-	m_Ghost.RefindSkins();
-	m_Chat.RefindSkins();
-	m_InfoMessages.RefindSkins();
+
+	for(auto &pComponent : m_vpAll)
+		pComponent->OnRefreshSkins();
+}
+
+void CGameClient::ConchainRefreshSkins(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	CGameClient *pThis = static_cast<CGameClient *>(pUserData);
+	pfnCallback(pResult, pCallbackUserData);
+	if(pResult->NumArguments() && pThis->m_Menus.IsInit())
+	{
+		pThis->RefreshSkins();
+	}
 }
 
 static bool UnknownMapSettingCallback(const char *pCommand, void *pUser)

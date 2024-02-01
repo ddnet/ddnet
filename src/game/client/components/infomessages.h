@@ -72,12 +72,11 @@ public:
 
 	virtual int Sizeof() const override { return sizeof(*this); }
 	virtual void OnWindowResize() override;
+	virtual void OnRefreshSkins() override;
 	virtual void OnReset() override;
 	virtual void OnRender() override;
 	virtual void OnMessage(int MsgType, void *pRawMsg) override;
 	virtual void OnInit() override;
-
-	void RefindSkins();
 };
 
 #endif

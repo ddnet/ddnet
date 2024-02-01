@@ -536,7 +536,7 @@ void CInfoMessages::OnRender()
 	}
 }
 
-void CInfoMessages::RefindSkins()
+void CInfoMessages::OnRefreshSkins()
 {
 	for(auto &InfoMsg : m_aInfoMsgs)
 	{
