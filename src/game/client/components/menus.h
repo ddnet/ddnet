@@ -81,8 +81,7 @@ class CMenus : public CComponent
 	void DoJoystickAxisPicker(CUIRect View);
 	void DoJoystickBar(const CUIRect *pRect, float Current, float Tolerance, bool Active);
 
-	void RefreshSkins();
-
+	bool m_SkinListNeedsUpdate = false;
 	void RandomSkin();
 
 	// menus_settings_assets.cpp
@@ -595,8 +594,6 @@ protected:
 
 	class CMenuBackground *m_pBackground;
 
-	static void ConchainReloadSkins(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
-
 public:
 	void RenderBackground();
 
@@ -619,6 +616,7 @@ public:
 
 	virtual void OnStateChange(int NewState, int OldState) override;
 	virtual void OnWindowResize() override;
+	virtual void OnRefreshSkins() override;
 	virtual void OnReset() override;
 	virtual void OnRender() override;
 	virtual bool OnInput(const IInput::CEvent &Event) override;

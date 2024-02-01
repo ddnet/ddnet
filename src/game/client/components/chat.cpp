@@ -923,7 +923,7 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 	}
 }
 
-void CChat::RefindSkins()
+void CChat::OnRefreshSkins()
 {
 	for(auto &Line : m_aLines)
 	{

@@ -165,8 +165,8 @@ public:
 	void OnWindowResize() override;
 	void OnConsoleInit() override;
 	void OnStateChange(int NewState, int OldState) override;
+	void OnRefreshSkins() override;
 	void OnRender() override;
-	void RefindSkins();
 	void OnPrepareLines(float y);
 	void Reset();
 	void OnRelease() override;
