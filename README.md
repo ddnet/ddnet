@@ -158,7 +158,7 @@ This library isn't compiled, so you have to do it:
 sudo apt install libgtest-dev
 cd /usr/src/gtest
 sudo cmake CMakeLists.txt
-sudo make -j8
+sudo make -j$(nproc)
 
 # copy or symlink libgtest.a and libgtest_main.a to your /usr/lib folder
 sudo cp lib/*.a /usr/lib
@@ -287,7 +287,7 @@ add_sqlserver w teeworlds record teeworlds "PW2" "localhost" "3306"
 $ mkdir build
 $ cd build
 $ cmake -DMYSQL=ON ..
-$ make -j8
+$ make -j$(nproc)
 $ ./DDNet-Server -f mine.cfg
 ```
 
