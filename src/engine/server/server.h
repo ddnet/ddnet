@@ -26,6 +26,7 @@
 #include "antibot.h"
 #include "authmanager.h"
 #include "name_ban.h"
+#include "snap_id_pool.h"
 
 #if defined(CONF_UPNP)
 #include "upnp.h"
@@ -38,47 +39,6 @@ class CMsgPacker;
 class CPacker;
 class IEngineMap;
 class ILogger;
-
-class CSnapIDPool
-{
-	enum
-	{
-		MAX_IDS = 32 * 1024,
-	};
-
-	// State of a Snap ID
-	enum
-	{
-		ID_FREE = 0,
-		ID_ALLOCATED = 1,
-		ID_TIMED = 2,
-	};
-
-	class CID
-	{
-	public:
-		short m_Next;
-		short m_State; // 0 = free, 1 = allocated, 2 = timed
-		int m_Timeout;
-	};
-
-	CID m_aIDs[MAX_IDS];
-
-	int m_FirstFree;
-	int m_FirstTimed;
-	int m_LastTimed;
-	int m_Usage;
-	int m_InUsage;
-
-public:
-	CSnapIDPool();
-
-	void Reset();
-	void RemoveFirstTimeout();
-	int NewID();
-	void TimeoutIDs();
-	void FreeID(int ID);
-};
 
 class CServerBan : public CNetBan
 {
