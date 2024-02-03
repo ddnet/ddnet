@@ -6462,20 +6462,17 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 			}
 		}
 
-		// sync checkbox
+		// toggle sync button
 		ToolBar.VSplitLeft(15.0f, nullptr, &ToolBar);
-		ToolBar.VSplitLeft(12.0f, &Button, &ToolBar);
+		ToolBar.VSplitLeft(40.0f, &Button, &ToolBar);
+
 		static int s_SyncButton;
-		if(DoButton_Editor(&s_SyncButton, pEnvelope->m_Synchronized ? "X" : "", 0, &Button, 0, "Synchronize envelope animation to game time (restarts when you touch the start line)"))
+		if(DoButton_Editor(&s_SyncButton, "Sync", pEnvelope->m_Synchronized, &Button, 0, "Synchronize envelope animation to game time (restarts when you touch the start line)"))
 		{
 			m_EnvelopeEditorHistory.RecordAction(std::make_shared<CEditorActionEnvelopeEdit>(this, m_SelectedEnvelope, CEditorActionEnvelopeEdit::EEditType::SYNC, pEnvelope->m_Synchronized, !pEnvelope->m_Synchronized));
 			pEnvelope->m_Synchronized = !pEnvelope->m_Synchronized;
 			m_Map.OnModify();
 		}
-
-		ToolBar.VSplitLeft(4.0f, nullptr, &ToolBar);
-		ToolBar.VSplitLeft(40.0f, &Button, &ToolBar);
-		UI()->DoLabel(&Button, "Sync.", 10.0f, TEXTALIGN_ML);
 
 		const bool ShouldPan = s_Operation == EEnvelopeEditorOp::OP_NONE && (UI()->MouseButton(2) || (UI()->MouseButton(0) && Input()->ModifierIsPressed()));
 		if(m_pContainerPanned == &s_EnvelopeEditorID)
