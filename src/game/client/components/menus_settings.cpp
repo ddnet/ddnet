@@ -801,19 +801,6 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 		m_SkinListNeedsUpdate = false;
 	}
 
-	const auto &&RenderFavIcon = [&](const CUIRect &FavIcon, bool AsFav, bool Hot) {
-		TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
-		TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
-		TextRender()->TextColor(AsFav ? ColorRGBA(1.0f, 0.85f, 0.3f, 0.8f + (Hot ? 0.2f : 0.0f)) : ColorRGBA(0.5f, 0.5f, 0.5f, 0.8f + (Hot ? 0.2f : 0.0f)));
-		TextRender()->TextOutlineColor(TextRender()->DefaultTextOutlineColor());
-		SLabelProperties Props;
-		Props.m_MaxWidth = FavIcon.w;
-		UI()->DoLabel(&FavIcon, FONT_ICON_STAR, 12.0f, TEXTALIGN_MR, Props);
-		TextRender()->TextColor(TextRender()->DefaultTextColor());
-		TextRender()->SetRenderFlags(0);
-		TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
-	};
-
 	int OldSelected = -1;
 	s_ListBox.DoStart(50.0f, s_vSkinList.size(), 4, 1, OldSelected, &MainView);
 	for(size_t i = 0; i < s_vSkinList.size(); ++i)
@@ -861,11 +848,7 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 			CUIRect FavIcon;
 			Item.m_Rect.HSplitTop(20.0f, &FavIcon, nullptr);
 			FavIcon.VSplitRight(20.0f, nullptr, &FavIcon);
-			if(IsFav || UI()->HotItem() == pSkinToBeDraw || UI()->HotItem() == &pSkinToBeDraw->m_Metrics.m_Body)
-			{
-				RenderFavIcon(FavIcon, IsFav, UI()->HotItem() == &pSkinToBeDraw->m_Metrics.m_Body);
-			}
-			if(UI()->DoButtonLogic(&pSkinToBeDraw->m_Metrics.m_Body, 0, &FavIcon))
+			if(DoButton_Favorite(&pSkinToBeDraw->m_Metrics.m_Body, pSkinToBeDraw, IsFav, &FavIcon))
 			{
 				if(IsFav)
 				{

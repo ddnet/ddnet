@@ -280,7 +280,6 @@ public:
 	virtual SWarning *GetCurWarning() = 0;
 
 	virtual CChecksumData *ChecksumData() = 0;
-	virtual bool InfoTaskRunning() = 0;
 	virtual int UdpConnectivity(int NetType) = 0;
 
 #if defined(CONF_FAMILY_WINDOWS)
