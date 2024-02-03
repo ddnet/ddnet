@@ -584,7 +584,13 @@ bool CGraphics_Threaded::LoadPNG(CImageInfo *pImg, const char *pFilename, int St
 	if(File)
 	{
 		io_seek(File, 0, IOSEEK_END);
-		unsigned int FileSize = io_tell(File);
+		long int FileSize = io_tell(File);
+		if(FileSize <= 0)
+		{
+			io_close(File);
+			log_error("game/png", "failed to get file size (%ld). filename='%s'", FileSize, pFilename);
+			return false;
+		}
 		io_seek(File, 0, IOSEEK_START);
 
 		TImageByteBuffer ByteBuffer;

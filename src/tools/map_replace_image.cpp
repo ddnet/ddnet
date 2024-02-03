@@ -29,7 +29,12 @@ bool LoadPNG(CImageInfo *pImg, const char *pFilename)
 	if(File)
 	{
 		io_seek(File, 0, IOSEEK_END);
-		unsigned int FileSize = io_tell(File);
+		long int FileSize = io_tell(File);
+		if(FileSize <= 0)
+		{
+			io_close(File);
+			return false;
+		}
 		io_seek(File, 0, IOSEEK_START);
 		TImageByteBuffer ByteBuffer;
 		SImageByteBuffer ImageByteBuffer(&ByteBuffer);
