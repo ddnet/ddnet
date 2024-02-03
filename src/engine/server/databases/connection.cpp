@@ -1,7 +1,5 @@
 #include "connection.h"
 
-#include <engine/shared/protocol.h>
-
 IDbConnection::IDbConnection(const char *pPrefix)
 {
 	str_copy(m_aPrefix, pPrefix);
@@ -30,7 +28,7 @@ void IDbConnection::FormatCreateRace(char *aBuf, unsigned int BufferSize, bool B
 		"  PRIMARY KEY (Map, Name, Time, Timestamp, Server)"
 		")",
 		GetPrefix(), Backup ? "_backup" : "",
-		BinaryCollate(), MAX_NAME_LENGTH, BinaryCollate());
+		BinaryCollate(), MAX_NAME_LENGTH_SQL, BinaryCollate());
 }
 
 void IDbConnection::FormatCreateTeamrace(char *aBuf, unsigned int BufferSize, const char *pIdType, bool Backup) const
@@ -47,7 +45,7 @@ void IDbConnection::FormatCreateTeamrace(char *aBuf, unsigned int BufferSize, co
 		"  PRIMARY KEY (ID, Name)"
 		")",
 		GetPrefix(), Backup ? "_backup" : "",
-		BinaryCollate(), MAX_NAME_LENGTH, BinaryCollate(), pIdType);
+		BinaryCollate(), MAX_NAME_LENGTH_SQL, BinaryCollate(), pIdType);
 }
 
 void IDbConnection::FormatCreateMaps(char *aBuf, unsigned int BufferSize) const
@@ -90,5 +88,5 @@ void IDbConnection::FormatCreatePoints(char *aBuf, unsigned int BufferSize) cons
 		"  Points INT DEFAULT 0, "
 		"  PRIMARY KEY (Name)"
 		")",
-		GetPrefix(), MAX_NAME_LENGTH, BinaryCollate());
+		GetPrefix(), MAX_NAME_LENGTH_SQL, BinaryCollate());
 }
