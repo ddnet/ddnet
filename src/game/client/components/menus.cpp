@@ -367,7 +367,7 @@ ColorHSLA CMenus::DoLine_ColorPicker(CButtonContainer *pResetID, const float Lin
 		Section.VSplitLeft(5.0f, nullptr, &Section);
 	}
 
-	Section.VSplitMid(&Label, &Section, 4.0f);
+	Section.VSplitRight(88.0f, &Label, &Section);
 	Section.VSplitRight(60.0f, &Section, &ResetButton);
 	Section.VSplitRight(8.0f, &Section, nullptr);
 	Section.VSplitRight(Section.h, &Section, &ColorPickerButton);
