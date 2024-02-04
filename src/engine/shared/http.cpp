@@ -84,14 +84,14 @@ bool CHttpRequest::BeforeInit()
 	{
 		if(fs_makedir_rec_for(m_aDestAbsolute) < 0)
 		{
-			dbg_msg("http", "i/o error, cannot create folder for: %s", m_aDest);
+			log_error("http", "i/o error, cannot create folder for: %s", m_aDest);
 			return false;
 		}
 
 		m_File = io_open(m_aDestAbsolute, IOFLAG_WRITE);
 		if(!m_File)
 		{
-			dbg_msg("http", "i/o error, cannot open file: %s", m_aDest);
+			log_error("http", "i/o error, cannot open file: %s", m_aDest);
 			return false;
 		}
 	}
@@ -266,19 +266,23 @@ void CHttpRequest::OnCompletionInternal(std::optional<unsigned int> Result)
 		if(Code != CURLE_OK)
 		{
 			if(g_Config.m_DbgCurl || m_LogProgress >= HTTPLOG::FAILURE)
-				dbg_msg("http", "%s failed. libcurl error (%u): %s", m_aUrl, Code, m_aErr);
+			{
+				log_error("http", "%s failed. libcurl error (%u): %s", m_aUrl, Code, m_aErr);
+			}
 			State = (Code == CURLE_ABORTED_BY_CALLBACK) ? EHttpState::ABORTED : EHttpState::ERROR;
 		}
 		else
 		{
 			if(g_Config.m_DbgCurl || m_LogProgress >= HTTPLOG::ALL)
-				dbg_msg("http", "task done: %s", m_aUrl);
+			{
+				log_info("http", "task done: %s", m_aUrl);
+			}
 			State = EHttpState::DONE;
 		}
 	}
 	else
 	{
-		dbg_msg("http", "%s failed. internal error: %s", m_aUrl, m_aErr);
+		log_error("http", "%s failed. internal error: %s", m_aUrl, m_aErr);
 		State = EHttpState::ERROR;
 	}
 
@@ -293,7 +297,7 @@ void CHttpRequest::OnCompletionInternal(std::optional<unsigned int> Result)
 				sha256_str(ActualSha256, aActualSha256, sizeof(aActualSha256));
 				char aExpectedSha256[SHA256_MAXSTRSIZE];
 				sha256_str(m_ExpectedSha256, aExpectedSha256, sizeof(aExpectedSha256));
-				dbg_msg("http", "SHA256 mismatch: got=%s, expected=%s, url=%s", aActualSha256, aExpectedSha256, m_aUrl);
+				log_error("http", "SHA256 mismatch: got=%s, expected=%s, url=%s", aActualSha256, aExpectedSha256, m_aUrl);
 			}
 			State = EHttpState::ERROR;
 		}
@@ -303,7 +307,7 @@ void CHttpRequest::OnCompletionInternal(std::optional<unsigned int> Result)
 	{
 		if(m_File && io_close(m_File) != 0)
 		{
-			dbg_msg("http", "i/o error, cannot close file: %s", m_aDest);
+			log_error("http", "i/o error, cannot close file: %s", m_aDest);
 			State = EHttpState::ERROR;
 		}
 		m_File = nullptr;
@@ -412,7 +416,7 @@ void CHttp::RunLoop()
 	std::unique_lock Lock(m_Lock);
 	if(curl_global_init(CURL_GLOBAL_DEFAULT))
 	{
-		dbg_msg("http", "curl_global_init failed");
+		log_error("http", "curl_global_init failed");
 		m_State = CHttp::ERROR;
 		m_Cv.notify_all();
 		return;
@@ -421,7 +425,7 @@ void CHttp::RunLoop()
 	m_pMultiH = curl_multi_init();
 	if(!m_pMultiH)
 	{
-		dbg_msg("http", "curl_multi_init failed");
+		log_error("http", "curl_multi_init failed");
 		m_State = CHttp::ERROR;
 		m_Cv.notify_all();
 		return;
@@ -430,12 +434,11 @@ void CHttp::RunLoop()
 	// print curl version
 	{
 		curl_version_info_data *pVersion = curl_version_info(CURLVERSION_NOW);
-		dbg_msg("http", "libcurl version %s (compiled = " LIBCURL_VERSION ")", pVersion->version);
+		log_info("http", "libcurl version %s (compiled = " LIBCURL_VERSION ")", pVersion->version);
 	}
 
 	m_State = CHttp::RUNNING;
 	m_Cv.notify_all();
-	dbg_msg("http", "running");
 	Lock.unlock();
 
 	while(m_State == CHttp::RUNNING)
@@ -462,7 +465,7 @@ void CHttp::RunLoop()
 		if(mc != CURLM_OK)
 		{
 			Lock.lock();
-			dbg_msg("http", "Failed multi wait: %s", curl_multi_strerror(mc));
+			log_error("http", "Failed multi wait: %s", curl_multi_strerror(mc));
 			m_State = CHttp::ERROR;
 			break;
 		}
@@ -471,7 +474,7 @@ void CHttp::RunLoop()
 		if(mc != CURLM_OK)
 		{
 			Lock.lock();
-			dbg_msg("http", "Failed multi perform: %s", curl_multi_strerror(mc));
+			log_error("http", "Failed multi perform: %s", curl_multi_strerror(mc));
 			m_State = CHttp::ERROR;
 			break;
 		}
@@ -501,7 +504,7 @@ void CHttp::RunLoop()
 		{
 			auto &pRequest = NewRequests.front();
 			if(g_Config.m_DbgCurl)
-				dbg_msg("http", "task: %s %s", CHttpRequest::GetRequestType(pRequest->m_Type), pRequest->m_aUrl);
+				log_debug("http", "task: %s %s", CHttpRequest::GetRequestType(pRequest->m_Type), pRequest->m_aUrl);
 
 			CURL *pEH = curl_easy_init();
 			if(!pEH)
@@ -522,7 +525,7 @@ void CHttp::RunLoop()
 		error_configure:
 			curl_easy_cleanup(pEH);
 		error_init:
-			dbg_msg("http", "failed to start new request");
+			log_error("http", "failed to start new request");
 			Lock.lock();
 			m_State = CHttp::ERROR;
 			break;
