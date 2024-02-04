@@ -4116,12 +4116,6 @@ void CClient::RegisterCommands()
 
 	m_pConsole->Chain("loglevel", ConchainLoglevel, this);
 	m_pConsole->Chain("stdout_output_level", ConchainStdoutOutputLevel, this);
-
-	// DDRace
-
-#define CONSOLE_COMMAND(name, params, flags, callback, userdata, help) m_pConsole->Register(name, params, flags, 0, 0, help);
-#include <game/ddracecommands.h>
-#undef CONSOLE_COMMAND
 }
 
 static CClient *CreateClient()

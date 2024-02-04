@@ -1996,8 +1996,6 @@ set_src(GAME_SHARED GLOB src/game
   alloc.h
   collision.cpp
   collision.h
-  ddracechat.h
-  ddracecommands.h
   gamecore.cpp
   gamecore.h
   layers.cpp
