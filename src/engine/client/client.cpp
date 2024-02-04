@@ -2685,8 +2685,6 @@ void CClient::InitInterfaces()
 
 	m_DemoEditor.Init(m_pGameClient->NetVersion(), &m_SnapshotDelta, m_pConsole, m_pStorage);
 
-	m_Http.Init(std::chrono::seconds{1});
-
 	m_ServerBrowser.SetBaseInfo(&m_aNetClient[CONN_CONTACT], m_pGameClient->NetVersion());
 
 #if defined(CONF_AUTOUPDATE)
@@ -2756,6 +2754,14 @@ void CClient::Run()
 		return;
 	}
 #endif
+
+	if(!m_Http.Init(std::chrono::seconds{1}))
+	{
+		const char *pErrorMessage = "Failed to initialize the HTTP client.";
+		log_error("client", "%s", pErrorMessage);
+		ShowMessageBox("HTTP Error", pErrorMessage);
+		return;
+	}
 
 	// init text render
 	m_pTextRender = Kernel()->RequestInterface<IEngineTextRender>();
