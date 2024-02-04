@@ -72,21 +72,10 @@ CHttpRequest::CHttpRequest(const char *pUrl)
 
 CHttpRequest::~CHttpRequest()
 {
-	m_ResponseLength = 0;
-	if(!m_WriteToFile)
-	{
-		m_BufferSize = 0;
-		free(m_pBuffer);
-		m_pBuffer = nullptr;
-	}
+	dbg_assert(m_File == nullptr, "HTTP request file was not closed");
+	free(m_pBuffer);
 	curl_slist_free_all((curl_slist *)m_pHeaders);
-	m_pHeaders = nullptr;
-	if(m_pBody)
-	{
-		m_BodyLength = 0;
-		free(m_pBody);
-		m_pBody = nullptr;
-	}
+	free(m_pBody);
 }
 
 bool CHttpRequest::BeforeInit()
@@ -317,6 +306,7 @@ void CHttpRequest::OnCompletionInternal(std::optional<unsigned int> Result)
 			dbg_msg("http", "i/o error, cannot close file: %s", m_aDest);
 			State = EHttpState::ERROR;
 		}
+		m_File = nullptr;
 
 		if(State == EHttpState::ERROR || State == EHttpState::ABORTED)
 		{
