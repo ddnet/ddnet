@@ -84,7 +84,6 @@ CClient::CClient() :
 	for(auto &DemoRecorder : m_aDemoRecorder)
 		DemoRecorder = CDemoRecorder(&m_SnapshotDelta);
 	m_LastRenderTime = time_get();
-	IStorage::FormatTmpPath(m_aDDNetInfoTmp, sizeof(m_aDDNetInfoTmp), DDNET_INFO_FILE);
 	mem_zero(m_aInputs, sizeof(m_aInputs));
 	mem_zero(m_aapSnapshots, sizeof(m_aapSnapshots));
 	for(auto &SnapshotStorage : m_aSnapshotStorage)
@@ -2054,7 +2053,7 @@ void CClient::FinishMapDownload()
 	}
 }
 
-void CClient::ResetDDNetInfo()
+void CClient::ResetDDNetInfoTask()
 {
 	if(m_pDDNetInfoTask)
 	{
@@ -2063,56 +2062,50 @@ void CClient::ResetDDNetInfo()
 	}
 }
 
-bool CClient::IsDDNetInfoChanged()
-{
-	IOHANDLE OldFile = m_pStorage->OpenFile(DDNET_INFO_FILE, IOFLAG_READ | IOFLAG_SKIP_BOM, IStorage::TYPE_SAVE);
-
-	if(!OldFile)
-		return true;
-
-	IOHANDLE NewFile = m_pStorage->OpenFile(m_aDDNetInfoTmp, IOFLAG_READ | IOFLAG_SKIP_BOM, IStorage::TYPE_SAVE);
-
-	if(NewFile)
-	{
-		char aOldData[4096];
-		char aNewData[4096];
-		unsigned OldBytes;
-		unsigned NewBytes;
-
-		do
-		{
-			OldBytes = io_read(OldFile, aOldData, sizeof(aOldData));
-			NewBytes = io_read(NewFile, aNewData, sizeof(aNewData));
-
-			if(OldBytes != NewBytes || mem_comp(aOldData, aNewData, OldBytes) != 0)
-			{
-				io_close(NewFile);
-				io_close(OldFile);
-				return true;
-			}
-		} while(OldBytes > 0);
-
-		io_close(NewFile);
-	}
-
-	io_close(OldFile);
-	return false;
-}
-
 void CClient::FinishDDNetInfo()
 {
-	ResetDDNetInfo();
-	if(IsDDNetInfoChanged())
+	if(m_ServerBrowser.DDNetInfoSha256() == m_pDDNetInfoTask->Sha256())
 	{
-		m_pStorage->RenameFile(m_aDDNetInfoTmp, DDNET_INFO_FILE, IStorage::TYPE_SAVE);
-		LoadDDNetInfo();
-		if(m_ServerBrowser.GetCurrentType() == IServerBrowser::TYPE_INTERNET || m_ServerBrowser.GetCurrentType() == IServerBrowser::TYPE_FAVORITES)
-			m_ServerBrowser.Refresh(m_ServerBrowser.GetCurrentType());
+		log_debug("client/info", "DDNet info already up-to-date");
+		return;
 	}
-	else
+
+	char aTempFilename[IO_MAX_PATH_LENGTH];
+	IStorage::FormatTmpPath(aTempFilename, sizeof(aTempFilename), DDNET_INFO_FILE);
+	IOHANDLE File = Storage()->OpenFile(aTempFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
+	if(!File)
 	{
-		m_pStorage->RemoveFile(m_aDDNetInfoTmp, IStorage::TYPE_SAVE);
+		log_error("client/info", "Failed to open temporary DDNet info '%s' for writing", aTempFilename);
+		return;
 	}
+
+	unsigned char *pResult;
+	size_t ResultLength;
+	m_pDDNetInfoTask->Result(&pResult, &ResultLength);
+	dbg_assert(pResult != nullptr, "Invalid info task state");
+	bool Error = io_write(File, pResult, ResultLength) != ResultLength;
+	Error |= io_close(File) != 0;
+	if(Error)
+	{
+		log_error("client/info", "Error writing temporary DDNet info to file '%s'", aTempFilename);
+		return;
+	}
+
+	if(Storage()->FileExists(DDNET_INFO_FILE, IStorage::TYPE_SAVE) && !Storage()->RemoveFile(DDNET_INFO_FILE, IStorage::TYPE_SAVE))
+	{
+		log_error("client/info", "Failed to remove old DDNet info '%s'", DDNET_INFO_FILE);
+		Storage()->RemoveFile(aTempFilename, IStorage::TYPE_SAVE);
+		return;
+	}
+	if(!Storage()->RenameFile(aTempFilename, DDNET_INFO_FILE, IStorage::TYPE_SAVE))
+	{
+		log_error("client/info", "Failed to rename temporary DDNet info '%s' to '%s'", aTempFilename, DDNET_INFO_FILE);
+		Storage()->RemoveFile(aTempFilename, IStorage::TYPE_SAVE);
+		return;
+	}
+
+	log_debug("client/info", "Loading new DDNet info");
+	LoadDDNetInfo();
 }
 
 typedef std::tuple<int, int, int> TVersion;
@@ -2590,16 +2583,13 @@ void CClient::Update()
 	if(m_pDDNetInfoTask)
 	{
 		if(m_pDDNetInfoTask->State() == EHttpState::DONE)
+		{
 			FinishDDNetInfo();
-		else if(m_pDDNetInfoTask->State() == EHttpState::ERROR)
-		{
-			Storage()->RemoveFile(m_aDDNetInfoTmp, IStorage::TYPE_SAVE);
-			ResetDDNetInfo();
+			ResetDDNetInfoTask();
 		}
-		else if(m_pDDNetInfoTask->State() == EHttpState::ABORTED)
+		else if(m_pDDNetInfoTask->State() == EHttpState::ERROR || m_pDDNetInfoTask->State() == EHttpState::ABORTED)
 		{
-			Storage()->RemoveFile(m_aDDNetInfoTmp, IStorage::TYPE_SAVE);
-			m_pDDNetInfoTask = NULL;
+			ResetDDNetInfoTask();
 		}
 	}
 
@@ -3006,11 +2996,6 @@ void CClient::Run()
 					m_vWarnings.emplace_back(aWarning);
 				}
 				s_SavedConfig = true;
-			}
-
-			if(m_pStorage->FileExists(m_aDDNetInfoTmp, IStorage::TYPE_SAVE))
-			{
-				m_pStorage->RemoveFile(m_aDDNetInfoTmp, IStorage::TYPE_SAVE);
 			}
 
 			if(m_vWarnings.empty() && !GameClient()->IsDisplayingWarning())
@@ -4578,7 +4563,7 @@ void CClient::RequestDDNetInfo()
 	}
 
 	// Use ipv4 so we can know the ingame ip addresses of players before they join game servers
-	m_pDDNetInfoTask = HttpGetFile(aUrl, Storage(), m_aDDNetInfoTmp, IStorage::TYPE_SAVE);
+	m_pDDNetInfoTask = HttpGet(aUrl);
 	m_pDDNetInfoTask->Timeout(CTimeout{10000, 0, 500, 10});
 	m_pDDNetInfoTask->IpResolve(IPRESOLVE::V4);
 	Http()->Run(m_pDDNetInfoTask);

@@ -3,6 +3,7 @@
 #ifndef ENGINE_CLIENT_SERVERBROWSER_H
 #define ENGINE_CLIENT_SERVERBROWSER_H
 
+#include <base/hash.h>
 #include <base/system.h>
 
 #include <engine/console.h>
@@ -252,7 +253,7 @@ public:
 	unsigned CurrentCommunitiesHash() const override;
 
 	bool DDNetInfoAvailable() const override { return m_pDDNetInfo != nullptr; }
-	int64_t DDNetInfoUpdateTime() const override { return m_DDNetInfoUpdateTime; }
+	SHA256_DIGEST DDNetInfoSha256() const override { return m_DDNetInfoSha256; }
 
 	CFavoriteCommunityFilterList &FavoriteCommunitiesFilter() override { return m_FavoriteCommunitiesFilter; }
 	CExcludedCommunityFilterList &CommunitiesFilter() override { return m_CommunitiesFilter; }
@@ -311,8 +312,8 @@ private:
 	CExcludedCommunityCountryFilterList m_CountriesFilter;
 	CExcludedCommunityTypeFilterList m_TypesFilter;
 
-	json_value *m_pDDNetInfo;
-	int64_t m_DDNetInfoUpdateTime;
+	json_value *m_pDDNetInfo = nullptr;
+	SHA256_DIGEST m_DDNetInfoSha256 = SHA256_ZEROED;
 
 	CServerEntry *m_pFirstReqServer; // request list
 	CServerEntry *m_pLastReqServer;

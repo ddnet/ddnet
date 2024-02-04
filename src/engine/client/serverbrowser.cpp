@@ -66,9 +66,6 @@ CServerBrowser::CServerBrowser() :
 	m_BroadcastTime = 0;
 	secure_random_fill(m_aTokenSeed, sizeof(m_aTokenSeed));
 
-	m_pDDNetInfo = nullptr;
-	m_DDNetInfoUpdateTime = 0;
-
 	CleanUp();
 }
 
@@ -1272,7 +1269,6 @@ const json_value *CServerBrowser::LoadDDNetInfo()
 		UpdateServerCommunity(&m_ppServerlist[i]->m_Info);
 		UpdateServerRank(&m_ppServerlist[i]->m_Info);
 	}
-	m_DDNetInfoUpdateTime = time_get();
 	return m_pDDNetInfo;
 }
 
@@ -1281,7 +1277,12 @@ void CServerBrowser::LoadDDNetInfoJson()
 	void *pBuf;
 	unsigned Length;
 	if(!m_pStorage->ReadFile(DDNET_INFO_FILE, IStorage::TYPE_SAVE, &pBuf, &Length))
+	{
+		m_DDNetInfoSha256 = SHA256_ZEROED;
 		return;
+	}
+
+	m_DDNetInfoSha256 = sha256(pBuf, Length);
 
 	json_value_free(m_pDDNetInfo);
 	json_settings JsonSettings{};

@@ -506,7 +506,7 @@ protected:
 	static void ConchainUiPageUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	struct SCommunityCache
 	{
-		int64_t m_UpdateTime = 0;
+		SHA256_DIGEST m_InfoSha256 = SHA256_ZEROED;
 		int m_LastPage = 0;
 		unsigned m_SelectedCommunitiesHash;
 		std::vector<const CCommunity *> m_vpSelectedCommunities;
@@ -560,7 +560,7 @@ protected:
 	std::vector<SCommunityIcon> m_vCommunityIcons;
 	std::deque<std::shared_ptr<CCommunityIconLoadJob>> m_CommunityIconLoadJobs;
 	std::deque<std::shared_ptr<CCommunityIconDownloadJob>> m_CommunityIconDownloadJobs;
-	int64_t m_CommunityIconsUpdateTime = 0;
+	SHA256_DIGEST m_CommunityIconsInfoSha256 = SHA256_ZEROED;
 	static int CommunityIconScan(const char *pName, int IsDir, int DirType, void *pUser);
 	const SCommunityIcon *FindCommunityIcon(const char *pCommunityId);
 	bool LoadCommunityIconFile(const char *pPath, int DirType, CImageInfo &Info, SHA256_DIGEST &Sha256);
