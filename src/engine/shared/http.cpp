@@ -443,9 +443,9 @@ void CHttp::RunLoop()
 
 	while(m_State == CHttp::RUNNING)
 	{
-		static int NextTimeout = std::numeric_limits<int>::max();
+		static int s_NextTimeout = std::numeric_limits<int>::max();
 		int Events = 0;
-		CURLMcode mc = curl_multi_poll(m_pMultiH, NULL, 0, NextTimeout, &Events);
+		const CURLMcode PollCode = curl_multi_poll(m_pMultiH, nullptr, 0, s_NextTimeout, &Events);
 
 		// We may have been woken up for a shutdown
 		if(m_Shutdown)
@@ -454,7 +454,7 @@ void CHttp::RunLoop()
 			if(!m_ShutdownTime.has_value())
 			{
 				m_ShutdownTime = Now + m_ShutdownDelay;
-				NextTimeout = m_ShutdownDelay.count();
+				s_NextTimeout = m_ShutdownDelay.count();
 			}
 			else if(m_ShutdownTime < Now || m_RunningRequests.empty())
 			{
@@ -462,36 +462,36 @@ void CHttp::RunLoop()
 			}
 		}
 
-		if(mc != CURLM_OK)
+		if(PollCode != CURLM_OK)
 		{
 			Lock.lock();
-			log_error("http", "Failed multi wait: %s", curl_multi_strerror(mc));
+			log_error("http", "Failed multi wait: %s", curl_multi_strerror(PollCode));
 			m_State = CHttp::ERROR;
 			break;
 		}
 
-		mc = curl_multi_perform(m_pMultiH, &Events);
-		if(mc != CURLM_OK)
+		const CURLMcode PerformCode = curl_multi_perform(m_pMultiH, &Events);
+		if(PerformCode != CURLM_OK)
 		{
 			Lock.lock();
-			log_error("http", "Failed multi perform: %s", curl_multi_strerror(mc));
+			log_error("http", "Failed multi perform: %s", curl_multi_strerror(PerformCode));
 			m_State = CHttp::ERROR;
 			break;
 		}
 
-		struct CURLMsg *m;
-		while((m = curl_multi_info_read(m_pMultiH, &Events)))
+		struct CURLMsg *pMsg;
+		while((pMsg = curl_multi_info_read(m_pMultiH, &Events)))
 		{
-			if(m->msg == CURLMSG_DONE)
+			if(pMsg->msg == CURLMSG_DONE)
 			{
-				auto RequestIt = m_RunningRequests.find(m->easy_handle);
+				auto RequestIt = m_RunningRequests.find(pMsg->easy_handle);
 				dbg_assert(RequestIt != m_RunningRequests.end(), "Running handle not added to map");
 				auto pRequest = std::move(RequestIt->second);
 				m_RunningRequests.erase(RequestIt);
 
-				pRequest->OnCompletionInternal(m->data.result);
-				curl_multi_remove_handle(m_pMultiH, m->easy_handle);
-				curl_easy_cleanup(m->easy_handle);
+				pRequest->OnCompletionInternal(pMsg->data.result);
+				curl_multi_remove_handle(m_pMultiH, pMsg->easy_handle);
+				curl_easy_cleanup(pMsg->easy_handle);
 			}
 		}
 
@@ -513,8 +513,7 @@ void CHttp::RunLoop()
 			if(!pRequest->ConfigureHandle(pEH))
 				goto error_configure;
 
-			mc = curl_multi_add_handle(m_pMultiH, pEH);
-			if(mc != CURLM_OK)
+			if(curl_multi_add_handle(m_pMultiH, pEH) != CURLM_OK)
 				goto error_configure;
 
 			m_RunningRequests.emplace(pEH, std::move(pRequest));
