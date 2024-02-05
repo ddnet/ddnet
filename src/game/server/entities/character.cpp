@@ -1269,6 +1269,10 @@ void CCharacter::Snap(int SnappingClient)
 	{
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_PRACTICE_MODE;
 	}
+	if(Teams()->TeamLocked(Team()))
+	{
+		pDDNetCharacter->m_Flags |= CHARACTERFLAG_LOCK_MODE;
+	}
 	pDDNetCharacter->m_TargetX = m_Core.m_Input.m_TargetX;
 	pDDNetCharacter->m_TargetY = m_Core.m_Input.m_TargetY;
 }
