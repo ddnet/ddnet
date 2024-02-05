@@ -131,6 +131,7 @@ private:
 	int m_DummyHammerOffset;
 	int m_DummyCopyOffset;
 	int m_PracticeModeOffset;
+	int m_LockModeOffset;
 };
 
 #endif

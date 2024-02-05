@@ -744,8 +744,9 @@ void CHud::PreparePlayerStateQuads()
 	m_DummyHammerOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
 	m_DummyCopyOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
 
-	// Quad for displaying practice mode
+	// Quads for displaying team modes
 	m_PracticeModeOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
+	m_LockModeOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
 }
 
 void CHud::RenderPlayerState(const int ClientID)
@@ -983,6 +984,12 @@ void CHud::RenderPlayerState(const int ClientID)
 	if(HasProhibitedCapabilities)
 	{
 		y += 12;
+	}
+	if(m_pClient->m_Snap.m_aCharacters[ClientID].m_HasExtendedDisplayInfo && m_pClient->m_Snap.m_aCharacters[ClientID].m_ExtendedData.m_Flags & CHARACTERFLAG_LOCK_MODE)
+	{
+		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudLockMode);
+		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_LockModeOffset, x, y);
+		x += 12;
 	}
 	if(m_pClient->m_Snap.m_aCharacters[ClientID].m_HasExtendedDisplayInfo && m_pClient->m_Snap.m_aCharacters[ClientID].m_ExtendedData.m_Flags & CHARACTERFLAG_PRACTICE_MODE)
 	{
