@@ -1701,13 +1701,14 @@ void CFavoriteCommunityFilterList::Add(const char *pCommunityId)
 	// the end of the list, to allow setting the entire list easier with binds.
 	Remove(pCommunityId);
 
-	// Ensure maximum number of favorite communities, by removing least-recently
-	// added communities from the beginning. One more than the maximum is removed
-	// to make room for the new community.
+	// Ensure maximum number of favorite communities, by removing the least-recently
+	// added community from the beginning, when the maximum number of favorite
+	// communities has been reached.
 	constexpr size_t MaxFavoriteCommunities = 3;
 	if(m_vEntries.size() >= MaxFavoriteCommunities)
 	{
-		m_vEntries.erase(m_vEntries.begin(), m_vEntries.begin() + (MaxFavoriteCommunities - 1));
+		dbg_assert(m_vEntries.size() == MaxFavoriteCommunities, "Maximum number of communities can never be exceeded");
+		m_vEntries.erase(m_vEntries.begin());
 	}
 	m_vEntries.emplace_back(pCommunityId);
 }
