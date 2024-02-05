@@ -199,7 +199,7 @@ public:
 	void Result(unsigned char **ppResult, size_t *pResultLength) const;
 	json_value *ResultJson() const;
 
-	const SHA256_DIGEST &Sha256() const { return m_ActualSha256; }
+	const SHA256_DIGEST &ResultSha256() const;
 };
 
 inline std::unique_ptr<CHttpRequest> HttpHead(const char *pUrl)

@@ -2064,7 +2064,7 @@ void CClient::ResetDDNetInfoTask()
 
 void CClient::FinishDDNetInfo()
 {
-	if(m_ServerBrowser.DDNetInfoSha256() == m_pDDNetInfoTask->Sha256())
+	if(m_ServerBrowser.DDNetInfoSha256() == m_pDDNetInfoTask->ResultSha256())
 	{
 		log_debug("client/info", "DDNet info already up-to-date");
 		return;
@@ -2082,7 +2082,6 @@ void CClient::FinishDDNetInfo()
 	unsigned char *pResult;
 	size_t ResultLength;
 	m_pDDNetInfoTask->Result(&pResult, &ResultLength);
-	dbg_assert(pResult != nullptr, "Invalid info task state");
 	bool Error = io_write(File, pResult, ResultLength) != ResultLength;
 	Error |= io_close(File) != 0;
 	if(Error)
