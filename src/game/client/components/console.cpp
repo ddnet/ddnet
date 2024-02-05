@@ -1126,7 +1126,7 @@ void CGameConsole::OnRender()
 			pConsole->UpdateSearch();
 
 			// keep scroll position when new entries are printed.
-			if(pConsole->m_BacklogCurLine != 0)
+			if(pConsole->m_BacklogCurLine != 0 || pConsole->m_HasSelection)
 			{
 				pConsole->m_BacklogCurLine += pConsole->m_NewLineCounter;
 				pConsole->m_BacklogLastActiveLine += pConsole->m_NewLineCounter;
