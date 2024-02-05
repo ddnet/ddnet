@@ -123,7 +123,7 @@ CUI::EPopupMenuFunctionResult CMapGrid::PopupGridSettings(void *pContext, CUIRec
 		NUM_PROPS,
 	};
 	CProperty aProps[] = {
-		{"Size", pMapGrid->Factor(), PROPTYPE_INT_STEP, MIN_GRID_FACTOR, MAX_GRID_FACTOR},
+		{"Size", pMapGrid->Factor(), PROPTYPE_INT, MIN_GRID_FACTOR, MAX_GRID_FACTOR},
 		{nullptr},
 	};
 

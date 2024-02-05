@@ -617,16 +617,16 @@ CUI::EPopupMenuFunctionResult CEditor::PopupGroup(void *pContext, CUIRect View, 
 	}
 
 	CProperty aProps[] = {
-		{"Order", pEditor->m_SelectedGroup, PROPTYPE_INT_STEP, 0, (int)pEditor->m_Map.m_vpGroups.size() - 1},
-		{"Pos X", -pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_OffsetX, PROPTYPE_INT_SCROLL, -1000000, 1000000},
-		{"Pos Y", -pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_OffsetY, PROPTYPE_INT_SCROLL, -1000000, 1000000},
-		{"Para X", pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ParallaxX, PROPTYPE_INT_SCROLL, -1000000, 1000000},
-		{"Para Y", pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ParallaxY, PROPTYPE_INT_SCROLL, -1000000, 1000000},
+		{"Order", pEditor->m_SelectedGroup, PROPTYPE_INT, 0, (int)pEditor->m_Map.m_vpGroups.size() - 1},
+		{"Pos X", -pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_OffsetX, PROPTYPE_INT, -1000000, 1000000},
+		{"Pos Y", -pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_OffsetY, PROPTYPE_INT, -1000000, 1000000},
+		{"Para X", pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ParallaxX, PROPTYPE_INT, -1000000, 1000000},
+		{"Para Y", pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ParallaxY, PROPTYPE_INT, -1000000, 1000000},
 		{"Use Clipping", pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_UseClipping, PROPTYPE_BOOL, 0, 1},
-		{"Clip X", pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ClipX, PROPTYPE_INT_SCROLL, -1000000, 1000000},
-		{"Clip Y", pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ClipY, PROPTYPE_INT_SCROLL, -1000000, 1000000},
-		{"Clip W", pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ClipW, PROPTYPE_INT_SCROLL, 0, 1000000},
-		{"Clip H", pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ClipH, PROPTYPE_INT_SCROLL, 0, 1000000},
+		{"Clip X", pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ClipX, PROPTYPE_INT, -1000000, 1000000},
+		{"Clip Y", pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ClipY, PROPTYPE_INT, -1000000, 1000000},
+		{"Clip W", pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ClipW, PROPTYPE_INT, 0, 1000000},
+		{"Clip H", pEditor->m_Map.m_vpGroups[pEditor->m_SelectedGroup]->m_ClipH, PROPTYPE_INT, 0, 1000000},
 		{nullptr},
 	};
 
@@ -771,8 +771,8 @@ CUI::EPopupMenuFunctionResult CEditor::PopupLayer(void *pContext, CUIRect View, 
 		View.HSplitBottom(10.0f, &View, nullptr);
 
 	CProperty aProps[] = {
-		{"Group", pEditor->m_SelectedGroup, PROPTYPE_INT_STEP, 0, (int)pEditor->m_Map.m_vpGroups.size() - 1},
-		{"Order", pEditor->m_vSelectedLayers[0], PROPTYPE_INT_STEP, 0, (int)pCurrentGroup->m_vpLayers.size() - 1},
+		{"Group", pEditor->m_SelectedGroup, PROPTYPE_INT, 0, (int)pEditor->m_Map.m_vpGroups.size() - 1},
+		{"Order", pEditor->m_vSelectedLayers[0], PROPTYPE_INT, 0, (int)pCurrentGroup->m_vpLayers.size() - 1},
 		{"Detail", pCurrentLayer->m_Flags & LAYERFLAG_DETAIL, PROPTYPE_BOOL, 0, 1},
 		{nullptr},
 	};
@@ -964,13 +964,13 @@ CUI::EPopupMenuFunctionResult CEditor::PopupQuad(void *pContext, CUIRect View, b
 
 	const int NumQuads = pLayer ? (int)pLayer->m_vQuads.size() : 0;
 	CProperty aProps[] = {
-		{"Order", pEditor->m_vSelectedQuads[pEditor->m_SelectedQuadIndex], PROPTYPE_INT_STEP, 0, NumQuads},
-		{"Pos X", fx2i(pCurrentQuad->m_aPoints[4].x), PROPTYPE_INT_SCROLL, -1000000, 1000000},
-		{"Pos Y", fx2i(pCurrentQuad->m_aPoints[4].y), PROPTYPE_INT_SCROLL, -1000000, 1000000},
+		{"Order", pEditor->m_vSelectedQuads[pEditor->m_SelectedQuadIndex], PROPTYPE_INT, 0, NumQuads},
+		{"Pos X", fx2i(pCurrentQuad->m_aPoints[4].x), PROPTYPE_INT, -1000000, 1000000},
+		{"Pos Y", fx2i(pCurrentQuad->m_aPoints[4].y), PROPTYPE_INT, -1000000, 1000000},
 		{"Pos. Env", pCurrentQuad->m_PosEnv + 1, PROPTYPE_ENVELOPE, 0, 0},
-		{"Pos. TO", pCurrentQuad->m_PosEnvOffset, PROPTYPE_INT_SCROLL, -1000000, 1000000},
+		{"Pos. TO", pCurrentQuad->m_PosEnvOffset, PROPTYPE_INT, -1000000, 1000000},
 		{"Color Env", pCurrentQuad->m_ColorEnv + 1, PROPTYPE_ENVELOPE, 0, 0},
-		{"Color TO", pCurrentQuad->m_ColorEnvOffset, PROPTYPE_INT_SCROLL, -1000000, 1000000},
+		{"Color TO", pCurrentQuad->m_ColorEnvOffset, PROPTYPE_INT, -1000000, 1000000},
 		{nullptr},
 	};
 
@@ -1101,16 +1101,16 @@ CUI::EPopupMenuFunctionResult CEditor::PopupSource(void *pContext, CUIRect View,
 	}
 
 	CProperty aProps[] = {
-		{"Pos X", pSource->m_Position.x / 1000, PROPTYPE_INT_SCROLL, -1000000, 1000000},
-		{"Pos Y", pSource->m_Position.y / 1000, PROPTYPE_INT_SCROLL, -1000000, 1000000},
+		{"Pos X", pSource->m_Position.x / 1000, PROPTYPE_INT, -1000000, 1000000},
+		{"Pos Y", pSource->m_Position.y / 1000, PROPTYPE_INT, -1000000, 1000000},
 		{"Loop", pSource->m_Loop, PROPTYPE_BOOL, 0, 1},
 		{"Pan", pSource->m_Pan, PROPTYPE_BOOL, 0, 1},
-		{"Delay", pSource->m_TimeDelay, PROPTYPE_INT_SCROLL, 0, 1000000},
-		{"Falloff", pSource->m_Falloff, PROPTYPE_INT_SCROLL, 0, 255},
+		{"Delay", pSource->m_TimeDelay, PROPTYPE_INT, 0, 1000000},
+		{"Falloff", pSource->m_Falloff, PROPTYPE_INT, 0, 255},
 		{"Pos. Env", pSource->m_PosEnv + 1, PROPTYPE_ENVELOPE, 0, 0},
-		{"Pos. TO", pSource->m_PosEnvOffset, PROPTYPE_INT_SCROLL, -1000000, 1000000},
+		{"Pos. TO", pSource->m_PosEnvOffset, PROPTYPE_INT, -1000000, 1000000},
 		{"Sound Env", pSource->m_SoundEnv + 1, PROPTYPE_ENVELOPE, 0, 0},
-		{"Sound. TO", pSource->m_SoundEnvOffset, PROPTYPE_INT_SCROLL, -1000000, 1000000},
+		{"Sound. TO", pSource->m_SoundEnvOffset, PROPTYPE_INT, -1000000, 1000000},
 		{nullptr},
 	};
 
@@ -1192,7 +1192,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupSource(void *pContext, CUIRect View,
 	case CSoundShape::SHAPE_CIRCLE:
 	{
 		CProperty aCircleProps[] = {
-			{"Radius", pSource->m_Shape.m_Circle.m_Radius, PROPTYPE_INT_SCROLL, 0, 1000000},
+			{"Radius", pSource->m_Shape.m_Circle.m_Radius, PROPTYPE_INT, 0, 1000000},
 			{nullptr},
 		};
 
@@ -1219,8 +1219,8 @@ CUI::EPopupMenuFunctionResult CEditor::PopupSource(void *pContext, CUIRect View,
 	case CSoundShape::SHAPE_RECTANGLE:
 	{
 		CProperty aRectangleProps[] = {
-			{"Width", pSource->m_Shape.m_Rectangle.m_Width / 1024, PROPTYPE_INT_SCROLL, 0, 1000000},
-			{"Height", pSource->m_Shape.m_Rectangle.m_Height / 1024, PROPTYPE_INT_SCROLL, 0, 1000000},
+			{"Width", pSource->m_Shape.m_Rectangle.m_Width / 1024, PROPTYPE_INT, 0, 1000000},
+			{"Height", pSource->m_Shape.m_Rectangle.m_Height / 1024, PROPTYPE_INT, 0, 1000000},
 			{nullptr},
 		};
 
@@ -1269,11 +1269,11 @@ CUI::EPopupMenuFunctionResult CEditor::PopupPoint(void *pContext, CUIRect View, 
 	const int TextureV = fx2f(pCurrentQuad->m_aTexcoords[pEditor->m_SelectedQuadPoint].y) * 1024;
 
 	CProperty aProps[] = {
-		{"Pos X", X, PROPTYPE_INT_SCROLL, -1000000, 1000000},
-		{"Pos Y", Y, PROPTYPE_INT_SCROLL, -1000000, 1000000},
+		{"Pos X", X, PROPTYPE_INT, -1000000, 1000000},
+		{"Pos Y", Y, PROPTYPE_INT, -1000000, 1000000},
 		{"Color", Color, PROPTYPE_COLOR, 0, 0},
-		{"Tex U", TextureU, PROPTYPE_INT_SCROLL, -1000000, 1000000},
-		{"Tex V", TextureV, PROPTYPE_INT_SCROLL, -1000000, 1000000},
+		{"Tex U", TextureU, PROPTYPE_INT, -1000000, 1000000},
+		{"Tex V", TextureV, PROPTYPE_INT, -1000000, 1000000},
 		{nullptr},
 	};
 
@@ -2513,9 +2513,9 @@ CUI::EPopupMenuFunctionResult CEditor::PopupTele(void *pContext, CUIRect View, b
 	// number picker
 	{
 		CProperty aProps[] = {
-			{"Number", pEditor->m_TeleNumber, PROPTYPE_INT_STEP, 1, 255},
-			{"Checkpoint", pEditor->m_TeleCheckpointNumber, PROPTYPE_INT_STEP, 1, 255},
-			{"View", pEditor->m_ViewTeleNumber, PROPTYPE_INT_STEP, 1, 255},
+			{"Number", pEditor->m_TeleNumber, PROPTYPE_INT, 1, 255},
+			{"Checkpoint", pEditor->m_TeleCheckpointNumber, PROPTYPE_INT, 1, 255},
+			{"View", pEditor->m_ViewTeleNumber, PROPTYPE_INT, 1, 255},
 			{nullptr},
 		};
 
@@ -2560,8 +2560,8 @@ CUI::EPopupMenuFunctionResult CEditor::PopupSpeedup(void *pContext, CUIRect View
 	};
 
 	CProperty aProps[] = {
-		{"Force", pEditor->m_SpeedupForce, PROPTYPE_INT_STEP, 1, 255},
-		{"Max Speed", pEditor->m_SpeedupMaxSpeed, PROPTYPE_INT_STEP, 0, 255},
+		{"Force", pEditor->m_SpeedupForce, PROPTYPE_INT, 1, 255},
+		{"Max Speed", pEditor->m_SpeedupMaxSpeed, PROPTYPE_INT, 0, 255},
 		{"Angle", pEditor->m_SpeedupAngle, PROPTYPE_ANGLE_SCROLL, 0, 359},
 		{nullptr},
 	};
@@ -2624,8 +2624,8 @@ CUI::EPopupMenuFunctionResult CEditor::PopupSwitch(void *pContext, CUIRect View,
 		};
 
 		CProperty aProps[] = {
-			{"Number", pEditor->m_SwitchNum, PROPTYPE_INT_STEP, 0, 255},
-			{"Delay", pEditor->m_SwitchDelay, PROPTYPE_INT_STEP, 0, 255},
+			{"Number", pEditor->m_SwitchNum, PROPTYPE_INT, 0, 255},
+			{"Delay", pEditor->m_SwitchDelay, PROPTYPE_INT, 0, 255},
 			{nullptr},
 		};
 
@@ -2661,7 +2661,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupTune(void *pContext, CUIRect View, b
 	};
 
 	CProperty aProps[] = {
-		{"Zone", pEditor->m_TuningNum, PROPTYPE_INT_STEP, 1, 255},
+		{"Zone", pEditor->m_TuningNum, PROPTYPE_INT, 1, 255},
 		{nullptr},
 	};
 
@@ -2691,8 +2691,8 @@ CUI::EPopupMenuFunctionResult CEditor::PopupGoto(void *pContext, CUIRect View, b
 	static ivec2 s_GotoPos(0, 0);
 
 	CProperty aProps[] = {
-		{"X", s_GotoPos.x, PROPTYPE_INT_STEP, std::numeric_limits<int>::min(), std::numeric_limits<int>::max()},
-		{"Y", s_GotoPos.y, PROPTYPE_INT_STEP, std::numeric_limits<int>::min(), std::numeric_limits<int>::max()},
+		{"X", s_GotoPos.x, PROPTYPE_INT, std::numeric_limits<int>::min(), std::numeric_limits<int>::max()},
+		{"Y", s_GotoPos.y, PROPTYPE_INT, std::numeric_limits<int>::min(), std::numeric_limits<int>::max()},
 		{nullptr},
 	};
 
