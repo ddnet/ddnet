@@ -302,6 +302,8 @@ public:
 	// engine events
 	void OnInit(const void *pPersistentData) override;
 	void OnConsoleInit() override;
+	void RegisterDDRaceCommands();
+	void RegisterChatCommands();
 	void OnMapChange(char *pNewMapName, int MapNameSize) override;
 	void OnShutdown(void *pPersistentData) override;
 
@@ -462,7 +464,6 @@ private:
 	static void ConUnlock(IConsole::IResult *pResult, void *pUserData);
 	static void ConInvite(IConsole::IResult *pResult, void *pUserData);
 	static void ConJoin(IConsole::IResult *pResult, void *pUserData);
-	static void ConAccept(IConsole::IResult *pResult, void *pUserData);
 	static void ConMe(IConsole::IResult *pResult, void *pUserData);
 	static void ConWhisper(IConsole::IResult *pResult, void *pUserData);
 	static void ConConverse(IConsole::IResult *pResult, void *pUserData);

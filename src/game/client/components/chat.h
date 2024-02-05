@@ -114,7 +114,6 @@ class CChat : public CComponent
 	};
 
 	std::vector<CCommand> m_vCommands;
-	std::vector<CCommand> m_vDefaultCommands;
 	bool m_CommandsNeedSorting;
 
 	struct CHistoryEntry
@@ -165,15 +164,14 @@ public:
 	void OnWindowResize() override;
 	void OnConsoleInit() override;
 	void OnStateChange(int NewState, int OldState) override;
+	void OnRefreshSkins() override;
 	void OnRender() override;
-	void RefindSkins();
 	void OnPrepareLines(float y);
 	void Reset();
 	void OnRelease() override;
 	void OnMessage(int MsgType, void *pRawMsg) override;
 	bool OnInput(const IInput::CEvent &Event) override;
 	void OnInit() override;
-	void OnMapLoad() override;
 
 	void RebuildChat();
 

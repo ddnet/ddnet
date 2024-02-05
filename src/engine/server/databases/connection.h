@@ -3,7 +3,14 @@
 
 #include "connection_pool.h"
 
+#include <engine/shared/protocol.h>
 #include <memory>
+
+enum
+{
+	// MAX_NAME_LENGTH includes the size with \0, which is not necessary in SQL
+	MAX_NAME_LENGTH_SQL = MAX_NAME_LENGTH - 1,
+};
 
 class IConsole;
 

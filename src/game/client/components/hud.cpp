@@ -562,57 +562,6 @@ void CHud::RenderTeambalanceWarning()
 	}
 }
 
-void CHud::RenderVoting()
-{
-	if((!g_Config.m_ClShowVotesAfterVoting && !m_pClient->m_Scoreboard.Active() && m_pClient->m_Voting.TakenChoice()) || !m_pClient->m_Voting.IsVoting() || Client()->State() == IClient::STATE_DEMOPLAYBACK)
-		return;
-
-	Graphics()->DrawRect(-10, 60 - 2, 100 + 10 + 4 + 5, 46, ColorRGBA(0.0f, 0.0f, 0.0f, 0.4f), IGraphics::CORNER_ALL, 5.0f);
-
-	TextRender()->TextColor(TextRender()->DefaultTextColor());
-
-	CTextCursor Cursor;
-	char aBuf[512];
-	str_format(aBuf, sizeof(aBuf), Localize("%ds left"), m_pClient->m_Voting.SecondsLeft());
-	float tw = TextRender()->TextWidth(6, aBuf, -1, -1.0f);
-	TextRender()->SetCursor(&Cursor, 5.0f + 100.0f - tw, 60.0f, 6.0f, TEXTFLAG_RENDER);
-	TextRender()->TextEx(&Cursor, aBuf, -1);
-
-	TextRender()->SetCursor(&Cursor, 5.0f, 60.0f, 6.0f, TEXTFLAG_RENDER);
-	Cursor.m_LineWidth = 100.0f - tw;
-	Cursor.m_MaxLines = 3;
-	TextRender()->TextEx(&Cursor, m_pClient->m_Voting.VoteDescription(), -1);
-
-	// reason
-	str_format(aBuf, sizeof(aBuf), "%s %s", Localize("Reason:"), m_pClient->m_Voting.VoteReason());
-	TextRender()->SetCursor(&Cursor, 5.0f, 79.0f, 6.0f, TEXTFLAG_RENDER | TEXTFLAG_STOP_AT_END);
-	Cursor.m_LineWidth = 100.0f;
-	TextRender()->TextEx(&Cursor, aBuf, -1);
-
-	CUIRect Base = {5, 88, 100, 4};
-	m_pClient->m_Voting.RenderBars(Base, false);
-
-	char aKey[64];
-	m_pClient->m_Binds.GetKey("vote yes", aKey, sizeof(aKey));
-
-	str_format(aBuf, sizeof(aBuf), "%s - %s", aKey, Localize("Vote yes"));
-	Base.y += Base.h;
-	Base.h = 12.0f;
-	if(m_pClient->m_Voting.TakenChoice() == 1)
-		TextRender()->TextColor(ColorRGBA(0.2f, 0.9f, 0.2f, 0.85f));
-	UI()->DoLabel(&Base, aBuf, 6.0f, TEXTALIGN_ML);
-
-	TextRender()->TextColor(TextRender()->DefaultTextColor());
-
-	m_pClient->m_Binds.GetKey("vote no", aKey, sizeof(aKey));
-	str_format(aBuf, sizeof(aBuf), "%s - %s", Localize("Vote no"), aKey);
-	if(m_pClient->m_Voting.TakenChoice() == -1)
-		TextRender()->TextColor(ColorRGBA(0.9f, 0.2f, 0.2f, 0.85f));
-	UI()->DoLabel(&Base, aBuf, 6.0f, TEXTALIGN_MR);
-
-	TextRender()->TextColor(TextRender()->DefaultTextColor());
-}
-
 void CHud::RenderCursor()
 {
 	if(!m_pClient->m_Snap.m_pLocalCharacter || Client()->State() == IClient::STATE_DEMOPLAYBACK)
@@ -795,8 +744,9 @@ void CHud::PreparePlayerStateQuads()
 	m_DummyHammerOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
 	m_DummyCopyOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
 
-	// Quad for displaying practice mode
+	// Quads for displaying team modes
 	m_PracticeModeOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
+	m_LockModeOffset = RenderTools()->QuadContainerAddSprite(m_HudQuadContainerIndex, 0.f, 0.f, 12.f, 12.f);
 }
 
 void CHud::RenderPlayerState(const int ClientID)
@@ -1034,6 +984,12 @@ void CHud::RenderPlayerState(const int ClientID)
 	if(HasProhibitedCapabilities)
 	{
 		y += 12;
+	}
+	if(m_pClient->m_Snap.m_aCharacters[ClientID].m_HasExtendedDisplayInfo && m_pClient->m_Snap.m_aCharacters[ClientID].m_ExtendedData.m_Flags & CHARACTERFLAG_LOCK_MODE)
+	{
+		Graphics()->TextureSet(m_pClient->m_HudSkin.m_SpriteHudLockMode);
+		Graphics()->RenderQuadContainerAsSprite(m_HudQuadContainerIndex, m_LockModeOffset, x, y);
+		x += 12;
 	}
 	if(m_pClient->m_Snap.m_aCharacters[ClientID].m_HasExtendedDisplayInfo && m_pClient->m_Snap.m_aCharacters[ClientID].m_ExtendedData.m_Flags & CHARACTERFLAG_PRACTICE_MODE)
 	{
@@ -1497,7 +1453,7 @@ void CHud::OnRender()
 		if(Client()->State() != IClient::STATE_DEMOPLAYBACK)
 			RenderConnectionWarning();
 		RenderTeambalanceWarning();
-		RenderVoting();
+		m_pClient->m_Voting.Render();
 		if(g_Config.m_ClShowRecord)
 			RenderRecord();
 	}

@@ -1117,6 +1117,7 @@ set(EXPECTED_DATA
   autoexec_server.cfg
   blob.png
   censorlist.txt
+  communityicons/none.png
   console.png
   console_bar.png
   countryflags/AD.png
@@ -1996,8 +1997,6 @@ set_src(GAME_SHARED GLOB src/game
   alloc.h
   collision.cpp
   collision.h
-  ddracechat.h
-  ddracecommands.h
   gamecore.cpp
   gamecore.h
   layers.cpp
@@ -2523,6 +2522,8 @@ if(SERVER)
     server.h
     server_logger.cpp
     server_logger.h
+    snap_id_pool.cpp
+    snap_id_pool.h
     sql_string_helpers.cpp
     sql_string_helpers.h
     upnp.cpp

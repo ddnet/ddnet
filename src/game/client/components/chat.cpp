@@ -30,11 +30,6 @@ CChat::CChat()
 		Line.m_QuadContainerIndex = -1;
 	}
 
-#define CHAT_COMMAND(name, params, flags, callback, userdata, help) m_vDefaultCommands.emplace_back(name, params, help);
-#include <game/ddracechat.h>
-#undef CHAT_COMMAND
-
-	std::sort(m_vDefaultCommands.begin(), m_vDefaultCommands.end());
 	m_Mode = MODE_NONE;
 
 	m_Input.SetClipboardLineCallback([this](const char *pStr) { SayChat(pStr); });
@@ -136,6 +131,7 @@ void CChat::Reset()
 	m_CommandsNeedSorting = false;
 	mem_zero(m_aCurrentInputText, sizeof(m_aCurrentInputText));
 	DisableMode();
+	m_vCommands.clear();
 
 	for(int64_t &LastSoundPlayed : m_aLastSoundPlayed)
 		LastSoundPlayed = 0;
@@ -228,11 +224,6 @@ void CChat::OnInit()
 	Console()->Chain("cl_chat_old", ConchainChatOld, this);
 	Console()->Chain("cl_chat_size", ConchainChatFontSize, this);
 	Console()->Chain("cl_chat_width", ConchainChatWidth, this);
-}
-
-void CChat::OnMapLoad()
-{
-	m_vCommands = m_vDefaultCommands;
 }
 
 bool CChat::OnInput(const IInput::CEvent &Event)
@@ -923,7 +914,7 @@ void CChat::AddLine(int ClientID, int Team, const char *pLine)
 	}
 }
 
-void CChat::RefindSkins()
+void CChat::OnRefreshSkins()
 {
 	for(auto &Line : m_aLines)
 	{

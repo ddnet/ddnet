@@ -183,6 +183,10 @@ public:
 	 */
 	virtual void OnWindowResize() {}
 	/**
+	 * Called when skins have been invalidated and must be updated.
+	 */
+	virtual void OnRefreshSkins() {}
+	/**
 	 * Called when the component should get rendered.
 	 *
 	 * The render order depends on the component insertion order.

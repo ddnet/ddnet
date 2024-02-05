@@ -1,13 +1,16 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#include <engine/shared/config.h>
-
 #include "voting.h"
+
+#include <engine/shared/config.h>
+#include <engine/textrender.h>
+
+#include <game/client/components/scoreboard.h>
 #include <game/client/components/sounds.h>
+#include <game/client/gameclient.h>
 #include <game/client/render.h>
 #include <game/generated/protocol.h>
-
-#include <game/client/gameclient.h>
+#include <game/localization.h>
 
 void CVoting::ConCallvote(IConsole::IResult *pResult, void *pUserData)
 {
@@ -139,12 +142,7 @@ void CVoting::Vote(int v)
 CVoting::CVoting()
 {
 	ClearOptions();
-
-	m_Closetime = 0;
-	m_aDescription[0] = 0;
-	m_aReason[0] = 0;
-	m_Yes = m_No = m_Pass = m_Total = 0;
-	m_Voted = 0;
+	OnReset();
 }
 
 void CVoting::AddOption(const char *pDescription)
@@ -177,6 +175,37 @@ void CVoting::AddOption(const char *pDescription)
 	++m_NumVoteOptions;
 }
 
+void CVoting::RemoveOption(const char *pDescription)
+{
+	for(CVoteOptionClient *pOption = m_pFirst; pOption; pOption = pOption->m_pNext)
+	{
+		if(str_comp(pOption->m_aDescription, pDescription) == 0)
+		{
+			// remove it from the list
+			if(m_pFirst == pOption)
+				m_pFirst = m_pFirst->m_pNext;
+			if(m_pLast == pOption)
+				m_pLast = m_pLast->m_pPrev;
+			if(pOption->m_pPrev)
+				pOption->m_pPrev->m_pNext = pOption->m_pNext;
+			if(pOption->m_pNext)
+				pOption->m_pNext->m_pPrev = pOption->m_pPrev;
+			--m_NumVoteOptions;
+
+			// add it to recycle list
+			pOption->m_pNext = 0;
+			pOption->m_pPrev = m_pRecycleLast;
+			if(pOption->m_pPrev)
+				pOption->m_pPrev->m_pNext = pOption;
+			m_pRecycleLast = pOption;
+			if(!m_pRecycleFirst)
+				m_pRecycleLast = pOption;
+
+			break;
+		}
+	}
+}
+
 void CVoting::ClearOptions()
 {
 	m_Heap.Reset();
@@ -191,7 +220,7 @@ void CVoting::ClearOptions()
 
 void CVoting::OnReset()
 {
-	m_Closetime = 0;
+	m_Opentime = m_Closetime = 0;
 	m_aDescription[0] = 0;
 	m_aReason[0] = 0;
 	m_Yes = m_No = m_Pass = m_Total = 0;
@@ -214,6 +243,7 @@ void CVoting::OnMessage(int MsgType, void *pRawMsg)
 		{
 			str_copy(m_aDescription, pMsg->m_pDescription);
 			str_copy(m_aReason, pMsg->m_pReason);
+			m_Opentime = time();
 			m_Closetime = time() + time_freq() * pMsg->m_Timeout;
 
 			if(Client()->RconAuthed())
@@ -271,34 +301,7 @@ void CVoting::OnMessage(int MsgType, void *pRawMsg)
 	else if(MsgType == NETMSGTYPE_SV_VOTEOPTIONREMOVE)
 	{
 		CNetMsg_Sv_VoteOptionRemove *pMsg = (CNetMsg_Sv_VoteOptionRemove *)pRawMsg;
-
-		for(CVoteOptionClient *pOption = m_pFirst; pOption; pOption = pOption->m_pNext)
-		{
-			if(str_comp(pOption->m_aDescription, pMsg->m_pDescription) == 0)
-			{
-				// remove it from the list
-				if(m_pFirst == pOption)
-					m_pFirst = m_pFirst->m_pNext;
-				if(m_pLast == pOption)
-					m_pLast = m_pLast->m_pPrev;
-				if(pOption->m_pPrev)
-					pOption->m_pPrev->m_pNext = pOption->m_pNext;
-				if(pOption->m_pNext)
-					pOption->m_pNext->m_pPrev = pOption->m_pPrev;
-				--m_NumVoteOptions;
-
-				// add it to recycle list
-				pOption->m_pNext = 0;
-				pOption->m_pPrev = m_pRecycleLast;
-				if(pOption->m_pPrev)
-					pOption->m_pPrev->m_pNext = pOption;
-				m_pRecycleLast = pOption;
-				if(!m_pRecycleFirst)
-					m_pRecycleLast = pOption;
-
-				break;
-			}
-		}
+		RemoveOption(pMsg->m_pDescription);
 	}
 	else if(MsgType == NETMSGTYPE_SV_YOURVOTE)
 	{
@@ -307,62 +310,93 @@ void CVoting::OnMessage(int MsgType, void *pRawMsg)
 	}
 }
 
-void CVoting::OnRender()
+void CVoting::Render()
 {
+	if((!g_Config.m_ClShowVotesAfterVoting && !m_pClient->m_Scoreboard.Active() && TakenChoice()) || !IsVoting() || Client()->State() == IClient::STATE_DEMOPLAYBACK)
+		return;
+	const int Seconds = SecondsLeft();
+	if(Seconds < 0)
+	{
+		OnReset();
+		return;
+	}
+
+	CUIRect View = {0.0f, 60.0f, 120.0f, 38.0f};
+	View.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.4f), IGraphics::CORNER_R, 3.0f);
+	View.Margin(3.0f, &View);
+
+	SLabelProperties Props;
+	Props.m_EllipsisAtEnd = true;
+
+	char aBuf[256];
+	str_format(aBuf, sizeof(aBuf), Localize("%ds left"), Seconds);
+
+	CUIRect Row, LeftColumn, RightColumn, ProgressSpinner;
+	View.HSplitTop(6.0f, &Row, &View);
+	Row.VSplitRight(TextRender()->TextWidth(6.0f, aBuf), &LeftColumn, &RightColumn);
+	LeftColumn.VSplitRight(2.0f, &LeftColumn, nullptr);
+	LeftColumn.VSplitRight(6.0f, &LeftColumn, &ProgressSpinner);
+	LeftColumn.VSplitRight(2.0f, &LeftColumn, nullptr);
+
+	SProgressSpinnerProperties ProgressProps;
+	ProgressProps.m_Progress = clamp((time() - m_Opentime) / (float)(m_Closetime - m_Opentime), 0.0f, 1.0f);
+	UI()->RenderProgressSpinner(ProgressSpinner.Center(), ProgressSpinner.h / 2.0f, ProgressProps);
+
+	UI()->DoLabel(&RightColumn, aBuf, 6.0f, TEXTALIGN_MR);
+
+	Props.m_MaxWidth = LeftColumn.w;
+	UI()->DoLabel(&LeftColumn, VoteDescription(), 6.0f, TEXTALIGN_ML, Props);
+
+	View.HSplitTop(3.0f, nullptr, &View);
+	View.HSplitTop(6.0f, &Row, &View);
+	str_format(aBuf, sizeof(aBuf), "%s %s", Localize("Reason:"), VoteReason());
+	Props.m_MaxWidth = Row.w;
+	UI()->DoLabel(&Row, aBuf, 6.0f, TEXTALIGN_ML, Props);
+
+	View.HSplitTop(3.0f, nullptr, &View);
+	View.HSplitTop(4.0f, &Row, &View);
+	RenderBars(Row);
+
+	View.HSplitTop(3.0f, nullptr, &View);
+	View.HSplitTop(6.0f, &Row, &View);
+	Row.VSplitMid(&LeftColumn, &RightColumn, 4.0f);
+
+	char aKey[64];
+	m_pClient->m_Binds.GetKey("vote yes", aKey, sizeof(aKey));
+	str_format(aBuf, sizeof(aBuf), "%s - %s", aKey, Localize("Vote yes"));
+	TextRender()->TextColor(TakenChoice() == 1 ? ColorRGBA(0.2f, 0.9f, 0.2f, 0.85f) : TextRender()->DefaultTextColor());
+	UI()->DoLabel(&LeftColumn, aBuf, 6.0f, TEXTALIGN_ML);
+
+	m_pClient->m_Binds.GetKey("vote no", aKey, sizeof(aKey));
+	str_format(aBuf, sizeof(aBuf), "%s - %s", Localize("Vote no"), aKey);
+	TextRender()->TextColor(TakenChoice() == -1 ? ColorRGBA(0.95f, 0.25f, 0.25f, 0.85f) : TextRender()->DefaultTextColor());
+	UI()->DoLabel(&RightColumn, aBuf, 6.0f, TEXTALIGN_MR);
+
+	TextRender()->TextColor(TextRender()->DefaultTextColor());
 }
 
-void CVoting::RenderBars(CUIRect Bars, bool Text)
+void CVoting::RenderBars(CUIRect Bars) const
 {
-	Bars.Draw(ColorRGBA(0.8f, 0.8f, 0.8f, 0.5f), IGraphics::CORNER_ALL, Bars.h / 3);
+	Bars.Draw(ColorRGBA(0.8f, 0.8f, 0.8f, 0.5f), IGraphics::CORNER_ALL, Bars.h / 2.0f);
 
-	CUIRect Splitter = Bars;
-	Splitter.x = Splitter.x + Splitter.w / 2;
-	Splitter.w = Splitter.h / 2.0f;
-	Splitter.x -= Splitter.w / 2;
-	Splitter.Draw(ColorRGBA(0.4f, 0.4f, 0.4f, 0.5f), IGraphics::CORNER_ALL, Splitter.h / 4);
+	CUIRect Splitter;
+	Bars.VMargin((Bars.w - 2.0f) / 2.0f, &Splitter);
+	Splitter.Draw(ColorRGBA(0.4f, 0.4f, 0.4f, 0.5f), IGraphics::CORNER_NONE, 0.0f);
 
 	if(m_Total)
 	{
-		CUIRect PassArea = Bars;
 		if(m_Yes)
 		{
-			CUIRect YesArea = Bars;
-			YesArea.w *= m_Yes / (float)m_Total;
-			YesArea.Draw(ColorRGBA(0.2f, 0.9f, 0.2f, 0.85f), IGraphics::CORNER_ALL, Bars.h / 3);
-
-			if(Text)
-			{
-				char aBuf[256];
-				str_from_int(m_Yes, aBuf);
-				UI()->DoLabel(&YesArea, aBuf, Bars.h * 0.75f, TEXTALIGN_MC);
-			}
-
-			PassArea.x += YesArea.w;
-			PassArea.w -= YesArea.w;
+			CUIRect YesArea;
+			Bars.VSplitLeft(Bars.w * m_Yes / m_Total, &YesArea, nullptr);
+			YesArea.Draw(ColorRGBA(0.2f, 0.9f, 0.2f, 0.85f), IGraphics::CORNER_ALL, YesArea.h / 2.0f);
 		}
 
 		if(m_No)
 		{
-			CUIRect NoArea = Bars;
-			NoArea.w *= m_No / (float)m_Total;
-			NoArea.x = (Bars.x + Bars.w) - NoArea.w;
-			NoArea.Draw(ColorRGBA(0.9f, 0.2f, 0.2f, 0.85f), IGraphics::CORNER_ALL, Bars.h / 3);
-
-			if(Text)
-			{
-				char aBuf[256];
-				str_from_int(m_No, aBuf);
-				UI()->DoLabel(&NoArea, aBuf, Bars.h * 0.75f, TEXTALIGN_MC);
-			}
-
-			PassArea.w -= NoArea.w;
-		}
-
-		if(Text && m_Pass)
-		{
-			char aBuf[256];
-			str_from_int(m_Pass, aBuf);
-			UI()->DoLabel(&PassArea, aBuf, Bars.h * 0.75f, TEXTALIGN_MC);
+			CUIRect NoArea;
+			Bars.VSplitRight(Bars.w * m_No / m_Total, nullptr, &NoArea);
+			NoArea.Draw(ColorRGBA(0.9f, 0.2f, 0.2f, 0.85f), IGraphics::CORNER_ALL, NoArea.h / 2.0f);
 		}
 	}
 }

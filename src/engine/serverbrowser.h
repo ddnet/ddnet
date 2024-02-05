@@ -231,6 +231,8 @@ public:
 	const SHA256_DIGEST &IconSha256() const { return m_IconSha256; }
 	const std::vector<CCommunityCountry> &Countries() const { return m_vCountries; }
 	const std::vector<CCommunityType> &Types() const { return m_vTypes; }
+	bool HasCountry(const char *pCountryName) const;
+	bool HasType(const char *pTypeName) const;
 	bool HasRanks() const { return m_HasFinishes; }
 	CServerInfo::ERankState HasRank(const char *pMap) const;
 };
@@ -271,6 +273,9 @@ public:
 		TYPE_INTERNET = 0,
 		TYPE_LAN,
 		TYPE_FAVORITES,
+		TYPE_FAVORITE_COMMUNITY_1,
+		TYPE_FAVORITE_COMMUNITY_2,
+		TYPE_FAVORITE_COMMUNITY_3,
 		NUM_TYPES,
 	};
 
@@ -279,7 +284,7 @@ public:
 
 	static constexpr const char *SEARCH_EXCLUDE_TOKEN = ";";
 
-	virtual void Refresh(int Type) = 0;
+	virtual void Refresh(int Type, bool Force = false) = 0;
 	virtual bool IsGettingServerlist() const = 0;
 	virtual bool IsRefreshing() const = 0;
 	virtual int LoadingProgression() const = 0;
@@ -296,11 +301,18 @@ public:
 	virtual const std::vector<CCommunity> &Communities() const = 0;
 	virtual const CCommunity *Community(const char *pCommunityId) const = 0;
 	virtual std::vector<const CCommunity *> SelectedCommunities() const = 0;
+	virtual std::vector<const CCommunity *> FavoriteCommunities() const = 0;
+	virtual std::vector<const CCommunity *> CurrentCommunities() const = 0;
+	virtual unsigned CurrentCommunitiesHash() const = 0;
+
+	virtual bool DDNetInfoAvailable() const = 0;
 	virtual int64_t DDNetInfoUpdateTime() const = 0;
 
+	virtual IFilterList &FavoriteCommunitiesFilter() = 0;
 	virtual IFilterList &CommunitiesFilter() = 0;
 	virtual IFilterList &CountriesFilter() = 0;
 	virtual IFilterList &TypesFilter() = 0;
+	virtual const IFilterList &FavoriteCommunitiesFilter() const = 0;
 	virtual const IFilterList &CommunitiesFilter() const = 0;
 	virtual const IFilterList &CountriesFilter() const = 0;
 	virtual const IFilterList &TypesFilter() const = 0;

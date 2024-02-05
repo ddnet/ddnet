@@ -684,7 +684,7 @@ int CGhost::GetLastRaceTick() const
 	return m_LastRaceTick;
 }
 
-void CGhost::RefindSkins()
+void CGhost::OnRefreshSkins()
 {
 	const auto &&RefindSkin = [&](auto &Ghost) {
 		if(Ghost.Empty())
