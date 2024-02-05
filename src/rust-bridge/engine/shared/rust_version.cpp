@@ -14,3 +14,10 @@ void RustVersionPrint(const ::IConsole &console) noexcept {
 void RustVersionRegister(::IConsole &console) noexcept {
   cxxbridge1$RustVersionRegister(console);
 }
+void cxxbridge1$RustVersionPrint(const ::IConsole &console) noexcept
+{
+}
+
+void cxxbridge1$RustVersionRegister(::IConsole &console) noexcept
+{
+}
