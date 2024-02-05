@@ -120,6 +120,19 @@ public:
 	 */
 	bool Inside(float PointX, float PointY) const;
 
+	/**
+	 * Fill background of *this* CUIRect.
+	 *
+	 * @note Example of filling a black half transparent background with 5px rounded edges on all sides
+	 * @note ```MyCuiRect.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.5f), IGraphics::CORNER_ALL, 5.0f);```
+	 *
+	 * @note Example of filling a red background with sharp edges
+	 * @note ```MyCuiRect.Draw(ColorRGBA(1.0f, 0.0f, 0.0f), IGraphics::CORNER_NONE, 0.0f);```
+	 *
+	 * @param Color
+	 * @param Corners
+	 * @param Rounding
+	 */
 	void Draw(ColorRGBA Color, int Corners, float Rounding) const;
 	void Draw4(ColorRGBA ColorTopLeft, ColorRGBA ColorTopRight, ColorRGBA ColorBottomLeft, ColorRGBA ColorBottomRight, int Corners, float Rounding) const;
 
