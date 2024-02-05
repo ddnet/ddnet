@@ -1105,6 +1105,7 @@ public:
 
 	unsigned char m_TeleNumber;
 	unsigned char m_TeleCheckpointNumber;
+	unsigned char m_ViewTeleNumber;
 
 	unsigned char m_TuningNum;
 

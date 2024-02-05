@@ -10,6 +10,9 @@ CLayerTele::CLayerTele(CEditor *pEditor, int w, int h) :
 
 	m_pTeleTile = new CTeleTile[w * h];
 	mem_zero(m_pTeleTile, (size_t)w * h * sizeof(CTeleTile));
+
+	m_GotoTeleOffset = 0;
+	m_GotoTeleLastPos = ivec2(-1, -1);
 }
 
 CLayerTele::CLayerTele(const CLayerTele &Other) :
@@ -314,6 +317,60 @@ bool CLayerTele::ContainsElementWithId(int Id, bool Checkpoint)
 	}
 
 	return false;
+}
+
+void CLayerTele::GetPos(int Number, int Offset, int &TeleX, int &TeleY)
+{
+	int Match = -1;
+	ivec2 MatchPos = ivec2(-1, -1);
+	TeleX = -1;
+	TeleY = -1;
+
+	auto FindTile = [this, &Match, &MatchPos, &Number, &Offset]() {
+		for(int x = 0; x < m_Width; x++)
+		{
+			for(int y = 0; y < m_Height; y++)
+			{
+				int i = y * m_Width + x;
+				int Tele = m_pTeleTile[i].m_Number;
+				if(Number == Tele)
+				{
+					Match++;
+					if(Offset != -1)
+					{
+						if(Match == Offset)
+						{
+							MatchPos = ivec2(x, y);
+							m_GotoTeleOffset = Match;
+							return;
+						}
+						continue;
+					}
+					MatchPos = ivec2(x, y);
+					if(m_GotoTeleLastPos != ivec2(-1, -1))
+					{
+						if(distance(m_GotoTeleLastPos, MatchPos) < 10.0f)
+						{
+							m_GotoTeleOffset++;
+							continue;
+						}
+					}
+					m_GotoTeleLastPos = MatchPos;
+					if(Match == m_GotoTeleOffset)
+						return;
+				}
+			}
+		}
+	};
+	FindTile();
+
+	if(MatchPos == ivec2(-1, -1))
+		return;
+	if(Match < m_GotoTeleOffset)
+		m_GotoTeleOffset = -1;
+	TeleX = MatchPos.x;
+	TeleY = MatchPos.y;
+	m_GotoTeleOffset++;
 }
 
 std::shared_ptr<CLayer> CLayerTele::Duplicate() const
