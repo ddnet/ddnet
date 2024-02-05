@@ -4391,8 +4391,16 @@ bool CEditor::SelectLayerByTile()
 					continue;
 
 				std::shared_ptr<CLayerTiles> pTiles = std::static_pointer_cast<CLayerTiles>(m_Map.m_vpGroups[g]->m_vpLayers[l]);
-				int x = (int)UI()->MouseWorldX() / 32 + m_Map.m_vpGroups[g]->m_OffsetX;
-				int y = (int)UI()->MouseWorldY() / 32 + m_Map.m_vpGroups[g]->m_OffsetY;
+
+				float aMapping[4];
+				m_Map.m_vpGroups[g]->Mapping(aMapping);
+				int x = aMapping[0] + (aMapping[2] - aMapping[0]) / 2;
+				int y = aMapping[1] + (aMapping[3] - aMapping[1]) / 2;
+				x += UI()->MouseWorldX() - (MapView()->GetWorldOffset().x * m_Map.m_vpGroups[g]->m_ParallaxX / 100) - m_Map.m_vpGroups[g]->m_OffsetX;
+				y += UI()->MouseWorldY() - (MapView()->GetWorldOffset().y * m_Map.m_vpGroups[g]->m_ParallaxY / 100) - m_Map.m_vpGroups[g]->m_OffsetY;
+				x /= 32;
+				y /= 32;
+
 				if(x < 0 || x >= pTiles->m_Width)
 					continue;
 				if(y < 0 || y >= pTiles->m_Height)
