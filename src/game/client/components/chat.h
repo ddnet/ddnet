@@ -86,12 +86,13 @@ class CChat : public CComponent
 	int m_PlaceholderOffset;
 	int m_PlaceholderLength;
 	static char ms_aDisplayText[MAX_LINE_LENGTH];
-	struct CRateablePlayer
+	struct CCompletablePlayer
 	{
 		int ClientID;
 		int Score;
+		bool IsFriend;
 	};
-	CRateablePlayer m_aPlayerCompletionList[MAX_CLIENTS];
+	CCompletablePlayer m_aPlayerCompletionList[MAX_CLIENTS];
 	int m_PlayerCompletionListLength;
 
 	struct CCommand

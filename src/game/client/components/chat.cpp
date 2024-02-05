@@ -310,13 +310,14 @@ bool CChat::OnInput(const IInput::CEvent &Event)
 						m_aPlayerCompletionList[m_PlayerCompletionListLength].ClientID = PlayerInfo->m_ClientID;
 						// The score for suggesting a player name is determined by the distance of the search input to the beginning of the player name
 						m_aPlayerCompletionList[m_PlayerCompletionListLength].Score = (int)(FoundInput - PlayerName);
+						m_aPlayerCompletionList[m_PlayerCompletionListLength].IsFriend = m_pClient->m_aClients[PlayerInfo->m_ClientID].m_Friend;
 						m_PlayerCompletionListLength++;
 					}
 				}
 			}
 			std::stable_sort(m_aPlayerCompletionList, m_aPlayerCompletionList + m_PlayerCompletionListLength,
-				[](const CRateablePlayer &p1, const CRateablePlayer &p2) -> bool {
-					return p1.Score < p2.Score;
+				[](const CCompletablePlayer &p1, const CCompletablePlayer &p2) -> bool {
+					return (g_Config.m_ClChatCompleteFriendsFirst && p1.IsFriend && !p2.IsFriend) || p1.Score < p2.Score;
 				});
 		}
 
