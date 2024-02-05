@@ -1328,7 +1328,7 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 					{
 						pButtonName = "Tele";
 						pfnPopupFunc = PopupTele;
-						Rows = 2;
+						Rows = 3;
 					}
 
 					if(pButtonName != nullptr)

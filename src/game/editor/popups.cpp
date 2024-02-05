@@ -2439,19 +2439,48 @@ CUI::EPopupMenuFunctionResult CEditor::PopupTele(void *pContext, CUIRect View, b
 
 	static int s_PreviousTeleNumber;
 	static int s_PreviousCheckpointNumber;
+	static int s_PreviousViewTeleNumber;
 
 	CUIRect NumberPicker;
 	CUIRect FindEmptySlot;
-	CUIRect FindFreeTeleSlot, FindFreeCheckpointSlot;
+	CUIRect FindFreeTeleSlot, FindFreeCheckpointSlot, FindFreeViewSlot;
 
 	View.VSplitRight(15.f, &NumberPicker, &FindEmptySlot);
 	NumberPicker.VSplitRight(2.f, &NumberPicker, nullptr);
 
 	FindEmptySlot.HSplitTop(13.0f, &FindFreeTeleSlot, &FindEmptySlot);
 	FindEmptySlot.HSplitTop(13.0f, &FindFreeCheckpointSlot, &FindEmptySlot);
+	FindEmptySlot.HSplitTop(13.0f, &FindFreeViewSlot, &FindEmptySlot);
 
 	FindFreeTeleSlot.HMargin(1.0f, &FindFreeTeleSlot);
 	FindFreeCheckpointSlot.HMargin(1.0f, &FindFreeCheckpointSlot);
+	FindFreeViewSlot.HMargin(1.0f, &FindFreeViewSlot);
+
+	auto ViewTele = [](CEditor *pEd) -> bool {
+		if(!pEd->m_ViewTeleNumber)
+			return false;
+		int TeleX, TeleY;
+		pEd->m_Map.m_pTeleLayer->GetPos(pEd->m_ViewTeleNumber, -1, TeleX, TeleY);
+		if(TeleX != -1 && TeleY != -1)
+		{
+			pEd->MapView()->SetWorldOffset({32.0f * TeleX + 0.5f, 32.0f * TeleY + 0.5f});
+			return true;
+		}
+		return false;
+	};
+
+	static std::vector<ColorRGBA> s_vColors = {
+		ColorRGBA(0.5f, 1, 0.5f, 0.5f),
+		ColorRGBA(0.5f, 1, 0.5f, 0.5f),
+		ColorRGBA(0.5f, 1, 0.5f, 0.5f),
+	};
+	enum
+	{
+		PROP_TELE = 0,
+		PROP_TELE_CP,
+		PROP_TELE_VIEW,
+		NUM_PROPS,
+	};
 
 	// find next free numbers buttons
 	{
@@ -2474,24 +2503,19 @@ CUI::EPopupMenuFunctionResult CEditor::PopupTele(void *pContext, CUIRect View, b
 			if(CPNumber != -1)
 				pEditor->m_TeleCheckpointNumber = CPNumber;
 		}
+
+		static int s_NextFreeViewPid = 0;
+		int btn = pEditor->DoButton_Editor(&s_NextFreeViewPid, "N", 0, &FindFreeViewSlot, 0, "[n] Show next tele with this number");
+		if(btn || (Active && pEditor->Input()->KeyPress(KEY_N)))
+			s_vColors[PROP_TELE_VIEW] = ViewTele(pEditor) ? ColorRGBA(0.5f, 1, 0.5f, 0.5f) : ColorRGBA(1, 0.5f, 0.5f, 0.5f);
 	}
 
 	// number picker
 	{
-		static std::vector<ColorRGBA> s_vColors = {
-			ColorRGBA(0.5f, 1, 0.5f, 0.5f),
-			ColorRGBA(0.5f, 1, 0.5f, 0.5f),
-		};
-
-		enum
-		{
-			PROP_TELE = 0,
-			PROP_TELE_CP = 1,
-			NUM_PROPS,
-		};
 		CProperty aProps[] = {
 			{"Number", pEditor->m_TeleNumber, PROPTYPE_INT_STEP, 1, 255},
 			{"Checkpoint", pEditor->m_TeleCheckpointNumber, PROPTYPE_INT_STEP, 1, 255},
+			{"View", pEditor->m_ViewTeleNumber, PROPTYPE_INT_STEP, 1, 255},
 			{nullptr},
 		};
 
@@ -2503,16 +2527,22 @@ CUI::EPopupMenuFunctionResult CEditor::PopupTele(void *pContext, CUIRect View, b
 			pEditor->m_TeleNumber = (NewVal - 1 + 255) % 255 + 1;
 		else if(Prop == PROP_TELE_CP)
 			pEditor->m_TeleCheckpointNumber = (NewVal - 1 + 255) % 255 + 1;
+		else if(Prop == PROP_TELE_VIEW)
+			pEditor->m_ViewTeleNumber = (NewVal - 1 + 255) % 255 + 1;
 
 		if(s_PreviousTeleNumber == 1 || s_PreviousTeleNumber != pEditor->m_TeleNumber)
 			s_vColors[PROP_TELE] = pEditor->m_Map.m_pTeleLayer->ContainsElementWithId(pEditor->m_TeleNumber, false) ? ColorRGBA(1, 0.5f, 0.5f, 0.5f) : ColorRGBA(0.5f, 1, 0.5f, 0.5f);
 
 		if(s_PreviousCheckpointNumber == 1 || s_PreviousCheckpointNumber != pEditor->m_TeleCheckpointNumber)
 			s_vColors[PROP_TELE_CP] = pEditor->m_Map.m_pTeleLayer->ContainsElementWithId(pEditor->m_TeleCheckpointNumber, true) ? ColorRGBA(1, 0.5f, 0.5f, 0.5f) : ColorRGBA(0.5f, 1, 0.5f, 0.5f);
+
+		if(s_PreviousViewTeleNumber != pEditor->m_ViewTeleNumber)
+			s_vColors[PROP_TELE_VIEW] = ViewTele(pEditor) ? ColorRGBA(0.5f, 1, 0.5f, 0.5f) : ColorRGBA(1, 0.5f, 0.5f, 0.5f);
 	}
 
 	s_PreviousTeleNumber = pEditor->m_TeleNumber;
 	s_PreviousCheckpointNumber = pEditor->m_TeleCheckpointNumber;
+	s_PreviousViewTeleNumber = pEditor->m_ViewTeleNumber;
 
 	return CUI::POPUP_KEEP_OPEN;
 }
