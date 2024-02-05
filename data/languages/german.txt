@@ -388,6 +388,9 @@ Show name plates
 Show only chat messages from friends
 == Nur Nachrichten von Freunden anzeigen
 
+Prefer friends when auto-completing in chat
+== Freunde bei Autovervollständigung im Chat bevorzugen
+
 Sound
 == Ton
 
