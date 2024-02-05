@@ -362,12 +362,8 @@ void CHttpRequest::Wait()
 
 void CHttpRequest::Result(unsigned char **ppResult, size_t *pResultLength) const
 {
-	if(m_WriteToFile || State() != EHttpState::DONE)
-	{
-		*ppResult = nullptr;
-		*pResultLength = 0;
-		return;
-	}
+	dbg_assert(State() == EHttpState::DONE, "Request not done");
+	dbg_assert(!m_WriteToFile, "Result not usable together with WriteToFile");
 	*ppResult = m_pBuffer;
 	*pResultLength = m_ResponseLength;
 }
@@ -377,11 +373,13 @@ json_value *CHttpRequest::ResultJson() const
 	unsigned char *pResult;
 	size_t ResultLength;
 	Result(&pResult, &ResultLength);
-	if(!pResult)
-	{
-		return nullptr;
-	}
 	return json_parse((char *)pResult, ResultLength);
+}
+
+const SHA256_DIGEST &CHttpRequest::ResultSha256() const
+{
+	dbg_assert(State() == EHttpState::DONE, "Request not done");
+	return m_ActualSha256;
 }
 
 bool CHttp::Init(std::chrono::milliseconds ShutdownDelay)
