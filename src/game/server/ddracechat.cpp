@@ -1638,11 +1638,11 @@ void CGameContext::ConTeleXY(IConsole::IResult *pResult, void *pUserData)
 			// Relative?
 			const char *pStrDelta = str_startswith(pInString, "~");
 
-			if(!str_isallnum(pStrDelta ? pStrDelta : pInString))
+			float d;
+			if(!str_tofloat(pStrDelta ? pStrDelta : pInString, &d))
 				return false;
 
 			// Is the number valid?
-			float d = str_tofloat(pStrDelta ? pStrDelta : pInString);
 			if(std::isnan(d) || std::isinf(d))
 				return false;
 
