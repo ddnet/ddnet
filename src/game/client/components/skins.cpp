@@ -310,26 +310,10 @@ void CSkins::OnInit()
 
 void CSkins::Refresh(TSkinLoadedCBFunc &&SkinLoadedFunc)
 {
-	for(const auto &SkinIt : m_Skins)
+	for(const auto &[_, pSkin] : m_Skins)
 	{
-		const auto &pSkin = SkinIt.second;
-		Graphics()->UnloadTexture(&pSkin->m_OriginalSkin.m_Body);
-		Graphics()->UnloadTexture(&pSkin->m_OriginalSkin.m_BodyOutline);
-		Graphics()->UnloadTexture(&pSkin->m_OriginalSkin.m_Feet);
-		Graphics()->UnloadTexture(&pSkin->m_OriginalSkin.m_FeetOutline);
-		Graphics()->UnloadTexture(&pSkin->m_OriginalSkin.m_Hands);
-		Graphics()->UnloadTexture(&pSkin->m_OriginalSkin.m_HandsOutline);
-		for(auto &Eye : pSkin->m_OriginalSkin.m_aEyes)
-			Graphics()->UnloadTexture(&Eye);
-
-		Graphics()->UnloadTexture(&pSkin->m_ColorableSkin.m_Body);
-		Graphics()->UnloadTexture(&pSkin->m_ColorableSkin.m_BodyOutline);
-		Graphics()->UnloadTexture(&pSkin->m_ColorableSkin.m_Feet);
-		Graphics()->UnloadTexture(&pSkin->m_ColorableSkin.m_FeetOutline);
-		Graphics()->UnloadTexture(&pSkin->m_ColorableSkin.m_Hands);
-		Graphics()->UnloadTexture(&pSkin->m_ColorableSkin.m_HandsOutline);
-		for(auto &Eye : pSkin->m_ColorableSkin.m_aEyes)
-			Graphics()->UnloadTexture(&Eye);
+		pSkin->m_OriginalSkin.Unload(Graphics());
+		pSkin->m_ColorableSkin.Unload(Graphics());
 	}
 
 	m_Skins.clear();

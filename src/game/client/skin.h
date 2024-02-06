@@ -37,6 +37,18 @@ public:
 			for(auto &Eye : m_aEyes)
 				Eye = IGraphics::CTextureHandle();
 		}
+
+		void Unload(IGraphics *pGraphics)
+		{
+			pGraphics->UnloadTexture(&m_Body);
+			pGraphics->UnloadTexture(&m_BodyOutline);
+			pGraphics->UnloadTexture(&m_Feet);
+			pGraphics->UnloadTexture(&m_FeetOutline);
+			pGraphics->UnloadTexture(&m_Hands);
+			pGraphics->UnloadTexture(&m_HandsOutline);
+			for(auto &Eye : m_aEyes)
+				pGraphics->UnloadTexture(&Eye);
+		}
 	};
 
 	SSkinTextures m_OriginalSkin;
