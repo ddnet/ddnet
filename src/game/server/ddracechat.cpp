@@ -1639,7 +1639,7 @@ void CGameContext::ConTeleXY(IConsole::IResult *pResult, void *pUserData)
 			const char *pStrDelta = str_startswith(pInString, "~");
 
 			float d;
-			if(!str_tofloat(pStrDelta ? pStrDelta : pInString,&d))
+			if(!str_tofloat(pStrDelta ? pStrDelta : pInString, &d))
 				return false;
 
 			// Is the number valid?
