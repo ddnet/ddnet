@@ -1704,6 +1704,26 @@ void CMenus::RenderServerbrowser(CUIRect MainView)
 {
 	UpdateCommunityCache(false);
 
+	switch(g_Config.m_UiPage)
+	{
+	case PAGE_INTERNET:
+		m_pBackground->ChangePosition(CMenuBackground::POS_BROWSER_INTERNET);
+		break;
+	case PAGE_LAN:
+		m_pBackground->ChangePosition(CMenuBackground::POS_BROWSER_LAN);
+		break;
+	case PAGE_FAVORITES:
+		m_pBackground->ChangePosition(CMenuBackground::POS_BROWSER_FAVORITES);
+		break;
+	case PAGE_FAVORITE_COMMUNITY_1:
+	case PAGE_FAVORITE_COMMUNITY_2:
+	case PAGE_FAVORITE_COMMUNITY_3:
+		m_pBackground->ChangePosition(g_Config.m_UiPage - PAGE_FAVORITE_COMMUNITY_1 + CMenuBackground::POS_BROWSER_CUSTOM0);
+		break;
+	default:
+		dbg_assert(false, "ui_page invalid for RenderServerbrowser");
+	}
+
 	/*
 		+---------------------------+ +---communities---+
 		|							| |					|

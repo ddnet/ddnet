@@ -56,7 +56,6 @@ float CMenus::ms_ListheaderHeight = 17.0f;
 CMenus::CMenus()
 {
 	m_Popup = POPUP_NONE;
-	m_ActivePage = PAGE_INTERNET;
 	m_MenuPage = 0;
 	m_GamePage = PAGE_GAME;
 
@@ -543,18 +542,17 @@ int CMenus::DoKeyReader(const void *pId, const CUIRect *pRect, int Key, int Modi
 	return NewKey;
 }
 
-void CMenus::RenderMenubar(CUIRect Box)
+void CMenus::RenderMenubar(CUIRect Box, IClient::EClientState ClientState)
 {
 	CUIRect Button;
 
-	m_ActivePage = m_MenuPage;
 	int NewPage = -1;
+	int ActivePage = -1;
 
-	if(Client()->State() != IClient::STATE_OFFLINE)
-		m_ActivePage = m_GamePage;
-
-	if(Client()->State() == IClient::STATE_OFFLINE)
+	if(ClientState == IClient::STATE_OFFLINE)
 	{
+		ActivePage = m_MenuPage;
+
 		Box.VSplitLeft(33.0f, &Button, &Box);
 
 		TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
@@ -596,7 +594,7 @@ void CMenus::RenderMenubar(CUIRect Box)
 		Box.VSplitLeft(10.0f, nullptr, &Box);
 		Box.VSplitLeft(75.0f, &Button, &Box);
 		static CButtonContainer s_InternetButton;
-		if(DoButton_MenuTab(&s_InternetButton, FONT_ICON_EARTH_AMERICAS, m_ActivePage == PAGE_INTERNET, &Button, IGraphics::CORNER_T, &m_aAnimatorsBigPage[BIG_TAB_INTERNET]))
+		if(DoButton_MenuTab(&s_InternetButton, FONT_ICON_EARTH_AMERICAS, ActivePage == PAGE_INTERNET, &Button, IGraphics::CORNER_T, &m_aAnimatorsBigPage[BIG_TAB_INTERNET]))
 		{
 			if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_INTERNET)
 			{
@@ -610,7 +608,7 @@ void CMenus::RenderMenubar(CUIRect Box)
 
 		Box.VSplitLeft(75.0f, &Button, &Box);
 		static CButtonContainer s_LanButton;
-		if(DoButton_MenuTab(&s_LanButton, FONT_ICON_NETWORK_WIRED, m_ActivePage == PAGE_LAN, &Button, IGraphics::CORNER_T, &m_aAnimatorsBigPage[BIG_TAB_LAN]))
+		if(DoButton_MenuTab(&s_LanButton, FONT_ICON_NETWORK_WIRED, ActivePage == PAGE_LAN, &Button, IGraphics::CORNER_T, &m_aAnimatorsBigPage[BIG_TAB_LAN]))
 		{
 			if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_LAN)
 				ServerBrowser()->Refresh(IServerBrowser::TYPE_LAN);
@@ -620,7 +618,7 @@ void CMenus::RenderMenubar(CUIRect Box)
 
 		Box.VSplitLeft(75.0f, &Button, &Box);
 		static CButtonContainer s_FavoritesButton;
-		if(DoButton_MenuTab(&s_FavoritesButton, FONT_ICON_STAR, m_ActivePage == PAGE_FAVORITES, &Button, IGraphics::CORNER_T, &m_aAnimatorsBigPage[BIG_TAB_FAVORITES]))
+		if(DoButton_MenuTab(&s_FavoritesButton, FONT_ICON_STAR, ActivePage == PAGE_FAVORITES, &Button, IGraphics::CORNER_T, &m_aAnimatorsBigPage[BIG_TAB_FAVORITES]))
 		{
 			if(ServerBrowser()->GetCurrentType() != IServerBrowser::TYPE_FAVORITES)
 			{
@@ -641,7 +639,7 @@ void CMenus::RenderMenubar(CUIRect Box)
 		{
 			Box.VSplitLeft(75.0f, &Button, &Box);
 			const int Page = PAGE_FAVORITE_COMMUNITY_1 + FavoriteCommunityIndex;
-			if(DoButton_MenuTab(&s_aFavoriteCommunityButtons[FavoriteCommunityIndex], FONT_ICON_ELLIPSIS, m_ActivePage == Page, &Button, IGraphics::CORNER_T, &m_aAnimatorsBigPage[BIT_TAB_FAVORITE_COMMUNITY_1 + FavoriteCommunityIndex], nullptr, nullptr, nullptr, 10.0f, FindCommunityIcon(pCommunity->Id())))
+			if(DoButton_MenuTab(&s_aFavoriteCommunityButtons[FavoriteCommunityIndex], FONT_ICON_ELLIPSIS, ActivePage == Page, &Button, IGraphics::CORNER_T, &m_aAnimatorsBigPage[BIT_TAB_FAVORITE_COMMUNITY_1 + FavoriteCommunityIndex], nullptr, nullptr, nullptr, 10.0f, FindCommunityIcon(pCommunity->Id())))
 			{
 				const int BrowserType = IServerBrowser::TYPE_FAVORITE_COMMUNITY_1 + FavoriteCommunityIndex;
 				if(ServerBrowser()->GetCurrentType() != BrowserType)
@@ -662,47 +660,51 @@ void CMenus::RenderMenubar(CUIRect Box)
 		TextRender()->SetRenderFlags(0);
 		TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
 	}
-	else
+	else if(ClientState == IClient::STATE_ONLINE)
 	{
+		ActivePage = m_GamePage;
+
 		// online menus
 		Box.VSplitLeft(90.0f, &Button, &Box);
 		static CButtonContainer s_GameButton;
-		if(DoButton_MenuTab(&s_GameButton, Localize("Game"), m_ActivePage == PAGE_GAME, &Button, IGraphics::CORNER_TL))
+		if(DoButton_MenuTab(&s_GameButton, Localize("Game"), ActivePage == PAGE_GAME, &Button, IGraphics::CORNER_TL))
 			NewPage = PAGE_GAME;
 
 		Box.VSplitLeft(90.0f, &Button, &Box);
 		static CButtonContainer s_PlayersButton;
-		if(DoButton_MenuTab(&s_PlayersButton, Localize("Players"), m_ActivePage == PAGE_PLAYERS, &Button, IGraphics::CORNER_NONE))
+		if(DoButton_MenuTab(&s_PlayersButton, Localize("Players"), ActivePage == PAGE_PLAYERS, &Button, IGraphics::CORNER_NONE))
 			NewPage = PAGE_PLAYERS;
 
 		Box.VSplitLeft(130.0f, &Button, &Box);
 		static CButtonContainer s_ServerInfoButton;
-		if(DoButton_MenuTab(&s_ServerInfoButton, Localize("Server info"), m_ActivePage == PAGE_SERVER_INFO, &Button, IGraphics::CORNER_NONE))
+		if(DoButton_MenuTab(&s_ServerInfoButton, Localize("Server info"), ActivePage == PAGE_SERVER_INFO, &Button, IGraphics::CORNER_NONE))
 			NewPage = PAGE_SERVER_INFO;
 
 		Box.VSplitLeft(90.0f, &Button, &Box);
 		static CButtonContainer s_NetworkButton;
-		if(DoButton_MenuTab(&s_NetworkButton, Localize("Browser"), m_ActivePage == PAGE_NETWORK, &Button, IGraphics::CORNER_NONE))
+		if(DoButton_MenuTab(&s_NetworkButton, Localize("Browser"), ActivePage == PAGE_NETWORK, &Button, IGraphics::CORNER_NONE))
 			NewPage = PAGE_NETWORK;
 
+		if(GameClient()->m_GameInfo.m_Race)
 		{
+			Box.VSplitLeft(90.0f, &Button, &Box);
 			static CButtonContainer s_GhostButton;
-			if(GameClient()->m_GameInfo.m_Race)
-			{
-				Box.VSplitLeft(90.0f, &Button, &Box);
-				if(DoButton_MenuTab(&s_GhostButton, Localize("Ghost"), m_ActivePage == PAGE_GHOST, &Button, IGraphics::CORNER_NONE))
-					NewPage = PAGE_GHOST;
-			}
+			if(DoButton_MenuTab(&s_GhostButton, Localize("Ghost"), ActivePage == PAGE_GHOST, &Button, IGraphics::CORNER_NONE))
+				NewPage = PAGE_GHOST;
 		}
 
 		Box.VSplitLeft(100.0f, &Button, &Box);
 		Box.VSplitLeft(4.0f, nullptr, &Box);
 		static CButtonContainer s_CallVoteButton;
-		if(DoButton_MenuTab(&s_CallVoteButton, Localize("Call vote"), m_ActivePage == PAGE_CALLVOTE, &Button, IGraphics::CORNER_TR))
+		if(DoButton_MenuTab(&s_CallVoteButton, Localize("Call vote"), ActivePage == PAGE_CALLVOTE, &Button, IGraphics::CORNER_TR))
 		{
 			NewPage = PAGE_CALLVOTE;
 			m_ControlPageOpening = true;
 		}
+	}
+	else
+	{
+		dbg_assert(false, "Client state invalid for RenderMenubar");
 	}
 
 	TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
@@ -727,7 +729,7 @@ void CMenus::RenderMenubar(CUIRect Box)
 	Box.VSplitRight(10.0f, &Box, nullptr);
 	Box.VSplitRight(33.0f, &Box, &Button);
 	static CButtonContainer s_SettingsButton;
-	if(DoButton_MenuTab(&s_SettingsButton, FONT_ICON_GEAR, m_ActivePage == PAGE_SETTINGS, &Button, IGraphics::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_SETTINGS]))
+	if(DoButton_MenuTab(&s_SettingsButton, FONT_ICON_GEAR, ActivePage == PAGE_SETTINGS, &Button, IGraphics::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_SETTINGS]))
 	{
 		NewPage = PAGE_SETTINGS;
 	}
@@ -742,12 +744,12 @@ void CMenus::RenderMenubar(CUIRect Box)
 	}
 	GameClient()->m_Tooltips.DoToolTip(&s_EditorButton, &Button, Localize("Editor"));
 
-	if(Client()->State() == IClient::STATE_OFFLINE)
+	if(ClientState == IClient::STATE_OFFLINE)
 	{
 		Box.VSplitRight(10.0f, &Box, nullptr);
 		Box.VSplitRight(33.0f, &Box, &Button);
 		static CButtonContainer s_DemoButton;
-		if(DoButton_MenuTab(&s_DemoButton, FONT_ICON_CLAPPERBOARD, m_ActivePage == PAGE_DEMOS, &Button, IGraphics::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_DEMOBUTTON]))
+		if(DoButton_MenuTab(&s_DemoButton, FONT_ICON_CLAPPERBOARD, ActivePage == PAGE_DEMOS, &Button, IGraphics::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_DEMOBUTTON]))
 		{
 			NewPage = PAGE_DEMOS;
 		}
@@ -759,7 +761,7 @@ void CMenus::RenderMenubar(CUIRect Box)
 
 	if(NewPage != -1)
 	{
-		if(Client()->State() == IClient::STATE_OFFLINE)
+		if(ClientState == IClient::STATE_OFFLINE)
 			SetMenuPage(NewPage);
 		else
 			m_GamePage = NewPage;
@@ -819,6 +821,8 @@ void CMenus::RenderLoading(const char *pCaption, const char *pContent, int Incre
 
 void CMenus::RenderNews(CUIRect MainView)
 {
+	m_pBackground->ChangePosition(CMenuBackground::POS_NEWS);
+
 	g_Config.m_UiUnreadNews = false;
 
 	MainView.Draw(ms_ColorTabbarActive, IGraphics::CORNER_B, 10.0f);
@@ -998,12 +1002,6 @@ bool CMenus::CanDisplayWarning() const
 
 void CMenus::Render()
 {
-	if(Client()->State() == IClient::STATE_DEMOPLAYBACK && m_Popup == POPUP_NONE)
-		return;
-
-	CUIRect Screen = *Ui()->Screen();
-	Screen.Margin(10.0f, &Screen);
-
 	Ui()->MapScreen();
 	Ui()->ResetMouseSlow();
 
@@ -1023,21 +1021,40 @@ void CMenus::Render()
 		UpdateCommunityIcons();
 	}
 
-	// Initially add DDNet as favorite community and select its tab.
-	// This must be delayed until the DDNet info is available.
-	if(m_CreateDefaultFavoriteCommunities && ServerBrowser()->DDNetInfoAvailable())
+	if(ServerBrowser()->DDNetInfoAvailable())
 	{
-		m_CreateDefaultFavoriteCommunities = false;
-		if(ServerBrowser()->Community(IServerBrowser::COMMUNITY_DDNET) != nullptr)
+		// Initially add DDNet as favorite community and select its tab.
+		// This must be delayed until the DDNet info is available.
+		if(m_CreateDefaultFavoriteCommunities)
 		{
-			ServerBrowser()->FavoriteCommunitiesFilter().Clear();
-			ServerBrowser()->FavoriteCommunitiesFilter().Add(IServerBrowser::COMMUNITY_DDNET);
-			SetMenuPage(PAGE_FAVORITE_COMMUNITY_1);
-			ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITE_COMMUNITY_1);
+			m_CreateDefaultFavoriteCommunities = false;
+			if(ServerBrowser()->Community(IServerBrowser::COMMUNITY_DDNET) != nullptr)
+			{
+				ServerBrowser()->FavoriteCommunitiesFilter().Clear();
+				ServerBrowser()->FavoriteCommunitiesFilter().Add(IServerBrowser::COMMUNITY_DDNET);
+				SetMenuPage(PAGE_FAVORITE_COMMUNITY_1);
+				ServerBrowser()->Refresh(IServerBrowser::TYPE_FAVORITE_COMMUNITY_1);
+			}
+		}
+
+		if(m_JoinTutorial && m_Popup == POPUP_NONE && !ServerBrowser()->IsGettingServerlist())
+		{
+			m_JoinTutorial = false;
+			// This is only reached on first launch, when the DDNet community tab has been created and
+			// activated by default, so the server info for the tutorial server should be available.
+			const char *pAddr = ServerBrowser()->GetTutorialServer();
+			if(pAddr)
+			{
+				Client()->Connect(pAddr);
+			}
 		}
 	}
 
-	if(Client()->State() == IClient::STATE_ONLINE || Client()->State() == IClient::STATE_DEMOPLAYBACK)
+	// Determine the client state once before rendering because it can change
+	// while rendering which causes frames with broken user interface.
+	const IClient::EClientState ClientState = Client()->State();
+
+	if(ClientState == IClient::STATE_ONLINE || ClientState == IClient::STATE_DEMOPLAYBACK)
 	{
 		ms_ColorTabbarInactive = ms_ColorTabbarInactiveIngame;
 		ms_ColorTabbarActive = ms_ColorTabbarActiveIngame;
@@ -1054,23 +1071,34 @@ void CMenus::Render()
 		ms_ColorTabbarHover = ms_ColorTabbarHoverOutgame;
 	}
 
-	if(m_Popup == POPUP_NONE)
+	CUIRect Screen = *Ui()->Screen();
+	if(Client()->State() != IClient::STATE_DEMOPLAYBACK || m_Popup != POPUP_NONE)
 	{
-		if(m_JoinTutorial && ServerBrowser()->DDNetInfoAvailable() && !ServerBrowser()->IsGettingServerlist())
-		{
-			m_JoinTutorial = false;
-			// This is only reached on first launch, when the DDNet community tab has been created and
-			// activated by default, so the server info for the tutorial server should be available.
-			const char *pAddr = ServerBrowser()->GetTutorialServer();
-			if(pAddr)
-			{
-				Client()->Connect(pAddr);
-			}
-		}
+		Screen.Margin(10.0f, &Screen);
+	}
 
-		if(m_ShowStart && Client()->State() == IClient::STATE_OFFLINE)
+	switch(ClientState)
+	{
+	case IClient::STATE_QUITTING:
+	case IClient::STATE_RESTARTING:
+		// Render nothing except menu background. This should not happen for more than one frame.
+		return;
+
+	case IClient::STATE_CONNECTING:
+		RenderPopupConnecting(Screen);
+		break;
+
+	case IClient::STATE_LOADING:
+		RenderPopupLoading(Screen);
+		break;
+
+	case IClient::STATE_OFFLINE:
+		if(m_Popup != POPUP_NONE)
 		{
-			m_pBackground->ChangePosition(CMenuBackground::POS_START);
+			RenderPopupFullscreen(Screen);
+		}
+		else if(m_ShowStart)
+		{
 			RenderStartMenu(Screen);
 		}
 		else
@@ -1078,93 +1106,95 @@ void CMenus::Render()
 			CUIRect TabBar, MainView;
 			Screen.HSplitTop(24.0f, &TabBar, &MainView);
 
-			// render news
-			if(m_MenuPage < PAGE_NEWS || m_MenuPage > PAGE_SETTINGS || (Client()->State() == IClient::STATE_OFFLINE && m_MenuPage >= PAGE_GAME && m_MenuPage <= PAGE_CALLVOTE))
+			if(m_MenuPage == PAGE_NEWS)
 			{
-				ServerBrowser()->Refresh(IServerBrowser::TYPE_INTERNET);
-				SetMenuPage(PAGE_INTERNET);
-			}
-
-			// render current page
-			if(Client()->State() != IClient::STATE_OFFLINE)
-			{
-				if(m_GamePage == PAGE_GAME)
-				{
-					RenderGame(MainView);
-					RenderIngameHint();
-				}
-				else if(m_GamePage == PAGE_PLAYERS)
-				{
-					RenderPlayers(MainView);
-				}
-				else if(m_GamePage == PAGE_SERVER_INFO)
-				{
-					RenderServerInfo(MainView);
-				}
-				else if(m_GamePage == PAGE_NETWORK)
-				{
-					RenderInGameNetwork(MainView);
-				}
-				else if(m_GamePage == PAGE_GHOST)
-				{
-					RenderGhost(MainView);
-				}
-				else if(m_GamePage == PAGE_CALLVOTE)
-				{
-					RenderServerControl(MainView);
-				}
-				else if(m_GamePage == PAGE_SETTINGS)
-				{
-					RenderSettings(MainView);
-				}
-			}
-			else if(m_MenuPage == PAGE_NEWS)
-			{
-				m_pBackground->ChangePosition(CMenuBackground::POS_NEWS);
 				RenderNews(MainView);
 			}
-			else if(m_MenuPage == PAGE_INTERNET)
+			else if(m_MenuPage >= PAGE_INTERNET && m_MenuPage <= PAGE_FAVORITE_COMMUNITY_3)
 			{
-				m_pBackground->ChangePosition(CMenuBackground::POS_BROWSER_INTERNET);
-				RenderServerbrowser(MainView);
-			}
-			else if(m_MenuPage == PAGE_LAN)
-			{
-				m_pBackground->ChangePosition(CMenuBackground::POS_BROWSER_LAN);
 				RenderServerbrowser(MainView);
 			}
 			else if(m_MenuPage == PAGE_DEMOS)
 			{
-				m_pBackground->ChangePosition(CMenuBackground::POS_DEMOS);
 				RenderDemoBrowser(MainView);
-			}
-			else if(m_MenuPage == PAGE_FAVORITES)
-			{
-				m_pBackground->ChangePosition(CMenuBackground::POS_BROWSER_FAVORITES);
-				RenderServerbrowser(MainView);
-			}
-			else if(m_MenuPage >= PAGE_FAVORITE_COMMUNITY_1 && m_MenuPage <= PAGE_FAVORITE_COMMUNITY_3)
-			{
-				m_pBackground->ChangePosition(m_MenuPage - PAGE_FAVORITE_COMMUNITY_1 + CMenuBackground::POS_BROWSER_CUSTOM0);
-				RenderServerbrowser(MainView);
 			}
 			else if(m_MenuPage == PAGE_SETTINGS)
 			{
 				RenderSettings(MainView);
 			}
+			else
+			{
+				dbg_assert(false, "m_MenuPage invalid");
+			}
 
-			RenderMenubar(TabBar);
+			RenderMenubar(TabBar, ClientState);
 		}
-	}
-	else
-	{
-		RenderPopupFullscreen(Screen);
+		break;
+
+	case IClient::STATE_ONLINE:
+		if(m_Popup != POPUP_NONE)
+		{
+			RenderPopupFullscreen(Screen);
+		}
+		else
+		{
+			CUIRect TabBar, MainView;
+			Screen.HSplitTop(24.0f, &TabBar, &MainView);
+
+			if(m_GamePage == PAGE_GAME)
+			{
+				RenderGame(MainView);
+				RenderIngameHint();
+			}
+			else if(m_GamePage == PAGE_PLAYERS)
+			{
+				RenderPlayers(MainView);
+			}
+			else if(m_GamePage == PAGE_SERVER_INFO)
+			{
+				RenderServerInfo(MainView);
+			}
+			else if(m_GamePage == PAGE_NETWORK)
+			{
+				RenderInGameNetwork(MainView);
+			}
+			else if(m_GamePage == PAGE_GHOST)
+			{
+				RenderGhost(MainView);
+			}
+			else if(m_GamePage == PAGE_CALLVOTE)
+			{
+				RenderServerControl(MainView);
+			}
+			else if(m_GamePage == PAGE_SETTINGS)
+			{
+				RenderSettings(MainView);
+			}
+			else
+			{
+				dbg_assert(false, "m_GamePage invalid");
+			}
+
+			RenderMenubar(TabBar, ClientState);
+		}
+		break;
+
+	case IClient::STATE_DEMOPLAYBACK:
+		if(m_Popup != POPUP_NONE)
+		{
+			RenderPopupFullscreen(Screen);
+		}
+		else
+		{
+			RenderDemoPlayer(Screen);
+		}
+		break;
 	}
 
 	Ui()->RenderPopupMenus();
 
 	// Handle this escape hotkey after popup menus
-	if(!m_ShowStart && Client()->State() == IClient::STATE_OFFLINE && Ui()->ConsumeHotkey(CUi::HOTKEY_ESCAPE))
+	if(!m_ShowStart && ClientState == IClient::STATE_OFFLINE && Ui()->ConsumeHotkey(CUi::HOTKEY_ESCAPE))
 	{
 		m_ShowStart = true;
 	}
@@ -1177,7 +1207,6 @@ void CMenus::RenderPopupFullscreen(CUIRect Screen)
 	const char *pExtraText = "";
 	const char *pButtonText = "";
 	bool TopAlign = false;
-	bool UseIpLabel = false;
 
 	ColorRGBA BgColor = ColorRGBA(0.0f, 0.0f, 0.0f, 0.5f);
 	if(m_Popup == POPUP_MESSAGE || m_Popup == POPUP_CONFIRM)
@@ -1185,63 +1214,6 @@ void CMenus::RenderPopupFullscreen(CUIRect Screen)
 		pTitle = m_aPopupTitle;
 		pExtraText = m_aPopupMessage;
 		TopAlign = true;
-	}
-	else if(m_Popup == POPUP_CONNECTING)
-	{
-		pTitle = Localize("Connecting to");
-		UseIpLabel = true;
-		pButtonText = Localize("Abort");
-		if(Client()->State() == IClient::STATE_CONNECTING && time_get() - Client()->StateStartTime() > time_freq())
-		{
-			int Connectivity = Client()->UdpConnectivity(Client()->ConnectNetTypes());
-			switch(Connectivity)
-			{
-			case IClient::CONNECTIVITY_UNKNOWN:
-				break;
-			case IClient::CONNECTIVITY_CHECKING:
-				pExtraText = Localize("Trying to determine UDP connectivity...");
-				break;
-			case IClient::CONNECTIVITY_UNREACHABLE:
-				pExtraText = Localize("UDP seems to be filtered.");
-				break;
-			case IClient::CONNECTIVITY_DIFFERING_UDP_TCP_IP_ADDRESSES:
-				pExtraText = Localize("UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.");
-				break;
-			case IClient::CONNECTIVITY_REACHABLE:
-				pExtraText = Localize("No answer from server yet.");
-				break;
-			}
-		}
-		else if(Client()->MapDownloadTotalsize() > 0)
-		{
-			str_format(aBuf, sizeof(aBuf), "%s: %s", Localize("Downloading map"), Client()->MapDownloadName());
-			pTitle = aBuf;
-			UseIpLabel = false;
-		}
-		else if(Client()->State() == IClient::STATE_LOADING)
-		{
-			UseIpLabel = false;
-			if(Client()->LoadingStateDetail() == IClient::LOADING_STATE_DETAIL_INITIAL)
-			{
-				pTitle = Localize("Connected");
-				pExtraText = Localize("Getting game info");
-			}
-			else if(Client()->LoadingStateDetail() == IClient::LOADING_STATE_DETAIL_LOADING_MAP)
-			{
-				pTitle = Localize("Connected");
-				pExtraText = Localize("Loading map file from storage");
-			}
-			else if(Client()->LoadingStateDetail() == IClient::LOADING_STATE_DETAIL_SENDING_READY)
-			{
-				pTitle = Localize("Connected");
-				pExtraText = Localize("Requesting to join the game");
-			}
-			else if(Client()->LoadingStateDetail() == IClient::LOADING_STATE_DETAIL_GETTING_READY)
-			{
-				pTitle = Localize("Connected");
-				pExtraText = Localize("Sending initial client info");
-			}
-		}
 	}
 	else if(m_Popup == POPUP_DISCONNECTED)
 	{
@@ -1349,16 +1321,6 @@ void CMenus::RenderPopupFullscreen(CUIRect Screen)
 	Part.VMargin(20.f, &Part);
 
 	float FontSize = m_Popup == POPUP_FIRST_LAUNCH ? 16.0f : 20.f;
-
-	if(UseIpLabel)
-	{
-		SLabelProperties IpLabelProps;
-		IpLabelProps.m_MaxWidth = Part.w;
-		IpLabelProps.m_EllipsisAtEnd = true;
-		Ui()->DoLabel(&Part, Client()->ConnectAddressString(), FontSize, TEXTALIGN_MC, IpLabelProps);
-		Box.HSplitTop(20.f, &Part, &Box);
-		Box.HSplitTop(24.f, &Part, &Box);
-	}
 
 	Props.m_MaxWidth = (int)Part.w;
 	if(TopAlign)
@@ -1476,73 +1438,6 @@ void CMenus::RenderPopupFullscreen(CUIRect Screen)
 		TextBox.VSplitRight(60.0f, &TextBox, 0);
 		Ui()->DoLabel(&Label, Localize("Password"), 18.0f, TEXTALIGN_ML);
 		Ui()->DoClearableEditBox(&m_PasswordInput, &TextBox, 12.0f);
-	}
-	else if(m_Popup == POPUP_CONNECTING)
-	{
-		Box = Screen;
-		Box.Margin(150.0f, &Box);
-		Box.HSplitBottom(20.f, &Box, &Part);
-		Box.HSplitBottom(24.f, &Box, &Part);
-		Part.VMargin(120.0f, &Part);
-
-		static CButtonContainer s_Button;
-		if(DoButton_Menu(&s_Button, pButtonText, 0, &Part) || Ui()->ConsumeHotkey(CUi::HOTKEY_ESCAPE))
-		{
-			Client()->Disconnect();
-			m_Popup = POPUP_NONE;
-			RefreshBrowserTab(g_Config.m_UiPage);
-		}
-
-		if(Client()->MapDownloadTotalsize() > 0)
-		{
-			int64_t Now = time_get();
-			if(Now - m_DownloadLastCheckTime >= time_freq())
-			{
-				if(m_DownloadLastCheckSize > Client()->MapDownloadAmount())
-				{
-					// map downloaded restarted
-					m_DownloadLastCheckSize = 0;
-				}
-
-				// update download speed
-				float Diff = (Client()->MapDownloadAmount() - m_DownloadLastCheckSize) / ((int)((Now - m_DownloadLastCheckTime) / time_freq()));
-				float StartDiff = m_DownloadLastCheckSize - 0.0f;
-				if(StartDiff + Diff > 0.0f)
-					m_DownloadSpeed = (Diff / (StartDiff + Diff)) * (Diff / 1.0f) + (StartDiff / (Diff + StartDiff)) * m_DownloadSpeed;
-				else
-					m_DownloadSpeed = 0.0f;
-				m_DownloadLastCheckTime = Now;
-				m_DownloadLastCheckSize = Client()->MapDownloadAmount();
-			}
-
-			Box.HSplitTop(64.f, 0, &Box);
-			Box.HSplitTop(24.f, &Part, &Box);
-			str_format(aBuf, sizeof(aBuf), "%d/%d KiB (%.1f KiB/s)", Client()->MapDownloadAmount() / 1024, Client()->MapDownloadTotalsize() / 1024, m_DownloadSpeed / 1024.0f);
-			Ui()->DoLabel(&Part, aBuf, 20.f, TEXTALIGN_MC);
-
-			// time left
-			int TimeLeft = maximum(1, m_DownloadSpeed > 0.0f ? static_cast<int>((Client()->MapDownloadTotalsize() - Client()->MapDownloadAmount()) / m_DownloadSpeed) : 1);
-			if(TimeLeft >= 60)
-			{
-				TimeLeft /= 60;
-				str_format(aBuf, sizeof(aBuf), TimeLeft == 1 ? Localize("%i minute left") : Localize("%i minutes left"), TimeLeft);
-			}
-			else
-			{
-				str_format(aBuf, sizeof(aBuf), TimeLeft == 1 ? Localize("%i second left") : Localize("%i seconds left"), TimeLeft);
-			}
-			Box.HSplitTop(20.f, 0, &Box);
-			Box.HSplitTop(24.f, &Part, &Box);
-			Ui()->DoLabel(&Part, aBuf, 20.f, TEXTALIGN_MC);
-
-			// progress bar
-			Box.HSplitTop(20.f, 0, &Box);
-			Box.HSplitTop(24.f, &Part, &Box);
-			Part.VMargin(40.0f, &Part);
-			Part.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, 5.0f);
-			Part.w = maximum(10.0f, (Part.w * Client()->MapDownloadAmount()) / Client()->MapDownloadTotalsize());
-			Part.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f), IGraphics::CORNER_ALL, 5.0f);
-		}
 	}
 	else if(m_Popup == POPUP_LANGUAGE)
 	{
@@ -1711,7 +1606,6 @@ void CMenus::RenderPopupFullscreen(CUIRect Screen)
 		const char *pPaused = m_StartPaused ? Localize("(paused)") : "";
 		str_format(aBuffer, sizeof(aBuffer), "%s: ×%g %s", Localize("Speed"), g_aSpeeds[m_Speed], pPaused);
 		Ui()->DoLabel(&Row, aBuffer, 12.8f, TEXTALIGN_ML);
-
 		Box.HSplitBottom(16.0f, &Box, nullptr);
 		Box.HSplitBottom(24.0f, &Box, &Row);
 
@@ -1866,6 +1760,187 @@ void CMenus::RenderPopupFullscreen(CUIRect Screen)
 
 	if(m_Popup == POPUP_NONE)
 		Ui()->SetActiveItem(nullptr);
+}
+
+void CMenus::RenderPopupConnecting(CUIRect Screen)
+{
+	const float FontSize = 20.0f;
+
+	CUIRect Box, Label;
+	Screen.Margin(150.0f, &Box);
+	Box.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.5f), IGraphics::CORNER_ALL, 15.0f);
+	Box.Margin(20.0f, &Box);
+
+	Box.HSplitTop(24.0f, &Label, &Box);
+	Ui()->DoLabel(&Label, Localize("Connecting to"), 24.0f, TEXTALIGN_MC);
+
+	Box.HSplitTop(20.0f, nullptr, &Box);
+	Box.HSplitTop(24.0f, &Label, &Box);
+	SLabelProperties Props;
+	Props.m_MaxWidth = Label.w;
+	Props.m_EllipsisAtEnd = true;
+	Ui()->DoLabel(&Label, Client()->ConnectAddressString(), FontSize, TEXTALIGN_MC, Props);
+
+	if(time_get() - Client()->StateStartTime() > time_freq())
+	{
+		const char *pConnectivityLabel = "";
+		switch(Client()->UdpConnectivity(Client()->ConnectNetTypes()))
+		{
+		case IClient::CONNECTIVITY_UNKNOWN:
+			break;
+		case IClient::CONNECTIVITY_CHECKING:
+			pConnectivityLabel = Localize("Trying to determine UDP connectivity...");
+			break;
+		case IClient::CONNECTIVITY_UNREACHABLE:
+			pConnectivityLabel = Localize("UDP seems to be filtered.");
+			break;
+		case IClient::CONNECTIVITY_DIFFERING_UDP_TCP_IP_ADDRESSES:
+			pConnectivityLabel = Localize("UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.");
+			break;
+		case IClient::CONNECTIVITY_REACHABLE:
+			pConnectivityLabel = Localize("No answer from server yet.");
+			break;
+		}
+		if(pConnectivityLabel[0] != '\0')
+		{
+			Box.HSplitTop(20.0f, nullptr, &Box);
+			Box.HSplitTop(24.0f, &Label, &Box);
+			SLabelProperties ConnectivityLabelProps;
+			ConnectivityLabelProps.m_MaxWidth = Label.w;
+			if(TextRender()->TextWidth(FontSize, pConnectivityLabel) > Label.w)
+				Ui()->DoLabel(&Label, pConnectivityLabel, FontSize, TEXTALIGN_ML, ConnectivityLabelProps);
+			else
+				Ui()->DoLabel(&Label, pConnectivityLabel, FontSize, TEXTALIGN_MC);
+		}
+	}
+
+	CUIRect Button;
+	Box.HSplitBottom(24.0f, &Box, &Button);
+	Button.VMargin(100.0f, &Button);
+
+	static CButtonContainer s_Button;
+	if(DoButton_Menu(&s_Button, Localize("Abort"), 0, &Button) || Ui()->ConsumeHotkey(CUi::HOTKEY_ESCAPE))
+	{
+		Client()->Disconnect();
+		Ui()->SetActiveItem(nullptr);
+		RefreshBrowserTab(g_Config.m_UiPage);
+	}
+}
+
+void CMenus::RenderPopupLoading(CUIRect Screen)
+{
+	char aTitle[256];
+	char aLabel1[128];
+	char aLabel2[128];
+	if(Client()->MapDownloadTotalsize() > 0)
+	{
+		const int64_t Now = time_get();
+		if(Now - m_DownloadLastCheckTime >= time_freq())
+		{
+			if(m_DownloadLastCheckSize > Client()->MapDownloadAmount())
+			{
+				// map downloaded restarted
+				m_DownloadLastCheckSize = 0;
+			}
+
+			// update download speed
+			const float Diff = (Client()->MapDownloadAmount() - m_DownloadLastCheckSize) / ((int)((Now - m_DownloadLastCheckTime) / time_freq()));
+			const float StartDiff = m_DownloadLastCheckSize - 0.0f;
+			if(StartDiff + Diff > 0.0f)
+				m_DownloadSpeed = (Diff / (StartDiff + Diff)) * (Diff / 1.0f) + (StartDiff / (Diff + StartDiff)) * m_DownloadSpeed;
+			else
+				m_DownloadSpeed = 0.0f;
+			m_DownloadLastCheckTime = Now;
+			m_DownloadLastCheckSize = Client()->MapDownloadAmount();
+		}
+
+		str_format(aTitle, sizeof(aTitle), "%s: %s", Localize("Downloading map"), Client()->MapDownloadName());
+
+		str_format(aLabel1, sizeof(aLabel1), "%d/%d KiB (%.1f KiB/s)", Client()->MapDownloadAmount() / 1024, Client()->MapDownloadTotalsize() / 1024, m_DownloadSpeed / 1024.0f);
+
+		const int SecondsLeft = maximum(1, m_DownloadSpeed > 0.0f ? static_cast<int>((Client()->MapDownloadTotalsize() - Client()->MapDownloadAmount()) / m_DownloadSpeed) : 1);
+		const int MinutesLeft = SecondsLeft / 60;
+		if(MinutesLeft > 0)
+		{
+			str_format(aLabel2, sizeof(aLabel2), MinutesLeft == 1 ? Localize("%i minute left") : Localize("%i minutes left"), MinutesLeft);
+		}
+		else
+		{
+			str_format(aLabel2, sizeof(aLabel2), SecondsLeft == 1 ? Localize("%i second left") : Localize("%i seconds left"), SecondsLeft);
+		}
+	}
+	else
+	{
+		str_copy(aTitle, Localize("Connected"));
+		switch(Client()->LoadingStateDetail())
+		{
+		case IClient::LOADING_STATE_DETAIL_INITIAL:
+			str_copy(aLabel1, Localize("Getting game info"));
+			break;
+		case IClient::LOADING_STATE_DETAIL_LOADING_MAP:
+			str_copy(aLabel1, Localize("Loading map file from storage"));
+			break;
+		case IClient::LOADING_STATE_DETAIL_SENDING_READY:
+			str_copy(aLabel1, Localize("Requesting to join the game"));
+			break;
+		case IClient::LOADING_STATE_DETAIL_GETTING_READY:
+			str_copy(aLabel1, Localize("Sending initial client info"));
+			break;
+		default:
+			dbg_assert(false, "Invalid loading state for RenderPopupLoading");
+			break;
+		}
+		aLabel2[0] = '\0';
+	}
+
+	const float FontSize = 20.0f;
+
+	CUIRect Box, Label;
+	Screen.Margin(150.0f, &Box);
+	Box.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.5f), IGraphics::CORNER_ALL, 15.0f);
+	Box.Margin(20.0f, &Box);
+
+	Box.HSplitTop(24.0f, &Label, &Box);
+	Ui()->DoLabel(&Label, aTitle, 24.0f, TEXTALIGN_MC);
+
+	Box.HSplitTop(20.0f, nullptr, &Box);
+	Box.HSplitTop(24.0f, &Label, &Box);
+	Ui()->DoLabel(&Label, aLabel1, FontSize, TEXTALIGN_MC);
+
+	if(aLabel2[0] != '\0')
+	{
+		Box.HSplitTop(20.0f, nullptr, &Box);
+		Box.HSplitTop(24.0f, &Label, &Box);
+		SLabelProperties ExtraTextProps;
+		ExtraTextProps.m_MaxWidth = Label.w;
+		if(TextRender()->TextWidth(FontSize, aLabel2) > Label.w)
+			Ui()->DoLabel(&Label, aLabel2, FontSize, TEXTALIGN_ML, ExtraTextProps);
+		else
+			Ui()->DoLabel(&Label, aLabel2, FontSize, TEXTALIGN_MC);
+	}
+
+	if(Client()->MapDownloadTotalsize() > 0)
+	{
+		CUIRect ProgressBar;
+		Box.HSplitTop(20.0f, nullptr, &Box);
+		Box.HSplitTop(24.0f, &ProgressBar, &Box);
+		ProgressBar.VMargin(20.0f, &ProgressBar);
+		ProgressBar.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, 5.0f);
+		ProgressBar.w = maximum(10.0f, (ProgressBar.w * Client()->MapDownloadAmount()) / Client()->MapDownloadTotalsize());
+		ProgressBar.Draw(ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f), IGraphics::CORNER_ALL, 5.0f);
+	}
+
+	CUIRect Button;
+	Box.HSplitBottom(24.0f, &Box, &Button);
+	Button.VMargin(100.0f, &Button);
+
+	static CButtonContainer s_Button;
+	if(DoButton_Menu(&s_Button, Localize("Abort"), 0, &Button) || Ui()->ConsumeHotkey(CUi::HOTKEY_ESCAPE))
+	{
+		Client()->Disconnect();
+		Ui()->SetActiveItem(nullptr);
+		RefreshBrowserTab(g_Config.m_UiPage);
+	}
 }
 
 #if defined(CONF_VIDEORECORDER)
@@ -2055,14 +2130,9 @@ void CMenus::OnStateChange(int NewState, int OldState)
 	}
 	else if(NewState == IClient::STATE_LOADING)
 	{
-		m_Popup = POPUP_CONNECTING;
 		m_DownloadLastCheckTime = time_get();
 		m_DownloadLastCheckSize = 0;
 		m_DownloadSpeed = 0.0f;
-	}
-	else if(NewState == IClient::STATE_CONNECTING)
-	{
-		m_Popup = POPUP_CONNECTING;
 	}
 	else if(NewState == IClient::STATE_ONLINE || NewState == IClient::STATE_DEMOPLAYBACK)
 	{
@@ -2085,12 +2155,6 @@ void CMenus::OnRender()
 
 	if(Client()->State() != IClient::STATE_ONLINE && Client()->State() != IClient::STATE_DEMOPLAYBACK)
 		SetActive(true);
-
-	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
-	{
-		Ui()->MapScreen();
-		RenderDemoPlayer(*Ui()->Screen());
-	}
 
 	if(Client()->State() == IClient::STATE_ONLINE && m_pClient->m_ServerMode == CGameClient::SERVERMODE_PUREMOD)
 	{
