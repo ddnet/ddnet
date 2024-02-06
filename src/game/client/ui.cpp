@@ -332,13 +332,15 @@ float CUI::ButtonColorMul(const void *pID)
 const CUIRect *CUI::Screen()
 {
 	m_Screen.h = 600.0f;
-	m_Screen.w = Graphics()->ScreenAspect() * m_Screen.h;
+	m_Screen.w = (16.0f / 9.0f) * m_Screen.h;
 	return &m_Screen;
 }
 
 void CUI::MapScreen()
 {
-	const CUIRect *pScreen = Screen();
+	CUIRect ScreenV = *Screen();
+	CUIRect* pScreen = &ScreenV;
+	pScreen->h = pScreen->w / Graphics()->ScreenAspect();
 	Graphics()->MapScreen(pScreen->x, pScreen->y, pScreen->w, pScreen->h);
 }
 
