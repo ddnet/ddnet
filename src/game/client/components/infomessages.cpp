@@ -230,7 +230,7 @@ void CInfoMessages::OnTeamKillMessage(const CNetMsg_Sv_KillMsgTeam *pMsg)
 	bool KillMsgValid = true;
 	for(int i = 0; i < Kill.m_TeamSize; i++)
 	{
-		KillMsgValid = KillMsgValid && Kill.m_aVictimIds[i] >= 0 && ((Kill.m_aVictimRenderInfo[i].m_CustomColoredSkin && Kill.m_aVictimRenderInfo[i].m_ColorableRenderSkin.m_Body.IsValid()) || (!Kill.m_aVictimRenderInfo[i].m_CustomColoredSkin && Kill.m_aVictimRenderInfo[i].m_OriginalRenderSkin.m_Body.IsValid()));
+		KillMsgValid = KillMsgValid && Kill.m_aVictimIds[i] >= 0 && Kill.m_aVictimRenderInfo[i].Valid();
 	}
 
 	if(KillMsgValid)
@@ -296,9 +296,7 @@ void CInfoMessages::OnKillMessage(const CNetMsg_Sv_KillMsg *pMsg)
 
 	CreateNamesIfNotCreated(&Kill);
 
-	bool KillMsgValid = (Kill.m_aVictimRenderInfo[0].m_CustomColoredSkin && Kill.m_aVictimRenderInfo[0].m_ColorableRenderSkin.m_Body.IsValid()) || (!Kill.m_aVictimRenderInfo[0].m_CustomColoredSkin && Kill.m_aVictimRenderInfo[0].m_OriginalRenderSkin.m_Body.IsValid());
-	KillMsgValid &= Kill.m_KillerID == -1 || ((Kill.m_KillerRenderInfo.m_CustomColoredSkin && Kill.m_KillerRenderInfo.m_ColorableRenderSkin.m_Body.IsValid()) || (!Kill.m_KillerRenderInfo.m_CustomColoredSkin && Kill.m_KillerRenderInfo.m_OriginalRenderSkin.m_Body.IsValid()));
-	if(KillMsgValid)
+	if(Kill.m_aVictimRenderInfo[0].Valid() && (Kill.m_KillerID == -1 || Kill.m_KillerRenderInfo.Valid()))
 	{
 		AddInfoMsg(EType::TYPE_KILL, Kill);
 	}
