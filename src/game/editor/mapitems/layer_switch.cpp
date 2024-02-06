@@ -10,6 +10,8 @@ CLayerSwitch::CLayerSwitch(CEditor *pEditor, int w, int h) :
 
 	m_pSwitchTile = new CSwitchTile[w * h];
 	mem_zero(m_pSwitchTile, (size_t)w * h * sizeof(CSwitchTile));
+	m_GotoSwitchLastPos = ivec2(-1, -1);
+	m_GotoSwitchOffset = 0;
 }
 
 CLayerSwitch::CLayerSwitch(const CLayerSwitch &Other) :
@@ -326,6 +328,58 @@ bool CLayerSwitch::ContainsElementWithId(int Id)
 	}
 
 	return false;
+}
+
+void CLayerSwitch::GetPos(int Number, int Offset, ivec2 &SwitchPos)
+{
+	int Match = -1;
+	ivec2 MatchPos = ivec2(-1, -1);
+	SwitchPos = ivec2(-1, -1);
+
+	auto FindTile = [this, &Match, &MatchPos, &Number, &Offset]() {
+		for(int x = 0; x < m_Width; x++)
+		{
+			for(int y = 0; y < m_Height; y++)
+			{
+				int i = y * m_Width + x;
+				int Switch = m_pSwitchTile[i].m_Number;
+				if(Number == Switch)
+				{
+					Match++;
+					if(Offset != -1)
+					{
+						if(Match == Offset)
+						{
+							MatchPos = ivec2(x, y);
+							m_GotoSwitchOffset = Match;
+							return;
+						}
+						continue;
+					}
+					MatchPos = ivec2(x, y);
+					if(m_GotoSwitchLastPos != ivec2(-1, -1))
+					{
+						if(distance(m_GotoSwitchLastPos, MatchPos) < 10.0f)
+						{
+							m_GotoSwitchOffset++;
+							continue;
+						}
+					}
+					m_GotoSwitchLastPos = MatchPos;
+					if(Match == m_GotoSwitchOffset)
+						return;
+				}
+			}
+		}
+	};
+	FindTile();
+
+	if(MatchPos == ivec2(-1, -1))
+		return;
+	if(Match < m_GotoSwitchOffset)
+		m_GotoSwitchOffset = -1;
+	SwitchPos = MatchPos;
+	m_GotoSwitchOffset++;
 }
 
 std::shared_ptr<CLayer> CLayerSwitch::Duplicate() const
