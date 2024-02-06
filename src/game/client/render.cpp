@@ -373,6 +373,9 @@ void CRenderTools::CalcScreenParams(float Aspect, float Zoom, float *pWidth, flo
 	const float WMax = 1500;
 	const float HMax = 1050;
 
+	if(g_Config.m_GfxIngameAspectRatio != 0)
+		Aspect = g_Config.m_GfxIngameAspectRatio / 1000.0f;
+
 	const float f = std::sqrt(Amount) / std::sqrt(Aspect);
 	*pWidth = f * Aspect;
 	*pHeight = f;
