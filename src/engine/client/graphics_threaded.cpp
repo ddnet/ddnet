@@ -2647,6 +2647,7 @@ bool CGraphics_Threaded::SetWindowScreen(int Index)
 
 	for(auto &PropChangedListener : m_vPropChangeListeners)
 		PropChangedListener();
+
 	return true;
 }
 
@@ -2967,6 +2968,11 @@ int CGraphics_Threaded::GetVideoModes(CVideoMode *pModes, int MaxModes, int Scre
 	int NumModes = 0;
 	m_pBackend->GetVideoModes(pModes, MaxModes, &NumModes, m_ScreenHiDPIScale, g_Config.m_GfxDesktopWidth, g_Config.m_GfxDesktopHeight, Screen);
 	return NumModes;
+}
+
+void CGraphics_Threaded::GetCurrentVideoMode(CVideoMode &pModes, int Screen)
+{
+	m_pBackend->GetCurrentVideoMode(pModes, m_ScreenHiDPIScale, g_Config.m_GfxDesktopWidth, g_Config.m_GfxDesktopHeight, Screen);
 }
 
 extern IEngineGraphics *CreateEngineGraphicsThreaded()

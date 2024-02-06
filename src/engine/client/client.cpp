@@ -3880,41 +3880,29 @@ int CClient::HandleChecksum(int Conn, CUuid Uuid, CUnpacker *pUnpacker)
 	return 0;
 }
 
-void CClient::SwitchWindowScreen(int Index, int WindowMode)
+void CClient::SwitchWindowScreen(int Index)
 {
-	SetWindowParams(0, false);
-	if(Graphics()->SetWindowScreen(Index))
-	{
-		g_Config.m_GfxScreen = Index;
-	}
-	static const int MAX_RESOLUTIONS = 256;
-	static CVideoMode s_aModes[MAX_RESOLUTIONS];
-	static int s_NumNodes = Graphics()->GetVideoModes(s_aModes, MAX_RESOLUTIONS, g_Config.m_GfxScreen);
-	for(int i = 0; i < s_NumNodes; ++i)
-	{
-		SetWindowParams(3, false);
-		if(s_aModes[i].m_WindowWidth == g_Config.m_GfxDesktopWidth && s_aModes[i].m_WindowHeight == g_Config.m_GfxDesktopHeight)
-		{
-			const int Depth = s_aModes[i].m_Red + s_aModes[i].m_Green + s_aModes[i].m_Blue > 16 ? 24 : 16;
-			g_Config.m_GfxColorDepth = Depth;
-			g_Config.m_GfxScreenWidth = s_aModes[i].m_WindowWidth;
-			g_Config.m_GfxScreenHeight = s_aModes[i].m_WindowHeight;
-			g_Config.m_GfxScreenRefreshRate = s_aModes[i].m_RefreshRate;
-			Graphics()->Resize(g_Config.m_GfxScreenWidth, g_Config.m_GfxScreenHeight, g_Config.m_GfxScreenRefreshRate);
-			break;
-		}
-	}
+	//Tested on windows 11 64 bit (gtx 1660 super, intel UHD 630 opengl 1.2.0, 3.3.0 and vulkan 1.1.0)
+	int IsFullscreen = g_Config.m_GfxFullscreen;
+	int IsBorderless = g_Config.m_GfxBorderless;
 
-	if(WindowMode == 0)
-		SetWindowParams(0, false);
-	else if(WindowMode == 1)
-		SetWindowParams(0, true);
-	else if(WindowMode == 2)
-		SetWindowParams(3, false);
-	else if(WindowMode == 3)
-		SetWindowParams(2, false);
-	else if(WindowMode == 4)
-		SetWindowParams(1, false);
+	if(Graphics()->SetWindowScreen(Index))
+		g_Config.m_GfxScreen = Index;
+
+	SetWindowParams(3, false); // prevent from DDNet get extend some of scene on next monitor
+
+	CVideoMode s_aMode;
+	Graphics()->GetCurrentVideoMode(s_aMode, Index); 
+
+	const int Depth = s_aMode.m_Red + s_aMode.m_Green + s_aMode.m_Blue > 16 ? 24 : 16;
+	g_Config.m_GfxColorDepth = Depth;
+	g_Config.m_GfxScreenWidth = s_aMode.m_WindowWidth;
+	g_Config.m_GfxScreenHeight = s_aMode.m_WindowHeight;
+	g_Config.m_GfxScreenRefreshRate = s_aMode.m_RefreshRate;
+
+	Graphics()->Resize(g_Config.m_GfxScreenWidth, g_Config.m_GfxScreenHeight, g_Config.m_GfxScreenRefreshRate);
+
+	SetWindowParams(IsFullscreen, IsBorderless);
 }
 
 void CClient::ConchainWindowScreen(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
@@ -3923,7 +3911,7 @@ void CClient::ConchainWindowScreen(IConsole::IResult *pResult, void *pUserData, 
 	if(pSelf->Graphics() && pResult->NumArguments())
 	{
 		if(g_Config.m_GfxScreen != pResult->GetInteger(0))
-			pSelf->SwitchWindowScreen(pResult->GetInteger(0), g_Config.m_GfxWindowMode);
+			pSelf->SwitchWindowScreen(pResult->GetInteger(0));
 	}
 	else
 		pfnCallback(pResult, pCallbackUserData);
