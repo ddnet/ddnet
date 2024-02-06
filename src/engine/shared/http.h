@@ -88,7 +88,8 @@ class CHttpRequest : public IHttpRequest
 	int64_t m_MaxResponseSize = -1;
 	REQUEST m_Type = REQUEST::GET;
 
-	SHA256_CTX m_ActualSha256;
+	SHA256_DIGEST m_ActualSha256 = SHA256_ZEROED;
+	SHA256_CTX m_ActualSha256Ctx;
 	SHA256_DIGEST m_ExpectedSha256 = SHA256_ZEROED;
 
 	bool m_WriteToFile = false;
@@ -197,6 +198,8 @@ public:
 
 	void Result(unsigned char **ppResult, size_t *pResultLength) const;
 	json_value *ResultJson() const;
+
+	const SHA256_DIGEST &ResultSha256() const;
 };
 
 inline std::unique_ptr<CHttpRequest> HttpHead(const char *pUrl)

@@ -306,7 +306,7 @@ public:
 	virtual unsigned CurrentCommunitiesHash() const = 0;
 
 	virtual bool DDNetInfoAvailable() const = 0;
-	virtual int64_t DDNetInfoUpdateTime() const = 0;
+	virtual SHA256_DIGEST DDNetInfoSha256() const = 0;
 
 	virtual IFilterList &FavoriteCommunitiesFilter() = 0;
 	virtual IFilterList &CommunitiesFilter() = 0;

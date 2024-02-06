@@ -2926,9 +2926,10 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		LeftView.HSplitTop(HeadlineAndVMargin, &Label, &LeftView);
 		UI()->DoLabel(&Label, Localize("Name Plate"), HeadlineFontSize, TEXTALIGN_ML);
 
-		// General chat settings
-		LeftView.HSplitTop(SectionTotalMargin + 9 * LineSize, &Section, &LeftView);
+		// General name plate settings
+		LeftView.HSplitTop(SectionTotalMargin + 10 * LineSize + 2 * ColorPickerLineSize, &Section, &LeftView);
 		Section.Margin(SectionMargin, &Section);
+
 		DoButton_CheckBoxAutoVMarginAndSet(&g_Config.m_ClNameplates, Localize("Show name plates"), &g_Config.m_ClNameplates, &Section, LineSize);
 		Section.HSplitTop(2 * LineSize, &Button, &Section);
 		UI()->DoScrollbarOption(&g_Config.m_ClNameplatesSize, &g_Config.m_ClNameplatesSize, &Button, Localize("Name plates size"), 0, 100, &CUI::ms_LinearScrollbarScale, CUI::SCROLLBAR_OPTION_MULTILINE);
@@ -2946,50 +2947,20 @@ void CMenus::RenderSettingsAppearance(CUIRect MainView)
 		Section.HSplitTop(LineSize, &Button, &Section);
 		if(DoButton_CheckBox(&g_Config.m_ClShowDirection, Localize("Show other players' key presses"), g_Config.m_ClShowDirection >= 1 && g_Config.m_ClShowDirection != 3, &Button))
 		{
-			switch(g_Config.m_ClShowDirection)
-			{
-			case 0:
-				g_Config.m_ClShowDirection = 1;
-				break;
-			case 1:
-				g_Config.m_ClShowDirection = 0;
-				break;
-			case 2:
-				g_Config.m_ClShowDirection = 3;
-				break;
-			case 3:
-				g_Config.m_ClShowDirection = 2;
-				break;
-			}
+			g_Config.m_ClShowDirection = g_Config.m_ClShowDirection ^ 1;
 		}
 
 		Section.HSplitTop(LineSize, &Button, &Section);
 		static int s_ShowLocalPlayer = 0;
 		if(DoButton_CheckBox(&s_ShowLocalPlayer, Localize("Show local player's key presses"), g_Config.m_ClShowDirection >= 2, &Button))
 		{
-			switch(g_Config.m_ClShowDirection)
-			{
-			case 0:
-				g_Config.m_ClShowDirection = 3;
-				break;
-			case 1:
-				g_Config.m_ClShowDirection = 2;
-				break;
-			case 2:
-				g_Config.m_ClShowDirection = 1;
-				break;
-			case 3:
-				g_Config.m_ClShowDirection = 0;
-				break;
-			}
+			g_Config.m_ClShowDirection = g_Config.m_ClShowDirection ^ 3;
 		}
 
-		Section.HSplitTop(LineSize, &Button, &Section);
 		ColorRGBA GreenDefault(0.78f, 1.0f, 0.8f, 1.0f);
-		static CButtonContainer s_AuthedColor;
-		static CButtonContainer s_SameClanColor;
-		DoLine_ColorPicker(&s_AuthedColor, 25.0f, 13.0f, 5.0f, &Button, Localize("Authed name color in scoreboard"), &g_Config.m_ClAuthedPlayerColor, GreenDefault, false);
-		DoLine_ColorPicker(&s_SameClanColor, 25.0f, 13.0f, 5.0f, &Button, Localize("Same clan color in scoreboard"), &g_Config.m_ClSameClanColor, GreenDefault, false);
+		static CButtonContainer s_AuthedColor, s_SameClanColor;
+		DoLine_ColorPicker(&s_AuthedColor, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Authed name color in scoreboard"), &g_Config.m_ClAuthedPlayerColor, GreenDefault, false);
+		DoLine_ColorPicker(&s_SameClanColor, ColorPickerLineSize, ColorPickerLabelSize, ColorPickerLineSpacing, &Section, Localize("Same clan color in scoreboard"), &g_Config.m_ClSameClanColor, GreenDefault, false);
 	}
 	else if(s_CurTab == APPEARANCE_TAB_HOOK_COLLISION)
 	{

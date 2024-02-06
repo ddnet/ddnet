@@ -1840,8 +1840,8 @@ void CMenus::UpdateCommunityCache(bool Force)
 		ServerBrowser()->Refresh(g_Config.m_UiPage - PAGE_FAVORITE_COMMUNITY_1 + IServerBrowser::TYPE_FAVORITE_COMMUNITY_1, true);
 	}
 
-	if(!Force && m_CommunityCache.m_UpdateTime != 0 &&
-		m_CommunityCache.m_UpdateTime == ServerBrowser()->DDNetInfoUpdateTime() &&
+	if(!Force && m_CommunityCache.m_InfoSha256 != SHA256_ZEROED &&
+		m_CommunityCache.m_InfoSha256 == ServerBrowser()->DDNetInfoSha256() &&
 		!CurrentCommunitiesChanged && !PageChanged)
 	{
 		return;
@@ -1849,7 +1849,7 @@ void CMenus::UpdateCommunityCache(bool Force)
 
 	ServerBrowser()->CleanFilters();
 
-	m_CommunityCache.m_UpdateTime = ServerBrowser()->DDNetInfoUpdateTime();
+	m_CommunityCache.m_InfoSha256 = ServerBrowser()->DDNetInfoSha256();
 	m_CommunityCache.m_LastPage = g_Config.m_UiPage;
 	m_CommunityCache.m_SelectedCommunitiesHash = CommunitiesHash;
 	m_CommunityCache.m_vpSelectedCommunities = ServerBrowser()->CurrentCommunities();
@@ -2055,9 +2055,9 @@ void CMenus::UpdateCommunityIcons()
 	}
 
 	// Rescan for changed communities only when necessary
-	if(!ServerBrowser()->DDNetInfoAvailable() || (m_CommunityIconsUpdateTime != 0 && m_CommunityIconsUpdateTime == ServerBrowser()->DDNetInfoUpdateTime()))
+	if(!ServerBrowser()->DDNetInfoAvailable() || (m_CommunityIconsInfoSha256 != SHA256_ZEROED && m_CommunityIconsInfoSha256 == ServerBrowser()->DDNetInfoSha256()))
 		return;
-	m_CommunityIconsUpdateTime = ServerBrowser()->DDNetInfoUpdateTime();
+	m_CommunityIconsInfoSha256 = ServerBrowser()->DDNetInfoSha256();
 
 	// Remove icons for removed communities
 	auto RemovalIterator = m_vCommunityIcons.begin();

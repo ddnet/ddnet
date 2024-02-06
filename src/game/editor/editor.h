@@ -227,8 +227,7 @@ enum
 {
 	PROPTYPE_NULL = 0,
 	PROPTYPE_BOOL,
-	PROPTYPE_INT_STEP,
-	PROPTYPE_INT_SCROLL,
+	PROPTYPE_INT,
 	PROPTYPE_ANGLE_SCROLL,
 	PROPTYPE_COLOR,
 	PROPTYPE_IMAGE,
@@ -1105,6 +1104,7 @@ public:
 
 	unsigned char m_TeleNumber;
 	unsigned char m_TeleCheckpointNumber;
+	unsigned char m_ViewTeleNumber;
 
 	unsigned char m_TuningNum;
 
