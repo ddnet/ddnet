@@ -445,6 +445,7 @@ bool CConfigManager::Save()
 		return false;
 	}
 
+	log_info("config", "saved to " CONFIG_FILE);
 	return true;
 }
 
