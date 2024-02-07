@@ -2981,27 +2981,10 @@ void CClient::Run()
 		AutoStatScreenshot_Cleanup();
 		AutoCSV_Cleanup();
 
-		// check conditions
-		if(State() == IClient::STATE_QUITTING || State() == IClient::STATE_RESTARTING)
-		{
-			static bool s_SavedConfig = false;
-			if(!s_SavedConfig)
-			{
-				// write down the config and quit
-				if(!m_pConfigManager->Save())
-				{
-					char aWarning[128];
-					str_format(aWarning, sizeof(aWarning), Localize("Saving settings to '%s' failed"), CONFIG_FILE);
-					m_vWarnings.emplace_back(aWarning);
-				}
-				s_SavedConfig = true;
-			}
-
-			if(m_vWarnings.empty() && !GameClient()->IsDisplayingWarning())
-				break;
-		}
-
 		m_Fifo.Update();
+
+		if(State() == IClient::STATE_QUITTING || State() == IClient::STATE_RESTARTING)
+			break;
 
 		// beNice
 		auto Now = time_get_nanoseconds();
@@ -3048,6 +3031,13 @@ void CClient::Run()
 		// update local and global time
 		m_LocalTime = (time_get() - m_LocalStartTime) / (float)time_freq();
 		m_GlobalTime = (time_get() - m_GlobalStartTime) / (float)time_freq();
+	}
+
+	if(!m_pConfigManager->Save())
+	{
+		char aError[128];
+		str_format(aError, sizeof(aError), Localize("Saving settings to '%s' failed"), CONFIG_FILE);
+		m_vQuittingWarnings.emplace_back(Localize("Error saving settings"), aError);
 	}
 
 	m_Fifo.Shutdown();
@@ -4172,6 +4162,26 @@ static bool SaveUnknownCommandCallback(const char *pCommand, void *pUser)
 	return true;
 }
 
+static Uint32 GetSdlMessageBoxFlags(IClient::EMessageBoxType Type)
+{
+	switch(Type)
+	{
+	case IClient::MESSAGE_BOX_TYPE_ERROR:
+		return SDL_MESSAGEBOX_ERROR;
+	case IClient::MESSAGE_BOX_TYPE_WARNING:
+		return SDL_MESSAGEBOX_WARNING;
+	case IClient::MESSAGE_BOX_TYPE_INFO:
+		return SDL_MESSAGEBOX_INFORMATION;
+	}
+	dbg_assert(false, "Type invalid");
+	return 0;
+}
+
+static void ShowMessageBox(const char *pTitle, const char *pMessage, IClient::EMessageBoxType Type = IClient::MESSAGE_BOX_TYPE_ERROR)
+{
+	SDL_ShowSimpleMessageBox(GetSdlMessageBoxFlags(Type), pTitle, pMessage, nullptr);
+}
+
 /*
 	Server Time
 	Client Mirror Time
@@ -4490,7 +4500,14 @@ int main(int argc, const char **argv)
 		pStorage->GetBinaryPath(PLAT_CLIENT_EXEC, aRestartBinaryPath, sizeof(aRestartBinaryPath));
 	}
 
+	std::vector<SWarning> vQuittingWarnings = pClient->QuittingWarnings();
+
 	PerformCleanup();
+
+	for(const SWarning &Warning : vQuittingWarnings)
+	{
+		::ShowMessageBox(Warning.m_aWarningTitle, Warning.m_aWarningMsg);
+	}
 
 	if(Restarting)
 	{
@@ -4708,25 +4725,10 @@ void CClient::ShellUnregister()
 }
 #endif
 
-static Uint32 GetSdlMessageBoxFlags(IClient::EMessageBoxType Type)
-{
-	switch(Type)
-	{
-	case IClient::MESSAGE_BOX_TYPE_ERROR:
-		return SDL_MESSAGEBOX_ERROR;
-	case IClient::MESSAGE_BOX_TYPE_WARNING:
-		return SDL_MESSAGEBOX_WARNING;
-	case IClient::MESSAGE_BOX_TYPE_INFO:
-		return SDL_MESSAGEBOX_INFORMATION;
-	}
-	dbg_assert(false, "Type invalid");
-	return 0;
-}
-
 void CClient::ShowMessageBox(const char *pTitle, const char *pMessage, EMessageBoxType Type)
 {
 	if(m_pGraphics == nullptr || !m_pGraphics->ShowMessageBox(GetSdlMessageBoxFlags(Type), pTitle, pMessage))
-		SDL_ShowSimpleMessageBox(GetSdlMessageBoxFlags(Type), pTitle, pMessage, nullptr);
+		::ShowMessageBox(pTitle, pMessage, Type);
 }
 
 void CClient::GetGPUInfoString(char (&aGPUInfo)[256])

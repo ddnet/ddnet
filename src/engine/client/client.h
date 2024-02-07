@@ -228,6 +228,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	} m_VersionInfo;
 
 	std::vector<SWarning> m_vWarnings;
+	std::vector<SWarning> m_vQuittingWarnings;
 
 	CFifo m_Fifo;
 
@@ -495,6 +496,7 @@ public:
 
 	void AddWarning(const SWarning &Warning) override;
 	SWarning *GetCurWarning() override;
+	std::vector<SWarning> &&QuittingWarnings() { return std::move(m_vQuittingWarnings); }
 
 	CChecksumData *ChecksumData() override { return &m_Checksum.m_Data; }
 	int UdpConnectivity(int NetType) override;
