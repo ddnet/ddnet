@@ -17,6 +17,9 @@ class ISound;
 class ITextRender;
 class IStorage;
 class CRenderTools;
+class CTile;
+class CLayer;
+class CLayerGroup;
 
 class CEditorObject
 {
@@ -53,6 +56,21 @@ public:
 	 * Gets called after `OnRender` when the component is active.
 	 */
 	virtual void OnActive();
+
+	/**
+	 * Gets called once before `OnHoverTile` is being called multiple times
+	 */
+	virtual void BeforeHoverTile(){};
+
+	/**
+	 * Gets called once after `OnHoverTile` is being called multiple times
+	 */
+	virtual void AfterHoverTile(){};
+
+	/**
+	 * Gets called once for every tile that is under the cursor
+	 */
+	virtual void OnHoverTile(int Group, int Layer, const CTile &Tile, int x, int y){};
 
 	virtual void OnReset();
 	virtual void OnMapLoad();
