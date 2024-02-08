@@ -75,77 +75,66 @@ void CInfoMessages::AddInfoMsg(EType Type, CInfoMsg NewMsg)
 	m_aInfoMsgs[m_InfoMsgCurrent] = NewMsg;
 }
 
-void CInfoMessages::CreateNamesIfNotCreated(CInfoMsg *pInfoMsg)
+void CInfoMessages::CreateTextContainersIfNotCreated(CInfoMsg &InfoMsg)
 {
 	const float FontSize = 36.0f;
-	if(!pInfoMsg->m_VictimTextContainerIndex.Valid() && pInfoMsg->m_aVictimName[0] != 0)
-	{
-		pInfoMsg->m_VictimTextWidth = TextRender()->TextWidth(FontSize, pInfoMsg->m_aVictimName);
 
-		CTextCursor Cursor;
-		TextRender()->SetCursor(&Cursor, 0, 0, FontSize, TEXTFLAG_RENDER);
-		Cursor.m_LineWidth = -1;
-
-		unsigned Color = g_Config.m_ClKillMessageNormalColor;
-		if(pInfoMsg->m_aVictimIds[0] == m_pClient->m_Snap.m_LocalClientID)
+	const auto &&NameColor = [&](int ClientID) -> ColorRGBA {
+		unsigned Color;
+		if(ClientID == m_pClient->m_Snap.m_LocalClientID)
 		{
 			Color = g_Config.m_ClKillMessageHighlightColor;
 		}
-		TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(Color)));
-
-		TextRender()->CreateTextContainer(pInfoMsg->m_VictimTextContainerIndex, &Cursor, pInfoMsg->m_aVictimName);
-	}
-
-	if(!pInfoMsg->m_KillerTextContainerIndex.Valid() && pInfoMsg->m_aKillerName[0] != 0)
-	{
-		pInfoMsg->m_KillerTextWidth = TextRender()->TextWidth(FontSize, pInfoMsg->m_aKillerName);
-
-		CTextCursor Cursor;
-		TextRender()->SetCursor(&Cursor, 0, 0, FontSize, TEXTFLAG_RENDER);
-		Cursor.m_LineWidth = -1;
-
-		unsigned Color = g_Config.m_ClKillMessageNormalColor;
-		if(pInfoMsg->m_KillerID == m_pClient->m_Snap.m_LocalClientID)
+		else
 		{
-			Color = g_Config.m_ClKillMessageHighlightColor;
+			Color = g_Config.m_ClKillMessageNormalColor;
 		}
-		TextRender()->TextColor(color_cast<ColorRGBA>(ColorHSLA(Color)));
+		return color_cast<ColorRGBA>(ColorHSLA(Color));
+	};
 
-		TextRender()->CreateTextContainer(pInfoMsg->m_KillerTextContainerIndex, &Cursor, pInfoMsg->m_aKillerName);
-	}
-	TextRender()->TextColor(TextRender()->DefaultTextColor());
-}
-
-void CInfoMessages::CreateFinishTextContainersIfNotCreated(CInfoMsg *pInfoMsg)
-{
-	const float FontSize = 36.0f;
-	if(!pInfoMsg->m_DiffTextContainerIndex.Valid() && pInfoMsg->m_aDiffText[0] != 0)
+	if(!InfoMsg.m_VictimTextContainerIndex.Valid() && InfoMsg.m_aVictimName[0] != '\0')
 	{
-		pInfoMsg->m_DiffTextWidth = TextRender()->TextWidth(FontSize, pInfoMsg->m_aDiffText);
+		InfoMsg.m_VictimTextWidth = TextRender()->TextWidth(FontSize, InfoMsg.m_aVictimName);
 		CTextCursor Cursor;
 		TextRender()->SetCursor(&Cursor, 0, 0, FontSize, TEXTFLAG_RENDER);
-		Cursor.m_LineWidth = -1;
+		TextRender()->TextColor(NameColor(InfoMsg.m_aVictimIds[0]));
+		TextRender()->CreateTextContainer(InfoMsg.m_VictimTextContainerIndex, &Cursor, InfoMsg.m_aVictimName);
+	}
 
-		if(pInfoMsg->m_Diff > 0)
-			TextRender()->TextColor(1.0f, 0.5f, 0.5f, 1); // red
-		else if(pInfoMsg->m_Diff < 0)
-			TextRender()->TextColor(0.5f, 1.0f, 0.5f, 1); // green
+	if(!InfoMsg.m_KillerTextContainerIndex.Valid() && InfoMsg.m_aKillerName[0] != '\0')
+	{
+		InfoMsg.m_KillerTextWidth = TextRender()->TextWidth(FontSize, InfoMsg.m_aKillerName);
+		CTextCursor Cursor;
+		TextRender()->SetCursor(&Cursor, 0, 0, FontSize, TEXTFLAG_RENDER);
+		TextRender()->TextColor(NameColor(InfoMsg.m_KillerID));
+		TextRender()->CreateTextContainer(InfoMsg.m_KillerTextContainerIndex, &Cursor, InfoMsg.m_aKillerName);
+	}
+
+	if(!InfoMsg.m_DiffTextContainerIndex.Valid() && InfoMsg.m_aDiffText[0] != '\0')
+	{
+		InfoMsg.m_DiffTextWidth = TextRender()->TextWidth(FontSize, InfoMsg.m_aDiffText);
+		CTextCursor Cursor;
+		TextRender()->SetCursor(&Cursor, 0, 0, FontSize, TEXTFLAG_RENDER);
+
+		if(InfoMsg.m_Diff > 0)
+			TextRender()->TextColor(1.0f, 0.5f, 0.5f, 1.0f); // red
+		else if(InfoMsg.m_Diff < 0)
+			TextRender()->TextColor(0.5f, 1.0f, 0.5f, 1.0f); // green
 		else
 			TextRender()->TextColor(TextRender()->DefaultTextColor());
 
-		TextRender()->CreateTextContainer(pInfoMsg->m_DiffTextContainerIndex, &Cursor, pInfoMsg->m_aDiffText);
+		TextRender()->CreateTextContainer(InfoMsg.m_DiffTextContainerIndex, &Cursor, InfoMsg.m_aDiffText);
 	}
-	if(!pInfoMsg->m_TimeTextContainerIndex.Valid() && pInfoMsg->m_aTimeText[0] != 0)
+
+	if(!InfoMsg.m_TimeTextContainerIndex.Valid() && InfoMsg.m_aTimeText[0] != '\0')
 	{
-		pInfoMsg->m_TimeTextWidth = TextRender()->TextWidth(FontSize, pInfoMsg->m_aTimeText);
+		InfoMsg.m_TimeTextWidth = TextRender()->TextWidth(FontSize, InfoMsg.m_aTimeText);
 		CTextCursor Cursor;
 		TextRender()->SetCursor(&Cursor, 0, 0, FontSize, TEXTFLAG_RENDER);
-		Cursor.m_LineWidth = -1;
-
 		TextRender()->TextColor(TextRender()->DefaultTextColor());
-
-		TextRender()->CreateTextContainer(pInfoMsg->m_TimeTextContainerIndex, &Cursor, pInfoMsg->m_aTimeText);
+		TextRender()->CreateTextContainer(InfoMsg.m_TimeTextContainerIndex, &Cursor, InfoMsg.m_aTimeText);
 	}
+
 	TextRender()->TextColor(TextRender()->DefaultTextColor());
 }
 
@@ -225,7 +214,7 @@ void CInfoMessages::OnTeamKillMessage(const CNetMsg_Sv_KillMsgTeam *pMsg)
 	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
 	Graphics()->MapScreen(0, 0, Width * 1.5f, Height * 1.5f);
 
-	CreateNamesIfNotCreated(&Kill);
+	CreateTextContainersIfNotCreated(Kill);
 
 	bool KillMsgValid = true;
 	for(int i = 0; i < Kill.m_TeamSize; i++)
@@ -294,7 +283,7 @@ void CInfoMessages::OnKillMessage(const CNetMsg_Sv_KillMsg *pMsg)
 	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
 	Graphics()->MapScreen(0, 0, Width * 1.5f, Height * 1.5f);
 
-	CreateNamesIfNotCreated(&Kill);
+	CreateTextContainersIfNotCreated(Kill);
 
 	if(Kill.m_aVictimRenderInfo[0].Valid() && (Kill.m_KillerID == -1 || Kill.m_KillerRenderInfo.Valid()))
 	{
@@ -354,8 +343,7 @@ void CInfoMessages::OnRaceFinishMessage(const CNetMsg_Sv_RaceFinish *pMsg)
 	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
 	Graphics()->MapScreen(0, 0, Width * 1.5f, Height * 1.5f);
 
-	CreateNamesIfNotCreated(&Finish);
-	CreateFinishTextContainersIfNotCreated(&Finish);
+	CreateTextContainersIfNotCreated(Finish);
 
 	if(Finish.m_aVictimRenderInfo[0].Valid())
 	{
@@ -378,8 +366,6 @@ void CInfoMessages::RenderKillMsg(CInfoMsg *pInfoMsg, float x, float y)
 		TextColor = m_pClient->GetDDTeamColor(pInfoMsg->m_VictimDDTeam, 0.75f);
 	else
 		TextColor = TextRender()->DefaultTextColor();
-
-	CreateNamesIfNotCreated(pInfoMsg);
 
 	if(pInfoMsg->m_VictimTextContainerIndex.Valid())
 		TextRender()->RenderTextContainer(pInfoMsg->m_VictimTextContainerIndex, TextColor, TextRender()->DefaultTextOutlineColor(), x, y + (46.f - 36.f) / 2.f);
@@ -471,8 +457,6 @@ void CInfoMessages::RenderKillMsg(CInfoMsg *pInfoMsg, float x, float y)
 void CInfoMessages::RenderFinishMsg(CInfoMsg *pInfoMsg, float x, float y)
 {
 	// render time diff
-	CreateFinishTextContainersIfNotCreated(pInfoMsg);
-
 	if(pInfoMsg->m_Diff)
 	{
 		x -= pInfoMsg->m_DiffTextWidth;
@@ -503,8 +487,6 @@ void CInfoMessages::RenderFinishMsg(CInfoMsg *pInfoMsg, float x, float y)
 		TextColor = m_pClient->GetDDTeamColor(pInfoMsg->m_VictimDDTeam, 0.75f);
 	else
 		TextColor = TextRender()->DefaultTextColor();
-
-	CreateNamesIfNotCreated(pInfoMsg);
 
 	if(pInfoMsg->m_VictimTextContainerIndex.Valid())
 		TextRender()->RenderTextContainer(pInfoMsg->m_VictimTextContainerIndex, TextColor, TextRender()->DefaultTextOutlineColor(), x, y + (46.f - 36.f) / 2.f);
@@ -537,6 +519,7 @@ void CInfoMessages::OnRender()
 		if(Client()->GameTick(g_Config.m_ClDummy) > pInfoMsg->m_Tick + Client()->GameTickSpeed() * 10)
 			continue;
 
+		CreateTextContainersIfNotCreated(*pInfoMsg);
 		if(pInfoMsg->m_Type == EType::TYPE_KILL && g_Config.m_ClShowKillMessages)
 		{
 			RenderKillMsg(pInfoMsg, StartX, y);
