@@ -54,8 +54,8 @@ public:
 
 private:
 	void AddInfoMsg(const CInfoMsg &InfoMsg);
-	void RenderKillMsg(CInfoMsg *pInfoMsg, float x, float y);
-	void RenderFinishMsg(CInfoMsg *pInfoMsg, float x, float y);
+	void RenderKillMsg(const CInfoMsg &InfoMsg, float x, float y);
+	void RenderFinishMsg(const CInfoMsg &InfoMsg, float x, float y);
 
 	void OnTeamKillMessage(const struct CNetMsg_Sv_KillMsgTeam *pMsg);
 	void OnKillMessage(const struct CNetMsg_Sv_KillMsg *pMsg);

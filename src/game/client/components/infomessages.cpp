@@ -14,6 +14,9 @@
 #include <game/client/prediction/entities/character.h>
 #include <game/client/prediction/gameworld.h>
 
+static constexpr float ROW_HEIGHT = 46.0f;
+static constexpr float FONT_SIZE = 36.0f;
+
 void CInfoMessages::OnWindowResize()
 {
 	for(auto &InfoMsg : m_aInfoMsgs)
@@ -93,8 +96,6 @@ void CInfoMessages::AddInfoMsg(const CInfoMsg &InfoMsg)
 
 void CInfoMessages::CreateTextContainersIfNotCreated(CInfoMsg &InfoMsg)
 {
-	const float FontSize = 36.0f;
-
 	const auto &&NameColor = [&](int ClientID) -> ColorRGBA {
 		unsigned Color;
 		if(ClientID == m_pClient->m_Snap.m_LocalClientID)
@@ -111,7 +112,7 @@ void CInfoMessages::CreateTextContainersIfNotCreated(CInfoMsg &InfoMsg)
 	if(!InfoMsg.m_VictimTextContainerIndex.Valid() && InfoMsg.m_aVictimName[0] != '\0')
 	{
 		CTextCursor Cursor;
-		TextRender()->SetCursor(&Cursor, 0, 0, FontSize, TEXTFLAG_RENDER);
+		TextRender()->SetCursor(&Cursor, 0, 0, FONT_SIZE, TEXTFLAG_RENDER);
 		TextRender()->TextColor(NameColor(InfoMsg.m_aVictimIds[0]));
 		TextRender()->CreateTextContainer(InfoMsg.m_VictimTextContainerIndex, &Cursor, InfoMsg.m_aVictimName);
 	}
@@ -119,7 +120,7 @@ void CInfoMessages::CreateTextContainersIfNotCreated(CInfoMsg &InfoMsg)
 	if(!InfoMsg.m_KillerTextContainerIndex.Valid() && InfoMsg.m_aKillerName[0] != '\0')
 	{
 		CTextCursor Cursor;
-		TextRender()->SetCursor(&Cursor, 0, 0, FontSize, TEXTFLAG_RENDER);
+		TextRender()->SetCursor(&Cursor, 0, 0, FONT_SIZE, TEXTFLAG_RENDER);
 		TextRender()->TextColor(NameColor(InfoMsg.m_KillerID));
 		TextRender()->CreateTextContainer(InfoMsg.m_KillerTextContainerIndex, &Cursor, InfoMsg.m_aKillerName);
 	}
@@ -127,7 +128,7 @@ void CInfoMessages::CreateTextContainersIfNotCreated(CInfoMsg &InfoMsg)
 	if(!InfoMsg.m_DiffTextContainerIndex.Valid() && InfoMsg.m_aDiffText[0] != '\0')
 	{
 		CTextCursor Cursor;
-		TextRender()->SetCursor(&Cursor, 0, 0, FontSize, TEXTFLAG_RENDER);
+		TextRender()->SetCursor(&Cursor, 0, 0, FONT_SIZE, TEXTFLAG_RENDER);
 
 		if(InfoMsg.m_Diff > 0)
 			TextRender()->TextColor(1.0f, 0.5f, 0.5f, 1.0f); // red
@@ -142,7 +143,7 @@ void CInfoMessages::CreateTextContainersIfNotCreated(CInfoMsg &InfoMsg)
 	if(!InfoMsg.m_TimeTextContainerIndex.Valid() && InfoMsg.m_aTimeText[0] != '\0')
 	{
 		CTextCursor Cursor;
-		TextRender()->SetCursor(&Cursor, 0, 0, FontSize, TEXTFLAG_RENDER);
+		TextRender()->SetCursor(&Cursor, 0, 0, FONT_SIZE, TEXTFLAG_RENDER);
 		TextRender()->TextColor(TextRender()->DefaultTextColor());
 		TextRender()->CreateTextContainer(InfoMsg.m_TimeTextContainerIndex, &Cursor, InfoMsg.m_aTimeText);
 	}
@@ -309,123 +310,115 @@ void CInfoMessages::OnRaceFinishMessage(const CNetMsg_Sv_RaceFinish *pMsg)
 	AddInfoMsg(Finish);
 }
 
-void CInfoMessages::RenderKillMsg(CInfoMsg *pInfoMsg, float x, float y)
+void CInfoMessages::RenderKillMsg(const CInfoMsg &InfoMsg, float x, float y)
 {
 	ColorRGBA TextColor;
-	if(g_Config.m_ClChatTeamColors && pInfoMsg->m_VictimDDTeam)
-		TextColor = m_pClient->GetDDTeamColor(pInfoMsg->m_VictimDDTeam, 0.75f);
+	if(g_Config.m_ClChatTeamColors && InfoMsg.m_VictimDDTeam)
+		TextColor = m_pClient->GetDDTeamColor(InfoMsg.m_VictimDDTeam, 0.75f);
 	else
 		TextColor = TextRender()->DefaultTextColor();
 
 	// render victim name
-	if(pInfoMsg->m_VictimTextContainerIndex.Valid())
+	if(InfoMsg.m_VictimTextContainerIndex.Valid())
 	{
-		x -= TextRender()->GetBoundingBoxTextContainer(pInfoMsg->m_VictimTextContainerIndex).m_W;
-		TextRender()->RenderTextContainer(pInfoMsg->m_VictimTextContainerIndex, TextColor, TextRender()->DefaultTextOutlineColor(), x, y + (46.f - 36.f) / 2.f);
+		x -= TextRender()->GetBoundingBoxTextContainer(InfoMsg.m_VictimTextContainerIndex).m_W;
+		TextRender()->RenderTextContainer(InfoMsg.m_VictimTextContainerIndex, TextColor, TextRender()->DefaultTextOutlineColor(), x, y + (ROW_HEIGHT - FONT_SIZE) / 2.0f);
 	}
 
-	// render victim tee
+	// render victim flag
 	x -= 24.0f;
-
-	if(m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_FLAGS)
+	if(m_pClient->m_Snap.m_pGameInfoObj && (m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_FLAGS) && (InfoMsg.m_ModeSpecial & 1))
 	{
-		if(pInfoMsg->m_ModeSpecial & 1)
+		int QuadOffset;
+		if(InfoMsg.m_aVictimIds[0] == InfoMsg.m_FlagCarrierBlue)
 		{
-			int QuadOffset = 0;
-			if(pInfoMsg->m_aVictimIds[0] == pInfoMsg->m_FlagCarrierBlue)
-				++QuadOffset;
-
-			if(QuadOffset == 0)
-				Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteFlagRed);
-			else
-				Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteFlagBlue);
-
-			Graphics()->RenderQuadContainerAsSprite(m_SpriteQuadContainerIndex, QuadOffset, x, y - 16);
+			Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteFlagBlue);
+			QuadOffset = 0;
 		}
+		else
+		{
+			Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteFlagRed);
+			QuadOffset = 1;
+		}
+		Graphics()->RenderQuadContainerAsSprite(m_SpriteQuadContainerIndex, QuadOffset, x, y - 16);
 	}
 
-	for(int j = (pInfoMsg->m_TeamSize - 1); j >= 0; j--)
+	// render victim tees
+	for(int j = (InfoMsg.m_TeamSize - 1); j >= 0; j--)
 	{
-		if(pInfoMsg->m_aVictimIds[j] < 0)
+		if(InfoMsg.m_aVictimIds[j] < 0)
 			continue;
 
-		const CAnimState *pIdleState = CAnimState::GetIdle();
 		vec2 OffsetToMid;
-		CRenderTools::GetRenderTeeOffsetToRenderedTee(pIdleState, &pInfoMsg->m_aVictimRenderInfo[j], OffsetToMid);
-		const vec2 TeeRenderPos = vec2(x, y + 46.0f / 2.0f + OffsetToMid.y);
-		RenderTools()->RenderTee(pIdleState, &pInfoMsg->m_aVictimRenderInfo[j], EMOTE_PAIN, vec2(-1, 0), TeeRenderPos);
-
+		CRenderTools::GetRenderTeeOffsetToRenderedTee(CAnimState::GetIdle(), &InfoMsg.m_aVictimRenderInfo[j], OffsetToMid);
+		const vec2 TeeRenderPos = vec2(x, y + ROW_HEIGHT / 2.0f + OffsetToMid.y);
+		RenderTools()->RenderTee(CAnimState::GetIdle(), &InfoMsg.m_aVictimRenderInfo[j], EMOTE_PAIN, vec2(-1, 0), TeeRenderPos);
 		x -= 44.0f;
 	}
 
 	// render weapon
 	x -= 32.0f;
-	if(pInfoMsg->m_Weapon >= 0)
+	if(InfoMsg.m_Weapon >= 0)
 	{
-		Graphics()->TextureSet(GameClient()->m_GameSkin.m_aSpriteWeapons[pInfoMsg->m_Weapon]);
-		Graphics()->RenderQuadContainerAsSprite(m_SpriteQuadContainerIndex, 4 + pInfoMsg->m_Weapon, x, y + 28);
+		Graphics()->TextureSet(GameClient()->m_GameSkin.m_aSpriteWeapons[InfoMsg.m_Weapon]);
+		Graphics()->RenderQuadContainerAsSprite(m_SpriteQuadContainerIndex, 4 + InfoMsg.m_Weapon, x, y + 28);
 	}
 	x -= 52.0f;
 
-	if(pInfoMsg->m_aVictimIds[0] != pInfoMsg->m_KillerID)
+	// render killer (only if different from victim)
+	if(InfoMsg.m_aVictimIds[0] != InfoMsg.m_KillerID)
 	{
-		if(m_pClient->m_Snap.m_pGameInfoObj && m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_FLAGS)
+		// render killer flag
+		if(m_pClient->m_Snap.m_pGameInfoObj && (m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_FLAGS) && (InfoMsg.m_ModeSpecial & 2))
 		{
-			if(pInfoMsg->m_ModeSpecial & 2)
+			int QuadOffset;
+			if(InfoMsg.m_KillerID == InfoMsg.m_FlagCarrierBlue)
 			{
-				int QuadOffset = 2;
-				if(pInfoMsg->m_KillerID == pInfoMsg->m_FlagCarrierBlue)
-					++QuadOffset;
-
-				if(QuadOffset == 2)
-					Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteFlagRed);
-				else
-					Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteFlagBlue);
-
-				Graphics()->RenderQuadContainerAsSprite(m_SpriteQuadContainerIndex, QuadOffset, x - 56, y - 16);
+				Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteFlagBlue);
+				QuadOffset = 2;
 			}
+			else
+			{
+				Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteFlagRed);
+				QuadOffset = 3;
+			}
+			Graphics()->RenderQuadContainerAsSprite(m_SpriteQuadContainerIndex, QuadOffset, x - 56, y - 16);
 		}
 
 		// render killer tee
 		x -= 24.0f;
-
-		if(pInfoMsg->m_KillerID >= 0)
+		if(InfoMsg.m_KillerID >= 0)
 		{
-			const CAnimState *pIdleState = CAnimState::GetIdle();
 			vec2 OffsetToMid;
-			CRenderTools::GetRenderTeeOffsetToRenderedTee(pIdleState, &pInfoMsg->m_KillerRenderInfo, OffsetToMid);
-			const vec2 TeeRenderPos = vec2(x, y + 46.0f / 2.0f + OffsetToMid.y);
-			RenderTools()->RenderTee(pIdleState, &pInfoMsg->m_KillerRenderInfo, EMOTE_ANGRY, vec2(1, 0), TeeRenderPos);
+			CRenderTools::GetRenderTeeOffsetToRenderedTee(CAnimState::GetIdle(), &InfoMsg.m_KillerRenderInfo, OffsetToMid);
+			const vec2 TeeRenderPos = vec2(x, y + ROW_HEIGHT / 2.0f + OffsetToMid.y);
+			RenderTools()->RenderTee(CAnimState::GetIdle(), &InfoMsg.m_KillerRenderInfo, EMOTE_ANGRY, vec2(1, 0), TeeRenderPos);
 		}
-
 		x -= 32.0f;
 
 		// render killer name
-		if(pInfoMsg->m_KillerTextContainerIndex.Valid())
+		if(InfoMsg.m_KillerTextContainerIndex.Valid())
 		{
-			x -= TextRender()->GetBoundingBoxTextContainer(pInfoMsg->m_KillerTextContainerIndex).m_W;
-			TextRender()->RenderTextContainer(pInfoMsg->m_KillerTextContainerIndex, TextColor, TextRender()->DefaultTextOutlineColor(), x, y + (46.f - 36.f) / 2.f);
+			x -= TextRender()->GetBoundingBoxTextContainer(InfoMsg.m_KillerTextContainerIndex).m_W;
+			TextRender()->RenderTextContainer(InfoMsg.m_KillerTextContainerIndex, TextColor, TextRender()->DefaultTextOutlineColor(), x, y + (ROW_HEIGHT - FONT_SIZE) / 2.0f);
 		}
 	}
 }
 
-void CInfoMessages::RenderFinishMsg(CInfoMsg *pInfoMsg, float x, float y)
+void CInfoMessages::RenderFinishMsg(const CInfoMsg &InfoMsg, float x, float y)
 {
 	// render time diff
-	if(pInfoMsg->m_Diff)
+	if(InfoMsg.m_DiffTextContainerIndex.Valid())
 	{
-		if(pInfoMsg->m_DiffTextContainerIndex.Valid())
-		{
-			x -= TextRender()->GetBoundingBoxTextContainer(pInfoMsg->m_DiffTextContainerIndex).m_W;
-			TextRender()->RenderTextContainer(pInfoMsg->m_DiffTextContainerIndex, TextRender()->DefaultTextColor(), TextRender()->DefaultTextOutlineColor(), x, y + (46.f - 36.f) / 2.f);
-		}
+		x -= TextRender()->GetBoundingBoxTextContainer(InfoMsg.m_DiffTextContainerIndex).m_W;
+		TextRender()->RenderTextContainer(InfoMsg.m_DiffTextContainerIndex, TextRender()->DefaultTextColor(), TextRender()->DefaultTextOutlineColor(), x, y + (ROW_HEIGHT - FONT_SIZE) / 2.0f);
 	}
 
 	// render time
-	if(pInfoMsg->m_TimeTextContainerIndex.Valid())
+	if(InfoMsg.m_TimeTextContainerIndex.Valid())
 	{
-		x -= TextRender()->GetBoundingBoxTextContainer(pInfoMsg->m_TimeTextContainerIndex).m_W;
-		TextRender()->RenderTextContainer(pInfoMsg->m_TimeTextContainerIndex, TextRender()->DefaultTextColor(), TextRender()->DefaultTextOutlineColor(), x, y + (46.f - 36.f) / 2.f);
+		x -= TextRender()->GetBoundingBoxTextContainer(InfoMsg.m_TimeTextContainerIndex).m_W;
+		TextRender()->RenderTextContainer(InfoMsg.m_TimeTextContainerIndex, TextRender()->DefaultTextColor(), TextRender()->DefaultTextOutlineColor(), x, y + (ROW_HEIGHT - FONT_SIZE) / 2.0f);
 	}
 
 	// render flag
@@ -438,56 +431,55 @@ void CInfoMessages::RenderFinishMsg(CInfoMsg *pInfoMsg, float x, float y)
 	Graphics()->QuadsEnd();
 
 	// render victim name
-	if(pInfoMsg->m_VictimTextContainerIndex.Valid())
+	if(InfoMsg.m_VictimTextContainerIndex.Valid())
 	{
-		x -= TextRender()->GetBoundingBoxTextContainer(pInfoMsg->m_VictimTextContainerIndex).m_W;
+		x -= TextRender()->GetBoundingBoxTextContainer(InfoMsg.m_VictimTextContainerIndex).m_W;
 		ColorRGBA TextColor;
-		if(g_Config.m_ClChatTeamColors && pInfoMsg->m_VictimDDTeam)
-			TextColor = m_pClient->GetDDTeamColor(pInfoMsg->m_VictimDDTeam, 0.75f);
+		if(g_Config.m_ClChatTeamColors && InfoMsg.m_VictimDDTeam)
+			TextColor = m_pClient->GetDDTeamColor(InfoMsg.m_VictimDDTeam, 0.75f);
 		else
 			TextColor = TextRender()->DefaultTextColor();
-		TextRender()->RenderTextContainer(pInfoMsg->m_VictimTextContainerIndex, TextColor, TextRender()->DefaultTextOutlineColor(), x, y + (46.f - 36.f) / 2.f);
+		TextRender()->RenderTextContainer(InfoMsg.m_VictimTextContainerIndex, TextColor, TextRender()->DefaultTextOutlineColor(), x, y + (ROW_HEIGHT - FONT_SIZE) / 2.0f);
 	}
 
 	// render victim tee
 	x -= 24.0f;
-
-	const CAnimState *pIdleState = CAnimState::GetIdle();
 	vec2 OffsetToMid;
-	CRenderTools::GetRenderTeeOffsetToRenderedTee(pIdleState, &pInfoMsg->m_aVictimRenderInfo[0], OffsetToMid);
-	const vec2 TeeRenderPos = vec2(x, y + 46.0f / 2.0f + OffsetToMid.y);
-	const int Emote = pInfoMsg->m_RecordPersonal ? EMOTE_HAPPY : EMOTE_NORMAL;
-	RenderTools()->RenderTee(pIdleState, &pInfoMsg->m_aVictimRenderInfo[0], Emote, vec2(-1, 0), TeeRenderPos);
+	CRenderTools::GetRenderTeeOffsetToRenderedTee(CAnimState::GetIdle(), &InfoMsg.m_aVictimRenderInfo[0], OffsetToMid);
+	const vec2 TeeRenderPos = vec2(x, y + ROW_HEIGHT / 2.0f + OffsetToMid.y);
+	const int Emote = InfoMsg.m_RecordPersonal ? EMOTE_HAPPY : EMOTE_NORMAL;
+	RenderTools()->RenderTee(CAnimState::GetIdle(), &InfoMsg.m_aVictimRenderInfo[0], Emote, vec2(-1, 0), TeeRenderPos);
 }
 
 void CInfoMessages::OnRender()
 {
-	float Height = 400 * 3.0f;
-	float Width = Height * Graphics()->ScreenAspect();
+	const float Height = 1.5f * 400.0f * 3.0f;
+	const float Width = Height * Graphics()->ScreenAspect();
 
-	Graphics()->MapScreen(0, 0, Width * 1.5f, Height * 1.5f);
-	Graphics()->SetColor(1.f, 1.f, 1.f, 1.f);
+	Graphics()->MapScreen(0, 0, Width, Height);
+	Graphics()->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
 
-	float StartX = Width * 1.5f - 10.0f;
-	float y = 30.0f + 100.0f * ((g_Config.m_ClShowfps ? 1 : 0) + (g_Config.m_ClShowpred && Client()->State() != IClient::STATE_DEMOPLAYBACK));
+	const float StartX = Width - 10.0f;
+	const float StartY = 30.0f + (g_Config.m_ClShowfps ? 100.0f : 0.0f) + (g_Config.m_ClShowpred && Client()->State() != IClient::STATE_DEMOPLAYBACK ? 100.0f : 0.0f);
 
+	float y = StartY;
 	for(int i = 1; i <= MAX_INFOMSGS; i++)
 	{
-		CInfoMsg *pInfoMsg = &m_aInfoMsgs[(m_InfoMsgCurrent + i) % MAX_INFOMSGS];
-		if(Client()->GameTick(g_Config.m_ClDummy) > pInfoMsg->m_Tick + Client()->GameTickSpeed() * 10)
+		CInfoMsg &InfoMsg = m_aInfoMsgs[(m_InfoMsgCurrent + i) % MAX_INFOMSGS];
+		if(Client()->GameTick(g_Config.m_ClDummy) > InfoMsg.m_Tick + Client()->GameTickSpeed() * 10)
 			continue;
 
-		CreateTextContainersIfNotCreated(*pInfoMsg);
+		CreateTextContainersIfNotCreated(InfoMsg);
 
-		if(pInfoMsg->m_Type == EType::TYPE_KILL && g_Config.m_ClShowKillMessages)
+		if(InfoMsg.m_Type == EType::TYPE_KILL && g_Config.m_ClShowKillMessages)
 		{
-			RenderKillMsg(pInfoMsg, StartX, y);
-			y += 46.0f;
+			RenderKillMsg(InfoMsg, StartX, y);
+			y += ROW_HEIGHT;
 		}
-		else if(pInfoMsg->m_Type == EType::TYPE_FINISH && g_Config.m_ClShowFinishMessages)
+		else if(InfoMsg.m_Type == EType::TYPE_FINISH && g_Config.m_ClShowFinishMessages)
 		{
-			RenderFinishMsg(pInfoMsg, StartX, y);
-			y += 46.0f;
+			RenderFinishMsg(InfoMsg, StartX, y);
+			y += ROW_HEIGHT;
 		}
 	}
 }
