@@ -6,6 +6,7 @@
 #include <base/vmath.h>
 #include <engine/shared/protocol.h>
 
+#include <map>
 #include <vector>
 
 enum
@@ -116,7 +117,15 @@ public:
 	class CLayers *Layers() { return m_pLayers; }
 	int m_HighestSwitchNumber;
 
+	std::map<int, std::vector<vec2>> &TeleIns() { return m_TeleIns; }
+	std::map<int, std::vector<vec2>> &TeleOuts() { return m_TeleOuts; }
+	std::map<int, std::vector<vec2>> &TeleCheckOuts() { return m_TeleCheckOuts; }
+
 private:
+	std::map<int, std::vector<vec2>> m_TeleIns;
+	std::map<int, std::vector<vec2>> m_TeleOuts;
+	std::map<int, std::vector<vec2>> m_TeleCheckOuts;
+
 	class CTeleTile *m_pTele;
 	class CSpeedupTile *m_pSpeedup;
 	class CTile *m_pFront;
