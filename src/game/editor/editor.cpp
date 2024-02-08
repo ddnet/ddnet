@@ -8464,8 +8464,10 @@ void CEditor::HandleCursorMovement()
 
 	float MouseRelX = 0.0f, MouseRelY = 0.0f;
 	IInput::ECursorType CursorType = Input()->CursorRelative(&MouseRelX, &MouseRelY);
-	if(CursorType != IInput::CURSOR_NONE)
-		UI()->ConvertMouseMove(&MouseRelX, &MouseRelY, CursorType);
+	if(CursorType == IInput::CURSOR_NONE)
+		return;
+
+	UI()->ConvertMouseMove(&MouseRelX, &MouseRelY, CursorType);
 
 	m_MouseDeltaX += MouseRelX;
 	m_MouseDeltaY += MouseRelY;
