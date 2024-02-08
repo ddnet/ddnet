@@ -64,6 +64,10 @@ private:
 	void CreateNamesIfNotCreated(CInfoMsg *pInfoMsg);
 	void CreateFinishTextContainersIfNotCreated(CInfoMsg *pInfoMsg);
 
+	void OnTeamKillMessage(const struct CNetMsg_Sv_KillMsgTeam *pMsg);
+	void OnKillMessage(const struct CNetMsg_Sv_KillMsg *pMsg);
+	void OnRaceFinishMessage(const struct CNetMsg_Sv_RaceFinish *pMsg);
+
 	void DeleteTextContainers(CInfoMsg *pInfoMsg);
 
 public:

@@ -154,205 +154,212 @@ void CInfoMessages::OnMessage(int MsgType, void *pRawMsg)
 	if(m_pClient->m_SuppressEvents)
 		return;
 
-	if(MsgType == NETMSGTYPE_SV_KILLMSGTEAM)
+	switch(MsgType)
 	{
-		CNetMsg_Sv_KillMsgTeam *pMsg = (CNetMsg_Sv_KillMsgTeam *)pRawMsg;
+	case NETMSGTYPE_SV_KILLMSGTEAM:
+		OnTeamKillMessage(static_cast<CNetMsg_Sv_KillMsgTeam *>(pRawMsg));
+		break;
+	case NETMSGTYPE_SV_KILLMSG:
+		OnKillMessage(static_cast<CNetMsg_Sv_KillMsg *>(pRawMsg));
+		break;
+	case NETMSGTYPE_SV_RACEFINISH:
+		OnRaceFinishMessage(static_cast<CNetMsg_Sv_RaceFinish *>(pRawMsg));
+		break;
+	}
+}
 
-		CInfoMsg Kill{};
+void CInfoMessages::OnTeamKillMessage(const CNetMsg_Sv_KillMsgTeam *pMsg)
+{
+	CInfoMsg Kill{};
 
-		std::vector<std::pair<int, int>> vStrongWeakSorted;
-		for(int i = 0; i < MAX_CLIENTS; i++)
+	std::vector<std::pair<int, int>> vStrongWeakSorted;
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(m_pClient->m_Teams.Team(i) == pMsg->m_Team)
 		{
-			if(m_pClient->m_Teams.Team(i) == pMsg->m_Team)
-			{
-				CCharacter *pChr = m_pClient->m_GameWorld.GetCharacterByID(i);
-				vStrongWeakSorted.emplace_back(i, pMsg->m_First == i ? MAX_CLIENTS : pChr ? pChr->GetStrongWeakID() : 0);
-			}
+			CCharacter *pChr = m_pClient->m_GameWorld.GetCharacterByID(i);
+			vStrongWeakSorted.emplace_back(i, pMsg->m_First == i ? MAX_CLIENTS : pChr ? pChr->GetStrongWeakID() : 0);
 		}
+	}
 
-		std::stable_sort(vStrongWeakSorted.begin(), vStrongWeakSorted.end(), [](auto &Left, auto &Right) { return Left.second > Right.second; });
+	std::stable_sort(vStrongWeakSorted.begin(), vStrongWeakSorted.end(), [](auto &Left, auto &Right) { return Left.second > Right.second; });
 
-		Kill.m_TeamSize = vStrongWeakSorted.size();
-		if(Kill.m_TeamSize > MAX_KILLMSG_TEAM_MEMBERS)
-			Kill.m_TeamSize = MAX_KILLMSG_TEAM_MEMBERS;
+	Kill.m_TeamSize = vStrongWeakSorted.size();
+	if(Kill.m_TeamSize > MAX_KILLMSG_TEAM_MEMBERS)
+		Kill.m_TeamSize = MAX_KILLMSG_TEAM_MEMBERS;
 
-		Kill.m_VictimDDTeam = pMsg->m_Team;
-		for(int i = 0; i < Kill.m_TeamSize; i++)
+	Kill.m_VictimDDTeam = pMsg->m_Team;
+	for(int i = 0; i < Kill.m_TeamSize; i++)
+	{
+		if(m_pClient->m_aClients[vStrongWeakSorted[i].first].m_Active)
 		{
-			if(m_pClient->m_aClients[vStrongWeakSorted[i].first].m_Active)
-			{
-				Kill.m_aVictimIds[i] = vStrongWeakSorted[i].first;
-				Kill.m_aVictimRenderInfo[i] = m_pClient->m_aClients[vStrongWeakSorted[i].first].m_RenderInfo;
-			}
-			else
-			{
-				Kill.m_aVictimIds[i] = -1;
-				Kill.m_aVictimRenderInfo[i].Reset();
-			}
+			Kill.m_aVictimIds[i] = vStrongWeakSorted[i].first;
+			Kill.m_aVictimRenderInfo[i] = m_pClient->m_aClients[vStrongWeakSorted[i].first].m_RenderInfo;
 		}
-		for(int i = Kill.m_TeamSize; i < MAX_KILLMSG_TEAM_MEMBERS; i++)
+		else
 		{
 			Kill.m_aVictimIds[i] = -1;
 			Kill.m_aVictimRenderInfo[i].Reset();
 		}
-		str_format(Kill.m_aVictimName, sizeof(Kill.m_aVictimName), Localize("Team %d"), pMsg->m_Team);
+	}
+	for(int i = Kill.m_TeamSize; i < MAX_KILLMSG_TEAM_MEMBERS; i++)
+	{
+		Kill.m_aVictimIds[i] = -1;
+		Kill.m_aVictimRenderInfo[i].Reset();
+	}
+	str_format(Kill.m_aVictimName, sizeof(Kill.m_aVictimName), Localize("Team %d"), pMsg->m_Team);
 
-		Kill.m_KillerID = -1;
+	Kill.m_KillerID = -1;
+	Kill.m_aKillerName[0] = '\0';
+	Kill.m_KillerRenderInfo.Reset();
+
+	Kill.m_Weapon = -1;
+	Kill.m_ModeSpecial = 0;
+
+	Kill.m_VictimTextWidth = Kill.m_KillerTextWidth = 0.f;
+
+	float Height = 400 * 3.0f;
+	float Width = Height * Graphics()->ScreenAspect();
+
+	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
+	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
+	Graphics()->MapScreen(0, 0, Width * 1.5f, Height * 1.5f);
+
+	CreateNamesIfNotCreated(&Kill);
+
+	bool KillMsgValid = true;
+	for(int i = 0; i < Kill.m_TeamSize; i++)
+	{
+		KillMsgValid = KillMsgValid && Kill.m_aVictimIds[i] >= 0 && ((Kill.m_aVictimRenderInfo[i].m_CustomColoredSkin && Kill.m_aVictimRenderInfo[i].m_ColorableRenderSkin.m_Body.IsValid()) || (!Kill.m_aVictimRenderInfo[i].m_CustomColoredSkin && Kill.m_aVictimRenderInfo[i].m_OriginalRenderSkin.m_Body.IsValid()));
+	}
+
+	if(KillMsgValid)
+	{
+		AddInfoMsg(EType::TYPE_KILL, Kill);
+	}
+	else
+	{
+		DeleteTextContainers(&Kill);
+	}
+
+	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
+}
+
+void CInfoMessages::OnKillMessage(const CNetMsg_Sv_KillMsg *pMsg)
+{
+	CInfoMsg Kill{};
+
+	Kill.m_TeamSize = 1;
+	Kill.m_aVictimIds[0] = pMsg->m_Victim;
+	if(Kill.m_aVictimIds[0] >= 0 && Kill.m_aVictimIds[0] < MAX_CLIENTS)
+	{
+		Kill.m_VictimDDTeam = m_pClient->m_Teams.Team(Kill.m_aVictimIds[0]);
+		str_copy(Kill.m_aVictimName, m_pClient->m_aClients[Kill.m_aVictimIds[0]].m_aName);
+		Kill.m_aVictimRenderInfo[0] = m_pClient->m_aClients[Kill.m_aVictimIds[0]].m_RenderInfo;
+	}
+	else
+	{
+		Kill.m_VictimDDTeam = 0;
+		Kill.m_aVictimName[0] = '\0';
+	}
+	for(int i = Kill.m_TeamSize; i < MAX_KILLMSG_TEAM_MEMBERS; i++)
+	{
+		Kill.m_aVictimIds[i] = -1;
+		Kill.m_aVictimRenderInfo[i].Reset();
+	}
+
+	Kill.m_KillerID = pMsg->m_Killer;
+	if(Kill.m_KillerID >= 0 && Kill.m_KillerID < MAX_CLIENTS)
+	{
+		str_copy(Kill.m_aKillerName, m_pClient->m_aClients[Kill.m_KillerID].m_aName);
+		Kill.m_KillerRenderInfo = m_pClient->m_aClients[Kill.m_KillerID].m_RenderInfo;
+	}
+	else
+	{
 		Kill.m_aKillerName[0] = '\0';
 		Kill.m_KillerRenderInfo.Reset();
-
-		Kill.m_Weapon = -1;
-		Kill.m_ModeSpecial = 0;
-
-		Kill.m_VictimTextWidth = Kill.m_KillerTextWidth = 0.f;
-
-		float Height = 400 * 3.0f;
-		float Width = Height * Graphics()->ScreenAspect();
-
-		float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
-		Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
-		Graphics()->MapScreen(0, 0, Width * 1.5f, Height * 1.5f);
-
-		CreateNamesIfNotCreated(&Kill);
-
-		bool KillMsgValid = true;
-		for(int i = 0; i < Kill.m_TeamSize; i++)
-		{
-			KillMsgValid = KillMsgValid && Kill.m_aVictimIds[i] >= 0 && ((Kill.m_aVictimRenderInfo[i].m_CustomColoredSkin && Kill.m_aVictimRenderInfo[i].m_ColorableRenderSkin.m_Body.IsValid()) || (!Kill.m_aVictimRenderInfo[i].m_CustomColoredSkin && Kill.m_aVictimRenderInfo[i].m_OriginalRenderSkin.m_Body.IsValid()));
-		}
-
-		if(KillMsgValid)
-		{
-			AddInfoMsg(EType::TYPE_KILL, Kill);
-		}
-		else
-		{
-			DeleteTextContainers(&Kill);
-		}
-
-		Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 	}
 
-	if(MsgType == NETMSGTYPE_SV_KILLMSG)
+	Kill.m_Weapon = pMsg->m_Weapon;
+	Kill.m_ModeSpecial = pMsg->m_ModeSpecial;
+
+	Kill.m_FlagCarrierBlue = m_pClient->m_Snap.m_pGameDataObj ? m_pClient->m_Snap.m_pGameDataObj->m_FlagCarrierBlue : -1;
+
+	Kill.m_VictimTextWidth = Kill.m_KillerTextWidth = 0.f;
+
+	float Height = 400 * 3.0f;
+	float Width = Height * Graphics()->ScreenAspect();
+
+	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
+	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
+	Graphics()->MapScreen(0, 0, Width * 1.5f, Height * 1.5f);
+
+	CreateNamesIfNotCreated(&Kill);
+
+	bool KillMsgValid = (Kill.m_aVictimRenderInfo[0].m_CustomColoredSkin && Kill.m_aVictimRenderInfo[0].m_ColorableRenderSkin.m_Body.IsValid()) || (!Kill.m_aVictimRenderInfo[0].m_CustomColoredSkin && Kill.m_aVictimRenderInfo[0].m_OriginalRenderSkin.m_Body.IsValid());
+	KillMsgValid &= Kill.m_KillerID == -1 || ((Kill.m_KillerRenderInfo.m_CustomColoredSkin && Kill.m_KillerRenderInfo.m_ColorableRenderSkin.m_Body.IsValid()) || (!Kill.m_KillerRenderInfo.m_CustomColoredSkin && Kill.m_KillerRenderInfo.m_OriginalRenderSkin.m_Body.IsValid()));
+	if(KillMsgValid)
 	{
-		CNetMsg_Sv_KillMsg *pMsg = (CNetMsg_Sv_KillMsg *)pRawMsg;
-
-		CInfoMsg Kill{};
-
-		Kill.m_TeamSize = 1;
-		Kill.m_aVictimIds[0] = pMsg->m_Victim;
-		if(Kill.m_aVictimIds[0] >= 0 && Kill.m_aVictimIds[0] < MAX_CLIENTS)
-		{
-			Kill.m_VictimDDTeam = m_pClient->m_Teams.Team(Kill.m_aVictimIds[0]);
-			str_copy(Kill.m_aVictimName, m_pClient->m_aClients[Kill.m_aVictimIds[0]].m_aName);
-			Kill.m_aVictimRenderInfo[0] = m_pClient->m_aClients[Kill.m_aVictimIds[0]].m_RenderInfo;
-		}
-		else
-		{
-			Kill.m_VictimDDTeam = 0;
-			Kill.m_aVictimName[0] = '\0';
-		}
-		for(int i = Kill.m_TeamSize; i < MAX_KILLMSG_TEAM_MEMBERS; i++)
-		{
-			Kill.m_aVictimIds[i] = -1;
-			Kill.m_aVictimRenderInfo[i].Reset();
-		}
-
-		Kill.m_KillerID = pMsg->m_Killer;
-		if(Kill.m_KillerID >= 0 && Kill.m_KillerID < MAX_CLIENTS)
-		{
-			str_copy(Kill.m_aKillerName, m_pClient->m_aClients[Kill.m_KillerID].m_aName);
-			Kill.m_KillerRenderInfo = m_pClient->m_aClients[Kill.m_KillerID].m_RenderInfo;
-		}
-		else
-		{
-			Kill.m_aKillerName[0] = '\0';
-			Kill.m_KillerRenderInfo.Reset();
-		}
-
-		Kill.m_Weapon = pMsg->m_Weapon;
-		Kill.m_ModeSpecial = pMsg->m_ModeSpecial;
-
-		Kill.m_FlagCarrierBlue = m_pClient->m_Snap.m_pGameDataObj ? m_pClient->m_Snap.m_pGameDataObj->m_FlagCarrierBlue : -1;
-
-		Kill.m_VictimTextWidth = Kill.m_KillerTextWidth = 0.f;
-
-		float Height = 400 * 3.0f;
-		float Width = Height * Graphics()->ScreenAspect();
-
-		float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
-		Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
-		Graphics()->MapScreen(0, 0, Width * 1.5f, Height * 1.5f);
-
-		CreateNamesIfNotCreated(&Kill);
-
-		bool KillMsgValid = (Kill.m_aVictimRenderInfo[0].m_CustomColoredSkin && Kill.m_aVictimRenderInfo[0].m_ColorableRenderSkin.m_Body.IsValid()) || (!Kill.m_aVictimRenderInfo[0].m_CustomColoredSkin && Kill.m_aVictimRenderInfo[0].m_OriginalRenderSkin.m_Body.IsValid());
-		KillMsgValid &= Kill.m_KillerID == -1 || ((Kill.m_KillerRenderInfo.m_CustomColoredSkin && Kill.m_KillerRenderInfo.m_ColorableRenderSkin.m_Body.IsValid()) || (!Kill.m_KillerRenderInfo.m_CustomColoredSkin && Kill.m_KillerRenderInfo.m_OriginalRenderSkin.m_Body.IsValid()));
-		if(KillMsgValid)
-		{
-			AddInfoMsg(EType::TYPE_KILL, Kill);
-		}
-		else
-		{
-			DeleteTextContainers(&Kill);
-		}
-
-		Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
+		AddInfoMsg(EType::TYPE_KILL, Kill);
 	}
-
-	if(MsgType == NETMSGTYPE_SV_RACEFINISH)
+	else
 	{
-		CNetMsg_Sv_RaceFinish *pMsg = (CNetMsg_Sv_RaceFinish *)pRawMsg;
+		DeleteTextContainers(&Kill);
+	}
 
-		char aBuf[256];
+	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
+}
 
-		CInfoMsg Finish;
-		Finish.m_TeamSize = 1;
-		Finish.m_aVictimIds[0] = pMsg->m_ClientID;
-		Finish.m_VictimDDTeam = m_pClient->m_Teams.Team(Finish.m_aVictimIds[0]);
-		str_copy(Finish.m_aVictimName, m_pClient->m_aClients[Finish.m_aVictimIds[0]].m_aName);
-		Finish.m_aVictimRenderInfo[0] = m_pClient->m_aClients[pMsg->m_ClientID].m_RenderInfo;
+void CInfoMessages::OnRaceFinishMessage(const CNetMsg_Sv_RaceFinish *pMsg)
+{
+	char aBuf[256];
 
-		Finish.m_aKillerName[0] = '\0';
+	CInfoMsg Finish;
+	Finish.m_TeamSize = 1;
+	Finish.m_aVictimIds[0] = pMsg->m_ClientID;
+	Finish.m_VictimDDTeam = m_pClient->m_Teams.Team(Finish.m_aVictimIds[0]);
+	str_copy(Finish.m_aVictimName, m_pClient->m_aClients[Finish.m_aVictimIds[0]].m_aName);
+	Finish.m_aVictimRenderInfo[0] = m_pClient->m_aClients[pMsg->m_ClientID].m_RenderInfo;
 
-		Finish.m_Diff = pMsg->m_Diff;
-		Finish.m_RecordPersonal = (pMsg->m_RecordPersonal || pMsg->m_RecordServer);
+	Finish.m_aKillerName[0] = '\0';
 
-		// diff time text
-		if(Finish.m_Diff)
+	Finish.m_Diff = pMsg->m_Diff;
+	Finish.m_RecordPersonal = (pMsg->m_RecordPersonal || pMsg->m_RecordServer);
+
+	// diff time text
+	if(Finish.m_Diff)
+	{
+		if(Finish.m_Diff < 0)
 		{
-			if(Finish.m_Diff < 0)
-			{
-				str_time_float(-Finish.m_Diff / 1000.0f, TIME_HOURS_CENTISECS, aBuf, sizeof(aBuf));
-				str_format(Finish.m_aDiffText, sizeof(Finish.m_aDiffText), "(-%s)", aBuf);
-			}
-			else
-			{
-				str_time_float(Finish.m_Diff / 1000.0f, TIME_HOURS_CENTISECS, aBuf, sizeof(aBuf));
-				str_format(Finish.m_aDiffText, sizeof(Finish.m_aDiffText), "(+%s)", aBuf);
-			}
+			str_time_float(-Finish.m_Diff / 1000.0f, TIME_HOURS_CENTISECS, aBuf, sizeof(aBuf));
+			str_format(Finish.m_aDiffText, sizeof(Finish.m_aDiffText), "(-%s)", aBuf);
 		}
 		else
 		{
-			Finish.m_aDiffText[0] = '\0';
+			str_time_float(Finish.m_Diff / 1000.0f, TIME_HOURS_CENTISECS, aBuf, sizeof(aBuf));
+			str_format(Finish.m_aDiffText, sizeof(Finish.m_aDiffText), "(+%s)", aBuf);
 		}
-
-		// finish time text
-		str_time_float(pMsg->m_Time / 1000.0f, TIME_HOURS_CENTISECS, Finish.m_aTimeText, sizeof(Finish.m_aTimeText));
-
-		float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
-		float Height = 400 * 3.0f;
-		float Width = Height * Graphics()->ScreenAspect();
-		Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
-		Graphics()->MapScreen(0, 0, Width * 1.5f, Height * 1.5f);
-
-		CreateNamesIfNotCreated(&Finish);
-		CreateFinishTextContainersIfNotCreated(&Finish);
-
-		AddInfoMsg(EType::TYPE_FINISH, Finish);
-
-		Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 	}
+	else
+	{
+		Finish.m_aDiffText[0] = '\0';
+	}
+
+	// finish time text
+	str_time_float(pMsg->m_Time / 1000.0f, TIME_HOURS_CENTISECS, Finish.m_aTimeText, sizeof(Finish.m_aTimeText));
+
+	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
+	float Height = 400 * 3.0f;
+	float Width = Height * Graphics()->ScreenAspect();
+	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
+	Graphics()->MapScreen(0, 0, Width * 1.5f, Height * 1.5f);
+
+	CreateNamesIfNotCreated(&Finish);
+	CreateFinishTextContainersIfNotCreated(&Finish);
+
+	AddInfoMsg(EType::TYPE_FINISH, Finish);
+
+	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 }
 
 void CInfoMessages::RenderKillMsg(CInfoMsg *pInfoMsg, float x, float y)
