@@ -26,7 +26,7 @@ public:
 	/**
 	 * Initialise the component and interface pointers.
 	 * Needs to be the first function that is called.
-     * The default implentation also resets the component.
+	 * The default implentation also resets the component.
 	 */
 	virtual void Init(CEditor *pEditor);
 
@@ -45,7 +45,6 @@ public:
 
 	/**
 	 * Gets called after `OnRender` when the component is hot but not active.
-	 * I
 	 */
 	virtual void OnHot();
 
