@@ -36,6 +36,7 @@
 #include "editor_server_settings.h"
 #include "editor_trackers.h"
 #include "editor_ui.h"
+#include "layer_selector.h"
 #include "map_view.h"
 #include "smooth_value.h"
 
@@ -277,6 +278,7 @@ class CEditor : public IEditor
 
 	std::vector<std::reference_wrapper<CEditorComponent>> m_vComponents;
 	CMapView m_MapView;
+	CLayerSelector m_LayerSelector;
 
 	bool m_EditorWasUsedBefore = false;
 
@@ -316,6 +318,7 @@ public:
 
 	CMapView *MapView() { return &m_MapView; }
 	const CMapView *MapView() const { return &m_MapView; }
+	CLayerSelector *LayerSelector() { return &m_LayerSelector; }
 
 	CEditor() :
 		m_ZoomEnvelopeX(1.0f, 0.1f, 600.0f),
@@ -426,6 +429,27 @@ public:
 		m_BrushDrawDestructive = true;
 	}
 
+	class CHoverTile
+	{
+	public:
+		CHoverTile(int Group, int Layer, int x, int y, const CTile Tile) :
+			m_Group(Group),
+			m_Layer(Layer),
+			m_X(x),
+			m_Y(y),
+			m_Tile(Tile)
+		{
+		}
+
+		int m_Group;
+		int m_Layer;
+		int m_X;
+		int m_Y;
+		const CTile m_Tile;
+	};
+	std::vector<CHoverTile> m_vHoverTiles;
+	const std::vector<CHoverTile> &HoverTiles() const { return m_vHoverTiles; }
+
 	void Init() override;
 	void OnUpdate() override;
 	void OnRender() override;
@@ -440,6 +464,7 @@ public:
 	void ResetIngameMoved() override { m_IngameMoved = false; }
 
 	void HandleCursorMovement();
+	void OnMouseMove(float MouseX, float MouseY);
 	void DispatchInputEvents();
 	void HandleAutosave();
 	bool PerformAutosave();
@@ -995,7 +1020,6 @@ public:
 
 	void SelectGameLayer();
 	std::vector<int> SortImages();
-	bool SelectLayerByTile();
 
 	void DoAudioPreview(CUIRect View, const void *pPlayPauseButtonID, const void *pStopButtonID, const void *pSeekBarID, const int SampleID);
 

@@ -3849,7 +3849,7 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 	}
 
 	static bool s_ScrollToSelectionNext = false;
-	const bool ScrollToSelection = SelectLayerByTile() || s_ScrollToSelectionNext;
+	const bool ScrollToSelection = LayerSelector()->SelectByTile() || s_ScrollToSelectionNext;
 	s_ScrollToSelectionNext = false;
 
 	// render layers
@@ -4384,69 +4384,6 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 			s_PreviousOperation = OP_NONE;
 		}
 	}
-}
-
-bool CEditor::SelectLayerByTile()
-{
-	// ctrl+rightclick a map index to select the layer that has a tile there
-	static int s_Selected = 0;
-	int MatchedGroup = -1;
-	int MatchedLayer = -1;
-	int Matches = 0;
-	bool IsFound = false;
-	if(Input()->ModifierIsPressed() && UI()->HotItem() == &m_MapEditorId && UI()->MouseButtonClicked(1))
-	{
-		for(size_t g = 0; g < m_Map.m_vpGroups.size(); g++)
-		{
-			for(size_t l = 0; l < m_Map.m_vpGroups[g]->m_vpLayers.size(); l++)
-			{
-				if(IsFound)
-					continue;
-				if(m_Map.m_vpGroups[g]->m_vpLayers[l]->m_Type != LAYERTYPE_TILES)
-					continue;
-
-				std::shared_ptr<CLayerTiles> pTiles = std::static_pointer_cast<CLayerTiles>(m_Map.m_vpGroups[g]->m_vpLayers[l]);
-
-				float aMapping[4];
-				m_Map.m_vpGroups[g]->Mapping(aMapping);
-				int x = aMapping[0] + (aMapping[2] - aMapping[0]) / 2;
-				int y = aMapping[1] + (aMapping[3] - aMapping[1]) / 2;
-				x += UI()->MouseWorldX() - (MapView()->GetWorldOffset().x * m_Map.m_vpGroups[g]->m_ParallaxX / 100) - m_Map.m_vpGroups[g]->m_OffsetX;
-				y += UI()->MouseWorldY() - (MapView()->GetWorldOffset().y * m_Map.m_vpGroups[g]->m_ParallaxY / 100) - m_Map.m_vpGroups[g]->m_OffsetY;
-				x /= 32;
-				y /= 32;
-
-				if(x < 0 || x >= pTiles->m_Width)
-					continue;
-				if(y < 0 || y >= pTiles->m_Height)
-					continue;
-				CTile Tile = pTiles->GetTile(x, y);
-				if(Tile.m_Index)
-				{
-					if(MatchedGroup == -1)
-					{
-						MatchedGroup = g;
-						MatchedLayer = l;
-					}
-					if(++Matches > s_Selected)
-					{
-						s_Selected++;
-						MatchedGroup = g;
-						MatchedLayer = l;
-						IsFound = true;
-					}
-				}
-			}
-		}
-		if(MatchedGroup != -1 && MatchedLayer != -1)
-		{
-			if(!IsFound)
-				s_Selected = 1;
-			SelectLayer(MatchedLayer, MatchedGroup);
-			return true;
-		}
-	}
-	return false;
 }
 
 bool CEditor::ReplaceImage(const char *pFileName, int StorageType, bool CheckDuplicate)
@@ -8424,6 +8361,7 @@ void CEditor::Init()
 
 	m_vComponents.emplace_back(m_MapView);
 	m_vComponents.emplace_back(m_MapSettingsBackend);
+	m_vComponents.emplace_back(m_LayerSelector);
 	for(CEditorComponent &Component : m_vComponents)
 		Component.Init(this);
 
@@ -8530,6 +8468,56 @@ void CEditor::HandleCursorMovement()
 		m_MouseWorldNoParaX = aPoints[0] + WorldWidth * (s_MouseX / Graphics()->WindowWidth());
 		m_MouseWorldNoParaY = aPoints[1] + WorldHeight * (s_MouseY / Graphics()->WindowHeight());
 	}
+
+	OnMouseMove(s_MouseX, s_MouseY);
+}
+
+void CEditor::OnMouseMove(float MouseX, float MouseY)
+{
+	m_vHoverTiles.clear();
+	for(size_t g = 0; g < m_Map.m_vpGroups.size(); g++)
+	{
+		const std::shared_ptr<CLayerGroup> pGroup = m_Map.m_vpGroups[g];
+		for(size_t l = 0; l < pGroup->m_vpLayers.size(); l++)
+		{
+			const std::shared_ptr<CLayer> pLayer = pGroup->m_vpLayers[l];
+			int LayerType = pLayer->m_Type;
+			if(LayerType != LAYERTYPE_TILES &&
+				LayerType != LAYERTYPE_FRONT &&
+				LayerType != LAYERTYPE_TELE &&
+				LayerType != LAYERTYPE_SPEEDUP &&
+				LayerType != LAYERTYPE_SWITCH &&
+				LayerType != LAYERTYPE_TUNE)
+				continue;
+
+			std::shared_ptr<CLayerTiles> pTiles = std::static_pointer_cast<CLayerTiles>(pLayer);
+			pGroup->MapScreen();
+			float aPoints[4];
+			pGroup->Mapping(aPoints);
+			float WorldWidth = aPoints[2] - aPoints[0];
+			float WorldHeight = aPoints[3] - aPoints[1];
+			CUIRect Rect;
+			Rect.x = aPoints[0] + WorldWidth * (MouseX / Graphics()->WindowWidth());
+			Rect.y = aPoints[1] + WorldHeight * (MouseY / Graphics()->WindowHeight());
+			Rect.w = 0;
+			Rect.h = 0;
+			RECTi r;
+			pTiles->Convert(Rect, &r);
+			pTiles->Clamp(&r);
+			int x = r.x;
+			int y = r.y;
+
+			if(x < 0 || x >= pTiles->m_Width)
+				continue;
+			if(y < 0 || y >= pTiles->m_Height)
+				continue;
+			CTile Tile = pTiles->GetTile(x, y);
+			if(Tile.m_Index)
+				m_vHoverTiles.emplace_back(CHoverTile(
+					g, l, x, y, Tile));
+		}
+	}
+	UI()->MapScreen();
 }
 
 void CEditor::DispatchInputEvents()
