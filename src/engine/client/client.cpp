@@ -3889,10 +3889,10 @@ void CClient::SwitchWindowScreen(int Index)
 	if(Graphics()->SetWindowScreen(Index))
 		g_Config.m_GfxScreen = Index;
 
-	SetWindowParams(3, false); // prevent from DDNet get extend some of scene on next monitor
+	SetWindowParams(3, false); // prevent DDNet to get stretch on monitors
 
 	CVideoMode s_aMode;
-	Graphics()->GetCurrentVideoMode(s_aMode, Index); 
+	Graphics()->GetCurrentVideoMode(s_aMode, Index);
 
 	const int Depth = s_aMode.m_Red + s_aMode.m_Green + s_aMode.m_Blue > 16 ? 24 : 16;
 	g_Config.m_GfxColorDepth = Depth;
