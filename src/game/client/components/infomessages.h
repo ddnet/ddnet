@@ -31,12 +31,10 @@ public:
 		int m_VictimDDTeam;
 		char m_aVictimName[64];
 		STextContainerIndex m_VictimTextContainerIndex;
-		float m_VictimTextWidth;
 		CTeeRenderInfo m_aVictimRenderInfo[MAX_KILLMSG_TEAM_MEMBERS];
 		int m_KillerID;
 		char m_aKillerName[64];
 		STextContainerIndex m_KillerTextContainerIndex;
-		float m_KillerTextWidth;
 		CTeeRenderInfo m_KillerRenderInfo;
 
 		// kill msg
@@ -51,8 +49,6 @@ public:
 		char m_aDiffText[32];
 		STextContainerIndex m_TimeTextContainerIndex;
 		STextContainerIndex m_DiffTextContainerIndex;
-		float m_TimeTextWidth;
-		float m_DiffTextWidth;
 		bool m_RecordPersonal;
 	};
 
