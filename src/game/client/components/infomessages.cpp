@@ -68,6 +68,40 @@ void CInfoMessages::OnInit()
 	Graphics()->QuadContainerUpload(m_SpriteQuadContainerIndex);
 }
 
+CInfoMessages::CInfoMsg CInfoMessages::CreateInfoMsg(EType Type)
+{
+	CInfoMsg InfoMsg;
+	InfoMsg.m_Type = Type;
+	InfoMsg.m_Tick = Client()->GameTick(g_Config.m_ClDummy);
+
+	for(int i = 0; i < MAX_KILLMSG_TEAM_MEMBERS; i++)
+	{
+		InfoMsg.m_aVictimIds[i] = -1;
+		InfoMsg.m_aVictimRenderInfo[i].Reset();
+	}
+	InfoMsg.m_VictimDDTeam = 0;
+	InfoMsg.m_aVictimName[0] = '\0';
+	InfoMsg.m_VictimTextContainerIndex.Reset();
+
+	InfoMsg.m_KillerID = -1;
+	InfoMsg.m_aKillerName[0] = '\0';
+	InfoMsg.m_KillerTextContainerIndex.Reset();
+	InfoMsg.m_KillerRenderInfo.Reset();
+
+	InfoMsg.m_Weapon = -1;
+	InfoMsg.m_ModeSpecial = 0;
+	InfoMsg.m_FlagCarrierBlue = -1;
+	InfoMsg.m_TeamSize = 0;
+
+	InfoMsg.m_Diff = 0;
+	InfoMsg.m_aTimeText[0] = '\0';
+	InfoMsg.m_aDiffText[0] = '\0';
+	InfoMsg.m_TimeTextContainerIndex.Reset();
+	InfoMsg.m_DiffTextContainerIndex.Reset();
+	InfoMsg.m_RecordPersonal = false;
+	return InfoMsg;
+}
+
 void CInfoMessages::AddInfoMsg(const CInfoMsg &InfoMsg)
 {
 	if(InfoMsg.m_KillerID >= 0 && !InfoMsg.m_KillerRenderInfo.Valid())
@@ -89,7 +123,6 @@ void CInfoMessages::AddInfoMsg(const CInfoMsg &InfoMsg)
 	DeleteTextContainers(m_aInfoMsgs[m_InfoMsgCurrent]);
 	m_aInfoMsgs[m_InfoMsgCurrent] = InfoMsg;
 	CreateTextContainersIfNotCreated(m_aInfoMsgs[m_InfoMsgCurrent]);
-	m_aInfoMsgs[m_InfoMsgCurrent].m_Tick = Client()->GameTick(g_Config.m_ClDummy);
 
 	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 }
@@ -172,9 +205,6 @@ void CInfoMessages::OnMessage(int MsgType, void *pRawMsg)
 
 void CInfoMessages::OnTeamKillMessage(const CNetMsg_Sv_KillMsgTeam *pMsg)
 {
-	CInfoMsg Kill{};
-	Kill.m_Type = TYPE_KILL;
-
 	std::vector<std::pair<int, int>> vStrongWeakSorted;
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
@@ -184,12 +214,10 @@ void CInfoMessages::OnTeamKillMessage(const CNetMsg_Sv_KillMsgTeam *pMsg)
 			vStrongWeakSorted.emplace_back(i, pMsg->m_First == i ? MAX_CLIENTS : pChr ? pChr->GetStrongWeakID() : 0);
 		}
 	}
-
 	std::stable_sort(vStrongWeakSorted.begin(), vStrongWeakSorted.end(), [](auto &Left, auto &Right) { return Left.second > Right.second; });
 
-	Kill.m_TeamSize = vStrongWeakSorted.size();
-	if(Kill.m_TeamSize > MAX_KILLMSG_TEAM_MEMBERS)
-		Kill.m_TeamSize = MAX_KILLMSG_TEAM_MEMBERS;
+	CInfoMsg Kill = CreateInfoMsg(TYPE_KILL);
+	Kill.m_TeamSize = minimum<int>(vStrongWeakSorted.size(), MAX_KILLMSG_TEAM_MEMBERS);
 
 	Kill.m_VictimDDTeam = pMsg->m_Team;
 	for(int i = 0; i < Kill.m_TeamSize; i++)
@@ -199,68 +227,28 @@ void CInfoMessages::OnTeamKillMessage(const CNetMsg_Sv_KillMsgTeam *pMsg)
 			Kill.m_aVictimIds[i] = vStrongWeakSorted[i].first;
 			Kill.m_aVictimRenderInfo[i] = m_pClient->m_aClients[vStrongWeakSorted[i].first].m_RenderInfo;
 		}
-		else
-		{
-			Kill.m_aVictimIds[i] = -1;
-			Kill.m_aVictimRenderInfo[i].Reset();
-		}
-	}
-	for(int i = Kill.m_TeamSize; i < MAX_KILLMSG_TEAM_MEMBERS; i++)
-	{
-		Kill.m_aVictimIds[i] = -1;
-		Kill.m_aVictimRenderInfo[i].Reset();
 	}
 	str_format(Kill.m_aVictimName, sizeof(Kill.m_aVictimName), Localize("Team %d"), pMsg->m_Team);
-
-	Kill.m_KillerID = -1;
-	Kill.m_aKillerName[0] = '\0';
-	Kill.m_KillerRenderInfo.Reset();
-
-	Kill.m_Weapon = -1;
-	Kill.m_ModeSpecial = 0;
 
 	AddInfoMsg(Kill);
 }
 
 void CInfoMessages::OnKillMessage(const CNetMsg_Sv_KillMsg *pMsg)
 {
-	CInfoMsg Kill{};
-	Kill.m_Type = TYPE_KILL;
+	CInfoMsg Kill = CreateInfoMsg(TYPE_KILL);
 
 	Kill.m_TeamSize = 1;
 	Kill.m_aVictimIds[0] = pMsg->m_Victim;
-	if(Kill.m_aVictimIds[0] >= 0 && Kill.m_aVictimIds[0] < MAX_CLIENTS)
-	{
-		Kill.m_VictimDDTeam = m_pClient->m_Teams.Team(Kill.m_aVictimIds[0]);
-		str_copy(Kill.m_aVictimName, m_pClient->m_aClients[Kill.m_aVictimIds[0]].m_aName);
-		Kill.m_aVictimRenderInfo[0] = m_pClient->m_aClients[Kill.m_aVictimIds[0]].m_RenderInfo;
-	}
-	else
-	{
-		Kill.m_VictimDDTeam = 0;
-		Kill.m_aVictimName[0] = '\0';
-	}
-	for(int i = Kill.m_TeamSize; i < MAX_KILLMSG_TEAM_MEMBERS; i++)
-	{
-		Kill.m_aVictimIds[i] = -1;
-		Kill.m_aVictimRenderInfo[i].Reset();
-	}
+	Kill.m_VictimDDTeam = m_pClient->m_Teams.Team(Kill.m_aVictimIds[0]);
+	str_copy(Kill.m_aVictimName, m_pClient->m_aClients[Kill.m_aVictimIds[0]].m_aName);
+	Kill.m_aVictimRenderInfo[0] = m_pClient->m_aClients[Kill.m_aVictimIds[0]].m_RenderInfo;
 
 	Kill.m_KillerID = pMsg->m_Killer;
-	if(Kill.m_KillerID >= 0 && Kill.m_KillerID < MAX_CLIENTS)
-	{
-		str_copy(Kill.m_aKillerName, m_pClient->m_aClients[Kill.m_KillerID].m_aName);
-		Kill.m_KillerRenderInfo = m_pClient->m_aClients[Kill.m_KillerID].m_RenderInfo;
-	}
-	else
-	{
-		Kill.m_aKillerName[0] = '\0';
-		Kill.m_KillerRenderInfo.Reset();
-	}
+	str_copy(Kill.m_aKillerName, m_pClient->m_aClients[Kill.m_KillerID].m_aName);
+	Kill.m_KillerRenderInfo = m_pClient->m_aClients[Kill.m_KillerID].m_RenderInfo;
 
 	Kill.m_Weapon = pMsg->m_Weapon;
 	Kill.m_ModeSpecial = pMsg->m_ModeSpecial;
-
 	Kill.m_FlagCarrierBlue = m_pClient->m_Snap.m_pGameDataObj ? m_pClient->m_Snap.m_pGameDataObj->m_FlagCarrierBlue : -1;
 
 	AddInfoMsg(Kill);
@@ -268,43 +256,22 @@ void CInfoMessages::OnKillMessage(const CNetMsg_Sv_KillMsg *pMsg)
 
 void CInfoMessages::OnRaceFinishMessage(const CNetMsg_Sv_RaceFinish *pMsg)
 {
-	char aBuf[256];
+	CInfoMsg Finish = CreateInfoMsg(TYPE_FINISH);
 
-	CInfoMsg Finish{};
-	Finish.m_Type = TYPE_FINISH;
 	Finish.m_TeamSize = 1;
 	Finish.m_aVictimIds[0] = pMsg->m_ClientID;
 	Finish.m_VictimDDTeam = m_pClient->m_Teams.Team(Finish.m_aVictimIds[0]);
 	str_copy(Finish.m_aVictimName, m_pClient->m_aClients[Finish.m_aVictimIds[0]].m_aName);
 	Finish.m_aVictimRenderInfo[0] = m_pClient->m_aClients[pMsg->m_ClientID].m_RenderInfo;
 
-	Finish.m_KillerID = -1;
-	Finish.m_aKillerName[0] = '\0';
-	Finish.m_KillerRenderInfo.Reset();
-
 	Finish.m_Diff = pMsg->m_Diff;
-	Finish.m_RecordPersonal = (pMsg->m_RecordPersonal || pMsg->m_RecordServer);
-
-	// diff time text
+	Finish.m_RecordPersonal = pMsg->m_RecordPersonal || pMsg->m_RecordServer;
 	if(Finish.m_Diff)
 	{
-		if(Finish.m_Diff < 0)
-		{
-			str_time_float(-Finish.m_Diff / 1000.0f, TIME_HOURS_CENTISECS, aBuf, sizeof(aBuf));
-			str_format(Finish.m_aDiffText, sizeof(Finish.m_aDiffText), "(-%s)", aBuf);
-		}
-		else
-		{
-			str_time_float(Finish.m_Diff / 1000.0f, TIME_HOURS_CENTISECS, aBuf, sizeof(aBuf));
-			str_format(Finish.m_aDiffText, sizeof(Finish.m_aDiffText), "(+%s)", aBuf);
-		}
+		char aBuf[64];
+		str_time_float(absolute(Finish.m_Diff) / 1000.0f, TIME_HOURS_CENTISECS, aBuf, sizeof(aBuf));
+		str_format(Finish.m_aDiffText, sizeof(Finish.m_aDiffText), "(%c%s)", Finish.m_Diff < 0 ? '-' : '+', aBuf);
 	}
-	else
-	{
-		Finish.m_aDiffText[0] = '\0';
-	}
-
-	// finish time text
 	str_time_float(pMsg->m_Time / 1000.0f, TIME_HOURS_CENTISECS, Finish.m_aTimeText, sizeof(Finish.m_aTimeText));
 
 	AddInfoMsg(Finish);
