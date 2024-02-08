@@ -18,7 +18,7 @@ void CInfoMessages::OnWindowResize()
 {
 	for(auto &InfoMsg : m_aInfoMsgs)
 	{
-		DeleteTextContainers(&InfoMsg);
+		DeleteTextContainers(InfoMsg);
 	}
 }
 
@@ -28,16 +28,16 @@ void CInfoMessages::OnReset()
 	for(auto &InfoMsg : m_aInfoMsgs)
 	{
 		InfoMsg.m_Tick = -100000;
-		DeleteTextContainers(&InfoMsg);
+		DeleteTextContainers(InfoMsg);
 	}
 }
 
-void CInfoMessages::DeleteTextContainers(CInfoMsg *pInfoMsg)
+void CInfoMessages::DeleteTextContainers(CInfoMsg &InfoMsg)
 {
-	TextRender()->DeleteTextContainer(pInfoMsg->m_VictimTextContainerIndex);
-	TextRender()->DeleteTextContainer(pInfoMsg->m_KillerTextContainerIndex);
-	TextRender()->DeleteTextContainer(pInfoMsg->m_DiffTextContainerIndex);
-	TextRender()->DeleteTextContainer(pInfoMsg->m_TimeTextContainerIndex);
+	TextRender()->DeleteTextContainer(InfoMsg.m_VictimTextContainerIndex);
+	TextRender()->DeleteTextContainer(InfoMsg.m_KillerTextContainerIndex);
+	TextRender()->DeleteTextContainer(InfoMsg.m_DiffTextContainerIndex);
+	TextRender()->DeleteTextContainer(InfoMsg.m_TimeTextContainerIndex);
 }
 
 void CInfoMessages::OnInit()
@@ -65,14 +65,30 @@ void CInfoMessages::OnInit()
 	Graphics()->QuadContainerUpload(m_SpriteQuadContainerIndex);
 }
 
-void CInfoMessages::AddInfoMsg(EType Type, CInfoMsg NewMsg)
+void CInfoMessages::AddInfoMsg(const CInfoMsg &InfoMsg)
 {
-	NewMsg.m_Type = Type;
-	NewMsg.m_Tick = Client()->GameTick(g_Config.m_ClDummy);
+	if(InfoMsg.m_KillerID >= 0 && !InfoMsg.m_KillerRenderInfo.Valid())
+		return;
+	for(int i = 0; i < InfoMsg.m_TeamSize; i++)
+	{
+		if(InfoMsg.m_aVictimIds[i] < 0 || !InfoMsg.m_aVictimRenderInfo[i].Valid())
+			return;
+	}
+
+	const float Height = 1.5f * 400.0f * 3.0f;
+	const float Width = Height * Graphics()->ScreenAspect();
+
+	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
+	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
+	Graphics()->MapScreen(0, 0, Width, Height);
 
 	m_InfoMsgCurrent = (m_InfoMsgCurrent + 1) % MAX_INFOMSGS;
-	DeleteTextContainers(&m_aInfoMsgs[m_InfoMsgCurrent]);
-	m_aInfoMsgs[m_InfoMsgCurrent] = NewMsg;
+	DeleteTextContainers(m_aInfoMsgs[m_InfoMsgCurrent]);
+	m_aInfoMsgs[m_InfoMsgCurrent] = InfoMsg;
+	CreateTextContainersIfNotCreated(m_aInfoMsgs[m_InfoMsgCurrent]);
+	m_aInfoMsgs[m_InfoMsgCurrent].m_Tick = Client()->GameTick(g_Config.m_ClDummy);
+
+	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 }
 
 void CInfoMessages::CreateTextContainersIfNotCreated(CInfoMsg &InfoMsg)
@@ -160,6 +176,7 @@ void CInfoMessages::OnMessage(int MsgType, void *pRawMsg)
 void CInfoMessages::OnTeamKillMessage(const CNetMsg_Sv_KillMsgTeam *pMsg)
 {
 	CInfoMsg Kill{};
+	Kill.m_Type = TYPE_KILL;
 
 	std::vector<std::pair<int, int>> vStrongWeakSorted;
 	for(int i = 0; i < MAX_CLIENTS; i++)
@@ -207,36 +224,13 @@ void CInfoMessages::OnTeamKillMessage(const CNetMsg_Sv_KillMsgTeam *pMsg)
 
 	Kill.m_VictimTextWidth = Kill.m_KillerTextWidth = 0.f;
 
-	float Height = 400 * 3.0f;
-	float Width = Height * Graphics()->ScreenAspect();
-
-	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
-	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
-	Graphics()->MapScreen(0, 0, Width * 1.5f, Height * 1.5f);
-
-	CreateTextContainersIfNotCreated(Kill);
-
-	bool KillMsgValid = true;
-	for(int i = 0; i < Kill.m_TeamSize; i++)
-	{
-		KillMsgValid = KillMsgValid && Kill.m_aVictimIds[i] >= 0 && Kill.m_aVictimRenderInfo[i].Valid();
-	}
-
-	if(KillMsgValid)
-	{
-		AddInfoMsg(EType::TYPE_KILL, Kill);
-	}
-	else
-	{
-		DeleteTextContainers(&Kill);
-	}
-
-	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
+	AddInfoMsg(Kill);
 }
 
 void CInfoMessages::OnKillMessage(const CNetMsg_Sv_KillMsg *pMsg)
 {
 	CInfoMsg Kill{};
+	Kill.m_Type = TYPE_KILL;
 
 	Kill.m_TeamSize = 1;
 	Kill.m_aVictimIds[0] = pMsg->m_Victim;
@@ -276,25 +270,7 @@ void CInfoMessages::OnKillMessage(const CNetMsg_Sv_KillMsg *pMsg)
 
 	Kill.m_VictimTextWidth = Kill.m_KillerTextWidth = 0.f;
 
-	float Height = 400 * 3.0f;
-	float Width = Height * Graphics()->ScreenAspect();
-
-	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
-	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
-	Graphics()->MapScreen(0, 0, Width * 1.5f, Height * 1.5f);
-
-	CreateTextContainersIfNotCreated(Kill);
-
-	if(Kill.m_aVictimRenderInfo[0].Valid() && (Kill.m_KillerID == -1 || Kill.m_KillerRenderInfo.Valid()))
-	{
-		AddInfoMsg(EType::TYPE_KILL, Kill);
-	}
-	else
-	{
-		DeleteTextContainers(&Kill);
-	}
-
-	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
+	AddInfoMsg(Kill);
 }
 
 void CInfoMessages::OnRaceFinishMessage(const CNetMsg_Sv_RaceFinish *pMsg)
@@ -302,6 +278,7 @@ void CInfoMessages::OnRaceFinishMessage(const CNetMsg_Sv_RaceFinish *pMsg)
 	char aBuf[256];
 
 	CInfoMsg Finish{};
+	Finish.m_Type = TYPE_FINISH;
 	Finish.m_TeamSize = 1;
 	Finish.m_aVictimIds[0] = pMsg->m_ClientID;
 	Finish.m_VictimDDTeam = m_pClient->m_Teams.Team(Finish.m_aVictimIds[0]);
@@ -337,24 +314,7 @@ void CInfoMessages::OnRaceFinishMessage(const CNetMsg_Sv_RaceFinish *pMsg)
 	// finish time text
 	str_time_float(pMsg->m_Time / 1000.0f, TIME_HOURS_CENTISECS, Finish.m_aTimeText, sizeof(Finish.m_aTimeText));
 
-	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
-	float Height = 400 * 3.0f;
-	float Width = Height * Graphics()->ScreenAspect();
-	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
-	Graphics()->MapScreen(0, 0, Width * 1.5f, Height * 1.5f);
-
-	CreateTextContainersIfNotCreated(Finish);
-
-	if(Finish.m_aVictimRenderInfo[0].Valid())
-	{
-		AddInfoMsg(EType::TYPE_FINISH, Finish);
-	}
-	else
-	{
-		DeleteTextContainers(&Finish);
-	}
-
-	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
+	AddInfoMsg(Finish);
 }
 
 void CInfoMessages::RenderKillMsg(CInfoMsg *pInfoMsg, float x, float y)
@@ -520,6 +480,7 @@ void CInfoMessages::OnRender()
 			continue;
 
 		CreateTextContainersIfNotCreated(*pInfoMsg);
+
 		if(pInfoMsg->m_Type == EType::TYPE_KILL && g_Config.m_ClShowKillMessages)
 		{
 			RenderKillMsg(pInfoMsg, StartX, y);

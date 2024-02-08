@@ -57,7 +57,7 @@ public:
 	};
 
 private:
-	void AddInfoMsg(EType Type, CInfoMsg NewMsg);
+	void AddInfoMsg(const CInfoMsg &InfoMsg);
 	void RenderKillMsg(CInfoMsg *pInfoMsg, float x, float y);
 	void RenderFinishMsg(CInfoMsg *pInfoMsg, float x, float y);
 
@@ -66,7 +66,7 @@ private:
 	void OnRaceFinishMessage(const struct CNetMsg_Sv_RaceFinish *pMsg);
 
 	void CreateTextContainersIfNotCreated(CInfoMsg &InfoMsg);
-	void DeleteTextContainers(CInfoMsg *pInfoMsg);
+	void DeleteTextContainers(CInfoMsg &InfoMsg);
 
 public:
 	CInfoMsg m_aInfoMsgs[MAX_INFOMSGS];
