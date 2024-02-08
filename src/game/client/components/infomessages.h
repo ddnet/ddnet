@@ -8,6 +8,7 @@
 class CInfoMessages : public CComponent
 {
 	int m_SpriteQuadContainerIndex;
+
 	enum
 	{
 		MAX_INFOMSGS = 5,
@@ -20,8 +21,6 @@ class CInfoMessages : public CComponent
 		TYPE_FINISH,
 	};
 
-public:
-	// info messages
 	struct CInfoMsg
 	{
 		EType m_Type;
@@ -52,7 +51,9 @@ public:
 		bool m_RecordPersonal;
 	};
 
-private:
+	CInfoMsg m_aInfoMsgs[MAX_INFOMSGS];
+	int m_InfoMsgCurrent;
+
 	CInfoMsg CreateInfoMsg(EType Type);
 	void AddInfoMsg(const CInfoMsg &InfoMsg);
 	void RenderKillMsg(const CInfoMsg &InfoMsg, float x, float y);
@@ -66,9 +67,6 @@ private:
 	void DeleteTextContainers(CInfoMsg &InfoMsg);
 
 public:
-	CInfoMsg m_aInfoMsgs[MAX_INFOMSGS];
-	int m_InfoMsgCurrent;
-
 	virtual int Sizeof() const override { return sizeof(*this); }
 	virtual void OnWindowResize() override;
 	virtual void OnRefreshSkins() override;
