@@ -497,20 +497,11 @@ void CHud::RenderTextInfo()
 		// calculate avg. fps
 		m_FrameTimeAvg = m_FrameTimeAvg * 0.9f + Client()->RenderFrameTime() * 0.1f;
 		char aBuf[64];
-		int FrameTime = (int)(1.0f / m_FrameTimeAvg + 0.5f);
+		int FrameTime = (int)(1.0f / m_FrameTimeAvg + 0.5f); // todo: multiply by 5 to boost fps
 		str_from_int(FrameTime, aBuf);
 
-		static float s_TextWidth0 = TextRender()->TextWidth(12.f, "0", -1, -1.0f);
-		static float s_TextWidth00 = TextRender()->TextWidth(12.f, "00", -1, -1.0f);
-		static float s_TextWidth000 = TextRender()->TextWidth(12.f, "000", -1, -1.0f);
-		static float s_TextWidth0000 = TextRender()->TextWidth(12.f, "0000", -1, -1.0f);
-		static float s_TextWidth00000 = TextRender()->TextWidth(12.f, "00000", -1, -1.0f);
-		static const float s_aTextWidth[5] = {s_TextWidth0, s_TextWidth00, s_TextWidth000, s_TextWidth0000, s_TextWidth00000};
-
-		int DigitIndex = GetDigitsIndex(FrameTime, 4);
-
 		CTextCursor Cursor;
-		TextRender()->SetCursor(&Cursor, m_Width - 10 - s_aTextWidth[DigitIndex], 5, 12, TEXTFLAG_RENDER);
+		TextRender()->SetCursor(&Cursor, m_Width - 10 - (int)TextRender()->TextWidth(12.f, aBuf, -1, -1.0f), 5, 12, TEXTFLAG_RENDER);
 		Cursor.m_LineWidth = -1;
 		auto OldFlags = TextRender()->GetRenderFlags();
 		TextRender()->SetRenderFlags(OldFlags | TEXT_RENDER_FLAG_ONE_TIME_USE);
