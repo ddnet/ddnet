@@ -357,7 +357,14 @@ void CInfoMessages::OnRaceFinishMessage(const CNetMsg_Sv_RaceFinish *pMsg)
 	CreateNamesIfNotCreated(&Finish);
 	CreateFinishTextContainersIfNotCreated(&Finish);
 
-	AddInfoMsg(EType::TYPE_FINISH, Finish);
+	if(Finish.m_aVictimRenderInfo[0].Valid())
+	{
+		AddInfoMsg(EType::TYPE_FINISH, Finish);
+	}
+	else
+	{
+		DeleteTextContainers(&Finish);
+	}
 
 	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 }
