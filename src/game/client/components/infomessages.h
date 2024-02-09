@@ -8,6 +8,7 @@
 class CInfoMessages : public CComponent
 {
 	int m_SpriteQuadContainerIndex;
+
 	enum
 	{
 		MAX_INFOMSGS = 5,
@@ -20,8 +21,6 @@ class CInfoMessages : public CComponent
 		TYPE_FINISH,
 	};
 
-public:
-	// info messages
 	struct CInfoMsg
 	{
 		EType m_Type;
@@ -31,12 +30,10 @@ public:
 		int m_VictimDDTeam;
 		char m_aVictimName[64];
 		STextContainerIndex m_VictimTextContainerIndex;
-		float m_VictimTextWidth;
 		CTeeRenderInfo m_aVictimRenderInfo[MAX_KILLMSG_TEAM_MEMBERS];
 		int m_KillerID;
 		char m_aKillerName[64];
 		STextContainerIndex m_KillerTextContainerIndex;
-		float m_KillerTextWidth;
 		CTeeRenderInfo m_KillerRenderInfo;
 
 		// kill msg
@@ -51,25 +48,25 @@ public:
 		char m_aDiffText[32];
 		STextContainerIndex m_TimeTextContainerIndex;
 		STextContainerIndex m_DiffTextContainerIndex;
-		float m_TimeTextWidth;
-		float m_DiffTextWidth;
 		bool m_RecordPersonal;
 	};
 
-private:
-	void AddInfoMsg(EType Type, CInfoMsg NewMsg);
-	void RenderKillMsg(CInfoMsg *pInfoMsg, float x, float y);
-	void RenderFinishMsg(CInfoMsg *pInfoMsg, float x, float y);
-
-	void CreateNamesIfNotCreated(CInfoMsg *pInfoMsg);
-	void CreateFinishTextContainersIfNotCreated(CInfoMsg *pInfoMsg);
-
-	void DeleteTextContainers(CInfoMsg *pInfoMsg);
-
-public:
 	CInfoMsg m_aInfoMsgs[MAX_INFOMSGS];
 	int m_InfoMsgCurrent;
 
+	CInfoMsg CreateInfoMsg(EType Type);
+	void AddInfoMsg(const CInfoMsg &InfoMsg);
+	void RenderKillMsg(const CInfoMsg &InfoMsg, float x, float y);
+	void RenderFinishMsg(const CInfoMsg &InfoMsg, float x, float y);
+
+	void OnTeamKillMessage(const struct CNetMsg_Sv_KillMsgTeam *pMsg);
+	void OnKillMessage(const struct CNetMsg_Sv_KillMsg *pMsg);
+	void OnRaceFinishMessage(const struct CNetMsg_Sv_RaceFinish *pMsg);
+
+	void CreateTextContainersIfNotCreated(CInfoMsg &InfoMsg);
+	void DeleteTextContainers(CInfoMsg &InfoMsg);
+
+public:
 	virtual int Sizeof() const override { return sizeof(*this); }
 	virtual void OnWindowResize() override;
 	virtual void OnRefreshSkins() override;

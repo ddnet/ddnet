@@ -62,6 +62,11 @@ public:
 	bool m_GotAirJump;
 	int m_TeeRenderFlags;
 	bool m_FeetFlipped;
+
+	bool Valid() const
+	{
+		return m_CustomColoredSkin ? m_ColorableRenderSkin.m_Body.IsValid() : m_OriginalRenderSkin.m_Body.IsValid();
+	}
 };
 
 // Tee Render Flags
