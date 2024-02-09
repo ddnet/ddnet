@@ -3891,14 +3891,14 @@ void CClient::SwitchWindowScreen(int Index)
 
 	SetWindowParams(3, false); // prevent DDNet to get stretch on monitors
 
-	CVideoMode s_aMode;
-	Graphics()->GetCurrentVideoMode(s_aMode, Index);
+	CVideoMode CurMode;
+	Graphics()->GetCurrentVideoMode(CurMode, Index);
 
-	const int Depth = s_aMode.m_Red + s_aMode.m_Green + s_aMode.m_Blue > 16 ? 24 : 16;
+	const int Depth = CurMode.m_Red + CurMode.m_Green + CurMode.m_Blue > 16 ? 24 : 16;
 	g_Config.m_GfxColorDepth = Depth;
-	g_Config.m_GfxScreenWidth = s_aMode.m_WindowWidth;
-	g_Config.m_GfxScreenHeight = s_aMode.m_WindowHeight;
-	g_Config.m_GfxScreenRefreshRate = s_aMode.m_RefreshRate;
+	g_Config.m_GfxScreenWidth = CurMode.m_WindowWidth;
+	g_Config.m_GfxScreenHeight = CurMode.m_WindowHeight;
+	g_Config.m_GfxScreenRefreshRate = CurMode.m_RefreshRate;
 
 	Graphics()->Resize(g_Config.m_GfxScreenWidth, g_Config.m_GfxScreenHeight, g_Config.m_GfxScreenRefreshRate);
 

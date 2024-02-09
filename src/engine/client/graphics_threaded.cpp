@@ -2970,9 +2970,9 @@ int CGraphics_Threaded::GetVideoModes(CVideoMode *pModes, int MaxModes, int Scre
 	return NumModes;
 }
 
-void CGraphics_Threaded::GetCurrentVideoMode(CVideoMode &pModes, int Screen)
+void CGraphics_Threaded::GetCurrentVideoMode(CVideoMode &CurMode, int Screen)
 {
-	m_pBackend->GetCurrentVideoMode(pModes, m_ScreenHiDPIScale, g_Config.m_GfxDesktopWidth, g_Config.m_GfxDesktopHeight, Screen);
+	m_pBackend->GetCurrentVideoMode(CurMode, m_ScreenHiDPIScale, g_Config.m_GfxDesktopWidth, g_Config.m_GfxDesktopHeight, Screen);
 }
 
 extern IEngineGraphics *CreateEngineGraphicsThreaded()
