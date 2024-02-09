@@ -301,16 +301,16 @@ class CEditor : public IEditor
 	static const ColorRGBA ms_DefaultPropColor;
 
 public:
-	class IInput *Input() { return m_pInput; }
-	class IClient *Client() { return m_pClient; }
-	class IConfigManager *ConfigManager() { return m_pConfigManager; }
-	class CConfig *Config() { return m_pConfig; }
-	class IConsole *Console() { return m_pConsole; }
-	class IEngine *Engine() { return m_pEngine; }
-	class IGraphics *Graphics() { return m_pGraphics; }
-	class ISound *Sound() { return m_pSound; }
-	class ITextRender *TextRender() { return m_pTextRender; }
-	class IStorage *Storage() { return m_pStorage; }
+	class IInput *Input() const { return m_pInput; }
+	class IClient *Client() const { return m_pClient; }
+	class IConfigManager *ConfigManager() const { return m_pConfigManager; }
+	class CConfig *Config() const { return m_pConfig; }
+	class IConsole *Console() const { return m_pConsole; }
+	class IEngine *Engine() const { return m_pEngine; }
+	class IGraphics *Graphics() const { return m_pGraphics; }
+	class ISound *Sound() const { return m_pSound; }
+	class ITextRender *TextRender() const { return m_pTextRender; }
+	class IStorage *Storage() const { return m_pStorage; }
 	CUI *UI() { return &m_UI; }
 	CRenderTools *RenderTools() { return &m_RenderTools; }
 
