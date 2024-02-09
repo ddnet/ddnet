@@ -319,7 +319,7 @@ int CEditor::DoButton_DraggableEx(const void *pID, const char *pText, int Checke
 	return UI()->DoDraggableButtonLogic(pID, Checked, pRect, pClicked, pAbrupted);
 }
 
-void CEditor::RenderBackground(CUIRect View, IGraphics::CTextureHandle Texture, float Size, float Brightness)
+void CEditor::RenderBackground(CUIRect View, IGraphics::CTextureHandle Texture, float Size, float Brightness) const
 {
 	Graphics()->TextureSet(Texture);
 	Graphics()->BlendNormal();
@@ -1547,7 +1547,7 @@ void CEditor::DoPointDrag(const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQu
 	pQuad->m_aPoints[PointIndex].y = m_QuadDragOriginalPoints[QuadIndex][PointIndex].y + OffsetY;
 }
 
-CEditor::EAxis CEditor::GetDragAxis(int OffsetX, int OffsetY)
+CEditor::EAxis CEditor::GetDragAxis(int OffsetX, int OffsetY) const
 {
 	if(Input()->ShiftIsPressed())
 		if(absolute(OffsetX) < absolute(OffsetY))
@@ -1558,7 +1558,7 @@ CEditor::EAxis CEditor::GetDragAxis(int OffsetX, int OffsetY)
 		return EAxis::AXIS_NONE;
 }
 
-void CEditor::DrawAxis(EAxis Axis, CPoint &OriginalPoint, CPoint &Point)
+void CEditor::DrawAxis(EAxis Axis, CPoint &OriginalPoint, CPoint &Point) const
 {
 	if(Axis == EAxis::AXIS_NONE)
 		return;
@@ -1892,7 +1892,7 @@ void CEditor::ComputeAABBAlignments(const std::shared_ptr<CLayerQuads> &pLayer, 
 	vAlignments.insert(vAlignments.end(), vAlignmentsY.begin(), vAlignmentsY.end());
 }
 
-void CEditor::DrawPointAlignments(const std::vector<SAlignmentInfo> &vAlignments, int OffsetX, int OffsetY)
+void CEditor::DrawPointAlignments(const std::vector<SAlignmentInfo> &vAlignments, int OffsetX, int OffsetY) const
 {
 	if(!g_Config.m_EdAlignQuads)
 		return;
@@ -1916,7 +1916,7 @@ void CEditor::DrawPointAlignments(const std::vector<SAlignmentInfo> &vAlignments
 	}
 }
 
-void CEditor::DrawAABB(const SAxisAlignedBoundingBox &AABB, int OffsetX, int OffsetY)
+void CEditor::DrawAABB(const SAxisAlignedBoundingBox &AABB, int OffsetX, int OffsetY) const
 {
 	// Drawing an AABB is simply converting the points from fixed to float
 	// Then making lines out of quads and drawing them
@@ -2006,7 +2006,7 @@ void CEditor::ApplyAlignments(const std::vector<SAlignmentInfo> &vAlignments, in
 	OffsetY += AdjustY;
 }
 
-void CEditor::ApplyAxisAlignment(int &OffsetX, int &OffsetY)
+void CEditor::ApplyAxisAlignment(int &OffsetX, int &OffsetY) const
 {
 	// This is used to preserve axis alignment when pressing `Shift`
 	// Should be called before any other computation
@@ -8361,7 +8361,7 @@ void CEditor::Reset(bool CreateDefault)
 	m_MapSettingsCommandContext.Reset();
 }
 
-int CEditor::GetTextureUsageFlag()
+int CEditor::GetTextureUsageFlag() const
 {
 	return Graphics()->Uses2DTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
 }
