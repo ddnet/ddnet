@@ -1310,7 +1310,7 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 					{
 						pButtonName = "Switch";
 						pfnPopupFunc = PopupSwitch;
-						Rows = 2;
+						Rows = 3;
 					}
 					else if(pS == m_Map.m_pSpeedupLayer)
 					{

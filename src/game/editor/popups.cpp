@@ -2590,12 +2590,43 @@ CUI::EPopupMenuFunctionResult CEditor::PopupSwitch(void *pContext, CUIRect View,
 {
 	CEditor *pEditor = static_cast<CEditor *>(pContext);
 
-	CUIRect NumberPicker, FindEmptySlot;
+	CUIRect NumberPicker, FindEmptySlot, ViewEmptySlot;
 
 	View.VSplitRight(15.0f, &NumberPicker, &FindEmptySlot);
 	NumberPicker.VSplitRight(2.0f, &NumberPicker, nullptr);
-	FindEmptySlot.HSplitTop(13.0f, &FindEmptySlot, nullptr);
+
+	FindEmptySlot.HSplitTop(13.0f, &FindEmptySlot, &ViewEmptySlot);
+	ViewEmptySlot.HSplitTop(13.0f, nullptr, &ViewEmptySlot);
+
 	FindEmptySlot.HMargin(1.0f, &FindEmptySlot);
+	ViewEmptySlot.HMargin(1.0f, &ViewEmptySlot);
+
+	auto ViewSwitch = [pEditor]() -> bool {
+		if(!pEditor->m_ViewSwitch)
+			return false;
+		ivec2 SwitchPos;
+		pEditor->m_Map.m_pSwitchLayer->GetPos(pEditor->m_ViewSwitch, -1, SwitchPos);
+		if(SwitchPos != ivec2(-1, -1))
+		{
+			pEditor->MapView()->SetWorldOffset({32.0f * SwitchPos.x + 0.5f, 32.0f * SwitchPos.y + 0.5f});
+			return true;
+		}
+		return false;
+	};
+
+	static std::vector<ColorRGBA> s_vColors = {
+		ColorRGBA(1, 1, 1, 0.5f),
+		ColorRGBA(1, 1, 1, 0.5f),
+		ColorRGBA(1, 1, 1, 0.5f),
+	};
+
+	enum
+	{
+		PROP_SWITCH_NUMBER = 0,
+		PROP_SWITCH_DELAY,
+		PROP_SWITCH_VIEW,
+		NUM_PROPS,
+	};
 
 	// find empty number button
 	{
@@ -2607,25 +2638,21 @@ CUI::EPopupMenuFunctionResult CEditor::PopupSwitch(void *pContext, CUIRect View,
 			if(Number != -1)
 				pEditor->m_SwitchNum = Number;
 		}
+
+		static int s_NextViewPid = 0;
+		int ButtonResult = pEditor->DoButton_Editor(&s_NextViewPid, "N", 0, &ViewEmptySlot, 0, "[n] Show next switcher with this number");
+		if(ButtonResult || (Active && pEditor->Input()->KeyPress(KEY_N)))
+			s_vColors[PROP_SWITCH_VIEW] = ViewSwitch() ? ColorRGBA(0.5f, 1, 0.5f, 0.5f) : ColorRGBA(1, 0.5f, 0.5f, 0.5f);
 	}
 
 	// number picker
 	static int s_PreviousNumber = -1;
+	static int s_PreviousView = -1;
 	{
-		static std::vector<ColorRGBA> s_vColors = {
-			ColorRGBA(1, 1, 1, 0.5f),
-		};
-
-		enum
-		{
-			PROP_SWITCH_NUMBER = 0,
-			PROP_SWITCH_DELAY,
-			NUM_PROPS,
-		};
-
 		CProperty aProps[] = {
 			{"Number", pEditor->m_SwitchNum, PROPTYPE_INT, 0, 255},
 			{"Delay", pEditor->m_SwitchDelay, PROPTYPE_INT, 0, 255},
+			{"View", pEditor->m_ViewSwitch, PROPTYPE_INT, 0, 255},
 			{nullptr},
 		};
 
@@ -2641,12 +2668,19 @@ CUI::EPopupMenuFunctionResult CEditor::PopupSwitch(void *pContext, CUIRect View,
 		{
 			pEditor->m_SwitchDelay = (NewVal + 256) % 256;
 		}
+		else if(Prop == PROP_SWITCH_VIEW)
+		{
+			pEditor->m_ViewSwitch = (NewVal + 256) % 256;
+		}
 
 		if(s_PreviousNumber == 1 || s_PreviousNumber != pEditor->m_SwitchNum)
 			s_vColors[PROP_SWITCH_NUMBER] = pEditor->m_Map.m_pSwitchLayer->ContainsElementWithId(pEditor->m_SwitchNum) ? ColorRGBA(1, 0.5f, 0.5f, 0.5f) : ColorRGBA(0.5f, 1, 0.5f, 0.5f);
+		if(s_PreviousView != pEditor->m_ViewSwitch)
+			s_vColors[PROP_SWITCH_VIEW] = ViewSwitch() ? ColorRGBA(0.5f, 1, 0.5f, 0.5f) : ColorRGBA(1, 0.5f, 0.5f, 0.5f);
 	}
 
 	s_PreviousNumber = pEditor->m_SwitchNum;
+	s_PreviousView = pEditor->m_ViewSwitch;
 	return CUI::POPUP_KEEP_OPEN;
 }
 
