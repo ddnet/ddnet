@@ -207,8 +207,9 @@ const CSkin *CSkins::LoadSkin(const char *pName, CImageInfo &Info)
 
 	// dig out blood color
 	{
-		int aColors[3] = {0};
+		int64_t aColors[3] = {0};
 		for(int y = 0; y < BodyHeight; y++)
+		{
 			for(int x = 0; x < BodyWidth; x++)
 			{
 				uint8_t AlphaValue = pData[y * Pitch + x * PixelStep + 3];
@@ -219,10 +220,9 @@ const CSkin *CSkins::LoadSkin(const char *pName, CImageInfo &Info)
 					aColors[2] += pData[y * Pitch + x * PixelStep + 2];
 				}
 			}
-		if(aColors[0] != 0 && aColors[1] != 0 && aColors[2] != 0)
-			Skin.m_BloodColor = ColorRGBA(normalize(vec3(aColors[0], aColors[1], aColors[2])));
-		else
-			Skin.m_BloodColor = ColorRGBA(0, 0, 0, 1);
+		}
+
+		Skin.m_BloodColor = ColorRGBA(normalize(vec3(aColors[0], aColors[1], aColors[2])));
 	}
 
 	CheckMetrics(Skin.m_Metrics.m_Body, pData, Pitch, 0, 0, BodyWidth, BodyHeight);
