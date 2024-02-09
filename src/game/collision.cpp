@@ -135,12 +135,9 @@ void CCollision::Init(class CLayers *pLayers)
 	m_TeleIns.clear();
 	m_TeleOuts.clear();
 	m_TeleCheckOuts.clear();
-	if(m_pLayers->TeleLayer())
+	if(m_pTele)
 	{
-		int Width = m_pLayers->TeleLayer()->m_Width;
-		int Height = m_pLayers->TeleLayer()->m_Height;
-
-		for(int i = 0; i < Width * Height; i++)
+		for(int i = 0; i < m_Width * m_Height; i++)
 		{
 			int Number = TeleLayer()[i].m_Number;
 			int Type = TeleLayer()[i].m_Type;
@@ -148,15 +145,15 @@ void CCollision::Init(class CLayers *pLayers)
 			{
 				if(Type == TILE_TELEIN)
 				{
-					m_TeleIns[Number - 1].emplace_back(i % Width * 32.0f + 16.0f, i / Width * 32.0f + 16.0f);
+					m_TeleIns[Number - 1].emplace_back(i % m_Width * 32.0f + 16.0f, i / m_Width * 32.0f + 16.0f);
 				}
 				else if(Type == TILE_TELEOUT)
 				{
-					m_TeleOuts[Number - 1].emplace_back(i % Width * 32.0f + 16.0f, i / Width * 32.0f + 16.0f);
+					m_TeleOuts[Number - 1].emplace_back(i % m_Width * 32.0f + 16.0f, i / m_Width * 32.0f + 16.0f);
 				}
 				else if(Type == TILE_TELECHECKOUT)
 				{
-					m_TeleCheckOuts[Number - 1].emplace_back(i % Width * 32.0f + 16.0f, i / Width * 32.0f + 16.0f);
+					m_TeleCheckOuts[Number - 1].emplace_back(i % m_Width * 32.0f + 16.0f, i / m_Width * 32.0f + 16.0f);
 				}
 			}
 		}

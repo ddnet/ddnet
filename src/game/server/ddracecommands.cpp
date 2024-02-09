@@ -361,13 +361,13 @@ void CGameContext::ConToTeleporter(IConsole::IResult *pResult, void *pUserData)
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	unsigned int TeleTo = pResult->GetInteger(0);
 
-	if(!pSelf->Collision()->TeleOuts()[TeleTo - 1].empty())
+	if(!pSelf->Collision()->TeleOuts(TeleTo - 1).empty())
 	{
 		CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientId);
 		if(pChr)
 		{
-			int TeleOut = pSelf->m_World.m_Core.RandomOr0(pSelf->Collision()->TeleOuts()[TeleTo - 1].size());
-			pSelf->Teleport(pChr, pSelf->Collision()->TeleOuts()[TeleTo - 1][TeleOut]);
+			int TeleOut = pSelf->m_World.m_Core.RandomOr0(pSelf->Collision()->TeleOuts(TeleTo - 1).size());
+			pSelf->Teleport(pChr, pSelf->Collision()->TeleOuts(TeleTo - 1)[TeleOut]);
 		}
 	}
 }
@@ -377,13 +377,13 @@ void CGameContext::ConToCheckTeleporter(IConsole::IResult *pResult, void *pUserD
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	unsigned int TeleTo = pResult->GetInteger(0);
 
-	if(!pSelf->Collision()->TeleCheckOuts()[TeleTo - 1].empty())
+	if(!pSelf->Collision()->TeleCheckOuts(TeleTo - 1).empty())
 	{
 		CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientId);
 		if(pChr)
 		{
-			int TeleOut = pSelf->m_World.m_Core.RandomOr0(pSelf->Collision()->TeleCheckOuts()[TeleTo - 1].size());
-			pSelf->Teleport(pChr, pSelf->Collision()->TeleCheckOuts()[TeleTo - 1][TeleOut]);
+			int TeleOut = pSelf->m_World.m_Core.RandomOr0(pSelf->Collision()->TeleCheckOuts(TeleTo - 1).size());
+			pSelf->Teleport(pChr, pSelf->Collision()->TeleCheckOuts(TeleTo - 1)[TeleOut]);
 			pChr->m_TeleCheckpoint = TeleTo;
 		}
 	}

@@ -117,9 +117,9 @@ public:
 	class CLayers *Layers() { return m_pLayers; }
 	int m_HighestSwitchNumber;
 
-	std::map<int, std::vector<vec2>> &TeleIns() { return m_TeleIns; }
-	std::map<int, std::vector<vec2>> &TeleOuts() { return m_TeleOuts; }
-	std::map<int, std::vector<vec2>> &TeleCheckOuts() { return m_TeleCheckOuts; }
+	const std::vector<vec2> &TeleIns(int Number) { return m_TeleIns[Number]; }
+	const std::vector<vec2> &TeleOuts(int Number) { return m_TeleOuts[Number]; }
+	const std::vector<vec2> &TeleCheckOuts(int Number) { return m_TeleCheckOuts[Number]; }
 
 private:
 	std::map<int, std::vector<vec2>> m_TeleIns;

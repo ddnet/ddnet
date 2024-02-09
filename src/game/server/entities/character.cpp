@@ -794,7 +794,7 @@ void CCharacter::TickDeferred()
 	// advance the dummy
 	{
 		CWorldCore TempWorld;
-		m_ReckoningCore.Init(&TempWorld, Collision(), &Teams()->m_Core, m_pTeleOuts);
+		m_ReckoningCore.Init(&TempWorld, Collision(), &Teams()->m_Core);
 		m_ReckoningCore.m_Id = m_pPlayer->GetCid();
 		m_ReckoningCore.Tick(false);
 		m_ReckoningCore.Move();
@@ -1291,13 +1291,6 @@ bool CCharacter::SameTeam(int ClientId)
 int CCharacter::Team()
 {
 	return Teams()->m_Core.Team(m_pPlayer->GetCid());
-}
-
-void CCharacter::SetTeleports(std::map<int, std::vector<vec2>> *pTeleOuts, std::map<int, std::vector<vec2>> *pTeleCheckOuts)
-{
-	m_pTeleOuts = pTeleOuts;
-	m_pTeleCheckOuts = pTeleCheckOuts;
-	m_Core.SetTeleOuts(pTeleOuts);
 }
 
 void CCharacter::FillAntibot(CAntibotCharacterData *pData)
@@ -1834,12 +1827,12 @@ void CCharacter::HandleTiles(int Index)
 	}
 
 	int z = Collision()->IsTeleport(MapIndex);
-	if(!g_Config.m_SvOldTeleportHook && !g_Config.m_SvOldTeleportWeapons && z && !(*m_pTeleOuts)[z - 1].empty())
+	if(!g_Config.m_SvOldTeleportHook && !g_Config.m_SvOldTeleportWeapons && z && !Collision()->TeleOuts(z - 1).empty())
 	{
 		if(m_Core.m_Super)
 			return;
-		int TeleOut = GameWorld()->m_Core.RandomOr0((*m_pTeleOuts)[z - 1].size());
-		m_Core.m_Pos = (*m_pTeleOuts)[z - 1][TeleOut];
+		int TeleOut = GameWorld()->m_Core.RandomOr0(Collision()->TeleOuts(z - 1).size());
+		m_Core.m_Pos = Collision()->TeleOuts(z - 1)[TeleOut];
 		if(!g_Config.m_SvTeleportHoldHook)
 		{
 			ResetHook();
@@ -1849,12 +1842,12 @@ void CCharacter::HandleTiles(int Index)
 		return;
 	}
 	int evilz = Collision()->IsEvilTeleport(MapIndex);
-	if(evilz && !(*m_pTeleOuts)[evilz - 1].empty())
+	if(evilz && !Collision()->TeleOuts(evilz - 1).empty())
 	{
 		if(m_Core.m_Super)
 			return;
-		int TeleOut = GameWorld()->m_Core.RandomOr0((*m_pTeleOuts)[evilz - 1].size());
-		m_Core.m_Pos = (*m_pTeleOuts)[evilz - 1][TeleOut];
+		int TeleOut = GameWorld()->m_Core.RandomOr0(Collision()->TeleOuts(evilz - 1).size());
+		m_Core.m_Pos = Collision()->TeleOuts(evilz - 1)[TeleOut];
 		if(!g_Config.m_SvOldTeleportHook && !g_Config.m_SvOldTeleportWeapons)
 		{
 			m_Core.m_Vel = vec2(0, 0);
@@ -1878,10 +1871,10 @@ void CCharacter::HandleTiles(int Index)
 		// first check if there is a TeleCheckOut for the current recorded checkpoint, if not check previous checkpoints
 		for(int k = m_TeleCheckpoint - 1; k >= 0; k--)
 		{
-			if(!(*m_pTeleCheckOuts)[k].empty())
+			if(!Collision()->TeleCheckOuts(k).empty())
 			{
-				int TeleOut = GameWorld()->m_Core.RandomOr0((*m_pTeleCheckOuts)[k].size());
-				m_Core.m_Pos = (*m_pTeleCheckOuts)[k][TeleOut];
+				int TeleOut = GameWorld()->m_Core.RandomOr0(Collision()->TeleCheckOuts(k).size());
+				m_Core.m_Pos = Collision()->TeleCheckOuts(k)[TeleOut];
 				m_Core.m_Vel = vec2(0, 0);
 
 				if(!g_Config.m_SvTeleportHoldHook)
@@ -1915,10 +1908,10 @@ void CCharacter::HandleTiles(int Index)
 		// first check if there is a TeleCheckOut for the current recorded checkpoint, if not check previous checkpoints
 		for(int k = m_TeleCheckpoint - 1; k >= 0; k--)
 		{
-			if(!(*m_pTeleCheckOuts)[k].empty())
+			if(!Collision()->TeleCheckOuts(k).empty())
 			{
-				int TeleOut = GameWorld()->m_Core.RandomOr0((*m_pTeleCheckOuts)[k].size());
-				m_Core.m_Pos = (*m_pTeleCheckOuts)[k][TeleOut];
+				int TeleOut = GameWorld()->m_Core.RandomOr0(Collision()->TeleCheckOuts(k).size());
+				m_Core.m_Pos = Collision()->TeleCheckOuts(k)[TeleOut];
 
 				if(!g_Config.m_SvTeleportHoldHook)
 				{

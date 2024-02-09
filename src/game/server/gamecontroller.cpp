@@ -482,8 +482,6 @@ void IGameController::OnCharacterSpawn(class CCharacter *pChr)
 	// give default weapons
 	pChr->GiveWeapon(WEAPON_HAMMER);
 	pChr->GiveWeapon(WEAPON_GUN);
-
-	pChr->SetTeleports(&GameServer()->Collision()->TeleOuts(), &GameServer()->Collision()->TeleCheckOuts());
 }
 
 void IGameController::HandleCharacterTiles(CCharacter *pChr, int MapIndex)
