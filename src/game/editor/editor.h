@@ -288,7 +288,7 @@ class CEditor : public IEditor
 	IGraphics::CTextureHandle m_SwitchTexture;
 	IGraphics::CTextureHandle m_TuneTexture;
 
-	int GetTextureUsageFlag();
+	int GetTextureUsageFlag() const;
 
 	enum EPreviewState
 	{
@@ -301,16 +301,16 @@ class CEditor : public IEditor
 	static const ColorRGBA ms_DefaultPropColor;
 
 public:
-	class IInput *Input() { return m_pInput; }
-	class IClient *Client() { return m_pClient; }
-	class IConfigManager *ConfigManager() { return m_pConfigManager; }
-	class CConfig *Config() { return m_pConfig; }
-	class IConsole *Console() { return m_pConsole; }
-	class IEngine *Engine() { return m_pEngine; }
-	class IGraphics *Graphics() { return m_pGraphics; }
-	class ISound *Sound() { return m_pSound; }
-	class ITextRender *TextRender() { return m_pTextRender; }
-	class IStorage *Storage() { return m_pStorage; }
+	class IInput *Input() const { return m_pInput; }
+	class IClient *Client() const { return m_pClient; }
+	class IConfigManager *ConfigManager() const { return m_pConfigManager; }
+	class CConfig *Config() const { return m_pConfig; }
+	class IConsole *Console() const { return m_pConsole; }
+	class IEngine *Engine() const { return m_pEngine; }
+	class IGraphics *Graphics() const { return m_pGraphics; }
+	class ISound *Sound() const { return m_pSound; }
+	class ITextRender *TextRender() const { return m_pTextRender; }
+	class IStorage *Storage() const { return m_pStorage; }
 	CUI *UI() { return &m_UI; }
 	CRenderTools *RenderTools() { return &m_RenderTools; }
 
@@ -823,7 +823,7 @@ public:
 	template<typename T>
 	int RenderEditBoxDropdown(SEditBoxDropdownContext *pDropdown, CUIRect View, CLineInput *pLineInput, int x, float MaxHeight, bool AutoWidth, const std::vector<T> &vData, const FDropdownRenderCallback<T> &fnMatchCallback);
 
-	void RenderBackground(CUIRect View, IGraphics::CTextureHandle Texture, float Size, float Brightness);
+	void RenderBackground(CUIRect View, IGraphics::CTextureHandle Texture, float Size, float Brightness) const;
 
 	SEditResult<int> UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, int Current, int Min, int Max, int Step, float Scale, const char *pToolTip, bool IsDegree = false, bool IsHex = false, int corners = IGraphics::CORNER_ALL, const ColorRGBA *pColor = nullptr, bool ShowValue = true);
 
@@ -919,9 +919,9 @@ public:
 	void DoQuad(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, int Index);
 	void PreparePointDrag(const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, int QuadIndex, int PointIndex);
 	void DoPointDrag(const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, int QuadIndex, int PointIndex, int OffsetX, int OffsetY);
-	EAxis GetDragAxis(int OffsetX, int OffsetY);
-	void DrawAxis(EAxis Axis, CPoint &OriginalPoint, CPoint &Point);
-	void DrawAABB(const SAxisAlignedBoundingBox &AABB, int OffsetX = 0, int OffsetY = 0);
+	EAxis GetDragAxis(int OffsetX, int OffsetY) const;
+	void DrawAxis(EAxis Axis, CPoint &OriginalPoint, CPoint &Point) const;
+	void DrawAABB(const SAxisAlignedBoundingBox &AABB, int OffsetX = 0, int OffsetY = 0) const;
 	ColorRGBA GetButtonColor(const void *pID, int Checked);
 
 	// Alignment methods
@@ -945,10 +945,10 @@ public:
 	void ComputePointAlignments(const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, int QuadIndex, int PointIndex, int OffsetX, int OffsetY, std::vector<SAlignmentInfo> &vAlignments, bool Append = false) const;
 	void ComputePointsAlignments(const std::shared_ptr<CLayerQuads> &pLayer, bool Pivot, int OffsetX, int OffsetY, std::vector<SAlignmentInfo> &vAlignments) const;
 	void ComputeAABBAlignments(const std::shared_ptr<CLayerQuads> &pLayer, const SAxisAlignedBoundingBox &AABB, int OffsetX, int OffsetY, std::vector<SAlignmentInfo> &vAlignments) const;
-	void DrawPointAlignments(const std::vector<SAlignmentInfo> &vAlignments, int OffsetX, int OffsetY);
+	void DrawPointAlignments(const std::vector<SAlignmentInfo> &vAlignments, int OffsetX, int OffsetY) const;
 	void QuadSelectionAABB(const std::shared_ptr<CLayerQuads> &pLayer, SAxisAlignedBoundingBox &OutAABB);
 	void ApplyAlignments(const std::vector<SAlignmentInfo> &vAlignments, int &OffsetX, int &OffsetY);
-	void ApplyAxisAlignment(int &OffsetX, int &OffsetY);
+	void ApplyAxisAlignment(int &OffsetX, int &OffsetY) const;
 
 	bool ReplaceImage(const char *pFilename, int StorageType, bool CheckDuplicate);
 	static bool ReplaceImageCallback(const char *pFilename, int StorageType, void *pUser);
