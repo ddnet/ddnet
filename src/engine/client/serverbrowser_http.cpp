@@ -207,7 +207,7 @@ void CChooseMaster::CJob::Run()
 		pGet->Wait();
 
 		auto Time = std::chrono::duration_cast<std::chrono::milliseconds>(time_get_nanoseconds() - StartTime);
-		if(pHead->State() == EHttpState::ABORTED)
+		if(pGet->State() == EHttpState::ABORTED)
 		{
 			dbg_msg("serverbrowse_http", "master chooser aborted");
 			return;
