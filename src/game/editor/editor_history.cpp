@@ -88,3 +88,8 @@ void CEditorHistory::EndBulk(const char *pDisplay)
 
 	m_vpBulkActions.clear();
 }
+
+void CEditorHistory::EndBulk(int DisplayToUse)
+{
+	EndBulk((DisplayToUse < 0 || DisplayToUse >= (int)m_vpBulkActions.size()) ? nullptr : m_vpBulkActions[DisplayToUse]->DisplayText());
+}
