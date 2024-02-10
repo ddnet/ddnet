@@ -3048,7 +3048,7 @@ void CClient::Run()
 	}
 
 	m_Fifo.Shutdown();
-
+	m_Http.Shutdown();
 	GameClient()->OnShutdown();
 	Disconnect();
 
