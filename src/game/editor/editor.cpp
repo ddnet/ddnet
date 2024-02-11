@@ -8025,6 +8025,7 @@ void CEditor::Render()
 
 	for(CEditorComponent &Component : m_vComponents)
 		Component.OnRender(View);
+	RenderPrompt(View);
 
 	MapView()->UpdateZoom();
 
@@ -8050,6 +8051,15 @@ void CEditor::Render()
 		RenderTooltip(TooltipRect);
 
 	RenderMousePointer();
+}
+
+#include "../../ddnet_hotui/loader.h"
+
+void CEditor::RenderPrompt(CUIRect View)
+{
+	static CListBox s_ListBox;
+	CUIRect Prompt, PromptBox;
+	HotEditorListCuiRects(this, s_ListBox, View, Prompt, PromptBox);
 }
 
 void CEditor::RenderPressedKeys(CUIRect View)
