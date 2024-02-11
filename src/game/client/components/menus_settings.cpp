@@ -273,7 +273,7 @@ void CMenus::SetNeedSendInfo()
 
 void CMenus::RenderSettingsPlayer(CUIRect MainView)
 {
-	CUIRect TabBar, PlayerTab, DummyTab;
+	CUIRect TabBar, PlayerTab, DummyTab, QuickSearch, QuickSearchClearButton;
 	MainView.HSplitTop(20.0f, &TabBar, &MainView);
 	TabBar.VSplitMid(&TabBar, nullptr);
 	TabBar.VSplitMid(&PlayerTab, &DummyTab);
@@ -336,14 +336,27 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 	}
 
 	// country flag selector
-	MainView.HSplitTop(10.0f, nullptr, &MainView);
-	int OldSelected = -1;
-	static CListBox s_ListBox;
-	s_ListBox.DoStart(48.0f, m_pClient->m_CountryFlags.Num(), 10, 3, OldSelected, &MainView);
+	static CLineInputBuffered<25> s_FlagFilterInput;
 
+	std::vector<const CCountryFlags::CCountryFlag *> vpFilteredFlags;
 	for(size_t i = 0; i < m_pClient->m_CountryFlags.Num(); ++i)
 	{
 		const CCountryFlags::CCountryFlag *pEntry = m_pClient->m_CountryFlags.GetByIndex(i);
+		if(!str_find_nocase(pEntry->m_aCountryCodeString, s_FlagFilterInput.GetString()))
+			continue;
+		vpFilteredFlags.push_back(pEntry);
+	}
+
+	MainView.HSplitTop(10.0f, nullptr, &MainView);
+	MainView.HSplitBottom(25.0f, &MainView, &QuickSearch);
+	int OldSelected = -1;
+	static CListBox s_ListBox;
+	s_ListBox.DoStart(48.0f, vpFilteredFlags.size(), 10, 3, OldSelected, &MainView);
+
+	for(size_t i = 0; i < vpFilteredFlags.size(); i++)
+	{
+		const CCountryFlags::CCountryFlag *pEntry = vpFilteredFlags[i];
+
 		if(pEntry->m_CountryCode == *pCountry)
 			OldSelected = i;
 
@@ -369,9 +382,34 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 	const int NewSelected = s_ListBox.DoEnd();
 	if(OldSelected != NewSelected)
 	{
-		*pCountry = m_pClient->m_CountryFlags.GetByIndex(NewSelected)->m_CountryCode;
+		*pCountry = vpFilteredFlags[NewSelected]->m_CountryCode;
 		SetNeedSendInfo();
 	}
+
+	// render quick search
+	QuickSearch.VSplitLeft(240.0f, &QuickSearch, nullptr);
+	QuickSearch.HSplitTop(5.0f, nullptr, &QuickSearch);
+
+	TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
+	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
+	UI()->DoLabel(&QuickSearch, FONT_ICON_MAGNIFYING_GLASS, 14.0f, TEXTALIGN_ML);
+	TextRender()->SetRenderFlags(0);
+	TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
+
+	float wSearch = TextRender()->TextWidth(14.0f, FONT_ICON_MAGNIFYING_GLASS, -1, -1.0f);
+	QuickSearch.VSplitLeft(wSearch - 1.5f, nullptr, &QuickSearch);
+	QuickSearch.VSplitLeft(5.0f, nullptr, &QuickSearch);
+	QuickSearch.VSplitLeft(QuickSearch.w - 10.0f, &QuickSearch, &QuickSearchClearButton);
+
+	TextRender()->SetRenderFlags(0);
+	TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
+	if(Input()->KeyPress(KEY_F) && Input()->ModifierIsPressed())
+	{
+		UI()->SetActiveItem(&s_FlagFilterInput);
+		s_FlagFilterInput.SelectAll();
+	}
+	s_FlagFilterInput.SetEmptyText(Localize("Search"));
+	UI()->DoClearableEditBox(&s_FlagFilterInput, &QuickSearch, 14.0f);
 }
 
 struct CUISkin
