@@ -1521,7 +1521,7 @@ void CGameContext::OnClientEnter(int ClientID)
 		int Empty = -1;
 		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
-			if(!Server()->ClientIngame(i))
+			if(Server()->ClientEmpty(i))
 			{
 				Empty = i;
 				break;
