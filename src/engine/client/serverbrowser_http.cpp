@@ -207,7 +207,7 @@ void CChooseMaster::CJob::Run()
 		pGet->Wait();
 
 		auto Time = std::chrono::duration_cast<std::chrono::milliseconds>(time_get_nanoseconds() - StartTime);
-		if(pHead->State() == EHttpState::ABORTED)
+		if(pGet->State() == EHttpState::ABORTED)
 		{
 			dbg_msg("serverbrowse_http", "master chooser aborted");
 			return;
@@ -345,7 +345,7 @@ void CServerBrowserHttp::Update()
 	}
 	else if(m_State == STATE_REFRESHING)
 	{
-		if(m_pGetServers->State() == EHttpState::QUEUED || m_pGetServers->State() == EHttpState::RUNNING)
+		if(!m_pGetServers->Done())
 		{
 			return;
 		}
@@ -354,7 +354,7 @@ void CServerBrowserHttp::Update()
 		std::swap(m_pGetServers, pGetServers);
 
 		bool Success = true;
-		json_value *pJson = pGetServers->ResultJson();
+		json_value *pJson = pGetServers->State() == EHttpState::DONE ? pGetServers->ResultJson() : nullptr;
 		Success = Success && pJson;
 		Success = Success && !Parse(pJson, &m_vServers, &m_vLegacyServers);
 		json_value_free(pJson);

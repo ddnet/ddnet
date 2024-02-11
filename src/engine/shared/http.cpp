@@ -257,33 +257,25 @@ int CHttpRequest::ProgressCallback(void *pUser, double DlTotal, double DlCurr, d
 	return pTask->m_Abort ? -1 : 0;
 }
 
-void CHttpRequest::OnCompletionInternal(std::optional<unsigned int> Result)
+void CHttpRequest::OnCompletionInternal(unsigned int Result)
 {
 	EHttpState State;
-	if(Result.has_value())
+	const CURLcode Code = static_cast<CURLcode>(Result);
+	if(Code != CURLE_OK)
 	{
-		CURLcode Code = static_cast<CURLcode>(Result.value());
-		if(Code != CURLE_OK)
+		if(g_Config.m_DbgCurl || m_LogProgress >= HTTPLOG::FAILURE)
 		{
-			if(g_Config.m_DbgCurl || m_LogProgress >= HTTPLOG::FAILURE)
-			{
-				log_error("http", "%s failed. libcurl error (%u): %s", m_aUrl, Code, m_aErr);
-			}
-			State = (Code == CURLE_ABORTED_BY_CALLBACK) ? EHttpState::ABORTED : EHttpState::ERROR;
+			log_error("http", "%s failed. libcurl error (%u): %s", m_aUrl, Code, m_aErr);
 		}
-		else
-		{
-			if(g_Config.m_DbgCurl || m_LogProgress >= HTTPLOG::ALL)
-			{
-				log_info("http", "task done: %s", m_aUrl);
-			}
-			State = EHttpState::DONE;
-		}
+		State = (Code == CURLE_ABORTED_BY_CALLBACK) ? EHttpState::ABORTED : EHttpState::ERROR;
 	}
 	else
 	{
-		log_error("http", "%s failed. internal error: %s", m_aUrl, m_aErr);
-		State = EHttpState::ERROR;
+		if(g_Config.m_DbgCurl || m_LogProgress >= HTTPLOG::ALL)
+		{
+			log_info("http", "task done: %s", m_aUrl);
+		}
+		State = EHttpState::DONE;
 	}
 
 	if(State == EHttpState::DONE)
@@ -543,7 +535,7 @@ void CHttp::RunLoop()
 	for(auto &pRequest : m_PendingRequests)
 	{
 		str_copy(pRequest->m_aErr, "Shutting down");
-		pRequest->OnCompletionInternal(std::nullopt);
+		pRequest->OnCompletionInternal(CURLE_ABORTED_BY_CALLBACK);
 	}
 
 	for(auto &ReqPair : m_RunningRequests)
@@ -556,7 +548,7 @@ void CHttp::RunLoop()
 		}
 
 		str_copy(pRequest->m_aErr, "Shutting down");
-		pRequest->OnCompletionInternal(std::nullopt);
+		pRequest->OnCompletionInternal(CURLE_ABORTED_BY_CALLBACK);
 	}
 
 	if(Cleanup)

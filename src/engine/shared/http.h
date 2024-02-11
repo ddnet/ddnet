@@ -118,7 +118,7 @@ class CHttpRequest : public IHttpRequest
 	// Abort the request with an error if `BeforeInit()` returns false.
 	bool BeforeInit();
 	bool ConfigureHandle(void *pHandle); // void * == CURL *
-	void OnCompletionInternal(std::optional<unsigned int> Result); // unsigned int == CURLcode
+	void OnCompletionInternal(unsigned int Result); // unsigned int == CURLcode
 
 	// Abort the request if `OnData()` returns something other than
 	// `DataSize`.
