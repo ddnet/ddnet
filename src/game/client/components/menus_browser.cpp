@@ -858,7 +858,10 @@ void CMenus::RenderServerbrowserDDNetFilter(CUIRect View,
 				else if(Click == 2)
 				{
 					// Right click: when all are active, only deactivate one
-					Filter.Add(GetItemName(ItemIndex));
+					if(MaxItems >= 2)
+					{
+						Filter.Add(GetItemName(ItemIndex));
+					}
 				}
 			}
 			else
