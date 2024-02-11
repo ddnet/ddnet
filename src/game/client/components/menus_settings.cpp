@@ -273,7 +273,7 @@ void CMenus::SetNeedSendInfo()
 
 void CMenus::RenderSettingsPlayer(CUIRect MainView)
 {
-	CUIRect TabBar, PlayerTab, DummyTab, QuickSearch, SearchIcon, QuickSearchClearButton;
+	CUIRect TabBar, PlayerTab, DummyTab, QuickSearch, QuickSearchClearButton;
 	MainView.HSplitTop(20.0f, &TabBar, &MainView);
 	TabBar.VSplitMid(&TabBar, nullptr);
 	TabBar.VSplitMid(&PlayerTab, &DummyTab);
@@ -338,24 +338,24 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 	// country flag selector
 	static CLineInputBuffered<25> s_FlagFilterInput;
 
-	std::vector<size_t> vFilteredFlagsIndices;
+	std::vector<const CCountryFlags::CCountryFlag *> vpFilteredFlags;
 	for(size_t i = 0; i < m_pClient->m_CountryFlags.Num(); ++i)
 	{
 		const CCountryFlags::CCountryFlag *pEntry = m_pClient->m_CountryFlags.GetByIndex(i);
 		if(!str_find_nocase(pEntry->m_aCountryCodeString, s_FlagFilterInput.GetString()))
 			continue;
-		vFilteredFlagsIndices.push_back(i);
+		vpFilteredFlags.push_back(pEntry);
 	}
 
 	MainView.HSplitTop(10.0f, nullptr, &MainView);
 	MainView.HSplitBottom(25.0f, &MainView, &QuickSearch);
 	int OldSelected = -1;
 	static CListBox s_ListBox;
-	s_ListBox.DoStart(48.0f, vFilteredFlagsIndices.size(), 10, 3, OldSelected, &MainView);
+	s_ListBox.DoStart(48.0f, vpFilteredFlags.size(), 10, 3, OldSelected, &MainView);
 
-	for(size_t i = 0; i < vFilteredFlagsIndices.size(); i++)
+	for(size_t i = 0; i < vpFilteredFlags.size(); i++)
 	{
-		const CCountryFlags::CCountryFlag *pEntry = m_pClient->m_CountryFlags.GetByIndex(vFilteredFlagsIndices[i]);
+		const CCountryFlags::CCountryFlag *pEntry = vpFilteredFlags[i];
 
 		if(pEntry->m_CountryCode == *pCountry)
 			OldSelected = i;
@@ -382,7 +382,7 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 	const int NewSelected = s_ListBox.DoEnd();
 	if(OldSelected != NewSelected)
 	{
-		*pCountry = m_pClient->m_CountryFlags.GetByIndex(vFilteredFlagsIndices[NewSelected])->m_CountryCode;
+		*pCountry = vpFilteredFlags[NewSelected]->m_CountryCode;
 		SetNeedSendInfo();
 	}
 
