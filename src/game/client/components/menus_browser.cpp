@@ -724,7 +724,9 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 		}
 	}
 
-	if(!m_CommunityCache.m_vpSelectableCountries.empty() || !m_CommunityCache.m_vpSelectableTypes.empty())
+	// countries and types filters (not shown if there are no countries and types, or if only the none community is selected)
+	if((!m_CommunityCache.m_vpSelectableCountries.empty() || !m_CommunityCache.m_vpSelectableTypes.empty()) &&
+		(m_CommunityCache.m_vpSelectedCommunities.size() != 1 || str_comp(m_CommunityCache.m_vpSelectedCommunities[0]->Id(), IServerBrowser::COMMUNITY_NONE) != 0))
 	{
 		const ColorRGBA ColorActive = ColorRGBA(0.0f, 0.0f, 0.0f, 0.3f);
 		const ColorRGBA ColorInactive = ColorRGBA(0.0f, 0.0f, 0.0f, 0.15f);

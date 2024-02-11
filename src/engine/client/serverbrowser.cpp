@@ -27,6 +27,9 @@
 #include <engine/http.h>
 #include <engine/storage.h>
 
+static constexpr const char *COMMUNITY_COUNTRY_NONE = "none";
+static constexpr const char *COMMUNITY_TYPE_NONE = "None";
+
 class CSortWrap
 {
 	typedef bool (CServerBrowser::*SortFunc)(int, int) const;
@@ -1497,7 +1500,12 @@ void CServerBrowser::LoadDDNetServers()
 	}
 
 	// Add default none community
-	m_vCommunities.emplace_back(COMMUNITY_NONE, "None", SHA256_ZEROED, "");
+	{
+		CCommunity NoneCommunity(COMMUNITY_NONE, "None", SHA256_ZEROED, "");
+		NoneCommunity.m_vCountries.emplace_back(COMMUNITY_COUNTRY_NONE, -1);
+		NoneCommunity.m_vTypes.emplace_back(COMMUNITY_TYPE_NONE);
+		m_vCommunities.push_back(std::move(NoneCommunity));
+	}
 
 	// Remove unknown elements from exclude lists
 	CleanFilters();
@@ -1543,8 +1551,8 @@ void CServerBrowser::UpdateServerCommunity(CServerInfo *pInfo) const
 		}
 	}
 	str_copy(pInfo->m_aCommunityId, COMMUNITY_NONE);
-	str_copy(pInfo->m_aCommunityCountry, "");
-	str_copy(pInfo->m_aCommunityType, "");
+	str_copy(pInfo->m_aCommunityCountry, COMMUNITY_COUNTRY_NONE);
+	str_copy(pInfo->m_aCommunityType, COMMUNITY_TYPE_NONE);
 }
 
 void CServerBrowser::UpdateServerRank(CServerInfo *pInfo) const
@@ -1876,11 +1884,6 @@ void CExcludedCommunityCountryFilterList::Clear()
 
 bool CExcludedCommunityCountryFilterList::Filtered(const char *pCountryName) const
 {
-	// If the needle is not defined, we exclude it if there is any other
-	// exclusion, i.e. we only show those elements when the filter is empty.
-	if(pCountryName[0] == '\0')
-		return !Empty();
-
 	const auto Communities = m_CurrentCommunitiesGetter();
 	return std::none_of(Communities.begin(), Communities.end(), [&](const CCommunity *pCommunity) {
 		if(!pCommunity->HasCountry(pCountryName))
@@ -2020,11 +2023,6 @@ void CExcludedCommunityTypeFilterList::Clear()
 
 bool CExcludedCommunityTypeFilterList::Filtered(const char *pTypeName) const
 {
-	// If the needle is not defined, we exclude it if there is any other
-	// exclusion, i.e. we only show those elements when the filter is empty.
-	if(pTypeName[0] == '\0')
-		return !Empty();
-
 	const auto Communities = m_CurrentCommunitiesGetter();
 	return std::none_of(Communities.begin(), Communities.end(), [&](const CCommunity *pCommunity) {
 		if(!pCommunity->HasType(pTypeName))
