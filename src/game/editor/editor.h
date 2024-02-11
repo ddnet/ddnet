@@ -360,6 +360,8 @@ public:
 		m_FilePreviewSound = -1;
 		m_FilePreviewState = PREVIEW_UNLOADED;
 
+		m_PromptSelectedIndex = -1;
+
 		m_ToolbarPreviewSound = -1;
 
 		m_SelectEntitiesImage = "DDNet";
@@ -616,6 +618,7 @@ public:
 	bool m_FileDialogOpening;
 
 	int m_ToolbarPreviewSound;
+	int m_PromptSelectedIndex;
 
 	struct CFilelistItem
 	{
@@ -628,6 +631,7 @@ public:
 	};
 	std::vector<CFilelistItem> m_vCompleteFileList;
 	std::vector<const CFilelistItem *> m_vpFilteredFileList;
+	std::vector<char *> m_vpCompletePrompList;
 	std::vector<const char *> m_vpFilteredPrompList;
 
 
