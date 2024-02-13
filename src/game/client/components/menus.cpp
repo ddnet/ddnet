@@ -591,6 +591,7 @@ void CMenus::RenderMenubar(CUIRect Box)
 		{
 			m_ShowStart = true;
 		}
+		GameClient()->m_Tooltips.DoToolTip(&s_StartButton, &Button, Localize("Main menu"));
 
 		Box.VSplitLeft(10.0f, nullptr, &Box);
 		Box.VSplitLeft(75.0f, &Button, &Box);
@@ -721,12 +722,16 @@ void CMenus::RenderMenubar(CUIRect Box)
 			Client()->Quit();
 		}
 	}
+	GameClient()->m_Tooltips.DoToolTip(&s_QuitButton, &Button, Localize("Quit"));
 
 	Box.VSplitRight(10.0f, &Box, nullptr);
 	Box.VSplitRight(33.0f, &Box, &Button);
 	static CButtonContainer s_SettingsButton;
 	if(DoButton_MenuTab(&s_SettingsButton, FONT_ICON_GEAR, m_ActivePage == PAGE_SETTINGS, &Button, IGraphics::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_SETTINGS]))
+	{
 		NewPage = PAGE_SETTINGS;
+	}
+	GameClient()->m_Tooltips.DoToolTip(&s_SettingsButton, &Button, Localize("Settings"));
 
 	Box.VSplitRight(10.0f, &Box, nullptr);
 	Box.VSplitRight(33.0f, &Box, &Button);
@@ -735,6 +740,7 @@ void CMenus::RenderMenubar(CUIRect Box)
 	{
 		g_Config.m_ClEditor = 1;
 	}
+	GameClient()->m_Tooltips.DoToolTip(&s_EditorButton, &Button, Localize("Editor"));
 
 	if(Client()->State() == IClient::STATE_OFFLINE)
 	{
@@ -742,7 +748,10 @@ void CMenus::RenderMenubar(CUIRect Box)
 		Box.VSplitRight(33.0f, &Box, &Button);
 		static CButtonContainer s_DemoButton;
 		if(DoButton_MenuTab(&s_DemoButton, FONT_ICON_CLAPPERBOARD, m_ActivePage == PAGE_DEMOS, &Button, IGraphics::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_DEMOBUTTON]))
+		{
 			NewPage = PAGE_DEMOS;
+		}
+		GameClient()->m_Tooltips.DoToolTip(&s_DemoButton, &Button, Localize("Demos"));
 	}
 
 	TextRender()->SetRenderFlags(0);
