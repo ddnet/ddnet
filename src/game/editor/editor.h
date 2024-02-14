@@ -694,6 +694,7 @@ public:
 	float m_MouseDeltaWy;
 	const void *m_pContainerPanned;
 	const void *m_pContainerPannedLast;
+	char m_MapEditorId; // UI element ID for the main map editor
 
 	enum EShowTile
 	{

@@ -3054,7 +3054,6 @@ void CEditor::DoMapEditor(CUIRect View)
 		View.w = View.h = Max;
 	}
 
-	static void *s_pEditorID = (void *)&s_pEditorID;
 	const bool Inside = UI()->MouseInside(&View);
 
 	// fetch mouse position
@@ -3179,7 +3178,7 @@ void CEditor::DoMapEditor(CUIRect View)
 	}
 
 	const bool ShouldPan = (Input()->ModifierIsPressed() && UI()->MouseButton(0)) || UI()->MouseButton(2);
-	if(m_pContainerPanned == &s_pEditorID)
+	if(m_pContainerPanned == &m_MapEditorId)
 	{
 		// do panning
 		if(ShouldPan)
@@ -3203,7 +3202,7 @@ void CEditor::DoMapEditor(CUIRect View)
 
 	if(Inside)
 	{
-		UI()->SetHotItem(s_pEditorID);
+		UI()->SetHotItem(&m_MapEditorId);
 
 		// do global operations like pan and zoom
 		if(UI()->CheckActiveItem(nullptr) && (UI()->MouseButton(0) || UI()->MouseButton(2)))
@@ -3212,11 +3211,11 @@ void CEditor::DoMapEditor(CUIRect View)
 			s_StartWy = wy;
 
 			if(ShouldPan && m_pContainerPanned == nullptr)
-				m_pContainerPanned = &s_pEditorID;
+				m_pContainerPanned = &m_MapEditorId;
 		}
 
 		// brush editing
-		if(UI()->HotItem() == s_pEditorID)
+		if(UI()->HotItem() == &m_MapEditorId)
 		{
 			if(m_ShowPicker)
 			{
@@ -3265,7 +3264,7 @@ void CEditor::DoMapEditor(CUIRect View)
 			else
 				str_copy(m_aTooltip, "Use left mouse button to paint with the brush. Right button clears the brush.");
 
-			if(UI()->CheckActiveItem(s_pEditorID))
+			if(UI()->CheckActiveItem(&m_MapEditorId))
 			{
 				CUIRect r;
 				r.x = s_StartWx;
@@ -3385,7 +3384,7 @@ void CEditor::DoMapEditor(CUIRect View)
 
 				if(!Input()->ModifierIsPressed() && UI()->MouseButton(0) && s_Operation == OP_NONE && !m_QuadKnifeActive)
 				{
-					UI()->SetActiveItem(s_pEditorID);
+					UI()->SetActiveItem(&m_MapEditorId);
 
 					if(m_pBrush->IsEmpty())
 						s_Operation = OP_BRUSH_GRAB;
@@ -3576,7 +3575,7 @@ void CEditor::DoMapEditor(CUIRect View)
 			}
 		}
 
-		if(UI()->CheckActiveItem(s_pEditorID))
+		if(UI()->CheckActiveItem(&m_MapEditorId))
 		{
 			// release mouse
 			if(!UI()->MouseButton(0))
@@ -3606,7 +3605,7 @@ void CEditor::DoMapEditor(CUIRect View)
 				MapView()->OffsetWorld({0, PanSpeed * m_MouseWScale});
 		}
 	}
-	else if(UI()->CheckActiveItem(s_pEditorID))
+	else if(UI()->CheckActiveItem(&m_MapEditorId))
 	{
 		// release mouse
 		if(!UI()->MouseButton(0))
@@ -4390,17 +4389,13 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 bool CEditor::SelectLayerByTile()
 {
 	// ctrl+rightclick a map index to select the layer that has a tile there
-	static bool s_CtrlClick = false;
 	static int s_Selected = 0;
 	int MatchedGroup = -1;
 	int MatchedLayer = -1;
 	int Matches = 0;
 	bool IsFound = false;
-	if(UI()->MouseButton(1) && Input()->ModifierIsPressed())
+	if(Input()->ModifierIsPressed() && UI()->HotItem() == &m_MapEditorId && UI()->MouseButtonClicked(1))
 	{
-		if(s_CtrlClick)
-			return false;
-		s_CtrlClick = true;
 		for(size_t g = 0; g < m_Map.m_vpGroups.size(); g++)
 		{
 			for(size_t l = 0; l < m_Map.m_vpGroups[g]->m_vpLayers.size(); l++)
@@ -4451,8 +4446,6 @@ bool CEditor::SelectLayerByTile()
 			return true;
 		}
 	}
-	else
-		s_CtrlClick = false;
 	return false;
 }
 
