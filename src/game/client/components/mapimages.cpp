@@ -395,8 +395,10 @@ void CMapImages::ChangeEntitiesPath(const char *pPath)
 		{
 			for(int n = 0; n < MAP_IMAGE_ENTITY_LAYER_TYPE_COUNT; ++n)
 			{
-				if(m_aaEntitiesTextures[i][n].IsValid())
+				if(m_aaEntitiesTextures[i][n].IsValid() && m_aaEntitiesTextures[i][n].Id() != m_TransparentTexture.Id())
+				{
 					Graphics()->UnloadTexture(&(m_aaEntitiesTextures[i][n]));
+				}
 				m_aaEntitiesTextures[i][n] = IGraphics::CTextureHandle();
 			}
 
