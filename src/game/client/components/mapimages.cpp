@@ -158,31 +158,6 @@ void CMapImages::LoadBackground(class CLayers *pLayers, class IMap *pMap)
 	OnMapLoadImpl(pLayers, pMap);
 }
 
-bool CMapImages::HasFrontLayer(EMapImageModType ModType)
-{
-	return ModType == MAP_IMAGE_MOD_TYPE_DDNET || ModType == MAP_IMAGE_MOD_TYPE_DDRACE;
-}
-
-bool CMapImages::HasSpeedupLayer(EMapImageModType ModType)
-{
-	return ModType == MAP_IMAGE_MOD_TYPE_DDNET || ModType == MAP_IMAGE_MOD_TYPE_DDRACE;
-}
-
-bool CMapImages::HasSwitchLayer(EMapImageModType ModType)
-{
-	return ModType == MAP_IMAGE_MOD_TYPE_DDNET || ModType == MAP_IMAGE_MOD_TYPE_DDRACE;
-}
-
-bool CMapImages::HasTeleLayer(EMapImageModType ModType)
-{
-	return ModType == MAP_IMAGE_MOD_TYPE_DDNET || ModType == MAP_IMAGE_MOD_TYPE_DDRACE;
-}
-
-bool CMapImages::HasTuneLayer(EMapImageModType ModType)
-{
-	return ModType == MAP_IMAGE_MOD_TYPE_DDNET || ModType == MAP_IMAGE_MOD_TYPE_DDRACE;
-}
-
 IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType EntityLayerType)
 {
 	EMapImageModType EntitiesModType = MAP_IMAGE_MOD_TYPE_DDNET;
@@ -207,17 +182,8 @@ IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType Entit
 	{
 		m_aEntitiesIsLoaded[(EntitiesModType * 2) + (int)EntitiesAreMasked] = true;
 
-		// any mod that does not mask, will get all layers unmasked
-		bool WasUnknown = !EntitiesAreMasked;
-
 		char aPath[64];
 		str_format(aPath, sizeof(aPath), "%s/%s.png", m_aEntitiesPath, gs_apModEntitiesNames[EntitiesModType]);
-
-		bool GameTypeHasFrontLayer = HasFrontLayer(EntitiesModType) || WasUnknown;
-		bool GameTypeHasSpeedupLayer = HasSpeedupLayer(EntitiesModType) || WasUnknown;
-		bool GameTypeHasSwitchLayer = HasSwitchLayer(EntitiesModType) || WasUnknown;
-		bool GameTypeHasTeleLayer = HasTeleLayer(EntitiesModType) || WasUnknown;
-		bool GameTypeHasTuneLayer = HasTuneLayer(EntitiesModType) || WasUnknown;
 
 		int TextureLoadFlag = 0;
 		if(Graphics()->HasTextureArraysSupport())
@@ -264,10 +230,7 @@ IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType Entit
 			for(int n = 0; n < MAP_IMAGE_ENTITY_LAYER_TYPE_COUNT; ++n)
 			{
 				bool BuildThisLayer = true;
-				if(n == MAP_IMAGE_ENTITY_LAYER_TYPE_ALL_EXCEPT_SWITCH && !GameTypeHasFrontLayer &&
-					!GameTypeHasSpeedupLayer && !GameTypeHasTeleLayer && !GameTypeHasTuneLayer)
-					BuildThisLayer = false;
-				else if(n == MAP_IMAGE_ENTITY_LAYER_TYPE_SWITCH && !GameTypeHasSwitchLayer)
+				if(n == MAP_IMAGE_ENTITY_LAYER_TYPE_SWITCH && EntitiesModType != MAP_IMAGE_MOD_TYPE_DDNET && EntitiesModType != MAP_IMAGE_MOD_TYPE_DDRACE)
 					BuildThisLayer = false;
 
 				dbg_assert(!m_aaEntitiesTextures[(EntitiesModType * 2) + (int)EntitiesAreMasked][n].IsValid(), "entities texture already loaded when it should not be");
