@@ -158,25 +158,30 @@ void CMapImages::LoadBackground(class CLayers *pLayers, class IMap *pMap)
 	OnMapLoadImpl(pLayers, pMap);
 }
 
+static EMapImageModType GetEntitiesModType(const CGameInfo &GameInfo)
+{
+	if(GameInfo.m_EntitiesFDDrace)
+		return MAP_IMAGE_MOD_TYPE_FDDRACE;
+	else if(GameInfo.m_EntitiesDDNet)
+		return MAP_IMAGE_MOD_TYPE_DDNET;
+	else if(GameInfo.m_EntitiesDDRace)
+		return MAP_IMAGE_MOD_TYPE_DDRACE;
+	else if(GameInfo.m_EntitiesRace)
+		return MAP_IMAGE_MOD_TYPE_RACE;
+	else if(GameInfo.m_EntitiesBW)
+		return MAP_IMAGE_MOD_TYPE_BLOCKWORLDS;
+	else if(GameInfo.m_EntitiesFNG)
+		return MAP_IMAGE_MOD_TYPE_FNG;
+	else if(GameInfo.m_EntitiesVanilla)
+		return MAP_IMAGE_MOD_TYPE_VANILLA;
+	else
+		return MAP_IMAGE_MOD_TYPE_DDNET;
+}
+
 IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType EntityLayerType)
 {
-	EMapImageModType EntitiesModType = MAP_IMAGE_MOD_TYPE_DDNET;
-	bool EntitiesAreMasked = !GameClient()->m_GameInfo.m_DontMaskEntities;
-
-	if(GameClient()->m_GameInfo.m_EntitiesFDDrace)
-		EntitiesModType = MAP_IMAGE_MOD_TYPE_FDDRACE;
-	else if(GameClient()->m_GameInfo.m_EntitiesDDNet)
-		EntitiesModType = MAP_IMAGE_MOD_TYPE_DDNET;
-	else if(GameClient()->m_GameInfo.m_EntitiesDDRace)
-		EntitiesModType = MAP_IMAGE_MOD_TYPE_DDRACE;
-	else if(GameClient()->m_GameInfo.m_EntitiesRace)
-		EntitiesModType = MAP_IMAGE_MOD_TYPE_RACE;
-	else if(GameClient()->m_GameInfo.m_EntitiesBW)
-		EntitiesModType = MAP_IMAGE_MOD_TYPE_BLOCKWORLDS;
-	else if(GameClient()->m_GameInfo.m_EntitiesFNG)
-		EntitiesModType = MAP_IMAGE_MOD_TYPE_FNG;
-	else if(GameClient()->m_GameInfo.m_EntitiesVanilla)
-		EntitiesModType = MAP_IMAGE_MOD_TYPE_VANILLA;
+	const bool EntitiesAreMasked = !GameClient()->m_GameInfo.m_DontMaskEntities;
+	const EMapImageModType EntitiesModType = GetEntitiesModType(GameClient()->m_GameInfo);
 
 	if(!m_aEntitiesIsLoaded[(EntitiesModType * 2) + (int)EntitiesAreMasked])
 	{
