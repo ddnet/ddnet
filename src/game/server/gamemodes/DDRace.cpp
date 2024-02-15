@@ -146,6 +146,10 @@ void CGameControllerDDRace::OnPlayerDisconnect(CPlayer *pPlayer, const char *pRe
 
 	if(g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO)
 		Teams().SetForceCharacterTeam(ClientID, TEAM_FLOCK);
+
+	for(int Team = TEAM_FLOCK + 1; Team < TEAM_SUPER; Team++)
+		if(Teams().IsInvited(Team, ClientID))
+			Teams().SetClientInvited(Team, ClientID, false);
 }
 
 void CGameControllerDDRace::OnReset()
