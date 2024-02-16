@@ -3592,9 +3592,9 @@ void CEditor::DoMapEditor(CUIRect View)
 				UI()->SetActiveItem(nullptr);
 			}
 		}
-		if(!Input()->ShiftIsPressed() && !Input()->ModifierIsPressed() && m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr)
+		if(!Input()->ModifierIsPressed() && m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr)
 		{
-			float PanSpeed = 64.0f;
+			float PanSpeed = Input()->ShiftIsPressed() ? 200.0f : 64.0f;
 			if(Input()->KeyPress(KEY_A))
 				MapView()->OffsetWorld({-PanSpeed * m_MouseWScale, 0});
 			else if(Input()->KeyPress(KEY_D))
