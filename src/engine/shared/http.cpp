@@ -560,9 +560,16 @@ void CHttp::RunLoop()
 
 void CHttp::Run(std::shared_ptr<IHttpRequest> pRequest)
 {
+	std::shared_ptr<CHttpRequest> pRequestImpl = std::static_pointer_cast<CHttpRequest>(pRequest);
 	std::unique_lock Lock(m_Lock);
+	if(m_Shutdown)
+	{
+		str_copy(pRequestImpl->m_aErr, "Shutting down");
+		pRequestImpl->OnCompletionInternal(CURLE_ABORTED_BY_CALLBACK);
+		return;
+	}
 	m_Cv.wait(Lock, [this]() { return m_State != CHttp::UNINITIALIZED; });
-	m_PendingRequests.emplace_back(std::static_pointer_cast<CHttpRequest>(pRequest));
+	m_PendingRequests.emplace_back(pRequestImpl);
 	curl_multi_wakeup(m_pMultiH);
 }
 
