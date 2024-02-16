@@ -8561,7 +8561,7 @@ void CEditor::HandleWriterFinishJobs()
 		return;
 
 	std::shared_ptr<CDataFileWriterFinishJob> pJob = m_WriterFinishJobs.front();
-	if(pJob->Status() != IJob::STATE_DONE)
+	if(!pJob->Done())
 		return;
 	m_WriterFinishJobs.pop_front();
 

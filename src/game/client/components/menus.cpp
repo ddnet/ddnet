@@ -1997,6 +1997,8 @@ void CMenus::OnReset()
 void CMenus::OnShutdown()
 {
 	KillServer();
+	m_CommunityIconLoadJobs.clear();
+	m_CommunityIconDownloadJobs.clear();
 }
 
 bool CMenus::OnCursorMove(float x, float y, IInput::ECursorType CursorType)

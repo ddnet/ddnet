@@ -7,19 +7,21 @@
 #include <engine/console.h>
 #include <engine/engine.h>
 #include <engine/shared/config.h>
+#include <engine/shared/jobs.h>
 #include <engine/shared/network.h>
 #include <engine/storage.h>
 
 class CEngine : public IEngine
 {
-public:
 	IConsole *m_pConsole;
 	IStorage *m_pStorage;
-	bool m_Logging;
 
+	bool m_Logging;
 	std::shared_ptr<CFutureLogger> m_pFutureLogger;
 
 	char m_aAppName[256];
+
+	CJobPool m_JobPool;
 
 	static void Con_DbgLognetwork(IConsole::IResult *pResult, void *pUserData)
 	{
@@ -43,6 +45,7 @@ public:
 		}
 	}
 
+public:
 	CEngine(bool Test, const char *pAppname, std::shared_ptr<CFutureLogger> pFutureLogger, int Jobs) :
 		m_pFutureLogger(std::move(pFutureLogger))
 	{
@@ -70,7 +73,6 @@ public:
 
 	~CEngine() override
 	{
-		m_JobPool.Destroy();
 		CNetBase::CloseLog();
 	}
 
@@ -92,16 +94,16 @@ public:
 		m_JobPool.Add(std::move(pJob));
 	}
 
+	void ShutdownJobs() override
+	{
+		m_JobPool.Shutdown();
+	}
+
 	void SetAdditionalLogger(std::shared_ptr<ILogger> &&pLogger) override
 	{
 		m_pFutureLogger->Set(pLogger);
 	}
 };
-
-void IEngine::RunJobBlocking(IJob *pJob)
-{
-	CJobPool::RunBlocking(pJob);
-}
 
 IEngine *CreateEngine(const char *pAppname, std::shared_ptr<CFutureLogger> pFutureLogger, int Jobs) { return new CEngine(false, pAppname, std::move(pFutureLogger), Jobs); }
 IEngine *CreateTestEngine(const char *pAppname, int Jobs) { return new CEngine(true, pAppname, nullptr, Jobs); }

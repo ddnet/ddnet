@@ -1925,6 +1925,7 @@ void CMenus::CCommunityIconLoadJob::Run()
 CMenus::CCommunityIconLoadJob::CCommunityIconLoadJob(CMenus *pMenus, const char *pCommunityId, int StorageType) :
 	CAbstractCommunityIconJob(pMenus, pCommunityId, StorageType)
 {
+	Abortable(true);
 }
 
 CMenus::CCommunityIconLoadJob::~CCommunityIconLoadJob()
@@ -2040,7 +2041,7 @@ void CMenus::UpdateCommunityIcons()
 	if(!m_CommunityIconLoadJobs.empty())
 	{
 		std::shared_ptr<CCommunityIconLoadJob> pJob = m_CommunityIconLoadJobs.front();
-		if(pJob->Status() == IJob::STATE_DONE)
+		if(pJob->Done())
 		{
 			if(pJob->Success())
 				LoadCommunityIconFinish(pJob->CommunityId(), pJob->ImageInfo(), pJob->Sha256());

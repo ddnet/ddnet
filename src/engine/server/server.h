@@ -37,6 +37,7 @@ class CHostLookup;
 class CLogMessage;
 class CMsgPacker;
 class CPacker;
+class IEngine;
 class IEngineMap;
 class ILogger;
 
@@ -70,6 +71,7 @@ class CServer : public IServer
 	class IStorage *m_pStorage;
 	class IEngineAntibot *m_pAntibot;
 	class IRegister *m_pRegister;
+	IEngine *m_pEngine;
 
 #if defined(CONF_UPNP)
 	CUPnP m_UPnP;
@@ -96,6 +98,7 @@ public:
 	class IStorage *Storage() { return m_pStorage; }
 	class IEngineAntibot *Antibot() { return m_pAntibot; }
 	class CDbConnectionPool *DbPool() { return m_pConnectionPool; }
+	IEngine *Engine() { return m_pEngine; }
 
 	enum
 	{
