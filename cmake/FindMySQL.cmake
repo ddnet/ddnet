@@ -7,6 +7,7 @@ if(NOT CMAKE_CROSSCOMPILING)
     execute_process(COMMAND ${MYSQL_CONFIG}
       ARGS --include
       OUTPUT_VARIABLE MY_TMP
+      OUTPUT_STRIP_TRAILING_WHITESPACE
     )
 
     string(REGEX REPLACE "-I([^ ]*)( .*)?" "\\1" MY_TMP "${MY_TMP}")
@@ -16,6 +17,7 @@ if(NOT CMAKE_CROSSCOMPILING)
     execute_process(COMMAND ${MYSQL_CONFIG}
       ARGS --libs_r
       OUTPUT_VARIABLE MY_TMP
+      OUTPUT_STRIP_TRAILING_WHITESPACE
     )
 
     set(MYSQL_CONFIG_LIBRARIES "")
