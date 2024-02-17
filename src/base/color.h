@@ -137,6 +137,16 @@ public:
 		return col;
 	}
 
+	DerivedT Multiply(const DerivedT &Other) const
+	{
+		DerivedT Color(static_cast<const DerivedT &>(*this));
+		Color.x *= Other.x;
+		Color.y *= Other.y;
+		Color.z *= Other.z;
+		Color.a *= Other.a;
+		return Color;
+	}
+
 	template<typename UnpackT>
 	static UnpackT UnpackAlphaLast(unsigned Color, bool Alpha = true)
 	{
