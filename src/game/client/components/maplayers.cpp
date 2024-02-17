@@ -1699,8 +1699,6 @@ void CMapLayers::OnRender()
 						{
 							if(!Graphics()->IsQuadBufferingEnabled())
 							{
-								//Graphics()->BlendNone();
-								//RenderTools()->ForceRenderQuads(pQuads, pQLayer->m_NumQuads, LAYERRENDERFLAG_OPAQUE, EnvelopeEval, this, 1.f);
 								Graphics()->BlendNormal();
 								RenderTools()->ForceRenderQuads(pQuads, pQLayer->m_NumQuads, LAYERRENDERFLAG_TRANSPARENT, EnvelopeEval, this, 1.f);
 							}
@@ -1714,8 +1712,6 @@ void CMapLayers::OnRender()
 					{
 						if(!Graphics()->IsQuadBufferingEnabled())
 						{
-							//Graphics()->BlendNone();
-							//RenderTools()->RenderQuads(pQuads, pQLayer->m_NumQuads, LAYERRENDERFLAG_OPAQUE, EnvelopeEval, this);
 							Graphics()->BlendNormal();
 							RenderTools()->RenderQuads(pQuads, pQLayer->m_NumQuads, LAYERRENDERFLAG_TRANSPARENT, EnvelopeEval, this);
 						}
@@ -1873,7 +1869,6 @@ void CMapLayers::OnRender()
 						RenderTools()->RenderTunemap(pTuneTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND | LAYERRENDERFLAG_OPAQUE);
 						Graphics()->BlendNormal();
 						RenderTools()->RenderTunemap(pTuneTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, Color, TILERENDERFLAG_EXTEND | LAYERRENDERFLAG_TRANSPARENT);
-						//RenderTools()->RenderTuneOverlay(pTuneTiles, pTMap->m_Width, pTMap->m_Height, 32.0f, EntityOverlayVal/100.0f);
 					}
 					else
 					{
