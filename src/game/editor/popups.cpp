@@ -1610,8 +1610,8 @@ CUI::EPopupMenuFunctionResult CEditor::PopupEnvPointCurveType(void *pContext, CU
 						if(SelectedIndex != FirstSelectedIndex && SelectedIndex != LastSelectedIndex)
 						{
 							CEnvPoint &CurrentPoint = pEnvelope->m_vPoints[SelectedIndex];
-							ColorRGBA Channels;
-							HelperEnvelope.Eval(CurrentPoint.m_Time / 1000.0f, Channels);
+							ColorRGBA Channels = ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f);
+							HelperEnvelope.Eval(CurrentPoint.m_Time / 1000.0f, Channels, 1);
 							int PrevValue = CurrentPoint.m_aValues[c];
 							CurrentPoint.m_aValues[c] = f2fx(Channels.r);
 							vpActions.push_back(std::make_shared<CEditorActionEnvelopeEditPoint>(pEditor, pEditor->m_SelectedEnvelope, SelectedIndex, SelectedChannel, CEditorActionEnvelopeEditPoint::EEditType::VALUE, PrevValue, CurrentPoint.m_aValues[c]));

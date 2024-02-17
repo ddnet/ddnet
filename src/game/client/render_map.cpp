@@ -237,22 +237,21 @@ static float SolveBezier(float x, float p0, float p1, float p2, float p3)
 	}
 }
 
-void CRenderTools::RenderEvalEnvelope(const IEnvelopePointAccess *pPoints, int Channels, std::chrono::nanoseconds TimeNanos, ColorRGBA &Result)
+void CRenderTools::RenderEvalEnvelope(const IEnvelopePointAccess *pPoints, std::chrono::nanoseconds TimeNanos, ColorRGBA &Result, size_t Channels)
 {
 	const int NumPoints = pPoints->NumPoints();
 	if(NumPoints == 0)
 	{
-		Result = ColorRGBA();
 		return;
 	}
 
 	if(NumPoints == 1)
 	{
 		const CEnvPoint *pFirstPoint = pPoints->GetPoint(0);
-		Result.r = fx2f(pFirstPoint->m_aValues[0]);
-		Result.g = fx2f(pFirstPoint->m_aValues[1]);
-		Result.b = fx2f(pFirstPoint->m_aValues[2]);
-		Result.a = fx2f(pFirstPoint->m_aValues[3]);
+		for(size_t c = 0; c < Channels; c++)
+		{
+			Result[c] = fx2f(pFirstPoint->m_aValues[c]);
+		}
 		return;
 	}
 
@@ -298,7 +297,7 @@ void CRenderTools::RenderEvalEnvelope(const IEnvelopePointAccess *pPoints, int C
 				const CEnvPointBezier *pNextPointBezier = pPoints->GetBezier(i + 1);
 				if(pCurrentPointBezier == nullptr || pNextPointBezier == nullptr)
 					break; // fallback to linear
-				for(int c = 0; c < Channels; c++)
+				for(size_t c = 0; c < Channels; c++)
 				{
 					// monotonic 2d cubic bezier curve
 					const vec2 p0 = vec2(pCurrentPoint->m_Time / 1000.0f, fx2f(pCurrentPoint->m_aValues[c]));
@@ -326,7 +325,7 @@ void CRenderTools::RenderEvalEnvelope(const IEnvelopePointAccess *pPoints, int C
 				break;
 			}
 
-			for(int c = 0; c < Channels; c++)
+			for(size_t c = 0; c < Channels; c++)
 			{
 				const float v0 = fx2f(pCurrentPoint->m_aValues[c]);
 				const float v1 = fx2f(pNextPoint->m_aValues[c]);
@@ -337,13 +336,13 @@ void CRenderTools::RenderEvalEnvelope(const IEnvelopePointAccess *pPoints, int C
 		}
 	}
 
-	Result.r = fx2f(pLastPoint->m_aValues[0]);
-	Result.g = fx2f(pLastPoint->m_aValues[1]);
-	Result.b = fx2f(pLastPoint->m_aValues[2]);
-	Result.a = fx2f(pLastPoint->m_aValues[3]);
+	for(size_t c = 0; c < Channels; c++)
+	{
+		Result[c] = fx2f(pLastPoint->m_aValues[c]);
+	}
 }
 
-static void Rotate(CPoint *pCenter, CPoint *pPoint, float Rotation)
+static void Rotate(const CPoint *pCenter, CPoint *pPoint, float Rotation)
 {
 	int x = pPoint->x - pCenter->x;
 	int y = pPoint->y - pCenter->y;
@@ -367,13 +366,10 @@ void CRenderTools::ForceRenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags
 	{
 		CQuad *pQuad = &pQuads[i];
 
-		ColorRGBA Color(1.f, 1.f, 1.f, 1.f);
-		if(pQuad->m_ColorEnv >= 0)
-		{
-			pfnEval(pQuad->m_ColorEnvOffset, pQuad->m_ColorEnv, Color, pUser);
-		}
+		ColorRGBA Color = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
+		pfnEval(pQuad->m_ColorEnvOffset, pQuad->m_ColorEnv, Color, 4, pUser);
 
-		if(Color.a <= 0)
+		if(Color.a <= 0.0f)
 			continue;
 
 		bool Opaque = false;
@@ -392,19 +388,10 @@ void CRenderTools::ForceRenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags
 			fx2f(pQuad->m_aTexcoords[2].x), fx2f(pQuad->m_aTexcoords[2].y),
 			fx2f(pQuad->m_aTexcoords[3].x), fx2f(pQuad->m_aTexcoords[3].y));
 
-		float OffsetX = 0;
-		float OffsetY = 0;
-		float Rot = 0;
-
-		// TODO: fix this
-		if(pQuad->m_PosEnv >= 0)
-		{
-			ColorRGBA Channels;
-			pfnEval(pQuad->m_PosEnvOffset, pQuad->m_PosEnv, Channels, pUser);
-			OffsetX = Channels.r;
-			OffsetY = Channels.g;
-			Rot = Channels.b / 360.0f * pi * 2;
-		}
+		ColorRGBA Position = ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f);
+		pfnEval(pQuad->m_PosEnvOffset, pQuad->m_PosEnv, Position, 3, pUser);
+		const vec2 Offset = vec2(Position.r, Position.g);
+		const float Rotation = Position.b / 180.0f * pi;
 
 		IGraphics::CColorVertex Array[4] = {
 			IGraphics::CColorVertex(0, pQuad->m_aColors[0].r * Conv * Color.r, pQuad->m_aColors[0].g * Conv * Color.g, pQuad->m_aColors[0].b * Conv * Color.b, pQuad->m_aColors[0].a * Conv * Color.a * Alpha),
@@ -415,26 +402,22 @@ void CRenderTools::ForceRenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags
 
 		CPoint *pPoints = pQuad->m_aPoints;
 
-		if(Rot != 0)
+		CPoint aRotated[4];
+		if(Rotation != 0.0f)
 		{
-			static CPoint aRotated[4];
-			aRotated[0] = pQuad->m_aPoints[0];
-			aRotated[1] = pQuad->m_aPoints[1];
-			aRotated[2] = pQuad->m_aPoints[2];
-			aRotated[3] = pQuad->m_aPoints[3];
+			for(size_t p = 0; p < std::size(aRotated); ++p)
+			{
+				aRotated[p] = pQuad->m_aPoints[p];
+				Rotate(&pQuad->m_aPoints[4], &aRotated[p], Rotation);
+			}
 			pPoints = aRotated;
-
-			Rotate(&pQuad->m_aPoints[4], &aRotated[0], Rot);
-			Rotate(&pQuad->m_aPoints[4], &aRotated[1], Rot);
-			Rotate(&pQuad->m_aPoints[4], &aRotated[2], Rot);
-			Rotate(&pQuad->m_aPoints[4], &aRotated[3], Rot);
 		}
 
 		IGraphics::CFreeformItem Freeform(
-			fx2f(pPoints[0].x) + OffsetX, fx2f(pPoints[0].y) + OffsetY,
-			fx2f(pPoints[1].x) + OffsetX, fx2f(pPoints[1].y) + OffsetY,
-			fx2f(pPoints[2].x) + OffsetX, fx2f(pPoints[2].y) + OffsetY,
-			fx2f(pPoints[3].x) + OffsetX, fx2f(pPoints[3].y) + OffsetY);
+			fx2f(pPoints[0].x) + Offset.x, fx2f(pPoints[0].y) + Offset.y,
+			fx2f(pPoints[1].x) + Offset.x, fx2f(pPoints[1].y) + Offset.y,
+			fx2f(pPoints[2].x) + Offset.x, fx2f(pPoints[2].y) + Offset.y,
+			fx2f(pPoints[3].x) + Offset.x, fx2f(pPoints[3].y) + Offset.y);
 		Graphics()->QuadsDrawFreeform(&Freeform, 1);
 	}
 	Graphics()->TrianglesEnd();
@@ -442,8 +425,7 @@ void CRenderTools::ForceRenderQuads(CQuad *pQuads, int NumQuads, int RenderFlags
 
 void CRenderTools::RenderTileRectangle(int RectX, int RectY, int RectW, int RectH,
 	unsigned char IndexIn, unsigned char IndexOut,
-	float Scale, ColorRGBA Color, int RenderFlags,
-	ENVELOPE_EVAL pfnEval, void *pUser, int ColorEnv, int ColorEnvOffset) const
+	float Scale, ColorRGBA Color, int RenderFlags) const
 {
 	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
@@ -453,17 +435,11 @@ void CRenderTools::RenderTileRectangle(int RectX, int RectY, int RectW, int Rect
 	float FinalTileSize = Scale / (ScreenX1 - ScreenX0) * Graphics()->ScreenWidth();
 	float FinalTilesetScale = FinalTileSize / TilePixelSize;
 
-	ColorRGBA Channels(1.f, 1.f, 1.f, 1.f);
-	if(ColorEnv >= 0)
-	{
-		pfnEval(ColorEnvOffset, ColorEnv, Channels, pUser);
-	}
-
 	if(Graphics()->HasTextureArraysSupport())
 		Graphics()->QuadsTex3DBegin();
 	else
 		Graphics()->QuadsBegin();
-	Graphics()->SetColor(Color.r * Channels.r, Color.g * Channels.g, Color.b * Channels.b, Color.a * Channels.a);
+	Graphics()->SetColor(Color);
 
 	int StartY = (int)(ScreenY0 / Scale) - 1;
 	int StartX = (int)(ScreenX0 / Scale) - 1;
@@ -540,8 +516,7 @@ void CRenderTools::RenderTileRectangle(int RectX, int RectY, int RectW, int Rect
 	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 }
 
-void CRenderTools::RenderTilemap(CTile *pTiles, int w, int h, float Scale, ColorRGBA Color, int RenderFlags,
-	ENVELOPE_EVAL pfnEval, void *pUser, int ColorEnv, int ColorEnvOffset) const
+void CRenderTools::RenderTilemap(CTile *pTiles, int w, int h, float Scale, ColorRGBA Color, int RenderFlags) const
 {
 	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
@@ -551,17 +526,12 @@ void CRenderTools::RenderTilemap(CTile *pTiles, int w, int h, float Scale, Color
 	float FinalTileSize = Scale / (ScreenX1 - ScreenX0) * Graphics()->ScreenWidth();
 	float FinalTilesetScale = FinalTileSize / TilePixelSize;
 
-	ColorRGBA Channels(1.f, 1.f, 1.f, 1.f);
-	if(ColorEnv >= 0)
-	{
-		pfnEval(ColorEnvOffset, ColorEnv, Channels, pUser);
-	}
-
 	if(Graphics()->HasTextureArraysSupport())
 		Graphics()->QuadsTex3DBegin();
 	else
 		Graphics()->QuadsBegin();
-	Graphics()->SetColor(Color.r * Channels.r, Color.g * Channels.g, Color.b * Channels.b, Color.a * Channels.a);
+	Graphics()->SetColor(Color);
+	const bool ColorOpaque = Color.a > 254.0f / 255.0f;
 
 	int StartY = (int)(ScreenY0 / Scale) - 1;
 	int StartX = (int)(ScreenX0 / Scale) - 1;
@@ -611,7 +581,7 @@ void CRenderTools::RenderTilemap(CTile *pTiles, int w, int h, float Scale, Color
 				unsigned char Flags = pTiles[c].m_Flags;
 
 				bool Render = false;
-				if(Flags & TILEFLAG_OPAQUE && Color.a * Channels.a > 254.0f / 255.0f)
+				if(ColorOpaque && Flags & TILEFLAG_OPAQUE)
 				{
 					if(RenderFlags & LAYERRENDERFLAG_OPAQUE)
 						Render = true;
