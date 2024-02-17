@@ -2304,6 +2304,8 @@ if(CLIENT)
     editor_trackers.h
     editor_ui.h
     explanations.cpp
+    layer_selector.cpp
+    layer_selector.h
     map_grid.cpp
     map_grid.h
     map_view.cpp
