@@ -1587,10 +1587,10 @@ void CEditor::ComputePointAlignments(const std::shared_ptr<CLayerQuads> &pLayer,
 	if(!g_Config.m_EdAlignQuads)
 		return;
 
-	bool IgnoreGrid = Input()->AltIsPressed();
+	bool GridEnabled = MapView()->MapGrid()->IsEnabled() && !Input()->AltIsPressed();
 
 	// Perform computation from the original position of this point
-	int Threshold = f2fx(maximum(10.0f, 10.0f * m_MouseWScale));
+	int Threshold = f2fx(maximum(5.0f, 10.0f * m_MouseWScale));
 	CPoint OrigPoint = m_QuadDragOriginalPoints.at(QuadIndex)[PointIndex];
 	// Get the "current" point by applying the offset
 	CPoint Point = OrigPoint + ivec2(OffsetX, OffsetY);
@@ -1607,14 +1607,7 @@ void CEditor::ComputePointAlignments(const std::shared_ptr<CLayerQuads> &pLayer,
 		int DiffX = absolute(DX);
 		int DiffY = absolute(DY);
 
-		const float PX = fx2f(pQuadPoint->x);
-		const float PY = fx2f(pQuadPoint->y);
-		float SnappedPX = PX;
-		float SnappedPY = PY;
-		if(MapView()->MapGrid()->IsEnabled() && !IgnoreGrid)
-			MapView()->MapGrid()->SnapToGrid(SnappedPX, SnappedPY);
-
-		if(DiffX <= Threshold && (SnappedPX == PX || DiffX == 0))
+		if(DiffX <= Threshold && (!GridEnabled || DiffX == 0))
 		{
 			// Only store alignments that have the smallest difference
 			if(DiffX < SmallestDiffX)
@@ -1636,7 +1629,7 @@ void CEditor::ComputePointAlignments(const std::shared_ptr<CLayerQuads> &pLayer,
 			}
 		}
 
-		if(DiffY <= Threshold && (SnappedPY == PY || DiffY == 0))
+		if(DiffY <= Threshold && (!GridEnabled || DiffY == 0))
 		{
 			// Only store alignments that have the smallest difference
 			if(DiffY < SmallestDiffY)
@@ -1782,11 +1775,11 @@ void CEditor::ComputeAABBAlignments(const std::shared_ptr<CLayerQuads> &pLayer, 
 	// This method is a bit different than the point alignment in the way where instead of trying to aling 1 point to all quads,
 	// we try to align 5 points to all quads, these 5 points being 5 points of an AABB.
 	// Otherwise, the concept is the same, we use the original position of the AABB to make the computations.
-	int Threshold = f2fx(maximum(10.0f, 10.0f * m_MouseWScale));
+	int Threshold = f2fx(maximum(5.0f, 10.0f * m_MouseWScale));
 	int SmallestDiffX = Threshold + 1, SmallestDiffY = Threshold + 1;
 	std::vector<SAlignmentInfo> vAlignmentsX, vAlignmentsY;
 
-	bool IgnoreGrid = Input()->AltIsPressed();
+	bool GridEnabled = MapView()->MapGrid()->IsEnabled() && !Input()->AltIsPressed();
 
 	auto &&CheckAlignment = [&](CPoint &Aligned, int Point) {
 		CPoint ToCheck = AABB.m_aPoints[Point] + ivec2(OffsetX, OffsetY);
@@ -1795,14 +1788,7 @@ void CEditor::ComputeAABBAlignments(const std::shared_ptr<CLayerQuads> &pLayer, 
 		int DiffX = absolute(DX);
 		int DiffY = absolute(DY);
 
-		const float PX = fx2f(Aligned.x);
-		const float PY = fx2f(Aligned.y);
-		float SnappedPX = PX;
-		float SnappedPY = PY;
-		if(MapView()->MapGrid()->IsEnabled() && !IgnoreGrid)
-			MapView()->MapGrid()->SnapToGrid(SnappedPX, SnappedPY);
-
-		if(DiffX <= Threshold && (SnappedPX == PX || DiffX == 0))
+		if(DiffX <= Threshold && (!GridEnabled || DiffX == 0))
 		{
 			if(DiffX < SmallestDiffX)
 			{
@@ -1822,7 +1808,7 @@ void CEditor::ComputeAABBAlignments(const std::shared_ptr<CLayerQuads> &pLayer, 
 			}
 		}
 
-		if(DiffY <= Threshold && (SnappedPY == PY || DiffY == 0))
+		if(DiffY <= Threshold && (!GridEnabled || DiffY == 0))
 		{
 			if(DiffY < SmallestDiffY)
 			{
