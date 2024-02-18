@@ -690,7 +690,7 @@ const char *FormatTime(float Time)
 	int Minutes = (int)Time / 60 % 60;
 	float Seconds = Time - ((int)Time / 60 * 60);
 
-	static char sTimeString	[128] = "";
+	static char sTimeString[128] = "";
 	memset(sTimeString, 0, sizeof(sTimeString)); // clear buffer
 
 	if(Days > 0)
