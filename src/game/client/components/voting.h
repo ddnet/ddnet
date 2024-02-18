@@ -24,6 +24,7 @@ class CVoting : public CComponent
 	char m_aReason[VOTE_REASON_LENGTH];
 	int m_Voted;
 	int m_Yes, m_No, m_Pass, m_Total;
+	bool m_ReceivingOptions;
 
 	void AddOption(const char *pDescription);
 	void RemoveOption(const char *pDescription);
@@ -61,6 +62,7 @@ public:
 	int TakenChoice() const { return m_Voted; }
 	const char *VoteDescription() const { return m_aDescription; }
 	const char *VoteReason() const { return m_aReason; }
+	bool IsReceivingOptions() const { return m_ReceivingOptions; }
 };
 
 #endif
