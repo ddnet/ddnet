@@ -3995,7 +3995,7 @@ void CGameContext::OnMapChange(char *pNewMapName, int MapNameSize)
 		if(!m_apPlayers[i])
 			continue;
 
-		Score()->SaveTeam(i, "", g_Config.m_SvSqlServerName);
+		Score()->SaveTeam(i, "", g_Config.m_SvSqlServerName, true);
 	}
 
 	char aConfig[IO_MAX_PATH_LENGTH];
