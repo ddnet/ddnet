@@ -218,27 +218,6 @@ int CEditor::DoButton_Env(const void *pID, const char *pText, int Checked, const
 	return DoButton_Editor_Common(pID, pText, Checked, pRect, 0, pToolTip);
 }
 
-int CEditor::DoButton_File(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip)
-{
-	if(Checked)
-		pRect->Draw(GetButtonColor(pID, Checked), IGraphics::CORNER_ALL, 3.0f);
-
-	CUIRect Rect;
-	pRect->VMargin(5.0f, &Rect);
-	UI()->DoLabel(&Rect, pText, 10.0f, TEXTALIGN_ML);
-	return DoButton_Editor_Common(pID, pText, Checked, pRect, Flags, pToolTip);
-}
-
-int CEditor::DoButton_Menu(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip)
-{
-	pRect->Draw(ColorRGBA(0.5f, 0.5f, 0.5f, 1.0f), IGraphics::CORNER_T, 3.0f);
-
-	CUIRect Rect;
-	pRect->VMargin(5.0f, &Rect);
-	UI()->DoLabel(&Rect, pText, 10.0f, TEXTALIGN_ML);
-	return DoButton_Editor_Common(pID, pText, Checked, pRect, Flags, pToolTip);
-}
-
 int CEditor::DoButton_MenuItem(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip)
 {
 	if(UI()->HotItem() == pID || Checked)
@@ -255,17 +234,17 @@ int CEditor::DoButton_MenuItem(const void *pID, const char *pText, int Checked, 
 	return DoButton_Editor_Common(pID, pText, Checked, pRect, Flags, pToolTip);
 }
 
-int CEditor::DoButton_Ex(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip, int Corners, float FontSize)
+int CEditor::DoButton_Ex(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip, int Corners, float FontSize, int Align)
 {
 	pRect->Draw(GetButtonColor(pID, Checked), Corners, 3.0f);
 
 	CUIRect Rect;
-	pRect->VMargin(pRect->w > 20.0f ? 5.0f : 0.0f, &Rect);
+	pRect->VMargin(((Align & TEXTALIGN_MASK_HORIZONTAL) == TEXTALIGN_CENTER) ? 1.0f : 5.0f, &Rect);
 
 	SLabelProperties Props;
 	Props.m_MaxWidth = Rect.w;
 	Props.m_EllipsisAtEnd = true;
-	UI()->DoLabel(&Rect, pText, FontSize, TEXTALIGN_MC, Props);
+	UI()->DoLabel(&Rect, pText, FontSize, Align, Props);
 
 	return DoButton_Editor_Common(pID, pText, Checked, pRect, Flags, pToolTip);
 }
@@ -280,20 +259,6 @@ int CEditor::DoButton_FontIcon(const void *pID, const char *pText, int Checked, 
 	TextRender()->SetRenderFlags(0);
 	TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
 
-	return DoButton_Editor_Common(pID, pText, Checked, pRect, Flags, pToolTip);
-}
-
-int CEditor::DoButton_ButtonInc(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip)
-{
-	pRect->Draw(GetButtonColor(pID, Checked), IGraphics::CORNER_R, 3.0f);
-	UI()->DoLabel(pRect, pText ? pText : "+", 10.0f, TEXTALIGN_MC);
-	return DoButton_Editor_Common(pID, pText, Checked, pRect, Flags, pToolTip);
-}
-
-int CEditor::DoButton_ButtonDec(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip)
-{
-	pRect->Draw(GetButtonColor(pID, Checked), IGraphics::CORNER_L, 3.0f);
-	UI()->DoLabel(pRect, pText ? pText : "-", 10.0f, TEXTALIGN_MC);
 	return DoButton_Editor_Common(pID, pText, Checked, pRect, Flags, pToolTip);
 }
 
@@ -1288,7 +1253,7 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 	{
 		// refocus button
 		{
-			TB_Bottom.VSplitLeft(45.0f, &Button, &TB_Bottom);
+			TB_Bottom.VSplitLeft(50.0f, &Button, &TB_Bottom);
 			static int s_RefocusButton = 0;
 			int FocusButtonChecked = MapView()->IsFocused() ? -1 : 1;
 			if(DoButton_Editor(&s_RefocusButton, "Refocus", FocusButtonChecked, &Button, 0, "[HOME] Restore map focus") || (m_Dialog == DIALOG_NONE && CLineInput::GetActiveInput() == nullptr && Input()->KeyPress(KEY_HOME)))
@@ -6252,7 +6217,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 				ToolBar.VSplitRight(5.0f, &ToolBar, nullptr);
 				ToolBar.VSplitRight(20.0f, &ToolBar, &Button);
 				static int s_ZoomOutButton = 0;
-				if(DoButton_FontIcon(&s_ZoomOutButton, "-", 0, &Button, 0, "[NumPad-] Zoom out horizontally, hold shift to zoom vertically", IGraphics::CORNER_R, 9.0f))
+				if(DoButton_FontIcon(&s_ZoomOutButton, FONT_ICON_MINUS, 0, &Button, 0, "[NumPad-] Zoom out horizontally, hold shift to zoom vertically", IGraphics::CORNER_R, 9.0f))
 				{
 					if(Input()->ShiftIsPressed())
 						m_ZoomEnvelopeY.ChangeValue(0.1f * m_ZoomEnvelopeY.GetValue());
@@ -6267,7 +6232,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 
 				ToolBar.VSplitRight(20.0f, &ToolBar, &Button);
 				static int s_ZoomInButton = 0;
-				if(DoButton_FontIcon(&s_ZoomInButton, "+", 0, &Button, 0, "[NumPad+] Zoom in horizontally, hold shift to zoom vertically", IGraphics::CORNER_L, 9.0f))
+				if(DoButton_FontIcon(&s_ZoomInButton, FONT_ICON_PLUS, 0, &Button, 0, "[NumPad+] Zoom in horizontally, hold shift to zoom vertically", IGraphics::CORNER_L, 9.0f))
 				{
 					if(Input()->ShiftIsPressed())
 						m_ZoomEnvelopeY.ChangeValue(-0.1f * m_ZoomEnvelopeY.GetValue());
@@ -6319,7 +6284,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		}
 
 		static int s_PrevButton = 0;
-		if(DoButton_ButtonDec(&s_PrevButton, nullptr, 0, &Dec, 0, "Previous Envelope"))
+		if(DoButton_FontIcon(&s_PrevButton, FONT_ICON_MINUS, 0, &Dec, 0, "Previous Envelope", IGraphics::CORNER_L, 7.0f))
 		{
 			m_SelectedEnvelope--;
 			if(m_SelectedEnvelope < 0)
@@ -6328,7 +6293,7 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 		}
 
 		static int s_NextButton = 0;
-		if(DoButton_ButtonInc(&s_NextButton, nullptr, 0, &Inc, 0, "Next Envelope"))
+		if(DoButton_FontIcon(&s_NextButton, FONT_ICON_PLUS, 0, &Inc, 0, "Next Envelope", IGraphics::CORNER_R, 7.0f))
 		{
 			m_SelectedEnvelope++;
 			if(m_SelectedEnvelope >= (int)m_Map.m_vpEnvelopes.size())
@@ -7679,7 +7644,7 @@ void CEditor::RenderMenubar(CUIRect MenuBar)
 	CUIRect FileButton;
 	static int s_FileButton = 0;
 	MenuBar.VSplitLeft(60.0f, &FileButton, &MenuBar);
-	if(DoButton_Menu(&s_FileButton, "File", 0, &FileButton, 0, nullptr))
+	if(DoButton_Ex(&s_FileButton, "File", 0, &FileButton, 0, nullptr, IGraphics::CORNER_T, EditorFontSizes::MENU, TEXTALIGN_ML))
 	{
 		static SPopupMenuId s_PopupMenuFileId;
 		UI()->DoPopupMenu(&s_PopupMenuFileId, FileButton.x, FileButton.y + FileButton.h - 1.0f, 120.0f, 174.0f, this, PopupMenuFile, PopupProperties);
@@ -7690,7 +7655,7 @@ void CEditor::RenderMenubar(CUIRect MenuBar)
 	CUIRect ToolsButton;
 	static int s_ToolsButton = 0;
 	MenuBar.VSplitLeft(60.0f, &ToolsButton, &MenuBar);
-	if(DoButton_Menu(&s_ToolsButton, "Tools", 0, &ToolsButton, 0, nullptr))
+	if(DoButton_Ex(&s_ToolsButton, "Tools", 0, &ToolsButton, 0, nullptr, IGraphics::CORNER_T, EditorFontSizes::MENU, TEXTALIGN_ML))
 	{
 		static SPopupMenuId s_PopupMenuToolsId;
 		UI()->DoPopupMenu(&s_PopupMenuToolsId, ToolsButton.x, ToolsButton.y + ToolsButton.h - 1.0f, 200.0f, 64.0f, this, PopupMenuTools, PopupProperties);
@@ -7701,7 +7666,7 @@ void CEditor::RenderMenubar(CUIRect MenuBar)
 	CUIRect SettingsButton;
 	static int s_SettingsButton = 0;
 	MenuBar.VSplitLeft(60.0f, &SettingsButton, &MenuBar);
-	if(DoButton_Menu(&s_SettingsButton, "Settings", 0, &SettingsButton, 0, nullptr))
+	if(DoButton_Ex(&s_SettingsButton, "Settings", 0, &SettingsButton, 0, nullptr, IGraphics::CORNER_T, EditorFontSizes::MENU, TEXTALIGN_ML))
 	{
 		static SPopupMenuId s_PopupMenuEntitiesId;
 		UI()->DoPopupMenu(&s_PopupMenuEntitiesId, SettingsButton.x, SettingsButton.y + SettingsButton.h - 1.0f, 200.0f, 92.0f, this, PopupMenuSettings, PopupProperties);
