@@ -646,7 +646,7 @@ int CServer::ClientCountry(int ClientID) const
 		return -1;
 }
 
-bool CServer::ClientEmpty(int ClientID) const
+bool CServer::ClientSlotEmpty(int ClientID) const
 {
 	return ClientID >= 0 && ClientID < MAX_CLIENTS && m_aClients[ClientID].m_State == CServer::CClient::STATE_EMPTY;
 }
