@@ -41,7 +41,7 @@ jobs:
           fancy: false
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: true
 
@@ -153,7 +153,7 @@ jobs:
 
     - name: Upload Codecov report (unit tests)
       if: contains(matrix.os, 'ubuntu-latest')
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v4
       with:
         gcov: true
         gcov_include: src
@@ -170,7 +170,7 @@ jobs:
 
     - name: Upload Codecov report (start & connect)
       if: contains(matrix.os, 'ubuntu-latest')
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v4
       with:
         gcov: true
         gcov_include: src
@@ -206,7 +206,7 @@ jobs:
 
     - name: Upload Codecov report (integration tests)
       if: contains(matrix.os, 'ubuntu-latest')
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v4
       with:
         gcov: true
         gcov_include: src
@@ -220,8 +220,7 @@ jobs:
         mv ${{ matrix.package-file }} artifacts
 
     - name: Upload Artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ddnet-${{ matrix.os }}
         path: release/artifacts
-
