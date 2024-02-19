@@ -217,7 +217,10 @@ void CGameContext::ConUnDeep(IConsole::IResult *pResult, void *pUserData)
 		return;
 	CCharacter *pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
 	if(pChr)
+	{
 		pChr->SetDeepFrozen(false);
+		pChr->UnFreeze();
+	}
 }
 
 void CGameContext::ConLiveFreeze(IConsole::IResult *pResult, void *pUserData)
