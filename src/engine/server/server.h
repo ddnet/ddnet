@@ -298,7 +298,7 @@ public:
 	const char *ClientName(int ClientID) const override;
 	const char *ClientClan(int ClientID) const override;
 	int ClientCountry(int ClientID) const override;
-	bool ClientEmpty(int ClientID) const override;
+	bool ClientSlotEmpty(int ClientID) const override;
 	bool ClientIngame(int ClientID) const override;
 	bool ClientAuthed(int ClientID) const override;
 	int Port() const override;
