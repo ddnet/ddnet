@@ -1438,6 +1438,7 @@ void CServerBrowser::LoadDDNetServers()
 		const json_value &IconSha256 = Icon["sha256"];
 		const json_value &IconUrl = Icon["url"];
 		const json_value &Name = Community["name"];
+		const json_value HasFinishes = Community["has_finishes"];
 		const json_value *pFinishes = &Icon["finishes"];
 		const json_value *pServers = &Icon["servers"];
 		if(pFinishes->type == json_none)
@@ -1464,6 +1465,7 @@ void CServerBrowser::LoadDDNetServers()
 			IconSha256.type != json_string ||
 			IconUrl.type != json_string ||
 			Name.type != json_string ||
+			HasFinishes.type != json_boolean ||
 			(pFinishes->type != json_array && pFinishes->type != json_none) ||
 			pServers->type != json_array)
 		{
@@ -1482,8 +1484,8 @@ void CServerBrowser::LoadDDNetServers()
 			log_error("serverbrowser", "invalid community servers (CommunityId=%s)", NewCommunity.Id());
 			continue;
 		}
-		NewCommunity.m_HasFinishes = pFinishes->type == json_array;
-		if(NewCommunity.m_HasFinishes && !ParseCommunityFinishes(&NewCommunity, *pFinishes))
+		NewCommunity.m_HasFinishes = HasFinishes;
+		if(NewCommunity.m_HasFinishes && pFinishes->type == json_array && !ParseCommunityFinishes(&NewCommunity, *pFinishes))
 		{
 			log_error("serverbrowser", "invalid community finishes (CommunityId=%s)", NewCommunity.Id());
 			continue;
