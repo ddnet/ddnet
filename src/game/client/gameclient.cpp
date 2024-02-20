@@ -574,6 +574,8 @@ void CGameClient::OnReset()
 	m_LastFlagCarrierBlue = -4;
 	m_aTuning[g_Config.m_ClDummy] = CTuningParams();
 
+	m_NextChangeInfo = 0;
+
 	m_Teams.Reset();
 	m_aDDRaceMsgSent[0] = false;
 	m_aDDRaceMsgSent[1] = false;
@@ -963,6 +965,11 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 		{
 			m_CharOrder.GiveWeak(ID.first);
 		}
+	}
+	else if(MsgId == NETMSGTYPE_SV_CHANGEINFOCOOLDOWN)
+	{
+		CNetMsg_Sv_ChangeInfoCooldown *pMsg = (CNetMsg_Sv_ChangeInfoCooldown *)pRawMsg;
+		m_NextChangeInfo = pMsg->m_WaitUntil;
 	}
 }
 
