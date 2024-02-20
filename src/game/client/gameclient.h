@@ -517,6 +517,8 @@ public:
 	void SendDummyInfo(bool Start) override;
 	void SendKill(int ClientID) const;
 
+	int m_NextChangeInfo;
+
 	// DDRace
 
 	int m_aLocalIDs[NUM_DUMMIES];

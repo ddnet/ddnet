@@ -273,9 +273,9 @@ void CMenus::SetNeedSendInfo()
 
 void CMenus::RenderSettingsPlayer(CUIRect MainView)
 {
-	CUIRect TabBar, PlayerTab, DummyTab, QuickSearch, QuickSearchClearButton;
+	CUIRect TabBar, PlayerTab, DummyTab, ChangeInfo, QuickSearch, QuickSearchClearButton;
 	MainView.HSplitTop(20.0f, &TabBar, &MainView);
-	TabBar.VSplitMid(&TabBar, nullptr);
+	TabBar.VSplitMid(&TabBar, &ChangeInfo, 20.f);
 	TabBar.VSplitMid(&PlayerTab, &DummyTab);
 	MainView.HSplitTop(10.0f, nullptr, &MainView);
 
@@ -289,6 +289,14 @@ void CMenus::RenderSettingsPlayer(CUIRect MainView)
 	if(DoButton_MenuTab(&s_DummyTabButton, Localize("Dummy"), m_Dummy, &DummyTab, IGraphics::CORNER_R, nullptr, nullptr, nullptr, nullptr, 4.0f))
 	{
 		m_Dummy = true;
+	}
+
+	if(Client()->State() == IClient::STATE_ONLINE && m_pClient->m_NextChangeInfo && m_pClient->m_NextChangeInfo > Client()->GameTick(g_Config.m_ClDummy))
+	{
+		char aChangeInfo[128], aTimeLeft[32];
+		str_format(aTimeLeft, sizeof(aTimeLeft), Localize("%ds left"), (m_pClient->m_NextChangeInfo - Client()->GameTick(g_Config.m_ClDummy) + Client()->GameTickSpeed() - 1) / Client()->GameTickSpeed());
+		str_format(aChangeInfo, sizeof(aChangeInfo), "%s: %s", Localize("Player info change cooldown"), aTimeLeft);
+		UI()->DoLabel(&ChangeInfo, aChangeInfo, 10.f, TEXTALIGN_ML);
 	}
 
 	static CLineInput s_NameInput;
@@ -520,9 +528,9 @@ void CMenus::OnConfigSave(IConfigManager *pConfigManager)
 
 void CMenus::RenderSettingsTee(CUIRect MainView)
 {
-	CUIRect TabBar, PlayerTab, DummyTab;
+	CUIRect TabBar, PlayerTab, DummyTab, ChangeInfo;
 	MainView.HSplitTop(20.0f, &TabBar, &MainView);
-	TabBar.VSplitMid(&TabBar, nullptr);
+	TabBar.VSplitMid(&TabBar, &ChangeInfo, 20.f);
 	TabBar.VSplitMid(&PlayerTab, &DummyTab);
 	MainView.HSplitTop(10.0f, nullptr, &MainView);
 
@@ -536,6 +544,14 @@ void CMenus::RenderSettingsTee(CUIRect MainView)
 	if(DoButton_MenuTab(&s_DummyTabButton, Localize("Dummy"), m_Dummy, &DummyTab, IGraphics::CORNER_R, nullptr, nullptr, nullptr, nullptr, 4.0f))
 	{
 		m_Dummy = true;
+	}
+
+	if(Client()->State() == IClient::STATE_ONLINE && m_pClient->m_NextChangeInfo && m_pClient->m_NextChangeInfo > Client()->GameTick(g_Config.m_ClDummy))
+	{
+		char aChangeInfo[128], aTimeLeft[32];
+		str_format(aTimeLeft, sizeof(aTimeLeft), Localize("%ds left"), (m_pClient->m_NextChangeInfo - Client()->GameTick(g_Config.m_ClDummy) + Client()->GameTickSpeed() - 1) / Client()->GameTickSpeed());
+		str_format(aChangeInfo, sizeof(aChangeInfo), "%s: %s", Localize("Player info change cooldown"), aTimeLeft);
+		UI()->DoLabel(&ChangeInfo, aChangeInfo, 10.f, TEXTALIGN_ML);
 	}
 
 	char *pSkinName;

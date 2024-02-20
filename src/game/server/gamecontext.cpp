@@ -2554,6 +2554,13 @@ void CGameContext::OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int
 	pPlayer->m_LastChangeInfo = Server()->Tick();
 	pPlayer->UpdatePlaytime();
 
+	if(g_Config.m_SvSpamprotection)
+	{
+		CNetMsg_Sv_ChangeInfoCooldown ChangeInfoCooldownMsg;
+		ChangeInfoCooldownMsg.m_WaitUntil = Server()->Tick() + Server()->TickSpeed() * g_Config.m_SvInfoChangeDelay;
+		Server()->SendPackMsg(&ChangeInfoCooldownMsg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientID);
+	}
+
 	// set infos
 	if(Server()->WouldClientNameChange(ClientID, pMsg->m_pName) && !ProcessSpamProtection(ClientID))
 	{
