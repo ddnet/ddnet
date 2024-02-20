@@ -174,7 +174,7 @@ bool CHttpRequest::ConfigureHandle(void *pHandle)
 	}
 
 #ifdef CONF_PLATFORM_ANDROID
-	curl_easy_setopt(pHandle, CURLOPT_CAINFO, "data/cacert.pem");
+	curl_easy_setopt(pH, CURLOPT_CAINFO, "data/cacert.pem");
 #endif
 
 	switch(m_Type)
