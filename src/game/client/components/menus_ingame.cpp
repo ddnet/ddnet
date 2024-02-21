@@ -985,28 +985,25 @@ void CMenus::UpdateOwnGhost(CGhostItem Item)
 		if(m_vGhosts[i].m_Own)
 			Own = i;
 
-	if(Own != -1)
+	if(Own == -1)
 	{
-		if(g_Config.m_ClRaceGhostSaveBest)
-		{
-			if(Item.HasFile() || !m_vGhosts[Own].HasFile())
-				DeleteGhostItem(Own);
-		}
-		if(m_vGhosts[Own].m_Time > Item.m_Time)
-		{
-			Item.m_Own = true;
-			m_vGhosts[Own].m_Own = false;
-			m_vGhosts[Own].m_Slot = -1;
-		}
-		else
-		{
-			Item.m_Own = false;
-			Item.m_Slot = -1;
-		}
+		Item.m_Own = true;
+	}
+	else if(g_Config.m_ClRaceGhostSaveBest && (Item.HasFile() || !m_vGhosts[Own].HasFile()))
+	{
+		Item.m_Own = true;
+		DeleteGhostItem(Own);
+	}
+	else if(m_vGhosts[Own].m_Time > Item.m_Time)
+	{
+		Item.m_Own = true;
+		m_vGhosts[Own].m_Own = false;
+		m_vGhosts[Own].m_Slot = -1;
 	}
 	else
 	{
-		Item.m_Own = true;
+		Item.m_Own = false;
+		Item.m_Slot = -1;
 	}
 
 	Item.m_Date = std::time(0);
