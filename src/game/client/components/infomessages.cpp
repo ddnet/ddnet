@@ -280,7 +280,7 @@ void CInfoMessages::OnRaceFinishMessage(const CNetMsg_Sv_RaceFinish *pMsg)
 void CInfoMessages::RenderKillMsg(const CInfoMsg &InfoMsg, float x, float y)
 {
 	ColorRGBA TextColor;
-	if(g_Config.m_ClChatTeamColors && InfoMsg.m_VictimDDTeam)
+	if(InfoMsg.m_VictimDDTeam)
 		TextColor = m_pClient->GetDDTeamColor(InfoMsg.m_VictimDDTeam, 0.75f);
 	else
 		TextColor = TextRender()->DefaultTextColor();
@@ -402,7 +402,7 @@ void CInfoMessages::RenderFinishMsg(const CInfoMsg &InfoMsg, float x, float y)
 	{
 		x -= TextRender()->GetBoundingBoxTextContainer(InfoMsg.m_VictimTextContainerIndex).m_W;
 		ColorRGBA TextColor;
-		if(g_Config.m_ClChatTeamColors && InfoMsg.m_VictimDDTeam)
+		if(InfoMsg.m_VictimDDTeam)
 			TextColor = m_pClient->GetDDTeamColor(InfoMsg.m_VictimDDTeam, 0.75f);
 		else
 			TextColor = TextRender()->DefaultTextColor();
