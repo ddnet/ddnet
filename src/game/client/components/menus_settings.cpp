@@ -81,16 +81,14 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 	// game
 	{
 		// headline
-		Game.HSplitTop(20.0f, &Label, &Game);
+		Game.HSplitTop(30.0f, &Label, &Game);
 		UI()->DoLabel(&Label, Localize("Game"), 20.0f, TEXTALIGN_ML);
-		Game.Margin(5.0f, &Game);
-		Game.VSplitMid(&Left, &Right);
-		Left.VSplitRight(5.0f, &Left, 0);
-		Right.VMargin(5.0f, &Right);
+		Game.HSplitTop(5.0f, nullptr, &Game);
+		Game.VSplitMid(&Left, nullptr, 20.0f);
 
 		// dynamic camera
 		Left.HSplitTop(20.0f, &Button, &Left);
-		bool IsDyncam = g_Config.m_ClDyncam || g_Config.m_ClMouseFollowfactor > 0;
+		const bool IsDyncam = g_Config.m_ClDyncam || g_Config.m_ClMouseFollowfactor > 0;
 		if(DoButton_CheckBox(&g_Config.m_ClDyncam, Localize("Dynamic Camera"), IsDyncam, &Button))
 		{
 			if(IsDyncam)
@@ -105,7 +103,7 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		}
 
 		// smooth dynamic camera
-		Left.HSplitTop(5.0f, 0, &Left);
+		Left.HSplitTop(5.0f, nullptr, &Left);
 		Left.HSplitTop(20.0f, &Button, &Left);
 		if(g_Config.m_ClDyncam)
 		{
@@ -124,13 +122,13 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		}
 
 		// weapon pickup
-		Left.HSplitTop(5.0f, 0, &Left);
+		Left.HSplitTop(5.0f, nullptr, &Left);
 		Left.HSplitTop(20.0f, &Button, &Left);
 		if(DoButton_CheckBox(&g_Config.m_ClAutoswitchWeapons, Localize("Switch weapon on pickup"), g_Config.m_ClAutoswitchWeapons, &Button))
 			g_Config.m_ClAutoswitchWeapons ^= 1;
 
 		// weapon out of ammo autoswitch
-		Left.HSplitTop(5.0f, 0, &Left);
+		Left.HSplitTop(5.0f, nullptr, &Left);
 		Left.HSplitTop(20.0f, &Button, &Left);
 		if(DoButton_CheckBox(&g_Config.m_ClAutoswitchWeaponsOutOfAmmo, Localize("Switch weapon when out of ammo"), g_Config.m_ClAutoswitchWeaponsOutOfAmmo, &Button))
 			g_Config.m_ClAutoswitchWeaponsOutOfAmmo ^= 1;
@@ -139,55 +137,28 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 	// client
 	{
 		// headline
-		Client.HSplitTop(20.0f, &Label, &Client);
+		Client.HSplitTop(30.0f, &Label, &Client);
 		UI()->DoLabel(&Label, Localize("Client"), 20.0f, TEXTALIGN_ML);
-		Client.Margin(5.0f, &Client);
-		Client.VSplitMid(&Left, &Right);
-		Left.VSplitRight(5.0f, &Left, 0);
-		Right.VMargin(5.0f, &Right);
+		Client.HSplitTop(5.0f, nullptr, &Client);
+		Client.VSplitMid(&Left, &Right, 20.0f);
 
 		// skip main menu
-		Left.HSplitTop(5.0f, 0, &Left);
 		Left.HSplitTop(20.0f, &Button, &Left);
 		if(DoButton_CheckBox(&g_Config.m_ClSkipStartMenu, Localize("Skip the main menu"), g_Config.m_ClSkipStartMenu, &Button))
 			g_Config.m_ClSkipStartMenu ^= 1;
-
-		float SliderGroupMargin = 10.0f;
-
-		// auto demo settings
-		{
-			Right.HSplitTop(40.0f, nullptr, &Right);
-			Right.HSplitTop(20.0f, &Button, &Right);
-			if(DoButton_CheckBox(&g_Config.m_ClAutoDemoRecord, Localize("Automatically record demos"), g_Config.m_ClAutoDemoRecord, &Button))
-				g_Config.m_ClAutoDemoRecord ^= 1;
-
-			Right.HSplitTop(2 * 20.0f, &Button, &Right);
-			if(g_Config.m_ClAutoDemoRecord)
-				UI()->DoScrollbarOption(&g_Config.m_ClAutoDemoMax, &g_Config.m_ClAutoDemoMax, &Button, Localize("Max demos"), 1, 1000, &CUI::ms_LinearScrollbarScale, CUI::SCROLLBAR_OPTION_INFINITE | CUI::SCROLLBAR_OPTION_MULTILINE);
-
-			Right.HSplitTop(SliderGroupMargin, nullptr, &Right);
-			Right.HSplitTop(20.0f, &Button, &Right);
-			if(DoButton_CheckBox(&g_Config.m_ClAutoScreenshot, Localize("Automatically take game over screenshot"), g_Config.m_ClAutoScreenshot, &Button))
-				g_Config.m_ClAutoScreenshot ^= 1;
-
-			Right.HSplitTop(2 * 20.0f, &Button, &Right);
-			if(g_Config.m_ClAutoScreenshot)
-				UI()->DoScrollbarOption(&g_Config.m_ClAutoScreenshotMax, &g_Config.m_ClAutoScreenshotMax, &Button, Localize("Max Screenshots"), 1, 1000, &CUI::ms_LinearScrollbarScale, CUI::SCROLLBAR_OPTION_INFINITE | CUI::SCROLLBAR_OPTION_MULTILINE);
-		}
 
 		Left.HSplitTop(10.0f, nullptr, &Left);
 		Left.HSplitTop(20.0f, &Button, &Left);
 		UI()->DoScrollbarOption(&g_Config.m_ClRefreshRate, &g_Config.m_ClRefreshRate, &Button, Localize("Refresh Rate"), 10, 10000, &CUI::ms_LogarithmicScrollbarScale, CUI::SCROLLBAR_OPTION_INFINITE, " Hz");
 		Left.HSplitTop(5.0f, nullptr, &Left);
 		Left.HSplitTop(20.0f, &Button, &Left);
-		int s_LowerRefreshRate;
+		static int s_LowerRefreshRate;
 		if(DoButton_CheckBox(&s_LowerRefreshRate, Localize("Save power by lowering refresh rate (higher input latency)"), g_Config.m_ClRefreshRate <= 480 && g_Config.m_ClRefreshRate != 0, &Button))
 			g_Config.m_ClRefreshRate = g_Config.m_ClRefreshRate > 480 || g_Config.m_ClRefreshRate == 0 ? 480 : 0;
 
 		CUIRect SettingsButton;
-		Left.HSplitBottom(25.0f, &Left, &SettingsButton);
-
-		SettingsButton.HSplitTop(5.0f, 0, &SettingsButton);
+		Left.HSplitBottom(20.0f, &Left, &SettingsButton);
+		Left.HSplitBottom(5.0f, &Left, nullptr);
 		static CButtonContainer s_SettingsButtonID;
 		if(DoButton_Menu(&s_SettingsButtonID, Localize("Settings file"), 0, &SettingsButton))
 		{
@@ -199,11 +170,9 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		}
 		GameClient()->m_Tooltips.DoToolTip(&s_SettingsButtonID, &SettingsButton, Localize("Open the settings file"));
 
-		Left.HSplitTop(15.0f, 0, &Left);
 		CUIRect ConfigButton;
-		Left.HSplitBottom(25.0f, &Left, &ConfigButton);
-
-		ConfigButton.HSplitTop(5.0f, 0, &ConfigButton);
+		Left.HSplitBottom(20.0f, &Left, &ConfigButton);
+		Left.HSplitBottom(5.0f, &Left, nullptr);
 		static CButtonContainer s_ConfigButtonID;
 		if(DoButton_Menu(&s_ConfigButtonID, Localize("Config directory"), 0, &ConfigButton))
 		{
@@ -215,12 +184,9 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		}
 		GameClient()->m_Tooltips.DoToolTip(&s_ConfigButtonID, &ConfigButton, Localize("Open the directory that contains the configuration and user files"));
 
-		Left.HSplitTop(15.0f, 0, &Left);
 		CUIRect DirectoryButton;
-		Left.HSplitBottom(25.0f, &Left, &DirectoryButton);
-		RenderThemeSelection(Left);
-
-		DirectoryButton.HSplitTop(5.0f, 0, &DirectoryButton);
+		Left.HSplitBottom(20.0f, &Left, &DirectoryButton);
+		Left.HSplitBottom(5.0f, &Left, nullptr);
 		static CButtonContainer s_ThemesButtonID;
 		if(DoButton_Menu(&s_ThemesButtonID, Localize("Themes directory"), 0, &DirectoryButton))
 		{
@@ -233,9 +199,33 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 		}
 		GameClient()->m_Tooltips.DoToolTip(&s_ThemesButtonID, &DirectoryButton, Localize("Open the directory to add custom themes"));
 
+		Left.HSplitTop(20.0f, nullptr, &Left);
+		RenderThemeSelection(Left);
+
+		// auto demo settings
+		{
+			Right.HSplitTop(40.0f, nullptr, &Right);
+			Right.HSplitTop(20.0f, &Button, &Right);
+			if(DoButton_CheckBox(&g_Config.m_ClAutoDemoRecord, Localize("Automatically record demos"), g_Config.m_ClAutoDemoRecord, &Button))
+				g_Config.m_ClAutoDemoRecord ^= 1;
+
+			Right.HSplitTop(2 * 20.0f, &Button, &Right);
+			if(g_Config.m_ClAutoDemoRecord)
+				UI()->DoScrollbarOption(&g_Config.m_ClAutoDemoMax, &g_Config.m_ClAutoDemoMax, &Button, Localize("Max demos"), 1, 1000, &CUI::ms_LinearScrollbarScale, CUI::SCROLLBAR_OPTION_INFINITE | CUI::SCROLLBAR_OPTION_MULTILINE);
+
+			Right.HSplitTop(10.0f, nullptr, &Right);
+			Right.HSplitTop(20.0f, &Button, &Right);
+			if(DoButton_CheckBox(&g_Config.m_ClAutoScreenshot, Localize("Automatically take game over screenshot"), g_Config.m_ClAutoScreenshot, &Button))
+				g_Config.m_ClAutoScreenshot ^= 1;
+
+			Right.HSplitTop(2 * 20.0f, &Button, &Right);
+			if(g_Config.m_ClAutoScreenshot)
+				UI()->DoScrollbarOption(&g_Config.m_ClAutoScreenshotMax, &g_Config.m_ClAutoScreenshotMax, &Button, Localize("Max Screenshots"), 1, 1000, &CUI::ms_LinearScrollbarScale, CUI::SCROLLBAR_OPTION_INFINITE | CUI::SCROLLBAR_OPTION_MULTILINE);
+		}
+
 		// auto statboard screenshot
 		{
-			Right.HSplitTop(SliderGroupMargin, nullptr, &Right);
+			Right.HSplitTop(10.0f, nullptr, &Right);
 			Right.HSplitTop(20.0f, &Button, &Right);
 			if(DoButton_CheckBox(&g_Config.m_ClAutoStatboardScreenshot, Localize("Automatically take statboard screenshot"), g_Config.m_ClAutoStatboardScreenshot, &Button))
 			{
@@ -249,7 +239,7 @@ void CMenus::RenderSettingsGeneral(CUIRect MainView)
 
 		// auto statboard csv
 		{
-			Right.HSplitTop(SliderGroupMargin, nullptr, &Right);
+			Right.HSplitTop(10.0f, nullptr, &Right);
 			Right.HSplitTop(20.0f, &Button, &Right);
 			if(DoButton_CheckBox(&g_Config.m_ClAutoCSV, Localize("Automatically create statboard csv"), g_Config.m_ClAutoCSV, &Button))
 			{
