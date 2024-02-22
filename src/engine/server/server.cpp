@@ -1817,7 +1817,8 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 		else if(Msg == NETMSG_PING)
 		{
 			CMsgPacker Msgp(NETMSG_PING_REPLY, true);
-			SendMsg(&Msgp, MSGFLAG_FLUSH, ClientID);
+			int Vital = (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 ? MSGFLAG_VITAL : 0;
+			SendMsg(&Msgp, MSGFLAG_FLUSH | Vital, ClientID);
 		}
 		else if(Msg == NETMSG_PINGEX)
 		{
@@ -1828,7 +1829,8 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 			}
 			CMsgPacker Msgp(NETMSG_PONGEX, true);
 			Msgp.AddRaw(pID, sizeof(*pID));
-			SendMsg(&Msgp, MSGFLAG_FLUSH, ClientID);
+			int Vital = (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 ? MSGFLAG_VITAL : 0;
+			SendMsg(&Msgp, MSGFLAG_FLUSH | Vital, ClientID);
 		}
 		else
 		{
