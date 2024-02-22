@@ -1730,70 +1730,70 @@ Entities background color
 == Колір фону об'єктів
 
 Saving settings to '%s' failed
-==
+== 
 
 Searching
-==
+== 
 
 Enter Username
-==
+== 
 
 Enter Password
-==
+== 
 
 NOT CONNECTED
-==
+== 
 
 Match %d of %d
-==
+== 
 
 No results
-==
+== 
 
 Lines %d - %d (%s)
-==
+== 
 
 Locked
-==
+== 
 
 Following
-==
+== 
 
 Press a key…
-==
+== 
 
 Are you sure that you want to restart?
-==
+== 
 
 There's an unsaved map in the editor, you might want to save it.
-==
+== 
 
 Continue anyway?
-==
+== 
 
 Communities
-==
+== 
 
 Please use a different filename
-==
+== 
 
 Info Messages
-==
+== 
 
 Show local time always
-==
+== 
 
 Chat font size
-==
+== 
 
 Chat width
-==
+== 
 
 Authed name color in scoreboard
-==
+== 
 
 Same clan color in scoreboard
-==
+== 
 
 Show finish messages
-==
+== 
