@@ -230,7 +230,7 @@ IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType Entit
 			for(int n = 0; n < MAP_IMAGE_ENTITY_LAYER_TYPE_COUNT; ++n)
 			{
 				bool BuildThisLayer = true;
-				if(n == MAP_IMAGE_ENTITY_LAYER_TYPE_SWITCH && EntitiesModType != MAP_IMAGE_MOD_TYPE_DDNET && EntitiesModType != MAP_IMAGE_MOD_TYPE_DDRACE)
+				if(n == MAP_IMAGE_ENTITY_LAYER_TYPE_SWITCH && Layers()->SwitchLayer() == nullptr)
 					BuildThisLayer = false;
 
 				dbg_assert(!m_aaEntitiesTextures[(EntitiesModType * 2) + (int)EntitiesAreMasked][n].IsValid(), "entities texture already loaded when it should not be");
@@ -274,11 +274,8 @@ IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType Entit
 							}
 						}
 
-						if(EntitiesModType == MAP_IMAGE_MOD_TYPE_DDNET || EntitiesModType == MAP_IMAGE_MOD_TYPE_DDRACE)
-						{
-							if(n == MAP_IMAGE_ENTITY_LAYER_TYPE_SWITCH && TileIndex == TILE_SWITCHTIMEDOPEN)
-								TileIndex = 8;
-						}
+						if(n == MAP_IMAGE_ENTITY_LAYER_TYPE_SWITCH && TileIndex == TILE_SWITCHTIMEDOPEN)
+							TileIndex = 8;
 
 						int X = TileIndex % 16;
 						int Y = TileIndex / 16;
