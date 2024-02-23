@@ -94,20 +94,17 @@ enum
 	BUTTON_CONTEXT = 1,
 };
 
-void CEditor::EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Channels, void *pUser)
+void CEditor::EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Result, size_t Channels, void *pUser)
 {
 	CEditor *pThis = (CEditor *)pUser;
 	if(Env < 0 || Env >= (int)pThis->m_Map.m_vpEnvelopes.size())
-	{
-		Channels = ColorRGBA();
 		return;
-	}
 
 	std::shared_ptr<CEnvelope> pEnv = pThis->m_Map.m_vpEnvelopes[Env];
-	float t = pThis->m_AnimateTime;
-	t *= pThis->m_AnimateSpeed;
-	t += (TimeOffsetMillis / 1000.0f);
-	pEnv->Eval(t, Channels);
+	float Time = pThis->m_AnimateTime;
+	Time *= pThis->m_AnimateSpeed;
+	Time += (TimeOffsetMillis / 1000.0f);
+	pEnv->Eval(Time, Result, Channels);
 }
 
 /********************************************************
@@ -2791,15 +2788,16 @@ void CEditor::DoQuadEnvelopes(const std::vector<CQuad> &vQuads, IGraphics::CText
 		const CPoint *pPivotPoint = &vQuads[j].m_aPoints[4];
 		for(size_t i = 0; i < apEnvelope[j]->m_vPoints.size() - 1; i++)
 		{
-			ColorRGBA Result;
-			apEnvelope[j]->Eval(apEnvelope[j]->m_vPoints[i].m_Time / 1000.0f + 0.000001f, Result);
+			ColorRGBA Result = ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f);
+			apEnvelope[j]->Eval(apEnvelope[j]->m_vPoints[i].m_Time / 1000.0f + 0.000001f, Result, 2);
 			vec2 Pos0 = vec2(fx2f(pPivotPoint->x) + Result.r, fx2f(pPivotPoint->y) + Result.g);
 
 			const int Steps = 15;
 			for(int n = 1; n <= Steps; n++)
 			{
 				const float Time = mix(apEnvelope[j]->m_vPoints[i].m_Time, apEnvelope[j]->m_vPoints[i + 1].m_Time, (float)n / Steps);
-				apEnvelope[j]->Eval(Time / 1000.0f - 0.000001f, Result);
+				Result = ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f);
+				apEnvelope[j]->Eval(Time / 1000.0f - 0.000001f, Result, 2);
 
 				vec2 Pos1 = vec2(fx2f(pPivotPoint->x) + Result.r, fx2f(pPivotPoint->y) + Result.g);
 
@@ -6445,11 +6443,9 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 				{
 					// add point
 					float Time = ScreenToEnvelopeX(View, UI()->MouseX());
-					ColorRGBA Channels;
+					ColorRGBA Channels = ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f);
 					if(in_range(Time, 0.0f, pEnvelope->EndTime()))
-						pEnvelope->Eval(Time, Channels);
-					else
-						Channels = {0, 0, 0, 0};
+						pEnvelope->Eval(Time, Channels, 4);
 
 					int FixedTime = std::round(Time * 1000.0f);
 					bool TimeFound = false;
@@ -6642,12 +6638,13 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 				float StepTime = (EndTime - StartTime) / static_cast<float>(Steps);
 				float StepSize = (EndX - StartX) / static_cast<float>(Steps);
 
-				ColorRGBA Channels;
-				pEnvelope->Eval(StartTime + StepTime, Channels);
+				ColorRGBA Channels = ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f);
+				pEnvelope->Eval(StartTime + StepTime, Channels, c + 1);
 				float PrevY = EnvelopeToScreenY(View, Channels[c]);
 				for(int i = 2; i < Steps; i++)
 				{
-					pEnvelope->Eval(StartTime + i * StepTime, Channels);
+					Channels = ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f);
+					pEnvelope->Eval(StartTime + i * StepTime, Channels, c + 1);
 					float CurrentY = EnvelopeToScreenY(View, Channels[c]);
 
 					IGraphics::CLineItem LineItem(

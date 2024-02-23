@@ -209,18 +209,11 @@ void CMapSounds::OnRender()
 						if(!Voice.m_Voice.IsValid())
 							continue;
 
-						float OffsetX = 0, OffsetY = 0;
+						ColorRGBA Position = ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f);
+						CMapLayers::EnvelopeEval(Voice.m_pSource->m_PosEnvOffset, Voice.m_pSource->m_PosEnv, Position, 2, &m_pClient->m_MapLayersBackground);
 
-						if(Voice.m_pSource->m_PosEnv >= 0)
-						{
-							ColorRGBA Channels;
-							CMapLayers::EnvelopeEval(Voice.m_pSource->m_PosEnvOffset, Voice.m_pSource->m_PosEnv, Channels, &m_pClient->m_MapLayersBackground);
-							OffsetX = Channels.r;
-							OffsetY = Channels.g;
-						}
-
-						float x = fx2f(Voice.m_pSource->m_Position.x) + OffsetX;
-						float y = fx2f(Voice.m_pSource->m_Position.y) + OffsetY;
+						float x = fx2f(Voice.m_pSource->m_Position.x) + Position.r;
+						float y = fx2f(Voice.m_pSource->m_Position.y) + Position.g;
 
 						x += Center.x * (1.0f - pGroup->m_ParallaxX / 100.0f);
 						y += Center.y * (1.0f - pGroup->m_ParallaxY / 100.0f);
@@ -230,13 +223,11 @@ void CMapSounds::OnRender()
 
 						Sound()->SetVoiceLocation(Voice.m_Voice, x, y);
 
-						if(Voice.m_pSource->m_SoundEnv >= 0)
+						ColorRGBA Volume = ColorRGBA(1.0f, 0.0f, 0.0f, 0.0f);
+						CMapLayers::EnvelopeEval(Voice.m_pSource->m_SoundEnvOffset, Voice.m_pSource->m_SoundEnv, Volume, 1, &m_pClient->m_MapLayersBackground);
+						if(Volume.r < 1.0f)
 						{
-							ColorRGBA Channels;
-							CMapLayers::EnvelopeEval(Voice.m_pSource->m_SoundEnvOffset, Voice.m_pSource->m_SoundEnv, Channels, &m_pClient->m_MapLayersBackground);
-							float Volume = clamp(Channels.r, 0.0f, 1.0f);
-
-							Sound()->SetVoiceVolume(Voice.m_Voice, Volume);
+							Sound()->SetVoiceVolume(Voice.m_Voice, Volume.r);
 						}
 					}
 				}

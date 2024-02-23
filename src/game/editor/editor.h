@@ -809,7 +809,7 @@ public:
 
 	int m_ShiftBy;
 
-	static void EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Channels, void *pUser);
+	static void EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Result, size_t Channels, void *pUser);
 
 	CLineInputBuffered<256> m_SettingsCommandInput;
 	CMapSettingsBackend m_MapSettingsBackend;
