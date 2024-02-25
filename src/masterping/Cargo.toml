@@ -2,7 +2,7 @@
 name = "masterping"
 version = "0.0.1"
 authors = ["heinrich5991 <heinrich5991@gmail.com>"]
-edition = "2018"
+edition = "2021"
 publish = false
 license = "Zlib"
 
