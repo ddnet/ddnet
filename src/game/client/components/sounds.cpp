@@ -16,6 +16,7 @@ CSoundLoading::CSoundLoading(CGameClient *pGameClient, bool Render) :
 	m_pGameClient(pGameClient),
 	m_Render(Render)
 {
+	Abortable(true);
 }
 
 void CSoundLoading::Run()
@@ -27,6 +28,9 @@ void CSoundLoading::Run()
 
 		for(int i = 0; i < g_pData->m_aSounds[s].m_NumSounds; i++)
 		{
+			if(State() == IJob::STATE_ABORTED)
+				return;
+
 			int Id = m_pGameClient->Sound()->LoadWV(g_pData->m_aSounds[s].m_aSounds[i].m_pFilename);
 			g_pData->m_aSounds[s].m_aSounds[i].m_Id = Id;
 			// try to render a frame
@@ -114,7 +118,7 @@ void CSounds::OnRender()
 	// check for sound initialisation
 	if(m_WaitForSoundJob)
 	{
-		if(m_pSoundJob->Status() == IJob::STATE_DONE)
+		if(m_pSoundJob->State() == IJob::STATE_DONE)
 			m_WaitForSoundJob = false;
 		else
 			return;

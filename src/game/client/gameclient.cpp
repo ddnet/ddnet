@@ -979,8 +979,6 @@ void CGameClient::OnStateChange(int NewState, int OldState)
 
 void CGameClient::OnShutdown()
 {
-	RenderShutdownMessage();
-
 	for(auto &pComponent : m_vpAll)
 		pComponent->OnShutdown();
 }

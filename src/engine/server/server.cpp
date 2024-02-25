@@ -1117,8 +1117,8 @@ void CServer::InitDnsbl(int ClientID)
 		str_format(aBuf, sizeof(aBuf), "%s.%d.%d.%d.%d.%s", Config()->m_SvDnsblKey, Addr.ip[3], Addr.ip[2], Addr.ip[1], Addr.ip[0], Config()->m_SvDnsblHost);
 	}
 
-	IEngine *pEngine = Kernel()->RequestInterface<IEngine>();
-	pEngine->AddJob(m_aClients[ClientID].m_pDnsblLookup = std::make_shared<CHostLookup>(aBuf, NETTYPE_IPV4));
+	m_aClients[ClientID].m_pDnsblLookup = std::make_shared<CHostLookup>(aBuf, NETTYPE_IPV4);
+	Engine()->AddJob(m_aClients[ClientID].m_pDnsblLookup);
 	m_aClients[ClientID].m_DnsblState = CClient::DNSBL_STATE_PENDING;
 }
 
@@ -2706,9 +2706,14 @@ int CServer::Run()
 	m_UPnP.Open(BindAddr);
 #endif
 
-	IEngine *pEngine = Kernel()->RequestInterface<IEngine>();
-	IHttp *pHttp = Kernel()->RequestInterface<IHttp>();
-	m_pRegister = CreateRegister(&g_Config, m_pConsole, pEngine, pHttp, this->Port(), m_NetServer.GetGlobalToken());
+	if(!m_Http.Init(std::chrono::seconds{2}))
+	{
+		log_error("server", "Failed to initialize the HTTP client.");
+		return -1;
+	}
+
+	m_pEngine = Kernel()->RequestInterface<IEngine>();
+	m_pRegister = CreateRegister(&g_Config, m_pConsole, m_pEngine, &m_Http, this->Port(), m_NetServer.GetGlobalToken());
 
 	m_NetServer.SetCallbacks(NewClientCallback, NewClientNoAuthCallback, ClientRejoinCallback, DelClientCallback, this);
 
@@ -2839,7 +2844,7 @@ int CServer::Run()
 						InitDnsbl(ClientID);
 					}
 					else if(m_aClients[ClientID].m_DnsblState == CClient::DNSBL_STATE_PENDING &&
-						m_aClients[ClientID].m_pDnsblLookup->Status() == IJob::STATE_DONE)
+						m_aClients[ClientID].m_pDnsblLookup->State() == IJob::STATE_DONE)
 					{
 						if(m_aClients[ClientID].m_pDnsblLookup->Result() != 0)
 						{
@@ -3009,22 +3014,19 @@ int CServer::Run()
 			m_NetServer.Drop(i, pDisconnectReason);
 	}
 
+	m_pRegister->OnShutdown();
 	m_Econ.Shutdown();
-
 	m_Fifo.Shutdown();
+	Engine()->ShutdownJobs();
 
 	GameServer()->OnShutdown(nullptr);
 	m_pMap->Unload();
-
 	DbPool()->OnShutdown();
 
 #if defined(CONF_UPNP)
 	m_UPnP.Shutdown();
 #endif
-
 	m_NetServer.Close();
-
-	m_pRegister->OnShutdown();
 
 	return ErrorShutdown();
 }
@@ -3743,7 +3745,6 @@ void CServer::RegisterCommands()
 	m_pStorage = Kernel()->RequestInterface<IStorage>();
 	m_pAntibot = Kernel()->RequestInterface<IEngineAntibot>();
 
-	m_Http.Init(std::chrono::seconds{2});
 	Kernel()->RegisterInterface(static_cast<IHttp *>(&m_Http), false);
 
 	// register console commands

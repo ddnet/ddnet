@@ -4,25 +4,24 @@
 #define ENGINE_ENGINE_H
 
 #include "kernel.h"
-#include <engine/shared/jobs.h>
+
+#include <memory>
 
 class CFutureLogger;
+class IJob;
 class ILogger;
 
 class IEngine : public IInterface
 {
 	MACRO_INTERFACE("engine")
 
-protected:
-	class CJobPool m_JobPool;
-
 public:
 	virtual ~IEngine() = default;
 
 	virtual void Init() = 0;
 	virtual void AddJob(std::shared_ptr<IJob> pJob) = 0;
+	virtual void ShutdownJobs() = 0;
 	virtual void SetAdditionalLogger(std::shared_ptr<ILogger> &&pLogger) = 0;
-	static void RunJobBlocking(IJob *pJob);
 };
 
 extern IEngine *CreateEngine(const char *pAppname, std::shared_ptr<CFutureLogger> pFutureLogger, int Jobs);

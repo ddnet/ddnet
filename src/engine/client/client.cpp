@@ -2607,7 +2607,7 @@ void CClient::Update()
 		if(!m_EditJobs.empty())
 		{
 			std::shared_ptr<CDemoEdit> pJob = m_EditJobs.front();
-			if(pJob->Status() == IJob::STATE_DONE)
+			if(pJob->State() == IJob::STATE_DONE)
 			{
 				char aBuf[IO_MAX_PATH_LENGTH + 64];
 				str_format(aBuf, sizeof(aBuf), "Successfully saved the replay to %s!", pJob->Destination());
@@ -3050,6 +3050,9 @@ void CClient::Run()
 		m_GlobalTime = (time_get() - m_GlobalStartTime) / (float)time_freq();
 	}
 
+	GameClient()->RenderShutdownMessage();
+	Disconnect();
+
 	if(!m_pConfigManager->Save())
 	{
 		char aError[128];
@@ -3059,14 +3062,15 @@ void CClient::Run()
 
 	m_Fifo.Shutdown();
 	m_Http.Shutdown();
-	GameClient()->OnShutdown();
-	Disconnect();
+	Engine()->ShutdownJobs();
 
-	// close socket
+	GameClient()->RenderShutdownMessage();
+	GameClient()->OnShutdown();
+	delete m_pEditor;
+
+	// close sockets
 	for(unsigned int i = 0; i < std::size(m_aNetClient); i++)
 		m_aNetClient[i].Close();
-
-	delete m_pEditor;
 
 	// shutdown text render while graphics are still available
 	m_pTextRender->Shutdown();

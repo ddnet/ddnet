@@ -502,7 +502,7 @@ public:
 
 	void RefreshSkins();
 
-	void RenderShutdownMessage();
+	void RenderShutdownMessage() override;
 
 	const char *GetItemName(int Type) const override;
 	const char *Version() const override;
