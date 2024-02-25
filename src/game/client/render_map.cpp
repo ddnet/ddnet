@@ -300,11 +300,11 @@ void CRenderTools::RenderEvalEnvelope(const IEnvelopePointAccess *pPoints, std::
 				for(size_t c = 0; c < Channels; c++)
 				{
 					// monotonic 2d cubic bezier curve
-					const vec2 p0 = vec2(pCurrentPoint->m_Time / 1000.0f, fx2f(pCurrentPoint->m_aValues[c]));
-					const vec2 p3 = vec2(pNextPoint->m_Time / 1000.0f, fx2f(pNextPoint->m_aValues[c]));
+					const vec2 p0 = vec2(pCurrentPoint->m_Time, fx2f(pCurrentPoint->m_aValues[c]));
+					const vec2 p3 = vec2(pNextPoint->m_Time, fx2f(pNextPoint->m_aValues[c]));
 
-					const vec2 OutTang = vec2(pCurrentPointBezier->m_aOutTangentDeltaX[c] / 1000.0f, fx2f(pCurrentPointBezier->m_aOutTangentDeltaY[c]));
-					const vec2 InTang = -vec2(pNextPointBezier->m_aInTangentDeltaX[c] / 1000.0f, fx2f(pNextPointBezier->m_aInTangentDeltaY[c]));
+					const vec2 OutTang = vec2(pCurrentPointBezier->m_aOutTangentDeltaX[c], fx2f(pCurrentPointBezier->m_aOutTangentDeltaY[c]));
+					const vec2 InTang = -vec2(pNextPointBezier->m_aInTangentDeltaX[c], fx2f(pNextPointBezier->m_aInTangentDeltaY[c]));
 					vec2 p1 = p0 + OutTang;
 					vec2 p2 = p3 - InTang;
 
@@ -312,7 +312,7 @@ void CRenderTools::RenderEvalEnvelope(const IEnvelopePointAccess *pPoints, std::
 					ValidateFCurve(p0, p1, p2, p3);
 
 					// solve x(a) = time for a
-					a = clamp(SolveBezier(TimeMillis / 1000.0f, p0.x, p1.x, p2.x, p3.x), 0.0f, 1.0f);
+					a = clamp(SolveBezier(TimeMillis, p0.x, p1.x, p2.x, p3.x), 0.0f, 1.0f);
 
 					// value = y(t)
 					Result[c] = bezier(p0.y, p1.y, p2.y, p3.y, a);
