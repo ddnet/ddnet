@@ -267,7 +267,7 @@ void CRenderTools::RenderEvalEnvelope(const IEnvelopePointAccess *pPoints, std::
 	{
 		const CEnvPoint *pCurrentPoint = pPoints->GetPoint(i);
 		const CEnvPoint *pNextPoint = pPoints->GetPoint(i + 1);
-		if(TimeMillis >= pCurrentPoint->m_Time && TimeMillis <= pNextPoint->m_Time)
+		if(TimeMillis >= pCurrentPoint->m_Time && TimeMillis < pNextPoint->m_Time)
 		{
 			const float Delta = pNextPoint->m_Time - pCurrentPoint->m_Time;
 			float a = (float)(TimeMillis - pCurrentPoint->m_Time) / Delta;
