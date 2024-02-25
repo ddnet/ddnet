@@ -6639,9 +6639,9 @@ void CEditor::RenderEnvelopeEditor(CUIRect View)
 				float StepSize = (EndX - StartX) / static_cast<float>(Steps);
 
 				ColorRGBA Channels = ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f);
-				pEnvelope->Eval(StartTime + StepTime, Channels, c + 1);
+				pEnvelope->Eval(StartTime, Channels, c + 1);
 				float PrevY = EnvelopeToScreenY(View, Channels[c]);
-				for(int i = 2; i < Steps; i++)
+				for(int i = 1; i < Steps; i++)
 				{
 					Channels = ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f);
 					pEnvelope->Eval(StartTime + i * StepTime, Channels, c + 1);
