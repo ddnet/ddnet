@@ -16,7 +16,7 @@ class CFifo
 #endif
 
 public:
-	void Init(IConsole *pConsole, char *pFifoFile, int Flag);
+	void Init(IConsole *pConsole, const char *pFifoFile, int Flag);
 	void Update();
 	void Shutdown();
 };

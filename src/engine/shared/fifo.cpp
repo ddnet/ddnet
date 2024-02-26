@@ -9,7 +9,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-void CFifo::Init(IConsole *pConsole, char *pFifoFile, int Flag)
+void CFifo::Init(IConsole *pConsole, const char *pFifoFile, int Flag)
 {
 	m_File = -1;
 
@@ -70,18 +70,23 @@ void CFifo::Update()
 		if(aBuf[i] != '\n')
 			continue;
 		aBuf[i] = '\0';
-		m_pConsole->ExecuteLineFlag(pCur, m_Flag, -1);
+		if(str_utf8_check(pCur))
+		{
+			m_pConsole->ExecuteLineFlag(pCur, m_Flag, -1);
+		}
 		pCur = aBuf + i + 1;
 	}
-	if(pCur < aBuf + Length) // missed the last line
+	if(pCur < aBuf + Length && str_utf8_check(pCur)) // missed the last line
+	{
 		m_pConsole->ExecuteLineFlag(pCur, m_Flag, -1);
+	}
 }
 
 #elif defined(CONF_FAMILY_WINDOWS)
 
 #include <windows.h>
 
-void CFifo::Init(IConsole *pConsole, char *pFifoFile, int Flag)
+void CFifo::Init(IConsole *pConsole, const char *pFifoFile, int Flag)
 {
 	m_pConsole = pConsole;
 	if(pFifoFile[0] == '\0')
@@ -187,11 +192,16 @@ void CFifo::Update()
 			if(pBuf[i] != '\n')
 				continue;
 			pBuf[i] = '\0';
-			m_pConsole->ExecuteLineFlag(pCur, m_Flag, -1);
+			if(str_utf8_check(pCur))
+			{
+				m_pConsole->ExecuteLineFlag(pCur, m_Flag, -1);
+			}
 			pCur = pBuf + i + 1;
 		}
-		if(pCur < pBuf + Length) // missed the last line
+		if(pCur < pBuf + Length && str_utf8_check(pCur)) // missed the last line
+		{
 			m_pConsole->ExecuteLineFlag(pCur, m_Flag, -1);
+		}
 
 		free(pBuf);
 	}
