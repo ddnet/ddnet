@@ -572,6 +572,7 @@ void CGameClient::OnReset()
 	std::fill(std::begin(m_aLastNewPredictedTick), std::end(m_aLastNewPredictedTick), -1);
 
 	m_LastRoundStartTick = -1;
+	m_LastRaceTick = -1;
 	m_LastFlagCarrierRed = -4;
 	m_LastFlagCarrierBlue = -4;
 
@@ -844,9 +845,18 @@ void CGameClient::OnDummyDisconnect()
 	m_PredictedDummyId = -1;
 }
 
-int CGameClient::GetLastRaceTick() const
+int CGameClient::LastRaceTick() const
 {
-	return m_Ghost.GetLastRaceTick();
+	return m_LastRaceTick;
+}
+
+int CGameClient::CurrentRaceTime() const
+{
+	if(m_LastRaceTick < 0)
+	{
+		return 0;
+	}
+	return (Client()->GameTick(g_Config.m_ClDummy) - m_LastRaceTick) / Client()->GameTickSpeed();
 }
 
 bool CGameClient::Predict() const
@@ -2088,6 +2098,19 @@ void CGameClient::OnNewSnapshot()
 			}
 		}
 	}
+
+	// Record m_LastRaceTick for g_Config.m_ClConfirmDisconnect/QuitTime
+	if(m_GameInfo.m_Race &&
+		Client()->State() == IClient::STATE_ONLINE &&
+		m_Snap.m_pGameInfoObj &&
+		!m_Snap.m_SpecInfo.m_Active &&
+		m_Snap.m_pLocalCharacter &&
+		m_Snap.m_pLocalPrevCharacter)
+	{
+		const bool RaceFlag = m_Snap.m_pGameInfoObj->m_GameStateFlags & GAMESTATEFLAG_RACETIME;
+		m_LastRaceTick = RaceFlag ? -m_Snap.m_pGameInfoObj->m_WarmupTimer : -1;
+	}
+
 	if(m_Snap.m_LocalClientId != m_PrevLocalId)
 		m_PredictedDummyId = m_PrevLocalId;
 	m_PrevLocalId = m_Snap.m_LocalClientId;

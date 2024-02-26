@@ -772,13 +772,6 @@ bool CClient::DummyAllowed() const
 	return m_ServerCapabilities.m_AllowDummy;
 }
 
-int CClient::GetCurrentRaceTime()
-{
-	if(GameClient()->GetLastRaceTick() < 0)
-		return 0;
-	return (GameTick(g_Config.m_ClDummy) - GameClient()->GetLastRaceTick()) / GameTickSpeed();
-}
-
 void CClient::GetServerInfo(CServerInfo *pServerInfo) const
 {
 	mem_copy(pServerInfo, &m_CurrentServerInfo, sizeof(m_CurrentServerInfo));
