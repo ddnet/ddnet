@@ -2612,11 +2612,20 @@ void CClient::Update()
 			if(pJob->State() == IJob::STATE_DONE)
 			{
 				char aBuf[IO_MAX_PATH_LENGTH + 64];
-				str_format(aBuf, sizeof(aBuf), "Successfully saved the replay to %s!", pJob->Destination());
-				m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", aBuf);
+				if(pJob->Success())
+				{
+					str_format(aBuf, sizeof(aBuf), "Successfully saved the replay to '%s'!", pJob->Destination());
+					m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", aBuf);
 
-				GameClient()->Echo(Localize("Successfully saved the replay!"));
+					GameClient()->Echo(Localize("Successfully saved the replay!"));
+				}
+				else
+				{
+					str_format(aBuf, sizeof(aBuf), "Failed saving the replay to '%s'...", pJob->Destination());
+					m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", aBuf);
 
+					GameClient()->Echo(Localize("Failed saving the replay!"));
+				}
 				m_EditJobs.pop_front();
 			}
 		}
@@ -3482,9 +3491,6 @@ void CClient::SaveReplay(const int Length, const char *pFilename)
 	}
 	else
 	{
-		// First we stop the recorder to slice correctly the demo after
-		DemoRecorder(RECORDER_REPLAYS)->Stop(IDemoRecorder::EStopMode::KEEP_FILE);
-
 		char aFilename[IO_MAX_PATH_LENGTH];
 		if(pFilename[0] == '\0')
 		{
@@ -3495,7 +3501,18 @@ void CClient::SaveReplay(const int Length, const char *pFilename)
 		else
 		{
 			str_format(aFilename, sizeof(aFilename), "demos/replays/%s.demo", pFilename);
+			IOHANDLE Handle = m_pStorage->OpenFile(aFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
+			if(!Handle)
+			{
+				m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", "ERROR: invalid filename. Try a different one!");
+				return;
+			}
+			io_close(Handle);
+			m_pStorage->RemoveFile(aFilename, IStorage::TYPE_SAVE);
 		}
+
+		// Stop the recorder to correctly slice the demo after
+		DemoRecorder(RECORDER_REPLAYS)->Stop(IDemoRecorder::EStopMode::KEEP_FILE);
 
 		// Slice the demo to get only the last cl_replay_length seconds
 		const char *pSrc = m_aDemoRecorder[RECORDER_REPLAYS].CurrentFilename();

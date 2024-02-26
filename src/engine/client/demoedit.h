@@ -18,10 +18,12 @@ class CDemoEdit : public IJob
 	char m_aDst[256];
 	int m_StartTick;
 	int m_EndTick;
+	bool m_Success;
 
 public:
 	CDemoEdit(const char *pNetVersion, CSnapshotDelta *pSnapshotDelta, IStorage *pStorage, const char *pDemo, const char *pDst, int StartTick, int EndTick);
 	void Run() override;
 	char *Destination() { return m_aDst; }
+	bool Success() { return m_Success; }
 };
 #endif

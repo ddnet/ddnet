@@ -1225,11 +1225,11 @@ void CDemoEditor::Init(const char *pNetVersion, class CSnapshotDelta *pSnapshotD
 	m_pStorage = pStorage;
 }
 
-void CDemoEditor::Slice(const char *pDemo, const char *pDst, int StartTick, int EndTick, DEMOFUNC_FILTER pfnFilter, void *pUser)
+bool CDemoEditor::Slice(const char *pDemo, const char *pDst, int StartTick, int EndTick, DEMOFUNC_FILTER pfnFilter, void *pUser)
 {
 	CDemoPlayer DemoPlayer(m_pSnapshotDelta, false);
 	if(DemoPlayer.Load(m_pStorage, m_pConsole, pDemo, IStorage::TYPE_ALL_OR_ABSOLUTE) == -1)
-		return;
+		return false;
 
 	const CMapInfo *pMapInfo = DemoPlayer.GetMapInfo();
 	const CDemoPlayer::CPlaybackInfo *pInfo = DemoPlayer.Info();
@@ -1248,7 +1248,7 @@ void CDemoEditor::Slice(const char *pDemo, const char *pDst, int StartTick, int 
 	if(Result != 0)
 	{
 		DemoPlayer.Stop();
-		return;
+		return false;
 	}
 
 	CDemoRecordingListener Listener;
@@ -1280,4 +1280,5 @@ void CDemoEditor::Slice(const char *pDemo, const char *pDst, int StartTick, int 
 
 	DemoPlayer.Stop();
 	DemoRecorder.Stop(IDemoRecorder::EStopMode::KEEP_FILE);
+	return true;
 }
