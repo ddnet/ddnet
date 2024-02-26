@@ -124,13 +124,6 @@ const CEnvPointBezier *CMapBasedEnvelopePointAccess::GetBezier(int Index) const
 	return nullptr;
 }
 
-static void ValidateFCurve(const vec2 &p0, vec2 &p1, vec2 &p2, const vec2 &p3)
-{
-	// validate the bezier curve
-	p1.x = clamp(p1.x, p0.x, p3.x);
-	p2.x = clamp(p2.x, p0.x, p3.x);
-}
-
 static double CubicRoot(double x)
 {
 	if(x == 0.0)
@@ -143,11 +136,6 @@ static double CubicRoot(double x)
 
 static float SolveBezier(float x, float p0, float p1, float p2, float p3)
 {
-	// check for valid f-curve
-	// we only take care of monotonic bezier curves, so there has to be exactly 1 real solution
-	if(!(p0 <= x && x <= p3) || !(p0 <= p1 && p1 <= p3) || !(p0 <= p2 && p2 <= p3))
-		return 0.0f;
-
 	const double x3 = -p0 + 3.0 * p1 - 3.0 * p2 + p3;
 	const double x2 = 3.0 * p0 - 6.0 * p1 + 3.0 * p2;
 	const double x1 = -3.0 * p0 + 3.0 * p1;
@@ -167,7 +155,7 @@ static float SolveBezier(float x, float p0, float p1, float p2, float p3)
 	else if(x3 == 0.0)
 	{
 		// quadratic
-		// t * t + b * t +c = 0
+		// t * t + b * t + c = 0
 		const double b = x1 / x2;
 		const double c = x0 / x2;
 
@@ -179,7 +167,7 @@ static float SolveBezier(float x, float p0, float p1, float p2, float p3)
 
 		const double t = (-b + SqrtD) / 2.0;
 
-		if(0.0 <= t && t <= 1.0001f)
+		if(0.0 <= t && t <= 1.0001)
 			return t;
 		return (-b - SqrtD) / 2.0;
 	}
@@ -213,24 +201,24 @@ static float SolveBezier(float x, float p0, float p1, float p2, float p3)
 			const double s = CubicRoot(-q);
 			const double t = 2.0 * s - sub;
 
-			if(0.0 <= t && t <= 1.0001f)
+			if(0.0 <= t && t <= 1.0001)
 				return t;
 			return (-s - sub);
 		}
 		else
 		{
-			// Casus irreductibilis ... ,_,
+			// Casus irreducibilis ... ,_,
 			const double phi = std::acos(-q / std::sqrt(-(p * p * p))) / 3.0;
 			const double s = 2.0 * std::sqrt(-p);
 
 			const double t1 = s * std::cos(phi) - sub;
 
-			if(0.0 <= t1 && t1 <= 1.0001f)
+			if(0.0 <= t1 && t1 <= 1.0001)
 				return t1;
 
 			const double t2 = -s * std::cos(phi + pi / 3.0) - sub;
 
-			if(0.0 <= t2 && t2 <= 1.0001f)
+			if(0.0 <= t2 && t2 <= 1.0001)
 				return t2;
 			return -s * std::cos(phi - pi / 3.0) - sub;
 		}
@@ -267,7 +255,7 @@ void CRenderTools::RenderEvalEnvelope(const IEnvelopePointAccess *pPoints, std::
 	{
 		const CEnvPoint *pCurrentPoint = pPoints->GetPoint(i);
 		const CEnvPoint *pNextPoint = pPoints->GetPoint(i + 1);
-		if(TimeMillis >= pCurrentPoint->m_Time && TimeMillis <= pNextPoint->m_Time)
+		if(TimeMillis >= pCurrentPoint->m_Time && TimeMillis < pNextPoint->m_Time)
 		{
 			const float Delta = pNextPoint->m_Time - pCurrentPoint->m_Time;
 			float a = (float)(TimeMillis - pCurrentPoint->m_Time) / Delta;
@@ -300,19 +288,21 @@ void CRenderTools::RenderEvalEnvelope(const IEnvelopePointAccess *pPoints, std::
 				for(size_t c = 0; c < Channels; c++)
 				{
 					// monotonic 2d cubic bezier curve
-					const vec2 p0 = vec2(pCurrentPoint->m_Time / 1000.0f, fx2f(pCurrentPoint->m_aValues[c]));
-					const vec2 p3 = vec2(pNextPoint->m_Time / 1000.0f, fx2f(pNextPoint->m_aValues[c]));
+					const vec2 p0 = vec2(pCurrentPoint->m_Time, fx2f(pCurrentPoint->m_aValues[c]));
+					const vec2 p3 = vec2(pNextPoint->m_Time, fx2f(pNextPoint->m_aValues[c]));
 
-					const vec2 OutTang = vec2(pCurrentPointBezier->m_aOutTangentDeltaX[c] / 1000.0f, fx2f(pCurrentPointBezier->m_aOutTangentDeltaY[c]));
-					const vec2 InTang = -vec2(pNextPointBezier->m_aInTangentDeltaX[c] / 1000.0f, fx2f(pNextPointBezier->m_aInTangentDeltaY[c]));
+					const vec2 OutTang = vec2(pCurrentPointBezier->m_aOutTangentDeltaX[c], fx2f(pCurrentPointBezier->m_aOutTangentDeltaY[c]));
+					const vec2 InTang = vec2(pNextPointBezier->m_aInTangentDeltaX[c], fx2f(pNextPointBezier->m_aInTangentDeltaY[c]));
+
 					vec2 p1 = p0 + OutTang;
-					vec2 p2 = p3 - InTang;
+					vec2 p2 = p3 + InTang;
 
 					// validate bezier curve
-					ValidateFCurve(p0, p1, p2, p3);
+					p1.x = clamp(p1.x, p0.x, p3.x);
+					p2.x = clamp(p2.x, p0.x, p3.x);
 
 					// solve x(a) = time for a
-					a = clamp(SolveBezier(TimeMillis / 1000.0f, p0.x, p1.x, p2.x, p3.x), 0.0f, 1.0f);
+					a = clamp(SolveBezier(TimeMillis, p0.x, p1.x, p2.x, p3.x), 0.0f, 1.0f);
 
 					// value = y(t)
 					Result[c] = bezier(p0.y, p1.y, p2.y, p3.y, a);
