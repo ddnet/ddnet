@@ -300,7 +300,7 @@ void CScore::SaveTeam(int ClientID, const char *pCode, const char *pServer, bool
 
 	auto Tmp = std::make_unique<CSqlTeamSave>(SaveResult);
 	str_copy(Tmp->m_aCode, pCode, sizeof(Tmp->m_aCode));
-	str_copy(Tmp->m_aMap, g_Config.m_SvMap, sizeof(Tmp->m_aMap));
+	str_copy(Tmp->m_aMap, this->Server()->GetMapName(), sizeof(Tmp->m_aMap));
 	str_copy(Tmp->m_aServer, pServer, sizeof(Tmp->m_aServer));
 	str_copy(Tmp->m_aClientName, this->Server()->ClientName(ClientID), sizeof(Tmp->m_aClientName));
 	Tmp->m_aGeneratedCode[0] = '\0';

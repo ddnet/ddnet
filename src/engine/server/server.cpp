@@ -2504,11 +2504,12 @@ void CServer::PumpNetwork(bool PacketWaiting)
 const char *CServer::GetMapName() const
 {
 	// get the name of the map without his path
-	const char *pMapShortName = &Config()->m_SvMap[0];
-	for(int i = 0; i < str_length(Config()->m_SvMap) - 1; i++)
+	const char *pMapName = m_aCurrentMap;
+	const char *pMapShortName = pMapName;
+	for(int i = 0; i < str_length(pMapName) - 1; i++)
 	{
-		if(Config()->m_SvMap[i] == '/' || Config()->m_SvMap[i] == '\\')
-			pMapShortName = &Config()->m_SvMap[i + 1];
+		if(pMapName[i] == '/' || pMapName[i] == '\\')
+			pMapShortName = &pMapName[i + 1];
 	}
 	return pMapShortName;
 }
