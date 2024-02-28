@@ -1,6 +1,3 @@
-
-#define _WIN32_WINNT 0x0501
-
 #include <base/logger.h>
 #include <base/system.h>
 
@@ -23,7 +20,6 @@
 #include <vector>
 
 #if defined(CONF_FAMILY_WINDOWS)
-#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #endif
 

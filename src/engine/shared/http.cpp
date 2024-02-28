@@ -15,7 +15,6 @@
 #include <csignal>
 #endif
 
-#define WIN32_LEAN_AND_MEAN
 #include <curl/curl.h>
 
 // There is a stray constant on Windows/MSVC...
