@@ -12,6 +12,13 @@ class CGameWorld;
 class CCharacter;
 class CSaveTeam;
 
+enum
+{
+	RESCUEMODE_AUTO = 0,
+	RESCUEMODE_MANUAL,
+	NUM_RESCUEMODES
+};
+
 class CSaveTee
 {
 public:

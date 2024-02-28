@@ -942,7 +942,7 @@ void CGameTeams::SwapTeamCharacters(CPlayer *pPrimaryPlayer, CPlayer *pTargetPla
 	}
 	std::swap(m_aTeeStarted[pPrimaryPlayer->GetCID()], m_aTeeStarted[pTargetPlayer->GetCID()]);
 	std::swap(m_aTeeFinished[pPrimaryPlayer->GetCID()], m_aTeeFinished[pTargetPlayer->GetCID()]);
-	std::swap(pPrimaryPlayer->GetCharacter()->GetRescueTeeRef(), pTargetPlayer->GetCharacter()->GetRescueTeeRef());
+	std::swap(pPrimaryPlayer->GetCharacter()->GetLastRescueTeeRef(), pTargetPlayer->GetCharacter()->GetLastRescueTeeRef());
 
 	GameServer()->m_World.SwapClients(pPrimaryPlayer->GetCID(), pTargetPlayer->GetCID());
 

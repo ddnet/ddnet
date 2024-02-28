@@ -165,7 +165,7 @@ private:
 	int m_LastBroadcast;
 	void DDRaceInit();
 	void HandleSkippableTiles(int Index);
-	void SetRescue();
+	void ForceSetRescue(int RescueMode);
 	void DDRaceTick();
 	void DDRacePostCoreTick();
 	void HandleBroadcast();
@@ -173,13 +173,14 @@ private:
 	void SendZoneMsgs();
 	IAntibot *Antibot();
 
-	bool m_SetSavePos;
-	CSaveTee m_RescueTee;
+	bool m_SetSavePos[NUM_RESCUEMODES];
+	CSaveTee m_RescueTee[NUM_RESCUEMODES];
 
 public:
 	CGameTeams *Teams() { return m_pTeams; }
 	void SetTeams(CGameTeams *pTeams);
 	void SetTeleports(std::map<int, std::vector<vec2>> *pTeleOuts, std::map<int, std::vector<vec2>> *pTeleCheckOuts);
+	bool TrySetRescue(int RescueMode);
 
 	void FillAntibot(CAntibotCharacterData *pData);
 	void Pause(bool Pause);
@@ -258,7 +259,7 @@ public:
 
 	bool IsSuper() { return m_Core.m_Super; }
 
-	CSaveTee &GetRescueTeeRef() { return m_RescueTee; }
+	CSaveTee &GetLastRescueTeeRef() { return m_RescueTee[RESCUEMODE_AUTO]; }
 };
 
 enum
