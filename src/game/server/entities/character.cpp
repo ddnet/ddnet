@@ -2296,8 +2296,8 @@ void CCharacter::DDRaceInit()
 	m_Paused = false;
 	m_DDRaceState = DDRACE_NONE;
 	m_PrevPos = m_Pos;
-	for(int i = 0; i < NUM_RESCUEMODES; i++)
-		m_SetSavePos[i] = false;
+	for(bool &Set : m_SetSavePos)
+		Set = false;
 	m_LastBroadcast = 0;
 	m_TeamBeforeSuper = 0;
 	m_Core.m_Id = GetPlayer()->GetCID();
