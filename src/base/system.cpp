@@ -62,11 +62,6 @@
 #endif
 
 #elif defined(CONF_FAMILY_WINDOWS)
-#define WIN32_LEAN_AND_MEAN
-#undef _WIN32_WINNT
-// 0x0501 (Windows XP) is required for mingw to get getaddrinfo to work
-// 0x0600 (Windows Vista) is required to use RegGetValueW and RegDeleteTreeW
-#define _WIN32_WINNT 0x0600
 #include <windows.h>
 #include <winsock2.h>
 #include <ws2tcpip.h>

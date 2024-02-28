@@ -79,7 +79,6 @@ void CFifo::Update()
 
 #elif defined(CONF_FAMILY_WINDOWS)
 
-#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
 void CFifo::Init(IConsole *pConsole, char *pFifoFile, int Flag)
