@@ -1565,7 +1565,7 @@ void CGameContext::ConRescueMode(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
-	if(str_comp(pResult->GetString(0), "auto") == 0)
+	if(str_comp_nocase(pResult->GetString(0), "auto") == 0)
 	{
 		if(pPlayer->m_RescueMode != RESCUEMODE_AUTO)
 		{
@@ -1577,7 +1577,7 @@ void CGameContext::ConRescueMode(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
-	if(str_comp(pResult->GetString(0), "manual") == 0)
+	if(str_comp_nocase(pResult->GetString(0), "manual") == 0)
 	{
 		if(pPlayer->m_RescueMode != RESCUEMODE_MANUAL)
 		{
@@ -1589,11 +1589,11 @@ void CGameContext::ConRescueMode(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
-	if(str_comp(pResult->GetString(0), "list") == 0)
+	if(str_comp_nocase(pResult->GetString(0), "list") == 0)
 	{
 		pSelf->SendChatTarget(pPlayer->GetCID(), "Available rescue modes: auto, manual");
 	}
-	else if(str_comp(pResult->GetString(0), "") == 0)
+	else if(str_comp_nocase(pResult->GetString(0), "") == 0)
 	{
 		char aBuf[64];
 		str_format(aBuf, sizeof(aBuf), "Current rescue mode: %s.", pPlayer->m_RescueMode == RESCUEMODE_MANUAL ? "manual" : "auto");
