@@ -60,7 +60,7 @@ void CBackground::LoadBackground()
 		bool NeedImageLoading = false;
 
 		char aBuf[IO_MAX_PATH_LENGTH];
-		str_format(aBuf, sizeof(aBuf), "maps/%s", g_Config.m_ClBackgroundEntities);
+		str_format(aBuf, sizeof(aBuf), str_endswith_nocase(g_Config.m_ClBackgroundEntities, ".map") ? "maps/%s" : "maps/%s.map", g_Config.m_ClBackgroundEntities);
 		if(str_comp(g_Config.m_ClBackgroundEntities, CURRENT_MAP) == 0)
 		{
 			m_pMap = Kernel()->RequestInterface<IEngineMap>();
