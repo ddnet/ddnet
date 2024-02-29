@@ -2683,7 +2683,7 @@ void CGameContext::OnEmoticonNetMessage(const CNetMsg_Cl_Emoticon *pMsg, int Cli
 		SendEmoticon(ClientID, pMsg->m_Emoticon, -1);
 	}
 
-	if(g_Config.m_SvEmotionalTees && pPlayer->m_EyeEmoteEnabled)
+	if(g_Config.m_SvEmotionalTees == 1 && pPlayer->m_EyeEmoteEnabled)
 	{
 		int EmoteType = EMOTE_NORMAL;
 		switch(pMsg->m_Emoticon)
