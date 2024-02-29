@@ -76,7 +76,6 @@ private:
 	IGraphics::CTextureHandle m_OverlayBottomTexture;
 	IGraphics::CTextureHandle m_OverlayTopTexture;
 	IGraphics::CTextureHandle m_OverlayCenterTexture;
-	IGraphics::CTextureHandle m_TransparentTexture;
 	int m_TextureScale;
 
 	void InitOverlayTextures();
