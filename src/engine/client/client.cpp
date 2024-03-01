@@ -305,43 +305,44 @@ int *CClient::GetInput(int Tick, int IsDummy) const
 }
 
 // ------ state handling -----
-void CClient::SetState(EClientState s)
+void CClient::SetState(EClientState State)
 {
 	if(m_State == IClient::STATE_QUITTING || m_State == IClient::STATE_RESTARTING)
 		return;
+	if(m_State == State)
+		return;
 
-	int Old = m_State;
 	if(g_Config.m_Debug)
 	{
-		char aBuf[128];
-		str_format(aBuf, sizeof(aBuf), "state change. last=%d current=%d", m_State, s);
+		char aBuf[64];
+		str_format(aBuf, sizeof(aBuf), "state change. last=%d current=%d", m_State, State);
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_DEBUG, "client", aBuf);
 	}
-	m_State = s;
-	if(Old != s)
+
+	const EClientState OldState = m_State;
+	m_State = State;
+
+	m_StateStartTime = time_get();
+	GameClient()->OnStateChange(m_State, OldState);
+
+	if(State == IClient::STATE_OFFLINE && m_ReconnectTime == 0)
 	{
-		m_StateStartTime = time_get();
-		GameClient()->OnStateChange(m_State, Old);
+		if(g_Config.m_ClReconnectFull > 0 && (str_find_nocase(ErrorString(), "full") || str_find_nocase(ErrorString(), "reserved")))
+			m_ReconnectTime = time_get() + time_freq() * g_Config.m_ClReconnectFull;
+		else if(g_Config.m_ClReconnectTimeout > 0 && (str_find_nocase(ErrorString(), "Timeout") || str_find_nocase(ErrorString(), "Too weak connection")))
+			m_ReconnectTime = time_get() + time_freq() * g_Config.m_ClReconnectTimeout;
+	}
 
-		if(s == IClient::STATE_OFFLINE && m_ReconnectTime == 0)
-		{
-			if(g_Config.m_ClReconnectFull > 0 && (str_find_nocase(ErrorString(), "full") || str_find_nocase(ErrorString(), "reserved")))
-				m_ReconnectTime = time_get() + time_freq() * g_Config.m_ClReconnectFull;
-			else if(g_Config.m_ClReconnectTimeout > 0 && (str_find_nocase(ErrorString(), "Timeout") || str_find_nocase(ErrorString(), "Too weak connection")))
-				m_ReconnectTime = time_get() + time_freq() * g_Config.m_ClReconnectTimeout;
-		}
-
-		if(s == IClient::STATE_ONLINE)
-		{
-			const bool AnnounceAddr = m_ServerBrowser.IsRegistered(ServerAddress());
-			Discord()->SetGameInfo(ServerAddress(), m_aCurrentMap, AnnounceAddr);
-			Steam()->SetGameInfo(ServerAddress(), m_aCurrentMap, AnnounceAddr);
-		}
-		else if(Old == IClient::STATE_ONLINE)
-		{
-			Discord()->ClearGameInfo();
-			Steam()->ClearGameInfo();
-		}
+	if(State == IClient::STATE_ONLINE)
+	{
+		const bool AnnounceAddr = m_ServerBrowser.IsRegistered(ServerAddress());
+		Discord()->SetGameInfo(ServerAddress(), m_aCurrentMap, AnnounceAddr);
+		Steam()->SetGameInfo(ServerAddress(), m_aCurrentMap, AnnounceAddr);
+	}
+	else if(OldState == IClient::STATE_ONLINE)
+	{
+		Discord()->ClearGameInfo();
+		Steam()->ClearGameInfo();
 	}
 }
 
