@@ -331,7 +331,7 @@ public:
 
 	virtual bool LoadPng(CImageInfo &Image, const char *pFilename, int StorageType) = 0;
 
-	virtual bool CheckImageDivisibility(const char *pFileName, CImageInfo &Img, int DivX, int DivY, bool AllowResize) = 0;
+	virtual bool CheckImageDivisibility(const char *pContextName, CImageInfo &Image, int DivX, int DivY, bool AllowResize) = 0;
 	virtual bool IsImageFormatRGBA(const char *pFileName, CImageInfo &Img) = 0;
 
 	// destination and source buffer require to have the same width and height

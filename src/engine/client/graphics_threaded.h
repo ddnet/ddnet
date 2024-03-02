@@ -983,7 +983,7 @@ public:
 	IGraphics::CTextureHandle LoadTexture(const char *pFilename, int StorageType, int Flags = 0) override;
 	bool LoadPng(CImageInfo &Image, const char *pFilename, int StorageType) override;
 
-	bool CheckImageDivisibility(const char *pFileName, CImageInfo &Img, int DivX, int DivY, bool AllowResize) override;
+	bool CheckImageDivisibility(const char *pContextName, CImageInfo &Image, int DivX, int DivY, bool AllowResize) override;
 	bool IsImageFormatRGBA(const char *pFileName, CImageInfo &Img) override;
 
 	void CopyTextureBufferSub(uint8_t *pDestBuffer, const CImageInfo &SourceImage, size_t SubOffsetX, size_t SubOffsetY, size_t SubCopyWidth, size_t SubCopyHeight) override;

@@ -651,42 +651,43 @@ bool CGraphics_Threaded::LoadPng(CImageInfo &Image, const char *pFilename, int S
 	return true;
 }
 
-bool CGraphics_Threaded::CheckImageDivisibility(const char *pFileName, CImageInfo &Img, int DivX, int DivY, bool AllowResize)
+bool CGraphics_Threaded::CheckImageDivisibility(const char *pContextName, CImageInfo &Image, int DivX, int DivY, bool AllowResize)
 {
 	dbg_assert(DivX != 0 && DivY != 0, "Passing 0 to this function is not allowed.");
 	bool ImageIsValid = true;
-	bool WidthBroken = Img.m_Width == 0 || (Img.m_Width % DivX) != 0;
-	bool HeightBroken = Img.m_Height == 0 || (Img.m_Height % DivY) != 0;
+	bool WidthBroken = Image.m_Width == 0 || (Image.m_Width % DivX) != 0;
+	bool HeightBroken = Image.m_Height == 0 || (Image.m_Height % DivY) != 0;
 	if(WidthBroken || HeightBroken)
 	{
 		SWarning NewWarning;
-		str_format(NewWarning.m_aWarningMsg, sizeof(NewWarning.m_aWarningMsg), Localize("The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs."), pFileName, DivX, DivY);
-
+		char aContextNameQuoted[128];
+		str_format(aContextNameQuoted, sizeof(aContextNameQuoted), "\"%s\"", pContextName);
+		str_format(NewWarning.m_aWarningMsg, sizeof(NewWarning.m_aWarningMsg),
+			Localize("The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs."), aContextNameQuoted, DivX, DivY);
 		m_vWarnings.emplace_back(NewWarning);
-
 		ImageIsValid = false;
 	}
 
-	if(AllowResize && !ImageIsValid && Img.m_Width > 0 && Img.m_Height > 0)
+	if(AllowResize && !ImageIsValid && Image.m_Width > 0 && Image.m_Height > 0)
 	{
 		int NewWidth = DivX;
 		int NewHeight = DivY;
 		if(WidthBroken)
 		{
-			NewWidth = maximum<int>(HighestBit(Img.m_Width), DivX);
+			NewWidth = maximum<int>(HighestBit(Image.m_Width), DivX);
 			NewHeight = (NewWidth / DivX) * DivY;
 		}
 		else
 		{
-			NewHeight = maximum<int>(HighestBit(Img.m_Height), DivY);
+			NewHeight = maximum<int>(HighestBit(Image.m_Height), DivY);
 			NewWidth = (NewHeight / DivY) * DivX;
 		}
 
-		uint8_t *pNewImg = ResizeImage(Img.m_pData, Img.m_Width, Img.m_Height, NewWidth, NewHeight, Img.PixelSize());
-		free(Img.m_pData);
-		Img.m_pData = pNewImg;
-		Img.m_Width = NewWidth;
-		Img.m_Height = NewHeight;
+		uint8_t *pNewImage = ResizeImage(Image.m_pData, Image.m_Width, Image.m_Height, NewWidth, NewHeight, Image.PixelSize());
+		free(Image.m_pData);
+		Image.m_pData = pNewImage;
+		Image.m_Width = NewWidth;
+		Image.m_Height = NewHeight;
 		ImageIsValid = true;
 	}
 
