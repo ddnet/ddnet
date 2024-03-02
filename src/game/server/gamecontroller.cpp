@@ -468,6 +468,71 @@ void IGameController::OnReset()
 			pPlayer->Respawn();
 }
 
+void IGameController::OnSayNetMessage(const CNetMsg_Cl_Say *pMsg, int ClientID, const CUnpacker *pUnpacker)
+{
+	GameServer()->OnSayNetMessage(pMsg, ClientID, pUnpacker);
+}
+
+void IGameController::OnCallVoteNetMessage(const CNetMsg_Cl_CallVote *pMsg, int ClientID)
+{
+	GameServer()->OnCallVoteNetMessage(pMsg, ClientID);
+}
+
+void IGameController::OnVoteNetMessage(const CNetMsg_Cl_Vote *pMsg, int ClientID)
+{
+	GameServer()->OnVoteNetMessage(pMsg, ClientID);
+}
+
+void IGameController::OnSetTeamNetMessage(const CNetMsg_Cl_SetTeam *pMsg, int ClientID)
+{
+	GameServer()->OnSetTeamNetMessage(pMsg, ClientID);
+}
+
+void IGameController::OnIsDDNetLegacyNetMessage(const CNetMsg_Cl_IsDDNetLegacy *pMsg, int ClientID, CUnpacker *pUnpacker)
+{
+	GameServer()->OnIsDDNetLegacyNetMessage(pMsg, ClientID, pUnpacker);
+}
+
+void IGameController::OnShowOthersLegacyNetMessage(const CNetMsg_Cl_ShowOthersLegacy *pMsg, int ClientID)
+{
+	GameServer()->OnShowOthersLegacyNetMessage(pMsg, ClientID);
+}
+
+void IGameController::OnShowOthersNetMessage(const CNetMsg_Cl_ShowOthers *pMsg, int ClientID)
+{
+	GameServer()->OnShowOthersNetMessage(pMsg, ClientID);
+}
+
+void IGameController::OnShowDistanceNetMessage(const CNetMsg_Cl_ShowDistance *pMsg, int ClientID)
+{
+	GameServer()->OnShowDistanceNetMessage(pMsg, ClientID);
+}
+
+void IGameController::OnSetSpectatorModeNetMessage(const CNetMsg_Cl_SetSpectatorMode *pMsg, int ClientID)
+{
+	GameServer()->OnSetSpectatorModeNetMessage(pMsg, ClientID);
+}
+
+void IGameController::OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int ClientID)
+{
+	GameServer()->OnChangeInfoNetMessage(pMsg, ClientID);
+}
+
+void IGameController::OnEmoticonNetMessage(const CNetMsg_Cl_Emoticon *pMsg, int ClientID)
+{
+	GameServer()->OnEmoticonNetMessage(pMsg, ClientID);
+}
+
+void IGameController::OnKillNetMessage(const CNetMsg_Cl_Kill *pMsg, int ClientID)
+{
+	GameServer()->OnKillNetMessage(pMsg, ClientID);
+}
+
+void IGameController::OnStartInfoNetMessage(const CNetMsg_Cl_StartInfo *pMsg, int ClientID)
+{
+	GameServer()->OnStartInfoNetMessage(pMsg, ClientID);
+}
+
 int IGameController::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon)
 {
 	return 0;

@@ -118,6 +118,20 @@ public:
 
 	virtual void OnReset();
 
+	virtual void OnSayNetMessage(const CNetMsg_Cl_Say *pMsg, int ClientID, const CUnpacker *pUnpacker);
+	virtual void OnCallVoteNetMessage(const CNetMsg_Cl_CallVote *pMsg, int ClientID);
+	virtual void OnVoteNetMessage(const CNetMsg_Cl_Vote *pMsg, int ClientID);
+	virtual void OnSetTeamNetMessage(const CNetMsg_Cl_SetTeam *pMsg, int ClientID);
+	virtual void OnIsDDNetLegacyNetMessage(const CNetMsg_Cl_IsDDNetLegacy *pMsg, int ClientID, CUnpacker *pUnpacker);
+	virtual void OnShowOthersLegacyNetMessage(const CNetMsg_Cl_ShowOthersLegacy *pMsg, int ClientID);
+	virtual void OnShowOthersNetMessage(const CNetMsg_Cl_ShowOthers *pMsg, int ClientID);
+	virtual void OnShowDistanceNetMessage(const CNetMsg_Cl_ShowDistance *pMsg, int ClientID);
+	virtual void OnSetSpectatorModeNetMessage(const CNetMsg_Cl_SetSpectatorMode *pMsg, int ClientID);
+	virtual void OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int ClientID);
+	virtual void OnEmoticonNetMessage(const CNetMsg_Cl_Emoticon *pMsg, int ClientID);
+	virtual void OnKillNetMessage(const CNetMsg_Cl_Kill *pMsg, int ClientID);
+	virtual void OnStartInfoNetMessage(const CNetMsg_Cl_StartInfo *pMsg, int ClientID);
+
 	// game
 	void DoWarmup(int Seconds);
 
