@@ -1729,7 +1729,13 @@ Regular background color
 Entities background color
 == Колір фону об'єктів
 
+Failed saving the replay!
+== 
+
 Saving settings to '%s' failed
+== 
+
+Error saving settings
 == 
 
 Searching
@@ -1759,7 +1765,13 @@ Locked
 Following
 == 
 
+Loading commands…
+== 
+
 Press a key…
+== 
+
+Main menu
 == 
 
 Are you sure that you want to restart?
@@ -1774,7 +1786,16 @@ Continue anyway?
 Communities
 == 
 
+Server filter
+== 
+
+Friends
+== 
+
 Please use a different filename
+== 
+
+Loading…
 == 
 
 Info Messages

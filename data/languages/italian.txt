@@ -1426,7 +1426,13 @@ Could not save downloaded map. Try manually deleting this file: %s
 Error playing demo
 == 
 
+Failed saving the replay!
+== 
+
 Saving settings to '%s' failed
+== 
+
+Error saving settings
 == 
 
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
@@ -1436,6 +1442,9 @@ The format of texture %s is not RGBA which will cause visual bugs.
 == 
 
 Why are you slowmo replaying to read this?
+== 
+
+Loading skin files
 == 
 
 Searching
@@ -1465,6 +1474,9 @@ Locked
 Following
 == 
 
+Loading commands…
+== 
+
 Some map images could not be loaded. Check the local console for details.
 == 
 
@@ -1475,6 +1487,9 @@ Loading menu themes
 == 
 
 Press a key…
+== 
+
+Main menu
 == 
 
 Render complete
@@ -1533,6 +1548,12 @@ Online players (%d)
 
 [friends (server browser)]
 Offline (%d)
+== 
+
+Server filter
+== 
+
+Friends
 == 
 
 Play the current demo
@@ -1652,6 +1673,9 @@ Unable to delete the demo '%s'
 Unable to delete the folder '%s'. Make sure it's empty first.
 == 
 
+Loading…
+== 
+
 Loading ghost files
 == 
 
@@ -1686,9 +1710,6 @@ Open the directory to add custom themes
 == 
 
 Dummy
-== 
-
-Loading skin files
 == 
 
 Converse

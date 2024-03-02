@@ -1816,3 +1816,24 @@ Same clan color in scoreboard
 
 Show finish messages
 == Mostrar mensajes de llegada de meta
+
+Failed saving the replay!
+== 
+
+Error saving settings
+== 
+
+Loading commands…
+== 
+
+Main menu
+== 
+
+Server filter
+== 
+
+Friends
+== 
+
+Loading…
+== 
