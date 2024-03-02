@@ -1575,7 +1575,13 @@ Create a random skin
 Error playing demo
 == 
 
+Failed saving the replay!
+== 
+
 Saving settings to '%s' failed
+== 
+
+Error saving settings
 == 
 
 Quitting. Please wait…
@@ -1611,6 +1617,9 @@ Locked
 Following
 == 
 
+Loading commands…
+== 
+
 Multi-View
 == 
 
@@ -1624,6 +1633,9 @@ Loading menu themes
 == 
 
 Press a key…
+== 
+
+Main menu
 == 
 
 Rename folder
@@ -1688,6 +1700,12 @@ None
 == 
 
 Add Clan
+== 
+
+Server filter
+== 
+
+Friends
 == 
 
 Go back the specified duration
@@ -1757,6 +1775,9 @@ Delete folder
 == 
 
 Unable to delete the folder '%s'. Make sure it's empty first.
+== 
+
+Loading…
 == 
 
 Ghosts directory

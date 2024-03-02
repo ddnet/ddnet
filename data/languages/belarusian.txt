@@ -518,10 +518,6 @@ LAN
 Name plates size
 == Памер таблічак з імёнамі
 
-Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== Недахоп памяці VRAM. Паспрабуйце выдаліць карыстацкія рэсурсы (скіны, тэкстуры і г.д.), асабліва тыя, што маюць высокае разрознасць.
-
-[Graphics error]
 An error during command recording occurred. Try to update your GPU drivers.
 == Адбылася памылка падчас выканання каманды запісу. Паспрабуйце абнавіць драйверы відэакарты.
 
@@ -1733,7 +1729,17 @@ Entities background color
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
 == 
 
+[Graphics error]
+Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
+== 
+
+Failed saving the replay!
+== 
+
 Saving settings to '%s' failed
+== 
+
+Error saving settings
 == 
 
 Searching
@@ -1763,7 +1769,13 @@ Locked
 Following
 == 
 
+Loading commands…
+== 
+
 Press a key…
+== 
+
+Main menu
 == 
 
 Are you sure that you want to restart?
@@ -1776,6 +1788,15 @@ Continue anyway?
 == 
 
 Communities
+== 
+
+Server filter
+== 
+
+Friends
+== 
+
+Loading…
 == 
 
 Info Messages

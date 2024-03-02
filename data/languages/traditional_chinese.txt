@@ -1824,3 +1824,24 @@ Same clan color in scoreboard
 
 Show finish messages
 == 顯示完成訊息
+
+Failed saving the replay!
+== 
+
+Error saving settings
+== 
+
+Loading commands…
+== 
+
+Main menu
+== 
+
+Server filter
+== 
+
+Friends
+== 
+
+Loading…
+== 

@@ -1773,9 +1773,6 @@ Lines %d - %d (%s)
 Locked
 == Закрыто
 
-Following
-== 
-
 Press a key…
 == Нажмите любую кнопку…
 
@@ -1811,3 +1808,27 @@ Same clan color in scoreboard
 
 Show finish messages
 == Показывать сообщения о финишах
+
+Failed saving the replay!
+== 
+
+Error saving settings
+== 
+
+Following
+== 
+
+Loading commands…
+== 
+
+Main menu
+== 
+
+Server filter
+== 
+
+Friends
+== 
+
+Loading…
+== 
