@@ -1431,7 +1431,7 @@ protected:
 				ImageBlitRegion.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 				ImageBlitRegion.srcSubresource.layerCount = 1;
 				ImageBlitRegion.srcOffsets[0] = SrcOffset;
-				ImageBlitRegion.srcOffsets[1] = BlitSize;
+				ImageBlitRegion.srcOffsets[1] = {SrcOffset.x + BlitSize.x, SrcOffset.y + BlitSize.y, SrcOffset.z + BlitSize.z};
 				ImageBlitRegion.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 				ImageBlitRegion.dstSubresource.layerCount = 1;
 				ImageBlitRegion.dstOffsets[1] = BlitSize;
