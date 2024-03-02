@@ -1360,7 +1360,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupEnvPoint(void *pContext, CUIRect Vie
 
 	std::shared_ptr<CEnvelope> pEnvelope = pEditor->m_Map.m_vpEnvelopes[pEditor->m_SelectedEnvelope];
 
-	if(pEnvelope->GetChannels() == 4)
+	if(pEnvelope->GetChannels() == 4 && !pEditor->IsTangentSelected())
 	{
 		View.HSplitTop(RowHeight, &Row, &View);
 		View.HSplitTop(4.0f, nullptr, &View);
