@@ -1718,7 +1718,7 @@ Locked
 == Locked
 
 Following
-== Following
+== Takipte
 
 Loading commands…
 == Komutlar yükleniyor…
