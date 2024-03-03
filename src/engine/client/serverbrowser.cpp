@@ -388,6 +388,17 @@ bool CServerBrowser::SortCompareNumClients(int Index1, int Index2) const
 	return pIndex1->m_Info.m_NumClients > pIndex2->m_Info.m_NumClients;
 }
 
+bool CServerBrowser::SortCompareNumFriends(int Index1, int Index2) const
+{
+	CServerEntry *pIndex1 = m_ppServerlist[Index1];
+	CServerEntry *pIndex2 = m_ppServerlist[Index2];
+
+	if(pIndex1->m_Info.m_FriendNum == pIndex2->m_Info.m_FriendNum)
+		return pIndex1->m_Info.m_NumFilteredPlayers > pIndex2->m_Info.m_NumFilteredPlayers;
+	else
+		return pIndex1->m_Info.m_FriendNum > pIndex2->m_Info.m_FriendNum;
+}
+
 bool CServerBrowser::SortCompareNumPlayersAndPing(int Index1, int Index2) const
 {
 	CServerEntry *pIndex1 = m_ppServerlist[Index1];
@@ -609,6 +620,8 @@ void CServerBrowser::Sort()
 		std::stable_sort(m_pSortedServerlist, m_pSortedServerlist + m_NumSortedServers, CSortWrap(this, &CServerBrowser::SortComparePing));
 	else if(g_Config.m_BrSort == IServerBrowser::SORT_MAP)
 		std::stable_sort(m_pSortedServerlist, m_pSortedServerlist + m_NumSortedServers, CSortWrap(this, &CServerBrowser::SortCompareMap));
+	else if(g_Config.m_BrSort == IServerBrowser::SORT_NUMFRIENDS)
+		std::stable_sort(m_pSortedServerlist, m_pSortedServerlist + m_NumSortedServers, CSortWrap(this, &CServerBrowser::SortCompareNumFriends));
 	else if(g_Config.m_BrSort == IServerBrowser::SORT_NUMPLAYERS)
 		std::stable_sort(m_pSortedServerlist, m_pSortedServerlist + m_NumSortedServers, CSortWrap(this, &CServerBrowser::SortCompareNumPlayers));
 	else if(g_Config.m_BrSort == IServerBrowser::SORT_GAMETYPE)
