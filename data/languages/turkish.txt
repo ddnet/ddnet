@@ -1715,7 +1715,7 @@ Lines %d - %d (%s)
 == Satır %d - %d (%s)
 
 Locked
-== Locked
+== Sabit
 
 Following
 == Takipte
