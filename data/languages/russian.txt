@@ -186,7 +186,7 @@ Game types:
 == Типы игры:
 
 General
-== Основные
+== Основное
 
 Graphics
 == Графика
@@ -405,7 +405,7 @@ Switch weapon when out of ammo
 == Переключать оружие без патронов
 
 Show only chat messages from friends
-== Показывать сообщения только от друзей
+== Показывать только дружеские с.
 
 Show clan above name plates
 == Показывать клан
@@ -489,19 +489,19 @@ Enable gun sound
 == Звуки оружия
 
 Enable server message sound
-== Звуки сообщений сервера
+== Звуки серверных сообщений
 
 Enable regular chat sound
 == Звуки обычных сообщений
 
 Enable team chat sound
-== Звуки сообщений в команде
+== Звуки командных сообщений
 
 Enable highlighted chat sound
-== Звуки подсвечиваемых сообщений
+== Звуки выделенных сообщений
 
 Use DDRace Scoreboard
-== Использовать DDRace таблицу счета
+== Использовать DDRace табло счета
 
 Show kill messages
 == Показывать сообщения о смерти
@@ -537,7 +537,7 @@ Sat.
 == Контр.
 
 Miscellaneous
-== Доп.
+== Дополнительно
 
 Internet
 == Интернет
@@ -612,7 +612,7 @@ Game paused
 == Пауза
 
 Team message
-== Сообщение от команды
+== Командное с.
 
 Automatically create statboard csv
 == Записывать результаты в CSV
@@ -633,7 +633,7 @@ Messages
 == Сообщения
 
 New random timeout code
-== Новый тайм-аут код
+== Сгенерировать новый тайм-аут код
 
 Loading DDNet Client
 == Загрузка DDNet Client
@@ -654,7 +654,7 @@ DDNet Client updated!
 == DDNet Client обновлён!
 
 Highlighted message
-== Выделенное сообщение
+== Выделенное с.
 
 Demo
 == Демо
@@ -855,7 +855,7 @@ DDNet
 == DDNet
 
 Friend message
-== Сообщение от друга
+== Дружеское с.
 
 Save the best demo of each race
 == Сохранять лучшее демо каждой карты
@@ -876,13 +876,13 @@ Size
 == Разм.
 
 Show text entities
-== Показывать текст
+== Показ. текст
 
 Show others (own team only)
-== Показывать только вашу команду
+== Показ. только вашу команду
 
 Show quads
-== Показывать квады
+== Показ. квады
 
 AntiPing
 == Антипинг
@@ -951,7 +951,7 @@ Grabs
 == 9+ упоминаний
 
 Client message
-== Клиентское сообщение
+== Клиентское с.
 
 Warning
 == Предупреждение
@@ -1084,7 +1084,7 @@ Replay
 == Запись
 
 Entities
-== Тайлы
+== Наложение
 
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
 == Ширина текстуры %s не делится на %d или же его высота не делится на %d, что может повлиять на графику.
@@ -1233,10 +1233,10 @@ Ingame controller mode
 == Режим контроллера в игре
 
 Ingame controller sens.
-== В игре
+== Чувств. в игре
 
 UI controller sens.
-== В меню
+== Чувств. в меню
 
 Controller jitter tolerance
 == Устойчивость к движению контроллера
@@ -1251,10 +1251,10 @@ Mouse
 == Мышь
 
 Ingame mouse sens.
-== В игре
+== Чувств. в игре
 
 UI mouse sens.
-== В меню
+== Чувств. в меню
 
 Controller
 == Контроллер
@@ -1302,7 +1302,7 @@ Tries to predict other entities to give a feel of low latency
 == Пытыается предсказать другие объекты, чтобы придать ощущение низкой задержки
 
 Extras
-== Дополнительно
+== Доп.
 
 Super
 == Супер
@@ -1389,19 +1389,19 @@ Hook collision line opacity
 == Прозрачность линии
 
 Colors of the hook collision line, in case of a possible collision with:
-== Цвет линии при:
+== Цвет линии коллизии крюка при:
 
 Your movements are not taken into account when calculating the line colors
-== Ваши движения не учитываются при расчете цвета линии
+== Ваше перемещение не учитываются при расчете цвета линии коллизии
 
 Nothing hookable
-== Касании нехукабельных тайлов
+== Невозможности зацепиться
 
 Something hookable
-== Касании хукабельных тайлов
+== Возможности зацепиться
 
 A Tee
-== Касании игрока
+== Пересечении игрока
 
 Loading assets
 == Загрузка ресурсов
@@ -1541,7 +1541,7 @@ Open the directory that contains the demo files
 == Открыть папку с демо записями
 
 Save power by lowering refresh rate (higher input latency)
-== Режим экономия энергии
+== Режим экономии энергии
 
 Open the settings file
 == Открытие файла настроек
@@ -1744,7 +1744,7 @@ Regular background color
 == Обычный цвет фона
 
 Entities background color
-== Цвет фона при тайлах
+== Цвет фона при наложении
 
 Saving settings to '%s' failed
 == Не получилось сохранить настройки в '%s'
