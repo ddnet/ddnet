@@ -210,25 +210,7 @@ void SStringConfigVariable::CommandCallback(IConsole::IResult *pResult, void *pU
 			return;
 
 		const char *pString = pResult->GetString(0);
-		if(!str_utf8_check(pString))
-		{
-			char aTemp[4];
-			size_t Length = 0;
-			while(*pString)
-			{
-				size_t Size = str_utf8_encode(aTemp, static_cast<unsigned char>(*pString++));
-				if(Length + Size < pData->m_MaxSize)
-				{
-					mem_copy(pData->m_pStr + Length, aTemp, Size);
-					Length += Size;
-				}
-				else
-					break;
-			}
-			pData->m_pStr[Length] = '\0';
-		}
-		else
-			str_copy(pData->m_pStr, pString, pData->m_MaxSize);
+		str_copy(pData->m_pStr, pString, pData->m_MaxSize);
 
 		if(pResult->m_ClientId != IConsole::CLIENT_ID_GAME)
 			str_copy(pData->m_pOldValue, pData->m_pStr, pData->m_MaxSize);
