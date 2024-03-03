@@ -101,13 +101,8 @@ public:
 				int ClientID = Item.m_ID;
 				if(ClientID < MAX_CLIENTS)
 				{
-<<<<<<< HEAD
 					CClientData *pClient = &m_aClients[ClientID];
-					IntsToStr(&pInfo->m_Name0, 4, pClient->m_aName);
-=======
-					CClientData *pClient = &m_aClients[ClientId];
 					int32_to_str(&pInfo->m_Name0, 4, pClient->m_aName, sizeof(pClient->m_aName));
->>>>>>> 1138e763b (Add validation for `StrToInts` and `IntsToStr`, move and rename)
 				}
 			}
 		}
