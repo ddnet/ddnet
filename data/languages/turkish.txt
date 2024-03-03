@@ -1824,4 +1824,4 @@ Regular background color
 == Normal arka plan rengi
 
 Entities background color
-== Varlık arka plan rengi
+== Yapı arka plan rengi
