@@ -166,7 +166,7 @@ void CGameClient::OnConsoleInit()
 	Console()->Register("kill", "", CFGFLAG_CLIENT, ConKill, this, "Kill yourself to restart");
 
 	// register tune zone command to allow the client prediction to load tunezones from the map
-	Console()->Register("tune_zone", "i[zone] s[tuning] f[value]", CFGFLAG_CLIENT | CFGFLAG_GAME, ConTuneZone, this, "Tune in zone a variable to value");
+	Console()->Register("tune_zone", "i[zone] s[tuning] f[value]", CFGFLAG_GAME, ConTuneZone, this, "Tune in zone a variable to value");
 
 	for(auto &pComponent : m_vpAll)
 		pComponent->m_pClient = this;
