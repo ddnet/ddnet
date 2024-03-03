@@ -93,8 +93,8 @@ jobs:
         brew update || true
         brew install pkg-config sdl2 ffmpeg ninja molten-vk vulkan-headers glslang spirv-tools || true
         brew upgrade freetype
-        pip3 install dmgbuild
-        echo /Library/Frameworks/Python.framework/Versions/3.11/bin >> $GITHUB_PATH
+        pip3 install --break-system-packages dmgbuild
+        echo /Library/Frameworks/Python.framework/Versions/3.12/bin >> $GITHUB_PATH
         sudo rm -rf /Library/Developer/CommandLineTools
 
     - name: Cache Rust dependencies
