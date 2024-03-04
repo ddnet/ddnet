@@ -104,7 +104,7 @@ public:
 				if(ClientID < MAX_CLIENTS)
 				{
 					CClientData *pClient = &m_aClients[ClientID];
-					IntsToStr(&pInfo->m_Name0, 4, pClient->m_aName);
+					IntsToStr(&pInfo->m_Name0, 4, pClient->m_aName, sizeof(pClient->m_aName));
 				}
 			}
 		}

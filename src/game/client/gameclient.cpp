@@ -1383,10 +1383,13 @@ void CGameClient::OnNewSnapshot()
 				{
 					CClientData *pClient = &m_aClients[ClientID];
 
-					IntsToStr(&pInfo->m_Name0, 4, pClient->m_aName);
-					IntsToStr(&pInfo->m_Clan0, 3, pClient->m_aClan);
+					if(!IntsToStr(&pInfo->m_Name0, 4, pClient->m_aName, std::size(pClient->m_aName)))
+					{
+						str_copy(pClient->m_aName, "nameless tee");
+					}
+					IntsToStr(&pInfo->m_Clan0, 3, pClient->m_aClan, std::size(pClient->m_aClan));
 					pClient->m_Country = pInfo->m_Country;
-					IntsToStr(&pInfo->m_Skin0, 6, pClient->m_aSkinName);
+					IntsToStr(&pInfo->m_Skin0, 6, pClient->m_aSkinName, std::size(pClient->m_aSkinName));
 
 					pClient->m_UseCustomColor = pInfo->m_UseCustomColor;
 					pClient->m_ColorBody = pInfo->m_ColorBody;
