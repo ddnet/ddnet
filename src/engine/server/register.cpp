@@ -21,6 +21,7 @@ class CRegister : public IRegister
 		STATUS_OK,
 		STATUS_NEEDCHALLENGE,
 		STATUS_NEEDINFO,
+		STATUS_ERROR,
 
 		PROTOCOL_TW6_IPV6 = 0,
 		PROTOCOL_TW6_IPV4,
@@ -155,6 +156,10 @@ bool CRegister::StatusFromString(int *pResult, const char *pString)
 	else if(str_comp(pString, "need_info") == 0)
 	{
 		*pResult = STATUS_NEEDINFO;
+	}
+	else if(str_comp(pString, "error") == 0)
+	{
+		*pResult = STATUS_ERROR;
 	}
 	else
 	{
@@ -302,6 +307,7 @@ void CRegister::CProtocol::SendRegister()
 	}
 	pRegister->LogProgress(HTTPLOG::FAILURE);
 	pRegister->IpResolve(ProtocolToIpresolve(m_Protocol));
+	pRegister->FailOnErrorStatus(false);
 
 	int RequestIndex;
 	{
@@ -413,9 +419,8 @@ void CRegister::CProtocol::CJob::Run()
 	m_pRegister->Wait();
 	if(m_pRegister->State() != EHttpState::DONE)
 	{
-		// TODO: log the error response content from master
 		// TODO: exponential backoff
-		log_error(ProtocolToSystem(m_Protocol), "error response from master");
+		log_error(ProtocolToSystem(m_Protocol), "error sending request to master");
 		return;
 	}
 	json_value *pJson = m_pRegister->ResultJson();
@@ -436,6 +441,25 @@ void CRegister::CProtocol::CJob::Run()
 	if(StatusFromString(&Status, StatusString))
 	{
 		log_error(ProtocolToSystem(m_Protocol), "invalid status from master: %s", (const char *)StatusString);
+		json_value_free(pJson);
+		return;
+	}
+	if(Status == STATUS_ERROR)
+	{
+		const json_value &Message = Json["message"];
+		if(Message.type != json_string)
+		{
+			json_value_free(pJson);
+			log_error(ProtocolToSystem(m_Protocol), "invalid JSON error response from master");
+			return;
+		}
+		log_error(ProtocolToSystem(m_Protocol), "error response from master: %d: %s", m_pRegister->StatusCode(), (const char *)Message);
+		json_value_free(pJson);
+		return;
+	}
+	if(m_pRegister->StatusCode() >= 400)
+	{
+		log_error(ProtocolToSystem(m_Protocol), "non-success status code %d from master without error code", m_pRegister->StatusCode());
 		json_value_free(pJson);
 		return;
 	}
