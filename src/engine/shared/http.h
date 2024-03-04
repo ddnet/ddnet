@@ -248,7 +248,6 @@ class CHttp : public IHttp
 	{
 		UNINITIALIZED,
 		RUNNING,
-		STOPPING,
 		ERROR,
 	};
 
