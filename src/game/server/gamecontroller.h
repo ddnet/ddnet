@@ -115,6 +115,7 @@ public:
 
 	virtual void OnPlayerConnect(class CPlayer *pPlayer);
 	virtual void OnPlayerDisconnect(class CPlayer *pPlayer, const char *pReason);
+	virtual int OnSnapPlayerScore(class CPlayer *pPlayer, int SnappingClient) { return 0; };
 
 	virtual void OnReset();
 
