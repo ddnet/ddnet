@@ -357,6 +357,7 @@ public:
 	bool RateLimitPlayerMapVote(int ClientID) const;
 
 	void OnUpdatePlayerServerInfo(char *aBuf, int BufSize, int ID) override;
+	void OnUpdateServerInfo(char *aBuf, int BufSize) const override;
 
 	std::shared_ptr<CScoreRandomMapResult> m_SqlRandomMapResult;
 
