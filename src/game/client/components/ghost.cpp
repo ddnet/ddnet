@@ -20,7 +20,7 @@ CGhost::CGhost() :
 
 void CGhost::GetGhostSkin(CGhostSkin *pSkin, const char *pSkinName, int UseCustomColor, int ColorBody, int ColorFeet)
 {
-	StrToInts(&pSkin->m_Skin0, 6, pSkinName);
+	str_to_int32(&pSkin->m_Skin0, 6, pSkinName);
 	pSkin->m_UseCustomColor = UseCustomColor;
 	pSkin->m_ColorBody = ColorBody;
 	pSkin->m_ColorFeet = ColorFeet;
@@ -385,8 +385,8 @@ void CGhost::OnRender()
 
 void CGhost::InitRenderInfos(CGhostItem *pGhost)
 {
-	char aSkinName[64];
-	IntsToStr(&pGhost->m_Skin.m_Skin0, 6, aSkinName);
+	char aSkinName[24];
+	int32_to_str(&pGhost->m_Skin.m_Skin0, 6, aSkinName, std::size(aSkinName));
 	CTeeRenderInfo *pRenderInfo = &pGhost->m_RenderInfo;
 
 	const CSkin *pSkin = m_pClient->m_Skins.Find(aSkinName);
@@ -689,8 +689,8 @@ void CGhost::OnRefreshSkins()
 	const auto &&RefindSkin = [&](auto &Ghost) {
 		if(Ghost.Empty())
 			return;
-		char aSkinName[64];
-		IntsToStr(&Ghost.m_Skin.m_Skin0, 6, aSkinName);
+		char aSkinName[24];
+		int32_to_str(&Ghost.m_Skin.m_Skin0, 6, aSkinName, std::size(aSkinName));
 		CTeeRenderInfo *pRenderInfo = &Ghost.m_RenderInfo;
 		if(aSkinName[0] != '\0')
 		{

@@ -2418,6 +2418,9 @@ const char *str_next_token(const char *str, const char *delim, char *buffer, int
 */
 int str_in_list(const char *list, const char *delim, const char *needle);
 
+void str_to_int32(int *ints, size_t num_ints, const char *str);
+void int32_to_str(const int *ints, size_t num_ints, char *str, size_t str_size);
+
 /**
  * Packs 4 big endian bytes into an unsigned.
  *

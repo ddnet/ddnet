@@ -4037,6 +4037,100 @@ const char *str_next_token(const char *str, const char *delim, char *buffer, int
 	return tok + len;
 }
 
+void str_to_int32(int *ints, size_t num_ints, const char *str)
+{
+	dbg_assert(num_ints > 0, "str_to_int32: num_ints invalid");
+
+	// Clear all integers, which also ensures null-termination,
+	// as the last byte is never written to.
+	for(size_t i = 0; i < num_ints; i++)
+	{
+		ints[i] = 0;
+	}
+
+	size_t byte_index = 0;
+	const size_t total_bytes = num_ints * sizeof(int) - 1; // -1 for null-termination
+	auto &&write_byte = [ints, &byte_index](int b) mutable {
+		ints[byte_index / sizeof(int)] |= b << ((sizeof(int) - byte_index % sizeof(int) - 1) * 8);
+		byte_index++;
+	};
+
+	// Write each UTF-8 codepoint individually
+	while(true)
+	{
+		const int codepoint = str_utf8_decode(&str);
+		dbg_assert(codepoint != -1, "str_to_int32: invalid UTF-8 in string");
+		if(codepoint == 0)
+		{
+			break;
+		}
+
+		char encoded[4];
+		const size_t encoded_count = str_utf8_encode(encoded, codepoint);
+		dbg_assert(encoded_count <= total_bytes - byte_index, "str_to_int32: string truncated");
+		for(size_t i = 0; i < encoded_count; i++)
+		{
+			write_byte(encoded[i] + 128);
+		}
+	}
+
+	// Write padding
+	while(byte_index < total_bytes)
+	{
+		write_byte(128);
+	}
+}
+
+void int32_to_str(const int *ints, size_t num_ints, char *str, size_t str_size)
+{
+	dbg_assert(num_ints > 0, "int32_to_str: num_ints invalid");
+	dbg_assert(str_size >= num_ints * sizeof(int), "int32_to_str: str_size invalid");
+
+	// Unpack string without validation
+	size_t str_index = 0;
+	for(size_t int_index = 0; int_index < num_ints; int_index++)
+	{
+		const int current_int = ints[int_index];
+		str[str_index] = ((current_int >> 24) & 0xff) - 128;
+		str_index++;
+		str[str_index] = ((current_int >> 16) & 0xff) - 128;
+		str_index++;
+		str[str_index] = ((current_int >> 8) & 0xff) - 128;
+		str_index++;
+		str[str_index] = (current_int & 0xff) - 128;
+		str_index++;
+	}
+	// Ensure null-termination
+	str[str_index - 1] = '\0';
+
+	// Validate
+	const char *check_str = str;
+	int str_check_index = 0;
+	while(true)
+	{
+		const char *prev_check_str = check_str;
+		const int codepoint = str_utf8_decode(&check_str);
+		if(codepoint == 0)
+		{
+			// Check for (early) null-termination.
+			str[str_check_index] = '\0';
+			break;
+		}
+		const size_t codepoint_size = check_str - prev_check_str;
+		if(codepoint == -1)
+		{
+			// Replace invalid codepoints with question mark characters instead of the Unicode
+			// replacement character, because the replacement character is 3 bytes long, so the
+			// string with added replacement characters may not fit into the buffer.
+			for(size_t i = 0; i < codepoint_size; i++)
+			{
+				str[str_check_index + i] = '?';
+			}
+		}
+		str_check_index += codepoint_size;
+	}
+}
+
 static_assert(sizeof(unsigned) == 4, "unsigned must be 4 bytes in size");
 static_assert(sizeof(unsigned) == sizeof(int), "unsigned and int must have the same size");
 
