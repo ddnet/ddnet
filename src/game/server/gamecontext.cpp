@@ -3879,9 +3879,6 @@ void CGameContext::OnInit(const void *pPersistentData)
 	// create all entities from the game layer
 	CreateAllEntities(true);
 
-	if(GIT_SHORTREV_HASH)
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "git-revision", GIT_SHORTREV_HASH);
-
 	m_pAntibot->RoundStart(this);
 }
 
