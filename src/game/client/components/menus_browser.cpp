@@ -108,6 +108,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 		COL_NAME,
 		COL_GAMETYPE,
 		COL_MAP,
+		COL_FRIENDS,
 		COL_PLAYERS,
 		COL_PING,
 
@@ -135,7 +136,8 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 		{COL_NAME, IServerBrowser::SORT_NAME, Localizable("Name"), 0, 50.0f, {0}},
 		{COL_GAMETYPE, IServerBrowser::SORT_GAMETYPE, Localizable("Type"), 1, 50.0f, {0}},
 		{COL_MAP, IServerBrowser::SORT_MAP, Localizable("Map"), 1, 120.0f + (Headers.w - 480) / 8, {0}},
-		{COL_PLAYERS, IServerBrowser::SORT_NUMPLAYERS, Localizable("Players"), 1, 85.0f, {0}},
+		{COL_FRIENDS, IServerBrowser::SORT_NUMFRIENDS, "", 1, 20.0f, {0}},
+		{COL_PLAYERS, IServerBrowser::SORT_NUMPLAYERS, Localizable("Players"), 1, 60.0f, {0}},
 		{-1, -1, "", 1, 4.0f, {0}},
 		{COL_PING, IServerBrowser::SORT_PING, Localizable("Ping"), 1, 40.0f, {0}},
 	};
@@ -190,6 +192,15 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 					g_Config.m_BrSortOrder = 0;
 				g_Config.m_BrSort = Col.m_Sort;
 			}
+		}
+
+		if(Col.m_ID == COL_FRIENDS)
+		{
+			TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
+			TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
+			UI()->DoLabel(&Col.m_Rect, FONT_ICON_HEART, 14.0f, TEXTALIGN_MC);
+			TextRender()->SetRenderFlags(0);
+			TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
 		}
 	}
 
@@ -374,25 +385,23 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 				if(!Printed)
 					UI()->DoLabelStreamed(*pUiElement->Rect(UI_ELEM_MAP_1), &Button, pItem->m_aMap, FontSize, TEXTALIGN_ML, Props);
 			}
-			else if(ID == COL_PLAYERS)
+			else if(ID == COL_FRIENDS)
 			{
-				Button.VMargin(2.0f, &Button);
 				if(pItem->m_FriendState != IFriends::FRIEND_NO)
 				{
-					CUIRect Icon;
-					Button.VSplitRight(50.0f, &Icon, &Button);
-					Icon.Margin(2.0f, &Icon);
-					RenderBrowserIcons(*pUiElement->Rect(UI_ELEM_FRIEND_ICON), &Icon, ColorRGBA(0.94f, 0.4f, 0.4f, 1.0f), TextRender()->DefaultTextOutlineColor(), FONT_ICON_HEART, TEXTALIGN_MC);
+					RenderBrowserIcons(*pUiElement->Rect(UI_ELEM_FRIEND_ICON), &Button, ColorRGBA(0.94f, 0.4f, 0.4f, 1.0f), TextRender()->DefaultTextOutlineColor(), FONT_ICON_HEART, TEXTALIGN_MC);
 
 					if(pItem->m_FriendNum > 1)
 					{
 						str_from_int(pItem->m_FriendNum, aTemp);
 						TextRender()->TextColor(0.94f, 0.8f, 0.8f, 1.0f);
-						UI()->DoLabel(&Icon, aTemp, 9.0f, TEXTALIGN_MC);
+						UI()->DoLabel(&Button, aTemp, 9.0f, TEXTALIGN_MC);
 						TextRender()->TextColor(TextRender()->DefaultTextColor());
 					}
 				}
-
+			}
+			else if(ID == COL_PLAYERS)
+			{
 				str_format(aTemp, sizeof(aTemp), "%i/%i", pItem->m_NumFilteredPlayers, ServerBrowser()->Max(*pItem));
 				if(g_Config.m_BrFilterString[0] && (pItem->m_QuickSearchHit & IServerBrowser::QUICK_PLAYER))
 				{

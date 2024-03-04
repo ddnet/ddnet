@@ -346,6 +346,7 @@ private:
 	bool SortCompareGametype(int Index1, int Index2) const;
 	bool SortCompareNumPlayers(int Index1, int Index2) const;
 	bool SortCompareNumClients(int Index1, int Index2) const;
+	bool SortCompareNumFriends(int Index1, int Index2) const;
 	bool SortCompareNumPlayersAndPing(int Index1, int Index2) const;
 
 	//
