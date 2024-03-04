@@ -139,7 +139,10 @@ bool CHttpRequest::ConfigureHandle(void *pHandle)
 #endif
 	curl_easy_setopt(pH, CURLOPT_FOLLOWLOCATION, 1L);
 	curl_easy_setopt(pH, CURLOPT_MAXREDIRS, 4L);
-	curl_easy_setopt(pH, CURLOPT_FAILONERROR, 1L);
+	if(m_FailOnErrorStatus)
+	{
+		curl_easy_setopt(pH, CURLOPT_FAILONERROR, 1L);
+	}
 	curl_easy_setopt(pH, CURLOPT_URL, m_aUrl);
 	curl_easy_setopt(pH, CURLOPT_NOSIGNAL, 1L);
 	curl_easy_setopt(pH, CURLOPT_USERAGENT, GAME_NAME " " GAME_RELEASE_VERSION " (" CONF_PLATFORM_STRING "; " CONF_ARCH_STRING ")");
@@ -256,8 +259,16 @@ int CHttpRequest::ProgressCallback(void *pUser, double DlTotal, double DlCurr, d
 	return pTask->m_Abort ? -1 : 0;
 }
 
-void CHttpRequest::OnCompletionInternal(unsigned int Result)
+void CHttpRequest::OnCompletionInternal(void *pHandle, unsigned int Result)
 {
+	if(pHandle)
+	{
+		CURL *pH = (CURL *)pHandle;
+		long StatusCode;
+		curl_easy_getinfo(pH, CURLINFO_RESPONSE_CODE, &StatusCode);
+		m_StatusCode = StatusCode;
+	}
+
 	EHttpState State;
 	const CURLcode Code = static_cast<CURLcode>(Result);
 	if(Code != CURLE_OK)
@@ -373,6 +384,12 @@ const SHA256_DIGEST &CHttpRequest::ResultSha256() const
 	return m_ActualSha256;
 }
 
+int CHttpRequest::StatusCode() const
+{
+	dbg_assert(State() == EHttpState::DONE, "Request not done");
+	return m_StatusCode;
+}
+
 bool CHttp::Init(std::chrono::milliseconds ShutdownDelay)
 {
 	m_ShutdownDelay = ShutdownDelay;
@@ -478,7 +495,7 @@ void CHttp::RunLoop()
 				auto pRequest = std::move(RequestIt->second);
 				m_RunningRequests.erase(RequestIt);
 
-				pRequest->OnCompletionInternal(pMsg->data.result);
+				pRequest->OnCompletionInternal(pMsg->easy_handle, pMsg->data.result);
 				curl_multi_remove_handle(m_pMultiH, pMsg->easy_handle);
 				curl_easy_cleanup(pMsg->easy_handle);
 			}
@@ -534,20 +551,21 @@ void CHttp::RunLoop()
 	for(auto &pRequest : m_PendingRequests)
 	{
 		str_copy(pRequest->m_aErr, "Shutting down");
-		pRequest->OnCompletionInternal(CURLE_ABORTED_BY_CALLBACK);
+		pRequest->OnCompletionInternal(nullptr, CURLE_ABORTED_BY_CALLBACK);
 	}
 
 	for(auto &ReqPair : m_RunningRequests)
 	{
 		auto &[pHandle, pRequest] = ReqPair;
+
+		str_copy(pRequest->m_aErr, "Shutting down");
+		pRequest->OnCompletionInternal(pHandle, CURLE_ABORTED_BY_CALLBACK);
+
 		if(Cleanup)
 		{
 			curl_multi_remove_handle(m_pMultiH, pHandle);
 			curl_easy_cleanup(pHandle);
 		}
-
-		str_copy(pRequest->m_aErr, "Shutting down");
-		pRequest->OnCompletionInternal(CURLE_ABORTED_BY_CALLBACK);
 	}
 
 	if(Cleanup)
@@ -564,7 +582,7 @@ void CHttp::Run(std::shared_ptr<IHttpRequest> pRequest)
 	if(m_Shutdown)
 	{
 		str_copy(pRequestImpl->m_aErr, "Shutting down");
-		pRequestImpl->OnCompletionInternal(CURLE_ABORTED_BY_CALLBACK);
+		pRequestImpl->OnCompletionInternal(nullptr, CURLE_ABORTED_BY_CALLBACK);
 		return;
 	}
 	m_Cv.wait(Lock, [this]() { return m_State != CHttp::UNINITIALIZED; });
