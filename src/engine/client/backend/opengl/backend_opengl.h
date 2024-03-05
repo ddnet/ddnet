@@ -144,13 +144,13 @@ class CCommandProcessorFragment_OpenGL2 : public CCommandProcessorFragment_OpenG
 
 	struct SBufferObject
 	{
-		SBufferObject(TWGLuint BufferObjectID) :
-			m_BufferObjectID(BufferObjectID)
+		SBufferObject(TWGLuint BufferObjectId) :
+			m_BufferObjectId(BufferObjectId)
 		{
 			m_pData = NULL;
 			m_DataSize = 0;
 		}
-		TWGLuint m_BufferObjectID;
+		TWGLuint m_BufferObjectId;
 		void *m_pData;
 		size_t m_DataSize;
 	};

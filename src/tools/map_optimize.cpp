@@ -138,9 +138,9 @@ int main(int argc, const char **argv)
 	// add all items
 	for(int Index = 0, i = 0; Index < Reader.NumItems(); Index++)
 	{
-		int Type, ID;
+		int Type, Id;
 		CUuid Uuid;
-		void *pPtr = Reader.GetItem(Index, &Type, &ID, &Uuid);
+		void *pPtr = Reader.GetItem(Index, &Type, &Id, &Uuid);
 
 		// Filter ITEMTYPE_EX items, they will be automatically added again.
 		if(Type == ITEMTYPE_EX)
@@ -205,7 +205,7 @@ int main(int argc, const char **argv)
 		}
 
 		int Size = Reader.GetItemSize(Index);
-		Writer.AddItem(Type, ID, Size, pPtr, &Uuid);
+		Writer.AddItem(Type, Id, Size, pPtr, &Uuid);
 	}
 
 	// add all data

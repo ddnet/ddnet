@@ -158,7 +158,7 @@ protected:
 	class IStorage *m_pStorage;
 	CBanAddrPool m_BanAddrPool;
 	CBanRangePool m_BanRangePool;
-	NETADDR m_LocalhostIPV4, m_LocalhostIPV6;
+	NETADDR m_LocalhostIpV4, m_LocalhostIpV6;
 
 public:
 	enum

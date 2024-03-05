@@ -28,37 +28,37 @@ void CEditorObject::OnMapLoad() {}
 
 bool CEditorObject::IsHot()
 {
-	return UI()->HotItem() == this;
+	return Ui()->HotItem() == this;
 }
 
 void CEditorObject::SetHot()
 {
-	UI()->SetHotItem(this);
+	Ui()->SetHotItem(this);
 }
 
 void CEditorObject::UnsetHot()
 {
 	if(IsHot())
-		UI()->SetHotItem(nullptr);
+		Ui()->SetHotItem(nullptr);
 }
 
 void CEditorObject::OnHot() {}
 
 bool CEditorObject::IsActive()
 {
-	return UI()->CheckActiveItem(this);
+	return Ui()->CheckActiveItem(this);
 }
 
 void CEditorObject::SetActive()
 {
 	SetHot();
-	UI()->SetActiveItem(this);
+	Ui()->SetActiveItem(this);
 }
 
 void CEditorObject::SetInactive()
 {
 	if(IsActive())
-		UI()->SetActiveItem(nullptr);
+		Ui()->SetActiveItem(nullptr);
 }
 
 void CEditorObject::OnActive() {}
@@ -74,5 +74,5 @@ IGraphics *CEditorObject::Graphics() { return m_pEditor->Graphics(); }
 ISound *CEditorObject::Sound() { return m_pEditor->Sound(); }
 ITextRender *CEditorObject::TextRender() { return m_pEditor->TextRender(); }
 IStorage *CEditorObject::Storage() { return m_pEditor->Storage(); }
-CUI *CEditorObject::UI() { return m_pEditor->UI(); }
+CUi *CEditorObject::Ui() { return m_pEditor->Ui(); }
 CRenderTools *CEditorObject::RenderTools() { return m_pEditor->RenderTools(); }

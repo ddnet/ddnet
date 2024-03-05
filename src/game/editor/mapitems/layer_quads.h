@@ -21,7 +21,7 @@ public:
 	void BrushFlipY() override;
 	void BrushRotate(float Amount) override;
 
-	CUI::EPopupMenuFunctionResult RenderProperties(CUIRect *pToolbox) override;
+	CUi::EPopupMenuFunctionResult RenderProperties(CUIRect *pToolbox) override;
 
 	void ModifyImageIndex(FIndexModifyFunction pfnFunc) override;
 	void ModifyEnvelopeIndex(FIndexModifyFunction pfnFunc) override;

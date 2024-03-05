@@ -174,7 +174,7 @@ CInput::CJoystick::CJoystick(CInput *pInput, int Index, SDL_Joystick *pDelegate)
 	m_NumHats = SDL_JoystickNumHats(pDelegate);
 	str_copy(m_aName, SDL_JoystickName(pDelegate));
 	SDL_JoystickGetGUIDString(SDL_JoystickGetGUID(pDelegate), m_aGUID, sizeof(m_aGUID));
-	m_InstanceID = SDL_JoystickInstanceID(pDelegate);
+	m_InstanceId = SDL_JoystickInstanceID(pDelegate);
 }
 
 void CInput::CloseJoysticks()
@@ -411,7 +411,7 @@ void CInput::HandleJoystickAxisMotionEvent(const SDL_JoyAxisEvent &Event)
 	if(!g_Config.m_InpControllerEnable)
 		return;
 	CJoystick *pJoystick = GetActiveJoystick();
-	if(!pJoystick || pJoystick->GetInstanceID() != Event.which)
+	if(!pJoystick || pJoystick->GetInstanceId() != Event.which)
 		return;
 	if(Event.axis >= NUM_JOYSTICK_AXES)
 		return;
@@ -450,7 +450,7 @@ void CInput::HandleJoystickButtonEvent(const SDL_JoyButtonEvent &Event)
 	if(!g_Config.m_InpControllerEnable)
 		return;
 	CJoystick *pJoystick = GetActiveJoystick();
-	if(!pJoystick || pJoystick->GetInstanceID() != Event.which)
+	if(!pJoystick || pJoystick->GetInstanceId() != Event.which)
 		return;
 	if(Event.button >= NUM_JOYSTICK_BUTTONS)
 		return;
@@ -475,7 +475,7 @@ void CInput::HandleJoystickHatMotionEvent(const SDL_JoyHatEvent &Event)
 	if(!g_Config.m_InpControllerEnable)
 		return;
 	CJoystick *pJoystick = GetActiveJoystick();
-	if(!pJoystick || pJoystick->GetInstanceID() != Event.which)
+	if(!pJoystick || pJoystick->GetInstanceId() != Event.which)
 		return;
 	if(Event.hat >= NUM_JOYSTICK_HATS)
 		return;
@@ -513,7 +513,7 @@ void CInput::HandleJoystickAddedEvent(const SDL_JoyDeviceEvent &Event)
 
 void CInput::HandleJoystickRemovedEvent(const SDL_JoyDeviceEvent &Event)
 {
-	auto RemovedJoystick = std::find_if(m_vJoysticks.begin(), m_vJoysticks.end(), [Event](const CJoystick &Joystick) -> bool { return Joystick.GetInstanceID() == Event.which; });
+	auto RemovedJoystick = std::find_if(m_vJoysticks.begin(), m_vJoysticks.end(), [Event](const CJoystick &Joystick) -> bool { return Joystick.GetInstanceId() == Event.which; });
 	if(RemovedJoystick != m_vJoysticks.end())
 	{
 		dbg_msg("joystick", "Closed joystick %d '%s'", (*RemovedJoystick).GetIndex(), (*RemovedJoystick).GetName());

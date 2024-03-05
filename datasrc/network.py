@@ -208,7 +208,7 @@ Objects = [
 
 	NetObject("PlayerInfo", [
 		NetIntRange("m_Local", 0, 1),
-		NetIntRange("m_ClientID", 0, 'MAX_CLIENTS-1'),
+		NetIntRange("m_ClientId", 0, 'MAX_CLIENTS-1'),
 		NetIntRange("m_Team", 'TEAM_SPECTATORS', 'TEAM_BLUE'),
 
 		NetIntAny("m_Score"),
@@ -236,7 +236,7 @@ Objects = [
 	]),
 
 	NetObject("SpectatorInfo", [
-		NetIntRange("m_SpectatorID", 'SPEC_FREEVIEW', 'MAX_CLIENTS-1'),
+		NetIntRange("m_SpectatorId", 'SPEC_FREEVIEW', 'MAX_CLIENTS-1'),
 		NetIntAny("m_X"),
 		NetIntAny("m_Y"),
 	]),
@@ -250,7 +250,7 @@ Objects = [
 		NetTick("m_FreezeEnd", 0),
 		NetIntRange("m_Jumps", -1, 255, 2),
 		NetIntAny("m_TeleCheckpoint", -1),
-		NetIntRange("m_StrongWeakID", 0, 'MAX_CLIENTS-1', 0),
+		NetIntRange("m_StrongWeakId", 0, 'MAX_CLIENTS-1', 0),
 
 		# New data fields for jump display, freeze bar and ninja bar
 		# Default values indicate that these values should not be used
@@ -331,15 +331,15 @@ Objects = [
 	NetEvent("HammerHit:Common", []),
 
 	NetEvent("Death:Common", [
-		NetIntRange("m_ClientID", 0, 'MAX_CLIENTS-1'),
+		NetIntRange("m_ClientId", 0, 'MAX_CLIENTS-1'),
 	]),
 
 	NetEvent("SoundGlobal:Common", [ #TODO 0.7: remove me
-		NetIntRange("m_SoundID", 0, 'NUM_SOUNDS-1'),
+		NetIntRange("m_SoundId", 0, 'NUM_SOUNDS-1'),
 	]),
 
 	NetEvent("SoundWorld:Common", [
-		NetIntRange("m_SoundID", 0, 'NUM_SOUNDS-1'),
+		NetIntRange("m_SoundId", 0, 'NUM_SOUNDS-1'),
 	]),
 
 	NetEvent("DamageInd:Common", [
@@ -386,7 +386,7 @@ Messages = [
 
 	NetMessage("Sv_Chat", [
 		NetIntRange("m_Team", -2, 3),
-		NetIntRange("m_ClientID", -1, 'MAX_CLIENTS-1'),
+		NetIntRange("m_ClientId", -1, 'MAX_CLIENTS-1'),
 		NetStringHalfStrict("m_pMessage"),
 	]),
 
@@ -398,7 +398,7 @@ Messages = [
 	]),
 
 	NetMessage("Sv_SoundGlobal", [
-		NetIntRange("m_SoundID", 0, 'NUM_SOUNDS-1'),
+		NetIntRange("m_SoundId", 0, 'NUM_SOUNDS-1'),
 	]),
 
 	NetMessage("Sv_TuneParams", []),
@@ -410,7 +410,7 @@ Messages = [
 	]),
 
 	NetMessage("Sv_Emoticon", [
-		NetIntRange("m_ClientID", 0, 'MAX_CLIENTS-1'),
+		NetIntRange("m_ClientId", 0, 'MAX_CLIENTS-1'),
 		NetIntRange("m_Emoticon", 0, 'NUM_EMOTICONS-1'),
 	]),
 
@@ -458,7 +458,7 @@ Messages = [
 	]),
 
 	NetMessage("Cl_SetSpectatorMode", [
-		NetIntRange("m_SpectatorID", 'SPEC_FREEVIEW', 'MAX_CLIENTS-1'),
+		NetIntRange("m_SpectatorId", 'SPEC_FREEVIEW', 'MAX_CLIENTS-1'),
 	]),
 
 	NetMessage("Cl_StartInfo", [
@@ -556,7 +556,7 @@ Messages = [
 	]),
 
 	NetMessageEx("Sv_RaceFinish", "racefinish@netmsg.ddnet.org", [
-		NetIntRange("m_ClientID", 0, 'MAX_CLIENTS-1'),
+		NetIntRange("m_ClientId", 0, 'MAX_CLIENTS-1'),
 		NetIntAny("m_Time"),
 		NetIntAny("m_Diff"),
 		NetBool("m_RecordPersonal"),

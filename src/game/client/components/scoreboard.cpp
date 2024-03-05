@@ -110,19 +110,19 @@ void CScoreboard::RenderSpectators(float x, float y, float w, float h)
 		if(Multiple)
 			TextRender()->TextEx(&Cursor, ", ", 2);
 
-		if(m_pClient->m_aClients[pInfo->m_ClientID].m_AuthLevel)
+		if(m_pClient->m_aClients[pInfo->m_ClientId].m_AuthLevel)
 		{
 			ColorRGBA Color = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClAuthedPlayerColor));
 			TextRender()->TextColor(Color);
 		}
 
-		if(g_Config.m_ClShowIDs)
+		if(g_Config.m_ClShowIds)
 		{
 			char aBuffer[5];
-			int size = str_format(aBuffer, sizeof(aBuffer), "%d: ", pInfo->m_ClientID);
+			int size = str_format(aBuffer, sizeof(aBuffer), "%d: ", pInfo->m_ClientId);
 			TextRender()->TextEx(&Cursor, aBuffer, size);
 		}
-		TextRender()->TextEx(&Cursor, m_pClient->m_aClients[pInfo->m_ClientID].m_aName, -1);
+		TextRender()->TextEx(&Cursor, m_pClient->m_aClients[pInfo->m_ClientId].m_aName, -1);
 		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 
 		Multiple = true;
@@ -207,10 +207,10 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 	}
 	else
 	{
-		if(m_pClient->m_Snap.m_SpecInfo.m_Active && m_pClient->m_Snap.m_SpecInfo.m_SpectatorID != SPEC_FREEVIEW &&
-			m_pClient->m_Snap.m_apPlayerInfos[m_pClient->m_Snap.m_SpecInfo.m_SpectatorID])
+		if(m_pClient->m_Snap.m_SpecInfo.m_Active && m_pClient->m_Snap.m_SpecInfo.m_SpectatorId != SPEC_FREEVIEW &&
+			m_pClient->m_Snap.m_apPlayerInfos[m_pClient->m_Snap.m_SpecInfo.m_SpectatorId])
 		{
-			int Score = m_pClient->m_Snap.m_apPlayerInfos[m_pClient->m_Snap.m_SpecInfo.m_SpectatorID]->m_Score;
+			int Score = m_pClient->m_Snap.m_apPlayerInfos[m_pClient->m_Snap.m_SpecInfo.m_SpectatorId]->m_Score;
 			str_from_int(Score, aBuf);
 		}
 		else if(m_pClient->m_Snap.m_pLocalInfo)
@@ -325,7 +325,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		if(rendered++ < 0)
 			continue;
 
-		int DDTeam = m_pClient->m_Teams.Team(pInfo->m_ClientID);
+		int DDTeam = m_pClient->m_Teams.Team(pInfo->m_ClientId);
 		int NextDDTeam = 0;
 
 		for(int j = i + 1; j < MAX_CLIENTS; j++)
@@ -335,7 +335,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 			if(!pInfo2 || pInfo2->m_Team != Team)
 				continue;
 
-			NextDDTeam = m_pClient->m_Teams.Team(pInfo2->m_ClientID);
+			NextDDTeam = m_pClient->m_Teams.Team(pInfo2->m_ClientId);
 			break;
 		}
 
@@ -348,7 +348,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 				if(!pInfo2 || pInfo2->m_Team != Team)
 					continue;
 
-				OldDDTeam = m_pClient->m_Teams.Team(pInfo2->m_ClientID);
+				OldDDTeam = m_pClient->m_Teams.Team(pInfo2->m_ClientId);
 				break;
 			}
 		}
@@ -391,7 +391,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		OldDDTeam = DDTeam;
 
 		// background so it's easy to find the local player or the followed one in spectator mode
-		if((!m_pClient->m_Snap.m_SpecInfo.m_Active && pInfo->m_Local) || (m_pClient->m_Snap.m_SpecInfo.m_SpectatorID == SPEC_FREEVIEW && pInfo->m_Local) || (m_pClient->m_Snap.m_SpecInfo.m_Active && pInfo->m_ClientID == m_pClient->m_Snap.m_SpecInfo.m_SpectatorID))
+		if((!m_pClient->m_Snap.m_SpecInfo.m_Active && pInfo->m_Local) || (m_pClient->m_Snap.m_SpecInfo.m_SpectatorId == SPEC_FREEVIEW && pInfo->m_Local) || (m_pClient->m_Snap.m_SpecInfo.m_Active && pInfo->m_ClientId == m_pClient->m_Snap.m_SpecInfo.m_SpectatorId))
 		{
 			Graphics()->DrawRect(x, y, w - 20.0f, LineHeight, ColorRGBA(1.0f, 1.0f, 1.0f, 0.25f), IGraphics::CORNER_ALL, RoundRadius);
 		}
@@ -412,10 +412,10 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 
 		// flag
 		if(m_pClient->m_Snap.m_pGameInfoObj->m_GameFlags & GAMEFLAG_FLAGS &&
-			m_pClient->m_Snap.m_pGameDataObj && (m_pClient->m_Snap.m_pGameDataObj->m_FlagCarrierRed == pInfo->m_ClientID || m_pClient->m_Snap.m_pGameDataObj->m_FlagCarrierBlue == pInfo->m_ClientID))
+			m_pClient->m_Snap.m_pGameDataObj && (m_pClient->m_Snap.m_pGameDataObj->m_FlagCarrierRed == pInfo->m_ClientId || m_pClient->m_Snap.m_pGameDataObj->m_FlagCarrierBlue == pInfo->m_ClientId))
 		{
 			Graphics()->BlendNormal();
-			if(m_pClient->m_Snap.m_pGameDataObj->m_FlagCarrierBlue == pInfo->m_ClientID)
+			if(m_pClient->m_Snap.m_pGameDataObj->m_FlagCarrierBlue == pInfo->m_ClientId)
 				Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteFlagBlue);
 			else
 				Graphics()->TextureSet(GameClient()->m_GameSkin.m_SpriteFlagRed);
@@ -430,7 +430,7 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		}
 
 		// avatar
-		CTeeRenderInfo TeeInfo = m_pClient->m_aClients[pInfo->m_ClientID].m_RenderInfo;
+		CTeeRenderInfo TeeInfo = m_pClient->m_aClients[pInfo->m_ClientId].m_RenderInfo;
 		TeeInfo.m_Size *= TeeSizeMod;
 		const CAnimState *pIdleState = CAnimState::GetIdle();
 		vec2 OffsetToMid;
@@ -441,22 +441,22 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 
 		// name
 		TextRender()->SetCursor(&Cursor, NameOffset, y + (LineHeight - FontSize) / 2.f, FontSize, TEXTFLAG_RENDER | TEXTFLAG_ELLIPSIS_AT_END);
-		if(m_pClient->m_aClients[pInfo->m_ClientID].m_AuthLevel)
+		if(m_pClient->m_aClients[pInfo->m_ClientId].m_AuthLevel)
 		{
 			ColorRGBA Color = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClAuthedPlayerColor));
 			TextRender()->TextColor(Color);
 		}
 
-		if(g_Config.m_ClShowIDs)
+		if(g_Config.m_ClShowIds)
 		{
 			char aId[64] = "";
-			if(pInfo->m_ClientID < 10)
+			if(pInfo->m_ClientId < 10)
 			{
-				str_format(aId, sizeof(aId), " %d: %s", pInfo->m_ClientID, m_pClient->m_aClients[pInfo->m_ClientID].m_aName);
+				str_format(aId, sizeof(aId), " %d: %s", pInfo->m_ClientId, m_pClient->m_aClients[pInfo->m_ClientId].m_aName);
 			}
 			else
 			{
-				str_format(aId, sizeof(aId), "%d: %s", pInfo->m_ClientID, m_pClient->m_aClients[pInfo->m_ClientID].m_aName);
+				str_format(aId, sizeof(aId), "%d: %s", pInfo->m_ClientId, m_pClient->m_aClients[pInfo->m_ClientId].m_aName);
 			}
 			Cursor.m_LineWidth = NameLength;
 			TextRender()->TextEx(&Cursor, aId, -1);
@@ -464,12 +464,12 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		else
 		{
 			Cursor.m_LineWidth = NameLength;
-			TextRender()->TextEx(&Cursor, m_pClient->m_aClients[pInfo->m_ClientID].m_aName, -1);
+			TextRender()->TextEx(&Cursor, m_pClient->m_aClients[pInfo->m_ClientId].m_aName, -1);
 		}
 
 		// clan
-		if(str_comp(m_pClient->m_aClients[pInfo->m_ClientID].m_aClan,
-			   m_pClient->m_aClients[GameClient()->m_aLocalIDs[g_Config.m_ClDummy]].m_aClan) == 0)
+		if(str_comp(m_pClient->m_aClients[pInfo->m_ClientId].m_aClan,
+			   m_pClient->m_aClients[GameClient()->m_aLocalIds[g_Config.m_ClDummy]].m_aClan) == 0)
 		{
 			ColorRGBA Color = color_cast<ColorRGBA>(ColorHSLA(g_Config.m_ClSameClanColor));
 			TextRender()->TextColor(Color);
@@ -477,15 +477,15 @@ void CScoreboard::RenderScoreboard(float x, float y, float w, int Team, const ch
 		else
 			TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 
-		tw = minimum(TextRender()->TextWidth(FontSize, m_pClient->m_aClients[pInfo->m_ClientID].m_aClan, -1, -1.0f), ClanLength);
+		tw = minimum(TextRender()->TextWidth(FontSize, m_pClient->m_aClients[pInfo->m_ClientId].m_aClan, -1, -1.0f), ClanLength);
 		TextRender()->SetCursor(&Cursor, ClanOffset + (ClanLength - tw) / 2, y + (LineHeight - FontSize) / 2.f, FontSize, TEXTFLAG_RENDER | TEXTFLAG_ELLIPSIS_AT_END);
 		Cursor.m_LineWidth = ClanLength;
-		TextRender()->TextEx(&Cursor, m_pClient->m_aClients[pInfo->m_ClientID].m_aClan, -1);
+		TextRender()->TextEx(&Cursor, m_pClient->m_aClients[pInfo->m_ClientId].m_aClan, -1);
 
 		TextRender()->TextColor(1.0f, 1.0f, 1.0f, 1.0f);
 
 		// country flag
-		m_pClient->m_CountryFlags.Render(m_pClient->m_aClients[pInfo->m_ClientID].m_Country, ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f),
+		m_pClient->m_CountryFlags.Render(m_pClient->m_aClients[pInfo->m_ClientId].m_Country, ColorRGBA(1.0f, 1.0f, 1.0f, 0.5f),
 			CountryOffset, y + (Spacing + TeeSizeMod * 5.0f) / 2.0f, CountryLength, LineHeight - Spacing - TeeSizeMod * 5.0f);
 
 		// ping
@@ -692,12 +692,12 @@ const char *CScoreboard::GetClanName(int Team)
 
 		if(!pClanName)
 		{
-			pClanName = m_pClient->m_aClients[pInfo->m_ClientID].m_aClan;
+			pClanName = m_pClient->m_aClients[pInfo->m_ClientId].m_aClan;
 			ClanPlayers++;
 		}
 		else
 		{
-			if(str_comp(m_pClient->m_aClients[pInfo->m_ClientID].m_aClan, pClanName) == 0)
+			if(str_comp(m_pClient->m_aClients[pInfo->m_ClientId].m_aClan, pClanName) == 0)
 				ClanPlayers++;
 			else
 				return 0;

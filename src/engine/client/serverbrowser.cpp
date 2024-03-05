@@ -944,7 +944,7 @@ void CServerBrowser::Refresh(int Type, bool Force)
 		CNetChunk Packet;
 
 		/* do the broadcast version */
-		Packet.m_ClientID = -1;
+		Packet.m_ClientId = -1;
 		mem_zero(&Packet, sizeof(Packet));
 		Packet.m_Address.type = m_pNetClient->NetType() | NETTYPE_LINK_BROADCAST;
 		Packet.m_Flags = NETSENDFLAG_CONNLESS | NETSENDFLAG_EXTENDED;
@@ -1020,7 +1020,7 @@ void CServerBrowser::RequestImpl(const NETADDR &Addr, CServerEntry *pEntry, int 
 	aBuffer[sizeof(SERVERBROWSE_GETINFO)] = GetBasicToken(Token);
 
 	CNetChunk Packet;
-	Packet.m_ClientID = -1;
+	Packet.m_ClientId = -1;
 	Packet.m_Address = Addr;
 	Packet.m_Flags = NETSENDFLAG_CONNLESS | NETSENDFLAG_EXTENDED;
 	Packet.m_DataSize = sizeof(aBuffer);

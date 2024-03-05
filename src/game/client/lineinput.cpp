@@ -424,7 +424,7 @@ STextBoundingBox CLineInput::Render(const CUIRect *pRect, float FontSize, int Al
 		}
 
 		const STextBoundingBox BoundingBox = TextRender()->TextBoundingBox(FontSize, pDisplayStr, -1, LineWidth, LineSpacing);
-		const vec2 CursorPos = CUI::CalcAlignedCursorPos(pRect, BoundingBox.Size(), Align);
+		const vec2 CursorPos = CUi::CalcAlignedCursorPos(pRect, BoundingBox.Size(), Align);
 
 		TextRender()->SetCursor(&Cursor, CursorPos.x, CursorPos.y, FontSize, TEXTFLAG_RENDER);
 		Cursor.m_LineWidth = LineWidth;
@@ -509,7 +509,7 @@ STextBoundingBox CLineInput::Render(const CUIRect *pRect, float FontSize, int Al
 	else
 	{
 		const STextBoundingBox BoundingBox = TextRender()->TextBoundingBox(FontSize, pDisplayStr, -1, LineWidth, LineSpacing);
-		const vec2 CursorPos = CUI::CalcAlignedCursorPos(pRect, BoundingBox.Size(), Align);
+		const vec2 CursorPos = CUi::CalcAlignedCursorPos(pRect, BoundingBox.Size(), Align);
 		TextRender()->SetCursor(&Cursor, CursorPos.x, CursorPos.y, FontSize, TEXTFLAG_RENDER);
 		Cursor.m_LineWidth = LineWidth;
 		Cursor.m_LineSpacing = LineSpacing;

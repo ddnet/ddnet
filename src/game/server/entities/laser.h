@@ -16,7 +16,7 @@ public:
 	virtual void Snap(int SnappingClient) override;
 	virtual void SwapClients(int Client1, int Client2) override;
 
-	virtual int GetOwnerID() const override { return m_Owner; }
+	virtual int GetOwnerId() const override { return m_Owner; }
 
 protected:
 	bool HitCharacter(vec2 From, vec2 To);

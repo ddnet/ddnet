@@ -4,12 +4,12 @@ def only(x):
 	return list(x)[0]
 
 GlobalIdCounter = 0
-def GetID():
+def GetId():
 	global GlobalIdCounter
 	GlobalIdCounter += 1
 	return GlobalIdCounter
 def GetUID():
-	return f"x{int(GetID())}"
+	return f"x{int(GetId())}"
 
 def FixCasing(Str):
 	NewStr = ""
@@ -36,7 +36,7 @@ class BaseType:
 	def __init__(self, type_name):
 		self._type_name = type_name
 		self._target_name = "INVALID"
-		self._id = GetID() # this is used to remember what order the members have in structures etc
+		self._id = GetId() # this is used to remember what order the members have in structures etc
 
 	def Identifier(self):
 		return "x"+str(self._id)
@@ -44,7 +44,7 @@ class BaseType:
 		return self._target_name
 	def TypeName(self):
 		return self._type_name
-	def ID(self):
+	def Id(self):
 		return self._id
 
 	def EmitDeclaration(self, name):
@@ -65,7 +65,7 @@ class Struct(BaseType):
 		BaseType.__init__(self, type_name)
 	def Members(self):
 		def sorter(a):
-			return a.var.ID()
+			return a.var.Id()
 		m = []
 		for name, value in self.__dict__.items():
 			if name[0] == "_":
@@ -226,7 +226,7 @@ class NetObject:
 			lines += [f"struct {self.struct_name} : public {self.base_struct_name}", "{"]
 		else:
 			lines += [f"struct {self.struct_name}", "{"]
-		lines += [f"\tstatic constexpr int ms_MsgID = {self.enum_name};"]
+		lines += [f"\tstatic constexpr int ms_MsgId = {self.enum_name};"]
 		for v in self.variables:
 			lines += ["\t"+line for line in v.emit_declaration()]
 		lines += ["};"]

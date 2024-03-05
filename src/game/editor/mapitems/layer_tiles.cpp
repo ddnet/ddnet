@@ -693,7 +693,7 @@ void CLayerTiles::ShowInfo()
 	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 }
 
-CUI::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
+CUi::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 {
 	CUIRect Button;
 
@@ -707,7 +707,7 @@ CUI::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 		pToolBox->HSplitBottom(12.0f, pToolBox, &Button);
 		static int s_GameTilesButton = 0;
 		if(m_pEditor->DoButton_Editor(&s_GameTilesButton, "Game tiles", 0, &Button, 0, "Constructs game tiles from this layer"))
-			m_pEditor->PopupSelectGametileOpInvoke(m_pEditor->UI()->MouseX(), m_pEditor->UI()->MouseY());
+			m_pEditor->PopupSelectGametileOpInvoke(m_pEditor->Ui()->MouseX(), m_pEditor->Ui()->MouseY());
 		int Result = m_pEditor->PopupSelectGameTileOpResult();
 		switch(Result)
 		{
@@ -938,7 +938,7 @@ CUI::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 				// record undo
 				m_pEditor->m_EditorHistory.RecordAction(std::make_shared<CEditorActionTileChanges>(m_pEditor, m_pEditor->m_SelectedGroup, m_pEditor->m_vSelectedLayers[0], "Auto map", m_TilesHistory));
 				ClearHistory();
-				return CUI::POPUP_CLOSE_CURRENT;
+				return CUi::POPUP_CLOSE_CURRENT;
 			}
 		}
 	}
@@ -1086,10 +1086,10 @@ CUI::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 	// Since we may also squeeze a tile changes action, we want both to appear as one, thus using a bulk
 	m_pEditor->m_EditorHistory.EndBulk(0);
 
-	return CUI::POPUP_KEEP_OPEN;
+	return CUi::POPUP_KEEP_OPEN;
 }
 
-CUI::EPopupMenuFunctionResult CLayerTiles::RenderCommonProperties(SCommonPropState &State, CEditor *pEditor, CUIRect *pToolbox, std::vector<std::shared_ptr<CLayerTiles>> &vpLayers, std::vector<int> &vLayerIndices)
+CUi::EPopupMenuFunctionResult CLayerTiles::RenderCommonProperties(SCommonPropState &State, CEditor *pEditor, CUIRect *pToolbox, std::vector<std::shared_ptr<CLayerTiles>> &vpLayers, std::vector<int> &vLayerIndices)
 {
 	if(State.m_Modified)
 	{
@@ -1190,7 +1190,7 @@ CUI::EPopupMenuFunctionResult CLayerTiles::RenderCommonProperties(SCommonPropSta
 		pEditor->TextRender()->TextColor(ColorRGBA(1.0f, 0.0f, 0.0f, 1.0f));
 		SLabelProperties Props;
 		Props.m_MaxWidth = Warning.w;
-		pEditor->UI()->DoLabel(&Warning, "Editing multiple layers", 9.0f, TEXTALIGN_ML, Props);
+		pEditor->Ui()->DoLabel(&Warning, "Editing multiple layers", 9.0f, TEXTALIGN_ML, Props);
 		pEditor->TextRender()->TextColor(ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f));
 		pToolbox->HSplitTop(2.0f, nullptr, pToolbox);
 	}
@@ -1259,7 +1259,7 @@ CUI::EPopupMenuFunctionResult CLayerTiles::RenderCommonProperties(SCommonPropSta
 		State.m_Modified |= SCommonPropState::MODIFIED_COLOR;
 	}
 
-	return CUI::POPUP_KEEP_OPEN;
+	return CUi::POPUP_KEEP_OPEN;
 }
 
 void CLayerTiles::FlagModified(int x, int y, int w, int h)

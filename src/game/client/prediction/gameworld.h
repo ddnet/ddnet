@@ -47,7 +47,7 @@ public:
 	void Tick();
 
 	// DDRace
-	void ReleaseHooked(int ClientID);
+	void ReleaseHooked(int ClientId);
 	std::vector<CCharacter *> IntersectedCharacters(vec2 Pos0, vec2 Pos1, float Radius, const CEntity *pNotThis = nullptr);
 
 	int m_GameTick;
@@ -60,8 +60,8 @@ public:
 	CTeamsCore *Teams() { return &m_Teams; }
 	std::vector<SSwitchers> &Switchers() { return m_Core.m_vSwitchers; }
 	CTuningParams *Tuning();
-	CEntity *GetEntity(int ID, int EntityType);
-	CCharacter *GetCharacterByID(int ID) { return (ID >= 0 && ID < MAX_CLIENTS) ? m_apCharacters[ID] : nullptr; }
+	CEntity *GetEntity(int Id, int EntityType);
+	CCharacter *GetCharacterById(int Id) { return (Id >= 0 && Id < MAX_CLIENTS) ? m_apCharacters[Id] : nullptr; }
 
 	// from gamecontext
 	void CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamage, int ActivatedTeam, CClientMask Mask);
@@ -87,16 +87,16 @@ public:
 	CGameWorld *m_pParent;
 	CGameWorld *m_pChild;
 
-	int m_LocalClientID;
+	int m_LocalClientId;
 
-	bool IsLocalTeam(int OwnerID) const;
+	bool IsLocalTeam(int OwnerId) const;
 	void OnModified() const;
-	void NetObjBegin(CTeamsCore Teams, int LocalClientID);
-	void NetCharAdd(int ObjID, CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended, int GameTeam, bool IsLocal);
-	void NetObjAdd(int ObjID, int ObjType, const void *pObjData, const CNetObj_EntityEx *pDataEx);
+	void NetObjBegin(CTeamsCore Teams, int LocalClientId);
+	void NetCharAdd(int ObjId, CNetObj_Character *pChar, CNetObj_DDNetCharacter *pExtended, int GameTeam, bool IsLocal);
+	void NetObjAdd(int ObjId, int ObjType, const void *pObjData, const CNetObj_EntityEx *pDataEx);
 	void NetObjEnd();
 	void CopyWorld(CGameWorld *pFrom);
-	CEntity *FindMatch(int ObjID, int ObjType, const void *pObjData);
+	CEntity *FindMatch(int ObjId, int ObjType, const void *pObjData);
 	void Clear();
 
 	CTuningParams *m_pTuningList;
@@ -115,31 +115,31 @@ private:
 class CCharOrder
 {
 public:
-	std::list<int> m_IDs; // reverse of the order in the gameworld, since entities will be inserted in reverse
+	std::list<int> m_Ids; // reverse of the order in the gameworld, since entities will be inserted in reverse
 	CCharOrder()
 	{
 		for(int i = 0; i < MAX_CLIENTS; i++)
-			m_IDs.push_back(i);
+			m_Ids.push_back(i);
 	}
 	void GiveStrong(int c)
 	{
 		if(0 <= c && c < MAX_CLIENTS)
 		{
-			m_IDs.remove(c);
-			m_IDs.push_front(c);
+			m_Ids.remove(c);
+			m_Ids.push_front(c);
 		}
 	}
 	void GiveWeak(int c)
 	{
 		if(0 <= c && c < MAX_CLIENTS)
 		{
-			m_IDs.remove(c);
-			m_IDs.push_back(c);
+			m_Ids.remove(c);
+			m_Ids.push_back(c);
 		}
 	}
 	bool HasStrongAgainst(int From, int To)
 	{
-		for(int i : m_IDs)
+		for(int i : m_Ids)
 		{
 			if(i == To)
 				return false;

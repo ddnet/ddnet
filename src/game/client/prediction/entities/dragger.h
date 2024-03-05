@@ -18,7 +18,7 @@ class CDragger : public CEntity
 	void DraggerBeamReset();
 
 public:
-	CDragger(CGameWorld *pGameWorld, int ID, const CLaserData *pData);
+	CDragger(CGameWorld *pGameWorld, int Id, const CLaserData *pData);
 	bool Match(CDragger *pDragger);
 	void Read(const CLaserData *pData);
 	float GetStrength() { return m_Strength; }

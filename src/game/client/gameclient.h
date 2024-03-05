@@ -181,7 +181,7 @@ private:
 
 	CLayers m_Layers;
 	CCollision m_Collision;
-	CUI m_UI;
+	CUi m_UI;
 
 	void ProcessEvents();
 	void UpdatePositions();
@@ -222,14 +222,14 @@ private:
 	// only used in OnNewSnapshot
 	bool m_GameOver = false;
 	bool m_GamePaused = false;
-	int m_PrevLocalID = -1;
+	int m_PrevLocalId = -1;
 
 public:
 	IKernel *Kernel() { return IInterface::Kernel(); }
 	IEngine *Engine() const { return m_pEngine; }
 	class IGraphics *Graphics() const { return m_pGraphics; }
 	class IClient *Client() const { return m_pClient; }
-	class CUI *UI() { return &m_UI; }
+	class CUi *Ui() { return &m_UI; }
 	class ISound *Sound() const { return m_pSound; }
 	class IInput *Input() const { return m_pInput; }
 	class IStorage *Storage() const { return m_pStorage; }
@@ -281,7 +281,7 @@ public:
 	int m_ServerMode;
 	CGameInfo m_GameInfo;
 
-	int m_DemoSpecID;
+	int m_DemoSpecId;
 
 	vec2 m_LocalCharacterPos;
 
@@ -300,7 +300,7 @@ public:
 		const CNetObj_Flag *m_apFlags[2];
 		const CNetObj_GameInfo *m_pGameInfoObj;
 		const CNetObj_GameData *m_pGameDataObj;
-		int m_GameDataSnapID;
+		int m_GameDataSnapId;
 
 		const CNetObj_PlayerInfo *m_apPlayerInfos[MAX_CLIENTS];
 		const CNetObj_PlayerInfo *m_apInfoByScore[MAX_CLIENTS];
@@ -308,7 +308,7 @@ public:
 		const CNetObj_PlayerInfo *m_apInfoByDDTeamScore[MAX_CLIENTS];
 		const CNetObj_PlayerInfo *m_apInfoByDDTeamName[MAX_CLIENTS];
 
-		int m_LocalClientID;
+		int m_LocalClientId;
 		int m_NumPlayers;
 		int m_aTeamSize[2];
 
@@ -316,7 +316,7 @@ public:
 		struct CSpectateInfo
 		{
 			bool m_Active;
-			int m_SpectatorID;
+			int m_SpectatorId;
 			bool m_UsePosition;
 			vec2 m_Position;
 		} m_SpecInfo;
@@ -493,7 +493,7 @@ public:
 	virtual void OnGameOver();
 	virtual void OnStartGame();
 	virtual void OnStartRound();
-	virtual void OnFlagGrab(int TeamID);
+	virtual void OnFlagGrab(int TeamId);
 	void OnWindowResize() override;
 
 	bool m_LanguageChanged = false;
@@ -515,13 +515,13 @@ public:
 	void SendSwitchTeam(int Team);
 	void SendInfo(bool Start);
 	void SendDummyInfo(bool Start) override;
-	void SendKill(int ClientID) const;
+	void SendKill(int ClientId) const;
 
 	int m_NextChangeInfo;
 
 	// DDRace
 
-	int m_aLocalIDs[NUM_DUMMIES];
+	int m_aLocalIds[NUM_DUMMIES];
 	CNetObj_PlayerInput m_DummyInput;
 	CNetObj_PlayerInput m_HammerInput;
 	unsigned int m_DummyFire;
@@ -529,7 +529,7 @@ public:
 
 	class CTeamsCore m_Teams;
 
-	int IntersectCharacter(vec2 HookPos, vec2 NewPos, vec2 &NewPos2, int ownID);
+	int IntersectCharacter(vec2 HookPos, vec2 NewPos, vec2 &NewPos2, int ownId);
 
 	int GetLastRaceTick() const override;
 
@@ -540,7 +540,7 @@ public:
 	bool AntiPingWeapons() { return g_Config.m_ClAntiPing && g_Config.m_ClAntiPingWeapons && !m_Snap.m_SpecInfo.m_Active && Client()->State() != IClient::STATE_DEMOPLAYBACK; }
 	bool AntiPingGunfire() { return AntiPingGrenade() && AntiPingWeapons() && g_Config.m_ClAntiPingGunfire; }
 	bool Predict() const;
-	bool PredictDummy() { return g_Config.m_ClPredictDummy && Client()->DummyConnected() && m_Snap.m_LocalClientID >= 0 && m_PredictedDummyID >= 0 && !m_aClients[m_PredictedDummyID].m_Paused; }
+	bool PredictDummy() { return g_Config.m_ClPredictDummy && Client()->DummyConnected() && m_Snap.m_LocalClientId >= 0 && m_PredictedDummyId >= 0 && !m_aClients[m_PredictedDummyId].m_Paused; }
 	const CTuningParams *GetTuning(int i) { return &m_aTuningList[i]; }
 	ColorRGBA GetDDTeamColor(int DDTeam, float Lightness = 0.5f) const;
 
@@ -553,7 +553,7 @@ public:
 
 	void DummyResetInput() override;
 	void Echo(const char *pString) override;
-	bool IsOtherTeam(int ClientID) const;
+	bool IsOtherTeam(int ClientId) const;
 	int SwitchStateTeam() const;
 	bool IsLocalCharSuper() const;
 	bool CanDisplayWarning() const override;
@@ -734,7 +734,7 @@ public:
 
 	void ResetMultiView();
 	int FindFirstMultiViewId();
-	void CleanMultiViewId(int ClientID);
+	void CleanMultiViewId(int ClientId);
 
 private:
 	std::vector<CSnapEntities> m_vSnapEntities;
@@ -749,9 +749,9 @@ private:
 	int m_aLastUpdateTick[MAX_CLIENTS] = {0};
 	void DetectStrongHook();
 
-	vec2 GetSmoothPos(int ClientID);
+	vec2 GetSmoothPos(int ClientId);
 
-	int m_PredictedDummyID;
+	int m_PredictedDummyId;
 	int m_IsDummySwapping;
 	CCharOrder m_CharOrder;
 	int m_aSwitchStateTeam[NUM_DUMMIES];

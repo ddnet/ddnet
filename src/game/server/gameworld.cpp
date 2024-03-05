@@ -163,7 +163,7 @@ void CGameWorld::RemoveEntitiesFromPlayers(int PlayerIds[], int NumPlayers)
 			m_pNextTraverseEntity = pEnt->m_pNextTypeEntity;
 			for(int i = 0; i < NumPlayers; i++)
 			{
-				if(pEnt->GetOwnerID() == PlayerIds[i])
+				if(pEnt->GetOwnerId() == PlayerIds[i])
 				{
 					RemoveEntity(pEnt);
 					pEnt->Destroy();
@@ -249,11 +249,11 @@ void CGameWorld::Tick()
 	RemoveEntities();
 
 	// find the characters' strong/weak id
-	int StrongWeakID = 0;
+	int StrongWeakId = 0;
 	for(CCharacter *pChar = (CCharacter *)FindFirst(ENTTYPE_CHARACTER); pChar; pChar = (CCharacter *)pChar->TypeNext())
 	{
-		pChar->m_StrongWeakID = StrongWeakID;
-		StrongWeakID++;
+		pChar->m_StrongWeakId = StrongWeakId;
+		StrongWeakId++;
 	}
 }
 
@@ -356,12 +356,12 @@ std::vector<CCharacter *> CGameWorld::IntersectedCharacters(vec2 Pos0, vec2 Pos1
 	return vpCharacters;
 }
 
-void CGameWorld::ReleaseHooked(int ClientID)
+void CGameWorld::ReleaseHooked(int ClientId)
 {
 	CCharacter *pChr = (CCharacter *)CGameWorld::FindFirst(CGameWorld::ENTTYPE_CHARACTER);
 	for(; pChr; pChr = (CCharacter *)pChr->TypeNext())
 	{
-		if(pChr->Core()->HookedPlayer() == ClientID && !pChr->IsSuper())
+		if(pChr->Core()->HookedPlayer() == ClientId && !pChr->IsSuper())
 		{
 			pChr->ReleaseHook();
 		}

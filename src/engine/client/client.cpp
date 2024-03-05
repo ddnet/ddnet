@@ -98,14 +98,14 @@ CClient::CClient() :
 static inline bool RepackMsg(const CMsgPacker *pMsg, CPacker &Packer)
 {
 	Packer.Reset();
-	if(pMsg->m_MsgID < OFFSET_UUID)
+	if(pMsg->m_MsgId < OFFSET_UUID)
 	{
-		Packer.AddInt((pMsg->m_MsgID << 1) | (pMsg->m_System ? 1 : 0));
+		Packer.AddInt((pMsg->m_MsgId << 1) | (pMsg->m_System ? 1 : 0));
 	}
 	else
 	{
 		Packer.AddInt(pMsg->m_System ? 1 : 0); // NETMSG_EX, NETMSGTYPE_EX
-		g_UuidManager.PackUuid(pMsg->m_MsgID, &Packer);
+		g_UuidManager.PackUuid(pMsg->m_MsgId, &Packer);
 	}
 	Packer.AddRaw(pMsg->Data(), pMsg->Size());
 
@@ -125,7 +125,7 @@ int CClient::SendMsg(int Conn, CMsgPacker *pMsg, int Flags)
 		return 0;
 
 	mem_zero(&Packet, sizeof(CNetChunk));
-	Packet.m_ClientID = 0;
+	Packet.m_ClientId = 0;
 	Packet.m_pData = Pack.Data();
 	Packet.m_DataSize = Pack.Size();
 
@@ -157,7 +157,7 @@ int CClient::SendMsgActive(CMsgPacker *pMsg, int Flags)
 void CClient::SendInfo(int Conn)
 {
 	CMsgPacker MsgVer(NETMSG_CLIENTVER, true);
-	MsgVer.AddRaw(&m_ConnectionID, sizeof(m_ConnectionID));
+	MsgVer.AddRaw(&m_ConnectionId, sizeof(m_ConnectionId));
 	MsgVer.AddInt(GameClient()->DDNetVersion());
 	MsgVer.AddString(GameClient()->DDNetVersionStr());
 	SendMsg(Conn, &MsgVer, MSGFLAG_VITAL);
@@ -445,7 +445,7 @@ void CClient::Connect(const char *pAddress, const char *pPassword)
 	Disconnect();
 	dbg_assert(m_State == IClient::STATE_OFFLINE, "Disconnect must ensure that client is offline");
 
-	m_ConnectionID = RandomUuid();
+	m_ConnectionId = RandomUuid();
 	if(pAddress != m_aConnectAddressStr)
 		str_copy(m_aConnectAddressStr, pAddress);
 
@@ -676,37 +676,37 @@ void CClient::LoadDebugFont()
 
 // ---
 
-void *CClient::SnapGetItem(int SnapID, int Index, CSnapItem *pItem) const
+void *CClient::SnapGetItem(int SnapId, int Index, CSnapItem *pItem) const
 {
-	dbg_assert(SnapID >= 0 && SnapID < NUM_SNAPSHOT_TYPES, "invalid SnapID");
-	const CSnapshot *pSnapshot = m_aapSnapshots[g_Config.m_ClDummy][SnapID]->m_pAltSnap;
+	dbg_assert(SnapId >= 0 && SnapId < NUM_SNAPSHOT_TYPES, "invalid SnapId");
+	const CSnapshot *pSnapshot = m_aapSnapshots[g_Config.m_ClDummy][SnapId]->m_pAltSnap;
 	const CSnapshotItem *pSnapshotItem = pSnapshot->GetItem(Index);
 	pItem->m_DataSize = pSnapshot->GetItemSize(Index);
 	pItem->m_Type = pSnapshot->GetItemType(Index);
-	pItem->m_ID = pSnapshotItem->ID();
+	pItem->m_Id = pSnapshotItem->Id();
 	return (void *)pSnapshotItem->Data();
 }
 
-int CClient::SnapItemSize(int SnapID, int Index) const
+int CClient::SnapItemSize(int SnapId, int Index) const
 {
-	dbg_assert(SnapID >= 0 && SnapID < NUM_SNAPSHOT_TYPES, "invalid SnapID");
-	return m_aapSnapshots[g_Config.m_ClDummy][SnapID]->m_pAltSnap->GetItemSize(Index);
+	dbg_assert(SnapId >= 0 && SnapId < NUM_SNAPSHOT_TYPES, "invalid SnapId");
+	return m_aapSnapshots[g_Config.m_ClDummy][SnapId]->m_pAltSnap->GetItemSize(Index);
 }
 
-const void *CClient::SnapFindItem(int SnapID, int Type, int ID) const
+const void *CClient::SnapFindItem(int SnapId, int Type, int Id) const
 {
-	if(!m_aapSnapshots[g_Config.m_ClDummy][SnapID])
+	if(!m_aapSnapshots[g_Config.m_ClDummy][SnapId])
 		return nullptr;
 
-	return m_aapSnapshots[g_Config.m_ClDummy][SnapID]->m_pAltSnap->FindItem(Type, ID);
+	return m_aapSnapshots[g_Config.m_ClDummy][SnapId]->m_pAltSnap->FindItem(Type, Id);
 }
 
-int CClient::SnapNumItems(int SnapID) const
+int CClient::SnapNumItems(int SnapId) const
 {
-	dbg_assert(SnapID >= 0 && SnapID < NUM_SNAPSHOT_TYPES, "invalid SnapID");
-	if(!m_aapSnapshots[g_Config.m_ClDummy][SnapID])
+	dbg_assert(SnapId >= 0 && SnapId < NUM_SNAPSHOT_TYPES, "invalid SnapId");
+	if(!m_aapSnapshots[g_Config.m_ClDummy][SnapId])
 		return 0;
-	return m_aapSnapshots[g_Config.m_ClDummy][SnapID]->m_pAltSnap->NumItems();
+	return m_aapSnapshots[g_Config.m_ClDummy][SnapId]->m_pAltSnap->NumItems();
 }
 
 void CClient::SnapSetStaticsize(int ItemType, int Size)
@@ -1306,7 +1306,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 	bool Sys;
 	CUuid Uuid;
 
-	int Result = UnpackMessageID(&Msg, &Sys, &Uuid, &Unpacker, &Packer);
+	int Result = UnpackMessageId(&Msg, &Sys, &Uuid, &Unpacker, &Packer);
 	if(Result == UNPACKMESSAGE_ERROR)
 	{
 		return;
@@ -1513,24 +1513,24 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 		}
 		else if(Msg == NETMSG_PINGEX)
 		{
-			CUuid *pID = (CUuid *)Unpacker.GetRaw(sizeof(*pID));
+			CUuid *pId = (CUuid *)Unpacker.GetRaw(sizeof(*pId));
 			if(Unpacker.Error())
 			{
 				return;
 			}
 			CMsgPacker MsgP(NETMSG_PONGEX, true);
-			MsgP.AddRaw(pID, sizeof(*pID));
+			MsgP.AddRaw(pId, sizeof(*pId));
 			int Vital = (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 ? MSGFLAG_VITAL : 0;
 			SendMsg(Conn, &MsgP, MSGFLAG_FLUSH | Vital);
 		}
 		else if(Conn == CONN_MAIN && Msg == NETMSG_PONGEX)
 		{
-			CUuid *pID = (CUuid *)Unpacker.GetRaw(sizeof(*pID));
+			CUuid *pId = (CUuid *)Unpacker.GetRaw(sizeof(*pId));
 			if(Unpacker.Error())
 			{
 				return;
 			}
-			if(m_ServerCapabilities.m_PingEx && m_CurrentServerCurrentPingTime >= 0 && *pID == m_CurrentServerPingUuid)
+			if(m_ServerCapabilities.m_PingEx && m_CurrentServerCurrentPingTime >= 0 && *pId == m_CurrentServerPingUuid)
 			{
 				int LatencyMs = (time_get() - m_CurrentServerCurrentPingTime) * 1000 / time_freq();
 				m_ServerBrowser.SetCurrentServerPing(ServerAddress(), LatencyMs);
@@ -1565,10 +1565,10 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 				return;
 			}
 			char aAddr[128];
-			char aIP[64];
+			char aIp[64];
 			NETADDR ServerAddr = ServerAddress();
-			net_addr_str(&ServerAddr, aIP, sizeof(aIP), 0);
-			str_format(aAddr, sizeof(aAddr), "%s:%d", aIP, RedirectPort);
+			net_addr_str(&ServerAddr, aIp, sizeof(aIp), 0);
+			str_format(aAddr, sizeof(aAddr), "%s:%d", aIp, RedirectPort);
 			Connect(aAddr);
 		}
 		else if(Conn == CONN_MAIN && (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_RCON_CMD_ADD)
@@ -1995,7 +1995,7 @@ int CClient::UnpackAndValidateSnapshot(CSnapshot *pFrom, CSnapshot *pTo)
 		}
 		const int ItemSize = pNetObjHandler->GetUnpackedObjSize(ItemType);
 
-		void *pObj = Builder.NewItem(pFromItem->Type(), pFromItem->ID(), ItemSize);
+		void *pObj = Builder.NewItem(pFromItem->Type(), pFromItem->Id(), ItemSize);
 		if(!pObj)
 			return -4;
 
@@ -2279,7 +2279,7 @@ void CClient::PumpNetwork()
 	{
 		while(m_aNetClient[i].Recv(&Packet))
 		{
-			if(Packet.m_ClientID == -1)
+			if(Packet.m_ClientId == -1)
 			{
 				ProcessConnlessPacket(&Packet);
 				continue;
@@ -2329,7 +2329,7 @@ void CClient::OnDemoPlayerMessage(void *pData, int Size)
 	bool Sys;
 	CUuid Uuid;
 
-	int Result = UnpackMessageID(&Msg, &Sys, &Uuid, &Unpacker, &Packer);
+	int Result = UnpackMessageId(&Msg, &Sys, &Uuid, &Unpacker, &Packer);
 	if(Result == UNPACKMESSAGE_ERROR)
 	{
 		return;
@@ -4340,8 +4340,8 @@ int main(int argc, const char **argv)
 		char aVersionStr[128];
 		if(!os_version_str(aVersionStr, sizeof(aVersionStr)))
 			str_copy(aVersionStr, "unknown");
-		char aGPUInfo[256];
-		pClient->GetGPUInfoString(aGPUInfo);
+		char aGpuInfo[256];
+		pClient->GetGpuInfoString(aGpuInfo);
 		char aMessage[768];
 		str_format(aMessage, sizeof(aMessage),
 			"An assertion error occurred. Please write down or take a screenshot of the following information and report this error.\n"
@@ -4352,7 +4352,7 @@ int main(int argc, const char **argv)
 			"OS version: %s\n\n"
 			"%s", // GPU info
 			pMsg, CONF_PLATFORM_STRING, GAME_RELEASE_VERSION, GIT_SHORTREV_HASH != nullptr ? GIT_SHORTREV_HASH : "", aVersionStr,
-			aGPUInfo);
+			aGpuInfo);
 		pClient->ShowMessageBox("Assertion Error", aMessage);
 		// Client will crash due to assertion, don't call PerformAllCleanup in this inconsistent state
 	});
@@ -4768,15 +4768,15 @@ void CClient::ShowMessageBox(const char *pTitle, const char *pMessage, EMessageB
 		::ShowMessageBox(pTitle, pMessage, Type);
 }
 
-void CClient::GetGPUInfoString(char (&aGPUInfo)[256])
+void CClient::GetGpuInfoString(char (&aGpuInfo)[256])
 {
 	if(m_pGraphics != nullptr && m_pGraphics->IsBackendInitialized())
 	{
-		str_format(aGPUInfo, std::size(aGPUInfo), "GPU: %s - %s - %s", m_pGraphics->GetVendorString(), m_pGraphics->GetRendererString(), m_pGraphics->GetVersionString());
+		str_format(aGpuInfo, std::size(aGpuInfo), "GPU: %s - %s - %s", m_pGraphics->GetVendorString(), m_pGraphics->GetRendererString(), m_pGraphics->GetVersionString());
 	}
 	else
 	{
-		str_copy(aGPUInfo, "Graphics backend was not yet initialized.");
+		str_copy(aGpuInfo, "Graphics backend was not yet initialized.");
 	}
 }
 

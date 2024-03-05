@@ -12,7 +12,7 @@ class IConfigManager;
 
 class CBinds : public CComponent
 {
-	int GetKeyID(const char *pKeyName);
+	int GetKeyId(const char *pKeyName);
 
 	static void ConBind(IConsole::IResult *pResult, void *pUserData);
 	static void ConBinds(IConsole::IResult *pResult, void *pUserData);
@@ -50,10 +50,10 @@ public:
 
 	CBindsSpecial m_SpecialBinds;
 
-	void Bind(int KeyID, const char *pStr, bool FreeOnly = false, int ModifierCombination = MODIFIER_NONE);
+	void Bind(int KeyId, const char *pStr, bool FreeOnly = false, int ModifierCombination = MODIFIER_NONE);
 	void SetDefaults();
 	void UnbindAll();
-	const char *Get(int KeyID, int ModifierCombination);
+	const char *Get(int KeyId, int ModifierCombination);
 	void GetKey(const char *pBindStr, char *pBuf, size_t BufSize);
 	int GetBindSlot(const char *pBindString, int *pModifierCombination);
 	static int GetModifierMask(IInput *pInput);

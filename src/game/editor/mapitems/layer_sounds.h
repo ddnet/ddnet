@@ -17,7 +17,7 @@ public:
 	int BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect) override;
 	void BrushPlace(std::shared_ptr<CLayer> pBrush, float wx, float wy) override;
 
-	CUI::EPopupMenuFunctionResult RenderProperties(CUIRect *pToolbox) override;
+	CUi::EPopupMenuFunctionResult RenderProperties(CUIRect *pToolbox) override;
 
 	void ModifyEnvelopeIndex(FIndexModifyFunction pfnFunc) override;
 	void ModifySoundIndex(FIndexModifyFunction pfnFunc) override;

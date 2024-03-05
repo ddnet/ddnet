@@ -11,7 +11,7 @@
 
 struct CTooltip
 {
-	const void *m_pID;
+	const void *m_pId;
 	CUIRect m_Rect;
 	const char *m_pText;
 	float m_WidthHint;
@@ -47,12 +47,12 @@ public:
 	 * On the first call to this function, the data passed is cached, afterwards the calls are used to detect if the tooltip should be activated.
 	 * If multiple tooltips cover the same rect or the rects intersect, then the tooltip that is added later has priority.
 	 *
-	 * @param pID The ID of the tooltip. Usually a reference to some g_Config value.
+	 * @param pId The ID of the tooltip. Usually a reference to some g_Config value.
 	 * @param pNearRect Place the tooltip near this rect.
 	 * @param pText The text to display in the tooltip.
 	 * @param WidthHint The maximum width of the tooltip, or -1.0f for unlimited.
 	 */
-	void DoToolTip(const void *pID, const CUIRect *pNearRect, const char *pText, float WidthHint = -1.0f);
+	void DoToolTip(const void *pId, const CUIRect *pNearRect, const char *pText, float WidthHint = -1.0f);
 
 	virtual void OnReset() override;
 	virtual void OnRender() override;

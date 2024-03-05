@@ -14,7 +14,7 @@
 
 void CGLSLProgram::CreateProgram()
 {
-	m_ProgramID = glCreateProgram();
+	m_ProgramId = glCreateProgram();
 }
 
 void CGLSLProgram::DeleteProgram()
@@ -22,14 +22,14 @@ void CGLSLProgram::DeleteProgram()
 	if(!m_IsLinked)
 		return;
 	m_IsLinked = false;
-	glDeleteProgram(m_ProgramID);
+	glDeleteProgram(m_ProgramId);
 }
 
 bool CGLSLProgram::AddShader(CGLSL *pShader) const
 {
 	if(pShader->IsLoaded())
 	{
-		glAttachShader(m_ProgramID, pShader->GetShaderID());
+		glAttachShader(m_ProgramId, pShader->GetShaderId());
 		return true;
 	}
 	return false;
@@ -39,27 +39,27 @@ void CGLSLProgram::DetachShader(CGLSL *pShader) const
 {
 	if(pShader->IsLoaded())
 	{
-		DetachShaderByID(pShader->GetShaderID());
+		DetachShaderById(pShader->GetShaderId());
 	}
 }
 
-void CGLSLProgram::DetachShaderByID(TWGLuint ShaderID) const
+void CGLSLProgram::DetachShaderById(TWGLuint ShaderId) const
 {
-	glDetachShader(m_ProgramID, ShaderID);
+	glDetachShader(m_ProgramId, ShaderId);
 }
 
 void CGLSLProgram::LinkProgram()
 {
-	glLinkProgram(m_ProgramID);
+	glLinkProgram(m_ProgramId);
 	int LinkStatus;
-	glGetProgramiv(m_ProgramID, GL_LINK_STATUS, &LinkStatus);
+	glGetProgramiv(m_ProgramId, GL_LINK_STATUS, &LinkStatus);
 	m_IsLinked = LinkStatus == GL_TRUE;
 	if(!m_IsLinked)
 	{
 		char aInfoLog[1024];
 		char aFinalMessage[1536];
 		int iLogLength;
-		glGetProgramInfoLog(m_ProgramID, 1024, &iLogLength, aInfoLog);
+		glGetProgramInfoLog(m_ProgramId, 1024, &iLogLength, aInfoLog);
 		str_format(aFinalMessage, sizeof(aFinalMessage), "Error! Shader program wasn't linked! The linker returned:\n\n%s", aInfoLog);
 		dbg_msg("glslprogram", "%s", aFinalMessage);
 	}
@@ -74,13 +74,13 @@ void CGLSLProgram::DetachAllShaders() const
 	GLsizei ReturnedCount = 0;
 	while(true)
 	{
-		glGetAttachedShaders(m_ProgramID, 100, &ReturnedCount, aShaders);
+		glGetAttachedShaders(m_ProgramId, 100, &ReturnedCount, aShaders);
 
 		if(ReturnedCount > 0)
 		{
 			for(GLsizei i = 0; i < ReturnedCount; ++i)
 			{
-				DetachShaderByID(aShaders[i]);
+				DetachShaderById(aShaders[i]);
 			}
 		}
 
@@ -121,18 +121,18 @@ void CGLSLProgram::SetUniform(int Loc, const bool Value)
 
 int CGLSLProgram::GetUniformLoc(const char *pName) const
 {
-	return glGetUniformLocation(m_ProgramID, pName);
+	return glGetUniformLocation(m_ProgramId, pName);
 }
 
 void CGLSLProgram::UseProgram() const
 {
 	if(m_IsLinked)
-		glUseProgram(m_ProgramID);
+		glUseProgram(m_ProgramId);
 }
 
-TWGLuint CGLSLProgram::GetProgramID() const
+TWGLuint CGLSLProgram::GetProgramId() const
 {
-	return m_ProgramID;
+	return m_ProgramId;
 }
 
 CGLSLProgram::CGLSLProgram()

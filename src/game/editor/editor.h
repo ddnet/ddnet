@@ -274,7 +274,7 @@ class CEditor : public IEditor
 	class ISound *m_pSound = nullptr;
 	class IStorage *m_pStorage = nullptr;
 	CRenderTools m_RenderTools;
-	CUI m_UI;
+	CUi m_UI;
 
 	std::vector<std::reference_wrapper<CEditorComponent>> m_vComponents;
 	CMapView m_MapView;
@@ -313,7 +313,7 @@ public:
 	class ISound *Sound() const { return m_pSound; }
 	class ITextRender *TextRender() const { return m_pTextRender; }
 	class IStorage *Storage() const { return m_pStorage; }
-	CUI *UI() { return &m_UI; }
+	CUi *Ui() { return &m_UI; }
 	CRenderTools *RenderTools() { return &m_RenderTools; }
 
 	CMapView *MapView() { return &m_MapView; }
@@ -482,7 +482,7 @@ public:
 			return str_comp(pLhs, pRhs) < 0;
 		}
 	};
-	std::map<const char *, CUI::SMessagePopupContext *, SStringKeyComparator> m_PopupMessageContexts;
+	std::map<const char *, CUi::SMessagePopupContext *, SStringKeyComparator> m_PopupMessageContexts;
 	void ShowFileDialogError(const char *pFormat, ...)
 		GNUC_ATTRIBUTE((format(printf, 2, 3)));
 
@@ -536,12 +536,12 @@ public:
 	std::pair<int, int> EnvGetSelectedTimeAndValue() const;
 
 	template<typename E>
-	SEditResult<E> DoPropertiesWithState(CUIRect *pToolbox, CProperty *pProps, int *pIDs, int *pNewVal, const std::vector<ColorRGBA> &vColors = {});
-	int DoProperties(CUIRect *pToolbox, CProperty *pProps, int *pIDs, int *pNewVal, const std::vector<ColorRGBA> &vColors = {});
+	SEditResult<E> DoPropertiesWithState(CUIRect *pToolbox, CProperty *pProps, int *pIds, int *pNewVal, const std::vector<ColorRGBA> &vColors = {});
+	int DoProperties(CUIRect *pToolbox, CProperty *pProps, int *pIds, int *pNewVal, const std::vector<ColorRGBA> &vColors = {});
 
-	CUI::SColorPickerPopupContext m_ColorPickerPopupContext;
-	const void *m_pColorPickerPopupActiveID = nullptr;
-	void DoColorPickerButton(const void *pID, const CUIRect *pRect, ColorRGBA Color, const std::function<void(ColorRGBA Color)> &SetColor);
+	CUi::SColorPickerPopupContext m_ColorPickerPopupContext;
+	const void *m_pColorPickerPopupActiveId = nullptr;
+	void DoColorPickerButton(const void *pId, const CUIRect *pRect, ColorRGBA Color, const std::function<void(ColorRGBA Color)> &SetColor);
 
 	int m_Mode;
 	int m_Dialog;
@@ -822,16 +822,16 @@ public:
 
 	void PlaceBorderTiles();
 
-	void UpdateTooltip(const void *pID, const CUIRect *pRect, const char *pToolTip);
-	int DoButton_Editor_Common(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip);
-	int DoButton_Editor(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip);
-	int DoButton_Env(const void *pID, const char *pText, int Checked, const CUIRect *pRect, const char *pToolTip, ColorRGBA Color, int Corners);
+	void UpdateTooltip(const void *pId, const CUIRect *pRect, const char *pToolTip);
+	int DoButton_Editor_Common(const void *pId, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip);
+	int DoButton_Editor(const void *pId, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip);
+	int DoButton_Env(const void *pId, const char *pText, int Checked, const CUIRect *pRect, const char *pToolTip, ColorRGBA Color, int Corners);
 
-	int DoButton_Ex(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip, int Corners, float FontSize = EditorFontSizes::MENU, int Align = TEXTALIGN_MC);
-	int DoButton_FontIcon(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip, int Corners, float FontSize = 10.0f);
-	int DoButton_MenuItem(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags = 0, const char *pToolTip = nullptr);
+	int DoButton_Ex(const void *pId, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip, int Corners, float FontSize = EditorFontSizes::MENU, int Align = TEXTALIGN_MC);
+	int DoButton_FontIcon(const void *pId, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip, int Corners, float FontSize = 10.0f);
+	int DoButton_MenuItem(const void *pId, const char *pText, int Checked, const CUIRect *pRect, int Flags = 0, const char *pToolTip = nullptr);
 
-	int DoButton_DraggableEx(const void *pID, const char *pText, int Checked, const CUIRect *pRect, bool *pClicked, bool *pAbrupted, int Flags, const char *pToolTip = nullptr, int Corners = IGraphics::CORNER_ALL, float FontSize = 10.0f);
+	int DoButton_DraggableEx(const void *pId, const char *pText, int Checked, const CUIRect *pRect, bool *pClicked, bool *pAbrupted, int Flags, const char *pToolTip = nullptr, int Corners = IGraphics::CORNER_ALL, float FontSize = 10.0f);
 
 	bool DoEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize, int Corners = IGraphics::CORNER_ALL, const char *pToolTip = nullptr, const std::vector<STextColorSplit> &vColorSplits = {});
 	bool DoClearableEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize, int Corners = IGraphics::CORNER_ALL, const char *pToolTip = nullptr, const std::vector<STextColorSplit> &vColorSplits = {});
@@ -845,12 +845,12 @@ public:
 
 	void RenderBackground(CUIRect View, IGraphics::CTextureHandle Texture, float Size, float Brightness) const;
 
-	SEditResult<int> UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, int Current, int Min, int Max, int Step, float Scale, const char *pToolTip, bool IsDegree = false, bool IsHex = false, int corners = IGraphics::CORNER_ALL, const ColorRGBA *pColor = nullptr, bool ShowValue = true);
+	SEditResult<int> UiDoValueSelector(void *pId, CUIRect *pRect, const char *pLabel, int Current, int Min, int Max, int Step, float Scale, const char *pToolTip, bool IsDegree = false, bool IsHex = false, int corners = IGraphics::CORNER_ALL, const ColorRGBA *pColor = nullptr, bool ShowValue = true);
 
-	static CUI::EPopupMenuFunctionResult PopupMenuFile(void *pContext, CUIRect View, bool Active);
-	static CUI::EPopupMenuFunctionResult PopupMenuTools(void *pContext, CUIRect View, bool Active);
-	static CUI::EPopupMenuFunctionResult PopupMenuSettings(void *pContext, CUIRect View, bool Active);
-	static CUI::EPopupMenuFunctionResult PopupGroup(void *pContext, CUIRect View, bool Active);
+	static CUi::EPopupMenuFunctionResult PopupMenuFile(void *pContext, CUIRect View, bool Active);
+	static CUi::EPopupMenuFunctionResult PopupMenuTools(void *pContext, CUIRect View, bool Active);
+	static CUi::EPopupMenuFunctionResult PopupMenuSettings(void *pContext, CUIRect View, bool Active);
+	static CUi::EPopupMenuFunctionResult PopupGroup(void *pContext, CUIRect View, bool Active);
 	struct SLayerPopupContext : public SPopupMenuId
 	{
 		CEditor *m_pEditor;
@@ -858,30 +858,30 @@ public:
 		std::vector<int> m_vLayerIndices;
 		CLayerTiles::SCommonPropState m_CommonPropState;
 	};
-	static CUI::EPopupMenuFunctionResult PopupLayer(void *pContext, CUIRect View, bool Active);
-	static CUI::EPopupMenuFunctionResult PopupQuad(void *pContext, CUIRect View, bool Active);
-	static CUI::EPopupMenuFunctionResult PopupSource(void *pContext, CUIRect View, bool Active);
-	static CUI::EPopupMenuFunctionResult PopupPoint(void *pContext, CUIRect View, bool Active);
-	static CUI::EPopupMenuFunctionResult PopupEnvPoint(void *pContext, CUIRect View, bool Active);
-	static CUI::EPopupMenuFunctionResult PopupEnvPointMulti(void *pContext, CUIRect View, bool Active);
-	static CUI::EPopupMenuFunctionResult PopupEnvPointCurveType(void *pContext, CUIRect View, bool Active);
-	static CUI::EPopupMenuFunctionResult PopupImage(void *pContext, CUIRect View, bool Active);
-	static CUI::EPopupMenuFunctionResult PopupSound(void *pContext, CUIRect View, bool Active);
-	static CUI::EPopupMenuFunctionResult PopupNewFolder(void *pContext, CUIRect View, bool Active);
-	static CUI::EPopupMenuFunctionResult PopupMapInfo(void *pContext, CUIRect View, bool Active);
-	static CUI::EPopupMenuFunctionResult PopupEvent(void *pContext, CUIRect View, bool Active);
-	static CUI::EPopupMenuFunctionResult PopupSelectImage(void *pContext, CUIRect View, bool Active);
-	static CUI::EPopupMenuFunctionResult PopupSelectSound(void *pContext, CUIRect View, bool Active);
-	static CUI::EPopupMenuFunctionResult PopupSelectGametileOp(void *pContext, CUIRect View, bool Active);
-	static CUI::EPopupMenuFunctionResult PopupSelectConfigAutoMap(void *pContext, CUIRect View, bool Active);
-	static CUI::EPopupMenuFunctionResult PopupTele(void *pContext, CUIRect View, bool Active);
-	static CUI::EPopupMenuFunctionResult PopupSpeedup(void *pContext, CUIRect View, bool Active);
-	static CUI::EPopupMenuFunctionResult PopupSwitch(void *pContext, CUIRect View, bool Active);
-	static CUI::EPopupMenuFunctionResult PopupTune(void *pContext, CUIRect View, bool Active);
-	static CUI::EPopupMenuFunctionResult PopupGoto(void *pContext, CUIRect View, bool Active);
-	static CUI::EPopupMenuFunctionResult PopupEntities(void *pContext, CUIRect View, bool Active);
-	static CUI::EPopupMenuFunctionResult PopupProofMode(void *pContext, CUIRect View, bool Active);
-	static CUI::EPopupMenuFunctionResult PopupAnimateSettings(void *pContext, CUIRect View, bool Active);
+	static CUi::EPopupMenuFunctionResult PopupLayer(void *pContext, CUIRect View, bool Active);
+	static CUi::EPopupMenuFunctionResult PopupQuad(void *pContext, CUIRect View, bool Active);
+	static CUi::EPopupMenuFunctionResult PopupSource(void *pContext, CUIRect View, bool Active);
+	static CUi::EPopupMenuFunctionResult PopupPoint(void *pContext, CUIRect View, bool Active);
+	static CUi::EPopupMenuFunctionResult PopupEnvPoint(void *pContext, CUIRect View, bool Active);
+	static CUi::EPopupMenuFunctionResult PopupEnvPointMulti(void *pContext, CUIRect View, bool Active);
+	static CUi::EPopupMenuFunctionResult PopupEnvPointCurveType(void *pContext, CUIRect View, bool Active);
+	static CUi::EPopupMenuFunctionResult PopupImage(void *pContext, CUIRect View, bool Active);
+	static CUi::EPopupMenuFunctionResult PopupSound(void *pContext, CUIRect View, bool Active);
+	static CUi::EPopupMenuFunctionResult PopupNewFolder(void *pContext, CUIRect View, bool Active);
+	static CUi::EPopupMenuFunctionResult PopupMapInfo(void *pContext, CUIRect View, bool Active);
+	static CUi::EPopupMenuFunctionResult PopupEvent(void *pContext, CUIRect View, bool Active);
+	static CUi::EPopupMenuFunctionResult PopupSelectImage(void *pContext, CUIRect View, bool Active);
+	static CUi::EPopupMenuFunctionResult PopupSelectSound(void *pContext, CUIRect View, bool Active);
+	static CUi::EPopupMenuFunctionResult PopupSelectGametileOp(void *pContext, CUIRect View, bool Active);
+	static CUi::EPopupMenuFunctionResult PopupSelectConfigAutoMap(void *pContext, CUIRect View, bool Active);
+	static CUi::EPopupMenuFunctionResult PopupTele(void *pContext, CUIRect View, bool Active);
+	static CUi::EPopupMenuFunctionResult PopupSpeedup(void *pContext, CUIRect View, bool Active);
+	static CUi::EPopupMenuFunctionResult PopupSwitch(void *pContext, CUIRect View, bool Active);
+	static CUi::EPopupMenuFunctionResult PopupTune(void *pContext, CUIRect View, bool Active);
+	static CUi::EPopupMenuFunctionResult PopupGoto(void *pContext, CUIRect View, bool Active);
+	static CUi::EPopupMenuFunctionResult PopupEntities(void *pContext, CUIRect View, bool Active);
+	static CUi::EPopupMenuFunctionResult PopupProofMode(void *pContext, CUIRect View, bool Active);
+	static CUi::EPopupMenuFunctionResult PopupAnimateSettings(void *pContext, CUIRect View, bool Active);
 
 	static bool CallbackOpenMap(const char *pFileName, int StorageType, void *pUser);
 	static bool CallbackAppendMap(const char *pFileName, int StorageType, void *pUser);
@@ -942,7 +942,7 @@ public:
 	EAxis GetDragAxis(int OffsetX, int OffsetY) const;
 	void DrawAxis(EAxis Axis, CPoint &OriginalPoint, CPoint &Point) const;
 	void DrawAABB(const SAxisAlignedBoundingBox &AABB, int OffsetX = 0, int OffsetY = 0) const;
-	ColorRGBA GetButtonColor(const void *pID, int Checked);
+	ColorRGBA GetButtonColor(const void *pId, int Checked);
 
 	// Alignment methods
 	// These methods take `OffsetX` and `OffsetY` because the calculations are made with the original positions
@@ -1015,7 +1015,7 @@ public:
 	void SelectGameLayer();
 	std::vector<int> SortImages();
 
-	void DoAudioPreview(CUIRect View, const void *pPlayPauseButtonID, const void *pStopButtonID, const void *pSeekBarID, const int SampleID);
+	void DoAudioPreview(CUIRect View, const void *pPlayPauseButtonId, const void *pStopButtonId, const void *pSeekBarId, const int SampleId);
 
 	// Tile Numbers For Explanations - TODO: Add/Improve tiles and explanations
 	enum

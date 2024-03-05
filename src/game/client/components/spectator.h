@@ -18,7 +18,7 @@ class CSpectator : public CComponent
 	bool m_WasActive;
 	bool m_Clicked;
 
-	int m_SelectedSpectatorID;
+	int m_SelectedSpectatorId;
 	vec2 m_SelectorMouse;
 
 	float m_OldMouseX;
@@ -47,7 +47,7 @@ public:
 	virtual void OnReset() override;
 	virtual bool OnInput(const IInput::CEvent &Event) override;
 
-	void Spectate(int SpectatorID);
+	void Spectate(int SpectatorId);
 	void SpectateClosest();
 };
 

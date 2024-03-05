@@ -44,7 +44,7 @@ int main(int argc, const char **argv)
 	aBuffer[sizeof(SERVERBROWSE_GETINFO)] = CurToken;
 
 	CNetChunk Packet;
-	Packet.m_ClientID = -1;
+	Packet.m_ClientId = -1;
 	Packet.m_Address = Addr;
 	Packet.m_Flags = NETSENDFLAG_CONNLESS;
 	Packet.m_DataSize = sizeof(aBuffer);

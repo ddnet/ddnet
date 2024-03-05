@@ -21,9 +21,9 @@ int g_aNewDataSize[MAX_MAPIMAGES];
 void *g_apNewData[MAX_MAPIMAGES];
 
 int g_Index = 0;
-int g_NextDataItemID = -1;
+int g_NextDataItemId = -1;
 
-int g_aImageIDs[MAX_MAPIMAGES];
+int g_aImageIds[MAX_MAPIMAGES];
 
 int LoadPNG(CImageInfo *pImg, const char *pFilename)
 {
@@ -86,7 +86,7 @@ bool CheckImageDimensions(void *pLayerItem, int LayerType, const char *pFilename
 		return true;
 
 	int Type;
-	void *pItem = g_DataReader.GetItem(g_aImageIDs[pTMap->m_Image], &Type);
+	void *pItem = g_DataReader.GetItem(g_aImageIds[pTMap->m_Image], &Type);
 	if(Type != MAPITEMTYPE_IMAGE)
 		return true;
 
@@ -134,7 +134,7 @@ void *ReplaceImageItem(int Index, CMapItemImage *pImgItem, CMapItemImage *pNewIm
 	pNewImgItem->m_Width = ImgInfo.m_Width;
 	pNewImgItem->m_Height = ImgInfo.m_Height;
 	pNewImgItem->m_External = false;
-	pNewImgItem->m_ImageData = g_NextDataItemID++;
+	pNewImgItem->m_ImageData = g_NextDataItemId++;
 
 	g_apNewData[g_Index] = ImgInfo.m_pData;
 	g_aNewDataSize[g_Index] = (size_t)ImgInfo.m_Width * ImgInfo.m_Height * ImgInfo.PixelSize();
@@ -199,7 +199,7 @@ int main(int argc, const char **argv)
 		return -1;
 	}
 
-	g_NextDataItemID = g_DataReader.NumData();
+	g_NextDataItemId = g_DataReader.NumData();
 
 	size_t i = 0;
 	for(int Index = 0; Index < g_DataReader.NumItems(); Index++)
@@ -213,7 +213,7 @@ int main(int argc, const char **argv)
 				dbg_msg("map_convert_07", "map uses more images than the client maximum of %" PRIzu ". filename='%s'", MAX_MAPIMAGES, pSourceFileName);
 				break;
 			}
-			g_aImageIDs[i] = Index;
+			g_aImageIds[i] = Index;
 			i++;
 		}
 	}
@@ -223,9 +223,9 @@ int main(int argc, const char **argv)
 	// add all items
 	for(int Index = 0; Index < g_DataReader.NumItems(); Index++)
 	{
-		int Type, ID;
+		int Type, Id;
 		CUuid Uuid;
-		void *pItem = g_DataReader.GetItem(Index, &Type, &ID, &Uuid);
+		void *pItem = g_DataReader.GetItem(Index, &Type, &Id, &Uuid);
 
 		// Filter ITEMTYPE_EX items, they will be automatically added again.
 		if(Type == ITEMTYPE_EX)
@@ -245,7 +245,7 @@ int main(int argc, const char **argv)
 			Size = sizeof(CMapItemImage);
 			NewImageItem.m_Version = CMapItemImage::CURRENT_VERSION;
 		}
-		g_DataWriter.AddItem(Type, ID, Size, pItem, &Uuid);
+		g_DataWriter.AddItem(Type, Id, Size, pItem, &Uuid);
 	}
 
 	// add all data

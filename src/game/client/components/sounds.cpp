@@ -194,7 +194,7 @@ void CSounds::Enqueue(int Channel, int SetId)
 void CSounds::PlayAndRecord(int Channel, int SetId, float Vol, vec2 Pos)
 {
 	CNetMsg_Sv_SoundGlobal Msg;
-	Msg.m_SoundID = SetId;
+	Msg.m_SoundId = SetId;
 	Client()->SendPackMsgActive(&Msg, MSGFLAG_NOSEND | MSGFLAG_RECORD);
 
 	Play(Channel, SetId, Vol);

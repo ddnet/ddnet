@@ -29,9 +29,9 @@ static int ResaveMap(const char *pSourceMap, const char *pDestinationMap, IStora
 	// add all items
 	for(int Index = 0; Index < Reader.NumItems(); Index++)
 	{
-		int Type, ID;
+		int Type, Id;
 		CUuid Uuid;
-		const void *pPtr = Reader.GetItem(Index, &Type, &ID, &Uuid);
+		const void *pPtr = Reader.GetItem(Index, &Type, &Id, &Uuid);
 
 		// Filter ITEMTYPE_EX items, they will be automatically added again.
 		if(Type == ITEMTYPE_EX)
@@ -40,7 +40,7 @@ static int ResaveMap(const char *pSourceMap, const char *pDestinationMap, IStora
 		}
 
 		int Size = Reader.GetItemSize(Index);
-		Writer.AddItem(Type, ID, Size, pPtr, &Uuid);
+		Writer.AddItem(Type, Id, Size, pPtr, &Uuid);
 	}
 
 	// add all data

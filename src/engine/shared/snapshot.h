@@ -15,12 +15,12 @@ class CSnapshotItem
 	int *Data() { return (int *)(this + 1); }
 
 public:
-	int m_TypeAndID;
+	int m_TypeAndId;
 
 	const int *Data() const { return (int *)(this + 1); }
-	int Type() const { return m_TypeAndID >> 16; }
-	int ID() const { return m_TypeAndID & 0xffff; }
-	int Key() const { return m_TypeAndID; }
+	int Type() const { return m_TypeAndId >> 16; }
+	int Id() const { return m_TypeAndId & 0xffff; }
+	int Key() const { return m_TypeAndId; }
 };
 
 class CSnapshot
@@ -54,7 +54,7 @@ public:
 	int GetItemIndex(int Key) const;
 	int GetItemType(int Index) const;
 	int GetExternalItemType(int InternalType) const;
-	const void *FindItem(int Type, int ID) const;
+	const void *FindItem(int Type, int Id) const;
 
 	unsigned Crc() const;
 	void DebugDump() const;
@@ -151,7 +151,7 @@ class CSnapshotBuilder
 	int m_NumExtendedItemTypes;
 
 	void AddExtendedItemType(int Index);
-	int GetExtendedItemTypeIndex(int TypeID);
+	int GetExtendedItemTypeIndex(int TypeId);
 	int GetTypeFromIndex(int Index) const;
 
 	bool m_Sixup;
@@ -161,7 +161,7 @@ public:
 
 	void Init(bool Sixup = false);
 
-	void *NewItem(int Type, int ID, int Size);
+	void *NewItem(int Type, int Id, int Size);
 
 	CSnapshotItem *GetItem(int Index);
 	int *GetItemData(int Key);

@@ -238,7 +238,7 @@ void CGameConsole::CInstance::PumpBacklogPending()
 		m_BacklogPending.Init();
 	}
 
-	m_pGameConsole->UI()->MapScreen();
+	m_pGameConsole->Ui()->MapScreen();
 	for(CInstance::CBacklogEntry *pEntry : vpEntries)
 	{
 		UpdateEntryTextAttributes(pEntry);
@@ -639,7 +639,7 @@ void CGameConsole::CInstance::UpdateEntryTextAttributes(CBacklogEntry *pEntry) c
 {
 	CTextCursor Cursor;
 	m_pGameConsole->TextRender()->SetCursor(&Cursor, 0.0f, 0.0f, FONT_SIZE, 0);
-	Cursor.m_LineWidth = m_pGameConsole->UI()->Screen()->w - 10;
+	Cursor.m_LineWidth = m_pGameConsole->Ui()->Screen()->w - 10;
 	Cursor.m_MaxLines = 10;
 	Cursor.m_LineSpacing = LINE_SPACING;
 	m_pGameConsole->TextRender()->TextEx(&Cursor, pEntry->m_aText, -1);
@@ -679,8 +679,8 @@ void CGameConsole::CInstance::UpdateSearch()
 		m_HasSelection = false;
 	}
 
-	ITextRender *pTextRender = m_pGameConsole->UI()->TextRender();
-	const int LineWidth = m_pGameConsole->UI()->Screen()->w - 10.0f;
+	ITextRender *pTextRender = m_pGameConsole->Ui()->TextRender();
+	const int LineWidth = m_pGameConsole->Ui()->Screen()->w - 10.0f;
 
 	CBacklogEntry *pEntry = m_Backlog.Last();
 	int EntryLine = 0, LineToScrollStart = 0, LineToScrollEnd = 0;
@@ -881,7 +881,7 @@ void CGameConsole::Prompt(char (&aPrompt)[32])
 
 void CGameConsole::OnRender()
 {
-	CUIRect Screen = *UI()->Screen();
+	CUIRect Screen = *Ui()->Screen();
 	CInstance *pConsole = CurrentConsole();
 
 	const float MaxConsoleHeight = Screen.h * 3 / 5.0f;
@@ -923,7 +923,7 @@ void CGameConsole::OnRender()
 
 	const float ConsoleHeight = ConsoleHeightScale * MaxConsoleHeight;
 
-	UI()->MapScreen();
+	Ui()->MapScreen();
 
 	// do console shadow
 	Graphics()->TextureClear();
@@ -1098,7 +1098,7 @@ void CGameConsole::OnRender()
 				}
 			}
 
-			UI()->DoSmoothScrollLogic(&pConsole->m_CompletionRenderOffset, &pConsole->m_CompletionRenderOffsetChange, Info.m_Width, Info.m_TotalWidth);
+			Ui()->DoSmoothScrollLogic(&pConsole->m_CompletionRenderOffset, &pConsole->m_CompletionRenderOffsetChange, Info.m_Width, Info.m_TotalWidth);
 		}
 		else if(pConsole->m_Searching && !pConsole->m_Input.IsEmpty())
 		{ // Render current match and match count
@@ -1281,7 +1281,7 @@ void CGameConsole::OnRender()
 
 		if(m_ConsoleType == CONSOLETYPE_REMOTE && Client()->ReceivingRconCommands())
 		{
-			UI()->RenderProgressSpinner(vec2(Screen.w / 4.0f + FONT_SIZE / 2.f, FONT_SIZE), FONT_SIZE / 2.f);
+			Ui()->RenderProgressSpinner(vec2(Screen.w / 4.0f + FONT_SIZE / 2.f, FONT_SIZE), FONT_SIZE / 2.f);
 			TextRender()->Text(Screen.w / 4.0f + FONT_SIZE + 2.0f, FONT_SIZE / 2.f, FONT_SIZE, Localize("Loading commands…"));
 		}
 
@@ -1336,13 +1336,13 @@ void CGameConsole::Toggle(int Type)
 
 		if(m_ConsoleState == CONSOLE_CLOSED || m_ConsoleState == CONSOLE_CLOSING)
 		{
-			UI()->SetEnabled(false);
+			Ui()->SetEnabled(false);
 			m_ConsoleState = CONSOLE_OPENING;
 		}
 		else
 		{
 			Input()->MouseModeRelative();
-			UI()->SetEnabled(true);
+			Ui()->SetEnabled(true);
 			m_pClient->OnRelease();
 			m_ConsoleState = CONSOLE_CLOSING;
 		}

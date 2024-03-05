@@ -275,9 +275,9 @@ void CSound::UpdateVolume()
 
 void CSound::Shutdown()
 {
-	for(unsigned SampleID = 0; SampleID < NUM_SAMPLES; SampleID++)
+	for(unsigned SampleId = 0; SampleId < NUM_SAMPLES; SampleId++)
 	{
-		UnloadSample(SampleID);
+		UnloadSample(SampleId);
 	}
 
 	SDL_CloseAudioDevice(m_Device);
@@ -640,15 +640,15 @@ int CSound::LoadWVFromMem(const void *pData, unsigned DataSize, bool FromEditor 
 	return pSample->m_Index;
 }
 
-void CSound::UnloadSample(int SampleID)
+void CSound::UnloadSample(int SampleId)
 {
-	if(SampleID == -1 || SampleID >= NUM_SAMPLES)
+	if(SampleId == -1 || SampleId >= NUM_SAMPLES)
 		return;
 
-	Stop(SampleID);
+	Stop(SampleId);
 
 	// Free data
-	CSample &Sample = m_aSamples[SampleID];
+	CSample &Sample = m_aSamples[SampleId];
 	free(Sample.m_pData);
 	Sample.m_pData = nullptr;
 
@@ -660,21 +660,21 @@ void CSound::UnloadSample(int SampleID)
 	}
 }
 
-float CSound::GetSampleTotalTime(int SampleID)
+float CSound::GetSampleTotalTime(int SampleId)
 {
-	if(SampleID == -1 || SampleID >= NUM_SAMPLES)
+	if(SampleId == -1 || SampleId >= NUM_SAMPLES)
 		return 0.0f;
 
-	return m_aSamples[SampleID].TotalTime();
+	return m_aSamples[SampleId].TotalTime();
 }
 
-float CSound::GetSampleCurrentTime(int SampleID)
+float CSound::GetSampleCurrentTime(int SampleId)
 {
-	if(SampleID == -1 || SampleID >= NUM_SAMPLES)
+	if(SampleId == -1 || SampleId >= NUM_SAMPLES)
 		return 0.0f;
 
 	const CLockScope LockScope(m_SoundLock);
-	CSample *pSample = &m_aSamples[SampleID];
+	CSample *pSample = &m_aSamples[SampleId];
 	for(auto &Voice : m_aVoices)
 	{
 		if(Voice.m_pSample == pSample)
@@ -686,13 +686,13 @@ float CSound::GetSampleCurrentTime(int SampleID)
 	return pSample->m_PausedAt / (float)pSample->m_Rate;
 }
 
-void CSound::SetSampleCurrentTime(int SampleID, float Time)
+void CSound::SetSampleCurrentTime(int SampleId, float Time)
 {
-	if(SampleID == -1 || SampleID >= NUM_SAMPLES)
+	if(SampleId == -1 || SampleId >= NUM_SAMPLES)
 		return;
 
 	const CLockScope LockScope(m_SoundLock);
-	CSample *pSample = &m_aSamples[SampleID];
+	CSample *pSample = &m_aSamples[SampleId];
 	for(auto &Voice : m_aVoices)
 	{
 		if(Voice.m_pSample == pSample)
@@ -705,10 +705,10 @@ void CSound::SetSampleCurrentTime(int SampleID, float Time)
 	pSample->m_PausedAt = pSample->m_NumFrames * Time;
 }
 
-void CSound::SetChannel(int ChannelID, float Vol, float Pan)
+void CSound::SetChannel(int ChannelId, float Vol, float Pan)
 {
-	m_aChannels[ChannelID].m_Vol = (int)(Vol * 255.0f);
-	m_aChannels[ChannelID].m_Pan = (int)(Pan * 255.0f); // TODO: this is only on and off right now
+	m_aChannels[ChannelId].m_Vol = (int)(Vol * 255.0f);
+	m_aChannels[ChannelId].m_Pan = (int)(Pan * 255.0f); // TODO: this is only on and off right now
 }
 
 void CSound::SetListenerPos(float x, float y)
@@ -722,14 +722,14 @@ void CSound::SetVoiceVolume(CVoiceHandle Voice, float Volume)
 	if(!Voice.IsValid())
 		return;
 
-	int VoiceID = Voice.Id();
+	int VoiceId = Voice.Id();
 
 	const CLockScope LockScope(m_SoundLock);
-	if(m_aVoices[VoiceID].m_Age != Voice.Age())
+	if(m_aVoices[VoiceId].m_Age != Voice.Age())
 		return;
 
 	Volume = clamp(Volume, 0.0f, 1.0f);
-	m_aVoices[VoiceID].m_Vol = (int)(Volume * 255.0f);
+	m_aVoices[VoiceId].m_Vol = (int)(Volume * 255.0f);
 }
 
 void CSound::SetVoiceFalloff(CVoiceHandle Voice, float Falloff)
@@ -737,14 +737,14 @@ void CSound::SetVoiceFalloff(CVoiceHandle Voice, float Falloff)
 	if(!Voice.IsValid())
 		return;
 
-	int VoiceID = Voice.Id();
+	int VoiceId = Voice.Id();
 
 	const CLockScope LockScope(m_SoundLock);
-	if(m_aVoices[VoiceID].m_Age != Voice.Age())
+	if(m_aVoices[VoiceId].m_Age != Voice.Age())
 		return;
 
 	Falloff = clamp(Falloff, 0.0f, 1.0f);
-	m_aVoices[VoiceID].m_Falloff = Falloff;
+	m_aVoices[VoiceId].m_Falloff = Falloff;
 }
 
 void CSound::SetVoiceLocation(CVoiceHandle Voice, float x, float y)
@@ -752,14 +752,14 @@ void CSound::SetVoiceLocation(CVoiceHandle Voice, float x, float y)
 	if(!Voice.IsValid())
 		return;
 
-	int VoiceID = Voice.Id();
+	int VoiceId = Voice.Id();
 
 	const CLockScope LockScope(m_SoundLock);
-	if(m_aVoices[VoiceID].m_Age != Voice.Age())
+	if(m_aVoices[VoiceId].m_Age != Voice.Age())
 		return;
 
-	m_aVoices[VoiceID].m_X = x;
-	m_aVoices[VoiceID].m_Y = y;
+	m_aVoices[VoiceId].m_X = x;
+	m_aVoices[VoiceId].m_Y = y;
 }
 
 void CSound::SetVoiceTimeOffset(CVoiceHandle Voice, float TimeOffset)
@@ -767,31 +767,31 @@ void CSound::SetVoiceTimeOffset(CVoiceHandle Voice, float TimeOffset)
 	if(!Voice.IsValid())
 		return;
 
-	int VoiceID = Voice.Id();
+	int VoiceId = Voice.Id();
 
 	const CLockScope LockScope(m_SoundLock);
-	if(m_aVoices[VoiceID].m_Age != Voice.Age())
+	if(m_aVoices[VoiceId].m_Age != Voice.Age())
 		return;
 
-	if(!m_aVoices[VoiceID].m_pSample)
+	if(!m_aVoices[VoiceId].m_pSample)
 		return;
 
 	int Tick = 0;
-	bool IsLooping = m_aVoices[VoiceID].m_Flags & ISound::FLAG_LOOP;
-	uint64_t TickOffset = m_aVoices[VoiceID].m_pSample->m_Rate * TimeOffset;
-	if(m_aVoices[VoiceID].m_pSample->m_NumFrames > 0 && IsLooping)
-		Tick = TickOffset % m_aVoices[VoiceID].m_pSample->m_NumFrames;
+	bool IsLooping = m_aVoices[VoiceId].m_Flags & ISound::FLAG_LOOP;
+	uint64_t TickOffset = m_aVoices[VoiceId].m_pSample->m_Rate * TimeOffset;
+	if(m_aVoices[VoiceId].m_pSample->m_NumFrames > 0 && IsLooping)
+		Tick = TickOffset % m_aVoices[VoiceId].m_pSample->m_NumFrames;
 	else
-		Tick = clamp(TickOffset, (uint64_t)0, (uint64_t)m_aVoices[VoiceID].m_pSample->m_NumFrames);
+		Tick = clamp(TickOffset, (uint64_t)0, (uint64_t)m_aVoices[VoiceId].m_pSample->m_NumFrames);
 
 	// at least 200msec off, else depend on buffer size
-	float Threshold = maximum(0.2f * m_aVoices[VoiceID].m_pSample->m_Rate, (float)m_MaxFrames);
-	if(absolute(m_aVoices[VoiceID].m_Tick - Tick) > Threshold)
+	float Threshold = maximum(0.2f * m_aVoices[VoiceId].m_pSample->m_Rate, (float)m_MaxFrames);
+	if(absolute(m_aVoices[VoiceId].m_Tick - Tick) > Threshold)
 	{
 		// take care of looping (modulo!)
-		if(!(IsLooping && (minimum(m_aVoices[VoiceID].m_Tick, Tick) + m_aVoices[VoiceID].m_pSample->m_NumFrames - maximum(m_aVoices[VoiceID].m_Tick, Tick)) <= Threshold))
+		if(!(IsLooping && (minimum(m_aVoices[VoiceId].m_Tick, Tick) + m_aVoices[VoiceId].m_pSample->m_NumFrames - maximum(m_aVoices[VoiceId].m_Tick, Tick)) <= Threshold))
 		{
-			m_aVoices[VoiceID].m_Tick = Tick;
+			m_aVoices[VoiceId].m_Tick = Tick;
 		}
 	}
 }
@@ -801,14 +801,14 @@ void CSound::SetVoiceCircle(CVoiceHandle Voice, float Radius)
 	if(!Voice.IsValid())
 		return;
 
-	int VoiceID = Voice.Id();
+	int VoiceId = Voice.Id();
 
 	const CLockScope LockScope(m_SoundLock);
-	if(m_aVoices[VoiceID].m_Age != Voice.Age())
+	if(m_aVoices[VoiceId].m_Age != Voice.Age())
 		return;
 
-	m_aVoices[VoiceID].m_Shape = ISound::SHAPE_CIRCLE;
-	m_aVoices[VoiceID].m_Circle.m_Radius = maximum(0.0f, Radius);
+	m_aVoices[VoiceId].m_Shape = ISound::SHAPE_CIRCLE;
+	m_aVoices[VoiceId].m_Circle.m_Radius = maximum(0.0f, Radius);
 }
 
 void CSound::SetVoiceRectangle(CVoiceHandle Voice, float Width, float Height)
@@ -816,81 +816,81 @@ void CSound::SetVoiceRectangle(CVoiceHandle Voice, float Width, float Height)
 	if(!Voice.IsValid())
 		return;
 
-	int VoiceID = Voice.Id();
+	int VoiceId = Voice.Id();
 
 	const CLockScope LockScope(m_SoundLock);
-	if(m_aVoices[VoiceID].m_Age != Voice.Age())
+	if(m_aVoices[VoiceId].m_Age != Voice.Age())
 		return;
 
-	m_aVoices[VoiceID].m_Shape = ISound::SHAPE_RECTANGLE;
-	m_aVoices[VoiceID].m_Rectangle.m_Width = maximum(0.0f, Width);
-	m_aVoices[VoiceID].m_Rectangle.m_Height = maximum(0.0f, Height);
+	m_aVoices[VoiceId].m_Shape = ISound::SHAPE_RECTANGLE;
+	m_aVoices[VoiceId].m_Rectangle.m_Width = maximum(0.0f, Width);
+	m_aVoices[VoiceId].m_Rectangle.m_Height = maximum(0.0f, Height);
 }
 
-ISound::CVoiceHandle CSound::Play(int ChannelID, int SampleID, int Flags, float x, float y)
+ISound::CVoiceHandle CSound::Play(int ChannelId, int SampleId, int Flags, float x, float y)
 {
 	const CLockScope LockScope(m_SoundLock);
 
 	// search for voice
-	int VoiceID = -1;
+	int VoiceId = -1;
 	for(int i = 0; i < NUM_VOICES; i++)
 	{
-		int NextID = (m_NextVoice + i) % NUM_VOICES;
-		if(!m_aVoices[NextID].m_pSample)
+		int NextId = (m_NextVoice + i) % NUM_VOICES;
+		if(!m_aVoices[NextId].m_pSample)
 		{
-			VoiceID = NextID;
-			m_NextVoice = NextID + 1;
+			VoiceId = NextId;
+			m_NextVoice = NextId + 1;
 			break;
 		}
 	}
 
 	// voice found, use it
 	int Age = -1;
-	if(VoiceID != -1)
+	if(VoiceId != -1)
 	{
-		m_aVoices[VoiceID].m_pSample = &m_aSamples[SampleID];
-		m_aVoices[VoiceID].m_pChannel = &m_aChannels[ChannelID];
+		m_aVoices[VoiceId].m_pSample = &m_aSamples[SampleId];
+		m_aVoices[VoiceId].m_pChannel = &m_aChannels[ChannelId];
 		if(Flags & FLAG_LOOP)
 		{
-			m_aVoices[VoiceID].m_Tick = m_aSamples[SampleID].m_PausedAt;
+			m_aVoices[VoiceId].m_Tick = m_aSamples[SampleId].m_PausedAt;
 		}
 		else if(Flags & FLAG_PREVIEW)
 		{
-			m_aVoices[VoiceID].m_Tick = m_aSamples[SampleID].m_PausedAt;
-			m_aSamples[SampleID].m_PausedAt = 0;
+			m_aVoices[VoiceId].m_Tick = m_aSamples[SampleId].m_PausedAt;
+			m_aSamples[SampleId].m_PausedAt = 0;
 		}
 		else
 		{
-			m_aVoices[VoiceID].m_Tick = 0;
+			m_aVoices[VoiceId].m_Tick = 0;
 		}
-		m_aVoices[VoiceID].m_Vol = 255;
-		m_aVoices[VoiceID].m_Flags = Flags;
-		m_aVoices[VoiceID].m_X = (int)x;
-		m_aVoices[VoiceID].m_Y = (int)y;
-		m_aVoices[VoiceID].m_Falloff = 0.0f;
-		m_aVoices[VoiceID].m_Shape = ISound::SHAPE_CIRCLE;
-		m_aVoices[VoiceID].m_Circle.m_Radius = 1500;
-		Age = m_aVoices[VoiceID].m_Age;
+		m_aVoices[VoiceId].m_Vol = 255;
+		m_aVoices[VoiceId].m_Flags = Flags;
+		m_aVoices[VoiceId].m_X = (int)x;
+		m_aVoices[VoiceId].m_Y = (int)y;
+		m_aVoices[VoiceId].m_Falloff = 0.0f;
+		m_aVoices[VoiceId].m_Shape = ISound::SHAPE_CIRCLE;
+		m_aVoices[VoiceId].m_Circle.m_Radius = 1500;
+		Age = m_aVoices[VoiceId].m_Age;
 	}
 
-	return CreateVoiceHandle(VoiceID, Age);
+	return CreateVoiceHandle(VoiceId, Age);
 }
 
-ISound::CVoiceHandle CSound::PlayAt(int ChannelID, int SampleID, int Flags, float x, float y)
+ISound::CVoiceHandle CSound::PlayAt(int ChannelId, int SampleId, int Flags, float x, float y)
 {
-	return Play(ChannelID, SampleID, Flags | ISound::FLAG_POS, x, y);
+	return Play(ChannelId, SampleId, Flags | ISound::FLAG_POS, x, y);
 }
 
-ISound::CVoiceHandle CSound::Play(int ChannelID, int SampleID, int Flags)
+ISound::CVoiceHandle CSound::Play(int ChannelId, int SampleId, int Flags)
 {
-	return Play(ChannelID, SampleID, Flags, 0, 0);
+	return Play(ChannelId, SampleId, Flags, 0, 0);
 }
 
-void CSound::Pause(int SampleID)
+void CSound::Pause(int SampleId)
 {
 	// TODO: a nice fade out
 	const CLockScope LockScope(m_SoundLock);
-	CSample *pSample = &m_aSamples[SampleID];
+	CSample *pSample = &m_aSamples[SampleId];
 	for(auto &Voice : m_aVoices)
 	{
 		if(Voice.m_pSample == pSample)
@@ -901,11 +901,11 @@ void CSound::Pause(int SampleID)
 	}
 }
 
-void CSound::Stop(int SampleID)
+void CSound::Stop(int SampleId)
 {
 	// TODO: a nice fade out
 	const CLockScope LockScope(m_SoundLock);
-	CSample *pSample = &m_aSamples[SampleID];
+	CSample *pSample = &m_aSamples[SampleId];
 	for(auto &Voice : m_aVoices)
 	{
 		if(Voice.m_pSample == pSample)
@@ -941,20 +941,20 @@ void CSound::StopVoice(CVoiceHandle Voice)
 	if(!Voice.IsValid())
 		return;
 
-	int VoiceID = Voice.Id();
+	int VoiceId = Voice.Id();
 
 	const CLockScope LockScope(m_SoundLock);
-	if(m_aVoices[VoiceID].m_Age != Voice.Age())
+	if(m_aVoices[VoiceId].m_Age != Voice.Age())
 		return;
 
-	m_aVoices[VoiceID].m_pSample = nullptr;
-	m_aVoices[VoiceID].m_Age++;
+	m_aVoices[VoiceId].m_pSample = nullptr;
+	m_aVoices[VoiceId].m_Age++;
 }
 
-bool CSound::IsPlaying(int SampleID)
+bool CSound::IsPlaying(int SampleId)
 {
 	const CLockScope LockScope(m_SoundLock);
-	const CSample *pSample = &m_aSamples[SampleID];
+	const CSample *pSample = &m_aSamples[SampleId];
 	return std::any_of(std::begin(m_aVoices), std::end(m_aVoices), [pSample](const auto &Voice) { return Voice.m_pSample == pSample; });
 }
 

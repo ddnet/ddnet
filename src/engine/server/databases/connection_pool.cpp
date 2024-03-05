@@ -49,7 +49,7 @@ struct CSqlExecData
 		{
 			CDbConnectionPool::Mode m_Mode;
 			CMysqlConfig m_Config;
-		} m_MySql;
+		} m_Mysql;
 		struct
 		{
 			CDbConnectionPool::Mode m_Mode;
@@ -104,8 +104,8 @@ CSqlExecData::CSqlExecData(CDbConnectionPool::Mode m,
 	m_pThreadData(nullptr),
 	m_pName("add mysql server")
 {
-	m_Ptr.m_MySql.m_Mode = m;
-	mem_copy(&m_Ptr.m_MySql.m_Config, pMysqlConfig, sizeof(m_Ptr.m_MySql.m_Config));
+	m_Ptr.m_Mysql.m_Mode = m;
+	mem_copy(&m_Ptr.m_Mysql.m_Config, pMysqlConfig, sizeof(m_Ptr.m_Mysql.m_Config));
 }
 
 CSqlExecData::CSqlExecData(IConsole *pConsole, CDbConnectionPool::Mode m) :
@@ -352,8 +352,8 @@ void CWorker::ProcessQueries()
 		break;
 		case CSqlExecData::ADD_MYSQL:
 		{
-			auto pMysql = CreateMysqlConnection(pThreadData->m_Ptr.m_MySql.m_Config);
-			switch(pThreadData->m_Ptr.m_MySql.m_Mode)
+			auto pMysql = CreateMysqlConnection(pThreadData->m_Ptr.m_Mysql.m_Config);
+			switch(pThreadData->m_Ptr.m_Mysql.m_Mode)
 			{
 			case CDbConnectionPool::Mode::READ:
 				m_vpReadConnections.push_back(std::move(pMysql));

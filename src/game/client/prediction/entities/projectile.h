@@ -37,7 +37,7 @@ public:
 	const vec2 &GetDirection() { return m_Direction; }
 	const int &GetOwner() { return m_Owner; }
 	const int &GetStartTick() { return m_StartTick; }
-	CProjectile(CGameWorld *pGameWorld, int ID, const CProjectileData *pProj);
+	CProjectile(CGameWorld *pGameWorld, int Id, const CProjectileData *pProj);
 
 private:
 	vec2 m_Direction;

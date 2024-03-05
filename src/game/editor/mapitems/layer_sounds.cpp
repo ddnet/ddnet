@@ -168,7 +168,7 @@ void CLayerSounds::BrushPlace(std::shared_ptr<CLayer> pBrush, float wx, float wy
 	m_pEditor->m_Map.OnModify();
 }
 
-CUI::EPopupMenuFunctionResult CLayerSounds::RenderProperties(CUIRect *pToolBox)
+CUi::EPopupMenuFunctionResult CLayerSounds::RenderProperties(CUIRect *pToolBox)
 {
 	CProperty aProps[] = {
 		{"Sound", m_Sound, PROPTYPE_SOUND, -1, 0},
@@ -196,7 +196,7 @@ CUI::EPopupMenuFunctionResult CLayerSounds::RenderProperties(CUIRect *pToolBox)
 
 	s_Tracker.End(Prop, State);
 
-	return CUI::POPUP_KEEP_OPEN;
+	return CUi::POPUP_KEEP_OPEN;
 }
 
 void CLayerSounds::ModifySoundIndex(FIndexModifyFunction Func)

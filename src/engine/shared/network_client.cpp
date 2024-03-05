@@ -90,7 +90,7 @@ int CNetClient::Recv(CNetChunk *pChunk)
 			if(m_RecvUnpacker.m_Data.m_Flags & NET_PACKETFLAG_CONNLESS)
 			{
 				pChunk->m_Flags = NETSENDFLAG_CONNLESS;
-				pChunk->m_ClientID = -1;
+				pChunk->m_ClientId = -1;
 				pChunk->m_Address = Addr;
 				pChunk->m_DataSize = m_RecvUnpacker.m_Data.m_DataSize;
 				pChunk->m_pData = m_RecvUnpacker.m_Data.m_aChunkData;
@@ -128,7 +128,7 @@ int CNetClient::Send(CNetChunk *pChunk)
 	else
 	{
 		int Flags = 0;
-		dbg_assert(pChunk->m_ClientID == 0, "erroneous client id");
+		dbg_assert(pChunk->m_ClientId == 0, "erroneous client id");
 
 		if(pChunk->m_Flags & NETSENDFLAG_VITAL)
 			Flags = NET_CHUNKFLAG_VITAL;
