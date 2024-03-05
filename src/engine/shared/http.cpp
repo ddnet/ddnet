@@ -471,7 +471,7 @@ void CHttp::RunLoop()
 		if(PollCode != CURLM_OK)
 		{
 			Lock.lock();
-			log_error("http", "Failed multi wait: %s", curl_multi_strerror(PollCode));
+			log_error("http", "curl_multi_poll failed: %s", curl_multi_strerror(PollCode));
 			m_State = CHttp::ERROR;
 			break;
 		}
@@ -480,7 +480,7 @@ void CHttp::RunLoop()
 		if(PerformCode != CURLM_OK)
 		{
 			Lock.lock();
-			log_error("http", "Failed multi perform: %s", curl_multi_strerror(PerformCode));
+			log_error("http", "curl_multi_perform failed: %s", curl_multi_strerror(PerformCode));
 			m_State = CHttp::ERROR;
 			break;
 		}
@@ -514,23 +514,33 @@ void CHttp::RunLoop()
 
 			CURL *pEH = curl_easy_init();
 			if(!pEH)
+			{
+				log_error("http", "curl_easy_init failed");
 				goto error_init;
+			}
 
 			if(!pRequest->ConfigureHandle(pEH))
-				goto error_configure;
+			{
+				curl_easy_cleanup(pEH);
+				str_copy(pRequest->m_aErr, "Failed to initialize request");
+				pRequest->OnCompletionInternal(nullptr, CURLE_ABORTED_BY_CALLBACK);
+				NewRequests.pop_front();
+				continue;
+			}
 
 			if(curl_multi_add_handle(m_pMultiH, pEH) != CURLM_OK)
+			{
+				log_error("http", "curl_multi_add_handle failed");
 				goto error_configure;
+			}
 
 			m_RunningRequests.emplace(pEH, std::move(pRequest));
 			NewRequests.pop_front();
-
 			continue;
 
 		error_configure:
 			curl_easy_cleanup(pEH);
 		error_init:
-			log_error("http", "failed to start new request");
 			Lock.lock();
 			m_State = CHttp::ERROR;
 			break;
@@ -579,7 +589,7 @@ void CHttp::Run(std::shared_ptr<IHttpRequest> pRequest)
 {
 	std::shared_ptr<CHttpRequest> pRequestImpl = std::static_pointer_cast<CHttpRequest>(pRequest);
 	std::unique_lock Lock(m_Lock);
-	if(m_Shutdown)
+	if(m_Shutdown || m_State == CHttp::ERROR)
 	{
 		str_copy(pRequestImpl->m_aErr, "Shutting down");
 		pRequestImpl->OnCompletionInternal(nullptr, CURLE_ABORTED_BY_CALLBACK);
