@@ -83,9 +83,8 @@ void CJobPool::RunLoop()
 
 		if(pJob)
 		{
-			// do the job if we have one
-			const IJob::EJobState OldStateQueued = pJob->m_State.exchange(IJob::STATE_RUNNING);
-			if(OldStateQueued != IJob::STATE_QUEUED)
+			IJob::EJobState OldStateQueued = IJob::STATE_QUEUED;
+			if(!pJob->m_State.compare_exchange_strong(OldStateQueued, IJob::STATE_RUNNING))
 			{
 				if(OldStateQueued == IJob::STATE_ABORTED)
 				{
@@ -109,10 +108,13 @@ void CJobPool::RunLoop()
 			}
 
 			// do not change state to done if job was not completed successfully
-			const IJob::EJobState OldStateRunning = pJob->m_State.exchange(IJob::STATE_DONE);
-			if(OldStateRunning != IJob::STATE_RUNNING)
+			IJob::EJobState OldStateRunning = IJob::STATE_RUNNING;
+			if(!pJob->m_State.compare_exchange_strong(OldStateRunning, IJob::STATE_DONE))
 			{
-				pJob->m_State = OldStateRunning;
+				if(OldStateRunning != IJob::STATE_ABORTED)
+				{
+					dbg_assert(false, "Job state invalid, must be either running or aborted");
+				}
 			}
 		}
 		else if(m_Shutdown)
