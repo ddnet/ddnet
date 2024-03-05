@@ -33,7 +33,7 @@ void CDebugHud::RenderNetCorrections()
 	const float VelspeedX = m_pClient->m_Snap.m_pLocalCharacter->m_VelX / 256.0f * Client()->GameTickSpeed();
 	const float VelspeedY = m_pClient->m_Snap.m_pLocalCharacter->m_VelY / 256.0f * Client()->GameTickSpeed();
 	const float Ramp = VelocityRamp(Velspeed, m_pClient->m_aTuning[g_Config.m_ClDummy].m_VelrampStart, m_pClient->m_aTuning[g_Config.m_ClDummy].m_VelrampRange, m_pClient->m_aTuning[g_Config.m_ClDummy].m_VelrampCurvature);
-	const CCharacter *pCharacter = m_pClient->m_GameWorld.GetCharacterByID(m_pClient->m_Snap.m_LocalClientID);
+	const CCharacter *pCharacter = m_pClient->m_GameWorld.GetCharacterById(m_pClient->m_Snap.m_LocalClientId);
 
 	const float FontSize = 5.0f;
 	const float LineHeight = FontSize + 1.0f;
@@ -92,7 +92,7 @@ void CDebugHud::RenderTuning()
 	if(g_Config.m_DbgTuning == DBG_TUNING_OFF)
 		return;
 
-	const CCharacter *pCharacter = m_pClient->m_GameWorld.GetCharacterByID(m_pClient->m_Snap.m_LocalClientID);
+	const CCharacter *pCharacter = m_pClient->m_GameWorld.GetCharacterById(m_pClient->m_Snap.m_LocalClientId);
 
 	const CTuningParams StandardTuning;
 	const CTuningParams *pGlobalTuning = m_pClient->GetTuning(0);

@@ -54,7 +54,7 @@ public:
 	bool FillExtraInfoLegacy(CNetObj_DDRaceProjectile *pProj);
 	void FillExtraInfo(CNetObj_DDNetProjectile *pProj);
 
-	virtual int GetOwnerID() const override { return m_Owner; }
+	virtual int GetOwnerId() const override { return m_Owner; }
 };
 
 #endif

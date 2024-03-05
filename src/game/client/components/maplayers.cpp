@@ -813,36 +813,36 @@ void CMapLayers::OnMapLoad()
 					CQuad *pQuad = &pQuads[i];
 					for(int j = 0; j < 4; ++j)
 					{
-						int QuadIDX = j;
+						int QuadIdX = j;
 						if(j == 2)
-							QuadIDX = 3;
+							QuadIdX = 3;
 						else if(j == 3)
-							QuadIDX = 2;
+							QuadIdX = 2;
 						if(!Textured)
 						{
 							// ignore the conversion for the position coordinates
-							vtmpQuads[i].m_aVertices[j].m_X = (pQuad->m_aPoints[QuadIDX].x);
-							vtmpQuads[i].m_aVertices[j].m_Y = (pQuad->m_aPoints[QuadIDX].y);
+							vtmpQuads[i].m_aVertices[j].m_X = (pQuad->m_aPoints[QuadIdX].x);
+							vtmpQuads[i].m_aVertices[j].m_Y = (pQuad->m_aPoints[QuadIdX].y);
 							vtmpQuads[i].m_aVertices[j].m_CenterX = (pQuad->m_aPoints[4].x);
 							vtmpQuads[i].m_aVertices[j].m_CenterY = (pQuad->m_aPoints[4].y);
-							vtmpQuads[i].m_aVertices[j].m_R = (unsigned char)pQuad->m_aColors[QuadIDX].r;
-							vtmpQuads[i].m_aVertices[j].m_G = (unsigned char)pQuad->m_aColors[QuadIDX].g;
-							vtmpQuads[i].m_aVertices[j].m_B = (unsigned char)pQuad->m_aColors[QuadIDX].b;
-							vtmpQuads[i].m_aVertices[j].m_A = (unsigned char)pQuad->m_aColors[QuadIDX].a;
+							vtmpQuads[i].m_aVertices[j].m_R = (unsigned char)pQuad->m_aColors[QuadIdX].r;
+							vtmpQuads[i].m_aVertices[j].m_G = (unsigned char)pQuad->m_aColors[QuadIdX].g;
+							vtmpQuads[i].m_aVertices[j].m_B = (unsigned char)pQuad->m_aColors[QuadIdX].b;
+							vtmpQuads[i].m_aVertices[j].m_A = (unsigned char)pQuad->m_aColors[QuadIdX].a;
 						}
 						else
 						{
 							// ignore the conversion for the position coordinates
-							vtmpQuadsTextured[i].m_aVertices[j].m_X = (pQuad->m_aPoints[QuadIDX].x);
-							vtmpQuadsTextured[i].m_aVertices[j].m_Y = (pQuad->m_aPoints[QuadIDX].y);
+							vtmpQuadsTextured[i].m_aVertices[j].m_X = (pQuad->m_aPoints[QuadIdX].x);
+							vtmpQuadsTextured[i].m_aVertices[j].m_Y = (pQuad->m_aPoints[QuadIdX].y);
 							vtmpQuadsTextured[i].m_aVertices[j].m_CenterX = (pQuad->m_aPoints[4].x);
 							vtmpQuadsTextured[i].m_aVertices[j].m_CenterY = (pQuad->m_aPoints[4].y);
-							vtmpQuadsTextured[i].m_aVertices[j].m_U = fx2f(pQuad->m_aTexcoords[QuadIDX].x);
-							vtmpQuadsTextured[i].m_aVertices[j].m_V = fx2f(pQuad->m_aTexcoords[QuadIDX].y);
-							vtmpQuadsTextured[i].m_aVertices[j].m_R = (unsigned char)pQuad->m_aColors[QuadIDX].r;
-							vtmpQuadsTextured[i].m_aVertices[j].m_G = (unsigned char)pQuad->m_aColors[QuadIDX].g;
-							vtmpQuadsTextured[i].m_aVertices[j].m_B = (unsigned char)pQuad->m_aColors[QuadIDX].b;
-							vtmpQuadsTextured[i].m_aVertices[j].m_A = (unsigned char)pQuad->m_aColors[QuadIDX].a;
+							vtmpQuadsTextured[i].m_aVertices[j].m_U = fx2f(pQuad->m_aTexcoords[QuadIdX].x);
+							vtmpQuadsTextured[i].m_aVertices[j].m_V = fx2f(pQuad->m_aTexcoords[QuadIdX].y);
+							vtmpQuadsTextured[i].m_aVertices[j].m_R = (unsigned char)pQuad->m_aColors[QuadIdX].r;
+							vtmpQuadsTextured[i].m_aVertices[j].m_G = (unsigned char)pQuad->m_aColors[QuadIdX].g;
+							vtmpQuadsTextured[i].m_aVertices[j].m_B = (unsigned char)pQuad->m_aColors[QuadIdX].b;
+							vtmpQuadsTextured[i].m_aVertices[j].m_A = (unsigned char)pQuad->m_aColors[QuadIdX].a;
 						}
 					}
 				}

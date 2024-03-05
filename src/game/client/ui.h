@@ -142,15 +142,15 @@ public:
 	}
 };
 
-class CUI;
+class CUi;
 
 class CUIElement
 {
-	friend class CUI;
+	friend class CUi;
 
-	CUI *m_pUI;
+	CUi *m_pUI;
 
-	CUIElement(CUI *pUI, int RequestedRectCount) { Init(pUI, RequestedRectCount); }
+	CUIElement(CUi *pUI, int RequestedRectCount) { Init(pUI, RequestedRectCount); }
 
 public:
 	struct SUIElementRect
@@ -185,13 +185,13 @@ public:
 	};
 
 protected:
-	CUI *UI() const { return m_pUI; }
+	CUi *Ui() const { return m_pUI; }
 	std::vector<SUIElementRect> m_vUIRects;
 
 public:
 	CUIElement() = default;
 
-	void Init(CUI *pUI, int RequestedRectCount);
+	void Init(CUi *pUI, int RequestedRectCount);
 
 	SUIElementRect *Rect(size_t Index)
 	{
@@ -231,16 +231,16 @@ struct SMenuButtonProperties
 class CUIElementBase
 {
 private:
-	static CUI *s_pUI;
+	static CUi *s_pUI;
 
 public:
-	static void Init(CUI *pUI) { s_pUI = pUI; }
+	static void Init(CUi *pUI) { s_pUI = pUI; }
 
 	IClient *Client() const;
 	IGraphics *Graphics() const;
 	IInput *Input() const;
 	ITextRender *TextRender() const;
-	CUI *UI() const { return s_pUI; }
+	CUi *Ui() const { return s_pUI; }
 };
 
 class CButtonContainer
@@ -278,7 +278,7 @@ struct SPopupMenuProperties
 	ColorRGBA m_BackgroundColor = ColorRGBA(0.0f, 0.0f, 0.0f, 0.75f);
 };
 
-class CUI
+class CUi
 {
 public:
 	/**
@@ -337,7 +337,7 @@ private:
 	unsigned m_LastMouseButtons;
 	bool m_MouseSlow = false;
 	bool m_MouseLock = false;
-	const void *m_pMouseLockID = nullptr;
+	const void *m_pMouseLockId = nullptr;
 
 	unsigned m_HotkeysPressed = 0;
 
@@ -353,7 +353,7 @@ private:
 		static constexpr float POPUP_BORDER = 1.0f;
 		static constexpr float POPUP_MARGIN = 4.0f;
 
-		const SPopupMenuId *m_pID;
+		const SPopupMenuId *m_pId;
 		SPopupMenuProperties m_Props;
 		CUIRect m_Rect;
 		void *m_pContext;
@@ -362,17 +362,17 @@ private:
 	std::vector<SPopupMenu> m_vPopupMenus;
 	FPopupMenuClosedCallback m_pfnPopupMenuClosedCallback = nullptr;
 
-	static CUI::EPopupMenuFunctionResult PopupMessage(void *pContext, CUIRect View, bool Active);
-	static CUI::EPopupMenuFunctionResult PopupConfirm(void *pContext, CUIRect View, bool Active);
-	static CUI::EPopupMenuFunctionResult PopupSelection(void *pContext, CUIRect View, bool Active);
-	static CUI::EPopupMenuFunctionResult PopupColorPicker(void *pContext, CUIRect View, bool Active);
+	static CUi::EPopupMenuFunctionResult PopupMessage(void *pContext, CUIRect View, bool Active);
+	static CUi::EPopupMenuFunctionResult PopupConfirm(void *pContext, CUIRect View, bool Active);
+	static CUi::EPopupMenuFunctionResult PopupSelection(void *pContext, CUIRect View, bool Active);
+	static CUi::EPopupMenuFunctionResult PopupColorPicker(void *pContext, CUIRect View, bool Active);
 
 	IClient *m_pClient;
 	IGraphics *m_pGraphics;
 	IInput *m_pInput;
 	ITextRender *m_pTextRender;
 
-	std::vector<CUIElement *> m_vpOwnUIElements; // ui elements maintained by CUI class
+	std::vector<CUIElement *> m_vpOwnUIElements; // ui elements maintained by CUi class
 	std::vector<CUIElement *> m_vpUIElements;
 
 public:
@@ -390,8 +390,8 @@ public:
 	IInput *Input() const { return m_pInput; }
 	ITextRender *TextRender() const { return m_pTextRender; }
 
-	CUI();
-	~CUI();
+	CUi();
+	~CUi();
 
 	enum EHotkey : unsigned
 	{
@@ -436,28 +436,28 @@ public:
 	int MouseButtonReleased(int Index) const { return ((m_LastMouseButtons >> Index) & 1) && !MouseButton(Index); }
 	bool CheckMouseLock()
 	{
-		if(m_MouseLock && ActiveItem() != m_pMouseLockID)
+		if(m_MouseLock && ActiveItem() != m_pMouseLockId)
 			DisableMouseLock();
 		return m_MouseLock;
 	}
-	void EnableMouseLock(const void *pID)
+	void EnableMouseLock(const void *pId)
 	{
 		m_MouseLock = true;
-		m_pMouseLockID = pID;
+		m_pMouseLockId = pId;
 	}
 	void DisableMouseLock() { m_MouseLock = false; }
 
-	void SetHotItem(const void *pID) { m_pBecomingHotItem = pID; }
-	void SetActiveItem(const void *pID)
+	void SetHotItem(const void *pId) { m_pBecomingHotItem = pId; }
+	void SetActiveItem(const void *pId)
 	{
 		m_ActiveItemValid = true;
-		m_pActiveItem = pID;
-		if(pID)
-			m_pLastActiveItem = pID;
+		m_pActiveItem = pId;
+		if(pId)
+			m_pLastActiveItem = pId;
 	}
-	bool CheckActiveItem(const void *pID)
+	bool CheckActiveItem(const void *pId)
 	{
-		if(m_pActiveItem == pID)
+		if(m_pActiveItem == pId)
 		{
 			m_ActiveItemValid = true;
 			return true;
@@ -492,7 +492,7 @@ public:
 	constexpr float ButtonColorMulActive() const { return 0.5f; }
 	constexpr float ButtonColorMulHot() const { return 1.5f; }
 	constexpr float ButtonColorMulDefault() const { return 1.0f; }
-	float ButtonColorMul(const void *pID);
+	float ButtonColorMul(const void *pId);
 
 	const CUIRect *Screen();
 	void MapScreen();
@@ -503,9 +503,9 @@ public:
 	const CUIRect *ClipArea() const;
 	inline bool IsClipped() const { return !m_vClips.empty(); }
 
-	int DoButtonLogic(const void *pID, int Checked, const CUIRect *pRect);
-	int DoDraggableButtonLogic(const void *pID, int Checked, const CUIRect *pRect, bool *pClicked, bool *pAbrupted);
-	EEditState DoPickerLogic(const void *pID, const CUIRect *pRect, float *pX, float *pY);
+	int DoButtonLogic(const void *pId, int Checked, const CUIRect *pRect);
+	int DoDraggableButtonLogic(const void *pId, int Checked, const CUIRect *pRect, bool *pClicked, bool *pAbrupted);
+	EEditState DoPickerLogic(const void *pId, const CUIRect *pRect, float *pX, float *pY);
 	void DoSmoothScrollLogic(float *pScrollOffset, float *pScrollOffsetChange, float ViewPortSize, float TotalSize, bool SmoothClamp = false, float ScrollSpeed = 10.0f) const;
 	static vec2 CalcAlignedCursorPos(const CUIRect *pRect, vec2 TextSize, int Align, const float *pBiggestCharHeight = nullptr);
 
@@ -550,13 +550,13 @@ public:
 	 */
 	bool DoClearableEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize, int Corners = IGraphics::CORNER_ALL, const std::vector<STextColorSplit> &vColorSplits = {});
 
-	int DoButton_Menu(CUIElement &UIElement, const CButtonContainer *pID, const std::function<const char *()> &GetTextLambda, const CUIRect *pRect, const SMenuButtonProperties &Props = {});
+	int DoButton_Menu(CUIElement &UIElement, const CButtonContainer *pId, const std::function<const char *()> &GetTextLambda, const CUIRect *pRect, const SMenuButtonProperties &Props = {});
 	// only used for popup menus
 	int DoButton_PopupMenu(CButtonContainer *pButtonContainer, const char *pText, const CUIRect *pRect, float Size, int Align, float Padding = 0.0f, bool TransparentInactive = false, bool Enabled = true);
 
 	// value selector
-	SEditResult<int64_t> DoValueSelectorWithState(const void *pID, const CUIRect *pRect, const char *pLabel, int64_t Current, int64_t Min, int64_t Max, const SValueSelectorProperties &Props = {});
-	int64_t DoValueSelector(const void *pID, const CUIRect *pRect, const char *pLabel, int64_t Current, int64_t Min, int64_t Max, const SValueSelectorProperties &Props = {});
+	SEditResult<int64_t> DoValueSelectorWithState(const void *pId, const CUIRect *pRect, const char *pLabel, int64_t Current, int64_t Min, int64_t Max, const SValueSelectorProperties &Props = {});
+	int64_t DoValueSelector(const void *pId, const CUIRect *pRect, const char *pLabel, int64_t Current, int64_t Min, int64_t Max, const SValueSelectorProperties &Props = {});
 	bool IsValueSelectorTextMode() const { return m_ValueSelectorTextMode; }
 	void SetValueSelectorTextMode(bool TextMode) { m_ValueSelectorTextMode = TextMode; }
 
@@ -567,20 +567,20 @@ public:
 		SCROLLBAR_OPTION_NOCLAMPVALUE = 1 << 1,
 		SCROLLBAR_OPTION_MULTILINE = 1 << 2,
 	};
-	float DoScrollbarV(const void *pID, const CUIRect *pRect, float Current);
-	float DoScrollbarH(const void *pID, const CUIRect *pRect, float Current, const ColorRGBA *pColorInner = nullptr);
-	void DoScrollbarOption(const void *pID, int *pOption, const CUIRect *pRect, const char *pStr, int Min, int Max, const IScrollbarScale *pScale = &ms_LinearScrollbarScale, unsigned Flags = 0u, const char *pSuffix = "");
+	float DoScrollbarV(const void *pId, const CUIRect *pRect, float Current);
+	float DoScrollbarH(const void *pId, const CUIRect *pRect, float Current, const ColorRGBA *pColorInner = nullptr);
+	void DoScrollbarOption(const void *pId, int *pOption, const CUIRect *pRect, const char *pStr, int Min, int Max, const IScrollbarScale *pScale = &ms_LinearScrollbarScale, unsigned Flags = 0u, const char *pSuffix = "");
 
 	// progress spinner
 	void RenderProgressSpinner(vec2 Center, float OuterRadius, const SProgressSpinnerProperties &Props = {}) const;
 
 	// popup menu
-	void DoPopupMenu(const SPopupMenuId *pID, int X, int Y, int Width, int Height, void *pContext, FPopupMenuFunction pfnFunc, const SPopupMenuProperties &Props = {});
+	void DoPopupMenu(const SPopupMenuId *pId, int X, int Y, int Width, int Height, void *pContext, FPopupMenuFunction pfnFunc, const SPopupMenuProperties &Props = {});
 	void RenderPopupMenus();
-	void ClosePopupMenu(const SPopupMenuId *pID, bool IncludeDescendants = false);
+	void ClosePopupMenu(const SPopupMenuId *pId, bool IncludeDescendants = false);
 	void ClosePopupMenus();
 	bool IsPopupOpen() const;
-	bool IsPopupOpen(const SPopupMenuId *pID) const;
+	bool IsPopupOpen(const SPopupMenuId *pId) const;
 	bool IsPopupHovered() const;
 	void SetPopupMenuClosedCallback(FPopupMenuClosedCallback pfnCallback);
 
@@ -589,7 +589,7 @@ public:
 		static constexpr float POPUP_MAX_WIDTH = 200.0f;
 		static constexpr float POPUP_FONT_SIZE = 10.0f;
 
-		CUI *m_pUI; // set by CUI when popup is shown
+		CUi *m_pUI; // set by CUi when popup is shown
 		char m_aMessage[1024];
 		ColorRGBA m_TextColor;
 
@@ -611,7 +611,7 @@ public:
 		static constexpr float POPUP_BUTTON_HEIGHT = 12.0f;
 		static constexpr float POPUP_BUTTON_SPACING = 5.0f;
 
-		CUI *m_pUI; // set by CUI when popup is shown
+		CUi *m_pUI; // set by CUi when popup is shown
 		char m_aPositiveButtonLabel[128];
 		char m_aNegativeButtonLabel[128];
 		char m_aMessage[1024];
@@ -628,7 +628,7 @@ public:
 
 	struct SSelectionPopupContext : public SPopupMenuId
 	{
-		CUI *m_pUI; // set by CUI when popup is shown
+		CUi *m_pUI; // set by CUi when popup is shown
 		class CScrollRegion *m_pScrollRegion;
 		SPopupMenuProperties m_Props;
 		char m_aMessage[256];
@@ -659,7 +659,7 @@ public:
 			MODE_HSLA,
 		};
 
-		CUI *m_pUI; // set by CUI when popup is shown
+		CUi *m_pUI; // set by CUi when popup is shown
 		EColorPickerMode m_ColorMode = MODE_UNSET;
 		bool m_Alpha = false;
 		unsigned int *m_pHslaColor = nullptr; // may be nullptr

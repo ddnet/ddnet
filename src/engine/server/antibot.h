@@ -19,10 +19,10 @@ class CAntibot : public IEngineAntibot
 	bool m_Initialized;
 
 	void Update();
-	static void Kick(int ClientID, const char *pMessage, void *pUser);
+	static void Kick(int ClientId, const char *pMessage, void *pUser);
 	static void Log(const char *pMessage, void *pUser);
-	static void Report(int ClientID, const char *pMessage, void *pUser);
-	static void Send(int ClientID, const void *pData, int Size, int Flags, void *pUser);
+	static void Report(int ClientId, const char *pMessage, void *pUser);
+	static void Send(int ClientId, const void *pData, int Size, int Flags, void *pUser);
 	static void Teehistorian(const void *pData, int Size, void *pUser);
 
 public:
@@ -33,25 +33,25 @@ public:
 	void Init() override;
 
 	void OnEngineTick() override;
-	void OnEngineClientJoin(int ClientID, bool Sixup) override;
-	void OnEngineClientDrop(int ClientID, const char *pReason) override;
-	bool OnEngineClientMessage(int ClientID, const void *pData, int Size, int Flags) override;
-	bool OnEngineServerMessage(int ClientID, const void *pData, int Size, int Flags) override;
-	bool OnEngineSimulateClientMessage(int *pClientID, void *pBuffer, int BufferSize, int *pOutSize, int *pFlags) override;
+	void OnEngineClientJoin(int ClientId, bool Sixup) override;
+	void OnEngineClientDrop(int ClientId, const char *pReason) override;
+	bool OnEngineClientMessage(int ClientId, const void *pData, int Size, int Flags) override;
+	bool OnEngineServerMessage(int ClientId, const void *pData, int Size, int Flags) override;
+	bool OnEngineSimulateClientMessage(int *pClientId, void *pBuffer, int BufferSize, int *pOutSize, int *pFlags) override;
 
 	// Game
 	void RoundStart(class IGameServer *pGameServer) override;
 	void RoundEnd() override;
 
-	void OnPlayerInit(int ClientID) override;
-	void OnPlayerDestroy(int ClientID) override;
-	void OnSpawn(int ClientID) override;
-	void OnHammerFireReloading(int ClientID) override;
-	void OnHammerFire(int ClientID) override;
-	void OnHammerHit(int ClientID, int TargetID) override;
-	void OnDirectInput(int ClientID) override;
-	void OnCharacterTick(int ClientID) override;
-	void OnHookAttach(int ClientID, bool Player) override;
+	void OnPlayerInit(int ClientId) override;
+	void OnPlayerDestroy(int ClientId) override;
+	void OnSpawn(int ClientId) override;
+	void OnHammerFireReloading(int ClientId) override;
+	void OnHammerFire(int ClientId) override;
+	void OnHammerHit(int ClientId, int TargetId) override;
+	void OnDirectInput(int ClientId) override;
+	void OnCharacterTick(int ClientId) override;
+	void OnHookAttach(int ClientId, bool Player) override;
 
 	void ConsoleCommand(const char *pCommand) override;
 };

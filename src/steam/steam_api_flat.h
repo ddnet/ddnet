@@ -11,7 +11,7 @@
 
 extern "C" {
 
-typedef uint64_t CSteamID;
+typedef uint64_t CSteamId;
 typedef int32_t HSteamPipe;
 typedef int32_t HSteamUser;
 
@@ -29,7 +29,7 @@ struct GameRichPresenceJoinRequested_t
 	{
 		k_iCallback = 337
 	};
-	CSteamID m_steamIDFriend;
+	CSteamId m_steamIdFriend;
 	char m_aRGCHConnect[256];
 };
 

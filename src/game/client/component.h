@@ -49,7 +49,7 @@ protected:
 	/**
 	 * Get the ui interface.
 	 */
-	class CUI *UI() const;
+	class CUi *Ui() const;
 	/**
 	 * Get the sound interface.
 	 */

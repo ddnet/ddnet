@@ -221,7 +221,7 @@ void CLayerQuads::GetSize(float *pWidth, float *pHeight)
 	}
 }
 
-CUI::EPopupMenuFunctionResult CLayerQuads::RenderProperties(CUIRect *pToolBox)
+CUi::EPopupMenuFunctionResult CLayerQuads::RenderProperties(CUIRect *pToolBox)
 {
 	CProperty aProps[] = {
 		{"Image", m_Image, PROPTYPE_IMAGE, -1, 0},
@@ -249,7 +249,7 @@ CUI::EPopupMenuFunctionResult CLayerQuads::RenderProperties(CUIRect *pToolBox)
 
 	s_Tracker.End(Prop, State);
 
-	return CUI::POPUP_KEEP_OPEN;
+	return CUi::POPUP_KEEP_OPEN;
 }
 
 void CLayerQuads::ModifyImageIndex(FIndexModifyFunction Func)

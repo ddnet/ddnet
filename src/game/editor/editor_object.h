@@ -6,7 +6,7 @@
 #include <engine/input.h>
 #include <game/client/ui_rect.h>
 
-class CUI;
+class CUi;
 class CEditor;
 class IClient;
 class CConfig;
@@ -75,7 +75,7 @@ public:
 	ISound *Sound();
 	ITextRender *TextRender();
 	IStorage *Storage();
-	CUI *UI();
+	CUi *Ui();
 	CRenderTools *RenderTools();
 
 private:

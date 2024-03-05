@@ -211,7 +211,7 @@ template<class T>
 int CNetBan::Ban(T *pBanPool, const typename T::CDataType *pData, int Seconds, const char *pReason)
 {
 	// do not ban localhost
-	if(NetMatch(pData, &m_LocalhostIPV4) || NetMatch(pData, &m_LocalhostIPV6))
+	if(NetMatch(pData, &m_LocalhostIpV4) || NetMatch(pData, &m_LocalhostIpV6))
 	{
 		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "net_ban", "ban failed (localhost)");
 		return -1;
@@ -276,8 +276,8 @@ void CNetBan::Init(IConsole *pConsole, IStorage *pStorage)
 	m_BanAddrPool.Reset();
 	m_BanRangePool.Reset();
 
-	net_host_lookup("localhost", &m_LocalhostIPV4, NETTYPE_IPV4);
-	net_host_lookup("localhost", &m_LocalhostIPV6, NETTYPE_IPV6);
+	net_host_lookup("localhost", &m_LocalhostIpV4, NETTYPE_IPV4);
+	net_host_lookup("localhost", &m_LocalhostIpV6, NETTYPE_IPV6);
 
 	Console()->Register("ban", "s[ip|id] ?i[minutes] r[reason]", CFGFLAG_SERVER | CFGFLAG_MASTER | CFGFLAG_STORE, ConBan, this, "Ban ip for x minutes for any reason");
 	Console()->Register("ban_range", "s[first ip] s[last ip] ?i[minutes] r[reason]", CFGFLAG_SERVER | CFGFLAG_MASTER | CFGFLAG_STORE, ConBanRange, this, "Ban ip range for x minutes for any reason");

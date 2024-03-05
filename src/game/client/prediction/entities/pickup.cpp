@@ -144,7 +144,7 @@ void CPickup::Move()
 	}
 }
 
-CPickup::CPickup(CGameWorld *pGameWorld, int ID, const CPickupData *pPickup) :
+CPickup::CPickup(CGameWorld *pGameWorld, int Id, const CPickupData *pPickup) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_PICKUP, vec2(0, 0), gs_PickupPhysSize)
 {
 	m_Pos = pPickup->m_Pos;
@@ -152,7 +152,7 @@ CPickup::CPickup(CGameWorld *pGameWorld, int ID, const CPickupData *pPickup) :
 	m_Subtype = pPickup->m_Subtype;
 	m_Core = vec2(0.f, 0.f);
 	m_IsCoreActive = false;
-	m_ID = ID;
+	m_Id = Id;
 	m_Number = pPickup->m_SwitchNumber;
 	m_Layer = m_Number > 0 ? LAYER_SWITCH : LAYER_GAME;
 }

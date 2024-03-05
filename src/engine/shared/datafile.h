@@ -54,10 +54,10 @@ public:
 	int NumData() const;
 
 	int GetItemSize(int Index) const;
-	void *GetItem(int Index, int *pType = nullptr, int *pID = nullptr, CUuid *pUuid = nullptr);
+	void *GetItem(int Index, int *pType = nullptr, int *pId = nullptr, CUuid *pUuid = nullptr);
 	void GetType(int Type, int *pStart, int *pNum);
-	int FindItemIndex(int Type, int ID);
-	void *FindItem(int Type, int ID);
+	int FindItemIndex(int Type, int Id);
+	void *FindItem(int Type, int Id);
 	int NumItems() const;
 
 	SHA256_DIGEST Sha256() const;
@@ -88,7 +88,7 @@ private:
 	struct CItemInfo
 	{
 		int m_Type;
-		int m_ID;
+		int m_Id;
 		int m_Size;
 		int m_Next;
 		int m_Prev;
@@ -136,7 +136,7 @@ public:
 	~CDataFileWriter();
 
 	bool Open(class IStorage *pStorage, const char *pFilename, int StorageType = IStorage::TYPE_SAVE);
-	int AddItem(int Type, int ID, size_t Size, const void *pData, const CUuid *pUuid = nullptr);
+	int AddItem(int Type, int Id, size_t Size, const void *pData, const CUuid *pUuid = nullptr);
 	int AddData(size_t Size, const void *pData, ECompressionLevel CompressionLevel = COMPRESSION_DEFAULT);
 	int AddDataSwapped(size_t Size, const void *pData);
 	int AddDataString(const char *pStr);

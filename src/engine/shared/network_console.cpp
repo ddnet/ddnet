@@ -42,12 +42,12 @@ int CNetConsole::Close()
 	return 0;
 }
 
-int CNetConsole::Drop(int ClientID, const char *pReason)
+int CNetConsole::Drop(int ClientId, const char *pReason)
 {
 	if(m_pfnDelClient)
-		m_pfnDelClient(ClientID, pReason, m_pUser);
+		m_pfnDelClient(ClientId, pReason, m_pUser);
 
-	m_aSlots[ClientID].m_Connection.Disconnect(pReason);
+	m_aSlots[ClientId].m_Connection.Disconnect(pReason);
 
 	return 0;
 }
@@ -121,24 +121,24 @@ int CNetConsole::Update()
 	return 0;
 }
 
-int CNetConsole::Recv(char *pLine, int MaxLength, int *pClientID)
+int CNetConsole::Recv(char *pLine, int MaxLength, int *pClientId)
 {
 	for(int i = 0; i < NET_MAX_CONSOLE_CLIENTS; i++)
 	{
 		if(m_aSlots[i].m_Connection.State() == NET_CONNSTATE_ONLINE && m_aSlots[i].m_Connection.Recv(pLine, MaxLength))
 		{
-			if(pClientID)
-				*pClientID = i;
+			if(pClientId)
+				*pClientId = i;
 			return 1;
 		}
 	}
 	return 0;
 }
 
-int CNetConsole::Send(int ClientID, const char *pLine)
+int CNetConsole::Send(int ClientId, const char *pLine)
 {
-	if(m_aSlots[ClientID].m_Connection.State() == NET_CONNSTATE_ONLINE)
-		return m_aSlots[ClientID].m_Connection.Send(pLine);
+	if(m_aSlots[ClientId].m_Connection.State() == NET_CONNSTATE_ONLINE)
+		return m_aSlots[ClientId].m_Connection.Send(pLine);
 	else
 		return -1;
 }

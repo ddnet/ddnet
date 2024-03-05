@@ -107,17 +107,17 @@ enum
 	NET_SECURITY_TOKEN_UNSUPPORTED = 0,
 };
 
-typedef int (*NETFUNC_DELCLIENT)(int ClientID, const char *pReason, void *pUser);
-typedef int (*NETFUNC_NEWCLIENT_CON)(int ClientID, void *pUser);
-typedef int (*NETFUNC_NEWCLIENT)(int ClientID, void *pUser, bool Sixup);
-typedef int (*NETFUNC_NEWCLIENT_NOAUTH)(int ClientID, void *pUser);
-typedef int (*NETFUNC_CLIENTREJOIN)(int ClientID, void *pUser);
+typedef int (*NETFUNC_DELCLIENT)(int ClientId, const char *pReason, void *pUser);
+typedef int (*NETFUNC_NEWCLIENT_CON)(int ClientId, void *pUser);
+typedef int (*NETFUNC_NEWCLIENT)(int ClientId, void *pUser, bool Sixup);
+typedef int (*NETFUNC_NEWCLIENT_NOAUTH)(int ClientId, void *pUser);
+typedef int (*NETFUNC_CLIENTREJOIN)(int ClientId, void *pUser);
 
 struct CNetChunk
 {
 	// -1 means that it's a stateless packet
 	// 0 on the client means the server
-	int m_ClientID;
+	int m_ClientId;
 	NETADDR m_Address; // only used when client_id == -1
 	int m_Flags;
 	int m_DataSize;
@@ -334,13 +334,13 @@ public:
 	NETADDR m_Addr;
 	CNetConnection *m_pConnection;
 	int m_CurrentChunk;
-	int m_ClientID;
+	int m_ClientId;
 	CNetPacketConstruct m_Data;
 	unsigned char m_aBuffer[NET_MAX_PACKETSIZE];
 
 	CNetRecvUnpacker() { Clear(); }
 	void Clear();
-	void Start(const NETADDR *pAddr, CNetConnection *pConnection, int ClientID);
+	void Start(const NETADDR *pAddr, CNetConnection *pConnection, int ClientId);
 	int FetchChunk(CNetChunk *pChunk);
 };
 
@@ -365,7 +365,7 @@ class CNetServer
 	CNetBan *m_pNetBan;
 	CSlot m_aSlots[NET_MAX_CLIENTS];
 	int m_MaxClients;
-	int m_MaxClientsPerIP;
+	int m_MaxClientsPerIp;
 
 	NETFUNC_NEWCLIENT m_pfnNewClient;
 	NETFUNC_NEWCLIENT_NOAUTH m_pfnNewClientNoAuth;
@@ -388,7 +388,7 @@ class CNetServer
 	void OnTokenCtrlMsg(NETADDR &Addr, int ControlMsg, const CNetPacketConstruct &Packet);
 	int OnSixupCtrlMsg(NETADDR &Addr, CNetChunk *pChunk, int ControlMsg, const CNetPacketConstruct &Packet, SECURITY_TOKEN &ResponseToken, SECURITY_TOKEN Token);
 	void OnPreConnMsg(NETADDR &Addr, CNetPacketConstruct &Packet);
-	void OnConnCtrlMsg(NETADDR &Addr, int ClientID, int ControlMsg, const CNetPacketConstruct &Packet);
+	void OnConnCtrlMsg(NETADDR &Addr, int ClientId, int ControlMsg, const CNetPacketConstruct &Packet);
 	bool ClientExists(const NETADDR &Addr) { return GetClientSlot(Addr) != -1; }
 	int GetClientSlot(const NETADDR &Addr);
 	void SendControl(NETADDR &Addr, int ControlMsg, const void *pExtra, int ExtraSize, SECURITY_TOKEN SecurityToken);
@@ -403,7 +403,7 @@ public:
 	int SetCallbacks(NETFUNC_NEWCLIENT pfnNewClient, NETFUNC_NEWCLIENT_NOAUTH pfnNewClientNoAuth, NETFUNC_CLIENTREJOIN pfnClientRejoin, NETFUNC_DELCLIENT pfnDelClient, void *pUser);
 
 	//
-	bool Open(NETADDR BindAddr, CNetBan *pNetBan, int MaxClients, int MaxClientsPerIP);
+	bool Open(NETADDR BindAddr, CNetBan *pNetBan, int MaxClients, int MaxClientsPerIp);
 	int Close();
 
 	//
@@ -412,11 +412,11 @@ public:
 	int Update();
 
 	//
-	int Drop(int ClientID, const char *pReason);
+	int Drop(int ClientId, const char *pReason);
 
 	// status requests
-	const NETADDR *ClientAddr(int ClientID) const { return m_aSlots[ClientID].m_Connection.PeerAddress(); }
-	bool HasSecurityToken(int ClientID) const { return m_aSlots[ClientID].m_Connection.SecurityToken() != NET_SECURITY_TOKEN_UNSUPPORTED; }
+	const NETADDR *ClientAddr(int ClientId) const { return m_aSlots[ClientId].m_Connection.PeerAddress(); }
+	bool HasSecurityToken(int ClientId) const { return m_aSlots[ClientId].m_Connection.SecurityToken() != NET_SECURITY_TOKEN_UNSUPPORTED; }
 	NETADDR Address() const { return m_Address; }
 	NETSOCKET Socket() const { return m_Socket; }
 	CNetBan *NetBan() const { return m_pNetBan; }
@@ -427,12 +427,12 @@ public:
 	int SendConnlessSixup(CNetChunk *pChunk, SECURITY_TOKEN ResponseToken);
 
 	//
-	void SetMaxClientsPerIP(int Max);
-	bool SetTimedOut(int ClientID, int OrigID);
-	void SetTimeoutProtected(int ClientID);
+	void SetMaxClientsPerIp(int Max);
+	bool SetTimedOut(int ClientId, int OrigId);
+	void SetTimeoutProtected(int ClientId);
 
-	int ResetErrorString(int ClientID);
-	const char *ErrorString(int ClientID);
+	int ResetErrorString(int ClientId);
+	const char *ErrorString(int ClientId);
 
 	// anti spoof
 	SECURITY_TOKEN GetGlobalToken();
@@ -466,16 +466,16 @@ public:
 	int Close();
 
 	//
-	int Recv(char *pLine, int MaxLength, int *pClientID = nullptr);
-	int Send(int ClientID, const char *pLine);
+	int Recv(char *pLine, int MaxLength, int *pClientId = nullptr);
+	int Send(int ClientId, const char *pLine);
 	int Update();
 
 	//
 	int AcceptClient(NETSOCKET Socket, const NETADDR *pAddr);
-	int Drop(int ClientID, const char *pReason);
+	int Drop(int ClientId, const char *pReason);
 
 	// status requests
-	const NETADDR *ClientAddr(int ClientID) const { return m_aSlots[ClientID].m_Connection.PeerAddress(); }
+	const NETADDR *ClientAddr(int ClientId) const { return m_aSlots[ClientId].m_Connection.PeerAddress(); }
 	CNetBan *NetBan() const { return m_pNetBan; }
 };
 

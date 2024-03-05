@@ -63,13 +63,13 @@ def main():
 			"Time FLOAT DEFAULT 0, "
 			"Server CHAR(4), " +
 			"".join(f"cp{i + 1} FLOAT DEFAULT 0, " for i in range(25)) +
-			"GameID VARCHAR(64), "
+			"GameId VARCHAR(64), "
 			"DDNet7 BOOL DEFAULT FALSE"
 		");")
 		c.executemany(
 			"INSERT INTO record_race (Map, Name, Time, Server, " +
 			"".join(f"cp{i + 1}, " for i in range(25)) +
-			"GameID, DDNet7) " +
+			"GameId, DDNet7) " +
 			f"VALUES ({','.join('?' * 31)})",
 			[(map, r.name, float(r.time), "TEXT", *[float(c) for c in r.checkpoints], None, False) for map, record in records.items() for r in record]
 		)

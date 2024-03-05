@@ -202,9 +202,9 @@ enum EBackendType
 	BACKEND_TYPE_COUNT,
 };
 
-struct STWGraphicGPU
+struct STWGraphicGpu
 {
-	enum ETWGraphicsGPUType
+	enum ETWGraphicsGpuType
 	{
 		GRAPHICS_GPU_TYPE_DISCRETE = 0,
 		GRAPHICS_GPU_TYPE_INTEGRATED,
@@ -215,16 +215,16 @@ struct STWGraphicGPU
 		GRAPHICS_GPU_TYPE_INVALID,
 	};
 
-	struct STWGraphicGPUItem
+	struct STWGraphicGpuItem
 	{
 		char m_aName[256];
-		ETWGraphicsGPUType m_GPUType;
+		ETWGraphicsGpuType m_GpuType;
 	};
-	std::vector<STWGraphicGPUItem> m_vGPUs;
-	STWGraphicGPUItem m_AutoGPU;
+	std::vector<STWGraphicGpuItem> m_vGpus;
+	STWGraphicGpuItem m_AutoGpu;
 };
 
-typedef STWGraphicGPU TTWGraphicsGPUList;
+typedef STWGraphicGpu TTwGraphicsGpuList;
 
 typedef std::function<void()> WINDOW_RESIZE_FUNC;
 typedef std::function<void()> WINDOW_PROPS_CHANGED_FUNC;
@@ -295,8 +295,8 @@ public:
 	*/
 	virtual void AddWindowPropChangeListener(WINDOW_PROPS_CHANGED_FUNC pFunc) = 0;
 
-	virtual void WindowDestroyNtf(uint32_t WindowID) = 0;
-	virtual void WindowCreateNtf(uint32_t WindowID) = 0;
+	virtual void WindowDestroyNtf(uint32_t WindowId) = 0;
+	virtual void WindowCreateNtf(uint32_t WindowId) = 0;
 
 	// ForceClearNow forces the backend to trigger a clear, even at performance cost, else it might be delayed by one frame
 	virtual void Clear(float r, float g, float b, bool ForceClearNow = false) = 0;
@@ -319,7 +319,7 @@ public:
 	virtual uint64_t StreamedMemoryUsage() const = 0;
 	virtual uint64_t StagingMemoryUsage() const = 0;
 
-	virtual const TTWGraphicsGPUList &GetGPUs() const = 0;
+	virtual const TTwGraphicsGpuList &GetGpus() const = 0;
 
 	virtual bool LoadPNG(CImageInfo *pImg, const char *pFilename, int StorageType) = 0;
 	virtual void FreePNG(CImageInfo *pImg) = 0;
@@ -336,7 +336,7 @@ public:
 	virtual int UnloadTexture(CTextureHandle *pIndex) = 0;
 	virtual CTextureHandle LoadTextureRaw(size_t Width, size_t Height, CImageInfo::EImageFormat Format, const void *pData, int Flags, const char *pTexName = nullptr) = 0;
 	virtual CTextureHandle LoadTextureRawMove(size_t Width, size_t Height, CImageInfo::EImageFormat Format, void *pData, int Flags, const char *pTexName = nullptr) = 0;
-	virtual int LoadTextureRawSub(CTextureHandle TextureID, int x, int y, size_t Width, size_t Height, CImageInfo::EImageFormat Format, const void *pData) = 0;
+	virtual int LoadTextureRawSub(CTextureHandle TextureId, int x, int y, size_t Width, size_t Height, CImageInfo::EImageFormat Format, const void *pData) = 0;
 	virtual CTextureHandle LoadTexture(const char *pFilename, int StorageType, int Flags = 0) = 0;
 	virtual CTextureHandle NullTexture() const = 0;
 	virtual void TextureSet(CTextureHandle Texture) = 0;
@@ -345,7 +345,7 @@ public:
 	// pTextData & pTextOutlineData are automatically free'd
 	virtual bool LoadTextTextures(size_t Width, size_t Height, CTextureHandle &TextTexture, CTextureHandle &TextOutlineTexture, void *pTextData, void *pTextOutlineData) = 0;
 	virtual bool UnloadTextTextures(CTextureHandle &TextTexture, CTextureHandle &TextOutlineTexture) = 0;
-	virtual bool UpdateTextTexture(CTextureHandle TextureID, int x, int y, size_t Width, size_t Height, const void *pData) = 0;
+	virtual bool UpdateTextTexture(CTextureHandle TextureId, int x, int y, size_t Width, size_t Height, const void *pData) = 0;
 
 	virtual CTextureHandle LoadSpriteTexture(CImageInfo &FromImageInfo, struct CDataSprite *pSprite) = 0;
 

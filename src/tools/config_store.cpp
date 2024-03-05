@@ -50,11 +50,11 @@ void Process(IStorage *pStorage, const char *pMapName, const char *pConfigName)
 	bool FoundInfo = false;
 	for(int i = 0; i < Reader.NumItems(); i++)
 	{
-		int Type, ID;
-		int *pItem = (int *)Reader.GetItem(i, &Type, &ID);
+		int Type, Id;
+		int *pItem = (int *)Reader.GetItem(i, &Type, &Id);
 		int Size = Reader.GetItemSize(i);
 		CMapItemInfoSettings MapInfo;
-		if(Type == MAPITEMTYPE_INFO && ID == 0)
+		if(Type == MAPITEMTYPE_INFO && Id == 0)
 		{
 			FoundInfo = true;
 			CMapItemInfoSettings *pInfo = (CMapItemInfoSettings *)pItem;
@@ -92,7 +92,7 @@ void Process(IStorage *pStorage, const char *pMapName, const char *pConfigName)
 				Size = sizeof(MapInfo);
 			}
 		}
-		Writer.AddItem(Type, ID, Size, pItem);
+		Writer.AddItem(Type, Id, Size, pItem);
 	}
 
 	if(!FoundInfo)

@@ -78,7 +78,7 @@ void CProjectile::Tick()
 	vec2 ColPos;
 	vec2 NewPos;
 	int Collide = Collision()->IntersectLine(PrevPos, CurPos, &ColPos, &NewPos);
-	CCharacter *pOwnerChar = GameWorld()->GetCharacterByID(m_Owner);
+	CCharacter *pOwnerChar = GameWorld()->GetCharacterById(m_Owner);
 
 	CCharacter *pTargetChr = GameWorld()->IntersectCharacter(PrevPos, ColPos, m_Freeze ? 1.0f : 6.0f, ColPos, pOwnerChar, m_Owner);
 
@@ -140,7 +140,7 @@ void CProjectile::Tick()
 		if(m_Explosive)
 		{
 			if(m_Owner >= 0)
-				pOwnerChar = GameWorld()->GetCharacterByID(m_Owner);
+				pOwnerChar = GameWorld()->GetCharacterById(m_Owner);
 
 			GameWorld()->CreateExplosion(ColPos, m_Owner, m_Type, m_Owner == -1, (!pOwnerChar ? -1 : pOwnerChar->Team()), CClientMask().set());
 		}
@@ -155,7 +155,7 @@ void CProjectile::SetBouncing(int Value)
 	m_Bouncing = Value;
 }
 
-CProjectile::CProjectile(CGameWorld *pGameWorld, int ID, const CProjectileData *pProj) :
+CProjectile::CProjectile(CGameWorld *pGameWorld, int Id, const CProjectileData *pProj) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_PROJECTILE)
 {
 	m_Pos = pProj->m_StartPos;
@@ -190,7 +190,7 @@ CProjectile::CProjectile(CGameWorld *pGameWorld, int ID, const CProjectileData *
 	else if(m_Type == WEAPON_SHOTGUN && !GameWorld()->m_WorldConfig.m_IsDDRace)
 		Lifetime = GetTuning(m_TuneZone)->m_ShotgunLifetime * GameWorld()->GameTickSpeed();
 	m_LifeSpan = Lifetime - (pGameWorld->GameTick() - m_StartTick);
-	m_ID = ID;
+	m_Id = Id;
 	m_Number = pProj->m_SwitchNumber;
 	m_Layer = m_Number > 0 ? LAYER_SWITCH : LAYER_GAME;
 }

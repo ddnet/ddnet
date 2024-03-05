@@ -50,7 +50,7 @@ int main(int argc, const char **argv)
 	str_copy(aFilenames[1], argv[9]); //output_map
 	str_copy(aFilenames[2], argv[1]); //image_file
 
-	int aLayerID[2] = {str_toint(argv[4]), str_toint(argv[5])}; //layergroup_id, layer_id
+	int aLayerId[2] = {str_toint(argv[4]), str_toint(argv[5])}; //layergroup_id, layer_id
 	int aStartingPos[2] = {str_toint(argv[6]) * 32, str_toint(argv[7]) * 32}; //pos_x, pos_y
 	int aPixelSizes[2] = {str_toint(argv[2]), str_toint(argv[8])}; //quad_pixelsize, img_pixelsize
 
@@ -59,12 +59,12 @@ int main(int argc, const char **argv)
 	aArtOptions[1] = argc >= 11 ? str_toint(argv[11]) : false; //centralize
 
 	dbg_msg("map_create_pixelart", "image_file='%s'; image_pixelsize='%dpx'; input_map='%s'; layergroup_id='#%d'; layer_id='#%d'; pos_x='#%dpx'; pos_y='%dpx'; quad_pixelsize='%dpx'; output_map='%s'; optimize='%d'; centralize='%d'",
-		aFilenames[2], aPixelSizes[0], aFilenames[1], aLayerID[0], aLayerID[1], aStartingPos[0], aStartingPos[1], aPixelSizes[1], aFilenames[2], aArtOptions[0], aArtOptions[1]);
+		aFilenames[2], aPixelSizes[0], aFilenames[1], aLayerId[0], aLayerId[1], aStartingPos[0], aStartingPos[1], aPixelSizes[1], aFilenames[2], aArtOptions[0], aArtOptions[1]);
 
-	return !CreatePixelArt(aFilenames, aLayerID, aStartingPos, aPixelSizes, aArtOptions);
+	return !CreatePixelArt(aFilenames, aLayerId, aStartingPos, aPixelSizes, aArtOptions);
 }
 
-bool CreatePixelArt(const char aFilenames[3][64], const int aLayerID[2], const int aStartingPos[2], int aPixelSizes[2], const bool aArtOptions[2])
+bool CreatePixelArt(const char aFilenames[3][64], const int aLayerId[2], const int aStartingPos[2], int aPixelSizes[2], const bool aArtOptions[2])
 {
 	CImageInfo Img;
 	if(!LoadPNG(&Img, aFilenames[2]))
@@ -79,7 +79,7 @@ bool CreatePixelArt(const char aFilenames[3][64], const int aLayerID[2], const i
 		return false;
 
 	int ItemNumber = 0;
-	CMapItemLayerQuads *pQuadLayer = GetQuadLayer(InputMap, aLayerID, &ItemNumber);
+	CMapItemLayerQuads *pQuadLayer = GetQuadLayer(InputMap, aLayerId, &ItemNumber);
 	if(!pQuadLayer)
 		return false;
 
@@ -248,32 +248,32 @@ void SetVisitedPixels(const CImageInfo &Img, int PosX, int PosY, int Width, int 
 			aVisitedPixels[x + y * Img.m_Width] = true;
 }
 
-CMapItemLayerQuads *GetQuadLayer(CDataFileReader &InputMap, const int aLayerID[2], int *pItemNumber)
+CMapItemLayerQuads *GetQuadLayer(CDataFileReader &InputMap, const int aLayerId[2], int *pItemNumber)
 {
 	int Start, Num;
 	InputMap.GetType(MAPITEMTYPE_GROUP, &Start, &Num);
 
-	CMapItemGroup *pGroupItem = aLayerID[0] >= Num ? 0x0 : (CMapItemGroup *)InputMap.GetItem(Start + aLayerID[0]);
+	CMapItemGroup *pGroupItem = aLayerId[0] >= Num ? 0x0 : (CMapItemGroup *)InputMap.GetItem(Start + aLayerId[0]);
 
 	if(!pGroupItem)
 	{
-		dbg_msg("map_create_pixelart", "ERROR: unable to find layergroup '#%d'", aLayerID[0]);
+		dbg_msg("map_create_pixelart", "ERROR: unable to find layergroup '#%d'", aLayerId[0]);
 		return 0x0;
 	}
 
 	InputMap.GetType(MAPITEMTYPE_LAYER, &Start, &Num);
-	*pItemNumber = Start + pGroupItem->m_StartLayer + aLayerID[1];
+	*pItemNumber = Start + pGroupItem->m_StartLayer + aLayerId[1];
 
-	CMapItemLayer *pLayerItem = aLayerID[1] >= pGroupItem->m_NumLayers ? 0x0 : (CMapItemLayer *)InputMap.GetItem(*pItemNumber);
+	CMapItemLayer *pLayerItem = aLayerId[1] >= pGroupItem->m_NumLayers ? 0x0 : (CMapItemLayer *)InputMap.GetItem(*pItemNumber);
 	if(!pLayerItem)
 	{
-		dbg_msg("map_create_pixelart", "ERROR: unable to find layer '#%d' in group '#%d'", aLayerID[1], aLayerID[0]);
+		dbg_msg("map_create_pixelart", "ERROR: unable to find layer '#%d' in group '#%d'", aLayerId[1], aLayerId[0]);
 		return 0x0;
 	}
 
 	if(pLayerItem->m_Type != LAYERTYPE_QUADS)
 	{
-		dbg_msg("map_create_pixelart", "ERROR: layer '#%d' in group '#%d' is not a quad layer", aLayerID[1], aLayerID[0]);
+		dbg_msg("map_create_pixelart", "ERROR: layer '#%d' in group '#%d' is not a quad layer", aLayerId[1], aLayerId[0]);
 		return 0x0;
 	}
 
@@ -380,9 +380,9 @@ void SaveOutputMap(CDataFileReader &InputMap, CDataFileWriter &OutputMap, CMapIt
 {
 	for(int i = 0; i < InputMap.NumItems(); i++)
 	{
-		int ID, Type;
+		int Id, Type;
 		CUuid Uuid;
-		void *pItem = InputMap.GetItem(i, &Type, &ID, &Uuid);
+		void *pItem = InputMap.GetItem(i, &Type, &Id, &Uuid);
 
 		// Filter ITEMTYPE_EX items, they will be automatically added again.
 		if(Type == ITEMTYPE_EX)
@@ -394,7 +394,7 @@ void SaveOutputMap(CDataFileReader &InputMap, CDataFileWriter &OutputMap, CMapIt
 			pItem = pNewItem;
 
 		int Size = InputMap.GetItemSize(i);
-		OutputMap.AddItem(Type, ID, Size, pItem, &Uuid);
+		OutputMap.AddItem(Type, Id, Size, pItem, &Uuid);
 	}
 
 	for(int i = 0; i < InputMap.NumData(); i++)

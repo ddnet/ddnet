@@ -8,36 +8,36 @@ CTeamsCore::CTeamsCore()
 	Reset();
 }
 
-bool CTeamsCore::SameTeam(int ClientID1, int ClientID2) const
+bool CTeamsCore::SameTeam(int ClientId1, int ClientId2) const
 {
-	return m_aTeam[ClientID1] == TEAM_SUPER || m_aTeam[ClientID2] == TEAM_SUPER || m_aTeam[ClientID1] == m_aTeam[ClientID2];
+	return m_aTeam[ClientId1] == TEAM_SUPER || m_aTeam[ClientId2] == TEAM_SUPER || m_aTeam[ClientId1] == m_aTeam[ClientId2];
 }
 
-int CTeamsCore::Team(int ClientID) const
+int CTeamsCore::Team(int ClientId) const
 {
-	return m_aTeam[ClientID];
+	return m_aTeam[ClientId];
 }
 
-void CTeamsCore::Team(int ClientID, int Team)
+void CTeamsCore::Team(int ClientId, int Team)
 {
 	dbg_assert(Team >= TEAM_FLOCK && Team <= TEAM_SUPER, "invalid team");
-	m_aTeam[ClientID] = Team;
+	m_aTeam[ClientId] = Team;
 }
 
-bool CTeamsCore::CanKeepHook(int ClientID1, int ClientID2) const
+bool CTeamsCore::CanKeepHook(int ClientId1, int ClientId2) const
 {
-	if(m_aTeam[ClientID1] == (m_IsDDRace16 ? VANILLA_TEAM_SUPER : TEAM_SUPER) || m_aTeam[ClientID2] == (m_IsDDRace16 ? VANILLA_TEAM_SUPER : TEAM_SUPER) || ClientID1 == ClientID2)
+	if(m_aTeam[ClientId1] == (m_IsDDRace16 ? VANILLA_TEAM_SUPER : TEAM_SUPER) || m_aTeam[ClientId2] == (m_IsDDRace16 ? VANILLA_TEAM_SUPER : TEAM_SUPER) || ClientId1 == ClientId2)
 		return true;
-	return m_aTeam[ClientID1] == m_aTeam[ClientID2];
+	return m_aTeam[ClientId1] == m_aTeam[ClientId2];
 }
 
-bool CTeamsCore::CanCollide(int ClientID1, int ClientID2) const
+bool CTeamsCore::CanCollide(int ClientId1, int ClientId2) const
 {
-	if(m_aTeam[ClientID1] == (m_IsDDRace16 ? VANILLA_TEAM_SUPER : TEAM_SUPER) || m_aTeam[ClientID2] == (m_IsDDRace16 ? VANILLA_TEAM_SUPER : TEAM_SUPER) || ClientID1 == ClientID2)
+	if(m_aTeam[ClientId1] == (m_IsDDRace16 ? VANILLA_TEAM_SUPER : TEAM_SUPER) || m_aTeam[ClientId2] == (m_IsDDRace16 ? VANILLA_TEAM_SUPER : TEAM_SUPER) || ClientId1 == ClientId2)
 		return true;
-	if(m_aIsSolo[ClientID1] || m_aIsSolo[ClientID2])
+	if(m_aIsSolo[ClientId1] || m_aIsSolo[ClientId2])
 		return false;
-	return m_aTeam[ClientID1] == m_aTeam[ClientID2];
+	return m_aTeam[ClientId1] == m_aTeam[ClientId2];
 }
 
 void CTeamsCore::Reset()
@@ -54,15 +54,15 @@ void CTeamsCore::Reset()
 	}
 }
 
-void CTeamsCore::SetSolo(int ClientID, bool Value)
+void CTeamsCore::SetSolo(int ClientId, bool Value)
 {
-	dbg_assert(ClientID >= 0 && ClientID < MAX_CLIENTS, "Invalid client id");
-	m_aIsSolo[ClientID] = Value;
+	dbg_assert(ClientId >= 0 && ClientId < MAX_CLIENTS, "Invalid client id");
+	m_aIsSolo[ClientId] = Value;
 }
 
-bool CTeamsCore::GetSolo(int ClientID) const
+bool CTeamsCore::GetSolo(int ClientId) const
 {
-	if(ClientID < 0 || ClientID >= MAX_CLIENTS)
+	if(ClientId < 0 || ClientId >= MAX_CLIENTS)
 		return false;
-	return m_aIsSolo[ClientID];
+	return m_aIsSolo[ClientId];
 }

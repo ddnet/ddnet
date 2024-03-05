@@ -31,7 +31,7 @@ private:
 	int m_GridFactor;
 
 	SPopupMenuId m_PopupGridSettingsId;
-	static CUI::EPopupMenuFunctionResult PopupGridSettings(void *pContext, CUIRect View, bool Active);
+	static CUi::EPopupMenuFunctionResult PopupGridSettings(void *pContext, CUIRect View, bool Active);
 };
 
 #endif

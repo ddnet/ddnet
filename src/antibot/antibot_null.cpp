@@ -32,19 +32,19 @@ void AntibotConsoleCommand(const char *pCommand)
 		g_pData->m_pfnLog("unknown command", g_pData->m_pUser);
 	}
 }
-void AntibotOnPlayerInit(int /*ClientID*/) {}
-void AntibotOnPlayerDestroy(int /*ClientID*/) {}
-void AntibotOnSpawn(int /*ClientID*/) {}
-void AntibotOnHammerFireReloading(int /*ClientID*/) {}
-void AntibotOnHammerFire(int /*ClientID*/) {}
-void AntibotOnHammerHit(int /*ClientID*/, int /*TargetID*/) {}
-void AntibotOnDirectInput(int /*ClientID*/) {}
-void AntibotOnCharacterTick(int /*ClientID*/) {}
-void AntibotOnHookAttach(int /*ClientID*/, bool /*Player*/) {}
+void AntibotOnPlayerInit(int /*ClientId*/) {}
+void AntibotOnPlayerDestroy(int /*ClientId*/) {}
+void AntibotOnSpawn(int /*ClientId*/) {}
+void AntibotOnHammerFireReloading(int /*ClientId*/) {}
+void AntibotOnHammerFire(int /*ClientId*/) {}
+void AntibotOnHammerHit(int /*ClientId*/, int /*TargetId*/) {}
+void AntibotOnDirectInput(int /*ClientId*/) {}
+void AntibotOnCharacterTick(int /*ClientId*/) {}
+void AntibotOnHookAttach(int /*ClientId*/, bool /*Player*/) {}
 void AntibotOnEngineTick(void) {}
-void AntibotOnEngineClientJoin(int /*ClientID*/, bool /*Sixup*/) {}
-void AntibotOnEngineClientDrop(int /*ClientID*/, const char * /*pReason*/) {}
-bool AntibotOnEngineClientMessage(int /*ClientID*/, const void * /*pData*/, int /*Size*/, int /*Flags*/) { return false; }
-bool AntibotOnEngineServerMessage(int /*ClientID*/, const void * /*pData*/, int /*Size*/, int /*Flags*/) { return false; }
-bool AntibotOnEngineSimulateClientMessage(int * /*pClientID*/, void * /*pBuffer*/, int /*BufferSize*/, int * /*pOutSize*/, int * /*pFlags*/) { return false; }
+void AntibotOnEngineClientJoin(int /*ClientId*/, bool /*Sixup*/) {}
+void AntibotOnEngineClientDrop(int /*ClientId*/, const char * /*pReason*/) {}
+bool AntibotOnEngineClientMessage(int /*ClientId*/, const void * /*pData*/, int /*Size*/, int /*Flags*/) { return false; }
+bool AntibotOnEngineServerMessage(int /*ClientId*/, const void * /*pData*/, int /*Size*/, int /*Flags*/) { return false; }
+bool AntibotOnEngineSimulateClientMessage(int * /*pClientId*/, void * /*pBuffer*/, int /*BufferSize*/, int * /*pOutSize*/, int * /*pFlags*/) { return false; }
 }

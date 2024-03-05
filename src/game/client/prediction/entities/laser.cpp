@@ -31,7 +31,7 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 {
 	static const vec2 StackedLaserShotgunBugSpeed = vec2(-2147483648.0f, -2147483648.0f);
 	vec2 At;
-	CCharacter *pOwnerChar = GameWorld()->GetCharacterByID(m_Owner);
+	CCharacter *pOwnerChar = GameWorld()->GetCharacterById(m_Owner);
 	CCharacter *pHit;
 	bool DontHitSelf = (g_Config.m_SvOldLaser || !GameWorld()->m_WorldConfig.m_IsDDRace) || (m_Bounces == 0);
 
@@ -178,7 +178,7 @@ void CLaser::Tick()
 	}
 }
 
-CLaser::CLaser(CGameWorld *pGameWorld, int ID, CLaserData *pLaser) :
+CLaser::CLaser(CGameWorld *pGameWorld, int Id, CLaserData *pLaser) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER)
 {
 	m_Pos = pLaser->m_To;
@@ -197,7 +197,7 @@ CLaser::CLaser(CGameWorld *pGameWorld, int ID, CLaserData *pLaser) :
 		m_Energy = 0;
 	m_Type = pLaser->m_Type == LASERTYPE_SHOTGUN ? WEAPON_SHOTGUN : WEAPON_LASER;
 	m_PrevPos = m_From;
-	m_ID = ID;
+	m_Id = Id;
 }
 
 bool CLaser::Match(CLaser *pLaser)

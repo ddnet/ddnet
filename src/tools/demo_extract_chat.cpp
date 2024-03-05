@@ -61,7 +61,7 @@ public:
 				continue;
 
 			const int ItemSize = NetObjHandler.GetUnpackedObjSize(ItemType);
-			void *pObj = Builder.NewItem(pFromItem->Type(), pFromItem->ID(), ItemSize);
+			void *pObj = Builder.NewItem(pFromItem->Type(), pFromItem->Id(), ItemSize);
 			if(!pObj)
 				return -4;
 
@@ -71,21 +71,21 @@ public:
 		return Builder.Finish(pTo);
 	}
 
-	int SnapNumItems(int SnapID)
+	int SnapNumItems(int SnapId)
 	{
-		dbg_assert(SnapID >= 0 && SnapID < IClient::NUM_SNAPSHOT_TYPES, "invalid SnapID");
-		if(!m_apSnapshots[SnapID])
+		dbg_assert(SnapId >= 0 && SnapId < IClient::NUM_SNAPSHOT_TYPES, "invalid SnapId");
+		if(!m_apSnapshots[SnapId])
 			return 0;
-		return m_apSnapshots[SnapID]->m_pAltSnap->NumItems();
+		return m_apSnapshots[SnapId]->m_pAltSnap->NumItems();
 	}
 
-	void *SnapGetItem(int SnapID, int Index, IClient::CSnapItem *pItem)
+	void *SnapGetItem(int SnapId, int Index, IClient::CSnapItem *pItem)
 	{
-		dbg_assert(SnapID >= 0 && SnapID < IClient::NUM_SNAPSHOT_TYPES, "invalid SnapID");
-		const CSnapshotItem *pSnapshotItem = m_apSnapshots[SnapID]->m_pAltSnap->GetItem(Index);
-		pItem->m_DataSize = m_apSnapshots[SnapID]->m_pAltSnap->GetItemSize(Index);
-		pItem->m_Type = m_apSnapshots[SnapID]->m_pAltSnap->GetItemType(Index);
-		pItem->m_ID = pSnapshotItem->ID();
+		dbg_assert(SnapId >= 0 && SnapId < IClient::NUM_SNAPSHOT_TYPES, "invalid SnapId");
+		const CSnapshotItem *pSnapshotItem = m_apSnapshots[SnapId]->m_pAltSnap->GetItem(Index);
+		pItem->m_DataSize = m_apSnapshots[SnapId]->m_pAltSnap->GetItemSize(Index);
+		pItem->m_Type = m_apSnapshots[SnapId]->m_pAltSnap->GetItemType(Index);
+		pItem->m_Id = pSnapshotItem->Id();
 		return (void *)pSnapshotItem->Data();
 	}
 
@@ -100,10 +100,10 @@ public:
 			if(Item.m_Type == NETOBJTYPE_CLIENTINFO)
 			{
 				const CNetObj_ClientInfo *pInfo = (const CNetObj_ClientInfo *)pData;
-				int ClientID = Item.m_ID;
-				if(ClientID < MAX_CLIENTS)
+				int ClientId = Item.m_Id;
+				if(ClientId < MAX_CLIENTS)
 				{
-					CClientData *pClient = &m_aClients[ClientID];
+					CClientData *pClient = &m_aClients[ClientId];
 					IntsToStr(&pInfo->m_Name0, 4, pClient->m_aName);
 				}
 			}
@@ -147,7 +147,7 @@ public:
 		bool Sys;
 		CUuid Uuid;
 
-		int Result = UnpackMessageID(&Msg, &Sys, &Uuid, &Unpacker, &Packer);
+		int Result = UnpackMessageId(&Msg, &Sys, &Uuid, &Unpacker, &Packer);
 		if(Result == UNPACKMESSAGE_ERROR)
 			return;
 
@@ -162,23 +162,23 @@ public:
 			{
 				CNetMsg_Sv_Chat *pMsg = (CNetMsg_Sv_Chat *)pRawMsg;
 
-				if(pMsg->m_ClientID > -1 && m_pClientSnapshotHandler->m_aClients[pMsg->m_ClientID].m_aName[0] == '\0')
+				if(pMsg->m_ClientId > -1 && m_pClientSnapshotHandler->m_aClients[pMsg->m_ClientId].m_aName[0] == '\0')
 					return;
 
 				const char *Prefix = pMsg->m_Team > 1 ? "whisper" : (pMsg->m_Team ? "teamchat" : "chat");
 
-				if(pMsg->m_ClientID < 0)
+				if(pMsg->m_ClientId < 0)
 				{
 					printf("%s: *** %s\n", Prefix, pMsg->m_pMessage);
 					return;
 				}
 
 				if(pMsg->m_Team == 2) // WHISPER SEND
-					printf("%s: -> %s: %s\n", Prefix, m_pClientSnapshotHandler->m_aClients[pMsg->m_ClientID].m_aName, pMsg->m_pMessage);
+					printf("%s: -> %s: %s\n", Prefix, m_pClientSnapshotHandler->m_aClients[pMsg->m_ClientId].m_aName, pMsg->m_pMessage);
 				else if(pMsg->m_Team == 3) // WHISPER RECEIVE
-					printf("%s: <- %s: %s\n", Prefix, m_pClientSnapshotHandler->m_aClients[pMsg->m_ClientID].m_aName, pMsg->m_pMessage);
+					printf("%s: <- %s: %s\n", Prefix, m_pClientSnapshotHandler->m_aClients[pMsg->m_ClientId].m_aName, pMsg->m_pMessage);
 				else
-					printf("%s: %s: %s\n", Prefix, m_pClientSnapshotHandler->m_aClients[pMsg->m_ClientID].m_aName, pMsg->m_pMessage);
+					printf("%s: %s: %s\n", Prefix, m_pClientSnapshotHandler->m_aClients[pMsg->m_ClientId].m_aName, pMsg->m_pMessage);
 			}
 			else if(Msg == NETMSGTYPE_SV_BROADCAST)
 			{

@@ -9,35 +9,35 @@ CEcon::CEcon() :
 {
 }
 
-int CEcon::NewClientCallback(int ClientID, void *pUser)
+int CEcon::NewClientCallback(int ClientId, void *pUser)
 {
 	CEcon *pThis = (CEcon *)pUser;
 
 	char aAddrStr[NETADDR_MAXSTRSIZE];
-	net_addr_str(pThis->m_NetConsole.ClientAddr(ClientID), aAddrStr, sizeof(aAddrStr), true);
+	net_addr_str(pThis->m_NetConsole.ClientAddr(ClientId), aAddrStr, sizeof(aAddrStr), true);
 	char aBuf[128];
-	str_format(aBuf, sizeof(aBuf), "client accepted. cid=%d addr=%s'", ClientID, aAddrStr);
+	str_format(aBuf, sizeof(aBuf), "client accepted. cid=%d addr=%s'", ClientId, aAddrStr);
 	pThis->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "econ", aBuf);
 
-	pThis->m_aClients[ClientID].m_State = CClient::STATE_CONNECTED;
-	pThis->m_aClients[ClientID].m_TimeConnected = time_get();
-	pThis->m_aClients[ClientID].m_AuthTries = 0;
+	pThis->m_aClients[ClientId].m_State = CClient::STATE_CONNECTED;
+	pThis->m_aClients[ClientId].m_TimeConnected = time_get();
+	pThis->m_aClients[ClientId].m_AuthTries = 0;
 
-	pThis->m_NetConsole.Send(ClientID, "Enter password:");
+	pThis->m_NetConsole.Send(ClientId, "Enter password:");
 	return 0;
 }
 
-int CEcon::DelClientCallback(int ClientID, const char *pReason, void *pUser)
+int CEcon::DelClientCallback(int ClientId, const char *pReason, void *pUser)
 {
 	CEcon *pThis = (CEcon *)pUser;
 
 	char aAddrStr[NETADDR_MAXSTRSIZE];
-	net_addr_str(pThis->m_NetConsole.ClientAddr(ClientID), aAddrStr, sizeof(aAddrStr), true);
+	net_addr_str(pThis->m_NetConsole.ClientAddr(ClientId), aAddrStr, sizeof(aAddrStr), true);
 	char aBuf[256];
-	str_format(aBuf, sizeof(aBuf), "client dropped. cid=%d addr=%s reason='%s'", ClientID, aAddrStr, pReason);
+	str_format(aBuf, sizeof(aBuf), "client dropped. cid=%d addr=%s reason='%s'", ClientId, aAddrStr, pReason);
 	pThis->Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "econ", aBuf);
 
-	pThis->m_aClients[ClientID].m_State = CClient::STATE_EMPTY;
+	pThis->m_aClients[ClientId].m_State = CClient::STATE_EMPTY;
 	return 0;
 }
 
@@ -45,8 +45,8 @@ void CEcon::ConLogout(IConsole::IResult *pResult, void *pUserData)
 {
 	CEcon *pThis = static_cast<CEcon *>(pUserData);
 
-	if(pThis->m_UserClientID >= 0 && pThis->m_UserClientID < NET_MAX_CONSOLE_CLIENTS && pThis->m_aClients[pThis->m_UserClientID].m_State != CClient::STATE_EMPTY)
-		pThis->m_NetConsole.Drop(pThis->m_UserClientID, "Logout");
+	if(pThis->m_UserClientId >= 0 && pThis->m_UserClientId < NET_MAX_CONSOLE_CLIENTS && pThis->m_aClients[pThis->m_UserClientId].m_State != CClient::STATE_EMPTY)
+		pThis->m_NetConsole.Drop(pThis->m_UserClientId, "Logout");
 }
 
 void CEcon::Init(CConfig *pConfig, IConsole *pConsole, CNetBan *pNetBan)
@@ -58,7 +58,7 @@ void CEcon::Init(CConfig *pConfig, IConsole *pConsole, CNetBan *pNetBan)
 		Client.m_State = CClient::STATE_EMPTY;
 
 	m_Ready = false;
-	m_UserClientID = -1;
+	m_UserClientId = -1;
 
 	if(g_Config.m_EcPort == 0 || g_Config.m_EcPassword[0] == 0)
 		return;
@@ -98,44 +98,44 @@ void CEcon::Update()
 	m_NetConsole.Update();
 
 	char aBuf[NET_MAX_PACKETSIZE];
-	int ClientID;
+	int ClientId;
 
-	while(m_NetConsole.Recv(aBuf, (int)(sizeof(aBuf)) - 1, &ClientID))
+	while(m_NetConsole.Recv(aBuf, (int)(sizeof(aBuf)) - 1, &ClientId))
 	{
-		dbg_assert(m_aClients[ClientID].m_State != CClient::STATE_EMPTY, "got message from empty slot");
-		if(m_aClients[ClientID].m_State == CClient::STATE_CONNECTED)
+		dbg_assert(m_aClients[ClientId].m_State != CClient::STATE_EMPTY, "got message from empty slot");
+		if(m_aClients[ClientId].m_State == CClient::STATE_CONNECTED)
 		{
 			if(str_comp(aBuf, g_Config.m_EcPassword) == 0)
 			{
-				m_aClients[ClientID].m_State = CClient::STATE_AUTHED;
-				m_NetConsole.Send(ClientID, "Authentication successful. External console access granted.");
+				m_aClients[ClientId].m_State = CClient::STATE_AUTHED;
+				m_NetConsole.Send(ClientId, "Authentication successful. External console access granted.");
 
-				str_format(aBuf, sizeof(aBuf), "cid=%d authed", ClientID);
+				str_format(aBuf, sizeof(aBuf), "cid=%d authed", ClientId);
 				Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "econ", aBuf);
 			}
 			else
 			{
-				m_aClients[ClientID].m_AuthTries++;
+				m_aClients[ClientId].m_AuthTries++;
 				char aMsg[128];
-				str_format(aMsg, sizeof(aMsg), "Wrong password %d/%d.", m_aClients[ClientID].m_AuthTries, MAX_AUTH_TRIES);
-				m_NetConsole.Send(ClientID, aMsg);
-				if(m_aClients[ClientID].m_AuthTries >= MAX_AUTH_TRIES)
+				str_format(aMsg, sizeof(aMsg), "Wrong password %d/%d.", m_aClients[ClientId].m_AuthTries, MAX_AUTH_TRIES);
+				m_NetConsole.Send(ClientId, aMsg);
+				if(m_aClients[ClientId].m_AuthTries >= MAX_AUTH_TRIES)
 				{
 					if(!g_Config.m_EcBantime)
-						m_NetConsole.Drop(ClientID, "Too many authentication tries");
+						m_NetConsole.Drop(ClientId, "Too many authentication tries");
 					else
-						m_NetConsole.NetBan()->BanAddr(m_NetConsole.ClientAddr(ClientID), g_Config.m_EcBantime * 60, "Too many authentication tries");
+						m_NetConsole.NetBan()->BanAddr(m_NetConsole.ClientAddr(ClientId), g_Config.m_EcBantime * 60, "Too many authentication tries");
 				}
 			}
 		}
-		else if(m_aClients[ClientID].m_State == CClient::STATE_AUTHED)
+		else if(m_aClients[ClientId].m_State == CClient::STATE_AUTHED)
 		{
 			char aFormatted[256];
-			str_format(aFormatted, sizeof(aFormatted), "cid=%d cmd='%s'", ClientID, aBuf);
+			str_format(aFormatted, sizeof(aFormatted), "cid=%d cmd='%s'", ClientId, aBuf);
 			Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "server", aFormatted);
-			m_UserClientID = ClientID;
+			m_UserClientId = ClientId;
 			Console()->ExecuteLine(aBuf);
-			m_UserClientID = -1;
+			m_UserClientId = -1;
 		}
 	}
 
@@ -147,12 +147,12 @@ void CEcon::Update()
 	}
 }
 
-void CEcon::Send(int ClientID, const char *pLine)
+void CEcon::Send(int ClientId, const char *pLine)
 {
 	if(!m_Ready)
 		return;
 
-	if(ClientID == -1)
+	if(ClientId == -1)
 	{
 		for(int i = 0; i < NET_MAX_CONSOLE_CLIENTS; i++)
 		{
@@ -160,8 +160,8 @@ void CEcon::Send(int ClientID, const char *pLine)
 				m_NetConsole.Send(i, pLine);
 		}
 	}
-	else if(ClientID >= 0 && ClientID < NET_MAX_CONSOLE_CLIENTS && m_aClients[ClientID].m_State == CClient::STATE_AUTHED)
-		m_NetConsole.Send(ClientID, pLine);
+	else if(ClientId >= 0 && ClientId < NET_MAX_CONSOLE_CLIENTS && m_aClients[ClientId].m_State == CClient::STATE_AUTHED)
+		m_NetConsole.Send(ClientId, pLine);
 }
 
 void CEcon::Shutdown()

@@ -33,9 +33,9 @@ void CEditorImage::AnalyseTileFlags()
 	{
 		unsigned char *pPixelData = (unsigned char *)m_pData;
 
-		int TileID = 0;
+		int TileId = 0;
 		for(int ty = 0; ty < 16; ty++)
-			for(int tx = 0; tx < 16; tx++, TileID++)
+			for(int tx = 0; tx < 16; tx++, TileId++)
 			{
 				bool Opaque = true;
 				for(int x = 0; x < tw; x++)
@@ -50,7 +50,7 @@ void CEditorImage::AnalyseTileFlags()
 					}
 
 				if(Opaque)
-					m_aTileFlags[TileID] |= TILEFLAG_OPAQUE;
+					m_aTileFlags[TileId] |= TILEFLAG_OPAQUE;
 			}
 	}
 }

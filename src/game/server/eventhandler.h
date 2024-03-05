@@ -36,7 +36,7 @@ public:
 	template<typename T>
 	T *Create(CClientMask Mask = CClientMask().set())
 	{
-		return static_cast<T *>(Create(T::ms_MsgID, sizeof(T), Mask));
+		return static_cast<T *>(Create(T::ms_MsgId, sizeof(T), Mask));
 	}
 
 	void Clear();

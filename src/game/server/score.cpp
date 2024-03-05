@@ -16,9 +16,9 @@
 
 class IDbConnection;
 
-std::shared_ptr<CScorePlayerResult> CScore::NewSqlPlayerResult(int ClientID)
+std::shared_ptr<CScorePlayerResult> CScore::NewSqlPlayerResult(int ClientId)
 {
-	CPlayer *pCurPlayer = GameServer()->m_apPlayers[ClientID];
+	CPlayer *pCurPlayer = GameServer()->m_apPlayers[ClientId];
 	if(pCurPlayer->m_ScoreQueryResult != nullptr) // TODO: send player a message: "too many requests"
 		return nullptr;
 	pCurPlayer->m_ScoreQueryResult = std::make_shared<CScorePlayerResult>();
@@ -28,31 +28,31 @@ std::shared_ptr<CScorePlayerResult> CScore::NewSqlPlayerResult(int ClientID)
 void CScore::ExecPlayerThread(
 	bool (*pFuncPtr)(IDbConnection *, const ISqlData *, char *pError, int ErrorSize),
 	const char *pThreadName,
-	int ClientID,
+	int ClientId,
 	const char *pName,
 	int Offset)
 {
-	auto pResult = NewSqlPlayerResult(ClientID);
+	auto pResult = NewSqlPlayerResult(ClientId);
 	if(pResult == nullptr)
 		return;
 	auto Tmp = std::make_unique<CSqlPlayerRequest>(pResult);
 	str_copy(Tmp->m_aName, pName, sizeof(Tmp->m_aName));
 	str_copy(Tmp->m_aMap, g_Config.m_SvMap, sizeof(Tmp->m_aMap));
 	str_copy(Tmp->m_aServer, g_Config.m_SvSqlServerName, sizeof(Tmp->m_aServer));
-	str_copy(Tmp->m_aRequestingPlayer, Server()->ClientName(ClientID), sizeof(Tmp->m_aRequestingPlayer));
+	str_copy(Tmp->m_aRequestingPlayer, Server()->ClientName(ClientId), sizeof(Tmp->m_aRequestingPlayer));
 	Tmp->m_Offset = Offset;
 
 	m_pPool->Execute(pFuncPtr, std::move(Tmp), pThreadName);
 }
 
-bool CScore::RateLimitPlayer(int ClientID)
+bool CScore::RateLimitPlayer(int ClientId)
 {
-	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientID];
+	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientId];
 	if(pPlayer == 0)
 		return true;
-	if(pPlayer->m_LastSQLQuery + (int64_t)g_Config.m_SvSqlQueriesDelay * Server()->TickSpeed() >= Server()->Tick())
+	if(pPlayer->m_LastSqlQuery + (int64_t)g_Config.m_SvSqlQueriesDelay * Server()->TickSpeed() >= Server()->Tick())
 		return true;
-	pPlayer->m_LastSQLQuery = Server()->Tick();
+	pPlayer->m_LastSqlQuery = Server()->Tick();
 	return false;
 }
 
@@ -121,40 +121,40 @@ void CScore::LoadBestTime()
 	m_pPool->Execute(CScoreWorker::LoadBestTime, std::move(Tmp), "load best time");
 }
 
-void CScore::LoadPlayerData(int ClientID, const char *pName)
+void CScore::LoadPlayerData(int ClientId, const char *pName)
 {
-	ExecPlayerThread(CScoreWorker::LoadPlayerData, "load player data", ClientID, pName, 0);
+	ExecPlayerThread(CScoreWorker::LoadPlayerData, "load player data", ClientId, pName, 0);
 }
 
-void CScore::MapVote(int ClientID, const char *pMapName)
+void CScore::MapVote(int ClientId, const char *pMapName)
 {
-	if(RateLimitPlayer(ClientID))
+	if(RateLimitPlayer(ClientId))
 		return;
-	ExecPlayerThread(CScoreWorker::MapVote, "map vote", ClientID, pMapName, 0);
+	ExecPlayerThread(CScoreWorker::MapVote, "map vote", ClientId, pMapName, 0);
 }
 
-void CScore::MapInfo(int ClientID, const char *pMapName)
+void CScore::MapInfo(int ClientId, const char *pMapName)
 {
-	if(RateLimitPlayer(ClientID))
+	if(RateLimitPlayer(ClientId))
 		return;
-	ExecPlayerThread(CScoreWorker::MapInfo, "map info", ClientID, pMapName, 0);
+	ExecPlayerThread(CScoreWorker::MapInfo, "map info", ClientId, pMapName, 0);
 }
 
-void CScore::SaveScore(int ClientID, float Time, const char *pTimestamp, const float aTimeCp[NUM_CHECKPOINTS], bool NotEligible)
+void CScore::SaveScore(int ClientId, float Time, const char *pTimestamp, const float aTimeCp[NUM_CHECKPOINTS], bool NotEligible)
 {
 	CConsole *pCon = (CConsole *)GameServer()->Console();
 	if(pCon->Cheated() || NotEligible)
 		return;
 
-	CPlayer *pCurPlayer = GameServer()->m_apPlayers[ClientID];
+	CPlayer *pCurPlayer = GameServer()->m_apPlayers[ClientId];
 	if(pCurPlayer->m_ScoreFinishResult != nullptr)
 		dbg_msg("sql", "WARNING: previous save score result didn't complete, overwriting it now");
 	pCurPlayer->m_ScoreFinishResult = std::make_shared<CScorePlayerResult>();
 	auto Tmp = std::make_unique<CSqlScoreData>(pCurPlayer->m_ScoreFinishResult);
 	str_copy(Tmp->m_aMap, g_Config.m_SvMap, sizeof(Tmp->m_aMap));
 	FormatUuid(GameServer()->GameUuid(), Tmp->m_aGameUuid, sizeof(Tmp->m_aGameUuid));
-	Tmp->m_ClientID = ClientID;
-	str_copy(Tmp->m_aName, Server()->ClientName(ClientID), sizeof(Tmp->m_aName));
+	Tmp->m_ClientId = ClientId;
+	str_copy(Tmp->m_aName, Server()->ClientName(ClientId), sizeof(Tmp->m_aName));
 	Tmp->m_Time = Time;
 	str_copy(Tmp->m_aTimestamp, pTimestamp, sizeof(Tmp->m_aTimestamp));
 	for(int i = 0; i < NUM_CHECKPOINTS; i++)
@@ -163,19 +163,19 @@ void CScore::SaveScore(int ClientID, float Time, const char *pTimestamp, const f
 	m_pPool->ExecuteWrite(CScoreWorker::SaveScore, std::move(Tmp), "save score");
 }
 
-void CScore::SaveTeamScore(int *pClientIDs, unsigned int Size, float Time, const char *pTimestamp)
+void CScore::SaveTeamScore(int *pClientIds, unsigned int Size, float Time, const char *pTimestamp)
 {
 	CConsole *pCon = (CConsole *)GameServer()->Console();
 	if(pCon->Cheated())
 		return;
 	for(unsigned int i = 0; i < Size; i++)
 	{
-		if(GameServer()->m_apPlayers[pClientIDs[i]]->m_NotEligibleForFinish)
+		if(GameServer()->m_apPlayers[pClientIds[i]]->m_NotEligibleForFinish)
 			return;
 	}
 	auto Tmp = std::make_unique<CSqlTeamScoreData>();
 	for(unsigned int i = 0; i < Size; i++)
-		str_copy(Tmp->m_aaNames[i], Server()->ClientName(pClientIDs[i]), sizeof(Tmp->m_aaNames[i]));
+		str_copy(Tmp->m_aaNames[i], Server()->ClientName(pClientIds[i]), sizeof(Tmp->m_aaNames[i]));
 	Tmp->m_Size = Size;
 	Tmp->m_Time = Time;
 	str_copy(Tmp->m_aTimestamp, pTimestamp, sizeof(Tmp->m_aTimestamp));
@@ -186,110 +186,110 @@ void CScore::SaveTeamScore(int *pClientIDs, unsigned int Size, float Time, const
 	m_pPool->ExecuteWrite(CScoreWorker::SaveTeamScore, std::move(Tmp), "save team score");
 }
 
-void CScore::ShowRank(int ClientID, const char *pName)
+void CScore::ShowRank(int ClientId, const char *pName)
 {
-	if(RateLimitPlayer(ClientID))
+	if(RateLimitPlayer(ClientId))
 		return;
-	ExecPlayerThread(CScoreWorker::ShowRank, "show rank", ClientID, pName, 0);
+	ExecPlayerThread(CScoreWorker::ShowRank, "show rank", ClientId, pName, 0);
 }
 
-void CScore::ShowTeamRank(int ClientID, const char *pName)
+void CScore::ShowTeamRank(int ClientId, const char *pName)
 {
-	if(RateLimitPlayer(ClientID))
+	if(RateLimitPlayer(ClientId))
 		return;
-	ExecPlayerThread(CScoreWorker::ShowTeamRank, "show team rank", ClientID, pName, 0);
+	ExecPlayerThread(CScoreWorker::ShowTeamRank, "show team rank", ClientId, pName, 0);
 }
 
-void CScore::ShowTop(int ClientID, int Offset)
+void CScore::ShowTop(int ClientId, int Offset)
 {
-	if(RateLimitPlayer(ClientID))
+	if(RateLimitPlayer(ClientId))
 		return;
-	ExecPlayerThread(CScoreWorker::ShowTop, "show top5", ClientID, "", Offset);
+	ExecPlayerThread(CScoreWorker::ShowTop, "show top5", ClientId, "", Offset);
 }
 
-void CScore::ShowTeamTop5(int ClientID, int Offset)
+void CScore::ShowTeamTop5(int ClientId, int Offset)
 {
-	if(RateLimitPlayer(ClientID))
+	if(RateLimitPlayer(ClientId))
 		return;
-	ExecPlayerThread(CScoreWorker::ShowTeamTop5, "show team top5", ClientID, "", Offset);
+	ExecPlayerThread(CScoreWorker::ShowTeamTop5, "show team top5", ClientId, "", Offset);
 }
 
-void CScore::ShowPlayerTeamTop5(int ClientID, const char *pName, int Offset)
+void CScore::ShowPlayerTeamTop5(int ClientId, const char *pName, int Offset)
 {
-	if(RateLimitPlayer(ClientID))
+	if(RateLimitPlayer(ClientId))
 		return;
-	ExecPlayerThread(CScoreWorker::ShowPlayerTeamTop5, "show team top5 player", ClientID, pName, Offset);
+	ExecPlayerThread(CScoreWorker::ShowPlayerTeamTop5, "show team top5 player", ClientId, pName, Offset);
 }
 
-void CScore::ShowTimes(int ClientID, int Offset)
+void CScore::ShowTimes(int ClientId, int Offset)
 {
-	if(RateLimitPlayer(ClientID))
+	if(RateLimitPlayer(ClientId))
 		return;
-	ExecPlayerThread(CScoreWorker::ShowTimes, "show times", ClientID, "", Offset);
+	ExecPlayerThread(CScoreWorker::ShowTimes, "show times", ClientId, "", Offset);
 }
 
-void CScore::ShowTimes(int ClientID, const char *pName, int Offset)
+void CScore::ShowTimes(int ClientId, const char *pName, int Offset)
 {
-	if(RateLimitPlayer(ClientID))
+	if(RateLimitPlayer(ClientId))
 		return;
-	ExecPlayerThread(CScoreWorker::ShowTimes, "show times", ClientID, pName, Offset);
+	ExecPlayerThread(CScoreWorker::ShowTimes, "show times", ClientId, pName, Offset);
 }
 
-void CScore::ShowPoints(int ClientID, const char *pName)
+void CScore::ShowPoints(int ClientId, const char *pName)
 {
-	if(RateLimitPlayer(ClientID))
+	if(RateLimitPlayer(ClientId))
 		return;
-	ExecPlayerThread(CScoreWorker::ShowPoints, "show points", ClientID, pName, 0);
+	ExecPlayerThread(CScoreWorker::ShowPoints, "show points", ClientId, pName, 0);
 }
 
-void CScore::ShowTopPoints(int ClientID, int Offset)
+void CScore::ShowTopPoints(int ClientId, int Offset)
 {
-	if(RateLimitPlayer(ClientID))
+	if(RateLimitPlayer(ClientId))
 		return;
-	ExecPlayerThread(CScoreWorker::ShowTopPoints, "show top points", ClientID, "", Offset);
+	ExecPlayerThread(CScoreWorker::ShowTopPoints, "show top points", ClientId, "", Offset);
 }
 
-void CScore::RandomMap(int ClientID, int Stars)
+void CScore::RandomMap(int ClientId, int Stars)
 {
-	auto pResult = std::make_shared<CScoreRandomMapResult>(ClientID);
+	auto pResult = std::make_shared<CScoreRandomMapResult>(ClientId);
 	GameServer()->m_SqlRandomMapResult = pResult;
 
 	auto Tmp = std::make_unique<CSqlRandomMapRequest>(pResult);
 	Tmp->m_Stars = Stars;
 	str_copy(Tmp->m_aCurrentMap, g_Config.m_SvMap, sizeof(Tmp->m_aCurrentMap));
 	str_copy(Tmp->m_aServerType, g_Config.m_SvServerType, sizeof(Tmp->m_aServerType));
-	str_copy(Tmp->m_aRequestingPlayer, GameServer()->Server()->ClientName(ClientID), sizeof(Tmp->m_aRequestingPlayer));
+	str_copy(Tmp->m_aRequestingPlayer, GameServer()->Server()->ClientName(ClientId), sizeof(Tmp->m_aRequestingPlayer));
 
 	m_pPool->Execute(CScoreWorker::RandomMap, std::move(Tmp), "random map");
 }
 
-void CScore::RandomUnfinishedMap(int ClientID, int Stars)
+void CScore::RandomUnfinishedMap(int ClientId, int Stars)
 {
-	auto pResult = std::make_shared<CScoreRandomMapResult>(ClientID);
+	auto pResult = std::make_shared<CScoreRandomMapResult>(ClientId);
 	GameServer()->m_SqlRandomMapResult = pResult;
 
 	auto Tmp = std::make_unique<CSqlRandomMapRequest>(pResult);
 	Tmp->m_Stars = Stars;
 	str_copy(Tmp->m_aCurrentMap, g_Config.m_SvMap, sizeof(Tmp->m_aCurrentMap));
 	str_copy(Tmp->m_aServerType, g_Config.m_SvServerType, sizeof(Tmp->m_aServerType));
-	str_copy(Tmp->m_aRequestingPlayer, GameServer()->Server()->ClientName(ClientID), sizeof(Tmp->m_aRequestingPlayer));
+	str_copy(Tmp->m_aRequestingPlayer, GameServer()->Server()->ClientName(ClientId), sizeof(Tmp->m_aRequestingPlayer));
 
 	m_pPool->Execute(CScoreWorker::RandomUnfinishedMap, std::move(Tmp), "random unfinished map");
 }
 
-void CScore::SaveTeam(int ClientID, const char *pCode, const char *pServer)
+void CScore::SaveTeam(int ClientId, const char *pCode, const char *pServer)
 {
-	if(RateLimitPlayer(ClientID))
+	if(RateLimitPlayer(ClientId))
 		return;
 	auto *pController = GameServer()->m_pController;
-	int Team = pController->Teams().m_Core.Team(ClientID);
+	int Team = pController->Teams().m_Core.Team(ClientId);
 	if(pController->Teams().GetSaving(Team))
 		return;
 
-	auto SaveResult = std::make_shared<CScoreSaveResult>(ClientID);
-	SaveResult->m_SaveID = RandomUuid();
+	auto SaveResult = std::make_shared<CScoreSaveResult>(ClientId);
+	SaveResult->m_SaveId = RandomUuid();
 	int Result = SaveResult->m_SavedTeam.Save(GameServer(), Team);
-	if(CSaveTeam::HandleSaveError(Result, ClientID, GameServer()))
+	if(CSaveTeam::HandleSaveError(Result, ClientId, GameServer()))
 		return;
 	pController->Teams().SetSaving(Team, SaveResult);
 
@@ -297,7 +297,7 @@ void CScore::SaveTeam(int ClientID, const char *pCode, const char *pServer)
 	str_copy(Tmp->m_aCode, pCode, sizeof(Tmp->m_aCode));
 	str_copy(Tmp->m_aMap, g_Config.m_SvMap, sizeof(Tmp->m_aMap));
 	str_copy(Tmp->m_aServer, pServer, sizeof(Tmp->m_aServer));
-	str_copy(Tmp->m_aClientName, this->Server()->ClientName(ClientID), sizeof(Tmp->m_aClientName));
+	str_copy(Tmp->m_aClientName, this->Server()->ClientName(ClientId), sizeof(Tmp->m_aClientName));
 	Tmp->m_aGeneratedCode[0] = '\0';
 	GeneratePassphrase(Tmp->m_aGeneratedCode, sizeof(Tmp->m_aGeneratedCode));
 
@@ -317,37 +317,37 @@ void CScore::SaveTeam(int ClientID, const char *pCode, const char *pServer)
 			Tmp->m_aCode,
 			Tmp->m_aGeneratedCode);
 	}
-	pController->Teams().KillSavedTeam(ClientID, Team);
+	pController->Teams().KillSavedTeam(ClientId, Team);
 	GameServer()->SendChatTeam(Team, aBuf);
 	m_pPool->ExecuteWrite(CScoreWorker::SaveTeam, std::move(Tmp), "save team");
 }
 
-void CScore::LoadTeam(const char *pCode, int ClientID)
+void CScore::LoadTeam(const char *pCode, int ClientId)
 {
-	if(RateLimitPlayer(ClientID))
+	if(RateLimitPlayer(ClientId))
 		return;
 	auto *pController = GameServer()->m_pController;
-	int Team = pController->Teams().m_Core.Team(ClientID);
+	int Team = pController->Teams().m_Core.Team(ClientId);
 	if(pController->Teams().GetSaving(Team))
 		return;
 	if(Team < TEAM_FLOCK || Team >= MAX_CLIENTS || (g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO && Team == TEAM_FLOCK))
 	{
-		GameServer()->SendChatTarget(ClientID, "You have to be in a team (from 1-63)");
+		GameServer()->SendChatTarget(ClientId, "You have to be in a team (from 1-63)");
 		return;
 	}
 	if(pController->Teams().GetTeamState(Team) != CGameTeams::TEAMSTATE_OPEN)
 	{
-		GameServer()->SendChatTarget(ClientID, "Team can't be loaded while racing");
+		GameServer()->SendChatTarget(ClientId, "Team can't be loaded while racing");
 		return;
 	}
-	auto SaveResult = std::make_shared<CScoreSaveResult>(ClientID);
+	auto SaveResult = std::make_shared<CScoreSaveResult>(ClientId);
 	SaveResult->m_Status = CScoreSaveResult::LOAD_FAILED;
 	pController->Teams().SetSaving(Team, SaveResult);
 	auto Tmp = std::make_unique<CSqlTeamLoad>(SaveResult);
 	str_copy(Tmp->m_aCode, pCode, sizeof(Tmp->m_aCode));
 	str_copy(Tmp->m_aMap, g_Config.m_SvMap, sizeof(Tmp->m_aMap));
-	Tmp->m_ClientID = ClientID;
-	str_copy(Tmp->m_aRequestingPlayer, Server()->ClientName(ClientID), sizeof(Tmp->m_aRequestingPlayer));
+	Tmp->m_ClientId = ClientId;
+	str_copy(Tmp->m_aRequestingPlayer, Server()->ClientName(ClientId), sizeof(Tmp->m_aRequestingPlayer));
 	Tmp->m_NumPlayer = 0;
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
@@ -355,16 +355,16 @@ void CScore::LoadTeam(const char *pCode, int ClientID)
 		{
 			// put all names at the beginning of the array
 			str_copy(Tmp->m_aClientNames[Tmp->m_NumPlayer], Server()->ClientName(i), sizeof(Tmp->m_aClientNames[Tmp->m_NumPlayer]));
-			Tmp->m_aClientID[Tmp->m_NumPlayer] = i;
+			Tmp->m_aClientId[Tmp->m_NumPlayer] = i;
 			Tmp->m_NumPlayer++;
 		}
 	}
 	m_pPool->ExecuteWrite(CScoreWorker::LoadTeam, std::move(Tmp), "load team");
 }
 
-void CScore::GetSaves(int ClientID)
+void CScore::GetSaves(int ClientId)
 {
-	if(RateLimitPlayer(ClientID))
+	if(RateLimitPlayer(ClientId))
 		return;
-	ExecPlayerThread(CScoreWorker::GetSaves, "get saves", ClientID, "", 0);
+	ExecPlayerThread(CScoreWorker::GetSaves, "get saves", ClientId, "", 0);
 }

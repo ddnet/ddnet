@@ -49,10 +49,10 @@ public:
 
 	void Render();
 
-	void CallvoteSpectate(int ClientID, const char *pReason, bool ForceVote = false);
-	void CallvoteKick(int ClientID, const char *pReason, bool ForceVote = false);
-	void CallvoteOption(int OptionID, const char *pReason, bool ForceVote = false);
-	void RemovevoteOption(int OptionID);
+	void CallvoteSpectate(int ClientId, const char *pReason, bool ForceVote = false);
+	void CallvoteKick(int ClientId, const char *pReason, bool ForceVote = false);
+	void CallvoteOption(int OptionId, const char *pReason, bool ForceVote = false);
+	void RemovevoteOption(int OptionId);
 	void AddvoteOption(const char *pDescription, const char *pCommand);
 
 	void Vote(int v); // -1 = no, 1 = yes

@@ -31,7 +31,7 @@ class CInfoMessages : public CComponent
 		char m_aVictimName[64];
 		STextContainerIndex m_VictimTextContainerIndex;
 		CTeeRenderInfo m_aVictimRenderInfo[MAX_KILLMSG_TEAM_MEMBERS];
-		int m_KillerID;
+		int m_KillerId;
 		char m_aKillerName[64];
 		STextContainerIndex m_KillerTextContainerIndex;
 		CTeeRenderInfo m_KillerRenderInfo;

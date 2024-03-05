@@ -26,10 +26,10 @@ public:
 
 	void LinkProgram();
 	void UseProgram() const;
-	TWGLuint GetProgramID() const;
+	TWGLuint GetProgramId() const;
 
 	void DetachShader(CGLSL *pShader) const;
-	void DetachShaderByID(TWGLuint ShaderID) const;
+	void DetachShaderById(TWGLuint ShaderId) const;
 	void DetachAllShaders() const;
 
 	//Support various types
@@ -47,7 +47,7 @@ public:
 	virtual ~CGLSLProgram();
 
 protected:
-	TWGLuint m_ProgramID;
+	TWGLuint m_ProgramId;
 	bool m_IsLinked;
 };
 

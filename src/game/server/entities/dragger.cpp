@@ -105,7 +105,7 @@ void CDragger::LookForPlayersToDrag()
 				!GameServer()->Collision()->IntersectNoLaser(m_Pos, pTarget->m_Pos, 0, 0);
 		if(IsReachable && pTarget->IsAlive())
 		{
-			const int &TargetClientId = pTarget->GetPlayer()->GetCID();
+			const int &TargetClientId = pTarget->GetPlayer()->GetCid();
 			// Solo players are dragged independently from the rest of the team
 			if(pTarget->Teams()->m_Core.GetSolo(TargetClientId))
 			{
@@ -156,30 +156,30 @@ void CDragger::LookForPlayersToDrag()
 	}
 }
 
-void CDragger::RemoveDraggerBeam(int ClientID)
+void CDragger::RemoveDraggerBeam(int ClientId)
 {
-	m_apDraggerBeam[ClientID] = nullptr;
+	m_apDraggerBeam[ClientId] = nullptr;
 }
 
-bool CDragger::WillDraggerBeamUseDraggerID(int TargetClientID, int SnappingClientID)
+bool CDragger::WillDraggerBeamUseDraggerId(int TargetClientId, int SnappingClientId)
 {
 	// For each snapping client, this must return true for at most one target (i.e. only one of the dragger beams),
 	// in which case the dragger itself must not be snapped
-	CCharacter *pTargetChar = GameServer()->GetPlayerChar(TargetClientID);
-	CCharacter *pSnapChar = GameServer()->GetPlayerChar(SnappingClientID);
-	if(pTargetChar && pSnapChar && m_apDraggerBeam[TargetClientID] != nullptr)
+	CCharacter *pTargetChar = GameServer()->GetPlayerChar(TargetClientId);
+	CCharacter *pSnapChar = GameServer()->GetPlayerChar(SnappingClientId);
+	if(pTargetChar && pSnapChar && m_apDraggerBeam[TargetClientId] != nullptr)
 	{
 		const int SnapTeam = pSnapChar->Team();
 		const int TargetTeam = pTargetChar->Team();
 		if(SnapTeam == TargetTeam && SnapTeam < MAX_CLIENTS)
 		{
-			if(pSnapChar->Teams()->m_Core.GetSolo(SnappingClientID) || m_aTargetIdInTeam[SnapTeam] < 0)
+			if(pSnapChar->Teams()->m_Core.GetSolo(SnappingClientId) || m_aTargetIdInTeam[SnapTeam] < 0)
 			{
-				return SnappingClientID == TargetClientID;
+				return SnappingClientId == TargetClientId;
 			}
 			else
 			{
-				return m_aTargetIdInTeam[SnapTeam] == TargetClientID;
+				return m_aTargetIdInTeam[SnapTeam] == TargetClientId;
 			}
 		}
 	}
@@ -200,7 +200,7 @@ void CDragger::Snap(int SnappingClient)
 	// Send the dragger in its resting position if the player would not otherwise see a dragger beam within its own team
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if(WillDraggerBeamUseDraggerID(i, SnappingClient))
+		if(WillDraggerBeamUseDraggerId(i, SnappingClient))
 		{
 			return;
 		}
@@ -222,8 +222,8 @@ void CDragger::Snap(int SnappingClient)
 		if(SnappingClient != SERVER_DEMO_CLIENT &&
 			(GameServer()->m_apPlayers[SnappingClient]->GetTeam() == TEAM_SPECTATORS ||
 				GameServer()->m_apPlayers[SnappingClient]->IsPaused()) &&
-			GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID != SPEC_FREEVIEW)
-			pChar = GameServer()->GetPlayerChar(GameServer()->m_apPlayers[SnappingClient]->m_SpectatorID);
+			GameServer()->m_apPlayers[SnappingClient]->m_SpectatorId != SPEC_FREEVIEW)
+			pChar = GameServer()->GetPlayerChar(GameServer()->m_apPlayers[SnappingClient]->m_SpectatorId);
 
 		int Tick = (Server()->Tick() % Server()->TickSpeed()) % 11;
 		if(pChar && m_Layer == LAYER_SWITCH && m_Number > 0 &&
@@ -237,7 +237,7 @@ void CDragger::Snap(int SnappingClient)
 			StartTick = Server()->Tick();
 	}
 
-	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion), GetID(),
+	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion), GetId(),
 		m_Pos, m_Pos, StartTick, -1, LASERTYPE_DRAGGER, Subtype, m_Number);
 }
 

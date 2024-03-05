@@ -9,7 +9,7 @@ class CAutoMapper : public CEditorComponent
 {
 	struct CIndexInfo
 	{
-		int m_ID;
+		int m_Id;
 		int m_Flag;
 		bool m_TestFlag;
 	};
@@ -31,7 +31,7 @@ class CAutoMapper : public CEditorComponent
 
 	struct CIndexRule
 	{
-		int m_ID;
+		int m_Id;
 		std::vector<CPosRule> m_vRules;
 		int m_Flag;
 		float m_RandomProbability;
@@ -60,8 +60,8 @@ public:
 	explicit CAutoMapper(CEditor *pEditor);
 
 	void Load(const char *pTileName);
-	void ProceedLocalized(class CLayerTiles *pLayer, int ConfigID, int Seed = 0, int X = 0, int Y = 0, int Width = -1, int Height = -1);
-	void Proceed(class CLayerTiles *pLayer, int ConfigID, int Seed = 0, int SeedOffsetX = 0, int SeedOffsetY = 0);
+	void ProceedLocalized(class CLayerTiles *pLayer, int ConfigId, int Seed = 0, int X = 0, int Y = 0, int Width = -1, int Height = -1);
+	void Proceed(class CLayerTiles *pLayer, int ConfigId, int Seed = 0, int SeedOffsetX = 0, int SeedOffsetY = 0);
 
 	int ConfigNamesNum() const { return m_vConfigs.size(); }
 	const char *GetConfigName(int Index);

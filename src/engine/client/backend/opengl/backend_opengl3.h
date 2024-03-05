@@ -37,18 +37,18 @@ protected:
 	CGLSLPrimitiveExProgram *m_pPrimitiveExProgramTexturedRotationless;
 	CGLSLSpriteMultipleProgram *m_pSpriteProgramMultiple;
 
-	TWGLuint m_LastProgramID;
+	TWGLuint m_LastProgramId;
 
-	TWGLuint m_aPrimitiveDrawVertexID[MAX_STREAM_BUFFER_COUNT];
-	TWGLuint m_PrimitiveDrawVertexIDTex3D;
-	TWGLuint m_aPrimitiveDrawBufferID[MAX_STREAM_BUFFER_COUNT];
-	TWGLuint m_PrimitiveDrawBufferIDTex3D;
+	TWGLuint m_aPrimitiveDrawVertexId[MAX_STREAM_BUFFER_COUNT];
+	TWGLuint m_PrimitiveDrawVertexIdTex3D;
+	TWGLuint m_aPrimitiveDrawBufferId[MAX_STREAM_BUFFER_COUNT];
+	TWGLuint m_PrimitiveDrawBufferIdTex3D;
 
 	TWGLuint m_aLastIndexBufferBound[MAX_STREAM_BUFFER_COUNT];
 
 	int m_LastStreamBuffer;
 
-	TWGLuint m_QuadDrawIndexBufferID;
+	TWGLuint m_QuadDrawIndexBufferId;
 	unsigned int m_CurrentIndicesInBuffer;
 
 	void DestroyBufferContainer(int Index, bool DeleteBOs = true);
@@ -58,8 +58,8 @@ protected:
 	struct SBufferContainer
 	{
 		SBufferContainer() :
-			m_VertArrayID(0), m_LastIndexBufferBound(0) {}
-		TWGLuint m_VertArrayID;
+			m_VertArrayId(0), m_LastIndexBufferBound(0) {}
+		TWGLuint m_VertArrayId;
 		TWGLuint m_LastIndexBufferBound;
 		SBufferContainerInfo m_ContainerInfo;
 	};

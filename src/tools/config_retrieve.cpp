@@ -16,10 +16,10 @@ void Process(IStorage *pStorage, const char *pMapName, const char *pConfigName)
 	Reader.GetType(MAPITEMTYPE_INFO, &Start, &Num);
 	for(int i = Start; i < Start + Num; i++)
 	{
-		int ID;
-		CMapItemInfoSettings *pItem = (CMapItemInfoSettings *)Reader.GetItem(i, nullptr, &ID);
+		int Id;
+		CMapItemInfoSettings *pItem = (CMapItemInfoSettings *)Reader.GetItem(i, nullptr, &Id);
 		int ItemSize = Reader.GetItemSize(i);
-		if(!pItem || ID != 0)
+		if(!pItem || Id != 0)
 			continue;
 
 		if(ItemSize < (int)sizeof(CMapItemInfoSettings))

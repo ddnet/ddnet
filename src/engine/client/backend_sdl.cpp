@@ -226,7 +226,7 @@ void CCommandProcessorFragment_SDL::Cmd_VSync(const CCommandBuffer::SCommand_VSy
 
 void CCommandProcessorFragment_SDL::Cmd_WindowCreateNtf(const CCommandBuffer::SCommand_WindowCreateNtf *pCommand)
 {
-	m_pWindow = SDL_GetWindowFromID(pCommand->m_WindowID);
+	m_pWindow = SDL_GetWindowFromID(pCommand->m_WindowId);
 	// Android destroys windows when they are not visible, so we get the new one and work with that
 	// The graphic context does not need to be recreated, just unbound see @see SCommand_WindowDestroyNtf
 #ifdef CONF_PLATFORM_ANDROID
@@ -900,10 +900,10 @@ static void DisplayToVideoMode(CVideoMode *pVMode, SDL_DisplayMode *pMode, int H
 	pVMode->m_Format = pMode->format;
 }
 
-void CGraphicsBackend_SDL_GL::GetVideoModes(CVideoMode *pModes, int MaxModes, int *pNumModes, int HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int ScreenID)
+void CGraphicsBackend_SDL_GL::GetVideoModes(CVideoMode *pModes, int MaxModes, int *pNumModes, int HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int ScreenId)
 {
 	SDL_DisplayMode DesktopMode;
-	int maxModes = SDL_GetNumDisplayModes(ScreenID);
+	int maxModes = SDL_GetNumDisplayModes(ScreenId);
 	int numModes = 0;
 
 	// Only collect fullscreen modes when requested, that makes sure in windowed mode no refresh rates are shown that aren't supported without
@@ -911,7 +911,7 @@ void CGraphicsBackend_SDL_GL::GetVideoModes(CVideoMode *pModes, int MaxModes, in
 	bool IsFullscreenDestkop = m_pWindow != NULL && (((SDL_GetWindowFlags(m_pWindow) & SDL_WINDOW_FULLSCREEN_DESKTOP) == SDL_WINDOW_FULLSCREEN_DESKTOP) || g_Config.m_GfxFullscreen == 3);
 	bool CollectFullscreenModes = m_pWindow == NULL || ((SDL_GetWindowFlags(m_pWindow) & SDL_WINDOW_FULLSCREEN) != 0 && !IsFullscreenDestkop);
 
-	if(SDL_GetDesktopDisplayMode(ScreenID, &DesktopMode) < 0)
+	if(SDL_GetDesktopDisplayMode(ScreenId, &DesktopMode) < 0)
 	{
 		dbg_msg("gfx", "unable to get display mode: %s", SDL_GetError());
 	}
@@ -922,7 +922,7 @@ void CGraphicsBackend_SDL_GL::GetVideoModes(CVideoMode *pModes, int MaxModes, in
 	for(int i = 0; i < maxModes && NumModes < ModeCount; i++)
 	{
 		SDL_DisplayMode mode;
-		if(SDL_GetDisplayMode(ScreenID, i, &mode) < 0)
+		if(SDL_GetDisplayMode(ScreenId, i, &mode) < 0)
 		{
 			dbg_msg("gfx", "unable to get display mode: %s", SDL_GetError());
 			continue;
@@ -964,20 +964,20 @@ void CGraphicsBackend_SDL_GL::GetVideoModes(CVideoMode *pModes, int MaxModes, in
 	*pNumModes = numModes;
 }
 
-void CGraphicsBackend_SDL_GL::GetCurrentVideoMode(CVideoMode &CurMode, int HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int ScreenID)
+void CGraphicsBackend_SDL_GL::GetCurrentVideoMode(CVideoMode &CurMode, int HiDPIScale, int MaxWindowWidth, int MaxWindowHeight, int ScreenId)
 {
-	SDL_DisplayMode DPMode;
+	SDL_DisplayMode DpMode;
 	// if "real" fullscreen, obtain the video mode for that
 	if((SDL_GetWindowFlags(m_pWindow) & SDL_WINDOW_FULLSCREEN_DESKTOP) == SDL_WINDOW_FULLSCREEN)
 	{
-		if(SDL_GetCurrentDisplayMode(ScreenID, &DPMode))
+		if(SDL_GetCurrentDisplayMode(ScreenId, &DpMode))
 		{
 			dbg_msg("gfx", "unable to get display mode: %s", SDL_GetError());
 		}
 	}
 	else
 	{
-		if(SDL_GetDesktopDisplayMode(ScreenID, &DPMode) < 0)
+		if(SDL_GetDesktopDisplayMode(ScreenId, &DpMode) < 0)
 		{
 			dbg_msg("gfx", "unable to get display mode: %s", SDL_GetError());
 		}
@@ -986,11 +986,11 @@ void CGraphicsBackend_SDL_GL::GetCurrentVideoMode(CVideoMode &CurMode, int HiDPI
 			int Width = 0;
 			int Height = 0;
 			SDL_GL_GetDrawableSize(m_pWindow, &Width, &Height);
-			DPMode.w = Width;
-			DPMode.h = Height;
+			DpMode.w = Width;
+			DpMode.h = Height;
 		}
 	}
-	DisplayToVideoMode(&CurMode, &DPMode, HiDPIScale, DPMode.refresh_rate);
+	DisplayToVideoMode(&CurMode, &DpMode, HiDPIScale, DpMode.refresh_rate);
 }
 
 CGraphicsBackend_SDL_GL::CGraphicsBackend_SDL_GL(TTranslateFunc &&TranslateFunc) :
@@ -1275,7 +1275,7 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 	CmdPre.m_pVendorString = m_aVendorString;
 	CmdPre.m_pVersionString = m_aVersionString;
 	CmdPre.m_pRendererString = m_aRendererString;
-	CmdPre.m_pGPUList = &m_GPUList;
+	CmdPre.m_pGpuList = &m_GpuList;
 	CmdBuffer.AddCommandUnsafe(CmdPre);
 	RunBufferSingleThreadedUnsafe(&CmdBuffer);
 	CmdBuffer.Reset();
@@ -1299,7 +1299,7 @@ int CGraphicsBackend_SDL_GL::Init(const char *pName, int *pScreen, int *pWidth, 
 		CmdGL.m_pBufferMemoryUsage = &m_BufferMemoryUsage;
 		CmdGL.m_pStreamMemoryUsage = &m_StreamMemoryUsage;
 		CmdGL.m_pStagingMemoryUsage = &m_StagingMemoryUsage;
-		CmdGL.m_pGPUList = &m_GPUList;
+		CmdGL.m_pGpuList = &m_GpuList;
 		CmdGL.m_pReadPresentedImageDataFunc = &m_ReadPresentedImageDataFunc;
 		CmdGL.m_pStorage = pStorage;
 		CmdGL.m_pCapabilities = &m_Capabilites;
@@ -1444,9 +1444,9 @@ uint64_t CGraphicsBackend_SDL_GL::StagingMemoryUsage() const
 	return m_StagingMemoryUsage;
 }
 
-const TTWGraphicsGPUList &CGraphicsBackend_SDL_GL::GetGPUs() const
+const TTwGraphicsGpuList &CGraphicsBackend_SDL_GL::GetGpus() const
 {
-	return m_GPUList;
+	return m_GpuList;
 }
 
 void CGraphicsBackend_SDL_GL::Minimize()
@@ -1488,14 +1488,14 @@ void CGraphicsBackend_SDL_GL::SetWindowParams(int FullscreenMode, bool IsBorderl
 			SDL_SetWindowFullscreen(m_pWindow, 0);
 			SDL_SetWindowBordered(m_pWindow, SDL_TRUE);
 			SDL_SetWindowResizable(m_pWindow, SDL_FALSE);
-			SDL_DisplayMode DPMode;
-			if(SDL_GetDesktopDisplayMode(g_Config.m_GfxScreen, &DPMode) < 0)
+			SDL_DisplayMode DpMode;
+			if(SDL_GetDesktopDisplayMode(g_Config.m_GfxScreen, &DpMode) < 0)
 			{
 				dbg_msg("gfx", "unable to get display mode: %s", SDL_GetError());
 			}
 			else
 			{
-				ResizeWindow(DPMode.w, DPMode.h, DPMode.refresh_rate);
+				ResizeWindow(DpMode.w, DpMode.h, DpMode.refresh_rate);
 				SDL_SetWindowPosition(m_pWindow, SDL_WINDOWPOS_CENTERED_DISPLAY(g_Config.m_GfxScreen), SDL_WINDOWPOS_CENTERED_DISPLAY(g_Config.m_GfxScreen));
 			}
 		}
@@ -1620,13 +1620,13 @@ void CGraphicsBackend_SDL_GL::NotifyWindow()
 #endif
 }
 
-void CGraphicsBackend_SDL_GL::WindowDestroyNtf(uint32_t WindowID)
+void CGraphicsBackend_SDL_GL::WindowDestroyNtf(uint32_t WindowId)
 {
 }
 
-void CGraphicsBackend_SDL_GL::WindowCreateNtf(uint32_t WindowID)
+void CGraphicsBackend_SDL_GL::WindowCreateNtf(uint32_t WindowId)
 {
-	m_pWindow = SDL_GetWindowFromID(WindowID);
+	m_pWindow = SDL_GetWindowFromID(WindowId);
 }
 
 TGLBackendReadPresentedImageData &CGraphicsBackend_SDL_GL::GetReadPresentedImageDataFuncUnsafe()

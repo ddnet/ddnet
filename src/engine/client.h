@@ -99,7 +99,7 @@ public:
 	{
 	public:
 		int m_Type;
-		int m_ID;
+		int m_Id;
 		int m_DataSize;
 	};
 
@@ -217,10 +217,10 @@ public:
 	};
 
 	// TODO: Refactor: should redo this a bit i think, too many virtual calls
-	virtual int SnapNumItems(int SnapID) const = 0;
-	virtual const void *SnapFindItem(int SnapID, int Type, int ID) const = 0;
-	virtual void *SnapGetItem(int SnapID, int Index, CSnapItem *pItem) const = 0;
-	virtual int SnapItemSize(int SnapID, int Index) const = 0;
+	virtual int SnapNumItems(int SnapId) const = 0;
+	virtual const void *SnapFindItem(int SnapId, int Type, int Id) const = 0;
+	virtual void *SnapGetItem(int SnapId, int Index, CSnapItem *pItem) const = 0;
+	virtual int SnapItemSize(int SnapId, int Index) const = 0;
 
 	virtual void SnapSetStaticsize(int ItemType, int Size) = 0;
 
@@ -230,7 +230,7 @@ public:
 	template<class T>
 	int SendPackMsgActive(T *pMsg, int Flags)
 	{
-		CMsgPacker Packer(T::ms_MsgID, false);
+		CMsgPacker Packer(T::ms_MsgId, false);
 		if(pMsg->Pack(&Packer))
 			return -1;
 		return SendMsgActive(&Packer, Flags);
@@ -293,7 +293,7 @@ public:
 		MESSAGE_BOX_TYPE_INFO,
 	};
 	virtual void ShowMessageBox(const char *pTitle, const char *pMessage, EMessageBoxType Type = MESSAGE_BOX_TYPE_ERROR) = 0;
-	virtual void GetGPUInfoString(char (&aGPUInfo)[256]) = 0;
+	virtual void GetGpuInfoString(char (&aGpuInfo)[256]) = 0;
 };
 
 class IGameClient : public IInterface
@@ -314,7 +314,7 @@ public:
 	virtual void OnUpdate() = 0;
 	virtual void OnStateChange(int NewState, int OldState) = 0;
 	virtual void OnConnected() = 0;
-	virtual void OnMessage(int MsgID, CUnpacker *pUnpacker, int Conn, bool Dummy) = 0;
+	virtual void OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dummy) = 0;
 	virtual void OnPredict() = 0;
 	virtual void OnActivateEditor() = 0;
 	virtual void OnWindowResize() = 0;

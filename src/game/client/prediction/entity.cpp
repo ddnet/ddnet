@@ -17,7 +17,7 @@ CEntity::CEntity(CGameWorld *pGameWorld, int ObjType, vec2 Pos, int ProximityRad
 	m_ProximityRadius = ProximityRadius;
 
 	m_MarkedForDestroy = false;
-	m_ID = -1;
+	m_Id = -1;
 
 	m_pPrevTypeEntity = 0;
 	m_pNextTypeEntity = 0;
