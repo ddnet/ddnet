@@ -26,6 +26,7 @@
 # 2023-08-11 By
 # 2023-11-25 By
 # 2024-01-15 By
+# 2024-03-05 By
 ##### /authors #####
 
 ##### translated strings #####
@@ -1700,7 +1701,7 @@ Videos directory
 == 影片目錄
 
 Video was saved to '%s'
-== 影片保存至 "%s"
+== 影片儲存至 "%s"
 
 Go back the specified duration
 == 倒轉指定時長
@@ -1748,7 +1749,7 @@ Enable ghost
 == 啟用影子
 
 Only save improvements
-== 只保存更佳記錄
+== 只儲存更佳記錄
 
 Regular background color
 == 原圖層背景顏色
@@ -1826,22 +1827,22 @@ Show finish messages
 == 顯示完成訊息
 
 Failed saving the replay!
-== 
+== 儲存回放失敗！
 
 Error saving settings
-== 
+== 儲存設定錯誤
 
 Loading commands…
-== 
+== 正在載入指令...
 
 Main menu
-== 
+== 主選單
 
 Server filter
-== 
+== 伺服器過濾器
 
 Friends
-== 
+== 好友
 
 Loading…
-== 
+== 正在載入...
