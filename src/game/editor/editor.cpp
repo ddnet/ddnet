@@ -4750,7 +4750,7 @@ void CEditor::RenderImagesList(CUIRect ToolBox)
 				if(Result == 2)
 				{
 					const std::shared_ptr<CEditorImage> pImg = m_Map.m_vpImages[m_SelectedImage];
-					const int Height = !pImg->m_External && IsVanillaImage(pImg->m_aName) ? 107 : (pImg->m_External ? 73 : 90);
+					const int Height = pImg->m_External ? 73 : 107;
 					static SPopupMenuId s_PopupImageId;
 					Ui()->DoPopupMenu(&s_PopupImageId, Ui()->MouseX(), Ui()->MouseY(), 140, Height, this, PopupImage);
 				}
