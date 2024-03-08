@@ -91,7 +91,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 
 	char m_aConnectAddressStr[MAX_SERVER_ADDRESSES * NETADDR_MAXSTRSIZE] = "";
 
-	CUuid m_ConnectionID = UUID_ZEROED;
+	CUuid m_ConnectionId = UUID_ZEROED;
 
 	bool m_HaveGlobalTcpAddr = false;
 	NETADDR m_GlobalTcpAddr = NETADDR_ZEROED;

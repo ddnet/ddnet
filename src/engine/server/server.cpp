@@ -586,7 +586,7 @@ bool CServer::GetClientInfo(int ClientID, CClientInfo *pInfo) const
 		pInfo->m_DDNetVersion = m_aClients[ClientID].m_DDNetVersion >= 0 ? m_aClients[ClientID].m_DDNetVersion : VERSION_VANILLA;
 		if(m_aClients[ClientID].m_GotDDNetVersionPacket)
 		{
-			pInfo->m_pConnectionID = &m_aClients[ClientID].m_ConnectionID;
+			pInfo->m_pConnectionID = &m_aClients[ClientID].m_ConnectionId;
 			pInfo->m_pDDNetVersionStr = m_aClients[ClientID].m_aDDNetVersionStr;
 		}
 		else
@@ -1470,7 +1470,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				{
 					return;
 				}
-				m_aClients[ClientID].m_ConnectionID = *pConnectionID;
+				m_aClients[ClientID].m_ConnectionId = *pConnectionID;
 				m_aClients[ClientID].m_DDNetVersion = DDNetVersion;
 				str_copy(m_aClients[ClientID].m_aDDNetVersionStr, pDDNetVersionStr);
 				m_aClients[ClientID].m_DDNetVersionSettled = true;

@@ -177,7 +177,7 @@ public:
 		bool m_DDNetVersionSettled;
 		int m_DDNetVersion;
 		char m_aDDNetVersionStr[64];
-		CUuid m_ConnectionID;
+		CUuid m_ConnectionId;
 		int64_t m_RedirectDropTime;
 
 		// DNSBL
