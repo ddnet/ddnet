@@ -391,8 +391,8 @@ private:
 	void UploadTextures()
 	{
 		const size_t NewTextureSize = m_TextureDimension * m_TextureDimension;
-		void *pTmpTextFillData = malloc(NewTextureSize);
-		void *pTmpTextOutlineData = malloc(NewTextureSize);
+		uint8_t *pTmpTextFillData = static_cast<uint8_t *>(malloc(NewTextureSize));
+		uint8_t *pTmpTextOutlineData = static_cast<uint8_t *>(malloc(NewTextureSize));
 		mem_copy(pTmpTextFillData, m_apTextureData[FONT_TEXTURE_FILL], NewTextureSize);
 		mem_copy(pTmpTextOutlineData, m_apTextureData[FONT_TEXTURE_OUTLINE], NewTextureSize);
 		Graphics()->LoadTextTextures(m_TextureDimension, m_TextureDimension, m_aTextures[FONT_TEXTURE_FILL], m_aTextures[FONT_TEXTURE_OUTLINE], pTmpTextFillData, pTmpTextOutlineData);
@@ -729,7 +729,7 @@ public:
 		return vec2(0.0f, 0.0f);
 	}
 
-	void UploadEntityLayerText(void *pTexBuff, size_t PixelSize, size_t TexWidth, size_t TexHeight, int TexSubWidth, int TexSubHeight, const char *pText, int Length, float x, float y, int FontSize)
+	void UploadEntityLayerText(uint8_t *pTexBuff, size_t PixelSize, size_t TexWidth, size_t TexHeight, int TexSubWidth, int TexSubHeight, const char *pText, int Length, float x, float y, int FontSize)
 	{
 		if(FontSize < 1)
 			return;
@@ -770,7 +770,6 @@ public:
 				else
 					mem_zero(m_aaGlyphData[FONT_TEXTURE_FILL], GlyphDataSize);
 
-				uint8_t *pImageBuff = (uint8_t *)pTexBuff;
 				for(unsigned OffY = 0; OffY < pBitmap->rows; ++OffY)
 				{
 					for(unsigned OffX = 0; OffX < pBitmap->width; ++OffX)
@@ -783,11 +782,11 @@ public:
 						{
 							if(i != PixelSize - 1)
 							{
-								*(pImageBuff + ImageOffset + i) = 255;
+								*(pTexBuff + ImageOffset + i) = 255;
 							}
 							else
 							{
-								*(pImageBuff + ImageOffset + i) = *(m_aaGlyphData[FONT_TEXTURE_FILL] + GlyphOffset);
+								*(pTexBuff + ImageOffset + i) = *(m_aaGlyphData[FONT_TEXTURE_FILL] + GlyphOffset);
 							}
 						}
 					}
@@ -2181,7 +2180,7 @@ public:
 		return TextContainer.m_BoundingBox;
 	}
 
-	void UploadEntityLayerText(void *pTexBuff, size_t PixelSize, size_t TexWidth, size_t TexHeight, int TexSubWidth, int TexSubHeight, const char *pText, int Length, float x, float y, int FontSize) override
+	void UploadEntityLayerText(uint8_t *pTexBuff, size_t PixelSize, size_t TexWidth, size_t TexHeight, int TexSubWidth, int TexSubHeight, const char *pText, int Length, float x, float y, int FontSize) override
 	{
 		m_pGlyphMap->UploadEntityLayerText(pTexBuff, PixelSize, TexWidth, TexHeight, TexSubWidth, TexSubHeight, pText, Length, x, y, FontSize);
 	}

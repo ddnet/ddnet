@@ -63,8 +63,8 @@ bool CEditorImage::DataEquals(const CEditorImage &Other) const
 	if(Other.m_Height != m_Height || Other.m_Width != m_Width || Other.PixelSize() != ImgPixelSize)
 		return false;
 
-	const auto &&GetPixel = [&](void *pData, int x, int y, size_t p) -> uint8_t {
-		return ((uint8_t *)pData)[x * ImgPixelSize + (m_Width * ImgPixelSize * y) + p];
+	const auto &&GetPixel = [&](uint8_t *pData, int x, int y, size_t p) -> uint8_t {
+		return pData[x * ImgPixelSize + (m_Width * ImgPixelSize * y) + p];
 	};
 
 	// Look through every pixel and check if there are any difference

@@ -337,7 +337,7 @@ static bool ConvertToRGBA(uint8_t *pDest, const uint8_t *pSrc, size_t SrcWidth, 
 	}
 }
 
-int CGraphics_Threaded::LoadTextureRawSub(CTextureHandle TextureId, int x, int y, size_t Width, size_t Height, CImageInfo::EImageFormat Format, const void *pData)
+int CGraphics_Threaded::LoadTextureRawSub(CTextureHandle TextureId, int x, int y, size_t Width, size_t Height, CImageInfo::EImageFormat Format, const uint8_t *pData)
 {
 	dbg_assert(TextureId.IsValid(), "Invalid texture handle used with LoadTextureRawSub.");
 
@@ -353,8 +353,8 @@ int CGraphics_Threaded::LoadTextureRawSub(CTextureHandle TextureId, int x, int y
 	const size_t MemSize = Width * Height * CImageInfo::PixelSize(CImageInfo::FORMAT_RGBA);
 
 	// copy texture data
-	void *pTmpData = malloc(MemSize);
-	ConvertToRGBA((uint8_t *)pTmpData, (const uint8_t *)pData, Width, Height, Format);
+	uint8_t *pTmpData = static_cast<uint8_t *>(malloc(MemSize));
+	ConvertToRGBA(pTmpData, pData, Width, Height, Format);
 	Cmd.m_pData = pTmpData;
 	AddCmd(Cmd);
 
@@ -365,7 +365,7 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadSpriteTextureImpl(CImageInfo &
 {
 	const size_t PixelSize = FromImageInfo.PixelSize();
 	m_vSpriteHelper.resize(w * h * PixelSize);
-	CopyTextureFromTextureBufferSub(m_vSpriteHelper.data(), w, h, (uint8_t *)FromImageInfo.m_pData, FromImageInfo.m_Width, FromImageInfo.m_Height, PixelSize, x, y, w, h);
+	CopyTextureFromTextureBufferSub(m_vSpriteHelper.data(), w, h, FromImageInfo.m_pData, FromImageInfo.m_Width, FromImageInfo.m_Height, PixelSize, x, y, w, h);
 	return LoadTextureRaw(w, h, FromImageInfo.m_Format, m_vSpriteHelper.data(), 0);
 }
 
@@ -384,7 +384,7 @@ bool CGraphics_Threaded::IsImageSubFullyTransparent(CImageInfo &FromImageInfo, i
 {
 	if(FromImageInfo.m_Format == CImageInfo::FORMAT_SINGLE_COMPONENT || FromImageInfo.m_Format == CImageInfo::FORMAT_RGBA)
 	{
-		uint8_t *pImgData = (uint8_t *)FromImageInfo.m_pData;
+		const uint8_t *pImgData = FromImageInfo.m_pData;
 		const size_t PixelSize = FromImageInfo.PixelSize();
 		for(int iy = 0; iy < h; ++iy)
 		{
@@ -450,7 +450,7 @@ static CCommandBuffer::SCommand_Texture_Create LoadTextureCreateCommand(int Text
 	return Cmd;
 }
 
-IGraphics::CTextureHandle CGraphics_Threaded::LoadTextureRaw(size_t Width, size_t Height, CImageInfo::EImageFormat Format, const void *pData, int Flags, const char *pTexName)
+IGraphics::CTextureHandle CGraphics_Threaded::LoadTextureRaw(size_t Width, size_t Height, CImageInfo::EImageFormat Format, const uint8_t *pData, int Flags, const char *pTexName)
 {
 	LoadTextureAddWarning(Width, Height, Flags, pTexName, m_vWarnings);
 
@@ -462,8 +462,8 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadTextureRaw(size_t Width, size_
 
 	// Copy texture data and convert if necessary
 	const size_t MemSize = Width * Height * CImageInfo::PixelSize(CImageInfo::FORMAT_RGBA);
-	void *pTmpData = malloc(MemSize);
-	if(!ConvertToRGBA(static_cast<uint8_t *>(pTmpData), static_cast<const uint8_t *>(pData), Width, Height, Format))
+	uint8_t *pTmpData = static_cast<uint8_t *>(malloc(MemSize));
+	if(!ConvertToRGBA(pTmpData, pData, Width, Height, Format))
 	{
 		dbg_msg("graphics", "converted image '%s' to RGBA, consider making its file format RGBA", pTexName ? pTexName : "(no name)");
 	}
@@ -474,7 +474,7 @@ IGraphics::CTextureHandle CGraphics_Threaded::LoadTextureRaw(size_t Width, size_
 	return TextureHandle;
 }
 
-IGraphics::CTextureHandle CGraphics_Threaded::LoadTextureRawMove(size_t Width, size_t Height, CImageInfo::EImageFormat Format, void *pData, int Flags, const char *pTexName)
+IGraphics::CTextureHandle CGraphics_Threaded::LoadTextureRawMove(size_t Width, size_t Height, CImageInfo::EImageFormat Format, uint8_t *pData, int Flags, const char *pTexName)
 {
 	if(Format != CImageInfo::FORMAT_RGBA)
 	{
@@ -522,7 +522,7 @@ IGraphics::CTextureHandle CGraphics_Threaded::NullTexture() const
 	return m_NullTexture;
 }
 
-bool CGraphics_Threaded::LoadTextTextures(size_t Width, size_t Height, CTextureHandle &TextTexture, CTextureHandle &TextOutlineTexture, void *pTextData, void *pTextOutlineData)
+bool CGraphics_Threaded::LoadTextTextures(size_t Width, size_t Height, CTextureHandle &TextTexture, CTextureHandle &TextOutlineTexture, uint8_t *pTextData, uint8_t *pTextOutlineData)
 {
 	if(Width == 0 || Height == 0)
 		return false;
@@ -556,7 +556,7 @@ bool CGraphics_Threaded::UnloadTextTextures(CTextureHandle &TextTexture, CTextur
 	return true;
 }
 
-bool CGraphics_Threaded::UpdateTextTexture(CTextureHandle TextureId, int x, int y, size_t Width, size_t Height, const void *pData)
+bool CGraphics_Threaded::UpdateTextTexture(CTextureHandle TextureId, int x, int y, size_t Width, size_t Height, const uint8_t *pData)
 {
 	CCommandBuffer::SCommand_TextTexture_Update Cmd;
 	Cmd.m_Slot = TextureId.Id();
@@ -569,7 +569,7 @@ bool CGraphics_Threaded::UpdateTextTexture(CTextureHandle TextureId, int x, int 
 	const size_t MemSize = Width * Height;
 
 	// copy texture data
-	void *pTmpData = malloc(MemSize);
+	uint8_t *pTmpData = static_cast<uint8_t *>(malloc(MemSize));
 	mem_copy(pTmpData, pData, MemSize);
 	Cmd.m_pData = pTmpData;
 	AddCmd(Cmd);
@@ -694,7 +694,7 @@ bool CGraphics_Threaded::CheckImageDivisibility(const char *pFileName, CImageInf
 			NewWidth = (NewHeight / DivY) * DivX;
 		}
 
-		uint8_t *pNewImg = ResizeImage((uint8_t *)Img.m_pData, Img.m_Width, Img.m_Height, NewWidth, NewHeight, Img.PixelSize());
+		uint8_t *pNewImg = ResizeImage(Img.m_pData, Img.m_Width, Img.m_Height, NewWidth, NewHeight, Img.PixelSize());
 		free(Img.m_pData);
 		Img.m_pData = pNewImg;
 		Img.m_Width = NewWidth;
@@ -773,7 +773,7 @@ class CScreenshotSaveJob : public IJob
 	char m_aName[IO_MAX_PATH_LENGTH];
 	int m_Width;
 	int m_Height;
-	void *m_pData;
+	uint8_t *m_pData;
 
 	void Run() override
 	{
@@ -785,7 +785,7 @@ class CScreenshotSaveJob : public IJob
 			TImageByteBuffer ByteBuffer;
 			SImageByteBuffer ImageByteBuffer(&ByteBuffer);
 
-			if(SavePNG(IMAGE_FORMAT_RGBA, (const uint8_t *)m_pData, ImageByteBuffer, m_Width, m_Height))
+			if(SavePNG(IMAGE_FORMAT_RGBA, m_pData, ImageByteBuffer, m_Width, m_Height))
 				io_write(File, &ByteBuffer.front(), ByteBuffer.size());
 			io_close(File);
 
@@ -799,7 +799,7 @@ class CScreenshotSaveJob : public IJob
 	}
 
 public:
-	CScreenshotSaveJob(IStorage *pStorage, IConsole *pConsole, const char *pName, int Width, int Height, void *pData) :
+	CScreenshotSaveJob(IStorage *pStorage, IConsole *pConsole, const char *pName, int Width, int Height, uint8_t *pData) :
 		m_pStorage(pStorage),
 		m_pConsole(pConsole),
 		m_Width(Width),

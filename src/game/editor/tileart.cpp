@@ -19,7 +19,7 @@ bool operator<(const ColorRGBA &Left, const ColorRGBA &Right)
 
 static ColorRGBA GetPixelColor(const CImageInfo &Image, size_t x, size_t y)
 {
-	uint8_t *pData = static_cast<uint8_t *>(Image.m_pData);
+	uint8_t *pData = Image.m_pData;
 	const size_t PixelSize = Image.PixelSize();
 	const size_t PixelStartIndex = x * PixelSize + (Image.m_Width * PixelSize * y);
 
@@ -43,7 +43,7 @@ static ColorRGBA GetPixelColor(const CImageInfo &Image, size_t x, size_t y)
 
 static void SetPixelColor(CImageInfo *pImage, size_t x, size_t y, ColorRGBA Color)
 {
-	uint8_t *pData = static_cast<uint8_t *>(pImage->m_pData);
+	uint8_t *pData = pImage->m_pData;
 	const size_t PixelSize = pImage->PixelSize();
 	const size_t PixelStartIndex = x * PixelSize + (pImage->m_Width * PixelSize * y);
 

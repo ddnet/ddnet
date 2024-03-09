@@ -85,8 +85,8 @@ protected:
 	static int TexFormatToOpenGLFormat(int TexFormat);
 	static size_t GLFormatToPixelSize(int GLFormat);
 
-	void TextureUpdate(int Slot, int X, int Y, int Width, int Height, int GLFormat, void *pTexData);
-	void TextureCreate(int Slot, int Width, int Height, int GLFormat, int GLStoreFormat, int Flags, void *pTexData);
+	void TextureUpdate(int Slot, int X, int Y, int Width, int Height, int GLFormat, uint8_t *pTexData);
+	void TextureCreate(int Slot, int Width, int Height, int GLFormat, int GLStoreFormat, int Flags, uint8_t *pTexData);
 
 	virtual bool Cmd_Init(const SCommand_Init *pCommand);
 	virtual void Cmd_Shutdown(const SCommand_Shutdown *pCommand) {}
@@ -151,7 +151,7 @@ class CCommandProcessorFragment_OpenGL2 : public CCommandProcessorFragment_OpenG
 			m_DataSize = 0;
 		}
 		TWGLuint m_BufferObjectId;
-		void *m_pData;
+		uint8_t *m_pData;
 		size_t m_DataSize;
 	};
 
