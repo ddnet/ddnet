@@ -502,9 +502,9 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 		size_t m_OffsetInBuffer = 0;
 		size_t m_Size;
 		size_t m_UsedSize;
-		void *m_pMappedBufferData;
+		uint8_t *m_pMappedBufferData;
 
-		SFrameBuffers(VkBuffer Buffer, SDeviceMemoryBlock BufferMem, size_t OffsetInBuffer, size_t Size, size_t UsedSize, void *pMappedBufferData) :
+		SFrameBuffers(VkBuffer Buffer, SDeviceMemoryBlock BufferMem, size_t OffsetInBuffer, size_t Size, size_t UsedSize, uint8_t *pMappedBufferData) :
 			m_Buffer(Buffer), m_BufferMem(BufferMem), m_OffsetInBuffer(OffsetInBuffer), m_Size(Size), m_UsedSize(UsedSize), m_pMappedBufferData(pMappedBufferData)
 		{
 		}
@@ -514,7 +514,7 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 	{
 		std::array<SDeviceDescriptorSet, 2> m_aUniformSets;
 
-		SFrameUniformBuffers(VkBuffer Buffer, SDeviceMemoryBlock BufferMem, size_t OffsetInBuffer, size_t Size, size_t UsedSize, void *pMappedBufferData) :
+		SFrameUniformBuffers(VkBuffer Buffer, SDeviceMemoryBlock BufferMem, size_t OffsetInBuffer, size_t Size, size_t UsedSize, uint8_t *pMappedBufferData) :
 			SFrameBuffers(Buffer, BufferMem, OffsetInBuffer, Size, UsedSize, pMappedBufferData) {}
 	};
 
@@ -2528,7 +2528,7 @@ protected:
 		return 4;
 	}
 
-	[[nodiscard]] bool UpdateTexture(size_t TextureSlot, VkFormat Format, void *&pData, int64_t XOff, int64_t YOff, size_t Width, size_t Height)
+	[[nodiscard]] bool UpdateTexture(size_t TextureSlot, VkFormat Format, uint8_t *&pData, int64_t XOff, int64_t YOff, size_t Width, size_t Height)
 	{
 		const size_t ImageSize = Width * Height * VulkanFormatToPixelSize(Format);
 		SMemoryBlock<s_StagingBufferImageCacheId> StagingBuffer;
@@ -2548,7 +2548,7 @@ protected:
 				YOff /= 2;
 			}
 
-			void *pTmpData = Resize((const uint8_t *)pData, Width, Height, Width, Height, VulkanFormatToPixelSize(Format));
+			uint8_t *pTmpData = Resize(pData, Width, Height, Width, Height, VulkanFormatToPixelSize(Format));
 			free(pData);
 			pData = pTmpData;
 		}
@@ -2581,7 +2581,7 @@ protected:
 		VkFormat Format,
 		VkFormat StoreFormat,
 		int Flags,
-		void *&pData)
+		uint8_t *&pData)
 	{
 		size_t ImageIndex = (size_t)Slot;
 		const size_t PixelSize = VulkanFormatToPixelSize(Format);
@@ -2602,7 +2602,7 @@ protected:
 				++RescaleCount;
 			} while((size_t)Width > m_MaxTextureSize || (size_t)Height > m_MaxTextureSize);
 
-			void *pTmpData = Resize((const uint8_t *)(pData), Width, Height, Width, Height, PixelSize);
+			uint8_t *pTmpData = Resize(pData, Width, Height, Width, Height, PixelSize);
 			free(pData);
 			pData = pTmpData;
 		}
@@ -2657,7 +2657,7 @@ protected:
 				dbg_msg("vulkan", "3D/2D array texture was resized");
 				int NewWidth = maximum<int>(HighestBit(ConvertWidth), 16);
 				int NewHeight = maximum<int>(HighestBit(ConvertHeight), 16);
-				uint8_t *pNewTexData = (uint8_t *)Resize((const uint8_t *)pData, ConvertWidth, ConvertHeight, NewWidth, NewHeight, PixelSize);
+				uint8_t *pNewTexData = Resize(pData, ConvertWidth, ConvertHeight, NewWidth, NewHeight, PixelSize);
 
 				ConvertWidth = NewWidth;
 				ConvertHeight = NewHeight;
@@ -2667,7 +2667,7 @@ protected:
 			}
 
 			bool Needs3DTexDel = false;
-			void *p3DTexData = malloc((size_t)PixelSize * ConvertWidth * ConvertHeight);
+			uint8_t *p3DTexData = static_cast<uint8_t *>(malloc((size_t)PixelSize * ConvertWidth * ConvertHeight));
 			if(!Texture2DTo3D(pData, ConvertWidth, ConvertHeight, PixelSize, 16, 16, p3DTexData, Image3DWidth, Image3DHeight))
 			{
 				free(p3DTexData);
@@ -2793,9 +2793,9 @@ protected:
 		return true;
 	}
 
-	[[nodiscard]] bool CreateTextureImage(size_t ImageIndex, VkImage &NewImage, SMemoryImageBlock<s_ImageBufferCacheId> &NewImgMem, const void *pData, VkFormat Format, size_t Width, size_t Height, size_t Depth, size_t PixelSize, size_t MipMapLevelCount)
+	[[nodiscard]] bool CreateTextureImage(size_t ImageIndex, VkImage &NewImage, SMemoryImageBlock<s_ImageBufferCacheId> &NewImgMem, const uint8_t *pData, VkFormat Format, size_t Width, size_t Height, size_t Depth, size_t PixelSize, size_t MipMapLevelCount)
 	{
-		int ImageSize = Width * Height * Depth * PixelSize;
+		VkDeviceSize ImageSize = Width * Height * Depth * PixelSize;
 
 		SMemoryBlock<s_StagingBufferImageCacheId> StagingBuffer;
 		if(!GetStagingBufferImage(StagingBuffer, pData, ImageSize))
@@ -6303,7 +6303,7 @@ public:
 				BufferMem = BufferOfFrame.m_BufferMem;
 				Offset = BufferOfFrame.m_UsedSize;
 				BufferOfFrame.m_UsedSize += DataSize;
-				pMem = (uint8_t *)BufferOfFrame.m_pMappedBufferData;
+				pMem = BufferOfFrame.m_pMappedBufferData;
 				pBufferMem = &BufferOfFrame;
 				break;
 			}
@@ -6336,7 +6336,7 @@ public:
 			BufferMem = StreamBufferMemory;
 
 			pBufferMem = &NewStreamBuffer;
-			pMem = (uint8_t *)NewStreamBuffer.m_pMappedBufferData;
+			pMem = NewStreamBuffer.m_pMappedBufferData;
 			Offset = NewStreamBuffer.m_OffsetInBuffer;
 			NewStreamBuffer.m_UsedSize += DataSize;
 
@@ -6634,8 +6634,7 @@ public:
 	[[nodiscard]] bool Cmd_Texture_Update(const CCommandBuffer::SCommand_Texture_Update *pCommand)
 	{
 		size_t IndexTex = pCommand->m_Slot;
-
-		void *pData = pCommand->m_pData;
+		uint8_t *pData = pCommand->m_pData;
 
 		if(!UpdateTexture(IndexTex, VK_FORMAT_B8G8R8A8_UNORM, pData, pCommand->m_X, pCommand->m_Y, pCommand->m_Width, pCommand->m_Height))
 			return false;
@@ -6665,7 +6664,7 @@ public:
 		int Format = pCommand->m_Format;
 		int StoreFormat = pCommand->m_StoreFormat;
 		int Flags = pCommand->m_Flags;
-		void *pData = pCommand->m_pData;
+		uint8_t *pData = pCommand->m_pData;
 
 		if(!CreateTextureCMD(Slot, Width, Height, TextureFormatToVulkanFormat(Format), TextureFormatToVulkanFormat(StoreFormat), Flags, pData))
 			return false;
@@ -6682,8 +6681,8 @@ public:
 		int Width = pCommand->m_Width;
 		int Height = pCommand->m_Height;
 
-		void *pTmpData = pCommand->m_pTextData;
-		void *pTmpData2 = pCommand->m_pTextOutlineData;
+		uint8_t *pTmpData = pCommand->m_pTextData;
+		uint8_t *pTmpData2 = pCommand->m_pTextOutlineData;
 
 		if(!CreateTextureCMD(Slot, Width, Height, VK_FORMAT_R8_UNORM, VK_FORMAT_R8_UNORM, CCommandBuffer::TEXFLAG_NOMIPMAPS, pTmpData))
 			return false;
@@ -6717,8 +6716,7 @@ public:
 	[[nodiscard]] bool Cmd_TextTexture_Update(const CCommandBuffer::SCommand_TextTexture_Update *pCommand)
 	{
 		size_t IndexTex = pCommand->m_Slot;
-
-		void *pData = pCommand->m_pData;
+		uint8_t *pData = pCommand->m_pData;
 
 		if(!UpdateTexture(IndexTex, VK_FORMAT_R8_UNORM, pData, pCommand->m_X, pCommand->m_Y, pCommand->m_Width, pCommand->m_Height))
 			return false;
@@ -6819,7 +6817,7 @@ public:
 		if(GetPresentedImageDataImpl(Width, Height, Format, m_vScreenshotHelper, true, {}))
 		{
 			const size_t ImgSize = (size_t)Width * (size_t)Height * CImageInfo::PixelSize(Format);
-			pCommand->m_pImage->m_pData = malloc(ImgSize);
+			pCommand->m_pImage->m_pData = static_cast<uint8_t *>(malloc(ImgSize));
 			mem_copy(pCommand->m_pImage->m_pData, m_vScreenshotHelper.data(), ImgSize);
 		}
 		else

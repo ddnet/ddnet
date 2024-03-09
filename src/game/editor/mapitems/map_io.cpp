@@ -524,7 +524,7 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 				// copy image data
 				void *pData = DataFile.GetData(pItem->m_ImageData);
 				const size_t DataSize = (size_t)pImg->m_Width * pImg->m_Height * CImageInfo::PixelSize(Format);
-				pImg->m_pData = malloc(DataSize);
+				pImg->m_pData = static_cast<uint8_t *>(malloc(DataSize));
 				mem_copy(pImg->m_pData, pData, DataSize);
 				int TextureLoadFlag = m_pEditor->Graphics()->Uses2DTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;
 				if(pImg->m_Width % 16 != 0 || pImg->m_Height % 16 != 0)

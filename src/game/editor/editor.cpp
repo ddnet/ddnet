@@ -866,7 +866,7 @@ bool CEditor::CallbackSaveImage(const char *pFileName, int StorageType, void *pU
 
 	TImageByteBuffer ByteBuffer;
 	SImageByteBuffer ImageByteBuffer(&ByteBuffer);
-	if(SavePNG(OutputFormat, static_cast<const uint8_t *>(pImg->m_pData), ImageByteBuffer, pImg->m_Width, pImg->m_Height))
+	if(SavePNG(OutputFormat, pImg->m_pData, ImageByteBuffer, pImg->m_Width, pImg->m_Height))
 	{
 		IOHANDLE File = pEditor->Storage()->OpenFile(pFileName, IOFLAG_WRITE, StorageType);
 		if(File)
@@ -4377,7 +4377,7 @@ bool CEditor::ReplaceImage(const char *pFileName, int StorageType, bool CheckDup
 
 	if(!pImg->m_External && g_Config.m_ClEditorDilate == 1 && pImg->m_Format == CImageInfo::FORMAT_RGBA)
 	{
-		DilateImage((unsigned char *)ImgInfo.m_pData, ImgInfo.m_Width, ImgInfo.m_Height);
+		DilateImage(ImgInfo.m_pData, ImgInfo.m_Width, ImgInfo.m_Height);
 	}
 
 	pImg->m_AutoMapper.Load(pImg->m_aName);
@@ -4437,7 +4437,7 @@ bool CEditor::AddImage(const char *pFileName, int StorageType, void *pUser)
 
 	if(!pImg->m_External && g_Config.m_ClEditorDilate == 1 && pImg->m_Format == CImageInfo::FORMAT_RGBA)
 	{
-		DilateImage((unsigned char *)ImgInfo.m_pData, ImgInfo.m_Width, ImgInfo.m_Height);
+		DilateImage(ImgInfo.m_pData, ImgInfo.m_Width, ImgInfo.m_Height);
 	}
 
 	int TextureLoadFlag = pEditor->Graphics()->Uses2DTextureArrays() ? IGraphics::TEXLOAD_TO_2D_ARRAY_TEXTURE : IGraphics::TEXLOAD_TO_3D_TEXTURE;

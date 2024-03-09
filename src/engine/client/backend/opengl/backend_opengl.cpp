@@ -618,7 +618,7 @@ bool CCommandProcessorFragment_OpenGL::Cmd_Init(const SCommand_Init *pCommand)
 	return true;
 }
 
-void CCommandProcessorFragment_OpenGL::TextureUpdate(int Slot, int X, int Y, int Width, int Height, int GLFormat, void *pTexData)
+void CCommandProcessorFragment_OpenGL::TextureUpdate(int Slot, int X, int Y, int Width, int Height, int GLFormat, uint8_t *pTexData)
 {
 	glBindTexture(GL_TEXTURE_2D, m_vTextures[Slot].m_Tex);
 
@@ -631,7 +631,7 @@ void CCommandProcessorFragment_OpenGL::TextureUpdate(int Slot, int X, int Y, int
 			int ResizedW = (int)(Width * ResizeW);
 			int ResizedH = (int)(Height * ResizeH);
 
-			void *pTmpData = Resize(static_cast<const unsigned char *>(pTexData), Width, Height, ResizedW, ResizedH, GLFormatToPixelSize(GLFormat));
+			uint8_t *pTmpData = Resize(pTexData, Width, Height, ResizedW, ResizedH, GLFormatToPixelSize(GLFormat));
 			free(pTexData);
 			pTexData = pTmpData;
 
@@ -653,7 +653,7 @@ void CCommandProcessorFragment_OpenGL::TextureUpdate(int Slot, int X, int Y, int
 			Y /= 2;
 		}
 
-		void *pTmpData = Resize(static_cast<const unsigned char *>(pTexData), OldWidth, OldHeight, Width, Height, GLFormatToPixelSize(GLFormat));
+		uint8_t *pTmpData = Resize(pTexData, OldWidth, OldHeight, Width, Height, GLFormatToPixelSize(GLFormat));
 		free(pTexData);
 		pTexData = pTmpData;
 	}
@@ -705,7 +705,7 @@ void CCommandProcessorFragment_OpenGL::Cmd_Texture_Destroy(const CCommandBuffer:
 	DestroyTexture(pCommand->m_Slot);
 }
 
-void CCommandProcessorFragment_OpenGL::TextureCreate(int Slot, int Width, int Height, int GLFormat, int GLStoreFormat, int Flags, void *pTexData)
+void CCommandProcessorFragment_OpenGL::TextureCreate(int Slot, int Width, int Height, int GLFormat, int GLStoreFormat, int Flags, uint8_t *pTexData)
 {
 #ifndef BACKEND_GL_MODERN_API
 
@@ -728,7 +728,7 @@ void CCommandProcessorFragment_OpenGL::TextureCreate(int Slot, int Width, int He
 		int PowerOfTwoHeight = HighestBit(Height);
 		if(Width != PowerOfTwoWidth || Height != PowerOfTwoHeight)
 		{
-			void *pTmpData = Resize(static_cast<const unsigned char *>(pTexData), Width, Height, PowerOfTwoWidth, PowerOfTwoHeight, GLFormatToPixelSize(GLFormat));
+			uint8_t *pTmpData = Resize(pTexData, Width, Height, PowerOfTwoWidth, PowerOfTwoHeight, GLFormatToPixelSize(GLFormat));
 			free(pTexData);
 			pTexData = pTmpData;
 
@@ -760,7 +760,7 @@ void CCommandProcessorFragment_OpenGL::TextureCreate(int Slot, int Width, int He
 
 		if(NeedsResize)
 		{
-			void *pTmpData = Resize(static_cast<const unsigned char *>(pTexData), OldWidth, OldHeight, Width, Height, GLFormatToPixelSize(GLFormat));
+			uint8_t *pTmpData = Resize(pTexData, OldWidth, OldHeight, Width, Height, GLFormatToPixelSize(GLFormat));
 			free(pTexData);
 			pTexData = pTmpData;
 		}
@@ -867,9 +867,7 @@ void CCommandProcessorFragment_OpenGL::TextureCreate(int Slot, int Width, int He
 				glBindSampler(0, 0);
 			}
 
-			uint8_t *p3DImageData = NULL;
-
-			p3DImageData = (uint8_t *)malloc((size_t)Width * Height * PixelSize);
+			uint8_t *p3DImageData = static_cast<uint8_t *>(malloc((size_t)Width * Height * PixelSize));
 			int Image3DWidth, Image3DHeight;
 
 			int ConvertWidth = Width;
@@ -880,7 +878,7 @@ void CCommandProcessorFragment_OpenGL::TextureCreate(int Slot, int Width, int He
 				dbg_msg("gfx", "3D/2D array texture was resized");
 				int NewWidth = maximum<int>(HighestBit(ConvertWidth), 16);
 				int NewHeight = maximum<int>(HighestBit(ConvertHeight), 16);
-				uint8_t *pNewTexData = (uint8_t *)Resize((const uint8_t *)pTexData, ConvertWidth, ConvertHeight, NewWidth, NewHeight, GLFormatToPixelSize(GLFormat));
+				uint8_t *pNewTexData = Resize(pTexData, ConvertWidth, ConvertHeight, NewWidth, NewHeight, GLFormatToPixelSize(GLFormat));
 
 				ConvertWidth = NewWidth;
 				ConvertHeight = NewHeight;
@@ -889,7 +887,7 @@ void CCommandProcessorFragment_OpenGL::TextureCreate(int Slot, int Width, int He
 				pTexData = pNewTexData;
 			}
 
-			if((Texture2DTo3D(pTexData, ConvertWidth, ConvertHeight, PixelSize, 16, 16, p3DImageData, Image3DWidth, Image3DHeight)))
+			if(Texture2DTo3D(pTexData, ConvertWidth, ConvertHeight, PixelSize, 16, 16, p3DImageData, Image3DWidth, Image3DHeight))
 			{
 				glTexImage3D(Target, 0, GLStoreFormat, Image3DWidth, Image3DHeight, 256, 0, GLFormat, GL_UNSIGNED_BYTE, p3DImageData);
 			}
@@ -1874,7 +1872,7 @@ void CCommandProcessorFragment_OpenGL2::Cmd_CreateBufferObject(const CCommandBuf
 	SBufferObject &BufferObject = m_vBufferObjectIndices[Index];
 	BufferObject.m_BufferObjectId = VertBufferId;
 	BufferObject.m_DataSize = pCommand->m_DataSize;
-	BufferObject.m_pData = malloc(pCommand->m_DataSize);
+	BufferObject.m_pData = static_cast<uint8_t *>(malloc(pCommand->m_DataSize));
 	if(pUploadData)
 		mem_copy(BufferObject.m_pData, pUploadData, pCommand->m_DataSize);
 
@@ -1894,7 +1892,7 @@ void CCommandProcessorFragment_OpenGL2::Cmd_RecreateBufferObject(const CCommandB
 
 	BufferObject.m_DataSize = pCommand->m_DataSize;
 	free(BufferObject.m_pData);
-	BufferObject.m_pData = malloc(pCommand->m_DataSize);
+	BufferObject.m_pData = static_cast<uint8_t *>(malloc(pCommand->m_DataSize));
 	if(pUploadData)
 		mem_copy(BufferObject.m_pData, pUploadData, pCommand->m_DataSize);
 
@@ -1913,7 +1911,7 @@ void CCommandProcessorFragment_OpenGL2::Cmd_UpdateBufferObject(const CCommandBuf
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	if(pUploadData)
-		mem_copy(((uint8_t *)BufferObject.m_pData) + (ptrdiff_t)pCommand->m_pOffset, pUploadData, pCommand->m_DataSize);
+		mem_copy(BufferObject.m_pData + (ptrdiff_t)pCommand->m_pOffset, pUploadData, pCommand->m_DataSize);
 
 	if(pCommand->m_DeletePointer)
 		free(pUploadData);
@@ -1927,10 +1925,10 @@ void CCommandProcessorFragment_OpenGL2::Cmd_CopyBufferObject(const CCommandBuffe
 	SBufferObject &ReadBufferObject = m_vBufferObjectIndices[ReadIndex];
 	SBufferObject &WriteBufferObject = m_vBufferObjectIndices[WriteIndex];
 
-	mem_copy(((uint8_t *)WriteBufferObject.m_pData) + (ptrdiff_t)pCommand->m_WriteOffset, ((uint8_t *)ReadBufferObject.m_pData) + (ptrdiff_t)pCommand->m_ReadOffset, pCommand->m_CopySize);
+	mem_copy(WriteBufferObject.m_pData + (ptrdiff_t)pCommand->m_WriteOffset, ReadBufferObject.m_pData + (ptrdiff_t)pCommand->m_ReadOffset, pCommand->m_CopySize);
 
 	glBindBuffer(GL_ARRAY_BUFFER, WriteBufferObject.m_BufferObjectId);
-	glBufferSubData(GL_ARRAY_BUFFER, (GLintptr)(pCommand->m_WriteOffset), (GLsizeiptr)(pCommand->m_CopySize), ((uint8_t *)WriteBufferObject.m_pData) + (ptrdiff_t)pCommand->m_WriteOffset);
+	glBufferSubData(GL_ARRAY_BUFFER, (GLintptr)(pCommand->m_WriteOffset), (GLsizeiptr)(pCommand->m_CopySize), WriteBufferObject.m_pData + (ptrdiff_t)pCommand->m_WriteOffset);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 

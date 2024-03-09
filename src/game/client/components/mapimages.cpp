@@ -131,7 +131,7 @@ void CMapImages::OnMapLoadImpl(class CLayers *pLayers, IMap *pMap)
 		}
 		else if(Format == CImageInfo::FORMAT_RGBA)
 		{
-			void *pData = pMap->GetData(pImg->m_ImageData);
+			const uint8_t *pData = static_cast<uint8_t *>(pMap->GetData(pImg->m_ImageData));
 			char aTexName[IO_MAX_PATH_LENGTH];
 			str_format(aTexName, sizeof(aTexName), "embedded: %s", pName);
 			m_aTextures[i] = Graphics()->LoadTextureRaw(pImg->m_Width, pImg->m_Height, Format, pData, LoadFlag, aTexName);
@@ -223,7 +223,7 @@ IGraphics::CTextureHandle CMapImages::GetEntities(EMapImageEntityLayerType Entit
 			const size_t PixelSize = ImgInfo.PixelSize();
 			const size_t BuildImageSize = (size_t)ImgInfo.m_Width * ImgInfo.m_Height * PixelSize;
 
-			uint8_t *pTmpImgData = (uint8_t *)ImgInfo.m_pData;
+			uint8_t *pTmpImgData = ImgInfo.m_pData;
 			uint8_t *pBuildImgData = (uint8_t *)malloc(BuildImageSize);
 
 			// build game layer
@@ -382,7 +382,7 @@ IGraphics::CTextureHandle CMapImages::UploadEntityLayerText(int TextureSize, int
 	const size_t Height = 1024;
 	const size_t PixelSize = CImageInfo::PixelSize(CImageInfo::FORMAT_RGBA);
 
-	void *pMem = calloc(Width * Height * PixelSize, 1);
+	uint8_t *pMem = static_cast<uint8_t *>(calloc(Width * Height * PixelSize, 1));
 
 	UpdateEntityLayerText(pMem, PixelSize, Width, Height, TextureSize, MaxWidth, YOffset, 0);
 	UpdateEntityLayerText(pMem, PixelSize, Width, Height, TextureSize, MaxWidth, YOffset, 1);
@@ -392,7 +392,7 @@ IGraphics::CTextureHandle CMapImages::UploadEntityLayerText(int TextureSize, int
 	return Graphics()->LoadTextureRawMove(Width, Height, CImageInfo::FORMAT_RGBA, pMem, TextureLoadFlag);
 }
 
-void CMapImages::UpdateEntityLayerText(void *pTexBuffer, size_t PixelSize, size_t TexWidth, size_t TexHeight, int TextureSize, int MaxWidth, int YOffset, int NumbersPower, int MaxNumber)
+void CMapImages::UpdateEntityLayerText(uint8_t *pTexBuffer, size_t PixelSize, size_t TexWidth, size_t TexHeight, int TextureSize, int MaxWidth, int YOffset, int NumbersPower, int MaxNumber)
 {
 	char aBuf[4];
 	int DigitsCount = NumbersPower + 1;
