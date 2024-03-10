@@ -1936,5 +1936,5 @@ void CGameContext::ConTimeCP(IConsole::IResult *pResult, void *pUserData)
 		return;
 
 	const char *pName = pResult->GetString(0);
-	pSelf->Score()->LoadPlayerData(pResult->m_ClientId, pName);
+	pSelf->Score()->LoadPlayerTimeCp(pResult->m_ClientId, pName);
 }

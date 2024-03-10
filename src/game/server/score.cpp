@@ -126,6 +126,11 @@ void CScore::LoadPlayerData(int ClientId, const char *pName)
 	ExecPlayerThread(CScoreWorker::LoadPlayerData, "load player data", ClientId, pName, 0);
 }
 
+void CScore::LoadPlayerTimeCp(int ClientId, const char *pName)
+{
+	ExecPlayerThread(CScoreWorker::LoadPlayerTimeCp, "load player timecp", ClientId, pName, 0);
+}
+
 void CScore::MapVote(int ClientId, const char *pMapName)
 {
 	if(RateLimitPlayer(ClientId))

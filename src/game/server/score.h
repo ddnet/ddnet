@@ -48,6 +48,7 @@ public:
 	void MapInfo(int ClientId, const char *pMapName);
 	void MapVote(int ClientId, const char *pMapName);
 	void LoadPlayerData(int ClientId, const char *pName = "");
+	void LoadPlayerTimeCp(int ClientId, const char *pName = "");
 	void SaveScore(int ClientId, float Time, const char *pTimestamp, const float aTimeCp[NUM_CHECKPOINTS], bool NotEligible);
 
 	void SaveTeamScore(int *pClientIds, unsigned int Size, float Time, const char *pTimestamp);
