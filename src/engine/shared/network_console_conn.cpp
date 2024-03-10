@@ -143,7 +143,7 @@ int CConsoleNetConnection::Recv(char *pLine, int MaxLength)
 			str_sanitize_cc(pLine);
 			mem_move(m_aBuffer, m_aBuffer + EndOffset, m_BufferOffset - EndOffset);
 			m_BufferOffset -= EndOffset;
-			return 1;
+			return str_utf8_check(pLine);
 		}
 	}
 	return 0;
