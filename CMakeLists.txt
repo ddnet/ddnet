@@ -1436,6 +1436,7 @@ set(EXPECTED_DATA
   languages/danish.txt
   languages/dutch.txt
   languages/esperanto.txt
+  languages/estonian.txt
   languages/finnish.txt
   languages/french.txt
   languages/galician.txt
