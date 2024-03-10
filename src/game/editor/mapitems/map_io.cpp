@@ -8,6 +8,7 @@
 #include <engine/sound.h>
 #include <engine/storage.h>
 
+#include <game/gamecore.h>
 #include <game/mapitems_ex.h>
 
 #include "image.h"
@@ -173,7 +174,7 @@ bool CEditorMap::Save(const char *pFileName)
 		GItem.m_NumLayers = 0;
 
 		// save group name
-		str_to_int32(GItem.m_aName, std::size(GItem.m_aName), pGroup->m_aName);
+		StrToInts(GItem.m_aName, sizeof(GItem.m_aName) / sizeof(int), pGroup->m_aName);
 
 		for(const std::shared_ptr<CLayer> &pLayer : pGroup->m_vpLayers)
 		{
@@ -242,7 +243,7 @@ bool CEditorMap::Save(const char *pFileName)
 					Item.m_Data = Writer.AddData((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CTile), pLayerTiles->m_pTiles);
 
 				// save layer name
-				str_to_int32(Item.m_aName, std::size(Item.m_aName), pLayerTiles->m_aName);
+				StrToInts(Item.m_aName, sizeof(Item.m_aName) / sizeof(int), pLayerTiles->m_aName);
 
 				Writer.AddItem(MAPITEMTYPE_LAYER, LayerCount, sizeof(Item), &Item);
 
@@ -284,7 +285,7 @@ bool CEditorMap::Save(const char *pFileName)
 					Item.m_Data = Writer.AddDataSwapped(pLayerQuads->m_vQuads.size() * sizeof(CQuad), pLayerQuads->m_vQuads.data());
 
 					// save layer name
-					str_to_int32(Item.m_aName, std::size(Item.m_aName), pLayerQuads->m_aName);
+					StrToInts(Item.m_aName, sizeof(Item.m_aName) / sizeof(int), pLayerQuads->m_aName);
 
 					Writer.AddItem(MAPITEMTYPE_LAYER, LayerCount, sizeof(Item), &Item);
 
@@ -310,7 +311,7 @@ bool CEditorMap::Save(const char *pFileName)
 					Item.m_Data = Writer.AddDataSwapped(pLayerSounds->m_vSources.size() * sizeof(CSoundSource), pLayerSounds->m_vSources.data());
 
 					// save layer name
-					str_to_int32(Item.m_aName, std::size(Item.m_aName), pLayerSounds->m_aName);
+					StrToInts(Item.m_aName, sizeof(Item.m_aName) / sizeof(int), pLayerSounds->m_aName);
 
 					Writer.AddItem(MAPITEMTYPE_LAYER, LayerCount, sizeof(Item), &Item);
 					GItem.m_NumLayers++;
@@ -334,7 +335,7 @@ bool CEditorMap::Save(const char *pFileName)
 		Item.m_StartPoint = PointCount;
 		Item.m_NumPoints = m_vpEnvelopes[e]->m_vPoints.size();
 		Item.m_Synchronized = m_vpEnvelopes[e]->m_Synchronized;
-		str_to_int32(Item.m_aName, std::size(Item.m_aName), m_vpEnvelopes[e]->m_aName);
+		StrToInts(Item.m_aName, sizeof(Item.m_aName) / sizeof(int), m_vpEnvelopes[e]->m_aName);
 
 		Writer.AddItem(MAPITEMTYPE_ENVELOPE, e, sizeof(Item), &Item);
 		PointCount += Item.m_NumPoints;
@@ -623,7 +624,7 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 
 			// load group name
 			if(pGItem->m_Version >= 3)
-				int32_to_str(pGItem->m_aName, std::size(pGItem->m_aName), pGroup->m_aName, std::size(pGroup->m_aName));
+				IntsToStr(pGItem->m_aName, sizeof(pGroup->m_aName) / sizeof(int), pGroup->m_aName);
 
 			for(int l = 0; l < pGItem->m_NumLayers; l++)
 			{
@@ -699,7 +700,7 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 
 					// load layer name
 					if(pTilemapItem->m_Version >= 3)
-						int32_to_str(pTilemapItem->m_aName, std::size(pTilemapItem->m_aName), pTiles->m_aName, std::size(pTiles->m_aName));
+						IntsToStr(pTilemapItem->m_aName, sizeof(pTiles->m_aName) / sizeof(int), pTiles->m_aName);
 
 					if(pTiles->m_Tele)
 					{
@@ -825,7 +826,7 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 
 					// load layer name
 					if(pQuadsItem->m_Version >= 2)
-						int32_to_str(pQuadsItem->m_aName, std::size(pQuadsItem->m_aName), pQuads->m_aName, std::size(pQuads->m_aName));
+						IntsToStr(pQuadsItem->m_aName, sizeof(pQuads->m_aName) / sizeof(int), pQuads->m_aName);
 
 					void *pData = DataFile.GetDataSwapped(pQuadsItem->m_Data);
 					pGroup->AddLayer(pQuads);
@@ -848,7 +849,7 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 						pSounds->m_Sound = -1;
 
 					// load layer name
-					int32_to_str(pSoundsItem->m_aName, std::size(pSoundsItem->m_aName), pSounds->m_aName, std::size(pSounds->m_aName));
+					IntsToStr(pSoundsItem->m_aName, sizeof(pSounds->m_aName) / sizeof(int), pSounds->m_aName);
 
 					// load data
 					void *pData = DataFile.GetDataSwapped(pSoundsItem->m_Data);
@@ -873,7 +874,7 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 						pSounds->m_Sound = -1;
 
 					// load layer name
-					int32_to_str(pSoundsItem->m_aName, std::size(pSoundsItem->m_aName), pSounds->m_aName, std::size(pSounds->m_aName));
+					IntsToStr(pSoundsItem->m_aName, sizeof(pSounds->m_aName) / sizeof(int), pSounds->m_aName);
 
 					// load data
 					CSoundSource_DEPRECATED *pData = (CSoundSource_DEPRECATED *)DataFile.GetDataSwapped(pSoundsItem->m_Data);
@@ -940,7 +941,7 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 					mem_copy(&pEnv->m_vPoints[p].m_Bezier, pPointBezier, sizeof(CEnvPointBezier));
 			}
 			if(pItem->m_aName[0] != -1) // compatibility with old maps
-				int32_to_str(pItem->m_aName, std::size(pItem->m_aName), pEnv->m_aName, std::size(pEnv->m_aName));
+				IntsToStr(pItem->m_aName, sizeof(pItem->m_aName) / sizeof(int), pEnv->m_aName);
 			m_vpEnvelopes.push_back(pEnv);
 			if(pItem->m_Version >= CMapItemEnvelope_v2::CURRENT_VERSION)
 				pEnv->m_Synchronized = pItem->m_Synchronized;

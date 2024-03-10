@@ -2,6 +2,7 @@
 #include <base/system.h>
 #include <engine/shared/datafile.h>
 #include <engine/storage.h>
+#include <game/gamecore.h>
 #include <game/mapitems.h>
 
 bool Process(IStorage *pStorage, const char **pMapNames)
@@ -59,12 +60,12 @@ bool Process(IStorage *pStorage, const char **pMapNames)
 			continue;
 
 		CMapItemLayerTilemap *apTilemap[2];
-		char aaName[2][12];
+		char aaName[2][16];
 
 		for(int i = 0; i < 2; ++i)
 		{
 			apTilemap[i] = (CMapItemLayerTilemap *)apItem[i];
-			int32_to_str(apTilemap[i]->m_aName, std::size(apTilemap[i]->m_aName), aaName[i], std::size(aaName[i]));
+			IntsToStr(apTilemap[i]->m_aName, sizeof(apTilemap[i]->m_aName) / sizeof(int), aaName[i]);
 		}
 
 		if(str_comp(aaName[0], aaName[1]) != 0 || apTilemap[0]->m_Width != apTilemap[1]->m_Width || apTilemap[0]->m_Height != apTilemap[1]->m_Height)

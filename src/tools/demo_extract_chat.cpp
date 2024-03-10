@@ -7,6 +7,8 @@
 #include <engine/shared/snapshot.h>
 #include <engine/storage.h>
 
+#include <game/gamecore.h>
+
 static const char *TOOL_NAME = "demo_extract_chat";
 
 class CClientSnapshotHandler
@@ -102,7 +104,7 @@ public:
 				if(ClientID < MAX_CLIENTS)
 				{
 					CClientData *pClient = &m_aClients[ClientID];
-					int32_to_str(&pInfo->m_Name0, 4, pClient->m_aName, sizeof(pClient->m_aName));
+					IntsToStr(&pInfo->m_Name0, 4, pClient->m_aName);
 				}
 			}
 		}
