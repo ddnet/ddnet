@@ -2107,8 +2107,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupEvent(void *pContext, CUIRect View, 
 
 			if(pEditor->m_PopupEventType == POPEVENT_PIXELART_BIG_IMAGE || pEditor->m_PopupEventType == POPEVENT_PIXELART_MANY_COLORS)
 			{
-				free(pEditor->m_TileartImageInfo.m_pData);
-				pEditor->m_TileartImageInfo.m_pData = nullptr;
+				pEditor->m_TileartImageInfo.Free();
 			}
 
 			return CUi::POPUP_CLOSE_CURRENT;
