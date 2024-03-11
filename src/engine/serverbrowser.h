@@ -117,6 +117,7 @@ public:
 	char m_aAddress[MAX_SERVER_ADDRESSES * NETADDR_MAXSTRSIZE];
 	CClient m_aClients[SERVERINFO_MAX_CLIENTS];
 	int m_NumFilteredPlayers;
+	bool m_RequiresLogin;
 
 	static int EstimateLatency(int Loc1, int Loc2);
 	static bool ParseLocation(int *pResult, const char *pString);

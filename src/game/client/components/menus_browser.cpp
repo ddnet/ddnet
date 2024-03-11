@@ -661,6 +661,10 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 		g_Config.m_BrFilterPw ^= 1;
 
 	View.HSplitTop(RowHeight, &Button, &View);
+	if(DoButton_CheckBox(&g_Config.m_BrFilterLogin, Localize("No login required"), g_Config.m_BrFilterLogin, &Button))
+		g_Config.m_BrFilterLogin ^= 1;
+
+	View.HSplitTop(RowHeight, &Button, &View);
 	if(DoButton_CheckBox(&g_Config.m_BrFilterGametypeStrict, Localize("Strict gametype filter"), g_Config.m_BrFilterGametypeStrict, &Button))
 		g_Config.m_BrFilterGametypeStrict ^= 1;
 
@@ -798,6 +802,7 @@ void CMenus::ResetServerbrowserFilters()
 	g_Config.m_BrFilterGametypeStrict = 0;
 	g_Config.m_BrFilterConnectingPlayers = 1;
 	g_Config.m_BrFilterServerAddress[0] = '\0';
+	g_Config.m_BrFilterLogin = true;
 
 	if(g_Config.m_UiPage != PAGE_LAN)
 	{
