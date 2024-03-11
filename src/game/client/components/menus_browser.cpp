@@ -834,6 +834,7 @@ void CMenus::RenderServerbrowserDDNetFilter(CUIRect View,
 
 	vec2 ScrollOffset(0.0f, 0.0f);
 	CScrollRegionParams ScrollParams;
+	ScrollParams.m_Active = !Ui()->IsPopupOpen();
 	ScrollParams.m_ScrollbarWidth = 10.0f;
 	ScrollParams.m_ScrollbarMargin = 3.0f;
 	ScrollParams.m_ScrollUnit = 2.0f * ItemHeight;
@@ -1191,6 +1192,7 @@ void CMenus::RenderServerbrowserInfoScoreboard(CUIRect View, const CServerInfo *
 	s_ListBox.DoAutoSpacing(1.0f);
 	s_ListBox.SetScrollbarWidth(16.0f);
 	s_ListBox.SetScrollbarMargin(5.0f);
+	s_ListBox.SetActive(!Ui()->IsPopupOpen());
 	s_ListBox.DoStart(25.0f, pSelectedServer->m_NumReceivedClients, 1, 3, -1, &View);
 
 	for(int i = 0; i < pSelectedServer->m_NumReceivedClients; i++)
@@ -1391,6 +1393,7 @@ void CMenus::RenderServerbrowserFriends(CUIRect View)
 		List.VSplitRight(5.0f, &List, nullptr);
 	vec2 ScrollOffset(0.0f, 0.0f);
 	CScrollRegionParams ScrollParams;
+	ScrollParams.m_Active = !Ui()->IsPopupOpen();
 	ScrollParams.m_ScrollbarWidth = 16.0f;
 	ScrollParams.m_ScrollbarMargin = 5.0f;
 	ScrollParams.m_ScrollUnit = 80.0f;
