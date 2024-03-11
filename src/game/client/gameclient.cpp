@@ -3520,11 +3520,6 @@ bool CGameClient::CanDisplayWarning() const
 	return m_Menus.CanDisplayWarning();
 }
 
-bool CGameClient::IsDisplayingWarning() const
-{
-	return m_Menus.GetCurPopup() == CMenus::POPUP_WARNING;
-}
-
 CNetObjHandler *CGameClient::GetNetObjHandler()
 {
 	return &m_NetObjHandler;

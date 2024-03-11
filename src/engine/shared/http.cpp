@@ -67,7 +67,7 @@ bool HttpHasIpresolveBug()
 CHttpRequest::CHttpRequest(const char *pUrl)
 {
 	str_copy(m_aUrl, pUrl);
-	sha256_init(&m_ActualSha256);
+	sha256_init(&m_ActualSha256Ctx);
 }
 
 CHttpRequest::~CHttpRequest()
@@ -213,7 +213,7 @@ size_t CHttpRequest::OnData(char *pData, size_t DataSize)
 		return 0;
 	}
 
-	sha256_update(&m_ActualSha256, pData, DataSize);
+	sha256_update(&m_ActualSha256Ctx, pData, DataSize);
 
 	if(!m_WriteToFile)
 	{
@@ -286,15 +286,15 @@ void CHttpRequest::OnCompletionInternal(std::optional<unsigned int> Result)
 		State = EHttpState::ERROR;
 	}
 
-	if(State == EHttpState::DONE && m_ExpectedSha256 != SHA256_ZEROED)
+	if(State == EHttpState::DONE)
 	{
-		const SHA256_DIGEST ActualSha256 = sha256_finish(&m_ActualSha256);
-		if(ActualSha256 != m_ExpectedSha256)
+		m_ActualSha256 = sha256_finish(&m_ActualSha256Ctx);
+		if(m_ExpectedSha256 != SHA256_ZEROED && m_ActualSha256 != m_ExpectedSha256)
 		{
 			if(g_Config.m_DbgCurl || m_LogProgress >= HTTPLOG::FAILURE)
 			{
 				char aActualSha256[SHA256_MAXSTRSIZE];
-				sha256_str(ActualSha256, aActualSha256, sizeof(aActualSha256));
+				sha256_str(m_ActualSha256, aActualSha256, sizeof(aActualSha256));
 				char aExpectedSha256[SHA256_MAXSTRSIZE];
 				sha256_str(m_ExpectedSha256, aExpectedSha256, sizeof(aExpectedSha256));
 				log_error("http", "SHA256 mismatch: got=%s, expected=%s, url=%s", aActualSha256, aExpectedSha256, m_aUrl);
@@ -362,12 +362,8 @@ void CHttpRequest::Wait()
 
 void CHttpRequest::Result(unsigned char **ppResult, size_t *pResultLength) const
 {
-	if(m_WriteToFile || State() != EHttpState::DONE)
-	{
-		*ppResult = nullptr;
-		*pResultLength = 0;
-		return;
-	}
+	dbg_assert(State() == EHttpState::DONE, "Request not done");
+	dbg_assert(!m_WriteToFile, "Result not usable together with WriteToFile");
 	*ppResult = m_pBuffer;
 	*pResultLength = m_ResponseLength;
 }
@@ -377,11 +373,13 @@ json_value *CHttpRequest::ResultJson() const
 	unsigned char *pResult;
 	size_t ResultLength;
 	Result(&pResult, &ResultLength);
-	if(!pResult)
-	{
-		return nullptr;
-	}
 	return json_parse((char *)pResult, ResultLength);
+}
+
+const SHA256_DIGEST &CHttpRequest::ResultSha256() const
+{
+	dbg_assert(State() == EHttpState::DONE, "Request not done");
+	return m_ActualSha256;
 }
 
 bool CHttp::Init(std::chrono::milliseconds ShutdownDelay)

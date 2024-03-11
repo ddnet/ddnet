@@ -242,8 +242,6 @@ public:
 	virtual const char *LatestVersion() const = 0;
 	virtual bool ConnectionProblems() const = 0;
 
-	virtual bool SoundInitFailed() const = 0;
-
 	virtual IGraphics::CTextureHandle GetDebugFont() const = 0; // TODO: remove this function
 
 	//DDRace
@@ -335,7 +333,6 @@ public:
 	virtual void DummyResetInput() = 0;
 	virtual void Echo(const char *pString) = 0;
 	virtual bool CanDisplayWarning() const = 0;
-	virtual bool IsDisplayingWarning() const = 0;
 
 	virtual CNetObjHandler *GetNetObjHandler() = 0;
 };

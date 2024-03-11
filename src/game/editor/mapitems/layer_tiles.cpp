@@ -945,16 +945,16 @@ CUI::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 	int Color = PackColor(m_Color);
 
 	CProperty aProps[] = {
-		{"Width", m_Width, PROPTYPE_INT_SCROLL, 1, 100000},
-		{"Height", m_Height, PROPTYPE_INT_SCROLL, 1, 100000},
+		{"Width", m_Width, PROPTYPE_INT, 1, 100000},
+		{"Height", m_Height, PROPTYPE_INT, 1, 100000},
 		{"Shift", 0, PROPTYPE_SHIFT, 0, 0},
-		{"Shift by", m_pEditor->m_ShiftBy, PROPTYPE_INT_SCROLL, 1, 100000},
+		{"Shift by", m_pEditor->m_ShiftBy, PROPTYPE_INT, 1, 100000},
 		{"Image", m_Image, PROPTYPE_IMAGE, 0, 0},
 		{"Color", Color, PROPTYPE_COLOR, 0, 0},
 		{"Color Env", m_ColorEnv + 1, PROPTYPE_ENVELOPE, 0, 0},
-		{"Color TO", m_ColorEnvOffset, PROPTYPE_INT_SCROLL, -1000000, 1000000},
+		{"Color TO", m_ColorEnvOffset, PROPTYPE_INT, -1000000, 1000000},
 		{"Auto Rule", m_AutoMapperConfig, PROPTYPE_AUTOMAPPER, m_Image, 0},
-		{"Seed", m_Seed, PROPTYPE_INT_SCROLL, 0, 1000000000},
+		{"Seed", m_Seed, PROPTYPE_INT, 0, 1000000000},
 		{nullptr},
 	};
 
@@ -1181,10 +1181,10 @@ CUI::EPopupMenuFunctionResult CLayerTiles::RenderCommonProperties(SCommonPropSta
 	}
 
 	CProperty aProps[] = {
-		{"Width", State.m_Width, PROPTYPE_INT_SCROLL, 1, 100000},
-		{"Height", State.m_Height, PROPTYPE_INT_SCROLL, 1, 100000},
+		{"Width", State.m_Width, PROPTYPE_INT, 1, 100000},
+		{"Height", State.m_Height, PROPTYPE_INT, 1, 100000},
 		{"Shift", 0, PROPTYPE_SHIFT, 0, 0},
-		{"Shift by", pEditor->m_ShiftBy, PROPTYPE_INT_SCROLL, 1, 100000},
+		{"Shift by", pEditor->m_ShiftBy, PROPTYPE_INT, 1, 100000},
 		{"Color", State.m_Color, PROPTYPE_COLOR, 0, 0},
 		{nullptr},
 	};
