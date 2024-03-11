@@ -24,7 +24,6 @@ char *CLineReader::Get()
 			// fetch more
 
 			// move the remaining part to the front
-			unsigned Read;
 			unsigned Left = m_BufferSize - LineStart;
 
 			if(LineStart > m_BufferSize)
@@ -34,7 +33,7 @@ char *CLineReader::Get()
 			m_BufferPos = Left;
 
 			// fill the buffer
-			Read = io_read(m_File, &m_aBuffer[m_BufferPos], m_BufferMaxSize - m_BufferPos);
+			unsigned Read = io_read(m_File, &m_aBuffer[m_BufferPos], m_BufferMaxSize - m_BufferPos);
 			m_BufferSize = Left + Read;
 			LineStart = 0;
 
@@ -42,7 +41,7 @@ char *CLineReader::Get()
 			{
 				if(Left)
 				{
-					m_aBuffer[Left] = 0; // return the last line
+					m_aBuffer[Left] = '\0'; // return the last line
 					m_BufferPos = Left;
 					m_BufferSize = Left;
 					if(!str_utf8_check(m_aBuffer))
@@ -53,8 +52,7 @@ char *CLineReader::Get()
 					}
 					return m_aBuffer;
 				}
-				else
-					return 0x0; // we are done!
+				return nullptr; // we are done!
 			}
 		}
 		else
@@ -72,9 +70,9 @@ char *CLineReader::Get()
 						continue;
 					}
 					else if(m_aBuffer[m_BufferPos + 1] == '\n')
-						m_aBuffer[m_BufferPos++] = 0;
+						m_aBuffer[m_BufferPos++] = '\0';
 				}
-				m_aBuffer[m_BufferPos++] = 0;
+				m_aBuffer[m_BufferPos++] = '\0';
 				if(!str_utf8_check(&m_aBuffer[LineStart]))
 				{
 					LineStart = m_BufferPos;
@@ -86,7 +84,7 @@ char *CLineReader::Get()
 			else if(CRLFBreak)
 			{
 				if(m_aBuffer[m_BufferPos] == '\n')
-					m_aBuffer[m_BufferPos++] = 0;
+					m_aBuffer[m_BufferPos++] = '\0';
 				if(!str_utf8_check(&m_aBuffer[LineStart]))
 				{
 					LineStart = m_BufferPos;
