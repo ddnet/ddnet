@@ -3,6 +3,7 @@
 #	Cammodude
 #modified by:
 #   Cammodude 2024-09-03 22:19:06
+#   Cammodude 2024-10-03 18:04:16
 ##### /authors #####
 
 ##### translated strings #####
@@ -83,7 +84,7 @@ Console
 == Konsool
 
 Controls
-== Kontrollit
+== Kontrollid
 
 Count players only
 == Loe ainult mängijaid
@@ -317,7 +318,7 @@ Reset filter
 == Lähtesta filter
 
 Score
-== Seis
+== Skoor
 
 Score limit
 == Punktilimiit
@@ -365,7 +366,7 @@ Spectate next
 == Jälgi järgmist
 
 Spectate previous
-== Järgi eelmist
+== Jälgi eelmist
 
 Spectator mode
 == Pealtvaataja režiim
@@ -521,7 +522,7 @@ Replay feature is disabled!
 == Korduse funktsioon on keelatud!
 
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
-== Tekstuuri %s laius ei jagu %d -ga või kõrgus ei jagu %d -ga, mis võib põhjustada visuaalseid vigu.
+== Tekstuuri %s laius ei jagu %d-ga või kõrgus ei jagu %d-ga, mis võib põhjustada visuaalseid vigu.
 
 Warning
 == Hoiatus
@@ -1707,10 +1708,10 @@ Entities
 == Üksused
 
 Door Laser Outline Color
-== Ukse laseri Kontuuri Värv
+== Ukse Laseri Kontuuri Värv
 
 Door Laser Inner Color
-== Ukse laseri Sisene Värv
+== Ukse Laseri Sisene Värv
 
 Freeze Laser Outline Color
 == Külmutava Laseri Kontuuri Värv
