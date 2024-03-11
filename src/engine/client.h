@@ -200,6 +200,7 @@ public:
 	virtual bool RconAuthed() const = 0;
 	virtual bool UseTempRconCommands() const = 0;
 	virtual void Rcon(const char *pLine) = 0;
+	virtual bool ReceivingRconCommands() const = 0;
 
 	// server info
 	virtual void GetServerInfo(class CServerInfo *pServerInfo) const = 0;
@@ -332,7 +333,9 @@ public:
 	virtual void OnDummyDisconnect() = 0;
 	virtual void DummyResetInput() = 0;
 	virtual void Echo(const char *pString) = 0;
+
 	virtual bool CanDisplayWarning() const = 0;
+	virtual void RenderShutdownMessage() = 0;
 
 	virtual CNetObjHandler *GetNetObjHandler() = 0;
 };

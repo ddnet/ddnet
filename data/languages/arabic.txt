@@ -1104,7 +1104,13 @@ Could not save downloaded map. Try manually deleting this file: %s
 Error playing demo
 == 
 
+Failed saving the replay!
+== 
+
 Saving settings to '%s' failed
+== 
+
+Error saving settings
 == 
 
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
@@ -1143,6 +1149,9 @@ Quitting. Please wait…
 Restarting. Please wait…
 == 
 
+Loading skin files
+== 
+
 Searching
 == 
 
@@ -1168,6 +1177,9 @@ Locked
 == 
 
 Following
+== 
+
+Loading commands…
 == 
 
 Position:
@@ -1198,6 +1210,9 @@ Loading menu themes
 == 
 
 Press a key…
+== 
+
+Main menu
 == 
 
 Trying to determine UDP connectivity...
@@ -1333,6 +1348,12 @@ Are you sure that you want to remove the clan '%s' from your friends list?
 Add Clan
 == 
 
+Server filter
+== 
+
+Friends
+== 
+
 Play the current demo
 == 
 
@@ -1447,6 +1468,9 @@ Unable to delete the demo '%s'
 Unable to delete the folder '%s'. Make sure it's empty first.
 == 
 
+Loading…
+== 
+
 Loading ghost files
 == 
 
@@ -1481,9 +1505,6 @@ Open the directory to add custom themes
 == 
 
 Dummy
-== 
-
-Loading skin files
 == 
 
 Download community skins

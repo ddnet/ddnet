@@ -42,12 +42,6 @@ class CMapImages : public CComponent
 
 	char m_aEntitiesPath[IO_MAX_PATH_LENGTH];
 
-	bool HasFrontLayer(EMapImageModType ModType);
-	bool HasSpeedupLayer(EMapImageModType ModType);
-	bool HasSwitchLayer(EMapImageModType ModType);
-	bool HasTeleLayer(EMapImageModType ModType);
-	bool HasTuneLayer(EMapImageModType ModType);
-
 public:
 	CMapImages();
 	CMapImages(int TextureSize);
@@ -82,7 +76,6 @@ private:
 	IGraphics::CTextureHandle m_OverlayBottomTexture;
 	IGraphics::CTextureHandle m_OverlayTopTexture;
 	IGraphics::CTextureHandle m_OverlayCenterTexture;
-	IGraphics::CTextureHandle m_TransparentTexture;
 	int m_TextureScale;
 
 	void InitOverlayTextures();

@@ -657,6 +657,7 @@ void CMenus::RenderServerControl(CUIRect MainView)
 	// render page
 	MainView.HSplitBottom(ms_ButtonHeight + 5 * 2, &MainView, &Bottom);
 	Bottom.HMargin(5.0f, &Bottom);
+	Bottom.HSplitTop(5.0f, nullptr, &Bottom);
 
 	bool Call = false;
 	if(s_ControlPage == EServerControlTab::SETTINGS)
@@ -667,12 +668,11 @@ void CMenus::RenderServerControl(CUIRect MainView)
 		Call = RenderServerControlKick(MainView, true);
 
 	// vote menu
-	CUIRect QuickSearch;
 
 	// render quick search
+	CUIRect QuickSearch;
 	Bottom.VSplitLeft(5.0f, 0, &Bottom);
 	Bottom.VSplitLeft(250.0f, &QuickSearch, &Bottom);
-	QuickSearch.HSplitTop(5.0f, 0, &QuickSearch);
 	TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
 	TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
 
@@ -695,7 +695,6 @@ void CMenus::RenderServerControl(CUIRect MainView)
 	// call vote
 	Bottom.VSplitRight(10.0f, &Bottom, 0);
 	Bottom.VSplitRight(120.0f, &Bottom, &Button);
-	Button.HSplitTop(5.0f, 0, &Button);
 
 	static CButtonContainer s_CallVoteButton;
 	if(DoButton_Menu(&s_CallVoteButton, Localize("Call vote"), 0, &Button) || Call)
@@ -731,7 +730,6 @@ void CMenus::RenderServerControl(CUIRect MainView)
 	CUIRect Reason;
 	Bottom.VSplitRight(20.0f, &Bottom, 0);
 	Bottom.VSplitRight(200.0f, &Bottom, &Reason);
-	Reason.HSplitTop(5.0f, 0, &Reason);
 	const char *pLabel = Localize("Reason:");
 	UI()->DoLabel(&Reason, pLabel, 14.0f, TEXTALIGN_ML);
 	float w = TextRender()->TextWidth(14.0f, pLabel, -1, -1.0f);
@@ -742,6 +740,18 @@ void CMenus::RenderServerControl(CUIRect MainView)
 		m_CallvoteReasonInput.SelectAll();
 	}
 	UI()->DoEditBox(&m_CallvoteReasonInput, &Reason, 14.0f);
+
+	// vote option loading indicator
+	if(s_ControlPage == EServerControlTab::SETTINGS && m_pClient->m_Voting.IsReceivingOptions())
+	{
+		CUIRect Spinner, LoadingLabel;
+		Bottom.VSplitLeft(20.0f, nullptr, &Bottom);
+		Bottom.VSplitLeft(16.0f, &Spinner, &Bottom);
+		Bottom.VSplitLeft(5.0f, nullptr, &Bottom);
+		Bottom.VSplitRight(10.0f, &LoadingLabel, nullptr);
+		UI()->RenderProgressSpinner(Spinner.Center(), 8.0f);
+		UI()->DoLabel(&LoadingLabel, Localize("Loading…"), 14.0f, TEXTALIGN_ML);
+	}
 
 	// extended features (only available when authed in rcon)
 	if(Client()->RconAuthed())
@@ -975,28 +985,25 @@ void CMenus::UpdateOwnGhost(CGhostItem Item)
 		if(m_vGhosts[i].m_Own)
 			Own = i;
 
-	if(Own != -1)
+	if(Own == -1)
 	{
-		if(g_Config.m_ClRaceGhostSaveBest)
-		{
-			if(Item.HasFile() || !m_vGhosts[Own].HasFile())
-				DeleteGhostItem(Own);
-		}
-		if(m_vGhosts[Own].m_Time > Item.m_Time)
-		{
-			Item.m_Own = true;
-			m_vGhosts[Own].m_Own = false;
-			m_vGhosts[Own].m_Slot = -1;
-		}
-		else
-		{
-			Item.m_Own = false;
-			Item.m_Slot = -1;
-		}
+		Item.m_Own = true;
+	}
+	else if(g_Config.m_ClRaceGhostSaveBest && (Item.HasFile() || !m_vGhosts[Own].HasFile()))
+	{
+		Item.m_Own = true;
+		DeleteGhostItem(Own);
+	}
+	else if(m_vGhosts[Own].m_Time > Item.m_Time)
+	{
+		Item.m_Own = true;
+		m_vGhosts[Own].m_Own = false;
+		m_vGhosts[Own].m_Slot = -1;
 	}
 	else
 	{
-		Item.m_Own = true;
+		Item.m_Own = false;
+		Item.m_Slot = -1;
 	}
 
 	Item.m_Date = std::time(0);

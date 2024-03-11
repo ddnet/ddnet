@@ -34,7 +34,7 @@ public:
 
 	bool GetBestUrl(const char **pBestUrl) const;
 	void Reset();
-	bool IsRefreshing() const { return m_pJob && m_pJob->Status() != IJob::STATE_DONE; }
+	bool IsRefreshing() const { return m_pJob && !m_pJob->Done(); }
 	void Refresh();
 
 private:
@@ -60,8 +60,12 @@ private:
 
 	public:
 		CJob(CChooseMaster *pParent, std::shared_ptr<CData> pData) :
-			m_pParent(pParent), m_pData(std::move(pData)) {}
-		void Abort() REQUIRES(!m_Lock);
+			m_pParent(pParent),
+			m_pData(std::move(pData))
+		{
+			Abortable(true);
+		}
+		bool Abort() override REQUIRES(!m_Lock);
 	};
 
 	IEngine *m_pEngine;
@@ -130,12 +134,20 @@ void CChooseMaster::Reset()
 
 void CChooseMaster::Refresh()
 {
-	if(m_pJob == nullptr || m_pJob->Status() == IJob::STATE_DONE)
-		m_pEngine->AddJob(m_pJob = std::make_shared<CJob>(this, m_pData));
+	if(m_pJob == nullptr || m_pJob->State() == IJob::STATE_DONE)
+	{
+		m_pJob = std::make_shared<CJob>(this, m_pData);
+		m_pEngine->AddJob(m_pJob);
+	}
 }
 
-void CChooseMaster::CJob::Abort()
+bool CChooseMaster::CJob::Abort()
 {
+	if(!IJob::Abort())
+	{
+		return false;
+	}
+
 	CLockScope ls(m_Lock);
 	if(m_pHead != nullptr)
 	{
@@ -146,6 +158,8 @@ void CChooseMaster::CJob::Abort()
 	{
 		m_pGet->Abort();
 	}
+
+	return true;
 }
 
 void CChooseMaster::CJob::Run()
@@ -184,7 +198,7 @@ void CChooseMaster::CJob::Run()
 
 		m_pParent->m_pHttp->Run(pHead);
 		pHead->Wait();
-		if(pHead->State() == EHttpState::ABORTED)
+		if(pHead->State() == EHttpState::ABORTED || State() == IJob::STATE_ABORTED)
 		{
 			dbg_msg("serverbrowse_http", "master chooser aborted");
 			return;
@@ -207,7 +221,7 @@ void CChooseMaster::CJob::Run()
 		pGet->Wait();
 
 		auto Time = std::chrono::duration_cast<std::chrono::milliseconds>(time_get_nanoseconds() - StartTime);
-		if(pHead->State() == EHttpState::ABORTED)
+		if(pGet->State() == EHttpState::ABORTED || State() == IJob::STATE_ABORTED)
 		{
 			dbg_msg("serverbrowse_http", "master chooser aborted");
 			return;
@@ -345,7 +359,7 @@ void CServerBrowserHttp::Update()
 	}
 	else if(m_State == STATE_REFRESHING)
 	{
-		if(m_pGetServers->State() == EHttpState::QUEUED || m_pGetServers->State() == EHttpState::RUNNING)
+		if(!m_pGetServers->Done())
 		{
 			return;
 		}
@@ -354,7 +368,7 @@ void CServerBrowserHttp::Update()
 		std::swap(m_pGetServers, pGetServers);
 
 		bool Success = true;
-		json_value *pJson = pGetServers->ResultJson();
+		json_value *pJson = pGetServers->State() == EHttpState::DONE ? pGetServers->ResultJson() : nullptr;
 		Success = Success && pJson;
 		Success = Success && !Parse(pJson, &m_vServers, &m_vLegacyServers);
 		json_value_free(pJson);

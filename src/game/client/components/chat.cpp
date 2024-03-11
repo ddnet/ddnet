@@ -353,7 +353,7 @@ bool CChat::OnInput(const IInput::CEvent &Event)
 
 				auto &Command = m_vCommands[Index];
 
-				if(str_startswith(Command.m_aName, pCommandStart))
+				if(str_startswith_nocase(Command.m_aName, pCommandStart))
 				{
 					pCompletionCommand = &Command;
 					m_CompletionChosen = Index + SearchType * NumCommands;

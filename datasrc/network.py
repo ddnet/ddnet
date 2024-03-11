@@ -578,4 +578,8 @@ Messages = [
 
 	NetMessageEx("Sv_CommandInfoGroupStart", "sv-commandinfo-group-start@netmsg.ddnet.org", []),
 	NetMessageEx("Sv_CommandInfoGroupEnd", "sv-commandinfo-group-end@netmsg.ddnet.org", []),
+
+	NetMessageEx("Sv_ChangeInfoCooldown", "change-info-cooldown@netmsg.ddnet.org", [
+		NetTick("m_WaitUntil")
+	]),
 ]

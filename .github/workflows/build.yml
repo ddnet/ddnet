@@ -41,7 +41,7 @@ jobs:
           fancy: false
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: true
 
@@ -92,11 +92,9 @@ jobs:
       run: |
         brew update || true
         brew install pkg-config sdl2 ffmpeg ninja molten-vk vulkan-headers glslang spirv-tools || true
-        # --overwrite for:  Target /usr/local/bin/2to3 already exists.
-        brew link --overwrite python@3.11
         brew upgrade freetype
-        pip3 install dmgbuild
-        echo /Library/Frameworks/Python.framework/Versions/3.11/bin >> $GITHUB_PATH
+        pip3 install --break-system-packages dmgbuild
+        echo /Library/Frameworks/Python.framework/Versions/3.12/bin >> $GITHUB_PATH
         sudo rm -rf /Library/Developer/CommandLineTools
 
     - name: Cache Rust dependencies
@@ -153,7 +151,7 @@ jobs:
 
     - name: Upload Codecov report (unit tests)
       if: contains(matrix.os, 'ubuntu-latest')
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v4
       with:
         gcov: true
         gcov_include: src
@@ -170,7 +168,7 @@ jobs:
 
     - name: Upload Codecov report (start & connect)
       if: contains(matrix.os, 'ubuntu-latest')
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v4
       with:
         gcov: true
         gcov_include: src
@@ -206,7 +204,7 @@ jobs:
 
     - name: Upload Codecov report (integration tests)
       if: contains(matrix.os, 'ubuntu-latest')
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v4
       with:
         gcov: true
         gcov_include: src
@@ -220,8 +218,7 @@ jobs:
         mv ${{ matrix.package-file }} artifacts
 
     - name: Upload Artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ddnet-${{ matrix.os }}
         path: release/artifacts
-

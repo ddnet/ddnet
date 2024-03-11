@@ -9,6 +9,7 @@
 #include <engine/keys.h>
 #include <engine/shared/config.h>
 #include <engine/storage.h>
+#include <engine/textrender.h>
 #include <limits>
 
 #include <game/client/ui_scrollregion.h>
@@ -17,6 +18,8 @@
 
 #include "editor.h"
 #include "editor_actions.h"
+
+using namespace FontIcons;
 
 CUI::EPopupMenuFunctionResult CEditor::PopupMenuFile(void *pContext, CUIRect View, bool Active)
 {
@@ -260,11 +263,11 @@ CUI::EPopupMenuFunctionResult CEditor::PopupMenuSettings(void *pContext, CUIRect
 		pEditor->UI()->DoLabel(&Label, "Brush coloring", 10.0f, TEXTALIGN_ML);
 		static int s_ButtonNo = 0;
 		static int s_ButtonYes = 0;
-		if(pEditor->DoButton_ButtonDec(&s_ButtonNo, "No", !pEditor->m_BrushColorEnabled, &No, 0, "Disable brush coloring"))
+		if(pEditor->DoButton_Ex(&s_ButtonNo, "No", !pEditor->m_BrushColorEnabled, &No, 0, "Disable brush coloring", IGraphics::CORNER_L))
 		{
 			pEditor->m_BrushColorEnabled = false;
 		}
-		if(pEditor->DoButton_ButtonInc(&s_ButtonYes, "Yes", pEditor->m_BrushColorEnabled, &Yes, 0, "Enable brush coloring"))
+		if(pEditor->DoButton_Ex(&s_ButtonYes, "Yes", pEditor->m_BrushColorEnabled, &Yes, 0, "Enable brush coloring", IGraphics::CORNER_R))
 		{
 			pEditor->m_BrushColorEnabled = true;
 		}
@@ -285,11 +288,11 @@ CUI::EPopupMenuFunctionResult CEditor::PopupMenuSettings(void *pContext, CUIRect
 		{
 			static int s_ButtonNo = 0;
 			static int s_ButtonYes = 0;
-			if(pEditor->DoButton_ButtonDec(&s_ButtonNo, "No", !pEditor->m_AllowPlaceUnusedTiles, &No, 0, "[ctrl+u] Disallow placing unused tiles"))
+			if(pEditor->DoButton_Ex(&s_ButtonNo, "No", !pEditor->m_AllowPlaceUnusedTiles, &No, 0, "[ctrl+u] Disallow placing unused tiles", IGraphics::CORNER_L))
 			{
 				pEditor->m_AllowPlaceUnusedTiles = false;
 			}
-			if(pEditor->DoButton_ButtonInc(&s_ButtonYes, "Yes", pEditor->m_AllowPlaceUnusedTiles, &Yes, 0, "[ctrl+u] Allow placing unused tiles"))
+			if(pEditor->DoButton_Ex(&s_ButtonYes, "Yes", pEditor->m_AllowPlaceUnusedTiles, &Yes, 0, "[ctrl+u] Allow placing unused tiles", IGraphics::CORNER_R))
 			{
 				pEditor->m_AllowPlaceUnusedTiles = true;
 			}
@@ -311,7 +314,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupMenuSettings(void *pContext, CUIRect
 		static int s_ButtonOff = 0;
 		static int s_ButtonDec = 0;
 		static int s_ButtonHex = 0;
-		if(pEditor->DoButton_ButtonDec(&s_ButtonOff, "Off", pEditor->m_ShowTileInfo == SHOW_TILE_OFF, &Off, 0, "Do not show tile information"))
+		if(pEditor->DoButton_Ex(&s_ButtonOff, "Off", pEditor->m_ShowTileInfo == SHOW_TILE_OFF, &Off, 0, "Do not show tile information", IGraphics::CORNER_L))
 		{
 			pEditor->m_ShowTileInfo = SHOW_TILE_OFF;
 			pEditor->m_ShowEnvelopePreview = SHOWENV_NONE;
@@ -321,7 +324,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupMenuSettings(void *pContext, CUIRect
 			pEditor->m_ShowTileInfo = SHOW_TILE_DECIMAL;
 			pEditor->m_ShowEnvelopePreview = SHOWENV_NONE;
 		}
-		if(pEditor->DoButton_ButtonInc(&s_ButtonHex, "Hex", pEditor->m_ShowTileInfo == SHOW_TILE_HEXADECIMAL, &Hex, 0, "[ctrl+shift+i] Show tile information in hexadecimal"))
+		if(pEditor->DoButton_Ex(&s_ButtonHex, "Hex", pEditor->m_ShowTileInfo == SHOW_TILE_HEXADECIMAL, &Hex, 0, "[ctrl+shift+i] Show tile information in hexadecimal", IGraphics::CORNER_R))
 		{
 			pEditor->m_ShowTileInfo = SHOW_TILE_HEXADECIMAL;
 			pEditor->m_ShowEnvelopePreview = SHOWENV_NONE;
@@ -342,11 +345,11 @@ CUI::EPopupMenuFunctionResult CEditor::PopupMenuSettings(void *pContext, CUIRect
 
 		static int s_ButtonNo = 0;
 		static int s_ButtonYes = 0;
-		if(pEditor->DoButton_ButtonDec(&s_ButtonNo, "No", !g_Config.m_EdAlignQuads, &No, 0, "Do not perform quad alignment to other quads/points when moving quads"))
+		if(pEditor->DoButton_Ex(&s_ButtonNo, "No", !g_Config.m_EdAlignQuads, &No, 0, "Do not perform quad alignment to other quads/points when moving quads", IGraphics::CORNER_L))
 		{
 			g_Config.m_EdAlignQuads = false;
 		}
-		if(pEditor->DoButton_ButtonInc(&s_ButtonYes, "Yes", g_Config.m_EdAlignQuads, &Yes, 0, "Allow quad alignment to other quads/points when moving quads"))
+		if(pEditor->DoButton_Ex(&s_ButtonYes, "Yes", g_Config.m_EdAlignQuads, &Yes, 0, "Allow quad alignment to other quads/points when moving quads", IGraphics::CORNER_R))
 		{
 			g_Config.m_EdAlignQuads = true;
 		}
@@ -366,11 +369,11 @@ CUI::EPopupMenuFunctionResult CEditor::PopupMenuSettings(void *pContext, CUIRect
 
 		static int s_ButtonNo = 0;
 		static int s_ButtonYes = 0;
-		if(pEditor->DoButton_ButtonDec(&s_ButtonNo, "No", !g_Config.m_EdShowQuadsRect, &No, 0, "Do not show quad bounds when moving quads"))
+		if(pEditor->DoButton_Ex(&s_ButtonNo, "No", !g_Config.m_EdShowQuadsRect, &No, 0, "Do not show quad bounds when moving quads", IGraphics::CORNER_L))
 		{
 			g_Config.m_EdShowQuadsRect = false;
 		}
-		if(pEditor->DoButton_ButtonInc(&s_ButtonYes, "Yes", g_Config.m_EdShowQuadsRect, &Yes, 0, "Show quad bounds when moving quads"))
+		if(pEditor->DoButton_Ex(&s_ButtonYes, "Yes", g_Config.m_EdShowQuadsRect, &Yes, 0, "Show quad bounds when moving quads", IGraphics::CORNER_R))
 		{
 			g_Config.m_EdShowQuadsRect = true;
 		}
@@ -1357,7 +1360,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupEnvPoint(void *pContext, CUIRect Vie
 
 	std::shared_ptr<CEnvelope> pEnvelope = pEditor->m_Map.m_vpEnvelopes[pEditor->m_SelectedEnvelope];
 
-	if(pEnvelope->GetChannels() == 4)
+	if(pEnvelope->GetChannels() == 4 && !pEditor->IsTangentSelected())
 	{
 		View.HSplitTop(RowHeight, &Row, &View);
 		View.HSplitTop(4.0f, nullptr, &View);
@@ -1607,8 +1610,8 @@ CUI::EPopupMenuFunctionResult CEditor::PopupEnvPointCurveType(void *pContext, CU
 						if(SelectedIndex != FirstSelectedIndex && SelectedIndex != LastSelectedIndex)
 						{
 							CEnvPoint &CurrentPoint = pEnvelope->m_vPoints[SelectedIndex];
-							ColorRGBA Channels;
-							HelperEnvelope.Eval(CurrentPoint.m_Time / 1000.0f, Channels);
+							ColorRGBA Channels = ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f);
+							HelperEnvelope.Eval(CurrentPoint.m_Time / 1000.0f, Channels, 1);
 							int PrevValue = CurrentPoint.m_aValues[c];
 							CurrentPoint.m_aValues[c] = f2fx(Channels.r);
 							vpActions.push_back(std::make_shared<CEditorActionEnvelopeEditPoint>(pEditor, pEditor->m_SelectedEnvelope, SelectedIndex, SelectedChannel, CEditorActionEnvelopeEditPoint::EEditType::VALUE, PrevValue, CurrentPoint.m_aValues[c]));
@@ -2590,12 +2593,43 @@ CUI::EPopupMenuFunctionResult CEditor::PopupSwitch(void *pContext, CUIRect View,
 {
 	CEditor *pEditor = static_cast<CEditor *>(pContext);
 
-	CUIRect NumberPicker, FindEmptySlot;
+	CUIRect NumberPicker, FindEmptySlot, ViewEmptySlot;
 
 	View.VSplitRight(15.0f, &NumberPicker, &FindEmptySlot);
 	NumberPicker.VSplitRight(2.0f, &NumberPicker, nullptr);
-	FindEmptySlot.HSplitTop(13.0f, &FindEmptySlot, nullptr);
+
+	FindEmptySlot.HSplitTop(13.0f, &FindEmptySlot, &ViewEmptySlot);
+	ViewEmptySlot.HSplitTop(13.0f, nullptr, &ViewEmptySlot);
+
 	FindEmptySlot.HMargin(1.0f, &FindEmptySlot);
+	ViewEmptySlot.HMargin(1.0f, &ViewEmptySlot);
+
+	auto ViewSwitch = [pEditor]() -> bool {
+		if(!pEditor->m_ViewSwitch)
+			return false;
+		ivec2 SwitchPos;
+		pEditor->m_Map.m_pSwitchLayer->GetPos(pEditor->m_ViewSwitch, -1, SwitchPos);
+		if(SwitchPos != ivec2(-1, -1))
+		{
+			pEditor->MapView()->SetWorldOffset({32.0f * SwitchPos.x + 0.5f, 32.0f * SwitchPos.y + 0.5f});
+			return true;
+		}
+		return false;
+	};
+
+	static std::vector<ColorRGBA> s_vColors = {
+		ColorRGBA(1, 1, 1, 0.5f),
+		ColorRGBA(1, 1, 1, 0.5f),
+		ColorRGBA(1, 1, 1, 0.5f),
+	};
+
+	enum
+	{
+		PROP_SWITCH_NUMBER = 0,
+		PROP_SWITCH_DELAY,
+		PROP_SWITCH_VIEW,
+		NUM_PROPS,
+	};
 
 	// find empty number button
 	{
@@ -2607,25 +2641,21 @@ CUI::EPopupMenuFunctionResult CEditor::PopupSwitch(void *pContext, CUIRect View,
 			if(Number != -1)
 				pEditor->m_SwitchNum = Number;
 		}
+
+		static int s_NextViewPid = 0;
+		int ButtonResult = pEditor->DoButton_Editor(&s_NextViewPid, "N", 0, &ViewEmptySlot, 0, "[n] Show next switcher with this number");
+		if(ButtonResult || (Active && pEditor->Input()->KeyPress(KEY_N)))
+			s_vColors[PROP_SWITCH_VIEW] = ViewSwitch() ? ColorRGBA(0.5f, 1, 0.5f, 0.5f) : ColorRGBA(1, 0.5f, 0.5f, 0.5f);
 	}
 
 	// number picker
 	static int s_PreviousNumber = -1;
+	static int s_PreviousView = -1;
 	{
-		static std::vector<ColorRGBA> s_vColors = {
-			ColorRGBA(1, 1, 1, 0.5f),
-		};
-
-		enum
-		{
-			PROP_SWITCH_NUMBER = 0,
-			PROP_SWITCH_DELAY,
-			NUM_PROPS,
-		};
-
 		CProperty aProps[] = {
 			{"Number", pEditor->m_SwitchNum, PROPTYPE_INT, 0, 255},
 			{"Delay", pEditor->m_SwitchDelay, PROPTYPE_INT, 0, 255},
+			{"View", pEditor->m_ViewSwitch, PROPTYPE_INT, 0, 255},
 			{nullptr},
 		};
 
@@ -2641,12 +2671,19 @@ CUI::EPopupMenuFunctionResult CEditor::PopupSwitch(void *pContext, CUIRect View,
 		{
 			pEditor->m_SwitchDelay = (NewVal + 256) % 256;
 		}
+		else if(Prop == PROP_SWITCH_VIEW)
+		{
+			pEditor->m_ViewSwitch = (NewVal + 256) % 256;
+		}
 
 		if(s_PreviousNumber == 1 || s_PreviousNumber != pEditor->m_SwitchNum)
 			s_vColors[PROP_SWITCH_NUMBER] = pEditor->m_Map.m_pSwitchLayer->ContainsElementWithId(pEditor->m_SwitchNum) ? ColorRGBA(1, 0.5f, 0.5f, 0.5f) : ColorRGBA(0.5f, 1, 0.5f, 0.5f);
+		if(s_PreviousView != pEditor->m_ViewSwitch)
+			s_vColors[PROP_SWITCH_VIEW] = ViewSwitch() ? ColorRGBA(0.5f, 1, 0.5f, 0.5f) : ColorRGBA(1, 0.5f, 0.5f, 0.5f);
 	}
 
 	s_PreviousNumber = pEditor->m_SwitchNum;
+	s_PreviousView = pEditor->m_ViewSwitch;
 	return CUI::POPUP_KEEP_OPEN;
 }
 
@@ -2795,7 +2832,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupAnimateSettings(void *pContext, CUIR
 	pEditor->UI()->DoLabel(&Label, "Speed", 10.0f, TEXTALIGN_ML);
 
 	static char s_DecreaseButton;
-	if(pEditor->DoButton_Ex(&s_DecreaseButton, "-", 0, &ButtonDecrease, 0, "Decrease animation speed", IGraphics::CORNER_L))
+	if(pEditor->DoButton_FontIcon(&s_DecreaseButton, FONT_ICON_MINUS, 0, &ButtonDecrease, 0, "Decrease animation speed", IGraphics::CORNER_L, 7.0f))
 	{
 		pEditor->m_AnimateSpeed -= pEditor->m_AnimateSpeed <= 1.0f ? 0.1f : 0.5f;
 		pEditor->m_AnimateSpeed = maximum(pEditor->m_AnimateSpeed, MIN_ANIM_SPEED);
@@ -2803,7 +2840,7 @@ CUI::EPopupMenuFunctionResult CEditor::PopupAnimateSettings(void *pContext, CUIR
 	}
 
 	static char s_IncreaseButton;
-	if(pEditor->DoButton_Ex(&s_IncreaseButton, "+", 0, &ButtonIncrease, 0, "Increase animation speed", IGraphics::CORNER_R))
+	if(pEditor->DoButton_FontIcon(&s_IncreaseButton, FONT_ICON_PLUS, 0, &ButtonIncrease, 0, "Increase animation speed", IGraphics::CORNER_R, 7.0f))
 	{
 		if(pEditor->m_AnimateSpeed < 0.1f)
 			pEditor->m_AnimateSpeed = 0.1f;

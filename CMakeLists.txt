@@ -2305,6 +2305,8 @@ if(CLIENT)
     editor_trackers.h
     editor_ui.h
     explanations.cpp
+    layer_selector.cpp
+    layer_selector.h
     map_grid.cpp
     map_grid.h
     map_view.cpp
@@ -3377,7 +3379,13 @@ foreach(target ${TARGETS_OWN})
     target_compile_options(${target} PRIVATE /wd4800) # Implicit conversion of int to bool.
   endif()
   if(TARGET_OS STREQUAL "windows")
+    # See https://learn.microsoft.com/en-us/windows/win32/winprog/using-the-windows-headers
     target_compile_definitions(${target} PRIVATE NOMINMAX) # windows.h shouldn't define min/max macros
+    target_compile_definitions(${target} PRIVATE WIN32_LEAN_AND_MEAN) # windows.h shouldn't define the name IStorage
+    # 0x0501 (Windows XP) is required for mingw to get getaddrinfo to work
+    # 0x0600 (Windows Vista) is required to use RegGetValueW and RegDeleteTreeW
+    target_compile_definitions(${target} PRIVATE NTDDI_VERSION=0x06000000) # Minimum OS version (new macro, since Vista)
+    target_compile_definitions(${target} PRIVATE _WIN32_WINNT=0x0600) # Minimum OS version (old macro, both must be defined)
     target_compile_definitions(${target} PRIVATE UNICODE) # Windows headers
     target_compile_definitions(${target} PRIVATE _UNICODE) # C-runtime
   endif()

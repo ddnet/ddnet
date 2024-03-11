@@ -15,7 +15,6 @@
 #include <csignal>
 #endif
 
-#define WIN32_LEAN_AND_MEAN
 #include <curl/curl.h>
 
 // There is a stray constant on Windows/MSVC...
@@ -140,7 +139,10 @@ bool CHttpRequest::ConfigureHandle(void *pHandle)
 #endif
 	curl_easy_setopt(pH, CURLOPT_FOLLOWLOCATION, 1L);
 	curl_easy_setopt(pH, CURLOPT_MAXREDIRS, 4L);
-	curl_easy_setopt(pH, CURLOPT_FAILONERROR, 1L);
+	if(m_FailOnErrorStatus)
+	{
+		curl_easy_setopt(pH, CURLOPT_FAILONERROR, 1L);
+	}
 	curl_easy_setopt(pH, CURLOPT_URL, m_aUrl);
 	curl_easy_setopt(pH, CURLOPT_NOSIGNAL, 1L);
 	curl_easy_setopt(pH, CURLOPT_USERAGENT, GAME_NAME " " GAME_RELEASE_VERSION " (" CONF_PLATFORM_STRING "; " CONF_ARCH_STRING ")");
@@ -174,7 +176,7 @@ bool CHttpRequest::ConfigureHandle(void *pHandle)
 	}
 
 #ifdef CONF_PLATFORM_ANDROID
-	curl_easy_setopt(pHandle, CURLOPT_CAINFO, "data/cacert.pem");
+	curl_easy_setopt(pH, CURLOPT_CAINFO, "data/cacert.pem");
 #endif
 
 	switch(m_Type)
@@ -257,33 +259,33 @@ int CHttpRequest::ProgressCallback(void *pUser, double DlTotal, double DlCurr, d
 	return pTask->m_Abort ? -1 : 0;
 }
 
-void CHttpRequest::OnCompletionInternal(std::optional<unsigned int> Result)
+void CHttpRequest::OnCompletionInternal(void *pHandle, unsigned int Result)
 {
-	EHttpState State;
-	if(Result.has_value())
+	if(pHandle)
 	{
-		CURLcode Code = static_cast<CURLcode>(Result.value());
-		if(Code != CURLE_OK)
+		CURL *pH = (CURL *)pHandle;
+		long StatusCode;
+		curl_easy_getinfo(pH, CURLINFO_RESPONSE_CODE, &StatusCode);
+		m_StatusCode = StatusCode;
+	}
+
+	EHttpState State;
+	const CURLcode Code = static_cast<CURLcode>(Result);
+	if(Code != CURLE_OK)
+	{
+		if(g_Config.m_DbgCurl || m_LogProgress >= HTTPLOG::FAILURE)
 		{
-			if(g_Config.m_DbgCurl || m_LogProgress >= HTTPLOG::FAILURE)
-			{
-				log_error("http", "%s failed. libcurl error (%u): %s", m_aUrl, Code, m_aErr);
-			}
-			State = (Code == CURLE_ABORTED_BY_CALLBACK) ? EHttpState::ABORTED : EHttpState::ERROR;
+			log_error("http", "%s failed. libcurl error (%u): %s", m_aUrl, Code, m_aErr);
 		}
-		else
-		{
-			if(g_Config.m_DbgCurl || m_LogProgress >= HTTPLOG::ALL)
-			{
-				log_info("http", "task done: %s", m_aUrl);
-			}
-			State = EHttpState::DONE;
-		}
+		State = (Code == CURLE_ABORTED_BY_CALLBACK) ? EHttpState::ABORTED : EHttpState::ERROR;
 	}
 	else
 	{
-		log_error("http", "%s failed. internal error: %s", m_aUrl, m_aErr);
-		State = EHttpState::ERROR;
+		if(g_Config.m_DbgCurl || m_LogProgress >= HTTPLOG::ALL)
+		{
+			log_info("http", "task done: %s", m_aUrl);
+		}
+		State = EHttpState::DONE;
 	}
 
 	if(State == EHttpState::DONE)
@@ -380,6 +382,12 @@ const SHA256_DIGEST &CHttpRequest::ResultSha256() const
 {
 	dbg_assert(State() == EHttpState::DONE, "Request not done");
 	return m_ActualSha256;
+}
+
+int CHttpRequest::StatusCode() const
+{
+	dbg_assert(State() == EHttpState::DONE, "Request not done");
+	return m_StatusCode;
 }
 
 bool CHttp::Init(std::chrono::milliseconds ShutdownDelay)
@@ -487,7 +495,7 @@ void CHttp::RunLoop()
 				auto pRequest = std::move(RequestIt->second);
 				m_RunningRequests.erase(RequestIt);
 
-				pRequest->OnCompletionInternal(pMsg->data.result);
+				pRequest->OnCompletionInternal(pMsg->easy_handle, pMsg->data.result);
 				curl_multi_remove_handle(m_pMultiH, pMsg->easy_handle);
 				curl_easy_cleanup(pMsg->easy_handle);
 			}
@@ -543,20 +551,21 @@ void CHttp::RunLoop()
 	for(auto &pRequest : m_PendingRequests)
 	{
 		str_copy(pRequest->m_aErr, "Shutting down");
-		pRequest->OnCompletionInternal(std::nullopt);
+		pRequest->OnCompletionInternal(nullptr, CURLE_ABORTED_BY_CALLBACK);
 	}
 
 	for(auto &ReqPair : m_RunningRequests)
 	{
 		auto &[pHandle, pRequest] = ReqPair;
+
+		str_copy(pRequest->m_aErr, "Shutting down");
+		pRequest->OnCompletionInternal(pHandle, CURLE_ABORTED_BY_CALLBACK);
+
 		if(Cleanup)
 		{
 			curl_multi_remove_handle(m_pMultiH, pHandle);
 			curl_easy_cleanup(pHandle);
 		}
-
-		str_copy(pRequest->m_aErr, "Shutting down");
-		pRequest->OnCompletionInternal(std::nullopt);
 	}
 
 	if(Cleanup)
@@ -568,9 +577,16 @@ void CHttp::RunLoop()
 
 void CHttp::Run(std::shared_ptr<IHttpRequest> pRequest)
 {
+	std::shared_ptr<CHttpRequest> pRequestImpl = std::static_pointer_cast<CHttpRequest>(pRequest);
 	std::unique_lock Lock(m_Lock);
+	if(m_Shutdown)
+	{
+		str_copy(pRequestImpl->m_aErr, "Shutting down");
+		pRequestImpl->OnCompletionInternal(nullptr, CURLE_ABORTED_BY_CALLBACK);
+		return;
+	}
 	m_Cv.wait(Lock, [this]() { return m_State != CHttp::UNINITIALIZED; });
-	m_PendingRequests.emplace_back(std::static_pointer_cast<CHttpRequest>(pRequest));
+	m_PendingRequests.emplace_back(pRequestImpl);
 	curl_multi_wakeup(m_pMultiH);
 }
 

@@ -1813,3 +1813,24 @@ Same clan color in scoreboard
 
 Show finish messages
 == Siegnachrichten anzeigen
+
+Failed saving the replay!
+== Speichern der Wiederholung fehlgeschlagen!
+
+Error saving settings
+== Fehler beim Speichern der Einstellungen
+
+Loading commands…
+== Befehle laden…
+
+Main menu
+== Hauptmenü
+
+Server filter
+== Serverfilter
+
+Friends
+== Freunde
+
+Loading…
+== Laden…

@@ -492,7 +492,12 @@ void CHud::RenderWarmupTimer()
 
 void CHud::RenderTextInfo()
 {
-	if(g_Config.m_ClShowfps)
+	int Showfps = g_Config.m_ClShowfps;
+#if defined(CONF_VIDEORECORDER)
+	if(IVideo::Current())
+		Showfps = 0;
+#endif
+	if(Showfps)
 	{
 		// calculate avg. fps
 		m_FrameTimeAvg = m_FrameTimeAvg * 0.9f + Client()->RenderFrameTime() * 0.1f;
@@ -528,7 +533,7 @@ void CHud::RenderTextInfo()
 	{
 		char aBuf[64];
 		str_from_int(Client()->GetPredictionTime(), aBuf);
-		TextRender()->Text(m_Width - 10 - TextRender()->TextWidth(12, aBuf, -1, -1.0f), g_Config.m_ClShowfps ? 20 : 5, 12, aBuf, -1.0f);
+		TextRender()->Text(m_Width - 10 - TextRender()->TextWidth(12, aBuf, -1, -1.0f), Showfps ? 20 : 5, 12, aBuf, -1.0f);
 	}
 }
 

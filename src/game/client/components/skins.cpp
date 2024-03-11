@@ -1,6 +1,7 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
+#include <base/log.h>
 #include <base/math.h>
 #include <base/system.h>
 
@@ -15,6 +16,26 @@
 #include <game/localization.h>
 
 #include "skins.h"
+
+CSkins::CSkins() :
+	m_PlaceholderSkin("dummy")
+{
+	m_PlaceholderSkin.m_OriginalSkin.Reset();
+	m_PlaceholderSkin.m_ColorableSkin.Reset();
+	m_PlaceholderSkin.m_BloodColor = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
+	m_PlaceholderSkin.m_Metrics.m_Body.m_Width = 64;
+	m_PlaceholderSkin.m_Metrics.m_Body.m_Height = 64;
+	m_PlaceholderSkin.m_Metrics.m_Body.m_OffsetX = 16;
+	m_PlaceholderSkin.m_Metrics.m_Body.m_OffsetY = 16;
+	m_PlaceholderSkin.m_Metrics.m_Body.m_MaxWidth = 96;
+	m_PlaceholderSkin.m_Metrics.m_Body.m_MaxHeight = 96;
+	m_PlaceholderSkin.m_Metrics.m_Feet.m_Width = 32;
+	m_PlaceholderSkin.m_Metrics.m_Feet.m_Height = 16;
+	m_PlaceholderSkin.m_Metrics.m_Feet.m_OffsetX = 16;
+	m_PlaceholderSkin.m_Metrics.m_Feet.m_OffsetY = 8;
+	m_PlaceholderSkin.m_Metrics.m_Feet.m_MaxWidth = 64;
+	m_PlaceholderSkin.m_Metrics.m_Feet.m_MaxHeight = 32;
+}
 
 bool CSkins::IsVanillaSkin(const char *pName)
 {
@@ -47,27 +68,30 @@ struct SSkinScanUser
 
 int CSkins::SkinScan(const char *pName, int IsDir, int DirType, void *pUser)
 {
-	auto *pUserReal = (SSkinScanUser *)pUser;
+	auto *pUserReal = static_cast<SSkinScanUser *>(pUser);
 	CSkins *pSelf = pUserReal->m_pThis;
 
-	if(IsDir || !str_endswith(pName, ".png"))
+	if(IsDir)
 		return 0;
 
-	char aNameWithoutPng[128];
-	str_copy(aNameWithoutPng, pName);
-	aNameWithoutPng[str_length(aNameWithoutPng) - 4] = 0;
-
-	if(g_Config.m_ClVanillaSkinsOnly && !IsVanillaSkin(aNameWithoutPng))
+	const char *pSuffix = str_endswith(pName, ".png");
+	if(pSuffix == nullptr)
 		return 0;
 
-	// Don't add duplicate skins (one from user's config directory, other from
-	// client itself)
-	if(pSelf->m_Skins.find(aNameWithoutPng) != pSelf->m_Skins.end())
+	char aSkinName[IO_MAX_PATH_LENGTH];
+	str_truncate(aSkinName, sizeof(aSkinName), pName, pSuffix - pName);
+	if(!CSkin::IsValidName(aSkinName))
+	{
+		log_error("skins", "Skin name is not valid: %s", aSkinName);
+		return 0;
+	}
+
+	if(g_Config.m_ClVanillaSkinsOnly && !IsVanillaSkin(aSkinName))
 		return 0;
 
-	char aBuf[IO_MAX_PATH_LENGTH];
-	str_format(aBuf, sizeof(aBuf), "skins/%s", pName);
-	pSelf->LoadSkin(aNameWithoutPng, aBuf, DirType);
+	char aPath[IO_MAX_PATH_LENGTH];
+	str_format(aPath, sizeof(aPath), "skins/%s", pName);
+	pSelf->LoadSkin(aSkinName, aPath, DirType);
 	pUserReal->m_SkinLoadedFunc((int)pSelf->m_Skins.size());
 	return 0;
 }
@@ -111,17 +135,15 @@ const CSkin *CSkins::LoadSkin(const char *pName, const char *pPath, int DirType)
 {
 	CImageInfo Info;
 	if(!LoadSkinPNG(Info, pName, pPath, DirType))
-		return 0;
+		return nullptr;
 	return LoadSkin(pName, Info);
 }
 
 bool CSkins::LoadSkinPNG(CImageInfo &Info, const char *pName, const char *pPath, int DirType)
 {
-	char aBuf[512];
 	if(!Graphics()->LoadPNG(&Info, pPath, DirType))
 	{
-		str_format(aBuf, sizeof(aBuf), "failed to load skin from %s", pName);
-		Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "game", aBuf);
+		log_error("skins", "Failed to load skin PNG: %s", pName);
 		return false;
 	}
 	return true;
@@ -129,18 +151,14 @@ bool CSkins::LoadSkinPNG(CImageInfo &Info, const char *pName, const char *pPath,
 
 const CSkin *CSkins::LoadSkin(const char *pName, CImageInfo &Info)
 {
-	char aBuf[512];
-
 	if(!Graphics()->CheckImageDivisibility(pName, Info, g_pData->m_aSprites[SPRITE_TEE_BODY].m_pSet->m_Gridx, g_pData->m_aSprites[SPRITE_TEE_BODY].m_pSet->m_Gridy, true))
 	{
-		str_format(aBuf, sizeof(aBuf), "skin failed image divisibility: %s", pName);
-		Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "game", aBuf);
+		log_error("skins", "Skin failed image divisibility: %s", pName);
 		return nullptr;
 	}
 	if(!Graphics()->IsImageFormatRGBA(pName, Info))
 	{
-		str_format(aBuf, sizeof(aBuf), "skin format is not RGBA: %s", pName);
-		Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "game", aBuf);
+		log_error("skins", "Skin format is not RGBA: %s", pName);
 		return nullptr;
 	}
 
@@ -189,8 +207,9 @@ const CSkin *CSkins::LoadSkin(const char *pName, CImageInfo &Info)
 
 	// dig out blood color
 	{
-		int aColors[3] = {0};
+		int64_t aColors[3] = {0};
 		for(int y = 0; y < BodyHeight; y++)
+		{
 			for(int x = 0; x < BodyWidth; x++)
 			{
 				uint8_t AlphaValue = pData[y * Pitch + x * PixelStep + 3];
@@ -201,10 +220,9 @@ const CSkin *CSkins::LoadSkin(const char *pName, CImageInfo &Info)
 					aColors[2] += pData[y * Pitch + x * PixelStep + 2];
 				}
 			}
-		if(aColors[0] != 0 && aColors[1] != 0 && aColors[2] != 0)
-			Skin.m_BloodColor = ColorRGBA(normalize(vec3(aColors[0], aColors[1], aColors[2])));
-		else
-			Skin.m_BloodColor = ColorRGBA(0, 0, 0, 1);
+		}
+
+		Skin.m_BloodColor = ColorRGBA(normalize(vec3(aColors[0], aColors[1], aColors[2])));
 	}
 
 	CheckMetrics(Skin.m_Metrics.m_Body, pData, Pitch, 0, 0, BodyWidth, BodyHeight);
@@ -277,11 +295,9 @@ const CSkin *CSkins::LoadSkin(const char *pName, CImageInfo &Info)
 
 	Graphics()->FreePNG(&Info);
 
-	// set skin data
 	if(g_Config.m_Debug)
 	{
-		str_format(aBuf, sizeof(aBuf), "load skin %s", Skin.GetName());
-		Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "game", aBuf);
+		log_trace("skins", "Loaded skin %s", Skin.GetName());
 	}
 
 	auto &&pSkin = std::make_unique<CSkin>(std::move(Skin));
@@ -310,26 +326,10 @@ void CSkins::OnInit()
 
 void CSkins::Refresh(TSkinLoadedCBFunc &&SkinLoadedFunc)
 {
-	for(const auto &SkinIt : m_Skins)
+	for(const auto &[_, pSkin] : m_Skins)
 	{
-		const auto &pSkin = SkinIt.second;
-		Graphics()->UnloadTexture(&pSkin->m_OriginalSkin.m_Body);
-		Graphics()->UnloadTexture(&pSkin->m_OriginalSkin.m_BodyOutline);
-		Graphics()->UnloadTexture(&pSkin->m_OriginalSkin.m_Feet);
-		Graphics()->UnloadTexture(&pSkin->m_OriginalSkin.m_FeetOutline);
-		Graphics()->UnloadTexture(&pSkin->m_OriginalSkin.m_Hands);
-		Graphics()->UnloadTexture(&pSkin->m_OriginalSkin.m_HandsOutline);
-		for(auto &Eye : pSkin->m_OriginalSkin.m_aEyes)
-			Graphics()->UnloadTexture(&Eye);
-
-		Graphics()->UnloadTexture(&pSkin->m_ColorableSkin.m_Body);
-		Graphics()->UnloadTexture(&pSkin->m_ColorableSkin.m_BodyOutline);
-		Graphics()->UnloadTexture(&pSkin->m_ColorableSkin.m_Feet);
-		Graphics()->UnloadTexture(&pSkin->m_ColorableSkin.m_FeetOutline);
-		Graphics()->UnloadTexture(&pSkin->m_ColorableSkin.m_Hands);
-		Graphics()->UnloadTexture(&pSkin->m_ColorableSkin.m_HandsOutline);
-		for(auto &Eye : pSkin->m_ColorableSkin.m_aEyes)
-			Graphics()->UnloadTexture(&Eye);
+		pSkin->m_OriginalSkin.Unload(Graphics());
+		pSkin->m_ColorableSkin.Unload(Graphics());
 	}
 
 	m_Skins.clear();
@@ -339,14 +339,6 @@ void CSkins::Refresh(TSkinLoadedCBFunc &&SkinLoadedFunc)
 	SkinScanUser.m_pThis = this;
 	SkinScanUser.m_SkinLoadedFunc = SkinLoadedFunc;
 	Storage()->ListDirectory(IStorage::TYPE_ALL, "skins", SkinScan, &SkinScanUser);
-	if(m_Skins.empty())
-	{
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "gameclient", "failed to load skins. folder='skins/'");
-		CSkin DummySkin{"dummy"};
-		DummySkin.m_BloodColor = ColorRGBA(1.0f, 1.0f, 1.0f);
-		auto &&pDummySkin = std::make_unique<CSkin>(std::move(DummySkin));
-		m_Skins.insert({pDummySkin->GetName(), std::move(pDummySkin)});
-	}
 }
 
 int CSkins::Num()
@@ -360,35 +352,34 @@ const CSkin *CSkins::Find(const char *pName)
 	if(pSkin == nullptr)
 	{
 		pSkin = FindOrNullptr("default");
-		if(pSkin == nullptr)
-			return m_Skins.begin()->second.get();
-		else
-			return pSkin;
 	}
-	else
+	if(pSkin == nullptr)
 	{
-		return pSkin;
+		pSkin = &m_PlaceholderSkin;
 	}
+	return pSkin;
 }
 
 const CSkin *CSkins::FindOrNullptr(const char *pName, bool IgnorePrefix)
 {
-	const char *pSkinPrefix = m_aEventSkinPrefix[0] ? m_aEventSkinPrefix : g_Config.m_ClSkinPrefix;
 	if(g_Config.m_ClVanillaSkinsOnly && !IsVanillaSkin(pName))
 	{
 		return nullptr;
 	}
-	else if(pSkinPrefix && pSkinPrefix[0] && !IgnorePrefix)
+
+	const char *pSkinPrefix = m_aEventSkinPrefix[0] != '\0' ? m_aEventSkinPrefix : g_Config.m_ClSkinPrefix;
+	if(!IgnorePrefix && pSkinPrefix[0] != '\0')
 	{
-		char aBuf[24];
-		str_format(aBuf, sizeof(aBuf), "%s_%s", pSkinPrefix, pName);
+		char aNameWithPrefix[48]; // Larger than skin name length to allow IsValidName to check if it's too long
+		str_format(aNameWithPrefix, sizeof(aNameWithPrefix), "%s_%s", pSkinPrefix, pName);
 		// If we find something, use it, otherwise fall back to normal skins.
-		const auto *pResult = FindImpl(aBuf);
+		const auto *pResult = FindImpl(aNameWithPrefix);
 		if(pResult != nullptr)
 		{
 			return pResult;
 		}
 	}
+
 	return FindImpl(pName);
 }
 
@@ -404,7 +395,7 @@ const CSkin *CSkins::FindImpl(const char *pName)
 	if(!g_Config.m_ClDownloadSkins)
 		return nullptr;
 
-	if(str_find(pName, "/") != 0)
+	if(!CSkin::IsValidName(pName))
 		return nullptr;
 
 	const auto SkinDownloadIt = m_DownloadSkins.find(pName);
@@ -430,9 +421,9 @@ const CSkin *CSkins::FindImpl(const char *pName)
 
 	CDownloadSkin Skin{pName};
 
-	char aUrl[IO_MAX_PATH_LENGTH];
 	char aEscapedName[256];
 	EscapeUrl(aEscapedName, sizeof(aEscapedName), pName);
+	char aUrl[IO_MAX_PATH_LENGTH];
 	str_format(aUrl, sizeof(aUrl), "%s%s.png", g_Config.m_ClDownloadCommunitySkins != 0 ? g_Config.m_ClSkinCommunityDownloadUrl : g_Config.m_ClSkinDownloadUrl, aEscapedName);
 
 	char aBuf[IO_MAX_PATH_LENGTH];

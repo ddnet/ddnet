@@ -186,7 +186,7 @@ Game types:
 == Типы игры:
 
 General
-== Основные
+== Основное
 
 Graphics
 == Графика
@@ -405,7 +405,7 @@ Switch weapon when out of ammo
 == Переключать оружие без патронов
 
 Show only chat messages from friends
-== Показывать сообщения только от друзей
+== Показывать только дружеские с.
 
 Show clan above name plates
 == Показывать клан
@@ -489,19 +489,19 @@ Enable gun sound
 == Звуки оружия
 
 Enable server message sound
-== Звуки сообщений сервера
+== Звуки серверных сообщений
 
 Enable regular chat sound
 == Звуки обычных сообщений
 
 Enable team chat sound
-== Звуки сообщений в команде
+== Звуки командных сообщений
 
 Enable highlighted chat sound
-== Звуки подсвечиваемых сообщений
+== Звуки выделенных сообщений
 
 Use DDRace Scoreboard
-== Использовать DDRace таблицу счета
+== Использовать DDRace табло счета
 
 Show kill messages
 == Показывать сообщения о смерти
@@ -510,7 +510,7 @@ Show score
 == Показывать табло счета
 
 Show names in chat in team colors
-== Выделять сообщения в командном чате
+== Выделять командный чат
 
 Show votes window after voting
 == Показывать голосование после выбора
@@ -606,13 +606,13 @@ Please use a different filename
 == Пожалуйста, используйте другое имя файла
 
 Show others
-== Показывать остальных
+== Показ. других
 
 Game paused
 == Пауза
 
 Team message
-== Сообщение от команды
+== Командное с.
 
 Automatically create statboard csv
 == Записывать результаты в CSV
@@ -624,7 +624,7 @@ Remove chat
 == Удалить чат
 
 System message
-== Системное сообщение
+== Системное с.
 
 Updating...
 == Обновление...
@@ -633,13 +633,13 @@ Messages
 == Сообщения
 
 New random timeout code
-== Новый тайм-аут код
+== Сгенерировать новый тайм-аут код
 
 Loading DDNet Client
 == Загрузка DDNet Client
 
 Normal message
-== Обычное сообщение
+== Обычное с.
 
 Connecting dummy
 == Подключение дамми
@@ -654,7 +654,7 @@ DDNet Client updated!
 == DDNet Client обновлён!
 
 Highlighted message
-== Выделенное сообщение
+== Выделенное с.
 
 Demo
 == Демо
@@ -708,7 +708,7 @@ Video name:
 == Название:
 
 Show DDNet map finishes in server browser
-== Показывать в браузере статус завершения карты
+== Показывать пройденные карты в браузере
 
 transmits your player name to info.ddnet.org
 == передает ваш псевдоним на info.ddnet.org
@@ -723,7 +723,7 @@ Indicate map finish
 == Выделять финишированные карты
 
 Unfinished map
-== Нефинишированная карта
+== Непройденная карта
 
 DDNet %s is out!
 == Вышел DDNet %s!
@@ -804,7 +804,7 @@ Default zoom
 == Ст. масштаб
 
 Show all
-== Показывать всех
+== Показ. всех
 
 Toggle dyncam
 == Смена дин. камеры
@@ -822,7 +822,7 @@ Hammerfly dummy
 == Полёт с дамми
 
 Converse
-== Беседовать
+== Личный чат
 
 Statboard
 == Статистика
@@ -831,10 +831,10 @@ Lock team
 == Закрыть команду
 
 Show entities
-== Показывать тайлы
+== Показ. тайлы
 
 Show HUD
-== Показывать HUD
+== Показ. HUD
 
 may cause delay
 == создает задержку
@@ -843,7 +843,7 @@ Screen
 == Экран
 
 Use high DPI
-== Использовать высокую чувств.
+== Использовать высокий DPI
 
 Enable long pain sound (used when shooting in freeze)
 == Включить звук продолжительной боли (при стрельбе во фризе)
@@ -855,7 +855,7 @@ DDNet
 == DDNet
 
 Friend message
-== Сообщение от друга
+== Дружеское с.
 
 Save the best demo of each race
 == Сохранять лучшее демо каждой карты
@@ -873,16 +873,16 @@ Overlay entities
 == Наложение
 
 Size
-== Размер
+== Разм.
 
 Show text entities
-== Показывать текст
+== Показ. текст
 
 Show others (own team only)
-== Показывать только вашу команду
+== Показ. только вашу команду
 
 Show quads
-== Показывать квады
+== Показ. квады
 
 AntiPing
 == Антипинг
@@ -951,13 +951,13 @@ Grabs
 == 9+ упоминаний
 
 Client message
-== Клиентское сообщение
+== Клиентское с.
 
 Warning
 == Предупреждение
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
-== Используйте кнопку k, чтобы возродиться, q для паузы и наблюдения за остальными игроками. Проверьте настройки остальных кнопок.
+== Используйте кнопку k, чтобы возродиться, q для паузы и наблюдения за остальными игроками. Ознакомьтесь с остальными биндами в настройках.
 
 Speed
 == Скорость
@@ -1005,7 +1005,7 @@ News
 == %d игрок
 
 Download skins
-== Скачать скины
+== Подкачивать скины
 
 Learn
 == Обучение
@@ -1084,7 +1084,7 @@ Replay
 == Запись
 
 Entities
-== Тайлы
+== Наложение
 
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
 == Ширина текстуры %s не делится на %d или же его высота не делится на %d, что может повлиять на графику.
@@ -1213,7 +1213,7 @@ No answer from server yet.
 == Сервер еще не ответил.
 
 Download community skins
-== Скачивать скины сообщества
+== Вкл. скины сообщества
 
 Choose default eyes when joining a server
 == Выберите стандартные глаза при подключении к серверу
@@ -1233,10 +1233,10 @@ Ingame controller mode
 == Режим контроллера в игре
 
 Ingame controller sens.
-== Чувств. контроллера в игре
+== Чувств. в игре
 
 UI controller sens.
-== Чувств. контроллера в меню
+== Чувств. в меню
 
 Controller jitter tolerance
 == Устойчивость к движению контроллера
@@ -1251,10 +1251,10 @@ Mouse
 == Мышь
 
 Ingame mouse sens.
-== Чувств. мыши в игре
+== Чувств. в игре
 
 UI mouse sens.
-== Чувств. мыши в меню
+== Чувств. в меню
 
 Controller
 == Контроллер
@@ -1287,22 +1287,22 @@ Highlight Color
 == Цвет выделения
 
 When you cross the start line, show a ghost tee replicating the movements of your best time
-== При пересечении стартовой линии, показать тень Tee, повторяющую прохождение лучшего времени
+== Показывать тень, повторяющую лучшее прохождение, при пересечении стартовой линии
 
 Opacity
-== Прозрачность
+== Прозр.
 
 Adjust the opacity of entities belonging to other teams, such as tees and nameplates
 == Регулирует прозрачность объектов другой команды, такие как Tee и имена.
 
 Quads are used for background decoration
-== Квады используются для фонового украшения
+== Квады используются для украшения фона
 
 Tries to predict other entities to give a feel of low latency
 == Пытыается предсказать другие объекты, чтобы придать ощущение низкой задержки
 
 Extras
-== Дополнительно
+== Доп.
 
 Super
 == Супер
@@ -1353,13 +1353,13 @@ Loading skin files
 == Загрузка файлов скинов
 
 Appearance
-== Внешний вид
+== Отображение
 
 Name Plate
-== Табличка имени
+== Доп. игровая инф.
 
 Hook Collisions
-== Коллизии крюка
+== Крюк
 
 Show health, shields and ammo
 == Показывать здоровье, щиты и патроны
@@ -1368,7 +1368,7 @@ DDRace HUD
 == DDRace HUD
 
 Show client IDs in scoreboard
-== Показывать ID клиентов в таблице счета
+== Показывать ид. игроков
 
 Show DDRace HUD
 == Показывать DDRace HUD
@@ -1389,31 +1389,31 @@ Hook collision line opacity
 == Прозрачность линии
 
 Colors of the hook collision line, in case of a possible collision with:
-== Цвет линии при:
+== Цвет линии коллизии крюка при:
 
 Your movements are not taken into account when calculating the line colors
-== Ваши движения не учитываются при расчете цвета линии
+== Ваше перемещение не учитываются при расчете цвета линии коллизии
 
 Nothing hookable
-== Касании нехукабельных тайлов
+== Невозможности зацепиться
 
 Something hookable
-== Касании хукабельных тайлов
+== Возможности зацепиться
 
 A Tee
-== Касании игрока
+== Пересечении игрока
 
 Loading assets
 == Загрузка ресурсов
 
 Loading race demo files
-== Загрузка файлов демо
+== Загрузка демо записей
 
 Loading sound files
 == Загрузка звуковых файлов
 
 Why are you slowmo replaying to read this?
-== Зачем ты читаешь на это в замедлении?
+== Ну и зачем же ты читаешь это в слоу-мо?
 
 Play the current demo
 == Включить демо
@@ -1464,7 +1464,7 @@ Freeze Laser Inner Color
 == Цвет фриз лазера
 
 Menu opened. Press Esc key again to close menu.
-== Меню открыто. Нажмите Esc для закрытия меню
+== Открыто меню. Нажмите Esc, чтобы закрыть его
 
 Set all to Rifle
 == Цвет всех как у лазера
@@ -1473,13 +1473,13 @@ Cancel
 == Отмена
 
 File '%s' already exists, do you want to overwrite it?
-== файл '%s' уже существует, вы уверены что хотите его перезаписать?
+== Файл '%s' уже существует, хотите его перезаписать?
 
 Are you sure that you want to remove the player '%s' from your friends list?
-== Вы уверены что хотите удалить игрока '%s' из списка ваших друзей?
+== Вы уверены, что хотите удалить игрока '%s' из списка ваших друзей?
 
 Are you sure that you want to remove the clan '%s' from your friends list?
-== Вы уверены что хотите удалить клан '%s' из списка ваших друзей?
+== Вы уверены, что хотите удалить клан '%s' из списка ваших друзей?
 
 Go back one tick
 == Отмотать назад на один тик
@@ -1494,7 +1494,7 @@ Go forward one marker
 == Отмотать вперед на один маркер
 
 Are you sure that you want to delete the demo '%s'?
-== Вы уверены что хотите удалить демо '%s'?
+== Вы уверены, что хотите удалить демо '%s'?
 
 Unable to delete the demo '%s'
 == Невозможно удалить демо '%s'
@@ -1503,15 +1503,15 @@ Reset controls
 == Сброс настроек
 
 Are you sure that you want to reset the controls to their defaults?
-== Вы уверены что хотите сбросить настройки на их стандартные значения?
+== Вы уверены, что хотите сбросить настройки по умолчанию?
 
 [Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== Ошибка во время инициализации. Попробуйте изменить gfx_backend на OpenGL или Vulkan в settings_ddnet.cfg в папке config и повторите попытку.
+== Ошибка во время инициализации. Попробуйте изменить gfx_backend на OpenGL или Vulkan в settings_ddnet.cfg в папке конфигурационных файлов и повторите попытку.
 
 [Graphics error]
 Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== Нехватка памяти VRAM. Попробуйте удалить пользовательские ресурсы (скины, энтити и т.д.), особенно те, которые имеют высокое разрешение.
+== Нехватка памяти VRAM. Попробуйте удалить пользовательские ресурсы (скины, тайлы и т.д.), особенно те, которые имеют высокое разрешение.
 
 [Graphics error]
 An error during command recording occurred. Try to update your GPU drivers.
@@ -1538,38 +1538,38 @@ Could not initialize the given graphics backend, reverting to the default backen
 == Не удалось инициализировать заданный графический модуль, возврат к модулю по умолчанию.
 
 Open the directory that contains the demo files
-== Открытие папки, содержащего файлы демок
+== Открыть папку с демо записями
 
 Save power by lowering refresh rate (higher input latency)
-== Экономия энергии за счет снижения частоты кадров (более высокая задержка ввода)
+== Режим экономии энергии
 
 Open the settings file
 == Открытие файла настроек
 
 Open the directory that contains the configuration and user files
-== Открытие папки, содержащей файлы конфигурации и пользовательские файлы
+== Открыть папку конфигурационных файлов
 
 Open the directory to add custom themes
-== Открытие папки для добавления пользовательских тем
+== Открыть папку пользовательских тем
 
 Open the directory to add custom skins
-== Открытие папки для добавления пользовательских скинов
+== Открыть папку пользовательских скинов
 
 No controller found. Plug in a controller.
 == Контроллер не найден. Подключите контроллер.
 
 Unregister protocol and file extensions
-== Незарегистрированный протокол и расширения файлов
+== Отвязать протокол и расширения файлов
 
 Open the directory to add custom assets
-== Открытие папки для добавления пользовательских ресурсов
+== Открыть папку пользовательского контента
 
 [Graphics error]
 Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
-== Не удалось инициализировать данный графический модуль, возможно, это связано с тем, что вы не установили драйвер встроенной видеокарты.
+== Не удалось инициализировать данный графический модуль, что, возможно, связано с тем, что вы не установили драйвер встроенной видеокарты.
 
 Could not save downloaded map. Try manually deleting this file: %s
-== Не удалось сохранить загруженную карту. Попробуйте вручную удалить этот файл: %s
+== Не удалось сохранить загруженную карту. Попробуйте удалить этот файл вручную: %s
 
 Copy info
 == Cкопировать данные
@@ -1578,17 +1578,17 @@ Create a random skin
 == Создать случайный скин
 
 Online players (%d)
-== Друзей онлайн (%d)
+== Друзья (%d)
 
 Online clanmates (%d)
-== Участников клана онлайн (%d)
+== Участники клана (%d)
 
 [friends (server browser)]
 Offline (%d)
 == Не в сети (%d)
 
 Click to select server. Double click to join your friend.
-== Нажмите, чтобы выбрать сервер. Двойное нажатие, чтобы присоединиться к другу
+== Нажмите, чтобы выбрать сервер. Нажмите дважды, чтобы присоединиться.
 
 Click to remove this player from your friends list.
 == Нажмите, чтобы убрать игрока из списка друзей.
@@ -1606,7 +1606,7 @@ A demo with this name already exists
 == Демо с таким именем уже существует
 
 No server selected
-== Не выбран сервер
+== Сервер не выбран
 
 Mark the beginning of a cut (right click to reset)
 == Отметить начало отрезка (нажмите ПКМ, чтобы сбросить)
@@ -1615,10 +1615,10 @@ Mark the end of a cut (right click to reset)
 == Отметить конец отрезка (нажмите ПКМ, чтобы сбросить)
 
 Close the demo player
-== Закрыть проигрыватель демок
+== Закрыть проигрыватель демо
 
 Export demo cut
-== Экспортировать отрезок демки
+== Экспортировать отрезок демо
 
 Cut interval
 == Интервал отрезка
@@ -1633,13 +1633,13 @@ Graphics card
 == Видеокарта
 
 Quitting. Please wait…
-== Выход из игры. Пожалуйста, подождите...
+== Выход из игры. Пожалуйста, подождите…
 
 Restarting. Please wait…
-== Перезапуск игры. Пожалуйста, подождите...
+== Перезапуск игры. Пожалуйста, подождите…
 
 Multi-View
-== Мульти-Просмотр
+== Мульти-просмотр
 
 Rename folder
 == Переименовать папку
@@ -1648,7 +1648,7 @@ A folder with this name already exists
 == Папка с таким именем уже существует
 
 Unable to rename the folder
-== Невозможно переименовать папку
+== Не удалось переименовать папку
 
 (paused)
 == (приостановленно)
@@ -1686,7 +1686,7 @@ Change the skip duration
 == Изменение времени перехода
 
 Go forward the specified duration
-== Отмотать вперед заданное время
+== Отмотать вперед на заданное время
 
 Render cut to video
 == Рендеринг отрезка в видео
@@ -1738,13 +1738,13 @@ Enable ghost
 == Включить тень
 
 Only save improvements
-== Сохранять только улучшения
+== Сохранять только лучшее
 
 Regular background color
 == Обычный цвет фона
 
 Entities background color
-== Цвет фона сущностей
+== Цвет фона при наложении
 
 Saving settings to '%s' failed
 == Не получилось сохранить настройки в '%s'
@@ -1768,13 +1768,10 @@ No results
 == Не найдено
 
 Lines %d - %d (%s)
-== Строк %d - %d (%s)
+== Строки %d - %d (%s)
 
 Locked
-== Закрыто
-
-Following
-== 
+== Зафиксированные
 
 Press a key…
 == Нажмите любую кнопку…
@@ -1783,7 +1780,7 @@ Are you sure that you want to restart?
 == Вы уверены, что хотите начать заново?
 
 There's an unsaved map in the editor, you might want to save it.
-== Вы не сохранили последнюю отредактированную карту, возможно, вы хотите ее сохранить
+== Вы не сохранили последнюю отредактированную карту, возможно, вы хотите ее сохранить.
 
 Continue anyway?
 == Все равно продолжить?
@@ -1804,10 +1801,34 @@ Chat width
 == Ширина чата
 
 Authed name color in scoreboard
-== Цвет ника администратора в таблице счета
+== Цвет администратора в табло
 
 Same clan color in scoreboard
-== Одинаковый цвет клана в таблице счета
+== Цвет клан в табло
 
 Show finish messages
 == Показывать сообщения о финишах
+
+Failed saving the replay!
+== Не удалось сохранить запись!
+
+Error saving settings
+== Ошибка сохранения настроек
+
+Following
+== Текущие
+
+Loading commands…
+== Загрузка команд…
+
+Main menu
+== Главное меню
+
+Server filter
+== Фильтр серверов
+
+Friends
+== Друзья
+
+Loading…
+== Загрузка…

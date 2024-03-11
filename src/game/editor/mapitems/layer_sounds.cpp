@@ -34,41 +34,31 @@ void CLayerSounds::Render(bool Tileset)
 	Graphics()->SetColor(0.6f, 0.8f, 1.0f, 0.4f);
 	for(const auto &Source : m_vSources)
 	{
-		float OffsetX = 0;
-		float OffsetY = 0;
-
-		if(Source.m_PosEnv >= 0)
-		{
-			ColorRGBA Channels;
-			CEditor::EnvelopeEval(Source.m_PosEnvOffset, Source.m_PosEnv, Channels, m_pEditor);
-			OffsetX = Channels.r;
-			OffsetY = Channels.g;
-		}
+		ColorRGBA Offset = ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f);
+		CEditor::EnvelopeEval(Source.m_PosEnvOffset, Source.m_PosEnv, Offset, 2, m_pEditor);
+		const vec2 Position = vec2(fx2f(Source.m_Position.x) + Offset.r, fx2f(Source.m_Position.y) + Offset.g);
+		const float Falloff = Source.m_Falloff / 255.0f;
 
 		switch(Source.m_Shape.m_Type)
 		{
 		case CSoundShape::SHAPE_CIRCLE:
 		{
-			m_pEditor->Graphics()->DrawCircle(fx2f(Source.m_Position.x) + OffsetX, fx2f(Source.m_Position.y) + OffsetY,
-				Source.m_Shape.m_Circle.m_Radius, 32);
-
-			float Falloff = ((float)Source.m_Falloff / 255.0f);
+			m_pEditor->Graphics()->DrawCircle(Position.x, Position.y, Source.m_Shape.m_Circle.m_Radius, 32);
 			if(Falloff > 0.0f)
-				m_pEditor->Graphics()->DrawCircle(fx2f(Source.m_Position.x) + OffsetX, fx2f(Source.m_Position.y) + OffsetY,
-					Source.m_Shape.m_Circle.m_Radius * Falloff, 32);
+			{
+				m_pEditor->Graphics()->DrawCircle(Position.x, Position.y, Source.m_Shape.m_Circle.m_Radius * Falloff, 32);
+			}
 			break;
 		}
 		case CSoundShape::SHAPE_RECTANGLE:
 		{
-			float Width = fx2f(Source.m_Shape.m_Rectangle.m_Width);
-			float Height = fx2f(Source.m_Shape.m_Rectangle.m_Height);
-			m_pEditor->Graphics()->DrawRectExt(fx2f(Source.m_Position.x) + OffsetX - Width / 2, fx2f(Source.m_Position.y) + OffsetY - Height / 2,
-				Width, Height, 0.0f, IGraphics::CORNER_NONE);
-
-			float Falloff = ((float)Source.m_Falloff / 255.0f);
+			const float Width = fx2f(Source.m_Shape.m_Rectangle.m_Width);
+			const float Height = fx2f(Source.m_Shape.m_Rectangle.m_Height);
+			m_pEditor->Graphics()->DrawRectExt(Position.x - Width / 2, Position.y - Height / 2, Width, Height, 0.0f, IGraphics::CORNER_NONE);
 			if(Falloff > 0.0f)
-				m_pEditor->Graphics()->DrawRectExt(fx2f(Source.m_Position.x) + OffsetX - Falloff * Width / 2, fx2f(Source.m_Position.y) + OffsetY - Falloff * Height / 2,
-					Width * Falloff, Height * Falloff, 0.0f, IGraphics::CORNER_NONE);
+			{
+				m_pEditor->Graphics()->DrawRectExt(Position.x - Falloff * Width / 2, Position.y - Falloff * Height / 2, Width * Falloff, Height * Falloff, 0.0f, IGraphics::CORNER_NONE);
+			}
 			break;
 		}
 		}
@@ -84,18 +74,10 @@ void CLayerSounds::Render(bool Tileset)
 	m_pEditor->RenderTools()->SelectSprite(SPRITE_AUDIO_SOURCE);
 	for(const auto &Source : m_vSources)
 	{
-		float OffsetX = 0;
-		float OffsetY = 0;
-
-		if(Source.m_PosEnv >= 0)
-		{
-			ColorRGBA Channels;
-			CEditor::EnvelopeEval(Source.m_PosEnvOffset, Source.m_PosEnv, Channels, m_pEditor);
-			OffsetX = Channels.r;
-			OffsetY = Channels.g;
-		}
-
-		m_pEditor->RenderTools()->DrawSprite(fx2f(Source.m_Position.x) + OffsetX, fx2f(Source.m_Position.y) + OffsetY, m_pEditor->MapView()->ScaleLength(s_SourceVisualSize));
+		ColorRGBA Offset = ColorRGBA(0.0f, 0.0f, 0.0f, 0.0f);
+		CEditor::EnvelopeEval(Source.m_PosEnvOffset, Source.m_PosEnv, Offset, 2, m_pEditor);
+		const vec2 Position = vec2(fx2f(Source.m_Position.x) + Offset.r, fx2f(Source.m_Position.y) + Offset.g);
+		m_pEditor->RenderTools()->DrawSprite(Position.x, Position.y, m_pEditor->MapView()->ScaleLength(s_SourceVisualSize));
 	}
 
 	Graphics()->QuadsEnd();

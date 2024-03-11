@@ -1520,6 +1520,8 @@ bool CGraphicsBackend_SDL_GL::SetWindowScreen(int Index)
 	{
 		return false;
 	}
+	// Todo SDL: remove this when fixed (changing screen when in fullscreen is bugged)
+	SDL_SetWindowBordered(m_pWindow, SDL_TRUE); //fixing primary monitor goes black when switch screen (borderless OpenGL)
 
 	SDL_SetWindowPosition(m_pWindow,
 		SDL_WINDOWPOS_CENTERED_DISPLAY(Index),

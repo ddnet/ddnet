@@ -111,14 +111,19 @@ class CHttpRequest : public IHttpRequest
 	HTTPLOG m_LogProgress = HTTPLOG::ALL;
 	IPRESOLVE m_IpResolve = IPRESOLVE::WHATEVER;
 
+	bool m_FailOnErrorStatus = true;
+
 	char m_aErr[256]; // 256 == CURL_ERROR_SIZE
 	std::atomic<EHttpState> m_State{EHttpState::QUEUED};
 	std::atomic<bool> m_Abort{false};
 
+	int m_StatusCode = 0;
+
 	// Abort the request with an error if `BeforeInit()` returns false.
 	bool BeforeInit();
 	bool ConfigureHandle(void *pHandle); // void * == CURL *
-	void OnCompletionInternal(std::optional<unsigned int> Result); // unsigned int == CURLcode
+	// `pHandle` can be nullptr if no handle was ever created for this request.
+	void OnCompletionInternal(void *pHandle, unsigned int Result); // void * == CURL *, unsigned int == CURLcode
 
 	// Abort the request if `OnData()` returns something other than
 	// `DataSize`.
@@ -140,6 +145,7 @@ public:
 	void MaxResponseSize(int64_t MaxResponseSize) { m_MaxResponseSize = MaxResponseSize; }
 	void LogProgress(HTTPLOG LogProgress) { m_LogProgress = LogProgress; }
 	void IpResolve(IPRESOLVE IpResolve) { m_IpResolve = IpResolve; }
+	void FailOnErrorStatus(bool FailOnErrorStatus) { m_FailOnErrorStatus = FailOnErrorStatus; }
 	void WriteToFile(IStorage *pStorage, const char *pDest, int StorageType);
 	void ExpectSha256(const SHA256_DIGEST &Sha256) { m_ExpectedSha256 = Sha256; }
 	void Head() { m_Type = REQUEST::HEAD; }
@@ -198,8 +204,9 @@ public:
 
 	void Result(unsigned char **ppResult, size_t *pResultLength) const;
 	json_value *ResultJson() const;
-
 	const SHA256_DIGEST &ResultSha256() const;
+
+	int StatusCode() const;
 };
 
 inline std::unique_ptr<CHttpRequest> HttpHead(const char *pUrl)

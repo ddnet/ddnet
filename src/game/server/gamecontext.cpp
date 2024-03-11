@@ -1535,7 +1535,7 @@ void CGameContext::OnClientEnter(int ClientID)
 		int Empty = -1;
 		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
-			if(!Server()->ClientIngame(i))
+			if(Server()->ClientSlotEmpty(i))
 			{
 				Empty = i;
 				break;
@@ -2590,6 +2590,13 @@ void CGameContext::OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int
 	pPlayer->m_LastChangeInfo = Server()->Tick();
 	pPlayer->UpdatePlaytime();
 
+	if(g_Config.m_SvSpamprotection)
+	{
+		CNetMsg_Sv_ChangeInfoCooldown ChangeInfoCooldownMsg;
+		ChangeInfoCooldownMsg.m_WaitUntil = Server()->Tick() + Server()->TickSpeed() * g_Config.m_SvInfoChangeDelay;
+		Server()->SendPackMsg(&ChangeInfoCooldownMsg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientID);
+	}
+
 	// set infos
 	if(Server()->WouldClientNameChange(ClientID, pMsg->m_pName) && !ProcessSpamProtection(ClientID))
 	{
@@ -2719,7 +2726,7 @@ void CGameContext::OnEmoticonNetMessage(const CNetMsg_Cl_Emoticon *pMsg, int Cli
 		SendEmoticon(ClientID, pMsg->m_Emoticon, -1);
 	}
 
-	if(g_Config.m_SvEmotionalTees && pPlayer->m_EyeEmoteEnabled)
+	if(g_Config.m_SvEmotionalTees == 1 && pPlayer->m_EyeEmoteEnabled)
 	{
 		int EmoteType = EMOTE_NORMAL;
 		switch(pMsg->m_Emoticon)
@@ -3689,7 +3696,9 @@ void CGameContext::RegisterChatCommands()
 	Console()->Register("tc", "?r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConTeleCursor, this, "Teleport yourself to player or to where you are spectating/or looking if no player name is given");
 	Console()->Register("telecursor", "?r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConTeleCursor, this, "Teleport yourself to player or to where you are spectating/or looking if no player name is given");
 	Console()->Register("unsolo", "", CFGFLAG_CHAT, ConPracticeUnSolo, this, "Puts you out of solo part");
+	Console()->Register("solo", "", CFGFLAG_CHAT, ConPracticeSolo, this, "Puts you into solo part");
 	Console()->Register("undeep", "", CFGFLAG_CHAT, ConPracticeUnDeep, this, "Puts you out of deep freeze");
+	Console()->Register("deep", "", CFGFLAG_CHAT, ConPracticeDeep, this, "Puts you into deep freeze");
 
 	Console()->Register("kill", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConProtectedKill, this, "Kill yourself when kill-protected during a long game (use f1, kill for regular kill)");
 }
@@ -3918,9 +3927,6 @@ void CGameContext::OnInit(const void *pPersistentData)
 
 	// create all entities from the game layer
 	CreateAllEntities(true);
-
-	if(GIT_SHORTREV_HASH)
-		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "git-revision", GIT_SHORTREV_HASH);
 
 	m_pAntibot->RoundStart(this);
 

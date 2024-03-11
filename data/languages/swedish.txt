@@ -7,7 +7,7 @@
 #	3edcxzaq1		2020-06-25 00:00:00
 #	cur.ie			2020-09-28 00:00:00
 #	simpygirl		2022-02-20 00:00:00
-#	furo			2024-01-14 00:00:00
+#	furo			2024-03-02 00:00:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -802,7 +802,7 @@ Demo
 == Demo
 
 Show only chat messages from friends
-== Visa bara chatt meddelanden från vänner
+== Visa bara chatt meddelanden från kompisar
 
 DDNet Client updated!
 == DDNet Klienten uppdaterades!
@@ -1800,3 +1800,24 @@ Same clan color in scoreboard
 
 Show finish messages
 == Visa avklarnings meddelanden
+
+Failed saving the replay!
+== Misslyckades att spara repris!
+
+Error saving settings
+== Misslyckades att spara inställningar
+
+Loading commands…
+== Laddar kommandon…
+
+Main menu
+== Huvudmeny
+
+Server filter
+== Server filter
+
+Friends
+== Kompisar
+
+Loading…
+== Laddar…

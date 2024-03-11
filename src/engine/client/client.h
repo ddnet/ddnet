@@ -116,6 +116,7 @@ class CClient : public IClient, public CDemoPlayer::IListener
 	char m_aRconUsername[32] = "";
 	char m_aRconPassword[sizeof(g_Config.m_SvRconPassword)] = "";
 	int m_UseTempRconCommands = 0;
+	bool m_ReceivingRconCommands = false;
 	char m_aPassword[sizeof(g_Config.m_Password)] = "";
 	bool m_SendPassword = false;
 
@@ -283,6 +284,7 @@ public:
 	bool UseTempRconCommands() const override { return m_UseTempRconCommands != 0; }
 	void RconAuth(const char *pName, const char *pPassword) override;
 	void Rcon(const char *pCmd) override;
+	bool ReceivingRconCommands() const override { return m_ReceivingRconCommands; }
 
 	bool ConnectionProblems() const override;
 
@@ -297,7 +299,7 @@ public:
 	const char *LatestVersion() const override;
 
 	// ------ state handling -----
-	void SetState(EClientState s);
+	void SetState(EClientState State);
 
 	// called when the map is loaded and we should init for a new round
 	void OnEnterGame(bool Dummy);

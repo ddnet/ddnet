@@ -108,6 +108,7 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 		COL_NAME,
 		COL_GAMETYPE,
 		COL_MAP,
+		COL_FRIENDS,
 		COL_PLAYERS,
 		COL_PING,
 
@@ -135,7 +136,8 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 		{COL_NAME, IServerBrowser::SORT_NAME, Localizable("Name"), 0, 50.0f, {0}},
 		{COL_GAMETYPE, IServerBrowser::SORT_GAMETYPE, Localizable("Type"), 1, 50.0f, {0}},
 		{COL_MAP, IServerBrowser::SORT_MAP, Localizable("Map"), 1, 120.0f + (Headers.w - 480) / 8, {0}},
-		{COL_PLAYERS, IServerBrowser::SORT_NUMPLAYERS, Localizable("Players"), 1, 85.0f, {0}},
+		{COL_FRIENDS, IServerBrowser::SORT_NUMFRIENDS, "", 1, 20.0f, {0}},
+		{COL_PLAYERS, IServerBrowser::SORT_NUMPLAYERS, Localizable("Players"), 1, 60.0f, {0}},
 		{-1, -1, "", 1, 4.0f, {0}},
 		{COL_PING, IServerBrowser::SORT_PING, Localizable("Ping"), 1, 40.0f, {0}},
 	};
@@ -190,6 +192,15 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 					g_Config.m_BrSortOrder = 0;
 				g_Config.m_BrSort = Col.m_Sort;
 			}
+		}
+
+		if(Col.m_ID == COL_FRIENDS)
+		{
+			TextRender()->SetFontPreset(EFontPreset::ICON_FONT);
+			TextRender()->SetRenderFlags(ETextRenderFlags::TEXT_RENDER_FLAG_ONLY_ADVANCE_WIDTH | ETextRenderFlags::TEXT_RENDER_FLAG_NO_X_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_Y_BEARING | ETextRenderFlags::TEXT_RENDER_FLAG_NO_PIXEL_ALIGMENT | ETextRenderFlags::TEXT_RENDER_FLAG_NO_OVERSIZE);
+			UI()->DoLabel(&Col.m_Rect, FONT_ICON_HEART, 14.0f, TEXTALIGN_MC);
+			TextRender()->SetRenderFlags(0);
+			TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
 		}
 	}
 
@@ -374,25 +385,23 @@ void CMenus::RenderServerbrowserServerList(CUIRect View, bool &WasListboxItemAct
 				if(!Printed)
 					UI()->DoLabelStreamed(*pUiElement->Rect(UI_ELEM_MAP_1), &Button, pItem->m_aMap, FontSize, TEXTALIGN_ML, Props);
 			}
-			else if(ID == COL_PLAYERS)
+			else if(ID == COL_FRIENDS)
 			{
-				Button.VMargin(2.0f, &Button);
 				if(pItem->m_FriendState != IFriends::FRIEND_NO)
 				{
-					CUIRect Icon;
-					Button.VSplitRight(50.0f, &Icon, &Button);
-					Icon.Margin(2.0f, &Icon);
-					RenderBrowserIcons(*pUiElement->Rect(UI_ELEM_FRIEND_ICON), &Icon, ColorRGBA(0.94f, 0.4f, 0.4f, 1.0f), TextRender()->DefaultTextOutlineColor(), FONT_ICON_HEART, TEXTALIGN_MC);
+					RenderBrowserIcons(*pUiElement->Rect(UI_ELEM_FRIEND_ICON), &Button, ColorRGBA(0.94f, 0.4f, 0.4f, 1.0f), TextRender()->DefaultTextOutlineColor(), FONT_ICON_HEART, TEXTALIGN_MC);
 
 					if(pItem->m_FriendNum > 1)
 					{
 						str_from_int(pItem->m_FriendNum, aTemp);
 						TextRender()->TextColor(0.94f, 0.8f, 0.8f, 1.0f);
-						UI()->DoLabel(&Icon, aTemp, 9.0f, TEXTALIGN_MC);
+						UI()->DoLabel(&Button, aTemp, 9.0f, TEXTALIGN_MC);
 						TextRender()->TextColor(TextRender()->DefaultTextColor());
 					}
 				}
-
+			}
+			else if(ID == COL_PLAYERS)
+			{
 				str_format(aTemp, sizeof(aTemp), "%i/%i", pItem->m_NumFilteredPlayers, ServerBrowser()->Max(*pItem));
 				if(g_Config.m_BrFilterString[0] && (pItem->m_QuickSearchHit & IServerBrowser::QUICK_PLAYER))
 				{
@@ -724,7 +733,9 @@ void CMenus::RenderServerbrowserFilters(CUIRect View)
 		}
 	}
 
-	if(!m_CommunityCache.m_vpSelectableCountries.empty() || !m_CommunityCache.m_vpSelectableTypes.empty())
+	// countries and types filters (not shown if there are no countries and types, or if only the none community is selected)
+	if((!m_CommunityCache.m_vpSelectableCountries.empty() || !m_CommunityCache.m_vpSelectableTypes.empty()) &&
+		(m_CommunityCache.m_vpSelectedCommunities.size() != 1 || str_comp(m_CommunityCache.m_vpSelectedCommunities[0]->Id(), IServerBrowser::COMMUNITY_NONE) != 0))
 	{
 		const ColorRGBA ColorActive = ColorRGBA(0.0f, 0.0f, 0.0f, 0.3f);
 		const ColorRGBA ColorInactive = ColorRGBA(0.0f, 0.0f, 0.0f, 0.15f);
@@ -858,7 +869,10 @@ void CMenus::RenderServerbrowserDDNetFilter(CUIRect View,
 				else if(Click == 2)
 				{
 					// Right click: when all are active, only deactivate one
-					Filter.Add(GetItemName(ItemIndex));
+					if(MaxItems >= 2)
+					{
+						Filter.Add(GetItemName(ItemIndex));
+					}
 				}
 			}
 			else
@@ -1637,15 +1651,24 @@ void CMenus::RenderServerbrowserTabBar(CUIRect TabBar)
 
 	static CButtonContainer s_FilterTabButton;
 	if(DoButton_MenuTab(&s_FilterTabButton, FONT_ICON_LIST_UL, g_Config.m_UiToolboxPage == UI_TOOLBOX_PAGE_FILTERS, &FilterTabButton, IGraphics::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_BROWSER_FILTER], &ColorInactive, &ColorActive))
+	{
 		g_Config.m_UiToolboxPage = UI_TOOLBOX_PAGE_FILTERS;
+	}
+	GameClient()->m_Tooltips.DoToolTip(&s_FilterTabButton, &FilterTabButton, Localize("Server filter"));
 
 	static CButtonContainer s_InfoTabButton;
 	if(DoButton_MenuTab(&s_InfoTabButton, FONT_ICON_INFO, g_Config.m_UiToolboxPage == UI_TOOLBOX_PAGE_INFO, &InfoTabButton, IGraphics::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_BROWSER_INFO], &ColorInactive, &ColorActive))
+	{
 		g_Config.m_UiToolboxPage = UI_TOOLBOX_PAGE_INFO;
+	}
+	GameClient()->m_Tooltips.DoToolTip(&s_InfoTabButton, &InfoTabButton, Localize("Server info"));
 
 	static CButtonContainer s_FriendsTabButton;
 	if(DoButton_MenuTab(&s_FriendsTabButton, FONT_ICON_HEART, g_Config.m_UiToolboxPage == UI_TOOLBOX_PAGE_FRIENDS, &FriendsTabButton, IGraphics::CORNER_T, &m_aAnimatorsSmallPage[SMALL_TAB_BROWSER_FRIENDS], &ColorInactive, &ColorActive))
+	{
 		g_Config.m_UiToolboxPage = UI_TOOLBOX_PAGE_FRIENDS;
+	}
+	GameClient()->m_Tooltips.DoToolTip(&s_FriendsTabButton, &FriendsTabButton, Localize("Friends"));
 
 	TextRender()->SetRenderFlags(0);
 	TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
@@ -1911,6 +1934,7 @@ void CMenus::CCommunityIconLoadJob::Run()
 CMenus::CCommunityIconLoadJob::CCommunityIconLoadJob(CMenus *pMenus, const char *pCommunityId, int StorageType) :
 	CAbstractCommunityIconJob(pMenus, pCommunityId, StorageType)
 {
+	Abortable(true);
 }
 
 CMenus::CCommunityIconLoadJob::~CCommunityIconLoadJob()
@@ -2026,7 +2050,7 @@ void CMenus::UpdateCommunityIcons()
 	if(!m_CommunityIconLoadJobs.empty())
 	{
 		std::shared_ptr<CCommunityIconLoadJob> pJob = m_CommunityIconLoadJobs.front();
-		if(pJob->Status() == IJob::STATE_DONE)
+		if(pJob->Done())
 		{
 			if(pJob->Success())
 				LoadCommunityIconFinish(pJob->CommunityId(), pJob->ImageInfo(), pJob->Sha256());

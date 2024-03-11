@@ -420,6 +420,7 @@ protected:
 
 	// found in menus.cpp
 	void Render();
+	void RenderPopupFullscreen(CUIRect Screen);
 #if defined(CONF_VIDEORECORDER)
 	void PopupConfirmDemoReplaceVideo();
 #endif

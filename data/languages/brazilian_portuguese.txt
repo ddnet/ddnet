@@ -30,6 +30,7 @@
 # Rafael Fontenelle   2023-08-14 14:17:00
 # Rafael Fontenelle   2023-09-25 14:23:00
 # Rafael Fontenelle   2023-12-05 17:01:00
+# Rafael Fontenelle   2024-03-02 16:20:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -1822,3 +1823,24 @@ Same clan color in scoreboard
 
 Show finish messages
 == Mostrar mensagens de finalização
+
+Failed saving the replay!
+== Falha ao salvar a reprodução!
+
+Error saving settings
+== Erro ao salvar as configurações
+
+Loading commands…
+== Carregando comandos…
+
+Main menu
+== Menu principal
+
+Server filter
+== Filtro de servidores
+
+Friends
+== Amigos
+
+Loading…
+== Carregando…

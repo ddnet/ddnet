@@ -514,7 +514,40 @@ public:
 	void DoLabel(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps = {}, int StrLen = -1, const CTextCursor *pReadCursor = nullptr) const;
 	void DoLabelStreamed(CUIElement::SUIElementRect &RectEl, const CUIRect *pRect, const char *pText, float Size, int Align, const SLabelProperties &LabelProps = {}, int StrLen = -1, const CTextCursor *pReadCursor = nullptr) const;
 
+	/**
+	 * Creates an input field.
+	 *
+	 * @see DoClearableEditBox
+	 *
+	 * @param pLineInput This pointer will be stored and written to on next user input.
+	 *                   So you can not pass in a pointer that goes out of scope such as a local variable.
+	 *                   Pass in either a member variable of the current class or a static variable.
+	 *                   For example ```static CLineInputBuffered<IO_MAX_PATH_LENGTH> s_MyInput;```
+	 * @param pRect the UI rect it will attach to with a 2.0f margin
+	 * @param FontSize Size of the font (`10.0f`, `12.0f` and `14.0f` are commonly used here)
+	 * @param Corners Number of corners (default: `IGraphics::CORNER_ALL`)
+	 * @param vColorSplits Sets color splits of the `CTextCursor` to allow multicolored text
+	 *
+	 * @return true if the value of the input field changed since the last call.
+	 */
 	bool DoEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize, int Corners = IGraphics::CORNER_ALL, const std::vector<STextColorSplit> &vColorSplits = {});
+
+	/**
+	 * Creates an input field with a clear [x] button attached to it.
+	 *
+	 * @see DoEditBox
+	 *
+	 * @param pLineInput This pointer will be stored and written to on next user input.
+	 *                   So you can not pass in a pointer that goes out of scope such as a local variable.
+	 *                   Pass in either a member variable of the current class or a static variable.
+	 *                   For example ```static CLineInputBuffered<IO_MAX_PATH_LENGTH> s_MyInput;```
+	 * @param pRect the UI rect it will attach to
+	 * @param FontSize Size of the font (`10.0f`, `12.0f` and `14.0f` are commonly used here)
+	 * @param Corners Number of corners (default: `IGraphics::CORNER_ALL`)
+	 * @param vColorSplits Sets color splits of the `CTextCursor` to allow multicolored text
+	 *
+	 * @return true if the value of the input field changed since the last call.
+	 */
 	bool DoClearableEditBox(CLineInput *pLineInput, const CUIRect *pRect, float FontSize, int Corners = IGraphics::CORNER_ALL, const std::vector<STextColorSplit> &vColorSplits = {});
 
 	int DoButton_Menu(CUIElement &UIElement, const CButtonContainer *pID, const std::function<const char *()> &GetTextLambda, const CUIRect *pRect, const SMenuButtonProperties &Props = {});

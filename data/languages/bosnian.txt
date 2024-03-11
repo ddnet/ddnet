@@ -963,7 +963,13 @@ Could not save downloaded map. Try manually deleting this file: %s
 Error playing demo
 == 
 
+Failed saving the replay!
+== 
+
 Saving settings to '%s' failed
+== 
+
+Error saving settings
 == 
 
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
@@ -1005,6 +1011,9 @@ Quitting. Please wait…
 Restarting. Please wait…
 == 
 
+Loading skin files
+== 
+
 Searching
 == 
 
@@ -1030,6 +1039,9 @@ Locked
 == 
 
 Following
+== 
+
+Loading commands…
 == 
 
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
@@ -1063,6 +1075,15 @@ Loading menu themes
 == 
 
 Press a key…
+== 
+
+Main menu
+== 
+
+Settings
+== 
+
+Editor
 == 
 
 Trying to determine UDP connectivity...
@@ -1225,6 +1246,12 @@ Are you sure that you want to remove the clan '%s' from your friends list?
 Add Clan
 == 
 
+Server filter
+== 
+
+Friends
+== 
+
 Play the current demo
 == 
 
@@ -1348,6 +1375,9 @@ Unable to delete the demo '%s'
 Unable to delete the folder '%s'. Make sure it's empty first.
 == 
 
+Loading…
+== 
+
 Loading ghost files
 == 
 
@@ -1394,9 +1424,6 @@ Max CSVs
 == 
 
 Dummy
-== 
-
-Loading skin files
 == 
 
 Download skins
@@ -1749,9 +1776,6 @@ Can't find a Tutorial server
 Website
 == 
 
-Settings
-== 
-
 Stop server
 == 
 
@@ -1759,9 +1783,6 @@ Run server
 == 
 
 Server executable not found, can't run server
-== 
-
-Editor
 == 
 
 [Start menu]

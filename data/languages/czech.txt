@@ -6,6 +6,7 @@
 #	Petr			2011-04-02 23:02:33
 #	Medik & Petr	2011-07-02 19:37:05
 #	TeeWorlds-org	2011-07-15 00:34:19
+#	dobrykafe		2024-03-04 00:00:00
 ##### /authors #####
 
 ##### translated strings #####
@@ -14,19 +15,19 @@
 == zbývá %ds
 
 %i minute left
-== Zbývá minut: %i
+== %i zbývající minuta
 
 %i minutes left
-== Zbývá minut: %i
+== %i zbývajících minut
 
 %i second left
-== Zbývá sekund: %i
+== %i zbývající sekunda
 
 %i seconds left
-== Zbývá sekund: %i
+== %i zbývajících sekund
 
 %s wins!
-== Vítězí %s!
+== %s vyhrává!
 
 Abort
 == Přerušit
@@ -44,13 +45,13 @@ All
 == Všem
 
 Are you sure that you want to quit?
-== Opravdu chcete ukončit Teeworlds?
+== Opravdu chcete ukončit hru?
 
 Automatically record demos
 == Automaticky nahrávat záznamy
 
 Automatically take game over screenshot
-== Na konci kola vyfotit obrazovku
+== Automaticky pořídit snímek obrazovky konce hry
 
 Blue team
 == Modří
@@ -71,7 +72,7 @@ Chat
 == Chat
 
 Clan
-== Herní klan
+== Klan
 
 Client
 == Klient
@@ -80,10 +81,10 @@ Connecting to
 == Připojuji na
 
 Connection Problems...
-== Chyba spojení...
+== Problémy s připojením...
 
 Console
-== Konzola
+== Konzole
 
 Controls
 == Ovládání
@@ -92,7 +93,7 @@ Count players only
 == Započítat hrající hráče
 
 Current
-== Aktuálně
+== Aktuální
 
 Custom colors
 == Vlastní barvy
@@ -125,13 +126,13 @@ Dynamic Camera
 == Pohyblivá kamera
 
 Emoticon
-== Emotikony
+== Emotikon
 
 Error
 == Chyba
 
 Error loading demo
-== Chyba načítání záznamu
+== Chyba při načítání záznamu
 
 Favorite
 == Oblíbený
@@ -140,7 +141,7 @@ Favorites
 == Oblíbené
 
 Feet
-== Nohy
+== Chodidla
 
 Fire
 == Střelba
@@ -149,7 +150,7 @@ Folder
 == Složka
 
 Force vote
-== Zvolit
+== Vynutit hlasování
 
 Free-View
 == Volný pohled
@@ -161,7 +162,7 @@ Game
 == Hra
 
 Game info
-== Hra
+== Herní info
 
 Game over
 == Konec hry
@@ -170,13 +171,13 @@ Game type
 == Herní mód
 
 Game types:
-== Herní mód:
+== Herní módy:
 
 General
-== Hlavní
+== Všeobecné
 
 Graphics
-== Video
+== Grafika
 
 Grenade
 == Granátomet
@@ -221,7 +222,7 @@ Move left
 == Pohyb doleva
 
 Move player to spectators
-== Poslat hráče pozorovat
+== Přesunout hráče k divákům
 
 Move right
 == Pohyb doprava
@@ -254,7 +255,7 @@ No servers match your filter criteria
 == Žádný server neodpovídá požadavkům filtru
 
 Ok
-== OK
+== Ok
 
 Parent Folder
 == Nadřazená složka
@@ -269,7 +270,7 @@ Ping
 == Ping
 
 Pistol
-== Pistolka
+== Pistole
 
 Play background music
 == Přehrávat hudbu na pozadí
@@ -278,10 +279,10 @@ Player
 == Hráč
 
 Player country:
-== Národnost:
+== Země hráčů:
 
 Player options
-== Nastavení hráčů
+== Možnosti hráčů
 
 Players
 == Hráči
@@ -293,7 +294,7 @@ Prev. weapon
 == Předchozí zbraň
 
 Quit
-== Konec
+== Ukončit
 
 Reason:
 == Důvod:
@@ -305,7 +306,7 @@ Red team wins!
 == Červení vyhráli!
 
 Remote console
-== Vzdálená konzola
+== Vzdálená konzole
 
 Remove
 == Odstranit
@@ -317,25 +318,25 @@ Rename demo
 == Přejmenovat záznam
 
 Reset filter
-== Vymazat filtr
+== Resetovat filtr
 
 Score
 == Skóre
 
 Score limit
-== Skóre limit
+== Limit skóre
 
 Scoreboard
 == Tabulka výsledků
 
 Screenshot
-== Vyfotit obrazovku
+== Snímek obrazovky
 
 Server address:
 == Adresa serveru:
 
 Server info
-== Informace
+== Server info
 
 Server not full
 == Možnost připojit se
@@ -353,7 +354,7 @@ Show ingame HUD
 == Zobrazit HUD
 
 Show name plates
-== Zobrazovat jména hráčů
+== Zobrazit jmenovky
 
 Sound
 == Zvuk
@@ -368,16 +369,16 @@ Spectate next
 == Pozorovat dalšího
 
 Spectate previous
-== Pozorovat minulého
+== Pozorovat předchozího
 
 Spectator mode
-== Nastavit pozorování
+== Divácký režim
 
 Spectators
-== Pozorovatelé
+== Diváci
 
 Stop record
-== Ukončit záznam
+== Zastavit záznam
 
 Strict gametype filter
 == Pouze tento herní mód
@@ -395,10 +396,10 @@ Team chat
 == Týmový chat
 
 The audio device couldn't be initialised.
-== Zvukové zařízení nelze inicializovat.
+== Zvukové zařízení se nepodařilo inicializovat.
 
 The server is running a non-standard tuning on a pure game type.
-== Server používá nestandartní nastavení (tuning) pro základní módy.
+== Server používá nestandardní nastavení pro základní módy.
 
 Time limit
 == Časový limit
@@ -419,7 +420,7 @@ Use sounds
 == Povolit zvuk
 
 Use team colors for name plates
-== Obarvit jména hráčů podle týmu
+== Použít barvy týmu pro jmenovky
 
 V-Sync
 == Vertikální synchronizace
@@ -428,16 +429,16 @@ Version
 == Verze
 
 Vote command:
-== Příkaz:
+== Příkaz hlasování:
 
 Vote description:
-== Popisek hlasování:
+== Popis hlasování:
 
 Vote no
-== NE
+== Hlasovat ne
 
 Vote yes
-== ANO
+== Hlasovat ano
 
 Voting
 == Hlasování
@@ -446,7 +447,7 @@ Warmup
 == Zahřívací kolo
 
 Weapon
-== Zbraně
+== Zbraň
 
 Yes
 == Ano
@@ -460,7 +461,7 @@ New name:
 == Nové jméno:
 
 Sat.
-== Barva
+== Syt.
 
 Miscellaneous
 == Ostatní
@@ -490,10 +491,10 @@ Laser
 == Laser
 
 Hue
-== Tón
+== Ods.
 
 Record demo
-== Zaznamenat
+== Začít záznam
 
 Your skin
 == Zvolený vzhled
@@ -508,7 +509,7 @@ Lht.
 == Jas
 
 UI Color
-== Barvy uživatelského rozhraní
+== Barva uživatelského rozhraní
 
 Alpha
 == Alfa
@@ -517,40 +518,40 @@ LAN
 == LAN
 
 Name plates size
-== Velikost jmen
+== Velikost jmenovek
 
 Successfully saved the replay!
 == Záznam byl úspěšně uložen!
 
 Replay feature is disabled!
-== Funkce opakovaného přehrávání je zakázána!
+== Funkce záznamů je zakázána!
 
 Game paused
-== Game paused
+== Hra pozastavena
 
 Server best:
-== Server best:
+== Server rekord:
 
 Personal best:
-== Personal best:
+== Osobní rekord:
 
 Learn
 == Učit se
 
 Browser
-== Browser
+== Prohlížeč
 
 Ghost
 == Duch
 
 Loading DDNet Client
-== Načítání DDNet klienta
+== Načítání DDNet Klienta
 
 Reconnect in %d sec
-== Opětovné připojení za %d sekund
+== Opětovné připojení za %d sek
 
 Render demo
-== Vyrenderovat demo
+== Vykreslit záznam
 
 Replace video
 == Nahradit video
@@ -601,7 +602,7 @@ Countries
 == Země
 
 Types
-== Typy
+== Módy
 
 DDNet %s is out!
 == DDNet %s je venku!
@@ -610,7 +611,7 @@ Downloading %s:
 == Stahování %s:
 
 DDNet Client updated!
-== Aktualizace selhala! Zkontrolujte log...
+== DDNet Klient aktualizován!
 
 Update now
 == Aktualizovat nyní
@@ -628,7 +629,7 @@ Remove chat
 == %.2f KiB
 
 Demo
-== Demo
+== Záznam
 
 Markers
 == Markery
@@ -670,7 +671,7 @@ Show clan above name plates
 == Ukázat klan nad jménem
 
 Clan plates size
-== Velikost klanových jmenovek
+== Velikost jmenovek klanu
 
 Refresh Rate
 == Obnovovací frekvence
@@ -682,7 +683,7 @@ Automatically create statboard csv
 == Automaticky vytvořit statboard csv
 
 Max CSVs
-== Maximální CSV
+== Maximální počet CSV
 
 Vanilla skins only
 == Pouze vanilla skiny
@@ -691,7 +692,7 @@ Fat skins (DDFat)
 == Tlusté skiny (DDFat)
 
 Skin prefix
-== Skin prefix
+== Skin předpona
 
 Hook collisions
 == Kolize háku
@@ -769,7 +770,7 @@ Enable server message sound
 == Povolit zvuk zpráv serveru
 
 Enable regular chat sound
-== Povolit normální zvuk chatu
+== Povolit zvuk normálního chatu
 
 Enable team chat sound
 == Povolit zvuk týmového chatu
@@ -790,7 +791,7 @@ DDNet Client needs to be restarted to complete update!
 == K dokončení aktualizace je nutné restartovat klienta DDNet!
 
 Use DDRace Scoreboard
-== Použijte hodnotící tabuli DDRace
+== Použít DDRace tabulku výsledků
 
 Show score
 == Zobrazit skóre
@@ -802,7 +803,7 @@ Show kill messages
 == Zobrazit zprávy zabití
 
 Show votes window after voting
-== Zobrazit okno hlasování po hlasování
+== Zobrazit okno hlasování po odhlasování
 
 Messages
 == Zprávy
@@ -826,7 +827,7 @@ Normal message
 == Normální zpráva
 
 Save the best demo of each race
-== Uložte si nejlepší demo každého závodu
+== Ukládat nejlepší záznam každého závodu
 
 Default length
 == Výchozí délka
@@ -955,7 +956,7 @@ Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
 == Režim ladění povolen. Stisknutím kláves Ctrl + Shift + D deaktivujte režim ladění.
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
-== Pomocí klávesy k se zabijete (restartujte), pomocí q se zapauzijete a můžete sledovat ostatní hráče. Viz nastavení pro další klávesové zkratky.
+== Pomocí klávesy k se zabijete (restartujte), pomocí q pauznete a můžete sledovat ostatní hráče. Otevřte nastavení pro další klávesové zkratky.
 
 Please enter your nickname below.
 == Níže zadejte svou přezdívku.
@@ -964,7 +965,7 @@ Existing Player
 == Stávající hráč
 
 Your nickname '%s' is already used (%d points). Do you still want to use it?
-== Vaše přezdívka '%s' je již použita (%d bodů). Chcete jej i přes to používat?
+== Vaše přezdívka '%s' je již použita (%d bodů). Chcete ji i přes to používat?
 
 Checking for existing player with your name
 == Kontrola pro existujícího hráče s vaším jménem
@@ -982,19 +983,19 @@ Theme
 == %d z %d serverů
 
 %d of %d server
-== %d z %d serverů
+== %d z %d serveru
 
 %d players
 == %d hráčů
 
 %d player
-==  %d hráč
+== %d hráč
 
 Demos directory
-== Adresář dem
+== Adresář záznamů
 
 Smooth Dynamic Camera
-== Hladká dynamická kamera
+== Hladká pohyblivá kamera
 
 Skip the main menu
 == Přeskočit hlavní nabídku
@@ -1003,7 +1004,7 @@ Themes directory
 == Adresář témat
 
 Download skins
-== Stáhnout skiny
+== Stahovat skiny
 
 Skin Database
 == Databáze skinů
@@ -1024,7 +1025,7 @@ Assets
 == Aktiva
 
 Use old chat style
-== Použijte starý styl chatu
+== Použít starý styl chatu
 
 Client message
 == Zpráva klienta
@@ -1048,7 +1049,7 @@ https://wiki.ddnet.org/
 == https://wiki.ddnet.org/
 
 Website
-== webová stránka
+== Web stránka
 
 Settings
 == Nastavení
@@ -1074,729 +1075,750 @@ Update failed! Check log...
 
 [Graphics error]
 Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== 
+== Inicializace se nezdařila. Zkuste změnit gfx_backend na OpenGL nebo Vulkan v settings_ddnet.cfg v adresáři s konfigurací a zkuste to znovu.
 
 [Graphics error]
 Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== 
+== Nedostatek VRAM. Zkuste odebrat vlastní aktiva (skins, entity, atd.), zejména ty s vysokým rozlišením.
 
 [Graphics error]
 An error during command recording occurred. Try to update your GPU drivers.
-== 
+== Při nahrávání příkazu došlo k chybě. Zkuste aktualizovat ovladače GPU.
 
 [Graphics error]
 A render command failed. Try to update your GPU drivers.
-== 
+== Příkaz k vykreslení selhal. Zkuste aktualizovat ovladače GPU.
 
 [Graphics error]
 Submitting the render commands failed. Try to update your GPU drivers.
-== 
+== Odeslání příkazů vykreslení se nezdařilo. Zkuste aktualizovat ovladače GPU.
 
 [Graphics error]
 Failed to swap framebuffers. Try to update your GPU drivers.
-== 
+== Záměna framebufferů se nezdařila. Zkuste aktualizovat ovladače GPU.
 
 [Graphics error]
 Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
-== 
+== Neznámá chyba. Zkuste změnit gfx_backend na OpenGL nebo Vulkan v settings_ddnet.cfg v adresáři s konfigurací a zkuste to znovu.
 
 [Graphics error]
 Could not initialize the given graphics backend, reverting to the default backend now.
-== 
+== Nelze inicializovat daný grafický backend, vrací se k výchozímu backendu.
 
 [Graphics error]
 Could not initialize the given graphics backend, this is probably because you didn't install the driver of the integrated graphics card.
-== 
+== Nelze inicializovat daný grafický backend, pravděpodobně proto, že jste nenainstalovali ovladač integrované grafické karty.
 
 Could not save downloaded map. Try manually deleting this file: %s
-== 
+== Staženou mapu nelze uložit. Zkuste ručně smazat tento soubor: %s
 
 Error playing demo
-== 
+== Chyba přehrávání záznamu
+
+Failed saving the replay!
+== Uložení záznamu se nezdařilo!
 
 Saving settings to '%s' failed
-== 
+== Uložení nastavení do '%s' se nezdařilo
+
+Error saving settings
+== Při ukládání nastavení došlo k chybě
 
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
-== 
+== Šířka textury %s není dělitelná %d nebo výška není dělitelná %d, což může způsobit vizuální chyby.
 
 The format of texture %s is not RGBA which will cause visual bugs.
-== 
+== Formát textury %s není RGBA, což způsobí vizuální chyby.
 
 Preparing demo playback
-== 
+== Příprava přehrávání záznamu
 
 Connected
-== 
+== Připojeno
 
 Loading map file from storage
-== 
+== Načítání souboru mapy z úložiště
 
 Why are you slowmo replaying to read this?
-== 
+== Proč přehráváte pomalu kvůli tomuhle?
 
 Initializing components
-== 
+== Inicializace komponent
 
 Initializing assets
-== 
+== Inicializace aktiv
 
 Initializing map logic
-== 
+== Inicializace logiky mapy
 
 Sending initial client info
-== 
+== Odeslání prvotních informací o klientovi
 
 Quitting. Please wait…
-== 
+== Ukončování. Prosím, čekejte…
 
 Restarting. Please wait…
-== 
+== Restartování. Prosím, čekejte…
+
+Loading skin files
+== Načítání skin souborů
 
 Searching
-== 
+== Hledání
 
 Enter Username
-== 
+== Zadejte uživatelské jméno
 
 Enter Password
-== 
+== Zadejte heslo
 
 NOT CONNECTED
-== 
+== NEPŘIPOJENO
 
 Match %d of %d
-== 
+== Shoda %d z %d
 
 No results
-== 
+== Žádné výsledky
 
 Lines %d - %d (%s)
-== 
+== Řádky %d – %d (%s)
 
 Locked
-== 
+== Zamčeno
 
 Following
-== 
+== Následování
+
+Loading commands…
+== Načítání příkazů…
 
 Position:
-== 
+== Pozice:
 
 Speed:
-== 
+== Rychlost:
 
 Angle:
-== 
+== Úhel:
 
 Multi-View
-== 
+== Multi-Pohled
 
 Team %d
-== 
+== Tým %d
 
 Some map images could not be loaded. Check the local console for details.
-== 
+== Některé obrázky mapy se nepodařilo načíst. Podrobnosti najdete v místní konzoli.
 
 Uploading map data to GPU
-== 
+== Nahrávání dat map do GPU
 
 Some map sounds could not be loaded. Check the local console for details.
-== 
+== Některé zvuky mapy nelze načíst. Podrobnosti najdete v místní konzoli.
 
 Loading menu themes
-== 
+== Načítání motivů menu
 
 Press a key…
-== 
+== Zmáčkni tlačítko…
+
+Main menu
+== Hlavní menu
 
 Trying to determine UDP connectivity...
-== 
+== Pokus o zjištění připojení UDP...
 
 UDP seems to be filtered.
-== 
+== Zdá se, že UDP je filtrován.
 
 UDP and TCP IP addresses seem to be different. Try disabling VPN, proxy or network accelerators.
-== 
+== IP adresy UDP a TCP se zdají být odlišné. Zkuste deaktivovat VPN, proxy nebo síťové akcelerátory.
 
 No answer from server yet.
-== 
+== Ze serveru zatím žádná odpověď.
 
 Getting game info
-== 
+== Získávání informací o hře
 
 Requesting to join the game
-== 
+== Žádost o připojení do hry
 
 Rename folder
-== 
+== Přejmenovat složku
 
 Render complete
-== 
+== Vykreslení dokončeno
 
 Are you sure that you want to restart?
-== 
+== Opravdu chcete restartovat hru?
 
 There's an unsaved map in the editor, you might want to save it.
-== 
+== V editoru je neuložená mapa, možná ji budete chtít uložit.
 
 Continue anyway?
-== 
+== Přesto pokračovat?
 
 A demo with this name already exists
-== 
+== Záznam s tímto názvem již existuje
 
 A folder with this name already exists
-== 
+== Složka s tímto názvem již existuje
 
 Unable to rename the folder
-== 
+== Složku nelze přejmenovat
 
 File '%s' already exists, do you want to overwrite it?
-== 
+== Soubor '%s' již existuje, chcete jej přepsat?
 
 (paused)
-== 
+== (pozastaveno)
 
 Videos directory
-== 
+== Adresář videí
 
 Video was saved to '%s'
-== 
+== Video bylo uloženo do '%s'
 
 Join Tutorial Server
-== 
+== Připojit se k výukovému serveru
 
 Skip Tutorial
-== 
+== Přeskočit výuku
 
 Loading menu images
-== 
+== Načítání obrázků v menu
 
 AFR
-== 
+== AFR
 
 ASI
-== 
+== ASI
 
 AUS
-== 
+== AUS
 
 EUR
-== 
+== EUR
 
 NA
-== 
+== NA
 
 SA
-== 
+== SA
 
 CHN
-== 
+== CHN
 
 Getting server list from master server
-== 
+== Získávání seznamu serverů z hlavního serveru
 
 Are you sure that you want to disconnect and switch to a different server?
-== 
+== Opravdu se chcete odpojit a přesunout na jiný server?
 
 Communities
-== 
+== Komunity
 
 Copy info
-== 
+== Zkopírovat info
 
 Leak IP
-== 
+== Zobrazit IP
 
 No server selected
-== 
+== Není vybrán žádný server
 
 Online players (%d)
-== 
+== Online hráči (%d)
 
 Online clanmates (%d)
-== 
+== Online členové klanu (%d)
 
 [friends (server browser)]
 Offline (%d)
-== 
+== Offline (%d)
 
 Click to select server. Double click to join your friend.
-== 
+== Kliknutím vyberete server. Dvojitým kliknutím se připojíte k příteli.
 
 Click to remove this player from your friends list.
-== 
+== Kliknutím odeberete tohoto hráče ze seznamu přátel.
 
 Click to remove this clan from your friends list.
-== 
+== Kliknutím odeberete tento klan ze seznamu přátel.
 
 None
-== 
+== Žádný
 
 Are you sure that you want to remove the player '%s' from your friends list?
-== 
+== Opravdu chcete odstranit hráče '%s' ze seznamu přátel?
 
 Are you sure that you want to remove the clan '%s' from your friends list?
-== 
+== Jste si jisti, že chcete odstranit klan '%s' ze svého seznamu přátel?
 
 Add Clan
-== 
+== Přidat Klan
+
+Server filter
+== Filtr serveru
+
+Friends
+== Přátelé
 
 Play the current demo
-== 
+== Přehrát aktuální záznam
 
 Pause the current demo
-== 
+== Pozastavit aktuální záznam
 
 Stop the current demo
-== 
+== Zastavit aktuální záznam
 
 Go back the specified duration
-== 
+== Vrátit se o zadanou dobu
 
 [Demo player duration]
 %d min.
-== 
+== %d min.
 
 [Demo player duration]
 %d sec.
-== 
+== %d sec.
 
 Change the skip duration
-== 
+== Změnit dobu přeskočení
 
 Go forward the specified duration
-== 
+== Vpřed o zadanou dobu trvání
 
 Go back one tick
-== 
+== Vzad o jeden tick
 
 Go forward one tick
-== 
+== Vpřed o jeden tick
 
 Go back one marker
-== 
+== Vzad o jeden marker
 
 Go forward one marker
-== 
+== Vpřed o jeden marker
 
 Slow down the demo
-== 
+== Zpomalit záznam
 
 Speed up the demo
-== 
+== Zrychlit záznam
 
 Mark the beginning of a cut (right click to reset)
-== 
+== Označit začátek řezu (pravý klik pro reset)
 
 Mark the end of a cut (right click to reset)
-== 
+== Označit konec řezu (pravý klik pro reset)
 
 Export cut as a separate demo
-== 
+== Exportovat řez jako samostatný záznam
 
 Close the demo player
-== 
+== Zavřít přehrávač záznamů
 
 Toggle keyboard shortcuts
-== 
+== Přepnout klávesové zkratky
 
 Export demo cut
-== 
+== Exportovat řez záznamu
 
 Cut interval
-== 
+== Interval řezu
 
 Cut length
-== 
+== Délka řezu
 
 Render cut to video
-== 
+== Vykreslit řez do videa
 
 Please use a different filename
-== 
+== Použijte prosím jiný název souboru
 
 Loading demo files
-== 
+== Načítání záznamů
 
 All combined
-== 
+== Vše dohromady
 
 No demo selected
-== 
+== Není vybrán žádný záznam
 
 Folder Link
-== 
+== Odkaz na složku
 
 Created
-== 
+== Vytvořeno
 
 Netversion
-== 
+== Netversion
 
 [Demo details]
 map not included
-== 
+== mapa není součástí
 
 Open the directory that contains the demo files
-== 
+== Otevřete adresář, který obsahuje soubory se záznamy
 
 Are you sure that you want to delete the folder '%s'?
-== 
+== Jste si jisti, že chcete smazat složku '%s'?
 
 Are you sure that you want to delete the demo '%s'?
-== 
+== Jste si jisti, že chcete smazat záznam '%s'?
 
 Delete folder
-== 
+== Smazat složku
 
 Unable to delete the demo '%s'
-== 
+== Nelze smazat záznam '%s'
 
 Unable to delete the folder '%s'. Make sure it's empty first.
-== 
+== Nelze smazat složku '%s'. Nejprve se ujistěte, že je prázdná.
+
+Loading…
+== Načítání…
 
 Loading ghost files
-== 
+== Načítání souborů duchů
 
 Ghosts directory
-== 
+== Adresář duchů
 
 Activate all
-== 
+== Aktivovat vše
 
 Deactivate all
-== 
+== Deaktivovat vše
 
 Menu opened. Press Esc key again to close menu.
-== 
+== Nabídka otevřena. Stisknutím klávesy Esc nabídku zavřete.
 
 Save power by lowering refresh rate (higher input latency)
-== 
+== Šetřit energii snížením obnovovací frekvence (vyšší vstupní odezva)
 
 Settings file
-== 
+== Soubor s nastavením
 
 Open the settings file
-== 
+== Otevřít soubor s nastavením
 
 Config directory
-== 
+== Adresář s konfigurací
 
 Open the directory that contains the configuration and user files
-== 
+== Otevřít adresář, který obsahuje konfigurační a uživatelské soubory
 
 Open the directory to add custom themes
-== 
+== Pro přidání vlastních motivů otevřte adresář
 
 Dummy
-== 
-
-Loading skin files
-== 
+== Dummy
 
 Download community skins
-== 
+== Stahovat komunitní skiny
 
 Create a random skin
-== 
+== Vytvořit náhodný skin
 
 Choose default eyes when joining a server
-== 
+== Vybrat výchozí oči po připojení k serveru
 
 Open the directory to add custom skins
-== 
+== Pro přidání vlastních skinů otevřte adresář
 
 Chat command
-== 
+== Chat příkaz
 
 Enable controller
-== 
+== Povolit ovladač
 
 Controller
-== 
+== Ovladač
 
 Ingame controller mode
-== 
+== Režim ovladače ve hře
 
 [Ingame controller mode]
 Relative
-== 
+== Relativní
 
 [Ingame controller mode]
 Absolute
-== 
+== Absolutní
 
 Ingame controller sens.
-== 
+== Citlivost ovladače ve hře
 
 UI controller sens.
-== 
+== Citlivost ovladače v menu
 
 Controller jitter tolerance
-== 
+== Tolerance nervozity ovladače
 
 No controller found. Plug in a controller.
-== 
+== Nebyl nalezen žádný ovladač. Zapojte ovladač.
 
 Axis
-== 
+== Osa
 
 Status
-== 
+== Status
 
 Aim bind
-== 
+== Bind míření
 
 Mouse
-== 
+== Myš
 
 Ingame mouse sens.
-== 
+== Citlivost myši ve hře
 
 UI mouse sens.
-== 
+== Citlivost myši v menu
 
 Reset controls
-== 
+== Resetovat ovládání
 
 Are you sure that you want to reset the controls to their defaults?
-== 
+== Opravdu chcete obnovit výchozí nastavení ovládání?
 
 Cancel
-== 
+== Zrušit
 
 Windowed
-== 
+== V okně
 
 Windowed borderless
-== 
+== V okně bez okrajů
 
 Windowed fullscreen
-== 
+== Celá obrazovka v okně
 
 Desktop fullscreen
-== 
+== Celá obrazovka plochy
 
 Allows maps to render with more detail
-== 
+== Umožňuje vykreslovat mapy s většími detaily
 
 Renderer
-== 
+== Renderer
 
 default
-== 
+== výchozí
 
 custom
-== 
+== vlastní
 
 Graphics card
-== 
+== Grafická karta
 
 auto
-== 
+== auto
 
 Appearance
-== 
+== Vzhled
 
 Name Plate
-== 
+== Jmenovka
 
 Hook Collisions
-== 
+== Kolize Háku
 
 Info Messages
-== 
+== Informační Zprávy
 
 Show health, shields and ammo
-== 
+== Zobrazit zdraví, štíty a munici
 
 Show local time always
-== 
+== Vždy zobrazovat místní čas
 
 DDRace HUD
-== 
+== DDRace HUD
 
 Show client IDs in scoreboard
-== 
+== Zobrazit ID klientů ve výsledkové tabulce
 
 Show DDRace HUD
-== 
+== Zobrazit DDRace HUD
 
 Show jumps indicator
-== 
+== Zobrazit indikátor skoku
 
 Show dummy actions
-== 
+== Zobrazit akce dummyho
 
 Show player position
-== 
+== Zobrazit pozici hráče
 
 Show player speed
-== 
+== Zobrazit rychlost hráče
 
 Show player target angle
-== 
+== Zobrazit cílový úhel hráče
 
 Show freeze bars
-== 
+== Zobrazit freeze bary
 
 Opacity of freeze bars inside freeze
-== 
+== Neprůhlednost freeze barů uvnitř freeze
 
 Chat font size
-== 
+== Velikost písma chatu
 
 Chat width
-== 
+== Šířka chatu
 
 Preview
-== 
+== Náhled
 
 Show hook strength indicator
-== 
+== Zobrazit indikátor síly háku
 
 Show local player's key presses
-== 
+== Zobrazit stisknutí kláves místních hráčů
 
 Authed name color in scoreboard
-== 
+== Barva ověřeného hráče ve výsledkové tabulce
 
 Same clan color in scoreboard
-== 
+== Barva stejného klanu ve výsledkové tabulce
 
 Hook collision line
-== 
+== Čára kolize háku
 
 Hook collision line width
-== 
+== Šířka čáry kolize háku
 
 Hook collision line opacity
-== 
+== Neprůhlednost čáry kolize háku
 
 Colors of the hook collision line, in case of a possible collision with:
-== 
+== Barvy čáry kolize háku v případě kolize s:
 
 Your movements are not taken into account when calculating the line colors
-== 
+== Váš pohyb se při výpočtu barev čar nebere v úvahu
 
 Nothing hookable
-== 
+== Nic k zaháknutí
 
 Something hookable
-== 
+== Něco k zaháknutí
 
 A Tee
-== 
+== Hráč
 
 Show finish messages
-== 
+== Zobrazit zprávy o dokončení
 
 Normal Color
-== 
+== Normální Barva
 
 Highlight Color
-== 
+== Zvýrazněná barva
 
 Weapons
-== 
+== Zbraně
 
 Rifle Laser Outline Color
-== 
+== Vnější Barva Laseru Pušky
 
 Rifle Laser Inner Color
-== 
+== Vnitřní Barva Laseru Pušky
 
 Shotgun Laser Outline Color
-== 
+== Vnější Barva Laseru Brokovnice
 
 Shotgun Laser Inner Color
-== 
+== Vnitřní Barva Laseru Brokovnice
 
 Door Laser Outline Color
-== 
+== Vnější Barva Laseru Dveří
 
 Door Laser Inner Color
-== 
+== Vnitřní Barva Laseru Dveří
 
 Freeze Laser Outline Color
-== 
+== Vnější Barva Freeze Laseru
 
 Freeze Laser Inner Color
-== 
+== Vnitřní Barva Freeze Laseru
 
 Set all to Rifle
-== 
+== Nastavit vše na Pušku
 
 Enable ghost
-== 
+== Povolit ducha
 
 When you cross the start line, show a ghost tee replicating the movements of your best time
-== 
+== Po překročení startovní čáry ukázat ducha, který kopíruje pohyby vašeho nejlepšího času
 
 Opacity
-== 
+== Neprůhlednost
 
 Only save improvements
-== 
+== Ukládat pouze vylepšení
 
 Adjust the opacity of entities belonging to other teams, such as tees and nameplates
-== 
+== Neprůhlednost entit patřících jiným týmům jako jsou hráči a jmenovky
 
 Quads are used for background decoration
-== 
+== Quads se používají pro dekoraci pozadí
 
 Tries to predict other entities to give a feel of low latency
-== 
+== Snaží se předpovídat jiné entity, aby navodil pocit nízké odezvy
 
 Background
-== 
+== Pozadí
 
 Regular background color
-== 
+== Běžná barva pozadí
 
 Entities background color
-== 
+== Barva pozadí entit
 
 Run on join
-== 
+== Spustit po připojení
 
 Chat command (e.g. showall 1)
-== 
+== Chat příkaz (např. showall 1)
 
 Unregister protocol and file extensions
-== 
+== Odregistrovat protokol a přípony souborů
 
 Extras
-== 
+== Extra
 
 Loading assets
-== 
+== Načítání aktiv
 
 Open the directory to add custom assets
-== 
+== Pro přidání vlastních aktiv otevřte adresář
 
 Discord
-== 
+== Discord
 
 https://ddnet.org/discord
-== 
+== https://ddnet.org/discord
 
 Tutorial
-== 
+== Výuka
 
 Can't find a Tutorial server
-== 
+== Nelze najít Výukový server
 
 Loading race demo files
-== 
+== Načítání záznamů závodů
 
 Super
-== 
+== Super
 
 Loading sound files
-== 
+== Načítání zvukových souborů
 
 Moved ingame
-== 
+== Přesun ve hře

@@ -98,7 +98,7 @@ Fire
 == Постріл
 
 Folder
-== Папку
+== Папка
 
 Force vote
 == Форсувати
@@ -242,7 +242,7 @@ Reset filter
 == Скинути фільтри
 
 Score
-== бали
+== Бали
 
 Score limit
 == Ліміт очок
@@ -352,7 +352,7 @@ Laser
 == Лазер
 
 Join game
-== Приєднатись до гри
+== Приєднатися до гри
 
 Sound volume
 == Гучність звуку
@@ -403,7 +403,7 @@ Free-View
 == Вільний перегляд
 
 Server best:
-== Найкращі сервера
+== Найкращі сервери
 
 Personal best:
 == Твоє найкраще
@@ -709,13 +709,13 @@ Toggle dyncam
 == Включити динамічну камеру
 
 Toggle dummy
-== Переключити Даммі
+== Переключити даммі
 
 Toggle ghost
 == Переключити тінь
 
 Dummy copy
-== Повторення рухів Даммі
+== Повторення рухів даммі
 
 Hammerfly dummy
 == Політ з даммі
@@ -727,7 +727,7 @@ Spectator mode
 == Режим спостерігача
 
 Spectate next
-== Спостерігати за наптупним
+== Спостерігати за наcтупним
 
 Spectate previous
 == Спостерігати за попереднім
@@ -739,7 +739,7 @@ Lock team
 == Закрити команду
 
 Show entities
-== Показати текстури
+== Показувати текстури
 
 Show HUD
 == Показувати HUD
@@ -955,22 +955,22 @@ Replay
 == Повтор
 
 The width of texture %s is not divisible by %d, or the height is not divisible by %d, which might cause visual bugs.
-== Ширина або висота текстури %s не поділяється на %d, що може викликати візуальні помилки
+== Ширина або висота текстури %s не ділиться на %d, що може викликати візуальні помилки.
 
 Warning
 == Небезпека
 
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
-== Включкний режим виправлення помилок натисніть Ctrl+Shift+D щоб виключити його
+== Включений режим відлагодження. Натисніть Ctrl+Shift+D щоб виключити його.
 
 Use k key to kill (restart), q to pause and watch other players. See settings for other key binds.
-== Натисніть k для самогубства,q щоб зупинитись і спостерігати за іншими. Дивіться в налаштуваннях для інших налаштувань
+== Натисніть k для самогубства,q щоб зупинитись і спостерігати за іншими. Дивіться в налаштуваннях для інших налаштувань.
 
 Existing Player
 == Існуючий гравець
 
 Your nickname '%s' is already used (%d points). Do you still want to use it?
-== Твій нік %s уже хтось використовує (%d очків ). Чи ти всеодно хочеш його взяти?
+== Твій нік %s уже хтось використовує (%d очків ). Ти всеодно хочеш його взяти?
 
 Checking for existing player with your name
 == Провіряється наявність гравців з твоїм ніком
@@ -1021,7 +1021,7 @@ Getting server list from master server
 == %d Гравець
 
 Leak IP
-== Стійке IP
+== Розголошувати IP
 
 Markers
 == Марки
@@ -1039,7 +1039,7 @@ Themes directory
 == Каталог тем
 
 Download skins
-== завантажувати скіни інших
+== Завантажувати скіни інших
 
 Skin Database
 == Бази даних скінів
@@ -1123,7 +1123,7 @@ Run server
 == Запустити сервер
 
 Server executable not found, can't run server
-== Серверний виконуваний файл не знайдено, неможливо запустити
+== Виконуваний файл сервера не знайдено, неможливо запустити
 
 Editor
 == Редактор
@@ -1138,23 +1138,23 @@ Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in s
 
 [Graphics error]
 Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== Не вистачає Відеопам'яті(VRAM). Спробуйте видалити користувацькі ресурси (скіни, ентіти тощо), особоливо ті, які мають високу роздільну здатність
+== Не вистачає Відеопам'яті(VRAM). Спробуйте видалити користувацькі ресурси (скіни, ентіти тощо), особоливо ті, які мають високу роздільну здатність.
 
 [Graphics error]
 An error during command recording occurred. Try to update your GPU drivers.
-== Виникла помилка під час запису команди. Спробуйте оновити драйвери вашогї відеокарти(GPU).
+== Виникла помилка під час запису команди. Спробуйте оновити драйвери вашої відеокарти(GPU).
 
 [Graphics error]
 A render command failed. Try to update your GPU drivers.
-== Не вдалося виконати команду рендеру, спробуйте оновити драйвер вашої відеокарти(GPU)
+== Не вдалося виконати команду рендеру, спробуйте оновити драйвери вашої відеокарти(GPU).
 
 [Graphics error]
 Submitting the render commands failed. Try to update your GPU drivers.
-== Під час подання команди рендеру відбудаля помилка, спробуйте оновити драйвер вашої відеокарти(GPU)
+== Під час подання команди рендеру відбудаля помилка, спробуйте оновити драйвери вашої відеокарти(GPU).
 
 [Graphics error]
 Failed to swap framebuffers. Try to update your GPU drivers.
-== Помилка під час обміну фрейм-буферу. спробуйте оновити драйвер вашої відеокарти(GPU)
+== Помилка під час обміну фрейм-буферу. Cпробуйте оновити драйвери вашої відеокарти(GPU).
 
 [Graphics error]
 Unknown error. Try to change gfx_backend to OpenGL or Vulkan in settings_ddnet.cfg in the config directory and try again.
@@ -1290,10 +1290,10 @@ Stop the current demo
 == Зупинити поточне демо
 
 Go back one tick
-== Повернутися на одну секунду назад
+== Повернутися на один крок назад
 
 Go forward one tick
-== Повернутися на одну секунду вперед
+== Перейти на один крок вперед
 
 Slow down the demo
 == Уповільнити демо
@@ -1359,7 +1359,7 @@ Choose default eyes when joining a server
 == Вибір очей за замовчуванням під час приєднання до сервера
 
 Create a random skin
-== Створити рандомний скін
+== Створити випадковий скін
 
 Open the directory to add custom skins
 == Відкрити каталог для додавання користувацьких скінів
@@ -1469,10 +1469,10 @@ Show player target angle
 == Показати кут націлювання гравця
 
 Show freeze bars
-== Показати Індикатор фрізу
+== Показати індикатор фрізу
 
 Opacity of freeze bars inside freeze
-== Непрозорість фрізу всередині фріза
+== Непрозорість індикатора фрізу всередині фріза
 
 Show hook strength indicator
 == Показати індикатор міцності гака
@@ -1484,10 +1484,10 @@ Hook collision line width
 == Ширина лінії колізій гачків
 
 Hook collision line opacity
-==  Непрозорість лінії колізій гачків
+==  Непрозорість лінії колізій гаків
 
 Colors of the hook collision line, in case of a possible collision with:
-== Кольори лінії колізій гачка, в разі можливого зіткнення з:
+== Кольори лінії колізій гака, в разі можливого зіткнення з:
 
 Your movements are not taken into account when calculating the line colors
 == Ваші рухи не враховуються при розрахунку кольору лінії
@@ -1601,7 +1601,7 @@ A demo with this name already exists
 == Демо з такою назвою вже існує
 
 A folder with this name already exists
-== Папка с такою назвою вже існує
+== Папка з такою назвою вже існує
 
 Unable to rename the folder
 == Неможливо перейменувати папку
@@ -1610,7 +1610,7 @@ Unable to rename the folder
 == (пауза)
 
 No server selected
-== Жоден сервер не вибран
+== Жоден сервер не вибрано
 
 Mark the beginning of a cut (right click to reset)
 == Позначте початок відрізка (натисніть праву кнопку миші, щоб скинути позначку)
@@ -1625,10 +1625,10 @@ Export demo cut
 == Експорт відрізку з демо
 
 Cut interval
-== Інтервал відрізку
+== Інтервал відрізка
 
 Cut length
-== Довжина відрізку
+== Довжина відрізкa
 
 All combined
 == Все разом
@@ -1729,7 +1729,13 @@ Regular background color
 Entities background color
 == Колір фону об'єктів
 
+Failed saving the replay!
+== 
+
 Saving settings to '%s' failed
+== 
+
+Error saving settings
 == 
 
 Searching
@@ -1759,7 +1765,13 @@ Locked
 Following
 == 
 
+Loading commands…
+== 
+
 Press a key…
+== 
+
+Main menu
 == 
 
 Are you sure that you want to restart?
@@ -1774,7 +1786,16 @@ Continue anyway?
 Communities
 == 
 
+Server filter
+== 
+
+Friends
+== 
+
 Please use a different filename
+== 
+
+Loading…
 == 
 
 Info Messages

@@ -37,6 +37,7 @@
 # 2023-08-11 By
 # 2023-11-25 By
 # 2024-01-15 By
+# 2024-03-03 Bamcane
 ##### /authors #####
 
 ##### translated strings #####
@@ -1835,3 +1836,24 @@ Same clan color in scoreboard
 
 Show finish messages
 == 显示完成消息
+
+Failed saving the replay!
+== 保存该回放失败！
+
+Error saving settings
+== 保存设置时出错
+
+Loading commands…
+== 正在加载指令…
+
+Main menu
+== 主菜单
+
+Server filter
+== 服务器筛选
+
+Friends
+== 好友
+
+Loading…
+== 加载中…

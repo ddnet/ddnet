@@ -12,4 +12,3 @@ panic = "abort"
 [profile.release]
 lto = "thin"
 panic = "abort"
-

@@ -1661,7 +1661,13 @@ Could not initialize the given graphics backend, this is probably because you di
 Error playing demo
 == 
 
+Failed saving the replay!
+== 
+
 Saving settings to '%s' failed
+== 
+
+Error saving settings
 == 
 
 Searching
@@ -1691,6 +1697,9 @@ Locked
 Following
 == 
 
+Loading commands…
+== 
+
 Some map images could not be loaded. Check the local console for details.
 == 
 
@@ -1701,6 +1710,9 @@ Loading menu themes
 == 
 
 Press a key…
+== 
+
+Main menu
 == 
 
 Render complete
@@ -1722,6 +1734,12 @@ Video was saved to '%s'
 == 
 
 Communities
+== 
+
+Server filter
+== 
+
+Friends
 == 
 
 Go back the specified duration
@@ -1758,6 +1776,9 @@ Netversion
 
 [Demo details]
 map not included
+== 
+
+Loading…
 == 
 
 Ghosts directory

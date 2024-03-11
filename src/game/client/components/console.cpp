@@ -884,9 +884,7 @@ void CGameConsole::OnRender()
 	CUIRect Screen = *UI()->Screen();
 	CInstance *pConsole = CurrentConsole();
 
-	float MaxConsoleHeight = Screen.h * 3 / 5.0f;
-	float ConsoleHeight;
-
+	const float MaxConsoleHeight = Screen.h * 3 / 5.0f;
 	float Progress = (Client()->GlobalTime() - (m_StateChangeEnd - m_StateChangeDuration)) / m_StateChangeDuration;
 
 	if(Progress >= 1.0f)
@@ -916,15 +914,14 @@ void CGameConsole::OnRender()
 		Input()->MouseModeAbsolute();
 
 	float ConsoleHeightScale;
-
 	if(m_ConsoleState == CONSOLE_OPENING)
 		ConsoleHeightScale = ConsoleScaleFunc(Progress);
 	else if(m_ConsoleState == CONSOLE_CLOSING)
 		ConsoleHeightScale = ConsoleScaleFunc(1.0f - Progress);
-	else // if (console_state == CONSOLE_OPEN)
+	else // CONSOLE_OPEN
 		ConsoleHeightScale = ConsoleScaleFunc(1.0f);
 
-	ConsoleHeight = ConsoleHeightScale * MaxConsoleHeight;
+	const float ConsoleHeight = ConsoleHeightScale * MaxConsoleHeight;
 
 	UI()->MapScreen();
 
@@ -959,6 +956,7 @@ void CGameConsole::OnRender()
 	Array[1] = IGraphics::CColorVertex(1, 0, 0, 0, 0.0f);
 	Array[2] = IGraphics::CColorVertex(2, 0, 0, 0, 0.25f);
 	Array[3] = IGraphics::CColorVertex(3, 0, 0, 0, 0.25f);
+
 	Graphics()->SetColorVertex(Array, 4);
 	QuadItem = IGraphics::CQuadItem(0, ConsoleHeight - 20, Screen.w, 10);
 	Graphics()->QuadsDrawTL(&QuadItem, 1);
@@ -973,15 +971,14 @@ void CGameConsole::OnRender()
 	Graphics()->QuadsDrawTL(&QuadItem, 1);
 	Graphics()->QuadsEnd();
 
-	ConsoleHeight -= 22.0f;
-
 	{
 		// Get height of 1 line
-		float LineHeight = TextRender()->TextBoundingBox(FONT_SIZE, " ", -1, -1, LINE_SPACING).m_H;
+		const float LineHeight = TextRender()->TextBoundingBox(FONT_SIZE, " ", -1, -1.0f, LINE_SPACING).m_H;
 
-		float RowHeight = FONT_SIZE * 1.5f;
+		const float RowHeight = FONT_SIZE * 1.5f;
+
 		float x = 3;
-		float y = ConsoleHeight - RowHeight - 5.0f;
+		float y = ConsoleHeight - RowHeight - 27.0f;
 
 		const float InitialX = x;
 		const float InitialY = y;
@@ -1150,11 +1147,9 @@ void CGameConsole::OnRender()
 
 		const float XScale = Graphics()->ScreenWidth() / Screen.w;
 		const float YScale = Graphics()->ScreenHeight() / Screen.h;
-		float CalcOffsetY = 0;
-		while(y - (CalcOffsetY + LineHeight) > RowHeight)
-			CalcOffsetY += LineHeight;
-		float ClipStartY = y - CalcOffsetY;
-		Graphics()->ClipEnable(0, ClipStartY * YScale, Screen.w * XScale, y * YScale - ClipStartY * YScale);
+		const float CalcOffsetY = LineHeight * std::floor((y - RowHeight) / LineHeight);
+		const float ClipStartY = (y - CalcOffsetY) * YScale;
+		Graphics()->ClipEnable(0, ClipStartY, Screen.w * XScale, y * YScale - ClipStartY);
 
 		while(pEntry)
 		{
@@ -1175,25 +1170,24 @@ void CGameConsole::OnRender()
 				OffsetY -= (pConsole->m_BacklogLastActiveLine - SkippedLines) * LineHeight;
 			}
 
-			float LocalOffsetY = OffsetY + pEntry->m_YOffset / (float)pEntry->m_LineCount;
+			const float LocalOffsetY = OffsetY + pEntry->m_YOffset / (float)pEntry->m_LineCount;
 			OffsetY += pEntry->m_YOffset;
 
 			// Only apply offset if we do not keep scroll position (m_BacklogCurLine == 0)
 			if((pConsole->m_HasSelection || pConsole->m_MouseIsPress) && pConsole->m_NewLineCounter > 0 && pConsole->m_BacklogCurLine == 0)
 			{
-				float MouseExtraOff = pEntry->m_YOffset;
-				pConsole->m_MousePress.y -= MouseExtraOff;
+				pConsole->m_MousePress.y -= pEntry->m_YOffset;
 				if(!pConsole->m_MouseIsPress)
-					pConsole->m_MouseRelease.y -= MouseExtraOff;
+					pConsole->m_MouseRelease.y -= pEntry->m_YOffset;
 			}
 
 			// stop rendering when lines reach the top
-			bool Outside = y - OffsetY <= RowHeight;
-			int CanRenderOneLine = y - LocalOffsetY > RowHeight;
+			const bool Outside = y - OffsetY <= RowHeight;
+			const bool CanRenderOneLine = y - LocalOffsetY > RowHeight;
 			if(Outside && !CanRenderOneLine)
 				break;
 
-			int LinesNotRendered = pEntry->m_LineCount - minimum((int)std::floor((y - LocalOffsetY) / RowHeight), pEntry->m_LineCount);
+			const int LinesNotRendered = pEntry->m_LineCount - minimum((int)std::floor((y - LocalOffsetY) / RowHeight), pEntry->m_LineCount);
 			pConsole->m_LinesRendered -= LinesNotRendered;
 
 			TextRender()->SetCursor(&Cursor, 0.0f, y - OffsetY, FONT_SIZE, TEXTFLAG_RENDER);
@@ -1285,10 +1279,15 @@ void CGameConsole::OnRender()
 		str_format(aBuf, sizeof(aBuf), Localize("Lines %d - %d (%s)"), pConsole->m_BacklogCurLine + 1, pConsole->m_BacklogCurLine + pConsole->m_LinesRendered, pConsole->m_BacklogCurLine != 0 ? Localize("Locked") : Localize("Following"));
 		TextRender()->Text(10.0f, FONT_SIZE / 2.f, FONT_SIZE, aBuf);
 
+		if(m_ConsoleType == CONSOLETYPE_REMOTE && Client()->ReceivingRconCommands())
+		{
+			UI()->RenderProgressSpinner(vec2(Screen.w / 4.0f + FONT_SIZE / 2.f, FONT_SIZE), FONT_SIZE / 2.f);
+			TextRender()->Text(Screen.w / 4.0f + FONT_SIZE + 2.0f, FONT_SIZE / 2.f, FONT_SIZE, Localize("Loading commands…"));
+		}
+
 		// render version
 		str_copy(aBuf, "v" GAME_VERSION " on " CONF_PLATFORM_STRING " " CONF_ARCH_STRING);
-		float Width = TextRender()->TextWidth(FONT_SIZE, aBuf, -1, -1.0f);
-		TextRender()->Text(Screen.w - Width - 10.0f, FONT_SIZE / 2.f, FONT_SIZE, aBuf);
+		TextRender()->Text(Screen.w - TextRender()->TextWidth(FONT_SIZE, aBuf) - 10.0f, FONT_SIZE / 2.f, FONT_SIZE, aBuf);
 	}
 }
 

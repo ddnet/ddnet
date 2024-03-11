@@ -1265,6 +1265,7 @@ public:
 	bool SetMultiSampling(uint32_t ReqMultiSamplingCount, uint32_t &MultiSamplingCountBackend) override;
 
 	int GetVideoModes(CVideoMode *pModes, int MaxModes, int Screen) override;
+	void GetCurrentVideoMode(CVideoMode &CurMode, int Screen) override;
 
 	virtual int GetDesktopScreenWidth() const { return g_Config.m_GfxDesktopWidth; }
 	virtual int GetDesktopScreenHeight() const { return g_Config.m_GfxDesktopHeight; }

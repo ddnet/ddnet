@@ -11,6 +11,7 @@ CHostLookup::CHostLookup(const char *pHostname, int Nettype)
 {
 	str_copy(m_aHostname, pHostname);
 	m_Nettype = Nettype;
+	Abortable(true);
 }
 
 void CHostLookup::Run()

@@ -118,7 +118,7 @@ class IDemoEditor : public IInterface
 {
 	MACRO_INTERFACE("demoeditor")
 public:
-	virtual void Slice(const char *pDemo, const char *pDst, int StartTick, int EndTick, DEMOFUNC_FILTER pfnFilter, void *pUser) = 0;
+	virtual bool Slice(const char *pDemo, const char *pDst, int StartTick, int EndTick, DEMOFUNC_FILTER pfnFilter, void *pUser) = 0;
 };
 
 #endif

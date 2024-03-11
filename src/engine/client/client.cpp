@@ -1,8 +1,6 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
-#define _WIN32_WINNT 0x0501
-
 #include <base/hash.h>
 #include <base/hash_ctxt.h>
 #include <base/logger.h>
@@ -307,43 +305,44 @@ int *CClient::GetInput(int Tick, int IsDummy) const
 }
 
 // ------ state handling -----
-void CClient::SetState(EClientState s)
+void CClient::SetState(EClientState State)
 {
 	if(m_State == IClient::STATE_QUITTING || m_State == IClient::STATE_RESTARTING)
 		return;
+	if(m_State == State)
+		return;
 
-	int Old = m_State;
 	if(g_Config.m_Debug)
 	{
-		char aBuf[128];
-		str_format(aBuf, sizeof(aBuf), "state change. last=%d current=%d", m_State, s);
+		char aBuf[64];
+		str_format(aBuf, sizeof(aBuf), "state change. last=%d current=%d", m_State, State);
 		m_pConsole->Print(IConsole::OUTPUT_LEVEL_DEBUG, "client", aBuf);
 	}
-	m_State = s;
-	if(Old != s)
+
+	const EClientState OldState = m_State;
+	m_State = State;
+
+	m_StateStartTime = time_get();
+	GameClient()->OnStateChange(m_State, OldState);
+
+	if(State == IClient::STATE_OFFLINE && m_ReconnectTime == 0)
 	{
-		m_StateStartTime = time_get();
-		GameClient()->OnStateChange(m_State, Old);
+		if(g_Config.m_ClReconnectFull > 0 && (str_find_nocase(ErrorString(), "full") || str_find_nocase(ErrorString(), "reserved")))
+			m_ReconnectTime = time_get() + time_freq() * g_Config.m_ClReconnectFull;
+		else if(g_Config.m_ClReconnectTimeout > 0 && (str_find_nocase(ErrorString(), "Timeout") || str_find_nocase(ErrorString(), "Too weak connection")))
+			m_ReconnectTime = time_get() + time_freq() * g_Config.m_ClReconnectTimeout;
+	}
 
-		if(s == IClient::STATE_OFFLINE && m_ReconnectTime == 0)
-		{
-			if(g_Config.m_ClReconnectFull > 0 && (str_find_nocase(ErrorString(), "full") || str_find_nocase(ErrorString(), "reserved")))
-				m_ReconnectTime = time_get() + time_freq() * g_Config.m_ClReconnectFull;
-			else if(g_Config.m_ClReconnectTimeout > 0 && (str_find_nocase(ErrorString(), "Timeout") || str_find_nocase(ErrorString(), "Too weak connection")))
-				m_ReconnectTime = time_get() + time_freq() * g_Config.m_ClReconnectTimeout;
-		}
-
-		if(s == IClient::STATE_ONLINE)
-		{
-			const bool AnnounceAddr = m_ServerBrowser.IsRegistered(ServerAddress());
-			Discord()->SetGameInfo(ServerAddress(), m_aCurrentMap, AnnounceAddr);
-			Steam()->SetGameInfo(ServerAddress(), m_aCurrentMap, AnnounceAddr);
-		}
-		else if(Old == IClient::STATE_ONLINE)
-		{
-			Discord()->ClearGameInfo();
-			Steam()->ClearGameInfo();
-		}
+	if(State == IClient::STATE_ONLINE)
+	{
+		const bool AnnounceAddr = m_ServerBrowser.IsRegistered(ServerAddress());
+		Discord()->SetGameInfo(ServerAddress(), m_aCurrentMap, AnnounceAddr);
+		Steam()->SetGameInfo(ServerAddress(), m_aCurrentMap, AnnounceAddr);
+	}
+	else if(OldState == IClient::STATE_ONLINE)
+	{
+		Discord()->ClearGameInfo();
+		Steam()->ClearGameInfo();
 	}
 }
 
@@ -543,6 +542,7 @@ void CClient::DisconnectWithReason(const char *pReason)
 	mem_zero(m_aRconPassword, sizeof(m_aRconPassword));
 	m_ServerSentCapabilities = false;
 	m_UseTempRconCommands = 0;
+	m_ReceivingRconCommands = false;
 	m_pConsole->DeregisterTempAll();
 	m_aNetClient[CONN_MAIN].Disconnect(pReason);
 	SetState(IClient::STATE_OFFLINE);
@@ -1508,7 +1508,8 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 		else if(Msg == NETMSG_PING)
 		{
 			CMsgPacker MsgP(NETMSG_PING_REPLY, true);
-			SendMsg(Conn, &MsgP, MSGFLAG_FLUSH);
+			int Vital = (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 ? MSGFLAG_VITAL : 0;
+			SendMsg(Conn, &MsgP, MSGFLAG_FLUSH | Vital);
 		}
 		else if(Msg == NETMSG_PINGEX)
 		{
@@ -1519,7 +1520,8 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 			}
 			CMsgPacker MsgP(NETMSG_PONGEX, true);
 			MsgP.AddRaw(pID, sizeof(*pID));
-			SendMsg(Conn, &MsgP, MSGFLAG_FLUSH);
+			int Vital = (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 ? MSGFLAG_VITAL : 0;
+			SendMsg(Conn, &MsgP, MSGFLAG_FLUSH | Vital);
 		}
 		else if(Conn == CONN_MAIN && Msg == NETMSG_PONGEX)
 		{
@@ -1605,6 +1607,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 				if(Old != 0 && m_UseTempRconCommands == 0)
 				{
 					m_pConsole->DeregisterTempAll();
+					m_ReceivingRconCommands = false;
 				}
 			}
 		}
@@ -1939,6 +1942,14 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 			{
 				GameClient()->OnRconType(UsernameReq);
 			}
+		}
+		else if(Conn == CONN_MAIN && (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_RCON_CMD_GROUP_START)
+		{
+			m_ReceivingRconCommands = true;
+		}
+		else if(Conn == CONN_MAIN && (pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0 && Msg == NETMSG_RCON_CMD_GROUP_END)
+		{
+			m_ReceivingRconCommands = false;
 		}
 	}
 	else if((pPacket->m_Flags & NET_CHUNKFLAG_VITAL) != 0)
@@ -2597,14 +2608,23 @@ void CClient::Update()
 		if(!m_EditJobs.empty())
 		{
 			std::shared_ptr<CDemoEdit> pJob = m_EditJobs.front();
-			if(pJob->Status() == IJob::STATE_DONE)
+			if(pJob->State() == IJob::STATE_DONE)
 			{
 				char aBuf[IO_MAX_PATH_LENGTH + 64];
-				str_format(aBuf, sizeof(aBuf), "Successfully saved the replay to %s!", pJob->Destination());
-				m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", aBuf);
+				if(pJob->Success())
+				{
+					str_format(aBuf, sizeof(aBuf), "Successfully saved the replay to '%s'!", pJob->Destination());
+					m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", aBuf);
 
-				GameClient()->Echo(Localize("Successfully saved the replay!"));
+					GameClient()->Echo(Localize("Successfully saved the replay!"));
+				}
+				else
+				{
+					str_format(aBuf, sizeof(aBuf), "Failed saving the replay to '%s'...", pJob->Destination());
+					m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", aBuf);
 
+					GameClient()->Echo(Localize("Failed saving the replay!"));
+				}
 				m_EditJobs.pop_front();
 			}
 		}
@@ -3040,6 +3060,9 @@ void CClient::Run()
 		m_GlobalTime = (time_get() - m_GlobalStartTime) / (float)time_freq();
 	}
 
+	GameClient()->RenderShutdownMessage();
+	Disconnect();
+
 	if(!m_pConfigManager->Save())
 	{
 		char aError[128];
@@ -3048,15 +3071,16 @@ void CClient::Run()
 	}
 
 	m_Fifo.Shutdown();
+	m_Http.Shutdown();
+	Engine()->ShutdownJobs();
 
+	GameClient()->RenderShutdownMessage();
 	GameClient()->OnShutdown();
-	Disconnect();
+	delete m_pEditor;
 
-	// close socket
+	// close sockets
 	for(unsigned int i = 0; i < std::size(m_aNetClient); i++)
 		m_aNetClient[i].Close();
-
-	delete m_pEditor;
 
 	// shutdown text render while graphics are still available
 	m_pTextRender->Shutdown();
@@ -3466,9 +3490,6 @@ void CClient::SaveReplay(const int Length, const char *pFilename)
 	}
 	else
 	{
-		// First we stop the recorder to slice correctly the demo after
-		DemoRecorder(RECORDER_REPLAYS)->Stop(IDemoRecorder::EStopMode::KEEP_FILE);
-
 		char aFilename[IO_MAX_PATH_LENGTH];
 		if(pFilename[0] == '\0')
 		{
@@ -3479,7 +3500,18 @@ void CClient::SaveReplay(const int Length, const char *pFilename)
 		else
 		{
 			str_format(aFilename, sizeof(aFilename), "demos/replays/%s.demo", pFilename);
+			IOHANDLE Handle = m_pStorage->OpenFile(aFilename, IOFLAG_WRITE, IStorage::TYPE_SAVE);
+			if(!Handle)
+			{
+				m_pConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "replay", "ERROR: invalid filename. Try a different one!");
+				return;
+			}
+			io_close(Handle);
+			m_pStorage->RemoveFile(aFilename, IStorage::TYPE_SAVE);
 		}
+
+		// Stop the recorder to correctly slice the demo after
+		DemoRecorder(RECORDER_REPLAYS)->Stop(IDemoRecorder::EStopMode::KEEP_FILE);
 
 		// Slice the demo to get only the last cl_replay_length seconds
 		const char *pSrc = m_aDemoRecorder[RECORDER_REPLAYS].CurrentFilename();
@@ -3878,19 +3910,27 @@ int CClient::HandleChecksum(int Conn, CUuid Uuid, CUnpacker *pUnpacker)
 
 void CClient::SwitchWindowScreen(int Index)
 {
-	// Todo SDL: remove this when fixed (changing screen when in fullscreen is bugged)
-	if(g_Config.m_GfxFullscreen)
-	{
-		SetWindowParams(0, g_Config.m_GfxBorderless);
-		if(Graphics()->SetWindowScreen(Index))
-			g_Config.m_GfxScreen = Index;
-		SetWindowParams(g_Config.m_GfxFullscreen, g_Config.m_GfxBorderless);
-	}
-	else
-	{
-		if(Graphics()->SetWindowScreen(Index))
-			g_Config.m_GfxScreen = Index;
-	}
+	//Tested on windows 11 64 bit (gtx 1660 super, intel UHD 630 opengl 1.2.0, 3.3.0 and vulkan 1.1.0)
+	int IsFullscreen = g_Config.m_GfxFullscreen;
+	int IsBorderless = g_Config.m_GfxBorderless;
+
+	if(Graphics()->SetWindowScreen(Index))
+		g_Config.m_GfxScreen = Index;
+
+	SetWindowParams(3, false); // prevent DDNet to get stretch on monitors
+
+	CVideoMode CurMode;
+	Graphics()->GetCurrentVideoMode(CurMode, Index);
+
+	const int Depth = CurMode.m_Red + CurMode.m_Green + CurMode.m_Blue > 16 ? 24 : 16;
+	g_Config.m_GfxColorDepth = Depth;
+	g_Config.m_GfxScreenWidth = CurMode.m_WindowWidth;
+	g_Config.m_GfxScreenHeight = CurMode.m_WindowHeight;
+	g_Config.m_GfxScreenRefreshRate = CurMode.m_RefreshRate;
+
+	Graphics()->Resize(g_Config.m_GfxScreenWidth, g_Config.m_GfxScreenHeight, g_Config.m_GfxScreenRefreshRate);
+
+	SetWindowParams(IsFullscreen, IsBorderless);
 }
 
 void CClient::ConchainWindowScreen(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
@@ -4030,16 +4070,6 @@ void CClient::ConchainStdoutOutputLevel(IConsole::IResult *pResult, void *pUserD
 void CClient::RegisterCommands()
 {
 	m_pConsole = Kernel()->RequestInterface<IConsole>();
-	// register server dummy commands for tab completion
-	m_pConsole->Register("kick", "i[id] ?r[reason]", CFGFLAG_SERVER, 0, 0, "Kick player with specified id for any reason");
-	m_pConsole->Register("ban", "s[ip|id] ?i[minutes] r[reason]", CFGFLAG_SERVER, 0, 0, "Ban player with ip/id for x minutes for any reason");
-	m_pConsole->Register("unban", "r[ip]", CFGFLAG_SERVER, 0, 0, "Unban ip");
-	m_pConsole->Register("bans", "?i[page]", CFGFLAG_SERVER, 0, 0, "Show banlist (page 0 by default, 20 entries per page)");
-	m_pConsole->Register("status", "?r[name]", CFGFLAG_SERVER, 0, 0, "List players containing name or all players");
-	m_pConsole->Register("shutdown", "", CFGFLAG_SERVER, 0, 0, "Shut down");
-	m_pConsole->Register("record", "r[file]", CFGFLAG_SERVER, 0, 0, "Record to a file");
-	m_pConsole->Register("stoprecord", "", CFGFLAG_SERVER, 0, 0, "Stop recording");
-	m_pConsole->Register("reload", "", CFGFLAG_SERVER, 0, 0, "Reload the map");
 
 	m_pConsole->Register("dummy_connect", "", CFGFLAG_CLIENT, Con_DummyConnect, this, "Connect dummy");
 	m_pConsole->Register("dummy_disconnect", "", CFGFLAG_CLIENT, Con_DummyDisconnect, this, "Disconnect dummy");

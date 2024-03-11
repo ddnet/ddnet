@@ -25,7 +25,6 @@
 #endif
 
 #if defined(CONF_FAMILY_WINDOWS)
-#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 // windows.h must be included before imm.h, but clang-format requires includes to be sorted alphabetically, hence this comment.
 #include <imm.h>

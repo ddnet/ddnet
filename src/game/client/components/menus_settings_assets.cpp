@@ -613,7 +613,7 @@ void CMenus::RenderSettingsCustom(CUIRect MainView)
 		TextRender()->SetFontPreset(EFontPreset::DEFAULT_FONT);
 		QuickSearch.VSplitLeft(wSearch, 0, &QuickSearch);
 		QuickSearch.VSplitLeft(5.0f, 0, &QuickSearch);
-		QuickSearch.VSplitLeft(QuickSearch.w - 15.0f, &QuickSearch, &QuickSearchClearButton);
+		QuickSearch.VSplitLeft(QuickSearch.w - 10.0f, &QuickSearch, &QuickSearchClearButton);
 		if(Input()->KeyPress(KEY_F) && Input()->ModifierIsPressed())
 		{
 			UI()->SetActiveItem(&s_aFilterInputs[s_CurCustomTab]);

@@ -146,13 +146,14 @@ void CLayerTiles::Render(bool Tileset)
 		Texture = m_pEditor->GetTuneTexture();
 	Graphics()->TextureSet(Texture);
 
-	ColorRGBA Color = ColorRGBA(m_Color.r / 255.0f, m_Color.g / 255.0f, m_Color.b / 255.0f, m_Color.a / 255.0f);
+	ColorRGBA ColorEnv = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
+	CEditor::EnvelopeEval(m_ColorEnvOffset, m_ColorEnv, ColorEnv, 4, m_pEditor);
+	const ColorRGBA Color = ColorRGBA(m_Color.r / 255.0f, m_Color.g / 255.0f, m_Color.b / 255.0f, m_Color.a / 255.0f).Multiply(ColorEnv);
+
 	Graphics()->BlendNone();
-	m_pEditor->RenderTools()->RenderTilemap(m_pTiles, m_Width, m_Height, 32.0f, Color, LAYERRENDERFLAG_OPAQUE,
-		CEditor::EnvelopeEval, m_pEditor, m_ColorEnv, m_ColorEnvOffset);
+	m_pEditor->RenderTools()->RenderTilemap(m_pTiles, m_Width, m_Height, 32.0f, Color, LAYERRENDERFLAG_OPAQUE);
 	Graphics()->BlendNormal();
-	m_pEditor->RenderTools()->RenderTilemap(m_pTiles, m_Width, m_Height, 32.0f, Color, LAYERRENDERFLAG_TRANSPARENT,
-		CEditor::EnvelopeEval, m_pEditor, m_ColorEnv, m_ColorEnvOffset);
+	m_pEditor->RenderTools()->RenderTilemap(m_pTiles, m_Width, m_Height, 32.0f, Color, LAYERRENDERFLAG_TRANSPARENT);
 
 	// Render DDRace Layers
 	if(!Tileset)
@@ -251,12 +252,12 @@ bool CLayerTiles::IsEmpty(const std::shared_ptr<CLayerTiles> &pLayer)
 void CLayerTiles::BrushSelecting(CUIRect Rect)
 {
 	Graphics()->TextureClear();
-	m_pEditor->Graphics()->QuadsBegin();
-	m_pEditor->Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
+	Graphics()->QuadsBegin();
+	Graphics()->SetColor(1.0f, 1.0f, 1.0f, 0.4f);
 	Snap(&Rect);
 	IGraphics::CQuadItem QuadItem(Rect.x, Rect.y, Rect.w, Rect.h);
-	m_pEditor->Graphics()->QuadsDrawTL(&QuadItem, 1);
-	m_pEditor->Graphics()->QuadsEnd();
+	Graphics()->QuadsDrawTL(&QuadItem, 1);
+	Graphics()->QuadsEnd();
 	char aBuf[16];
 	str_format(aBuf, sizeof(aBuf), "%d⨯%d", ConvertX(Rect.w), ConvertY(Rect.h));
 	TextRender()->Text(Rect.x + 3.0f, Rect.y + 3.0f, m_pEditor->m_ShowPicker ? 15.0f : m_pEditor->MapView()->ScaleLength(15.0f), aBuf, -1.0f);
@@ -976,6 +977,7 @@ CUI::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 
 	static CLayerTilesPropTracker s_Tracker(m_pEditor);
 	s_Tracker.Begin(this, Prop, State);
+	m_pEditor->m_EditorHistory.BeginBulk();
 
 	if(Prop == ETilesProp::PROP_WIDTH && NewVal > 1)
 	{
@@ -1064,12 +1066,25 @@ CUI::EPopupMenuFunctionResult CLayerTiles::RenderProperties(CUIRect *pToolBox)
 			m_AutoMapperConfig = -1;
 	}
 
-	if(Prop != ETilesProp::PROP_NONE && Prop != ETilesProp::PROP_SHIFT_BY)
+	s_Tracker.End(Prop, State);
+
+	// Check if modified property could have an effect on automapper
+	if(HasAutomapEffect(Prop))
 	{
 		FlagModified(0, 0, m_Width, m_Height);
+
+		// Record undo if automapper was ran
+		if(m_AutoAutoMap && !m_TilesHistory.empty())
+		{
+			m_pEditor->m_EditorHistory.RecordAction(std::make_shared<CEditorActionTileChanges>(m_pEditor, m_pEditor->m_SelectedGroup, m_pEditor->m_vSelectedLayers[0], "Auto map", m_TilesHistory));
+			ClearHistory();
+		}
 	}
 
-	s_Tracker.End(Prop, State);
+	// End undo bulk, taking the first action display as the displayed text in the history
+	// This is usually the resulting text of the edit layer tiles prop action
+	// Since we may also squeeze a tile changes action, we want both to appear as one, thus using a bulk
+	m_pEditor->m_EditorHistory.EndBulk(0);
 
 	return CUI::POPUP_KEEP_OPEN;
 }
@@ -1274,4 +1289,21 @@ void CLayerTiles::ShowPreventUnusedTilesWarning()
 		m_pEditor->m_PopupEventActivated = true;
 		m_pEditor->m_PreventUnusedTilesWasWarned = true;
 	}
+}
+
+bool CLayerTiles::HasAutomapEffect(ETilesProp Prop)
+{
+	switch(Prop)
+	{
+	case ETilesProp::PROP_WIDTH:
+	case ETilesProp::PROP_HEIGHT:
+	case ETilesProp::PROP_SHIFT:
+	case ETilesProp::PROP_IMAGE:
+	case ETilesProp::PROP_AUTOMAPPER:
+	case ETilesProp::PROP_SEED:
+		return true;
+	default:
+		return false;
+	}
+	return false;
 }

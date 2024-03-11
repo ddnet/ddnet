@@ -502,7 +502,7 @@ public:
 
 	void RefreshSkins();
 
-	void RenderShutdownMessage();
+	void RenderShutdownMessage() override;
 
 	const char *GetItemName(int Type) const override;
 	const char *Version() const override;
@@ -516,6 +516,8 @@ public:
 	void SendInfo(bool Start);
 	void SendDummyInfo(bool Start) override;
 	void SendKill(int ClientID) const;
+
+	int m_NextChangeInfo;
 
 	// DDRace
 

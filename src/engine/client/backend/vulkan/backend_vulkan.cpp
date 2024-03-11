@@ -30,6 +30,7 @@
 #include <string>
 #include <thread>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include <SDL_video.h>
@@ -160,6 +161,20 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 			size_t m_OffsetToAlign;
 			SMemoryHeapElement *m_pElementInHeap;
 			[[nodiscard]] bool operator>(const SMemoryHeapQueueElement &Other) const { return m_AllocationSize > Other.m_AllocationSize; }
+			struct SMemoryHeapQueueElementFind
+			{
+				// respects alignment requirements
+				constexpr bool operator()(const SMemoryHeapQueueElement &Val, const std::pair<size_t, size_t> &Other) const
+				{
+					auto AllocSize = Other.first;
+					auto AllocAlignment = Other.second;
+					size_t ExtraSizeAlign = Val.m_OffsetInHeap % AllocAlignment;
+					if(ExtraSizeAlign != 0)
+						ExtraSizeAlign = AllocAlignment - ExtraSizeAlign;
+					size_t RealAllocSize = AllocSize + ExtraSizeAlign;
+					return Val.m_AllocationSize < RealAllocSize;
+				}
+			};
 		};
 
 		typedef std::multiset<SMemoryHeapQueueElement, std::greater<>> TMemoryHeapQueue;
@@ -202,23 +217,31 @@ class CCommandProcessorFragment_Vulkan : public CCommandProcessorFragment_GLBase
 			}
 			else
 			{
-				// calculate the alignment
-				size_t ExtraSizeAlign = m_Elements.begin()->m_OffsetInHeap % AllocAlignment;
-				if(ExtraSizeAlign != 0)
-					ExtraSizeAlign = AllocAlignment - ExtraSizeAlign;
-				size_t RealAllocSize = AllocSize + ExtraSizeAlign;
-
 				// check if there is enough space in this instance
-				if(m_Elements.begin()->m_AllocationSize < RealAllocSize)
+				if(bool(SMemoryHeapQueueElement::SMemoryHeapQueueElementFind{}(*m_Elements.begin(), std::make_pair(AllocSize, AllocAlignment))))
 				{
 					return false;
 				}
 				else
 				{
-					auto TopEl = *m_Elements.begin();
+					// see SMemoryHeapQueueElement::operator>
+					SMemoryHeapQueueElement FindAllocSize;
+					FindAllocSize.m_AllocationSize = AllocSize;
+					// find upper bound for a allocation size
+					auto Upper = m_Elements.upper_bound(FindAllocSize);
+					// then find the first entry that respects alignment, this is a linear search!
+					auto FoundEl = std::lower_bound(std::make_reverse_iterator(Upper), m_Elements.rend(), std::make_pair(AllocSize, AllocAlignment), SMemoryHeapQueueElement::SMemoryHeapQueueElementFind{});
+
+					auto TopEl = *FoundEl;
 					m_Elements.erase(TopEl.m_pElementInHeap->m_InQueue);
 
 					TopEl.m_pElementInHeap->m_InUse = true;
+
+					// calculate the real alloc size + alignment offset
+					size_t ExtraSizeAlign = TopEl.m_OffsetInHeap % AllocAlignment;
+					if(ExtraSizeAlign != 0)
+						ExtraSizeAlign = AllocAlignment - ExtraSizeAlign;
+					size_t RealAllocSize = AllocSize + ExtraSizeAlign;
 
 					// the heap element gets children
 					TopEl.m_pElementInHeap->m_pLeft = std::make_unique<SMemoryHeapElement>();
@@ -1431,7 +1454,7 @@ protected:
 				ImageBlitRegion.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 				ImageBlitRegion.srcSubresource.layerCount = 1;
 				ImageBlitRegion.srcOffsets[0] = SrcOffset;
-				ImageBlitRegion.srcOffsets[1] = BlitSize;
+				ImageBlitRegion.srcOffsets[1] = {SrcOffset.x + BlitSize.x, SrcOffset.y + BlitSize.y, SrcOffset.z + BlitSize.z};
 				ImageBlitRegion.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
 				ImageBlitRegion.dstSubresource.layerCount = 1;
 				ImageBlitRegion.dstOffsets[1] = BlitSize;

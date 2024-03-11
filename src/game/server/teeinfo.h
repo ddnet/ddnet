@@ -6,7 +6,7 @@ class CTeeInfo
 public:
 	constexpr static const float ms_DarkestLGT7 = 61 / 255.0f;
 
-	char m_aSkinName[64] = {'\0'};
+	char m_aSkinName[24] = {'\0'};
 	int m_UseCustomColor = 0;
 	int m_ColorBody = 0;
 	int m_ColorFeet = 0;

@@ -27,6 +27,9 @@
 #include <engine/http.h>
 #include <engine/storage.h>
 
+static constexpr const char *COMMUNITY_COUNTRY_NONE = "none";
+static constexpr const char *COMMUNITY_TYPE_NONE = "None";
+
 class CSortWrap
 {
 	typedef bool (CServerBrowser::*SortFunc)(int, int) const;
@@ -385,6 +388,17 @@ bool CServerBrowser::SortCompareNumClients(int Index1, int Index2) const
 	return pIndex1->m_Info.m_NumClients > pIndex2->m_Info.m_NumClients;
 }
 
+bool CServerBrowser::SortCompareNumFriends(int Index1, int Index2) const
+{
+	CServerEntry *pIndex1 = m_ppServerlist[Index1];
+	CServerEntry *pIndex2 = m_ppServerlist[Index2];
+
+	if(pIndex1->m_Info.m_FriendNum == pIndex2->m_Info.m_FriendNum)
+		return pIndex1->m_Info.m_NumFilteredPlayers > pIndex2->m_Info.m_NumFilteredPlayers;
+	else
+		return pIndex1->m_Info.m_FriendNum > pIndex2->m_Info.m_FriendNum;
+}
+
 bool CServerBrowser::SortCompareNumPlayersAndPing(int Index1, int Index2) const
 {
 	CServerEntry *pIndex1 = m_ppServerlist[Index1];
@@ -606,6 +620,8 @@ void CServerBrowser::Sort()
 		std::stable_sort(m_pSortedServerlist, m_pSortedServerlist + m_NumSortedServers, CSortWrap(this, &CServerBrowser::SortComparePing));
 	else if(g_Config.m_BrSort == IServerBrowser::SORT_MAP)
 		std::stable_sort(m_pSortedServerlist, m_pSortedServerlist + m_NumSortedServers, CSortWrap(this, &CServerBrowser::SortCompareMap));
+	else if(g_Config.m_BrSort == IServerBrowser::SORT_NUMFRIENDS)
+		std::stable_sort(m_pSortedServerlist, m_pSortedServerlist + m_NumSortedServers, CSortWrap(this, &CServerBrowser::SortCompareNumFriends));
 	else if(g_Config.m_BrSort == IServerBrowser::SORT_NUMPLAYERS)
 		std::stable_sort(m_pSortedServerlist, m_pSortedServerlist + m_NumSortedServers, CSortWrap(this, &CServerBrowser::SortCompareNumPlayers));
 	else if(g_Config.m_BrSort == IServerBrowser::SORT_GAMETYPE)
@@ -1435,6 +1451,7 @@ void CServerBrowser::LoadDDNetServers()
 		const json_value &IconSha256 = Icon["sha256"];
 		const json_value &IconUrl = Icon["url"];
 		const json_value &Name = Community["name"];
+		const json_value HasFinishes = Community["has_finishes"];
 		const json_value *pFinishes = &Icon["finishes"];
 		const json_value *pServers = &Icon["servers"];
 		if(pFinishes->type == json_none)
@@ -1461,6 +1478,7 @@ void CServerBrowser::LoadDDNetServers()
 			IconSha256.type != json_string ||
 			IconUrl.type != json_string ||
 			Name.type != json_string ||
+			HasFinishes.type != json_boolean ||
 			(pFinishes->type != json_array && pFinishes->type != json_none) ||
 			pServers->type != json_array)
 		{
@@ -1479,8 +1497,8 @@ void CServerBrowser::LoadDDNetServers()
 			log_error("serverbrowser", "invalid community servers (CommunityId=%s)", NewCommunity.Id());
 			continue;
 		}
-		NewCommunity.m_HasFinishes = pFinishes->type == json_array;
-		if(NewCommunity.m_HasFinishes && !ParseCommunityFinishes(&NewCommunity, *pFinishes))
+		NewCommunity.m_HasFinishes = HasFinishes;
+		if(NewCommunity.m_HasFinishes && pFinishes->type == json_array && !ParseCommunityFinishes(&NewCommunity, *pFinishes))
 		{
 			log_error("serverbrowser", "invalid community finishes (CommunityId=%s)", NewCommunity.Id());
 			continue;
@@ -1497,7 +1515,12 @@ void CServerBrowser::LoadDDNetServers()
 	}
 
 	// Add default none community
-	m_vCommunities.emplace_back(COMMUNITY_NONE, "None", SHA256_ZEROED, "");
+	{
+		CCommunity NoneCommunity(COMMUNITY_NONE, "None", SHA256_ZEROED, "");
+		NoneCommunity.m_vCountries.emplace_back(COMMUNITY_COUNTRY_NONE, -1);
+		NoneCommunity.m_vTypes.emplace_back(COMMUNITY_TYPE_NONE);
+		m_vCommunities.push_back(std::move(NoneCommunity));
+	}
 
 	// Remove unknown elements from exclude lists
 	CleanFilters();
@@ -1543,8 +1566,8 @@ void CServerBrowser::UpdateServerCommunity(CServerInfo *pInfo) const
 		}
 	}
 	str_copy(pInfo->m_aCommunityId, COMMUNITY_NONE);
-	str_copy(pInfo->m_aCommunityCountry, "");
-	str_copy(pInfo->m_aCommunityType, "");
+	str_copy(pInfo->m_aCommunityCountry, COMMUNITY_COUNTRY_NONE);
+	str_copy(pInfo->m_aCommunityType, COMMUNITY_TYPE_NONE);
 }
 
 void CServerBrowser::UpdateServerRank(CServerInfo *pInfo) const
@@ -1876,11 +1899,6 @@ void CExcludedCommunityCountryFilterList::Clear()
 
 bool CExcludedCommunityCountryFilterList::Filtered(const char *pCountryName) const
 {
-	// If the needle is not defined, we exclude it if there is any other
-	// exclusion, i.e. we only show those elements when the filter is empty.
-	if(pCountryName[0] == '\0')
-		return !Empty();
-
 	const auto Communities = m_CurrentCommunitiesGetter();
 	return std::none_of(Communities.begin(), Communities.end(), [&](const CCommunity *pCommunity) {
 		if(!pCommunity->HasCountry(pCountryName))
@@ -2020,11 +2038,6 @@ void CExcludedCommunityTypeFilterList::Clear()
 
 bool CExcludedCommunityTypeFilterList::Filtered(const char *pTypeName) const
 {
-	// If the needle is not defined, we exclude it if there is any other
-	// exclusion, i.e. we only show those elements when the filter is empty.
-	if(pTypeName[0] == '\0')
-		return !Empty();
-
 	const auto Communities = m_CurrentCommunitiesGetter();
 	return std::none_of(Communities.begin(), Communities.end(), [&](const CCommunity *pCommunity) {
 		if(!pCommunity->HasType(pTypeName))

@@ -36,6 +36,7 @@
 #include "editor_server_settings.h"
 #include "editor_trackers.h"
 #include "editor_ui.h"
+#include "layer_selector.h"
 #include "map_view.h"
 #include "smooth_value.h"
 
@@ -277,6 +278,7 @@ class CEditor : public IEditor
 
 	std::vector<std::reference_wrapper<CEditorComponent>> m_vComponents;
 	CMapView m_MapView;
+	CLayerSelector m_LayerSelector;
 
 	bool m_EditorWasUsedBefore = false;
 
@@ -288,7 +290,7 @@ class CEditor : public IEditor
 	IGraphics::CTextureHandle m_SwitchTexture;
 	IGraphics::CTextureHandle m_TuneTexture;
 
-	int GetTextureUsageFlag();
+	int GetTextureUsageFlag() const;
 
 	enum EPreviewState
 	{
@@ -301,21 +303,22 @@ class CEditor : public IEditor
 	static const ColorRGBA ms_DefaultPropColor;
 
 public:
-	class IInput *Input() { return m_pInput; }
-	class IClient *Client() { return m_pClient; }
-	class IConfigManager *ConfigManager() { return m_pConfigManager; }
-	class CConfig *Config() { return m_pConfig; }
-	class IConsole *Console() { return m_pConsole; }
-	class IEngine *Engine() { return m_pEngine; }
-	class IGraphics *Graphics() { return m_pGraphics; }
-	class ISound *Sound() { return m_pSound; }
-	class ITextRender *TextRender() { return m_pTextRender; }
-	class IStorage *Storage() { return m_pStorage; }
+	class IInput *Input() const { return m_pInput; }
+	class IClient *Client() const { return m_pClient; }
+	class IConfigManager *ConfigManager() const { return m_pConfigManager; }
+	class CConfig *Config() const { return m_pConfig; }
+	class IConsole *Console() const { return m_pConsole; }
+	class IEngine *Engine() const { return m_pEngine; }
+	class IGraphics *Graphics() const { return m_pGraphics; }
+	class ISound *Sound() const { return m_pSound; }
+	class ITextRender *TextRender() const { return m_pTextRender; }
+	class IStorage *Storage() const { return m_pStorage; }
 	CUI *UI() { return &m_UI; }
 	CRenderTools *RenderTools() { return &m_RenderTools; }
 
 	CMapView *MapView() { return &m_MapView; }
 	const CMapView *MapView() const { return &m_MapView; }
+	CLayerSelector *LayerSelector() { return &m_LayerSelector; }
 
 	CEditor() :
 		m_ZoomEnvelopeX(1.0f, 0.1f, 600.0f),
@@ -426,6 +429,27 @@ public:
 		m_BrushDrawDestructive = true;
 	}
 
+	class CHoverTile
+	{
+	public:
+		CHoverTile(int Group, int Layer, int x, int y, const CTile Tile) :
+			m_Group(Group),
+			m_Layer(Layer),
+			m_X(x),
+			m_Y(y),
+			m_Tile(Tile)
+		{
+		}
+
+		int m_Group;
+		int m_Layer;
+		int m_X;
+		int m_Y;
+		const CTile m_Tile;
+	};
+	std::vector<CHoverTile> m_vHoverTiles;
+	const std::vector<CHoverTile> &HoverTiles() const { return m_vHoverTiles; }
+
 	void Init() override;
 	void OnUpdate() override;
 	void OnRender() override;
@@ -440,6 +464,7 @@ public:
 	void ResetIngameMoved() override { m_IngameMoved = false; }
 
 	void HandleCursorMovement();
+	void OnMouseMove(float MouseX, float MouseY);
 	void DispatchInputEvents();
 	void HandleAutosave();
 	bool PerformAutosave();
@@ -694,6 +719,7 @@ public:
 	float m_MouseDeltaWy;
 	const void *m_pContainerPanned;
 	const void *m_pContainerPannedLast;
+	char m_MapEditorId; // UI element ID for the main map editor
 
 	enum EShowTile
 	{
@@ -783,7 +809,7 @@ public:
 
 	int m_ShiftBy;
 
-	static void EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Channels, void *pUser);
+	static void EnvelopeEval(int TimeOffsetMillis, int Env, ColorRGBA &Result, size_t Channels, void *pUser);
 
 	CLineInputBuffered<256> m_SettingsCommandInput;
 	CMapSettingsBackend m_MapSettingsBackend;
@@ -801,14 +827,8 @@ public:
 	int DoButton_Editor(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip);
 	int DoButton_Env(const void *pID, const char *pText, int Checked, const CUIRect *pRect, const char *pToolTip, ColorRGBA Color, int Corners);
 
-	int DoButton_Ex(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip, int Corners, float FontSize = 10.0f);
+	int DoButton_Ex(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip, int Corners, float FontSize = EditorFontSizes::MENU, int Align = TEXTALIGN_MC);
 	int DoButton_FontIcon(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip, int Corners, float FontSize = 10.0f);
-	int DoButton_ButtonDec(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip);
-	int DoButton_ButtonInc(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip);
-
-	int DoButton_File(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip);
-
-	int DoButton_Menu(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags, const char *pToolTip);
 	int DoButton_MenuItem(const void *pID, const char *pText, int Checked, const CUIRect *pRect, int Flags = 0, const char *pToolTip = nullptr);
 
 	int DoButton_DraggableEx(const void *pID, const char *pText, int Checked, const CUIRect *pRect, bool *pClicked, bool *pAbrupted, int Flags, const char *pToolTip = nullptr, int Corners = IGraphics::CORNER_ALL, float FontSize = 10.0f);
@@ -823,7 +843,7 @@ public:
 	template<typename T>
 	int RenderEditBoxDropdown(SEditBoxDropdownContext *pDropdown, CUIRect View, CLineInput *pLineInput, int x, float MaxHeight, bool AutoWidth, const std::vector<T> &vData, const FDropdownRenderCallback<T> &fnMatchCallback);
 
-	void RenderBackground(CUIRect View, IGraphics::CTextureHandle Texture, float Size, float Brightness);
+	void RenderBackground(CUIRect View, IGraphics::CTextureHandle Texture, float Size, float Brightness) const;
 
 	SEditResult<int> UiDoValueSelector(void *pID, CUIRect *pRect, const char *pLabel, int Current, int Min, int Max, int Step, float Scale, const char *pToolTip, bool IsDegree = false, bool IsHex = false, int corners = IGraphics::CORNER_ALL, const ColorRGBA *pColor = nullptr, bool ShowValue = true);
 
@@ -919,9 +939,9 @@ public:
 	void DoQuad(int LayerIndex, const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, int Index);
 	void PreparePointDrag(const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, int QuadIndex, int PointIndex);
 	void DoPointDrag(const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, int QuadIndex, int PointIndex, int OffsetX, int OffsetY);
-	EAxis GetDragAxis(int OffsetX, int OffsetY);
-	void DrawAxis(EAxis Axis, CPoint &OriginalPoint, CPoint &Point);
-	void DrawAABB(const SAxisAlignedBoundingBox &AABB, int OffsetX = 0, int OffsetY = 0);
+	EAxis GetDragAxis(int OffsetX, int OffsetY) const;
+	void DrawAxis(EAxis Axis, CPoint &OriginalPoint, CPoint &Point) const;
+	void DrawAABB(const SAxisAlignedBoundingBox &AABB, int OffsetX = 0, int OffsetY = 0) const;
 	ColorRGBA GetButtonColor(const void *pID, int Checked);
 
 	// Alignment methods
@@ -945,10 +965,10 @@ public:
 	void ComputePointAlignments(const std::shared_ptr<CLayerQuads> &pLayer, CQuad *pQuad, int QuadIndex, int PointIndex, int OffsetX, int OffsetY, std::vector<SAlignmentInfo> &vAlignments, bool Append = false) const;
 	void ComputePointsAlignments(const std::shared_ptr<CLayerQuads> &pLayer, bool Pivot, int OffsetX, int OffsetY, std::vector<SAlignmentInfo> &vAlignments) const;
 	void ComputeAABBAlignments(const std::shared_ptr<CLayerQuads> &pLayer, const SAxisAlignedBoundingBox &AABB, int OffsetX, int OffsetY, std::vector<SAlignmentInfo> &vAlignments) const;
-	void DrawPointAlignments(const std::vector<SAlignmentInfo> &vAlignments, int OffsetX, int OffsetY);
+	void DrawPointAlignments(const std::vector<SAlignmentInfo> &vAlignments, int OffsetX, int OffsetY) const;
 	void QuadSelectionAABB(const std::shared_ptr<CLayerQuads> &pLayer, SAxisAlignedBoundingBox &OutAABB);
 	void ApplyAlignments(const std::vector<SAlignmentInfo> &vAlignments, int &OffsetX, int &OffsetY);
-	void ApplyAxisAlignment(int &OffsetX, int &OffsetY);
+	void ApplyAxisAlignment(int &OffsetX, int &OffsetY) const;
 
 	bool ReplaceImage(const char *pFilename, int StorageType, bool CheckDuplicate);
 	static bool ReplaceImageCallback(const char *pFilename, int StorageType, void *pUser);
@@ -994,7 +1014,6 @@ public:
 
 	void SelectGameLayer();
 	std::vector<int> SortImages();
-	bool SelectLayerByTile();
 
 	void DoAudioPreview(CUIRect View, const void *pPlayPauseButtonID, const void *pStopButtonID, const void *pSeekBarID, const int SampleID);
 
@@ -1114,6 +1133,7 @@ public:
 
 	unsigned char m_SwitchNum;
 	unsigned char m_SwitchDelay;
+	unsigned char m_ViewSwitch;
 
 	void AdjustBrushSpecialTiles(bool UseNextFree, int Adjust = 0);
 	int FindNextFreeSwitchNumber();

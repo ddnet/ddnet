@@ -32,6 +32,7 @@ public:
 
 	void BeginBulk();
 	void EndBulk(const char *pDisplay = nullptr);
+	void EndBulk(int DisplayToUse);
 
 	CEditor *m_pEditor;
 	std::deque<std::shared_ptr<IEditorAction>> m_vpUndoActions;

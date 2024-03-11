@@ -558,7 +558,13 @@ Error playing demo
 Successfully saved the replay!
 == 
 
+Failed saving the replay!
+== 
+
 Saving settings to '%s' failed
+== 
+
+Error saving settings
 == 
 
 Replay feature is disabled!
@@ -606,6 +612,9 @@ Quitting. Please wait…
 Restarting. Please wait…
 == 
 
+Loading skin files
+== 
+
 Searching
 == 
 
@@ -631,6 +640,9 @@ Locked
 == 
 
 Following
+== 
+
+Loading commands…
 == 
 
 Debug mode enabled. Press Ctrl+Shift+D to disable debug mode.
@@ -675,10 +687,19 @@ Reset
 Press a key…
 == 
 
+Main menu
+== 
+
 Browser
 == 
 
 Ghost
+== 
+
+Settings
+== 
+
+Editor
 == 
 
 Trying to determine UDP connectivity...
@@ -843,9 +864,6 @@ Are you sure that you want to disconnect and switch to a different server?
 Filter connecting players
 == 
 
-Communities
-== 
-
 Indicate map finish
 == 
 
@@ -856,6 +874,9 @@ Countries
 == 
 
 Types
+== 
+
+Communities
 == 
 
 Copy info
@@ -896,6 +917,12 @@ Are you sure that you want to remove the clan '%s' from your friends list?
 == 
 
 Add Clan
+== 
+
+Server filter
+== 
+
+Friends
 == 
 
 Play the current demo
@@ -1066,6 +1093,9 @@ Kill
 Pause
 == 
 
+Loading…
+== 
+
 Loading ghost files
 == 
 
@@ -1136,9 +1166,6 @@ Max CSVs
 == 
 
 Dummy
-== 
-
-Loading skin files
 == 
 
 Download skins
@@ -1377,9 +1404,6 @@ Info Messages
 Show health, shields and ammo
 == 
 
-Show kill messages
-== 
-
 Show score
 == 
 
@@ -1504,6 +1528,9 @@ Something hookable
 == 
 
 A Tee
+== 
+
+Show kill messages
 == 
 
 Show finish messages
@@ -1698,9 +1725,6 @@ Can't find a Tutorial server
 Website
 == 
 
-Settings
-== 
-
 Stop server
 == 
 
@@ -1708,9 +1732,6 @@ Run server
 == 
 
 Server executable not found, can't run server
-== 
-
-Editor
 == 
 
 [Start menu]
