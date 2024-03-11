@@ -27,9 +27,9 @@ void CGameControllerBaseFng::OnCharacterSpawn(class CCharacter *pChr)
 	CGameControllerInstagib::OnCharacterSpawn(pChr);
 }
 
-int CGameControllerBaseFng::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int WeaponID)
+int CGameControllerBaseFng::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int WeaponId)
 {
-	CGameControllerInstagib::OnCharacterDeath(pVictim, pKiller, WeaponID);
+	CGameControllerInstagib::OnCharacterDeath(pVictim, pKiller, WeaponId);
 	return 0;
 }
 

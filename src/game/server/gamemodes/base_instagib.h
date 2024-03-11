@@ -15,7 +15,7 @@ public:
 	class IConsole *Console() { return GameServer()->Console(); }
 	class IStorage *Storage() { return GameServer()->Storage(); }
 	void SendChatTarget(int To, const char *pText, int Flags = CGameContext::CHAT_SIX | CGameContext::CHAT_SIXUP) const;
-	void SendChat(int ClientID, int Team, const char *pText, int SpamProtectionClientID = -1, int Flags = CGameContext::CHAT_SIX | CGameContext::CHAT_SIXUP);
+	void SendChat(int ClientId, int Team, const char *pText, int SpamProtectionClientId = -1, int Flags = CGameContext::CHAT_SIX | CGameContext::CHAT_SIXUP);
 
 	void OnPlayerConstruct(class CPlayer *pPlayer);
 	void OnCharacterConstruct(class CCharacter *pChr);
@@ -45,14 +45,14 @@ public:
 	void SwapTeams();
 	void ModifyWeapons(IConsole::IResult *pResult, void *pUserData, int Weapon, bool Remove);
 
-	void BangCommandVote(int ClientID, const char *pCommand, const char *pDesc);
-	void ComCallShuffleVote(int ClientID);
-	void ComCallSwapTeamsVote(int ClientID);
-	void ComCallSwapTeamsRandomVote(int ClientID);
+	void BangCommandVote(int ClientId, const char *pCommand, const char *pDesc);
+	void ComCallShuffleVote(int ClientId);
+	void ComCallSwapTeamsVote(int ClientId);
+	void ComCallSwapTeamsRandomVote(int ClientId);
 
 	bool AllowPublicChat(const CPlayer *pPlayer);
-	bool ParseChatCmd(char Prefix, int ClientID, const char *pCmdWithArgs);
-	bool OnBangCommand(int ClientID, const char *pCmd, int NumArgs, const char **ppArgs);
+	bool ParseChatCmd(char Prefix, int ClientId, const char *pCmdWithArgs);
+	bool OnBangCommand(int ClientId, const char *pCmd, int NumArgs, const char **ppArgs);
 	void AddSpree(CPlayer *pPlayer);
 	void EndSpree(CPlayer *pPlayer, CPlayer *pKiller);
 	void CheckForceUnpauseGame();
@@ -63,7 +63,7 @@ public:
 		NUM_SPAWN_WEAPONS
 	};
 	ESpawnWeapons m_SpawnWeapons;
-	ESpawnWeapons GetSpawnWeapons(int ClientID) { return m_SpawnWeapons; }
+	ESpawnWeapons GetSpawnWeapons(int ClientId) { return m_SpawnWeapons; }
 	void SetSpawnWeapons(class CCharacter *pChr);
 
 	static void ConchainSpawnWeapons(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);

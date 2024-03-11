@@ -130,7 +130,7 @@ public:
 	void ChangeMap(const char *pToMap);
 
 	void CheckGameInfo();
-	bool IsFriendlyFire(int ClientID1, int ClientID2);
+	bool IsFriendlyFire(int ClientId1, int ClientId2);
 	bool IsTeamplay() const { return m_GameFlags & GAMEFLAG_TEAMS; }
 
 	bool IsForceBalanced();
@@ -152,8 +152,8 @@ public:
 
 	*/
 	virtual const char *GetTeamName(int Team);
-	virtual int GetAutoTeam(int NotThisID);
-	virtual bool CanJoinTeam(int Team, int NotThisID, char *pErrorReason, int ErrorReasonSize);
+	virtual int GetAutoTeam(int NotThisId);
+	virtual bool CanJoinTeam(int Team, int NotThisId, char *pErrorReason, int ErrorReasonSize);
 	int ClampTeam(int Team) const;
 
 	CClientMask GetMaskForPlayerWorldEvent(int Asker, int ExceptId = -1);
@@ -201,8 +201,8 @@ public:
 	*/
 	virtual bool OnChatMessage(const CNetMsg_Cl_Say *pMsg, int Length, int &Team, CPlayer *pPlayer) { return false; };
 	virtual void OnPlayerReadyChange(class CPlayer *pPlayer); // 0.7 ready change
-	void CheckReadyStates(int WithoutID = -1);
-	bool GetPlayersReadyState(int WithoutID = -1, int *pNumUnready = nullptr);
+	void CheckReadyStates(int WithoutId = -1);
+	bool GetPlayersReadyState(int WithoutId = -1, int *pNumUnready = nullptr);
 	void SetPlayersReadyState(bool ReadyState);
 	bool IsPlayerReadyMode();
 	int IsGameRunning() { return m_GameState == IGS_GAME_RUNNING; }
@@ -284,7 +284,7 @@ protected:
 		int m_ScoreLimit;
 		int m_TimeLimit;
 	} m_GameInfo;
-	void UpdateGameInfo(int ClientID);
+	void UpdateGameInfo(int ClientId);
 	/*
 		Variable: m_GameStartTick
 			Sent in snap to 0.7 clients for timer

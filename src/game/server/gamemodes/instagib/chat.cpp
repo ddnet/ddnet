@@ -18,7 +18,7 @@ bool CGameControllerInstagib::AllowPublicChat(const CPlayer *pPlayer)
 	return true;
 }
 
-bool CGameControllerInstagib::ParseChatCmd(char Prefix, int ClientID, const char *pCmdWithArgs)
+bool CGameControllerInstagib::ParseChatCmd(char Prefix, int ClientId, const char *pCmdWithArgs)
 {
 	const int MAX_ARG_LEN = 256;
 	char aCmd[MAX_ARG_LEN];
@@ -103,30 +103,30 @@ bool CGameControllerInstagib::ParseChatCmd(char Prefix, int ClientID, const char
 	str_format(aBuf, sizeof(aBuf), "got cmd '%s' with %d args: %s", aCmd, NumArgs, aArgsStr);
 	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "bang-command", aBuf);
 
-	bool match = OnBangCommand(ClientID, aCmd, NumArgs, (const char **)ppArgs);
+	bool match = OnBangCommand(ClientId, aCmd, NumArgs, (const char **)ppArgs);
 	for(int x = 0; x < 8; ++x)
 		delete[] ppArgs[x];
 	delete[] ppArgs;
 	return match;
 }
 
-bool CGameControllerInstagib::OnBangCommand(int ClientID, const char *pCmd, int NumArgs, const char **ppArgs)
+bool CGameControllerInstagib::OnBangCommand(int ClientId, const char *pCmd, int NumArgs, const char **ppArgs)
 {
-	if(ClientID < 0 || ClientID >= MAX_CLIENTS)
+	if(ClientId < 0 || ClientId >= MAX_CLIENTS)
 		return false;
-	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientID];
+	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientId];
 	if(!pPlayer)
 		return false;
 
 	if(!str_comp_nocase(pCmd, "set") || !str_comp_nocase(pCmd, "sett") || !str_comp_nocase(pCmd, "settings") || !str_comp_nocase(pCmd, "config"))
 	{
-		GameServer()->ShowCurrentInstagibConfigsMotd(ClientID, true);
+		GameServer()->ShowCurrentInstagibConfigsMotd(ClientId, true);
 		return true;
 	}
 
 	if(pPlayer->GetTeam() == TEAM_SPECTATORS && !g_Config.m_SvSpectatorVotes)
 	{
-		SendChatTarget(ClientID, "Spectators aren't allowed to vote.");
+		SendChatTarget(ClientId, "Spectators aren't allowed to vote.");
 		return false;
 	}
 
@@ -158,7 +158,7 @@ bool CGameControllerInstagib::OnBangCommand(int ClientID, const char *pCmd, int 
 		str_format(aCmd, sizeof(aCmd), "sv_spectator_slots %d", MAX_CLIENTS - SetSlots * 2);
 		char aDesc[512];
 		str_format(aDesc, sizeof(aDesc), "%dvs%d", SetSlots, SetSlots);
-		BangCommandVote(ClientID, aCmd, aDesc);
+		BangCommandVote(ClientId, aCmd, aDesc);
 	}
 	else if(!str_comp_nocase(pCmd, "restart") || !str_comp_nocase(pCmd, "reload"))
 	{
@@ -168,7 +168,7 @@ bool CGameControllerInstagib::OnBangCommand(int ClientID, const char *pCmd, int 
 		str_format(aCmd, sizeof(aCmd), "restart %d", Seconds);
 		char aDesc[512];
 		str_format(aDesc, sizeof(aDesc), "restart %d", Seconds);
-		BangCommandVote(ClientID, aCmd, aDesc);
+		BangCommandVote(ClientId, aCmd, aDesc);
 	}
 	else if(!str_comp_nocase(pCmd, "ready") || !str_comp_nocase(pCmd, "pause"))
 	{
@@ -176,15 +176,15 @@ bool CGameControllerInstagib::OnBangCommand(int ClientID, const char *pCmd, int 
 	}
 	else if(!str_comp_nocase(pCmd, "shuffle"))
 	{
-		ComCallShuffleVote(ClientID);
+		ComCallShuffleVote(ClientId);
 	}
 	else if(!str_comp_nocase(pCmd, "swap"))
 	{
-		ComCallSwapTeamsVote(ClientID);
+		ComCallSwapTeamsVote(ClientId);
 	}
 	else if(!str_comp_nocase(pCmd, "swap_random"))
 	{
-		ComCallSwapTeamsRandomVote(ClientID);
+		ComCallSwapTeamsRandomVote(ClientId);
 	}
 	else if(!str_comp_nocase(pCmd, "gamestate"))
 	{
@@ -195,14 +195,14 @@ bool CGameControllerInstagib::OnBangCommand(int ClientID, const char *pCmd, int 
 			else if(!str_comp_nocase(ppArgs[0], "off"))
 				pPlayer->m_GameStateBroadcast = false;
 			else
-				SendChatTarget(ClientID, "usage: !gamestate [on|off]");
+				SendChatTarget(ClientId, "usage: !gamestate [on|off]");
 		}
 		else
 			pPlayer->m_GameStateBroadcast = !pPlayer->m_GameStateBroadcast;
 	}
 	else
 	{
-		SendChatTarget(ClientID, "Unknown command. Commands: !restart, !ready, !shuffle, !1on1, !settings");
+		SendChatTarget(ClientId, "Unknown command. Commands: !restart, !ready, !shuffle, !1on1, !settings");
 		return false;
 	}
 	return true;
@@ -210,7 +210,7 @@ bool CGameControllerInstagib::OnBangCommand(int ClientID, const char *pCmd, int 
 
 bool CGameControllerInstagib::OnChatMessage(const CNetMsg_Cl_Say *pMsg, int Length, int &Team, CPlayer *pPlayer)
 {
-	int ClientID = pPlayer->GetCID();
+	int ClientId = pPlayer->GetCid();
 
 	if(pMsg->m_Team || !AllowPublicChat(pPlayer))
 		Team = ((pPlayer->GetTeam() == TEAM_SPECTATORS) ? CGameContext::CHAT_SPEC : pPlayer->GetTeam()); // ddnet-insta
@@ -228,11 +228,11 @@ bool CGameControllerInstagib::OnChatMessage(const CNetMsg_Cl_Say *pMsg, int Leng
 				continue;
 			if(AllowPublicChat(pSpecPlayer))
 				continue;
-			if(!str_find_nocase(pMsg->m_pMessage, Server()->ClientName(pSpecPlayer->GetCID())))
+			if(!str_find_nocase(pMsg->m_pMessage, Server()->ClientName(pSpecPlayer->GetCid())))
 				continue;
 
 			char aChatText[256];
-			str_format(aChatText, sizeof(aChatText), "Warning: '%s' got pinged in chat but can not respond", Server()->ClientName(pSpecPlayer->GetCID()));
+			str_format(aChatText, sizeof(aChatText), "Warning: '%s' got pinged in chat but can not respond", Server()->ClientName(pSpecPlayer->GetCid()));
 			GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aChatText);
 			GameServer()->SendChat(-1, CGameContext::CHAT_ALL, "turn off tournament chat or make sure there are enough in game slots");
 			break;
@@ -381,14 +381,14 @@ bool CGameControllerInstagib::OnChatMessage(const CNetMsg_Cl_Say *pMsg, int Leng
 	// swallow all other ! prefixed chat messages
 	if(pMsg->m_pMessage[0] == '!' && pMsg->m_pMessage[1] && pMsg->m_pMessage[1] != '!')
 	{
-		ParseChatCmd('!', ClientID, pMsg->m_pMessage + 1);
+		ParseChatCmd('!', ClientId, pMsg->m_pMessage + 1);
 		return true;
 	}
 
 	if(pMsg->m_pMessage[0] == '/')
 	{
 		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "%d used %s", ClientID, pMsg->m_pMessage);
+		str_format(aBuf, sizeof(aBuf), "%d used %s", ClientId, pMsg->m_pMessage);
 		GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chat-command", aBuf);
 
 		if(!str_comp_nocase(pMsg->m_pMessage + 1, "ready") || !str_comp_nocase(pMsg->m_pMessage + 1, "pause")) // ddnet-insta
@@ -398,17 +398,17 @@ bool CGameControllerInstagib::OnChatMessage(const CNetMsg_Cl_Say *pMsg, int Leng
 		}
 		else if(!str_comp_nocase(pMsg->m_pMessage + 1, "shuffle")) // ddnet-insta
 		{
-			ComCallShuffleVote(ClientID);
+			ComCallShuffleVote(ClientId);
 			return true;
 		}
 		else if(!str_comp_nocase(pMsg->m_pMessage + 1, "swap")) // ddnet-insta
 		{
-			ComCallSwapTeamsVote(ClientID);
+			ComCallSwapTeamsVote(ClientId);
 			return true;
 		}
 		else if(!str_comp_nocase(pMsg->m_pMessage + 1, "swap_random")) // ddnet-insta
 		{
-			ComCallSwapTeamsRandomVote(ClientID);
+			ComCallSwapTeamsRandomVote(ClientId);
 			return true;
 		}
 	}

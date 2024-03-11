@@ -131,11 +131,11 @@ void CGameControllerDDRace::OnPlayerConnect(CPlayer *pPlayer)
 		str_format(aBuf, sizeof(aBuf), "'%s' entered and joined the %s", Server()->ClientName(ClientId), GetTeamName(pPlayer->GetTeam()));
 		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, -1, CGameContext::CHAT_SIX);
 
-		GameServer()->SendChatTarget(ClientID, "DDNet-insta https://github.com/ZillyInsta/ddnet-insta/");
-		GameServer()->SendChatTarget(ClientID, "DDraceNetwork Mod. Version: " GAME_VERSION);
+		GameServer()->SendChatTarget(ClientId, "DDNet-insta https://github.com/ZillyInsta/ddnet-insta/");
+		GameServer()->SendChatTarget(ClientId, "DDraceNetwork Mod. Version: " GAME_VERSION);
 
-		GameServer()->AlertOnSpecialInstagibConfigs(ClientID);
-		GameServer()->ShowCurrentInstagibConfigsMotd(ClientID);
+		GameServer()->AlertOnSpecialInstagibConfigs(ClientId);
+		GameServer()->ShowCurrentInstagibConfigsMotd(ClientId);
 	}
 }
 

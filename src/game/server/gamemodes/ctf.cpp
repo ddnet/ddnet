@@ -33,9 +33,9 @@ void CGameControllerCTF::OnCharacterSpawn(class CCharacter *pChr)
 	CGameControllerInstagib::OnCharacterSpawn(pChr);
 }
 
-int CGameControllerCTF::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int WeaponID)
+int CGameControllerCTF::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int WeaponId)
 {
-	CGameControllerInstagib::OnCharacterDeath(pVictim, pKiller, WeaponID);
+	CGameControllerInstagib::OnCharacterDeath(pVictim, pKiller, WeaponId);
 	int HadFlag = 0;
 
 	// drop flags
@@ -104,7 +104,7 @@ void CGameControllerCTF::OnFlagGrab(class CFlag *pFlag)
 	if(!pFlag->m_pCarrier)
 		return;
 
-	Teams().OnCharacterStart(pFlag->m_pCarrier->GetPlayer()->GetCID());
+	Teams().OnCharacterStart(pFlag->m_pCarrier->GetPlayer()->GetCid());
 }
 
 void CGameControllerCTF::OnFlagCapture(class CFlag *pFlag, float Time)
@@ -116,7 +116,7 @@ void CGameControllerCTF::OnFlagCapture(class CFlag *pFlag, float Time)
 	if(!pFlag->m_pCarrier)
 		return;
 
-	Teams().OnCharacterFinish(pFlag->m_pCarrier->GetPlayer()->GetCID());
+	Teams().OnCharacterFinish(pFlag->m_pCarrier->GetPlayer()->GetCid());
 }
 
 void CGameControllerCTF::FlagTick()
@@ -145,8 +145,8 @@ void CGameControllerCTF::FlagTick()
 
 					char aBuf[64];
 					str_format(aBuf, sizeof(aBuf), "flag_capture player='%d:%s' team=%d time=%.2f",
-						F->GetCarrier()->GetPlayer()->GetCID(),
-						Server()->ClientName(F->GetCarrier()->GetPlayer()->GetCID()),
+						F->GetCarrier()->GetPlayer()->GetCid(),
+						Server()->ClientName(F->GetCarrier()->GetPlayer()->GetCid()),
 						F->GetCarrier()->GetPlayer()->GetTeam(),
 						Diff / (float)Server()->TickSpeed());
 					GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
@@ -156,24 +156,24 @@ void CGameControllerCTF::FlagTick()
 						str_format(aBuf,
 							sizeof(aBuf),
 							"The %s flag was captured by '%s' (%d.%s%d seconds)", fi ? "blue" : "red",
-							Server()->ClientName(F->GetCarrier()->GetPlayer()->GetCID()), (int)CaptureTime % 60, ((int)(CaptureTime * 100) % 100) < 10 ? "0" : "", (int)(CaptureTime * 100) % 100);
+							Server()->ClientName(F->GetCarrier()->GetPlayer()->GetCid()), (int)CaptureTime % 60, ((int)(CaptureTime * 100) % 100) < 10 ? "0" : "", (int)(CaptureTime * 100) % 100);
 					else
 						str_format(
 							aBuf,
 							sizeof(aBuf),
 							"The %s flag was captured by '%s'", fi ? "blue" : "red",
-							Server()->ClientName(F->GetCarrier()->GetPlayer()->GetCID()));
+							Server()->ClientName(F->GetCarrier()->GetPlayer()->GetCid()));
 					for(auto &pPlayer : GameServer()->m_apPlayers)
 					{
 						if(!pPlayer)
 							continue;
-						if(Server()->IsSixup(pPlayer->GetCID()))
+						if(Server()->IsSixup(pPlayer->GetCid()))
 							continue;
 
-						GameServer()->SendChatTarget(pPlayer->GetCID(), aBuf);
+						GameServer()->SendChatTarget(pPlayer->GetCid(), aBuf);
 					}
 					GameServer()->m_pController->OnFlagCapture(F, Diff);
-					GameServer()->SendGameMsg(protocol7::GAMEMSG_CTF_CAPTURE, fi, F->GetCarrier()->GetPlayer()->GetCID(), Diff, -1);
+					GameServer()->SendGameMsg(protocol7::GAMEMSG_CTF_CAPTURE, fi, F->GetCarrier()->GetPlayer()->GetCid(), Diff, -1);
 					GameServer()->CreateSoundGlobal(SOUND_CTF_CAPTURE);
 					for(int i = 0; i < 2; i++)
 						for(auto &pFlag : m_apFlags)
@@ -203,8 +203,8 @@ void CGameControllerCTF::FlagTick()
 
 						char aBuf[256];
 						str_format(aBuf, sizeof(aBuf), "flag_return player='%d:%s' team=%d",
-							pChr->GetPlayer()->GetCID(),
-							Server()->ClientName(pChr->GetPlayer()->GetCID()),
+							pChr->GetPlayer()->GetCid(),
+							Server()->ClientName(pChr->GetPlayer()->GetCid()),
 							pChr->GetPlayer()->GetTeam());
 						GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
 						GameServer()->SendGameMsg(protocol7::GAMEMSG_CTF_RETURN, -1);
@@ -224,8 +224,8 @@ void CGameControllerCTF::FlagTick()
 
 					char aBuf[256];
 					str_format(aBuf, sizeof(aBuf), "flag_grab player='%d:%s' team=%d",
-						F->GetCarrier()->GetPlayer()->GetCID(),
-						Server()->ClientName(F->GetCarrier()->GetPlayer()->GetCID()),
+						F->GetCarrier()->GetPlayer()->GetCid(),
+						Server()->ClientName(F->GetCarrier()->GetPlayer()->GetCid()),
 						F->GetCarrier()->GetPlayer()->GetTeam());
 					GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
 					GameServer()->SendGameMsg(protocol7::GAMEMSG_CTF_GRAB, fi, -1);
@@ -247,7 +247,7 @@ void CGameControllerCTF::Snap(int SnappingClient)
 		if(m_apFlags[TEAM_RED]->m_AtStand)
 			FlagCarrierRed = FLAG_ATSTAND;
 		else if(m_apFlags[TEAM_RED]->GetCarrier() && m_apFlags[TEAM_RED]->GetCarrier()->GetPlayer())
-			FlagCarrierRed = m_apFlags[TEAM_RED]->GetCarrier()->GetPlayer()->GetCID();
+			FlagCarrierRed = m_apFlags[TEAM_RED]->GetCarrier()->GetPlayer()->GetCid();
 		else
 			FlagCarrierRed = FLAG_TAKEN;
 	}
@@ -258,7 +258,7 @@ void CGameControllerCTF::Snap(int SnappingClient)
 		if(m_apFlags[TEAM_BLUE]->m_AtStand)
 			FlagCarrierBlue = FLAG_ATSTAND;
 		else if(m_apFlags[TEAM_BLUE]->GetCarrier() && m_apFlags[TEAM_BLUE]->GetCarrier()->GetPlayer())
-			FlagCarrierBlue = m_apFlags[TEAM_BLUE]->GetCarrier()->GetPlayer()->GetCID();
+			FlagCarrierBlue = m_apFlags[TEAM_BLUE]->GetCarrier()->GetPlayer()->GetCid();
 		else
 			FlagCarrierBlue = FLAG_TAKEN;
 	}

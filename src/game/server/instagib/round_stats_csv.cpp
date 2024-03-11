@@ -39,7 +39,7 @@ void IGameController::GetRoundEndStatsStrCsv(char *pBuf, size_t Size)
 		CStatsPlayer *pStatsPlayer = pPlayer->GetTeam() == TEAM_RED ? &aStatsPlayerRed[i] : &aStatsPlayerBlue[i];
 		pStatsPlayer->m_Active = true;
 		pStatsPlayer->m_Score = pPlayer->m_Score.value_or(0);
-		pStatsPlayer->m_pName = Server()->ClientName(pPlayer->GetCID());
+		pStatsPlayer->m_pName = Server()->ClientName(pPlayer->GetCid());
 	}
 
 	std::stable_sort(aStatsPlayerRed, aStatsPlayerRed + MAX_CLIENTS,

@@ -24,13 +24,13 @@ void IGameController::OnEndMatchInsta()
 void IGameController::PsvRowPlayer(const CPlayer *pPlayer, char *pBuf, size_t Size)
 {
 	char aBuf[512];
-	const CInstaPlayerStats *pStats = &m_aInstaPlayerStats[pPlayer->GetCID()];
+	const CInstaPlayerStats *pStats = &m_aInstaPlayerStats[pPlayer->GetCid()];
 	str_format(
 		aBuf,
 		sizeof(aBuf),
-		"ID: %d | Name: %s | Score: %d | Kills: %d | Deaths: %d | Ratio: %.2f\n",
-		pPlayer->GetCID(),
-		Server()->ClientName(pPlayer->GetCID()),
+		"Id: %d | Name: %s | Score: %d | Kills: %d | Deaths: %d | Ratio: %.2f\n",
+		pPlayer->GetCid(),
+		Server()->ClientName(pPlayer->GetCid()),
 		pPlayer->m_Score.value_or(0),
 		pStats->m_Kills,
 		pStats->m_Deaths,

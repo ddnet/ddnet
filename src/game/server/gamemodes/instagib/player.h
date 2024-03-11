@@ -16,7 +16,7 @@ class CPlayer
 
 public:
 	// zcatch
-	int m_KillerID;
+	int m_KillerId;
 	void SetTeamRaw(int Team) { m_Team = Team; }
 	bool m_IsDead;
 

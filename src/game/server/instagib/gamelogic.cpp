@@ -10,23 +10,23 @@
 
 #include "strhelpers.h"
 
-void CGameContext::AlertOnSpecialInstagibConfigs(int ClientID) const
+void CGameContext::AlertOnSpecialInstagibConfigs(int ClientId) const
 {
 	if(g_Config.m_SvTournament)
 	{
-		SendChatTarget(ClientID, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-		SendChatTarget(ClientID, "THERE IS A TOURNAMENT IN PROGRESS RIGHT NOW");
-		SendChatTarget(ClientID, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+		SendChatTarget(ClientId, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+		SendChatTarget(ClientId, "THERE IS A TOURNAMENT IN PROGRESS RIGHT NOW");
+		SendChatTarget(ClientId, "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 		if(g_Config.m_SvTournamentWelcomeChat[0])
-			SendChatTarget(ClientID, g_Config.m_SvTournamentWelcomeChat);
+			SendChatTarget(ClientId, g_Config.m_SvTournamentWelcomeChat);
 	}
 	if(g_Config.m_SvOnlyHookKills)
-		SendChatTarget(ClientID, "WARNING: only hooked enemies can be killed");
+		SendChatTarget(ClientId, "WARNING: only hooked enemies can be killed");
 	if(g_Config.m_SvKillHook)
-		SendChatTarget(ClientID, "WARNING: the hook kills");
+		SendChatTarget(ClientId, "WARNING: the hook kills");
 }
 
-void CGameContext::ShowCurrentInstagibConfigsMotd(int ClientID, bool Force) const
+void CGameContext::ShowCurrentInstagibConfigsMotd(int ClientId, bool Force) const
 {
 	if(!g_Config.m_SvShowSettingsMotd && !Force)
 		return;
@@ -80,7 +80,7 @@ void CGameContext::ShowCurrentInstagibConfigsMotd(int ClientID, bool Force) cons
 
 	CNetMsg_Sv_Motd Msg;
 	Msg.m_pMessage = aMotd;
-	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientID);
+	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, ClientId);
 }
 
 void CGameContext::UpdateVoteCheckboxes() const
@@ -152,7 +152,7 @@ void CGameContext::SendBroadcastSix(const char *pText, bool Important)
 	{
 		if(!pPlayer)
 			continue;
-		if(Server()->IsSixup(pPlayer->GetCID()))
+		if(Server()->IsSixup(pPlayer->GetCid()))
 			continue;
 
 		// not very nice but the best hack that comes to my mind
@@ -167,8 +167,8 @@ void CGameContext::SendBroadcastSix(const char *pText, bool Important)
 		// but this causes confusion since a sv_warmup(igs countdown) is not a warmup
 		// it is a countdown until the game begins and is a different thing already
 		if(!pPlayer->m_HasGhostCharInGame && pPlayer->GetTeam() != TEAM_SPECTATORS)
-			SendChatTarget(pPlayer->GetCID(), pText);
-		SendBroadcast(pText, pPlayer->GetCID(), Important);
+			SendChatTarget(pPlayer->GetCid(), pText);
+		SendBroadcast(pText, pPlayer->GetCid(), Important);
 	}
 }
 
@@ -194,13 +194,13 @@ void CGameContext::PlayerReadyStateBroadcast()
 	SendBroadcastSix(aBuf, false);
 }
 
-void CGameContext::SendGameMsg(int GameMsgID, int ClientID) const
+void CGameContext::SendGameMsg(int GameMsgId, int ClientId) const
 {
 	CMsgPacker Msg(protocol7::NETMSGTYPE_SV_GAMEMSG, false, true);
-	Msg.AddInt(GameMsgID);
-	if(ClientID != -1 && Server()->IsSixup(ClientID))
+	Msg.AddInt(GameMsgId);
+	if(ClientId != -1 && Server()->IsSixup(ClientId))
 	{
-		Server()->SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
+		Server()->SendMsg(&Msg, MSGFLAG_VITAL, ClientId);
 		return;
 	}
 	for(int i = 0; i < MAX_CLIENTS; i++)
@@ -214,14 +214,14 @@ void CGameContext::SendGameMsg(int GameMsgID, int ClientID) const
 	}
 }
 
-void CGameContext::SendGameMsg(int GameMsgID, int ParaI1, int ClientID) const
+void CGameContext::SendGameMsg(int GameMsgId, int ParaI1, int ClientId) const
 {
 	CMsgPacker Msg(protocol7::NETMSGTYPE_SV_GAMEMSG, false, true);
-	Msg.AddInt(GameMsgID);
+	Msg.AddInt(GameMsgId);
 	Msg.AddInt(ParaI1);
-	if(ClientID != -1 && Server()->IsSixup(ClientID))
+	if(ClientId != -1 && Server()->IsSixup(ClientId))
 	{
-		Server()->SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
+		Server()->SendMsg(&Msg, MSGFLAG_VITAL, ClientId);
 		return;
 	}
 	for(int i = 0; i < MAX_CLIENTS; i++)
@@ -231,25 +231,25 @@ void CGameContext::SendGameMsg(int GameMsgID, int ParaI1, int ClientID) const
 			Server()->SendMsg(&Msg, MSGFLAG_VITAL, i);
 			continue;
 		}
-		if(GameMsgID == protocol7::GAMEMSG_GAME_PAUSED)
+		if(GameMsgId == protocol7::GAMEMSG_GAME_PAUSED)
 		{
 			char aBuf[512];
-			int PauseID = clamp(ParaI1, 0, MAX_CLIENTS - 1);
-			str_format(aBuf, sizeof(aBuf), "'%s' initiated a pause. If you are ready do /ready", Server()->ClientName(PauseID));
+			int PauseId = clamp(ParaI1, 0, MAX_CLIENTS - 1);
+			str_format(aBuf, sizeof(aBuf), "'%s' initiated a pause. If you are ready do /ready", Server()->ClientName(PauseId));
 			SendChatTarget(i, aBuf);
 		}
 	}
 }
 
-void CGameContext::SendGameMsg(int GameMsgID, int ParaI1, int ParaI2, int ParaI3, int ClientID) const
+void CGameContext::SendGameMsg(int GameMsgId, int ParaI1, int ParaI2, int ParaI3, int ClientId) const
 {
 	CMsgPacker Msg(protocol7::NETMSGTYPE_SV_GAMEMSG, false, true);
-	Msg.AddInt(GameMsgID);
+	Msg.AddInt(GameMsgId);
 	Msg.AddInt(ParaI1);
 	Msg.AddInt(ParaI2);
 	Msg.AddInt(ParaI3);
-	if(ClientID != -1)
-		Server()->SendMsg(&Msg, MSGFLAG_VITAL, ClientID);
+	if(ClientId != -1)
+		Server()->SendMsg(&Msg, MSGFLAG_VITAL, ClientId);
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		if(Server()->IsSixup(i))

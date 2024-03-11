@@ -33,21 +33,21 @@ void CGameControllerZcatch::OnCharacterSpawn(class CCharacter *pChr)
 
 void CGameControllerZcatch::OnCaught(class CPlayer *pVictim, class CPlayer *pKiller)
 {
-	if(pVictim->GetCID() == pKiller->GetCID())
+	if(pVictim->GetCid() == pKiller->GetCid())
 		return;
 
 	char aBuf[512];
-	str_format(aBuf, sizeof(aBuf), "You are spectator until '%s' dies", Server()->ClientName(pKiller->GetCID()));
-	GameServer()->SendChatTarget(pVictim->GetCID(), aBuf);
+	str_format(aBuf, sizeof(aBuf), "You are spectator until '%s' dies", Server()->ClientName(pKiller->GetCid()));
+	GameServer()->SendChatTarget(pVictim->GetCid(), aBuf);
 
 	pVictim->SetTeamRaw(TEAM_SPECTATORS);
 	pVictim->m_IsDead = true;
-	pVictim->m_KillerID = pKiller->GetCID();
+	pVictim->m_KillerId = pKiller->GetCid();
 }
 
-int CGameControllerZcatch::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int WeaponID)
+int CGameControllerZcatch::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int WeaponId)
 {
-	CGameControllerInstagib::OnCharacterDeath(pVictim, pKiller, WeaponID);
+	CGameControllerInstagib::OnCharacterDeath(pVictim, pKiller, WeaponId);
 
 	// TODO: revisit this edge case when zcatch is done
 	//       a killer leaving while the bullet is flying
@@ -61,15 +61,15 @@ int CGameControllerZcatch::OnCharacterDeath(class CCharacter *pVictim, class CPl
 	{
 		if(!pPlayer)
 			continue;
-		if(pPlayer->m_KillerID == -1)
+		if(pPlayer->m_KillerId == -1)
 			continue;
-		if(pPlayer->GetCID() == pVictim->GetPlayer()->GetCID())
+		if(pPlayer->GetCid() == pVictim->GetPlayer()->GetCid())
 			continue;
-		if(pPlayer->m_KillerID != pVictim->GetPlayer()->GetCID())
+		if(pPlayer->m_KillerId != pVictim->GetPlayer()->GetCid())
 			continue;
 
-		str_format(aBuf, sizeof(aBuf), "You respawned because '%s' died", Server()->ClientName(pVictim->GetPlayer()->GetCID()));
-		GameServer()->SendChatTarget(pPlayer->GetCID(), aBuf);
+		str_format(aBuf, sizeof(aBuf), "You respawned because '%s' died", Server()->ClientName(pVictim->GetPlayer()->GetCid()));
+		GameServer()->SendChatTarget(pPlayer->GetCid(), aBuf);
 		pPlayer->m_IsDead = false;
 		pPlayer->SetTeamRaw(TEAM_RED);
 	}
@@ -77,9 +77,9 @@ int CGameControllerZcatch::OnCharacterDeath(class CCharacter *pVictim, class CPl
 	return 0;
 }
 
-bool CGameControllerZcatch::CanJoinTeam(int Team, int NotThisID, char *pErrorReason, int ErrorReasonSize)
+bool CGameControllerZcatch::CanJoinTeam(int Team, int NotThisId, char *pErrorReason, int ErrorReasonSize)
 {
-	CPlayer *pPlayer = GameServer()->m_apPlayers[NotThisID];
+	CPlayer *pPlayer = GameServer()->m_apPlayers[NotThisId];
 	if(!pPlayer)
 		return false;
 

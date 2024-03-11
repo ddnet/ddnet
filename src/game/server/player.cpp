@@ -25,7 +25,7 @@ CPlayer::CPlayer(CGameContext *pGameServer, uint32_t UniqueClientId, int ClientI
 	m_pGameServer = pGameServer;
 	m_RespawnTick = Server()->Tick(); // ddnet-insta
 	m_HasGhostCharInGame = false; // ddnet-insta
-	m_ClientID = ClientID;
+	m_ClientId = ClientId;
 	m_Team = GameServer()->m_pController->GetStartTeam();
 	m_NumInputs = 0;
 	m_Spawning = false;
@@ -354,7 +354,7 @@ void CPlayer::Snap(int SnappingClient)
 	// }
 
 	// // send 0 if times of others are not shown
-	// if(SnappingClient != m_ClientID && g_Config.m_SvHideScore)
+	// if(SnappingClient != m_ClientId && g_Config.m_SvHideScore)
 	// 	Score = -9999;
 
 	Score = m_Score.value_or(0); // ddnet-insta
@@ -387,7 +387,7 @@ void CPlayer::Snap(int SnappingClient)
 			char aReady[512];
 			char aName[64];
 			static const int MaxNameLen = MAX_NAME_LENGTH - (str_length("\xE2\x9C\x93") + 2);
-			str_truncate(aName, sizeof(aName), Server()->ClientName(m_ClientID), MaxNameLen);
+			str_truncate(aName, sizeof(aName), Server()->ClientName(m_ClientId), MaxNameLen);
 			str_format(aReady, sizeof(aReady), "\xE2\x9C\x93 %s", aName);
 			// 0.7 puts the checkmark at the end
 			// we put it in the beginning because ddnet scoreboard cuts off long names
@@ -404,13 +404,13 @@ void CPlayer::Snap(int SnappingClient)
 		pPlayerInfo->m_PlayerFlags = PlayerFlags_SixToSeven(m_PlayerFlags);
 		if(SnappingClientVersion >= VERSION_DDRACE && (m_PlayerFlags & PLAYERFLAG_AIM))
 			pPlayerInfo->m_PlayerFlags |= protocol7::PLAYERFLAG_AIM;
-		if(Server()->ClientAuthed(m_ClientID) && (!g_Config.m_SvHideAdmins || Server()->GetAuthedState(SnappingClient) != AUTHED_NO))
+		if(Server()->ClientAuthed(m_ClientId) && (!g_Config.m_SvHideAdmins || Server()->GetAuthedState(SnappingClient) != AUTHED_NO))
 			pPlayerInfo->m_PlayerFlags |= protocol7::PLAYERFLAG_ADMIN;
 		if(!GameServer()->m_pController->IsPlayerReadyMode() || m_IsReadyToPlay)
 			pPlayerInfo->m_PlayerFlags |= protocol7::PLAYERFLAG_READY;
 
 		// Times are in milliseconds for 0.7
-		// pPlayerInfo->m_Score = m_Score.has_value() ? GameServer()->Score()->PlayerData(m_ClientID)->m_BestTime * 1000 : -1;
+		// pPlayerInfo->m_Score = m_Score.has_value() ? GameServer()->Score()->PlayerData(m_ClientId)->m_BestTime * 1000 : -1;
 		pPlayerInfo->m_Score = Score; // ddnet-insta
 		pPlayerInfo->m_Latency = Latency;
 	}
@@ -444,7 +444,7 @@ void CPlayer::Snap(int SnappingClient)
 	if(!pDDNetPlayer)
 		return;
 
-	pDDNetPlayer->m_AuthLevel = Server()->GetAuthedState(m_ClientID);
+	pDDNetPlayer->m_AuthLevel = Server()->GetAuthedState(m_ClientId);
 	// ddnet-insta
 	if(g_Config.m_SvHideAdmins && Server()->GetAuthedState(SnappingClient) == AUTHED_NO)
 		pDDNetPlayer->m_AuthLevel = AUTHED_NO;
@@ -957,7 +957,7 @@ void CPlayer::ProcessScoreResult(CScorePlayerResult &Result)
 		case CScorePlayerResult::PLAYER_INFO:
 			if(Result.m_Data.m_Info.m_Time.has_value())
 			{
-				GameServer()->Score()->PlayerData(m_ClientID)->Set(Result.m_Data.m_Info.m_Time.value(), Result.m_Data.m_Info.m_aTimeCp);
+				GameServer()->Score()->PlayerData(m_ClientId)->Set(Result.m_Data.m_Info.m_Time.value(), Result.m_Data.m_Info.m_aTimeCp);
 				// m_Score = Result.m_Data.m_Info.m_Time; // ddnet-insta
 			}
 			Server()->ExpireServerInfo();

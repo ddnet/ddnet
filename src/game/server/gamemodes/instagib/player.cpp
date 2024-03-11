@@ -8,6 +8,6 @@
 void CGameControllerInstagib::OnPlayerConstruct(class CPlayer *pPlayer)
 {
 	pPlayer->m_IsDead = false;
-	pPlayer->m_KillerID = -1;
+	pPlayer->m_KillerId = -1;
 	pPlayer->m_Spree = 0;
 }

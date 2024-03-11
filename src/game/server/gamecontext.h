@@ -270,14 +270,14 @@ public:
 
 	void List(int ClientId, const char *pFilter);
 
-	void SendGameMsg(int GameMsgID, int ClientID) const;
-	void SendGameMsg(int GameMsgID, int ParaI1, int ClientID) const;
-	void SendGameMsg(int GameMsgID, int ParaI1, int ParaI2, int ParaI3, int ClientID) const; // ddnet-insta
+	void SendGameMsg(int GameMsgId, int ClientId) const;
+	void SendGameMsg(int GameMsgId, int ParaI1, int ClientId) const;
+	void SendGameMsg(int GameMsgId, int ParaI1, int ParaI2, int ParaI3, int ClientId) const; // ddnet-insta
 	int GetDDNetInstaWeapon();
 	void UpdateVoteCheckboxes() const;
 	void RefreshVotes();
-	void AlertOnSpecialInstagibConfigs(int ClientID = -1) const;
-	void ShowCurrentInstagibConfigsMotd(int ClientID = -1, bool Force = false) const;
+	void AlertOnSpecialInstagibConfigs(int ClientId = -1) const;
+	void ShowCurrentInstagibConfigsMotd(int ClientId = -1, bool Force = false) const;
 	void PlayerReadyStateBroadcast();
 	void SendBroadcastSix(const char *pText, bool Important = true);
 	enum

@@ -51,14 +51,14 @@ void CCharacter::Reset()
 	// https://github.com/ddnet/ddnet/pull/7588
 	// is merged
 	// just accept incoming changes
-	if(Server()->IsRecording(m_pPlayer->GetCID()))
+	if(Server()->IsRecording(m_pPlayer->GetCid()))
 	{
-		CPlayerData *pData = GameServer()->Score()->PlayerData(m_pPlayer->GetCID());
+		CPlayerData *pData = GameServer()->Score()->PlayerData(m_pPlayer->GetCid());
 
 		if(pData->m_RecordStopTick - Server()->Tick() <= Server()->TickSpeed() && pData->m_RecordStopTick != -1)
-			Server()->SaveDemo(m_pPlayer->GetCID(), pData->m_RecordFinishTime);
+			Server()->SaveDemo(m_pPlayer->GetCid(), pData->m_RecordFinishTime);
 		else
-			Server()->StopRecord(m_pPlayer->GetCID());
+			Server()->StopRecord(m_pPlayer->GetCid());
 
 		pData->m_RecordStopTick = -1;
 	}
@@ -843,7 +843,7 @@ void CCharacter::Tick()
 		{
 			CCharacter *pChr = GameServer()->m_apPlayers[HookedPlayer]->GetCharacter();
 			if(pChr)
-				pChr->TakeDamage(vec2(0, 0), 10, m_pPlayer->GetCID(), WEAPON_GAME);
+				pChr->TakeDamage(vec2(0, 0), 10, m_pPlayer->GetCid(), WEAPON_GAME);
 		}
 	}
 
@@ -1005,13 +1005,13 @@ void CCharacter::Die(int Killer, int Weapon, bool SendKillMsg)
 	{
 		str_format(aBuf, sizeof(aBuf), "kill killer='%d:%d:' victim='%d:%d:%s' weapon=%d special=%d",
 			Killer, -1 - Killer,
-			m_pPlayer->GetCID(), m_pPlayer->GetTeam(), Server()->ClientName(m_pPlayer->GetCID()), Weapon, ModeSpecial);
+			m_pPlayer->GetCid(), m_pPlayer->GetTeam(), Server()->ClientName(m_pPlayer->GetCid()), Weapon, ModeSpecial);
 	}
 	else
 	{
 		str_format(aBuf, sizeof(aBuf), "kill killer='%d:%d:%s' victim='%d:%d:%s' weapon=%d special=%d",
 			Killer, GameServer()->m_apPlayers[Killer]->GetTeam(), Server()->ClientName(Killer),
-			m_pPlayer->GetCID(), m_pPlayer->GetTeam(), Server()->ClientName(m_pPlayer->GetCID()), Weapon, ModeSpecial);
+			m_pPlayer->GetCid(), m_pPlayer->GetTeam(), Server()->ClientName(m_pPlayer->GetCid()), Weapon, ModeSpecial);
 	}
 	GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
 

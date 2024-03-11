@@ -5,36 +5,36 @@
 
 #include "../base_instagib.h"
 
-void CGameControllerInstagib::BangCommandVote(int ClientID, const char *pCommand, const char *pDesc)
+void CGameControllerInstagib::BangCommandVote(int ClientId, const char *pCommand, const char *pDesc)
 {
-	if(ClientID < 0 || ClientID >= MAX_CLIENTS)
+	if(ClientId < 0 || ClientId >= MAX_CLIENTS)
 		return;
-	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientID];
+	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientId];
 	if(!pPlayer)
 		return;
 	// not needed for bang command but for slash command
 	if(pPlayer->GetTeam() == TEAM_SPECTATORS && !g_Config.m_SvSpectatorVotes)
 	{
-		SendChatTarget(ClientID, "Spectators aren't allowed to vote.");
+		SendChatTarget(ClientId, "Spectators aren't allowed to vote.");
 		return;
 	}
 	char aChatmsg[1024];
-	str_format(aChatmsg, sizeof(aChatmsg), "'%s' called vote to change server option '%s'", Server()->ClientName(ClientID), pDesc);
+	str_format(aChatmsg, sizeof(aChatmsg), "'%s' called vote to change server option '%s'", Server()->ClientName(ClientId), pDesc);
 	GameServer()->m_VoteType = GameServer()->VOTE_TYPE_OPTION;
-	GameServer()->CallVote(ClientID, pDesc, pCommand, "chat cmd", aChatmsg);
+	GameServer()->CallVote(ClientId, pDesc, pCommand, "chat cmd", aChatmsg);
 }
 
-void CGameControllerInstagib::ComCallShuffleVote(int ClientID)
+void CGameControllerInstagib::ComCallShuffleVote(int ClientId)
 {
-	BangCommandVote(ClientID, "shuffle_teams", "shuffle teams");
+	BangCommandVote(ClientId, "shuffle_teams", "shuffle teams");
 }
 
-void CGameControllerInstagib::ComCallSwapTeamsVote(int ClientID)
+void CGameControllerInstagib::ComCallSwapTeamsVote(int ClientId)
 {
-	BangCommandVote(ClientID, "swap_teams", "swap teams");
+	BangCommandVote(ClientId, "swap_teams", "swap teams");
 }
 
-void CGameControllerInstagib::ComCallSwapTeamsRandomVote(int ClientID)
+void CGameControllerInstagib::ComCallSwapTeamsRandomVote(int ClientId)
 {
-	BangCommandVote(ClientID, "swap_teams_random", "swap teams (random)");
+	BangCommandVote(ClientId, "swap_teams_random", "swap teams (random)");
 }

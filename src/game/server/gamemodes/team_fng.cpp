@@ -29,9 +29,9 @@ void CGameControllerTeamFng::OnCharacterSpawn(class CCharacter *pChr)
 	CGameControllerBaseFng::OnCharacterSpawn(pChr);
 }
 
-int CGameControllerTeamFng::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int WeaponID)
+int CGameControllerTeamFng::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int WeaponId)
 {
-	CGameControllerBaseFng::OnCharacterDeath(pVictim, pKiller, WeaponID);
+	CGameControllerBaseFng::OnCharacterDeath(pVictim, pKiller, WeaponId);
 	return 0;
 }
 

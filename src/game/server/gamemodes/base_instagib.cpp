@@ -52,9 +52,9 @@ void CGameControllerInstagib::SendChatTarget(int To, const char *pText, int Flag
 	GameServer()->SendChatTarget(To, pText, Flags);
 }
 
-void CGameControllerInstagib::SendChat(int ClientID, int Team, const char *pText, int SpamProtectionClientID, int Flags)
+void CGameControllerInstagib::SendChat(int ClientId, int Team, const char *pText, int SpamProtectionClientId, int Flags)
 {
-	GameServer()->SendChat(ClientID, Team, pText, SpamProtectionClientID, Flags);
+	GameServer()->SendChat(ClientId, Team, pText, SpamProtectionClientId, Flags);
 }
 
 void CGameControllerInstagib::ConchainGameinfoUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
@@ -98,7 +98,7 @@ void CGameControllerInstagib::ModifyWeapons(IConsole::IResult *pResult, void *pU
 	int Weapon, bool Remove)
 {
 	CGameControllerInstagib *pSelf = (CGameControllerInstagib *)pUserData;
-	CCharacter *pChr = GameServer()->GetPlayerChar(pResult->m_ClientID);
+	CCharacter *pChr = GameServer()->GetPlayerChar(pResult->m_ClientId);
 	if(!pChr)
 		return;
 
@@ -202,9 +202,9 @@ int CGameControllerInstagib::OnCharacterDeath(class CCharacter *pVictim, class C
 
 	// selfkill is no kill
 	if(pKiller != pVictim->GetPlayer())
-		m_aInstaPlayerStats[pKiller->GetCID()].m_Kills++;
+		m_aInstaPlayerStats[pKiller->GetCid()].m_Kills++;
 	// but selfkill is a death
-	m_aInstaPlayerStats[pVictim->GetPlayer()->GetCID()].m_Deaths++;
+	m_aInstaPlayerStats[pVictim->GetPlayer()->GetCid()].m_Deaths++;
 
 	if(g_Config.m_SvKillingspreeKills > 0 && pKiller && pVictim)
 	{
@@ -282,7 +282,7 @@ void CGameControllerInstagib::Tick()
 				sizeof(aBuf),
 				"GameState: %s                                                                                                                               ",
 				GameStateToStr(GameState()));
-			GameServer()->SendBroadcast(aBuf, pPlayer->GetCID());
+			GameServer()->SendBroadcast(aBuf, pPlayer->GetCid());
 		}
 	}
 }
@@ -295,10 +295,10 @@ bool CGameControllerInstagib::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &
 		return false;
 	}
 	// TODO: ddnet-insta cfg team damage
-	// if(GameServer()->m_pController->IsFriendlyFire(Character.GetPlayer()->GetCID(), From) && !g_Config.m_SvTeamdamage)
-	if(GameServer()->m_pController->IsFriendlyFire(Character.GetPlayer()->GetCID(), From))
+	// if(GameServer()->m_pController->IsFriendlyFire(Character.GetPlayer()->GetCid(), From) && !g_Config.m_SvTeamdamage)
+	if(GameServer()->m_pController->IsFriendlyFire(Character.GetPlayer()->GetCid(), From))
 		return false;
-	if(From == Character.GetPlayer()->GetCID())
+	if(From == Character.GetPlayer()->GetCid())
 	{
 		Dmg = 0;
 		//Give back ammo on grenade self push//Only if not infinite ammo and activated
@@ -311,7 +311,7 @@ bool CGameControllerInstagib::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &
 	if(g_Config.m_SvOnlyHookKills && From >= 0 && From <= MAX_CLIENTS)
 	{
 		CCharacter *pChr = GameServer()->m_apPlayers[From]->GetCharacter();
-		if(!pChr || pChr->GetCore().HookedPlayer() != Character.GetPlayer()->GetCID())
+		if(!pChr || pChr->GetCore().HookedPlayer() != Character.GetPlayer()->GetCid())
 			Dmg = 0;
 	}
 
@@ -319,14 +319,14 @@ bool CGameControllerInstagib::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &
 
 	// no self damage
 	if(Dmg >= g_Config.m_SvDamageNeededForKill)
-		Health = From == Character.GetPlayer()->GetCID() ? Health : 0;
+		Health = From == Character.GetPlayer()->GetCid() ? Health : 0;
 
 	// check for death
 	if(Health <= 0)
 	{
 		Character.Die(From, Weapon);
 
-		if(From >= 0 && From != Character.GetPlayer()->GetCID() && GameServer()->m_apPlayers[From])
+		if(From >= 0 && From != Character.GetPlayer()->GetCid() && GameServer()->m_apPlayers[From])
 		{
 			CCharacter *pChr = GameServer()->m_apPlayers[From]->GetCharacter();
 			if(pChr)
@@ -350,7 +350,7 @@ bool CGameControllerInstagib::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &
 			CClientMask Mask = CClientMask().set(From);
 			for(int i = 0; i < MAX_CLIENTS; i++)
 			{
-				if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS && GameServer()->m_apPlayers[i]->m_SpectatorID == From)
+				if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS && GameServer()->m_apPlayers[i]->m_SpectatorId == From)
 					Mask.set(i);
 			}
 			GameServer()->CreateSound(GameServer()->m_apPlayers[From]->m_ViewPos, SOUND_HIT, Mask);
@@ -374,7 +374,7 @@ bool CGameControllerInstagib::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &
 
 void CGameControllerInstagib::SetSpawnWeapons(class CCharacter *pChr)
 {
-	switch(CGameControllerInstagib::GetSpawnWeapons(pChr->GetPlayer()->GetCID()))
+	switch(CGameControllerInstagib::GetSpawnWeapons(pChr->GetPlayer()->GetCid()))
 	{
 	case SPAWN_WEAPON_LASER:
 		pChr->GiveWeapon(WEAPON_LASER, false);
@@ -393,7 +393,7 @@ void CGameControllerInstagib::OnCharacterSpawn(class CCharacter *pChr)
 	OnCharacterConstruct(pChr);
 
 	pChr->SetTeams(&Teams());
-	Teams().OnCharacterSpawn(pChr->GetPlayer()->GetCID());
+	Teams().OnCharacterSpawn(pChr->GetPlayer()->GetCid());
 
 	// default health
 	pChr->IncreaseHealth(10);
@@ -412,7 +412,7 @@ void CGameControllerInstagib::AddSpree(class CPlayer *pPlayer)
 		static const char aaSpreeMsg[NumMsg][32] = {"is on a killing spree", "is on a rampage", "is dominating", "is unstoppable", "is godlike"};
 		int No = pPlayer->m_Spree / g_Config.m_SvKillingspreeKills;
 
-		str_format(aBuf, sizeof(aBuf), "'%s' %s with %d kills!", Server()->ClientName(pPlayer->GetCID()), aaSpreeMsg[(No > NumMsg - 1) ? NumMsg - 1 : No], pPlayer->m_Spree);
+		str_format(aBuf, sizeof(aBuf), "'%s' %s with %d kills!", Server()->ClientName(pPlayer->GetCid()), aaSpreeMsg[(No > NumMsg - 1) ? NumMsg - 1 : No], pPlayer->m_Spree);
 		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
 	}
 }
@@ -426,7 +426,7 @@ void CGameControllerInstagib::EndSpree(class CPlayer *pPlayer, class CPlayer *pK
 		if(charac)
 		{
 			GameServer()->CreateSound(charac->m_Pos, SOUND_GRENADE_EXPLODE);
-			// GameServer()->CreateExplosion(charac->m_Pos,  pPlayer->GetCID(), WEAPON_GRENADE, true, -1, -1);
+			// GameServer()->CreateExplosion(charac->m_Pos,  pPlayer->GetCid(), WEAPON_GRENADE, true, -1, -1);
 			CNetEvent_Explosion *pEvent = GameServer()->m_Events.Create<CNetEvent_Explosion>(CClientMask());
 			if(pEvent)
 			{
@@ -436,7 +436,7 @@ void CGameControllerInstagib::EndSpree(class CPlayer *pPlayer, class CPlayer *pK
 
 			char aBuf[128];
 			str_format(aBuf, sizeof(aBuf), "'%s' %d-kills killing spree was ended by %s",
-				Server()->ClientName(pPlayer->GetCID()), pPlayer->m_Spree, Server()->ClientName(pKiller->GetCID()));
+				Server()->ClientName(pPlayer->GetCid()), pPlayer->m_Spree, Server()->ClientName(pKiller->GetCid()));
 			GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf);
 		}
 	}
@@ -448,30 +448,30 @@ void CGameControllerInstagib::OnPlayerConnect(CPlayer *pPlayer)
 {
 	OnPlayerConstruct(pPlayer);
 	IGameController::OnPlayerConnect(pPlayer);
-	int ClientID = pPlayer->GetCID();
-	m_aInstaPlayerStats[ClientID].Reset();
+	int ClientId = pPlayer->GetCid();
+	m_aInstaPlayerStats[ClientId].Reset();
 
 	// init the player
-	Score()->PlayerData(ClientID)->Reset();
+	Score()->PlayerData(ClientId)->Reset();
 
 	// Can't set score here as LoadScore() is threaded, run it in
 	// LoadScoreThreaded() instead
-	Score()->LoadPlayerData(ClientID);
+	Score()->LoadPlayerData(ClientId);
 
-	if(!Server()->ClientPrevIngame(ClientID))
+	if(!Server()->ClientPrevIngame(ClientId))
 	{
 		char aBuf[512];
-		str_format(aBuf, sizeof(aBuf), "'%s' entered and joined the %s", Server()->ClientName(ClientID), GetTeamName(pPlayer->GetTeam()));
+		str_format(aBuf, sizeof(aBuf), "'%s' entered and joined the %s", Server()->ClientName(ClientId), GetTeamName(pPlayer->GetTeam()));
 		if(!g_Config.m_SvTournamentJoinMsgs || pPlayer->GetTeam() != TEAM_SPECTATORS)
 			GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, -1, CGameContext::CHAT_SIX);
 		else if(g_Config.m_SvTournamentJoinMsgs == 2)
 			SendChatSpectators(aBuf, CGameContext::CHAT_SIX);
 
-		GameServer()->SendChatTarget(ClientID, "DDNet-insta https://github.com/ZillyInsta/ddnet-insta/");
-		GameServer()->SendChatTarget(ClientID, "DDraceNetwork Mod. Version: " GAME_VERSION);
+		GameServer()->SendChatTarget(ClientId, "DDNet-insta https://github.com/ZillyInsta/ddnet-insta/");
+		GameServer()->SendChatTarget(ClientId, "DDraceNetwork Mod. Version: " GAME_VERSION);
 
-		GameServer()->AlertOnSpecialInstagibConfigs(ClientID);
-		GameServer()->ShowCurrentInstagibConfigsMotd(ClientID);
+		GameServer()->AlertOnSpecialInstagibConfigs(ClientId);
+		GameServer()->ShowCurrentInstagibConfigsMotd(ClientId);
 	}
 
 	CheckReadyStates(); // ddnet-insta
@@ -485,32 +485,32 @@ void CGameControllerInstagib::SendChatSpectators(const char *pMessage, int Flags
 			continue;
 		if(pPlayer->GetTeam() != TEAM_SPECTATORS)
 			continue;
-		bool Send = (Server()->IsSixup(pPlayer->GetCID()) && (Flags & CGameContext::CHAT_SIXUP)) ||
-			    (!Server()->IsSixup(pPlayer->GetCID()) && (Flags & CGameContext::CHAT_SIX));
+		bool Send = (Server()->IsSixup(pPlayer->GetCid()) && (Flags & CGameContext::CHAT_SIXUP)) ||
+			    (!Server()->IsSixup(pPlayer->GetCid()) && (Flags & CGameContext::CHAT_SIX));
 		if(!Send)
 			continue;
 
-		GameServer()->SendChat(pPlayer->GetCID(), CGameContext::CHAT_ALL, pMessage, -1, Flags);
+		GameServer()->SendChat(pPlayer->GetCid(), CGameContext::CHAT_ALL, pMessage, -1, Flags);
 	}
 }
 
 void CGameControllerInstagib::OnPlayerDisconnect(class CPlayer *pPlayer, const char *pReason)
 {
 	pPlayer->OnDisconnect();
-	int ClientID = pPlayer->GetCID();
-	if(Server()->ClientIngame(ClientID))
+	int ClientId = pPlayer->GetCid();
+	if(Server()->ClientIngame(ClientId))
 	{
 		char aBuf[512];
 		if(pReason && *pReason)
-			str_format(aBuf, sizeof(aBuf), "'%s' has left the game (%s)", Server()->ClientName(ClientID), pReason);
+			str_format(aBuf, sizeof(aBuf), "'%s' has left the game (%s)", Server()->ClientName(ClientId), pReason);
 		else
-			str_format(aBuf, sizeof(aBuf), "'%s' has left the game", Server()->ClientName(ClientID));
+			str_format(aBuf, sizeof(aBuf), "'%s' has left the game", Server()->ClientName(ClientId));
 		if(!g_Config.m_SvTournamentJoinMsgs || pPlayer->GetTeam() != TEAM_SPECTATORS)
 			GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, -1, CGameContext::CHAT_SIX);
 		else if(g_Config.m_SvTournamentJoinMsgs == 2)
 			SendChatSpectators(aBuf, CGameContext::CHAT_SIX);
 
-		str_format(aBuf, sizeof(aBuf), "leave player='%d:%s'", ClientID, Server()->ClientName(ClientID));
+		str_format(aBuf, sizeof(aBuf), "leave player='%d:%s'", ClientId, Server()->ClientName(ClientId));
 		GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
 	}
 
@@ -529,16 +529,16 @@ void CGameControllerInstagib::DoTeamChange(CPlayer *pPlayer, int Team, bool DoCh
 
 	int OldTeam = pPlayer->GetTeam(); // ddnet-insta
 	pPlayer->SetTeam(Team);
-	int ClientID = pPlayer->GetCID();
+	int ClientId = pPlayer->GetCid();
 
 	char aBuf[128];
 	if(DoChatMsg)
 	{
-		str_format(aBuf, sizeof(aBuf), "'%s' joined the %s", Server()->ClientName(ClientID), GameServer()->m_pController->GetTeamName(Team));
+		str_format(aBuf, sizeof(aBuf), "'%s' joined the %s", Server()->ClientName(ClientId), GameServer()->m_pController->GetTeamName(Team));
 		GameServer()->SendChat(-1, CGameContext::CHAT_ALL, aBuf, CGameContext::CHAT_SIX);
 	}
 
-	str_format(aBuf, sizeof(aBuf), "team_join player='%d:%s' m_Team=%d", ClientID, Server()->ClientName(ClientID), Team);
+	str_format(aBuf, sizeof(aBuf), "team_join player='%d:%s' m_Team=%d", ClientId, Server()->ClientName(ClientId), Team);
 	GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
 
 	// OnPlayerInfoChange(pPlayer);
@@ -547,8 +547,8 @@ void CGameControllerInstagib::DoTeamChange(CPlayer *pPlayer, int Team, bool DoCh
 
 	if(OldTeam == TEAM_SPECTATORS)
 	{
-		GameServer()->AlertOnSpecialInstagibConfigs(pPlayer->GetCID());
-		GameServer()->ShowCurrentInstagibConfigsMotd(pPlayer->GetCID());
+		GameServer()->AlertOnSpecialInstagibConfigs(pPlayer->GetCid());
+		GameServer()->ShowCurrentInstagibConfigsMotd(pPlayer->GetCid());
 	}
 
 	// update effected game settings

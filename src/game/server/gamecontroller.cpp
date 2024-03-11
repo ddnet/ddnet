@@ -1033,7 +1033,7 @@ void IGameController::OnPlayerReadyChange(CPlayer *pPlayer)
 		if(m_GameState == IGS_GAME_RUNNING && !pPlayer->m_IsReadyToPlay)
 		{
 			SetGameState(IGS_GAME_PAUSED, TIMER_INFINITE); // one player isn't ready -> pause the game
-			GameServer()->SendGameMsg(protocol7::GAMEMSG_GAME_PAUSED, pPlayer->GetCID(), -1);
+			GameServer()->SendGameMsg(protocol7::GAMEMSG_GAME_PAUSED, pPlayer->GetCid(), -1);
 		}
 
 		GameServer()->PlayerReadyStateBroadcast();
@@ -1044,7 +1044,7 @@ void IGameController::OnPlayerReadyChange(CPlayer *pPlayer)
 }
 
 // to be called when a player changes state, spectates or disconnects
-void IGameController::CheckReadyStates(int WithoutID)
+void IGameController::CheckReadyStates(int WithoutId)
 {
 	if(Config()->m_SvPlayerReadyMode)
 	{
@@ -1052,12 +1052,12 @@ void IGameController::CheckReadyStates(int WithoutID)
 		{
 		case IGS_WARMUP_USER:
 			// all players are ready -> end warmup
-			if(GetPlayersReadyState(WithoutID))
+			if(GetPlayersReadyState(WithoutId))
 				SetGameState(IGS_WARMUP_USER, 0);
 			break;
 		case IGS_GAME_PAUSED:
 			// all players are ready -> unpause the game
-			if(GetPlayersReadyState(WithoutID))
+			if(GetPlayersReadyState(WithoutId))
 			{
 				SetGameState(IGS_GAME_PAUSED, 0);
 				GameServer()->SendBroadcastSix("", false); // clear "%d players not ready" 0.6 backport
@@ -1075,12 +1075,12 @@ void IGameController::CheckReadyStates(int WithoutID)
 	}
 }
 
-bool IGameController::GetPlayersReadyState(int WithoutID, int *pNumUnready)
+bool IGameController::GetPlayersReadyState(int WithoutId, int *pNumUnready)
 {
 	int Unready = 0;
 	for(int i = 0; i < MAX_CLIENTS; ++i)
 	{
-		if(i == WithoutID)
+		if(i == WithoutId)
 			continue; // skip
 		if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS && !GameServer()->m_apPlayers[i]->m_IsReadyToPlay)
 		{
@@ -1214,31 +1214,31 @@ void IGameController::CheckGameInfo()
 		UpdateGameInfo(-1);
 }
 
-bool IGameController::IsFriendlyFire(int ClientID1, int ClientID2)
+bool IGameController::IsFriendlyFire(int ClientId1, int ClientId2)
 {
-	if(ClientID1 == ClientID2)
+	if(ClientId1 == ClientId2)
 		return false;
 
 	if(IsTeamplay())
 	{
-		if(!GameServer()->m_apPlayers[ClientID1] || !GameServer()->m_apPlayers[ClientID2])
+		if(!GameServer()->m_apPlayers[ClientId1] || !GameServer()->m_apPlayers[ClientId2])
 			return false;
 
-		// if(!Config()->m_SvTeamdamage && GameServer()->m_apPlayers[ClientID1]->GetTeam() == GameServer()->m_apPlayers[ClientID2]->GetTeam())
-		if(true && GameServer()->m_apPlayers[ClientID1]->GetTeam() == GameServer()->m_apPlayers[ClientID2]->GetTeam())
+		// if(!Config()->m_SvTeamdamage && GameServer()->m_apPlayers[ClientId1]->GetTeam() == GameServer()->m_apPlayers[ClientId2]->GetTeam())
+		if(true && GameServer()->m_apPlayers[ClientId1]->GetTeam() == GameServer()->m_apPlayers[ClientId2]->GetTeam())
 			return true;
 	}
 
 	return false;
 }
 
-void IGameController::UpdateGameInfo(int ClientID)
+void IGameController::UpdateGameInfo(int ClientId)
 {
 	// ddnet-insta
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
-		if(ClientID != -1)
-			if(ClientID != i)
+		if(ClientId != -1)
+			if(ClientId != i)
 				continue;
 
 		if(Server()->IsSixup(i))

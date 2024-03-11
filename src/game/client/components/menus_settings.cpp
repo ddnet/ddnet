@@ -1819,10 +1819,10 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		MainView.HSplitTop(20.0f, &GpuDropDown, &MainView);
 		Ui()->DoLabel(&Text, Localize("Graphics card"), 16.0f, TEXTALIGN_MC);
 
-		static std::vector<const char *> s_vpGpuIDNames;
+		static std::vector<const char *> s_vpGpuIdNames;
 
 		size_t GPUCount = GPUList.m_vGpus.size() + 1;
-		s_vpGpuIDNames.resize(GPUCount);
+		s_vpGpuIdNames.resize(GPUCount);
 
 		char aCurDeviceName[256 + 4];
 
@@ -1832,7 +1832,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 			if(i == 0)
 			{
 				str_format(aCurDeviceName, sizeof(aCurDeviceName), "%s (%s)", Localize("auto"), GPUList.m_AutoGpu.m_aName);
-				s_vpGpuIDNames[i] = aCurDeviceName;
+				s_vpGpuIdNames[i] = aCurDeviceName;
 				if(str_comp("auto", g_Config.m_GfxGpuName) == 0)
 				{
 					OldSelectedGpu = 0;
@@ -1840,7 +1840,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 			}
 			else
 			{
-				s_vpGpuIDNames[i] = GPUList.m_vGpus[i - 1].m_aName;
+				s_vpGpuIdNames[i] = GPUList.m_vGpus[i - 1].m_aName;
 				if(str_comp(GPUList.m_vGpus[i - 1].m_aName, g_Config.m_GfxGpuName) == 0)
 				{
 					OldSelectedGpu = i;
@@ -1855,7 +1855,7 @@ void CMenus::RenderSettingsGraphics(CUIRect MainView)
 		static CUi::SDropDownState s_GpuDropDownState;
 		static CScrollRegion s_GpuDropDownScrollRegion;
 		s_GpuDropDownState.m_SelectionPopupContext.m_pScrollRegion = &s_GpuDropDownScrollRegion;
-		const int NewGpu = Ui()->DoDropDown(&GpuDropDown, OldSelectedGpu, s_vpGpuIDNames.data(), GPUCount, s_GpuDropDownState);
+		const int NewGpu = Ui()->DoDropDown(&GpuDropDown, OldSelectedGpu, s_vpGpuIdNames.data(), GPUCount, s_GpuDropDownState);
 		if(OldSelectedGpu != NewGpu)
 		{
 			if(NewGpu == 0)

@@ -326,7 +326,7 @@ void CGameContext::CreateExplosion(vec2 Pos, int Owner, int Weapon, bool NoDamag
 				TeamMask.reset(PlayerTeam);
 			}
 
-			if(!g_Config.m_SvSprayprotection || SprayMask.test(pChr->GetPlayer()->GetCID()))
+			if(!g_Config.m_SvSprayprotection || SprayMask.test(pChr->GetPlayer()->GetCid()))
 				pChr->TakeDamage(ForceDir * Dmg * 2, (int)Dmg, Owner, Weapon);
 		}
 	}
@@ -1483,7 +1483,7 @@ void CGameContext::OnClientEnter(int ClientId)
 			Msg.m_MatchNum = 0;
 			Msg.m_ScoreLimit = Config()->m_SvScorelimit; // ddnet-insta
 			Msg.m_TimeLimit = Config()->m_SvTimelimit; // ddnet-insta
-			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientID);
+			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientId);
 		}
 
 		// /team is essential
@@ -1875,12 +1875,12 @@ void *CGameContext::PreProcessMsg(int *pMsgId, CUnpacker *pUnpacker, int ClientI
 			pMsg->m_ColorFeet = pPlayer->m_TeeInfos.m_ColorFeet;
 		}
 		// ddnet-insta ready start
-		else if(*pMsgID == protocol7::NETMSGTYPE_CL_READYCHANGE)
+		else if(*pMsgId == protocol7::NETMSGTYPE_CL_READYCHANGE)
 		{
 			m_pController->OnPlayerReadyChange(pPlayer);
 		}
 		// ddnet-insta ready end
-		else if(*pMsgID == protocol7::NETMSGTYPE_CL_SKINCHANGE)
+		else if(*pMsgId == protocol7::NETMSGTYPE_CL_SKINCHANGE)
 		{
 			protocol7::CNetMsg_Cl_SkinChange *pMsg = (protocol7::CNetMsg_Cl_SkinChange *)pRawMsg;
 			if(g_Config.m_SvSpamprotection && pPlayer->m_LastChangeInfo &&
@@ -2187,7 +2187,7 @@ void CGameContext::OnSayNetMessage(const CNetMsg_Cl_Say *pMsg, int ClientId, con
 		CensorMessage(aCensoredMessage, pMsg->m_pMessage, sizeof(aCensoredMessage));
 		if(g_Config.m_SvUnstackChat)
 			InstagibUnstackChatMessage(aCensoredMessage, pMsg->m_pMessage, sizeof(aCensoredMessage));
-		SendChat(ClientID, Team, aCensoredMessage, ClientID);
+		SendChat(ClientId, Team, aCensoredMessage, ClientId);
 	}
 }
 
@@ -2195,9 +2195,9 @@ void CGameContext::OnCallVoteNetMessage(const CNetMsg_Cl_CallVote *pMsg, int Cli
 {
 	if(RateLimitPlayerVote(ClientId) || m_VoteCloseTime)
 		return;
-	if(m_apPlayers[ClientID]->GetTeam() == TEAM_SPECTATORS && !g_Config.m_SvSpectatorVotes)
+	if(m_apPlayers[ClientId]->GetTeam() == TEAM_SPECTATORS && !g_Config.m_SvSpectatorVotes)
 	{
-		SendChatTarget(ClientID, "Spectators aren't allowed to vote.");
+		SendChatTarget(ClientId, "Spectators aren't allowed to vote.");
 		return;
 	}
 
@@ -2447,7 +2447,7 @@ void CGameContext::OnVoteNetMessage(const CNetMsg_Cl_Vote *pMsg, int ClientId)
 
 	if(pPlayer->GetTeam() == TEAM_SPECTATORS && !g_Config.m_SvSpectatorVotes)
 	{
-		// SendChatTarget(ClientID, "Spectators aren't allowed to vote.");
+		// SendChatTarget(ClientId, "Spectators aren't allowed to vote.");
 		return;
 	}
 
