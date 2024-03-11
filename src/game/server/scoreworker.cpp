@@ -43,6 +43,13 @@ void CScorePlayerResult::SetVariant(Variant v)
 		m_Data.m_Info.m_Time.reset();
 		for(float &TimeCp : m_Data.m_Info.m_aTimeCp)
 			TimeCp = 0;
+		break;
+	case PLAYER_TIMECP:
+		m_Data.m_Info.m_aRequestedPlayer[0] = '\0';
+		m_Data.m_Info.m_Time.reset();
+		for(float &TimeCp : m_Data.m_Info.m_aTimeCp)
+			TimeCp = 0;
+		break;
 	}
 }
 
@@ -199,6 +206,56 @@ bool CScoreWorker::LoadPlayerData(IDbConnection *pSqlServer, const ISqlData *pGa
 		int StampYear, StampMonth, StampDay;
 		if(sscanf(aCurrent, "%d-%d-%d", &CurrentYear, &CurrentMonth, &CurrentDay) == 3 && sscanf(aStamp, "%d-%d-%d", &StampYear, &StampMonth, &StampDay) == 3 && CurrentMonth == StampMonth && CurrentDay == StampDay)
 			pResult->m_Data.m_Info.m_Birthday = CurrentYear - StampYear;
+	}
+	return false;
+}
+
+bool CScoreWorker::LoadPlayerTimeCp(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
+{
+	const auto *pData = dynamic_cast<const CSqlPlayerRequest *>(pGameData);
+	auto *pResult = dynamic_cast<CScorePlayerResult *>(pGameData->m_pResult.get());
+	auto *paMessages = pResult->m_Data.m_aaMessages;
+
+	char aBuf[1024];
+	str_format(aBuf, sizeof(aBuf),
+		"SELECT"
+		"  Time, cp1, cp2, cp3, cp4, cp5, cp6, cp7, cp8, cp9, cp10, cp11, cp12, cp13, "
+		"  cp14, cp15, cp16, cp17, cp18, cp19, cp20, cp21, cp22, cp23, cp24, cp25, "
+		"  (cp1 + cp2 + cp3 + cp4 + cp5 + cp6 + cp7 + cp8 + cp9 + cp10 + cp11 + cp12 + cp13 + cp14 + "
+		"  cp15 + cp16 + cp17 + cp18 + cp19 + cp20 + cp21 + cp22 + cp23 + cp24 + cp25 > 0) AS hasCP "
+		"FROM %s_race "
+		"WHERE Map = ? AND Name = ? AND hasCP = true "
+		"ORDER BY Time ASC "
+		"LIMIT 1",
+		pSqlServer->GetPrefix());
+	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+	{
+		return true;
+	}
+
+	const char *pPlayer = pData->m_aName[0] != '\0' ? pData->m_aName : pData->m_aRequestingPlayer;
+	pSqlServer->BindString(1, pData->m_aMap);
+	pSqlServer->BindString(2, pPlayer);
+
+	bool End;
+	if(pSqlServer->Step(&End, pError, ErrorSize))
+	{
+		return true;
+	}
+	if(!End)
+	{
+		pResult->SetVariant(CScorePlayerResult::PLAYER_TIMECP);
+		pResult->m_Data.m_Info.m_Time = pSqlServer->GetFloat(1);
+		for(int i = 0; i < NUM_CHECKPOINTS; i++)
+		{
+			pResult->m_Data.m_Info.m_aTimeCp[i] = pSqlServer->GetFloat(i + 2);
+		}
+		str_copy(pResult->m_Data.m_Info.m_aRequestedPlayer, pPlayer, sizeof(pResult->m_Data.m_Info.m_aRequestedPlayer));
+	}
+	else
+	{
+		pResult->SetVariant(CScorePlayerResult::DIRECT);
+		str_format(paMessages[0], sizeof(paMessages[0]), "'%s' has no checkpoint times available", pPlayer);
 	}
 	return false;
 }
