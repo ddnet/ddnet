@@ -1436,6 +1436,7 @@ set(EXPECTED_DATA
   languages/danish.txt
   languages/dutch.txt
   languages/esperanto.txt
+  languages/estonian.txt
   languages/finnish.txt
   languages/french.txt
   languages/galician.txt
@@ -2739,6 +2740,7 @@ if(TOOLS)
         src/tools/${TOOL}.cpp
         ${EXTRA_TOOL_SRC}
         $<TARGET_OBJECTS:engine-shared>
+        $<TARGET_OBJECTS:game-shared>
       )
       target_include_directories(${TOOL} SYSTEM PRIVATE ${TOOL_INCLUDE_DIRS})
       target_link_libraries(${TOOL} ${TOOL_LIBS})

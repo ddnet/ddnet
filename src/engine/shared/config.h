@@ -56,6 +56,7 @@ enum
 	CFGFLAG_COLLIGHT = 1 << 10,
 	CFGFLAG_COLALPHA = 1 << 11,
 	CFGFLAG_INSENSITIVE = 1 << 12,
+	CMDFLAG_PRACTICE = 1 << 13,
 };
 
 struct SConfigVariable

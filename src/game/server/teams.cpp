@@ -1065,7 +1065,7 @@ void CGameTeams::OnCharacterDeath(int ClientId, int Weapon)
 		ChangeTeamState(Team, CGameTeams::TEAMSTATE_OPEN);
 		if(m_aPractice[Team])
 		{
-			if(Weapon == WEAPON_SELF)
+			if(Weapon != WEAPON_WORLD)
 			{
 				ResetRoundState(Team);
 			}

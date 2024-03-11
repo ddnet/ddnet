@@ -222,7 +222,7 @@ bool GetPixelClamped(const CImageInfo &Img, int x, int y, uint8_t aPixel[4])
 
 	const size_t PixelSize = Img.PixelSize();
 	for(size_t i = 0; i < PixelSize; i++)
-		aPixel[i] = ((uint8_t *)Img.m_pData)[x * PixelSize + (Img.m_Width * PixelSize * y) + i];
+		aPixel[i] = Img.m_pData[x * PixelSize + (Img.m_Width * PixelSize * y) + i];
 
 	return aPixel[3] > 0;
 }
