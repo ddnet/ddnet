@@ -45,6 +45,12 @@ char *CLineReader::Get()
 					m_aBuffer[Left] = 0; // return the last line
 					m_BufferPos = Left;
 					m_BufferSize = Left;
+					if(!str_utf8_check(m_aBuffer))
+					{
+						LineStart = m_BufferPos;
+						CRLFBreak = false;
+						continue; // skip lines containing invalid UTF-8
+					}
 					return m_aBuffer;
 				}
 				else
@@ -69,12 +75,24 @@ char *CLineReader::Get()
 						m_aBuffer[m_BufferPos++] = 0;
 				}
 				m_aBuffer[m_BufferPos++] = 0;
+				if(!str_utf8_check(&m_aBuffer[LineStart]))
+				{
+					LineStart = m_BufferPos;
+					CRLFBreak = false;
+					continue; // skip lines containing invalid UTF-8
+				}
 				return &m_aBuffer[LineStart];
 			}
 			else if(CRLFBreak)
 			{
 				if(m_aBuffer[m_BufferPos] == '\n')
 					m_aBuffer[m_BufferPos++] = 0;
+				if(!str_utf8_check(&m_aBuffer[LineStart]))
+				{
+					LineStart = m_BufferPos;
+					CRLFBreak = false;
+					continue; // skip lines containing invalid UTF-8
+				}
 				return &m_aBuffer[LineStart];
 			}
 			else
