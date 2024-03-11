@@ -1372,8 +1372,13 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 			const char *pMap = Unpacker.GetString(CUnpacker::SANITIZE_CC | CUnpacker::SKIP_START_WHITESPACES);
 			int MapCrc = Unpacker.GetInt();
 			int MapSize = Unpacker.GetInt();
-			if(Unpacker.Error() || MapSize < 0)
+			if(Unpacker.Error())
 			{
+				return;
+			}
+			if(MapSize < 0 || MapSize > 1024 * 1024 * 1024) // 1 GiB
+			{
+				DisconnectWithReason("invalid map size");
 				return;
 			}
 
@@ -1381,6 +1386,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 			{
 				if(pMap[i] == '/' || pMap[i] == '\\')
 				{
+					DisconnectWithReason("strange character in map name");
 					return;
 				}
 			}
@@ -1441,7 +1447,7 @@ void CClient::ProcessServerPacket(CNetChunk *pPacket, int Conn, bool Dummy)
 
 					m_pMapdownloadTask = HttpGetFile(pMapUrl ? pMapUrl : aUrl, Storage(), m_aMapdownloadFilenameTemp, IStorage::TYPE_SAVE);
 					m_pMapdownloadTask->Timeout(CTimeout{g_Config.m_ClMapDownloadConnectTimeoutMs, 0, g_Config.m_ClMapDownloadLowSpeedLimit, g_Config.m_ClMapDownloadLowSpeedTime});
-					m_pMapdownloadTask->MaxResponseSize(1024 * 1024 * 1024); // 1 GiB
+					m_pMapdownloadTask->MaxResponseSize(MapSize);
 					m_pMapdownloadTask->ExpectSha256(*pMapSha256);
 					Http()->Run(m_pMapdownloadTask);
 				}
